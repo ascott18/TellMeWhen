@@ -37,7 +37,7 @@ local LSM = LibStub("LibSharedMedia-3.0")
 
 TELLMEWHEN_VERSION = "4.0.1"
 TELLMEWHEN_VERSION_MINOR = " beta"
-TELLMEWHEN_VERSIONNUMBER = 40100
+TELLMEWHEN_VERSIONNUMBER = 40102
 TELLMEWHEN_MAXGROUPS = 10 	--this is a default, used by SetTheory (addon), so dont rename
 TELLMEWHEN_MAXROWS = 20
 TELLMEWHEN_MAXCONDITIONS = 1 --this is a default
