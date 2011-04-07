@@ -37,7 +37,7 @@ local LSM = LibStub("LibSharedMedia-3.0")
 
 TELLMEWHEN_VERSION = "4.0.1"
 TELLMEWHEN_VERSION_MINOR = " beta"
-TELLMEWHEN_REVISION = 40100
+TELLMEWHEN_VERSIONNUMBER = 40100
 TELLMEWHEN_MAXGROUPS = 10 	--this is a default, used by SetTheory (addon), so dont rename
 TELLMEWHEN_MAXROWS = 20
 TELLMEWHEN_MAXCONDITIONS = 1 --this is a default
@@ -233,7 +233,7 @@ TMW.DeletedIconSettings = {
 
 TMW.Defaults = {
 	profile = {
---	Version 	= 	TELLMEWHEN_REVISION,  -- DO NOT DEFINE VERSION AS A DEFAULT, OTHERWISE WE CANT TRACK IF A USER HAS AN OLD VERSION BECAUSE IT WILL ALWAYS DEFAULT TO THE LATEST
+--	Version 	= 	TELLMEWHEN_VERSIONNUMBER,  -- DO NOT DEFINE VERSION AS A DEFAULT, OTHERWISE WE CANT TRACK IF A USER HAS AN OLD VERSION BECAUSE IT WILL ALWAYS DEFAULT TO THE LATEST
 	Locked 		= 	false,
 	NumGroups	=	10,
 	Interval	=	UPD_INTV,
@@ -611,8 +611,8 @@ function TMW:OnInitialize()
 
 	TELLMEWHEN_MAXGROUPS = db.profile.NumGroups -- need to define before upgrading
 
-	db.profile.Version = db.profile.Version or TELLMEWHEN_REVISION -- this only does anything for new profiles
-	if TellMeWhen_Settings or (type(db.profile.Version) == "string") or (db.profile.Version < TELLMEWHEN_REVISION) then
+	db.profile.Version = db.profile.Version or TELLMEWHEN_VERSIONNUMBER -- this only does anything for new profiles
+	if TellMeWhen_Settings or (type(db.profile.Version) == "string") or (db.profile.Version < TELLMEWHEN_VERSIONNUMBER) then
 		TMW:Upgrade()
 	end
 	db.RegisterCallback(TMW, "OnProfileChanged", "OnProfile") -- must set callbacks after TMW:Upgrade() because the db is overwritten there when upgrading from 3.0.0
@@ -637,7 +637,7 @@ function TMW:OnInitialize()
 	end
 	 
 	if IsInGuild() then
-		TMW:SendCommMessage("TMW", "M:" .. TELLMEWHEN_VERSION .. "^m:" .. TELLMEWHEN_VERSION_MINOR .. "^R:" .. TELLMEWHEN_REVISION .. "^", "GUILD")
+		TMW:SendCommMessage("TMW", "M:" .. TELLMEWHEN_VERSION .. "^m:" .. TELLMEWHEN_VERSION_MINOR .. "^R:" .. TELLMEWHEN_VERSIONNUMBER .. "^", "GUILD")
 	end
 
 	TMW.VarsLoaded = true
@@ -645,8 +645,8 @@ end
 
 function TMW:OnProfile()
 	TELLMEWHEN_MAXGROUPS = db.profile.NumGroups -- need to define before upgrading
-	db.profile.Version = db.profile.Version or TELLMEWHEN_REVISION -- this is for new profiles
-	if (type(db.profile.Version) == "string") or db.profile.Version < TELLMEWHEN_REVISION then
+	db.profile.Version = db.profile.Version or TELLMEWHEN_VERSIONNUMBER -- this is for new profiles
+	if (type(db.profile.Version) == "string") or db.profile.Version < TELLMEWHEN_VERSIONNUMBER then
 		TMW:Upgrade()
 	end
 	for icon in TMW:InIcons() do
@@ -670,7 +670,7 @@ function TMW:OnCommReceived(prefix, text, channel, who)
 		if strsub(text, 1, 1) == "R" then
 			local major, minor, revision = strmatch(text, "M:(.*)%^m:(.*)%^R:(.*)%^")
 			revision = tonumber(revision)
-			if revision and major and minor and revision > TELLMEWHEN_REVISION and not TMW.VersionWarned then
+			if revision and major and minor and revision > TELLMEWHEN_VERSIONNUMBER and not TMW.VersionWarned then
 				TMW.VersionWarned = true
 				TMW:Printf(L["NEWVERSION"], major .. minor)
 			end
@@ -1007,7 +1007,7 @@ function TMW:Upgrade()
 	end
 
 	--All Upgrades Complete
-	db.profile.Version = TELLMEWHEN_REVISION
+	db.profile.Version = TELLMEWHEN_VERSIONNUMBER
 end
 
 function TMW:LoadOptions()
