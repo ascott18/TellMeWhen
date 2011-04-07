@@ -29,3 +29,4 @@ enable-nolib-creation: no
 
 move-folders:
     TellMeWhen/TellMeWhen_Options: TellMeWhen_Options
+
