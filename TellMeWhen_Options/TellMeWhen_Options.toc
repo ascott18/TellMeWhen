@@ -1,0 +1,11 @@
+﻿## Interface: 40000
+## X-Compatible-With: 40100
+## Title: TellMeWhen Options
+
+## Author: Cybeloras of Mal'Ganis
+## Notes: Options and configuration for TellMeWhen
+## RequiredDeps: TellMeWhen
+## LoadOnDemand: 1
+## X-Category: Combat
+
+TellMeWhen_Options.xml

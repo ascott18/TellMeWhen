@@ -1,0 +1,246 @@
+﻿<Ui xmlns="http://www.blizzard.com/wow/ui/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.blizzard.com/wow/ui/ .. \FrameXML\UI.xsd">
+
+	<Script file="Lib\LibStub\LibStub.lua"/>
+	<Include file="Lib\CallbackHandler-1.0\CallbackHandler-1.0.xml"/>
+	<Include file="Lib\AceAddon-3.0\AceAddon-3.0.xml"/>
+	<Include file="Lib\AceConsole-3.0\AceConsole-3.0.xml"/>
+	<Include file="Lib\AceEvent-3.0\AceEvent-3.0.xml"/>
+	<Include file="Lib\AceTimer-3.0\AceTimer-3.0.xml"/>
+	<Include file="Lib\AceLocale-3.0\AceLocale-3.0.xml"/>
+	<Include file="Lib\AceDB-3.0\AceDB-3.0.xml"/>
+	<Include file="Lib\AceComm-3.0\AceComm-3.0.xml"/>
+	<Include file="Lib\LibSharedMedia-3.0\LibSharedMedia-3.0.xml"/>
+	<Script file="Lib\libdatabroker-1-1\LibDataBroker-1.1.lua"/>
+
+	<Script file="Localization\TellMeWhen-enUS.lua"/>
+	<Script file="Localization\TellMeWhen-deDE.lua"/>
+	<Script file="Localization\TellMeWhen-esES.lua"/>
+	<Script file="Localization\TellMeWhen-esMX.lua"/>
+	<Script file="Localization\TellMeWhen-frFR.lua"/>
+	<Script file="Localization\TellMeWhen-koKR.lua"/>
+	<Script file="Localization\TellMeWhen-ruRU.lua"/>
+	<Script file="Localization\TellMeWhen-zhCN.lua"/>
+	<Script file="Localization\TellMeWhen-zhTW.lua"/>
+
+	<Script file="TellMeWhen.lua"/>
+
+	<Script file="Types\cooldown.lua"/>
+	<Script file="Types\buff.lua"/>
+	<Script file="Types\reactive.lua"/>
+	<Script file="Types\wpnenchant.lua"/>
+	<Script file="Types\totem.lua"/>
+	<Script file="Types\icd.lua"/>
+	<Script file="Types\unitcooldown.lua"/>
+	<Script file="Types\cast.lua"/>
+	<Script file="Types\meta.lua"/>
+
+	<Script file="conditions.lua"/>
+	<Script file="LDB.lua"/>
+
+	<!-- TEMPLATES -->
+	<Frame name="TellMeWhen_GroupTemplate" enableMouse="false" toplevel="true" movable="true" parent="UIParent" virtual="true">
+		<Size>
+			<AbsDimension x="1" y="1"/>
+		</Size>
+		<Layers>
+			<Layer level="BACKGROUND">
+				<Texture setAllPoints="true">
+					<Color r="0" g="0" b="0" a="0"/>
+				</Texture>
+			</Layer>
+		</Layers>
+		<Frames>
+			<Button name="$parent_ResizeButton" parentKey="resizeButton" frameStrata="HIGH">
+				<Size>
+					<AbsDimension x="10" y="10"/>
+				</Size>
+				<Anchors>
+					<Anchor point="BOTTOMRIGHT" relativeTo="$parent" relativePoint="BOTTOMRIGHT"/>
+				</Anchors>
+				<Layers>
+					<Layer level="BACKGROUND">
+						<Texture name="$parentTexture" parentKey="texture" file="Interface\AddOns\TellMeWhen\Textures\Resize">
+							<Size x="10" y="10"/>
+						</Texture>
+					</Layer>
+				</Layers>
+				<Scripts>
+					<OnLoad>
+						self.texture:SetVertexColor(0.6, 0.6, 0.6)
+						TMW:TT(self, "RESIZE", "RESIZE_TOOLTIP")
+					</OnLoad>
+					<OnMouseDown>
+						TMW:Group_StartSizing(self)
+					</OnMouseDown>
+					<OnMouseUp>
+						TMW:Group_StopSizing(self)
+					</OnMouseUp>
+					<OnEnter>
+						self.texture:SetVertexColor(1, 1, 1)
+					</OnEnter>
+					<OnLeave>
+						self.texture:SetVertexColor(0.6, 0.6, 0.6)
+					</OnLeave>
+				</Scripts>
+			</Button>
+		</Frames>
+	</Frame>
+	<Button name="TellMeWhen_IconTemplate" virtual="true" enableMouse="true">
+		<Size>
+			<AbsDimension x="30" y="30"/>
+		</Size>
+		<Layers>
+			<Layer level="BACKGROUND">
+				<Texture file="Interface\Buttons\UI-EmptySlot-Disabled">
+					<Size>
+						<AbsDimension x="46" y="46"/>
+					</Size>
+					<Anchors>
+						<Anchor point="CENTER"/>
+					</Anchors>
+				</Texture>
+			</Layer>
+			<Layer level="ARTWORK">
+				<Texture name="$parentIcon" parentKey="texture" file="Interface\Icons\INV_Misc_QuestionMark">
+					<Size>
+						<AbsDimension x="30" y="30"/>
+					</Size>
+				</Texture>
+			</Layer>
+			<Layer level="OVERLAY">
+				<FontString name="$parentCount" parentKey="countText" inherits="NumberFontNormalSmall" justifyH="RIGHT">
+					<Anchors>
+						<Anchor point="BOTTOMRIGHT" relativeTo="$parent" relativePoint="BOTTOMRIGHT">
+							<Offset x="-2" y="2"/>
+						</Anchor>
+					</Anchors>
+				</FontString>
+			</Layer>
+		</Layers>
+		<Frames>
+			<StatusBar name="$parentPowerBar" parentKey="powerbar" hidden="true">
+				<Anchors>
+					<Anchor point="BOTTOM" relativeTo="$parent" relativePoint="CENTER">
+						<Offset>
+							<AbsDimension x="0" y="0.5"/>
+						</Offset>
+					</Anchor>
+				</Anchors>
+				<Layers>
+					<Layer level="ARTWORK">
+						<Texture name="$parenttexture" parentKey="texture" file="Interface\TargetingFrame\UI-StatusBar">
+							<Size x="30" y="30"/>
+						</Texture>
+					</Layer>
+				</Layers>
+				<Scripts>
+					<OnLoad>
+						self.Max = 1
+						self:SetFrameLevel(self:GetParent():GetFrameLevel() + 2)
+						self.icon = self:GetParent()
+						self:SetStatusBarTexture(self.texture)
+					</OnLoad>
+				</Scripts>
+			</StatusBar>
+			<StatusBar name="$parentCooldownBar" parentKey="cooldownbar" minvalue="0" maxvalue="1" defaultvalue="0" hidden="true">
+				<Anchors>
+					<Anchor point="TOP" relativeTo="$parent" relativePoint="CENTER">
+						<Offset>
+							<AbsDimension x="0" y="-0.5"/>
+						</Offset>
+					</Anchor>
+				</Anchors>
+				<Layers>
+					<Layer level="ARTWORK">
+						<Texture name="$parenttexture" parentKey="texture" file="Interface\TargetingFrame\UI-StatusBar">
+							<Size x="30" y="30"/>
+						</Texture>
+					</Layer>
+				</Layers>
+				<Scripts>
+					<OnLoad>
+						self.Max = 1
+						self:SetFrameLevel(self:GetParent():GetFrameLevel() + 2)
+						self.icon = self:GetParent()
+						self:SetStatusBarTexture(self.texture)
+					</OnLoad>
+				</Scripts>
+			</StatusBar>
+			<Cooldown name="$parentCooldown" parentKey="cooldown" inherits="CooldownFrameTemplate">
+				<Size x="30" y="30"/>
+				<Anchors>
+					<Anchor point="CENTER"/>
+				</Anchors>
+			</Cooldown>
+		</Frames>
+		<Scripts>
+			<OnLoad>
+				self:RegisterForDrag("LeftButton", "RightButton")
+			</OnLoad>
+			<OnEnter>
+				local line1 = TMW.L["ICON_TOOLTIP1"] .. " " .. format(TMW.L["GROUPICON"], TMW:GetGroupName(self:GetParent().Name, self:GetParent():GetID(), 1), self:GetID())
+				if self:GetParent().Locked then
+					line1 = line1 .. " (" .. TMW.L["LOCKED"] .. ")"
+				end
+				GameTooltip_SetDefaultAnchor(GameTooltip, self)
+				GameTooltip:AddLine(line1, HIGHLIGHT_FONT_COLOR.r, HIGHLIGHT_FONT_COLOR.g, HIGHLIGHT_FONT_COLOR.b, 1)
+				GameTooltip:AddLine(TMW.L["ICON_TOOLTIP2NEW"], NORMAL_FONT_COLOR.r, NORMAL_FONT_COLOR.g, NORMAL_FONT_COLOR.b, 1)
+				GameTooltip:Show()
+			</OnEnter>
+			<OnLeave>
+				GameTooltip:Hide()
+			</OnLeave>
+			<OnMouseUp>
+				if button == "RightButton" then
+					PlaySound("igCharacterInfoTab")
+					TMW.IE:SaveSettings()
+					TMW.CNDT:ClearDialog()
+					TMW.CI.i = self:GetID()		-- yay for dirty hacks
+					TMW.CI.g = self:GetParent():GetID()
+					TMW.CI.ic = self
+					TMW.CI.t = self.Type
+					TMW.IE:Load()
+				end
+			</OnMouseUp>
+			<OnDragStart>
+				if button == "RightButton" and TMW.ID then
+					TMW.ID.srcgroupID = self:GetParent():GetID()
+					TMW.ID.srciconID = self:GetID()
+					TMW.ID.srcicon = self
+					TMW.ID:Start(self)
+					return
+				elseif button == "LeftButton" then
+					local group = self:GetParent()
+					if not group.Locked then
+						group:StartMoving()
+					end
+				end
+			</OnDragStart>
+			<OnReceiveDrag>
+				if TMW.ID then
+					TMW.ID:CompleteDrag(self)
+					TMW.ID:SpellItemToIcon(self:GetParent():GetID(), self:GetID())
+				end
+			</OnReceiveDrag>
+			<OnClick>
+				if TMW.ID then
+					TMW.ID:SpellItemToIcon(self:GetParent():GetID(), self:GetID())
+				end
+			</OnClick>
+			<OnDragStop>
+				if TMW.ID and TMW.ID.IsDragging then
+					TMW.ID:Stop()
+				elseif not self:GetParent().Locked then
+					TMW:Group_StopMoving(self)
+				end
+			</OnDragStop>
+		</Scripts>
+		<HighlightTexture alphaMode="ADD" file="Interface\Buttons\ButtonHilight-Square"/>
+	</Button>
+
+	<!-- END TEMPLATES -->
+</Ui>
+
+
+
+

@@ -1,0 +1,19 @@
+﻿# Originally by Nephthys of Hyjal
+# Major Updates by Oozebull of Twisting Nether, Xenyr of Aszune, and Cybeloras of Mal'Ganis
+
+# Dont forget to toc bump TellMeWhen_Options too
+## Interface: 40000
+## X-Compatible-With: 40100
+## Title: TellMeWhen
+
+## Version: 4.0.0.10beta10
+## Author: Cybeloras of Mal'Ganis
+## Notes: Notifications about cooldowns, buffs, etc.
+## OptionalDeps: LibStub, ButtonFacade, Ace3, AceGUI-3.0-SharedMediaWidgets, LibSharedMedia-3.0, LibDataBroker-1.1, OmniCC, tullaCC
+# The per character settings are the old settings, but we still need them to upgrade to the new ones
+## SavedVariablesPerCharacter: TellMeWhen_Settings
+## SavedVariables: TellMeWhenDB
+## X-Embeds: LibStub, Ace3, AceGUI-3.0-SharedMediaWidgets, LibSharedMedia-3.0, LibDataBroker-1.1
+## X-Category: Combat
+
+TellMeWhen.xml
