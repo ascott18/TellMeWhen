@@ -9,7 +9,7 @@ v4.0.0 beta10
 -Fixed a bug that caused icons that shouldnt be shown to not be hidden when switching profiles or removing rows/columns.
 -Textures should properly reset when switching profiles.
 -Switched to SVN instead of manual file uploads, yay!
--New feature: autocomplete (kinda, its not finished, more on this later)
+-New feature: autocomplete (kinda, its mostly finished, more on this later)
 
 v4.0.0 beta9
 -Actually added mainassist and maintank to the unit dropdowns.

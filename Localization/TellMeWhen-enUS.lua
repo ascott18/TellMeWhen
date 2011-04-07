@@ -416,39 +416,19 @@ L["MESSAGERECIEVE"] = "%s has sent you a TellMeWhen icon! You can import this ic
 L["MESSAGERECIEVE_SHORT"] = "%s has sent you a TellMeWhen icon!"
 L["ALLOWCOMM"] = "Allow icon importing"
 L["NEWVERSION"] = "A new version of TellMeWhen is available (%s)"
-
-
+L["CACHING"] = "TellMeWhen is caching and filtering all spells in the game. This only needs to be done once per WoW patch. You can speed up or slow down the process using the slider below."
+L["CACHINGSPEED"] = "Spells per frame:"
 
 
 L["TOPLEFT"] = "Top Left"
-
-
 L["TOP"] = "Top"
-
-
 L["TOPRIGHT"] = "Top Right"
-
-
 L["LEFT"] = "Left"
-
-
 L["CENTER"] = "Center"
-
-
 L["RIGHT"] = "Right"
-
-
 L["BOTTOMLEFT"] = "Bottom Left"
-
-
 L["BOTTOM"] = "Bottom"
-
-
 L["BOTTOMRIGHT"] = "Bottom Right"
-
-
-
-
 
 -- --------
 -- EQUIVS

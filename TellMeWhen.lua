@@ -386,6 +386,14 @@ TMW.Defaults = {
 TMW.Group_Defaults = TMW.Defaults.profile.Groups["**"]
 TMW.Icon_Defaults = TMW.Group_Defaults.Icons["**"]
 
+TMW.DS = {
+	Magic = "Interface\\Icons\\spell_fire_immolation",
+	Curse = "Interface\\Icons\\spell_shadow_curseofsargeras",
+	Disease = "Interface\\Icons\\spell_nature_nullifydisease",
+	Poison = "Interface\\Icons\\spell_nature_corrosivebreath",
+	Enraged = "Interface\\Icons\\ability_druid_challangingroar",
+}
+
 TMW.BE = {	--Much of these are thanks to Malazee @ US-Dalaran's chart: http://forums.wow-petopia.com/download/file.php?mode=view&id=4979 and spreadsheet https://spreadsheets.google.com/ccc?key=0Aox2ZHZE6e_SdHhTc0tZam05QVJDU0lONnp0ZVgzdkE&hl=en#gid=18
 	--NOTE: any id prefixed with "_" will have its localized name substituted in instead of being forced to match as an ID
 	debuffs = {
@@ -447,9 +455,11 @@ TMW.BE = {	--Much of these are thanks to Malazee @ US-Dalaran's chart: http://fo
 		mainassist = "mainassist1;mainassist2;mainassist3;mainassist4;mainassist5",
 	}
 } local BE = TMW.BE
+
 TMW.IDEquivLookup = {}
 TMW.NamesEquivLookup = {}
-for category, b in pairs(TMW.BE) do
+TMW.OldBE = CopyTable(TMW.BE)
+for category, b in pairs(TMW.OldBE) do
 	for equiv, str in pairs(b) do
 	
 		-- create the lookup table first, so that we can have the first ID even if it will be turned into a name
@@ -458,6 +468,8 @@ for category, b in pairs(TMW.BE) do
 		TMW.IDEquivLookup[equiv] = first
 		
 		-- turn all IDs prefixed with "_" into their localized name. Dont do this on every single one, but do use it for spells that do not have any other spells with the same name but different effects.
+		
+		TMW.OldBE[category][equiv] = gsub(str, "_", "") -- this is used to put icons into tooltips
 		while strfind(str, "_") do
 			local id = strmatch(str, "_%d+")
 			if id then
@@ -466,8 +478,11 @@ for category, b in pairs(TMW.BE) do
 			end
 		end
 		TMW.NamesEquivLookup[equiv] = str
-		b[equiv] = str
+		TMW.BE[category][equiv] = str
 	end
+end
+for dispeltype, icon in pairs(TMW.DS) do
+	TMW.IDEquivLookup[dispeltype] = icon
 end
 
 TMW.GCDSpells = {
@@ -482,14 +497,6 @@ TMW.GCDSpells = {
 	HUNTER=1978, -- serpent sting
 	DEATHKNIGHT=47541, -- death coil
 } local GCDSpell = TMW.GCDSpells[pclass]
-
-TMW.DS = {
-	Magic = "Interface\\Icons\\spell_fire_immolation",
-	Curse = "Interface\\Icons\\spell_shadow_curseofsargeras",
-	Disease = "Interface\\Icons\\spell_nature_nullifydisease",
-	Poison = "Interface\\Icons\\spell_nature_corrosivebreath",
-	Enraged = "Interface\\Icons\\ability_druid_challangingroar",
-}
 
 TMW.ZoneTypes = {
 	[0] = NONE,

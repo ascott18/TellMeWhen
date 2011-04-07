@@ -849,6 +849,9 @@
 						end
 					end
 				end
+				if TMW.IE.Main.Name:HasFocus() then
+					TMW.SUG:NameOnCursor()
+				end
 				TMW.IE:ShowHide()
 				TMW:ScheduleIconUpdate(groupID, iconID)
 			</OnClick>
@@ -946,7 +949,7 @@
 				self.Background:SetVertexColor(0, 1, 0)
 			</OnLoad>
 			<OnClick>
-				--stuff
+				TMW.SUG.OnClick(self)
 			</OnClick>
 			<OnEnter>
 				GameTooltip_SetDefaultAnchor(GameTooltip, self)
@@ -1235,6 +1238,86 @@
 						</Backdrop>
 						<Frames>
 							<Button name="$parentItem1" inherits="TellMeWhen_SpellSuggestTemplate" parentKey="Item1" id="1"/>
+							<Slider name="$parentSpeed" inherits="OptionsSliderTemplate" parentKey="Speed" minvalue="1" maxvalue="1000" hidden="true">
+								<Size x="160" y="18"/>
+								<Scripts>
+									<OnLoad>
+										self.text:SetText(TMW.L["CACHINGSPEED"])
+										local minValue, maxValue = self:GetMinMaxValues()
+										_G[self:GetName() .. "Low"]:SetText(minValue)
+										_G[self:GetName() .. "High"]:SetText(maxValue)
+										self.val:SetText(TMW.SUG.NumCachePerFrame)
+										self.infotext:SetText(TMW.L["CACHING"])
+										self:SetValue(TMW.SUG.NumCachePerFrame)
+									</OnLoad>
+									<OnValueChanged>
+										TMW.SUG.NumCachePerFrame = floor(value)
+										self.val:SetText(floor(value))
+									</OnValueChanged>
+								</Scripts>
+								<Layers>
+									<Layer level="ARTWORK">
+										<FontString name="$parentVal" parentKey="val" inherits="GameFontHighlightSmall" text="HIGH">
+											<Anchors>
+												<Anchor point="TOP" relativePoint="BOTTOM">
+													<Offset x="0" y="3"/>
+												</Anchor>
+											</Anchors>
+										</FontString>
+										<FontString name="$parentText" parentKey="text" inherits="GameFontHighlight">
+											<Anchors>
+												<Anchor point="BOTTOM" relativePoint="TOP">
+													<Offset x="0" y="-1"/>
+												</Anchor>
+											</Anchors>
+										</FontString>
+										
+										<FontString name="$parentInfoText" parentKey="infotext" inherits="GameFontHighlight">
+											<Size x="165" />
+											<Anchors>
+												<Anchor point="BOTTOM" relativePoint="TOP">
+													<Offset x="0" y="20"/>
+												</Anchor>
+											</Anchors>
+										</FontString>
+									</Layer>
+								</Layers>
+								<Anchors>
+									<Anchor point="CENTER" />
+								</Anchors>
+							</Slider>
+							<StatusBar name="$parentStatus" parentKey="Status" hidden="true">
+								<Size x="170" y="25"/>
+								<Anchors>
+									<Anchor point="TOP" relativeTo="$parentSpeed" relativePoint="BOTTOM">
+										<Offset x="0" y="-10"/>
+									</Anchor>
+								</Anchors>
+								<Layers>
+									<Layer level="ARTWORK">
+										<Texture name="$parenttexture" parentKey="texture" file="Interface\TargetingFrame\UI-StatusBar"/>
+									</Layer>
+									
+									<Layer level="OVERLAY">
+										<FontString name="$parentText" parentKey="text" inherits="GameFontHighlight">
+											<Anchors>
+												<Anchor point="CENTER" />
+											</Anchors>
+										</FontString>
+									</Layer>
+								</Layers>
+								<Scripts>
+									<OnLoad>
+										self:SetStatusBarTexture(self.texture)
+									</OnLoad>
+									<OnValueChanged>
+										if self:IsShown() then
+											self.text:SetText(value.." / ~"..(TMWOptDB.CacheLength or 100000))
+										end
+									</OnValueChanged>
+								</Scripts>
+							</StatusBar>
+			
 						</Frames>
 						<Layers>
 							<Layer level="OVERLAY">
@@ -1362,6 +1445,11 @@
 								self:GetScript("OnTextChanged")(self)
 								TMW.IE.Main.Suggest:Hide()
 							</OnEditFocusLost>
+							<OnEditFocusGained>
+								EditBox_HighlightText(self)
+								self.BackgroundText:SetText(nil)
+								TMW.SUG:NameOnCursor()
+							</OnEditFocusGained>
 							<OnEnter>
 								self.isOver = true
 								self:GetScript("OnEvent")(self)
@@ -1384,9 +1472,12 @@
 									self.BackgroundText:SetText(nil)
 								end
 								if userInput then
-									TMW.SUG:NameOnChar()
+									TMW.SUG:NameOnCursor()
 								end
 							</OnTextChanged>
+							<OnMouseDown>
+								TMW.SUG:NameOnCursor()
+							</OnMouseDown>
 						</Scripts>
 					</EditBox>
 					<Frame name="$parentIcons" hidden="true" parentKey="Icons">

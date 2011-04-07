@@ -1870,75 +1870,124 @@ end
 
 SUG = TMW:NewModule("Suggester", "AceEvent-3.0") TMW.SUG = SUG
 SUG.doUpdateItemCache = true
-SUG.SpellCache, SUG.ItemCache, SUG.ActionCache = {}, {}, {}
+
 SUG.f = CreateFrame("Frame")
 SUG.Parser = CreateFrame("GameTooltip", "TMWSUGParser", TMW, "GameTooltipTemplate")
-function SUG.BAG_UPDATE()
+function SUG:BAG_UPDATE()
 	SUG.doUpdateItemCache = true
 end
 SUG:RegisterEvent("BAG_UPDATE")
-SUG.Blacklist = {
-	["Interface\\Icons\\Trade_Alchemy"] = true,
-	["Interface\\Icons\\Trade_BlackSmithing"] = true,
-	["Interface\\Icons\\Trade_BrewPoison"] = true,
-	["Interface\\Icons\\Trade_Engineering"] = true,
-	["Interface\\Icons\\Trade_Engraving"] = true,
-	["Interface\\Icons\\Trade_Fishing"] = true,
-	["Interface\\Icons\\Trade_Herbalism"] = true,
-	["Interface\\Icons\\Trade_LeatherWorking"] = true,
-	["Interface\\Icons\\Trade_Mining"] = true,
-	["Interface\\Icons\\Trade_Tailoring"] = true,
-	["Interface\\Icons\\INV_Inscription_Tradeskill01"] = true,
-	["Interface\\Icons\\Temp"] = true,
-}
 
-local index, spellsFailed = 0, 0, 0
-SUG.NumCachePerFrame = 1000
-function SUG:SpellCacher()
-	for id = index, index + SUG.NumCachePerFrame do
-		if spellsFailed < 2000 then
-			local name, rank, icon = GetSpellInfo(id)
-			if name then
-				name = strlower(name)
-				if
-					not SUG.Blacklist[icon] and
-					rank ~= SPELL_PASSIVE and
-					not strfind(name, "dnd") and
-					not strfind(name, "test") and
-					not strfind(name, "debug") and
-					not strfind(name, "bunny") and
-					not strfind(name, "visual") and
-					not strfind(name, "trigger") and
-					not strfind(name, "quest") and
-					not strfind(name, "vehicle") and
-					not strfind(name, "event") and
-					not strfind(name, "camera") and
-					not strfind(name, "warning") and
-					not strfind(name, "i am a")
-				then
-					SUG.SpellCache[id] = name
-					spellsFailed = 0
+SUG.NumCachePerFrame = 10
+function SUG:ADDON_LOADED(event, addon)
+	if addon == "TellMeWhen_Options" then
+		TMWOptDB = TMWOptDB or {}
+		
+		TMWOptDB.SpellCache = TMWOptDB.SpellCache or {}
+		TMWOptDB.CastCache = TMWOptDB.CastCache or {}
+		SUG.SpellCache = TMWOptDB.SpellCache
+		SUG.CastCache = TMWOptDB.CastCache
+		SUG.ItemCache = {}
+		SUG.ActionCache = {}
+		if TMWOptDB.IncompleteCache or not TMWOptDB.WoWVersion or TMWOptDB.WoWVersion < select(4, GetBuildInfo()) then
+			TMWOptDB.IncompleteCache = true
+			
+			local Blacklist = {
+				["Interface\\Icons\\Trade_Alchemy"] = true,
+				["Interface\\Icons\\Trade_BlackSmithing"] = true,
+				["Interface\\Icons\\Trade_BrewPoison"] = true,
+				["Interface\\Icons\\Trade_Engineering"] = true,
+				["Interface\\Icons\\Trade_Engraving"] = true,
+				["Interface\\Icons\\Trade_Fishing"] = true,
+				["Interface\\Icons\\Trade_Herbalism"] = true,
+				["Interface\\Icons\\Trade_LeatherWorking"] = true,
+				["Interface\\Icons\\Trade_Mining"] = true,
+				["Interface\\Icons\\Trade_Tailoring"] = true,
+				["Interface\\Icons\\INV_Inscription_Tradeskill01"] = true,
+				["Interface\\Icons\\Temp"] = true,
+			}
+			local index, spellsFailed = 0, 0
+			TMWOptDB.CacheLength = TMWOptDB.CacheLength or 100000
+			SUG.Suggest.Status:Show()
+			SUG.Suggest.Status.texture:SetTexture(LSM:Fetch("statusbar", db.profile.TextureName))
+			SUG.Suggest.Status:SetMinMaxValues(1, TMWOptDB.CacheLength)
+			SUG.Suggest.Speed:Show()
+			if TMWOptDB.WoWVersion and TMWOptDB.WoWVersion < select(4, GetBuildInfo()) then
+				wipe(SUG.SpellCache)
+				wipe(SUG.CastCache)
+			elseif TMWOptDB.IncompleteCache then
+				for id in pairs(SUG.SpellCache) do
+					index = max(index, id)
 				end
-			else
-				spellsFailed = spellsFailed + 1
 			end
-		else
-			print("Finished Caching!")
-			SUG.f:SetScript("OnUpdate", nil)
-			SUG.IsCaching = nil
-			SUG.SpellCache[1852] = nil -- GM spell named silenced, interferes with equiv
-			SUG.SpellCache[57208] = nil -- enraged
-			SUG.SpellCache[71216] = nil -- enraged
-			if SUG.onCompleteCache then
-				SUG:NameOnChar()
+			TMWOptDB.WoWVersion = select(4, GetBuildInfo())
+			
+			local function SpellCacher()
+				for id = index, index + SUG.NumCachePerFrame do
+					SUG.Suggest.Status:SetValue(id)
+					if spellsFailed < 1000 then
+						local name, rank, icon = GetSpellInfo(id)
+						if name then
+							name = strlower(name)
+							if
+								not Blacklist[icon] and
+								rank ~= SPELL_PASSIVE and
+								not strfind(name, "dnd") and
+								not strfind(name, "test") and
+								not strfind(name, "debug") and
+								not strfind(name, "bunny") and
+								not strfind(name, "visual") and
+								not strfind(name, "trigger") and
+								not strfind(name, "quest") and
+								not strfind(name, "vehicle") and
+								not strfind(name, "event") and
+								not strfind(name, "camera") and
+								not strfind(name, "warning") and
+								not strfind(name, "%[ph%]") and
+								not strfind(name, "i am a")
+							then
+								GameTooltip_SetDefaultAnchor(SUG.Parser, UIParent)
+								SUG.Parser:SetSpellByID(id)
+								local r, g, b = TMWSUGParserTextLeft1:GetTextColor()
+								if g > .95 and r > .95 and b > .95 then
+									SUG.SpellCache[id] = name
+									if TMWSUGParserTextLeft2:GetText() == SPELL_CAST_CHANNELED or TMWSUGParserTextLeft3:GetText() == SPELL_CAST_CHANNELED or select(7, GetSpellInfo(id)) > 0 then
+										SUG.CastCache[id] = name
+									end
+								end
+								SUG.Parser:Hide()
+								spellsFailed = 0
+							end
+						else
+							spellsFailed = spellsFailed + 1
+						end
+					else
+						print("Finished Caching!")
+						TMWOptDB.IncompleteCache = false
+						TMWOptDB.CacheLength = id
+						SUG.f:SetScript("OnUpdate", nil)
+						SUG.Suggest.Speed:Hide()
+						SUG.Suggest.Status:Hide()
+						
+						SUG.IsCaching = nil
+						SUG.SpellCache[1852] = nil -- GM spell named silenced, interferes with equiv
+						SUG.SpellCache[57208] = nil -- enraged
+						SUG.SpellCache[71216] = nil -- enraged
+						if SUG.onCompleteCache then
+							SUG:NameOnCursor()
+						end
+						return
+					end
+				end
+				index = index + 1 + SUG.NumCachePerFrame
 			end
-			return
+			SUG.f:SetScript("OnUpdate", SpellCacher)
+			SUG.IsCaching = true
 		end
+		SUG:UnregisterEvent("ADDON_LOADED")
 	end
-	index = index + 1 + SUG.NumCachePerFrame
 end
-SUG.f:SetScript("OnUpdate", SUG.SpellCacher)
-SUG.IsCaching = true
+SUG:RegisterEvent("ADDON_LOADED")
 
 function GameTooltip:SetTMWEquiv(equiv)
 	GameTooltip:AddLine(equiv, HIGHLIGHT_FONT_COLOR.r, HIGHLIGHT_FONT_COLOR.g, HIGHLIGHT_FONT_COLOR.b, 1)
@@ -2027,6 +2076,8 @@ function SUG:Suggester()
 		local id, name
 		if TMW.CI.SoI == "item" then
 			id, name = next(SUG.ItemCache, SUG.nextCacheKey)
+		elseif TMW.CI.t == "cast" then
+			id, name = next(SUG.CastCache, SUG.nextCacheKey)
 		else
 			id, name = next(SUG.SpellCache, SUG.nextCacheKey)
 		end
@@ -2059,46 +2110,6 @@ function SUG:SuggestingComplete()
 	end
 	local i = 1
 	while SUG[i] do
-		if TMW.CI.SoI == "spell" then
-			while SUG.preTable[i+offset] do
-				local id = SUG.preTable[i+offset]
-				if type(id) == "number" then
-					--[[GameTooltip_SetDefaultAnchor(SUG.Parser, UIParent)
-					SUG.Parser:SetSpellByID(id)
-					local r, g, b = TMWSUGParserTextLeft1:GetTextColor()
-					if floor(g + 0.10) ~= 1 or floor(r + 0.10) ~= 1 or floor(b + 0.10) ~= 1 then
-						offset = offset + 1
-						if SUG.SpellCache[id] then
-							SUG.SpellCache[id] = nil
-						end
-						SUG.Parser:Hide()
-					elseif TMW.CI.t == "cast" and (TMWSUGParserTextLeft2:GetText() ~= SPELL_CAST_CHANNELED and TMWSUGParserTextLeft3:GetText() ~= SPELL_CAST_CHANNELED and select(7, GetSpellInfo(id)) <= 0) then
-						offset = offset + 1
-						SUG.Parser:Hide()]]
-					if TMW.CI.t == "cast" then
-						if select(7, GetSpellInfo(id)) > 0 then
-							break
-						else
-							GameTooltip_SetDefaultAnchor(SUG.Parser, UIParent)
-							SUG.Parser:SetSpellByID(id)
-							local r, g, b = TMWSUGParserTextLeft1:GetTextColor()
-							if (TMWSUGParserTextLeft2:GetText() ~= SPELL_CAST_CHANNELED and TMWSUGParserTextLeft3:GetText() ~= SPELL_CAST_CHANNELED) then
-								SUG.Parser:Hide()
-								offset = offset + 1
-							else
-								SUG.Parser:Hide()
-								break
-							end
-						end
-					else
-						SUG.Parser:Hide()
-						break
-					end
-				else
-					break
-				end
-			end
-		end
 		local id = SUG.preTable[i+offset]
 		local f = SUG[i]
 		if id then
@@ -2108,10 +2119,9 @@ function SUG:SuggestingComplete()
 				local icon = TMW.DS[id]
 				
 				f.Name:SetText(L[dispeltype])
-				f.nameinsert = equiv
-				
 				f.ID:SetText(nil)
-				f.idinsert = equiv
+				
+				f.insert = dispeltype
 				
 				f.tooltipmethod = nil
 				f.tooltiptitle = L[dispeltype]
@@ -2121,14 +2131,14 @@ function SUG:SuggestingComplete()
 				f.Background:SetVertexColor(1, .49, .04, 1) -- druid orange
 			
 			elseif TMW.IDEquivLookup[id] then -- if the entry is an equivalacy (buff, cast, or whatever)
+				--NOTE: dispel types are put in here too for efficiency in the sorter func, but as long as dispel types are checked first, it wont matter
 				local equiv = id
 				local firstid = TMW.IDEquivLookup[id]
 				
 				f.Name:SetText(L[equiv])
-				f.nameinsert = equiv
-				
 				f.ID:SetText(nil)
-				f.idinsert = equiv
+				
+				f.insert = equiv
 				
 				f.tooltipmethod = "SetTMWEquiv"
 				f.tooltiparg = equiv
@@ -2147,10 +2157,9 @@ function SUG:SuggestingComplete()
 					local name, link = GetItemInfo(id)
 					
 					f.Name:SetText(link)
-					f.nameinsert = id
-					
 					f.ID:SetText(id)
-					f.idinsert = id
+				
+					f.insert = SUG.inputType == "number" and id or name
 					
 					f.tooltipmethod = "SetHyperlink"
 					f.tooltiparg = link
@@ -2161,13 +2170,12 @@ function SUG:SuggestingComplete()
 					local name = GetSpellInfo(id)
 					
 					f.Name:SetText(name)
-					f.nameinsert = name
-					
 					f.ID:SetText(id)
-					f.idinsert = id
 					
 					f.tooltipmethod = "SetSpellByID"
 					f.tooltiparg = id
+					
+					f.insert = SUG.inputType == "number" and id or name
 					
 					f.Icon:SetTexture(GetSpellTexture(id))
 					if FindSpellBookSlotBySpellID(id) then
@@ -2187,25 +2195,45 @@ function SUG:SuggestingComplete()
 	end
 end
 
-function SUG:NameOnChar()
+function SUG:NameOnCursor()
 	if SUG.IsCaching then
 		SUG.onCompleteCache = true
+		SUG.Suggest:Show()
 		return
 	end
 	wipe(SUG.preTable)
-	local text = TMW:CleanString(IE.Main.Name:GetText())
+	local text = IE.Main.Name:GetText()
 	
-	for i = IE.Main.Name:GetCursorPosition(), 0, -1 do
+	SUG.startpos = 0
+	SUG.endpos = IE.Main.Name:GetCursorPosition()
+	for i = SUG.endpos, 0, -1 do
 		if strsub(text, i, i) == ";" then
-			SUG.startpos = i
+			SUG.startpos = i+1
 			break
 		end
 	end
-	SUG.lastName = strlower(strtrim(strmatch(text, ";?([^;]*)[;$]?", SUG.startpos)))
-	SUG.atBeginning = "^"..SUG.lastName
-	SUG.startpos, SUG.endpos = strfind(text, ";?([^;]*)[;$]?", SUG.startpos)
+	print(1, text, SUG.startpos, SUG.endpos)
 	
-	if SUG.lastName == "" then
+	SUG.lastName = strsub(text, SUG.startpos, SUG.endpos)
+	SUG.lastName = strlower(TMW:CleanString(SUG.lastName))
+	
+	--disable pattern matches that i dont like (leave only single letter wildcard
+	--if not debug then
+		SUG.lastName = gsub(SUG.lastName, "%%", "%%%")
+		SUG.lastName = gsub(SUG.lastName, "%*", "%%*")
+		SUG.lastName = gsub(SUG.lastName, "%+", "%%+")
+		SUG.lastName = gsub(SUG.lastName, "%-", "%%-")
+		SUG.lastName = gsub(SUG.lastName, "%?", "%%?")
+		SUG.lastName = gsub(SUG.lastName, "%[", "%%[")
+		SUG.lastName = gsub(SUG.lastName, "%]", "%%]")
+		SUG.lastName = gsub(SUG.lastName, "%(", "%%(")
+		SUG.lastName = gsub(SUG.lastName, "%)", "%%)")
+--	end
+
+
+	SUG.atBeginning = "^"..SUG.lastName
+	
+	if SUG.lastName == "" or not strfind(SUG.lastName, "[^%.]") then
 		SUG.Suggest:Hide()
 		SUG.f:SetScript("OnUpdate", nil)
 		return
@@ -2224,6 +2252,31 @@ function SUG:NameOnChar()
 	end
 	
 	SUG:StartSuggester()
+end
+
+function SUG:OnClick()
+	if self.insert then
+		local SUG = TMW.SUG
+
+
+		local currenttext = TMW.IE.Main.Name:GetText()
+		local start = SUG.startpos-1
+		local firsthalf
+		if start <= 0 then
+			firsthalf = ""
+		else
+			firsthalf = strsub(currenttext, 0, start)
+		end
+		local lasthalf = strsub(currenttext, SUG.endpos+1)
+		local newtext = firsthalf .. "; " .. self.insert .. "; " .. lasthalf
+		TMW.IE.Main.Name:SetText(TMW:CleanString(newtext))
+		TMW.IE.Main.Name:SetCursorPosition(SUG.endpos + (#tostring(self.insert) - #tostring(SUG.lastName)) + 2)
+		if IE.Main.Name:GetCursorPosition() == IE.Main.Name:GetNumLetters() then -- if we are at the end of the exitbox then put a semicolon in anyway for convenience
+			TMW.IE.Main.Name:SetText(TMW.IE.Main.Name:GetText().. "; ")
+			TMW.IE.Main.Name:SetCursorPosition(IE.Main.Name:GetNumLetters())
+		end	
+		SUG.Suggest:Hide()
+	end
 end
 
 function SUG:CacheItems()
