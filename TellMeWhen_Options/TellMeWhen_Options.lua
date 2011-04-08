@@ -884,7 +884,7 @@ function ID:CompleteDrag(icon) -- icon here is the destination
 		ID.destgroupID = icon.group:GetID()
 		ID:Stop()
 
-		if ID.destgroupID == ID.srcgroupID and ID.desticonID == ID.srciconID then print(1) return end
+		if ID.destgroupID == ID.srcgroupID and ID.desticonID == ID.srciconID then return end
 
 		UIDropDownMenu_Initialize(ID.DD, ID.Drag_DropDown, "DROPDOWN")
 		UIDropDownMenu_SetAnchor(ID.DD, 0, 0, "TOPLEFT", icon, "BOTTOMLEFT")
@@ -1483,12 +1483,20 @@ function IE:Equiv_GenerateTips(equiv)
 	local r = "" --tconcat doesnt allow me to exclude duplicates unless i make another garbage table, so lets just do this
 	local tbl = TMW:SplitNames(TMW.NamesEquivLookup[equiv])
 	for k, v in pairs(tbl) do
-		local name = GetSpellInfo(v) or v
+		local name, _, texture = GetSpellInfo(v)
+		if not name then
+			if debug then
+				error("INVALID ID FOUND: "..equiv..":"..v)
+			else
+				name = v
+				texture = "Interface\\Icons\\INV_Misc_QuestionMark"
+			end
+		end
 		if not tiptemp[name] then --prevents display of the same name twice when there are multiple ranks.
 			if k ~= #tbl then
-				r = r .. name .. "\r\n"
+				r = r .. "|T" .. texture .. ":0|t" .. name .. "\r\n"
 			else
-				r = r .. name
+				r = r .. "|T" .. texture .. ":0|t" .. name
 			end
 		end
 		tiptemp[name] = true
@@ -1506,6 +1514,13 @@ function IE:Equiv_DropDown()
 				info.text = L[k]
 				info.tooltipTitle = k
 				local text = IE:Equiv_GenerateTips(k)
+
+				info.icon = GetSpellTexture(TMW.EquivIDLookup[k])
+				info.tCoordLeft = 0.07
+				info.tCoordRight = 0.93
+				info.tCoordTop = 0.07
+				info.tCoordBottom = 0.93
+
 				info.tooltipText = text
 				info.tooltipOnButton = true
 				info.value = k
@@ -1518,6 +1533,14 @@ function IE:Equiv_DropDown()
 				local info = UIDropDownMenu_CreateInfo()
 				info.func = IE.Equiv_DropDown_OnClick
 				info.text = L[k]
+
+				local first = strsplit(TMW.EquivIDLookup[k], ";")
+				info.icon = v
+				info.tCoordLeft = 0.07
+				info.tCoordRight = 0.93
+				info.tCoordTop = 0.07
+				info.tCoordBottom = 0.93
+
 				info.value = k
 				info.arg1 = k
 				info.notCheckable = true
@@ -1526,6 +1549,7 @@ function IE:Equiv_DropDown()
 		end
 		return
 	end
+
 	local info = UIDropDownMenu_CreateInfo()
 	info.text = L["ICONMENU_BUFF"]
 	info.value = "buffs"
@@ -1604,7 +1628,8 @@ function IE:Type_Dropdown_OnClick()
 	TMW:ScheduleIconUpdate(groupID, iconID)
 	UIDropDownMenu_SetSelectedValue(IE.Main.Type, "")
 	TMW.CI.t = ""
-	IE.Main.Suggest:Hide()
+	SUG.redoIfSame = 1
+	SUG.Suggest:Hide()
 	IE:SetupRadios()
 	IE:LoadSettings()
 	IE:ShowHide()
@@ -1661,7 +1686,7 @@ function IE:Copy_DropDown()
 		for k, v in pairs(TMW.Recieved) do -- deserialize recieved icons because we dont do it as they are recieved; AceSerializer is only embedded in _Options
 			if type(k) == "string" and v then
 				local success, tbl = TMW:Deserialize(k)
-				if success and type(tbl) == "table" then
+				if success and type(tbl) == "table" and tbl.Name and tbl.Type then -- checks to make sure that it is actually an icon because of my poor planning
 					deserialized[tbl] = v
 					TMW.Recieved[k] = false
 				end
@@ -1833,34 +1858,50 @@ end
 
 local cachednames = {}
 function IE:GetRealNames()
-	-- gets a string to set as a tooltip of all of the spells names in the name box in the IE. splits up equivalancies and turns IDs into names
+	-- gets a string to set as a tooltip of all of the spells names in the name box in the IE. Splits up equivalancies and turns IDs into names
 	local text = IE.Main.Name:GetText()
 	if cachednames[TMW.CI.t .. TMW.CI.SoI .. text] then return cachednames[TMW.CI.t .. TMW.CI.SoI .. text] end
 
 	for name in pairs(TMW.DS) do
-		text = gsub(text, name, "(" .. L[name] .. ")")
+		-- want to buy a case insensitive gsub so i dont have to do stupid stuff like this
+		local t = strlower(text)
+		local startpos, endpos = strfind(t, "[; ]"..strlower(name).."[; ]")
+		if startpos then
+			local firsthalf = strsub(text, 0, startpos-1)
+			local lasthalf = strsub(text, endpos+1)
+			text = firsthalf.."; (" .. L[name] .. ");"..lasthalf
+		end
 	end
+	text = TMW:CleanString(text)
 	local tbl
+	
+	local BEbackup = TMW.BE
+	TMW.BE = TMW.OldBE -- the level of hackyness here is sickening
+	-- by passing false in for arg3 (firstOnly), it creates a unique cache string and therefore a unique cache - nessecary because we arent using the real TMW.BE
 	if TMW.CI.SoI == "item" then
-		tbl = TMW:GetItemIDs(nil, text, nil, 1)
+		tbl = TMW:GetItemIDs(nil, text, false)
 	else
-		tbl = TMW:GetSpellNames(nil, text, nil, 1)
+		tbl = TMW:GetSpellNames(nil, text, false)
 	end
+	TMW.BE = BEbackup -- unhack
+	
 	local str = ""
-
+	LBCode(tbl)
 	for k, v in pairs(tbl) do
-		if not tiptemp[v] then --prevents display of the same name twice when there are multiple spellIDs.
+		local name, _, texture = GetSpellInfo(v)
+		name = name or v
+		if not tiptemp[name] then --prevents display of the same name twice when there are multiple spellIDs.
 			if k ~= #tbl then
 				if #tbl > 50 then -- dont use 1 per line if there a bunch
-					str = str .. v .. "; "
+					str = str .. (texture and ("|T" .. texture .. ":0|t") or "") .. name .. "; "
 				else
-					str = str .. v .. "; \r\n"
+					str = str .. (texture and ("|T" .. texture .. ":0|t") or "") .. name .. "; \r\n"
 				end
 			else
-				str = str .. v
+				str = str .. (texture and ("|T" .. texture .. ":0|t") or "") .. name
 			end
 		end
-		tiptemp[v] = true
+		tiptemp[name] = true
 	end
 	wipe(tiptemp)
 	cachednames[TMW.CI.t .. TMW.CI.SoI .. text] = str
@@ -1868,7 +1909,7 @@ function IE:GetRealNames()
 end
 
 
-SUG = TMW:NewModule("Suggester", "AceEvent-3.0") TMW.SUG = SUG
+SUG = TMW:NewModule("Suggester", "AceEvent-3.0", "AceComm-3.0", "AceSerializer-3.0") TMW.SUG = SUG
 SUG.doUpdateItemCache = true
 
 SUG.f = CreateFrame("Frame")
@@ -1882,16 +1923,39 @@ SUG.NumCachePerFrame = 10
 function SUG:ADDON_LOADED(event, addon)
 	if addon == "TellMeWhen_Options" then
 		TMWOptDB = TMWOptDB or {}
-		
+
 		TMWOptDB.SpellCache = TMWOptDB.SpellCache or {}
 		TMWOptDB.CastCache = TMWOptDB.CastCache or {}
-		SUG.SpellCache = TMWOptDB.SpellCache
-		SUG.CastCache = TMWOptDB.CastCache
-		SUG.ItemCache = {}
-		SUG.ActionCache = {}
+		TMWOptDB.ItemCache = TMWOptDB.ItemCache or {}
+		TMWOptDB.ClassSpellCache = TMWOptDB.ClassSpellCache or {}
+		
+		for k, v in pairs(TMWOptDB) do
+			SUG[k] = v
+		end
+		SUG.ActionCache = {} -- dont save this, it should be a list of things that are CURRENTLY on THIS CHARACTER'S action bars
+		SUG.RequestedFrom = {}
+		
+		SUG.ClassSpellCache[pclass] = SUG.ClassSpellCache[pclass] or {}
+		local _, _, offs, numspells = GetSpellTabInfo(GetNumSpellTabs())
+		local ClassSpellCache = SUG.ClassSpellCache[pclass]
+		for i = 1, offs + numspells do
+			local _, id = GetSpellBookItemInfo(i, "player")
+			if id then
+				ClassSpellCache[id] = 1
+			end
+		end
+		SUG:BuildClassSpellLookup()
+		
+		SUG:RegisterComm("TMWSUG")
+		if RegisterAddonMessagePrefix then
+			RegisterAddonMessagePrefix("TMWSUG") -- new in WoW 4.1
+		end
+		SUG:SendCommMessage("TMWSUG", SUG:Serialize("RCSL"), "GUILD")
+		
+		
 		if TMWOptDB.IncompleteCache or not TMWOptDB.WoWVersion or TMWOptDB.WoWVersion < select(4, GetBuildInfo()) then
 			TMWOptDB.IncompleteCache = true
-			
+
 			local Blacklist = {
 				["Interface\\Icons\\Trade_Alchemy"] = true,
 				["Interface\\Icons\\Trade_BlackSmithing"] = true,
@@ -1921,7 +1985,7 @@ function SUG:ADDON_LOADED(event, addon)
 				end
 			end
 			TMWOptDB.WoWVersion = select(4, GetBuildInfo())
-			
+
 			local function SpellCacher()
 				for id = index, index + SUG.NumCachePerFrame do
 					SUG.Suggest.Status:SetValue(id)
@@ -1938,12 +2002,15 @@ function SUG:ADDON_LOADED(event, addon)
 								not strfind(name, "bunny") and
 								not strfind(name, "visual") and
 								not strfind(name, "trigger") and
+								not strfind(name, "%[") and
+								not strfind(name, "%%") and
+								not strfind(name, "%+") and
+								not strfind(name, "%?") and
 								not strfind(name, "quest") and
 								not strfind(name, "vehicle") and
 								not strfind(name, "event") and
 								not strfind(name, "camera") and
 								not strfind(name, "warning") and
-								not strfind(name, "%[ph%]") and
 								not strfind(name, "i am a")
 							then
 								GameTooltip_SetDefaultAnchor(SUG.Parser, UIParent)
@@ -1962,18 +2029,18 @@ function SUG:ADDON_LOADED(event, addon)
 							spellsFailed = spellsFailed + 1
 						end
 					else
-						print("Finished Caching!")
 						TMWOptDB.IncompleteCache = false
 						TMWOptDB.CacheLength = id
 						SUG.f:SetScript("OnUpdate", nil)
 						SUG.Suggest.Speed:Hide()
 						SUG.Suggest.Status:Hide()
-						
+
 						SUG.IsCaching = nil
 						SUG.SpellCache[1852] = nil -- GM spell named silenced, interferes with equiv
 						SUG.SpellCache[57208] = nil -- enraged
 						SUG.SpellCache[71216] = nil -- enraged
 						if SUG.onCompleteCache then
+							TMW.SUG.redoIfSame = 1
 							SUG:NameOnCursor()
 						end
 						return
@@ -1989,16 +2056,91 @@ function SUG:ADDON_LOADED(event, addon)
 end
 SUG:RegisterEvent("ADDON_LOADED")
 
+function SUG:UNIT_PET(event, unit)
+	if unit == "player" then
+		if not TMWOptDB.ClassSpellCache then return end
+		if HasPetSpells() then
+			local ClassSpellCache = SUG.ClassSpellCache[pclass]
+			local i = 1
+			while true do
+				local _, id = GetSpellBookItemInfo(i, "pet")
+				if id then
+					ClassSpellCache[id] = 1
+				else
+					break
+				end
+				i=i+1
+			end
+		end
+	end
+end
+SUG:RegisterEvent("UNIT_PET")
+
+local commThrowaway = {}
+function SUG:OnCommReceived(prefix, text, channel, who)
+	if prefix ~= "TMWSUG" then return end
+	if channel == "WHISPER" and who == UnitName("player") then return end
+	local success, arg1, arg2, arg3, arg4, arg5 = SUG:Deserialize(text)
+	if success then
+		if arg1 == "RCSL" and not SUG.RequestedFrom[who] then -- only send if the player has not requested yet this session
+			SUG:BuildClassSpellLookup()
+			SUG:SendCommMessage("TMWSUG", SUG:Serialize("CSL", SUG.ClassSpellLength), "WHISPER", who)
+			SUG.RequestedFrom[who] = true
+		elseif arg1 == "CSL" then
+			wipe(commThrowaway)
+			local RecievedClassSpellLength = arg2
+			SUG:BuildClassSpellLookup()
+			for class, length in pairs(RecievedClassSpellLength) do
+				if not SUG.ClassSpellLength[class] or SUG.ClassSpellLength[class] < length then
+					tinsert(commThrowaway, class)
+				end
+			end
+			if #commThrowaway > 0 then
+				SUG:SendCommMessage("TMWSUG", SUG:Serialize("RCSC", commThrowaway), "WHISPER", who)
+			end
+		elseif arg1 == "RCSC" then
+			wipe(commThrowaway)
+			for _, class in pairs(arg2) do
+				commThrowaway[class] = SUG.ClassSpellCache[class]
+			end
+			SUG:SendCommMessage("TMWSUG", SUG:Serialize("CSC", commThrowaway), "WHISPER", who)
+		elseif arg1 == "CSC" then
+			for class, tbl in pairs(arg2) do
+				for id in pairs(tbl) do
+					SUG.ClassSpellCache[class][id] = 1
+				end
+			end
+			SUG:BuildClassSpellLookup()
+		end
+	end
+end
+
+
 function GameTooltip:SetTMWEquiv(equiv)
-	GameTooltip:AddLine(equiv, HIGHLIGHT_FONT_COLOR.r, HIGHLIGHT_FONT_COLOR.g, HIGHLIGHT_FONT_COLOR.b, 1)
+	GameTooltip:AddLine(L[equiv], HIGHLIGHT_FONT_COLOR.r, HIGHLIGHT_FONT_COLOR.g, HIGHLIGHT_FONT_COLOR.b, 1)
 	GameTooltip:AddLine(IE:Equiv_GenerateTips(equiv), NORMAL_FONT_COLOR.r, NORMAL_FONT_COLOR.g, NORMAL_FONT_COLOR.b, 1)
 end
 
 
 SUG.preTable = {}
+local miscprioritize = {
+	[42292] = 1, -- pvp trinket spell
+}
 
 function SUG.Sorter(a, b)
-	local equivA, equivB = TMW.IDEquivLookup[a], TMW.IDEquivLookup[b]
+	--[[PRIORITY:
+		1)	Equivalancies/Dispel Types
+		2)	Abilities on player's action bar if current icon is a multistate cooldown
+		3)	Player's spells (pclass)
+		4)	All player spells (any class)
+		5)	Miscellaneous proiritization spells
+		6)	SpellID if input is an ID
+		7)	If input is a name
+			7a) SpellID if names are identical
+			7b) Alphabetical if names are different
+	]]
+	
+	local equivA, equivB = TMW.EquivIDLookup[a], TMW.EquivIDLookup[b]
 	if equivA or equivB then
 		if equivA and equivB then
 			return L[a] < L[b]
@@ -2006,7 +2148,7 @@ function SUG.Sorter(a, b)
 			return equivA
 		end
 	end
-	
+
 	if TMW.CI.IsMultiState then
 		local haveA = SUG.ActionCache[a]
 		local haveB = SUG.ActionCache[b]
@@ -2015,16 +2157,32 @@ function SUG.Sorter(a, b)
 		end
 	end
 	if TMW.CI.SoI == "spell" then
-		local haveA = FindSpellBookSlotBySpellID(a)
-		local haveB = FindSpellBookSlotBySpellID(b)
+		--player's spells (pclass)
+		local t = SUG.ClassSpellCache[pclass]
+		local haveA = t[a]
+		local haveB = t[b]
+		if (haveA and not haveB) or (haveB and not haveA) then
+			return haveA
+		end
+		
+		--all player spells (any class)
+		haveA = SUG.ClassSpellLookup[a]
+		haveB = SUG.ClassSpellLookup[b]
 		if (haveA and not haveB) or (haveB and not haveA) then
 			return haveA
 		end
 	end
 	
+	local miscA, miscB = miscprioritize[a], miscprioritize[b] -- miscprioritize
+	if (miscA and not miscB) or (miscB and not miscA) then
+		return miscA
+	end
+
 	if SUG.inputType == "number" then
+		--sort by id
 		return a < b
 	else
+		--sort by name
 		local nameA, nameB
 		if TMW.CI.SoI == "item" then
 			nameA, nameB = SUG.ItemCache[a], SUG.ItemCache[b]
@@ -2032,8 +2190,10 @@ function SUG.Sorter(a, b)
 			nameA, nameB = SUG.SpellCache[a], SUG.SpellCache[b]
 		end
 		if nameA == nameB then
+			--sort identical names by ID
 			return a < b
 		else
+			--sort by name
 			return nameA < nameB
 		end
 	end
@@ -2044,9 +2204,11 @@ function SUG:StartSuggester()
 	SUG.f:SetScript("OnUpdate", SUG.Suggester)
 end
 
+local buffEquivs = {TMW.BE.buffs, TMW.BE.debuffs}
 function SUG:Suggester()
 	local start = GetTime()
 	if SUG.startOver then
+		wipe(SUG.preTable)
 		SUG.nextCacheKey = nil
 		SUG.startOver = false
 		if TMW.CI.t == "cast" then
@@ -2056,12 +2218,10 @@ function SUG:Suggester()
 				end
 			end
 		elseif TMW.CI.t == "buff" then
-			for category, b in pairs(TMW.BE) do
-				if category ~= "casts" and category ~= "unlisted" then
-					for equiv, str in pairs(b) do
-						if strfind(strlower(equiv), SUG.atBeginning) or strfind(strlower(L[equiv]), SUG.atBeginning)  then
-							SUG.preTable[#SUG.preTable + 1] = equiv
-						end
+			for _, b in pairs(buffEquivs) do
+				for equiv, str in pairs(b) do
+					if strfind(strlower(equiv), SUG.atBeginning) or strfind(strlower(L[equiv]), SUG.atBeginning)  then
+						SUG.preTable[#SUG.preTable + 1] = equiv
 					end
 				end
 			end
@@ -2072,7 +2232,7 @@ function SUG:Suggester()
 			end
 		end
 	end
-	while GetTime() - start < 0.02 do -- throttle it
+	while GetTime() - start < 0.025 do -- throttle it
 		local id, name
 		if TMW.CI.SoI == "item" then
 			id, name = next(SUG.ItemCache, SUG.nextCacheKey)
@@ -2096,9 +2256,9 @@ function SUG:Suggester()
 			SUG.nextCacheKey = nil
 			SUG.f:SetScript("OnUpdate", nil)
 			SUG.Suggesting = nil
+			SUG.doSort = true
 			SUG:SuggestingComplete()
-			print("Suggesting Complete!")
-			return 
+			return
 		end
 	end
 end
@@ -2107,6 +2267,7 @@ function SUG:SuggestingComplete()
 	local offset = SUG.offset
 	if SUG.doSort then
 		sort(SUG.preTable, SUG.Sorter)
+		SUG.doSort = nil
 	end
 	local i = 1
 	while SUG[i] do
@@ -2116,76 +2277,83 @@ function SUG:SuggestingComplete()
 			f.Background:SetVertexColor(0, 0, 0, 0)
 			if TMW.DS[id] then -- if the entry is a dispel type (magic, poison, etc)
 				local dispeltype = id
-				local icon = TMW.DS[id]
-				
-				f.Name:SetText(L[dispeltype])
+
+				f.Name:SetText(dispeltype)
 				f.ID:SetText(nil)
-				
+
 				f.insert = dispeltype
-				
+
 				f.tooltipmethod = nil
-				f.tooltiptitle = L[dispeltype]
+				f.tooltiptitle = dispeltype
 				f.tooltiptext = L["ICONMENU_DISPEL"]
-				
+
 				f.Icon:SetTexture(TMW.DS[id])
 				f.Background:SetVertexColor(1, .49, .04, 1) -- druid orange
-			
-			elseif TMW.IDEquivLookup[id] then -- if the entry is an equivalacy (buff, cast, or whatever)
-				--NOTE: dispel types are put in here too for efficiency in the sorter func, but as long as dispel types are checked first, it wont matter
+
+			elseif TMW.EquivIDLookup[id] then -- if the entry is an equivalacy (buff, cast, or whatever)
+				--NOTE: dispel types are put in EquivIDLookup too for efficiency in the sorter func, but as long as dispel types are checked first, it wont matter
 				local equiv = id
-				local firstid = TMW.IDEquivLookup[id]
-				
-				f.Name:SetText(L[equiv])
+				local firstid = TMW.EquivIDLookup[id]
+
+				f.Name:SetText(equiv)
 				f.ID:SetText(nil)
-				
+
 				f.insert = equiv
-				
+
 				f.tooltipmethod = "SetTMWEquiv"
 				f.tooltiparg = equiv
-				
+
 				f.Icon:SetTexture(GetSpellTexture(firstid))
 				if TMW.BE.buffs[equiv] then
 					f.Background:SetVertexColor(.2, .9, .2, 1) -- lightish green
 				elseif TMW.BE.debuffs[equiv] then
 					f.Background:SetVertexColor(.77, .12, .23, 1) -- deathknight red
 				elseif TMW.BE.casts[equiv] then
-					f.Background:SetVertexColor(.58, .51, .79, 1) -- warlock purple
+					f.Background:SetVertexColor(1, .96, .41, 1) -- rogue yellow
 				end
-				
+
 			elseif tonumber(id) then --sanity check
 				if TMW.CI.SoI == "item" then -- if the entry is an item
 					local name, link = GetItemInfo(id)
-					
+
 					f.Name:SetText(link)
 					f.ID:SetText(id)
-				
+
 					f.insert = SUG.inputType == "number" and id or name
-					
+
 					f.tooltipmethod = "SetHyperlink"
 					f.tooltiparg = link
-					
+
 					f.Icon:SetTexture(GetItemIcon(id))
-					
+
 				else -- the entry must be just a normal spell
 					local name = GetSpellInfo(id)
-					
+
 					f.Name:SetText(name)
 					f.ID:SetText(id)
-					
+
 					f.tooltipmethod = "SetSpellByID"
 					f.tooltiparg = id
-					
+
 					f.insert = SUG.inputType == "number" and id or name
-					
+
 					f.Icon:SetTexture(GetSpellTexture(id))
-					if FindSpellBookSlotBySpellID(id) then
-						if TMW.CI.IsMultiState and SUG.ActionCache[id] then
-							f.Background:SetVertexColor(0, .44, .87, 1) --color actions that are on your action bars if the type is a multistate cooldown shaman blue
-						else
-							f.Background:SetVertexColor(.41, .8, .94, 1) --color all other spells that you have in your spellbook mage blue
+					if TMW.CI.IsMultiState and SUG.ActionCache[id] then
+						f.Background:SetVertexColor(0, .44, .87, 1) --color actions that are on your action bars if the type is a multistate cooldown shaman blue
+					elseif SUG.ClassSpellCache[pclass][id] then
+						f.Background:SetVertexColor(.41, .8, .94, 1) --color all other spells that you have in your/your pet's spellbook mage blue
+					else
+						for class, tbl in pairs(SUG.ClassSpellCache) do
+							if tbl[id] then
+								f.Background:SetVertexColor(.96, .55, .73, 1) --color all other known class spells paladin pink
+								break
+							end
 						end
 					end
 				end
+			end
+			if miscprioritize[id] then -- override previous
+				f.Background:SetVertexColor(.58, .51, .79, 1)
 			end
 			f:Show()
 		else
@@ -2201,9 +2369,9 @@ function SUG:NameOnCursor()
 		SUG.Suggest:Show()
 		return
 	end
-	wipe(SUG.preTable)
+	SUG.oldLastName = SUG.lastName
 	local text = IE.Main.Name:GetText()
-	
+
 	SUG.startpos = 0
 	SUG.endpos = IE.Main.Name:GetCursorPosition()
 	for i = SUG.endpos, 0, -1 do
@@ -2212,27 +2380,21 @@ function SUG:NameOnCursor()
 			break
 		end
 	end
-	print(1, text, SUG.startpos, SUG.endpos)
-	
+
 	SUG.lastName = strsub(text, SUG.startpos, SUG.endpos)
 	SUG.lastName = strlower(TMW:CleanString(SUG.lastName))
-	
-	--disable pattern matches that i dont like (leave only single letter wildcard
-	--if not debug then
-		SUG.lastName = gsub(SUG.lastName, "%%", "%%%")
-		SUG.lastName = gsub(SUG.lastName, "%*", "%%*")
-		SUG.lastName = gsub(SUG.lastName, "%+", "%%+")
-		SUG.lastName = gsub(SUG.lastName, "%-", "%%-")
-		SUG.lastName = gsub(SUG.lastName, "%?", "%%?")
-		SUG.lastName = gsub(SUG.lastName, "%[", "%%[")
-		SUG.lastName = gsub(SUG.lastName, "%]", "%%]")
-		SUG.lastName = gsub(SUG.lastName, "%(", "%%(")
-		SUG.lastName = gsub(SUG.lastName, "%)", "%%)")
---	end
+
+	--disable pattern matches that will break/interfere
+	SUG.lastName = gsub(SUG.lastName, "%%", "%%%%")
+	SUG.lastName = gsub(SUG.lastName, "%-", "%%-")
+	SUG.lastName = gsub(SUG.lastName, "%[", "%%[")
+	SUG.lastName = gsub(SUG.lastName, "%]", "%%]")
+	SUG.lastName = gsub(SUG.lastName, "%(", "%%(")
+	SUG.lastName = gsub(SUG.lastName, "%)", "%%)")
 
 
 	SUG.atBeginning = "^"..SUG.lastName
-	
+
 	if SUG.lastName == "" or not strfind(SUG.lastName, "[^%.]") then
 		SUG.Suggest:Hide()
 		SUG.f:SetScript("OnUpdate", nil)
@@ -2240,26 +2402,23 @@ function SUG:NameOnCursor()
 	else
 		SUG.Suggest:Show()
 	end
-	
+
 	SUG.inputType = type(tonumber(SUG.lastName) or SUG.lastName)
 	SUG.startOver = true
-	SUG.doSort = true
-	SUG.offset = 0
-	
-	SUG:CacheItems()
-	if TMW.CI.IsMultiState then
-		SUG:CacheActions()
+	if not (SUG.oldLastName == SUG.lastName and not SUG.redoIfSame) then
+		SUG:CacheItems()
+		if TMW.CI.IsMultiState then
+			SUG:CacheActions()
+		end
+
+		SUG.offset = 0
+		SUG:StartSuggester()
 	end
-	
-	SUG:StartSuggester()
 end
 
 function SUG:OnClick()
 	if self.insert then
-		local SUG = TMW.SUG
-
-
-		local currenttext = TMW.IE.Main.Name:GetText()
+		local currenttext = IE.Main.Name:GetText()
 		local start = SUG.startpos-1
 		local firsthalf
 		if start <= 0 then
@@ -2269,12 +2428,12 @@ function SUG:OnClick()
 		end
 		local lasthalf = strsub(currenttext, SUG.endpos+1)
 		local newtext = firsthalf .. "; " .. self.insert .. "; " .. lasthalf
-		TMW.IE.Main.Name:SetText(TMW:CleanString(newtext))
-		TMW.IE.Main.Name:SetCursorPosition(SUG.endpos + (#tostring(self.insert) - #tostring(SUG.lastName)) + 2)
+		IE.Main.Name:SetText(TMW:CleanString(newtext))
+		IE.Main.Name:SetCursorPosition(SUG.endpos + (#tostring(self.insert) - #tostring(SUG.lastName)) + 2)
 		if IE.Main.Name:GetCursorPosition() == IE.Main.Name:GetNumLetters() then -- if we are at the end of the exitbox then put a semicolon in anyway for convenience
-			TMW.IE.Main.Name:SetText(TMW.IE.Main.Name:GetText().. "; ")
-			TMW.IE.Main.Name:SetCursorPosition(IE.Main.Name:GetNumLetters())
-		end	
+			IE.Main.Name:SetText(IE.Main.Name:GetText().. "; ")
+			IE.Main.Name:SetCursorPosition(IE.Main.Name:GetNumLetters())
+		end
 		SUG.Suggest:Hide()
 	end
 end
@@ -2285,7 +2444,15 @@ function SUG:CacheItems()
 			local id = GetContainerItemID(container, slot)
 			if id then
 				SUG.ItemCache[id] = strlower(GetItemInfo(id))
+		--		local 
 			end
+		end
+	end
+	for slot = 1, 19 do
+		local id = GetInventoryItemID("player", slot)
+		if id then
+			SUG.ItemCache[id] = strlower(GetItemInfo(id))
+	--		local 
 		end
 	end
 end
@@ -2300,6 +2467,17 @@ function SUG:CacheActions()
 	end
 end
 
+function SUG:BuildClassSpellLookup()
+	SUG.ClassSpellLength = SUG.ClassSpellLength or {}
+	SUG.ClassSpellLookup = SUG.ClassSpellLookup or {}
+	for class, tbl in pairs(SUG.ClassSpellCache) do
+		SUG.ClassSpellLength[class] = 0
+		for id in pairs(tbl) do
+			SUG.ClassSpellLookup[id] = 1
+			SUG.ClassSpellLength[class] = SUG.ClassSpellLength[class] + 1
+		end
+	end
+end
 
 -- -----------------------
 -- CONDITION EDITOR DIALOG
@@ -2309,7 +2487,7 @@ CNDT = TMW.CNDT
 
 function CNDT:TypeMenuOnClick(frame, data)
 	UIDropDownMenu_SetSelectedValue(frame, self.value)
-	UIDropDownMenu_SetText(frame, data.text) 
+	UIDropDownMenu_SetText(frame, data.text)
 	local group = frame:GetParent()
 	local showval = CNDT:TypeCheck(group, data)
 	CNDT:SetSliderMinMax(group)

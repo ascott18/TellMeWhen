@@ -37,7 +37,7 @@ local LSM = LibStub("LibSharedMedia-3.0")
 
 TELLMEWHEN_VERSION = "4.0.1"
 TELLMEWHEN_VERSION_MINOR = " beta"
-TELLMEWHEN_VERSIONNUMBER = 40102
+TELLMEWHEN_VERSIONNUMBER = 40103
 TELLMEWHEN_MAXGROUPS = 10 	--this is a default, used by SetTheory (addon), so dont rename
 TELLMEWHEN_MAXROWS = 20
 TELLMEWHEN_MAXCONDITIONS = 1 --this is a default
@@ -453,23 +453,25 @@ TMW.BE = {	--Much of these are thanks to Malazee @ US-Dalaran's chart: http://fo
 		boss = "boss1;boss;boss3;boss4",
 		maintank = "maintank1;maintank2;maintank3;maintank4;maintank5",
 		mainassist = "mainassist1;mainassist2;mainassist3;mainassist4;mainassist5",
-	}
-} local BE = TMW.BE
+	},
+}
 
-TMW.IDEquivLookup = {}
+TMW.EquivIDLookup = {}
 TMW.NamesEquivLookup = {}
 TMW.OldBE = CopyTable(TMW.BE)
 for category, b in pairs(TMW.OldBE) do
 	for equiv, str in pairs(b) do
 	
-		-- create the lookup table first, so that we can have the first ID even if it will be turned into a name
+		-- create the lookup tables first, so that we can have the first ID even if it will be turned into a name
 		local first = strsplit(";", str)
 		first = strtrim(first, "; _")
-		TMW.IDEquivLookup[equiv] = first
+			
+		TMW.EquivIDLookup[equiv] = first -- this is used to display them in the list (tooltip, name, id display)
+		TMW.OldBE[category][equiv] = gsub(str, "_", "") -- this is used to put icons into tooltips
+		TMW.NamesEquivLookup[equiv] = TMW.OldBE[category][equiv]
 		
 		-- turn all IDs prefixed with "_" into their localized name. Dont do this on every single one, but do use it for spells that do not have any other spells with the same name but different effects.
 		
-		TMW.OldBE[category][equiv] = gsub(str, "_", "") -- this is used to put icons into tooltips
 		while strfind(str, "_") do
 			local id = strmatch(str, "_%d+")
 			if id then
@@ -477,12 +479,12 @@ for category, b in pairs(TMW.OldBE) do
 				str = gsub(str, id, name)
 			end
 		end
-		TMW.NamesEquivLookup[equiv] = str
+		
 		TMW.BE[category][equiv] = str
 	end
 end
 for dispeltype, icon in pairs(TMW.DS) do
-	TMW.IDEquivLookup[dispeltype] = icon
+	TMW.EquivIDLookup[dispeltype] = icon
 end
 
 TMW.GCDSpells = {
@@ -669,7 +671,7 @@ function TMW:OnTalentUpdate()
 end
 
 function TMW:OnCommReceived(prefix, text, channel, who)
-	if not prefix == "TMW" then return end
+	if prefix ~= "TMW" then return end
 	if channel == "GUILD" then
 		if TMW.debug then
 			print(prefix, text, channel, who)
@@ -682,7 +684,7 @@ function TMW:OnCommReceived(prefix, text, channel, who)
 				TMW:Printf(L["NEWVERSION"], major .. minor)
 			end
 		end
-	elseif db.profile.ReceiveComm then
+	elseif channel == "WHISPER" and db.profile.ReceiveComm then
 		TMW.Recieved[text] = who or true
 		if who then
 			if db.profile.HasImported then
@@ -1913,15 +1915,21 @@ end
 
 local eqttcache = {}
 function TMW:EquivToTable(name)
+	name = strlower(name)
 	local names
-	for k, v in pairs(BE) do -- check in subtables ('buffs', 'debuffs', 'casts', etc)
-		names = BE[k][name]
-		if names then
-			break -- if this subtable contains the equivalency string, then stop looking
+	for k, v in pairs(TMW.BE) do -- check in subtables ('buffs', 'debuffs', 'casts', etc)
+		for equiv, str in pairs(v) do
+			if strlower(equiv) == name then
+				names = str
+				break
+			end
 		end
+		if names then break end
 	end
 	if not names then return end -- if we didnt find an equivalency string then gtfo
+	
 	if eqttcache[names] then return eqttcache[names] end -- if we already made a table of this string, then use it
+	
 	local tbl = { strsplit(";", names) } -- split the string into a table
 	for a, b in pairs(tbl) do
 		local new = strtrim(b) -- take off trailing spaces
@@ -2088,9 +2096,15 @@ end
 
 function TMW:CleanString(text)
 	text = strtrim(text, "; \t\r\n")-- remove all leading and trailing semicolons, spaces, tabs, and newlines
-	text = gsub(text, " ;", "; ") -- remove all spaces followed by semicolons
-	text = gsub(text, ";  ", "; ") -- remove all double spaces between entries
-	text = gsub(text, ";;", ";") -- remove all double semicolons
+	while strfind(text, " ;") do
+		text = gsub(text, " ;", "; ") -- remove all spaces followed by semicolons
+	end
+	while strfind(text, ";  ") do
+		text = gsub(text, ";  ", "; ") -- remove all double spaces between entries
+	end
+	while strfind(text, ";;") do
+		text = gsub(text, ";;", ";") -- remove all double semicolons
+	end
 	return text
 end
 

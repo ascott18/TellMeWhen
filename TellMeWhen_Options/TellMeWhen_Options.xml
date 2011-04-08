@@ -850,6 +850,7 @@
 					end
 				end
 				if TMW.IE.Main.Name:HasFocus() then
+					TMW.SUG.redoIfSame = 1
 					TMW.SUG:NameOnCursor()
 				end
 				TMW.IE:ShowHide()
@@ -942,7 +943,7 @@
 
 	<Button name="TellMeWhen_SpellSuggestTemplate" virtual="true" hidden="true">
 		<Size>
-			<AbsDimension x="180" y="18.6"/>
+			<AbsDimension y="18.6"/>
 		</Size>
 		<Scripts>
 			<OnLoad>
@@ -967,6 +968,11 @@
 			<OnMouseWheel>
 				if not TMW.SUG.Suggesting then
 					if (not TMW.SUG[#TMW.SUG]:IsShown() and delta == 1) or TMW.SUG[#TMW.SUG]:IsShown() then
+						if IsLeftShiftKeyDown() or IsRightShiftKeyDown() then
+							delta = delta*5
+						elseif IsLeftControlKeyDown() or IsRightControlKeyDown() then
+							delta = delta*(#TMW.SUG-1)
+						end
 						TMW.SUG.offset = max(0, TMW.SUG.offset - delta)
 					end
 					TMW.SUG:SuggestingComplete()
@@ -1216,7 +1222,7 @@
 				</Anchors>
 				<Frames>
 					<Frame name="$parentSuggest" parentKey="Suggest" hidden="true">
-						<Size x="200"/>
+						<Size x="220"/>
 						<Anchors>
 							<Anchor point="TOPLEFT" relativeTo="$parent" relativePoint="TOPRIGHT">
 								<Offset x="-12" y="0" />
@@ -1317,11 +1323,10 @@
 									</OnValueChanged>
 								</Scripts>
 							</StatusBar>
-			
 						</Frames>
 						<Layers>
 							<Layer level="OVERLAY">
-								<FontString name="$parentHeader" inherits="GameFontNormalLarge" justifyH="LEFT" text="SUGGESTIONS">
+								<FontString name="$parentHeader" inherits="GameFontNormalLarge" parentKey="Header" justifyH="LEFT" text="SUGGESTIONS">
 									<Anchors>
 										<Anchor point="TOP" relativeTo="$parent">
 											<Offset x="0" y="-12"/>
@@ -1333,14 +1338,17 @@
 						<Scripts>
 							<OnLoad>
 								TMW.SUG.Suggest = self
+								self.Header:SetText(TMW.L["SUGGESTIONS"])
 								local previous = self.Item1
-								self.Item1:SetPoint("TOPLEFT", self, "TOPLEFT", 12, -12-self.Item1:GetHeight())
 								TMW.SUG[1] = self.Item1
+								self.Item1:SetPoint("TOPLEFT", self, "TOPLEFT", 12, -12-self.Item1:GetHeight())
+								self.Item1:SetWidth(self:GetWidth()-20)
 								for i=2, self:GetHeight()/self.Item1:GetHeight()-2 do
 									local f = CreateFrame("Button", self:GetName().."Item"..i, self, "TellMeWhen_SpellSuggestTemplate")
 									self["Item"..i] = f
 									TMW.SUG[i] = f
 									f:SetPoint("TOPLEFT", previous, "BOTTOMLEFT", 0, 0)
+									f:SetWidth(self:GetWidth()-20)
 									previous = f
 								end
 							</OnLoad>
@@ -1443,11 +1451,12 @@
 								end
 								TMW:ScheduleIconUpdate(groupID, iconID)
 								self:GetScript("OnTextChanged")(self)
-								TMW.IE.Main.Suggest:Hide()
+								TMW.SUG.Suggest:Hide()
 							</OnEditFocusLost>
 							<OnEditFocusGained>
 								EditBox_HighlightText(self)
 								self.BackgroundText:SetText(nil)
+								TMW.SUG.redoIfSame = nil
 								TMW.SUG:NameOnCursor()
 							</OnEditFocusGained>
 							<OnEnter>
@@ -1472,6 +1481,7 @@
 									self.BackgroundText:SetText(nil)
 								end
 								if userInput then
+									TMW.SUG.redoIfSame = nil
 									TMW.SUG:NameOnCursor()
 								end
 							</OnTextChanged>
