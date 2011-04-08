@@ -55,41 +55,22 @@ function Type:Update()
 	ab = db.profile.ABSENTColor
 end
 
-local Casts = {} TMW.Casts = Casts
-if clientVersion >= 40100 then -- COMBAT_LOG_EVENT_UNFILTERED
-	function Type:COMBAT_LOG_EVENT_UNFILTERED(e, _, p, _, g, _, _, _, _, _, i)-- tyPe, sourceGuid, spellId -- NEW ARG IN 4.1 BETWEEN TYPE AND SOURCEGUID
-		if p == "SPELL_CAST_START" then
-			Casts[g] = i
-		elseif p == "SPELL_CAST_FAILED" or p == "SPELL_CAST_SUCCESS" then
-			Casts[g] = nil
-		end
-	end
-else
-	function Type:COMBAT_LOG_EVENT_UNFILTERED(e, _, p, g, _, _, _, _, _, i)-- tyPe, Guid, spellId
-		if p == "SPELL_CAST_START" then
-			Casts[g] = i
-		elseif p == "SPELL_CAST_FAILED" or p == "SPELL_CAST_SUCCESS" then
-			Casts[g] = nil
-		end
-	end
-end
-
 local function Cast_OnUpdate(icon)
 	if icon.UpdateTimer <= CUR_TIME - UPD_INTV then
 		icon.UpdateTimer = CUR_TIME
 		local CndtCheck = icon.CndtCheck if CndtCheck and CndtCheck() then return end
 		
-		local NameFirst, NameDictionary, Interruptible = icon.NameFirst, icon.NameDictionary, icon.Interruptible
+		local NameFirst, NameNameDictionary, Interruptible = icon.NameFirst, icon.NameNameDictionary, icon.Interruptible
 		for _, unit in ipairs(icon.Units) do
 			if UnitExists(unit) then
 				local name, _, _, iconTexture, start, endTime, _, _, notInterruptible = UnitCastingInfo(unit)
-				local reverse = false
+				local reverse = false -- must be false
 				if not name then
 					name, _, _, iconTexture, start, endTime, _, notInterruptible = UnitChannelInfo(unit)
 					reverse = true
 				end
 
-				if name and not (notInterruptible and icon.Interruptible) and (NameFirst == "" or NameDictionary[strlower(name)] or NameDictionary[Casts[UnitGUID(unit)]]) then
+				if name and not (notInterruptible and icon.Interruptible) and (NameFirst == "" or NameNameDictionary[strlower(name)]) then
 					local Alpha = icon.Alpha
 					if Alpha == 0 then
 						icon:SetAlpha(0)
@@ -151,15 +132,9 @@ end
 Type.AllowNoName = true
 function Type:Setup(icon, groupID, iconID)
 	icon.NameFirst = TMW:GetSpellNames(icon, icon.Name, 1)
-	icon.NameDictionary = TMW:GetSpellNames(icon, icon.Name, nil, nil, 1)
---	icon.NameNameDictionary = TMW:GetSpellNames(icon, icon.Name, nil, 1, 1)
+--	icon.NameDictionary = TMW:GetSpellNames(icon, icon.Name, nil, nil, 1)
+	icon.NameNameDictionary = TMW:GetSpellNames(icon, icon.Name, nil, 1, 1)
 	icon.Units = TMW:GetUnits(icon, icon.Unit)
-
-	for name in pairs(icon.NameDictionary) do
-		if type(name) == "number" then
-			Type:RegisterEvent("COMBAT_LOG_EVENT_UNFILTERED")
-		end
-	end
 	
 	if icon.Name == "" then
 		icon:SetTexture("Interface\\Icons\\Temp")

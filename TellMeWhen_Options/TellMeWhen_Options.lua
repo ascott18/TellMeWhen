@@ -47,6 +47,7 @@ local points = {
 }
 local print = TMW.print
 TMW.CI = {}		--current icon
+local clientVersion = select(4, GetBuildInfo())
 
 function TMW:CopyWithMetatable(settings)
 	local copy = {}
@@ -1124,7 +1125,7 @@ local tabs = {
 	[3] = "Group",
 	--[4] = "ImpExp",
 }
-
+local IsMultiState, SoI
 IE.Data = {
 	-- the keys on this table need to match the settings variable names
 	Type = {}, -- this will be populated by registered icon types
@@ -1328,16 +1329,16 @@ function IE:ShowHide()
 	local spb = IE.Main.ShowPBar
 	local scb = IE.Main.ShowCBar
 	if TMW.CI.t == "cooldown" and IE.Main.TypeChecks.Radio3:GetChecked() and IE.Main.TypeChecks.Radio3.value == "item" then
-		TMW.CI.SoI = "item"
+		SoI = "item"
 	else
 		if TMW.CI.t == "cooldown" and IE.Main.TypeChecks.Radio2:GetChecked() and IE.Main.TypeChecks.Radio2.value == "multistate" then
-			TMW.CI.IsMultiState = true
+			IsMultiState = true
 		else
-			TMW.CI.IsMultiState = nil
+			IsMultiState = nil
 		end
-		TMW.CI.SoI = "spell"
+		SoI = "spell"
 	end
-	if TMW.CI.SoI == "item" then
+	if SoI == "item" then
 		spb:SetEnabled(nil)
 		scb:SetEnabled(1)
 		IE.Main.OnlyEquipped:Show()
@@ -1860,7 +1861,7 @@ local cachednames = {}
 function IE:GetRealNames()
 	-- gets a string to set as a tooltip of all of the spells names in the name box in the IE. Splits up equivalancies and turns IDs into names
 	local text = IE.Main.Name:GetText()
-	if cachednames[TMW.CI.t .. TMW.CI.SoI .. text] then return cachednames[TMW.CI.t .. TMW.CI.SoI .. text] end
+	if cachednames[TMW.CI.t .. SoI .. text] then return cachednames[TMW.CI.t .. SoI .. text] end
 
 	for name in pairs(TMW.DS) do
 		-- want to buy a case insensitive gsub so i dont have to do stupid stuff like this
@@ -1878,7 +1879,7 @@ function IE:GetRealNames()
 	local BEbackup = TMW.BE
 	TMW.BE = TMW.OldBE -- the level of hackyness here is sickening
 	-- by passing false in for arg3 (firstOnly), it creates a unique cache string and therefore a unique cache - nessecary because we arent using the real TMW.BE
-	if TMW.CI.SoI == "item" then
+	if SoI == "item" then
 		tbl = TMW:GetItemIDs(nil, text, false)
 	else
 		tbl = TMW:GetSpellNames(nil, text, false)
@@ -1904,12 +1905,13 @@ function IE:GetRealNames()
 		tiptemp[name] = true
 	end
 	wipe(tiptemp)
-	cachednames[TMW.CI.t .. TMW.CI.SoI .. text] = str
+	cachednames[TMW.CI.t .. SoI .. text] = str
 	return str
 end
 
 
 SUG = TMW:NewModule("Suggester", "AceEvent-3.0", "AceComm-3.0", "AceSerializer-3.0") TMW.SUG = SUG
+local inputType
 SUG.doUpdateItemCache = true
 
 SUG.f = CreateFrame("Frame")
@@ -1927,11 +1929,19 @@ function SUG:ADDON_LOADED(event, addon)
 		TMWOptDB.SpellCache = TMWOptDB.SpellCache or {}
 		TMWOptDB.CastCache = TMWOptDB.CastCache or {}
 		TMWOptDB.ItemCache = TMWOptDB.ItemCache or {}
+		TMWOptDB.AuraCache = TMWOptDB.AuraCache or {}
 		TMWOptDB.ClassSpellCache = TMWOptDB.ClassSpellCache or {}
 		
 		for k, v in pairs(TMWOptDB) do
 			SUG[k] = v
 		end
+		for k, v in pairs(TMW.AuraCache) do
+			-- import into the options DB and take it out of the main DB
+			SUG.AuraCache[k] = v
+			TMW.AuraCache[k] = nil
+		end
+		TMW.AuraCache = SUG.AuraCache
+		
 		SUG.ActionCache = {} -- dont save this, it should be a list of things that are CURRENTLY on THIS CHARACTER'S action bars
 		SUG.RequestedFrom = {}
 		
@@ -1953,7 +1963,7 @@ function SUG:ADDON_LOADED(event, addon)
 		SUG:SendCommMessage("TMWSUG", SUG:Serialize("RCSL"), "GUILD")
 		
 		
-		if TMWOptDB.IncompleteCache or not TMWOptDB.WoWVersion or TMWOptDB.WoWVersion < select(4, GetBuildInfo()) then
+		if TMWOptDB.IncompleteCache or not TMWOptDB.WoWVersion or TMWOptDB.WoWVersion < clientVersion then
 			TMWOptDB.IncompleteCache = true
 
 			local Blacklist = {
@@ -1976,7 +1986,7 @@ function SUG:ADDON_LOADED(event, addon)
 			SUG.Suggest.Status.texture:SetTexture(LSM:Fetch("statusbar", db.profile.TextureName))
 			SUG.Suggest.Status:SetMinMaxValues(1, TMWOptDB.CacheLength)
 			SUG.Suggest.Speed:Show()
-			if TMWOptDB.WoWVersion and TMWOptDB.WoWVersion < select(4, GetBuildInfo()) then
+			if TMWOptDB.WoWVersion and TMWOptDB.WoWVersion < clientVersion then
 				wipe(SUG.SpellCache)
 				wipe(SUG.CastCache)
 			elseif TMWOptDB.IncompleteCache then
@@ -1984,7 +1994,7 @@ function SUG:ADDON_LOADED(event, addon)
 					index = max(index, id)
 				end
 			end
-			TMWOptDB.WoWVersion = select(4, GetBuildInfo())
+			TMWOptDB.WoWVersion = clientVersion
 
 			local function SpellCacher()
 				for id = index, index + SUG.NumCachePerFrame do
@@ -2037,7 +2047,6 @@ function SUG:ADDON_LOADED(event, addon)
 
 						SUG.IsCaching = nil
 						SUG.SpellCache[1852] = nil -- GM spell named silenced, interferes with equiv
-						SUG.SpellCache[57208] = nil -- enraged
 						SUG.SpellCache[71216] = nil -- enraged
 						if SUG.onCompleteCache then
 							TMW.SUG.redoIfSame = 1
@@ -2078,9 +2087,8 @@ SUG:RegisterEvent("UNIT_PET")
 
 local commThrowaway = {}
 function SUG:OnCommReceived(prefix, text, channel, who)
-	if prefix ~= "TMWSUG" then return end
-	if channel == "WHISPER" and who == UnitName("player") then return end
-	local success, arg1, arg2, arg3, arg4, arg5 = SUG:Deserialize(text)
+	if prefix ~= "TMWSUG" or who == UnitName("player") then return end
+	local success, arg1, arg2 = SUG:Deserialize(text)
 	if success then
 		if arg1 == "RCSL" and not SUG.RequestedFrom[who] then -- only send if the player has not requested yet this session
 			SUG:BuildClassSpellLookup()
@@ -2112,6 +2120,8 @@ function SUG:OnCommReceived(prefix, text, channel, who)
 			end
 			SUG:BuildClassSpellLookup()
 		end
+	elseif debug then
+		error(arg1)
 	end
 end
 
@@ -2134,67 +2144,80 @@ function SUG.Sorter(a, b)
 		3)	Player's spells (pclass)
 		4)	All player spells (any class)
 		5)	Miscellaneous proiritization spells
-		6)	SpellID if input is an ID
-		7)	If input is a name
-			7a) SpellID if names are identical
-			7b) Alphabetical if names are different
+		6)	Known auras
+		7)	SpellID if input is an ID
+		8)	If input is a name
+			8a) SpellID if names are identical
+			8b) Alphabetical if names are different
 	]]
 	
-	local equivA, equivB = TMW.EquivIDLookup[a], TMW.EquivIDLookup[b]
-	if equivA or equivB then
-		if equivA and equivB then
-			return L[a] < L[b]
+	local t = TMW.EquivIDLookup
+	local haveA, haveB = t[a], t[b]
+	if haveA or haveB then
+		if haveA and haveB then
+			--return L[a] < L[b]
+			return a < b
 		else
-			return equivA
+			return haveA
 		end
 	end
 
-	if TMW.CI.IsMultiState then
-		local haveA = SUG.ActionCache[a]
-		local haveB = SUG.ActionCache[b]
+	if IsMultiState then
+		t = SUG.ActionCache
+		haveA = t[a]
+		haveB = t[b]
 		if (haveA and not haveB) or (haveB and not haveA) then
 			return haveA
 		end
 	end
-	if TMW.CI.SoI == "spell" then
+	if SoI == "spell" then
 		--player's spells (pclass)
-		local t = SUG.ClassSpellCache[pclass]
-		local haveA = t[a]
-		local haveB = t[b]
+		t = SUG.ClassSpellCache[pclass]
+		haveA = t[a]
+		haveB = t[b]
 		if (haveA and not haveB) or (haveB and not haveA) then
 			return haveA
 		end
 		
 		--all player spells (any class)
-		haveA = SUG.ClassSpellLookup[a]
-		haveB = SUG.ClassSpellLookup[b]
+		t = SUG.ClassSpellLookup
+		haveA = t[a]
+		haveB = t[b]
 		if (haveA and not haveB) or (haveB and not haveA) then
 			return haveA
 		end
 	end
 	
-	local miscA, miscB = miscprioritize[a], miscprioritize[b] -- miscprioritize
-	if (miscA and not miscB) or (miscB and not miscA) then
-		return miscA
+	haveA, haveB = miscprioritize[a], miscprioritize[b] -- miscprioritize
+	if (haveA and not haveB) or (haveB and not haveA) then
+		return haveA
 	end
+	
+	t = SUG.AuraCache
+	haveA, haveB = t[a], t[b] -- Auras
+	if (haveA and not haveB) or (haveB and not haveA) then
+		return haveA
+	end
+	
 
-	if SUG.inputType == "number" then
+	if inputType == "number" then
 		--sort by id
 		return a < b
 	else
 		--sort by name
-		local nameA, nameB
-		if TMW.CI.SoI == "item" then
-			nameA, nameB = SUG.ItemCache[a], SUG.ItemCache[b]
+		if SoI == "item" then
+			t = SUG.ItemCache
+			haveA, haveB = t[a], t[b]
 		else
-			nameA, nameB = SUG.SpellCache[a], SUG.SpellCache[b]
+			t = SUG.SpellCache
+			haveA, haveB = t[a], t[b]
 		end
-		if nameA == nameB then
+		if haveA == haveB then
 			--sort identical names by ID
 			return a < b
 		else
 			--sort by name
-			return nameA < nameB
+			return haveA < haveB
 		end
 	end
 end
@@ -2234,7 +2257,7 @@ function SUG:Suggester()
 	end
 	while GetTime() - start < 0.025 do -- throttle it
 		local id, name
-		if TMW.CI.SoI == "item" then
+		if SoI == "item" then
 			id, name = next(SUG.ItemCache, SUG.nextCacheKey)
 		elseif TMW.CI.t == "cast" then
 			id, name = next(SUG.CastCache, SUG.nextCacheKey)
@@ -2242,7 +2265,7 @@ function SUG:Suggester()
 			id, name = next(SUG.SpellCache, SUG.nextCacheKey)
 		end
 		if id then
-			if SUG.inputType == "number" then
+			if inputType == "number" then
 				if strfind(id, SUG.atBeginning) then
 					SUG.preTable[#SUG.preTable + 1] = id
 				end
@@ -2313,13 +2336,13 @@ function SUG:SuggestingComplete()
 				end
 
 			elseif tonumber(id) then --sanity check
-				if TMW.CI.SoI == "item" then -- if the entry is an item
+				if SoI == "item" then -- if the entry is an item
 					local name, link = GetItemInfo(id)
 
 					f.Name:SetText(link)
 					f.ID:SetText(id)
 
-					f.insert = SUG.inputType == "number" and id or name
+					f.insert = inputType == "number" and id or name
 
 					f.tooltipmethod = "SetHyperlink"
 					f.tooltiparg = link
@@ -2335,10 +2358,10 @@ function SUG:SuggestingComplete()
 					f.tooltipmethod = "SetSpellByID"
 					f.tooltiparg = id
 
-					f.insert = SUG.inputType == "number" and id or name
+					f.insert = inputType == "number" and id or name
 
 					f.Icon:SetTexture(GetSpellTexture(id))
-					if TMW.CI.IsMultiState and SUG.ActionCache[id] then
+					if IsMultiState and SUG.ActionCache[id] then
 						f.Background:SetVertexColor(0, .44, .87, 1) --color actions that are on your action bars if the type is a multistate cooldown shaman blue
 					elseif SUG.ClassSpellCache[pclass][id] then
 						f.Background:SetVertexColor(.41, .8, .94, 1) --color all other spells that you have in your/your pet's spellbook mage blue
@@ -2354,6 +2377,11 @@ function SUG:SuggestingComplete()
 			end
 			if miscprioritize[id] then -- override previous
 				f.Background:SetVertexColor(.58, .51, .79, 1)
+			elseif SUG.AuraCache[id] then
+				local r, g, b, a = f.Background:GetVertexColor()
+				if a < .5 then
+					f.Background:SetVertexColor(.78, .61, .43, 1) -- color known auras warrior brown, but only if nothing else has colored the entry yet
+				end
 			end
 			f:Show()
 		else
@@ -2403,11 +2431,11 @@ function SUG:NameOnCursor()
 		SUG.Suggest:Show()
 	end
 
-	SUG.inputType = type(tonumber(SUG.lastName) or SUG.lastName)
+	inputType = type(tonumber(SUG.lastName) or SUG.lastName)
 	SUG.startOver = true
 	if not (SUG.oldLastName == SUG.lastName and not SUG.redoIfSame) then
 		SUG:CacheItems()
-		if TMW.CI.IsMultiState then
+		if IsMultiState then
 			SUG:CacheActions()
 		end
 

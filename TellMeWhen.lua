@@ -37,7 +37,7 @@ local LSM = LibStub("LibSharedMedia-3.0")
 
 TELLMEWHEN_VERSION = "4.0.1"
 TELLMEWHEN_VERSION_MINOR = " beta"
-TELLMEWHEN_VERSIONNUMBER = 40103
+TELLMEWHEN_VERSIONNUMBER = 40104
 TELLMEWHEN_MAXGROUPS = 10 	--this is a default, used by SetTheory (addon), so dont rename
 TELLMEWHEN_MAXROWS = 20
 TELLMEWHEN_MAXCONDITIONS = 1 --this is a default
@@ -65,6 +65,7 @@ local st, co, talenthandler, BarGCD, ClockGCD, Locked, CNDT, doUpdateIcons
 local GCD, NumShapeshiftForms, UpdateTimer = 0, 0, 0
 local CUR_TIME = GetTime(); TMW.CUR_TIME = CUR_TIME
 local updateicons, unitsToChange = {}, {}
+local clientVersion = select(4, GetBuildInfo())
 
 
 function TMW.tContains(table, item)
@@ -636,6 +637,9 @@ function TMW:OnInitialize()
 	if LBF then
 		LBF:RegisterSkinCallback("TellMeWhen", TellMeWhen_SkinCallback, self)
 	end
+	TellMeWhenDB.AuraCache = TellMeWhenDB.AuraCache or {}
+	TMW.AuraCache = TellMeWhenDB.AuraCache
+	TMW:RegisterEvent("COMBAT_LOG_EVENT_UNFILTERED")
 	TMW:RegisterEvent("PLAYER_ENTERING_WORLD")
 
 	if db.profile.ReceiveComm then
@@ -1141,6 +1145,20 @@ function TMW:RAID_ROSTER_UPDATE()
 	
 end
 
+if clientVersion >= 40100 then -- COMBAT_LOG_EVENT_UNFILTERED
+	-- This is only used for the suggester, but i want to to be listening all the times for auras, not just when you load the options
+	function TMW:COMBAT_LOG_EVENT_UNFILTERED(_, _, p, _, _, _, _, _, _, _, i)-- tyPe, spellId -- NEW ARG IN 4.1
+		if p == "SPELL_AURA_APPLIED" then
+			TMW.AuraCache[i] = 1
+		end
+	end
+else
+	function TMW:COMBAT_LOG_EVENT_UNFILTERED(_, _, p, _, _, _, _, _, _, i)-- tyPe, Guid, spellId, spellName
+		if p == "SPELL_AURA_APPLIED" then
+			TMW.AuraCache[i] = 1
+		end
+	end
+end
 
 -- -----------
 -- GROUP FRAME

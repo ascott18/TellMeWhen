@@ -11,6 +11,7 @@ v4.0.0 beta10
 -Switched to SVN instead of manual file uploads, yay!
 -New feature: Suggestion list. The suggestion list will take what you type and search though all known spells/items, as well as TMW equivalancies and dispel types, to suggest what you might be looking for. For example, if you are configuring a "Spell Cast" icon type, the list will show only spells with cast times, as well as the cast equivalancies. More information regarding this feature will be in the documentation that I will hopefully start writing soon. (If someone wants to help me out with that, send me a PM)
 -Equivalancies are no longer case-sensitive.
+-Reverted failed experimentation to force spell casts to match spellIDs
 
 v4.0.0 beta9
 -Actually added mainassist and maintank to the unit dropdowns.
