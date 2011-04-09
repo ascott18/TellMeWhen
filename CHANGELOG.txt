@@ -16,6 +16,7 @@ v4.0.1 beta
 -Fixed the tooltip that appears whilst you mouseover the name editbox in the icon editor with shift held down
 -Fixed a missing translation
 -Reset your aura cache to remove incorrect entires that were put in prior to version 4.0.1 beta3
+-Instead of typing "raid" for units raid1 through raid25, you now must type "raid1-25". This will allow for much more flexibility, e.g. raid1-10.
 
 v4.0.0 beta9
 -Actually added mainassist and maintank to the unit dropdowns.

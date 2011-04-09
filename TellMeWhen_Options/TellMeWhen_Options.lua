@@ -1189,12 +1189,12 @@ IE.Data = {
 		{ value = "mouseover", 					text = L["ICONMENU_MOUSEOVER"] },
 		{ value = "mouseovertarget",			text = L["ICONMENU_MOUSEOVERTARGET"]  },
 		{ value = "vehicle", 					text = L["ICONMENU_VEHICLE"] },
-		{ value = "party|cFFFF0000#|r", 		text = PARTY, 			range = "|cFFFF0000#|r = 1-" .. MAX_PARTY_MEMBERS .. " (4)" },
-		{ value = "raid|cFFFF0000#|r", 			text = RAID, 			range = "|cFFFF0000#|r = 1-" .. MAX_RAID_MEMBERS .. " (25)"  },
-		{ value = "arena|cFFFF0000#|r",			text = ARENA, 			range = "|cFFFF0000#|r = 1-5" .. " (5)"   },
-		{ value = "boss|cFFFF0000#|r", 			text = BOSS, 			range = "|cFFFF0000#|r = 1-" .. MAX_BOSS_FRAMES .. " (4)"   },
-		{ value = "maintank|cFFFF0000#|r", 		text = L["MAINTANK"], 	range = "|cFFFF0000#|r = 1-" .. MAX_RAID_MEMBERS .. " (5)"   },
-		{ value = "mainassist|cFFFF0000#|r", 	text = L["MAINASSIST"], range = "|cFFFF0000#|r = 1-" .. MAX_RAID_MEMBERS .. " (5)"   },
+		{ value = "party|cFFFF0000#|r", 		text = PARTY, 			range = "|cFFFF0000#|r = 1-" .. MAX_PARTY_MEMBERS},
+		{ value = "raid|cFFFF0000#|r", 			text = RAID, 			range = "|cFFFF0000#|r = 1-" .. MAX_RAID_MEMBERS},
+		{ value = "arena|cFFFF0000#|r",			text = ARENA, 			range = "|cFFFF0000#|r = 1-5"},
+		{ value = "boss|cFFFF0000#|r", 			text = BOSS, 			range = "|cFFFF0000#|r = 1-" .. MAX_BOSS_FRAMES},
+		{ value = "maintank|cFFFF0000#|r", 		text = L["MAINTANK"], 	range = "|cFFFF0000#|r = 1-" .. MAX_RAID_MEMBERS},
+		{ value = "mainassist|cFFFF0000#|r", 	text = L["MAINASSIST"], range = "|cFFFF0000#|r = 1-" .. MAX_RAID_MEMBERS},
 	},
 }
 for k, Type in pairs(TMW.OrderedTypes) do
@@ -1926,7 +1926,7 @@ function SUG:BAG_UPDATE()
 end
 SUG:RegisterEvent("BAG_UPDATE")
 
-SUG.NumCachePerFrame = 10
+SUG.NumCachePerFrame = 5
 function SUG:ADDON_LOADED(event, addon)
 	if addon == "TellMeWhen_Options" then
 		TMWOptDB = TMWOptDB or {}

@@ -932,7 +932,7 @@
 				end
 			</OnTextChanged>
 		</Scripts>
-		<FontString inherits="GameFontHighlightSmall"/>
+		<FontString inherits="GameFontHighlight"/>
 	</EditBox>
 	<Button name="TellMeWhen_TabTemplate" inherits="CharacterFrameTabButtonTemplate" virtual="true">
 		<Scripts>

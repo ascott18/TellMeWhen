@@ -36,8 +36,8 @@ local AceDB = LibStub("AceDB-3.0")
 local LSM = LibStub("LibSharedMedia-3.0")
 
 TELLMEWHEN_VERSION = "4.0.1"
-TELLMEWHEN_VERSION_MINOR = " beta 3"
-TELLMEWHEN_VERSIONNUMBER = 40109
+TELLMEWHEN_VERSION_MINOR = " beta 4"
+TELLMEWHEN_VERSIONNUMBER = 40111
 TELLMEWHEN_MAXGROUPS = 10 	--this is a default, used by SetTheory (addon), so dont rename
 TELLMEWHEN_MAXROWS = 20
 local UPD_INTV = 0.05	--this is a default, local because i use it in onupdate functions
@@ -1030,6 +1030,19 @@ function TMW:Upgrade()
 	end
 	if db.profile.Version < 40109 then
 		TellMeWhenDB.DoResetAuraCache = true -- dont store this in db.profile - make it global
+	end
+	
+	if db.profile.Version < 40111 then
+		for ics in TMW.InIconSettings() do
+			ics.Unit = ics.Unit .. ";" -- it wont change things at the end of the unit string without a character after the unit at the end
+			ics.Unit = gsub(ics.Unit, "raid[^%d]", "raid1-25;")
+			ics.Unit = gsub(ics.Unit, "party[^%d]", "party1-4;")
+			ics.Unit = gsub(ics.Unit, "arena[^%d]", "arena1-5;")
+			ics.Unit = gsub(ics.Unit, "boss[^%d]", "boss1-4;")
+			ics.Unit = gsub(ics.Unit, "maintank[^%d]", "maintank1-5;")
+			ics.Unit = gsub(ics.Unit, "mainassist[^%d]", "mainassist1-5;")
+			ics.Unit = TMW:CleanString(ics.Unit)
+		end
 	end
 
 	--All Upgrades Complete
@@ -2093,6 +2106,29 @@ function TMW:GetUnits(icon, setting)
 	if unitcache[setting] then return unitcache[setting] end --why make a bunch of tables and do a bunch of stuff if we dont need to
 
 	setting = TMW:CleanString(setting)
+	setting = strlower(setting)
+	local startpos, endpos = 0, 0
+	while true do
+		startpos, endpos = strfind(setting, "(%a+) ?(%d+) ?%- ?(%d+) ?;?", endpos+1)
+		if not startpos then break end
+		local wholething, unit, firstnum, lastnum = strmatch(setting, "((%a+) ?(%d+) ?%- ?(%d+)) ?;?", startpos)
+		if unit and firstnum and lastnum then
+			local str = ""
+			local order = firstnum > lastnum and -1 or 1
+			
+			for i = firstnum, lastnum, order do
+				str = str .. unit .. i .. ";"
+			end
+			str = strtrim(str, " ;")
+			print(str)
+			wholething = gsub(wholething, "%-", "%%-") -- need to escape the dash for it to work
+			print(wholething)
+			print(setting)
+			setting = gsub(setting, wholething, str)
+			print(setting)
+		end
+	end
+	
 	local Units = TMW:SplitNames(setting) -- get a table of everything
 
 	--INSERT EQUIVALENCIES
