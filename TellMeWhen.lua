@@ -37,12 +37,10 @@ local LSM = LibStub("LibSharedMedia-3.0")
 
 TELLMEWHEN_VERSION = "4.0.1"
 TELLMEWHEN_VERSION_MINOR = " beta 3"
-TELLMEWHEN_VERSIONNUMBER = 40108
+TELLMEWHEN_VERSIONNUMBER = 40109
 TELLMEWHEN_MAXGROUPS = 10 	--this is a default, used by SetTheory (addon), so dont rename
 TELLMEWHEN_MAXROWS = 20
-TELLMEWHEN_MAXCONDITIONS = 1 --this is a default
 local UPD_INTV = 0.05	--this is a default, local because i use it in onupdate functions
-local EFFICIENCY_THRESHOLD = 15	--this is too
 
 local GetSpellCooldown, GetSpellInfo =
 	  GetSpellCooldown, GetSpellInfo
@@ -238,7 +236,7 @@ TMW.Defaults = {
 	Locked 		= 	false,
 	NumGroups	=	10,
 	Interval	=	UPD_INTV,
-	EffThreshold=	EFFICIENCY_THRESHOLD,
+	EffThreshold=	15,
 	CDCOColor 	= 	{r=0, g=1, b=0, a=1},
 	CDSTColor 	= 	{r=1, g=0, b=0, a=1},
 	PRESENTColor=	{r=1, g=1, b=1, a=1},
@@ -1030,6 +1028,9 @@ function TMW:Upgrade()
 			end
 		end
 	end
+	if db.profile.Version < 40109 then
+		TellMeWhenDB.DoResetAuraCache = true -- dont store this in db.profile - make it global
+	end
 
 	--All Upgrades Complete
 	db.profile.Version = TELLMEWHEN_VERSIONNUMBER
@@ -1160,7 +1161,7 @@ end
 if clientVersion >= 40100 then -- COMBAT_LOG_EVENT_UNFILTERED
 	-- This is only used for the suggester, but i want to to be listening all the times for auras, not just when you load the options
 	function TMW:COMBAT_LOG_EVENT_UNFILTERED(_, _, p, _, g, _, _, _, _, _, i)-- tyPe, Guid, spellId -- NEW ARG IN 4.1 BETWEEN TYPE AND SOURCEGUID
-		if p == "SPELL_AURA_APPLIED" then
+		if p == "SPELL_AURA_APPLIED" and not TMW.AuraCache[i] then
 			local t = tonumber(strsub(g, 5, 5), 16) % 8
 			if t == 0 or t == 4 then -- player or pet
 				TMW.AuraCache[i] = 2
@@ -1171,7 +1172,7 @@ if clientVersion >= 40100 then -- COMBAT_LOG_EVENT_UNFILTERED
 	end
 else
 	function TMW:COMBAT_LOG_EVENT_UNFILTERED(_, _, p, g, _, _, _, _, _, i)-- tyPe, Guid, spellId
-		if p == "SPELL_AURA_APPLIED" then
+		if p == "SPELL_AURA_APPLIED" and not TMW.AuraCache[i] then
 			local t = tonumber(strsub(g, 5, 5), 16) % 8
 			if t == 0 or t == 4 then
 				TMW.AuraCache[i] = 2

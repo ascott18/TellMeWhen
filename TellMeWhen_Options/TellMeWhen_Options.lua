@@ -1884,7 +1884,7 @@ function IE:GetRealNames()
 	
 	local tbl
 	local BEbackup = TMW.BE
-	TMW.BE = TMW.OldBE -- the level of hackyness here is sickening
+	TMW.BE = TMW.OldBE -- the level of hackyness here is sickening. Note that OldBE does not contain the enrage equiv (intended so we dont flood the tooltip)
 	-- by passing false in for arg3 (firstOnly), it creates a unique cache string and therefore a unique cache - nessecary because we arent using the real TMW.BE
 	if SoI == "item" then
 		tbl = TMW:GetItemIDs(nil, text, false)
@@ -1940,12 +1940,16 @@ function SUG:ADDON_LOADED(event, addon)
 		for k, v in pairs(TMWOptDB) do
 			SUG[k] = v
 		end
+		if TellMeWhenDB.DoResetAuraCache then
+			wipe(TMWOptDB.AuraCache)
+		end
 		for k, v in pairs(TMW.AuraCache) do
 			-- import into the options DB and take it out of the main DB
 			SUG.AuraCache[k] = v
 			TMW.AuraCache[k] = nil
 		end
 		TMW.AuraCache = SUG.AuraCache -- make new inserts go into the optionDB and this table
+		
 		
 		SUG.ActionCache = {} -- dont save this, it should be a list of things that are CURRENTLY on THIS CHARACTER'S action bars
 		SUG.RequestedFrom = {}

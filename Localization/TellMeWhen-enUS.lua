@@ -356,6 +356,7 @@ L["STANCE"] = "Stance"
 L["AURA"] = "Aura"
 L["ASPECT"] = "Aspect"
 L["SHAPESHIFT"] = "Shapeshift"
+L["PRESENCE"] = "Presence"
 L["SPEED"] = "Unit Speed"
 L["SPEED_DESC"] = [[This refers to the current movement speed of the unit. If the unit is not moving, it is zero.
 If you wish to track the maximum run speed of the unit, use the 'Unit Run Speed' condition instead.]]
