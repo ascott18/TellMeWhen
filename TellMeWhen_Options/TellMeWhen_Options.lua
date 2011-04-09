@@ -1942,6 +1942,7 @@ function SUG:ADDON_LOADED(event, addon)
 		end
 		if TellMeWhenDB.DoResetAuraCache then
 			wipe(TMWOptDB.AuraCache)
+			TellMeWhenDB.DoResetAuraCache = nil
 		end
 		for k, v in pairs(TMW.AuraCache) do
 			-- import into the options DB and take it out of the main DB
