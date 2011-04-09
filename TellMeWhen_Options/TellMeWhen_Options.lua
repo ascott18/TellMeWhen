@@ -2957,15 +2957,15 @@ function CNDT:TypeCheck(group, data)
 		else
 			TMW:TT(group.EditBox, nil, nil, nil, nil, 1)
 		end
-		group.Slider:SetWidth(120)
+		group.Slider:SetWidth(140)
 		if data.noslide then
-			group.EditBox:SetWidth(435)
+			group.EditBox:SetWidth(455)
 		else
-			group.EditBox:SetWidth(305)
+			group.EditBox:SetWidth(312)
 		end
 	else
 		group.EditBox:Hide()
-		group.Slider:SetWidth(440)
+		group.Slider:SetWidth(463)
 	end
 	if data.nooperator then
 		group.TextOperator:SetText("")

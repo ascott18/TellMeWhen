@@ -37,7 +37,7 @@ local LSM = LibStub("LibSharedMedia-3.0")
 
 TELLMEWHEN_VERSION = "4.0.1"
 TELLMEWHEN_VERSION_MINOR = " beta"
-TELLMEWHEN_VERSIONNUMBER = 40105
+TELLMEWHEN_VERSIONNUMBER = 40106
 TELLMEWHEN_MAXGROUPS = 10 	--this is a default, used by SetTheory (addon), so dont rename
 TELLMEWHEN_MAXROWS = 20
 TELLMEWHEN_MAXCONDITIONS = 1 --this is a default
@@ -1009,12 +1009,26 @@ function TMW:Upgrade()
 		for ics in TMW.InIconSettings() do
 			for k, condition in pairs(ics.Conditions) do
 				if condition.Type == "NAME" then
-					condition.Value = 0
+					condition.Level = 0
 				end
 			end
 		end
 		db.profile["BarGCD"] = true
 		db.profile["ClockGCD"] = true
+	end
+	if db.profile.Version < 40106 then
+		for ics in TMW.InIconSettings() do
+			for k, condition in pairs(ics.Conditions) do
+				if condition.Type == "ITEMINBAGS" then
+					if condition.Level == 0 then
+						condition.Operator = ">"
+					elseif condition.Level == 1 then
+						condition.Operator = "=="
+						condition.Level = 0
+					end
+				end
+			end
+		end
 	end
 
 	--All Upgrades Complete

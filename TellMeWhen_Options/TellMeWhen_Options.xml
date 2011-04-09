@@ -60,7 +60,7 @@
 	</Button>
 	<Frame name="TellMeWhen_ConditionGroup" virtual="true">
 		<Size>
-			<AbsDimension x="580" y="70" />
+			<AbsDimension x="600" y="70" />
 		</Size>
 		<Backdrop bgFile="Interface\DialogFrame\UI-DialogBox-Background" tile="true">
 			<EdgeSize>
@@ -82,12 +82,12 @@
 			<Frame name="$parentType" parentKey="Type" inherits="UIDropDownMenuTemplate">
 				<Anchors>
 					<Anchor point="TOPLEFT">
-						<Offset x="30" y="0" />
+						<Offset x="25" y="0" />
 					</Anchor>
 				</Anchors>
 				<Scripts>
 					<OnLoad>
-						UIDropDownMenu_SetWidth(self, 90)
+						UIDropDownMenu_SetWidth(self, 130)
 						UIDropDownMenu_JustifyText(self, "LEFT")
 						_G[self:GetName() .. "Button"]:SetScript("PreClick", function()
 							UIDropDownMenu_Initialize(self, TMW.CNDT.TypeMenu_DropDown, "DROPDOWN")
@@ -98,14 +98,16 @@
 			</Frame>
 			<Frame name="$parentIcon" parentKey="Icon" inherits="UIDropDownMenuTemplate">
 				<Anchors>
-					<Anchor point="TOPLEFT">
-						<Offset x="140" y="0" />
+					<Anchor point="LEFT" relativeTo="$parentType" relativePoint="RIGHT">
+						<Offset>
+							<AbsDimension x="-27" y="0" />
+						</Offset>
 					</Anchor>
 				</Anchors>
 				<Scripts>
 					<OnLoad>
 						self:Hide()
-						UIDropDownMenu_SetWidth(self, 150)
+						UIDropDownMenu_SetWidth(self, 148)
 						UIDropDownMenu_JustifyText(self, "LEFT")
 						_G[self:GetName() .. "Button"]:SetScript("PreClick", function()
 							UIDropDownMenu_Initialize(self, TMW.CNDT.IconMenu_DropDown, "DROPDOWN")
@@ -116,7 +118,7 @@
 			</Frame>
 			<EditBox name="$parentUnit" inherits="TellMeWhen_InputBoxTemplate" parentKey="Unit" autoFocus="false">
 				<Size>
-					<AbsDimension x="97" y="32"/>
+					<AbsDimension x="75" y="32"/>
 				</Size>
 				<Anchors>
 					<Anchor point="LEFT" relativeTo="$parentType" relativePoint="RIGHT">
@@ -166,8 +168,10 @@
 			</EditBox>
 			<Frame name="$parentOperator" parentKey="Operator" inherits="UIDropDownMenuTemplate">
 				<Anchors>
-					<Anchor point="TOPLEFT">
-						<Offset x="267" y="0" />
+					<Anchor point="LEFT" relativeTo="$parentUnit" relativePoint="RIGHT">
+						<Offset>
+							<AbsDimension x="5" y="-3" />
+						</Offset>
 					</Anchor>
 				</Anchors>
 				<Scripts>
@@ -183,7 +187,7 @@
 				</Scripts>
 			</Frame>
 			<Slider name="$parentSlider" parentKey="Slider" inherits="OptionsSliderTemplate" minvalue="0" maxvalue="100" valuestep="1" defaultvalue="100">
-				<Size x="440" y="17"/>
+				<Size x="463" y="17"/>
 				<Anchors>
 					<Anchor point="TOPRIGHT">
 						<Offset x="-90" y="-30" />
@@ -224,10 +228,10 @@
 				</Scripts>
 			</Slider>
 			<EditBox name="$parentEditBox" inherits="TellMeWhen_InputBoxTemplate" parentKey="EditBox" autoFocus="false">
-				<Size x="305" y="28"/>
+				<Size x="302" y="28"/>
 				<Anchors>
-					<Anchor point="TOPLEFT">
-						<Offset x="55" y="-23" />
+					<Anchor point="TOPLEFT" relativeTo="$parentType" relativePoint="BOTTOMLEFT">
+						<Offset x="23" y="8" />
 					</Anchor>
 				</Anchors>
 				<Scripts>
@@ -482,8 +486,8 @@
 			</Frame>
 			<Frame name="$parentAndOr" parentKey="AndOr" inherits="UIDropDownMenuTemplate">
 				<Anchors>
-					<Anchor point="TOPLEFT">
-						<Offset x="480" y="30" />
+					<Anchor point="TOPRIGHT">
+						<Offset x="0" y="30" />
 					</Anchor>
 				</Anchors>
 				<Layers>
@@ -570,7 +574,7 @@
 				<FontString name="$parentValText" parentKey="ValText" inherits="GameFontNormalLarge" justifyH="LEFT">
 					<Anchors>
 						<Anchor point="LEFT" relativePoint="TOPLEFT">
-							<Offset x="350" y="-14" />
+							<Offset x="367" y="-14" />
 						</Anchor>
 					</Anchors>
 				</FontString>
@@ -598,7 +602,7 @@
 				<FontString name="$parentTextValue" parentKey="TextValue" inherits="GameFontNormalSmall" justifyH="CENTER">
 					<Anchors>
 						<Anchor point="TOPLEFT">
-							<Offset x="350" y="9" />
+							<Offset x="367" y="9" />
 						</Anchor>
 					</Anchors>
 				</FontString>
