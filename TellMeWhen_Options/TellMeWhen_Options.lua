@@ -1867,12 +1867,12 @@ end
 local cachednames = {}
 function IE:GetRealNames()
 	-- gets a string to set as a tooltip of all of the spells names in the name box in the IE. Splits up equivalancies and turns IDs into names
-	local text = IE.Main.Name:GetText()
+	local text = TMW:CleanString(IE.Main.Name:GetText())
 	if cachednames[TMW.CI.t .. SoI .. text] then return cachednames[TMW.CI.t .. SoI .. text] end
 
-	for name in pairs(TMW.DS) do
+	--[[for name in pairs(TMW.DS) do -- JUST DONT TO THIS, IT IS CAUSING WAY TOO MANY PROBLEMS JUST TO PUT A SET OF PARENTHESIS AROUND 4 THINGS
 		-- want to buy a case insensitive gsub so i dont have to do stupid stuff like this
-		local t = strlower(text)
+		local t = ";" .. strlower(text) .. ";" -- the first and last one wont work if you dont concat semicolons on
 		local startpos, endpos = strfind(t, "[; ]"..strlower(name).."[; ]")
 		if startpos then
 			local firsthalf = strsub(text, 0, startpos-1)
@@ -1880,9 +1880,9 @@ function IE:GetRealNames()
 			text = firsthalf.."; (" .. L[name] .. ");"..lasthalf
 		end
 	end
-	text = TMW:CleanString(text)
-	local tbl
+	]]
 	
+	local tbl
 	local BEbackup = TMW.BE
 	TMW.BE = TMW.OldBE -- the level of hackyness here is sickening
 	-- by passing false in for arg3 (firstOnly), it creates a unique cache string and therefore a unique cache - nessecary because we arent using the real TMW.BE
@@ -1894,7 +1894,6 @@ function IE:GetRealNames()
 	TMW.BE = BEbackup -- unhack
 	
 	local str = ""
-	LBCode(tbl)
 	for k, v in pairs(tbl) do
 		local name, _, texture = GetSpellInfo(v)
 		name = name or v

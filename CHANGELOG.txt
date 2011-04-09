@@ -13,6 +13,7 @@ v4.0.1 beta
 -Equivalancies are no longer case-sensitive.
 -Reverted failed experimentation to force spell casts to match spellIDs
 -Colors on the suggestion list should now be final (known player auras are now shown with a different color than known NPC auras - if you installed the first version of 4.0.1 beta, you may see a few wrong spells, but they will be updated the next time you see them)
+-Fixed the tooltip that appears whilst you mouseover the name editbox in the icon editor with shift held down
 
 v4.0.0 beta9
 -Actually added mainassist and maintank to the unit dropdowns.
