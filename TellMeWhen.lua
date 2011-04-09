@@ -37,7 +37,7 @@ local LSM = LibStub("LibSharedMedia-3.0")
 
 TELLMEWHEN_VERSION = "4.0.1"
 TELLMEWHEN_VERSION_MINOR = " beta"
-TELLMEWHEN_VERSIONNUMBER = 40104
+TELLMEWHEN_VERSIONNUMBER = 40105
 TELLMEWHEN_MAXGROUPS = 10 	--this is a default, used by SetTheory (addon), so dont rename
 TELLMEWHEN_MAXROWS = 20
 TELLMEWHEN_MAXCONDITIONS = 1 --this is a default
@@ -669,7 +669,8 @@ function TMW:OnProfile()
 	TMW:LoadOptions()
 end
 
-function TMW:OnTalentUpdate()
+function TMW:PLAYER_TALENT_UPDATE()
+	--ghetto bucket
 	TMW:CancelTimer(talenthandler, 1)
 	talenthandler = TMW:ScheduleTimer("Update", 1)
 end
@@ -677,9 +678,6 @@ end
 function TMW:OnCommReceived(prefix, text, channel, who)
 	if prefix ~= "TMW" then return end
 	if channel == "GUILD" then
-		if TMW.debug then
-			print(prefix, text, channel, who)
-		end
 		if strsub(text, 1, 1) == "R" then
 			local major, minor, revision = strmatch(text, "M:(.*)%^m:(.*)%^R:(.*)%^")
 			revision = tonumber(revision)
@@ -1073,8 +1071,8 @@ end
 function TMW:PLAYER_ENTERING_WORLD()
 	if not TMW.VarsLoaded then return end
 	TMW.EnteredWorld = true
-	TMW:RegisterEvent("PLAYER_TALENT_UPDATE", "OnTalentUpdate")
-	TMW:RegisterEvent("ACTIVE_TALENT_GROUP_CHANGED", "OnTalentUpdate")
+	TMW:RegisterEvent("PLAYER_TALENT_UPDATE", "PLAYER_TALENT_UPDATE")
+	TMW:RegisterEvent("ACTIVE_TALENT_GROUP_CHANGED", "PLAYER_TALENT_UPDATE")
 	TMW:SetScript("OnUpdate", TMW.OnUpdate)
 end
 
@@ -1147,15 +1145,25 @@ end
 
 if clientVersion >= 40100 then -- COMBAT_LOG_EVENT_UNFILTERED
 	-- This is only used for the suggester, but i want to to be listening all the times for auras, not just when you load the options
-	function TMW:COMBAT_LOG_EVENT_UNFILTERED(_, _, p, _, _, _, _, _, _, _, i)-- tyPe, spellId -- NEW ARG IN 4.1
+	function TMW:COMBAT_LOG_EVENT_UNFILTERED(_, _, p, _, g, _, _, _, _, _, i)-- tyPe, Guid, spellId -- NEW ARG IN 4.1 BETWEEN TYPE AND SOURCEGUID
 		if p == "SPELL_AURA_APPLIED" then
-			TMW.AuraCache[i] = 1
+			local t = tonumber(strsub(g, 5, 5), 16) % 8
+			if t == 0 or t == 4 then -- player or pet
+				TMW.AuraCache[i] = 2
+			else
+				TMW.AuraCache[i] = 1
+			end
 		end
 	end
 else
-	function TMW:COMBAT_LOG_EVENT_UNFILTERED(_, _, p, _, _, _, _, _, _, i)-- tyPe, Guid, spellId, spellName
+	function TMW:COMBAT_LOG_EVENT_UNFILTERED(_, _, p, g, _, _, _, _, _, i)-- tyPe, Guid, spellId
 		if p == "SPELL_AURA_APPLIED" then
-			TMW.AuraCache[i] = 1
+			local t = tonumber(strsub(g, 5, 5), 16) % 8
+			if t == 0 or t == 4 then
+				TMW.AuraCache[i] = 2
+			else
+				TMW.AuraCache[i] = 1
+			end
 		end
 	end
 end

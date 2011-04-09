@@ -7,6 +7,13 @@
 -- Cybeloras of Mal'Ganis
 -- --------------------
 
+--[[todo list/notes (this really should be here, but im in a hurry)
+Parsing tooltips for numbers (recaptured mana, empowered shadows) - in the icon type's onupdate, call a function to scan a unit/index/filter (unit should probably be player only)
+-the parser listens to UNIT_AURA to determine if the tooltip/data needs updating - if it does, update it, if not, then return cached data
+-create the tooltip as a child of the icon
+]]
+
+
 if not TMW then return end
 
 local TMW = TMW
@@ -1915,7 +1922,6 @@ local inputType
 SUG.doUpdateItemCache = true
 
 SUG.f = CreateFrame("Frame")
-SUG.Parser = CreateFrame("GameTooltip", "TMWSUGParser", TMW, "GameTooltipTemplate")
 function SUG:BAG_UPDATE()
 	SUG.doUpdateItemCache = true
 end
@@ -1940,7 +1946,7 @@ function SUG:ADDON_LOADED(event, addon)
 			SUG.AuraCache[k] = v
 			TMW.AuraCache[k] = nil
 		end
-		TMW.AuraCache = SUG.AuraCache
+		TMW.AuraCache = SUG.AuraCache -- make new inserts go into the optionDB and this table
 		
 		SUG.ActionCache = {} -- dont save this, it should be a list of things that are CURRENTLY on THIS CHARACTER'S action bars
 		SUG.RequestedFrom = {}
@@ -1996,6 +2002,7 @@ function SUG:ADDON_LOADED(event, addon)
 			end
 			TMWOptDB.WoWVersion = clientVersion
 
+			local Parser = CreateFrame("GameTooltip", "TMWSUGParser", TMW, "GameTooltipTemplate")
 			local function SpellCacher()
 				for id = index, index + SUG.NumCachePerFrame do
 					SUG.Suggest.Status:SetValue(id)
@@ -2023,8 +2030,8 @@ function SUG:ADDON_LOADED(event, addon)
 								not strfind(name, "warning") and
 								not strfind(name, "i am a")
 							then
-								GameTooltip_SetDefaultAnchor(SUG.Parser, UIParent)
-								SUG.Parser:SetSpellByID(id)
+								GameTooltip_SetDefaultAnchor(Parser, UIParent)
+								Parser:SetSpellByID(id)
 								local r, g, b = TMWSUGParserTextLeft1:GetTextColor()
 								if g > .95 and r > .95 and b > .95 then
 									SUG.SpellCache[id] = name
@@ -2032,7 +2039,7 @@ function SUG:ADDON_LOADED(event, addon)
 										SUG.CastCache[id] = name
 									end
 								end
-								SUG.Parser:Hide()
+								Parser:Hide()
 								spellsFailed = 0
 							end
 						else
@@ -2143,8 +2150,10 @@ function SUG.Sorter(a, b)
 		2)	Abilities on player's action bar if current icon is a multistate cooldown
 		3)	Player's spells (pclass)
 		4)	All player spells (any class)
-		5)	Miscellaneous proiritization spells
-		6)	Known auras
+		5)	Known auras
+			5a) Player Auras
+			5b) NPC Auras
+		6)	Miscellaneous proiritization spells
 		7)	SpellID if input is an ID
 		8)	If input is a name
 			8a) SpellID if names are identical
@@ -2164,8 +2173,7 @@ function SUG.Sorter(a, b)
 
 	if IsMultiState then
 		t = SUG.ActionCache
-		haveA = t[a]
-		haveB = t[b]
+		local haveA, haveB = t[a], t[b]
 		if (haveA and not haveB) or (haveB and not haveA) then
 			return haveA
 		end
@@ -2173,31 +2181,35 @@ function SUG.Sorter(a, b)
 	if SoI == "spell" then
 		--player's spells (pclass)
 		t = SUG.ClassSpellCache[pclass]
-		haveA = t[a]
-		haveB = t[b]
+		local haveA, haveB = t[a], t[b]
 		if (haveA and not haveB) or (haveB and not haveA) then
 			return haveA
 		end
 		
 		--all player spells (any class)
 		t = SUG.ClassSpellLookup
-		haveA = t[a]
-		haveB = t[b]
+		local haveA, haveB = t[a], t[b]
+		if (haveA and not haveB) or (haveB and not haveA) then
+			return haveA
+		elseif not (haveA or haveB) then
+		
+			t = SUG.AuraCache
+			local haveA, haveB = t[a], t[b] -- Auras
+			if haveA and haveB and haveA ~= haveB then -- if both are auras (kind doesnt matter) AND if they are different aura types, then compare the types
+				return haveA > haveB -- greater than is intended.. player auras are 2 while npc auras are 1, player auras should go first
+			elseif (haveA and not haveB) or (haveB and not haveA) then --otherwise, if only one of them is an aura, then prioritize the one that is an aura
+				return haveA
+			end
+			--if they both were auras, and they were auras of the same type (player, NPC) then procede on to the rest of the code to sort them by name/id
+		end
+		
+		local haveA, haveB = miscprioritize[a], miscprioritize[b] -- miscprioritize
 		if (haveA and not haveB) or (haveB and not haveA) then
 			return haveA
 		end
 	end
 	
-	haveA, haveB = miscprioritize[a], miscprioritize[b] -- miscprioritize
-	if (haveA and not haveB) or (haveB and not haveA) then
-		return haveA
-	end
 	
-	t = SUG.AuraCache
-	haveA, haveB = t[a], t[b] -- Auras
-	if (haveA and not haveB) or (haveB and not haveA) then
-		return haveA
-	end
 	
 
 	if inputType == "number" then
@@ -2205,6 +2217,7 @@ function SUG.Sorter(a, b)
 		return a < b
 	else
 		--sort by name
+		local haveA, haveB
 		if SoI == "item" then
 			t = SUG.ItemCache
 			haveA, haveB = t[a], t[b]
@@ -2377,10 +2390,17 @@ function SUG:SuggestingComplete()
 			end
 			if miscprioritize[id] then -- override previous
 				f.Background:SetVertexColor(.58, .51, .79, 1)
-			elseif SUG.AuraCache[id] then
-				local r, g, b, a = f.Background:GetVertexColor()
-				if a < .5 then
-					f.Background:SetVertexColor(.78, .61, .43, 1) -- color known auras warrior brown, but only if nothing else has colored the entry yet
+			else
+				local whoCasted = SUG.AuraCache[id]
+				if whoCasted then
+					local r, g, b, a = f.Background:GetVertexColor()
+					if a < .5 then -- only if nothing else has colored the entry yet
+						if whoCasted == 1 then
+							f.Background:SetVertexColor(.78, .61, .43, 1) -- color known NPC auras warrior brown
+						elseif whoCasted == 2 then
+							f.Background:SetVertexColor(.87, .24, 1, 1) -- color known PLAYER auras a bright pink ish pruple ish color that is similar to paladin pink but has sufficient contrast for distinguishing
+						end
+					end
 				end
 			end
 			f:Show()

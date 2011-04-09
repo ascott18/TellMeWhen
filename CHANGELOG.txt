@@ -1,4 +1,4 @@
-v4.0.0 beta10
+v4.0.1 beta
 -More Efficiency! Yayyy! (New stuff, plus a fix to a bug in the icon engine that was making it check every single icon, even when they were hidden)
 -New option for icon cooldowns: Only if in bags. (Note that this is forcibly checked if 'Only if equipped' is checked, and an item that is equipped is considered to be in your bags.
 -Fixed a bunch of things that were broken
@@ -12,6 +12,7 @@ v4.0.0 beta10
 -New feature: Suggestion list. The suggestion list will take what you type and search though all known spells/items, as well as TMW equivalancies and dispel types, to suggest what you might be looking for. For example, if you are configuring a "Spell Cast" icon type, the list will show only spells with cast times, as well as the cast equivalancies. More information regarding this feature will be in the documentation that I will hopefully start writing soon. (If someone wants to help me out with that, send me a PM)
 -Equivalancies are no longer case-sensitive.
 -Reverted failed experimentation to force spell casts to match spellIDs
+-Colors on the suggestion list should now be final (known player auras are now shown with a different color than known NPC auras - if you installed the first version of 4.0.1 beta, you may see a few wrong spells, but they will be updated the next time you see them)
 
 v4.0.0 beta9
 -Actually added mainassist and maintank to the unit dropdowns.

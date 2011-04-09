@@ -1221,7 +1221,7 @@
 					<Anchor point="BOTTOMRIGHT" relativeTo="$parent" relativePoint="BOTTOMRIGHT"/>
 				</Anchors>
 				<Frames>
-					<Frame name="$parentSuggest" parentKey="Suggest" hidden="true">
+					<Frame name="$parentSuggest" parentKey="Suggest" hidden="true" enableMouse="true">
 						<Size x="220"/>
 						<Anchors>
 							<Anchor point="TOPLEFT" relativeTo="$parent" relativePoint="TOPRIGHT">
