@@ -36,8 +36,8 @@ local AceDB = LibStub("AceDB-3.0")
 local LSM = LibStub("LibSharedMedia-3.0")
 
 TELLMEWHEN_VERSION = "4.0.1"
-TELLMEWHEN_VERSION_MINOR = " beta 2"
-TELLMEWHEN_VERSIONNUMBER = 40107
+TELLMEWHEN_VERSION_MINOR = " beta 3"
+TELLMEWHEN_VERSIONNUMBER = 40108
 TELLMEWHEN_MAXGROUPS = 10 	--this is a default, used by SetTheory (addon), so dont rename
 TELLMEWHEN_MAXROWS = 20
 TELLMEWHEN_MAXCONDITIONS = 1 --this is a default
