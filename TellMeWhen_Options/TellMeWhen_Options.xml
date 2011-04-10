@@ -1325,6 +1325,28 @@
 									</OnValueChanged>
 								</Scripts>
 							</StatusBar>
+							<Button name="HelpMicroButton" inherits="MainMenuBarMicroButton" hidden="false">
+								<Anchors>
+									<Anchor point="TOPRIGHT" relativeTo="$parent" relativePoint="TOPRIGHT">
+										<Offset x="-15" y="9" />
+									</Anchor>
+								</Anchors>
+								<Scripts>
+									<OnLoad>
+										self:SetNormalTexture("Interface\\Buttons\\UI-MicroButton-Help-Up")
+										self:SetPushedTexture("Interface\\Buttons\\UI-MicroButton-Help-Up")
+										self:SetDisabledTexture("Interface\\Buttons\\UI-MicroButton-Help-Up")
+										self:SetHighlightTexture("Interface\\Buttons\\UI-MicroButton-Hilight")
+										self:SetScale(.58)
+									</OnLoad>
+									<OnEnter>
+										TMW.SUG:ColorHelp(self)
+									</OnEnter>
+									<OnLeave>
+										GameTooltip:Hide()
+									</OnLeave>
+								</Scripts>
+							</Button>
 						</Frames>
 						<Layers>
 							<Layer level="OVERLAY">

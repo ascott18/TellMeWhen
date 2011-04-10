@@ -421,6 +421,24 @@ L["CACHING"] = "TellMeWhen is caching and filtering all spells in the game. This
 L["CACHINGSPEED"] = "Spells per frame:"
 L["SUGGESTIONS"] = "Suggestions:"
 
+L["SUG_TOOLTIPTITLE"] = [[As you type, TellMeWhen will look through its cache and determine the spells that you were mosty likely looking for.
+
+Spells are categorized and colored as per the list below. Note that the categories that begin with the word "Known" will not have spells put into them until they have been seen as you play or log onto different classes.
+
+Clicking on an entry will insert it into the editbox.
+
+]]
+L["SUG_DISPELTYPES"] = "Dispel Types"
+L["SUG_BUFFEQUIVS"] = "Buff Equivalancies"
+L["SUG_DEBUFFEQUIVS"] = "Debuff equivalancies"
+L["SUG_CASTEQUIVS"] = "Spellcast equivalancies"
+L["SUG_MSCDONBARS"] = "Valid multi-state cooldowns"
+L["SUG_PLAYERSPELLS"] = "Your spells"
+L["SUG_CLASSSPELLS"] = "Known PC/pet spells"
+L["SUG_NPCAURAS"] = "Known NPC buffs/debuffs"
+L["SUG_PLAYERAURAS"] = "Known PC/pet buffs/debuffs"
+L["SUG_MISC"] = "Miscellaneous"
+
 
 L["TOPLEFT"] = "Top Left"
 L["TOP"] = "Top"

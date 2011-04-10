@@ -2566,6 +2566,22 @@ function SUG:BuildClassSpellLookup()
 	end
 end
 
+function SUG:ColorHelp(frame)
+	GameTooltip_SetDefaultAnchor(GameTooltip, frame)
+	GameTooltip:AddLine(L["SUG_TOOLTIPTITLE"], NORMAL_FONT_COLOR.r, NORMAL_FONT_COLOR.g, NORMAL_FONT_COLOR.b, 1)
+	GameTooltip:AddLine(L["SUG_DISPELTYPES"], 1, .49, .04, 1)
+	GameTooltip:AddLine(L["SUG_BUFFEQUIVS"], .2, .9, .2, 1)
+	GameTooltip:AddLine(L["SUG_DEBUFFEQUIVS"], .77, .12, .23, 1)
+	GameTooltip:AddLine(L["SUG_CASTEQUIVS"], 1, .96, .41, 1)
+	GameTooltip:AddLine(L["SUG_MSCDONBARS"], 0, .44, .87, 1)
+	GameTooltip:AddLine(L["SUG_PLAYERSPELLS"], .41, .8, .94, 1)
+	GameTooltip:AddLine(L["SUG_CLASSSPELLS"], .96, .55, .73, 1)
+	GameTooltip:AddLine(L["SUG_PLAYERAURAS"], .87, .24, 1, 1)
+	GameTooltip:AddLine(L["SUG_NPCAURAS"], .78, .61, .43, 1)
+	GameTooltip:AddLine(L["SUG_MISC"], .58, .51, .79, 1)
+	GameTooltip:Show()
+end
+
 
 -- -----------------------
 -- CONDITION EDITOR DIALOG
