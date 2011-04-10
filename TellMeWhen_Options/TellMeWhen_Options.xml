@@ -487,7 +487,7 @@
 			<Frame name="$parentAndOr" parentKey="AndOr" inherits="UIDropDownMenuTemplate">
 				<Anchors>
 					<Anchor point="TOPRIGHT">
-						<Offset x="0" y="30" />
+						<Offset x="-7" y="30" />
 					</Anchor>
 				</Anchors>
 				<Layers>
@@ -501,7 +501,7 @@
 				</Layers>
 				<Scripts>
 					<OnLoad>
-						UIDropDownMenu_SetWidth(self, 50)
+						UIDropDownMenu_SetWidth(self, 45)
 						UIDropDownMenu_JustifyText(self, "CENTER")
 						_G[self:GetName() .. "Button"]:SetScript("PreClick", function()
 							UIDropDownMenu_Initialize(self, TMW.CNDT.AndOrMenu_DropDown, "DROPDOWN")
@@ -2721,7 +2721,7 @@
 									<Frame name="$parentGroup1" inherits="TellMeWhen_ConditionGroup" id="1">
 										<Anchors>
 											<Anchor point="TOPLEFT">
-												<Offset x="0" y="-15" />
+												<Offset x="-4" y="-17" />
 											</Anchor>
 										</Anchors>
 										<Scripts>
@@ -2747,6 +2747,9 @@
 						</Scripts>
 						<Frames>
 							<Slider name="$parentScrollBar" inherits="MinimalScrollBarTemplate" parentKey="ScrollBar">
+								<Size>
+									<AbsDimension x="17" y="0"/>
+								</Size>
 								<Anchors>
 									<Anchor point="TOPRIGHT" relativeTo="TellMeWhen_IconEditorConditions" relativePoint="TOPRIGHT">
 										<Offset>
