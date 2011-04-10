@@ -963,7 +963,6 @@ end
 -- ICON EDITOR
 -- ----------------------
 
-
 ME = TMW:NewModule("MetaEditor") TMW.ME = ME -- really part of the icon editor now, but im too lazy to move it over
 
 function ME:UpOrDown(self, delta)
@@ -1039,22 +1038,39 @@ function ME:Update()
 	ME[1]:Show()
 end
 
+local addedGroups = {} -- this is also used for the condition icon menu, but its just a throwaway, so whatever
 function ME:IconMenu()
-	for k, v in pairs(TMW.Icons) do
-		if TMW.CI.ic and v ~= TMW.CI.ic:GetName() then
-			local info = UIDropDownMenu_CreateInfo()
-			info.func = ME.IconMenuOnClick
+	if UIDROPDOWNMENU_MENU_LEVEL == 2 then
+		for k, v in pairs(TMW.Icons) do
 			local g, i = strmatch(v, "TellMeWhen_Group(%d+)_Icon(%d+)")
 			g, i = tonumber(g), tonumber(i)
-			local text, textshort = TMW:GetIconMenuText(g, i)
-			info.text = textshort
-			info.value = v
-			info.tooltipTitle = text
-			info.tooltipText = format(L["GROUPICON"], TMW:GetGroupName(db.profile.Groups[g].Name, g, 1), i)
-			info.tooltipOnButton = true
-			info.icon = _G["TellMeWhen_Group" .. g .. "_Icon" .. i].texture:GetTexture()
-			info.arg1 = self
-			UIDropDownMenu_AddButton(info)
+			if UIDROPDOWNMENU_MENU_VALUE == g and TMW.CI.ic and v ~= TMW.CI.ic:GetName() then
+				local info = UIDropDownMenu_CreateInfo()
+				info.func = ME.IconMenuOnClick
+				local text, textshort = TMW:GetIconMenuText(g, i)
+				info.text = textshort
+				info.value = v
+				info.tooltipTitle = text
+				info.tooltipText = format(L["GROUPICON"], TMW:GetGroupName(db.profile.Groups[g].Name, g, 1), i)
+				info.tooltipOnButton = true
+				info.arg1 = self
+				info.icon = TMW[g][i].texture:GetTexture()
+				UIDropDownMenu_AddButton(info, UIDROPDOWNMENU_MENU_LEVEL)
+			end
+		end
+	elseif UIDROPDOWNMENU_MENU_LEVEL == 1 then
+		wipe(addedGroups)
+		for k, v in pairs(TMW.Icons) do
+			local g = tonumber(strmatch(v, "TellMeWhen_Group(%d+)"))
+			if not addedGroups[g] then
+				local info = UIDropDownMenu_CreateInfo()
+				info.text = TMW:GetGroupName(db.profile.Groups[g].Name, g, 1)
+				info.hasArrow = true
+				info.notCheckable = true
+				info.value = g
+				UIDropDownMenu_AddButton(info, UIDROPDOWNMENU_MENU_LEVEL)
+				addedGroups[g] = true
+			end
 		end
 	end
 	UIDropDownMenu_JustifyText(self, "LEFT")
@@ -1063,6 +1079,7 @@ end
 function ME:IconMenuOnClick(frame)
 	db.profile.Groups[TMW.CI.g].Icons[TMW.CI.i].Icons[frame:GetParent():GetID()] = self.value
 	UIDropDownMenu_SetSelectedValue(frame, self.value)
+	CloseDropDownMenus()
 end
 
 
@@ -1918,6 +1935,10 @@ function IE:GetRealNames()
 end
 
 
+-- ----------------------
+-- SUGGESTER
+-- ----------------------
+
 SUG = TMW:NewModule("Suggester", "AceEvent-3.0", "AceComm-3.0", "AceSerializer-3.0") TMW.SUG = SUG
 local inputType
 SUG.doUpdateItemCache = true
@@ -2151,12 +2172,10 @@ function SUG:OnCommReceived(prefix, text, channel, who)
 	end
 end
 
-
 function GameTooltip:SetTMWEquiv(equiv)
 	GameTooltip:AddLine(L[equiv], HIGHLIGHT_FONT_COLOR.r, HIGHLIGHT_FONT_COLOR.g, HIGHLIGHT_FONT_COLOR.b, 1)
 	GameTooltip:AddLine(IE:Equiv_GenerateTips(equiv), NORMAL_FONT_COLOR.r, NORMAL_FONT_COLOR.g, NORMAL_FONT_COLOR.b, 1)
 end
-
 
 SUG.preTable = {}
 local miscprioritize = {
@@ -2546,6 +2565,7 @@ function SUG:BuildClassSpellLookup()
 	end
 end
 
+
 -- -----------------------
 -- CONDITION EDITOR DIALOG
 -- -----------------------
@@ -2635,24 +2655,43 @@ end
 
 function CNDT:IconMenuOnClick(frame)
 	UIDropDownMenu_SetSelectedValue(frame, self.value)
+	CloseDropDownMenus()
 	CNDT:OK()
 end
 
 function CNDT:IconMenu_DropDown()
-	for k, v in pairs(TMW.Icons) do
-		local info = UIDropDownMenu_CreateInfo()
-		info.func = CNDT.IconMenuOnClick
-		local g, i = strmatch(v, "TellMeWhen_Group(%d+)_Icon(%d+)")
-		g, i = tonumber(g), tonumber(i)
-		local text, textshort = TMW:GetIconMenuText(g, i)
-		info.text = textshort
-		info.value = v
-		info.tooltipTitle = text
-		info.tooltipText = format(L["GROUPICON"], TMW:GetGroupName(db.profile.Groups[g].Name, g, 1), i)
-		info.tooltipOnButton = true
-		info.arg1 = self
-		info.icon = TMW[g][i].texture:GetTexture()
-		UIDropDownMenu_AddButton(info)
+	if UIDROPDOWNMENU_MENU_LEVEL == 2 then
+		for k, v in pairs(TMW.Icons) do
+			local g, i = strmatch(v, "TellMeWhen_Group(%d+)_Icon(%d+)")
+			g, i = tonumber(g), tonumber(i)
+			if UIDROPDOWNMENU_MENU_VALUE == g then
+				local info = UIDropDownMenu_CreateInfo()
+				info.func = CNDT.IconMenuOnClick
+				local text, textshort = TMW:GetIconMenuText(g, i)
+				info.text = textshort
+				info.value = v
+				info.tooltipTitle = text
+				info.tooltipText = format(L["GROUPICON"], TMW:GetGroupName(db.profile.Groups[g].Name, g, 1), i)
+				info.tooltipOnButton = true
+				info.arg1 = self
+				info.icon = TMW[g][i].texture:GetTexture()
+				UIDropDownMenu_AddButton(info, UIDROPDOWNMENU_MENU_LEVEL)
+			end
+		end
+	elseif UIDROPDOWNMENU_MENU_LEVEL == 1 then
+		wipe(addedGroups)
+		for k, v in pairs(TMW.Icons) do
+			local g = tonumber(strmatch(v, "TellMeWhen_Group(%d+)"))
+			if not addedGroups[g] then
+				local info = UIDropDownMenu_CreateInfo()
+				info.text = TMW:GetGroupName(db.profile.Groups[g].Name, g, 1)
+				info.hasArrow = true
+				info.notCheckable = true
+				info.value = g
+				UIDropDownMenu_AddButton(info, UIDROPDOWNMENU_MENU_LEVEL)
+				addedGroups[g] = true
+			end
+		end
 	end
 end
 
