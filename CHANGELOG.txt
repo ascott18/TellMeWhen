@@ -17,6 +17,7 @@ v4.0.1 beta
 -Fixed a missing translation
 -Reset your aura cache to remove incorrect entires that were put in prior to version 4.0.1 beta3
 -Instead of typing "raid" for units raid1 through raid25, you now must type "raid1-25". This will allow for much more flexibility, e.g. raid1-10.
+-Spell cast conditions now allow you to specify if the cast must be interruptible.
 
 v4.0.0 beta9
 -Actually added mainassist and maintank to the unit dropdowns.

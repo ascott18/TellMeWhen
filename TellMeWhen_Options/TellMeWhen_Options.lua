@@ -1660,12 +1660,14 @@ function IE:Unit_DropDown()
 		end
 		info.notCheckable = true
 		info.func = IE.Unit_DropDown_OnClick
+		info.arg1 = self
 		UIDropDownMenu_AddButton(info, UIDROPDOWNMENU_MENU_LEVEL)
 	end
 end
 
 function IE:Unit_DropDown_OnClick()
-	e:Insert(";" .. v.value .. ";")
+	local e = IE.Main.Unit
+	e:Insert(";" .. self.value .. ";")
 	e:SetText(TMW:CleanString(e:GetText()))
 	local groupID, iconID = TMW.CI.g, TMW.CI.i
 	db.profile.Groups[groupID].Icons[iconID].Unit = e:GetText()

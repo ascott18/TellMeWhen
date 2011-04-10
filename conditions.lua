@@ -179,6 +179,21 @@ local function IsItemOnCooldown(itemID)
 	return not(duration == 0 or OnGCD(duration))
 end
 
+local UnitCastingInfo, UnitChannelInfo = UnitCastingInfo, UnitChannelInfo
+local function UnitCast(unit, level)
+	local name, _, _, _, _, _, _, _, notInterruptible = UnitCastingInfo(unit)
+	if not name then
+		name, _, _, _, _, _, _, notInterruptible = UnitChannelInfo(unit)
+	end
+	if level == 0 then -- only interruptible
+		return name and not notInterruptible
+	elseif level == 1 then -- present
+		return name
+	else
+		return not name -- absent
+	end
+end
+
 Env = {
 	UnitHealth = UnitHealth,
 	UnitHealthMax = UnitHealthMax,
@@ -212,8 +227,7 @@ Env = {
 	GetWeaponEnchantInfo = GetWeaponEnchantInfo,
 	GetItemCount = GetItemCount,
 	IsEquippedItem = IsEquippedItem,
-	UnitCastingInfo = UnitCastingInfo,
-	UnitChannelInfo = UnitChannelInfo,
+	UnitCast = UnitCast,
 	
 	IsSpellOnCooldown = IsSpellOnCooldown,
 	IsItemOnCooldown = IsItemOnCooldown,
@@ -850,12 +864,17 @@ CNDT.Types = {
 		value = "CASTING",
 		category = L["ICONFUNCTIONS"],
 		min = 0,
-		max = 1,
+		max = 2,
 		nooperator = true,
-		texttable = presentabsent,
+		texttable = {
+			[0] = L["ICONMENU_ONLYINTERRUPTIBLE"],
+			[1] = L["ICONMENU_PRESENT"],
+			[2] = L["ICONMENU_ABSENT"],
+		},
+		midt = L["ICONMENU_PRESENT"],
 		icon = "Interface\\Icons\\Temp",
 		tcoords = standardtcoords,
-		funcstr = [[c.1nil == (UnitCastingInfo(c.Unit) or UnitChannelInfo(c.Unit))]],
+		funcstr = [[UnitCast(c.Unit, c.Level)]],
 	},
 	
 	{ -- item in bags
@@ -1145,8 +1164,9 @@ function CNDT:ProcessConditions(icon)
 			local thisstr = andor .. "(" .. thiscondtstr .. ")"
 			
 			if strfind(thisstr, "c.Unit") and (strfind(c.Unit, "maintank") or strfind(c.Unit, "mainassist")) then
-				thisstr = gsub(thisstr, "c.Unit",	c.Unit) -- sub it in as a variable
-				Env[c.Unit] = c.Unit
+				local unit = gsub(c.Unit, "|cFFFF0000#|r", "1")
+				thisstr = gsub(thisstr, "c.Unit",	unit) -- sub it in as a variable
+				Env[unit] = unit
 				TMW:RegisterEvent("RAID_ROSTER_UPDATE")
 				TMW:RAID_ROSTER_UPDATE()
 			else

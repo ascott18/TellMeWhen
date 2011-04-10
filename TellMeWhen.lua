@@ -37,7 +37,7 @@ local LSM = LibStub("LibSharedMedia-3.0")
 
 TELLMEWHEN_VERSION = "4.0.1"
 TELLMEWHEN_VERSION_MINOR = " beta 4"
-TELLMEWHEN_VERSIONNUMBER = 40111
+TELLMEWHEN_VERSIONNUMBER = 40112
 TELLMEWHEN_MAXGROUPS = 10 	--this is a default, used by SetTheory (addon), so dont rename
 TELLMEWHEN_MAXROWS = 20
 local UPD_INTV = 0.05	--this is a default, local because i use it in onupdate functions
@@ -1042,6 +1042,15 @@ function TMW:Upgrade()
 			ics.Unit = gsub(ics.Unit, "maintank[^%d]", "maintank1-5;")
 			ics.Unit = gsub(ics.Unit, "mainassist[^%d]", "mainassist1-5;")
 			ics.Unit = TMW:CleanString(ics.Unit)
+		end
+	end
+	if db.profile.Version < 40112 then
+		for ics in TMW.InIconSettings() do
+			for k, condition in pairs(ics.Conditions) do
+				if condition.Type == "CASTING" then
+					condition.Level = condition.Level + 1
+				end
+			end
 		end
 	end
 
@@ -2107,6 +2116,8 @@ function TMW:GetUnits(icon, setting)
 
 	setting = TMW:CleanString(setting)
 	setting = strlower(setting)
+	
+	--SUBSTITUTE RAID1-10 WITH RAID1;RAID2;RAID3;...RAID10
 	local startpos, endpos = 0, 0
 	while true do
 		startpos, endpos = strfind(setting, "(%a+) ?(%d+) ?%- ?(%d+) ?;?", endpos+1)
@@ -2120,32 +2131,12 @@ function TMW:GetUnits(icon, setting)
 				str = str .. unit .. i .. ";"
 			end
 			str = strtrim(str, " ;")
-			print(str)
 			wholething = gsub(wholething, "%-", "%%-") -- need to escape the dash for it to work
-			print(wholething)
-			print(setting)
 			setting = gsub(setting, wholething, str)
-			print(setting)
 		end
 	end
 	
 	local Units = TMW:SplitNames(setting) -- get a table of everything
-
-	--INSERT EQUIVALENCIES
-	local k = #Units --start at the end of the table, that way we dont have to worry about increasing the key of Units to work with every time we insert something
-	while k > 0 do
-		local eqtt = TMW:EquivToTable(Units[k]) -- get the table form of the equivalency string
-		if eqtt then
-			local n = k	--point to start inserting the values at
-			tremove(Units, k)	--take the actual equavalancey itself out, because it isnt an actual unit or anything
-			for z, x in ipairs(eqtt) do
-				tinsert(Units, n, x)	--put the names into the main table
-				n = n + 1	--increment the point of insertion
-			end
-		else
-			k = k - 1	--there is no equivalency to insert, so move backwards one key towards zero to the next key
-		end
-	end
 
 	-- REMOVE DUPLICATES
 	local k = #Units --start at the end of the table so that we dont remove duplicates at the beginning of the table
