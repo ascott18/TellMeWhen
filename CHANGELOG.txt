@@ -1,3 +1,10 @@
+v4.0.1.2
+-Groups and icons should now properly copy using the dropdown on the icon editor
+-Added some tooltips to icon types
+
+v4.0.1.1
+-Cleaned up the conditon editor
+
 v4.0.1 beta
 -More Efficiency! Yayyy! (New stuff, plus a fix to a bug in the icon engine that was making it check every single icon, even when they were hidden)
 -New option for icon cooldowns: Only if in bags. (Note that this is forcibly checked if 'Only if equipped' is checked, and an item that is equipped is considered to be in your bags.

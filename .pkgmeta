@@ -20,7 +20,7 @@ externals:
 
 optional-dependencies:
     - buttonfacade
-    - omnicc
+    - omni-cc
     - tullacc
 
 manual-changelog: CHANGELOG.txt

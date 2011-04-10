@@ -35,9 +35,9 @@ local LBF = LibStub("LibButtonFacade", true)
 local AceDB = LibStub("AceDB-3.0")
 local LSM = LibStub("LibSharedMedia-3.0")
 
-TELLMEWHEN_VERSION = "4.0.1"
+TELLMEWHEN_VERSION = "4.0.1.2"
 TELLMEWHEN_VERSION_MINOR = ""
-TELLMEWHEN_VERSIONNUMBER = 40117
+TELLMEWHEN_VERSIONNUMBER = 40118
 TELLMEWHEN_MAXGROUPS = 10 	--this is a default, used by SetTheory (addon), so dont rename
 TELLMEWHEN_MAXROWS = 20
 local UPD_INTV = 0.05	--this is a default, local because i use it in onupdate functions
@@ -396,14 +396,14 @@ TMW.DS = {
 TMW.BE = {	--Much of these are thanks to Malazee @ US-Dalaran's chart: http://forums.wow-petopia.com/download/file.php?mode=view&id=4979 and spreadsheet https://spreadsheets.google.com/ccc?key=0Aox2ZHZE6e_SdHhTc0tZam05QVJDU0lONnp0ZVgzdkE&hl=en#gid=18
 	--NOTE: any id prefixed with "_" will have its localized name substituted in instead of being forced to match as an ID
 	debuffs = {
-		CrowdControl = "339;2637;33786;_118;_1499;19503;19386;20066;10326;9484;6770;2094;51514;76780;710;5782;6358", -- by calico0 of Curse
-		Bleeding = "9007;1822;1079;33745;1943;703;94009;43104;89775",
+		CrowdControl = "_339;2637;33786;_118;_1499;_19503;_19386;20066;10326;_9484;_6770;_2094;_51514;76780;_710;_5782;_6358", -- by calico0 of Curse
+		Bleeding = "9007;_1822;_1079;33745;1943;703;94009;43104;89775",
 		Incapacitated = "1776;20066;49203",
-		Feared = "5782;5246;8122;10326;1513;5484;6789;87204",
-		Stunned = "1833;408;91800;5211;9005;22570;19577;56626;44572;82691;853;2812;85388;64044;20549;46968;30283;20252;65929;7922;12809;50519",
+		Feared = "_5782;5246;_8122;10326;1513;_5484;_6789;87204",
+		Stunned = "_1833;_408;_91800;_5211;_56;9005;22570;19577;56626;44572;82691;853;2812;85388;64044;20549;46968;30283;20252;65929;7922;12809;50519",
 		--DontMelee = "5277;871;Retaliation;Dispersion;Hand of Sacrifice;Hand of Protection;Divine Shield;Divine Protection;Ice Block;Icebound Fortitude;Cyclone;Banish",  --does somebody want to update these for me?
 		--MovementSlowed = "Incapacitating Shout;Chains of Ice;Icy Clutch;Slow;Daze;Hamstring;Piercing Howl;Wing Clip;Ice Trap;Frostbolt;Cone of Cold;Blast Wave;Mind Flay;Crippling Poison;Deadly Throw;Frost Shock;Earthbind;Curse of Exhaustion",
-		Disoriented = "19503;31661;2094;51514;90337",
+		Disoriented = "_19503;31661;_2094;_51514;90337",
 		Silenced = "_47476;78675;34490;_55021;_15487;1330;_24259;_18498;_25046",
 		Disarmed = "_51722;_676;64058;50541;91644",
 		Rooted = "_339;_122;23694;58373;64695;_19185;33395;4167;54706;50245;90327;16979;83301;83302",

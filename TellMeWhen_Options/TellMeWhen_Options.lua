@@ -1769,7 +1769,9 @@ function IE:Copy_DropDown()
 				info.notCheckable = true
 				info.icon = TMW:GuessIconTexture(tbl)
 				info.func = function(self)
+					CloseDropDownMenus()
 					local groupID, iconID = TMW.CI.g, TMW.CI.i
+					TMW:CopyTableInPlace(TMW.Icon_Defaults, db.profile.Groups[groupID].Icons[iconID])
 					TMW:CopyTableInPlace(self.value, db.profile.Groups[groupID].Icons[iconID])
 					TMW:ScheduleIconUpdate(groupID, iconID)
 					IE:Load(1)
@@ -1813,11 +1815,11 @@ function IE:Copy_DropDown()
 		info = UIDropDownMenu_CreateInfo()
 		info.text = L["COPYPOS"]
 		info.func = function()
-
+			CloseDropDownMenus()
+			TMW:CopyTableInPlace(TMW.Group_Defaults.Point, db.profile.Groups[groupID].Point)
 			TMW:CopyTableInPlace(db.profiles[n].Groups[g].Point, db.profile.Groups[groupID].Point)
 			db.profile.Groups[groupID].Scale = db.profiles[n].Groups[g].Scale or TMW.Group_Defaults.Scale
 			db.profile.Groups[groupID].Level = db.profiles[n].Groups[g].Level or TMW.Group_Defaults.Level
-
 			TMW:Group_Update(groupID)
 		end
 		info.notCheckable = true
@@ -1826,12 +1828,9 @@ function IE:Copy_DropDown()
 		info = UIDropDownMenu_CreateInfo()
 		info.text = L["COPYALL"]
 		info.func = function()
-			local currentprofile = db:GetCurrentProfile()
-			db:SetProfile(n)
-			local temp = TMW:CopyWithMetatable(db.profile.Groups[g])
-			db:SetProfile(currentprofile)
-			wipe(db.profile.Groups[groupID])
-			db.profile.Groups[groupID] = TMW:CopyWithMetatable(temp)
+			CloseDropDownMenus()
+			TMW:CopyTableInPlace(TMW.Group_Defaults, db.profile.Groups[groupID])
+			TMW:CopyTableInPlace(db.profiles[n].Groups[g], db.profile.Groups[groupID])
 			TMW:Group_Update(groupID)
 			IE:Load(1)
 		end
@@ -1865,7 +1864,10 @@ function IE:Copy_DropDown()
 					info = UIDropDownMenu_CreateInfo()
 					info.text = L["COPYICON"] .. i
 					info.func = function()
+						CloseDropDownMenus()
+						TMW:CopyTableInPlace(TMW.Icon_Defaults, db.profile.Groups[groupID].Icons[iconID])
 						TMW:CopyTableInPlace(db.profiles[n].Groups[g].Icons[i], db.profile.Groups[groupID].Icons[iconID])
+						TMW[groupID][iconID]:SetTexture(nil)
 						TMW:Group_Update(groupID)
 						IE:Load(1)
 					end

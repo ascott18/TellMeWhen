@@ -38,6 +38,7 @@ local RelevantSettings = {
 
 local Type = TMW:RegisterIconType("wpnenchant", RelevantSettings, L["ICONMENU_WPNENCHANT"])
 Type.name = L["ICONMENU_WPNENCHANT"]
+Type.desc = L["ICONMENU_WPNENCHANT_DESC"]
 
 local Parser = CreateFrame("GameTooltip", "TellMeWhen_Parser", TMW, "GameTooltipTemplate")
 local function GetWeaponEnchantName(slot)

@@ -40,7 +40,13 @@ L["ICONMENU_TYPE"] = "Icon type"
 L["ICONMENU_COOLDOWN"] = "Cooldown"
 L["ICONMENU_BUFFDEBUFF"] = "Buff/Debuff"
 L["ICONMENU_REACTIVE"] = "Reactive ability"
-L["ICONMENU_WPNENCHANT"] = "Temporary weapon enchant"
+L["ICONMENU_REACTIVE_DESC"] = [[Reactive abilities are things like Kill Shot, Revenge, and Conflagrate -
+abilites that are only usable when certain conditions are met. Use this icon type to track their usability.]]
+L["ICONMENU_WPNENCHANT"] = "Weapon enchant"
+L["ICONMENU_WPNENCHANT_DESC"] = [[Tracks the status of temporary weapon enchants on your weapons - most useful for shaman.
+With this icon type, the name can be left blank to track any weapon enchant in the specified slot,
+or you can insert the names of weapon enchants to only show it for specific enchants.
+The names that must be entered are the names that appear in the tooltip of your weapon while the enchant is active, e.g "Flametongue", not "Flametongue Weapon."]]
 L["ICONMENU_TOTEM"] = "Totem"
 L["ICONMENU_GHOUL"] = "Non-MoG ghoul"
 L["ICONMENU_MUSHROOMS"] = "Wild Mushrooms"

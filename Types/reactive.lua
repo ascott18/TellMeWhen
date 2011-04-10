@@ -46,6 +46,7 @@ local RelevantSettings = {
 
 local Type = TMW:RegisterIconType("reactive", RelevantSettings)
 Type.name = L["ICONMENU_REACTIVE"]
+Type.desc = L["ICONMENU_REACTIVE_DESC"]
 
 Type:SetScript("OnUpdate", function()
 	CUR_TIME = TMW.CUR_TIME
