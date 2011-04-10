@@ -37,7 +37,7 @@ local LSM = LibStub("LibSharedMedia-3.0")
 
 TELLMEWHEN_VERSION = "4.0.1"
 TELLMEWHEN_VERSION_MINOR = " beta 4"
-TELLMEWHEN_VERSIONNUMBER = 40112
+TELLMEWHEN_VERSIONNUMBER = 40113
 TELLMEWHEN_MAXGROUPS = 10 	--this is a default, used by SetTheory (addon), so dont rename
 TELLMEWHEN_MAXROWS = 20
 local UPD_INTV = 0.05	--this is a default, local because i use it in onupdate functions
@@ -650,6 +650,7 @@ function TMW:OnInitialize()
 	if IsInGuild() then
 		TMW:SendCommMessage("TMW", "M:" .. TELLMEWHEN_VERSION .. "^m:" .. TELLMEWHEN_VERSION_MINOR .. "^R:" .. TELLMEWHEN_VERSIONNUMBER .. "^", "GUILD")
 	end
+	TMW:ZONE_CHANGED_NEW_AREA()
 
 	TMW.VarsLoaded = true
 end
@@ -672,6 +673,17 @@ function TMW:PLAYER_TALENT_UPDATE()
 	TMW:CancelTimer(talenthandler, 1)
 	talenthandler = TMW:ScheduleTimer("Update", 1)
 end
+
+function TMW:ZONE_CHANGED_NEW_AREA()
+	if GetRealNumRaidMembers() > 0 then
+		TMW:SendCommMessage("TMW", "M:" .. TELLMEWHEN_VERSION .. "^m:" .. TELLMEWHEN_VERSION_MINOR .. "^R:" .. TELLMEWHEN_VERSIONNUMBER .. "^", "RAID")
+	elseif GetRealNumPartyMembers() > 0 then
+		TMW:SendCommMessage("TMW", "M:" .. TELLMEWHEN_VERSION .. "^m:" .. TELLMEWHEN_VERSION_MINOR .. "^R:" .. TELLMEWHEN_VERSIONNUMBER .. "^", "PARTY")
+	elseif UnitInBattleground("player") then
+		TMW:SendCommMessage("TMW", "M:" .. TELLMEWHEN_VERSION .. "^m:" .. TELLMEWHEN_VERSION_MINOR .. "^R:" .. TELLMEWHEN_VERSIONNUMBER .. "^", "BATTLEGROUND")
+	end
+end
+TMW:RegisterEvent("ZONE_CHANGED_NEW_AREA")
 
 function TMW:OnCommReceived(prefix, text, channel, who)
 	if prefix ~= "TMW" then return end

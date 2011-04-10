@@ -1972,8 +1972,10 @@ function SUG:ADDON_LOADED(event, addon)
 		if RegisterAddonMessagePrefix then
 			RegisterAddonMessagePrefix("TMWSUG") -- new in WoW 4.1
 		end
-		SUG:SendCommMessage("TMWSUG", SUG:Serialize("RCSL"), "GUILD")
-		
+		if IsInGuild() then
+			SUG:SendCommMessage("TMWSUG", SUG:Serialize("RCSL"), "GUILD")
+		end
+		SUG:ZONE_CHANGED_NEW_AREA()
 		
 		if TMWOptDB.IncompleteCache or not TMWOptDB.WoWVersion or TMWOptDB.WoWVersion < clientVersion then
 			TMWOptDB.IncompleteCache = true
@@ -2097,6 +2099,17 @@ function SUG:UNIT_PET(event, unit)
 	end
 end
 SUG:RegisterEvent("UNIT_PET")
+
+function SUG:ZONE_CHANGED_NEW_AREA()
+	if GetRealNumRaidMembers() > 0 then
+		SUG:SendCommMessage("TMWSUG", SUG:Serialize("RCSL"), "RAID")
+	elseif GetRealNumPartyMembers() > 0 then
+		SUG:SendCommMessage("TMWSUG", SUG:Serialize("RCSL"), "PARTY")
+	elseif UnitInBattleground("player") then
+		SUG:SendCommMessage("TMWSUG", SUG:Serialize("RCSL"), "BATTLEGROUND")
+	end
+end
+SUG:RegisterEvent("ZONE_CHANGED_NEW_AREA")
 
 local commThrowaway = {}
 function SUG:OnCommReceived(prefix, text, channel, who)
