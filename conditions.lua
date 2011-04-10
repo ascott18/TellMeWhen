@@ -194,6 +194,17 @@ local function UnitCast(unit, level)
 	end
 end
 
+local function AuraStacks(unit, name, filter)
+	local buffName, _, _, count = UnitAura(unit, name, nil, filter)
+	if not buffName then
+		return 0
+	elseif buffName and count == 0 then
+		return 1
+	else
+		return count
+	end
+end
+
 Env = {
 	UnitHealth = UnitHealth,
 	UnitHealthMax = UnitHealthMax,
@@ -228,6 +239,7 @@ Env = {
 	GetItemCount = GetItemCount,
 	IsEquippedItem = IsEquippedItem,
 	UnitCast = UnitCast,
+	AuraStacks = AuraStacks,
 	
 	IsSpellOnCooldown = IsSpellOnCooldown,
 	IsItemOnCooldown = IsItemOnCooldown,
@@ -783,26 +795,24 @@ CNDT.Types = {
 		value = "BUFF",
 		category = L["ICONFUNCTIONS"],
 		min = 0,
-		max = 1,
+		max = 20,
 		name = function(editbox) TMW:TT(editbox, "ICONMENU_BUFF", "BUFFCNDT_DESC", nil, nil, 1) end,
-		nooperator = true,
-		texttable = presentabsent,
+		texttable = setmetatable({[0] = L["ICONMENU_ABSENT"]}, {__index = function(tbl, k) return format(STACKS, k) end}),
 		icon = "Interface\\Icons\\spell_nature_rejuvenation",
 		tcoords = standardtcoords,
-		funcstr = [[c.1nil == (UnitBuff(c.Unit, c.NameName) and 1)]],
+		funcstr = [[AuraStacks(c.Unit, c.NameName, "HELPFUL") c.Operator c.Level]],
 	},
 	{ -- unit debuff
 		text = L["ICONMENU_DEBUFF"],
 		value = "DEBUFF",
 		category = L["ICONFUNCTIONS"],
 		min = 0,
-		max = 1,
+		max = 20,
 		name = function(editbox) TMW:TT(editbox, "ICONMENU_DEBUFF", "BUFFCNDT_DESC", nil, nil, 1) end,
-		nooperator = true,
-		texttable = presentabsent,
+		texttable = setmetatable({[0] = L["ICONMENU_ABSENT"]}, {__index = function(tbl, k) return format(STACKS, k) end}),
 		icon = "Interface\\Icons\\spell_shadow_abominationexplosion",
 		tcoords = standardtcoords,
-		funcstr = [[c.1nil == (UnitDebuff(c.Unit, c.NameName) and 1)]],
+		funcstr = [[AuraStacks(c.Unit, c.NameName, "HELPFUL") c.Operator c.Level]],
 	},
 	{ -- reactive
 		text = L["ICONMENU_REACTIVE"],
@@ -883,7 +893,7 @@ CNDT.Types = {
 		category = L["ICONFUNCTIONS"],
 		min = 0,
 		max = 50,
-		texttable = setmetatable({}, {__index = function(tbl, k) return L["CHARGES"] .. k end}),
+		texttable = setmetatable({}, {__index = function(tbl, k) return format(ITEM_SPELL_CHARGES, k) end}),
 		name = function(editbox) TMW:TT(editbox, "ITEMINBAGS", "CNDT_ONLYFIRST", nil, nil, 1) end,
 		unit = false,
 		icon = "Interface\\Icons\\inv_misc_bag_08",
@@ -1181,14 +1191,15 @@ function CNDT:ProcessConditions(icon)
 				thisstr = gsub(thisstr, "c.nil1", 		c.Level == 1 and 1 or "nil") -- reverse 1nil
 			end
 			
-			thisstr = gsub(thisstr, "c.Operator", 	c.Operator)
-			thisstr = gsub(thisstr, "c.NameFirst", 	"\"" .. TMW:GetSpellNames(nil, name, 1) .. "\"")
-			thisstr = gsub(thisstr, "c.NameName", 	"\"" .. TMW:GetSpellNames(nil, name, 1, 1) .. "\"")
-			thisstr = gsub(thisstr, "c.ItemID", 	TMW:GetItemIDs(icon, name, 1))
-			thisstr = gsub(thisstr, "c.Name", 		"\"" .. name .. "\"")
+			thisstr = thisstr:
+			gsub("c.Operator", 		c.Operator):
+			gsub("c.NameFirst", 	"\"" .. TMW:GetSpellNames(nil, name, 1) .. "\""):
+			gsub("c.NameName", 		"\"" .. TMW:GetSpellNames(nil, name, 1, 1) .. "\""):
+			gsub( "c.ItemID", 		TMW:GetItemIDs(icon, name, 1)):
+			gsub("c.Name", 			"\"" .. name .. "\""):
 			
-			thisstr = gsub(thisstr, "c.True", 		tostring(c.Level == 0))
-			thisstr = gsub(thisstr, "c.False", 		tostring(c.Level == 1))
+			gsub("c.True", 			tostring(c.Level == 0)):
+			gsub("c.False", 		tostring(c.Level == 1))
 
 			funcstr = funcstr .. thisstr
 		end

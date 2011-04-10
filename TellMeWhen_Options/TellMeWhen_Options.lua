@@ -2471,12 +2471,13 @@ function SUG:NameOnCursor()
 	SUG.lastName = strlower(TMW:CleanString(SUG.lastName))
 
 	--disable pattern matches that will break/interfere
-	SUG.lastName = gsub(SUG.lastName, "%%", "%%%%")
-	SUG.lastName = gsub(SUG.lastName, "%-", "%%-")
-	SUG.lastName = gsub(SUG.lastName, "%[", "%%[")
-	SUG.lastName = gsub(SUG.lastName, "%]", "%%]")
-	SUG.lastName = gsub(SUG.lastName, "%(", "%%(")
-	SUG.lastName = gsub(SUG.lastName, "%)", "%%)")
+	SUG.lastName = SUG.lastName:
+	gsub("%%", "%%%%"):
+	gsub("%-", "%%-"):
+	gsub("%[", "%%["):
+	gsub("%]", "%%]"):
+	gsub("%(", "%%("):
+	gsub("%)", "%%)")
 
 
 	SUG.atBeginning = "^"..SUG.lastName

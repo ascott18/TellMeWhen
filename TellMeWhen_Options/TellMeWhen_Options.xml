@@ -1067,9 +1067,7 @@
 
 				local t = TMW:CleanString(self:GetText())
 				if strfind(self.setting, "Duration") and strfind(t, ":") then
-					t = gsub(t, " ", "")
-					t = gsub(t, "::", ":")
-					t = gsub(t, ":", "*60+")
+					t = t:gsub(" ", ""):gsub("::", ":"):gsub(":", "*60+")
 					local f, err = loadstring("TMW.IE.temptime = " .. t)
 					if f then f() end
 					t = TMW.IE.temptime or 0

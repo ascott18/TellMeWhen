@@ -37,7 +37,7 @@ local LSM = LibStub("LibSharedMedia-3.0")
 
 TELLMEWHEN_VERSION = "4.0.1"
 TELLMEWHEN_VERSION_MINOR = " beta 4"
-TELLMEWHEN_VERSIONNUMBER = 40114
+TELLMEWHEN_VERSIONNUMBER = 40115
 TELLMEWHEN_MAXGROUPS = 10 	--this is a default, used by SetTheory (addon), so dont rename
 TELLMEWHEN_MAXROWS = 20
 local UPD_INTV = 0.05	--this is a default, local because i use it in onupdate functions
@@ -1046,14 +1046,13 @@ function TMW:Upgrade()
 	
 	if db.profile.Version < 40111 then
 		for ics in TMW.InIconSettings() do
-			ics.Unit = ics.Unit .. ";" -- it wont change things at the end of the unit string without a character after the unit at the end
-			ics.Unit = gsub(ics.Unit, "raid[^%d]", "raid1-25;")
-			ics.Unit = gsub(ics.Unit, "party[^%d]", "party1-4;")
-			ics.Unit = gsub(ics.Unit, "arena[^%d]", "arena1-5;")
-			ics.Unit = gsub(ics.Unit, "boss[^%d]", "boss1-4;")
-			ics.Unit = gsub(ics.Unit, "maintank[^%d]", "maintank1-5;")
-			ics.Unit = gsub(ics.Unit, "mainassist[^%d]", "mainassist1-5;")
-			ics.Unit = TMW:CleanString(ics.Unit)
+			ics.Unit = TMW:CleanString((ics.Unit .. ";"):	-- it wont change things at the end of the unit string without a character after the unit at the end
+			gsub("raid[^%d]", "raid1-25;"):
+			gsub( "party[^%d]", "party1-4;"):
+			gsub("arena[^%d]", "arena1-5;"):
+			gsub("boss[^%d]", "boss1-4;"):
+			gsub("maintank[^%d]", "maintank1-5;"):
+			gsub("mainassist[^%d]", "mainassist1-5;"))
 		end
 	end
 	if db.profile.Version < 40112 then
@@ -1065,6 +1064,21 @@ function TMW:Upgrade()
 			end
 		end
 	end
+	if db.profile.Version < 40115 then
+		for ics in TMW.InIconSettings() do
+			for k, condition in pairs(ics.Conditions) do
+				if condition.Type == "BUFF" or condition.Type == "DEBUFF" then
+					if condition.Level == 0 then
+						condition.Operator = ">"
+					elseif condition.Level == 1 then
+						condition.Operator = "=="
+						condition.Level = 0
+					end
+				end
+			end
+		end
+	end
+	
 
 	--All Upgrades Complete
 	db.profile.Version = TELLMEWHEN_VERSIONNUMBER
