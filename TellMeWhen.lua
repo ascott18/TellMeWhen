@@ -37,10 +37,10 @@ local LSM = LibStub("LibSharedMedia-3.0")
 
 TELLMEWHEN_VERSION = "4.0.1.4"
 TELLMEWHEN_VERSION_MINOR = ""
-TELLMEWHEN_VERSIONNUMBER = 40120
+TELLMEWHEN_VERSIONNUMBER = 40121
 TELLMEWHEN_MAXGROUPS = 10 	--this is a default, used by SetTheory (addon), so dont rename
 TELLMEWHEN_MAXROWS = 20
-local UPD_INTV = 0.05	--this is a default, local because i use it in onupdate functions
+local UPD_INTV = 0.06	--this is a default, local because i use it in onupdate functions
 
 local GetSpellCooldown, GetSpellInfo =
 	  GetSpellCooldown, GetSpellInfo
@@ -62,6 +62,7 @@ local _, pclass = UnitClass("Player")
 local st, co, talenthandler, BarGCD, ClockGCD, Locked, CNDT, doUpdateIcons
 local GCD, NumShapeshiftForms, UpdateTimer = 0, 0, 0
 local time = GetTime()
+TMW.time = time
 local updateicons, unitsToChange = {}, {}
 local clientVersion = select(4, GetBuildInfo())
 

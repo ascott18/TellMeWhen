@@ -1,5 +1,6 @@
 v4.0.1.4
 -Fixed all the errors. Sorry guys!
+-Fixed totem icons
 
 v4.0.1.3
 -Dispel types should now properly work for icons that surpass the efficiency threshold
