@@ -13,11 +13,12 @@ local L = TMW.L
 
 local _, pclass = UnitClass("Player")
 
-local db, CUR_TIME, UPD_INTV, ClockGCD, pr, ab, rc, mc
-local strlower, ipairs =
-	  strlower, ipairs
+local db, time, UPD_INTV, ClockGCD, pr, ab, rc, mc
+local strlower =
+	  strlower
 local GetTotemInfo, GetSpellTexture =
 	  GetTotemInfo, GetSpellTexture
+local print = TMW.print
 
 local RelevantSettings = {
 	Name = pclass ~= "DRUID" and pclass ~= "DEATHKNIGHT",
@@ -41,12 +42,8 @@ local RelevantSettings = {
 local Type = TMW:RegisterIconType("totem", RelevantSettings)
 Type.name = pclass == "DRUID" and L["ICONMENU_MUSHROOMS"] or pclass == "DEATHKNIGHT" and L["ICONMENU_GHOUL"] or L["ICONMENU_TOTEM"]
 
-Type:SetScript("OnUpdate", function()
-	CUR_TIME = TMW.CUR_TIME
-end)
 
 function Type:Update()
-	CUR_TIME = TMW.CUR_TIME
 	db = TMW.db
 	UPD_INTV = db.profile.Interval
 	ClockGCD = db.profile.ClockGCD
@@ -56,15 +53,18 @@ function Type:Update()
 	mc = db.profile.OOMColor
 end
 
-local function Totem_OnUpdate(icon)
-	if icon.UpdateTimer <= CUR_TIME - UPD_INTV then
-		icon.UpdateTimer = CUR_TIME
+local function Totem_OnUpdate(icon, time)
+	if icon.UpdateTimer <= time - UPD_INTV then
+		icon.UpdateTimer = time
 		local CndtCheck = icon.CndtCheck if CndtCheck and CndtCheck() then return end
-		for iSlot, enabled in ipairs(icon.Slots) do
-			if enabled then
+		
+		local Slots, NameNameDictionary, NameFirst = icon.Slots, icon.NameNameDictionary, icon.NameFirst
+		for iSlot = 1, #Slots do -- be careful here. slots that are explicitly disabled by the user are set false. slots that are disabled internally are set nil.
+			if Slots[i] then
 				local _, totemName, start, duration, totemIcon = GetTotemInfo(iSlot)
-				if start ~= 0 and totemName and ((icon.NameFirst == "") or icon.NameNameDictionary[strlower(totemName)]) then
-					local d = duration - (CUR_TIME - start)
+				if start ~= 0 and totemName and ((NameFirst == "") or NameNameDictionary[strlower(totemName)]) then
+					local d = duration - (time - start)
+					local Alpha = icon.Alpha
 					if (icon.DurationMinEnabled and icon.DurationMin > d) or (icon.DurationMaxEnabled and d > icon.DurationMax) then
 						icon:SetAlpha(0)
 						return
@@ -72,12 +72,12 @@ local function Totem_OnUpdate(icon)
 					if icon.ShowCBar then
 						icon:CDBarStart(start, duration, 1)
 					end
-					if icon.Alpha ~= 0 and icon.UnAlpha ~= 0 then
+					if Alpha ~= 0 and icon.UnAlpha ~= 0 then
 						icon:SetVertexColor(pr)
 					else
 						icon:SetVertexColor(1)
 					end
-					icon:SetAlpha(icon.Alpha)
+					icon:SetAlpha(Alpha)
 
 					if totemIcon then
 						icon:SetTexture(totemIcon)
@@ -97,12 +97,14 @@ local function Totem_OnUpdate(icon)
 				icon:SetTexture(t)
 			end
 		end
-		if icon.Alpha ~= 0 and icon.UnAlpha ~= 0 then
+		local UnAlpha = icon.UnAlpha
+		
+		if icon.Alpha ~= 0 and UnAlpha ~= 0 then
 			icon:SetVertexColor(ab)
 		else
 			icon:SetVertexColor(1)
 		end
-		icon:SetAlpha(icon.UnAlpha)
+		icon:SetAlpha(UnAlpha)
 		icon:SetCooldown(0, 0)
 
 		return
@@ -153,7 +155,7 @@ function Type:Setup(icon, groupID, iconID)
 	end
 
 	icon:SetScript("OnUpdate", Totem_OnUpdate)
-	icon:OnUpdate()
+	icon:OnUpdate(GetTime() + 1)
 end
 
 

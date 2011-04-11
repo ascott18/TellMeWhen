@@ -16,4 +16,42 @@
 ## X-Embeds: LibStub, Ace3, AceGUI-3.0-SharedMediaWidgets, LibSharedMedia-3.0, LibDataBroker-1.1
 ## X-Category: Combat
 
+
+Lib\LibStub\LibStub.lua
+Lib\CallbackHandler-1.0\CallbackHandler-1.0.xml
+Lib\AceAddon-3.0\AceAddon-3.0.xml
+Lib\AceConsole-3.0\AceConsole-3.0.xml
+Lib\AceEvent-3.0\AceEvent-3.0.xml
+Lib\AceTimer-3.0\AceTimer-3.0.xml
+Lib\AceLocale-3.0\AceLocale-3.0.xml
+Lib\AceDB-3.0\AceDB-3.0.xml
+Lib\AceComm-3.0\AceComm-3.0.xml
+Lib\LibSharedMedia-3.0\LibSharedMedia-3.0.xml
+Lib\libdatabroker-1-1\LibDataBroker-1.1.lua
+
+Localization\TellMeWhen-enUS.lua
+Localization\TellMeWhen-deDE.lua
+Localization\TellMeWhen-esES.lua
+Localization\TellMeWhen-esMX.lua
+Localization\TellMeWhen-frFR.lua
+Localization\TellMeWhen-koKR.lua
+Localization\TellMeWhen-ruRU.lua
+Localization\TellMeWhen-zhCN.lua
+Localization\TellMeWhen-zhTW.lua
+
+TellMeWhen.lua
+
+Types\cooldown.lua
+Types\buff.lua
+Types\reactive.lua
+Types\wpnenchant.lua
+Types\totem.lua
+Types\icd.lua
+Types\unitcooldown.lua
+Types\cast.lua
+Types\meta.lua
+
+conditions.lua
+LDB.lua
+	
 TellMeWhen.xml

@@ -133,10 +133,10 @@ end
 function TMW:GetGroupName(n, g, short)
 	if (not n) or n == "" then
 		if short then return g end
-		return L["GROUP"] .. g
+		return format(L["fGROUP"], g)
 	end
 	if short then return n .. " (" .. g .. ")" end
-	return n .. " (" .. L["GROUP"] .. g .. ")"
+	return n .. " (" .. format(L["fGROUP"], g) .. ")"
 end
 
 
@@ -1788,7 +1788,7 @@ function IE:Copy_DropDown()
 				info.value = {profilename = UIDROPDOWNMENU_MENU_VALUE, groupid = g}
 				info.hasArrow = true
 				info.notCheckable = true
-				info.tooltipTitle = L["COPYPANEL_GROUP"] .. g
+				info.tooltipTitle = format(L["fGROUP"], g)
 				info.tooltipText = 	(L["UIPANEL_ROWS"] .. ": " .. (v.Rows or 1) .. "\r\n") ..
 								L["UIPANEL_COLUMNS"] .. ": " .. (v.Columns or 4) ..
 								(v.OnlyInCombat and "\r\n" .. L["UIPANEL_ONLYINCOMBAT"] or "") ..
@@ -1862,7 +1862,7 @@ function IE:Copy_DropDown()
 					end
 
 					info = UIDropDownMenu_CreateInfo()
-					info.text = L["COPYICON"] .. i
+					info.text = format(L["fICON"], i)
 					info.func = function()
 						CloseDropDownMenus()
 						TMW:CopyTableInPlace(TMW.Icon_Defaults, db.profile.Groups[groupID].Icons[iconID])
@@ -2136,6 +2136,7 @@ SUG:RegisterEvent("ZONE_CHANGED_NEW_AREA")
 
 local commThrowaway = {}
 function SUG:OnCommReceived(prefix, text, channel, who)
+	if debug then print(text, channel, who) end
 	if prefix ~= "TMWSUG" or who == UnitName("player") then return end
 	local success, arg1, arg2 = SUG:Deserialize(text)
 	if success then

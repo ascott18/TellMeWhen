@@ -11,11 +11,12 @@ local TMW = TMW
 if not TMW then return end
 local L = TMW.L
 
-local db, CUR_TIME, UPD_INTV, pr, ab
+local db, time, UPD_INTV, pr, ab
 local strlower =
 	  strlower
 local GetSpellTexture =
 	  GetSpellTexture
+local print = TMW.print
 
 local pGUID = UnitGUID("player") -- this isnt actually defined right here (it returns nil), so I will do it later too
 local clientVersion = select(4, GetBuildInfo())
@@ -44,12 +45,8 @@ local Type = TMW:RegisterIconType("icd", RelevantSettings)
 Type.name = L["ICONMENU_ICD"]
 Type.desc = L["ICONMENU_ICD_DESC"]
 
-Type:SetScript("OnUpdate", function()
-	CUR_TIME = TMW.CUR_TIME
-end)
 
 function Type:Update()
-	CUR_TIME = TMW.CUR_TIME
 	db = TMW.db
 	UPD_INTV = db.profile.Interval
 	pr = db.profile.PRESENTColor
@@ -65,16 +62,16 @@ if clientVersion >= 40100 then
 			local _, event, _, sourceGUID, _, _, _, _, _, spellID, spellName = ... --NEW ARG ADDED BETWEEN EVENT AND SOURCEGUID IN 4.1
 			if sourceGUID == pGUID and (event == "SPELL_AURA_APPLIED" or event == "SPELL_AURA_REFRESH" or event == "SPELL_ENERGIZE") then
 				if icon.NameDictionary[spellID] or icon.NameDictionary[strlower(spellName)] then
-					icon.texture = GetSpellTexture(spellID)
-					icon.StartTime = CUR_TIME
+					icon:SetTexture(GetSpellTexture(spellID))
+					icon.StartTime = time
 				end
 			end
 		elseif event == "UNIT_SPELLCAST_SUCCEEDED" then
 			local unit, spellName, _, _, spellID = ...
 			if unit == "player" then
 				if icon.NameDictionary[spellID] or icon.NameDictionary[strlower(spellName)] then
-					icon.texture = GetSpellTexture(spellID)
-					icon.StartTime = CUR_TIME
+					icon:SetTexture(GetSpellTexture(spellID))
+					icon.StartTime = time
 				end
 			end
 		end
@@ -86,8 +83,8 @@ else
 			if sourceGUID == pGUID and (event == "SPELL_AURA_APPLIED" or event == "SPELL_AURA_REFRESH" or event == "SPELL_ENERGIZE") then
 				local NameDictionary = icon.NameDictionary
 				if NameDictionary[spellID] or NameDictionary[strlower(spellName)] then
-					icon.texfile = GetSpellTexture(spellID)
-					icon.StartTime = CUR_TIME
+					icon:SetTexture(GetSpellTexture(spellID))
+					icon.StartTime = time
 				end
 			end
 		elseif event == "UNIT_SPELLCAST_SUCCEEDED" then
@@ -95,20 +92,20 @@ else
 			if unit == "player" then
 				local NameDictionary = icon.NameDictionary
 				if NameDictionary[spellID] or NameDictionary[strlower(spellName)] then
-					icon.texfile = GetSpellTexture(spellID)
-					icon.StartTime = CUR_TIME
+					icon:SetTexture(GetSpellTexture(spellID))
+					icon.StartTime = time
 				end
 			end
 		end
 	end
 end
 
-local function ICD_OnUpdate(icon)
-	if icon.UpdateTimer <= CUR_TIME - UPD_INTV then
-		icon.UpdateTimer = CUR_TIME
+local function ICD_OnUpdate(icon, time)
+	if icon.UpdateTimer <= time - UPD_INTV then
+		icon.UpdateTimer = time
 		local CndtCheck = icon.CndtCheck if CndtCheck and CndtCheck() then return end
 
-		local timesince = CUR_TIME - icon.StartTime
+		local timesince = time - icon.StartTime
 		local ICDDuration = icon.ICDDuration
 
 		local d = ICDDuration - timesince
@@ -116,7 +113,6 @@ local function ICD_OnUpdate(icon)
 			icon:SetAlpha(0)
 			return
 		end
-		icon:SetTexture(icon.texfile)
 		if icon.ShowCBar then
 			icon:CDBarStart(icon.StartTime, ICDDuration)
 		end
@@ -172,7 +168,7 @@ function Type:Setup(icon, groupID, iconID)
 	end
 
 	icon:SetScript("OnUpdate", ICD_OnUpdate)
-	icon:OnUpdate()
+	icon:OnUpdate(GetTime() + 1)
 end
 
 

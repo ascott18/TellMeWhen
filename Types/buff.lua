@@ -11,11 +11,12 @@ local TMW = TMW
 if not TMW then return end
 local L = TMW.L
 
-local db, CUR_TIME, UPD_INTV, EFF_THR, ClockGCD, rc, mc, pr, ab
-local ipairs, tonumber, strlower =
-	  ipairs, tonumber, strlower
+local db, time, UPD_INTV, EFF_THR, ClockGCD, rc, mc, pr, ab
+local tonumber, strlower =
+	  tonumber, strlower
 local UnitAura, UnitExists =
 	  UnitAura, UnitExists
+local print = TMW.print
 local DS = TMW.DS
 
 local RelevantSettings = {
@@ -49,12 +50,8 @@ local RelevantSettings = {
 local Type = TMW:RegisterIconType("buff", RelevantSettings)
 Type.name = L["ICONMENU_BUFFDEBUFF"]
 
-Type:SetScript("OnUpdate", function()
-	CUR_TIME = TMW.CUR_TIME
-end)
 
 function Type:Update()
-	CUR_TIME = TMW.CUR_TIME
 	db = TMW.db
 	UPD_INTV = db.profile.Interval
 	ClockGCD = db.profile.ClockGCD
@@ -66,17 +63,19 @@ function Type:Update()
 end
 
 
-local function Buff_OnUpdate(icon)
-	if icon.UpdateTimer <= CUR_TIME - UPD_INTV then
-		icon.UpdateTimer = CUR_TIME
+local function Buff_OnUpdate(icon, time)
+	if icon.UpdateTimer <= time - UPD_INTV then
+		icon.UpdateTimer = time
 		local CndtCheck = icon.CndtCheck if CndtCheck and CndtCheck() then return end
 
-		local NameArray, NameNameArray, NameDictionary, Filter, Filterh = icon.NameArray, icon.NameNameArray, icon.NameDictionary, icon.Filter, icon.Filterh
-
-		for _, unit in ipairs(icon.Units) do
+		local Units, NameArray, NameNameArray, NameDictionary, Filter, Filterh = icon.Units, icon.NameArray, icon.NameNameArray, icon.NameDictionary, icon.Filter, icon.Filterh
+		local NAL = #NameArray
+		
+		for u = 1, #Units do
+			local unit = Units[u]
 			if UnitExists(unit) then
 				local buffName, _, iconTexture, count, dispelType, duration, expirationTime, _, _, _, id
-				if #NameArray > EFF_THR then
+				if NAL > EFF_THR then
 					for z=1, 60 do --60 because i can and it breaks when there are no more buffs anyway
 						buffName, _, iconTexture, count, dispelType, duration, expirationTime, _, _, _, id = UnitAura(unit, z, Filter)
 						if not buffName
@@ -98,7 +97,8 @@ local function Buff_OnUpdate(icon)
 						end
 					end
 				else
-					for i, iName in ipairs(NameArray) do
+					for i = 1, NAL do
+						local iName = NameArray[i]
 						if DS[iName] then --Enrage wont be handled here because it will always have more auras than the efficiency threshold (max 40, there are about 120 enrages i think)
 							for z=1, 60 do
 								buffName, _, iconTexture, count, dispelType, duration, expirationTime, _, _, _, id = UnitAura(unit, z, Filter)
@@ -152,7 +152,7 @@ local function Buff_OnUpdate(icon)
 						return
 					end
 
-					local d = expirationTime - CUR_TIME
+					local d = expirationTime - time
 					if expirationTime ~= 0 and ((icon.DurationMinEnabled and icon.DurationMin > d) or (icon.DurationMaxEnabled and d > icon.DurationMax)) then
 						icon:SetAlpha(0)
 						return
@@ -161,7 +161,7 @@ local function Buff_OnUpdate(icon)
 					icon:SetStack(count)
 					icon:SetTexture(iconTexture)
 					icon:SetAlpha(Alpha)
-					if icon.UnAlpha ~= 0 then -- Alpha ~= 0 and  (not needed because it wou ld have returned earlier)
+					if icon.UnAlpha ~= 0 then
 						icon:SetVertexColor(pr)
 					else
 						icon:SetVertexColor(1)
@@ -212,7 +212,6 @@ local function Buff_OnUpdate(icon)
 end
 
 
-
 function Type:Setup(icon, groupID, iconID)
 	icon.NameFirst = TMW:GetSpellNames(icon, icon.Name, 1)
 	icon.NameName = TMW:GetSpellNames(icon, icon.Name, 1, 1)
@@ -239,7 +238,7 @@ function Type:Setup(icon, groupID, iconID)
 	end
 
 	icon:SetScript("OnUpdate", Buff_OnUpdate)
-	icon:OnUpdate()
+	icon:OnUpdate(GetTime() + 1)
 end
 
 

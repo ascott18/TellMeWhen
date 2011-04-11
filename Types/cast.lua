@@ -11,11 +11,12 @@ local TMW = TMW
 if not TMW then return end
 local L = TMW.L
 
-local db, CUR_TIME, UPD_INTV, pr, ab
+local db, time, UPD_INTV, pr, ab
 local ipairs, strlower =
 	  ipairs, strlower
 local UnitCastingInfo, UnitChannelInfo, UnitExists, UnitGUID =
 	  UnitCastingInfo, UnitChannelInfo, UnitExists, UnitGUID
+local print = TMW.print
 
 local clientVersion = select(4, GetBuildInfo())
 
@@ -43,21 +44,17 @@ local Type = TMW:RegisterIconType("cast", RelevantSettings)
 Type.name = L["ICONMENU_CAST"]
 LibStub("AceEvent-3.0"):Embed(Type)
 
-Type:SetScript("OnUpdate", function()
-	CUR_TIME = TMW.CUR_TIME
-end)
 
 function Type:Update()
-	CUR_TIME = TMW.CUR_TIME
 	db = TMW.db
 	UPD_INTV = db.profile.Interval
 	pr = db.profile.PRESENTColor
 	ab = db.profile.ABSENTColor
 end
 
-local function Cast_OnUpdate(icon)
-	if icon.UpdateTimer <= CUR_TIME - UPD_INTV then
-		icon.UpdateTimer = CUR_TIME
+local function Cast_OnUpdate(icon, time)
+	if icon.UpdateTimer <= time - UPD_INTV then
+		icon.UpdateTimer = time
 		local CndtCheck = icon.CndtCheck if CndtCheck and CndtCheck() then return end
 		
 		local NameFirst, NameNameDictionary, Interruptible = icon.NameFirst, icon.NameNameDictionary, icon.Interruptible
@@ -77,7 +74,7 @@ local function Cast_OnUpdate(icon)
 						return
 					end
 					
-					local d = endTime - CUR_TIME
+					local d = endTime - time
 					if (icon.DurationMinEnabled and icon.DurationMin > d) or (icon.DurationMaxEnabled and d > icon.DurationMax) then
 						icon:SetAlpha(0)
 						return
@@ -146,7 +143,7 @@ function Type:Setup(icon, groupID, iconID)
 
 	icon.ShowPBar = false
 	icon:SetScript("OnUpdate", Cast_OnUpdate)
-	icon:OnUpdate()
+	icon:OnUpdate(GetTime() + 1)
 end
 
 

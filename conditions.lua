@@ -31,7 +31,7 @@ end)
 local test
 test = function()
 	if true then return end -- toggle this on and off here
-	_G.print("RUNNING CONDITION TESTS")
+	_G.print("|cffffffffRUNNING CONDITION TESTS")
 	test = nil
 	local icon = CreateFrame("Button", "TESTICON")
 	Env.TESTICON = icon
@@ -248,6 +248,7 @@ Env = {
 	NumPartyMembers = 0,
 	NumRaidMembers = 0,
 	print = TMW.print,
+	time = GetTime()
 } CNDT.Env = Env
 
 CNDT.Operators  =  {
@@ -752,7 +753,7 @@ CNDT.Types = {
 		end,
 		funcstr = function(c)
 			if c.Icon == "" then return [[true]] end
-			local str = [[(c.Icon and c.Icon.__shown and c.Icon.group.__shown and c.Icon.OnUpdate and not c.Icon:OnUpdate())]]
+			local str = [[(c.Icon and c.Icon.__shown and c.Icon.group.__shown and c.Icon.OnUpdate and not c.Icon:OnUpdate(time))]]
 			if c.Level == 0 then
 				str = str .. [[and c.Icon.FakeAlpha > 0]]
 			else

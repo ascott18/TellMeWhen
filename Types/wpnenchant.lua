@@ -11,11 +11,12 @@ local TMW = TMW
 if not TMW then return end
 local L = TMW.L
 
-local db, CUR_TIME, UPD_INTV, WpnEnchDurs, ClockGCD, pr, ab, rc, mc
+local db, time, UPD_INTV, WpnEnchDurs, ClockGCD, pr, ab, rc, mc
 local _G, strlower, strmatch, strtrim, select, floor =
 	  _G, strlower, strmatch, strtrim, select, floor
 local GetInventoryItemTexture, GetInventorySlotInfo, GetWeaponEnchantInfo =
 	  GetInventoryItemTexture, GetInventorySlotInfo, GetWeaponEnchantInfo
+local print = TMW.print
 
 local RelevantSettings = {
 	Name = true,
@@ -65,12 +66,8 @@ local function GetWeaponEnchantName(slot)
 	Parser:Hide()
 end
 
-Type:SetScript("OnUpdate", function()
-	CUR_TIME = TMW.CUR_TIME
-end)
 
 function Type:Update()
-	CUR_TIME = TMW.CUR_TIME
 	db = TMW.db
 	UPD_INTV = db.profile.Interval
 	ClockGCD = db.profile.ClockGCD
@@ -88,25 +85,10 @@ local SlotsToNumbers = {
 }
 
 
-local function WpnEnchant_OnEvent(icon, event, unit)
-	if unit == "player" then
-		icon:SetTexture(GetInventoryItemTexture("player", icon.Slot) or "Interface\\Icons\\INV_Misc_QuestionMark")
 
-		local EnchantName = GetWeaponEnchantName(icon.Slot)
-		icon.EnchantName = EnchantName
-		if icon.Name == "" then
-			icon.CorrectEnchant = true
-		else
-			if EnchantName then
-				icon.CorrectEnchant = icon.NameDictionary[strlower(EnchantName)]
-			end
-		end
-	end
-end
-
-local function WpnEnchant_OnUpdate(icon)
-	if icon.UpdateTimer <= CUR_TIME - UPD_INTV then
-		icon.UpdateTimer = CUR_TIME
+local function WpnEnchant_OnUpdate(icon, time)
+	if icon.UpdateTimer <= time - UPD_INTV then
+		icon.UpdateTimer = time
 		if icon.CndtCheck and icon.CndtCheck() then return end
 		local has, expiration = select(icon.SelectIndex, GetWeaponEnchantInfo())
 		if has and icon.CorrectEnchant then
@@ -134,7 +116,7 @@ local function WpnEnchant_OnUpdate(icon)
 			else
 				duration = expiration
 			end
-			local start = floor(CUR_TIME - duration + expiration)
+			local start = floor(time - duration + expiration)
 
 			if icon.UnAlpha ~= 0 then
 				icon:SetVertexColor(pr)
@@ -167,6 +149,34 @@ local function WpnEnchant_OnUpdate(icon)
 	end
 end
 
+
+local function WpnEnchant_OnEvent(icon, event, unit)
+	if unit == "player" then
+		local wpnTexture = GetInventoryItemTexture("player", icon.Slot)
+		icon:SetTexture(wpnTexture or "Interface\\Icons\\INV_Misc_QuestionMark")
+		print(icon, wpnTexture,icon.HideUnequipped)
+		if not wpnTexture and icon.HideUnequipped then
+			print(icon, "HIDE")
+			icon:SetAlpha(0)
+			icon.FakeAlpha = 0
+			if icon.OnUpdate then
+				icon:SetScript("OnUpdate", nil)
+			end
+		elseif not icon.OnUpdate then
+			icon:SetScript("OnUpdate", WpnEnchant_OnUpdate)
+		end
+		local EnchantName = GetWeaponEnchantName(icon.Slot)
+		icon.EnchantName = EnchantName
+		if icon.Name == "" then
+			icon.CorrectEnchant = true
+		else
+			if EnchantName then
+				icon.CorrectEnchant = icon.NameDictionary[strlower(EnchantName)]
+			end
+		end
+	end
+end
+
 Type.AllowNoName = true
 function Type:Setup(icon, groupID, iconID)
 	icon.NameDictionary = TMW:GetSpellNames(icon, icon.Name, nil, nil, 1)
@@ -179,11 +189,11 @@ function Type:Setup(icon, groupID, iconID)
 	
 	icon:SetReverse(true)
 
+	icon:SetScript("OnUpdate", WpnEnchant_OnUpdate)
+	icon:OnUpdate(GetTime() + 1)
+	
 	icon:RegisterEvent("UNIT_INVENTORY_CHANGED")
 	icon:SetScript("OnEvent", WpnEnchant_OnEvent)
 	icon:OnEvent(nil, "player")
-
-	icon:SetScript("OnUpdate", WpnEnchant_OnUpdate)
-	icon:OnUpdate()
 end
 

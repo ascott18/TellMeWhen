@@ -11,9 +11,7 @@ local TMW = TMW
 if not TMW then return end
 local L = TMW.L
 
-local db, CUR_TIME, UPD_INTV, ClockGCD, rc, mc
-local ipairs =
-	  ipairs
+local db, time, UPD_INTV, ClockGCD, rc, mc
 local GetSpellCooldown, IsSpellInRange, IsUsableSpell, GetSpellTexture =
 	  GetSpellCooldown, IsSpellInRange, IsUsableSpell, GetSpellTexture
 local GetItemCooldown, IsItemInRange, IsEquippedItem, GetItemIcon =
@@ -21,6 +19,7 @@ local GetItemCooldown, IsItemInRange, IsEquippedItem, GetItemIcon =
 local GetActionCooldown, IsActionInRange, IsUsableAction, GetActionTexture, GetActionInfo =
 	  GetActionCooldown, IsActionInRange, IsUsableAction, GetActionTexture, GetActionInfo
 local OnGCD = TMW.OnGCD
+local print = TMW.print
 local _, pclass = UnitClass("Player")
 
 local RelevantSettings = {
@@ -52,12 +51,8 @@ local RelevantSettings = {
 local Type = TMW:RegisterIconType("cooldown", RelevantSettings)
 Type.name = L["ICONMENU_COOLDOWN"]
 
-Type:SetScript("OnUpdate", function()
-	CUR_TIME = TMW.CUR_TIME
-end)
 
 function Type:Update()
-	CUR_TIME = TMW.CUR_TIME
 	db = TMW.db
 	UPD_INTV = db.profile.Interval
 	ClockGCD = db.profile.ClockGCD
@@ -67,14 +62,16 @@ end
 
 
 
-local function SpellCooldown_OnUpdate(icon)
-	if icon.UpdateTimer <= CUR_TIME - UPD_INTV then
-		icon.UpdateTimer = CUR_TIME
+local function SpellCooldown_OnUpdate(icon, time)
+	if icon.UpdateTimer <= time - UPD_INTV then
+		icon.UpdateTimer = time
 		local CndtCheck = icon.CndtCheck if CndtCheck and CndtCheck() then return end
 
 		local n, inrange, nomana, start, duration, isGCD = 1
-		local IgnoreRunes, RangeCheck, ManaCheck, NameNameArray = icon.IgnoreRunes, icon.RangeCheck, icon.ManaCheck, icon.NameNameArray
-		for i, iName in ipairs(icon.NameArray) do
+		local IgnoreRunes, RangeCheck, ManaCheck, NameArray, NameNameArray = icon.IgnoreRunes, icon.RangeCheck, icon.ManaCheck, icon.NameArray, icon.NameNameArray
+		
+		for i = 1, #NameArray do
+			local iName = NameArray[i]
 			n = i
 			start, duration = GetSpellCooldown(iName)
 			if duration then
@@ -146,7 +143,7 @@ local function SpellCooldown_OnUpdate(icon)
 			isGCD = OnGCD(duration)
 		end
 		if duration then
-			local d = duration - (CUR_TIME - start)
+			local d = duration - (time - start)
 			if (icon.DurationMinEnabled and icon.DurationMin > d) or (icon.DurationMaxEnabled and d > icon.DurationMax) then
 				icon:SetAlpha(0)
 				return
@@ -198,9 +195,9 @@ local function ItemCooldown_OnEvent(icon)
 	icon.DoUpdateIDs = true
 end
 
-local function ItemCooldown_OnUpdate(icon)
-	if icon.UpdateTimer <= CUR_TIME - UPD_INTV then
-		icon.UpdateTimer = CUR_TIME
+local function ItemCooldown_OnUpdate(icon, time)
+	if icon.UpdateTimer <= time - UPD_INTV then
+		icon.UpdateTimer = time
 		if icon.DoUpdateIDs then
 			local Name = icon.Name
 			icon.NameFirst = TMW:GetItemIDs(icon, Name, 1)
@@ -211,8 +208,9 @@ local function ItemCooldown_OnUpdate(icon)
 		local CndtCheck = icon.CndtCheck if CndtCheck and CndtCheck() then return end
 
 		local n, inrange, equipped, start, duration, isGCD = 1
-		local RangeCheck, OnlyEquipped, OnlyInBags = icon.RangeCheck, icon.OnlyEquipped, icon.OnlyInBags
-		for i, iName in ipairs(icon.NameArray) do
+		local RangeCheck, OnlyEquipped, OnlyInBags, NameArray = icon.RangeCheck, icon.OnlyEquipped, icon.OnlyInBags, icon.NameArray
+		for i = 1, #NameArray do
+			local iName = NameArray[i]
 			n = i
 			start, duration = GetItemCooldown(iName)
 			if duration then
@@ -261,13 +259,9 @@ local function ItemCooldown_OnUpdate(icon)
 		
 		local NameFirst2
 		if OnlyInBags then
-			for i, iName in ipairs(icon.NameArray) do
-				if OnlyEquipped then
-					if IsEquippedItem(iName) then
-						NameFirst2 = iName
-						break
-					end
-				elseif GetItemCount(iName) > 0 then
+			for i = 1, #NameArray do
+				local iName = NameArray[i]
+				if (OnlyEquipped and IsEquippedItem(iName)) or (GetItemCount(iName) > 0) then
 					NameFirst2 = iName
 					break
 				end				
@@ -289,7 +283,7 @@ local function ItemCooldown_OnUpdate(icon)
 		end
 		if duration then
 
-			local d = duration - (CUR_TIME - start)
+			local d = duration - (time - start)
 			if (icon.DurationMinEnabled and icon.DurationMin > d) or (icon.DurationMaxEnabled and d > icon.DurationMax) then
 				icon:SetAlpha(0)
 				return
@@ -346,15 +340,15 @@ local function MultiStateCD_OnEvent(icon)
 
 end
 
-local function MultiStateCD_OnUpdate(icon)
-	if icon.UpdateTimer <= CUR_TIME - UPD_INTV then
-		icon.UpdateTimer = CUR_TIME
+local function MultiStateCD_OnUpdate(icon, time)
+	if icon.UpdateTimer <= time - UPD_INTV then
+		icon.UpdateTimer = time
 		local Slot = icon.Slot
 		local start, duration = GetActionCooldown(Slot)
 		if duration then
 
 			local CndtCheck = icon.CndtCheck if CndtCheck and CndtCheck() then return end
-			local d = duration - (CUR_TIME - start)
+			local d = duration - (time - start)
 			if (icon.DurationMinEnabled and icon.DurationMin > d) or (icon.DurationMaxEnabled and d > icon.DurationMax) then
 				icon:SetAlpha(0)
 				return
@@ -422,7 +416,7 @@ function Type:Setup(icon, groupID, iconID)
 			icon:SetTexture("Interface\\Icons\\INV_Misc_QuestionMark")
 		end
 		icon:SetScript("OnUpdate", SpellCooldown_OnUpdate)
-		icon:OnUpdate()
+		icon:OnUpdate(GetTime() + 1)
 	end
 	if icon.CooldownType == "item" then
 		icon.NameFirst = TMW:GetItemIDs(icon, icon.Name, 1)
@@ -450,7 +444,7 @@ function Type:Setup(icon, groupID, iconID)
 		end
 
 		icon:SetScript("OnUpdate", ItemCooldown_OnUpdate)
-		icon:OnUpdate()
+		icon:OnUpdate(GetTime() + 1)
 	end
 	if icon.CooldownType == "multistate" then
 		icon.NameFirst = TMW:GetSpellNames(icon, icon.Name, 1)
@@ -476,7 +470,7 @@ function Type:Setup(icon, groupID, iconID)
 		icon:SetScript("OnEvent", MultiStateCD_OnEvent)
 
 		icon:SetScript("OnUpdate", MultiStateCD_OnUpdate)
-		icon:OnUpdate()
+		icon:OnUpdate(GetTime() + 1)
 	end
 end
 

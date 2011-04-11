@@ -15,8 +15,6 @@ L["RESIZE"] = "Resize"
 L["RESIZE_TOOLTIP"] = "Click and drag to change size"
 
 L["HPSSWARN"] = "Warning! Any icon conditions that you had set that checked for holy power or soul shards may be messed up! Check them to prevent later confusion!"
-L["ERRSPAMWARN"] = " disabled to prevent massive error spam. Type /tmw and change the name of the icon to a spellID to fix this."
-L["CONDITIONORMETA_INVALIDATED"] = "Warning! The following icons were checking icons in the group that you just deleted. You may wish to modify their settings to restore functionality."
 L["CONDITIONORMETA_CHECKINGINVALID"] = "Warning! Group %d, Icon %d is checking an invalid icon (Group %d, Icon %d)"
 
 -- -------------
@@ -26,7 +24,6 @@ L["CONDITIONORMETA_CHECKINGINVALID"] = "Warning! Group %d, Icon %d is checking a
 L["ICONMENU_CHOOSENAME"] = "Choose name/ID"
 L["ICONMENU_ENABLE"] = "Enable icon"
 L["CHOOSENAME_EQUIVS_TOOLTIP"] = "You can select a predefined set of buffs/debuffs, spell casts, or dispel types (Magic, Curse, etc.) from this menu to insert into the editbox."
-L["CHOOSENAME_DIALOG_PRESETS"] = "Presets"
 L["CHOOSENAME_DIALOG_DDDEFAULT"] = "Predefined Spell Sets/Dispel Types"
 L["CHOOSENAME_DIALOG"] = [=[Enter the Name or ID of what you want this icon to monitor. You can add multiple things (except for multi-state cooldowns) by seperating them with semicolons (;).
 
@@ -72,14 +69,7 @@ Icons that have fake hidden enabled will still be shown if they would otherwise 
 L["ICONMENU_COOLDOWNTYPE"] = "Cooldown type"
 L["ICONMENU_SPELL"] = "Spell or ability"
 L["ICONMENU_ITEM"] = "Item"
---[[
-L["ICONMENU_UCD_INSTANT"] = "Instant cast/channeled"
-L["ICONMENU_UCD_INSTANT_DESC"] = "Select this option if the cooldown is a spell with no cast time or a channeled spell."
-L["ICONMENU_UCD_AURA"] = "Cast time and buff/debuff"
-L["ICONMENU_UCD_AURA_DESC"] = "Select this option if the cooldown is a spell with a cast time that applies a unique buff/debuff when it is cast (e.g Howl of Terror)"
-L["ICONMENU_UCD_DAMAGE"] = "Damage/heal"
-L["ICONMENU_UCD_DAMAGE_DESC"] = "Select this option if the spell has a cast time, but does not apply a buff/debuff (e.g. Chaos Bolt)"
-]]
+
 L["ICONMENU_SHOWWHEN"] = "Show icon when"
 L["ICONMENU_USABLE"] = "Usable"
 L["ICONMENU_UNUSABLE"] = "Unusable"
@@ -97,7 +87,7 @@ L["ICONMENU_CASTS"] = "Spell Casts"
 
 L["ICONMENU_UNITSTOWATCH"] = "Units to watch"
 L["ICONMENU_UNITS"] = "Units"
-L["ICONMENU_UNIT_DESC"] = "Enter the units to watch in this box. Units can be inserted from the dropdown to the right, or advanced users can insert their own units. Separate each unit with a semicolon (;). Standard units (player, target, mouseover, etc; the same units that are used for macros) may be used, or friendly player names (Cybeloras, Nephthys, etc.)"
+L["ICONMENU_UNIT_DESC"] = "Enter the units to watch in this box. Units can be inserted from the dropdown to the right, or advanced users can insert their own units. Separate each unit with a semicolon (;). Standard units (player, target, mouseover, etc; the same units that are used for macros) may be used, or friendly player names if those players are in your group/raid (Cybeloras, Nephthys, etc.)"
 L["DROPDOWN_UNIT_DESC"] = "You can select units from this menu to insert into the editbox. Units that end with '|cFFFF0000#|r' require that the '|cFFFF0000#|r' be replaced with a number corresponding to the appropriate unit, or a range of numbers like 1-10. E.g. change 'raid|cFFFF0000#|r' to 'raid25' to track the 25th raid member, or change it to 'raid1-25' to track the first 25 raid members."
 L["ICONMENU_TARGETTARGET"] = "Target's target"
 L["ICONMENU_FOCUSTARGET"] = "Focus' target"
@@ -114,6 +104,7 @@ L["ICONMENU_ALWAYS"] = "Always"
 
 L["ICONMENU_CASTSHOWWHEN"] = "Show when a cast is"
 L["ICONMENU_ONLYINTERRUPTIBLE"] = "Only Interruptible"
+L["ICONMENU_ONLYINTERRUPTIBLE_DESC"] = "Check this box to only show spell casts that are interruptible"
 
 L["ICONMENU_ONLYMINE"] = "Only show mine"
 L["ICONMENU_SHOWTIMER"] = "Show timer"
@@ -180,20 +171,6 @@ L["METAPANEL_DOWN"] = "Move down"
 L["METAPANEL_REMOVE"] = "Remove this icon"
 L["METAPANEL_INSERT"] = "Insert an icon"
 
---[[L["ICONMENU_SetAlpha"] = "Set Alpha Levels"
-L["ICONMENU_SetAlphaMOD"] = "Set Alpha Levels |cFFFF5959(Modified)|r"
-L["ICONALPHAPANEL_ALPHA"] = "Usable/Present"
-L["ICONALPHAPANEL_ALPHA_DESC"] = "Slide to set the alpha level for the icon when the ability is usable/present"
-L["ICONALPHAPANEL_UNALPHA"] = "Unusable/Absent"
-L["ICONALPHAPANEL_UNALPHA_DESC"] = "Slide to set the alpha level for the icon when ability is unusable/absent"
-
-L["ICONALPHAPANEL_DURATIONALPHA"] = "Incorrect Duration"
-L["ICONALPHAPANEL_DURATIONALPHA_DESC"] = "Slide to set the alpha level for the icon when its duration requirements fail."
-L["ICONALPHAPANEL_STACKALPHA"] = "Incorrect Stacks"
-L["ICONALPHAPANEL_STACKALPHA_DESC"] = "Slide to set the alpha level for the icon when its stack requirements fail."
-
-L["ICONALPHAPANEL_CNDTALPHA"] = "Failed Condition"
-L["ICONALPHAPANEL_CNDTALPHA_DESC"] = "Slide to set the alpha level for the icon when its conditions fail."]]
 L["ICONALPHAPANEL_FAKEHIDDEN"] = "Fake Hidden"
 L["ICONALPHAPANEL_FAKEHIDDEN_DESC"] = "Causes the icon to be hidden all the time, but still enabled in order to allow the conditions of other icons to check this icon, or for meta icons to include this icon."
 L["ICONMENU_WPNENCHANTTYPE"] = "Weapon slot to monitor"
@@ -236,7 +213,6 @@ L["UIPANEL_ALLRESET"] = "Reset all"
 L["UIPANEL_TOOLTIP_ALLRESET"] = "Reset DATA and POSITION of all icons and groups, as well as any other settings."
 L["UIPANEL_LOCKUNLOCK"] = "Lock/Unlock AddOn"
 L["UIPANEL_BARTEXTURE"] = "Bar Texture"
-L["UIPANEL_NOCOUNT"] = "Toggle Timer Text"
 L["UIPANEL_NOCOUNT_DESC"] = "Enables/disables the text that displays the cooldown on the icon. It will only be shown if the icon's timer is enabled, this option is enabled, and OMNICC IS INSTALLED"
 L["UIPANEL_BARIGNOREGCD"] = "Bars Ignore GCD"
 L["UIPANEL_BARIGNOREGCD_DESC"] = "If checked, cooldown bars will not change values if the cooldown triggered is a global cooldown"
@@ -397,22 +373,14 @@ L["CONDITIONPANEL_REMOVE"] = "Remove this condition"
 -- ----------
 
 L["GROUPICON"] = "Group: %s, Icon: %d"
-L["COPYPANEL_GROUP"] = "Group: "
-L["GROUP"] = "Group "
-L["COPYICON"] = "Icon "
-L["COPYPANEL_ICON"] = "Icon: "
-L["FROM"] = "From:"
-L["TO"] = "To:"
-L["COPY"] = "Copy"
-L["ENABLED"] = "Enabled"
+L["fGROUP"] = "Group %d"
+L["fICON"] = "Icon %d"
 L["DISABLED"] = "Disabled"
 L["IMPORTCOPY"] = "Copy/Import"
 L["COPYPOS"] = "Copy position/scale"
 L["COPYALL"] = "Copy entire group"
 
 L["GROUPADDONSETTINGS"] = "Group settings"
-L["ALPHADURATION"] = "Alpha/Duration"
-L["STACKS"] = "/Stacks"
 L["CONDITIONS"] = "Conditions"
 L["MAIN"] = "Main"
 L["RECEIVED"] = "Received icons"
@@ -426,7 +394,6 @@ L["NEWVERSION"] = "A new version of TellMeWhen is available (%s)"
 L["CACHING"] = "TellMeWhen is caching and filtering all spells in the game. This only needs to be done once per WoW patch. You can speed up or slow down the process using the slider below."
 L["CACHINGSPEED"] = "Spells per frame:"
 L["SUGGESTIONS"] = "Suggestions:"
-
 L["SUG_TOOLTIPTITLE"] = [[As you type, TellMeWhen will look through its cache and determine the spells that you were mosty likely looking for.
 
 Spells are categorized and colored as per the list below. Note that the categories that begin with the word "Known" will not have spells put into them until they have been seen as you play or log onto different classes.
@@ -444,7 +411,6 @@ L["SUG_CLASSSPELLS"] = "Known PC/pet spells"
 L["SUG_NPCAURAS"] = "Known NPC buffs/debuffs"
 L["SUG_PLAYERAURAS"] = "Known PC/pet buffs/debuffs"
 L["SUG_MISC"] = "Miscellaneous"
-
 
 L["TOPLEFT"] = "Top Left"
 L["TOP"] = "Top"

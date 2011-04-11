@@ -11,11 +11,12 @@ local TMW = TMW
 if not TMW then return end
 local L = TMW.L
 
-local db, CUR_TIME, UPD_INTV, ClockGCD, pr, ab, rc, mc
+local db, time, UPD_INTV, ClockGCD, pr, ab, rc, mc
 local ipairs, strlower, type =
 	  ipairs, strlower, type
 local UnitGUID, UnitExists, GetSpellTexture =
 	  UnitGUID, UnitExists, GetSpellTexture
+local print = TMW.print
 
 local clientVersion = select(4, GetBuildInfo())
 
@@ -44,12 +45,8 @@ LibStub("AceEvent-3.0"):Embed(Type)
 Type.name = L["ICONMENU_UNITCOOLDOWN"]
 Type.desc = format(L["ICONMENU_UNITCOOLDOWN_DESC"], GetSpellInfo(42292))
 
-Type:SetScript("OnUpdate", function()
-	CUR_TIME = TMW.CUR_TIME
-end)
 
 function Type:Update()
-	CUR_TIME = TMW.CUR_TIME
 	db = TMW.db
 	UPD_INTV = db.profile.Interval
 	ClockGCD = db.profile.ClockGCD
@@ -70,9 +67,9 @@ if clientVersion >= 40100 then -- COMBAT_LOG_EVENT_UNFILTERED
 		if p == "SPELL_CAST_SUCCESS" then
 			local c = Cooldowns[g]
 			c[strlower(n)] = i
-			c[i] = CUR_TIME
+			c[i] = time
 		elseif p == "SPELL_AURA_APPLIED" or p == "SPELL_AURA_REFRESH" or p == "SPELL_DAMAGE" or p == "SPELL_HEAL" or p == "SPELL_MISSED" then
-			local t = CUR_TIME
+			local t = time
 			local c = Cooldowns[g]
 			local ci = c[i]
 			if (ci and ci + 1.8 < t) or not ci then 	-- if this event was less than 1.8 seconds after a SPELL_CAST_SUCCESS or a UNIT_SPELLCAST_SUCCEEDED then ignore it (this is just a safety window for spell travel time so that if we found the real cast start, we dont overwrite it)
@@ -86,9 +83,9 @@ else
 		if p == "SPELL_CAST_SUCCESS" then
 			local c = Cooldowns[g]
 			c[strlower(n)] = i
-			c[i] = CUR_TIME
+			c[i] = time
 		elseif p == "SPELL_AURA_APPLIED" or p == "SPELL_AURA_REFRESH" or p == "SPELL_DAMAGE" or p == "SPELL_HEAL" or p == "SPELL_MISSED" then
-			local t = CUR_TIME
+			local t = time
 			local c = Cooldowns[g]
 			local ci = c[i]
 			if (ci and ci + 1.8 < t) or not ci then 	-- if this event was less than 1.8 seconds after a SPELL_CAST_SUCCESS or a UNIT_SPELLCAST_SUCCEEDED then ignore it (this is just a safety window for spell travel time so that if we found the real cast start, we dont overwrite it)
@@ -102,37 +99,35 @@ end
 function Type:UNIT_SPELLCAST_SUCCEEDED(e, u, n, _, _, i)--Unit, spellName, spellId
 	local c = Cooldowns[UnitGUID(u)]
 	c[strlower(n)] = i
-	c[i] = CUR_TIME
+	c[i] = time
 end
 
-local function UnitCooldown_OnUpdate(icon)
-	if icon.UpdateTimer <= CUR_TIME - UPD_INTV then
-		icon.UpdateTimer = CUR_TIME
+local function UnitCooldown_OnUpdate(icon, time)
+	if icon.UpdateTimer <= time - UPD_INTV then
+		icon.UpdateTimer = time
 		local CndtCheck = icon.CndtCheck if CndtCheck and CndtCheck() then return end
 		local unstart, unname
-		local Alpha, ICDDuration = icon.Alpha, icon.ICDDuration
-
-		for _, unit in ipairs(icon.Units) do
+		local Alpha, ICDDuration, Units, NameArray, OnlySeen = icon.Alpha, icon.ICDDuration, icon.Units, icon.NameArray, icon.OnlySeen
+		local NAL = #NameArray
+		
+		for u = 1, #Units do
+			local unit = Units[u]
 			if UnitExists(unit) then
 				local cooldowns = Cooldowns[UnitGUID(unit)]
-				for i, iName in ipairs(icon.NameArray) do
-					local start
+				for i = 1, NAL do
+					local iName = NameArray[i]
 					if type(iName) == "string" then
 						iName = cooldowns[strlower(iName)] or iName-- spell name keys have values that are the spellid of the name, we need the spellid for the texture (thats why i did it like this)
-						if icon.OnlySeen then
-							start = cooldowns[iName]
-						else
-							start = cooldowns[iName] or 0
-						end
+					end
+					
+					local start
+					if OnlySeen then
+						start = cooldowns[iName]
 					else
-						if icon.OnlySeen then
-							start = cooldowns[iName]
-						else
-							start = cooldowns[iName] or 0
-						end
+						start = cooldowns[iName] or 0
 					end
 					if start then
-						if (CUR_TIME - start) > ICDDuration then -- off cooldown
+						if (time - start) > ICDDuration then -- off cooldown
 
 							icon:SetCooldown(0, 0)
 							if icon.ShowCBar then
@@ -155,8 +150,10 @@ local function UnitCooldown_OnUpdate(icon)
 				if Alpha == 0 and unstart then break end -- we found something on cooldown and we dont care about things that are on cooldown (break unit loop)
 			end
 		end
-		if icon.UnAlpha ~= 0 and unstart then
-			local d = ICDDuration - (CUR_TIME - unstart)
+		
+		local UnAlpha = icon.UnAlpha
+		if UnAlpha ~= 0 and unstart then
+			local d = ICDDuration - (time - unstart)
 			if (icon.DurationMinEnabled and icon.DurationMin > d) or (icon.DurationMaxEnabled and d > icon.DurationMax) then
 				icon:SetAlpha(0)
 				return
@@ -179,7 +176,7 @@ local function UnitCooldown_OnUpdate(icon)
 				icon:SetTexture(t)
 			end
 
-			icon:SetAlpha(icon.UnAlpha)
+			icon:SetAlpha(UnAlpha)
 			return
 		end
 		icon:SetAlpha(0)
@@ -204,5 +201,5 @@ function Type:Setup(icon, groupID, iconID)
 	end
 
 	icon:SetScript("OnUpdate", UnitCooldown_OnUpdate)
-	icon:OnUpdate()
+	icon:OnUpdate(GetTime() + 1)
 end

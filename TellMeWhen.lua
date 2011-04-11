@@ -35,9 +35,9 @@ local LBF = LibStub("LibButtonFacade", true)
 local AceDB = LibStub("AceDB-3.0")
 local LSM = LibStub("LibSharedMedia-3.0")
 
-TELLMEWHEN_VERSION = "4.0.1.2"
+TELLMEWHEN_VERSION = "4.0.1.3"
 TELLMEWHEN_VERSION_MINOR = ""
-TELLMEWHEN_VERSIONNUMBER = 40118
+TELLMEWHEN_VERSIONNUMBER = 40119
 TELLMEWHEN_MAXGROUPS = 10 	--this is a default, used by SetTheory (addon), so dont rename
 TELLMEWHEN_MAXROWS = 20
 local UPD_INTV = 0.05	--this is a default, local because i use it in onupdate functions
@@ -61,7 +61,7 @@ local _G = _G
 local _, pclass = UnitClass("Player")
 local st, co, talenthandler, BarGCD, ClockGCD, Locked, CNDT, doUpdateIcons
 local GCD, NumShapeshiftForms, UpdateTimer = 0, 0, 0
-local CUR_TIME = GetTime(); TMW.CUR_TIME = CUR_TIME
+local time = GetTime()
 local updateicons, unitsToChange = {}, {}
 local clientVersion = select(4, GetBuildInfo())
 
@@ -444,14 +444,8 @@ TMW.BE = {	--Much of these are thanks to Malazee @ US-Dalaran's chart: http://fo
 		Tier11Interrupts = "83703;86166;86167;86168;_82752;82636;83070;92454;92455;92456;79710;77896;77569;80734",
 	},
 	unlisted = {
-		-- enrages were extracted from http://db.mmo-champion.com/spells/?dispel_type=9  (hint: view the page source) (there are a few that arent spells anymore, make sure and delete those (look at the tooltip on the name editbox in the editor when you hold down a mod key))
+		-- enrages were extracted using the script in the /Scripts folder
 		Enraged = "24689;18499;29131;59465;39575;77238;52262;12292;54508;23257;66092;57733;58942;40076;8599;15061;15716;18501;19451;19812;22428;23128;23342;25503;26041;26051;28371;30485;31540;31915;32714;33958;34670;37605;37648;37975;38046;38166;38664;39031;41254;41447;42705;42745;43139;47399;48138;48142;48193;50420;51513;52470;54427;55285;56646;59697;59707;59828;60075;61369;63227;68541;70371;72143;72146;72147;72148;75998;76100;76862;78722;78943;80084;80467;86736;95436;95459;5229;12880;57514;57518;14201;57516;57519;14202;57520;51170;4146;76816;90872;82033;48702;52537;49029;67233;54781;56729;53361;79420;66759;67657;67658;67659;40601;60177;43292;90045;92946;52071;82759;60430;81772;48391;80158;54475;56769;63147;62071;52610;41364;81021;81022;81016;81017;34392;55462;50636;72203;49016;69052;43664;59694;91668;52461;54356;76691;81706;52309;29340;76487",
-		raid = "raid1;raid2;raid3;raid4;raid5;raid6;raid7;raid8;raid9;raid10;raid11;raid12;raid13;raid14;raid15;raid16;raid17;raid18;raid19;raid20;raid21;raid22;raid23;raid24;raid25",
-		party = "party1;party2;party3;party4",
-		arena = "arena1;arena2;arena3;arena4;arena5",
-		boss = "boss1;boss;boss3;boss4",
-		maintank = "maintank1;maintank2;maintank3;maintank4;maintank5",
-		mainassist = "mainassist1;mainassist2;mainassist3;mainassist4;mainassist5",
 	},
 }
 
@@ -709,15 +703,15 @@ function TMW:OnCommReceived(prefix, text, channel, who)
 end
 
 function TMW:OnUpdate()
-	CUR_TIME = GetTime()
-	TMW.CUR_TIME = CUR_TIME
-	if UpdateTimer <= CUR_TIME - UPD_INTV then
-		UpdateTimer = CUR_TIME
+	time = GetTime()
+	if UpdateTimer <= time - UPD_INTV then
+		CNDT.time = time
+		UpdateTimer = time
 		_, GCD=GetSpellCooldown(GCDSpell)
 		for i = 1, #Scripts do
 			local icon = Scripts[i]
 			if icon.__shown and icon.group.__shown then
-				icon:OnUpdate(CUR_TIME)
+				icon:OnUpdate(time)
 			end
 		end
 		if doUpdateIcons then
@@ -1374,9 +1368,9 @@ function TMW:Group_Update(groupID)
 	if LBF then
 		TMW.DontRun = true
 		local lbfs = db.profile.Groups[groupID]["LBF"]
-		LBF:Group("TellMeWhen", L["GROUP"] .. groupID)
+		LBF:Group("TellMeWhen", format(L["fGROUP"], groupID))
 		if lbfs.SkinID then
-			LBF:Group("TellMeWhen", L["GROUP"] .. groupID):Skin(lbfs.SkinID, lbfs.Gloss, lbfs.Backdrop, lbfs.Colors)
+			LBF:Group("TellMeWhen", format(L["fGROUP"], groupID)):Skin(lbfs.SkinID, lbfs.Gloss, lbfs.Backdrop, lbfs.Colors)
 		end
 	end
 
@@ -1484,6 +1478,7 @@ local function ScriptSort(iconA, iconB)
 	end
 	return gA*gOrder < gB*gOrder
 end
+local tDeleteItem = tDeleteItem-- TODO move this
 local function SetScript(icon, handler, func)
 	icon[handler] = func
 	if handler ~= "OnUpdate" then
@@ -1492,8 +1487,8 @@ local function SetScript(icon, handler, func)
 		tDeleteItem(Scripts, icon)
 		if func then
 			Scripts[#Scripts+1] = icon
+			sort(Scripts, ScriptSort)
 		end
-		sort(Scripts, ScriptSort)
 	end
 end
 
@@ -1504,11 +1499,11 @@ local function SetCooldown(icon, start, duration, reverse)
 		if duration > 0 then
 			local cd = icon.cooldown
 			cd:SetCooldown(start, duration)
+			cd:Show() --cd:SetAlpha(1) to use omnicc's finish effects properly, but im leaving it alone for now.
 			if reverse ~= nil then -- must be ~= nil
 				icon.__reverse = reverse
 				cd:SetReverse(reverse)
 			end
-			cd:Show() --cd:SetAlpha(1) to use omnicc's finish effects properly, but im leaving it alone for now.
 		else
 			icon.cooldown:Hide()-- cd:SetAlpha(0)
 		end
@@ -1568,7 +1563,7 @@ local function CDBarOnUpdate(bar)
 		else
 			bar:SetMinMaxValues(0, duration)
 			bar.Max = duration
-			bar:SetValue(CUR_TIME - bar.start + bar.offset)
+			bar:SetValue(time - bar.start + bar.offset)
 		end
 	else
 		if duration == 0 then
@@ -1576,7 +1571,7 @@ local function CDBarOnUpdate(bar)
 		else
 			bar:SetMinMaxValues(0,  duration)
 			bar.Max = duration
-			bar:SetValue(duration - (CUR_TIME - bar.start) + bar.offset)
+			bar:SetValue(duration - (time - bar.start) + bar.offset)
 		end
 	end
 end
@@ -1587,7 +1582,7 @@ local function CDBarOnValueChanged(bar)
 	local pct
 	if not bar.InvertBars then
 		if duration ~= 0 then
-			pct = (CUR_TIME - start) / duration
+			pct = (time - start) / duration
 			local inv = 1-pct
 			bar.texture:SetTexCoord(0, min(inv, 1), 0, 1)
 			bar:SetStatusBarColor(
@@ -1603,7 +1598,7 @@ local function CDBarOnValueChanged(bar)
 			bar:SetStatusBarColor(co.r, co.g, co.b, co.a)
 			bar.texture:SetTexCoord(0, 1, 0, 1)
 		else
-			pct = (CUR_TIME - start) / duration
+			pct = (time - start) / duration
 			local inv = 1-pct
 			bar.texture:SetTexCoord(0, min(pct, 1), 0, 1)
 			bar:SetStatusBarColor(
@@ -1820,6 +1815,7 @@ function TMW:Icon_Update(icon)
 	local iconID = icon:GetID()
 	local groupID = icon.group:GetID()
 
+	icon.__previousNameFirst = icon.NameFirst -- used to detect changes in the name that would cause a texture change
 	for k in pairs(TMW.Icon_Defaults) do 	--lets clear any settings that might get left behind.
 		icon[k] = nil
 	end
@@ -1875,7 +1871,7 @@ function TMW:Icon_Update(icon)
 	if LBF then
 		TMW.DontRun = true -- TMW:Update() is ran in the LBF skin callback, which just causes an infinite loop. This tells it not to
 		local lbfs = db.profile.Groups[groupID].LBF
-		LBF:Group("TellMeWhen", L["GROUP"] .. groupID):AddButton(icon)
+		LBF:Group("TellMeWhen", format(L["fGROUP"], groupID)):AddButton(icon)
 		local SkID = lbfs.SkinID or "Blizzard"
 		local tbl = LBF:GetSkins()
 		if tbl and SkID and tbl[SkID] then
@@ -1900,9 +1896,9 @@ function TMW:Icon_Update(icon)
 	else
 		ct:ClearAllPoints()
 		ct:SetPoint("BOTTOMRIGHT", icon, "BOTTOMRIGHT", f.x, f.y)
-		cd:SetFrameLevel(icon:GetFrameLevel() + 1)
-		icon.cooldownbar:SetFrameLevel(icon:GetFrameLevel() + 2)
-		icon.powerbar:SetFrameLevel(icon:GetFrameLevel() + 2)
+		cd:SetFrameLevel(icon:GetFrameLevel() + 2)
+		icon.cooldownbar:SetFrameLevel(icon:GetFrameLevel() + 3)
+		icon.powerbar:SetFrameLevel(icon:GetFrameLevel() + 3)
 	end
 
 	icon.__alpha = nil -- force an alpha update
@@ -1930,6 +1926,7 @@ function TMW:Icon_Update(icon)
 	end
 
 	icon:SetCooldown(0, 0)
+	icon.__previousNameFirst = nil
 
 	Icon_Bars_Update(icon, groupID, iconID)
 	icon:Show()
@@ -2069,6 +2066,11 @@ function TMW:GetSpellNames(icon, setting, firstOnly, toname, dictionary)
 			end
 			if type(v) == "string" then -- all dictionary table lookups use the lowercase string to negate case sensitivity
 				v = strlower(v)
+			end
+			for ds in pairs(TMW.DS) do	--EXCEPT dispel types, they retain their capitalization. Restore it here.
+				if strlower(ds) == v then
+					v = ds
+				end
 			end
 			dictionary[v] = true -- put the final value in the table as well (may or may not be the same as the original value
 		end
@@ -2216,7 +2218,10 @@ end
 function TMW:DoSetTexture(icon)
 	-- used to determine if the texture of an icon should be changed during config (basically, if it's a default texture used for unknowns then try and change it)
 	local t = icon.texture:GetTexture()
+	local oldname = icon.__previousNameFirst
+	local currentname = icon.NameFirst
 	if not t or
+	oldname ~= currentname or 
 	t == "Interface\\Icons\\INV_Misc_PocketWatch_01" or
 	t == "Interface\\Icons\\INV_Misc_QuestionMark" or
 	t == "Interface\\Icons\\Temp" then

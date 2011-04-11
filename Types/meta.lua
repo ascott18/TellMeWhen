@@ -11,9 +11,10 @@ local TMW = TMW
 if not TMW then return end
 local L = TMW.L
 
-local db, CUR_TIME, UPD_INTV
+local db, time, UPD_INTV
 local _G, strmatch, tonumber, ipairs =
 	  _G, strmatch, tonumber, ipairs
+local print = TMW.print
 local AlreadyChecked = {} TMW.AlreadyChecked = AlreadyChecked
 
 local RelevantSettings = {
@@ -25,25 +26,21 @@ local Type = TMW:RegisterIconType("meta", RelevantSettings)
 Type.name = L["ICONMENU_META"]
 Type.desc = L["ICONMENU_META_DESC"]
 
-Type:SetScript("OnUpdate", function()
-	CUR_TIME = TMW.CUR_TIME
-end)
 
 function Type:Update()
-	CUR_TIME = TMW.CUR_TIME
 	db = TMW.db
 	UPD_INTV = db.profile.Interval
 end
 
-local function Meta_OnUpdate(icon)
-	if icon.UpdateTimer <= CUR_TIME - UPD_INTV then
-		icon.UpdateTimer = CUR_TIME
+local function Meta_OnUpdate(icon, time)
+	if icon.UpdateTimer <= time - UPD_INTV then
+		icon.UpdateTimer = time
 		local CndtCheck = icon.CndtCheck if CndtCheck and CndtCheck() then return end
 		local CheckNext = icon.CheckNext
 		for k, i in ipairs(icon.Icons) do
 			local ic = _G[i]
 			if ic and ic.OnUpdate and (not CheckNext or (CheckNext and not AlreadyChecked[ic])) then
-				ic:OnUpdate()
+				ic:OnUpdate(time)
 				local alpha = ic.FakeAlpha
 				if alpha > 0 and ic.__shown and ic.group.__shown then
 				

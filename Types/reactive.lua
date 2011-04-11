@@ -11,12 +11,11 @@ local TMW = TMW
 if not TMW then return end
 local L = TMW.L
 
-local db, CUR_TIME, UPD_INTV, ClockGCD, pr, ab, rc, mc
-local ipairs=
-	  ipairs
+local db, time, UPD_INTV, ClockGCD, pr, ab, rc, mc
 local GetSpellCooldown, IsSpellInRange, IsUsableSpell, GetSpellTexture, GetSpellInfo =
 	  GetSpellCooldown, IsSpellInRange, IsUsableSpell, GetSpellTexture, GetSpellInfo
 local OnGCD = TMW.OnGCD
+local print = TMW.print
 local _, pclass = UnitClass("Player")
 
 local RelevantSettings = {
@@ -48,12 +47,8 @@ local Type = TMW:RegisterIconType("reactive", RelevantSettings)
 Type.name = L["ICONMENU_REACTIVE"]
 Type.desc = L["ICONMENU_REACTIVE_DESC"]
 
-Type:SetScript("OnUpdate", function()
-	CUR_TIME = TMW.CUR_TIME
-end)
 
 function Type:Update()
-	CUR_TIME = TMW.CUR_TIME
 	db = TMW.db
 	UPD_INTV = db.profile.Interval
 	ClockGCD = db.profile.ClockGCD
@@ -77,34 +72,38 @@ local function Reactive_OnEvent(icon, event, spell)
 	end
 end
 
-local function Reactive_OnUpdate(icon)
-	if icon.UpdateTimer <= CUR_TIME - UPD_INTV then
-		icon.UpdateTimer = CUR_TIME
+local function Reactive_OnUpdate(icon, time)
+	if icon.UpdateTimer <= time - UPD_INTV then
+		icon.UpdateTimer = time
 		local CndtCheck = icon.CndtCheck if CndtCheck and CndtCheck() then return end
 
 		local n, inrange, nomana, start, duration, isGCD, CD, usable = 1
-		for i, iName in ipairs(icon.NameArray) do
+		local NameArray, NameNameArray, RangeCheck, ManaCheck, CooldownCheck, IgnoreRunes, Usable =
+		 icon.NameArray, icon.NameNameArray, icon.RangeCheck, icon.ManaCheck, icon.CooldownCheck, icon.IgnoreRunes, icon.Usable
+		
+		for i = 1, #NameArray do
+			local iName = NameArray[i]
 			n = i
 			start, duration = GetSpellCooldown(iName)
 			if duration then
 				inrange, CD = 1
-				if icon.RangeCheck then
-					inrange = IsSpellInRange(icon.NameNameArray[i], "target") or 1
+				if RangeCheck then
+					inrange = IsSpellInRange(NameNameArray[i], "target") or 1
 				end
 				usable, nomana = IsUsableSpell(iName)
-				if not icon.ManaCheck then
+				if not ManaCheck then
 					nomana = nil
 				end
 				isGCD = OnGCD(duration)
-				if icon.CooldownCheck then
-					if icon.IgnoreRunes then
+				if CooldownCheck then
+					if IgnoreRunes then
 						if start == GetSpellCooldown(45477) or start == GetSpellCooldown(45462) or start == GetSpellCooldown(45902) then
 							start, duration = 0, 0
 						end
 					end
 					CD = not (duration == 0 or isGCD)
 				end
-				usable = icon.Usable or usable
+				usable = Usable or usable
 				if usable and not CD and not nomana and inrange == 1 then --usable
 					if icon.Alpha == 0 then
 						icon:SetAlpha(0)
@@ -157,7 +156,7 @@ local function Reactive_OnUpdate(icon)
 			isGCD = OnGCD(duration)
 		end
 		if duration then
-			local d = duration - (CUR_TIME - start)
+			local d = duration - (time - start)
 			if (icon.DurationMinEnabled and icon.DurationMin > d) or (icon.DurationMaxEnabled and d > icon.DurationMax) then
 				icon:SetAlpha(0)
 				return
@@ -229,7 +228,7 @@ function Type:Setup(icon, groupID, iconID)
 	end
 
 	icon:SetScript("OnUpdate", Reactive_OnUpdate)
-	icon:OnUpdate()
+	icon:OnUpdate(GetTime() + 1)
 end
 
 

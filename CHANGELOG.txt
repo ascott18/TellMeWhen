@@ -1,6 +1,14 @@
+v4.0.1.3
+-Dispel types should now properly work for icons that surpass the efficiency threshold
+-Internal cooldowns will show the proper icon during config in WoW 4.1+
+-Textures should properly update when changing the name of an icon that remembers the previous texture (buff/debuff, icd, and others)
+-Weapon enchant icons should now properly obey the setting to be hidden when the slot is empty
+-Maybe fixed a really rare frame level bug with cooldowns?
+
 v4.0.1.2
 -Groups and icons should now properly copy using the dropdown on the icon editor
 -Added some tooltips to icon types
+-Added some more name substitutions to equivalancies (so they will accept any spell named "Hex" instead of just the shaman's hex spell, etc)
 
 v4.0.1.1
 -Cleaned up the conditon editor

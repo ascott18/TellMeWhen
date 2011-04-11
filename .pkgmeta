@@ -33,3 +33,4 @@ move-folders:
 ignore:
     - Lib
     - TellMeWhen_Options/Lib
+    - Scripts

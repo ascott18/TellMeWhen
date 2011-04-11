@@ -1732,6 +1732,7 @@
 						<Scripts>
 							<OnLoad>
 								self.text:SetText(TMW.L["ICONMENU_ONLYINTERRUPTIBLE"])
+								TMW:TT(self, "ICONMENU_ONLYINTERRUPTIBLE", "ICONMENU_ONLYINTERRUPTIBLE_DESC")
 								self.text:SetWidth(TELLMEWHEN_COLUMN1WIDTH)
 							</OnLoad>
 							<OnClick>
