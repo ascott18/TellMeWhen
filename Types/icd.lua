@@ -63,7 +63,7 @@ if clientVersion >= 40100 then
 			if sourceGUID == pGUID and (event == "SPELL_AURA_APPLIED" or event == "SPELL_AURA_REFRESH" or event == "SPELL_ENERGIZE") then
 				if icon.NameDictionary[spellID] or icon.NameDictionary[strlower(spellName)] then
 					icon:SetTexture(GetSpellTexture(spellID))
-					icon.StartTime = time
+					icon.StartTime = TMW.time
 				end
 			end
 		elseif event == "UNIT_SPELLCAST_SUCCEEDED" then
@@ -71,7 +71,7 @@ if clientVersion >= 40100 then
 			if unit == "player" then
 				if icon.NameDictionary[spellID] or icon.NameDictionary[strlower(spellName)] then
 					icon:SetTexture(GetSpellTexture(spellID))
-					icon.StartTime = time
+					icon.StartTime = TMW.time
 				end
 			end
 		end
@@ -84,7 +84,7 @@ else
 				local NameDictionary = icon.NameDictionary
 				if NameDictionary[spellID] or NameDictionary[strlower(spellName)] then
 					icon:SetTexture(GetSpellTexture(spellID))
-					icon.StartTime = time
+					icon.StartTime = TMW.time
 				end
 			end
 		elseif event == "UNIT_SPELLCAST_SUCCEEDED" then
@@ -93,7 +93,7 @@ else
 				local NameDictionary = icon.NameDictionary
 				if NameDictionary[spellID] or NameDictionary[strlower(spellName)] then
 					icon:SetTexture(GetSpellTexture(spellID))
-					icon.StartTime = time
+					icon.StartTime = TMW.time
 				end
 			end
 		end

@@ -35,9 +35,9 @@ local LBF = LibStub("LibButtonFacade", true)
 local AceDB = LibStub("AceDB-3.0")
 local LSM = LibStub("LibSharedMedia-3.0")
 
-TELLMEWHEN_VERSION = "4.0.1.3"
+TELLMEWHEN_VERSION = "4.0.1.4"
 TELLMEWHEN_VERSION_MINOR = ""
-TELLMEWHEN_VERSIONNUMBER = 40119
+TELLMEWHEN_VERSIONNUMBER = 40120
 TELLMEWHEN_MAXGROUPS = 10 	--this is a default, used by SetTheory (addon), so dont rename
 TELLMEWHEN_MAXROWS = 20
 local UPD_INTV = 0.05	--this is a default, local because i use it in onupdate functions
@@ -706,6 +706,7 @@ function TMW:OnUpdate()
 	time = GetTime()
 	if UpdateTimer <= time - UPD_INTV then
 		CNDT.time = time
+		TMW.time = time
 		UpdateTimer = time
 		_, GCD=GetSpellCooldown(GCDSpell)
 		for i = 1, #Scripts do

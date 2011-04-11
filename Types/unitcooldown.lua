@@ -67,9 +67,9 @@ if clientVersion >= 40100 then -- COMBAT_LOG_EVENT_UNFILTERED
 		if p == "SPELL_CAST_SUCCESS" then
 			local c = Cooldowns[g]
 			c[strlower(n)] = i
-			c[i] = time
+			c[i] = TMW.time
 		elseif p == "SPELL_AURA_APPLIED" or p == "SPELL_AURA_REFRESH" or p == "SPELL_DAMAGE" or p == "SPELL_HEAL" or p == "SPELL_MISSED" then
-			local t = time
+			local t = TMW.time
 			local c = Cooldowns[g]
 			local ci = c[i]
 			if (ci and ci + 1.8 < t) or not ci then 	-- if this event was less than 1.8 seconds after a SPELL_CAST_SUCCESS or a UNIT_SPELLCAST_SUCCEEDED then ignore it (this is just a safety window for spell travel time so that if we found the real cast start, we dont overwrite it)
@@ -83,9 +83,9 @@ else
 		if p == "SPELL_CAST_SUCCESS" then
 			local c = Cooldowns[g]
 			c[strlower(n)] = i
-			c[i] = time
+			c[i] = TMW.time
 		elseif p == "SPELL_AURA_APPLIED" or p == "SPELL_AURA_REFRESH" or p == "SPELL_DAMAGE" or p == "SPELL_HEAL" or p == "SPELL_MISSED" then
-			local t = time
+			local t = TMW.time
 			local c = Cooldowns[g]
 			local ci = c[i]
 			if (ci and ci + 1.8 < t) or not ci then 	-- if this event was less than 1.8 seconds after a SPELL_CAST_SUCCESS or a UNIT_SPELLCAST_SUCCEEDED then ignore it (this is just a safety window for spell travel time so that if we found the real cast start, we dont overwrite it)
@@ -99,7 +99,7 @@ end
 function Type:UNIT_SPELLCAST_SUCCEEDED(e, u, n, _, _, i)--Unit, spellName, spellId
 	local c = Cooldowns[UnitGUID(u)]
 	c[strlower(n)] = i
-	c[i] = time
+	c[i] = TMW.time
 end
 
 local function UnitCooldown_OnUpdate(icon, time)
