@@ -1,7 +1,7 @@
 v4.0.1.4
 -Fixed all the errors. Sorry guys!
 -Fixed totem icons
-
+-Fixed icon shown conditions
 v4.0.1.3
 -Dispel types should now properly work for icons that surpass the efficiency threshold
 -Internal cooldowns will show the proper icon during config in WoW 4.1+

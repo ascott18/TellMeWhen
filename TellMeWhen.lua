@@ -706,7 +706,7 @@ end
 function TMW:OnUpdate()
 	time = GetTime()
 	if UpdateTimer <= time - UPD_INTV then
-		CNDT.time = time
+		CNDT.Env.time = time
 		TMW.time = time
 		UpdateTimer = time
 		_, GCD=GetSpellCooldown(GCDSpell)
