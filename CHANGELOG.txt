@@ -4,6 +4,7 @@ v4.0.2
 -ICD icons now refresh when a stack of a buff is added.
 -Fixed the version warnings that were spamming people and telling them that you sent them an icon
 -Groups that are anchored to other groups with higher groupIDs should now properly anchor after logging in or reloading
+-Many old spell equivalanceies were updated, and some new ones were added, thanks to 
 
 v4.0.1.4
 -Fixed all the errors. Sorry guys!

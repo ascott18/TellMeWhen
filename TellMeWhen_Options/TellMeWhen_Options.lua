@@ -2065,7 +2065,7 @@ function SUG:ADDON_LOADED(event, addon)
 							name = strlower(name)
 							if
 								not Blacklist[icon] and
-								rank ~= SPELL_PASSIVE and
+							--	rank ~= SPELL_PASSIVE and -- moonkin aura is a passive
 								not strfind(name, "dnd") and
 								not strfind(name, "test") and
 								not strfind(name, "debug") and

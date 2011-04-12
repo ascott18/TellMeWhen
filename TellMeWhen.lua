@@ -37,7 +37,7 @@ local LSM = LibStub("LibSharedMedia-3.0")
 
 TELLMEWHEN_VERSION = "4.0.2"
 TELLMEWHEN_VERSION_MINOR = ""
-TELLMEWHEN_VERSIONNUMBER = 40201
+TELLMEWHEN_VERSIONNUMBER = 40202
 TELLMEWHEN_MAXGROUPS = 10 	--this is a default, used by SetTheory (addon), so dont rename
 TELLMEWHEN_MAXROWS = 20
 local UPD_INTV = 0.06	--this is a default, local because i use it in onupdate functions
@@ -396,20 +396,22 @@ TMW.DS = {
 	Enraged = "Interface\\Icons\\ability_druid_challangingroar",
 }
 
-TMW.BE = {	--Much of these are thanks to Malazee @ US-Dalaran's chart: http://forums.wow-petopia.com/download/file.php?mode=view&id=4979 and spreadsheet https://spreadsheets.google.com/ccc?key=0Aox2ZHZE6e_SdHhTc0tZam05QVJDU0lONnp0ZVgzdkE&hl=en#gid=18
+TMW.BE = {
+	--Much of these are thanks to Malazee @ US-Dalaran's chart: http://forums.wow-petopia.com/download/file.php?mode=view&id=4979 and spreadsheet https://spreadsheets.google.com/ccc?key=0Aox2ZHZE6e_SdHhTc0tZam05QVJDU0lONnp0ZVgzdkE&hl=en#gid=18
+	--Many more new spells/corrections were provided by Catok of Curse
 	--NOTE: any id prefixed with "_" will have its localized name substituted in instead of being forced to match as an ID
 	debuffs = {
-		CrowdControl = "_339;2637;33786;_118;_1499;_19503;_19386;20066;10326;_9484;_6770;_2094;_51514;76780;_710;_5782;_6358", -- by calico0 of Curse
+		CrowdControl = "_339;2637;33786;_118;_1499;_19503;_19386;20066;10326;_9484;_6770;_2094;_51514;76780;_710;_5782;_6358;_51209;_605;82691", -- originally by calico0 of Curse
 		Bleeding = "9007;_1822;_1079;33745;1943;703;94009;43104;89775",
 		Incapacitated = "1776;20066;49203",
 		Feared = "_5782;5246;_8122;10326;1513;_5484;_6789;87204",
-		Stunned = "_1833;_408;_91800;_5211;_56;9005;22570;19577;56626;44572;82691;853;2812;85388;64044;20549;46968;30283;20252;65929;7922;12809;50519",
+		Stunned = "_1833;_408;_91800;_5211;_56;9005;22570;19577;56626;44572;853;2812;85388;64044;20549;46968;30283;20253;65929;7922;12809;50519;91797;47481;12355;24394;83047;39796;93986;89766;54786",
 		--DontMelee = "5277;871;Retaliation;Dispersion;Hand of Sacrifice;Hand of Protection;Divine Shield;Divine Protection;Ice Block;Icebound Fortitude;Cyclone;Banish",  --does somebody want to update these for me?
 		--MovementSlowed = "Incapacitating Shout;Chains of Ice;Icy Clutch;Slow;Daze;Hamstring;Piercing Howl;Wing Clip;Ice Trap;Frostbolt;Cone of Cold;Blast Wave;Mind Flay;Crippling Poison;Deadly Throw;Frost Shock;Earthbind;Curse of Exhaustion",
-		Disoriented = "_19503;31661;_2094;_51514;90337",
-		Silenced = "_47476;78675;34490;_55021;_15487;1330;_24259;_18498;_25046",
+		Disoriented = "_19503;31661;_2094;_51514;90337;88625",
+		Silenced = "_47476;78675;34490;_55021;_15487;1330;_24259;_18498;_25046;81261;31935;18425;31117",
 		Disarmed = "_51722;_676;64058;50541;91644",
-		Rooted = "_339;_122;23694;58373;64695;_19185;33395;4167;54706;50245;90327;16979;83301;83302",
+		Rooted = "_339;_122;23694;58373;64695;_19185;33395;4167;54706;50245;90327;16979;83301;83302;45334;19306;55080;87195;63685;19387",
 		PhysicalDmgTaken = "30070;58683;81326;50518;55749",
 		SpellDamageTaken = "93068;1490;65142;85547;60433;34889;24844",
 		SpellCritTaken = "17800;22959",
@@ -421,13 +423,13 @@ TMW.BE = {	--Much of these are thanks to Malazee @ US-Dalaran's chart: http://fo
 		ReducedPhysicalDone = "1160;99;26017;81130;702;24423",
 	},
 	buffs = {
-		ImmuneToStun = "642;45438;34471;19574;48792;1022;33786;710",
-		ImmuneToMagicCC = "642;45438;34471;19574;33786;710",
+		ImmuneToStun = "642;45438;34471;19574;48792;1022;33786;710;46924;19263;47585",
+		ImmuneToMagicCC = "642;45438;34471;19574;33786;710;46924;19263;47585;31224;8178;23920;49039",
 		IncreasedStats = "79061;79063;90363",
 		IncreasedDamage = "75447;82930",
 		IncreasedCrit = "24932;29801;51701;51470;24604;90309",
 		IncreasedAP = "79102;53138;19506;30808",
-		IncreasedSPsix = "79058;52109",
+		IncreasedSPsix = "_79058;_61316;_52109",
 		IncreasedSPten = "77747;53646",
 		IncreasedPhysHaste = "55610;53290;8515",
 		IncreasedSpellHaste = "2895;24907;49868",
@@ -435,16 +437,20 @@ TMW.BE = {	--Much of these are thanks to Malazee @ US-Dalaran's chart: http://fo
 		BonusAgiStr = "6673;8076;57330;93435",
 		BonusStamina = "79105;469;6307;90364",
 		BonusArmor = "465;8072",
-		BonusMana = "79058;54424",
+		BonusMana = "_79058;_61316;54424",
 		ManaRegen = "54424;79102;5677",
 		BurstManaRegen = "29166;16191;64901",
 		PushbackResistance = "19746;87717",
 		Resistances = "19891;8185",
+		DefensiveBuffs = "48707;30823;33206;47585;871;48792;498;22812;61336;5277;74001;47788;19263;6940;_12976",
+		MiscHelpfulBuffs = "89488;10060;23920;68992;31642;54428;2983;1850;29166;16689;53271;1044;31821;45182",
+		DamageBuffs = "1719;12292;85730;50334;5217;3045;77801;34692;31884;51713;49016;12472",
 	},
 	casts = {
+		--prefixing with _ doesnt really matter here since casts only match by ID, but it may prevent confusion if people try and use these as buff/debuff equivs
 		Heals = "50464;5185;8936;740;2050;2060;2061;32546;596;64843;635;82326;19750;331;77472;8004;1064;73920",
-		PvPSpells = "33786;339;20484;1513;982;64901;605;453;5782;5484;79268;10326;51514;118;12051",
-		Tier11Interrupts = "83703;86166;86167;86168;_82752;82636;83070;92454;92455;92456;79710;77896;77569;80734",
+		PvPSpells = "33786;339;20484;1513;982;64901;_605;453;5782;5484;79268;10326;51514;118;12051",
+		Tier11Interrupts = "_83703;_82752;_82636;_83070;_79710;_77896;_77569;_80734",
 	},
 	unlisted = {
 		-- enrages were extracted using the script in the /Scripts folder (source is db.mmo-champion.com)
