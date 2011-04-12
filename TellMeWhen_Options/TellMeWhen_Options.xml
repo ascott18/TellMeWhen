@@ -779,7 +779,7 @@
 				local groupID, iconID = TMW.CI.g, TMW.CI.i
 				if TMW.db then
 					TMW.db.profile.Groups[groupID].Icons[iconID][self.setting] = self:GetValue() / 100
-					TMW:ScheduleIconUpdate(groupID, iconID)
+					TMW.IE:ScheduleIconUpdate(groupID, iconID)
 				end
 			</OnValueChanged>
 			<OnLoad>
@@ -858,7 +858,7 @@
 					TMW.SUG:NameOnCursor()
 				end
 				TMW.IE:ShowHide()
-				TMW:ScheduleIconUpdate(groupID, iconID)
+				TMW.IE:ScheduleIconUpdate(groupID, iconID)
 			</OnClick>
 		</Scripts>
 	</CheckButton>
@@ -1080,7 +1080,7 @@
 				local groupID, iconID = TMW.CI.g, TMW.CI.i
 				if TMW.db then
 					TMW.db.profile.Groups[groupID].Icons[iconID][self.setting] = t
-					TMW:ScheduleIconUpdate(groupID, iconID)
+					TMW.IE:ScheduleIconUpdate(groupID, iconID)
 				end
 				self:GetScript("OnTextChanged")(self)
 			</OnEditFocusLost>
@@ -1473,7 +1473,7 @@
 								if TMW.db then
 									TMW.db.profile.Groups[groupID].Icons[iconID]["Name"] = TMW:CleanString(self:GetText())
 								end
-								TMW:ScheduleIconUpdate(groupID, iconID)
+								TMW.IE:ScheduleIconUpdate(groupID, iconID)
 								self:GetScript("OnTextChanged")(self)
 								TMW.SUG.Suggest:Hide()
 							</OnEditFocusLost>
@@ -1615,7 +1615,7 @@
 								if TMW.db then
 									TMW.db.profile.Groups[groupID].Icons[iconID].Unit = strtrim(self:GetText())
 								end
-								TMW:ScheduleIconUpdate(groupID, iconID)
+								TMW.IE:ScheduleIconUpdate(groupID, iconID)
 								self:GetScript("OnTextChanged")(self)
 							</OnEditFocusLost>
 						</Scripts>
@@ -1665,7 +1665,7 @@
 								local groupID, iconID = TMW.CI.g, TMW.CI.i
 								if TMW.db then
 									TMW.db.profile.Groups[groupID].Icons[iconID]["ShowTimer"] = not not self:GetChecked()
-									TMW:ScheduleIconUpdate(groupID, iconID)
+									TMW.IE:ScheduleIconUpdate(groupID, iconID)
 								end
 								local stt = self:GetParent().ShowTimerText
 								if self:GetChecked() and (IsAddOnLoaded("OmniCC") or IsAddOnLoaded("tullaCC")) then
@@ -1692,7 +1692,7 @@
 								local groupID, iconID = TMW.CI.g, TMW.CI.i
 								if TMW.db then
 									TMW.db.profile.Groups[groupID].Icons[iconID]["ShowTimerText"] = not not self:GetChecked()
-									TMW:ScheduleIconUpdate(groupID, iconID)
+									TMW.IE:ScheduleIconUpdate(groupID, iconID)
 								end
 							</OnClick>
 							<OnEnable>
@@ -1720,7 +1720,7 @@
 								local groupID, iconID = TMW.CI.g, TMW.CI.i
 								if TMW.db then
 									TMW.db.profile.Groups[groupID].Icons[iconID]["OnlyMine"] = not not self:GetChecked()
-									TMW:ScheduleIconUpdate(groupID, iconID)
+									TMW.IE:ScheduleIconUpdate(groupID, iconID)
 								end
 							</OnClick>
 						</Scripts>
@@ -1739,7 +1739,7 @@
 								local groupID, iconID = TMW.CI.g, TMW.CI.i
 								if TMW.db then
 									TMW.db.profile.Groups[groupID].Icons[iconID]["Interruptible"] = not not self:GetChecked()
-									TMW:ScheduleIconUpdate(groupID, iconID)
+									TMW.IE:ScheduleIconUpdate(groupID, iconID)
 								end
 							</OnClick>
 						</Scripts>
@@ -1757,7 +1757,7 @@
 								local groupID, iconID = TMW.CI.g, TMW.CI.i
 								if TMW.db then
 									TMW.db.profile.Groups[groupID].Icons[iconID]["HideUnequipped"] = not not self:GetChecked()
-									TMW:ScheduleIconUpdate(groupID, iconID)
+									TMW.IE:ScheduleIconUpdate(groupID, iconID)
 								end
 							</OnClick>
 						</Scripts>
@@ -1776,7 +1776,7 @@
 								local groupID, iconID = TMW.CI.g, TMW.CI.i
 								if TMW.db then
 									TMW.db.profile.Groups[groupID].Icons[iconID]["UseActvtnOverlay"] = not not self:GetChecked()
-									TMW:ScheduleIconUpdate(groupID, iconID)
+									TMW.IE:ScheduleIconUpdate(groupID, iconID)
 								end
 							</OnClick>
 						</Scripts>
@@ -1805,7 +1805,7 @@
 										self:GetParent().OnlyInBags:Enable()
 										self:GetParent().OnlyInBags:SetAlpha(1)
 									end
-									TMW:ScheduleIconUpdate(groupID, iconID)
+									TMW.IE:ScheduleIconUpdate(groupID, iconID)
 								end
 							</OnClick>
 						</Scripts>
@@ -1824,7 +1824,7 @@
 								local groupID, iconID = TMW.CI.g, TMW.CI.i
 								if TMW.db then
 									TMW.db.profile.Groups[groupID].Icons[iconID]["OnlySeen"] = not not self:GetChecked()
-									TMW:ScheduleIconUpdate(groupID, iconID)
+									TMW.IE:ScheduleIconUpdate(groupID, iconID)
 								end
 							</OnClick>
 						</Scripts>
@@ -1847,7 +1847,7 @@
 								local groupID, iconID = TMW.CI.g, TMW.CI.i
 								if TMW.db then
 									TMW.db.profile.Groups[groupID].Icons[iconID]["RangeCheck"] = not not self:GetChecked()
-									TMW:ScheduleIconUpdate(groupID, iconID)
+									TMW.IE:ScheduleIconUpdate(groupID, iconID)
 								end
 							</OnClick>
 						</Scripts>
@@ -1868,7 +1868,7 @@
 								local groupID, iconID = TMW.CI.g, TMW.CI.i
 								if TMW.db then
 									TMW.db.profile.Groups[groupID].Icons[iconID]["ManaCheck"] = not not self:GetChecked()
-									TMW:ScheduleIconUpdate(groupID, iconID)
+									TMW.IE:ScheduleIconUpdate(groupID, iconID)
 								end
 							</OnClick>
 						</Scripts>
@@ -1889,7 +1889,7 @@
 								local groupID, iconID = TMW.CI.g, TMW.CI.i
 								if TMW.db then
 									TMW.db.profile.Groups[groupID].Icons[iconID]["CooldownCheck"] = not not self:GetChecked()
-									TMW:ScheduleIconUpdate(groupID, iconID)
+									TMW.IE:ScheduleIconUpdate(groupID, iconID)
 								end
 								if self:GetChecked() or TMW.CI.t ~= "reactive" then
 									self:GetParent().IgnoreRunes:Enable()
@@ -1927,7 +1927,7 @@
 								local groupID, iconID = TMW.CI.g, TMW.CI.i
 								if TMW.db then
 									TMW.db.profile.Groups[groupID].Icons[iconID]["IgnoreRunes"] = not not self:GetChecked()
-									TMW:ScheduleIconUpdate(groupID, iconID)
+									TMW.IE:ScheduleIconUpdate(groupID, iconID)
 								end
 							</OnClick>
 						</Scripts>
@@ -1949,7 +1949,7 @@
 								local groupID, iconID = TMW.CI.g, TMW.CI.i
 								if TMW.db then
 									TMW.db.profile.Groups[groupID].Icons[iconID]["OnlyInBags"] = not not self:GetChecked()
-									TMW:ScheduleIconUpdate(groupID, iconID)
+									TMW.IE:ScheduleIconUpdate(groupID, iconID)
 								end
 							</OnClick>
 						</Scripts>
@@ -2096,7 +2096,7 @@
 											TMW.db.profile.Groups[groupID].Icons[iconID].ShowPBar = not not self:GetChecked()
 										end
 										self:GetParent().PBarOffs:SetEnabled(self:GetChecked())
-										TMW:ScheduleIconUpdate(groupID, iconID)
+										TMW.IE:ScheduleIconUpdate(groupID, iconID)
 									</OnClick>
 								</Scripts>
 							</CheckButton>
@@ -2144,7 +2144,7 @@
 											TMW.db.profile.Groups[groupID].Icons[iconID].PBarOffs = tonumber(strtrim(self:GetText())) or 0
 											self:SetText(TMW.db.profile.Groups[groupID].Icons[iconID].PBarOffs)
 										end
-										TMW:ScheduleIconUpdate(groupID, iconID)
+										TMW.IE:ScheduleIconUpdate(groupID, iconID)
 									</OnEditFocusLost>
 								</Scripts>
 							</EditBox>
@@ -2191,7 +2191,7 @@
 											TMW.db.profile.Groups[groupID].Icons[iconID].ShowCBar = not not self:GetChecked()
 										end
 										self:GetParent().CBarOffs:SetEnabled(self:GetChecked())
-										TMW:ScheduleIconUpdate(groupID, iconID)
+										TMW.IE:ScheduleIconUpdate(groupID, iconID)
 									</OnClick>
 								</Scripts>
 							</CheckButton>
@@ -2239,7 +2239,7 @@
 											TMW.db.profile.Groups[groupID].Icons[iconID].CBarOffs = tonumber(strtrim(self:GetText())) or 0
 											self:SetText(TMW.db.profile.Groups[groupID].Icons[iconID].CBarOffs)
 										end
-										TMW:ScheduleIconUpdate(groupID, iconID)
+										TMW.IE:ScheduleIconUpdate(groupID, iconID)
 									</OnEditFocusLost>
 								</Scripts>
 							</EditBox>
@@ -2276,7 +2276,7 @@
 								if TMW.db then
 									TMW.db.profile.Groups[groupID].Icons[iconID].InvertBars = not not self:GetChecked()
 								end
-								TMW:ScheduleIconUpdate(groupID, iconID)
+								TMW.IE:ScheduleIconUpdate(groupID, iconID)
 							</OnClick>
 							<OnEnable>
 								self:SetAlpha(1)
@@ -2349,7 +2349,7 @@
 								local groupID, iconID = TMW.CI.g, TMW.CI.i
 								if TMW.db then
 									TMW.db.profile.Groups[groupID].Icons[iconID]["DurationMinEnabled"] = checked
-									TMW:ScheduleIconUpdate(groupID, iconID)
+									TMW.IE:ScheduleIconUpdate(groupID, iconID)
 								end
 							</OnClick>
 						</Scripts>
@@ -2378,7 +2378,7 @@
 								local groupID, iconID = TMW.CI.g, TMW.CI.i
 								if TMW.db then
 									TMW.db.profile.Groups[groupID].Icons[iconID]["DurationMaxEnabled"] = checked
-									TMW:ScheduleIconUpdate(groupID, iconID)
+									TMW.IE:ScheduleIconUpdate(groupID, iconID)
 								end
 							</OnClick>
 						</Scripts>
@@ -2443,7 +2443,7 @@
 								local groupID, iconID = TMW.CI.g, TMW.CI.i
 								if TMW.db then
 									TMW.db.profile.Groups[groupID].Icons[iconID]["StackMinEnabled"] = checked
-									TMW:ScheduleIconUpdate(groupID, iconID)
+									TMW.IE:ScheduleIconUpdate(groupID, iconID)
 								end
 							</OnClick>
 						</Scripts>
@@ -2472,7 +2472,7 @@
 								local groupID, iconID = TMW.CI.g, TMW.CI.i
 								if TMW.db then
 									TMW.db.profile.Groups[groupID].Icons[iconID]["StackMaxEnabled"] = checked
-									TMW:ScheduleIconUpdate(groupID, iconID)
+									TMW.IE:ScheduleIconUpdate(groupID, iconID)
 								end
 							</OnClick>
 						</Scripts>
@@ -2525,7 +2525,7 @@
 								local groupID, iconID = TMW.CI.g, TMW.CI.i
 								if TMW.db then
 									TMW.db.profile.Groups[groupID].Icons[iconID]["FakeHidden"] = not not self:GetChecked()
-									TMW:ScheduleIconUpdate(groupID, iconID)
+									TMW.IE:ScheduleIconUpdate(groupID, iconID)
 								end
 							</OnClick>
 						</Scripts>
@@ -2617,7 +2617,7 @@
 								local groupID, iconID = TMW.CI.g, TMW.CI.i
 								if TMW.db then
 									TMW.db.profile.Groups[groupID].Icons[iconID]["Enabled"] = not not self:GetChecked()
-									TMW:ScheduleIconUpdate(groupID, iconID)
+									TMW.IE:ScheduleIconUpdate(groupID, iconID)
 								end
 							</OnClick>
 						</Scripts>
@@ -2637,7 +2637,7 @@
 								local groupID, iconID = TMW.CI.g, TMW.CI.i
 								if TMW.db then
 									TMW.db.profile.Groups[groupID].Icons[iconID]["CheckNext"] = not not self:GetChecked()
-									TMW:ScheduleIconUpdate(groupID, iconID)
+									TMW.IE:ScheduleIconUpdate(groupID, iconID)
 								end
 							</OnClick>
 						</Scripts>

@@ -1498,7 +1498,7 @@ end
 function IE:Reset()
 	local groupID, iconID = TMW.CI.g, TMW.CI.i
 	db.profile.Groups[groupID].Icons[iconID] = nil
-	TMW:ScheduleIconUpdate(groupID, iconID)
+	IE:ScheduleIconUpdate(groupID, iconID)
 	IE:Load()
 	IE:TabClick(IE.MainTab)
 end
@@ -1635,7 +1635,7 @@ function IE:Type_DropDown()
 		info.checked = (info.value == db.profile.Groups[groupID].Icons[iconID].Type)
 		info.func = function()
 			db.profile.Groups[groupID].Icons[iconID].Type = v.value
-			TMW:ScheduleIconUpdate(groupID, iconID)
+			IE:ScheduleIconUpdate(groupID, iconID)
 			local DD = IE.Main.Type
 			UIDropDownMenu_SetSelectedValue(DD, v.value)
 			TMW.CI.t = v.value
@@ -1650,7 +1650,7 @@ end
 function IE:Type_Dropdown_OnClick()
 	db.profile.Groups[groupID].Icons[iconID].Type = ""
 	TMW.CI.ic.texture:SetTexture(nil)
-	TMW:ScheduleIconUpdate(groupID, iconID)
+	IE:ScheduleIconUpdate(groupID, iconID)
 	UIDropDownMenu_SetSelectedValue(IE.Main.Type, "")
 	TMW.CI.t = ""
 	SUG.redoIfSame = 1
@@ -1688,7 +1688,7 @@ function IE:Unit_DropDown_OnClick()
 	e:SetText(TMW:CleanString(e:GetText()))
 	local groupID, iconID = TMW.CI.g, TMW.CI.i
 	db.profile.Groups[groupID].Icons[iconID].Unit = e:GetText()
-	TMW:ScheduleIconUpdate(groupID, iconID)
+	IE:ScheduleIconUpdate(groupID, iconID)
 	CloseDropDownMenus()
 end
 
@@ -1773,7 +1773,7 @@ function IE:Copy_DropDown()
 					local groupID, iconID = TMW.CI.g, TMW.CI.i
 					TMW:CopyTableInPlace(TMW.Icon_Defaults, db.profile.Groups[groupID].Icons[iconID])
 					TMW:CopyTableInPlace(self.value, db.profile.Groups[groupID].Icons[iconID])
-					TMW:ScheduleIconUpdate(groupID, iconID)
+					IE:ScheduleIconUpdate(groupID, iconID)
 					IE:Load(1)
 					db.profile.HasImported = true
 				end
@@ -1936,6 +1936,28 @@ function IE:GetRealNames()
 	return str
 end
 
+local IconUpdater = CreateFrame("Frame")
+local iconsToUpdate = {}
+local function UpdateIcons()
+	for icon in pairs(iconsToUpdate) do
+		TMW:Icon_Update(icon)
+	end
+	wipe(iconsToUpdate)
+	IconUpdater:SetScript("OnUpdate", nil)
+end
+function IE:ScheduleIconUpdate(icon, groupID, iconID)
+	-- this is a handler to prevent the spamming of Icon_Update and creating excessive garbage.
+	if type(icon) == "number" then --allow omission of icon
+		iconID = groupID
+		groupID = icon
+		assert(groupID ~= 0)
+		icon = TMW[groupID] and TMW[groupID][iconID]
+	end
+	if not icon then return end
+	iconsToUpdate[icon] = true
+	IconUpdater:SetScript("OnUpdate", UpdateIcons)
+end
+
 
 -- ----------------------
 -- SUGGESTER
@@ -1998,7 +2020,7 @@ function SUG:ADDON_LOADED(event, addon)
 		if IsInGuild() then
 			SUG:SendCommMessage("TMWSUG", SUG:Serialize("RCSL"), "GUILD")
 		end
-		SUG:ZONE_CHANGED_NEW_AREA()
+		SUG:PLAYER_ENTERING_WORLD()
 		
 		if TMWOptDB.IncompleteCache or not TMWOptDB.WoWVersion or TMWOptDB.WoWVersion < clientVersion then
 			TMWOptDB.IncompleteCache = true
@@ -2123,16 +2145,26 @@ function SUG:UNIT_PET(event, unit)
 end
 SUG:RegisterEvent("UNIT_PET")
 
-function SUG:ZONE_CHANGED_NEW_AREA()
-	if GetRealNumRaidMembers() > 0 then
+function SUG:PLAYER_ENTERING_WORLD()
+	local NumRealRaidMembers = GetRealNumRaidMembers()
+	local NumRealPartyMembers = GetRealNumPartyMembers()
+	local NumRaidMembers = GetNumRaidMembers()
+	
+	if (NumRealRaidMembers > 0) and (NumRealRaidMembers ~= (SUG.OldNumRealRaidMembers or 0)) then
+		SUG.OldNumRealRaidMembers = NumRealRaidMembers
 		SUG:SendCommMessage("TMWSUG", SUG:Serialize("RCSL"), "RAID")
-	elseif GetRealNumPartyMembers() > 0 then
+		
+	elseif (NumRealRaidMembers == 0) and (NumRealPartyMembers > 0) and (NumRealPartyMembers ~= (SUG.OldNumRealPartyMembers or 0)) then
+		SUG.OldNumRealPartyMembers = NumRealPartyMembers
 		SUG:SendCommMessage("TMWSUG", SUG:Serialize("RCSL"), "PARTY")
-	elseif UnitInBattleground("player") then
+		
+	elseif UnitInBattleground("player") and (NumRaidMembers ~= (SUG.OldNumRaidMembers or 0)) then
+		SUG.OldNumRaidMembers = NumRaidMembers
 		SUG:SendCommMessage("TMWSUG", SUG:Serialize("RCSL"), "BATTLEGROUND")
 	end
+	
 end
-SUG:RegisterEvent("ZONE_CHANGED_NEW_AREA")
+SUG:RegisterEvent("PLAYER_ENTERING_WORLD")
 
 local commThrowaway = {}
 function SUG:OnCommReceived(prefix, text, channel, who)
@@ -2859,7 +2891,7 @@ function CNDT:OK()
 		conditions[i] = nil
 		i=i+1
 	end
-	TMW:ScheduleIconUpdate(groupID, iconID)
+	IE:ScheduleIconUpdate(groupID, iconID)
 end
 
 function CNDT:Load()

@@ -1,7 +1,15 @@
+v4.0.2
+-Moar efficient!
+-Ignore GCD settings are now on by default now. This shouldn't affect you if you manually disabled these options.
+-ICD icons now refresh when a stack of a buff is added.
+-Fixed the version warnings that were spamming people and telling them that you sent them an icon
+-Groups that are anchored to other groups with higher groupIDs should now properly anchor after logging in or reloading
+
 v4.0.1.4
 -Fixed all the errors. Sorry guys!
 -Fixed totem icons
 -Fixed icon shown conditions
+
 v4.0.1.3
 -Dispel types should now properly work for icons that surpass the efficiency threshold
 -Internal cooldowns will show the proper icon during config in WoW 4.1+

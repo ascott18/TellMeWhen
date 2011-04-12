@@ -133,10 +133,10 @@ local function UnitCooldown_OnUpdate(icon, time)
 							if icon.ShowCBar then
 								icon:CDBarStart(start, ICDDuration)
 							end
-							icon:SetVertexColor(1)
-							icon:SetAlpha(Alpha)
+							icon:AlphaColor(Alpha, 1)
 
-							icon:SetTexture((iName and (GetSpellTexture(iName) )) or "Interface\\Icons\\INV_Misc_PocketWatch_01")
+							local t = (iName and (GetSpellTexture(iName) )) or "Interface\\Icons\\INV_Misc_PocketWatch_01"
+							if t ~= icon.__tex then icon:SetTexture(t) end
 
 							if Alpha ~= 0 then -- we care about usable cooldowns and we found one, so stop
 								return
@@ -167,16 +167,14 @@ local function UnitCooldown_OnUpdate(icon, time)
 			end
 
 			if not icon.ShowTimer and Alpha ~= 0 then
-				icon:SetVertexColor(0.5)
+				icon:AlphaColor(UnAlpha, 0.5)
 			else
-				icon:SetVertexColor(1)
+				icon:AlphaColor(UnAlpha, 1)
 			end
+			
 			local t = GetSpellTexture(unname)
-			if t then
-				icon:SetTexture(t)
-			end
+			if t and t ~= icon.__tex then icon:SetTexture(t) end
 
-			icon:SetAlpha(UnAlpha)
 			return
 		end
 		icon:SetAlpha(0)

@@ -87,7 +87,7 @@ local function SpellCooldown_OnUpdate(icon, time)
 				if ManaCheck then
 					_, nomana = IsUsableSpell(iName)
 				end
-				isGCD = OnGCD(duration)
+				isGCD = (ClockGCD or duration ~= 0) and OnGCD(duration)
 				if inrange == 1 and not nomana and (duration == 0 or isGCD) then --usable
 					local Alpha = icon.Alpha
 					if Alpha == 0 then
@@ -96,16 +96,13 @@ local function SpellCooldown_OnUpdate(icon, time)
 					end
 
 					local t = GetSpellTexture(iName)
-					if t then
-						icon:SetTexture(t)
-					end
+					if t and t ~= icon.__tex then icon:SetTexture(t) end
 
-					icon:SetVertexColor(1)
-					icon:SetAlpha(Alpha)
+					icon:AlphaColor(Alpha, 1)
 
-					if not icon.ShowTimer or (ClockGCD and isGCD) then
+					if ClockGCD and isGCD then
 						icon:SetCooldown(0, 0)
-					else
+					elseif icon.ShowTimer then
 						icon:SetCooldown(start, duration)
 					end
 
@@ -151,28 +148,24 @@ local function SpellCooldown_OnUpdate(icon, time)
 
 			if icon.Alpha ~= 0 then
 				if inrange ~= 1 then
-					icon:SetVertexColor(rc)
-					icon:SetAlpha(UnAlpha*rc.a)
+					icon:AlphaColor(UnAlpha*rc.a, rc)
 				elseif nomana then
-					icon:SetVertexColor(mc)
-					icon:SetAlpha(UnAlpha*mc.a)
+					icon:AlphaColor(UnAlpha*mc.a, mc)
 				elseif not icon.ShowTimer then
-					icon:SetVertexColor(0.5)
-					icon:SetAlpha(UnAlpha)
+					icon:AlphaColor(UnAlpha, 0.5)
 				else
-					icon:SetVertexColor(1)
-					icon:SetAlpha(UnAlpha)
+					icon:AlphaColor(UnAlpha, 1)
 				end
 			else
-				icon:SetVertexColor(1)
-				icon:SetAlpha(UnAlpha)
+				icon:AlphaColor(UnAlpha, 1)
 			end
 
-			icon:SetTexture(icon.FirstTexture)
+			local t = icon.FirstTexture
+			if t ~= icon.__tex then icon:SetTexture(t) end
 
-			if not icon.ShowTimer or (ClockGCD and isGCD) then
+			if ClockGCD and isGCD then
 				icon:SetCooldown(0, 0)
-			else
+			elseif icon.ShowTimer then
 				icon:SetCooldown(start, duration)
 			end
 
@@ -231,11 +224,11 @@ local function ItemCooldown_OnUpdate(icon, time)
 						icon:SetAlpha(0)
 						return
 					end
+					
+					local t = GetItemIcon(iName) or "Interface\\Icons\\INV_Misc_QuestionMark"
+					if t ~= icon.__tex then icon:SetTexture(t) end
 
-					icon:SetTexture(GetItemIcon(iName) or "Interface\\Icons\\INV_Misc_QuestionMark")
-
-					icon:SetVertexColor(1)
-					icon:SetAlpha(Alpha)
+					icon:AlphaColor(Alpha, 1)
 
 					if not icon.ShowTimer or (ClockGCD and isGCD) then
 						icon:SetCooldown(0, 0)
@@ -292,24 +285,18 @@ local function ItemCooldown_OnUpdate(icon, time)
 			local ShowTimer = icon.ShowTimer
 			if icon.Alpha ~= 0 then
 				if inrange ~= 1 then
-					icon:SetVertexColor(rc)
-					icon:SetAlpha(UnAlpha*rc.a)
+					icon:AlphaColor(UnAlpha*rc.a, rc)
 				elseif not ShowTimer then
-					icon:SetVertexColor(0.5)
-					icon:SetAlpha(UnAlpha)
+					icon:AlphaColor(UnAlpha, 0.5)
 				else
-					icon:SetVertexColor(1)
-					icon:SetAlpha(UnAlpha)
+					icon:AlphaColor(UnAlpha, 1)
 				end
 			else
-				icon:SetVertexColor(1)
-				icon:SetAlpha(UnAlpha)
+				icon:AlphaColor(UnAlpha, 1)
 			end
 
 			local t = GetItemIcon(NameFirst2)
-			if t then
-				icon:SetTexture(t)
-			end
+			if t and t ~= icon.__tex then icon:SetTexture(t) end
 
 			if not ShowTimer or (ClockGCD and isGCD) then
 				icon:SetCooldown(0, 0)
@@ -362,7 +349,9 @@ local function MultiStateCD_OnUpdate(icon, time)
 			if icon.ShowCBar then
 				icon:CDBarStart(start, duration)
 			end
-			icon:SetTexture(GetActionTexture(Slot) or "Interface\\Icons\\INV_Misc_QuestionMark")
+			
+			local t = GetActionTexture(Slot) or "Interface\\Icons\\INV_Misc_QuestionMark"
+			if t ~= icon.__tex then icon:SetTexture(t) end
 
 			local inrange = IsActionInRange(Slot, "target")
 			local _, nomana = IsUsableAction(Slot)
@@ -373,25 +362,19 @@ local function MultiStateCD_OnUpdate(icon, time)
 				nomana = nil
 			end
 			if (duration == 0 or OnGCD(duration)) and inrange == 1 and not nomana then
-				icon:SetVertexColor(1)
-				icon:SetAlpha(icon.Alpha)
+				icon:AlphaColor(icon.Alpha, 1)
 			elseif icon.Alpha ~= 0 then
 				if inrange ~= 1 then
-					icon:SetVertexColor(rc)
-					icon:SetAlpha(icon.UnAlpha*rc.a)
+					icon:AlphaColor(icon.UnAlpha*rc.a, rc)
 				elseif nomana then
-					icon:SetVertexColor(mc)
-					icon:SetAlpha(icon.UnAlpha*mc.a)
+					icon:AlphaColor(icon.UnAlpha*mc.a, mc)
 				elseif not icon.ShowTimer then
-					icon:SetVertexColor(0.5)
-					icon:SetAlpha(icon.UnAlpha)
+					icon:AlphaColor(icon.UnAlpha, 0.5)
 				else
-					icon:SetVertexColor(1)
-					icon:SetAlpha(icon.UnAlpha)
+					icon:AlphaColor(icon.UnAlpha, 1)
 				end
 			else
-				icon:SetVertexColor(1)
-				icon:SetAlpha(icon.UnAlpha)
+				icon:AlphaColor(icon.UnAlpha, 1)
 			end
 		end
 	end

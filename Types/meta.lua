@@ -47,11 +47,14 @@ local function Meta_OnUpdate(icon, time)
 					icon.cooldown.noCooldownCount = ic.cooldown.noCooldownCount
 					icon:SetCooldown(ic.__start, ic.__duration, ic.__reverse)
 
-					icon:SetTexture(ic.__tex)
-					icon:SetVertexColor(ic.__vrtxinfo)
-					icon:SetAlpha(alpha)
+					local ic__tex = ic.__tex
+					if ic__tex ~= icon.__tex then icon:SetTexture(ic__tex) end
+					
+					icon:AlphaColor(alpha, ic.__vrtxcolor)
 
-					icon:SetStack(ic.__count)
+					local ic__count = ic.__count
+					if icon.__count ~= ic__count then icon:SetStack(ic__count) end
+					
 					icon.InvertBars = ic.InvertBars
 
 					local icpb = ic.powerbar

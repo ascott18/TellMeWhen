@@ -60,9 +60,11 @@ if clientVersion >= 40100 then
 	ICD_OnEvent = function(icon, event, ...)
 		if event == "COMBAT_LOG_EVENT_UNFILTERED" then
 			local _, event, _, sourceGUID, _, _, _, _, _, spellID, spellName = ... --NEW ARG ADDED BETWEEN EVENT AND SOURCEGUID IN 4.1
-			if sourceGUID == pGUID and (event == "SPELL_AURA_APPLIED" or event == "SPELL_AURA_REFRESH" or event == "SPELL_ENERGIZE") then
+			if sourceGUID == pGUID and (event == "SPELL_AURA_APPLIED" or event == "SPELL_AURA_REFRESH" or event == "SPELL_ENERGIZE" or event == "SPELL_AURA_APPLIED_DOSE") then
 				if icon.NameDictionary[spellID] or icon.NameDictionary[strlower(spellName)] then
-					icon:SetTexture(GetSpellTexture(spellID))
+					local t = GetSpellTexture(spellID)
+					if t ~= icon.__tex then icon:SetTexture(t) end
+					
 					icon.StartTime = TMW.time
 				end
 			end
@@ -70,7 +72,9 @@ if clientVersion >= 40100 then
 			local unit, spellName, _, _, spellID = ...
 			if unit == "player" then
 				if icon.NameDictionary[spellID] or icon.NameDictionary[strlower(spellName)] then
-					icon:SetTexture(GetSpellTexture(spellID))
+					local t = GetSpellTexture(spellID)
+					if t ~= icon.__tex then icon:SetTexture(t) end
+					
 					icon.StartTime = TMW.time
 				end
 			end
@@ -80,10 +84,12 @@ else
 	ICD_OnEvent = function(icon, event, ...)
 		if event == "COMBAT_LOG_EVENT_UNFILTERED" then
 			local _, event, sourceGUID, _, _, _, _, _, spellID, spellName = ...
-			if sourceGUID == pGUID and (event == "SPELL_AURA_APPLIED" or event == "SPELL_AURA_REFRESH" or event == "SPELL_ENERGIZE") then
+			if sourceGUID == pGUID and (event == "SPELL_AURA_APPLIED" or event == "SPELL_AURA_REFRESH" or event == "SPELL_ENERGIZE" or event == "SPELL_AURA_APPLIED_DOSE") then
 				local NameDictionary = icon.NameDictionary
 				if NameDictionary[spellID] or NameDictionary[strlower(spellName)] then
-					icon:SetTexture(GetSpellTexture(spellID))
+					local t = GetSpellTexture(spellID)
+					if t ~= icon.__tex then icon:SetTexture(t) end
+					
 					icon.StartTime = TMW.time
 				end
 			end
@@ -92,7 +98,9 @@ else
 			if unit == "player" then
 				local NameDictionary = icon.NameDictionary
 				if NameDictionary[spellID] or NameDictionary[strlower(spellName)] then
-					icon:SetTexture(GetSpellTexture(spellID))
+					local t = GetSpellTexture(spellID)
+					if t ~= icon.__tex then icon:SetTexture(t) end
+					
 					icon.StartTime = TMW.time
 				end
 			end
@@ -117,27 +125,21 @@ local function ICD_OnUpdate(icon, time)
 			icon:CDBarStart(icon.StartTime, ICDDuration)
 		end
 		if timesince > ICDDuration then
-			icon:SetVertexColor(1)
-			icon:SetAlpha(icon.Alpha)
+			icon:AlphaColor(icon.Alpha, 1)
 			icon:SetCooldown(0, 0)
-			return
 		else
 			if icon.Alpha ~= 0 then
 				if not icon.ShowTimer then
-					icon:SetVertexColor(0.5)
-					icon:SetAlpha(icon.UnAlpha)
+					icon:AlphaColor(icon.UnAlpha, 0.5)
 				else
-					icon:SetVertexColor(1)
-					icon:SetAlpha(icon.UnAlpha)
+					icon:AlphaColor(icon.UnAlpha, 1)
 				end
 			else
-				icon:SetVertexColor(1)
-				icon:SetAlpha(icon.UnAlpha)
+				icon:AlphaColor(icon.UnAlpha, 1)
 			end
 			if icon.ShowTimer then
 				icon:SetCooldown(icon.StartTime, ICDDuration)
 			end
-			return
 		end
 	end
 end

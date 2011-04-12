@@ -80,13 +80,12 @@ local function Cast_OnUpdate(icon, time)
 						return
 					end
 					
-					icon:SetTexture(iconTexture)
-					icon:SetAlpha(Alpha)
+					if iconTexture ~= icon.__tex then icon:SetTexture(iconTexture) end
 
 					if icon.UnAlpha ~= 0 then
-						icon:SetVertexColor(pr)
+						icon:AlphaColor(Alpha, pr)
 					else
-						icon:SetVertexColor(1)
+						icon:AlphaColor(Alpha, 1)
 					end
 					start, endTime = start/1000, endTime/1000
 					local duration = endTime - start
@@ -111,11 +110,10 @@ local function Cast_OnUpdate(icon, time)
 			icon:CDBarStop()
 		end
 
-		icon:SetAlpha(UnAlpha)
 		if icon.Alpha ~= 0 then
-			icon:SetVertexColor(ab)
+			icon:AlphaColor(UnAlpha, ab)
 		else
-			icon:SetVertexColor(1)
+			icon:AlphaColor(UnAlpha, 1)
 		end
 
 		if icon.ShowTimer then

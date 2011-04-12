@@ -35,9 +35,9 @@ local LBF = LibStub("LibButtonFacade", true)
 local AceDB = LibStub("AceDB-3.0")
 local LSM = LibStub("LibSharedMedia-3.0")
 
-TELLMEWHEN_VERSION = "4.0.1.4"
+TELLMEWHEN_VERSION = "4.0.2"
 TELLMEWHEN_VERSION_MINOR = ""
-TELLMEWHEN_VERSIONNUMBER = 40121
+TELLMEWHEN_VERSIONNUMBER = 40201
 TELLMEWHEN_MAXGROUPS = 10 	--this is a default, used by SetTheory (addon), so dont rename
 TELLMEWHEN_MAXROWS = 20
 local UPD_INTV = 0.06	--this is a default, local because i use it in onupdate functions
@@ -52,8 +52,8 @@ local UnitPower, UnitAffectingCombat, UnitHasVehicleUI =
 	  UnitPower, UnitAffectingCombat, UnitHasVehicleUI
 local GetNumRaidMembers =
 	  GetNumRaidMembers
-local tonumber, tostring, type, pairs, ipairs, tinsert, tremove, sort, select, wipe, rawget =
-	  tonumber, tostring, type, pairs, ipairs, tinsert, tremove, sort, select, wipe, rawget
+local tonumber, tostring, type, pairs, ipairs, tinsert, tremove, sort, select, wipe, rawget, tDeleteItem =
+	  tonumber, tostring, type, pairs, ipairs, tinsert, tremove, sort, select, wipe, rawget, tDeleteItem
 local strfind, strmatch, format, gsub, strsub, strtrim, strsplit, strlower, min, max, ceil, floor =
 	  strfind, strmatch, format, gsub, strsub, strtrim, strsplit, strlower, min, max, ceil, floor
 local GetTime, debugstack = GetTime, debugstack
@@ -250,6 +250,8 @@ TMW.Defaults = {
 	HasImported	=	false,
 	ReceiveComm	=	true,
 	WarnInvalids=	true,
+	BarGCD		=	true,
+	ClockGCD	=	true,
 	Font 		= 	{
 		Name = "Arial Narrow",
 		Size = 12,
@@ -445,7 +447,7 @@ TMW.BE = {	--Much of these are thanks to Malazee @ US-Dalaran's chart: http://fo
 		Tier11Interrupts = "83703;86166;86167;86168;_82752;82636;83070;92454;92455;92456;79710;77896;77569;80734",
 	},
 	unlisted = {
-		-- enrages were extracted using the script in the /Scripts folder
+		-- enrages were extracted using the script in the /Scripts folder (source is db.mmo-champion.com)
 		Enraged = "24689;18499;29131;59465;39575;77238;52262;12292;54508;23257;66092;57733;58942;40076;8599;15061;15716;18501;19451;19812;22428;23128;23342;25503;26041;26051;28371;30485;31540;31915;32714;33958;34670;37605;37648;37975;38046;38166;38664;39031;41254;41447;42705;42745;43139;47399;48138;48142;48193;50420;51513;52470;54427;55285;56646;59697;59707;59828;60075;61369;63227;68541;70371;72143;72146;72147;72148;75998;76100;76862;78722;78943;80084;80467;86736;95436;95459;5229;12880;57514;57518;14201;57516;57519;14202;57520;51170;4146;76816;90872;82033;48702;52537;49029;67233;54781;56729;53361;79420;66759;67657;67658;67659;40601;60177;43292;90045;92946;52071;82759;60430;81772;48391;80158;54475;56769;63147;62071;52610;41364;81021;81022;81016;81017;34392;55462;50636;72203;49016;69052;43664;59694;91668;52461;54356;76691;81706;52309;29340;76487",
 	},
 }
@@ -512,7 +514,7 @@ TMW.Cooldowns = setmetatable({}, {__index = function(t, k)
 	return n
 end})
 
-TMW.Scripts = {} local Scripts = TMW.Scripts
+local OnUpdateHandlers = {}
 
 do -- STANCES
 	TMW.Stances = {
@@ -634,6 +636,9 @@ function TMW:OnInitialize()
 	TMW.AuraCache = TellMeWhenDB.AuraCache
 	TMW:RegisterEvent("COMBAT_LOG_EVENT_UNFILTERED")
 	TMW:RegisterEvent("PLAYER_ENTERING_WORLD")
+	TMW:RegisterEvent("PLAYER_TALENT_UPDATE")
+	TMW:RegisterEvent("ACTIVE_TALENT_GROUP_CHANGED", "PLAYER_TALENT_UPDATE")
+	TMW:SetScript("OnUpdate", TMW.OnUpdate)
 
 	if db.profile.ReceiveComm then
 		TMW:RegisterComm("TMW")
@@ -641,11 +646,15 @@ function TMW:OnInitialize()
 			RegisterAddonMessagePrefix("TMW") -- new in WoW 4.1
 		end
 	end
+	TMW:RegisterComm("TMWV")
+	if RegisterAddonMessagePrefix then
+		RegisterAddonMessagePrefix("TMWV") -- new in WoW 4.1
+	end
 	 
 	if IsInGuild() then
-		TMW:SendCommMessage("TMW", "M:" .. TELLMEWHEN_VERSION .. "^m:" .. TELLMEWHEN_VERSION_MINOR .. "^R:" .. TELLMEWHEN_VERSIONNUMBER .. "^", "GUILD")
+		TMW:SendCommMessage("TMWV", "M:" .. TELLMEWHEN_VERSION .. "^m:" .. TELLMEWHEN_VERSION_MINOR .. "^R:" .. TELLMEWHEN_VERSIONNUMBER .. "^", "GUILD")
 	end
-	TMW:ZONE_CHANGED_NEW_AREA()
+	TMW:PLAYER_ENTERING_WORLD()
 
 	TMW.VarsLoaded = true
 end
@@ -669,29 +678,16 @@ function TMW:PLAYER_TALENT_UPDATE()
 	talenthandler = TMW:ScheduleTimer("Update", 1)
 end
 
-function TMW:ZONE_CHANGED_NEW_AREA()
-	if GetRealNumRaidMembers() > 0 then
-		TMW:SendCommMessage("TMW", "M:" .. TELLMEWHEN_VERSION .. "^m:" .. TELLMEWHEN_VERSION_MINOR .. "^R:" .. TELLMEWHEN_VERSIONNUMBER .. "^", "RAID")
-	elseif GetRealNumPartyMembers() > 0 then
-		TMW:SendCommMessage("TMW", "M:" .. TELLMEWHEN_VERSION .. "^m:" .. TELLMEWHEN_VERSION_MINOR .. "^R:" .. TELLMEWHEN_VERSIONNUMBER .. "^", "PARTY")
-	elseif UnitInBattleground("player") then
-		TMW:SendCommMessage("TMW", "M:" .. TELLMEWHEN_VERSION .. "^m:" .. TELLMEWHEN_VERSION_MINOR .. "^R:" .. TELLMEWHEN_VERSIONNUMBER .. "^", "BATTLEGROUND")
-	end
-end
-TMW:RegisterEvent("ZONE_CHANGED_NEW_AREA")
-
 function TMW:OnCommReceived(prefix, text, channel, who)
-	if prefix ~= "TMW" then return end
-	if channel == "GUILD" then
-		if strsub(text, 1, 1) == "R" then
-			local major, minor, revision = strmatch(text, "M:(.*)%^m:(.*)%^R:(.*)%^")
-			revision = tonumber(revision)
-			if revision and major and minor and revision > TELLMEWHEN_VERSIONNUMBER and not TMW.VersionWarned then
-				TMW.VersionWarned = true
-				TMW:Printf(L["NEWVERSION"], major .. minor)
-			end
+	print(prefix, text, channel, who)
+	if prefix == "TMWV" and strsub(text, 1, 1) == "M" and not TMW.VersionWarned then
+		local major, minor, revision = strmatch(text, "M:(.*)%^m:(.*)%^R:(.*)%^")
+		revision = tonumber(revision)
+		if revision and major and minor and revision > TELLMEWHEN_VERSIONNUMBER then
+			TMW.VersionWarned = true
+			TMW:Printf(L["NEWVERSION"], major .. minor)
 		end
-	elseif channel == "WHISPER" and db.profile.ReceiveComm then
+	elseif prefix == "TMW" and channel == "WHISPER" and db.profile.ReceiveComm then
 		TMW.Recieved[text] = who or true
 		if who then
 			if db.profile.HasImported then
@@ -703,25 +699,18 @@ function TMW:OnCommReceived(prefix, text, channel, who)
 	end
 end
 
-function TMW:OnUpdate()
+function TMW:OnUpdate() -- this is where all icon OnUpdate scripts are actually called
 	time = GetTime()
 	if UpdateTimer <= time - UPD_INTV then
 		CNDT.Env.time = time
 		TMW.time = time
 		UpdateTimer = time
 		_, GCD=GetSpellCooldown(GCDSpell)
-		for i = 1, #Scripts do
-			local icon = Scripts[i]
+		for i = 1, #OnUpdateHandlers do
+			local icon = OnUpdateHandlers[i]
 			if icon.__shown and icon.group.__shown then
 				icon:OnUpdate(time)
 			end
-		end
-		if doUpdateIcons then
-			for icon in pairs(updateicons) do
-				TMW:Icon_Update(icon)
-			end
-			wipe(updateicons)
-			doUpdateIcons = false
 		end
 
 		if TMW.DoWipeAC then
@@ -766,12 +755,18 @@ function TMW:Update()
 	for group in TMW.InGroups() do
 		group:Hide()
 	end
-	TMW:ColorUpdate() -- r
+	TMW:ColorUpdate()
 
 	wipe(TMW.Icons)
 
-	for groupID = 1, TELLMEWHEN_MAXGROUPS do -- dont use TMW.InGroups()
+	TMW.dontSetGroupPos = true
+	for groupID = 1, TELLMEWHEN_MAXGROUPS do -- dont use TMW.InGroups() because that will setup every group that exists, even if it shouldn't be setup (i.e. it has been deleted or the user changed profiles)
 		TMW:Group_Update(groupID)
+	end
+	TMW.dontSetGroupPos = nil
+	for groupID = 1, TELLMEWHEN_MAXGROUPS do
+		-- the reason that this is separated is because groups may be anchored to other groups with higher groupIDs, but those groups must exist first before anchoring.
+		TMW:Group_SetPos(groupID)
 	end
 
 	if not Locked then
@@ -1008,7 +1003,6 @@ function TMW:Upgrade()
 		if needtowarn ~= "" then
 			TMW.Warn("The following icons may have had their maximum stacks and/or duration modified, you may wish to check them: " .. needtowarn)
 		end
-		db.profile.Revision = 77
 	end
 	
 	if db.profile.Version < 40010 then
@@ -1074,18 +1068,27 @@ function TMW:Upgrade()
 			end
 		end
 	end
+	if db.profile.Version < 40124 then
+		db.profile.Revision = nil-- unused
+	end
 	
 
 	--All Upgrades Complete
 	db.profile.Version = TELLMEWHEN_VERSIONNUMBER
 end
 
-function TMW:LoadOptions()
+function TMW:LoadOptions(n)
+	n = n or 1
 	local loaded, reason = LoadAddOn("TellMeWhen_Options")
 	if not loaded then
-		local err = L["LOADERROR"] .. _G["ADDON_"..reason]
-		TMW:Print(err)
-		error(err, 0)
+		if reason == "DISABLED" and (n < 2) then -- prevent accidental recursion
+			EnableAddOn("TellMeWhen_Options")
+			TMW:LoadOptions(n+1)
+		else
+			local err = L["LOADERROR"] .. _G["ADDON_"..reason]
+			TMW:Print(err)
+			geterrorhandler()(err, 0) -- non breaking error
+		end
 	end
 	TMW:CompileOptions()
 end
@@ -1130,9 +1133,23 @@ end
 function TMW:PLAYER_ENTERING_WORLD()
 	if not TMW.VarsLoaded then return end
 	TMW.EnteredWorld = true
-	TMW:RegisterEvent("PLAYER_TALENT_UPDATE", "PLAYER_TALENT_UPDATE")
-	TMW:RegisterEvent("ACTIVE_TALENT_GROUP_CHANGED", "PLAYER_TALENT_UPDATE")
-	TMW:SetScript("OnUpdate", TMW.OnUpdate)
+	
+	local NumRealRaidMembers = GetRealNumRaidMembers()
+	local NumRealPartyMembers = GetRealNumPartyMembers()
+	local NumRaidMembers = GetNumRaidMembers()
+	
+	if (NumRealRaidMembers > 0) and (NumRealRaidMembers ~= (TMW.OldNumRealRaidMembers or 0)) then
+		TMW.OldNumRealRaidMembers = NumRealRaidMembers
+		TMW:SendCommMessage("TMWV", "M:" .. TELLMEWHEN_VERSION .. "^m:" .. TELLMEWHEN_VERSION_MINOR .. "^R:" .. TELLMEWHEN_VERSIONNUMBER .. "^", "RAID")
+		
+	elseif (NumRealRaidMembers == 0) and (NumRealPartyMembers > 0) and (NumRealPartyMembers ~= (TMW.OldNumRealPartyMembers or 0)) then
+		TMW.OldNumRealPartyMembers = NumRealPartyMembers
+		TMW:SendCommMessage("TMWV", "M:" .. TELLMEWHEN_VERSION .. "^m:" .. TELLMEWHEN_VERSION_MINOR .. "^R:" .. TELLMEWHEN_VERSIONNUMBER .. "^", "PARTY")
+		
+	elseif UnitInBattleground("player") and (NumRaidMembers ~= (TMW.OldNumRaidMembers or 0)) then
+		TMW.OldNumRaidMembers = NumRaidMembers
+		TMW:SendCommMessage("TMWV", "M:" .. TELLMEWHEN_VERSION .. "^m:" .. TELLMEWHEN_VERSION_MINOR .. "^R:" .. TELLMEWHEN_VERSIONNUMBER .. "^", "BATTLEGROUND")
+	end
 end
 
 local mtTranslations, maTranslations = {}, {}
@@ -1413,7 +1430,9 @@ function TMW:Group_Update(groupID)
 		end
 	end
 
-	TMW:Group_SetPos(groupID)
+	if not TMW.dontSetGroupPos then
+		TMW:Group_SetPos(groupID)
+	end
 
 	if group.OnlyInCombat then
 		group:RegisterEvent("PLAYER_REGEN_ENABLED")
@@ -1480,16 +1499,16 @@ local function ScriptSort(iconA, iconB)
 	end
 	return gA*gOrder < gB*gOrder
 end
-local tDeleteItem = tDeleteItem-- TODO move this
+
 local function SetScript(icon, handler, func)
 	icon[handler] = func
 	if handler ~= "OnUpdate" then
 		icon:setscript(handler, func)
 	else
-		tDeleteItem(Scripts, icon)
+		tDeleteItem(OnUpdateHandlers, icon)
 		if func then
-			Scripts[#Scripts+1] = icon
-			sort(Scripts, ScriptSort)
+			OnUpdateHandlers[#OnUpdateHandlers+1] = icon
+			sort(OnUpdateHandlers, ScriptSort)
 		end
 	end
 end
@@ -1502,7 +1521,7 @@ local function SetCooldown(icon, start, duration, reverse)
 			local cd = icon.cooldown
 			cd:SetCooldown(start, duration)
 			cd:Show() --cd:SetAlpha(1) to use omnicc's finish effects properly, but im leaving it alone for now.
-			if reverse ~= nil then -- must be ~= nil
+			if reverse ~= nil and icon.__reverse ~= reverse then -- must be ( ~= nil )
 				icon.__reverse = reverse
 				cd:SetReverse(reverse)
 			end
@@ -1513,15 +1532,14 @@ local function SetCooldown(icon, start, duration, reverse)
 end
 
 local function SetTexture(icon, tex)
-	if icon.__tex ~= tex then
-		icon.__tex = tex
-		icon.texture:SetTexture(tex)
-	end
+	--if icon.__tex ~= tex then ------dont check for this, checking is done before this method is even called
+	icon.__tex = tex
+	icon.texture:SetTexture(tex)
 end
 
 local function SetVertexColor(icon, info)
-	if icon.__vrtxinfo ~= info then
-		icon.__vrtxinfo = info
+	if icon.__vrtxcolor ~= info then
+		icon.__vrtxcolor = info
 		if type(info) == "table" then
 			icon.texture:SetVertexColor(info.r, info.g, info.b, 1)
 		else
@@ -1531,14 +1549,34 @@ local function SetVertexColor(icon, info)
 
 end
 
-local function SetStack(icon, count)
-	if icon.__count ~= count then
-		icon.__count = count
-		if count and count > 1 then
-			icon.countText:SetText(count)
+local function AlphaColor(icon, alpha, color)
+	icon.FakeAlpha = alpha
+	if alpha ~= icon.__alpha then
+		if icon.FakeHidden then
+			icon:setalpha(0) -- setalpha(lowercase) is the old, raw SetAlpha. Use it to override FakeAlpha, although this really should never happen ourside of here
+			icon.__alpha = 0
 		else
-			icon.countText:SetText(nil)
+			icon:setalpha(alpha)
+			icon.__alpha = alpha
 		end
+	end
+	if icon.__vrtxcolor ~= color then
+		icon.__vrtxcolor = color
+		if type(color) == "table" then
+			icon.texture:SetVertexColor(color.r, color.g, color.b, 1)
+		else
+			icon.texture:SetVertexColor(color, color, color, 1)
+		end
+	end
+end
+
+local function SetStack(icon, count)
+	--if icon.__count ~= count then ------dont check for this, checking is done before this method is even called
+	icon.__count = count
+	if count and count > 1 then
+		icon.countText:SetText(count)
+	else
+		icon.countText:SetText(nil)
 	end
 end
 
@@ -1696,6 +1734,7 @@ local IconAddIns = {
 	SetVertexColor	=	SetVertexColor,
 	SetStack		=	SetStack,
 	SetReverse		=	SetReverse,
+	AlphaColor		=	AlphaColor,
 	Show			=	Show,
 	Hide			=	Hide,
 }
@@ -1924,7 +1963,7 @@ function TMW:Icon_Update(icon)
 	end
 
 	if icon.FakeHidden then
-		tDeleteItem(Scripts, icon) -- remove it from the list of scripts to run on update, but dont call SetScript on it because that will remove it and set icon.OnUpdate to nil, which is called by conditions/metas
+		tDeleteItem(OnUpdateHandlers, icon) -- remove it from the list of scripts to run on update, but dont call SetScript on it because that will remove it and set icon.OnUpdate to nil, which is called by conditions/metas
 	end
 
 	icon:SetCooldown(0, 0)
@@ -1981,19 +2020,6 @@ function TMW:Icon_Update(icon)
 			pbar:SetValue(0)
 		end
 	end
-end
-
-function TMW:ScheduleIconUpdate(icon, groupID, iconID)
-	-- this is a handler to prevent the spamming of Icon_Update and creating excessive garbage.
-	if type(icon) == "number" then --allow omission of icon
-		iconID = groupID
-		groupID = icon
-		assert(groupID ~= 0)
-		icon = TMW[groupID] and TMW[groupID][iconID]
-	end
-	if not icon then return end
-	updateicons[icon] = true
-	doUpdateIcons = true
 end
 
 

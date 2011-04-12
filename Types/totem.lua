@@ -73,15 +73,12 @@ local function Totem_OnUpdate(icon, time)
 						icon:CDBarStart(start, duration, 1)
 					end
 					if Alpha ~= 0 and icon.UnAlpha ~= 0 then
-						icon:SetVertexColor(pr)
+						icon:AlphaColor(Alpha, pr)
 					else
-						icon:SetVertexColor(1)
+						icon:AlphaColor(Alpha, 1)
 					end
-					icon:SetAlpha(Alpha)
-
-					if totemIcon then
-						icon:SetTexture(totemIcon)
-					end
+					
+					if totemIcon and totemIcon ~= icon.__tex then icon:SetTexture(totemIcon) end
 
 					if icon.ShowTimer then
 						icon:SetCooldown(start, duration)
@@ -91,20 +88,20 @@ local function Totem_OnUpdate(icon, time)
 				end
 			end
 		end
-		if icon.NameName then
-			local t = GetSpellTexture(icon.NameName)
-			if t then
-				icon:SetTexture(t)
-			end
-		end
 		local UnAlpha = icon.UnAlpha
-		
-		if icon.Alpha ~= 0 and UnAlpha ~= 0 then
-			icon:SetVertexColor(ab)
-		else
-			icon:SetVertexColor(1)
+		if UnAlpha == 0 then
+			icon:SetAlpha(0)
+			return
 		end
-		icon:SetAlpha(UnAlpha)
+		
+		local t = icon.FirstTexture
+		if t and t ~= icon.__tex then icon:SetTexture(t) end
+		
+		if icon.Alpha ~= 0 then
+			icon:AlphaColor(UnAlpha, ab)
+		else
+			icon:AlphaColor(UnAlpha, 1)
+		end
 		icon:SetCooldown(0, 0)
 
 		return
@@ -132,6 +129,7 @@ function Type:Setup(icon, groupID, iconID)
 		icon.Slots[4] = nil
 	elseif pclass == "DRUID" then
 		icon.NameFirst = ""
+		icon.NameName = GetSpellInfo(88747)
 		icon.Slots[4] = nil -- there is no mushroom 4
 	elseif pclass ~= "SHAMAN" then --enable all totems for people that dont have totem slot options (future-proof it)
 		icon.Slots[1] = true
@@ -141,6 +139,8 @@ function Type:Setup(icon, groupID, iconID)
 	end
 	icon.ShowPBar = false
 	icon:SetReverse(true)
+	
+	icon.FirstTexture = icon.NameName and GetSpellTexture(icon.NameName)
 
 	if pclass == "DRUID" then
 		icon:SetTexture(GetSpellTexture(88747))

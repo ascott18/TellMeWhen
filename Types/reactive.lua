@@ -105,18 +105,16 @@ local function Reactive_OnUpdate(icon, time)
 				end
 				usable = Usable or usable
 				if usable and not CD and not nomana and inrange == 1 then --usable
-					if icon.Alpha == 0 then
+					local Alpha = icon.Alpha
+					if Alpha == 0 then
 						icon:SetAlpha(0)
 						return
 					end
 
 					local t = GetSpellTexture(iName)
-					if t then
-						icon:SetTexture(t)
-					end
+					if t and t ~= icon.__tex then icon:SetTexture(t) end
 
-					icon:SetVertexColor(1)
-					icon:SetAlpha(icon.Alpha)
+					icon:AlphaColor(Alpha, 1)
 
 					if not icon.ShowTimer or (ClockGCD and isGCD) then
 						icon:SetCooldown(0, 0)
@@ -135,7 +133,8 @@ local function Reactive_OnUpdate(icon, time)
 				end
 			end
 		end
-		if icon.UnAlpha == 0 then
+		local UnAlpha = icon.UnAlpha
+		if UnAlpha == 0 then
 			icon:SetAlpha(0)
 			return
 		end
@@ -164,23 +163,18 @@ local function Reactive_OnUpdate(icon, time)
 
 			if icon.Alpha ~= 0 then
 				if inrange ~= 1 then
-					icon:SetVertexColor(rc)
-					icon:SetAlpha(icon.UnAlpha*rc.a)
+					icon:AlphaColor(UnAlpha*rc.a, rc)
 				elseif nomana then
-					icon:SetVertexColor(mc)
-					icon:SetAlpha(icon.UnAlpha*mc.a)
+					icon:AlphaColor(UnAlpha*mc.a, mc)
 				else
-					icon:SetVertexColor(0.5)
-					icon:SetAlpha(icon.UnAlpha)
+					icon:AlphaColor(UnAlpha, 0.5)
 				end
 			else
-				icon:SetVertexColor(1)
-				icon:SetAlpha(icon.UnAlpha)
+				icon:AlphaColor(UnAlpha, 1)
 			end
-
-			if icon.FirstTexture then
-				icon:SetTexture(icon.FirstTexture)
-			end
+			
+			local t = icon.FirstTexture
+			if t and t ~= icon.__tex then icon:SetTexture(t) end
 
 			if not icon.ShowTimer or (ClockGCD and isGCD) then
 				icon:SetCooldown(0, 0)

@@ -158,13 +158,14 @@ local function Buff_OnUpdate(icon, time)
 						return
 					end
 
-					icon:SetStack(count)
-					icon:SetTexture(iconTexture)
-					icon:SetAlpha(Alpha)
+					if icon.__count ~= count then icon:SetStack(count) end
+					
+					if iconTexture ~= icon.__tex then icon:SetTexture(iconTexture) end
+					
 					if icon.UnAlpha ~= 0 then
-						icon:SetVertexColor(pr)
+						icon:AlphaColor(Alpha, pr)
 					else
-						icon:SetVertexColor(1)
+						icon:AlphaColor(Alpha, 1)
 					end
 					
 					local start = expirationTime - duration
@@ -193,20 +194,19 @@ local function Buff_OnUpdate(icon, time)
 			icon:CDBarStop()
 		end
 
-		icon:SetAlpha(UnAlpha)
 		if icon.Alpha ~= 0 then -- and UnAlpha ~= 0  (not needed, it has to not be 0 or it would have returned earlier)
-			icon:SetVertexColor(ab)
+			icon:AlphaColor(UnAlpha, ab)
 		else
-			icon:SetVertexColor(1)
+			icon:AlphaColor(UnAlpha, 1)
 		end
 
-		if icon.FirstTexture then
-			icon:SetTexture(icon.FirstTexture)
-		end
+		local t = icon.FirstTexture
+		if t and t ~= icon.__tex then icon:SetTexture(t) end
+		
 		if icon.ShowTimer then
 			icon:SetCooldown(0, 0)
 		end
-		icon:SetStack(nil)
+		if icon.__count then icon:SetStack(nil) end
 
 	end
 end

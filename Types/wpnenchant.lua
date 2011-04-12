@@ -119,11 +119,10 @@ local function WpnEnchant_OnUpdate(icon, time)
 			local start = floor(time - duration + expiration)
 
 			if icon.UnAlpha ~= 0 then
-				icon:SetVertexColor(pr)
+				icon:AlphaColor(Alpha, pr)
 			else
-				icon:SetVertexColor(1)
+				icon:AlphaColor(Alpha, 1)
 			end
-			icon:SetAlpha(Alpha)
 
 			if icon.ShowTimer then
 				icon:SetCooldown(start, duration)
@@ -138,11 +137,10 @@ local function WpnEnchant_OnUpdate(icon, time)
 				return
 			end
 			if icon.Alpha ~= 0 then
-				icon:SetVertexColor(ab)
+				icon:AlphaColor(UnAlpha, ab)
 			else
-				icon:SetVertexColor(1)
+				icon:AlphaColor(UnAlpha, 1)
 			end
-			icon:SetAlpha(UnAlpha)
 			icon:SetCooldown(0, 0)
 			icon:CDBarStop()
 		end
@@ -153,12 +151,12 @@ end
 local function WpnEnchant_OnEvent(icon, event, unit)
 	if unit == "player" then
 		local wpnTexture = GetInventoryItemTexture("player", icon.Slot)
-		icon:SetTexture(wpnTexture or "Interface\\Icons\\INV_Misc_QuestionMark")
-		print(icon, wpnTexture,icon.HideUnequipped)
+		
+		local t = wpnTexture or "Interface\\Icons\\INV_Misc_QuestionMark"
+		if t ~= icon.__tex then icon:SetTexture(t) end
+			
 		if not wpnTexture and icon.HideUnequipped then
-			print(icon, "HIDE")
 			icon:SetAlpha(0)
-			icon.FakeAlpha = 0
 			if icon.OnUpdate then
 				icon:SetScript("OnUpdate", nil)
 			end
