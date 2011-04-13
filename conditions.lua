@@ -753,7 +753,7 @@ CNDT.Types = {
 		end,
 		funcstr = function(c)
 			if c.Icon == "" then return [[true]] end
-			local str = [[(c.Icon and c.Icon.__shown and c.Icon.group.__shown and c.Icon.OnUpdate and not c.Icon:OnUpdate(time))]]
+			local str = [[(c.Icon and c.Icon.__shown and c.Icon.OnUpdate and not c.Icon:OnUpdate(time))]]
 			if c.Level == 0 then
 				str = str .. [[and c.Icon.FakeAlpha > 0]]
 			else

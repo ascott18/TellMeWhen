@@ -42,7 +42,7 @@ local function Meta_OnUpdate(icon, time)
 			if ic and ic.OnUpdate and (not CheckNext or (CheckNext and not AlreadyChecked[ic])) then
 				ic:OnUpdate(time)
 				local alpha = ic.FakeAlpha
-				if alpha > 0 and ic.__shown and ic.group.__shown then
+				if alpha > 0 and ic.__shown then
 				
 					icon.cooldown.noCooldownCount = ic.cooldown.noCooldownCount
 					icon:SetCooldown(ic.__start, ic.__duration, ic.__reverse)

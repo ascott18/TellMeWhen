@@ -37,7 +37,7 @@ local LSM = LibStub("LibSharedMedia-3.0")
 
 TELLMEWHEN_VERSION = "4.0.2"
 TELLMEWHEN_VERSION_MINOR = ""
-TELLMEWHEN_VERSIONNUMBER = 40203
+TELLMEWHEN_VERSIONNUMBER = 40204
 TELLMEWHEN_MAXGROUPS = 10 	--this is a default, used by SetTheory (addon), so dont rename
 TELLMEWHEN_MAXROWS = 20
 local UPD_INTV = 0.06	--this is a default, local because i use it in onupdate functions
@@ -714,7 +714,7 @@ function TMW:OnUpdate() -- this is where all icon OnUpdate scripts are actually 
 		_, GCD=GetSpellCooldown(GCDSpell)
 		for i = 1, #OnUpdateHandlers do
 			local icon = OnUpdateHandlers[i]
-			if icon.__shown and icon.group.__shown then
+			if icon.__shown then
 				icon:OnUpdate(time)
 			end
 		end
@@ -1273,7 +1273,6 @@ local function CreateGroup(groupID)
 	local group = CreateFrame("Frame", "TellMeWhen_Group" .. groupID, UIParent, "TellMeWhen_GroupTemplate", groupID)
 	TMW[groupID] = group
 	group:SetID(groupID)
-	group.__shown = group:IsShown()
 	
 	--[[for k, v in pairs(GroupAddIns) do -- CURRENTLY UNUSED
 		if type(group[k]) == "function" then -- if the method already exists on the icon
