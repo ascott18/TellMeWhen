@@ -197,6 +197,12 @@
 					TMW:Group_StopMoving(self)
 				end
 			</OnDragStop>
+			<OnShow>
+				self.__shown = 1
+			</OnShow>
+			<OnHide>
+				self.__shown = nil
+			</OnHide>
 		</Scripts>
 		<HighlightTexture alphaMode="ADD" file="Interface\Buttons\ButtonHilight-Square"/>
 	</Button>

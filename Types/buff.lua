@@ -152,13 +152,15 @@ local function Buff_OnUpdate(icon, time)
 						return
 					end
 
-					local d = expirationTime - time
-					if expirationTime ~= 0 and ((icon.DurationMinEnabled and icon.DurationMin > d) or (icon.DurationMaxEnabled and d > icon.DurationMax)) then
-						icon:SetAlpha(0)
-						return
+					if icon.DurationEnabled then
+						local d = expirationTime == 0 and 0 or expirationTime - time
+						if (icon.DurationMinEnabled and icon.DurationMin > d) or (icon.DurationMaxEnabled and d > icon.DurationMax) then
+							icon:SetAlpha(0)
+							return
+						end
 					end
 
-					if icon.__count ~= count then icon:SetStack(count) end
+					if count ~= icon.__count then icon:SetStack(count) end
 					
 					if iconTexture ~= icon.__tex then icon:SetTexture(iconTexture) end
 					

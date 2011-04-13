@@ -37,7 +37,7 @@ local LSM = LibStub("LibSharedMedia-3.0")
 
 TELLMEWHEN_VERSION = "4.0.2"
 TELLMEWHEN_VERSION_MINOR = ""
-TELLMEWHEN_VERSIONNUMBER = 40202
+TELLMEWHEN_VERSIONNUMBER = 40203
 TELLMEWHEN_MAXGROUPS = 10 	--this is a default, used by SetTheory (addon), so dont rename
 TELLMEWHEN_MAXROWS = 20
 local UPD_INTV = 0.06	--this is a default, local because i use it in onupdate functions
@@ -1269,19 +1269,18 @@ function TMW:GetShapeshiftForm()
 	return i or 0
 end local GetShapeshiftForm = TMW.GetShapeshiftForm
 
-local GroupAddIns
 local function CreateGroup(groupID)
 	local group = CreateFrame("Frame", "TellMeWhen_Group" .. groupID, UIParent, "TellMeWhen_GroupTemplate", groupID)
 	TMW[groupID] = group
 	group:SetID(groupID)
 	group.__shown = group:IsShown()
 	
-	for k, v in pairs(GroupAddIns) do
+	--[[for k, v in pairs(GroupAddIns) do -- CURRENTLY UNUSED
 		if type(group[k]) == "function" then -- if the method already exists on the icon
 			group[strlower(k)] = group[k] -- store the old method as the lowercase same name
 		end
 		group[k] = v
-	end
+	end]]
 	return group
 end
 
@@ -1591,16 +1590,6 @@ local function SetReverse(icon, reverse)
 	icon.cooldown:SetReverse(reverse)
 end
 
-local function Show(icon)
-	icon.__shown = true
-	icon:show()
-end
-
-local function Hide(icon)
-	icon.__shown = false
-	icon:hide()
-end
-
 local function CDBarOnUpdate(bar)
 	local duration = bar.duration
 	if bar.InvertBars then
@@ -1741,8 +1730,6 @@ local IconAddIns = {
 	SetStack		=	SetStack,
 	SetReverse		=	SetReverse,
 	AlphaColor		=	AlphaColor,
-	Show			=	Show,
-	Hide			=	Hide,
 }
 
 local IconMetamethods = {
@@ -1760,10 +1747,6 @@ local IconMetamethods = {
 	end
 }
 
-GroupAddIns = {
-	Show			=	Show,
-	Hide			=	Hide,
-}
 
 -- -------------
 -- ICON FUNCTIONS
@@ -1787,7 +1770,6 @@ function TMW:CreateIcon(group, groupID, iconID)
 	local icon = CreateFrame("Button", "TellMeWhen_Group" .. groupID .. "_Icon" .. iconID, group, "TellMeWhen_IconTemplate", iconID)
 	icon.group = group
 	group[iconID] = icon
-	group.__shown = icon:IsShown()
 	CNDT.Env[icon:GetName()] = icon
 	local mt = getmetatable(icon)
 	for k, v in pairs(IconMetamethods) do
