@@ -29,15 +29,15 @@ TMW.OrderedTypes = {}
 
 local db
 local L = LibStub("AceLocale-3.0"):GetLocale("TellMeWhen", true)
---setmetatable({}, {__index = function() return "! ! ! ! ! ! ! ! ! ! ! ! ! ! ! ! ! ! ! ! !" end}) -- stress testing for text widths
+--L = setmetatable({}, {__index = function() return "! ! ! ! ! ! ! ! ! ! ! ! ! ! ! ! ! ! ! ! !" end}) -- stress testing for text widths
 TMW.L = L
 local LBF = LibStub("LibButtonFacade", true)
 local AceDB = LibStub("AceDB-3.0")
 local LSM = LibStub("LibSharedMedia-3.0")
 
-TELLMEWHEN_VERSION = "4.0.2"
+TELLMEWHEN_VERSION = "4.0.3"
 TELLMEWHEN_VERSION_MINOR = ""
-TELLMEWHEN_VERSIONNUMBER = 40204
+TELLMEWHEN_VERSIONNUMBER = 40301
 TELLMEWHEN_MAXGROUPS = 10 	--this is a default, used by SetTheory (addon), so dont rename
 TELLMEWHEN_MAXROWS = 20
 local UPD_INTV = 0.06	--this is a default, local because i use it in onupdate functions
@@ -52,18 +52,18 @@ local UnitPower, UnitAffectingCombat, UnitHasVehicleUI =
 	  UnitPower, UnitAffectingCombat, UnitHasVehicleUI
 local GetNumRaidMembers =
 	  GetNumRaidMembers
-local tonumber, tostring, type, pairs, ipairs, tinsert, tremove, sort, select, wipe, rawget, tDeleteItem =
+local tonumber, tostring, type, pairs, ipairs, tinsert, tremove, sort, select, wipe, rawget, tDeleteItem = --tDeleteItem is a blizzard function defined in UIParent.lua
 	  tonumber, tostring, type, pairs, ipairs, tinsert, tremove, sort, select, wipe, rawget, tDeleteItem
 local strfind, strmatch, format, gsub, strsub, strtrim, strsplit, strlower, min, max, ceil, floor =
 	  strfind, strmatch, format, gsub, strsub, strtrim, strsplit, strlower, min, max, ceil, floor
 local GetTime, debugstack = GetTime, debugstack
 local _G = _G
 local _, pclass = UnitClass("Player")
-local st, co, talenthandler, BarGCD, ClockGCD, Locked, CNDT, doUpdateIcons
+local st, co, talenthandler, BarGCD, ClockGCD, Locked, CNDT
 local GCD, NumShapeshiftForms, UpdateTimer = 0, 0, 0
 local time = GetTime()
 TMW.time = time
-local updateicons, unitsToChange = {}, {}
+local unitsToChange = {}
 local clientVersion = select(4, GetBuildInfo())
 
 
@@ -1760,7 +1760,8 @@ TMW.Types = {
 				icon:SetTexture(nil)
 			end
 		end,
-		Update = function() end
+		Update = function() end,
+		HideBars = true,
 	},
 }	TMW.RelevantSettings[""] = {Name = true}
 
@@ -1929,6 +1930,9 @@ function TMW:Icon_Update(icon)
 		icon.powerbar:SetFrameLevel(icon:GetFrameLevel() + 3)
 	end
 
+	
+	icon.__normaltex = icon.__LBF_Normal or icon:GetNormalTexture()
+	icon.__previcon = nil
 	icon.__alpha = nil -- force an alpha update
 	icon.__tex = "qq i got reset" -- force a texture update
 	if not (Locked and not icon.Enabled) then
@@ -1961,7 +1965,9 @@ function TMW:Icon_Update(icon)
 	local pbar = icon.powerbar
 	local cbar = icon.cooldownbar
 	if Locked then
-		icon:DisableDrawLayer("BACKGROUND")
+		if icon.texture:GetTexture() == "Interface\\AddOns\\TellMeWhen\\Textures\\Disabled" then
+			icon:SetTexture(nil)
+		end
 		icon:EnableMouse(0)
 		if (not icon.Enabled) or (icon.Name == "" and not TMW.Types[icon.Type].AllowNoName) then
 			ClearScripts(icon)
@@ -1980,12 +1986,10 @@ function TMW:Icon_Update(icon)
 		if icon.Enabled then
 			icon:setalpha(1.0)
 		else
-			icon:setalpha(0.4)
+			icon:setalpha(0.5)
 		end
 		if not icon.texture:GetTexture() then
-			icon:EnableDrawLayer("BACKGROUND")
-		else
-			icon:DisableDrawLayer("BACKGROUND")
+			icon:SetTexture("Interface\\AddOns\\TellMeWhen\\Textures\\Disabled")
 		end
 		ClearScripts(cbar)
 		cbar.UpdateSet = false

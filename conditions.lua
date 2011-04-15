@@ -19,6 +19,32 @@ local Env
 
 local L = TMW.L
 local _, pclass = UnitClass("Player")
+
+local strlower, min =
+	  strlower, min
+local NONE, MAX_SPELL_SCHOOLS =
+	  NONE, MAX_SPELL_SCHOOLS
+local GetEclipseDirection, IsResting =
+	  GetEclipseDirection, IsResting
+local IsInInstance, GetInstanceDifficulty =
+	  IsInInstance, GetInstanceDifficulty
+local GetNumPartyMembers, GetNumRaidMembers =
+	  GetNumPartyMembers, GetNumRaidMembers
+local GetShapeshiftFormInfo =
+	  GetShapeshiftFormInfo
+local UnitAttackPower, UnitRangedAttackPower =
+	  UnitAttackPower, UnitRangedAttackPower
+local GetMeleeHaste, GetRangedHaste, UnitSpellHaste =
+	  GetMeleeHaste, GetRangedHaste, UnitSpellHaste
+local GetCritChance, GetRangedCritChance, GetSpellCritChance =
+	  GetCritChance, GetRangedCritChance, GetSpellCritChance
+local GetSpellBonusDamage, GetSpellBonusHealing =
+	  GetSpellBonusDamage, GetSpellBonusHealing
+local GetExpertise, GetMastery, UnitStat =
+	  GetExpertise, GetMastery, UnitStat
+local UnitAura =
+	  UnitAura
+
 local _G = _G
 local print = TMW.print
 
@@ -127,7 +153,7 @@ end
 
 function CNDT:UNIT_RANGED_ATTACK_POWER(unit)
 	if unit == "player" then
-		base, pos, neg = UnitRangedAttackPower("player")
+		local base, pos, neg = UnitRangedAttackPower("player")
 		Env.RangeAttackPower = base + pos + neg
 	end
 end
@@ -1044,7 +1070,7 @@ CNDT.Types = {
 		max = 2,
 		unit = false,
 		texttable = {[0] = SOLO, [1] = PARTY, [2] = RAID},
-		icon = "Interface\\Icons\\INV_Misc_GroupNeedMore",
+		icon = "Interface\\Calendar\\MeetingIcon",
 		tcoords = standardtcoords,
 		funcstr = [[((NumRaidMembers > 0 and 2) or (NumPartyMembers > 0 and 1) or 0) c.Operator c.Level]], -- this one was harder than it should have been to figure out; keep it in mind for future condition creating
 		events = {"PARTY_MEMBERS_CHANGED", "RAID_ROSTER_UPDATE"},

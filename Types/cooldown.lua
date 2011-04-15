@@ -14,8 +14,8 @@ local L = TMW.L
 local db, time, UPD_INTV, ClockGCD, rc, mc
 local GetSpellCooldown, IsSpellInRange, IsUsableSpell, GetSpellTexture =
 	  GetSpellCooldown, IsSpellInRange, IsUsableSpell, GetSpellTexture
-local GetItemCooldown, IsItemInRange, IsEquippedItem, GetItemIcon =
-	  GetItemCooldown, IsItemInRange, IsEquippedItem, GetItemIcon
+local GetItemCooldown, IsItemInRange, IsEquippedItem, GetItemIcon, GetItemCount =
+	  GetItemCooldown, IsItemInRange, IsEquippedItem, GetItemIcon, GetItemCount
 local GetActionCooldown, IsActionInRange, IsUsableAction, GetActionTexture, GetActionInfo =
 	  GetActionCooldown, IsActionInRange, IsUsableAction, GetActionTexture, GetActionInfo
 local OnGCD = TMW.OnGCD
@@ -99,11 +99,13 @@ local function SpellCooldown_OnUpdate(icon, time)
 					if t and t ~= icon.__tex then icon:SetTexture(t) end
 
 					icon:AlphaColor(Alpha, 1)
-
-					if ClockGCD and isGCD then
-						icon:SetCooldown(0, 0)
-					elseif icon.ShowTimer then
-						icon:SetCooldown(start, duration)
+					
+					if icon.ShowTimer then
+						if ClockGCD and isGCD then
+							icon:SetCooldown(0, 0)
+						else
+							icon:SetCooldown(start, duration)
+						end
 					end
 
 					if icon.ShowCBar then
@@ -163,10 +165,12 @@ local function SpellCooldown_OnUpdate(icon, time)
 			local t = icon.FirstTexture
 			if t ~= icon.__tex then icon:SetTexture(t) end
 
-			if ClockGCD and isGCD then
-				icon:SetCooldown(0, 0)
-			elseif icon.ShowTimer then
-				icon:SetCooldown(start, duration)
+			if icon.ShowTimer then
+				if ClockGCD and isGCD then
+					icon:SetCooldown(0, 0)
+				else
+					icon:SetCooldown(start, duration)
+				end
 			end
 
 			if icon.ShowCBar then
@@ -229,11 +233,13 @@ local function ItemCooldown_OnUpdate(icon, time)
 					if t ~= icon.__tex then icon:SetTexture(t) end
 
 					icon:AlphaColor(Alpha, 1)
-
-					if not icon.ShowTimer or (ClockGCD and isGCD) then
-						icon:SetCooldown(0, 0)
-					else
-						icon:SetCooldown(start, duration)
+					
+					if icon.ShowTimer then
+						if ClockGCD and isGCD then
+							icon:SetCooldown(0, 0)
+						else
+							icon:SetCooldown(start, duration)
+						end
 					end
 
 					if icon.ShowCBar then
@@ -298,10 +304,12 @@ local function ItemCooldown_OnUpdate(icon, time)
 			local t = GetItemIcon(NameFirst2)
 			if t and t ~= icon.__tex then icon:SetTexture(t) end
 
-			if not ShowTimer or (ClockGCD and isGCD) then
-				icon:SetCooldown(0, 0)
-			else
-				icon:SetCooldown(start, duration)
+			if ShowTimer then
+				if ClockGCD and isGCD then
+					icon:SetCooldown(0, 0)
+				else
+					icon:SetCooldown(start, duration)
+				end
 			end
 
 			if icon.ShowCBar then
@@ -340,12 +348,15 @@ local function MultiStateCD_OnUpdate(icon, time)
 				icon:SetAlpha(0)
 				return
 			end
-
-			if (not icon.ShowTimer) or (ClockGCD and OnGCD(duration)) then
-				icon:SetCooldown(0, 0)
-			else
-				icon:SetCooldown(start, duration)
+			local isGCD = OnGCD(duration)
+			if icon.ShowTimer then
+				if ClockGCD and isGCD then
+					icon:SetCooldown(0, 0)
+				else
+					icon:SetCooldown(start, duration)
+				end
 			end
+			
 			if icon.ShowCBar then
 				icon:CDBarStart(start, duration)
 			end
@@ -353,15 +364,17 @@ local function MultiStateCD_OnUpdate(icon, time)
 			local t = GetActionTexture(Slot) or "Interface\\Icons\\INV_Misc_QuestionMark"
 			if t ~= icon.__tex then icon:SetTexture(t) end
 
-			local inrange = IsActionInRange(Slot, "target")
-			local _, nomana = IsUsableAction(Slot)
-			if not icon.RangeCheck or not inrange then
-				inrange = 1
+			local inrange, nomana = 1
+			
+			if icon.RangeCheck then
+				inrange = IsActionInRange(Slot, "target") or 1
 			end
-			if not icon.ManaCheck then
-				nomana = nil
+			if icon.ManaCheck then
+				_, nomana = IsUsableAction(Slot)
 			end
-			if (duration == 0 or OnGCD(duration)) and inrange == 1 and not nomana then
+			
+			
+			if (duration == 0 or isGCD) and inrange == 1 and not nomana then
 				icon:AlphaColor(icon.Alpha, 1)
 			elseif icon.Alpha ~= 0 then
 				if inrange ~= 1 then

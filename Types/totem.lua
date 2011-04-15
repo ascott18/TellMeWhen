@@ -102,9 +102,10 @@ local function Totem_OnUpdate(icon, time)
 		else
 			icon:AlphaColor(UnAlpha, 1)
 		end
-		icon:SetCooldown(0, 0)
+		if icon.ShowTimer then
+			icon:SetCooldown(0, 0)
+		end
 
-		return
 	end
 end
 

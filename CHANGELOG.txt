@@ -1,3 +1,10 @@
+v4.0.3
+-For purposes of duration requirements, buffs/debuffs with an infinite duration are now considered to have a duration of 0, instead of completely ignoring this feature.
+-Meta icons now inherit the "Normal" color of the icon it is showing if you are using ButtonFacade.
+-Enhanced the overall appearance of icons in config mode. The "blank" icon texture will not appear unless you completely restart WoW.
+-New icon type: Condition Icon. This icon type is for simply checking the state of a condition. The icon can be set to a specific spell texture or texture path via the name editbox.
+-A few random bugfixes
+
 v4.0.2
 -Moar efficient!
 -Ignore GCD settings are now on by default now. This shouldn't affect you if you manually disabled these options.
@@ -5,7 +12,6 @@ v4.0.2
 -Fixed the version warnings that were spamming people and telling them that you sent them an icon
 -Groups that are anchored to other groups with higher groupIDs should now properly anchor after logging in or reloading
 -Many old spell equivalanceies were updated, and some new ones were added, thanks to Catok of Curse.
--For purposes of duration requirements, buffs/debuffs with an infinite duration are now considered to have a duration of 0, instead of completely ignoring this feature.
 
 v4.0.1.4
 -Fixed all the errors. Sorry guys!

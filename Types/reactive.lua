@@ -115,11 +115,13 @@ local function Reactive_OnUpdate(icon, time)
 					if t and t ~= icon.__tex then icon:SetTexture(t) end
 
 					icon:AlphaColor(Alpha, 1)
-
-					if not icon.ShowTimer or (ClockGCD and isGCD) then
-						icon:SetCooldown(0, 0)
-					else
-						icon:SetCooldown(start, duration)
+					
+					if icon.ShowTimer then
+						if ClockGCD and isGCD then
+							icon:SetCooldown(0, 0)
+						else
+							icon:SetCooldown(start, duration)
+						end
 					end
 
 					if icon.ShowCBar then
@@ -175,11 +177,13 @@ local function Reactive_OnUpdate(icon, time)
 			
 			local t = icon.FirstTexture
 			if t and t ~= icon.__tex then icon:SetTexture(t) end
-
-			if not icon.ShowTimer or (ClockGCD and isGCD) then
-				icon:SetCooldown(0, 0)
-			else
-				icon:SetCooldown(start, duration)
+			
+			if icon.ShowTimer then
+				if ClockGCD and isGCD then
+					icon:SetCooldown(0, 0)
+				else
+					icon:SetCooldown(start, duration)
+				end
 			end
 
 			if icon.ShowCBar then

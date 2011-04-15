@@ -10,6 +10,7 @@
 local TMW = TMW
 if not TMW then return end
 local L = TMW.L
+local LBF = LibStub("LibButtonFacade", true)
 
 local db, time, UPD_INTV
 local _G, strmatch, tonumber, ipairs =
@@ -50,6 +51,14 @@ local function Meta_OnUpdate(icon, time)
 					local ic__tex = ic.__tex
 					if ic__tex ~= icon.__tex then icon:SetTexture(ic__tex) end
 					
+					if LBF and ic ~= icon.__previcon then -- i dont like the way that ButtonFacade handles this (inefficient), so i'll do it myself
+						local icnt = ic.__normaltex
+						local iconnt = icon.__normaltex
+						if icnt and iconnt then
+							iconnt:SetVertexColor(icnt:GetVertexColor())
+						end
+					end
+					
 					icon:AlphaColor(alpha, ic.__vrtxcolor)
 
 					local ic__count = ic.__count
@@ -74,6 +83,7 @@ local function Meta_OnUpdate(icon, time)
 						icon:CDBarStop(1)
 					end
 					AlreadyChecked[ic] = true
+					icon.__previcon = ic
 					return
 				end
 			end
@@ -97,6 +107,7 @@ local function GetFullIconTable(icons, tbl) -- for meta icons, to check what all
 end
 
 Type.AllowNoName = true
+Type.HideBars = true
 function Type:Setup(icon, groupID, iconID)
 	icon.NameFirst = "" --need to set this to something for bars update
 	icon.ProcessedAt = 1

@@ -12,8 +12,8 @@ if not TMW then return end
 local L = TMW.L
 
 local db, time, UPD_INTV, ClockGCD, pr, ab, rc, mc
-local ipairs, strlower, type =
-	  ipairs, strlower, type
+local strlower, type =
+	  strlower, type
 local UnitGUID, UnitExists, GetSpellTexture =
 	  UnitGUID, UnitExists, GetSpellTexture
 local print = TMW.print
@@ -129,7 +129,9 @@ local function UnitCooldown_OnUpdate(icon, time)
 					if start then
 						if (time - start) > ICDDuration then -- off cooldown
 
-							icon:SetCooldown(0, 0)
+							if icon.ShowTimer then
+								icon:SetCooldown(0, 0)
+							end
 							if icon.ShowCBar then
 								icon:CDBarStart(start, ICDDuration)
 							end

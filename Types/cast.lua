@@ -67,7 +67,7 @@ local function Cast_OnUpdate(icon, time)
 					reverse = true
 				end
 
-				if name and not (notInterruptible and icon.Interruptible) and (NameFirst == "" or NameNameDictionary[strlower(name)]) then
+				if name and not (notInterruptible and Interruptible) and (NameFirst == "" or NameNameDictionary[strlower(name)]) then
 					local Alpha = icon.Alpha
 					if Alpha == 0 then
 						icon:SetAlpha(0)

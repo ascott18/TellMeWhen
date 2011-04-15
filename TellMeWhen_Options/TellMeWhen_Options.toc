@@ -9,4 +9,13 @@
 ## SavedVariables: TMWOptDB
 ## X-Category: Combat
 
+
+Lib\AceGUI-3.0\AceGUI-3.0.xml
+Lib\AceGUI-3.0-SharedMediaWidgets\widget.xml
+Lib\AceConfig-3.0\AceConfig-3.0.xml
+Lib\AceDBOptions-3.0\AceDBOptions-3.0.xml
+Lib\AceSerializer-3.0\AceSerializer-3.0.xml
+
+TellMeWhen_Options.lua
+	
 TellMeWhen_Options.xml

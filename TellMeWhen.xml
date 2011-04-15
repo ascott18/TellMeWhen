@@ -53,16 +53,6 @@
 			<AbsDimension x="30" y="30"/>
 		</Size>
 		<Layers>
-			<Layer level="BACKGROUND">
-				<Texture file="Interface\Buttons\UI-EmptySlot-Disabled">
-					<Size>
-						<AbsDimension x="46" y="46"/>
-					</Size>
-					<Anchors>
-						<Anchor point="CENTER"/>
-					</Anchors>
-				</Texture>
-			</Layer>
 			<Layer level="ARTWORK">
 				<Texture name="$parentIcon" parentKey="texture" file="Interface\Icons\INV_Misc_QuestionMark">
 					<Size>
@@ -154,6 +144,9 @@
 				GameTooltip:Hide()
 			</OnLeave>
 			<OnMouseUp>
+				if TMW.ID.isMoving then
+					TMW:Group_StopMoving(TMW.ID.isMoving)
+				end
 				if button == "RightButton" then
 					PlaySound("igCharacterInfoTab")
 					TMW.IE:SaveSettings()
@@ -165,6 +158,12 @@
 					TMW.IE:Load()
 				end
 			</OnMouseUp>
+			<OnMouseDown>
+				local ID = TMW.ID
+				ID.DraggingInfo = nil
+				ID.F:Hide()
+				ID.IsDragging = nil
+			</OnMouseDown>
 			<OnDragStart>
 				if button == "RightButton" and TMW.ID then
 					TMW.ID.srcgroupID = self:GetParent():GetID()
@@ -176,6 +175,7 @@
 					local group = self:GetParent()
 					if not group.Locked then
 						group:StartMoving()
+						TMW.ID.isMoving = group
 					end
 				end
 			</OnDragStart>
@@ -194,7 +194,7 @@
 				if TMW.ID and TMW.ID.IsDragging then
 					TMW.ID:Stop()
 				elseif not self:GetParent().Locked then
-					TMW:Group_StopMoving(self)
+					TMW:Group_StopMoving(self:GetParent())
 				end
 			</OnDragStop>
 			<OnShow>
@@ -205,6 +205,7 @@
 			</OnHide>
 		</Scripts>
 		<HighlightTexture alphaMode="ADD" file="Interface\Buttons\ButtonHilight-Square"/>
+		<PushedTexture file="Interface\Buttons\UI-Quickslot-Depress"/>
 	</Button>
 
 	<!-- END TEMPLATES -->

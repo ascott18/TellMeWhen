@@ -40,7 +40,7 @@ local strfind, strmatch, format, gsub, strsub, strtrim, max =
 	  strfind, strmatch, format, gsub, strsub, strtrim, max
 local _G, GetTime = _G, GetTime
 local tiptemp = {}
-local ME, CNDT, IE, SUG
+local ME, CNDT, IE, SUG, ID
 local points = {
 	TOPLEFT = L["TOPLEFT"],
 	TOP = L["TOP"],
@@ -724,9 +724,9 @@ function TMW:Group_StopSizing(self)
 	LibStub("AceConfigRegistry-3.0"):NotifyChange("TellMeWhen Options")
 end
 
-function TMW:Group_StopMoving(self)
-	local group = self:GetParent()
+function TMW:Group_StopMoving(group)
 	group:StopMovingOrSizing()
+	ID.isMoving = nil
 	local p = db.profile.Groups[group:GetID()]["Point"]
 	p.point, p.relativeTo, p.relativePoint, p.x, p.y = group:GetPoint(1)
 	p.relativeTo = p.relativeTo and p.relativeTo.GetName and p.relativeTo:GetName() or "UIParent"
@@ -798,7 +798,14 @@ ID = TMW:NewModule("IconDragger", "AceTimer-3.0", "AceEvent-3.0") TMW.ID = ID
 --dragging stuff
 function ID:BAR_HIDEGRID() ID.DraggingInfo = nil end
 hooksecurefunc("PickupSpellBookItem", function(...) ID.DraggingInfo = {...} end)
-WorldFrame:HookScript("OnMouseDown", ID.BAR_HIDEGRID)
+WorldFrame:HookScript("OnMouseDown", function() -- this actually contains other bug fix stuff too
+	ID.DraggingInfo = nil
+	ID.F:Hide()
+	ID.IsDragging = nil
+	if ID.isMoving then
+		TMW:Group_StopMoving(ID.isMoving)
+	end
+end)
 hooksecurefunc("ClearCursor", ID.BAR_HIDEGRID)
 ID:RegisterEvent("PET_BAR_HIDEGRID", "BAR_HIDEGRID")
 ID:RegisterEvent("ACTIONBAR_HIDEGRID", "BAR_HIDEGRID")
@@ -1390,7 +1397,7 @@ function IE:ShowHide()
 	spb.PBarOffs:SetEnabled(spb.ShowPBar:GetChecked())
 	scb.CBarOffs:SetEnabled(scb.ShowCBar:GetChecked())
 
-	if t == "" or t == "meta" then -- override the previous shows and disables
+	if TMW.Types[t].HideBars then -- override the previous shows and disables
 		spb:Hide()
 		scb:Hide()
 		IE.Main.InvertBars:Hide()
@@ -1468,6 +1475,16 @@ function IE:Load(isRefresh)
 	elseif not TellMeWhen_IconEditor:IsShown() and isRefresh then
 		return
 	end
+	if TMW.CI.t and TMW.CI.t ~= IE.previousType then
+		if IE.previousType and TMW.Types[IE.previousType].OnUnloadIE then
+			TMW.Types[IE.previousType]:OnUnloadIE()
+		end
+		if TMW.Types[TMW.CI.t].OnLoadIE then
+			TMW.Types[TMW.CI.t]:OnLoadIE()
+		end
+		IE.previousType = TMW.CI.t
+	end
+	
 	local groupID, iconID = TMW.CI.g, TMW.CI.i
 
 	IE.Main.Name:ClearFocus()

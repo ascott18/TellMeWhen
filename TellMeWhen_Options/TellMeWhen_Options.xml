@@ -1,13 +1,6 @@
 ﻿<Ui xmlns="http://www.blizzard.com/wow/ui/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.blizzard.com/wow/ui/
  ..\FrameXML\UI.xsd">
 
-	<Include file="Lib\AceGUI-3.0\AceGUI-3.0.xml"/>
-	<Include file="Lib\AceGUI-3.0-SharedMediaWidgets\widget.xml"/>
-	<Include file="Lib\AceConfig-3.0\AceConfig-3.0.xml"/>
-	<Include file="Lib\AceDBOptions-3.0\AceDBOptions-3.0.xml"/>
-	<Include file="Lib\AceSerializer-3.0\AceSerializer-3.0.xml"/>
-
-	<Script file="TellMeWhen_Options.lua"/> 
 
 	<!-- TEMPLATES -->
 	<Button name="TellMeWhen_ConditionEditorRuneCheckTemplate" virtual="true">
@@ -1452,6 +1445,8 @@
 							<OnLoad>
 								self:RegisterEvent("MODIFIER_STATE_CHANGED")
 								self.label = TMW.L["ICONMENU_CHOOSENAME"]
+								self.TTtitle = TMW.L["ICONMENU_CHOOSENAME"]
+								self.TTtext = TMW.L["CHOOSENAME_DIALOG"]
 								self.BackgroundText:SetWidth(self:GetWidth())
 							</OnLoad>
 							<OnEvent>
@@ -1461,8 +1456,8 @@
 								if IsModifierKeyDown() then
 									GameTooltip:AddLine(TMW.IE:GetRealNames(self), NORMAL_FONT_COLOR.r, NORMAL_FONT_COLOR.g, NORMAL_FONT_COLOR.b, 1)
 								else
-									GameTooltip:AddLine(TMW.L["ICONMENU_CHOOSENAME"], HIGHLIGHT_FONT_COLOR.r, HIGHLIGHT_FONT_COLOR.g, HIGHLIGHT_FONT_COLOR.b, 1)
-									GameTooltip:AddLine(TMW.L["CHOOSENAME_DIALOG"], NORMAL_FONT_COLOR.r, NORMAL_FONT_COLOR.g, NORMAL_FONT_COLOR.b, 1)
+									GameTooltip:AddLine(self.TTtitle, HIGHLIGHT_FONT_COLOR.r, HIGHLIGHT_FONT_COLOR.g, HIGHLIGHT_FONT_COLOR.b, 1)
+									GameTooltip:AddLine(self.TTtext, NORMAL_FONT_COLOR.r, NORMAL_FONT_COLOR.g, NORMAL_FONT_COLOR.b, 1)
 								end
 								GameTooltip:Show()
 							</OnEvent>

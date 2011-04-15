@@ -26,7 +26,7 @@ Lib\AceTimer-3.0\AceTimer-3.0.xml
 Lib\AceLocale-3.0\AceLocale-3.0.xml
 Lib\AceDB-3.0\AceDB-3.0.xml
 Lib\AceComm-3.0\AceComm-3.0.xml
-Lib\LibSharedMedia-3.0\LibSharedMedia-3.0.xml
+Lib\LibSharedMedia-3.0\lib.xml
 Lib\libdatabroker-1-1\LibDataBroker-1.1.lua
 
 Localization\TellMeWhen-enUS.lua
@@ -49,6 +49,7 @@ Types\totem.lua
 Types\icd.lua
 Types\unitcooldown.lua
 Types\cast.lua
+Types\conditionicon.lua
 Types\meta.lua
 
 conditions.lua

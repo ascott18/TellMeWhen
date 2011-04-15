@@ -22,6 +22,7 @@ optional-dependencies:
     - buttonfacade
     - omni-cc
     - tullacc
+    - libdatabroker-1-1
 
 manual-changelog: CHANGELOG.txt
 license-output: LICENSE.txt

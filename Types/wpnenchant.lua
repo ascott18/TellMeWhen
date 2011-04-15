@@ -141,7 +141,9 @@ local function WpnEnchant_OnUpdate(icon, time)
 			else
 				icon:AlphaColor(UnAlpha, 1)
 			end
-			icon:SetCooldown(0, 0)
+			if icon.ShowTimer then
+				icon:SetCooldown(0, 0)
+			end
 			icon:CDBarStop()
 		end
 	end

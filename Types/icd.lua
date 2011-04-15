@@ -126,7 +126,9 @@ local function ICD_OnUpdate(icon, time)
 		end
 		if timesince > ICDDuration then
 			icon:AlphaColor(icon.Alpha, 1)
-			icon:SetCooldown(0, 0)
+			if icon.ShowTimer then
+				icon:SetCooldown(0, 0)
+			end
 		else
 			if icon.Alpha ~= 0 then
 				if not icon.ShowTimer then

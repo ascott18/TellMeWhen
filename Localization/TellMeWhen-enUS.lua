@@ -22,12 +22,14 @@ L["CONDITIONORMETA_CHECKINGINVALID"] = "Warning! Group %d, Icon %d is checking a
 -- -------------
 
 L["ICONMENU_CHOOSENAME"] = "Choose name/ID"
+L["ICONMENU_CHOOSENAME_CNDTIC"] = "Choose name/ID/texture path"
 L["ICONMENU_ENABLE"] = "Enable icon"
 L["CHOOSENAME_EQUIVS_TOOLTIP"] = "You can select a predefined set of buffs/debuffs, spell casts, or dispel types (Magic, Curse, etc.) from this menu to insert into the editbox."
 L["CHOOSENAME_DIALOG_DDDEFAULT"] = "Predefined Spell Sets/Dispel Types"
 L["CHOOSENAME_DIALOG"] = [=[Enter the Name or ID of what you want this icon to monitor. You can add multiple things (except for multi-state cooldowns) by seperating them with semicolons (;).
 
 |cFFFF5959PET ABILITIES|r must use SpellIDs.]=]
+L["CHOOSENAME_DIALOG_CNDTIC"] = "Enter the Name or ID of the spell that has the texture that you want to use. You may also enter a texture path, such as \"Interface/Icons/spell_nature_healingtouch\""
 L["CHOOSENAME_DIALOG_ICD"] = "ICD/duration"
 L["CHOOSENAME_DIALOG_ICD_DESC"] = "Enter the internal cooldown length or the duration of the spell that you want to track."
 L["CHOOSENAME_DIALOG_UCD_DESC"] = "Enter the cooldown length of the spell(s) that you want to track."
@@ -61,6 +63,9 @@ or the name of the spell that you would like to track the duration of. Semicolon
 L["ICONMENU_CAST"] = "Spell Cast"
 L["ICONMENU_CAST_DESC"] = [=[The name dialog can be left blank to show the icon for any cast, or in order to only shown the icon for certain spells,
 you can enter a single spell, or a semicolon-delimited list of spells.]=]
+L["ICONMENU_CNDTIC"] = "Condition Icon"
+L["ICONMENU_CNDTIC_DESC"] = [=[This icon type is for simply checking a condition.
+The icon can be set to a specific spell texture or texture path via the name editbox.]=]
 L["ICONMENU_META"] = "Meta icon"
 L["ICONMENU_META_DESC"] = [=[This icon type can be used to combine several icons into one.
 Icons that have fake hidden enabled will still be shown if they would otherwise be shown.]=]
