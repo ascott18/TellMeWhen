@@ -37,7 +37,7 @@ local LSM = LibStub("LibSharedMedia-3.0")
 
 TELLMEWHEN_VERSION = "4.0.4"
 TELLMEWHEN_VERSION_MINOR = ""
-TELLMEWHEN_VERSIONNUMBER = 40402
+TELLMEWHEN_VERSIONNUMBER = 40403
 TELLMEWHEN_MAXGROUPS = 10 	--this is a default, used by SetTheory (addon), so dont rename
 TELLMEWHEN_MAXROWS = 20
 local UPD_INTV = 0.06	--this is a default, local because i use it in onupdate functions
@@ -1879,12 +1879,13 @@ function TMW:Icon_Update(icon)
 	else
 		icon.DurationEnabled = false
 	end
-	icon:SetStack(nil)
-	if #(icon.Conditions) > 0 and Locked then -- dont define conditions if we are unlocked so that i dont have to deal with meta icons checking icons during config. I think i solved this somewhere else too without thinking about it, but what the hell
+	
+	if #icon.Conditions > 0 and Locked then -- dont define conditions if we are unlocked so that i dont have to deal with meta icons checking icons during config. I think i solved this somewhere else too without thinking about it, but what the hell
 		TMW.CNDT:ProcessConditions(icon)
 	else
 		icon.CndtCheck = nil
 	end
+	
 	if icon.Enabled and icon.group.Enabled then
 		if not tContains(TMW.Icons, icon:GetName()) then tinsert(TMW.Icons, icon:GetName()) end
 	else
@@ -1940,6 +1941,7 @@ function TMW:Icon_Update(icon)
 	icon.__previcon = nil
 	icon.__alpha = nil -- force an alpha update
 	icon.__tex = "qq i got reset" -- force a texture update
+	
 	if not (Locked and not icon.Enabled) then
 		if icon.CooldownShowWhen == "usable" or icon.BuffShowWhen == "present" then
 			icon.UnAlpha = 0
@@ -1963,6 +1965,7 @@ function TMW:Icon_Update(icon)
 	end
 
 	icon:SetCooldown(0, 0)
+	icon:SetStack(nil)
 	icon.__previousNameFirst = nil
 
 	Icon_Bars_Update(icon, groupID, iconID)

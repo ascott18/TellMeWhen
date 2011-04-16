@@ -3,6 +3,8 @@
  * Stance conditions work now.
  * Fixed debuff conditions.
  * Began redesigning the condition editor to make room for the options to 'group' sets of conditions with parenthesis.
+ * Fixed a rare error in condition processing.
+ * Fixed the "only if equipped" option for item cooldowns for the 453rd time. Why don't I just leave it alone now?
 
 
 ===v4.0.3===

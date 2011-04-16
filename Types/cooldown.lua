@@ -260,7 +260,7 @@ local function ItemCooldown_OnUpdate(icon, time)
 		if OnlyInBags then
 			for i = 1, #NameArray do
 				local iName = NameArray[i]
-				if (OnlyEquipped and IsEquippedItem(iName)) or (GetItemCount(iName) > 0) then
+				if (OnlyEquipped and IsEquippedItem(iName)) or (not OnlyEquipped and GetItemCount(iName) > 0) then
 					NameFirst2 = iName
 					break
 				end				

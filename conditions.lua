@@ -1172,7 +1172,8 @@ function CNDT:ProcessConditions(icon)
 	if TMW.debug and test then test() end
 	local Conditions = icon.Conditions
 	local funcstr = ""
-	for i, c in ipairs(Conditions) do
+	for i = 1, #Conditions do
+		local c = Conditions[i]
 		local t = c.Type
 		local v = ConditionsByType[t]
 		if v and v.events then
@@ -1199,6 +1200,7 @@ function CNDT:ProcessConditions(icon)
 		if type(thiscondtstr) == "function" then
 			thiscondtstr = thiscondtstr(c)
 		end
+		
 		if thiscondtstr then
 			local thisstr = andor .. "(" .. thiscondtstr .. ")"
 			
@@ -1224,12 +1226,11 @@ function CNDT:ProcessConditions(icon)
 			gsub("c.Operator", 		c.Operator):
 			gsub("c.NameFirst", 	"\"" .. TMW:GetSpellNames(nil, name, 1) .. "\""):
 			gsub("c.NameName", 		"\"" .. TMW:GetSpellNames(nil, name, 1, 1) .. "\""):
-			gsub( "c.ItemID", 		TMW:GetItemIDs(icon, name, 1)):
+			gsub("c.ItemID", 		TMW:GetItemIDs(icon, name, 1)):
 			gsub("c.Name", 			"\"" .. name .. "\""):
 			
 			gsub("c.True", 			tostring(c.Level == 0)):
 			gsub("c.False", 		tostring(c.Level == 1))
-
 			funcstr = funcstr .. thisstr
 		end
 	end
