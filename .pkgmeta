@@ -23,8 +23,9 @@ optional-dependencies:
     - omni-cc
     - tullacc
     - libdatabroker-1-1
-
-manual-changelog: CHANGELOG.txt
+manual-changelog:
+    filename: CHANGELOG.txt
+    markup-type: creole
 license-output: LICENSE.txt
 enable-nolib-creation: no
 

@@ -35,9 +35,9 @@ local LBF = LibStub("LibButtonFacade", true)
 local AceDB = LibStub("AceDB-3.0")
 local LSM = LibStub("LibSharedMedia-3.0")
 
-TELLMEWHEN_VERSION = "4.0.3"
+TELLMEWHEN_VERSION = "4.0.4"
 TELLMEWHEN_VERSION_MINOR = ""
-TELLMEWHEN_VERSIONNUMBER = 40301
+TELLMEWHEN_VERSIONNUMBER = 40402
 TELLMEWHEN_MAXGROUPS = 10 	--this is a default, used by SetTheory (addon), so dont rename
 TELLMEWHEN_MAXROWS = 20
 local UPD_INTV = 0.06	--this is a default, local because i use it in onupdate functions
@@ -345,6 +345,7 @@ TMW.Defaults = {
 					RangeCheck			= false,
 					ManaCheck			= false,
 					CooldownCheck		= false,
+					IgnoreRunes			= false,
 				--	StackAlpha			= 0,
 					StackMin			= 0,
 					StackMax			= 0,
@@ -781,6 +782,10 @@ function TMW:Update()
 
 	if TMW.IE then
 		TMW.IE:Load(1) -- for reloading icon editor after copying/dragging something onto an icon in case the icon copied to is the current icon
+	end
+	for group in TMW.InGroups() do
+		group:SetFrameLevel(group:GetFrameLevel() + 1)
+		group:SetFrameLevel(group:GetFrameLevel() - 1)
 	end
 
 	TMW.Initd = true

@@ -2783,22 +2783,6 @@ function CNDT:OperatorMenu_DropDown()
 	end
 end
 
-function CNDT:AndOrMenuOnClick(frame)
-	UIDropDownMenu_SetSelectedValue(frame, self.value)
-	CNDT:OK()
-end
-
-function CNDT:AndOrMenu_DropDown()
-	for k, v in pairs(CNDT.AndOrs) do
-		local info = UIDropDownMenu_CreateInfo()
-		info.func = CNDT.AndOrMenuOnClick
-		info.text = v.text
-		info.value = v.value
-		info.arg1 = self
-		UIDropDownMenu_AddButton(info)
-	end
-end
-
 function CNDT:RuneHandler(rune)
 	local id = rune:GetID()
 	local pair
@@ -2893,7 +2877,7 @@ function CNDT:OK()
 		condition.Operator = UIDropDownMenu_GetSelectedValue(group.Operator) or "=="
 		condition.Icon = UIDropDownMenu_GetSelectedValue(group.Icon) or ""
 		condition.Level = tonumber(group.Slider:GetValue()) or 0
-		condition.AndOr = UIDropDownMenu_GetSelectedValue(group.AndOr) or "AND"
+		condition.AndOr = group.And:GetChecked() and "AND" or "OR"
 		condition.Name = strtrim(group.EditBox:GetText()) or ""
 
 		for k, rune in pairs(group.Runes) do
@@ -2943,7 +2927,8 @@ function CNDT:Load()
 			group:Show()
 
 			if i > 1 then
-				CNDT:SetUIDropdownText(group.AndOr, conditions[i].AndOr, CNDT.AndOrs)
+				group.And:SetChecked(conditions[i].AndOr == "AND")
+				group.Or:SetChecked(conditions[i].AndOr == "OR")
 			end
 			i=i+1
 		end
@@ -2959,7 +2944,8 @@ function CNDT:ClearGroup(group)
 	UIDropDownMenu_SetSelectedValue(group.Icon, "")
 	CNDT:SetUIDropdownText(group.Type, "HEALTH", CNDT.Types)
 	CNDT:SetUIDropdownText(group.Operator, "==", CNDT.Operators)
-	CNDT:SetUIDropdownText(group.AndOr, "AND", CNDT.AndOrs)
+	group.And:SetChecked(1)
+	group.Or:SetChecked(nil)
 	for k, rune in pairs(group.Runes) do
 		if type(rune) == "table" then
 			rune:SetChecked(nil)
@@ -2993,9 +2979,10 @@ function CNDT:CreateGroups(num)
 	end
 	for i=start, num do
 		local group = CNDT[i] or CreateFrame("Frame", "TellMeWhen_IconEditorConditionsGroupsGroup" .. i, TellMeWhen_IconEditor.Conditions.Groups, "TellMeWhen_ConditionGroup", i)
-		group:SetPoint("TOPLEFT", CNDT[i-1], "BOTTOMLEFT", 0, 0)
+		group:SetPoint("TOPLEFT", CNDT[i-1], "BOTTOMLEFT", 0, -16)
 		group.AddDelete:ClearAllPoints()
-		group.AddDelete:SetPoint("TOPLEFT", CNDT[i], 12, 16)
+		local p, _, rp, x, y = TMW.CNDT[1].AddDelete:GetPoint()
+		group.AddDelete:SetPoint(p, CNDT[i], rp, x, y)
 		CNDT:ClearGroup(group)
 		CNDT:SetTitles(group)
 	end
@@ -3035,7 +3022,7 @@ function CNDT:SetTitles(onlygroup)
 		group.TextUnitOrIcon:SetText(L["CONDITIONPANEL_UNIT"])
 		group.TextUnitDef:SetText("")
 		group.TextOperator:SetText(L["CONDITIONPANEL_OPERATOR"])
-		group.AndOrTxt:SetText(L["CONDITIONPANEL_ANDOR"])
+	--	group.AndOrTxt:SetText(L["CONDITIONPANEL_ANDOR"])
 		group.TextValue:SetText(L["CONDITIONPANEL_VALUEN"])
 		if onlygroup then return end
 	end
@@ -3084,7 +3071,7 @@ function CNDT:TypeCheck(group, data)
 		else
 			TMW:TT(group.EditBox, nil, nil, nil, nil, 1)
 		end
-		group.Slider:SetWidth(140)
+		group.Slider:SetWidth(200)
 		if data.noslide then
 			group.EditBox:SetWidth(455)
 		else
@@ -3092,7 +3079,7 @@ function CNDT:TypeCheck(group, data)
 		end
 	else
 		group.EditBox:Hide()
-		group.Slider:SetWidth(463)
+		group.Slider:SetWidth(523)
 	end
 	if data.nooperator then
 		group.TextOperator:SetText("")

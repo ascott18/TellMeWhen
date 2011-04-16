@@ -3,793 +3,6 @@
 
 
 	<!-- TEMPLATES -->
-	<Button name="TellMeWhen_ConditionEditorRuneCheckTemplate" virtual="true">
-		<Size>
-			<AbsDimension x="25" y="25" />
-		</Size>
-		<Layers>
-			<Layer level="OVERLAY">
-				<Texture name="$parentCheck" parentKey="Check" file="">
-					<Anchors>
-						<Anchor point="CENTER" relativeTo="$parent" relativePoint="CENTER"/>
-					</Anchors>
-					<Size>
-						<AbsDimension x="15" y="15"/>
-					</Size>
-				</Texture>
-			</Layer>
-		</Layers>
-		<Scripts>
-			<OnClick>
-				if self.checked then
-					self.checked = false
-					self.Check:SetTexture("Interface\\RAIDFRAME\\ReadyCheck-NotReady")
-				elseif self.checked == false then
-					self.checked = nil
-					self.Check:SetTexture(nil)
-				elseif self.checked == nil then
-					self.checked = true
-					self.Check:SetTexture("Interface\\RAIDFRAME\\ReadyCheck-Ready")
-				end
-				TMW.CNDT:RuneHandler(self)
-				TMW.CNDT:OK()
-			</OnClick>
-			<OnLoad>
-				function self:GetChecked()
-					return self.checked
-				end
-				function self:SetChecked(checked)
-					self.checked = checked
-					if checked then
-						self.Check:SetTexture("Interface\\RAIDFRAME\\ReadyCheck-Ready")
-					elseif checked == nil then
-						self.Check:SetTexture(nil)
-					elseif checked == false then
-						self.Check:SetTexture("Interface\\RAIDFRAME\\ReadyCheck-NotReady")
-					end
-				end
-			</OnLoad>
-		</Scripts>
-	</Button>
-	<Frame name="TellMeWhen_ConditionGroup" virtual="true">
-		<Size>
-			<AbsDimension x="600" y="70" />
-		</Size>
-		<Backdrop bgFile="Interface\DialogFrame\UI-DialogBox-Background" tile="true">
-			<EdgeSize>
-				<AbsValue val="4"/>
-			</EdgeSize>
-			<BackgroundInsets>
-				<AbsInset left="16" right="85" top="-11" bottom="15" />
-			</BackgroundInsets>
-			<TileSize>
-				<AbsValue val="32" />
-			</TileSize>
-		</Backdrop>
-		<Anchors>
-			<Anchor point="TOPLEFT">
-				<Offset x="0" y="0" />
-			</Anchor>
-		</Anchors>
-		<Frames>
-			<Frame name="$parentType" parentKey="Type" inherits="UIDropDownMenuTemplate">
-				<Anchors>
-					<Anchor point="TOPLEFT">
-						<Offset x="25" y="0" />
-					</Anchor>
-				</Anchors>
-				<Scripts>
-					<OnLoad>
-						UIDropDownMenu_SetWidth(self, 130)
-						UIDropDownMenu_JustifyText(self, "LEFT")
-						_G[self:GetName() .. "Button"]:SetScript("PreClick", function()
-							UIDropDownMenu_Initialize(self, TMW.CNDT.TypeMenu_DropDown, "DROPDOWN")
-							_G[self:GetName() .. "Button"]:SetScript("PreClick", nil)
-						end)
-					</OnLoad>
-				</Scripts>
-			</Frame>
-			<Frame name="$parentIcon" parentKey="Icon" inherits="UIDropDownMenuTemplate">
-				<Anchors>
-					<Anchor point="LEFT" relativeTo="$parentType" relativePoint="RIGHT">
-						<Offset>
-							<AbsDimension x="-27" y="0" />
-						</Offset>
-					</Anchor>
-				</Anchors>
-				<Scripts>
-					<OnLoad>
-						self:Hide()
-						UIDropDownMenu_SetWidth(self, 148)
-						UIDropDownMenu_JustifyText(self, "LEFT")
-						_G[self:GetName() .. "Button"]:SetScript("PreClick", function()
-							UIDropDownMenu_Initialize(self, TMW.CNDT.IconMenu_DropDown, "DROPDOWN")
-							_G[self:GetName() .. "Button"]:SetScript("PreClick", nil)
-						end)
-					</OnLoad>
-				</Scripts>
-			</Frame>
-			<EditBox name="$parentUnit" inherits="TellMeWhen_InputBoxTemplate" parentKey="Unit" autoFocus="false">
-				<Size>
-					<AbsDimension x="75" y="32"/>
-				</Size>
-				<Anchors>
-					<Anchor point="LEFT" relativeTo="$parentType" relativePoint="RIGHT">
-						<Offset>
-							<AbsDimension x="-5" y="3" />
-						</Offset>
-					</Anchor>
-				</Anchors>
-				<Frames>
-					<Button name="$parentButton"  motionScriptsWhileDisabled="true" parentKey="Button">
-						<Size>
-							<AbsDimension x="24" y="24"/>
-						</Size>
-						<Anchors>
-							<Anchor point="LEFT" relativeTo="$parent" relativePoint="RIGHT">
-								<Offset>
-									<AbsDimension x="-3" y="-1"/>
-								</Offset>
-							</Anchor>
-						</Anchors>
-						<Scripts>
-							<OnClick>
-								TellMeWhen_IconEditorConditionsUnitDD:SetParent(self:GetParent())
-								TellMeWhen_IconEditorConditionsUnitDD:Init()
-								ToggleDropDownMenu(1, nil, TellMeWhen_IconEditorConditionsUnitDD, self, 0, 0)
-								PlaySound("igCharacterInfoTab")
-							</OnClick>
-						</Scripts>
-						<NormalTexture file="Interface\ChatFrame\UI-ChatIcon-ScrollDown-Up"/>
-						<PushedTexture file="Interface\ChatFrame\UI-ChatIcon-ScrollDown-Down"/>
-						<DisabledTexture file="Interface\ChatFrame\UI-ChatIcon-ScrollDown-Disabled"/>
-						<HighlightTexture file="Interface\Buttons\UI-Common-MouseHilight" alphaMode="ADD"/>
-					</Button>
-				</Frames>
-				<Scripts>
-					<OnLoad>
-						self.Ins = TellMeWhen_IconEditorConditionsUnitDD
-						TMW:TT(self, "CONDITIONPANEL_UNIT", "CONDITIONPANEL_UNIT_DESC")
-						TMW:TT(self.Button, "CONDITIONPANEL_UNIT", "CONDITIONPANEL_UNITDROPDOWN_DESC")
-					</OnLoad>
-					<OnEditFocusLost>
-						EditBox_ClearHighlight(self)
-						self:SetText(TMW:CleanString(self:GetText()))
-						TMW.CNDT:OK()
-					</OnEditFocusLost>
-				</Scripts>
-			</EditBox>
-			<Frame name="$parentOperator" parentKey="Operator" inherits="UIDropDownMenuTemplate">
-				<Anchors>
-					<Anchor point="LEFT" relativeTo="$parentUnit" relativePoint="RIGHT">
-						<Offset>
-							<AbsDimension x="5" y="-3" />
-						</Offset>
-					</Anchor>
-				</Anchors>
-				<Scripts>
-					<OnLoad>
-						_G[self:GetName() .. "Text"]:SetFontObject(GameFontHighlightLarge)
-						UIDropDownMenu_SetWidth(self, 47)
-						UIDropDownMenu_JustifyText(self, "LEFT")
-						_G[self:GetName() .. "Button"]:SetScript("PreClick", function()
-							UIDropDownMenu_Initialize(self, TMW.CNDT.OperatorMenu_DropDown, "DROPDOWN")
-							_G[self:GetName() .. "Button"]:SetScript("PreClick", nil)
-						end)
-					</OnLoad>
-				</Scripts>
-			</Frame>
-			<Slider name="$parentSlider" parentKey="Slider" inherits="OptionsSliderTemplate" minvalue="0" maxvalue="100" valuestep="1" defaultvalue="100">
-				<Size x="463" y="17"/>
-				<Anchors>
-					<Anchor point="TOPRIGHT">
-						<Offset x="-90" y="-30" />
-					</Anchor>
-				</Anchors>
-				<Layers>
-					<Layer level="ARTWORK">
-						<FontString name="$parentMid" inherits="GameFontHighlightSmall">
-							<Anchors>
-								<Anchor point="TOP" relativePoint="BOTTOM">
-									<Offset>
-										<AbsDimension x="0" y="3"/>
-									</Offset>
-								</Anchor>
-							</Anchors>
-						</FontString>
-					</Layer>
-				</Layers>
-				<Scripts>
-					<OnValueChanged>
-						TMW.CNDT:SetValText(self:GetParent())
-					</OnValueChanged>
-					<OnMouseUp>
-						TMW.CNDT:OK()
-					</OnMouseUp>
-					<OnLoad>
-						self:EnableMouseWheel(true)
-					</OnLoad>
-					<OnMouseWheel>
-						if IsLeftShiftKeyDown() or IsRightShiftKeyDown() then
-							delta = delta*10
-						elseif IsLeftControlKeyDown() or IsRightControlKeyDown() then
-							delta = delta*100
-						end
-						self:SetValue(self:GetValue()+delta)
-						TMW.CNDT:OK()
-					</OnMouseWheel>
-				</Scripts>
-			</Slider>
-			<EditBox name="$parentEditBox" inherits="TellMeWhen_InputBoxTemplate" parentKey="EditBox" autoFocus="false">
-				<Size x="302" y="28"/>
-				<Anchors>
-					<Anchor point="TOPLEFT" relativeTo="$parentType" relativePoint="BOTTOMLEFT">
-						<Offset x="23" y="8" />
-					</Anchor>
-				</Anchors>
-				<Scripts>
-					<OnEditFocusLost>
-						EditBox_ClearHighlight(self)
-						self:SetText(TMW:CleanString(self:GetText()))
-						TMW.CNDT:OK()
-					</OnEditFocusLost>
-				</Scripts>
-			</EditBox>
-			<Frame name="$parentRunes" parentKey="Runes" hidden="true">
-				<Size x="1" y="1"/>
-				<Anchors>
-					<Anchor point="TOPLEFT">
-						<Offset x="200" y="2" />
-					</Anchor>
-				</Anchors>
-				<Frames>
-					<Button name="$parentBlood1" parentKey="blood1" inherits="TellMeWhen_ConditionEditorRuneCheckTemplate" id="1">
-						<Anchors>
-							<Anchor point="TOPLEFT">
-								<Offset x="0" y="0" />
-							</Anchor>
-						</Anchors>
-						<Layers>
-							<Layer level="ARTWORK">
-								<Texture name="$parentRune" file="Interface\PlayerFrame\UI-PlayerFrame-Deathknight-Blood">
-									<Anchors>
-										<Anchor point="CENTER" relativeTo="$parent" relativePoint="CENTER"/>
-									</Anchors>
-									<Size>
-										<AbsDimension x="20" y="20"/>
-									</Size>
-								</Texture>
-							</Layer>
-						</Layers>
-					</Button>
-					<Button name="$parentBlood2" parentKey="blood2" inherits="TellMeWhen_ConditionEditorRuneCheckTemplate" id="2">
-						<Anchors>
-							<Anchor point="LEFT" relativeTo="$parentBlood1" relativePoint="RIGHT">
-								<Offset x="0" y="0" />
-							</Anchor>
-						</Anchors>
-						<Layers>
-							<Layer level="ARTWORK">
-								<Texture name="$parentRune" file="Interface\PlayerFrame\UI-PlayerFrame-Deathknight-Blood">
-									<Anchors>
-										<Anchor point="CENTER" relativeTo="$parent" relativePoint="CENTER"/>
-									</Anchors>
-									<Size>
-										<AbsDimension x="20" y="20"/>
-									</Size>
-								</Texture>
-							</Layer>
-						</Layers>
-					</Button>
-		 			<Button name="$parentFrost1" parentKey="frost1" inherits="TellMeWhen_ConditionEditorRuneCheckTemplate" id="5">
-						<Anchors>
-							<Anchor point="LEFT" relativeTo="$parentBlood2" relativePoint="RIGHT">
-								<Offset x="0" y="0" />
-							</Anchor>
-						</Anchors>
-						<Layers>
-							<Layer level="ARTWORK">
-								<Texture name="$parentRune" file="Interface\PlayerFrame\UI-PlayerFrame-Deathknight-Frost">
-									<Anchors>
-										<Anchor point="CENTER" relativeTo="$parent" relativePoint="CENTER"/>
-									</Anchors>
-									<Size>
-										<AbsDimension x="20" y="20"/>
-									</Size>
-								</Texture>
-							</Layer>
-						</Layers>
-					</Button>
-					<Button name="$parentFrost2" parentKey="frost2" inherits="TellMeWhen_ConditionEditorRuneCheckTemplate" id="6">
-						<Anchors>
-							<Anchor point="LEFT" relativeTo="$parentFrost1" relativePoint="RIGHT">
-								<Offset x="0" y="0" />
-							</Anchor>
-						</Anchors>
-						<Layers>
-							<Layer level="ARTWORK">
-								<Texture name="$parentRune" file="Interface\PlayerFrame\UI-PlayerFrame-Deathknight-Frost">
-									<Anchors>
-										<Anchor point="CENTER" relativeTo="$parent" relativePoint="CENTER"/>
-									</Anchors>
-									<Size>
-										<AbsDimension x="20" y="20"/>
-									</Size>
-								</Texture>
-							</Layer>
-						</Layers>
-					</Button>
-					<Button name="$parentUnholy1" parentKey="unholy1" inherits="TellMeWhen_ConditionEditorRuneCheckTemplate" id="3">
-						<Anchors>
-							<Anchor point="LEFT" relativeTo="$parentFrost2" relativePoint="RIGHT">
-								<Offset x="0" y="0" />
-							</Anchor>
-						</Anchors>
-						<Layers>
-							<Layer level="ARTWORK">
-								<Texture name="$parentRune" file="Interface\PlayerFrame\UI-PlayerFrame-Deathknight-Unholy">
-									<Anchors>
-										<Anchor point="CENTER" relativeTo="$parent" relativePoint="CENTER"/>
-									</Anchors>
-									<Size>
-										<AbsDimension x="20" y="20"/>
-									</Size>
-								</Texture>
-							</Layer>
-						</Layers>
-					</Button>
-					<Button name="$parentUnholy2" parentKey="unholy2" inherits="TellMeWhen_ConditionEditorRuneCheckTemplate" id="4">
-						<Anchors>
-							<Anchor point="LEFT" relativeTo="$parentUnholy1" relativePoint="RIGHT">
-								<Offset x="0" y="0" />
-							</Anchor>
-						</Anchors>
-						<Layers>
-							<Layer level="ARTWORK">
-								<Texture name="$parentRune" file="Interface\PlayerFrame\UI-PlayerFrame-Deathknight-Unholy">
-									<Anchors>
-										<Anchor point="CENTER" relativeTo="$parent" relativePoint="CENTER"/>
-									</Anchors>
-									<Size>
-										<AbsDimension x="20" y="20"/>
-									</Size>
-								</Texture>
-							</Layer>
-						</Layers>
-					</Button>
-
-
-					<Button name="$parentBlood1Death" parentKey="blood1death" inherits="TellMeWhen_ConditionEditorRuneCheckTemplate" id="7">
-						<Anchors>
-							<Anchor point="TOP" relativeTo="$parentBlood1" relativePoint="BOTTOM">
-								<Offset x="0" y="0" />
-							</Anchor>
-						</Anchors>
-						<Layers>
-							<Layer level="ARTWORK">
-								<Texture name="$parentRune" file="Interface\AddOns\TellMeWhen_Options\Textures\Blood">
-									<Anchors>
-										<Anchor point="CENTER" relativeTo="$parent" relativePoint="CENTER"/>
-									</Anchors>
-									<Size>
-										<AbsDimension x="20" y="20"/>
-									</Size>
-								</Texture>
-							</Layer>
-						</Layers>
-					</Button>
-					<Button name="$parentBlood2Death" parentKey="blood2death" inherits="TellMeWhen_ConditionEditorRuneCheckTemplate" id="8">
-						<Anchors>
-							<Anchor point="LEFT" relativeTo="$parentBlood1Death" relativePoint="RIGHT">
-								<Offset x="0" y="0" />
-							</Anchor>
-						</Anchors>
-						<Layers>
-							<Layer level="ARTWORK">
-								<Texture name="$parentRune" file="Interface\AddOns\TellMeWhen_Options\Textures\Blood">
-									<Anchors>
-										<Anchor point="CENTER" relativeTo="$parent" relativePoint="CENTER"/>
-									</Anchors>
-									<Size>
-										<AbsDimension x="20" y="20"/>
-									</Size>
-								</Texture>
-							</Layer>
-						</Layers>
-					</Button>
-					<Button name="$parentFrost1Death" parentKey="frost1death" inherits="TellMeWhen_ConditionEditorRuneCheckTemplate" id="11">
-						<Anchors>
-							<Anchor point="LEFT" relativeTo="$parentBlood2Death" relativePoint="RIGHT">
-								<Offset x="0" y="0" />
-							</Anchor>
-						</Anchors>
-						<Layers>
-							<Layer level="ARTWORK">
-								<Texture name="$parentRune" file="Interface\AddOns\TellMeWhen_Options\Textures\Frost">
-									<Anchors>
-										<Anchor point="CENTER" relativeTo="$parent" relativePoint="CENTER"/>
-									</Anchors>
-									<Size>
-										<AbsDimension x="20" y="20"/>
-									</Size>
-								</Texture>
-							</Layer>
-						</Layers>
-					</Button>
-					<Button name="$parentFrost2Death" parentKey="frost2death" inherits="TellMeWhen_ConditionEditorRuneCheckTemplate" id="12">
-						<Anchors>
-							<Anchor point="LEFT" relativeTo="$parentFrost1Death" relativePoint="RIGHT">
-								<Offset x="0" y="0" />
-							</Anchor>
-						</Anchors>
-						<Layers>
-							<Layer level="ARTWORK">
-								<Texture name="$parentRune" file="Interface\AddOns\TellMeWhen_Options\Textures\Frost">
-									<Anchors>
-										<Anchor point="CENTER" relativeTo="$parent" relativePoint="CENTER"/>
-									</Anchors>
-									<Size>
-										<AbsDimension x="20" y="20"/>
-									</Size>
-								</Texture>
-							</Layer>
-						</Layers>
-					</Button>
-					<Button name="$parentUnholy1Death" parentKey="unholy1death" inherits="TellMeWhen_ConditionEditorRuneCheckTemplate" id="9">
-						<Anchors>
-							<Anchor point="LEFT" relativeTo="$parentFrost2Death" relativePoint="RIGHT">
-								<Offset x="0" y="0" />
-							</Anchor>
-						</Anchors>
-						<Layers>
-							<Layer level="ARTWORK">
-								<Texture name="$parentRune" file="Interface\AddOns\TellMeWhen_Options\Textures\Unholy">
-									<Anchors>
-										<Anchor point="CENTER" relativeTo="$parent" relativePoint="CENTER"/>
-									</Anchors>
-									<Size>
-										<AbsDimension x="20" y="20"/>
-									</Size>
-								</Texture>
-							</Layer>
-						</Layers>
-					</Button>
-					<Button name="$parentUnholy2Death" parentKey="unholy2death" inherits="TellMeWhen_ConditionEditorRuneCheckTemplate" id="10">
-						<Anchors>
-							<Anchor point="LEFT" relativeTo="$parentUnholy1Death" relativePoint="RIGHT">
-								<Offset x="0" y="0" />
-							</Anchor>
-						</Anchors>
-						<Layers>
-							<Layer level="ARTWORK">
-								<Texture name="$parentRune" file="Interface\AddOns\TellMeWhen_Options\Textures\Unholy">
-									<Anchors>
-										<Anchor point="CENTER" relativeTo="$parent" relativePoint="CENTER"/>
-									</Anchors>
-									<Size>
-										<AbsDimension x="20" y="20"/>
-									</Size>
-								</Texture>
-							</Layer>
-						</Layers>
-					</Button>
-
-
-				</Frames>
-			</Frame>
-			<Frame name="$parentAndOr" parentKey="AndOr" inherits="UIDropDownMenuTemplate">
-				<Anchors>
-					<Anchor point="TOPRIGHT">
-						<Offset x="-7" y="30" />
-					</Anchor>
-				</Anchors>
-				<Layers>
-					<Layer level="OVERLAY">
-						<FontString name="$parentTxt" parentKey="AndOrTxt" inherits="GameFontNormalSmall" justifyH="CENTER">
-							<Anchors>
-								<Anchor point="BOTTOM" relativeTo="$parent" relativePoint="TOP"/>
-							</Anchors>
-						</FontString>
-					</Layer>
-				</Layers>
-				<Scripts>
-					<OnLoad>
-						UIDropDownMenu_SetWidth(self, 45)
-						UIDropDownMenu_JustifyText(self, "CENTER")
-						_G[self:GetName() .. "Button"]:SetScript("PreClick", function()
-							UIDropDownMenu_Initialize(self, TMW.CNDT.AndOrMenu_DropDown, "DROPDOWN")
-							_G[self:GetName() .. "Button"]:SetScript("PreClick", nil)
-						end)
-						self:GetParent().AndOrTxt = self.AndOrTxt
-					</OnLoad>
-				</Scripts>
-			</Frame>
-
-			<Button name="$parentDown" parentKey="Down">
-				<Size>
-					<AbsDimension x="30" y="30" />
-				</Size>
-				<Anchors>
-					<Anchor point="BOTTOMLEFT">
-						<Offset x="18" y="15" />
-					</Anchor>
-				</Anchors>
-				<Scripts>
-					<OnLoad>TMW:TT(self, "METAPANEL_DOWN") self:SetScale(0.8)</OnLoad>
-					 <OnClick>TMW.CNDT:UpOrDown(self:GetParent():GetID(), 1)</OnClick>
-				</Scripts>
-				<NormalTexture urgency="5" file="Interface\ChatFrame\UI-ChatIcon-ScrollDown-Up"/>
-				<PushedTexture file="Interface\ChatFrame\UI-ChatIcon-ScrollDown-Down"/>
-				<DisabledTexture urgency="5" file="Interface\ChatFrame\UI-ChatIcon-ScrollDown-Disabled"/>
-				<HighlightTexture file="Interface\Buttons\UI-Common-MouseHilight" alphaMode="ADD"/>
-			</Button>
-			<Button name="$parentUp" parentKey="Up">
-				<Size>
-					<AbsDimension x="30" y="30" />
-				</Size>
-				<Anchors>
-					<Anchor point="BOTTOM" relativeTo="$parentDown" relativePoint="TOP">
-						<Offset x="" y="-5" />
-					</Anchor>
-				</Anchors>
-				<Scripts>
-					<OnLoad>TMW:TT(self, "METAPANEL_UP") self:SetScale(0.8)</OnLoad>
-					 <OnClick>TMW.CNDT:UpOrDown(self:GetParent():GetID(), -1)</OnClick>
-				</Scripts>
-				<NormalTexture urgency="5" file="Interface\ChatFrame\UI-ChatIcon-ScrollUp-Up"/>
-				<PushedTexture file="Interface\ChatFrame\UI-ChatIcon-ScrollUp-Down"/>
-				<DisabledTexture file="Interface\ChatFrame\UI-ChatIcon-ScrollUp-Disabled"/>
-				<HighlightTexture file="Interface\Buttons\UI-Common-MouseHilight" alphaMode="ADD"/>
-			</Button>
-			<Button name="$parentAddDelete" parentKey="AddDelete">
-				<Size>
-					<AbsDimension x="30" y="30" />
-				</Size>
-				<Anchors>
-					<Anchor point="TOPLEFT" relativeto="$parent">
-						<Offset x="12" y="16" />
-					</Anchor>
-				</Anchors>
-				<Scripts>
-					<OnLoad>
-						self.RealParent = self:GetParent()
-						self:SetParent(self:GetParent():GetParent()) -- dont hide it when the group is hidden
-					</OnLoad>
-					<OnClick>TMW.CNDT:AddDelete(self.RealParent) TMW.CNDT:OK()</OnClick>
-				</Scripts>
-				<NormalTexture urgency="5" file="Interface\AddOns\TellMeWhen_Options\Textures\Plus-Up"/>
-				<PushedTexture file="Interface\AddOns\TellMeWhen_Options\Textures\Plus-Down"/>
-				<HighlightTexture urgency="5" file="Interface\AddOns\TellMeWhen_Options\Textures\Plus-Highlight" alphaMode="ADD"/>
-			</Button>
-		</Frames>
-		<Layers>
-			<Layer level="OVERLAY">
-				<FontString name="$parentValText" parentKey="ValText" inherits="GameFontNormalLarge" justifyH="LEFT">
-					<Anchors>
-						<Anchor point="LEFT" relativePoint="TOPLEFT">
-							<Offset x="367" y="-14" />
-						</Anchor>
-					</Anchors>
-				</FontString>
-				<FontString name="$parentTextType" parentKey="TextType" inherits="GameFontNormalSmall" justifyH="CENTER">
-					<Anchors>
-						<Anchor point="BOTTOM" relativeto="$parentType" relativePoint="TOP">
-							<Offset x="0" y="0" />
-						</Anchor>
-					</Anchors>
-				</FontString>
-				<FontString name="$parentTextUnitOrIcon" parentKey="TextUnitOrIcon" inherits="GameFontNormalSmall" justifyH="CENTER">
-					<Anchors>
-						<Anchor point="BOTTOM" relativeto="$parentUnit" relativePoint="TOP">
-							<Offset x="0" y="-4" />
-						</Anchor>
-					</Anchors>
-				</FontString>
-				<FontString name="$parentTextOperator" parentKey="TextOperator" inherits="GameFontNormalSmall" justifyH="CENTER">
-					<Anchors>
-						<Anchor point="BOTTOM" relativeto="$parentOperator" relativePoint="TOP">
-							<Offset x="0" y="0" />
-						</Anchor>
-					</Anchors>
-				</FontString>
-				<FontString name="$parentTextValue" parentKey="TextValue" inherits="GameFontNormalSmall" justifyH="CENTER">
-					<Anchors>
-						<Anchor point="TOPLEFT">
-							<Offset x="367" y="9" />
-						</Anchor>
-					</Anchors>
-				</FontString>
-				<FontString name="$parentTextUnitDef" parentKey="TextUnitDef" inherits="GameFontNormalLarge" justifyH="CENTER">
-					<Anchors>
-						<Anchor point="CENTER" relativeto="$parentUnit" relativePoint="CENTER">
-							<Offset x="0" y="-1" />
-						</Anchor>
-					</Anchors>
-				</FontString>
-				<FontString name="$parentSliderMid" parentKey="SliderMid" inherits="GameFontHighlightSmall">
-					<Anchors>
-						<Anchor point="TOP" relativeto="$parentSlider" relativePoint="BOTTOM">
-							<Offset x="0" y="3"/>
-						</Anchor>
-					</Anchors>
-				</FontString>
-			</Layer>
-		</Layers>
-		<Scripts>
-			<OnLoad>
-				TMW.CNDT[self:GetID()] = self
-				TMW.IE.Conditions.Groups[self:GetID()] = self
-			</OnLoad>
-			<OnShow>
-				self.AddDelete:SetNormalTexture("Interface\\Buttons\\UI-Panel-MinimizeButton-Up")
-				self.AddDelete:SetPushedTexture("Interface\\Buttons\\UI-Panel-MinimizeButton-Down")
-				self.AddDelete:SetHighlightTexture("Interface\\Buttons\\UI-Panel-MinimizeButton-Highlight", "ADD")
-			</OnShow>
-			<OnHide>
-				self.AddDelete:SetNormalTexture("Interface\\AddOns\\TellMeWhen_Options\\Textures\\Plus-Up")
-				self.AddDelete:SetPushedTexture("Interface\\AddOns\\TellMeWhen_Options\\Textures\\Plus-Down")
-				self.AddDelete:SetHighlightTexture("Interface\\AddOns\\TellMeWhen_Options\\Textures\\Plus-Highlight", "ADD")
-			</OnHide>
-
-		</Scripts>
-	</Frame>
-	<Frame name="TellMeWhen_MetaEditorGroup" virtual="true">
-		<Size>
-			<AbsDimension x="440" y="30" />
-		</Size>
-		<Frames>
-			<Frame name="$parentIcon" parentKey="icon" inherits="UIDropDownMenuTemplate">
-				<Anchors>
-					<Anchor point="LEFT">
-						<Offset x="-13" y="-2" />
-					</Anchor>
-				</Anchors>
-				<Scripts>
-					<OnLoad>
-						UIDropDownMenu_SetWidth(self, 350)
-						UIDropDownMenu_JustifyText(self, "LEFT")
-						_G[self:GetName() .. "Button"]:SetScript("PreClick", function()
-							UIDropDownMenu_Initialize(self, TMW.ME.IconMenu, "DROPDOWN")
-							_G[self:GetName() .. "Button"]:SetScript("PreClick", nil)
-						end)
-						_G[self:GetName() .. "Button"]:SetFrameLevel(self:GetFrameLevel()+1)
-					</OnLoad>
-				</Scripts>
-			</Frame>
-			<Button name="$parentUp" parentKey="up">
-				<Size>
-					<AbsDimension x="30" y="30" />
-				</Size>
-				<Anchors>
-					<Anchor point="LEFT" relativeTo="$parentIcon" relativePoint="RIGHT">
-						<Offset x="-15" y="2" />
-					</Anchor>
-				</Anchors>
-				<Scripts>
-					<OnLoad>TMW:TT(self, "METAPANEL_UP")</OnLoad>
-					 <OnClick>TMW.ME:UpOrDown(self, -1)</OnClick>
-				</Scripts>
-				<NormalTexture urgency="5" file="Interface\ChatFrame\UI-ChatIcon-ScrollUp-Up"/>
-				<PushedTexture file="Interface\ChatFrame\UI-ChatIcon-ScrollUp-Down"/>
-				<DisabledTexture file="Interface\ChatFrame\UI-ChatIcon-ScrollUp-Disabled"/>
-				<HighlightTexture file="Interface\Buttons\UI-Common-MouseHilight" alphaMode="ADD"/>
-			</Button>
-			<Button name="$parentDown" parentKey="down">
-				<Size>
-					<AbsDimension x="30" y="30" />
-				</Size>
-				<Anchors>
-					<Anchor point="LEFT" relativeTo="$parentUp" relativePoint="RIGHT">
-						<Offset x="0" y="0" />
-					</Anchor>
-				</Anchors>
-				<Scripts>
-					<OnLoad>TMW:TT(self, "METAPANEL_DOWN")</OnLoad>
-					 <OnClick>TMW.ME:UpOrDown(self, 1)</OnClick>
-				</Scripts>
-				<NormalTexture urgency="5" file="Interface\ChatFrame\UI-ChatIcon-ScrollDown-Up"/>
-				<PushedTexture file="Interface\ChatFrame\UI-ChatIcon-ScrollDown-Down"/>
-				<DisabledTexture urgency="5" file="Interface\ChatFrame\UI-ChatIcon-ScrollDown-Disabled"/>
-				<HighlightTexture file="Interface\Buttons\UI-Common-MouseHilight" alphaMode="ADD"/>
-			</Button>
-			<Button name="$parentDelete" parentKey="delete" inherits="UIPanelCloseButton">
-				<Anchors>
-					<Anchor point="LEFT" relativeTo="$parentDown" relativePoint="RIGHT">
-						<Offset x="-4" y="0" />
-					</Anchor>
-				</Anchors>
-				<Scripts>
-					<OnLoad>TMW:TT(self, "METAPANEL_REMOVE")</OnLoad>
-					<OnClick>TMW.ME:Delete(self)</OnClick>
-				</Scripts>
-			</Button>
-			<Button name="$parentInsert" parentKey="insert">
-				<Size>
-					<AbsDimension x="30" y="30" />
-				</Size>
-				<Anchors>
-					<Anchor point="LEFT" relativeTo="$parent" relativePoint="BOTTOMRIGHT">
-						<Offset x="11" y="0" />
-					</Anchor>
-				</Anchors>
-				<NormalTexture urgency="5" file="Interface\AddOns\TellMeWhen_Options\Textures\Plus-Up"/>
-				<PushedTexture file="Interface\AddOns\TellMeWhen_Options\Textures\Plus-Down"/>
-				<HighlightTexture urgency="5" file="Interface\AddOns\TellMeWhen_Options\Textures\Plus-Highlight" alphaMode="ADD"/>
-				<Scripts>
-					 <OnLoad>
-						TMW:TT(self, "METAPANEL_INSERT")
-					</OnLoad>
-					<OnClick>TMW.ME:Insert(self:GetParent():GetID()+1)</OnClick>
-				</Scripts>
-			</Button>
-		</Frames>
-		<Layers>
-			<Layer level="OVERLAY">
-				<FontString name="$parentValText" inherits="GameFontNormalLarge" justifyH="LEFT">
-					<Anchors>
-						<Anchor point="LEFT" relativePoint="TOPLEFT">
-							<Offset x="440" y="-14" />
-						</Anchor>
-					</Anchors>
-				</FontString>
-			</Layer>
-		</Layers>
-		<Scripts>
-			<OnLoad>
-				TMW.ME[self:GetID()] = self
-			</OnLoad>
-		</Scripts>
-	</Frame>
-
-	<Slider name="TellMeWhen_AlphaSliderTemplate" inherits="OptionsSliderTemplate" minvalue="0" maxvalue="100" valuestep="1" virtual="true">
-		<Size x="160" y="17"/>
-		<Layers>
-			<Layer level="ARTWORK">
-				<FontString name="$parentVal" parentKey="val" inherits="GameFontHighlightSmall" text="HIGH">
-					<Anchors>
-						<Anchor point="TOP" relativePoint="BOTTOM">
-							<Offset x="0" y="3"/>
-						</Anchor>
-					</Anchors>
-				</FontString>
-				<FontString name="$parentText" parentKey="text" inherits="GameFontHighlight">
-					<Anchors>
-						<Anchor point="BOTTOM" relativePoint="TOP">
-							<Offset x="0" y="-1"/>
-						</Anchor>
-					</Anchors>
-				</FontString>
-			</Layer>
-		</Layers>
-		<Scripts>
-			<OnMinMaxChanged>
-				local minValue, maxValue = self:GetMinMaxValues()
-				_G[self:GetName() .. "Low"]:SetText(minValue .. "%")
-				_G[self:GetName() .. "High"]:SetText(maxValue .. "%")
-			</OnMinMaxChanged>
-			<OnValueChanged>
-				_G[self:GetName() .. "Val"]:SetText(self:GetValue() .. "%")
-				local groupID, iconID = TMW.CI.g, TMW.CI.i
-				if TMW.db then
-					TMW.db.profile.Groups[groupID].Icons[iconID][self.setting] = self:GetValue() / 100
-					TMW.IE:ScheduleIconUpdate(groupID, iconID)
-				end
-			</OnValueChanged>
-			<OnLoad>
-				self:EnableMouseWheel(true)
-			</OnLoad>
-			<OnEnable>
-				self:SetAlpha(1)
-			</OnEnable>
-			<OnDisable>
-				self:SetAlpha(0.4)
-			</OnDisable>
-			<OnMouseWheel>
-				self:SetValue(self:GetValue()+delta)
-			</OnMouseWheel>
-		</Scripts>
-	</Slider>
-
 	<CheckButton name="TellMeWhen_CheckTemplate" virtual="true">
 		<Size>
 			<AbsDimension x="30" y="30"/>
@@ -1079,7 +292,57 @@
 			</OnEditFocusLost>
 		</Scripts>
 	</EditBox>
-<!-- 
+
+	<Slider name="TellMeWhen_AlphaSliderTemplate" inherits="OptionsSliderTemplate" minvalue="0" maxvalue="100" valuestep="1" virtual="true">
+		<Size x="160" y="17"/>
+		<Layers>
+			<Layer level="ARTWORK">
+				<FontString name="$parentVal" parentKey="val" inherits="GameFontHighlightSmall" text="HIGH">
+					<Anchors>
+						<Anchor point="TOP" relativePoint="BOTTOM">
+							<Offset x="0" y="3"/>
+						</Anchor>
+					</Anchors>
+				</FontString>
+				<FontString name="$parentText" parentKey="text" inherits="GameFontHighlight">
+					<Anchors>
+						<Anchor point="BOTTOM" relativePoint="TOP">
+							<Offset x="0" y="-1"/>
+						</Anchor>
+					</Anchors>
+				</FontString>
+			</Layer>
+		</Layers>
+		<Scripts>
+			<OnMinMaxChanged>
+				local minValue, maxValue = self:GetMinMaxValues()
+				_G[self:GetName() .. "Low"]:SetText(minValue .. "%")
+				_G[self:GetName() .. "High"]:SetText(maxValue .. "%")
+			</OnMinMaxChanged>
+			<OnValueChanged>
+				_G[self:GetName() .. "Val"]:SetText(self:GetValue() .. "%")
+				local groupID, iconID = TMW.CI.g, TMW.CI.i
+				if TMW.db then
+					TMW.db.profile.Groups[groupID].Icons[iconID][self.setting] = self:GetValue() / 100
+					TMW.IE:ScheduleIconUpdate(groupID, iconID)
+				end
+			</OnValueChanged>
+			<OnLoad>
+				self:EnableMouseWheel(true)
+			</OnLoad>
+			<OnEnable>
+				self:SetAlpha(1)
+			</OnEnable>
+			<OnDisable>
+				self:SetAlpha(0.4)
+			</OnDisable>
+			<OnMouseWheel>
+				self:SetValue(self:GetValue()+delta)
+			</OnMouseWheel>
+		</Scripts>
+	</Slider>
+
+	<!-- 
 	<Button name="TellMeWhen_ColorModeButtonTemplate" virtual="true">
 		<Backdrop bgFile="Interface\AddOns\TellMeWhen_Options\Textures\AlphaTile" tile="true">
 			<TileSize>
@@ -1125,6 +388,760 @@
 		</HighlightTexture>
 	</Button>
  -->
+	
+	<Button name="TellMeWhen_ConditionEditorRuneCheckTemplate" virtual="true">
+		<Size>
+			<AbsDimension x="35" y="29" />
+		</Size>
+		<Layers>
+			<Layer level="OVERLAY">
+				<Texture name="$parentCheck" parentKey="Check" file="">
+					<Anchors>
+						<Anchor point="CENTER" relativeTo="$parent" relativePoint="CENTER"/>
+					</Anchors>
+					<Size x="27" y="27"/>
+				</Texture>
+			</Layer>
+		</Layers>
+		<Scripts>
+			<OnClick>
+				if self.checked then
+					self.checked = false
+					self.Check:SetTexture("Interface\\RAIDFRAME\\ReadyCheck-NotReady")
+				elseif self.checked == false then
+					self.checked = nil
+					self.Check:SetTexture(nil)
+				elseif self.checked == nil then
+					self.checked = true
+					self.Check:SetTexture("Interface\\RAIDFRAME\\ReadyCheck-Ready")
+				end
+				TMW.CNDT:RuneHandler(self)
+				TMW.CNDT:OK()
+			</OnClick>
+			<OnLoad>
+				function self:GetChecked()
+					return self.checked
+				end
+				function self:SetChecked(checked)
+					self.checked = checked
+					if checked then
+						self.Check:SetTexture("Interface\\RAIDFRAME\\ReadyCheck-Ready")
+					elseif checked == nil then
+						self.Check:SetTexture(nil)
+					elseif checked == false then
+						self.Check:SetTexture("Interface\\RAIDFRAME\\ReadyCheck-NotReady")
+					end
+				end
+			</OnLoad>
+		</Scripts>
+	</Button>
+	<Frame name="TellMeWhen_ConditionGroup" virtual="true">
+		<Size>
+			<AbsDimension x="559" y="59" />
+		</Size>
+		<Backdrop bgFile="Interface\DialogFrame\UI-DialogBox-Background" tile="true">
+			<EdgeSize>
+				<AbsValue val="10"/>
+			</EdgeSize>
+			<BackgroundInsets>
+				<AbsInset left="0" right="0" top="0" bottom="0" />
+			</BackgroundInsets>
+			<TileSize>
+				<AbsValue val="32" />
+			</TileSize>
+		</Backdrop>
+		<Anchors>
+			<Anchor point="TOPLEFT">
+				<Offset x="0" y="0" />
+			</Anchor>
+		</Anchors>
+		<Frames>
+			<Frame name="$parentType" parentKey="Type" inherits="UIDropDownMenuTemplate">
+				<Anchors>
+					<Anchor point="TOPLEFT">
+						<Offset x="9" y="-10" />
+					</Anchor>
+				</Anchors>
+				<Scripts>
+					<OnLoad>
+						UIDropDownMenu_SetWidth(self, 160)
+						UIDropDownMenu_JustifyText(self, "LEFT")
+						_G[self:GetName() .. "Button"]:SetScript("PreClick", function()
+							UIDropDownMenu_Initialize(self, TMW.CNDT.TypeMenu_DropDown, "DROPDOWN")
+							_G[self:GetName() .. "Button"]:SetScript("PreClick", nil)
+						end)
+					</OnLoad>
+				</Scripts>
+			</Frame>
+			<Frame name="$parentIcon" parentKey="Icon" inherits="UIDropDownMenuTemplate">
+				<Anchors>
+					<Anchor point="LEFT" relativeTo="$parentType" relativePoint="RIGHT">
+						<Offset x="-27" y="0" />
+					</Anchor>
+				</Anchors>
+				<Scripts>
+					<OnLoad>
+						self:Hide()
+						UIDropDownMenu_SetWidth(self, 168)
+						UIDropDownMenu_JustifyText(self, "LEFT")
+						_G[self:GetName() .. "Button"]:SetScript("PreClick", function()
+							UIDropDownMenu_Initialize(self, TMW.CNDT.IconMenu_DropDown, "DROPDOWN")
+							_G[self:GetName() .. "Button"]:SetScript("PreClick", nil)
+						end)
+					</OnLoad>
+				</Scripts>
+			</Frame>
+			<EditBox name="$parentUnit" inherits="TellMeWhen_InputBoxTemplate" parentKey="Unit" autoFocus="false">
+				<Size x="95" y="32"/>
+				<Anchors>
+					<Anchor point="LEFT" relativeTo="$parentType" relativePoint="RIGHT">
+						<Offset>
+							<AbsDimension x="-5" y="3" />
+						</Offset>
+					</Anchor>
+				</Anchors>
+				<Frames>
+					<Button name="$parentButton"  motionScriptsWhileDisabled="true" parentKey="Button">
+						<Size>
+							<AbsDimension x="24" y="24"/>
+						</Size>
+						<Anchors>
+							<Anchor point="LEFT" relativeTo="$parent" relativePoint="RIGHT">
+								<Offset>
+									<AbsDimension x="-3" y="-1"/>
+								</Offset>
+							</Anchor>
+						</Anchors>
+						<Scripts>
+							<OnClick>
+								TellMeWhen_IconEditorConditionsUnitDD:SetParent(self:GetParent())
+								TellMeWhen_IconEditorConditionsUnitDD:Init()
+								ToggleDropDownMenu(1, nil, TellMeWhen_IconEditorConditionsUnitDD, self, 0, 0)
+								PlaySound("igCharacterInfoTab")
+							</OnClick>
+						</Scripts>
+						<NormalTexture file="Interface\ChatFrame\UI-ChatIcon-ScrollDown-Up"/>
+						<PushedTexture file="Interface\ChatFrame\UI-ChatIcon-ScrollDown-Down"/>
+						<DisabledTexture file="Interface\ChatFrame\UI-ChatIcon-ScrollDown-Disabled"/>
+						<HighlightTexture file="Interface\Buttons\UI-Common-MouseHilight" alphaMode="ADD"/>
+					</Button>
+				</Frames>
+				<Scripts>
+					<OnLoad>
+						self.Ins = TellMeWhen_IconEditorConditionsUnitDD
+						TMW:TT(self, "CONDITIONPANEL_UNIT", "CONDITIONPANEL_UNIT_DESC")
+						TMW:TT(self.Button, "CONDITIONPANEL_UNIT", "CONDITIONPANEL_UNITDROPDOWN_DESC")
+					</OnLoad>
+					<OnEditFocusLost>
+						EditBox_ClearHighlight(self)
+						self:SetText(TMW:CleanString(self:GetText()))
+						TMW.CNDT:OK()
+					</OnEditFocusLost>
+				</Scripts>
+			</EditBox>
+			<Frame name="$parentOperator" parentKey="Operator" inherits="UIDropDownMenuTemplate">
+				<Anchors>
+					<Anchor point="LEFT" relativeTo="$parentUnit" relativePoint="RIGHT">
+						<Offset>
+							<AbsDimension x="5" y="-3" />
+						</Offset>
+					</Anchor>
+				</Anchors>
+				<Scripts>
+					<OnLoad>
+						_G[self:GetName() .. "Text"]:SetFontObject(GameFontHighlightLarge)
+						UIDropDownMenu_SetWidth(self, 47)
+						UIDropDownMenu_JustifyText(self, "LEFT")
+						_G[self:GetName() .. "Button"]:SetScript("PreClick", function()
+							UIDropDownMenu_Initialize(self, TMW.CNDT.OperatorMenu_DropDown, "DROPDOWN")
+							_G[self:GetName() .. "Button"]:SetScript("PreClick", nil)
+						end)
+					</OnLoad>
+				</Scripts>
+			</Frame>
+			<Slider name="$parentSlider" parentKey="Slider" inherits="OptionsSliderTemplate" minvalue="0" maxvalue="100" valuestep="1" defaultvalue="100">
+				<Size x="523" y="17"/>
+				<Anchors>
+					<Anchor point="TOPRIGHT">
+						<Offset x="-5" y="-35" />
+					</Anchor>
+				</Anchors>
+				<Layers>
+					<Layer level="ARTWORK">
+						<FontString name="$parentMid" inherits="GameFontHighlightSmall">
+							<Anchors>
+								<Anchor point="TOP" relativePoint="BOTTOM">
+									<Offset>
+										<AbsDimension x="0" y="3"/>
+									</Offset>
+								</Anchor>
+							</Anchors>
+						</FontString>
+					</Layer>
+				</Layers>
+				<Scripts>
+					<OnValueChanged>
+						TMW.CNDT:SetValText(self:GetParent())
+					</OnValueChanged>
+					<OnMouseUp>
+						TMW.CNDT:OK()
+					</OnMouseUp>
+					<OnLoad>
+						self:EnableMouseWheel(true)
+					</OnLoad>
+					<OnMouseWheel>
+						if IsLeftShiftKeyDown() or IsRightShiftKeyDown() then
+							delta = delta*10
+						elseif IsLeftControlKeyDown() or IsRightControlKeyDown() then
+							delta = delta*100
+						end
+						self:SetValue(self:GetValue()+delta)
+						TMW.CNDT:OK()
+					</OnMouseWheel>
+				</Scripts>
+			</Slider>
+			<EditBox name="$parentEditBox" inherits="TellMeWhen_InputBoxTemplate" parentKey="EditBox" autoFocus="false">
+				<Size x="302" y="18"/>
+				<Anchors>
+					<Anchor point="TOPLEFT" relativeTo="$parentType" relativePoint="BOTTOMLEFT">
+						<Offset x="23" y="5" />
+					</Anchor>
+				</Anchors>
+				<Scripts>
+					<OnEditFocusLost>
+						EditBox_ClearHighlight(self)
+						self:SetText(TMW:CleanString(self:GetText()))
+						TMW.CNDT:OK()
+					</OnEditFocusLost>
+				</Scripts>
+			</EditBox>
+			<Frame name="$parentRunes" parentKey="Runes" hidden="true">
+				<Size x="1" y="1"/>
+				<Anchors>
+					<Anchor point="TOPLEFT" relativeTo="$parentType" relativePoint="TOPRIGHT">
+						<Offset x="10" y="9" />
+					</Anchor>
+				</Anchors>
+				<Frames>
+					<Button name="$parentBlood1" parentKey="blood1" inherits="TellMeWhen_ConditionEditorRuneCheckTemplate" id="1">
+						<Anchors>
+							<Anchor point="TOPLEFT">
+								<Offset x="0" y="0" />
+							</Anchor>
+						</Anchors>
+						<Layers>
+							<Layer level="ARTWORK">
+								<Texture name="$parentRune" file="Interface\PlayerFrame\UI-PlayerFrame-Deathknight-Blood">
+									<Anchors>
+										<Anchor point="CENTER" relativeTo="$parent" relativePoint="CENTER"/>
+									</Anchors>
+									<Size>
+										<AbsDimension x="28" y="28"/>
+									</Size>
+								</Texture>
+							</Layer>
+						</Layers>
+					</Button>
+					<Button name="$parentBlood2" parentKey="blood2" inherits="TellMeWhen_ConditionEditorRuneCheckTemplate" id="2">
+						<Anchors>
+							<Anchor point="LEFT" relativeTo="$parentBlood1" relativePoint="RIGHT">
+								<Offset x="0" y="0" />
+							</Anchor>
+						</Anchors>
+						<Layers>
+							<Layer level="ARTWORK">
+								<Texture name="$parentRune" file="Interface\PlayerFrame\UI-PlayerFrame-Deathknight-Blood">
+									<Anchors>
+										<Anchor point="CENTER" relativeTo="$parent" relativePoint="CENTER"/>
+									</Anchors>
+									<Size>
+										<AbsDimension x="28" y="28"/>
+									</Size>
+								</Texture>
+							</Layer>
+						</Layers>
+					</Button>
+		 			<Button name="$parentFrost1" parentKey="frost1" inherits="TellMeWhen_ConditionEditorRuneCheckTemplate" id="5">
+						<Anchors>
+							<Anchor point="LEFT" relativeTo="$parentBlood2" relativePoint="RIGHT">
+								<Offset x="0" y="0" />
+							</Anchor>
+						</Anchors>
+						<Layers>
+							<Layer level="ARTWORK">
+								<Texture name="$parentRune" file="Interface\PlayerFrame\UI-PlayerFrame-Deathknight-Frost">
+									<Anchors>
+										<Anchor point="CENTER" relativeTo="$parent" relativePoint="CENTER"/>
+									</Anchors>
+									<Size>
+										<AbsDimension x="28" y="28"/>
+									</Size>
+								</Texture>
+							</Layer>
+						</Layers>
+					</Button>
+					<Button name="$parentFrost2" parentKey="frost2" inherits="TellMeWhen_ConditionEditorRuneCheckTemplate" id="6">
+						<Anchors>
+							<Anchor point="LEFT" relativeTo="$parentFrost1" relativePoint="RIGHT">
+								<Offset x="0" y="0" />
+							</Anchor>
+						</Anchors>
+						<Layers>
+							<Layer level="ARTWORK">
+								<Texture name="$parentRune" file="Interface\PlayerFrame\UI-PlayerFrame-Deathknight-Frost">
+									<Anchors>
+										<Anchor point="CENTER" relativeTo="$parent" relativePoint="CENTER"/>
+									</Anchors>
+									<Size>
+										<AbsDimension x="28" y="28"/>
+									</Size>
+								</Texture>
+							</Layer>
+						</Layers>
+					</Button>
+					<Button name="$parentUnholy1" parentKey="unholy1" inherits="TellMeWhen_ConditionEditorRuneCheckTemplate" id="3">
+						<Anchors>
+							<Anchor point="LEFT" relativeTo="$parentFrost2" relativePoint="RIGHT">
+								<Offset x="0" y="0" />
+							</Anchor>
+						</Anchors>
+						<Layers>
+							<Layer level="ARTWORK">
+								<Texture name="$parentRune" file="Interface\PlayerFrame\UI-PlayerFrame-Deathknight-Unholy">
+									<Anchors>
+										<Anchor point="CENTER" relativeTo="$parent" relativePoint="CENTER"/>
+									</Anchors>
+									<Size>
+										<AbsDimension x="28" y="28"/>
+									</Size>
+								</Texture>
+							</Layer>
+						</Layers>
+					</Button>
+					<Button name="$parentUnholy2" parentKey="unholy2" inherits="TellMeWhen_ConditionEditorRuneCheckTemplate" id="4">
+						<Anchors>
+							<Anchor point="LEFT" relativeTo="$parentUnholy1" relativePoint="RIGHT">
+								<Offset x="0" y="0" />
+							</Anchor>
+						</Anchors>
+						<Layers>
+							<Layer level="ARTWORK">
+								<Texture name="$parentRune" file="Interface\PlayerFrame\UI-PlayerFrame-Deathknight-Unholy">
+									<Anchors>
+										<Anchor point="CENTER" relativeTo="$parent" relativePoint="CENTER"/>
+									</Anchors>
+									<Size>
+										<AbsDimension x="28" y="28"/>
+									</Size>
+								</Texture>
+							</Layer>
+						</Layers>
+					</Button>
+
+
+					<Button name="$parentBlood1Death" parentKey="blood1death" inherits="TellMeWhen_ConditionEditorRuneCheckTemplate" id="7">
+						<Anchors>
+							<Anchor point="TOP" relativeTo="$parentBlood1" relativePoint="BOTTOM">
+								<Offset x="0" y="0" />
+							</Anchor>
+						</Anchors>
+						<Layers>
+							<Layer level="ARTWORK">
+								<Texture name="$parentRune" file="Interface\AddOns\TellMeWhen_Options\Textures\Blood">
+									<Anchors>
+										<Anchor point="CENTER" relativeTo="$parent" relativePoint="CENTER"/>
+									</Anchors>
+									<Size>
+										<AbsDimension x="28" y="28"/>
+									</Size>
+								</Texture>
+							</Layer>
+						</Layers>
+					</Button>
+					<Button name="$parentBlood2Death" parentKey="blood2death" inherits="TellMeWhen_ConditionEditorRuneCheckTemplate" id="8">
+						<Anchors>
+							<Anchor point="LEFT" relativeTo="$parentBlood1Death" relativePoint="RIGHT">
+								<Offset x="0" y="0" />
+							</Anchor>
+						</Anchors>
+						<Layers>
+							<Layer level="ARTWORK">
+								<Texture name="$parentRune" file="Interface\AddOns\TellMeWhen_Options\Textures\Blood">
+									<Anchors>
+										<Anchor point="CENTER" relativeTo="$parent" relativePoint="CENTER"/>
+									</Anchors>
+									<Size>
+										<AbsDimension x="28" y="28"/>
+									</Size>
+								</Texture>
+							</Layer>
+						</Layers>
+					</Button>
+					<Button name="$parentFrost1Death" parentKey="frost1death" inherits="TellMeWhen_ConditionEditorRuneCheckTemplate" id="11">
+						<Anchors>
+							<Anchor point="LEFT" relativeTo="$parentBlood2Death" relativePoint="RIGHT">
+								<Offset x="0" y="0" />
+							</Anchor>
+						</Anchors>
+						<Layers>
+							<Layer level="ARTWORK">
+								<Texture name="$parentRune" file="Interface\AddOns\TellMeWhen_Options\Textures\Frost">
+									<Anchors>
+										<Anchor point="CENTER" relativeTo="$parent" relativePoint="CENTER"/>
+									</Anchors>
+									<Size>
+										<AbsDimension x="28" y="28"/>
+									</Size>
+								</Texture>
+							</Layer>
+						</Layers>
+					</Button>
+					<Button name="$parentFrost2Death" parentKey="frost2death" inherits="TellMeWhen_ConditionEditorRuneCheckTemplate" id="12">
+						<Anchors>
+							<Anchor point="LEFT" relativeTo="$parentFrost1Death" relativePoint="RIGHT">
+								<Offset x="0" y="0" />
+							</Anchor>
+						</Anchors>
+						<Layers>
+							<Layer level="ARTWORK">
+								<Texture name="$parentRune" file="Interface\AddOns\TellMeWhen_Options\Textures\Frost">
+									<Anchors>
+										<Anchor point="CENTER" relativeTo="$parent" relativePoint="CENTER"/>
+									</Anchors>
+									<Size>
+										<AbsDimension x="28" y="28"/>
+									</Size>
+								</Texture>
+							</Layer>
+						</Layers>
+					</Button>
+					<Button name="$parentUnholy1Death" parentKey="unholy1death" inherits="TellMeWhen_ConditionEditorRuneCheckTemplate" id="9">
+						<Anchors>
+							<Anchor point="LEFT" relativeTo="$parentFrost2Death" relativePoint="RIGHT">
+								<Offset x="0" y="0" />
+							</Anchor>
+						</Anchors>
+						<Layers>
+							<Layer level="ARTWORK">
+								<Texture name="$parentRune" file="Interface\AddOns\TellMeWhen_Options\Textures\Unholy">
+									<Anchors>
+										<Anchor point="CENTER" relativeTo="$parent" relativePoint="CENTER"/>
+									</Anchors>
+									<Size>
+										<AbsDimension x="28" y="28"/>
+									</Size>
+								</Texture>
+							</Layer>
+						</Layers>
+					</Button>
+					<Button name="$parentUnholy2Death" parentKey="unholy2death" inherits="TellMeWhen_ConditionEditorRuneCheckTemplate" id="10">
+						<Anchors>
+							<Anchor point="LEFT" relativeTo="$parentUnholy1Death" relativePoint="RIGHT">
+								<Offset x="0" y="0" />
+							</Anchor>
+						</Anchors>
+						<Layers>
+							<Layer level="ARTWORK">
+								<Texture name="$parentRune" file="Interface\AddOns\TellMeWhen_Options\Textures\Unholy">
+									<Anchors>
+										<Anchor point="CENTER" relativeTo="$parent" relativePoint="CENTER"/>
+									</Anchors>
+									<Size>
+										<AbsDimension x="28" y="28"/>
+									</Size>
+								</Texture>
+							</Layer>
+						</Layers>
+					</Button>
+
+
+				</Frames>
+			</Frame>
+			
+			
+			<CheckButton name="$parentAnd" inherits="TellMeWhen_CheckTemplate" parentKey="And">
+				<Size x="18" y="18"/>
+				<!-- <Anchors>
+					<Anchor point="TOPRIGHT">
+						<Offset x="-68" y="21" />
+					</Anchor>
+				</Anchors> -->
+				<Scripts>
+					<OnLoad>
+						TMW:TT(self, "CONDITIONPANEL_ANDOR", "CONDITIONPANEL_AND")
+						self.text:SetText(TMW.L["CONDITIONPANEL_AND"])
+						self.text:SetWidth(40)
+						self:SetPoint("BOTTOMRIGHT", self:GetParent(), "TOP", -self.text:GetWidth()-1, 0)
+					</OnLoad>
+					<OnClick>
+						self:GetParent().Or:SetChecked(nil)
+						self:SetChecked(1)
+						TMW.CNDT:OK()
+					</OnClick>
+				</Scripts>
+			</CheckButton>
+			<CheckButton name="$parentOr" inherits="TellMeWhen_CheckTemplate" parentKey="Or">
+				<Size x="18" y="18"/>
+				<Anchors>
+					<Anchor point="BOTTOMLEFT" relativeTo="$parent" relativePoint="TOP">
+						<Offset x="1" y="0" />
+					</Anchor>
+				</Anchors>
+				<Scripts>
+					<OnLoad>
+						TMW:TT(self, "CONDITIONPANEL_ANDOR", "CONDITIONPANEL_OR")
+						self.text:SetText(TMW.L["CONDITIONPANEL_OR"])
+						self.text:SetWidth(40)
+					</OnLoad>
+					<OnClick>
+						self:GetParent().And:SetChecked(nil)
+						self:SetChecked(1)
+						TMW.CNDT:OK()
+					</OnClick>
+				</Scripts>
+			</CheckButton>
+				
+			
+			<Button name="$parentUp" parentKey="Up">
+				<Size>
+					<AbsDimension x="15" y="15" />
+				</Size>
+				<Anchors>
+					<Anchor point="TOPLEFT">
+						<Offset x="0" y="-25" />
+					</Anchor>
+				</Anchors>
+				<Scripts>
+					<OnLoad>TMW:TT(self, "METAPANEL_UP") self:SetScale(0.8)</OnLoad>
+					 <OnClick>TMW.CNDT:UpOrDown(self:GetParent():GetID(), -1)</OnClick>
+				</Scripts>
+				<NormalTexture urgency="5" file="Interface\ChatFrame\UI-ChatIcon-ScrollUp-Up">
+					<TexCoords left="0.21875" right="0.6875" top="0.34375" bottom="0.65625"/>
+				</NormalTexture>
+				<HighlightTexture urgency="5" file="Interface\ChatFrame\UI-ChatIcon-ScrollUp-Up" alphaMode="ADD">
+					<TexCoords left="0.21875" right="0.6875" top="0.34375" bottom="0.65625"/>
+				</HighlightTexture>
+			</Button>
+			<Button name="$parentDown" parentKey="Down">
+				<Size>
+					<AbsDimension x="15" y="15" />
+				</Size>
+				<Anchors>
+					<Anchor point="LEFT" relativeTo="$parentUp" relativePoint="RIGHT">
+						<Offset x="0" y="0" />
+					</Anchor>
+				</Anchors>
+				<Scripts>
+					<OnLoad>TMW:TT(self, "METAPANEL_DOWN") self:SetScale(0.8)</OnLoad>
+					 <OnClick>TMW.CNDT:UpOrDown(self:GetParent():GetID(), 1)</OnClick>
+				</Scripts>
+				<NormalTexture urgency="5" file="Interface\ChatFrame\UI-ChatIcon-ScrollDown-Up">
+					<TexCoords left="0.21875" right="0.6875" top="0.34375" bottom="0.65625"/>
+				</NormalTexture>
+				<HighlightTexture urgency="5" file="Interface\ChatFrame\UI-ChatIcon-ScrollDown-Up" alphaMode="ADD">
+					<TexCoords left="0.21875" right="0.6875" top="0.34375" bottom="0.65625"/>
+				</HighlightTexture>
+			</Button>
+			<Button name="$parentAddDelete" parentKey="AddDelete">
+				<Size>
+					<AbsDimension x="30" y="30" />
+				</Size>
+				<Anchors>
+					<Anchor point="TOPLEFT" relativeto="$parent">
+						<Offset x="-4" y="6" />
+					</Anchor>
+				</Anchors>
+				<Scripts>
+					<OnLoad>
+						self.RealParent = self:GetParent()
+						self:SetParent(self:GetParent():GetParent()) -- dont hide it when the group is hidden
+					</OnLoad>
+					<OnClick>TMW.CNDT:AddDelete(self.RealParent) TMW.CNDT:OK()</OnClick>
+				</Scripts>
+				<NormalTexture urgency="5" file="Interface\AddOns\TellMeWhen_Options\Textures\Plus-Up"/>
+				<PushedTexture file="Interface\AddOns\TellMeWhen_Options\Textures\Plus-Down"/>
+				<HighlightTexture urgency="5" file="Interface\AddOns\TellMeWhen_Options\Textures\Plus-Highlight" alphaMode="ADD"/>
+			</Button>
+		</Frames>
+		<Layers>
+			<Layer level="OVERLAY">
+				<FontString name="$parentTextType" parentKey="TextType" inherits="GameFontNormalSmall" justifyH="CENTER">
+					<Anchors>
+						<Anchor point="BOTTOM" relativeto="$parentType" relativePoint="TOP">
+							<Offset x="0" y="-1" />
+						</Anchor>
+					</Anchors>
+				</FontString>
+				<FontString name="$parentTextUnitOrIcon" parentKey="TextUnitOrIcon" inherits="GameFontNormalSmall" justifyH="CENTER">
+					<Anchors>
+						<Anchor point="BOTTOM" relativeto="$parentUnit" relativePoint="TOP">
+							<Offset x="0" y="-5" />
+						</Anchor>
+					</Anchors>
+				</FontString>
+				<FontString name="$parentTextOperator" parentKey="TextOperator" inherits="GameFontNormalSmall" justifyH="CENTER">
+					<Anchors>
+						<Anchor point="BOTTOM" relativeto="$parentOperator" relativePoint="TOP">
+							<Offset x="0" y="-1" />
+						</Anchor>
+					</Anchors>
+				</FontString>
+				<FontString name="$parentTextValue" parentKey="TextValue" inherits="GameFontNormalSmall" justifyH="CENTER">
+					<Anchors>
+						<Anchor point="BOTTOMLEFT" relativeto="$parentOperator" relativePoint="TOPRIGHT">
+							<Offset x="-10" y="-1" />
+						</Anchor>
+					</Anchors>
+				</FontString>
+				<FontString name="$parentValText" parentKey="ValText" inherits="GameFontNormalLarge" justifyH="LEFT">
+					<Anchors>
+						<Anchor point="LEFT" relativeto="$parentOperator" relativePoint="RIGHT">
+							<Offset x="-10" y="2" />
+						</Anchor>
+					</Anchors>
+				</FontString>
+				<FontString name="$parentTextUnitDef" parentKey="TextUnitDef" inherits="GameFontNormalLarge" justifyH="CENTER">
+					<Anchors>
+						<Anchor point="CENTER" relativeto="$parentUnit" relativePoint="CENTER">
+							<Offset x="0" y="-2" />
+						</Anchor>
+					</Anchors>
+				</FontString>
+				<FontString name="$parentSliderMid" parentKey="SliderMid" inherits="GameFontHighlightSmall">
+					<Anchors>
+						<Anchor point="TOP" relativeto="$parentSlider" relativePoint="BOTTOM">
+							<Offset x="0" y="3"/>
+						</Anchor>
+					</Anchors>
+				</FontString>
+			</Layer>
+		</Layers>
+		<Scripts>
+			<OnLoad>
+				TMW.CNDT[self:GetID()] = self
+				TMW.IE.Conditions.Groups[self:GetID()] = self
+			</OnLoad>
+			<OnShow>
+				self.AddDelete:SetNormalTexture("Interface\\Buttons\\UI-Panel-MinimizeButton-Up")
+				self.AddDelete:SetPushedTexture("Interface\\Buttons\\UI-Panel-MinimizeButton-Down")
+				self.AddDelete:SetHighlightTexture("Interface\\Buttons\\UI-Panel-MinimizeButton-Highlight", "ADD")
+			</OnShow>
+			<OnHide>
+				self.AddDelete:SetNormalTexture("Interface\\AddOns\\TellMeWhen_Options\\Textures\\Plus-Up")
+				self.AddDelete:SetPushedTexture("Interface\\AddOns\\TellMeWhen_Options\\Textures\\Plus-Down")
+				self.AddDelete:SetHighlightTexture("Interface\\AddOns\\TellMeWhen_Options\\Textures\\Plus-Highlight", "ADD")
+			</OnHide>
+
+		</Scripts>
+	</Frame>
+	<Frame name="TellMeWhen_MetaEditorGroup" virtual="true">
+		<Size>
+			<AbsDimension x="440" y="30" />
+		</Size>
+		<Frames>
+			<Frame name="$parentIcon" parentKey="icon" inherits="UIDropDownMenuTemplate">
+				<Anchors>
+					<Anchor point="LEFT">
+						<Offset x="-13" y="-2" />
+					</Anchor>
+				</Anchors>
+				<Scripts>
+					<OnLoad>
+						UIDropDownMenu_SetWidth(self, 350)
+						UIDropDownMenu_JustifyText(self, "LEFT")
+						_G[self:GetName() .. "Button"]:SetScript("PreClick", function()
+							UIDropDownMenu_Initialize(self, TMW.ME.IconMenu, "DROPDOWN")
+							_G[self:GetName() .. "Button"]:SetScript("PreClick", nil)
+						end)
+						_G[self:GetName() .. "Button"]:SetFrameLevel(self:GetFrameLevel()+1)
+					</OnLoad>
+				</Scripts>
+			</Frame>
+			<Button name="$parentUp" parentKey="up">
+				<Size>
+					<AbsDimension x="30" y="30" />
+				</Size>
+				<Anchors>
+					<Anchor point="LEFT" relativeTo="$parentIcon" relativePoint="RIGHT">
+						<Offset x="-15" y="2" />
+					</Anchor>
+				</Anchors>
+				<Scripts>
+					<OnLoad>TMW:TT(self, "METAPANEL_UP")</OnLoad>
+					 <OnClick>TMW.ME:UpOrDown(self, -1)</OnClick>
+				</Scripts>
+				<NormalTexture urgency="5" file="Interface\ChatFrame\UI-ChatIcon-ScrollUp-Up"/>
+				<PushedTexture file="Interface\ChatFrame\UI-ChatIcon-ScrollUp-Down"/>
+				<DisabledTexture file="Interface\ChatFrame\UI-ChatIcon-ScrollUp-Disabled"/>
+				<HighlightTexture file="Interface\Buttons\UI-Common-MouseHilight" alphaMode="ADD"/>
+			</Button>
+			<Button name="$parentDown" parentKey="down">
+				<Size>
+					<AbsDimension x="30" y="30" />
+				</Size>
+				<Anchors>
+					<Anchor point="LEFT" relativeTo="$parentUp" relativePoint="RIGHT">
+						<Offset x="0" y="0" />
+					</Anchor>
+				</Anchors>
+				<Scripts>
+					<OnLoad>TMW:TT(self, "METAPANEL_DOWN")</OnLoad>
+					 <OnClick>TMW.ME:UpOrDown(self, 1)</OnClick>
+				</Scripts>
+				<NormalTexture urgency="5" file="Interface\ChatFrame\UI-ChatIcon-ScrollDown-Up"/>
+				<PushedTexture file="Interface\ChatFrame\UI-ChatIcon-ScrollDown-Down"/>
+				<DisabledTexture urgency="5" file="Interface\ChatFrame\UI-ChatIcon-ScrollDown-Disabled"/>
+				<HighlightTexture file="Interface\Buttons\UI-Common-MouseHilight" alphaMode="ADD"/>
+			</Button>
+			<Button name="$parentDelete" parentKey="delete" inherits="UIPanelCloseButton">
+				<Anchors>
+					<Anchor point="LEFT" relativeTo="$parentDown" relativePoint="RIGHT">
+						<Offset x="-4" y="0" />
+					</Anchor>
+				</Anchors>
+				<Scripts>
+					<OnLoad>TMW:TT(self, "METAPANEL_REMOVE")</OnLoad>
+					<OnClick>TMW.ME:Delete(self)</OnClick>
+				</Scripts>
+			</Button>
+			<Button name="$parentInsert" parentKey="insert">
+				<Size>
+					<AbsDimension x="30" y="30" />
+				</Size>
+				<Anchors>
+					<Anchor point="LEFT" relativeTo="$parent" relativePoint="BOTTOMRIGHT">
+						<Offset x="11" y="0" />
+					</Anchor>
+				</Anchors>
+				<NormalTexture urgency="5" file="Interface\AddOns\TellMeWhen_Options\Textures\Plus-Up"/>
+				<PushedTexture file="Interface\AddOns\TellMeWhen_Options\Textures\Plus-Down"/>
+				<HighlightTexture urgency="5" file="Interface\AddOns\TellMeWhen_Options\Textures\Plus-Highlight" alphaMode="ADD"/>
+				<Scripts>
+					 <OnLoad>
+						TMW:TT(self, "METAPANEL_INSERT")
+					</OnLoad>
+					<OnClick>TMW.ME:Insert(self:GetParent():GetID()+1)</OnClick>
+				</Scripts>
+			</Button>
+		</Frames>
+		<Layers>
+			<Layer level="OVERLAY">
+				<FontString name="$parentValText" inherits="GameFontNormalLarge" justifyH="LEFT">
+					<Anchors>
+						<Anchor point="LEFT" relativePoint="TOPLEFT">
+							<Offset x="440" y="-14" />
+						</Anchor>
+					</Anchors>
+				</FontString>
+			</Layer>
+		</Layers>
+		<Scripts>
+			<OnLoad>
+				TMW.ME[self:GetID()] = self
+			</OnLoad>
+		</Scripts>
+	</Frame>
+
 	<!-- END TEMPLATES -->
 
 	<Button name="TellMeWhen_IconDragger" hidden="true" enableMouse="false" frameStrata="HIGH">
@@ -2529,7 +2546,7 @@
 					<Frame name="$parentCopy" inherits="UIDropDownMenuTemplate" parentKey="Copy">
 						<Anchors>
 							<Anchor point="BOTTOMLEFT" relativeTo="$parent" relativePoint="BOTTOMLEFT">
-								<Offset x="153" y="7" />
+								<Offset x="153" y="6" />
 							</Anchor>
 						</Anchors>
 						<Scripts>
@@ -2546,7 +2563,7 @@
 					</Frame>
 					<Editbox name="$parentExportName" inherits="TellMeWhen_InputBoxTemplate" letters="12" parentKey="ExportName">
 						<Size>
-							<AbsDimension x="115" y="15" />
+							<AbsDimension x="115" y="14" />
 						</Size>
 						<Anchors>
 							<Anchor point="LEFT" relativeTo="$parentCopy" relativePoint="RIGHT">
@@ -2704,7 +2721,7 @@
 							</Anchor>
 							<Anchor point="BOTTOMRIGHT" relativePoint="BOTTOMRIGHT">
 								<Offset>
-									<AbsDimension x="0" y="40"/>
+									<AbsDimension x="0" y="34"/>
 								</Offset>
 							</Anchor>
 						</Anchors>
@@ -2717,12 +2734,13 @@
 									<Frame name="$parentGroup1" inherits="TellMeWhen_ConditionGroup" id="1">
 										<Anchors>
 											<Anchor point="TOPLEFT">
-												<Offset x="-4" y="-17" />
+												<Offset x="12" y="-7" />
 											</Anchor>
 										</Anchors>
 										<Scripts>
 											<OnLoad>
-												self.AndOr:Hide()
+												self.And:Hide()
+												self.Or:Hide()
 												TMW.CNDT[self:GetID()] = self
 												self:GetParent()[self:GetID()] = self
 											</OnLoad>
@@ -2883,7 +2901,7 @@
 
 			<Button name="$parentOkayButton" parentKey="OkayButton" inherits="UIPanelButtonTemplate" text="OKAY">
 				<Size>
-					<AbsDimension x="60" y="20" />
+					<AbsDimension x="60" y="17" />
 				</Size>
 				<Anchors>
 					<Anchor point="BOTTOMRIGHT">
@@ -2910,7 +2928,7 @@
 			</Button>
 			<Button name="$parentResetButton" inherits="GameMenuButtonTemplate" text="RESET">
 				<Size>
-					<AbsDimension x="150" y="20" />
+					<AbsDimension x="150" y="17" />
 				</Size>
 				<Anchors>
 					<Anchor point="BOTTOMLEFT">

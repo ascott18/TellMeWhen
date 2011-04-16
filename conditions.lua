@@ -122,10 +122,10 @@ local GetShapeshiftForm = TMW.GetShapeshiftForm
 function CNDT:UPDATE_SHAPESHIFT_FORM()
 	local i = GetShapeshiftForm()
 	if i == 0 then
-		Env.ShapeshiftForm = ";" .. strlower(NONE) .. ";"
+		Env.ShapeshiftForm = NONE
 	else
 		local _, n = GetShapeshiftFormInfo(i)
-		Env.ShapeshiftForm = ";" .. strlower(n) .. ";"
+		Env.ShapeshiftForm = n
 	end
 end
 
@@ -279,7 +279,7 @@ Env = {
 
 CNDT.Operators  =  {
 	{ tooltipText = L["CONDITIONPANEL_EQUALS"], 		value = "==", 	text = "==" },
-	{ tooltipText = L["CONDITIONPANEL_NOTEQUAL"], 	 	value = "~=", 	text = "!=" },
+	{ tooltipText = L["CONDITIONPANEL_NOTEQUAL"], 	 	value = "~=", 	text = "~=" },
 	{ tooltipText = L["CONDITIONPANEL_LESS"], 			value = "<", 	text = "<" 	},
 	{ tooltipText = L["CONDITIONPANEL_LESSEQUAL"], 		value = "<=", 	text = "<=" },
 	{ tooltipText = L["CONDITIONPANEL_GREATER"], 		value = ">", 	text = ">" 	},
@@ -839,7 +839,7 @@ CNDT.Types = {
 		texttable = setmetatable({[0] = L["ICONMENU_ABSENT"]}, {__index = function(tbl, k) return format(STACKS, k) end}),
 		icon = "Interface\\Icons\\spell_shadow_abominationexplosion",
 		tcoords = standardtcoords,
-		funcstr = [[AuraStacks(c.Unit, c.NameName, "HELPFUL") c.Operator c.Level]],
+		funcstr = [[AuraStacks(c.Unit, c.NameName, "HARMFUL") c.Operator c.Level]],
 	},
 	{ -- reactive
 		text = L["ICONMENU_REACTIVE"],
@@ -1117,8 +1117,8 @@ CNDT.Types = {
 				pclass == "PALADIN" and L["AURA"] or
 				pclass == "WARRIOR" and L["STANCE"] or
 				pclass == "DEATHKNIGHT" and L["PRESENCE"] or
-				class == "DRUID" and L["SHAPESHIFT"] or
-				firststanceid and GetSpellInfo(firststanceid) or
+				pclass == "DRUID" and L["SHAPESHIFT"] or
+			--	firststanceid and GetSpellInfo(firststanceid) or
 				L["STANCE"],
 		value = "STANCE",
 		min = 0,
@@ -1128,7 +1128,9 @@ CNDT.Types = {
 		nooperator = true,
 		icon = function() return firststanceid and GetSpellTexture(firststanceid) end,
 		tcoords = standardtcoords,
-		funcstr = [[strfind(c.Name, ShapeshiftForm)]],
+		funcstr = function(c)
+			return (TMW.CSN[c.Level] and "\""..TMW.CSN[c.Level].."\"" or "nil") .. [[ == ShapeshiftForm]]
+		end,
 		events = {"UPDATE_SHAPESHIFT_FORM"},
 		shouldshow = #TMW.CSN > 0,
 	},
@@ -1237,6 +1239,7 @@ function CNDT:ProcessConditions(icon)
 	end]]
 	local f, err = loadstring(funcstr, icon:GetName() .. " Condition")
 	if TMW.debug and err then
+		print(funcstr)
 		error(err)
 	end
 	local func = functionCache[funcstr] or f
