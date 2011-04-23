@@ -35,9 +35,9 @@ local LBF = LibStub("LibButtonFacade", true)
 local AceDB = LibStub("AceDB-3.0")
 local LSM = LibStub("LibSharedMedia-3.0")
 
-TELLMEWHEN_VERSION = "4.0.4"
+TELLMEWHEN_VERSION = "4.1.0"
 TELLMEWHEN_VERSION_MINOR = ""
-TELLMEWHEN_VERSIONNUMBER = 40403
+TELLMEWHEN_VERSIONNUMBER = 41001 -- NEVER DECREASE THIS NUMBER, ONLY INCREASE IT 
 TELLMEWHEN_MAXGROUPS = 10 	--this is a default, used by SetTheory (addon), so dont rename
 TELLMEWHEN_MAXROWS = 20
 local UPD_INTV = 0.06	--this is a default, local because i use it in onupdate functions
@@ -50,8 +50,8 @@ local GetShapeshiftForm, GetNumShapeshiftForms, GetShapeshiftFormInfo =
 	  GetShapeshiftForm, GetNumShapeshiftForms, GetShapeshiftFormInfo
 local UnitPower, UnitAffectingCombat, UnitHasVehicleUI =
 	  UnitPower, UnitAffectingCombat, UnitHasVehicleUI
-local GetNumRaidMembers =
-	  GetNumRaidMembers
+local GetNumRaidMembers, PlaySoundFile =
+	  GetNumRaidMembers, PlaySoundFile
 local tonumber, tostring, type, pairs, ipairs, tinsert, tremove, sort, select, wipe, rawget, tDeleteItem = --tDeleteItem is a blizzard function defined in UIParent.lua
 	  tonumber, tostring, type, pairs, ipairs, tinsert, tremove, sort, select, wipe, rawget, tDeleteItem
 local strfind, strmatch, format, gsub, strsub, strtrim, strsplit, strlower, min, max, ceil, floor =
@@ -59,12 +59,13 @@ local strfind, strmatch, format, gsub, strsub, strtrim, strsplit, strlower, min,
 local GetTime, debugstack = GetTime, debugstack
 local _G = _G
 local _, pclass = UnitClass("Player")
-local st, co, talenthandler, BarGCD, ClockGCD, Locked, CNDT
+local st, co, talenthandler, BarGCD, ClockGCD, Locked, CNDT, SndChan
 local GCD, NumShapeshiftForms, UpdateTimer = 0, 0, 0
 local time = GetTime()
 TMW.time = time
 local unitsToChange = {}
 local clientVersion = select(4, GetBuildInfo())
+local dummy = function() end
 
 
 function TMW.tContains(table, item)
@@ -94,6 +95,7 @@ function TMW.print(...)
 			print("|cffff0000TMW:|r ", ...)
 		end
 	end
+	return ...
 end
 local print = TMW.print
 
@@ -246,8 +248,9 @@ TMW.Defaults = {
 	OOMColor	=	{r=0.5, g=0.5, b=0.5, a=1},
 	TextureName = 	"Blizzard",
 	DrawEdge	=	false,
-	TestOn 		= 	false,
+	TestOn 		= 	false, -- not used anymore, just here to keep SV file cleaner
 	HasImported	=	false,
+	MasterSound	=	false,
 	ReceiveComm	=	true,
 	WarnInvalids=	true,
 	BarGCD		=	true,
@@ -368,6 +371,10 @@ TMW.Defaults = {
 					OnlyInBags			= false,
 					OnlySeen			= false,
 					TotemSlots			= "1111",
+					SoundOnShow			= "None",
+					SoundOnHide			= "None",
+					SoundOnStart		= "None",
+					SoundOnFinish		= "None",
 					Conditions = {
 						["**"] = {
 							AndOr = "AND",
@@ -388,6 +395,11 @@ TMW.Defaults = {
 }
 TMW.Group_Defaults = TMW.Defaults.profile.Groups["**"]
 TMW.Icon_Defaults = TMW.Group_Defaults.Icons["**"]
+for k in pairs(TMW.Icon_Defaults) do
+	if strsub(k, 1, 5) == "Sound" then
+		TMW.RelevantSettings.all[k] = true
+	end
+end
 
 TMW.DS = {
 	Magic = "Interface\\Icons\\spell_fire_immolation",
@@ -645,7 +657,6 @@ function TMW:OnInitialize()
 	TMW:RegisterEvent("PLAYER_ENTERING_WORLD")
 	TMW:RegisterEvent("PLAYER_TALENT_UPDATE")
 	TMW:RegisterEvent("ACTIVE_TALENT_GROUP_CHANGED", "PLAYER_TALENT_UPDATE")
-	TMW:SetScript("OnUpdate", TMW.OnUpdate)
 
 	if db.profile.ReceiveComm then
 		TMW:RegisterComm("TMW")
@@ -737,12 +748,23 @@ function TMW:Update()
 		end
 	end
 
+	time = GetTime() TMW.time = time
+	UpdateTimer = time - 10
+	PlaySoundFile = dummy
+	
 	Locked = db.profile.Locked
 	CNDT.Env.Locked = Locked
 	TMW.DoWipeAC = false
 	if not Locked then
-		TMW:LoadOptions()
+		if not TMW.IE then
+			TMW:LoadOptions()
+		end
+		TMW:SetScript("OnUpdate", nil)
+		TMW:OnUpdate()
+	else
+		TMW:SetScript("OnUpdate", TMW.OnUpdate)
 	end
+	
 	if TMW.IE then
 		TMW.IE:SaveSettings()
 	end
@@ -758,6 +780,7 @@ function TMW:Update()
 
 	BarGCD = db.profile["BarGCD"]
 	ClockGCD = db.profile["ClockGCD"]
+	SndChan = db.profile["MasterSound"] and "Master" or nil
 
 	for group in TMW.InGroups() do
 		group:Hide()
@@ -787,7 +810,9 @@ function TMW:Update()
 		group:SetFrameLevel(group:GetFrameLevel() + 1)
 		group:SetFrameLevel(group:GetFrameLevel() - 1)
 	end
-
+	
+	time = GetTime() TMW.time = time
+	TMW:ScheduleTimer("RestoreSound", UPD_INTV*2.1)
 	TMW.Initd = true
 end
 
@@ -1140,6 +1165,9 @@ function TMW:ColorUpdate()
 	co = db.profile.CDCOColor
 end
 
+function TMW:RestoreSound()
+	PlaySoundFile = _G.PlaySoundFile
+end
 
 function TMW:PLAYER_ENTERING_WORLD()
 	if not TMW.VarsLoaded then return end
@@ -1264,8 +1292,7 @@ function TMW:GetShapeshiftForm()
 	local i = GetShapeshiftForm()
 	if pclass == "WARLOCK" and i == 2 then  --metamorphosis is index 2 for some reason
 		i = 1
-	end
-	if pclass == "ROGUE" and i >= 2 then	--vanish and shadow dance return 3 when active, vanish returns 2 when shadow dance isnt learned. Just treat everything as stealth
+	elseif pclass == "ROGUE" and i >= 2 then	--vanish and shadow dance return 3 when active, vanish returns 2 when shadow dance isnt learned. Just treat everything as stealth
 		i = 1
 	end
 	if i > NumShapeshiftForms then 	--many classes return an invalid number on login, but not anymore!
@@ -1422,7 +1449,7 @@ function TMW:Group_Update(groupID)
 				TMW:Icon_Update(icon)
 			end
 		end
-		for iconID = group.Rows*group.Columns+1, TELLMEWHEN_MAXROWS*TELLMEWHEN_MAXROWS do
+		for iconID = (group.Rows*group.Columns)+1, TELLMEWHEN_MAXROWS*TELLMEWHEN_MAXROWS do
 			local icon = TMW[groupID][iconID]
 			if icon then
 				icon:Hide()
@@ -1486,8 +1513,18 @@ local function OnGCD(d)
 end	TMW.OnGCD = OnGCD
 
 local function SetAlpha(icon, alpha)
-	icon.FakeAlpha = alpha
 	if alpha ~= icon.__alpha then
+		if alpha == 0 then
+			local Sound = icon.SoundOnHide
+			if Sound then
+				PlaySoundFile(Sound, SndChan)
+			end
+		elseif icon.FakeAlpha == 0 then
+			local Sound = icon.SoundOnShow
+			if Sound then
+				PlaySoundFile(Sound, SndChan)
+			end
+		end
 		if icon.FakeHidden then
 			icon:setalpha(0) -- setalpha(lowercase) is the old, raw SetAlpha. Use it to override FakeAlpha, although this really should never happen ourside of here
 			icon.__alpha = 0
@@ -1496,6 +1533,7 @@ local function SetAlpha(icon, alpha)
 			icon.__alpha = alpha
 		end
 	end
+	icon.FakeAlpha = alpha
 end
 
 local function ScriptSort(iconA, iconB)
@@ -1522,71 +1560,10 @@ local function SetScript(icon, handler, func)
 	end
 end
 
-local function SetCooldown(icon, start, duration, reverse)
-	if icon.__start ~= start then
-		icon.__start = start
-		icon.__duration = duration
-		if duration > 0 then
-			local cd = icon.cooldown
-			cd:SetCooldown(start, duration)
-			cd:Show() --cd:SetAlpha(1) to use omnicc's finish effects properly, but im leaving it alone for now.
-			if reverse ~= nil and icon.__reverse ~= reverse then -- must be ( ~= nil )
-				icon.__reverse = reverse
-				cd:SetReverse(reverse)
-			end
-		else
-			icon.cooldown:Hide()-- cd:SetAlpha(0)
-		end
-	end
-end
-
 local function SetTexture(icon, tex)
 	--if icon.__tex ~= tex then ------dont check for this, checking is done before this method is even called
 	icon.__tex = tex
 	icon.texture:SetTexture(tex)
-end
-
-local function SetVertexColor(icon, info)
-	if icon.__vrtxcolor ~= info then
-		icon.__vrtxcolor = info
-		if type(info) == "table" then
-			icon.texture:SetVertexColor(info.r, info.g, info.b, 1)
-		else
-			icon.texture:SetVertexColor(info, info, info, 1)
-		end
-	end
-
-end
-
-local function AlphaColor(icon, alpha, color)
-	icon.FakeAlpha = alpha
-	if alpha ~= icon.__alpha then
-		if icon.FakeHidden then
-			icon:setalpha(0) -- setalpha(lowercase) is the old, raw SetAlpha. Use it to override FakeAlpha, although this really should never happen ourside of here
-			icon.__alpha = 0
-		else
-			icon:setalpha(alpha)
-			icon.__alpha = alpha
-		end
-	end
-	if icon.__vrtxcolor ~= color then
-		icon.__vrtxcolor = color
-		if type(color) == "table" then
-			icon.texture:SetVertexColor(color.r, color.g, color.b, 1)
-		else
-			icon.texture:SetVertexColor(color, color, color, 1)
-		end
-	end
-end
-
-local function SetStack(icon, count)
-	--if icon.__count ~= count then ------dont check for this, checking is done before this method is even called
-	icon.__count = count
-	if count and count > 1 then
-		icon.countText:SetText(count)
-	else
-		icon.countText:SetText(nil)
-	end
 end
 
 local function SetReverse(icon, reverse)
@@ -1650,35 +1627,6 @@ local function CDBarOnValueChanged(bar)
 	end
 end
 
-local function CDBarStart(icon, start, duration, buff)
-	local bar = icon.cooldownbar
-	if start ~= bar.start then
-		bar.start = start
-		if OnGCD(duration) and BarGCD and not buff then
-			duration = 0
-		end
-		bar.duration = duration
-		bar.InvertBars = bar.icon.InvertBars
-		if not bar.UpdateSet then
-			bar:SetScript("OnUpdate", CDBarOnUpdate)
-			bar.UpdateSet = true
-		end
-	end
-end
-
-local function CDBarStop(icon, override)
-	local bar = icon.cooldownbar
-	if bar.UpdateSet or override then
-		bar:SetScript("OnUpdate", nil)
-		bar.UpdateSet = false
-		if bar.icon.InvertBars then
-			bar:SetValue(bar.Max)
-		else
-			bar:SetValue(0)
-		end
-	end
-end
-
 local function PwrBarOnUpdate(bar)
 	local power = UnitPower("player", bar.powerType) + bar.offset
 	if not bar.InvertBars then
@@ -1692,48 +1640,177 @@ local function PwrBarOnValueChanged(bar, val)
 	bar.texture:SetTexCoord(0, max(0, val/bar.Max), 0, 1)
 end
 
-local function PwrBarStart(icon, name)
-	local bar = icon.powerbar
-	bar.name = name
-	local cost
-	_, _, _, cost, _, bar.powerType = GetSpellInfo(name)
-	if cost then
-		bar:SetMinMaxValues(0, cost)
-		bar.Max = cost
-		bar.InvertBars = bar.icon.InvertBars
-		if not bar.UpdateSet then
-			bar:SetScript("OnUpdate", PwrBarOnUpdate)
-			bar.UpdateSet = true
+local function SetInfo(icon, alpha, color, texture, start, duration, checkGCD, pbName, reverse, count)
+	
+	local played
+	if alpha ~= icon.__alpha then
+		if alpha == 0 then
+			local Sound = icon.SoundOnHide
+			if Sound then
+				PlaySoundFile(Sound, SndChan)
+			end
+		elseif icon.FakeAlpha == 0 then
+			local Sound = icon.SoundOnShow
+			if Sound then
+				PlaySoundFile(Sound, SndChan)
+				played = true
+			end
 		end
-	end
-end
-
-local function PwrBarStop(icon, override)
-	local bar = icon.powerbar
-	if bar.UpdateSet or override then
-		bar:SetScript("OnUpdate", nil)
-		bar.UpdateSet = false
-		if bar.icon.InvertBars then
-			bar:SetValue(bar.Max)
+		if icon.FakeHidden then
+			icon:setalpha(0) -- setalpha(lowercase) is the old, raw SetAlpha. Use it to override FakeAlpha, although this really should never happen ourside of here
+			icon.__alpha = 0
 		else
-			bar:SetValue(0)
+			icon:setalpha(alpha)
+			icon.__alpha = alpha
 		end
 	end
+	icon.FakeAlpha = alpha
+	if alpha == 0 then
+		return
+	end
+	
+	if icon.__start ~= start or icon.__duration ~= duration then
+		local isGCD
+		if duration == 1 then
+			isGCD = true
+		elseif GCD > 1.7 then
+			isGCD = false
+		else
+			isGCD = (GCD == duration and duration > 0)
+		end
+		
+		local realDuration = isGCD and 0 or duration
+		if icon.__realDuration ~= realDuration then
+			if realDuration == 0 then
+				local Sound = icon.SoundOnFinish
+				if Sound then
+					PlaySoundFile(Sound, SndChan)
+				end
+			else
+				local Sound = icon.SoundOnStart
+				if Sound and not played then
+					PlaySoundFile(Sound, SndChan)
+				end
+			end
+			icon.__realDuration = realDuration
+		end
+		
+		if icon.ShowTimer then
+			if duration > 0 then
+				local cd = icon.cooldown
+				if isGCD and ClockGCD then
+					cd:SetCooldown(0, 0)
+				else
+					cd:SetCooldown(start, duration)
+				end
+				
+				cd:Show()
+				if reverse ~= nil and icon.__reverse ~= reverse then -- must be ( ~= nil )
+					icon.__reverse = reverse
+					cd:SetReverse(reverse)
+				end
+			else
+				icon.cooldown:Hide()
+			end
+		else
+			icon.cooldown:Hide()
+		end
+		
+		if icon.ShowCBar then
+			local bar = icon.cooldownbar
+			if duration > 0 then
+				bar.start = start
+				if isGCD and BarGCD then
+					bar.duration = 0
+				else
+					bar.duration = duration
+				end
+				
+				bar.InvertBars = icon.InvertBars
+				if not bar.UpdateSet then
+					bar:SetScript("OnUpdate", CDBarOnUpdate)
+					bar.UpdateSet = true
+				end
+			elseif bar.UpdateSet then
+				bar:SetScript("OnUpdate", nil)
+				bar.UpdateSet = false
+				if icon.InvertBars then
+					bar:SetValue(bar.Max)
+				else
+					bar:SetValue(0)
+				end
+			end
+			bar:Show()
+		else
+			icon.cooldownbar:Hide()
+		end
+		
+		icon.__start = start
+		icon.__duration = duration
+	end
+	
+	if icon.__vrtxcolor ~= color then
+		icon.__vrtxcolor = color
+		if type(color) == "table" then
+			icon.texture:SetVertexColor(color.r, color.g, color.b, 1)
+		else
+			icon.texture:SetVertexColor(color, color, color, 1)
+		end
+	end
+	
+	if texture ~= nil and icon.__tex ~= texture then
+		icon.__tex = texture
+		icon.texture:SetTexture(texture)
+	end
+	
+	if icon.ShowPBar then
+		local bar = icon.powerbar
+		if pbName then
+			local cost
+			_, _, _, cost, _, bar.powerType = GetSpellInfo(pbName)
+			if cost then
+				bar:SetMinMaxValues(0, cost)
+				bar.Max = cost
+				bar.InvertBars = icon.InvertBars
+				if not bar.UpdateSet then
+					bar:SetScript("OnUpdate", PwrBarOnUpdate)
+					bar.UpdateSet = true
+				end
+			end
+		elseif bar.UpdateSet then
+			bar:SetScript("OnUpdate", nil)
+			bar.UpdateSet = false
+			if icon.InvertBars then
+				bar:SetValue(bar.Max)
+			else
+				bar:SetValue(0)
+			end
+		end
+		icon.__pbName = pbName
+		bar:Show()
+	else
+		icon.powerbar:Hide()
+	end
+	
+	if icon.__count ~= count then
+		if count and count > 1 then
+			icon.countText:SetText(count)
+		else
+			icon.countText:SetText(nil)
+		end
+		icon.__count = count
+	end
+	
+	icon.__checkGCD = checkGCD
+	
 end
 
 local IconAddIns = {
+	SetInfo			=	SetInfo,
 	SetAlpha		= 	SetAlpha,
 	SetScript		= 	SetScript,
-	SetCooldown		= 	SetCooldown,
-	CDBarStart		= 	CDBarStart,
-	CDBarStop		= 	CDBarStop,
-	PwrBarStart		= 	PwrBarStart,
-	PwrBarStop		= 	PwrBarStop,
 	SetTexture		=	SetTexture,
-	SetVertexColor	=	SetVertexColor,
-	SetStack		=	SetStack,
 	SetReverse		=	SetReverse,
-	AlphaColor		=	AlphaColor,
 }
 
 local IconMetamethods = {
@@ -1846,12 +1923,19 @@ end
 
 function TMW:Icon_Update(icon)
 	if not icon then return end
+	
 	local iconID = icon:GetID()
 	local groupID = icon.group:GetID()
+	local dontreassign
+	if PlaySoundFile == dummy then
+		dontreassign = true
+	else
+		PlaySoundFile = dummy
+	end
 
 	icon.__previousNameFirst = icon.NameFirst -- used to detect changes in the name that would cause a texture change
-	for k in pairs(TMW.Icon_Defaults) do 	--lets clear any settings that might get left behind.
-		icon[k] = nil
+	for k in pairs(TMW.Icon_Defaults) do 	
+		icon[k] = nil --lets clear any settings that might get left behind.
 	end
 
 	for k in pairs(TMW.RelevantSettings.all) do
@@ -1860,6 +1944,22 @@ function TMW:Icon_Update(icon)
 	if TMW.RelevantSettings[icon.Type] then
 		for k in pairs(TMW.RelevantSettings[icon.Type]) do
 			icon[k] = db.profile.Groups[groupID].Icons[iconID][k]
+		end
+	end
+	for k, v in pairs(icon) do
+		if strsub(k, 1, 5) == "Sound" then
+			if v == "" or v == "Interface\\Quiet.ogg" or v == "None" then
+				icon[k] = nil
+			elseif strfind(v, "%.[^\\]+$") then
+				-- http://www.youtube.com/watch?v=tfslY_AvhLw
+			else
+				local s = LSM:Fetch("sound", v)
+				if s and s ~= "Interface\\Quiet.ogg" and s ~= "" then
+					icon[k] = s
+				else
+					print("Hmmm, it seems that this sound setting managed to make it past all the checks for invalidness (or it is a LSM sound that doesnt exist anymore:", v)
+				end
+			end
 		end
 	end
 
@@ -1931,16 +2031,17 @@ function TMW:Icon_Update(icon)
 	else
 		ct:ClearAllPoints()
 		ct:SetPoint("BOTTOMRIGHT", icon, "BOTTOMRIGHT", f.x, f.y)
-		cd:SetFrameLevel(icon:GetFrameLevel() + 2)
-		icon.cooldownbar:SetFrameLevel(icon:GetFrameLevel() + 3)
-		icon.powerbar:SetFrameLevel(icon:GetFrameLevel() + 3)
+	--	cd:SetFrameLevel(icon:GetFrameLevel() + 1)
+		icon.cooldownbar:SetFrameLevel(icon:GetFrameLevel() + 1)
+		icon.powerbar:SetFrameLevel(icon:GetFrameLevel() + 1)
 	end
 
 	
 	icon.__normaltex = icon.__LBF_Normal or icon:GetNormalTexture()
 	icon.__previcon = nil
-	icon.__alpha = nil -- force an alpha update
-	icon.__tex = "qq i got reset" -- force a texture update
+	icon.__alpha = icon:GetAlpha()
+	icon.__tex = icon.texture:GetTexture()
+	icon.__realDuration = icon.__realDuration or 0
 	
 	if not (Locked and not icon.Enabled) then
 		if icon.CooldownShowWhen == "usable" or icon.BuffShowWhen == "present" then
@@ -1964,9 +2065,8 @@ function TMW:Icon_Update(icon)
 		tDeleteItem(OnUpdateHandlers, icon) -- remove it from the list of scripts to run on update, but dont call SetScript on it because that will remove it and set icon.OnUpdate to nil, which is called by conditions/metas
 	end
 
-	icon:SetCooldown(0, 0)
-	icon:SetStack(nil)
-	icon.__previousNameFirst = nil
+	icon:SetInfo(1, 1, nil, 0, 0)
+	icon.__previousNameFirst = nil -- not needed now
 
 	Icon_Bars_Update(icon, groupID, iconID)
 	icon:Show()
@@ -2013,11 +2113,13 @@ function TMW:Icon_Update(icon)
 		pbar.texture:SetTexCoord(0, 1, 0, 1)
 
 		icon:EnableMouse(1)
-		icon:SetVertexColor(1)
 		if icon.Type == "meta" then
 			cbar:SetValue(0)
 			pbar:SetValue(0)
 		end
+	end
+	if not dontreassign then
+		TMW:ScheduleTimer("RestoreSound", UPD_INTV*2.1)
 	end
 end
 

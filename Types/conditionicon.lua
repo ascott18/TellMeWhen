@@ -11,7 +11,7 @@ local TMW = TMW
 if not TMW then return end
 local L = TMW.L
 
-local db, time, UPD_INTV
+local db, UPD_INTV
 local print = TMW.print
 
 
@@ -59,7 +59,7 @@ function Type:Setup(icon, groupID, iconID)
 	end
 
 	icon:SetScript("OnUpdate", ConditionIcon_OnUpdate)
-	--icon:OnUpdate(GetTime() + 1)
+	--icon:OnUpdate(TMW.time)
 end
 
 

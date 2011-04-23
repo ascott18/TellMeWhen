@@ -417,6 +417,32 @@ L["SUG_NPCAURAS"] = "Known NPC buffs/debuffs"
 L["SUG_PLAYERAURAS"] = "Known PC/pet buffs/debuffs"
 L["SUG_MISC"] = "Miscellaneous"
 
+
+L["SOUND_EVENT_ONSHOW"] = "On Show"
+L["SOUND_EVENT_ONSHOW_DESC"] = "Sound to play when the icon becomes shown (even if fake hidden is checked)."
+L["SOUND_EVENT_ONHIDE"] = "On Hide"
+L["SOUND_EVENT_ONHIDE_DESC"] = "Sound to play when the icon is hidden."
+L["SOUND_EVENT_ONSTART"] = "On Start"
+L["SOUND_EVENT_ONSTART_DESC"] = "Sound to play when the cooldown becomes unusable, the buff/debuff is applied, etc. NOTE: This sound will never play at the same time as the OnShow sound."
+L["SOUND_EVENT_ONFINISH"] = "On Finish"
+L["SOUND_EVENT_ONFINISH_DESC"] = "Sound to play when the cooldown becomes usable, the buff/debuff falls off, etc. NOTE: This sound will never play at the same time as the OnHide sound."
+L["SOUND_EVENTS"] = "Icon Events"
+L["SOUND_SOUNDTOPLAY"] = "Sound to Play"
+L["SOUND_CUSTOM"] = "Custom sound file"
+L["SOUND_CUSTOM_DESC"] = [[Insert the path to a custom sound to play. Here are some examples, where "file" is the name of your sound, and "ext" is the file's extension (ogg or mp3 only!):
+
+- "CustomSounds\file.ext": a file placed in a new folder named "CustomSounds" that is in WoW's root directory (the same location as Wow.exe, Interface and WTF folders, etc)
+- "Interface\AddOns\file.ext": a loose file in the AddOns folder
+- "file.ext": a loose file in WoW's root directory ]]
+L["SOUND_TAB"] = "Sounds"
+L["SOUND_USEMASTER"] = "Always play sounds"
+L["SOUND_USEMASTER_DESC"] = "Check this to allow sounds to play even when the game sound has been muted. Uncheck to only play sounds while the game sound is enabled."
+
+
+
+
+
+
 L["TOPLEFT"] = "Top Left"
 L["TOP"] = "Top"
 L["TOPRIGHT"] = "Top Right"

@@ -11,7 +11,7 @@ local TMW = TMW
 if not TMW then return end
 local L = TMW.L
 
-local db, time, UPD_INTV, EFF_THR, ClockGCD, rc, mc, pr, ab
+local db, UPD_INTV, EFF_THR, ClockGCD, rc, mc, pr, ab
 local tonumber, strlower =
 	  tonumber, strlower
 local UnitAura, UnitExists =
@@ -142,11 +142,6 @@ local function Buff_OnUpdate(icon, time)
 					end
 				end
 				if buffName then
-					local Alpha = icon.Alpha
-					if Alpha == 0 then
-						icon:SetAlpha(0)
-						return
-					end
 					if (icon.StackMinEnabled and icon.StackMin > count) or (icon.StackMaxEnabled and count > icon.StackMax) then
 						icon:SetAlpha(0)
 						return
@@ -159,56 +154,29 @@ local function Buff_OnUpdate(icon, time)
 							return
 						end
 					end
-
-					if count ~= icon.__count then icon:SetStack(count) end
 					
-					if iconTexture ~= icon.__tex then icon:SetTexture(iconTexture) end
-					
+					local color
 					if icon.UnAlpha ~= 0 then
-						icon:AlphaColor(Alpha, pr)
+						color = pr
 					else
-						icon:AlphaColor(Alpha, 1)
+						color = 1
 					end
 					
-					local start = expirationTime - duration
-					if icon.ShowTimer then
-						icon:SetCooldown(start, duration)
-					end
-					if icon.ShowCBar then
-						icon:CDBarStart(start, duration, true)
-					end
-					if icon.ShowPBar then
-						icon:PwrBarStart(buffName)
-					end
+					icon:SetInfo(icon.Alpha, color, iconTexture, expirationTime - duration, duration, nil, buffName, count)
+					
 					return
 				end
 			end
 		end
-		local UnAlpha = icon.UnAlpha
-		if UnAlpha == 0 then
-			icon:SetAlpha(0)
-			return
-		end
-		if icon.ShowPBar then
-			icon:PwrBarStart(icon.NameFirst)
-		end
-		if icon.ShowCBar then
-			icon:CDBarStop()
-		end
 
+		local color
 		if icon.Alpha ~= 0 then -- and UnAlpha ~= 0  (not needed, it has to not be 0 or it would have returned earlier)
-			icon:AlphaColor(UnAlpha, ab)
+			color = ab
 		else
-			icon:AlphaColor(UnAlpha, 1)
+			color = 1
 		end
 
-		local t = icon.FirstTexture
-		if t and t ~= icon.__tex then icon:SetTexture(t) end
-		
-		if icon.ShowTimer then
-			icon:SetCooldown(0, 0)
-		end
-		if icon.__count then icon:SetStack(nil) end
+		icon:SetInfo(icon.UnAlpha, color, icon.FirstTexture, 0, 0, nil, icon.NameFirst)
 
 	end
 end
@@ -240,7 +208,7 @@ function Type:Setup(icon, groupID, iconID)
 	end
 
 	icon:SetScript("OnUpdate", Buff_OnUpdate)
-	icon:OnUpdate(GetTime() + 1)
+	icon:OnUpdate(TMW.time)
 end
 
 

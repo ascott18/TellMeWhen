@@ -11,7 +11,7 @@ local TMW = TMW
 if not TMW then return end
 local L = TMW.L
 
-local db, time, UPD_INTV, ClockGCD, pr, ab, rc, mc
+local db, UPD_INTV, ClockGCD, pr, ab, rc, mc
 local strlower, type =
 	  strlower, type
 local UnitGUID, UnitExists, GetSpellTexture =
@@ -129,17 +129,10 @@ local function UnitCooldown_OnUpdate(icon, time)
 					if start then
 						if (time - start) > ICDDuration then -- off cooldown
 
-							if icon.ShowTimer then
-								icon:SetCooldown(0, 0)
-							end
-							if icon.ShowCBar then
-								icon:CDBarStart(start, ICDDuration)
-							end
-							icon:AlphaColor(Alpha, 1)
-
 							local t = (iName and (GetSpellTexture(iName) )) or "Interface\\Icons\\INV_Misc_PocketWatch_01"
-							if t ~= icon.__tex then icon:SetTexture(t) end
 
+							icon:SetInfo(Alpha, 1, t, 0, 0)
+		
 							if Alpha ~= 0 then -- we care about usable cooldowns and we found one, so stop
 								return
 							end
@@ -161,22 +154,14 @@ local function UnitCooldown_OnUpdate(icon, time)
 				return
 			end
 
-			if icon.ShowTimer then
-				icon:SetCooldown(unstart, ICDDuration)
-			end
-			if icon.ShowCBar then
-				icon:CDBarStart(unstart, ICDDuration)
-			end
-
+			local color
 			if not icon.ShowTimer and Alpha ~= 0 then
-				icon:AlphaColor(UnAlpha, 0.5)
+				color = 0.5
 			else
-				icon:AlphaColor(UnAlpha, 1)
+				color = 1
 			end
 			
-			local t = GetSpellTexture(unname)
-			if t and t ~= icon.__tex then icon:SetTexture(t) end
-
+			icon:SetInfo(UnAlpha, color, GetSpellTexture(unname), unstart, ICDDuration)
 			return
 		end
 		icon:SetAlpha(0)
@@ -201,5 +186,5 @@ function Type:Setup(icon, groupID, iconID)
 	end
 
 	icon:SetScript("OnUpdate", UnitCooldown_OnUpdate)
-	icon:OnUpdate(GetTime() + 1)
+	icon:OnUpdate(TMW.time)
 end

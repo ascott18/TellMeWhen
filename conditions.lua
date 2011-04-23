@@ -196,13 +196,13 @@ local OnGCD = TMW.OnGCD
 local GetSpellCooldown = GetSpellCooldown
 local function IsSpellOnCooldown(spell)
 	local start, duration = GetSpellCooldown(spell)
-	return not(duration == 0 or OnGCD(duration))
+	return not (duration == 0 or OnGCD(duration))
 end
 
 local GetItemCooldown = GetItemCooldown
 local function IsItemOnCooldown(itemID)
 	local start, duration = GetItemCooldown(itemID)
-	return not(duration == 0 or OnGCD(duration))
+	return not (duration == 0 or OnGCD(duration))
 end
 
 local UnitCastingInfo, UnitChannelInfo = UnitCastingInfo, UnitChannelInfo

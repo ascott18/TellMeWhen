@@ -13,7 +13,7 @@ local L = TMW.L
 
 local _, pclass = UnitClass("Player")
 
-local db, time, UPD_INTV, ClockGCD, pr, ab, rc, mc
+local db, UPD_INTV, ClockGCD, pr, ab, rc, mc
 local strlower =
 	  strlower
 local GetTotemInfo, GetSpellTexture =
@@ -69,42 +69,27 @@ local function Totem_OnUpdate(icon, time)
 						icon:SetAlpha(0)
 						return
 					end
-					if icon.ShowCBar then
-						icon:CDBarStart(start, duration, 1)
-					end
-					if Alpha ~= 0 and icon.UnAlpha ~= 0 then
-						icon:AlphaColor(Alpha, pr)
-					else
-						icon:AlphaColor(Alpha, 1)
-					end
 					
-					if totemIcon and totemIcon ~= icon.__tex then icon:SetTexture(totemIcon) end
-
-					if icon.ShowTimer then
-						icon:SetCooldown(start, duration)
+					local color
+					if Alpha ~= 0 and icon.UnAlpha ~= 0 then
+						color = pr
+					else
+						color = 1
 					end
 
+					icon:SetInfo(Alpha, color, totemIcon, start, duration)
 					return
 				end
 			end
 		end
-		local UnAlpha = icon.UnAlpha
-		if UnAlpha == 0 then
-			icon:SetAlpha(0)
-			return
-		end
 		
-		local t = icon.FirstTexture
-		if t and t ~= icon.__tex then icon:SetTexture(t) end
-		
+		local color
 		if icon.Alpha ~= 0 then
-			icon:AlphaColor(UnAlpha, ab)
+			color = ab
 		else
-			icon:AlphaColor(UnAlpha, 1)
+			color = 1
 		end
-		if icon.ShowTimer then
-			icon:SetCooldown(0, 0)
-		end
+		icon:SetInfo(icon.UnAlpha, color, icon.FirstTexture, 0, 0)
 
 	end
 end
@@ -156,7 +141,7 @@ function Type:Setup(icon, groupID, iconID)
 	end
 
 	icon:SetScript("OnUpdate", Totem_OnUpdate)
-	icon:OnUpdate(GetTime() + 1)
+	icon:OnUpdate(TMW.time)
 end
 
 

@@ -11,7 +11,7 @@ local TMW = TMW
 if not TMW then return end
 local L = TMW.L
 
-local db, time, UPD_INTV, pr, ab
+local db, UPD_INTV, pr, ab
 local strlower =
 	  strlower
 local GetSpellTexture =
@@ -121,27 +121,22 @@ local function ICD_OnUpdate(icon, time)
 			icon:SetAlpha(0)
 			return
 		end
-		if icon.ShowCBar then
-			icon:CDBarStart(icon.StartTime, ICDDuration)
-		end
+		
 		if timesince > ICDDuration then
-			icon:AlphaColor(icon.Alpha, 1)
-			if icon.ShowTimer then
-				icon:SetCooldown(0, 0)
-			end
+			icon:SetInfo(icon.Alpha, 1, nil, 0, 0)
 		else
+			local color
 			if icon.Alpha ~= 0 then
 				if not icon.ShowTimer then
-					icon:AlphaColor(icon.UnAlpha, 0.5)
+					color = 0.5
 				else
-					icon:AlphaColor(icon.UnAlpha, 1)
+					color = 1
 				end
 			else
-				icon:AlphaColor(icon.UnAlpha, 1)
+				color = 1
 			end
-			if icon.ShowTimer then
-				icon:SetCooldown(icon.StartTime, ICDDuration)
-			end
+			
+			icon:SetInfo(icon.UnAlpha, 1, nil, icon.StartTime, ICDDuration)
 		end
 	end
 end
@@ -172,7 +167,7 @@ function Type:Setup(icon, groupID, iconID)
 	end
 
 	icon:SetScript("OnUpdate", ICD_OnUpdate)
-	icon:OnUpdate(GetTime() + 1)
+	icon:OnUpdate(TMW.time)
 end
 
 

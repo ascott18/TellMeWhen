@@ -6,7 +6,7 @@
 ## X-Compatible-With: 40100
 ## Title: TellMeWhen
 
-## Version: 4.0.4
+## Version: 4.1.0
 ## Author: Cybeloras of Mal'Ganis
 ## Notes: Notifications about cooldowns, buffs, etc.
 ## OptionalDeps: LibStub, ButtonFacade, Ace3, AceGUI-3.0-SharedMediaWidgets, LibSharedMedia-3.0, LibDataBroker-1.1, OmniCC, tullaCC

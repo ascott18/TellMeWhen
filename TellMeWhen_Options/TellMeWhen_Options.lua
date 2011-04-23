@@ -40,7 +40,7 @@ local strfind, strmatch, format, gsub, strsub, strtrim, max =
 	  strfind, strmatch, format, gsub, strsub, strtrim, max
 local _G, GetTime = _G, GetTime
 local tiptemp = {}
-local ME, CNDT, IE, SUG, ID
+local ME, CNDT, IE, SUG, ID, SND
 local points = {
 	TOPLEFT = L["TOPLEFT"],
 	TOP = L["TOP"],
@@ -476,6 +476,12 @@ function TMW:CompileOptions() -- options
 									desc = L["UIPANEL_DRAWEDGE_DESC"],
 									type = "toggle",
 									order = 40,
+								},
+								MasterSound = {
+									name = L["SOUND_USEMASTER"],
+									desc = L["SOUND_USEMASTER_DESC"],
+									type = "toggle",
+									order = 41,
 								},
 								WarnInvalids = {
 									name = L["UIPANEL_WARNINVALIDS"],
@@ -1153,7 +1159,8 @@ local checks = { --1=check box, 2=editbox, 3=slider(x100), 4=custom, table=subke
 local tabs = {
 	[1] = "Main",
 	[2] = "Conditions",
-	[3] = "Group",
+	[3] = "Sound",
+	[4] = "Group",
 	--[4] = "ImpExp",
 }
 local IsMultiState, SoI
@@ -1506,6 +1513,7 @@ function IE:Load(isRefresh)
 
 	ME:Update()
 	CNDT:Load()
+	SND:Load()
 
 	IE:SetupRadios()
 	IE:LoadSettings()
@@ -1967,12 +1975,189 @@ function IE:ScheduleIconUpdate(icon, groupID, iconID)
 	if type(icon) == "number" then --allow omission of icon
 		iconID = groupID
 		groupID = icon
-		assert(groupID ~= 0)
 		icon = TMW[groupID] and TMW[groupID][iconID]
 	end
 	if not icon then return end
 	iconsToUpdate[icon] = true
 	IconUpdater:SetScript("OnUpdate", UpdateIcons)
+end
+
+
+-- ----------------------
+-- SOUNDS
+-- ----------------------
+
+SND = TMW:NewModule("Sound") TMW.SND = SND
+SND.LSM = LSM
+SND.List = CopyTable(LSM:List("sound"))
+TMW.SND.EventList = {
+	{
+		name = "OnShow",
+		text = L["SOUND_EVENT_ONSHOW"],
+		desc = L["SOUND_EVENT_ONSHOW_DESC"],
+	},
+	{
+		name = "OnHide",
+		text = L["SOUND_EVENT_ONHIDE"],
+		desc = L["SOUND_EVENT_ONHIDE_DESC"],
+	},
+	{
+		name = "OnStart",
+		text = L["SOUND_EVENT_ONSTART"],
+		desc = L["SOUND_EVENT_ONSTART_DESC"],
+	},
+	{
+		name = "OnFinish",
+		text = L["SOUND_EVENT_ONFINISH"],
+		desc = L["SOUND_EVENT_ONFINISH_DESC"],
+	},
+}
+for k, v in pairs(SND.List) do
+	if v == "None" then
+		tremove(SND.List, k)
+		break
+	end
+end
+
+function SND:SetSoundsOffset(offs)
+	SND.offs = offs
+	
+	for i=1, #SND.Sounds do
+		local f = SND.Sounds[i]
+		if f then
+			local n = i + offs
+			local name = SND.List[n]
+			if name then
+				f.soundname = name
+				f.Name:SetText(name)
+				f.soundfile = LSM:Fetch("sound", name)
+				f:Show()
+				if n == SND.selectedListID then
+					f:LockHighlight()
+					f:GetHighlightTexture():SetVertexColor(NORMAL_FONT_COLOR.r, NORMAL_FONT_COLOR.g, NORMAL_FONT_COLOR.b, 1)
+				else
+					f:UnlockHighlight()
+					f:GetHighlightTexture():SetVertexColor(1, 1, 1, 1)
+				end
+			else
+				f:Hide()
+			end
+			f.listID = n
+		end
+	end
+	
+	if max(0, #SND.List - #SND.Sounds) == 0 then
+		SND.Sounds.ScrollBar:Hide()
+	else
+		SND.Sounds.ScrollBar:SetMinMaxValues(0, #SND.List - #SND.Sounds)
+	end
+end
+
+function SND:SelectEvent(id)
+	local groupID, iconID = TMW.CI.g, TMW.CI.i
+	
+	SND.currentEventID = id
+	SND.currentEventSetting = SND.Events[id].setting
+
+	local eventFrame = SND.Events[id]
+	for i=1, #SND.Events do
+		local f = SND.Events[i]
+		f.selected = nil
+		f:UnlockHighlight()
+		f:GetHighlightTexture():SetVertexColor(1, 1, 1, 1)
+	end
+	eventFrame.selected = 1
+	eventFrame:LockHighlight()
+	eventFrame:GetHighlightTexture():SetVertexColor(NORMAL_FONT_COLOR.r, NORMAL_FONT_COLOR.g, NORMAL_FONT_COLOR.b, 1)
+	
+	if groupID and iconID then
+		SND:SelectSound(db.profile.Groups[groupID].Icons[iconID][eventFrame.setting])
+	end
+	
+end
+
+function SND:SelectSound(name)
+	local soundFrame, listID
+	
+	for k, listname in ipairs(SND.List) do
+		if listname == name then
+			listID = k
+			break
+		end
+	end
+	
+	if listID and (listID > SND.Sounds[#SND.Sounds].listID or listID < SND.Sounds[1].listID) then
+		SND.Sounds.ScrollBar:SetValue(listID)
+	end
+	
+	for i=1, #SND.Sounds do
+		local f = SND.Sounds[i]
+		if f.soundname == name then
+			soundFrame = f
+		end
+		f.selected = nil
+		f:UnlockHighlight()
+		f:GetHighlightTexture():SetVertexColor(1, 1, 1, 1)
+	end
+	
+	SND.selectedListID = 0
+	SND.Custom.selected = nil
+	SND.Custom.Background:Hide()
+	SND.Custom.Background:SetVertexColor(1, 1, 1, 1)
+	SND.Custom:SetText("")
+	SND.Sounds.None:UnlockHighlight()
+	SND.Sounds.None:GetHighlightTexture():SetVertexColor(1, 1, 1, 1)
+	
+	if name == "None" then
+		SND.selectedListID = -1 -- lame
+		SND.Sounds.None:LockHighlight()
+		SND.Sounds.None:GetHighlightTexture():SetVertexColor(NORMAL_FONT_COLOR.r, NORMAL_FONT_COLOR.g, NORMAL_FONT_COLOR.b, 1)
+	elseif soundFrame then
+		SND.selectedListID = soundFrame.listID
+		soundFrame:LockHighlight()
+		soundFrame:GetHighlightTexture():SetVertexColor(NORMAL_FONT_COLOR.r, NORMAL_FONT_COLOR.g, NORMAL_FONT_COLOR.b, 1)
+	elseif strfind(name, "%.[^\\]+$") then
+		SND.Custom.selected = 1
+		SND.Custom.Background:Show()
+		SND.Custom.Background:SetVertexColor(NORMAL_FONT_COLOR.r, NORMAL_FONT_COLOR.g, NORMAL_FONT_COLOR.b, 1)
+		SND.Custom:SetText(name)
+	end
+	SND.Events[SND.currentEventID].SoundName:SetText(name)
+	SND:SetTabText()
+end
+
+function SND:Load()
+	for i = 1, #SND.Events do
+		SND:SelectEvent(i)
+	end
+	SND:SetTabText()
+end
+
+function SND:SetTabText()
+	local groupID, iconID = TMW.CI.g, TMW.CI.i
+	local n = 0
+	for i = 1, #SND.Events do
+		local f = SND.Events[i]
+		local v = db.profile.Groups[groupID].Icons[iconID][f.setting]
+		if v == "" or v == "Interface\\Quiet.ogg" or v == "None" then
+			-- none
+		elseif strfind(v, "%.[^\\]+$") then
+			n = n + 1
+		else
+			local s = LSM:Fetch("sound", v)
+			if s and s ~= "Interface\\Quiet.ogg" and s ~= "" then
+				n = n + 1
+			else
+				--fail
+			end
+		end
+	end
+	if n > 0 then
+		IE.SoundTab:SetText(L["SOUND_TAB"] .. " |cFFFF5959(" .. n .. ")")
+	else
+		IE.SoundTab:SetText(L["SOUND_TAB"] .. " (" .. n .. ")")
+	end
+	PanelTemplates_TabResize(IE.SoundTab, 0, nil, nil, 600)
 end
 
 
@@ -2198,7 +2383,7 @@ function SUG:OnCommReceived(prefix, text, channel, who)
 			local RecievedClassSpellLength = arg2
 			SUG:BuildClassSpellLookup()
 			for class, length in pairs(RecievedClassSpellLength) do
-				if not SUG.ClassSpellLength[class] or SUG.ClassSpellLength[class] < length then
+				if (not SUG.ClassSpellLength[class]) or (SUG.ClassSpellLength[class] < length) then
 					tinsert(commThrowaway, class)
 				end
 			end
@@ -2791,7 +2976,6 @@ function CNDT:RuneHandler(rune)
 	else
 		pair = _G[rune:GetName() .. "Death"]
 	end
-	assert(pair)
 	if rune:GetChecked() ~= nil then
 		pair:SetChecked(nil)
 	end

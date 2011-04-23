@@ -11,7 +11,7 @@ local TMW = TMW
 if not TMW then return end
 local L = TMW.L
 
-local db, time, UPD_INTV, ClockGCD, pr, ab, rc, mc
+local db, UPD_INTV, ClockGCD, pr, ab, rc, mc
 local GetSpellCooldown, IsSpellInRange, IsUsableSpell, GetSpellTexture, GetSpellInfo =
 	  GetSpellCooldown, IsSpellInRange, IsUsableSpell, GetSpellTexture, GetSpellInfo
 local OnGCD = TMW.OnGCD
@@ -105,41 +105,14 @@ local function Reactive_OnUpdate(icon, time)
 				end
 				usable = Usable or usable
 				if usable and not CD and not nomana and inrange == 1 then --usable
-					local Alpha = icon.Alpha
-					if Alpha == 0 then
-						icon:SetAlpha(0)
-						return
-					end
-
-					local t = GetSpellTexture(iName)
-					if t and t ~= icon.__tex then icon:SetTexture(t) end
-
-					icon:AlphaColor(Alpha, 1)
-					
-					if icon.ShowTimer then
-						if ClockGCD and isGCD then
-							icon:SetCooldown(0, 0)
-						else
-							icon:SetCooldown(start, duration)
-						end
-					end
-
-					if icon.ShowCBar then
-						icon:CDBarStart(start, duration)
-					end
-					if icon.ShowPBar then
-						icon:PwrBarStart(iName)
-					end
+				
+					icon:SetInfo(icon.Alpha, 1, GetSpellTexture(iName), start, duration, true, iName)
 
 					return
 				end
 			end
 		end
-		local UnAlpha = icon.UnAlpha
-		if UnAlpha == 0 then
-			icon:SetAlpha(0)
-			return
-		end
+		
 		if n > 1 then -- if there is more than 1 spell that was checked then we need to get these again for the first spell, otherwise reuse the values obtained above since they are just for the first one
 			start, duration = GetSpellCooldown(icon.NameFirst)
 			if icon.IgnoreRunes then
@@ -163,35 +136,20 @@ local function Reactive_OnUpdate(icon, time)
 				return
 			end
 
+			local alpha, color
 			if icon.Alpha ~= 0 then
 				if inrange ~= 1 then
-					icon:AlphaColor(UnAlpha*rc.a, rc)
+					alpha, color = icon.UnAlpha*rc.a, rc
 				elseif nomana then
-					icon:AlphaColor(UnAlpha*mc.a, mc)
+					alpha, color = icon.UnAlpha*mc.a, mc
 				else
-					icon:AlphaColor(UnAlpha, 0.5)
+					alpha, color = icon.UnAlpha, 0.5
 				end
 			else
-				icon:AlphaColor(UnAlpha, 1)
+				alpha, color = icon.UnAlpha, 1
 			end
 			
-			local t = icon.FirstTexture
-			if t and t ~= icon.__tex then icon:SetTexture(t) end
-			
-			if icon.ShowTimer then
-				if ClockGCD and isGCD then
-					icon:SetCooldown(0, 0)
-				else
-					icon:SetCooldown(start, duration)
-				end
-			end
-
-			if icon.ShowCBar then
-				icon:CDBarStart(start, duration)
-			end
-			if icon.ShowPBar then
-				icon:PwrBarStart(icon.NameFirst)
-			end
+			icon:SetInfo(icon.Alpha, color, icon.FirstTexture, start, duration, true, icon.NameFirst, "")
 
 			return
 		else
@@ -226,7 +184,7 @@ function Type:Setup(icon, groupID, iconID)
 	end
 
 	icon:SetScript("OnUpdate", Reactive_OnUpdate)
-	icon:OnUpdate(GetTime() + 1)
+	icon:OnUpdate(TMW.time)
 end
 
 

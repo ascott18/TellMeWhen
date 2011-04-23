@@ -12,7 +12,7 @@ if not TMW then return end
 local L = TMW.L
 local LBF = LibStub("LibButtonFacade", true)
 
-local db, time, UPD_INTV
+local db, UPD_INTV
 local _G, strmatch, tonumber, ipairs =
 	  _G, strmatch, tonumber, ipairs
 local print = TMW.print
@@ -45,45 +45,23 @@ local function Meta_OnUpdate(icon, time)
 				local alpha = ic.FakeAlpha
 				if alpha > 0 and ic.__shown then
 				
-					icon.cooldown.noCooldownCount = ic.cooldown.noCooldownCount
-					icon:SetCooldown(ic.__start, ic.__duration, ic.__reverse)
-
-					local ic__tex = ic.__tex
-					if ic__tex ~= icon.__tex then icon:SetTexture(ic__tex) end
-					
-					if LBF and ic ~= icon.__previcon then -- i dont like the way that ButtonFacade handles this (inefficient), so i'll do it myself
+					if LBF and ic ~= icon.__previcon  then -- i dont like the way that ButtonFacade handles this (inefficient), so i'll do it myself
 						local icnt = ic.__normaltex
 						local iconnt = icon.__normaltex
 						if icnt and iconnt then
 							iconnt:SetVertexColor(icnt:GetVertexColor())
 						end
+						icon.__previcon = ic
 					end
 					
-					icon:AlphaColor(alpha, ic.__vrtxcolor)
-
-					local ic__count = ic.__count
-					if icon.__count ~= ic__count then icon:SetStack(ic__count) end
-					
+					icon.ShowCBar, icon.ShowPBar = ic.ShowCBar, ic.ShowPBar
 					icon.InvertBars = ic.InvertBars
-
-					local icpb = ic.powerbar
-					if ic.ShowPBar and icpb.UpdateSet then
-						icon:PwrBarStart(icpb.name)
-						icon.powerbar:SetStatusBarColor(icpb:GetStatusBarColor())
-					else
-						icon.powerbar.Max = icpb.Max
-						icon:PwrBarStop(1)
-					end
-
-					local iccb = ic.cooldownbar
-					if ic.ShowCBar and iccb.UpdateSet then
-						icon:CDBarStart(iccb.start, iccb.duration)
-					else
-						icon.cooldownbar.Max = iccb.Max
-						icon:CDBarStop(1)
-					end
+					icon.ShowTimer = ic.ShowTimer
+					icon.cooldown.noCooldownCount = ic.cooldown.noCooldownCount
+					
+					icon:SetInfo(alpha, ic.__vrtxcolor, ic.__tex, ic.__start, ic.__duration, ic.__checkGCD, ic.__pbName, ic.__reverse, ic.__count)
+					
 					AlreadyChecked[ic] = true
-					icon.__previcon = ic
 					return
 				end
 			end

@@ -1142,6 +1142,208 @@
 		</Scripts>
 	</Frame>
 
+	<Button name="TellMeWhen_SoundSelectButton" virtual="true" >
+		<Size>
+			<AbsDimension y="14"/>
+		</Size>
+		<Scripts>
+			<OnLoad>
+			--	self.Background:SetVertexColor(0, 1, 0)
+			</OnLoad>
+			<OnClick>
+				TMW.SND:SelectSound(self.soundname)
+				assert(TMW.SND.currentEventSetting)
+				local groupID, iconID = TMW.CI.g, TMW.CI.i
+				if TMW.db then
+					TMW.db.profile.Groups[groupID].Icons[iconID][TMW.SND.currentEventSetting] = self.soundname
+					TMW.IE:ScheduleIconUpdate(groupID, iconID)
+				end
+				TMW.SND:SetTabText()
+			</OnClick>
+			<OnEnter>
+			--[[	GameTooltip_SetDefaultAnchor(GameTooltip, self)
+				if self.tooltipmethod then
+					GameTooltip[self.tooltipmethod](GameTooltip, self.tooltiparg)
+				elseif self.tooltiptitle then
+					GameTooltip:AddLine(self.tooltiptitle, HIGHLIGHT_FONT_COLOR.r, HIGHLIGHT_FONT_COLOR.g, HIGHLIGHT_FONT_COLOR.b, 1)
+					GameTooltip:AddLine(self.tooltiptext, NORMAL_FONT_COLOR.r, NORMAL_FONT_COLOR.g, NORMAL_FONT_COLOR.b, 1)
+				end
+				GameTooltip:Show()]]
+			</OnEnter>
+			<OnLeave>
+			--	GameTooltip:Hide()
+			</OnLeave>
+			<OnMouseWheel>
+			--[[	if not TMW.SUG.Suggesting then
+					if (not TMW.SUG[#TMW.SUG]:IsShown() and delta == 1) or TMW.SUG[#TMW.SUG]:IsShown() then
+						if IsLeftShiftKeyDown() or IsRightShiftKeyDown() then
+							delta = delta*5
+						elseif IsLeftControlKeyDown() or IsRightControlKeyDown() then
+							delta = delta*(#TMW.SUG-1)
+						end
+						TMW.SUG.offset = max(0, TMW.SUG.offset - delta)
+					end
+					TMW.SUG:SuggestingComplete()
+				end]]
+				self:GetParent().ScrollBar:SetValue(self:GetParent().ScrollBar:GetValue() - delta)
+			</OnMouseWheel>
+		</Scripts>
+		<NormalFont style="GameFontNormal"/>
+		<HighlightFont style="GameFontHighlight"/>
+		<HighlightTexture file="Interface\QuestFrame\UI-QuestLogTitleHighlight" alphaMode="ADD">
+			<Anchors>
+				<Anchor point="TOPLEFT">	
+					<Offset>
+						<AbsDimension x="0" y="1"/>
+					</Offset>
+				</Anchor>
+				<Anchor point="BOTTOMRIGHT">	
+					<Offset>
+						<AbsDimension x="0" y="1"/>
+					</Offset>
+				</Anchor>
+			</Anchors>
+		</HighlightTexture>
+		<Frames>
+			<Button name="$parentPlay" parentKey="Play" virtual="true">
+				<NormalTexture file="Interface\Common\VoiceChat-Speaker"/>
+				<HighlightTexture file="Interface\Common\VoiceChat-On"/>
+				<Scripts>
+					<OnClick>
+						PlaySoundFile(self:GetParent().soundfile)
+					</OnClick>
+					<OnEnter>
+						self:GetParent():LockHighlight()
+					</OnEnter>
+					<OnLeave>
+						if TMW.SND.selectedListID ~= self.listID then
+							self:GetParent():UnlockHighlight()
+						end
+					</OnLeave>
+				</Scripts>
+				<Size x="15" y="15"/>
+				<Anchors>
+					<Anchor point="RIGHT">
+						<Offset x="0" y="1" />
+					</Anchor>
+				</Anchors>
+			</Button>
+		</Frames>
+		<Layers>
+			<Layer level="OVERLAY">
+				<FontString name="$parentName" parentKey="Name" inherits="GameFontHighlight" justifyH="LEFT" text="Serpent Sting Sting Sting Sting">
+					<Anchors>
+						<Anchor point="LEFT">
+							<Offset x="3" y="0"/>
+						</Anchor>
+						<Anchor point="RIGHT" relativeTo="$parentPlay" relativePoint="LEFT">
+							<Offset x="-1" y="0"/>
+						</Anchor>
+					</Anchors>
+				</FontString>
+			</Layer>
+		</Layers>
+	</Button>
+	
+	<Button name="TellMeWhen_EventSelectButton" virtual="true" >
+		<Size>
+			<AbsDimension y="30"/>
+		</Size>
+		<Scripts>
+			<OnLoad>
+			--	self.Background:SetVertexColor(0, 1, 0)
+			</OnLoad>
+			<OnClick>
+				TMW.SND:SelectEvent(self:GetID())
+			</OnClick>
+			<OnEnter>
+			--[[	GameTooltip_SetDefaultAnchor(GameTooltip, self)
+				if self.tooltipmethod then
+					GameTooltip[self.tooltipmethod](GameTooltip, self.tooltiparg)
+				elseif self.tooltiptitle then
+					GameTooltip:AddLine(self.tooltiptitle, HIGHLIGHT_FONT_COLOR.r, HIGHLIGHT_FONT_COLOR.g, HIGHLIGHT_FONT_COLOR.b, 1)
+					GameTooltip:AddLine(self.tooltiptext, NORMAL_FONT_COLOR.r, NORMAL_FONT_COLOR.g, NORMAL_FONT_COLOR.b, 1)
+				end
+				GameTooltip:Show()]]
+			</OnEnter>
+			<OnLeave>
+			--	GameTooltip:Hide()
+			</OnLeave>
+		</Scripts>
+		<NormalFont style="GameFontNormal"/>
+		<HighlightFont style="GameFontHighlight"/>
+		<HighlightTexture file="Interface\QuestFrame\UI-QuestLogTitleHighlight" alphaMode="ADD">
+			<Anchors>
+				<Anchor point="TOPLEFT">	
+					<Offset>
+						<AbsDimension x="0" y="1"/>
+					</Offset>
+				</Anchor>
+				<Anchor point="BOTTOMRIGHT">	
+					<Offset>
+						<AbsDimension x="0" y="1"/>
+					</Offset>
+				</Anchor>
+			</Anchors>
+		</HighlightTexture>
+		<Frames>
+			<Button name="$parentPlay" parentKey="Play" virtual="true">
+				<NormalTexture file="Interface\Common\VoiceChat-Speaker"/>
+				<HighlightTexture file="Interface\Common\VoiceChat-On"/>
+				<Scripts>
+					<OnClick>
+						local groupID, iconID = TMW.CI.g, TMW.CI.i
+						
+						local setting = TMW.db.profile.Groups[groupID].Icons[iconID][self:GetParent().setting] or ""
+						local sound
+						if strfind(setting, "%.[^\\]+$") then
+							sound = setting
+						else
+							sound = TMW.SND.LSM:Fetch("sound", setting) or ""
+						end
+						PlaySoundFile(sound)
+					</OnClick>
+					<OnEnter>
+						self:GetParent():LockHighlight()
+					</OnEnter>
+					<OnLeave>
+						if not self:GetParent().selected then
+							self:GetParent():UnlockHighlight()
+						end
+					</OnLeave>
+				</Scripts>
+				<Size x="15" y="15"/>
+				<Anchors>
+					<Anchor point="TOPRIGHT">
+						<Offset x="0" y="0" />
+					</Anchor>
+				</Anchors>
+			</Button>
+		</Frames>
+		<Layers>
+			<Layer level="OVERLAY">
+				<FontString name="$parentEventName" parentKey="EventName" inherits="GameFontNormal" justifyH="LEFT" text="Serpent Sting Sting Sting Sting Sting">
+					<Anchors>
+						<Anchor point="TOPLEFT">
+							<Offset x="3" y="-2"/>
+						</Anchor>
+						<Anchor point="RIGHT" relativeTo="$parentPlay" relativePoint="LEFT">
+							<Offset x="-1" y="0"/>
+						</Anchor>
+					</Anchors>
+				</FontString>
+				<FontString name="$parentSoundName" parentKey="SoundName" inherits="GameFontHighlight" justifyH="LEFT" text="Serpent Sting Sting Sting Sting Sting">
+					<Anchors>
+						<Anchor point="BOTTOMLEFT">
+							<Offset x="3" y="2"/>
+						</Anchor>
+						<Anchor point="RIGHT"/>
+					</Anchors>
+				</FontString>
+			</Layer>
+		</Layers>
+	</Button>
+	
 	<!-- END TEMPLATES -->
 
 	<Button name="TellMeWhen_IconDragger" hidden="true" enableMouse="false" frameStrata="HIGH">
@@ -1213,9 +1415,15 @@
 				</Anchors>
 				<Scripts> <OnLoad> self:SetText(TMW.L["CONDITIONS"]) </OnLoad> </Scripts>
 			</Button>
-			<Button name="$parentTab3" parentKey="GroupTab" inherits="TellMeWhen_TabTemplate" id="3">
+			<Button name="$parentTab3" parentKey="SoundTab" inherits="TellMeWhen_TabTemplate" id="3">
 				<Anchors>
 				   <Anchor point="LEFT" relativeTo="$parentTab2" relativePoint="RIGHT" x="-15" y="0"/>
+				</Anchors>
+				<Scripts> <OnLoad> self:SetText(TMW.L["SOUND_TAB"]) </OnLoad> </Scripts>
+			</Button>
+			<Button name="$parentTab4" parentKey="GroupTab" inherits="TellMeWhen_TabTemplate" id="4">
+				<Anchors>
+				   <Anchor point="LEFT" relativeTo="$parentTab3" relativePoint="RIGHT" x="-15" y="0"/>
 				</Anchors>
 				<Scripts>
 					<OnLoad> self:SetText(TMW.L["GROUPADDONSETTINGS"]) </OnLoad>
@@ -2786,6 +2994,278 @@
 					<OnDragStop> TellMeWhen_IconEditor:StopMovingOrSizing() </OnDragStop>
 				</Scripts>
 			</Frame>
+			<Frame name="$parentSound" enableMouse="true" hidden="true" parentKey="Sound">
+				<Anchors>
+					<Anchor point="TOPLEFT" relativeTo="$parent" relativePoint="TOPLEFT"/>
+					<Anchor point="BOTTOMRIGHT" relativeTo="$parent" relativePoint="BOTTOMRIGHT"/>
+				</Anchors>
+				<Frames>
+				
+				
+					<Frame name="$parentEvents" parentKey="Events">
+						<Size x="200" y="280"/>
+						<Anchors>
+							<Anchor point="TOPLEFT" relativeTo="$parent" relativePoint="TOPLEFT">
+								<Offset x="20" y="-50"/>
+							</Anchor>
+						</Anchors>
+					<!-- 	<Frames>
+						
+						</Frames> -->
+						<Backdrop bgFile="Interface\DialogFrame\UI-DialogBox-Background-Dark" tile="true"/>
+						<Layers>
+							<Layer level="OVERLAY">
+								<FontString name="$parentHeader" inherits="GameFontNormalLarge" parentKey="Header" justifyH="LEFT" text="">
+									<Anchors>
+										<Anchor point="BOTTOM" relativeTo="$parent" relativePoint="TOP">
+											<Offset x="0" y="1"/>
+										</Anchor>
+									</Anchors>
+								</FontString>
+							</Layer>
+						</Layers>
+						<Scripts>
+							<OnLoad>
+								
+								self.Header:SetText(TMW.L["SOUND_EVENTS"])
+								
+								local previous
+								for i=1, #TMW.SND.EventList do
+									local f = CreateFrame("Button", self:GetName().."Event"..i, self, "TellMeWhen_EventSelectButton", i)
+									self[i] = f
+									f:SetPoint("TOPLEFT", previous, "BOTTOMLEFT")
+									f:SetPoint("TOPRIGHT", previous, "BOTTOMRIGHT")
+									f.event = TMW.SND.EventList[i].name
+									f.setting = "Sound" .. f.event
+									f.EventName:SetText(TMW.SND.EventList[i].text)
+									TMW:TT(f, TMW.SND.EventList[i].text, TMW.SND.EventList[i].desc, 1, 1)
+									previous = f
+								end
+								
+								self[1]:SetPoint("TOPLEFT", self, "TOPLEFT", 0, 0)
+								self[1]:SetPoint("TOPRIGHT", self, "TOPRIGHT", 0, 0)
+								
+								self:SetHeight(#self*self[1]:GetHeight())
+								TMW.SND.Events = self
+								TMW.SND:SelectEvent(1)
+							</OnLoad>
+						</Scripts>
+					</Frame>
+					
+					
+					<Frame name="$parentSounds" parentKey="Sounds">
+						<Size x="320" y="266"/>
+						<Anchors>
+							<Anchor point="TOPLEFT" relativeTo="$parent" relativePoint="TOPLEFT">
+								<Offset x="235" y="-50"/>
+							</Anchor>
+						</Anchors>
+						<Frames>
+							<Button name="$parentNone" inherits="TellMeWhen_SoundSelectButton" parentKey="None" id="0"/>
+							
+							
+							<Slider name="$parentScrollBar" inherits="MinimalScrollBarTemplate" parentKey="ScrollBar">
+								<Size>
+									<AbsDimension x="17" y="0"/>
+								</Size>
+								<Anchors>
+									<Anchor point="TOPLEFT" relativeTo="$parent" relativePoint="TOPRIGHT">
+										<Offset>
+											<AbsDimension x="1" y="-17"/>
+										</Offset>
+									</Anchor>
+									<Anchor point="BOTTOMLEFT" relativeTo="$parent" relativePoint="BOTTOMRIGHT">
+										<Offset>
+											<AbsDimension x="1" y="17"/>
+										</Offset>
+									</Anchor>
+								</Anchors>
+								<Scripts>
+									<OnLoad>
+										self:SetValue(0)
+										self.scrollStep = 1
+										self:SetValueStep(1)
+									</OnLoad>
+									<OnValueChanged>
+										TMW.SND:SetSoundsOffset(value)
+									</OnValueChanged>
+								</Scripts>
+							</Slider>
+						</Frames>
+						<Backdrop bgFile="Interface\DialogFrame\UI-DialogBox-Background-Dark" tile="true"/>
+						<Layers>
+							<Layer level="OVERLAY">
+								<FontString name="$parentHeader" inherits="GameFontNormalLarge" parentKey="Header" justifyH="LEFT" text="">
+									<Anchors>
+										<Anchor point="BOTTOM" relativeTo="$parent" relativePoint="TOP">
+											<Offset x="0" y="1"/>
+										</Anchor>
+									</Anchors>
+								</FontString>
+							</Layer>
+						</Layers>
+						<Scripts>
+							<OnLoad>
+								self.Header:SetText(TMW.L["SOUND_SOUNDTOPLAY"])
+								local previous = self.None
+								TMW.SND[0] = previous
+								
+								previous:SetPoint("TOPLEFT", self, "TOPLEFT", 0, 0)
+								previous:SetPoint("TOPRIGHT", self, "TOPRIGHT", 0, 0)
+								
+								previous.Name:SetText(NONE)
+								previous.Play:Hide()
+								previous.soundfile = ""
+								previous.soundname = "None"
+								
+								for i=1, self:GetHeight()/self.None:GetHeight() do
+									local f = CreateFrame("Button", self:GetName().."Sound"..i, self, "TellMeWhen_SoundSelectButton", i)
+									self[i] = f
+									f:SetPoint("TOPLEFT", previous, "BOTTOMLEFT", 0, 0)
+									f:SetPoint("TOPRIGHT", previous, "BOTTOMRIGHT", 0, 0)
+									previous = f
+								end
+								TMW.SND.Sounds = self
+								TMW.SND:SetSoundsOffset(0)
+							</OnLoad>
+						</Scripts>
+					</Frame>
+					
+					
+					<EditBox name="$parentCustom" parentKey="Custom" inherits="TellMeWhen_InputBoxTemplate">
+						<Size y="15"/>
+						<Anchors>
+							<Anchor point="TOPLEFT" relativeTo="$parentSounds" relativePoint="BOTTOMLEFT">
+								<Offset x="5" y="-5" />
+							</Anchor>
+							<Anchor point="TOPRIGHT" relativeTo="$parentSounds" relativePoint="BOTTOMRIGHT">
+								<Offset x="0" y="-5" />
+							</Anchor>
+						</Anchors>
+						<Frames>
+							<Button name="$parentPlay" parentKey="Play" virtual="true">
+								<NormalTexture file="Interface\Common\VoiceChat-Speaker"/>
+								<HighlightTexture file="Interface\Common\VoiceChat-On"/>
+								<Scripts>
+									<OnClick>
+										PlaySoundFile(self:GetParent():GetText())
+									</OnClick>
+									<OnEnter>
+										self:GetParent().Background:Show()
+									</OnEnter>
+									<OnLeave>
+										if not self:GetParent().selected then
+											self:GetParent().Background:Hide()
+										end
+									</OnLeave>
+								</Scripts>
+								<Size x="20" y="20"/>
+								<Anchors>
+									<Anchor point="LEFT" relativeTo="$parent" relativePoint="RIGHT"/>
+								</Anchors>
+							</Button>
+						</Frames>
+						<Layers>
+							<Layer level="BACKGROUND">
+								<Texture name="$parentBackground" parentKey="Background" file="Interface\QuestFrame\UI-QuestLogTitleHighlight" hidden="true">
+									<Anchor point="TOPLEFT">	
+										<Offset>
+											<AbsDimension x="0" y="1"/>
+										</Offset>
+									</Anchor>
+									<Anchor point="BOTTOMRIGHT">	
+										<Offset>
+											<AbsDimension x="0" y="1"/>
+										</Offset>
+									</Anchor>
+								</Texture>
+							</Layer>
+						</Layers>
+						<Scripts>
+							<OnLoad>
+								TMW:TT(self, "SOUND_CUSTOM", "SOUND_CUSTOM_DESC")
+								self.label = TMW.L["SOUND_CUSTOM"]
+								self.setting = self:GetParent().setting
+							</OnLoad>
+							<OnEnter>
+								self.Background:Show()
+							</OnEnter>
+							<OnLeave>
+								if not self.selected then
+									self.Background:Hide()
+								end
+							</OnLeave>
+							<OnEditFocusLost>
+								EditBox_ClearHighlight(self)
+								local groupID, iconID = TMW.CI.g, TMW.CI.i
+								
+								local t = TMW:CleanString(self:GetText())
+								t = gsub(t, "/", "\\")
+								
+								if not strfind(t, "%.[^\\]+$") then
+									t = "None"
+								end
+									
+								self:SetText(t)
+								
+								if TMW.db and TMW.SND.currentEventSetting then
+									TMW.db.profile.Groups[groupID].Icons[iconID][TMW.SND.currentEventSetting] = t
+								end
+								TMW.SND:SelectSound(t)
+								TMW.IE:ScheduleIconUpdate(groupID, iconID)
+								self:GetScript("OnTextChanged")(self)
+								TMW.SND:SetTabText()
+							</OnEditFocusLost>
+						</Scripts>
+					</EditBox>
+	
+	
+					<!-- <Frame name="$parentShowSound" inherits="TellMeWhen_SoundSelectFrame">
+						<Anchors>
+							<Anchor point="TOPLEFT" relativeTo="$parent" relativePoint="TOPLEFT">
+								<Offset x="20" y="-50"/>
+							</Anchor>
+						</Anchors>
+					</Frame>
+					<Frame name="$parentHideSound" inherits="TellMeWhen_SoundSelectFrame">
+						<Anchors>
+							<Anchor point="TOPLEFT" relativeTo="$parentShowSound" relativePoint="TOPRIGHT">
+								<Offset x="20" y="0"/>
+							</Anchor>
+						</Anchors>
+					</Frame>
+					<Frame name="$parentStartSound" inherits="TellMeWhen_SoundSelectFrame">
+						<Anchors>
+							<Anchor point="TOPLEFT" relativeTo="$parentHideSound" relativePoint="TOPRIGHT">
+								<Offset x="20" y="0"/>
+							</Anchor>
+						</Anchors>
+					</Frame>
+					<Frame name="$parentFinishSound" inherits="TellMeWhen_SoundSelectFrame">
+						<Anchors>
+							<Anchor point="TOPLEFT" relativeTo="$parentStartSound" relativePoint="TOPRIGHT">
+								<Offset x="20" y="0"/>
+							</Anchor>
+						</Anchors>
+					</Frame>
+			 -->
+				</Frames>
+				<Scripts>
+					<OnLoad>
+						self:RegisterForDrag("LeftButton")
+						self:Hide()
+						
+						for k, v in pairs(self) do
+							if k ~= 0 then
+								TMW.SND[k] = v
+							end
+						end
+					</OnLoad>
+					<OnDragStart> TellMeWhen_IconEditor:StartMoving() </OnDragStart>
+					<OnDragStop> TellMeWhen_IconEditor:StopMovingOrSizing() </OnDragStop>
+				</Scripts>
+			</Frame>
+			<!-- 
 			<Frame name="$parentASD" hidden="true" parentKey="ASD">
 				<Anchors>
 					<Anchor point="TOPLEFT" relativeTo="$parent" relativePoint="TOPLEFT"/>
@@ -2897,7 +3377,7 @@
 					<OnDragStart> TellMeWhen_IconEditor:StartMoving() </OnDragStart>
 					<OnDragStop> TellMeWhen_IconEditor:StopMovingOrSizing() </OnDragStop>
 				</Scripts>
-			</Frame>
+			</Frame> -->
 
 			<Button name="$parentOkayButton" parentKey="OkayButton" inherits="UIPanelButtonTemplate" text="OKAY">
 				<Size>
@@ -3024,7 +3504,7 @@
 		<Scripts>
 			<OnLoad>
 				self:RegisterForDrag("LeftButton")
-				self.numTabs = 3
+				self.numTabs = 4
 				for k, v in pairs(self) do
 					if k ~= 0 then
 						TMW.IE[k] = v

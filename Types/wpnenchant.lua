@@ -11,12 +11,13 @@ local TMW = TMW
 if not TMW then return end
 local L = TMW.L
 
-local db, time, UPD_INTV, WpnEnchDurs, ClockGCD, pr, ab, rc, mc
+local db, UPD_INTV, WpnEnchDurs, ClockGCD, pr, ab, rc, mc
 local _G, strlower, strmatch, strtrim, select, floor =
 	  _G, strlower, strmatch, strtrim, select, floor
 local GetInventoryItemTexture, GetInventorySlotInfo, GetWeaponEnchantInfo =
 	  GetInventoryItemTexture, GetInventorySlotInfo, GetWeaponEnchantInfo
 local print = TMW.print
+local UIParent = UIParent
 
 local RelevantSettings = {
 	Name = true,
@@ -43,7 +44,7 @@ Type.desc = L["ICONMENU_WPNENCHANT_DESC"]
 
 local Parser = CreateFrame("GameTooltip", "TellMeWhen_Parser", TMW, "GameTooltipTemplate")
 local function GetWeaponEnchantName(slot)
-	GameTooltip_SetDefaultAnchor(Parser, UIParent)
+	Parser:SetOwner(UIParent, "ANCHOR_NONE");
 	local has = Parser:SetInventoryItem("player", slot)
 
 	if not has then Parser:Hide() return false end
@@ -92,11 +93,6 @@ local function WpnEnchant_OnUpdate(icon, time)
 		if icon.CndtCheck and icon.CndtCheck() then return end
 		local has, expiration = select(icon.SelectIndex, GetWeaponEnchantInfo())
 		if has and icon.CorrectEnchant then
-			local Alpha = icon.Alpha
-			if Alpha == 0 then
-				icon:SetAlpha(0)
-				return
-			end
 			expiration = expiration/1000
 			
 			if (icon.DurationMinEnabled and icon.DurationMin > expiration) or (icon.DurationMaxEnabled and expiration > icon.DurationMax) then
@@ -118,33 +114,23 @@ local function WpnEnchant_OnUpdate(icon, time)
 			end
 			local start = floor(time - duration + expiration)
 
+			local color
 			if icon.UnAlpha ~= 0 then
-				icon:AlphaColor(Alpha, pr)
+				color = pr
 			else
-				icon:AlphaColor(Alpha, 1)
+				color = 1
 			end
-
-			if icon.ShowTimer then
-				icon:SetCooldown(start, duration)
-			end
-			if icon.ShowCBar then
-				icon:CDBarStart(start, duration)
-			end
+			icon:SetInfo(icon.Alpha, color, nil, start, duration)
 		else
-			local UnAlpha = icon.UnAlpha
-			if UnAlpha == 0 then
-				icon:SetAlpha(0)
-				return
-			end
+			
+			local color
 			if icon.Alpha ~= 0 then
-				icon:AlphaColor(UnAlpha, ab)
+				color = ab
 			else
-				icon:AlphaColor(UnAlpha, 1)
+				color = 1
 			end
-			if icon.ShowTimer then
-				icon:SetCooldown(0, 0)
-			end
-			icon:CDBarStop()
+			
+			icon:SetInfo(icon.UnAlpha, color, nil, 0, 0)
 		end
 	end
 end
@@ -190,7 +176,7 @@ function Type:Setup(icon, groupID, iconID)
 	icon:SetReverse(true)
 
 	icon:SetScript("OnUpdate", WpnEnchant_OnUpdate)
-	icon:OnUpdate(GetTime() + 1)
+	icon:OnUpdate(TMW.time)
 	
 	icon:RegisterEvent("UNIT_INVENTORY_CHANGED")
 	icon:SetScript("OnEvent", WpnEnchant_OnEvent)

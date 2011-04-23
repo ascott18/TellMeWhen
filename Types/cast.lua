@@ -11,7 +11,7 @@ local TMW = TMW
 if not TMW then return end
 local L = TMW.L
 
-local db, time, UPD_INTV, pr, ab
+local db, UPD_INTV, pr, ab
 local ipairs, strlower =
 	  ipairs, strlower
 local UnitCastingInfo, UnitChannelInfo, UnitExists, UnitGUID =
@@ -68,57 +68,36 @@ local function Cast_OnUpdate(icon, time)
 				end
 
 				if name and not (notInterruptible and Interruptible) and (NameFirst == "" or NameNameDictionary[strlower(name)]) then
-					local Alpha = icon.Alpha
-					if Alpha == 0 then
-						icon:SetAlpha(0)
-						return
-					end
-					
+				
 					local d = endTime - time
 					if (icon.DurationMinEnabled and icon.DurationMin > d) or (icon.DurationMaxEnabled and d > icon.DurationMax) then
 						icon:SetAlpha(0)
 						return
 					end
-					
-					if iconTexture ~= icon.__tex then icon:SetTexture(iconTexture) end
 
+					local color
 					if icon.UnAlpha ~= 0 then
-						icon:AlphaColor(Alpha, pr)
+						color = pr
 					else
-						icon:AlphaColor(Alpha, 1)
+						color = 1
 					end
 					start, endTime = start/1000, endTime/1000
 					local duration = endTime - start
-
-					if icon.ShowTimer then
-						icon:SetCooldown(start, duration, reverse)
-					end
-					if icon.ShowCBar then
-						icon:CDBarStart(start, duration, true)
-					end
+					
+					icon:SetInfo(icon.Alpha, color, iconTexture, start, duration, nil, nil, reverse)
 
 					return
 				end
 			end
 		end
-		local UnAlpha = icon.UnAlpha
-		if UnAlpha == 0 then
-			icon:SetAlpha(0)
-			return
-		end
-		if icon.ShowCBar then
-			icon:CDBarStop()
-		end
 
+		local color
 		if icon.Alpha ~= 0 then
-			icon:AlphaColor(UnAlpha, ab)
+			color = ab
 		else
-			icon:AlphaColor(UnAlpha, 1)
+			color = 1
 		end
-
-		if icon.ShowTimer then
-			icon:SetCooldown(0, 0)
-		end
+		icon:SetInfo(icon.UnAlpha, color, nil, 0, 0)
 	end
 end
 
@@ -141,7 +120,7 @@ function Type:Setup(icon, groupID, iconID)
 
 	icon.ShowPBar = false
 	icon:SetScript("OnUpdate", Cast_OnUpdate)
-	icon:OnUpdate(GetTime() + 1)
+	icon:OnUpdate(TMW.time)
 end
 
 
