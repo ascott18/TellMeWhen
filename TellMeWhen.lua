@@ -37,7 +37,7 @@ local LSM = LibStub("LibSharedMedia-3.0")
 
 TELLMEWHEN_VERSION = "4.1.0"
 TELLMEWHEN_VERSION_MINOR = ""
-TELLMEWHEN_VERSIONNUMBER = 41001 -- NEVER DECREASE THIS NUMBER, ONLY INCREASE IT 
+TELLMEWHEN_VERSIONNUMBER = 41002 -- NEVER DECREASE THIS NUMBER, ONLY INCREASE IT 
 TELLMEWHEN_MAXGROUPS = 10 	--this is a default, used by SetTheory (addon), so dont rename
 TELLMEWHEN_MAXROWS = 20
 local UPD_INTV = 0.06	--this is a default, local because i use it in onupdate functions
@@ -1642,12 +1642,13 @@ end
 
 local function SetInfo(icon, alpha, color, texture, start, duration, checkGCD, pbName, reverse, count)
 	
-	local played
+	local played, justShowed
 	if alpha ~= icon.__alpha then
 		if alpha == 0 then
 			local Sound = icon.SoundOnHide
 			if Sound then
 				PlaySoundFile(Sound, SndChan)
+				played = true
 			end
 		elseif icon.FakeAlpha == 0 then
 			local Sound = icon.SoundOnShow
@@ -1655,6 +1656,7 @@ local function SetInfo(icon, alpha, color, texture, start, duration, checkGCD, p
 				PlaySoundFile(Sound, SndChan)
 				played = true
 			end
+			justShowed = true
 		end
 		if icon.FakeHidden then
 			icon:setalpha(0) -- setalpha(lowercase) is the old, raw SetAlpha. Use it to override FakeAlpha, although this really should never happen ourside of here
@@ -1665,9 +1667,6 @@ local function SetInfo(icon, alpha, color, texture, start, duration, checkGCD, p
 		end
 	end
 	icon.FakeAlpha = alpha
-	if alpha == 0 then
-		return
-	end
 	
 	if icon.__start ~= start or icon.__duration ~= duration then
 		local isGCD
@@ -1683,7 +1682,7 @@ local function SetInfo(icon, alpha, color, texture, start, duration, checkGCD, p
 		if icon.__realDuration ~= realDuration then
 			if realDuration == 0 then
 				local Sound = icon.SoundOnFinish
-				if Sound then
+				if Sound and not justShowed then
 					PlaySoundFile(Sound, SndChan)
 				end
 			else
@@ -1694,20 +1693,26 @@ local function SetInfo(icon, alpha, color, texture, start, duration, checkGCD, p
 			end
 			icon.__realDuration = realDuration
 		end
+		if alpha == 0 then-- doing this twice is intended. It shouldn't return until after all playsounds have happened, but dont go as far to set the timer or cooldown bars if not needed
+			return
+		end
 		
 		if icon.ShowTimer then
 			if duration > 0 then
-				local cd = icon.cooldown
+				local cd, s, d = icon.cooldown, start, duration
+				
 				if isGCD and ClockGCD then
-					cd:SetCooldown(0, 0)
-				else
-					cd:SetCooldown(start, duration)
+					s, d = 0, 0
 				end
 				
-				cd:Show()
-				if reverse ~= nil and icon.__reverse ~= reverse then -- must be ( ~= nil )
-					icon.__reverse = reverse
-					cd:SetReverse(reverse)
+				-- cd.s is completely internal and is used to prevent finish effect spam (and to increase efficiency). icon.__start isnt used because that just records the start time passed in, which may be a GCD, so it will change frequently
+				if cd.s ~= s then
+					cd:SetCooldown(s, d)
+					cd:Show()
+					if reverse ~= nil and icon.__reverse ~= reverse then -- must be ( ~= nil )
+						icon.__reverse = reverse
+						cd:SetReverse(reverse)
+					end
 				end
 			else
 				icon.cooldown:Hide()
@@ -1748,6 +1753,11 @@ local function SetInfo(icon, alpha, color, texture, start, duration, checkGCD, p
 		icon.__start = start
 		icon.__duration = duration
 	end
+	
+	if alpha == 0 then 
+		return
+	end
+		
 	
 	if icon.__vrtxcolor ~= color then
 		icon.__vrtxcolor = color

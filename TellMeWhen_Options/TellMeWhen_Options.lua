@@ -2127,8 +2127,12 @@ function SND:SelectSound(name)
 end
 
 function SND:Load()
-	for i = 1, #SND.Events do
+	local oldID = SND.currentEventID
+	for i = #SND.Events, 1, -1 do
 		SND:SelectEvent(i)
+	end
+	if oldID then
+		SND:SelectEvent(oldID)
 	end
 	SND:SetTabText()
 end

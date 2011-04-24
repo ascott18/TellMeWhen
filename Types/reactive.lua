@@ -149,7 +149,7 @@ local function Reactive_OnUpdate(icon, time)
 				alpha, color = icon.UnAlpha, 1
 			end
 			
-			icon:SetInfo(icon.Alpha, color, icon.FirstTexture, start, duration, true, icon.NameFirst, "")
+			icon:SetInfo(alpha, color, icon.FirstTexture, start, duration, true, icon.NameFirst)
 
 			return
 		else
