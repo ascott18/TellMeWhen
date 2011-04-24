@@ -37,7 +37,7 @@ local LSM = LibStub("LibSharedMedia-3.0")
 
 TELLMEWHEN_VERSION = "4.1.0"
 TELLMEWHEN_VERSION_MINOR = ""
-TELLMEWHEN_VERSIONNUMBER = 41002 -- NEVER DECREASE THIS NUMBER, ONLY INCREASE IT 
+TELLMEWHEN_VERSIONNUMBER = 41003 -- NEVER DECREASE THIS NUMBER, ONLY INCREASE IT 
 TELLMEWHEN_MAXGROUPS = 10 	--this is a default, used by SetTheory (addon), so dont rename
 TELLMEWHEN_MAXROWS = 20
 local UPD_INTV = 0.06	--this is a default, local because i use it in onupdate functions
@@ -2049,7 +2049,7 @@ function TMW:Icon_Update(icon)
 	
 	icon.__normaltex = icon.__LBF_Normal or icon:GetNormalTexture()
 	icon.__previcon = nil
-	icon.__alpha = icon:GetAlpha()
+	icon.__alpha = nil
 	icon.__tex = icon.texture:GetTexture()
 	icon.__realDuration = icon.__realDuration or 0
 	
@@ -2102,7 +2102,7 @@ function TMW:Icon_Update(icon)
 	else
 		ClearScripts(icon)
 		if icon.Enabled then
-			icon:setalpha(1.0)
+			icon:setalpha(1)
 		else
 			icon:setalpha(0.5)
 		end

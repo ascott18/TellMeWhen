@@ -3064,7 +3064,7 @@
 							<Button name="$parentNone" inherits="TellMeWhen_SoundSelectButton" parentKey="None" id="0"/>
 							
 							
-							<Slider name="$parentScrollBar" inherits="MinimalScrollBarTemplate" parentKey="ScrollBar" value="0">
+							<Slider name="$parentScrollBar" inherits="MinimalScrollBarTemplate" parentKey="ScrollBar" defaultvalue="0">
 								<Size>
 									<AbsDimension x="17" y="0"/>
 								</Size>

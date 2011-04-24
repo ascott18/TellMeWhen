@@ -1,7 +1,8 @@
 ===v4.1.0===
  * Implemented sounds! It should be mostly functional, but if you find anything that is breaking or not working how it probably should, open a ticket.
  * Reduced CPU usage by about 20%.
- * Fixed the alpha on reactive icons
+ * Fixed the alpha on unusable reactive icons
+ * Fixed a bug where icons that were set to fake hidden would sometimes still show after leaving config
 
  ===v4.0.4===
  * Maybe fixed a really rare frame level bug with cooldowns?
