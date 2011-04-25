@@ -1212,7 +1212,7 @@ function CNDT:ProcessConditions(icon)
 			end
 		end
 
-		local name = gsub(c.Name, "; ", ";")
+		local name = gsub((c.Name or ""), "; ", ";")
 		name = gsub(name, " ;", ";")
 		name = ";" .. name .. ";"
 		name = gsub(name, ";;", ";")
