@@ -37,7 +37,7 @@ local LSM = LibStub("LibSharedMedia-3.0")
 
 TELLMEWHEN_VERSION = "4.1.0"
 TELLMEWHEN_VERSION_MINOR = ""
-TELLMEWHEN_VERSIONNUMBER = 41005 -- NEVER DECREASE THIS NUMBER, ONLY INCREASE IT
+TELLMEWHEN_VERSIONNUMBER = 41008 -- NEVER DECREASE THIS NUMBER, ONLY INCREASE IT
 TELLMEWHEN_MAXGROUPS = 10 	--this is a default, used by SetTheory (addon), so dont rename
 TELLMEWHEN_MAXROWS = 20
 local UPD_INTV = 0.06	--this is a default, local because i use it in onupdate functions
@@ -634,6 +634,9 @@ function TMW:OnInitialize()
 	if type(TellMeWhenDB) ~= "table" then TellMeWhenDB = {} end
 	TMW.db = AceDB:New("TellMeWhenDB", TMW.Defaults)
 	db = TMW.db
+	
+	LSM:Register("sound", "Die!", "Sound\\Creature\\GruulTheDragonkiller\\GRULLAIR_Gruul_Slay03.wav")
+	LSM:Register("sound", "You Fail!", "Sound\\Creature\\Kologarn\\UR_Kologarn_slay02.wav")
 
 	TELLMEWHEN_MAXGROUPS = db.profile.NumGroups -- need to define before upgrading
 
@@ -1125,6 +1128,28 @@ function TMW:Upgrade()
 			ics.ConditionAlpha = 0
 		end
 	end
+	if db.profile.Version < 41008 then
+		for ics in TMW.InIconSettings() do
+			for k, condition in pairs(ics.Conditions) do
+				if condition.Type == "SPELLCD" or condition.Type == "ITEMCD" then
+					if condition.Level == 0 then
+						condition.Operator = "=="
+					elseif condition.Level == 1 then
+						condition.Operator = ">"
+						condition.Level = 0
+					end
+				elseif condition.Type == "MAINHAND" or condition.Type == "OFFHAND" or condition.Type == "THROWN" then
+					if condition.Level == 0 then
+						condition.Operator = ">"
+					elseif condition.Level == 1 then
+						condition.Operator = "=="
+						condition.Level = 0
+					end
+				end
+			end
+		end
+	end
+	
 
 	--All Upgrades Complete
 	db.profile.Version = TELLMEWHEN_VERSIONNUMBER

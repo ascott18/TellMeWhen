@@ -70,11 +70,23 @@ end
 
 function TMW:CopyTableInPlace(src, dest)
 	--src and dest must have congruent data structure, otherwise shit will blow up
+	for k in pairs(src) do
+		if dest[k] and type(dest[k]) == "table" and type(src[k]) == "table" then
+			TMW:CopyTableInPlaceWithMeta(src[k], dest[k])
+		elseif type(src[k]) ~= "table" then
+			dest[k] = src[k]
+		end
+	end
+	return dest -- not really needed, but what the hell why not
+end
+
+function TMW:CopyTableInPlaceWithMeta(src, dest)
+	--src and dest must have congruent data structure, otherwise shit will blow up
 	local metatemp = getmetatable(src) -- lets not go overwriting random metatables
 	setmetatable(src, getmetatable(dest))
 	for k in pairs(src) do
 		if dest[k] and type(dest[k]) == "table" and type(src[k]) == "table" then
-			TMW:CopyTableInPlace(src[k], dest[k])
+			TMW:CopyTableInPlaceWithMeta(src[k], dest[k])
 		elseif type(src[k]) ~= "table" then
 			dest[k] = src[k]
 		end
@@ -1367,10 +1379,10 @@ function IE:ShowHide()
 	end
 	local spb = IE.Main.ShowPBar
 	local scb = IE.Main.ShowCBar
-	if TMW.CI.t == "cooldown" and IE.Main.TypeChecks.Radio3:GetChecked() and IE.Main.TypeChecks.Radio3.value == "item" then
+	if t == "cooldown" and IE.Main.TypeChecks.Radio3:GetChecked() and IE.Main.TypeChecks.Radio3.value == "item" then
 		SoI = "item"
 	else
-		if TMW.CI.t == "cooldown" and IE.Main.TypeChecks.Radio2:GetChecked() and IE.Main.TypeChecks.Radio2.value == "multistate" then
+		if t == "cooldown" and IE.Main.TypeChecks.Radio2:GetChecked() and IE.Main.TypeChecks.Radio2.value == "multistate" then
 			IsMultiState = true
 		else
 			IsMultiState = nil
@@ -1388,6 +1400,19 @@ function IE:ShowHide()
 		IE.Main.OnlyInBags:Hide()
 		IE.Main.ManaCheck:Show()
 	end
+	
+	local Name = IE.Main.Name
+	if t == "conditionicon" then
+		Name.label = TMW.L["ICONMENU_CHOOSENAME_CNDTIC"]
+		Name.TTtitle = TMW.L["ICONMENU_CHOOSENAME_CNDTIC"]
+		Name.TTtext = TMW.L["CHOOSENAME_DIALOG_CNDTIC"]
+	else
+		Name.label = TMW.L["ICONMENU_CHOOSENAME"]
+		Name.TTtitle = TMW.L["ICONMENU_CHOOSENAME"]
+		Name.TTtext = TMW.L["CHOOSENAME_DIALOG"]
+	end
+	Name:GetScript("OnTextChanged")(Name)
+	
 	if not spb:IsShown() then
 		spb:Show()
 		spb:SetEnabled(nil)
@@ -1482,15 +1507,6 @@ function IE:Load(isRefresh)
 		IE:TabClick(IE.MainTab)
 	elseif not TellMeWhen_IconEditor:IsShown() and isRefresh then
 		return
-	end
-	if TMW.CI.t and TMW.CI.t ~= IE.previousType then
-		if IE.previousType and TMW.Types[IE.previousType].OnUnloadIE then
-			TMW.Types[IE.previousType]:OnUnloadIE()
-		end
-		if TMW.Types[TMW.CI.t].OnLoadIE then
-			TMW.Types[TMW.CI.t]:OnLoadIE()
-		end
-		IE.previousType = TMW.CI.t
 	end
 
 	local groupID, iconID = TMW.CI.g, TMW.CI.i
@@ -1664,6 +1680,7 @@ function IE:Type_DropDown()
 			IE:ScheduleIconUpdate(groupID, iconID)
 			local DD = IE.Main.Type
 			UIDropDownMenu_SetSelectedValue(DD, v.value)
+		
 			TMW.CI.t = v.value
 			IE:SetupRadios()
 			IE:LoadSettings()
@@ -1797,8 +1814,8 @@ function IE:Copy_DropDown()
 				info.func = function(self)
 					CloseDropDownMenus()
 					local groupID, iconID = TMW.CI.g, TMW.CI.i
-					TMW:CopyTableInPlace(TMW.Icon_Defaults, db.profile.Groups[groupID].Icons[iconID])
-					TMW:CopyTableInPlace(self.value, db.profile.Groups[groupID].Icons[iconID])
+					TMW:CopyTableInPlaceWithMeta(TMW.Icon_Defaults, db.profile.Groups[groupID].Icons[iconID])
+					TMW:CopyTableInPlaceWithMeta(self.value, db.profile.Groups[groupID].Icons[iconID])
 					IE:ScheduleIconUpdate(groupID, iconID)
 					IE:Load(1)
 					db.profile.HasImported = true
@@ -1842,8 +1859,8 @@ function IE:Copy_DropDown()
 		info.text = L["COPYPOS"]
 		info.func = function()
 			CloseDropDownMenus()
-			TMW:CopyTableInPlace(TMW.Group_Defaults.Point, db.profile.Groups[groupID].Point)
-			TMW:CopyTableInPlace(db.profiles[n].Groups[g].Point, db.profile.Groups[groupID].Point)
+			TMW:CopyTableInPlaceWithMeta(TMW.Group_Defaults.Point, db.profile.Groups[groupID].Point)
+			TMW:CopyTableInPlaceWithMeta(db.profiles[n].Groups[g].Point, db.profile.Groups[groupID].Point)
 			db.profile.Groups[groupID].Scale = db.profiles[n].Groups[g].Scale or TMW.Group_Defaults.Scale
 			db.profile.Groups[groupID].Level = db.profiles[n].Groups[g].Level or TMW.Group_Defaults.Level
 			TMW:Group_Update(groupID)
@@ -1855,8 +1872,8 @@ function IE:Copy_DropDown()
 		info.text = L["COPYALL"]
 		info.func = function()
 			CloseDropDownMenus()
-			TMW:CopyTableInPlace(TMW.Group_Defaults, db.profile.Groups[groupID])
-			TMW:CopyTableInPlace(db.profiles[n].Groups[g], db.profile.Groups[groupID])
+			TMW:CopyTableInPlaceWithMeta(TMW.Group_Defaults, db.profile.Groups[groupID])
+			TMW:CopyTableInPlaceWithMeta(db.profiles[n].Groups[g], db.profile.Groups[groupID])
 			TMW:Group_Update(groupID)
 			IE:Load(1)
 		end
@@ -1891,8 +1908,8 @@ function IE:Copy_DropDown()
 					info.text = format(L["fICON"], i)
 					info.func = function()
 						CloseDropDownMenus()
-						TMW:CopyTableInPlace(TMW.Icon_Defaults, db.profile.Groups[groupID].Icons[iconID])
-						TMW:CopyTableInPlace(db.profiles[n].Groups[g].Icons[i], db.profile.Groups[groupID].Icons[iconID])
+						TMW:CopyTableInPlaceWithMeta(TMW.Icon_Defaults, db.profile.Groups[groupID].Icons[iconID])
+						TMW:CopyTableInPlaceWithMeta(db.profiles[n].Groups[g].Icons[i], db.profile.Groups[groupID].Icons[iconID])
 						TMW[groupID][iconID]:SetTexture(nil)
 						TMW:Group_Update(groupID)
 						IE:Load(1)

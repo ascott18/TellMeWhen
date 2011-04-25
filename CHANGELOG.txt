@@ -1,11 +1,12 @@
 ===v4.1.0===
  * Implemented sounds! It should be mostly functional, but if you find anything that is breaking or not working how it probably should, open a ticket.
  * Reduced CPU usage by about 20%.
- * Alpha can noe be customized for when conditions fail, or for when duration/stack requirements are not met.
- * New conditions:
+ * Alpha can now be customized for when conditions fail, or for when duration/stack requirements are not met.
+ * New/changed conditions:
  ** Old Buff/Debuff conditions changed to Buff/Debuff Stacks
  ** Buff duration 
  ** Debuff duration
+ ** Cooldown and weapon enchant conditions now allow you to specify a duration
  * Fixes since the first revision of this version:
  ** Fixed the alpha on unusable reactive icons
  ** Fixed a bug where icons that were set to fake hidden would sometimes still show after leaving config

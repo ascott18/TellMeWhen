@@ -65,23 +65,5 @@ function Type:Setup(icon, groupID, iconID)
 end
 
 
-local oldLabel, oldTTtitle, oldTTtext
-function Type:OnUnloadIE()
-	TMW.IE.Main.Name.label = oldLabel
-	TMW.IE.Main.Name.TTtitle = oldTTtitle
-	TMW.IE.Main.Name.TTtext = oldTTtext
-end
-
-function Type:OnLoadIE()
-	local Name = TMW.IE.Main.Name
-	oldLabel = Name.label
-	oldTTtitle = Name.TTtitle
-	oldTTtext = Name.TTtext
-	Name.label = TMW.L["ICONMENU_CHOOSENAME_CNDTIC"]
-	Name.TTtitle = TMW.L["ICONMENU_CHOOSENAME_CNDTIC"]
-	Name.TTtext = TMW.L["CHOOSENAME_DIALOG_CNDTIC"]
-end
-
-
 
 
