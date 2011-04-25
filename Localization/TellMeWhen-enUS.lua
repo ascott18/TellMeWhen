@@ -35,6 +35,8 @@ L["CHOOSENAME_DIALOG_ICD_DESC"] = "Enter the internal cooldown length or the dur
 L["CHOOSENAME_DIALOG_UCD_DESC"] = "Enter the cooldown length of the spell(s) that you want to track."
 
 L["ICONMENU_ALPHA"] = "Transparency"
+L["CONDITIONALPHA"] = "Conditions/Duration/Stacks"
+L["CONDITIONALPHA_DESC"] = "This will be used when conditions fail, or if the duration or stack requirements are not met."
 L["ICONMENU_TYPE"] = "Icon type"
 L["ICONMENU_COOLDOWN"] = "Cooldown"
 L["ICONMENU_BUFFDEBUFF"] = "Buff/Debuff"
@@ -396,6 +398,9 @@ L["MESSAGERECIEVE"] = "%s has sent you a TellMeWhen icon! You can import this ic
 L["MESSAGERECIEVE_SHORT"] = "%s has sent you a TellMeWhen icon!"
 L["ALLOWCOMM"] = "Allow icon importing"
 L["NEWVERSION"] = "A new version of TellMeWhen is available (%s)"
+L["INFINITE"] = "Infinite"
+
+
 L["CACHING"] = "TellMeWhen is caching and filtering all spells in the game. This only needs to be done once per WoW patch. You can speed up or slow down the process using the slider below."
 L["CACHINGSPEED"] = "Spells per frame:"
 L["SUGGESTIONS"] = "Suggestions:"

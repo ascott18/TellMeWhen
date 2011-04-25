@@ -193,12 +193,12 @@
 		<HighlightFont style="GameFontHighlight"/>
 		<HighlightTexture file="Interface\QuestFrame\UI-QuestLogTitleHighlight" alphaMode="ADD">
 			<Anchors>
-				<Anchor point="TOPLEFT">	
+				<Anchor point="TOPLEFT">
 					<Offset>
 						<AbsDimension x="0" y="1"/>
 					</Offset>
 				</Anchor>
-				<Anchor point="BOTTOMRIGHT">	
+				<Anchor point="BOTTOMRIGHT">
 					<Offset>
 						<AbsDimension x="0" y="1"/>
 					</Offset>
@@ -209,12 +209,12 @@
 			<Layer level="BACKGROUND">
 				<Texture name="$parentBackground" parentKey="Background" file="Interface\QuestFrame\UI-QuestLogTitleHighlight">
 					<Anchors>
-						<Anchor point="TOPLEFT">	
+						<Anchor point="TOPLEFT">
 							<Offset>
 								<AbsDimension x="0" y="1"/>
 							</Offset>
 						</Anchor>
-						<Anchor point="BOTTOMRIGHT">	
+						<Anchor point="BOTTOMRIGHT">
 							<Offset>
 								<AbsDimension x="0" y="1"/>
 							</Offset>
@@ -250,7 +250,7 @@
 			</Layer>
 		</Layers>
 	</Button>
-	
+
 	<EditBox name="TellMeWhen_TimeEditBoxTemplate" inherits="TellMeWhen_InputBoxTemplate" virtual="true">
 		<Size>
 			<AbsDimension x="60" y="15"/>
@@ -294,7 +294,7 @@
 	</EditBox>
 
 	<Slider name="TellMeWhen_AlphaSliderTemplate" inherits="OptionsSliderTemplate" minvalue="0" maxvalue="100" valuestep="1" virtual="true">
-		<Size x="160" y="17"/>
+		<Size x="175" y="17"/>
 		<Layers>
 			<Layer level="ARTWORK">
 				<FontString name="$parentVal" parentKey="val" inherits="GameFontHighlightSmall" text="HIGH">
@@ -342,7 +342,7 @@
 		</Scripts>
 	</Slider>
 
-	<!-- 
+	<!--
 	<Button name="TellMeWhen_ColorModeButtonTemplate" virtual="true">
 		<Backdrop bgFile="Interface\AddOns\TellMeWhen_Options\Textures\AlphaTile" tile="true">
 			<TileSize>
@@ -388,7 +388,7 @@
 		</HighlightTexture>
 	</Button>
  -->
-	
+
 	<Button name="TellMeWhen_ConditionEditorRuneCheckTemplate" virtual="true">
 		<Size>
 			<AbsDimension x="35" y="29" />
@@ -857,8 +857,8 @@
 
 				</Frames>
 			</Frame>
-			
-			
+
+
 			<CheckButton name="$parentAnd" inherits="TellMeWhen_CheckTemplate" parentKey="And">
 				<Size x="18" y="18"/>
 				<!-- <Anchors>
@@ -900,8 +900,8 @@
 					</OnClick>
 				</Scripts>
 			</CheckButton>
-				
-			
+
+
 			<Button name="$parentUp" parentKey="Up">
 				<Size>
 					<AbsDimension x="15" y="15" />
@@ -1192,12 +1192,12 @@
 		<HighlightFont style="GameFontHighlight"/>
 		<HighlightTexture file="Interface\QuestFrame\UI-QuestLogTitleHighlight" alphaMode="ADD">
 			<Anchors>
-				<Anchor point="TOPLEFT">	
+				<Anchor point="TOPLEFT">
 					<Offset>
 						<AbsDimension x="0" y="1"/>
 					</Offset>
 				</Anchor>
-				<Anchor point="BOTTOMRIGHT">	
+				<Anchor point="BOTTOMRIGHT">
 					<Offset>
 						<AbsDimension x="0" y="1"/>
 					</Offset>
@@ -1244,7 +1244,7 @@
 			</Layer>
 		</Layers>
 	</Button>
-	
+
 	<Button name="TellMeWhen_EventSelectButton" virtual="true" >
 		<Size>
 			<AbsDimension y="30"/>
@@ -1274,12 +1274,12 @@
 		<HighlightFont style="GameFontHighlight"/>
 		<HighlightTexture file="Interface\QuestFrame\UI-QuestLogTitleHighlight" alphaMode="ADD">
 			<Anchors>
-				<Anchor point="TOPLEFT">	
+				<Anchor point="TOPLEFT">
 					<Offset>
 						<AbsDimension x="0" y="1"/>
 					</Offset>
 				</Anchor>
-				<Anchor point="BOTTOMRIGHT">	
+				<Anchor point="BOTTOMRIGHT">
 					<Offset>
 						<AbsDimension x="0" y="1"/>
 					</Offset>
@@ -1293,7 +1293,7 @@
 				<Scripts>
 					<OnClick>
 						local groupID, iconID = TMW.CI.g, TMW.CI.i
-						
+
 						local setting = TMW.db.profile.Groups[groupID].Icons[iconID][self:GetParent().setting] or ""
 						local sound
 						if strfind(setting, "%.[^\\]+$") then
@@ -1343,7 +1343,7 @@
 			</Layer>
 		</Layers>
 	</Button>
-	
+
 	<!-- END TEMPLATES -->
 
 	<Button name="TellMeWhen_IconDragger" hidden="true" enableMouse="false" frameStrata="HIGH">
@@ -1497,7 +1497,7 @@
 												</Anchor>
 											</Anchors>
 										</FontString>
-										
+
 										<FontString name="$parentInfoText" parentKey="infotext" inherits="GameFontHighlight">
 											<Size x="165" />
 											<Anchors>
@@ -1523,7 +1523,7 @@
 									<Layer level="ARTWORK">
 										<Texture name="$parenttexture" parentKey="texture" file="Interface\TargetingFrame\UI-StatusBar"/>
 									</Layer>
-									
+
 									<Layer level="OVERLAY">
 										<FontString name="$parentText" parentKey="text" inherits="GameFontHighlight">
 											<Anchors>
@@ -1596,7 +1596,7 @@
 							</OnLoad>
 						</Scripts>
 					</Frame>
-				
+
 					<Frame name="$parentType" inherits="UIDropDownMenuTemplate" parentKey="Type">
 						<Anchors>
 							<Anchor point="TOPLEFT" relativeTo="$parent" relativePoint="TOPLEFT">
@@ -1873,7 +1873,7 @@
 					<CheckButton name="$parentShowTimer" inherits="TellMeWhen_CheckTemplate" parentKey="ShowTimer">
 						<Anchors>
 							<Anchor point="TOPLEFT" relativeTo="$parentUnit" relativePoint="BOTTOMLEFT">
-								<Offset x="-5" y="-4" />
+								<Offset x="-5" y="-5" />
 							</Anchor>
 						</Anchors>
 						<Scripts>
@@ -1899,7 +1899,7 @@
 					<CheckButton name="$parentShowTText" inherits="TellMeWhen_CheckTemplate" parentKey="ShowTimerText">
 						<Anchors>
 							<Anchor point="TOP" relativeTo="$parentShowTimer" relativePoint="BOTTOM">
-								<Offset x="0" y="3" />
+								<Offset x="0" y="4" />
 							</Anchor>
 						</Anchors>
 						<Scripts>
@@ -1928,7 +1928,7 @@
 					<CheckButton name="$parentOnlyMine" inherits="TellMeWhen_CheckTemplate" parentKey="OnlyMine">
 						<Anchors>
 							<Anchor point="TOP" relativeTo="$parentShowTText" relativePoint="BOTTOM">
-								<Offset x="0" y="3" />
+								<Offset x="0" y="4" />
 							</Anchor>
 						</Anchors>
 						<Scripts>
@@ -2049,12 +2049,12 @@
 							</OnClick>
 						</Scripts>
 					</CheckButton>
-				
-					
+
+
 					<CheckButton name="$parentRangeCheck" inherits="TellMeWhen_CheckTemplate" parentKey="RangeCheck">
 						<Anchors>
 							<Anchor point="TOP" relativeTo="$parentOnlyMine" relativePoint="BOTTOM">
-								<Offset x="0" y="3" />
+								<Offset x="0" y="4" />
 							</Anchor>
 						</Anchors>
 						<Scripts>
@@ -2075,7 +2075,7 @@
 					<CheckButton name="$parentManaCheck" inherits="TellMeWhen_CheckTemplate" parentKey="ManaCheck">
 						<Anchors>
 							<Anchor point="TOPLEFT" relativeTo="$parentRangeCheck" relativePoint="BOTTOMLEFT">
-								<Offset x="0" y="3" />
+								<Offset x="0" y="4" />
 							</Anchor>
 						</Anchors>
 						<Scripts>
@@ -2096,7 +2096,7 @@
 					<CheckButton name="$parentCooldownCheck" inherits="TellMeWhen_CheckTemplate" parentKey="CooldownCheck">
 						<Anchors>
 							<Anchor point="TOPLEFT" relativeTo="$parentManaCheck" relativePoint="BOTTOMLEFT">
-								<Offset x="0" y="3" />
+								<Offset x="0" y="4" />
 							</Anchor>
 						</Anchors>
 						<Scripts>
@@ -2134,7 +2134,7 @@
 					<CheckButton name="$parentIgnoreRunes" inherits="TellMeWhen_CheckTemplate" parentKey="IgnoreRunes">
 						<Anchors>
 							<Anchor point="TOPLEFT" relativeTo="$parentManaCheck" relativePoint="BOTTOMLEFT">
-								<Offset x="0" y="3" />
+								<Offset x="0" y="4" />
 							</Anchor>
 						</Anchors>
 						<Scripts>
@@ -2155,7 +2155,7 @@
 					<CheckButton name="$parentOnlyInBags" inherits="TellMeWhen_CheckTemplate" parentKey="OnlyInBags">
 						<Anchors>
 							<Anchor point="TOPLEFT" relativeTo="$parentRangeCheck" relativePoint="BOTTOMLEFT">
-								<Offset x="0" y="3" />
+								<Offset x="0" y="4" />
 							</Anchor>
 						</Anchors>
 						<Scripts>
@@ -2174,7 +2174,7 @@
 							</OnClick>
 						</Scripts>
 					</CheckButton>
-					
+
 					<Frame name="$parentTypeChecks" parentKey="TypeChecks">
 						<Size x="140" y="100"/>
 						<Anchors>
@@ -2204,21 +2204,21 @@
 							<CheckButton name="$parent2" inherits="TellMeWhen_RadioCheckTemplate" parentKey="Radio2" id="2">
 								<Anchors>
 									<Anchor point="TOP" relativeTo="$parent1" relativePoint="BOTTOM">
-										<Offset x="0" y="4" />
+										<Offset x="0" y="5" />
 									</Anchor>
 								</Anchors>
 							</CheckButton>
 							<CheckButton name="$parent3" inherits="TellMeWhen_RadioCheckTemplate" parentKey="Radio3" id="3">
 								<Anchors>
 									<Anchor point="TOP" relativeTo="$parent2" relativePoint="BOTTOM">
-										<Offset x="0" y="4" />
+										<Offset x="0" y="5" />
 									</Anchor>
 								</Anchors>
 							</CheckButton>
 							<CheckButton name="$parent4" inherits="TellMeWhen_RadioCheckTemplate" parentKey="Radio4" id="4">
 								<Anchors>
 									<Anchor point="TOP" relativeTo="$parent3" relativePoint="BOTTOM">
-										<Offset x="0" y="4" />
+										<Offset x="0" y="5" />
 									</Anchor>
 								</Anchors>
 							</CheckButton>
@@ -2243,7 +2243,7 @@
 							<OnShow>
 								local f = self:GetParent().WhenChecks
 								f:ClearAllPoints()
-								f:SetPoint("TOPLEFT", self, "BOTTOMLEFT", 0, 5)
+								f:SetPoint("TOPLEFT", self, "BOTTOMLEFT", 0, 7)
 							</OnShow>
 						</Scripts>
 					</Frame>
@@ -2251,7 +2251,7 @@
 						<Size x="140" y="90"/>
 						<Anchors>
 							<Anchor point="TOPLEFT" relativeTo="$parentTypeChecks" relativePoint="BOTTOMLEFT">
-								<Offset x="0" y="5" />
+								<Offset x="0" y="7" />
 							</Anchor>
 						</Anchors>
 						<Layers>
@@ -2276,14 +2276,14 @@
 							<CheckButton name="$parent2" inherits="TellMeWhen_RadioCheckTemplate" parentKey="Radio2" id="2">
 								<Anchors>
 									<Anchor point="TOP" relativeTo="$parent1" relativePoint="BOTTOM">
-										<Offset x="0" y="4" />
+										<Offset x="0" y="5" />
 									</Anchor>
 								</Anchors>
 							</CheckButton>
 							<CheckButton name="$parent3" inherits="TellMeWhen_RadioCheckTemplate" parentKey="Radio3" id="3">
 								<Anchors>
 									<Anchor point="TOP" relativeTo="$parent2" relativePoint="BOTTOM">
-										<Offset x="0" y="4" />
+										<Offset x="0" y="5" />
 									</Anchor>
 								</Anchors>
 							</CheckButton>
@@ -2701,7 +2701,7 @@
 					<Slider name="$parentAlpha" parentKey="Alpha" inherits="TellMeWhen_AlphaSliderTemplate" valuestep="1">
 						<Anchors>
 							<Anchor point="BOTTOMLEFT" relativeTo="$parent" relativePoint="BOTTOMLEFT">
-								<Offset x="110" y="50" />
+								<Offset x="18" y="44" />
 							</Anchor>
 						</Anchors>
 						<Scripts>
@@ -2728,33 +2728,26 @@
 							</OnLoad>
 						</Scripts>
 					</Slider>
-					<CheckButton name="$parentFakeHidden" parentKey="FakeHidden" inherits="TellMeWhen_CheckTemplate">
+					<Slider name="$parentConditionAlpha" parentKey="ConditionAlpha" inherits="TellMeWhen_AlphaSliderTemplate" valuestep="1">
 						<Anchors>
 							<Anchor point="LEFT" relativeTo="$parentUnAlpha" relativePoint="RIGHT">
-								<Offset x="10" y="0" />
+								<Offset x="17" y="0" />
 							</Anchor>
 						</Anchors>
 						<Scripts>
 							<OnLoad>
-								TMW:TT(self, "ICONALPHAPANEL_FAKEHIDDEN", "ICONALPHAPANEL_FAKEHIDDEN_DESC")
-								self.text:SetText(TMW.L["ICONALPHAPANEL_FAKEHIDDEN"])
-								self.text:SetWidth(100)
-								self.text:SetFontObject("GameFontHighlight")
+								self.setting = "ConditionAlpha"
+								self.text:SetText(TMW.L["CONDITIONALPHA"])
+								TMW:TT(self, "CONDITIONALPHA", "CONDITIONALPHA_DESC")
 							</OnLoad>
-							<OnClick>
-								local groupID, iconID = TMW.CI.g, TMW.CI.i
-								if TMW.db then
-									TMW.db.profile.Groups[groupID].Icons[iconID]["FakeHidden"] = not not self:GetChecked()
-									TMW.IE:ScheduleIconUpdate(groupID, iconID)
-								end
-							</OnClick>
 						</Scripts>
-					</CheckButton>
+					</Slider>
+					
 
 					<Frame name="$parentCopy" inherits="UIDropDownMenuTemplate" parentKey="Copy">
 						<Anchors>
 							<Anchor point="BOTTOMLEFT" relativeTo="$parent" relativePoint="BOTTOMLEFT">
-								<Offset x="153" y="6" />
+								<Offset x="153" y="5" />
 							</Anchor>
 						</Anchors>
 						<Scripts>
@@ -2842,7 +2835,7 @@
 							</OnClick>
 						</Scripts>
 					</CheckButton>
-					<CheckButton name="$parentCheckNext" inherits="TellMeWhen_CheckTemplate" parentKey="CheckNext">
+					<CheckButton name="$parentFakeHidden" parentKey="FakeHidden" inherits="TellMeWhen_CheckTemplate">
 						<Anchors>
 							<Anchor point="LEFT" relativeTo="$parentEnabled" relativePoint="RIGHT">
 								<Offset x="110" y="0" />
@@ -2850,8 +2843,31 @@
 						</Anchors>
 						<Scripts>
 							<OnLoad>
+								TMW:TT(self, "ICONALPHAPANEL_FAKEHIDDEN", "ICONALPHAPANEL_FAKEHIDDEN_DESC")
+								self.text:SetText(TMW.L["ICONALPHAPANEL_FAKEHIDDEN"])
+								self.text:SetWidth(140)
+								self.text:SetFontObject("GameFontHighlight")
+							</OnLoad>
+							<OnClick>
+								local groupID, iconID = TMW.CI.g, TMW.CI.i
+								if TMW.db then
+									TMW.db.profile.Groups[groupID].Icons[iconID]["FakeHidden"] = not not self:GetChecked()
+									TMW.IE:ScheduleIconUpdate(groupID, iconID)
+								end
+							</OnClick>
+						</Scripts>
+					</CheckButton>
+					<CheckButton name="$parentCheckNext" inherits="TellMeWhen_CheckTemplate" parentKey="CheckNext">
+						<Anchors>
+							<Anchors>
+								<Anchor point="CENTER" relativeTo="$parentEnabled"/>
+							</Anchors>
+						</Anchors>
+						<Scripts>
+							<OnLoad>
 								TMW:TT(self, "ICONMENU_CHECKNEXT", "ICONMENU_CHECKNEXT_DESC")
 								self.text:SetText(TMW.L["ICONMENU_CHECKNEXT"])
+								self.text:SetWidth(140)
 							</OnLoad>
 							<OnClick>
 								local groupID, iconID = TMW.CI.g, TMW.CI.i
@@ -2886,8 +2902,8 @@
 						</FontString>
 						<FontString name="$parentTransparencyHeader" parentKey="TransparencyHeader" inherits="GameFontNormal" justifyH="RIGHT">
 							<Anchors>
-								<Anchor point="RIGHT" relativeTo="$parentAlpha" relativePoint="LEFT">
-									<Offset x="-5" y="0" />
+								<Anchor point="BOTTOM" relativeTo="$parentUnAlpha" relativePoint="TOP">
+									<Offset x="0" y="15" />
 								</Anchor>
 							</Anchors>
 						</FontString>
@@ -3000,8 +3016,8 @@
 					<Anchor point="BOTTOMRIGHT" relativeTo="$parent" relativePoint="BOTTOMRIGHT"/>
 				</Anchors>
 				<Frames>
-				
-				
+
+
 					<Frame name="$parentEvents" parentKey="Events">
 						<Size x="200" y="280"/>
 						<Anchors>
@@ -3010,7 +3026,7 @@
 							</Anchor>
 						</Anchors>
 					<!-- 	<Frames>
-						
+
 						</Frames> -->
 						<Backdrop bgFile="Interface\DialogFrame\UI-DialogBox-Background-Dark" tile="true"/>
 						<Layers>
@@ -3026,9 +3042,9 @@
 						</Layers>
 						<Scripts>
 							<OnLoad>
-								
+
 								self.Header:SetText(TMW.L["SOUND_EVENTS"])
-								
+
 								local previous
 								for i=1, #TMW.SND.EventList do
 									local f = CreateFrame("Button", self:GetName().."Event"..i, self, "TellMeWhen_EventSelectButton", i)
@@ -3041,18 +3057,18 @@
 									TMW:TT(f, TMW.SND.EventList[i].text, TMW.SND.EventList[i].desc, 1, 1)
 									previous = f
 								end
-								
+
 								self[1]:SetPoint("TOPLEFT", self, "TOPLEFT", 0, 0)
 								self[1]:SetPoint("TOPRIGHT", self, "TOPRIGHT", 0, 0)
-								
+
 								self:SetHeight(#self*self[1]:GetHeight())
 								TMW.SND.Events = self
 								TMW.SND:SelectEvent(1)
 							</OnLoad>
 						</Scripts>
 					</Frame>
-					
-					
+
+
 					<Frame name="$parentSounds" parentKey="Sounds">
 						<Size x="320" y="266"/>
 						<Anchors>
@@ -3062,9 +3078,9 @@
 						</Anchors>
 						<Frames>
 							<Button name="$parentNone" inherits="TellMeWhen_SoundSelectButton" parentKey="None" id="0"/>
-							
-							
-							<Slider name="$parentScrollBar" inherits="MinimalScrollBarTemplate" parentKey="ScrollBar" defaultvalue="0">
+
+
+							<Slider name="$parentScrollBar" inherits="MinimalScrollBarTemplate" parentKey="ScrollBar">
 								<Size>
 									<AbsDimension x="17" y="0"/>
 								</Size>
@@ -3109,15 +3125,15 @@
 								self.Header:SetText(TMW.L["SOUND_SOUNDTOPLAY"])
 								local previous = self.None
 								TMW.SND[0] = previous
-								
+
 								previous:SetPoint("TOPLEFT", self, "TOPLEFT", 0, 0)
 								previous:SetPoint("TOPRIGHT", self, "TOPRIGHT", 0, 0)
-								
+
 								previous.Name:SetText(NONE)
 								previous.Play:Hide()
 								previous.soundfile = ""
 								previous.soundname = "None"
-								
+
 								for i=1, self:GetHeight()/self.None:GetHeight() do
 									local f = CreateFrame("Button", self:GetName().."Sound"..i, self, "TellMeWhen_SoundSelectButton", i)
 									self[i] = f
@@ -3130,8 +3146,8 @@
 							</OnLoad>
 						</Scripts>
 					</Frame>
-					
-					
+
+
 					<EditBox name="$parentCustom" parentKey="Custom" inherits="TellMeWhen_InputBoxTemplate">
 						<Size y="15"/>
 						<Anchors>
@@ -3168,12 +3184,12 @@
 						<Layers>
 							<Layer level="BACKGROUND">
 								<Texture name="$parentBackground" parentKey="Background" file="Interface\QuestFrame\UI-QuestLogTitleHighlight" hidden="true">
-									<Anchor point="TOPLEFT">	
+									<Anchor point="TOPLEFT">
 										<Offset>
 											<AbsDimension x="0" y="1"/>
 										</Offset>
 									</Anchor>
-									<Anchor point="BOTTOMRIGHT">	
+									<Anchor point="BOTTOMRIGHT">
 										<Offset>
 											<AbsDimension x="0" y="1"/>
 										</Offset>
@@ -3198,16 +3214,16 @@
 							<OnEditFocusLost>
 								EditBox_ClearHighlight(self)
 								local groupID, iconID = TMW.CI.g, TMW.CI.i
-								
+
 								local t = TMW:CleanString(self:GetText())
 								t = gsub(t, "/", "\\")
-								
+
 								if not strfind(t, "%.[^\\]+$") then
 									t = "None"
 								end
-									
+
 								self:SetText(t)
-								
+
 								if TMW.db and TMW.SND.currentEventSetting then
 									TMW.db.profile.Groups[groupID].Icons[iconID][TMW.SND.currentEventSetting] = t
 								end
@@ -3218,8 +3234,8 @@
 							</OnEditFocusLost>
 						</Scripts>
 					</EditBox>
-	
-	
+
+
 					<!-- <Frame name="$parentShowSound" inherits="TellMeWhen_SoundSelectFrame">
 						<Anchors>
 							<Anchor point="TOPLEFT" relativeTo="$parent" relativePoint="TOPLEFT">
@@ -3254,7 +3270,7 @@
 					<OnLoad>
 						self:RegisterForDrag("LeftButton")
 						self:Hide()
-						
+
 						for k, v in pairs(self) do
 							if k ~= 0 then
 								TMW.SND[k] = v
@@ -3265,7 +3281,7 @@
 					<OnDragStop> TellMeWhen_IconEditor:StopMovingOrSizing() </OnDragStop>
 				</Scripts>
 			</Frame>
-			<!-- 
+			<!--
 			<Frame name="$parentASD" hidden="true" parentKey="ASD">
 				<Anchors>
 					<Anchor point="TOPLEFT" relativeTo="$parent" relativePoint="TOPLEFT"/>

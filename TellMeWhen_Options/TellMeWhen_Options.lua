@@ -1115,7 +1115,7 @@ local set2 = {
 	cast = "BuffShowWhen",
 	meta = nil,
 }
-local checks = { --1=check box, 2=editbox, 3=slider(x100), 4=custom, table=subkeys are settings
+local checks = { --1=check box, 2=editbox, 333=slider(x100), 4=custom, table=subkeys are settings
 	Name = 2,
 	RangeCheck = 1,
 	ManaCheck = 1,
@@ -1154,6 +1154,7 @@ local checks = { --1=check box, 2=editbox, 3=slider(x100), 4=custom, table=subke
 	StackMaxEnabled = 1,
 	Alpha = 3,
 	UnAlpha = 3,
+	ConditionAlpha = 3,
 	FakeHidden = 1,
 }
 local tabs = {
@@ -1273,7 +1274,7 @@ function IE:SetupRadios()
 					frame:SetPoint(p, rt, rp, x, 10)
 				elseif frame:GetID() > 1 then
 					local p, rt, rp, x, y = frame:GetPoint(1)
-					frame:SetPoint(p, rt, rp, x, 4)
+					frame:SetPoint(p, rt, rp, x, 5)
 				end
 				if info then
 					frame:Show()
@@ -1491,7 +1492,7 @@ function IE:Load(isRefresh)
 		end
 		IE.previousType = TMW.CI.t
 	end
-	
+
 	local groupID, iconID = TMW.CI.g, TMW.CI.i
 
 	IE.Main.Name:ClearFocus()
@@ -1927,7 +1928,7 @@ function IE:GetRealNames()
 		end
 	end
 	]]
-	
+
 	local tbl
 	local BEbackup = TMW.BE
 	TMW.BE = TMW.OldBE -- the level of hackyness here is sickening. Note that OldBE does not contain the enrage equiv (intended so we dont flood the tooltip)
@@ -1938,7 +1939,7 @@ function IE:GetRealNames()
 		tbl = TMW:GetSpellNames(nil, text, false)
 	end
 	TMW.BE = BEbackup -- unhack
-	
+
 	local str = ""
 	for k, v in pairs(tbl) do
 		local name, _, texture = GetSpellInfo(v)
@@ -2021,7 +2022,7 @@ end
 
 function SND:SetSoundsOffset(offs)
 	SND.offs = offs
-	
+
 	for i=1, #SND.Sounds do
 		local f = SND.Sounds[i]
 		if f then
@@ -2045,7 +2046,7 @@ function SND:SetSoundsOffset(offs)
 			f.listID = n
 		end
 	end
-	
+
 	if max(0, #SND.List - #SND.Sounds) == 0 then
 		SND.Sounds.ScrollBar:Hide()
 	else
@@ -2055,7 +2056,7 @@ end
 
 function SND:SelectEvent(id)
 	local groupID, iconID = TMW.CI.g, TMW.CI.i
-	
+
 	SND.currentEventID = id
 	SND.currentEventSetting = SND.Events[id].setting
 
@@ -2069,27 +2070,27 @@ function SND:SelectEvent(id)
 	eventFrame.selected = 1
 	eventFrame:LockHighlight()
 	eventFrame:GetHighlightTexture():SetVertexColor(NORMAL_FONT_COLOR.r, NORMAL_FONT_COLOR.g, NORMAL_FONT_COLOR.b, 1)
-	
+
 	if groupID and iconID then
 		SND:SelectSound(db.profile.Groups[groupID].Icons[iconID][eventFrame.setting])
 	end
-	
+
 end
 
 function SND:SelectSound(name)
 	local soundFrame, listID
-	
+
 	for k, listname in ipairs(SND.List) do
 		if listname == name then
 			listID = k
 			break
 		end
 	end
-	
+
 	if listID and (listID > SND.Sounds[#SND.Sounds].listID or listID < SND.Sounds[1].listID) then
 		SND.Sounds.ScrollBar:SetValue(listID)
 	end
-	
+
 	for i=1, #SND.Sounds do
 		local f = SND.Sounds[i]
 		if f.soundname == name then
@@ -2099,7 +2100,7 @@ function SND:SelectSound(name)
 		f:UnlockHighlight()
 		f:GetHighlightTexture():SetVertexColor(1, 1, 1, 1)
 	end
-	
+
 	SND.selectedListID = 0
 	SND.Custom.selected = nil
 	SND.Custom.Background:Hide()
@@ -2107,7 +2108,7 @@ function SND:SelectSound(name)
 	SND.Custom:SetText("")
 	SND.Sounds.None:UnlockHighlight()
 	SND.Sounds.None:GetHighlightTexture():SetVertexColor(1, 1, 1, 1)
-	
+
 	if name == "None" then
 		SND.selectedListID = -1 -- lame
 		SND.Sounds.None:LockHighlight()
@@ -2164,6 +2165,9 @@ function SND:SetTabText()
 	PanelTemplates_TabResize(IE.SoundTab, 0, nil, nil, 600)
 end
 
+function SND:OnInitialize()
+	SND.Sounds.ScrollBar:SetValue(0)
+end
 
 -- ----------------------
 -- SUGGESTER
@@ -2189,7 +2193,7 @@ function SUG:ADDON_LOADED(event, addon)
 		TMWOptDB.ItemCache = TMWOptDB.ItemCache or {}
 		TMWOptDB.AuraCache = TMWOptDB.AuraCache or {}
 		TMWOptDB.ClassSpellCache = TMWOptDB.ClassSpellCache or {}
-		
+
 		for k, v in pairs(TMWOptDB) do
 			SUG[k] = v
 		end
@@ -2203,11 +2207,11 @@ function SUG:ADDON_LOADED(event, addon)
 			TMW.AuraCache[k] = nil
 		end
 		TMW.AuraCache = SUG.AuraCache -- make new inserts go into the optionDB and this table
-		
-		
+
+
 		SUG.ActionCache = {} -- dont save this, it should be a list of things that are CURRENTLY on THIS CHARACTER'S action bars
 		SUG.RequestedFrom = {}
-		
+
 		SUG.ClassSpellCache[pclass] = SUG.ClassSpellCache[pclass] or {}
 		local _, _, offs, numspells = GetSpellTabInfo(GetNumSpellTabs())
 		local ClassSpellCache = SUG.ClassSpellCache[pclass]
@@ -2218,7 +2222,7 @@ function SUG:ADDON_LOADED(event, addon)
 			end
 		end
 		SUG:BuildClassSpellLookup()
-		
+
 		SUG:RegisterComm("TMWSUG")
 		if RegisterAddonMessagePrefix then
 			RegisterAddonMessagePrefix("TMWSUG") -- new in WoW 4.1
@@ -2227,7 +2231,7 @@ function SUG:ADDON_LOADED(event, addon)
 			SUG:SendCommMessage("TMWSUG", SUG:Serialize("RCSL"), "GUILD")
 		end
 		SUG:PLAYER_ENTERING_WORLD()
-		
+
 		if TMWOptDB.IncompleteCache or not TMWOptDB.WoWVersion or TMWOptDB.WoWVersion < clientVersion then
 			TMWOptDB.IncompleteCache = true
 
@@ -2355,20 +2359,20 @@ function SUG:PLAYER_ENTERING_WORLD()
 	local NumRealRaidMembers = GetRealNumRaidMembers()
 	local NumRealPartyMembers = GetRealNumPartyMembers()
 	local NumRaidMembers = GetNumRaidMembers()
-	
+
 	if (NumRealRaidMembers > 0) and (NumRealRaidMembers ~= (SUG.OldNumRealRaidMembers or 0)) then
 		SUG.OldNumRealRaidMembers = NumRealRaidMembers
 		SUG:SendCommMessage("TMWSUG", SUG:Serialize("RCSL"), "RAID")
-		
+
 	elseif (NumRealRaidMembers == 0) and (NumRealPartyMembers > 0) and (NumRealPartyMembers ~= (SUG.OldNumRealPartyMembers or 0)) then
 		SUG.OldNumRealPartyMembers = NumRealPartyMembers
 		SUG:SendCommMessage("TMWSUG", SUG:Serialize("RCSL"), "PARTY")
-		
+
 	elseif UnitInBattleground("player") and (NumRaidMembers ~= (SUG.OldNumRaidMembers or 0)) then
 		SUG.OldNumRaidMembers = NumRaidMembers
 		SUG:SendCommMessage("TMWSUG", SUG:Serialize("RCSL"), "BATTLEGROUND")
 	end
-	
+
 end
 SUG:RegisterEvent("PLAYER_ENTERING_WORLD")
 
@@ -2438,7 +2442,7 @@ function SUG.Sorter(a, b)
 			8a) SpellID if names are identical
 			8b) Alphabetical if names are different
 	]]
-	
+
 	local t = TMW.EquivIDLookup
 	local haveA, haveB = t[a], t[b]
 	if haveA or haveB then
@@ -2464,14 +2468,14 @@ function SUG.Sorter(a, b)
 		if (haveA and not haveB) or (haveB and not haveA) then
 			return haveA
 		end
-		
+
 		--all player spells (any class)
 		t = SUG.ClassSpellLookup
 		local haveA, haveB = t[a], t[b]
 		if (haveA and not haveB) or (haveB and not haveA) then
 			return haveA
 		elseif not (haveA or haveB) then
-		
+
 			t = SUG.AuraCache
 			local haveA, haveB = t[a], t[b] -- Auras
 			if haveA and haveB and haveA ~= haveB then -- if both are auras (kind doesnt matter) AND if they are different aura types, then compare the types
@@ -2481,15 +2485,15 @@ function SUG.Sorter(a, b)
 			end
 			--if they both were auras, and they were auras of the same type (player, NPC) then procede on to the rest of the code to sort them by name/id
 		end
-		
+
 		local haveA, haveB = miscprioritize[a], miscprioritize[b] -- miscprioritize
 		if (haveA and not haveB) or (haveB and not haveA) then
 			return haveA
 		end
 	end
-	
-	
-	
+
+
+
 
 	if inputType == "number" then
 		--sort by id
@@ -2772,7 +2776,7 @@ function SUG:CacheItems()
 			local id = GetContainerItemID(container, slot)
 			if id then
 				SUG.ItemCache[id] = strlower(GetItemInfo(id))
-		--		local 
+		--		local
 			end
 		end
 	end
@@ -2780,7 +2784,7 @@ function SUG:CacheItems()
 		local id = GetInventoryItemID("player", slot)
 		if id then
 			SUG.ItemCache[id] = strlower(GetItemInfo(id))
-	--		local 
+	--		local
 		end
 	end
 end

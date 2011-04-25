@@ -18,6 +18,7 @@ local print = TMW.print
 local RelevantSettings = {
 	Name = true,
 	FakeHidden = true,
+	ConditionAlpha = true,
 }
 
 local Type = TMW:RegisterIconType("conditionicon", RelevantSettings)
@@ -33,10 +34,11 @@ end
 local function ConditionIcon_OnUpdate(icon, time)
 	if icon.UpdateTimer <= time - UPD_INTV then
 		icon.UpdateTimer = time
-		local CndtCheck = icon.CndtCheck 
-		if not (CndtCheck and CndtCheck()) then
-			icon:SetAlpha(1)
+		local CndtCheck = icon.CndtCheck
+		if CndtCheck and CndtCheck() then
+			return
 		end
+		icon:SetAlpha(icon.CndtFailed and icon.ConditionAlpha or 1)
 	end
 end
 
@@ -46,7 +48,7 @@ Type.AllowNoName = true
 Type.HideBars = true
 function Type:Setup(icon, groupID, iconID)
 	icon.NameFirst = TMW:GetSpellNames(icon, icon.Name, 1)
-	
+
 	if icon.Name == "" then
 		icon:SetTexture("Interface\\Icons\\INV_Misc_QuestionMark")
 	elseif GetSpellTexture(icon.NameFirst) then

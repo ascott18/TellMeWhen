@@ -57,38 +57,24 @@ local function Totem_OnUpdate(icon, time)
 	if icon.UpdateTimer <= time - UPD_INTV then
 		icon.UpdateTimer = time
 		local CndtCheck = icon.CndtCheck if CndtCheck and CndtCheck() then return end
-		
+
 		local Slots, NameNameDictionary, NameFirst = icon.Slots, icon.NameNameDictionary, icon.NameFirst
 		for iSlot = 1, #Slots do -- be careful here. slots that are explicitly disabled by the user are set false. slots that are disabled internally are set nil.
 			if Slots[iSlot] then
 				local _, totemName, start, duration, totemIcon = GetTotemInfo(iSlot)
 				if start ~= 0 and totemName and ((NameFirst == "") or NameNameDictionary[strlower(totemName)]) then
-					local d = duration - (time - start)
 					local Alpha = icon.Alpha
-					if (icon.DurationMinEnabled and icon.DurationMin > d) or (icon.DurationMaxEnabled and d > icon.DurationMax) then
-						icon:SetAlpha(0)
-						return
-					end
-					
-					local color
-					if Alpha ~= 0 and icon.UnAlpha ~= 0 then
-						color = pr
-					else
-						color = 1
-					end
+
+					local color = icon.UnAlpha ~= 0 and pr or 1
 
 					icon:SetInfo(Alpha, color, totemIcon, start, duration)
 					return
 				end
 			end
 		end
-		
-		local color
-		if icon.Alpha ~= 0 then
-			color = ab
-		else
-			color = 1
-		end
+
+		local color = icon.Alpha ~= 0 and ab or 1
+
 		icon:SetInfo(icon.UnAlpha, color, icon.FirstTexture, 0, 0)
 
 	end
@@ -125,7 +111,7 @@ function Type:Setup(icon, groupID, iconID)
 	end
 	icon.ShowPBar = false
 	icon:SetReverse(true)
-	
+
 	icon.FirstTexture = icon.NameName and GetSpellTexture(icon.NameName)
 
 	if pclass == "DRUID" then

@@ -1,8 +1,15 @@
 ===v4.1.0===
  * Implemented sounds! It should be mostly functional, but if you find anything that is breaking or not working how it probably should, open a ticket.
  * Reduced CPU usage by about 20%.
- * Fixed the alpha on unusable reactive icons
- * Fixed a bug where icons that were set to fake hidden would sometimes still show after leaving config
+ * Alpha can noe be customized for when conditions fail, or for when duration/stack requirements are not met.
+ * New conditions:
+ ** Old Buff/Debuff conditions changed to Buff/Debuff Stacks
+ ** Buff duration 
+ ** Debuff duration
+ * Fixes since the first revision of this version:
+ ** Fixed the alpha on unusable reactive icons
+ ** Fixed a bug where icons that were set to fake hidden would sometimes still show after leaving config
+ ** Fixed stack text on buff icons
 
  ===v4.0.4===
  * Maybe fixed a really rare frame level bug with cooldowns?
@@ -591,10 +598,10 @@ Use the following groups (capitalization matters just like with everything else)
     * Cooldown icons should now be more responsive
 
 ===v1.1.1===
- *   Icons for reactive abilities will no longer show when the abilities are still on cooldown.  
+ *   Icons for reactive abilities will no longer show when the abilities are still on cooldown.
 
 ===v1.1===
- *   Added cooldown and buff/debuff timers.  Compatible with OmniCC.  
+ *   Added cooldown and buff/debuff timers.  Compatible with OmniCC.
 
 ===v1.0.1===
  *   Updated for WoW 3.0

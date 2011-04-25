@@ -56,7 +56,7 @@ local function Cast_OnUpdate(icon, time)
 	if icon.UpdateTimer <= time - UPD_INTV then
 		icon.UpdateTimer = time
 		local CndtCheck = icon.CndtCheck if CndtCheck and CndtCheck() then return end
-		
+
 		local NameFirst, NameNameDictionary, Interruptible = icon.NameFirst, icon.NameNameDictionary, icon.Interruptible
 		for _, unit in ipairs(icon.Units) do
 			if UnitExists(unit) then
@@ -68,22 +68,12 @@ local function Cast_OnUpdate(icon, time)
 				end
 
 				if name and not (notInterruptible and Interruptible) and (NameFirst == "" or NameNameDictionary[strlower(name)]) then
-				
-					local d = endTime - time
-					if (icon.DurationMinEnabled and icon.DurationMin > d) or (icon.DurationMaxEnabled and d > icon.DurationMax) then
-						icon:SetAlpha(0)
-						return
-					end
 
-					local color
-					if icon.UnAlpha ~= 0 then
-						color = pr
-					else
-						color = 1
-					end
+					local color = icon.UnAlpha ~= 0 and pr or 1
+
 					start, endTime = start/1000, endTime/1000
 					local duration = endTime - start
-					
+
 					icon:SetInfo(icon.Alpha, color, iconTexture, start, duration, nil, nil, reverse)
 
 					return
@@ -91,12 +81,8 @@ local function Cast_OnUpdate(icon, time)
 			end
 		end
 
-		local color
-		if icon.Alpha ~= 0 then
-			color = ab
-		else
-			color = 1
-		end
+		local color = icon.Alpha ~= 0 and ab or 1
+
 		icon:SetInfo(icon.UnAlpha, color, nil, 0, 0)
 	end
 end
@@ -109,7 +95,7 @@ function Type:Setup(icon, groupID, iconID)
 --	icon.NameDictionary = TMW:GetSpellNames(icon, icon.Name, nil, nil, 1)
 	icon.NameNameDictionary = TMW:GetSpellNames(icon, icon.Name, nil, 1, 1)
 	icon.Units = TMW:GetUnits(icon, icon.Unit)
-	
+
 	if icon.Name == "" then
 		icon:SetTexture("Interface\\Icons\\Temp")
 	elseif GetSpellTexture(icon.NameFirst) then

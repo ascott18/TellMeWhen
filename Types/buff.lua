@@ -70,7 +70,7 @@ local function Buff_OnUpdate(icon, time)
 
 		local Units, NameArray, NameNameArray, NameDictionary, Filter, Filterh = icon.Units, icon.NameArray, icon.NameNameArray, icon.NameDictionary, icon.Filter, icon.Filterh
 		local NAL = #NameArray
-		
+
 		for u = 1, #Units do
 			local unit = Units[u]
 			if UnitExists(unit) then
@@ -142,39 +142,17 @@ local function Buff_OnUpdate(icon, time)
 					end
 				end
 				if buffName then
-					if (icon.StackMinEnabled and icon.StackMin > count) or (icon.StackMaxEnabled and count > icon.StackMax) then
-						icon:SetAlpha(0)
-						return
-					end
 
-					if icon.DurationEnabled then
-						local d = expirationTime == 0 and 0 or expirationTime - time
-						if (icon.DurationMinEnabled and icon.DurationMin > d) or (icon.DurationMaxEnabled and d > icon.DurationMax) then
-							icon:SetAlpha(0)
-							return
-						end
-					end
-					
-					local color
-					if icon.UnAlpha ~= 0 then
-						color = pr
-					else
-						color = 1
-					end
-					
-					icon:SetInfo(icon.Alpha, color, iconTexture, expirationTime - duration, duration, nil, buffName, count)
-					
+					local color = icon.UnAlpha ~= 0 and pr or 1
+
+					icon:SetInfo(icon.Alpha, color, iconTexture, expirationTime - duration, duration, nil, buffName, nil, count)
+
 					return
 				end
 			end
 		end
 
-		local color
-		if icon.Alpha ~= 0 then -- and UnAlpha ~= 0  (not needed, it has to not be 0 or it would have returned earlier)
-			color = ab
-		else
-			color = 1
-		end
+		local color = icon.Alpha ~= 0 and ab or 1
 
 		icon:SetInfo(icon.UnAlpha, color, icon.FirstTexture, 0, 0, nil, icon.NameFirst)
 

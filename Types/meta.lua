@@ -44,7 +44,7 @@ local function Meta_OnUpdate(icon, time)
 				ic:OnUpdate(time)
 				local alpha = ic.FakeAlpha
 				if alpha > 0 and ic.__shown then
-				
+
 					if LBF and ic ~= icon.__previcon  then -- i dont like the way that ButtonFacade handles this (inefficient), so i'll do it myself
 						local icnt = ic.__normaltex
 						local iconnt = icon.__normaltex
@@ -53,14 +53,14 @@ local function Meta_OnUpdate(icon, time)
 						end
 						icon.__previcon = ic
 					end
-					
+
 					icon.ShowCBar, icon.ShowPBar = ic.ShowCBar, ic.ShowPBar
 					icon.InvertBars = ic.InvertBars
 					icon.ShowTimer = ic.ShowTimer
 					icon.cooldown.noCooldownCount = ic.cooldown.noCooldownCount
-					
+
 					icon:SetInfo(alpha, ic.__vrtxcolor, ic.__tex, ic.__start, ic.__duration, ic.__checkGCD, ic.__pbName, ic.__reverse, ic.__count)
-					
+
 					AlreadyChecked[ic] = true
 					return
 				end

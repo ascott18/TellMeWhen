@@ -94,11 +94,7 @@ local function WpnEnchant_OnUpdate(icon, time)
 		local has, expiration = select(icon.SelectIndex, GetWeaponEnchantInfo())
 		if has and icon.CorrectEnchant then
 			expiration = expiration/1000
-			
-			if (icon.DurationMinEnabled and icon.DurationMin > expiration) or (icon.DurationMaxEnabled and expiration > icon.DurationMax) then
-				icon:SetAlpha(0)
-				return
-			end
+
 			local duration
 			local EnchantName = icon.EnchantName
 			if EnchantName then
@@ -114,22 +110,13 @@ local function WpnEnchant_OnUpdate(icon, time)
 			end
 			local start = floor(time - duration + expiration)
 
-			local color
-			if icon.UnAlpha ~= 0 then
-				color = pr
-			else
-				color = 1
-			end
+			local color = icon.UnAlpha ~= 0 and pr or 1
+
 			icon:SetInfo(icon.Alpha, color, nil, start, duration)
 		else
-			
-			local color
-			if icon.Alpha ~= 0 then
-				color = ab
-			else
-				color = 1
-			end
-			
+
+			local color = icon.Alpha ~= 0 and ab or 1
+
 			icon:SetInfo(icon.UnAlpha, color, nil, 0, 0)
 		end
 	end
@@ -139,10 +126,10 @@ end
 local function WpnEnchant_OnEvent(icon, event, unit)
 	if unit == "player" then
 		local wpnTexture = GetInventoryItemTexture("player", icon.Slot)
-		
+
 		local t = wpnTexture or "Interface\\Icons\\INV_Misc_QuestionMark"
 		if t ~= icon.__tex then icon:SetTexture(t) end
-			
+
 		if not wpnTexture and icon.HideUnequipped then
 			icon:SetAlpha(0)
 			if icon.OnUpdate then
@@ -172,12 +159,12 @@ function Type:Setup(icon, groupID, iconID)
 	icon.ShowPBar = false
 
 	icon:SetTexture(GetInventoryItemTexture("player", icon.Slot) or "Interface\\Icons\\INV_Misc_QuestionMark")
-	
+
 	icon:SetReverse(true)
 
 	icon:SetScript("OnUpdate", WpnEnchant_OnUpdate)
 	icon:OnUpdate(TMW.time)
-	
+
 	icon:RegisterEvent("UNIT_INVENTORY_CHANGED")
 	icon:SetScript("OnEvent", WpnEnchant_OnEvent)
 	icon:OnEvent(nil, "player")

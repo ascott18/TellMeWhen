@@ -69,7 +69,7 @@ local function SpellCooldown_OnUpdate(icon, time)
 
 		local n, inrange, nomana, start, duration, isGCD = 1
 		local IgnoreRunes, RangeCheck, ManaCheck, NameArray, NameNameArray = icon.IgnoreRunes, icon.RangeCheck, icon.ManaCheck, icon.NameArray, icon.NameNameArray
-		
+
 		for i = 1, #NameArray do
 			local iName = NameArray[i]
 			n = i
@@ -94,7 +94,7 @@ local function SpellCooldown_OnUpdate(icon, time)
 				end
 			end
 		end
-		
+
 		local NameFirst = icon.NameFirst
 		if n > 1 then -- if there is more than 1 spell that was checked then we need to get these again for the first spell, otherwise reuse the values obtained above since they are just for the first one
 			start, duration = GetSpellCooldown(NameFirst)
@@ -113,11 +113,6 @@ local function SpellCooldown_OnUpdate(icon, time)
 			isGCD = OnGCD(duration)
 		end
 		if duration then
-			local d = duration - (time - start)
-			if (icon.DurationMinEnabled and icon.DurationMin > d) or (icon.DurationMaxEnabled and d > icon.DurationMax) then
-				icon:SetAlpha(0)
-				return
-			end
 
 			local alpha, color
 			if icon.Alpha ~= 0 then
@@ -179,14 +174,14 @@ local function ItemCooldown_OnUpdate(icon, time)
 				end
 				isGCD = OnGCD(duration)
 				if equipped and inrange == 1 and (duration == 0 or isGCD) then --usable
-					
+
 					icon:SetInfo(icon.Alpha, 1, GetItemIcon(iName) or "Interface\\Icons\\INV_Misc_QuestionMark", start, duration, true)
-					
+
 					return
 				end
 			end
 		end
-		
+
 		local NameFirst2
 		if OnlyInBags then
 			for i = 1, #NameArray do
@@ -194,7 +189,7 @@ local function ItemCooldown_OnUpdate(icon, time)
 				if (OnlyEquipped and IsEquippedItem(iName)) or (not OnlyEquipped and GetItemCount(iName) > 0) then
 					NameFirst2 = iName
 					break
-				end				
+				end
 			end
 			if not NameFirst2 then
 				icon:SetAlpha(0)
@@ -213,11 +208,11 @@ local function ItemCooldown_OnUpdate(icon, time)
 		end
 		if duration then
 
-			local d = duration - (time - start)
+			--[[local d = duration - (time - start)
 			if (icon.DurationMinEnabled and icon.DurationMin > d) or (icon.DurationMaxEnabled and d > icon.DurationMax) then
 				icon:SetAlpha(0)
 				return
-			end
+			end]]
 
 			local alpha, color
 			if icon.Alpha ~= 0 then
@@ -257,27 +252,27 @@ local function MultiStateCD_OnUpdate(icon, time)
 	if icon.UpdateTimer <= time - UPD_INTV then
 		icon.UpdateTimer = time
 		local CndtCheck = icon.CndtCheck if CndtCheck and CndtCheck() then return end
-		
+
 		local Slot = icon.Slot
 		local start, duration = GetActionCooldown(Slot)
 		if duration then
 
-			local d = duration - (time - start)
+			--[[local d = duration - (time - start)
 			if (icon.DurationMinEnabled and icon.DurationMin > d) or (icon.DurationMaxEnabled and d > icon.DurationMax) then
 				icon:SetAlpha(0)
 				return
-			end
+			end]]
 
 			local inrange, nomana = 1
-			
+
 			if icon.RangeCheck then
 				inrange = IsActionInRange(Slot, "target") or 1
 			end
 			if icon.ManaCheck then
 				_, nomana = IsUsableAction(Slot)
 			end
-			
-			
+
+
 			local alpha, color
 			if (duration == 0 or OnGCD(duration)) and inrange == 1 and not nomana then
 				alpha, color = icon.Alpha, 1
@@ -294,7 +289,7 @@ local function MultiStateCD_OnUpdate(icon, time)
 			else
 				alpha, color = icon.UnAlpha, 1
 			end
-			
+
 			icon:SetInfo(alpha, color, GetActionTexture(Slot) or "Interface\\Icons\\INV_Misc_QuestionMark", start, duration, true, icon.NameFirst)
 		end
 	end

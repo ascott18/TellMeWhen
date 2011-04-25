@@ -80,7 +80,7 @@ local function Reactive_OnUpdate(icon, time)
 		local n, inrange, nomana, start, duration, isGCD, CD, usable = 1
 		local NameArray, NameNameArray, RangeCheck, ManaCheck, CooldownCheck, IgnoreRunes, Usable =
 		 icon.NameArray, icon.NameNameArray, icon.RangeCheck, icon.ManaCheck, icon.CooldownCheck, icon.IgnoreRunes, icon.Usable
-		
+
 		for i = 1, #NameArray do
 			local iName = NameArray[i]
 			n = i
@@ -105,14 +105,14 @@ local function Reactive_OnUpdate(icon, time)
 				end
 				usable = Usable or usable
 				if usable and not CD and not nomana and inrange == 1 then --usable
-				
+
 					icon:SetInfo(icon.Alpha, 1, GetSpellTexture(iName), start, duration, true, iName)
 
 					return
 				end
 			end
 		end
-		
+
 		if n > 1 then -- if there is more than 1 spell that was checked then we need to get these again for the first spell, otherwise reuse the values obtained above since they are just for the first one
 			start, duration = GetSpellCooldown(icon.NameFirst)
 			if icon.IgnoreRunes then
@@ -130,11 +130,6 @@ local function Reactive_OnUpdate(icon, time)
 			isGCD = OnGCD(duration)
 		end
 		if duration then
-			local d = duration - (time - start)
-			if (icon.DurationMinEnabled and icon.DurationMin > d) or (icon.DurationMaxEnabled and d > icon.DurationMax) then
-				icon:SetAlpha(0)
-				return
-			end
 
 			local alpha, color
 			if icon.Alpha ~= 0 then
@@ -148,7 +143,7 @@ local function Reactive_OnUpdate(icon, time)
 			else
 				alpha, color = icon.UnAlpha, 1
 			end
-			
+
 			icon:SetInfo(alpha, color, icon.FirstTexture, start, duration, true, icon.NameFirst)
 
 			return

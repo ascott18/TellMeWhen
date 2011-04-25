@@ -68,7 +68,7 @@ test = function()
 	end
 	CNDT:ProcessConditions(icon)
 	icon:CndtCheck()
-	
+
 	local n = 0
 	for _ in pairs(CNDT.ConditionsByType) do
 		n = n + 1
@@ -168,7 +168,7 @@ function CNDT:COMBAT_RATING_UPDATE()
 	Env.Expertise = GetExpertise()
 	Env.MeleeCrit = GetCritChance()/100
 	Env.RangeCrit = GetRangedCritChance()/100
-	
+
 	local minCrit = GetSpellCritChance(2)
 	for i=3, MAX_SPELL_SCHOOLS do
 		minCrit = min(minCrit, GetSpellCritChance(i))
@@ -231,6 +231,15 @@ local function AuraStacks(unit, name, filter)
 	end
 end
 
+local function AuraDur(unit, name, filter)
+	local buffName, _, _, _, _, duration, expirationTime = UnitAura(unit, name, nil, filter)
+	if not buffName then
+		return 0
+	else
+		return expirationTime == 0 and 0 or expirationTime - TMW.time
+	end
+end
+
 Env = {
 	UnitHealth = UnitHealth,
 	UnitHealthMax = UnitHealthMax,
@@ -266,10 +275,11 @@ Env = {
 	IsEquippedItem = IsEquippedItem,
 	UnitCast = UnitCast,
 	AuraStacks = AuraStacks,
-	
+	AuraDur = AuraDur,
+
 	IsSpellOnCooldown = IsSpellOnCooldown,
 	IsItemOnCooldown = IsItemOnCooldown,
-	
+
 	ZoneType = 0,
 	NumPartyMembers = 0,
 	NumRaidMembers = 0,
@@ -507,8 +517,8 @@ CNDT.Types = {
 		tcoords = standardtcoords,
 		funcstr = [[GetComboPoints("player", c.Unit) c.Operator c.Level]],
 	},
-	
--------------------------------------stats	
+
+-------------------------------------stats
 	{ -- strength
 		text = _G["SPELL_STAT1_NAME"],
 		value = "STRENGTH",
@@ -581,7 +591,7 @@ CNDT.Types = {
 		funcstr = [[Mastery c.Operator c.Level]],
 		events = {"MASTERY_UPDATE"},
 	},
-	
+
 	{ -- melee AP
 		text = MELEE_ATTACK_POWER,
 		value = "MELEEAP",
@@ -635,7 +645,7 @@ CNDT.Types = {
 		funcstr = [[Expertise c.Operator c.Level]],
 		events = {"COMBAT_RATING_UPDATE"},
 	},
-	
+
 	{ -- ranged AP
 		text = RANGED_ATTACK_POWER,
 		value = "RANGEAP",
@@ -677,8 +687,8 @@ CNDT.Types = {
 		funcstr = [[RangeHaste c.Operator c.Level]],
 		events = {"UNIT_RANGEDDAMAGE"},
 	},
-	
-	
+
+
 	{ -- spell damage
 		text = STAT_SPELLDAMAGE,
 		value = "SPELLDMG",
@@ -759,7 +769,7 @@ CNDT.Types = {
 --///////////////////////////////////stats
 
 -------------------------------------icon functions
-	
+
 	{ -- icon shown
 		text = L["CONDITIONPANEL_ICON"],
 		tooltip = L["CONDITIONPANEL_ICON_DESC"],
@@ -817,27 +827,51 @@ CNDT.Types = {
 		tcoords = standardtcoords,
 		funcstr = [[c.False == IsItemOnCooldown(c.ItemID)]],
 	},
-	{ -- unit buff
-		text = L["ICONMENU_BUFF"],
-		value = "BUFF",
+	{ -- unit buff duration
+		text = L["ICONMENU_BUFF"] .. " - " .. L["DURATIONPANEL_TITLE"],
+		value = "BUFFDUR",
+		category = L["ICONFUNCTIONS"],
+		min = 0,
+		max = 600,
+		name = function(editbox) TMW:TT(editbox, L["ICONMENU_BUFF"] .. " - " .. L["DURATIONPANEL_TITLE"], "BUFFCNDT_DESC", 1, nil, 1) end,
+		texttable = setmetatable({[0] = "0 ("..L["ICONMENU_ABSENT"].."/"..L["INFINITE"]..")"}, {__index = function(tbl, k) return format(D_SECONDS, k) end}),
+		icon = "Interface\\Icons\\spell_nature_rejuvenation",
+		tcoords = standardtcoords,
+		funcstr = [[AuraDur(c.Unit, c.NameName, "HELPFUL") c.Operator c.Level]],
+	},
+	{ -- unit buff stacks
+		text = L["ICONMENU_BUFF"] .. " - " .. L["STACKSPANEL_TITLE"],
+		value = "BUFFSTACKS",
 		category = L["ICONFUNCTIONS"],
 		min = 0,
 		max = 20,
-		name = function(editbox) TMW:TT(editbox, "ICONMENU_BUFF", "BUFFCNDT_DESC", nil, nil, 1) end,
-		texttable = setmetatable({[0] = L["ICONMENU_ABSENT"]}, {__index = function(tbl, k) return format(STACKS, k) end}),
-		icon = "Interface\\Icons\\spell_nature_rejuvenation",
+		name = function(editbox) TMW:TT(editbox, L["ICONMENU_BUFF"] .. " - " .. L["STACKSPANEL_TITLE"], "BUFFCNDT_DESC", 1, nil, 1) end,
+		texttable = setmetatable({[0] = format(STACKS, 0).." ("..L["ICONMENU_ABSENT"]..")"}, {__index = function(tbl, k) return format(STACKS, k) end}),
+		icon = "Interface\\Icons\\inv_misc_herb_felblossom",
 		tcoords = standardtcoords,
 		funcstr = [[AuraStacks(c.Unit, c.NameName, "HELPFUL") c.Operator c.Level]],
 	},
-	{ -- unit debuff
-		text = L["ICONMENU_DEBUFF"],
-		value = "DEBUFF",
+	{ -- unit debuff duration
+		text = L["ICONMENU_DEBUFF"] .. " - " .. L["DURATIONPANEL_TITLE"],
+		value = "DEBUFFDUR",
+		category = L["ICONFUNCTIONS"],
+		min = 0,
+		max = 600,
+		name = function(editbox) TMW:TT(editbox, L["ICONMENU_DEBUFF"] .. " - " .. L["DURATIONPANEL_TITLE"], "BUFFCNDT_DESC", 1, nil, 1) end,
+		texttable = setmetatable({[0] = "0 ("..L["ICONMENU_ABSENT"].."/"..L["INFINITE"]..")"}, {__index = function(tbl, k) return format(D_SECONDS, k) end}),
+		icon = "Interface\\Icons\\spell_shadow_abominationexplosion",
+		tcoords = standardtcoords,
+		funcstr = [[AuraDur(c.Unit, c.NameName, "HARMFUL") c.Operator c.Level]],
+	},
+	{ -- unit debuff stacks
+		text = L["ICONMENU_DEBUFF"] .. " - " .. L["STACKSPANEL_TITLE"],
+		value = "DEBUFFSTACKS",
 		category = L["ICONFUNCTIONS"],
 		min = 0,
 		max = 20,
-		name = function(editbox) TMW:TT(editbox, "ICONMENU_DEBUFF", "BUFFCNDT_DESC", nil, nil, 1) end,
-		texttable = setmetatable({[0] = L["ICONMENU_ABSENT"]}, {__index = function(tbl, k) return format(STACKS, k) end}),
-		icon = "Interface\\Icons\\spell_shadow_abominationexplosion",
+		name = function(editbox) TMW:TT(editbox, L["ICONMENU_DEBUFF"] .. " - " .. L["STACKSPANEL_TITLE"], "BUFFCNDT_DESC", nil, nil, 1) end,
+		texttable = setmetatable({[0] = format(STACKS, 0).." ("..L["ICONMENU_ABSENT"]..")"}, {__index = function(tbl, k) return format(STACKS, k) end}),
+		icon = "Interface\\Icons\\ability_warrior_sunder",
 		tcoords = standardtcoords,
 		funcstr = [[AuraStacks(c.Unit, c.NameName, "HARMFUL") c.Operator c.Level]],
 	},
@@ -913,7 +947,7 @@ CNDT.Types = {
 		tcoords = standardtcoords,
 		funcstr = [[UnitCast(c.Unit, c.Level)]],
 	},
-	
+
 	{ -- item in bags
 		text = L["ITEMINBAGS"],
 		value = "ITEMINBAGS",
@@ -1049,7 +1083,7 @@ CNDT.Types = {
 		tcoords = {0.05, 0.95, 0.03, 0.97},
 		funcstr = [[UnitLevel(c.Unit) c.Operator c.Level]],
 	},
-	
+
 	{ -- instance type
 		text = L["CONDITIONPANEL_INSTANCETYPE"],
 		value = "INSTANCE",
@@ -1200,10 +1234,10 @@ function CNDT:ProcessConditions(icon)
 		if type(thiscondtstr) == "function" then
 			thiscondtstr = thiscondtstr(c)
 		end
-		
+
 		if thiscondtstr then
 			local thisstr = andor .. "(" .. thiscondtstr .. ")"
-			
+
 			if strfind(thisstr, "c.Unit") and (strfind(c.Unit, "maintank") or strfind(c.Unit, "mainassist")) then
 				local unit = gsub(c.Unit, "|cFFFF0000#|r", "1")
 				thisstr = gsub(thisstr, "c.Unit",	unit) -- sub it in as a variable
@@ -1213,7 +1247,7 @@ function CNDT:ProcessConditions(icon)
 			else
 				thisstr = gsub(thisstr, "c.Unit",	"\"" .. c.Unit .. "\"") -- sub it in as a string
 			end
-			
+
 			if v.percent then
 				thisstr = gsub(thisstr, "c.Level", 		c.Level/100)
 			else
@@ -1221,34 +1255,35 @@ function CNDT:ProcessConditions(icon)
 				thisstr = gsub(thisstr, "c.1nil", 		c.Level == 0 and 1 or "nil")
 				thisstr = gsub(thisstr, "c.nil1", 		c.Level == 1 and 1 or "nil") -- reverse 1nil
 			end
-			
+
 			thisstr = thisstr:
 			gsub("c.Operator", 		c.Operator):
 			gsub("c.NameFirst", 	"\"" .. TMW:GetSpellNames(nil, name, 1) .. "\""):
 			gsub("c.NameName", 		"\"" .. TMW:GetSpellNames(nil, name, 1, 1) .. "\""):
 			gsub("c.ItemID", 		TMW:GetItemIDs(icon, name, 1)):
 			gsub("c.Name", 			"\"" .. name .. "\""):
-			
+
 			gsub("c.True", 			tostring(c.Level == 0)):
 			gsub("c.False", 		tostring(c.Level == 1))
 			funcstr = funcstr .. thisstr
 		end
 	end
 	funcstr = [[if not (]] .. strsub(funcstr, 4) .. [[) then
-		]]..icon:GetName()..[[:SetAlpha(0)
-		return true
+		]] .. (icon.ConditionAlpha == 0 and (icon:GetName()..[[:SetAlpha(0) return true]]) or (icon:GetName()..[[.CndtFailed = 1]])) .. [[
+	else
+		]]..icon:GetName()..[[.CndtFailed = nil
 	end]]
-	local f, err = loadstring(funcstr, icon:GetName() .. " Condition")
-	if TMW.debug and err then
-		print(funcstr)
-		error(err)
-	end
-	local func = functionCache[funcstr] or f
+
+	local func, err = functionCache[funcstr] or loadstring(funcstr, icon:GetName() .. " Condition")
+
 	if func then
 		func = setfenv(func, Env)
 		icon.CndtCheck = func
 		functionCache[funcstr] = func
-		return func
+		return funcs
+	elseif TMW.debug and err then
+		print(funcstr)
+		error(err)
 	end
 end
 

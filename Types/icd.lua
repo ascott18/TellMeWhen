@@ -64,7 +64,7 @@ if clientVersion >= 40100 then
 				if icon.NameDictionary[spellID] or icon.NameDictionary[strlower(spellName)] then
 					local t = GetSpellTexture(spellID)
 					if t ~= icon.__tex then icon:SetTexture(t) end
-					
+
 					icon.StartTime = TMW.time
 				end
 			end
@@ -74,7 +74,7 @@ if clientVersion >= 40100 then
 				if icon.NameDictionary[spellID] or icon.NameDictionary[strlower(spellName)] then
 					local t = GetSpellTexture(spellID)
 					if t ~= icon.__tex then icon:SetTexture(t) end
-					
+
 					icon.StartTime = TMW.time
 				end
 			end
@@ -89,7 +89,7 @@ else
 				if NameDictionary[spellID] or NameDictionary[strlower(spellName)] then
 					local t = GetSpellTexture(spellID)
 					if t ~= icon.__tex then icon:SetTexture(t) end
-					
+
 					icon.StartTime = TMW.time
 				end
 			end
@@ -100,7 +100,7 @@ else
 				if NameDictionary[spellID] or NameDictionary[strlower(spellName)] then
 					local t = GetSpellTexture(spellID)
 					if t ~= icon.__tex then icon:SetTexture(t) end
-					
+
 					icon.StartTime = TMW.time
 				end
 			end
@@ -121,22 +121,13 @@ local function ICD_OnUpdate(icon, time)
 			icon:SetAlpha(0)
 			return
 		end
-		
+
 		if timesince > ICDDuration then
 			icon:SetInfo(icon.Alpha, 1, nil, 0, 0)
 		else
-			local color
-			if icon.Alpha ~= 0 then
-				if not icon.ShowTimer then
-					color = 0.5
-				else
-					color = 1
-				end
-			else
-				color = 1
-			end
-			
-			icon:SetInfo(icon.UnAlpha, 1, nil, icon.StartTime, ICDDuration)
+			local color = icon.Alpha ~= 0 and (icon.ShowTimer and 1 or .5) or 1
+
+			icon:SetInfo(icon.UnAlpha, color, nil, icon.StartTime, ICDDuration)
 		end
 	end
 end

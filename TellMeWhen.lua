@@ -29,7 +29,7 @@ TMW.OrderedTypes = {}
 
 local db
 local L = LibStub("AceLocale-3.0"):GetLocale("TellMeWhen", true)
---L = setmetatable({}, {__index = function() return "! ! ! ! ! ! ! ! ! ! ! ! ! ! ! ! ! ! ! ! !" end}) -- stress testing for text widths
+--L = setmetatable({}, {__index = function() return "| ! | ! | ! | ! | ! | ! | ! | ! | ! | ! | ! | ! | ! | ! | ! | ! | ! " end}) -- stress testing for text widths
 TMW.L = L
 local LBF = LibStub("LibButtonFacade", true)
 local AceDB = LibStub("AceDB-3.0")
@@ -37,7 +37,7 @@ local LSM = LibStub("LibSharedMedia-3.0")
 
 TELLMEWHEN_VERSION = "4.1.0"
 TELLMEWHEN_VERSION_MINOR = ""
-TELLMEWHEN_VERSIONNUMBER = 41003 -- NEVER DECREASE THIS NUMBER, ONLY INCREASE IT 
+TELLMEWHEN_VERSIONNUMBER = 41005 -- NEVER DECREASE THIS NUMBER, ONLY INCREASE IT
 TELLMEWHEN_MAXGROUPS = 10 	--this is a default, used by SetTheory (addon), so dont rename
 TELLMEWHEN_MAXROWS = 20
 local UPD_INTV = 0.06	--this is a default, local because i use it in onupdate functions
@@ -344,7 +344,7 @@ TMW.Defaults = {
 					Icons				= {},
 					Alpha				= 1,
 					UnAlpha				= 1,
-				--	ConditionAlpha		= 0,
+					ConditionAlpha		= 0,
 					RangeCheck			= false,
 					ManaCheck			= false,
 					CooldownCheck		= false,
@@ -476,17 +476,17 @@ TMW.NamesEquivLookup = {}
 TMW.OldBE = CopyTable(TMW.BE)
 for category, b in pairs(TMW.OldBE) do
 	for equiv, str in pairs(b) do
-	
+
 		-- create the lookup tables first, so that we can have the first ID even if it will be turned into a name
 		local first = strsplit(";", str)
 		first = strtrim(first, "; _")
-			
+
 		TMW.EquivIDLookup[equiv] = first -- this is used to display them in the list (tooltip, name, id display)
 		TMW.OldBE[category][equiv] = gsub(str, "_", "") -- this is used to put icons into tooltips
 		TMW.NamesEquivLookup[equiv] = TMW.OldBE[category][equiv]
-		
+
 		-- turn all IDs prefixed with "_" into their localized name. Dont do this on every single one, but do use it for spells that do not have any other spells with the same name but different effects.
-		
+
 		while strfind(str, "_") do
 			local id = strmatch(str, "_%d+")
 			if id then
@@ -494,7 +494,7 @@ for category, b in pairs(TMW.OldBE) do
 				str = gsub(str, id, name)
 			end
 		end
-		
+
 		TMW.BE[category][equiv] = str
 	end
 end TMW.OldBE.unlisted.Enraged = nil
@@ -606,10 +606,12 @@ if LBF then
 	local function SkinCallback(arg1, SkinID, Gloss, Backdrop, Group, Button, Colors)
 		if Group and SkinID then
 			local groupID = tonumber(strmatch(Group, "%d+")) --Group is a string like "Group 5", so cant use :GetID()
-			db.profile.Groups[groupID]["LBF"]["SkinID"] = SkinID
-			db.profile.Groups[groupID]["LBF"]["Gloss"] = Gloss
-			db.profile.Groups[groupID]["LBF"]["Backdrop"] = Backdrop
-			db.profile.Groups[groupID]["LBF"]["Colors"] = Colors
+			if groupID then
+				db.profile.Groups[groupID]["LBF"]["SkinID"] = SkinID
+				db.profile.Groups[groupID]["LBF"]["Gloss"] = Gloss
+				db.profile.Groups[groupID]["LBF"]["Backdrop"] = Backdrop
+				db.profile.Groups[groupID]["LBF"]["Colors"] = Colors
+			end
 		end
 		if not TMW.DontRun then
 			TMW:Update()
@@ -668,7 +670,7 @@ function TMW:OnInitialize()
 	if RegisterAddonMessagePrefix then
 		RegisterAddonMessagePrefix("TMWV") -- new in WoW 4.1
 	end
-	 
+
 	if IsInGuild() then
 		TMW:SendCommMessage("TMWV", "M:" .. TELLMEWHEN_VERSION .. "^m:" .. TELLMEWHEN_VERSION_MINOR .. "^R:" .. TELLMEWHEN_VERSIONNUMBER .. "^", "GUILD")
 	end
@@ -751,7 +753,7 @@ function TMW:Update()
 	time = GetTime() TMW.time = time
 	UpdateTimer = time - 10
 	PlaySoundFile = dummy
-	
+
 	Locked = db.profile.Locked
 	CNDT.Env.Locked = Locked
 	TMW.DoWipeAC = false
@@ -764,7 +766,7 @@ function TMW:Update()
 	else
 		TMW:SetScript("OnUpdate", TMW.OnUpdate)
 	end
-	
+
 	if TMW.IE then
 		TMW.IE:SaveSettings()
 	end
@@ -810,14 +812,14 @@ function TMW:Update()
 		group:SetFrameLevel(group:GetFrameLevel() + 1)
 		group:SetFrameLevel(group:GetFrameLevel() - 1)
 	end
-	
+
 	time = GetTime() TMW.time = time
 	TMW:ScheduleTimer("RestoreSound", UPD_INTV*2.1)
 	TMW.Initd = true
 end
 
 function TMW:Upgrade()
-	
+
 	if TellMeWhen_Settings then -- needs to be the first one
 		TMW:Print()
 		for k, v in pairs(TellMeWhen_Settings) do
@@ -828,13 +830,13 @@ function TMW:Upgrade()
 		db.profile.Version = TellMeWhen_Settings.Version
 		TellMeWhen_Settings = nil
 	end
-	
+
 	if type(db.profile.Version) == "string" then
 		local v = gsub(db.profile.Version, "[^%d]", "") -- remove decimals
 		v = v..strrep("0", 5-#v)	-- append zeroes to create a 5 digit number
 		db.profile.Version = tonumber(v)
 	end
-	
+
 	--[[if db.profile.Version < 11400 then
 		db:ResetProfile()
 		return
@@ -952,7 +954,7 @@ function TMW:Upgrade()
 		db.profile.UNUSEColor = nil
 		db.profile.USEColor = nil
 		if db.profile.Font.Outline == "THICK" then db.profile.Font.Outline = "THICKOUTLINE" end --oops
-		
+
 		for gs in TMW.InGroupSettings() do
 			gs.Point.defined = true
 			gs.LBFGroup = nil
@@ -971,7 +973,7 @@ function TMW:Upgrade()
 			for k in pairs(TMW.DeletedIconSettings) do
 				ics[k] = nil
 			end
-			
+
 			-- this is part of the old CondenseSettings (but modified slightly), just to get rid of values that are defined in the saved variables that dont need to be (basically, they were set automatically on accident, most of them in early versions)
 			local nondefault = 0
 			local n = 0
@@ -991,11 +993,11 @@ function TMW:Upgrade()
 	if db.profile.Version < 40000 then
 		db.profile.Spacing = nil
 		db.profile.Locked = false
-		
+
 		for gs in TMW.InGroupSettings() do
 			gs.Spacing = db.profile.Spacing or 0
 		end
-		
+
 		for ics in TMW.InIconSettings() do
 			if ics.Type == "icd" then
 				ics.CooldownShowWhen = ics.ICDShowWhen
@@ -1022,7 +1024,7 @@ function TMW:Upgrade()
 				gs.Stance[NONE] = false -- change it to something that will probably never change
 			end
 		end
-		
+
 		local needtowarn = ""
 		for ics, groupID, iconID in TMW.InIconSettings() do
 			ics.StackMin = floor(ics.StackMin)
@@ -1040,7 +1042,7 @@ function TMW:Upgrade()
 			TMW.Warn("The following icons may have had their maximum stacks and/or duration modified, you may wish to check them: " .. needtowarn)
 		end
 	end
-	
+
 	if db.profile.Version < 40010 then
 		for ics in TMW.InIconSettings() do
 			for k, condition in pairs(ics.Conditions) do
@@ -1069,7 +1071,7 @@ function TMW:Upgrade()
 	if db.profile.Version < 40109 then
 		TellMeWhenDB.DoResetAuraCache = true -- dont store this in db.profile - make it global
 	end
-	
+
 	if db.profile.Version < 40111 then
 		for ics in TMW.InIconSettings() do
 			ics.Unit = TMW:CleanString((ics.Unit .. ";"):	-- it wont change things at the end of the unit string without a character after the unit at the end
@@ -1107,7 +1109,22 @@ function TMW:Upgrade()
 	if db.profile.Version < 40124 then
 		db.profile.Revision = nil-- unused
 	end
-	
+	if db.profile.Version < 41004 then
+		for ics in TMW.InIconSettings() do
+			for k, condition in pairs(ics.Conditions) do
+				if condition.Type == "BUFF" then
+					condition.Type = "BUFFSTACKS"
+				elseif condition.Type == "DEBUFF" then
+					condition.Type = "DEBUFFSTACKS"
+				end
+			end
+		end
+	end
+	if db.profile.Version < 41005 then
+		for ics in TMW.InIconSettings() do
+			ics.ConditionAlpha = 0
+		end
+	end
 
 	--All Upgrades Complete
 	db.profile.Version = TELLMEWHEN_VERSIONNUMBER
@@ -1172,19 +1189,19 @@ end
 function TMW:PLAYER_ENTERING_WORLD()
 	if not TMW.VarsLoaded then return end
 	TMW.EnteredWorld = true
-	
+
 	local NumRealRaidMembers = GetRealNumRaidMembers()
 	local NumRealPartyMembers = GetRealNumPartyMembers()
 	local NumRaidMembers = GetNumRaidMembers()
-	
+
 	if (NumRealRaidMembers > 0) and (NumRealRaidMembers ~= (TMW.OldNumRealRaidMembers or 0)) then
 		TMW.OldNumRealRaidMembers = NumRealRaidMembers
 		TMW:SendCommMessage("TMWV", "M:" .. TELLMEWHEN_VERSION .. "^m:" .. TELLMEWHEN_VERSION_MINOR .. "^R:" .. TELLMEWHEN_VERSIONNUMBER .. "^", "RAID")
-		
+
 	elseif (NumRealRaidMembers == 0) and (NumRealPartyMembers > 0) and (NumRealPartyMembers ~= (TMW.OldNumRealPartyMembers or 0)) then
 		TMW.OldNumRealPartyMembers = NumRealPartyMembers
 		TMW:SendCommMessage("TMWV", "M:" .. TELLMEWHEN_VERSION .. "^m:" .. TELLMEWHEN_VERSION_MINOR .. "^R:" .. TELLMEWHEN_VERSIONNUMBER .. "^", "PARTY")
-		
+
 	elseif UnitInBattleground("player") and (NumRaidMembers ~= (TMW.OldNumRaidMembers or 0)) then
 		TMW.OldNumRaidMembers = NumRaidMembers
 		TMW:SendCommMessage("TMWV", "M:" .. TELLMEWHEN_VERSION .. "^m:" .. TELLMEWHEN_VERSION_MINOR .. "^R:" .. TELLMEWHEN_VERSIONNUMBER .. "^", "BATTLEGROUND")
@@ -1208,7 +1225,7 @@ function TMW:RAID_ROSTER_UPDATE()
 			maN = maN + 1
 		end
 	end
-	
+
 	for original, Units in pairs(unitsToChange) do
 		wipe(Units) -- clear unit translations so that we arent referencing incorrect units
 		for k, oldunit in ipairs(original) do
@@ -1255,7 +1272,7 @@ function TMW:RAID_ROSTER_UPDATE()
 			end
 		end
 	end
-	
+
 end
 
 if clientVersion >= 40100 then -- COMBAT_LOG_EVENT_UNFILTERED
@@ -1305,7 +1322,7 @@ local function CreateGroup(groupID)
 	local group = CreateFrame("Frame", "TellMeWhen_Group" .. groupID, UIParent, "TellMeWhen_GroupTemplate", groupID)
 	TMW[groupID] = group
 	group:SetID(groupID)
-	
+
 	--[[for k, v in pairs(GroupAddIns) do -- CURRENTLY UNUSED
 		if type(group[k]) == "function" then -- if the method already exists on the icon
 			group[strlower(k)] = group[k] -- store the old method as the lowercase same name
@@ -1641,8 +1658,18 @@ local function PwrBarOnValueChanged(bar, val)
 end
 
 local function SetInfo(icon, alpha, color, texture, start, duration, checkGCD, pbName, reverse, count)
-	
+
 	local played, justShowed
+	alpha = icon.CndtFailed and icon.ConditionAlpha or alpha
+
+	local d = duration - (time - start)
+	if
+	 (d > 0 and ((icon.DurationMinEnabled and icon.DurationMin > d) or (icon.DurationMaxEnabled and d > icon.DurationMax))) or
+	 (count and ((icon.StackMinEnabled and icon.StackMin > count) or (icon.StackMaxEnabled and count > icon.StackMax)))
+	then
+		alpha = min(alpha, icon.ConditionAlpha)
+	end
+
 	if alpha ~= icon.__alpha then
 		if alpha == 0 then
 			local Sound = icon.SoundOnHide
@@ -1667,7 +1694,7 @@ local function SetInfo(icon, alpha, color, texture, start, duration, checkGCD, p
 		end
 	end
 	icon.FakeAlpha = alpha
-	
+
 	if icon.__start ~= start or icon.__duration ~= duration then
 		local isGCD
 		if duration == 1 then
@@ -1677,7 +1704,7 @@ local function SetInfo(icon, alpha, color, texture, start, duration, checkGCD, p
 		else
 			isGCD = (GCD == duration and duration > 0)
 		end
-		
+
 		local realDuration = isGCD and 0 or duration
 		if icon.__realDuration ~= realDuration then
 			if realDuration == 0 then
@@ -1696,16 +1723,16 @@ local function SetInfo(icon, alpha, color, texture, start, duration, checkGCD, p
 		if alpha == 0 then-- doing this twice is intended. It shouldn't return until after all playsounds have happened, but dont go as far to set the timer or cooldown bars if not needed
 			return
 		end
-		
+
 		if icon.ShowTimer then
 			if duration > 0 then
 				local cd, s, d = icon.cooldown, start, duration
-				
+
 				if isGCD and ClockGCD then
 					s, d = 0, 0
 				end
-				
-				-- cd.s is completely internal and is used to prevent finish effect spam (and to increase efficiency). icon.__start isnt used because that just records the start time passed in, which may be a GCD, so it will change frequently
+
+				-- cd.s is completely internal and is used to prevent finish effect spam (and to increase efficiency) while GCDs are being triggered. icon.__start isnt used because that just records the start time passed in, which may be a GCD, so it will change frequently
 				if cd.s ~= s then
 					cd:SetCooldown(s, d)
 					cd:Show()
@@ -1713,6 +1740,7 @@ local function SetInfo(icon, alpha, color, texture, start, duration, checkGCD, p
 						icon.__reverse = reverse
 						cd:SetReverse(reverse)
 					end
+					cd.s = s
 				end
 			else
 				icon.cooldown:Hide()
@@ -1720,7 +1748,7 @@ local function SetInfo(icon, alpha, color, texture, start, duration, checkGCD, p
 		else
 			icon.cooldown:Hide()
 		end
-		
+
 		if icon.ShowCBar then
 			local bar = icon.cooldownbar
 			if duration > 0 then
@@ -1730,7 +1758,7 @@ local function SetInfo(icon, alpha, color, texture, start, duration, checkGCD, p
 				else
 					bar.duration = duration
 				end
-				
+
 				bar.InvertBars = icon.InvertBars
 				if not bar.UpdateSet then
 					bar:SetScript("OnUpdate", CDBarOnUpdate)
@@ -1749,16 +1777,16 @@ local function SetInfo(icon, alpha, color, texture, start, duration, checkGCD, p
 		else
 			icon.cooldownbar:Hide()
 		end
-		
+
 		icon.__start = start
 		icon.__duration = duration
 	end
-	
-	if alpha == 0 then 
+
+	if alpha == 0 then
 		return
 	end
-		
-	
+
+
 	if icon.__vrtxcolor ~= color then
 		icon.__vrtxcolor = color
 		if type(color) == "table" then
@@ -1767,12 +1795,12 @@ local function SetInfo(icon, alpha, color, texture, start, duration, checkGCD, p
 			icon.texture:SetVertexColor(color, color, color, 1)
 		end
 	end
-	
+
 	if texture ~= nil and icon.__tex ~= texture then
 		icon.__tex = texture
 		icon.texture:SetTexture(texture)
 	end
-	
+
 	if icon.ShowPBar then
 		local bar = icon.powerbar
 		if pbName then
@@ -1801,7 +1829,7 @@ local function SetInfo(icon, alpha, color, texture, start, duration, checkGCD, p
 	else
 		icon.powerbar:Hide()
 	end
-	
+
 	if icon.__count ~= count then
 		if count and count > 1 then
 			icon.countText:SetText(count)
@@ -1810,9 +1838,9 @@ local function SetInfo(icon, alpha, color, texture, start, duration, checkGCD, p
 		end
 		icon.__count = count
 	end
-	
+
 	icon.__checkGCD = checkGCD
-	
+
 end
 
 local IconAddIns = {
@@ -1933,7 +1961,7 @@ end
 
 function TMW:Icon_Update(icon)
 	if not icon then return end
-	
+
 	local iconID = icon:GetID()
 	local groupID = icon.group:GetID()
 	local dontreassign
@@ -1944,7 +1972,7 @@ function TMW:Icon_Update(icon)
 	end
 
 	icon.__previousNameFirst = icon.NameFirst -- used to detect changes in the name that would cause a texture change
-	for k in pairs(TMW.Icon_Defaults) do 	
+	for k in pairs(TMW.Icon_Defaults) do
 		icon[k] = nil --lets clear any settings that might get left behind.
 	end
 
@@ -1989,13 +2017,13 @@ function TMW:Icon_Update(icon)
 	else
 		icon.DurationEnabled = false
 	end
-	
+
 	if #icon.Conditions > 0 and Locked then -- dont define conditions if we are unlocked so that i dont have to deal with meta icons checking icons during config. I think i solved this somewhere else too without thinking about it, but what the hell
 		TMW.CNDT:ProcessConditions(icon)
 	else
 		icon.CndtCheck = nil
 	end
-	
+
 	if icon.Enabled and icon.group.Enabled then
 		if not tContains(TMW.Icons, icon:GetName()) then tinsert(TMW.Icons, icon:GetName()) end
 	else
@@ -2008,7 +2036,7 @@ function TMW:Icon_Update(icon)
 	cd.noCooldownCount = not icon.ShowTimerText
 	cd:SetDrawEdge(db.profile.DrawEdge)
 	icon:SetReverse(false)
-	
+
 
 	local f = db.profile.Font
 	local ct = icon.countText
@@ -2034,7 +2062,7 @@ function TMW:Icon_Update(icon)
 			ct:SetPoint("BOTTOMRIGHT", icon, "BOTTOMRIGHT", f.x, f.y)
 		end
 		ct:SetFont(LSM:Fetch("font", f.Name), tbl[SkID].Count.FontSize or f.Size, f.Outline)
-		
+
 		cd:SetFrameLevel(icon:GetFrameLevel() - 2)
 		icon.cooldownbar:SetFrameLevel(icon:GetFrameLevel() -1)
 		icon.powerbar:SetFrameLevel(icon:GetFrameLevel() - 1)
@@ -2046,13 +2074,14 @@ function TMW:Icon_Update(icon)
 		icon.powerbar:SetFrameLevel(icon:GetFrameLevel() + 1)
 	end
 
-	
+
 	icon.__normaltex = icon.__LBF_Normal or icon:GetNormalTexture()
 	icon.__previcon = nil
 	icon.__alpha = nil
 	icon.__tex = icon.texture:GetTexture()
 	icon.__realDuration = icon.__realDuration or 0
-	
+	icon.CndtFailed = nil
+
 	if not (Locked and not icon.Enabled) then
 		if icon.CooldownShowWhen == "usable" or icon.BuffShowWhen == "present" then
 			icon.UnAlpha = 0
@@ -2152,9 +2181,9 @@ function TMW:EquivToTable(name)
 		if names then break end
 	end
 	if not names then return end -- if we didnt find an equivalency string then gtfo
-	
+
 	if eqttcache[names] then return eqttcache[names] end -- if we already made a table of this string, then use it
-	
+
 	local tbl = { strsplit(";", names) } -- split the string into a table
 	for a, b in pairs(tbl) do
 		local new = strtrim(b) -- take off trailing spaces
@@ -2168,7 +2197,7 @@ local gsncache = {}
 function TMW:GetSpellNames(icon, setting, firstOnly, toname, dictionary)
 	local cachestring = setting .. tostring(firstOnly) .. tostring(toname) .. tostring(dictionary) -- a unique key for the cache table, turn possible nils into strings
 	if gsncache[cachestring] then return gsncache[cachestring] end --why make a bunch of tables and do a bunch of stuff if we dont need to
-	
+
 	local buffNames = TMW:SplitNames(setting) -- get a table of everything
 
 	--INSERT EQUIVALENCIES
@@ -2239,7 +2268,7 @@ end
 
 function TMW:GetItemIDs(icon, setting, firstOnly, toname)
 	-- note: these cannot be cached because of slotIDs
-	
+
 	local names = TMW:SplitNames(setting)
 
 	for k, item in ipairs(names) do
@@ -2283,7 +2312,7 @@ function TMW:GetUnits(icon, setting)
 
 	setting = TMW:CleanString(setting)
 	setting = strlower(setting)
-	
+
 	--SUBSTITUTE RAID1-10 WITH RAID1;RAID2;RAID3;...RAID10
 	local startpos, endpos = 0, 0
 	while true do
@@ -2293,7 +2322,7 @@ function TMW:GetUnits(icon, setting)
 		if unit and firstnum and lastnum then
 			local str = ""
 			local order = firstnum > lastnum and -1 or 1
-			
+
 			for i = firstnum, lastnum, order do
 				str = str .. unit .. i .. ";"
 			end
@@ -2302,7 +2331,7 @@ function TMW:GetUnits(icon, setting)
 			setting = gsub(setting, wholething, str)
 		end
 	end
-	
+
 	local Units = TMW:SplitNames(setting) -- get a table of everything
 
 	-- REMOVE DUPLICATES
@@ -2360,7 +2389,7 @@ function TMW:DoSetTexture(icon)
 	local oldname = icon.__previousNameFirst
 	local currentname = icon.NameFirst
 	if not t or
-	oldname ~= currentname or 
+	oldname ~= currentname or
 	t == "Interface\\Icons\\INV_Misc_PocketWatch_01" or
 	t == "Interface\\Icons\\INV_Misc_QuestionMark" or
 	t == "Interface\\Icons\\Temp" then

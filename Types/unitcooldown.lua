@@ -62,6 +62,12 @@ local Cooldowns = setmetatable({}, {__index = function(t, k)
 	return n
 end}) TMW.Cooldowns = Cooldowns
 
+local SpellTextures = setmetatable({}, {__index = function(t, name)
+	local tex = GetSpellTexture(name)
+	t[name] = tex
+	return tex
+end})
+
 if clientVersion >= 40100 then -- COMBAT_LOG_EVENT_UNFILTERED
 	function Type:COMBAT_LOG_EVENT_UNFILTERED(e, _, p, _, g, _, _, _, _, _, i, n)-- tyPe, sourceGuid, spellId, spellName -- NEW ARG IN 4.1 BETWEEN TYPE AND SOURCEGUID
 		if p == "SPELL_CAST_SUCCESS" then
@@ -109,7 +115,7 @@ local function UnitCooldown_OnUpdate(icon, time)
 		local unstart, unname
 		local Alpha, ICDDuration, Units, NameArray, OnlySeen = icon.Alpha, icon.ICDDuration, icon.Units, icon.NameArray, icon.OnlySeen
 		local NAL = #NameArray
-		
+
 		for u = 1, #Units do
 			local unit = Units[u]
 			if UnitExists(unit) then
@@ -119,7 +125,7 @@ local function UnitCooldown_OnUpdate(icon, time)
 					if type(iName) == "string" then
 						iName = cooldowns[strlower(iName)] or iName-- spell name keys have values that are the spellid of the name, we need the spellid for the texture (thats why i did it like this)
 					end
-					
+
 					local start
 					if OnlySeen then
 						start = cooldowns[iName]
@@ -129,10 +135,10 @@ local function UnitCooldown_OnUpdate(icon, time)
 					if start then
 						if (time - start) > ICDDuration then -- off cooldown
 
-							local t = (iName and (GetSpellTexture(iName) )) or "Interface\\Icons\\INV_Misc_PocketWatch_01"
+							local t = SpellTextures[iName] or "Interface\\Icons\\INV_Misc_PocketWatch_01"
 
 							icon:SetInfo(Alpha, 1, t, 0, 0)
-		
+
 							if Alpha ~= 0 then -- we care about usable cooldowns and we found one, so stop
 								return
 							end
@@ -145,23 +151,13 @@ local function UnitCooldown_OnUpdate(icon, time)
 				if Alpha == 0 and unstart then break end -- we found something on cooldown and we dont care about things that are on cooldown (break unit loop)
 			end
 		end
-		
+
 		local UnAlpha = icon.UnAlpha
 		if UnAlpha ~= 0 and unstart then
-			local d = ICDDuration - (time - unstart)
-			if (icon.DurationMinEnabled and icon.DurationMin > d) or (icon.DurationMaxEnabled and d > icon.DurationMax) then
-				icon:SetAlpha(0)
-				return
-			end
 
-			local color
-			if not icon.ShowTimer and Alpha ~= 0 then
-				color = 0.5
-			else
-				color = 1
-			end
-			
-			icon:SetInfo(UnAlpha, color, GetSpellTexture(unname), unstart, ICDDuration)
+			local color = (not icon.ShowTimer and Alpha ~= 0) and .5 or 1
+
+			icon:SetInfo(UnAlpha, color, SpellTextures[unname], unstart, ICDDuration)
 			return
 		end
 		icon:SetAlpha(0)
