@@ -990,6 +990,10 @@ end
 
 ME = TMW:NewModule("MetaEditor") TMW.ME = ME -- really part of the icon editor now, but im too lazy to move it over
 
+function ME:OnInitialize()
+	ME[1] = TellMeWhen_IconEditorMainIcons1
+end
+
 function ME:UpOrDown(self, delta)
 	local groupID, iconID = TMW.CI.g, TMW.CI.i
 	local settings = db.profile.Groups[groupID].Icons[iconID].Icons
@@ -1007,8 +1011,8 @@ function ME:Insert(where)
 	db.profile.Groups[groupID].Icons[iconID].Icons = db.profile.Groups[groupID].Icons[iconID].Icons or {}
 	if not db.profile.Groups[groupID].Icons[iconID].Icons[1] then
 		db.profile.Groups[groupID].Icons[iconID].Icons[1] = TMW.Icons[1]
-		UIDropDownMenu_SetSelectedValue(TellMeWhen_MetaEditorGroup1.icon, TMW.Icons[1])
-		UIDropDownMenu_SetText(TellMeWhen_MetaEditorGroup1.icon, TMW.Icons[1])
+		UIDropDownMenu_SetSelectedValue(ME[1], TMW.Icons[1])
+		UIDropDownMenu_SetText(ME[1], TMW.Icons[1])
 	end
 	tinsert(db.profile.Groups[groupID].Icons[iconID].Icons, where, TMW.Icons[1])
 	ME:Update()
@@ -1037,7 +1041,7 @@ function ME:Update()
 	ME[1].delete:Hide()
 
 	for k, v in pairs(settings) do
-		local mg = ME[k] or CreateFrame("Frame", "TellMeWhen_MetaEditorGroup" .. k, TellMeWhen_IconEditor.Main.Icons, "TellMeWhen_MetaEditorGroup", k)
+		local mg = ME[k] or CreateFrame("Frame", "TellMeWhen_IconEditorMainIcons" .. k, TellMeWhen_IconEditor.Main.Icons.ScrollFrame.Icons, "TellMeWhen_MetaGroup", k)
 		ME[k] = mg
 		mg:Show()
 		if k > 1 then
@@ -1047,6 +1051,7 @@ function ME:Update()
 		UIDropDownMenu_SetSelectedValue(mg.icon, v)
 		local text = TMW:GetIconMenuText(strmatch(v, "TellMeWhen_Group(%d+)_Icon(%d+)"))
 		UIDropDownMenu_SetText(mg.icon, text)
+		mg.icontexture:SetTexture(_G[v] and _G[v].texture:GetTexture())
 	end
 	for f=#settings+1, i do
 		ME[f]:Hide()
@@ -1087,7 +1092,7 @@ function ME:IconMenu()
 		wipe(addedGroups)
 		for k, v in pairs(TMW.Icons) do
 			local g = tonumber(strmatch(v, "TellMeWhen_Group(%d+)"))
-			if not addedGroups[g] then
+			if not addedGroups[g] and v ~= TMW.CI.ic:GetName() then
 				local info = UIDropDownMenu_CreateInfo()
 				info.text = TMW:GetGroupName(db.profile.Groups[g].Name, g, 1)
 				info.hasArrow = true
@@ -1104,6 +1109,7 @@ end
 function ME:IconMenuOnClick(frame)
 	db.profile.Groups[TMW.CI.g].Icons[TMW.CI.i].Icons[frame:GetParent():GetID()] = self.value
 	UIDropDownMenu_SetSelectedValue(frame, self.value)
+	ME:Update()
 	CloseDropDownMenus()
 end
 

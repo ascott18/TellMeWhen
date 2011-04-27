@@ -1034,7 +1034,7 @@
 
 		</Scripts>
 	</Frame>
-	<Frame name="TellMeWhen_MetaEditorGroup" virtual="true">
+	<Frame name="TellMeWhen_MetaGroup" virtual="true">
 		<Size>
 			<AbsDimension x="440" y="30" />
 		</Size>
@@ -1133,6 +1133,17 @@
 						</Anchor>
 					</Anchors>
 				</FontString>
+				<Texture name="$parentIconTexture" parentKey="icontexture">
+					<TexCoords left="0.07" right="0.93" top="0.07" bottom="0.93" />
+					<Size>
+						<AbsDimension x="24" y="24"/>
+					</Size>
+					<Anchors>
+						<Anchor point="RIGHT" relativeTo="$parentIcon" relativePoint="LEFT">
+							<Offset x="13" y="3" />
+						</Anchor>
+					</Anchors>
+				</Texture>
 			</Layer>
 		</Layers>
 		<Scripts>
@@ -1734,49 +1745,75 @@
 							</OnMouseDown>
 						</Scripts>
 					</EditBox>
-					<Frame name="$parentIcons" hidden="true" parentKey="Icons">
-						<Size>
-							<AbsDimension x="600" y="300" />
-						</Size>
+					<Frame name="$parentIcons[DND]" hidden="true" parentKey="Icons">
 						<Anchors>
 							<Anchor point="TOPLEFT" relativeTo="$parentType" relativePoint="BOTTOMLEFT">
-								<Offset x="-10" y="40" />
+								<Offset x="-10" y="2" />
+							</Anchor>
+							<Anchor point="BOTTOMRIGHT" relativeTo="$parent" relativePoint="BOTTOMRIGHT">
+								<Offset x="0" y="34" />
 							</Anchor>
 						</Anchors>
 						<Frames>
-							<Frame name="TellMeWhen_MetaEditorGroup1" inherits="TellMeWhen_MetaEditorGroup" id="1">
+							<ScrollFrame name="$parentSF" parentKey="ScrollFrame" inherits="UIPanelScrollFrameCodeTemplate" movable="true" enableMouse="true">
 								<Anchors>
-									<Anchor point="TOP" relativeTo="$parent" relativePoint="TOP">
-										<Offset x="0" y="-40" />
-									</Anchor>
+									<Anchor point="TOPLEFT"/>
+									<Anchor point="BOTTOMRIGHT"/>
 								</Anchors>
-							</Frame>
-							<Button name="$parentInsert" parentKey="insertat1">
-								<Size>
-									<AbsDimension x="30" y="30" />
-								</Size>
-								<Anchors>
-									<Anchor point="LEFT" relativeTo="TellMeWhen_MetaEditorGroup1" relativePoint="TOPRIGHT">
-										<Offset x="11" y="0" />
-									</Anchor>
-								</Anchors>
-								<NormalTexture urgency="5" file="Interface\AddOns\TellMeWhen_Options\Textures\Plus-Up"/>
-								<PushedTexture file="Interface\AddOns\TellMeWhen_Options\Textures\Plus-Down"/>
-								<HighlightTexture urgency="5" file="Interface\AddOns\TellMeWhen_Options\Textures\Plus-Highlight" alphaMode="ADD"/>
+								<ScrollChild>
+									<Frame name="TellMeWhen_IconEditorMainIcons" parentKey="Icons" movable="true" enableMouse="true" >
+										<Size>
+											<AbsDimension x="580" y="150" />
+										</Size>
+										<Frames>
+											<Frame name="$parent1" inherits="TellMeWhen_MetaGroup" id="1">
+												<Anchors>
+													<Anchor point="TOP" relativeTo="$parent" relativePoint="TOP">
+														<Offset x="0" y="2" />
+													</Anchor>
+												</Anchors>
+											</Frame>
+										</Frames>
+										<Scripts>
+											<OnLoad> self:RegisterForDrag("LeftButton")</OnLoad>
+											<OnDragStart> TellMeWhen_IconEditor:StartMoving() </OnDragStart>
+											<OnDragStop> TellMeWhen_IconEditor:StopMovingOrSizing() </OnDragStop>
+										</Scripts>
+									</Frame>
+								</ScrollChild>
 								<Scripts>
-									 <OnLoad>
-										TMW:TT(self, "METAPANEL_INSERT")
-									</OnLoad>
-									<OnClick>TMW.ME:Insert(1)</OnClick>
+									<OnLoad> self:RegisterForDrag("LeftButton") self.scrollBarHideable = true</OnLoad>
+									<OnDragStart> TellMeWhen_IconEditor:StartMoving() </OnDragStart>
+									<OnDragStop> TellMeWhen_IconEditor:StopMovingOrSizing() </OnDragStop>
 								</Scripts>
-							</Button>
+								<Frames>
+									<Slider name="$parentScrollBar" inherits="MinimalScrollBarTemplate" parentKey="ScrollBar">
+										<Size>
+											<AbsDimension x="17" y="0"/>
+										</Size>
+										<Anchors>
+											<Anchor point="TOPRIGHT" relativeTo="$parent" relativePoint="TOPRIGHT">
+												<Offset>
+													<AbsDimension x="-10" y="-17"/>
+												</Offset>
+											</Anchor>
+											<Anchor point="BOTTOMRIGHT" relativeTo="$parent" relativePoint="BOTTOMRIGHT">
+												<Offset>
+													<AbsDimension x="-10" y="17"/>
+												</Offset>
+											</Anchor>
+										</Anchors>
+									</Slider>
+								</Frames>
+							</ScrollFrame>
 						</Frames>
 						<Scripts>
-							<OnLoad> self:RegisterForDrag("LeftButton") self:SetFrameLevel(self:GetFrameLevel()-1)</OnLoad>
+							<OnLoad> self:RegisterForDrag("LeftButton") self:Hide()</OnLoad>
 							<OnDragStart> TellMeWhen_IconEditor:StartMoving() </OnDragStart>
 							<OnDragStop> TellMeWhen_IconEditor:StopMovingOrSizing() </OnDragStop>
 						</Scripts>
 					</Frame>
+					
 					<EditBox name="$parentUnit" inherits="TellMeWhen_InputBoxTemplate" parentKey="Unit" autoFocus="false">
 						<Size>
 							<AbsDimension x="466" y="15"/>

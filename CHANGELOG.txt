@@ -2,6 +2,7 @@
  * Implemented sounds! It should be mostly functional, but if you find anything that is breaking or not working how it probably should, open a ticket.
  * Reduced CPU usage by about 20%.
  * Alpha can now be customized for when conditions fail, or for when duration/stack requirements are not met.
+ * Made the meta icon editor much prettier.
  * New/changed conditions:
  ** Old Buff/Debuff conditions changed to Buff/Debuff Stacks
  ** Buff duration 
