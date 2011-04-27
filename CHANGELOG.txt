@@ -8,13 +8,14 @@
  ** Debuff duration
  ** Cooldown and weapon enchant conditions now allow you to specify a duration
  * Fixes since the first revision of this version:
- ** Fixed the alpha on unusable reactive icons
- ** Fixed a bug where icons that were set to fake hidden would sometimes still show after leaving config
- ** Fixed stack text on buff icons
- ** Fixed: conditions.lua line 1220: bad argument #1 to 'gsub' (string expected, got nil) 
- ** Fixed: TellMeWhen_Options.lua:2217: attempt to index field '?' (a nil value)
- ** Fixed the sheck sub-metas toggle for meta icons - accidentally broke the anchor for it
- ** Meta icons should obey conditions
+ ** (r52) Fixed the alpha on unusable reactive icons
+ ** (r52) Fixed a bug where icons that were set to fake hidden would sometimes still show after leaving config
+ ** (r52) Fixed stack text on buff icons
+ ** (r53) Fixed: conditions.lua line 1220: bad argument #1 to 'gsub' (string expected, got nil) 
+ ** (r53) Fixed: TellMeWhen_Options.lua:2217: attempt to index field '?' (a nil value)
+ ** (r54) Fixed the sheck sub-metas toggle for meta icons - accidentally broke the anchor for it
+ ** (r54) Meta icons should obey conditions
+ ** (r55) Cooldowns on meta icons should properly set when the meta changes to from an icon with an active timer to one without, and then back to the first icon that has an active timer.
 
  ===v4.0.4===
  * Maybe fixed a really rare frame level bug with cooldowns?

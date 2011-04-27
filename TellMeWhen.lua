@@ -37,7 +37,7 @@ local LSM = LibStub("LibSharedMedia-3.0")
 
 TELLMEWHEN_VERSION = "4.1.0"
 TELLMEWHEN_VERSION_MINOR = ""
-TELLMEWHEN_VERSIONNUMBER = 41010 -- NEVER DECREASE THIS NUMBER, ONLY INCREASE IT
+TELLMEWHEN_VERSIONNUMBER = 41011 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL (although it is displayed in version warnings to prevent confusion about a warning for the same major version)
 TELLMEWHEN_MAXGROUPS = 10 	--this is a default, used by SetTheory (addon), so dont rename
 TELLMEWHEN_MAXROWS = 20
 local UPD_INTV = 0.06	--this is a default, local because i use it in onupdate functions
@@ -1750,8 +1750,9 @@ local function SetInfo(icon, alpha, color, texture, start, duration, checkGCD, p
 		end
 
 		if icon.ShowTimer then
+			local cd = icon.cooldown
 			if duration > 0 then
-				local cd, s, d = icon.cooldown, start, duration
+				local s, d = start, duration
 
 				if isGCD and ClockGCD then
 					s, d = 0, 0
@@ -1768,7 +1769,8 @@ local function SetInfo(icon, alpha, color, texture, start, duration, checkGCD, p
 					cd.s = s
 				end
 			else
-				icon.cooldown:Hide()
+				cd.s = 0
+				cd:Hide()
 			end
 		else
 			icon.cooldown:Hide()

@@ -21,6 +21,7 @@ local AlreadyChecked = {} TMW.AlreadyChecked = AlreadyChecked
 local RelevantSettings = {
 	Icons = true,
 	CheckNext = true,
+--	ConditionAlpha = true,
 }
 
 local Type = TMW:RegisterIconType("meta", RelevantSettings)
@@ -36,7 +37,7 @@ end
 local function Meta_OnUpdate(icon, time)
 	if icon.UpdateTimer <= time - UPD_INTV then
 		icon.UpdateTimer = time
-		local CndtCheck = icon.CndtCheck if CndtCheck and CndtCheck() then print("FAILED") return end
+		local CndtCheck = icon.CndtCheck if CndtCheck and CndtCheck() then return end
 		local CheckNext = icon.CheckNext
 		for k, i in ipairs(icon.Icons) do
 			local ic = _G[i]
@@ -58,7 +59,6 @@ local function Meta_OnUpdate(icon, time)
 					icon.InvertBars = ic.InvertBars
 					icon.ShowTimer = ic.ShowTimer
 					icon.cooldown.noCooldownCount = ic.cooldown.noCooldownCount
-					print(ic, alpha)
 					icon:SetInfo(alpha, ic.__vrtxcolor, ic.__tex, ic.__start, ic.__duration, ic.__checkGCD, ic.__pbName, ic.__reverse, ic.__count)
 
 					AlreadyChecked[ic] = true
