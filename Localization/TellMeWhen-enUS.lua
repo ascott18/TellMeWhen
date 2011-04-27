@@ -335,6 +335,7 @@ Each rune is a check button. A check mark will require that the rune be usable, 
 The runes in the second row are the death rune version of each rune above.]=]
 L["CONDITIONPANEL_PVPFLAG"] = "Unit is PvP Flagged"
 L["CONDITIONPANEL_LEVEL"] = "Unit Level"
+L["CONDITIONPANEL_CLASS"] = "Unit Class"
 L["CONDITIONPANEL_NAME"] = "Unit Name"
 L["CONDITIONPANEL_NAMETOOLTIP"] = "Separate multiple names with semicolons (;)"
 L["CONDITIONPANEL_INSTANCETYPE"] = "Instance Type"

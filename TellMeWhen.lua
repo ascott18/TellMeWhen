@@ -35,9 +35,9 @@ local LBF = LibStub("LibButtonFacade", true)
 local AceDB = LibStub("AceDB-3.0")
 local LSM = LibStub("LibSharedMedia-3.0")
 
-TELLMEWHEN_VERSION = "4.1.0"
+TELLMEWHEN_VERSION = "4.1.1"
 TELLMEWHEN_VERSION_MINOR = ""
-TELLMEWHEN_VERSIONNUMBER = 41012 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL (although it is displayed in version warnings to prevent confusion about a warning for the same major version)
+TELLMEWHEN_VERSIONNUMBER = 41100 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL (although it is displayed in version warnings to prevent confusion about a warning for the same major version)
 TELLMEWHEN_MAXGROUPS = 10 	--this is a default, used by SetTheory (addon), so dont rename
 TELLMEWHEN_MAXROWS = 20
 local UPD_INTV = 0.06	--this is a default, local because i use it in onupdate functions
@@ -665,14 +665,8 @@ function TMW:OnInitialize()
 
 	if db.profile.ReceiveComm then
 		TMW:RegisterComm("TMW")
-		if RegisterAddonMessagePrefix then
-			RegisterAddonMessagePrefix("TMW") -- new in WoW 4.1
-		end
 	end
 	TMW:RegisterComm("TMWV")
-	if RegisterAddonMessagePrefix then
-		RegisterAddonMessagePrefix("TMWV") -- new in WoW 4.1
-	end
 
 	if IsInGuild() then
 		TMW:SendCommMessage("TMWV", "M:" .. TELLMEWHEN_VERSION .. "^m:" .. TELLMEWHEN_VERSION_MINOR .. "^R:" .. TELLMEWHEN_VERSIONNUMBER .. "^", "GUILD")

@@ -1047,7 +1047,7 @@ function ME:Update()
 		if k > 1 then
 			mg:SetPoint("TOP", ME[k-1], "BOTTOM", 0, 0)
 		end
-		mg:SetFrameLevel(TellMeWhen_IconEditor.Main.Icons:GetFrameLevel()+1)
+		mg:SetFrameLevel(TellMeWhen_IconEditor.Main.Icons:GetFrameLevel()+2)
 		UIDropDownMenu_SetSelectedValue(mg.icon, v)
 		local text = TMW:GetIconMenuText(strmatch(v, "TellMeWhen_Group(%d+)_Icon(%d+)"))
 		UIDropDownMenu_SetText(mg.icon, text)
@@ -2247,9 +2247,7 @@ function SUG:ADDON_LOADED(event, addon)
 		SUG:BuildClassSpellLookup()
 
 		SUG:RegisterComm("TMWSUG")
-		if RegisterAddonMessagePrefix then
-			RegisterAddonMessagePrefix("TMWSUG") -- new in WoW 4.1
-		end
+		
 		if IsInGuild() then
 			SUG:SendCommMessage("TMWSUG", SUG:Serialize("RCSL"), "GUILD")
 		end

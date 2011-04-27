@@ -78,6 +78,18 @@ test = function()
 	end
 end
 
+local classes = {
+	"DEATHKNIGHT",
+	"DRUID",
+	"HUNTER",
+	"MAGE",
+	"PRIEST",
+	"PALADIN",
+	"ROGUE",
+	"SHAMAN",
+	"WARLOCK",
+	"WARRIOR",
+}
 
 local firststanceid
 for k, v in ipairs(TMW.Stances) do
@@ -252,6 +264,7 @@ Env = {
 	UnitIsDeadOrGhost = UnitIsDeadOrGhost,
 	UnitAffectingCombat = UnitAffectingCombat,
 	UnitIsPVP = UnitIsPVP,
+	UnitClass = UnitClass,
 	GetNumRaidMembers = GetNumRaidMembers,
 	GetNumPartyMembers = GetNumPartyMembers,
 	UnitIsEnemy = UnitIsEnemy,
@@ -1076,7 +1089,25 @@ CNDT.Types = {
 		texttable = setmetatable({[-1] = BOSS}, {__index = function(t, k) return k end}),
 		icon = "Interface\\TargetingFrame\\UI-TargetingFrame-Skull",
 		tcoords = {0.05, 0.95, 0.03, 0.97},
-		funcstr = [[UnitLevel(c.Unit) c.Operator c.Level]],
+		funcstr = [[UnitClass(c.Unit) c.Operator c.Level]],
+	},
+	{ -- class
+		text = L["CONDITIONPANEL_CLASS"],
+		value = "CLASS",
+		min = 1,
+		max = #classes,
+		texttable = setmetatable({}, {__index = function(t, k) return classes[k] and LOCALIZED_CLASS_NAMES_MALE[classes[k]] end}),
+		icon = "Interface\\GLUES\\CHARACTERCREATE\\UI-CHARACTERCREATE-CLASSES",
+		nooperator = true,
+		tcoords = {
+			CLASS_ICON_TCOORDS[pclass][1]+.02,
+			CLASS_ICON_TCOORDS[pclass][2]-.02,
+			CLASS_ICON_TCOORDS[pclass][3]+.02, 
+			CLASS_ICON_TCOORDS[pclass][4]-.02,
+		},
+		funcstr = function(c)
+			return [[select(2, UnitClass(c.Unit)) == "]] .. (classes[c.Level] or "whoops") .. "\""
+		end,
 	},
 
 	{ -- instance type

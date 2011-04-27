@@ -1,3 +1,7 @@
+===v4.1.1===
+ * New Condition: Unit Class
+ * Fixed frame level issues in the meta editor
+
 ===v4.1.0===
  * Implemented sounds! It should be mostly functional, but if you find anything that is breaking or not working how it probably should, open a ticket.
  * Reduced CPU usage by about 20%.
