@@ -36,7 +36,7 @@ end
 local function Meta_OnUpdate(icon, time)
 	if icon.UpdateTimer <= time - UPD_INTV then
 		icon.UpdateTimer = time
-		local CndtCheck = icon.CndtCheck if CndtCheck and CndtCheck() then return end
+		local CndtCheck = icon.CndtCheck if CndtCheck and CndtCheck() then print("FAILED") return end
 		local CheckNext = icon.CheckNext
 		for k, i in ipairs(icon.Icons) do
 			local ic = _G[i]
@@ -46,7 +46,7 @@ local function Meta_OnUpdate(icon, time)
 				if alpha > 0 and ic.__shown then
 
 					if LBF and ic ~= icon.__previcon  then -- i dont like the way that ButtonFacade handles this (inefficient), so i'll do it myself
-						local icnt = ic.__normaltex
+						local icnt = ic.__normaltex -- icon.__normaltex = icon.__LBF_Normal or icon:GetNormalTexture() -- set during Icon_Update()
 						local iconnt = icon.__normaltex
 						if icnt and iconnt then
 							iconnt:SetVertexColor(icnt:GetVertexColor())
@@ -58,7 +58,7 @@ local function Meta_OnUpdate(icon, time)
 					icon.InvertBars = ic.InvertBars
 					icon.ShowTimer = ic.ShowTimer
 					icon.cooldown.noCooldownCount = ic.cooldown.noCooldownCount
-
+					print(ic, alpha)
 					icon:SetInfo(alpha, ic.__vrtxcolor, ic.__tex, ic.__start, ic.__duration, ic.__checkGCD, ic.__pbName, ic.__reverse, ic.__count)
 
 					AlreadyChecked[ic] = true
@@ -97,6 +97,7 @@ function Type:Setup(icon, groupID, iconID)
 	icon.ShowCBar = true
 	icon.InvertBars = false
 	icon:SetTexture("Interface\\Icons\\LevelUpIcon-LFD")
+	icon.ConditionAlpha = 0
 
 	icon:SetScript("OnUpdate", Meta_OnUpdate)
 end

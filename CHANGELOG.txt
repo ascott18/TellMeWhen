@@ -13,6 +13,8 @@
  ** Fixed stack text on buff icons
  ** Fixed: conditions.lua line 1220: bad argument #1 to 'gsub' (string expected, got nil) 
  ** Fixed: TellMeWhen_Options.lua:2217: attempt to index field '?' (a nil value)
+ ** Fixed the sheck sub-metas toggle for meta icons - accidentally broke the anchor for it
+ ** Meta icons should obey conditions
 
  ===v4.0.4===
  * Maybe fixed a really rare frame level bug with cooldowns?

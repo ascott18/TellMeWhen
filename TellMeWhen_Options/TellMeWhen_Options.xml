@@ -2859,9 +2859,7 @@
 					</CheckButton>
 					<CheckButton name="$parentCheckNext" inherits="TellMeWhen_CheckTemplate" parentKey="CheckNext">
 						<Anchors>
-							<Anchors>
-								<Anchor point="CENTER" relativeTo="$parentEnabled"/>
-							</Anchors>
+							<Anchor point="CENTER" relativeTo="$parentFakeHidden"/>
 						</Anchors>
 						<Scripts>
 							<OnLoad>
