@@ -91,6 +91,42 @@ local classes = {
 	"WARRIOR",
 }
 
+local totems = {}
+local totemtex = {}
+if pclass == "SHAMAN" then
+	totems = {
+		L["ICONMENU_TOTEM"] .. " - " .. L["FIRE"],
+		L["ICONMENU_TOTEM"] .. " - " .. L["EARTH"],
+		L["ICONMENU_TOTEM"] .. " - " .. L["WATER"],
+		L["ICONMENU_TOTEM"] .. " - " .. L["AIR"],
+	}
+	totemtex = { --TODO: change these to GetSpellTexture(#####)
+		"Interface\\Icons\\spell_nature_guardianward",
+		"Interface\\Icons\\spell_nature_stoneskintotem",
+		"Interface\\Icons\\spell_nature_manaregentotem",
+		"Interface\\Icons\\spell_nature_slowingtotem",
+	}
+elseif pclass == "DRUID" then
+	totems = {
+		format(L["MUSHROOM"], 1),
+		format(L["MUSHROOM"], 2),
+		format(L["MUSHROOM"], 3),
+	}
+	totemtex = {
+		GetSpellTexture(88747),
+		GetSpellTexture(88747),
+		GetSpellTexture(88747),
+	}
+elseif pclass == "DEATHKNIGHT" then
+	totems = {
+		L["ICONMENU_GHOUL"]
+	}
+	totemtex = {
+		GetSpellTexture(46584),
+	}
+end
+
+
 local firststanceid
 for k, v in ipairs(TMW.Stances) do
 	if v.class == pclass then
@@ -252,6 +288,11 @@ local function AuraDur(unit, name, filter, time)
 	end
 end
 
+local function TotemDuration(slot, time)
+	local have, name, start, duration = GetTotemInfo(slot)
+	return duration and duration ~= 0 and (duration - (time - start)) or 0
+end
+
 Env = {
 	UnitHealth = UnitHealth,
 	UnitHealthMax = UnitHealthMax,
@@ -291,6 +332,7 @@ Env = {
 	AuraDur = AuraDur,
 
 	CooldownDuration = CooldownDuration,
+	TotemDuration = TotemDuration,
 	ItemCooldownDuration = ItemCooldownDuration,
 
 	ZoneType = 0,
@@ -320,6 +362,15 @@ local bool = {[0] = L["TRUE"],[1] = L["FALSE"],}
 local usableunusable = {[0] = L["ICONMENU_USABLE"],[1] = L["ICONMENU_UNUSABLE"],}
 local presentabsent = {[0] = L["ICONMENU_PRESENT"],[1] = L["ICONMENU_ABSENT"],}
 local standardtcoords = {0.07, 0.93, 0.07, 0.93}
+local function formatSeconds(seconds)
+    local d =  seconds / 86400
+    local h = (seconds % 86400) / 3600
+    local m = (seconds % 86400  % 3600) / 60
+    local s =  seconds % 86400  % 3600  % 60
+    if d >= 1 then return format("%d:%02d:%02d:%02d", d, h, m, s) end
+    if h >= 1 then return format("%d:%02d:%02d", h, m, s) end
+    return format("%d:%02d", m, s)
+end
 
 CNDT.Types = {
 	{ -- health
@@ -430,7 +481,7 @@ CNDT.Types = {
 		icon = "Interface\\Icons\\inv_misc_gem_amethyst_02",
 		tcoords = standardtcoords,
 		funcstr = [[UnitPower(c.Unit, 7) c.Operator c.Level]],
-		shouldshow = pclass == "WARLOCK",
+		hidden = pclass ~= "WARLOCK",
 	},
 	{ -- holy power
 		text = HOLY_POWER,
@@ -442,7 +493,7 @@ CNDT.Types = {
 		icon = "Interface\\Icons\\Spell_Holy_Rune",
 		tcoords = standardtcoords,
 		funcstr = [[UnitPower(c.Unit, 9) c.Operator c.Level]],
-		shouldshow = pclass == "PALADIN",
+		hidden = pclass ~= "PALADIN",
 	},
 	{ -- eclipse
 		text = ECLIPSE,
@@ -457,7 +508,7 @@ CNDT.Types = {
 		icon = "Interface\\PlayerFrame\\UI-DruidEclipse",
 		tcoords = {0.65625000, 0.74609375, 0.37500000, 0.55468750},
 		funcstr = [[UnitPower(c.Unit, 8) c.Operator c.Level]],
-		shouldshow = pclass == "DRUID",
+		hidden = pclass ~= "DRUID",
 	},
 	{ -- eclipse direction
 		text = L["ECLIPSE_DIRECTION"],
@@ -471,7 +522,7 @@ CNDT.Types = {
 		icon = "Interface\\PlayerFrame\\UI-DruidEclipse",
 		tcoords = {0.55859375, 0.64843750, 0.57031250, 0.75000000},
 		funcstr = [[c.Level == EclipseDir]],
-		shouldshow = pclass == "DRUID",
+		hidden = pclass ~= "DRUID",
 		events = {"ECLIPSE_DIRECTION_CHANGE"},
 	},
 	{ -- pet happiness
@@ -485,7 +536,7 @@ CNDT.Types = {
 		icon = "Interface\\PetPaperDollFrame\\UI-PetHappiness",
 		tcoords = {0.390625, 0.5491, 0.03, 0.3305},
 		funcstr = GetPetHappiness and [[(GetPetHappiness() or 0) c.Operator c.Level]] or [[true]], -- dummy string to keep support for wowCN
-		shouldshow = not not (GetPetHappiness and (pclass == "HUNTER")), -- dont show if GetPetHappiness doesnt exist (if happiness is removed in the client version), not not because it must be false, not nil
+		hidden = not GetPetHappiness or pclass ~= "HUNTER", -- dont show if GetPetHappiness doesnt exist (if happiness is removed in the client version), not not because it must be false, not nil
 	},
 	{ -- runes
 		text = RUNES,
@@ -518,7 +569,7 @@ CNDT.Types = {
 				return [[true]] -- just a cheesy error prevention if no runes are checked
 			end
 		end,
-		shouldshow = pclass == "DEATHKNIGHT",
+		hidden = pclass ~= "DEATHKNIGHT",
 	},
 	{ -- combo
 		text = L["CONDITIONPANEL_COMBO"],
@@ -695,7 +746,7 @@ CNDT.Types = {
 		min = 0,
 		max = 100,
 		unit = PLAYER,
-		icon = "Interface\\Icons\\spell_nature_bloodlust",
+		icon = "Interface\\Icons\\ability_hunter_runningshot",
 		tcoords = standardtcoords,
 		funcstr = [[RangeHaste c.Operator c.Level]],
 		events = {"UNIT_RANGEDDAMAGE"},
@@ -819,12 +870,28 @@ CNDT.Types = {
 		max = 600,
 		name = function(editbox) TMW:TT(editbox, L["ICONMENU_COOLDOWN"] .. " - " .. L["ICONMENU_SPELL"], "CNDT_ONLYFIRST", 1, nil, 1) end,
 		unit = PLAYER,
-		texttable = setmetatable({[0] = format(D_SECONDS, 0).." ("..L["ICONMENU_USABLE"]..")"}, {__index = function(tbl, k) return format(D_SECONDS, k) end}),
+		texttable = setmetatable({[0] = formatSeconds(0).." ("..L["ICONMENU_USABLE"]..")"}, {__index = function(tbl, k) return formatSeconds(k) end}),
 		icon = "Interface\\Icons\\spell_holy_divineintervention",
 		tcoords = standardtcoords,
 		funcstr = [[CooldownDuration(c.NameFirst, time) c.Operator c.Level]],
 		spacebefore = true,
 	},
+	{ -- reactive
+		text = L["ICONMENU_REACTIVE"],
+		tooltip = L["REACTIVECNDT_DESC"],
+		value = "REACTIVE",
+		category = L["ICONFUNCTIONS"],
+		min = 0,
+		max = 1,
+		name = function(editbox) TMW:TT(editbox, "ICONMENU_REACTIVE", "CNDT_ONLYFIRST", nil, nil, 1) end,
+		nooperator = true,
+		unit = false,
+		texttable = usableunusable,
+		icon = "Interface\\Icons\\ability_warrior_revenge",
+		tcoords = standardtcoords,
+		funcstr = [[c.1nil == IsUsableSpell(c.NameFirst)]],
+	},
+	
 	{ -- item cooldown
 		text = L["ICONMENU_COOLDOWN"] .. " - " .. L["ICONMENU_ITEM"],
 		value = "ITEMCD",
@@ -833,11 +900,40 @@ CNDT.Types = {
 		max = 600,
 		name = function(editbox) TMW:TT(editbox, L["ICONMENU_COOLDOWN"] .. " - " .. L["ICONMENU_ITEM"], "CNDT_ONLYFIRST", 1, nil, 1) end,
 		unit = PLAYER,
-		texttable = setmetatable({[0] = format(D_SECONDS, 0).." ("..L["ICONMENU_USABLE"]..")"}, {__index = function(tbl, k) return format(D_SECONDS, k) end}),
+		texttable = setmetatable({[0] = formatSeconds(0).." ("..L["ICONMENU_USABLE"]..")"}, {__index = function(tbl, k) return formatSeconds(k) end}),
 		icon = "Interface\\Icons\\inv_jewelry_trinketpvp_01",
 		tcoords = standardtcoords,
 		funcstr = [[ItemCooldownDuration(c.NameFirst, time) c.Operator c.Level]],
+		spacebefore = true,
 	},
+	{ -- item in bags
+		text = L["ITEMINBAGS"],
+		value = "ITEMINBAGS",
+		category = L["ICONFUNCTIONS"],
+		min = 0,
+		max = 50,
+		texttable = setmetatable({}, {__index = function(tbl, k) return format(ITEM_SPELL_CHARGES, k) end}),
+		name = function(editbox) TMW:TT(editbox, "ITEMINBAGS", "CNDT_ONLYFIRST", nil, nil, 1) end,
+		unit = false,
+		icon = "Interface\\Icons\\inv_misc_bag_08",
+		tcoords = standardtcoords,
+		funcstr = [[GetItemCount(c.ItemID, nil, 1) c.Operator c.Level]],
+	},
+	{ -- item equipped
+		text = L["ITEMEQUIPPED"],
+		value = "ITEMEQUIPPED",
+		category = L["ICONFUNCTIONS"],
+		min = 0,
+		max = 1,
+		nooperator = true,
+		texttable = bool,
+		name = function(editbox) TMW:TT(editbox, "ITEMEQUIPPED", "CNDT_ONLYFIRST", nil, nil, 1) end,
+		unit = false,
+		icon = "Interface\\PaperDoll\\UI-PaperDoll-Slot-MainHand",
+		tcoords = standardtcoords,
+		funcstr = [[c.1nil == IsEquippedItem(c.ItemID)]],
+	},
+	
 	{ -- unit buff duration
 		text = L["ICONMENU_BUFF"] .. " - " .. L["DURATIONPANEL_TITLE"],
 		value = "BUFFDUR",
@@ -845,10 +941,11 @@ CNDT.Types = {
 		min = 0,
 		max = 600,
 		name = function(editbox) TMW:TT(editbox, L["ICONMENU_BUFF"] .. " - " .. L["DURATIONPANEL_TITLE"], "BUFFCNDT_DESC", 1, nil, 1) end,
-		texttable = setmetatable({[0] = "0 ("..L["ICONMENU_ABSENT"].."/"..L["INFINITE"]..")"}, {__index = function(tbl, k) return format(D_SECONDS, k) end}),
+		texttable = setmetatable({[0] = formatSeconds(0).." ("..L["ICONMENU_ABSENT"].."/"..L["INFINITE"]..")"}, {__index = function(tbl, k) return formatSeconds(k) end}),
 		icon = "Interface\\Icons\\spell_nature_rejuvenation",
 		tcoords = standardtcoords,
 		funcstr = [[AuraDur(c.Unit, c.NameName, "HELPFUL", time) c.Operator c.Level]],
+		spacebefore = true,
 	},
 	{ -- unit buff stacks
 		text = L["ICONMENU_BUFF"] .. " - " .. L["STACKSPANEL_TITLE"],
@@ -869,7 +966,7 @@ CNDT.Types = {
 		min = 0,
 		max = 600,
 		name = function(editbox) TMW:TT(editbox, L["ICONMENU_DEBUFF"] .. " - " .. L["DURATIONPANEL_TITLE"], "BUFFCNDT_DESC", 1, nil, 1) end,
-		texttable = setmetatable({[0] = "0 ("..L["ICONMENU_ABSENT"].."/"..L["INFINITE"]..")"}, {__index = function(tbl, k) return format(D_SECONDS, k) end}),
+		texttable = setmetatable({[0] = formatSeconds(0).." ("..L["ICONMENU_ABSENT"].."/"..L["INFINITE"]..")"}, {__index = function(tbl, k) return formatSeconds(k) end}),
 		icon = "Interface\\Icons\\spell_shadow_abominationexplosion",
 		tcoords = standardtcoords,
 		funcstr = [[AuraDur(c.Unit, c.NameName, "HARMFUL", time) c.Operator c.Level]],
@@ -886,58 +983,100 @@ CNDT.Types = {
 		tcoords = standardtcoords,
 		funcstr = [[AuraStacks(c.Unit, c.NameName, "HARMFUL") c.Operator c.Level]],
 	},
-	{ -- reactive
-		text = L["ICONMENU_REACTIVE"],
-		tooltip = L["REACTIVECNDT_DESC"],
-		value = "REACTIVE",
-		category = L["ICONFUNCTIONS"],
-		min = 0,
-		max = 1,
-		name = function(editbox) TMW:TT(editbox, "ICONMENU_REACTIVE", "CNDT_ONLYFIRST", nil, nil, 1) end,
-		nooperator = true,
-		unit = false,
-		texttable = usableunusable,
-		icon = "Interface\\Icons\\ability_warrior_revenge",
-		tcoords = standardtcoords,
-		funcstr = [[c.1nil == IsUsableSpell(c.NameFirst)]],
-	},
+	
 	{ -- mainhand
-		text = INVTYPE_WEAPONMAINHAND .. " - " .. L["ICONMENU_WPNENCHANT"],
+		text = L["ICONMENU_WPNENCHANT"] .. " - " .. INVTYPE_WEAPONMAINHAND,
 		value = "MAINHAND",
 		category = L["ICONFUNCTIONS"],
 		min = 0,
 		max = 600,
 		unit = false,
-		texttable = setmetatable({[0] = format(D_SECONDS, 0).." ("..L["ICONMENU_ABSENT"]..")"}, {__index = function(tbl, k) return format(D_SECONDS, k) end}),
+		texttable = setmetatable({[0] = formatSeconds(0).." ("..L["ICONMENU_ABSENT"]..")"}, {__index = function(tbl, k) return formatSeconds(k) end}),
 		icon = function() return GetInventoryItemTexture("player", GetInventorySlotInfo("MainHandSlot")) or "Interface\\Icons\\inv_weapon_shortblade_14" end,
 		tcoords = standardtcoords,
 		funcstr = [[(select(2, GetWeaponEnchantInfo()) or 0)/1000 c.Operator c.Level]],
+		spacebefore = true,
 	},
 	{ -- offhand
-		text = INVTYPE_WEAPONOFFHAND .. " - " .. L["ICONMENU_WPNENCHANT"],
+		text = L["ICONMENU_WPNENCHANT"] .. " - " .. INVTYPE_WEAPONOFFHAND,
 		value = "OFFHAND",
 		category = L["ICONFUNCTIONS"],
 		min = 0,
 		max = 600,
 		unit = false,
-		texttable = setmetatable({[0] = format(D_SECONDS, 0).." ("..L["ICONMENU_ABSENT"]..")"}, {__index = function(tbl, k) return format(D_SECONDS, k) end}),
+		texttable = setmetatable({[0] = formatSeconds(0).." ("..L["ICONMENU_ABSENT"]..")"}, {__index = function(tbl, k) return formatSeconds(k) end}),
 		icon = function() return GetInventoryItemTexture("player", GetInventorySlotInfo("SecondaryHandSlot")) or "Interface\\Icons\\inv_weapon_shortblade_15" end,
 		tcoords = standardtcoords,
 		funcstr = [[(select(5, GetWeaponEnchantInfo()) or 0)/1000 c.Operator c.Level]],
 	},
 	{ -- thrown
-		text = INVTYPE_THROWN .. " - " .. L["ICONMENU_WPNENCHANT"],
+		text = L["ICONMENU_WPNENCHANT"] .. " - " .. INVTYPE_THROWN,
 		value = "THROWN",
 		category = L["ICONFUNCTIONS"],
 		min = 0,
 		max = 600,
 		unit = false,
-		texttable = setmetatable({[0] = format(D_SECONDS, 0).." ("..L["ICONMENU_ABSENT"]..")"}, {__index = function(tbl, k) return format(D_SECONDS, k) end}),
+		texttable = setmetatable({[0] = formatSeconds(0).." ("..L["ICONMENU_ABSENT"]..")"}, {__index = function(tbl, k) return formatSeconds(k) end}),
 		icon = function() return GetInventoryItemTexture("player", GetInventorySlotInfo("RangedSlot")) or "Interface\\Icons\\inv_throwingknife_06" end,
 		tcoords = standardtcoords,
 		funcstr = [[(select(8, GetWeaponEnchantInfo()) or 0)/1000 c.Operator c.Level]],
-		shouldshow = pclass == "ROGUE",
+		hidden = pclass ~= "ROGUE",
 	},
+	
+	{ -- totem1
+		text = totems[1],
+		value = "TOTEM1",
+		category = L["ICONFUNCTIONS"],
+		min = 0,
+		max = 420,
+		unit = false,
+		texttable = setmetatable({[0] = formatSeconds(0).." ("..L["ICONMENU_ABSENT"]..")"}, {__index = function(tbl, k) return formatSeconds(k) end}),
+		icon = totemtex[1],
+		tcoords = standardtcoords,
+		funcstr = [[TotemDuration(1, time) c.Operator c.Level]],
+		hidden = not totems[1],
+		spacebefore = true,
+	},
+	{ -- totem2
+		text = totems[2],
+		value = "TOTEM2",
+		category = L["ICONFUNCTIONS"],
+		min = 0,
+		max = 420,
+		unit = false,
+		texttable = setmetatable({[0] = formatSeconds(0).." ("..L["ICONMENU_ABSENT"]..")"}, {__index = function(tbl, k) return formatSeconds(k) end}),
+		icon = totemtex[2],
+		tcoords = standardtcoords,
+		funcstr = [[TotemDuration(2, time) c.Operator c.Level]],
+		hidden = not totems[2],
+	},
+	{ -- totem3
+		text = totems[3],
+		value = "TOTEM3",
+		category = L["ICONFUNCTIONS"],
+		min = 0,
+		max = 420,
+		unit = false,
+		texttable = setmetatable({[0] = formatSeconds(0).." ("..L["ICONMENU_ABSENT"]..")"}, {__index = function(tbl, k) return formatSeconds(k) end}),
+		icon = totemtex[3],
+		tcoords = standardtcoords,
+		funcstr = [[TotemDuration(3, time) c.Operator c.Level]],
+		hidden = not totems[3],
+	},
+	{ -- totem4
+		text = totems[4],
+		value = "TOTEM4",
+		category = L["ICONFUNCTIONS"],
+		min = 0,
+		max = 420,
+		unit = false,
+		texttable = setmetatable({[0] = formatSeconds(0).." ("..L["ICONMENU_ABSENT"]..")"}, {__index = function(tbl, k) return formatSeconds(k) end}),
+		icon = totemtex[4],
+		tcoords = standardtcoords,
+		funcstr = [[TotemDuration(4, time) c.Operator c.Level]],
+		hidden = not totems[4],
+	},
+	
 	{ -- casting
 		text = L["ICONMENU_CAST"],
 		value = "CASTING",
@@ -954,37 +1093,8 @@ CNDT.Types = {
 		icon = "Interface\\Icons\\Temp",
 		tcoords = standardtcoords,
 		funcstr = [[UnitCast(c.Unit, c.Level)]],
-	},
-
-	{ -- item in bags
-		text = L["ITEMINBAGS"],
-		value = "ITEMINBAGS",
-		category = L["ICONFUNCTIONS"],
-		min = 0,
-		max = 50,
-		texttable = setmetatable({}, {__index = function(tbl, k) return format(ITEM_SPELL_CHARGES, k) end}),
-		name = function(editbox) TMW:TT(editbox, "ITEMINBAGS", "CNDT_ONLYFIRST", nil, nil, 1) end,
-		unit = false,
-		icon = "Interface\\Icons\\inv_misc_bag_08",
-		tcoords = standardtcoords,
-		funcstr = [[GetItemCount(c.ItemID, nil, 1) c.Operator c.Level]],
 		spacebefore = true,
 	},
-	{ -- item equipped
-		text = L["ITEMEQUIPPED"],
-		value = "ITEMEQUIPPED",
-		category = L["ICONFUNCTIONS"],
-		min = 0,
-		max = 1,
-		nooperator = true,
-		texttable = bool,
-		name = function(editbox) TMW:TT(editbox, "ITEMEQUIPPED", "CNDT_ONLYFIRST", nil, nil, 1) end,
-		unit = false,
-		icon = "Interface\\PaperDoll\\UI-PaperDoll-Slot-MainHand",
-		tcoords = standardtcoords,
-		funcstr = [[c.1nil == IsEquippedItem(c.ItemID)]],
-	},
-
 
 
 --////////////////////////////////////icon functions
@@ -1192,7 +1302,7 @@ CNDT.Types = {
 			return (TMW.CSN[c.Level] and "\""..TMW.CSN[c.Level].."\"" or "nil") .. [[ == ShapeshiftForm]]
 		end,
 		events = {"UPDATE_SHAPESHIFT_FORM"},
-		shouldshow = #TMW.CSN > 0,
+		hidden = #TMW.CSN == 0,
 	},
 	{ -- talent spec
 		text = L["UIPANEL_SPEC"],
@@ -1262,7 +1372,7 @@ function CNDT:ProcessConditions(icon)
 		end
 
 		if thiscondtstr then
-			local thisstr = andor .. "(" .. thiscondtstr .. ")"
+			local thisstr = andor .. "(" .. strrep("(", c.PrtsBefore) .. thiscondtstr .. strrep(")", c.PrtsAfter)  .. ")"
 
 			if strfind(thisstr, "c.Unit") and (strfind(c.Unit, "maintank") or strfind(c.Unit, "mainassist")) then
 				local unit = gsub(c.Unit, "|cFFFF0000#|r", "1")
@@ -1300,13 +1410,18 @@ function CNDT:ProcessConditions(icon)
 		]]..icon:GetName()..[[.CndtFailed = nil
 	end]]
 
-	local func, err = functionCache[funcstr] or loadstring(funcstr, icon:GetName() .. " Condition")
 
+	if functionCache[funcstr] then
+		icon.CndtCheck = functionCache[funcstr]
+		return functionCache[funcstr]
+	end
+		
+	local func, err = loadstring(funcstr, icon:GetName() .. " Condition")
 	if func then
 		func = setfenv(func, Env)
 		icon.CndtCheck = func
 		functionCache[funcstr] = func
-		return funcs
+		return func
 	elseif TMW.debug and err then
 		print(funcstr)
 		error(err)

@@ -2874,7 +2874,7 @@ local addedcategories = {}
 function CNDT:TypeMenu_DropDown()
 	wipe(addedcategories)
 	for k, v in pairs(CNDT.Types) do
-		if ((UIDROPDOWNMENU_MENU_LEVEL == 2 and v.category == UIDROPDOWNMENU_MENU_VALUE) or (UIDROPDOWNMENU_MENU_LEVEL == 1 and not v.category)) and v.shouldshow ~= false then
+		if ((UIDROPDOWNMENU_MENU_LEVEL == 2 and v.category == UIDROPDOWNMENU_MENU_VALUE) or (UIDROPDOWNMENU_MENU_LEVEL == 1 and not v.category)) and not v.hidden then
 			if v.spacebefore then
 				local info = UIDropDownMenu_CreateInfo()
 				info.text = ""
@@ -3016,6 +3016,7 @@ function CNDT:AddRemoveHandler()
 	CNDT[1].Up:Hide()
 	while CNDT[i] do
 		CNDT[i].Down:Show()
+		CNDT[i].RightParenthesis:Show()
 		if CNDT[i+1] then
 			if CNDT[i]:IsShown() then
 				CNDT[i+1].AddDelete:Show()
@@ -3025,6 +3026,7 @@ function CNDT:AddRemoveHandler()
 				CNDT[i+1]:Hide()
 				if i > 1 then
 					CNDT[i-1].Down:Hide()
+					CNDT[i-1].RightParenthesis:Hide()
 				end
 			end
 		else -- this handles the last one in the frame
@@ -3033,6 +3035,7 @@ function CNDT:AddRemoveHandler()
 			else
 				if i > 1 then
 					CNDT[i-1].Down:Hide()
+					CNDT[i-1].RightParenthesis:Hide()
 				end
 			end
 		end
@@ -3098,7 +3101,28 @@ function CNDT:OK()
 				condition.Runes[rune:GetID()] = rune:GetChecked()
 			end
 		end
-
+		
+		local n = 0
+		if group.RightParenthesis:IsShown() then
+			for k, frame in pairs(group.RightParenthesis) do
+				if type(frame) == "table" and frame:GetChecked() then
+					n = n + 1
+				end
+			end
+		end
+		condition.PrtsBefore = n
+		
+		n = 0
+		if group.LeftParenthesis:IsShown() then
+			for k, frame in pairs(group.LeftParenthesis) do
+				if type(frame) == "table" and frame:GetChecked() then
+					n = n + 1
+				end
+			end
+		end
+		condition.PrtsAfter = n
+		
+		
 		i=i+1
 	end
 	while CNDT[i] and not CNDT[i]:IsShown() do
@@ -3111,6 +3135,7 @@ end
 function CNDT:Load()
 	local groupID, iconID = TMW.CI.g, TMW.CI.i
 	local conditions = db.profile.Groups[groupID].Icons[iconID].Conditions
+	IE.Conditions.Warning:SetText(nil)
 	if #conditions > 0 then
 		for i = #conditions, TELLMEWHEN_MAXCONDITIONS do
 			CNDT:ClearGroup(CNDT[i])
@@ -3120,29 +3145,41 @@ function CNDT:Load()
 		local i = 1
 		while #conditions >= i do
 			local group = CNDT[i]
-			CNDT:SetUIDropdownText(group.Type, conditions[i].Type, CNDT.Types)
-			group.Unit:SetText(conditions[i].Unit)
-			group.EditBox:SetText(conditions[i].Name)
-			CNDT:SetUIDropdownText(group.Icon, conditions[i].Icon, TMW.Icons)
+			local condition = conditions[i]
+			
+			CNDT:SetUIDropdownText(group.Type, condition.Type, CNDT.Types)
+			group.Unit:SetText(condition.Unit)
+			group.EditBox:SetText(condition.Name)
+			CNDT:SetUIDropdownText(group.Icon, condition.Icon, TMW.Icons)
 
-			local v = CNDT:SetUIDropdownText(group.Operator, conditions[i].Operator, CNDT.Operators)
+			local v = CNDT:SetUIDropdownText(group.Operator, condition.Operator, CNDT.Operators)
 			TMW:TT(group.Operator, v.tooltipText, nil, 1, nil, 1)
 
-			group.Slider:SetValue(conditions[i].Level or 0)
+			group.Slider:SetValue(condition.Level or 0)
 			CNDT:SetValText(group)
 
 			for k, rune in pairs(group.Runes) do
 				if type(rune) == "table" then
-					rune:SetChecked(conditions[i].Runes[rune:GetID()])
+					rune:SetChecked(condition.Runes[rune:GetID()])
+				end
+			end
+			
+			for k, frame in pairs(group.RightParenthesis) do
+				if type(frame) == "table" then
+					group.RightParenthesis[k]:SetChecked(condition.PrtsBefore >= k)
+				end
+			end
+			for k, frame in pairs(group.LeftParenthesis) do
+				if type(frame) == "table" then
+					group.LeftParenthesis[k]:SetChecked(condition.PrtsAfter >= k)
 				end
 			end
 
+			group.And:SetChecked(condition.AndOr == "AND")
+			group.Or:SetChecked(condition.AndOr == "OR")
+			
 			group:Show()
 
-			if i > 1 then
-				group.And:SetChecked(conditions[i].AndOr == "AND")
-				group.Or:SetChecked(conditions[i].AndOr == "OR")
-			end
 			i=i+1
 		end
 	else

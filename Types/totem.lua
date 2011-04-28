@@ -63,20 +63,12 @@ local function Totem_OnUpdate(icon, time)
 			if Slots[iSlot] then
 				local _, totemName, start, duration, totemIcon = GetTotemInfo(iSlot)
 				if start ~= 0 and totemName and ((NameFirst == "") or NameNameDictionary[strlower(totemName)]) then
-					local Alpha = icon.Alpha
-
-					local color = icon.UnAlpha ~= 0 and pr or 1
-
-					icon:SetInfo(Alpha, color, totemIcon, start, duration)
+					icon:SetInfo(icon.Alpha, icon.UnAlpha ~= 0 and pr or 1, totemIcon, start, duration)
 					return
 				end
 			end
 		end
-
-		local color = icon.Alpha ~= 0 and ab or 1
-
-		icon:SetInfo(icon.UnAlpha, color, icon.FirstTexture, 0, 0)
-
+		icon:SetInfo(icon.UnAlpha, icon.Alpha ~= 0 and ab or 1, icon.FirstTexture, 0, 0)
 	end
 end
 

@@ -154,10 +154,7 @@ local function UnitCooldown_OnUpdate(icon, time)
 
 		local UnAlpha = icon.UnAlpha
 		if UnAlpha ~= 0 and unstart then
-
-			local color = (not icon.ShowTimer and Alpha ~= 0) and .5 or 1
-
-			icon:SetInfo(UnAlpha, color, SpellTextures[unname], unstart, ICDDuration)
+			icon:SetInfo(UnAlpha, (not icon.ShowTimer and Alpha ~= 0) and .5 or 1, SpellTextures[unname], unstart, ICDDuration)
 			return
 		end
 		icon:SetAlpha(0)

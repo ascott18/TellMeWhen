@@ -125,9 +125,7 @@ local function ICD_OnUpdate(icon, time)
 		if timesince > ICDDuration then
 			icon:SetInfo(icon.Alpha, 1, nil, 0, 0)
 		else
-			local color = icon.Alpha ~= 0 and (icon.ShowTimer and 1 or .5) or 1
-
-			icon:SetInfo(icon.UnAlpha, color, nil, icon.StartTime, ICDDuration)
+			icon:SetInfo(icon.UnAlpha, icon.Alpha ~= 0 and (icon.ShowTimer and 1 or .5) or 1, nil, icon.StartTime, ICDDuration)
 		end
 	end
 end

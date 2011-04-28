@@ -110,14 +110,9 @@ local function WpnEnchant_OnUpdate(icon, time)
 			end
 			local start = floor(time - duration + expiration)
 
-			local color = icon.UnAlpha ~= 0 and pr or 1
-
-			icon:SetInfo(icon.Alpha, color, nil, start, duration)
+			icon:SetInfo(icon.Alpha, icon.UnAlpha ~= 0 and pr or 1, nil, start, duration)
 		else
-
-			local color = icon.Alpha ~= 0 and ab or 1
-
-			icon:SetInfo(icon.UnAlpha, color, nil, 0, 0)
+			icon:SetInfo(icon.UnAlpha, icon.Alpha ~= 0 and ab or 1, nil, 0, 0)
 		end
 	end
 end

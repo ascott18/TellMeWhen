@@ -68,22 +68,16 @@ local function Cast_OnUpdate(icon, time)
 				end
 
 				if name and not (notInterruptible and Interruptible) and (NameFirst == "" or NameNameDictionary[strlower(name)]) then
-
-					local color = icon.UnAlpha ~= 0 and pr or 1
-
 					start, endTime = start/1000, endTime/1000
 					local duration = endTime - start
 
-					icon:SetInfo(icon.Alpha, color, iconTexture, start, duration, nil, nil, reverse)
+					icon:SetInfo(icon.Alpha, icon.UnAlpha ~= 0 and pr or 1, iconTexture, start, duration, nil, nil, reverse)
 
 					return
 				end
 			end
 		end
-
-		local color = icon.Alpha ~= 0 and ab or 1
-
-		icon:SetInfo(icon.UnAlpha, color, nil, 0, 0)
+		icon:SetInfo(icon.UnAlpha, icon.Alpha ~= 0 and ab or 1, nil, 0, 0)
 	end
 end
 

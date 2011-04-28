@@ -435,6 +435,79 @@
 			</OnLoad>
 		</Scripts>
 	</Button>
+	
+	<CheckButton name="TellMeWhen_ConditionEditorParenthesisTemplate" virtual="true">
+		<Size x="20" y="20"/>
+		<HitRectInsets>
+			<AbsInset left="4" right="4" top="0" bottom="0"/>
+		</HitRectInsets>
+		<Layers>
+			<Layer level="ARTWORK">
+				<FontString name="$parentText" parentKey="text" justifyH="LEFT" inherits="GameFontHighlight">
+					<Anchors>
+						<Anchor point="CENTER"/>
+					</Anchors>
+				</FontString>
+			</Layer>
+		</Layers>
+		<Scripts>
+			<OnLoad>
+				if strfind(self:GetParent():GetName(), "Left") then
+					self.text:SetText(")")
+				else
+					self.text:SetText("(")
+				end
+				function self:SetChecked(checked)
+					self.checked = checked
+					if checked then
+						self.text:SetTextColor(0, 1, 0, 1)
+					else
+						self.text:SetTextColor(.4, .4, .4, 1)
+					end
+					
+					local numleft, numright = 0, 0
+					for k, v in ipairs(TMW.CNDT) do
+						if v:IsShown() and v.LeftParenthesis:IsShown() then
+							for k, v in ipairs(v.LeftParenthesis) do
+								if v:GetChecked() then
+									numleft = numleft + 1	
+								end
+							end
+						end
+						if v:IsShown() and v.RightParenthesis:IsShown() then
+							for k, v in ipairs(v.RightParenthesis) do
+								if v:GetChecked() then
+									numright = numright + 1
+								end
+							end
+						end
+					end
+					if numright ~= numleft then
+						local suffix = ""
+						if numright > numleft then
+							suffix = " +" .. numright-numleft .. " '('"
+						else
+							suffix = " +" .. numleft-numright .. " ')'"
+						end
+						TMW.IE.Conditions.Warning:SetText(TMW.L["PARENTHESISWARNING"] .. suffix)
+					else
+						TMW.IE.Conditions.Warning:SetText(nil)
+					end
+				end
+				
+				function self:GetChecked()
+					return self.checked
+				end
+				self:GetParent()[self:GetID()] = self
+			</OnLoad>
+			<OnClick>
+				self:SetChecked(not self.checked)
+				TMW.CNDT:OK()
+			</OnClick>
+		</Scripts>
+		<HighlightTexture urgency="5" file="Interface\Buttons\UI-CheckBox-Highlight" alphaMode="ADD"/>
+	</CheckButton>
+	
 	<Frame name="TellMeWhen_ConditionGroup" virtual="true">
 		<Size>
 			<AbsDimension x="559" y="59" />
@@ -860,7 +933,7 @@
 
 
 			<CheckButton name="$parentAnd" inherits="TellMeWhen_CheckTemplate" parentKey="And">
-				<Size x="18" y="18"/>
+				<Size x="20" y="20"/>
 				<!-- <Anchors>
 					<Anchor point="TOPRIGHT">
 						<Offset x="-68" y="21" />
@@ -871,7 +944,7 @@
 						TMW:TT(self, "CONDITIONPANEL_ANDOR", "CONDITIONPANEL_AND")
 						self.text:SetText(TMW.L["CONDITIONPANEL_AND"])
 						self.text:SetWidth(40)
-						self:SetPoint("BOTTOMRIGHT", self:GetParent(), "TOP", -self.text:GetWidth()-1, 0)
+						self:SetPoint("BOTTOMRIGHT", self:GetParent(), "TOP", -self.text:GetWidth()-1, -3)
 					</OnLoad>
 					<OnClick>
 						self:GetParent().Or:SetChecked(nil)
@@ -881,10 +954,10 @@
 				</Scripts>
 			</CheckButton>
 			<CheckButton name="$parentOr" inherits="TellMeWhen_CheckTemplate" parentKey="Or">
-				<Size x="18" y="18"/>
+				<Size x="20" y="20"/>
 				<Anchors>
 					<Anchor point="BOTTOMLEFT" relativeTo="$parent" relativePoint="TOP">
-						<Offset x="1" y="0" />
+						<Offset x="1" y="-3" />
 					</Anchor>
 				</Anchors>
 				<Scripts>
@@ -900,7 +973,69 @@
 					</OnClick>
 				</Scripts>
 			</CheckButton>
-
+			
+			<Frame name="$parentRightParenthesis" parentKey="RightParenthesis">
+				<Size x="100" y="20"/>
+				<Anchors>
+					<Anchor point="BOTTOMRIGHT" relativeTo="$parent" relativePoint="TOPRIGHT">
+						<Offset x="-80" y="-2" />
+					</Anchor>
+				</Anchors>
+				<Frames>
+					<CheckButton name="$parent1" inherits="TellMeWhen_ConditionEditorParenthesisTemplate" id="1">
+						<Anchors>
+							<Anchor point="LEFT" relativeTo="$parent" relativePoint="LEFT">
+								<Offset x="0" y="0" />
+							</Anchor>
+						</Anchors>
+					</CheckButton>
+					<CheckButton name="$parent2" inherits="TellMeWhen_ConditionEditorParenthesisTemplate" id="2">
+						<Anchors>
+							<Anchor point="LEFT" relativeTo="$parent1" relativePoint="RIGHT">
+								<Offset x="-8" y="0" />
+							</Anchor>
+						</Anchors>
+					</CheckButton>
+					<CheckButton name="$parent3" inherits="TellMeWhen_ConditionEditorParenthesisTemplate" id="3">
+						<Anchors>
+							<Anchor point="LEFT" relativeTo="$parent2" relativePoint="RIGHT">
+								<Offset x="-8" y="0" />
+							</Anchor>
+						</Anchors>
+					</CheckButton>
+				</Frames>
+			</Frame>
+			<Frame name="$parentLeftParenthesis" parentKey="LeftParenthesis">
+				<Size x="100" y="20"/>
+				<Anchors>
+					<Anchor point="TOPLEFT" relativeTo="$parent" relativePoint="BOTTOMLEFT">
+						<Offset x="80" y="2" />
+					</Anchor>
+				</Anchors>
+				<Frames>
+					<CheckButton name="$parent1" inherits="TellMeWhen_ConditionEditorParenthesisTemplate" id="1">
+						<Anchors>
+							<Anchor point="RIGHT" relativeTo="$parent" relativePoint="RIGHT">
+								<Offset x="0" y="0" />
+							</Anchor>
+						</Anchors>
+					</CheckButton>
+					<CheckButton name="$parent2" inherits="TellMeWhen_ConditionEditorParenthesisTemplate" id="2">
+						<Anchors>
+							<Anchor point="RIGHT" relativeTo="$parent1" relativePoint="LEFT">
+								<Offset x="8" y="0" />
+							</Anchor>
+						</Anchors>
+					</CheckButton>
+					<CheckButton name="$parent3" inherits="TellMeWhen_ConditionEditorParenthesisTemplate" id="3">
+						<Anchors>
+							<Anchor point="RIGHT" relativeTo="$parent2" relativePoint="LEFT">
+								<Offset x="8" y="0" />
+							</Anchor>
+						</Anchors>
+					</CheckButton>
+				</Frames>
+			</Frame>
 
 			<Button name="$parentUp" parentKey="Up">
 				<Size>
@@ -2993,13 +3128,14 @@
 									<Frame name="$parentGroup1" inherits="TellMeWhen_ConditionGroup" id="1">
 										<Anchors>
 											<Anchor point="TOPLEFT">
-												<Offset x="12" y="-7" />
+												<Offset x="12" y="-16" />
 											</Anchor>
 										</Anchors>
 										<Scripts>
 											<OnLoad>
 												self.And:Hide()
 												self.Or:Hide()
+												self.LeftParenthesis:Hide()
 												TMW.CNDT[self:GetID()] = self
 												self:GetParent()[self:GetID()] = self
 											</OnLoad>
@@ -3040,10 +3176,25 @@
 					</ScrollFrame>
 				</Frames>
 				<Scripts>
-					<OnLoad> self:RegisterForDrag("LeftButton") self:Hide()</OnLoad>
+					<OnLoad>
+						self:RegisterForDrag("LeftButton")
+						self:Hide()
+						self.Warning:SetPoint("BOTTOMLEFT", self, 170, 15)
+					</OnLoad>
 					<OnDragStart> TellMeWhen_IconEditor:StartMoving() </OnDragStart>
 					<OnDragStop> TellMeWhen_IconEditor:StopMovingOrSizing() </OnDragStop>
 				</Scripts>
+				<Layers>
+					<Layer level="OVERLAY">
+						<FontString name="$parentWarning" parentKey="Warning" inherits="GameFontNormalLeftRed" justifyH="RIGHT">
+							<Anchors>
+								<Anchor point="BOTTOMLEFT" >
+									<Offset x="168" y="17" />
+								</Anchor>
+							</Anchors>
+						</FontString>
+					</Layer>
+				</Layers>
 			</Frame>
 			<Frame name="$parentSound" enableMouse="true" hidden="true" parentKey="Sound">
 				<Anchors>
@@ -3430,7 +3581,7 @@
 				</Scripts>
 			</Frame> -->
 
-			<Button name="$parentOkayButton" parentKey="OkayButton" inherits="UIPanelButtonTemplate" text="OKAY">
+			<Button name="$parentOkay" parentKey="OkayButton" inherits="UIPanelButtonTemplate" text="OKAY">
 				<Size>
 					<AbsDimension x="60" y="17" />
 				</Size>
@@ -3444,7 +3595,7 @@
 					<OnClick>self:GetParent():Hide() </OnClick>
 				</Scripts>
 			</Button>
-			<Button name="$parentCloseButton" parentKey="CloseButton" inherits="UIPanelCloseButton">
+			<Button name="$parentClose" parentKey="CloseButton" inherits="UIPanelCloseButton">
 				<Anchors>
 					<Anchor point="CENTER" relativeTo="$parent" relativePoint="TOPRIGHT">
 						<Offset>
@@ -3457,7 +3608,7 @@
 					<OnClick>self:GetParent():Hide()</OnClick>
 				</Scripts>
 			</Button>
-			<Button name="$parentResetButton" inherits="GameMenuButtonTemplate" text="RESET">
+			<Button name="$parentReset" inherits="GameMenuButtonTemplate" text="RESET">
 				<Size>
 					<AbsDimension x="150" y="17" />
 				</Size>
@@ -3474,7 +3625,7 @@
 				<HighlightFont style="GameFontHighlight"/>
 				<DisabledFont style="GameFontDisable"/>
 			</Button>
-			<Button name="$parentResizeButton" parentKey="resizeButton">
+			<Button name="$parentResize" parentKey="resizeButton">
 				<Size>
 					<AbsDimension x="25" y="25"/>
 				</Size>

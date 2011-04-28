@@ -69,7 +69,7 @@ local function Buff_OnUpdate(icon, time)
 		local CndtCheck = icon.CndtCheck if CndtCheck and CndtCheck() then return end
 
 		local Units, NameArray, NameNameArray, NameDictionary, Filter, Filterh = icon.Units, icon.NameArray, icon.NameNameArray, icon.NameDictionary, icon.Filter, icon.Filterh
-		local NAL = #NameArray
+		local NAL = icon.NAL
 
 		for u = 1, #Units do
 			local unit = Units[u]
@@ -142,20 +142,12 @@ local function Buff_OnUpdate(icon, time)
 					end
 				end
 				if buffName then
-
-					local color = icon.UnAlpha ~= 0 and pr or 1
-
-					icon:SetInfo(icon.Alpha, color, iconTexture, expirationTime - duration, duration, nil, buffName, nil, count)
-
+					icon:SetInfo(icon.Alpha, icon.UnAlpha ~= 0 and pr or 1, iconTexture, expirationTime - duration, duration, nil, buffName, nil, count)
 					return
 				end
 			end
 		end
-
-		local color = icon.Alpha ~= 0 and ab or 1
-
-		icon:SetInfo(icon.UnAlpha, color, icon.FirstTexture, 0, 0, nil, icon.NameFirst)
-
+		icon:SetInfo(icon.UnAlpha, icon.Alpha ~= 0 and ab or 1, icon.FirstTexture, 0, 0, nil, icon.NameFirst)
 	end
 end
 
@@ -166,6 +158,7 @@ function Type:Setup(icon, groupID, iconID)
 	icon.NameArray = TMW:GetSpellNames(icon, icon.Name)
 	icon.NameNameArray = TMW:GetSpellNames(icon, icon.Name, nil, 1)
 	icon.NameDictionary = TMW:GetSpellNames(icon, icon.Name, nil, nil, 1)
+	icon.NameNameDictionary = TMW:GetSpellNames(icon, icon.Name, nil, 1, 1)
 	icon.Units = TMW:GetUnits(icon, icon.Unit)
 
 	icon.Filter = icon.BuffOrDebuff
@@ -175,6 +168,7 @@ function Type:Setup(icon, groupID, iconID)
 		if icon.Filterh then icon.Filterh = icon.Filterh .. "|PLAYER" end
 	end
 	icon:SetReverse(true)
+	icon.NAL = icon.NameNameDictionary[strlower(GetSpellInfo(8921))] and EFF_THR + 2 or #icon.NameArray
 
 	icon.FirstTexture = GetSpellTexture(icon.NameFirst)
 	if icon.Name == "" then
