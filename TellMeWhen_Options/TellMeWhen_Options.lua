@@ -3006,13 +3006,67 @@ function CNDT:RuneHandler(rune)
 	end
 end
 
+function CNDT:ValidateParenthesis()
+	local numclose, numopen, runningcount = 0, 0, 0
+	local unopened
+	for k, v in ipairs(CNDT) do
+		if v:IsShown() and v.OpenParenthesis:IsShown() then
+			for k, v in ipairs(v.OpenParenthesis) do
+				if v:GetChecked() then
+					numopen = numopen + 1
+					runningcount = runningcount + 1
+				end
+				if runningcount < 0 then unopened = 1 end
+			end
+		end
+		if v:IsShown() and v.CloseParenthesis:IsShown() then
+			for k, v in ipairs(v.CloseParenthesis) do
+				if v:GetChecked() then
+					numclose = numclose + 1
+					runningcount = runningcount - 1
+				end
+				if runningcount < 0 then unopened = 1 end
+			end
+		end
+	end
+	if unopened then
+		IE.Conditions.Warning:SetText(L["PARENTHESISWARNING2"])
+		CNDT.invalid = 1
+	elseif numopen ~= numclose then
+		local suffix = ""
+		if numopen > numclose then
+			suffix = " +" .. numopen-numclose .. " '('"
+		else
+			suffix = " +" .. numclose-numopen .. " ')'"
+		end
+		IE.Conditions.Warning:SetText(L["PARENTHESISWARNING"] .. suffix)
+		CNDT.invalid = 1
+	else
+		IE.Conditions.Warning:SetText(nil)
+		CNDT.invalid = nil
+	end
+	
+	local n = 1
+	while CNDT[n] and CNDT[n]:IsShown() do
+		n = n + 1
+	end
+	n = n - 1
+	
+	if n > 0 then
+		IE.ConditionTab:SetText((CNDT.invalid and "|TInterface\\DialogFrame\\DialogAlertIcon:20:20:0:2:15:45:20:46|t|cFFFF0000" or "") .. L["CONDITIONS"] .. " |cFFFF5959(" .. n .. ")")
+	else
+		IE.ConditionTab:SetText(L["CONDITIONS"] .. " (" .. n .. ")")
+	end
+	PanelTemplates_TabResize(IE.ConditionTab, 0, nil, nil, 600)
+end
+
 
 function CNDT:AddRemoveHandler()
 	local i=1
 	CNDT[1].Up:Hide()
 	while CNDT[i] do
-		CNDT[i].LeftParenthesis:Show()
-		CNDT[i].RightParenthesis:Show()
+		CNDT[i].CloseParenthesis:Show()
+		CNDT[i].OpenParenthesis:Show()
 		CNDT[i].Down:Show()
 		if CNDT[i+1] then
 			if CNDT[i]:IsShown() then
@@ -3045,13 +3099,13 @@ function CNDT:AddRemoveHandler()
 	
 	if n < 3 then
 		for i = 1, n do 
-			CNDT[i].LeftParenthesis:Hide()
-			CNDT[i].RightParenthesis:Hide()
+			CNDT[i].CloseParenthesis:Hide()
+			CNDT[i].OpenParenthesis:Hide()
 		end
 	end
 	
 	if n > 0 then
-		IE.ConditionTab:SetText(L["CONDITIONS"] .. " |cFFFF5959(" .. n .. ")")
+		IE.ConditionTab:SetText((CNDT.invalid and "|TInterface\\DialogFrame\\DialogAlertIcon:20:20:0:3:15:45:20:46|t|cFFFF0000" or "") .. L["CONDITIONS"] .. " |cFFFF5959(" .. n .. ")")
 	else
 		IE.ConditionTab:SetText(L["CONDITIONS"] .. " (" .. n .. ")")
 	end
@@ -3106,8 +3160,8 @@ function CNDT:OK()
 		end
 		
 		local n = 0
-		if group.RightParenthesis:IsShown() then
-			for k, frame in pairs(group.RightParenthesis) do
+		if group.OpenParenthesis:IsShown() then
+			for k, frame in pairs(group.OpenParenthesis) do
 				if type(frame) == "table" and frame:GetChecked() then
 					n = n + 1
 				end
@@ -3116,8 +3170,8 @@ function CNDT:OK()
 		condition.PrtsBefore = n
 		
 		n = 0
-		if group.LeftParenthesis:IsShown() then
-			for k, frame in pairs(group.LeftParenthesis) do
+		if group.CloseParenthesis:IsShown() then
+			for k, frame in pairs(group.CloseParenthesis) do
 				if type(frame) == "table" and frame:GetChecked() then
 					n = n + 1
 				end
@@ -3167,14 +3221,14 @@ function CNDT:Load()
 				end
 			end
 			
-			for k, frame in pairs(group.RightParenthesis) do
+			for k, frame in pairs(group.OpenParenthesis) do
 				if type(frame) == "table" then
-					group.RightParenthesis[k]:SetChecked(condition.PrtsBefore >= k)
+					group.OpenParenthesis[k]:SetChecked(condition.PrtsBefore >= k)
 				end
 			end
-			for k, frame in pairs(group.LeftParenthesis) do
+			for k, frame in pairs(group.CloseParenthesis) do
 				if type(frame) == "table" then
-					group.LeftParenthesis[k]:SetChecked(condition.PrtsAfter >= k)
+					group.CloseParenthesis[k]:SetChecked(condition.PrtsAfter >= k)
 				end
 			end
 

@@ -8,7 +8,8 @@
  * Bug fixes:
  ** Error fix: TellMeWhen_Options.lua:2431: attempt to index field '?' (a nil value) 
  ** Fixed the bug with moonfire debuff tracking in 4.1
- 
+ ** Fixed a bug with unit level conditions (attempt to compare number with string)
+ ** Added better checking for invalid parenthesis in conditions.
 
  ===v4.1.1===
  * New Condition: Unit Class

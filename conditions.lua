@@ -1246,7 +1246,7 @@ CNDT.Types = {
 		texttable = setmetatable({[-1] = BOSS}, {__index = function(t, k) return k end}),
 		icon = "Interface\\TargetingFrame\\UI-TargetingFrame-Skull",
 		tcoords = {0.05, 0.95, 0.03, 0.97},
-		funcstr = [[UnitClass(c.Unit) c.Operator c.Level]],
+		funcstr = [[UnitLevel(c.Unit) c.Operator c.Level]],
 	},
 	{ -- class
 		text = L["CONDITIONPANEL_CLASS"],

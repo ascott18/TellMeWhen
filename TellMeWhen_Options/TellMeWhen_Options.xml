@@ -342,53 +342,6 @@
 		</Scripts>
 	</Slider>
 
-	<!--
-	<Button name="TellMeWhen_ColorModeButtonTemplate" virtual="true">
-		<Backdrop bgFile="Interface\AddOns\TellMeWhen_Options\Textures\AlphaTile" tile="true">
-			<TileSize>
-				<AbsValue val="64" />
-			</TileSize>
-		</Backdrop>
-		<Size>
-			<AbsDimension x="150" y="18"/>
-		</Size>
-		<Scripts>
-			<OnLoad>
-				self.text = _G[self:GetName() .. "Text"]
-				self:GetHighlightTexture():SetVertexColor(.196, .388, .8)
-				self.text:SetText("TEST TEST TEST")
-				self:RegisterForClicks("LeftButtonUp", "RightButtonUp")
-			</OnLoad>
-			<OnClick>
-				for name, frame in pairs(self:GetParent()) do
-					if type(frame) == "table" then
-						frame:UnlockHighlight()
-					end
-				end
-				self:LockHighlight()
-				PlaySound("igMainMenuOptionCheckBoxOn")
-			</OnClick>
-		</Scripts>
-		<ButtonText name="$parentText" justifyH="LEFT" />
-		<NormalFont style="GameFontNormal"/>
-		<HighlightFont style="GameFontHighlight"/>
-		<HighlightTexture file="Interface\QuestFrame\UI-QuestLogTitleHighlight" alphaMode="ADD">
-			<Anchors>
-				<Anchor point="TOPLEFT">
-					<Offset>
-						<AbsDimension x="0" y="1"/>
-					</Offset>
-				</Anchor>
-				<Anchor point="BOTTOMRIGHT">
-					<Offset>
-						<AbsDimension x="0" y="1"/>
-					</Offset>
-				</Anchor>
-			</Anchors>
-		</HighlightTexture>
-	</Button>
- -->
-
 	<Button name="TellMeWhen_ConditionEditorRuneCheckTemplate" virtual="true">
 		<Size>
 			<AbsDimension x="35" y="29" />
@@ -436,7 +389,7 @@
 		</Scripts>
 	</Button>
 	
-	<CheckButton name="TellMeWhen_ConditionEditorParenthesisTemplate" virtual="true">
+	<CheckButton name="TellMeWhen_ConditionEditorParenthesisTemplate" hidden="true" virtual="true">
 		<Size x="20" y="20"/>
 		<HitRectInsets>
 			<AbsInset left="4" right="4" top="0" bottom="0"/>
@@ -452,47 +405,40 @@
 		</Layers>
 		<Scripts>
 			<OnLoad>
-				if strfind(self:GetParent():GetName(), "Left") then
+				if strfind(self:GetParent():GetName(), "Close") then
 					self.text:SetText(")")
 				else
 					self.text:SetText("(")
 				end
 				function self:SetChecked(checked)
+					self:Show()
 					self.checked = checked
 					if checked then
 						self.text:SetTextColor(0, 1, 0, 1)
+						local next = self:GetParent()[self:GetID() + 1]
+						if next then
+							next:Show()
+						elseif self:GetID() &lt; 13 then
+							next = CreateFrame("CheckButton", self:GetParent():GetName() .. self:GetID() + 1, self:GetParent(), "TellMeWhen_ConditionEditorParenthesisTemplate", self:GetID() + 1)
+							self:GetParent()[self:GetID() + 1] = next
+							local a, _, c, d, e = self:GetPoint()
+							next:SetPoint(a, self, c, d, e)
+							next:Show()
+							next:SetChecked(nil)
+						end
 					else
 						self.text:SetTextColor(.4, .4, .4, 1)
+						local last = self:GetParent()[self:GetID() - 1]
+						if type(last) == "table" and not last.checked then
+							self:Hide()
+						end
+						for i = self:GetID() + 1, #self:GetParent() do
+							self:GetParent()[i]:SetChecked(nil)
+							self:GetParent()[i]:Hide()
+						end
 					end
 					
-					local numleft, numright = 0, 0
-					for k, v in ipairs(TMW.CNDT) do
-						if v:IsShown() and v.LeftParenthesis:IsShown() then
-							for k, v in ipairs(v.LeftParenthesis) do
-								if v:GetChecked() then
-									numleft = numleft + 1	
-								end
-							end
-						end
-						if v:IsShown() and v.RightParenthesis:IsShown() then
-							for k, v in ipairs(v.RightParenthesis) do
-								if v:GetChecked() then
-									numright = numright + 1
-								end
-							end
-						end
-					end
-					if numright ~= numleft then
-						local suffix = ""
-						if numright > numleft then
-							suffix = " +" .. numright-numleft .. " '('"
-						else
-							suffix = " +" .. numleft-numright .. " ')'"
-						end
-						TMW.IE.Conditions.Warning:SetText(TMW.L["PARENTHESISWARNING"] .. suffix)
-					else
-						TMW.IE.Conditions.Warning:SetText(nil)
-					end
+					TMW.CNDT:ValidateParenthesis()
 				end
 				
 				function self:GetChecked()
@@ -504,6 +450,12 @@
 				self:SetChecked(not self.checked)
 				TMW.CNDT:OK()
 			</OnClick>
+			<OnShow>
+				TMW.CNDT:ValidateParenthesis()
+			</OnShow>
+			<OnHide>
+				TMW.CNDT:ValidateParenthesis()
+			</OnHide>
 		</Scripts>
 		<HighlightTexture urgency="5" file="Interface\Buttons\UI-CheckBox-Highlight" alphaMode="ADD"/>
 	</CheckButton>
@@ -974,7 +926,7 @@
 				</Scripts>
 			</CheckButton>
 			
-			<Frame name="$parentRightParenthesis" parentKey="RightParenthesis">
+			<Frame name="$parentOpenParenthesis" parentKey="OpenParenthesis">
 				<Size x="100" y="20"/>
 				<Anchors>
 					<Anchor point="BOTTOMRIGHT" relativeTo="$parent" relativePoint="TOPRIGHT">
@@ -996,16 +948,9 @@
 							</Anchor>
 						</Anchors>
 					</CheckButton>
-					<CheckButton name="$parent3" inherits="TellMeWhen_ConditionEditorParenthesisTemplate" id="3">
-						<Anchors>
-							<Anchor point="LEFT" relativeTo="$parent2" relativePoint="RIGHT">
-								<Offset x="-8" y="0" />
-							</Anchor>
-						</Anchors>
-					</CheckButton>
 				</Frames>
 			</Frame>
-			<Frame name="$parentLeftParenthesis" parentKey="LeftParenthesis">
+			<Frame name="$parentCloseParenthesis" parentKey="CloseParenthesis">
 				<Size x="100" y="20"/>
 				<Anchors>
 					<Anchor point="TOPLEFT" relativeTo="$parent" relativePoint="BOTTOMLEFT">
@@ -1023,13 +968,6 @@
 					<CheckButton name="$parent2" inherits="TellMeWhen_ConditionEditorParenthesisTemplate" id="2">
 						<Anchors>
 							<Anchor point="RIGHT" relativeTo="$parent1" relativePoint="LEFT">
-								<Offset x="8" y="0" />
-							</Anchor>
-						</Anchors>
-					</CheckButton>
-					<CheckButton name="$parent3" inherits="TellMeWhen_ConditionEditorParenthesisTemplate" id="3">
-						<Anchors>
-							<Anchor point="RIGHT" relativeTo="$parent2" relativePoint="LEFT">
 								<Offset x="8" y="0" />
 							</Anchor>
 						</Anchors>
@@ -3135,7 +3073,7 @@
 											<OnLoad>
 												self.And:Hide()
 												self.Or:Hide()
-												self.LeftParenthesis:Hide()
+												self.CloseParenthesis:Hide()
 												TMW.CNDT[self:GetID()] = self
 												self:GetParent()[self:GetID()] = self
 											</OnLoad>

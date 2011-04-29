@@ -168,7 +168,7 @@ function Type:Setup(icon, groupID, iconID)
 		if icon.Filterh then icon.Filterh = icon.Filterh .. "|PLAYER" end
 	end
 	icon:SetReverse(true)
-	icon.NAL = icon.NameNameDictionary[strlower(GetSpellInfo(8921))] and EFF_THR + 2 or #icon.NameArray
+	icon.NAL = icon.NameNameDictionary[strlower(GetSpellInfo(8921))] and EFF_THR + 2 or #icon.NameArray -- need to force any icon looking for moonfire to check all auras on the target because of a blizzard bug in 4.1.
 
 	icon.FirstTexture = GetSpellTexture(icon.NameFirst)
 	if icon.Name == "" then

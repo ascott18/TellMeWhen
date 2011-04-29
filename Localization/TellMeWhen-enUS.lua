@@ -381,6 +381,7 @@ L["CONDITIONPANEL_GREATER"] = "Greater Than"
 L["CONDITIONPANEL_GREATEREQUAL"] = "Greater Than/Equal to"
 L["CONDITIONPANEL_REMOVE"] = "Remove this condition"
 L["PARENTHESISWARNING"] = "# of opening and closing parenthesis isn't equal!"
+L["PARENTHESISWARNING2"] = "Some closing parenthesis are missing openers!"
 
 -- ----------
 -- STUFF THAT I GOT SICK OF ADDING PREFIXES TOO AND PUTTING IN THE RIGHT PLACE
