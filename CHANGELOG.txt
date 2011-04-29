@@ -1,7 +1,14 @@
-===v4.1.1===
- * Fixed the bug with moonfire debuff tracking in 4.1
- * New conditions: Totems 1-4 (only shown if applicable to current class)
+===v4.1.2===
  * You can now 'group' conditions together with parenthesis. If you have any suggestions on how to make the GUI for it look better, please let me know.
+ * New conditions:
+ ** Totems 1-4 (only shown if applicable to current class)
+ ** Spell in range of unit
+ ** Item in range of unit
+ ** Spell usable (mana, rage, energy, etc)
+ * Bug fixes:
+ ** Error fix: TellMeWhen_Options.lua:2431: attempt to index field '?' (a nil value) 
+ ** Fixed the bug with moonfire debuff tracking in 4.1
+ 
 
  ===v4.1.1===
  * New Condition: Unit Class

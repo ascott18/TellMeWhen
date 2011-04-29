@@ -2197,7 +2197,9 @@ end
 -- ----------------------
 
 SUG = TMW:NewModule("Suggester", "AceEvent-3.0", "AceComm-3.0", "AceSerializer-3.0") TMW.SUG = SUG
-local inputType
+local inputType, EquivIDLookup
+
+local EquivIDLookup, ActionCache, pclassSpellCache, ClassSpellLookup, AuraCache, ItemCache, SpellCache
 SUG.doUpdateItemCache = true
 
 SUG.f = CreateFrame("Frame")
@@ -2207,154 +2209,155 @@ end
 SUG:RegisterEvent("BAG_UPDATE")
 
 SUG.NumCachePerFrame = 5
-function SUG:ADDON_LOADED(event, addon)
-	if addon == "TellMeWhen_Options" then
-		TMWOptDB = TMWOptDB or {}
+function SUG:OnInitialize()
+	TMWOptDB = TMWOptDB or {}
 
-		TMWOptDB.SpellCache = TMWOptDB.SpellCache or {}
-		TMWOptDB.CastCache = TMWOptDB.CastCache or {}
-		TMWOptDB.ItemCache = TMWOptDB.ItemCache or {}
-		TMWOptDB.AuraCache = TMWOptDB.AuraCache or {}
-		TMWOptDB.ClassSpellCache = TMWOptDB.ClassSpellCache or {}
+	TMWOptDB.SpellCache = TMWOptDB.SpellCache or {}
+	TMWOptDB.CastCache = TMWOptDB.CastCache or {}
+	TMWOptDB.ItemCache = TMWOptDB.ItemCache or {}
+	TMWOptDB.AuraCache = TMWOptDB.AuraCache or {}
+	TMWOptDB.ClassSpellCache = TMWOptDB.ClassSpellCache or {}
 
-		for k, v in pairs(TMWOptDB) do
-			SUG[k] = v
+	for k, v in pairs(TMWOptDB) do
+		SUG[k] = v
+	end
+	if TellMeWhenDB.DoResetAuraCache then
+		wipe(TMWOptDB.AuraCache)
+		if debug then
+			TMW.warn("RESETTING AURA CACHE RESETTING AURA CACHE RESETTING AURA CACHE RESETTING AURA CACHE RESETTING AURA CACHE RESETTING AURA CACHE RESETTING AURA CACHE RESETTING AURA CACHE ")
 		end
-		if TellMeWhenDB.DoResetAuraCache then
-			wipe(TMWOptDB.AuraCache)
-			TellMeWhenDB.DoResetAuraCache = nil
+		TellMeWhenDB.DoResetAuraCache = nil
+	end
+	for k, v in pairs(TMW.AuraCache) do
+		-- import into the options DB and take it out of the main DB
+		SUG.AuraCache[k] = SUG.AuraCache[k] or v
+		TMW.AuraCache[k] = nil
+	end
+	TMW.AuraCache = SUG.AuraCache -- make new inserts go into the optionDB and this table
+
+
+	SUG.ActionCache = {} -- dont save this, it should be a list of things that are CURRENTLY on THIS CHARACTER'S action bars
+	SUG.RequestedFrom = {}
+	
+
+	SUG.ClassSpellCache[pclass] = SUG.ClassSpellCache[pclass] or {}
+	local _, _, offs, numspells = GetSpellTabInfo(GetNumSpellTabs())
+	local ClassSpellCache = SUG.ClassSpellCache[pclass]
+	for i = 1, offs + numspells do
+		local _, id = GetSpellBookItemInfo(i, "player")
+		if id then
+			ClassSpellCache[id] = 1
 		end
-		for k, v in pairs(TMW.AuraCache) do
-			-- import into the options DB and take it out of the main DB
-			SUG.AuraCache[k] = v
-			TMW.AuraCache[k] = nil
-		end
-		TMW.AuraCache = SUG.AuraCache -- make new inserts go into the optionDB and this table
+	end
+	SUG:BuildClassSpellLookup()
 
+	SUG:RegisterComm("TMWSUG")
+	
+	if IsInGuild() then
+		SUG:SendCommMessage("TMWSUG", SUG:Serialize("RCSL"), "GUILD")
+	end
+	
+	EquivIDLookup, ActionCache, pclassSpellCache, ClassSpellLookup, AuraCache, ItemCache, SpellCache =
+	 TMW.EquivIDLookup, SUG.ActionCache, SUG.ClassSpellCache[pclass], SUG.ClassSpellLookup, SUG.AuraCache, SUG.ItemCache, SUG.SpellCache
+	 
+	SUG:PLAYER_ENTERING_WORLD()
 
-		SUG.ActionCache = {} -- dont save this, it should be a list of things that are CURRENTLY on THIS CHARACTER'S action bars
-		SUG.RequestedFrom = {}
+	if TMWOptDB.IncompleteCache or not TMWOptDB.WoWVersion or TMWOptDB.WoWVersion < clientVersion then
+		TMWOptDB.IncompleteCache = true
 
-		SUG.ClassSpellCache[pclass] = SUG.ClassSpellCache[pclass] or {}
-		local _, _, offs, numspells = GetSpellTabInfo(GetNumSpellTabs())
-		local ClassSpellCache = SUG.ClassSpellCache[pclass]
-		for i = 1, offs + numspells do
-			local _, id = GetSpellBookItemInfo(i, "player")
-			if id then
-				ClassSpellCache[id] = 1
+		local Blacklist = {
+			["Interface\\Icons\\Trade_Alchemy"] = true,
+			["Interface\\Icons\\Trade_BlackSmithing"] = true,
+			["Interface\\Icons\\Trade_BrewPoison"] = true,
+			["Interface\\Icons\\Trade_Engineering"] = true,
+			["Interface\\Icons\\Trade_Engraving"] = true,
+			["Interface\\Icons\\Trade_Fishing"] = true,
+			["Interface\\Icons\\Trade_Herbalism"] = true,
+			["Interface\\Icons\\Trade_LeatherWorking"] = true,
+			["Interface\\Icons\\Trade_Mining"] = true,
+			["Interface\\Icons\\Trade_Tailoring"] = true,
+			["Interface\\Icons\\INV_Inscription_Tradeskill01"] = true,
+			["Interface\\Icons\\Temp"] = true,
+		}
+		local index, spellsFailed = 0, 0
+		TMWOptDB.CacheLength = TMWOptDB.CacheLength or 100000
+		SUG.Suggest.Status:Show()
+		SUG.Suggest.Status.texture:SetTexture(LSM:Fetch("statusbar", db.profile.TextureName))
+		SUG.Suggest.Status:SetMinMaxValues(1, TMWOptDB.CacheLength)
+		SUG.Suggest.Speed:Show()
+		if TMWOptDB.WoWVersion and TMWOptDB.WoWVersion < clientVersion then
+			wipe(SUG.SpellCache)
+			wipe(SUG.CastCache)
+		elseif TMWOptDB.IncompleteCache then
+			for id in pairs(SUG.SpellCache) do
+				index = max(index, id)
 			end
 		end
-		SUG:BuildClassSpellLookup()
+		TMWOptDB.WoWVersion = clientVersion
 
-		SUG:RegisterComm("TMWSUG")
-		
-		if IsInGuild() then
-			SUG:SendCommMessage("TMWSUG", SUG:Serialize("RCSL"), "GUILD")
-		end
-		SUG:PLAYER_ENTERING_WORLD()
-
-		if TMWOptDB.IncompleteCache or not TMWOptDB.WoWVersion or TMWOptDB.WoWVersion < clientVersion then
-			TMWOptDB.IncompleteCache = true
-
-			local Blacklist = {
-				["Interface\\Icons\\Trade_Alchemy"] = true,
-				["Interface\\Icons\\Trade_BlackSmithing"] = true,
-				["Interface\\Icons\\Trade_BrewPoison"] = true,
-				["Interface\\Icons\\Trade_Engineering"] = true,
-				["Interface\\Icons\\Trade_Engraving"] = true,
-				["Interface\\Icons\\Trade_Fishing"] = true,
-				["Interface\\Icons\\Trade_Herbalism"] = true,
-				["Interface\\Icons\\Trade_LeatherWorking"] = true,
-				["Interface\\Icons\\Trade_Mining"] = true,
-				["Interface\\Icons\\Trade_Tailoring"] = true,
-				["Interface\\Icons\\INV_Inscription_Tradeskill01"] = true,
-				["Interface\\Icons\\Temp"] = true,
-			}
-			local index, spellsFailed = 0, 0
-			TMWOptDB.CacheLength = TMWOptDB.CacheLength or 100000
-			SUG.Suggest.Status:Show()
-			SUG.Suggest.Status.texture:SetTexture(LSM:Fetch("statusbar", db.profile.TextureName))
-			SUG.Suggest.Status:SetMinMaxValues(1, TMWOptDB.CacheLength)
-			SUG.Suggest.Speed:Show()
-			if TMWOptDB.WoWVersion and TMWOptDB.WoWVersion < clientVersion then
-				wipe(SUG.SpellCache)
-				wipe(SUG.CastCache)
-			elseif TMWOptDB.IncompleteCache then
-				for id in pairs(SUG.SpellCache) do
-					index = max(index, id)
-				end
-			end
-			TMWOptDB.WoWVersion = clientVersion
-
-			local Parser = CreateFrame("GameTooltip", "TMWSUGParser", TMW, "GameTooltipTemplate")
-			local function SpellCacher()
-				for id = index, index + SUG.NumCachePerFrame do
-					SUG.Suggest.Status:SetValue(id)
-					if spellsFailed < 1000 then
-						local name, rank, icon = GetSpellInfo(id)
-						if name then
-							name = strlower(name)
-							if
-								not Blacklist[icon] and
-							--	rank ~= SPELL_PASSIVE and -- moonkin aura is a passive
-								not strfind(name, "dnd") and
-								not strfind(name, "test") and
-								not strfind(name, "debug") and
-								not strfind(name, "bunny") and
-								not strfind(name, "visual") and
-								not strfind(name, "trigger") and
-								not strfind(name, "%[") and
-								not strfind(name, "%%") and
-								not strfind(name, "%+") and
-								not strfind(name, "%?") and
-								not strfind(name, "quest") and
-								not strfind(name, "vehicle") and
-								not strfind(name, "event") and
-								not strfind(name, "camera") and
-								not strfind(name, "warning") and
-								not strfind(name, "i am a")
-							then
-								GameTooltip_SetDefaultAnchor(Parser, UIParent)
-								Parser:SetSpellByID(id)
-								local r, g, b = TMWSUGParserTextLeft1:GetTextColor()
-								if g > .95 and r > .95 and b > .95 then
-									SUG.SpellCache[id] = name
-									if TMWSUGParserTextLeft2:GetText() == SPELL_CAST_CHANNELED or TMWSUGParserTextLeft3:GetText() == SPELL_CAST_CHANNELED or select(7, GetSpellInfo(id)) > 0 then
-										SUG.CastCache[id] = name
-									end
+		local Parser = CreateFrame("GameTooltip", "TMWSUGParser", TMW, "GameTooltipTemplate")
+		local function SpellCacher()
+			for id = index, index + SUG.NumCachePerFrame do
+				SUG.Suggest.Status:SetValue(id)
+				if spellsFailed < 1000 then
+					local name, rank, icon = GetSpellInfo(id)
+					if name then
+						name = strlower(name)
+						if
+							not Blacklist[icon] and
+						--	rank ~= SPELL_PASSIVE and -- moonkin aura is a passive
+							not strfind(name, "dnd") and
+							not strfind(name, "test") and
+							not strfind(name, "debug") and
+							not strfind(name, "bunny") and
+							not strfind(name, "visual") and
+							not strfind(name, "trigger") and
+							not strfind(name, "[%[%%%+%?]") and
+							not strfind(name, "quest") and
+							not strfind(name, "vehicle") and
+							not strfind(name, "event") and
+							not strfind(name, "camera") and
+							not strfind(name, "warning") and
+							not strfind(name, "i am a")
+						then
+							GameTooltip_SetDefaultAnchor(Parser, UIParent)
+							Parser:SetSpellByID(id)
+							local r, g, b = TMWSUGParserTextLeft1:GetTextColor()
+							if g > .95 and r > .95 and b > .95 then
+								SUG.SpellCache[id] = name
+								if TMWSUGParserTextLeft2:GetText() == SPELL_CAST_CHANNELED or TMWSUGParserTextLeft3:GetText() == SPELL_CAST_CHANNELED or select(7, GetSpellInfo(id)) > 0 then
+									SUG.CastCache[id] = name
 								end
-								Parser:Hide()
-								spellsFailed = 0
 							end
-						else
-							spellsFailed = spellsFailed + 1
+							Parser:Hide()
+							spellsFailed = 0
 						end
 					else
-						TMWOptDB.IncompleteCache = false
-						TMWOptDB.CacheLength = id
-						SUG.f:SetScript("OnUpdate", nil)
-						SUG.Suggest.Speed:Hide()
-						SUG.Suggest.Status:Hide()
-
-						SUG.IsCaching = nil
-						SUG.SpellCache[1852] = nil -- GM spell named silenced, interferes with equiv
-						SUG.SpellCache[71216] = nil -- enraged
-						if SUG.onCompleteCache then
-							TMW.SUG.redoIfSame = 1
-							SUG:NameOnCursor()
-						end
-						return
+						spellsFailed = spellsFailed + 1
 					end
+				else
+					TMWOptDB.IncompleteCache = false
+					TMWOptDB.CacheLength = id
+					SUG.f:SetScript("OnUpdate", nil)
+					SUG.Suggest.Speed:Hide()
+					SUG.Suggest.Status:Hide()
+
+					SUG.IsCaching = nil
+					SUG.SpellCache[1852] = nil -- GM spell named silenced, interferes with equiv
+					SUG.SpellCache[71216] = nil -- enraged
+					if SUG.onCompleteCache then
+						TMW.SUG.redoIfSame = 1
+						SUG:NameOnCursor()
+					end
+					return
 				end
-				index = index + 1 + SUG.NumCachePerFrame
 			end
-			SUG.f:SetScript("OnUpdate", SpellCacher)
-			SUG.IsCaching = true
+			index = index + 1 + SUG.NumCachePerFrame
 		end
-		SUG:UnregisterEvent("ADDON_LOADED")
+		SUG.f:SetScript("OnUpdate", SpellCacher)
+		SUG.IsCaching = true
 	end
 end
-SUG:RegisterEvent("ADDON_LOADED")
 
 function SUG:UNIT_PET(event, unit)
 	if unit == "player" then
@@ -2427,8 +2430,12 @@ function SUG:OnCommReceived(prefix, text, channel, who)
 			SUG:SendCommMessage("TMWSUG", SUG:Serialize("CSC", commThrowaway), "WHISPER", who)
 		elseif arg1 == "CSC" then
 			for class, tbl in pairs(arg2) do
-				for id in pairs(tbl) do
-					SUG.ClassSpellCache[class][id] = 1
+				if SUG.ClassSpellCache[class] then
+					for id in pairs(tbl) do
+						SUG.ClassSpellCache[class][id] = 1
+					end
+				else
+					SUG.ClassSpellCache[class] = tbl
 				end
 			end
 			SUG:BuildClassSpellLookup()
@@ -2460,15 +2467,13 @@ function SUG.Sorter(a, b)
 		6)	Miscellaneous proiritization spells
 		7)	SpellID if input is an ID
 		8)	If input is a name
-			8a) SpellID if names are identical
-			8b) Alphabetical if names are different
+			8a) Alphabetical if names are different
+			8b) SpellID if names are identical
 	]]
 
-	local t = TMW.EquivIDLookup
-	local haveA, haveB = t[a], t[b]
+	local haveA, haveB = EquivIDLookup[a], EquivIDLookup[b]
 	if haveA or haveB then
 		if haveA and haveB then
-			--return L[a] < L[b]
 			return a < b
 		else
 			return haveA
@@ -2476,29 +2481,25 @@ function SUG.Sorter(a, b)
 	end
 
 	if IsMultiState then
-		t = SUG.ActionCache
-		local haveA, haveB = t[a], t[b]
+		local haveA, haveB = ActionCache[a], ActionCache[b]
 		if (haveA and not haveB) or (haveB and not haveA) then
 			return haveA
 		end
 	end
 	if SoI == "spell" then
 		--player's spells (pclass)
-		t = SUG.ClassSpellCache[pclass]
-		local haveA, haveB = t[a], t[b]
+		local haveA, haveB = pclassSpellCache[a], pclassSpellCache[b]
 		if (haveA and not haveB) or (haveB and not haveA) then
 			return haveA
 		end
 
 		--all player spells (any class)
-		t = SUG.ClassSpellLookup
-		local haveA, haveB = t[a], t[b]
+		local haveA, haveB = ClassSpellLookup[a], ClassSpellLookup[b]
 		if (haveA and not haveB) or (haveB and not haveA) then
 			return haveA
 		elseif not (haveA or haveB) then
 
-			t = SUG.AuraCache
-			local haveA, haveB = t[a], t[b] -- Auras
+			local haveA, haveB = AuraCache[a], AuraCache[b] -- Auras
 			if haveA and haveB and haveA ~= haveB then -- if both are auras (kind doesnt matter) AND if they are different aura types, then compare the types
 				return haveA > haveB -- greater than is intended.. player auras are 2 while npc auras are 1, player auras should go first
 			elseif (haveA and not haveB) or (haveB and not haveA) then --otherwise, if only one of them is an aura, then prioritize the one that is an aura
@@ -2513,9 +2514,6 @@ function SUG.Sorter(a, b)
 		end
 	end
 
-
-
-
 	if inputType == "number" then
 		--sort by id
 		return a < b
@@ -2523,11 +2521,9 @@ function SUG.Sorter(a, b)
 		--sort by name
 		local haveA, haveB
 		if SoI == "item" then
-			t = SUG.ItemCache
-			haveA, haveB = t[a], t[b]
+			haveA, haveB = ItemCache[a], ItemCache[b]
 		else
-			t = SUG.SpellCache
-			haveA, haveB = t[a], t[b]
+			haveA, haveB = SpellCache[a], SpellCache[b]
 		end
 		if haveA == haveB then
 			--sort identical names by ID
@@ -3015,8 +3011,9 @@ function CNDT:AddRemoveHandler()
 	local i=1
 	CNDT[1].Up:Hide()
 	while CNDT[i] do
-		CNDT[i].Down:Show()
+		CNDT[i].LeftParenthesis:Show()
 		CNDT[i].RightParenthesis:Show()
+		CNDT[i].Down:Show()
 		if CNDT[i+1] then
 			if CNDT[i]:IsShown() then
 				CNDT[i+1].AddDelete:Show()
@@ -3026,7 +3023,6 @@ function CNDT:AddRemoveHandler()
 				CNDT[i+1]:Hide()
 				if i > 1 then
 					CNDT[i-1].Down:Hide()
-					CNDT[i-1].RightParenthesis:Hide()
 				end
 			end
 		else -- this handles the last one in the frame
@@ -3035,7 +3031,6 @@ function CNDT:AddRemoveHandler()
 			else
 				if i > 1 then
 					CNDT[i-1].Down:Hide()
-					CNDT[i-1].RightParenthesis:Hide()
 				end
 			end
 		end
@@ -3047,6 +3042,14 @@ function CNDT:AddRemoveHandler()
 		n = n + 1
 	end
 	n = n - 1
+	
+	if n < 3 then
+		for i = 1, n do 
+			CNDT[i].LeftParenthesis:Hide()
+			CNDT[i].RightParenthesis:Hide()
+		end
+	end
+	
 	if n > 0 then
 		IE.ConditionTab:SetText(L["CONDITIONS"] .. " |cFFFF5959(" .. n .. ")")
 	else

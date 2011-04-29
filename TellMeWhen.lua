@@ -37,7 +37,7 @@ local LSM = LibStub("LibSharedMedia-3.0")
 
 TELLMEWHEN_VERSION = "4.1.2"
 TELLMEWHEN_VERSION_MINOR = ""
-TELLMEWHEN_VERSIONNUMBER = 41200 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL (although it is displayed in version warnings to prevent confusion about a warning for the same major version)
+TELLMEWHEN_VERSIONNUMBER = 41202 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL (although it is displayed in version warnings to prevent confusion about a warning for the same major version)
 TELLMEWHEN_MAXGROUPS = 10 	--this is a default, used by SetTheory (addon), so dont rename
 TELLMEWHEN_MAXROWS = 20
 local UPD_INTV = 0.06	--this is a default, local because i use it in onupdate functions
@@ -430,7 +430,7 @@ TMW.BE = {
 		PhysicalDmgTaken = "30070;58683;81326;50518;55749",
 		SpellDamageTaken = "93068;1490;65142;85547;60433;34889;24844",
 		SpellCritTaken = "17800;22959",
-		BleedDamageTaken = "33878;33876;16511;46857;50271;35290;57386",
+		BleedDamageTaken = "33878;33876;16511;_46857;50271;35290;57386",
 		ReducedAttackSpeed = "6343;55095;58180;68055;8042;90314;50285",
 		ReducedCastingSpeed = "1714;5760;31589;73975;50274;50498",
 		ReducedArmor = "8647;50498;35387;91565;58567",
@@ -1300,7 +1300,7 @@ if clientVersion >= 40100 then -- COMBAT_LOG_EVENT_UNFILTERED
 	-- This is only used for the suggester, but i want to to be listening all the times for auras, not just when you load the options
 	function TMW:COMBAT_LOG_EVENT_UNFILTERED(_, _, p, _, g, _, _, _, _, _, i)-- tyPe, Guid, spellId -- NEW ARG IN 4.1 BETWEEN TYPE AND SOURCEGUID
 		if p == "SPELL_AURA_APPLIED" and not TMW.AuraCache[i] then
-			local t = tonumber(strsub(g, 5, 5), 16) % 8
+			local t = strsub(g, 5, 5), 16 % 8
 			if t == 0 or t == 4 then -- player or pet
 				TMW.AuraCache[i] = 2
 			else
@@ -1311,7 +1311,7 @@ if clientVersion >= 40100 then -- COMBAT_LOG_EVENT_UNFILTERED
 else
 	function TMW:COMBAT_LOG_EVENT_UNFILTERED(_, _, p, g, _, _, _, _, _, i)-- tyPe, Guid, spellId
 		if p == "SPELL_AURA_APPLIED" and not TMW.AuraCache[i] then
-			local t = tonumber(strsub(g, 5, 5), 16) % 8
+			local t = strsub(g, 5, 5), 16 % 8
 			if t == 0 or t == 4 then
 				TMW.AuraCache[i] = 2
 			else

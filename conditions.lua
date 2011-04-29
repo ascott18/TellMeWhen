@@ -328,9 +328,11 @@ Env = {
 	GetItemCount = GetItemCount,
 	IsEquippedItem = IsEquippedItem,
 	UnitCast = UnitCast,
+	IsSpellInRange = IsSpellInRange,
+	IsItemInRange = IsItemInRange,
+	
 	AuraStacks = AuraStacks,
 	AuraDur = AuraDur,
-
 	CooldownDuration = CooldownDuration,
 	TotemDuration = TotemDuration,
 	ItemCooldownDuration = ItemCooldownDuration,
@@ -891,6 +893,35 @@ CNDT.Types = {
 		tcoords = standardtcoords,
 		funcstr = [[c.1nil == IsUsableSpell(c.NameFirst)]],
 	},
+	{ -- mana
+		text = L["CONDITIONPANEL_MANAUSABLE"],
+		value = "MANAUSABLE",
+		category = L["ICONFUNCTIONS"],
+		min = 0,
+		max = 1,
+		name = function(editbox) TMW:TT(editbox, "CONDITIONPANEL_MANAUSABLE", "CNDT_ONLYFIRST", nil, nil, 1) end,
+		nooperator = true,
+		unit = false,
+		texttable = usableunusable,
+		icon = "Interface\\Icons\\inv_potion_137",
+		tcoords = standardtcoords,
+		funcstr = [[c.nil1 == select(2, IsUsableSpell(c.NameFirst))]],
+	},
+	{ -- spell range
+		text = L["CONDITIONPANEL_SPELLRANGE"],
+		value = "SPELLRANGE",
+		category = L["ICONFUNCTIONS"],
+		min = 0,
+		max = 1,
+		name = function(editbox) TMW:TT(editbox, "CONDITIONPANEL_SPELLRANGE", "CNDT_ONLYFIRST", nil, nil, 1) end,
+		nooperator = true,
+		texttable = {[0] = L["INRANGE"], [1] = L["NOTINRANGE"]},
+		icon = "Interface\\Icons\\ability_hunter_snipershot",
+		tcoords = standardtcoords,
+		funcstr = function(c)
+			return 1-c.Level .. [[ == (IsSpellInRange(c.NameName, c.Unit) or 0)]]
+		end,
+	},
 	
 	{ -- item cooldown
 		text = L["ICONMENU_COOLDOWN"] .. " - " .. L["ICONMENU_ITEM"],
@@ -903,8 +934,23 @@ CNDT.Types = {
 		texttable = setmetatable({[0] = formatSeconds(0).." ("..L["ICONMENU_USABLE"]..")"}, {__index = function(tbl, k) return formatSeconds(k) end}),
 		icon = "Interface\\Icons\\inv_jewelry_trinketpvp_01",
 		tcoords = standardtcoords,
-		funcstr = [[ItemCooldownDuration(c.NameFirst, time) c.Operator c.Level]],
+		funcstr = [[ItemCooldownDuration(c.ItemID, time) c.Operator c.Level]],
 		spacebefore = true,
+	},
+	{ -- spell range
+		text = L["CONDITIONPANEL_ITEMRANGE"],
+		value = "ITEMRANGE",
+		category = L["ICONFUNCTIONS"],
+		min = 0,
+		max = 1,
+		name = function(editbox) TMW:TT(editbox, "CONDITIONPANEL_ITEMRANGE", "CNDT_ONLYFIRST", nil, nil, 1) end,
+		nooperator = true,
+		texttable = {[0] = L["INRANGE"], [1] = L["NOTINRANGE"]},
+		icon = "Interface\\Icons\\ability_hunter_snipershot",
+		tcoords = standardtcoords,
+		funcstr = function(c)
+			return 1-c.Level .. [[ == (IsItemInRange(c.ItemID, c.Unit) or 0)]]
+		end,
 	},
 	{ -- item in bags
 		text = L["ITEMINBAGS"],
@@ -933,6 +979,7 @@ CNDT.Types = {
 		tcoords = standardtcoords,
 		funcstr = [[c.1nil == IsEquippedItem(c.ItemID)]],
 	},
+	
 	
 	{ -- unit buff duration
 		text = L["ICONMENU_BUFF"] .. " - " .. L["DURATIONPANEL_TITLE"],
