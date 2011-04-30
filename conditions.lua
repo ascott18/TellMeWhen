@@ -279,12 +279,13 @@ local function AuraStacks(unit, name, filter)
 	end
 end
 
+local huge = math.huge
 local function AuraDur(unit, name, filter, time)
 	local buffName, _, _, _, _, duration, expirationTime = UnitAura(unit, name, nil, filter)
 	if not buffName then
 		return 0
 	else
-		return expirationTime == 0 and 0 or expirationTime - time
+		return expirationTime == 0 and huge or expirationTime - time
 	end
 end
 
@@ -871,6 +872,7 @@ CNDT.Types = {
 		min = 0,
 		max = 600,
 		name = function(editbox) TMW:TT(editbox, L["ICONMENU_COOLDOWN"] .. " - " .. L["ICONMENU_SPELL"], "CNDT_ONLYFIRST", 1, nil, 1) end,
+		useSUG = true,
 		unit = PLAYER,
 		texttable = setmetatable({[0] = formatSeconds(0).." ("..L["ICONMENU_USABLE"]..")"}, {__index = function(tbl, k) return formatSeconds(k) end}),
 		icon = "Interface\\Icons\\spell_holy_divineintervention",
@@ -886,6 +888,7 @@ CNDT.Types = {
 		min = 0,
 		max = 1,
 		name = function(editbox) TMW:TT(editbox, "ICONMENU_REACTIVE", "CNDT_ONLYFIRST", nil, nil, 1) end,
+		useSUG = true,
 		nooperator = true,
 		unit = false,
 		texttable = usableunusable,
@@ -900,6 +903,7 @@ CNDT.Types = {
 		min = 0,
 		max = 1,
 		name = function(editbox) TMW:TT(editbox, "CONDITIONPANEL_MANAUSABLE", "CNDT_ONLYFIRST", nil, nil, 1) end,
+		useSUG = true,
 		nooperator = true,
 		unit = false,
 		texttable = usableunusable,
@@ -914,6 +918,7 @@ CNDT.Types = {
 		min = 0,
 		max = 1,
 		name = function(editbox) TMW:TT(editbox, "CONDITIONPANEL_SPELLRANGE", "CNDT_ONLYFIRST", nil, nil, 1) end,
+		useSUG = true,
 		nooperator = true,
 		texttable = {[0] = L["INRANGE"], [1] = L["NOTINRANGE"]},
 		icon = "Interface\\Icons\\ability_hunter_snipershot",
@@ -930,6 +935,7 @@ CNDT.Types = {
 		min = 0,
 		max = 600,
 		name = function(editbox) TMW:TT(editbox, L["ICONMENU_COOLDOWN"] .. " - " .. L["ICONMENU_ITEM"], "CNDT_ONLYFIRST", 1, nil, 1) end,
+		useSUG = "item",
 		unit = PLAYER,
 		texttable = setmetatable({[0] = formatSeconds(0).." ("..L["ICONMENU_USABLE"]..")"}, {__index = function(tbl, k) return formatSeconds(k) end}),
 		icon = "Interface\\Icons\\inv_jewelry_trinketpvp_01",
@@ -937,13 +943,14 @@ CNDT.Types = {
 		funcstr = [[ItemCooldownDuration(c.ItemID, time) c.Operator c.Level]],
 		spacebefore = true,
 	},
-	{ -- spell range
+	{ -- item range
 		text = L["CONDITIONPANEL_ITEMRANGE"],
 		value = "ITEMRANGE",
 		category = L["ICONFUNCTIONS"],
 		min = 0,
 		max = 1,
 		name = function(editbox) TMW:TT(editbox, "CONDITIONPANEL_ITEMRANGE", "CNDT_ONLYFIRST", nil, nil, 1) end,
+		useSUG = "item",
 		nooperator = true,
 		texttable = {[0] = L["INRANGE"], [1] = L["NOTINRANGE"]},
 		icon = "Interface\\Icons\\ability_hunter_snipershot",
@@ -960,6 +967,7 @@ CNDT.Types = {
 		max = 50,
 		texttable = setmetatable({}, {__index = function(tbl, k) return format(ITEM_SPELL_CHARGES, k) end}),
 		name = function(editbox) TMW:TT(editbox, "ITEMINBAGS", "CNDT_ONLYFIRST", nil, nil, 1) end,
+		useSUG = "item",
 		unit = false,
 		icon = "Interface\\Icons\\inv_misc_bag_08",
 		tcoords = standardtcoords,
@@ -974,6 +982,7 @@ CNDT.Types = {
 		nooperator = true,
 		texttable = bool,
 		name = function(editbox) TMW:TT(editbox, "ITEMEQUIPPED", "CNDT_ONLYFIRST", nil, nil, 1) end,
+		useSUG = "item",
 		unit = false,
 		icon = "Interface\\PaperDoll\\UI-PaperDoll-Slot-MainHand",
 		tcoords = standardtcoords,
@@ -988,10 +997,14 @@ CNDT.Types = {
 		min = 0,
 		max = 600,
 		name = function(editbox) TMW:TT(editbox, L["ICONMENU_BUFF"] .. " - " .. L["DURATIONPANEL_TITLE"], "BUFFCNDT_DESC", 1, nil, 1) end,
-		texttable = setmetatable({[0] = formatSeconds(0).." ("..L["ICONMENU_ABSENT"].."/"..L["INFINITE"]..")"}, {__index = function(tbl, k) return formatSeconds(k) end}),
+		useSUG = true,
+		check = function(check) TMW:TT(check, "ONLYCHECKMINE", "ONLYCHECKMINE_DESC", nil, nil, 1) end,
+		texttable = setmetatable({[0] = formatSeconds(0).." ("..L["ICONMENU_ABSENT"]..")"}, {__index = function(tbl, k) return formatSeconds(k) end}),
 		icon = "Interface\\Icons\\spell_nature_rejuvenation",
 		tcoords = standardtcoords,
-		funcstr = [[AuraDur(c.Unit, c.NameName, "HELPFUL", time) c.Operator c.Level]],
+		funcstr = function(c)
+			return [[AuraDur(c.Unit, c.NameName, "HELPFUL]] .. (c.Checked and "|PLAYER" or "") .. [[", time) c.Operator c.Level]]
+		end,
 		spacebefore = true,
 	},
 	{ -- unit buff stacks
@@ -1001,10 +1014,14 @@ CNDT.Types = {
 		min = 0,
 		max = 20,
 		name = function(editbox) TMW:TT(editbox, L["ICONMENU_BUFF"] .. " - " .. L["STACKSPANEL_TITLE"], "BUFFCNDT_DESC", 1, nil, 1) end,
+		useSUG = true,
+		check = function(check) TMW:TT(check, "ONLYCHECKMINE", "ONLYCHECKMINE_DESC", nil, nil, 1) end,
 		texttable = setmetatable({[0] = format(STACKS, 0).." ("..L["ICONMENU_ABSENT"]..")"}, {__index = function(tbl, k) return format(STACKS, k) end}),
 		icon = "Interface\\Icons\\inv_misc_herb_felblossom",
 		tcoords = standardtcoords,
-		funcstr = [[AuraStacks(c.Unit, c.NameName, "HELPFUL") c.Operator c.Level]],
+		funcstr = function(c)
+			return [[AuraStacks(c.Unit, c.NameName, "HELPFUL]] .. (c.Checked and "|PLAYER" or "") .. [[") c.Operator c.Level]]
+		end,
 	},
 	{ -- unit debuff duration
 		text = L["ICONMENU_DEBUFF"] .. " - " .. L["DURATIONPANEL_TITLE"],
@@ -1013,10 +1030,14 @@ CNDT.Types = {
 		min = 0,
 		max = 600,
 		name = function(editbox) TMW:TT(editbox, L["ICONMENU_DEBUFF"] .. " - " .. L["DURATIONPANEL_TITLE"], "BUFFCNDT_DESC", 1, nil, 1) end,
-		texttable = setmetatable({[0] = formatSeconds(0).." ("..L["ICONMENU_ABSENT"].."/"..L["INFINITE"]..")"}, {__index = function(tbl, k) return formatSeconds(k) end}),
+		useSUG = true,
+		check = function(check) TMW:TT(check, "ONLYCHECKMINE", "ONLYCHECKMINE_DESC", nil, nil, 1) end,
+		texttable = setmetatable({[0] = formatSeconds(0).." ("..L["ICONMENU_ABSENT"]..")"}, {__index = function(tbl, k) return formatSeconds(k) end}),
 		icon = "Interface\\Icons\\spell_shadow_abominationexplosion",
 		tcoords = standardtcoords,
-		funcstr = [[AuraDur(c.Unit, c.NameName, "HARMFUL", time) c.Operator c.Level]],
+		funcstr = function(c)
+			return [[AuraDur(c.Unit, c.NameName, "HARMFUL]] .. (c.Checked and "|PLAYER" or "") .. [[", time) c.Operator c.Level]]
+		end,
 	},
 	{ -- unit debuff stacks
 		text = L["ICONMENU_DEBUFF"] .. " - " .. L["STACKSPANEL_TITLE"],
@@ -1025,10 +1046,14 @@ CNDT.Types = {
 		min = 0,
 		max = 20,
 		name = function(editbox) TMW:TT(editbox, L["ICONMENU_DEBUFF"] .. " - " .. L["STACKSPANEL_TITLE"], "BUFFCNDT_DESC", 1, nil, 1) end,
+		useSUG = true,
+		check = function(check) TMW:TT(check, "ONLYCHECKMINE", "ONLYCHECKMINE_DESC", nil, nil, 1) end,
 		texttable = setmetatable({[0] = format(STACKS, 0).." ("..L["ICONMENU_ABSENT"]..")"}, {__index = function(tbl, k) return format(STACKS, k) end}),
 		icon = "Interface\\Icons\\ability_warrior_sunder",
 		tcoords = standardtcoords,
-		funcstr = [[AuraStacks(c.Unit, c.NameName, "HARMFUL") c.Operator c.Level]],
+		funcstr = function(c)
+			return [[AuraStacks(c.Unit, c.NameName, "HARMFUL]] .. (c.Checked and "|PLAYER" or "") .. [[") c.Operator c.Level]]
+		end,
 	},
 	
 	{ -- mainhand

@@ -1,6 +1,9 @@
 ===v4.1.2===
  * You can now 'group' conditions together with parenthesis. If you have any suggestions on how to make the GUI for it look better, please let me know.
- * New conditions:
+ * Implemented the suggestion list for conditions that take spell/item inputs.
+ * New/changed conditions:
+ ** Buff/Debuff conditions now have a checkbox to specify whether to only check for your auras, or any auras.
+ ** Buff/Debuff duration conditions now treat infinite duration auras as having an infinite duration (greater than the maximum specifiable time of 10 minutes) instead of having a duration of 0 (absent)
  ** Totems 1-4 (only shown if applicable to current class)
  ** Spell in range of unit
  ** Item in range of unit

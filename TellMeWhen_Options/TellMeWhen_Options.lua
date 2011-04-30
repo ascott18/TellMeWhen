@@ -2199,7 +2199,7 @@ end
 SUG = TMW:NewModule("Suggester", "AceEvent-3.0", "AceComm-3.0", "AceSerializer-3.0") TMW.SUG = SUG
 local inputType, EquivIDLookup
 
-local EquivIDLookup, ActionCache, pclassSpellCache, ClassSpellLookup, AuraCache, ItemCache, SpellCache
+local EquivIDLookup, ActionCache, pclassSpellCache, ClassSpellLookup, AuraCache, ItemCache, SpellCache, CastCache
 SUG.doUpdateItemCache = true
 
 SUG.f = CreateFrame("Frame")
@@ -2238,7 +2238,7 @@ function SUG:OnInitialize()
 
 	SUG.ActionCache = {} -- dont save this, it should be a list of things that are CURRENTLY on THIS CHARACTER'S action bars
 	SUG.RequestedFrom = {}
-	
+	SUG.Box = IE.Main.Name
 
 	SUG.ClassSpellCache[pclass] = SUG.ClassSpellCache[pclass] or {}
 	local _, _, offs, numspells = GetSpellTabInfo(GetNumSpellTabs())
@@ -2257,8 +2257,8 @@ function SUG:OnInitialize()
 		SUG:SendCommMessage("TMWSUG", SUG:Serialize("RCSL"), "GUILD")
 	end
 	
-	EquivIDLookup, ActionCache, pclassSpellCache, ClassSpellLookup, AuraCache, ItemCache, SpellCache =
-	 TMW.EquivIDLookup, SUG.ActionCache, SUG.ClassSpellCache[pclass], SUG.ClassSpellLookup, SUG.AuraCache, SUG.ItemCache, SUG.SpellCache
+	EquivIDLookup, ActionCache, pclassSpellCache, ClassSpellLookup, AuraCache, ItemCache, SpellCache, CastCache =
+	 TMW.EquivIDLookup, SUG.ActionCache, SUG.ClassSpellCache[pclass], SUG.ClassSpellLookup, SUG.AuraCache, SUG.ItemCache, SUG.SpellCache, SUG.CastCache
 	 
 	SUG:PLAYER_ENTERING_WORLD()
 
@@ -2486,6 +2486,7 @@ function SUG.Sorter(a, b)
 			return haveA
 		end
 	end
+	local SoI = SUG.overrideSoI or SoI
 	if SoI == "spell" then
 		--player's spells (pclass)
 		local haveA, haveB = pclassSpellCache[a], pclassSpellCache[b]
@@ -2543,48 +2544,53 @@ end
 local buffEquivs = {TMW.BE.buffs, TMW.BE.debuffs}
 function SUG:Suggester()
 	local start = GetTime()
+	local preTable = SUG.preTable
 	if SUG.startOver then
 		wipe(SUG.preTable)
 		SUG.nextCacheKey = nil
 		SUG.startOver = false
-		if TMW.CI.t == "cast" then
+		if TMW.CI.t == "cast" and not SUG.overrideSoI then
 			for equiv, str in pairs(TMW.BE.casts) do
 				if strfind(strlower(equiv), SUG.atBeginning) or strfind(strlower(L[equiv]), SUG.atBeginning) then
-					SUG.preTable[#SUG.preTable + 1] = equiv
+					preTable[#preTable + 1] = equiv
 				end
 			end
-		elseif TMW.CI.t == "buff" then
+		elseif TMW.CI.t == "buff" and not SUG.overrideSoI then
 			for _, b in pairs(buffEquivs) do
 				for equiv, str in pairs(b) do
 					if strfind(strlower(equiv), SUG.atBeginning) or strfind(strlower(L[equiv]), SUG.atBeginning)  then
-						SUG.preTable[#SUG.preTable + 1] = equiv
+						preTable[#preTable + 1] = equiv
 					end
 				end
 			end
 			for dispeltype in pairs(TMW.DS) do
 				if strfind(strlower(dispeltype), SUG.atBeginning) or strfind(strlower(L[dispeltype]), SUG.atBeginning)  then
-					SUG.preTable[#SUG.preTable + 1] = dispeltype
+					preTable[#preTable + 1] = dispeltype
 				end
 			end
 		end
 	end
+	local overrideSoI = SUG.overrideSoI
+	local SoI = overrideSoI or SoI
+	local atBeginning = SUG.atBeginning
+	local t = TMW.CI.t
 	while GetTime() - start < 0.025 do -- throttle it
 		local id, name
 		if SoI == "item" then
-			id, name = next(SUG.ItemCache, SUG.nextCacheKey)
-		elseif TMW.CI.t == "cast" then
-			id, name = next(SUG.CastCache, SUG.nextCacheKey)
+			id, name = next(ItemCache, SUG.nextCacheKey)
+		elseif t == "cast" and not overrideSoI then
+			id, name = next(CastCache, SUG.nextCacheKey)
 		else
-			id, name = next(SUG.SpellCache, SUG.nextCacheKey)
+			id, name = next(SpellCache, SUG.nextCacheKey)
 		end
 		if id then
 			if inputType == "number" then
-				if strfind(id, SUG.atBeginning) then
-					SUG.preTable[#SUG.preTable + 1] = id
+				if strfind(id, atBeginning) then
+					preTable[#preTable + 1] = id
 				end
 			else
-				if strfind(name, SUG.atBeginning) then
-					SUG.preTable[#SUG.preTable + 1] = id
+				if strfind(name, atBeginning) then
+					preTable[#preTable + 1] = id
 				end
 			end
 			SUG.nextCacheKey = id
@@ -2600,11 +2606,14 @@ function SUG:Suggester()
 end
 
 function SUG:SuggestingComplete()
+	SUG.offset = min(SUG.offset, max(0, #SUG.preTable-#SUG+1))
 	local offset = SUG.offset
 	if SUG.doSort then
 		sort(SUG.preTable, SUG.Sorter)
 		SUG.doSort = nil
 	end
+	local SoI = SUG.overrideSoI or SoI
+	
 	local i = 1
 	while SUG[i] do
 		local id = SUG.preTable[i+offset]
@@ -2691,7 +2700,7 @@ function SUG:SuggestingComplete()
 			if miscprioritize[id] then -- override previous
 				f.Background:SetVertexColor(.58, .51, .79, 1)
 			else
-				local whoCasted = SUG.AuraCache[id]
+				local whoCasted = (SoI == "spell") and SUG.AuraCache[id]
 				if whoCasted then
 					local r, g, b, a = f.Background:GetVertexColor()
 					if a < .5 then -- only if nothing else has colored the entry yet
@@ -2718,10 +2727,10 @@ function SUG:NameOnCursor()
 		return
 	end
 	SUG.oldLastName = SUG.lastName
-	local text = IE.Main.Name:GetText()
+	local text = SUG.Box:GetText()
 
 	SUG.startpos = 0
-	SUG.endpos = IE.Main.Name:GetCursorPosition()
+	SUG.endpos = SUG.Box:GetCursorPosition()
 	for i = SUG.endpos, 0, -1 do
 		if strsub(text, i, i) == ";" then
 			SUG.startpos = i+1
@@ -2767,7 +2776,7 @@ end
 
 function SUG:OnClick()
 	if self.insert then
-		local currenttext = IE.Main.Name:GetText()
+		local currenttext = SUG.Box:GetText()
 		local start = SUG.startpos-1
 		local firsthalf
 		if start <= 0 then
@@ -2777,11 +2786,13 @@ function SUG:OnClick()
 		end
 		local lasthalf = strsub(currenttext, SUG.endpos+1)
 		local newtext = firsthalf .. "; " .. self.insert .. "; " .. lasthalf
-		IE.Main.Name:SetText(TMW:CleanString(newtext))
-		IE.Main.Name:SetCursorPosition(SUG.endpos + (#tostring(self.insert) - #tostring(SUG.lastName)) + 2)
-		if IE.Main.Name:GetCursorPosition() == IE.Main.Name:GetNumLetters() then -- if we are at the end of the exitbox then put a semicolon in anyway for convenience
-			IE.Main.Name:SetText(IE.Main.Name:GetText().. "; ")
-			IE.Main.Name:SetCursorPosition(IE.Main.Name:GetNumLetters())
+		SUG.Box:SetText(TMW:CleanString(newtext))
+		SUG.Box:SetCursorPosition(SUG.endpos + (#tostring(self.insert) - #tostring(SUG.lastName)) + 2)
+		if SUG.Box:GetCursorPosition() == SUG.Box:GetNumLetters() and not SUG.overrideSoI then -- if we are at the end of the exitbox then put a semicolon in anyway for convenience
+			SUG.Box:SetText(SUG.Box:GetText().. "; ")
+			SUG.Box:SetCursorPosition(SUG.Box:GetNumLetters())
+		elseif SUG.overrideSoI then
+			SUG.Box:ClearFocus()
 		end
 		SUG.Suggest:Hide()
 	end
@@ -3152,6 +3163,7 @@ function CNDT:OK()
 		condition.Level = tonumber(group.Slider:GetValue()) or 0
 		condition.AndOr = group.And:GetChecked() and "AND" or "OR"
 		condition.Name = strtrim(group.EditBox:GetText()) or ""
+		condition.Checked = not not group.Check:GetChecked()
 
 		for k, rune in pairs(group.Runes) do
 			if type(rune) == "table" then
@@ -3207,6 +3219,7 @@ function CNDT:Load()
 			CNDT:SetUIDropdownText(group.Type, condition.Type, CNDT.Types)
 			group.Unit:SetText(condition.Unit)
 			group.EditBox:SetText(condition.Name)
+			group.Check:SetChecked(condition.Checked)
 			CNDT:SetUIDropdownText(group.Icon, condition.Icon, TMW.Icons)
 
 			local v = CNDT:SetUIDropdownText(group.Operator, condition.Operator, CNDT.Operators)
@@ -3248,6 +3261,7 @@ end
 function CNDT:ClearGroup(group)
 	group.Unit:SetText("player")
 	group.EditBox:SetText("")
+	group.Check:SetChecked(nil)
 	UIDropDownMenu_SetSelectedValue(group.Icon, "")
 	CNDT:SetUIDropdownText(group.Type, "HEALTH", CNDT.Types)
 	CNDT:SetUIDropdownText(group.Operator, "==", CNDT.Operators)
@@ -3384,9 +3398,18 @@ function CNDT:TypeCheck(group, data)
 		else
 			group.EditBox:SetWidth(312)
 		end
+		if data.check then
+			data.check(group.Check)
+			group.Check:Show()
+		else
+			group.Check:Hide()
+		end
+		group.EditBox.useSUG = data.useSUG
 	else
 		group.EditBox:Hide()
+		group.Check:Hide()
 		group.Slider:SetWidth(523)
+		group.EditBox.useSUG = nil
 	end
 	if data.nooperator then
 		group.TextOperator:SetText("")

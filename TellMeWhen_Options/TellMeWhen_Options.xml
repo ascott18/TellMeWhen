@@ -164,7 +164,7 @@
 			</OnClick>
 			<OnEnter>
 				GameTooltip_SetDefaultAnchor(GameTooltip, self)
-				if self.tooltipmethod then
+				if self.tooltipmethod and self.tooltiparg then
 					GameTooltip[self.tooltipmethod](GameTooltip, self.tooltiparg)
 				elseif self.tooltiptitle then
 					GameTooltip:AddLine(self.tooltiptitle, HIGHLIGHT_FONT_COLOR.r, HIGHLIGHT_FONT_COLOR.g, HIGHLIGHT_FONT_COLOR.b, 1)
@@ -636,8 +636,36 @@
 					<OnEditFocusLost>
 						EditBox_ClearHighlight(self)
 						self:SetText(TMW:CleanString(self:GetText()))
+						TMW.SUG.Suggest:Hide()
 						TMW.CNDT:OK()
 					</OnEditFocusLost>
+					<OnEditFocusGained>
+						EditBox_HighlightText(self)
+						self.BackgroundText:SetText(nil)
+						if self.useSUG then
+							TMW.SUG.redoIfSame = nil
+							TMW.SUG.Box = self
+							TMW.SUG:NameOnCursor()
+							TMW.SUG.overrideSoI = (self.useSUG == true and "spell") or self.useSUG
+						end
+					</OnEditFocusGained>
+					<OnTextChanged>
+						local text = self:GetText()
+						if text == "" then
+							self.BackgroundText:SetText(self.label)
+						else
+							self.BackgroundText:SetText(nil)
+						end
+						if userInput and self.useSUG then
+							TMW.SUG.redoIfSame = nil
+							TMW.SUG:NameOnCursor()
+						end
+					</OnTextChanged>
+					<OnMouseDown>
+						if self.useSUG then
+							TMW.SUG:NameOnCursor()
+						end
+					</OnMouseDown>
 				</Scripts>
 			</EditBox>
 			<Frame name="$parentRunes" parentKey="Runes" hidden="true">
@@ -882,7 +910,23 @@
 
 				</Frames>
 			</Frame>
-
+			<CheckButton name="$parentCheck" inherits="TellMeWhen_CheckTemplate" parentKey="Check">
+				<Anchors>
+					<Anchor point="RIGHT" relativeTo="$parentEditBox" >
+						<Offset x="5" y="-1" />
+					</Anchor>
+				</Anchors>
+				<Scripts>
+					<OnLoad>
+						self:SetFrameLevel(self:GetParent().EditBox:GetFrameLevel() + 1)
+						self:GetNormalTexture():SetVertexColor(1, 0, 0, 1)
+					</OnLoad>
+					<OnClick>
+						TMW.CNDT:OK()
+					</OnClick>
+				</Scripts>
+			</CheckButton>
+			
 
 			<CheckButton name="$parentAnd" inherits="TellMeWhen_CheckTemplate" parentKey="And">
 				<Size x="20" y="20"/>
@@ -1258,17 +1302,6 @@
 			--	GameTooltip:Hide()
 			</OnLeave>
 			<OnMouseWheel>
-			--[[	if not TMW.SUG.Suggesting then
-					if (not TMW.SUG[#TMW.SUG]:IsShown() and delta == 1) or TMW.SUG[#TMW.SUG]:IsShown() then
-						if IsLeftShiftKeyDown() or IsRightShiftKeyDown() then
-							delta = delta*5
-						elseif IsLeftControlKeyDown() or IsRightControlKeyDown() then
-							delta = delta*(#TMW.SUG-1)
-						end
-						TMW.SUG.offset = max(0, TMW.SUG.offset - delta)
-					end
-					TMW.SUG:SuggestingComplete()
-				end]]
 				self:GetParent().ScrollBar:SetValue(self:GetParent().ScrollBar:GetValue() - delta)
 			</OnMouseWheel>
 		</Scripts>
@@ -1519,168 +1552,169 @@
 					</OnClick>
 				</Scripts>
 			</Button>
-			<Frame name="$parentMain" enableMouse="true" hidden="true" parentKey="Main">
+			
+			<Frame name="$parentSuggest" parentKey="Suggest" hidden="true" enableMouse="true">
+				<Size x="220"/>
 				<Anchors>
-					<Anchor point="TOPLEFT" relativeTo="$parent" relativePoint="TOPLEFT"/>
-					<Anchor point="BOTTOMRIGHT" relativeTo="$parent" relativePoint="BOTTOMRIGHT"/>
+					<Anchor point="TOPLEFT" relativeTo="$parent" relativePoint="TOPRIGHT">
+						<Offset x="-12" y="0" />
+					</Anchor>
+					<Anchor point="BOTTOMLEFT" relativeTo="$parent" relativePoint="BOTTOMRIGHT">
+						<Offset x="-12" y="0" />
+					</Anchor>
 				</Anchors>
+				<Backdrop bgFile="Interface\DialogFrame\UI-DialogBox-Background-Dark" edgeFile="Interface\DialogFrame\UI-DialogBox-Border" tile="true">
+					<BackgroundInsets>
+						<AbsInset left="11" right="12" top="12" bottom="11" />
+					</BackgroundInsets>
+					<TileSize>
+						<AbsValue val="32" />
+					</TileSize>
+					<EdgeSize>
+						<AbsValue val="32" />
+					</EdgeSize>
+				</Backdrop>
 				<Frames>
-					<Frame name="$parentSuggest" parentKey="Suggest" hidden="true" enableMouse="true">
-						<Size x="220"/>
+					<Button name="$parentItem1" inherits="TellMeWhen_SpellSuggestTemplate" parentKey="Item1" id="1"/>
+					<Slider name="$parentSpeed" inherits="OptionsSliderTemplate" parentKey="Speed" minvalue="1" maxvalue="1000" hidden="true">
+						<Size x="160" y="18"/>
+						<Scripts>
+							<OnLoad>
+								self.text:SetText(TMW.L["CACHINGSPEED"])
+								local minValue, maxValue = self:GetMinMaxValues()
+								_G[self:GetName() .. "Low"]:SetText(minValue)
+								_G[self:GetName() .. "High"]:SetText(maxValue)
+								self.val:SetText(TMW.SUG.NumCachePerFrame)
+								self.infotext:SetText(TMW.L["CACHING"])
+								self:SetValue(TMW.SUG.NumCachePerFrame)
+							</OnLoad>
+							<OnValueChanged>
+								TMW.SUG.NumCachePerFrame = floor(value)
+								self.val:SetText(floor(value))
+							</OnValueChanged>
+						</Scripts>
+						<Layers>
+							<Layer level="ARTWORK">
+								<FontString name="$parentVal" parentKey="val" inherits="GameFontHighlightSmall" text="HIGH">
+									<Anchors>
+										<Anchor point="TOP" relativePoint="BOTTOM">
+											<Offset x="0" y="3"/>
+										</Anchor>
+									</Anchors>
+								</FontString>
+								<FontString name="$parentText" parentKey="text" inherits="GameFontHighlight">
+									<Anchors>
+										<Anchor point="BOTTOM" relativePoint="TOP">
+											<Offset x="0" y="-1"/>
+										</Anchor>
+									</Anchors>
+								</FontString>
+
+								<FontString name="$parentInfoText" parentKey="infotext" inherits="GameFontHighlight">
+									<Size x="165" />
+									<Anchors>
+										<Anchor point="BOTTOM" relativePoint="TOP">
+											<Offset x="0" y="20"/>
+										</Anchor>
+									</Anchors>
+								</FontString>
+							</Layer>
+						</Layers>
 						<Anchors>
-							<Anchor point="TOPLEFT" relativeTo="$parent" relativePoint="TOPRIGHT">
-								<Offset x="-12" y="0" />
-							</Anchor>
-							<Anchor point="BOTTOMLEFT" relativeTo="$parent" relativePoint="BOTTOMRIGHT">
-								<Offset x="-12" y="0" />
+							<Anchor point="CENTER" />
+						</Anchors>
+					</Slider>
+					<StatusBar name="$parentStatus" parentKey="Status" hidden="true">
+						<Size x="170" y="25"/>
+						<Anchors>
+							<Anchor point="TOP" relativeTo="$parentSpeed" relativePoint="BOTTOM">
+								<Offset x="0" y="-10"/>
 							</Anchor>
 						</Anchors>
-						<Backdrop bgFile="Interface\DialogFrame\UI-DialogBox-Background-Dark" edgeFile="Interface\DialogFrame\UI-DialogBox-Border" tile="true">
-							<BackgroundInsets>
-								<AbsInset left="11" right="12" top="12" bottom="11" />
-							</BackgroundInsets>
-							<TileSize>
-								<AbsValue val="32" />
-							</TileSize>
-							<EdgeSize>
-								<AbsValue val="32" />
-							</EdgeSize>
-						</Backdrop>
-						<Frames>
-							<Button name="$parentItem1" inherits="TellMeWhen_SpellSuggestTemplate" parentKey="Item1" id="1"/>
-							<Slider name="$parentSpeed" inherits="OptionsSliderTemplate" parentKey="Speed" minvalue="1" maxvalue="1000" hidden="true">
-								<Size x="160" y="18"/>
-								<Scripts>
-									<OnLoad>
-										self.text:SetText(TMW.L["CACHINGSPEED"])
-										local minValue, maxValue = self:GetMinMaxValues()
-										_G[self:GetName() .. "Low"]:SetText(minValue)
-										_G[self:GetName() .. "High"]:SetText(maxValue)
-										self.val:SetText(TMW.SUG.NumCachePerFrame)
-										self.infotext:SetText(TMW.L["CACHING"])
-										self:SetValue(TMW.SUG.NumCachePerFrame)
-									</OnLoad>
-									<OnValueChanged>
-										TMW.SUG.NumCachePerFrame = floor(value)
-										self.val:SetText(floor(value))
-									</OnValueChanged>
-								</Scripts>
-								<Layers>
-									<Layer level="ARTWORK">
-										<FontString name="$parentVal" parentKey="val" inherits="GameFontHighlightSmall" text="HIGH">
-											<Anchors>
-												<Anchor point="TOP" relativePoint="BOTTOM">
-													<Offset x="0" y="3"/>
-												</Anchor>
-											</Anchors>
-										</FontString>
-										<FontString name="$parentText" parentKey="text" inherits="GameFontHighlight">
-											<Anchors>
-												<Anchor point="BOTTOM" relativePoint="TOP">
-													<Offset x="0" y="-1"/>
-												</Anchor>
-											</Anchors>
-										</FontString>
-
-										<FontString name="$parentInfoText" parentKey="infotext" inherits="GameFontHighlight">
-											<Size x="165" />
-											<Anchors>
-												<Anchor point="BOTTOM" relativePoint="TOP">
-													<Offset x="0" y="20"/>
-												</Anchor>
-											</Anchors>
-										</FontString>
-									</Layer>
-								</Layers>
-								<Anchors>
-									<Anchor point="CENTER" />
-								</Anchors>
-							</Slider>
-							<StatusBar name="$parentStatus" parentKey="Status" hidden="true">
-								<Size x="170" y="25"/>
-								<Anchors>
-									<Anchor point="TOP" relativeTo="$parentSpeed" relativePoint="BOTTOM">
-										<Offset x="0" y="-10"/>
-									</Anchor>
-								</Anchors>
-								<Layers>
-									<Layer level="ARTWORK">
-										<Texture name="$parenttexture" parentKey="texture" file="Interface\TargetingFrame\UI-StatusBar"/>
-									</Layer>
-
-									<Layer level="OVERLAY">
-										<FontString name="$parentText" parentKey="text" inherits="GameFontHighlight">
-											<Anchors>
-												<Anchor point="CENTER" />
-											</Anchors>
-										</FontString>
-									</Layer>
-								</Layers>
-								<Scripts>
-									<OnLoad>
-										self:SetStatusBarTexture(self.texture)
-									</OnLoad>
-									<OnValueChanged>
-										if self:IsShown() then
-											self.text:SetText(value.." / ~"..(TMWOptDB.CacheLength or 100000))
-										end
-									</OnValueChanged>
-								</Scripts>
-							</StatusBar>
-							<Button name="HelpMicroButton" inherits="MainMenuBarMicroButton" hidden="false">
-								<Anchors>
-									<Anchor point="TOPRIGHT" relativeTo="$parent" relativePoint="TOPRIGHT">
-										<Offset x="-15" y="9" />
-									</Anchor>
-								</Anchors>
-								<Scripts>
-									<OnLoad>
-										self:SetNormalTexture("Interface\\Buttons\\UI-MicroButton-Help-Up")
-										self:SetPushedTexture("Interface\\Buttons\\UI-MicroButton-Help-Up")
-										self:SetDisabledTexture("Interface\\Buttons\\UI-MicroButton-Help-Up")
-										self:SetHighlightTexture("Interface\\Buttons\\UI-MicroButton-Hilight")
-										self:SetScale(.58)
-									</OnLoad>
-									<OnEnter>
-										TMW.SUG:ColorHelp(self)
-									</OnEnter>
-									<OnLeave>
-										GameTooltip:Hide()
-									</OnLeave>
-								</Scripts>
-							</Button>
-						</Frames>
 						<Layers>
+							<Layer level="ARTWORK">
+								<Texture name="$parenttexture" parentKey="texture" file="Interface\TargetingFrame\UI-StatusBar"/>
+							</Layer>
+
 							<Layer level="OVERLAY">
-								<FontString name="$parentHeader" inherits="GameFontNormalLarge" parentKey="Header" justifyH="LEFT" text="SUGGESTIONS">
+								<FontString name="$parentText" parentKey="text" inherits="GameFontHighlight">
 									<Anchors>
-										<Anchor point="TOP" relativeTo="$parent">
-											<Offset x="0" y="-12"/>
-										</Anchor>
+										<Anchor point="CENTER" />
 									</Anchors>
 								</FontString>
 							</Layer>
 						</Layers>
 						<Scripts>
 							<OnLoad>
-								TMW.SUG.Suggest = self
-								self.Header:SetText(TMW.L["SUGGESTIONS"])
-								local previous = self.Item1
-								TMW.SUG[1] = self.Item1
-								self.Item1:SetPoint("TOPLEFT", self, "TOPLEFT", 12, -12-self.Item1:GetHeight())
-								self.Item1:SetWidth(self:GetWidth()-20)
-								for i=2, self:GetHeight()/self.Item1:GetHeight()-2 do
-									local f = CreateFrame("Button", self:GetName().."Item"..i, self, "TellMeWhen_SpellSuggestTemplate")
-									self["Item"..i] = f
-									TMW.SUG[i] = f
-									f:SetPoint("TOPLEFT", previous, "BOTTOMLEFT", 0, 0)
-									f:SetWidth(self:GetWidth()-20)
-									previous = f
-								end
+								self:SetStatusBarTexture(self.texture)
 							</OnLoad>
+							<OnValueChanged>
+								if self:IsShown() then
+									self.text:SetText(value.." / ~"..(TMWOptDB.CacheLength or 100000))
+								end
+							</OnValueChanged>
 						</Scripts>
-					</Frame>
+					</StatusBar>
+					<Button name="HelpMicroButton" inherits="MainMenuBarMicroButton" hidden="false">
+						<Anchors>
+							<Anchor point="TOPRIGHT" relativeTo="$parent" relativePoint="TOPRIGHT">
+								<Offset x="-15" y="9" />
+							</Anchor>
+						</Anchors>
+						<Scripts>
+							<OnLoad>
+								self:SetNormalTexture("Interface\\Buttons\\UI-MicroButton-Help-Up")
+								self:SetPushedTexture("Interface\\Buttons\\UI-MicroButton-Help-Up")
+								self:SetDisabledTexture("Interface\\Buttons\\UI-MicroButton-Help-Up")
+								self:SetHighlightTexture("Interface\\Buttons\\UI-MicroButton-Hilight")
+								self:SetScale(.58)
+							</OnLoad>
+							<OnEnter>
+								TMW.SUG:ColorHelp(self)
+							</OnEnter>
+							<OnLeave>
+								GameTooltip:Hide()
+							</OnLeave>
+						</Scripts>
+					</Button>
+				</Frames>
+				<Layers>
+					<Layer level="OVERLAY">
+						<FontString name="$parentHeader" inherits="GameFontNormalLarge" parentKey="Header" justifyH="LEFT" text="SUGGESTIONS">
+							<Anchors>
+								<Anchor point="TOP" relativeTo="$parent">
+									<Offset x="0" y="-12"/>
+								</Anchor>
+							</Anchors>
+						</FontString>
+					</Layer>
+				</Layers>
+				<Scripts>
+					<OnLoad>
+						TMW.SUG.Suggest = self
+						self.Header:SetText(TMW.L["SUGGESTIONS"])
+						local previous = self.Item1
+						TMW.SUG[1] = self.Item1
+						self.Item1:SetPoint("TOPLEFT", self, "TOPLEFT", 12, -12-self.Item1:GetHeight())
+						self.Item1:SetWidth(self:GetWidth()-20)
+						for i=2, self:GetHeight()/self.Item1:GetHeight()-2 do
+							local f = CreateFrame("Button", self:GetName().."Item"..i, self, "TellMeWhen_SpellSuggestTemplate")
+							self["Item"..i] = f
+							TMW.SUG[i] = f
+							f:SetPoint("TOPLEFT", previous, "BOTTOMLEFT", 0, 0)
+							f:SetWidth(self:GetWidth()-20)
+							previous = f
+						end
+					</OnLoad>
+				</Scripts>
+			</Frame>
 
+			<Frame name="$parentMain" enableMouse="true" hidden="true" parentKey="Main">
+				<Anchors>
+					<Anchor point="TOPLEFT" relativeTo="$parent" relativePoint="TOPLEFT"/>
+					<Anchor point="BOTTOMRIGHT" relativeTo="$parent" relativePoint="BOTTOMRIGHT"/>
+				</Anchors>
+				<Frames>
 					<Frame name="$parentType" inherits="UIDropDownMenuTemplate" parentKey="Type">
 						<Anchors>
 							<Anchor point="TOPLEFT" relativeTo="$parent" relativePoint="TOPLEFT">
@@ -1785,7 +1819,9 @@
 								EditBox_HighlightText(self)
 								self.BackgroundText:SetText(nil)
 								TMW.SUG.redoIfSame = nil
+								TMW.SUG.Box = self
 								TMW.SUG:NameOnCursor()
+								TMW.SUG.overrideSoI = nil
 							</OnEditFocusGained>
 							<OnEnter>
 								self.isOver = true
