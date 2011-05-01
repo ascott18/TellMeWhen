@@ -57,8 +57,8 @@ end)
 local test
 test = function()
 	if true then return end -- toggle this on and off here
-	_G.print("|cffffffffRUNNING CONDITION TESTS")
 	test = nil
+	print("|cffffffffRUNNING CONDITION TESTS")
 	local icon = CreateFrame("Button", "TESTICON")
 	Env.TESTICON = icon
 	icon.Conditions = {}
@@ -167,17 +167,21 @@ function CNDT:RAID_ROSTER_UPDATE()
 end
 
 local GetShapeshiftForm = TMW.GetShapeshiftForm
+local RevCSN = {}
+for k, v in pairs(TMW.CSN) do
+	RevCSN[v] = k
+end
 function CNDT:UPDATE_SHAPESHIFT_FORM()
 	local i = GetShapeshiftForm()
 	if i == 0 then
-		Env.ShapeshiftForm = NONE
+		Env.ShapeshiftForm = 0
 	else
 		local _, n = GetShapeshiftFormInfo(i)
-		Env.ShapeshiftForm = n
+		Env.ShapeshiftForm = RevCSN[n] or 0
 	end
 end
 
-function CNDT:UNIT_STATS(unit)
+function CNDT:UNIT_STATS(_, unit)
 	if unit == "player" then
 		for i = 1, 5 do
 			local _, val = UnitStat("player", i)
@@ -186,27 +190,27 @@ function CNDT:UNIT_STATS(unit)
 	end
 end
 
-function CNDT:UNIT_ATTACK_POWER(unit)
+function CNDT:UNIT_ATTACK_POWER(_, unit)
 	if unit == "player" then
 		local base, pos, neg = UnitAttackPower("player")
 		Env.MeleeAttackPower = base + pos + neg
 	end
 end
 
-function CNDT:UNIT_ATTACK_SPEED(unit)
+function CNDT:UNIT_ATTACK_SPEED(_, unit)
 	if unit == "player" then
 		Env.MeleeHaste = GetMeleeHaste()/100
 	end
 end
 
-function CNDT:UNIT_RANGED_ATTACK_POWER(unit)
+function CNDT:UNIT_RANGED_ATTACK_POWER(_, unit)
 	if unit == "player" then
 		local base, pos, neg = UnitRangedAttackPower("player")
 		Env.RangeAttackPower = base + pos + neg
 	end
 end
 
-function CNDT:UNIT_RANGEDDAMAGE(unit)
+function CNDT:UNIT_RANGEDDAMAGE(_, unit)
 	if unit == "player" then
 		Env.RangeHaste = GetRangedHaste()/100
 	end
@@ -238,9 +242,22 @@ function CNDT:PLAYER_DAMAGE_DONE_MODS()
 	Env.SpellHealing = GetSpellBonusHealing()
 end
 
+function CNDT:PLAYER_REGEN_ENABLED()
+	Env.PlayerInCombat = nil
+end
+
+function CNDT:PLAYER_REGEN_DISABLED()
+	Env.PlayerInCombat = 1
+end
+
+function CNDT:UNIT_VEHICLE(_, unit)
+	if unit == "player" then
+		Env.PlayerInVehicle = UnitHasVehicleUI("player")
+	end
+end
+
 -- helper functions
 local OnGCD = TMW.OnGCD
-
 local GetSpellCooldown = GetSpellCooldown
 local function CooldownDuration(spell, time)
 	local start, duration = GetSpellCooldown(spell)
@@ -305,6 +322,7 @@ Env = {
 	UnitExists = UnitExists,
 	UnitIsDeadOrGhost = UnitIsDeadOrGhost,
 	UnitAffectingCombat = UnitAffectingCombat,
+	UnitHasVehicleUI = UnitHasVehicleUI,
 	UnitIsPVP = UnitIsPVP,
 	UnitClass = UnitClass,
 	GetNumRaidMembers = GetNumRaidMembers,
@@ -374,6 +392,7 @@ local function formatSeconds(seconds)
     if h >= 1 then return format("%d:%02d:%02d", h, m, s) end
     return format("%d:%02d", m, s)
 end
+
 
 CNDT.Types = {
 	{ -- health
@@ -1204,7 +1223,36 @@ CNDT.Types = {
 		nooperator = true,
 		icon = "Interface\\CharacterFrame\\UI-StateIcon",
 		tcoords = {0.53, 0.92, 0.05, 0.42},
-		funcstr = [[c.1nil == UnitAffectingCombat(c.Unit)]],
+		funcstr = function(c)
+			if strlower(c.Unit) == "player" then
+				CNDT:RegisterEvent("PLAYER_REGEN_ENABLED")
+				CNDT:RegisterEvent("PLAYER_REGEN_DISABLED")
+				Env.PlayerInCombat = UnitAffectingCombat("player")
+				return [[c.1nil == PlayerInCombat]]
+			else
+				return [[c.1nil == UnitAffectingCombat(c.Unit)]]
+			end
+		end,
+	},
+	{ -- controlling vehicle
+		text = L["CONDITIONPANEL_VEHICLE"],
+		value = "VEHICLE",
+		min = 0,
+		max = 1,
+		texttable = bool,
+		nooperator = true,
+		icon = "Interface\\Icons\\Ability_Vehicle_SiegeEngineCharge",
+		tcoords = standardtcoords,
+		funcstr = function(c)
+			if strlower(c.Unit) == "player" then
+				CNDT:RegisterEvent("UNIT_ENTERED_VEHICLE", "UNIT_VEHICLE")
+				CNDT:RegisterEvent("UNIT_EXITED_VEHICLE", "UNIT_VEHICLE")
+				Env.PlayerInVehicle = UnitHasVehicleUI("player")
+				return [[c.True == PlayerInVehicle]]
+			else
+				return [[c.True == UnitHasVehicleUI(c.Unit)]]
+			end
+		end,
 	},
 	{ -- pvp
 		text = L["CONDITIONPANEL_PVPFLAG"],
@@ -1238,7 +1286,7 @@ CNDT.Types = {
 		texttable = percent,
 		icon = "Interface\\Icons\\ability_rogue_sprint",
 		tcoords = standardtcoords,
-		funcstr = [[floor(GetUnitSpeed(c.Unit)*]].. BASE_MOVEMENT_SPEED ..[[) c.Operator c.Level]],
+		funcstr = [[GetUnitSpeed(c.Unit)/]].. BASE_MOVEMENT_SPEED ..[[ c.Operator c.Level]],
 	},
 	{ -- runspeed
 		text = L["RUNSPEED"],
@@ -1249,7 +1297,7 @@ CNDT.Types = {
 		texttable = percent,
 		icon = "Interface\\Icons\\ability_rogue_sprint",
 		tcoords = standardtcoords,
-		funcstr = [[floor(select(2, GetUnitSpeed(c.Unit))*]].. BASE_MOVEMENT_SPEED ..[[) c.Operator c.Level]],
+		funcstr = [[select(2, GetUnitSpeed(c.Unit))/]].. BASE_MOVEMENT_SPEED ..[[ c.Operator c.Level]],
 	},
 	{ -- name
 		text = L["CONDITIONPANEL_NAME"],
@@ -1360,19 +1408,15 @@ CNDT.Types = {
 				pclass == "WARRIOR" and L["STANCE"] or
 				pclass == "DEATHKNIGHT" and L["PRESENCE"] or
 				pclass == "DRUID" and L["SHAPESHIFT"] or
-			--	firststanceid and GetSpellInfo(firststanceid) or
 				L["STANCE"],
 		value = "STANCE",
 		min = 0,
 		max = #TMW.CSN,
 		texttable = TMW.CSN, -- now isn't this convenient? too bad i have to track them by ID so they wont upgrade properly when stances are added/removed
 		unit = PLAYER,
-		nooperator = true,
 		icon = function() return firststanceid and GetSpellTexture(firststanceid) end,
 		tcoords = standardtcoords,
-		funcstr = function(c)
-			return (TMW.CSN[c.Level] and "\""..TMW.CSN[c.Level].."\"" or "nil") .. [[ == ShapeshiftForm]]
-		end,
+		funcstr = [[ShapeshiftForm c.Operator c.Level]],
 		events = {"UPDATE_SHAPESHIFT_FORM"},
 		hidden = #TMW.CSN == 0,
 	},
@@ -1402,6 +1446,22 @@ CNDT.Types = {
 		tcoords = standardtcoords,
 		funcstr = [[CurrentTree c.Operator c.Level]],
 	},
+	
+	{ -- talent tree
+		text = L["LUACONDITION"],
+		tooltip = L["LUACONDITION_DESC"],
+		value = "LUA",
+		spacebefore = true,
+		min = 0,
+		max = 1,
+		nooperator = true,
+		noslide = true,
+		name = function(editbox) TMW:TT(editbox, "LUACONDITION", gsub(L["LUACONDITION_DESC"], "\r\n", " "), nil, 1, 1) end,
+		unit = false,
+		icon = "Interface\\Icons\\INV_Misc_Gear_01",
+		tcoords = standardtcoords,
+		funcstr = function(c) return c.Name end,
+	},
 }
 
 CNDT.ConditionsByType = {}
@@ -1414,6 +1474,7 @@ function CNDT:ProcessConditions(icon)
 	if TMW.debug and test then test() end
 	local Conditions = icon.Conditions
 	local funcstr = ""
+	local luaUsed
 	for i = 1, #Conditions do
 		local c = Conditions[i]
 		local t = c.Type
@@ -1421,10 +1482,12 @@ function CNDT:ProcessConditions(icon)
 		if v and v.events then
 			for k, event in pairs(v.events) do
 				CNDT:RegisterEvent(event)
-				CNDT[event](CNDT, "player")
+				CNDT[event](CNDT, event, "player")
 			end
 		end
-
+		if t == "LUA" then
+			luaUsed = 1
+		end
 		local name = gsub((c.Name or ""), "; ", ";")
 		name = gsub(name, " ;", ";")
 		name = ";" .. name .. ";"
@@ -1468,7 +1531,7 @@ function CNDT:ProcessConditions(icon)
 			gsub("c.Operator", 		c.Operator):
 			gsub("c.NameFirst", 	"\"" .. TMW:GetSpellNames(nil, name, 1) .. "\""):
 			gsub("c.NameName", 		"\"" .. TMW:GetSpellNames(nil, name, 1, 1) .. "\""):
-			gsub("c.ItemID", 		TMW:GetItemIDs(icon, name, 1)):
+			gsub("c.ItemID", 		TMW:GetItemIDs(nil, name, 1)):
 			gsub("c.Name", 			"\"" .. name .. "\""):
 
 			gsub("c.True", 			tostring(c.Level == 0)):
@@ -1476,11 +1539,20 @@ function CNDT:ProcessConditions(icon)
 			funcstr = funcstr .. thisstr
 		end
 	end
-	funcstr = [[if not (]] .. strsub(funcstr, 4) .. [[) then
-		]] .. (icon.ConditionAlpha == 0 and (icon:GetName()..[[:SetAlpha(0) return true]]) or (icon:GetName()..[[.CndtFailed = 1]])) .. [[
+	
+	if strfind(icon:GetName(), "Icon") then
+		funcstr = [[if not (]] .. strsub(funcstr, 4) .. [[) then
+			]] .. (icon.ConditionAlpha == 0 and (icon:GetName()..[[:SetAlpha(0) return true]]) or (icon:GetName()..[[.CndtFailed = 1]])) .. [[
+		else
+			]]..icon:GetName()..[[.CndtFailed = nil
+		end]]
 	else
-		]]..icon:GetName()..[[.CndtFailed = nil
-	end]]
+		funcstr = [[if not (]] .. strsub(funcstr, 4) .. [[) then
+			]] .. icon:GetName() .. [[:Hide()
+		else
+			]] .. icon:GetName() .. [[:Show()
+		end]]
+	end
 
 
 	if functionCache[funcstr] then
@@ -1494,8 +1566,7 @@ function CNDT:ProcessConditions(icon)
 		icon.CndtCheck = func
 		functionCache[funcstr] = func
 		return func
-	elseif TMW.debug and err then
-		print(funcstr)
+	elseif (TMW.debug or luaUsed) and err then
 		error(err)
 	end
 end

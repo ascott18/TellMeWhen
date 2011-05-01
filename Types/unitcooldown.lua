@@ -37,6 +37,7 @@ local RelevantSettings = {
 	DurationMax = true,
 	DurationMinEnabled = true,
 	DurationMaxEnabled = true,
+	ConditionAlpha = true,
 	FakeHidden = true,
 }
 

@@ -39,6 +39,9 @@ local RelevantSettings = {
 	InvertBars = true,
 	Alpha = true,
 	UnAlpha = true,
+	Sort = true,
+	SortAsc = true,
+	SortDesc = true,
 	ConditionAlpha = true,
 	DurationMin = true,
 	DurationMax = true,
@@ -62,13 +65,13 @@ function Type:Update()
 	ab = db.profile.ABSENTColor
 end
 
-
+local huge = math.huge
 local function Buff_OnUpdate(icon, time)
 	if icon.UpdateTimer <= time - UPD_INTV then
 		icon.UpdateTimer = time
 		local CndtCheck = icon.CndtCheck if CndtCheck and CndtCheck() then return end
 
-		local Units, NameArray, NameNameArray, NameDictionary, Filter, Filterh = icon.Units, icon.NameArray, icon.NameNameArray, icon.NameDictionary, icon.Filter, icon.Filterh
+		local Units, NameArray, NameNameArray, NameDictionary, Filter, Filterh, Sort = icon.Units, icon.NameArray, icon.NameNameArray, icon.NameDictionary, icon.Filter, icon.Filterh, icon.Sort
 		local NAL = icon.NAL
 
 		for u = 1, #Units do
@@ -76,23 +79,42 @@ local function Buff_OnUpdate(icon, time)
 			if UnitExists(unit) then
 				local buffName, _, iconTexture, count, dispelType, duration, expirationTime, _, _, _, id
 				if NAL > EFF_THR then
+					local d = Sort == -1 and huge or 0
 					for z=1, 60 do --60 because i can and it breaks when there are no more buffs anyway
-						buffName, _, iconTexture, count, dispelType, duration, expirationTime, _, _, _, id = UnitAura(unit, z, Filter)
-						if not buffName
-						or NameDictionary[id]
-						or NameDictionary[strlower(buffName)]
-						or NameDictionary[dispelType] then
+						local _buffName, _, _iconTexture, _count, _dispelType, _duration, _expirationTime, _, _, _, _id = UnitAura(unit, z, Filter)
+						if not _buffName then
 							break
+						elseif NameDictionary[_id] or NameDictionary[_dispelType] or NameDictionary[strlower(_buffName)] then
+							if Sort then
+								local _d = (_expirationTime == 0 and huge) or _expirationTime - time
+								if (Sort == 1 and d < _d) or (Sort == -1 and d > _d) then
+									buffName, iconTexture, count, dispelType, duration, expirationTime, id, d =
+									 _buffName, _iconTexture, _count, _dispelType, _duration, _expirationTime, _id, _d
+								end
+							else
+								buffName, iconTexture, count, dispelType, duration, expirationTime, id =
+								 _buffName, _iconTexture, _count, _dispelType, _duration, _expirationTime, _id
+								break
+							end
 						end
 					end
 					if Filterh and not buffName then
 						for z=1, 60 do
-							buffName, _, iconTexture, count, dispelType, duration, expirationTime, _, _, _, id = UnitAura(unit, z, Filterh)
-							if not buffName
-							or NameDictionary[id]
-							or NameDictionary[strlower(buffName)]
-							or NameDictionary[dispelType] then
+							local _buffName, _, _iconTexture, _count, _dispelType, _duration, _expirationTime, _, _, _, _id = UnitAura(unit, z, Filterh)
+							if not _buffName then
 								break
+							elseif NameDictionary[_id] or NameDictionary[_dispelType] or NameDictionary[strlower(_buffName)] then
+								if Sort then
+									local _d = (_expirationTime == 0 and huge) or _expirationTime - time
+									if (Sort == 1 and d < _d) or (Sort == -1 and d > _d) then
+										buffName, iconTexture, count, dispelType, duration, expirationTime, id, d =
+										 _buffName, _iconTexture, _count, _dispelType, _duration, _expirationTime, _id, _d
+									end
+								else
+									buffName, iconTexture, count, dispelType, duration, expirationTime, id =
+									 _buffName, _iconTexture, _count, _dispelType, _duration, _expirationTime, _id
+									break
+								end
 							end
 						end
 					end
@@ -168,8 +190,9 @@ function Type:Setup(icon, groupID, iconID)
 		if icon.Filterh then icon.Filterh = icon.Filterh .. "|PLAYER" end
 	end
 	icon:SetReverse(true)
-	icon.NAL = icon.NameNameDictionary[strlower(GetSpellInfo(8921))] and EFF_THR + 2 or #icon.NameArray -- need to force any icon looking for moonfire to check all auras on the target because of a blizzard bug in 4.1.
-
+	icon.NAL = icon.NameNameDictionary[strlower(GetSpellInfo(8921))] and EFF_THR + 2 or #icon.NameArray -- need to force any icon looking for moonfire to check all auras on the target because of a blizzard bug in WoW 4.1.
+	icon.NAL = icon.Sort and #icon.NameArray > 1 and EFF_THR + 2 or icon.NAL
+	
 	icon.FirstTexture = GetSpellTexture(icon.NameFirst)
 	if icon.Name == "" then
 		icon:SetTexture("Interface\\Icons\\INV_Misc_QuestionMark")

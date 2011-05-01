@@ -1,3 +1,15 @@
+===v4.1.3===
+ * Conditions can now be set by group
+ ** IMPORTANT: Group combat, vehicle, and stance settings have migrated to conditions instead of being settings that are defined in the group options
+ ** The old dual spec and talent tree settings remain as a way to prevent groups in the same spot that serve different purposes from being displayed during config when not needed.
+ * New/changed conditions:
+ ** Stance conditions now allow an operator to be specified. Less/greater than operators are relative to the stance's position on the slider.
+ ** Unit controlling vehicle
+ * Buff/debuff icons now have the option to sort the auras that they find by duration.
+ * Spell caching will not begin until the icon editor is opened. You can have a few framerates back.
+ * Bug Fixes:
+ ** Unit cooldown icons should now have the condition alpha option, and subsequently, conditions will actually work with them.
+ 
 ===v4.1.2===
  * You can now 'group' conditions together with parenthesis. If you have any suggestions on how to make the GUI for it look better, please let me know.
  * Implemented the suggestion list for conditions that take spell/item inputs.
@@ -8,6 +20,7 @@
  ** Spell in range of unit
  ** Item in range of unit
  ** Spell usable (mana, rage, energy, etc)
+ ** Lua (Advanced)
  * Bug fixes:
  ** Error fix: TellMeWhen_Options.lua:2431: attempt to index field '?' (a nil value) 
  ** Fixed the bug with moonfire debuff tracking in 4.1

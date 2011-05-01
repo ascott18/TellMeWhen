@@ -27,7 +27,6 @@
 	<CheckButton name="TellMeWhen_RadioCheckTemplate" virtual="true" inherits="TellMeWhen_CheckTemplate">
 		<Scripts>
 			<OnLoad>
-				self.setting = "CooldownType"
 				self.text:SetWidth(self:GetParent():GetWidth()-20)
 			</OnLoad>
 			<OnClick>
@@ -180,7 +179,8 @@
 					if (not TMW.SUG[#TMW.SUG]:IsShown() and delta == 1) or TMW.SUG[#TMW.SUG]:IsShown() then
 						if IsLeftShiftKeyDown() or IsRightShiftKeyDown() then
 							delta = delta*5
-						elseif IsLeftControlKeyDown() or IsRightControlKeyDown() then
+						end
+						if IsLeftControlKeyDown() or IsRightControlKeyDown() then
 							delta = delta*(#TMW.SUG-1)
 						end
 						TMW.SUG.offset = max(0, TMW.SUG.offset - delta)
@@ -1526,7 +1526,7 @@
 				</Anchors>
 				<Scripts> <OnLoad> self:SetText(TMW.L["MAIN"]) </OnLoad> </Scripts>
 			</Button>
-			<Button name="$parentTab2" parentKey="ConditionTab" inherits="TellMeWhen_TabTemplate" id="2">
+			<Button name="$parentTab2" parentKey="IconConditionTab" inherits="TellMeWhen_TabTemplate" id="2"> <!-- AVOID CHANGING THIS TAB'S ID, OR MAKE SURE TO FIX IT WHERE NEEDED IF YOU DO -->
 				<Anchors>
 				   <Anchor point="LEFT" relativeTo="$parentTab1" relativePoint="RIGHT" x="-15" y="0"/>
 				</Anchors>
@@ -1540,28 +1540,29 @@
 			</Button>
 			<Button name="$parentTab4" parentKey="GroupTab" inherits="TellMeWhen_TabTemplate" id="4">
 				<Anchors>
-				   <Anchor point="LEFT" relativeTo="$parentTab3" relativePoint="RIGHT" x="-15" y="0"/>
+					<Anchor point="BOTTOMRIGHT" x="-11" y="-25"/>
 				</Anchors>
 				<Scripts>
 					<OnLoad> self:SetText(TMW.L["GROUPADDONSETTINGS"]) </OnLoad>
 					<OnClick>
 						TMW:CompileOptions()
 						LibStub("AceConfigDialog-3.0"):Open("TellMeWhen Options")
-						LibStub("AceConfigDialog-3.0"):SelectGroup("TellMeWhen Options", "groups", tostring(TMW.CI.g))
-						LibStub("AceConfigRegistry-3.0"):NotifyChange("TellMeWhen Options") -- slider values do not show on first open, stupid fix
+						LibStub("AceConfigDialog-3.0"):SelectGroup("TellMeWhen Options", "groups", "Group " .. TMW.CI.g)
 					</OnClick>
 				</Scripts>
+			</Button>
+			<Button name="$parentTab5" parentKey="GroupConditionTab" inherits="TellMeWhen_TabTemplate" id="5"> <!-- AVOID CHANGING THIS TAB'S ID, OR MAKE SURE TO FIX IT WHERE NEEDED IF YOU DO -->
+				<Anchors>
+				   <Anchor point="RIGHT" relativeTo="$parentTab4" relativePoint="LEFT" x="15" y="0"/>
+				</Anchors>
+				<Scripts> <OnLoad> self:SetText(TMW.L["GROUPCONDITIONS"]) </OnLoad> </Scripts>
 			</Button>
 			
 			<Frame name="$parentSuggest" parentKey="Suggest" hidden="true" enableMouse="true">
 				<Size x="220"/>
 				<Anchors>
-					<Anchor point="TOPLEFT" relativeTo="$parent" relativePoint="TOPRIGHT">
-						<Offset x="-12" y="0" />
-					</Anchor>
-					<Anchor point="BOTTOMLEFT" relativeTo="$parent" relativePoint="BOTTOMRIGHT">
-						<Offset x="-12" y="0" />
-					</Anchor>
+					<Anchor point="TOPLEFT" relativeTo="$parent" relativePoint="TOPRIGHT" x="-12" y="0" />
+					<Anchor point="BOTTOMLEFT" relativeTo="$parent" relativePoint="BOTTOMRIGHT" x="-12" y="0" />
 				</Anchors>
 				<Backdrop bgFile="Interface\DialogFrame\UI-DialogBox-Background-Dark" edgeFile="Interface\DialogFrame\UI-DialogBox-Border" tile="true">
 					<BackgroundInsets>
@@ -1576,21 +1577,23 @@
 				</Backdrop>
 				<Frames>
 					<Button name="$parentItem1" inherits="TellMeWhen_SpellSuggestTemplate" parentKey="Item1" id="1"/>
-					<Slider name="$parentSpeed" inherits="OptionsSliderTemplate" parentKey="Speed" minvalue="1" maxvalue="1000" hidden="true">
+					<Slider name="$parentSpeed" inherits="OptionsSliderTemplate" parentKey="Speed" hidden="true">
 						<Size x="160" y="18"/>
 						<Scripts>
 							<OnLoad>
+								self.exponent = 4
 								self.text:SetText(TMW.L["CACHINGSPEED"])
-								local minValue, maxValue = self:GetMinMaxValues()
-								_G[self:GetName() .. "Low"]:SetText(minValue)
-								_G[self:GetName() .. "High"]:SetText(maxValue)
+								self:SetMinMaxValues(1, (1000^(1/self.exponent)))
+								_G[self:GetName() .. "Low"]:SetText(1)
+								_G[self:GetName() .. "High"]:SetText(1000)
 								self.val:SetText(TMW.SUG.NumCachePerFrame)
 								self.infotext:SetText(TMW.L["CACHING"])
 								self:SetValue(TMW.SUG.NumCachePerFrame)
 							</OnLoad>
 							<OnValueChanged>
-								TMW.SUG.NumCachePerFrame = floor(value)
-								self.val:SetText(floor(value))
+								value = value^self.exponent
+								TMW.SUG.NumCachePerFrame = floor(value)-1
+								self.val:SetText(floor(value+0.5))
 							</OnValueChanged>
 						</Scripts>
 						<Layers>
@@ -2320,7 +2323,86 @@
 							</OnClick>
 						</Scripts>
 					</CheckButton>
+					
+					<Frame name="$parentSortChecks" parentKey="SortChecks">
+						<Size x="140" y="90"/>
+						<Anchors>
+							<Anchor point="TOPLEFT" relativeTo="$parentRangeCheck" relativePoint="BOTTOMLEFT">
+								<Offset x="0" y="0" />
+							</Anchor>
+						</Anchors>
+						<Layers>
+							<Layer level="ARTWORK">
+								<FontString name="$parentFS1" inherits="GameFontNormal" parentKey="text" justifyH="LEFT">
+									<Anchors>
+										<Anchor point="TOPLEFT" relativePoint="TOPLEFT">
+											<Offset x="0" y="10" />
+										</Anchor>
+									</Anchors>
+								</FontString>
+							</Layer>
+						</Layers>
+						<Frames>
+							<CheckButton name="$parent1" inherits="TellMeWhen_RadioCheckTemplate" parentKey="Radio1" id="1">
+								<Anchors>
+									<Anchor point="TOPLEFT" relativeTo="$parent" relativePoint="TOPLEFT">
+										<Offset x="0" y="0" />
+									</Anchor>
+								</Anchors>
+								<Scripts>
+									<OnLoad>
+										self:Show()
+										self.setting = "Sort"
+										self.value = nil
+										self.text:SetText(TMW.L["SORTBYNONE"])
+										TMW:TT(self, "SORTBYNONE", "SORTBYNONE_DESC")
+										self.text:SetWidth(TELLMEWHEN_COLUMN1WIDTH)
+									</OnLoad>
+								</Scripts>
+							</CheckButton>
+							<CheckButton name="$parent2" inherits="TellMeWhen_RadioCheckTemplate" parentKey="Radio2" id="2">
+								<Anchors>
+									<Anchor point="TOP" relativeTo="$parent1" relativePoint="BOTTOM">
+										<Offset x="0" y="0" />
+									</Anchor>
+								</Anchors>
+								<Scripts>
+									<OnLoad>
+										self:Show()
+										self.setting = "Sort"
+										self.value = -1
+										self.text:SetText(TMW.L["ICONMENU_SORTASC"])
+										TMW:TT(self, "ICONMENU_SORTASC", "ICONMENU_SORTASC_DESC")
+										self.text:SetWidth(TELLMEWHEN_COLUMN1WIDTH)
+									</OnLoad>
+								</Scripts>
+							</CheckButton>
+							<CheckButton name="$parent3" inherits="TellMeWhen_RadioCheckTemplate" parentKey="Radio3" id="3">
+								<Anchors>
+									<Anchor point="TOP" relativeTo="$parent2" relativePoint="BOTTOM">
+										<Offset x="0" y="5" />
+									</Anchor>
+								</Anchors>
+								<Scripts>
+									<OnLoad>
+										self:Show()
+										self.setting = "Sort"
+										self.value = 1
+										self.text:SetText(TMW.L["ICONMENU_SORTDESC"])
+										TMW:TT(self, "ICONMENU_SORTDESC", "ICONMENU_SORTDESC_DESC")
+										self.text:SetWidth(TELLMEWHEN_COLUMN1WIDTH)
+									</OnLoad>
+								</Scripts>
+							</CheckButton>
+						</Frames>
+						<Scripts>
+							<OnLoad>
+								self.text:SetText(TMW.L["SORTBY"])
+							</OnLoad>
+						</Scripts>
+					</Frame>
 
+					
 					<Frame name="$parentTypeChecks" parentKey="TypeChecks">
 						<Size x="140" y="100"/>
 						<Anchors>
@@ -2372,7 +2454,7 @@
 						<Scripts>
 							<OnLoad>
 								local _, pclass = UnitClass("Player")
-								if pclass == "SHAMAN" or TMW.debug then
+								if pclass == "SHAMAN" then
 									for k, frame in pairs(self) do
 										if type(frame) == "table" and frame.GetID and frame:GetID() > 1 then
 											local p, rt, rp, x, y = frame:GetPoint(1)
@@ -3294,7 +3376,7 @@
 								previous.soundfile = ""
 								previous.soundname = "None"
 
-								for i=1, self:GetHeight()/self.None:GetHeight() do
+								for i=1, floor(self:GetHeight())/self.None:GetHeight() do
 									local f = CreateFrame("Button", self:GetName().."Sound"..i, self, "TellMeWhen_SoundSelectButton", i)
 									self[i] = f
 									f:SetPoint("TOPLEFT", previous, "BOTTOMLEFT", 0, 0)
@@ -3377,12 +3459,20 @@
 
 								local t = TMW:CleanString(self:GetText())
 								t = gsub(t, "/", "\\")
-
+								local wt
+								
 								if not strfind(t, "%.[^\\]+$") then
 									t = "None"
+									wt = TMW.L["SOUNDERROR1"]
+								elseif strfind(strlower(t), "%.wav$") and select(4, GetBuildInfo()) > 40000 then
+									t = "None"
+									wt = TMW.L["SOUNDERROR2"]
+								elseif not (strfind(strlower(t), "%.ogg$") or strfind(strlower(t), "%.mp3$")) then
+									wt = TMW.L["SOUNDERROR3"]
 								end
 
 								self:SetText(t)
+								TMW.IE.Sound.Warning:SetText(wt)
 
 								if TMW.db and TMW.SND.currentEventSetting then
 									TMW.db.profile.Groups[groupID].Icons[iconID][TMW.SND.currentEventSetting] = t
@@ -3426,6 +3516,17 @@
 					</Frame>
 			 -->
 				</Frames>
+				<Layers>
+					<Layer level="OVERLAY">
+						<FontString name="$parentWarning" parentKey="Warning" inherits="GameFontNormalLeftRed" justifyH="RIGHT">
+							<Anchors>
+								<Anchor point="BOTTOMLEFT" >
+									<Offset x="168" y="17" />
+								</Anchor>
+							</Anchors>
+						</FontString>
+					</Layer>
+				</Layers>
 				<Scripts>
 					<OnLoad>
 						self:RegisterForDrag("LeftButton")
@@ -3680,10 +3781,12 @@
 		<Scripts>
 			<OnLoad>
 				self:RegisterForDrag("LeftButton")
-				self.numTabs = 4
 				for k, v in pairs(self) do
 					if k ~= 0 then
 						TMW.IE[k] = v
+						if strfind(k, "Tab") then
+							self.numTabs = max(self.numTabs or 0, v:GetID())
+						end
 					end
 				end
 				tinsert(UISpecialFrames, self:GetName())
@@ -3691,7 +3794,12 @@
 			<OnUpdate>
 				local groupID, iconID = TMW.CI.g, TMW.CI.i
 				local ic = TMW.CI.ic
-				self.FS1:SetFormattedText(TMW.L["GROUPICON"], TMW:GetGroupName(TMW.db.profile.Groups[groupID].Name, groupID, 1), iconID)
+				local t 
+				if TMW.CNDT and TMW.CNDT.type == "group" and self.selectedTab == 5 then
+					self.FS1:SetFormattedText(TMW.L["fGROUP"], TMW:GetGroupName(TMW.db.profile.Groups[groupID].Name, groupID, 1))
+				else
+					self.FS1:SetFormattedText(TMW.L["GROUPICON"], TMW:GetGroupName(TMW.db.profile.Groups[groupID].Name, groupID, 1), iconID)
+				end
 				if ic then
 					self.icontexture:SetTexture(ic.texture:GetTexture())
 				end

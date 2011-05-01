@@ -19,8 +19,8 @@ TMW.Print = TMW.Print or _G.print
 TMW.Warn = setmetatable({}, {__call = function(tbl, text)
 	if TMW.Warned then
 		TMW:Print(text)
-	else
-		tbl[text] = true
+	elseif not TMW.tContains(tbl, text) then
+		tinsert(tbl, text)
 	end
 end})
 TMW.Icons = {}
@@ -35,9 +35,9 @@ local LBF = LibStub("LibButtonFacade", true)
 local AceDB = LibStub("AceDB-3.0")
 local LSM = LibStub("LibSharedMedia-3.0")
 
-TELLMEWHEN_VERSION = "4.1.2"
+TELLMEWHEN_VERSION = "4.1.3"
 TELLMEWHEN_VERSION_MINOR = ""
-TELLMEWHEN_VERSIONNUMBER = 41205 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL (although it is displayed in version warnings to prevent confusion about a warning for the same major version)
+TELLMEWHEN_VERSIONNUMBER = 41301 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL (although it is displayed in version warnings to prevent confusion about a warning for the same major version)
 TELLMEWHEN_MAXGROUPS = 10 	--this is a default, used by SetTheory (addon), so dont rename
 TELLMEWHEN_MAXROWS = 20
 local UPD_INTV = 0.06	--this is a default, local because i use it in onupdate functions
@@ -46,10 +46,10 @@ local GetSpellCooldown, GetSpellInfo =
 	  GetSpellCooldown, GetSpellInfo
 local GetItemInfo, GetInventoryItemID =
 	  GetItemInfo, GetInventoryItemID
-local GetShapeshiftForm, GetNumShapeshiftForms, GetShapeshiftFormInfo =
-	  GetShapeshiftForm, GetNumShapeshiftForms, GetShapeshiftFormInfo
-local UnitPower, UnitAffectingCombat, UnitHasVehicleUI =
-	  UnitPower, UnitAffectingCombat, UnitHasVehicleUI
+local GetShapeshiftForm, GetNumShapeshiftForms =
+	  GetShapeshiftForm, GetNumShapeshiftForms
+local UnitPower =
+	  UnitPower
 local GetNumRaidMembers, PlaySoundFile =
 	  GetNumRaidMembers, PlaySoundFile
 local tonumber, tostring, type, pairs, ipairs, tinsert, tremove, sort, select, wipe, rawget, tDeleteItem = --tDeleteItem is a blizzard function defined in UIParent.lua
@@ -282,16 +282,11 @@ TMW.Defaults = {
 			Columns			= 4,
 			Spacing			= 0,
 			CheckOrder		= -1,
-			OnlyInCombat	= false,
-			NotInVehicle	= false,
 			PrimarySpec		= true,
 			SecondarySpec	= true,
 			Tree1			= true,
 			Tree2			= true,
 			Tree3			= true,
-			Stance = {
-				["*"] = true
-			},
 			Point = {
 				point = "TOPLEFT",
 				relativeTo = "UIParent",
@@ -398,6 +393,7 @@ TMW.Defaults = {
 }
 TMW.Group_Defaults = TMW.Defaults.profile.Groups["**"]
 TMW.Icon_Defaults = TMW.Group_Defaults.Icons["**"]
+TMW.Group_Defaults.Conditions = TMW.Icon_Defaults.Conditions
 for k in pairs(TMW.Icon_Defaults) do
 	if strsub(k, 1, 5) == "Sound" then
 		TMW.RelevantSettings.all[k] = true
@@ -536,7 +532,8 @@ TMW.Cooldowns = setmetatable({}, {__index = function(t, k)
 	return n
 end})
 
-local OnUpdateHandlers = {}
+local IconUpdateFuncs = {}
+local GroupUpdateFuncs = {}
 
 do -- STANCES
 	TMW.Stances = {
@@ -593,7 +590,6 @@ end local CSN = TMW.CSN
 -- EXECUTIVE FUNCTIONS, ETC
 -- --------------------------
 
-
 StaticPopupDialogs["TMW_RESTARTNEEDED"] = {
 	text = "A complete restart of WoW is required to use TellMeWhen "..TELLMEWHEN_VERSION..TELLMEWHEN_VERSION_MINOR..". Would you like to restart WoW now?", --not worth translating imo, most people will never see it by the time it gets translated.
 	button1 = EXIT_GAME,
@@ -638,8 +634,22 @@ function TMW:OnInitialize()
 	TMW.db = AceDB:New("TellMeWhenDB", TMW.Defaults)
 	db = TMW.db
 	
-	LSM:Register("sound", "Die!", "Sound\\Creature\\GruulTheDragonkiller\\GRULLAIR_Gruul_Slay03.wav")
-	LSM:Register("sound", "You Fail!", "Sound\\Creature\\Kologarn\\UR_Kologarn_slay02.wav")
+	LSM:Register("sound", "Rubber Ducky", [[Sound\Doodad\Goblin_Lottery_Open01.wav]])
+	LSM:Register("sound", "Cartoon FX", [[Sound\Doodad\Goblin_Lottery_Open03.wav]])
+	LSM:Register("sound", "Explosion", [[Sound\Doodad\Hellfire_Raid_FX_Explosion05.wav]])
+	LSM:Register("sound", "Shing!", [[Sound\Doodad\PortcullisActive_Closed.wav]])
+	LSM:Register("sound", "Wham!", [[Sound\Doodad\PVP_Lordaeron_Door_Open.wav]])
+	LSM:Register("sound", "Simon Chime", [[Sound\Doodad\SimonGame_LargeBlueTree.wav]])
+	LSM:Register("sound", "War Drums", [[Sound\Event Sounds\Event_wardrum_ogre.wav]])
+	LSM:Register("sound", "Cheer", [[Sound\Event Sounds\OgreEventCheerUnique.wav]])
+	LSM:Register("sound", "Humm", [[Sound\Spells\SimonGame_Visual_GameStart.wav]])
+	LSM:Register("sound", "Short Circuit", [[Sound\Spells\SimonGame_Visual_BadPress.wav]])
+	LSM:Register("sound", "Fel Portal", [[Sound\Spells\Sunwell_Fel_PortalStand.wav]])
+	LSM:Register("sound", "Fel Nova", [[Sound\Spells\SeepingGaseous_Fel_Nova.wav]])
+	LSM:Register("sound", "You Will Die!", [[Sound\Creature\CThun\CThunYouWillDie.wav]])
+	
+	LSM:Register("sound", "Die!", [[Sound\Creature\GruulTheDragonkiller\GRULLAIR_Gruul_Slay03.wav]])
+	LSM:Register("sound", "You Fail!", [[Sound\Creature\Kologarn\UR_Kologarn_slay02.wav]])
 
 	TELLMEWHEN_MAXGROUPS = db.profile.NumGroups -- need to define before upgrading
 
@@ -689,7 +699,7 @@ function TMW:OnProfile()
 		icon:SetTexture(nil)
 	end
 	TMW:Update()
-	TMW:LoadOptions()
+--	TMW:LoadOptions() -- why is this here?
 end
 
 function TMW:PLAYER_TALENT_UPDATE()
@@ -726,8 +736,15 @@ function TMW:OnUpdate() -- this is where all icon OnUpdate scripts are actually 
 		TMW.time = time
 		UpdateTimer = time
 		_, GCD=GetSpellCooldown(GCDSpell)
-		for i = 1, #OnUpdateHandlers do
-			local icon = OnUpdateHandlers[i]
+		for i = 1, #GroupUpdateFuncs do
+			local CndtCheck = GroupUpdateFuncs[i].CndtCheck
+			if CndtCheck then
+				CndtCheck()
+			end
+		end
+		
+		for i = 1, #IconUpdateFuncs do
+			local icon = IconUpdateFuncs[i]
 			if icon.__shown then
 				icon:OnUpdate(time)
 			end
@@ -745,8 +762,8 @@ function TMW:Update()
 
 	if not TMW.Warned then
 		TMW.Warned = true
-		for k, v in pairs(TMW.Warn) do
-			TMW:Print(k)
+		for k, v in ipairs(TMW.Warn) do
+			TMW:Print(v)
 		end
 	end
 
@@ -838,6 +855,7 @@ function TMW:Upgrade()
 	end
 
 	--[[if db.profile.Version < 11400 then
+		-- I FAIL TO FIND A REASON TO DO THIS, IT HAS BEEN IN HERE SINCE WAY BACK WHEN THOUGH
 		db:ResetProfile()
 		return
 	end]]
@@ -855,7 +873,7 @@ function TMW:Upgrade()
 	end
 	if db.profile.Version < 15400 then
 		for ics in TMW.InIconSettings() do
-			if ics["Alpha"] == 0.01 then ics["Alpha"] = 1 end
+			if ics.Alpha == 0.01 then ics.Alpha = 1 end
 		end
 	end
 	if db.profile.Version < 20100 then
@@ -958,14 +976,16 @@ function TMW:Upgrade()
 		for gs in TMW.InGroupSettings() do
 			gs.Point.defined = true
 			gs.LBFGroup = nil
-			for k, v in pairs(gs.Stance) do
-				if CSN[k] then
-					if v then
-						gs.Stance[CSN[k]] = false
-					else
-						gs.Stance[CSN[k]] = true
+			if gs.Stance then
+				for k, v in pairs(gs.Stance) do
+					if CSN[k] then
+						if v then -- everything switched in this version
+							gs.Stance[CSN[k]] = false
+						else
+							gs.Stance[CSN[k]] = true
+						end
+						gs.Stance[k] = nil
 					end
-					gs.Stance[k] = true
 				end
 			end
 		end
@@ -1018,10 +1038,10 @@ function TMW:Upgrade()
 	end
 	if db.profile.Version < 40080 then -- beta8
 		for gs in TMW.InGroupSettings() do
-			if not gs.Stance[L["NONE"]] or not gs.Stance[L["CASTERFORM"]] then
-				gs.Stance[L["NONE"]] = true
-				gs.Stance[L["CASTERFORM"]] = true
-				gs.Stance[NONE] = false -- change it to something that will probably never change
+			if gs.Stance and (gs.Stance[L["NONE"]] == false or gs.Stance[L["CASTERFORM"]] == false) then
+				gs.Stance[L["NONE"]] = nil
+				gs.Stance[L["CASTERFORM"]] = nil
+				gs.Stance[NONE] = false 
 			end
 		end
 
@@ -1067,9 +1087,6 @@ function TMW:Upgrade()
 				end
 			end
 		end
-	end
-	if db.profile.Version < 40109 then
-		TellMeWhenDB.DoResetAuraCache = true -- dont store this in db.profile - make it global
 	end
 
 	if db.profile.Version < 40111 then
@@ -1143,6 +1160,81 @@ function TMW:Upgrade()
 						condition.Level = 0
 					end
 				end
+			end
+		end
+	end
+	if db.profile.Version < 41206 then
+		for ics in TMW.InIconSettings() do
+			for k, condition in pairs(ics.Conditions) do
+				if condition.Type == "STANCE" then
+					condition.Operator = "=="
+				end
+			end
+		end
+	end
+	if db.profile.Version < 41301 then
+		for gs, groupID in TMW.InGroupSettings() do
+			local Conditions = gs.Conditions
+
+			if gs.OnlyInCombat then
+				local condition = Conditions[#Conditions + 1]
+				condition.Type = "COMBAT"
+				condition.Level = 0
+				gs.OnlyInCombat = nil
+			end
+			if gs.NotInVehicle then
+				local condition = Conditions[#Conditions + 1]
+				condition.Type = "VEHICLE"
+				condition.Level = 1
+				gs.NotInVehicle = nil
+			end
+			TMW.Warn(groupID..tostring(gs.Stance))
+			if gs.Stance then
+				local nume = {}
+				local numd = {}
+				for id = 0, #TMW.CSN do
+					local sn = TMW.CSN[id]
+					local en = gs.Stance[sn]
+					TMW.Warn(groupID.." "..tostring(id).." "..tostring(sn).." "..tostring(en))
+					if en == false then
+						tinsert(numd, id)
+					elseif en == nil or en == true then
+						tinsert(nume, id)
+					end
+				end
+				TMW.Warn(#nume.." "..#numd)
+				if #nume ~= 0 then
+					local start = #Conditions + 1
+					if #nume <= ceil(#TMW.CSN/2) then
+						
+						for _, value in ipairs(nume) do
+							local condition = Conditions[#Conditions + 1]
+							condition.Type = "STANCE"
+							condition.Operator = "=="
+							condition.Level = value
+							condition.AndOr = "OR"
+						end
+						Conditions[start].AndOr = "AND"
+						if #Conditions > #nume then
+							Conditions[start].PrtsBefore = 1
+							Conditions[#Conditions].PrtsAfter = 1
+						end
+					elseif #numd > 0 then
+						
+						for _, value in ipairs(numd) do
+							local condition = Conditions[#Conditions + 1]
+							condition.Type = "STANCE"
+							condition.Operator = "~="
+							condition.Level = value
+							condition.AndOr = "AND"
+						end
+						if #Conditions > #numd then
+							Conditions[start].PrtsBefore = 1
+							Conditions[#Conditions].PrtsAfter = 1
+						end
+					end
+				end
+				gs.Stance = nil
 			end
 		end
 	end
@@ -1322,9 +1414,48 @@ else
 	end
 end
 
+
 -- -----------
 -- GROUP FRAME
 -- -----------
+
+local function GroupScriptSort(groupA, groupB)
+	local gOrder = -db.profile.CheckOrder
+	return groupA:GetID()*gOrder < groupB:GetID()*gOrder
+end
+
+local function GroupSetScript(group, handler, func)
+	group[handler] = func
+	if handler ~= "OnUpdate" then
+		group:setscript(handler, func)
+	else
+		tDeleteItem(GroupUpdateFuncs, group)
+		if func then
+			GroupUpdateFuncs[#GroupUpdateFuncs+1] = group
+			sort(GroupUpdateFuncs, GroupScriptSort)
+		end
+	end
+end
+
+local function Show(group)
+	if not group.__shown then
+		group:show()
+		group.__shown = 1
+	end
+end
+
+local function Hide(group)
+	if group.__shown then
+		group:hide()
+		group.__shown = nil
+	end
+end
+
+local GroupAddIns = {
+	SetScript	=	GroupSetScript,
+	Show 		=	Show,
+	Hide 		=	Hide,
+}
 
 function TMW:GetShapeshiftForm()
 	-- very hackey function because of inconsistencies in blizzard's GetShapeshiftForm
@@ -1343,87 +1474,16 @@ end local GetShapeshiftForm = TMW.GetShapeshiftForm
 local function CreateGroup(groupID)
 	local group = CreateFrame("Frame", "TellMeWhen_Group" .. groupID, UIParent, "TellMeWhen_GroupTemplate", groupID)
 	TMW[groupID] = group
+	CNDT.Env[group:GetName()] = group
 	group:SetID(groupID)
 
-	--[[for k, v in pairs(GroupAddIns) do -- CURRENTLY UNUSED
+	for k, v in pairs(GroupAddIns) do
 		if type(group[k]) == "function" then -- if the method already exists on the icon
 			group[strlower(k)] = group[k] -- store the old method as the lowercase same name
 		end
 		group[k] = v
-	end]]
+	end
 	return group
-end
-
-local function Group_StanceCheck(group)
-	if not group.CorrectSpec then
-		return
-	end
-	if #(CSN) == 0 then group.CorrectStance = true return end
-
-	local index = GetShapeshiftForm()
-
-	if index == 0 then
-		if db.profile.Groups[group:GetID()]["Stance"][CSN[0]] then
-			group.CorrectStance = true
-		else
-			group.CorrectStance = false
-		end
-	elseif index then
-		local _, name = GetShapeshiftFormInfo(index)
-		local groupID = group:GetID()
-		for k, v in ipairs(CSN) do
-			if v == name then
-				if db.profile.Groups[groupID]["Stance"][name] then
-					group.CorrectStance = true
-				else
-					group.CorrectStance = false
-				end
-			end
-		end
-	end
-end
-
-local function Group_ShowHide(group)
-	local OnlyInCombat = group.OnlyInCombat
-	local NotInVehicle = group.NotInVehicle
-
-	if group.CorrectStance then
-		if OnlyInCombat and NotInVehicle then
-			if UnitAffectingCombat("player") then
-				if UnitHasVehicleUI("player") then
-					group:Hide()
-				else
-					group:Show()
-				end
-			else
-				group:Hide()
-			end
-		elseif OnlyInCombat then
-			if UnitAffectingCombat("player") then
-				group:Show()
-			else
-				group:Hide()
-			end
-		elseif NotInVehicle then
-			if UnitHasVehicleUI("player") then
-				group:Hide()
-			else
-				group:Show()
-			end
-		else
-			group:Show()
-		end
-	else
-		group:Hide()
-	end
-end
-
-local function Group_OnEvent(group, event, unit)
-	if event == "UPDATE_SHAPESHIFT_FORM" or event == "UPDATE_SHAPESHIFT_FORMS" then
-		Group_StanceCheck(group)
-	end
-	if (event == "UNIT_ENTERED_VEHICLE" or event == "UNIT_EXITED_VEHICLE") and unit ~= "player" then return end
-	Group_ShowHide(group)
 end
 
 function TMW:Group_SetPos(groupID)
@@ -1449,6 +1509,7 @@ end
 function TMW:Group_Update(groupID)
 	local group = TMW[groupID] or CreateGroup(groupID)
 	group.CorrectStance = true
+	group.__shown = group:IsShown()
 
 	for k, v in pairs(TMW.Group_Defaults) do
 		group[k] = db.profile.Groups[groupID][k]
@@ -1509,35 +1570,21 @@ function TMW:Group_Update(groupID)
 		TMW:Group_SetPos(groupID)
 	end
 
-	if group.OnlyInCombat then
-		group:RegisterEvent("PLAYER_REGEN_ENABLED")
-		group:RegisterEvent("PLAYER_REGEN_DISABLED")
-		group:RegisterEvent("PLAYER_ALIVE")
-		group:RegisterEvent("PLAYER_DEAD")
-		group:RegisterEvent("PLAYER_UNGHOST")
-	end
-	if group.NotInVehicle then
-		group:RegisterEvent("UNIT_ENTERED_VEHICLE")
-		group:RegisterEvent("UNIT_EXITED_VEHICLE")
-	end
-
 	if group.Enabled and group.CorrectSpec and Locked then
-		if #(CSN) > 0 and tContains(group.Stance, false) then
-			group:RegisterEvent("UPDATE_SHAPESHIFT_FORM")
-			group:RegisterEvent("UPDATE_SHAPESHIFT_FORMS")
-			Group_StanceCheck(group)
+		group:Show()
+		if #group.Conditions > 0 then
+			group:SetScript("OnUpdate", TMW.CNDT:ProcessConditions(group))
+		else
+			group:SetScript("OnUpdate", nil)
 		end
-		Group_ShowHide(group)
 	else
-		group:UnregisterAllEvents()
+		group:SetScript("OnUpdate", nil)
 		if group.Enabled and group.CorrectSpec then
 			group:Show()
 		else
 			group:Hide()
 		end
 	end
-
-	group:SetScript("OnEvent", Group_OnEvent)
 end
 
 
@@ -1575,7 +1622,7 @@ local function SetAlpha(icon, alpha)
 	icon.FakeAlpha = alpha
 end
 
-local function ScriptSort(iconA, iconB)
+local function IconScriptSort(iconA, iconB)
 	local gOrder = -db.profile.CheckOrder
 	local gA = iconA.group:GetID()
 	local gB = iconB.group:GetID()
@@ -1586,15 +1633,15 @@ local function ScriptSort(iconA, iconB)
 	return gA*gOrder < gB*gOrder
 end
 
-local function SetScript(icon, handler, func)
+local function IconSetScript(icon, handler, func)
 	icon[handler] = func
 	if handler ~= "OnUpdate" then
 		icon:setscript(handler, func)
 	else
-		tDeleteItem(OnUpdateHandlers, icon)
+		tDeleteItem(IconUpdateFuncs, icon)
 		if func then
-			OnUpdateHandlers[#OnUpdateHandlers+1] = icon
-			sort(OnUpdateHandlers, ScriptSort)
+			IconUpdateFuncs[#IconUpdateFuncs+1] = icon
+			sort(IconUpdateFuncs, IconScriptSort)
 		end
 	end
 end
@@ -1639,7 +1686,7 @@ local function CDBarOnValueChanged(bar)
 		if duration ~= 0 then
 			pct = (time - start) / duration
 			local inv = 1-pct
-			bar.texture:SetTexCoord(0, min(inv, 1), 0, 1)
+		--	bar.texture:SetTexCoord(0, min(inv, 1), 0, 1)
 			bar:SetStatusBarColor(
 				(co.r*pct) + (st.r * inv),
 				(co.g*pct) + (st.g * inv),
@@ -1651,11 +1698,11 @@ local function CDBarOnValueChanged(bar)
 		--inverted
 		if duration == 0 then
 			bar:SetStatusBarColor(co.r, co.g, co.b, co.a)
-			bar.texture:SetTexCoord(0, 1, 0, 1)
+		--	bar.texture:SetTexCoord(0, 1, 0, 1)
 		else
 			pct = (time - start) / duration
 			local inv = 1-pct
-			bar.texture:SetTexCoord(0, min(pct, 1), 0, 1)
+	--		bar.texture:SetTexCoord(0, min(pct, 1), 0, 1)
 			bar:SetStatusBarColor(
 				(co.r*pct) + (st.r * inv),
 				(co.g*pct) + (st.g * inv),
@@ -1676,7 +1723,7 @@ local function PwrBarOnUpdate(bar)
 end
 
 local function PwrBarOnValueChanged(bar, val)
-	bar.texture:SetTexCoord(0, max(0, val/bar.Max), 0, 1)
+--	bar.texture:SetTexCoord(0, max(0, val/bar.Max), 0, 1)
 end
 
 local function SetInfo(icon, alpha, color, texture, start, duration, checkGCD, pbName, reverse, count)
@@ -1870,7 +1917,7 @@ end
 local IconAddIns = {
 	SetInfo			=	SetInfo,
 	SetAlpha		= 	SetAlpha,
-	SetScript		= 	SetScript,
+	SetScript		= 	IconSetScript,
 	SetTexture		=	SetTexture,
 	SetReverse		=	SetReverse,
 }
@@ -2105,6 +2152,7 @@ function TMW:Icon_Update(icon)
 	icon.__tex = icon.texture:GetTexture()
 	icon.__realDuration = icon.__realDuration or 0
 	icon.CndtFailed = nil
+	icon.ConditionAlpha = icon.ConditionAlpha or 0
 
 	if not (Locked and not icon.Enabled) then
 		if icon.CooldownShowWhen == "usable" or icon.BuffShowWhen == "present" then
@@ -2125,7 +2173,7 @@ function TMW:Icon_Update(icon)
 	end
 
 	if icon.FakeHidden then
-		tDeleteItem(OnUpdateHandlers, icon) -- remove it from the list of scripts to run on update, but dont call SetScript on it because that will remove it and set icon.OnUpdate to nil, which is called by conditions/metas
+		tDeleteItem(IconUpdateFuncs, icon) -- remove it from the list of scripts to run on update, but dont call SetScript on it because that will remove it and set icon.OnUpdate to nil, which is called by conditions/metas
 	end
 
 	icon:SetInfo(1, 1, nil, 0, 0)
@@ -2167,13 +2215,13 @@ function TMW:Icon_Update(icon)
 		cbar:SetValue(cbar.Max)
 		cbar:SetAlpha(.7)
 		cbar:SetStatusBarColor(0, 1, 0, 0.5)
-		cbar.texture:SetTexCoord(0, 1, 0, 1)
+	--	cbar.texture:SetTexCoord(0, 1, 0, 1)
 
 		ClearScripts(pbar)
 		pbar.UpdateSet = false
 		pbar:SetValue(2000000)
 		pbar:SetAlpha(.7)
-		pbar.texture:SetTexCoord(0, 1, 0, 1)
+	--	pbar.texture:SetTexCoord(0, 1, 0, 1)
 
 		icon:EnableMouse(1)
 		if icon.Type == "meta" then

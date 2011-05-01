@@ -157,6 +157,14 @@ L["ICONMENU_RANGECHECK_DESC"] = "Check this to enable changing the color of the 
 L["ICONMENU_MANACHECK_DESC"] = "Check this to enable changing the color of the icon when you are out of mana/rage/runic power/etc"
 L["ICONMENU_COOLDOWNCHECK_DESC"] = "Check this to cause the icon to be considered unusable if it is on cooldown"
 
+L["SORTBY"] = "Sort by"
+L["SORTBYNONE"] = "Don't sort"
+L["SORTBYNONE_DESC"] = "If checked, buffs/debuffs will be checked in, and appear in, the order that they were entered into the editbox as long as the number entered does not exceed the efficiency threshold setting. If it does, they will be checked in the order that they would normally appear on the unit's unit frame."
+L["ICONMENU_SORTASC"] = "Ascending duration"
+L["ICONMENU_SORTASC_DESC"] = "Check this box to prioritize and show auras with the lowest duration."
+L["ICONMENU_SORTDESC"] = "Descending duration"
+L["ICONMENU_SORTDESC_DESC"] = "Check this box to prioritize and show auras with the highest duration."
+
 L["ICONMENU_MOVEHERE"] = "Move here"
 L["ICONMENU_COPYHERE"] = "Copy here"
 L["ICONMENU_SWAPWITH"] = "Swap with"
@@ -321,6 +329,7 @@ L["CONDITIONPANEL_EXISTS"] = "Unit Exists"
 L["CONDITIONPANEL_ALIVE"] = "Unit is Alive"
 L["CONDITIONPANEL_ALIVE_DESC"] = "The condition will pass if the unit specified is alive."
 L["CONDITIONPANEL_COMBAT"] = "Unit in Combat"
+L["CONDITIONPANEL_VEHICLE"] = "Unit Controls Vehicle"
 L["CONDITIONPANEL_POWER_DESC"] = [=[Will check for energy if the unit is a druid in cat form,
 rage if the unit is a warrior, etc.]=]
 L["ECLIPSE_DIRECTION"] = "Eclipse Direction"
@@ -347,6 +356,13 @@ L["CONDITIONPANEL_SPELLRANGE"] = "Spell in range of unit"
 L["CONDITIONPANEL_ITEMRANGE"] = "Item in range of unit"
 L["ONLYCHECKMINE"] = "Only Check Mine"
 L["ONLYCHECKMINE_DESC"] = "Check this to cause this condition to only check your own buffs/debuffs"
+L["LUACONDITION"] = "Lua (Advanced)"
+L["LUACONDITION_DESC"] = [[This condition type allows you to evaluate Lua code to determine the state of a condition.
+The input is not an 'if .. then' statement, nor is it a function closure.
+It is a regular statement to be evaluated, e.g. 'a and b or c'.
+If complex functionality is required, use a call to a function, e.g. 'CheckStuff()', that is defined externally.
+ALL functions and variables used must be defined in/will be stored in TMW["CNDT"]["Env"].
+If more help is needed (but not help about how to write Lua code), open a ticket on CurseForge.]]
 L["NOTINRANGE"] = "Not in range"
 L["INRANGE"] = "In range"
 L["STANCE"] = "Stance"
@@ -389,9 +405,9 @@ L["PARENTHESISWARNING2"] = "Some closing parenthesis are missing openers!"
 -- STUFF THAT I GOT SICK OF ADDING PREFIXES TOO AND PUTTING IN THE RIGHT PLACE
 -- ----------
 
-L["GROUPICON"] = "Group: %s, Icon: %d"
-L["fGROUP"] = "Group %d"
-L["fICON"] = "Icon %d"
+L["GROUPICON"] = "Group: %s, Icon: %s"
+L["fGROUP"] = "Group %s"
+L["fICON"] = "Icon %s"
 L["DISABLED"] = "Disabled"
 L["IMPORTCOPY"] = "Copy/Import"
 L["COPYPOS"] = "Copy position/scale"
@@ -399,6 +415,7 @@ L["COPYALL"] = "Copy entire group"
 
 L["GROUPADDONSETTINGS"] = "Group settings"
 L["CONDITIONS"] = "Conditions"
+L["GROUPCONDITIONS"] = "Group Conditions"
 L["MAIN"] = "Main"
 L["RECEIVED"] = "Received icons"
 L["EXPORT"] = "Export"
@@ -452,8 +469,10 @@ L["SOUND_CUSTOM_DESC"] = [[Insert the path to a custom sound to play. Here are s
 L["SOUND_TAB"] = "Sounds"
 L["SOUND_USEMASTER"] = "Always play sounds"
 L["SOUND_USEMASTER_DESC"] = "Check this to allow sounds to play even when the game sound has been muted. Uncheck to only play sounds while the game sound is enabled."
-
-
+L["SOUNDERROR1"] = "File must have an extension!"
+L["SOUNDERROR2"] = "Custom WAV files not supported by WoW 4.0+"
+L["SOUNDERROR3"] = "|cFFFFD100Only OGG and MP3 files are supported!"
+L["SOUNDERROR4"] = "|cFFFFD100Sound file to play was not found!"
 
 
 

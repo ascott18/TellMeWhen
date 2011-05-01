@@ -175,6 +175,13 @@ local coloroption = {
 	end,
 }	]]
 
+local function findid(info)
+	for i = #info, 0, -1 do
+		local n = tonumber(strmatch(info[i], "Group (%d+)"))
+		if n then return n end
+	end
+end
+
 local checkorder = {
 	-- NOTE: these are actually backwards so they sort logically in AceConfig, but have their signs switched in the actual function.
 	[-1] = L["ASCENDING"],
@@ -182,8 +189,8 @@ local checkorder = {
 }
 local groupConfigTemplate = {
 	type = "group",
-	name = function(info) return TMW:GetGroupName(db.profile.Groups[tonumber(info[2])].Name, tonumber(info[2])) end,
-	order = function(info) return tonumber(info[2]) end,
+	name = function(info) local g=findid(info) return TMW:GetGroupName(db.profile.Groups[g].Name, g) end,
+	order = function(info) return findid(info) end,
 --		childGroups = "tab",
 	args = {
 	--[[	Main = {
@@ -195,9 +202,11 @@ local groupConfigTemplate = {
 					name = L["UIPANEL_GROUPNAME"],
 					type = "input",
 					order = 1,
+					width = "full",
 					set = function(info, val)
-						db.profile.Groups[tonumber(info[2])].Name = strtrim(val)
-						TMW:Group_Update(tonumber(info[2]))
+						local g = findid(info)
+						db.profile.Groups[g].Name = strtrim(val)
+						TMW:Group_Update(g)
 					end,
 				},
 				Enabled = {
@@ -205,18 +214,6 @@ local groupConfigTemplate = {
 					desc = L["UIPANEL_TOOLTIP_ENABLEGROUP"],
 					type = "toggle",
 					order = 2,
-				},
-				OnlyInCombat = {
-					name = L["UIPANEL_ONLYINCOMBAT"],
-					desc = L["UIPANEL_TOOLTIP_ONLYINCOMBAT"],
-					type = "toggle",
-					order = 3,
-				},
-				NotInVehicle = {
-					name = L["UIPANEL_NOTINVEHICLE"],
-					desc = L["UIPANEL_TOOLTIP_NOTINVEHICLE"],
-					type = "toggle",
-					order = 4,
 				},
 				PrimarySpec = {
 					name = L["UIPANEL_PRIMARYSPEC"],
@@ -274,7 +271,7 @@ local groupConfigTemplate = {
 					type = "execute",
 					order = 50,
 					func = function(info)
-						TMW:Group_OnDelete(tonumber(info[2]))
+						TMW:Group_OnDelete(findid(info))
 					end,
 					confirm = true,
 			--[[	},
@@ -287,10 +284,11 @@ local groupConfigTemplate = {
 			guiInline = true,
 			dialogInline = true,
 			set = function(info, val)
-				db.profile.Groups[tonumber(info[2])].Point[info[#info]] = val
-				TMW:Group_SetPos(tonumber(info[2]))
+				local g = findid(info)
+				db.profile.Groups[g].Point[info[#info]] = val
+				TMW:Group_SetPos(g)
 			end,
-			get = function(info) return db.profile.Groups[tonumber(info[2])].Point[info[#info]] end,
+			get = function(info) return db.profile.Groups[findid(info)].Point[info[#info]] end,
 			args = {
 				point = {
 					name = L["UIPANEL_POINT"],
@@ -338,10 +336,11 @@ local groupConfigTemplate = {
 					softMax = 10,
 					bigStep = 0.05,
 					set = function(info, val)
-						db.profile.Groups[tonumber(info[2])].Scale = val
-						TMW:Group_SetPos(tonumber(info[2]))
+						local g = findid(info)
+						db.profile.Groups[g].Scale = val
+						TMW:Group_SetPos(g)
 					end,
-					get = function(info) return db.profile.Groups[tonumber(info[2])].Scale end,
+					get = function(info) return db.profile.Groups[findid(info)].Scale end,
 				},
 				level = {
 					name = L["UIPANEL_LEVEL"],
@@ -351,10 +350,11 @@ local groupConfigTemplate = {
 					softMax = 100,
 					step = 1,
 					set = function(info, val)
-						db.profile.Groups[tonumber(info[2])].Level = val
-						TMW:Group_SetPos(tonumber(info[2]))
+						local g = findid(info)
+						db.profile.Groups[g].Level = val
+						TMW:Group_SetPos(g)
 					end,
-					get = function(info) return db.profile.Groups[tonumber(info[2])].Level end,
+					get = function(info) return db.profile.Groups[findid(info)].Level end,
 				},
 				lock = {
 					name = L["UIPANEL_LOCK"],
@@ -362,17 +362,18 @@ local groupConfigTemplate = {
 					type = "toggle",
 					order = 11,
 					set = function(info, val)
-						db.profile.Groups[tonumber(info[2])].Locked = val
-						TMW:Group_Update(tonumber(info[2]))
+						local g = findid(info)
+						db.profile.Groups[g].Locked = val
+						TMW:Group_Update(g)
 					end,
-					get = function(info) return db.profile.Groups[tonumber(info[2])].Locked end
+					get = function(info) return db.profile.Groups[findid(info)].Locked end
 				},
 				reset = {
 					name = L["UIPANEL_GROUPRESET"],
 					desc = L["UIPANEL_TOOLTIP_GROUPRESET"],
 					type = "execute",
 					order = 12,
-					func = function(info) TMW:Group_ResetPosition(tonumber(info[2])) end
+					func = function(info) TMW:Group_ResetPosition(findid(info)) end
 				},
 			},
 		},
@@ -385,21 +386,6 @@ for i = 1, GetNumTalentTabs() do
 		name = name,
 		desc = L["UIPANEL_TREE_DESC"],
 		order = 7+i,
-	}
-end
-if #(TMW.CSN) > 0 then 		-- 	[0] (NONE) doesnt factor into the length
-	groupConfigTemplate.args.stance = {
-		type = "multiselect",
-		name = L["UIPANEL_STANCE"],
-		order = 30,
-		values = TMW.CSN,
-		set = function(info, key, val)
-			db.profile.Groups[tonumber(info[2])].Stance[TMW.CSN[key]] = val
-			TMW:Group_Update(tonumber(info[2]))
-		end,
-		get = function(info, key)
-			return db.profile.Groups[tonumber(info[2])].Stance[TMW.CSN[key]]
-		end,
 	}
 end
 
@@ -665,10 +651,11 @@ function TMW:CompileOptions() -- options
 					name = L["UIPANEL_GROUPS"],
 					order = 2,
 					set = function(info, val)
-						db.profile.Groups[tonumber(info[2])][info[#info]] = val
-						TMW:Group_Update(tonumber(info[2]))
+						local g = findid(info)
+						db.profile.Groups[g][info[#info]] = val
+						TMW:Group_Update(g)
 					end,
-					get = function(info) return db.profile.Groups[tonumber(info[2])][info[#info]] end,
+					get = function(info) return db.profile.Groups[findid(info)][info[#info]] end,
 					args = {},
 				},
 			},
@@ -680,17 +667,17 @@ function TMW:CompileOptions() -- options
 
 
 	for k, v in pairs(TMW.OptionsTable.args.groups.args) do
-		if tonumber(k) then -- protect ["addgroup"] and any other future settings in the group header
+		if strfind(k, "Group %d+") then -- protect ["addgroup"] and any other future settings in the group header
 			TMW.OptionsTable.args.groups.args[k] = nil
 		end
 	end
 
 	for g = 1, TELLMEWHEN_MAXGROUPS do
-		TMW.OptionsTable.args.groups.args[tostring(g)] = groupConfigTemplate
+		TMW.OptionsTable.args.groups.args["Group " .. g] = groupConfigTemplate
 	end
 
 	LibStub("AceConfig-3.0"):RegisterOptionsTable("TellMeWhen Options", TMW.OptionsTable)
-	LibStub("AceConfigDialog-3.0"):SetDefaultSize("TellMeWhen Options", 802, 400)
+	LibStub("AceConfigDialog-3.0"):SetDefaultSize("TellMeWhen Options", 762, 512)
 	if not TMW.AddedToBlizz then
 		LibStub("AceConfigDialog-3.0"):AddToBlizOptions("TellMeWhen Options", L["ICON_TOOLTIP1"])
 		TMW.AddedToBlizz = true
@@ -704,14 +691,14 @@ end
 -- GROUP CONFIG
 -- -------------
 
-local function Group_SizeUpdate(self)
+local function Group_SizeUpdate(resizeButton)
 	local uiScale = UIParent:GetScale()
-	local group = self:GetParent()
+	local group = resizeButton:GetParent()
 	local cursorX, cursorY = GetCursorPosition(UIParent)
 
 	-- calculate new scale
-	local newXScale = group.oldScale * (cursorX/uiScale - group.oldX*group.oldScale) / (self.oldCursorX/uiScale - group.oldX*group.oldScale)
-	local newYScale = group.oldScale * (cursorY/uiScale - group.oldY*group.oldScale) / (self.oldCursorY/uiScale - group.oldY*group.oldScale)
+	local newXScale = group.oldScale * (cursorX/uiScale - group.oldX*group.oldScale) / (resizeButton.oldCursorX/uiScale - group.oldX*group.oldScale)
+	local newYScale = group.oldScale * (cursorY/uiScale - group.oldY*group.oldScale) / (resizeButton.oldCursorY/uiScale - group.oldY*group.oldScale)
 	local newScale = max(0.6, newXScale, newYScale)
 	group:SetScale(newScale)
 
@@ -722,18 +709,18 @@ local function Group_SizeUpdate(self)
 	group:SetPoint("TOPLEFT", UIParent, "BOTTOMLEFT", newX, newY)
 end
 
-function TMW:Group_StartSizing(self)
-	local group = self:GetParent()
+function TMW:Group_StartSizing(resizeButton)
+	local group = resizeButton:GetParent()
 	group.oldScale = group:GetScale()
-	self.oldCursorX, self.oldCursorY = GetCursorPosition(UIParent)
+	resizeButton.oldCursorX, resizeButton.oldCursorY = GetCursorPosition(UIParent)
 	group.oldX = group:GetLeft()
 	group.oldY = group:GetTop()
-	self:SetScript("OnUpdate", Group_SizeUpdate)
+	resizeButton:SetScript("OnUpdate", Group_SizeUpdate)
 end
 
-function TMW:Group_StopSizing(self)
-	self:SetScript("OnUpdate", nil)
-	local group = self:GetParent()
+function TMW:Group_StopSizing(resizeButton)
+	resizeButton:SetScript("OnUpdate", nil)
+	local group = resizeButton:GetParent()
 	db.profile.Groups[group:GetID()]["Scale"] = group:GetScale()
 	local p = db.profile.Groups[group:GetID()]["Point"]
 	p.point, p.relativeTo, p.relativePoint, p.x, p.y = group:GetPoint(1)
@@ -816,7 +803,7 @@ ID = TMW:NewModule("IconDragger", "AceTimer-3.0", "AceEvent-3.0") TMW.ID = ID
 --dragging stuff
 function ID:BAR_HIDEGRID() ID.DraggingInfo = nil end
 hooksecurefunc("PickupSpellBookItem", function(...) ID.DraggingInfo = {...} end)
-WorldFrame:HookScript("OnMouseDown", function() -- this actually contains other bug fix stuff too
+WorldFrame:HookScript("OnMouseDown", function() -- this contains other bug fix stuff too
 	ID.DraggingInfo = nil
 	ID.F:Hide()
 	ID.IsDragging = nil
@@ -1133,7 +1120,7 @@ local set2 = {
 	cast = "BuffShowWhen",
 	meta = nil,
 }
-local checks = { --1=check box, 2=editbox, 333=slider(x100), 4=custom, table=subkeys are settings
+local checks = { --1=check box, 2=editbox, 3=slider(x100), 4=custom, table=subkeys are settings
 	Name = 2,
 	RangeCheck = 1,
 	ManaCheck = 1,
@@ -1180,6 +1167,7 @@ local tabs = {
 	[2] = "Conditions",
 	[3] = "Sound",
 	[4] = "Group",
+	[5] = "Conditions",
 	--[4] = "ImpExp",
 }
 local IsMultiState, SoI
@@ -1276,6 +1264,15 @@ function IE:TabClick(self)
 			IE[frame]:Hide()
 		end
 	end
+	if self:GetID() == 2 then
+		CNDT.settings = db.profile.Groups[TMW.CI.g].Icons[TMW.CI.i].Conditions
+		CNDT.type = "icon"
+		CNDT:Load()
+	elseif self:GetID() == 5 then
+		CNDT.settings = db.profile.Groups[TMW.CI.g].Conditions
+		CNDT.type = "group"
+		CNDT:Load()
+	end
 	IE[tabs[self:GetID()]]:Show()
 	TellMeWhen_IconEditor:Show()
 end
@@ -1345,6 +1342,13 @@ function IE:SetupRadios()
 	else
 		IE.Main.WhenChecks:Hide()
 	end
+	
+	if t == "buff" then
+		IE.Main.SortChecks:Show()
+	else
+		IE.Main.SortChecks:Hide()
+	end
+	
 	local alphainfo
 	if t == "icd" then
 		alphainfo = IE.Data.ICDShowWhen
@@ -1482,7 +1486,7 @@ function IE:LoadSettings()
 		end
 	end
 
-	for _, parent in pairs({IE.Main.TypeChecks, IE.Main.WhenChecks}) do
+	for _, parent in pairs({IE.Main.TypeChecks, IE.Main.WhenChecks, IE.Main.SortChecks}) do
 		for k, frame in pairs(parent) do
 			if strfind(k, "Radio") then
 				if frame.setting == "TotemSlots" then
@@ -1534,8 +1538,17 @@ function IE:Load(isRefresh)
 		end
 	end
 
-	ME:Update()
+	local eq2 = TellMeWhen_IconEditor.selectedTab == 2
+	CNDT.settings = eq2 and db.profile.Groups[groupID].Conditions or db.profile.Groups[groupID].Icons[iconID].Conditions
+	CNDT.type = eq2 and "group" or "icon"
 	CNDT:Load()
+	
+	CNDT.settings = eq2 and db.profile.Groups[groupID].Icons[iconID].Conditions or db.profile.Groups[groupID].Conditions
+	CNDT.type = eq2 and "icon" or "group"
+	CNDT:Load()
+	
+	
+	ME:Update()
 	SND:Load()
 
 	IE:SetupRadios()
@@ -1840,8 +1853,6 @@ function IE:Copy_DropDown()
 				info.tooltipTitle = format(L["fGROUP"], g)
 				info.tooltipText = 	(L["UIPANEL_ROWS"] .. ": " .. (v.Rows or 1) .. "\r\n") ..
 								L["UIPANEL_COLUMNS"] .. ": " .. (v.Columns or 4) ..
-								(v.OnlyInCombat and "\r\n" .. L["UIPANEL_ONLYINCOMBAT"] or "") ..
-								(v.NotInVehicle and "\r\n" .. L["UIPANEL_NOTINVEHICLE"] or "") ..
 								((v.PrimarySpec or v.PrimarySpec == nil) and "\r\n" .. L["UIPANEL_PRIMARYSPEC"] or "") ..
 								((v.SecondarySpec or v.SecondarySpec == nil) and "\r\n" .. L["UIPANEL_SECONDARYSPEC"] or "") ..
 								((v.Enabled and "") or "\r\n(" .. L["DISABLED"] .. ")")
@@ -1989,9 +2000,8 @@ local IconUpdater = CreateFrame("Frame")
 local iconsToUpdate = {}
 local function UpdateIcons()
 	for icon in pairs(iconsToUpdate) do
-		TMW:Icon_Update(icon)
+		TMW:Icon_Update(tremove(iconsToUpdate, 1))
 	end
-	wipe(iconsToUpdate)
 	IconUpdater:SetScript("OnUpdate", nil)
 end
 function IE:ScheduleIconUpdate(icon, groupID, iconID)
@@ -2002,7 +2012,7 @@ function IE:ScheduleIconUpdate(icon, groupID, iconID)
 		icon = TMW[groupID] and TMW[groupID][iconID]
 	end
 	if not icon then return end
-	iconsToUpdate[icon] = true
+	tinsert(iconsToUpdate, icon)
 	IconUpdater:SetScript("OnUpdate", UpdateIcons)
 end
 
@@ -2200,15 +2210,21 @@ SUG = TMW:NewModule("Suggester", "AceEvent-3.0", "AceComm-3.0", "AceSerializer-3
 local inputType, EquivIDLookup
 
 local EquivIDLookup, ActionCache, pclassSpellCache, ClassSpellLookup, AuraCache, ItemCache, SpellCache, CastCache
-SUG.doUpdateItemCache = true
+doUpdateItemCache = true
+doUpdateActionCache = true
 
 SUG.f = CreateFrame("Frame")
 function SUG:BAG_UPDATE()
-	SUG.doUpdateItemCache = true
+	doUpdateItemCache = true
+end
+function SUG:ACTIONBAR_SLOT_CHANGED()
+	doUpdateActionCache = true
 end
 SUG:RegisterEvent("BAG_UPDATE")
+SUG:RegisterEvent("BANKFRAME_OPENED", "BAG_UPDATE")
+SUG:RegisterEvent("ACTIONBAR_SLOT_CHANGED")
 
-SUG.NumCachePerFrame = 5
+SUG.NumCachePerFrame = 0 -- 0 is actually 1. Yeah, i know, its lame. I'm lazy.
 function SUG:OnInitialize()
 	TMWOptDB = TMWOptDB or {}
 
@@ -2221,13 +2237,7 @@ function SUG:OnInitialize()
 	for k, v in pairs(TMWOptDB) do
 		SUG[k] = v
 	end
-	if TellMeWhenDB.DoResetAuraCache then
-		wipe(TMWOptDB.AuraCache)
-		if debug then
-			TMW.warn("RESETTING AURA CACHE RESETTING AURA CACHE RESETTING AURA CACHE RESETTING AURA CACHE RESETTING AURA CACHE RESETTING AURA CACHE RESETTING AURA CACHE RESETTING AURA CACHE ")
-		end
-		TellMeWhenDB.DoResetAuraCache = nil
-	end
+	
 	for k, v in pairs(TMW.AuraCache) do
 		-- import into the options DB and take it out of the main DB
 		SUG.AuraCache[k] = SUG.AuraCache[k] or v
@@ -2249,7 +2259,7 @@ function SUG:OnInitialize()
 			ClassSpellCache[id] = 1
 		end
 	end
-	SUG:BuildClassSpellLookup()
+	SUG:BuildClassSpellLookup() -- must go before the local versions (ClassSpellLookup) are defined
 
 	SUG:RegisterComm("TMWSUG")
 	
@@ -2263,6 +2273,9 @@ function SUG:OnInitialize()
 	SUG:PLAYER_ENTERING_WORLD()
 
 	if TMWOptDB.IncompleteCache or not TMWOptDB.WoWVersion or TMWOptDB.WoWVersion < clientVersion then
+	local didrunhook = false
+	TellMeWhen_IconEditor:HookScript("OnShow", function()
+		if didrunhook then return end
 		TMWOptDB.IncompleteCache = true
 
 		local Blacklist = {
@@ -2300,12 +2313,11 @@ function SUG:OnInitialize()
 			for id = index, index + SUG.NumCachePerFrame do
 				SUG.Suggest.Status:SetValue(id)
 				if spellsFailed < 1000 then
-					local name, rank, icon = GetSpellInfo(id)
+					local name, rank, icon, _, _, _, castTime = GetSpellInfo(id)
 					if name then
 						name = strlower(name)
 						if
 							not Blacklist[icon] and
-						--	rank ~= SPELL_PASSIVE and -- moonkin aura is a passive
 							not strfind(name, "dnd") and
 							not strfind(name, "test") and
 							not strfind(name, "debug") and
@@ -2316,16 +2328,14 @@ function SUG:OnInitialize()
 							not strfind(name, "quest") and
 							not strfind(name, "vehicle") and
 							not strfind(name, "event") and
-							not strfind(name, "camera") and
-							not strfind(name, "warning") and
-							not strfind(name, "i am a")
+							not strfind(name, "camera")
 						then
 							GameTooltip_SetDefaultAnchor(Parser, UIParent)
 							Parser:SetSpellByID(id)
 							local r, g, b = TMWSUGParserTextLeft1:GetTextColor()
 							if g > .95 and r > .95 and b > .95 then
 								SUG.SpellCache[id] = name
-								if TMWSUGParserTextLeft2:GetText() == SPELL_CAST_CHANNELED or TMWSUGParserTextLeft3:GetText() == SPELL_CAST_CHANNELED or select(7, GetSpellInfo(id)) > 0 then
+								if TMWSUGParserTextLeft2:GetText() == SPELL_CAST_CHANNELED or TMWSUGParserTextLeft3:GetText() == SPELL_CAST_CHANNELED or castTime > 0 then
 									SUG.CastCache[id] = name
 								end
 							end
@@ -2346,6 +2356,7 @@ function SUG:OnInitialize()
 					SUG.SpellCache[1852] = nil -- GM spell named silenced, interferes with equiv
 					SUG.SpellCache[71216] = nil -- enraged
 					if SUG.onCompleteCache then
+						SUG.onCompleteCache = nil
 						TMW.SUG.redoIfSame = 1
 						SUG:NameOnCursor()
 					end
@@ -2356,6 +2367,8 @@ function SUG:OnInitialize()
 		end
 		SUG.f:SetScript("OnUpdate", SpellCacher)
 		SUG.IsCaching = true
+		didrunhook = true
+	end)
 	end
 end
 
@@ -2450,7 +2463,7 @@ function GameTooltip:SetTMWEquiv(equiv)
 	GameTooltip:AddLine(IE:Equiv_GenerateTips(equiv), NORMAL_FONT_COLOR.r, NORMAL_FONT_COLOR.g, NORMAL_FONT_COLOR.b, 1)
 end
 
-SUG.preTable = {}
+local preTable = {}
 local miscprioritize = {
 	[42292] = 1, -- pvp trinket spell
 }
@@ -2542,38 +2555,38 @@ function SUG:StartSuggester()
 end
 
 local buffEquivs = {TMW.BE.buffs, TMW.BE.debuffs}
+local startOver
 function SUG:Suggester()
 	local start = GetTime()
-	local preTable = SUG.preTable
-	if SUG.startOver then
-		wipe(SUG.preTable)
+	local atBeginning = SUG.atBeginning
+	local overrideSoI = SUG.overrideSoI
+	local t = TMW.CI.t
+	if startOver then
+		wipe(preTable)
 		SUG.nextCacheKey = nil
-		SUG.startOver = false
-		if TMW.CI.t == "cast" and not SUG.overrideSoI then
+		startOver = false
+		if t == "cast" and not overrideSoI then
 			for equiv, str in pairs(TMW.BE.casts) do
-				if strfind(strlower(equiv), SUG.atBeginning) or strfind(strlower(L[equiv]), SUG.atBeginning) then
+				if strfind(strlower(equiv), atBeginning) or strfind(strlower(L[equiv]), atBeginning) then
 					preTable[#preTable + 1] = equiv
 				end
 			end
-		elseif TMW.CI.t == "buff" and not SUG.overrideSoI then
+		elseif t == "buff" and not overrideSoI then
 			for _, b in pairs(buffEquivs) do
 				for equiv, str in pairs(b) do
-					if strfind(strlower(equiv), SUG.atBeginning) or strfind(strlower(L[equiv]), SUG.atBeginning)  then
+					if strfind(strlower(equiv), atBeginning) or strfind(strlower(L[equiv]), atBeginning)  then
 						preTable[#preTable + 1] = equiv
 					end
 				end
 			end
 			for dispeltype in pairs(TMW.DS) do
-				if strfind(strlower(dispeltype), SUG.atBeginning) or strfind(strlower(L[dispeltype]), SUG.atBeginning)  then
+				if strfind(strlower(dispeltype), atBeginning) or strfind(strlower(L[dispeltype]), atBeginning)  then
 					preTable[#preTable + 1] = dispeltype
 				end
 			end
 		end
 	end
-	local overrideSoI = SUG.overrideSoI
 	local SoI = overrideSoI or SoI
-	local atBeginning = SUG.atBeginning
-	local t = TMW.CI.t
 	while GetTime() - start < 0.025 do -- throttle it
 		local id, name
 		if SoI == "item" then
@@ -2606,17 +2619,17 @@ function SUG:Suggester()
 end
 
 function SUG:SuggestingComplete()
-	SUG.offset = min(SUG.offset, max(0, #SUG.preTable-#SUG+1))
+	SUG.offset = min(SUG.offset, max(0, #preTable-#SUG+1))
 	local offset = SUG.offset
 	if SUG.doSort then
-		sort(SUG.preTable, SUG.Sorter)
+		sort(preTable, SUG.Sorter)
 		SUG.doSort = nil
 	end
 	local SoI = SUG.overrideSoI or SoI
 	
 	local i = 1
 	while SUG[i] do
-		local id = SUG.preTable[i+offset]
+		local id = preTable[i+offset]
 		local f = SUG[i]
 		if id then
 			f.Background:SetVertexColor(0, 0, 0, 0)
@@ -2762,8 +2775,9 @@ function SUG:NameOnCursor()
 	end
 
 	inputType = type(tonumber(SUG.lastName) or SUG.lastName)
-	SUG.startOver = true
-	if not (SUG.oldLastName == SUG.lastName and not SUG.redoIfSame) then
+	startOver = true
+
+	if SUG.oldLastName ~= SUG.lastName or SUG.redoIfSame then
 		SUG:CacheItems()
 		if IsMultiState then
 			SUG:CacheActions()
@@ -2772,6 +2786,7 @@ function SUG:NameOnCursor()
 		SUG.offset = 0
 		SUG:StartSuggester()
 	end
+	
 end
 
 function SUG:OnClick()
@@ -2799,11 +2814,12 @@ function SUG:OnClick()
 end
 
 function SUG:CacheItems()
+	if not doUpdateItemCache then return end
 	for container = -2, NUM_BAG_SLOTS do
 		for slot = 1, GetContainerNumSlots(container) do
 			local id = GetContainerItemID(container, slot)
 			if id then
-				SUG.ItemCache[id] = strlower(GetItemInfo(id))
+				ItemCache[id] = strlower(GetItemInfo(id))
 		--		local
 			end
 		end
@@ -2811,20 +2827,23 @@ function SUG:CacheItems()
 	for slot = 1, 19 do
 		local id = GetInventoryItemID("player", slot)
 		if id then
-			SUG.ItemCache[id] = strlower(GetItemInfo(id))
+			ItemCache[id] = strlower(GetItemInfo(id))
 	--		local
 		end
 	end
+	doUpdateItemCache = nil
 end
 
 function SUG:CacheActions()
-	wipe(SUG.ActionCache)
+	if not doUpdateActionCache then return end
+	wipe(ActionCache)
 	for i=1, 120 do
 		local actionType, spellID = GetActionInfo(i)
 		if actionType == "spell" and spellID then
-			SUG.ActionCache[spellID] = i
+			ActionCache[spellID] = i
 		end
 	end
+	doUpdateActionCache = nil
 end
 
 function SUG:BuildClassSpellLookup()
@@ -3018,6 +3037,7 @@ function CNDT:RuneHandler(rune)
 end
 
 function CNDT:ValidateParenthesis()
+	if not IE.Conditions:IsShown() then return end
 	local numclose, numopen, runningcount = 0, 0, 0
 	local unopened
 	for k, v in ipairs(CNDT) do
@@ -3063,12 +3083,13 @@ function CNDT:ValidateParenthesis()
 	end
 	n = n - 1
 	
+	local tab = (CNDT.type == "icon" and IE.IconConditionTab) or IE.GroupConditionTab
 	if n > 0 then
-		IE.ConditionTab:SetText((CNDT.invalid and "|TInterface\\DialogFrame\\DialogAlertIcon:20:20:0:2:15:45:20:46|t|cFFFF0000" or "") .. L["CONDITIONS"] .. " |cFFFF5959(" .. n .. ")")
+		tab:SetText((CNDT.invalid and "|TInterface\\DialogFrame\\DialogAlertIcon:20:20:0:2:15:45:20:46|t|cFFFF0000" or "") .. L[CNDT.type == "icon" and "CONDITIONS" or "GROUPCONDITIONS"] .. " |cFFFF5959(" .. n .. ")")
 	else
-		IE.ConditionTab:SetText(L["CONDITIONS"] .. " (" .. n .. ")")
+		tab:SetText(L[CNDT.type == "icon" and "CONDITIONS" or "GROUPCONDITIONS"] .. " (" .. n .. ")")
 	end
-	PanelTemplates_TabResize(IE.ConditionTab, 0, nil, nil, 600)
+	PanelTemplates_TabResize(tab, 0, nil, nil, 600)
 end
 
 
@@ -3115,29 +3136,27 @@ function CNDT:AddRemoveHandler()
 		end
 	end
 	
+	local tab = (CNDT.type == "icon" and IE.IconConditionTab) or IE.GroupConditionTab
 	if n > 0 then
-		IE.ConditionTab:SetText((CNDT.invalid and "|TInterface\\DialogFrame\\DialogAlertIcon:20:20:0:3:15:45:20:46|t|cFFFF0000" or "") .. L["CONDITIONS"] .. " |cFFFF5959(" .. n .. ")")
+		tab:SetText((CNDT.invalid and "|TInterface\\DialogFrame\\DialogAlertIcon:20:20:0:2:15:45:20:46|t|cFFFF0000" or "") .. L[CNDT.type == "icon" and "CONDITIONS" or "GROUPCONDITIONS"] .. " |cFFFF5959(" .. n .. ")")
 	else
-		IE.ConditionTab:SetText(L["CONDITIONS"] .. " (" .. n .. ")")
+		tab:SetText(L[CNDT.type == "icon" and "CONDITIONS" or "GROUPCONDITIONS"] .. " (" .. n .. ")")
 	end
-	PanelTemplates_TabResize(IE.ConditionTab, 0, nil, nil, 600)
+	PanelTemplates_TabResize(tab, 0, nil, nil, 600)
 end
 
 function CNDT:AddDelete(group)
-	local groupID, iconID = TMW.CI.g, TMW.CI.i
-	local conditions = db.profile.Groups[groupID].Icons[iconID]["Conditions"]
 	if group:IsShown() then
-		tremove(conditions, group:GetID())
+		tremove(CNDT.settings, group:GetID())
 	else
-		local condition = conditions[group:GetID()] -- cheesy way to invoke the metamethod and create a new condition table
+		local condition = CNDT.settings[group:GetID()] -- cheesy way to invoke the metamethod and create a new condition table
 	end
 	CNDT:AddRemoveHandler()
 	CNDT:Load()
 end
 
 function CNDT:UpOrDown(ID, delta)
-	local groupID, iconID = TMW.CI.g, TMW.CI.i
-	local settings = db.profile.Groups[groupID].Icons[iconID].Conditions
+	local settings = CNDT.settings
 	local curdata, destinationdata
 	curdata = settings[ID]
 	destinationdata = settings[ID+delta]
@@ -3150,7 +3169,7 @@ function CNDT:OK()
 	local groupID, iconID = TMW.CI.g, TMW.CI.i
 	if not groupID then return end
 
-	local conditions = db.profile.Groups[groupID].Icons[iconID]["Conditions"]
+	local conditions = CNDT.settings
 	local i = 1
 	while CNDT[i] and CNDT[i]:IsShown() do
 		local group = CNDT[i]
@@ -3198,14 +3217,19 @@ function CNDT:OK()
 		conditions[i] = nil
 		i=i+1
 	end
-	IE:ScheduleIconUpdate(groupID, iconID)
+	
+	if CNDT.type == "icon" then
+		IE:ScheduleIconUpdate(groupID, iconID)
+	elseif CNDT.type == "group" then
+		TMW:Group_Update(groupID)
+	end
 end
 
 function CNDT:Load()
-	local groupID, iconID = TMW.CI.g, TMW.CI.i
-	local conditions = db.profile.Groups[groupID].Icons[iconID].Conditions
+	local conditions = CNDT.settings
 	IE.Conditions.Warning:SetText(nil)
-	if #conditions > 0 then
+	
+	if conditions and #conditions > 0 then
 		for i = #conditions, TELLMEWHEN_MAXCONDITIONS do
 			CNDT:ClearGroup(CNDT[i])
 		end
@@ -3284,7 +3308,6 @@ function CNDT:ClearGroup(group)
 end
 
 function CNDT:ClearDialog()
-	TellMeWhen_IconEditor.Conditions.ScrollFrame.ScrollBar:Hide()
 	for i=1, TELLMEWHEN_MAXCONDITIONS do
 		CNDT:ClearGroup(CNDT[i])
 	end
@@ -3394,7 +3417,7 @@ function CNDT:TypeCheck(group, data)
 		end
 		group.Slider:SetWidth(200)
 		if data.noslide then
-			group.EditBox:SetWidth(455)
+			group.EditBox:SetWidth(520)
 		else
 			group.EditBox:SetWidth(312)
 		end
