@@ -9,6 +9,7 @@
  * Spell caching will not begin until the icon editor is opened. You can have a few framerates back.
  * Bug Fixes:
  ** Unit cooldown icons should now have the condition alpha option, and subsequently, conditions will actually work with them.
+ ** (r66) TMW will still function upon updating ButtonFacade to Masque, but skinning buttons will not. This is only temporary while I sort out the changes with Masque.
  
 ===v4.1.2===
  * You can now 'group' conditions together with parenthesis. If you have any suggestions on how to make the GUI for it look better, please let me know.

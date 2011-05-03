@@ -37,7 +37,7 @@ local LSM = LibStub("LibSharedMedia-3.0")
 
 TELLMEWHEN_VERSION = "4.1.3"
 TELLMEWHEN_VERSION_MINOR = ""
-TELLMEWHEN_VERSIONNUMBER = 41301 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL (although it is displayed in version warnings to prevent confusion about a warning for the same major version)
+TELLMEWHEN_VERSIONNUMBER = 41302 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL (although it is displayed in version warnings to prevent confusion about a warning for the same major version)
 TELLMEWHEN_MAXGROUPS = 10 	--this is a default, used by SetTheory (addon), so dont rename
 TELLMEWHEN_MAXROWS = 20
 local UPD_INTV = 0.06	--this is a default, local because i use it in onupdate functions
@@ -2126,13 +2126,13 @@ function TMW:Icon_Update(icon)
 				icon.Width = tonumber(tbl[SkID].Icon.Width) or 36*0.9 		-- possible error here causing this to be a function? 	EDIT: nevermind, it was being caused by Tukui and is fixed in Icon_Bars_Update
 				icon.Height = tonumber(tbl[SkID].Icon.Height) or 36*0.9		-- (attempt to perform arithmetic on field 'Width' (a function value)) (occured in Icon_Bars_Update where the CBar size is set)
 			end
+			ct:SetFont(LSM:Fetch("font", f.Name), tbl and tbl[SkID].Count.FontSize or f.Size, f.Outline)
 		end
 
 		if f.OverrideLBFPos then
 			ct:ClearAllPoints()
 			ct:SetPoint("BOTTOMRIGHT", icon, "BOTTOMRIGHT", f.x, f.y)
 		end
-		ct:SetFont(LSM:Fetch("font", f.Name), tbl[SkID].Count.FontSize or f.Size, f.Outline)
 
 		cd:SetFrameLevel(icon:GetFrameLevel() - 2)
 		icon.cooldownbar:SetFrameLevel(icon:GetFrameLevel() -1)
