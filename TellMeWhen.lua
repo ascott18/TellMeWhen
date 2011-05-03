@@ -32,12 +32,13 @@ local L = LibStub("AceLocale-3.0"):GetLocale("TellMeWhen", true)
 --L = setmetatable({}, {__index = function() return "| ! | ! | ! | ! | ! | ! | ! | ! | ! | ! | ! | ! | ! | ! | ! | ! | ! " end}) -- stress testing for text widths
 TMW.L = L
 local LBF = LibStub("LibButtonFacade", true)
+local LMB = LibMasque and LibMasque("Button")
 local AceDB = LibStub("AceDB-3.0")
 local LSM = LibStub("LibSharedMedia-3.0")
 
 TELLMEWHEN_VERSION = "4.1.3"
 TELLMEWHEN_VERSION_MINOR = ""
-TELLMEWHEN_VERSIONNUMBER = 41302 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL (although it is displayed in version warnings to prevent confusion about a warning for the same major version)
+TELLMEWHEN_VERSIONNUMBER = 41303 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL (although it is displayed in version warnings to prevent confusion about a warning for the same major version)
 TELLMEWHEN_MAXGROUPS = 10 	--this is a default, used by SetTheory (addon), so dont rename
 TELLMEWHEN_MAXROWS = 20
 local UPD_INTV = 0.06	--this is a default, local because i use it in onupdate functions
@@ -1527,6 +1528,8 @@ function TMW:Group_Update(groupID)
 		if lbfs.SkinID then
 			LBF:Group("TellMeWhen", format(L["fGROUP"], groupID)):Skin(lbfs.SkinID, lbfs.Gloss, lbfs.Backdrop, lbfs.Colors)
 		end
+	elseif LMB then
+		db.profile.Groups[groupID].LBF = nil -- if people get masque then they dont need these settings anymore. If they want to downgrade then they will just have to set things up again, sorry
 	end
 
 	group:SetFrameLevel(group.Level)
@@ -1984,15 +1987,11 @@ function TMW:RegisterIconType(Type, relevantSettings)
 end
 
 local function Icon_Bars_Update(icon)
-	local width, height = icon:GetSize()
 	local pbar = icon.powerbar
 	local cbar = icon.cooldownbar
-	icon.Width = tonumber(icon.Width) or 36*0.9 	--hack to prevent these fields from being functions (see http://www.tukui.org/forums/topic.php?id=9071&view=all and Width = <function> defined @Interface\AddOns\Tukui\core\api.lua:61)
-	icon.Height = tonumber(icon.Height) or 36*0.9
 	if icon.ShowPBar and icon.NameFirst then
 		local _, _, _, cost, _, powerType = GetSpellInfo(icon.NameFirst)
 		cost = cost or 0
-		pbar:SetSize(width*(icon.Width/36), ((height / 2)*(icon.Height/36))-0.5)
 		pbar:SetMinMaxValues(0, cost)
 		pbar.Max = cost
 		pbar.texture:SetTexture(LSM:Fetch("statusbar", db.profile.TextureName))
@@ -2009,7 +2008,6 @@ local function Icon_Bars_Update(icon)
 		pbar:Hide()
 	end
 	if icon.ShowCBar then
-		cbar:SetSize(width*(icon.Width/36), ((height / 2)*(icon.Height/36))-0.5)
 		cbar.texture:SetTexture(LSM:Fetch("statusbar", db.profile.TextureName))
 		cbar:SetMinMaxValues(0, 1)
 		cbar.Max = 1
@@ -2072,8 +2070,6 @@ function TMW:Icon_Update(icon)
 		end
 	end
 
-	icon.Width			= icon.Width or 36*0.9
-	icon.Height			= icon.Height or 36*0.9
 	icon.UpdateTimer 	= 0
 	icon.FakeAlpha 		= 0
 	if pclass ~= "DEATHKNIGHT" then
@@ -2119,13 +2115,6 @@ function TMW:Icon_Update(icon)
 		local SkID = lbfs.SkinID or "Blizzard"
 		local tbl = LBF:GetSkins()
 		if tbl and SkID and tbl[SkID] then
-			if SkID == "Blizzard" then --blizzard needs custom overlay bar sizes because of the borders, other skins might like to use this too
-				icon.Width = tbl[SkID].Icon.Width*0.9
-				icon.Height = tbl[SkID].Icon.Height*0.9
-			else
-				icon.Width = tonumber(tbl[SkID].Icon.Width) or 36*0.9 		-- possible error here causing this to be a function? 	EDIT: nevermind, it was being caused by Tukui and is fixed in Icon_Bars_Update
-				icon.Height = tonumber(tbl[SkID].Icon.Height) or 36*0.9		-- (attempt to perform arithmetic on field 'Width' (a function value)) (occured in Icon_Bars_Update where the CBar size is set)
-			end
 			ct:SetFont(LSM:Fetch("font", f.Name), tbl and tbl[SkID].Count.FontSize or f.Size, f.Outline)
 		end
 
@@ -2137,6 +2126,12 @@ function TMW:Icon_Update(icon)
 		cd:SetFrameLevel(icon:GetFrameLevel() - 2)
 		icon.cooldownbar:SetFrameLevel(icon:GetFrameLevel() -1)
 		icon.powerbar:SetFrameLevel(icon:GetFrameLevel() - 1)
+	elseif LMB then
+		LMB:Group("TellMeWhen", format(L["fGROUP"], groupID)):AddButton(icon)
+		if f.OverrideLBFPos then
+			ct:ClearAllPoints()
+			ct:SetPoint("BOTTOMRIGHT", icon, "BOTTOMRIGHT", f.x, f.y)
+		end
 	else
 		ct:ClearAllPoints()
 		ct:SetPoint("BOTTOMRIGHT", icon, "BOTTOMRIGHT", f.x, f.y)
@@ -2146,7 +2141,7 @@ function TMW:Icon_Update(icon)
 	end
 
 
-	icon.__normaltex = icon.__LBF_Normal or icon:GetNormalTexture()
+	icon.__normaltex = icon.__LBF_Normal or icon._MSQ_NormalTexture --or icon:GetNormalTexture()
 	icon.__previcon = nil
 	icon.__alpha = nil
 	icon.__tex = icon.texture:GetTexture()

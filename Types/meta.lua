@@ -70,14 +70,16 @@ local function Meta_OnUpdate(icon, time)
 	end
 end
 
-local function GetFullIconTable(icons, tbl) -- for meta icons, to check what all the possible icons it can show are
+local alreadyinserted = {}
+local function GetFullIconTable(icons, tbl) -- check what all the possible icons it can show are, for use with setting CheckNext
 	tbl = tbl or {}
 	for i, ic in ipairs(icons) do
 		local g, i = strmatch(ic, "TellMeWhen_Group(%d+)_Icon(%d+)")
 		g, i = tonumber(g), tonumber(i)
 		if db.profile.Groups[g].Icons[i].Type ~= "meta" then
 			tinsert(tbl, ic)
-		else
+		elseif not alreadyinserted[ic] then
+			alreadyinserted[ic] = 1
 			GetFullIconTable(db.profile.Groups[g].Icons[i].Icons, tbl)
 		end
 	end
@@ -91,6 +93,7 @@ function Type:Setup(icon, groupID, iconID)
 	icon.ProcessedAt = 1
 	if icon.CheckNext then
 		TMW.DoWipeAC = true
+		wipe(alreadyinserted)
 		icon.Icons = GetFullIconTable(icon.Icons)
 	end
 	icon.ShowPBar = true
