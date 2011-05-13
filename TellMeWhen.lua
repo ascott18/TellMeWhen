@@ -36,10 +36,10 @@ local LMB = LibMasque and LibMasque("Button")
 local AceDB = LibStub("AceDB-3.0")
 local LSM = LibStub("LibSharedMedia-3.0")
 
-TELLMEWHEN_VERSION = "4.1.3"
+TELLMEWHEN_VERSION = "4.1.4"
 TELLMEWHEN_VERSION_MINOR = ""
-TELLMEWHEN_VERSIONNUMBER = 41303 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL (although it is displayed in version warnings to prevent confusion about a warning for the same major version)
-TELLMEWHEN_MAXGROUPS = 10 	--this is a default, used by SetTheory (addon), so dont rename
+TELLMEWHEN_VERSIONNUMBER = 41403 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
+TELLMEWHEN_MAXGROUPS = 1 	--this is a default, used by SetTheory (addon), so dont rename
 TELLMEWHEN_MAXROWS = 20
 local UPD_INTV = 0.06	--this is a default, local because i use it in onupdate functions
 
@@ -238,7 +238,7 @@ TMW.Defaults = {
 	profile = {
 --	Version 	= 	TELLMEWHEN_VERSIONNUMBER,  -- DO NOT DEFINE VERSION AS A DEFAULT, OTHERWISE WE CANT TRACK IF A USER HAS AN OLD VERSION BECAUSE IT WILL ALWAYS DEFAULT TO THE LATEST
 	Locked 		= 	false,
-	NumGroups	=	10,
+	NumGroups	=	1,
 	Interval	=	UPD_INTV,
 	EffThreshold=	15,
 	CDCOColor 	= 	{r=0, g=1, b=0, a=1},
@@ -289,12 +289,11 @@ TMW.Defaults = {
 			Tree2			= true,
 			Tree3			= true,
 			Point = {
-				point = "TOPLEFT",
+				point = "CENTER",
 				relativeTo = "UIParent",
-				relativePoint = "TOPLEFT",
-				x = 50,
-				y = -50,
-				defined = false,
+				relativePoint = "CENTER",
+				x = 0,
+				y = 0,
 			},
 			LBF	= {
 				Gloss = 0,
@@ -414,9 +413,9 @@ TMW.BE = {
 	--Many more new spells/corrections were provided by Catok of Curse
 	--NOTE: any id prefixed with "_" will have its localized name substituted in instead of being forced to match as an ID
 	debuffs = {
-		CrowdControl = "_339;2637;33786;_118;_1499;_19503;_19386;20066;10326;_9484;_6770;_2094;_51514;76780;_710;_5782;_6358;_51209;_605;82691", -- originally by calico0 of Curse
-		Bleeding = "9007;_1822;_1079;33745;1943;703;94009;43104;89775",
-		Incapacitated = "1776;20066;49203",
+		CrowdControl = "_118;_339;2637;33786;_1499;_19503;_19386;20066;10326;_9484;_6770;_2094;_51514;76780;_710;_5782;_6358;_51209;_605;82691", -- originally by calico0 of Curse
+		Bleeding = "_1822;_1079;9007;33745;1943;703;94009;43104;89775",
+		Incapacitated = "20066;1776;49203",
 		Feared = "_5782;5246;_8122;10326;1513;_5484;_6789;87204",
 		Stunned = "_1833;_408;_91800;_5211;_56;9005;22570;19577;56626;44572;853;2812;85388;64044;20549;46968;30283;20253;65929;7922;12809;50519;91797;47481;12355;24394;83047;39796;93986;89766;54786",
 		--DontMelee = "5277;871;Retaliation;Dispersion;Hand of Sacrifice;Hand of Protection;Divine Shield;Divine Protection;Ice Block;Icebound Fortitude;Cyclone;Banish",  --does somebody want to update these for me?
@@ -426,12 +425,12 @@ TMW.BE = {
 		Disarmed = "_51722;_676;64058;50541;91644",
 		Rooted = "_339;_122;23694;58373;64695;_19185;33395;4167;54706;50245;90327;16979;83301;83302;45334;19306;55080;87195;63685;19387",
 		PhysicalDmgTaken = "30070;58683;81326;50518;55749",
-		SpellDamageTaken = "93068;1490;65142;85547;60433;34889;24844",
+		SpellDamageTaken = "1490;65142;85547;60433;93068;34889;24844",
 		SpellCritTaken = "17800;22959",
 		BleedDamageTaken = "33878;33876;16511;_46857;50271;35290;57386",
 		ReducedAttackSpeed = "6343;55095;58180;68055;8042;90314;50285",
 		ReducedCastingSpeed = "1714;5760;31589;73975;50274;50498",
-		ReducedArmor = "8647;50498;35387;91565;58567",
+		ReducedArmor = "58567;91565;8647;50498;35387",
 		ReducedHealing = "12294;13218;56112;48301;82654;30213;54680",
 		ReducedPhysicalDone = "1160;99;26017;81130;702;24423",
 	},
@@ -631,7 +630,27 @@ function TMW:OnInitialize()
 		StaticPopup_Show("TMW_RESTARTNEEDED")
 	end
 
-	if type(TellMeWhenDB) ~= "table" then TellMeWhenDB = {} end
+	if type(TellMeWhenDB) ~= "table" then
+		TellMeWhenDB = {Version = TELLMEWHEN_VERSIONNUMBER}
+	end
+	TellMeWhenDB.Version = TellMeWhenDB.Version or 0
+	-- Begin DB upgrades that need to be done before defaults are added. Upgrades here should always do everything needed to every single profile, and remember to make sure that a table exists before going into it.
+	if TellMeWhenDB.Version < 41402 then
+		if TellMeWhenDB.profiles then 
+			for _, p in pairs(TellMeWhenDB.profiles) do
+				if p.Groups then
+					for _, g in pairs(p.Groups) do
+						if g.Point then
+							g.Point.point = g.Point.point or "TOPLEFT"
+							g.Point.relativePoint = g.Point.relativePoint or "TOPLEFT"
+						end
+					end
+				end
+			end
+		end
+	end
+	TellMeWhenDB.Version = TELLMEWHEN_VERSIONNUMBER -- pre-default upgrades complete!
+	
 	TMW.db = AceDB:New("TellMeWhenDB", TMW.Defaults)
 	db = TMW.db
 	
@@ -663,10 +682,7 @@ function TMW:OnInitialize()
 	db.RegisterCallback(TMW, "OnProfileReset", "OnProfile")
 	db.RegisterCallback(TMW, "OnNewProfile", "OnProfile")
 
-	CreateFrame("Frame", nil, InterfaceOptionsFrame):SetScript("OnShow", function()
-		TMW:LoadOptions()
-	end)
-
+	
 	if LBF then
 		LBF:RegisterSkinCallback("TellMeWhen", TellMeWhen_SkinCallback, self)
 	end
@@ -700,7 +716,7 @@ function TMW:OnProfile()
 		icon:SetTexture(nil)
 	end
 	TMW:Update()
---	TMW:LoadOptions() -- why is this here?
+	if TMW.CompileOptions then TMW:CompileOptions() end -- redo groups in the options
 end
 
 function TMW:PLAYER_TALENT_UPDATE()
@@ -836,10 +852,420 @@ function TMW:Update()
 	TMW.Initd = true
 end
 
+local upgradeTable
+function TMW:GetUpgradeTable()
+	if upgradeTable then return upgradeTable end
+	local t = {
+		[41401] = {
+			priority = 1,
+			global = function()
+				-- needs to be before the rest as well
+				-- i changed the default number of groups from 10 to 1, so those that had 10 groups will need to have their settings scanned to see how many groups they used to have
+				if db.profile.NumGroups == 1 then
+					local n = 0
+					for k, v in pairs(db.profile.Groups) do
+						n = max(n, k)
+					end
+					db.profile.NumGroups = n
+					TELLMEWHEN_MAXGROUPS = n
+				end
+			end,
+		},
+		[12000] = {
+			global = function()
+				db.profile.Spec = nil
+			end,
+		},
+		[15300] = {
+			icon = function(ics)
+				if ics.Alpha > 1 then
+					ics.Alpha = (ics.Alpha / 100)
+				else
+					ics.Alpha = 1
+				end
+			end,
+		},
+		[15400] = {
+			icon = function(ics)
+				if ics.Alpha == 0.01 then ics.Alpha = 1 end
+			end,
+		},
+		[20100] = {
+			icon = function(ics)
+				for k, v in ipairs(ics.Conditions) do
+					v.ConditionLevel = tonumber(v.ConditionLevel) or 0
+					if ((v.ConditionType == "SOUL_SHARDS") or (v.ConditionType == "HOLY_POWER")) and (v.ConditionLevel > 3) then
+						v.ConditionLevel = ceil((v.ConditionLevel/100)*3)
+					end
+				end
+			end,
+		},
+		[21200] = {
+			icon = function(ics)
+				if ics.WpnEnchantType == "thrown" then
+					ics.WpnEnchantType = "RangedSlot"
+				elseif ics.WpnEnchantType == "offhand" then
+					ics.WpnEnchantType = "SecondaryHandSlot"
+				elseif ics.WpnEnchantType == "mainhand" then --idk why this would happen, but you never know
+					ics.WpnEnchantType = "MainHandSlot"
+				end
+			end,
+		},
+		[22000] = {
+			icon = function(ics)
+				for k, v in ipairs(ics.Conditions) do
+					if ((v.ConditionType == "ICON") or (v.ConditionType == "EXISTS") or (v.ConditionType == "ALIVE")) then
+						v.ConditionLevel = 0
+					end
+				end
+			end,
+		},
+		[22010] = {
+			icon = function(ics)
+				for i, condition in ipairs(ics.Conditions) do
+					for k, v in pairs(condition) do
+						condition[gsub(k, "Condition", "")] = v
+					end
+				end
+			end,
+		},
+		[22100] = {
+			icon = function(ics)
+				if ics.UnitReact and ics.UnitReact ~= 0 then
+					tinsert(ics.Conditions, {
+						Type = "REACT",
+						Level = ics.UnitReact,
+						Unit = "target",
+					})
+				end
+			end,
+		},
+		[23000] = {
+			icon = function(ics)
+				if ics.StackMin ~= TMW.Icon_Defaults.StackMin then
+					ics.StackMinEnabled = true
+				end
+				if ics.StackMax ~= TMW.Icon_Defaults.StackMax then
+					ics.StackMaxEnabled = true
+				end
+			end,
+		},
+		[24000] = {
+			icon = function(ics)
+				ics.Name = gsub(ics.Name, "StunnedOrIncapacitated", "Stunned;Incapacitated")
+				ics.Name = gsub(ics.Name, "IncreasedSPboth", "IncreasedSPsix;IncreasedSPten")
+				if ics.Type == "darksim" then
+					ics.Type = "multistatecd"
+					ics.Name = "77606"
+				end
+			end,
+		},
+		[24100] = {
+			icon = function(ics)
+				if ics.Type == "meta" and type(ics.Icons) == "table" then
+					--make values the data, not the keys, so that we can customize the order that they are checked in
+					for k, v in pairs(ics.Icons) do
+						tinsert(ics.Icons, k)
+						ics.Icons[k] = nil
+					end
+				end
+			end,
+		},
+		[30000] = {
+			global = function()
+				db.profile.NumGroups = 10
+				db.profile.Condensed = nil
+				db.profile.NumCondits = nil
+				db.profile.DSN = nil
+				db.profile.UNUSEColor = nil
+				db.profile.USEColor = nil
+				if db.profile.Font.Outline == "THICK" then db.profile.Font.Outline = "THICKOUTLINE" end --oops
+			end,
+			group = function(gs)
+				gs.LBFGroup = nil
+				if gs.Stance then
+					for k, v in pairs(gs.Stance) do
+						if CSN[k] then
+							if v then -- everything switched in this version
+								gs.Stance[CSN[k]] = false
+							else
+								gs.Stance[CSN[k]] = true
+							end
+							gs.Stance[k] = nil
+						end
+					end
+				end
+			end,
+			icon = function(ics, groupID, iconID)
+				for k in pairs(TMW.DeletedIconSettings) do
+					ics[k] = nil
+				end
+
+				-- this is part of the old CondenseSettings (but modified slightly), just to get rid of values that are defined in the saved variables that dont need to be (basically, they were set automatically on accident, most of them in early versions)
+				local nondefault = 0
+				local n = 0
+				for s, v in pairs(ics) do
+					if (type(v) ~= "table" and v ~= TMW.Icon_Defaults[s]) or (type(v) == "table" and #v ~= 0) then
+						nondefault = nondefault + 1
+						if (s == "Enabled") or (s == "ShowTimerText") then
+							n = n+1
+						end
+					end
+				end
+				if n == nondefault then
+					db.profile.Groups[groupID].Icons[iconID] = nil
+				end
+			end,
+		},
+		[40000] = {
+			global = function()
+				db.profile.Spacing = nil
+				db.profile.Locked = false
+			end,
+			group = function(gs)
+				gs.Spacing = db.profile.Spacing or 0
+			end,
+			icon = function(ics)
+				if ics.Type == "icd" then
+					ics.CooldownShowWhen = ics.ICDShowWhen
+					ics.ICDShowWhen = "usable" -- default, to make it go away safely
+				end
+			end,
+		},
+		[40010] = {
+			icon = function(ics)
+				if ics.Type == "multistatecd" then
+					ics.Type = "cooldown"
+					ics.CooldownType = "multistate"
+				end
+			end,
+		},
+		[40060] = {
+			global = function()
+				db.profile.Texture = nil --now i get the texture from LSM the right way instead of saving the texture path
+			end,
+		},
+		[40080] = {
+			group = function(gs)
+				if gs.Stance and (gs.Stance[L["NONE"]] == false or gs.Stance[L["CASTERFORM"]] == false) then
+					gs.Stance[L["NONE"]] = nil
+					gs.Stance[L["CASTERFORM"]] = nil
+					gs.Stance[NONE] = false 
+				end
+			end,
+			icon = function(ics)
+				ics.StackMin = floor(ics.StackMin)
+				ics.StackMax = floor(ics.StackMax)
+				for k, v in pairs(ics.Conditions) do
+					if v.Type == "ECLIPSE_DIRECTION" and v.Level == -1 then
+						v.Level = 0
+					end
+				end
+			end,
+		},
+		[40100] = {
+			global = function()
+				db.profile["BarGCD"] = true
+				db.profile["ClockGCD"] = true
+			end,
+			icon = function(ics)
+				for k, condition in pairs(ics.Conditions) do
+					if condition.Type == "NAME" then
+						condition.Level = 0
+					end
+				end
+			end,
+		},
+		[40106] = {
+			icon = function(ics)
+				for k, condition in pairs(ics.Conditions) do
+					if condition.Type == "ITEMINBAGS" then
+						if condition.Level == 0 then
+							condition.Operator = ">"
+						elseif condition.Level == 1 then
+							condition.Operator = "=="
+							condition.Level = 0
+						end
+					end
+				end
+			end,
+		},
+		[40111] = {
+			icon = function(ics)
+				ics.Unit = TMW:CleanString((ics.Unit .. ";"):	-- it wont change things at the end of the unit string without a character after the unit at the end
+				gsub("raid[^%d]", "raid1-25;"):
+				gsub( "party[^%d]", "party1-4;"):
+				gsub("arena[^%d]", "arena1-5;"):
+				gsub("boss[^%d]", "boss1-4;"):
+				gsub("maintank[^%d]", "maintank1-5;"):
+				gsub("mainassist[^%d]", "mainassist1-5;"))
+			end,
+		},
+		[40112] = {
+			icon = function(ics)
+				for k, condition in pairs(ics.Conditions) do
+					if condition.Type == "CASTING" then
+						condition.Level = condition.Level + 1
+					end
+				end
+			end,
+		},
+		[40115] = {
+			icon = function(ics)
+				for k, condition in pairs(ics.Conditions) do
+					if condition.Type == "BUFF" or condition.Type == "DEBUFF" then
+						if condition.Level == 0 then
+							condition.Operator = ">"
+						elseif condition.Level == 1 then
+							condition.Operator = "=="
+							condition.Level = 0
+						end
+					end
+				end
+			end,
+		},
+		[40124] = {
+			global = function()
+				db.profile.Revision = nil-- unused
+			end,
+		},
+		[41004] = {
+			icon = function(ics)
+				for k, condition in pairs(ics.Conditions) do
+					if condition.Type == "BUFF" then
+						condition.Type = "BUFFSTACKS"
+					elseif condition.Type == "DEBUFF" then
+						condition.Type = "DEBUFFSTACKS"
+					end
+				end
+			end,
+		},
+		[41005] = {
+			icon = function(ics)
+				ics.ConditionAlpha = 0
+			end,
+		},
+		[41008] = {
+			icon = function(ics)
+				for k, condition in pairs(ics.Conditions) do
+					if condition.Type == "SPELLCD" or condition.Type == "ITEMCD" then
+						if condition.Level == 0 then
+							condition.Operator = "=="
+						elseif condition.Level == 1 then
+							condition.Operator = ">"
+							condition.Level = 0
+						end
+					elseif condition.Type == "MAINHAND" or condition.Type == "OFFHAND" or condition.Type == "THROWN" then
+						if condition.Level == 0 then
+							condition.Operator = ">"
+						elseif condition.Level == 1 then
+							condition.Operator = "=="
+							condition.Level = 0
+						end
+					end
+				end
+			end,
+		},
+		[41206] = {
+			icon = function(ics)
+				for k, condition in pairs(ics.Conditions) do
+					if condition.Type == "STANCE" then
+						condition.Operator = "=="
+					end
+				end
+			end,
+		},
+		[41301] = {
+			group = function(gs)
+				local Conditions = gs.Conditions
+
+				if gs.OnlyInCombat then
+					local condition = Conditions[#Conditions + 1]
+					condition.Type = "COMBAT"
+					condition.Level = 0
+					gs.OnlyInCombat = nil
+				end
+				if gs.NotInVehicle then
+					local condition = Conditions[#Conditions + 1]
+					condition.Type = "VEHICLE"
+					condition.Level = 1
+					gs.NotInVehicle = nil
+				end
+				if gs.Stance then
+					local nume = {}
+					local numd = {}
+					for id = 0, #TMW.CSN do
+						local sn = TMW.CSN[id]
+						local en = gs.Stance[sn]
+						if en == false then
+							tinsert(numd, id)
+						elseif en == nil or en == true then
+							tinsert(nume, id)
+						end
+					end
+					if #nume ~= 0 then
+						local start = #Conditions + 1
+						if #nume <= ceil(#TMW.CSN/2) then
+							
+							for _, value in ipairs(nume) do
+								local condition = Conditions[#Conditions + 1]
+								condition.Type = "STANCE"
+								condition.Operator = "=="
+								condition.Level = value
+								condition.AndOr = "OR"
+							end
+							Conditions[start].AndOr = "AND"
+							if #Conditions > #nume then
+								Conditions[start].PrtsBefore = 1
+								Conditions[#Conditions].PrtsAfter = 1
+							end
+						elseif #numd > 0 then
+							
+							for _, value in ipairs(numd) do
+								local condition = Conditions[#Conditions + 1]
+								condition.Type = "STANCE"
+								condition.Operator = "~="
+								condition.Level = value
+								condition.AndOr = "AND"
+							end
+							if #Conditions > #numd then
+								Conditions[start].PrtsBefore = 1
+								Conditions[#Conditions].PrtsAfter = 1
+							end
+						end
+					end
+					gs.Stance = nil
+				end
+			end,
+		},
+		[41402] = {
+			group = function(gs)
+				gs.Point.defined = nil
+			end,
+		}, 
+	}
+	
+	upgradeTable = {}
+	for k, v in pairs(t) do
+		v.Version = k
+		tinsert(upgradeTable, v)
+	end
+	sort(upgradeTable, function(a, b)
+		if a.priority or b.priority then
+			if a.priority and b.priority then
+				return a.priority < b.priority
+			else
+				return a.priority
+			end
+		end
+		return a.Version < b.Version
+	end)
+	return upgradeTable
+end
+
 function TMW:Upgrade()
 
 	if TellMeWhen_Settings then -- needs to be the first one
-		TMW:Print()
 		for k, v in pairs(TellMeWhen_Settings) do
 			db.profile[k] = v
 		end
@@ -848,408 +1274,41 @@ function TMW:Upgrade()
 		db.profile.Version = TellMeWhen_Settings.Version
 		TellMeWhen_Settings = nil
 	end
-
 	if type(db.profile.Version) == "string" then
 		local v = gsub(db.profile.Version, "[^%d]", "") -- remove decimals
 		v = v..strrep("0", 5-#v)	-- append zeroes to create a 5 digit number
 		db.profile.Version = tonumber(v)
 	end
-
-	--[[if db.profile.Version < 11400 then
-		-- I FAIL TO FIND A REASON TO DO THIS, IT HAS BEEN IN HERE SINCE WAY BACK WHEN THOUGH
-		db:ResetProfile()
-		return
-	end]]
-	if db.profile.Version < 12000 then
-		db.profile.Spec = nil
-	end
-	if db.profile.Version < 15300 then
-		for ics in TMW.InIconSettings() do
-			if ics.Alpha > 1 then
-				ics.Alpha = (ics.Alpha / 100)
-			else
-				ics.Alpha = 1
+	
+	for k, v in ipairs(TMW:GetUpgradeTable()) do
+		if v.Version > db.profile.Version then
+			if v.global then
+				v.global()
 			end
-		end
-	end
-	if db.profile.Version < 15400 then
-		for ics in TMW.InIconSettings() do
-			if ics.Alpha == 0.01 then ics.Alpha = 1 end
-		end
-	end
-	if db.profile.Version < 20100 then
-		local needtowarn = ""
-		for ics, groupID, iconID in TMW.InIconSettings() do
-			for k, v in ipairs(ics.Conditions) do
-				v.ConditionLevel = tonumber(v.ConditionLevel) or 0
-				if ((v.ConditionType == "SOUL_SHARDS") or (v.ConditionType == "HOLY_POWER")) and (v.ConditionLevel > 3) then
-					needtowarn = needtowarn .. (format(L["GROUPICON"], groupID, iconID)) .. ";  "
-					v.ConditionLevel = ceil((v.ConditionLevel/100)*3)
+			if v.group then
+				for group, groupID in TMW:InGroupSettings() do
+					v.group(group, groupID)
 				end
 			end
-		end
-		if needtowarn ~= "" then
-			TMW.Warn(L["HPSSWARN"] .. " " .. needtowarn)
-		end
-	end
-	if db.profile.Version < 21200 then
-		for ics in TMW.InIconSettings() do
-			if ics.WpnEnchantType == "thrown" then
-				ics.WpnEnchantType = "RangedSlot"
-			elseif ics.WpnEnchantType == "offhand" then
-				ics.WpnEnchantType = "SecondaryHandSlot"
-			elseif ics.WpnEnchantType == "mainhand" then --idk why this would happen, but you never know
-				ics.WpnEnchantType = "MainHandSlot"
-			end
-		end
-	end
-	if db.profile.Version < 22000 then
-		for ics in TMW.InIconSettings() do
-			if ics.Conditions then
-				for k, v in ipairs(ics.Conditions) do
-					if ((v.ConditionType == "ICON") or (v.ConditionType == "EXISTS") or (v.ConditionType == "ALIVE")) then
-						v.ConditionLevel = 0
-					end
+			if v.icon then
+				for ics, groupID, iconID in TMW.InIconSettings() do
+					v.icon(ics, groupID, iconID)
 				end
-			end
-		end
-	end
-	if db.profile.Version < 22010 then
-		for ics in TMW.InIconSettings() do
-			for i, condition in ipairs(ics.Conditions) do
-				for k, v in pairs(condition) do
-					condition[gsub(k, "Condition", "")] = v
-				end
-			end
-		end
-	end
-	if db.profile.Version < 22100 then
-		for ics in TMW.InIconSettings() do
-			if ics.UnitReact and ics.UnitReact ~= 0 then
-				tinsert(ics.Conditions, {
-					Type = "REACT",
-					Level = ics.UnitReact,
-					Unit = "target",
-				})
-			end
-		end
-	end
-	if db.profile.Version < 23000 then
-		for ics in TMW.InIconSettings() do
-			if ics.StackMin ~= TMW.Icon_Defaults.StackMin then
-				ics.StackMinEnabled = true
-			end
-			if ics.StackMax ~= TMW.Icon_Defaults.StackMax then
-				ics.StackMaxEnabled = true
-			end
-		end
-	end
-	if db.profile.Version < 24000 then
-		for ics in TMW.InIconSettings() do
-			ics.Name = gsub(ics.Name, "StunnedOrIncapacitated", "Stunned;Incapacitated")
-			ics.Name = gsub(ics.Name, "IncreasedSPboth", "IncreasedSPsix;IncreasedSPten")
-			if ics.Type == "darksim" then
-				ics.Type = "multistatecd"
-				ics.Name = "77606"
-			end
-		end
-	end
-	if db.profile.Version < 24100 then
-		for ics in TMW.InIconSettings() do
-			if ics.Type == "meta" and type(ics.Icons) == "table" then
-				--make values the data, not the keys, so that we can customize the order that they are checked in
-				for k, v in pairs(ics.Icons) do
-					tinsert(ics.Icons, k)
-					ics.Icons[k] = nil
-				end
-			end
-		end
-	end
-	if db.profile.Version < 30000 then
-		db.profile.NumGroups = 10
-		db.profile.Condensed = nil
-		db.profile.NumCondits = nil
-		db.profile.DSN = nil
-		db.profile.UNUSEColor = nil
-		db.profile.USEColor = nil
-		if db.profile.Font.Outline == "THICK" then db.profile.Font.Outline = "THICKOUTLINE" end --oops
-
-		for gs in TMW.InGroupSettings() do
-			gs.Point.defined = true
-			gs.LBFGroup = nil
-			if gs.Stance then
-				for k, v in pairs(gs.Stance) do
-					if CSN[k] then
-						if v then -- everything switched in this version
-							gs.Stance[CSN[k]] = false
-						else
-							gs.Stance[CSN[k]] = true
-						end
-						gs.Stance[k] = nil
-					end
-				end
-			end
-		end
-		for ics, groupID, iconID in TMW.InIconSettings() do
-			for k in pairs(TMW.DeletedIconSettings) do
-				ics[k] = nil
-			end
-
-			-- this is part of the old CondenseSettings (but modified slightly), just to get rid of values that are defined in the saved variables that dont need to be (basically, they were set automatically on accident, most of them in early versions)
-			local nondefault = 0
-			local n = 0
-			for s, v in pairs(ics) do
-				if (type(v) ~= "table" and v ~= TMW.Icon_Defaults[s]) or (type(v) == "table" and #v ~= 0) then
-					nondefault = nondefault + 1
-					if (s == "Enabled") or (s == "ShowTimerText") then
-						n = n+1
-					end
-				end
-			end
-			if n == nondefault then
-				db.profile.Groups[groupID].Icons[iconID] = nil
-			end
-		end
-	end
-	if db.profile.Version < 40000 then
-		db.profile.Spacing = nil
-		db.profile.Locked = false
-
-		for gs in TMW.InGroupSettings() do
-			gs.Spacing = db.profile.Spacing or 0
-		end
-
-		for ics in TMW.InIconSettings() do
-			if ics.Type == "icd" then
-				ics.CooldownShowWhen = ics.ICDShowWhen
-				ics.ICDShowWhen = "usable" -- default, to make it go away safely
-			end
-		end
-	end
-	if db.profile.Version < 40010 then -- beta4
-		for ics in TMW.InIconSettings() do
-			if ics.Type == "multistatecd" then
-				ics.Type = "cooldown"
-				ics.CooldownType = "multistate"
-			end
-		end
-	end
-	if db.profile.Version < 40060 then -- beta6
-		db.profile.Texture = nil --now i get the texture from LSM the right way instead of saving the texture path
-	end
-	if db.profile.Version < 40080 then -- beta8
-		for gs in TMW.InGroupSettings() do
-			if gs.Stance and (gs.Stance[L["NONE"]] == false or gs.Stance[L["CASTERFORM"]] == false) then
-				gs.Stance[L["NONE"]] = nil
-				gs.Stance[L["CASTERFORM"]] = nil
-				gs.Stance[NONE] = false 
-			end
-		end
-
-		local needtowarn = ""
-		for ics, groupID, iconID in TMW.InIconSettings() do
-			ics.StackMin = floor(ics.StackMin)
-			ics.StackMax = floor(ics.StackMax)
-			if (ics.StackMaxEnabled and ics.StackMax == 0) or (ics.DurationMaxEnabled and ics.DurationMax == 0) then -- i changed the default values
-				needtowarn = needtowarn .. (format(L["GROUPICON"], groupID, iconID)) .. ";  "
-			end
-			for k, v in pairs(ics.Conditions) do
-				if v.Type == "ECLIPSE_DIRECTION" and v.Level == -1 then
-					v.Level = 0
-				end
-			end
-		end
-		if needtowarn ~= "" then
-			TMW.Warn("The following icons may have had their maximum stacks and/or duration modified, you may wish to check them: " .. needtowarn)
-		end
-	end
-
-	if db.profile.Version < 40010 then
-		for ics in TMW.InIconSettings() do
-			for k, condition in pairs(ics.Conditions) do
-				if condition.Type == "NAME" then
-					condition.Level = 0
-				end
-			end
-		end
-		db.profile["BarGCD"] = true
-		db.profile["ClockGCD"] = true
-	end
-	if db.profile.Version < 40106 then
-		for ics in TMW.InIconSettings() do
-			for k, condition in pairs(ics.Conditions) do
-				if condition.Type == "ITEMINBAGS" then
-					if condition.Level == 0 then
-						condition.Operator = ">"
-					elseif condition.Level == 1 then
-						condition.Operator = "=="
-						condition.Level = 0
-					end
-				end
-			end
-		end
-	end
-
-	if db.profile.Version < 40111 then
-		for ics in TMW.InIconSettings() do
-			ics.Unit = TMW:CleanString((ics.Unit .. ";"):	-- it wont change things at the end of the unit string without a character after the unit at the end
-			gsub("raid[^%d]", "raid1-25;"):
-			gsub( "party[^%d]", "party1-4;"):
-			gsub("arena[^%d]", "arena1-5;"):
-			gsub("boss[^%d]", "boss1-4;"):
-			gsub("maintank[^%d]", "maintank1-5;"):
-			gsub("mainassist[^%d]", "mainassist1-5;"))
-		end
-	end
-	if db.profile.Version < 40112 then
-		for ics in TMW.InIconSettings() do
-			for k, condition in pairs(ics.Conditions) do
-				if condition.Type == "CASTING" then
-					condition.Level = condition.Level + 1
-				end
-			end
-		end
-	end
-	if db.profile.Version < 40115 then
-		for ics in TMW.InIconSettings() do
-			for k, condition in pairs(ics.Conditions) do
-				if condition.Type == "BUFF" or condition.Type == "DEBUFF" then
-					if condition.Level == 0 then
-						condition.Operator = ">"
-					elseif condition.Level == 1 then
-						condition.Operator = "=="
-						condition.Level = 0
-					end
-				end
-			end
-		end
-	end
-	if db.profile.Version < 40124 then
-		db.profile.Revision = nil-- unused
-	end
-	if db.profile.Version < 41004 then
-		for ics in TMW.InIconSettings() do
-			for k, condition in pairs(ics.Conditions) do
-				if condition.Type == "BUFF" then
-					condition.Type = "BUFFSTACKS"
-				elseif condition.Type == "DEBUFF" then
-					condition.Type = "DEBUFFSTACKS"
-				end
-			end
-		end
-	end
-	if db.profile.Version < 41005 then
-		for ics in TMW.InIconSettings() do
-			ics.ConditionAlpha = 0
-		end
-	end
-	if db.profile.Version < 41008 then
-		for ics in TMW.InIconSettings() do
-			for k, condition in pairs(ics.Conditions) do
-				if condition.Type == "SPELLCD" or condition.Type == "ITEMCD" then
-					if condition.Level == 0 then
-						condition.Operator = "=="
-					elseif condition.Level == 1 then
-						condition.Operator = ">"
-						condition.Level = 0
-					end
-				elseif condition.Type == "MAINHAND" or condition.Type == "OFFHAND" or condition.Type == "THROWN" then
-					if condition.Level == 0 then
-						condition.Operator = ">"
-					elseif condition.Level == 1 then
-						condition.Operator = "=="
-						condition.Level = 0
-					end
-				end
-			end
-		end
-	end
-	if db.profile.Version < 41206 then
-		for ics in TMW.InIconSettings() do
-			for k, condition in pairs(ics.Conditions) do
-				if condition.Type == "STANCE" then
-					condition.Operator = "=="
-				end
-			end
-		end
-	end
-	if db.profile.Version < 41301 then
-		for gs, groupID in TMW.InGroupSettings() do
-			local Conditions = gs.Conditions
-
-			if gs.OnlyInCombat then
-				local condition = Conditions[#Conditions + 1]
-				condition.Type = "COMBAT"
-				condition.Level = 0
-				gs.OnlyInCombat = nil
-			end
-			if gs.NotInVehicle then
-				local condition = Conditions[#Conditions + 1]
-				condition.Type = "VEHICLE"
-				condition.Level = 1
-				gs.NotInVehicle = nil
-			end
-			TMW.Warn(groupID..tostring(gs.Stance))
-			if gs.Stance then
-				local nume = {}
-				local numd = {}
-				for id = 0, #TMW.CSN do
-					local sn = TMW.CSN[id]
-					local en = gs.Stance[sn]
-					TMW.Warn(groupID.." "..tostring(id).." "..tostring(sn).." "..tostring(en))
-					if en == false then
-						tinsert(numd, id)
-					elseif en == nil or en == true then
-						tinsert(nume, id)
-					end
-				end
-				TMW.Warn(#nume.." "..#numd)
-				if #nume ~= 0 then
-					local start = #Conditions + 1
-					if #nume <= ceil(#TMW.CSN/2) then
-						
-						for _, value in ipairs(nume) do
-							local condition = Conditions[#Conditions + 1]
-							condition.Type = "STANCE"
-							condition.Operator = "=="
-							condition.Level = value
-							condition.AndOr = "OR"
-						end
-						Conditions[start].AndOr = "AND"
-						if #Conditions > #nume then
-							Conditions[start].PrtsBefore = 1
-							Conditions[#Conditions].PrtsAfter = 1
-						end
-					elseif #numd > 0 then
-						
-						for _, value in ipairs(numd) do
-							local condition = Conditions[#Conditions + 1]
-							condition.Type = "STANCE"
-							condition.Operator = "~="
-							condition.Level = value
-							condition.AndOr = "AND"
-						end
-						if #Conditions > #numd then
-							Conditions[start].PrtsBefore = 1
-							Conditions[#Conditions].PrtsAfter = 1
-						end
-					end
-				end
-				gs.Stance = nil
 			end
 		end
 	end
 	
-
 	--All Upgrades Complete
 	db.profile.Version = TELLMEWHEN_VERSIONNUMBER
 end
 
 function TMW:LoadOptions(n)
 	n = n or 1
+	TMW:Print(L["LOADINGOPT"])
 	local loaded, reason = LoadAddOn("TellMeWhen_Options")
 	if not loaded then
 		if reason == "DISABLED" and (n < 2) then -- prevent accidental recursion
+			TMW:Print(L["ENABLINGOPT"])
 			EnableAddOn("TellMeWhen_Options")
 			TMW:LoadOptions(n+1)
 		else
@@ -1257,8 +1316,17 @@ function TMW:LoadOptions(n)
 			TMW:Print(err)
 			geterrorhandler()(err, 0) -- non breaking error
 		end
+	else
+		for k, v in pairs(INTERFACEOPTIONS_ADDONCATEGORIES) do
+			if v.name == "TellMeWhen" and not v.obj then
+				tremove(INTERFACEOPTIONS_ADDONCATEGORIES, k)
+				InterfaceAddOnsList_Update()
+				break
+			end
+		end
+		TMW:CompileOptions()
+		collectgarbage()
 	end
-	TMW:CompileOptions()
 end
 
 function TMW:CheckForInvalidIcons()
@@ -1492,15 +1560,15 @@ function TMW:Group_SetPos(groupID)
 	local s = db.profile.Groups[groupID]
 	local p = s.Point
 	group:ClearAllPoints()
-	if p.defined and p.x then
+	--if p.defined and p.x then
 		local relativeTo = _G[p.relativeTo] or "UIParent"
 		group:SetPoint(p.point, relativeTo, p.relativePoint, p.x, p.y)
-	else
+--[[	else
 		local groupID=groupID-1
 		local xoffs = 50 + 135*floor(groupID/10)
 		local yoffs = (floor(groupID/10)*-10)+groupID
 		group:SetPoint("TOPLEFT", "UIParent", "TOPLEFT", xoffs, (-50 - (30*yoffs)))
-	end
+	end]]
 	group:SetScale(s.Scale)
 	local Spacing = s.Spacing
 	group:SetSize(s.Columns*(30+Spacing)-Spacing, s.Rows*(30+Spacing)-Spacing)
@@ -1730,7 +1798,17 @@ local function PwrBarOnValueChanged(bar, val)
 end
 
 local function SetInfo(icon, alpha, color, texture, start, duration, checkGCD, pbName, reverse, count)
-
+	-- icon		- the icon object to set the attributes on (frame) (but call as icon:SetInfo(alpha, ...) )
+	-- alpha	- the alpha to set the icon to (number)
+	-- color	- the value(s) to call SetVertexColor with. Either a (number) that will be used as the r, g, and b; or a (table) with keys r, g, and b set to
+	-- texture	- the texture path to set the icon to (string)
+	-- start	- the start time of the cooldow/duration, as passsed to icon.cooldown:SetCooldown(start, duration)
+	-- duration	- the duration of the cooldow/duration, as passsed to icon.cooldown:SetCooldown(start, duration)
+	-- checkGCD - true if the icon should check to see if the cooldown is a GCD before setting a cooldown, should only be used for icons that actually track cooldowns (boolean/nil)
+	-- pbName	- the name or ID of the spell to be used for the icons power bar overlay (string/number)
+	-- reverse	- true/false to set icon.cooldown:SetReverse(reverse), nil to not change (boolean/nil)
+	-- count	- the stack text to be set on the icon, nil/false to hide (number/nil/false)
+	
 	local played, justShowed
 	alpha = icon.CndtFailed and icon.ConditionAlpha or alpha
 
@@ -1857,6 +1935,7 @@ local function SetInfo(icon, alpha, color, texture, start, duration, checkGCD, p
 	end
 
 	if alpha == 0 then
+		-- doing this twice is intended. It shouldn't return until after all playsounds have happened, but dont go as far to set the timer or cooldown bars if not needed
 		return
 	end
 
@@ -1986,11 +2065,23 @@ function TMW:RegisterIconType(Type, relevantSettings)
 	return t
 end
 
+local blizzEdgeInsets = 1.5
 local function Icon_Bars_Update(icon)
 	local pbar = icon.powerbar
 	local cbar = icon.cooldownbar
 	if icon.ShowPBar and icon.NameFirst then
 		local _, _, _, cost, _, powerType = GetSpellInfo(icon.NameFirst)
+		if (not LBF and not LMB) or
+		 (LMB and icon._MSQ_NormalSkin and icon._MSQ_NormalSkin.Texture == "Interface\\Buttons\\UI-Quickslot2") or
+		 (LBF and not LMB and icon.group.LBF and icon.group.LBF.SkinID == "Blizzard") then
+			pbar:SetPoint("BOTTOM", icon.texture, "CENTER", 0, 0.5)
+			pbar:SetPoint("TOPLEFT", icon.texture, "TOPLEFT", blizzEdgeInsets, -blizzEdgeInsets)
+			pbar:SetPoint("TOPRIGHT", icon.texture, "TOPRIGHT", -blizzEdgeInsets, -blizzEdgeInsets)
+		else
+			pbar:SetPoint("BOTTOM", icon.texture, "CENTER", 0, 0.5)
+			pbar:SetPoint("TOPLEFT", icon.texture, "TOPLEFT", 0, 0)
+			pbar:SetPoint("TOPRIGHT", icon.texture, "TOPRIGHT", 0, 0)
+		end
 		cost = cost or 0
 		pbar:SetMinMaxValues(0, cost)
 		pbar.Max = cost
@@ -2009,6 +2100,15 @@ local function Icon_Bars_Update(icon)
 	end
 	if icon.ShowCBar then
 		cbar.texture:SetTexture(LSM:Fetch("statusbar", db.profile.TextureName))
+		if not LBF and not LMB then
+			cbar:SetPoint("TOP", icon.texture, "CENTER", 0, -0.5)
+			cbar:SetPoint("BOTTOMLEFT", icon.texture, "BOTTOMLEFT", blizzEdgeInsets, blizzEdgeInsets)
+			cbar:SetPoint("BOTTOMRIGHT", icon.texture, "BOTTOMRIGHT", -blizzEdgeInsets, blizzEdgeInsets)
+		else
+			cbar:SetPoint("TOP", icon.texture, "CENTER", 0, -0.5)
+			cbar:SetPoint("BOTTOMLEFT", icon.texture, "BOTTOMLEFT", 0, 0)
+			cbar:SetPoint("BOTTOMRIGHT", icon.texture, "BOTTOMRIGHT", 0, 0)
+		end
 		cbar:SetMinMaxValues(0, 1)
 		cbar.Max = 1
 		cbar:Show()
@@ -2108,7 +2208,17 @@ function TMW:Icon_Update(icon)
 	local f = db.profile.Font
 	local ct = icon.countText
 	ct:SetFont(LSM:Fetch("font", f.Name), f.Size, f.Outline)
-	if LBF then
+	if LMB then
+		LMB:Group("TellMeWhen", format(L["fGROUP"], groupID)):AddButton(icon)
+		if f.OverrideLBFPos then
+			ct:ClearAllPoints()
+			ct:SetPoint("BOTTOMRIGHT", icon, "BOTTOMRIGHT", f.x, f.y)
+		end
+		
+		cd:SetFrameLevel(icon:GetFrameLevel() - 2)
+		icon.cooldownbar:SetFrameLevel(icon:GetFrameLevel() - 1)
+		icon.powerbar:SetFrameLevel(icon:GetFrameLevel() - 1)
+	elseif LBF then
 		TMW.DontRun = true -- TMW:Update() is ran in the LBF skin callback, which just causes an infinite loop. This tells it not to
 		local lbfs = db.profile.Groups[groupID].LBF
 		LBF:Group("TellMeWhen", format(L["fGROUP"], groupID)):AddButton(icon)
@@ -2126,18 +2236,19 @@ function TMW:Icon_Update(icon)
 		cd:SetFrameLevel(icon:GetFrameLevel() - 2)
 		icon.cooldownbar:SetFrameLevel(icon:GetFrameLevel() -1)
 		icon.powerbar:SetFrameLevel(icon:GetFrameLevel() - 1)
-	elseif LMB then
-		LMB:Group("TellMeWhen", format(L["fGROUP"], groupID)):AddButton(icon)
-		if f.OverrideLBFPos then
-			ct:ClearAllPoints()
-			ct:SetPoint("BOTTOMRIGHT", icon, "BOTTOMRIGHT", f.x, f.y)
-		end
 	else
 		ct:ClearAllPoints()
 		ct:SetPoint("BOTTOMRIGHT", icon, "BOTTOMRIGHT", f.x, f.y)
 	--	cd:SetFrameLevel(icon:GetFrameLevel() + 1)
 		icon.cooldownbar:SetFrameLevel(icon:GetFrameLevel() + 1)
 		icon.powerbar:SetFrameLevel(icon:GetFrameLevel() + 1)
+	end
+	if (not LBF and not LMB) or
+	 (LMB and icon._MSQ_NormalSkin and icon._MSQ_NormalSkin.Texture == "Interface\\Buttons\\UI-Quickslot2") or
+	 (LBF and not LMB and icon.group.LBF and icon.group.LBF.SkinID == "Blizzard") then
+		icon:GetNormalTexture():Hide()
+	else
+		icon:GetNormalTexture():Show()
 	end
 
 
@@ -2167,11 +2278,13 @@ function TMW:Icon_Update(icon)
 		end
 	end
 
-	if icon.FakeHidden then
-		tDeleteItem(IconUpdateFuncs, icon) -- remove it from the list of scripts to run on update, but dont call SetScript on it because that will remove it and set icon.OnUpdate to nil, which is called by conditions/metas
+	if icon.FakeHidden and not (icon.SoundOnShow or icon.SoundOnHide or icon.SoundOnStart or icon.SoundOnFinish) then
+		-- dont bother updating an icon that is fake hidden and doesnt have any sounds on its own because metas and icon shown conditions will update it when needed, instead of updating all the time
+		-- remove it from the list of scripts to run on update, but dont call SetScript on it because that will remove it and set icon.OnUpdate to nil, which is called by conditions/metas
+		tDeleteItem(IconUpdateFuncs, icon)
 	end
 
-	icon:SetInfo(1, 1, nil, 0, 0)
+	icon:SetInfo(1, 1, nil, 0, 0) -- alpha is set to 1 here so it doesnt return early
 	icon.__previousNameFirst = nil -- not needed now
 
 	Icon_Bars_Update(icon, groupID, iconID)
@@ -2179,6 +2292,7 @@ function TMW:Icon_Update(icon)
 	local pbar = icon.powerbar
 	local cbar = icon.cooldownbar
 	if Locked then
+		icon:SetAlpha(0)
 		if icon.texture:GetTexture() == "Interface\\AddOns\\TellMeWhen\\Textures\\Disabled" then
 			icon:SetTexture(nil)
 		end
@@ -2187,6 +2301,7 @@ function TMW:Icon_Update(icon)
 			ClearScripts(icon)
 			icon:Hide()
 		end
+		
 		pbar:SetValue(0)
 		pbar:SetAlpha(.9)
 		if icon.InvertBars then
@@ -2205,6 +2320,7 @@ function TMW:Icon_Update(icon)
 		if not icon.texture:GetTexture() then
 			icon:SetTexture("Interface\\AddOns\\TellMeWhen\\Textures\\Disabled")
 		end
+		
 		ClearScripts(cbar)
 		cbar.UpdateSet = false
 		cbar:SetValue(cbar.Max)
@@ -2508,7 +2624,9 @@ function TMW:SlashCommand(str)
 	local cmd = TMW:GetArgs(str)
 	cmd = strlower(cmd or "")
 	if cmd == strlower(L["CMD_OPTIONS"]) or cmd == "options" then --allow unlocalized "options" too
-		TMW:LoadOptions()
+		if not TMW.IE then
+			TMW:LoadOptions()
+		end
 		LibStub("AceConfigDialog-3.0"):Open("TellMeWhen Options")
 	else
 		TMW:LockToggle()

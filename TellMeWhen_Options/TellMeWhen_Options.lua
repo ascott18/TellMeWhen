@@ -53,7 +53,7 @@ local points = {
 	BOTTOMRIGHT = L["BOTTOMRIGHT"],
 }
 local print = TMW.print
-TMW.CI = {}		--current icon
+TMW.CI = {} local CI = TMW.CI		--current icon
 local clientVersion = select(4, GetBuildInfo())
 
 function TMW:CopyWithMetatable(settings)
@@ -72,7 +72,7 @@ function TMW:CopyTableInPlace(src, dest)
 	--src and dest must have congruent data structure, otherwise shit will blow up
 	for k in pairs(src) do
 		if dest[k] and type(dest[k]) == "table" and type(src[k]) == "table" then
-			TMW:CopyTableInPlaceWithMeta(src[k], dest[k])
+			TMW:CopyTableInPlace(src[k], dest[k])
 		elseif type(src[k]) ~= "table" then
 			dest[k] = src[k]
 		end
@@ -108,8 +108,8 @@ function TMW:GetIconMenuText(g, i, data)
 	data = data or db.profile.Groups[tonumber(g)].Icons[tonumber(i)]
 
 	local text = data.Name or ""
-	if data.Type == "wpnenchant" then
-		if data.WpnEnchantType == "MainHandSlot" then text = INVTYPE_WEAPONMAINHAND
+	if data.Type == "wpnenchant" and text == "" then
+		if data.WpnEnchantType == "MainHandSlot" or not data.WpnEnchantType then text = INVTYPE_WEAPONMAINHAND
 		elseif data.WpnEnchantType == "SecondaryHandSlot" then text = INVTYPE_WEAPONOFFHAND
 		elseif data.WpnEnchantType == "RangedSlot" then text = INVTYPE_THROWN end
 		text = text .. " ((" .. L["ICONMENU_WPNENCHANT"] .. "))"
@@ -117,10 +117,18 @@ function TMW:GetIconMenuText(g, i, data)
 		text = "((" .. L["ICONMENU_META"] .. "))"
 	elseif data.Type == "cast" and text == "" then
 		text = "((" .. L["ICONMENU_CAST"] .. "))"
+	elseif data.Type == "totem" and text == "" then
+		text = "((" .. L["ICONMENU_TOTEM"] .. "))"
 	end
+	text = text == "" and L["UNNAMED"] or text
 	local textshort = strsub(text, 1, 35)
 	if strlen(text) > 35 then textshort = textshort .. "..." end
-	return text, textshort
+
+	local tooltip =	((data.Name and data.Name ~= "" and data.Type ~= "meta" and data.Type ~= "wpnenchant") and data.Name .. "\r\n" or "") ..
+					(GetLocalizedSettingString("Type", data.Type) or "") ..
+					((data.Enabled and "") or "\r\n(" .. L["DISABLED"] .. ")")
+
+	return text, textshort, tooltip
 end
 
 function TMW:GuessIconTexture(data)
@@ -183,7 +191,7 @@ local function findid(info)
 end
 
 local checkorder = {
-	-- NOTE: these are actually backwards so they sort logically in AceConfig, but have their signs switched in the actual function.
+	-- NOTE: these are actually backwards so they sort logically in AceConfig, but have their signs switched in the actual function (1 = -1; -1 = 1).
 	[-1] = L["ASCENDING"],
 	[1] = L["DESCENDING"],
 }
@@ -286,9 +294,12 @@ local groupConfigTemplate = {
 			set = function(info, val)
 				local g = findid(info)
 				db.profile.Groups[g].Point[info[#info]] = val
+		--		db.profile.Groups[g].Point.defined = true
 				TMW:Group_SetPos(g)
 			end,
-			get = function(info) return db.profile.Groups[findid(info)].Point[info[#info]] end,
+			get = function(info)
+				return db.profile.Groups[findid(info)].Point[info[#info]]
+			end,
 			args = {
 				point = {
 					name = L["UIPANEL_POINT"],
@@ -334,7 +345,7 @@ local groupConfigTemplate = {
 					order = 6,
 					min = 0.6,
 					softMax = 10,
-					bigStep = 0.05,
+					bigStep = 0.01,
 					set = function(info, val)
 						local g = findid(info)
 						db.profile.Groups[g].Scale = val
@@ -679,8 +690,7 @@ function TMW:CompileOptions() -- options
 	LibStub("AceConfig-3.0"):RegisterOptionsTable("TellMeWhen Options", TMW.OptionsTable)
 	LibStub("AceConfigDialog-3.0"):SetDefaultSize("TellMeWhen Options", 762, 512)
 	if not TMW.AddedToBlizz then
-		LibStub("AceConfigDialog-3.0"):AddToBlizOptions("TellMeWhen Options", L["ICON_TOOLTIP1"])
-		TMW.AddedToBlizz = true
+		TMW.AddedToBlizz = LibStub("AceConfigDialog-3.0"):AddToBlizOptions("TellMeWhen Options", L["ICON_TOOLTIP1"])
 	else
 		LibStub("AceConfigRegistry-3.0"):NotifyChange("TellMeWhen Options")
 	end
@@ -725,7 +735,7 @@ function TMW:Group_StopSizing(resizeButton)
 	local p = db.profile.Groups[group:GetID()]["Point"]
 	p.point, p.relativeTo, p.relativePoint, p.x, p.y = group:GetPoint(1)
 	p.relativeTo = p.relativeTo and p.relativeTo:GetName() or "UIParent"
-	p.defined = true
+--	p.defined = true
 	LibStub("AceConfigRegistry-3.0"):NotifyChange("TellMeWhen Options")
 end
 
@@ -735,14 +745,14 @@ function TMW:Group_StopMoving(group)
 	local p = db.profile.Groups[group:GetID()]["Point"]
 	p.point, p.relativeTo, p.relativePoint, p.x, p.y = group:GetPoint(1)
 	p.relativeTo = p.relativeTo and p.relativeTo.GetName and p.relativeTo:GetName() or "UIParent"
-	p.defined = true
+--	p.defined = true
 	LibStub("AceConfigRegistry-3.0"):NotifyChange("TellMeWhen Options")
 end
 
 function TMW:Group_ResetPosition(groupID)
-	db.profile.Groups[groupID].Point.defined = false
-	db.profile.Groups[groupID].Scale = 2.0
-	db.profile.Groups[groupID].Level = 10
+	for k, v in pairs(TMW.Group_Defaults.Point) do
+		db.profile.Groups[groupID].Point[k] = v
+	end
 	LibStub("AceConfigRegistry-3.0"):NotifyChange("TellMeWhen Options")
 	TMW:Group_Update(groupID)
 end
@@ -982,7 +992,7 @@ function ME:OnInitialize()
 end
 
 function ME:UpOrDown(self, delta)
-	local groupID, iconID = TMW.CI.g, TMW.CI.i
+	local groupID, iconID = CI.g, CI.i
 	local settings = db.profile.Groups[groupID].Icons[iconID].Icons
 	local ID = self:GetParent():GetID()
 	local curdata, destinationdata
@@ -994,7 +1004,7 @@ function ME:UpOrDown(self, delta)
 end
 
 function ME:Insert(where)
-	local groupID, iconID = TMW.CI.g, TMW.CI.i
+	local groupID, iconID = CI.g, CI.i
 	db.profile.Groups[groupID].Icons[iconID].Icons = db.profile.Groups[groupID].Icons[iconID].Icons or {}
 	if not db.profile.Groups[groupID].Icons[iconID].Icons[1] then
 		db.profile.Groups[groupID].Icons[iconID].Icons[1] = TMW.Icons[1]
@@ -1006,12 +1016,12 @@ function ME:Insert(where)
 end
 
 function ME:Delete(self)
-	tremove(db.profile.Groups[TMW.CI.g].Icons[TMW.CI.i].Icons, self:GetParent():GetID())
+	tremove(db.profile.Groups[CI.g].Icons[CI.i].Icons, self:GetParent():GetID())
 	ME:Update()
 end
 
 function ME:Update()
-	local groupID, iconID = TMW.CI.g, TMW.CI.i
+	local groupID, iconID = CI.g, CI.i
 	db.profile.Groups[groupID].Icons[iconID].Icons = db.profile.Groups[groupID].Icons[iconID].Icons or {}
 	local settings = db.profile.Groups[groupID].Icons[iconID].Icons
 	local i=1
@@ -1061,7 +1071,7 @@ function ME:IconMenu()
 		for k, v in pairs(TMW.Icons) do
 			local g, i = strmatch(v, "TellMeWhen_Group(%d+)_Icon(%d+)")
 			g, i = tonumber(g), tonumber(i)
-			if UIDROPDOWNMENU_MENU_VALUE == g and TMW.CI.ic and v ~= TMW.CI.ic:GetName() then
+			if UIDROPDOWNMENU_MENU_VALUE == g and CI.ic and v ~= CI.ic:GetName() then
 				local info = UIDropDownMenu_CreateInfo()
 				info.func = ME.IconMenuOnClick
 				local text, textshort = TMW:GetIconMenuText(g, i)
@@ -1079,7 +1089,7 @@ function ME:IconMenu()
 		wipe(addedGroups)
 		for k, v in pairs(TMW.Icons) do
 			local g = tonumber(strmatch(v, "TellMeWhen_Group(%d+)"))
-			if not addedGroups[g] and v ~= TMW.CI.ic:GetName() then
+			if not addedGroups[g] and v ~= CI.ic:GetName() then
 				local info = UIDropDownMenu_CreateInfo()
 				info.text = TMW:GetGroupName(db.profile.Groups[g].Name, g, 1)
 				info.hasArrow = true
@@ -1094,7 +1104,7 @@ function ME:IconMenu()
 end
 
 function ME:IconMenuOnClick(frame)
-	db.profile.Groups[TMW.CI.g].Icons[TMW.CI.i].Icons[frame:GetParent():GetID()] = self.value
+	db.profile.Groups[CI.g].Icons[CI.i].Icons[frame:GetParent():GetID()] = self.value
 	UIDropDownMenu_SetSelectedValue(frame, self.value)
 	ME:Update()
 	CloseDropDownMenus()
@@ -1265,11 +1275,11 @@ function IE:TabClick(self)
 		end
 	end
 	if self:GetID() == 2 then
-		CNDT.settings = db.profile.Groups[TMW.CI.g].Icons[TMW.CI.i].Conditions
+		CNDT.settings = db.profile.Groups[CI.g].Icons[CI.i].Conditions
 		CNDT.type = "icon"
 		CNDT:Load()
 	elseif self:GetID() == 5 then
-		CNDT.settings = db.profile.Groups[TMW.CI.g].Conditions
+		CNDT.settings = db.profile.Groups[CI.g].Conditions
 		CNDT.type = "group"
 		CNDT:Load()
 	end
@@ -1278,7 +1288,7 @@ function IE:TabClick(self)
 end
 
 function IE:SetupRadios()
-	local t = TMW.CI.t
+	local t = CI.t
 
 	if set1[t] and IE.Data[set1[t]] then
 		for k, frame in pairs(IE.Main.TypeChecks) do
@@ -1342,13 +1352,13 @@ function IE:SetupRadios()
 	else
 		IE.Main.WhenChecks:Hide()
 	end
-	
+
 	if t == "buff" then
 		IE.Main.SortChecks:Show()
 	else
 		IE.Main.SortChecks:Hide()
 	end
-	
+
 	local alphainfo
 	if t == "icd" then
 		alphainfo = IE.Data.ICDShowWhen
@@ -1365,7 +1375,7 @@ function IE:SetupRadios()
 end
 
 function IE:ShowHide()
-	local t = TMW.CI.t
+	local t = CI.t
 	if not t then return end
 
 	local ICDDuration = IE.Main.ICDDuration
@@ -1410,7 +1420,7 @@ function IE:ShowHide()
 		IE.Main.OnlyInBags:Hide()
 		IE.Main.ManaCheck:Show()
 	end
-	
+
 	local Name = IE.Main.Name
 	if t == "conditionicon" then
 		Name.label = TMW.L["ICONMENU_CHOOSENAME_CNDTIC"]
@@ -1422,7 +1432,7 @@ function IE:ShowHide()
 		Name.TTtext = TMW.L["CHOOSENAME_DIALOG"]
 	end
 	Name:GetScript("OnTextChanged")(Name)
-	
+
 	if not spb:IsShown() then
 		spb:Show()
 		spb:SetEnabled(nil)
@@ -1463,7 +1473,7 @@ function IE:SaveSettings()
 end
 
 function IE:LoadSettings()
-	local groupID, iconID = TMW.CI.g, TMW.CI.i
+	local groupID, iconID = CI.g, CI.i
 
 	for setting, settingtype in pairs(checks) do
 		if settingtype == 1 then
@@ -1513,20 +1523,20 @@ function IE:LoadSettings()
 end
 
 function IE:Load(isRefresh)
-	if (not TellMeWhen_IconEditor:IsShown() and not isRefresh) or (TellMeWhen_IconEditor.selectedTab == 2 and TMW.CI.t == "meta") then
+	if (not TellMeWhen_IconEditor:IsShown() and not isRefresh) or (TellMeWhen_IconEditor.selectedTab == 2 and CI.t == "meta") then
 		IE:TabClick(IE.MainTab)
 	elseif not TellMeWhen_IconEditor:IsShown() and isRefresh then
 		return
 	end
 
-	local groupID, iconID = TMW.CI.g, TMW.CI.i
+	local groupID, iconID = CI.g, CI.i
 
 	IE.Main.Name:ClearFocus()
 	IE.Main.Unit:ClearFocus()
 	TellMeWhen_IconEditor:SetScale(db.profile.EditorScale)
 
 	UIDropDownMenu_SetSelectedValue(IE.Main.Type, db.profile.Groups[groupID].Icons[iconID].Type)
-	TMW.CI.t = db.profile.Groups[groupID].Icons[iconID].Type
+	CI.t = db.profile.Groups[groupID].Icons[iconID].Type
 	if db.profile.Groups[groupID].Icons[iconID].Type == "" then
 		UIDropDownMenu_SetText(IE.Main.Type, L["ICONMENU_TYPE"])
 	else
@@ -1542,12 +1552,12 @@ function IE:Load(isRefresh)
 	CNDT.settings = eq2 and db.profile.Groups[groupID].Conditions or db.profile.Groups[groupID].Icons[iconID].Conditions
 	CNDT.type = eq2 and "group" or "icon"
 	CNDT:Load()
-	
+
 	CNDT.settings = eq2 and db.profile.Groups[groupID].Icons[iconID].Conditions or db.profile.Groups[groupID].Conditions
 	CNDT.type = eq2 and "icon" or "group"
 	CNDT:Load()
-	
-	
+
+
 	ME:Update()
 	SND:Load()
 
@@ -1557,7 +1567,7 @@ function IE:Load(isRefresh)
 end
 
 function IE:Reset()
-	local groupID, iconID = TMW.CI.g, TMW.CI.i
+	local groupID, iconID = CI.g, CI.i
 	db.profile.Groups[groupID].Icons[iconID] = nil
 	IE:ScheduleIconUpdate(groupID, iconID)
 	IE:Load()
@@ -1669,7 +1679,7 @@ end
 
 function IE:Type_DropDown()
 	if not db then return end
-	local groupID, iconID = TMW.CI.g, TMW.CI.i
+	local groupID, iconID = CI.g, CI.i
 
 	local info = UIDropDownMenu_CreateInfo()
 	info.text = L["ICONMENU_TYPE"]
@@ -1699,8 +1709,8 @@ function IE:Type_DropDown()
 			IE:ScheduleIconUpdate(groupID, iconID)
 			local DD = IE.Main.Type
 			UIDropDownMenu_SetSelectedValue(DD, v.value)
-		
-			TMW.CI.t = v.value
+
+			CI.t = v.value
 			IE:SetupRadios()
 			IE:LoadSettings()
 			IE:ShowHide()
@@ -1711,10 +1721,10 @@ end
 
 function IE:Type_Dropdown_OnClick()
 	db.profile.Groups[groupID].Icons[iconID].Type = ""
-	TMW.CI.ic.texture:SetTexture(nil)
+	CI.ic.texture:SetTexture(nil)
 	IE:ScheduleIconUpdate(groupID, iconID)
 	UIDropDownMenu_SetSelectedValue(IE.Main.Type, "")
-	TMW.CI.t = ""
+	CI.t = ""
 	SUG.redoIfSame = 1
 	SUG.Suggest:Hide()
 	IE:SetupRadios()
@@ -1748,16 +1758,107 @@ function IE:Unit_DropDown_OnClick()
 	local e = IE.Main.Unit
 	e:Insert(";" .. self.value .. ";")
 	e:SetText(TMW:CleanString(e:GetText()))
-	local groupID, iconID = TMW.CI.g, TMW.CI.i
+	local groupID, iconID = CI.g, CI.i
 	db.profile.Groups[groupID].Icons[iconID].Unit = e:GetText()
 	IE:ScheduleIconUpdate(groupID, iconID)
 	CloseDropDownMenus()
 end
 
+function TMW:CleanDefaults(settings, defaults)
+	-- yep, this function is out of place. I dont care.
+	-- make sure and pass in a COPY of the settings, not the original settings
+	for k, v in pairs(settings) do
+		if type(v) == "table" and type(defaults[k]) == "table" and next(v) then
+			settings[k] = TMW:CleanDefaults(v, defaults[k])
+		elseif type(v) ~= "table" then
+			if v == defaults[k] and k ~= "Name" and k ~= "Type" then -- more poor planning
+				settings[k] = nil
+			end
+		elseif not next(v) then
+			settings[k] = nil
+		end
+	end
+	return settings
+end
+
+function IE:ImpExp_DropDown()
+	if not db then return end
+	local e = TMW.IE.Main.ExportBox
+
+
+	local info = UIDropDownMenu_CreateInfo()
+	info.text = L["TOPLAYER"]
+	info.tooltipTitle = L["TOPLAYER"]
+	info.tooltipText = L["TOPLAYER_DESC"]
+	info.tooltipOnButton = true
+	info.notCheckable = true
+	info.func = function()
+		IE:SaveSettings()
+		local player = strtrim(e:GetText())
+		if player and player ~= "" and #player > 1 and #player < 13 then
+			local settings = CopyTable(db.profile.Groups[CI.g].Icons[CI.i])
+			local t = TMW:CleanDefaults(settings, TMW.Icon_Defaults)
+			t = TMW:Serialize(t, TELLMEWHEN_VERSIONNUMBER)
+
+			TMW:SendCommMessage("TMW", t, "WHISPER", player, "BULK", e.callback, e)
+		end
+	end
+	UIDropDownMenu_AddButton(info, UIDROPDOWNMENU_MENU_LEVEL)
+
+	local info = UIDropDownMenu_CreateInfo()
+	info.text = L["TOSTRING"]
+	info.tooltipTitle = L["TOSTRING"]
+	info.tooltipText = L["TOSTRING_DESC"]
+	info.tooltipOnButton = true
+	info.notCheckable = true
+	info.func = function()
+		IE:SaveSettings()
+		local settings = CopyTable(db.profile.Groups[CI.g].Icons[CI.i])
+		local t = TMW:CleanDefaults(settings, TMW.Icon_Defaults)
+		t = TMW:Serialize(t, TELLMEWHEN_VERSIONNUMBER)
+		e:SetText(t)
+		e:HighlightText()
+		e:SetFocus()
+	end
+	UIDropDownMenu_AddButton(info, UIDROPDOWNMENU_MENU_LEVEL)
+
+	local info = UIDropDownMenu_CreateInfo()
+	info.text = L["FROMSTRING"]
+	info.tooltipTitle = L["FROMSTRING"]
+	info.tooltipText = L["FROMSTRING_DESC"]
+	info.tooltipOnButton = true
+	info.notCheckable = true
+	info.func = function()
+		local t = strtrim(e:GetText())
+		if t and t ~= "" then
+			local success, settings, version = TMW:Deserialize(t)
+			if not success then
+				error("There was an error processing the string. Ensure that you copied the entire string from the source.")
+			end
+			e:SetText("")
+			e:ClearFocus()
+			CloseDropDownMenus()
+			local groupID, iconID = CI.g, CI.i
+
+			TMW:CopyTableInPlaceWithMeta(TMW.Icon_Defaults, db.profile.Groups[groupID].Icons[iconID])
+			TMW:CopyTableInPlaceWithMeta(settings, db.profile.Groups[groupID].Icons[iconID])
+			for k, v in ipairs(TMW:GetUpgradeTable()) do
+				if version and version < k and v.icon then
+					v.icon(db.profile.Groups[groupID].Icons[iconID], groupID, iconID)
+				end
+			end
+
+			IE:ScheduleIconUpdate(groupID, iconID)
+			IE:Load(1)
+		end
+	end
+	UIDropDownMenu_AddButton(info, UIDROPDOWNMENU_MENU_LEVEL)
+end
+
 local deserialized = {}
 function IE:Copy_DropDown()
-	local groupID, iconID = TMW.CI.g, TMW.CI.i
-	local icon = TMW.CI.ic
+	local groupID, iconID = CI.g, CI.i
+	local icon = CI.ic
 	if not (icon and icon.Conditions) then return end
 	local info
 
@@ -1774,9 +1875,9 @@ function IE:Copy_DropDown()
 
 		for k, v in pairs(TMW.Recieved) do -- deserialize recieved icons because we dont do it as they are recieved; AceSerializer is only embedded in _Options
 			if type(k) == "string" and v then
-				local success, tbl = TMW:Deserialize(k)
+				local success, tbl, version = TMW:Deserialize(k)
 				if success and type(tbl) == "table" and tbl.Name and tbl.Type then -- checks to make sure that it is actually an icon because of my poor planning
-					deserialized[tbl] = v
+					deserialized[tbl] = version or TELLMEWHEN_VERSIONNUMBER
 					TMW.Recieved[k] = false
 				end
 			end
@@ -1820,21 +1921,28 @@ function IE:Copy_DropDown()
 
 	if UIDROPDOWNMENU_MENU_LEVEL == 2 then
 		if UIDROPDOWNMENU_MENU_VALUE == "Imports" then
-			for tbl, who in pairs(deserialized) do
+			for tbl, version in pairs(deserialized) do
 				local info = UIDropDownMenu_CreateInfo()
-				local text, textshort = TMW:GetIconMenuText(nil, nil, tbl)
+				local text, textshort, tooltipText = TMW:GetIconMenuText(nil, nil, tbl)
 				info.text = textshort
 				info.value = tbl
 				info.tooltipTitle = text
-				info.tooltipText = who
+				info.tooltipText = tooltipText
 				info.tooltipOnButton = true
 				info.notCheckable = true
 				info.icon = TMW:GuessIconTexture(tbl)
 				info.func = function(self)
 					CloseDropDownMenus()
-					local groupID, iconID = TMW.CI.g, TMW.CI.i
+					local groupID, iconID = CI.g, CI.i
+
 					TMW:CopyTableInPlaceWithMeta(TMW.Icon_Defaults, db.profile.Groups[groupID].Icons[iconID])
 					TMW:CopyTableInPlaceWithMeta(self.value, db.profile.Groups[groupID].Icons[iconID])
+					for k, v in ipairs(TMW:GetUpgradeTable()) do
+						if version < k and v.icon then
+							v.icon(db.profile.Groups[groupID].Icons[iconID], groupID, iconID)
+						end
+					end
+
 					IE:ScheduleIconUpdate(groupID, iconID)
 					IE:Load(1)
 					db.profile.HasImported = true
@@ -1921,23 +2029,32 @@ function IE:Copy_DropDown()
 						tex = TMW:GuessIconTexture(d)
 					end
 
+					local text, textshort, tooltipText = TMW:GetIconMenuText(nil, nil, d)
 					info = UIDropDownMenu_CreateInfo()
-					info.text = format(L["fICON"], i)
+					--info.text = format(L["fICON"], i)
+				--	info.tooltipTitle = format(L["GROUPICON"], TMW:GetGroupName(db.profiles[n].Groups[g].Name, g, 1), i)
+					info.text = textshort
+					info.tooltipTitle = format(L["GROUPICON"], TMW:GetGroupName(db.profiles[n].Groups[g].Name, g, 1), i)
+					info.tooltipText = tooltipText
+					info.tooltipOnButton = true
+					info.icon = tex
+					info.notCheckable = true
 					info.func = function()
 						CloseDropDownMenus()
+
 						TMW:CopyTableInPlaceWithMeta(TMW.Icon_Defaults, db.profile.Groups[groupID].Icons[iconID])
 						TMW:CopyTableInPlaceWithMeta(db.profiles[n].Groups[g].Icons[i], db.profile.Groups[groupID].Icons[iconID])
+						local sourceversion = #tostring(gsub(db.profiles[n].Version, "[^%d]", "")) >= 5 and tonumber(db.profiles[n].Version)
+						for k, v in ipairs(TMW:GetUpgradeTable()) do
+							if sourceversion and sourceversion < k and v.icon then
+								v.icon(db.profile.Groups[groupID].Icons[iconID], groupID, iconID)
+							end
+						end
+
 						TMW[groupID][iconID]:SetTexture(nil)
 						TMW:Group_Update(groupID)
 						IE:Load(1)
 					end
-					info.tooltipTitle = format(L["GROUPICON"], TMW:GetGroupName(db.profiles[n].Groups[g].Name, g, 1), i)
-					info.tooltipText = 	((d.Name and d.Name ~= "" and d.Type ~= "meta" and d.Type ~= "wpnenchant") and d.Name .. "\r\n" or "") ..
-									(GetLocalizedSettingString("Type", d.Type) or "") ..
-									((d.Enabled and "") or "\r\n(" .. L["DISABLED"] .. ")")
-					info.tooltipOnButton = true
-					info.icon = tex
-					info.notCheckable = true
 					UIDropDownMenu_AddButton(info, UIDROPDOWNMENU_MENU_LEVEL)
 				end
 			end
@@ -1949,7 +2066,7 @@ local cachednames = {}
 function IE:GetRealNames()
 	-- gets a string to set as a tooltip of all of the spells names in the name box in the IE. Splits up equivalancies and turns IDs into names
 	local text = TMW:CleanString(IE.Main.Name:GetText())
-	if cachednames[TMW.CI.t .. SoI .. text] then return cachednames[TMW.CI.t .. SoI .. text] end
+	if cachednames[CI.t .. SoI .. text] then return cachednames[CI.t .. SoI .. text] end
 
 	--[[for name in pairs(TMW.DS) do -- JUST DONT TO THIS, IT IS CAUSING WAY TOO MANY PROBLEMS JUST TO PUT A SET OF PARENTHESIS AROUND 4 THINGS
 		-- want to buy a case insensitive gsub so i dont have to do stupid stuff like this
@@ -1992,7 +2109,7 @@ function IE:GetRealNames()
 		tiptemp[name] = true
 	end
 	wipe(tiptemp)
-	cachednames[TMW.CI.t .. SoI .. text] = str
+	cachednames[CI.t .. SoI .. text] = str
 	return str
 end
 
@@ -2088,7 +2205,7 @@ function SND:SetSoundsOffset(offs)
 end
 
 function SND:SelectEvent(id)
-	local groupID, iconID = TMW.CI.g, TMW.CI.i
+	local groupID, iconID = CI.g, CI.i
 
 	SND.currentEventID = id
 	SND.currentEventSetting = SND.Events[id].setting
@@ -2172,7 +2289,7 @@ function SND:Load()
 end
 
 function SND:SetTabText()
-	local groupID, iconID = TMW.CI.g, TMW.CI.i
+	local groupID, iconID = CI.g, CI.i
 	local n = 0
 	for i = 1, #SND.Events do
 		local f = SND.Events[i]
@@ -2237,7 +2354,7 @@ function SUG:OnInitialize()
 	for k, v in pairs(TMWOptDB) do
 		SUG[k] = v
 	end
-	
+
 	for k, v in pairs(TMW.AuraCache) do
 		-- import into the options DB and take it out of the main DB
 		SUG.AuraCache[k] = SUG.AuraCache[k] or v
@@ -2262,14 +2379,14 @@ function SUG:OnInitialize()
 	SUG:BuildClassSpellLookup() -- must go before the local versions (ClassSpellLookup) are defined
 
 	SUG:RegisterComm("TMWSUG")
-	
+
 	if IsInGuild() then
 		SUG:SendCommMessage("TMWSUG", SUG:Serialize("RCSL"), "GUILD")
 	end
-	
+
 	EquivIDLookup, ActionCache, pclassSpellCache, ClassSpellLookup, AuraCache, ItemCache, SpellCache, CastCache =
 	 TMW.EquivIDLookup, SUG.ActionCache, SUG.ClassSpellCache[pclass], SUG.ClassSpellLookup, SUG.AuraCache, SUG.ItemCache, SUG.SpellCache, SUG.CastCache
-	 
+
 	SUG:PLAYER_ENTERING_WORLD()
 
 	if TMWOptDB.IncompleteCache or not TMWOptDB.WoWVersion or TMWOptDB.WoWVersion < clientVersion then
@@ -2360,6 +2477,7 @@ function SUG:OnInitialize()
 						TMW.SUG.redoIfSame = 1
 						SUG:NameOnCursor()
 					end
+					collectgarbage()
 					return
 				end
 			end
@@ -2560,7 +2678,7 @@ function SUG:Suggester()
 	local start = GetTime()
 	local atBeginning = SUG.atBeginning
 	local overrideSoI = SUG.overrideSoI
-	local t = TMW.CI.t
+	local t = CI.t
 	if startOver then
 		wipe(preTable)
 		SUG.nextCacheKey = nil
@@ -2626,7 +2744,7 @@ function SUG:SuggestingComplete()
 		SUG.doSort = nil
 	end
 	local SoI = SUG.overrideSoI or SoI
-	
+
 	local i = 1
 	while SUG[i] do
 		local id = preTable[i+offset]
@@ -2786,7 +2904,7 @@ function SUG:NameOnCursor()
 		SUG.offset = 0
 		SUG:StartSuggester()
 	end
-	
+
 end
 
 function SUG:OnClick()
@@ -3060,10 +3178,8 @@ function CNDT:ValidateParenthesis()
 			end
 		end
 	end
-	if unopened then
-		IE.Conditions.Warning:SetText(L["PARENTHESISWARNING2"])
-		CNDT.invalid = 1
-	elseif numopen ~= numclose then
+
+	if numopen ~= numclose then
 		local suffix = ""
 		if numopen > numclose then
 			suffix = " +" .. numopen-numclose .. " '('"
@@ -3072,17 +3188,20 @@ function CNDT:ValidateParenthesis()
 		end
 		IE.Conditions.Warning:SetText(L["PARENTHESISWARNING"] .. suffix)
 		CNDT.invalid = 1
+	elseif unopened then
+		IE.Conditions.Warning:SetText(L["PARENTHESISWARNING2"])
+		CNDT.invalid = 1
 	else
 		IE.Conditions.Warning:SetText(nil)
 		CNDT.invalid = nil
 	end
-	
+
 	local n = 1
 	while CNDT[n] and CNDT[n]:IsShown() do
 		n = n + 1
 	end
 	n = n - 1
-	
+
 	local tab = (CNDT.type == "icon" and IE.IconConditionTab) or IE.GroupConditionTab
 	if n > 0 then
 		tab:SetText((CNDT.invalid and "|TInterface\\DialogFrame\\DialogAlertIcon:20:20:0:2:15:45:20:46|t|cFFFF0000" or "") .. L[CNDT.type == "icon" and "CONDITIONS" or "GROUPCONDITIONS"] .. " |cFFFF5959(" .. n .. ")")
@@ -3128,14 +3247,14 @@ function CNDT:AddRemoveHandler()
 		n = n + 1
 	end
 	n = n - 1
-	
+
 	if n < 3 then
-		for i = 1, n do 
+		for i = 1, n do
 			CNDT[i].CloseParenthesis:Hide()
 			CNDT[i].OpenParenthesis:Hide()
 		end
 	end
-	
+
 	local tab = (CNDT.type == "icon" and IE.IconConditionTab) or IE.GroupConditionTab
 	if n > 0 then
 		tab:SetText((CNDT.invalid and "|TInterface\\DialogFrame\\DialogAlertIcon:20:20:0:2:15:45:20:46|t|cFFFF0000" or "") .. L[CNDT.type == "icon" and "CONDITIONS" or "GROUPCONDITIONS"] .. " |cFFFF5959(" .. n .. ")")
@@ -3166,7 +3285,7 @@ function CNDT:UpOrDown(ID, delta)
 end
 
 function CNDT:OK()
-	local groupID, iconID = TMW.CI.g, TMW.CI.i
+	local groupID, iconID = CI.g, CI.i
 	if not groupID then return end
 
 	local conditions = CNDT.settings
@@ -3189,7 +3308,7 @@ function CNDT:OK()
 				condition.Runes[rune:GetID()] = rune:GetChecked()
 			end
 		end
-		
+
 		local n = 0
 		if group.OpenParenthesis:IsShown() then
 			for k, frame in pairs(group.OpenParenthesis) do
@@ -3199,7 +3318,7 @@ function CNDT:OK()
 			end
 		end
 		condition.PrtsBefore = n
-		
+
 		n = 0
 		if group.CloseParenthesis:IsShown() then
 			for k, frame in pairs(group.CloseParenthesis) do
@@ -3209,15 +3328,15 @@ function CNDT:OK()
 			end
 		end
 		condition.PrtsAfter = n
-		
-		
+
+
 		i=i+1
 	end
 	while CNDT[i] and not CNDT[i]:IsShown() do
 		conditions[i] = nil
 		i=i+1
 	end
-	
+
 	if CNDT.type == "icon" then
 		IE:ScheduleIconUpdate(groupID, iconID)
 	elseif CNDT.type == "group" then
@@ -3228,7 +3347,7 @@ end
 function CNDT:Load()
 	local conditions = CNDT.settings
 	IE.Conditions.Warning:SetText(nil)
-	
+
 	if conditions and #conditions > 0 then
 		for i = #conditions, TELLMEWHEN_MAXCONDITIONS do
 			CNDT:ClearGroup(CNDT[i])
@@ -3239,7 +3358,7 @@ function CNDT:Load()
 		while #conditions >= i do
 			local group = CNDT[i]
 			local condition = conditions[i]
-			
+
 			CNDT:SetUIDropdownText(group.Type, condition.Type, CNDT.Types)
 			group.Unit:SetText(condition.Unit)
 			group.EditBox:SetText(condition.Name)
@@ -3257,7 +3376,7 @@ function CNDT:Load()
 					rune:SetChecked(condition.Runes[rune:GetID()])
 				end
 			end
-			
+
 			for k, frame in pairs(group.OpenParenthesis) do
 				if type(frame) == "table" then
 					group.OpenParenthesis[k]:SetChecked(condition.PrtsBefore >= k)
@@ -3271,7 +3390,7 @@ function CNDT:Load()
 
 			group.And:SetChecked(condition.AndOr == "AND")
 			group.Or:SetChecked(condition.AndOr == "OR")
-			
+
 			group:Show()
 
 			i=i+1

@@ -201,12 +201,27 @@
 			</OnHide>
 		</Scripts>
 		
-		<NormalTexture name="a" file=""/>
-		<HighlightTexture  name="b" alphaMode="ADD" file="Interface\Buttons\ButtonHilight-Square"/>
-		<PushedTexture  name="c" file="Interface\Buttons\UI-Quickslot-Depress"/>
+		<NormalTexture file=""/>
+		<HighlightTexture alphaMode="ADD" file="Interface\Buttons\ButtonHilight-Square"/>
+		<PushedTexture file="Interface\Buttons\UI-Quickslot-Depress"/>
 	</Button>
 
 	<!-- END TEMPLATES -->
+	
+	<Frame name="TellMeWhen_BlizzOptionsStub" hidden="true">
+		<Scripts>
+			<OnLoad>
+				self.name = TMW.L["ICON_TOOLTIP1"]
+				InterfaceOptions_AddCategory(self)
+			</OnLoad>
+			<OnShow>
+				if not TMW.IE then
+					TMW:LoadOptions()
+				end
+				InterfaceOptionsFrame_OpenToCategory(TMW.AddedToBlizz)
+			</OnShow>
+		</Scripts>
+	</Frame>
 </Ui>
 
 

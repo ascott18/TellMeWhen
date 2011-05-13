@@ -100,7 +100,7 @@ local function WpnEnchant_OnUpdate(icon, time)
 			if EnchantName then
 				local d = WpnEnchDurs[EnchantName]
 				if d < expiration then
-					WpnEnchDurs[EnchantName] = expiration
+					WpnEnchDurs[EnchantName] = ceil(expiration)
 					duration = expiration
 				else
 					duration = d

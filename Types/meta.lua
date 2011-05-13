@@ -11,6 +11,7 @@ local TMW = TMW
 if not TMW then return end
 local L = TMW.L
 local LBF = LibStub("LibButtonFacade", true)
+local LMB = LibMasque and LibMasque("Button")
 
 local db, UPD_INTV
 local _G, strmatch, tonumber, ipairs =
@@ -46,7 +47,7 @@ local function Meta_OnUpdate(icon, time)
 				local alpha = ic.FakeAlpha
 				if alpha > 0 and ic.__shown then
 
-					if LBF and ic ~= icon.__previcon  then -- i dont like the way that ButtonFacade handles this (inefficient), so i'll do it myself
+					if (LBF or LMB) and ic ~= icon.__previcon  then -- i dont like the way that ButtonFacade handles this (inefficient), so i'll do it myself
 						local icnt = ic.__normaltex -- icon.__normaltex = icon.__LBF_Normal or icon:GetNormalTexture() -- set during Icon_Update()
 						local iconnt = icon.__normaltex
 						if icnt and iconnt then

@@ -106,9 +106,8 @@
 			<Layer level="OVERLAY">
 				<FontString name="$parentBackgroundText" parentKey="BackgroundText" justifyH="CENTER" inherits="GameFontHighlightSmall">
 					<Anchors>
-						<Anchor point="CENTER" relativePoint="CENTER">
-							<Offset x="0" y="0"/>
-						</Anchor>
+						<Anchor point="LEFT"/>
+						<Anchor point="RIGHT"/>
 					</Anchors>
 				</FontString>
 			</Layer>
@@ -526,7 +525,7 @@
 					</Anchor>
 				</Anchors>
 				<Frames>
-					<Button name="$parentButton"  motionScriptsWhileDisabled="true" parentKey="Button">
+					<Button name="$parentButton" motionScriptsWhileDisabled="true" parentKey="Button">
 						<Size>
 							<AbsDimension x="24" y="24"/>
 						</Size>
@@ -554,6 +553,7 @@
 				<Scripts>
 					<OnLoad>
 						self.Ins = TellMeWhen_IconEditorConditionsUnitDD
+						self.label = "|cffff0000" .. TMW.L["CONDITIONPANEL_UNIT"] .. "!|r"
 						TMW:TT(self, "CONDITIONPANEL_UNIT", "CONDITIONPANEL_UNIT_DESC")
 						TMW:TT(self.Button, "CONDITIONPANEL_UNIT", "CONDITIONPANEL_UNITDROPDOWN_DESC")
 					</OnLoad>
@@ -2971,18 +2971,35 @@
 						</Scripts>
 					</Slider>
 					
-
+					<Button name="$parentReset" parentKey="ResetButton" inherits="GameMenuButtonTemplate" text="RESET">
+						<Size>
+							<AbsDimension x="100" y="17" />
+						</Size>
+						<Anchors>
+							<Anchor point="BOTTOMLEFT">
+								<Offset x="15" y="15" />
+							</Anchor>
+						</Anchors>
+						<Scripts>
+							<OnLoad> self:SetFrameLevel(self:GetFrameLevel()+2)</OnLoad>
+							<OnClick>TMW.IE:Reset()</OnClick>
+						</Scripts>
+						<NormalFont style="GameFontNormal"/>
+						<HighlightFont style="GameFontHighlight"/>
+						<DisabledFont style="GameFontDisable"/>
+					</Button>
+				
 					<Frame name="$parentCopy" inherits="UIDropDownMenuTemplate" parentKey="Copy">
 						<Anchors>
-							<Anchor point="BOTTOMLEFT" relativeTo="$parent" relativePoint="BOTTOMLEFT">
-								<Offset x="153" y="5" />
+							<Anchor point="LEFT" relativeTo="$parentReset" relativePoint="RIGHT">
+								<Offset x="-15" y="-2" />
 							</Anchor>
 						</Anchors>
 						<Scripts>
 							<OnLoad>
 								UIDropDownMenu_SetText(self, TMW.L["IMPORTCOPY"])
 								UIDropDownMenu_JustifyText(self, "LEFT")
-								UIDropDownMenu_SetWidth(self, 115)
+								UIDropDownMenu_SetWidth(self, 90)
 								_G[self:GetName() .. "Button"]:SetScript("PreClick", function()
 									UIDropDownMenu_Initialize(self, TMW.IE.Copy_DropDown, "DROPDOWN")
 									_G[self:GetName() .. "Button"]:SetScript("PreClick", nil)
@@ -2990,60 +3007,62 @@
 							</OnLoad>
 						</Scripts>
 					</Frame>
-					<Editbox name="$parentExportName" inherits="TellMeWhen_InputBoxTemplate" letters="12" parentKey="ExportName">
+					<Editbox name="$parentExportBox" inherits="TellMeWhen_InputBoxTemplate" parentKey="ExportBox">
 						<Size>
-							<AbsDimension x="115" y="14" />
+							<AbsDimension x="250" y="14" />
 						</Size>
 						<Anchors>
 							<Anchor point="LEFT" relativeTo="$parentCopy" relativePoint="RIGHT">
-								<Offset x="-5" y="2" />
+								<Offset x="-8" y="3" />
 							</Anchor>
 						</Anchors>
-						<Scripts>
-							<OnLoad>
-								self.label = TMW.L["RECIPIENT"]
-							</OnLoad>
-							<OnEditFocusLost>
-								EditBox_ClearHighlight(self)
-								self:SetText(TMW:CleanString(self:GetText()))
-							</OnEditFocusLost>
-							<OnEnterPressed>
-								self:ClearFocus()
-								self.Button:GetScript("OnClick")(self.Button)
-							</OnEnterPressed>
-						</Scripts>
 						<Frames>
-							<Button name="$parentButton" parentKey="Button" inherits="UIPanelButtonTemplate" text="OKAY">
-								<Size>
-									<AbsDimension x="60" y="20" />
-								</Size>
+							<Frame name="$parentDD" inherits="UIDropDownMenuTemplate" parentKey="DD">
 								<Anchors>
 									<Anchor point="LEFT" relativeTo="$parent" relativePoint="RIGHT">
-										<Offset x="0" y="0" />
+										<Offset>
+											<AbsDimension x="-15" y="-4" />
+										</Offset>
 									</Anchor>
 								</Anchors>
 								<Scripts>
 									<OnLoad>
-										self:SetText(TMW.L["EXPORT"])
-										self:SetFrameLevel(self:GetParent():GetFrameLevel()+4)
-
-										function self:callback(soFar, total)
-											if soFar == total then
-												TMW:Print(TMW.L["SENDSUCCESSFUL"])
-											end
-										end
+										_G[self:GetName() .. "Left"]:Hide()
+										_G[self:GetName() .. "Middle"]:Hide()
+										_G[self:GetName() .. "Right"]:Hide()
+										_G[self:GetName() .. "Text"]:Hide()
+										UIDropDownMenu_SetWidth(self, 1)
+										_G[self:GetName() .. "Button"]:SetScript("PreClick", function()
+											UIDropDownMenu_Initialize(self, TMW.IE.ImpExp_DropDown, "DROPDOWN")
+											_G[self:GetName() .. "Button"]:SetScript("PreClick", nil)
+										end)
 									</OnLoad>
-									<OnClick>
-										TMW.IE:SaveSettings()
-										local t = self:GetParent():GetText()
-										if t and t ~= "" then
-											TMW:SendCommMessage("TMW", TMW:Serialize(TMW.db.profile.Groups[TMW.CI.g].Icons[TMW.CI.i]), "WHISPER", t, "BULK", self.callback, self)
-										end
-									</OnClick>
 								</Scripts>
-							</Button>
+							</Frame>
 						</Frames>
+						<Scripts>
+							<OnLoad>
+								self.label = TMW.L["EXPORT"]
+								TMW:TT(self, "EXPORT", "EXPORT_DESC")
+								
+								function self:callback(soFar, total)
+									if soFar == total then
+										TMW:Print(TMW.L["SENDSUCCESSFUL"])
+									end
+								end
+								self:SetScript("OnEnterPressed", function()
+									self:ClearFocus()
+									ToggleDropDownMenu(1, nil, self.DD)
+								end)
+							</OnLoad>
+							<OnEditFocusLost>
+								EditBox_ClearHighlight(self)
+								self:SetText(TMW:CleanString(self:GetText()))
+								self:GetScript("OnTextChanged")(self)
+							</OnEditFocusLost>
+						</Scripts>
 					</Editbox>
+					
 					<CheckButton name="$parentEnabled" inherits="TellMeWhen_CheckTemplate" parentKey="Enabled">
 						<Anchors>
 							<Anchor point="LEFT" relativeTo="$parentType" relativePoint="RIGHT">
@@ -3212,9 +3231,7 @@
 						</Scripts>
 						<Frames>
 							<Slider name="$parentScrollBar" inherits="MinimalScrollBarTemplate" parentKey="ScrollBar">
-								<Size>
-									<AbsDimension x="17" y="0"/>
-								</Size>
+								<Size x="17" y="0"/>
 								<Anchors>
 									<Anchor point="TOPRIGHT" relativeTo="TellMeWhen_IconEditorConditions" relativePoint="TOPRIGHT">
 										<Offset>
@@ -3223,7 +3240,7 @@
 									</Anchor>
 									<Anchor point="BOTTOMRIGHT" relativeTo="TellMeWhen_IconEditorConditions" relativePoint="BOTTOMRIGHT">
 										<Offset>
-											<AbsDimension x="-10" y="55"/>
+											<AbsDimension x="-10" y="50"/>
 										</Offset>
 									</Anchor>
 								</Anchors>
@@ -3235,7 +3252,7 @@
 					<OnLoad>
 						self:RegisterForDrag("LeftButton")
 						self:Hide()
-						self.Warning:SetPoint("BOTTOMLEFT", self, 170, 15)
+						self.Warning:SetPoint("BOTTOMLEFT", self, 20, 15)
 					</OnLoad>
 					<OnDragStart> TellMeWhen_IconEditor:StartMoving() </OnDragStart>
 					<OnDragStop> TellMeWhen_IconEditor:StopMovingOrSizing() </OnDragStop>
@@ -3245,7 +3262,7 @@
 						<FontString name="$parentWarning" parentKey="Warning" inherits="GameFontNormalLeftRed" justifyH="RIGHT">
 							<Anchors>
 								<Anchor point="BOTTOMLEFT" >
-									<Offset x="168" y="17" />
+									<Offset x="20" y="17" />
 								</Anchor>
 							</Anchors>
 						</FontString>
@@ -3521,7 +3538,7 @@
 						<FontString name="$parentWarning" parentKey="Warning" inherits="GameFontNormalLeftRed" justifyH="RIGHT">
 							<Anchors>
 								<Anchor point="BOTTOMLEFT" >
-									<Offset x="168" y="17" />
+									<Offset x="20" y="17" />
 								</Anchor>
 							</Anchors>
 						</FontString>
@@ -3682,23 +3699,6 @@
 					<OnLoad>self:SetFrameLevel(self:GetFrameLevel() + 2)</OnLoad>
 					<OnClick>self:GetParent():Hide()</OnClick>
 				</Scripts>
-			</Button>
-			<Button name="$parentReset" inherits="GameMenuButtonTemplate" text="RESET">
-				<Size>
-					<AbsDimension x="150" y="17" />
-				</Size>
-				<Anchors>
-					<Anchor point="BOTTOMLEFT">
-						<Offset x="15" y="15" />
-					</Anchor>
-				</Anchors>
-				<Scripts>
-					<OnLoad> self:SetText(TMW.L["ICONMENU_CLEAR"]) self:SetFrameLevel(self:GetFrameLevel()+2)</OnLoad>
-					<OnClick>TMW.IE:Reset()</OnClick>
-				</Scripts>
-				<NormalFont style="GameFontNormal"/>
-				<HighlightFont style="GameFontHighlight"/>
-				<DisabledFont style="GameFontDisable"/>
 			</Button>
 			<Button name="$parentResize" parentKey="resizeButton">
 				<Size>

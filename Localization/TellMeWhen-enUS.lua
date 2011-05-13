@@ -9,6 +9,8 @@ L["ICON_TOOLTIP2NEW"] = "Right click for icon options. Right click and drag to a
 L["LDB_TOOLTIP1"] = "|cff7fffffLeft-click|r to toggle the group locks"
 L["LDB_TOOLTIP2"] = "|cff7fffffRight-click|r to show the main TMW options"
 L["LOADERROR"] = "TellMeWhen_Options could not be loaded: "
+L["LOADINGOPT"] = "Loading TellMeWhen_Options."
+L["ENABLINGOPT"] = "TellMeWhen_Options is disabled. Enabling..."
 
 L["LOCKED"] = "Locked"
 L["RESIZE"] = "Resize"
@@ -199,8 +201,6 @@ L["ICONMENU_ONLYBAGS_DESC"] = "Check this to make the icon show only if the item
 L["ICONMENU_ONLYSEEN"] = "Only if seen"
 L["ICONMENU_ONLYSEEN_DESC"] = "Check this to make the icon only show a cooldown if the unit has cast it at least once. You should check this if you are checking spells from different classes in one icon."
 
-L["ICONMENU_CLEAR"] = "Reset Entire Icon"
-
 
 -- -------------
 -- UI PANEL
@@ -345,6 +345,7 @@ The runes in the second row are the death rune version of each rune above.]=]
 L["CONDITIONPANEL_PVPFLAG"] = "Unit is PvP Flagged"
 L["CONDITIONPANEL_LEVEL"] = "Unit Level"
 L["CONDITIONPANEL_CLASS"] = "Unit Class"
+L["CONDITIONPANEL_CLASSIFICATION"] = "Unit Classification"
 L["CONDITIONPANEL_NAME"] = "Unit Name"
 L["CONDITIONPANEL_NAMETOOLTIP"] = "Separate multiple names with semicolons (;)"
 L["CONDITIONPANEL_INSTANCETYPE"] = "Instance Type"
@@ -385,6 +386,7 @@ L["SPELLHASTE"] = "Spell Haste"
 L["SPELLCRIT"] = "Spell Crit"
 L["ITEMINBAGS"] = "Item count (includes charges)"
 L["ITEMEQUIPPED"] = "Item is equipped"
+L["ITEMCOOLDOWN"] = "Item cooldown"
 L["MP5"] = "%d MP5"
 L["REACTIVECNDT_DESC"] = "This condition only checks the reactive state of the ability, not the cooldown of it."
 L["BUFFCNDT_DESC"] = "Only the first spell will be checked, all others will be ignored. Spells entered as IDs will not be forced to have their ID match an aura found; only the name will have to match."
@@ -418,14 +420,27 @@ L["CONDITIONS"] = "Conditions"
 L["GROUPCONDITIONS"] = "Group Conditions"
 L["MAIN"] = "Main"
 L["RECEIVED"] = "Received icons"
-L["EXPORT"] = "Export"
-L["RECIPIENT"] = "Recipient player"
+L["EXPORT"] = "Export to string/player OR Import from string"
+L["EXPORT_DESC"] = [[To export to a player, type their name into this editbox and choose "Export to Player" in the dropdown menu at the right.
+
+To export to a string, simply choose "Export to String" in the dropdown menu at the right, and then press CTRL+C to copy it to your clipboard.
+
+To import from a string, press CTRL+V to paste the string into the editbox after you have copied it to your clipboard, and then choose "Import from String" from the dropdown menu at the right.
+]]
+L["UNNAMED"] = "((Unnamed))"
+
+L["TOPLAYER"] = "Export to Player"
+L["TOPLAYER_DESC"] = "Type a player's name into the editbox and choose this option to send it to them. They must be somebody that you can whisper (same faction, server, online), and they must have TellMeWhen v4+"
+L["TOSTRING"] = "Export to String"
+L["TOSTRING_DESC"] = "A string containing all of this icon's settings will be pasted into the editbox.  Press Ctrl+C to copy it, and then paste it whever you want to share it."
+L["FROMSTRING"] = "Import from String"
+L["FROMSTRING_DESC"] = "Press Ctrl+V to paste in an export string that you have copied to your clipboard from another source to be applied to this icon."
+
 L["SENDSUCCESSFUL"] = "Sent successfully"
 L["MESSAGERECIEVE"] = "%s has sent you a TellMeWhen icon! You can import this icon into a slot by using the 'Copy/Import' dropdown in the icon editor."
 L["MESSAGERECIEVE_SHORT"] = "%s has sent you a TellMeWhen icon!"
 L["ALLOWCOMM"] = "Allow icon importing"
-L["NEWVERSION"] = "A new version of TellMeWhen is available (%s)"
-L["INFINITE"] = "Infinite"
+L["NEWVERSION"] = "A new version of TellMeWhen is available: %s"
 
 
 L["CACHING"] = "TellMeWhen is caching and filtering all spells in the game. This only needs to be done once per WoW patch. You can speed up or slow down the process using the slider below."
@@ -544,4 +559,9 @@ L["Disease"] = "Disease"
 L["Poison"] = "Poison"
 L["Enraged"] = "Enrage"
 
+L["normal"] = "Normal"
+L["rare"] = "Rare"
+L["elite"] = "Elite"
+L["rareelite"] = "Rare Elite"
+L["worldboss"] = "World Boss"
 

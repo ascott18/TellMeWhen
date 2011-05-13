@@ -184,7 +184,7 @@ function Type:Setup(icon, groupID, iconID)
 	icon.Units = TMW:GetUnits(icon, icon.Unit)
 
 	icon.Filter = icon.BuffOrDebuff
-	icon.Filterh = ((icon.BuffOrDebuff == "EITHER") and "HARMFUL")
+	icon.Filterh = icon.BuffOrDebuff == "EITHER" and "HARMFUL"
 	if icon.OnlyMine then
 		icon.Filter = icon.Filter .. "|PLAYER"
 		if icon.Filterh then icon.Filterh = icon.Filterh .. "|PLAYER" end

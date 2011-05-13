@@ -91,6 +91,18 @@ local classes = {
 	"WARRIOR",
 }
 
+local classifications = {
+	"normal",
+	"rare",
+	"elite",
+	"rareelite",
+	"worldboss",
+}
+local reverseClassifications = {}
+for k, v in pairs(classifications) do
+	reverseClassifications[v] = k
+end
+
 local totems = {}
 local totemtex = {}
 if pclass == "SHAMAN" then
@@ -325,6 +337,7 @@ Env = {
 	UnitHasVehicleUI = UnitHasVehicleUI,
 	UnitIsPVP = UnitIsPVP,
 	UnitClass = UnitClass,
+	UnitClassification = UnitClassification,
 	GetNumRaidMembers = GetNumRaidMembers,
 	GetNumPartyMembers = GetNumPartyMembers,
 	UnitIsEnemy = UnitIsEnemy,
@@ -356,6 +369,7 @@ Env = {
 	TotemDuration = TotemDuration,
 	ItemCooldownDuration = ItemCooldownDuration,
 
+	reverseClassifications = reverseClassifications,
 	ZoneType = 0,
 	NumPartyMembers = 0,
 	NumRaidMembers = 0,
@@ -948,12 +962,12 @@ CNDT.Types = {
 	},
 	
 	{ -- item cooldown
-		text = L["ICONMENU_COOLDOWN"] .. " - " .. L["ICONMENU_ITEM"],
+		text = L["ITEMCOOLDOWN"],
 		value = "ITEMCD",
 		category = L["ICONFUNCTIONS"],
 		min = 0,
 		max = 600,
-		name = function(editbox) TMW:TT(editbox, L["ICONMENU_COOLDOWN"] .. " - " .. L["ICONMENU_ITEM"], "CNDT_ONLYFIRST", 1, nil, 1) end,
+		name = function(editbox) TMW:TT(editbox, L["ITEMCOOLDOWN"], "CNDT_ONLYFIRST", 1, nil, 1) end,
 		useSUG = "item",
 		unit = PLAYER,
 		texttable = setmetatable({[0] = formatSeconds(0).." ("..L["ICONMENU_USABLE"]..")"}, {__index = function(tbl, k) return formatSeconds(k) end}),
@@ -1339,6 +1353,18 @@ CNDT.Types = {
 			return [[select(2, UnitClass(c.Unit)) == "]] .. (classes[c.Level] or "whoops") .. "\""
 		end,
 	},
+	{ -- classification
+		text = L["CONDITIONPANEL_CLASSIFICATION"],
+		value = "CLASSIFICATION",
+		min = 1,
+		max = #classifications,
+		texttable = setmetatable({}, {__index = function(t, k) return L[classifications[k]] end}),
+		icon = "Interface\\Icons\\achievement_pvp_h_03",
+		tcoords = standardtcoords,
+		funcstr = function(c)
+			return [[(reverseClassifications[UnitClassification(c.Unit)] or 1) c.Operator c.Level]]
+		end,
+	},
 
 	{ -- instance type
 		text = L["CONDITIONPANEL_INSTANCETYPE"],
@@ -1468,6 +1494,9 @@ CNDT.ConditionsByType = {}
 for k, v in pairs(CNDT.Types) do
 	CNDT.ConditionsByType[v.value] = v
 end local ConditionsByType = CNDT.ConditionsByType
+local EnvMeta = {
+	__index = _G
+}
 
 local functionCache = {} CNDT.functionCache = functionCache
 function CNDT:ProcessConditions(icon)
@@ -1487,6 +1516,7 @@ function CNDT:ProcessConditions(icon)
 		end
 		if t == "LUA" then
 			luaUsed = 1
+			setmetatable(Env, EnvMeta)
 		end
 		local name = gsub((c.Name or ""), "; ", ";")
 		name = gsub(name, " ;", ";")
