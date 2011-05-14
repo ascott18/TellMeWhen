@@ -1831,6 +1831,7 @@ function IE:ImpExp_DropDown()
 	info.func = function()
 		local t = strtrim(e:GetText())
 		if t and t ~= "" then
+			t = t:gsub("||", "|")
 			local success, settings, version = TMW:Deserialize(t)
 			if not success then
 				error("There was an error processing the string. Ensure that you copied the entire string from the source.")
@@ -2390,7 +2391,7 @@ function SUG:OnInitialize()
 	SUG:PLAYER_ENTERING_WORLD()
 
 	if TMWOptDB.IncompleteCache or not TMWOptDB.WoWVersion or TMWOptDB.WoWVersion < clientVersion then
-	local didrunhook = false
+	local didrunhook
 	TellMeWhen_IconEditor:HookScript("OnShow", function()
 		if didrunhook then return end
 		TMWOptDB.IncompleteCache = true
@@ -2530,6 +2531,16 @@ function SUG:PLAYER_ENTERING_WORLD()
 
 end
 SUG:RegisterEvent("PLAYER_ENTERING_WORLD")
+
+function SUG:PLAYER_TALENT_UPDATE()
+	for i = 1, offs + numspells do
+		local _, id = GetSpellBookItemInfo(i, "player")
+		if id then
+			pclassSpellCache[id] = 1
+		end
+	end
+end
+SUG:RegisterEvent("PLAYER_TALENT_UPDATE")
 
 local commThrowaway = {}
 function SUG:OnCommReceived(prefix, text, channel, who)
@@ -3366,6 +3377,7 @@ function CNDT:Load()
 			CNDT:SetUIDropdownText(group.Icon, condition.Icon, TMW.Icons)
 
 			local v = CNDT:SetUIDropdownText(group.Operator, condition.Operator, CNDT.Operators)
+			print(v, condition.Operator)
 			TMW:TT(group.Operator, v.tooltipText, nil, 1, nil, 1)
 
 			group.Slider:SetValue(condition.Level or 0)
