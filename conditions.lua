@@ -1372,7 +1372,17 @@ CNDT.Types = {
 		min = 0,
 		max = 8,
 		unit = false,
-		texttable = TMW.ZoneTypes,
+		texttable = {
+			[0] = NONE,
+			[1] = BATTLEGROUND,
+			[2] = ARENA,
+			[3] = DUNGEON_DIFFICULTY1,
+			[4] = DUNGEON_DIFFICULTY2,
+			[5] = RAID_DIFFICULTY1,
+			[6] = RAID_DIFFICULTY2,
+			[7] = RAID_DIFFICULTY3,
+			[8] = RAID_DIFFICULTY4,
+		},
 		icon = "Interface\\Icons\\Spell_Frost_Stun",
 		tcoords = standardtcoords,
 		funcstr = [[ZoneType c.Operator c.Level]],
@@ -1597,6 +1607,7 @@ function CNDT:ProcessConditions(icon)
 		functionCache[funcstr] = func
 		return func
 	elseif (TMW.debug or luaUsed) and err then
+		print(funcstr)
 		error(err)
 	end
 end

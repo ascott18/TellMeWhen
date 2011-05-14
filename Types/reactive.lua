@@ -77,7 +77,7 @@ local function Reactive_OnUpdate(icon, time)
 		icon.UpdateTimer = time
 		local CndtCheck = icon.CndtCheck if CndtCheck and CndtCheck() then return end
 
-		local n, inrange, nomana, start, duration, isGCD, CD, usable = 1
+		local n, inrange, nomana, start, duration, CD, usable = 1
 		local NameArray, NameNameArray, RangeCheck, ManaCheck, CooldownCheck, IgnoreRunes, Usable =
 		 icon.NameArray, icon.NameNameArray, icon.RangeCheck, icon.ManaCheck, icon.CooldownCheck, icon.IgnoreRunes, icon.Usable
 
@@ -94,14 +94,13 @@ local function Reactive_OnUpdate(icon, time)
 				if not ManaCheck then
 					nomana = nil
 				end
-				isGCD = OnGCD(duration)
 				if CooldownCheck then
 					if IgnoreRunes then
 						if start == GetSpellCooldown(45477) or start == GetSpellCooldown(45462) or start == GetSpellCooldown(45902) then
 							start, duration = 0, 0
 						end
 					end
-					CD = not (duration == 0 or isGCD)
+					CD = not (duration == 0 or OnGCD(duration))
 				end
 				usable = Usable or usable
 				if usable and not CD and not nomana and inrange == 1 then --usable
@@ -127,7 +126,6 @@ local function Reactive_OnUpdate(icon, time)
 			if icon.ManaCheck then
 				_, nomana = IsUsableSpell(icon.NameFirst)
 			end
-			isGCD = OnGCD(duration)
 		end
 		if duration then
 

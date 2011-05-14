@@ -24,7 +24,6 @@ TMW.Warn = setmetatable({}, {__call = function(tbl, text)
 	end
 end})
 TMW.Icons = {}
-TMW.Recieved = {}
 TMW.OrderedTypes = {}
 
 local db
@@ -38,7 +37,7 @@ local LSM = LibStub("LibSharedMedia-3.0")
 
 TELLMEWHEN_VERSION = "4.1.4"
 TELLMEWHEN_VERSION_MINOR = ""
-TELLMEWHEN_VERSIONNUMBER = 41406 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
+TELLMEWHEN_VERSIONNUMBER = 41408 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
 TELLMEWHEN_MAXGROUPS = 1 	--this is a default, used by SetTheory (addon), so dont rename
 TELLMEWHEN_MAXROWS = 20
 local UPD_INTV = 0.06	--this is a default, local because i use it in onupdate functions
@@ -221,17 +220,6 @@ TMW.RelevantSettings = {
 		Type = true,
 		Conditions = true,
 	},
-}
-
-TMW.DeletedIconSettings = {
-	OORColor = true,
-	OOMColor = true,
-	Color = true,
-	ColorOverride = true,
-	UnColor = true,
-	DurationAndCD = true,
-	Shapeshift = true, -- i used this one during some initial testing for shapeshifts
-	UnitReact = true,
 }
 
 TMW.Defaults = {
@@ -469,23 +457,10 @@ TMW.BE = {
 		Enraged = "24689;18499;29131;59465;39575;77238;52262;12292;54508;23257;66092;57733;58942;40076;8599;15061;15716;18501;19451;19812;22428;23128;23342;25503;26041;26051;28371;30485;31540;31915;32714;33958;34670;37605;37648;37975;38046;38166;38664;39031;41254;41447;42705;42745;43139;47399;48138;48142;48193;50420;51513;52470;54427;55285;56646;59697;59707;59828;60075;61369;63227;68541;70371;72143;72146;72147;72148;75998;76100;76862;78722;78943;80084;80467;86736;95436;95459;5229;12880;57514;57518;14201;57516;57519;14202;57520;51170;4146;76816;90872;82033;48702;52537;49029;67233;54781;56729;53361;79420;66759;67657;67658;67659;40601;60177;43292;90045;92946;52071;82759;60430;81772;48391;80158;54475;56769;63147;62071;52610;41364;81021;81022;81016;81017;34392;55462;50636;72203;49016;69052;43664;59694;91668;52461;54356;76691;81706;52309;29340;76487",
 	},
 }
-
-TMW.EquivIDLookup = {}
-TMW.NamesEquivLookup = {}
 TMW.OldBE = CopyTable(TMW.BE)
 for category, b in pairs(TMW.OldBE) do
 	for equiv, str in pairs(b) do
-
-		-- create the lookup tables first, so that we can have the first ID even if it will be turned into a name
-		local first = strsplit(";", str)
-		first = strtrim(first, "; _")
-
-		TMW.EquivIDLookup[equiv] = first -- this is used to display them in the list (tooltip, name, id display)
-		TMW.OldBE[category][equiv] = gsub(str, "_", "") -- this is used to put icons into tooltips
-		TMW.NamesEquivLookup[equiv] = TMW.OldBE[category][equiv]
-
 		-- turn all IDs prefixed with "_" into their localized name. Dont do this on every single one, but do use it for spells that do not have any other spells with the same name but different effects.
-
 		while strfind(str, "_") do
 			local id = strmatch(str, "_%d+")
 			if id then
@@ -493,12 +468,8 @@ for category, b in pairs(TMW.OldBE) do
 				str = gsub(str, id, name)
 			end
 		end
-
 		TMW.BE[category][equiv] = str
 	end
-end TMW.OldBE.unlisted.Enraged = nil
-for dispeltype, icon in pairs(TMW.DS) do
-	TMW.EquivIDLookup[dispeltype] = icon
 end
 
 TMW.GCDSpells = {
@@ -513,18 +484,6 @@ TMW.GCDSpells = {
 	HUNTER=1978, -- serpent sting
 	DEATHKNIGHT=47541, -- death coil
 } local GCDSpell = TMW.GCDSpells[pclass]
-
-TMW.ZoneTypes = {
-	[0] = NONE,
-	[1] = BATTLEGROUND,
-	[2] = ARENA,
-	[3] = DUNGEON_DIFFICULTY1,
-	[4] = DUNGEON_DIFFICULTY2,
-	[5] = RAID_DIFFICULTY1,
-	[6] = RAID_DIFFICULTY2,
-	[7] = RAID_DIFFICULTY3,
-	[8] = RAID_DIFFICULTY4,
-}
 
 TMW.Cooldowns = setmetatable({}, {__index = function(t, k)
 	local n = {}
@@ -590,16 +549,6 @@ end local CSN = TMW.CSN
 -- EXECUTIVE FUNCTIONS, ETC
 -- --------------------------
 
-StaticPopupDialogs["TMW_RESTARTNEEDED"] = {
-	text = "A complete restart of WoW is required to use TellMeWhen "..TELLMEWHEN_VERSION..TELLMEWHEN_VERSION_MINOR..". Would you like to restart WoW now?", --not worth translating imo, most people will never see it by the time it gets translated.
-	button1 = EXIT_GAME,
-	button2 = CANCEL,
-	OnAccept = ForceQuit,
-	OnCancel = function() StaticPopup_Hide("TMW_RESTARTNEEDED") end,
-	timeout = 0,
-	showAlert = true,
-	whileDead = true,
-}
 
 if LBF then
 	local function SkinCallback(arg1, SkinID, Gloss, Backdrop, Group, Button, Colors)
@@ -627,6 +576,16 @@ function TMW:OnInitialize()
 	if not CNDT then
 		-- this also includes upgrading from older than 3.0 (pre-Ace3 DB settings)
 		TMW.Warn("A complete restart of WoW is required to use TellMeWhen "..TELLMEWHEN_VERSION..TELLMEWHEN_VERSION_MINOR..". (conditions.lua not found)")
+		StaticPopupDialogs["TMW_RESTARTNEEDED"] = {
+			text = "A complete restart of WoW is required to use TellMeWhen "..TELLMEWHEN_VERSION..TELLMEWHEN_VERSION_MINOR..". Would you like to restart WoW now?", --not worth translating imo, most people will never see it by the time it gets translated.
+			button1 = EXIT_GAME,
+			button2 = CANCEL,
+			OnAccept = ForceQuit,
+			OnCancel = function() StaticPopup_Hide("TMW_RESTARTNEEDED") end,
+			timeout = 0,
+			showAlert = true,
+			whileDead = true,
+		}
 		StaticPopup_Show("TMW_RESTARTNEEDED")
 	end
 
@@ -735,6 +694,7 @@ function TMW:OnCommReceived(prefix, text, channel, who)
 			TMW:Printf(L["NEWVERSION"], major .. minor)
 		end
 	elseif prefix == "TMW" and channel == "WHISPER" and db.profile.ReceiveComm then
+		TMW.Recieved = TMW.Recieved or {}
 		TMW.Recieved[text] = who or true
 		if who then
 			if db.profile.HasImported then
@@ -997,7 +957,16 @@ function TMW:GetUpgradeTable()
 				end
 			end,
 			icon = function(ics, groupID, iconID)
-				for k in pairs(TMW.DeletedIconSettings) do
+				for k in pairs({
+					OORColor = true,
+					OOMColor = true,
+					Color = true,
+					ColorOverride = true,
+					UnColor = true,
+					DurationAndCD = true,
+					Shapeshift = true, -- i used this one during some initial testing for shapeshifts
+					UnitReact = true,
+				}) do
 					ics[k] = nil
 				end
 
@@ -2037,7 +2006,6 @@ TMW.Types = {
 		HideBars = true,
 	},
 }	TMW.RelevantSettings[""] = {Name = true}
-
 
 function TMW:CreateIcon(group, groupID, iconID)
 	local icon = CreateFrame("Button", "TellMeWhen_Group" .. groupID .. "_Icon" .. iconID, group, "TellMeWhen_IconTemplate", iconID)

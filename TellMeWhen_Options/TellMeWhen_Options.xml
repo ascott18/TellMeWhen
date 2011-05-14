@@ -68,6 +68,7 @@
 		</Scripts>
 	</CheckButton>
 	<EditBox name="TellMeWhen_InputBoxTemplate" enableMouse="true" virtual="true" autoFocus="false">
+		<Size y="15"/>
 		<Layers>
 			<Layer level="BACKGROUND">
 				<Texture name="$parentLeft" urgency="5" file="Interface\Common\Common-Input-Border">
@@ -1507,7 +1508,7 @@
 		</Anchors>
 		<Backdrop bgFile="Interface\DialogFrame\UI-DialogBox-Background-Dark" edgeFile="Interface\DialogFrame\UI-DialogBox-Border" tile="true">
 			<BackgroundInsets>
-				<AbsInset left="11" right="12" top="12" bottom="11" />
+				<AbsInset left="8" right="8" top="8" bottom="8" />
 			</BackgroundInsets>
 			<TileSize>
 				<AbsValue val="32" />
@@ -1517,30 +1518,30 @@
 			</EdgeSize>
 		</Backdrop>
 		<Size>
-			<AbsDimension x="600" y="375" />
+			<AbsDimension x="600" y="380" />
 		</Size>
 		<Frames>
 			<Button name="$parentTab1" parentKey="MainTab" inherits="TellMeWhen_TabTemplate" id="1">
 				<Anchors>
-					<Anchor point="BOTTOMLEFT" x="11" y="-25"/>
+					<Anchor point="BOTTOMLEFT" x="8" y="-25"/>
 				</Anchors>
 				<Scripts> <OnLoad> self:SetText(TMW.L["MAIN"]) </OnLoad> </Scripts>
 			</Button>
 			<Button name="$parentTab2" parentKey="IconConditionTab" inherits="TellMeWhen_TabTemplate" id="2"> <!-- AVOID CHANGING THIS TAB'S ID, OR MAKE SURE TO FIX IT WHERE NEEDED IF YOU DO -->
 				<Anchors>
-				   <Anchor point="LEFT" relativeTo="$parentTab1" relativePoint="RIGHT" x="-15" y="0"/>
+				   <Anchor point="LEFT" relativeTo="$parentTab1" relativePoint="RIGHT" x="-16" y="0"/>
 				</Anchors>
 				<Scripts> <OnLoad> self:SetText(TMW.L["CONDITIONS"]) </OnLoad> </Scripts>
 			</Button>
 			<Button name="$parentTab3" parentKey="SoundTab" inherits="TellMeWhen_TabTemplate" id="3">
 				<Anchors>
-				   <Anchor point="LEFT" relativeTo="$parentTab2" relativePoint="RIGHT" x="-15" y="0"/>
+				   <Anchor point="LEFT" relativeTo="$parentTab2" relativePoint="RIGHT" x="-16" y="0"/>
 				</Anchors>
 				<Scripts> <OnLoad> self:SetText(TMW.L["SOUND_TAB"]) </OnLoad> </Scripts>
 			</Button>
 			<Button name="$parentTab4" parentKey="GroupTab" inherits="TellMeWhen_TabTemplate" id="4">
 				<Anchors>
-					<Anchor point="BOTTOMRIGHT" x="-11" y="-25"/>
+					<Anchor point="BOTTOMRIGHT" x="-8" y="-25"/>
 				</Anchors>
 				<Scripts>
 					<OnLoad> self:SetText(TMW.L["GROUPADDONSETTINGS"]) </OnLoad>
@@ -1553,7 +1554,7 @@
 			</Button>
 			<Button name="$parentTab5" parentKey="GroupConditionTab" inherits="TellMeWhen_TabTemplate" id="5"> <!-- AVOID CHANGING THIS TAB'S ID, OR MAKE SURE TO FIX IT WHERE NEEDED IF YOU DO -->
 				<Anchors>
-				   <Anchor point="RIGHT" relativeTo="$parentTab4" relativePoint="LEFT" x="15" y="0"/>
+				   <Anchor point="RIGHT" relativeTo="$parentTab4" relativePoint="LEFT" x="16" y="0"/>
 				</Anchors>
 				<Scripts> <OnLoad> self:SetText(TMW.L["GROUPCONDITIONS"]) </OnLoad> </Scripts>
 			</Button>
@@ -2929,7 +2930,7 @@
 					<Slider name="$parentAlpha" parentKey="Alpha" inherits="TellMeWhen_AlphaSliderTemplate" valuestep="1">
 						<Anchors>
 							<Anchor point="BOTTOMLEFT" relativeTo="$parent" relativePoint="BOTTOMLEFT">
-								<Offset x="18" y="44" />
+								<Offset x="18" y="47" />
 							</Anchor>
 						</Anchors>
 						<Scripts>
@@ -2977,7 +2978,7 @@
 						</Size>
 						<Anchors>
 							<Anchor point="BOTTOMLEFT">
-								<Offset x="15" y="15" />
+								<Offset x="15" y="13" />
 							</Anchor>
 						</Anchors>
 						<Scripts>
@@ -2992,14 +2993,14 @@
 					<Frame name="$parentCopy" inherits="UIDropDownMenuTemplate" parentKey="Copy">
 						<Anchors>
 							<Anchor point="LEFT" relativeTo="$parentReset" relativePoint="RIGHT">
-								<Offset x="-15" y="-2" />
+								<Offset x="-15" y="0" />
 							</Anchor>
 						</Anchors>
 						<Scripts>
 							<OnLoad>
 								UIDropDownMenu_SetText(self, TMW.L["IMPORTCOPY"])
 								UIDropDownMenu_JustifyText(self, "LEFT")
-								UIDropDownMenu_SetWidth(self, 90)
+								UIDropDownMenu_SetWidth(self, 120)
 								_G[self:GetName() .. "Button"]:SetScript("PreClick", function()
 									UIDropDownMenu_Initialize(self, TMW.IE.Copy_DropDown, "DROPDOWN")
 									_G[self:GetName() .. "Button"]:SetScript("PreClick", nil)
@@ -3008,12 +3009,10 @@
 						</Scripts>
 					</Frame>
 					<Editbox name="$parentExportBox" inherits="TellMeWhen_InputBoxTemplate" parentKey="ExportBox">
-						<Size>
-							<AbsDimension x="250" y="14" />
-						</Size>
+						<Size x="235" y="15"/>
 						<Anchors>
 							<Anchor point="LEFT" relativeTo="$parentCopy" relativePoint="RIGHT">
-								<Offset x="-8" y="3" />
+								<Offset x="-8" y="2" />
 							</Anchor>
 						</Anchors>
 						<Frames>
@@ -3042,7 +3041,7 @@
 						</Frames>
 						<Scripts>
 							<OnLoad>
-								self.label = TMW.L["EXPORT"]
+								self.label = TMW.L["EXPORT_LOLTITLE"]
 								TMW:TT(self, "EXPORT", "EXPORT_DESC")
 								
 								function self:callback(soFar, total)
@@ -3148,7 +3147,7 @@
 						<FontString name="$parentTransparencyHeader" parentKey="TransparencyHeader" inherits="GameFontNormal" justifyH="RIGHT">
 							<Anchors>
 								<Anchor point="BOTTOM" relativeTo="$parentUnAlpha" relativePoint="TOP">
-									<Offset x="0" y="15" />
+									<Offset x="0" y="14" />
 								</Anchor>
 							</Anchors>
 						</FontString>
@@ -3190,7 +3189,7 @@
 							</Anchor>
 							<Anchor point="BOTTOMRIGHT" relativePoint="BOTTOMRIGHT">
 								<Offset>
-									<AbsDimension x="0" y="34"/>
+									<AbsDimension x="0" y="30"/>
 								</Offset>
 							</Anchor>
 						</Anchors>
@@ -3679,7 +3678,7 @@
 				</Size>
 				<Anchors>
 					<Anchor point="BOTTOMRIGHT">
-						<Offset x="-15" y="15" />
+						<Offset x="-15" y="13" />
 					</Anchor>
 				</Anchors>
 				<Scripts>

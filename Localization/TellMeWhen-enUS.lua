@@ -420,7 +420,8 @@ L["CONDITIONS"] = "Conditions"
 L["GROUPCONDITIONS"] = "Group Conditions"
 L["MAIN"] = "Main"
 L["RECEIVED"] = "Received icons"
-L["EXPORT"] = "Export to string/player OR Import from string"
+L["EXPORT"] = "Export to string/player OR import from string"
+L["EXPORT_LOLTITLE"] = "The editbox of sharing..."
 L["EXPORT_DESC"] = [[To export to a player, type their name into this editbox and choose "Export to Player" in the dropdown menu at the right.
 
 To export to a string, simply choose "Export to String" in the dropdown menu at the right, and then press CTRL+C to copy it to your clipboard.

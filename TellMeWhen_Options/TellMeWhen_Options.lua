@@ -1265,6 +1265,23 @@ elseif pclass == "DRUID" then
 		{ text = format(L["MUSHROOM"], 3) },
 	}
 end
+local NamesEquivLookup = {}
+local EquivIDLookup = {}
+for category, b in pairs(TMW.OldBE) do
+	for equiv, str in pairs(b) do
+
+		-- create the lookup tables first, so that we can have the first ID even if it will be turned into a name
+		local first = strsplit(";", str)
+		first = strtrim(first, "; _")
+		EquivIDLookup[equiv] = first -- this is used to display them in the list (tooltip, name, id display)
+		
+		b[equiv] = gsub(str, "_", "") -- this is used to put icons into tooltips
+		NamesEquivLookup[equiv] = b[equiv]
+	end
+end TMW.OldBE.unlisted.Enraged = nil
+for dispeltype, icon in pairs(TMW.DS) do
+	EquivIDLookup[dispeltype] = icon
+end
 
 function IE:TabClick(self)
 	PanelTemplates_Tab_OnClick(self, self:GetParent())
@@ -1577,7 +1594,7 @@ end
 
 function IE:Equiv_GenerateTips(equiv)
 	local r = "" --tconcat doesnt allow me to exclude duplicates unless i make another garbage table, so lets just do this
-	local tbl = TMW:SplitNames(TMW.NamesEquivLookup[equiv])
+	local tbl = TMW:SplitNames(NamesEquivLookup[equiv])
 	for k, v in pairs(tbl) do
 		local name, _, texture = GetSpellInfo(v)
 		if not name then
@@ -1611,7 +1628,7 @@ function IE:Equiv_DropDown()
 				info.tooltipTitle = k
 				local text = IE:Equiv_GenerateTips(k)
 
-				info.icon = GetSpellTexture(TMW.EquivIDLookup[k])
+				info.icon = GetSpellTexture(EquivIDLookup[k])
 				info.tCoordLeft = 0.07
 				info.tCoordRight = 0.93
 				info.tCoordTop = 0.07
@@ -1630,7 +1647,7 @@ function IE:Equiv_DropDown()
 				info.func = IE.Equiv_DropDown_OnClick
 				info.text = L[k]
 
-				local first = strsplit(TMW.EquivIDLookup[k], ";")
+				local first = strsplit(EquivIDLookup[k], ";")
 				info.icon = v
 				info.tCoordLeft = 0.07
 				info.tCoordRight = 0.93
@@ -1874,12 +1891,14 @@ function IE:Copy_DropDown()
 			UIDropDownMenu_AddButton(info, UIDROPDOWNMENU_MENU_LEVEL)
 		end
 
-		for k, v in pairs(TMW.Recieved) do -- deserialize recieved icons because we dont do it as they are recieved; AceSerializer is only embedded in _Options
-			if type(k) == "string" and v then
-				local success, tbl, version = TMW:Deserialize(k)
-				if success and type(tbl) == "table" and tbl.Name and tbl.Type then -- checks to make sure that it is actually an icon because of my poor planning
-					deserialized[tbl] = version or TELLMEWHEN_VERSIONNUMBER
-					TMW.Recieved[k] = false
+		if TMW.Recieved then
+			for k, v in pairs(TMW.Recieved) do -- deserialize recieved icons because we dont do it as they are recieved; AceSerializer is only embedded in _Options
+				if type(k) == "string" and v then
+					local success, tbl, version = TMW:Deserialize(k)
+					if success and type(tbl) == "table" and tbl.Name and tbl.Type then -- checks to make sure that it is actually an icon because of my poor planning
+						deserialized[tbl] = version or TELLMEWHEN_VERSIONNUMBER
+						TMW.Recieved[k] = false
+					end
 				end
 			end
 		end
@@ -2325,9 +2344,9 @@ end
 -- ----------------------
 
 SUG = TMW:NewModule("Suggester", "AceEvent-3.0", "AceComm-3.0", "AceSerializer-3.0") TMW.SUG = SUG
-local inputType, EquivIDLookup
+local inputType
 
-local EquivIDLookup, ActionCache, pclassSpellCache, ClassSpellLookup, AuraCache, ItemCache, SpellCache, CastCache
+local ActionCache, pclassSpellCache, ClassSpellLookup, AuraCache, ItemCache, SpellCache, CastCache
 doUpdateItemCache = true
 doUpdateActionCache = true
 
@@ -2369,14 +2388,7 @@ function SUG:OnInitialize()
 	SUG.Box = IE.Main.Name
 
 	SUG.ClassSpellCache[pclass] = SUG.ClassSpellCache[pclass] or {}
-	local _, _, offs, numspells = GetSpellTabInfo(GetNumSpellTabs())
-	local ClassSpellCache = SUG.ClassSpellCache[pclass]
-	for i = 1, offs + numspells do
-		local _, id = GetSpellBookItemInfo(i, "player")
-		if id then
-			ClassSpellCache[id] = 1
-		end
-	end
+	SUG:PLAYER_TALENT_UPDATE()
 	SUG:BuildClassSpellLookup() -- must go before the local versions (ClassSpellLookup) are defined
 
 	SUG:RegisterComm("TMWSUG")
@@ -2385,8 +2397,8 @@ function SUG:OnInitialize()
 		SUG:SendCommMessage("TMWSUG", SUG:Serialize("RCSL"), "GUILD")
 	end
 
-	EquivIDLookup, ActionCache, pclassSpellCache, ClassSpellLookup, AuraCache, ItemCache, SpellCache, CastCache =
-	 TMW.EquivIDLookup, SUG.ActionCache, SUG.ClassSpellCache[pclass], SUG.ClassSpellLookup, SUG.AuraCache, SUG.ItemCache, SUG.SpellCache, SUG.CastCache
+	ActionCache, pclassSpellCache, ClassSpellLookup, AuraCache, ItemCache, SpellCache, CastCache =
+	SUG.ActionCache, SUG.ClassSpellCache[pclass], SUG.ClassSpellLookup, SUG.AuraCache, SUG.ItemCache, SUG.SpellCache, SUG.CastCache
 
 	SUG:PLAYER_ENTERING_WORLD()
 
@@ -2533,10 +2545,11 @@ end
 SUG:RegisterEvent("PLAYER_ENTERING_WORLD")
 
 function SUG:PLAYER_TALENT_UPDATE()
+	local _, _, offs, numspells = GetSpellTabInfo(GetNumSpellTabs())
 	for i = 1, offs + numspells do
 		local _, id = GetSpellBookItemInfo(i, "player")
 		if id then
-			pclassSpellCache[id] = 1
+			SUG.ClassSpellCache[pclass][id] = 1
 		end
 	end
 end
@@ -2777,10 +2790,10 @@ function SUG:SuggestingComplete()
 				f.Icon:SetTexture(TMW.DS[id])
 				f.Background:SetVertexColor(1, .49, .04, 1) -- druid orange
 
-			elseif TMW.EquivIDLookup[id] then -- if the entry is an equivalacy (buff, cast, or whatever)
+			elseif EquivIDLookup[id] then -- if the entry is an equivalacy (buff, cast, or whatever)
 				--NOTE: dispel types are put in EquivIDLookup too for efficiency in the sorter func, but as long as dispel types are checked first, it wont matter
 				local equiv = id
-				local firstid = TMW.EquivIDLookup[id]
+				local firstid = EquivIDLookup[id]
 
 				f.Name:SetText(equiv)
 				f.ID:SetText(nil)
@@ -3377,9 +3390,9 @@ function CNDT:Load()
 			CNDT:SetUIDropdownText(group.Icon, condition.Icon, TMW.Icons)
 
 			local v = CNDT:SetUIDropdownText(group.Operator, condition.Operator, CNDT.Operators)
-			print(v, condition.Operator)
-			TMW:TT(group.Operator, v.tooltipText, nil, 1, nil, 1)
-
+			if v then
+				TMW:TT(group.Operator, v.tooltipText, nil, 1, nil, 1)
+			end
 			group.Slider:SetValue(condition.Level or 0)
 			CNDT:SetValText(group)
 
