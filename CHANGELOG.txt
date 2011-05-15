@@ -1,4 +1,7 @@
 ===v4.1.4===
+ * Bugfix: TellMeWhen.lua:620: attempt to compare string with number
+
+===v4.1.4===
  * New profiles now default to only one group instead of ten, and new/reset groups now place themselves in the center of the screen.
  * **//IMPORTANT//**: Because of the above change, there is a (very very small) chance that some of your groups moved. I apologize for the inconvenience. If you find that a group has been moved off the screen, type /tmw options, go to that group's config, and click the button to reset the group's position.
  * You can now import and exports icons in string format to other users of TMW, meaning that you can share them outside of the game or to players that you are not able to whisper.
