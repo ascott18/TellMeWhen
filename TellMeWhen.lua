@@ -37,7 +37,9 @@ local LSM = LibStub("LibSharedMedia-3.0")
 
 TELLMEWHEN_VERSION = "4.1.4"
 TELLMEWHEN_VERSION_MINOR = ""
-TELLMEWHEN_VERSIONNUMBER = 414069 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
+TELLMEWHEN_VERSIONNUMBER = 41410 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
+if TELLMEWHEN_VERSIONNUMBER > 50000 then return end -- safety check because i accidentally made the version number 414069 once
+
 TELLMEWHEN_MAXGROUPS = 1 	--this is a default, used by SetTheory (addon), so dont rename
 TELLMEWHEN_MAXROWS = 20
 local UPD_INTV = 0.06	--this is a default, local because i use it in onupdate functions
@@ -593,6 +595,7 @@ function TMW:OnInitialize()
 		TellMeWhenDB = {Version = TELLMEWHEN_VERSIONNUMBER}
 	end
 	TellMeWhenDB.Version = TellMeWhenDB.Version or 0
+	if TellMeWhenDB.Version == 414069 then TellMeWhenDB.Version = 41409 end --well, that was a mighty fine fail
 	-- Begin DB upgrades that need to be done before defaults are added. Upgrades here should always do everything needed to every single profile, and remember to make sure that a table exists before going into it.
 	if TellMeWhenDB.Version < 41402 then
 		if TellMeWhenDB.profiles then 
@@ -604,6 +607,18 @@ function TMW:OnInitialize()
 							g.Point.relativePoint = g.Point.relativePoint or "TOPLEFT"
 						end
 					end
+				end
+			end
+		end
+	end
+	if TellMeWhenDB.Version < 41410 then
+		if TellMeWhenDB.profiles then 
+			for _, p in pairs(TellMeWhenDB.profiles) do
+				if p.Version == 414069 then
+					p.Version = 41409
+				end
+				if p.Version < 41401 and not p.NumGroups then
+					p.NumGroups = 10
 				end
 			end
 		end
@@ -816,21 +831,6 @@ local upgradeTable
 function TMW:GetUpgradeTable()
 	if upgradeTable then return upgradeTable end
 	local t = {
-		[41401] = {
-			priority = 1,
-			global = function()
-				-- needs to be before the rest as well
-				-- i changed the default number of groups from 10 to 1, so those that had 10 groups will need to have their settings scanned to see how many groups they used to have
-				if db.profile.NumGroups == 1 then
-					local n = 0
-					for k, v in pairs(db.profile.Groups) do
-						n = max(n, k)
-					end
-					db.profile.NumGroups = n
-					TELLMEWHEN_MAXGROUPS = n
-				end
-			end,
-		},
 		[12000] = {
 			global = function()
 				db.profile.Spec = nil

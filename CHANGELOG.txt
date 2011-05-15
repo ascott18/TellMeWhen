@@ -588,76 +588,74 @@ v.1.4.3
  * Fixed Swipe for druids.
 
 ===v1.2.4===
-* Various bug fixes
-* Added 'ShowTimer' option for Reactive abilities (thanks to Jabborwok)
+ * Various bug fixes
+ * Added 'ShowTimer' option for Reactive abilities (thanks to Jabborwok)
 
-*Big thanks to Predeter of Proudmoore for:
-**Added support for multiple Auras in the same icon via semicolon ; separated lists.
-**Added Buff equivalencies for groups of spells with similar effects.
-Use the following groups (capitalization matters just like with everything else):
- ***Bleeding
-   ***VulnerableToBleed
-  ***Incapacitated
-   ***StunnedOrIncapacitated
-  ***Stunned
-   ***DontMelee
-   ***ImmunToStun
-  ***ImmuneToMagicCC
-  ***FaerieFires
+ * Big thanks to Predeter of Proudmoore for:
+ ** Added support for multiple Auras in the same icon via semicolon ; separated lists.
+ ** Added Buff equivalencies for groups of spells with similar effects. Use the following groups (capitalization matters just like with everything else):
+ *** Bleeding
+ *** VulnerableToBleed
+ *** Incapacitated
+ *** StunnedOrIncapacitated
+ *** Stunned
+ *** DontMelee
+ *** ImmunToStun
+ *** ImmuneToMagicCC
+ *** FaerieFires
 
 ===v1.2.3===
-    * Initial fix for bug where icons blink off during GCD
+ * Initial fix for bug where icons blink off during GCD
 
 ===v1.2.2===
-    * Updated for 3.3.2
-    * timers on buffs should now reset properly when switching targets or looking at a dead target.
+ * Updated for 3.3.2
+ * timers on buffs should now reset properly when switching targets or looking at a dead target.
 
 ===v1.2.1===
-    * Fixed Buffs not showing properly in patch 3.3
+ * Fixed Buffs not showing properly in patch 3.3
 
 ===v1.2.0===
-    * Added options for targetoffocus and targetofpet
-    * Added "/tmw options" as a shortcut to options menu
-
-	* (Major thanks to Oodyboo for the following changes)
-
-    ** Changed how spec settings are saved
-    ** Editbox for "Choose spell/buff/item" retains previous entered value
-    ** Supports 8 bars instead of the old 4
-    ** Added primary/secondary spec toggles for each bar
-    ** Disabled bars and icons don't process everything
+ * Added options for targetoffocus and targetofpet
+ * Added "/tmw options" as a shortcut to options menu
+ * (Major thanks to Oodyboo for the following changes)
+ ** Changed how spec settings are saved
+ ** Editbox for "Choose spell/buff/item" retains previous entered value
+ ** Supports 8 bars instead of the old 4
+ ** Added primary/secondary spec toggles for each bar
+ ** Disabled bars and icons don't process everything
 
 ===v1.1.6===
-    * Fixed a bug where pets caused an endless stream of errormessages when dismissed/killed
-    * Fixed a bug where Buff/Debuff set to "Show when Absent" was acting as it was set to "Always Visible"
+ * Fixed a bug where pets caused an endless stream of errormessages when dismissed/killed
+ * Fixed a bug where Buff/Debuff set to "Show when Absent" was acting as it was set to "Always Visible"
 
-===v1.1.5 (Updated for 3.2)===
-    * Changed Interface and Version numbers in TOC
-    * Buffs/Debuffs set to Always Visible now indicates if they are missing
-    * Icontextures should update correctly now
+===v1.1.5===
+ * Updated for 3.2
+ * Changed Interface and Version numbers in TOC
+ * Buffs/Debuffs set to Always Visible now indicates if they are missing
+ * Icontextures should update correctly now
 
 ===v1.1.4===
-    * DualSpec Support
+ * DualSpec Support
 
 ===v1.1.3===
-    * Rewrote Buffcheck to use UNIT_AURA instead of COMBAT_LOG_EVENT_UNFILTERED.
-    * Removed a bunch of variables that was created, but not used.
+ * Rewrote Buffcheck to use UNIT_AURA instead of COMBAT_LOG_EVENT_UNFILTERED.
+ * Removed a bunch of variables that was created, but not used.
 
 ===v1.1.2===
-    * Updated for WoW 3.1
-    * Now works with vehicles
-    * Fixed a problem with buff charges not showing as consumed
-    * Icons for reactive abilities will no longer show when the abilities are still on cooldown
-    * Cooldown icons should now be more responsive
+ * Updated for WoW 3.1
+ * Now works with vehicles
+ * Fixed a problem with buff charges not showing as consumed
+ * Icons for reactive abilities will no longer show when the abilities are still on cooldown
+ * Cooldown icons should now be more responsive
 
 ===v1.1.1===
- *   Icons for reactive abilities will no longer show when the abilities are still on cooldown.
+ * Icons for reactive abilities will no longer show when the abilities are still on cooldown.
 
 ===v1.1===
- *   Added cooldown and buff/debuff timers.  Compatible with OmniCC.
+ * Added cooldown and buff/debuff timers.  Compatible with OmniCC.
 
 ===v1.0.1===
- *   Updated for WoW 3.0
+ * Updated for WoW 3.0
 
 ===v1.0===
- *   Hello world!
+ * Hello world!
