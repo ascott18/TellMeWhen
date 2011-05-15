@@ -56,6 +56,9 @@ function Type:Setup(icon, groupID, iconID)
 	else
 		icon:SetTexture(icon.Name)
 		if not icon.texture:GetTexture() then
+			icon:SetTexture("Interface\\Icons\\" .. icon.Name)
+		end
+		if not icon.texture:GetTexture() then
 			icon:SetTexture("Interface\\Icons\\INV_Misc_QuestionMark")
 		end
 	end

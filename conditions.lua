@@ -62,7 +62,7 @@ test = function()
 	local icon = CreateFrame("Button", "TESTICON")
 	Env.TESTICON = icon
 	icon.Conditions = {}
-	for k, v in pairs(CNDT.Types) do
+	for k, v in ipairs(CNDT.Types) do
 		icon.Conditions[k] = CopyTable(TMW.Icon_Defaults.Conditions["**"])
 		icon.Conditions[k].Type = v.value
 	end
@@ -362,6 +362,7 @@ Env = {
 	UnitCast = UnitCast,
 	IsSpellInRange = IsSpellInRange,
 	IsItemInRange = IsItemInRange,
+	GetCurrencyInfo = GetCurrencyInfo,
 	
 	AuraStacks = AuraStacks,
 	AuraDur = AuraDur,
@@ -1203,7 +1204,7 @@ CNDT.Types = {
 
 
 --////////////////////////////////////icon functions
-
+	"CURRENCYPLACEHOLDER",
 	{ -- exists
 		text = L["CONDITIONPANEL_EXISTS"],
 		value = "EXISTS",
@@ -1500,10 +1501,82 @@ CNDT.Types = {
 	},
 }
 
+local currencies = {
+	395,	--Justice Points
+	396,	--Valor Points
+	392,	--Honor Points
+	390,	--Conquest Points
+	391,	--Tol Barad Commendation
+	416,	--Mark of the World Tree
+	241,	--Champion\'s Seal
+	361,	--Illustrious Jewelcrafter\'s Token
+	402,	--Chef\'s Award
+	61,		--Dalaran Jewelcrafter\'s Token
+	81,		--Dalaran Cooking Award
+	384,	--Dwarf Archaeology Fragment
+	398,	--Draenei Archaeology Fragment
+	393,	--Fossil Archaeology Fragment
+	394,	--Night Elf Archaeology Fragment
+	400,	--Nerubian Archaeology Fragment
+	397,	--Orc Archaeology Fragment
+	401,	--Tol\'vir Archaeology Fragment
+	385,	--Troll Archaeology Fragment
+	399,	--Vrykul Archaeology Fragment
+}
+for k, v in ipairs(CNDT.Types) do
+	if v == "CURRENCYPLACEHOLDER" then
+		CNDT.Types[k] = nil
+		for _, id in ipairs(currencies) do
+			tinsert(CNDT.Types, k, {
+				value = "CURRENCY"..id,
+				category = L["CURRENCIES"],
+				min = 0,
+				max = 5000,
+				unit = false,
+				funcstr = [[select(2, GetCurrencyInfo(]]..id..[[)) c.Operator c.Level]],
+				tcoords = standardtcoords,
+				hidden = true,
+			})
+			k = k + 1
+		end
+		break
+	end
+end
+
 CNDT.ConditionsByType = {}
 for k, v in pairs(CNDT.Types) do
 	CNDT.ConditionsByType[v.value] = v
 end local ConditionsByType = CNDT.ConditionsByType
+function CNDT:CURRENCY_DISPLAY_UPDATE()
+	for _, id in pairs(currencies) do
+		local data = CNDT.ConditionsByType["CURRENCY"..id]
+		local name, amount, texture, _, _, totalMax = GetCurrencyInfo(id)
+		if name ~= "" then
+			data.text = name
+			data.icon = "Interface\\Icons\\"..texture
+			data.hidden = false
+			if TMWOptDB then
+				TMWOptDB.Currencies = TMWOptDB.Currencies or {}
+				TMWOptDB.Currencies[id] = name .. "^" .. texture
+			end
+			--[[if totalMax > 0 then -- not using this till blizzard fixes the bug where it shows the honor and conquest caps as 40,000
+				data.max = totalMax/100
+			end]]
+		elseif TMWOptDB and TMWOptDB.Currencies then
+			if TMWOptDB.Currencies[id] then
+				local name, texture = strmatch(TMWOptDB.Currencies[id], "(.*)^(.*)")
+				if name and texture then
+					data.text = name
+					data.icon = "Interface\\Icons\\"..texture
+					data.hidden = false
+				end
+			end
+		end
+	end
+end
+CNDT:RegisterEvent("CURRENCY_DISPLAY_UPDATE")
+CNDT:CURRENCY_DISPLAY_UPDATE()
+
 local EnvMeta = {
 	__index = _G
 }
@@ -1512,6 +1585,7 @@ local functionCache = {} CNDT.functionCache = functionCache
 function CNDT:ProcessConditions(icon)
 	if TMW.debug and test then test() end
 	local Conditions = icon.Conditions
+	Conditions["**"] = nil -- i dont know why these occasionally pop up, but this seems like a good place to get rid of them
 	local funcstr = ""
 	local luaUsed
 	for i = 1, #Conditions do

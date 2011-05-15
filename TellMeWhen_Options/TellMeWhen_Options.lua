@@ -760,28 +760,28 @@ end
 function TMW:Group_OnDelete(groupID)
 	tremove(db.profile.Groups, groupID)
 	local warntext = ""
-	for gID in pairs(db.profile.Groups) do
-		for iID in pairs(db.profile.Groups[gID].Icons) do
-			if db.profile.Groups[gID].Icons[iID].Conditions then
-				for k, v in ipairs(db.profile.Groups[gID].Icons[iID].Conditions) do
+	for gID, gs in pairs(db.profile.Groups) do
+		for iID, ics in pairs(gs.Icons) do
+			if ics.Conditions then
+				for k, v in ipairs(ics.Conditions) do
 					if v.Icon ~= "" and v.Type == "ICON" then
 						local g = tonumber(strmatch(v.Icon, "TellMeWhen_Group(%d+)_Icon"))
 						if g > groupID then
-							db.profile.Groups[gID].Icons[iID].Conditions[k].Icon = gsub(v.Icon, "_Group" .. g, "_Group" .. g-1)
+							ics.Conditions[k].Icon = gsub(v.Icon, "_Group" .. g, "_Group" .. g-1)
 						elseif g == groupID then
-							warntext = warntext .. format(L["GROUPICON"], TMW:GetGroupName(db.profile.Groups[gID].Name, gID, 1), iID) .. ", "
+							warntext = warntext .. format(L["GROUPICON"], TMW:GetGroupName(gs.Name, gID, 1), iID) .. ", "
 						end
 					end
 				end
 			end
-			if db.profile.Groups[gID].Icons[iID].Type == "meta" then
-				for k, v in pairs(db.profile.Groups[gID].Icons[iID].Icons) do
+			if ics.Type == "meta" then
+				for k, v in pairs(ics.Icons) do
 					if v ~= "" then
 						local g =  tonumber(strmatch(v, "TellMeWhen_Group(%d+)_Icon"))
 						if g > groupID then
-							db.profile.Groups[gID].Icons[iID].Icons[k] = gsub(v, "_Group" .. g, "_Group" .. g-1)
+							ics.Icons[k] = gsub(v, "_Group" .. g, "_Group" .. g-1)
 						elseif g == groupID then
-							warntext = warntext .. format(L["GROUPICON"], TMW:GetGroupName(db.profile.Groups[gID].Name, gID, 1), iID) .. ", "
+							warntext = warntext .. format(L["GROUPICON"], TMW:GetGroupName(gs.Name, gID, 1), iID) .. ", "
 						end
 					end
 				end
@@ -1785,8 +1785,8 @@ function TMW:CleanDefaults(settings, defaults)
 	-- yep, this function is out of place. I dont care.
 	-- make sure and pass in a COPY of the settings, not the original settings
 	for k, v in pairs(settings) do
-		if type(v) == "table" and type(defaults[k]) == "table" and next(v) then
-			settings[k] = TMW:CleanDefaults(v, defaults[k])
+		if type(v) == "table" and next(v) then
+			settings[k] = TMW:CleanDefaults(v, defaults["**"] or defaults[k])
 		elseif type(v) ~= "table" then
 			if v == defaults[k] and k ~= "Name" and k ~= "Type" then -- more poor planning
 				settings[k] = nil
@@ -2364,6 +2364,8 @@ SUG:RegisterEvent("ACTIONBAR_SLOT_CHANGED")
 SUG.NumCachePerFrame = 0 -- 0 is actually 1. Yeah, i know, its lame. I'm lazy.
 function SUG:OnInitialize()
 	TMWOptDB = TMWOptDB or {}
+	
+	CNDT:CURRENCY_DISPLAY_UPDATE() -- im in ur SUG, hijackin ur OnInitialize
 
 	TMWOptDB.SpellCache = TMWOptDB.SpellCache or {}
 	TMWOptDB.CastCache = TMWOptDB.CastCache or {}
@@ -2375,12 +2377,14 @@ function SUG:OnInitialize()
 		SUG[k] = v
 	end
 
-	for k, v in pairs(TMW.AuraCache) do
-		-- import into the options DB and take it out of the main DB
-		SUG.AuraCache[k] = SUG.AuraCache[k] or v
-		TMW.AuraCache[k] = nil
+	if TMW.AuraCache ~= SUG.AuraCache then -- desprate attempt to fix the problem where the aura cache randomly decides to reset itself. LATER: YAY, I FIGURED IT OUT. I was calling SUG:OnInitialize() in some testing, which was causing it to delete all of its keys. this check will prevent that from now on.
+		for k, v in pairs(TMW.AuraCache) do
+			-- import into the options DB and take it out of the main DB
+			SUG.AuraCache[k] = SUG.AuraCache[k] or v or SUG.AuraCache[k]
+			TMW.AuraCache[k] = nil
+		end
+		TMW.AuraCache = SUG.AuraCache -- make new inserts go into the optionDB and this table
 	end
-	TMW.AuraCache = SUG.AuraCache -- make new inserts go into the optionDB and this table
 
 
 	SUG.ActionCache = {} -- dont save this, it should be a list of things that are CURRENTLY on THIS CHARACTER'S action bars
@@ -3312,11 +3316,12 @@ function CNDT:OK()
 	local groupID, iconID = CI.g, CI.i
 	if not groupID then return end
 
-	local conditions = CNDT.settings
+	local Conditions = CNDT.settings
+	Conditions["**"] = nil -- i dont know why these occasionally pop up, but this seems like a good place to get rid of them
 	local i = 1
 	while CNDT[i] and CNDT[i]:IsShown() do
 		local group = CNDT[i]
-		local condition = conditions[i]
+		local condition = Conditions[i]
 
 		condition.Type = UIDropDownMenu_GetSelectedValue(group.Type) or "HEALTH"
 		condition.Unit = strtrim(group.Unit:GetText()) or "player"
@@ -3357,7 +3362,7 @@ function CNDT:OK()
 		i=i+1
 	end
 	while CNDT[i] and not CNDT[i]:IsShown() do
-		conditions[i] = nil
+		Conditions[i] = nil
 		i=i+1
 	end
 
@@ -3369,19 +3374,20 @@ function CNDT:OK()
 end
 
 function CNDT:Load()
-	local conditions = CNDT.settings
+	local Conditions = CNDT.settings
 	IE.Conditions.Warning:SetText(nil)
+	Conditions["**"] = nil -- i dont know why these occasionally pop up, but this seems like a good place to get rid of them
 
-	if conditions and #conditions > 0 then
-		for i = #conditions, TELLMEWHEN_MAXCONDITIONS do
+	if Conditions and #Conditions > 0 then
+		for i = #Conditions, TELLMEWHEN_MAXCONDITIONS do
 			CNDT:ClearGroup(CNDT[i])
 		end
-		CNDT:CreateGroups(#conditions+1)
+		CNDT:CreateGroups(#Conditions+1)
 
 		local i = 1
-		while #conditions >= i do
+		while #Conditions >= i do
 			local group = CNDT[i]
-			local condition = conditions[i]
+			local condition = Conditions[i]
 
 			CNDT:SetUIDropdownText(group.Type, condition.Type, CNDT.Types)
 			group.Unit:SetText(condition.Unit)
@@ -3598,7 +3604,6 @@ function CNDT:TypeCheck(group, data)
 	end
 	return showval
 end
-
 
 
 

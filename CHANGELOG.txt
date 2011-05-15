@@ -5,6 +5,7 @@
  * Imported icons will now be upgraded as needed to fully function with your current version of TMW. Icons recieved from newer versions of TMW that your current version may still have an occasional error, so please always ensure that you are upgraded to the latest version of TMW before reporting an error with importing.
  * New/changed conditions:
  ** Unit Classification (Normal, Elite, Rare, Rare-Elite, World Boss)
+ ** Currencies
  ** Lua conditions no longer require you define functions/variables in TMW.CNDT.Env, as the _index metamethod is set to _G if you are using a Lua condition.
  
 ===v4.1.3===
