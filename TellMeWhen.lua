@@ -35,9 +35,9 @@ local LMB = LibMasque and LibMasque("Button")
 local AceDB = LibStub("AceDB-3.0")
 local LSM = LibStub("LibSharedMedia-3.0")
 
-TELLMEWHEN_VERSION = "4.1.4.1"
+TELLMEWHEN_VERSION = "4.1.4.2"
 TELLMEWHEN_VERSION_MINOR = ""
-TELLMEWHEN_VERSIONNUMBER = 41411 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
+TELLMEWHEN_VERSIONNUMBER = 41420 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
 if TELLMEWHEN_VERSIONNUMBER > 50000 then return end -- safety check because i accidentally made the version number 414069 once
 
 TELLMEWHEN_MAXGROUPS = 1 	--this is a default, used by SetTheory (addon), so dont rename
@@ -617,7 +617,12 @@ function TMW:OnInitialize()
 				if p.Version == 414069 then
 					p.Version = 41409
 				end
-				if p.Version and p.Version < 41401 and not p.NumGroups then
+				if type(p.Version) == "string" then
+					local v = gsub(p.Version, "[^%d]", "") -- remove decimals
+					v = v..strrep("0", 5-#v)	-- append zeroes to create a 5 digit number
+					p.Version = tonumber(v)
+				end
+				if type(p.Version) == "number" and p.Version < 41401 and not p.NumGroups then -- numb
 					p.NumGroups = 10
 				end
 			end
