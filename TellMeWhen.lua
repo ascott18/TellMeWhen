@@ -37,7 +37,7 @@ local LSM = LibStub("LibSharedMedia-3.0")
 
 TELLMEWHEN_VERSION = "4.2.0"
 TELLMEWHEN_VERSION_MINOR = ""
-TELLMEWHEN_VERSIONNUMBER = 42001 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
+TELLMEWHEN_VERSIONNUMBER = 42002 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
 if TELLMEWHEN_VERSIONNUMBER > 50000 or TELLMEWHEN_VERSIONNUMBER < 42000 then return end -- safety check because i accidentally made the version number 414069 once
 
 TELLMEWHEN_MAXGROUPS = 1 	--this is a default, used by SetTheory (addon), so dont rename
@@ -673,8 +673,8 @@ function TMW:OnInitialize()
 	TMW.AuraCache = TellMeWhenDB.AuraCache
 	TMW:RegisterEvent("COMBAT_LOG_EVENT_UNFILTERED")
 	TMW:RegisterEvent("PLAYER_ENTERING_WORLD")
-	TMW:RegisterEvent("PLAYER_TALENT_UPDATE")
-	TMW:RegisterEvent("ACTIVE_TALENT_GROUP_CHANGED", "PLAYER_TALENT_UPDATE")
+	TMW:RegisterEvent("PLAYER_TALENT_UPDATE", "ScheduleUpdate")
+	TMW:RegisterEvent("ACTIVE_TALENT_GROUP_CHANGED", "ScheduleUpdate")
 
 	if db.profile.ReceiveComm then
 		TMW:RegisterComm("TMW")
@@ -702,10 +702,11 @@ function TMW:OnProfile()
 	if TMW.CompileOptions then TMW:CompileOptions() end -- redo groups in the options
 end
 
-function TMW:PLAYER_TALENT_UPDATE()
+function TMW:ScheduleUpdate(timetill)
+	timetill = tonumber(timetill) or 1
 	--ghetto bucket
 	TMW:CancelTimer(talenthandler, 1)
-	talenthandler = TMW:ScheduleTimer("Update", 1)
+	talenthandler = TMW:ScheduleTimer("Update", timetill)
 end
 
 function TMW:OnCommReceived(prefix, text, channel, who)
@@ -1569,15 +1570,15 @@ function TMW:Group_Update(groupID)
 		group.CorrectSpec = false
 	end
 
-	if LBF then
+	if LMB then
+		db.profile.Groups[groupID].LBF = nil -- if people get masque then they dont need these settings anymore. If they want to downgrade then they will just have to set things up again, sorry
+	elseif LBF then
 		TMW.DontRun = true
 		local lbfs = db.profile.Groups[groupID]["LBF"]
 		LBF:Group("TellMeWhen", format(L["fGROUP"], groupID))
 		if lbfs.SkinID then
 			LBF:Group("TellMeWhen", format(L["fGROUP"], groupID)):Skin(lbfs.SkinID, lbfs.Gloss, lbfs.Backdrop, lbfs.Colors)
 		end
-	elseif LMB then
-		db.profile.Groups[groupID].LBF = nil -- if people get masque then they dont need these settings anymore. If they want to downgrade then they will just have to set things up again, sorry
 	end
 
 	group:SetFrameLevel(group.Level)
@@ -2081,9 +2082,7 @@ local function Icon_Bars_Update(icon)
 	local cbar = icon.cooldownbar
 	if icon.ShowPBar and icon.NameFirst then
 		local _, _, _, cost, _, powerType = GetSpellInfo(icon.NameFirst)
-		if (not LBF and not LMB) or
-		 (LMB and icon._MSQ_NormalSkin and icon._MSQ_NormalSkin.Texture == "Interface\\Buttons\\UI-Quickslot2") or
-		 (LBF and not LMB and icon.group.LBF and icon.group.LBF.SkinID == "Blizzard") then
+		if (not LBF and not LMB) or not icon.group.SkinID or icon.group.SkinID == "Blizzard" then
 			pbar:SetPoint("BOTTOM", icon.texture, "CENTER", 0, 0.5)
 			pbar:SetPoint("TOPLEFT", icon.texture, "TOPLEFT", blizzEdgeInsets, -blizzEdgeInsets)
 			pbar:SetPoint("TOPRIGHT", icon.texture, "TOPRIGHT", -blizzEdgeInsets, -blizzEdgeInsets)
@@ -2110,7 +2109,7 @@ local function Icon_Bars_Update(icon)
 	end
 	if icon.ShowCBar then
 		cbar.texture:SetTexture(LSM:Fetch("statusbar", db.profile.TextureName))
-		if not LBF and not LMB then
+		if (not LBF and not LMB) or not icon.group.SkinID or icon.group.SkinID == "Blizzard" then
 			cbar:SetPoint("TOP", icon.texture, "CENTER", 0, -0.5)
 			cbar:SetPoint("BOTTOMLEFT", icon.texture, "BOTTOMLEFT", blizzEdgeInsets, blizzEdgeInsets)
 			cbar:SetPoint("BOTTOMRIGHT", icon.texture, "BOTTOMRIGHT", -blizzEdgeInsets, blizzEdgeInsets)
@@ -2138,6 +2137,11 @@ local function IconsSort(a, b)
 	return TMW:GetGlobalIconID(strmatch(a, "TellMeWhen_Group(%d+)_Icon(%d+)")) < TMW:GetGlobalIconID(strmatch(b, "TellMeWhen_Group(%d+)_Icon(%d+)"))
 end
 
+local function LMBSkinHook(self)
+	if self and self.Addon == "TellMeWhen" then
+		TMW:ScheduleUpdate(.2)
+	end
+end local hookedLMBSkin
 function TMW:Icon_Update(icon)
 	if not icon then return end
 
@@ -2227,7 +2231,15 @@ function TMW:Icon_Update(icon)
 	local ct = icon.countText
 	ct:SetFont(LSM:Fetch("font", f.Name), f.Size, f.Outline)
 	if LMB then
-		LMB:Group("TellMeWhen", format(L["fGROUP"], groupID)):AddButton(icon)
+		local g = LMB:Group("TellMeWhen", format(L["fGROUP"], groupID))
+		if not hookedLMBSkin and g.__Skin and g.__Disable then
+			hooksecurefunc(g, "__Skin", LMBSkinHook)
+			hooksecurefunc(g, "__Disable", LMBSkinHook)
+			hookedLMBSkin = 1
+		end
+		g:AddButton(icon)
+		icon.group.SkinID = g.SkinID
+		
 		if f.OverrideLBFPos then
 			ct:ClearAllPoints()
 			ct:SetPoint("BOTTOMRIGHT", icon, "BOTTOMRIGHT", f.x, f.y)
@@ -2239,11 +2251,13 @@ function TMW:Icon_Update(icon)
 	elseif LBF then
 		TMW.DontRun = true -- TMW:Update() is ran in the LBF skin callback, which just causes an infinite loop. This tells it not to
 		local lbfs = db.profile.Groups[groupID].LBF
-		LBF:Group("TellMeWhen", format(L["fGROUP"], groupID)):AddButton(icon)
-		local SkID = lbfs.SkinID or "Blizzard"
+		local g = LBF:Group("TellMeWhen", format(L["fGROUP"], groupID))
+		g:AddButton(icon)
+		
+		icon.group.SkinID = lbfs.SkinID or g.SkinID or "Blizzard"
 		local tbl = LBF:GetSkins()
-		if tbl and SkID and tbl[SkID] then
-			ct:SetFont(LSM:Fetch("font", f.Name), tbl and tbl[SkID].Count.FontSize or f.Size, f.Outline)
+		if tbl and tbl[icon.group.SkinID] then
+			ct:SetFont(LSM:Fetch("font", f.Name), tbl and tbl[icon.group.SkinID].Count.FontSize or f.Size, f.Outline)
 		end
 
 		if f.OverrideLBFPos then
@@ -2261,16 +2275,17 @@ function TMW:Icon_Update(icon)
 		icon.cooldownbar:SetFrameLevel(icon:GetFrameLevel() + 1)
 		icon.powerbar:SetFrameLevel(icon:GetFrameLevel() + 1)
 	end
-	if (not LBF and not LMB) or
-	 (LMB and icon._MSQ_NormalSkin and icon._MSQ_NormalSkin.Texture == "Interface\\Buttons\\UI-Quickslot2") or
-	 (LBF and not LMB and icon.group.LBF and icon.group.LBF.SkinID == "Blizzard") then
-		icon:GetNormalTexture():Hide()
+	
+	icon.__normaltex = icon.__LBF_Normal or icon.__MSQ_NormalTexture or icon:GetNormalTexture()
+	if (not LBF and not LMB) or not icon.group.SkinID or icon.group.SkinID == "Blizzard" then
+		icon.__normaltex:Hide()
+		icon.cooldownbar:SetFrameLevel(icon:GetFrameLevel() + 1)
+		icon.powerbar:SetFrameLevel(icon:GetFrameLevel() + 1)
 	else
-		icon:GetNormalTexture():Show()
+		icon.__normaltex:Show()
 	end
 
 
-	icon.__normaltex = icon.__LBF_Normal or icon._MSQ_NormalTexture --or icon:GetNormalTexture()
 	icon.__previcon = nil
 	icon.__alpha = nil
 	icon.__tex = icon.texture:GetTexture()
