@@ -35,10 +35,10 @@ local LMB = LibMasque and LibMasque("Button")
 local AceDB = LibStub("AceDB-3.0")
 local LSM = LibStub("LibSharedMedia-3.0")
 
-TELLMEWHEN_VERSION = "4.1.4.2"
+TELLMEWHEN_VERSION = "4.2.0"
 TELLMEWHEN_VERSION_MINOR = ""
-TELLMEWHEN_VERSIONNUMBER = 41420 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
-if TELLMEWHEN_VERSIONNUMBER > 50000 then return end -- safety check because i accidentally made the version number 414069 once
+TELLMEWHEN_VERSIONNUMBER = 42001 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
+if TELLMEWHEN_VERSIONNUMBER > 50000 or TELLMEWHEN_VERSIONNUMBER < 42000 then return end -- safety check because i accidentally made the version number 414069 once
 
 TELLMEWHEN_MAXGROUPS = 1 	--this is a default, used by SetTheory (addon), so dont rename
 TELLMEWHEN_MAXROWS = 20
@@ -52,8 +52,8 @@ local GetShapeshiftForm, GetNumShapeshiftForms =
 	  GetShapeshiftForm, GetNumShapeshiftForms
 local UnitPower =
 	  UnitPower
-local GetNumRaidMembers, PlaySoundFile =
-	  GetNumRaidMembers, PlaySoundFile
+local GetNumRaidMembers, PlaySoundFile, SendChatMessage =
+	  GetNumRaidMembers, PlaySoundFile, SendChatMessage
 local tonumber, tostring, type, pairs, ipairs, tinsert, tremove, sort, select, wipe, rawget, tDeleteItem = --tDeleteItem is a blizzard function defined in UIParent.lua
 	  tonumber, tostring, type, pairs, ipairs, tinsert, tremove, sort, select, wipe, rawget, tDeleteItem
 local strfind, strmatch, format, gsub, strsub, strtrim, strsplit, strlower, min, max, ceil, floor =
@@ -220,6 +220,7 @@ TMW.RelevantSettings = {
 	all = {
 		Enabled = true,
 		Type = true,
+		ANN = true,
 		Conditions = true,
 	},
 }
@@ -360,6 +361,10 @@ TMW.Defaults = {
 					SoundOnHide			= "None",
 					SoundOnStart		= "None",
 					SoundOnFinish		= "None",
+					ANNOnShow			= "\001",
+					ANNOnHide			= "\001",
+					ANNOnStart			= "\001",
+					ANNOnFinish			= "\001",
 					Conditions = {
 						["**"] = {
 							AndOr = "AND",
@@ -597,8 +602,9 @@ function TMW:OnInitialize()
 	TellMeWhenDB.Version = TellMeWhenDB.Version or 0
 	if TellMeWhenDB.Version == 414069 then TellMeWhenDB.Version = 41409 end --well, that was a mighty fine fail
 	-- Begin DB upgrades that need to be done before defaults are added. Upgrades here should always do everything needed to every single profile, and remember to make sure that a table exists before going into it.
-	if TellMeWhenDB.Version < 41402 then
-		if TellMeWhenDB.profiles then 
+	
+	if TellMeWhenDB.profiles then 
+		if TellMeWhenDB.Version < 41402 then
 			for _, p in pairs(TellMeWhenDB.profiles) do
 				if p.Groups then
 					for _, g in pairs(p.Groups) do
@@ -610,9 +616,7 @@ function TMW:OnInitialize()
 				end
 			end
 		end
-	end
-	if TellMeWhenDB.Version < 41410 then
-		if TellMeWhenDB.profiles then 
+		if TellMeWhenDB.Version < 41410 then
 			for _, p in pairs(TellMeWhenDB.profiles) do
 				if p.Version == 414069 then
 					p.Version = 41409
@@ -622,7 +626,7 @@ function TMW:OnInitialize()
 					v = v..strrep("0", 5-#v)	-- append zeroes to create a 5 digit number
 					p.Version = tonumber(v)
 				end
-				if type(p.Version) == "number" and p.Version < 41401 and not p.NumGroups then -- numb
+				if type(p.Version) == "number" and p.Version < 41401 and not p.NumGroups then -- 41401 is intended here, i already did a crapper version of this upgrade
 					p.NumGroups = 10
 				end
 			end
@@ -767,6 +771,7 @@ function TMW:Update()
 	time = GetTime() TMW.time = time
 	UpdateTimer = time - 10
 	PlaySoundFile = dummy
+	SendChatMessage = dummy
 
 	Locked = db.profile.Locked
 	CNDT.Env.Locked = Locked
@@ -1341,6 +1346,7 @@ end
 
 function TMW:RestoreSound()
 	PlaySoundFile = _G.PlaySoundFile
+	SendChatMessage = _G.SendChatMessage
 end
 
 function TMW:PLAYER_ENTERING_WORLD()
@@ -1650,14 +1656,22 @@ local function SetAlpha(icon, alpha)
 			if Sound then
 				PlaySoundFile(Sound, SndChan)
 			end
+			local ANN = icon.ANNOnHide
+			if ANN then
+				SendChatMessage(strsplit("\001", ANN))
+			end
 		elseif icon.FakeAlpha == 0 then
 			local Sound = icon.SoundOnShow
 			if Sound then
 				PlaySoundFile(Sound, SndChan)
 			end
+			local ANN = icon.ANNOnShow
+			if ANN then
+				SendChatMessage(strsplit("\001", ANN))
+			end
 		end
 		if icon.FakeHidden then
-			icon:setalpha(0) -- setalpha(lowercase) is the old, raw SetAlpha. Use it to override FakeAlpha, although this really should never happen ourside of here
+			icon:setalpha(0) -- setalpha(lowercase) is the old, raw SetAlpha.
 			icon.__alpha = 0
 		else
 			icon:setalpha(alpha)
@@ -1783,7 +1797,7 @@ local function SetInfo(icon, alpha, color, texture, start, duration, checkGCD, p
 	-- reverse	- true/false to set icon.cooldown:SetReverse(reverse), nil to not change (boolean/nil)
 	-- count	- the stack text to be set on the icon, nil/false to hide (number/nil/false)
 	
-	local played, justShowed
+	local played, annd, justShowed
 	alpha = icon.CndtFailed and icon.ConditionAlpha or alpha
 
 	local d = duration - (time - start)
@@ -1801,11 +1815,21 @@ local function SetInfo(icon, alpha, color, texture, start, duration, checkGCD, p
 				PlaySoundFile(Sound, SndChan)
 				played = true
 			end
+			local ANN = icon.ANNOnHide
+			if ANN then
+				SendChatMessage(strsplit("\001", ANN))
+				annd = true
+			end
 		elseif icon.FakeAlpha == 0 then
 			local Sound = icon.SoundOnShow
 			if Sound then
 				PlaySoundFile(Sound, SndChan)
 				played = true
+			end
+			local ANN = icon.ANNOnShow
+			if ANN then
+				SendChatMessage(strsplit("\001", ANN))
+				annd = true
 			end
 			justShowed = true
 		end
@@ -1836,10 +1860,20 @@ local function SetInfo(icon, alpha, color, texture, start, duration, checkGCD, p
 				if Sound and not justShowed then
 					PlaySoundFile(Sound, SndChan)
 				end
+				local ANN = icon.ANNOnFinish
+				if ANN and not annd then
+					SendChatMessage(strsplit("\001", ANN))
+					annd = true
+				end
 			else
 				local Sound = icon.SoundOnStart
 				if Sound and not played then
 					PlaySoundFile(Sound, SndChan)
+				end
+				local ANN = icon.ANNOnStart
+				if ANN and not annd then
+					SendChatMessage(strsplit("\001", ANN))
+					annd = true
 				end
 			end
 			icon.__realDuration = realDuration
@@ -2010,7 +2044,10 @@ TMW.Types = {
 		Update = function() end,
 		HideBars = true,
 	},
-}	TMW.RelevantSettings[""] = {Name = true}
+}
+TMW.RelevantSettings[""] = {
+	Name = true,
+}
 
 function TMW:CreateIcon(group, groupID, iconID)
 	local icon = CreateFrame("Button", "TellMeWhen_Group" .. groupID .. "_Icon" .. iconID, group, "TellMeWhen_IconTemplate", iconID)
@@ -2111,6 +2148,7 @@ function TMW:Icon_Update(icon)
 		dontreassign = true
 	else
 		PlaySoundFile = dummy
+		SendChatMessage = dummy
 	end
 
 	icon.__previousNameFirst = icon.NameFirst -- used to detect changes in the name that would cause a texture change
@@ -2139,6 +2177,13 @@ function TMW:Icon_Update(icon)
 				else
 					print("Hmmm, it seems that this sound setting managed to make it past all the checks for invalidness (or it is a LSM sound that doesnt exist anymore:", v)
 				end
+			end
+		elseif strsub(k, 1, 3) == "ANN" and type(v) == "string" then
+			local text, channel = strsplit("\001", v)
+			if #text > 0 and #channel > 0 and _G["CHAT_MSG_" .. channel] then
+				-- http://www.youtube.com/watch?v=tfslY_AvhLw
+			else
+				icon[k] = nil
 			end
 		end
 	end
@@ -2251,8 +2296,11 @@ function TMW:Icon_Update(icon)
 		end
 	end
 
-	if icon.FakeHidden and not (icon.SoundOnShow or icon.SoundOnHide or icon.SoundOnStart or icon.SoundOnFinish) then
-		-- dont bother updating an icon that is fake hidden and doesnt have any sounds on its own because metas and icon shown conditions will update it when needed, instead of updating all the time
+	if icon.FakeHidden and
+	not (icon.SoundOnShow or icon.SoundOnHide or icon.SoundOnStart or icon.SoundOnFinish) and
+	not (icon.ANNOnShow or icon.ANNOnHide or icon.ANNOnStart or icon.ANNOnFinish)
+		then
+		-- dont bother updating an icon that is fake hidden and doesnt have any sounds/announces on its own because metas and icon shown conditions will update it when needed, instead of updating all the time
 		-- remove it from the list of scripts to run on update, but dont call SetScript on it because that will remove it and set icon.OnUpdate to nil, which is called by conditions/metas
 		tDeleteItem(IconUpdateFuncs, icon)
 	end
@@ -2559,31 +2607,32 @@ function TMW:GetGlobalIconID(g, i)
 	--for example, 111 could be group1icon11 or group11icon1, whereas 11001 is surely group11icon1 and 1011 is surely group1icon11
 end
 
+local TTShow = function(self)
+	GameTooltip_SetDefaultAnchor(GameTooltip, self)
+	GameTooltip:AddLine(self.__title, HIGHLIGHT_FONT_COLOR.r, HIGHLIGHT_FONT_COLOR.g, HIGHLIGHT_FONT_COLOR.b, 1)
+	GameTooltip:AddLine(self.__text, NORMAL_FONT_COLOR.r, NORMAL_FONT_COLOR.g, NORMAL_FONT_COLOR.b, 1)
+	GameTooltip:Show()
+end
+local TTHide = function(self)
+	GameTooltip:Hide()
+end
 function TMW:TT(f, title, text, actualtitle, actualtext, override)
 	-- setting actualtitle or actualtext true cause it to use exactly what is passed in for title or text as the text in the tooltip
 	-- if these variables arent set, then it will attempt to see if the string is a global variable (e.g. "MAXIMUM")
 	-- if they arent set and it isnt a global, then it must be a TMW localized string, so use that
 	if title then
-		title = (actualtitle and title) or _G[title] or L[title]
+		f.__title = (actualtitle and title) or _G[title] or L[title]
 	end
 	if text then
-		text = (actualtext and text) or _G[text] or L[text]
+		f.__text = (actualtext and text) or _G[text] or L[text]
 	end
-	local show = function(self)
-		GameTooltip_SetDefaultAnchor(GameTooltip, self)
-		GameTooltip:AddLine(title, HIGHLIGHT_FONT_COLOR.r, HIGHLIGHT_FONT_COLOR.g, HIGHLIGHT_FONT_COLOR.b, 1)
-		GameTooltip:AddLine(text, NORMAL_FONT_COLOR.r, NORMAL_FONT_COLOR.g, NORMAL_FONT_COLOR.b, 1)
-		GameTooltip:Show()
-	end
-	local hide = function()
-		GameTooltip:Hide()
-	end
+	
 	if override then -- completely overwrite the old enter and leave scripts if the tooltip can be changed on a frame, rather than a set it and forget it tooltip
-		f:SetScript("OnEnter", show)
-		f:SetScript("OnLeave", hide)
+		f:SetScript("OnEnter", TTShow)
+		f:SetScript("OnLeave", TTHide)
 	else
-		f:HookScript("OnEnter", show)
-		f:HookScript("OnLeave", hide)
+		f:HookScript("OnEnter", TTShow)
+		f:HookScript("OnLeave", TTHide)
 	end
 end
 

@@ -208,12 +208,6 @@ local function ItemCooldown_OnUpdate(icon, time)
 		end
 		if duration then
 
-			--[[local d = duration - (time - start)
-			if (icon.DurationMinEnabled and icon.DurationMin > d) or (icon.DurationMaxEnabled and d > icon.DurationMax) then
-				icon:SetAlpha(0)
-				return
-			end]]
-
 			local alpha, color
 			if icon.Alpha ~= 0 then
 				if inrange ~= 1 then
@@ -256,12 +250,6 @@ local function MultiStateCD_OnUpdate(icon, time)
 		local Slot = icon.Slot
 		local start, duration = GetActionCooldown(Slot)
 		if duration then
-
-			--[[local d = duration - (time - start)
-			if (icon.DurationMinEnabled and icon.DurationMin > d) or (icon.DurationMaxEnabled and d > icon.DurationMax) then
-				icon:SetAlpha(0)
-				return
-			end]]
 
 			local inrange, nomana = 1
 

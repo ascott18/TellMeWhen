@@ -40,7 +40,7 @@ local strfind, strmatch, format, gsub, strsub, strtrim, max =
 	  strfind, strmatch, format, gsub, strsub, strtrim, max
 local _G, GetTime = _G, GetTime
 local tiptemp = {}
-local ME, CNDT, IE, SUG, ID, SND
+local ME, CNDT, IE, SUG, ID, SND, ANN
 local points = {
 	TOPLEFT = L["TOPLEFT"],
 	TOP = L["TOP"],
@@ -163,25 +163,6 @@ end
 -- --------------
 -- MAIN OPTIONS
 -- --------------
---[[
-local coloroption = {
-	name = function(info) return L[info[#info] ] end,
-    desc = function(info) return L[info[#info] .. "_DESC"] end,
-    type = "color",
-	order = function(info) return #info end,
-	set = function(info, r, g, b)
-		local c = db.profile.Groups[tonumber(info[#info - 2])].Color[info[#info] ]
-		c.r = r
-		c.g = g
-		c.b = b
-		c.a = a
-		--TMW:ColorUpdate()
-	end,
-	get = function(info)
-		local c = db.profile.Groups[tonumber(info[#info - 2])].Color[info[#info] ]
-		return c.r, c.g, c.b, c.a
-	end,
-}	]]
 
 local function findid(info)
 	for i = #info, 0, -1 do
@@ -199,91 +180,83 @@ local groupConfigTemplate = {
 	type = "group",
 	name = function(info) local g=findid(info) return TMW:GetGroupName(db.profile.Groups[g].Name, g) end,
 	order = function(info) return findid(info) end,
---		childGroups = "tab",
 	args = {
-	--[[	Main = {
-			type = "group",
+		Name = {
+			name = L["UIPANEL_GROUPNAME"],
+			type = "input",
 			order = 1,
-			name = "MAIN",
-			args = {]]
-				Name = {
-					name = L["UIPANEL_GROUPNAME"],
-					type = "input",
-					order = 1,
-					width = "full",
-					set = function(info, val)
-						local g = findid(info)
-						db.profile.Groups[g].Name = strtrim(val)
-						TMW:Group_Update(g)
-					end,
-				},
-				Enabled = {
-					name = L["UIPANEL_ENABLEGROUP"],
-					desc = L["UIPANEL_TOOLTIP_ENABLEGROUP"],
-					type = "toggle",
-					order = 2,
-				},
-				PrimarySpec = {
-					name = L["UIPANEL_PRIMARYSPEC"],
-					desc = L["UIPANEL_TOOLTIP_PRIMARYSPEC"],
-					type = "toggle",
-					order = 6,
-				},
-				SecondarySpec = {
-					name = L["UIPANEL_SECONDARYSPEC"],
-					desc = L["UIPANEL_TOOLTIP_SECONDARYSPEC"],
-					type = "toggle",
-					order = 7,
-				},
-				Columns = {
-					name = L["UIPANEL_COLUMNS"],
-					desc = L["UIPANEL_TOOLTIP_COLUMNS"],
-					type = "range",
-					order = 20,
-					min = 1,
-					max = TELLMEWHEN_MAXROWS,
-					step = 1,
-					bigStep = 1,
-				},
-				Rows = {
-					name = L["UIPANEL_ROWS"],
-					desc = L["UIPANEL_TOOLTIP_ROWS"],
-					type = "range",
-					order = 21,
-					min = 1,
-					max = TELLMEWHEN_MAXROWS,
-					step = 1,
-					bigStep = 1,
-				},
-				Spacing = {
-					name = L["UIPANEL_ICONSPACING"],
-					desc = L["UIPANEL_ICONSPACING_DESC"],
-					type = "range",
-					order = 22,
-					min = 0,
-					softMax = 20,
-					step = 0.1,
-					bigStep = 1,
-				},
-				CheckOrder = {
-					name = L["CHECKORDER"],
-					desc = L["CHECKORDER_ICONDESC"],
-					type = "select",
-					values = checkorder,
-					style = "dropdown",
-					order = 24,
-				},
-				delete = {
-					name = L["UIPANEL_DELGROUP"],
-					desc = L["UIPANEL_DELGROUP_DESC"],
-					type = "execute",
-					order = 50,
-					func = function(info)
-						TMW:Group_OnDelete(findid(info))
-					end,
-					confirm = true,
-			--[[	},
-			},]]
+			width = "full",
+			set = function(info, val)
+				local g = findid(info)
+				db.profile.Groups[g].Name = strtrim(val)
+				TMW:Group_Update(g)
+			end,
+		},
+		Enabled = {
+			name = L["UIPANEL_ENABLEGROUP"],
+			desc = L["UIPANEL_TOOLTIP_ENABLEGROUP"],
+			type = "toggle",
+			order = 2,
+		},
+		PrimarySpec = {
+			name = L["UIPANEL_PRIMARYSPEC"],
+			desc = L["UIPANEL_TOOLTIP_PRIMARYSPEC"],
+			type = "toggle",
+			order = 6,
+		},
+		SecondarySpec = {
+			name = L["UIPANEL_SECONDARYSPEC"],
+			desc = L["UIPANEL_TOOLTIP_SECONDARYSPEC"],
+			type = "toggle",
+			order = 7,
+		},
+		Columns = {
+			name = L["UIPANEL_COLUMNS"],
+			desc = L["UIPANEL_TOOLTIP_COLUMNS"],
+			type = "range",
+			order = 20,
+			min = 1,
+			max = TELLMEWHEN_MAXROWS,
+			step = 1,
+			bigStep = 1,
+		},
+		Rows = {
+			name = L["UIPANEL_ROWS"],
+			desc = L["UIPANEL_TOOLTIP_ROWS"],
+			type = "range",
+			order = 21,
+			min = 1,
+			max = TELLMEWHEN_MAXROWS,
+			step = 1,
+			bigStep = 1,
+		},
+		Spacing = {
+			name = L["UIPANEL_ICONSPACING"],
+			desc = L["UIPANEL_ICONSPACING_DESC"],
+			type = "range",
+			order = 22,
+			min = 0,
+			softMax = 20,
+			step = 0.1,
+			bigStep = 1,
+		},
+		CheckOrder = {
+			name = L["CHECKORDER"],
+			desc = L["CHECKORDER_ICONDESC"],
+			type = "select",
+			values = checkorder,
+			style = "dropdown",
+			order = 24,
+		},
+		delete = {
+			name = L["UIPANEL_DELGROUP"],
+			desc = L["UIPANEL_DELGROUP_DESC"],
+			type = "execute",
+			order = 50,
+			func = function(info)
+				TMW:Group_OnDelete(findid(info))
+			end,
+			confirm = true,
 		},
 		position = {
 			type = "group",
@@ -294,7 +267,6 @@ local groupConfigTemplate = {
 			set = function(info, val)
 				local g = findid(info)
 				db.profile.Groups[g].Point[info[#info]] = val
-		--		db.profile.Groups[g].Point.defined = true
 				TMW:Group_SetPos(g)
 			end,
 			get = function(info)
@@ -401,7 +373,7 @@ for i = 1, GetNumTalentTabs() do
 end
 
 function TMW:CompileOptions() -- options
-	if not TMW.InitializedOptions then
+	if not TMW.OptionsTable then
 		TMW.OptionsTable = {
 			type = "group",
 			args = {
@@ -673,7 +645,6 @@ function TMW:CompileOptions() -- options
 		}
 		TMW.OptionsTable.args.groups.args.addgroup = TMW.OptionsTable.args.main.args.addgroup
 		TMW.OptionsTable.args.profiles = LibStub("AceDBOptions-3.0"):GetOptionsTable(db)
-		TMW.InitializedOptions = true
 	end
 
 
@@ -789,7 +760,7 @@ function TMW:Group_OnDelete(groupID)
 		end
 	end
 	if warntext ~= "" then
-		TMW:Print(warntext)
+		TMW:Print(strsub(warntext, 1, -3))
 	end
 	db.profile.NumGroups = db.profile.NumGroups - 1
 	for k, v in pairs(TMW.Icons) do
@@ -1176,8 +1147,9 @@ local tabs = {
 	[1] = "Main",
 	[2] = "Conditions",
 	[3] = "Sound",
-	[4] = "Group",
-	[5] = "Conditions",
+	[4] = "Announcements",
+	[5] = "Group",
+	[6] = "Conditions",
 	--[4] = "ImpExp",
 }
 local IsMultiState, SoI
@@ -1291,11 +1263,11 @@ function IE:TabClick(self)
 			IE[frame]:Hide()
 		end
 	end
-	if self:GetID() == 2 then
+	if self:GetID() == TMW.ICCNDTTab then
 		CNDT.settings = db.profile.Groups[CI.g].Icons[CI.i].Conditions
 		CNDT.type = "icon"
 		CNDT:Load()
-	elseif self:GetID() == 5 then
+	elseif self:GetID() == TMW.GRCNDTTab then
 		CNDT.settings = db.profile.Groups[CI.g].Conditions
 		CNDT.type = "group"
 		CNDT:Load()
@@ -1565,7 +1537,7 @@ function IE:Load(isRefresh)
 		end
 	end
 
-	local eq2 = TellMeWhen_IconEditor.selectedTab == 2
+	local eq2 = TellMeWhen_IconEditor.selectedTab == TMW.ICCNDTTab
 	CNDT.settings = eq2 and db.profile.Groups[groupID].Conditions or db.profile.Groups[groupID].Icons[iconID].Conditions
 	CNDT.type = eq2 and "group" or "icon"
 	CNDT:Load()
@@ -1577,6 +1549,7 @@ function IE:Load(isRefresh)
 
 	ME:Update()
 	SND:Load()
+	ANN:Load()
 
 	IE:SetupRadios()
 	IE:LoadSettings()
@@ -1618,10 +1591,26 @@ function IE:Equiv_GenerateTips(equiv)
 	return r
 end
 
+local equivSorted
+local function equivSorter(a, b)
+	if a == "IncreasedSPsix" and b == "IncreasedSPten" then
+		return true
+	elseif b == "IncreasedSPsix" and a == "IncreasedSPten" then
+		return false
+	else
+		return L[a] < L[b]
+	end
+end
 function IE:Equiv_DropDown()
+	equivSorted = equivSorted and wipe(equivSorted) or {}
 	if (UIDROPDOWNMENU_MENU_LEVEL == 2) then
 		if TMW.BE[UIDROPDOWNMENU_MENU_VALUE] then
-			for k, v in pairs(TMW.BE[UIDROPDOWNMENU_MENU_VALUE]) do
+			for k in pairs(TMW.BE[UIDROPDOWNMENU_MENU_VALUE]) do
+				equivSorted[#equivSorted + 1] = k
+			end
+			sort(equivSorted, equivSorter)
+			for _, k in ipairs(equivSorted) do
+				local v = TMW.BE[UIDROPDOWNMENU_MENU_VALUE][k]
 				local info = UIDropDownMenu_CreateInfo()
 				info.func = IE.Equiv_DropDown_OnClick
 				info.text = L[k]
@@ -1642,7 +1631,12 @@ function IE:Equiv_DropDown()
 				UIDropDownMenu_AddButton(info, 2)
 			end
 		elseif UIDROPDOWNMENU_MENU_VALUE == "dispel" then
-			for k, v in pairs(TMW.DS) do
+			for k in pairs(TMW.DS) do
+				equivSorted[#equivSorted + 1] = k
+			end
+			sort(equivSorted, equivSorter)
+			for _, k in ipairs(equivSorted) do
+				local v = TMW.DS[k]
 				local info = UIDropDownMenu_CreateInfo()
 				info.func = IE.Equiv_DropDown_OnClick
 				info.text = L[k]
@@ -1721,27 +1715,19 @@ function IE:Type_DropDown()
 			info.tooltipOnButton = true
 		end
 		info.checked = (info.value == db.profile.Groups[groupID].Icons[iconID].Type)
-		info.func = function()
-			db.profile.Groups[groupID].Icons[iconID].Type = v.value
-			IE:ScheduleIconUpdate(groupID, iconID)
-			local DD = IE.Main.Type
-			UIDropDownMenu_SetSelectedValue(DD, v.value)
-
-			CI.t = v.value
-			IE:SetupRadios()
-			IE:LoadSettings()
-			IE:ShowHide()
-		end
+		info.func = IE.Type_Dropdown_OnClick
+		info.arg1 = v
 		UIDropDownMenu_AddButton(info, UIDROPDOWNMENU_MENU_LEVEL)
 	end
 end
 
-function IE:Type_Dropdown_OnClick()
-	db.profile.Groups[groupID].Icons[iconID].Type = ""
+function IE:Type_Dropdown_OnClick(v)
+	local groupID, iconID = CI.g, CI.i
+	db.profile.Groups[groupID].Icons[iconID].Type = self.value
 	CI.ic.texture:SetTexture(nil)
 	IE:ScheduleIconUpdate(groupID, iconID)
-	UIDropDownMenu_SetSelectedValue(IE.Main.Type, "")
-	CI.t = ""
+	UIDropDownMenu_SetSelectedValue(IE.Main.Type, self.value)
+	CI.t = self.value
 	SUG.redoIfSame = 1
 	SUG.Suggest:Hide()
 	IE:SetupRadios()
@@ -2161,7 +2147,7 @@ end
 SND = TMW:NewModule("Sound") TMW.SND = SND
 SND.LSM = LSM
 SND.List = CopyTable(LSM:List("sound"))
-TMW.SND.EventList = {
+TMW.EventList = {
 	{
 		name = "OnShow",
 		text = L["SOUND_EVENT_ONSHOW"],
@@ -2332,12 +2318,153 @@ function SND:SetTabText()
 	else
 		IE.SoundTab:SetText(L["SOUND_TAB"] .. " (" .. n .. ")")
 	end
-	PanelTemplates_TabResize(IE.SoundTab, 0, nil, nil, 600)
+	PanelTemplates_TabResize(IE.SoundTab, -6)
 end
 
 function SND:OnInitialize()
 	SND.Sounds.ScrollBar:SetValue(0)
 end
+
+
+-- ----------------------
+-- ANNOUNCEMENTS
+-- ----------------------
+
+ANN = TMW:NewModule("Announcements") TMW.ANN = ANN
+ANN.ChannelList = {
+	{
+		text = NONE,
+		channel = "",
+	},
+	{
+		text = CHAT_MSG_SAY,
+		channel = "SAY",
+	},
+	{
+		text = CHAT_MSG_YELL,
+		channel = "YELL",
+	},
+	{
+		text = CHAT_MSG_PARTY,
+		channel = "PARTY",
+	},
+	{
+		text = CHAT_MSG_RAID,
+		channel = "RAID",
+	},
+	{
+		text = CHAT_MSG_RAID_WARNING,
+		channel = "RAID_WARNING",
+	},
+	{
+		text = CHAT_MSG_BATTLEGROUND,
+		channel = "BATTLEGROUND",
+	},
+	{
+		text = CHAT_MSG_GUILD,
+		channel = "GUILD",
+	},
+	{
+		text = CHAT_MSG_OFFICER,
+		channel = "OFFICER",
+	},
+	{
+		text = CHAT_MSG_EMOTE,
+		channel = "EMOTE",
+	},
+}
+
+function ANN:OnInitialize()
+end
+
+function ANN:SelectEvent(id)
+	local groupID, iconID = CI.g, CI.i
+
+	ANN.Editbox:ClearFocus()
+	ANN.currentEventID = id
+	ANN.currentEventSetting = ANN.Events[id].event
+
+	local eventFrame = ANN.Events[id]
+	for i=1, #ANN.Events do
+		local f = ANN.Events[i]
+		f.selected = nil
+		f:UnlockHighlight()
+		f:GetHighlightTexture():SetVertexColor(1, 1, 1, 1)
+	end
+	eventFrame.selected = 1
+	eventFrame:LockHighlight()
+	eventFrame:GetHighlightTexture():SetVertexColor(NORMAL_FONT_COLOR.r, NORMAL_FONT_COLOR.g, NORMAL_FONT_COLOR.b, 1)
+
+	if groupID and iconID then
+		local text, channel = strsplit("\001", db.profile.Groups[groupID].Icons[iconID]["ANN" .. eventFrame.event] or "\001")
+		ANN:SelectChannel(channel)
+		ANN.Editbox:SetText(text)
+	end
+
+end
+
+function ANN:SelectChannel(channel)
+	local channelFrame, listID
+
+	for k, tbl in ipairs(ANN.ChannelList) do
+		if tbl.channel == channel then
+			listID = k
+			break
+		end
+	end
+
+	for i=1, #ANN.Channels do
+		local f = ANN.Channels[i]
+		if f.channel == channel then
+			channelFrame = f
+		end
+		f.selected = nil
+		f:UnlockHighlight()
+		f:GetHighlightTexture():SetVertexColor(1, 1, 1, 1)
+	end
+	ANN.currentChannelSetting = channel
+	ANN.selectedListID = 1
+
+	if channelFrame then
+		ANN.selectedListID = channelFrame.listID
+		channelFrame:LockHighlight()
+		channelFrame:GetHighlightTexture():SetVertexColor(NORMAL_FONT_COLOR.r, NORMAL_FONT_COLOR.g, NORMAL_FONT_COLOR.b, 1)
+	end
+	if ANN.currentEventID and listID then
+		ANN.Events[ANN.currentEventID].ChannelName:SetText(ANN.ChannelList[listID].text)
+	end
+	ANN:SetTabText()
+end
+
+function ANN:Load()
+	local oldID = ANN.currentEventID
+	for i = #ANN.Events, 1, -1 do
+		ANN:SelectEvent(i)
+	end
+	if oldID then
+		ANN:SelectEvent(oldID)
+	end
+	ANN:SetTabText()
+end
+
+function ANN:SetTabText()
+	local groupID, iconID = CI.g, CI.i
+	local n = 0
+	for i = 1, #ANN.Events do
+		local f = ANN.Events[i]
+		local text, channel = strsplit("\001", db.profile.Groups[groupID].Icons[iconID]["ANN" .. f.event] or "\001")
+		if channel and #channel > 2 and channel ~= "None" then
+			n = n + 1
+		end
+	end
+	if n > 0 then
+		IE.AnnounceTab:SetText(L["ANN_TAB"] .. " |cFFFF5959(" .. n .. ")")
+	else
+		IE.AnnounceTab:SetText(L["ANN_TAB"] .. " (" .. n .. ")")
+	end
+	PanelTemplates_TabResize(IE.AnnounceTab, -6)
+end
+
 
 -- ----------------------
 -- SUGGESTER
@@ -3236,7 +3363,7 @@ function CNDT:ValidateParenthesis()
 	else
 		tab:SetText(L[CNDT.type == "icon" and "CONDITIONS" or "GROUPCONDITIONS"] .. " (" .. n .. ")")
 	end
-	PanelTemplates_TabResize(tab, 0, nil, nil, 600)
+	PanelTemplates_TabResize(tab, -6)
 end
 
 
@@ -3289,7 +3416,7 @@ function CNDT:AddRemoveHandler()
 	else
 		tab:SetText(L[CNDT.type == "icon" and "CONDITIONS" or "GROUPCONDITIONS"] .. " (" .. n .. ")")
 	end
-	PanelTemplates_TabResize(tab, 0, nil, nil, 600)
+	PanelTemplates_TabResize(tab, -6)
 end
 
 function CNDT:AddDelete(group)

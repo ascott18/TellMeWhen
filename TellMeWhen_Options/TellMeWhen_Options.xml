@@ -145,7 +145,7 @@
 				TMW.IE:TabClick(self)
 			</OnClick>
 			<OnShow>
-				PanelTemplates_TabResize(self, 0, nil, nil, 600)
+				PanelTemplates_TabResize(self, -6)
 			</OnShow>
 		</Scripts>
 	</Button>
@@ -1362,8 +1362,63 @@
 			</Layer>
 		</Layers>
 	</Button>
+	
+	<Button name="TellMeWhen_ChannelSelectButton" virtual="true" >
+		<Size>
+			<AbsDimension y="14"/>
+		</Size>
+		<Scripts>
+			<OnLoad>
+			--	self.Background:SetVertexColor(0, 1, 0)
+			</OnLoad>
+			<OnClick>
+				TMW.ANN:SelectChannel(self.channel)
+				assert(TMW.ANN.currentEventSetting)
+				local groupID, iconID = TMW.CI.g, TMW.CI.i
+				if TMW.db then
+					if self.channel == "" or not self.channel then
+						TMW.db.profile.Groups[groupID].Icons[iconID]["ANN" .. TMW.ANN.currentEventSetting] = "\001"
+					else
+						TMW.db.profile.Groups[groupID].Icons[iconID]["ANN" .. TMW.ANN.currentEventSetting] = TMW.ANN.Editbox:GetText() .. "\001" .. self.channel
+					end
+					TMW.IE:ScheduleIconUpdate(groupID, iconID)
+				end
+				TMW.ANN:SetTabText()
+			</OnClick>
+		</Scripts>
+		<NormalFont style="GameFontNormal"/>
+		<HighlightFont style="GameFontHighlight"/>
+		<HighlightTexture file="Interface\QuestFrame\UI-QuestLogTitleHighlight" alphaMode="ADD">
+			<Anchors>
+				<Anchor point="TOPLEFT">
+					<Offset>
+						<AbsDimension x="0" y="1"/>
+					</Offset>
+				</Anchor>
+				<Anchor point="BOTTOMRIGHT">
+					<Offset>
+						<AbsDimension x="0" y="1"/>
+					</Offset>
+				</Anchor>
+			</Anchors>
+		</HighlightTexture>
+		<Layers>
+			<Layer level="OVERLAY">
+				<FontString name="$parentName" parentKey="Name" inherits="GameFontHighlight" justifyH="LEFT" text="Serpent Sting Sting Sting Sting">
+					<Anchors>
+						<Anchor point="LEFT">
+							<Offset x="3" y="0"/>
+						</Anchor>
+						<Anchor point="RIGHT">
+							<Offset x="-1" y="0"/>
+						</Anchor>
+					</Anchors>
+				</FontString>
+			</Layer>
+		</Layers>
+	</Button>
 
-	<Button name="TellMeWhen_EventSelectButton" virtual="true" >
+	<Button name="TellMeWhen_SoundEvent" virtual="true" >
 		<Size>
 			<AbsDimension y="30"/>
 		</Size>
@@ -1461,6 +1516,58 @@
 			</Layer>
 		</Layers>
 	</Button>
+	
+	<Button name="TellMeWhen_AnnounceEvent" virtual="true" >
+		<Size>
+			<AbsDimension y="30"/>
+		</Size>
+		<Scripts>
+			<OnLoad>
+			--	self.Background:SetVertexColor(0, 1, 0)
+			</OnLoad>
+			<OnClick>
+				TMW.ANN:SelectEvent(self:GetID())
+			</OnClick>
+		</Scripts>
+		<NormalFont style="GameFontNormal"/>
+		<HighlightFont style="GameFontHighlight"/>
+		<HighlightTexture file="Interface\QuestFrame\UI-QuestLogTitleHighlight" alphaMode="ADD">
+			<Anchors>
+				<Anchor point="TOPLEFT">
+					<Offset>
+						<AbsDimension x="0" y="1"/>
+					</Offset>
+				</Anchor>
+				<Anchor point="BOTTOMRIGHT">
+					<Offset>
+						<AbsDimension x="0" y="1"/>
+					</Offset>
+				</Anchor>
+			</Anchors>
+		</HighlightTexture>
+		<Layers>
+			<Layer level="OVERLAY">
+				<FontString name="$parentEventName" parentKey="EventName" inherits="GameFontNormal" justifyH="LEFT" text="Serpent Sting Sting Sting Sting Sting">
+					<Anchors>
+						<Anchor point="TOPLEFT">
+							<Offset x="3" y="-2"/>
+						</Anchor>
+						<Anchor point="RIGHT" relativeTo="$parentPlay" relativePoint="LEFT">
+							<Offset x="-1" y="0"/>
+						</Anchor>
+					</Anchors>
+				</FontString>
+				<FontString name="$parentChannelName" parentKey="ChannelName" inherits="GameFontHighlight" justifyH="LEFT" text="Serpent Sting Sting Sting Sting Sting">
+					<Anchors>
+						<Anchor point="BOTTOMLEFT">
+							<Offset x="3" y="2"/>
+						</Anchor>
+						<Anchor point="RIGHT"/>
+					</Anchors>
+				</FontString>
+			</Layer>
+		</Layers>
+	</Button>
 
 	<!-- END TEMPLATES -->
 
@@ -1523,25 +1630,37 @@
 		<Frames>
 			<Button name="$parentTab1" parentKey="MainTab" inherits="TellMeWhen_TabTemplate" id="1">
 				<Anchors>
-					<Anchor point="BOTTOMLEFT" x="8" y="-25"/>
+					<Anchor point="BOTTOMLEFT" x="5" y="-25"/>
 				</Anchors>
 				<Scripts> <OnLoad> self:SetText(TMW.L["MAIN"]) </OnLoad> </Scripts>
 			</Button>
-			<Button name="$parentTab2" parentKey="IconConditionTab" inherits="TellMeWhen_TabTemplate" id="2"> <!-- AVOID CHANGING THIS TAB'S ID, OR MAKE SURE TO FIX IT WHERE NEEDED IF YOU DO -->
+			<Button name="$parentTab2" parentKey="IconConditionTab" inherits="TellMeWhen_TabTemplate" id="2">
 				<Anchors>
-				   <Anchor point="LEFT" relativeTo="$parentTab1" relativePoint="RIGHT" x="-16" y="0"/>
+				   <Anchor point="LEFT" relativeTo="$parentTab1" relativePoint="RIGHT" x="-18" y="0"/>
 				</Anchors>
-				<Scripts> <OnLoad> self:SetText(TMW.L["CONDITIONS"]) </OnLoad> </Scripts>
+				<Scripts> <OnLoad> self:SetText(TMW.L["CONDITIONS"]) TMW.ICCNDTTab = self:GetID() </OnLoad> </Scripts>
 			</Button>
 			<Button name="$parentTab3" parentKey="SoundTab" inherits="TellMeWhen_TabTemplate" id="3">
 				<Anchors>
-				   <Anchor point="LEFT" relativeTo="$parentTab2" relativePoint="RIGHT" x="-16" y="0"/>
+				   <Anchor point="LEFT" relativeTo="$parentTab2" relativePoint="RIGHT" x="-18" y="0"/>
 				</Anchors>
 				<Scripts> <OnLoad> self:SetText(TMW.L["SOUND_TAB"]) </OnLoad> </Scripts>
 			</Button>
-			<Button name="$parentTab4" parentKey="GroupTab" inherits="TellMeWhen_TabTemplate" id="4">
+			<Button name="$parentTab4" parentKey="AnnounceTab" inherits="TellMeWhen_TabTemplate" id="4">
 				<Anchors>
-					<Anchor point="BOTTOMRIGHT" x="-8" y="-25"/>
+				   <Anchor point="LEFT" relativeTo="$parentTab3" relativePoint="RIGHT" x="-18" y="0"/>
+				</Anchors>
+				<Scripts> <OnLoad> self:SetText(TMW.L["ANN_TAB"]) </OnLoad> </Scripts>
+			</Button>
+			<Button name="$parentTab6" parentKey="GroupConditionTab" inherits="TellMeWhen_TabTemplate" id="6">
+				<Anchors>
+				   <Anchor point="LEFT" relativeTo="$parentTab4" relativePoint="RIGHT" x="-18" y="0"/>
+				</Anchors>
+				<Scripts> <OnLoad> self:SetText(TMW.L["GROUPCONDITIONS"]) TMW.GRCNDTTab = self:GetID() </OnLoad> </Scripts>
+			</Button>
+			<Button name="$parentTab5" parentKey="GroupTab" inherits="TellMeWhen_TabTemplate" id="5">
+				<Anchors>
+				   <Anchor point="LEFT" relativeTo="$parentTab6" relativePoint="RIGHT" x="-18" y="0"/>
 				</Anchors>
 				<Scripts>
 					<OnLoad> self:SetText(TMW.L["GROUPADDONSETTINGS"]) </OnLoad>
@@ -1551,12 +1670,6 @@
 						LibStub("AceConfigDialog-3.0"):SelectGroup("TellMeWhen Options", "groups", "Group " .. TMW.CI.g)
 					</OnClick>
 				</Scripts>
-			</Button>
-			<Button name="$parentTab5" parentKey="GroupConditionTab" inherits="TellMeWhen_TabTemplate" id="5"> <!-- AVOID CHANGING THIS TAB'S ID, OR MAKE SURE TO FIX IT WHERE NEEDED IF YOU DO -->
-				<Anchors>
-				   <Anchor point="RIGHT" relativeTo="$parentTab4" relativePoint="LEFT" x="16" y="0"/>
-				</Anchors>
-				<Scripts> <OnLoad> self:SetText(TMW.L["GROUPCONDITIONS"]) </OnLoad> </Scripts>
 			</Button>
 			
 			<Frame name="$parentSuggest" parentKey="Suggest" hidden="true" enableMouse="true">
@@ -3304,15 +3417,15 @@
 								self.Header:SetText(TMW.L["SOUND_EVENTS"])
 
 								local previous
-								for i=1, #TMW.SND.EventList do
-									local f = CreateFrame("Button", self:GetName().."Event"..i, self, "TellMeWhen_EventSelectButton", i)
+								for i=1, #TMW.EventList do
+									local f = CreateFrame("Button", self:GetName().."Event"..i, self, "TellMeWhen_SoundEvent", i)
 									self[i] = f
 									f:SetPoint("TOPLEFT", previous, "BOTTOMLEFT")
 									f:SetPoint("TOPRIGHT", previous, "BOTTOMRIGHT")
-									f.event = TMW.SND.EventList[i].name
+									f.event = TMW.EventList[i].name
 									f.setting = "Sound" .. f.event
-									f.EventName:SetText(TMW.SND.EventList[i].text)
-									TMW:TT(f, TMW.SND.EventList[i].text, TMW.SND.EventList[i].desc, 1, 1)
+									f.EventName:SetText(TMW.EventList[i].text)
+									TMW:TT(f, TMW.EventList[i].text, TMW.EventList[i].desc, 1, 1)
 									previous = f
 								end
 
@@ -3558,6 +3671,162 @@
 					<OnDragStop> TellMeWhen_IconEditor:StopMovingOrSizing() </OnDragStop>
 				</Scripts>
 			</Frame>
+			<Frame name="$parentAnnouncements" enableMouse="true" hidden="true" parentKey="Announcements">
+				<Anchors>
+					<Anchor point="TOPLEFT" relativeTo="$parent" relativePoint="TOPLEFT"/>
+					<Anchor point="BOTTOMRIGHT" relativeTo="$parent" relativePoint="BOTTOMRIGHT"/>
+				</Anchors>
+				<Frames>
+
+
+					<EditBox name="$parentEditbox" inherits="TellMeWhen_InputBoxTemplate" parentKey="Editbox" autoFocus="false">
+						<Size>
+							<AbsDimension x="540" y="15"/>
+						</Size>
+						<Anchors>
+							<Anchor point="TOPLEFT" relativeTo="$parent" relativePoint="TOPLEFT">
+								<Offset>
+									<AbsDimension x="25" y="-40" />
+								</Offset>
+							</Anchor>
+						</Anchors>
+						<Scripts>
+							<OnLoad>
+								TMW:TT(self, "ANN_EDITBOX", "ANN_EDITBOX_DESC")
+								self.label = TMW.L["ANN_EDITBOX"]
+								self.BackgroundText:SetWidth(self:GetWidth())
+							</OnLoad>
+							<OnEditFocusLost>
+								EditBox_ClearHighlight(self)
+								local groupID, iconID = TMW.CI.g, TMW.CI.i
+								self:SetText(TMW:CleanString(self:GetText()))
+								if TMW.db then
+									if TMW.ANN.currentChannelSetting == "" or not TMW.ANN.currentChannelSetting then
+										TMW.db.profile.Groups[groupID].Icons[iconID]["ANN" .. TMW.ANN.currentEventSetting] = "\001"
+									else
+										TMW.db.profile.Groups[groupID].Icons[iconID]["ANN" .. TMW.ANN.currentEventSetting] = (self:GetText() or "") .. "\001" .. (TMW.ANN.currentChannelSetting or "")
+									end
+								end
+								TMW.IE:ScheduleIconUpdate(groupID, iconID)
+								self:GetScript("OnTextChanged")(self)
+							</OnEditFocusLost>
+						</Scripts>
+					</EditBox>
+					<Frame name="$parentEvents" parentKey="Events">
+						<Size x="200" y="280"/>
+						<Anchors>
+							<Anchor point="TOPLEFT" relativeTo="$parent" relativePoint="TOPLEFT">
+								<Offset x="20" y="-80"/>
+							</Anchor>
+						</Anchors>
+						<Backdrop bgFile="Interface\DialogFrame\UI-DialogBox-Background-Dark" tile="true"/>
+						<Layers>
+							<Layer level="OVERLAY">
+								<FontString name="$parentHeader" inherits="GameFontNormalLarge" parentKey="Header" justifyH="LEFT" text="">
+									<Anchors>
+										<Anchor point="BOTTOM" relativeTo="$parent" relativePoint="TOP">
+											<Offset x="0" y="1"/>
+										</Anchor>
+									</Anchors>
+								</FontString>
+							</Layer>
+						</Layers>
+						<Scripts>
+							<OnLoad>
+								self.Header:SetText(TMW.L["SOUND_EVENTS"])
+
+								local previous
+								for i=1, #TMW.EventList do
+									local f = CreateFrame("Button", self:GetName().."Event"..i, self, "TellMeWhen_AnnounceEvent", i)
+									self[i] = f
+									f:SetPoint("TOPLEFT", previous, "BOTTOMLEFT")
+									f:SetPoint("TOPRIGHT", previous, "BOTTOMRIGHT")
+									f.event = TMW.EventList[i].name
+									f.EventName:SetText(TMW.EventList[i].text)
+									TMW:TT(f, TMW.EventList[i].text, TMW.EventList[i].desc, 1, 1)
+									previous = f
+								end
+
+								self[1]:SetPoint("TOPLEFT", self, "TOPLEFT", 0, 0)
+								self[1]:SetPoint("TOPRIGHT", self, "TOPRIGHT", 0, 0)
+
+								self:SetHeight(#self*self[1]:GetHeight())
+							</OnLoad>
+						</Scripts>
+					</Frame>
+					<Frame name="$parentChannels" parentKey="Channels">
+						<Size x="320" y="266"/>
+						<Anchors>
+							<Anchor point="TOPLEFT" relativeTo="$parent" relativePoint="TOPLEFT">
+								<Offset x="235" y="-80"/>
+							</Anchor>
+						</Anchors>
+						<Frames>
+							<Button name="$parentNone" inherits="TellMeWhen_ChannelSelectButton" parentKey="None" id="1"/>
+						</Frames>
+						<Backdrop bgFile="Interface\DialogFrame\UI-DialogBox-Background-Dark" tile="true"/>
+						<Layers>
+							<Layer level="OVERLAY">
+								<FontString name="$parentHeader" inherits="GameFontNormalLarge" parentKey="Header" justifyH="LEFT" text="">
+									<Anchors>
+										<Anchor point="BOTTOM" relativeTo="$parent" relativePoint="TOP">
+											<Offset x="0" y="1"/>
+										</Anchor>
+									</Anchors>
+								</FontString>
+							</Layer>
+						</Layers>
+						<Scripts>
+							<OnLoad>
+								self.Header:SetText(TMW.L["ANN_CHANTOUSE"])
+								local previous
+
+								for i, t in ipairs(TMW.ANN.ChannelList) do
+									local f = CreateFrame("Button", self:GetName().."Channel"..i, self, "TellMeWhen_ChannelSelectButton", i)
+									self[i] = f
+									f:SetPoint("TOPLEFT", previous, "BOTTOMLEFT", 0, 0)
+									f:SetPoint("TOPRIGHT", previous, "BOTTOMRIGHT", 0, 0)
+									previous = f
+									f.channel = t.channel
+									f.Name:SetText(t.text)
+									f:Show()
+								end
+								self[1]:SetPoint("TOPLEFT", self, "TOPLEFT", 0, 0)
+								self[1]:SetPoint("TOPRIGHT", self, "TOPRIGHT", 0, 0)
+								self:SetHeight(#self*self[1]:GetHeight())
+								
+								TMW.ANN.Channels = self
+							</OnLoad>
+						</Scripts>
+					</Frame>
+					
+				</Frames>
+				<Layers>
+					<Layer level="OVERLAY">
+						<FontString name="$parentWarning" parentKey="Warning" inherits="GameFontNormalLeftRed" justifyH="RIGHT">
+							<Anchors>
+								<Anchor point="BOTTOMLEFT" >
+									<Offset x="20" y="17" />
+								</Anchor>
+							</Anchors>
+						</FontString>
+					</Layer>
+				</Layers>
+				<Scripts>
+					<OnLoad>
+						self:RegisterForDrag("LeftButton")
+						self:Hide()
+
+						for k, v in pairs(self) do
+							if k ~= 0 then
+								TMW.ANN[k] = v
+							end
+						end
+					</OnLoad>
+					<OnDragStart> TellMeWhen_IconEditor:StartMoving() </OnDragStart>
+					<OnDragStop> TellMeWhen_IconEditor:StopMovingOrSizing() </OnDragStop>
+				</Scripts>
+			</Frame>
 			<!--
 			<Frame name="$parentASD" hidden="true" parentKey="ASD">
 				<Anchors>
@@ -3783,7 +4052,7 @@
 				for k, v in pairs(self) do
 					if k ~= 0 then
 						TMW.IE[k] = v
-						if strfind(k, "Tab") then
+						if strfind(k, "Tab") and type(v) == "table" then
 							self.numTabs = max(self.numTabs or 0, v:GetID())
 						end
 					end
@@ -3794,7 +4063,7 @@
 				local groupID, iconID = TMW.CI.g, TMW.CI.i
 				local ic = TMW.CI.ic
 				local t 
-				if TMW.CNDT and TMW.CNDT.type == "group" and self.selectedTab == 5 then
+				if TMW.CNDT and TMW.CNDT.type == "group" and self.selectedTab == TMW.GRCNDTTab then
 					self.FS1:SetFormattedText(TMW.L["fGROUP"], TMW:GetGroupName(TMW.db.profile.Groups[groupID].Name, groupID, 1))
 				else
 					self.FS1:SetFormattedText(TMW.L["GROUPICON"], TMW:GetGroupName(TMW.db.profile.Groups[groupID].Name, groupID, 1), iconID)

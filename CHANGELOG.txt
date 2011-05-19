@@ -1,3 +1,11 @@
+===v4.2.0===
+ * New feature: Announcements. This allows you to announce something to WoW's chat (say, yell, party, raid, guild, emote, etc) when icon events are triggered (the same events that sounds already use).
+ * The equivalancy dropdown no longer gives you a headache when you look at it (It is now sorted alphabetically).
+ * Fake hidden has been renamed to "Always Hide." The old functionality persists.
+ * I spellchecked all of the English texts!
+ * Bug Fixes:
+ ** Fixed error: conditions.lua:276: attempt to perform arithmetic on local "start" (a nil value) 
+
 ===v4.1.4.2===
  * Bugfix: TellMeWhen.lua:620: attempt to compare string with number
  * Bugfix: v4.1.4s interal version number was about 40,000 higher than it should have been. Whoops!

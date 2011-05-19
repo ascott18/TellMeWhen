@@ -25,10 +25,10 @@ L["CONDITIONORMETA_CHECKINGINVALID"] = "Warning! Group %d, Icon %d is checking a
 
 L["ICONMENU_CHOOSENAME"] = "Choose name/ID"
 L["ICONMENU_CHOOSENAME_CNDTIC"] = "Choose name/ID/texture path"
-L["ICONMENU_ENABLE"] = "Enable icon"
+L["ICONMENU_ENABLE"] = "Enabled"
 L["CHOOSENAME_EQUIVS_TOOLTIP"] = "You can select a predefined set of buffs/debuffs, spell casts, or dispel types (Magic, Curse, etc.) from this menu to insert into the editbox."
 L["CHOOSENAME_DIALOG_DDDEFAULT"] = "Predefined Spell Sets/Dispel Types"
-L["CHOOSENAME_DIALOG"] = [=[Enter the Name or ID of what you want this icon to monitor. You can add multiple things (except for multi-state cooldowns) by seperating them with semicolons (;).
+L["CHOOSENAME_DIALOG"] = [=[Enter the Name or ID of what you want this icon to monitor. You can add multiple things (except for multi-state cooldowns) by separating them with semicolons (;).
 
 |cFFFF5959PET ABILITIES|r must use SpellIDs.]=]
 L["CHOOSENAME_DIALOG_CNDTIC"] = "Enter the Name or ID of the spell that has the texture that you want to use. You may also enter a texture path, such as \"Interface/Icons/spell_nature_healingtouch\""
@@ -44,7 +44,7 @@ L["ICONMENU_COOLDOWN"] = "Cooldown"
 L["ICONMENU_BUFFDEBUFF"] = "Buff/Debuff"
 L["ICONMENU_REACTIVE"] = "Reactive ability"
 L["ICONMENU_REACTIVE_DESC"] = [[Reactive abilities are things like Kill Shot, Revenge, and Conflagrate -
-abilites that are only usable when certain conditions are met. Use this icon type to track their usability.]]
+abilities that are only usable when certain conditions are met. Use this icon type to track their usability.]]
 L["ICONMENU_WPNENCHANT"] = "Weapon enchant"
 L["ICONMENU_WPNENCHANT_DESC"] = [[Tracks the status of temporary weapon enchants on your weapons - most useful for shaman.
 With this icon type, the name can be left blank to track any weapon enchant in the specified slot,
@@ -72,7 +72,7 @@ L["ICONMENU_CNDTIC_DESC"] = [=[This icon type is for simply checking a condition
 The icon can be set to a specific spell texture or texture path via the name editbox.]=]
 L["ICONMENU_META"] = "Meta icon"
 L["ICONMENU_META_DESC"] = [=[This icon type can be used to combine several icons into one.
-Icons that have fake hidden enabled will still be shown if they would otherwise be shown.]=]
+Icons that have 'Always Hide' checked will still be shown if they would otherwise be shown.]=]
 
 
 L["ICONMENU_COOLDOWNTYPE"] = "Cooldown type"
@@ -123,8 +123,8 @@ L["ICONMENU_SHOWTIMERTEXT_DESC"] = "This is only applicable if 'Show timer' is c
 L["ICONMENU_BARS"] = "Bars"
 L["ICONMENU_SHOWPBARN"] = "Power bar"
 L["ICONMENU_SHOWCBARN"] = "Timer bar"
-L["ICONMENU_SHOWPBAR_DESC"] = "Shows a bar that is overlayed across the top half of the icon that will indicate the power still needed to cast the spell (or the power that you have when 'Fill bars up' is checked)"
-L["ICONMENU_SHOWCBAR_DESC"] = "Shows a bar that is overlayed across the bottom half of the icon that will indicate the cooldown/duration remaining (or the time that has passed if 'Fill bars up' is checked)"
+L["ICONMENU_SHOWPBAR_DESC"] = "Shows a bar that is overlaid across the top half of the icon that will indicate the power still needed to cast the spell (or the power that you have when 'Fill bars up' is checked)"
+L["ICONMENU_SHOWCBAR_DESC"] = "Shows a bar that is overlaid across the bottom half of the icon that will indicate the cooldown/duration remaining (or the time that has passed if 'Fill bars up' is checked)"
 L["ICONMENU_INVERTBARS"] = "Fill bars up"
 L["ICONMENU_OFFS"] = "Offset"
 L["ICONMENU_BAROFFS"] = "This amount will be added to the bar in order to offset it. Useful for custom indicators of when you should begin casting a spell to prevent a buff from falling off, or to indicate the power required to cast a spell and still have some left over for an interrupt."
@@ -188,8 +188,8 @@ L["METAPANEL_DOWN"] = "Move down"
 L["METAPANEL_REMOVE"] = "Remove this icon"
 L["METAPANEL_INSERT"] = "Insert an icon"
 
-L["ICONALPHAPANEL_FAKEHIDDEN"] = "Fake Hidden"
-L["ICONALPHAPANEL_FAKEHIDDEN_DESC"] = "Causes the icon to be hidden all the time, but still enabled in order to allow the conditions of other icons to check this icon, or for meta icons to include this icon."
+L["ICONALPHAPANEL_FAKEHIDDEN"] = "Always Hide"
+L["ICONALPHAPANEL_FAKEHIDDEN_DESC"] = "Causes the icon to be hidden all the time, but whilst still enabled in order to allow the conditions of other icons to check this icon, or for meta icons to include this icon."
 L["ICONMENU_WPNENCHANTTYPE"] = "Weapon slot to monitor"
 L["ICONMENU_HIDEUNEQUIPPED"] = "Hide when slot is empty"
 L["ICONMENU_USEACTIVATIONOVERLAY"] = "Check activation border"
@@ -236,9 +236,9 @@ L["UIPANEL_CLOCKIGNOREGCD_DESC"] = "If checked, timers and the cooldown clock wi
 L["UIPANEL_UPDATEINTERVAL"] = "Update Interval"
 L["UIPANEL_TOOLTIP_UPDATEINTERVAL"] = "Sets how often (in seconds) icons are checked for show/hide, alpha, conditions, etc. Zero is as fast as possible. Lower values can have a significant impact on framerate for low-end computers"
 L["UIPANEL_EFFTHRESHOLD"] = "Buff Efficiency Threshold"
-L["UIPANEL_EFFTHRESHOLD_DESC"] = "Sets the minimum number of buffs/debuffs to switch to a more efficient mode of checking them when there are a high number. Note that once the number of auras being checed exceeds this number, older auras will be prioritized instead of priority based on the order in which they were entered."
+L["UIPANEL_EFFTHRESHOLD_DESC"] = "Sets the minimum number of buffs/debuffs to switch to a more efficient mode of checking them when there are a high number. Note that once the number of auras being checked exceeds this number, older auras will be prioritized instead of priority based on the order in which they were entered."
 L["UIPANEL_ICONSPACING"] = "Icon Spacing"
-L["UIPANEL_ICONSPACING_DESC"] = "Distance that icons within a group are away from eachother"
+L["UIPANEL_ICONSPACING_DESC"] = "Distance that icons within a group are away from each other"
 L["UIPANEL_ADDGROUP"] = "Add Another Group"
 L["UIPANEL_ADDGROUP_DESC"] = "The new group will be assigned the next available groupID"
 L["UIPANEL_DELGROUP"] = "Delete this Group"
@@ -337,7 +337,7 @@ L["CONDITIONPANEL_ECLIPSE_DESC"] = [=[Eclipse has a range of -100 (a lunar eclip
 Input -80 if you want the icon to work with a value of 80 lunar power.]=]
 L["CONDITIONPANEL_ICON"] = "Icon Shown"
 L["CONDITIONPANEL_ICON_DESC"] = [=[The condition will pass if the icon specified is currently shown with an alpha above 0%, or hidden with an alpha of 0% if set to false.
-If you don't want to display the icons that are being checked, check 'Fake Hidden' in the icon editor of the icon being checked.
+If you don't want to display the icons that are being checked, check 'Always Hide' in the icon editor of the icon being checked.
 The group of the icon being checked must also be shown in order to check the icon, even if the condition is set to false.]=]
 L["CONDITIONPANEL_RUNES_DESC"] = [=[Use this condition type to only show the icon when the selected runes are available.
 Each rune is a check button. A check mark will require that the rune be usable, an 'X' will require that the rune be unusable, no mark will ignore the rune.
@@ -401,8 +401,8 @@ L["CONDITIONPANEL_LESSEQUAL"] = "Less Than/Equal to"
 L["CONDITIONPANEL_GREATER"] = "Greater Than"
 L["CONDITIONPANEL_GREATEREQUAL"] = "Greater Than/Equal to"
 L["CONDITIONPANEL_REMOVE"] = "Remove this condition"
-L["PARENTHESISWARNING"] = "# of opening and closing parenthesis isn't equal!"
-L["PARENTHESISWARNING2"] = "Some closing parenthesis are missing openers!"
+L["PARENTHESISWARNING"] = "# of opening and closing parentheses isn't equal!"
+L["PARENTHESISWARNING2"] = "Some closing parentheses are missing openers!"
 
 -- ----------
 -- STUFF THAT I GOT SICK OF ADDING PREFIXES TOO AND PUTTING IN THE RIGHT PLACE
@@ -434,7 +434,7 @@ L["UNNAMED"] = "((Unnamed))"
 L["TOPLAYER"] = "Export to Player"
 L["TOPLAYER_DESC"] = "Type a player's name into the editbox and choose this option to send it to them. They must be somebody that you can whisper (same faction, server, online), and they must have TellMeWhen v4+"
 L["TOSTRING"] = "Export to String"
-L["TOSTRING_DESC"] = "A string containing all of this icon's settings will be pasted into the editbox.  Press Ctrl+C to copy it, and then paste it whever you want to share it."
+L["TOSTRING_DESC"] = "A string containing all of this icon's settings will be pasted into the editbox.  Press Ctrl+C to copy it, and then paste it wherever you want to share it."
 L["FROMSTRING"] = "Import from String"
 L["FROMSTRING_DESC"] = "Press Ctrl+V to paste in an export string that you have copied to your clipboard from another source to be applied to this icon."
 
@@ -448,7 +448,7 @@ L["NEWVERSION"] = "A new version of TellMeWhen is available: %s"
 L["CACHING"] = "TellMeWhen is caching and filtering all spells in the game. This only needs to be done once per WoW patch. You can speed up or slow down the process using the slider below."
 L["CACHINGSPEED"] = "Spells per frame:"
 L["SUGGESTIONS"] = "Suggestions:"
-L["SUG_TOOLTIPTITLE"] = [[As you type, TellMeWhen will look through its cache and determine the spells that you were mosty likely looking for.
+L["SUG_TOOLTIPTITLE"] = [[As you type, TellMeWhen will look through its cache and determine the spells that you were most likely looking for.
 
 Spells are categorized and colored as per the list below. Note that the categories that begin with the word "Known" will not have spells put into them until they have been seen as you play or log onto different classes.
 
@@ -456,9 +456,9 @@ Clicking on an entry will insert it into the editbox.
 
 ]]
 L["SUG_DISPELTYPES"] = "Dispel Types"
-L["SUG_BUFFEQUIVS"] = "Buff Equivalancies"
-L["SUG_DEBUFFEQUIVS"] = "Debuff equivalancies"
-L["SUG_CASTEQUIVS"] = "Spellcast equivalancies"
+L["SUG_BUFFEQUIVS"] = "Buff Equivalencies"
+L["SUG_DEBUFFEQUIVS"] = "Debuff Equivalencies"
+L["SUG_CASTEQUIVS"] = "Spellcast Equivalencies"
 L["SUG_MSCDONBARS"] = "Valid multi-state cooldowns"
 L["SUG_PLAYERSPELLS"] = "Your spells"
 L["SUG_CLASSSPELLS"] = "Known PC/pet spells"
@@ -468,13 +468,13 @@ L["SUG_MISC"] = "Miscellaneous"
 
 
 L["SOUND_EVENT_ONSHOW"] = "On Show"
-L["SOUND_EVENT_ONSHOW_DESC"] = "Sound to play when the icon becomes shown (even if fake hidden is checked)."
+L["SOUND_EVENT_ONSHOW_DESC"] = "This event triggers when the icon becomes shown (even if 'Always Hide' is checked)."
 L["SOUND_EVENT_ONHIDE"] = "On Hide"
-L["SOUND_EVENT_ONHIDE_DESC"] = "Sound to play when the icon is hidden."
+L["SOUND_EVENT_ONHIDE_DESC"] = "This event triggers when the icon is hidden (even if 'Always Hide' is checked)."
 L["SOUND_EVENT_ONSTART"] = "On Start"
-L["SOUND_EVENT_ONSTART_DESC"] = "Sound to play when the cooldown becomes unusable, the buff/debuff is applied, etc. NOTE: This sound will never play at the same time as the OnShow sound."
+L["SOUND_EVENT_ONSTART_DESC"] = "This event triggers when the cooldown becomes unusable, the buff/debuff is applied, etc. NOTE: This event will never trigger at the same time as the OnShow event."
 L["SOUND_EVENT_ONFINISH"] = "On Finish"
-L["SOUND_EVENT_ONFINISH_DESC"] = "Sound to play when the cooldown becomes usable, the buff/debuff falls off, etc. NOTE: This sound will never play at the same time as the OnHide sound."
+L["SOUND_EVENT_ONFINISH_DESC"] = "This event triggers when the cooldown becomes usable, the buff/debuff falls off, etc. NOTE: This event will never trigger at the same time as the OnHide event."
 L["SOUND_EVENTS"] = "Icon Events"
 L["SOUND_SOUNDTOPLAY"] = "Sound to Play"
 L["SOUND_CUSTOM"] = "Custom sound file"
@@ -489,8 +489,11 @@ L["SOUND_USEMASTER_DESC"] = "Check this to allow sounds to play even when the ga
 L["SOUNDERROR1"] = "File must have an extension!"
 L["SOUNDERROR2"] = "Custom WAV files not supported by WoW 4.0+"
 L["SOUNDERROR3"] = "|cFFFFD100Only OGG and MP3 files are supported!"
-L["SOUNDERROR4"] = "|cFFFFD100Sound file to play was not found!"
 
+L["ANN_TAB"] = "Announcements"
+L["ANN_CHANTOUSE"] = "Channel to Use"
+L["ANN_EDITBOX"] = "Text to be spoken"
+L["ANN_EDITBOX_DESC"] = [[Type the text that you wish to be said when the event triggers. Standard substitutions "%t" for your target and "%f" for your focus may be used.]]
 
 
 
@@ -530,18 +533,18 @@ L["IncreasedSPten"] = "Increased Spellpower (10%)"
 L["IncreasedPhysHaste"] = "Increased Physical Haste"
 L["IncreasedSpellHaste"] = "Increased Spell Haste"
 L["BurstHaste"] = "Heroism/Bloodlust"
-L["BonusAgiStr"] = "Agility/Strength"
-L["BonusStamina"] = "Bonus Stamina"
-L["BonusArmor"] = "Bonus Armor"
+L["BonusAgiStr"] = "Increased Agility/Strength"
+L["BonusStamina"] = "Increased Stamina"
+L["BonusArmor"] = "Increased Armor"
 L["BonusMana"] = "Increased Mana Pool"
 L["ManaRegen"] = "Increased Mana Regen"
 L["BurstManaRegen"] = "Burst Mana Regen"
-L["PushbackResistance"] = "Pushback Resistance"
-L["Resistances"] = "Spell Resistance"
+L["PushbackResistance"] = "Increased Pushback Resistance"
+L["Resistances"] = "Increased Spell Resistance"
 L["PhysicalDmgTaken"] = "Physical Damage Taken"
-L["SpellDamageTaken"] = "Spell Damage Taken"
-L["SpellCritTaken"] = "Spell Crit Taken"
-L["BleedDamageTaken"] = "Bleed Damage Taken"
+L["SpellDamageTaken"] = "Increased Spell Damage Taken"
+L["SpellCritTaken"] = "Increased Spell Crit Taken"
+L["BleedDamageTaken"] = "Increased Bleed Damage Taken"
 L["ReducedAttackSpeed"] = "Reduced Attack Speed"
 L["ReducedCastingSpeed"] = "Reduced Casting Speed"
 L["ReducedArmor"] = "Reduced Armor"
@@ -553,7 +556,7 @@ L["DamageBuffs"] = "Damage Buffs"
 
 L["Heals"] = "Player Heals"
 L["PvPSpells"] = "PvP Crowd Control, etc."
-L["Tier11Interrupts"] = "Tier 11 Interruptables"
+L["Tier11Interrupts"] = "Tier 11 Interruptibles"
 
 L["Magic"] = "Magic"
 L["Curse"] = "Curse"
