@@ -390,7 +390,7 @@ TMW.Group_Defaults = TMW.Defaults.profile.Groups["**"]
 TMW.Icon_Defaults = TMW.Group_Defaults.Icons["**"]
 TMW.Group_Defaults.Conditions = TMW.Icon_Defaults.Conditions
 for k in pairs(TMW.Icon_Defaults) do
-	if strsub(k, 1, 5) == "Sound" then
+	if strsub(k, 1, 5) == "Sound" or strsub(k, 1, 3) == "ANN" then
 		TMW.RelevantSettings.all[k] = true
 	end
 end
@@ -1864,7 +1864,6 @@ local function SetInfo(icon, alpha, color, texture, start, duration, checkGCD, p
 				local ANN = icon.ANNOnFinish
 				if ANN and not annd then
 					SendChatMessage(strsplit("\001", ANN))
-					annd = true
 				end
 			else
 				local Sound = icon.SoundOnStart
@@ -1874,7 +1873,6 @@ local function SetInfo(icon, alpha, color, texture, start, duration, checkGCD, p
 				local ANN = icon.ANNOnStart
 				if ANN and not annd then
 					SendChatMessage(strsplit("\001", ANN))
-					annd = true
 				end
 			end
 			icon.__realDuration = realDuration
@@ -2271,7 +2269,7 @@ function TMW:Icon_Update(icon)
 	else
 		ct:ClearAllPoints()
 		ct:SetPoint("BOTTOMRIGHT", icon, "BOTTOMRIGHT", f.x, f.y)
-	--	cd:SetFrameLevel(icon:GetFrameLevel() + 1)
+		cd:SetFrameLevel(icon:GetFrameLevel() + 1)
 		icon.cooldownbar:SetFrameLevel(icon:GetFrameLevel() + 1)
 		icon.powerbar:SetFrameLevel(icon:GetFrameLevel() + 1)
 	end
@@ -2279,6 +2277,7 @@ function TMW:Icon_Update(icon)
 	icon.__normaltex = icon.__LBF_Normal or icon.__MSQ_NormalTexture or icon:GetNormalTexture()
 	if (not LBF and not LMB) or not icon.group.SkinID or icon.group.SkinID == "Blizzard" then
 		icon.__normaltex:Hide()
+		cd:SetFrameLevel(icon:GetFrameLevel() + 1)
 		icon.cooldownbar:SetFrameLevel(icon:GetFrameLevel() + 1)
 		icon.powerbar:SetFrameLevel(icon:GetFrameLevel() + 1)
 	else
