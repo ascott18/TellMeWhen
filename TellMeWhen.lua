@@ -37,7 +37,7 @@ local LSM = LibStub("LibSharedMedia-3.0")
 
 TELLMEWHEN_VERSION = "4.2.0"
 TELLMEWHEN_VERSION_MINOR = ""
-TELLMEWHEN_VERSIONNUMBER = 42002 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
+TELLMEWHEN_VERSIONNUMBER = 42004 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
 if TELLMEWHEN_VERSIONNUMBER > 50000 or TELLMEWHEN_VERSIONNUMBER < 42000 then return end -- safety check because i accidentally made the version number 414069 once
 
 TELLMEWHEN_MAXGROUPS = 1 	--this is a default, used by SetTheory (addon), so dont rename
@@ -449,7 +449,7 @@ TMW.BE = {
 		BurstManaRegen = "29166;16191;64901",
 		PushbackResistance = "19746;87717",
 		Resistances = "19891;8185",
-		DefensiveBuffs = "48707;30823;33206;47585;871;48792;498;22812;61336;5277;74001;47788;19263;6940;_12976",
+		DefensiveBuffs = "48707;30823;33206;47585;871;48792;498;22812;61336;5277;74001;47788;19263;6940;_12976;31850",
 		MiscHelpfulBuffs = "89488;10060;23920;68992;31642;54428;2983;1850;29166;16689;53271;1044;31821;45182",
 		DamageBuffs = "1719;12292;85730;50334;5217;3045;77801;34692;31884;51713;49016;12472",
 	},
@@ -634,7 +634,7 @@ function TMW:OnInitialize()
 	end
 	TellMeWhenDB.Version = TELLMEWHEN_VERSIONNUMBER -- pre-default upgrades complete!
 	
-	TMW.db = AceDB:New("TellMeWhenDB", TMW.Defaults)
+TMW.db = AceDB:New("TellMeWhenDB", TMW.Defaults)
 	db = TMW.db
 	
 	LSM:Register("sound", "Rubber Ducky", [[Sound\Doodad\Goblin_Lottery_Open01.wav]])
@@ -1798,7 +1798,7 @@ local function SetInfo(icon, alpha, color, texture, start, duration, checkGCD, p
 	-- reverse	- true/false to set icon.cooldown:SetReverse(reverse), nil to not change (boolean/nil)
 	-- count	- the stack text to be set on the icon, nil/false to hide (number/nil/false)
 	
-	local played, annd, justShowed
+	local played, announced, justShowed
 	alpha = icon.CndtFailed and icon.ConditionAlpha or alpha
 
 	local d = duration - (time - start)
@@ -1819,7 +1819,7 @@ local function SetInfo(icon, alpha, color, texture, start, duration, checkGCD, p
 			local ANN = icon.ANNOnHide
 			if ANN then
 				SendChatMessage(strsplit("\001", ANN))
-				annd = true
+				announced = true
 			end
 		elseif icon.FakeAlpha == 0 then
 			local Sound = icon.SoundOnShow
@@ -1830,9 +1830,8 @@ local function SetInfo(icon, alpha, color, texture, start, duration, checkGCD, p
 			local ANN = icon.ANNOnShow
 			if ANN then
 				SendChatMessage(strsplit("\001", ANN))
-				annd = true
+				announced = true
 			end
-			justShowed = true
 		end
 		if icon.FakeHidden then
 			icon:setalpha(0) -- setalpha(lowercase) is the old, raw SetAlpha. Use it to override FakeAlpha, although this really should never happen ourside of here
@@ -1858,11 +1857,11 @@ local function SetInfo(icon, alpha, color, texture, start, duration, checkGCD, p
 		if icon.__realDuration ~= realDuration then
 			if realDuration == 0 then
 				local Sound = icon.SoundOnFinish
-				if Sound and not justShowed then
+				if Sound and not played then
 					PlaySoundFile(Sound, SndChan)
 				end
 				local ANN = icon.ANNOnFinish
-				if ANN and not annd then
+				if ANN and not announced then
 					SendChatMessage(strsplit("\001", ANN))
 				end
 			else
@@ -1871,7 +1870,7 @@ local function SetInfo(icon, alpha, color, texture, start, duration, checkGCD, p
 					PlaySoundFile(Sound, SndChan)
 				end
 				local ANN = icon.ANNOnStart
-				if ANN and not annd then
+				if ANN and not announced then
 					SendChatMessage(strsplit("\001", ANN))
 				end
 			end

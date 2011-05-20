@@ -3,10 +3,12 @@
  * The equivalency dropdown no longer gives you a headache when you look at it (It is now sorted alphabetically).
  * Fake hidden has been renamed to "Always Hide." The old functionality persists.
  * I spellchecked all of the English texts!
+ * Added Ardent Defender to the defensive buff equivalency
  * Bug Fixes:
  ** (r80) Fixed error: conditions.lua:276: attempt to perform arithmetic on local "start" (a nil value) 
  ** (r81) Hopefully put the final nail in the coffin of the Masque ugly texture crap.
  ** (r82) Last minute changes without testing are bad, mmmkay? (Announcements actually work now.)
+ ** (r83) Sounds for event "On Finish" should now work a little better. 
 
 ===v4.1.4.2===
  * Bugfix: TellMeWhen.lua:620: attempt to compare string with number
