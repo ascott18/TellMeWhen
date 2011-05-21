@@ -56,7 +56,31 @@ end
 
 
 local ICD_OnEvent
-if clientVersion >= 40100 then
+if clientVersion >= 40200 then
+	ICD_OnEvent = function(icon, event, ...)
+		if event == "COMBAT_LOG_EVENT_UNFILTERED" then
+			local _, event, _, sourceGUID, _, _, _, _, _, _, _, spellID, spellName = ... -- 2 NEW ARGS ADDED IN 4.2
+			if sourceGUID == pGUID and (event == "SPELL_AURA_APPLIED" or event == "SPELL_AURA_REFRESH" or event == "SPELL_ENERGIZE" or event == "SPELL_AURA_APPLIED_DOSE") then
+				if icon.NameDictionary[spellID] or icon.NameDictionary[strlower(spellName)] then
+					local t = GetSpellTexture(spellID)
+					if t ~= icon.__tex then icon:SetTexture(t) end
+
+					icon.StartTime = TMW.time
+				end
+			end
+		elseif event == "UNIT_SPELLCAST_SUCCEEDED" then
+			local unit, spellName, _, _, spellID = ...
+			if unit == "player" then
+				if icon.NameDictionary[spellID] or icon.NameDictionary[strlower(spellName)] then
+					local t = GetSpellTexture(spellID)
+					if t ~= icon.__tex then icon:SetTexture(t) end
+
+					icon.StartTime = TMW.time
+				end
+			end
+		end
+	end
+elseif clientVersion >= 40100 then
 	ICD_OnEvent = function(icon, event, ...)
 		if event == "COMBAT_LOG_EVENT_UNFILTERED" then
 			local _, event, _, sourceGUID, _, _, _, _, _, spellID, spellName = ... --NEW ARG ADDED BETWEEN EVENT AND SOURCEGUID IN 4.1
@@ -89,7 +113,7 @@ else
 				if NameDictionary[spellID] or NameDictionary[strlower(spellName)] then
 					local t = GetSpellTexture(spellID)
 					if t ~= icon.__tex then icon:SetTexture(t) end
-
+					
 					icon.StartTime = TMW.time
 				end
 			end

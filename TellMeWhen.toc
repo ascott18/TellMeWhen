@@ -3,6 +3,7 @@
 
 # Dont forget to toc bump TellMeWhen_Options too
 ## Interface: 40100
+## X-Compatible-With: 40200
 ## Title: TellMeWhen
 
 ## Version: 4.2.0

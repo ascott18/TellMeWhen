@@ -1113,6 +1113,7 @@ local checks = { --1=check box, 2=editbox, 3=slider(x100), 4=custom, table=subke
 	ShowTimer = 1,
 	ShowTimerText = 1,
 	Icons = 4,
+	Sort = 4,
 	ICDDuration = 2,
 	Unit = 2,
 	ShowPBar = {
@@ -1342,12 +1343,6 @@ function IE:SetupRadios()
 		IE.Main.WhenChecks:Hide()
 	end
 
-	if t == "buff" then
-		IE.Main.SortChecks:Show()
-	else
-		IE.Main.SortChecks:Hide()
-	end
-
 	local alphainfo
 	if t == "icd" then
 		alphainfo = IE.Data.ICDShowWhen
@@ -1439,7 +1434,7 @@ function IE:ShowHide()
 	spb.PBarOffs:SetEnabled(spb.ShowPBar:GetChecked())
 	scb.CBarOffs:SetEnabled(scb.ShowCBar:GetChecked())
 
-	if TMW.Types[t].HideBars then -- override the previous shows and disables
+	if TMW.Types[t] and TMW.Types[t].HideBars then -- override the previous shows and disables
 		spb:Hide()
 		scb:Hide()
 		IE.Main.InvertBars:Hide()
@@ -1485,7 +1480,7 @@ function IE:LoadSettings()
 		end
 	end
 
-	for _, parent in pairs({IE.Main.TypeChecks, IE.Main.WhenChecks, IE.Main.SortChecks}) do
+	for _, parent in pairs({IE.Main.TypeChecks, IE.Main.WhenChecks, IE.Main.Sort}) do
 		for k, frame in pairs(parent) do
 			if strfind(k, "Radio") then
 				if frame.setting == "TotemSlots" then
@@ -2135,7 +2130,9 @@ function IE:ScheduleIconUpdate(icon, groupID, iconID)
 		icon = TMW[groupID] and TMW[groupID][iconID]
 	end
 	if not icon then return end
-	tinsert(iconsToUpdate, icon)
+	if not TMW.tContains(iconsToUpdate, icon) then
+		tinsert(iconsToUpdate, icon)
+	end
 	IconUpdater:SetScript("OnUpdate", UpdateIcons)
 end
 

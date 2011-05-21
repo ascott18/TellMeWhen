@@ -40,8 +40,6 @@ local RelevantSettings = {
 	Alpha = true,
 	UnAlpha = true,
 	Sort = true,
-	SortAsc = true,
-	SortDesc = true,
 	ConditionAlpha = true,
 	DurationMin = true,
 	DurationMax = true,
@@ -74,12 +72,13 @@ local function Buff_OnUpdate(icon, time)
 		local Units, NameArray, NameNameArray, NameDictionary, Filter, Filterh, Sort = icon.Units, icon.NameArray, icon.NameNameArray, icon.NameDictionary, icon.Filter, icon.Filterh, icon.Sort
 		local NAL = icon.NAL
 
+		local buffName, _, iconTexture, count, dispelType, duration, expirationTime, _, _, _, id
+		local d = Sort == -1 and huge or 0
+		
 		for u = 1, #Units do
 			local unit = Units[u]
 			if UnitExists(unit) then
-				local buffName, _, iconTexture, count, dispelType, duration, expirationTime, _, _, _, id
 				if NAL > EFF_THR then
-					local d = Sort == -1 and huge or 0
 					for z=1, 60 do --60 because i can and it breaks when there are no more buffs anyway
 						local _buffName, _, _iconTexture, _count, _dispelType, _duration, _expirationTime, _, _, _, _id = UnitAura(unit, z, Filter)
 						if not _buffName then
@@ -163,13 +162,16 @@ local function Buff_OnUpdate(icon, time)
 						end
 					end
 				end
-				if buffName then
-					icon:SetInfo(icon.Alpha, icon.UnAlpha ~= 0 and pr or 1, iconTexture, expirationTime - duration, duration, nil, buffName, nil, count)
+				if buffName and not Sort then
 					return
 				end
 			end
 		end
-		icon:SetInfo(icon.UnAlpha, icon.Alpha ~= 0 and ab or 1, icon.FirstTexture, 0, 0, nil, icon.NameFirst)
+		if buffName then
+			icon:SetInfo(icon.Alpha, icon.UnAlpha ~= 0 and pr or 1, iconTexture, expirationTime - duration, duration, nil, buffName, nil, count)
+		else
+			icon:SetInfo(icon.UnAlpha, icon.Alpha ~= 0 and ab or 1, icon.FirstTexture, 0, 0, nil, icon.NameFirst)
+		end
 	end
 end
 

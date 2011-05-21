@@ -161,11 +161,11 @@ L["ICONMENU_COOLDOWNCHECK_DESC"] = "Check this to cause the icon to be considere
 
 L["SORTBY"] = "Sort by"
 L["SORTBYNONE"] = "Don't sort"
-L["SORTBYNONE_DESC"] = "If checked, buffs/debuffs will be checked in, and appear in, the order that they were entered into the editbox as long as the number entered does not exceed the efficiency threshold setting. If it does, they will be checked in the order that they would normally appear on the unit's unit frame."
+L["SORTBYNONE_DESC"] = "If checked, spells will be checked in and appear in the order that they were entered into the editbox. If this icon is a buff/debuff icon, auras will be checked in the order that they would normally appear on the unit's unit frame IF the number of auras being checked exceeds the efficiency threshold setting."
 L["ICONMENU_SORTASC"] = "Ascending duration"
-L["ICONMENU_SORTASC_DESC"] = "Check this box to prioritize and show auras with the lowest duration."
+L["ICONMENU_SORTASC_DESC"] = "Check this box to prioritize and show spells with the lowest duration."
 L["ICONMENU_SORTDESC"] = "Descending duration"
-L["ICONMENU_SORTDESC_DESC"] = "Check this box to prioritize and show auras with the highest duration."
+L["ICONMENU_SORTDESC_DESC"] = "Check this box to prioritize and show spells with the highest duration."
 
 L["ICONMENU_MOVEHERE"] = "Move here"
 L["ICONMENU_COPYHERE"] = "Copy here"
@@ -401,8 +401,11 @@ L["CONDITIONPANEL_LESSEQUAL"] = "Less Than/Equal to"
 L["CONDITIONPANEL_GREATER"] = "Greater Than"
 L["CONDITIONPANEL_GREATEREQUAL"] = "Greater Than/Equal to"
 L["CONDITIONPANEL_REMOVE"] = "Remove this condition"
+L["CONDITIONPANEL_ADD"] = "Add a condition"
 L["PARENTHESISWARNING"] = "# of opening and closing parentheses isn't equal!"
 L["PARENTHESISWARNING2"] = "Some closing parentheses are missing openers!"
+
+
 
 -- ----------
 -- STUFF THAT I GOT SICK OF ADDING PREFIXES TOO AND PUTTING IN THE RIGHT PLACE

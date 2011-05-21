@@ -1143,11 +1143,13 @@
 				self.AddDelete:SetNormalTexture("Interface\\Buttons\\UI-Panel-MinimizeButton-Up")
 				self.AddDelete:SetPushedTexture("Interface\\Buttons\\UI-Panel-MinimizeButton-Down")
 				self.AddDelete:SetHighlightTexture("Interface\\Buttons\\UI-Panel-MinimizeButton-Highlight", "ADD")
+				TMW:TT(self.AddDelete, "CONDITIONPANEL_REMOVE", nil, nil, nil, 1)
 			</OnShow>
 			<OnHide>
 				self.AddDelete:SetNormalTexture("Interface\\AddOns\\TellMeWhen_Options\\Textures\\Plus-Up")
 				self.AddDelete:SetPushedTexture("Interface\\AddOns\\TellMeWhen_Options\\Textures\\Plus-Down")
 				self.AddDelete:SetHighlightTexture("Interface\\AddOns\\TellMeWhen_Options\\Textures\\Plus-Highlight", "ADD")
+				TMW:TT(self.AddDelete, "CONDITIONPANEL_ADD", nil, nil, nil, 1)
 			</OnHide>
 
 		</Scripts>
@@ -2438,7 +2440,7 @@
 						</Scripts>
 					</CheckButton>
 					
-					<Frame name="$parentSortChecks" parentKey="SortChecks">
+					<Frame name="$parentSortChecks" parentKey="Sort">
 						<Size x="140" y="90"/>
 						<Anchors>
 							<Anchor point="TOPLEFT" relativeTo="$parentRangeCheck" relativePoint="BOTTOMLEFT">

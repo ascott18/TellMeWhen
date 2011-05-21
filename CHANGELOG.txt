@@ -1,3 +1,8 @@
+===v4.2.1===
+ * Unit cooldowns can now be sorted by duration.
+ * Buffs/debuffs that are being sorted by duration now do so across all units that are being checked instead of only within each unit.
+ * Updated COMBAT_LOG_EVENT_UNFILTERED for 4.2.
+
 ===v4.2.0===
  * New feature: Announcements. This allows you to announce something to WoW's chat (say, yell, party, raid, guild, emote, etc) when icon events are triggered (the same events that sounds already use).
  * The equivalency dropdown no longer gives you a headache when you look at it (It is now sorted alphabetically).
@@ -9,6 +14,7 @@
  ** (r81) Hopefully put the final nail in the coffin of the Masque ugly texture crap.
  ** (r82) Last minute changes without testing are bad, mmmkay? (Announcements actually work now.)
  ** (r83) Sounds for event "On Finish" should now work a little better. 
+ ** (r84) Jinx: CoE is now properly checked as part of the spell damage taken equivalency. 
 
 ===v4.1.4.2===
  * Bugfix: TellMeWhen.lua:620: attempt to compare string with number
