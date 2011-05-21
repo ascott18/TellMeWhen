@@ -2208,10 +2208,8 @@ function SND:SetSoundsOffset(offs)
 end
 
 function SND:SelectEvent(id)
-	local groupID, iconID = CI.g, CI.i
-
 	SND.currentEventID = id
-	SND.currentEventSetting = SND.Events[id].setting
+	SND.currentEvent = SND.Events[id].event
 
 	local eventFrame = SND.Events[id]
 	for i=1, #SND.Events do
@@ -2224,8 +2222,8 @@ function SND:SelectEvent(id)
 	eventFrame:LockHighlight()
 	eventFrame:GetHighlightTexture():SetVertexColor(NORMAL_FONT_COLOR.r, NORMAL_FONT_COLOR.g, NORMAL_FONT_COLOR.b, 1)
 
-	if groupID and iconID then
-		SND:SelectSound(db.profile.Groups[groupID].Icons[iconID][eventFrame.setting])
+	if CI.ics then
+		SND:SelectSound(CI.ics.Events[eventFrame.event].Sound)
 	end
 
 end
@@ -2296,7 +2294,7 @@ function SND:SetTabText()
 	local n = 0
 	for i = 1, #SND.Events do
 		local f = SND.Events[i]
-		local v = db.profile.Groups[groupID].Icons[iconID][f.setting]
+		local v = CI.ics.Events[f.event].Sound
 		if v == "" or v == "Interface\\Quiet.ogg" or v == "None" then
 			-- none
 		elseif strfind(v, "%.[^\\]+$") then
@@ -2371,15 +2369,10 @@ ANN.ChannelList = {
 	},
 }
 
-function ANN:OnInitialize()
-end
-
 function ANN:SelectEvent(id)
-	local groupID, iconID = CI.g, CI.i
-
 	ANN.Editbox:ClearFocus()
 	ANN.currentEventID = id
-	ANN.currentEventSetting = ANN.Events[id].event
+	ANN.currentEvent = ANN.Events[id].event
 
 	local eventFrame = ANN.Events[id]
 	for i=1, #ANN.Events do
@@ -2392,8 +2385,8 @@ function ANN:SelectEvent(id)
 	eventFrame:LockHighlight()
 	eventFrame:GetHighlightTexture():SetVertexColor(NORMAL_FONT_COLOR.r, NORMAL_FONT_COLOR.g, NORMAL_FONT_COLOR.b, 1)
 
-	if groupID and iconID then
-		local text, channel = strsplit("\001", db.profile.Groups[groupID].Icons[iconID]["ANN" .. eventFrame.event] or "\001")
+	if CI.ics then
+		local text, channel = strsplit("\001", CI.ics.Events[eventFrame.event].Announce or "\001")
 		ANN:SelectChannel(channel)
 		ANN.Editbox:SetText(text)
 	end
@@ -2445,11 +2438,10 @@ function ANN:Load()
 end
 
 function ANN:SetTabText()
-	local groupID, iconID = CI.g, CI.i
 	local n = 0
 	for i = 1, #ANN.Events do
 		local f = ANN.Events[i]
-		local text, channel = strsplit("\001", db.profile.Groups[groupID].Icons[iconID]["ANN" .. f.event] or "\001")
+		local text, channel = strsplit("\001", CI.ics.Events[f.event].Announce or "\001")
 		if channel and #channel > 2 and channel ~= "None" then
 			n = n + 1
 		end

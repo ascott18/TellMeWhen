@@ -250,7 +250,6 @@
 			</Layer>
 		</Layers>
 	</Button>
-
 	<EditBox name="TellMeWhen_TimeEditBoxTemplate" inherits="TellMeWhen_InputBoxTemplate" virtual="true">
 		<Size>
 			<AbsDimension x="60" y="15"/>
@@ -292,7 +291,6 @@
 			</OnEditFocusLost>
 		</Scripts>
 	</EditBox>
-
 	<Slider name="TellMeWhen_AlphaSliderTemplate" inherits="OptionsSliderTemplate" minvalue="0" maxvalue="100" valuestep="1" virtual="true">
 		<Size x="175" y="17"/>
 		<Layers>
@@ -388,7 +386,6 @@
 			</OnLoad>
 		</Scripts>
 	</Button>
-	
 	<CheckButton name="TellMeWhen_ConditionEditorParenthesisTemplate" hidden="true" virtual="true">
 		<Size x="20" y="20"/>
 		<HitRectInsets>
@@ -459,7 +456,6 @@
 		</Scripts>
 		<HighlightTexture urgency="5" file="Interface\Buttons\UI-CheckBox-Highlight" alphaMode="ADD"/>
 	</CheckButton>
-	
 	<Frame name="TellMeWhen_ConditionGroup" virtual="true">
 		<Size>
 			<AbsDimension x="559" y="59" />
@@ -1283,10 +1279,10 @@
 			</OnLoad>
 			<OnClick>
 				TMW.SND:SelectSound(self.soundname)
-				assert(TMW.SND.currentEventSetting)
+				assert(TMW.SND.currentEvent)
 				local groupID, iconID = TMW.CI.g, TMW.CI.i
 				if TMW.db then
-					TMW.db.profile.Groups[groupID].Icons[iconID][TMW.SND.currentEventSetting] = self.soundname
+					TMW.db.profile.Groups[groupID].Icons[iconID].Events[TMW.SND.currentEvent].Sound = self.soundname
 					TMW.IE:ScheduleIconUpdate(groupID, iconID)
 				end
 				TMW.SND:SetTabText()
@@ -1364,86 +1360,14 @@
 			</Layer>
 		</Layers>
 	</Button>
-	
-	<Button name="TellMeWhen_ChannelSelectButton" virtual="true" >
-		<Size>
-			<AbsDimension y="14"/>
-		</Size>
-		<Scripts>
-			<OnLoad>
-			--	self.Background:SetVertexColor(0, 1, 0)
-			</OnLoad>
-			<OnClick>
-				TMW.ANN:SelectChannel(self.channel)
-				assert(TMW.ANN.currentEventSetting)
-				local groupID, iconID = TMW.CI.g, TMW.CI.i
-				if TMW.db then
-					if self.channel == "" or not self.channel then
-						TMW.db.profile.Groups[groupID].Icons[iconID]["ANN" .. TMW.ANN.currentEventSetting] = "\001"
-					else
-						TMW.db.profile.Groups[groupID].Icons[iconID]["ANN" .. TMW.ANN.currentEventSetting] = TMW.ANN.Editbox:GetText() .. "\001" .. self.channel
-					end
-					TMW.IE:ScheduleIconUpdate(groupID, iconID)
-				end
-				TMW.ANN:SetTabText()
-			</OnClick>
-		</Scripts>
-		<NormalFont style="GameFontNormal"/>
-		<HighlightFont style="GameFontHighlight"/>
-		<HighlightTexture file="Interface\QuestFrame\UI-QuestLogTitleHighlight" alphaMode="ADD">
-			<Anchors>
-				<Anchor point="TOPLEFT">
-					<Offset>
-						<AbsDimension x="0" y="1"/>
-					</Offset>
-				</Anchor>
-				<Anchor point="BOTTOMRIGHT">
-					<Offset>
-						<AbsDimension x="0" y="1"/>
-					</Offset>
-				</Anchor>
-			</Anchors>
-		</HighlightTexture>
-		<Layers>
-			<Layer level="OVERLAY">
-				<FontString name="$parentName" parentKey="Name" inherits="GameFontHighlight" justifyH="LEFT" text="Serpent Sting Sting Sting Sting">
-					<Anchors>
-						<Anchor point="LEFT">
-							<Offset x="3" y="0"/>
-						</Anchor>
-						<Anchor point="RIGHT">
-							<Offset x="-1" y="0"/>
-						</Anchor>
-					</Anchors>
-				</FontString>
-			</Layer>
-		</Layers>
-	</Button>
-
 	<Button name="TellMeWhen_SoundEvent" virtual="true" >
 		<Size>
 			<AbsDimension y="30"/>
 		</Size>
 		<Scripts>
-			<OnLoad>
-			--	self.Background:SetVertexColor(0, 1, 0)
-			</OnLoad>
 			<OnClick>
 				TMW.SND:SelectEvent(self:GetID())
 			</OnClick>
-			<OnEnter>
-			--[[	GameTooltip_SetDefaultAnchor(GameTooltip, self)
-				if self.tooltipmethod then
-					GameTooltip[self.tooltipmethod](GameTooltip, self.tooltiparg)
-				elseif self.tooltiptitle then
-					GameTooltip:AddLine(self.tooltiptitle, HIGHLIGHT_FONT_COLOR.r, HIGHLIGHT_FONT_COLOR.g, HIGHLIGHT_FONT_COLOR.b, 1)
-					GameTooltip:AddLine(self.tooltiptext, NORMAL_FONT_COLOR.r, NORMAL_FONT_COLOR.g, NORMAL_FONT_COLOR.b, 1)
-				end
-				GameTooltip:Show()]]
-			</OnEnter>
-			<OnLeave>
-			--	GameTooltip:Hide()
-			</OnLeave>
 		</Scripts>
 		<NormalFont style="GameFontNormal"/>
 		<HighlightFont style="GameFontHighlight"/>
@@ -1469,7 +1393,7 @@
 					<OnClick>
 						local groupID, iconID = TMW.CI.g, TMW.CI.i
 
-						local setting = TMW.db.profile.Groups[groupID].Icons[iconID][self:GetParent().setting] or ""
+						local setting = TMW.db.profile.Groups[groupID].Icons[iconID].Events[self:GetParent().event].Sound or ""
 						local sound
 						if strfind(setting, "%.[^\\]+$") then
 							sound = setting
@@ -1519,6 +1443,56 @@
 		</Layers>
 	</Button>
 	
+	<Button name="TellMeWhen_ChannelSelectButton" virtual="true" >
+		<Size>
+			<AbsDimension y="14"/>
+		</Size>
+		<Scripts>
+			<OnLoad>
+			--	self.Background:SetVertexColor(0, 1, 0)
+			</OnLoad>
+			<OnClick>
+				TMW.ANN:SelectChannel(self.channel)
+				assert(TMW.ANN.currentEvent)
+				local groupID, iconID = TMW.CI.g, TMW.CI.i
+				if TMW.CI.ics then
+					TMW.CI.ics.Events[TMW.ANN.currentEvent].Announce = TMW.ANN.Editbox:GetText() .. "\001" .. (self.channel or "")
+					TMW.IE:ScheduleIconUpdate(groupID, iconID)
+				end
+				TMW.ANN:SetTabText()
+			</OnClick>
+		</Scripts>
+		<NormalFont style="GameFontNormal"/>
+		<HighlightFont style="GameFontHighlight"/>
+		<HighlightTexture file="Interface\QuestFrame\UI-QuestLogTitleHighlight" alphaMode="ADD">
+			<Anchors>
+				<Anchor point="TOPLEFT">
+					<Offset>
+						<AbsDimension x="0" y="1"/>
+					</Offset>
+				</Anchor>
+				<Anchor point="BOTTOMRIGHT">
+					<Offset>
+						<AbsDimension x="0" y="1"/>
+					</Offset>
+				</Anchor>
+			</Anchors>
+		</HighlightTexture>
+		<Layers>
+			<Layer level="OVERLAY">
+				<FontString name="$parentName" parentKey="Name" inherits="GameFontHighlight" justifyH="LEFT" text="Serpent Sting Sting Sting Sting">
+					<Anchors>
+						<Anchor point="LEFT">
+							<Offset x="3" y="0"/>
+						</Anchor>
+						<Anchor point="RIGHT">
+							<Offset x="-1" y="0"/>
+						</Anchor>
+					</Anchors>
+				</FontString>
+			</Layer>
+		</Layers>
+	</Button>
 	<Button name="TellMeWhen_AnnounceEvent" virtual="true" >
 		<Size>
 			<AbsDimension y="30"/>
@@ -3389,8 +3363,6 @@
 					<Anchor point="BOTTOMRIGHT" relativeTo="$parent" relativePoint="BOTTOMRIGHT"/>
 				</Anchors>
 				<Frames>
-
-
 					<Frame name="$parentEvents" parentKey="Events">
 						<Size x="200" y="280"/>
 						<Anchors>
@@ -3398,9 +3370,6 @@
 								<Offset x="20" y="-50"/>
 							</Anchor>
 						</Anchors>
-					<!-- 	<Frames>
-
-						</Frames> -->
 						<Backdrop bgFile="Interface\DialogFrame\UI-DialogBox-Background-Dark" tile="true"/>
 						<Layers>
 							<Layer level="OVERLAY">
@@ -3439,9 +3408,7 @@
 								TMW.SND:SelectEvent(1)
 							</OnLoad>
 						</Scripts>
-					</Frame>
-
-
+					</Frame>	
 					<Frame name="$parentSounds" parentKey="Sounds">
 						<Size x="320" y="266"/>
 						<Anchors>
@@ -3519,8 +3486,6 @@
 							</OnLoad>
 						</Scripts>
 					</Frame>
-
-
 					<EditBox name="$parentCustom" parentKey="Custom" inherits="TellMeWhen_InputBoxTemplate">
 						<Size y="15"/>
 						<Anchors>
@@ -3605,8 +3570,8 @@
 								self:SetText(t)
 								TMW.IE.Sound.Warning:SetText(wt)
 
-								if TMW.db and TMW.SND.currentEventSetting then
-									TMW.db.profile.Groups[groupID].Icons[iconID][TMW.SND.currentEventSetting] = t
+								if TMW.CI.ics and TMW.SND.currentEvent then
+									TMW.CI.ics.Events[TMW.SND.currentEvent].Sound = t
 								end
 								TMW.SND:SelectSound(t)
 								TMW.IE:ScheduleIconUpdate(groupID, iconID)
@@ -3615,37 +3580,6 @@
 							</OnEditFocusLost>
 						</Scripts>
 					</EditBox>
-
-
-					<!-- <Frame name="$parentShowSound" inherits="TellMeWhen_SoundSelectFrame">
-						<Anchors>
-							<Anchor point="TOPLEFT" relativeTo="$parent" relativePoint="TOPLEFT">
-								<Offset x="20" y="-50"/>
-							</Anchor>
-						</Anchors>
-					</Frame>
-					<Frame name="$parentHideSound" inherits="TellMeWhen_SoundSelectFrame">
-						<Anchors>
-							<Anchor point="TOPLEFT" relativeTo="$parentShowSound" relativePoint="TOPRIGHT">
-								<Offset x="20" y="0"/>
-							</Anchor>
-						</Anchors>
-					</Frame>
-					<Frame name="$parentStartSound" inherits="TellMeWhen_SoundSelectFrame">
-						<Anchors>
-							<Anchor point="TOPLEFT" relativeTo="$parentHideSound" relativePoint="TOPRIGHT">
-								<Offset x="20" y="0"/>
-							</Anchor>
-						</Anchors>
-					</Frame>
-					<Frame name="$parentFinishSound" inherits="TellMeWhen_SoundSelectFrame">
-						<Anchors>
-							<Anchor point="TOPLEFT" relativeTo="$parentStartSound" relativePoint="TOPRIGHT">
-								<Offset x="20" y="0"/>
-							</Anchor>
-						</Anchors>
-					</Frame>
-			 -->
 				</Frames>
 				<Layers>
 					<Layer level="OVERLAY">
@@ -3679,8 +3613,6 @@
 					<Anchor point="BOTTOMRIGHT" relativeTo="$parent" relativePoint="BOTTOMRIGHT"/>
 				</Anchors>
 				<Frames>
-
-
 					<EditBox name="$parentEditbox" inherits="TellMeWhen_InputBoxTemplate" parentKey="Editbox" autoFocus="false">
 						<Size>
 							<AbsDimension x="540" y="15"/>
@@ -3702,12 +3634,8 @@
 								EditBox_ClearHighlight(self)
 								local groupID, iconID = TMW.CI.g, TMW.CI.i
 								self:SetText(TMW:CleanString(self:GetText()))
-								if TMW.db then
-									if TMW.ANN.currentChannelSetting == "" or not TMW.ANN.currentChannelSetting then
-										TMW.db.profile.Groups[groupID].Icons[iconID]["ANN" .. TMW.ANN.currentEventSetting] = "\001"
-									else
-										TMW.db.profile.Groups[groupID].Icons[iconID]["ANN" .. TMW.ANN.currentEventSetting] = (self:GetText() or "") .. "\001" .. (TMW.ANN.currentChannelSetting or "")
-									end
+								if TMW.CI.ics and TMW.ANN.currentEvent then
+									TMW.CI.ics.Events[TMW.ANN.currentEvent].Announce = (self:GetText() or "") .. "\001" .. (TMW.ANN.currentChannelSetting or "")
 								end
 								TMW.IE:ScheduleIconUpdate(groupID, iconID)
 								self:GetScript("OnTextChanged")(self)
@@ -3801,7 +3729,6 @@
 							</OnLoad>
 						</Scripts>
 					</Frame>
-					
 				</Frames>
 				<Layers>
 					<Layer level="OVERLAY">

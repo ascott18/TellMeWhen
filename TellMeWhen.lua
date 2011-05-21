@@ -37,7 +37,7 @@ local LSM = LibStub("LibSharedMedia-3.0")
 
 TELLMEWHEN_VERSION = "4.2.1"
 TELLMEWHEN_VERSION_MINOR = ""
-TELLMEWHEN_VERSIONNUMBER = 42100 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
+TELLMEWHEN_VERSIONNUMBER = 42102 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
 if TELLMEWHEN_VERSIONNUMBER > 50000 or TELLMEWHEN_VERSIONNUMBER < 42000 then return end -- safety check because i accidentally made the version number 414069 once
 
 TELLMEWHEN_MAXGROUPS = 1 	--this is a default, used by SetTheory (addon), so dont rename
@@ -220,7 +220,7 @@ TMW.RelevantSettings = {
 	all = {
 		Enabled = true,
 		Type = true,
-		ANN = true,
+		Events = true,
 		Conditions = true,
 	},
 }
@@ -357,14 +357,12 @@ TMW.Defaults = {
 					OnlyInBags			= false,
 					OnlySeen			= false,
 					TotemSlots			= "1111",
-					SoundOnShow			= "None",
-					SoundOnHide			= "None",
-					SoundOnStart		= "None",
-					SoundOnFinish		= "None",
-					ANNOnShow			= "\001",
-					ANNOnHide			= "\001",
-					ANNOnStart			= "\001",
-					ANNOnFinish			= "\001",
+					Events = {
+						["**"] = {
+							Sound = "None",
+							Announce = "\001",
+						},
+					},
 					Conditions = {
 						["**"] = {
 							AndOr = "AND",
@@ -389,11 +387,6 @@ TMW.Defaults = {
 TMW.Group_Defaults = TMW.Defaults.profile.Groups["**"]
 TMW.Icon_Defaults = TMW.Group_Defaults.Icons["**"]
 TMW.Group_Defaults.Conditions = TMW.Icon_Defaults.Conditions
-for k in pairs(TMW.Icon_Defaults) do
-	if strsub(k, 1, 5) == "Sound" or strsub(k, 1, 3) == "ANN" then
-		TMW.RelevantSettings.all[k] = true
-	end
-end
 
 TMW.DS = {
 	Magic = "Interface\\Icons\\spell_fire_immolation",
@@ -842,317 +835,38 @@ local upgradeTable
 function TMW:GetUpgradeTable()
 	if upgradeTable then return upgradeTable end
 	local t = {
-		[12000] = {
-			global = function()
-				db.profile.Spec = nil
-			end,
-		},
-		[15300] = {
+		[42102] = {
 			icon = function(ics)
-				if ics.Alpha > 1 then
-					ics.Alpha = (ics.Alpha / 100)
-				else
-					ics.Alpha = 1
-				end
+				local Events = ics.Events
+				Events.OnShow = {
+					Sound = ics.SoundOnShow,
+					Announce = ics.ANNOnShow,
+				}
+				Events.OnHide = {
+					Sound = ics.SoundOnHide,
+					Announce = ics.ANNOnHide,
+				}
+				Events.OnStart = {
+					Sound = ics.SoundOnStart,
+					Announce = ics.ANNOnStart,
+				}
+				Events.OnFinish = {
+					Sound = ics.SoundOnFinish,
+					Announce = ics.ANNOnFinish,
+				}
+				ics.SoundOnShow		= nil
+				ics.SoundOnHide		= nil
+				ics.SoundOnStart	= nil
+				ics.SoundOnFinish	= nil
+				ics.ANNOnShow		= nil
+				ics.ANNOnHide		= nil
+				ics.ANNOnStart		= nil
+				ics.ANNOnFinish		= nil
 			end,
 		},
-		[15400] = {
-			icon = function(ics)
-				if ics.Alpha == 0.01 then ics.Alpha = 1 end
-			end,
-		},
-		[20100] = {
-			icon = function(ics)
-				for k, v in ipairs(ics.Conditions) do
-					v.ConditionLevel = tonumber(v.ConditionLevel) or 0
-					if ((v.ConditionType == "SOUL_SHARDS") or (v.ConditionType == "HOLY_POWER")) and (v.ConditionLevel > 3) then
-						v.ConditionLevel = ceil((v.ConditionLevel/100)*3)
-					end
-				end
-			end,
-		},
-		[21200] = {
-			icon = function(ics)
-				if ics.WpnEnchantType == "thrown" then
-					ics.WpnEnchantType = "RangedSlot"
-				elseif ics.WpnEnchantType == "offhand" then
-					ics.WpnEnchantType = "SecondaryHandSlot"
-				elseif ics.WpnEnchantType == "mainhand" then --idk why this would happen, but you never know
-					ics.WpnEnchantType = "MainHandSlot"
-				end
-			end,
-		},
-		[22000] = {
-			icon = function(ics)
-				for k, v in ipairs(ics.Conditions) do
-					if ((v.ConditionType == "ICON") or (v.ConditionType == "EXISTS") or (v.ConditionType == "ALIVE")) then
-						v.ConditionLevel = 0
-					end
-				end
-			end,
-		},
-		[22010] = {
-			icon = function(ics)
-				for i, condition in ipairs(ics.Conditions) do
-					for k, v in pairs(condition) do
-						condition[gsub(k, "Condition", "")] = v
-					end
-				end
-			end,
-		},
-		[22100] = {
-			icon = function(ics)
-				if ics.UnitReact and ics.UnitReact ~= 0 then
-					tinsert(ics.Conditions, {
-						Type = "REACT",
-						Level = ics.UnitReact,
-						Unit = "target",
-					})
-				end
-			end,
-		},
-		[23000] = {
-			icon = function(ics)
-				if ics.StackMin ~= TMW.Icon_Defaults.StackMin then
-					ics.StackMinEnabled = true
-				end
-				if ics.StackMax ~= TMW.Icon_Defaults.StackMax then
-					ics.StackMaxEnabled = true
-				end
-			end,
-		},
-		[24000] = {
-			icon = function(ics)
-				ics.Name = gsub(ics.Name, "StunnedOrIncapacitated", "Stunned;Incapacitated")
-				ics.Name = gsub(ics.Name, "IncreasedSPboth", "IncreasedSPsix;IncreasedSPten")
-				if ics.Type == "darksim" then
-					ics.Type = "multistatecd"
-					ics.Name = "77606"
-				end
-			end,
-		},
-		[24100] = {
-			icon = function(ics)
-				if ics.Type == "meta" and type(ics.Icons) == "table" then
-					--make values the data, not the keys, so that we can customize the order that they are checked in
-					for k, v in pairs(ics.Icons) do
-						tinsert(ics.Icons, k)
-						ics.Icons[k] = nil
-					end
-				end
-			end,
-		},
-		[30000] = {
-			global = function()
-				db.profile.NumGroups = 10
-				db.profile.Condensed = nil
-				db.profile.NumCondits = nil
-				db.profile.DSN = nil
-				db.profile.UNUSEColor = nil
-				db.profile.USEColor = nil
-				if db.profile.Font.Outline == "THICK" then db.profile.Font.Outline = "THICKOUTLINE" end --oops
-			end,
+		[41402] = {
 			group = function(gs)
-				gs.LBFGroup = nil
-				if gs.Stance then
-					for k, v in pairs(gs.Stance) do
-						if CSN[k] then
-							if v then -- everything switched in this version
-								gs.Stance[CSN[k]] = false
-							else
-								gs.Stance[CSN[k]] = true
-							end
-							gs.Stance[k] = nil
-						end
-					end
-				end
-			end,
-			icon = function(ics, groupID, iconID)
-				for k in pairs({
-					OORColor = true,
-					OOMColor = true,
-					Color = true,
-					ColorOverride = true,
-					UnColor = true,
-					DurationAndCD = true,
-					Shapeshift = true, -- i used this one during some initial testing for shapeshifts
-					UnitReact = true,
-				}) do
-					ics[k] = nil
-				end
-
-				-- this is part of the old CondenseSettings (but modified slightly), just to get rid of values that are defined in the saved variables that dont need to be (basically, they were set automatically on accident, most of them in early versions)
-				local nondefault = 0
-				local n = 0
-				for s, v in pairs(ics) do
-					if (type(v) ~= "table" and v ~= TMW.Icon_Defaults[s]) or (type(v) == "table" and #v ~= 0) then
-						nondefault = nondefault + 1
-						if (s == "Enabled") or (s == "ShowTimerText") then
-							n = n+1
-						end
-					end
-				end
-				if n == nondefault then
-					db.profile.Groups[groupID].Icons[iconID] = nil
-				end
-			end,
-		},
-		[40000] = {
-			global = function()
-				db.profile.Spacing = nil
-				db.profile.Locked = false
-			end,
-			group = function(gs)
-				gs.Spacing = db.profile.Spacing or 0
-			end,
-			icon = function(ics)
-				if ics.Type == "icd" then
-					ics.CooldownShowWhen = ics.ICDShowWhen
-					ics.ICDShowWhen = "usable" -- default, to make it go away safely
-				end
-			end,
-		},
-		[40010] = {
-			icon = function(ics)
-				if ics.Type == "multistatecd" then
-					ics.Type = "cooldown"
-					ics.CooldownType = "multistate"
-				end
-			end,
-		},
-		[40060] = {
-			global = function()
-				db.profile.Texture = nil --now i get the texture from LSM the right way instead of saving the texture path
-			end,
-		},
-		[40080] = {
-			group = function(gs)
-				if gs.Stance and (gs.Stance[L["NONE"]] == false or gs.Stance[L["CASTERFORM"]] == false) then
-					gs.Stance[L["NONE"]] = nil
-					gs.Stance[L["CASTERFORM"]] = nil
-					gs.Stance[NONE] = false 
-				end
-			end,
-			icon = function(ics)
-				ics.StackMin = floor(ics.StackMin)
-				ics.StackMax = floor(ics.StackMax)
-				for k, v in pairs(ics.Conditions) do
-					if v.Type == "ECLIPSE_DIRECTION" and v.Level == -1 then
-						v.Level = 0
-					end
-				end
-			end,
-		},
-		[40100] = {
-			global = function()
-				db.profile["BarGCD"] = true
-				db.profile["ClockGCD"] = true
-			end,
-			icon = function(ics)
-				for k, condition in pairs(ics.Conditions) do
-					if condition.Type == "NAME" then
-						condition.Level = 0
-					end
-				end
-			end,
-		},
-		[40106] = {
-			icon = function(ics)
-				for k, condition in pairs(ics.Conditions) do
-					if condition.Type == "ITEMINBAGS" then
-						if condition.Level == 0 then
-							condition.Operator = ">"
-						elseif condition.Level == 1 then
-							condition.Operator = "=="
-							condition.Level = 0
-						end
-					end
-				end
-			end,
-		},
-		[40111] = {
-			icon = function(ics)
-				ics.Unit = TMW:CleanString((ics.Unit .. ";"):	-- it wont change things at the end of the unit string without a character after the unit at the end
-				gsub("raid[^%d]", "raid1-25;"):
-				gsub( "party[^%d]", "party1-4;"):
-				gsub("arena[^%d]", "arena1-5;"):
-				gsub("boss[^%d]", "boss1-4;"):
-				gsub("maintank[^%d]", "maintank1-5;"):
-				gsub("mainassist[^%d]", "mainassist1-5;"))
-			end,
-		},
-		[40112] = {
-			icon = function(ics)
-				for k, condition in pairs(ics.Conditions) do
-					if condition.Type == "CASTING" then
-						condition.Level = condition.Level + 1
-					end
-				end
-			end,
-		},
-		[40115] = {
-			icon = function(ics)
-				for k, condition in pairs(ics.Conditions) do
-					if condition.Type == "BUFF" or condition.Type == "DEBUFF" then
-						if condition.Level == 0 then
-							condition.Operator = ">"
-						elseif condition.Level == 1 then
-							condition.Operator = "=="
-							condition.Level = 0
-						end
-					end
-				end
-			end,
-		},
-		[40124] = {
-			global = function()
-				db.profile.Revision = nil-- unused
-			end,
-		},
-		[41004] = {
-			icon = function(ics)
-				for k, condition in pairs(ics.Conditions) do
-					if condition.Type == "BUFF" then
-						condition.Type = "BUFFSTACKS"
-					elseif condition.Type == "DEBUFF" then
-						condition.Type = "DEBUFFSTACKS"
-					end
-				end
-			end,
-		},
-		[41005] = {
-			icon = function(ics)
-				ics.ConditionAlpha = 0
-			end,
-		},
-		[41008] = {
-			icon = function(ics)
-				for k, condition in pairs(ics.Conditions) do
-					if condition.Type == "SPELLCD" or condition.Type == "ITEMCD" then
-						if condition.Level == 0 then
-							condition.Operator = "=="
-						elseif condition.Level == 1 then
-							condition.Operator = ">"
-							condition.Level = 0
-						end
-					elseif condition.Type == "MAINHAND" or condition.Type == "OFFHAND" or condition.Type == "THROWN" then
-						if condition.Level == 0 then
-							condition.Operator = ">"
-						elseif condition.Level == 1 then
-							condition.Operator = "=="
-							condition.Level = 0
-						end
-					end
-				end
-			end,
-		},
-		[41206] = {
-			icon = function(ics)
-				for k, condition in pairs(ics.Conditions) do
-					if condition.Type == "STANCE" then
-						condition.Operator = "=="
-					end
-				end
+				gs.Point.defined = nil
 			end,
 		},
 		[41301] = {
@@ -1218,11 +932,320 @@ function TMW:GetUpgradeTable()
 				end
 			end,
 		},
-		[41402] = {
-			group = function(gs)
-				gs.Point.defined = nil
+		[41206] = {
+			icon = function(ics)
+				for k, condition in pairs(ics.Conditions) do
+					if condition.Type == "STANCE" then
+						condition.Operator = "=="
+					end
+				end
 			end,
-		}, 
+		},
+		[41008] = {
+			icon = function(ics)
+				for k, condition in pairs(ics.Conditions) do
+					if condition.Type == "SPELLCD" or condition.Type == "ITEMCD" then
+						if condition.Level == 0 then
+							condition.Operator = "=="
+						elseif condition.Level == 1 then
+							condition.Operator = ">"
+							condition.Level = 0
+						end
+					elseif condition.Type == "MAINHAND" or condition.Type == "OFFHAND" or condition.Type == "THROWN" then
+						if condition.Level == 0 then
+							condition.Operator = ">"
+						elseif condition.Level == 1 then
+							condition.Operator = "=="
+							condition.Level = 0
+						end
+					end
+				end
+			end,
+		},
+		[41005] = {
+			icon = function(ics)
+				ics.ConditionAlpha = 0
+			end,
+		},
+		[41004] = {
+			icon = function(ics)
+				for k, condition in pairs(ics.Conditions) do
+					if condition.Type == "BUFF" then
+						condition.Type = "BUFFSTACKS"
+					elseif condition.Type == "DEBUFF" then
+						condition.Type = "DEBUFFSTACKS"
+					end
+				end
+			end,
+		},
+		[40124] = {
+			global = function()
+				db.profile.Revision = nil-- unused
+			end,
+		},
+		[40115] = {
+			icon = function(ics)
+				for k, condition in pairs(ics.Conditions) do
+					if condition.Type == "BUFF" or condition.Type == "DEBUFF" then
+						if condition.Level == 0 then
+							condition.Operator = ">"
+						elseif condition.Level == 1 then
+							condition.Operator = "=="
+							condition.Level = 0
+						end
+					end
+				end
+			end,
+		},
+		[40112] = {
+			icon = function(ics)
+				for k, condition in pairs(ics.Conditions) do
+					if condition.Type == "CASTING" then
+						condition.Level = condition.Level + 1
+					end
+				end
+			end,
+		},
+		[40111] = {
+			icon = function(ics)
+				ics.Unit = TMW:CleanString((ics.Unit .. ";"):	-- it wont change things at the end of the unit string without a character after the unit at the end
+				gsub("raid[^%d]", "raid1-25;"):
+				gsub( "party[^%d]", "party1-4;"):
+				gsub("arena[^%d]", "arena1-5;"):
+				gsub("boss[^%d]", "boss1-4;"):
+				gsub("maintank[^%d]", "maintank1-5;"):
+				gsub("mainassist[^%d]", "mainassist1-5;"))
+			end,
+		},
+		[40106] = {
+			icon = function(ics)
+				for k, condition in pairs(ics.Conditions) do
+					if condition.Type == "ITEMINBAGS" then
+						if condition.Level == 0 then
+							condition.Operator = ">"
+						elseif condition.Level == 1 then
+							condition.Operator = "=="
+							condition.Level = 0
+						end
+					end
+				end
+			end,
+		},
+		[40100] = {
+			global = function()
+				db.profile["BarGCD"] = true
+				db.profile["ClockGCD"] = true
+			end,
+			icon = function(ics)
+				for k, condition in pairs(ics.Conditions) do
+					if condition.Type == "NAME" then
+						condition.Level = 0
+					end
+				end
+			end,
+		},
+		[40080] = {
+			group = function(gs)
+				if gs.Stance and (gs.Stance[L["NONE"]] == false or gs.Stance[L["CASTERFORM"]] == false) then
+					gs.Stance[L["NONE"]] = nil
+					gs.Stance[L["CASTERFORM"]] = nil
+					gs.Stance[NONE] = false 
+				end
+			end,
+			icon = function(ics)
+				ics.StackMin = floor(ics.StackMin)
+				ics.StackMax = floor(ics.StackMax)
+				for k, v in pairs(ics.Conditions) do
+					if v.Type == "ECLIPSE_DIRECTION" and v.Level == -1 then
+						v.Level = 0
+					end
+				end
+			end,
+		},
+		[40060] = {
+			global = function()
+				db.profile.Texture = nil --now i get the texture from LSM the right way instead of saving the texture path
+			end,
+		},
+		[40010] = {
+			icon = function(ics)
+				if ics.Type == "multistatecd" then
+					ics.Type = "cooldown"
+					ics.CooldownType = "multistate"
+				end
+			end,
+		},
+		[40000] = {
+			global = function()
+				db.profile.Spacing = nil
+				db.profile.Locked = false
+			end,
+			group = function(gs)
+				gs.Spacing = db.profile.Spacing or 0
+			end,
+			icon = function(ics)
+				if ics.Type == "icd" then
+					ics.CooldownShowWhen = ics.ICDShowWhen
+					ics.ICDShowWhen = "usable" -- default, to make it go away safely
+				end
+			end,
+		},
+		[30000] = {
+			global = function()
+				db.profile.NumGroups = 10
+				db.profile.Condensed = nil
+				db.profile.NumCondits = nil
+				db.profile.DSN = nil
+				db.profile.UNUSEColor = nil
+				db.profile.USEColor = nil
+				if db.profile.Font.Outline == "THICK" then db.profile.Font.Outline = "THICKOUTLINE" end --oops
+			end,
+			group = function(gs)
+				gs.LBFGroup = nil
+				if gs.Stance then
+					for k, v in pairs(gs.Stance) do
+						if CSN[k] then
+							if v then -- everything switched in this version
+								gs.Stance[CSN[k]] = false
+							else
+								gs.Stance[CSN[k]] = true
+							end
+							gs.Stance[k] = nil
+						end
+					end
+				end
+			end,
+			icon = function(ics, groupID, iconID)
+				for k in pairs({
+					OORColor = true,
+					OOMColor = true,
+					Color = true,
+					ColorOverride = true,
+					UnColor = true,
+					DurationAndCD = true,
+					Shapeshift = true, -- i used this one during some initial testing for shapeshifts
+					UnitReact = true,
+				}) do
+					ics[k] = nil
+				end
+
+				-- this is part of the old CondenseSettings (but modified slightly), just to get rid of values that are defined in the saved variables that dont need to be (basically, they were set automatically on accident, most of them in early versions)
+				local nondefault = 0
+				local n = 0
+				for s, v in pairs(ics) do
+					if (type(v) ~= "table" and v ~= TMW.Icon_Defaults[s]) or (type(v) == "table" and #v ~= 0) then
+						nondefault = nondefault + 1
+						if (s == "Enabled") or (s == "ShowTimerText") then
+							n = n+1
+						end
+					end
+				end
+				if n == nondefault then
+					db.profile.Groups[groupID].Icons[iconID] = nil
+				end
+			end,
+		},
+		[24100] = {
+			icon = function(ics)
+				if ics.Type == "meta" and type(ics.Icons) == "table" then
+					--make values the data, not the keys, so that we can customize the order that they are checked in
+					for k, v in pairs(ics.Icons) do
+						tinsert(ics.Icons, k)
+						ics.Icons[k] = nil
+					end
+				end
+			end,
+		},
+		[24000] = {
+			icon = function(ics)
+				ics.Name = gsub(ics.Name, "StunnedOrIncapacitated", "Stunned;Incapacitated")
+				ics.Name = gsub(ics.Name, "IncreasedSPboth", "IncreasedSPsix;IncreasedSPten")
+				if ics.Type == "darksim" then
+					ics.Type = "multistatecd"
+					ics.Name = "77606"
+				end
+			end,
+		},
+		[23000] = {
+			icon = function(ics)
+				if ics.StackMin ~= TMW.Icon_Defaults.StackMin then
+					ics.StackMinEnabled = true
+				end
+				if ics.StackMax ~= TMW.Icon_Defaults.StackMax then
+					ics.StackMaxEnabled = true
+				end
+			end,
+		},
+		[22100] = {
+			icon = function(ics)
+				if ics.UnitReact and ics.UnitReact ~= 0 then
+					tinsert(ics.Conditions, {
+						Type = "REACT",
+						Level = ics.UnitReact,
+						Unit = "target",
+					})
+				end
+			end,
+		},
+		[22010] = {
+			icon = function(ics)
+				for i, condition in ipairs(ics.Conditions) do
+					for k, v in pairs(condition) do
+						condition[gsub(k, "Condition", "")] = v
+					end
+				end
+			end,
+		},
+		[22000] = {
+			icon = function(ics)
+				for k, v in ipairs(ics.Conditions) do
+					if ((v.ConditionType == "ICON") or (v.ConditionType == "EXISTS") or (v.ConditionType == "ALIVE")) then
+						v.ConditionLevel = 0
+					end
+				end
+			end,
+		},
+		[21200] = {
+			icon = function(ics)
+				if ics.WpnEnchantType == "thrown" then
+					ics.WpnEnchantType = "RangedSlot"
+				elseif ics.WpnEnchantType == "offhand" then
+					ics.WpnEnchantType = "SecondaryHandSlot"
+				elseif ics.WpnEnchantType == "mainhand" then --idk why this would happen, but you never know
+					ics.WpnEnchantType = "MainHandSlot"
+				end
+			end,
+		},
+		[20100] = {
+			icon = function(ics)
+				for k, v in ipairs(ics.Conditions) do
+					v.ConditionLevel = tonumber(v.ConditionLevel) or 0
+					if ((v.ConditionType == "SOUL_SHARDS") or (v.ConditionType == "HOLY_POWER")) and (v.ConditionLevel > 3) then
+						v.ConditionLevel = ceil((v.ConditionLevel/100)*3)
+					end
+				end
+			end,
+		},
+		[15400] = {
+			icon = function(ics)
+				if ics.Alpha == 0.01 then ics.Alpha = 1 end
+			end,
+		},
+		[15300] = {
+			icon = function(ics)
+				if ics.Alpha > 1 then
+					ics.Alpha = (ics.Alpha / 100)
+				else
+					ics.Alpha = 1
+				end
+			end,
+		},
+		[12000] = {
+			global = function()
+				db.profile.Spec = nil
+			end,
+		},
+		
 	}
 	
 	upgradeTable = {}
@@ -1665,20 +1688,20 @@ end	TMW.OnGCD = OnGCD
 local function SetAlpha(icon, alpha)
 	if alpha ~= icon.__alpha then
 		if alpha == 0 then
-			local Sound = icon.SoundOnHide
+			local Sound = icon.OnHideSound
 			if Sound then
 				PlaySoundFile(Sound, SndChan)
 			end
-			local ANN = icon.ANNOnHide
+			local ANN = icon.OnHideAnnounce
 			if ANN then
 				SendChatMessage(strsplit("\001", ANN))
 			end
 		elseif icon.FakeAlpha == 0 then
-			local Sound = icon.SoundOnShow
+			local Sound = icon.OnShowSound
 			if Sound then
 				PlaySoundFile(Sound, SndChan)
 			end
-			local ANN = icon.ANNOnShow
+			local ANN = icon.OnShowAnnounce
 			if ANN then
 				SendChatMessage(strsplit("\001", ANN))
 			end
@@ -1823,23 +1846,23 @@ local function SetInfo(icon, alpha, color, texture, start, duration, checkGCD, p
 
 	if alpha ~= icon.__alpha then
 		if alpha == 0 then
-			local Sound = icon.SoundOnHide
+			local Sound = icon.OnHideSound 
 			if Sound then
 				PlaySoundFile(Sound, SndChan)
 				played = true
 			end
-			local ANN = icon.ANNOnHide
+			local ANN = icon.OnHideAnnounce
 			if ANN then
 				SendChatMessage(strsplit("\001", ANN))
 				announced = true
 			end
 		elseif icon.FakeAlpha == 0 then
-			local Sound = icon.SoundOnShow
+			local Sound = icon.OnShowSound
 			if Sound then
 				PlaySoundFile(Sound, SndChan)
 				played = true
 			end
-			local ANN = icon.ANNOnShow
+			local ANN = icon.OnShowAnnounce
 			if ANN then
 				SendChatMessage(strsplit("\001", ANN))
 				announced = true
@@ -1868,20 +1891,20 @@ local function SetInfo(icon, alpha, color, texture, start, duration, checkGCD, p
 		local realDuration = isGCD and 0 or duration
 		if icon.__realDuration ~= realDuration then
 			if realDuration == 0 then
-				local Sound = icon.SoundOnFinish
+				local Sound = icon.OnFinishSound
 				if Sound and not played then
 					PlaySoundFile(Sound, SndChan)
 				end
-				local ANN = icon.ANNOnFinish
+				local ANN = icon.OnFinishAnnounce
 				if ANN and not announced then
 					SendChatMessage(strsplit("\001", ANN))
 				end
 			else
-				local Sound = icon.SoundOnStart
+				local Sound = icon.OnStartSound
 				if Sound and not played then
 					PlaySoundFile(Sound, SndChan)
 				end
-				local ANN = icon.ANNOnStart
+				local ANN = icon.OnStartAnnounce
 				if ANN and not announced then
 					SendChatMessage(strsplit("\001", ANN))
 				end
@@ -2177,28 +2200,36 @@ function TMW:Icon_Update(icon)
 			icon[k] = db.profile.Groups[groupID].Icons[iconID][k]
 		end
 	end
-	for k, v in pairs(icon) do
-		if strsub(k, 1, 5) == "Sound" then
-			if v == "" or v == "Interface\\Quiet.ogg" or v == "None" then
-				icon[k] = nil
-			elseif strfind(v, "%.[^\\]+$") then
-				-- http://www.youtube.com/watch?v=tfslY_AvhLw
-			else
-				local s = LSM:Fetch("sound", v)
-				if s and s ~= "Interface\\Quiet.ogg" and s ~= "" then
-					icon[k] = s
+	
+	local dontremove
+	for event, actions in pairs(icon.Events) do
+		for action, data in pairs(actions) do
+			if action == "Sound" then
+				if data == "" or data == "Interface\\Quiet.ogg" or data == "None" then
+					-- dont set it on the icon
+				elseif strfind(data, "%.[^\\]+$") then
+					icon[event..action] = data
+					dontremove = 1
 				else
-					print("Hmmm, it seems that this sound setting managed to make it past all the checks for invalidness (or it is a LSM sound that doesnt exist anymore:", v)
+					local s = LSM:Fetch("sound", data)
+					if s and s ~= "Interface\\Quiet.ogg" and s ~= "" then
+						icon[event..action] = s
+						dontremove = 1
+					else
+						print("Hmmm, it seems that this sound setting managed to make it past all the checks for invalidness (or it is a LSM sound that doesnt exist anymore:", v)
+					end
+				end
+			elseif action == "Announce" and type(data) == "string" then
+				local text, channel = strsplit("\001", data)
+				if #text > 0 and #channel > 0 and _G["CHAT_MSG_" .. channel] then
+					icon[event..action] = data
+					dontremove = 1
 				end
 			end
-		elseif strsub(k, 1, 3) == "ANN" and type(v) == "string" then
-			local text, channel = strsplit("\001", v)
-			if #text > 0 and #channel > 0 and _G["CHAT_MSG_" .. channel] then
-				-- http://www.youtube.com/watch?v=tfslY_AvhLw
-			else
-				icon[k] = nil
-			end
 		end
+	end
+	if icon.FakeHidden and not dontremove then
+		tDeleteItem(IconUpdateFuncs, icon)
 	end
 
 	icon.UpdateTimer 	= 0
@@ -2319,15 +2350,6 @@ function TMW:Icon_Update(icon)
 				icon:SetTexture(nil)
 			end
 		end
-	end
-
-	if icon.FakeHidden and
-	not (icon.SoundOnShow or icon.SoundOnHide or icon.SoundOnStart or icon.SoundOnFinish) and
-	not (icon.ANNOnShow or icon.ANNOnHide or icon.ANNOnStart or icon.ANNOnFinish)
-		then
-		-- dont bother updating an icon that is fake hidden and doesnt have any sounds/announces on its own because metas and icon shown conditions will update it when needed, instead of updating all the time
-		-- remove it from the list of scripts to run on update, but dont call SetScript on it because that will remove it and set icon.OnUpdate to nil, which is called by conditions/metas
-		tDeleteItem(IconUpdateFuncs, icon)
 	end
 
 	icon:SetInfo(1, 1, nil, 0, 0) -- alpha is set to 1 here so it doesnt return early

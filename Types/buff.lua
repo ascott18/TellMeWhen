@@ -163,7 +163,7 @@ local function Buff_OnUpdate(icon, time)
 					end
 				end
 				if buffName and not Sort then
-					return
+					break
 				end
 			end
 		end

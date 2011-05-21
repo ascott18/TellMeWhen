@@ -150,6 +150,7 @@
 					TMW.CI.i = self:GetID()		-- yay for dirty hacks
 					TMW.CI.g = self:GetParent():GetID()
 					TMW.CI.ic = self
+					TMW.CI.ics = TMW.db and TMW.db.profile.Groups[TMW.CI.g].Icons[TMW.CI.i]
 					TMW.CI.t = self.Type
 					TMW.IE:Load()
 				end
