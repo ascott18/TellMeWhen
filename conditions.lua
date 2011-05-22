@@ -312,6 +312,19 @@ local function AuraStacks(unit, name, filter)
 	end
 end
 
+local function AuraCount(unit, name, filter)
+	local n = 0
+	for i = 1, 60 do
+		local buffName = UnitAura(unit, i, filter)
+		if not buffName then
+			return n
+		elseif strlower(buffName) == name then
+			n = n + 1
+		end
+	end
+	return n
+end
+
 local huge = math.huge
 local function AuraDur(unit, name, filter, time)
 	local buffName, _, _, _, _, duration, expirationTime = UnitAura(unit, name, nil, filter)
@@ -370,6 +383,7 @@ Env = {
 	
 	AuraStacks = AuraStacks,
 	AuraDur = AuraDur,
+	AuraCount = AuraCount,
 	CooldownDuration = CooldownDuration,
 	TotemDuration = TotemDuration,
 	ItemCooldownDuration = ItemCooldownDuration,
@@ -875,34 +889,6 @@ CNDT.Types = {
 
 -------------------------------------icon functions
 
-	{ -- icon shown
-		text = L["CONDITIONPANEL_ICON"],
-		tooltip = L["CONDITIONPANEL_ICON_DESC"],
-		value = "ICON",
-		category = L["ICONFUNCTIONS"],
-		min = 0,
-		max = 1,
-		texttable = bool,
-		isicon = true,
-		nooperator = true,
-		unit = false,
-		icon = "Interface\\Icons\\INV_Misc_PocketWatch_01",
-		tcoords = standardtcoords,
-		showhide = function(group)
-			group.TextUnitOrIcon:SetText(L["ICONTOCHECK"])
-			group.Icon:Show()
-		end,
-		funcstr = function(c)
-			if c.Icon == "" then return [[true]] end
-			local str = [[(c.Icon and c.Icon.__shown and c.Icon.OnUpdate and not c.Icon:OnUpdate(time))]]
-			if c.Level == 0 then
-				str = str .. [[and c.Icon.FakeAlpha > 0]]
-			else
-				str = str .. [[and c.Icon.FakeAlpha == 0]]
-			end
-			return gsub(str, "c.Icon", c.Icon)
-		end,
-	},
 	{ -- spell cooldown
 		text = L["ICONMENU_COOLDOWN"] .. " - " .. L["ICONMENU_SPELL"],
 		value = "SPELLCD",
@@ -916,7 +902,7 @@ CNDT.Types = {
 		icon = "Interface\\Icons\\spell_holy_divineintervention",
 		tcoords = standardtcoords,
 		funcstr = [[CooldownDuration(c.NameFirst, time) c.Operator c.Level]],
-		spacebefore = true,
+--		spacebefore = true,
 	},
 	{ -- reactive
 		text = L["ICONMENU_REACTIVE"],
@@ -1061,6 +1047,23 @@ CNDT.Types = {
 			return [[AuraStacks(c.Unit, c.NameName, "HELPFUL]] .. (c.Checked and "|PLAYER" or "") .. [[") c.Operator c.Level]]
 		end,
 	},
+	{ -- unit buff number
+		text = L["ICONMENU_BUFF"] .. " - " .. L["NUMAURAS"],
+		tooltip = L["NUMAURAS_DESC"],
+		value = "BUFFNUMBER",
+		category = L["ICONFUNCTIONS"],
+		min = 0,
+		max = 20,
+		name = function(editbox) TMW:TT(editbox, L["ICONMENU_BUFF"] .. " - " .. L["NUMAURAS"], "BUFFCNDT_DESC", 1, nil, 1) end,
+		useSUG = true,
+		check = function(check) TMW:TT(check, "ONLYCHECKMINE", "ONLYCHECKMINE_DESC", nil, nil, 1) end,
+		texttable = setmetatable({}, {__index = function(tbl, k) return format(L["ACTIVE"], k) end}),
+		icon = "Interface\\Icons\\ability_paladin_sacredcleansing",
+		tcoords = standardtcoords,
+		funcstr = function(c)
+			return [[AuraCount(c.Unit, "]]..strlower(TMW:GetSpellNames(nil, c.Name, 1, 1))..[[", "HELPFUL]] .. (c.Checked and "|PLAYER" or "") .. [[") c.Operator c.Level]]
+		end,
+	},
 	{ -- unit debuff duration
 		text = L["ICONMENU_DEBUFF"] .. " - " .. L["DURATIONPANEL_TITLE"],
 		value = "DEBUFFDUR",
@@ -1091,6 +1094,23 @@ CNDT.Types = {
 		tcoords = standardtcoords,
 		funcstr = function(c)
 			return [[AuraStacks(c.Unit, c.NameName, "HARMFUL]] .. (c.Checked and "|PLAYER" or "") .. [[") c.Operator c.Level]]
+		end,
+	},
+	{ -- unit debuff number
+		text = L["ICONMENU_DEBUFF"] .. " - " .. L["NUMAURAS"],
+		tooltip = L["NUMAURAS_DESC"],
+		value = "DEBUFFNUMBER",
+		category = L["ICONFUNCTIONS"],
+		min = 0,
+		max = 20,
+		name = function(editbox) TMW:TT(editbox, L["ICONMENU_DEBUFF"] .. " - " .. L["NUMAURAS"], "BUFFCNDT_DESC", 1, nil, 1) end,
+		useSUG = true,
+		check = function(check) TMW:TT(check, "ONLYCHECKMINE", "ONLYCHECKMINE_DESC", nil, nil, 1) end,
+		texttable = setmetatable({}, {__index = function(tbl, k) return format(L["ACTIVE"], k) end}),
+		icon = "Interface\\Icons\\spell_deathknight_frostfever",
+		tcoords = standardtcoords,
+		funcstr = function(c)
+			return [[AuraCount(c.Unit, "]]..strlower(TMW:GetSpellNames(nil, c.Name, 1, 1))..[[", "HARMFUL]] .. (c.Checked and "|PLAYER" or "") .. [[") c.Operator c.Level]]
 		end,
 	},
 	
@@ -1488,11 +1508,38 @@ CNDT.Types = {
 		funcstr = [[CurrentTree c.Operator c.Level]],
 	},
 	
-	{ -- talent tree
+	{ -- icon shown
+		text = L["CONDITIONPANEL_ICON"],
+		tooltip = L["CONDITIONPANEL_ICON_DESC"],
+		value = "ICON",
+		spacebefore = true,
+		min = 0,
+		max = 1,
+		texttable = bool,
+		isicon = true,
+		nooperator = true,
+		unit = false,
+		icon = "Interface\\Icons\\INV_Misc_PocketWatch_01",
+		tcoords = standardtcoords,
+		showhide = function(group)
+			group.TextUnitOrIcon:SetText(L["ICONTOCHECK"])
+			group.Icon:Show()
+		end,
+		funcstr = function(c)
+			if c.Icon == "" then return [[true]] end
+			local str = [[(c.Icon and c.Icon.__shown and c.Icon.OnUpdate and not c.Icon:OnUpdate(time))]]
+			if c.Level == 0 then
+				str = str .. [[and c.Icon.FakeAlpha > 0]]
+			else
+				str = str .. [[and c.Icon.FakeAlpha == 0]]
+			end
+			return gsub(str, "c.Icon", c.Icon)
+		end,
+	},
+	{ -- Lua
 		text = L["LUACONDITION"],
 		tooltip = L["LUACONDITION_DESC"],
 		value = "LUA",
-		spacebefore = true,
 		min = 0,
 		max = 1,
 		nooperator = true,

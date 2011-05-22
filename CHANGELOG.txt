@@ -7,6 +7,8 @@
  ** SCT (Scrolling Combat Text by Grayhoof)
  ** MikSBT
  ** Parrot
+ * New Conditions:
+ ** Buff/Debuff - Number of - This conditions tracks the number of a buff or debuff that are active on a unit. This is not the number of stacks, but rather the actual number of auras (3 warlocks in your raid cast 3 corruptions, etc.).
 
 ===v4.2.0===
  * New feature: Announcements. This allows you to announce something to WoW's chat (say, yell, party, raid, guild, emote, etc) when icon events are triggered (the same events that sounds already use).

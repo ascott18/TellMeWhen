@@ -37,7 +37,7 @@ local LSM = LibStub("LibSharedMedia-3.0")
 
 TELLMEWHEN_VERSION = "4.2.1"
 TELLMEWHEN_VERSION_MINOR = ""
-TELLMEWHEN_VERSIONNUMBER = 42104 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
+TELLMEWHEN_VERSIONNUMBER = 42106 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
 if TELLMEWHEN_VERSIONNUMBER > 50000 or TELLMEWHEN_VERSIONNUMBER < 42000 then return end -- safety check because i accidentally made the version number 414069 once
 
 TELLMEWHEN_MAXGROUPS = 1 	--this is a default, used by SetTheory (addon), so dont rename
@@ -951,7 +951,7 @@ local upgradeTable
 function TMW:GetUpgradeTable()
 	if upgradeTable then return upgradeTable end
 	local t = {
-		[42104] = {
+		[42105] = {
 			-- cleanup some old stuff that i noticed is sticking around in my settings, probably in other peoples' settings too
 			icon = function(ics)
 				for _, condition in pairs(ics.Conditions) do
@@ -961,6 +961,11 @@ function TMW:GetUpgradeTable()
 						end
 					end
 					condition.Names = nil
+				end
+				for _, t in pairs(ics.Events) do
+					if t.Sound == "" then -- major screw up
+						t.Sound = "None"
+					end
 				end
 			end,
 		},
@@ -978,19 +983,19 @@ function TMW:GetUpgradeTable()
 			icon = function(ics)
 				local Events = ics.Events
 				Events.OnShow = {
-					Sound = ics.SoundOnShow or "",
+					Sound = ics.SoundOnShow or "None",
 					Announce = ics.ANNOnShow or "\001",
 				}
 				Events.OnHide = {
-					Sound = ics.SoundOnHide or "",
+					Sound = ics.SoundOnHide or "None",
 					Announce = ics.ANNOnHide or "\001",
 				}
 				Events.OnStart = {
-					Sound = ics.SoundOnStart or "",
+					Sound = ics.SoundOnStart or "None",
 					Announce = ics.ANNOnStart or "\001",
 				}
 				Events.OnFinish = {
-					Sound = ics.SoundOnFinish or "",
+					Sound = ics.SoundOnFinish or "None",
 					Announce = ics.ANNOnFinish or "\001",
 				}
 				ics.SoundOnShow		= nil

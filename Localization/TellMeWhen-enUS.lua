@@ -404,6 +404,12 @@ L["CONDITIONPANEL_REMOVE"] = "Remove this condition"
 L["CONDITIONPANEL_ADD"] = "Add a condition"
 L["PARENTHESISWARNING"] = "# of opening and closing parentheses isn't equal!"
 L["PARENTHESISWARNING2"] = "Some closing parentheses are missing openers!"
+L["NUMAURAS"] = "Number of"
+L["ACTIVE"] = "%d Active"
+L["NUMAURAS_DESC"] = [[This condition checks the number of an aura active - not to be confused with the number of stacks of an aura.
+This is for checking things like if you have both weapon enchant procs active at the same time.
+Use sparingly, as the process used to count the numbers is a bit CPU intensive.]]
+
 
 
 
