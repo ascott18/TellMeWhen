@@ -33,6 +33,10 @@ move-folders:
     TellMeWhen/TellMeWhen_Options: TellMeWhen_Options
 
 ignore:
+    - scrapper.lua
+    - USEDLOCALE.lua
     - Lib
     - TellMeWhen_Options/Lib
+    - TellMeWhen_Options/scrapper.lua
+    - TellMeWhen_Options/USEDLOCALE.lua
     - Scripts

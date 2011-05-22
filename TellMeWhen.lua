@@ -37,7 +37,7 @@ local LSM = LibStub("LibSharedMedia-3.0")
 
 TELLMEWHEN_VERSION = "4.2.1"
 TELLMEWHEN_VERSION_MINOR = ""
-TELLMEWHEN_VERSIONNUMBER = 42106 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
+TELLMEWHEN_VERSIONNUMBER = 42107 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
 if TELLMEWHEN_VERSIONNUMBER > 50000 or TELLMEWHEN_VERSIONNUMBER < 42000 then return end -- safety check because i accidentally made the version number 414069 once
 
 TELLMEWHEN_MAXGROUPS = 1 	--this is a default, used by SetTheory (addon), so dont rename
@@ -799,15 +799,19 @@ end
 
 function TMW:ShutdownProfile()
 	-- the current icon might not exist in the new profile
-	for k, v in pairs(TMW.CI) do
-		TMW.CI[k] = nil
+	if TMW.CI then
+		for k, v in pairs(TMW.CI) do
+			TMW.CI[k] = nil
+		end
+		TellMeWhen_IconEditor:Hide()
 	end
-	TellMeWhen_IconEditor:Hide()
 	
 	-- get rid of settings that are stored in database tables for convenience, but dont need to be kept.
 	for ics in TMW:InIconSettings() do
-		for _, t in pairs(ics.Events) do
-			t.SoundData = nil
+		if ics.Events then
+			for _, t in pairs(ics.Events) do
+				t.SoundData = nil
+			end
 		end
 	end
 end
@@ -2391,7 +2395,7 @@ function TMW:Icon_Update(icon)
 				else
 					local s = LSM:Fetch("sound", data)
 					if s and s ~= "Interface\\Quiet.ogg" and s ~= "" then
-						tbl.SoundData = data
+						tbl.SoundData = s
 						dontremove = 1
 					else
 						tbl.SoundData = nil

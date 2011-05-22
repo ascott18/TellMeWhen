@@ -53,7 +53,9 @@ local points = {
 	BOTTOMRIGHT = L["BOTTOMRIGHT"],
 }
 local print = TMW.print
-TMW.CI = {} local CI = TMW.CI		--current icon
+TMW.CI = setmetatable({}, {__index = function(tbl, k)
+	if k == "ics" then return tbl.g and tbl.i and TMW.db and TMW.db.profile.Groups[tbl.g].Icons[tbl.i] end
+end}) local CI = TMW.CI		--current icon
 local clientVersion = select(4, GetBuildInfo())
 
 function TMW:CopyWithMetatable(settings)
@@ -1554,7 +1556,6 @@ end
 function IE:Reset()
 	local groupID, iconID = CI.g, CI.i
 	db.profile.Groups[groupID].Icons[iconID] = nil
-	CI.ics = db.profile.Groups[groupID].Icons[iconID]
 	IE:ScheduleIconUpdate(groupID, iconID)
 	IE:Load()
 	IE:TabClick(IE.MainTab)
@@ -2230,6 +2231,7 @@ function SND:SelectEvent(id)
 end
 
 function SND:SelectSound(name)
+	if not name then return end
 	local soundFrame, listID
 
 	for k, listname in ipairs(SND.List) do
