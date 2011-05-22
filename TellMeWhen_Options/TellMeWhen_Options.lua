@@ -1554,6 +1554,7 @@ end
 function IE:Reset()
 	local groupID, iconID = CI.g, CI.i
 	db.profile.Groups[groupID].Icons[iconID] = nil
+	CI.ics = db.profile.Groups[groupID].Icons[iconID]
 	IE:ScheduleIconUpdate(groupID, iconID)
 	IE:Load()
 	IE:TabClick(IE.MainTab)
@@ -2326,48 +2327,10 @@ end
 -- ----------------------
 
 ANN = TMW:NewModule("Announcements") TMW.ANN = ANN
-ANN.ChannelList = {
-	{
-		text = NONE,
-		channel = "",
-	},
-	{
-		text = CHAT_MSG_SAY,
-		channel = "SAY",
-	},
-	{
-		text = CHAT_MSG_YELL,
-		channel = "YELL",
-	},
-	{
-		text = CHAT_MSG_PARTY,
-		channel = "PARTY",
-	},
-	{
-		text = CHAT_MSG_RAID,
-		channel = "RAID",
-	},
-	{
-		text = CHAT_MSG_RAID_WARNING,
-		channel = "RAID_WARNING",
-	},
-	{
-		text = CHAT_MSG_BATTLEGROUND,
-		channel = "BATTLEGROUND",
-	},
-	{
-		text = CHAT_MSG_GUILD,
-		channel = "GUILD",
-	},
-	{
-		text = CHAT_MSG_OFFICER,
-		channel = "OFFICER",
-	},
-	{
-		text = CHAT_MSG_EMOTE,
-		channel = "EMOTE",
-	},
-}
+local channelsByChannel = {}
+for k, v in pairs(TMW.ChannelList) do
+	channelsByChannel[v.channel] = v
+end
 
 function ANN:SelectEvent(id)
 	ANN.Editbox:ClearFocus()
@@ -2386,22 +2349,15 @@ function ANN:SelectEvent(id)
 	eventFrame:GetHighlightTexture():SetVertexColor(NORMAL_FONT_COLOR.r, NORMAL_FONT_COLOR.g, NORMAL_FONT_COLOR.b, 1)
 
 	if CI.ics then
-		local text, channel = strsplit("\001", CI.ics.Events[eventFrame.event].Announce or "\001")
-		ANN:SelectChannel(channel)
-		ANN.Editbox:SetText(text)
+		local EventSettings = CI.ics.Events[eventFrame.event]
+		ANN:SelectChannel(EventSettings.Channel)
+		ANN.Editbox:SetText(EventSettings.Text)
 	end
-
 end
 
 function ANN:SelectChannel(channel)
-	local channelFrame, listID
-
-	for k, tbl in ipairs(ANN.ChannelList) do
-		if tbl.channel == channel then
-			listID = k
-			break
-		end
-	end
+	local EventSettings = CI.ics.Events[ANN.Events[ANN.currentEventID].event]
+	local channelFrame
 
 	for i=1, #ANN.Channels do
 		local f = ANN.Channels[i]
@@ -2413,15 +2369,41 @@ function ANN:SelectChannel(channel)
 		f:GetHighlightTexture():SetVertexColor(1, 1, 1, 1)
 	end
 	ANN.currentChannelSetting = channel
-	ANN.selectedListID = 1
+	
+	local channelsettings = channelsByChannel[channel]
+	if channelsettings then
+		if channelsettings.sticky then
+			ANN.Sticky:SetChecked(EventSettings.Sticky)
+			ANN.Sticky:Show()
+		else
+			ANN.Sticky:Hide()
+		end
+		if channelsettings.icon then
+			ANN.Icon:SetChecked(EventSettings.Icon)
+			ANN.Icon:Show()
+		else
+			ANN.Icon:Hide()
+		end
+		if channelsettings.defaultlocation then
+			local location = EventSettings.Location
+			location = location and location ~= "" and location or channelsettings.defaultlocation
+			location = channelsettings.ddtext(location) and location or channelsettings.defaultlocation
+			EventSettings.Location = location
+			loc = channelsettings.ddtext(location)
+			UIDropDownMenu_SetSelectedValue(ANN.Location, location)
+			UIDropDownMenu_SetText(ANN.Location, loc)
+			ANN.Location:Show()
+		else
+			ANN.Location:Hide()
+		end
+	end
 
 	if channelFrame then
-		ANN.selectedListID = channelFrame.listID
 		channelFrame:LockHighlight()
 		channelFrame:GetHighlightTexture():SetVertexColor(NORMAL_FONT_COLOR.r, NORMAL_FONT_COLOR.g, NORMAL_FONT_COLOR.b, 1)
 	end
-	if ANN.currentEventID and listID then
-		ANN.Events[ANN.currentEventID].ChannelName:SetText(ANN.ChannelList[listID].text)
+	if ANN.currentEventID and channelsettings then
+		ANN.Events[ANN.currentEventID].ChannelName:SetText(channelsettings.text)
 	end
 	ANN:SetTabText()
 end
@@ -2441,7 +2423,7 @@ function ANN:SetTabText()
 	local n = 0
 	for i = 1, #ANN.Events do
 		local f = ANN.Events[i]
-		local text, channel = strsplit("\001", CI.ics.Events[f.event].Announce or "\001")
+		local channel = CI.ics.Events[f.event].Channel
 		if channel and #channel > 2 and channel ~= "None" then
 			n = n + 1
 		end
@@ -2449,12 +2431,23 @@ function ANN:SetTabText()
 	if n > 0 then
 		IE.AnnounceTab:SetText(L["ANN_TAB"] .. " |cFFFF5959(" .. n .. ")")
 	else
-		IE.AnnounceTab:SetText(L["ANN_TAB"] .. " (" .. n .. ")")
+		IE.AnnounceTab:SetText(L["ANN_TAB"] .. " (0)")
 	end
 	PanelTemplates_TabResize(IE.AnnounceTab, -6)
 end
 
+function ANN:LocDropdownFunc(text)
+	UIDropDownMenu_SetSelectedValue(ANN.Location, self.value)
+	UIDropDownMenu_SetText(ANN.Location, text)
+	CI.ics.Events[ANN.currentEvent].Location = self.value
+end
 
+function ANN:DropDown()
+	local channelSettings = channelsByChannel[ANN.currentChannelSetting]
+	if channelSettings and channelSettings.dropdown then 
+		channelSettings.dropdown()
+	end
+end
 -- ----------------------
 -- SUGGESTER
 -- ----------------------

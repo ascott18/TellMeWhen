@@ -1448,15 +1448,12 @@
 			<AbsDimension y="14"/>
 		</Size>
 		<Scripts>
-			<OnLoad>
-			--	self.Background:SetVertexColor(0, 1, 0)
-			</OnLoad>
 			<OnClick>
 				TMW.ANN:SelectChannel(self.channel)
 				assert(TMW.ANN.currentEvent)
 				local groupID, iconID = TMW.CI.g, TMW.CI.i
 				if TMW.CI.ics then
-					TMW.CI.ics.Events[TMW.ANN.currentEvent].Announce = TMW.ANN.Editbox:GetText() .. "\001" .. (self.channel or "")
+					TMW.CI.ics.Events[TMW.ANN.currentEvent].Channel = self.channel
 					TMW.IE:ScheduleIconUpdate(groupID, iconID)
 				end
 				TMW.ANN:SetTabText()
@@ -3635,13 +3632,16 @@
 								local groupID, iconID = TMW.CI.g, TMW.CI.i
 								self:SetText(TMW:CleanString(self:GetText()))
 								if TMW.CI.ics and TMW.ANN.currentEvent then
-									TMW.CI.ics.Events[TMW.ANN.currentEvent].Announce = (self:GetText() or "") .. "\001" .. (TMW.ANN.currentChannelSetting or "")
+									TMW.CI.ics.Events[TMW.ANN.currentEvent].Text = self:GetText()
 								end
 								TMW.IE:ScheduleIconUpdate(groupID, iconID)
 								self:GetScript("OnTextChanged")(self)
 							</OnEditFocusLost>
 						</Scripts>
 					</EditBox>
+					
+					
+					
 					<Frame name="$parentEvents" parentKey="Events">
 						<Size x="200" y="280"/>
 						<Anchors>
@@ -3685,7 +3685,7 @@
 						</Scripts>
 					</Frame>
 					<Frame name="$parentChannels" parentKey="Channels">
-						<Size x="320" y="266"/>
+						<Size x="170" y="266"/>
 						<Anchors>
 							<Anchor point="TOPLEFT" relativeTo="$parent" relativePoint="TOPLEFT">
 								<Offset x="235" y="-80"/>
@@ -3711,15 +3711,18 @@
 								self.Header:SetText(TMW.L["ANN_CHANTOUSE"])
 								local previous
 
-								for i, t in ipairs(TMW.ANN.ChannelList) do
-									local f = CreateFrame("Button", self:GetName().."Channel"..i, self, "TellMeWhen_ChannelSelectButton", i)
-									self[i] = f
-									f:SetPoint("TOPLEFT", previous, "BOTTOMLEFT", 0, 0)
-									f:SetPoint("TOPRIGHT", previous, "BOTTOMRIGHT", 0, 0)
-									previous = f
-									f.channel = t.channel
-									f.Name:SetText(t.text)
-									f:Show()
+								for i, t in ipairs(TMW.ChannelList) do
+									if not t.hidden then
+										local f = CreateFrame("Button", self:GetName().."Channel"..i, self, "TellMeWhen_ChannelSelectButton", i)
+										self[i] = f
+										f:SetPoint("TOPLEFT", previous, "BOTTOMLEFT", 0, 0)
+										f:SetPoint("TOPRIGHT", previous, "BOTTOMRIGHT", 0, 0)
+										previous = f
+										f.channel = t.channel
+										f.Name:SetText(t.text)
+										f:Show()
+										TMW:TT(f, t.text, t.addon, 1, 1)
+									end
 								end
 								self[1]:SetPoint("TOPLEFT", self, "TOPLEFT", 0, 0)
 								self[1]:SetPoint("TOPRIGHT", self, "TOPRIGHT", 0, 0)
@@ -3729,6 +3732,68 @@
 							</OnLoad>
 						</Scripts>
 					</Frame>
+					<Frame name="$parentLocation" inherits="UIDropDownMenuTemplate" parentKey="Location">
+						<Anchors>
+							<Anchor point="TOPLEFT" relativeTo="$parentChannels" relativePoint="TOPRIGHT">
+								<Offset x="5" y="0" />
+							</Anchor>
+						</Anchors>
+						<Layers>
+							<Layer level="OVERLAY">
+								<FontString name="$parentHeader" inherits="GameFontNormalLarge" parentKey="Header" justifyH="LEFT" text="">
+									<Anchors>
+										<Anchor point="BOTTOM" relativeTo="$parent" relativePoint="TOP">
+											<Offset x="0" y="1"/>
+										</Anchor>
+									</Anchors>
+								</FontString>
+							</Layer>
+						</Layers>
+						<Scripts>
+							<OnLoad>
+								self.Header:SetText(TMW.L["ANN_SUB_CHANNEL"])
+								UIDropDownMenu_JustifyText(self, "LEFT")
+								UIDropDownMenu_SetWidth(self, 120)
+								_G[self:GetName() .. "Button"]:SetScript("PreClick", function()
+									UIDropDownMenu_Initialize(self, TMW.ANN.DropDown, "DROPDOWN")
+									_G[self:GetName() .. "Button"]:SetScript("PreClick", nil)
+								end)
+							</OnLoad>
+						</Scripts>
+					</Frame>
+					<CheckButton name="$parentSticky" inherits="TellMeWhen_CheckTemplate" parentKey="Sticky">
+						<Anchors>
+							<Anchor point="TOPLEFT" relativeTo="$parentLocation" relativePoint="BOTTOMLEFT">
+								<Offset x="12" y="-5" />
+							</Anchor>
+						</Anchors>
+						<Scripts>
+							<OnLoad>
+								self.text:SetText(TMW.L["ANN_STICKY"])
+							</OnLoad>
+							<OnClick>
+								TMW.CI.ics.Events[TMW.ANN.currentEvent].Sticky = not not self:GetChecked()
+							</OnClick>
+						</Scripts>
+					</CheckButton>
+					<CheckButton name="$parentIcon" inherits="TellMeWhen_CheckTemplate" parentKey="Icon">
+						<Anchors>
+							<Anchor point="TOP" relativeTo="$parentSticky" relativePoint="BOTTOM">
+								<Offset x="0" y="4" />
+							</Anchor>
+						</Anchors>
+						<Scripts>
+							<OnLoad>
+								self.text:SetText(TMW.L["ANN_SHOWICON"])
+								TMW:TT(self, "ANN_SHOWICON", "ANN_SHOWICON_DESC")
+							</OnLoad>
+							<OnClick>
+								TMW.CI.ics.Events[TMW.ANN.currentEvent].Icon = not not self:GetChecked()
+							</OnClick>
+						</Scripts>
+					</CheckButton>
+					
+					
 				</Frames>
 				<Layers>
 					<Layer level="OVERLAY">

@@ -37,7 +37,7 @@ local LSM = LibStub("LibSharedMedia-3.0")
 
 TELLMEWHEN_VERSION = "4.2.1"
 TELLMEWHEN_VERSION_MINOR = ""
-TELLMEWHEN_VERSIONNUMBER = 42102 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
+TELLMEWHEN_VERSIONNUMBER = 42104 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
 if TELLMEWHEN_VERSIONNUMBER > 50000 or TELLMEWHEN_VERSIONNUMBER < 42000 then return end -- safety check because i accidentally made the version number 414069 once
 
 TELLMEWHEN_MAXGROUPS = 1 	--this is a default, used by SetTheory (addon), so dont rename
@@ -62,12 +62,13 @@ local GetTime, debugstack = GetTime, debugstack
 local _G = _G
 local _, pclass = UnitClass("Player")
 local st, co, talenthandler, BarGCD, ClockGCD, Locked, CNDT, SndChan
+local runEvents = 1
 local GCD, NumShapeshiftForms, UpdateTimer = 0, 0, 0
 local time = GetTime()
 TMW.time = time
 local unitsToChange = {}
+local sctcolor = {r=1,b=1,g=1}
 local clientVersion = select(4, GetBuildInfo())
-local dummy = function() end
 
 
 function TMW.tContains(table, item)
@@ -360,7 +361,11 @@ TMW.Defaults = {
 					Events = {
 						["**"] = {
 							Sound = "None",
-							Announce = "\001",
+							Text = "",
+							Channel = "",
+							Location = "",
+							Sticky = false,
+							Icon = true,
 						},
 					},
 					Conditions = {
@@ -485,6 +490,134 @@ TMW.GCDSpells = {
 	DEATHKNIGHT=47541, -- death coil
 } local GCDSpell = TMW.GCDSpells[pclass]
 
+TMW.ChannelList = {
+	{
+		text = NONE,
+		channel = "",
+	},
+	{
+		text = CHAT_MSG_SAY,
+		channel = "SAY",
+	},
+	{
+		text = CHAT_MSG_YELL,
+		channel = "YELL",
+	},
+	{
+		text = CHAT_MSG_PARTY,
+		channel = "PARTY",
+	},
+	{
+		text = CHAT_MSG_RAID,
+		channel = "RAID",
+	},
+	{
+		text = CHAT_MSG_RAID_WARNING,
+		channel = "RAID_WARNING",
+	},
+	{
+		text = CHAT_MSG_BATTLEGROUND,
+		channel = "BATTLEGROUND",
+	},
+	{
+		text = CHAT_MSG_GUILD,
+		channel = "GUILD",
+	},
+	{
+		text = CHAT_MSG_OFFICER,
+		channel = "OFFICER",
+	},
+	{
+		text = CHAT_MSG_EMOTE,
+		channel = "EMOTE",
+	},
+	{
+		text = "Scrolling Combat Text",
+		channel = "SCT",
+		hidden = not (SCT and SCT:IsEnabled()),
+		sticky = 1,
+		icon = 1,
+		defaultlocation = "MSG",
+		dropdown = function()
+			local info = UIDropDownMenu_CreateInfo()
+			info.func = TMW.ANN.LocDropdownFunc
+			
+			info.text = SCT.LOCALS.EXAMPLE
+			info.arg1 = info.text
+			info.value = "FRAME1"
+			info.checked = "FRAME1" == TMW.CI.ics.Events[TMW.ANN.currentEvent].Location
+			UIDropDownMenu_AddButton(info, UIDROPDOWNMENU_MENU_LEVEL)
+			
+			info.text = SCT.LOCALS.EXAMPLE2
+			info.arg1 = info.text
+			info.value = "FRAME2"
+			info.checked = "FRAME2" == TMW.CI.ics.Events[TMW.ANN.currentEvent].Location
+			UIDropDownMenu_AddButton(info, UIDROPDOWNMENU_MENU_LEVEL)
+			
+			info.text = SCT.LOCALS.MSG_EXAMPLE
+			info.arg1 = info.text
+			info.value = "MSG"
+			info.checked = "MSG" == TMW.CI.ics.Events[TMW.ANN.currentEvent].Location
+			UIDropDownMenu_AddButton(info, UIDROPDOWNMENU_MENU_LEVEL)
+		end,
+		ddtext = function(value)
+			if value == "FRAME1" then return SCT.LOCALS.EXAMPLE
+			elseif value == "FRAME2" then return SCT.LOCALS.EXAMPLE2
+			elseif value == "MSG" then return SCT.LOCALS.MSG_EXAMPLE
+			end
+		end,
+	},
+	{
+		text = "MikSBT",
+		channel = "MSBT",
+		hidden = not MikSBT,
+		sticky = 1,
+		icon = 1,
+		defaultlocation = "Notification",
+		dropdown = function()
+			for scrollAreaKey, scrollAreaName in MikSBT:IterateScrollAreas() do
+				local info = UIDropDownMenu_CreateInfo()
+				info.text = scrollAreaName
+				info.value = scrollAreaKey
+				info.checked = scrollAreaKey == TMW.CI.ics.Events[TMW.ANN.currentEvent].Location
+				info.func = TMW.ANN.LocDropdownFunc
+				info.arg1 = scrollAreaName
+				UIDropDownMenu_AddButton(info, UIDROPDOWNMENU_MENU_LEVEL)
+			end
+		end,
+		ddtext = function(value)
+			if value then
+				return MikSBT and select(2, MikSBT:IterateScrollAreas())[value]
+			end
+		end,
+	},
+	{
+		text = "Parrot",
+		channel = "PARROT",
+		hidden = not (Parrot and ((Parrot.IsEnabled and Parrot:IsEnabled()) or Parrot:IsActive())),
+		sticky = 1,
+		icon = 1,
+		defaultlocation = "Notification",
+		dropdown = function()
+			local areas = Parrot.GetScrollAreasChoices and Parrot:GetScrollAreasChoices() or Parrot:GetScrollAreasValidate()
+			for k, n in pairs(areas) do
+				local info = UIDropDownMenu_CreateInfo()
+				info.text = n
+				info.value = k
+				info.func = TMW.ANN.LocDropdownFunc
+				info.arg1 = n
+				info.checked = k == TMW.CI.ics.Events[TMW.ANN.currentEvent].Location
+				UIDropDownMenu_AddButton(info, UIDROPDOWNMENU_MENU_LEVEL)
+			end
+		end,
+		ddtext = function(value)
+			if value then
+				return (Parrot.GetScrollAreasChoices and Parrot:GetScrollAreasChoices() or Parrot:GetScrollAreasValidate())[value]
+			end
+		end,
+	},
+}
+
 TMW.Cooldowns = setmetatable({}, {__index = function(t, k)
 	local n = {}
 	t[k] = n
@@ -592,42 +725,9 @@ function TMW:OnInitialize()
 	if type(TellMeWhenDB) ~= "table" then
 		TellMeWhenDB = {Version = TELLMEWHEN_VERSIONNUMBER}
 	end
-	TellMeWhenDB.Version = TellMeWhenDB.Version or 0
-	if TellMeWhenDB.Version == 414069 then TellMeWhenDB.Version = 41409 end --well, that was a mighty fine fail
-	-- Begin DB upgrades that need to be done before defaults are added. Upgrades here should always do everything needed to every single profile, and remember to make sure that a table exists before going into it.
+	TMW:GlobalUpgrade() -- must happen before the db is created
 	
-	if TellMeWhenDB.profiles then 
-		if TellMeWhenDB.Version < 41402 then
-			for _, p in pairs(TellMeWhenDB.profiles) do
-				if p.Groups then
-					for _, g in pairs(p.Groups) do
-						if g.Point then
-							g.Point.point = g.Point.point or "TOPLEFT"
-							g.Point.relativePoint = g.Point.relativePoint or "TOPLEFT"
-						end
-					end
-				end
-			end
-		end
-		if TellMeWhenDB.Version < 41410 then
-			for _, p in pairs(TellMeWhenDB.profiles) do
-				if p.Version == 414069 then
-					p.Version = 41409
-				end
-				if type(p.Version) == "string" then
-					local v = gsub(p.Version, "[^%d]", "") -- remove decimals
-					v = v..strrep("0", 5-#v)	-- append zeroes to create a 5 digit number
-					p.Version = tonumber(v)
-				end
-				if type(p.Version) == "number" and p.Version < 41401 and not p.NumGroups then -- 41401 is intended here, i already did a crapper version of this upgrade
-					p.NumGroups = 10
-				end
-			end
-		end
-	end
-	TellMeWhenDB.Version = TELLMEWHEN_VERSIONNUMBER -- pre-default upgrades complete!
-	
-TMW.db = AceDB:New("TellMeWhenDB", TMW.Defaults)
+	TMW.db = AceDB:New("TellMeWhenDB", TMW.Defaults)
 	db = TMW.db
 	
 	LSM:Register("sound", "Rubber Ducky", [[Sound\Doodad\Goblin_Lottery_Open01.wav]])
@@ -657,6 +757,8 @@ TMW.db = AceDB:New("TellMeWhenDB", TMW.Defaults)
 	db.RegisterCallback(TMW, "OnProfileCopied", "OnProfile")
 	db.RegisterCallback(TMW, "OnProfileReset", "OnProfile")
 	db.RegisterCallback(TMW, "OnNewProfile", "OnProfile")
+	db.RegisterCallback(TMW, "OnProfileShutdown", "ShutdownProfile")
+	db.RegisterCallback(TMW, "OnDatabaseShutdown", "ShutdownProfile")
 
 	
 	if LBF then
@@ -693,6 +795,21 @@ function TMW:OnProfile()
 	end
 	TMW:Update()
 	if TMW.CompileOptions then TMW:CompileOptions() end -- redo groups in the options
+end
+
+function TMW:ShutdownProfile()
+	-- the current icon might not exist in the new profile
+	for k, v in pairs(TMW.CI) do
+		TMW.CI[k] = nil
+	end
+	TellMeWhen_IconEditor:Hide()
+	
+	-- get rid of settings that are stored in database tables for convenience, but dont need to be kept.
+	for ics in TMW:InIconSettings() do
+		for _, t in pairs(ics.Events) do
+			t.SoundData = nil
+		end
+	end
 end
 
 function TMW:ScheduleUpdate(timetill)
@@ -764,8 +881,7 @@ function TMW:Update()
 
 	time = GetTime() TMW.time = time
 	UpdateTimer = time - 10
-	PlaySoundFile = dummy
-	SendChatMessage = dummy
+	runEvents = nil
 
 	Locked = db.profile.Locked
 	CNDT.Env.Locked = Locked
@@ -835,24 +951,47 @@ local upgradeTable
 function TMW:GetUpgradeTable()
 	if upgradeTable then return upgradeTable end
 	local t = {
+		[42104] = {
+			-- cleanup some old stuff that i noticed is sticking around in my settings, probably in other peoples' settings too
+			icon = function(ics)
+				for _, condition in pairs(ics.Conditions) do
+					for k in pairs(condition) do
+						if strfind(k, "Condition") then
+							condition[k] = nil
+						end
+					end
+					condition.Names = nil
+				end
+			end,
+		},
+		[42103] = {
+			icon = function(ics)
+				for _, t in pairs(ics.Events) do
+					if t.Announce then
+						t.Text, t.Channel = strsplit("\001", t.Announce)
+						t.Announce = nil
+					end
+				end
+			end,
+		},
 		[42102] = {
 			icon = function(ics)
 				local Events = ics.Events
 				Events.OnShow = {
-					Sound = ics.SoundOnShow,
-					Announce = ics.ANNOnShow,
+					Sound = ics.SoundOnShow or "",
+					Announce = ics.ANNOnShow or "\001",
 				}
 				Events.OnHide = {
-					Sound = ics.SoundOnHide,
-					Announce = ics.ANNOnHide,
+					Sound = ics.SoundOnHide or "",
+					Announce = ics.ANNOnHide or "\001",
 				}
 				Events.OnStart = {
-					Sound = ics.SoundOnStart,
-					Announce = ics.ANNOnStart,
+					Sound = ics.SoundOnStart or "",
+					Announce = ics.ANNOnStart or "\001",
 				}
 				Events.OnFinish = {
-					Sound = ics.SoundOnFinish,
-					Announce = ics.ANNOnFinish,
+					Sound = ics.SoundOnFinish or "",
+					Announce = ics.ANNOnFinish or "\001",
 				}
 				ics.SoundOnShow		= nil
 				ics.SoundOnHide		= nil
@@ -1191,7 +1330,8 @@ function TMW:GetUpgradeTable()
 			icon = function(ics)
 				for i, condition in ipairs(ics.Conditions) do
 					for k, v in pairs(condition) do
-						condition[gsub(k, "Condition", "")] = v
+						condition[k] = nil
+						condition[k:gsub("Condition", "")] = v
 					end
 				end
 			end,
@@ -1264,6 +1404,43 @@ function TMW:GetUpgradeTable()
 		return a.Version < b.Version
 	end)
 	return upgradeTable
+end
+
+function TMW:GlobalUpgrade()
+	TellMeWhenDB.Version = TellMeWhenDB.Version or 0
+	if TellMeWhenDB.Version == 414069 then TellMeWhenDB.Version = 41409 end --well, that was a mighty fine fail
+	-- Begin DB upgrades that need to be done before defaults are added. Upgrades here should always do everything needed to every single profile, and remember to make sure that a table exists before going into it.
+	
+	if TellMeWhenDB.profiles then 
+		if TellMeWhenDB.Version < 41402 then
+			for _, p in pairs(TellMeWhenDB.profiles) do
+				if p.Groups then
+					for _, g in pairs(p.Groups) do
+						if g.Point then
+							g.Point.point = g.Point.point or "TOPLEFT"
+							g.Point.relativePoint = g.Point.relativePoint or "TOPLEFT"
+						end
+					end
+				end
+			end
+		end
+		if TellMeWhenDB.Version < 41410 then
+			for _, p in pairs(TellMeWhenDB.profiles) do
+				if p.Version == 414069 then
+					p.Version = 41409
+				end
+				if type(p.Version) == "string" then
+					local v = gsub(p.Version, "[^%d]", "") -- remove decimals
+					v = v..strrep("0", 5-#v)	-- append zeroes to create a 5 digit number
+					p.Version = tonumber(v)
+				end
+				if type(p.Version) == "number" and p.Version < 41401 and not p.NumGroups then -- 41401 is intended here, i already did a crapper version of this upgrade
+					p.NumGroups = 10
+				end
+			end
+		end
+	end
+	TellMeWhenDB.Version = TELLMEWHEN_VERSIONNUMBER -- pre-default upgrades complete!
 end
 
 function TMW:Upgrade()
@@ -1369,8 +1546,7 @@ function TMW:ColorUpdate()
 end
 
 function TMW:RestoreSound()
-	PlaySoundFile = _G.PlaySoundFile
-	SendChatMessage = _G.SendChatMessage
+	runEvents = 1
 end
 
 function TMW:PLAYER_ENTERING_WORLD()
@@ -1685,25 +1861,40 @@ local function OnGCD(d)
 	return GCD == d and d > 0 -- if the duration passed in is the same as the GCD spell, and the duration isnt zero, then it is a GCD
 end	TMW.OnGCD = OnGCD
 
+local function HandleEvent(icon, event, data, played, announced)
+	local Sound = data.SoundData
+	if Sound and not played then
+		PlaySoundFile(Sound, SndChan)
+		played = 1
+	end
+	local Channel, Text = data.Channel, data.Text
+	if Channel ~= "" and not announced then
+		if Channel == "MSBT" and MikSBT then
+			MikSBT.DisplayMessage(Text, data.Location, data.Sticky, nil, nil, nil, nil, nil, data.Icon and icon.__tex)
+		elseif Channel == "SCT" and SCT then
+			-- sctcolor isnt absolutely needed, but SCT garbage gens a table every time if it isnt passed in, so i should do it.
+			SCT:DisplayCustomEvent(Text, sctcolor, data.Sticky, SCT[data.Location], nil, data.Icon and icon.__tex)
+		elseif Channel == "PARROT" and Parrot then
+			Parrot:ShowMessage(Text, data.Location, data.Sticky, nil, nil, nil, nil, nil, nil, data.Icon and icon.__tex)
+		elseif Text then
+			SendChatMessage(Text, Channel)
+		end
+		announced = 1
+	end
+	return played, announced
+end
+
 local function SetAlpha(icon, alpha)
 	if alpha ~= icon.__alpha then
 		if alpha == 0 then
-			local Sound = icon.OnHideSound
-			if Sound then
-				PlaySoundFile(Sound, SndChan)
-			end
-			local ANN = icon.OnHideAnnounce
-			if ANN then
-				SendChatMessage(strsplit("\001", ANN))
+			local data = runEvents and icon.OnHide
+			if data then
+				icon:HandleEvent("OnHide", data)
 			end
 		elseif icon.FakeAlpha == 0 then
-			local Sound = icon.OnShowSound
-			if Sound then
-				PlaySoundFile(Sound, SndChan)
-			end
-			local ANN = icon.OnShowAnnounce
-			if ANN then
-				SendChatMessage(strsplit("\001", ANN))
+			local data = runEvents and icon.OnShow
+			if data then
+				icon:HandleEvent("OnShow", data)
 			end
 		end
 		if icon.FakeHidden then
@@ -1844,28 +2035,21 @@ local function SetInfo(icon, alpha, color, texture, start, duration, checkGCD, p
 		alpha = min(alpha, icon.ConditionAlpha)
 	end
 
+	if texture ~= nil and icon.__tex ~= texture then -- do this before events are processed because some text outputs use icon.__tex
+		icon.__tex = texture
+		icon.texture:SetTexture(texture)
+	end
+
 	if alpha ~= icon.__alpha then
 		if alpha == 0 then
-			local Sound = icon.OnHideSound 
-			if Sound then
-				PlaySoundFile(Sound, SndChan)
-				played = true
-			end
-			local ANN = icon.OnHideAnnounce
-			if ANN then
-				SendChatMessage(strsplit("\001", ANN))
-				announced = true
+			local data = runEvents and icon.OnHide
+			if data then
+				played, announced = icon:HandleEvent("OnHide", data)
 			end
 		elseif icon.FakeAlpha == 0 then
-			local Sound = icon.OnShowSound
-			if Sound then
-				PlaySoundFile(Sound, SndChan)
-				played = true
-			end
-			local ANN = icon.OnShowAnnounce
-			if ANN then
-				SendChatMessage(strsplit("\001", ANN))
-				announced = true
+			local data = runEvents and icon.OnShow
+			if data then
+				played, announced = icon:HandleEvent("OnShow", data)
 			end
 		end
 		if icon.FakeHidden then
@@ -1891,22 +2075,14 @@ local function SetInfo(icon, alpha, color, texture, start, duration, checkGCD, p
 		local realDuration = isGCD and 0 or duration
 		if icon.__realDuration ~= realDuration then
 			if realDuration == 0 then
-				local Sound = icon.OnFinishSound
-				if Sound and not played then
-					PlaySoundFile(Sound, SndChan)
-				end
-				local ANN = icon.OnFinishAnnounce
-				if ANN and not announced then
-					SendChatMessage(strsplit("\001", ANN))
+				local data = runEvents and icon.OnFinish
+				if data then
+					played, announced = icon:HandleEvent("OnFinish", data, played, announced)
 				end
 			else
-				local Sound = icon.OnStartSound
-				if Sound and not played then
-					PlaySoundFile(Sound, SndChan)
-				end
-				local ANN = icon.OnStartAnnounce
-				if ANN and not announced then
-					SendChatMessage(strsplit("\001", ANN))
+				local data = runEvents and icon.OnStart
+				if data then
+					played, announced = icon:HandleEvent("OnStart", data, played, announced)
 				end
 			end
 			icon.__realDuration = realDuration
@@ -1990,11 +2166,6 @@ local function SetInfo(icon, alpha, color, texture, start, duration, checkGCD, p
 		end
 	end
 
-	if texture ~= nil and icon.__tex ~= texture then
-		icon.__tex = texture
-		icon.texture:SetTexture(texture)
-	end
-
 	if icon.ShowPBar then
 		local bar = icon.powerbar
 		if pbName then
@@ -2038,6 +2209,7 @@ local function SetInfo(icon, alpha, color, texture, start, duration, checkGCD, p
 end
 
 local IconAddIns = {
+	HandleEvent		=	HandleEvent,
 	SetInfo			=	SetInfo,
 	SetAlpha		= 	SetAlpha,
 	SetScript		= 	IconSetScript,
@@ -2174,17 +2346,17 @@ local function LMBSkinHook(self)
 		TMW:ScheduleUpdate(.2)
 	end
 end local hookedLMBSkin
+
 function TMW:Icon_Update(icon)
 	if not icon then return end
 
 	local iconID = icon:GetID()
 	local groupID = icon.group:GetID()
 	local dontreassign
-	if PlaySoundFile == dummy then
+	if not runEvents then
 		dontreassign = true
 	else
-		PlaySoundFile = dummy
-		SendChatMessage = dummy
+		runEvents = nil
 	end
 
 	icon.__previousNameFirst = icon.NameFirst -- used to detect changes in the name that would cause a texture change
@@ -2202,29 +2374,27 @@ function TMW:Icon_Update(icon)
 	end
 	
 	local dontremove
-	for event, actions in pairs(icon.Events) do
-		for action, data in pairs(actions) do
-			if action == "Sound" then
+	for event, tbl in pairs(icon.Events) do
+		icon[event] = tbl
+		for key, data in pairs(tbl) do
+			if key == "Sound" then
 				if data == "" or data == "Interface\\Quiet.ogg" or data == "None" then
-					-- dont set it on the icon
+					tbl.SoundData = nil
 				elseif strfind(data, "%.[^\\]+$") then
-					icon[event..action] = data
+					tbl.SoundData = data
 					dontremove = 1
 				else
 					local s = LSM:Fetch("sound", data)
 					if s and s ~= "Interface\\Quiet.ogg" and s ~= "" then
-						icon[event..action] = s
+						tbl.SoundData = data
 						dontremove = 1
 					else
+						tbl.SoundData = nil
 						print("Hmmm, it seems that this sound setting managed to make it past all the checks for invalidness (or it is a LSM sound that doesnt exist anymore:", v)
 					end
 				end
-			elseif action == "Announce" and type(data) == "string" then
-				local text, channel = strsplit("\001", data)
-				if #text > 0 and #channel > 0 and _G["CHAT_MSG_" .. channel] then
-					icon[event..action] = data
-					dontremove = 1
-				end
+			elseif key == "Channel" and data ~= "" then
+				dontremove = 1
 			end
 		end
 	end
