@@ -221,7 +221,8 @@ local function ItemCooldown_OnUpdate(icon, time)
 				alpha, color = icon.UnAlpha, 1
 			end
 			icon:SetInfo(alpha, color, GetItemIcon(NameFirst2), start, duration, true)
-
+		else
+			icon:SetAlpha(0)
 		end
 	end
 end
@@ -291,7 +292,6 @@ function Type:Setup(icon, groupID, iconID)
 		icon.NameName = TMW:GetSpellNames(icon, icon.Name, 1, 1)
 		icon.NameArray = TMW:GetSpellNames(icon, icon.Name)
 		icon.NameNameArray = TMW:GetSpellNames(icon, icon.Name, nil, 1)
-
 		icon.FirstTexture = GetSpellTexture(icon.NameFirst)
 
 		if icon.Name == "" then
@@ -308,12 +308,17 @@ function Type:Setup(icon, groupID, iconID)
 		icon.NameFirst = TMW:GetItemIDs(icon, icon.Name, 1)
 		icon.NameArray = TMW:GetItemIDs(icon, icon.Name)
 
-		for _, n in ipairs(TMW:SplitNames(icon.Name)) do
-			n = tonumber(strtrim(n))
-			if n and n <= 19 then
-				icon:RegisterEvent("PLAYER_EQUIPMENT_CHANGED")
-				icon:SetScript("OnEvent", ItemCooldown_OnEvent)
-				break
+		if not icon.NameFirst or icon.NameFirst == 0 then
+			icon:RegisterEvent("UNIT_INVENTORY_CHANGED")
+			icon:SetScript("OnEvent", ItemCooldown_OnEvent)
+		else
+			for _, n in ipairs(TMW:SplitNames(icon.Name)) do
+				n = tonumber(strtrim(n))
+				if n and n <= 19 then
+					icon:RegisterEvent("PLAYER_EQUIPMENT_CHANGED")
+					icon:SetScript("OnEvent", ItemCooldown_OnEvent)
+					break
+				end
 			end
 		end
 

@@ -911,6 +911,22 @@ function ID:Move()
 	db.profile.Groups[ID.destgroupID].Icons[ID.desticonID] = db.profile.Groups[ID.srcgroupID].Icons[ID.srciconID]
 	db.profile.Groups[ID.srcgroupID].Icons[ID.srciconID] = nil
 	ID.desticon.texture:SetTexture(ID.srcicon.texture:GetTexture()) -- preserve buff/debuff/other types textures
+	
+	-- update meta icons and icon shown conditions
+	local srcicon, desticon = tostring(ID.srcicon), tostring(ID.desticon)
+	for ics in TMW:InIconSettings() do
+		for k, ic in pairs(ics.Icons) do
+			if ic == srcicon then
+				ics.Icons[k] = desticon
+			end
+		end
+		for k, condition in pairs(ics.Conditions) do
+			if condition.Icon == srcicon then
+				condition.Icon = desticon
+			end
+		end
+	end
+	
 	TMW:Update()
 end
 
@@ -931,6 +947,26 @@ function ID:Swap()
 	local desttex = ID.desticon.texture:GetTexture() -- preserve buff/debuff/other types textures
 	ID.desticon.texture:SetTexture(ID.srcicon.texture:GetTexture())
 	ID.srcicon.texture:SetTexture(desttex)
+	
+	-- update meta icons and icon shown conditions
+	local srcicon, desticon = tostring(ID.srcicon), tostring(ID.desticon)
+	for ics in TMW:InIconSettings() do
+		for k, ic in pairs(ics.Icons) do
+			if ic == tostring(ID.srcicon) then
+				ics.Icons[k] = desticon
+			elseif ic == desticon then
+				ics.Icons[k] = srcicon
+			end
+		end
+		for k, condition in pairs(ics.Conditions) do
+			if condition.Icon == srcicon then
+				condition.Icon = desticon
+			elseif condition.Icon == desticon then
+				condition.Icon = srcicon
+			end
+		end
+	end
+	
 	TMW:Update()
 end
 

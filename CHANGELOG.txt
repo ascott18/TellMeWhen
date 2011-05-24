@@ -2,14 +2,15 @@
  * Unit cooldowns can now be sorted by duration.
  * Buffs/debuffs that are being sorted by duration now do so across all units that are being checked instead of only within each unit.
  * Updated COMBAT_LOG_EVENT_UNFILTERED for 4.2.
- * Restructured the data format for sounds/announcements
+ * When right-click-dragging icons to move them or swap them, any meta icons or icon shown conditions will now update to reflect that change.
+ * The "On Show" icon event should no longer erroneously trigger sometimes when changing zones.
  * Added the following text output destinations:
- ** SCT (Scrolling Combat Text by Grayhoof)
- ** MikSBT
- ** Parrot
+ ** Grayhoof's Scrolling Combat Text
+ ** mikord's MikScrollingBattleText
+ ** ckknight's Parrot
  * New Conditions:
  ** Buff/Debuff - Number of - This conditions tracks the number of a buff or debuff that are active on a unit. This is not the number of stacks, but rather the actual number of auras (3 warlocks in your raid cast 3 corruptions, etc.).
-
+ 
 ===v4.2.0===
  * New feature: Announcements. This allows you to announce something to WoW's chat (say, yell, party, raid, guild, emote, etc) when icon events are triggered (the same events that sounds already use).
  * The equivalency dropdown no longer gives you a headache when you look at it (It is now sorted alphabetically).

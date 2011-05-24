@@ -37,7 +37,7 @@ local LSM = LibStub("LibSharedMedia-3.0")
 
 TELLMEWHEN_VERSION = "4.2.1"
 TELLMEWHEN_VERSION_MINOR = ""
-TELLMEWHEN_VERSIONNUMBER = 42107 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
+TELLMEWHEN_VERSIONNUMBER = 42108 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
 if TELLMEWHEN_VERSIONNUMBER > 50000 or TELLMEWHEN_VERSIONNUMBER < 42000 then return end -- safety check because i accidentally made the version number 414069 once
 
 TELLMEWHEN_MAXGROUPS = 1 	--this is a default, used by SetTheory (addon), so dont rename
@@ -61,7 +61,7 @@ local strfind, strmatch, format, gsub, strsub, strtrim, strsplit, strlower, min,
 local GetTime, debugstack = GetTime, debugstack
 local _G = _G
 local _, pclass = UnitClass("Player")
-local st, co, talenthandler, BarGCD, ClockGCD, Locked, CNDT, SndChan
+local st, co, updatehandler, BarGCD, ClockGCD, Locked, CNDT, SndChan
 local runEvents = 1
 local GCD, NumShapeshiftForms, UpdateTimer = 0, 0, 0
 local time = GetTime()
@@ -817,10 +817,11 @@ function TMW:ShutdownProfile()
 end
 
 function TMW:ScheduleUpdate(timetill)
-	timetill = tonumber(timetill) or 1
 	--ghetto bucket
-	TMW:CancelTimer(talenthandler, 1)
-	talenthandler = TMW:ScheduleTimer("Update", timetill)
+	
+	timetill = tonumber(timetill) or 1 -- careful, timetill is actually the event if this is being called from the event handlers
+	TMW:CancelTimer(updatehandler, 1)
+	updatehandler = TMW:ScheduleTimer("Update", timetill)
 end
 
 function TMW:OnCommReceived(prefix, text, channel, who)
@@ -2109,7 +2110,7 @@ local function SetInfo(icon, alpha, color, texture, start, duration, checkGCD, p
 					s, d = 0, 0
 				end
 
-				-- cd.s is completely internal and is used to prevent finish effect spam (and to increase efficiency) while GCDs are being triggered. icon.__start isnt used because that just records the start time passed in, which may be a GCD, so it will change frequently
+				-- cd.s is only used in this function and is used to prevent finish effect spam (and to increase efficiency) while GCDs are being triggered. icon.__start isnt used because that just records the start time passed in, which may be a GCD, so it will change frequently
 				if cd.s ~= s then
 					cd:SetCooldown(s, d)
 					cd:Show()
@@ -2512,14 +2513,13 @@ function TMW:Icon_Update(icon)
 	icon.__realDuration = icon.__realDuration or 0
 	icon.CndtFailed = nil
 	icon.ConditionAlpha = icon.ConditionAlpha or 0
+	if icon.CooldownShowWhen == "usable" or icon.BuffShowWhen == "present" then
+		icon.UnAlpha = 0
+	elseif icon.CooldownShowWhen == "unusable" or icon.BuffShowWhen == "absent" then
+		icon.Alpha = 0
+	end
 
-	if not (Locked and not icon.Enabled) then
-		if icon.CooldownShowWhen == "usable" or icon.BuffShowWhen == "present" then
-			icon.UnAlpha = 0
-		elseif icon.CooldownShowWhen == "unusable" or icon.BuffShowWhen == "absent" then
-			icon.Alpha = 0
-		end
-
+	if icon.Enabled or not Locked then
 		if TMW.Types[icon.Type] then
 			TMW.Types[icon.Type]:Setup(icon, groupID, iconID)
 		else
@@ -2528,10 +2528,12 @@ function TMW:Icon_Update(icon)
 			else
 				icon:SetTexture(nil)
 			end
+			icon:SetAlpha(0)
 		end
+	else
+		icon:SetAlpha(0)
 	end
 
-	icon:SetInfo(1, 1, nil, 0, 0) -- alpha is set to 1 here so it doesnt return early
 	icon.__previousNameFirst = nil -- not needed now
 
 	Icon_Bars_Update(icon, groupID, iconID)
@@ -2539,7 +2541,7 @@ function TMW:Icon_Update(icon)
 	local pbar = icon.powerbar
 	local cbar = icon.cooldownbar
 	if Locked then
-		icon:SetAlpha(0)
+		-- avoid doing any icon:SetAlpha or icon:SetInfo here because it will screw up event handling when TMW:Update() is called from talent update events during zone change
 		if icon.texture:GetTexture() == "Interface\\AddOns\\TellMeWhen\\Textures\\Disabled" then
 			icon:SetTexture(nil)
 		end
@@ -2559,6 +2561,7 @@ function TMW:Icon_Update(icon)
 		cbar:SetAlpha(.9)
 	else
 		ClearScripts(icon)
+		icon:SetInfo(1, 1, nil, 0, 0) -- alpha is set to 1 here so it doesnt return early
 		if icon.Enabled then
 			icon:setalpha(1)
 		else
