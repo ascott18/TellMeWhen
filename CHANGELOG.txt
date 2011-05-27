@@ -1,15 +1,21 @@
 ===v4.2.1===
  * Unit cooldowns can now be sorted by duration.
  * Buffs/debuffs that are being sorted by duration now do so across all units that are being checked instead of only within each unit.
+ * Internal Cooldown icons now have the option to not reset their cooldown to full duration if they are triggered while cooling down (mainly for the Early Frost mage talent).
  * Updated COMBAT_LOG_EVENT_UNFILTERED for 4.2.
  * When right-click-dragging icons to move them or swap them, any meta icons or icon shown conditions will now update to reflect that change.
- * The "On Show" icon event should no longer erroneously trigger sometimes when changing zones.
  * Added the following text output destinations:
  ** Grayhoof's Scrolling Combat Text
  ** mikord's MikScrollingBattleText
  ** ckknight's Parrot
  * New Conditions:
  ** Buff/Debuff - Number of - This conditions tracks the number of a buff or debuff that are active on a unit. This is not the number of stacks, but rather the actual number of auras (3 warlocks in your raid cast 3 corruptions, etc.).
+ * Bug fixes:
+ ** The "On Show" icon event should no longer erroneously trigger sometimes when changing zones.
+ ** Item cooldown icons use item names instead of IDs that attempt to set themselves up before the required data is available will now attempt to fix themselves once that data becomes available instead of requring a full lock toggle.
+ ** Icon settings are now resetting to the defaults in a more correct manner before icons are copied onto them.
+ ** The suggestion list should now properly update to the current cursor position instead of the last cursor position when clicked.
+ ** The suggestion list should now take an entire entry into consideration if the cursor is clicked on the middle of it.
  
 ===v4.2.0===
  * New feature: Announcements. This allows you to announce something to WoW's chat (say, yell, party, raid, guild, emote, etc) when icon events are triggered (the same events that sounds already use).
@@ -26,13 +32,13 @@
 
 ===v4.1.4.2===
  * Bugfix: TellMeWhen.lua:620: attempt to compare string with number
- * Bugfix: v4.1.4s interal version number was about 40,000 higher than it should have been. Whoops!
+ * Bugfix: v4.1.4s internal version number was about 40,000 higher than it should have been. Whoops!
  
 ===v4.1.4===
  * New profiles now default to only one group instead of ten, and new/reset groups now place themselves in the center of the screen.
  * **//IMPORTANT//**: Because of the above change, there is a (very very small) chance that some of your groups moved. I apologize for the inconvenience. If you find that a group has been moved off the screen, type /tmw options, go to that group's config, and click the button to reset the group's position.
  * You can now import and exports icons in string format to other users of TMW, meaning that you can share them outside of the game or to players that you are not able to whisper.
- * Imported icons will now be upgraded as needed to fully function with your current version of TMW. Icons recieved from newer versions of TMW that your current version may still have an occasional error, so please always ensure that you are upgraded to the latest version of TMW before reporting an error with importing.
+ * Imported icons will now be upgraded as needed to fully function with your current version of TMW. Icons received from newer versions of TMW that your current version may still have an occasional error, so please always ensure that you are upgraded to the latest version of TMW before reporting an error with importing.
  * New/changed conditions:
  ** Unit Classification (Normal, Elite, Rare, Rare-Elite, World Boss)
  ** Currencies
@@ -90,7 +96,7 @@
  ** (r52) Fixed stack text on buff icons
  ** (r53) Fixed: conditions.lua line 1220: bad argument #1 to 'gsub' (string expected, got nil) 
  ** (r53) Fixed: TellMeWhen_Options.lua:2217: attempt to index field '?' (a nil value)
- ** (r54) Fixed the sheck sub-metas toggle for meta icons - accidentally broke the anchor for it
+ ** (r54) Fixed the "Check sub-metas" toggle for meta icons - accidentally broke the anchor for it
  ** (r54) Meta icons should obey conditions
  ** (r55) Cooldowns on meta icons should properly set when the meta changes to from an icon with an active timer to one without, and then back to the first icon that has an active timer.
 
@@ -115,7 +121,7 @@
  * ICD icons now refresh when a stack of a buff is added.
  * Fixed the version warnings that were spamming people and telling them that you sent them an icon
  * Groups that are anchored to other groups with higher groupIDs should now properly anchor after logging in or reloading
- * Many old spell equivalanceies were updated, and some new ones were added, thanks to Catok of Curse.
+ * Many old spell equivalencies were updated, and some new ones were added, thanks to Catok of Curse.
 
 ===v4.0.1.4===
  * Fixed all the errors. Sorry, guys!
@@ -132,10 +138,10 @@
 ===v4.0.1.2===
  * Groups and icons should now properly copy using the dropdown on the icon editor
  * Added some tooltips to icon types
- * Added some more name substitutions to equivalancies (so they will accept any spell named "Hex" instead of just the shaman's hex spell, etc)
+ * Added some more name substitutions to equivalencies (so they will accept any spell named "Hex" instead of just the shaman's hex spell, etc)
 
 ===v4.0.1.1===
- * Cleaned up the conditon editor
+ * Cleaned up the condition editor
 
 ===v4.0.1 beta===
  * **IMPORTANT**: Instead of typing "raid" for units raid1 through raid25, you now must type "raid1-25". This will allow for much more flexibility, e.g. raid1-10.
@@ -146,11 +152,11 @@
  * Fixed an issue with cooldowns looking bad on circular LBF skins
  * Overlay bars now go underneath the border of LBF skins
  * Bars and timers will be set to ignore GCD in this version. You will need to toggle this off if you dont't want it. (Sorry, i screwed something up in beta9)
- * Fixed a bug that caused icons that shouldnt be shown to not be hidden when switching profiles or removing rows/columns.
+ * Fixed a bug that caused icons that shouldn't be shown to not be hidden when switching profiles or removing rows/columns.
  * Textures should properly reset when switching profiles.
  * Switched to SVN instead of manual file uploads, yay!
  * New feature: Suggestion list. The suggestion list will take what you type and search though all known spells/items, as well as TMW equivalancies and dispel types, to suggest what you might be looking for. For example, if you are configuring a "Spell Cast" icon type, the list will show only spells with cast times, as well as the cast equivalancies. More information regarding this feature will be in the documentation that I will hopefully start writing soon. (If someone wants to help me out with that, send me a PM)
- * Equivalancies are no longer case-sensitive.
+ * Equivalencies are no longer case-sensitive.
  * Reverted failed experimentation to force spell casts to match spellIDs
  * Colors on the suggestion list should now be final (known player auras are now shown with a different color than known NPC auras - if you installed the first version of 4.0.1 beta, you may see a few wrong spells, but they will be updated the next time you see them)
  * Fixed the tooltip that appears whilst you mouseover the name editbox in the icon editor with shift held down
@@ -180,8 +186,8 @@
  * Conditions now generate their own, single function instead of chaining a bunch of functions. They also make use of Lua's short-circuit evaluation capabilities in order to become more efficient (instead of the old way that checked EVERYTHING)
  * You can now define what talent trees must be active in order to show a group.
  * Fixed an error that was being caused by interference from Tukui.
- * "mainassist#" and "maintank#" are now valid units for TMW. Their implementation is a little unorthodox though, so the order of them is not guarenteed compared to be the same as the order in your unit frames if your unit frames display these units.
- * Added compatability for the changes made to CLEU and pet happiness in WoW 4.1.0.
+ * "mainassist#" and "maintank#" are now valid units for TMW. Their implementation is a little unorthodox though, so the order of them is not guaranteed compared to be the same as the order in your unit frames if your unit frames display these units.
+ * Added compatibility for the changes made to CLEU and pet happiness in WoW 4.1.0.
  * You can now specify which totem slots to check for totem icons, and it should now be more clear what this icon type can be used for (Totems, Non-MoG ghoul, Wild Mushrooms)
  * Implemented a much more elegant method of generating group settings.
 
@@ -215,7 +221,7 @@
  * You can now send icons to other players that are using this version of TMW or later, and obviously you can receive icons from other players too.
  * New condition: Group type.
  * When checking a high number of buffs/debuffs (this threshold can be customized), a more efficient method of checking them will be used.
- * Chosing "Icon Type" in the icon type dropdown should now properly change the type to none rather than changing it to a meta icon.
+ * Choosing "Icon Type" in the icon type dropdown should now properly change the type to none rather than changing it to a meta icon.
  * The multi-state cooldown icon type has been merged with the normal cooldown icon type.
  * Removed an incorrect line from the tooltip for unit cooldown icons.
  * Added trap launcher frost trap to the CrowdControl preset.
@@ -228,7 +234,7 @@
  * Fixed the ButtonFacade callback that I broke for some reason.
  * Fixed an error in upgrading from old versions (actually, I just removed that upgrade entirely).
  * Changed max stack and duration defaults to 10 instead of 50 and 100, respectfully.
- * Conditions now save immidately upon any change made to them, instead of only when closing or reloading the icon editor.
+ * Conditions now save immediately upon any change made to them, instead of only when closing or reloading the icon editor.
  * The tooltip over the name dialog that appears when you hold down a modifier key should now properly only attempt to get item names if the icon is an item cooldown icon.
 
 ===v4.0.0 beta2===
@@ -238,7 +244,7 @@
 
 ===v4.0.0 beta1===
  * Well, that was a quick jump from 3.0 to 4.0
- * New icon type: Unit cooldown. This icon type will allow you to track the cooldown of any spell of any valid unit, provided that you specify the cooldown length. Instant casts and channeled spells are guarenteed 99.9% accurate, but spells with cast times that either apply a buff/debuff or do direct damage/healing can be off by about +- 1 second because of travel time.
+ * New icon type: Unit cooldown. This icon type will allow you to track the cooldown of any spell of any valid unit, provided that you specify the cooldown length. Instant casts and channeled spells are guaranteed 99.9% accurate, but spells with cast times that either apply a buff/debuff or do direct damage/healing can be off by about +- 1 second because of travel time.
  * Completely revamped icon configuration. Gone is the dropdown, in is a dialog that combines all of the old dialogs (4 of them) into one. This will pave the way for many more useful settings, like some of the ones below.
  * Any icon type that can check units (buff/debuff, unit cooldown) can now check multiple units.
  * Overlay bars can now have a custom offset defined in order to show a value that is higher/lower than the actual value.
@@ -249,7 +255,7 @@
  * New condition: 'Swimming'. Checks if you are swimming or not
  * New condition: 'Mounted'. Checks if you are mounted or not
  * Icon spacing is now defined per group.
- * You can now manually define the anchors, offsets, scale, and frame level of a group. You can also lock the group, preventing any movement or resizing by click-and-drag (reccomended if you want to keep it anchored to the top of you raid frames, or something else that moves dynamically).
+ * You can now manually define the anchors, offsets, scale, and frame level of a group. You can also lock the group, preventing any movement or resizing by click-and-drag (recommended if you want to keep it anchored to the top of you raid frames, or something else that moves dynamically).
  * You can now disable the warning that is printed to chat when a meta icon or a condition is checking an invalid icon.
  * You can now right-click-and-drag an icon to another icon slot in order to move or copy it.
  * You can now drag a spell from your spellbook or an item from your bags/character sheet onto an icon to quickly set it up. If an icon is already configured, the name will be appended to the end of the list of names.
@@ -257,7 +263,7 @@
  * Chakra states are no longer supported by reactive or cooldown icons. Use a multi-state cooldown icon in order to track chakra states from now on.
  * ICD icons now check for energize effects (mana/rage/enegy/etc gains).
  * Custom alpha levels for failed conditions/stacks/durations have been removed. They were causing several problems that were limiting some features.
- * Fix several buff equivalancies (Feared, Stunned, Disoriented, Silenced, Rooted).
+ * Fix several buff equivalencies (Feared, Stunned, Disoriented, Silenced, Rooted).
  * Spell names should now always check in the correct order.
  * The flickering timer issue should be gone for good now.
 
@@ -305,7 +311,7 @@
 ===v3.0.0===
  * Converted the entire settings system to AceDB-3.0. As such, the profile copy features that come along with it have been added to the Blizz interface options.
  * You can now copy the position and scale or a group, or an entire group, or any icon from any of your characters (that you have logged in to with this version of TMW or higher) though the icon config dropdown menu.
- * Rightclicking the LDB plugin now brings up the Blizz interface options for TMW instead of a menu with settings in it.
+ * Right clicking the LDB plugin now brings up the Blizz interface options for TMW instead of a menu with settings in it.
  * All icons now use the update interval that is specified in the Blizz interface options.
  * Efficiency increases across the board.
  * Overlay bars now have a little better functionality.
@@ -318,7 +324,7 @@
  * Groups can now be up to 20 rows by 20 columns.
  * Groups can no longer be moved off the screen.
  * You can now configure a group straight from an icon's dropdown menu.
- * You can now have an ifinite number of groups. Groups can be added by pressing the "Add another group" button in the Blizz interface options panel.
+ * You can now have an infinite number of groups. Groups can be added by pressing the "Add another group" button in the Blizz interface options panel.
  * You can now delete groups as you please. The groups with groupIDs higher than that of the deleted group will be reassigned a new groupID, and any icons that had condition or meta checks to the shifted groups will automatically be updated.
  * You can now customize the position of the stack text on icons.
  * And much, much more!
@@ -407,7 +413,7 @@
 ===v2.1.0===
  * Your settings file should become much, much smaller.
  * Icon cooldown now support slot ids (10 for gloves, 6 for belt, 13/14 for trinkets 1,2; etc, http://www.wowpedia.org/InventorySlotId)
- * A total reset puts groups where they are supposed to be instead of stacked on top of eachother
+ * A total reset puts groups where they are supposed to be instead of stacked on top of each other
  * Fixed some other minor stuff too, like the encoding of the localization files
 
 ===v2.0.4===
@@ -504,7 +510,7 @@
 ===v1.5===
  * Conditions can now check units other than  yourself
  * Conditions can now check for holy power, lunar power, and soul shards
- * Added many new buff equivalancies. For now these can be found in TellMeWhen.lua but will get a GUI in the next version.
+ * Added many new buff equivalencies. For now these can be found in TellMeWhen.lua but will get a GUI in the next version.
  * Fixed reactive icons that were set to always show (they weren't dimming when unusable)
  * Small efficiency increase
 
@@ -655,20 +661,20 @@ v.1.4.3
  ** Disabled bars and icons don't process everything
 
 ===v1.1.6===
- * Fixed a bug where pets caused an endless stream of errormessages when dismissed/killed
+ * Fixed a bug where pets caused an endless stream of error messages when dismissed/killed
  * Fixed a bug where Buff/Debuff set to "Show when Absent" was acting as it was set to "Always Visible"
 
 ===v1.1.5===
  * Updated for 3.2
  * Changed Interface and Version numbers in TOC
  * Buffs/Debuffs set to Always Visible now indicates if they are missing
- * Icontextures should update correctly now
+ * Icon textures should update correctly now
 
 ===v1.1.4===
- * DualSpec Support
+ * Dual Spec Support
 
 ===v1.1.3===
- * Rewrote Buffcheck to use UNIT_AURA instead of COMBAT_LOG_EVENT_UNFILTERED.
+ * Rewrote Buff checks to use UNIT_AURA instead of COMBAT_LOG_EVENT_UNFILTERED.
  * Removed a bunch of variables that was created, but not used.
 
 ===v1.1.2===

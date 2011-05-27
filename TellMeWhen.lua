@@ -13,7 +13,7 @@
 -- ADDON GLOBALS AND LOCALS
 -- -------------
 
-TMW = LibStub("AceAddon-3.0"):NewAddon(CreateFrame("Frame"), "TellMeWhen", "AceEvent-3.0", "AceTimer-3.0", "AceConsole-3.0", "AceComm-3.0")
+TMW = LibStub("AceAddon-3.0"):NewAddon(CreateFrame("Frame", "TellMeWhen"), "TellMeWhen", "AceEvent-3.0", "AceTimer-3.0", "AceConsole-3.0", "AceComm-3.0")
 local TMW = TMW
 TMW.Print = TMW.Print or _G.print
 TMW.Warn = setmetatable({}, {__call = function(tbl, text)
@@ -37,7 +37,7 @@ local LSM = LibStub("LibSharedMedia-3.0")
 
 TELLMEWHEN_VERSION = "4.2.1"
 TELLMEWHEN_VERSION_MINOR = ""
-TELLMEWHEN_VERSIONNUMBER = 42108 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
+TELLMEWHEN_VERSIONNUMBER = 42109 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
 if TELLMEWHEN_VERSIONNUMBER > 50000 or TELLMEWHEN_VERSIONNUMBER < 42000 then return end -- safety check because i accidentally made the version number 414069 once
 
 TELLMEWHEN_MAXGROUPS = 1 	--this is a default, used by SetTheory (addon), so dont rename
@@ -48,12 +48,12 @@ local GetSpellCooldown, GetSpellInfo =
 	  GetSpellCooldown, GetSpellInfo
 local GetItemInfo, GetInventoryItemID =
 	  GetItemInfo, GetInventoryItemID
-local GetShapeshiftForm, GetNumShapeshiftForms =
-	  GetShapeshiftForm, GetNumShapeshiftForms
+local GetShapeshiftForm, GetNumShapeshiftForms, GetNumRaidMembers =
+	  GetShapeshiftForm, GetNumShapeshiftForms, GetNumRaidMembers
 local UnitPower =
 	  UnitPower
-local GetNumRaidMembers, PlaySoundFile, SendChatMessage =
-	  GetNumRaidMembers, PlaySoundFile, SendChatMessage
+local PlaySoundFile, SendChatMessage =
+	  PlaySoundFile, SendChatMessage
 local tonumber, tostring, type, pairs, ipairs, tinsert, tremove, sort, select, wipe, rawget, tDeleteItem = --tDeleteItem is a blizzard function defined in UIParent.lua
 	  tonumber, tostring, type, pairs, ipairs, tinsert, tremove, sort, select, wipe, rawget, tDeleteItem
 local strfind, strmatch, format, gsub, strsub, strtrim, strsplit, strlower, min, max, ceil, floor =

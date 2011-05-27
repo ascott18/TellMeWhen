@@ -658,11 +658,11 @@
 							TMW.SUG:NameOnCursor()
 						end
 					</OnTextChanged>
-					<OnMouseDown>
+					<OnMouseUp>
 						if self.useSUG then
-							TMW.SUG:NameOnCursor()
+							TMW.SUG:NameOnCursor(1)
 						end
-					</OnMouseDown>
+					</OnMouseUp>
 				</Scripts>
 			</EditBox>
 			<Frame name="$parentRunes" parentKey="Runes" hidden="true">
@@ -1899,7 +1899,7 @@
 								local groupID, iconID = TMW.CI.g, TMW.CI.i
 								self:SetText(TMW:CleanString(self:GetText()))
 								if TMW.db then
-									TMW.db.profile.Groups[groupID].Icons[iconID]["Name"] = TMW:CleanString(self:GetText())
+									TMW.CI.ics["Name"] = TMW:CleanString(self:GetText())
 								end
 								TMW.IE:ScheduleIconUpdate(groupID, iconID)
 								self:GetScript("OnTextChanged")(self)
@@ -1926,6 +1926,7 @@
 							</OnReceiveDrag>
 							<OnMouseUp>
 								TMW.ID:SpellItemToIcon(TMW.CI.g, TMW.CI.i)
+								TMW.SUG:NameOnCursor(1)
 							</OnMouseUp>
 							<OnTextChanged>
 								local text = self:GetText()
@@ -1939,9 +1940,6 @@
 									TMW.SUG:NameOnCursor()
 								end
 							</OnTextChanged>
-							<OnMouseDown>
-								TMW.SUG:NameOnCursor()
-							</OnMouseDown>
 						</Scripts>
 					</EditBox>
 					<Frame name="$parentIcons[DND]" hidden="true" parentKey="Icons">
@@ -2176,6 +2174,27 @@
 								local groupID, iconID = TMW.CI.g, TMW.CI.i
 								if TMW.db then
 									TMW.db.profile.Groups[groupID].Icons[iconID]["OnlyMine"] = not not self:GetChecked()
+									TMW.IE:ScheduleIconUpdate(groupID, iconID)
+								end
+							</OnClick>
+						</Scripts>
+					</CheckButton>
+					<CheckButton name="$parentDontRefresh" inherits="TellMeWhen_CheckTemplate" parentKey="DontRefresh">
+						<Anchors>
+							<Anchor point="TOP" relativeTo="$parentShowTText" relativePoint="BOTTOM">
+								<Offset x="0" y="4" />
+							</Anchor>
+						</Anchors>
+						<Scripts>
+							<OnLoad>
+								TMW:TT(self, "ICONMENU_DONTREFRESH", "ICONMENU_DONTREFRESH_DESC")
+								self.text:SetText(TMW.L["ICONMENU_DONTREFRESH"])
+								self.text:SetWidth(TELLMEWHEN_COLUMN1WIDTH)
+							</OnLoad>
+							<OnClick>
+								local groupID, iconID = TMW.CI.g, TMW.CI.i
+								if TMW.db then
+									TMW.db.profile.Groups[groupID].Icons[iconID]["DontRefresh"] = not not self:GetChecked()
 									TMW.IE:ScheduleIconUpdate(groupID, iconID)
 								end
 							</OnClick>
@@ -2488,8 +2507,6 @@
 							</OnLoad>
 						</Scripts>
 					</Frame>
-
-					
 					<Frame name="$parentTypeChecks" parentKey="TypeChecks">
 						<Size x="140" y="100"/>
 						<Anchors>

@@ -90,7 +90,7 @@ local SlotsToNumbers = {
 local function WpnEnchant_OnUpdate(icon, time)
 	if icon.UpdateTimer <= time - UPD_INTV then
 		icon.UpdateTimer = time
-		if icon.CndtCheck and icon.CndtCheck() then return end
+		local CndtCheck = icon.CndtCheck if CndtCheck and CndtCheck() then return end
 		local has, expiration = select(icon.SelectIndex, GetWeaponEnchantInfo())
 		if has and icon.CorrectEnchant then
 			expiration = expiration/1000
@@ -120,7 +120,8 @@ end
 
 local function WpnEnchant_OnEvent(icon, event, unit)
 	if unit == "player" then
-		local wpnTexture = GetInventoryItemTexture("player", icon.Slot)
+		local Slot = icon.Slot
+		local wpnTexture = GetInventoryItemTexture("player", Slot)
 
 		local t = wpnTexture or "Interface\\Icons\\INV_Misc_QuestionMark"
 		if t ~= icon.__tex then icon:SetTexture(t) end
@@ -133,7 +134,7 @@ local function WpnEnchant_OnEvent(icon, event, unit)
 		elseif not icon.OnUpdate then
 			icon:SetScript("OnUpdate", WpnEnchant_OnUpdate)
 		end
-		local EnchantName = GetWeaponEnchantName(icon.Slot)
+		local EnchantName = GetWeaponEnchantName(Slot)
 		icon.EnchantName = EnchantName
 		if icon.Name == "" then
 			icon.CorrectEnchant = true

@@ -112,19 +112,20 @@ local function Reactive_OnUpdate(icon, time)
 			end
 		end
 
-		if n > 1 then -- if there is more than 1 spell that was checked then we need to get these again for the first spell, otherwise reuse the values obtained above since they are just for the first one
-			start, duration = GetSpellCooldown(icon.NameFirst)
-			if icon.IgnoreRunes then
+		local NameFirst = icon.NameFirst
+		if n > 1 then -- if more than 1 spell was checked, we need to get these again for the first spell, otherwise reuse the values obtained above since they are just for the first one
+			start, duration = GetSpellCooldown(NameFirst)
+			if IgnoreRunes then
 				if start == GetSpellCooldown(45477) or start == GetSpellCooldown(45462) or start == GetSpellCooldown(45902) then
 					start, duration = 0, 0
 				end
 			end
 			inrange, nomana = 1
-			if icon.RangeCheck then
+			if RangeCheck then
 				inrange = IsSpellInRange(icon.NameName, "target") or 1
 			end
-			if icon.ManaCheck then
-				_, nomana = IsUsableSpell(icon.NameFirst)
+			if ManaCheck then
+				_, nomana = IsUsableSpell(NameFirst)
 			end
 		end
 		if duration then
@@ -142,7 +143,7 @@ local function Reactive_OnUpdate(icon, time)
 				alpha, color = icon.UnAlpha, 1
 			end
 
-			icon:SetInfo(alpha, color, icon.FirstTexture, start, duration, true, icon.NameFirst)
+			icon:SetInfo(alpha, color, icon.FirstTexture, start, duration, true, NameFirst)
 
 			return
 		else

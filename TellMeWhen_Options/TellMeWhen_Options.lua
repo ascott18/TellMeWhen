@@ -54,7 +54,15 @@ local points = {
 }
 local print = TMW.print
 TMW.CI = setmetatable({}, {__index = function(tbl, k)
-	if k == "ics" then return tbl.g and tbl.i and TMW.db and TMW.db.profile.Groups[tbl.g].Icons[tbl.i] end
+	if k == "ics" then
+		local t = TMW.db
+		t = t and t.profile
+		t = t and t.Groups
+		t = t and t[tbl.g]
+		t = t and t.Icons
+		t = t and t[tbl.i]
+		return t
+	end
 end}) local CI = TMW.CI		--current icon
 local clientVersion = select(4, GetBuildInfo())
 
@@ -1181,6 +1189,7 @@ local checks = { --1=check box, 2=editbox, 3=slider(x100), 4=custom, table=subke
 	UnAlpha = 3,
 	ConditionAlpha = 3,
 	FakeHidden = 1,
+	DontRefresh = 1,
 }
 local tabs = {
 	[1] = "Main",
@@ -1877,7 +1886,7 @@ function IE:ImpExp_DropDown()
 			CloseDropDownMenus()
 			local groupID, iconID = CI.g, CI.i
 
-			TMW:CopyTableInPlaceWithMeta(TMW.Icon_Defaults, db.profile.Groups[groupID].Icons[iconID])
+			db.profile.Groups[groupID].Icons[iconID] = nil -- restore defaults, table recreated when passed in to CTIPWM
 			TMW:CopyTableInPlaceWithMeta(settings, db.profile.Groups[groupID].Icons[iconID])
 			for k, v in ipairs(TMW:GetUpgradeTable()) do
 				if version and version < k and v.icon then
@@ -1974,7 +1983,7 @@ function IE:Copy_DropDown()
 					CloseDropDownMenus()
 					local groupID, iconID = CI.g, CI.i
 
-					TMW:CopyTableInPlaceWithMeta(TMW.Icon_Defaults, db.profile.Groups[groupID].Icons[iconID])
+					db.profile.Groups[groupID].Icons[iconID] = nil -- restore defaults, table recreated when passed in to CTIPWM
 					TMW:CopyTableInPlaceWithMeta(self.value, db.profile.Groups[groupID].Icons[iconID])
 					for k, v in ipairs(TMW:GetUpgradeTable()) do
 						if version < k and v.icon then
@@ -2023,8 +2032,10 @@ function IE:Copy_DropDown()
 		info.text = L["COPYPOS"]
 		info.func = function()
 			CloseDropDownMenus()
-			TMW:CopyTableInPlaceWithMeta(TMW.Group_Defaults.Point, db.profile.Groups[groupID].Point)
+			
+			db.profile.Groups[groupID].Point = nil -- restore defaults, table recreated when passed in to CTIPWM
 			TMW:CopyTableInPlaceWithMeta(db.profiles[n].Groups[g].Point, db.profile.Groups[groupID].Point)
+			
 			db.profile.Groups[groupID].Scale = db.profiles[n].Groups[g].Scale or TMW.Group_Defaults.Scale
 			db.profile.Groups[groupID].Level = db.profiles[n].Groups[g].Level or TMW.Group_Defaults.Level
 			TMW:Group_Update(groupID)
@@ -2036,7 +2047,8 @@ function IE:Copy_DropDown()
 		info.text = L["COPYALL"]
 		info.func = function()
 			CloseDropDownMenus()
-			TMW:CopyTableInPlaceWithMeta(TMW.Group_Defaults, db.profile.Groups[groupID])
+			
+			db.profile.Groups[groupID] = nil -- restore defaults, table recreated when passed in to CTIPWM
 			TMW:CopyTableInPlaceWithMeta(db.profiles[n].Groups[g], db.profile.Groups[groupID])
 			TMW:Group_Update(groupID)
 			IE:Load(1)
@@ -2070,8 +2082,6 @@ function IE:Copy_DropDown()
 
 					local text, textshort, tooltipText = TMW:GetIconMenuText(nil, nil, d)
 					info = UIDropDownMenu_CreateInfo()
-					--info.text = format(L["fICON"], i)
-				--	info.tooltipTitle = format(L["GROUPICON"], TMW:GetGroupName(db.profiles[n].Groups[g].Name, g, 1), i)
 					info.text = textshort
 					info.tooltipTitle = format(L["GROUPICON"], TMW:GetGroupName(db.profiles[n].Groups[g].Name, g, 1), i)
 					info.tooltipText = tooltipText
@@ -2081,7 +2091,7 @@ function IE:Copy_DropDown()
 					info.func = function()
 						CloseDropDownMenus()
 
-						TMW:CopyTableInPlaceWithMeta(TMW.Icon_Defaults, db.profile.Groups[groupID].Icons[iconID])
+						db.profile.Groups[groupID].Icons[iconID] = nil -- restore defaults, table recreated when passed in to CTIPWM
 						TMW:CopyTableInPlaceWithMeta(db.profiles[n].Groups[g].Icons[i], db.profile.Groups[groupID].Icons[iconID])
 						local sourceversion = #tostring(gsub(db.profiles[n].Version, "[^%d]", "")) >= 5 and tonumber(db.profiles[n].Version)
 						for k, v in ipairs(TMW:GetUpgradeTable()) do
@@ -3026,7 +3036,7 @@ function SUG:SuggestingComplete()
 	end
 end
 
-function SUG:NameOnCursor()
+function SUG:NameOnCursor(isClick)
 	if SUG.IsCaching then
 		SUG.onCompleteCache = true
 		SUG.Suggest:Show()
@@ -3036,12 +3046,22 @@ function SUG:NameOnCursor()
 	local text = SUG.Box:GetText()
 
 	SUG.startpos = 0
-	SUG.endpos = SUG.Box:GetCursorPosition()
-	for i = SUG.endpos, 0, -1 do
+	for i = SUG.Box:GetCursorPosition(), 0, -1 do
 		if strsub(text, i, i) == ";" then
 			SUG.startpos = i+1
 			break
 		end
+	end
+	if isClick then
+		SUG.endpos = #text
+		for i = SUG.startpos, #text do
+			if strsub(text, i, i) == ";" then
+				SUG.endpos = i-1
+				break
+			end
+		end
+	else
+		SUG.endpos = SUG.Box:GetCursorPosition()
 	end
 
 	SUG.lastName = strsub(text, SUG.startpos, SUG.endpos)
@@ -3056,7 +3076,7 @@ function SUG:NameOnCursor()
 	gsub("%(", "%%("):
 	gsub("%)", "%%)")
 
-
+	
 	SUG.atBeginning = "^"..SUG.lastName
 
 	if SUG.lastName == "" or not strfind(SUG.lastName, "[^%.]") then

@@ -27,6 +27,7 @@ local RelevantSettings = {
 	ShowTimerText = true,
 	ICDType = true,
 	ICDDuration = true,
+	DontRefresh = true,
 	CooldownShowWhen = true,
 	ShowCBar = true,
 	CBarOffs = true,
@@ -61,7 +62,8 @@ if clientVersion >= 40200 then
 		if event == "COMBAT_LOG_EVENT_UNFILTERED" then
 			local _, event, _, sourceGUID, _, _, _, _, _, _, _, spellID, spellName = ... -- 2 NEW ARGS ADDED IN 4.2
 			if sourceGUID == pGUID and (event == "SPELL_AURA_APPLIED" or event == "SPELL_AURA_REFRESH" or event == "SPELL_ENERGIZE" or event == "SPELL_AURA_APPLIED_DOSE") then
-				if icon.NameDictionary[spellID] or icon.NameDictionary[strlower(spellName)] then
+				local NameDictionary = icon.NameDictionary
+				if (NameDictionary[spellID] or NameDictionary[strlower(spellName)]) and not (icon.DontRefresh and (TMW.time - icon.StartTime) < icon.ICDDuration) then
 					local t = GetSpellTexture(spellID)
 					if t ~= icon.__tex then icon:SetTexture(t) end
 
@@ -71,7 +73,8 @@ if clientVersion >= 40200 then
 		elseif event == "UNIT_SPELLCAST_SUCCEEDED" then
 			local unit, spellName, _, _, spellID = ...
 			if unit == "player" then
-				if icon.NameDictionary[spellID] or icon.NameDictionary[strlower(spellName)] then
+				local NameDictionary = icon.NameDictionary
+				if (NameDictionary[spellID] or NameDictionary[strlower(spellName)]) and not (icon.DontRefresh and (TMW.time - icon.StartTime) < icon.ICDDuration) then
 					local t = GetSpellTexture(spellID)
 					if t ~= icon.__tex then icon:SetTexture(t) end
 
@@ -85,7 +88,8 @@ elseif clientVersion >= 40100 then
 		if event == "COMBAT_LOG_EVENT_UNFILTERED" then
 			local _, event, _, sourceGUID, _, _, _, _, _, spellID, spellName = ... --NEW ARG ADDED BETWEEN EVENT AND SOURCEGUID IN 4.1
 			if sourceGUID == pGUID and (event == "SPELL_AURA_APPLIED" or event == "SPELL_AURA_REFRESH" or event == "SPELL_ENERGIZE" or event == "SPELL_AURA_APPLIED_DOSE") then
-				if icon.NameDictionary[spellID] or icon.NameDictionary[strlower(spellName)] then
+				local NameDictionary = icon.NameDictionary
+				if (NameDictionary[spellID] or NameDictionary[strlower(spellName)]) and not (icon.DontRefresh and (TMW.time - icon.StartTime) < icon.ICDDuration) then
 					local t = GetSpellTexture(spellID)
 					if t ~= icon.__tex then icon:SetTexture(t) end
 
@@ -95,7 +99,8 @@ elseif clientVersion >= 40100 then
 		elseif event == "UNIT_SPELLCAST_SUCCEEDED" then
 			local unit, spellName, _, _, spellID = ...
 			if unit == "player" then
-				if icon.NameDictionary[spellID] or icon.NameDictionary[strlower(spellName)] then
+				local NameDictionary = icon.NameDictionary
+				if (NameDictionary[spellID] or NameDictionary[strlower(spellName)]) and not (icon.DontRefresh and (TMW.time - icon.StartTime) < icon.ICDDuration) then
 					local t = GetSpellTexture(spellID)
 					if t ~= icon.__tex then icon:SetTexture(t) end
 
@@ -110,7 +115,7 @@ else
 			local _, event, sourceGUID, _, _, _, _, _, spellID, spellName = ...
 			if sourceGUID == pGUID and (event == "SPELL_AURA_APPLIED" or event == "SPELL_AURA_REFRESH" or event == "SPELL_ENERGIZE" or event == "SPELL_AURA_APPLIED_DOSE") then
 				local NameDictionary = icon.NameDictionary
-				if NameDictionary[spellID] or NameDictionary[strlower(spellName)] then
+				if (NameDictionary[spellID] or NameDictionary[strlower(spellName)]) and not (icon.DontRefresh and (TMW.time - icon.StartTime) < icon.ICDDuration) then
 					local t = GetSpellTexture(spellID)
 					if t ~= icon.__tex then icon:SetTexture(t) end
 					
@@ -121,7 +126,7 @@ else
 			local unit, spellName, _, _, spellID = ...
 			if unit == "player" then
 				local NameDictionary = icon.NameDictionary
-				if NameDictionary[spellID] or NameDictionary[strlower(spellName)] then
+				if (NameDictionary[spellID] or NameDictionary[strlower(spellName)]) and not (icon.DontRefresh and (TMW.time - icon.StartTime) < icon.ICDDuration) then
 					local t = GetSpellTexture(spellID)
 					if t ~= icon.__tex then icon:SetTexture(t) end
 
@@ -137,7 +142,8 @@ local function ICD_OnUpdate(icon, time)
 		icon.UpdateTimer = time
 		local CndtCheck = icon.CndtCheck if CndtCheck and CndtCheck() then return end
 
-		local timesince = time - icon.StartTime
+		local StartTime = icon.StartTime
+		local timesince = time - StartTime
 		local ICDDuration = icon.ICDDuration
 
 		local d = ICDDuration - timesince
@@ -149,7 +155,7 @@ local function ICD_OnUpdate(icon, time)
 		if timesince > ICDDuration then
 			icon:SetInfo(icon.Alpha, 1, nil, 0, 0)
 		else
-			icon:SetInfo(icon.UnAlpha, icon.Alpha ~= 0 and (icon.ShowTimer and 1 or .5) or 1, nil, icon.StartTime, ICDDuration)
+			icon:SetInfo(icon.UnAlpha, icon.Alpha ~= 0 and (icon.ShowTimer and 1 or .5) or 1, nil, StartTime, ICDDuration)
 		end
 	end
 end
