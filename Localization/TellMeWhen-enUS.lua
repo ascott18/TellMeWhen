@@ -73,7 +73,7 @@ The icon can be set to a specific spell texture or texture path via the name edi
 L["ICONMENU_META"] = "Meta icon"
 L["ICONMENU_META_DESC"] = [=[This icon type can be used to combine several icons into one.
 Icons that have 'Always Hide' checked will still be shown if they would otherwise be shown.]=]
-
+L["ICONMENU_DR"] = "Diminishing Returns"
 
 L["ICONMENU_COOLDOWNTYPE"] = "Cooldown type"
 L["ICONMENU_SPELL"] = "Spell or ability"

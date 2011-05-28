@@ -39,9 +39,9 @@ local function Meta_OnUpdate(icon, time)
 	if icon.UpdateTimer <= time - UPD_INTV then
 		icon.UpdateTimer = time
 		local CndtCheck = icon.CndtCheck if CndtCheck and CndtCheck() then return end
-		local CheckNext, IconTable = icon.CheckNext, icon.IconTable
-		for n = 1, #IconTable do
-			local ic = IconTable[n]
+		local CheckNext, Icons = icon.CheckNext, icon.Icons
+		for n = 1, #Icons do
+			local ic = _G[Icons[n]]
 			if ic and ic.OnUpdate and ic.__shown and (not CheckNext or (CheckNext and not AlreadyChecked[ic])) then
 				ic:OnUpdate(time)
 				local alpha = ic.FakeAlpha
@@ -73,7 +73,6 @@ end
 
 local alreadyinserted = {}
 local function GetFullIconTable(icons, tbl) -- check what all the possible icons it can show are, for use with setting CheckNext
-	tbl = tbl or {}
 	for i, ic in ipairs(icons) do
 		local g, i = strmatch(ic, "TellMeWhen_Group(%d+)_Icon(%d+)")
 		g, i = tonumber(g), tonumber(i)
@@ -90,18 +89,15 @@ end
 
 Type.AllowNoName = true
 Type.HideBars = true
+local preTable = {}
 function Type:Setup(icon, groupID, iconID)
 	icon.NameFirst = "" --need to set this to something for bars update
 	icon.ProcessedAt = 1
+	
 	if icon.CheckNext then
 		TMW.DoWipeAC = true
 		wipe(alreadyinserted)
 		icon.Icons = GetFullIconTable(icon.Icons)
-	end
-	
-	icon.IconTable = icon.IconTable and wipe(icon.IconTable) or {}
-	for i, ic in ipairs(icon.Icons) do
-		tinsert(icon.IconTable, _G[ic])
 	end
 	
 	icon.ShowPBar = true

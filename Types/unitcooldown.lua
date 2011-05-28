@@ -19,6 +19,7 @@ local UnitGUID, UnitExists, GetSpellTexture =
 local print = TMW.print
 local huge = math.huge
 local strlowerCache = TMW.strlowerCache
+local SpellTextures = TMW.SpellTextures
 
 local clientVersion = select(4, GetBuildInfo())
 
@@ -65,8 +66,6 @@ local Cooldowns = setmetatable({}, {__index = function(t, k)
 	t[k] = n
 	return n
 end}) TMW.Cooldowns = Cooldowns
-
-local SpellTextures = TMW.SpellTextures
 
 if clientVersion >= 40200 then -- COMBAT_LOG_EVENT_UNFILTERED
 	function Type:COMBAT_LOG_EVENT_UNFILTERED(e, _, p, _, g, _, _, _, _, _, _, _, i, n)-- tyPe, sourceGuid, spellId, spellName -- 2 NEW ARGS IN 4.2

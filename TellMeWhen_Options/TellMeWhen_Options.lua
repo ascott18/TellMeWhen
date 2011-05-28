@@ -1143,6 +1143,7 @@ local set2 = {
 	wpnenchant = "BuffShowWhen",
 	totem = "BuffShowWhen",
 	unitcooldown = "CooldownShowWhen",
+	dr = "CooldownShowWhen",
 	icd = "CooldownShowWhen",
 	cast = "BuffShowWhen",
 	meta = nil,
