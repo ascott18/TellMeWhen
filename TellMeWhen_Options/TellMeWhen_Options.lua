@@ -2410,12 +2410,14 @@ function ANN:SelectChannel(channel)
 
 	for i=1, #ANN.Channels do
 		local f = ANN.Channels[i]
-		if f.channel == channel then
-			channelFrame = f
+		if f then
+			if f.channel == channel then
+				channelFrame = f
+			end
+			f.selected = nil
+			f:UnlockHighlight()
+			f:GetHighlightTexture():SetVertexColor(1, 1, 1, 1)
 		end
-		f.selected = nil
-		f:UnlockHighlight()
-		f:GetHighlightTexture():SetVertexColor(1, 1, 1, 1)
 	end
 	ANN.currentChannelSetting = channel
 	

@@ -26,9 +26,9 @@ local AceDB = LibStub("AceDB-3.0")
 local LSM = LibStub("LibSharedMedia-3.0")
 local DRData = LibStub("DRData-1.0", true)
 
-TELLMEWHEN_VERSION = "4.2.1.1"
+TELLMEWHEN_VERSION = "4.2.1.2"
 TELLMEWHEN_VERSION_MINOR = ""
-TELLMEWHEN_VERSIONNUMBER = 42111 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
+TELLMEWHEN_VERSIONNUMBER = 42120 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
 if TELLMEWHEN_VERSIONNUMBER > 50000 or TELLMEWHEN_VERSIONNUMBER < 42000 then return end -- safety check because i accidentally made the version number 414069 once
 
 TELLMEWHEN_MAXGROUPS = 1 	--this is a default, used by SetTheory (addon), so dont rename
@@ -2041,17 +2041,18 @@ local function PwrBarOnValueChanged(bar, val)
 --	bar.texture:SetTexCoord(0, max(0, val/bar.Max), 0, 1)
 end
 
-local function SetInfo(icon, alpha, color, texture, start, duration, checkGCD, pbName, reverse, count)
-	-- icon		- the icon object to set the attributes on (frame) (but call as icon:SetInfo(alpha, ...) )
-	-- alpha	- the alpha to set the icon to (number)
-	-- color	- the value(s) to call SetVertexColor with. Either a (number) that will be used as the r, g, and b; or a (table) with keys r, g, and b set to
-	-- texture	- the texture path to set the icon to (string)
-	-- start	- the start time of the cooldow/duration, as passsed to icon.cooldown:SetCooldown(start, duration)
-	-- duration	- the duration of the cooldow/duration, as passsed to icon.cooldown:SetCooldown(start, duration)
-	-- checkGCD - true if the icon should check to see if the cooldown is a GCD before setting a cooldown, should only be used for icons that actually track cooldowns (boolean/nil)
-	-- pbName	- the name or ID of the spell to be used for the icons power bar overlay (string/number)
-	-- reverse	- true/false to set icon.cooldown:SetReverse(reverse), nil to not change (boolean/nil)
-	-- count	- the stack text to be set on the icon, nil/false to hide (number/nil/false)
+local function SetInfo(icon, alpha, color, texture, start, duration, checkGCD, pbName, reverse, count, countText)
+	-- icon			- the icon object to set the attributes on (frame) (but call as icon:SetInfo(alpha, ...) )
+	-- alpha		- the alpha to set the icon to (number)
+	-- color		- the value(s) to call SetVertexColor with. Either a (number) that will be used as the r, g, and b; or a (table) with keys r, g, b
+	-- texture		- the texture path to set the icon to (string)
+	-- start		- the start time of the cooldow/duration, as passsed to icon.cooldown:SetCooldown(start, duration)
+	-- duration		- the duration of the cooldow/duration, as passsed to icon.cooldown:SetCooldown(start, duration)
+	-- checkGCD 	- true if the icon should check to see if the cooldown is a GCD before setting a cooldown, should only be used for icons that actually track cooldowns (boolean/nil)
+	-- pbName		- the name or ID of the spell to be used for the icons power bar overlay (string/number)
+	-- reverse		- true/false to set icon.cooldown:SetReverse(reverse), nil to not change (boolean/nil)
+	-- count		- the number of stacks to be used for comparison, nil/false to hide (number/nil/false)
+	-- [countText]	- the actual stack TEXT to be set on the icon, will use count if nil (number/string/nil/false)
 	
 	local played, announced, justShowed
 	alpha = icon.CndtFailed and icon.ConditionAlpha or alpha
@@ -2225,12 +2226,13 @@ local function SetInfo(icon, alpha, color, texture, start, duration, checkGCD, p
 	end
 
 	if icon.__count ~= count then
-		if count and count > 1 then
-			icon.countText:SetText(count)
+		if count then
+			icon.countText:SetText(countText or count)
 		else
 			icon.countText:SetText(nil)
 		end
 		icon.__count = count
+		icon.__countText = countText
 	end
 
 	icon.__checkGCD = checkGCD

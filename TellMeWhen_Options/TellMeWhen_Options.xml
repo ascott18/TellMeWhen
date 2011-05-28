@@ -3739,8 +3739,10 @@
 								self.Header:SetText(TMW.L["ANN_CHANTOUSE"])
 								local previous
 
+								local offs = 0
 								for i, t in ipairs(TMW.ChannelList) do
 									if not t.hidden then
+										i = i + offs
 										local f = CreateFrame("Button", self:GetName().."Channel"..i, self, "TellMeWhen_ChannelSelectButton", i)
 										self[i] = f
 										f:SetPoint("TOPLEFT", previous, "BOTTOMLEFT", 0, 0)
@@ -3750,6 +3752,8 @@
 										f.Name:SetText(t.text)
 										f:Show()
 										TMW:TT(f, t.text, t.addon, 1, 1)
+									else
+										offs = offs - 1
 									end
 								end
 								self[1]:SetPoint("TOPLEFT", self, "TOPLEFT", 0, 0)

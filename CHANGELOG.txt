@@ -1,3 +1,6 @@
+===v4.2.1.2===
+ * Fixed: meta.lua line 80: bad argument #1 to 'tinsert' (table expected, got nil)
+
 ===v4.2.1.1===
  * Fixed a bug that was breaking meta icons until config mode was toggled on and off at least once after logging in.
  

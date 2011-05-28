@@ -60,7 +60,7 @@ local function Meta_OnUpdate(icon, time)
 					icon.InvertBars = ic.InvertBars
 					icon.ShowTimer = ic.ShowTimer
 					icon.cooldown.noCooldownCount = ic.cooldown.noCooldownCount
-					icon:SetInfo(alpha, ic.__vrtxcolor, ic.__tex, ic.__start, ic.__duration, ic.__checkGCD, ic.__pbName, ic.__reverse, ic.__count)
+					icon:SetInfo(alpha, ic.__vrtxcolor, ic.__tex, ic.__start, ic.__duration, ic.__checkGCD, ic.__pbName, ic.__reverse, ic.__count, ic.__countText)
 
 					AlreadyChecked[ic] = true
 					return
@@ -73,6 +73,7 @@ end
 
 local alreadyinserted = {}
 local function GetFullIconTable(icons, tbl) -- check what all the possible icons it can show are, for use with setting CheckNext
+	tbl = tbl or {}
 	for i, ic in ipairs(icons) do
 		local g, i = strmatch(ic, "TellMeWhen_Group(%d+)_Icon(%d+)")
 		g, i = tonumber(g), tonumber(i)
