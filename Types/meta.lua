@@ -39,10 +39,10 @@ local function Meta_OnUpdate(icon, time)
 	if icon.UpdateTimer <= time - UPD_INTV then
 		icon.UpdateTimer = time
 		local CndtCheck = icon.CndtCheck if CndtCheck and CndtCheck() then return end
-		local CheckNext = icon.CheckNext
-		for k, i in ipairs(icon.Icons) do
-			local ic = _G[i]
-			if ic and ic.OnUpdate and (not CheckNext or (CheckNext and not AlreadyChecked[ic])) then
+		local CheckNext, IconTable = icon.CheckNext, icon.IconTable
+		for n = 1, #IconTable do
+			local ic = IconTable[n]
+			if ic and ic.OnUpdate and ic.__shown and (not CheckNext or (CheckNext and not AlreadyChecked[ic])) then
 				ic:OnUpdate(time)
 				local alpha = ic.FakeAlpha
 				if alpha > 0 and ic.__shown then
@@ -87,6 +87,7 @@ local function GetFullIconTable(icons, tbl) -- check what all the possible icons
 	return tbl
 end
 
+
 Type.AllowNoName = true
 Type.HideBars = true
 function Type:Setup(icon, groupID, iconID)
@@ -97,6 +98,12 @@ function Type:Setup(icon, groupID, iconID)
 		wipe(alreadyinserted)
 		icon.Icons = GetFullIconTable(icon.Icons)
 	end
+	
+	icon.IconTable = icon.IconTable and wipe(icon.IconTable) or {}
+	for i, ic in ipairs(icon.Icons) do
+		tinsert(icon.IconTable, _G[ic])
+	end
+	
 	icon.ShowPBar = true
 	icon.ShowCBar = true
 	icon.InvertBars = false

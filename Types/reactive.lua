@@ -12,11 +12,12 @@ if not TMW then return end
 local L = TMW.L
 
 local db, UPD_INTV, ClockGCD, pr, ab, rc, mc
-local GetSpellCooldown, IsSpellInRange, IsUsableSpell, GetSpellTexture, GetSpellInfo =
-	  GetSpellCooldown, IsSpellInRange, IsUsableSpell, GetSpellTexture, GetSpellInfo
+local GetSpellCooldown, IsSpellInRange, IsUsableSpell, GetSpellInfo =
+	  GetSpellCooldown, IsSpellInRange, IsUsableSpell, GetSpellInfo
 local OnGCD = TMW.OnGCD
 local print = TMW.print
 local _, pclass = UnitClass("Player")
+local SpellTextures = TMW.SpellTextures
 
 local RelevantSettings = {
 	Name = true,
@@ -105,7 +106,7 @@ local function Reactive_OnUpdate(icon, time)
 				usable = Usable or usable
 				if usable and not CD and not nomana and inrange == 1 then --usable
 
-					icon:SetInfo(icon.Alpha, 1, GetSpellTexture(iName), start, duration, true, iName)
+					icon:SetInfo(icon.Alpha, 1, SpellTextures[iName], start, duration, true, iName)
 
 					return
 				end
@@ -161,7 +162,7 @@ function Type:Setup(icon, groupID, iconID)
 	icon.NameNameArray = TMW:GetSpellNames(icon, icon.Name, nil, 1)
 	icon.Usable = false
 
-	icon.FirstTexture = GetSpellTexture(icon.NameFirst)
+	icon.FirstTexture = SpellTextures[icon.NameFirst]
 
 	if icon.UseActvtnOverlay then
 		icon:RegisterEvent("SPELL_ACTIVATION_OVERLAY_GLOW_SHOW")
@@ -171,8 +172,8 @@ function Type:Setup(icon, groupID, iconID)
 
 	if icon.Name == "" then
 		icon:SetTexture("Interface\\Icons\\INV_Misc_QuestionMark")
-	elseif GetSpellTexture(icon.NameFirst) then
-		icon:SetTexture(GetSpellTexture(icon.NameFirst))
+	elseif icon.FirstTexture then
+		icon:SetTexture(icon.FirstTexture)
 	elseif TMW:DoSetTexture(icon) then
 		icon:SetTexture("Interface\\Icons\\INV_Misc_QuestionMark")
 	end

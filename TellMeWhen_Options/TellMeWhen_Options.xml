@@ -606,18 +606,29 @@
 						TMW.CNDT:SetValText(self:GetParent())
 					</OnValueChanged>
 					<OnMouseUp>
+						TMW.CNDT:SetSliderMinMax(self:GetParent())
 						TMW.CNDT:OK()
 					</OnMouseUp>
 					<OnLoad>
 						self:EnableMouseWheel(true)
+						self.getvalue = self.GetValue
+						function self:GetValue()
+							local step = self.step or 1
+							local val = self:getvalue()
+							return floor(val * (1/step) + 0.5) / (1/step)
+						end
 					</OnLoad>
 					<OnMouseWheel>
 						if IsLeftShiftKeyDown() or IsRightShiftKeyDown() then
 							delta = delta*10
-						elseif IsLeftControlKeyDown() or IsRightControlKeyDown() then
-							delta = delta*100
 						end
-						self:SetValue(self:GetValue()+delta)
+						if IsLeftControlKeyDown() or IsRightControlKeyDown() then
+							delta = delta*60
+						end
+						if delta == 1 or delta == -1 then
+							delta = delta*(self.step or 1)
+						end
+						TMW.CNDT:SetSliderMinMax(self:GetParent(), self:GetValue()+delta)
 						TMW.CNDT:OK()
 					</OnMouseWheel>
 				</Scripts>

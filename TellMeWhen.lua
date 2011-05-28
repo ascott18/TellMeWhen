@@ -15,16 +15,6 @@
 
 TMW = LibStub("AceAddon-3.0"):NewAddon(CreateFrame("Frame", "TellMeWhen"), "TellMeWhen", "AceEvent-3.0", "AceTimer-3.0", "AceConsole-3.0", "AceComm-3.0")
 local TMW = TMW
-TMW.Print = TMW.Print or _G.print
-TMW.Warn = setmetatable({}, {__call = function(tbl, text)
-	if TMW.Warned then
-		TMW:Print(text)
-	elseif not TMW.tContains(tbl, text) then
-		tinsert(tbl, text)
-	end
-end})
-TMW.Icons = {}
-TMW.OrderedTypes = {}
 
 local db
 local L = LibStub("AceLocale-3.0"):GetLocale("TellMeWhen", true)
@@ -37,15 +27,15 @@ local LSM = LibStub("LibSharedMedia-3.0")
 
 TELLMEWHEN_VERSION = "4.2.1"
 TELLMEWHEN_VERSION_MINOR = ""
-TELLMEWHEN_VERSIONNUMBER = 42109 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
+TELLMEWHEN_VERSIONNUMBER = 42110 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
 if TELLMEWHEN_VERSIONNUMBER > 50000 or TELLMEWHEN_VERSIONNUMBER < 42000 then return end -- safety check because i accidentally made the version number 414069 once
 
 TELLMEWHEN_MAXGROUPS = 1 	--this is a default, used by SetTheory (addon), so dont rename
 TELLMEWHEN_MAXROWS = 20
 local UPD_INTV = 0.06	--this is a default, local because i use it in onupdate functions
 
-local GetSpellCooldown, GetSpellInfo =
-	  GetSpellCooldown, GetSpellInfo
+local GetSpellCooldown, GetSpellInfo, GetSpellTexture =
+	  GetSpellCooldown, GetSpellInfo, GetSpellTexture
 local GetItemInfo, GetInventoryItemID =
 	  GetItemInfo, GetInventoryItemID
 local GetShapeshiftForm, GetNumShapeshiftForms, GetNumRaidMembers =
@@ -64,12 +54,32 @@ local _, pclass = UnitClass("Player")
 local st, co, updatehandler, BarGCD, ClockGCD, Locked, CNDT, SndChan
 local runEvents = 1
 local GCD, NumShapeshiftForms, UpdateTimer = 0, 0, 0
-local time = GetTime()
-TMW.time = time
+local time = GetTime() TMW.time = time
 local unitsToChange = {}
 local sctcolor = {r=1,b=1,g=1}
 local clientVersion = select(4, GetBuildInfo())
 
+
+TMW.Print = TMW.Print or _G.print
+TMW.Warn = setmetatable({}, {__call = function(tbl, text)
+	if TMW.Warned then
+		TMW:Print(text)
+	elseif not TMW.tContains(tbl, text) then
+		tinsert(tbl, text)
+	end
+end})
+TMW.SpellTextures = setmetatable({}, {__index = function(t, name)
+	local tex = GetSpellTexture(name)
+	t[name] = tex
+	return tex
+end}) local SpellTextures = TMW.SpellTextures
+TMW.strlowerCache = setmetatable({}, {__index = function(t, i)
+	local o = strlower(i)
+	t[i] = o
+	return o
+end})
+TMW.Icons = {}
+TMW.OrderedTypes = {}
 
 function TMW.tContains(table, item)
 	local firstkey
@@ -89,7 +99,6 @@ local function ClearScripts(f)
 		f:SetScript("OnValueChanged", nil)
 	end
 end
-
 function TMW.print(...)
 	if TMW.debug or not TMW.VarsLoaded then
 		if ... == TMW then

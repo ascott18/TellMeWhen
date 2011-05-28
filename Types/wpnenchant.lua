@@ -18,6 +18,7 @@ local GetInventoryItemTexture, GetInventorySlotInfo, GetWeaponEnchantInfo =
 	  GetInventoryItemTexture, GetInventorySlotInfo, GetWeaponEnchantInfo
 local print = TMW.print
 local UIParent = UIParent
+local strlowerCache = TMW.strlowerCache
 
 local RelevantSettings = {
 	Name = true,
@@ -140,7 +141,7 @@ local function WpnEnchant_OnEvent(icon, event, unit)
 			icon.CorrectEnchant = true
 		else
 			if EnchantName then
-				icon.CorrectEnchant = icon.NameDictionary[strlower(EnchantName)]
+				icon.CorrectEnchant = icon.NameDictionary[strlowerCache[EnchantName]]
 			end
 		end
 	end

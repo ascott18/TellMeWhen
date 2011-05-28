@@ -825,12 +825,12 @@ function ID:Drag_DropDown(a)
 		info.text = L["ICONMENU_APPENDCONDT"]
 		info.func = ID.Condition
 		UIDropDownMenu_AddButton(info)
-	end
-
-	if ID.desticon.Type == "meta" then
-		info.text = L["ICONMENU_ADDMETA"]
-		info.func = ID.Meta
-		UIDropDownMenu_AddButton(info)
+		
+		if ID.desticon.Type == "meta" then
+			info.text = L["ICONMENU_ADDMETA"]
+			info.func = ID.Meta
+			UIDropDownMenu_AddButton(info)
+		end
 	end
 
 	info.text = CANCEL
@@ -2615,7 +2615,7 @@ function SUG:OnInitialize()
 							not strfind(name, "bunny") and
 							not strfind(name, "visual") and
 							not strfind(name, "trigger") and
-							not strfind(name, "[%[%%%+%?]") and
+							not strfind(name, "[%[%%%+%?]") and -- no brackets, plus signs, percent signs, or question marks
 							not strfind(name, "quest") and
 							not strfind(name, "vehicle") and
 							not strfind(name, "event") and
@@ -3296,6 +3296,10 @@ function CNDT:IconMenu_DropDown()
 				info.tooltipText = format(L["GROUPICON"], TMW:GetGroupName(db.profile.Groups[g].Name, g, 1), i)
 				info.tooltipOnButton = true
 				info.arg1 = self
+				info.tCoordLeft = 0.07
+				info.tCoordRight = 0.93
+				info.tCoordTop = 0.07
+				info.tCoordBottom = 0.93
 				info.icon = TMW[g][i].texture:GetTexture()
 				UIDropDownMenu_AddButton(info, UIDROPDOWNMENU_MENU_LEVEL)
 			end
@@ -3566,7 +3570,8 @@ function CNDT:Load()
 			if v then
 				TMW:TT(group.Operator, v.tooltipText, nil, 1, nil, 1)
 			end
-			group.Slider:SetValue(condition.Level or 0)
+			
+			CNDT:SetSliderMinMax(group, condition.Level or 0)
 			CNDT:SetValText(group)
 
 			for k, rune in pairs(group.Runes) do
@@ -3655,7 +3660,7 @@ end
 function CNDT:SetUIDropdownText(frame, value, tbl)
 	UIDropDownMenu_SetSelectedValue(frame, value)
 	local group = frame:GetParent()
-	CNDT:SetSliderMinMax(group)
+	
 	if tbl == CNDT.Types then
 		CNDT:TypeCheck(group, CNDT.ConditionsByType[value])
 	elseif tbl == TMW.Icons then
@@ -3700,12 +3705,34 @@ function CNDT:SetValText(group)
 	end
 end
 
-function CNDT:SetSliderMinMax(group)
+function CNDT:SetSliderMinMax(group, level)
+	-- level is passed in only when the setting is changing or being loaded
 	local v = CNDT.ConditionsByType[UIDropDownMenu_GetSelectedValue(group.Type)]
-	group.Slider:SetMinMaxValues(v.min or 0, v.max or 1)
-	_G[group.Slider:GetName() .. "Low"]:SetText((v.texttable and v.texttable[v.min]) or v.mint or v.min or 0)
-	_G[group.Slider:GetName() .. "Mid"]:SetText(v.midt)
-	_G[group.Slider:GetName() .. "High"]:SetText((v.texttable and v.texttable[v.max]) or v.maxt or v.max or 1)
+	if not v then return end
+	local Slider = group.Slider
+	if v.range then
+		local deviation = v.range/2
+		local val = level or Slider:GetValue()
+		
+		local newmin = max(0, val-deviation)
+		local newmax = max(deviation, val + deviation)
+		
+		Slider:SetMinMaxValues(newmin, newmax)
+		
+		_G[Slider:GetName() .. "Low"]:SetText((v.texttable and v.texttable[newmin]) or newmin)
+		_G[Slider:GetName() .. "Mid"]:SetText(nil)
+		_G[Slider:GetName() .. "High"]:SetText((v.texttable and v.texttable[newmax]) or newmax)
+	else
+		Slider:SetMinMaxValues(v.min or 0, v.max or 1)
+		_G[Slider:GetName() .. "Low"]:SetText((v.texttable and v.texttable[v.min]) or v.mint or v.min or 0)
+		_G[Slider:GetName() .. "Mid"]:SetText(v.midt)
+		_G[Slider:GetName() .. "High"]:SetText((v.texttable and v.texttable[v.max]) or v.maxt or v.max or 1)
+	end
+	Slider.step = v.step or 1
+	Slider:SetValueStep(Slider.step)
+	if level then
+		Slider:SetValue(level)
+	end
 end
 
 function CNDT:TypeCheck(group, data)

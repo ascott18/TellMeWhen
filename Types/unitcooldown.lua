@@ -18,6 +18,7 @@ local UnitGUID, UnitExists, GetSpellTexture =
 	  UnitGUID, UnitExists, GetSpellTexture
 local print = TMW.print
 local huge = math.huge
+local strlowerCache = TMW.strlowerCache
 
 local clientVersion = select(4, GetBuildInfo())
 
@@ -65,24 +66,20 @@ local Cooldowns = setmetatable({}, {__index = function(t, k)
 	return n
 end}) TMW.Cooldowns = Cooldowns
 
-local SpellTextures = setmetatable({}, {__index = function(t, name)
-	local tex = GetSpellTexture(name)
-	t[name] = tex
-	return tex
-end})
+local SpellTextures = TMW.SpellTextures
 
 if clientVersion >= 40200 then -- COMBAT_LOG_EVENT_UNFILTERED
 	function Type:COMBAT_LOG_EVENT_UNFILTERED(e, _, p, _, g, _, _, _, _, _, _, _, i, n)-- tyPe, sourceGuid, spellId, spellName -- 2 NEW ARGS IN 4.2
 		if p == "SPELL_CAST_SUCCESS" then
 			local c = Cooldowns[g]
-			c[strlower(n)] = i
+			c[strlowerCache[n]] = i
 			c[i] = TMW.time
 		elseif p == "SPELL_AURA_APPLIED" or p == "SPELL_AURA_REFRESH" or p == "SPELL_DAMAGE" or p == "SPELL_HEAL" or p == "SPELL_MISSED" then
 			local t = TMW.time
 			local c = Cooldowns[g]
 			local ci = c[i]
 			if (ci and ci + 1.8 < t) or not ci then 	-- if this event was less than 1.8 seconds after a SPELL_CAST_SUCCESS or a UNIT_SPELLCAST_SUCCEEDED then ignore it (this is just a safety window for spell travel time so that if we found the real cast start, we dont overwrite it)
-				c[strlower(n)] = i
+				c[strlowerCache[n]] = i
 				c[i] = t-1			-- hack it to make it a little bit more accurate. a max range dk deathcoil has a travel time of about 1.3 seconds, so 1 second should be a good average to be safe with travel times.
 			end						-- (and really, how often are people actually going to be tracking cooldowns with cast times? there arent that many, and the ones that do exist arent that important)
 		end
@@ -91,14 +88,14 @@ elseif clientVersion >= 40100 then
 	function Type:COMBAT_LOG_EVENT_UNFILTERED(e, _, p, _, g, _, _, _, _, _, i, n)-- tyPe, sourceGuid, spellId, spellName -- NEW ARG IN 4.1 BETWEEN TYPE AND SOURCEGUID
 		if p == "SPELL_CAST_SUCCESS" then
 			local c = Cooldowns[g]
-			c[strlower(n)] = i
+			c[strlowerCache[n]] = i
 			c[i] = TMW.time
 		elseif p == "SPELL_AURA_APPLIED" or p == "SPELL_AURA_REFRESH" or p == "SPELL_DAMAGE" or p == "SPELL_HEAL" or p == "SPELL_MISSED" then
 			local t = TMW.time
 			local c = Cooldowns[g]
 			local ci = c[i]
 			if (ci and ci + 1.8 < t) or not ci then 	-- if this event was less than 1.8 seconds after a SPELL_CAST_SUCCESS or a UNIT_SPELLCAST_SUCCEEDED then ignore it (this is just a safety window for spell travel time so that if we found the real cast start, we dont overwrite it)
-				c[strlower(n)] = i
+				c[strlowerCache[n]] = i
 				c[i] = t-1			-- hack it to make it a little bit more accurate. a max range dk deathcoil has a travel time of about 1.3 seconds, so 1 second should be a good average to be safe with travel times.
 			end						-- (and really, how often are people actually going to be tracking cooldowns with cast times? there arent that many, and the ones that do exist arent that important)
 		end
@@ -107,14 +104,14 @@ else
 	function Type:COMBAT_LOG_EVENT_UNFILTERED(e, _, p, g, _, _, _, _, _, i, n)-- tyPe, Guid, spellId, spellName
 		if p == "SPELL_CAST_SUCCESS" then
 			local c = Cooldowns[g]
-			c[strlower(n)] = i
+			c[strlowerCache[n]] = i
 			c[i] = TMW.time
 		elseif p == "SPELL_AURA_APPLIED" or p == "SPELL_AURA_REFRESH" or p == "SPELL_DAMAGE" or p == "SPELL_HEAL" or p == "SPELL_MISSED" then
 			local t = TMW.time
 			local c = Cooldowns[g]
 			local ci = c[i]
 			if (ci and ci + 1.8 < t) or not ci then 	-- if this event was less than 1.8 seconds after a SPELL_CAST_SUCCESS or a UNIT_SPELLCAST_SUCCEEDED then ignore it (this is just a safety window for spell travel time so that if we found the real cast start, we dont overwrite it)
-				c[strlower(n)] = i
+				c[strlowerCache[n]] = i
 				c[i] = t-1			-- hack it to make it a little bit more accurate. a max range dk deathcoil has a travel time of about 1.3 seconds, so 1 second should be a good average to be safe with travel times.
 			end						-- (and really, how often are people actually going to be tracking cooldowns with cast times? there arent that many, and the ones that do exist arent that important)
 		end
@@ -123,7 +120,7 @@ end
 
 function Type:UNIT_SPELLCAST_SUCCEEDED(e, u, n, _, _, i)--Unit, spellName, spellId
 	local c = Cooldowns[UnitGUID(u)]
-	c[strlower(n)] = i
+	c[strlowerCache[n]] = i
 	c[i] = TMW.time
 end
 
@@ -148,7 +145,7 @@ local function UnitCooldown_OnUpdate(icon, time)
 				for i = 1, NAL do
 					local iName = NameArray[i]
 					if type(iName) == "string" then
-						iName = cooldowns[strlower(iName)] or iName-- spell name keys have values that are the spellid of the name, we need the spellid for the texture (thats why i did it like this)
+						iName = cooldowns[iName] or iName-- spell name keys have values that are the spellid of the name, we need the spellid for the texture (thats why i did it like this)
 					end
 					local _start
 					if OnlySeen then
@@ -158,7 +155,7 @@ local function UnitCooldown_OnUpdate(icon, time)
 					end
 					
 					if _start then
-						local tms = time-_start -- Time Minus Start - time since the unit's last cast of the spell
+						local tms = time-_start -- Time Minus Start - time since the unit's last cast of the spell (not neccesarily the time it has been on cooldown)
 						local _d = tms > ICDDuration and 0 or tms -- real duration remaining on the cooldown
 						if Sort then
 							if _d ~= 0 then -- found an unusable cooldown
@@ -215,6 +212,13 @@ function Type:Setup(icon, groupID, iconID)
 	icon.Units = TMW:GetUnits(icon, icon.Unit)
 	icon.Sort = icon.Sort and -icon.Sort -- i wish i could figue out why this is backwards
 
+	for k, v in pairs(icon.NameArray) do
+		-- this is for looking up the spellID in Cooldowns[GUID] - spell names are stored lowercase
+		if type(v) == "string" then
+			icon.NameArray[k] = strlower(v)
+		end
+	end
+	
 	Type:RegisterEvent("COMBAT_LOG_EVENT_UNFILTERED")
 	Type:RegisterEvent("UNIT_SPELLCAST_SUCCEEDED")
 

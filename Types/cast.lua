@@ -17,6 +17,7 @@ local ipairs, strlower =
 local UnitCastingInfo, UnitChannelInfo, UnitExists, UnitGUID =
 	  UnitCastingInfo, UnitChannelInfo, UnitExists, UnitGUID
 local print = TMW.print
+local strlowerCache = TMW.strlowerCache
 
 local clientVersion = select(4, GetBuildInfo())
 
@@ -57,8 +58,10 @@ local function Cast_OnUpdate(icon, time)
 		icon.UpdateTimer = time
 		local CndtCheck = icon.CndtCheck if CndtCheck and CndtCheck() then return end
 
-		local NameFirst, NameNameDictionary, Interruptible = icon.NameFirst, icon.NameNameDictionary, icon.Interruptible
-		for _, unit in ipairs(icon.Units) do
+		local NameFirst, NameNameDictionary, Units, Interruptible = icon.NameFirst, icon.NameNameDictionary, icon.Units, icon.Interruptible
+		
+		for u = 1, #Units do
+			local unit = Units[u]
 			if UnitExists(unit) then
 				local name, _, _, iconTexture, start, endTime, _, _, notInterruptible = UnitCastingInfo(unit)
 				local reverse = false -- must be false
@@ -67,7 +70,7 @@ local function Cast_OnUpdate(icon, time)
 					reverse = true
 				end
 
-				if name and not (notInterruptible and Interruptible) and (NameFirst == "" or NameNameDictionary[strlower(name)]) then
+				if name and not (notInterruptible and Interruptible) and (NameFirst == "" or NameNameDictionary[strlowerCache[name]]) then
 					start, endTime = start/1000, endTime/1000
 					local duration = endTime - start
 

@@ -4,6 +4,9 @@
  * Internal Cooldown icons now have the option to not reset their cooldown to full duration if they are triggered while cooling down (mainly for the Early Frost mage talent).
  * Updated COMBAT_LOG_EVENT_UNFILTERED for 4.2.
  * When right-click-dragging icons to move them or swap them, any meta icons or icon shown conditions will now update to reflect that change.
+ * Further categorized the ever-expanding condition type dropdown.
+ * Some conditions that check a duration now allow a smaller increment of time to be specified.
+ * Some conditions that had high maximum values now adjust their min/max based on the current value, allowing finer tuning with a higher (infinite) maximum.
  * Added the following text output destinations:
  ** Grayhoof's Scrolling Combat Text
  ** mikord's MikScrollingBattleText

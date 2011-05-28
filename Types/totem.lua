@@ -19,6 +19,7 @@ local strlower =
 local GetTotemInfo, GetSpellTexture =
 	  GetTotemInfo, GetSpellTexture
 local print = TMW.print
+local strlowerCache = TMW.strlowerCache
 
 local RelevantSettings = {
 	Name = pclass ~= "DRUID" and pclass ~= "DEATHKNIGHT",
@@ -62,7 +63,7 @@ local function Totem_OnUpdate(icon, time)
 		for iSlot = 1, #Slots do -- be careful here. slots that are explicitly disabled by the user are set false. slots that are disabled internally are set nil.
 			if Slots[iSlot] then
 				local _, totemName, start, duration, totemIcon = GetTotemInfo(iSlot)
-				if start ~= 0 and totemName and ((NameFirst == "") or NameNameDictionary[strlower(totemName)]) then
+				if start ~= 0 and totemName and ((NameFirst == "") or NameNameDictionary[strlowerCache[totemName]]) then
 					icon:SetInfo(icon.Alpha, icon.UnAlpha ~= 0 and pr or 1, totemIcon, start, duration)
 					return
 				end

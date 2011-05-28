@@ -18,6 +18,13 @@ local UnitAura, UnitExists =
 	  UnitAura, UnitExists
 local print = TMW.print
 local DS = TMW.DS
+local SpellTextures = TMW.SpellTextures
+local strlowerCache = TMW.strlowerCache
+local isNumber = setmetatable({}, {__index = function(t, i)
+	local o = not not tonumber(i)
+	t[i] = o
+	return o
+end})
 
 local RelevantSettings = {
 	Name = true,
@@ -83,7 +90,7 @@ local function Buff_OnUpdate(icon, time)
 						local _buffName, _, _iconTexture, _count, _dispelType, _duration, _expirationTime, _, _, _, _id = UnitAura(unit, z, Filter)
 						if not _buffName then
 							break
-						elseif NameDictionary[_id] or NameDictionary[_dispelType] or NameDictionary[strlower(_buffName)] then
+						elseif NameDictionary[_id] or NameDictionary[_dispelType] or NameDictionary[strlowerCache[_buffName]] then
 							if Sort then
 								local _d = (_expirationTime == 0 and huge) or _expirationTime - time
 								if (Sort == 1 and d < _d) or (Sort == -1 and d > _d) then
@@ -102,7 +109,7 @@ local function Buff_OnUpdate(icon, time)
 							local _buffName, _, _iconTexture, _count, _dispelType, _duration, _expirationTime, _, _, _, _id = UnitAura(unit, z, Filterh)
 							if not _buffName then
 								break
-							elseif NameDictionary[_id] or NameDictionary[_dispelType] or NameDictionary[strlower(_buffName)] then
+							elseif NameDictionary[_id] or NameDictionary[_dispelType] or NameDictionary[strlowerCache[_buffName]] then
 								if Sort then
 									local _d = (_expirationTime == 0 and huge) or _expirationTime - time
 									if (Sort == 1 and d < _d) or (Sort == -1 and d > _d) then
@@ -137,11 +144,11 @@ local function Buff_OnUpdate(icon, time)
 							end
 						else
 							buffName, _, iconTexture, count, dispelType, duration, expirationTime, _, _, _, id = UnitAura(unit, NameNameArray[i], nil, Filter)
+							if Filterh and not buffName then
+								buffName, _, iconTexture, count, dispelType, duration, expirationTime, _, _, _, id = UnitAura(unit, NameNameArray[i], nil, Filterh)
+							end
 						end
-						if Filterh and not buffName then
-							buffName, _, iconTexture, count, dispelType, duration, expirationTime, _, _, _, id = UnitAura(unit, NameNameArray[i], nil, Filterh)
-						end
-						if buffName and id ~= iName and tonumber(iName) then
+						if buffName and id ~= iName and isNumber[iName] then
 							for z=1, 60 do
 								buffName, _, iconTexture, count, dispelType, duration, expirationTime, _, _, _, id = UnitAura(unit, z, Filter)
 								if not id or id == iName then
@@ -195,11 +202,11 @@ function Type:Setup(icon, groupID, iconID)
 	icon.NAL = icon.NameNameDictionary[strlower(GetSpellInfo(8921))] and EFF_THR + 1 or #icon.NameArray -- need to force any icon looking for moonfire to check all auras on the target because of a blizzard bug in WoW 4.1.
 	icon.NAL = icon.Sort and #icon.NameArray > 1 and EFF_THR + 1 or icon.NAL
 	
-	icon.FirstTexture = GetSpellTexture(icon.NameFirst)
+	icon.FirstTexture = SpellTextures[icon.NameFirst]
 	if icon.Name == "" then
 		icon:SetTexture("Interface\\Icons\\INV_Misc_QuestionMark")
-	elseif GetSpellTexture(icon.NameFirst) then
-		icon:SetTexture(GetSpellTexture(icon.NameFirst))
+	elseif SpellTextures[icon.NameFirst] then
+		icon:SetTexture(SpellTextures[icon.NameFirst])
 	elseif TMW:DoSetTexture(icon) then
 		icon:SetTexture("Interface\\Icons\\INV_Misc_PocketWatch_01")
 	end

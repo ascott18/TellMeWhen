@@ -363,6 +363,7 @@ Env = {
 	GetRuneCount = GetRuneCount,
 	UnitLevel = UnitLevel,
 	strlower = strlower,
+	strlowerCache = TMW.strlowerCache,
 	strfind = strfind,
 	floor = floor,
 	select = select,
@@ -417,17 +418,26 @@ local usableunusable = {[0] = L["ICONMENU_USABLE"],[1] = L["ICONMENU_UNUSABLE"],
 local presentabsent = {[0] = L["ICONMENU_PRESENT"],[1] = L["ICONMENU_ABSENT"],}
 local standardtcoords = {0.07, 0.93, 0.07, 0.93}
 local function formatSeconds(seconds)
-    local d =  seconds / 86400
-    local h = (seconds % 86400) / 3600
-    local m = (seconds % 86400  % 3600) / 60
-    local s =  seconds % 86400  % 3600  % 60
-    if d >= 1 then return format("%d:%02d:%02d:%02d", d, h, m, s) end
-    if h >= 1 then return format("%d:%02d:%02d", h, m, s) end
-    return format("%d:%02d", m, s)
+	--seconds =  floor(seconds * 100 + 0.5) / 100
+	local d =  seconds / 86400
+	local h = (seconds % 86400) / 3600
+	local m = (seconds % 86400  % 3600) / 60
+	local s =  seconds % 86400  % 3600  % 60
+	
+	s = tonumber(format("%.1f", s))
+	if s < 10 then
+		s = "0" .. s
+	end
+	
+	if d >= 1 then return format("%d:%02d:%02d:%s", d, h, m, s) end
+	if h >= 1 then return format("%d:%02d:%s", h, m, s) end
+	return format("%d:%s", m, s)
 end
 
 
 CNDT.Types = {
+
+-------------------------------------resources
 	{ -- health
 		text = HEALTH,
 		value = "HEALTH",
@@ -637,13 +647,188 @@ CNDT.Types = {
 		funcstr = [[GetComboPoints("player", c.Unit) c.Operator c.Level]],
 	},
 
+	
+-------------------------------------unit status
+	{ -- exists
+		text = L["CONDITIONPANEL_EXISTS"],
+		category = L["UNITSTATUS"],
+		value = "EXISTS",
+		min = 0,
+		max = 1,
+		texttable = bool,
+		nooperator = true,
+		icon = "Interface\\Icons\\ABILITY_SEAL",
+		tcoords = standardtcoords,
+		funcstr = [[c.1nil == UnitExists(c.Unit)]],
+	},
+	{ -- alive
+		text = L["CONDITIONPANEL_ALIVE"],
+		tooltip = L["CONDITIONPANEL_ALIVE_DESC"],
+		category = L["UNITSTATUS"],
+		value = "ALIVE",
+		min = 0,
+		max = 1,
+		texttable = bool,
+		nooperator = true,
+		icon = "Interface\\Icons\\Ability_Vanish",
+		tcoords = standardtcoords,
+		funcstr = [[c.nil1 == UnitIsDeadOrGhost(c.Unit)]], -- note usage of nil1, not 1nil
+	},
+	{ -- combat
+		text = L["CONDITIONPANEL_COMBAT"],
+		category = L["UNITSTATUS"],
+		value = "COMBAT",
+		min = 0,
+		max = 1,
+		texttable = bool,
+		nooperator = true,
+		icon = "Interface\\CharacterFrame\\UI-StateIcon",
+		tcoords = {0.53, 0.92, 0.05, 0.42},
+		funcstr = function(c)
+			if strlower(c.Unit) == "player" then
+				CNDT:RegisterEvent("PLAYER_REGEN_ENABLED")
+				CNDT:RegisterEvent("PLAYER_REGEN_DISABLED")
+				Env.PlayerInCombat = UnitAffectingCombat("player")
+				return [[c.1nil == PlayerInCombat]]
+			else
+				return [[c.1nil == UnitAffectingCombat(c.Unit)]]
+			end
+		end,
+	},
+	{ -- controlling vehicle
+		text = L["CONDITIONPANEL_VEHICLE"],
+		category = L["UNITSTATUS"],
+		value = "VEHICLE",
+		min = 0,
+		max = 1,
+		texttable = bool,
+		nooperator = true,
+		icon = "Interface\\Icons\\Ability_Vehicle_SiegeEngineCharge",
+		tcoords = standardtcoords,
+		funcstr = function(c)
+			if strlower(c.Unit) == "player" then
+				CNDT:RegisterEvent("UNIT_ENTERED_VEHICLE", "UNIT_VEHICLE")
+				CNDT:RegisterEvent("UNIT_EXITED_VEHICLE", "UNIT_VEHICLE")
+				Env.PlayerInVehicle = UnitHasVehicleUI("player")
+				return [[c.True == PlayerInVehicle]]
+			else
+				return [[c.True == UnitHasVehicleUI(c.Unit)]]
+			end
+		end,
+	},
+	{ -- pvp
+		text = L["CONDITIONPANEL_PVPFLAG"],
+		category = L["UNITSTATUS"],
+		value = "PVPFLAG",
+		min = 0,
+		max = 1,
+		texttable = bool,
+		nooperator = true,
+		icon = "Interface\\TargetingFrame\\UI-PVP-" .. UnitFactionGroup("player"),
+		tcoords = {0.046875, 0.609375, 0.015625, 0.59375},
+		funcstr = [[c.1nil == UnitIsPVP(c.Unit)]],
+	},
+	{ -- react
+		text = L["ICONMENU_REACT"],
+		category = L["UNITSTATUS"],
+		value = "REACT",
+		min = 1,
+		max = 2,
+		texttable = {[1] = L["ICONMENU_HOSTILE"], [2] = L["ICONMENU_FRIEND"]},
+		nooperator = true,
+		icon = "Interface\\Icons\\Warrior_talent_icon_FuryInTheBlood",
+		tcoords = standardtcoords,
+		funcstr = [[(((UnitIsEnemy("player", c.Unit) or ((UnitReaction("player", c.Unit) or 5) <= 4)) and 1) or 2) == c.Level]],
+	},
+	{ -- speed
+		text = L["SPEED"],
+		tooltip = L["SPEED_DESC"],
+		category = L["UNITSTATUS"],
+		value = "SPEED",
+		min = 0,
+		max = 500,
+		percent = true,
+		texttable = percent,
+		icon = "Interface\\Icons\\ability_rogue_sprint",
+		tcoords = standardtcoords,
+		funcstr = [[GetUnitSpeed(c.Unit)/]].. BASE_MOVEMENT_SPEED ..[[ c.Operator c.Level]],
+	},
+	{ -- runspeed
+		text = L["RUNSPEED"],
+		category = L["UNITSTATUS"],
+		value = "RUNSPEED",
+		min = 0,
+		max = 500,
+		percent = true,
+		texttable = percent,
+		icon = "Interface\\Icons\\ability_rogue_sprint",
+		tcoords = standardtcoords,
+		funcstr = [[select(2, GetUnitSpeed(c.Unit))/]].. BASE_MOVEMENT_SPEED ..[[ c.Operator c.Level]],
+	},
+	{ -- name
+		text = L["CONDITIONPANEL_NAME"],
+		category = L["UNITSTATUS"],
+		value = "NAME",
+		min = 0,
+		max = 1,
+		name = function(editbox) TMW:TT(editbox, "CONDITIONPANEL_NAME", "CONDITIONPANEL_NAMETOOLTIP", nil, nil, 1) end,
+		nooperator = true,
+		texttable = bool,
+		icon = "Interface\\LFGFrame\\LFGFrame-SearchIcon-Background",
+		tcoords = standardtcoords,
+		funcstr = [[c.1nil == (strfind(c.Name, ";" .. strlowerCache[UnitName(c.Unit) or ""] .. ";") and 1)]],
+	},
+	{ -- level
+		text = L["CONDITIONPANEL_LEVEL"],
+		category = L["UNITSTATUS"],
+		value = "LEVEL",
+		min = -1,
+		max = 90,
+		texttable = setmetatable({[-1] = BOSS}, {__index = function(t, k) return k end}),
+		icon = "Interface\\TargetingFrame\\UI-TargetingFrame-Skull",
+		tcoords = {0.05, 0.95, 0.03, 0.97},
+		funcstr = [[UnitLevel(c.Unit) c.Operator c.Level]],
+	},
+	{ -- class
+		text = L["CONDITIONPANEL_CLASS"],
+		category = L["UNITSTATUS"],
+		value = "CLASS",
+		min = 1,
+		max = #classes,
+		texttable = setmetatable({}, {__index = function(t, k) return classes[k] and LOCALIZED_CLASS_NAMES_MALE[classes[k]] end}),
+		icon = "Interface\\GLUES\\CHARACTERCREATE\\UI-CHARACTERCREATE-CLASSES",
+		nooperator = true,
+		tcoords = {
+			CLASS_ICON_TCOORDS[pclass][1]+.02,
+			CLASS_ICON_TCOORDS[pclass][2]-.02,
+			CLASS_ICON_TCOORDS[pclass][3]+.02, 
+			CLASS_ICON_TCOORDS[pclass][4]-.02,
+		},
+		funcstr = function(c)
+			return [[select(2, UnitClass(c.Unit)) == "]] .. (classes[c.Level] or "whoops") .. "\""
+		end,
+	},
+	{ -- classification
+		text = L["CONDITIONPANEL_CLASSIFICATION"],
+		category = L["UNITSTATUS"],
+		value = "CLASSIFICATION",
+		min = 1,
+		max = #classifications,
+		texttable = setmetatable({}, {__index = function(t, k) return L[classifications[k]] end}),
+		icon = "Interface\\Icons\\achievement_pvp_h_03",
+		tcoords = standardtcoords,
+		funcstr = function(c)
+			return [[(reverseClassifications[UnitClassification(c.Unit)] or 1) c.Operator c.Level]]
+		end,
+	},
+
+
 -------------------------------------stats
 	{ -- strength
 		text = _G["SPELL_STAT1_NAME"],
 		value = "STRENGTH",
 		category = L["PLAYERSTATS"],
-		min = 0,
-		max = 20000,
+		range = 5000,
 		unit = PLAYER,
 		icon = "Interface\\Icons\\spell_nature_strength",
 		tcoords = standardtcoords,
@@ -654,8 +839,7 @@ CNDT.Types = {
 		text = _G["SPELL_STAT2_NAME"],
 		value = "AGILITY",
 		category = L["PLAYERSTATS"],
-		min = 0,
-		max = 20000,
+		range = 5000,
 		unit = PLAYER,
 		icon = "Interface\\Icons\\spell_holy_blessingofagility",
 		tcoords = standardtcoords,
@@ -666,8 +850,7 @@ CNDT.Types = {
 		text = _G["SPELL_STAT3_NAME"],
 		value = "STAMINA",
 		category = L["PLAYERSTATS"],
-		min = 0,
-		max = 20000,
+		range = 5000,
 		unit = PLAYER,
 		icon = "Interface\\Icons\\spell_holy_wordfortitude",
 		tcoords = standardtcoords,
@@ -678,8 +861,7 @@ CNDT.Types = {
 		text = _G["SPELL_STAT4_NAME"],
 		value = "INTELLECT",
 		category = L["PLAYERSTATS"],
-		min = 0,
-		max = 20000,
+		range = 5000,
 		unit = PLAYER,
 		icon = "Interface\\Icons\\spell_holy_magicalsentry",
 		tcoords = standardtcoords,
@@ -690,8 +872,7 @@ CNDT.Types = {
 		text = _G["SPELL_STAT5_NAME"],
 		value = "SPIRIT",
 		category = L["PLAYERSTATS"],
-		min = 0,
-		max = 20000,
+		range = 5000,
 		unit = PLAYER,
 		icon = "Interface\\Icons\\spell_shadow_burningspirit",
 		tcoords = standardtcoords,
@@ -715,8 +896,7 @@ CNDT.Types = {
 		text = MELEE_ATTACK_POWER,
 		value = "MELEEAP",
 		category = L["PLAYERSTATS"],
-		min = 0,
-		max = 50000,
+		range = 5000,
 		unit = PLAYER,
 		icon = "Interface\\Icons\\INV_Sword_04",
 		tcoords = standardtcoords,
@@ -769,8 +949,7 @@ CNDT.Types = {
 		text = RANGED_ATTACK_POWER,
 		value = "RANGEAP",
 		category = L["PLAYERSTATS"],
-		min = 0,
-		max = 50000,
+		range = 5000,
 		unit = PLAYER,
 		icon = "Interface\\Icons\\INV_Weapon_Bow_07",
 		tcoords = standardtcoords,
@@ -812,8 +991,7 @@ CNDT.Types = {
 		text = STAT_SPELLDAMAGE,
 		value = "SPELLDMG",
 		category = L["PLAYERSTATS"],
-		min = 0,
-		max = 20000,
+		range = 5000,
 		unit = PLAYER,
 		icon = "Interface\\Icons\\spell_fire_flamebolt",
 		tcoords = standardtcoords,
@@ -825,8 +1003,7 @@ CNDT.Types = {
 		text = STAT_SPELLHEALING,
 		value = "SPELLHEALING",
 		category = L["PLAYERSTATS"],
-		min = 0,
-		max = 20000,
+		range = 5000,
 		unit = PLAYER,
 		icon = "Interface\\Icons\\spell_nature_healingtouch",
 		tcoords = standardtcoords,
@@ -865,8 +1042,7 @@ CNDT.Types = {
 		text = MANA_REGEN,
 		value = "MANAREGEN",
 		category = L["PLAYERSTATS"],
-		min = 0,
-		max = 15000/5,
+		range = 1000/5,
 		unit = PLAYER,
 		texttable = setmetatable({}, {__index = function(t, k) return format(L["MP5"], k*5) end}),
 		icon = "Interface\\Icons\\spell_magic_managain",
@@ -877,24 +1053,148 @@ CNDT.Types = {
 		text = MANA_REGEN_COMBAT,
 		value = "MANAREGENCOMBAT",
 		category = L["PLAYERSTATS"],
-		min = 0,
-		max = 15000/5,
+		range = 1000/5,
 		unit = PLAYER,
 		texttable = setmetatable({}, {__index = function(t, k) return format(L["MP5"], k*5) end}),
 		icon = "Interface\\Icons\\spell_frost_summonwaterelemental",
 		tcoords = standardtcoords,
 		funcstr = [[select(2,GetManaRegen()) c.Operator c.Level]],
 	},
---///////////////////////////////////stats
 
+
+-------------------------------------player status
+	{ -- instance type
+		text = L["CONDITIONPANEL_INSTANCETYPE"],
+		category = L["PLAYERSTATUS"],
+		value = "INSTANCE",
+		min = 0,
+		max = 8,
+		unit = false,
+		texttable = {
+			[0] = NONE,
+			[1] = BATTLEGROUND,
+			[2] = ARENA,
+			[3] = DUNGEON_DIFFICULTY1,
+			[4] = DUNGEON_DIFFICULTY2,
+			[5] = RAID_DIFFICULTY1,
+			[6] = RAID_DIFFICULTY2,
+			[7] = RAID_DIFFICULTY3,
+			[8] = RAID_DIFFICULTY4,
+		},
+		icon = "Interface\\Icons\\Spell_Frost_Stun",
+		tcoords = standardtcoords,
+		funcstr = [[ZoneType c.Operator c.Level]],
+		events = {"ZONE_CHANGED_NEW_AREA"},
+	},
+	{ -- grouptype
+		text = L["CONDITIONPANEL_GROUPTYPE"],
+		category = L["PLAYERSTATUS"],
+		value = "GROUP",
+		min = 0,
+		max = 2,
+		unit = false,
+		texttable = {[0] = SOLO, [1] = PARTY, [2] = RAID},
+		icon = "Interface\\Calendar\\MeetingIcon",
+		tcoords = standardtcoords,
+		funcstr = [[((NumRaidMembers > 0 and 2) or (NumPartyMembers > 0 and 1) or 0) c.Operator c.Level]], -- this one was harder than it should have been to figure out; keep it in mind for future condition creating
+		events = {"PARTY_MEMBERS_CHANGED", "RAID_ROSTER_UPDATE"},
+	},
+	{ -- mounted
+		text = L["CONDITIONPANEL_MOUNTED"],
+		category = L["PLAYERSTATUS"],
+		value = "MOUNTED",
+		min = 0,
+		max = 1,
+		texttable = bool,
+		nooperator = true,
+		unit = PLAYER,
+		icon = "Interface\\Icons\\Ability_Mount_Charger",
+		tcoords = standardtcoords,
+		funcstr = [[c.1nil == IsMounted()]],
+	},
+	{ -- swimming
+		text = L["CONDITIONPANEL_SWIMMING"],
+		category = L["PLAYERSTATUS"],
+		value = "SWIMMING",
+		min = 0,
+		max = 1,
+		texttable = bool,
+		nooperator = true,
+		unit = PLAYER,
+		icon = "Interface\\Icons\\Spell_Shadow_DemonBreath",
+		tcoords = standardtcoords,
+		funcstr = [[c.1nil == IsSwimming()]],
+	},
+	{ -- resting
+		text = L["CONDITIONPANEL_RESTING"],
+		category = L["PLAYERSTATUS"],
+		value = "RESTING",
+		min = 0,
+		max = 1,
+		texttable = bool,
+		nooperator = true,
+		unit = PLAYER,
+		icon = "Interface\\CHARACTERFRAME\\UI-StateIcon",
+		tcoords = {0.0625, 0.453125, 0.046875, 0.421875},
+		funcstr = [[c.1nil == Resting]],
+		events = {"PLAYER_UPDATE_RESTING"},
+	},
+	{ -- stance
+		text = 	pclass == "HUNTER" and L["ASPECT"] or
+				pclass == "PALADIN" and L["AURA"] or
+				pclass == "WARRIOR" and L["STANCE"] or
+				pclass == "DEATHKNIGHT" and L["PRESENCE"] or
+				pclass == "DRUID" and L["SHAPESHIFT"] or
+				L["STANCE"],
+		category = L["PLAYERSTATUS"],
+		value = "STANCE",
+		min = 0,
+		max = #TMW.CSN,
+		texttable = TMW.CSN, -- now isn't this convenient? too bad i have to track them by ID so they wont upgrade properly when stances are added/removed
+		unit = PLAYER,
+		icon = function() return firststanceid and GetSpellTexture(firststanceid) end,
+		tcoords = standardtcoords,
+		funcstr = [[ShapeshiftForm c.Operator c.Level]],
+		events = {"UPDATE_SHAPESHIFT_FORM"},
+		hidden = #TMW.CSN == 0,
+	},
+	{ -- talent spec
+		text = L["UIPANEL_SPEC"],
+		category = L["PLAYERSTATUS"],
+		value = "SPEC",
+		min = 1,
+		max = 2,
+		texttable = {
+			[1] = L["UIPANEL_PRIMARYSPEC"],
+			[2] = L["UIPANEL_SECONDARYSPEC"],
+		},
+		nooperator = true,
+		unit = PLAYER,
+		icon = "Interface\\Icons\\achievement_general",
+		tcoords = standardtcoords,
+		funcstr = [[c.Level == CurrentSpec]],
+	},
+	{ -- talent tree
+		text = L["UIPANEL_TREE"],
+		category = L["PLAYERSTATUS"],
+		value = "TREE",
+		min = 1,
+		max = 3,
+		texttable = setmetatable({}, {__index=function(t, i) return select(2, GetTalentTabInfo(i)) end}),
+		unit = PLAYER,
+		icon = function() return select(4, GetTalentTabInfo(1)) end,
+		tcoords = standardtcoords,
+		funcstr = [[CurrentTree c.Operator c.Level]],
+	},
+
+	
 -------------------------------------icon functions
-
 	{ -- spell cooldown
 		text = L["ICONMENU_COOLDOWN"] .. " - " .. L["ICONMENU_SPELL"],
 		value = "SPELLCD",
 		category = L["ICONFUNCTIONS"],
-		min = 0,
-		max = 600,
+		range = 30,
+		step = 0.1,
 		name = function(editbox) TMW:TT(editbox, L["ICONMENU_COOLDOWN"] .. " - " .. L["ICONMENU_SPELL"], "CNDT_ONLYFIRST", 1, nil, 1) end,
 		useSUG = true,
 		unit = PLAYER,
@@ -956,8 +1256,8 @@ CNDT.Types = {
 		text = L["ITEMCOOLDOWN"],
 		value = "ITEMCD",
 		category = L["ICONFUNCTIONS"],
-		min = 0,
-		max = 600,
+		range = 30,
+		step = 0.1,
 		name = function(editbox) TMW:TT(editbox, L["ITEMCOOLDOWN"], "CNDT_ONLYFIRST", 1, nil, 1) end,
 		useSUG = "item",
 		unit = PLAYER,
@@ -1013,13 +1313,12 @@ CNDT.Types = {
 		funcstr = [[c.1nil == IsEquippedItem(c.ItemID)]],
 	},
 	
-	
 	{ -- unit buff duration
 		text = L["ICONMENU_BUFF"] .. " - " .. L["DURATIONPANEL_TITLE"],
 		value = "BUFFDUR",
 		category = L["ICONFUNCTIONS"],
-		min = 0,
-		max = 600,
+		range = 30,
+		step = 0.1,
 		name = function(editbox) TMW:TT(editbox, L["ICONMENU_BUFF"] .. " - " .. L["DURATIONPANEL_TITLE"], "BUFFCNDT_DESC", 1, nil, 1) end,
 		useSUG = true,
 		check = function(check) TMW:TT(check, "ONLYCHECKMINE", "ONLYCHECKMINE_DESC", nil, nil, 1) end,
@@ -1068,8 +1367,8 @@ CNDT.Types = {
 		text = L["ICONMENU_DEBUFF"] .. " - " .. L["DURATIONPANEL_TITLE"],
 		value = "DEBUFFDUR",
 		category = L["ICONFUNCTIONS"],
-		min = 0,
-		max = 600,
+		range = 30,
+		step = 0.1,
 		name = function(editbox) TMW:TT(editbox, L["ICONMENU_DEBUFF"] .. " - " .. L["DURATIONPANEL_TITLE"], "BUFFCNDT_DESC", 1, nil, 1) end,
 		useSUG = true,
 		check = function(check) TMW:TT(check, "ONLYCHECKMINE", "ONLYCHECKMINE_DESC", nil, nil, 1) end,
@@ -1118,8 +1417,7 @@ CNDT.Types = {
 		text = L["ICONMENU_WPNENCHANT"] .. " - " .. INVTYPE_WEAPONMAINHAND,
 		value = "MAINHAND",
 		category = L["ICONFUNCTIONS"],
-		min = 0,
-		max = 600,
+		range = 120,
 		unit = false,
 		texttable = setmetatable({[0] = formatSeconds(0).." ("..L["ICONMENU_ABSENT"]..")"}, {__index = function(tbl, k) return formatSeconds(k) end}),
 		icon = function() return GetInventoryItemTexture("player", GetInventorySlotInfo("MainHandSlot")) or "Interface\\Icons\\inv_weapon_shortblade_14" end,
@@ -1131,8 +1429,7 @@ CNDT.Types = {
 		text = L["ICONMENU_WPNENCHANT"] .. " - " .. INVTYPE_WEAPONOFFHAND,
 		value = "OFFHAND",
 		category = L["ICONFUNCTIONS"],
-		min = 0,
-		max = 600,
+		range = 120,
 		unit = false,
 		texttable = setmetatable({[0] = formatSeconds(0).." ("..L["ICONMENU_ABSENT"]..")"}, {__index = function(tbl, k) return formatSeconds(k) end}),
 		icon = function() return GetInventoryItemTexture("player", GetInventorySlotInfo("SecondaryHandSlot")) or "Interface\\Icons\\inv_weapon_shortblade_15" end,
@@ -1143,8 +1440,7 @@ CNDT.Types = {
 		text = L["ICONMENU_WPNENCHANT"] .. " - " .. INVTYPE_THROWN,
 		value = "THROWN",
 		category = L["ICONFUNCTIONS"],
-		min = 0,
-		max = 600,
+		range = 120,
 		unit = false,
 		texttable = setmetatable({[0] = formatSeconds(0).." ("..L["ICONMENU_ABSENT"]..")"}, {__index = function(tbl, k) return formatSeconds(k) end}),
 		icon = function() return GetInventoryItemTexture("player", GetInventorySlotInfo("RangedSlot")) or "Interface\\Icons\\inv_throwingknife_06" end,
@@ -1157,8 +1453,7 @@ CNDT.Types = {
 		text = totems[1],
 		value = "TOTEM1",
 		category = L["ICONFUNCTIONS"],
-		min = 0,
-		max = 420,
+		range = 60,
 		unit = false,
 		texttable = setmetatable({[0] = formatSeconds(0).." ("..L["ICONMENU_ABSENT"]..")"}, {__index = function(tbl, k) return formatSeconds(k) end}),
 		icon = totemtex[1],
@@ -1171,8 +1466,7 @@ CNDT.Types = {
 		text = totems[2],
 		value = "TOTEM2",
 		category = L["ICONFUNCTIONS"],
-		min = 0,
-		max = 420,
+		range = 60,
 		unit = false,
 		texttable = setmetatable({[0] = formatSeconds(0).." ("..L["ICONMENU_ABSENT"]..")"}, {__index = function(tbl, k) return formatSeconds(k) end}),
 		icon = totemtex[2],
@@ -1184,8 +1478,7 @@ CNDT.Types = {
 		text = totems[3],
 		value = "TOTEM3",
 		category = L["ICONFUNCTIONS"],
-		min = 0,
-		max = 420,
+		range = 60,
 		unit = false,
 		texttable = setmetatable({[0] = formatSeconds(0).." ("..L["ICONMENU_ABSENT"]..")"}, {__index = function(tbl, k) return formatSeconds(k) end}),
 		icon = totemtex[3],
@@ -1197,8 +1490,7 @@ CNDT.Types = {
 		text = totems[4],
 		value = "TOTEM4",
 		category = L["ICONFUNCTIONS"],
-		min = 0,
-		max = 420,
+		range = 60,
 		unit = false,
 		texttable = setmetatable({[0] = formatSeconds(0).." ("..L["ICONMENU_ABSENT"]..")"}, {__index = function(tbl, k) return formatSeconds(k) end}),
 		icon = totemtex[4],
@@ -1226,287 +1518,8 @@ CNDT.Types = {
 		spacebefore = true,
 	},
 
-
---////////////////////////////////////icon functions
+	
 	"CURRENCYPLACEHOLDER",
-	{ -- exists
-		text = L["CONDITIONPANEL_EXISTS"],
-		value = "EXISTS",
-		min = 0,
-		max = 1,
-		texttable = bool,
-		nooperator = true,
-		icon = "Interface\\Icons\\ABILITY_SEAL",
-		tcoords = standardtcoords,
-		funcstr = [[c.1nil == UnitExists(c.Unit)]],
-		spacebefore = true,
-	},
-	{ -- alive
-		text = L["CONDITIONPANEL_ALIVE"],
-		tooltip = L["CONDITIONPANEL_ALIVE_DESC"],
-		value = "ALIVE",
-		min = 0,
-		max = 1,
-		texttable = bool,
-		nooperator = true,
-		icon = "Interface\\Icons\\Ability_Vanish",
-		tcoords = standardtcoords,
-		funcstr = [[c.nil1 == UnitIsDeadOrGhost(c.Unit)]], -- note usage of nil1, not 1nil
-	},
-	{ -- combat
-		text = L["CONDITIONPANEL_COMBAT"],
-		value = "COMBAT",
-		min = 0,
-		max = 1,
-		texttable = bool,
-		nooperator = true,
-		icon = "Interface\\CharacterFrame\\UI-StateIcon",
-		tcoords = {0.53, 0.92, 0.05, 0.42},
-		funcstr = function(c)
-			if strlower(c.Unit) == "player" then
-				CNDT:RegisterEvent("PLAYER_REGEN_ENABLED")
-				CNDT:RegisterEvent("PLAYER_REGEN_DISABLED")
-				Env.PlayerInCombat = UnitAffectingCombat("player")
-				return [[c.1nil == PlayerInCombat]]
-			else
-				return [[c.1nil == UnitAffectingCombat(c.Unit)]]
-			end
-		end,
-	},
-	{ -- controlling vehicle
-		text = L["CONDITIONPANEL_VEHICLE"],
-		value = "VEHICLE",
-		min = 0,
-		max = 1,
-		texttable = bool,
-		nooperator = true,
-		icon = "Interface\\Icons\\Ability_Vehicle_SiegeEngineCharge",
-		tcoords = standardtcoords,
-		funcstr = function(c)
-			if strlower(c.Unit) == "player" then
-				CNDT:RegisterEvent("UNIT_ENTERED_VEHICLE", "UNIT_VEHICLE")
-				CNDT:RegisterEvent("UNIT_EXITED_VEHICLE", "UNIT_VEHICLE")
-				Env.PlayerInVehicle = UnitHasVehicleUI("player")
-				return [[c.True == PlayerInVehicle]]
-			else
-				return [[c.True == UnitHasVehicleUI(c.Unit)]]
-			end
-		end,
-	},
-	{ -- pvp
-		text = L["CONDITIONPANEL_PVPFLAG"],
-		value = "PVPFLAG",
-		min = 0,
-		max = 1,
-		texttable = bool,
-		nooperator = true,
-		icon = "Interface\\TargetingFrame\\UI-PVP-" .. UnitFactionGroup("player"),
-		tcoords = {0.046875, 0.609375, 0.015625, 0.59375},
-		funcstr = [[c.1nil == UnitIsPVP(c.Unit)]],
-	},
-	{ -- react
-		text = L["ICONMENU_REACT"],
-		value = "REACT",
-		min = 1,
-		max = 2,
-		texttable = {[1] = L["ICONMENU_HOSTILE"], [2] = L["ICONMENU_FRIEND"]},
-		nooperator = true,
-		icon = "Interface\\Icons\\Warrior_talent_icon_FuryInTheBlood",
-		tcoords = standardtcoords,
-		funcstr = [[(((UnitIsEnemy("player", c.Unit) or ((UnitReaction("player", c.Unit) or 5) <= 4)) and 1) or 2) == c.Level]],
-	},
-	{ -- speed
-		text = L["SPEED"],
-		tooltip = L["SPEED_DESC"],
-		value = "SPEED",
-		min = 0,
-		max = 500,
-		percent = true,
-		texttable = percent,
-		icon = "Interface\\Icons\\ability_rogue_sprint",
-		tcoords = standardtcoords,
-		funcstr = [[GetUnitSpeed(c.Unit)/]].. BASE_MOVEMENT_SPEED ..[[ c.Operator c.Level]],
-	},
-	{ -- runspeed
-		text = L["RUNSPEED"],
-		value = "RUNSPEED",
-		min = 0,
-		max = 500,
-		percent = true,
-		texttable = percent,
-		icon = "Interface\\Icons\\ability_rogue_sprint",
-		tcoords = standardtcoords,
-		funcstr = [[select(2, GetUnitSpeed(c.Unit))/]].. BASE_MOVEMENT_SPEED ..[[ c.Operator c.Level]],
-	},
-	{ -- name
-		text = L["CONDITIONPANEL_NAME"],
-		value = "NAME",
-		min = 0,
-		max = 1,
-		name = function(editbox) TMW:TT(editbox, "CONDITIONPANEL_NAME", "CONDITIONPANEL_NAMETOOLTIP", nil, nil, 1) end,
-		nooperator = true,
-		texttable = bool,
-		icon = "Interface\\LFGFrame\\LFGFrame-SearchIcon-Background",
-		tcoords = standardtcoords,
-		funcstr = [[c.1nil == (strfind(c.Name, ";" .. strlower(UnitName(c.Unit) or "") .. ";") and 1)]],
-	},
-	{ -- level
-		text = L["CONDITIONPANEL_LEVEL"],
-		value = "LEVEL",
-		min = -1,
-		max = 90,
-		texttable = setmetatable({[-1] = BOSS}, {__index = function(t, k) return k end}),
-		icon = "Interface\\TargetingFrame\\UI-TargetingFrame-Skull",
-		tcoords = {0.05, 0.95, 0.03, 0.97},
-		funcstr = [[UnitLevel(c.Unit) c.Operator c.Level]],
-	},
-	{ -- class
-		text = L["CONDITIONPANEL_CLASS"],
-		value = "CLASS",
-		min = 1,
-		max = #classes,
-		texttable = setmetatable({}, {__index = function(t, k) return classes[k] and LOCALIZED_CLASS_NAMES_MALE[classes[k]] end}),
-		icon = "Interface\\GLUES\\CHARACTERCREATE\\UI-CHARACTERCREATE-CLASSES",
-		nooperator = true,
-		tcoords = {
-			CLASS_ICON_TCOORDS[pclass][1]+.02,
-			CLASS_ICON_TCOORDS[pclass][2]-.02,
-			CLASS_ICON_TCOORDS[pclass][3]+.02, 
-			CLASS_ICON_TCOORDS[pclass][4]-.02,
-		},
-		funcstr = function(c)
-			return [[select(2, UnitClass(c.Unit)) == "]] .. (classes[c.Level] or "whoops") .. "\""
-		end,
-	},
-	{ -- classification
-		text = L["CONDITIONPANEL_CLASSIFICATION"],
-		value = "CLASSIFICATION",
-		min = 1,
-		max = #classifications,
-		texttable = setmetatable({}, {__index = function(t, k) return L[classifications[k]] end}),
-		icon = "Interface\\Icons\\achievement_pvp_h_03",
-		tcoords = standardtcoords,
-		funcstr = function(c)
-			return [[(reverseClassifications[UnitClassification(c.Unit)] or 1) c.Operator c.Level]]
-		end,
-	},
-
-	{ -- instance type
-		text = L["CONDITIONPANEL_INSTANCETYPE"],
-		value = "INSTANCE",
-		min = 0,
-		max = 8,
-		unit = false,
-		texttable = {
-			[0] = NONE,
-			[1] = BATTLEGROUND,
-			[2] = ARENA,
-			[3] = DUNGEON_DIFFICULTY1,
-			[4] = DUNGEON_DIFFICULTY2,
-			[5] = RAID_DIFFICULTY1,
-			[6] = RAID_DIFFICULTY2,
-			[7] = RAID_DIFFICULTY3,
-			[8] = RAID_DIFFICULTY4,
-		},
-		icon = "Interface\\Icons\\Spell_Frost_Stun",
-		tcoords = standardtcoords,
-		funcstr = [[ZoneType c.Operator c.Level]],
-		events = {"ZONE_CHANGED_NEW_AREA"},
-		spacebefore = true,
-	},
-	{ -- grouptype
-		text = L["CONDITIONPANEL_GROUPTYPE"],
-		value = "GROUP",
-		min = 0,
-		max = 2,
-		unit = false,
-		texttable = {[0] = SOLO, [1] = PARTY, [2] = RAID},
-		icon = "Interface\\Calendar\\MeetingIcon",
-		tcoords = standardtcoords,
-		funcstr = [[((NumRaidMembers > 0 and 2) or (NumPartyMembers > 0 and 1) or 0) c.Operator c.Level]], -- this one was harder than it should have been to figure out; keep it in mind for future condition creating
-		events = {"PARTY_MEMBERS_CHANGED", "RAID_ROSTER_UPDATE"},
-	},
-	{ -- mounted
-		text = L["CONDITIONPANEL_MOUNTED"],
-		value = "MOUNTED",
-		min = 0,
-		max = 1,
-		texttable = bool,
-		nooperator = true,
-		unit = PLAYER,
-		icon = "Interface\\Icons\\Ability_Mount_Charger",
-		tcoords = standardtcoords,
-		funcstr = [[c.1nil == IsMounted()]],
-	},
-	{ -- swimming
-		text = L["CONDITIONPANEL_SWIMMING"],
-		value = "SWIMMING",
-		min = 0,
-		max = 1,
-		texttable = bool,
-		nooperator = true,
-		unit = PLAYER,
-		icon = "Interface\\Icons\\Spell_Shadow_DemonBreath",
-		tcoords = standardtcoords,
-		funcstr = [[c.1nil == IsSwimming()]],
-	},
-	{ -- resting
-		text = L["CONDITIONPANEL_RESTING"],
-		value = "RESTING",
-		min = 0,
-		max = 1,
-		texttable = bool,
-		nooperator = true,
-		unit = PLAYER,
-		icon = "Interface\\CHARACTERFRAME\\UI-StateIcon",
-		tcoords = {0.0625, 0.453125, 0.046875, 0.421875},
-		funcstr = [[c.1nil == Resting]],
-		events = {"PLAYER_UPDATE_RESTING"},
-	},
-	{ -- stance
-		text = 	pclass == "HUNTER" and L["ASPECT"] or
-				pclass == "PALADIN" and L["AURA"] or
-				pclass == "WARRIOR" and L["STANCE"] or
-				pclass == "DEATHKNIGHT" and L["PRESENCE"] or
-				pclass == "DRUID" and L["SHAPESHIFT"] or
-				L["STANCE"],
-		value = "STANCE",
-		min = 0,
-		max = #TMW.CSN,
-		texttable = TMW.CSN, -- now isn't this convenient? too bad i have to track them by ID so they wont upgrade properly when stances are added/removed
-		unit = PLAYER,
-		icon = function() return firststanceid and GetSpellTexture(firststanceid) end,
-		tcoords = standardtcoords,
-		funcstr = [[ShapeshiftForm c.Operator c.Level]],
-		events = {"UPDATE_SHAPESHIFT_FORM"},
-		hidden = #TMW.CSN == 0,
-	},
-	{ -- talent spec
-		text = L["UIPANEL_SPEC"],
-		value = "SPEC",
-		min = 1,
-		max = 2,
-		texttable = {
-			[1] = L["UIPANEL_PRIMARYSPEC"],
-			[2] = L["UIPANEL_SECONDARYSPEC"],
-		},
-		nooperator = true,
-		unit = PLAYER,
-		icon = "Interface\\Icons\\achievement_general",
-		tcoords = standardtcoords,
-		funcstr = [[c.Level == CurrentSpec]],
-	},
-	{ -- talent tree
-		text = L["UIPANEL_TREE"],
-		value = "TREE",
-		min = 1,
-		max = 3,
-		texttable = setmetatable({}, {__index=function(t, i) return select(2, GetTalentTabInfo(i)) end}),
-		unit = PLAYER,
-		icon = function() return select(4, GetTalentTabInfo(1)) end,
-		tcoords = standardtcoords,
-		funcstr = [[CurrentTree c.Operator c.Level]],
-	},
 	
 	{ -- icon shown
 		text = L["CONDITIONPANEL_ICON"],
@@ -1581,8 +1594,7 @@ for k, v in ipairs(CNDT.Types) do
 			tinsert(CNDT.Types, k, {
 				value = "CURRENCY"..id,
 				category = L["CURRENCIES"],
-				min = 0,
-				max = 5000,
+				range = 500,
 				unit = false,
 				funcstr = [[select(2, GetCurrencyInfo(]]..id..[[)) c.Operator c.Level]],
 				tcoords = standardtcoords,

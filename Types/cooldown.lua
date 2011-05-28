@@ -12,8 +12,8 @@ if not TMW then return end
 local L = TMW.L
 
 local db, UPD_INTV, ClockGCD, rc, mc
-local GetSpellCooldown, IsSpellInRange, IsUsableSpell, GetSpellTexture =
-	  GetSpellCooldown, IsSpellInRange, IsUsableSpell, GetSpellTexture
+local GetSpellCooldown, IsSpellInRange, IsUsableSpell =
+	  GetSpellCooldown, IsSpellInRange, IsUsableSpell
 local GetItemCooldown, IsItemInRange, IsEquippedItem, GetItemIcon, GetItemCount =
 	  GetItemCooldown, IsItemInRange, IsEquippedItem, GetItemIcon, GetItemCount
 local GetActionCooldown, IsActionInRange, IsUsableAction, GetActionTexture, GetActionInfo =
@@ -21,6 +21,7 @@ local GetActionCooldown, IsActionInRange, IsUsableAction, GetActionTexture, GetA
 local OnGCD = TMW.OnGCD
 local print = TMW.print
 local _, pclass = UnitClass("Player")
+local SpellTextures = TMW.SpellTextures
 
 local RelevantSettings = {
 	Name = true,
@@ -89,7 +90,7 @@ local function SpellCooldown_OnUpdate(icon, time)
 				end
 				isGCD = (ClockGCD or duration ~= 0) and OnGCD(duration)
 				if inrange == 1 and not nomana and (duration == 0 or isGCD) then --usable
-					icon:SetInfo(icon.Alpha, 1, GetSpellTexture(iName), start, duration, true, iName)
+					icon:SetInfo(icon.Alpha, 1, SpellTextures[iName], start, duration, true, iName)
 					return
 				end
 			end
@@ -292,7 +293,7 @@ function Type:Setup(icon, groupID, iconID)
 		icon.NameName = TMW:GetSpellNames(icon, icon.Name, 1, 1)
 		icon.NameArray = TMW:GetSpellNames(icon, icon.Name)
 		icon.NameNameArray = TMW:GetSpellNames(icon, icon.Name, nil, 1)
-		icon.FirstTexture = GetSpellTexture(icon.NameFirst)
+		icon.FirstTexture = SpellTextures[icon.NameFirst]
 
 		if icon.Name == "" then
 			icon:SetTexture("Interface\\Icons\\INV_Misc_QuestionMark")

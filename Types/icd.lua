@@ -17,9 +17,11 @@ local strlower =
 local GetSpellTexture =
 	  GetSpellTexture
 local print = TMW.print
+local SpellTextures = TMW.SpellTextures
 
 local pGUID = UnitGUID("player") -- this isnt actually defined right here (it returns nil), so I will do it later too
 local clientVersion = select(4, GetBuildInfo())
+local strlowerCache = TMW.strlowerCache
 
 local RelevantSettings = {
 	Name = true,
@@ -63,8 +65,8 @@ if clientVersion >= 40200 then
 			local _, event, _, sourceGUID, _, _, _, _, _, _, _, spellID, spellName = ... -- 2 NEW ARGS ADDED IN 4.2
 			if sourceGUID == pGUID and (event == "SPELL_AURA_APPLIED" or event == "SPELL_AURA_REFRESH" or event == "SPELL_ENERGIZE" or event == "SPELL_AURA_APPLIED_DOSE") then
 				local NameDictionary = icon.NameDictionary
-				if (NameDictionary[spellID] or NameDictionary[strlower(spellName)]) and not (icon.DontRefresh and (TMW.time - icon.StartTime) < icon.ICDDuration) then
-					local t = GetSpellTexture(spellID)
+				if (NameDictionary[spellID] or NameDictionary[strlowerCache[spellName]]) and not (icon.DontRefresh and (TMW.time - icon.StartTime) < icon.ICDDuration) then
+					local t = SpellTextures[spellID]
 					if t ~= icon.__tex then icon:SetTexture(t) end
 
 					icon.StartTime = TMW.time
@@ -74,8 +76,8 @@ if clientVersion >= 40200 then
 			local unit, spellName, _, _, spellID = ...
 			if unit == "player" then
 				local NameDictionary = icon.NameDictionary
-				if (NameDictionary[spellID] or NameDictionary[strlower(spellName)]) and not (icon.DontRefresh and (TMW.time - icon.StartTime) < icon.ICDDuration) then
-					local t = GetSpellTexture(spellID)
+				if (NameDictionary[spellID] or NameDictionary[strlowerCache[spellName]]) and not (icon.DontRefresh and (TMW.time - icon.StartTime) < icon.ICDDuration) then
+					local t = SpellTextures[spellID]
 					if t ~= icon.__tex then icon:SetTexture(t) end
 
 					icon.StartTime = TMW.time
@@ -89,8 +91,8 @@ elseif clientVersion >= 40100 then
 			local _, event, _, sourceGUID, _, _, _, _, _, spellID, spellName = ... --NEW ARG ADDED BETWEEN EVENT AND SOURCEGUID IN 4.1
 			if sourceGUID == pGUID and (event == "SPELL_AURA_APPLIED" or event == "SPELL_AURA_REFRESH" or event == "SPELL_ENERGIZE" or event == "SPELL_AURA_APPLIED_DOSE") then
 				local NameDictionary = icon.NameDictionary
-				if (NameDictionary[spellID] or NameDictionary[strlower(spellName)]) and not (icon.DontRefresh and (TMW.time - icon.StartTime) < icon.ICDDuration) then
-					local t = GetSpellTexture(spellID)
+				if (NameDictionary[spellID] or NameDictionary[strlowerCache[spellName]]) and not (icon.DontRefresh and (TMW.time - icon.StartTime) < icon.ICDDuration) then
+					local t = SpellTextures[spellID]
 					if t ~= icon.__tex then icon:SetTexture(t) end
 
 					icon.StartTime = TMW.time
@@ -100,8 +102,8 @@ elseif clientVersion >= 40100 then
 			local unit, spellName, _, _, spellID = ...
 			if unit == "player" then
 				local NameDictionary = icon.NameDictionary
-				if (NameDictionary[spellID] or NameDictionary[strlower(spellName)]) and not (icon.DontRefresh and (TMW.time - icon.StartTime) < icon.ICDDuration) then
-					local t = GetSpellTexture(spellID)
+				if (NameDictionary[spellID] or NameDictionary[strlowerCache[spellName]]) and not (icon.DontRefresh and (TMW.time - icon.StartTime) < icon.ICDDuration) then
+					local t = SpellTextures[spellID]
 					if t ~= icon.__tex then icon:SetTexture(t) end
 
 					icon.StartTime = TMW.time
@@ -115,8 +117,8 @@ else
 			local _, event, sourceGUID, _, _, _, _, _, spellID, spellName = ...
 			if sourceGUID == pGUID and (event == "SPELL_AURA_APPLIED" or event == "SPELL_AURA_REFRESH" or event == "SPELL_ENERGIZE" or event == "SPELL_AURA_APPLIED_DOSE") then
 				local NameDictionary = icon.NameDictionary
-				if (NameDictionary[spellID] or NameDictionary[strlower(spellName)]) and not (icon.DontRefresh and (TMW.time - icon.StartTime) < icon.ICDDuration) then
-					local t = GetSpellTexture(spellID)
+				if (NameDictionary[spellID] or NameDictionary[strlowerCache[spellName]]) and not (icon.DontRefresh and (TMW.time - icon.StartTime) < icon.ICDDuration) then
+					local t = SpellTextures[spellID]
 					if t ~= icon.__tex then icon:SetTexture(t) end
 					
 					icon.StartTime = TMW.time
@@ -126,8 +128,8 @@ else
 			local unit, spellName, _, _, spellID = ...
 			if unit == "player" then
 				local NameDictionary = icon.NameDictionary
-				if (NameDictionary[spellID] or NameDictionary[strlower(spellName)]) and not (icon.DontRefresh and (TMW.time - icon.StartTime) < icon.ICDDuration) then
-					local t = GetSpellTexture(spellID)
+				if (NameDictionary[spellID] or NameDictionary[strlowerCache[spellName]]) and not (icon.DontRefresh and (TMW.time - icon.StartTime) < icon.ICDDuration) then
+					local t = SpellTextures[spellID]
 					if t ~= icon.__tex then icon:SetTexture(t) end
 
 					icon.StartTime = TMW.time
@@ -179,8 +181,8 @@ function Type:Setup(icon, groupID, iconID)
 
 	if icon.Name == "" then
 		icon:SetTexture("Interface\\Icons\\INV_Misc_QuestionMark")
-	elseif GetSpellTexture(icon.NameFirst) then
-		icon:SetTexture(GetSpellTexture(icon.NameFirst))
+	elseif SpellTextures[icon.NameFirst] then 
+		icon:SetTexture(SpellTextures[icon.NameFirst])
 	elseif TMW:DoSetTexture(icon) then
 		icon:SetTexture("Interface\\Icons\\INV_Misc_PocketWatch_01")
 	end
