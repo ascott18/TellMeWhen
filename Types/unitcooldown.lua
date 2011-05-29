@@ -27,7 +27,7 @@ local RelevantSettings = {
 	Name = true,
 	ShowTimer = true,
 	ShowTimerText = true,
-	CooldownShowWhen = true,
+	ShowWhen = true,
 	ICDDuration = true,
 	Unit = true,
 	OnlySeen = true,
@@ -49,6 +49,12 @@ local Type = TMW:RegisterIconType("unitcooldown", RelevantSettings)
 LibStub("AceEvent-3.0"):Embed(Type)
 Type.name = L["ICONMENU_UNITCOOLDOWN"]
 Type.desc = format(L["ICONMENU_UNITCOOLDOWN_DESC"], GetSpellInfo(42292))
+Type.WhenChecks = {
+	text = L["ICONMENU_SHOWWHEN"],
+	{ value = "alpha", 		text = L["ICONMENU_USABLE"], 			colorCode = "|cFF00FF00" },
+	{ value = "unalpha",  		text = L["ICONMENU_UNUSABLE"], 			colorCode = "|cFFFF0000" },
+	{ value = "always", 		text = L["ICONMENU_ALWAYS"] },
+}
 
 
 function Type:Update()
@@ -67,47 +73,22 @@ local Cooldowns = setmetatable({}, {__index = function(t, k)
 	return n
 end}) TMW.Cooldowns = Cooldowns
 
-if clientVersion >= 40200 then -- COMBAT_LOG_EVENT_UNFILTERED
-	function Type:COMBAT_LOG_EVENT_UNFILTERED(e, _, p, _, g, _, _, _, _, _, _, _, i, n)-- tyPe, sourceGuid, spellId, spellName -- 2 NEW ARGS IN 4.2
-		if p == "SPELL_CAST_SUCCESS" then
-			local c = Cooldowns[g]
-			c[strlowerCache[n]] = i
-			c[i] = TMW.time
-		elseif p == "SPELL_AURA_APPLIED" or p == "SPELL_AURA_REFRESH" or p == "SPELL_DAMAGE" or p == "SPELL_HEAL" or p == "SPELL_MISSED" then
-			local t = TMW.time
-			local c = Cooldowns[g]
-			local ci = c[i]
-			if (ci and ci + 1.8 < t) or not ci then 	-- if this event was less than 1.8 seconds after a SPELL_CAST_SUCCESS or a UNIT_SPELLCAST_SUCCEEDED then ignore it (this is just a safety window for spell travel time so that if we found the real cast start, we dont overwrite it)
-				c[strlowerCache[n]] = i
-				c[i] = t-1			-- hack it to make it a little bit more accurate. a max range dk deathcoil has a travel time of about 1.3 seconds, so 1 second should be a good average to be safe with travel times.
-			end						-- (and really, how often are people actually going to be tracking cooldowns with cast times? there arent that many, and the ones that do exist arent that important)
+function Type:COMBAT_LOG_EVENT_UNFILTERED(e, _, p, ...)-- tyPe, sourceGuid, spellId, spellName -- 2 NEW ARGS IN 4.2
+	if p == "SPELL_CAST_SUCCESS" or p == "SPELL_AURA_APPLIED" or p == "SPELL_AURA_REFRESH" or p == "SPELL_DAMAGE" or p == "SPELL_HEAL" or p == "SPELL_MISSED" then
+		local g, i, n, _
+		if clientVersion >= 40200 then
+			_, g, _, _, _, _, _, _, _, i, n = ...
+		elseif clientVersion >= 40100 then
+			_, g, _, _, _, _, _, i, n = ...
+		else
+			g, _, _, _, _, _, i, n = ...
 		end
-	end
-elseif clientVersion >= 40100 then
-	function Type:COMBAT_LOG_EVENT_UNFILTERED(e, _, p, _, g, _, _, _, _, _, i, n)-- tyPe, sourceGuid, spellId, spellName -- NEW ARG IN 4.1 BETWEEN TYPE AND SOURCEGUID
+		local c = Cooldowns[g]
 		if p == "SPELL_CAST_SUCCESS" then
-			local c = Cooldowns[g]
 			c[strlowerCache[n]] = i
 			c[i] = TMW.time
-		elseif p == "SPELL_AURA_APPLIED" or p == "SPELL_AURA_REFRESH" or p == "SPELL_DAMAGE" or p == "SPELL_HEAL" or p == "SPELL_MISSED" then
+		else
 			local t = TMW.time
-			local c = Cooldowns[g]
-			local ci = c[i]
-			if (ci and ci + 1.8 < t) or not ci then 	-- if this event was less than 1.8 seconds after a SPELL_CAST_SUCCESS or a UNIT_SPELLCAST_SUCCEEDED then ignore it (this is just a safety window for spell travel time so that if we found the real cast start, we dont overwrite it)
-				c[strlowerCache[n]] = i
-				c[i] = t-1			-- hack it to make it a little bit more accurate. a max range dk deathcoil has a travel time of about 1.3 seconds, so 1 second should be a good average to be safe with travel times.
-			end						-- (and really, how often are people actually going to be tracking cooldowns with cast times? there arent that many, and the ones that do exist arent that important)
-		end
-	end
-else
-	function Type:COMBAT_LOG_EVENT_UNFILTERED(e, _, p, g, _, _, _, _, _, i, n)-- tyPe, Guid, spellId, spellName
-		if p == "SPELL_CAST_SUCCESS" then
-			local c = Cooldowns[g]
-			c[strlowerCache[n]] = i
-			c[i] = TMW.time
-		elseif p == "SPELL_AURA_APPLIED" or p == "SPELL_AURA_REFRESH" or p == "SPELL_DAMAGE" or p == "SPELL_HEAL" or p == "SPELL_MISSED" then
-			local t = TMW.time
-			local c = Cooldowns[g]
 			local ci = c[i]
 			if (ci and ci + 1.8 < t) or not ci then 	-- if this event was less than 1.8 seconds after a SPELL_CAST_SUCCESS or a UNIT_SPELLCAST_SUCCEEDED then ignore it (this is just a safety window for spell travel time so that if we found the real cast start, we dont overwrite it)
 				c[strlowerCache[n]] = i
@@ -124,8 +105,6 @@ function Type:UNIT_SPELLCAST_SUCCEEDED(e, u, n, _, _, i)--Unit, spellName, spell
 end
 
 
-					
-					
 local function UnitCooldown_OnUpdate(icon, time)
 	if icon.UpdateTimer <= time - UPD_INTV then
 		icon.UpdateTimer = time

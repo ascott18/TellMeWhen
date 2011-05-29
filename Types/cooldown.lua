@@ -27,7 +27,7 @@ local RelevantSettings = {
 	Name = true,
 	ShowTimer = true,
 	ShowTimerText = true,
-	CooldownShowWhen = true,
+	ShowWhen = true,
 	CooldownType = true,
 	RangeCheck = true,
 	ManaCheck = true,
@@ -51,6 +51,19 @@ local RelevantSettings = {
 
 local Type = TMW:RegisterIconType("cooldown", RelevantSettings)
 Type.name = L["ICONMENU_COOLDOWN"]
+Type.TypeChecks = {
+	text = L["ICONMENU_COOLDOWNTYPE"],
+	setting = "CooldownType",
+	{ value = "spell", 			text = L["ICONMENU_SPELL"] },
+	{ value = "multistate", 	text = L["ICONMENU_MULTISTATECD"], 		tooltipText = L["ICONMENU_MULTISTATECD_DESC"] },
+	{ value = "item", 			text = L["ICONMENU_ITEM"] },
+}
+Type.WhenChecks = {
+	text = L["ICONMENU_SHOWWHEN"],
+	{ value = "alpha", 			text = L["ICONMENU_USABLE"], 			colorCode = "|cFF00FF00" },
+	{ value = "unalpha",  		text = L["ICONMENU_UNUSABLE"], 			colorCode = "|cFFFF0000" },
+	{ value = "always", 		text = L["ICONMENU_ALWAYS"] },
+}
 
 
 function Type:Update()

@@ -153,6 +153,9 @@
 					TMW.CI.t = self.Type
 					TMW.IE:Load()
 				end
+				if TMW.IE then
+					TMW.IE:ScheduleIconUpdate(self:GetParent():GetID(), self:GetID())
+				end
 			</OnMouseUp>
 			<OnMouseDown>
 				local ID = TMW.ID
@@ -166,13 +169,15 @@
 					TMW.ID.srciconID = self:GetID()
 					TMW.ID.srcicon = self
 					TMW.ID:Start(self)
-					return
 				elseif button == "LeftButton" then
 					local group = self:GetParent()
 					if not group.Locked then
 						group:StartMoving()
 						TMW.ID.isMoving = group
 					end
+				end
+				if TMW.IE then
+					TMW.IE:ScheduleIconUpdate(self:GetParent():GetID(), self:GetID())
 				end
 			</OnDragStart>
 			<OnReceiveDrag>

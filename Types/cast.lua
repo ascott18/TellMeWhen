@@ -25,7 +25,7 @@ local RelevantSettings = {
 	Name = true,
 	ShowTimer = true,
 	ShowTimerText = true,
-	BuffShowWhen = true,
+	ShowWhen = true,
 	Interruptible = true,
 	Unit = true,
 	ShowCBar = true,
@@ -42,8 +42,14 @@ local RelevantSettings = {
 }
 
 local Type = TMW:RegisterIconType("cast", RelevantSettings)
-Type.name = L["ICONMENU_CAST"]
 LibStub("AceEvent-3.0"):Embed(Type)
+Type.name = L["ICONMENU_CAST"]
+Type.WhenChecks = {
+	text = L["ICONMENU_CASTSHOWWHEN"],
+	{ value = "alpha", 			text = L["ICONMENU_PRESENT"], 			colorCode = "|cFF00FF00" },
+	{ value = "unalpha", 		text = L["ICONMENU_ABSENT"], 			colorCode = "|cFFFF0000" },
+	{ value = "always", 		text = L["ICONMENU_ALWAYS"] },
+}
 
 
 function Type:Update()

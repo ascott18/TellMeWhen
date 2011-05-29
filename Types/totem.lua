@@ -25,7 +25,7 @@ local RelevantSettings = {
 	Name = pclass ~= "DRUID" and pclass ~= "DEATHKNIGHT",
 	ShowTimer = true,
 	ShowTimerText = true,
-	BuffShowWhen = true,
+	ShowWhen = true,
 	ShowCBar = true,
 	CBarOffs = true,
 	InvertBars = true,
@@ -42,6 +42,30 @@ local RelevantSettings = {
 
 local Type = TMW:RegisterIconType("totem", RelevantSettings)
 Type.name = pclass == "DRUID" and L["ICONMENU_MUSHROOMS"] or pclass == "DEATHKNIGHT" and L["ICONMENU_GHOUL"] or L["ICONMENU_TOTEM"]
+if pclass == "SHAMAN" then
+	Type.TypeChecks = {
+		setting = "TotemSlots",
+		text = L["TOTEMS"],
+		{ text = L["FIRE"] },
+		{ text = L["EARTH"] },
+		{ text = L["WATER"] },
+		{ text = L["AIR"] },
+	}
+elseif pclass == "DRUID" then
+	Type.TypeChecks = {
+		setting = "TotemSlots",
+		text = L["MUSHROOMS"],
+		{ text = format(L["MUSHROOM"], 1) },
+		{ text = format(L["MUSHROOM"], 2) },
+		{ text = format(L["MUSHROOM"], 3) },
+	}
+end
+Type.WhenChecks = {
+	text = L["ICONMENU_SHOWWHEN"],
+	{ value = "alpha", 			text = L["ICONMENU_PRESENT"], 			colorCode = "|cFF00FF00" },
+	{ value = "unalpha", 		text = L["ICONMENU_ABSENT"], 			colorCode = "|cFFFF0000" },
+	{ value = "always", 		text = L["ICONMENU_ALWAYS"] },
+}
 
 
 function Type:Update()

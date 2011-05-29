@@ -31,13 +31,16 @@ TELLMEWHEN_COLUMN1WIDTH = 170
 local LSM = LibStub("LibSharedMedia-3.0")
 LibStub("AceSerializer-3.0"):Embed(TMW)
 local L = TMW.L
+local LBF = LibStub("LibButtonFacade", true)
+local LMB = LibMasque and LibMasque("Button")
 local _, pclass = UnitClass("Player")
 local GetSpellInfo, GetContainerItemID, GetContainerItemLink =
 	  GetSpellInfo, GetContainerItemID, GetContainerItemLink
-local tonumber, tostring, type, pairs, ipairs, tinsert, tremove, sort, wipe =
-	  tonumber, tostring, type, pairs, ipairs, tinsert, tremove, sort, wipe
-local strfind, strmatch, format, gsub, strsub, strtrim, max =
-	  strfind, strmatch, format, gsub, strsub, strtrim, max
+local tonumber, tostring, type, pairs, ipairs, tinsert, tremove, sort, wipe, next =
+	  tonumber, tostring, type, pairs, ipairs, tinsert, tremove, sort, wipe, next
+local strfind, strmatch, format, gsub, strsub, strtrim, max, min, strlower =
+	  strfind, strmatch, format, gsub, strsub, strtrim, max, min, strlower
+local strlowerCache = TMW.strlowerCache
 local _G, GetTime = _G, GetTime
 local tiptemp = {}
 local ME, CNDT, IE, SUG, ID, SND, ANN
@@ -267,6 +270,79 @@ local groupConfigTemplate = {
 				TMW:Group_OnDelete(findid(info))
 			end,
 			confirm = true,
+		},
+		countfont = {
+			type = "group",
+			name = L["UIPANEL_FONT"],
+			order = 39,
+			guiInline = true,
+			dialogInline = true,
+			set = function(info, val)
+				local g = findid(info)
+				db.profile.Groups[g].Font[info[#info]] = val
+				TMW[g].FontTest = 1
+				TMW:Group_Update(g)
+			end,
+			get = function(info)
+				return db.profile.Groups[findid(info)].Font[info[#info]]
+			end,
+			args = {
+				OverrideLBFPos = {
+					name = L["UIPANEL_FONT_OVERRIDELBF"],
+					desc = L["UIPANEL_FONT_OVERRIDELBF_DESC"],
+					type = "toggle",
+					order = 1,
+					hidden = not (LibStub("LibButtonFacade", true) or (LibMasque and LibMasque("Button"))),
+				},
+				Name = {
+					name = L["UIPANEL_FONT"],
+					desc = L["UIPANEL_FONT_DESC"],
+					type = "select",
+					order = 3,
+					dialogControl = 'LSM30_Font',
+					values = LSM:HashTable("font"),
+				},
+				Size = {
+					name = L["UIPANEL_FONT_SIZE"],
+					desc = L["UIPANEL_FONT_SIZE_DESC"],
+					type = "range",
+					order = 10,
+					min = 6,
+					max = 26,
+					step = 1,
+					bigStep = 1,
+				},
+				Outline = {
+					name = L["UIPANEL_FONT_OUTLINE"],
+					desc = L["UIPANEL_FONT_OUTLINE_DESC"],
+					type = "select",
+					values = {
+						MONOCHROME = L["OUTLINE_NO"],
+						OUTLINE = L["OUTLINE_THIN"],
+						THICKOUTLINE = L["OUTLINE_THICK"],
+					},
+					style = "dropdown",
+					order = 11,
+				},
+				x = {
+					name = L["UIPANEL_FONT_XOFFS"],
+					type = "range",
+					order = 21,
+					min = -30,
+					max = 10,
+					step = 1,
+					bigStep = 1,
+				},
+				y = {
+					name = L["UIPANEL_FONT_YOFFS"],
+					type = "range",
+					order = 22,
+					min = -10,
+					max = 30,
+					step = 1,
+					bigStep = 1,
+				},
+			},
 		},
 		position = {
 			type = "group",
@@ -500,10 +576,21 @@ function TMW:CompileOptions() -- options
 							type = "execute",
 							order = 41,
 							func = function()
-								db.profile.NumGroups = db.profile.NumGroups + 1
-								db.profile.Groups[db.profile.NumGroups].LBF = TMW:CopyWithMetatable(db.profile.Groups[db.profile.NumGroups-1].LBF)
+								local groupID = db.profile.NumGroups + 1
+								db.profile.NumGroups = groupID
 								db.profile.Groups[db.profile.NumGroups].Enabled = true
 								TMW:Update()
+								local stub = LMB or LBF
+								if stub then
+									local parent = stub:Group("TellMeWhen")
+									local group = stub:Group("TellMeWhen", format(L["fGROUP"], groupID))
+									
+									group.SkinID, group.Gloss, group.Backdrop, group.Colors =
+									parent.SkinID, parent.Gloss, parent.Backdrop, parent.Colors
+									
+									group:ReSkin()
+								end
+								TMW:Group_Update(groupID)
 								TMW:CompileOptions()
 							end,
 						},
@@ -571,72 +658,6 @@ function TMW:CompileOptions() -- options
 								},
 							},
 						},
-						countfont = {
-							type = "group",
-							name = L["UIPANEL_FONT"],
-							order = 4,
-							set = function(info, val)
-								db.profile.Font[info[#info]] = val
-								TMW:Update()
-							end,
-							get = function(info) return db.profile.Font[info[#info]] end,
-							args = {
-								Name = {
-									name = L["UIPANEL_FONT"],
-									desc = L["UIPANEL_FONT_DESC"],
-									type = "select",
-									order = 3,
-									dialogControl = 'LSM30_Font',
-									values = LSM:HashTable("font"),
-								},
-								Size = {
-									name = L["UIPANEL_FONT_SIZE"],
-									desc = L["UIPANEL_FONT_SIZE_DESC"],
-									type = "range",
-									order = 10,
-									min = 6,
-									max = 26,
-									step = 1,
-									bigStep = 1,
-								},
-								Outline = {
-									name = L["UIPANEL_FONT_OUTLINE"],
-									desc = L["UIPANEL_FONT_OUTLINE_DESC"],
-									type = "select",
-									values = {
-										MONOCHROME = L["OUTLINE_NO"],
-										OUTLINE = L["OUTLINE_THIN"],
-										THICKOUTLINE = L["OUTLINE_THICK"],
-									},
-									style = "dropdown",
-									order = 11,
-								},
-								OverrideLBFPos = {
-									name = L["UIPANEL_FONT_OVERRIDELBF"],
-									desc = L["UIPANEL_FONT_OVERRIDELBF_DESC"],
-									type = "toggle",
-									order = 20,
-								},
-								x = {
-									name = L["UIPANEL_FONT_XOFFS"],
-									type = "range",
-									order = 21,
-									min = -30,
-									max = 10,
-									step = 1,
-									bigStep = 1,
-								},
-								y = {
-									name = L["UIPANEL_FONT_YOFFS"],
-									type = "range",
-									order = 22,
-									min = -10,
-									max = 30,
-									step = 1,
-									bigStep = 1,
-								},
-							},
-						},
 					},
 				},
 				groups = {
@@ -669,7 +690,7 @@ function TMW:CompileOptions() -- options
 	end
 
 	LibStub("AceConfig-3.0"):RegisterOptionsTable("TellMeWhen Options", TMW.OptionsTable)
-	LibStub("AceConfigDialog-3.0"):SetDefaultSize("TellMeWhen Options", 762, 512)
+	LibStub("AceConfigDialog-3.0"):SetDefaultSize("TellMeWhen Options", 781, 512)
 	if not TMW.AddedToBlizz then
 		TMW.AddedToBlizz = LibStub("AceConfigDialog-3.0"):AddToBlizOptions("TellMeWhen Options", L["ICON_TOOLTIP1"])
 	else
@@ -1129,25 +1150,6 @@ end
 
 
 IE = TMW:NewModule("IconEditor", "AceEvent-3.0") TMW.IE = IE
-local set1 = {
-	cooldown = "CooldownType",
-	buff = "BuffOrDebuff",
-	wpnenchant = "WpnEnchantType",
-	totem = "TotemSlots",
-	icd = "ICDType",
-}
-local set2 = {
-	cooldown = "CooldownShowWhen",
-	buff = "BuffShowWhen",
-	reactive = "CooldownShowWhen",
-	wpnenchant = "BuffShowWhen",
-	totem = "BuffShowWhen",
-	unitcooldown = "CooldownShowWhen",
-	dr = "CooldownShowWhen",
-	icd = "CooldownShowWhen",
-	cast = "BuffShowWhen",
-	meta = nil,
-}
 local checks = { --1=check box, 2=editbox, 3=slider(x100), 4=custom, table=subkeys are settings
 	Name = 2,
 	RangeCheck = 1,
@@ -1199,53 +1201,11 @@ local tabs = {
 	[4] = "Announcements",
 	[5] = "Group",
 	[6] = "Conditions",
-	--[4] = "ImpExp",
 }
 local IsMultiState, SoI
 IE.Data = {
 	-- the keys on this table need to match the settings variable names
 	Type = {}, -- this will be populated by registered icon types
-	CooldownType = {
-		text = L["ICONMENU_COOLDOWNTYPE"],
-		{ value = "spell", 			text = L["ICONMENU_SPELL"] },
-		{ value = "multistate", 	text = L["ICONMENU_MULTISTATECD"], 		tooltipText = L["ICONMENU_MULTISTATECD_DESC"] },
-		{ value = "item", 			text = L["ICONMENU_ITEM"] },
-	},
-	ICDType = {
-		text = L["ICONMENU_ICDTYPE"],
-		{ value = "aura", 			text = L["ICONMENU_ICDBDE"], 			tooltipText = L["ICONMENU_ICDAURA_DESC"]},
-		{ value = "spellcast", 		text = L["ICONMENU_SPELLCAST"], 		tooltipText = L["ICONMENU_SPELLCAST_DESC"]},
-	},
-	WpnEnchantType = {
-		text = L["ICONMENU_WPNENCHANTTYPE"],
-		{ value = "MainHandSlot",	text = INVTYPE_WEAPONMAINHAND },
-		{ value = "SecondaryHandSlot", text = INVTYPE_WEAPONOFFHAND },
-		{ value = "RangedSlot",		text = INVTYPE_THROWN },
-	},
-	BuffOrDebuff = {
-		text = L["ICONMENU_BUFFTYPE"],
-		{ value = "HELPFUL", 		text = L["ICONMENU_BUFF"], 				colorCode = "|cFF00FF00" },
-		{ value = "HARMFUL", 		text = L["ICONMENU_DEBUFF"], 			colorCode = "|cFFFF0000" },
-		{ value = "EITHER", 		text = L["ICONMENU_BOTH"] },
-	},
-
-	BuffShowWhen = {
-		text = L["ICONMENU_SHOWWHEN"],
-		{ value = "present", 		text = L["ICONMENU_PRESENT"], 			colorCode = "|cFF00FF00" },
-		{ value = "absent", 		text = L["ICONMENU_ABSENT"], 			colorCode = "|cFFFF0000" },
-		{ value = "always", 		text = L["ICONMENU_ALWAYS"] },
-	},
-	CooldownShowWhen = {
-		text = L["ICONMENU_SHOWWHEN"],
-		{ value = "usable", 		text = L["ICONMENU_USABLE"], 			colorCode = "|cFF00FF00" },
-		{ value = "unusable", 		text = L["ICONMENU_UNUSABLE"], 			colorCode = "|cFFFF0000" },
-		{ value = "always", 		text = L["ICONMENU_ALWAYS"] },
-	},
-	ICDShowWhen = {
-		{ value = "usable", 		text = L["ICONMENU_ICDUSABLE"], },
-		{ value = "unusable", 		text = L["ICONMENU_ICDUNUSABLE"], },
-		{ value = "always", 		text = L["ICONMENU_ALWAYS"] },
-	},
 
 	Unit = {
 		{ value = "player", 					text = PLAYER },
@@ -1266,42 +1226,31 @@ IE.Data = {
 		{ value = "mainassist|cFFFF0000#|r", 	text = L["MAINASSIST"], range = "|cFFFF0000#|r = 1-" .. MAX_RAID_MEMBERS},
 	},
 }
-for k, Type in pairs(TMW.OrderedTypes) do
-	local data = TMW.Types[Type]
-	IE.Data.Type[k] = {value = Type, text = data.name, tooltipText = data.desc}
+for k, Type in ipairs(TMW.OrderedTypes) do
+	IE.Data.Type[k] = {value = Type.type, text = Type.name, tooltipText = Type.desc}
 end
-if pclass == "SHAMAN" then
-	IE.Data.TotemSlots = {
-		text = L["TOTEMS"],
-		{ text = L["FIRE"] },
-		{ text = L["EARTH"] },
-		{ text = L["WATER"] },
-		{ text = L["AIR"] },
-	}
-elseif pclass == "DRUID" then
-	IE.Data.TotemSlots = {
-		text = L["MUSHROOMS"],
-		{ text = format(L["MUSHROOM"], 1) },
-		{ text = format(L["MUSHROOM"], 2) },
-		{ text = format(L["MUSHROOM"], 3) },
-	}
-end
-local NamesEquivLookup = {}
-local EquivIDLookup = {}
+local EquivFullIDLookup = {}
+local EquivFullNameLookup = {}
+local EquivFirstIDLookup = {}
 for category, b in pairs(TMW.OldBE) do
 	for equiv, str in pairs(b) do
 
 		-- create the lookup tables first, so that we can have the first ID even if it will be turned into a name
 		local first = strsplit(";", str)
 		first = strtrim(first, "; _")
-		EquivIDLookup[equiv] = first -- this is used to display them in the list (tooltip, name, id display)
+		EquivFirstIDLookup[equiv] = first -- this is used to display them in the list (tooltip, name, id display)
 		
 		b[equiv] = gsub(str, "_", "") -- this is used to put icons into tooltips
-		NamesEquivLookup[equiv] = b[equiv]
+		EquivFullIDLookup[equiv] = b[equiv]
+		local tbl = TMW:SplitNames(b[equiv])
+		for k, v in pairs(tbl) do
+			tbl[k] = GetSpellInfo(v) or v
+		end
+		EquivFullNameLookup[equiv] = table.concat(tbl, ";")
 	end
 end TMW.OldBE.unlisted.Enraged = nil
 for dispeltype, icon in pairs(TMW.DS) do
-	EquivIDLookup[dispeltype] = icon
+	EquivFirstIDLookup[dispeltype] = icon
 end
 
 function IE:TabClick(self)
@@ -1327,12 +1276,12 @@ end
 
 function IE:SetupRadios()
 	local t = CI.t
-
-	if set1[t] and IE.Data[set1[t]] then
+	local Type = TMW.Types[t]
+	if Type and Type.TypeChecks then
 		for k, frame in pairs(IE.Main.TypeChecks) do
 			if strfind(k, "Radio") then
-				local info = IE.Data[set1[t]][frame:GetID()]
-				if pclass == "SHAMAN" and set1[t] == "TotemSlots" and frame:GetID() > 1 then
+				local info = Type.TypeChecks[frame:GetID()]
+				if pclass == "SHAMAN" and Type.TypeChecks.setting == "TotemSlots" and frame:GetID() > 1 then
 					local p, rt, rp, x, y = frame:GetPoint(1)
 					frame:SetPoint(p, rt, rp, x, 10)
 				elseif frame:GetID() > 1 then
@@ -1341,7 +1290,7 @@ function IE:SetupRadios()
 				end
 				if info then
 					frame:Show()
-					frame.setting = set1[t]
+					frame.setting = Type.TypeChecks.setting
 					frame.value = info.value
 					frame.text:SetText((info.colorCode or "") .. info.text .. "|r")
 					if info.tooltipText then
@@ -1355,21 +1304,18 @@ function IE:SetupRadios()
 			end
 		end
 		IE.Main.TypeChecks:Show()
-		IE.Main.TypeChecks.text:SetText(IE.Data[set1[t]].text)
+		IE.Main.TypeChecks.text:SetText(Type.TypeChecks.text)
 	else
 		IE.Main.TypeChecks:Hide()
 	end
-	if set2[t] then
+	if Type and Type.WhenChecks then
 		for k, frame in pairs(IE.Main.WhenChecks) do
 			if strfind(k, "Radio") then
-				local info = IE.Data[set2[t]][frame:GetID()]
+				local info = Type.WhenChecks[frame:GetID()]
 				if info then
 					frame:Show()
-					frame.setting = set2[t]
+					frame.setting = "ShowWhen"
 					frame.value = info.value
-					if t == "icd" then
-						info = IE.Data.ICDShowWhen[frame:GetID()]
-					end
 					frame.text:SetText((info.colorCode or "") .. info.text .. "|r")
 					if info.tooltipText then
 						TMW:TT(frame, info.text, info.tooltipText, 1, 1, 1)
@@ -1384,19 +1330,14 @@ function IE:SetupRadios()
 		if t == "cast" then
 			IE.Main.WhenChecks.text:SetText(L["ICONMENU_CASTSHOWWHEN"])
 		else
-			IE.Main.WhenChecks.text:SetText(IE.Data[set2[t]].text)
+			IE.Main.WhenChecks.text:SetText(Type.WhenChecks.text)
 		end
 		IE.Main.WhenChecks:Show()
 	else
 		IE.Main.WhenChecks:Hide()
 	end
 
-	local alphainfo
-	if t == "icd" then
-		alphainfo = IE.Data.ICDShowWhen
-	elseif set2[t] then
-		alphainfo = IE.Data[set2[t]]
-	end
+	local alphainfo = Type.WhenChecks
 	if alphainfo then
 		IE.Main.Alpha.text:SetText((alphainfo[1].colorCode or "") .. alphainfo[1].text .. "|r")
 		IE.Main.UnAlpha.text:SetText((alphainfo[2].colorCode or "") .. alphainfo[2].text .. "|r")
@@ -1603,19 +1544,20 @@ function IE:Reset()
 	local groupID, iconID = CI.g, CI.i
 	db.profile.Groups[groupID].Icons[iconID] = nil
 	IE:ScheduleIconUpdate(groupID, iconID)
-	IE:Load()
+	IE:Load(1) 
+	IE:Load(1) -- it doesnt like to clear completely on the first run sometimes, and i dont feel like figuring out why
 	IE:TabClick(IE.MainTab)
 end
 
 
 function IE:Equiv_GenerateTips(equiv)
 	local r = "" --tconcat doesnt allow me to exclude duplicates unless i make another garbage table, so lets just do this
-	local tbl = TMW:SplitNames(NamesEquivLookup[equiv])
+	local tbl = TMW:SplitNames(EquivFullIDLookup[equiv])
 	for k, v in pairs(tbl) do
 		local name, _, texture = GetSpellInfo(v)
 		if not name then
 			if debug then
-				error("INVALID ID FOUND: "..equiv..":"..v)
+				geterrorhandler()("INVALID ID FOUND: "..equiv..":"..v)
 			else
 				name = v
 				texture = "Interface\\Icons\\INV_Misc_QuestionMark"
@@ -1660,7 +1602,7 @@ function IE:Equiv_DropDown()
 				info.tooltipTitle = k
 				local text = IE:Equiv_GenerateTips(k)
 
-				info.icon = GetSpellTexture(EquivIDLookup[k])
+				info.icon = GetSpellTexture(EquivFirstIDLookup[k])
 				info.tCoordLeft = 0.07
 				info.tCoordRight = 0.93
 				info.tCoordTop = 0.07
@@ -1684,7 +1626,7 @@ function IE:Equiv_DropDown()
 				info.func = IE.Equiv_DropDown_OnClick
 				info.text = L[k]
 
-				local first = strsplit(EquivIDLookup[k], ";")
+				local first = strsplit(EquivFirstIDLookup[k], ";")
 				info.icon = v
 				info.tCoordLeft = 0.07
 				info.tCoordRight = 0.93
@@ -1716,6 +1658,11 @@ function IE:Equiv_DropDown()
 
 	info.text = L["ICONMENU_CASTS"]
 	info.value = "casts"
+	info.colorCode = nil
+	UIDropDownMenu_AddButton(info)
+
+	info.text = L["ICONMENU_DRS"]
+	info.value = "dr"
 	info.colorCode = nil
 	UIDropDownMenu_AddButton(info)
 
@@ -2789,8 +2736,8 @@ function SUG.Sorter(a, b)
 			8a) Alphabetical if names are different
 			8b) SpellID if names are identical
 	]]
-
-	local haveA, haveB = EquivIDLookup[a], EquivIDLookup[b]
+	
+	local haveA, haveB = EquivFirstIDLookup[a], EquivFirstIDLookup[b]
 	if haveA or haveB then
 		if haveA and haveB then
 			return a < b
@@ -2871,22 +2818,60 @@ function SUG:Suggester()
 		wipe(preTable)
 		SUG.nextCacheKey = nil
 		startOver = false
-		if t == "cast" and not overrideSoI then
+		local lastName = SUG.lastName
+		local semiLN = ";"..lastName
+		local LNlen = #lastName
+		if t == "dr" and not overrideSoI then
+			for equiv, str in pairs(TMW.BE.dr) do
+				if 	(LNlen > 2 and (
+						(strfind(strlowerCache[equiv], atBeginning)) or 
+						(strfind(strlowerCache[L[equiv]], atBeginning)) or
+						((inputType == "string" and strfind(strlowerCache[EquivFullNameLookup[equiv]], semiLN)) or
+						(inputType == "number" and strfind(EquivFullIDLookup[equiv], semiLN))))
+				) or
+					(LNlen <= 2 and (
+						(strfind(strlowerCache[equiv], atBeginning)) or 
+						(strfind(strlowerCache[L[equiv]], atBeginning)))
+				) then
+					preTable[#preTable + 1] = equiv
+				end
+			end
+		elseif t == "cast" and not overrideSoI then
+			-- not that last name is used here instead of at beginning because there are so few cast equivs - some people may never see that these exist
+			-- also note that dr equivs check the whole string too
 			for equiv, str in pairs(TMW.BE.casts) do
-				if strfind(strlower(equiv), atBeginning) or strfind(strlower(L[equiv]), atBeginning) then
+				if 	(LNlen > 2 and (
+						(strfind(strlowerCache[equiv], atBeginning)) or 
+						(strfind(strlowerCache[L[equiv]], atBeginning)) or
+						((inputType == "string" and strfind(strlowerCache[EquivFullNameLookup[equiv]], semiLN)) or
+						(inputType == "number" and strfind(EquivFullIDLookup[equiv], semiLN))))
+				) or
+					(LNlen <= 2 and (
+						(strfind(strlowerCache[equiv], atBeginning)) or 
+						(strfind(strlowerCache[L[equiv]], atBeginning)))
+				) then
 					preTable[#preTable + 1] = equiv
 				end
 			end
 		elseif t == "buff" and not overrideSoI then
 			for _, b in pairs(buffEquivs) do
 				for equiv, str in pairs(b) do
-					if strfind(strlower(equiv), atBeginning) or strfind(strlower(L[equiv]), atBeginning)  then
+					if 	(LNlen > 2 and (
+							(strfind(strlowerCache[equiv], atBeginning)) or 
+							(strfind(strlowerCache[L[equiv]], atBeginning)) or
+							((inputType == "string" and strfind(strlowerCache[EquivFullNameLookup[equiv]], semiLN)) or
+							(inputType == "number" and strfind(EquivFullIDLookup[equiv], semiLN))))
+					) or
+						(LNlen <= 2 and (
+							(strfind(strlowerCache[equiv], atBeginning)) or 
+							(strfind(strlowerCache[L[equiv]], atBeginning)))
+					) then
 						preTable[#preTable + 1] = equiv
 					end
 				end
 			end
 			for dispeltype in pairs(TMW.DS) do
-				if strfind(strlower(dispeltype), atBeginning) or strfind(strlower(L[dispeltype]), atBeginning)  then
+				if strfind(strlowerCache[dispeltype], atBeginning) or strfind(strlowerCache[L[dispeltype]], atBeginning)  then
 					preTable[#preTable + 1] = dispeltype
 				end
 			end
@@ -2954,10 +2939,10 @@ function SUG:SuggestingComplete()
 				f.Icon:SetTexture(TMW.DS[id])
 				f.Background:SetVertexColor(1, .49, .04, 1) -- druid orange
 
-			elseif EquivIDLookup[id] then -- if the entry is an equivalacy (buff, cast, or whatever)
-				--NOTE: dispel types are put in EquivIDLookup too for efficiency in the sorter func, but as long as dispel types are checked first, it wont matter
+			elseif EquivFirstIDLookup[id] then -- if the entry is an equivalacy (buff, cast, or whatever)
+				--NOTE: dispel types are put in EquivFirstIDLookup too for efficiency in the sorter func, but as long as dispel types are checked first, it wont matter
 				local equiv = id
-				local firstid = EquivIDLookup[id]
+				local firstid = EquivFirstIDLookup[id]
 
 				f.Name:SetText(equiv)
 				f.ID:SetText(nil)
@@ -2972,7 +2957,7 @@ function SUG:SuggestingComplete()
 					f.Background:SetVertexColor(.2, .9, .2, 1) -- lightish green
 				elseif TMW.BE.debuffs[equiv] then
 					f.Background:SetVertexColor(.77, .12, .23, 1) -- deathknight red
-				elseif TMW.BE.casts[equiv] then
+				elseif TMW.BE.casts[equiv] or TMW.BE.dr[equiv] then
 					f.Background:SetVertexColor(1, .96, .41, 1) -- rogue yellow
 				end
 
@@ -3026,7 +3011,7 @@ function SUG:SuggestingComplete()
 						if whoCasted == 1 then
 							f.Background:SetVertexColor(.78, .61, .43, 1) -- color known NPC auras warrior brown
 						elseif whoCasted == 2 then
-							f.Background:SetVertexColor(.87, .24, 1, 1) -- color known PLAYER auras a bright pink ish pruple ish color that is similar to paladin pink but has sufficient contrast for distinguishing
+							f.Background:SetVertexColor(.79, .30, 1, 1) -- color known PLAYER auras a bright pink ish pruple ish color that is similar to paladin pink but has sufficient contrast for distinguishing
 						end
 					end
 				end
@@ -3094,6 +3079,7 @@ function SUG:NameOnCursor(isClick)
 	startOver = true
 
 	if SUG.oldLastName ~= SUG.lastName or SUG.redoIfSame then
+		SUG.redoIfSame = nil
 		SUG:CacheItems()
 		if IsMultiState then
 			SUG:CacheActions()
@@ -3180,11 +3166,11 @@ function SUG:ColorHelp(frame)
 	GameTooltip:AddLine(L["SUG_DISPELTYPES"], 1, .49, .04, 1)
 	GameTooltip:AddLine(L["SUG_BUFFEQUIVS"], .2, .9, .2, 1)
 	GameTooltip:AddLine(L["SUG_DEBUFFEQUIVS"], .77, .12, .23, 1)
-	GameTooltip:AddLine(L["SUG_CASTEQUIVS"], 1, .96, .41, 1)
+	GameTooltip:AddLine(L["SUG_OTHEREQUIVS"], 1, .96, .41, 1)
 	GameTooltip:AddLine(L["SUG_MSCDONBARS"], 0, .44, .87, 1)
 	GameTooltip:AddLine(L["SUG_PLAYERSPELLS"], .41, .8, .94, 1)
 	GameTooltip:AddLine(L["SUG_CLASSSPELLS"], .96, .55, .73, 1)
-	GameTooltip:AddLine(L["SUG_PLAYERAURAS"], .87, .24, 1, 1)
+	GameTooltip:AddLine(L["SUG_PLAYERAURAS"], .79, .30, 1, 1)
 	GameTooltip:AddLine(L["SUG_NPCAURAS"], .78, .61, .43, 1)
 	GameTooltip:AddLine(L["SUG_MISC"], .58, .51, .79, 1)
 	GameTooltip:Show()

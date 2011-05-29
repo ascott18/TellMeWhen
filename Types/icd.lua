@@ -30,7 +30,7 @@ local RelevantSettings = {
 	ICDType = true,
 	ICDDuration = true,
 	DontRefresh = true,
-	CooldownShowWhen = true,
+	ShowWhen = true,
 	ShowCBar = true,
 	CBarOffs = true,
 	InvertBars = true,
@@ -47,6 +47,18 @@ local RelevantSettings = {
 local Type = TMW:RegisterIconType("icd", RelevantSettings)
 Type.name = L["ICONMENU_ICD"]
 Type.desc = L["ICONMENU_ICD_DESC"]
+Type.TypeChecks = {
+	setting = "ICDType",
+	text = L["ICONMENU_ICDTYPE"],
+	{ value = "aura", 			text = L["ICONMENU_ICDBDE"], 			tooltipText = L["ICONMENU_ICDAURA_DESC"]},
+	{ value = "spellcast", 		text = L["ICONMENU_SPELLCAST"], 		tooltipText = L["ICONMENU_SPELLCAST_DESC"]},
+}
+Type.WhenChecks = {
+	text = L["ICONMENU_SHOWWHEN"],
+	{ value = "alpha", 		text = L["ICONMENU_ICDUSABLE"], },
+	{ value = "unalpha",  		text = L["ICONMENU_ICDUNUSABLE"], },
+	{ value = "always", 		text = L["ICONMENU_ALWAYS"] },
+}
 
 
 function Type:Update()
@@ -58,82 +70,34 @@ function Type:Update()
 end
 
 
-local ICD_OnEvent
-if clientVersion >= 40200 then
-	ICD_OnEvent = function(icon, event, ...)
-		if event == "COMBAT_LOG_EVENT_UNFILTERED" then
-			local _, event, _, sourceGUID, _, _, _, _, _, _, _, spellID, spellName = ... -- 2 NEW ARGS ADDED IN 4.2
-			if sourceGUID == pGUID and (event == "SPELL_AURA_APPLIED" or event == "SPELL_AURA_REFRESH" or event == "SPELL_ENERGIZE" or event == "SPELL_AURA_APPLIED_DOSE") then
-				local NameDictionary = icon.NameDictionary
-				if (NameDictionary[spellID] or NameDictionary[strlowerCache[spellName]]) and not (icon.DontRefresh and (TMW.time - icon.StartTime) < icon.ICDDuration) then
-					local t = SpellTextures[spellID]
-					if t ~= icon.__tex then icon:SetTexture(t) end
+local function ICD_OnEvent(icon, event, ...)
+	if event == "COMBAT_LOG_EVENT_UNFILTERED" then
+		local p, g, i, n, _
+		if clientVersion >= 40200 then
+			_, p, _, g, _, _, _, _, _, _, _, i, n = ...
+		elseif clientVersion >= 40100 then
+			_, p, _, g, _, _, _, _, _, i, n = ...
+		else
+			_, p, _, g, _, _, _, _, i, n = ...
+		end
+		if g == pGUID and (p == "SPELL_AURA_APPLIED" or p == "SPELL_AURA_REFRESH" or p == "SPELL_ENERGIZE" or p == "SPELL_AURA_APPLIED_DOSE") then
+			local NameDictionary = icon.NameDictionary
+			if (NameDictionary[i] or NameDictionary[strlowerCache[n]]) and not (icon.DontRefresh and (TMW.time - icon.StartTime) < icon.ICDDuration) then
+				local t = SpellTextures[i]
+				if t ~= icon.__tex then icon:SetTexture(t) end
 
-					icon.StartTime = TMW.time
-				end
-			end
-		elseif event == "UNIT_SPELLCAST_SUCCEEDED" then
-			local unit, spellName, _, _, spellID = ...
-			if unit == "player" then
-				local NameDictionary = icon.NameDictionary
-				if (NameDictionary[spellID] or NameDictionary[strlowerCache[spellName]]) and not (icon.DontRefresh and (TMW.time - icon.StartTime) < icon.ICDDuration) then
-					local t = SpellTextures[spellID]
-					if t ~= icon.__tex then icon:SetTexture(t) end
-
-					icon.StartTime = TMW.time
-				end
+				icon.StartTime = TMW.time
 			end
 		end
-	end
-elseif clientVersion >= 40100 then
-	ICD_OnEvent = function(icon, event, ...)
-		if event == "COMBAT_LOG_EVENT_UNFILTERED" then
-			local _, event, _, sourceGUID, _, _, _, _, _, spellID, spellName = ... --NEW ARG ADDED BETWEEN EVENT AND SOURCEGUID IN 4.1
-			if sourceGUID == pGUID and (event == "SPELL_AURA_APPLIED" or event == "SPELL_AURA_REFRESH" or event == "SPELL_ENERGIZE" or event == "SPELL_AURA_APPLIED_DOSE") then
-				local NameDictionary = icon.NameDictionary
-				if (NameDictionary[spellID] or NameDictionary[strlowerCache[spellName]]) and not (icon.DontRefresh and (TMW.time - icon.StartTime) < icon.ICDDuration) then
-					local t = SpellTextures[spellID]
-					if t ~= icon.__tex then icon:SetTexture(t) end
+	elseif event == "UNIT_SPELLCAST_SUCCEEDED" then
+		local u, n, _, _, i = ...
+		if u == "player" then
+			local NameDictionary = icon.NameDictionary
+			if (NameDictionary[i] or NameDictionary[strlowerCache[n]]) and not (icon.DontRefresh and (TMW.time - icon.StartTime) < icon.ICDDuration) then
+				local t = SpellTextures[i]
+				if t ~= icon.__tex then icon:SetTexture(t) end
 
-					icon.StartTime = TMW.time
-				end
-			end
-		elseif event == "UNIT_SPELLCAST_SUCCEEDED" then
-			local unit, spellName, _, _, spellID = ...
-			if unit == "player" then
-				local NameDictionary = icon.NameDictionary
-				if (NameDictionary[spellID] or NameDictionary[strlowerCache[spellName]]) and not (icon.DontRefresh and (TMW.time - icon.StartTime) < icon.ICDDuration) then
-					local t = SpellTextures[spellID]
-					if t ~= icon.__tex then icon:SetTexture(t) end
-
-					icon.StartTime = TMW.time
-				end
-			end
-		end
-	end
-else
-	ICD_OnEvent = function(icon, event, ...)
-		if event == "COMBAT_LOG_EVENT_UNFILTERED" then
-			local _, event, sourceGUID, _, _, _, _, _, spellID, spellName = ...
-			if sourceGUID == pGUID and (event == "SPELL_AURA_APPLIED" or event == "SPELL_AURA_REFRESH" or event == "SPELL_ENERGIZE" or event == "SPELL_AURA_APPLIED_DOSE") then
-				local NameDictionary = icon.NameDictionary
-				if (NameDictionary[spellID] or NameDictionary[strlowerCache[spellName]]) and not (icon.DontRefresh and (TMW.time - icon.StartTime) < icon.ICDDuration) then
-					local t = SpellTextures[spellID]
-					if t ~= icon.__tex then icon:SetTexture(t) end
-					
-					icon.StartTime = TMW.time
-				end
-			end
-		elseif event == "UNIT_SPELLCAST_SUCCEEDED" then
-			local unit, spellName, _, _, spellID = ...
-			if unit == "player" then
-				local NameDictionary = icon.NameDictionary
-				if (NameDictionary[spellID] or NameDictionary[strlowerCache[spellName]]) and not (icon.DontRefresh and (TMW.time - icon.StartTime) < icon.ICDDuration) then
-					local t = SpellTextures[spellID]
-					if t ~= icon.__tex then icon:SetTexture(t) end
-
-					icon.StartTime = TMW.time
-				end
+				icon.StartTime = TMW.time
 			end
 		end
 	end

@@ -18,6 +18,7 @@ L["RESIZE_TOOLTIP"] = "Click and drag to change size"
 
 L["HPSSWARN"] = "Warning! Any icon conditions that you had set that checked for holy power or soul shards may be messed up! Check them to prevent later confusion!"
 L["CONDITIONORMETA_CHECKINGINVALID"] = "Warning! Group %d, Icon %d is checking an invalid icon (Group %d, Icon %d)"
+L["WARN_DRMISMATCH"] = "Warning! Group %d, Icon %d is checking the diminishing returns on spells from two different categories, but all spells should be from the same category. (You will only see this once per icon per sesson)"
 
 -- -------------
 -- ICONMENU
@@ -43,13 +44,13 @@ L["ICONMENU_TYPE"] = "Icon type"
 L["ICONMENU_COOLDOWN"] = "Cooldown"
 L["ICONMENU_BUFFDEBUFF"] = "Buff/Debuff"
 L["ICONMENU_REACTIVE"] = "Reactive ability"
-L["ICONMENU_REACTIVE_DESC"] = [[Reactive abilities are things like Kill Shot, Revenge, and Conflagrate -
-abilities that are only usable when certain conditions are met. Use this icon type to track their usability.]]
+L["ICONMENU_REACTIVE_DESC"] = [=[Reactive abilities are things like Kill Shot, Revenge, and Conflagrate -
+abilities that are only usable when certain conditions are met. Use this icon type to track their usability.]=]
 L["ICONMENU_WPNENCHANT"] = "Weapon enchant"
-L["ICONMENU_WPNENCHANT_DESC"] = [[Tracks the status of temporary weapon enchants on your weapons - most useful for shaman.
+L["ICONMENU_WPNENCHANT_DESC"] = [=[Tracks the status of temporary weapon enchants on your weapons - most useful for shaman.
 With this icon type, the name can be left blank to track any weapon enchant in the specified slot,
 or you can insert the names of weapon enchants to only show it for specific enchants.
-The names that must be entered are the names that appear in the tooltip of your weapon while the enchant is active, e.g "Flametongue", not "Flametongue Weapon."]]
+The names that must be entered are the names that appear in the tooltip of your weapon while the enchant is active, e.g "Flametongue", not "Flametongue Weapon."]=]
 L["ICONMENU_TOTEM"] = "Totem"
 L["ICONMENU_GHOUL"] = "Non-MoG ghoul"
 L["ICONMENU_MUSHROOMS"] = "Wild Mushrooms"
@@ -74,6 +75,10 @@ L["ICONMENU_META"] = "Meta icon"
 L["ICONMENU_META_DESC"] = [=[This icon type can be used to combine several icons into one.
 Icons that have 'Always Hide' checked will still be shown if they would otherwise be shown.]=]
 L["ICONMENU_DR"] = "Diminishing Returns"
+L["ICONMENU_DR_DESC"] = [=[This icon type can be used to track the length and extent of the diminishing returns of a category of spells.
+Spells from different diminishing returns categories should not be checked in one icon.
+For example, do not put Polymorph and Cheap Shot in the same icon, as they are not in the same category.
+It is advised that you used the predefined DR-<category> equivalancies that TMW provides.]=]
 
 L["ICONMENU_COOLDOWNTYPE"] = "Cooldown type"
 L["ICONMENU_SPELL"] = "Spell or ability"
@@ -93,6 +98,7 @@ L["ICONMENU_CHECKNEXT_DESC"] = "Checking this box will cause this icon to check 
 
 L["ICONMENU_DISPEL"] = "Dispel Type"
 L["ICONMENU_CASTS"] = "Spell Casts"
+L["ICONMENU_DRS"] = "Diminishing Returns"
 
 L["ICONMENU_UNITSTOWATCH"] = "Units to watch"
 L["ICONMENU_UNITS"] = "Units"
@@ -141,6 +147,9 @@ L["ICONMENU_SPELLCAST_DESC"] = "Select this option if the internal cooldown begi
 L["ICONMENU_ICDAURA_DESC"] = "Select this option if the internal cooldown begins when you apply the buff or debuff that you chose, or if the effect energizes you with mana/rage/etc."
 L["ICONMENU_ICDUSABLE"] = "Usable CD/Expired spell"
 L["ICONMENU_ICDUNUSABLE"] = "Unusable CD/Present spell"
+
+L["ICONMENU_DRPRESENT"] = "Diminished"
+L["ICONMENU_DRABSENT"] = "Undiminished"
 
 L["TOTEMS"] = "Totems to check"
 L["FIRE"] = "Fire"
@@ -473,7 +482,7 @@ Clicking on an entry will insert it into the editbox.
 L["SUG_DISPELTYPES"] = "Dispel Types"
 L["SUG_BUFFEQUIVS"] = "Buff Equivalencies"
 L["SUG_DEBUFFEQUIVS"] = "Debuff Equivalencies"
-L["SUG_CASTEQUIVS"] = "Spellcast Equivalencies"
+L["SUG_OTHEREQUIVS"] = "Other Equivalencies"
 L["SUG_MSCDONBARS"] = "Valid multi-state cooldowns"
 L["SUG_PLAYERSPELLS"] = "Your spells"
 L["SUG_CLASSSPELLS"] = "Known PC/pet spells"
@@ -588,4 +597,22 @@ L["rare"] = "Rare"
 L["elite"] = "Elite"
 L["rareelite"] = "Rare Elite"
 L["worldboss"] = "World Boss"
+
+
+L["DR-RandomStun"] = "Random stuns"
+L["DR-ControlledStun"] = "Controlled stuns"
+L["DR-Scatter"] = "Scatter Shot"
+L["DR-Fear"] = "Fears"
+L["DR-Silence"] = "Silences"
+L["DR-Banish"] = "Banish"
+L["DR-MindControl"] = "Mind Control"
+L["DR-Entrapment"] = "Entrapment"
+L["DR-Taunt"] = "Taunts"
+L["DR-Disarm"] = "Disarms"
+L["DR-Horrify"] = "Horrors"
+L["DR-Cyclone"] = "Cyclone"
+L["DR-Disorient"] = "Disorients"
+L["DR-RandomRoot"] = "Random roots"
+L["DR-ControlledRoot"] = "Controlled roots"
+L["DR-DragonsBreath"] = "Dragon's Breath"
 

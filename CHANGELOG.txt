@@ -1,3 +1,8 @@
+===v4.3.0===
+ * New icon type: Diminishing Returns. Guess what this one tracks?
+ * The suggestion list just got a hell of a lot smarter.
+ * Stack text settings are now set by group.
+
 ===v4.2.1.2===
  * Fixed: meta.lua line 80: bad argument #1 to 'tinsert' (table expected, got nil)
 

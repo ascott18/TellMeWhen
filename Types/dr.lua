@@ -12,8 +12,8 @@ if not TMW then return end
 local L = TMW.L
 
 local db, UPD_INTV, ClockGCD, pr, ab, rc, mc
-local strlower, type =
-	  strlower, type
+local strlower, bitband =
+	  strlower, bit.band
 local UnitGUID, UnitExists, GetSpellTexture =
 	  UnitGUID, UnitExists, GetSpellTexture
 local print = TMW.print
@@ -27,12 +27,18 @@ local DRData = LibStub("DRData-1.0", true)
 if not DRData then return end
 local DRSpells = DRData.spells
 local DRReset = DRData.RESET_TIME
+local PvEDRs = {}
+for spellID, category in pairs(DRSpells) do
+	if DRData.pveDR[category] then
+		PvEDRs[spellID] = 1
+	end
+end
 
 local RelevantSettings = {
 	Name = true,
 	ShowTimer = true,
 	ShowTimerText = true,
-	CooldownShowWhen = true,
+	ShowWhen = true,
 	Unit = true,
 	Alpha = true,
 	UnAlpha = true,
@@ -54,7 +60,13 @@ local RelevantSettings = {
 local Type = TMW:RegisterIconType("dr", RelevantSettings)
 LibStub("AceEvent-3.0"):Embed(Type)
 Type.name = L["ICONMENU_DR"]
---Type.desc = format(L["ICONMENU_DR_DESC"], GetSpellInfo(42292))
+Type.desc = L["ICONMENU_DR_DESC"]
+Type.WhenChecks = {
+	text = L["ICONMENU_SHOWWHEN"],
+	{ value = "alpha", 			text = L["ICONMENU_DRPRESENT"], 		colorCode = "|cFFFF0000" },
+	{ value = "unalpha",  		text = L["ICONMENU_DRABSENT"], 			colorCode = "|cFF00FF00" },
+	{ value = "always", 		text = L["ICONMENU_ALWAYS"] },
+}
 
 
 function Type:Update()
@@ -70,40 +82,63 @@ end
 local SpellTextures = TMW.SpellTextures
 
 local function func(icon, g, i)
-	local DRamt = icon.DRamt
-	if DRamt ~= 0 then
-		icon.DRamt = DRamt > 25 and DRamt/2 or 0
-		icon.DRduration = 18
-		icon.DRstart = TMW.time
-		icon.DRtex = SpellTextures[i]
+	local dr = icon[g]
+	if not dr then
+		dr = {
+			amt = 50,
+			start = TMW.time, 
+			duration = 18,
+			tex = SpellTextures[i]
+		}
+		icon[g] = dr
+	else
+		local amt = dr.amt
+		if amt ~= 0 then
+			dr.amt = amt > 25 and amt/2 or 0
+			dr.duration = 18
+			dr.start = TMW.time
+			dr.tex = SpellTextures[i]
+		end
 	end
 end
 
+local CL_PLAYER = COMBATLOG_OBJECT_TYPE_PLAYER
+local CL_PET = COMBATLOG_OBJECT_CONTROL_PLAYER
+
 local DR_OnEvent
-if clientVersion >= 40200 then -- COMBAT_LOG_EVENT_UNFILTERED
-	DR_OnEvent = function(icon, _, _, p, _, _, _, _, _, g, _, _, _, i, n, _, t)-- tyPe, Guid, spellId, spellName, auraType -- 2 NEW ARGS IN 4.2
-		if t == "DEBUFF" and (p == "SPELL_AURA_REFRESH" or p == "SPELL_AURA_REMOVED") then
-			local ND = icon.NameDictionary
-			if ND[i] or ND[strlowerCache[n]] then
-				func(icon, g, i)
-			end
+local function DR_OnEvent(icon, _, _, p, ...)
+	if p == "SPELL_AURA_REMOVED" or p == "SPELL_AURA_REFRESH" then
+		local g, f, i, n, t, _
+		if clientVersion >= 40200 then
+			_, _, _, _, _, g, _, f, _, i, n, _, t = ...
+		elseif clientVersion >= 40100 then
+			_, _, _, _, g, _, f, i, n, _, t = ...
+		else
+			_, _, _, g, _, f, i, n, _, t = ...
 		end
-	end
-elseif clientVersion >= 40100 then
-	DR_OnEvent = function(icon, _, _, p, _, _, _, _, g, _, _, i, n, _, t)-- tyPe, Guid, spellId, spellName, auraType -- NEW ARG IN 4.1 BETWEEN TYPE AND SOURCEGUID
-		if t == "DEBUFF" and (p == "SPELL_AURA_REFRESH" or p == "SPELL_AURA_REMOVED") then
+		if t == "DEBUFF" then
 			local ND = icon.NameDictionary
 			if ND[i] or ND[strlowerCache[n]] then
-				func(icon, g, i)
-			end
-		end
-	end
-else
-	DR_OnEvent = function(icon, _, _, p, _, _, _, g, _, _, i, n, _, t)-- tyPe, Guid, spellId, spellName, auraType
-		if t == "DEBUFF" and (p == "SPELL_AURA_REFRESH" or p == "SPELL_AURA_REMOVED") then
-			local ND = icon.NameDictionary
-			if ND[i] or ND[strlowerCache[n]] then
-				func(icon, g, i)
+				if PvEDRs[i] or (bitband(f, CL_PLAYER) == CL_PLAYER or bitband(f, CL_PET) == CL_PET) then
+					local dr = icon[g]
+					if not dr then
+						dr = {
+							amt = 50,
+							start = TMW.time, 
+							duration = 18,
+							tex = SpellTextures[i]
+						}
+						icon[g] = dr
+					else
+						local amt = dr.amt
+						if amt ~= 0 then
+							dr.amt = amt > 25 and amt/2 or 0
+							dr.duration = 18
+							dr.start = TMW.time
+							dr.tex = SpellTextures[i]
+						end
+					end
+				end
 			end
 		end
 	end
@@ -118,19 +153,25 @@ local function DR_OnUpdate(icon, time)
 		
 		for u = 1, #Units do
 			local unit = Units[u]
-			if UnitExists(unit) then
-				if icon.DRstart + icon.DRduration <= time then
-					icon.DRamt = 100
-					icon:SetInfo(Alpha, 1, icon.DRtex, 0, 0)
+			local dr = UnitExists(unit) and icon[UnitGUID(unit)]
+			if dr then
+				if dr.start + dr.duration <= time then
+					dr.amt = 100
+					icon:SetInfo(Alpha, 1, dr.tex, 0, 0)
 					if Alpha > 0 then
 						return
 					end
 				else
-					local DRamt = icon.DRamt
-					icon:SetInfo(UnAlpha, (not icon.ShowTimer and Alpha ~= 0) and .5 or 1, icon.DRtex, icon.DRstart, icon.DRduration, nil, nil, nil, DRamt, DRamt .. "%")
+					local amt = dr.amt
+					icon:SetInfo(UnAlpha, (not icon.ShowTimer and Alpha ~= 0) and .5 or 1, dr.tex, dr.start, dr.duration, nil, nil, nil, amt, amt .. "%")
 					if UnAlpha > 0 then
 						return
 					end
+				end
+			else
+				icon:SetInfo(Alpha, 1, icon.FirstTexture, 0, 0)
+				if Alpha > 0 then
+					return
 				end
 			end
 		end
@@ -138,17 +179,37 @@ local function DR_OnUpdate(icon, time)
 	end
 end			
 
-
+local warnedMismatch = {}
 function Type:Setup(icon, groupID, iconID)
 	icon.ShowPBar = false
 	icon.NameFirst = TMW:GetSpellNames(icon, icon.Name, 1)
 	icon.NameDictionary = TMW:GetSpellNames(icon, icon.Name, nil, nil, 1)
 	icon.Units = TMW:GetUnits(icon, icon.Unit)
-	
-	icon.DRstart = icon.DRstart or 0
-	icon.DRduration = icon.DRduration or 0
-	icon.DRamt = icon.DRamt or 1
+	icon.FirstTexture = SpellTextures[icon.NameFirst]
 
+	if not db.profile.Locked and not warnedMismatch[icon] then
+		-- Do the Right Thing and tell people if their DRs mismatch
+		local firstCategory, dobreak
+		for spellID in pairs(icon.NameDictionary) do
+			for category, str in pairs(TMW.BE.dr) do
+				if strfind(";"..str..";", ";"..spellID..";") then
+					if not firstCategory then
+						firstCategory = category
+					end
+					if firstCategory ~= category then
+						TMW:Printf(L["WARN_DRMISMATCH"], groupID, iconID)
+						warnedMismatch[icon] = 1
+						dobreak=1
+						break
+					end
+				end
+			end
+			if dobreak then
+				break
+			end
+		end
+	end
+	
 	if icon.Name == "" then
 		icon:SetTexture("Interface\\Icons\\INV_Misc_QuestionMark")
 	elseif GetSpellTexture(icon.NameFirst) then

@@ -23,7 +23,7 @@ local RelevantSettings = {
 	Name = true,
 	ShowTimer = true,
 	ShowTimerText = true,
-	CooldownShowWhen = true,
+	ShowWhen = true,
 	RangeCheck = true,
 	ManaCheck = true,
 	CooldownCheck = true,
@@ -47,6 +47,12 @@ local RelevantSettings = {
 local Type = TMW:RegisterIconType("reactive", RelevantSettings)
 Type.name = L["ICONMENU_REACTIVE"]
 Type.desc = L["ICONMENU_REACTIVE_DESC"]
+Type.WhenChecks = {
+	text = L["ICONMENU_SHOWWHEN"],
+	{ value = "alpha", 		text = L["ICONMENU_USABLE"], 			colorCode = "|cFF00FF00" },
+	{ value = "unalpha",  		text = L["ICONMENU_UNUSABLE"], 			colorCode = "|cFFFF0000" },
+	{ value = "always", 		text = L["ICONMENU_ALWAYS"] },
+}
 
 
 function Type:Update()

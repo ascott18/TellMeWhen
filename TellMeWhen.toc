@@ -49,7 +49,7 @@ Types\wpnenchant.lua
 Types\totem.lua
 Types\icd.lua
 Types\unitcooldown.lua
-# Types\dr.lua
+Types\dr.lua
 Types\cast.lua
 Types\conditionicon.lua
 Types\meta.lua

@@ -1,5 +1,5 @@
 local major = "DRData-1.0"
-local minor = 1006
+local minor = 1007
 assert(LibStub, string.format("%s requires LibStub.", major))
 
 local Data = LibStub:NewLibrary(major, minor)
@@ -7,8 +7,6 @@ if( not Data ) then return end
 
 local L = {
 	["Banish"] = "Banish",
-	["Charge"] = "Charge",
-	["Cheap Shot"] = "Cheap Shot",
 	["Controlled stuns"] = "Controlled stuns",
 	["Cyclone"] = "Cyclone",
 	["Disarms"] = "Disarms",
@@ -21,15 +19,13 @@ local L = {
 	["Random stuns"] = "Random stuns",
 	["Controlled roots"] = "Controlled roots",
 	["Scatter Shot"] = "Scatter Shot",
+	["Dragon's Breath"] = "Dragon's Breath",
 	["Silences"] = "Silences",
-	["Hibernate"] = "Hibernate",
 	["Taunts"] = "Taunts",
 }
 
 if GetLocale() == "frFR" then
 	L["Banish"] = "Bannissement"
-	L["Charge"] = "Charge"
-	L["Cheap Shot"] = "Coup bas"
 	L["Controlled stuns"] = "Etourdissements contrôlés"
 	L["Cyclone"] = "Cyclone"
 	L["Disarms"] = "Désarmements"
@@ -42,8 +38,8 @@ if GetLocale() == "frFR" then
 	L["Random stuns"] = "Etourdissemensts aléatoires"
 	L["Controlled roots"] = "Immobilisations contrôlées"
 	L["Scatter Shot"] = "Flèche de dispersion"
+	L["Dragon's Breath"] = "Souffle du dragon"
 	L["Silences"] = "Silences"
-	L["Hibernate"] = "Hibernation"
 	L["Taunts"] = "Provocations"
 end
 
@@ -53,28 +49,27 @@ Data.RESET_TIME = 18
 
 -- List of spellID -> DR category
 Data.spells = {
-	--[[ TAUNT ]]--	
-	[  355] = "taunt", -- Taunt (Warrior)	
-	[53477] = "taunt", -- Taunt (Hunter tenacity pet)	
-	[ 6795] = "taunt", -- Growl (Druid)	
-	[56222] = "taunt", -- Dark Command	
-	[62124] = "taunt", -- Hand of Reckoning	
+	--[[ TAUNT ]]--
+	[  355] = "taunt", -- Taunt (Warrior)
+	[53477] = "taunt", -- Taunt (Hunter tenacity pet)
+	[ 6795] = "taunt", -- Growl (Druid)
+	[56222] = "taunt", -- Dark Command
+	[62124] = "taunt", -- Hand of Reckoning
 	[31790] = "taunt", -- Righteous Defense
-	[20736] = "taunt", -- Distracting Shot	
-	[ 1161] = "taunt", -- Challenging Shout	
-	[ 5209] = "taunt", -- Challenging Roar	
+	[20736] = "taunt", -- Distracting Shot
+	[ 1161] = "taunt", -- Challenging Shout
+	[ 5209] = "taunt", -- Challenging Roar
 	[57603] = "taunt", -- Death Grip
 	[36213] = "taunt", -- Angered Earth -- FIXME: NPC ability ?
 	[17735] = "taunt", -- Suffering (Voidwalker)
 	[58857] = "taunt", -- Twin Howl (Spirit wolves)
-	
-	--[[ DISORIENTS ]]--	
-	[31661] = "disorient", -- Dragon's Breath	
+
+	--[[ DISORIENTS ]]--
 	[49203] = "disorient", -- Hungering Cold
-	[ 6770] = "disorient", -- Sap	
+	[ 6770] = "disorient", -- Sap
 	[ 1776] = "disorient", -- Gouge
 	[51514] = "disorient", -- Hex
-	[ 9484] = "disorient", -- Shackle Undead	
+	[ 9484] = "disorient", -- Shackle Undead
 	[  118] = "disorient", -- Polymorph
 	[28272] = "disorient", -- Polymorph (pig)
 	[28271] = "disorient", -- Polymorph (turtle)
@@ -86,7 +81,9 @@ Data.spells = {
 	[19386] = "disorient", -- Wyvern Sting
 	[20066] = "disorient", -- Repentance
 	[90337] = "disorient", -- Bad Manner (Monkey) -- FIXME: to check
-		
+	[ 2637] = "disorient", -- Hibernate
+	[82676] = "disorient", -- Ring of Frost
+
 	--[[ SILENCES ]]--
 	[50479] = "silence", -- Nether Shock (Nether ray)
 	[ 1330] = "silence", -- Garrote
@@ -107,15 +104,15 @@ Data.spells = {
 	[74347] = "silence", -- Gag Order (Warrior talent) -- FIXME: duplicate ?
 	[81261] = "silence", -- Solar Beam
 	[31935] = "silence", -- Avenger's Shield
-	
+
 	--[[ DISARMS ]]--
 	[91644] = "disarm", -- Snatch (Bird of Prey)
 	[51722] = "disarm", -- Dismantle
 	[  676] = "disarm", -- Disarm
 	[64058] = "disarm", -- Psychic Horror (Disarm effect)
 	[50541] = "disarm", -- Clench (Scorpid)
-	
-	--[[ FEARS ]]--	
+
+	--[[ FEARS ]]--
 	[ 2094] = "fear", -- Blind
 	[ 5782] = "fear", -- Fear (Warlock)
 	[ 6358] = "fear", -- Seduction (Succubus)
@@ -151,16 +148,18 @@ Data.spells = {
 	[85388] = "ctrlstun", -- Throwdown
 	[ 1833] = "ctrlstun", -- Cheap Shot
 	[ 9005] = "ctrlstun", -- Pounce
-	[82676] = "ctrlstun", -- Ring of Frost
 	[88625] = "ctrlstun", -- Holy Word: Chastise
-	
+	[ 7922] = "ctrlstun", -- Charge
+
 	--[[ RANDOM STUNS ]]--
 	[64343] = "rndstun", -- Impact
 	[39796] = "rndstun", -- Stoneclaw Stun
+	[11210] = "rndstun", -- Improved Polymorph (rank 1)
+	[12592] = "rndstun", -- Improved Polymorph (rank 2)
 
 	--[[ CYCLONE ]]--
 	[33786] = "cyclone", -- Cyclone
-	
+
 	--[[ ROOTS ]]--
 	[33395] = "ctrlroot", -- Freeze (Water Elemental)
 	[50245] = "ctrlroot", -- Pin (Crab)
@@ -172,24 +171,23 @@ Data.spells = {
 	[54706] = "ctrlroot",	-- Venom Web Spray (Silithid)
 	[19306] = "ctrlroot", -- Counterattack
 	[90327] = "ctrlroot", -- Lock Jaw (Dog)
-	
+	[11190] = "ctrlroot", -- Improved Cone of Cold (rank 1)
+	[12489] = "ctrlroot", -- Improved Cone of Cold (rank 2)
+
 	--[[ RANDOM ROOTS ]]--
-	[23694] = "rndroot", -- Improved Hamstring
+	[23694] = "rndroot", -- Improved Hamstring -- FIXME: to check
 	[44745] = "rndroot", -- Shattered Barrier (rank 1)
 	[54787] = "rndroot", -- Shattered Barrier (rank 2)
-	
-	--[[ SLEEPS ]]--
-	[ 2637] = "sleep", -- Hibernate
-		
+
 	--[[ HORROR ]]--
 	[ 6789] = "horror", -- Death Coil
 	[64044] = "horror", -- Psychic Horror
 	[87099] = "horror", -- Sin and Punishment (rank 1)
 	[87100] = "horror", -- Sin and Punishment (rank 2)
-	
+
 	--[[ MISC ]]--
 	[19503] = "scatters",   -- Scatter Shot
-	[ 7922] = "charge",     -- Charge
+	[31661] = "dragons",    -- Dragon's Breath
 	[  605] = "mc",         -- Mind Control
 	[  710] = "banish",     -- Banish
 	[19185] = "entrapment", -- Entrapment
@@ -198,8 +196,6 @@ Data.spells = {
 -- DR Category names
 Data.categoryNames = {
 	["banish"] = L["Banish"],
-	["charge"] = L["Charge"],
-	["cheapshot"] = L["Cheap Shot"],
 	["ctrlstun"] = L["Controlled stuns"],
 	["cyclone"] = L["Cyclone"],
 	["disarm"] = L["Disarms"],
@@ -212,8 +208,8 @@ Data.categoryNames = {
 	["rndstun"] = L["Random stuns"],
 	["ctrlroot"] = L["Controlled roots"],
 	["scatters"] = L["Scatter Shot"],
+	["dragons"] = L["Dragon's Breath"],
 	["silence"] = L["Silences"],
-	["sleep"] = L["Hibernate"],
 	["taunt"] = L["Taunts"],
 }
 
@@ -263,7 +259,7 @@ function Data:NextDR(diminished)
 	elseif( diminished == 0.50 ) then
 		return 0.25
 	end
-	
+
 	return 0
 end
 
@@ -278,7 +274,7 @@ local function debuffGained(spellID, destName, destGUID, isEnemy, isPlayer)
 	if( not isPlayer and not DRData:IsPVE(drCat) ) then
 		return
 	end
-	
+
 	if( not trackedPlayers[destGUID] ) then
 		trackedPlayers[destGUID] = {}
 	end
@@ -303,13 +299,13 @@ local function debuffFaded(spellID, destName, destGUID, isEnemy, isPlayer)
 	if( not trackedPlayers[destGUID][drCat] ) then
 		trackedPlayers[destGUID][drCat] = { reset = 0, diminished = 1.0 }
 	end
-	
+
 	local time = GetTime()
 	local tracked = trackedPlayers[destGUID][drCat]
-	
+
 	tracked.reset = time + DRData:GetResetTime()
 	tracked.diminished = DRData:NextDR(tracked.diminished)
-	
+
 	-- Diminishing returns changed, now you can do an update
 end
 
@@ -332,14 +328,14 @@ local function COMBAT_LOG_EVENT_UNFILTERED(self, event, timestamp, eventType, so
 	if( not eventRegistered[eventType] ) then
 		return
 	end
-	
+
 	-- Enemy gained a debuff
 	if( eventType == "SPELL_AURA_APPLIED" ) then
 		if( auraType == "DEBUFF" and DRData:GetSpellCategory(spellID) ) then
 			local isPlayer = ( bit.band(destFlags, COMBATLOG_OBJECT_TYPE_PLAYER) == COMBATLOG_OBJECT_TYPE_PLAYER or bit.band(destFlags, COMBATLOG_OBJECT_CONTROL_PLAYER) == COMBATLOG_OBJECT_CONTROL_PLAYER )
 			debuffGained(spellID, destName, destGUID, (bit.band(destFlags, COMBATLOG_OBJECT_REACTION_HOSTILE) == COMBATLOG_OBJECT_REACTION_HOSTILE), isPlayer)
 		end
-	
+
 	-- Enemy had a debuff refreshed before it faded, so fade + gain it quickly
 	elseif( eventType == "SPELL_AURA_REFRESH" ) then
 		if( auraType == "DEBUFF" and DRData:GetSpellCategory(spellID) ) then
@@ -348,14 +344,14 @@ local function COMBAT_LOG_EVENT_UNFILTERED(self, event, timestamp, eventType, so
 			debuffFaded(spellID, destName, destGUID, isHostile, isPlayer)
 			debuffGained(spellID, destName, destGUID, isHostile, isPlayer)
 		end
-	
+
 	-- Buff or debuff faded from an enemy
 	elseif( eventType == "SPELL_AURA_REMOVED" ) then
 		if( auraType == "DEBUFF" and DRData:GetSpellCategory(spellID) ) then
 			local isPlayer = ( bit.band(destFlags, COMBATLOG_OBJECT_TYPE_PLAYER) == COMBATLOG_OBJECT_TYPE_PLAYER or bit.band(destFlags, COMBATLOG_OBJECT_CONTROL_PLAYER) == COMBATLOG_OBJECT_CONTROL_PLAYER )
 			debuffFaded(spellID, destName, destGUID, (bit.band(destFlags, COMBATLOG_OBJECT_REACTION_HOSTILE) == COMBATLOG_OBJECT_REACTION_HOSTILE), isPlayer)
 		end
-		
+
 	-- Don't use UNIT_DIED inside arenas due to accuracy issues, outside of arenas we don't care too much
 	elseif( ( eventType == "UNIT_DIED" and select(2, IsInInstance()) ~= "arena" ) or eventType == "PARTY_KILL" ) then
 		resetDR(destGUID)

@@ -26,7 +26,7 @@ local RelevantSettings = {
 	ShowTimerText = true,
 	HideUnequipped = true,
 	WpnEnchantType = true,
-	BuffShowWhen = true,
+	ShowWhen = true,
 	Alpha = true,
 	UnAlpha = true,
 	ShowCBar = true,
@@ -42,6 +42,19 @@ local RelevantSettings = {
 local Type = TMW:RegisterIconType("wpnenchant", RelevantSettings, L["ICONMENU_WPNENCHANT"])
 Type.name = L["ICONMENU_WPNENCHANT"]
 Type.desc = L["ICONMENU_WPNENCHANT_DESC"]
+Type.TypeChecks = {
+	text = L["ICONMENU_WPNENCHANTTYPE"],
+	setting = "WpnEnchantType",
+	{ value = "MainHandSlot",	text = INVTYPE_WEAPONMAINHAND },
+	{ value = "SecondaryHandSlot", text = INVTYPE_WEAPONOFFHAND },
+	{ value = "RangedSlot",		text = INVTYPE_THROWN },
+}
+Type.WhenChecks = {
+	text = L["ICONMENU_SHOWWHEN"],
+	{ value = "alpha", 			text = L["ICONMENU_PRESENT"], 			colorCode = "|cFF00FF00" },
+	{ value = "unalpha", 		text = L["ICONMENU_ABSENT"], 			colorCode = "|cFFFF0000" },
+	{ value = "always", 		text = L["ICONMENU_ALWAYS"] },
+}
 
 local Parser = CreateFrame("GameTooltip", "TellMeWhen_Parser", TMW, "GameTooltipTemplate")
 local function GetWeaponEnchantName(slot)

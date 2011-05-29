@@ -26,10 +26,10 @@ local AceDB = LibStub("AceDB-3.0")
 local LSM = LibStub("LibSharedMedia-3.0")
 local DRData = LibStub("DRData-1.0", true)
 
-TELLMEWHEN_VERSION = "4.2.1.2"
+TELLMEWHEN_VERSION = "4.3.0"
 TELLMEWHEN_VERSION_MINOR = ""
-TELLMEWHEN_VERSIONNUMBER = 42120 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
-if TELLMEWHEN_VERSIONNUMBER > 50000 or TELLMEWHEN_VERSIONNUMBER < 42000 then return end -- safety check because i accidentally made the version number 414069 once
+TELLMEWHEN_VERSIONNUMBER = 43002 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
+if TELLMEWHEN_VERSIONNUMBER > 44000 or TELLMEWHEN_VERSIONNUMBER < 43000 then error("YOU SCREWED UP THE VERSION NUMBER OR DIDNT CHANGE THE LIMITS") return end -- safety check because i accidentally made the version number 414069 once
 
 TELLMEWHEN_MAXGROUPS = 1 	--this is a default, used by SetTheory (addon), so dont rename
 TELLMEWHEN_MAXROWS = 20
@@ -49,6 +49,9 @@ local tonumber, tostring, type, pairs, ipairs, tinsert, tremove, sort, select, w
 	  tonumber, tostring, type, pairs, ipairs, tinsert, tremove, sort, select, wipe, rawget, tDeleteItem
 local strfind, strmatch, format, gsub, strsub, strtrim, strsplit, strlower, min, max, ceil, floor =
 	  strfind, strmatch, format, gsub, strsub, strtrim, strsplit, strlower, min, max, ceil, floor
+local CL_PLAYER = COMBATLOG_OBJECT_TYPE_PLAYER
+local CL_PET = COMBATLOG_OBJECT_CONTROL_PLAYER
+local bitband = bit.band
 local GetTime, debugstack = GetTime, debugstack
 local _G = _G
 local _, pclass = UnitClass("Player")
@@ -78,7 +81,11 @@ TMW.strlowerCache = setmetatable({}, {__index = function(t, i)
 	local o = strlower(i)
 	t[i] = o
 	return o
+end, 
+__call = function(t, i)
+	return t[i]
 end})
+
 TMW.Icons = {}
 TMW.OrderedTypes = {}
 
@@ -258,14 +265,6 @@ TMW.Defaults = {
 	WarnInvalids=	true,
 	BarGCD		=	true,
 	ClockGCD	=	true,
-	Font 		= 	{
-		Name = "Arial Narrow",
-		Size = 12,
-		Outline = "THICKOUTLINE",
-		x = -2,
-		y = 2,
-		OverrideLBFPos = false,
-	},
 	WpnEnchDurs	=	{
 		["*"] = 0,
 	},
@@ -303,6 +302,14 @@ TMW.Defaults = {
 				Backdrop = false,
 				SkinID = "Blizzard",
 			},
+			Font = {
+				Name = "Arial Narrow",
+				Size = 12,
+				Outline = "THICKOUTLINE",
+				x = -2,
+				y = 2,
+				OverrideLBFPos = false,
+			},
 			--[[Colors = { -- not going to implement this unless people actually want it.
 				CCO = 	{r=0,	g=1,	b=0		},	-- cooldown bar complete
 				CST = 	{r=1,	g=0,	b=0		},	-- cooldown bar start
@@ -322,8 +329,7 @@ TMW.Defaults = {
 			Icons = {
 				["**"] = {
 					BuffOrDebuff		= "HELPFUL",
-					BuffShowWhen		= "present",
-					CooldownShowWhen	= "usable",
+					ShowWhen			= "alpha",
 					CooldownType		= "spell",
 					Enabled				= false,
 					Name				= "",
@@ -361,7 +367,6 @@ TMW.Defaults = {
 					Interruptible		= false,
 					ICDType				= "aura",
 					ICDDuration			= 45,
-					ICDShowWhen			= "usable",
 					CheckNext			= false,
 					UseActvtnOverlay	= false,
 					OnlyEquipped		= false,
@@ -475,10 +480,31 @@ TMW.BE = {
 	},
 }
 if DRData then
+	local myCategories = {
+		ctrlstun = "DR-ControlledStun",
+		scatters = "DR-Scatter",
+		fear = "DR-Fear",
+		rndstun = "DR-RandomStun",
+		silence = "DR-Silence",
+		banish = "DR-Banish",
+		mc = "DR-MindControl",
+		entrapment = "DR-Entrapment",
+		taunt = "DR-Taunt",
+		disarm = "DR-Disarm",
+		horror = "DR-Horrify",
+		cyclone = "DR-Cyclone",
+		rndroot = "DR-RandomRoot",
+		disorient = "DR-Disorient",
+		ctrlroot = "DR-ControlledRoot",
+		dragons = "DR-DragonsBreath",
+	}
+	if not GetSpellInfo(74347) then -- invalid
+		DRData.spells[74347] = nil
+	end
 	local dr = TMW.BE.dr
 	for spellID, category in pairs(DRData.spells) do
-		local k = "DR-"..category
-		dr[k] = dr[k] and (dr[k] .. ";" .. spellID) or tostring(spellID)
+		local k = myCategories[category] or "DR-"..category
+		dr[k] = (dr[k] and (dr[k] .. ";" .. spellID)) or tostring(spellID)
 	end
 end
 TMW.OldBE = CopyTable(TMW.BE)
@@ -962,6 +988,7 @@ function TMW:Update()
 		TMW.IE:Load(1) -- for reloading icon editor after copying/dragging something onto an icon in case the icon copied to is the current icon
 	end
 	for group in TMW.InGroups() do
+		-- attempt at a fix for the cooldown clock frame level bug - seems to work most of the time
 		group:SetFrameLevel(group:GetFrameLevel() + 1)
 		group:SetFrameLevel(group:GetFrameLevel() - 1)
 	end
@@ -972,9 +999,51 @@ function TMW:Update()
 end
 
 local upgradeTable
-function TMW:GetUpgradeTable()
+function TMW:GetUpgradeTable() -- upgrade functions
 	if upgradeTable then return upgradeTable end
 	local t = {
+		[43002] = {
+			WhenChecks = {
+				cooldown = "CooldownShowWhen",
+				buff = "BuffShowWhen",
+				reactive = "CooldownShowWhen",
+				wpnenchant = "BuffShowWhen",
+				totem = "BuffShowWhen",
+				unitcooldown = "CooldownShowWhen",
+				dr = "CooldownShowWhen",
+				icd = "CooldownShowWhen",
+				cast = "BuffShowWhen",
+			},
+			Defaults = {
+				CooldownShowWhen	= "usable",
+				BuffShowWhen		= "present",
+			},
+			Conversions = {
+				usable		= "alpha",
+				present		= "alpha",
+				unusable	= "unalpha",
+				absent		= "unalpha",
+				always		= "always",
+			},
+			icon = function(ics, self)
+				local setting = self.WhenChecks[ics.Type]
+				if setting then
+					ics.ShowWhen = self.Conversions[ics[setting] or self.Defaults[setting]] or ics[setting] or self.Defaults[setting]
+				end
+				ics.CooldownShowWhen = nil
+				ics.BuffShowWhen = nil
+			end,
+		},
+		[43001] = {
+			group = function(gs)
+				for k, v in pairs(db.profile.Font) do
+					gs.Font[k] = v
+				end
+			end,
+			postglobal = function()
+				db.profile.Font = nil
+			end
+		},
 		[42105] = {
 			-- cleanup some old stuff that i noticed is sticking around in my settings, probably in other peoples' settings too
 			icon = function(ics)
@@ -1253,8 +1322,8 @@ function TMW:GetUpgradeTable()
 			end,
 			icon = function(ics)
 				if ics.Type == "icd" then
-					ics.CooldownShowWhen = ics.ICDShowWhen
-					ics.ICDShowWhen = "usable" -- default, to make it go away safely
+					ics.CooldownShowWhen = ics.ICDShowWhen or "usable"
+					ics.ICDShowWhen = nil
 				end
 			end,
 		},
@@ -1283,7 +1352,7 @@ function TMW:GetUpgradeTable()
 					end
 				end
 			end,
-			icon = function(ics, groupID, iconID)
+			icon = function(ics, self, groupID, iconID)
 				for k in pairs({
 					OORColor = true,
 					OOMColor = true,
@@ -1492,17 +1561,20 @@ function TMW:Upgrade()
 	for k, v in ipairs(TMW:GetUpgradeTable()) do
 		if v.Version > db.profile.Version then
 			if v.global then
-				v.global()
+				v.global(v)
 			end
 			if v.group then
 				for group, groupID in TMW:InGroupSettings() do
-					v.group(group, groupID)
+					v.group(group, v, groupID)
 				end
 			end
 			if v.icon then
 				for ics, groupID, iconID in TMW.InIconSettings() do
-					v.icon(ics, groupID, iconID)
+					v.icon(ics, v, groupID, iconID)
 				end
+			end
+			if v.postglobal then
+				v.postglobal(v)
 			end
 		end
 	end
@@ -1664,38 +1736,21 @@ function TMW:RAID_ROSTER_UPDATE()
 			end
 		end
 	end
-
 end
 
-if clientVersion >= 40200 then -- COMBAT_LOG_EVENT_UNFILTERED
+function TMW:COMBAT_LOG_EVENT_UNFILTERED(_, _, p, ...)
 	-- This is only used for the suggester, but i want to to be listening all the times for auras, not just when you load the options
-	function TMW:COMBAT_LOG_EVENT_UNFILTERED(_, _, p, _, g, _, _, _, _, _, _, _, i)-- tyPe, Guid, spellId -- 2 NEW ARGS IN 4.2 
-		if p == "SPELL_AURA_APPLIED" and not TMW.AuraCache[i] then
-			local t = strsub(g, 5, 5), 16 % 8
-			if t == 0 or t == 4 then -- player or pet
-				TMW.AuraCache[i] = 2
-			else
-				TMW.AuraCache[i] = 1
-			end
+	if p == "SPELL_AURA_APPLIED" then
+		local g, i, f, _
+		if clientVersion >= 40200 then
+			_, g, _, f, _, _, _, _, _, i = ...
+		elseif clientVersion >= 40100 then
+			_, g, _, f, _, _, _, i = ...
+		else
+			g, _, f, _, _, _, i = ...
 		end
-	end
-elseif clientVersion >= 40100 then
-	-- This is only used for the suggester, but i want to to be listening all the times for auras, not just when you load the options
-	function TMW:COMBAT_LOG_EVENT_UNFILTERED(_, _, p, _, g, _, _, _, _, _, i)-- tyPe, Guid, spellId -- NEW ARG IN 4.1 BETWEEN TYPE AND SOURCEGUID
-		if p == "SPELL_AURA_APPLIED" and not TMW.AuraCache[i] then
-			local t = strsub(g, 5, 5), 16 % 8
-			if t == 0 or t == 4 then -- player or pet
-				TMW.AuraCache[i] = 2
-			else
-				TMW.AuraCache[i] = 1
-			end
-		end
-	end
-else
-	function TMW:COMBAT_LOG_EVENT_UNFILTERED(_, _, p, g, _, _, _, _, _, i)-- tyPe, Guid, spellId
-		if p == "SPELL_AURA_APPLIED" and not TMW.AuraCache[i] then
-			local t = strsub(g, 5, 5), 16 % 8
-			if t == 0 or t == 4 then
+		if not TMW.AuraCache[i] then
+			if bitband(f, CL_PLAYER) == CL_PLAYER or bitband(f, CL_PET) == CL_PET then -- player or pet
 				TMW.AuraCache[i] = 2
 			else
 				TMW.AuraCache[i] = 1
@@ -1820,6 +1875,7 @@ function TMW:Group_Update(groupID)
 			LBF:Group("TellMeWhen", format(L["fGROUP"], groupID)):Skin(lbfs.SkinID, lbfs.Gloss, lbfs.Backdrop, lbfs.Colors)
 		end
 	end
+	group.FontTest = (not Locked) and group.FontTest
 
 	group:SetFrameLevel(group.Level)
 	local Spacing = group.Spacing
@@ -1865,7 +1921,7 @@ function TMW:Group_Update(groupID)
 	if group.Enabled and group.CorrectSpec and Locked then
 		group:Show()
 		if #group.Conditions > 0 then
-			group:SetScript("OnUpdate", TMW.CNDT:ProcessConditions(group))
+			group:SetScript("OnUpdate", TMW.CNDT:ProcessConditions(group)) -- dont be alarmed, this is handled by GroupSetScript
 		else
 			group:SetScript("OnUpdate", nil)
 		end
@@ -2306,7 +2362,8 @@ end
 function TMW:RegisterIconType(Type, relevantSettings)
 	local t = CreateFrame("Frame")
 	TMW.Types[Type] = t
-	tinsert(TMW.OrderedTypes, Type)
+	t.type = Type
+	tinsert(TMW.OrderedTypes, t)
 	TMW.RelevantSettings[Type] = relevantSettings
 	return t
 end
@@ -2383,6 +2440,7 @@ function TMW:Icon_Update(icon)
 
 	local iconID = icon:GetID()
 	local groupID = icon.group:GetID()
+	local group = icon.group
 	local dontreassign
 	if not runEvents then
 		dontreassign = true
@@ -2454,7 +2512,7 @@ function TMW:Icon_Update(icon)
 		icon.CndtCheck = nil
 	end
 
-	if icon.Enabled and icon.group.Enabled then
+	if icon.Enabled and group.Enabled then
 		if not tContains(TMW.Icons, icon:GetName()) then tinsert(TMW.Icons, icon:GetName()) end
 	else
 		local k = tContains(TMW.Icons, icon:GetName())
@@ -2468,7 +2526,7 @@ function TMW:Icon_Update(icon)
 	icon:SetReverse(false)
 
 
-	local f = db.profile.Font
+	local f = group.Font
 	local ct = icon.countText
 	ct:SetFont(LSM:Fetch("font", f.Name), f.Size, f.Outline)
 	if LMB then
@@ -2479,7 +2537,7 @@ function TMW:Icon_Update(icon)
 			hookedLMBSkin = 1
 		end
 		g:AddButton(icon)
-		icon.group.SkinID = g.SkinID
+		group.SkinID = g.SkinID
 		
 		if f.OverrideLBFPos then
 			ct:ClearAllPoints()
@@ -2495,10 +2553,10 @@ function TMW:Icon_Update(icon)
 		local g = LBF:Group("TellMeWhen", format(L["fGROUP"], groupID))
 		g:AddButton(icon)
 		
-		icon.group.SkinID = lbfs.SkinID or g.SkinID or "Blizzard"
+		group.SkinID = lbfs.SkinID or g.SkinID or "Blizzard"
 		local tbl = LBF:GetSkins()
-		if tbl and tbl[icon.group.SkinID] then
-			ct:SetFont(LSM:Fetch("font", f.Name), tbl and tbl[icon.group.SkinID].Count.FontSize or f.Size, f.Outline)
+		if tbl and tbl[group.SkinID] then
+			ct:SetFont(LSM:Fetch("font", f.Name), tbl and tbl[group.SkinID].Count.FontSize or f.Size, f.Outline)
 		end
 
 		if f.OverrideLBFPos then
@@ -2518,7 +2576,7 @@ function TMW:Icon_Update(icon)
 	end
 	
 	icon.__normaltex = icon.__LBF_Normal or icon.__MSQ_NormalTexture or icon:GetNormalTexture()
-	if (not LBF and not LMB) or not icon.group.SkinID or icon.group.SkinID == "Blizzard" then
+	if (not LBF and not LMB) or not group.SkinID or group.SkinID == "Blizzard" then
 		icon.__normaltex:Hide()
 		cd:SetFrameLevel(icon:GetFrameLevel() + 1)
 		icon.cooldownbar:SetFrameLevel(icon:GetFrameLevel() + 1)
@@ -2534,9 +2592,9 @@ function TMW:Icon_Update(icon)
 	icon.__realDuration = icon.__realDuration or 0
 	icon.CndtFailed = nil
 	icon.ConditionAlpha = icon.ConditionAlpha or 0
-	if icon.CooldownShowWhen == "usable" or icon.BuffShowWhen == "present" then
+	if icon.ShowWhen == "alpha" then
 		icon.UnAlpha = 0
-	elseif icon.CooldownShowWhen == "unusable" or icon.BuffShowWhen == "absent" then
+	elseif icon.ShowWhen == "unalpha" then
 		icon.Alpha = 0
 	end
 
@@ -2582,7 +2640,24 @@ function TMW:Icon_Update(icon)
 		cbar:SetAlpha(.9)
 	else
 		ClearScripts(icon)
-		icon:SetInfo(1, 1, nil, 0, 0) -- alpha is set to 1 here so it doesnt return early
+		local testCount, testCountText
+		if group.FontTest then
+			if icon.Type == "buff" then
+				testCount = random(1, 20)
+			elseif icon.Type == "dr" then
+				local rand = random(1, 3)
+				testCount = rand == 1 and 0 or rand == 2 and 25 or rand == 3 and 50
+				testCountText = testCount.."%"
+			elseif icon.Type == "meta" then
+				-- its the best of both worlds!
+				local rand = random(1, 23)
+				testCount = rand == 1 and 0 or rand == 2 and 25 or rand == 3 and 50 or rand - 3
+				if rand < 4 then
+					testCountText = testCount.."%"
+				end
+			end
+		end
+		icon:SetInfo(1, 1, nil, 0, 0, nil, nil, nil, testCount, testCountText) -- alpha is set to 1 here so it doesnt return early
 		if icon.Enabled then
 			icon:setalpha(1)
 		else

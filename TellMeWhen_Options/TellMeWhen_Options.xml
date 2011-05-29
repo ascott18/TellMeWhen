@@ -1909,7 +1909,7 @@
 								EditBox_ClearHighlight(self)
 								local groupID, iconID = TMW.CI.g, TMW.CI.i
 								self:SetText(TMW:CleanString(self:GetText()))
-								if TMW.db then
+								if TMW.CI.ics then
 									TMW.CI.ics["Name"] = TMW:CleanString(self:GetText())
 								end
 								TMW.IE:ScheduleIconUpdate(groupID, iconID)
@@ -1919,7 +1919,7 @@
 							<OnEditFocusGained>
 								EditBox_HighlightText(self)
 								self.BackgroundText:SetText(nil)
-								TMW.SUG.redoIfSame = nil
+							--	TMW.SUG.redoIfSame = nil
 								TMW.SUG.Box = self
 								TMW.SUG:NameOnCursor()
 								TMW.SUG.overrideSoI = nil
@@ -2077,8 +2077,8 @@
 								EditBox_ClearHighlight(self)
 								local groupID, iconID = TMW.CI.g, TMW.CI.i
 								self:SetText(TMW:CleanString(self:GetText()))
-								if TMW.db then
-									TMW.db.profile.Groups[groupID].Icons[iconID].Unit = strtrim(self:GetText())
+								if TMW.CI.ics then
+									TMW.CI.ics.Unit = strtrim(self:GetText())
 								end
 								TMW.IE:ScheduleIconUpdate(groupID, iconID)
 								self:GetScript("OnTextChanged")(self)
