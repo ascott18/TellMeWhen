@@ -60,6 +60,7 @@ local function Meta_OnUpdate(icon, time)
 					icon.InvertBars = ic.InvertBars
 					icon.ShowTimer = ic.ShowTimer
 					icon.cooldown.noCooldownCount = ic.cooldown.noCooldownCount
+					
 					icon:SetInfo(alpha, ic.__vrtxcolor, ic.__tex, ic.__start, ic.__duration, ic.__checkGCD, ic.__pbName, ic.__reverse, ic.__count, ic.__countText)
 
 					AlreadyChecked[ic] = true

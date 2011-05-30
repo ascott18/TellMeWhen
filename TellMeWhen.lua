@@ -28,8 +28,8 @@ local DRData = LibStub("DRData-1.0", true)
 
 TELLMEWHEN_VERSION = "4.3.0"
 TELLMEWHEN_VERSION_MINOR = ""
-TELLMEWHEN_VERSIONNUMBER = 43003 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
-if TELLMEWHEN_VERSIONNUMBER > 44000 or TELLMEWHEN_VERSIONNUMBER < 43000 then error("YOU SCREWED UP THE VERSION NUMBER OR DIDNT CHANGE THE LIMITS") return end -- safety check because i accidentally made the version number 414069 once
+TELLMEWHEN_VERSIONNUMBER = 43004 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
+if TELLMEWHEN_VERSIONNUMBER > 44000 or TELLMEWHEN_VERSIONNUMBER < 43000 then error("YOU SCREWED UP THE VERSION NUMBER OR DIDNT CHANGE THE SAFETY LIMITS") return end -- safety check because i accidentally made the version number 414069 once
 
 TELLMEWHEN_MAXGROUPS = 1 	--this is a default, used by SetTheory (addon), so dont rename
 TELLMEWHEN_MAXROWS = 20
@@ -2590,6 +2590,8 @@ function TMW:Icon_Update(icon)
 
 
 	icon.__previcon = nil
+	icon.__start = icon.__start or 0 --TellMeWhen-4.2.1.2.lua:2115 attempt to perform arithmetic on local "start" (a nil value) -- caused because condition icons do not define start/durations at all, even if shown.
+	icon.__duration = icon.__duration or 0
 	icon.__alpha = nil
 	icon.__tex = icon.texture:GetTexture()
 	icon.__realDuration = icon.__realDuration or 0
