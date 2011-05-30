@@ -287,30 +287,41 @@ local groupConfigTemplate = {
 				return db.profile.Groups[findid(info)].Font[info[#info]]
 			end,
 			args = {
-				OverrideLBFPos = {
-					name = L["UIPANEL_FONT_OVERRIDELBF"],
-					desc = L["UIPANEL_FONT_OVERRIDELBF_DESC"],
-					type = "toggle",
-					order = 1,
-					hidden = not (LibStub("LibButtonFacade", true) or (LibMasque and LibMasque("Button"))),
-				},
-				Name = {
-					name = L["UIPANEL_FONT"],
-					desc = L["UIPANEL_FONT_DESC"],
-					type = "select",
-					order = 3,
-					dialogControl = 'LSM30_Font',
-					values = LSM:HashTable("font"),
-				},
 				Size = {
 					name = L["UIPANEL_FONT_SIZE"],
 					desc = L["UIPANEL_FONT_SIZE_DESC"],
 					type = "range",
-					order = 10,
+					order = 1,
 					min = 6,
 					max = 26,
 					step = 1,
 					bigStep = 1,
+				},
+				x = {
+					name = L["UIPANEL_FONT_XOFFS"],
+					type = "range",
+					order = 10,
+					min = -30,
+					max = 10,
+					step = 1,
+					bigStep = 1,
+				},
+				y = {
+					name = L["UIPANEL_FONT_YOFFS"],
+					type = "range",
+					order = 20,
+					min = -10,
+					max = 30,
+					step = 1,
+					bigStep = 1,
+				},
+				Name = {
+					name = L["UIPANEL_FONTFACE"],
+					desc = L["UIPANEL_FONT_DESC"],
+					type = "select",
+					order = 30,
+					dialogControl = 'LSM30_Font',
+					values = LSM:HashTable("font"),
 				},
 				Outline = {
 					name = L["UIPANEL_FONT_OUTLINE"],
@@ -322,25 +333,14 @@ local groupConfigTemplate = {
 						THICKOUTLINE = L["OUTLINE_THICK"],
 					},
 					style = "dropdown",
-					order = 11,
+					order = 40,
 				},
-				x = {
-					name = L["UIPANEL_FONT_XOFFS"],
-					type = "range",
-					order = 21,
-					min = -30,
-					max = 10,
-					step = 1,
-					bigStep = 1,
-				},
-				y = {
-					name = L["UIPANEL_FONT_YOFFS"],
-					type = "range",
-					order = 22,
-					min = -10,
-					max = 30,
-					step = 1,
-					bigStep = 1,
+				OverrideLBFPos = {
+					name = L["UIPANEL_FONT_OVERRIDELBF"],
+					desc = L["UIPANEL_FONT_OVERRIDELBF_DESC"],
+					type = "toggle",
+					order = 50,
+					hidden = not (LibStub("LibButtonFacade", true) or (LibMasque and LibMasque("Button"))),
 				},
 			},
 		},
@@ -1542,10 +1542,10 @@ end
 
 function IE:Reset()
 	local groupID, iconID = CI.g, CI.i
+	IE:SaveSettings() -- this is here just to clear the focus of editboxes, not to actually save things
 	db.profile.Groups[groupID].Icons[iconID] = nil
 	IE:ScheduleIconUpdate(groupID, iconID)
-	IE:Load(1) 
-	IE:Load(1) -- it doesnt like to clear completely on the first run sometimes, and i dont feel like figuring out why
+	IE:Load(1)
 	IE:TabClick(IE.MainTab)
 end
 
@@ -2824,8 +2824,8 @@ function SUG:Suggester()
 		if t == "dr" and not overrideSoI then
 			for equiv, str in pairs(TMW.BE.dr) do
 				if 	(LNlen > 2 and (
-						(strfind(strlowerCache[equiv], atBeginning)) or 
-						(strfind(strlowerCache[L[equiv]], atBeginning)) or
+						(strfind(strlowerCache[equiv], lastName)) or 
+						(strfind(strlowerCache[L[equiv]], lastName)) or
 						((inputType == "string" and strfind(strlowerCache[EquivFullNameLookup[equiv]], semiLN)) or
 						(inputType == "number" and strfind(EquivFullIDLookup[equiv], semiLN))))
 				) or
@@ -2837,18 +2837,16 @@ function SUG:Suggester()
 				end
 			end
 		elseif t == "cast" and not overrideSoI then
-			-- not that last name is used here instead of at beginning because there are so few cast equivs - some people may never see that these exist
-			-- also note that dr equivs check the whole string too
 			for equiv, str in pairs(TMW.BE.casts) do
 				if 	(LNlen > 2 and (
-						(strfind(strlowerCache[equiv], atBeginning)) or 
-						(strfind(strlowerCache[L[equiv]], atBeginning)) or
+						(strfind(strlowerCache[equiv], lastName)) or 
+						(strfind(strlowerCache[L[equiv]], lastName)) or
 						((inputType == "string" and strfind(strlowerCache[EquivFullNameLookup[equiv]], semiLN)) or
 						(inputType == "number" and strfind(EquivFullIDLookup[equiv], semiLN))))
 				) or
 					(LNlen <= 2 and (
-						(strfind(strlowerCache[equiv], atBeginning)) or 
-						(strfind(strlowerCache[L[equiv]], atBeginning)))
+						(strfind(strlowerCache[equiv], lastName)) or 
+						(strfind(strlowerCache[L[equiv]], lastName)))
 				) then
 					preTable[#preTable + 1] = equiv
 				end
@@ -2857,14 +2855,14 @@ function SUG:Suggester()
 			for _, b in pairs(buffEquivs) do
 				for equiv, str in pairs(b) do
 					if 	(LNlen > 2 and (
-							(strfind(strlowerCache[equiv], atBeginning)) or 
-							(strfind(strlowerCache[L[equiv]], atBeginning)) or
+							(strfind(strlowerCache[equiv], lastName)) or 
+							(strfind(strlowerCache[L[equiv]], lastName)) or
 							((inputType == "string" and strfind(strlowerCache[EquivFullNameLookup[equiv]], semiLN)) or
 							(inputType == "number" and strfind(EquivFullIDLookup[equiv], semiLN))))
 					) or
 						(LNlen <= 2 and (
-							(strfind(strlowerCache[equiv], atBeginning)) or 
-							(strfind(strlowerCache[L[equiv]], atBeginning)))
+							(strfind(strlowerCache[equiv], lastName)) or 
+							(strfind(strlowerCache[L[equiv]], lastName)))
 					) then
 						preTable[#preTable + 1] = equiv
 					end

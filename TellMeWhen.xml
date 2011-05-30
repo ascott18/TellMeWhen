@@ -71,7 +71,7 @@
 			</Layer>
 		</Layers>
 		<Frames>
-			<StatusBar name="$parentPowerBar" parentKey="powerbar" hidden="true">
+			<StatusBar name="$parentPowerBar" parentKey="pbar" hidden="true">
 				<Anchors>
 					<Anchor point="BOTTOM" relativeTo="$parentIcon" relativePoint="CENTER" x="0" y="0.5"/>
 					<Anchor point="TOPLEFT" relativeTo="$parentIcon" relativePoint="TOPLEFT" x="0" y="0"/>
@@ -93,7 +93,7 @@
 					</OnLoad>
 				</Scripts>
 			</StatusBar>
-			<StatusBar name="$parentCooldownBar" parentKey="cooldownbar" minvalue="0" maxvalue="1" defaultvalue="0" hidden="true">
+			<StatusBar name="$parentCooldownBar" parentKey="cbar" minvalue="0" maxvalue="1" defaultvalue="0" hidden="true">
 				<Anchors>
 					<Anchor point="TOP" relativeTo="$parentIcon" relativePoint="CENTER" x="0" y="-0.5"/>
 					<Anchor point="BOTTOMLEFT" relativeTo="$parentIcon" relativePoint="BOTTOMLEFT" x="0" y="0"/>

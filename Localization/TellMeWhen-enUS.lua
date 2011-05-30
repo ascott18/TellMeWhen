@@ -283,6 +283,7 @@ L["NONE"] = "None of these"
 L["CASTERFORM"] = "Caster Form"
 
 L["UIPANEL_FONT"] = "Stack Text"
+L["UIPANEL_FONTFACE"] = "Font Face"
 L["UIPANEL_FONT_DESC"] = "Chose the font to be used by the stack text on icons."
 L["UIPANEL_FONT_SIZE"] = "Font Size"
 L["UIPANEL_FONT_SIZE_DESC"] = "Change the size of the font used for stack text on icons. If ButtonFacade is used and the set skin has a font size defined, then this value will be ignored."

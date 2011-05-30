@@ -28,7 +28,7 @@ local DRData = LibStub("DRData-1.0", true)
 
 TELLMEWHEN_VERSION = "4.3.0"
 TELLMEWHEN_VERSION_MINOR = ""
-TELLMEWHEN_VERSIONNUMBER = 43002 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
+TELLMEWHEN_VERSIONNUMBER = 43003 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
 if TELLMEWHEN_VERSIONNUMBER > 44000 or TELLMEWHEN_VERSIONNUMBER < 43000 then error("YOU SCREWED UP THE VERSION NUMBER OR DIDNT CHANGE THE LIMITS") return end -- safety check because i accidentally made the version number 414069 once
 
 TELLMEWHEN_MAXGROUPS = 1 	--this is a default, used by SetTheory (addon), so dont rename
@@ -41,8 +41,8 @@ local GetItemInfo, GetInventoryItemID =
 	  GetItemInfo, GetInventoryItemID
 local GetShapeshiftForm, GetNumShapeshiftForms, GetNumRaidMembers =
 	  GetShapeshiftForm, GetNumShapeshiftForms, GetNumRaidMembers
-local UnitPower =
-	  UnitPower
+local UnitPower, PowerBarColor =
+	  UnitPower, PowerBarColor
 local PlaySoundFile, SendChatMessage =
 	  PlaySoundFile, SendChatMessage
 local tonumber, tostring, type, pairs, ipairs, tinsert, tremove, sort, select, wipe, rawget, tDeleteItem = --tDeleteItem is a blizzard function defined in UIParent.lua
@@ -955,9 +955,6 @@ function TMW:Update()
 	CNDT.Env.CurrentSpec = GetActiveTalentGroup()
 	CNDT.Env.CurrentTree = GetPrimaryTalentTree()
 	NumShapeshiftForms = GetNumShapeshiftForms()
-	for _, Type in pairs(TMW.Types) do
-		Type:Update()
-	end
 
 	BarGCD = db.profile["BarGCD"]
 	ClockGCD = db.profile["ClockGCD"]
@@ -1036,8 +1033,10 @@ function TMW:GetUpgradeTable() -- upgrade functions
 		},
 		[43001] = {
 			group = function(gs)
-				for k, v in pairs(db.profile.Font) do
-					gs.Font[k] = v
+				if db.profile.Font then
+					for k, v in pairs(db.profile.Font) do
+						gs.Font[k] = v
+					end
 				end
 			end,
 			postglobal = function()
@@ -2101,22 +2100,24 @@ local function SetInfo(icon, alpha, color, texture, start, duration, checkGCD, p
 	-- icon			- the icon object to set the attributes on (frame) (but call as icon:SetInfo(alpha, ...) )
 	-- alpha		- the alpha to set the icon to (number)
 	-- color		- the value(s) to call SetVertexColor with. Either a (number) that will be used as the r, g, and b; or a (table) with keys r, g, b
-	-- texture		- the texture path to set the icon to (string)
+	-- [texture]	- the texture path to set the icon to (string). Pass nil to leave unchanged.
 	-- start		- the start time of the cooldow/duration, as passsed to icon.cooldown:SetCooldown(start, duration)
 	-- duration		- the duration of the cooldow/duration, as passsed to icon.cooldown:SetCooldown(start, duration)
-	-- checkGCD 	- true if the icon should check to see if the cooldown is a GCD before setting a cooldown, should only be used for icons that actually track cooldowns (boolean/nil)
-	-- pbName		- the name or ID of the spell to be used for the icons power bar overlay (string/number)
-	-- reverse		- true/false to set icon.cooldown:SetReverse(reverse), nil to not change (boolean/nil)
-	-- count		- the number of stacks to be used for comparison, nil/false to hide (number/nil/false)
+	-- [checkGCD] 	- true if the icon should check to see if the cooldown is a GCD before setting a cooldown, should only be used for icons that actually track cooldowns (boolean/nil)
+	-- [pbName]		- the name or ID of the spell to be used for the icons power bar overlay (string/number)
+	-- [reverse]	- true/false to set icon.cooldown:SetReverse(reverse), nil to not change (boolean/nil)
+	-- [count]		- the number of stacks to be used for comparison, nil/false to hide (number/nil/false)
 	-- [countText]	- the actual stack TEXT to be set on the icon, will use count if nil (number/string/nil/false)
 	
 	local played, announced, justShowed
-	alpha = icon.CndtFailed and icon.ConditionAlpha or alpha
+	--alpha = icon.CndtFailed and icon.ConditionAlpha or alpha
 
 	local d = duration - (time - start)
+	
 	if
-	 (d > 0 and ((icon.DurationMinEnabled and icon.DurationMin > d) or (icon.DurationMaxEnabled and d > icon.DurationMax))) or
-	 (count and ((icon.StackMinEnabled and icon.StackMin > count) or (icon.StackMaxEnabled and count > icon.StackMax)))
+		(icon.CndtFailed) or 
+		(d > 0 and ((icon.DurationMinEnabled and icon.DurationMin > d) or (icon.DurationMaxEnabled and d > icon.DurationMax))) or
+		(count and ((icon.StackMinEnabled and icon.StackMin > count) or (icon.StackMaxEnabled and count > icon.StackMax)))
 	then
 		alpha = min(alpha, icon.ConditionAlpha)
 	end
@@ -2205,7 +2206,7 @@ local function SetInfo(icon, alpha, color, texture, start, duration, checkGCD, p
 		end
 
 		if icon.ShowCBar then
-			local bar = icon.cooldownbar
+			local bar = icon.cbar
 			if duration > 0 then
 				bar.start = start
 				if isGCD and BarGCD then
@@ -2230,7 +2231,7 @@ local function SetInfo(icon, alpha, color, texture, start, duration, checkGCD, p
 			end
 			bar:Show()
 		else
-			icon.cooldownbar:Hide()
+			icon.cbar:Hide()
 		end
 
 		icon.__start = start
@@ -2244,41 +2245,43 @@ local function SetInfo(icon, alpha, color, texture, start, duration, checkGCD, p
 
 
 	if icon.__vrtxcolor ~= color then
-		icon.__vrtxcolor = color
 		if type(color) == "table" then
 			icon.texture:SetVertexColor(color.r, color.g, color.b, 1)
 		else
 			icon.texture:SetVertexColor(color, color, color, 1)
 		end
+		icon.__vrtxcolor = color
 	end
 
 	if icon.ShowPBar then
-		local bar = icon.powerbar
+		local pbar = icon.pbar
 		if pbName then
-			local cost
-			_, _, _, cost, _, bar.powerType = GetSpellInfo(pbName)
+			local _, _, _, cost, _, powerType = GetSpellInfo(pbName)
 			if cost then
-				bar:SetMinMaxValues(0, cost)
-				bar.Max = cost
-				bar.InvertBars = icon.InvertBars
-				if not bar.UpdateSet then
-					bar:SetScript("OnUpdate", PwrBarOnUpdate)
-					bar.UpdateSet = true
+				pbar:SetMinMaxValues(0, cost)
+				pbar.Max = cost
+				pbar.InvertBars = icon.InvertBars
+				
+				if powerType ~= pbar.powerType then
+					local colorinfo = PowerBarColor[powerType]
+					pbar:SetStatusBarColor(colorinfo.r, colorinfo.g, colorinfo.b, 0.9)
+					pbar.powerType = powerType
+				end
+			
+				if not pbar.UpdateSet then
+					pbar:SetScript("OnUpdate", PwrBarOnUpdate)
+					pbar.UpdateSet = true
 				end
 			end
-		elseif bar.UpdateSet then
-			bar:SetScript("OnUpdate", nil)
-			bar.UpdateSet = false
-			if icon.InvertBars then
-				bar:SetValue(bar.Max)
-			else
-				bar:SetValue(0)
-			end
+		elseif pbar.UpdateSet then
+			pbar:SetScript("OnUpdate", nil)
+			pbar.UpdateSet = false
+			pbar:SetValue(icon.InvertBars and pbar.Max or 0)
 		end
 		icon.__pbName = pbName
-		bar:Show()
+		pbar:Show()
 	else
-		icon.powerbar:Hide()
+		icon.pbar:Hide()
 	end
 
 	if icon.__count ~= count then
@@ -2370,8 +2373,8 @@ end
 
 local blizzEdgeInsets = 1.5
 local function Icon_Bars_Update(icon)
-	local pbar = icon.powerbar
-	local cbar = icon.cooldownbar
+	local pbar = icon.pbar
+	local cbar = icon.cbar
 	if icon.ShowPBar and icon.NameFirst then
 		local _, _, _, cost, _, powerType = GetSpellInfo(icon.NameFirst)
 		if (not LBF and not LMB) or not icon.group.SkinID or icon.group.SkinID == "Blizzard" then
@@ -2545,8 +2548,8 @@ function TMW:Icon_Update(icon)
 		end
 		
 		cd:SetFrameLevel(icon:GetFrameLevel() - 2)
-		icon.cooldownbar:SetFrameLevel(icon:GetFrameLevel() - 1)
-		icon.powerbar:SetFrameLevel(icon:GetFrameLevel() - 1)
+		icon.cbar:SetFrameLevel(icon:GetFrameLevel() - 1)
+		icon.pbar:SetFrameLevel(icon:GetFrameLevel() - 1)
 	elseif LBF then
 		TMW.DontRun = true -- TMW:Update() is ran in the LBF skin callback, which just causes an infinite loop. This tells it not to
 		local lbfs = db.profile.Groups[groupID].LBF
@@ -2565,22 +2568,22 @@ function TMW:Icon_Update(icon)
 		end
 
 		cd:SetFrameLevel(icon:GetFrameLevel() - 2)
-		icon.cooldownbar:SetFrameLevel(icon:GetFrameLevel() -1)
-		icon.powerbar:SetFrameLevel(icon:GetFrameLevel() - 1)
+		icon.cbar:SetFrameLevel(icon:GetFrameLevel() -1)
+		icon.pbar:SetFrameLevel(icon:GetFrameLevel() - 1)
 	else
 		ct:ClearAllPoints()
 		ct:SetPoint("BOTTOMRIGHT", icon, "BOTTOMRIGHT", f.x, f.y)
 		cd:SetFrameLevel(icon:GetFrameLevel() + 1)
-		icon.cooldownbar:SetFrameLevel(icon:GetFrameLevel() + 1)
-		icon.powerbar:SetFrameLevel(icon:GetFrameLevel() + 1)
+		icon.cbar:SetFrameLevel(icon:GetFrameLevel() + 1)
+		icon.pbar:SetFrameLevel(icon:GetFrameLevel() + 1)
 	end
 	
 	icon.__normaltex = icon.__LBF_Normal or icon.__MSQ_NormalTexture or icon:GetNormalTexture()
 	if (not LBF and not LMB) or not group.SkinID or group.SkinID == "Blizzard" then
 		icon.__normaltex:Hide()
 		cd:SetFrameLevel(icon:GetFrameLevel() + 1)
-		icon.cooldownbar:SetFrameLevel(icon:GetFrameLevel() + 1)
-		icon.powerbar:SetFrameLevel(icon:GetFrameLevel() + 1)
+		icon.cbar:SetFrameLevel(icon:GetFrameLevel() + 1)
+		icon.pbar:SetFrameLevel(icon:GetFrameLevel() + 1)
 	else
 		icon.__normaltex:Show()
 	end
@@ -2600,6 +2603,7 @@ function TMW:Icon_Update(icon)
 
 	if icon.Enabled or not Locked then
 		if TMW.Types[icon.Type] then
+			TMW.Types[icon.Type]:Update()
 			TMW.Types[icon.Type]:Setup(icon, groupID, iconID)
 		else
 			if icon.Name ~= "" then
@@ -2617,8 +2621,8 @@ function TMW:Icon_Update(icon)
 
 	Icon_Bars_Update(icon, groupID, iconID)
 	icon:Show()
-	local pbar = icon.powerbar
-	local cbar = icon.cooldownbar
+	local pbar = icon.pbar
+	local cbar = icon.cbar
 	if Locked then
 		-- avoid doing any icon:SetAlpha or icon:SetInfo here because it will screw up event handling when TMW:Update() is called from talent update events during zone change
 		if icon.texture:GetTexture() == "Interface\\AddOns\\TellMeWhen\\Textures\\Disabled" then
