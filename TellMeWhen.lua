@@ -1,11 +1,14 @@
 ﻿-- --------------------
 -- TellMeWhen
 -- Originally by Nephthys of Hyjal <lieandswell@yahoo.com>
+
 -- Other contributions by
 -- Oozebull of Twisting Nether
 -- Banjankri of Blackrock
 -- Predeter of Proudmoore
 -- Xenyr of Aszune
+
+-- Currently maintained by
 -- Cybeloras of Mal'Ganis
 -- --------------------
 
@@ -28,7 +31,7 @@ local DRData = LibStub("DRData-1.0", true)
 
 TELLMEWHEN_VERSION = "4.3.0"
 TELLMEWHEN_VERSION_MINOR = ""
-TELLMEWHEN_VERSIONNUMBER = 43004 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
+TELLMEWHEN_VERSIONNUMBER = 43006 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
 if TELLMEWHEN_VERSIONNUMBER > 44000 or TELLMEWHEN_VERSIONNUMBER < 43000 then error("YOU SCREWED UP THE VERSION NUMBER OR DIDNT CHANGE THE SAFETY LIMITS") return end -- safety check because i accidentally made the version number 414069 once
 
 TELLMEWHEN_MAXGROUPS = 1 	--this is a default, used by SetTheory (addon), so dont rename
@@ -87,15 +90,20 @@ __call = function(t, i)
 end})
 
 TMW.Icons = {}
+TMW.IconsLookup = {}
 TMW.OrderedTypes = {}
 
-function TMW.tContains(table, item)
+function TMW.tContains(table, item, returnNum)
 	local firstkey
 	local num = 0
 	for k, v in pairs(table) do
 		if v == item then
-			num = num + 1
-			firstkey = firstkey or k
+			if not returnNum then
+				return k
+			else
+				num = num + 1
+				firstkey = firstkey or k
+			end
 		end
 	end
 	return firstkey, num
@@ -368,6 +376,7 @@ TMW.Defaults = {
 					ICDType				= "aura",
 					ICDDuration			= 45,
 					CheckNext			= false,
+					DontRefresh			= false,
 					UseActvtnOverlay	= false,
 					OnlyEquipped		= false,
 					OnlyInBags			= false,
@@ -842,6 +851,15 @@ function TMW:OnProfile()
 	if TMW.CompileOptions then TMW:CompileOptions() end -- redo groups in the options
 end
 
+TMW.DatabaseCleanups = {
+	icon = function(ics)
+		if ics.Events then
+			for _, t in pairs(ics.Events) do
+				t.SoundData = nil
+			end
+		end
+	end,
+}
 function TMW:ShutdownProfile()
 	-- the current icon might not exist in the new profile
 	if TMW.CI then
@@ -853,11 +871,7 @@ function TMW:ShutdownProfile()
 	
 	-- get rid of settings that are stored in database tables for convenience, but dont need to be kept.
 	for ics in TMW:InIconSettings() do
-		if ics.Events then
-			for _, t in pairs(ics.Events) do
-				t.SoundData = nil
-			end
-		end
+		TMW.DatabaseCleanups.icon(ics)
 	end
 end
 
@@ -956,9 +970,9 @@ function TMW:Update()
 	CNDT.Env.CurrentTree = GetPrimaryTalentTree()
 	NumShapeshiftForms = GetNumShapeshiftForms()
 
-	BarGCD = db.profile["BarGCD"]
-	ClockGCD = db.profile["ClockGCD"]
-	SndChan = db.profile["MasterSound"] and "Master" or nil
+	BarGCD = db.profile.BarGCD
+	ClockGCD = db.profile.ClockGCD
+	SndChan = db.profile.MasterSound and "Master" or nil
 
 	for group in TMW.InGroups() do
 		group:Hide()
@@ -966,6 +980,7 @@ function TMW:Update()
 	TMW:ColorUpdate()
 
 	wipe(TMW.Icons)
+	wipe(TMW.IconsLookup)
 
 	TMW.dontSetGroupPos = true
 	for groupID = 1, TELLMEWHEN_MAXGROUPS do -- dont use TMW.InGroups() because that will setup every group that exists, even if it shouldn't be setup (i.e. it has been deleted or the user changed profiles)
@@ -999,6 +1014,11 @@ local upgradeTable
 function TMW:GetUpgradeTable() -- upgrade functions
 	if upgradeTable then return upgradeTable end
 	local t = {
+		[43005] = {
+			icon = function(ics)
+				ics.ANN = nil -- whoops, forgot to to this a while back when ANN was replaced with the new event data structure
+			end,
+		},
 		[43002] = {
 			WhenChecks = {
 				cooldown = "CooldownShowWhen",
@@ -1542,7 +1562,7 @@ end
 
 function TMW:Upgrade()
 
-	if TellMeWhen_Settings then -- needs to be the first one
+	if TellMeWhen_Settings then -- needs to be first
 		for k, v in pairs(TellMeWhen_Settings) do
 			db.profile[k] = v
 		end
@@ -1618,7 +1638,7 @@ function TMW:CheckForInvalidIcons()
 				if is.Enabled then
 					for k, v in ipairs(is.Conditions) do
 						if v.Icon ~= "" and v.Type == "ICON" then
-							if not tContains(TMW.Icons, v.Icon) then
+							if not TMW:IsIconValid(v.Icon) then
 								local g, i = strmatch(v.Icon, "TellMeWhen_Group(%d+)_Icon(%d+)")
 								g, i = tonumber(g), tonumber(i)
 								TMW.Warn(format(L["CONDITIONORMETA_CHECKINGINVALID"], gID, iID, g, i))
@@ -1627,7 +1647,7 @@ function TMW:CheckForInvalidIcons()
 					end
 					if is.Type == "meta" then
 						for k, v in pairs(is.Icons) do
-							if not tContains(TMW.Icons, v) then
+							if not TMW:IsIconValid(v) then
 								local g, i = strmatch(v, "TellMeWhen_Group(%d+)_Icon(%d+)")
 								g, i = tonumber(g), tonumber(i)
 								TMW.Warn(format(L["CONDITIONORMETA_CHECKINGINVALID"], gID, iID, g, i))
@@ -1759,8 +1779,30 @@ function TMW:COMBAT_LOG_EVENT_UNFILTERED(_, _, p, ...)
 end
 
 
+function TMW:ValidateIcon(icon)
+	if type(icon) == "string" then icon = _G[icon] end
+	-- adds the icon to the list of icons that can be checked in metas/conditions
+	if not TMW.IconsLookup[icon] then
+		tinsert(TMW.Icons, icon:GetName())
+		TMW.IconsLookup[icon] = 1
+	end
+end
+function TMW:InvalidateIcon(icon)
+	if type(icon) == "string" then icon = _G[icon] end
+	-- removes the icon from the list of icons that can be checked in metas/conditions
+	if TMW.IconsLookup[icon] then
+		local k = tContains(TMW.Icons, icon:GetName())
+		if k then tremove(TMW.Icons, k) end
+		TMW.IconsLookup[icon] = nil
+	end
+end
+function TMW:IsIconValid(icon)
+	if type(icon) == "string" then icon = _G[icon] end
+	return TMW.IconsLookup[icon]
+end
+
 -- -----------
--- GROUP FRAME
+-- GROUPS
 -- -----------
 
 local function GroupScriptSort(groupA, groupB)
@@ -2428,7 +2470,7 @@ local function Icon_Bars_Update(icon)
 	end
 end
 
-local function IconsSort(a, b)
+function TMW.IconsSort(a, b)
 	return TMW:GetGlobalIconID(strmatch(a, "TellMeWhen_Group(%d+)_Icon(%d+)")) < TMW:GetGlobalIconID(strmatch(b, "TellMeWhen_Group(%d+)_Icon(%d+)"))
 end
 
@@ -2444,6 +2486,7 @@ function TMW:Icon_Update(icon)
 	local iconID = icon:GetID()
 	local groupID = icon.group:GetID()
 	local group = icon.group
+	
 	local dontreassign
 	if not runEvents then
 		dontreassign = true
@@ -2490,9 +2533,6 @@ function TMW:Icon_Update(icon)
 			end
 		end
 	end
-	if icon.FakeHidden and not dontremove then
-		tDeleteItem(IconUpdateFuncs, icon)
-	end
 
 	icon.UpdateTimer 	= 0
 	icon.FakeAlpha 		= 0
@@ -2503,12 +2543,6 @@ function TMW:Icon_Update(icon)
 	icon:UnregisterAllEvents()
 	ClearScripts(icon)
 
-	if icon.DurationMinEnabled or icon.DurationMaxEnabled then
-		icon.DurationEnabled = true
-	else
-		icon.DurationEnabled = false
-	end
-
 	if #icon.Conditions > 0 and Locked then -- dont define conditions if we are unlocked so that i dont have to deal with meta icons checking icons during config. I think i solved this somewhere else too without thinking about it, but what the hell
 		TMW.CNDT:ProcessConditions(icon)
 	else
@@ -2516,12 +2550,10 @@ function TMW:Icon_Update(icon)
 	end
 
 	if icon.Enabled and group.Enabled then
-		if not tContains(TMW.Icons, icon:GetName()) then tinsert(TMW.Icons, icon:GetName()) end
+		TMW:ValidateIcon(icon)
 	else
-		local k = tContains(TMW.Icons, icon:GetName())
-		if k then tremove(TMW.Icons, k) end
+		TMW:InvalidateIcon(icon)
 	end
-	sort(TMW.Icons, IconsSort)
 
 	local cd = icon.cooldown
 	cd.noCooldownCount = not icon.ShowTimerText
@@ -2590,8 +2622,6 @@ function TMW:Icon_Update(icon)
 
 
 	icon.__previcon = nil
-	icon.__start = icon.__start or 0 --TellMeWhen-4.2.1.2.lua:2115 attempt to perform arithmetic on local "start" (a nil value) -- caused because condition icons do not define start/durations at all, even if shown.
-	icon.__duration = icon.__duration or 0
 	icon.__alpha = nil
 	icon.__tex = icon.texture:GetTexture()
 	icon.__realDuration = icon.__realDuration or 0
@@ -2617,6 +2647,9 @@ function TMW:Icon_Update(icon)
 		end
 	else
 		icon:SetAlpha(0)
+	end
+	if icon.FakeHidden and not dontremove then
+		tDeleteItem(IconUpdateFuncs, icon)
 	end
 
 	icon.__previousNameFirst = nil -- not needed now
@@ -2646,6 +2679,7 @@ function TMW:Icon_Update(icon)
 		cbar:SetAlpha(.9)
 	else
 		ClearScripts(icon)
+		
 		local testCount, testCountText
 		if group.FontTest then
 			if icon.Type == "buff" then
@@ -2663,6 +2697,7 @@ function TMW:Icon_Update(icon)
 				end
 			end
 		end
+		
 		icon:SetInfo(1, 1, nil, 0, 0, nil, nil, nil, testCount, testCountText) -- alpha is set to 1 here so it doesnt return early
 		if icon.Enabled then
 			icon:setalpha(1)
@@ -2754,7 +2789,7 @@ function TMW:GetSpellNames(icon, setting, firstOnly, toname, dictionary)
 	-- REMOVE DUPLICATES
 	local k = #buffNames --start at the end of the table so that we dont remove duplicates at the beginning of the table
 	while k > 0 do
-		if select(2, tContains(buffNames, buffNames[k])) > 1 then
+		if select(2, tContains(buffNames, buffNames[k], true)) > 1 then
 			tremove(buffNames, k) --if the current value occurs more than once then remove this entry of it
 		else
 			k = k - 1 --there are no duplicates, so move backwards towards zero
@@ -2872,7 +2907,7 @@ function TMW:GetUnits(icon, setting)
 	-- REMOVE DUPLICATES
 	local k = #Units --start at the end of the table so that we dont remove duplicates at the beginning of the table
 	while k > 0 do
-		if select(2, tContains(Units, Units[k])) > 1 then
+		if select(2, tContains(Units, Units[k], true)) > 1 then
 			tremove(Units, k) --if the current value occurs more than once then remove this entry of it
 		else
 			k = k - 1 --there are no duplicates, so move backwards towards zero

@@ -18,7 +18,8 @@ L["RESIZE_TOOLTIP"] = "Click and drag to change size"
 
 L["HPSSWARN"] = "Warning! Any icon conditions that you had set that checked for holy power or soul shards may be messed up! Check them to prevent later confusion!"
 L["CONDITIONORMETA_CHECKINGINVALID"] = "Warning! Group %d, Icon %d is checking an invalid icon (Group %d, Icon %d)"
-L["WARN_DRMISMATCH"] = "Warning! Group %d, Icon %d is checking the diminishing returns on spells from two different categories, but all spells should be from the same category. (You will only see this once per icon per sesson)"
+L["WARN_DRMISMATCH"] = "Warning! Group %d, Icon %d is checking the diminishing returns on spells from two different known categories. All spells should be from the same category. You will only see this once per icon per sesson."
+L["FROMNEWERVERSION"] = "You are importing an icon that was created in a newer version of TellMeWhen than your version. Some settings might not work until you upgrade to the latest version."
 
 -- -------------
 -- ICONMENU
@@ -32,7 +33,7 @@ L["CHOOSENAME_DIALOG_DDDEFAULT"] = "Predefined Spell Sets/Dispel Types"
 L["CHOOSENAME_DIALOG"] = [=[Enter the Name or ID of what you want this icon to monitor. You can add multiple things (except for multi-state cooldowns) by separating them with semicolons (;).
 
 |cFFFF5959PET ABILITIES|r must use SpellIDs.]=]
-L["CHOOSENAME_DIALOG_CNDTIC"] = "Enter the Name or ID of the spell that has the texture that you want to use. You may also enter a texture path, such as \"Interface/Icons/spell_nature_healingtouch\""
+L["CHOOSENAME_DIALOG_CNDTIC"] = "Enter the Name or ID of the spell that has the texture that you want to use. You may also enter a texture path, such as 'Interface/Icons/spell_nature_healingtouch', or just 'spell_nature_healingtouch' if the path is 'Interface/Icons'"
 L["CHOOSENAME_DIALOG_ICD"] = "ICD/duration"
 L["CHOOSENAME_DIALOG_ICD_DESC"] = "Enter the internal cooldown length or the duration of the spell that you want to track."
 L["CHOOSENAME_DIALOG_UCD_DESC"] = "Enter the cooldown length of the spell(s) that you want to track."
@@ -293,7 +294,7 @@ L["OUTLINE_NO"] = "No Outline"
 L["OUTLINE_THIN"] = "Thin Outline"
 L["OUTLINE_THICK"] = "Thick Outline"
 L["UIPANEL_FONT_OVERRIDELBF"] = "Override ButtonFacade"
-L["UIPANEL_FONT_OVERRIDELBF_DESC"] = "Check this to override the position of the stack text that is defined in your ButtonFacade skin. If you do not use ButtonFacade, ignore this."
+L["UIPANEL_FONT_OVERRIDELBF_DESC"] = "Check this to override the position of the stack text that is defined in your ButtonFacade skin."
 L["UIPANEL_FONT_XOFFS"] = "X Offset"
 L["UIPANEL_FONT_YOFFS"] = "Y Offset"
 L["UIPANEL_POSITION"] = "Position"

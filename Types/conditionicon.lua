@@ -1,9 +1,14 @@
 ﻿-- --------------------
 -- TellMeWhen
 -- Originally by Nephthys of Hyjal <lieandswell@yahoo.com>
--- Major updates by
+
+-- Other contributions by
 -- Oozebull of Twisting Nether
 -- Banjankri of Blackrock
+-- Predeter of Proudmoore
+-- Xenyr of Aszune
+
+-- Currently maintained by
 -- Cybeloras of Mal'Ganis
 -- --------------------
 
@@ -62,6 +67,9 @@ function Type:Setup(icon, groupID, iconID)
 			icon:SetTexture("Interface\\Icons\\INV_Misc_QuestionMark")
 		end
 	end
+	icon.__start = 0 --TellMeWhen-4.2.1.2.lua:2115 attempt to perform arithmetic on local "start" (a nil value) -- caused because condition icons do not define start/durations at all, even if shown.
+	icon.__duration = 0
+	icon.__vrtxcolor = 1
 
 	icon:SetScript("OnUpdate", ConditionIcon_OnUpdate)
 	--icon:OnUpdate(TMW.time)

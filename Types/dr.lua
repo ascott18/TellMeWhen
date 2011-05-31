@@ -1,9 +1,14 @@
 ﻿-- --------------------
 -- TellMeWhen
 -- Originally by Nephthys of Hyjal <lieandswell@yahoo.com>
--- Major updates by
+
+-- Other contributions by
 -- Oozebull of Twisting Nether
 -- Banjankri of Blackrock
+-- Predeter of Proudmoore
+-- Xenyr of Aszune
+
+-- Currently maintained by
 -- Cybeloras of Mal'Ganis
 -- --------------------
 
@@ -63,8 +68,8 @@ Type.name = L["ICONMENU_DR"]
 Type.desc = L["ICONMENU_DR_DESC"]
 Type.WhenChecks = {
 	text = L["ICONMENU_SHOWWHEN"],
-	{ value = "alpha", 			text = L["ICONMENU_DRPRESENT"], 		colorCode = "|cFFFF0000" },
-	{ value = "unalpha",  		text = L["ICONMENU_DRABSENT"], 			colorCode = "|cFF00FF00" },
+	{ value = "alpha", 			text = L["ICONMENU_DRABSENT"], 		colorCode = "|cFF00FF00" },
+	{ value = "unalpha",  		text = L["ICONMENU_DRPRESENT"], 	colorCode = "|cFFFF0000" },
 	{ value = "always", 		text = L["ICONMENU_ALWAYS"] },
 }
 
@@ -107,7 +112,7 @@ local CL_PET = COMBATLOG_OBJECT_CONTROL_PLAYER
 
 local DR_OnEvent
 local function DR_OnEvent(icon, _, _, p, ...)
-	if p == "SPELL_AURA_REMOVED" or p == "SPELL_AURA_REFRESH" then
+	if p == "SPELL_AURA_REMOVED" or p == "SPELL_AURA_REFRESH" or p == "SPELL_AURA_APPLIED" then
 		local g, f, i, n, t, _
 		if clientVersion >= 40200 then
 			_, _, _, _, _, g, _, f, _, i, n, _, t = ...
@@ -121,21 +126,29 @@ local function DR_OnEvent(icon, _, _, p, ...)
 			if ND[i] or ND[strlowerCache[n]] then
 				if PvEDRs[i] or bitband(f, CL_PLAYER) == CL_PLAYER or bitband(f, CL_PET) == CL_PET then
 					local dr = icon[g]
-					if not dr then
-						dr = {
-							amt = 50,
-							start = TMW.time, 
-							duration = 18,
-							tex = SpellTextures[i]
-						}
-						icon[g] = dr
+					if p == "SPELL_AURA_APPLIED" then
+						if dr and dr.start + dr.duration <= TMW.time then
+							dr.start = 0
+							dr.duration = 0
+							dr.amt = 100
+						end
 					else
-						local amt = dr.amt
-						if amt ~= 0 then
-							dr.amt = amt > 25 and amt/2 or 0
-							dr.duration = 18
-							dr.start = TMW.time
-							dr.tex = SpellTextures[i]
+						if not dr then
+							dr = {
+								amt = 50,
+								start = TMW.time, 
+								duration = 18,
+								tex = SpellTextures[i]
+							}
+							icon[g] = dr
+						else
+							local amt = dr.amt
+							if amt ~= 0 then
+								dr.amt = amt > 25 and amt/2 or 0
+								dr.duration = 18
+								dr.start = TMW.time
+								dr.tex = SpellTextures[i]
+							end
 						end
 					end
 				end
@@ -153,10 +166,9 @@ local function DR_OnUpdate(icon, time)
 		
 		for u = 1, #Units do
 			local unit = Units[u]
-			local dr = UnitExists(unit) and icon[UnitGUID(unit)]
+			local dr = icon[UnitGUID(unit)]
 			if dr then
 				if dr.start + dr.duration <= time then
-					dr.amt = 100
 					icon:SetInfo(Alpha, 1, dr.tex, 0, 0)
 					if Alpha > 0 then
 						return

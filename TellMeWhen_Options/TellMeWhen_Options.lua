@@ -1,9 +1,14 @@
 ﻿-- --------------------
 -- TellMeWhen
 -- Originally by Nephthys of Hyjal <lieandswell@yahoo.com>
--- Major updates by
+
+-- Other contributions by
 -- Oozebull of Twisting Nether
 -- Banjankri of Blackrock
+-- Predeter of Proudmoore
+-- Xenyr of Aszune
+
+-- Currently maintained by
 -- Cybeloras of Mal'Ganis
 -- --------------------
 
@@ -172,6 +177,62 @@ function TMW:GetGroupName(n, g, short)
 	return n .. " (" .. format(L["fGROUP"], g) .. ")"
 end
 
+function TMW:CleanIconSettings(settings)
+	TMW.DatabaseCleanups.icon(settings)
+	return TMW:CleanDefaults(settings, TMW.Icon_Defaults)
+end
+
+function TMW:CleanDefaults(settings, defaults, blocker)
+	-- yep, this function is out of place. I dont care.
+	-- make sure and pass in a COPY of the settings, not the original settings
+	
+	-- the following function is a slightly modified version of the one that AceDB uses to strip defaults.
+	
+	-- remove all metatables from the db, so we don't accidentally create new sub-tables through them
+	setmetatable(settings, nil)
+	-- loop through the defaults and remove their content
+	for k,v in pairs(defaults) do
+		if k == "*" or k == "**" then
+			if type(v) == "table" then
+				-- Loop through all the actual k,v pairs and remove
+				for key, value in pairs(settings) do
+					if type(value) == "table" then
+						-- if the key was not explicitly specified in the defaults table, just strip everything from * and ** tables
+						if defaults[key] == nil and (not blocker or blocker[key] == nil) then
+							TMW:CleanDefaults(value, v)
+							-- if the table is empty afterwards, remove it
+							if next(value) == nil then
+								settings[key] = nil
+							end
+						-- if it was specified, only strip ** content, but block values which were set in the key table
+						elseif k == "**" then
+							TMW:CleanDefaults(value, v, defaults[key])
+						end
+					end
+				end
+			elseif k == "*" then
+				-- check for non-table default
+				for key, value in pairs(settings) do
+					if defaults[key] == nil and v == value then
+						settings[key] = nil
+					end
+				end
+			end
+		elseif type(v) == "table" and type(settings[k]) == "table" then
+			-- if a blocker was set, dive into it, to allow multi-level defaults
+			TMW:CleanDefaults(settings[k], v, blocker and blocker[k])
+			if next(settings[k]) == nil then
+				settings[k] = nil
+			end
+		else
+			-- check if the current value matches the default, and that its not blocked by another defaults table
+			if settings[k] == defaults[k] and (not blocker or blocker[k] == nil) then
+				settings[k] = nil
+			end
+		end
+	end
+	return settings
+end
 
 -- --------------
 -- MAIN OPTIONS
@@ -293,7 +354,7 @@ local groupConfigTemplate = {
 					type = "range",
 					order = 1,
 					min = 6,
-					max = 26,
+					softMax = 26,
 					step = 1,
 					bigStep = 1,
 				},
@@ -328,7 +389,7 @@ local groupConfigTemplate = {
 					desc = L["UIPANEL_FONT_OUTLINE_DESC"],
 					type = "select",
 					values = {
-						MONOCHROME = L["OUTLINE_NO"],
+						[""] = L["OUTLINE_NO"],
 						OUTLINE = L["OUTLINE_THIN"],
 						THICKOUTLINE = L["OUTLINE_THICK"],
 					},
@@ -795,11 +856,10 @@ function TMW:Group_OnDelete(groupID)
 	end
 	db.profile.NumGroups = db.profile.NumGroups - 1
 	for k, v in pairs(TMW.Icons) do
-		if tonumber(strmatch(v, "TellMeWhen_Group(%d+)_Icon")) == groupID then
-			tremove(TMW.Icons, k)
+		if tonumber(strmatch(v, "TellMeWhen_Group(%d+)")) == groupID then
+			TMW:InvalidateIcon(k)
 		end
 	end
-	sort(TMW.Icons, function(a, b) return TMW:GetGlobalIconID(strmatch(a, "TellMeWhen_Group(%d+)_Icon(%d+)")) < TMW:GetGlobalIconID(strmatch(b, "TellMeWhen_Group(%d+)_Icon(%d+)")) end)
 	TMW:Update()
 	TMW:CompileOptions()
 	CloseDropDownMenus()
@@ -842,7 +902,7 @@ function ID:Drag_DropDown(a)
 	info.func = ID.Swap
 	UIDropDownMenu_AddButton(info)
 
-	if TMW.tContains(TMW.Icons, ID.srcicon:GetName()) then
+	if TMW:IsIconValid(ID.srcicon) then
 		info.text = L["ICONMENU_APPENDCONDT"]
 		info.func = ID.Condition
 		UIDropDownMenu_AddButton(info)
@@ -1043,13 +1103,13 @@ end
 
 function ME:Insert(where)
 	local groupID, iconID = CI.g, CI.i
-	db.profile.Groups[groupID].Icons[iconID].Icons = db.profile.Groups[groupID].Icons[iconID].Icons or {}
-	if not db.profile.Groups[groupID].Icons[iconID].Icons[1] then
-		db.profile.Groups[groupID].Icons[iconID].Icons[1] = TMW.Icons[1]
+--	db.profile.Groups[groupID].Icons[iconID].Icons = db.profile.Groups[groupID].Icons[iconID].Icons or {}
+	if not CI.ics.Icons[1] then
+		CI.ics.Icons[1] = TMW.Icons[1]
 		UIDropDownMenu_SetSelectedValue(ME[1], TMW.Icons[1])
 		UIDropDownMenu_SetText(ME[1], TMW.Icons[1])
 	end
-	tinsert(db.profile.Groups[groupID].Icons[iconID].Icons, where, TMW.Icons[1])
+	tinsert(CI.ics.Icons, where, TMW.Icons[1])
 	ME:Update()
 end
 
@@ -1062,51 +1122,51 @@ function ME:Update()
 	local groupID, iconID = CI.g, CI.i
 	db.profile.Groups[groupID].Icons[iconID].Icons = db.profile.Groups[groupID].Icons[iconID].Icons or {}
 	local settings = db.profile.Groups[groupID].Icons[iconID].Icons
-	local i=1
 	UIDropDownMenu_SetSelectedValue(ME[1].icon, nil)
 	UIDropDownMenu_SetText(ME[1].icon, "")
-	while ME[i] do
-		ME[i].up:Show()
-		ME[i].down:Show()
-		ME[i]:Show()
-		i=i+1
-	end
-	i=i-1 -- i is always the number of groups plus 1
-	ME[1].up:Hide()
-	ME[1].delete:Hide()
-
+	
 	for k, v in pairs(settings) do
-		local mg = ME[k] or CreateFrame("Frame", "TellMeWhen_IconEditorMainIcons" .. k, TellMeWhen_IconEditor.Main.Icons.ScrollFrame.Icons, "TellMeWhen_MetaGroup", k)
+		local mg = ME[k] or CreateFrame("Frame", "TellMeWhen_IconEditorMainIcons" .. k, IE.Main.Icons.ScrollFrame.Icons, "TellMeWhen_MetaGroup", k)
 		ME[k] = mg
 		mg:Show()
+		ME[k].up:Show()
+		ME[k].down:Show()
 		if k > 1 then
 			mg:SetPoint("TOP", ME[k-1], "BOTTOM", 0, 0)
 		end
-		mg:SetFrameLevel(TellMeWhen_IconEditor.Main.Icons:GetFrameLevel()+2)
+		mg:SetFrameLevel(IE.Main.Icons:GetFrameLevel()+2)
 		UIDropDownMenu_SetSelectedValue(mg.icon, v)
 		local text = TMW:GetIconMenuText(strmatch(v, "TellMeWhen_Group(%d+)_Icon(%d+)"))
 		UIDropDownMenu_SetText(mg.icon, text)
 		mg.icontexture:SetTexture(_G[v] and _G[v].texture:GetTexture())
 	end
-	for f=#settings+1, i do
+	
+	for f=#settings+1, #ME do
 		ME[f]:Hide()
 	end
+	ME[1].up:Hide()
+	ME[1]:Show()
+	
 	if settings[1] then
 		ME[#settings].down:Hide()
 		ME[1].delete:Hide()
 	else
 		ME[1].down:Hide()
 	end
+	
 	if settings[2] then
 		ME[1].delete:Show()
+	else
+		ME[1].delete:Hide()
 	end
-	ME[1]:Show()
+	
 end
 
 local addedGroups = {} -- this is also used for the condition icon menu, but its just a throwaway, so whatever
 function ME:IconMenu()
+	sort(TMW.Icons, TMW.IconsSort)
 	if UIDROPDOWNMENU_MENU_LEVEL == 2 then
-		for k, v in pairs(TMW.Icons) do
+		for k, v in ipairs(TMW.Icons) do
 			local g, i = strmatch(v, "TellMeWhen_Group(%d+)_Icon(%d+)")
 			g, i = tonumber(g), tonumber(i)
 			if UIDROPDOWNMENU_MENU_VALUE == g and CI.ic and v ~= CI.ic:GetName() then
@@ -1125,7 +1185,7 @@ function ME:IconMenu()
 		end
 	elseif UIDROPDOWNMENU_MENU_LEVEL == 1 then
 		wipe(addedGroups)
-		for k, v in pairs(TMW.Icons) do
+		for k, v in ipairs(TMW.Icons) do
 			local g = tonumber(strmatch(v, "TellMeWhen_Group(%d+)"))
 			if not addedGroups[g] and v ~= CI.ic:GetName() then
 				local info = UIDropDownMenu_CreateInfo()
@@ -1241,12 +1301,12 @@ for category, b in pairs(TMW.OldBE) do
 		EquivFirstIDLookup[equiv] = first -- this is used to display them in the list (tooltip, name, id display)
 		
 		b[equiv] = gsub(str, "_", "") -- this is used to put icons into tooltips
-		EquivFullIDLookup[equiv] = b[equiv]
+		EquivFullIDLookup[equiv] = ";" .. b[equiv]
 		local tbl = TMW:SplitNames(b[equiv])
 		for k, v in pairs(tbl) do
 			tbl[k] = GetSpellInfo(v) or v
 		end
-		EquivFullNameLookup[equiv] = table.concat(tbl, ";")
+		EquivFullNameLookup[equiv] = ";" .. table.concat(tbl, ";")
 	end
 end TMW.OldBE.unlisted.Enraged = nil
 for dispeltype, icon in pairs(TMW.DS) do
@@ -1506,6 +1566,7 @@ function IE:Load(isRefresh)
 
 	IE.Main.Name:ClearFocus()
 	IE.Main.Unit:ClearFocus()
+	IE.Main.ExportBox:SetText("")
 	TellMeWhen_IconEditor:SetScale(db.profile.EditorScale)
 
 	UIDropDownMenu_SetSelectedValue(IE.Main.Type, db.profile.Groups[groupID].Icons[iconID].Type)
@@ -1757,23 +1818,6 @@ function IE:Unit_DropDown_OnClick()
 	CloseDropDownMenus()
 end
 
-function TMW:CleanDefaults(settings, defaults)
-	-- yep, this function is out of place. I dont care.
-	-- make sure and pass in a COPY of the settings, not the original settings
-	for k, v in pairs(settings) do
-		if type(v) == "table" and next(v) then
-			settings[k] = TMW:CleanDefaults(v, defaults["**"] or defaults[k])
-		elseif type(v) ~= "table" then
-			if v == defaults[k] and k ~= "Name" and k ~= "Type" then -- more poor planning
-				settings[k] = nil
-			end
-		elseif not next(v) then
-			settings[k] = nil
-		end
-	end
-	return settings
-end
-
 function IE:ImpExp_DropDown()
 	if not db then return end
 	local e = TMW.IE.Main.ExportBox
@@ -1790,10 +1834,10 @@ function IE:ImpExp_DropDown()
 		local player = strtrim(e:GetText())
 		if player and player ~= "" and #player > 1 and #player < 13 then
 			local settings = CopyTable(db.profile.Groups[CI.g].Icons[CI.i])
-			local t = TMW:CleanDefaults(settings, TMW.Icon_Defaults)
-			t = TMW:Serialize(t, TELLMEWHEN_VERSIONNUMBER)
+			TMW:CleanIconSettings(settings)
+			local s = TMW:Serialize(settings, TELLMEWHEN_VERSIONNUMBER)
 
-			TMW:SendCommMessage("TMW", t, "WHISPER", player, "BULK", e.callback, e)
+			TMW:SendCommMessage("TMW", s, "WHISPER", player, "BULK", e.callback, e)
 		end
 	end
 	UIDropDownMenu_AddButton(info, UIDROPDOWNMENU_MENU_LEVEL)
@@ -1807,9 +1851,9 @@ function IE:ImpExp_DropDown()
 	info.func = function()
 		IE:SaveSettings()
 		local settings = CopyTable(db.profile.Groups[CI.g].Icons[CI.i])
-		local t = TMW:CleanDefaults(settings, TMW.Icon_Defaults)
-		t = TMW:Serialize(t, TELLMEWHEN_VERSIONNUMBER)
-		e:SetText(t)
+		TMW:CleanIconSettings(settings)
+		local s = TMW:Serialize(settings, TELLMEWHEN_VERSIONNUMBER)
+		e:SetText(s)
 		e:HighlightText()
 		e:SetFocus()
 	end
@@ -1836,9 +1880,16 @@ function IE:ImpExp_DropDown()
 
 			db.profile.Groups[groupID].Icons[iconID] = nil -- restore defaults, table recreated when passed in to CTIPWM
 			TMW:CopyTableInPlaceWithMeta(settings, db.profile.Groups[groupID].Icons[iconID])
-			for k, v in ipairs(TMW:GetUpgradeTable()) do
-				if version and version < k and v.icon then
-					v.icon(db.profile.Groups[groupID].Icons[iconID], groupID, iconID)
+			
+			if version then
+				if version > TELLMEWHEN_VERSIONNUMBER then
+					TMW:Print(L["FROMNEWERVERSION"])
+				else
+					for k, v in ipairs(TMW:GetUpgradeTable()) do
+						if version < k and v.icon then
+							v.icon(db.profile.Groups[groupID].Icons[iconID], groupID, iconID)
+						end
+					end
 				end
 			end
 
@@ -1933,9 +1984,13 @@ function IE:Copy_DropDown()
 
 					db.profile.Groups[groupID].Icons[iconID] = nil -- restore defaults, table recreated when passed in to CTIPWM
 					TMW:CopyTableInPlaceWithMeta(self.value, db.profile.Groups[groupID].Icons[iconID])
-					for k, v in ipairs(TMW:GetUpgradeTable()) do
-						if version < k and v.icon then
-							v.icon(db.profile.Groups[groupID].Icons[iconID], groupID, iconID)
+					if version > TELLMEWHEN_VERSIONNUMBER then
+						TMW:Print(L["FROMNEWERVERSION"])
+					else
+						for k, v in ipairs(TMW:GetUpgradeTable()) do
+							if version < k and v.icon then
+								v.icon(db.profile.Groups[groupID].Icons[iconID], groupID, iconID)
+							end
 						end
 					end
 
@@ -2041,10 +2096,16 @@ function IE:Copy_DropDown()
 
 						db.profile.Groups[groupID].Icons[iconID] = nil -- restore defaults, table recreated when passed in to CTIPWM
 						TMW:CopyTableInPlaceWithMeta(db.profiles[n].Groups[g].Icons[i], db.profile.Groups[groupID].Icons[iconID])
-						local sourceversion = #tostring(gsub(db.profiles[n].Version, "[^%d]", "")) >= 5 and tonumber(db.profiles[n].Version)
-						for k, v in ipairs(TMW:GetUpgradeTable()) do
-							if sourceversion and sourceversion < k and v.icon then
-								v.icon(db.profile.Groups[groupID].Icons[iconID], groupID, iconID)
+						local version = #tostring(gsub(db.profiles[n].Version, "[^%d]", "")) >= 5 and tonumber(db.profiles[n].Version)
+						if version then
+							if version > TELLMEWHEN_VERSIONNUMBER then
+								TMW:Print(L["FROMNEWERVERSION"])
+							else
+								for k, v in ipairs(TMW:GetUpgradeTable()) do
+									if version < k and v.icon then
+										v.icon(db.profile.Groups[groupID].Icons[iconID], groupID, iconID)
+									end
+								end
 							end
 						end
 
@@ -3269,8 +3330,9 @@ function CNDT:IconMenuOnClick(frame)
 end
 
 function CNDT:IconMenu_DropDown()
+	sort(TMW.Icons, TMW.IconsSort)
 	if UIDROPDOWNMENU_MENU_LEVEL == 2 then
-		for k, v in pairs(TMW.Icons) do
+		for k, v in ipairs(TMW.Icons) do
 			local g, i = strmatch(v, "TellMeWhen_Group(%d+)_Icon(%d+)")
 			g, i = tonumber(g), tonumber(i)
 			if UIDROPDOWNMENU_MENU_VALUE == g then
@@ -3293,7 +3355,7 @@ function CNDT:IconMenu_DropDown()
 		end
 	elseif UIDROPDOWNMENU_MENU_LEVEL == 1 then
 		wipe(addedGroups)
-		for k, v in pairs(TMW.Icons) do
+		for k, v in ipairs(TMW.Icons) do
 			local g = tonumber(strmatch(v, "TellMeWhen_Group(%d+)"))
 			if not addedGroups[g] then
 				local info = UIDropDownMenu_CreateInfo()

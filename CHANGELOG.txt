@@ -2,11 +2,14 @@
  * New icon type: Diminishing Returns. Guess what this one tracks?
  * The suggestion list just got a hell of a lot smarter.
  * Stack text settings are now set by group.
+ * Significantly increased the efficiency of the icon setup process. If you have a large number of icons, you
  * Bug Fixes:
  ** (r99) buff.lua:87 attempt to perform arithmetic on upvalue 'UPD_INTV' (a nil value) //Not reproduced, but the fix should work//
  ** (r99) TellMeWhen.lua:1039 bad argument #1 to 'pairs' (table expected, got nil)
  ** (r99) Meta icons should now always inherit the proper power bar color, and icons with power bars that are checking spells/abilities with different power types (druids) should reflect this in the color.
  ** (r100) TellMeWhen-4.2.1.2.lua:2115 attempt to perform arithmetic on local "start" (a nil value)
+ ** (r101) Condition icons should no longer be black when shown through a meta icon.
+ ** (r101) DR icons should properly function when a spell is reapplied within the last few seconds of the DR cooldown.
 
 ===v4.2.1.2===
  * Fixed: meta.lua line 80: bad argument #1 to 'tinsert' (table expected, got nil)
