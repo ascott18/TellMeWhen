@@ -10,6 +10,7 @@
  ** (r100) TellMeWhen-4.2.1.2.lua:2115 attempt to perform arithmetic on local "start" (a nil value)
  ** (r101) Condition icons should no longer be black when shown through a meta icon.
  ** (r101) DR icons should properly function when a spell is reapplied within the last few seconds of the DR cooldown.
+ ** (r102) Buff/debuff icons that are checking multiple units with a sort method enabled should now function properly.
 
 ===v4.2.1.2===
  * Fixed: meta.lua line 80: bad argument #1 to 'tinsert' (table expected, got nil)

@@ -1253,6 +1253,7 @@ local checks = { --1=check box, 2=editbox, 3=slider(x100), 4=custom, table=subke
 	ConditionAlpha = 3,
 	FakeHidden = 1,
 	DontRefresh = 1,
+	EnableStacks = 1,
 }
 local tabs = {
 	[1] = "Main",
@@ -1271,7 +1272,7 @@ IE.Data = {
 		{ value = "player", 					text = PLAYER },
 		{ value = "target", 					text = TARGET },
 		{ value = "targettarget", 				text = L["ICONMENU_TARGETTARGET"] },
-		{ value = "focus", 						text = FOCUS },
+		{ value = "focus", 						text = L["ICONMENU_FOCUS"] },
 		{ value = "focustarget", 				text = L["ICONMENU_FOCUSTARGET"] },
 		{ value = "pet", 						text = PET },
 		{ value = "pettarget", 					text = L["ICONMENU_PETTARGET"] },
@@ -1442,16 +1443,36 @@ function IE:ShowHide()
 		end
 		SoI = "spell"
 	end
+	
+	
+	--TODO: Move this chunk to the cooldown file
 	if SoI == "item" then
 		spb:SetEnabled(nil)
 		scb:SetEnabled(1)
 		IE.Main.OnlyEquipped:Show()
+		IE.Main.EnableStacks:Show()
+		if IE.Main.EnableStacks:GetChecked() then
+			IE.Main.StackMin:Show()
+			IE.Main.StackMax:Show()
+			IE.Main.StackMinEnabled:Show()
+			IE.Main.StackMaxEnabled:Show()
+		else
+			IE.Main.StackMin:Hide()
+			IE.Main.StackMax:Hide()
+			IE.Main.StackMinEnabled:Hide()
+			IE.Main.StackMaxEnabled:Hide()
+		end
 		IE.Main.OnlyInBags:Show()
 		IE.Main.ManaCheck:Hide()
 	elseif t == "cooldown" then
+		IE.Main.EnableStacks:Hide()
 		IE.Main.OnlyEquipped:Hide()
 		IE.Main.OnlyInBags:Hide()
 		IE.Main.ManaCheck:Show()
+		IE.Main.StackMin:Hide()
+		IE.Main.StackMax:Hide()
+		IE.Main.StackMinEnabled:Hide()
+		IE.Main.StackMaxEnabled:Hide()
 	end
 
 	local Name = IE.Main.Name

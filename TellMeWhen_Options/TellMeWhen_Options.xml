@@ -2267,35 +2267,6 @@
 							</OnClick>
 						</Scripts>
 					</CheckButton>
-					<CheckButton name="$parentOnlyEquipped" inherits="TellMeWhen_CheckTemplate" parentKey="OnlyEquipped">
-						<Anchors>
-							<Anchor point="CENTER" relativeTo="$parentOnlyMine"/>
-						</Anchors>
-						<Scripts>
-							<OnLoad>
-								TMW:TT(self, "ICONMENU_ONLYEQPPD", "ICONMENU_ONLYEQPPD_DESC")
-								self.text:SetText(TMW.L["ICONMENU_ONLYEQPPD"])
-								self.text:SetWidth(TELLMEWHEN_COLUMN1WIDTH)
-							</OnLoad>
-							<OnClick>
-								local groupID, iconID = TMW.CI.g, TMW.CI.i
-								if TMW.db then
-									local checked = not not self:GetChecked()
-									TMW.db.profile.Groups[groupID].Icons[iconID]["OnlyEquipped"] = checked
-									if checked then
-										self:GetParent().OnlyInBags:SetChecked(true)
-										self:GetParent().OnlyInBags:Disable()
-										self:GetParent().OnlyInBags:SetAlpha(0.4)
-										TMW.db.profile.Groups[groupID].Icons[iconID]["OnlyInBags"] = checked
-									else
-										self:GetParent().OnlyInBags:Enable()
-										self:GetParent().OnlyInBags:SetAlpha(1)
-									end
-									TMW.IE:ScheduleIconUpdate(groupID, iconID)
-								end
-							</OnClick>
-						</Scripts>
-					</CheckButton>
 					<CheckButton name="$parentOnlySeen" inherits="TellMeWhen_CheckTemplate" parentKey="OnlySeen">
 						<Anchors>
 							<Anchor point="CENTER" relativeTo="$parentOnlyMine"/>
@@ -2315,7 +2286,6 @@
 							</OnClick>
 						</Scripts>
 					</CheckButton>
-
 
 					<CheckButton name="$parentRangeCheck" inherits="TellMeWhen_CheckTemplate" parentKey="RangeCheck">
 						<Anchors>
@@ -2420,9 +2390,7 @@
 					</CheckButton>
 					<CheckButton name="$parentOnlyInBags" inherits="TellMeWhen_CheckTemplate" parentKey="OnlyInBags">
 						<Anchors>
-							<Anchor point="TOPLEFT" relativeTo="$parentRangeCheck" relativePoint="BOTTOMLEFT">
-								<Offset x="0" y="4" />
-							</Anchor>
+							<Anchor point="TOPLEFT" relativeTo="$parentRangeCheck" relativePoint="BOTTOMLEFT" x="0" y="4" />
 						</Anchors>
 						<Scripts>
 							<OnLoad>
@@ -2437,6 +2405,55 @@
 									TMW.db.profile.Groups[groupID].Icons[iconID]["OnlyInBags"] = not not self:GetChecked()
 									TMW.IE:ScheduleIconUpdate(groupID, iconID)
 								end
+							</OnClick>
+						</Scripts>
+					</CheckButton>
+					<CheckButton name="$parentOnlyEquipped" inherits="TellMeWhen_CheckTemplate" parentKey="OnlyEquipped">
+						<Anchors>
+							<Anchor point="TOPLEFT" relativeTo="$parentOnlyInBags" relativePoint="BOTTOMLEFT" x="0" y="4" />
+						</Anchors>
+						<Scripts>
+							<OnLoad>
+								TMW:TT(self, "ICONMENU_ONLYEQPPD", "ICONMENU_ONLYEQPPD_DESC")
+								self.text:SetText(TMW.L["ICONMENU_ONLYEQPPD"])
+								self.text:SetWidth(TELLMEWHEN_COLUMN1WIDTH)
+							</OnLoad>
+							<OnClick>
+								local groupID, iconID = TMW.CI.g, TMW.CI.i
+								if TMW.db then
+									local checked = not not self:GetChecked()
+									TMW.db.profile.Groups[groupID].Icons[iconID]["OnlyEquipped"] = checked
+									if checked then
+										self:GetParent().OnlyInBags:SetChecked(true)
+										self:GetParent().OnlyInBags:Disable()
+										self:GetParent().OnlyInBags:SetAlpha(0.4)
+										TMW.db.profile.Groups[groupID].Icons[iconID]["OnlyInBags"] = checked
+									else
+										self:GetParent().OnlyInBags:Enable()
+										self:GetParent().OnlyInBags:SetAlpha(1)
+									end
+									TMW.IE:ScheduleIconUpdate(groupID, iconID)
+								end
+							</OnClick>
+						</Scripts>
+					</CheckButton>
+					<CheckButton name="$parentEnableStacks" inherits="TellMeWhen_CheckTemplate" parentKey="EnableStacks">
+						<Anchors>
+							<Anchor point="TOPLEFT" relativeTo="$parentOnlyEquipped" relativePoint="BOTTOMLEFT" x="0" y="4" />
+						</Anchors>
+						<Scripts>
+							<OnLoad>
+								TMW:TT(self, "ICONMENU_SHOWSTACKS", "ICONMENU_SHOWSTACKS_DESC")
+								self.text:SetText(TMW.L["ICONMENU_SHOWSTACKS"])
+								self.text:SetWidth(TELLMEWHEN_COLUMN1WIDTH)
+							</OnLoad>
+							<OnClick>
+								local groupID, iconID = TMW.CI.g, TMW.CI.i
+								if TMW.db then
+									TMW.db.profile.Groups[groupID].Icons[iconID]["EnableStacks"] = not not self:GetChecked()
+									TMW.IE:ScheduleIconUpdate(groupID, iconID)
+								end
+								TMW.IE:ShowHide()
 							</OnClick>
 						</Scripts>
 					</CheckButton>

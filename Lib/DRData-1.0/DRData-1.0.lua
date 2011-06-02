@@ -266,7 +266,7 @@ end
 --[[ EXAMPLES ]]--
 -- This is how you would track DR easily, you're welcome to do whatever you want with the below functions
 
-
+--[[
 local trackedPlayers = {}
 local function debuffGained(spellID, destName, destGUID, isEnemy, isPlayer)
 	-- Not a player, and this category isn't diminished in PVE, as well as make sure we want to track NPCs

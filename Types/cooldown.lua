@@ -51,9 +51,14 @@ local RelevantSettings = {
 	IgnoreRunes = (pclass == "DEATHKNIGHT"),
 	OnlyEquipped = true,
 	OnlyInBags = true,
+	EnableStacks = true,
+	StackMin = true,
+	StackMax = true,
+	StackMinEnabled = true,
+	StackMaxEnabled = true,
 	FakeHidden = true,
 }
-
+-- TODO: Split item cooldowns out of this type
 local Type = TMW:RegisterIconType("cooldown", RelevantSettings)
 Type.name = L["ICONMENU_COOLDOWN"]
 Type.TypeChecks = {
@@ -174,27 +179,25 @@ local function ItemCooldown_OnUpdate(icon, time)
 
 		local CndtCheck = icon.CndtCheck if CndtCheck and CndtCheck() then return end
 
-		local n, inrange, equipped, start, duration, isGCD = 1
-		local RangeCheck, OnlyEquipped, OnlyInBags, NameArray = icon.RangeCheck, icon.OnlyEquipped, icon.OnlyInBags, icon.NameArray
+		local n, inrange, equipped, start, duration, isGCD, count = 1
+		local RangeCheck, OnlyEquipped, OnlyInBags, NameArray, EnableStacks = icon.RangeCheck, icon.OnlyEquipped, icon.OnlyInBags, icon.NameArray, icon.EnableStacks
 		for i = 1, #NameArray do
 			local iName = NameArray[i]
 			n = i
 			start, duration = GetItemCooldown(iName)
 			if duration then
-				inrange, equipped = 1, true
+				inrange, equipped, count = 1, true, GetItemCount(iName, nil, 1)
 				if RangeCheck then
 					inrange = IsItemInRange(iName, "target") or 1
 				end
-				if OnlyEquipped and not IsEquippedItem(iName) then
-					equipped = false
-				end
-				if equipped and OnlyInBags and (GetItemCount(iName) == 0) then
+				
+				if (OnlyEquipped and not IsEquippedItem(iName)) or (OnlyInBags and (count == 0)) then
 					equipped = false
 				end
 				isGCD = OnGCD(duration)
 				if equipped and inrange == 1 and (duration == 0 or isGCD) then --usable
 
-					icon:SetInfo(icon.Alpha, 1, GetItemIcon(iName) or "Interface\\Icons\\INV_Misc_QuestionMark", start, duration, true)
+					icon:SetInfo(icon.Alpha, 1, GetItemIcon(iName) or "Interface\\Icons\\INV_Misc_QuestionMark", start, duration, true, nil, nil, EnableStacks and count > 1 and count)
 
 					return
 				end
@@ -219,7 +222,7 @@ local function ItemCooldown_OnUpdate(icon, time)
 		end
 		if n > 1 then -- if there is more than 1 spell that was checked then we need to get these again for the first spell, otherwise reuse the values obtained above since they are just for the first one
 			start, duration = GetItemCooldown(NameFirst2)
-			inrange = 1
+			inrange, count = 1, GetItemCount(iName, nil, 1)
 			if RangeCheck then
 				inrange = IsItemInRange(NameFirst2, "target") or 1
 			end
@@ -239,7 +242,7 @@ local function ItemCooldown_OnUpdate(icon, time)
 			else
 				alpha, color = icon.UnAlpha, 1
 			end
-			icon:SetInfo(alpha, color, GetItemIcon(NameFirst2), start, duration, true)
+			icon:SetInfo(alpha, color, GetItemIcon(NameFirst2), start, duration, true, nil, nil, EnableStacks and count > 1 and count)
 		else
 			icon:SetAlpha(0)
 		end

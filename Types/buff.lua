@@ -141,10 +141,13 @@ local function Buff_OnUpdate(icon, time)
 							end
 						end
 					end
+					if buffName and not Sort then
+						break --  break unit loop
+					end
 				else
 					for i = 1, NAL do
 						local iName = NameArray[i]
-						if DS[iName] then --Enrage wont be handled here because it will always have more auras than the efficiency threshold (max 40, there are about 120 enrages i think)
+						if DS[iName] then --Handle dispel types. Enrage wont be handled here because it will always have more auras than the efficiency threshold (max 40, there are about 120 enrages i think)
 							for z=1, 60 do
 								buffName, _, iconTexture, count, dispelType, duration, expirationTime, _, _, _, id = UnitAura(unit, z, Filter)
 								if not buffName or dispelType == iName then
@@ -182,12 +185,12 @@ local function Buff_OnUpdate(icon, time)
 							end
 						end
 						if buffName then
-							break
+							break -- break spell loop
 						end
 					end
-				end
-				if buffName and not Sort then
-					break
+					if buffName then
+						break --  break unit loop
+					end
 				end
 			end
 		end

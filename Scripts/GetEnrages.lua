@@ -8,19 +8,15 @@
  
  
 local http = require("socket.http")
-local string = require("string")
 
-local url = "http://db.mmo-champion.com/spells/?dispel_type=9"
+local src = http.request("http://db.mmo-champion.com/spells/?dispel_type=9")
 
-local src = http.request(url)
+local t = {}
 
-local start = string.find(src, "'id': %d+", start)
-local str = ""
-while string.find(src, "'id': (%d+)", start) do
-	id = string.match(src, "'id': (%d+)", start)
-	s, start = string.find(src, "'id': %d+", start)
-	str = str .. ";" .. id
+for id in string.gmatch(src, "'id': (%d+)") do
+	t[#t+1] = id
 end
-str = string.sub(str, 2)
+
+str = table.concat(t, ";")
 
 io.open("B:\\Games\\World Of Warcraft\\Interface\\AddOns\\TellMeWhen\\Scripts\\Enrages.txt", "w"):write(str)
