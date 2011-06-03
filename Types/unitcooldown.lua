@@ -216,3 +216,11 @@ function Type:Setup(icon, groupID, iconID)
 	icon:SetScript("OnUpdate", UnitCooldown_OnUpdate)
 	icon:OnUpdate(TMW.time)
 end
+
+
+function Type:IE_TypeLoaded()
+	local ICDDuration = TMW.IE.Main.ICDDuration
+	TMW:TT(ICDDuration, "ICONMENU_COOLDOWN", "CHOOSENAME_DIALOG_UCD_DESC", nil, nil, 1)
+	ICDDuration.label = TMW.L["ICONMENU_COOLDOWN"]
+end
+	

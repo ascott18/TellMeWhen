@@ -75,6 +75,20 @@ function Type:Setup(icon, groupID, iconID)
 	--icon:OnUpdate(TMW.time)
 end
 
+function Type:IE_TypeLoaded()
+	local Name = TMW.IE.Main.Name
+	Name.label = L["ICONMENU_CHOOSENAME_CNDTIC"]
+	Name.TTtitle = L["ICONMENU_CHOOSENAME_CNDTIC"]
+	Name.TTtext = L["CHOOSENAME_DIALOG_CNDTIC"]
+	Name:GetScript("OnTextChanged")(Name)
+end
 
+function Type:IE_TypeUnloaded()
+	local Name = TMW.IE.Main.Name
+	Name.label = L["ICONMENU_CHOOSENAME"]
+	Name.TTtitle = L["ICONMENU_CHOOSENAME"]
+	Name.TTtext = L["CHOOSENAME_DIALOG"]
+	Name:GetScript("OnTextChanged")(Name)
+end
 
 

@@ -58,7 +58,7 @@ local RelevantSettings = {
 	StackMaxEnabled = true,
 	FakeHidden = true,
 }
--- TODO: Split item cooldowns out of this type
+
 local Type = TMW:RegisterIconType("cooldown", RelevantSettings)
 Type.name = L["ICONMENU_COOLDOWN"]
 Type.TypeChecks = {
@@ -384,6 +384,35 @@ function Type:Setup(icon, groupID, iconID)
 	end
 end
 
-
-
+function Type:IE_TypeLoaded()
+	local IE = TMW.IE
+	if TMW.CI.SoI == "item" then
+		IE.Main.ShowPBar:SetEnabled(nil)
+		IE.Main.ShowCBar:SetEnabled(1)
+		IE.Main.OnlyEquipped:Show()
+		IE.Main.EnableStacks:Show()
+		if IE.Main.EnableStacks:GetChecked() then
+			IE.Main.StackMin:Show()
+			IE.Main.StackMax:Show()
+			IE.Main.StackMinEnabled:Show()
+			IE.Main.StackMaxEnabled:Show()
+		else
+			IE.Main.StackMin:Hide()
+			IE.Main.StackMax:Hide()
+			IE.Main.StackMinEnabled:Hide()
+			IE.Main.StackMaxEnabled:Hide()
+		end
+		IE.Main.OnlyInBags:Show()
+		IE.Main.ManaCheck:Hide()
+	else
+		IE.Main.EnableStacks:Hide()
+		IE.Main.OnlyEquipped:Hide()
+		IE.Main.OnlyInBags:Hide()
+		IE.Main.ManaCheck:Show()
+		IE.Main.StackMin:Hide()
+		IE.Main.StackMax:Hide()
+		IE.Main.StackMinEnabled:Hide()
+		IE.Main.StackMaxEnabled:Hide()
+	end
+end
 

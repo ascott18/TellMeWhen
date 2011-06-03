@@ -55,8 +55,9 @@ Type.desc = L["ICONMENU_ICD_DESC"]
 Type.TypeChecks = {
 	setting = "ICDType",
 	text = L["ICONMENU_ICDTYPE"],
-	{ value = "aura", 			text = L["ICONMENU_ICDBDE"], 			tooltipText = L["ICONMENU_ICDAURA_DESC"]},
-	{ value = "spellcast", 		text = L["ICONMENU_SPELLCAST"], 		tooltipText = L["ICONMENU_SPELLCAST_DESC"]},
+	{ value = "aura", 			text = L["ICONMENU_ICDBDE"], 				tooltipText = L["ICONMENU_ICDAURA_DESC"]},
+	{ value = "caststart", 		text = L["ICONMENU_SPELLCAST_START"], 		tooltipText = L["ICONMENU_SPELLCAST_START_DESC"]},
+	{ value = "spellcast", 		text = L["ICONMENU_SPELLCAST_COMPLETE"], 	tooltipText = L["ICONMENU_SPELLCAST_COMPLETE_DESC"]},
 }
 Type.WhenChecks = {
 	text = L["ICONMENU_SHOWWHEN"],
@@ -94,7 +95,7 @@ local function ICD_OnEvent(icon, event, ...)
 				icon.StartTime = TMW.time
 			end
 		end
-	elseif event == "UNIT_SPELLCAST_SUCCEEDED" then
+	elseif event == "UNIT_SPELLCAST_SUCCEEDED" or event == "UNIT_SPELLCAST_CHANNEL_START" or event == "UNIT_SPELLCAST_START"then
 		local u, n, _, _, i = ...
 		if u == "player" then
 			local NameDictionary = icon.NameDictionary
@@ -138,11 +139,13 @@ function Type:Setup(icon, groupID, iconID)
 
 	icon.StartTime = icon.ICDDuration
 
-	--[[ keep these events per icon isntead of global like unitcooldowns so that we dont start mixing and matching icon.
-	also so that we only process icon for the player and nobody else, because that is all we care about here.
-	technically, unitcooldown can track ICDs too, but not as accurately all the time, and unitcooldown's events dont consider SPELL_ENERGIZE.]]
+	--[[ keep these events per icon isntead of global like unitcooldowns are so that ...
+	well i had a reason here but it didnt make sense when i came back and read it a while later. Just do it.]]
 	if icon.ICDType == "spellcast" then
 		icon:RegisterEvent("UNIT_SPELLCAST_SUCCEEDED")
+	elseif icon.ICDType == "caststart" then
+		icon:RegisterEvent("UNIT_SPELLCAST_START")
+		icon:RegisterEvent("UNIT_SPELLCAST_CHANNEL_START")
 	elseif icon.ICDType == "aura" then
 		icon:RegisterEvent("COMBAT_LOG_EVENT_UNFILTERED")
 	end
@@ -160,4 +163,9 @@ function Type:Setup(icon, groupID, iconID)
 	icon:OnUpdate(TMW.time)
 end
 
+function Type:IE_TypeLoaded()
+	local ICDDuration = TMW.IE.Main.ICDDuration
+	TMW:TT(ICDDuration, "CHOOSENAME_DIALOG_ICD", "CHOOSENAME_DIALOG_ICD_DESC", nil, nil, 1)
+	ICDDuration.label = TMW.L["CHOOSENAME_DIALOG_ICD"]
+end
 

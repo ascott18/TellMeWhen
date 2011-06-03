@@ -42,12 +42,12 @@ L["ICONMENU_ALPHA"] = "Transparency"
 L["CONDITIONALPHA"] = "Conditions/Duration/Stacks"
 L["CONDITIONALPHA_DESC"] = "This will be used when conditions fail, or if the duration or stack requirements are not met."
 L["ICONMENU_TYPE"] = "Icon type"
-L["ICONMENU_COOLDOWN"] = "Cooldown"
+L["ICONMENU_COOLDOWN"] = "Cooldown - Mine"
 L["ICONMENU_BUFFDEBUFF"] = "Buff/Debuff"
-L["ICONMENU_REACTIVE"] = "Reactive ability"
+L["ICONMENU_REACTIVE"] = "Reactive Ability"
 L["ICONMENU_REACTIVE_DESC"] = [=[Reactive abilities are things like Kill Shot, Revenge, and Conflagrate -
 abilities that are only usable when certain conditions are met. Use this icon type to track their usability.]=]
-L["ICONMENU_WPNENCHANT"] = "Weapon enchant"
+L["ICONMENU_WPNENCHANT"] = "Weapon Enchant"
 L["ICONMENU_WPNENCHANT_DESC"] = [=[Tracks the status of temporary weapon enchants on your weapons - most useful for shaman.
 With this icon type, the name can be left blank to track any weapon enchant in the specified slot,
 or you can insert the names of weapon enchants to only show it for specific enchants.
@@ -57,11 +57,11 @@ L["ICONMENU_GHOUL"] = "Non-MoG ghoul"
 L["ICONMENU_MUSHROOMS"] = "Wild Mushrooms"
 L["ICONMENU_MULTISTATECD"] = "Multi-state ability"
 L["ICONMENU_MULTISTATECD_DESC"] = "This should be used when you want to track multiple states/textures/etc of a cooldown. Some examples are Holy Word: Chastise and Dark Simulacrum. |cFFFF5959IMPORTANT|r: The action being tracked MUST be on your action bars for this icon type to work. You should also make sure that the ability is in its default state before leaving config mode."
-L["ICONMENU_UNITCOOLDOWN"] = "Unit cooldown"
-L["ICONMENU_UNITCOOLDOWN_DESC"] = [=[This icon type will allow you to track the cooldowns of your enemies.
+L["ICONMENU_UNITCOOLDOWN"] = "Cooldown - Other"
+L["ICONMENU_UNITCOOLDOWN_DESC"] = [=[This icon type will allow you to track the cooldowns of your friends or your enemies.
 You must enter the duration of the cooldown in the editbox to the right of the unit input.
 Note regarding pvp trinkets: they can be tracked using '%s' as the name.]=]
-L["ICONMENU_ICD"] = "Internal cooldown/Spell duration"
+L["ICONMENU_ICD"] = "Cooldown - Internal"
 L["ICONMENU_ICD_DESC"] = [=[This icon type can be used to track either the internal cooldown of something such as a proc from a talent or a trinket,
 or to track the duration of a spell (e.g. traps, mage orb), or even the duration of a summon (e.g. Infernal).
 Enter the spellID or name of the buff/debuff that is placed when the cooldown starts,
@@ -72,7 +72,7 @@ you can enter a single spell, or a semicolon-delimited list of spells.]=]
 L["ICONMENU_CNDTIC"] = "Condition Icon"
 L["ICONMENU_CNDTIC_DESC"] = [=[This icon type is for simply checking a condition.
 The icon can be set to a specific spell texture or texture path via the name editbox.]=]
-L["ICONMENU_META"] = "Meta icon"
+L["ICONMENU_META"] = "Meta Icon"
 L["ICONMENU_META_DESC"] = [=[This icon type can be used to combine several icons into one.
 Icons that have 'Always Hide' checked will still be shown if they would otherwise be shown.]=]
 L["ICONMENU_DR"] = "Diminishing Returns"
@@ -143,9 +143,11 @@ L["ICONMENU_HOSTILE"] = "Hostile"
 L["ICONMENU_EITHER"] = "Any"
 
 L["ICONMENU_ICDTYPE"] = "Triggered by"
-L["ICONMENU_SPELLCAST"] = "Spell Cast"
+L["ICONMENU_SPELLCAST_COMPLETE"] = "Spell Cast Finish"
+L["ICONMENU_SPELLCAST_START"] = "Spell Cast Start"
 L["ICONMENU_ICDBDE"] = "Buff/Debuff/Energize"
-L["ICONMENU_SPELLCAST_DESC"] = "Select this option if the internal cooldown begins when you cast the spell that you chose"
+L["ICONMENU_SPELLCAST_COMPLETE_DESC"] = "Select this option if the internal cooldown begins when you finish casting the spell that you chose"
+L["ICONMENU_SPELLCAST_START_DESC"] = "Select this option if the internal cooldown begins when you start casting the spell that you chose"
 L["ICONMENU_ICDAURA_DESC"] = "Select this option if the internal cooldown begins when you apply the buff or debuff that you chose, or if the effect energizes you with mana/rage/etc."
 L["ICONMENU_ICDUSABLE"] = "Usable CD/Expired spell"
 L["ICONMENU_ICDUNUSABLE"] = "Unusable CD/Present spell"
@@ -428,6 +430,7 @@ L["ACTIVE"] = "%d Active"
 L["NUMAURAS_DESC"] = [[This condition checks the number of an aura active - not to be confused with the number of stacks of an aura.
 This is for checking things like if you have both weapon enchant procs active at the same time.
 Use sparingly, as the process used to count the numbers is a bit CPU intensive.]]
+L["COOLDOWN"] = "Cooldown"
 
 
 

@@ -48,6 +48,7 @@ local strfind, strmatch, format, gsub, strsub, strtrim, max, min, strlower =
 local strlowerCache = TMW.strlowerCache
 local _G, GetTime = _G, GetTime
 local tiptemp = {}
+local Types = TMW.Types
 local ME, CNDT, IE, SUG, ID, SND, ANN
 local points = {
 	TOPLEFT = L["TOPLEFT"],
@@ -61,15 +62,27 @@ local points = {
 	BOTTOMRIGHT = L["BOTTOMRIGHT"],
 }
 local print = TMW.print
+
+local function approachTable(...)
+    local t = ...
+    if not t then return end
+    for i=2, select("#", ...) do
+        t = t[select(i, ...)]
+        if not t then return end
+    end
+    return t
+end
+
 TMW.CI = setmetatable({}, {__index = function(tbl, k)
 	if k == "ics" then
-		local t = TMW.db
-		t = t and t.profile
-		t = t and t.Groups
-		t = t and t[tbl.g]
-		t = t and t.Icons
-		t = t and t[tbl.i]
-		return t
+		-- take no chances with errors occuring here
+		return approachTable(TMW.db, "profile", "Groups", tbl.g, "Icons", tbl.i)
+	elseif k == "SoI" then -- spell or item
+		local ics = TMW.CI.ics
+		return ics and ics.Type == "cooldown" and ics.CooldownType or "spell"
+	elseif k == "IMS" then -- IsMultiState 
+		local ics = TMW.CI.ics
+		return ics and ics.Type == "cooldown" and ics.CooldownType == "multistate"
 	end
 end}) local CI = TMW.CI		--current icon
 local clientVersion = select(4, GetBuildInfo())
@@ -1263,7 +1276,7 @@ local tabs = {
 	[5] = "Group",
 	[6] = "Conditions",
 }
-local IsMultiState, SoI
+local SUGIMS, SoI, SUGSoI
 IE.Data = {
 	-- the keys on this table need to match the settings variable names
 	Type = {}, -- this will be populated by registered icon types
@@ -1337,7 +1350,7 @@ end
 
 function IE:SetupRadios()
 	local t = CI.t
-	local Type = TMW.Types[t]
+	local Type = Types[t]
 	if Type and Type.TypeChecks then
 		for k, frame in pairs(IE.Main.TypeChecks) do
 			if strfind(k, "Radio") then
@@ -1412,15 +1425,6 @@ function IE:ShowHide()
 	local t = CI.t
 	if not t then return end
 
-	local ICDDuration = IE.Main.ICDDuration
-	if t == "icd" then
-		TMW:TT(ICDDuration, "CHOOSENAME_DIALOG_ICD", "CHOOSENAME_DIALOG_ICD_DESC", nil, nil, 1)
-		ICDDuration.label = TMW.L["CHOOSENAME_DIALOG_ICD"]
-	elseif t == "unitcooldown" then
-		TMW:TT(ICDDuration, "ICONMENU_COOLDOWN", "CHOOSENAME_DIALOG_UCD_DESC", nil, nil, 1)
-		ICDDuration.label = TMW.L["ICONMENU_COOLDOWN"]
-	end
-
 	for k, v in pairs(checks) do
 		if (TMW.RelevantSettings[t] and TMW.RelevantSettings[t][k]) or TMW.RelevantSettings.all[k] then
 			IE.Main[k]:Show()
@@ -1431,83 +1435,39 @@ function IE:ShowHide()
 			IE.Main[k]:Hide()
 		end
 	end
+	
+	for name, Type in pairs(Types) do
+		if name ~= t and Type.IE_TypeUnloaded then
+			Type:IE_TypeUnloaded()
+		end
+	end
+	if Types[t] and Types[t].IE_TypeLoaded then
+		Types[t]:IE_TypeLoaded()
+	end
+
 	local spb = IE.Main.ShowPBar
 	local scb = IE.Main.ShowCBar
-	if t == "cooldown" and IE.Main.TypeChecks.Radio3:GetChecked() and IE.Main.TypeChecks.Radio3.value == "item" then
-		SoI = "item"
-	else
-		if t == "cooldown" and IE.Main.TypeChecks.Radio2:GetChecked() and IE.Main.TypeChecks.Radio2.value == "multistate" then
-			IsMultiState = true
-		else
-			IsMultiState = nil
-		end
-		SoI = "spell"
-	end
-	
-	
-	--TODO: Move this chunk to the cooldown file
-	if SoI == "item" then
-		spb:SetEnabled(nil)
-		scb:SetEnabled(1)
-		IE.Main.OnlyEquipped:Show()
-		IE.Main.EnableStacks:Show()
-		if IE.Main.EnableStacks:GetChecked() then
-			IE.Main.StackMin:Show()
-			IE.Main.StackMax:Show()
-			IE.Main.StackMinEnabled:Show()
-			IE.Main.StackMaxEnabled:Show()
-		else
-			IE.Main.StackMin:Hide()
-			IE.Main.StackMax:Hide()
-			IE.Main.StackMinEnabled:Hide()
-			IE.Main.StackMaxEnabled:Hide()
-		end
-		IE.Main.OnlyInBags:Show()
-		IE.Main.ManaCheck:Hide()
-	elseif t == "cooldown" then
-		IE.Main.EnableStacks:Hide()
-		IE.Main.OnlyEquipped:Hide()
-		IE.Main.OnlyInBags:Hide()
-		IE.Main.ManaCheck:Show()
-		IE.Main.StackMin:Hide()
-		IE.Main.StackMax:Hide()
-		IE.Main.StackMinEnabled:Hide()
-		IE.Main.StackMaxEnabled:Hide()
-	end
-
-	local Name = IE.Main.Name
-	if t == "conditionicon" then
-		Name.label = TMW.L["ICONMENU_CHOOSENAME_CNDTIC"]
-		Name.TTtitle = TMW.L["ICONMENU_CHOOSENAME_CNDTIC"]
-		Name.TTtext = TMW.L["CHOOSENAME_DIALOG_CNDTIC"]
-	else
-		Name.label = TMW.L["ICONMENU_CHOOSENAME"]
-		Name.TTtitle = TMW.L["ICONMENU_CHOOSENAME"]
-		Name.TTtext = TMW.L["CHOOSENAME_DIALOG"]
-	end
-	Name:GetScript("OnTextChanged")(Name)
-
-	if not spb:IsShown() then
-		spb:Show()
-		spb:SetEnabled(nil)
-	end
-	if not scb:IsShown() then
-		scb:Show()
-		scb:SetEnabled(nil)
-	end
-	IE.Main.InvertBars:Enable()
-	if not (spb.enabled or scb.enabled) then
-		IE.Main.InvertBars:Show()
-		IE.Main.InvertBars:Disable()
-	end
-
-	spb.PBarOffs:SetEnabled(spb.ShowPBar:GetChecked())
-	scb.CBarOffs:SetEnabled(scb.ShowCBar:GetChecked())
-
-	if TMW.Types[t] and TMW.Types[t].HideBars then -- override the previous shows and disables
+	if Types[t] and Types[t].HideBars then -- override the previous shows and disables
 		spb:Hide()
 		scb:Hide()
 		IE.Main.InvertBars:Hide()
+	else
+		if not spb:IsShown() then
+			spb:Show()
+			spb:SetEnabled(nil)
+		end
+		if not scb:IsShown() then
+			scb:Show()
+			scb:SetEnabled(nil)
+		end
+		IE.Main.InvertBars:Enable()
+		if not (spb.enabled or scb.enabled) then
+			IE.Main.InvertBars:Show()
+			IE.Main.InvertBars:Disable()
+		end
+
+		spb.PBarOffs:SetEnabled(spb.ShowPBar:GetChecked())
+		scb.CBarOffs:SetEnabled(scb.ShowCBar:GetChecked())
 	end
 
 	local stt = IE.Main.ShowTimerText
@@ -1873,7 +1833,9 @@ function IE:ImpExp_DropDown()
 		IE:SaveSettings()
 		local settings = CopyTable(db.profile.Groups[CI.g].Icons[CI.i])
 		TMW:CleanIconSettings(settings)
-		local s = TMW:Serialize(settings, TELLMEWHEN_VERSIONNUMBER)
+		local s = TMW:Serialize(settings, TELLMEWHEN_VERSIONNUMBER):
+		gsub("(^[^tT%d][^^]*^[^^]*)", "%1 "):
+		gsub("%^ ^", "^^")
 		e:SetText(s)
 		e:HighlightText()
 		e:SetFocus()
@@ -2145,25 +2107,13 @@ local cachednames = {}
 function IE:GetRealNames()
 	-- gets a string to set as a tooltip of all of the spells names in the name box in the IE. Splits up equivalancies and turns IDs into names
 	local text = TMW:CleanString(IE.Main.Name:GetText())
-	if cachednames[CI.t .. SoI .. text] then return cachednames[CI.t .. SoI .. text] end
-
-	--[[for name in pairs(TMW.DS) do -- JUST DONT TO THIS, IT IS CAUSING WAY TOO MANY PROBLEMS JUST TO PUT A SET OF PARENTHESIS AROUND 4 THINGS
-		-- want to buy a case insensitive gsub so i dont have to do stupid stuff like this
-		local t = ";" .. strlower(text) .. ";" -- the first and last one wont work if you dont concat semicolons on
-		local startpos, endpos = strfind(t, "[; ]"..strlower(name).."[; ]")
-		if startpos then
-			local firsthalf = strsub(text, 0, startpos-1)
-			local lasthalf = strsub(text, endpos+1)
-			text = firsthalf.."; (" .. L[name] .. ");"..lasthalf
-		end
-	end
-	]]
+	if cachednames[CI.t .. CI.SoI .. text] then return cachednames[CI.t .. CI.SoI .. text] end
 
 	local tbl
 	local BEbackup = TMW.BE
 	TMW.BE = TMW.OldBE -- the level of hackyness here is sickening. Note that OldBE does not contain the enrage equiv (intended so we dont flood the tooltip)
 	-- by passing false in for arg3 (firstOnly), it creates a unique cache string and therefore a unique cache - nessecary because we arent using the real TMW.BE
-	if SoI == "item" then
+	if CI.SoI == "item" then
 		tbl = TMW:GetItemIDs(nil, text, false)
 	else
 		tbl = TMW:GetSpellNames(nil, text, false)
@@ -2188,7 +2138,7 @@ function IE:GetRealNames()
 		tiptemp[name] = true
 	end
 	wipe(tiptemp)
-	cachednames[CI.t .. SoI .. text] = str
+	cachednames[CI.t .. CI.SoI .. text] = str
 	return str
 end
 
@@ -2828,14 +2778,14 @@ function SUG.Sorter(a, b)
 		end
 	end
 
-	if IsMultiState then
+	if SUGIMS then
 		local haveA, haveB = ActionCache[a], ActionCache[b]
 		if (haveA and not haveB) or (haveB and not haveA) then
 			return haveA
 		end
 	end
-	local SoI = SUG.overrideSoI or SoI
-	if SoI == "spell" then
+	
+	if SUGSoI == "spell" then
 		--player's spells (pclass)
 		local haveA, haveB = pclassSpellCache[a], pclassSpellCache[b]
 		if (haveA and not haveB) or (haveB and not haveA) then
@@ -2869,7 +2819,7 @@ function SUG.Sorter(a, b)
 	else
 		--sort by name
 		local haveA, haveB
-		if SoI == "item" then
+		if SUGSoI == "item" then
 			haveA, haveB = ItemCache[a], ItemCache[b]
 		else
 			haveA, haveB = SpellCache[a], SpellCache[b]
@@ -2885,6 +2835,7 @@ function SUG.Sorter(a, b)
 end
 
 function SUG:StartSuggester()
+	SUGSoI = SUG.overrideSoI or CI.SoI
 	SUG.Suggesting = 1
 	SUG.f:SetScript("OnUpdate", SUG.Suggester)
 end
@@ -2957,10 +2908,10 @@ function SUG:Suggester()
 			end
 		end
 	end
-	local SoI = overrideSoI or SoI
+	
 	while GetTime() - start < 0.025 do -- throttle it
 		local id, name
-		if SoI == "item" then
+		if SUGSoI == "item" then
 			id, name = next(ItemCache, SUG.nextCacheKey)
 		elseif t == "cast" and not overrideSoI then
 			id, name = next(CastCache, SUG.nextCacheKey)
@@ -2992,11 +2943,12 @@ end
 function SUG:SuggestingComplete()
 	SUG.offset = min(SUG.offset, max(0, #preTable-#SUG+1))
 	local offset = SUG.offset
+	SUGSoI = SUG.overrideSoI or CI.SoI
+	SUGIMS = CI.IMS
 	if SUG.doSort then
 		sort(preTable, SUG.Sorter)
 		SUG.doSort = nil
 	end
-	local SoI = SUG.overrideSoI or SoI
 
 	local i = 1
 	while SUG[i] do
@@ -3042,7 +2994,7 @@ function SUG:SuggestingComplete()
 				end
 
 			elseif tonumber(id) then --sanity check
-				if SoI == "item" then -- if the entry is an item
+				if SUGSoI == "item" then -- if the entry is an item
 					local name, link = GetItemInfo(id)
 
 					f.Name:SetText(link)
@@ -3067,7 +3019,7 @@ function SUG:SuggestingComplete()
 					f.insert = inputType == "number" and id or name
 
 					f.Icon:SetTexture(GetSpellTexture(id))
-					if IsMultiState and SUG.ActionCache[id] then
+					if SUGIMS and SUG.ActionCache[id] then
 						f.Background:SetVertexColor(0, .44, .87, 1) --color actions that are on your action bars if the type is a multistate cooldown shaman blue
 					elseif SUG.ClassSpellCache[pclass][id] then
 						f.Background:SetVertexColor(.41, .8, .94, 1) --color all other spells that you have in your/your pet's spellbook mage blue
@@ -3084,7 +3036,7 @@ function SUG:SuggestingComplete()
 			if miscprioritize[id] then -- override previous
 				f.Background:SetVertexColor(.58, .51, .79, 1)
 			else
-				local whoCasted = (SoI == "spell") and SUG.AuraCache[id]
+				local whoCasted = (SUGSoI == "spell") and SUG.AuraCache[id]
 				if whoCasted then
 					local r, g, b, a = f.Background:GetVertexColor()
 					if a < .5 then -- only if nothing else has colored the entry yet

@@ -960,12 +960,12 @@ CNDT.Types = {
 	
 -------------------------------------icon functions
 	{ -- spell cooldown
-		text = L["ICONMENU_COOLDOWN"] .. " - " .. L["ICONMENU_SPELL"],
+		text = L["COOLDOWN"] .. " - " .. L["ICONMENU_SPELL"],
 		value = "SPELLCD",
 		category = L["CNDTCAT_SPELLSABILITIES"],
 		range = 30,
 		step = 0.1,
-		name = function(editbox) TMW:TT(editbox, L["ICONMENU_COOLDOWN"] .. " - " .. L["ICONMENU_SPELL"], "CNDT_ONLYFIRST", 1, nil, 1) end,
+		name = function(editbox) TMW:TT(editbox, L["COOLDOWN"] .. " - " .. L["ICONMENU_SPELL"], "CNDT_ONLYFIRST", 1, nil, 1) end,
 		useSUG = true,
 		unit = PLAYER,
 		texttable = setmetatable({[0] = formatSeconds(0).." ("..L["ICONMENU_USABLE"]..")"}, {__index = function(tbl, k) return formatSeconds(k) end}),
