@@ -379,7 +379,7 @@ TMW.Defaults = {
 					DontRefresh			= false,
 					UseActvtnOverlay	= false,
 					OnlyEquipped		= false,
-					EnableStacks		= false,
+					EnableStacks		= true,
 					OnlyInBags			= false,
 					OnlySeen			= false,
 					TotemSlots			= "1111",
@@ -2674,6 +2674,7 @@ function TMW:Icon_Update(icon)
 
 	icon.__previcon = nil
 	icon.__alpha = nil
+	icon.__count = "UPDATE ME!"
 	icon.__tex = icon.texture:GetTexture()
 	icon.__realDuration = icon.__realDuration or 0
 	icon.CndtFailed = nil
@@ -2710,7 +2711,6 @@ function TMW:Icon_Update(icon)
 	local pbar = icon.pbar
 	local cbar = icon.cbar
 	if Locked then
-		-- avoid doing any icon:SetAlpha or icon:SetInfo here because it will screw up event handling when TMW:Update() is called from talent update events during zone change
 		if icon.texture:GetTexture() == "Interface\\AddOns\\TellMeWhen\\Textures\\Disabled" then
 			icon:SetTexture(nil)
 		end
@@ -2728,6 +2728,9 @@ function TMW:Icon_Update(icon)
 			cbar:SetValue(0)
 		end
 		cbar:SetAlpha(.9)
+		if not tContains(IconUpdateFuncs, icon) then
+			icon:SetAlpha(0)
+		end
 	else
 		ClearScripts(icon)
 

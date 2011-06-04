@@ -60,6 +60,7 @@ local RelevantSettings = {
 }
 
 local Type = TMW:RegisterIconType("cooldown", RelevantSettings)
+LibStub("AceEvent-3.0"):Embed(Type)
 Type.name = L["ICONMENU_COOLDOWN"]
 Type.TypeChecks = {
 	text = L["ICONMENU_COOLDOWNTYPE"],
@@ -163,6 +164,17 @@ local function SpellCooldown_OnUpdate(icon, time)
 end
 
 
+local ItemCount = setmetatable({}, {__index = function(tbl, k)
+	local count = GetItemCount(k, nil, 1)
+	tbl[k] = count
+	return count
+end}) Type.ItemCount = ItemCount
+function Type:BAG_UPDATE()
+	for k in pairs(ItemCount) do
+		ItemCount[k] = GetItemCount(k, nil, 1)
+	end
+end
+
 local function ItemCooldown_OnEvent(icon)
 	-- the reason for doing it like this is because this event will fire several times at once sometimes,
 	-- but there is no reason to recheck things until they are needed next.
@@ -188,7 +200,7 @@ local function ItemCooldown_OnUpdate(icon, time)
 			n = i
 			start, duration = GetItemCooldown(iName)
 			if duration then
-				inrange, equipped, count = 1, true, GetItemCount(iName, nil, 1)
+				inrange, equipped, count = 1, true, ItemCount[iName]
 				if RangeCheck then
 					inrange = IsItemInRange(iName, "target") or 1
 				end
@@ -199,7 +211,7 @@ local function ItemCooldown_OnUpdate(icon, time)
 				isGCD = OnGCD(duration)
 				if equipped and inrange == 1 and (duration == 0 or isGCD) then --usable
 
-					icon:SetInfo(icon.Alpha, 1, GetItemIcon(iName) or "Interface\\Icons\\INV_Misc_QuestionMark", start, duration, true, nil, nil, EnableStacks and count > 1 and count)
+					icon:SetInfo(icon.Alpha, 1, GetItemIcon(iName) or "Interface\\Icons\\INV_Misc_QuestionMark", start, duration, true, nil, nil, count, EnableStacks and count > 1 and count or "")
 
 					return
 				end
@@ -210,7 +222,7 @@ local function ItemCooldown_OnUpdate(icon, time)
 		if OnlyInBags then
 			for i = 1, #NameArray do
 				local iName = NameArray[i]
-				if (OnlyEquipped and IsEquippedItem(iName)) or (not OnlyEquipped and GetItemCount(iName) > 0) then
+				if (OnlyEquipped and IsEquippedItem(iName)) or (not OnlyEquipped and ItemCount[iName] > 0) then
 					NameFirst2 = iName
 					break
 				end
@@ -224,7 +236,7 @@ local function ItemCooldown_OnUpdate(icon, time)
 		end
 		if n > 1 then -- if there is more than 1 spell that was checked then we need to get these again for the first spell, otherwise reuse the values obtained above since they are just for the first one
 			start, duration = GetItemCooldown(NameFirst2)
-			inrange, count = 1, GetItemCount(iName, nil, 1)
+			inrange, count = 1, ItemCount[iName]
 			if RangeCheck then
 				inrange = IsItemInRange(NameFirst2, "target") or 1
 			end
@@ -244,7 +256,7 @@ local function ItemCooldown_OnUpdate(icon, time)
 			else
 				alpha, color = icon.UnAlpha, 1
 			end
-			icon:SetInfo(alpha, color, GetItemIcon(NameFirst2), start, duration, true, nil, nil, EnableStacks and count > 1 and count)
+			icon:SetInfo(alpha, color, GetItemIcon(NameFirst2), start, duration, true, nil, nil, count, EnableStacks and count > 1 and count or "")
 		else
 			icon:SetAlpha(0)
 		end
@@ -357,7 +369,9 @@ function Type:Setup(icon, groupID, iconID)
 		else
 			icon:SetTexture("Interface\\Icons\\INV_Misc_QuestionMark")
 		end
-
+		
+		Type:RegisterEvent("BAG_UPDATE")
+		
 		icon:SetScript("OnUpdate", ItemCooldown_OnUpdate)
 		icon:OnUpdate(TMW.time)
 	end
@@ -393,17 +407,17 @@ function Type:IE_TypeLoaded()
 		IE.Main.ShowCBar:SetEnabled(1)
 		IE.Main.OnlyEquipped:Show()
 		IE.Main.EnableStacks:Show()
-		if IE.Main.EnableStacks:GetChecked() then
+	--	if IE.Main.EnableStacks:GetChecked() then
 			IE.Main.StackMin:Show()
 			IE.Main.StackMax:Show()
 			IE.Main.StackMinEnabled:Show()
 			IE.Main.StackMaxEnabled:Show()
-		else
+	--[[	else
 			IE.Main.StackMin:Hide()
 			IE.Main.StackMax:Hide()
 			IE.Main.StackMinEnabled:Hide()
 			IE.Main.StackMaxEnabled:Hide()
-		end
+		end]]
 		IE.Main.OnlyInBags:Show()
 		IE.Main.ManaCheck:Hide()
 	else

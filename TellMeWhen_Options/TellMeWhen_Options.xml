@@ -2439,7 +2439,7 @@
 					</CheckButton>
 					<CheckButton name="$parentEnableStacks" inherits="TellMeWhen_CheckTemplate" parentKey="EnableStacks">
 						<Anchors>
-							<Anchor point="TOPLEFT" relativeTo="$parentOnlyEquipped" relativePoint="BOTTOMLEFT" x="0" y="4" />
+							<Anchor point="TOPLEFT" relativeTo="$parentShowTText" relativePoint="BOTTOMLEFT" x="0" y="4" />
 						</Anchors>
 						<Scripts>
 							<OnLoad>
