@@ -31,7 +31,7 @@ local DRData = LibStub("DRData-1.0", true)
 
 TELLMEWHEN_VERSION = "4.3.0"
 TELLMEWHEN_VERSION_MINOR = ""
-TELLMEWHEN_VERSIONNUMBER = 43009 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
+TELLMEWHEN_VERSIONNUMBER = 43011 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
 if TELLMEWHEN_VERSIONNUMBER > 44000 or TELLMEWHEN_VERSIONNUMBER < 43000 then error("YOU SCREWED UP THE VERSION NUMBER OR DIDNT CHANGE THE SAFETY LIMITS") return end -- safety check because i accidentally made the version number 414069 once
 
 TELLMEWHEN_MAXGROUPS = 1 	--this is a default, used by SetTheory (addon), so dont rename
@@ -611,13 +611,14 @@ TMW.ChannelList = {
 		icon = 1,
 		color = 1,
 		defaultlocation = "MSG",
-		frames = {
+		frames = SCT and {
 		  [SCT.FRAME1] = "Frame 1",
 		  [SCT.FRAME2] = "Frame 2",
 		  [SCT.FRAME3 or SCT.MSG] = "SCTD", -- cheesy, i know
 		  [SCT.MSG] = "Messages",
 		},
 		dropdown = function()
+			if not SCT then return end
 			for id, name in pairs(TMW.ChannelLookup.SCT.frames) do
 				local info = UIDropDownMenu_CreateInfo()
 				info.func = TMW.ANN.LocDropdownFunc
@@ -629,6 +630,7 @@ TMW.ChannelList = {
 			end
 		end,
 		ddtext = function(value)
+			if not SCT then return end
 			return TMW.ChannelLookup.SCT.frames[value]
 		end,
 	},
