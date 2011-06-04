@@ -31,7 +31,7 @@ local DRData = LibStub("DRData-1.0", true)
 
 TELLMEWHEN_VERSION = "4.3.0"
 TELLMEWHEN_VERSION_MINOR = ""
-TELLMEWHEN_VERSIONNUMBER = 43011 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
+TELLMEWHEN_VERSIONNUMBER = 43012 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
 if TELLMEWHEN_VERSIONNUMBER > 44000 or TELLMEWHEN_VERSIONNUMBER < 43000 then error("YOU SCREWED UP THE VERSION NUMBER OR DIDNT CHANGE THE SAFETY LIMITS") return end -- safety check because i accidentally made the version number 414069 once
 
 TELLMEWHEN_MAXGROUPS = 1 	--this is a default, used by SetTheory (addon), so dont rename
@@ -2352,6 +2352,7 @@ local function SetInfo(icon, alpha, color, texture, start, duration, checkGCD, p
 		if pbName and (updatePBar or icon.__pbName ~= pbName) then
 			local _, _, _, cost, _, powerType = GetSpellInfo(pbName)
 			if cost then
+				cost = powerType == 9 and 3 or cost
 				pbar:SetMinMaxValues(0, cost)
 				pbar.Max = cost
 				pbar.InvertBars = icon.InvertBars
@@ -2493,7 +2494,7 @@ local function Icon_Bars_Update(icon)
 		pbar.offset = icon.PBarOffs or 0
 		pbar.InvertBars = icon.InvertBars
 		icon.PBarOffs = nil --reduce table clutter, we dont need this anymore
-		pbar:SetScript("OnValueChanged", PwrBarOnValueChanged)
+	--	pbar:SetScript("OnValueChanged", PwrBarOnValueChanged)
 	else
 		pbar:Hide()
 	end

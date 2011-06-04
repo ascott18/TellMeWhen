@@ -6,6 +6,7 @@
  * Significantly increased the efficiency of the icon setup process. If you have a large number of icons, you will almost certainly notice a difference.
  * Export strings are a little prettier when pasted.
  * Text outputs to addons can now specify the color and font size of the message.
+ * Power bars for spells that use holy power should always use a max value of 3.
  * Bug Fixes:
  ** (r99) buff.lua:87 attempt to perform arithmetic on upvalue 'UPD_INTV' (a nil value) //Not reproduced, but the fix should work//
  ** (r99) TellMeWhen.lua:1039 bad argument #1 to 'pairs' (table expected, got nil)
