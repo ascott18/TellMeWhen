@@ -31,7 +31,7 @@ local DRData = LibStub("DRData-1.0", true)
 
 TELLMEWHEN_VERSION = "4.3.0"
 TELLMEWHEN_VERSION_MINOR = ""
-TELLMEWHEN_VERSIONNUMBER = 43012 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
+TELLMEWHEN_VERSIONNUMBER = 43013 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
 if TELLMEWHEN_VERSIONNUMBER > 44000 or TELLMEWHEN_VERSIONNUMBER < 43000 then error("YOU SCREWED UP THE VERSION NUMBER OR DIDNT CHANGE THE SAFETY LIMITS") return end -- safety check because i accidentally made the version number 414069 once
 
 TELLMEWHEN_MAXGROUPS = 1 	--this is a default, used by SetTheory (addon), so dont rename
@@ -40,10 +40,8 @@ local UPD_INTV = 0.06	--this is a default, local because i use it in onupdate fu
 
 local GetSpellCooldown, GetSpellInfo, GetSpellTexture =
 	  GetSpellCooldown, GetSpellInfo, GetSpellTexture
-local GetItemInfo, GetInventoryItemID =
-	  GetItemInfo, GetInventoryItemID
-local GetShapeshiftForm, GetNumShapeshiftForms, GetNumRaidMembers =
-	  GetShapeshiftForm, GetNumShapeshiftForms, GetNumRaidMembers
+local GetShapeshiftForm, GetNumRaidMembers, GetPartyAssignment =
+	  GetShapeshiftForm, GetNumRaidMembers, GetPartyAssignment
 local UnitPower, PowerBarColor =
 	  UnitPower, PowerBarColor
 local PlaySoundFile, SendChatMessage =
@@ -52,20 +50,21 @@ local tonumber, tostring, type, pairs, ipairs, tinsert, tremove, sort, select, w
 	  tonumber, tostring, type, pairs, ipairs, tinsert, tremove, sort, select, wipe, rawget, tDeleteItem
 local strfind, strmatch, format, gsub, strsub, strtrim, strsplit, strlower, min, max, ceil, floor =
 	  strfind, strmatch, format, gsub, strsub, strtrim, strsplit, strlower, min, max, ceil, floor
+local _G, GetTime, debugstack =
+	  _G, GetTime, debugstack
+local MikSBT, Parrot, SCT =
+	  MikSBT, Parrot, SCT
 local CL_PLAYER = COMBATLOG_OBJECT_TYPE_PLAYER
 local CL_PET = COMBATLOG_OBJECT_CONTROL_PLAYER
 local bitband = bit.band
-local GetTime, debugstack = GetTime, debugstack
-local _G = _G
-local _, pclass = UnitClass("Player")
 local st, co, updatehandler, BarGCD, ClockGCD, Locked, CNDT, SndChan
 local runEvents, updatePBar = 1, 1
 local GCD, NumShapeshiftForms, UpdateTimer = 0, 0, 0
+local IconUpdateFuncs, GroupUpdateFuncs, unitsToChange = {}, {}, {}
 local time = GetTime() TMW.time = time
-local unitsToChange = {}
-local sctcolor = {r=1,b=1,g=1}
+local sctcolor = {r=1, b=1, g=1}
 local clientVersion = select(4, GetBuildInfo())
-
+local _, pclass = UnitClass("Player")
 
 TMW.Print = TMW.Print or _G.print
 TMW.Warn = setmetatable({}, {__call = function(tbl, text)
@@ -242,12 +241,29 @@ do -- Iterators
 	end
 end
 
+TMW.Types = {
+	[""] = {
+		Setup = function(Type, icon)
+			if icon.Name ~= "" then
+				icon:SetTexture("Interface\\Icons\\INV_Misc_QuestionMark")
+			else
+				icon:SetTexture(nil)
+			end
+		end,
+		Update = function() end,
+		HideBars = true,
+	},
+}
+
 TMW.RelevantSettings = {
 	all = {
 		Enabled = true,
 		Type = true,
 		Events = true,
 		Conditions = true,
+	},
+	[""] = {
+		Name = true,
 	},
 }
 
@@ -379,7 +395,7 @@ TMW.Defaults = {
 					DontRefresh			= false,
 					UseActvtnOverlay	= false,
 					OnlyEquipped		= false,
-					EnableStacks		= true,
+					EnableStacks		= false,
 					OnlyInBags			= false,
 					OnlySeen			= false,
 					TotemSlots			= "1111",
@@ -429,7 +445,6 @@ TMW.DS = {
 	Poison = "Interface\\Icons\\spell_nature_corrosivebreath",
 	Enraged = "Interface\\Icons\\ability_druid_challangingroar",
 }
-
 TMW.BE = {
 	--Much of these are thanks to Malazee @ US-Dalaran's chart: http://forums.wow-petopia.com/download/file.php?mode=view&id=4979 and spreadsheet https://spreadsheets.google.com/ccc?key=0Aox2ZHZE6e_SdHhTc0tZam05QVJDU0lONnp0ZVgzdkE&hl=en#gid=18
 	--Many more new spells/corrections were provided by Catok of Curse
@@ -610,7 +625,7 @@ TMW.ChannelList = {
 		sticky = 1,
 		icon = 1,
 		color = 1,
-		defaultlocation = "MSG",
+		defaultlocation = SCT and SCT.FRAME1,
 		frames = SCT and {
 		  [SCT.FRAME1] = "Frame 1",
 		  [SCT.FRAME2] = "Frame 2",
@@ -692,15 +707,6 @@ TMW.ChannelLookup = {}
 for k, v in pairs(TMW.ChannelList) do
 	TMW.ChannelLookup[v.channel] = v
 end local ChannelLookup = TMW.ChannelLookup
-
-TMW.Cooldowns = setmetatable({}, {__index = function(t, k)
-	local n = {}
-	t[k] = n
-	return n
-end})
-
-local IconUpdateFuncs = {}
-local GroupUpdateFuncs = {}
 
 do -- STANCES
 	TMW.Stances = {
@@ -909,7 +915,7 @@ function TMW:OnCommReceived(prefix, text, channel, who)
 	if prefix == "TMWV" and strsub(text, 1, 1) == "M" and not TMW.VersionWarned then
 		local major, minor, revision = strmatch(text, "M:(.*)%^m:(.*)%^R:(.*)%^")
 		revision = tonumber(revision)
-		if revision and major and minor and revision > TELLMEWHEN_VERSIONNUMBER then
+		if revision and major and minor and revision > TELLMEWHEN_VERSIONNUMBER and revision ~= 414069 then
 			TMW.VersionWarned = true
 			TMW:Printf(L["NEWVERSION"], major .. minor)
 		end
@@ -1735,7 +1741,7 @@ function TMW:RAID_ROSTER_UPDATE()
 	local maN = 1
 	--setup a table with (key, value) pairs as (oldnumber, newnumber) (oldnumber is 7 for raid7, newnumber is 1 for raid7 when the current maintank/assist is the first one found, 2 for the 2nd one found, etc)
 	for i = 1, GetNumRaidMembers() do
-		raidunit = "raid" .. i
+		local raidunit = "raid" .. i
 		if GetPartyAssignment("MAINTANK", raidunit) then
 			mtTranslations[mtN] = i
 			mtN = mtN + 1
@@ -2017,8 +2023,14 @@ end
 
 
 -- ------------------
--- ICON SCRIPTS, ETC
+-- ICONS
 -- ------------------
+
+local function LMBSkinHook(self)
+	if self and self.Addon == "TellMeWhen" then
+		TMW:ScheduleUpdate(.2)
+	end
+end local hookedLMBSkin
 
 local function OnGCD(d)
 	if d == 1 then return true end -- a cd of 1 is always a GCD (or at least isn't worth showing)
@@ -2418,26 +2430,15 @@ local IconMetamethods = {
 }
 
 
--- -------------
--- ICONS
--- -------------
 
-TMW.Types = {
-	[""] = {
-		Setup = function(Type, icon)
-			if icon.Name ~= "" then
-				icon:SetTexture("Interface\\Icons\\INV_Misc_QuestionMark")
-			else
-				icon:SetTexture(nil)
-			end
-		end,
-		Update = function() end,
-		HideBars = true,
-	},
-}
-TMW.RelevantSettings[""] = {
-	Name = true,
-}
+function TMW:RegisterIconType(Type, relevantSettings)
+	local t = CreateFrame("Frame")
+	TMW.Types[Type] = t
+	t.type = Type
+	tinsert(TMW.OrderedTypes, t)
+	TMW.RelevantSettings[Type] = relevantSettings
+	return t
+end
 
 function TMW:CreateIcon(group, groupID, iconID)
 	local icon = CreateFrame("Button", "TellMeWhen_Group" .. groupID .. "_Icon" .. iconID, group, "TellMeWhen_IconTemplate", iconID)
@@ -2457,17 +2458,19 @@ function TMW:CreateIcon(group, groupID, iconID)
 	return icon
 end
 
-function TMW:RegisterIconType(Type, relevantSettings)
-	local t = CreateFrame("Frame")
-	TMW.Types[Type] = t
-	t.type = Type
-	tinsert(TMW.OrderedTypes, t)
-	TMW.RelevantSettings[Type] = relevantSettings
-	return t
+function TMW.IconsSort(a, b)
+	local icon1, icon2 = _G[a], _G[b]
+	local g1 = icon1.group:GetID()
+	local g2 = icon2.group:GetID()
+	if g1 ~= g2 then
+		return g1 < g2
+	else
+		return icon1:GetID() < icon2:GetID()
+	end
 end
 
-local blizzEdgeInsets = 1.5
-local function Icon_Bars_Update(icon)
+function TMW:Icon_UpdateBars(icon)
+	local blizzEdgeInsets = 1.5
 	local pbar = icon.pbar
 	local cbar = icon.cbar
 	if icon.ShowPBar and icon.NameFirst then
@@ -2523,16 +2526,6 @@ local function Icon_Bars_Update(icon)
 		cbar:Hide()
 	end
 end
-
-function TMW.IconsSort(a, b)
-	return TMW:GetGlobalIconID(strmatch(a, "TellMeWhen_Group(%d+)_Icon(%d+)")) < TMW:GetGlobalIconID(strmatch(b, "TellMeWhen_Group(%d+)_Icon(%d+)"))
-end
-
-local function LMBSkinHook(self)
-	if self and self.Addon == "TellMeWhen" then
-		TMW:ScheduleUpdate(.2)
-	end
-end local hookedLMBSkin
 
 function TMW:Icon_Update(icon)
 	if not icon then return end
@@ -2688,6 +2681,7 @@ function TMW:Icon_Update(icon)
 		icon.Alpha = 0
 	end
 
+	TMW.time = GetTime()
 	if icon.Enabled or not Locked then
 		if TMW.Types[icon.Type] then
 			TMW.Types[icon.Type]:Update()
@@ -2705,11 +2699,14 @@ function TMW:Icon_Update(icon)
 	end
 	if icon.FakeHidden and not dontremove then
 		tDeleteItem(IconUpdateFuncs, icon)
+		if Locked then
+			icon:SetAlpha(0)
+		end
 	end
 
 	icon.__previousNameFirst = nil -- not needed now
 
-	Icon_Bars_Update(icon, groupID, iconID)
+	TMW:Icon_UpdateBars(icon, groupID, iconID)
 	icon:Show()
 	local pbar = icon.pbar
 	local cbar = icon.cbar
@@ -2731,9 +2728,6 @@ function TMW:Icon_Update(icon)
 			cbar:SetValue(0)
 		end
 		cbar:SetAlpha(.9)
-		if not tContains(IconUpdateFuncs, icon) then
-			icon:SetAlpha(0)
-		end
 	else
 		ClearScripts(icon)
 
@@ -3026,12 +3020,6 @@ function TMW:DoSetTexture(icon)
 	t == "Interface\\Icons\\Temp" then
 		return true
 	end
-end
-
-function TMW:GetGlobalIconID(g, i)
-	i = tostring(i) -- cant take the length of a number
-	return tonumber(g .. strrep("0", 3-#i) .. i) -- add zeroes to the beginning of the iconID so that there cant be any duplicate globalIDs
-	--for example, 111 could be group1icon11 or group11icon1, whereas 11001 is surely group11icon1 and 1011 is surely group1icon11
 end
 
 local TTShow = function(self)

@@ -2348,6 +2348,44 @@ function SND:SetTabText()
 end
 
 function SND:OnInitialize()
+	local Events = SND.Events
+	Events.Header:SetText(L["SOUND_EVENTS"])
+	local previous
+	for i=1, #TMW.EventList do
+		local f = CreateFrame("Button", Events:GetName().."Event"..i, Events, "TellMeWhen_SoundEvent", i)
+		Events[i] = f
+		f:SetPoint("TOPLEFT", previous, "BOTTOMLEFT")
+		f:SetPoint("TOPRIGHT", previous, "BOTTOMRIGHT")
+		f.event = TMW.EventList[i].name
+		f.setting = "Sound" .. f.event
+		f.EventName:SetText(TMW.EventList[i].text)
+		TMW:TT(f, TMW.EventList[i].text, TMW.EventList[i].desc, 1, 1)
+		previous = f
+	end
+	Events[1]:SetPoint("TOPLEFT", Events, "TOPLEFT", 0, 0)
+	Events[1]:SetPoint("TOPRIGHT", Events, "TOPRIGHT", 0, 0)
+	Events:SetHeight(#Events*Events[1]:GetHeight())
+	SND:SelectEvent(1)	
+	
+	local Sounds = SND.Sounds
+	Sounds.Header:SetText(L["SOUND_SOUNDTOPLAY"])
+	local previous = Sounds.None
+	SND[0] = previous
+	previous:SetPoint("TOPLEFT", Sounds, "TOPLEFT", 0, 0)
+	previous:SetPoint("TOPRIGHT", Sounds, "TOPRIGHT", 0, 0)
+	previous.Name:SetText(NONE)
+	previous.Play:Hide()
+	previous.soundfile = ""
+	previous.soundname = "None"
+	for i=1, floor(Sounds:GetHeight())/Sounds.None:GetHeight() do
+		local f = CreateFrame("Button", Sounds:GetName().."Sound"..i, Sounds, "TellMeWhen_SoundSelectButton", i)
+		Sounds[i] = f
+		f:SetPoint("TOPLEFT", previous, "BOTTOMLEFT", 0, 0)
+		f:SetPoint("TOPRIGHT", previous, "BOTTOMRIGHT", 0, 0)
+		previous = f
+	end
+	SND:SetSoundsOffset(0)
+	
 	SND.Sounds.ScrollBar:SetValue(0)
 end
 
@@ -2358,6 +2396,49 @@ end
 
 ANN = TMW:NewModule("Announcements") TMW.ANN = ANN
 local ChannelLookup = TMW.ChannelLookup
+
+function ANN:OnInitialize()
+	local Events = ANN.Events
+	Events.Header:SetText(L["SOUND_EVENTS"])
+	local previous
+	for i=1, #TMW.EventList do
+		local f = CreateFrame("Button", Events:GetName().."Event"..i, Events, "TellMeWhen_AnnounceEvent", i)
+		Events[i] = f
+		f:SetPoint("TOPLEFT", previous, "BOTTOMLEFT")
+		f:SetPoint("TOPRIGHT", previous, "BOTTOMRIGHT")
+		f.event = TMW.EventList[i].name
+		f.EventName:SetText(TMW.EventList[i].text)
+		TMW:TT(f, TMW.EventList[i].text, TMW.EventList[i].desc, 1, 1)
+		previous = f
+	end
+	Events[1]:SetPoint("TOPLEFT", Events, "TOPLEFT", 0, 0)
+	Events[1]:SetPoint("TOPRIGHT", Events, "TOPRIGHT", 0, 0)
+	Events:SetHeight(#Events*Events[1]:GetHeight())
+	
+	local Channels = ANN.Channels
+	Channels.Header:SetText(L["ANN_CHANTOUSE"])
+	local previous
+	local offs = 0
+	for i, t in ipairs(TMW.ChannelList) do
+		if not t.hidden then
+			i = i + offs
+			local f = CreateFrame("Button", Channels:GetName().."Channel"..i, Channels, "TellMeWhen_ChannelSelectButton", i)
+			Channels[i] = f
+			f:SetPoint("TOPLEFT", previous, "BOTTOMLEFT", 0, 0)
+			f:SetPoint("TOPRIGHT", previous, "BOTTOMRIGHT", 0, 0)
+			previous = f
+			f.channel = t.channel
+			f.Name:SetText(t.text)
+			f:Show()
+			TMW:TT(f, t.text, t.addon, 1, 1)
+		else
+			offs = offs - 1
+		end
+	end
+	Channels[1]:SetPoint("TOPLEFT", Channels, "TOPLEFT", 0, 0)
+	Channels[1]:SetPoint("TOPRIGHT", Channels, "TOPRIGHT", 0, 0)
+	Channels:SetHeight(#Channels*Channels[1]:GetHeight())
+end
 
 function ANN:SelectEvent(id)
 	ANN.Editbox:ClearFocus()

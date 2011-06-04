@@ -3425,32 +3425,6 @@
 								</FontString>
 							</Layer>
 						</Layers>
-						<Scripts>
-							<OnLoad>
-
-								self.Header:SetText(TMW.L["SOUND_EVENTS"])
-
-								local previous
-								for i=1, #TMW.EventList do
-									local f = CreateFrame("Button", self:GetName().."Event"..i, self, "TellMeWhen_SoundEvent", i)
-									self[i] = f
-									f:SetPoint("TOPLEFT", previous, "BOTTOMLEFT")
-									f:SetPoint("TOPRIGHT", previous, "BOTTOMRIGHT")
-									f.event = TMW.EventList[i].name
-									f.setting = "Sound" .. f.event
-									f.EventName:SetText(TMW.EventList[i].text)
-									TMW:TT(f, TMW.EventList[i].text, TMW.EventList[i].desc, 1, 1)
-									previous = f
-								end
-
-								self[1]:SetPoint("TOPLEFT", self, "TOPLEFT", 0, 0)
-								self[1]:SetPoint("TOPRIGHT", self, "TOPRIGHT", 0, 0)
-
-								self:SetHeight(#self*self[1]:GetHeight())
-								TMW.SND.Events = self
-								TMW.SND:SelectEvent(1)
-							</OnLoad>
-						</Scripts>
 					</Frame>
 					<Frame name="$parentSounds" parentKey="Sounds">
 						<Size x="320" y="266"/>
@@ -3503,31 +3477,6 @@
 								</FontString>
 							</Layer>
 						</Layers>
-						<Scripts>
-							<OnLoad>
-								self.Header:SetText(TMW.L["SOUND_SOUNDTOPLAY"])
-								local previous = self.None
-								TMW.SND[0] = previous
-
-								previous:SetPoint("TOPLEFT", self, "TOPLEFT", 0, 0)
-								previous:SetPoint("TOPRIGHT", self, "TOPRIGHT", 0, 0)
-
-								previous.Name:SetText(NONE)
-								previous.Play:Hide()
-								previous.soundfile = ""
-								previous.soundname = "None"
-
-								for i=1, floor(self:GetHeight())/self.None:GetHeight() do
-									local f = CreateFrame("Button", self:GetName().."Sound"..i, self, "TellMeWhen_SoundSelectButton", i)
-									self[i] = f
-									f:SetPoint("TOPLEFT", previous, "BOTTOMLEFT", 0, 0)
-									f:SetPoint("TOPRIGHT", previous, "BOTTOMRIGHT", 0, 0)
-									previous = f
-								end
-								TMW.SND.Sounds = self
-								TMW.SND:SetSoundsOffset(0)
-							</OnLoad>
-						</Scripts>
 					</Frame>
 					<EditBox name="$parentCustom" parentKey="Custom" inherits="TellMeWhen_InputBoxTemplate">
 						<Size y="15"/>
@@ -3705,28 +3654,6 @@
 								</FontString>
 							</Layer>
 						</Layers>
-						<Scripts>
-							<OnLoad>
-								self.Header:SetText(TMW.L["SOUND_EVENTS"])
-
-								local previous
-								for i=1, #TMW.EventList do
-									local f = CreateFrame("Button", self:GetName().."Event"..i, self, "TellMeWhen_AnnounceEvent", i)
-									self[i] = f
-									f:SetPoint("TOPLEFT", previous, "BOTTOMLEFT")
-									f:SetPoint("TOPRIGHT", previous, "BOTTOMRIGHT")
-									f.event = TMW.EventList[i].name
-									f.EventName:SetText(TMW.EventList[i].text)
-									TMW:TT(f, TMW.EventList[i].text, TMW.EventList[i].desc, 1, 1)
-									previous = f
-								end
-
-								self[1]:SetPoint("TOPLEFT", self, "TOPLEFT", 0, 0)
-								self[1]:SetPoint("TOPRIGHT", self, "TOPRIGHT", 0, 0)
-
-								self:SetHeight(#self*self[1]:GetHeight())
-							</OnLoad>
-						</Scripts>
 					</Frame>
 					<Frame name="$parentChannels" parentKey="Channels">
 						<Size x="170" y="266"/>
@@ -3750,35 +3677,6 @@
 								</FontString>
 							</Layer>
 						</Layers>
-						<Scripts>
-							<OnLoad>
-								self.Header:SetText(TMW.L["ANN_CHANTOUSE"])
-								local previous
-
-								local offs = 0
-								for i, t in ipairs(TMW.ChannelList) do
-									if not t.hidden then
-										i = i + offs
-										local f = CreateFrame("Button", self:GetName().."Channel"..i, self, "TellMeWhen_ChannelSelectButton", i)
-										self[i] = f
-										f:SetPoint("TOPLEFT", previous, "BOTTOMLEFT", 0, 0)
-										f:SetPoint("TOPRIGHT", previous, "BOTTOMRIGHT", 0, 0)
-										previous = f
-										f.channel = t.channel
-										f.Name:SetText(t.text)
-										f:Show()
-										TMW:TT(f, t.text, t.addon, 1, 1)
-									else
-										offs = offs - 1
-									end
-								end
-								self[1]:SetPoint("TOPLEFT", self, "TOPLEFT", 0, 0)
-								self[1]:SetPoint("TOPRIGHT", self, "TOPRIGHT", 0, 0)
-								self:SetHeight(#self*self[1]:GetHeight())
-
-								TMW.ANN.Channels = self
-							</OnLoad>
-						</Scripts>
 					</Frame>
 					<Frame name="$parentLocation" inherits="UIDropDownMenuTemplate" parentKey="Location">
 						<Anchors>
