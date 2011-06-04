@@ -98,7 +98,7 @@ local function Buff_OnUpdate(icon, time)
 
 		local buffName, _, iconTexture, count, dispelType, duration, expirationTime, _, _, _, id
 		local d = Sort == -1 and huge or 0
-		
+
 		for u = 1, #Units do
 			local unit = Units[u]
 			if UnitExists(unit) then
@@ -221,7 +221,7 @@ function Type:Setup(icon, groupID, iconID)
 	icon:SetReverse(true)
 	icon.NAL = icon.NameNameDictionary[strlower(GetSpellInfo(8921))] and EFF_THR + 1 or #icon.NameArray -- need to force any icon looking for moonfire to check all auras on the target because of a blizzard bug in WoW 4.1.
 	icon.NAL = icon.Sort and #icon.NameArray > 1 and EFF_THR + 1 or icon.NAL
-	
+
 	icon.FirstTexture = SpellTextures[icon.NameFirst]
 	if icon.Name == "" then
 		icon:SetTexture("Interface\\Icons\\INV_Misc_QuestionMark")

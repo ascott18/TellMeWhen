@@ -91,7 +91,7 @@ local function func(icon, g, i)
 	if not dr then
 		dr = {
 			amt = 50,
-			start = TMW.time, 
+			start = TMW.time,
 			duration = 18,
 			tex = SpellTextures[i]
 		}
@@ -136,7 +136,7 @@ local function DR_OnEvent(icon, _, _, p, ...)
 						if not dr then
 							dr = {
 								amt = 50,
-								start = TMW.time, 
+								start = TMW.time,
 								duration = 18,
 								tex = SpellTextures[i]
 							}
@@ -163,7 +163,7 @@ local function DR_OnUpdate(icon, time)
 		icon.UpdateTimer = time
 		local CndtCheck = icon.CndtCheck if CndtCheck and CndtCheck() then return end
 		local Alpha, UnAlpha, Units = icon.Alpha, icon.UnAlpha, icon.Units
-		
+
 		for u = 1, #Units do
 			local unit = Units[u]
 			local dr = icon[UnitGUID(unit)]
@@ -189,7 +189,7 @@ local function DR_OnUpdate(icon, time)
 		end
 		icon:SetAlpha(0)
 	end
-end			
+end
 
 local warnedMismatch = {}
 function Type:Setup(icon, groupID, iconID)
@@ -221,7 +221,7 @@ function Type:Setup(icon, groupID, iconID)
 			end
 		end
 	end
-	
+
 	if icon.Name == "" then
 		icon:SetTexture("Interface\\Icons\\INV_Misc_QuestionMark")
 	elseif GetSpellTexture(icon.NameFirst) then
@@ -232,7 +232,7 @@ function Type:Setup(icon, groupID, iconID)
 
 	icon:SetScript("OnEvent", DR_OnEvent)
 	icon:RegisterEvent("COMBAT_LOG_EVENT_UNFILTERED")
-	
+
 	icon:SetScript("OnUpdate", DR_OnUpdate)
 	icon:OnUpdate(TMW.time)
 end

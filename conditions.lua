@@ -386,7 +386,7 @@ Env = {
 	IsSpellInRange = IsSpellInRange,
 	IsItemInRange = IsItemInRange,
 	GetCurrencyInfo = GetCurrencyInfo,
-	
+
 	AuraStacks = AuraStacks,
 	AuraDur = AuraDur,
 	AuraCount = AuraCount,
@@ -428,12 +428,12 @@ local function formatSeconds(seconds)
 	local h = (seconds % 86400) / 3600
 	local m = (seconds % 86400  % 3600) / 60
 	local s =  seconds % 86400  % 3600  % 60
-	
+
 	s = tonumber(format("%.1f", s))
 	if s < 10 then
 		s = "0" .. s
 	end
-	
+
 	if d >= 1 then return format("%d:%02d:%02d:%s", d, h, m, s) end
 	if h >= 1 then return format("%d:%02d:%s", h, m, s) end
 	return format("%d:%s", m, s)
@@ -657,7 +657,7 @@ CNDT.Types = {
 		funcstr = [[GetComboPoints("player", c.Unit) c.Operator c.Level]],
 	},
 
-	
+
 -------------------------------------status/attributes
 	{ -- exists
 		text = L["CONDITIONPANEL_EXISTS"],
@@ -811,7 +811,7 @@ CNDT.Types = {
 		tcoords = {
 			CLASS_ICON_TCOORDS[pclass][1]+.02,
 			CLASS_ICON_TCOORDS[pclass][2]-.02,
-			CLASS_ICON_TCOORDS[pclass][3]+.02, 
+			CLASS_ICON_TCOORDS[pclass][3]+.02,
 			CLASS_ICON_TCOORDS[pclass][4]-.02,
 		},
 		funcstr = function(c)
@@ -957,7 +957,7 @@ CNDT.Types = {
 		funcstr = [[CurrentTree c.Operator c.Level]],
 	},
 
-	
+
 -------------------------------------icon functions
 	{ -- spell cooldown
 		text = L["COOLDOWN"] .. " - " .. L["ICONMENU_SPELL"],
@@ -1021,7 +1021,7 @@ CNDT.Types = {
 			return 1-c.Level .. [[ == (IsSpellInRange(c.NameName, c.Unit) or 0)]]
 		end,
 	},
-	
+
 	{ -- item cooldown
 		text = L["ITEMCOOLDOWN"],
 		value = "ITEMCD",
@@ -1082,7 +1082,7 @@ CNDT.Types = {
 		tcoords = standardtcoords,
 		funcstr = [[c.1nil == IsEquippedItem(c.ItemID)]],
 	},
-	
+
 	{ -- unit buff duration
 		text = L["ICONMENU_BUFF"] .. " - " .. L["DURATIONPANEL_TITLE"],
 		value = "BUFFDUR",
@@ -1182,7 +1182,7 @@ CNDT.Types = {
 			return [[AuraCount(c.Unit, "]]..strlower(TMW:GetSpellNames(nil, c.Name, 1, 1))..[[", "HARMFUL]] .. (c.Checked and "|PLAYER" or "") .. [[") c.Operator c.Level]]
 		end,
 	},
-	
+
 	{ -- mainhand
 		text = L["ICONMENU_WPNENCHANT"] .. " - " .. INVTYPE_WEAPONMAINHAND,
 		value = "MAINHAND",
@@ -1218,7 +1218,7 @@ CNDT.Types = {
 		funcstr = [[(select(8, GetWeaponEnchantInfo()) or 0)/1000 c.Operator c.Level]],
 		hidden = pclass ~= "ROGUE",
 	},
-	
+
 	{ -- totem1
 		text = totems[1],
 		value = "TOTEM1",
@@ -1268,7 +1268,7 @@ CNDT.Types = {
 		funcstr = [[TotemDuration(4, time) c.Operator c.Level]],
 		hidden = not totems[4],
 	},
-	
+
 	{ -- casting
 		text = L["ICONMENU_CAST"],
 		value = "CASTING",
@@ -1527,9 +1527,9 @@ CNDT.Types = {
 		funcstr = [[select(2,GetManaRegen()) c.Operator c.Level]],
 	},
 
-	
+
 	"CURRENCYPLACEHOLDER",
-	
+
 	{ -- icon shown
 		text = L["CONDITIONPANEL_ICON"],
 		tooltip = L["CONDITIONPANEL_ICON_DESC"],
@@ -1727,7 +1727,7 @@ function CNDT:ProcessConditions(icon)
 			funcstr = funcstr .. thisstr
 		end
 	end
-	
+
 	if strfind(icon:GetName(), "Icon") then
 		funcstr = [[if not (]] .. strsub(funcstr, 4) .. [[) then
 			]] .. (icon.ConditionAlpha == 0 and (icon:GetName()..[[:SetAlpha(0) return true]]) or (icon:GetName()..[[.CndtFailed = 1]])) .. [[
@@ -1747,7 +1747,7 @@ function CNDT:ProcessConditions(icon)
 		icon.CndtCheck = functionCache[funcstr]
 		return functionCache[funcstr]
 	end
-		
+
 	local func, err = loadstring(funcstr, icon:GetName() .. " Condition")
 	if func then
 		func = setfenv(func, Env)

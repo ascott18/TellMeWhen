@@ -9,7 +9,7 @@
 ## Version: 4.3.0
 ## Author: Cybeloras of Mal'Ganis
 ## Notes: Notifications about cooldowns, buffs, etc.
-## OptionalDeps: ButtonFacade, Masque, Ace3, OmniCC, tullaCC, sct, MikScrollingBattleText, Parrot
+## OptionalDeps: ButtonFacade, Masque, Ace3, OmniCC, tullaCC, sct, sctd, MikScrollingBattleText, Parrot
 # The per character settings are the old settings, but we still need them to upgrade to the new ones
 ## SavedVariablesPerCharacter: TellMeWhen_Settings
 ## SavedVariables: TellMeWhenDB
@@ -45,6 +45,7 @@ TellMeWhen.lua
 Types\cooldown.lua
 Types\unitcooldown.lua
 Types\icd.lua
+Types\autoshot.lua
 Types\buff.lua
 Types\reactive.lua
 Types\wpnenchant.lua

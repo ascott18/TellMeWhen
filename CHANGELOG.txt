@@ -1,9 +1,11 @@
 ===v4.3.0===
  * New icon type: Diminishing Returns. Guess what this one tracks?
+ * New icon type: Cooldown - Auto Shot.
  * The suggestion list just got a hell of a lot smarter.
  * Stack text settings are now set by group.
  * Significantly increased the efficiency of the icon setup process. If you have a large number of icons, you will almost certainly notice a difference.
  * Export strings are a little prettier when pasted.
+ * Text outputs to addons can now specify the color and font size of the message.
  * Bug Fixes:
  ** (r99) buff.lua:87 attempt to perform arithmetic on upvalue 'UPD_INTV' (a nil value) //Not reproduced, but the fix should work//
  ** (r99) TellMeWhen.lua:1039 bad argument #1 to 'pairs' (table expected, got nil)
@@ -18,7 +20,7 @@
 
 ===v4.2.1.1===
  * Fixed a bug that was breaking meta icons until config mode was toggled on and off at least once after logging in.
- 
+
 ===v4.2.1===
  * Unit cooldowns can now be sorted by duration.
  * Buffs/debuffs that are being sorted by duration now do so across all units that are being checked instead of only within each unit.
@@ -41,7 +43,7 @@
  ** Icon settings are now resetting to the defaults in a more correct manner before icons are copied onto them.
  ** The suggestion list should now properly update to the current cursor position instead of the last cursor position when clicked.
  ** The suggestion list should now take an entire entry into consideration if the cursor is clicked on the middle of it.
- 
+
 ===v4.2.0===
  * New feature: Announcements. This allows you to announce something to WoW's chat (say, yell, party, raid, guild, emote, etc) when icon events are triggered (the same events that sounds already use).
  * The equivalency dropdown no longer gives you a headache when you look at it (It is now sorted alphabetically).
@@ -49,16 +51,16 @@
  * I spellchecked all of the English texts!
  * Added Ardent Defender to the defensive buff equivalency
  * Bug Fixes:
- ** (r80) Fixed error: conditions.lua:276: attempt to perform arithmetic on local "start" (a nil value) 
+ ** (r80) Fixed error: conditions.lua:276: attempt to perform arithmetic on local "start" (a nil value)
  ** (r81) Hopefully put the final nail in the coffin of the Masque ugly texture crap.
  ** (r82) Last minute changes without testing are bad, mmmkay? (Announcements actually work now.)
- ** (r83) Sounds for event "On Finish" should now work a little better. 
- ** (r84) Jinx: CoE is now properly checked as part of the spell damage taken equivalency. 
+ ** (r83) Sounds for event "On Finish" should now work a little better.
+ ** (r84) Jinx: CoE is now properly checked as part of the spell damage taken equivalency.
 
 ===v4.1.4.2===
  * Bugfix: TellMeWhen.lua:620: attempt to compare string with number
  * Bugfix: v4.1.4s internal version number was about 40,000 higher than it should have been. Whoops!
- 
+
 ===v4.1.4===
  * New profiles now default to only one group instead of ten, and new/reset groups now place themselves in the center of the screen.
  * **//IMPORTANT//**: Because of the above change, there is a (very very small) chance that some of your groups moved. I apologize for the inconvenience. If you find that a group has been moved off the screen, type /tmw options, go to that group's config, and click the button to reset the group's position.
@@ -68,7 +70,7 @@
  ** Unit Classification (Normal, Elite, Rare, Rare-Elite, World Boss)
  ** Currencies
  ** Lua conditions no longer require you define functions/variables in TMW.CNDT.Env, as the _index metamethod is set to _G if you are using a Lua condition.
- 
+
 ===v4.1.3===
  * Conditions can now be set by group
  ** IMPORTANT: Group combat, vehicle, and stance settings have migrated to conditions instead of being settings that are defined in the group options
@@ -83,7 +85,7 @@
  ** (r66) TMW will still function upon updating ButtonFacade to Masque, but skinning buttons will not. This is only temporary while I sort out the changes with Masque.
  ** (r67) Fixed an infinite recursion when meta icons accidentally get looped (1 checks 2, 2 checks 3, 3 checks 1) and one of them has the 'Check sub-metas' option enabled.
  ** (r67) TMW should now be compatible with Masque (and still compatible with ButtonFacade too)
- 
+
 ===v4.1.2===
  * You can now 'group' conditions together with parenthesis. If you have any suggestions on how to make the GUI for it look better, please let me know.
  * Implemented the suggestion list for conditions that take spell/item inputs.
@@ -96,7 +98,7 @@
  ** Spell usable (mana, rage, energy, etc)
  ** Lua (Advanced)
  * Bug fixes:
- ** Error fix: TellMeWhen_Options.lua:2431: attempt to index field '?' (a nil value) 
+ ** Error fix: TellMeWhen_Options.lua:2431: attempt to index field '?' (a nil value)
  ** Fixed the bug with moonfire debuff tracking in 4.1
  ** Fixed a bug with unit level conditions (attempt to compare number with string)
  ** Added better checking for invalid parenthesis in conditions.
@@ -112,14 +114,14 @@
  * Made the meta icon editor much prettier.
  * New/changed conditions:
  ** Old Buff/Debuff conditions changed to Buff/Debuff Stacks
- ** Buff duration 
+ ** Buff duration
  ** Debuff duration
  ** Cooldown and weapon enchant conditions now allow you to specify a duration
  * Fixes since the first revision of this version:
  ** (r52) Fixed the alpha on unusable reactive icons
  ** (r52) Fixed a bug where icons that were set to fake hidden would sometimes still show after leaving config
  ** (r52) Fixed stack text on buff icons
- ** (r53) Fixed: conditions.lua line 1220: bad argument #1 to 'gsub' (string expected, got nil) 
+ ** (r53) Fixed: conditions.lua line 1220: bad argument #1 to 'gsub' (string expected, got nil)
  ** (r53) Fixed: TellMeWhen_Options.lua:2217: attempt to index field '?' (a nil value)
  ** (r54) Fixed the "Check sub-metas" toggle for meta icons - accidentally broke the anchor for it
  ** (r54) Meta icons should obey conditions

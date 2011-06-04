@@ -80,7 +80,7 @@ TMW.CI = setmetatable({}, {__index = function(tbl, k)
 	elseif k == "SoI" then -- spell or item
 		local ics = TMW.CI.ics
 		return ics and ics.Type == "cooldown" and ics.CooldownType or "spell"
-	elseif k == "IMS" then -- IsMultiState 
+	elseif k == "IMS" then -- IsMultiState
 		local ics = TMW.CI.ics
 		return ics and ics.Type == "cooldown" and ics.CooldownType == "multistate"
 	end
@@ -198,9 +198,9 @@ end
 function TMW:CleanDefaults(settings, defaults, blocker)
 	-- yep, this function is out of place. I dont care.
 	-- make sure and pass in a COPY of the settings, not the original settings
-	
+
 	-- the following function is a slightly modified version of the one that AceDB uses to strip defaults.
-	
+
 	-- remove all metatables from the db, so we don't accidentally create new sub-tables through them
 	setmetatable(settings, nil)
 	-- loop through the defaults and remove their content
@@ -658,10 +658,10 @@ function TMW:CompileOptions() -- options
 								if stub then
 									local parent = stub:Group("TellMeWhen")
 									local group = stub:Group("TellMeWhen", format(L["fGROUP"], groupID))
-									
+
 									group.SkinID, group.Gloss, group.Backdrop, group.Colors =
 									parent.SkinID, parent.Gloss, parent.Backdrop, parent.Colors
-									
+
 									group:ReSkin()
 								end
 								TMW:Group_Update(groupID)
@@ -919,7 +919,7 @@ function ID:Drag_DropDown(a)
 		info.text = L["ICONMENU_APPENDCONDT"]
 		info.func = ID.Condition
 		UIDropDownMenu_AddButton(info)
-		
+
 		if ID.desticon.Type == "meta" then
 			info.text = L["ICONMENU_ADDMETA"]
 			info.func = ID.Meta
@@ -1013,7 +1013,7 @@ function ID:Move()
 	db.profile.Groups[ID.destgroupID].Icons[ID.desticonID] = db.profile.Groups[ID.srcgroupID].Icons[ID.srciconID]
 	db.profile.Groups[ID.srcgroupID].Icons[ID.srciconID] = nil
 	ID.desticon.texture:SetTexture(ID.srcicon.texture:GetTexture()) -- preserve buff/debuff/other types textures
-	
+
 	-- update meta icons and icon shown conditions
 	local srcicon, desticon = tostring(ID.srcicon), tostring(ID.desticon)
 	for ics in TMW:InIconSettings() do
@@ -1028,7 +1028,7 @@ function ID:Move()
 			end
 		end
 	end
-	
+
 	TMW:Update()
 end
 
@@ -1049,7 +1049,7 @@ function ID:Swap()
 	local desttex = ID.desticon.texture:GetTexture() -- preserve buff/debuff/other types textures
 	ID.desticon.texture:SetTexture(ID.srcicon.texture:GetTexture())
 	ID.srcicon.texture:SetTexture(desttex)
-	
+
 	-- update meta icons and icon shown conditions
 	local srcicon, desticon = tostring(ID.srcicon), tostring(ID.desticon)
 	for ics in TMW:InIconSettings() do
@@ -1068,7 +1068,7 @@ function ID:Swap()
 			end
 		end
 	end
-	
+
 	TMW:Update()
 end
 
@@ -1137,7 +1137,7 @@ function ME:Update()
 	local settings = db.profile.Groups[groupID].Icons[iconID].Icons
 	UIDropDownMenu_SetSelectedValue(ME[1].icon, nil)
 	UIDropDownMenu_SetText(ME[1].icon, "")
-	
+
 	for k, v in pairs(settings) do
 		local mg = ME[k] or CreateFrame("Frame", "TellMeWhen_IconEditorMainIcons" .. k, IE.Main.Icons.ScrollFrame.Icons, "TellMeWhen_MetaGroup", k)
 		ME[k] = mg
@@ -1153,26 +1153,26 @@ function ME:Update()
 		UIDropDownMenu_SetText(mg.icon, text)
 		mg.icontexture:SetTexture(_G[v] and _G[v].texture:GetTexture())
 	end
-	
+
 	for f=#settings+1, #ME do
 		ME[f]:Hide()
 	end
 	ME[1].up:Hide()
 	ME[1]:Show()
-	
+
 	if settings[1] then
 		ME[#settings].down:Hide()
 		ME[1].delete:Hide()
 	else
 		ME[1].down:Hide()
 	end
-	
+
 	if settings[2] then
 		ME[1].delete:Show()
 	else
 		ME[1].delete:Hide()
 	end
-	
+
 end
 
 local addedGroups = {} -- this is also used for the condition icon menu, but its just a throwaway, so whatever
@@ -1313,7 +1313,7 @@ for category, b in pairs(TMW.OldBE) do
 		local first = strsplit(";", str)
 		first = strtrim(first, "; _")
 		EquivFirstIDLookup[equiv] = first -- this is used to display them in the list (tooltip, name, id display)
-		
+
 		b[equiv] = gsub(str, "_", "") -- this is used to put icons into tooltips
 		EquivFullIDLookup[equiv] = ";" .. b[equiv]
 		local tbl = TMW:SplitNames(b[equiv])
@@ -1435,7 +1435,7 @@ function IE:ShowHide()
 			IE.Main[k]:Hide()
 		end
 	end
-	
+
 	for name, Type in pairs(Types) do
 		if name ~= t and Type.IE_TypeUnloaded then
 			Type:IE_TypeUnloaded()
@@ -1727,7 +1727,7 @@ function IE:Type_DropDown()
 	local info = UIDropDownMenu_CreateInfo()
 	info.text = L["ICONMENU_TYPE"]
 	info.value = ""
-	info.checked = (info.value == db.profile.Groups[groupID].Icons[iconID].Type)
+	info.checked = info.value == db.profile.Groups[groupID].Icons[iconID].Type
 	info.func = IE.Type_Dropdown_OnClick
 	UIDropDownMenu_AddButton(info, UIDROPDOWNMENU_MENU_LEVEL)
 
@@ -1738,18 +1738,20 @@ function IE:Type_DropDown()
 	UIDropDownMenu_AddButton(info)
 
 	for k, v in pairs(IE.Data.Type) do
-		local info = UIDropDownMenu_CreateInfo()
-		info.text = v.text
-		info.value = v.value
-		if v.tooltipText then
-			info.tooltipTitle = v.tooltipTitle or v.text
-			info.tooltipText = v.tooltipText
-			info.tooltipOnButton = true
+		if not v.hidden then
+			local info = UIDropDownMenu_CreateInfo()
+			info.text = v.text
+			info.value = v.value
+			if v.tooltipText then
+				info.tooltipTitle = v.tooltipTitle or v.text
+				info.tooltipText = v.tooltipText
+				info.tooltipOnButton = true
+			end
+			info.checked = (info.value == db.profile.Groups[groupID].Icons[iconID].Type)
+			info.func = IE.Type_Dropdown_OnClick
+			info.arg1 = v
+			UIDropDownMenu_AddButton(info, UIDROPDOWNMENU_MENU_LEVEL)
 		end
-		info.checked = (info.value == db.profile.Groups[groupID].Icons[iconID].Type)
-		info.func = IE.Type_Dropdown_OnClick
-		info.arg1 = v
-		UIDropDownMenu_AddButton(info, UIDROPDOWNMENU_MENU_LEVEL)
 	end
 end
 
@@ -1863,7 +1865,7 @@ function IE:ImpExp_DropDown()
 
 			db.profile.Groups[groupID].Icons[iconID] = nil -- restore defaults, table recreated when passed in to CTIPWM
 			TMW:CopyTableInPlaceWithMeta(settings, db.profile.Groups[groupID].Icons[iconID])
-			
+
 			if version then
 				if version > TELLMEWHEN_VERSIONNUMBER then
 					TMW:Print(L["FROMNEWERVERSION"])
@@ -2018,10 +2020,10 @@ function IE:Copy_DropDown()
 		info.text = L["COPYPOS"]
 		info.func = function()
 			CloseDropDownMenus()
-			
+
 			db.profile.Groups[groupID].Point = nil -- restore defaults, table recreated when passed in to CTIPWM
 			TMW:CopyTableInPlaceWithMeta(db.profiles[n].Groups[g].Point, db.profile.Groups[groupID].Point)
-			
+
 			db.profile.Groups[groupID].Scale = db.profiles[n].Groups[g].Scale or TMW.Group_Defaults.Scale
 			db.profile.Groups[groupID].Level = db.profiles[n].Groups[g].Level or TMW.Group_Defaults.Level
 			TMW:Group_Update(groupID)
@@ -2033,7 +2035,7 @@ function IE:Copy_DropDown()
 		info.text = L["COPYALL"]
 		info.func = function()
 			CloseDropDownMenus()
-			
+
 			db.profile.Groups[groupID] = nil -- restore defaults, table recreated when passed in to CTIPWM
 			TMW:CopyTableInPlaceWithMeta(db.profiles[n].Groups[g], db.profile.Groups[groupID])
 			TMW:Group_Update(groupID)
@@ -2355,10 +2357,7 @@ end
 -- ----------------------
 
 ANN = TMW:NewModule("Announcements") TMW.ANN = ANN
-local channelsByChannel = {}
-for k, v in pairs(TMW.ChannelList) do
-	channelsByChannel[v.channel] = v
-end
+local ChannelLookup = TMW.ChannelLookup
 
 function ANN:SelectEvent(id)
 	ANN.Editbox:ClearFocus()
@@ -2399,8 +2398,8 @@ function ANN:SelectChannel(channel)
 		end
 	end
 	ANN.currentChannelSetting = channel
-	
-	local channelsettings = channelsByChannel[channel]
+
+	local channelsettings = ChannelLookup[channel]
 	if channelsettings then
 		if channelsettings.sticky then
 			ANN.Sticky:SetChecked(EventSettings.Sticky)
@@ -2425,6 +2424,19 @@ function ANN:SelectChannel(channel)
 			ANN.Location:Show()
 		else
 			ANN.Location:Hide()
+		end
+		if channelsettings.color then
+			local r, g, b = EventSettings.r, EventSettings.g, EventSettings.b
+			ANN.Color:GetNormalTexture():SetVertexColor(r, g, b, 1)
+			ANN.Color:Show()
+		else
+			ANN.Color:Hide()
+		end
+		if channelsettings.size then
+			ANN.Size:SetValue(EventSettings.Size)
+			ANN.Size:Show()
+		else
+			ANN.Size:Hide()
 		end
 	end
 
@@ -2473,11 +2485,13 @@ function ANN:LocDropdownFunc(text)
 end
 
 function ANN:DropDown()
-	local channelSettings = channelsByChannel[ANN.currentChannelSetting]
-	if channelSettings and channelSettings.dropdown then 
+	local channelSettings = ChannelLookup[ANN.currentChannelSetting]
+	if channelSettings and channelSettings.dropdown then
 		channelSettings.dropdown()
 	end
 end
+
+
 -- ----------------------
 -- SUGGESTER
 -- ----------------------
@@ -2503,7 +2517,7 @@ SUG:RegisterEvent("ACTIONBAR_SLOT_CHANGED")
 SUG.NumCachePerFrame = 0 -- 0 is actually 1. Yeah, i know, its lame. I'm lazy.
 function SUG:OnInitialize()
 	TMWOptDB = TMWOptDB or {}
-	
+
 	CNDT:CURRENCY_DISPLAY_UPDATE() -- im in ur SUG, hijackin ur OnInitialize
 
 	TMWOptDB.SpellCache = TMWOptDB.SpellCache or {}
@@ -2768,7 +2782,7 @@ function SUG.Sorter(a, b)
 			8a) Alphabetical if names are different
 			8b) SpellID if names are identical
 	]]
-	
+
 	local haveA, haveB = EquivFirstIDLookup[a], EquivFirstIDLookup[b]
 	if haveA or haveB then
 		if haveA and haveB then
@@ -2784,7 +2798,7 @@ function SUG.Sorter(a, b)
 			return haveA
 		end
 	end
-	
+
 	if SUGSoI == "spell" then
 		--player's spells (pclass)
 		local haveA, haveB = pclassSpellCache[a], pclassSpellCache[b]
@@ -2857,13 +2871,13 @@ function SUG:Suggester()
 		if t == "dr" and not overrideSoI then
 			for equiv, str in pairs(TMW.BE.dr) do
 				if 	(LNlen > 2 and (
-						(strfind(strlowerCache[equiv], lastName)) or 
+						(strfind(strlowerCache[equiv], lastName)) or
 						(strfind(strlowerCache[L[equiv]], lastName)) or
 						((inputType == "string" and strfind(strlowerCache[EquivFullNameLookup[equiv]], semiLN)) or
 						(inputType == "number" and strfind(EquivFullIDLookup[equiv], semiLN))))
 				) or
 					(LNlen <= 2 and (
-						(strfind(strlowerCache[equiv], atBeginning)) or 
+						(strfind(strlowerCache[equiv], atBeginning)) or
 						(strfind(strlowerCache[L[equiv]], atBeginning)))
 				) then
 					preTable[#preTable + 1] = equiv
@@ -2872,13 +2886,13 @@ function SUG:Suggester()
 		elseif t == "cast" and not overrideSoI then
 			for equiv, str in pairs(TMW.BE.casts) do
 				if 	(LNlen > 2 and (
-						(strfind(strlowerCache[equiv], lastName)) or 
+						(strfind(strlowerCache[equiv], lastName)) or
 						(strfind(strlowerCache[L[equiv]], lastName)) or
 						((inputType == "string" and strfind(strlowerCache[EquivFullNameLookup[equiv]], semiLN)) or
 						(inputType == "number" and strfind(EquivFullIDLookup[equiv], semiLN))))
 				) or
 					(LNlen <= 2 and (
-						(strfind(strlowerCache[equiv], lastName)) or 
+						(strfind(strlowerCache[equiv], lastName)) or
 						(strfind(strlowerCache[L[equiv]], lastName)))
 				) then
 					preTable[#preTable + 1] = equiv
@@ -2888,13 +2902,13 @@ function SUG:Suggester()
 			for _, b in pairs(buffEquivs) do
 				for equiv, str in pairs(b) do
 					if 	(LNlen > 2 and (
-							(strfind(strlowerCache[equiv], lastName)) or 
+							(strfind(strlowerCache[equiv], lastName)) or
 							(strfind(strlowerCache[L[equiv]], lastName)) or
 							((inputType == "string" and strfind(strlowerCache[EquivFullNameLookup[equiv]], semiLN)) or
 							(inputType == "number" and strfind(EquivFullIDLookup[equiv], semiLN))))
 					) or
 						(LNlen <= 2 and (
-							(strfind(strlowerCache[equiv], lastName)) or 
+							(strfind(strlowerCache[equiv], lastName)) or
 							(strfind(strlowerCache[L[equiv]], lastName)))
 					) then
 						preTable[#preTable + 1] = equiv
@@ -2908,7 +2922,7 @@ function SUG:Suggester()
 			end
 		end
 	end
-	
+
 	while GetTime() - start < 0.025 do -- throttle it
 		local id, name
 		if SUGSoI == "item" then
@@ -3096,7 +3110,7 @@ function SUG:NameOnCursor(isClick)
 	gsub("%(", "%%("):
 	gsub("%)", "%%)")
 
-	
+
 	SUG.atBeginning = "^"..SUG.lastName
 
 	if SUG.lastName == "" or not strfind(SUG.lastName, "[^%.]") then
@@ -3592,7 +3606,7 @@ function CNDT:Load()
 			if v then
 				TMW:TT(group.Operator, v.tooltipText, nil, 1, nil, 1)
 			end
-			
+
 			CNDT:SetSliderMinMax(group, condition.Level or 0)
 			CNDT:SetValText(group)
 
@@ -3682,7 +3696,7 @@ end
 function CNDT:SetUIDropdownText(frame, value, tbl)
 	UIDropDownMenu_SetSelectedValue(frame, value)
 	local group = frame:GetParent()
-	
+
 	if tbl == CNDT.Types then
 		CNDT:TypeCheck(group, CNDT.ConditionsByType[value])
 	elseif tbl == TMW.Icons then
@@ -3735,12 +3749,12 @@ function CNDT:SetSliderMinMax(group, level)
 	if v.range then
 		local deviation = v.range/2
 		local val = level or Slider:GetValue()
-		
+
 		local newmin = max(0, val-deviation)
 		local newmax = max(deviation, val + deviation)
-		
+
 		Slider:SetMinMaxValues(newmin, newmax)
-		
+
 		_G[Slider:GetName() .. "Low"]:SetText((v.texttable and v.texttable[newmin]) or newmin)
 		_G[Slider:GetName() .. "Mid"]:SetText(nil)
 		_G[Slider:GetName() .. "High"]:SetText((v.texttable and v.texttable[newmax]) or newmax)

@@ -56,13 +56,19 @@ Type.TypeChecks = {
 	setting = "ICDType",
 	text = L["ICONMENU_ICDTYPE"],
 	{ value = "aura", 			text = L["ICONMENU_ICDBDE"], 				tooltipText = L["ICONMENU_ICDAURA_DESC"]},
-	{ value = "caststart", 		text = L["ICONMENU_SPELLCAST_START"], 		tooltipText = L["ICONMENU_SPELLCAST_START_DESC"]},
 	{ value = "spellcast", 		text = L["ICONMENU_SPELLCAST_COMPLETE"], 	tooltipText = L["ICONMENU_SPELLCAST_COMPLETE_DESC"]},
+	{ value = "caststart", 		text = L["ICONMENU_SPELLCAST_START"], 		tooltipText = L["ICONMENU_SPELLCAST_START_DESC"]},
 }
-Type.WhenChecks = {
+--[[Type.WhenChecks = {
 	text = L["ICONMENU_SHOWWHEN"],
 	{ value = "alpha", 		text = L["ICONMENU_ICDUSABLE"], },
 	{ value = "unalpha",  		text = L["ICONMENU_ICDUNUSABLE"], },
+	{ value = "always", 		text = L["ICONMENU_ALWAYS"] },
+}]]
+Type.WhenChecks = {
+	text = L["ICONMENU_SHOWWHEN"],
+	{ value = "alpha", 			text = L["ICONMENU_USABLE"], 			colorCode = "|cFF00FF00" },
+	{ value = "unalpha",  		text = L["ICONMENU_UNUSABLE"], 			colorCode = "|cFFFF0000" },
 	{ value = "always", 		text = L["ICONMENU_ALWAYS"] },
 }
 
@@ -95,7 +101,7 @@ local function ICD_OnEvent(icon, event, ...)
 				icon.StartTime = TMW.time
 			end
 		end
-	elseif event == "UNIT_SPELLCAST_SUCCEEDED" or event == "UNIT_SPELLCAST_CHANNEL_START" or event == "UNIT_SPELLCAST_START"then
+	elseif event == "UNIT_SPELLCAST_SUCCEEDED" or event == "UNIT_SPELLCAST_CHANNEL_START" or event == "UNIT_SPELLCAST_START" then
 		local u, n, _, _, i = ...
 		if u == "player" then
 			local NameDictionary = icon.NameDictionary
@@ -153,7 +159,7 @@ function Type:Setup(icon, groupID, iconID)
 
 	if icon.Name == "" then
 		icon:SetTexture("Interface\\Icons\\INV_Misc_QuestionMark")
-	elseif SpellTextures[icon.NameFirst] then 
+	elseif SpellTextures[icon.NameFirst] then
 		icon:SetTexture(SpellTextures[icon.NameFirst])
 	elseif TMW:DoSetTexture(icon) then
 		icon:SetTexture("Interface\\Icons\\INV_Misc_PocketWatch_01")

@@ -70,7 +70,7 @@ local function Cast_OnUpdate(icon, time)
 		local CndtCheck = icon.CndtCheck if CndtCheck and CndtCheck() then return end
 
 		local NameFirst, NameNameDictionary, Units, Interruptible = icon.NameFirst, icon.NameNameDictionary, icon.Units, icon.Interruptible
-		
+
 		for u = 1, #Units do
 			local unit = Units[u]
 			if UnitExists(unit) then

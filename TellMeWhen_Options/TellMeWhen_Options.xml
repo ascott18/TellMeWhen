@@ -434,10 +434,10 @@
 							self:GetParent()[i]:Hide()
 						end
 					end
-					
+
 					TMW.CNDT:ValidateParenthesis()
 				end
-				
+
 				function self:GetChecked()
 					return self.checked
 				end
@@ -934,7 +934,7 @@
 					</OnClick>
 				</Scripts>
 			</CheckButton>
-			
+
 
 			<CheckButton name="$parentAnd" inherits="TellMeWhen_CheckTemplate" parentKey="And">
 				<Size x="20" y="20"/>
@@ -977,7 +977,7 @@
 					</OnClick>
 				</Scripts>
 			</CheckButton>
-			
+
 			<Frame name="$parentOpenParenthesis" parentKey="OpenParenthesis">
 				<Size x="100" y="20"/>
 				<Anchors>
@@ -1453,7 +1453,7 @@
 			</Layer>
 		</Layers>
 	</Button>
-	
+
 	<Button name="TellMeWhen_ChannelSelectButton" virtual="true" >
 		<Size>
 			<AbsDimension y="14"/>
@@ -1655,7 +1655,7 @@
 					</OnClick>
 				</Scripts>
 			</Button>
-			
+
 			<Frame name="$parentSuggest" parentKey="Suggest" hidden="true" enableMouse="true">
 				<Size x="220"/>
 				<Anchors>
@@ -2021,7 +2021,7 @@
 							<OnDragStop> TellMeWhen_IconEditor:StopMovingOrSizing() </OnDragStop>
 						</Scripts>
 					</Frame>
-					
+
 					<EditBox name="$parentUnit" inherits="TellMeWhen_InputBoxTemplate" parentKey="Unit" autoFocus="false">
 						<Size>
 							<AbsDimension x="466" y="15"/>
@@ -2457,7 +2457,7 @@
 							</OnClick>
 						</Scripts>
 					</CheckButton>
-					
+
 					<Frame name="$parentSortChecks" parentKey="Sort">
 						<Size x="140" y="90"/>
 						<Anchors>
@@ -2706,6 +2706,7 @@
 										self.text:SetWidth(58)
 										TMW:TT(self, "ICONMENU_OFFS", "ICONMENU_BAROFFS")
 										function self:SetEnabled(arg1)
+											arg1 = self:GetParent().enabled and arg1
 											if arg1 then
 												self:SetAlpha(1)
 											else
@@ -2739,8 +2740,8 @@
 										self.ShowPBar:Disable()
 										self.ShowPBar:SetAlpha(0.3)
 									end
-									self.PBarOffs:SetEnabled(arg1)
 									self.enabled = arg1
+									self.PBarOffs:SetEnabled(arg1)
 								end
 							</OnLoad>
 						</Scripts>
@@ -3102,7 +3103,7 @@
 							</OnLoad>
 						</Scripts>
 					</Slider>
-					
+
 					<Button name="$parentReset" parentKey="ResetButton" inherits="GameMenuButtonTemplate" text="RESET">
 						<Size>
 							<AbsDimension x="100" y="17" />
@@ -3120,7 +3121,7 @@
 						<HighlightFont style="GameFontHighlight"/>
 						<DisabledFont style="GameFontDisable"/>
 					</Button>
-				
+
 					<Frame name="$parentCopy" inherits="UIDropDownMenuTemplate" parentKey="Copy">
 						<Anchors>
 							<Anchor point="LEFT" relativeTo="$parentReset" relativePoint="RIGHT">
@@ -3174,7 +3175,7 @@
 							<OnLoad>
 								self.label = TMW.L["EXPORT_LOLTITLE"]
 								TMW:TT(self, "EXPORT", "EXPORT_DESC")
-								
+
 								function self:callback(soFar, total)
 									if soFar == total then
 										TMW:Print(TMW.L["SENDSUCCESSFUL"])
@@ -3192,7 +3193,7 @@
 							</OnEditFocusLost>
 						</Scripts>
 					</Editbox>
-					
+
 					<CheckButton name="$parentEnabled" inherits="TellMeWhen_CheckTemplate" parentKey="Enabled">
 						<Anchors>
 							<Anchor point="LEFT" relativeTo="$parentType" relativePoint="RIGHT">
@@ -3450,7 +3451,7 @@
 								TMW.SND:SelectEvent(1)
 							</OnLoad>
 						</Scripts>
-					</Frame>	
+					</Frame>
 					<Frame name="$parentSounds" parentKey="Sounds">
 						<Size x="320" y="266"/>
 						<Anchors>
@@ -3598,7 +3599,7 @@
 								local t = TMW:CleanString(self:GetText())
 								t = gsub(t, "/", "\\")
 								local wt
-								
+
 								if not strfind(t, "%.[^\\]+$") then
 									t = "None"
 									wt = TMW.L["SOUNDERROR1"]
@@ -3684,9 +3685,7 @@
 							</OnEditFocusLost>
 						</Scripts>
 					</EditBox>
-					
-					
-					
+
 					<Frame name="$parentEvents" parentKey="Events">
 						<Size x="200" y="280"/>
 						<Anchors>
@@ -3776,7 +3775,7 @@
 								self[1]:SetPoint("TOPLEFT", self, "TOPLEFT", 0, 0)
 								self[1]:SetPoint("TOPRIGHT", self, "TOPRIGHT", 0, 0)
 								self:SetHeight(#self*self[1]:GetHeight())
-								
+
 								TMW.ANN.Channels = self
 							</OnLoad>
 						</Scripts>
@@ -3827,9 +3826,7 @@
 					</CheckButton>
 					<CheckButton name="$parentIcon" inherits="TellMeWhen_CheckTemplate" parentKey="Icon">
 						<Anchors>
-							<Anchor point="TOP" relativeTo="$parentSticky" relativePoint="BOTTOM">
-								<Offset x="0" y="4" />
-							</Anchor>
+							<Anchor point="TOP" relativeTo="$parentSticky" relativePoint="BOTTOM" x="0" y="4" />
 						</Anchors>
 						<Scripts>
 							<OnLoad>
@@ -3838,11 +3835,115 @@
 							</OnLoad>
 							<OnClick>
 								TMW.CI.ics.Events[TMW.ANN.currentEvent].Icon = not not self:GetChecked()
+								TMW.IE:ScheduleIconUpdate(TMW.CI.g, TMW.CI.i)
 							</OnClick>
 						</Scripts>
 					</CheckButton>
-					
-					
+					<Button name="$parentColor" parentKey="Color">
+						<Size x="20" y="20"/>
+						<Anchors>
+							<Anchor point="TOP" relativeTo="$parentIcon" relativePoint="BOTTOM"/>
+						</Anchors>
+						<Layers>
+							<Layer level="BACKGROUND">
+								<Texture>
+									<Size x="17.5" y="17.5"/>
+									<Anchors>
+										<Anchor point="CENTER"/>
+									</Anchors>
+									<Color r="1.0" g="1.0" b="1.0"/>
+								</Texture>
+								<FontString name="$parenttext" parentKey="text" justifyH="LEFT" inherits="GameFontHighlight">
+									<Anchors>
+										<Anchor point="LEFT" relativeTo="$parent" relativePoint="RIGHT" x="2"/>
+									</Anchors>
+								</FontString>
+							</Layer>
+						</Layers>
+						<Scripts>
+							<OnLoad>
+								self.text:SetText(TMW.L["FONTCOLOR"])
+								self.func = function()
+									local settings = TMW.CI.ics.Events[TMW.ANN.currentEvent]
+									local r, g, b = ColorPickerFrame:GetColorRGB()
+									settings.r = r
+									settings.g = g
+									settings.b = b
+									self:GetNormalTexture():SetVertexColor(r, g, b, 1)
+									TMW.IE:ScheduleIconUpdate(TMW.CI.g, TMW.CI.i)
+								end
+								self.cancel = function()
+									local settings = TMW.CI.ics.Events[TMW.ANN.currentEvent]
+									local r, g, b = self.br, self.bg, self.bb
+									settings.r = r
+									settings.g = g
+									settings.b = b
+									self:GetNormalTexture():SetVertexColor(r, g, b, 1)
+									TMW.IE:ScheduleIconUpdate(TMW.CI.g, TMW.CI.i)
+								end
+							</OnLoad>
+							<OnClick>
+								local settings = TMW.CI.ics.Events[TMW.ANN.currentEvent]
+								local r, g, b = settings.r, settings.g, settings.b
+								self.br, self.bg, self.bb = r, g, b
+								
+								ColorPickerFrame.hasOpacity = nil
+								ColorPickerFrame.func, ColorPickerFrame.cancelFunc = self.func, self.cancel
+								ColorPickerFrame:SetColorRGB(r,g,b)
+								ColorPickerFrame:Show()
+							</OnClick>
+						</Scripts>
+						<NormalTexture name="$parentNormalTexture" file="Interface\ChatFrame\ChatFrameColorSwatch"/>
+					</Button>
+
+					<Slider name="$parentSize" inherits="OptionsSliderTemplate" parentKey="Size" minvalue="0" maxvalue="38" valuestep="1">
+						<Size x="150" y="17"/>
+						<Anchors>
+							<Anchor point="TOPLEFT" relativeTo="$parentColor" relativePoint="BOTTOMLEFT" x="0" y="-17" />
+						</Anchors>
+						<Layers>
+							<Layer level="ARTWORK">
+								<FontString name="$parentVal" parentKey="val" inherits="GameFontHighlightSmall" text="HIGH">
+									<Anchors>
+										<Anchor point="TOP" relativePoint="BOTTOM">
+											<Offset x="0" y="3"/>
+										</Anchor>
+									</Anchors>
+								</FontString>
+								<FontString name="$parentText" parentKey="text" inherits="GameFontHighlight">
+									<Anchors>
+										<Anchor point="BOTTOM" relativePoint="TOP">
+											<Offset x="0" y="-1"/>
+										</Anchor>
+									</Anchors>
+								</FontString>
+							</Layer>
+						</Layers>
+						<Scripts>
+							<OnMinMaxChanged>
+								local minValue, maxValue = self:GetMinMaxValues()
+								_G[self:GetName() .. "Low"]:SetText(TMW.L["DEFAULT"])
+								_G[self:GetName() .. "High"]:SetText(maxValue)
+							</OnMinMaxChanged>
+							<OnValueChanged>
+								local val = self:GetValue()
+								_G[self:GetName() .. "Val"]:SetText(val == 0 and TMW.L["DEFAULT"] or val)
+								local groupID, iconID = TMW.CI.g, TMW.CI.i
+								if TMW.CI.ics then
+									TMW.CI.ics.Events[TMW.ANN.currentEvent].Size = val
+									TMW.IE:ScheduleIconUpdate(groupID, iconID)
+								end
+							</OnValueChanged>
+							<OnLoad>
+								self.text:SetText(TMW.L["FONTSIZE"])
+								self:EnableMouseWheel(true)
+							</OnLoad>
+							<OnMouseWheel>
+								self:SetValue(self:GetValue()+delta)
+							</OnMouseWheel>
+						</Scripts>
+					</Slider>
+
 				</Frames>
 				<Layers>
 					<Layer level="OVERLAY">
@@ -4105,7 +4206,7 @@
 			<OnUpdate>
 				local groupID, iconID = TMW.CI.g, TMW.CI.i
 				local ic = TMW.CI.ic
-				local t 
+				local t
 				if TMW.CNDT and TMW.CNDT.type == "group" and self.selectedTab == TMW.GRCNDTTab then
 					self.FS1:SetFormattedText(TMW.L["fGROUP"], TMW:GetGroupName(TMW.db.profile.Groups[groupID].Name, groupID, 1))
 				else

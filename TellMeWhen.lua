@@ -31,7 +31,7 @@ local DRData = LibStub("DRData-1.0", true)
 
 TELLMEWHEN_VERSION = "4.3.0"
 TELLMEWHEN_VERSION_MINOR = ""
-TELLMEWHEN_VERSIONNUMBER = 43008 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
+TELLMEWHEN_VERSIONNUMBER = 43009 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
 if TELLMEWHEN_VERSIONNUMBER > 44000 or TELLMEWHEN_VERSIONNUMBER < 43000 then error("YOU SCREWED UP THE VERSION NUMBER OR DIDNT CHANGE THE SAFETY LIMITS") return end -- safety check because i accidentally made the version number 414069 once
 
 TELLMEWHEN_MAXGROUPS = 1 	--this is a default, used by SetTheory (addon), so dont rename
@@ -84,7 +84,7 @@ TMW.strlowerCache = setmetatable({}, {__index = function(t, i)
 	local o = strlower(i)
 	t[i] = o
 	return o
-end, 
+end,
 __call = function(t, i)
 	return t[i]
 end})
@@ -379,6 +379,7 @@ TMW.Defaults = {
 					DontRefresh			= false,
 					UseActvtnOverlay	= false,
 					OnlyEquipped		= false,
+					EnableStacks		= false,
 					OnlyInBags			= false,
 					OnlySeen			= false,
 					TotemSlots			= "1111",
@@ -390,6 +391,10 @@ TMW.Defaults = {
 							Location = "",
 							Sticky = false,
 							Icon = true,
+							r = 1,
+							g = 1,
+							b = 1,
+							Size = 0,
 						},
 					},
 					Conditions = {
@@ -556,38 +561,47 @@ TMW.ChannelList = {
 	{
 		text = CHAT_MSG_SAY,
 		channel = "SAY",
+		isBlizz = 1,
 	},
 	{
 		text = CHAT_MSG_YELL,
 		channel = "YELL",
+		isBlizz = 1,
 	},
 	{
 		text = CHAT_MSG_PARTY,
 		channel = "PARTY",
+		isBlizz = 1,
 	},
 	{
 		text = CHAT_MSG_RAID,
 		channel = "RAID",
+		isBlizz = 1,
 	},
 	{
 		text = CHAT_MSG_RAID_WARNING,
 		channel = "RAID_WARNING",
+		isBlizz = 1,
 	},
 	{
 		text = CHAT_MSG_BATTLEGROUND,
 		channel = "BATTLEGROUND",
+		isBlizz = 1,
 	},
 	{
 		text = CHAT_MSG_GUILD,
 		channel = "GUILD",
+		isBlizz = 1,
 	},
 	{
 		text = CHAT_MSG_OFFICER,
 		channel = "OFFICER",
+		isBlizz = 1,
 	},
 	{
 		text = CHAT_MSG_EMOTE,
 		channel = "EMOTE",
+		isBlizz = 1,
 	},
 	{
 		text = "Scrolling Combat Text",
@@ -595,34 +609,27 @@ TMW.ChannelList = {
 		hidden = not (SCT and SCT:IsEnabled()),
 		sticky = 1,
 		icon = 1,
+		color = 1,
 		defaultlocation = "MSG",
+		frames = {
+		  [SCT.FRAME1] = "Frame 1",
+		  [SCT.FRAME2] = "Frame 2",
+		  [SCT.FRAME3 or SCT.MSG] = "SCTD", -- cheesy, i know
+		  [SCT.MSG] = "Messages",
+		},
 		dropdown = function()
-			local info = UIDropDownMenu_CreateInfo()
-			info.func = TMW.ANN.LocDropdownFunc
-			
-			info.text = SCT.LOCALS.EXAMPLE
-			info.arg1 = info.text
-			info.value = "FRAME1"
-			info.checked = "FRAME1" == TMW.CI.ics.Events[TMW.ANN.currentEvent].Location
-			UIDropDownMenu_AddButton(info, UIDROPDOWNMENU_MENU_LEVEL)
-			
-			info.text = SCT.LOCALS.EXAMPLE2
-			info.arg1 = info.text
-			info.value = "FRAME2"
-			info.checked = "FRAME2" == TMW.CI.ics.Events[TMW.ANN.currentEvent].Location
-			UIDropDownMenu_AddButton(info, UIDROPDOWNMENU_MENU_LEVEL)
-			
-			info.text = SCT.LOCALS.MSG_EXAMPLE
-			info.arg1 = info.text
-			info.value = "MSG"
-			info.checked = "MSG" == TMW.CI.ics.Events[TMW.ANN.currentEvent].Location
-			UIDropDownMenu_AddButton(info, UIDROPDOWNMENU_MENU_LEVEL)
+			for id, name in pairs(TMW.ChannelLookup.SCT.frames) do
+				local info = UIDropDownMenu_CreateInfo()
+				info.func = TMW.ANN.LocDropdownFunc
+				info.text = name
+				info.arg1 = info.text
+				info.value = id
+				info.checked = id == TMW.CI.ics.Events[TMW.ANN.currentEvent].Location
+				UIDropDownMenu_AddButton(info, UIDROPDOWNMENU_MENU_LEVEL)
+			end
 		end,
 		ddtext = function(value)
-			if value == "FRAME1" then return SCT.LOCALS.EXAMPLE
-			elseif value == "FRAME2" then return SCT.LOCALS.EXAMPLE2
-			elseif value == "MSG" then return SCT.LOCALS.MSG_EXAMPLE
-			end
+			return TMW.ChannelLookup.SCT.frames[value]
 		end,
 	},
 	{
@@ -631,6 +638,8 @@ TMW.ChannelList = {
 		hidden = not MikSBT,
 		sticky = 1,
 		icon = 1,
+		color = 1,
+		size = 1,
 		defaultlocation = "Notification",
 		dropdown = function()
 			for scrollAreaKey, scrollAreaName in MikSBT:IterateScrollAreas() do
@@ -655,6 +664,8 @@ TMW.ChannelList = {
 		hidden = not (Parrot and ((Parrot.IsEnabled and Parrot:IsEnabled()) or Parrot:IsActive())),
 		sticky = 1,
 		icon = 1,
+		color = 1,
+		size = 1,
 		defaultlocation = "Notification",
 		dropdown = function()
 			local areas = Parrot.GetScrollAreasChoices and Parrot:GetScrollAreasChoices() or Parrot:GetScrollAreasValidate()
@@ -675,6 +686,10 @@ TMW.ChannelList = {
 		end,
 	},
 }
+TMW.ChannelLookup = {}
+for k, v in pairs(TMW.ChannelList) do
+	TMW.ChannelLookup[v.channel] = v
+end local ChannelLookup = TMW.ChannelLookup
 
 TMW.Cooldowns = setmetatable({}, {__index = function(t, k)
 	local n = {}
@@ -784,10 +799,10 @@ function TMW:OnInitialize()
 		TellMeWhenDB = {Version = TELLMEWHEN_VERSIONNUMBER}
 	end
 	TMW:GlobalUpgrade() -- must happen before the db is created
-	
+
 	TMW.db = AceDB:New("TellMeWhenDB", TMW.Defaults)
 	db = TMW.db
-	
+
 	LSM:Register("sound", "Rubber Ducky", [[Sound\Doodad\Goblin_Lottery_Open01.wav]])
 	LSM:Register("sound", "Cartoon FX", [[Sound\Doodad\Goblin_Lottery_Open03.wav]])
 	LSM:Register("sound", "Explosion", [[Sound\Doodad\Hellfire_Raid_FX_Explosion05.wav]])
@@ -801,7 +816,7 @@ function TMW:OnInitialize()
 	LSM:Register("sound", "Fel Portal", [[Sound\Spells\Sunwell_Fel_PortalStand.wav]])
 	LSM:Register("sound", "Fel Nova", [[Sound\Spells\SeepingGaseous_Fel_Nova.wav]])
 	LSM:Register("sound", "You Will Die!", [[Sound\Creature\CThun\CThunYouWillDie.wav]])
-	
+
 	LSM:Register("sound", "Die!", [[Sound\Creature\GruulTheDragonkiller\GRULLAIR_Gruul_Slay03.wav]])
 	LSM:Register("sound", "You Fail!", [[Sound\Creature\Kologarn\UR_Kologarn_slay02.wav]])
 
@@ -818,7 +833,7 @@ function TMW:OnInitialize()
 	db.RegisterCallback(TMW, "OnProfileShutdown", "ShutdownProfile")
 	db.RegisterCallback(TMW, "OnDatabaseShutdown", "ShutdownProfile")
 
-	
+
 	if LBF then
 		LBF:RegisterSkinCallback("TellMeWhen", TellMeWhen_SkinCallback, self)
 	end
@@ -872,7 +887,7 @@ function TMW:ShutdownProfile()
 		end
 		TellMeWhen_IconEditor:Hide()
 	end
-	
+
 	-- get rid of settings that are stored in database tables for convenience, but dont need to be kept.
 	for ics in TMW:InIconSettings() do
 		TMW.DatabaseCleanups.icon(ics)
@@ -881,7 +896,7 @@ end
 
 function TMW:ScheduleUpdate(timetill)
 	--ghetto bucket
-	
+
 	timetill = tonumber(timetill) or 1 -- careful, timetill is actually the event if this is being called from the event handlers
 	TMW:CancelTimer(updatehandler, 1)
 	updatehandler = TMW:ScheduleTimer("Update", timetill)
@@ -911,9 +926,9 @@ end
 
 function TMW:OnUpdate() -- this is where all icon OnUpdate scripts are actually called
 	time = GetTime()
+	CNDT.Env.time = time
+	TMW.time = time
 	if UpdateTimer <= time - UPD_INTV then
-		CNDT.Env.time = time
-		TMW.time = time
 		UpdateTimer = time
 		_, GCD=GetSpellCooldown(GCDSpell)
 		for i = 1, #GroupUpdateFuncs do
@@ -922,7 +937,7 @@ function TMW:OnUpdate() -- this is where all icon OnUpdate scripts are actually 
 				CndtCheck()
 			end
 		end
-		
+
 		for i = 1, #IconUpdateFuncs do
 			local icon = IconUpdateFuncs[i]
 			if icon.__shown then
@@ -1020,6 +1035,19 @@ local upgradeTable
 function TMW:GetUpgradeTable() -- upgrade functions
 	if upgradeTable then return upgradeTable end
 	local t = {
+		[43009] = {
+			icon = function(ics)
+				for k, v in pairs(ics.Events) do
+					if v.Location == "FRAME1" then
+						v.Location = 1
+					elseif v.Location == "FRAME2" then
+						v.Location = 2
+					elseif v.Location == "MSG" then
+						v.Location = 10
+					end
+				end
+			end,
+		},
 		[43005] = {
 			icon = function(ics)
 				ics.ANN = nil -- whoops, forgot to to this a while back when ANN was replaced with the new event data structure
@@ -1162,7 +1190,7 @@ function TMW:GetUpgradeTable() -- upgrade functions
 					if #nume ~= 0 then
 						local start = #Conditions + 1
 						if #nume <= ceil(#TMW.CSN/2) then
-							
+
 							for _, value in ipairs(nume) do
 								local condition = Conditions[#Conditions + 1]
 								condition.Type = "STANCE"
@@ -1176,7 +1204,7 @@ function TMW:GetUpgradeTable() -- upgrade functions
 								Conditions[#Conditions].PrtsAfter = 1
 							end
 						elseif #numd > 0 then
-							
+
 							for _, value in ipairs(numd) do
 								local condition = Conditions[#Conditions + 1]
 								condition.Type = "STANCE"
@@ -1311,7 +1339,7 @@ function TMW:GetUpgradeTable() -- upgrade functions
 				if gs.Stance and (gs.Stance[L["NONE"]] == false or gs.Stance[L["CASTERFORM"]] == false) then
 					gs.Stance[L["NONE"]] = nil
 					gs.Stance[L["CASTERFORM"]] = nil
-					gs.Stance[NONE] = false 
+					gs.Stance[NONE] = false
 				end
 			end,
 			icon = function(ics)
@@ -1508,9 +1536,9 @@ function TMW:GetUpgradeTable() -- upgrade functions
 				db.profile.Spec = nil
 			end,
 		},
-		
+
 	}
-	
+
 	upgradeTable = {}
 	for k, v in pairs(t) do
 		v.Version = k
@@ -1533,8 +1561,8 @@ function TMW:GlobalUpgrade()
 	TellMeWhenDB.Version = TellMeWhenDB.Version or 0
 	if TellMeWhenDB.Version == 414069 then TellMeWhenDB.Version = 41409 end --well, that was a mighty fine fail
 	-- Begin DB upgrades that need to be done before defaults are added. Upgrades here should always do everything needed to every single profile, and remember to make sure that a table exists before going into it.
-	
-	if TellMeWhenDB.profiles then 
+
+	if TellMeWhenDB.profiles then
 		if TellMeWhenDB.Version < 41402 then
 			for _, p in pairs(TellMeWhenDB.profiles) do
 				if p.Groups then
@@ -1582,7 +1610,7 @@ function TMW:Upgrade()
 		v = v..strrep("0", 5-#v)	-- append zeroes to create a 5 digit number
 		db.profile.Version = tonumber(v)
 	end
-	
+
 	for k, v in ipairs(TMW:GetUpgradeTable()) do
 		if v.Version > db.profile.Version then
 			if v.global then
@@ -1603,7 +1631,7 @@ function TMW:Upgrade()
 			end
 		end
 	end
-	
+
 	--All Upgrades Complete
 	db.profile.Version = TELLMEWHEN_VERSIONNUMBER
 end
@@ -2004,15 +2032,28 @@ local function HandleEvent(icon, event, data, played, announced)
 	end
 	local Channel, Text = data.Channel, data.Text
 	if Channel ~= "" and not announced then
-		if Channel == "MSBT" and MikSBT then
-			MikSBT.DisplayMessage(Text, data.Location, data.Sticky, nil, nil, nil, nil, nil, data.Icon and icon.__tex)
-		elseif Channel == "SCT" and SCT then
-			-- sctcolor isnt absolutely needed, but SCT garbage gens a table every time if it isnt passed in, so i should do it.
-			SCT:DisplayCustomEvent(Text, sctcolor, data.Sticky, SCT[data.Location], nil, data.Icon and icon.__tex)
-		elseif Channel == "PARROT" and Parrot then
-			Parrot:ShowMessage(Text, data.Location, data.Sticky, nil, nil, nil, nil, nil, nil, data.Icon and icon.__tex)
-		elseif Text then
-			SendChatMessage(Text, Channel)
+		if Channel == "MSBT" then
+			if MikSBT then
+				local Size = data.Size
+				if Size == 0 then Size = nil end
+				MikSBT.DisplayMessage(Text, data.Location, data.Sticky, data.r*255, data.g*255, data.b*255, Size, nil, data.Icon and icon.__tex)
+			end
+		elseif Channel == "SCT" then
+			if SCT then
+				sctcolor.r, sctcolor.g, sctcolor.b = data.r, data.g, data.b
+				SCT:DisplayCustomEvent(Text, sctcolor, data.Sticky, data.Location, nil, data.Icon and icon.__tex)
+			end
+		elseif Channel == "PARROT" then
+			if Parrot then
+				local Size = data.Size
+				if Size == 0 then Size = nil end
+				Parrot:ShowMessage(Text, data.Location, data.Sticky, data.r, data.g, data.b, nil, Size, nil, data.Icon and icon.__tex)
+			end
+		else
+			local chandata = ChannelLookup[Channel]
+			if Text and chandata and chandata.isBlizz then
+				SendChatMessage(Text, Channel)
+			end
 		end
 		announced = 1
 	end
@@ -2159,14 +2200,14 @@ local function SetInfo(icon, alpha, color, texture, start, duration, checkGCD, p
 	-- [reverse]	- true/false to set icon.cooldown:SetReverse(reverse), nil to not change (boolean/nil)
 	-- [count]		- the number of stacks to be used for comparison, nil/false to hide (number/nil/false)
 	-- [countText]	- the actual stack TEXT to be set on the icon, will use count if nil (number/string/nil/false)
-	
+
 	local played, announced, justShowed
 	--alpha = icon.CndtFailed and icon.ConditionAlpha or alpha
 
 	local d = duration - (time - start)
-	
+
 	if
-		(icon.CndtFailed) or 
+		(icon.CndtFailed) or
 		(d > 0 and ((icon.DurationMinEnabled and icon.DurationMin > d) or (icon.DurationMaxEnabled and d > icon.DurationMax))) or
 		(count and ((icon.StackMinEnabled and icon.StackMin > count) or (icon.StackMaxEnabled and count > icon.StackMax)))
 	then
@@ -2312,13 +2353,13 @@ local function SetInfo(icon, alpha, color, texture, start, duration, checkGCD, p
 				pbar:SetMinMaxValues(0, cost)
 				pbar.Max = cost
 				pbar.InvertBars = icon.InvertBars
-				
+
 				if powerType ~= pbar.powerType then
 					local colorinfo = PowerBarColor[powerType]
 					pbar:SetStatusBarColor(colorinfo.r, colorinfo.g, colorinfo.b, 0.9)
 					pbar.powerType = powerType
 				end
-			
+
 				if not pbar.UpdateSet then
 					pbar:SetScript("OnUpdate", PwrBarOnUpdate)
 					pbar.UpdateSet = true
@@ -2375,7 +2416,7 @@ local IconMetamethods = {
 
 
 -- -------------
--- ICON FUNCTIONS
+-- ICONS
 -- -------------
 
 TMW.Types = {
@@ -2496,7 +2537,7 @@ function TMW:Icon_Update(icon)
 	local iconID = icon:GetID()
 	local groupID = icon.group:GetID()
 	local group = icon.group
-	
+
 	local dontreassign
 	if not runEvents then
 		dontreassign = true
@@ -2517,7 +2558,7 @@ function TMW:Icon_Update(icon)
 			icon[k] = db.profile.Groups[groupID].Icons[iconID][k]
 		end
 	end
-	
+
 	local dontremove
 	for event, tbl in pairs(icon.Events) do
 		icon[event] = tbl
@@ -2583,12 +2624,12 @@ function TMW:Icon_Update(icon)
 		end
 		g:AddButton(icon)
 		group.SkinID = g.SkinID
-		
+
 		if f.OverrideLBFPos then
 			ct:ClearAllPoints()
 			ct:SetPoint("BOTTOMRIGHT", icon, "BOTTOMRIGHT", f.x, f.y)
 		end
-		
+
 		cd:SetFrameLevel(icon:GetFrameLevel() - 2)
 		icon.cbar:SetFrameLevel(icon:GetFrameLevel() - 1)
 		icon.pbar:SetFrameLevel(icon:GetFrameLevel() - 1)
@@ -2597,7 +2638,7 @@ function TMW:Icon_Update(icon)
 		local lbfs = db.profile.Groups[groupID].LBF
 		local g = LBF:Group("TellMeWhen", format(L["fGROUP"], groupID))
 		g:AddButton(icon)
-		
+
 		group.SkinID = lbfs.SkinID or g.SkinID or "Blizzard"
 		local tbl = LBF:GetSkins()
 		if tbl and tbl[group.SkinID] then
@@ -2619,7 +2660,7 @@ function TMW:Icon_Update(icon)
 		icon.cbar:SetFrameLevel(icon:GetFrameLevel() + 1)
 		icon.pbar:SetFrameLevel(icon:GetFrameLevel() + 1)
 	end
-	
+
 	icon.__normaltex = icon.__LBF_Normal or icon.__MSQ_NormalTexture or icon:GetNormalTexture()
 	if (not LBF and not LMB) or not group.SkinID or group.SkinID == "Blizzard" then
 		icon.__normaltex:Hide()
@@ -2678,7 +2719,7 @@ function TMW:Icon_Update(icon)
 			ClearScripts(icon)
 			icon:Hide()
 		end
-		
+
 		pbar:SetValue(0)
 		pbar:SetAlpha(.9)
 		if icon.InvertBars then
@@ -2689,7 +2730,7 @@ function TMW:Icon_Update(icon)
 		cbar:SetAlpha(.9)
 	else
 		ClearScripts(icon)
-		
+
 		local testCount, testCountText
 		if group.FontTest then
 			if icon.Type == "buff" then
@@ -2707,7 +2748,7 @@ function TMW:Icon_Update(icon)
 				end
 			end
 		end
-		
+
 		icon:SetInfo(1, 1, nil, 0, 0, nil, nil, nil, testCount, testCountText) -- alpha is set to 1 here so it doesnt return early
 		if icon.Enabled then
 			icon:setalpha(1)
@@ -2717,7 +2758,7 @@ function TMW:Icon_Update(icon)
 		if not icon.texture:GetTexture() then
 			icon:SetTexture("Interface\\AddOns\\TellMeWhen\\Textures\\Disabled")
 		end
-		
+
 		ClearScripts(cbar)
 		cbar.UpdateSet = false
 		cbar:SetValue(cbar.Max)
@@ -3006,7 +3047,7 @@ function TMW:TT(f, title, text, actualtitle, actualtext, override)
 	if text then
 		f.__text = (actualtext and text) or _G[text] or L[text]
 	end
-	
+
 	if override then -- completely overwrite the old enter and leave scripts if the tooltip can be changed on a frame, rather than a set it and forget it tooltip
 		f:SetScript("OnEnter", TTShow)
 		f:SetScript("OnLeave", TTHide)

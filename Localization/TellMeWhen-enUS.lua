@@ -80,6 +80,7 @@ L["ICONMENU_DR_DESC"] = [=[This icon type can be used to track the length and ex
 Spells from different diminishing returns categories should not be checked in one icon.
 For example, do not put Polymorph and Cheap Shot in the same icon, as they are not in the same category.
 It is advised that you used the predefined DR-<category> equivalancies that TMW provides.]=]
+L["ICONMENU_AUTOSHOT"] = "Cooldown - Auto Shot"
 
 L["ICONMENU_COOLDOWNTYPE"] = "Cooldown type"
 L["ICONMENU_SPELL"] = "Spell or ability"
@@ -143,10 +144,10 @@ L["ICONMENU_HOSTILE"] = "Hostile"
 L["ICONMENU_EITHER"] = "Any"
 
 L["ICONMENU_ICDTYPE"] = "Triggered by"
-L["ICONMENU_SPELLCAST_COMPLETE"] = "Spell Cast Finish"
+L["ICONMENU_SPELLCAST_COMPLETE"] = "Spell Cast Finish/Instant Cast"
 L["ICONMENU_SPELLCAST_START"] = "Spell Cast Start"
 L["ICONMENU_ICDBDE"] = "Buff/Debuff/Energize"
-L["ICONMENU_SPELLCAST_COMPLETE_DESC"] = "Select this option if the internal cooldown begins when you finish casting the spell that you chose"
+L["ICONMENU_SPELLCAST_COMPLETE_DESC"] = "Select this option if the internal cooldown begins when you finish casting the spell that you chose, or if the spell is an instant cast spell."
 L["ICONMENU_SPELLCAST_START_DESC"] = "Select this option if the internal cooldown begins when you start casting the spell that you chose"
 L["ICONMENU_ICDAURA_DESC"] = "Select this option if the internal cooldown begins when you apply the buff or debuff that you chose, or if the effect energizes you with mana/rage/etc."
 L["ICONMENU_ICDUSABLE"] = "Usable CD/Expired spell"
@@ -284,6 +285,9 @@ L["UIPANEL_COLOR_PRESENT"] = "Present color"
 L["UIPANEL_COLOR_PRESENT_DESC"] = "The tint of the icon when the buff/debuff/enchant/totem is present and the icon is set to always show."
 L["UIPANEL_COLOR_ABSENT"] = "Absent color"
 L["UIPANEL_COLOR_ABSENT_DESC"] = "The tint of the icon when the buff/debuff/enchant/totem is absent and the icon is set to always show."
+L["FONTCOLOR"] = "Font Color"
+L["FONTSIZE"] = "Font Size"
+L["DEFAULT"] = "Default"
 L["UIPANEL_STANCE"] = "Show while in:"
 L["NONE"] = "None of these"
 L["CASTERFORM"] = "Caster Form"

@@ -120,7 +120,7 @@ local function UnitCooldown_OnUpdate(icon, time)
 		local d = Sort == -1 and huge or 0
 		local UnAlpha = icon.UnAlpha
 		local dobreak
-		
+
 		for u = 1, #Units do
 			local unit = Units[u]
 			if UnitExists(unit) then
@@ -136,7 +136,7 @@ local function UnitCooldown_OnUpdate(icon, time)
 					else
 						_start = cooldowns[iName] or 0
 					end
-					
+
 					if _start then
 						local tms = time-_start -- Time Minus Start - time since the unit's last cast of the spell (not neccesarily the time it has been on cooldown)
 						local _d = tms > ICDDuration and 0 or tms -- real duration remaining on the cooldown
@@ -185,7 +185,7 @@ local function UnitCooldown_OnUpdate(icon, time)
 			icon:SetAlpha(0)
 		end
 	end
-end			
+end
 
 
 function Type:Setup(icon, groupID, iconID)
@@ -201,7 +201,7 @@ function Type:Setup(icon, groupID, iconID)
 			icon.NameArray[k] = strlower(v)
 		end
 	end
-	
+
 	Type:RegisterEvent("COMBAT_LOG_EVENT_UNFILTERED")
 	Type:RegisterEvent("UNIT_SPELLCAST_SUCCEEDED")
 
@@ -223,4 +223,3 @@ function Type:IE_TypeLoaded()
 	TMW:TT(ICDDuration, "ICONMENU_COOLDOWN", "CHOOSENAME_DIALOG_UCD_DESC", nil, nil, 1)
 	ICDDuration.label = TMW.L["ICONMENU_COOLDOWN"]
 end
-	

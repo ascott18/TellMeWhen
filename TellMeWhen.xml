@@ -205,14 +205,14 @@
 				self.__shown = nil
 			</OnHide>
 		</Scripts>
-		
+
 		<NormalTexture file=""/>
 		<HighlightTexture alphaMode="ADD" file="Interface\Buttons\ButtonHilight-Square"/>
 		<PushedTexture file="Interface\Buttons\UI-Quickslot-Depress"/>
 	</Button>
 
 	<!-- END TEMPLATES -->
-	
+
 	<Frame name="TellMeWhen_BlizzOptionsStub" hidden="true">
 		<Scripts>
 			<OnLoad>

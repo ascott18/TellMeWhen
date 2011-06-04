@@ -67,8 +67,8 @@ function Type:Setup(icon, groupID, iconID)
 			icon:SetTexture("Interface\\Icons\\INV_Misc_QuestionMark")
 		end
 	end
-	icon.__start = 0 --TellMeWhen-4.2.1.2.lua:2115 attempt to perform arithmetic on local "start" (a nil value) -- caused because condition icons do not define start/durations at all, even if shown.
-	icon.__duration = 0
+	icon.__start = icon.__start or 0 --TellMeWhen-4.2.1.2.lua:2115 attempt to perform arithmetic on local "start" (a nil value) -- caused because condition icons do not define start/durations at all, even if shown.
+	icon.__duration = icon.__duration or 0
 	icon.__vrtxcolor = 1
 
 	icon:SetScript("OnUpdate", ConditionIcon_OnUpdate)

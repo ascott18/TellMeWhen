@@ -16,7 +16,7 @@ local TMW = TMW
 if not TMW then return end
 local L = TMW.L
 
-local db, UPD_INTV, ClockGCD, rc, mc
+local db, UPD_INTV, ClockGCD, rc, mc, pr, ab
 local GetSpellCooldown, IsSpellInRange, IsUsableSpell =
 	  GetSpellCooldown, IsSpellInRange, IsUsableSpell
 local GetItemCooldown, IsItemInRange, IsEquippedItem, GetItemIcon, GetItemCount =
@@ -82,6 +82,8 @@ function Type:Update()
 	ClockGCD = db.profile.ClockGCD
 	rc = db.profile.OORColor
 	mc = db.profile.OOMColor
+	pr = db.profile.PRESENTColor
+	ab = db.profile.ABSENTColor
 end
 
 
@@ -113,7 +115,7 @@ local function SpellCooldown_OnUpdate(icon, time)
 				end
 				isGCD = (ClockGCD or duration ~= 0) and OnGCD(duration)
 				if inrange == 1 and not nomana and (duration == 0 or isGCD) then --usable
-					icon:SetInfo(icon.Alpha, 1, SpellTextures[iName], start, duration, true, iName)
+					icon:SetInfo(icon.Alpha, icon.UnAlpha ~= 0 and pr or 1, SpellTextures[iName], start, duration, true, iName)
 					return
 				end
 			end
@@ -190,7 +192,7 @@ local function ItemCooldown_OnUpdate(icon, time)
 				if RangeCheck then
 					inrange = IsItemInRange(iName, "target") or 1
 				end
-				
+
 				if (OnlyEquipped and not IsEquippedItem(iName)) or (OnlyInBags and (count == 0)) then
 					equipped = false
 				end
