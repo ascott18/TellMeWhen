@@ -535,6 +535,7 @@ end
 function TMW:CompileOptions() -- options
 	if not TMW.OptionsTable then
 		TMW.OptionsTable = {
+			name = L["ICON_TOOLTIP1"] .. " " .. TELLMEWHEN_VERSION_FULL,
 			type = "group",
 			args = {
 				main = {
@@ -547,11 +548,6 @@ function TMW:CompileOptions() -- options
 					end,
 					get = function(info) return db.profile[info[#info]] end,
 					args = {
-						header = {
-							name = L["ICON_TOOLTIP1"] .. " " .. TELLMEWHEN_VERSION .. TELLMEWHEN_VERSION_MINOR,
-							type = "header",
-							order = 1,
-						},
 						Locked = {
 							name = L["UIPANEL_LOCKUNLOCK"],
 							desc = L["UIPANEL_SUBTEXT2"],
@@ -1488,23 +1484,24 @@ end
 
 function IE:LoadSettings()
 	local groupID, iconID = CI.g, CI.i
-
+	local ics = CI.ics
 	for setting, settingtype in pairs(checks) do
+		local f = IE.Main[setting]
 		if settingtype == 1 then
-			IE.Main[setting]:SetChecked(db.profile.Groups[groupID].Icons[iconID][setting])
-			IE.Main[setting]:GetScript("OnClick")(IE.Main[setting])
+			f:SetChecked(ics[setting])
+			f:GetScript("OnClick")(f)
 		elseif settingtype == 2 then
-			IE.Main[setting]:SetText(db.profile.Groups[groupID].Icons[iconID][setting])
-			IE.Main[setting]:SetCursorPosition(0)
+			f:SetText(ics[setting])
+			f:SetCursorPosition(0)
 		elseif settingtype == 3 then
-			IE.Main[setting]:SetValue(db.profile.Groups[groupID].Icons[iconID][setting]*100)
+			f:SetValue(ics[setting]*100)
 		elseif type(settingtype) == "table" then
 			for subset, subtype in pairs(settingtype) do
 				if subtype == 1 then
-					IE.Main[setting][subset]:SetChecked(db.profile.Groups[groupID].Icons[iconID][subset])
+					f[subset]:SetChecked(ics[subset])
 				elseif subtype == 2 then
-					IE.Main[setting][subset]:SetText(db.profile.Groups[groupID].Icons[iconID][subset])
-					IE.Main[setting][subset]:SetCursorPosition(0)
+					f[subset]:SetText(ics[subset])
+					f[subset]:SetCursorPosition(0)
 				end
 			end
 		end
@@ -1514,9 +1511,9 @@ function IE:LoadSettings()
 		for k, frame in pairs(parent) do
 			if strfind(k, "Radio") then
 				if frame.setting == "TotemSlots" then
-					frame:SetChecked(strsub(db.profile.Groups[groupID].Icons[iconID][frame.setting], frame:GetID(), frame:GetID()) == "1")
+					frame:SetChecked(strsub(ics[frame.setting], frame:GetID(), frame:GetID()) == "1")
 				else
-					local checked = db.profile.Groups[groupID].Icons[iconID][frame.setting] == frame.value
+					local checked = ics[frame.setting] == frame.value
 					frame:SetChecked(checked)
 					if checked and parent == IE.Main.WhenChecks then
 						if frame:GetID() == 1 then
@@ -2202,6 +2199,20 @@ for k, v in pairs(SND.List) do
 		break
 	end
 end
+sort(SND.List, function(a, b)
+	local TMWa = strsub(a, 1, 3) == "TMW"
+	local TMWb = strsub(b, 1, 3) == "TMW"
+	if TMWa or TMWb then
+		if TMWa and TMWb then
+			return a < b
+		else
+			return TMWa
+		end
+	else
+		return a < b
+	end
+
+end)
 
 function SND:SetSoundsOffset(offs)
 	SND.offs = offs
@@ -3873,6 +3884,7 @@ function CNDT:TypeCheck(group, data)
 		group.EditBox:Show()
 		if type(data.name) == "function" then
 			data.name(group.EditBox)
+			group.EditBox:GetScript("OnTextChanged")(group.EditBox)
 		else
 			TMW:TT(group.EditBox, nil, nil, nil, nil, 1)
 		end

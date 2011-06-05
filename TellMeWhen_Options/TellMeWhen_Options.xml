@@ -116,6 +116,7 @@
 		<Scripts>
 			<OnEscapePressed>
 				EditBox_ClearFocus(self)
+				self:GetScript("OnTextChanged")(self)
 			</OnEscapePressed>
 			<OnEditFocusLost>
 				EditBox_ClearHighlight(self)
@@ -2479,9 +2480,7 @@
 						<Frames>
 							<CheckButton name="$parent1" inherits="TellMeWhen_RadioCheckTemplate" parentKey="Radio1" id="1">
 								<Anchors>
-									<Anchor point="TOPLEFT" relativeTo="$parent" relativePoint="TOPLEFT">
-										<Offset x="0" y="0" />
-									</Anchor>
+									<Anchor point="TOPLEFT" relativeTo="$parent" relativePoint="TOPLEFT" x="0" y="0" />
 								</Anchors>
 								<Scripts>
 									<OnLoad>
@@ -2496,9 +2495,7 @@
 							</CheckButton>
 							<CheckButton name="$parent2" inherits="TellMeWhen_RadioCheckTemplate" parentKey="Radio2" id="2">
 								<Anchors>
-									<Anchor point="TOP" relativeTo="$parent1" relativePoint="BOTTOM">
-										<Offset x="0" y="0" />
-									</Anchor>
+									<Anchor point="TOP" relativeTo="$parent1" relativePoint="BOTTOM" x="0" y="5" />
 								</Anchors>
 								<Scripts>
 									<OnLoad>
@@ -2513,9 +2510,7 @@
 							</CheckButton>
 							<CheckButton name="$parent3" inherits="TellMeWhen_RadioCheckTemplate" parentKey="Radio3" id="3">
 								<Anchors>
-									<Anchor point="TOP" relativeTo="$parent2" relativePoint="BOTTOM">
-										<Offset x="0" y="5" />
-									</Anchor>
+									<Anchor point="TOP" relativeTo="$parent2" relativePoint="BOTTOM" x="0" y="5" />
 								</Anchors>
 								<Scripts>
 									<OnLoad>

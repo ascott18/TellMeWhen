@@ -57,7 +57,7 @@ L["ICONMENU_GHOUL"] = "Non-MoG ghoul"
 L["ICONMENU_MUSHROOMS"] = "Wild Mushrooms"
 L["ICONMENU_MULTISTATECD"] = "Multi-state ability"
 L["ICONMENU_MULTISTATECD_DESC"] = "This should be used when you want to track multiple states/textures/etc of a cooldown. Some examples are Holy Word: Chastise and Dark Simulacrum. |cFFFF5959IMPORTANT|r: The action being tracked MUST be on your action bars for this icon type to work. You should also make sure that the ability is in its default state before leaving config mode."
-L["ICONMENU_UNITCOOLDOWN"] = "Cooldown - Other"
+L["ICONMENU_UNITCOOLDOWN"] = "Cooldown - Others'"
 L["ICONMENU_UNITCOOLDOWN_DESC"] = [=[This icon type will allow you to track the cooldowns of your friends or your enemies.
 You must enter the duration of the cooldown in the editbox to the right of the unit input.
 Note regarding pvp trinkets: they can be tracked using '%s' as the name.]=]
@@ -368,6 +368,10 @@ L["CONDITIONPANEL_PVPFLAG"] = "Unit is PvP Flagged"
 L["CONDITIONPANEL_LEVEL"] = "Unit Level"
 L["CONDITIONPANEL_CLASS"] = "Unit Class"
 L["CONDITIONPANEL_CLASSIFICATION"] = "Unit Classification"
+L["CONDITIONPANEL_UNITISUNIT"] = "Unit is Unit"
+L["CONDITIONPANEL_UNITISUNIT_DESC"] = "This condition will pass if the unit in the first editbox and the second editbox are the same entity."
+L["CONDITIONPANEL_UNITISUNIT_EBDESC"] = "Enter a unit in this editbox to be compared with the first unit."
+L["UNITTWO"] = "Second Unit"
 L["CONDITIONPANEL_NAME"] = "Unit Name"
 L["CONDITIONPANEL_NAMETOOLTIP"] = "Separate multiple names with semicolons (;)"
 L["CONDITIONPANEL_INSTANCETYPE"] = "Instance Type"
@@ -397,6 +401,11 @@ L["SPEED"] = "Unit Speed"
 L["SPEED_DESC"] = [[This refers to the current movement speed of the unit. If the unit is not moving, it is zero.
 If you wish to track the maximum run speed of the unit, use the 'Unit Run Speed' condition instead.]]
 L["RUNSPEED"] = "Unit Run Speed"
+L["SPELLTOCHECK"] = "Spell to Check"
+L["ITEMTOCHECK"] = "Item to Check"
+L["BUFFTOCHECK"] = "Buff to Check"
+L["DEBUFFTOCHECK"] = "Debuff to Check"
+L["CODETOEXE"] = "Code to Execute"
 
 L["MELEEHASTE"] = "Melee Haste"
 L["MELEECRIT"] = "Melee Crit"

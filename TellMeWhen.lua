@@ -29,9 +29,10 @@ local AceDB = LibStub("AceDB-3.0")
 local LSM = LibStub("LibSharedMedia-3.0")
 local DRData = LibStub("DRData-1.0", true)
 
-TELLMEWHEN_VERSION = "4.3.0"
-TELLMEWHEN_VERSION_MINOR = ""
-TELLMEWHEN_VERSIONNUMBER = 43013 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
+TELLMEWHEN_VERSION = "4.3.1"
+TELLMEWHEN_VERSION_MINOR = strmatch(" @project-version@", " r%d+") or ""
+TELLMEWHEN_VERSION_FULL = TELLMEWHEN_VERSION .. TELLMEWHEN_VERSION_MINOR
+TELLMEWHEN_VERSIONNUMBER = 43101 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
 if TELLMEWHEN_VERSIONNUMBER > 44000 or TELLMEWHEN_VERSIONNUMBER < 43000 then error("YOU SCREWED UP THE VERSION NUMBER OR DIDNT CHANGE THE SAFETY LIMITS") return end -- safety check because i accidentally made the version number 414069 once
 
 TELLMEWHEN_MAXGROUPS = 1 	--this is a default, used by SetTheory (addon), so dont rename
@@ -789,9 +790,9 @@ function TMW:OnInitialize()
 	CNDT = TMW.CNDT
 	if not CNDT then
 		-- this also includes upgrading from older than 3.0 (pre-Ace3 DB settings)
-		TMW.Warn("A complete restart of WoW is required to use TellMeWhen "..TELLMEWHEN_VERSION..TELLMEWHEN_VERSION_MINOR..". (conditions.lua not found)")
+		TMW.Warn("A complete restart of WoW is required to use TellMeWhen "..TELLMEWHEN_VERSION_FULL..". (conditions.lua not found)")
 		StaticPopupDialogs["TMW_RESTARTNEEDED"] = {
-			text = "A complete restart of WoW is required to use TellMeWhen "..TELLMEWHEN_VERSION..TELLMEWHEN_VERSION_MINOR..". Would you like to restart WoW now?", --not worth translating imo, most people will never see it by the time it gets translated.
+			text = "A complete restart of WoW is required to use TellMeWhen "..TELLMEWHEN_VERSION_FULL..". Would you like to restart WoW now?", --not worth translating imo, most people will never see it by the time it gets translated.
 			button1 = EXIT_GAME,
 			button2 = CANCEL,
 			OnAccept = ForceQuit,
@@ -827,6 +828,22 @@ function TMW:OnInitialize()
 
 	LSM:Register("sound", "Die!", [[Sound\Creature\GruulTheDragonkiller\GRULLAIR_Gruul_Slay03.wav]])
 	LSM:Register("sound", "You Fail!", [[Sound\Creature\Kologarn\UR_Kologarn_slay02.wav]])
+	
+	LSM:Register("sound", "TMW - Pling 1", [[Interface\Addons\TellMeWhen\Sounds\Pling1.ogg]])
+	LSM:Register("sound", "TMW - Pling 2", [[Interface\Addons\TellMeWhen\Sounds\Pling2.ogg]])
+	LSM:Register("sound", "TMW - Pling 3", [[Interface\Addons\TellMeWhen\Sounds\Pling3.ogg]])
+	LSM:Register("sound", "TMW - Pling 4", [[Interface\Addons\TellMeWhen\Sounds\Pling4.ogg]])
+	LSM:Register("sound", "TMW - Pling 5", [[Interface\Addons\TellMeWhen\Sounds\Pling5.ogg]])
+	LSM:Register("sound", "TMW - Pling 6", [[Interface\Addons\TellMeWhen\Sounds\Pling6.ogg]])
+	LSM:Register("sound", "TMW - Ding 1", [[Interface\Addons\TellMeWhen\Sounds\Ding1.ogg]])
+	LSM:Register("sound", "TMW - Ding 2", [[Interface\Addons\TellMeWhen\Sounds\Ding2.ogg]])
+	LSM:Register("sound", "TMW - Ding 3", [[Interface\Addons\TellMeWhen\Sounds\Ding3.ogg]])
+	LSM:Register("sound", "TMW - Ding 4", [[Interface\Addons\TellMeWhen\Sounds\Ding4.ogg]])
+	LSM:Register("sound", "TMW - Ding 5", [[Interface\Addons\TellMeWhen\Sounds\Ding5.ogg]])
+	LSM:Register("sound", "TMW - Ding 6", [[Interface\Addons\TellMeWhen\Sounds\Ding6.ogg]])
+	LSM:Register("sound", "TMW - Ding 7", [[Interface\Addons\TellMeWhen\Sounds\Ding7.ogg]])
+	LSM:Register("sound", "TMW - Ding 8", [[Interface\Addons\TellMeWhen\Sounds\Ding8.ogg]])
+	LSM:Register("sound", "TMW - Ding 9", [[Interface\Addons\TellMeWhen\Sounds\Ding9.ogg]])
 
 	TELLMEWHEN_MAXGROUPS = db.profile.NumGroups -- need to define before upgrading
 

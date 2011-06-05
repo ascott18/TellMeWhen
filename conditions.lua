@@ -363,6 +363,7 @@ Env = {
 	GetNumRaidMembers = GetNumRaidMembers,
 	GetNumPartyMembers = GetNumPartyMembers,
 	UnitIsEnemy = UnitIsEnemy,
+	UnitIsUnit = UnitIsUnit,
 	UnitReaction = UnitReaction,
 	GetRuneType = GetRuneType,
 	GetRuneCount = GetRuneCount,
@@ -416,12 +417,14 @@ CNDT.AndOrs = {
 	{ text=L["CONDITIONPANEL_OR"], 	value="OR" 	},
 }
 
+-- preset text tables that are frequently used
 local percent = setmetatable({}, {__index = function(t, k) return k.."%" end})
 local pluspercent = setmetatable({}, {__index = function(t, k) return "+"..k.."%" end})
 local bool = {[0] = L["TRUE"],[1] = L["FALSE"],}
 local usableunusable = {[0] = L["ICONMENU_USABLE"],[1] = L["ICONMENU_UNUSABLE"],}
 local presentabsent = {[0] = L["ICONMENU_PRESENT"],[1] = L["ICONMENU_ABSENT"],}
 local standardtcoords = {0.07, 0.93, 0.07, 0.93}
+
 local function formatSeconds(seconds)
 	--seconds =  floor(seconds * 100 + 0.5) / 100
 	local d =  seconds / 86400
@@ -438,13 +441,7 @@ local function formatSeconds(seconds)
 	if h >= 1 then return format("%d:%02d:%s", h, m, s) end
 	return format("%d:%s", m, s)
 end
---[[
-L["CNDTCAT_SPELLSABILITIES"] = "Spells/Abilities/Items/etc."
-L["CNDTCAT_STATUS"] = "Attributes/Status"
-L["CNDTCAT_STATS"] = "Combat Stats"
-L["CNDTCAT_RESOURCES"] = "Resources"
-L["CNDTCAT_CURRENCIES"] = "Currencies"
-]]
+
 CNDT.Types = {
 
 -------------------------------------resources
@@ -781,7 +778,7 @@ CNDT.Types = {
 		value = "NAME",
 		min = 0,
 		max = 1,
-		name = function(editbox) TMW:TT(editbox, "CONDITIONPANEL_NAME", "CONDITIONPANEL_NAMETOOLTIP", nil, nil, 1) end,
+		name = function(editbox) TMW:TT(editbox, "CONDITIONPANEL_NAME", "CONDITIONPANEL_NAMETOOLTIP", nil, nil, 1) editbox.label = L["CONDITIONPANEL_NAME"] end,
 		nooperator = true,
 		texttable = bool,
 		icon = "Interface\\LFGFrame\\LFGFrame-SearchIcon-Background",
@@ -827,11 +824,24 @@ CNDT.Types = {
 		texttable = setmetatable({}, {__index = function(t, k) return L[classifications[k]] end}),
 		icon = "Interface\\Icons\\achievement_pvp_h_03",
 		tcoords = standardtcoords,
-		funcstr = function(c)
-			return [[(reverseClassifications[UnitClassification(c.Unit)] or 1) c.Operator c.Level]]
-		end,
+		funcstr = [[(reverseClassifications[UnitClassification(c.Unit)] or 1) c.Operator c.Level]],
 	},
--------------------player status
+	{ -- unit is unit
+		text = L["CONDITIONPANEL_UNITISUNIT"],
+		tooltip = L["CONDITIONPANEL_UNITISUNIT_DESC"],
+		category = L["CNDTCAT_STATUS"],
+		value = "UNITISUNIT",
+		min = 0,
+		max = 1,
+		nooperator = true,
+		texttable = setmetatable({}, {__index = function(t, k) return L[classifications[k]] end}),
+		name = function(editbox) TMW:TT(editbox, "CONDITIONPANEL_UNITISUNIT", "CONDITIONPANEL_UNITISUNIT_EBDESC", nil, nil, 1) editbox.label = L["UNITTWO"] end,
+		texttable = bool,
+		icon = "Interface\\Icons\\spell_holy_prayerofhealing",
+		tcoords = standardtcoords,
+		funcstr = [[UnitIsUnit(c.Unit, c.Unit2) == c.1nil]],
+	},
+
 	{ -- instance type
 		text = L["CONDITIONPANEL_INSTANCETYPE"],
 		category = L["CNDTCAT_STATUS"],
@@ -965,7 +975,7 @@ CNDT.Types = {
 		category = L["CNDTCAT_SPELLSABILITIES"],
 		range = 30,
 		step = 0.1,
-		name = function(editbox) TMW:TT(editbox, L["COOLDOWN"] .. " - " .. L["ICONMENU_SPELL"], "CNDT_ONLYFIRST", 1, nil, 1) end,
+		name = function(editbox) TMW:TT(editbox, L["COOLDOWN"] .. " - " .. L["ICONMENU_SPELL"], "CNDT_ONLYFIRST", 1, nil, 1) editbox.label = L["SPELLTOCHECK"] end,
 		useSUG = true,
 		unit = PLAYER,
 		texttable = setmetatable({[0] = formatSeconds(0).." ("..L["ICONMENU_USABLE"]..")"}, {__index = function(tbl, k) return formatSeconds(k) end}),
@@ -981,7 +991,7 @@ CNDT.Types = {
 		category = L["CNDTCAT_SPELLSABILITIES"],
 		min = 0,
 		max = 1,
-		name = function(editbox) TMW:TT(editbox, "ICONMENU_REACTIVE", "CNDT_ONLYFIRST", nil, nil, 1) end,
+		name = function(editbox) TMW:TT(editbox, "ICONMENU_REACTIVE", "CNDT_ONLYFIRST", nil, nil, 1) editbox.label = L["SPELLTOCHECK"] end,
 		useSUG = true,
 		nooperator = true,
 		unit = false,
@@ -996,7 +1006,7 @@ CNDT.Types = {
 		category = L["CNDTCAT_SPELLSABILITIES"],
 		min = 0,
 		max = 1,
-		name = function(editbox) TMW:TT(editbox, "CONDITIONPANEL_MANAUSABLE", "CNDT_ONLYFIRST", nil, nil, 1) end,
+		name = function(editbox) TMW:TT(editbox, "CONDITIONPANEL_MANAUSABLE", "CNDT_ONLYFIRST", nil, nil, 1) editbox.label = L["SPELLTOCHECK"] end,
 		useSUG = true,
 		nooperator = true,
 		unit = false,
@@ -1011,7 +1021,7 @@ CNDT.Types = {
 		category = L["CNDTCAT_SPELLSABILITIES"],
 		min = 0,
 		max = 1,
-		name = function(editbox) TMW:TT(editbox, "CONDITIONPANEL_SPELLRANGE", "CNDT_ONLYFIRST", nil, nil, 1) end,
+		name = function(editbox) TMW:TT(editbox, "CONDITIONPANEL_SPELLRANGE", "CNDT_ONLYFIRST", nil, nil, 1) editbox.label = L["SPELLTOCHECK"] end,
 		useSUG = true,
 		nooperator = true,
 		texttable = {[0] = L["INRANGE"], [1] = L["NOTINRANGE"]},
@@ -1028,7 +1038,7 @@ CNDT.Types = {
 		category = L["CNDTCAT_SPELLSABILITIES"],
 		range = 30,
 		step = 0.1,
-		name = function(editbox) TMW:TT(editbox, L["ITEMCOOLDOWN"], "CNDT_ONLYFIRST", 1, nil, 1) end,
+		name = function(editbox) TMW:TT(editbox, L["ITEMCOOLDOWN"], "CNDT_ONLYFIRST", 1, nil, 1) editbox.label = L["ITEMTOCHECK"] end,
 		useSUG = "item",
 		unit = PLAYER,
 		texttable = setmetatable({[0] = formatSeconds(0).." ("..L["ICONMENU_USABLE"]..")"}, {__index = function(tbl, k) return formatSeconds(k) end}),
@@ -1043,7 +1053,7 @@ CNDT.Types = {
 		category = L["CNDTCAT_SPELLSABILITIES"],
 		min = 0,
 		max = 1,
-		name = function(editbox) TMW:TT(editbox, "CONDITIONPANEL_ITEMRANGE", "CNDT_ONLYFIRST", nil, nil, 1) end,
+		name = function(editbox) TMW:TT(editbox, "CONDITIONPANEL_ITEMRANGE", "CNDT_ONLYFIRST", nil, nil, 1) editbox.label = L["ITEMTOCHECK"] end,
 		useSUG = "item",
 		nooperator = true,
 		texttable = {[0] = L["INRANGE"], [1] = L["NOTINRANGE"]},
@@ -1060,7 +1070,7 @@ CNDT.Types = {
 		min = 0,
 		max = 50,
 		texttable = setmetatable({}, {__index = function(tbl, k) return format(ITEM_SPELL_CHARGES, k) end}),
-		name = function(editbox) TMW:TT(editbox, "ITEMINBAGS", "CNDT_ONLYFIRST", nil, nil, 1) end,
+		name = function(editbox) TMW:TT(editbox, "ITEMINBAGS", "CNDT_ONLYFIRST", nil, nil, 1) editbox.label = L["ITEMTOCHECK"] end,
 		useSUG = "item",
 		unit = false,
 		icon = "Interface\\Icons\\inv_misc_bag_08",
@@ -1075,7 +1085,7 @@ CNDT.Types = {
 		max = 1,
 		nooperator = true,
 		texttable = bool,
-		name = function(editbox) TMW:TT(editbox, "ITEMEQUIPPED", "CNDT_ONLYFIRST", nil, nil, 1) end,
+		name = function(editbox) TMW:TT(editbox, "ITEMEQUIPPED", "CNDT_ONLYFIRST", nil, nil, 1) editbox.label = L["ITEMTOCHECK"] end,
 		useSUG = "item",
 		unit = false,
 		icon = "Interface\\PaperDoll\\UI-PaperDoll-Slot-MainHand",
@@ -1089,7 +1099,7 @@ CNDT.Types = {
 		category = L["CNDTCAT_SPELLSABILITIES"],
 		range = 30,
 		step = 0.1,
-		name = function(editbox) TMW:TT(editbox, L["ICONMENU_BUFF"] .. " - " .. L["DURATIONPANEL_TITLE"], "BUFFCNDT_DESC", 1, nil, 1) end,
+		name = function(editbox) TMW:TT(editbox, L["ICONMENU_BUFF"] .. " - " .. L["DURATIONPANEL_TITLE"], "BUFFCNDT_DESC", 1, nil, 1) editbox.label = L["BUFFTOCHECK"] end,
 		useSUG = true,
 		check = function(check) TMW:TT(check, "ONLYCHECKMINE", "ONLYCHECKMINE_DESC", nil, nil, 1) end,
 		texttable = setmetatable({[0] = formatSeconds(0).." ("..L["ICONMENU_ABSENT"]..")"}, {__index = function(tbl, k) return formatSeconds(k) end}),
@@ -1106,7 +1116,7 @@ CNDT.Types = {
 		category = L["CNDTCAT_SPELLSABILITIES"],
 		min = 0,
 		max = 20,
-		name = function(editbox) TMW:TT(editbox, L["ICONMENU_BUFF"] .. " - " .. L["STACKSPANEL_TITLE"], "BUFFCNDT_DESC", 1, nil, 1) end,
+		name = function(editbox) TMW:TT(editbox, L["ICONMENU_BUFF"] .. " - " .. L["STACKSPANEL_TITLE"], "BUFFCNDT_DESC", 1, nil, 1) editbox.label = L["BUFFTOCHECK"] end,
 		useSUG = true,
 		check = function(check) TMW:TT(check, "ONLYCHECKMINE", "ONLYCHECKMINE_DESC", nil, nil, 1) end,
 		texttable = setmetatable({[0] = format(STACKS, 0).." ("..L["ICONMENU_ABSENT"]..")"}, {__index = function(tbl, k) return format(STACKS, k) end}),
@@ -1123,7 +1133,7 @@ CNDT.Types = {
 		category = L["CNDTCAT_SPELLSABILITIES"],
 		min = 0,
 		max = 20,
-		name = function(editbox) TMW:TT(editbox, L["ICONMENU_BUFF"] .. " - " .. L["NUMAURAS"], "BUFFCNDT_DESC", 1, nil, 1) end,
+		name = function(editbox) TMW:TT(editbox, L["ICONMENU_BUFF"] .. " - " .. L["NUMAURAS"], "BUFFCNDT_DESC", 1, nil, 1) editbox.label = L["BUFFTOCHECK"] end,
 		useSUG = true,
 		check = function(check) TMW:TT(check, "ONLYCHECKMINE", "ONLYCHECKMINE_DESC", nil, nil, 1) end,
 		texttable = setmetatable({}, {__index = function(tbl, k) return format(L["ACTIVE"], k) end}),
@@ -1139,7 +1149,7 @@ CNDT.Types = {
 		category = L["CNDTCAT_SPELLSABILITIES"],
 		range = 30,
 		step = 0.1,
-		name = function(editbox) TMW:TT(editbox, L["ICONMENU_DEBUFF"] .. " - " .. L["DURATIONPANEL_TITLE"], "BUFFCNDT_DESC", 1, nil, 1) end,
+		name = function(editbox) TMW:TT(editbox, L["ICONMENU_DEBUFF"] .. " - " .. L["DURATIONPANEL_TITLE"], "BUFFCNDT_DESC", 1, nil, 1) editbox.label = L["DEBUFFTOCHECK"] end,
 		useSUG = true,
 		check = function(check) TMW:TT(check, "ONLYCHECKMINE", "ONLYCHECKMINE_DESC", nil, nil, 1) end,
 		texttable = setmetatable({[0] = formatSeconds(0).." ("..L["ICONMENU_ABSENT"]..")"}, {__index = function(tbl, k) return formatSeconds(k) end}),
@@ -1155,7 +1165,7 @@ CNDT.Types = {
 		category = L["CNDTCAT_SPELLSABILITIES"],
 		min = 0,
 		max = 20,
-		name = function(editbox) TMW:TT(editbox, L["ICONMENU_DEBUFF"] .. " - " .. L["STACKSPANEL_TITLE"], "BUFFCNDT_DESC", 1, nil, 1) end,
+		name = function(editbox) TMW:TT(editbox, L["ICONMENU_DEBUFF"] .. " - " .. L["STACKSPANEL_TITLE"], "BUFFCNDT_DESC", 1, nil, 1) editbox.label = L["DEBUFFTOCHECK"]end,
 		useSUG = true,
 		check = function(check) TMW:TT(check, "ONLYCHECKMINE", "ONLYCHECKMINE_DESC", nil, nil, 1) end,
 		texttable = setmetatable({[0] = format(STACKS, 0).." ("..L["ICONMENU_ABSENT"]..")"}, {__index = function(tbl, k) return format(STACKS, k) end}),
@@ -1172,7 +1182,7 @@ CNDT.Types = {
 		category = L["CNDTCAT_SPELLSABILITIES"],
 		min = 0,
 		max = 20,
-		name = function(editbox) TMW:TT(editbox, L["ICONMENU_DEBUFF"] .. " - " .. L["NUMAURAS"], "BUFFCNDT_DESC", 1, nil, 1) end,
+		name = function(editbox) TMW:TT(editbox, L["ICONMENU_DEBUFF"] .. " - " .. L["NUMAURAS"], "BUFFCNDT_DESC", 1, nil, 1) editbox.label = L["DEBUFFTOCHECK"]end,
 		useSUG = true,
 		check = function(check) TMW:TT(check, "ONLYCHECKMINE", "ONLYCHECKMINE_DESC", nil, nil, 1) end,
 		texttable = setmetatable({}, {__index = function(tbl, k) return format(L["ACTIVE"], k) end}),
@@ -1566,7 +1576,7 @@ CNDT.Types = {
 		max = 1,
 		nooperator = true,
 		noslide = true,
-		name = function(editbox) TMW:TT(editbox, "LUACONDITION", gsub(L["LUACONDITION_DESC"], "\r\n", " "), nil, 1, 1) end,
+		name = function(editbox) TMW:TT(editbox, "LUACONDITION", gsub(L["LUACONDITION_DESC"], "\r\n", " "), nil, 1, 1) editbox.label = L["CODETOEXE"] end,
 		unit = false,
 		icon = "Interface\\Icons\\INV_Misc_Gear_01",
 		tcoords = standardtcoords,
@@ -1697,15 +1707,27 @@ function CNDT:ProcessConditions(icon)
 		if thiscondtstr then
 			local thisstr = andor .. "(" .. strrep("(", c.PrtsBefore) .. thiscondtstr .. strrep(")", c.PrtsAfter)  .. ")"
 
+			
+			if strfind(thisstr, "c.Unit2") and (strfind(c.Name, "maintank") or strfind(c.Name, "mainassist")) then
+				local unit = gsub(c.Name, "|cFFFF0000#|r", "1")
+				thisstr = gsub(thisstr, "c.Unit2",		unit) -- sub it in as a variable
+				Env[unit] = unit
+				TMW:RegisterEvent("RAID_ROSTER_UPDATE")
+				TMW:RAID_ROSTER_UPDATE()
+			else
+				thisstr = gsub(thisstr, "c.Unit2",	"\"" .. c.Name .. "\"") -- sub it in as a string
+			end
+			
 			if strfind(thisstr, "c.Unit") and (strfind(c.Unit, "maintank") or strfind(c.Unit, "mainassist")) then
 				local unit = gsub(c.Unit, "|cFFFF0000#|r", "1")
-				thisstr = gsub(thisstr, "c.Unit",	unit) -- sub it in as a variable
+				thisstr = gsub(thisstr, "c.Unit",		unit) -- sub it in as a variable
 				Env[unit] = unit
 				TMW:RegisterEvent("RAID_ROSTER_UPDATE")
 				TMW:RAID_ROSTER_UPDATE()
 			else
 				thisstr = gsub(thisstr, "c.Unit",	"\"" .. c.Unit .. "\"") -- sub it in as a string
 			end
+			
 
 			if v.percent then
 				thisstr = gsub(thisstr, "c.Level", 		c.Level/100)
