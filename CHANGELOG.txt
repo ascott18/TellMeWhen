@@ -1,6 +1,8 @@
 ===v4.3.1===
  * Added some custom sounds.
  * New Condition: Unit is Unit
+ * Bug Fixes:
+ ** Groups that are anchored to frames that aren't created when their parent addon is loaded should now update their position once the frame that the group is anchored to is created.
 
 ===v4.3.0===
  * New icon type: Diminishing Returns. Guess what this one tracks?

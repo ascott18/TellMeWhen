@@ -32,7 +32,7 @@ local DRData = LibStub("DRData-1.0", true)
 TELLMEWHEN_VERSION = "4.3.1"
 TELLMEWHEN_VERSION_MINOR = strmatch(" @project-version@", " r%d+") or ""
 TELLMEWHEN_VERSION_FULL = TELLMEWHEN_VERSION .. TELLMEWHEN_VERSION_MINOR
-TELLMEWHEN_VERSIONNUMBER = 43101 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
+TELLMEWHEN_VERSIONNUMBER = 43102 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
 if TELLMEWHEN_VERSIONNUMBER > 44000 or TELLMEWHEN_VERSIONNUMBER < 43000 then error("YOU SCREWED UP THE VERSION NUMBER OR DIDNT CHANGE THE SAFETY LIMITS") return end -- safety check because i accidentally made the version number 414069 once
 
 TELLMEWHEN_MAXGROUPS = 1 	--this is a default, used by SetTheory (addon), so dont rename
@@ -1934,20 +1934,40 @@ local function CreateGroup(groupID)
 	return group
 end
 
+local PositionsToHook = {}
+local hookedGroupSetPos
+local function CreateFrameHook(_, name)
+	for groupID, frameName in pairs(PositionsToHook) do
+		if frameName == name then
+			TMW:Group_SetPos(groupID)
+			PositionsToHook[groupID] = nil
+		end
+	end
+end
+local function LoadAddOnHook(_, name)
+	for groupID, frameName in pairs(PositionsToHook) do
+		if _G[frameName] then
+			TMW:Group_SetPos(groupID)
+			PositionsToHook[groupID] = nil
+		end
+	end
+end
 function TMW:Group_SetPos(groupID)
 	local group = TMW[groupID]
 	local s = db.profile.Groups[groupID]
 	local p = s.Point
 	group:ClearAllPoints()
-	--if p.defined and p.x then
-		local relativeTo = _G[p.relativeTo] or "UIParent"
-		group:SetPoint(p.point, relativeTo, p.relativePoint, p.x, p.y)
---[[	else
-		local groupID=groupID-1
-		local xoffs = 50 + 135*floor(groupID/10)
-		local yoffs = (floor(groupID/10)*-10)+groupID
-		group:SetPoint("TOPLEFT", "UIParent", "TOPLEFT", xoffs, (-50 - (30*yoffs)))
-	end]]
+	local relativeTo = _G[p.relativeTo]
+	if not relativeTo then
+		if not hookedGroupSetPos then
+			hooksecurefunc("CreateFrame", CreateFrameHook)
+			hooksecurefunc("LoadAddOn", LoadAddOnHook)
+			hookedGroupSetPos = 1
+		end
+		PositionsToHook[groupID] = p.relativeTo
+		relativeTo = "UIParent"
+	end
+	group:SetPoint(p.point, relativeTo, p.relativePoint, p.x, p.y)
 	group:SetScale(s.Scale)
 	local Spacing = s.Spacing
 	group:SetSize(s.Columns*(30+Spacing)-Spacing, s.Rows*(30+Spacing)-Spacing)

@@ -1833,8 +1833,8 @@ function IE:ImpExp_DropDown()
 		local settings = CopyTable(db.profile.Groups[CI.g].Icons[CI.i])
 		TMW:CleanIconSettings(settings)
 		local s = TMW:Serialize(settings, TELLMEWHEN_VERSIONNUMBER):
-		gsub("(^[^tT%d][^^]*^[^^]*)", "%1 "):
-		gsub("%^ ^", "^^")
+		gsub("(^[^tT%d][^^]*^[^^]*)", "%1 "): -- add spaces to clean it up a little
+		gsub("%^ ^", "^^") -- remove double space at the end
 		e:SetText(s)
 		e:HighlightText()
 		e:SetFocus()
@@ -3194,13 +3194,7 @@ function SUG:NameOnCursor(isClick)
 	SUG.lastName = strlower(TMW:CleanString(SUG.lastName))
 
 	--disable pattern matches that will break/interfere
-	SUG.lastName = SUG.lastName:
-	gsub("%%", "%%%%"):
-	gsub("%-", "%%-"):
-	gsub("%[", "%%["):
-	gsub("%]", "%%]"):
-	gsub("%(", "%%("):
-	gsub("%)", "%%)")
+	SUG.lastName = gsub(SUG.lastName, "([%%%-%[%]%(%)])", "%%%1")
 
 
 	SUG.atBeginning = "^"..SUG.lastName
