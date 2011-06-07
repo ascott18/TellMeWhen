@@ -3,7 +3,8 @@
  * New Condition: Unit is Unit
  * Bug Fixes:
  ** Groups that are anchored to frames that aren't created when their parent addon is loaded should now update their position once the frame that the group is anchored to is created.
-
+ ** Buffs with one stack were not obeying stack conditionals.
+ 
 ===v4.3.0===
  * New icon type: Diminishing Returns. Guess what this one tracks?
  * New icon type: Cooldown - Auto Shot.
