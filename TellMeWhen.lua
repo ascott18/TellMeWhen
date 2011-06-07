@@ -32,7 +32,7 @@ local DRData = LibStub("DRData-1.0", true)
 TELLMEWHEN_VERSION = "4.3.1"
 TELLMEWHEN_VERSION_MINOR = strmatch(" @project-version@", " r%d+") or ""
 TELLMEWHEN_VERSION_FULL = TELLMEWHEN_VERSION .. TELLMEWHEN_VERSION_MINOR
-TELLMEWHEN_VERSIONNUMBER = 43103 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
+TELLMEWHEN_VERSIONNUMBER = 43104 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
 if TELLMEWHEN_VERSIONNUMBER > 44000 or TELLMEWHEN_VERSIONNUMBER < 43000 then error("YOU SCREWED UP THE VERSION NUMBER OR DIDNT CHANGE THE SAFETY LIMITS") return end -- safety check because i accidentally made the version number 414069 once
 
 TELLMEWHEN_MAXGROUPS = 1 	--this is a default, used by SetTheory (addon), so dont rename
@@ -58,7 +58,7 @@ local MikSBT, Parrot, SCT =
 local CL_PLAYER = COMBATLOG_OBJECT_TYPE_PLAYER
 local CL_PET = COMBATLOG_OBJECT_CONTROL_PLAYER
 local bitband = bit.band
-local st, co, updatehandler, BarGCD, ClockGCD, Locked, CNDT, SndChan
+local st, co, updatehandler, BarGCD, ClockGCD, Locked, CNDT, SndChan, FramesToFind
 local runEvents, updatePBar = 1, 1
 local GCD, NumShapeshiftForms, UpdateTimer = 0, 0, 0
 local IconUpdateFuncs, GroupUpdateFuncs, unitsToChange = {}, {}, {}
@@ -956,6 +956,21 @@ function TMW:OnUpdate() -- this is where all icon OnUpdate scripts are actually 
 	if UpdateTimer <= time - UPD_INTV then
 		UpdateTimer = time
 		_, GCD=GetSpellCooldown(GCDSpell)
+		
+		if FramesToFind then
+			-- I hate to do this, but this is the only way to detect frames that are created by an upvalued CreateFrame (*cough* VuhDo) (Unless i raw hook it, but CreateFrame should be secure)
+			for groupID, frameName in pairs(FramesToFind) do
+				if _G[frameName] then
+					TMW:Group_SetPos(groupID)
+					FramesToFind[groupID] = nil
+					if not next(FramesToFind) then
+						FramesToFind = nil
+						break
+					end
+				end
+			end
+		end
+		
 		for i = 1, #GroupUpdateFuncs do
 			local CndtCheck = GroupUpdateFuncs[i].CndtCheck
 			if CndtCheck then
@@ -1934,24 +1949,6 @@ local function CreateGroup(groupID)
 	return group
 end
 
-local PositionsToHook = {}
-local hookedGroupSetPos
-local function CreateFrameHook(_, name)
-	for groupID, frameName in pairs(PositionsToHook) do
-		if frameName == name then
-			TMW:Group_SetPos(groupID)
-			PositionsToHook[groupID] = nil
-		end
-	end
-end
-local function LoadAddOnHook(_, name)
-	for groupID, frameName in pairs(PositionsToHook) do
-		if _G[frameName] then
-			TMW:Group_SetPos(groupID)
-			PositionsToHook[groupID] = nil
-		end
-	end
-end
 function TMW:Group_SetPos(groupID)
 	local group = TMW[groupID]
 	local s = db.profile.Groups[groupID]
@@ -1959,12 +1956,9 @@ function TMW:Group_SetPos(groupID)
 	group:ClearAllPoints()
 	local relativeTo = _G[p.relativeTo]
 	if not relativeTo then
-		if not hookedGroupSetPos then
-			hooksecurefunc("CreateFrame", CreateFrameHook)
-			hooksecurefunc("LoadAddOn", LoadAddOnHook)
-			hookedGroupSetPos = 1
-		end
-		PositionsToHook[groupID] = p.relativeTo
+		print(groupID, p.relativeTo)
+		FramesToFind = FramesToFind or {}
+		FramesToFind[groupID] = p.relativeTo
 		relativeTo = "UIParent"
 	end
 	group:SetPoint(p.point, relativeTo, p.relativePoint, p.x, p.y)
