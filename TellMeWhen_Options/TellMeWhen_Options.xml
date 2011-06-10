@@ -176,18 +176,16 @@
 				GameTooltip:Hide()
 			</OnLeave>
 			<OnMouseWheel>
-				if not TMW.SUG.Suggesting then
-					if (not TMW.SUG[#TMW.SUG]:IsShown() and delta == 1) or TMW.SUG[#TMW.SUG]:IsShown() then
-						if IsLeftShiftKeyDown() or IsRightShiftKeyDown() then
-							delta = delta*5
-						end
-						if IsLeftControlKeyDown() or IsRightControlKeyDown() then
-							delta = delta*(#TMW.SUG-1)
-						end
-						TMW.SUG.offset = max(0, TMW.SUG.offset - delta)
+				if (not TMW.SUG[#TMW.SUG]:IsShown() and delta == 1) or TMW.SUG[#TMW.SUG]:IsShown() then
+					if IsLeftShiftKeyDown() or IsRightShiftKeyDown() then
+						delta = delta*5
 					end
-					TMW.SUG:SuggestingComplete()
+					if IsLeftControlKeyDown() or IsRightControlKeyDown() then
+						delta = delta*(#TMW.SUG-1)
+					end
+					TMW.SUG.offset = max(0, TMW.SUG.offset - delta)
 				end
+				TMW.SUG:SuggestingComplete()
 			</OnMouseWheel>
 		</Scripts>
 		<NormalFont style="GameFontNormal"/>

@@ -32,7 +32,7 @@ local DRData = LibStub("DRData-1.0", true)
 TELLMEWHEN_VERSION = "4.3.1"
 TELLMEWHEN_VERSION_MINOR = strmatch(" @project-version@", " r%d+") or ""
 TELLMEWHEN_VERSION_FULL = TELLMEWHEN_VERSION .. TELLMEWHEN_VERSION_MINOR
-TELLMEWHEN_VERSIONNUMBER = 43104 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
+TELLMEWHEN_VERSIONNUMBER = 43105 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
 if TELLMEWHEN_VERSIONNUMBER > 44000 or TELLMEWHEN_VERSIONNUMBER < 43000 then error("YOU SCREWED UP THE VERSION NUMBER OR DIDNT CHANGE THE SAFETY LIMITS") return end -- safety check because i accidentally made the version number 414069 once
 
 TELLMEWHEN_MAXGROUPS = 1 	--this is a default, used by SetTheory (addon), so dont rename
@@ -455,6 +455,7 @@ TMW.BE = {
 		Bleeding = "_1822;_1079;9007;33745;1943;703;94009;43104;89775",
 		Incapacitated = "20066;1776;49203",
 		Feared = "_5782;5246;_8122;10326;1513;_5484;_6789;87204",
+		Slowed = "_116;_120;_15571;13810;_5116;_8056;3600;_1715;_12323;45524;_18223;_15407;_3409;26679;_51693;_58180;61391;_50434;_55741;44614;_7302;_8034;_63529", -- by algus2
 		Stunned = "_1833;_408;_91800;_5211;_56;9005;22570;19577;56626;44572;853;2812;85388;64044;20549;46968;30283;20253;65929;7922;12809;50519;91797;47481;12355;24394;83047;39796;93986;89766;54786",
 		--DontMelee = "5277;871;Retaliation;Dispersion;Hand of Sacrifice;Hand of Protection;Divine Shield;Divine Protection;Ice Block;Icebound Fortitude;Cyclone;Banish",  --does somebody want to update these for me?
 		--MovementSlowed = "Incapacitating Shout;Chains of Ice;Icy Clutch;Slow;Daze;Hamstring;Piercing Howl;Wing Clip;Ice Trap;Frostbolt;Cone of Cold;Blast Wave;Mind Flay;Crippling Poison;Deadly Throw;Frost Shock;Earthbind;Curse of Exhaustion",
@@ -1956,12 +1957,12 @@ function TMW:Group_SetPos(groupID)
 	group:ClearAllPoints()
 	local relativeTo = _G[p.relativeTo]
 	if not relativeTo then
-		print(groupID, p.relativeTo)
 		FramesToFind = FramesToFind or {}
 		FramesToFind[groupID] = p.relativeTo
-		relativeTo = "UIParent"
+		group:SetPoint("CENTER", UIParent)
+	else
+		group:SetPoint(p.point, relativeTo, p.relativePoint, p.x, p.y)
 	end
-	group:SetPoint(p.point, relativeTo, p.relativePoint, p.x, p.y)
 	group:SetScale(s.Scale)
 	local Spacing = s.Spacing
 	group:SetSize(s.Columns*(30+Spacing)-Spacing, s.Rows*(30+Spacing)-Spacing)
@@ -2157,6 +2158,11 @@ local function SetTexture(icon, tex)
 	--if icon.__tex ~= tex then ------dont check for this, checking is done before this method is even called
 	icon.__tex = tex
 	icon.texture:SetTexture(tex)
+end
+
+local function RegisterEvent(icon, event)
+	icon:registerevent(event)
+	icon.__hasEvents = 1
 end
 
 local function SetReverse(icon, reverse)
@@ -2443,6 +2449,7 @@ local IconAddIns = {
 	SetScript		= 	IconSetScript,
 	SetTexture		=	SetTexture,
 	SetReverse		=	SetReverse,
+	RegisterEvent	=	RegisterEvent,
 }
 
 local IconMetamethods = {
@@ -2573,6 +2580,7 @@ function TMW:Icon_Update(icon)
 	end
 
 	icon.__previousNameFirst = icon.NameFirst -- used to detect changes in the name that would cause a texture change
+	
 	for k in pairs(TMW.Icon_Defaults) do
 		icon[k] = nil --lets clear any settings that might get left behind.
 	end
@@ -2618,7 +2626,11 @@ function TMW:Icon_Update(icon)
 		icon.IgnoreRunes = nil
 	end
 
-	icon:UnregisterAllEvents()
+	if icon.__hasEvents then
+		-- UnregisterAllEvents uses a ton of CPU
+		icon:UnregisterAllEvents()
+		icon.__hasEvents = nil
+	end
 	ClearScripts(icon)
 
 	if #icon.Conditions > 0 and Locked then -- dont define conditions if we are unlocked so that i dont have to deal with meta icons checking icons during config. I think i solved this somewhere else too without thinking about it, but what the hell
@@ -2637,7 +2649,6 @@ function TMW:Icon_Update(icon)
 	cd.noCooldownCount = not icon.ShowTimerText
 	cd:SetDrawEdge(db.profile.DrawEdge)
 	icon:SetReverse(false)
-
 
 	local f = group.Font
 	local ct = icon.countText
@@ -2698,7 +2709,6 @@ function TMW:Icon_Update(icon)
 		icon.__normaltex:Show()
 	end
 
-
 	icon.__previcon = nil
 	icon.__alpha = nil
 	icon.__count = "UPDATE ME!"
@@ -2711,7 +2721,7 @@ function TMW:Icon_Update(icon)
 	elseif icon.ShowWhen == "unalpha" then
 		icon.Alpha = 0
 	end
-
+	
 	TMW.time = GetTime()
 	if icon.Enabled or not Locked then
 		if TMW.Types[icon.Type] then
@@ -2812,6 +2822,7 @@ function TMW:Icon_Update(icon)
 	if not dontreassign then
 		TMW:ScheduleTimer("RestoreSound", UPD_INTV*2.1)
 	end
+	
 end
 
 

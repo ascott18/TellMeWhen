@@ -79,7 +79,10 @@ TMW.CI = setmetatable({}, {__index = function(tbl, k)
 		return approachTable(TMW.db, "profile", "Groups", tbl.g, "Icons", tbl.i)
 	elseif k == "SoI" then -- spell or item
 		local ics = TMW.CI.ics
-		return ics and ics.Type == "cooldown" and ics.CooldownType or "spell"
+		if ics and ics.Type == "cooldown" and ics.CooldownType == "item" then
+			return "item"
+		end
+		return "spell"
 	elseif k == "IMS" then -- IsMultiState
 		local ics = TMW.CI.ics
 		return ics and ics.Type == "cooldown" and ics.CooldownType == "multistate"
@@ -807,7 +810,6 @@ function TMW:Group_StopSizing(resizeButton)
 	local p = db.profile.Groups[group:GetID()]["Point"]
 	p.point, p.relativeTo, p.relativePoint, p.x, p.y = group:GetPoint(1)
 	p.relativeTo = p.relativeTo and p.relativeTo:GetName() or "UIParent"
---	p.defined = true
 	LibStub("AceConfigRegistry-3.0"):NotifyChange("TellMeWhen Options")
 end
 
@@ -817,7 +819,6 @@ function TMW:Group_StopMoving(group)
 	local p = db.profile.Groups[group:GetID()]["Point"]
 	p.point, p.relativeTo, p.relativePoint, p.x, p.y = group:GetPoint(1)
 	p.relativeTo = p.relativeTo and p.relativeTo.GetName and p.relativeTo:GetName() or "UIParent"
---	p.defined = true
 	LibStub("AceConfigRegistry-3.0"):NotifyChange("TellMeWhen Options")
 end
 
@@ -898,12 +899,17 @@ ID:RegisterEvent("ACTIONBAR_HIDEGRID", "BAR_HIDEGRID")
 
 function ID:Drag_DropDown(a)
 	local info = UIDropDownMenu_CreateInfo()
-	info.text = L["ICONMENU_MOVEHERE"]
+	local append = ""
+	if ID.desticon.texture:GetTexture() ~= "Interface\\AddOns\\TellMeWhen\\Textures\\Disabled" then
+		append = "|TInterface\\AddOns\\TellMeWhen_Options\\Textures\\Alert:0:2|t"
+	end
+	
+	info.text = L["ICONMENU_MOVEHERE"] .. append
 	info.notCheckable = true
 	info.func = ID.Move
 	UIDropDownMenu_AddButton(info)
 
-	info.text = L["ICONMENU_COPYHERE"]
+	info.text = L["ICONMENU_COPYHERE"] .. append
 	info.func = ID.Copy
 	UIDropDownMenu_AddButton(info)
 
@@ -2924,136 +2930,117 @@ function SUG.Sorter(a, b)
 		return a < b
 	else
 		--sort by name
-		local haveA, haveB
+		local nameA, nameB
 		if SUGSoI == "item" then
-			haveA, haveB = ItemCache[a], ItemCache[b]
+			nameA, nameB = ItemCache[a], ItemCache[b]
 		else
-			haveA, haveB = SpellCache[a], SpellCache[b]
+			nameA, nameB = SpellCache[a], SpellCache[b]
 		end
-		if haveA == haveB then
+		if nameA == nameB then
 			--sort identical names by ID
 			return a < b
 		else
 			--sort by name
-			return haveA < haveB
+			return nameA < nameB
 		end
 	end
 end
 
-function SUG:StartSuggester()
-	SUGSoI = SUG.overrideSoI or CI.SoI
-	SUG.Suggesting = 1
-	SUG.f:SetScript("OnUpdate", SUG.Suggester)
-end
-
 local buffEquivs = {TMW.BE.buffs, TMW.BE.debuffs}
-local startOver
-function SUG:Suggester()
-	local start = GetTime()
+function SUG:DoSuggest()
+	SUGSoI = SUG.overrideSoI or CI.SoI
 	local atBeginning = SUG.atBeginning
 	local overrideSoI = SUG.overrideSoI
 	local t = CI.t
-	if startOver then
-		wipe(preTable)
-		SUG.nextCacheKey = nil
-		startOver = false
-		local lastName = SUG.lastName
-		local semiLN = ";"..lastName
-		local LNlen = #lastName
-		if t == "dr" and not overrideSoI then
-			for equiv, str in pairs(TMW.BE.dr) do
-				if 	(LNlen > 2 and (
+	local lastName = SUG.lastName
+	local semiLN = ";"..lastName
+	local long = #lastName > 2
+	wipe(preTable)
+	if t == "dr" and not overrideSoI then
+		for equiv, str in pairs(TMW.BE.dr) do
+			if 	(long and (
+					(strfind(strlowerCache[equiv], lastName)) or
+					(strfind(strlowerCache[L[equiv]], lastName)) or
+					((inputType == "string" and strfind(strlowerCache[EquivFullNameLookup[equiv]], semiLN)) or
+					(inputType == "number" and strfind(EquivFullIDLookup[equiv], semiLN))))
+			) or
+				(not long and (
+					(strfind(strlowerCache[equiv], atBeginning)) or
+					(strfind(strlowerCache[L[equiv]], atBeginning)))
+			) then
+				preTable[#preTable + 1] = equiv
+			end
+		end
+	elseif t == "cast" and not overrideSoI then
+		for equiv, str in pairs(TMW.BE.casts) do
+			if 	(long and (
+					(strfind(strlowerCache[equiv], lastName)) or
+					(strfind(strlowerCache[L[equiv]], lastName)) or
+					((inputType == "string" and strfind(strlowerCache[EquivFullNameLookup[equiv]], semiLN)) or
+					(inputType == "number" and strfind(EquivFullIDLookup[equiv], semiLN))))
+			) or
+				(not long and (
+					(strfind(strlowerCache[equiv], atBeginning)) or
+					(strfind(strlowerCache[L[equiv]], atBeginning)))
+			) then
+				preTable[#preTable + 1] = equiv
+			end
+		end
+	elseif t == "buff" and not overrideSoI then
+		for _, b in pairs(buffEquivs) do
+			for equiv, str in pairs(b) do
+				if 	(long and (
 						(strfind(strlowerCache[equiv], lastName)) or
 						(strfind(strlowerCache[L[equiv]], lastName)) or
 						((inputType == "string" and strfind(strlowerCache[EquivFullNameLookup[equiv]], semiLN)) or
 						(inputType == "number" and strfind(EquivFullIDLookup[equiv], semiLN))))
 				) or
-					(LNlen <= 2 and (
+					(not long and (
 						(strfind(strlowerCache[equiv], atBeginning)) or
 						(strfind(strlowerCache[L[equiv]], atBeginning)))
 				) then
 					preTable[#preTable + 1] = equiv
 				end
 			end
-		elseif t == "cast" and not overrideSoI then
-			for equiv, str in pairs(TMW.BE.casts) do
-				if 	(LNlen > 2 and (
-						(strfind(strlowerCache[equiv], lastName)) or
-						(strfind(strlowerCache[L[equiv]], lastName)) or
-						((inputType == "string" and strfind(strlowerCache[EquivFullNameLookup[equiv]], semiLN)) or
-						(inputType == "number" and strfind(EquivFullIDLookup[equiv], semiLN))))
-				) or
-					(LNlen <= 2 and (
-						(strfind(strlowerCache[equiv], lastName)) or
-						(strfind(strlowerCache[L[equiv]], lastName)))
-				) then
-					preTable[#preTable + 1] = equiv
-				end
-			end
-		elseif t == "buff" and not overrideSoI then
-			for _, b in pairs(buffEquivs) do
-				for equiv, str in pairs(b) do
-					if 	(LNlen > 2 and (
-							(strfind(strlowerCache[equiv], lastName)) or
-							(strfind(strlowerCache[L[equiv]], lastName)) or
-							((inputType == "string" and strfind(strlowerCache[EquivFullNameLookup[equiv]], semiLN)) or
-							(inputType == "number" and strfind(EquivFullIDLookup[equiv], semiLN))))
-					) or
-						(LNlen <= 2 and (
-							(strfind(strlowerCache[equiv], lastName)) or
-							(strfind(strlowerCache[L[equiv]], lastName)))
-					) then
-						preTable[#preTable + 1] = equiv
-					end
-				end
-			end
-			for dispeltype in pairs(TMW.DS) do
-				if strfind(strlowerCache[dispeltype], atBeginning) or strfind(strlowerCache[L[dispeltype]], atBeginning)  then
-					preTable[#preTable + 1] = dispeltype
-				end
+		end
+		for dispeltype in pairs(TMW.DS) do
+			if strfind(strlowerCache[dispeltype], atBeginning) or strfind(strlowerCache[L[dispeltype]], atBeginning)  then
+				preTable[#preTable + 1] = dispeltype
 			end
 		end
 	end
-
-	while GetTime() - start < 0.025 do -- throttle it
-		local id, name
-		if SUGSoI == "item" then
-			id, name = next(ItemCache, SUG.nextCacheKey)
-		elseif t == "cast" and not overrideSoI then
-			id, name = next(CastCache, SUG.nextCacheKey)
-		else
-			id, name = next(SpellCache, SUG.nextCacheKey)
-		end
-		if id then
-			if inputType == "number" then
-				if strfind(id, atBeginning) then
-					preTable[#preTable + 1] = id
-				end
-			else
-				if strfind(name, atBeginning) then
-					preTable[#preTable + 1] = id
-				end
+	
+	local tbl
+	if SUGSoI == "item" then
+		tbl = ItemCache
+	elseif t == "cast" and not overrideSoI then
+		tbl = CastCache
+	else
+		tbl = SpellCache
+	end
+	
+	for id, name in pairs(tbl) do
+		if inputType == "number" then
+			if strfind(id, atBeginning) then
+				preTable[#preTable + 1] = id
 			end
-			SUG.nextCacheKey = id
 		else
-			SUG.nextCacheKey = nil
-			SUG.f:SetScript("OnUpdate", nil)
-			SUG.Suggesting = nil
-			SUG.doSort = true
-			SUG:SuggestingComplete()
-			return
+			if strfind(name, atBeginning) then
+				preTable[#preTable + 1] = id
+			end
 		end
 	end
+	
+	SUG:SuggestingComplete(1)
 end
 
-function SUG:SuggestingComplete()
+function SUG:SuggestingComplete(doSort)
 	SUG.offset = min(SUG.offset, max(0, #preTable-#SUG+1))
 	local offset = SUG.offset
 	SUGSoI = SUG.overrideSoI or CI.SoI
 	SUGIMS = CI.IMS
-	if SUG.doSort then
+	if doSort then
 		sort(preTable, SUG.Sorter)
-		SUG.doSort = nil
 	end
 
 	local i = 1
@@ -3194,7 +3181,8 @@ function SUG:NameOnCursor(isClick)
 	SUG.lastName = strlower(TMW:CleanString(SUG.lastName))
 
 	--disable pattern matches that will break/interfere
-	SUG.lastName = gsub(SUG.lastName, "([%%%-%[%]%(%)])", "%%%1")
+	--only keep * for debugging, otherwise escape it (causes a short client lockup because of the massive sorting that must occur)
+	SUG.lastName = gsub(SUG.lastName, "([%%%-%[%]%(%)" ..(debug and "" or "%*").. "])", "%%%1") 
 
 
 	SUG.atBeginning = "^"..SUG.lastName
@@ -3208,17 +3196,16 @@ function SUG:NameOnCursor(isClick)
 	end
 
 	inputType = type(tonumber(SUG.lastName) or SUG.lastName)
-	startOver = true
 
 	if SUG.oldLastName ~= SUG.lastName or SUG.redoIfSame then
 		SUG.redoIfSame = nil
 		SUG:CacheItems()
-		if IsMultiState then
+		if CI.IMS then
 			SUG:CacheActions()
 		end
 
 		SUG.offset = 0
-		SUG:StartSuggester()
+		SUG:DoSuggest()
 	end
 
 end
@@ -3525,7 +3512,7 @@ function CNDT:ValidateParenthesis()
 
 	local tab = (CNDT.type == "icon" and IE.IconConditionTab) or IE.GroupConditionTab
 	if n > 0 then
-		tab:SetText((CNDT.invalid and "|TInterface\\DialogFrame\\DialogAlertIcon:20:20:0:2:15:45:20:46|t|cFFFF0000" or "") .. L[CNDT.type == "icon" and "CONDITIONS" or "GROUPCONDITIONS"] .. " |cFFFF5959(" .. n .. ")")
+		tab:SetText((CNDT.invalid and "|TInterface\\AddOns\\TellMeWhen_Options\\Textures\\Alert:0:2|t|cFFFF0000" or "") .. L[CNDT.type == "icon" and "CONDITIONS" or "GROUPCONDITIONS"] .. " |cFFFF5959(" .. n .. ")")
 	else
 		tab:SetText(L[CNDT.type == "icon" and "CONDITIONS" or "GROUPCONDITIONS"] .. " (" .. n .. ")")
 	end
@@ -3578,7 +3565,7 @@ function CNDT:AddRemoveHandler()
 
 	local tab = (CNDT.type == "icon" and IE.IconConditionTab) or IE.GroupConditionTab
 	if n > 0 then
-		tab:SetText((CNDT.invalid and "|TInterface\\DialogFrame\\DialogAlertIcon:20:20:0:2:15:45:20:46|t|cFFFF0000" or "") .. L[CNDT.type == "icon" and "CONDITIONS" or "GROUPCONDITIONS"] .. " |cFFFF5959(" .. n .. ")")
+		tab:SetText((CNDT.invalid and "|TInterface\\AddOns\\TellMeWhen_Options\\Textures\\Alert:0:2|t|cFFFF0000" or "") .. L[CNDT.type == "icon" and "CONDITIONS" or "GROUPCONDITIONS"] .. " |cFFFF5959(" .. n .. ")")
 	else
 		tab:SetText(L[CNDT.type == "icon" and "CONDITIONS" or "GROUPCONDITIONS"] .. " (" .. n .. ")")
 	end
