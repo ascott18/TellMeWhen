@@ -104,8 +104,12 @@ L["ICONMENU_DRS"] = "Diminishing Returns"
 
 L["ICONMENU_UNITSTOWATCH"] = "Units to watch"
 L["ICONMENU_UNITS"] = "Units"
-L["ICONMENU_UNIT_DESC"] = "Enter the units to watch in this box. Units can be inserted from the dropdown to the right, or advanced users can insert their own units. Separate each unit with a semicolon (;). Standard units (player, target, mouseover, etc; the same units that are used for macros) may be used, or friendly player names if those players are in your group/raid (Cybeloras, Nephthys, etc.)"
-L["DROPDOWN_UNIT_DESC"] = "You can select units from this menu to insert into the editbox. Units that end with '|cFFFF0000#|r' require that the '|cFFFF0000#|r' be replaced with a number corresponding to the appropriate unit, or a range of numbers like 1-10. E.g. change 'raid|cFFFF0000#|r' to 'raid25' to track the 25th raid member, or change it to 'raid1-25' to track the first 25 raid members."
+L["ICONMENU_UNIT_DESC"] = [[Enter the units to watch in this box. Units can be inserted from the dropdown to the right, or advanced users can insert their own units. Separate each unit with a semicolon (;). 
+
+For more information about units, go to http://www.wowpedia.org/UnitId.]]
+L["DROPDOWN_UNIT_DESC"] = [[You can select units from this menu to insert into the editbox. Units that end with '|cFFFF0000#|r' require that the '|cFFFF0000#|r' be replaced with a number corresponding to the appropriate unit, or a range of numbers. E.g. change 'raid|cFFFF0000#|r' to 'raid25' to track the 25th raid member, or change it to 'raid1-25' to track the first 25 raid members.
+
+For more information about units, go to http://www.wowpedia.org/UnitId.]]
 L["ICONMENU_FOCUS"] = "Focus"
 L["ICONMENU_TARGETTARGET"] = "Target's target"
 L["ICONMENU_FOCUSTARGET"] = "Focus' target"
@@ -368,6 +372,7 @@ L["CONDITIONPANEL_PVPFLAG"] = "Unit is PvP Flagged"
 L["CONDITIONPANEL_LEVEL"] = "Unit Level"
 L["CONDITIONPANEL_CLASS"] = "Unit Class"
 L["CONDITIONPANEL_CLASSIFICATION"] = "Unit Classification"
+L["CONDITIONPANEL_ROLE"] = "Unit Role"
 L["CONDITIONPANEL_UNITISUNIT"] = "Unit is Unit"
 L["CONDITIONPANEL_UNITISUNIT_DESC"] = "This condition will pass if the unit in the first editbox and the second editbox are the same entity."
 L["CONDITIONPANEL_UNITISUNIT_EBDESC"] = "Enter a unit in this editbox to be compared with the first unit."
@@ -390,6 +395,15 @@ It is a regular statement to be evaluated, e.g. 'a and b or c'.
 If complex functionality is required, use a call to a function, e.g. 'CheckStuff()', that is defined externally.
 ALL functions and variables used must be defined in/will be stored in TMW["CNDT"]["Env"].
 If more help is needed (but not help about how to write Lua code), open a ticket on CurseForge.]]
+L["MACROCONDITION"] = "Macro Conditional"
+L["MACROCONDITION_DESC"] = [[This condition will evaluate a macro conditional, and will pass if it passes.
+All macro conditionals can be prepended with "no" to reverse what they check.
+Examples:
+	"[nomodifier:alt]" - not holding down the alt key.
+	"[@target, help][mod:ctrl]" - target is friendly OR holding down ctrl
+	"[@focus, harm, nomod:shift]" - focus is hostile AND not holding down shift
+For more help, go to http://www.wowpedia.org/Making_a_macro]]
+L["MACROCONDITION_EB_DESC"] = "If using a single condition, opening and closing brackets are optional. Brackets are required if using multiple conditionals."
 L["NOTINRANGE"] = "Not in range"
 L["INRANGE"] = "In range"
 L["STANCE"] = "Stance"
@@ -406,6 +420,7 @@ L["ITEMTOCHECK"] = "Item to Check"
 L["BUFFTOCHECK"] = "Buff to Check"
 L["DEBUFFTOCHECK"] = "Debuff to Check"
 L["CODETOEXE"] = "Code to Execute"
+L["MACROTOEVAL"] = "Macro Conditional(s) to Evaluate"
 
 L["MELEEHASTE"] = "Melee Haste"
 L["MELEECRIT"] = "Melee Crit"
@@ -618,6 +633,10 @@ L["rare"] = "Rare"
 L["elite"] = "Elite"
 L["rareelite"] = "Rare Elite"
 L["worldboss"] = "World Boss"
+
+L["DAMAGER"] = "Damage"
+L["HEALER"] = "Heal"
+L["TANK"] = "Tank"
 
 
 L["DR-RandomStun"] = "Random stuns"

@@ -32,7 +32,7 @@ local DRData = LibStub("DRData-1.0", true)
 TELLMEWHEN_VERSION = "4.3.1"
 TELLMEWHEN_VERSION_MINOR = strmatch(" @project-version@", " r%d+") or ""
 TELLMEWHEN_VERSION_FULL = TELLMEWHEN_VERSION .. TELLMEWHEN_VERSION_MINOR
-TELLMEWHEN_VERSIONNUMBER = 43105 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
+TELLMEWHEN_VERSIONNUMBER = 43106 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
 if TELLMEWHEN_VERSIONNUMBER > 44000 or TELLMEWHEN_VERSIONNUMBER < 43000 then error("YOU SCREWED UP THE VERSION NUMBER OR DIDNT CHANGE THE SAFETY LIMITS") return end -- safety check because i accidentally made the version number 414069 once
 
 TELLMEWHEN_MAXGROUPS = 1 	--this is a default, used by SetTheory (addon), so dont rename
@@ -452,7 +452,7 @@ TMW.BE = {
 	--NOTE: any id prefixed with "_" will have its localized name substituted in instead of being forced to match as an ID
 	debuffs = {
 		CrowdControl = "_118;_339;2637;33786;_1499;_19503;_19386;20066;10326;_9484;_6770;_2094;_51514;76780;_710;_5782;_6358;_49203;_605;82691", -- originally by calico0 of Curse
-		Bleeding = "_1822;_1079;9007;33745;1943;703;94009;43104;89775",
+		Bleeding = "_1822;_1079;9007;33745;1943;703;_94009;43104;89775",
 		Incapacitated = "20066;1776;49203",
 		Feared = "_5782;5246;_8122;10326;1513;_5484;_6789;87204",
 		Slowed = "_116;_120;_15571;13810;_5116;_8056;3600;_1715;_12323;45524;_18223;_15407;_3409;26679;_51693;_58180;61391;_50434;_55741;44614;_7302;_8034;_63529", -- by algus2
@@ -549,7 +549,7 @@ for category, b in pairs(TMW.OldBE) do
 				if name then -- this should never ever ever happen except in new patches if spellIDs were wrong (experience talking)
 					str = gsub(str, id, name)
 				else
-					error("Invalid spellID found: " .. id .. "! Please report this on TMW's CurseForge page if you are currently on the PTR!")
+					geterrorhandler()("Invalid spellID found: " .. id .. "! Please report this on TMW's CurseForge page if you are currently on the PTR!")
 				end
 			end
 		end

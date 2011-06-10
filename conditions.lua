@@ -103,9 +103,18 @@ local classifications = {
 	"rareelite",
 	"worldboss",
 }
-local reverseClassifications = {}
 for k, v in pairs(classifications) do
-	reverseClassifications[v] = k
+	classifications[v] = k
+end
+
+local roles = {
+	"NONE",
+	"DAMAGER",
+	"HEALER",
+	"TANK",
+}
+for k, v in pairs(roles) do
+	roles[v] = k
 end
 
 local totems = {}
@@ -360,6 +369,7 @@ Env = {
 	UnitIsPVP = UnitIsPVP,
 	UnitClass = UnitClass,
 	UnitClassification = UnitClassification,
+	UnitGroupRolesAssigned = UnitGroupRolesAssigned,
 	GetNumRaidMembers = GetNumRaidMembers,
 	GetNumPartyMembers = GetNumPartyMembers,
 	UnitIsEnemy = UnitIsEnemy,
@@ -387,6 +397,7 @@ Env = {
 	IsSpellInRange = IsSpellInRange,
 	IsItemInRange = IsItemInRange,
 	GetCurrencyInfo = GetCurrencyInfo,
+	SecureCmdOptionParse = SecureCmdOptionParse,
 
 	AuraStacks = AuraStacks,
 	AuraDur = AuraDur,
@@ -395,7 +406,9 @@ Env = {
 	TotemDuration = TotemDuration,
 	ItemCooldownDuration = ItemCooldownDuration,
 
-	reverseClassifications = reverseClassifications,
+	classifications = classifications,
+	roles = roles,
+	
 	ZoneType = 0,
 	NumPartyMembers = 0,
 	NumRaidMembers = 0,
@@ -824,7 +837,18 @@ CNDT.Types = {
 		texttable = setmetatable({}, {__index = function(t, k) return L[classifications[k]] end}),
 		icon = "Interface\\Icons\\achievement_pvp_h_03",
 		tcoords = standardtcoords,
-		funcstr = [[(reverseClassifications[UnitClassification(c.Unit)] or 1) c.Operator c.Level]],
+		funcstr = [[(classifications[UnitClassification(c.Unit)] or 1) c.Operator c.Level]],
+	},
+	{ -- role
+		text = L["CONDITIONPANEL_ROLE"],
+		category = L["CNDTCAT_STATUS"],
+		value = "ROLE",
+		min = 1,
+		max = #roles,
+		texttable = setmetatable({[1]=NONE}, {__index = function(t, k) return L[roles[k]] end}),
+		icon = "Interface\\LFGFrame\\UI-LFG-ICON-ROLES",
+		tcoords = {GetTexCoordsForRole("DAMAGER")},
+		funcstr = [[(roles[UnitGroupRolesAssigned(c.Unit)] or 1) c.Operator c.Level]],
 	},
 	{ -- unit is unit
 		text = L["CONDITIONPANEL_UNITISUNIT"],
@@ -1568,6 +1592,25 @@ CNDT.Types = {
 			return gsub(str, "c.Icon", c.Icon)
 		end,
 	},
+	{ -- macro conditional
+		text = L["MACROCONDITION"],
+		tooltip = L["MACROCONDITION_DESC"],
+		value = "MACRO",
+		min = 0,
+		max = 1,
+		nooperator = true,
+		noslide = true,
+		name = function(editbox) TMW:TT(editbox, "MACROCONDITION", "MACROCONDITION_EB_DESC", nil, nil, 1) editbox.label = L["MACROTOEVAL"] end,
+		unit = false,
+		icon = "Interface\\Icons\\inv_misc_punchcards_yellow",
+		tcoords = standardtcoords,
+		funcstr = function(c)
+			local text = c.Name
+			text = (not strfind(text, "^%[") and ("[" .. text)) or text
+			text = (not strfind(text, "%]$") and (text .. "]")) or text
+			return [[SecureCmdOptionParse("]] .. text .. [[")]]
+		end,
+	},
 	{ -- Lua
 		text = L["LUACONDITION"],
 		tooltip = L["LUACONDITION_DESC"],
@@ -1576,7 +1619,7 @@ CNDT.Types = {
 		max = 1,
 		nooperator = true,
 		noslide = true,
-		name = function(editbox) TMW:TT(editbox, "LUACONDITION", gsub(L["LUACONDITION_DESC"], "\r\n", " "), nil, 1, 1) editbox.label = L["CODETOEXE"] end,
+		name = function(editbox) TMW:TT(editbox, "LUACONDITION", gsub(L["LUACONDITION_DESC"], "\n", " "), nil, 1, 1) editbox.label = L["CODETOEXE"] end,
 		unit = false,
 		icon = "Interface\\Icons\\INV_Misc_Gear_01",
 		tcoords = standardtcoords,
@@ -1586,18 +1629,21 @@ CNDT.Types = {
 
 local currencies = {
 	-- currencies were extracted using the script in the /Scripts folder (source is wowhead)
-	-- make sure and order them here in a way that makes sense (most common first)
+	-- make sure and order them here in a way that makes sense (most common first, blah blah derp)
 	395,	--Justice Points
 	396,	--Valor Points
 	392,	--Honor Points
 	390,	--Conquest Points
+	
 	391,	--Tol Barad Commendation
 	416,	--Mark of the World Tree
 	241,	--Champion\'s Seal
+	
 	361,	--Illustrious Jewelcrafter\'s Token
 	402,	--Chef\'s Award
 	61,		--Dalaran Jewelcrafter\'s Token
 	81,		--Dalaran Cooking Award
+	
 	384,	--Dwarf Archaeology Fragment
 	398,	--Draenei Archaeology Fragment
 	393,	--Fossil Archaeology Fragment
@@ -1778,7 +1824,7 @@ function CNDT:ProcessConditions(icon)
 		return func
 	elseif (TMW.debug or luaUsed) and err then
 		print(funcstr)
-		error(err)
+		geterrorhandler()(err)
 	end
 end
 

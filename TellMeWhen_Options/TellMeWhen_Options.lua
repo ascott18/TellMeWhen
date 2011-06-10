@@ -250,6 +250,28 @@ function TMW:CleanDefaults(settings, defaults, blocker)
 	return settings
 end
 
+local mult = {
+    1,
+    60,
+    60*60,
+    60*60*24,
+    60*60*24*365.242199,
+}
+function string:toseconds()
+    self = ":"..strtrim(self, ": ")
+    local _, numcolon = gsub(self, ":", ":") -- let the cheesy coding commence!
+    local seconds = 0
+    for num in gmatch(self, ":([0-9%.]*)") do
+        if tonumber(num) and mult[numcolon] then
+            seconds = seconds + mult[numcolon]*num
+        end
+        numcolon = numcolon - 1
+    end
+    return seconds
+    
+end
+
+
 -- --------------
 -- MAIN OPTIONS
 -- --------------
@@ -1601,7 +1623,7 @@ function IE:Equiv_GenerateTips(equiv)
 	for k, v in pairs(tbl) do
 		local name, _, texture = GetSpellInfo(v)
 		if not name then
-			if debug then
+			if TMW.debug then
 				geterrorhandler()("INVALID ID FOUND: "..equiv..":"..v)
 			else
 				name = v
@@ -2601,7 +2623,6 @@ local ActionCache, pclassSpellCache, ClassSpellLookup, AuraCache, ItemCache, Spe
 doUpdateItemCache = true
 doUpdateActionCache = true
 
-SUG.f = CreateFrame("Frame")
 function SUG:BAG_UPDATE()
 	doUpdateItemCache = true
 end
@@ -2694,6 +2715,7 @@ function SUG:OnInitialize()
 		TMWOptDB.WoWVersion = clientVersion
 
 		local Parser = CreateFrame("GameTooltip", "TMWSUGParser", TMW, "GameTooltipTemplate")
+		local f = CreateFrame("Frame")
 		local function SpellCacher()
 			for id = index, index + SUG.NumCachePerFrame do
 				SUG.Suggest.Status:SetValue(id)
@@ -2733,7 +2755,7 @@ function SUG:OnInitialize()
 				else
 					TMWOptDB.IncompleteCache = false
 					TMWOptDB.CacheLength = id
-					SUG.f:SetScript("OnUpdate", nil)
+					f:SetScript("OnUpdate", nil)
 					SUG.Suggest.Speed:Hide()
 					SUG.Suggest.Status:Hide()
 
@@ -2751,7 +2773,7 @@ function SUG:OnInitialize()
 			end
 			index = index + 1 + SUG.NumCachePerFrame
 		end
-		SUG.f:SetScript("OnUpdate", SpellCacher)
+		f:SetScript("OnUpdate", SpellCacher)
 		SUG.IsCaching = true
 		didrunhook = true
 	end)
@@ -2812,7 +2834,7 @@ SUG:RegisterEvent("PLAYER_TALENT_UPDATE")
 
 local commThrowaway = {}
 function SUG:OnCommReceived(prefix, text, channel, who)
-	if debug then print(text, channel, who) end
+	if TMW.debug then print(text, channel, who) end
 	if prefix ~= "TMWSUG" or who == UnitName("player") then return end
 	local success, arg1, arg2 = SUG:Deserialize(text)
 	if success then
@@ -2850,8 +2872,8 @@ function SUG:OnCommReceived(prefix, text, channel, who)
 			end
 			SUG:BuildClassSpellLookup()
 		end
-	elseif debug then
-		error(arg1)
+	elseif TMW.debug then
+		geterrorhandler()(arg1)
 	end
 end
 
@@ -3180,16 +3202,17 @@ function SUG:NameOnCursor(isClick)
 	SUG.lastName = strsub(text, SUG.startpos, SUG.endpos)
 	SUG.lastName = strlower(TMW:CleanString(SUG.lastName))
 
-	--disable pattern matches that will break/interfere
-	--only keep * for debugging, otherwise escape it (causes a short client lockup because of the massive sorting that must occur)
-	SUG.lastName = gsub(SUG.lastName, "([%%%-%[%]%(%)" ..(debug and "" or "%*").. "])", "%%%1") 
+	--disable pattern matches that will break/interfere, but dont do it for me because I will just manually escape things if they show up for whatever reason. I want them for debugging, blah blah blah
+	if not TMW.debug then
+		SUG.lastName = gsub(SUG.lastName, "([%(%)%*%%%[%]%-])", "%%%1")
+	end
 
 
 	SUG.atBeginning = "^"..SUG.lastName
 
-	if SUG.lastName == "" or not strfind(SUG.lastName, "[^%.]") then
+	
+	if (not TMW.debug and #SUG.lastName < 2) or SUG.lastName == "" or not strfind(SUG.lastName, "[^%.]") then
 		SUG.Suggest:Hide()
-		SUG.f:SetScript("OnUpdate", nil)
 		return
 	else
 		SUG.Suggest:Show()

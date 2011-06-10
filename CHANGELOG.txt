@@ -1,6 +1,7 @@
 ===v4.3.1===
  * Added some custom sounds.
  * New Condition: Unit is Unit
+ * New Condition: Macro conditional
  * New debuff equivalency: Slowed
  * The suggester now does its scan in about 30ms, down from about 200ms. Sorting still sucks, though.
  * Bug Fixes:
