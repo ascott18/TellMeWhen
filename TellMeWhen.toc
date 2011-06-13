@@ -43,14 +43,13 @@ Localization\TellMeWhen-zhTW.lua
 TellMeWhen.lua
 
 Types\cooldown.lua
-Types\unitcooldown.lua
-Types\icd.lua
-Types\autoshot.lua
 Types\buff.lua
 Types\reactive.lua
 Types\wpnenchant.lua
 Types\totem.lua
 Types\dr.lua
+Types\unitcooldown.lua
+Types\icd.lua
 Types\cast.lua
 Types\conditionicon.lua
 Types\meta.lua

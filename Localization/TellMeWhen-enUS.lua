@@ -42,45 +42,43 @@ L["ICONMENU_ALPHA"] = "Transparency"
 L["CONDITIONALPHA"] = "Conditions/Duration/Stacks"
 L["CONDITIONALPHA_DESC"] = "This will be used when conditions fail, or if the duration or stack requirements are not met."
 L["ICONMENU_TYPE"] = "Icon type"
-L["ICONMENU_COOLDOWN"] = "Cooldown - Mine"
+L["ICONMENU_COOLDOWN"] = "Cooldown"
 L["ICONMENU_BUFFDEBUFF"] = "Buff/Debuff"
 L["ICONMENU_REACTIVE"] = "Reactive Ability"
-L["ICONMENU_REACTIVE_DESC"] = [=[Reactive abilities are things like Kill Shot, Revenge, and Conflagrate -
-abilities that are only usable when certain conditions are met. Use this icon type to track their usability.]=]
+L["ICONMENU_REACTIVE_DESC"] = "Reactive abilities are things like Kill Shot, Revenge, and Conflagrate - abilities that are only usable when certain conditions are met.  Use this icon type to track their usability."
 L["ICONMENU_WPNENCHANT"] = "Weapon Enchant"
-L["ICONMENU_WPNENCHANT_DESC"] = [=[Tracks the status of temporary weapon enchants on your weapons - most useful for shaman.
-With this icon type, the name can be left blank to track any weapon enchant in the specified slot,
-or you can insert the names of weapon enchants to only show it for specific enchants.
-The names that must be entered are the names that appear in the tooltip of your weapon while the enchant is active, e.g "Flametongue", not "Flametongue Weapon."]=]
+L["ICONMENU_WPNENCHANT_DESC"] = [=[This icon type tracks the status of temporary weapon enchants on your weapons - most useful for shaman.
+
+The name field can be left blank to track any weapon enchant in the specified slot, or you can insert the names of weapon enchants to only show it for specific enchants.  The names that must be entered are the names that appear in the tooltip of your weapon while the enchant is active, e.g "Flametongue", not "Flametongue Weapon."]=]
 L["ICONMENU_TOTEM"] = "Totem"
 L["ICONMENU_GHOUL"] = "Non-MoG ghoul"
 L["ICONMENU_MUSHROOMS"] = "Wild Mushrooms"
 L["ICONMENU_MULTISTATECD"] = "Multi-state ability"
 L["ICONMENU_MULTISTATECD_DESC"] = "This should be used when you want to track multiple states/textures/etc of a cooldown. Some examples are Holy Word: Chastise and Dark Simulacrum. |cFFFF5959IMPORTANT|r: The action being tracked MUST be on your action bars for this icon type to work. You should also make sure that the ability is in its default state before leaving config mode."
-L["ICONMENU_UNITCOOLDOWN"] = "Cooldown - Others'"
-L["ICONMENU_UNITCOOLDOWN_DESC"] = [=[This icon type will allow you to track the cooldowns of your friends or your enemies.
-You must enter the duration of the cooldown in the editbox to the right of the unit input.
+L["ICONMENU_UNITCOOLDOWN"] = "Unit Cooldown"
+L["ICONMENU_UNITCOOLDOWN_DESC"] = [=[This icon type allows you to track the cooldowns of your friends or your enemies.  You must enter the duration of the cooldown in the editbox to the right of the unit input.
+
 Note regarding pvp trinkets: they can be tracked using '%s' as the name.]=]
-L["ICONMENU_ICD"] = "Cooldown - Internal"
-L["ICONMENU_ICD_DESC"] = [=[This icon type can be used to track either the internal cooldown of something such as a proc from a talent or a trinket,
-or to track the duration of a spell (e.g. traps, mage orb), or even the duration of a summon (e.g. Infernal).
-Enter the spellID or name of the buff/debuff that is placed when the cooldown starts,
-or the name of the spell that you would like to track the duration of. Semicolon-delimited lists are valid.]=]
+L["ICONMENU_ICD"] = "Internal Cooldown"
+L["ICONMENU_ICD_DESC"] = [=[This icon type can be used to track either the internal cooldown of something such as a proc from a talent or a trinket,or the duration of a spell (e.g. traps, mage orb), or even the duration of a summon (e.g. Infernal).
+
+Enter the spellID or name of the buff/debuff that is placed when the cooldown starts, or the name of the spell that you would like to track the duration of. Semicolon-delimited lists are valid.
+
+If the cooldown can be reset by an ability or proc, it is advised that you instead use the "Unit Cooldown" icon type to track the cooldown instead of this icon type]=]
 L["ICONMENU_CAST"] = "Spell Cast"
-L["ICONMENU_CAST_DESC"] = [=[The name dialog can be left blank to show the icon for any cast, or in order to only shown the icon for certain spells,
-you can enter a single spell, or a semicolon-delimited list of spells.]=]
+L["ICONMENU_CAST_DESC"] = [=[The name dialog can be left blank to show the icon for any cast, or in order to only shown the icon for certain spells, you can enter a single spell, or a semicolon-delimited list of spells.]=]
 L["ICONMENU_CNDTIC"] = "Condition Icon"
 L["ICONMENU_CNDTIC_DESC"] = [=[This icon type is for simply checking a condition.
+
 The icon can be set to a specific spell texture or texture path via the name editbox.]=]
 L["ICONMENU_META"] = "Meta Icon"
 L["ICONMENU_META_DESC"] = [=[This icon type can be used to combine several icons into one.
-Icons that have 'Always Hide' checked will still be shown if they would otherwise be shown.]=]
+
+Icons that have 'Always Hide' checked will still be shown in a meta icon if they would otherwise be shown.]=]
 L["ICONMENU_DR"] = "Diminishing Returns"
 L["ICONMENU_DR_DESC"] = [=[This icon type can be used to track the length and extent of the diminishing returns of a category of spells.
-Spells from different diminishing returns categories should not be checked in one icon.
-For example, do not put Polymorph and Cheap Shot in the same icon, as they are not in the same category.
-It is advised that you used the predefined DR-<category> equivalancies that TMW provides.]=]
-L["ICONMENU_AUTOSHOT"] = "Cooldown - Auto Shot"
+
+Spells from different diminishing returns categories should not be checked in one icon.  For example, do not put Polymorph and Cheap Shot in the same icon, as they are not in the same category. It is advised that you used the predefined DR-<category> equivalancies that TMW provides.]=]
 
 L["ICONMENU_COOLDOWNTYPE"] = "Cooldown type"
 L["ICONMENU_SPELL"] = "Spell or ability"
@@ -179,12 +177,12 @@ L["ICONMENU_IGNORERUNES_DESC"] = "Check this to treat the cooldown as usable if 
 L["ICONMENU_DONTREFRESH"] = "Don't Refresh"
 L["ICONMENU_DONTREFRESH_DESC"] = "Check to force the cooldown to not reset if the trigger occurs while it is still counting down. Useful for talents such as Early Frost."
 
-L["SORTBY"] = "Sort by"
-L["SORTBYNONE"] = "Don't sort"
-L["SORTBYNONE_DESC"] = "If checked, spells will be checked in and appear in the order that they were entered into the editbox. If this icon is a buff/debuff icon, auras will be checked in the order that they would normally appear on the unit's unit frame IF the number of auras being checked exceeds the efficiency threshold setting."
-L["ICONMENU_SORTASC"] = "Ascending duration"
+L["SORTBY"] = "Prioritize"
+L["SORTBYNONE"] = "Don't prioritize"
+L["SORTBYNONE_DESC"] = "If checked, spells will be checked in and appear in the order that they were entered into the editbox. If this icon is a buff/debuff icon and the number of auras being checked exceeds the efficiency threshold setting, auras will be checked in the order that they would normally appear on the unit's unit frame."
+L["ICONMENU_SORTASC"] = "Low duration"
 L["ICONMENU_SORTASC_DESC"] = "Check this box to prioritize and show spells with the lowest duration."
-L["ICONMENU_SORTDESC"] = "Descending duration"
+L["ICONMENU_SORTDESC"] = "High duration"
 L["ICONMENU_SORTDESC_DESC"] = "Check this box to prioritize and show spells with the highest duration."
 
 L["ICONMENU_MOVEHERE"] = "Move here"
@@ -349,30 +347,32 @@ L["CONDITIONPANEL_OR"] = "Or"
 L["CONDITIONPANEL_POWER"] = "Primary Resource"
 L["CONDITIONPANEL_COMBO"] = "Combo Points"
 L["CONDITIONPANEL_ALTPOWER"] = "Alt. Power"
-L["CONDITIONPANEL_ALTPOWER_DESC"] = [[This is the encounter specific power used in several encounters in Cataclysm,
-including Cho'gall and Atramedes]]
+L["CONDITIONPANEL_ALTPOWER_DESC"] = [[This is the encounter specific power used in several encounters in Cataclysm, including Cho'gall and Atramedes]]
 L["CONDITIONPANEL_EXISTS"] = "Unit Exists"
 L["CONDITIONPANEL_ALIVE"] = "Unit is Alive"
 L["CONDITIONPANEL_ALIVE_DESC"] = "The condition will pass if the unit specified is alive."
 L["CONDITIONPANEL_COMBAT"] = "Unit in Combat"
 L["CONDITIONPANEL_VEHICLE"] = "Unit Controls Vehicle"
-L["CONDITIONPANEL_POWER_DESC"] = [=[Will check for energy if the unit is a druid in cat form,
-rage if the unit is a warrior, etc.]=]
+L["CONDITIONPANEL_POWER_DESC"] = [=[Will check for energy if the unit is a druid in cat form, rage if the unit is a warrior, etc.]=]
 L["ECLIPSE_DIRECTION"] = "Eclipse Direction"
-L["CONDITIONPANEL_ECLIPSE_DESC"] = [=[Eclipse has a range of -100 (a lunar eclipse) to 100 (a solar eclipse).
-Input -80 if you want the icon to work with a value of 80 lunar power.]=]
+L["CONDITIONPANEL_ECLIPSE_DESC"] = [=[Eclipse has a range of -100 (a lunar eclipse) to 100 (a solar eclipse).  Input -80 if you want the icon to work with a value of 80 lunar power.]=]
 L["CONDITIONPANEL_ICON"] = "Icon Shown"
 L["CONDITIONPANEL_ICON_DESC"] = [=[The condition will pass if the icon specified is currently shown with an alpha above 0%, or hidden with an alpha of 0% if set to false.
+
 If you don't want to display the icons that are being checked, check 'Always Hide' in the icon editor of the icon being checked.
+
 The group of the icon being checked must also be shown in order to check the icon, even if the condition is set to false.]=]
 L["CONDITIONPANEL_RUNES_DESC"] = [=[Use this condition type to only show the icon when the selected runes are available.
+
 Each rune is a check button. A check mark will require that the rune be usable, an 'X' will require that the rune be unusable, no mark will ignore the rune.
+
 The runes in the second row are the death rune version of each rune above.]=]
 L["CONDITIONPANEL_PVPFLAG"] = "Unit is PvP Flagged"
 L["CONDITIONPANEL_LEVEL"] = "Unit Level"
 L["CONDITIONPANEL_CLASS"] = "Unit Class"
 L["CONDITIONPANEL_CLASSIFICATION"] = "Unit Classification"
 L["CONDITIONPANEL_ROLE"] = "Unit Role"
+L["CONDITIONPANEL_RAIDICON"] = "Unit Raid Icon"
 L["CONDITIONPANEL_UNITISUNIT"] = "Unit is Unit"
 L["CONDITIONPANEL_UNITISUNIT_DESC"] = "This condition will pass if the unit in the first editbox and the second editbox are the same entity."
 L["CONDITIONPANEL_UNITISUNIT_EBDESC"] = "Enter a unit in this editbox to be compared with the first unit."
@@ -390,18 +390,18 @@ L["ONLYCHECKMINE"] = "Only Check Mine"
 L["ONLYCHECKMINE_DESC"] = "Check this to cause this condition to only check your own buffs/debuffs"
 L["LUACONDITION"] = "Lua (Advanced)"
 L["LUACONDITION_DESC"] = [[This condition type allows you to evaluate Lua code to determine the state of a condition.
-The input is not an 'if .. then' statement, nor is it a function closure.
-It is a regular statement to be evaluated, e.g. 'a and b or c'.
-If complex functionality is required, use a call to a function, e.g. 'CheckStuff()', that is defined externally.
-ALL functions and variables used must be defined in/will be stored in TMW["CNDT"]["Env"].
-If more help is needed (but not help about how to write Lua code), open a ticket on CurseForge.]]
+
+The input is not an 'if .. then' statement, nor is it a function closure. It is a regular statement to be evaluated, e.g. 'a and b or c'.  If complex functionality is required, use a call to a function, e.g. 'CheckStuff()', that is defined externally.
+
+If more help is needed (but not help about how to write Lua code), open a ticket on CurseForge. For help on how to write Lua, go to the interwebs.]]
 L["MACROCONDITION"] = "Macro Conditional"
-L["MACROCONDITION_DESC"] = [[This condition will evaluate a macro conditional, and will pass if it passes.
-All macro conditionals can be prepended with "no" to reverse what they check.
+L["MACROCONDITION_DESC"] = [[This condition will evaluate a macro conditional, and will pass if it passes. All macro conditionals can be prepended with "no" to reverse what they check.
+
 Examples:
 	"[nomodifier:alt]" - not holding down the alt key.
 	"[@target, help][mod:ctrl]" - target is friendly OR holding down ctrl
 	"[@focus, harm, nomod:shift]" - focus is hostile AND not holding down shift
+	
 For more help, go to http://www.wowpedia.org/Making_a_macro]]
 L["MACROCONDITION_EB_DESC"] = "If using a single condition, opening and closing brackets are optional. Brackets are required if using multiple conditionals."
 L["NOTINRANGE"] = "Not in range"
@@ -412,8 +412,7 @@ L["ASPECT"] = "Aspect"
 L["SHAPESHIFT"] = "Shapeshift"
 L["PRESENCE"] = "Presence"
 L["SPEED"] = "Unit Speed"
-L["SPEED_DESC"] = [[This refers to the current movement speed of the unit. If the unit is not moving, it is zero.
-If you wish to track the maximum run speed of the unit, use the 'Unit Run Speed' condition instead.]]
+L["SPEED_DESC"] = [[This refers to the current movement speed of the unit. If the unit is not moving, it is zero.  If you wish to track the maximum run speed of the unit, use the 'Unit Run Speed' condition instead.]]
 L["RUNSPEED"] = "Unit Run Speed"
 L["SPELLTOCHECK"] = "Spell to Check"
 L["ITEMTOCHECK"] = "Item to Check"
@@ -436,7 +435,7 @@ L["REACTIVECNDT_DESC"] = "This condition only checks the reactive state of the a
 L["BUFFCNDT_DESC"] = "Only the first spell will be checked, all others will be ignored. Spells entered as IDs will not be forced to have their ID match an aura found; only the name will have to match."
 L["CNDT_ONLYFIRST"] = "Only the first spell/item will be checked - semicolon-delimited lists are not valid for this condition type."
 
-L["CNDTCAT_SPELLSABILITIES"] = "Spells/Abilities/Items/etc."
+L["CNDTCAT_SPELLSABILITIES"] = "Abilities/Items/Buffs/etc."
 L["CNDTCAT_STATUS"] = "Attributes/Status"
 L["CNDTCAT_STATS"] = "Combat Statistics"
 L["CNDTCAT_RESOURCES"] = "Resources"
@@ -455,9 +454,7 @@ L["PARENTHESISWARNING"] = "# of opening and closing parentheses isn't equal!"
 L["PARENTHESISWARNING2"] = "Some closing parentheses are missing openers!"
 L["NUMAURAS"] = "Number of"
 L["ACTIVE"] = "%d Active"
-L["NUMAURAS_DESC"] = [[This condition checks the number of an aura active - not to be confused with the number of stacks of an aura.
-This is for checking things like if you have both weapon enchant procs active at the same time.
-Use sparingly, as the process used to count the numbers is a bit CPU intensive.]]
+L["NUMAURAS_DESC"] = [[This condition checks the number of an aura active - not to be confused with the number of stacks of an aura.  This is for checking things like if you have both weapon enchant procs active at the same time.  Use sparingly, as the process used to count the numbers is a bit CPU intensive.]]
 L["COOLDOWN"] = "Cooldown"
 
 
@@ -558,6 +555,26 @@ L["ANN_SHOWICON"] = "Show icon texture"
 L["ANN_SHOWICON_DESC"] = "Some text destinations can show a texture along with the text. Check this to enable that feature."
 L["ANN_SUB_CHANNEL"] = "Sub section"
 
+
+
+L["HELP_FIRSTUCD"] = [[It looks like this is your first time using an icon type that uses the special duration syntax! Spells that are added to the name editbox must define their duration immediately after a spell using the following syntax:
+
+Spell:Duration
+
+For example:
+
+"%s: 120"
+"%s: 10; %s: 24"
+"%s: 180"
+"%s: 3:00"
+"62618: 3:00"]]
+L["HELP_MISSINGDURS"] = [[The following spells are missing durations:
+
+%s
+
+To add durations, use the following syntax:
+
+Spell One: 10; Spell Two: 24", and so on.]]
 
 
 L["TOPLEFT"] = "Top Left"

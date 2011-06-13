@@ -25,7 +25,24 @@ local print = TMW.print
 local UIParent = UIParent
 local strlowerCache = TMW.strlowerCache
 
-local RelevantSettings = {
+
+local Type = TMW:RegisterIconType("wpnenchant")
+Type.name = L["ICONMENU_WPNENCHANT"]
+Type.desc = L["ICONMENU_WPNENCHANT_DESC"]
+Type.TypeChecks = {
+	text = L["ICONMENU_WPNENCHANTTYPE"],
+	setting = "WpnEnchantType",
+	{ value = "MainHandSlot",	text = INVTYPE_WEAPONMAINHAND },
+	{ value = "SecondaryHandSlot", text = INVTYPE_WEAPONOFFHAND },
+	{ value = "RangedSlot",		text = INVTYPE_THROWN },
+}
+Type.WhenChecks = {
+	text = L["ICONMENU_SHOWWHEN"],
+	{ value = "alpha", 			text = L["ICONMENU_PRESENT"], 			colorCode = "|cFF00FF00" },
+	{ value = "unalpha", 		text = L["ICONMENU_ABSENT"], 			colorCode = "|cFFFF0000" },
+	{ value = "always", 		text = L["ICONMENU_ALWAYS"] },
+}
+Type.RelevantSettings = {
 	Name = true,
 	ShowTimer = true,
 	ShowTimerText = true,
@@ -42,23 +59,6 @@ local RelevantSettings = {
 	DurationMinEnabled = true,
 	DurationMaxEnabled = true,
 	FakeHidden = true,
-}
-
-local Type = TMW:RegisterIconType("wpnenchant", RelevantSettings, L["ICONMENU_WPNENCHANT"])
-Type.name = L["ICONMENU_WPNENCHANT"]
-Type.desc = L["ICONMENU_WPNENCHANT_DESC"]
-Type.TypeChecks = {
-	text = L["ICONMENU_WPNENCHANTTYPE"],
-	setting = "WpnEnchantType",
-	{ value = "MainHandSlot",	text = INVTYPE_WEAPONMAINHAND },
-	{ value = "SecondaryHandSlot", text = INVTYPE_WEAPONOFFHAND },
-	{ value = "RangedSlot",		text = INVTYPE_THROWN },
-}
-Type.WhenChecks = {
-	text = L["ICONMENU_SHOWWHEN"],
-	{ value = "alpha", 			text = L["ICONMENU_PRESENT"], 			colorCode = "|cFF00FF00" },
-	{ value = "unalpha", 		text = L["ICONMENU_ABSENT"], 			colorCode = "|cFFFF0000" },
-	{ value = "always", 		text = L["ICONMENU_ALWAYS"] },
 }
 
 local Parser = CreateFrame("GameTooltip", "TellMeWhen_Parser", TMW, "GameTooltipTemplate")

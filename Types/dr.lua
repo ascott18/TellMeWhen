@@ -39,7 +39,18 @@ for spellID, category in pairs(DRSpells) do
 	end
 end
 
-local RelevantSettings = {
+
+local Type = TMW:RegisterIconType("dr")
+LibStub("AceEvent-3.0"):Embed(Type)
+Type.name = L["ICONMENU_DR"]
+Type.desc = L["ICONMENU_DR_DESC"]
+Type.WhenChecks = {
+	text = L["ICONMENU_SHOWWHEN"],
+	{ value = "alpha", 			text = L["ICONMENU_DRABSENT"], 		colorCode = "|cFF00FF00" },
+	{ value = "unalpha",  		text = L["ICONMENU_DRPRESENT"], 	colorCode = "|cFFFF0000" },
+	{ value = "always", 		text = L["ICONMENU_ALWAYS"] },
+}
+Type.RelevantSettings = {
 	Name = true,
 	ShowTimer = true,
 	ShowTimerText = true,
@@ -60,17 +71,6 @@ local RelevantSettings = {
 	DurationMaxEnabled = true,
 	ConditionAlpha = true,
 	FakeHidden = true,
-}
-
-local Type = TMW:RegisterIconType("dr", RelevantSettings)
-LibStub("AceEvent-3.0"):Embed(Type)
-Type.name = L["ICONMENU_DR"]
-Type.desc = L["ICONMENU_DR_DESC"]
-Type.WhenChecks = {
-	text = L["ICONMENU_SHOWWHEN"],
-	{ value = "alpha", 			text = L["ICONMENU_DRABSENT"], 		colorCode = "|cFF00FF00" },
-	{ value = "unalpha",  		text = L["ICONMENU_DRPRESENT"], 	colorCode = "|cFFFF0000" },
-	{ value = "always", 		text = L["ICONMENU_ALWAYS"] },
 }
 
 

@@ -29,11 +29,11 @@ local AceDB = LibStub("AceDB-3.0")
 local LSM = LibStub("LibSharedMedia-3.0")
 local DRData = LibStub("DRData-1.0", true)
 
-TELLMEWHEN_VERSION = "4.3.1"
+TELLMEWHEN_VERSION = "4.4.0"
 TELLMEWHEN_VERSION_MINOR = strmatch(" @project-version@", " r%d+") or ""
 TELLMEWHEN_VERSION_FULL = TELLMEWHEN_VERSION .. TELLMEWHEN_VERSION_MINOR
-TELLMEWHEN_VERSIONNUMBER = 43106 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
-if TELLMEWHEN_VERSIONNUMBER > 44000 or TELLMEWHEN_VERSIONNUMBER < 43000 then error("YOU SCREWED UP THE VERSION NUMBER OR DIDNT CHANGE THE SAFETY LIMITS") return end -- safety check because i accidentally made the version number 414069 once
+TELLMEWHEN_VERSIONNUMBER = 44003 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
+if TELLMEWHEN_VERSIONNUMBER > 45000 or TELLMEWHEN_VERSIONNUMBER < 44000 then error("YOU SCREWED UP THE VERSION NUMBER OR DIDNT CHANGE THE SAFETY LIMITS") return end -- safety check because i accidentally made the version number 414069 once
 
 TELLMEWHEN_MAXGROUPS = 1 	--this is a default, used by SetTheory (addon), so dont rename
 TELLMEWHEN_MAXROWS = 20
@@ -75,11 +75,22 @@ TMW.Warn = setmetatable({}, {__call = function(tbl, text)
 		tinsert(tbl, text)
 	end
 end})
-TMW.SpellTextures = setmetatable({}, {__index = function(t, name)
-	local tex = GetSpellTexture(name)
-	t[name] = tex
-	return tex
-end}) local SpellTextures = TMW.SpellTextures
+TMW.SpellTextures = setmetatable(
+	{
+		--hack for pvp tinkets
+		[42292] = "Interface\\Icons\\inv_jewelry_trinketpvp_0" .. (UnitFactionGroup("player") == "Horde" and "2" or "1"),
+	},
+	{__index = function(t, name)
+		local tex
+		if strlower(name) == strlower(GetSpellInfo(42292)) then --hack for pvp tinkets
+			tex = t[42292]
+		else
+			tex = GetSpellTexture(name)
+		end
+		
+		t[name] = tex
+		return tex
+end	}) local SpellTextures = TMW.SpellTextures
 TMW.strlowerCache = setmetatable({}, {__index = function(t, i)
 	local o = strlower(i)
 	t[i] = o
@@ -155,7 +166,7 @@ do -- Iterators
 			return rawget(db.profile.Groups, cg) and rawget(db.profile.Groups[cg].Icons,ci), cg, ci -- setting table, groupID, iconID
 		end
 
-		function TMW.InIconSettings()
+		function TMW:InIconSettings()
 			cg = 1
 			ci = 0
 			mg = TELLMEWHEN_MAXGROUPS
@@ -171,7 +182,7 @@ do -- Iterators
 			return rawget(db.profile.Groups, cg), cg -- setting table, groupID
 		end
 
-		function TMW.InGroupSettings()
+		function TMW:InGroupSettings()
 			cg = 0
 			mg = TELLMEWHEN_MAXGROUPS
 			return iter
@@ -198,7 +209,7 @@ do -- Iterators
 			return TMW[cg] and TMW[cg][ci], cg, ci -- icon, groupID, iconID
 		end
 
-		function TMW.InIcons()
+		function TMW:InIcons()
 			cg = 1
 			ci = 0
 			mg = TELLMEWHEN_MAXGROUPS
@@ -214,7 +225,7 @@ do -- Iterators
 			return TMW[cg], cg -- group, groupID
 		end
 
-		function TMW.InGroups()
+		function TMW:InGroups()
 			cg = 0
 			mg = TELLMEWHEN_MAXGROUPS
 			return iter
@@ -229,7 +240,7 @@ do -- Iterators
 			return i, t[i]
 		end
 
-		function TMW.Vararg(...)
+		function TMW:Vararg(...)
 			i = 0
 			wipe(t)
 			l = select("#", ...)
@@ -243,6 +254,14 @@ do -- Iterators
 end
 
 TMW.Types = {
+	all = {
+		RelevantSettings = {
+			Enabled = true,
+			Type = true,
+			Events = true,
+			Conditions = true,
+		},
+	},
 	[""] = {
 		Setup = function(Type, icon)
 			if icon.Name ~= "" then
@@ -253,23 +272,14 @@ TMW.Types = {
 		end,
 		Update = function() end,
 		HideBars = true,
-	},
-}
-
-TMW.RelevantSettings = {
-	all = {
-		Enabled = true,
-		Type = true,
-		Events = true,
-		Conditions = true,
-	},
-	[""] = {
-		Name = true,
+		RelevantSettings = {
+			Name = true,
+		},
 	},
 }
 
 TMW.Defaults = {
-	profile = {
+profile = {
 --	Version 	= 	TELLMEWHEN_VERSIONNUMBER,  -- DO NOT DEFINE VERSION AS A DEFAULT, OTHERWISE WE CANT TRACK IF A USER HAS AN OLD VERSION BECAUSE IT WILL ALWAYS DEFAULT TO THE LATEST
 	Locked 		= 	false,
 	NumGroups	=	1,
@@ -391,7 +401,6 @@ TMW.Defaults = {
 					HideUnequipped		= false,
 					Interruptible		= false,
 					ICDType				= "aura",
-					ICDDuration			= 45,
 					CheckNext			= false,
 					DontRefresh			= false,
 					UseActvtnOverlay	= false,
@@ -433,7 +442,10 @@ TMW.Defaults = {
 			},
 		},
 	},
-	},
+},
+global = {
+	SeenNewDurSyntax = false,
+}
 }
 TMW.Group_Defaults = TMW.Defaults.profile.Groups["**"]
 TMW.Icon_Defaults = TMW.Group_Defaults.Icons["**"]
@@ -1076,6 +1088,24 @@ local upgradeTable
 function TMW:GetUpgradeTable() -- upgrade functions
 	if upgradeTable then return upgradeTable end
 	local t = {
+		[44003] = {
+			icon = function(ics)
+				if ics.Type == "unitcooldown" or ics.Type == "icd" then
+					local duration = ics.ICDDuration or 45 -- 45 was the old default
+					ics.Name = TMW:CleanString(gsub(ics.Name..";", ";", ": "..duration.."; "))
+					ics.ICDDuration = nil
+				end
+			end,
+		},
+		[44002] = {
+			icon = function(ics)
+				if ics.Type == "autoshot" then
+					ics.Type = "cooldown"
+					ics.CooldownType = "spell"
+					ics.Name = 75
+				end
+			end,
+		},
 		[43009] = {
 			icon = function(ics)
 				for k, v in pairs(ics.Events) do
@@ -2070,7 +2100,7 @@ local function OnGCD(d)
 	return GCD == d and d > 0 -- if the duration passed in is the same as the GCD spell, and the duration isnt zero, then it is a GCD
 end	TMW.OnGCD = OnGCD
 
-local function HandleEvent(icon, event, data, played, announced)
+local function HandleEvent(icon, data, played, announced)
 	local Sound = data.SoundData
 	if Sound and not played then
 		PlaySoundFile(Sound, SndChan)
@@ -2111,12 +2141,12 @@ local function SetAlpha(icon, alpha)
 		if alpha == 0 then
 			local data = runEvents and icon.OnHide
 			if data then
-				icon:HandleEvent("OnHide", data)
+				icon:HandleEvent(data)
 			end
 		elseif icon.FakeAlpha == 0 then
 			local data = runEvents and icon.OnShow
 			if data then
-				icon:HandleEvent("OnShow", data)
+				icon:HandleEvent(data)
 			end
 		end
 		if icon.FakeHidden then
@@ -2235,10 +2265,6 @@ local function PwrBarOnUpdate(bar)
 	end
 end
 
-local function PwrBarOnValueChanged(bar, val)
---	bar.texture:SetTexCoord(0, max(0, val/bar.Max), 0, 1)
-end
-
 local function SetInfo(icon, alpha, color, texture, start, duration, checkGCD, pbName, reverse, count, countText)
 	-- icon			- the icon object to set the attributes on (frame) (but call as icon:SetInfo(alpha, ...) )
 	-- alpha		- the alpha to set the icon to (number)
@@ -2252,8 +2278,7 @@ local function SetInfo(icon, alpha, color, texture, start, duration, checkGCD, p
 	-- [count]		- the number of stacks to be used for comparison, nil/false to hide (number/nil/false)
 	-- [countText]	- the actual stack TEXT to be set on the icon, will use count if nil (number/string/nil/false)
 
-	local played, announced, justShowed
-	--alpha = icon.CndtFailed and icon.ConditionAlpha or alpha
+	local played, announced
 
 	local d = duration - (time - start)
 
@@ -2274,12 +2299,12 @@ local function SetInfo(icon, alpha, color, texture, start, duration, checkGCD, p
 		if alpha == 0 then
 			local data = runEvents and icon.OnHide
 			if data then
-				played, announced = icon:HandleEvent("OnHide", data)
+				played, announced = icon:HandleEvent(data)
 			end
 		elseif icon.FakeAlpha == 0 then
 			local data = runEvents and icon.OnShow
 			if data then
-				played, announced = icon:HandleEvent("OnShow", data)
+				played, announced = icon:HandleEvent(data)
 			end
 		end
 		if icon.FakeHidden then
@@ -2307,12 +2332,12 @@ local function SetInfo(icon, alpha, color, texture, start, duration, checkGCD, p
 			if realDuration == 0 then
 				local data = runEvents and icon.OnFinish
 				if data then
-					played, announced = icon:HandleEvent("OnFinish", data, played, announced)
+					played, announced = icon:HandleEvent(data, played, announced)
 				end
 			else
 				local data = runEvents and icon.OnStart
 				if data then
-					played, announced = icon:HandleEvent("OnStart", data, played, announced)
+					played, announced = icon:HandleEvent(data, played, announced)
 				end
 			end
 			icon.__realDuration = realDuration
@@ -2468,13 +2493,16 @@ local IconMetamethods = {
 }
 
 
-
-function TMW:RegisterIconType(Type, relevantSettings)
+function TMW:RegisterIconType(Type)
 	local t = CreateFrame("Frame")
+	if TMW.Types[Type] and TMW.debug then
+		-- for tweaking and recreating icon types inside of WowLua .. too lazy to change the type string each time.
+		Type = Type .. " - " .. date("%X")
+		t.nameOverride = Type
+	end
 	TMW.Types[Type] = t
 	t.type = Type
 	tinsert(TMW.OrderedTypes, t)
-	TMW.RelevantSettings[Type] = relevantSettings
 	return t
 end
 
@@ -2585,11 +2613,11 @@ function TMW:Icon_Update(icon)
 		icon[k] = nil --lets clear any settings that might get left behind.
 	end
 
-	for k in pairs(TMW.RelevantSettings.all) do
+	for k in pairs(TMW.Types.all.RelevantSettings) do
 		icon[k] = db.profile.Groups[groupID].Icons[iconID][k]
 	end
-	if TMW.RelevantSettings[icon.Type] then
-		for k in pairs(TMW.RelevantSettings[icon.Type]) do
+	if TMW.Types[icon.Type] then
+		for k in pairs(TMW.Types[icon.Type].RelevantSettings) do
 			icon[k] = db.profile.Groups[groupID].Icons[iconID][k]
 		end
 	end
@@ -2726,7 +2754,10 @@ function TMW:Icon_Update(icon)
 	if icon.Enabled or not Locked then
 		if TMW.Types[icon.Type] then
 			TMW.Types[icon.Type]:Update()
-			TMW.Types[icon.Type]:Setup(icon, groupID, iconID)
+			local success, err = pcall(TMW.Types[icon.Type].Setup, TMW.Types[icon.Type], icon, groupID, iconID)
+			if not success then
+				geterrorhandler()(L["GROUPICON"]:format(groupID, iconID) .. ": " .. err)
+			end
 		else
 			if icon.Name ~= "" then
 				icon:SetTexture("Interface\\Icons\\INV_Misc_QuestionMark")
@@ -2830,6 +2861,27 @@ end
 -- NAME/ETC FUNCTIONS
 -- ------------------
 
+local mult = {
+    1,
+    60,
+    60*60,
+    60*60*24,
+    60*60*24*365.242199,
+}
+function string:toseconds()
+    self = ":" .. self:trim(": ")
+    local _, numcolon = self:gsub(":", ":") -- let the cheesy coding commence!
+    local seconds = 0
+    for num in self:gmatch(":([0-9%.]*)") do
+        if tonumber(num) and mult[numcolon] then
+            seconds = seconds + mult[numcolon]*num
+        end
+        numcolon = numcolon - 1
+    end
+    return seconds
+    
+end
+
 local eqttcache = {}
 function TMW:EquivToTable(name)
 	name = strlower(name)
@@ -2857,8 +2909,8 @@ function TMW:EquivToTable(name)
 end
 
 local gsncache = {}
-function TMW:GetSpellNames(icon, setting, firstOnly, toname, dictionary)
-	local cachestring = setting .. tostring(firstOnly) .. tostring(toname) .. tostring(dictionary) -- a unique key for the cache table, turn possible nils into strings
+function TMW:GetSpellNames(icon, setting, firstOnly, toname, dictionary, keepDurations)
+	local cachestring = setting .. tostring(firstOnly) .. tostring(toname) .. tostring(dictionary) .. tostring(keepDurations) -- a unique key for the cache table, turn possible nils into strings
 	if gsncache[cachestring] then return gsncache[cachestring] end --why make a bunch of tables and do a bunch of stuff if we dont need to
 
 	local buffNames = TMW:SplitNames(setting) -- get a table of everything
@@ -2888,6 +2940,15 @@ function TMW:GetSpellNames(icon, setting, firstOnly, toname, dictionary)
 			k = k - 1 --there are no duplicates, so move backwards towards zero
 		end
 	end
+	
+	-- REMOVE SPELL DURATIONS (FOR UNIT COOLDOWNS/ICDs)
+	if not keepDurations then
+		for k, buffName in pairs(buffNames) do
+			if strfind(buffName, ":[%d:%s%.]*$") then
+				buffNames[k] = strmatch(buffName, "(.-):[%d:%s%.]*$")
+			end
+		end
+	end
 
 	if dictionary then
 		local dictionary = {}
@@ -2903,7 +2964,7 @@ function TMW:GetSpellNames(icon, setting, firstOnly, toname, dictionary)
 					v = ds
 				end
 			end
-			dictionary[v] = true -- put the final value in the table as well (may or may not be the same as the original value
+			dictionary[v] = k -- put the final value in the table as well (may or may not be the same as the original value. Value should be NameArrray's key, for use with the duration table.
 		end
 		gsncache[cachestring] = dictionary
 		return dictionary
@@ -2927,6 +2988,27 @@ function TMW:GetSpellNames(icon, setting, firstOnly, toname, dictionary)
 	end
 	gsncache[cachestring] = buffNames
 	return buffNames
+end
+
+local gsdcache = {}
+function TMW:GetSpellDurations(icon, setting)
+	if gsdcache[setting] then return gsdcache[setting] end --why make a bunch of tables and do a bunch of stuff if we dont need to
+	
+	local NameArray = TMW:GetSpellNames(icon, setting, nil, nil, nil, 1)
+	local DurationArray = CopyTable(NameArray)
+	
+	-- EXTRACT SPELL DURATIONS
+	for k, buffName in pairs(NameArray) do
+		DurationArray[k] = strmatch(buffName, ".-:([%d:%s%.]*)$")
+		if not DurationArray[k] then
+			DurationArray[k] = 0
+		else
+			DurationArray[k] = tonumber(DurationArray[k]:trim(" :;."):toseconds())
+		end
+	end
+	
+	gsdcache[setting] = DurationArray
+	return DurationArray
 end
 
 function TMW:GetItemIDs(icon, setting, firstOnly, toname)
@@ -3027,8 +3109,8 @@ end
 
 function TMW:CleanString(text)
 	text = strtrim(text, "; \t\r\n")-- remove all leading and trailing semicolons, spaces, tabs, and newlines
-	while strfind(text, " ;") do
-		text = gsub(text, " ;", "; ") -- remove all spaces followed by semicolons
+	while strfind(text, "[^:] ;") do
+		text = gsub(text, "[^:] ;", "; ") -- remove all spaces followed by semicolons
 	end
 	while strfind(text, ";  ") do
 		text = gsub(text, ";  ", "; ") -- remove all double spaces between entries

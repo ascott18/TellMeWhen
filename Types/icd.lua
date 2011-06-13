@@ -28,12 +28,29 @@ local pGUID = UnitGUID("player") -- this isnt actually defined right here (it re
 local clientVersion = select(4, GetBuildInfo())
 local strlowerCache = TMW.strlowerCache
 
-local RelevantSettings = {
+
+local Type = TMW:RegisterIconType("icd")
+Type.name = L["ICONMENU_ICD"]
+Type.desc = L["ICONMENU_ICD_DESC"]
+Type.DurationSyntax = 1
+Type.TypeChecks = {
+	setting = "ICDType",
+	text = L["ICONMENU_ICDTYPE"],
+	{ value = "aura", 			text = L["ICONMENU_ICDBDE"], 				tooltipText = L["ICONMENU_ICDAURA_DESC"]},
+	{ value = "spellcast", 		text = L["ICONMENU_SPELLCAST_COMPLETE"], 	tooltipText = L["ICONMENU_SPELLCAST_COMPLETE_DESC"]},
+	{ value = "caststart", 		text = L["ICONMENU_SPELLCAST_START"], 		tooltipText = L["ICONMENU_SPELLCAST_START_DESC"]},
+}
+Type.WhenChecks = {
+	text = L["ICONMENU_SHOWWHEN"],
+	{ value = "alpha", 			text = L["ICONMENU_USABLE"], 			colorCode = "|cFF00FF00" },
+	{ value = "unalpha",  		text = L["ICONMENU_UNUSABLE"], 			colorCode = "|cFFFF0000" },
+	{ value = "always", 		text = L["ICONMENU_ALWAYS"] },
+}
+Type.RelevantSettings = {
 	Name = true,
 	ShowTimer = true,
 	ShowTimerText = true,
 	ICDType = true,
-	ICDDuration = true,
 	DontRefresh = true,
 	ShowWhen = true,
 	ShowCBar = true,
@@ -49,29 +66,6 @@ local RelevantSettings = {
 	FakeHidden = true,
 }
 
-local Type = TMW:RegisterIconType("icd", RelevantSettings)
-Type.name = L["ICONMENU_ICD"]
-Type.desc = L["ICONMENU_ICD_DESC"]
-Type.TypeChecks = {
-	setting = "ICDType",
-	text = L["ICONMENU_ICDTYPE"],
-	{ value = "aura", 			text = L["ICONMENU_ICDBDE"], 				tooltipText = L["ICONMENU_ICDAURA_DESC"]},
-	{ value = "spellcast", 		text = L["ICONMENU_SPELLCAST_COMPLETE"], 	tooltipText = L["ICONMENU_SPELLCAST_COMPLETE_DESC"]},
-	{ value = "caststart", 		text = L["ICONMENU_SPELLCAST_START"], 		tooltipText = L["ICONMENU_SPELLCAST_START_DESC"]},
-}
---[[Type.WhenChecks = {
-	text = L["ICONMENU_SHOWWHEN"],
-	{ value = "alpha", 		text = L["ICONMENU_ICDUSABLE"], },
-	{ value = "unalpha",  		text = L["ICONMENU_ICDUNUSABLE"], },
-	{ value = "always", 		text = L["ICONMENU_ALWAYS"] },
-}]]
-Type.WhenChecks = {
-	text = L["ICONMENU_SHOWWHEN"],
-	{ value = "alpha", 			text = L["ICONMENU_USABLE"], 			colorCode = "|cFF00FF00" },
-	{ value = "unalpha",  		text = L["ICONMENU_UNUSABLE"], 			colorCode = "|cFFFF0000" },
-	{ value = "always", 		text = L["ICONMENU_ALWAYS"] },
-}
-
 
 function Type:Update()
 	db = TMW.db
@@ -83,34 +77,31 @@ end
 
 
 local function ICD_OnEvent(icon, event, ...)
+	local valid, i, n, _
 	if event == "COMBAT_LOG_EVENT_UNFILTERED" then
-		local p, g, i, n, _
+		local p, g
 		if clientVersion >= 40200 then
 			_, p, _, g, _, _, _, _, _, _, _, i, n = ...
 		elseif clientVersion >= 40100 then
 			_, p, _, g, _, _, _, _, _, i, n = ...
 		else
-			_, p, _, g, _, _, _, _, i, n = ...
+			_, p, g, _, _, _, _, _, i, n = ...
 		end
-		if g == pGUID and (p == "SPELL_AURA_APPLIED" or p == "SPELL_AURA_REFRESH" or p == "SPELL_ENERGIZE" or p == "SPELL_AURA_APPLIED_DOSE") then
-			local NameDictionary = icon.NameDictionary
-			if (NameDictionary[i] or NameDictionary[strlowerCache[n]]) and not (icon.DontRefresh and (TMW.time - icon.StartTime) < icon.ICDDuration) then
-				local t = SpellTextures[i]
-				if t ~= icon.__tex then icon:SetTexture(t) end
-
-				icon.StartTime = TMW.time
-			end
-		end
+		valid = g == pGUID and (p == "SPELL_AURA_APPLIED" or p == "SPELL_AURA_REFRESH" or p == "SPELL_ENERGIZE" or p == "SPELL_AURA_APPLIED_DOSE")
 	elseif event == "UNIT_SPELLCAST_SUCCEEDED" or event == "UNIT_SPELLCAST_CHANNEL_START" or event == "UNIT_SPELLCAST_START" then
-		local u, n, _, _, i = ...
-		if u == "player" then
-			local NameDictionary = icon.NameDictionary
-			if (NameDictionary[i] or NameDictionary[strlowerCache[n]]) and not (icon.DontRefresh and (TMW.time - icon.StartTime) < icon.ICDDuration) then
-				local t = SpellTextures[i]
-				if t ~= icon.__tex then icon:SetTexture(t) end
+		valid, n, _, _, i = ... -- i cheat. valid is actually a unitID here.
+		valid = valid == "player"
+	end
+	
+	if valid then
+		local NameDictionary = icon.NameDictionary
+		local Key = NameDictionary[i] or NameDictionary[strlowerCache[n]]
+		if Key and not (icon.DontRefresh and (TMW.time - icon.ICDStartTime) < icon.Durations[Key]) then
+			local t = SpellTextures[i]
+			if t ~= icon.__tex then icon:SetTexture(t) end
 
-				icon.StartTime = TMW.time
-			end
+			icon.ICDStartTime = TMW.time
+			icon.ICDDuration = icon.Durations[Key]
 		end
 	end
 end
@@ -120,8 +111,8 @@ local function ICD_OnUpdate(icon, time)
 		icon.UpdateTimer = time
 		local CndtCheck = icon.CndtCheck if CndtCheck and CndtCheck() then return end
 
-		local StartTime = icon.StartTime
-		local timesince = time - StartTime
+		local ICDStartTime = icon.ICDStartTime
+		local timesince = time - ICDStartTime
 		local ICDDuration = icon.ICDDuration
 
 		local d = ICDDuration - timesince
@@ -133,7 +124,7 @@ local function ICD_OnUpdate(icon, time)
 		if timesince > ICDDuration then
 			icon:SetInfo(icon.Alpha, 1, nil, 0, 0)
 		else
-			icon:SetInfo(icon.UnAlpha, icon.Alpha ~= 0 and (icon.ShowTimer and 1 or .5) or 1, nil, StartTime, ICDDuration)
+			icon:SetInfo(icon.UnAlpha, icon.Alpha ~= 0 and (icon.ShowTimer and 1 or .5) or 1, nil, ICDStartTime, ICDDuration)
 		end
 	end
 end
@@ -142,11 +133,12 @@ function Type:Setup(icon, groupID, iconID)
 	icon.ShowPBar = false
 	icon.NameFirst = TMW:GetSpellNames(icon, icon.Name, 1)
 	icon.NameDictionary = TMW:GetSpellNames(icon, icon.Name, nil, nil, 1)
+	icon.Durations = TMW:GetSpellDurations(icon, icon.Name)
 
 	icon.StartTime = icon.ICDDuration
 
 	--[[ keep these events per icon isntead of global like unitcooldowns are so that ...
-	well i had a reason here but it didnt make sense when i came back and read it a while later. Just do it.]]
+	well i had a reason here but it didnt make sense when i came back and read it a while later. Just do it. I guess.]]
 	if icon.ICDType == "spellcast" then
 		icon:RegisterEvent("UNIT_SPELLCAST_SUCCEEDED")
 	elseif icon.ICDType == "caststart" then
@@ -169,9 +161,18 @@ function Type:Setup(icon, groupID, iconID)
 	icon:OnUpdate(TMW.time)
 end
 
+
 function Type:IE_TypeLoaded()
-	local ICDDuration = TMW.IE.Main.ICDDuration
-	TMW:TT(ICDDuration, "CHOOSENAME_DIALOG_ICD", "CHOOSENAME_DIALOG_ICD_DESC", nil, nil, 1)
-	ICDDuration.label = TMW.L["CHOOSENAME_DIALOG_ICD"]
+	if not db.global.SeenNewDurSyntax then
+		TMW.IE:ShowHelp(L["HELP_FIRSTUCD"]:format(GetSpellInfo(65547), GetSpellInfo(47528), GetSpellInfo(2139), GetSpellInfo(62618), GetSpellInfo(62618)) 
+		, TMW.IE.Main.Type, 20, 0)
+		db.global.SeenNewDurSyntax = 1
+	end
+end
+
+function Type:IE_TypeUnloaded()
+	if TMW.CI.t ~= "unitcooldown" and TMW.CI.t ~= "icd" then
+		TMW.IE.Help:Hide()
+	end
 end
 

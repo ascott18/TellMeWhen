@@ -24,16 +24,16 @@ local _G, strmatch, tonumber, ipairs =
 local print = TMW.print
 local AlreadyChecked = {} TMW.AlreadyChecked = AlreadyChecked
 
-local RelevantSettings = {
-	Icons = true,
-	CheckNext = true,
---	ConditionAlpha = true,
-}
 
-local Type = TMW:RegisterIconType("meta", RelevantSettings)
+
+local Type = TMW:RegisterIconType("meta")
 Type.name = L["ICONMENU_META"]
 Type.desc = L["ICONMENU_META_DESC"]
-
+Type.RelevantSettings = {
+	Icons = true,
+	CheckNext = true,
+--	ConditionAlpha = true, TODO:implement conditionalpha for metas
+}
 
 function Type:Update()
 	db = TMW.db

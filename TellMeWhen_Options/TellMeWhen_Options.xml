@@ -481,6 +481,7 @@
 				</Anchors>
 				<Scripts>
 					<OnLoad>
+						self.wrapTooltips = 1
 						UIDropDownMenu_SetWidth(self, 160)
 						UIDropDownMenu_JustifyText(self, "LEFT")
 						_G[self:GetName() .. "Button"]:SetScript("PreClick", function()
@@ -498,6 +499,7 @@
 				</Anchors>
 				<Scripts>
 					<OnLoad>
+						self.wrapTooltips = 1
 						self:Hide()
 						UIDropDownMenu_SetWidth(self, 168)
 						UIDropDownMenu_JustifyText(self, "LEFT")
@@ -567,6 +569,7 @@
 				</Anchors>
 				<Scripts>
 					<OnLoad>
+						self.wrapTooltips = 1
 						_G[self:GetName() .. "Text"]:SetFontObject(GameFontHighlightLarge)
 						UIDropDownMenu_SetWidth(self, 47)
 						UIDropDownMenu_JustifyText(self, "LEFT")
@@ -1170,6 +1173,7 @@
 				</Anchors>
 				<Scripts>
 					<OnLoad>
+						self.wrapTooltips = 1
 						UIDropDownMenu_SetWidth(self, 350)
 						UIDropDownMenu_JustifyText(self, "LEFT")
 						_G[self:GetName() .. "Button"]:SetScript("PreClick", function()
@@ -1587,6 +1591,8 @@
 		</Frames>
 	</Button>
 
+	
+	
 	<Frame name="TellMeWhen_IconEditor" hidden="true" movable="true" enableMouse="true" frameStrata="DIALOG">
 		<Anchors>
 			<Anchor point="CENTER" relativeTo="UIParent">
@@ -1652,6 +1658,57 @@
 				</Scripts>
 			</Button>
 
+			<Frame name="Help" parentKey="Help" inherits="GlowBoxTemplate" enableMouse="true" hidden="true" >
+				<Size x="230" y="200"/>
+				<Anchors>
+					<Anchor point="TOPRIGHT" relativePoint="LEFT" x="-30" y="-15"/>
+				</Anchors>
+				<Layers>
+					<Layer level="OVERLAY">
+						<FontString name="$parentText" parentKey="text" inherits="GameFontHighlightLeft" justifyV="TOP" >
+							<Size x="208" y="0"/>
+							<Anchors>
+								<Anchor point="TOPLEFT" x="10" y="-24"/>
+							</Anchors>
+						</FontString>
+					</Layer>
+				</Layers>
+				<Frames>
+					<Button name="$parentClose" inherits="UIPanelCloseButton">
+						<Anchors>
+							<Anchor point="TOPRIGHT" x="6" y="6"/>
+						</Anchors>
+						<Scripts>
+							<OnClick>
+								TMW.IE.Help:Hide()
+							</OnClick>
+						</Scripts>
+					</Button>
+					<Frame name="$parentArrow" parentKey="arrow" inherits="GlowBoxArrowTemplate">
+						<Anchors>
+							<Anchor point="TOPLEFT" relativePoint="TOPRIGHT" x="0" y="0"/>
+						</Anchors>
+					</Frame>
+				</Frames>
+				<Scripts>
+					<OnLoad>
+						local arrow = self.arrow
+						arrow:SetSize(21, 53)
+						
+						arrow.arrow = _G[arrow:GetName() .. "Arrow"]
+						arrow.arrow:SetAllPoints(true)
+						arrow.arrow:SetTexCoord(0.78515625, 0.54687500, 0.99218750, 0.54687500, 0.78515625, 0.58789063, 0.99218750, 0.58789063)
+						
+						arrow.glow = _G[arrow:GetName() .. "Glow"]
+						arrow.glow:SetAllPoints(true)
+						arrow.glow:SetTexCoord(0.40625000, 0.77343750, 0.66015625, 0.77343750, 0.40625000, 0.82812500, 0.66015625, 0.82812500)
+						
+						self.text:SetSpacing(4)
+					</OnLoad>
+				</Scripts>
+			</Frame>
+			
+			
 			<Frame name="$parentSuggest" parentKey="Suggest" hidden="true" enableMouse="true">
 				<Size x="220"/>
 				<Anchors>
@@ -1682,7 +1739,7 @@
 								_G[self:GetName() .. "High"]:SetText(1000)
 								self.val:SetText(TMW.SUG.NumCachePerFrame)
 								self.infotext:SetText(TMW.L["CACHING"])
-								self:SetValue(TMW.SUG.NumCachePerFrame)
+								self:SetValue(TMW.SUG.NumCachePerFrame or 0)
 							</OnLoad>
 							<OnValueChanged>
 								value = value^self.exponent
@@ -1820,6 +1877,7 @@
 						</Anchors>
 						<Scripts>
 							<OnLoad>
+								self.wrapTooltips = 1
 								TMW:TT(self, "ICONMENU_TYPE")
 								UIDropDownMenu_SetWidth(self, 220)
 								_G[self:GetName() .. "Button"]:SetScript("PreClick", function()
@@ -1911,6 +1969,23 @@
 								TMW.IE:ScheduleIconUpdate(groupID, iconID)
 								self:GetScript("OnTextChanged")(self)
 								TMW.SUG.Suggest:Hide()
+								
+								if TMW.Types[TMW.CI.t].DurationSyntax then
+									local s = ""
+									local array = TMW:GetSpellNames(nil, self:GetText())
+									for k, v in pairs(TMW:GetSpellDurations(nil, self:GetText())) do
+										if v == 0 then
+											s = s .. (s ~= "" and "; " or "") .. array[k]
+										end
+									end
+									if s ~= "" then
+										TMW.IE:ShowHelp(TMW.L["HELP_MISSINGDURS"]:format(s), self, 0, 0)
+									else
+										TMW.IE.Help:Hide()
+									end
+								else
+									TMW.IE.Help:Hide()
+								end
 							</OnEditFocusLost>
 							<OnEditFocusGained>
 								EditBox_HighlightText(self)
@@ -2020,7 +2095,7 @@
 
 					<EditBox name="$parentUnit" inherits="TellMeWhen_InputBoxTemplate" parentKey="Unit" autoFocus="false">
 						<Size>
-							<AbsDimension x="466" y="15"/>
+							<AbsDimension x="545" y="15"/>
 						</Size>
 						<Anchors>
 							<Anchor point="TOPLEFT" relativeTo="$parentName" relativePoint="BOTTOMLEFT">
@@ -2081,36 +2156,7 @@
 							</OnEditFocusLost>
 						</Scripts>
 					</EditBox>
-					<EditBox name="$parentICDDuration" inherits="TellMeWhen_TimeEditBoxTemplate" parentKey="ICDDuration" autoFocus="false">
-						<Size>
-							<AbsDimension x="70" y="32"/>
-						</Size>
-						<Anchors>
-							<Anchor point="LEFT" relativeTo="$parentUnit" relativePoint="RIGHT">
-								<Offset x="25" y="0" />
-							</Anchor>
-						</Anchors>
-						<Layers>
-							<Layer level="ARTWORK">
-								<FontString name="$parentFS1" inherits="GameFontHighlightSmall" parentKey="text" justifyH="LEFT">
-									<Anchors>
-										<Anchor point="LEFT" relativePoint="RIGHT">
-											<Offset x="5" y="-1" />
-										</Anchor>
-									</Anchors>
-								</FontString>
-							</Layer>
-						</Layers>
-						<Scripts>
-							<OnLoad>
-								self.setting = "ICDDuration"
-								self.BackgroundText:SetWidth(self:GetWidth())
-								self.label = TMW.L["CHOOSENAME_DIALOG_ICD"]
-								TMW:TT(self, "CHOOSENAME_DIALOG_ICD", "CHOOSENAME_DIALOG_ICD_DESC")
-							</OnLoad>
-						</Scripts>
-					</EditBox>
-
+					
 					<CheckButton name="$parentShowTimer" inherits="TellMeWhen_CheckTemplate" parentKey="ShowTimer">
 						<Anchors>
 							<Anchor point="TOPLEFT" relativeTo="$parentUnit" relativePoint="BOTTOMLEFT">
@@ -3120,6 +3166,7 @@
 						</Anchors>
 						<Scripts>
 							<OnLoad>
+								self.wrapTooltips = 1
 								UIDropDownMenu_SetText(self, TMW.L["IMPORTCOPY"])
 								UIDropDownMenu_JustifyText(self, "LEFT")
 								UIDropDownMenu_SetWidth(self, 120)

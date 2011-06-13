@@ -20,16 +20,16 @@ local db, UPD_INTV
 local print = TMW.print
 
 
-local RelevantSettings = {
+
+
+local Type = TMW:RegisterIconType("conditionicon")
+Type.name = L["ICONMENU_CNDTIC"]
+Type.desc = L["ICONMENU_CNDTIC_DESC"]
+Type.RelevantSettings = {
 	Name = true,
 	FakeHidden = true,
 	ConditionAlpha = true,
 }
-
-local Type = TMW:RegisterIconType("conditionicon", RelevantSettings)
-Type.name = L["ICONMENU_CNDTIC"]
-Type.desc = L["ICONMENU_CNDTIC_DESC"]
-
 
 function Type:Update()
 	db = TMW.db

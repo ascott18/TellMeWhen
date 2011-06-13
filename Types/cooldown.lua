@@ -28,7 +28,24 @@ local print = TMW.print
 local _, pclass = UnitClass("Player")
 local SpellTextures = TMW.SpellTextures
 
-local RelevantSettings = {
+
+local Type = TMW:RegisterIconType("cooldown")
+LibStub("AceEvent-3.0"):Embed(Type)
+Type.name = L["ICONMENU_COOLDOWN"]
+Type.TypeChecks = {
+	text = L["ICONMENU_COOLDOWNTYPE"],
+	setting = "CooldownType",
+	{ value = "spell", 			text = L["ICONMENU_SPELL"] },
+	{ value = "multistate", 	text = L["ICONMENU_MULTISTATECD"], 		tooltipText = L["ICONMENU_MULTISTATECD_DESC"] },
+	{ value = "item", 			text = L["ICONMENU_ITEM"] },
+}
+Type.WhenChecks = {
+	text = L["ICONMENU_SHOWWHEN"],
+	{ value = "alpha", 			text = L["ICONMENU_USABLE"], 			colorCode = "|cFF00FF00" },
+	{ value = "unalpha",  		text = L["ICONMENU_UNUSABLE"], 			colorCode = "|cFFFF0000" },
+	{ value = "always", 		text = L["ICONMENU_ALWAYS"] },
+}
+Type.RelevantSettings = {
 	Name = true,
 	ShowTimer = true,
 	ShowTimerText = true,
@@ -59,23 +76,6 @@ local RelevantSettings = {
 	FakeHidden = true,
 }
 
-local Type = TMW:RegisterIconType("cooldown", RelevantSettings)
-LibStub("AceEvent-3.0"):Embed(Type)
-Type.name = L["ICONMENU_COOLDOWN"]
-Type.TypeChecks = {
-	text = L["ICONMENU_COOLDOWNTYPE"],
-	setting = "CooldownType",
-	{ value = "spell", 			text = L["ICONMENU_SPELL"] },
-	{ value = "multistate", 	text = L["ICONMENU_MULTISTATECD"], 		tooltipText = L["ICONMENU_MULTISTATECD_DESC"] },
-	{ value = "item", 			text = L["ICONMENU_ITEM"] },
-}
-Type.WhenChecks = {
-	text = L["ICONMENU_SHOWWHEN"],
-	{ value = "alpha", 			text = L["ICONMENU_USABLE"], 			colorCode = "|cFF00FF00" },
-	{ value = "unalpha",  		text = L["ICONMENU_UNUSABLE"], 			colorCode = "|cFFFF0000" },
-	{ value = "always", 		text = L["ICONMENU_ALWAYS"] },
-}
-
 
 function Type:Update()
 	db = TMW.db
@@ -88,6 +88,41 @@ function Type:Update()
 end
 
 
+
+local function AutoShot_OnEvent(icon, event, unit, _, _, _, spellID)
+	if unit == "player" and spellID == 75 then
+		icon.asStart = TMW.time
+		icon.asDuration = UnitRangedDamage("player")
+	end
+end
+
+local function AutoShot_OnUpdate(icon, time)
+	if icon.UpdateTimer <= time - UPD_INTV then
+		icon.UpdateTimer = time
+		local CndtCheck = icon.CndtCheck if CndtCheck and CndtCheck() then return end
+		
+		local ready = time - icon.asStart > icon.asDuration
+		local inrange = icon.RangeCheck and IsSpellInRange(icon.NameName, "target") or 1
+		
+		if ready and inrange then
+			icon:SetInfo(icon.Alpha, icon.UnAlpha ~= 0 and pr or 1, nil, 0, 0)
+		else
+			local alpha, color
+			if icon.Alpha ~= 0 then
+				if inrange ~= 1 then
+					alpha, color = icon.UnAlpha*rc.a, rc
+				elseif not icon.ShowTimer then
+					alpha, color = icon.UnAlpha, 0.5
+				else
+					alpha, color = icon.UnAlpha, 1
+				end
+			else
+				alpha, color = icon.UnAlpha, 1
+			end
+			icon:SetInfo(alpha, color, nil, icon.asStart, icon.asDuration, true)
+		end
+	end
+end
 
 local function SpellCooldown_OnUpdate(icon, time)
 	if icon.UpdateTimer <= time - UPD_INTV then
@@ -165,6 +200,7 @@ end
 
 
 local ItemCount = setmetatable({}, {__index = function(tbl, k)
+	if not k then return end
 	local count = GetItemCount(k, nil, 1)
 	tbl[k] = count
 	return count
@@ -328,16 +364,29 @@ function Type:Setup(icon, groupID, iconID)
 		icon.NameName = TMW:GetSpellNames(icon, icon.Name, 1, 1)
 		icon.NameArray = TMW:GetSpellNames(icon, icon.Name)
 		icon.NameNameArray = TMW:GetSpellNames(icon, icon.Name, nil, 1)
-		icon.FirstTexture = SpellTextures[icon.NameFirst]
+		
+		if strlower(icon.NameName) == strlower(GetSpellInfo(75)) and not icon.NameArray[2] then
+			icon:SetTexture(GetSpellTexture(75))
+			icon.asStart = icon.asStart or 0
+			icon.asDuration = icon.asDuration or 0
+			
+			icon:RegisterEvent("UNIT_SPELLCAST_SUCCEEDED")
+			icon:SetScript("OnEvent", AutoShot_OnEvent)
+			
+			icon:SetScript("OnUpdate", AutoShot_OnUpdate)
+		else
+			icon.FirstTexture = SpellTextures[icon.NameFirst]
 
-		if icon.Name == "" then
-			icon:SetTexture("Interface\\Icons\\INV_Misc_QuestionMark")
-		elseif icon.FirstTexture then
-			icon:SetTexture(icon.FirstTexture)
-		elseif TMW:DoSetTexture(icon) then
-			icon:SetTexture("Interface\\Icons\\INV_Misc_QuestionMark")
+			if icon.Name == "" then
+				icon:SetTexture("Interface\\Icons\\INV_Misc_QuestionMark")
+			elseif icon.FirstTexture then
+				icon:SetTexture(icon.FirstTexture)
+			elseif TMW:DoSetTexture(icon) then
+				icon:SetTexture("Interface\\Icons\\INV_Misc_QuestionMark")
+			end
+			icon:SetScript("OnUpdate", SpellCooldown_OnUpdate)
 		end
-		icon:SetScript("OnUpdate", SpellCooldown_OnUpdate)
+		
 		icon:OnUpdate(TMW.time)
 	end
 	if icon.CooldownType == "item" then
@@ -407,19 +456,13 @@ function Type:IE_TypeLoaded()
 		IE.Main.ShowCBar:SetEnabled(1)
 		IE.Main.OnlyEquipped:Show()
 		IE.Main.EnableStacks:Show()
-	--	if IE.Main.EnableStacks:GetChecked() then
-			IE.Main.StackMin:Show()
-			IE.Main.StackMax:Show()
-			IE.Main.StackMinEnabled:Show()
-			IE.Main.StackMaxEnabled:Show()
-	--[[	else
-			IE.Main.StackMin:Hide()
-			IE.Main.StackMax:Hide()
-			IE.Main.StackMinEnabled:Hide()
-			IE.Main.StackMaxEnabled:Hide()
-		end]]
 		IE.Main.OnlyInBags:Show()
 		IE.Main.ManaCheck:Hide()
+		
+		IE.Main.StackMin:Show()
+		IE.Main.StackMax:Show()
+		IE.Main.StackMinEnabled:Show()
+		IE.Main.StackMaxEnabled:Show()
 	else
 		IE.Main.EnableStacks:Hide()
 		IE.Main.OnlyEquipped:Hide()

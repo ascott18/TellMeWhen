@@ -28,12 +28,23 @@ local SpellTextures = TMW.SpellTextures
 
 local clientVersion = select(4, GetBuildInfo())
 
-local RelevantSettings = {
+
+local Type = TMW:RegisterIconType("unitcooldown")
+LibStub("AceEvent-3.0"):Embed(Type)
+Type.name = L["ICONMENU_UNITCOOLDOWN"]
+Type.desc = L["ICONMENU_UNITCOOLDOWN_DESC"]:format(GetSpellInfo(42292))
+Type.DurationSyntax = 1
+Type.WhenChecks = {
+	text = L["ICONMENU_SHOWWHEN"],
+	{ value = "alpha", 			text = L["ICONMENU_USABLE"], 			colorCode = "|cFF00FF00" },
+	{ value = "unalpha",  		text = L["ICONMENU_UNUSABLE"], 			colorCode = "|cFFFF0000" },
+	{ value = "always", 		text = L["ICONMENU_ALWAYS"] },
+}
+Type.RelevantSettings = {
 	Name = true,
 	ShowTimer = true,
 	ShowTimerText = true,
 	ShowWhen = true,
-	ICDDuration = true,
 	Unit = true,
 	OnlySeen = true,
 	Alpha = true,
@@ -48,17 +59,6 @@ local RelevantSettings = {
 	ConditionAlpha = true,
 	FakeHidden = true,
 	Sort = true,
-}
-
-local Type = TMW:RegisterIconType("unitcooldown", RelevantSettings)
-LibStub("AceEvent-3.0"):Embed(Type)
-Type.name = L["ICONMENU_UNITCOOLDOWN"]
-Type.desc = format(L["ICONMENU_UNITCOOLDOWN_DESC"], GetSpellInfo(42292))
-Type.WhenChecks = {
-	text = L["ICONMENU_SHOWWHEN"],
-	{ value = "alpha", 		text = L["ICONMENU_USABLE"], 			colorCode = "|cFF00FF00" },
-	{ value = "unalpha",  		text = L["ICONMENU_UNUSABLE"], 			colorCode = "|cFFFF0000" },
-	{ value = "always", 		text = L["ICONMENU_ALWAYS"] },
 }
 
 
@@ -78,6 +78,88 @@ local Cooldowns = setmetatable({}, {__index = function(t, k)
 	return n
 end}) TMW.Cooldowns = Cooldowns
 
+local resetsOnCast = {
+	[23989] = { -- readiness
+		[19386] = 1,
+		[3674] = 1,
+		[19503] = 1,
+		[53209] = 1,
+		[34490] = 1,
+		[19577] = 1,
+		[53271] = 1,
+		[19263] = 1,
+		[781] = 1,
+		[5116] = 1,
+		[53351] = 1,
+		[3045] = 1,
+		[3034] = 1,
+		[34026] = 1,
+		[60192] = 1,
+		[34600] = 1,
+		[1499] = 1,
+		[13809] = 1,
+		[13795] = 1,
+		[1543] = 1,
+		[19434] = 1,
+		[20736] = 1,
+		[19306] = 1,
+		[3044] = 1,
+		[34477] = 1,
+		[2973] = 1,
+		[53301] = 1,
+		[2643] = 1,
+	},
+	[11958] = { -- coldsnap
+		[44572] = 1,
+		[31687] = 1,
+		[11426] = 1,
+		[12472] = 1,
+		[45438] = 1,
+		[120] = 1,
+		[122] = 1,
+	},
+	[14185] = { --prep
+		[5277] = 1,
+		[2983] = 1,
+		[1856] = 1,
+		[36554] = 1,
+		[1766] = 1,
+		[51722] = 1,
+		[76577] = 1,
+	},
+	[60970] = { --some warrior thing that resets intercept
+		[20252] = 1,
+	},
+	[50334] = { --druid berserk or something
+		[33878] = 1,
+	},
+}
+local resetsOnAura = {
+	[81162] = { -- will of the necropolis
+		[48982] = 1,
+	},
+	[93400] = { -- shooting stars
+		[78674] = 1,
+	},
+	[93622] = { -- lacerate or something
+		[33878] = 1,
+	},
+	[48517] = { -- solar eclipse
+		[16886] = 1,
+	},
+	[48518] = { -- lunar eclipse
+		[16886] = 1,
+	},
+	[64343] = { -- impact
+		[2136] = 1,
+	},
+	[50227] = { -- sword and board
+		[23922] = 1,
+	},
+
+}
+
+
 function Type:COMBAT_LOG_EVENT_UNFILTERED(e, _, p, ...)-- tyPe, sourceGuid, spellId, spellName -- 2 NEW ARGS IN 4.2
 	if p == "SPELL_CAST_SUCCESS" or p == "SPELL_AURA_APPLIED" or p == "SPELL_AURA_REFRESH" or p == "SPELL_DAMAGE" or p == "SPELL_HEAL" or p == "SPELL_MISSED" then
 		local g, i, n, _
@@ -89,7 +171,27 @@ function Type:COMBAT_LOG_EVENT_UNFILTERED(e, _, p, ...)-- tyPe, sourceGuid, spel
 			g, _, _, _, _, _, i, n = ...
 		end
 		local c = Cooldowns[g]
+		if p == "SPELL_AURA_APPLIED" then
+			if resetsOnAura[i] then
+				for id in pairs(resetsOnAura[i]) do
+					if c[id] then
+						-- dont set it to 0 if it doesnt exist so we dont make spells that havent been seen suddenly act like they have been seen
+						-- on the other hand, dont set things to nil or it will look like they haven't been seen.
+						c[id] = 0
+					end
+				end
+			end
+		end
 		if p == "SPELL_CAST_SUCCESS" then
+			if resetsOnCast[i] then
+				for id in pairs(resetsOnCast[i]) do
+					if c[id] then
+						-- dont set it to 0 if it doesnt exist so we dont make spells that havent been seen suddenly act like they have been seen
+						-- on the other hand, dont set things to nil or it will look like they haven't been seen.
+						c[id] = 0
+					end
+				end
+			end
 			c[strlowerCache[n]] = i
 			c[i] = TMW.time
 		else
@@ -114,8 +216,8 @@ local function UnitCooldown_OnUpdate(icon, time)
 	if icon.UpdateTimer <= time - UPD_INTV then
 		icon.UpdateTimer = time
 		local CndtCheck = icon.CndtCheck if CndtCheck and CndtCheck() then return end
-		local unstart, unname, usename
-		local Alpha, ICDDuration, Units, NameArray, OnlySeen, Sort = icon.Alpha, icon.ICDDuration, icon.Units, icon.NameArray, icon.OnlySeen, icon.Sort
+		local unstart, unname, unduration, usename
+		local Alpha, Units, NameArray, OnlySeen, Sort, Durations = icon.Alpha, icon.Units, icon.NameArray, icon.OnlySeen, icon.Sort, icon.Durations
 		local NAL = #NameArray
 		local d = Sort == -1 and huge or 0
 		local UnAlpha = icon.UnAlpha
@@ -139,13 +241,14 @@ local function UnitCooldown_OnUpdate(icon, time)
 
 					if _start then
 						local tms = time-_start -- Time Minus Start - time since the unit's last cast of the spell (not neccesarily the time it has been on cooldown)
-						local _d = tms > ICDDuration and 0 or tms -- real duration remaining on the cooldown
+						local _d = (tms > Durations[i]) and 0 or tms -- real duration remaining on the cooldown
 						if Sort then
 							if _d ~= 0 then -- found an unusable cooldown
 								if (Sort == 1 and d < _d) or (Sort == -1 and d > _d) then -- the duration is lower or higher than the last duration that was going to be used
 									d = _d
 									unname = iName
 									unstart = _start
+									unduration = Durations[i]
 								end
 							elseif not usename then -- we found the first usable cooldown
 								usename = iName
@@ -158,6 +261,7 @@ local function UnitCooldown_OnUpdate(icon, time)
 							if _d ~= 0 and not unname then -- we found the first UNusable cooldown
 								unname = iName
 								unstart = _start
+								unduration = Durations[i]
 								if Alpha == 0 then -- we DONT care about usable cooldowns, so stop looking
 									dobreak = 1
 									break
@@ -180,7 +284,8 @@ local function UnitCooldown_OnUpdate(icon, time)
 		if usename and Alpha > 0 then
 			icon:SetInfo(Alpha, 1, SpellTextures[usename] or "Interface\\Icons\\INV_Misc_PocketWatch_01", 0, 0)
 		elseif unname then
-			icon:SetInfo(UnAlpha, (not icon.ShowTimer and Alpha ~= 0) and .5 or 1, SpellTextures[unname], unstart, ICDDuration)
+			print(unduration)
+			icon:SetInfo(UnAlpha, (not icon.ShowTimer and Alpha ~= 0) and .5 or 1, SpellTextures[unname], unstart, unduration)
 		else
 			icon:SetAlpha(0)
 		end
@@ -192,6 +297,7 @@ function Type:Setup(icon, groupID, iconID)
 	icon.ShowPBar = false
 	icon.NameFirst = TMW:GetSpellNames(icon, icon.Name, 1)
 	icon.NameArray = TMW:GetSpellNames(icon, icon.Name)
+	icon.Durations = TMW:GetSpellDurations(icon, icon.Name)
 	icon.Units = TMW:GetUnits(icon, icon.Unit)
 	icon.Sort = icon.Sort and -icon.Sort -- i wish i could figue out why this is backwards
 
@@ -207,8 +313,8 @@ function Type:Setup(icon, groupID, iconID)
 
 	if icon.Name == "" then
 		icon:SetTexture("Interface\\Icons\\INV_Misc_QuestionMark")
-	elseif GetSpellTexture(icon.NameFirst) then
-		icon:SetTexture(GetSpellTexture(icon.NameFirst))
+	elseif SpellTextures[icon.NameFirst] then
+		icon:SetTexture(SpellTextures[icon.NameFirst])
 	elseif TMW:DoSetTexture(icon) then
 		icon:SetTexture("Interface\\Icons\\INV_Misc_PocketWatch_01")
 	end
@@ -219,7 +325,15 @@ end
 
 
 function Type:IE_TypeLoaded()
-	local ICDDuration = TMW.IE.Main.ICDDuration
-	TMW:TT(ICDDuration, "ICONMENU_COOLDOWN", "CHOOSENAME_DIALOG_UCD_DESC", nil, nil, 1)
-	ICDDuration.label = TMW.L["ICONMENU_COOLDOWN"]
+	if not db.global.SeenNewDurSyntax then
+		TMW.IE:ShowHelp(L["HELP_FIRSTUCD"]:format(GetSpellInfo(65547), GetSpellInfo(47528), GetSpellInfo(2139), GetSpellInfo(62618), GetSpellInfo(62618)) 
+		, TMW.IE.Main.Type, 20, 0)
+		db.global.SeenNewDurSyntax = 1
+	end
+end
+
+function Type:IE_TypeUnloaded()
+	if TMW.CI.t ~= "unitcooldown" and TMW.CI.t ~= "icd" then
+		TMW.IE.Help:Hide()
+	end
 end

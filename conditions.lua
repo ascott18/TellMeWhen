@@ -850,6 +850,16 @@ CNDT.Types = {
 		tcoords = {GetTexCoordsForRole("DAMAGER")},
 		funcstr = [[(roles[UnitGroupRolesAssigned(c.Unit)] or 1) c.Operator c.Level]],
 	},
+	{ -- raid icon
+		text = L["CONDITIONPANEL_RAIDICON"],
+		category = L["CNDTCAT_STATUS"],
+		value = "RAIDICON",
+		min = 0,
+		max = 8,
+		texttable = setmetatable({[0]=NONE}, {__index = function(t, k) return "|TInterface\\TargetingFrame\\UI-RaidTargetingIcon_"..k..":0|t ".._G["RAID_TARGET_"..k] end}),
+		icon = "Interface\\TargetingFrame\\UI-RaidTargetingIcon_8",
+		funcstr = [[(GetRaidTargetIndex(c.Unit) or 0) c.Operator c.Level]],
+	},
 	{ -- unit is unit
 		text = L["CONDITIONPANEL_UNITISUNIT"],
 		tooltip = L["CONDITIONPANEL_UNITISUNIT_DESC"],
@@ -859,7 +869,7 @@ CNDT.Types = {
 		max = 1,
 		nooperator = true,
 		texttable = setmetatable({}, {__index = function(t, k) return L[classifications[k]] end}),
-		name = function(editbox) TMW:TT(editbox, "CONDITIONPANEL_UNITISUNIT", "CONDITIONPANEL_UNITISUNIT_EBDESC", nil, nil, 1) editbox.label = L["UNITTWO"] end,
+		name = function(editbox) TMW:TT(editbox, "UNITTWO", "CONDITIONPANEL_UNITISUNIT_EBDESC", nil, nil, 1) editbox.label = L["UNITTWO"] end,
 		texttable = bool,
 		icon = "Interface\\Icons\\spell_holy_prayerofhealing",
 		tcoords = standardtcoords,
@@ -1708,7 +1718,8 @@ CNDT:RegisterEvent("CURRENCY_DISPLAY_UPDATE")
 CNDT:CURRENCY_DISPLAY_UPDATE()
 
 local EnvMeta = {
-	__index = _G
+	__index = _G,
+	--__newindex = _G,
 }
 
 local functionCache = {} CNDT.functionCache = functionCache

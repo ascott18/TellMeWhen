@@ -129,15 +129,6 @@ function TMW:CopyTableInPlaceWithMeta(src, dest)
 	return dest -- not really needed, but what the hell why not
 end
 
-local function GetLocalizedSettingString(setting, value)
-	if not value or not setting then return end
-	for k, v in pairs(IE.Data[setting]) do
-		if v.value == value then
-			return v.text
-		end
-	end
-end
-
 function TMW:GetIconMenuText(g, i, data)
 	data = data or db.profile.Groups[tonumber(g)].Icons[tonumber(i)]
 
@@ -159,7 +150,7 @@ function TMW:GetIconMenuText(g, i, data)
 	if strlen(text) > 35 then textshort = textshort .. "..." end
 
 	local tooltip =	((data.Name and data.Name ~= "" and data.Type ~= "meta" and data.Type ~= "wpnenchant") and data.Name .. "\r\n" or "") ..
-					(GetLocalizedSettingString("Type", data.Type) or "") ..
+					((Types[data.Type] and Types[data.Type].name) or "") ..
 					((data.Enabled and "") or "\r\n(" .. L["DISABLED"] .. ")")
 
 	return text, textshort, tooltip
@@ -199,7 +190,6 @@ function TMW:CleanIconSettings(settings)
 end
 
 function TMW:CleanDefaults(settings, defaults, blocker)
-	-- yep, this function is out of place. I dont care.
 	-- make sure and pass in a COPY of the settings, not the original settings
 
 	-- the following function is a slightly modified version of the one that AceDB uses to strip defaults.
@@ -250,27 +240,17 @@ function TMW:CleanDefaults(settings, defaults, blocker)
 	return settings
 end
 
-local mult = {
-    1,
-    60,
-    60*60,
-    60*60*24,
-    60*60*24*365.242199,
-}
-function string:toseconds()
-    self = ":"..strtrim(self, ": ")
-    local _, numcolon = gsub(self, ":", ":") -- let the cheesy coding commence!
-    local seconds = 0
-    for num in gmatch(self, ":([0-9%.]*)") do
-        if tonumber(num) and mult[numcolon] then
-            seconds = seconds + mult[numcolon]*num
-        end
-        numcolon = numcolon - 1
-    end
-    return seconds
-    
+GameTooltip.OldAddLine = GameTooltip.AddLine
+function GameTooltip:AddLine(text, r, g, b, wrap, ...)
+	-- this fixes the problem where tooltips in blizz dropdowns dont wrap, nor do they have a setting to do it.
+	-- Pretty hackey fix, but it works
+	-- Only force the wrap option if the current dropdown has wrapTooltips set true, the dropdown is shown, and the mouse is over the dropdown menu (not DDL.isCounting)
+	local DDL = DropDownList1
+	if DDL and not DDL.isCounting and DDL.dropdown and DDL.dropdown.wrapTooltips and DDL:IsShown() then
+		wrap = 1
+	end
+	self:OldAddLine(text, r, g, b, wrap, ...)
 end
-
 
 -- --------------
 -- MAIN OPTIONS
@@ -904,20 +884,25 @@ end
 
 ID = TMW:NewModule("IconDragger", "AceTimer-3.0", "AceEvent-3.0") TMW.ID = ID
 
---dragging stuff
-function ID:BAR_HIDEGRID() ID.DraggingInfo = nil end
-hooksecurefunc("PickupSpellBookItem", function(...) ID.DraggingInfo = {...} end)
-WorldFrame:HookScript("OnMouseDown", function() -- this contains other bug fix stuff too
-	ID.DraggingInfo = nil
-	ID.F:Hide()
-	ID.IsDragging = nil
-	if ID.isMoving then
-		TMW:Group_StopMoving(ID.isMoving)
-	end
-end)
-hooksecurefunc("ClearCursor", ID.BAR_HIDEGRID)
-ID:RegisterEvent("PET_BAR_HIDEGRID", "BAR_HIDEGRID")
-ID:RegisterEvent("ACTIONBAR_HIDEGRID", "BAR_HIDEGRID")
+function ID:OnInitialize()
+	--dragging stuff
+	function ID:BAR_HIDEGRID() ID.DraggingInfo = nil end
+	hooksecurefunc("PickupSpellBookItem", function(...) ID.DraggingInfo = {...} end)
+	WorldFrame:HookScript("OnMouseDown", function() -- this contains other bug fix stuff too
+		ID.DraggingInfo = nil
+		ID.F:Hide()
+		ID.IsDragging = nil
+		if ID.isMoving then
+			TMW:Group_StopMoving(ID.isMoving)
+		end
+	end)
+	hooksecurefunc("ClearCursor", ID.BAR_HIDEGRID)
+	ID:RegisterEvent("PET_BAR_HIDEGRID", "BAR_HIDEGRID")
+	ID:RegisterEvent("ACTIONBAR_HIDEGRID", "BAR_HIDEGRID")
+	
+	
+	ID.DD.wrapTooltips = 1
+end
 
 function ID:Drag_DropDown(a)
 	local info = UIDropDownMenu_CreateInfo()
@@ -1140,7 +1125,6 @@ end
 
 function ME:Insert(where)
 	local groupID, iconID = CI.g, CI.i
---	db.profile.Groups[groupID].Icons[iconID].Icons = db.profile.Groups[groupID].Icons[iconID].Icons or {}
 	if not CI.ics.Icons[1] then
 		CI.ics.Icons[1] = TMW.Icons[1]
 		UIDropDownMenu_SetSelectedValue(ME[1], TMW.Icons[1])
@@ -1247,7 +1231,7 @@ end
 
 
 IE = TMW:NewModule("IconEditor", "AceEvent-3.0") TMW.IE = IE
-local checks = { --1=check box, 2=editbox, 3=slider(x100), 4=custom, table=subkeys are settings
+IE.Checks = { --1=check box, 2=editbox, 3=slider(x100), 4=custom, table=subkeys are settings
 	Name = 2,
 	RangeCheck = 1,
 	ManaCheck = 1,
@@ -1260,7 +1244,6 @@ local checks = { --1=check box, 2=editbox, 3=slider(x100), 4=custom, table=subke
 	ShowTimerText = 1,
 	Icons = 4,
 	Sort = 4,
-	ICDDuration = 2,
 	Unit = 2,
 	ShowPBar = {
 		ShowPBar = 1,
@@ -1292,7 +1275,7 @@ local checks = { --1=check box, 2=editbox, 3=slider(x100), 4=custom, table=subke
 	DontRefresh = 1,
 	EnableStacks = 1,
 }
-local tabs = {
+IE.Tabs = {
 	[1] = "Main",
 	[2] = "Conditions",
 	[3] = "Sound",
@@ -1300,33 +1283,24 @@ local tabs = {
 	[5] = "Group",
 	[6] = "Conditions",
 }
-local SUGIMS, SoI, SUGSoI
-IE.Data = {
-	-- the keys on this table need to match the settings variable names
-	Type = {}, -- this will be populated by registered icon types
-
-	Unit = {
-		{ value = "player", 					text = PLAYER },
-		{ value = "target", 					text = TARGET },
-		{ value = "targettarget", 				text = L["ICONMENU_TARGETTARGET"] },
-		{ value = "focus", 						text = L["ICONMENU_FOCUS"] },
-		{ value = "focustarget", 				text = L["ICONMENU_FOCUSTARGET"] },
-		{ value = "pet", 						text = PET },
-		{ value = "pettarget", 					text = L["ICONMENU_PETTARGET"] },
-		{ value = "mouseover", 					text = L["ICONMENU_MOUSEOVER"] },
-		{ value = "mouseovertarget",			text = L["ICONMENU_MOUSEOVERTARGET"]  },
-		{ value = "vehicle", 					text = L["ICONMENU_VEHICLE"] },
-		{ value = "party|cFFFF0000#|r", 		text = PARTY, 			range = "|cFFFF0000#|r = 1-" .. MAX_PARTY_MEMBERS},
-		{ value = "raid|cFFFF0000#|r", 			text = RAID, 			range = "|cFFFF0000#|r = 1-" .. MAX_RAID_MEMBERS},
-		{ value = "arena|cFFFF0000#|r",			text = ARENA, 			range = "|cFFFF0000#|r = 1-5"},
-		{ value = "boss|cFFFF0000#|r", 			text = BOSS, 			range = "|cFFFF0000#|r = 1-" .. MAX_BOSS_FRAMES},
-		{ value = "maintank|cFFFF0000#|r", 		text = L["MAINTANK"], 	range = "|cFFFF0000#|r = 1-" .. MAX_RAID_MEMBERS},
-		{ value = "mainassist|cFFFF0000#|r", 	text = L["MAINASSIST"], range = "|cFFFF0000#|r = 1-" .. MAX_RAID_MEMBERS},
-	},
+IE.Units = {
+	{ value = "player", 					text = PLAYER },
+	{ value = "target", 					text = TARGET },
+	{ value = "targettarget", 				text = L["ICONMENU_TARGETTARGET"] },
+	{ value = "focus", 						text = L["ICONMENU_FOCUS"] },
+	{ value = "focustarget", 				text = L["ICONMENU_FOCUSTARGET"] },
+	{ value = "pet", 						text = PET },
+	{ value = "pettarget", 					text = L["ICONMENU_PETTARGET"] },
+	{ value = "mouseover", 					text = L["ICONMENU_MOUSEOVER"] },
+	{ value = "mouseovertarget",			text = L["ICONMENU_MOUSEOVERTARGET"]  },
+	{ value = "vehicle", 					text = L["ICONMENU_VEHICLE"] },
+	{ value = "party|cFFFF0000#|r", 		text = PARTY, 			range = "|cFFFF0000#|r = 1-" .. MAX_PARTY_MEMBERS},
+	{ value = "raid|cFFFF0000#|r", 			text = RAID, 			range = "|cFFFF0000#|r = 1-" .. MAX_RAID_MEMBERS},
+	{ value = "arena|cFFFF0000#|r",			text = ARENA, 			range = "|cFFFF0000#|r = 1-5"},
+	{ value = "boss|cFFFF0000#|r", 			text = BOSS, 			range = "|cFFFF0000#|r = 1-" .. MAX_BOSS_FRAMES},
+	{ value = "maintank|cFFFF0000#|r", 		text = L["MAINTANK"], 	range = "|cFFFF0000#|r = 1-" .. MAX_RAID_MEMBERS},
+	{ value = "mainassist|cFFFF0000#|r", 	text = L["MAINASSIST"], range = "|cFFFF0000#|r = 1-" .. MAX_RAID_MEMBERS},
 }
-for k, Type in ipairs(TMW.OrderedTypes) do
-	IE.Data.Type[k] = {value = Type.type, text = Type.name, tooltipText = Type.desc}
-end
 local EquivFullIDLookup = {}
 local EquivFullNameLookup = {}
 local EquivFirstIDLookup = {}
@@ -1354,7 +1328,7 @@ end
 function IE:TabClick(self)
 	PanelTemplates_Tab_OnClick(self, self:GetParent())
 	PlaySound("igCharacterInfoTab")
-	for id, frame in pairs(tabs) do
+	for id, frame in pairs(IE.Tabs) do
 		if IE[frame] then
 			IE[frame]:Hide()
 		end
@@ -1368,7 +1342,7 @@ function IE:TabClick(self)
 		CNDT.type = "group"
 		CNDT:Load()
 	end
-	IE[tabs[self:GetID()]]:Show()
+	IE[IE.Tabs[self:GetID()]]:Show()
 	TellMeWhen_IconEditor:Show()
 end
 
@@ -1425,17 +1399,13 @@ function IE:SetupRadios()
 				end
 			end
 		end
-		if t == "cast" then
-			IE.Main.WhenChecks.text:SetText(L["ICONMENU_CASTSHOWWHEN"])
-		else
-			IE.Main.WhenChecks.text:SetText(Type.WhenChecks.text)
-		end
+		IE.Main.WhenChecks.text:SetText(Type.WhenChecks.text)
 		IE.Main.WhenChecks:Show()
 	else
 		IE.Main.WhenChecks:Hide()
 	end
 
-	local alphainfo = Type.WhenChecks
+	local alphainfo = Type and Type.WhenChecks
 	if alphainfo then
 		IE.Main.Alpha.text:SetText((alphainfo[1].colorCode or "") .. alphainfo[1].text .. "|r")
 		IE.Main.UnAlpha.text:SetText((alphainfo[2].colorCode or "") .. alphainfo[2].text .. "|r")
@@ -1449,8 +1419,8 @@ function IE:ShowHide()
 	local t = CI.t
 	if not t then return end
 
-	for k, v in pairs(checks) do
-		if (TMW.RelevantSettings[t] and TMW.RelevantSettings[t][k]) or TMW.RelevantSettings.all[k] then
+	for k, v in pairs(IE.Checks) do
+		if (Types[t] and Types[t].RelevantSettings[k]) or Types.all.RelevantSettings[k] then
 			IE.Main[k]:Show()
 			if IE.Main[k].SetEnabled then
 				IE.Main[k]:SetEnabled(1)
@@ -1506,14 +1476,13 @@ function IE:SaveSettings()
 	if TellMeWhen_IconEditor:IsShown() then
 		IE.Main.Name:ClearFocus()
 		IE.Main.Unit:ClearFocus()
-		IE.Main.ICDDuration:ClearFocus()
 	end
 end
 
 function IE:LoadSettings()
 	local groupID, iconID = CI.g, CI.i
 	local ics = CI.ics
-	for setting, settingtype in pairs(checks) do
+	for setting, settingtype in pairs(IE.Checks) do
 		local f = IE.Main[setting]
 		if settingtype == 1 then
 			f:SetChecked(ics[setting])
@@ -1577,14 +1546,12 @@ function IE:Load(isRefresh)
 
 	UIDropDownMenu_SetSelectedValue(IE.Main.Type, db.profile.Groups[groupID].Icons[iconID].Type)
 	CI.t = db.profile.Groups[groupID].Icons[iconID].Type
-	if db.profile.Groups[groupID].Icons[iconID].Type == "" then
+	if CI.t == "" then
 		UIDropDownMenu_SetText(IE.Main.Type, L["ICONMENU_TYPE"])
 	else
-		for k, v in pairs(IE.Data.Type) do
-			if (v.value == db.profile.Groups[groupID].Icons[iconID].Type) then
-				UIDropDownMenu_SetText(IE.Main.Type, v.text)
-				break
-			end
+		local Type = TMW.Types[CI.t]
+		if Type then
+			UIDropDownMenu_SetText(IE.Main.Type, Type.name)
 		end
 	end
 
@@ -1616,6 +1583,13 @@ function IE:Reset()
 	IE:TabClick(IE.MainTab)
 end
 
+function IE:ShowHelp(text, frame, x, y)
+	IE.Help:ClearAllPoints()
+	IE.Help:SetPoint("TOPRIGHT", frame, "LEFT", (x or 0) - 30, (y or 0) + 28)
+	IE.Help.text:SetText(text)
+	IE.Help:SetHeight(IE.Help.text:GetHeight() + 38)
+	IE.Help:Show()
+end
 
 function IE:Equiv_GenerateTips(equiv)
 	local r = "" --tconcat doesnt allow me to exclude duplicates unless i make another garbage table, so lets just do this
@@ -1739,9 +1713,10 @@ function IE:Equiv_DropDown()
 end
 
 function IE:Equiv_DropDown_OnClick(value)
-	local e = TellMeWhen_IconEditor.Main.Name
-	e:Insert(";" .. value .. ";")
+	local e = IE.Main.Name
+	e:Insert("; " .. value .. "; ")
 	e:SetText(TMW:CleanString(e:GetText()))
+	e:SetCursorPosition(select(2, e:GetText():find(value:gsub("([%-])", "%%%1"))) + 1)
 	CloseDropDownMenus()
 end
 
@@ -1762,25 +1737,25 @@ function IE:Type_DropDown()
 	info.notCheckable = true
 	UIDropDownMenu_AddButton(info)
 
-	for k, v in pairs(IE.Data.Type) do
-		if not v.hidden then
+	for _, Type in ipairs(TMW.OrderedTypes) do
+		if not Type.hidden then
 			local info = UIDropDownMenu_CreateInfo()
-			info.text = v.text
-			info.value = v.value
-			if v.tooltipText then
-				info.tooltipTitle = v.tooltipTitle or v.text
-				info.tooltipText = v.tooltipText
+			info.text = Type.nameOverride or Type.name
+			info.value = Type.type
+			if Type.desc then
+				info.tooltipTitle = Type.tooltipTitle or Type.name
+				info.tooltipText = Type.desc
 				info.tooltipOnButton = true
 			end
 			info.checked = (info.value == db.profile.Groups[groupID].Icons[iconID].Type)
 			info.func = IE.Type_Dropdown_OnClick
-			info.arg1 = v
+			info.arg1 = Type
 			UIDropDownMenu_AddButton(info, UIDROPDOWNMENU_MENU_LEVEL)
 		end
 	end
 end
 
-function IE:Type_Dropdown_OnClick(v)
+function IE:Type_Dropdown_OnClick()
 	local groupID, iconID = CI.g, CI.i
 	db.profile.Groups[groupID].Icons[iconID].Type = self.value
 	CI.ic.texture:SetTexture(nil)
@@ -1800,7 +1775,7 @@ function IE:Unit_DropDown()
 	if not e:HasFocus() then
 		e:HighlightText()
 	end
-	for k, v in pairs(IE.Data.Unit) do
+	for k, v in pairs(IE.Units) do
 		local info = UIDropDownMenu_CreateInfo()
 		info.text = v.text
 		info.value = v.value
@@ -2130,6 +2105,25 @@ function IE:Copy_DropDown()
 	end
 end
 
+
+local function formatSeconds(seconds)
+	-- note that this is different from the one in conditions.lua
+	local d =  seconds / 86400
+	local h = (seconds % 86400) / 3600
+	local m = (seconds % 86400  % 3600) / 60
+	local s =  seconds % 86400  % 3600  % 60
+
+	s = tonumber(format("%.1f", s))
+	local ns = s
+	if s < 10 then
+		ns = "0" .. s
+	end
+
+	if d >= 1 then return format("%d:%02d:%02d:%s", d, h, m, ns) end
+	if h >= 1 then return format("%d:%02d:%s", h, m, ns) end
+	if m >= 1 then return format("%d:%s", m, ns) end
+	return s
+end
 local cachednames = {}
 function IE:GetRealNames()
 	-- gets a string to set as a tooltip of all of the spells names in the name box in the IE. Splits up equivalancies and turns IDs into names
@@ -2145,6 +2139,7 @@ function IE:GetRealNames()
 	else
 		tbl = TMW:GetSpellNames(nil, text, false)
 	end
+	local durations = TMW:GetSpellDurations(nil, text)
 	TMW.BE = BEbackup -- unhack
 
 	local str = ""
@@ -2152,14 +2147,10 @@ function IE:GetRealNames()
 		local name, _, texture = GetSpellInfo(v)
 		name = name or v
 		if not tiptemp[name] then --prevents display of the same name twice when there are multiple spellIDs.
-			if k ~= #tbl then
-				if #tbl > 50 then -- dont use 1 per line if there a bunch
-					str = str .. (texture and ("|T" .. texture .. ":0|t") or "") .. name .. "; "
-				else
-					str = str .. (texture and ("|T" .. texture .. ":0|t") or "") .. name .. "; \r\n"
-				end
-			else
-				str = str .. (texture and ("|T" .. texture .. ":0|t") or "") .. name
+			local time = Types[CI.t].DurationSyntax and " ("..formatSeconds(durations[k])..")" or ""
+			str = str .. (texture and ("|T" .. texture .. ":0|t") or "") .. name .. time .. (k ~= #tbl and "; " or "")
+			if #tbl < 50 then -- dont use 1 per line if there a bunch
+				str = str .. "\r\n"
 			end
 		end
 		tiptemp[name] = true
@@ -2618,22 +2609,10 @@ end
 
 SUG = TMW:NewModule("Suggester", "AceEvent-3.0", "AceComm-3.0", "AceSerializer-3.0") TMW.SUG = SUG
 local inputType
+local SUGIMS, SUGSoI
 
 local ActionCache, pclassSpellCache, ClassSpellLookup, AuraCache, ItemCache, SpellCache, CastCache
-doUpdateItemCache = true
-doUpdateActionCache = true
 
-function SUG:BAG_UPDATE()
-	doUpdateItemCache = true
-end
-function SUG:ACTIONBAR_SLOT_CHANGED()
-	doUpdateActionCache = true
-end
-SUG:RegisterEvent("BAG_UPDATE")
-SUG:RegisterEvent("BANKFRAME_OPENED", "BAG_UPDATE")
-SUG:RegisterEvent("ACTIONBAR_SLOT_CHANGED")
-
-SUG.NumCachePerFrame = 0 -- 0 is actually 1. Yeah, i know, its lame. I'm lazy.
 function SUG:OnInitialize()
 	TMWOptDB = TMWOptDB or {}
 
@@ -2658,16 +2637,24 @@ function SUG:OnInitialize()
 		TMW.AuraCache = SUG.AuraCache -- make new inserts go into the optionDB and this table
 	end
 
-
 	SUG.ActionCache = {} -- dont save this, it should be a list of things that are CURRENTLY on THIS CHARACTER'S action bars
 	SUG.RequestedFrom = {}
+	SUG.commThrowaway = {}
 	SUG.Box = IE.Main.Name
 
 	SUG.ClassSpellCache[pclass] = SUG.ClassSpellCache[pclass] or {}
 	SUG:PLAYER_TALENT_UPDATE()
 	SUG:BuildClassSpellLookup() -- must go before the local versions (ClassSpellLookup) are defined
+	SUG.doUpdateItemCache = true
+	SUG.doUpdateActionCache = true
 
 	SUG:RegisterComm("TMWSUG")
+	SUG:RegisterEvent("PLAYER_TALENT_UPDATE")
+	SUG:RegisterEvent("PLAYER_ENTERING_WORLD")
+	SUG:RegisterEvent("UNIT_PET")
+	SUG:RegisterEvent("BAG_UPDATE")
+	SUG:RegisterEvent("BANKFRAME_OPENED", "BAG_UPDATE")
+	SUG:RegisterEvent("ACTIONBAR_SLOT_CHANGED")
 
 	if IsInGuild() then
 		SUG:SendCommMessage("TMWSUG", SUG:Serialize("RCSL"), "GUILD")
@@ -2683,6 +2670,7 @@ function SUG:OnInitialize()
 	TellMeWhen_IconEditor:HookScript("OnShow", function()
 		if didrunhook then return end
 		TMWOptDB.IncompleteCache = true
+		SUG.NumCachePerFrame = 0 -- 0 is actually 1. Yeah, i know, its lame. I'm lazy.
 
 		local Blacklist = {
 			["Interface\\Icons\\Trade_Alchemy"] = true,
@@ -2735,6 +2723,7 @@ function SUG:OnInitialize()
 							not strfind(name, "quest") and
 							not strfind(name, "vehicle") and
 							not strfind(name, "event") and
+							not strfind(name, ":%s?%d") and
 							not strfind(name, "camera")
 						then
 							GameTooltip_SetDefaultAnchor(Parser, UIParent)
@@ -2798,7 +2787,6 @@ function SUG:UNIT_PET(event, unit)
 		end
 	end
 end
-SUG:RegisterEvent("UNIT_PET")
 
 function SUG:PLAYER_ENTERING_WORLD()
 	local NumRealRaidMembers = GetRealNumRaidMembers()
@@ -2819,7 +2807,6 @@ function SUG:PLAYER_ENTERING_WORLD()
 	end
 
 end
-SUG:RegisterEvent("PLAYER_ENTERING_WORLD")
 
 function SUG:PLAYER_TALENT_UPDATE()
 	local _, _, offs, numspells = GetSpellTabInfo(GetNumSpellTabs())
@@ -2830,9 +2817,15 @@ function SUG:PLAYER_TALENT_UPDATE()
 		end
 	end
 end
-SUG:RegisterEvent("PLAYER_TALENT_UPDATE")
 
-local commThrowaway = {}
+function SUG:BAG_UPDATE()
+	SUG.doUpdateItemCache = true
+end
+
+function SUG:ACTIONBAR_SLOT_CHANGED()
+	SUG.doUpdateActionCache = true
+end
+
 function SUG:OnCommReceived(prefix, text, channel, who)
 	if TMW.debug then print(text, channel, who) end
 	if prefix ~= "TMWSUG" or who == UnitName("player") then return end
@@ -2843,23 +2836,23 @@ function SUG:OnCommReceived(prefix, text, channel, who)
 			SUG:SendCommMessage("TMWSUG", SUG:Serialize("CSL", SUG.ClassSpellLength), "WHISPER", who)
 			SUG.RequestedFrom[who] = true
 		elseif arg1 == "CSL" then
-			wipe(commThrowaway)
+			wipe(SUG.commThrowaway)
 			local RecievedClassSpellLength = arg2
 			SUG:BuildClassSpellLookup()
 			for class, length in pairs(RecievedClassSpellLength) do
 				if (not SUG.ClassSpellLength[class]) or (SUG.ClassSpellLength[class] < length) then
-					tinsert(commThrowaway, class)
+					tinsert(SUG.commThrowaway, class)
 				end
 			end
-			if #commThrowaway > 0 then
-				SUG:SendCommMessage("TMWSUG", SUG:Serialize("RCSC", commThrowaway), "WHISPER", who)
+			if #SUG.commThrowaway > 0 then
+				SUG:SendCommMessage("TMWSUG", SUG:Serialize("RCSC", SUG.commThrowaway), "WHISPER", who)
 			end
 		elseif arg1 == "RCSC" then
-			wipe(commThrowaway)
+			wipe(SUG.commThrowaway)
 			for _, class in pairs(arg2) do
-				commThrowaway[class] = SUG.ClassSpellCache[class]
+				SUG.commThrowaway[class] = SUG.ClassSpellCache[class]
 			end
-			SUG:SendCommMessage("TMWSUG", SUG:Serialize("CSC", commThrowaway), "WHISPER", who)
+			SUG:SendCommMessage("TMWSUG", SUG:Serialize("CSC", SUG.commThrowaway), "WHISPER", who)
 		elseif arg1 == "CSC" then
 			for class, tbl in pairs(arg2) do
 				if SUG.ClassSpellCache[class] then
@@ -2882,10 +2875,7 @@ function GameTooltip:SetTMWEquiv(equiv)
 	GameTooltip:AddLine(IE:Equiv_GenerateTips(equiv), NORMAL_FONT_COLOR.r, NORMAL_FONT_COLOR.g, NORMAL_FONT_COLOR.b, 1)
 end
 
-local preTable = {}
-local miscprioritize = {
-	[42292] = 1, -- pvp trinket spell
-}
+local SUGpreTable = {}
 
 function SUG.Sorter(a, b)
 	--[[PRIORITY:
@@ -2896,11 +2886,10 @@ function SUG.Sorter(a, b)
 		5)	Known auras
 			5a) Player Auras
 			5b) NPC Auras
-		6)	Miscellaneous proiritization spells
-		7)	SpellID if input is an ID
-		8)	If input is a name
-			8a) Alphabetical if names are different
-			8b) SpellID if names are identical
+		6)	SpellID if input is an ID
+		7)	If input is a name
+			7a) Alphabetical if names are different
+			7b) SpellID if names are identical
 	]]
 
 	local haveA, haveB = EquivFirstIDLookup[a], EquivFirstIDLookup[b]
@@ -2940,11 +2929,6 @@ function SUG.Sorter(a, b)
 			end
 			--if they both were auras, and they were auras of the same type (player, NPC) then procede on to the rest of the code to sort them by name/id
 		end
-
-		local haveA, haveB = miscprioritize[a], miscprioritize[b] -- miscprioritize
-		if (haveA and not haveB) or (haveB and not haveA) then
-			return haveA
-		end
 	end
 
 	if inputType == "number" then
@@ -2968,7 +2952,6 @@ function SUG.Sorter(a, b)
 	end
 end
 
-local buffEquivs = {TMW.BE.buffs, TMW.BE.debuffs}
 function SUG:DoSuggest()
 	SUGSoI = SUG.overrideSoI or CI.SoI
 	local atBeginning = SUG.atBeginning
@@ -2977,40 +2960,11 @@ function SUG:DoSuggest()
 	local lastName = SUG.lastName
 	local semiLN = ";"..lastName
 	local long = #lastName > 2
-	wipe(preTable)
-	if t == "dr" and not overrideSoI then
-		for equiv, str in pairs(TMW.BE.dr) do
-			if 	(long and (
-					(strfind(strlowerCache[equiv], lastName)) or
-					(strfind(strlowerCache[L[equiv]], lastName)) or
-					((inputType == "string" and strfind(strlowerCache[EquivFullNameLookup[equiv]], semiLN)) or
-					(inputType == "number" and strfind(EquivFullIDLookup[equiv], semiLN))))
-			) or
-				(not long and (
-					(strfind(strlowerCache[equiv], atBeginning)) or
-					(strfind(strlowerCache[L[equiv]], atBeginning)))
-			) then
-				preTable[#preTable + 1] = equiv
-			end
-		end
-	elseif t == "cast" and not overrideSoI then
-		for equiv, str in pairs(TMW.BE.casts) do
-			if 	(long and (
-					(strfind(strlowerCache[equiv], lastName)) or
-					(strfind(strlowerCache[L[equiv]], lastName)) or
-					((inputType == "string" and strfind(strlowerCache[EquivFullNameLookup[equiv]], semiLN)) or
-					(inputType == "number" and strfind(EquivFullIDLookup[equiv], semiLN))))
-			) or
-				(not long and (
-					(strfind(strlowerCache[equiv], atBeginning)) or
-					(strfind(strlowerCache[L[equiv]], atBeginning)))
-			) then
-				preTable[#preTable + 1] = equiv
-			end
-		end
-	elseif t == "buff" and not overrideSoI then
-		for _, b in pairs(buffEquivs) do
-			for equiv, str in pairs(b) do
+	wipe(SUGpreTable)
+	if not overrideSoI then
+		for _, tbl in TMW:Vararg((t == "dr" and TMW.BE.dr) or (t == "cast" and TMW.BE.casts) or (t == "buff" and TMW.BE.buffs), (t == "buff" and TMW.BE.debuffs)) do
+			if not tbl then break end
+			for equiv in pairs(tbl) do
 				if 	(long and (
 						(strfind(strlowerCache[equiv], lastName)) or
 						(strfind(strlowerCache[L[equiv]], lastName)) or
@@ -3021,13 +2975,16 @@ function SUG:DoSuggest()
 						(strfind(strlowerCache[equiv], atBeginning)) or
 						(strfind(strlowerCache[L[equiv]], atBeginning)))
 				) then
-					preTable[#preTable + 1] = equiv
+					SUGpreTable[#SUGpreTable + 1] = equiv
 				end
 			end
 		end
-		for dispeltype in pairs(TMW.DS) do
-			if strfind(strlowerCache[dispeltype], atBeginning) or strfind(strlowerCache[L[dispeltype]], atBeginning)  then
-				preTable[#preTable + 1] = dispeltype
+		
+		if t == "buff" then
+			for dispeltype in pairs(TMW.DS) do
+				if strfind(strlowerCache[dispeltype], atBeginning) or strfind(strlowerCache[L[dispeltype]], atBeginning)  then
+					SUGpreTable[#SUGpreTable + 1] = dispeltype
+				end
 			end
 		end
 	end
@@ -3044,11 +3001,11 @@ function SUG:DoSuggest()
 	for id, name in pairs(tbl) do
 		if inputType == "number" then
 			if strfind(id, atBeginning) then
-				preTable[#preTable + 1] = id
+				SUGpreTable[#SUGpreTable + 1] = id
 			end
 		else
 			if strfind(name, atBeginning) then
-				preTable[#preTable + 1] = id
+				SUGpreTable[#SUGpreTable + 1] = id
 			end
 		end
 	end
@@ -3057,17 +3014,17 @@ function SUG:DoSuggest()
 end
 
 function SUG:SuggestingComplete(doSort)
-	SUG.offset = min(SUG.offset, max(0, #preTable-#SUG+1))
+	SUG.offset = min(SUG.offset, max(0, #SUGpreTable-#SUG+1))
 	local offset = SUG.offset
 	SUGSoI = SUG.overrideSoI or CI.SoI
 	SUGIMS = CI.IMS
 	if doSort then
-		sort(preTable, SUG.Sorter)
+		sort(SUGpreTable, SUG.Sorter)
 	end
 
 	local i = 1
 	while SUG[i] do
-		local id = preTable[i+offset]
+		local id = SUGpreTable[i+offset]
 		local f = SUG[i]
 		if id then
 			f.Background:SetVertexColor(0, 0, 0, 0)
@@ -3148,18 +3105,14 @@ function SUG:SuggestingComplete(doSort)
 					end
 				end
 			end
-			if miscprioritize[id] then -- override previous
-				f.Background:SetVertexColor(.58, .51, .79, 1)
-			else
-				local whoCasted = (SUGSoI == "spell") and SUG.AuraCache[id]
-				if whoCasted then
-					local r, g, b, a = f.Background:GetVertexColor()
-					if a < .5 then -- only if nothing else has colored the entry yet
-						if whoCasted == 1 then
-							f.Background:SetVertexColor(.78, .61, .43, 1) -- color known NPC auras warrior brown
-						elseif whoCasted == 2 then
-							f.Background:SetVertexColor(.79, .30, 1, 1) -- color known PLAYER auras a bright pink ish pruple ish color that is similar to paladin pink but has sufficient contrast for distinguishing
-						end
+			local whoCasted = (SUGSoI == "spell") and SUG.AuraCache[id]
+			if whoCasted then
+				local r, g, b, a = f.Background:GetVertexColor()
+				if a < .5 then -- only if nothing else has colored the entry yet
+					if whoCasted == 1 then
+						f.Background:SetVertexColor(.78, .61, .43, 1) -- color known NPC auras warrior brown
+					elseif whoCasted == 2 then
+						f.Background:SetVertexColor(.79, .30, 1, 1) -- color known PLAYER auras a bright pink ish pruple ish color that is similar to paladin pink but has sufficient contrast for distinguishing
 					end
 				end
 			end
@@ -3199,8 +3152,14 @@ function SUG:NameOnCursor(isClick)
 		SUG.endpos = SUG.Box:GetCursorPosition()
 	end
 
-	SUG.lastName = strsub(text, SUG.startpos, SUG.endpos)
-	SUG.lastName = strlower(TMW:CleanString(SUG.lastName))
+	SUG.lastName = TMW:CleanString(text:sub(SUG.startpos, SUG.endpos)):lower()
+	
+	if strfind(SUG.lastName, ":[%d:%s%.]*$") then
+		SUG.lastName, SUG.duration = SUG.lastName:match("(.-):([%d:%s%.]*)$")
+		SUG.duration = SUG.duration:trim(" :;.")
+	else
+		SUG.duration = nil
+	end
 
 	--disable pattern matches that will break/interfere, but dont do it for me because I will just manually escape things if they show up for whatever reason. I want them for debugging, blah blah blah
 	if not TMW.debug then
@@ -3244,21 +3203,29 @@ function SUG:OnClick()
 			firsthalf = strsub(currenttext, 0, start)
 		end
 		local lasthalf = strsub(currenttext, SUG.endpos+1)
-		local newtext = firsthalf .. "; " .. self.insert .. "; " .. lasthalf
+		
+		local addcolon = (SUG.duration or (Types[CI.t].DurationSyntax and not SUG.overrideSoI))
+		local insert = (addcolon and self.insert .. ": " .. (SUG.duration or "")) or self.insert
+		local newtext = firsthalf .. "; " .. insert .. "; " .. lasthalf
 		SUG.Box:SetText(TMW:CleanString(newtext))
-		SUG.Box:SetCursorPosition(SUG.endpos + (#tostring(self.insert) - #tostring(SUG.lastName)) + 2)
+		SUG.Box:SetCursorPosition(SUG.endpos + (#tostring(insert) - #tostring(SUG.lastName)))
+		
+		local offset = 0
 		if SUG.Box:GetCursorPosition() == SUG.Box:GetNumLetters() and not SUG.overrideSoI then -- if we are at the end of the exitbox then put a semicolon in anyway for convenience
-			SUG.Box:SetText(SUG.Box:GetText().. "; ")
-			SUG.Box:SetCursorPosition(SUG.Box:GetNumLetters())
+			SUG.Box:SetText(SUG.Box:GetText().. (addcolon and " " or "") .. "; ")
+			offset = 2 
 		elseif SUG.overrideSoI then
 			SUG.Box:ClearFocus()
+		end
+		if addcolon then
+			SUG.Box:SetCursorPosition(SUG.Box:GetCursorPosition() - offset)
 		end
 		SUG.Suggest:Hide()
 	end
 end
 
 function SUG:CacheItems()
-	if not doUpdateItemCache then return end
+	if not SUG.doUpdateItemCache then return end
 	for container = -2, NUM_BAG_SLOTS do
 		for slot = 1, GetContainerNumSlots(container) do
 			local id = GetContainerItemID(container, slot)
@@ -3275,11 +3242,11 @@ function SUG:CacheItems()
 	--		local
 		end
 	end
-	doUpdateItemCache = nil
+	SUG.doUpdateItemCache = nil
 end
 
 function SUG:CacheActions()
-	if not doUpdateActionCache then return end
+	if not SUG.doUpdateActionCache then return end
 	wipe(ActionCache)
 	for i=1, 120 do
 		local actionType, spellID = GetActionInfo(i)
@@ -3287,7 +3254,7 @@ function SUG:CacheActions()
 			ActionCache[spellID] = i
 		end
 	end
-	doUpdateActionCache = nil
+	SUG.doUpdateActionCache = nil
 end
 
 function SUG:BuildClassSpellLookup()
@@ -3386,7 +3353,7 @@ function CNDT:TypeMenu_DropDown()
 end
 
 function CNDT:UnitMenu_DropDown()
-	for k, v in pairs(IE.Data.Unit) do
+	for k, v in pairs(IE.Units) do
 		local info = UIDropDownMenu_CreateInfo()
 		info.func = function(self, frame)
 			frame:GetParent():SetText(v.value)

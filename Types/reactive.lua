@@ -24,7 +24,17 @@ local print = TMW.print
 local _, pclass = UnitClass("Player")
 local SpellTextures = TMW.SpellTextures
 
-local RelevantSettings = {
+
+local Type = TMW:RegisterIconType("reactive")
+Type.name = L["ICONMENU_REACTIVE"]
+Type.desc = L["ICONMENU_REACTIVE_DESC"]
+Type.WhenChecks = {
+	text = L["ICONMENU_SHOWWHEN"],
+	{ value = "alpha", 		text = L["ICONMENU_USABLE"], 			colorCode = "|cFF00FF00" },
+	{ value = "unalpha",  		text = L["ICONMENU_UNUSABLE"], 			colorCode = "|cFFFF0000" },
+	{ value = "always", 		text = L["ICONMENU_ALWAYS"] },
+}
+Type.RelevantSettings = {
 	Name = true,
 	ShowTimer = true,
 	ShowTimerText = true,
@@ -47,16 +57,6 @@ local RelevantSettings = {
 	UseActvtnOverlay = true,
 	IgnoreRunes = (pclass == "DEATHKNIGHT"),
 	FakeHidden = true,
-}
-
-local Type = TMW:RegisterIconType("reactive", RelevantSettings)
-Type.name = L["ICONMENU_REACTIVE"]
-Type.desc = L["ICONMENU_REACTIVE_DESC"]
-Type.WhenChecks = {
-	text = L["ICONMENU_SHOWWHEN"],
-	{ value = "alpha", 		text = L["ICONMENU_USABLE"], 			colorCode = "|cFF00FF00" },
-	{ value = "unalpha",  		text = L["ICONMENU_UNUSABLE"], 			colorCode = "|cFFFF0000" },
-	{ value = "always", 		text = L["ICONMENU_ALWAYS"] },
 }
 
 

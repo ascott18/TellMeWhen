@@ -26,26 +26,8 @@ local GetTotemInfo, GetSpellTexture =
 local print = TMW.print
 local strlowerCache = TMW.strlowerCache
 
-local RelevantSettings = {
-	Name = pclass ~= "DRUID" and pclass ~= "DEATHKNIGHT",
-	ShowTimer = true,
-	ShowTimerText = true,
-	ShowWhen = true,
-	ShowCBar = true,
-	CBarOffs = true,
-	InvertBars = true,
-	Alpha = true,
-	UnAlpha = true,
-	ConditionAlpha = true,
-	DurationMin = true,
-	DurationMax = true,
-	DurationMinEnabled = true,
-	DurationMaxEnabled = true,
-	TotemSlots = true,
-	FakeHidden = true,
-}
 
-local Type = TMW:RegisterIconType("totem", RelevantSettings)
+local Type = TMW:RegisterIconType("totem")
 Type.name = pclass == "DRUID" and L["ICONMENU_MUSHROOMS"] or pclass == "DEATHKNIGHT" and L["ICONMENU_GHOUL"] or L["ICONMENU_TOTEM"]
 if pclass == "SHAMAN" then
 	Type.TypeChecks = {
@@ -70,6 +52,24 @@ Type.WhenChecks = {
 	{ value = "alpha", 			text = L["ICONMENU_PRESENT"], 			colorCode = "|cFF00FF00" },
 	{ value = "unalpha", 		text = L["ICONMENU_ABSENT"], 			colorCode = "|cFFFF0000" },
 	{ value = "always", 		text = L["ICONMENU_ALWAYS"] },
+}
+Type.RelevantSettings = {
+	Name = pclass ~= "DRUID" and pclass ~= "DEATHKNIGHT",
+	ShowTimer = true,
+	ShowTimerText = true,
+	ShowWhen = true,
+	ShowCBar = true,
+	CBarOffs = true,
+	InvertBars = true,
+	Alpha = true,
+	UnAlpha = true,
+	ConditionAlpha = true,
+	DurationMin = true,
+	DurationMax = true,
+	DurationMinEnabled = true,
+	DurationMaxEnabled = true,
+	TotemSlots = true,
+	FakeHidden = true,
 }
 
 

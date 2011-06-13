@@ -31,7 +31,23 @@ local isNumber = setmetatable({}, {__index = function(t, i)
 	return o
 end})
 
-local RelevantSettings = {
+
+local Type = TMW:RegisterIconType("buff")
+Type.name = L["ICONMENU_BUFFDEBUFF"]
+Type.TypeChecks = {
+	text = L["ICONMENU_BUFFTYPE"],
+	setting = "BuffOrDebuff",
+	{ value = "HELPFUL", 		text = L["ICONMENU_BUFF"], 				colorCode = "|cFF00FF00" },
+	{ value = "HARMFUL", 		text = L["ICONMENU_DEBUFF"], 			colorCode = "|cFFFF0000" },
+	{ value = "EITHER", 		text = L["ICONMENU_BOTH"] },
+}
+Type.WhenChecks = {
+	text = L["ICONMENU_SHOWWHEN"],
+	{ value = "alpha", 			text = L["ICONMENU_PRESENT"], 			colorCode = "|cFF00FF00" },
+	{ value = "unalpha", 		text = L["ICONMENU_ABSENT"], 			colorCode = "|cFFFF0000" },
+	{ value = "always", 		text = L["ICONMENU_ALWAYS"] },
+}
+Type.RelevantSettings = {
 	Name = true,
 	ShowTimer = true,
 	ShowTimerText = true,
@@ -57,22 +73,6 @@ local RelevantSettings = {
 	DurationMinEnabled = true,
 	DurationMaxEnabled = true,
 	FakeHidden = true,
-}
-
-local Type = TMW:RegisterIconType("buff", RelevantSettings)
-Type.name = L["ICONMENU_BUFFDEBUFF"]
-Type.TypeChecks = {
-	text = L["ICONMENU_BUFFTYPE"],
-	setting = "BuffOrDebuff",
-	{ value = "HELPFUL", 		text = L["ICONMENU_BUFF"], 				colorCode = "|cFF00FF00" },
-	{ value = "HARMFUL", 		text = L["ICONMENU_DEBUFF"], 			colorCode = "|cFFFF0000" },
-	{ value = "EITHER", 		text = L["ICONMENU_BOTH"] },
-}
-Type.WhenChecks = {
-	text = L["ICONMENU_SHOWWHEN"],
-	{ value = "alpha", 			text = L["ICONMENU_PRESENT"], 			colorCode = "|cFF00FF00" },
-	{ value = "unalpha", 		text = L["ICONMENU_ABSENT"], 			colorCode = "|cFFFF0000" },
-	{ value = "always", 		text = L["ICONMENU_ALWAYS"] },
 }
 
 
