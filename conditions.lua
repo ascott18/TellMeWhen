@@ -372,6 +372,7 @@ Env = {
 	UnitGroupRolesAssigned = UnitGroupRolesAssigned,
 	GetNumRaidMembers = GetNumRaidMembers,
 	GetNumPartyMembers = GetNumPartyMembers,
+	GetRaidTargetIndex = GetRaidTargetIndex,
 	UnitIsEnemy = UnitIsEnemy,
 	UnitIsUnit = UnitIsUnit,
 	UnitReaction = UnitReaction,

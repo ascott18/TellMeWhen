@@ -3110,14 +3110,18 @@ end
 function TMW:CleanString(text)
 	text = strtrim(text, "; \t\r\n")-- remove all leading and trailing semicolons, spaces, tabs, and newlines
 	while strfind(text, "[^:] ;") do
-		text = gsub(text, "[^:] ;", "; ") -- remove all spaces followed by semicolons
+		text = gsub(text, "[^:] ;", "; ") -- remove all spaces before semicolons
 	end
-	while strfind(text, ";  ") do
-		text = gsub(text, ";  ", "; ") -- remove all double spaces between entries
+	while strfind(text, "; ") do
+		text = gsub(text, "; ", ";") -- remove all spaces after semicolons
 	end
 	while strfind(text, ";;") do
 		text = gsub(text, ";;", ";") -- remove all double semicolons
 	end
+	while strfind(text, ":  ") do
+		text = gsub(text, ":  ", ": ") -- remove all double spaces after colons (DONT REMOVE ALL DOUBLE SPACES, SOME SPELLS HAVE TYPO'd NAMES WITH 2 SPACES!)
+	end
+	text = gsub(text, ";", "; ") -- add spaces after all semicolons. Never used to do this, but it just looks so much better.
 	return text
 end
 

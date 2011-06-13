@@ -1979,7 +1979,7 @@
 										end
 									end
 									if s ~= "" then
-										TMW.IE:ShowHelp(TMW.L["HELP_MISSINGDURS"]:format(s), self, 0, 0)
+										TMW.IE:ShowHelp(TMW.L["HELP_MISSINGDURS"]:format(s, GetSpellInfo(1766)), self, 0, 0)
 									else
 										TMW.IE.Help:Hide()
 									end

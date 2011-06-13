@@ -574,7 +574,9 @@ L["HELP_MISSINGDURS"] = [[The following spells are missing durations:
 
 To add durations, use the following syntax:
 
-Spell One: 10; Spell Two: 24", and so on.]]
+Spell Name: Duration
+
+E.g. "%s: 10"]]
 
 
 L["TOPLEFT"] = "Top Left"
