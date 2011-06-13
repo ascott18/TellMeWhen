@@ -135,8 +135,9 @@ function Type:Setup(icon, groupID, iconID)
 	icon.NameDictionary = TMW:GetSpellNames(icon, icon.Name, nil, nil, 1)
 	icon.Durations = TMW:GetSpellDurations(icon, icon.Name)
 
-	icon.StartTime = icon.ICDDuration
-
+	icon.ICDStartTime = icon.ICDStartTime or 0
+	icon.ICDDuration = icon.ICDDuration or 0
+	
 	--[[ keep these events per icon isntead of global like unitcooldowns are so that ...
 	well i had a reason here but it didnt make sense when i came back and read it a while later. Just do it. I guess.]]
 	if icon.ICDType == "spellcast" then

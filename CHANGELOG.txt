@@ -1,17 +1,18 @@
 ===v4.4.0===
  * Dramatically changed the way that Unit Cooldown and Internal Cooldown icons handle durations. Durations are now defined per spell within an icon, instead of having the same duration for all spells within an icon. More information is available by choosing one of these types in-game.
  * Added some custom sounds.
+ * New debuff equivalency: Slowed
+ * The suggester now does its scan in about 30ms, down from about 200ms.
+ * Unit cooldown icons now listen for abilities that reset cooldowns and properly do so when they occur.
+ * Unit cooldown icons checking pvp trinkets should now show an actual pvp trinket texture.
  * New Conditions:
  ** Unit is Unit
  ** Unit Role
  ** Macro conditional
- * New debuff equivalency: Slowed
- * The suggester now does its scan in about 30ms, down from about 200ms. Sorting still sucks, though.
- * Unit cooldown icons now listen for abilities that reset cooldowns and properly do so when they occur.
- * Unit cooldown icons checking pvp trinkets should now show an actual pvp trinket texture
  * Bug Fixes:
  ** Groups that are anchored to frames that aren't created when their parent addon is loaded should now update their position once the frame that the group is anchored to is created.
  ** Buffs with one stack were not obeying stack conditionals. This has been fixed.
+ ** (r117) icd.lua:115: attempt to perform arithmetic on local "ICDStartTime" (a nil value)
  
 ===v4.3.0===
  * New icon type: Diminishing Returns. Guess what this one tracks?
