@@ -19,8 +19,8 @@ local L = TMW.L
 local db, UPD_INTV, ClockGCD, pr, ab, rc, mc
 local strlower, type =
 	  strlower, type
-local UnitGUID, UnitExists, GetSpellTexture =
-	  UnitGUID, UnitExists, GetSpellTexture
+local UnitGUID =
+	  UnitGUID
 local print = TMW.print
 local huge = math.huge
 local strlowerCache = TMW.strlowerCache
@@ -226,8 +226,9 @@ local function UnitCooldown_OnUpdate(icon, time)
 		for u = 1, #Units do
 			local unit = Units[u]
 			
-			if UnitExists(unit) then
-				local cooldowns = Cooldowns[UnitGUID(unit)]
+			local uguid = UnitGUID(unit)
+			if uguid then
+				local cooldowns = Cooldowns[uguid]
 				for i = 1, NAL do
 					local iName = NameArray[i]
 					if type(iName) == "string" then

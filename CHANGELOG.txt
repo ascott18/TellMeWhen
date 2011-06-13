@@ -13,9 +13,9 @@
  ** Groups that are anchored to frames that aren't created when their parent addon is loaded should now update their position once the frame that the group is anchored to is created.
  ** Buffs with one stack were not obeying stack conditionals. This has been fixed.
  ** (r117) icd.lua:115: attempt to perform arithmetic on local "ICDStartTime" (a nil value)
- ** (r118) (Conditions) attempt to call global "GetRaidTargetIndex" (a nil value)
- ** (r119) unitcooldown.lua:328: attempt to index upvalue "db" (a nil value)
- ** (r120) Fixed a bug that was causing unitcooldowns/icd icons that use spellIDs to not work.
+ ** (r118?) (Conditions) attempt to call global "GetRaidTargetIndex" (a nil value)
+ ** (r119?) unitcooldown.lua:328: attempt to index upvalue "db" (a nil value)
+ ** (r119) Fixed a bug that was causing unitcooldowns/icd icons that use spellIDs to not work.
  
 ===v4.3.0===
  * New icon type: Diminishing Returns. Guess what this one tracks?

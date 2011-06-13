@@ -101,7 +101,6 @@ local function DR_OnEvent(icon, _, _, p, ...)
 		if t == "DEBUFF" then
 			local ND = icon.NameDictionary
 			if ND[i] or ND[strlowerCache[n]] then
-				print(n)
 				if PvEDRs[i] or bitband(f, CL_PLAYER) == CL_PLAYER or bitband(f, CL_PET) == CL_PET then
 					local dr = icon[g]
 					if p == "SPELL_AURA_APPLIED" then

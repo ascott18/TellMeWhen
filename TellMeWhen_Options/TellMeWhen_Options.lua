@@ -2829,7 +2829,7 @@ function SUG:ACTIONBAR_SLOT_CHANGED()
 end
 
 function SUG:OnCommReceived(prefix, text, channel, who)
-	if TMW.debug then print(text, channel, who) end
+	print(text, channel, who)
 	if prefix ~= "TMWSUG" or who == UnitName("player") then return end
 	local success, arg1, arg2 = SUG:Deserialize(text)
 	if success then
@@ -3154,11 +3154,11 @@ function SUG:NameOnCursor(isClick)
 		SUG.endpos = SUG.Box:GetCursorPosition()
 	end
 
-	SUG.lastName = TMW:CleanString(text:sub(SUG.startpos, SUG.endpos)):lower()
+	SUG.lastName = strlower(TMW:CleanString(strsub(text, SUG.startpos, SUG.endpos)))
 	
 	if strfind(SUG.lastName, ":[%d:%s%.]*$") then
-		SUG.lastName, SUG.duration = SUG.lastName:match("(.-):([%d:%s%.]*)$")
-		SUG.duration = SUG.duration:trim(" :;.")
+		SUG.lastName, SUG.duration = strmatch(SUG.lastName, "(.-):([%d:%s%.]*)$")
+		SUG.duration = strtrim(SUG.duration, " :;.")
 	else
 		SUG.duration = nil
 	end
