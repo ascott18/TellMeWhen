@@ -19,8 +19,8 @@ local L = TMW.L
 local db, UPD_INTV, ClockGCD, pr, ab, rc, mc
 local strlower, bitband =
 	  strlower, bit.band
-local UnitGUID, UnitExists, GetSpellTexture =
-	  UnitGUID, UnitExists, GetSpellTexture
+local UnitGUID =
+	  UnitGUID
 local print = TMW.print
 local huge = math.huge
 local strlowerCache = TMW.strlowerCache
@@ -84,29 +84,6 @@ function Type:Update()
 	mc = db.profile.OOMColor
 end
 
-local SpellTextures = TMW.SpellTextures
-
-local function func(icon, g, i)
-	local dr = icon[g]
-	if not dr then
-		dr = {
-			amt = 50,
-			start = TMW.time,
-			duration = 18,
-			tex = SpellTextures[i]
-		}
-		icon[g] = dr
-	else
-		local amt = dr.amt
-		if amt ~= 0 then
-			dr.amt = amt > 25 and amt/2 or 0
-			dr.duration = 18
-			dr.start = TMW.time
-			dr.tex = SpellTextures[i]
-		end
-	end
-end
-
 local CL_PLAYER = COMBATLOG_OBJECT_TYPE_PLAYER
 local CL_PET = COMBATLOG_OBJECT_CONTROL_PLAYER
 
@@ -124,6 +101,7 @@ local function DR_OnEvent(icon, _, _, p, ...)
 		if t == "DEBUFF" then
 			local ND = icon.NameDictionary
 			if ND[i] or ND[strlowerCache[n]] then
+				print(n)
 				if PvEDRs[i] or bitband(f, CL_PLAYER) == CL_PLAYER or bitband(f, CL_PET) == CL_PET then
 					local dr = icon[g]
 					if p == "SPELL_AURA_APPLIED" then

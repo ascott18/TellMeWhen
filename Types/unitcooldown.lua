@@ -225,6 +225,7 @@ local function UnitCooldown_OnUpdate(icon, time)
 
 		for u = 1, #Units do
 			local unit = Units[u]
+			
 			if UnitExists(unit) then
 				local cooldowns = Cooldowns[UnitGUID(unit)]
 				for i = 1, NAL do
@@ -238,10 +239,11 @@ local function UnitCooldown_OnUpdate(icon, time)
 					else
 						_start = cooldowns[iName] or 0
 					end
-
+					
 					if _start then
 						local tms = time-_start -- Time Minus Start - time since the unit's last cast of the spell (not neccesarily the time it has been on cooldown)
 						local _d = (tms > Durations[i]) and 0 or tms -- real duration remaining on the cooldown
+
 						if Sort then
 							if _d ~= 0 then -- found an unusable cooldown
 								if (Sort == 1 and d < _d) or (Sort == -1 and d > _d) then -- the duration is lower or higher than the last duration that was going to be used
@@ -284,7 +286,6 @@ local function UnitCooldown_OnUpdate(icon, time)
 		if usename and Alpha > 0 then
 			icon:SetInfo(Alpha, 1, SpellTextures[usename] or "Interface\\Icons\\INV_Misc_PocketWatch_01", 0, 0)
 		elseif unname then
-			print(unduration)
 			icon:SetInfo(UnAlpha, (not icon.ShowTimer and Alpha ~= 0) and .5 or 1, SpellTextures[unname], unstart, unduration)
 		else
 			icon:SetAlpha(0)
@@ -325,10 +326,10 @@ end
 
 
 function Type:IE_TypeLoaded()
-	if not db.global.SeenNewDurSyntax then
+	if not TMW.db.global.SeenNewDurSyntax then
 		TMW.IE:ShowHelp(L["HELP_FIRSTUCD"]:format(GetSpellInfo(65547), GetSpellInfo(47528), GetSpellInfo(2139), GetSpellInfo(62618), GetSpellInfo(62618)) 
 		, TMW.IE.Main.Type, 20, 0)
-		db.global.SeenNewDurSyntax = 1
+		TMW.db.global.SeenNewDurSyntax = 1
 	end
 end
 

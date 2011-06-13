@@ -1588,6 +1588,7 @@ function IE:ShowHelp(text, frame, x, y)
 	IE.Help:SetPoint("TOPRIGHT", frame, "LEFT", (x or 0) - 30, (y or 0) + 28)
 	IE.Help.text:SetText(text)
 	IE.Help:SetHeight(IE.Help.text:GetHeight() + 38)
+	IE.Help:SetParent(frame)
 	IE.Help:Show()
 end
 
@@ -1631,12 +1632,7 @@ function IE:Equiv_DropDown()
 	equivSorted = equivSorted and wipe(equivSorted) or {}
 	if (UIDROPDOWNMENU_MENU_LEVEL == 2) then
 		if TMW.BE[UIDROPDOWNMENU_MENU_VALUE] then
-			for k in pairs(TMW.BE[UIDROPDOWNMENU_MENU_VALUE]) do
-				equivSorted[#equivSorted + 1] = k
-			end
-			sort(equivSorted, equivSorter)
-			for _, k in ipairs(equivSorted) do
-				local v = TMW.BE[UIDROPDOWNMENU_MENU_VALUE][k]
+			for k, v in TMW:OrderedPairs(TMW.BE[UIDROPDOWNMENU_MENU_VALUE], equivSorter) do
 				local info = UIDropDownMenu_CreateInfo()
 				info.func = IE.Equiv_DropDown_OnClick
 				info.text = L[k]
@@ -1657,11 +1653,7 @@ function IE:Equiv_DropDown()
 				UIDropDownMenu_AddButton(info, 2)
 			end
 		elseif UIDROPDOWNMENU_MENU_VALUE == "dispel" then
-			for k in pairs(TMW.DS) do
-				equivSorted[#equivSorted + 1] = k
-			end
-			sort(equivSorted, equivSorter)
-			for _, k in ipairs(equivSorted) do
+			for k, v in TMW:OrderedPairs(TMW.DS) do
 				local v = TMW.DS[k]
 				local info = UIDropDownMenu_CreateInfo()
 				info.func = IE.Equiv_DropDown_OnClick
@@ -1737,7 +1729,7 @@ function IE:Type_DropDown()
 	info.notCheckable = true
 	UIDropDownMenu_AddButton(info)
 
-	for _, Type in ipairs(TMW.OrderedTypes) do
+	for _, Type in ipairs(TMW.OrderedTypes) do -- order in the order in which they are loaded in the .toc file
 		if not Type.hidden then
 			local info = UIDropDownMenu_CreateInfo()
 			info.text = Type.nameOverride or Type.name
@@ -1931,7 +1923,8 @@ function IE:Copy_DropDown()
 			UIDropDownMenu_AddButton(info, UIDROPDOWNMENU_MENU_LEVEL)
 		end
 
-		for profilename, profiletable in pairs(db.profiles) do
+		for profilename, profiletable in TMW:OrderedPairs(db.profiles) do
+			local profiletable = db.profiles[profilename]
 			if not (profilename == current or profilename == "Default") then
 				info = UIDropDownMenu_CreateInfo()
 				info.text = profilename
@@ -1963,6 +1956,11 @@ function IE:Copy_DropDown()
 				info.tooltipOnButton = true
 				info.notCheckable = true
 				info.icon = TMW:GuessIconTexture(tbl)
+				info.tCoordLeft = 0.07
+				info.tCoordRight = 0.93
+				info.tCoordTop = 0.07
+				info.tCoordBottom = 0.93
+				
 				info.func = function(self)
 					CloseDropDownMenus()
 					local groupID, iconID = CI.g, CI.i
@@ -1987,7 +1985,7 @@ function IE:Copy_DropDown()
 			end
 			return
 		end
-		for g, v in pairs(db.profiles[UIDROPDOWNMENU_MENU_VALUE].Groups) do
+		for g, v in TMW:OrderedPairs(db.profiles[UIDROPDOWNMENU_MENU_VALUE].Groups) do
 			if g <= (tonumber(db.profiles[UIDROPDOWNMENU_MENU_VALUE].NumGroups) or 10) then
 				info = UIDropDownMenu_CreateInfo()
 				info.text = TMW:GetGroupName(db.profiles[UIDROPDOWNMENU_MENU_VALUE].Groups[g].Name, g)
@@ -2051,10 +2049,10 @@ function IE:Copy_DropDown()
 			info.isTitle = true
 			info.notCheckable = true
 			UIDropDownMenu_AddButton(info, UIDROPDOWNMENU_MENU_LEVEL)
-			for i, d in pairs(db.profiles[n].Groups[g].Icons) do
+			for i, d in TMW:OrderedPairs(db.profiles[n].Groups[g].Icons) do
 				local nsettings = 0
 				for icondatakey, icondatadata in pairs(d) do
-					if type(icondatadata) == "table" then if #icondatadata ~= 0 then nsettings = nsettings + 1 end
+					if type(icondatadata) == "table" then if next(icondatadata) then nsettings = nsettings + 1 end
 					elseif TMW.Icon_Defaults[icondatakey] ~= icondatadata then
 						nsettings = nsettings + 1
 					end
@@ -2075,6 +2073,10 @@ function IE:Copy_DropDown()
 					info.tooltipText = tooltipText
 					info.tooltipOnButton = true
 					info.icon = tex
+					info.tCoordLeft = 0.07
+					info.tCoordRight = 0.93
+					info.tCoordTop = 0.07
+					info.tCoordBottom = 0.93
 					info.notCheckable = true
 					info.func = function()
 						CloseDropDownMenus()

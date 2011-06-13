@@ -32,7 +32,7 @@ local DRData = LibStub("DRData-1.0", true)
 TELLMEWHEN_VERSION = "4.4.0"
 TELLMEWHEN_VERSION_MINOR = strmatch(" @project-version@", " r%d+") or ""
 TELLMEWHEN_VERSION_FULL = TELLMEWHEN_VERSION .. TELLMEWHEN_VERSION_MINOR
-TELLMEWHEN_VERSIONNUMBER = 44004 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
+TELLMEWHEN_VERSIONNUMBER = 44007 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
 if TELLMEWHEN_VERSIONNUMBER > 45000 or TELLMEWHEN_VERSIONNUMBER < 44000 then error("YOU SCREWED UP THE VERSION NUMBER OR DIDNT CHANGE THE SAFETY LIMITS") return end -- safety check because i accidentally made the version number 414069 once
 
 TELLMEWHEN_MAXGROUPS = 1 	--this is a default, used by SetTheory (addon), so dont rename
@@ -249,7 +249,61 @@ do -- Iterators
 			end
 			return iter
 		end
+	end
 
+	do -- ordered pairs
+
+		local tables = {}
+		local unused = {}
+		
+		local function sorter(a, b)
+			local ta, tb = type(a), type(b)
+			if ta ~= tb then
+				return ta < tb
+			elseif ta == "number" and tb == "number"
+				or ta == "string" and tb == "string" then
+				return a < b
+			elseif ta == "boolean" and tb == "boolean" then
+				return a == true
+			else
+				return tostring(a) < tostring(b)
+			end
+		end
+
+		local function next(t, state)
+			if state == nil then
+			
+				local key = tables[t][1]
+				return key, t[key]
+			end
+			
+			local key
+			for i = 1, #tables[t] do
+				if tables[t][i] == state then
+					key = tables[t][i+1]
+					break
+				end
+			end
+
+			if key then
+				return key, t[key]
+			end
+
+			unused[#unused+1] = wipe(tables[t])
+			tables[t] = nil
+			return
+		end
+
+		function TMW:OrderedPairs(t, func)
+			local orderedIndex = tremove(unused) or {}
+			for key in pairs(t) do
+				orderedIndex[#orderedIndex + 1] = key
+			end
+			sort(orderedIndex, func or sorter)
+			tables[t] = orderedIndex
+			
+			return next, t
+		end
 	end
 end
 
@@ -2287,7 +2341,7 @@ local function SetInfo(icon, alpha, color, texture, start, duration, checkGCD, p
 		(d > 0 and ((icon.DurationMinEnabled and icon.DurationMin > d) or (icon.DurationMaxEnabled and d > icon.DurationMax))) or
 		(count and ((icon.StackMinEnabled and icon.StackMin > count) or (icon.StackMaxEnabled and count > icon.StackMax)))
 	then
-		alpha = min(alpha, icon.ConditionAlpha)
+		alpha = alpha ~= 0 and icon.ConditionAlpha or alpha
 	end
 
 	if texture ~= nil and icon.__tex ~= texture then -- do this before events are processed because some text outputs use icon.__tex
@@ -2934,7 +2988,8 @@ function TMW:GetSpellNames(icon, setting, firstOnly, toname, dictionary, keepDur
 	-- REMOVE DUPLICATES
 	local k = #buffNames --start at the end of the table so that we dont remove duplicates at the beginning of the table
 	while k > 0 do
-		if select(2, tContains(buffNames, buffNames[k], true)) > 1 then
+		local first, num = tContains(buffNames, buffNames[k], true)
+		if num > 1 then
 			tremove(buffNames, k) --if the current value occurs more than once then remove this entry of it
 		else
 			k = k - 1 --there are no duplicates, so move backwards towards zero
@@ -2946,6 +3001,7 @@ function TMW:GetSpellNames(icon, setting, firstOnly, toname, dictionary, keepDur
 		for k, buffName in pairs(buffNames) do
 			if strfind(buffName, ":[%d:%s%.]*$") then
 				buffNames[k] = strmatch(buffName, "(.-):[%d:%s%.]*$")
+				buffNames[k] = tonumber(buffNames[k]) or buffNames[k] -- turn it into a number if it is one
 			end
 		end
 	end
