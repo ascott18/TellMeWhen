@@ -39,7 +39,7 @@ L["CHOOSENAME_DIALOG_ICD_DESC"] = "Enter the internal cooldown length or the dur
 L["CHOOSENAME_DIALOG_UCD_DESC"] = "Enter the cooldown length of the spell(s) that you want to track."
 
 L["ICONMENU_ALPHA"] = "Transparency"
-L["CONDITIONALPHA"] = "Conditions/Duration/Stacks"
+L["CONDITIONALPHA"] = "Condition/Duration/Stacks"
 L["CONDITIONALPHA_DESC"] = "This will be used when conditions fail, or if the duration or stack requirements are not met."
 L["ICONMENU_TYPE"] = "Icon type"
 L["ICONMENU_COOLDOWN"] = "Cooldown"
@@ -435,6 +435,7 @@ L["REACTIVECNDT_DESC"] = "This condition only checks the reactive state of the a
 L["BUFFCNDT_DESC"] = "Only the first spell will be checked, all others will be ignored. Spells entered as IDs will not be forced to have their ID match an aura found; only the name will have to match."
 L["CNDT_ONLYFIRST"] = "Only the first spell/item will be checked - semicolon-delimited lists are not valid for this condition type."
 
+L["CNDTCAT_FREQUENTLYUSED"] = "Frequently Used"
 L["CNDTCAT_SPELLSABILITIES"] = "Abilities/Items/Buffs/etc."
 L["CNDTCAT_STATUS"] = "Attributes/Status"
 L["CNDTCAT_STATS"] = "Combat Statistics"
@@ -537,7 +538,9 @@ L["SOUND_CUSTOM"] = "Custom sound file"
 L["SOUND_CUSTOM_DESC"] = [[Insert the path to a custom sound to play. Here are some examples, where "file" is the name of your sound, and "ext" is the file's extension (ogg or mp3 only!):
 
 - "CustomSounds\file.ext": a file placed in a new folder named "CustomSounds" that is in WoW's root directory (the same location as Wow.exe, Interface and WTF folders, etc)
+
 - "Interface\AddOns\file.ext": a loose file in the AddOns folder
+
 - "file.ext": a loose file in WoW's root directory ]]
 L["SOUND_TAB"] = "Sounds"
 L["SOUND_USEMASTER"] = "Always play sounds"

@@ -60,8 +60,7 @@ hooksecurefunc(TMW, "OnInitialize", function()
 end)
 
 local test
-test = function()
-	if true then return end -- toggle this on and off here
+--[[test = function()
 	test = nil
 	print("|cffffffffRUNNING CONDITION TESTS")
 	local icon = CreateFrame("Button", "TESTICON")
@@ -81,7 +80,7 @@ test = function()
 	if #CNDT.Types ~= n then
 		error("you screwed up the value field somewhere")
 	end
-end
+end]]
 
 local classes = {
 	"DEATHKNIGHT",

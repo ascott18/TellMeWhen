@@ -78,7 +78,7 @@ TMW.CI = setmetatable({}, {__index = function(tbl, k)
 		-- take no chances with errors occuring here
 		return approachTable(TMW.db, "profile", "Groups", tbl.g, "Icons", tbl.i)
 	elseif k == "SoI" then -- spell or item
-		local ics = TMW.CI.ics
+		local ics = tbl.ics
 		if ics and ics.Type == "cooldown" and ics.CooldownType == "item" then
 			return "item"
 		end
@@ -88,7 +88,6 @@ TMW.CI = setmetatable({}, {__index = function(tbl, k)
 		return ics and ics.Type == "cooldown" and ics.CooldownType == "multistate"
 	end
 end}) local CI = TMW.CI		--current icon
-local clientVersion = select(4, GetBuildInfo())
 
 function TMW:CopyWithMetatable(settings)
 	local copy = {}
@@ -1420,7 +1419,7 @@ function IE:ShowHide()
 	if not t then return end
 
 	for k, v in pairs(IE.Checks) do
-		if (Types[t] and Types[t].RelevantSettings[k]) or Types.all.RelevantSettings[k] then
+		if Types[t].RelevantSettings[k] then
 			IE.Main[k]:Show()
 			if IE.Main[k].SetEnabled then
 				IE.Main[k]:SetEnabled(1)
@@ -1549,9 +1548,11 @@ function IE:Load(isRefresh)
 	if CI.t == "" then
 		UIDropDownMenu_SetText(IE.Main.Type, L["ICONMENU_TYPE"])
 	else
-		local Type = TMW.Types[CI.t]
+		local Type = rawget(TMW.Types, CI.t)
 		if Type then
 			UIDropDownMenu_SetText(IE.Main.Type, Type.name)
+		else
+			UIDropDownMenu_SetText(IE.Main.Type, "UNKNOWN TYPE: " .. CI.t)
 		end
 	end
 
@@ -1979,7 +1980,7 @@ function IE:Copy_DropDown()
 
 					IE:ScheduleIconUpdate(groupID, iconID)
 					IE:Load(1)
-					db.profile.HasImported = true
+					db.global.HasImported = true
 				end
 				UIDropDownMenu_AddButton(info, UIDROPDOWNMENU_MENU_LEVEL)
 			end
@@ -2135,13 +2136,13 @@ function IE:GetRealNames()
 	local tbl
 	local BEbackup = TMW.BE
 	TMW.BE = TMW.OldBE -- the level of hackyness here is sickening. Note that OldBE does not contain the enrage equiv (intended so we dont flood the tooltip)
-	-- by passing false in for arg3 (firstOnly), it creates a unique cache string and therefore a unique cache - nessecary because we arent using the real TMW.BE
+	-- by passing false in for arg3 (firstOnly), it creates a unique cache string and therefore a unique cache value - nessecary because we arent using the real TMW.BE
 	if CI.SoI == "item" then
 		tbl = TMW:GetItemIDs(nil, text, false)
 	else
 		tbl = TMW:GetSpellNames(nil, text, false)
 	end
-	local durations = TMW:GetSpellDurations(nil, text)
+	local durations = Types[CI.t].DurationSyntax and TMW:GetSpellDurations(nil, text) -- needs to happen before unhacking
 	TMW.BE = BEbackup -- unhack
 
 	local str = ""
@@ -2667,107 +2668,108 @@ function SUG:OnInitialize()
 
 	SUG:PLAYER_ENTERING_WORLD()
 
+	local _, _, _, clientVersion = GetBuildInfo()
 	if TMWOptDB.IncompleteCache or not TMWOptDB.WoWVersion or TMWOptDB.WoWVersion < clientVersion then
-	local didrunhook
-	TellMeWhen_IconEditor:HookScript("OnShow", function()
-		if didrunhook then return end
-		TMWOptDB.IncompleteCache = true
-		SUG.NumCachePerFrame = 0 -- 0 is actually 1. Yeah, i know, its lame. I'm lazy.
+		local didrunhook
+		TellMeWhen_IconEditor:HookScript("OnShow", function()
+			if didrunhook then return end
+			TMWOptDB.IncompleteCache = true
+			SUG.NumCachePerFrame = 0 -- 0 is actually 1. Yeah, i know, its lame. I'm lazy.
 
-		local Blacklist = {
-			["Interface\\Icons\\Trade_Alchemy"] = true,
-			["Interface\\Icons\\Trade_BlackSmithing"] = true,
-			["Interface\\Icons\\Trade_BrewPoison"] = true,
-			["Interface\\Icons\\Trade_Engineering"] = true,
-			["Interface\\Icons\\Trade_Engraving"] = true,
-			["Interface\\Icons\\Trade_Fishing"] = true,
-			["Interface\\Icons\\Trade_Herbalism"] = true,
-			["Interface\\Icons\\Trade_LeatherWorking"] = true,
-			["Interface\\Icons\\Trade_Mining"] = true,
-			["Interface\\Icons\\Trade_Tailoring"] = true,
-			["Interface\\Icons\\INV_Inscription_Tradeskill01"] = true,
-			["Interface\\Icons\\Temp"] = true,
-		}
-		local index, spellsFailed = 0, 0
-		TMWOptDB.CacheLength = TMWOptDB.CacheLength or 100000
-		SUG.Suggest.Status:Show()
-		SUG.Suggest.Status.texture:SetTexture(LSM:Fetch("statusbar", db.profile.TextureName))
-		SUG.Suggest.Status:SetMinMaxValues(1, TMWOptDB.CacheLength)
-		SUG.Suggest.Speed:Show()
-		if TMWOptDB.WoWVersion and TMWOptDB.WoWVersion < clientVersion then
-			wipe(SUG.SpellCache)
-			wipe(SUG.CastCache)
-		elseif TMWOptDB.IncompleteCache then
-			for id in pairs(SUG.SpellCache) do
-				index = max(index, id)
-			end
-		end
-		TMWOptDB.WoWVersion = clientVersion
-
-		local Parser = CreateFrame("GameTooltip", "TMWSUGParser", TMW, "GameTooltipTemplate")
-		local f = CreateFrame("Frame")
-		local function SpellCacher()
-			for id = index, index + SUG.NumCachePerFrame do
-				SUG.Suggest.Status:SetValue(id)
-				if spellsFailed < 1000 then
-					local name, rank, icon, _, _, _, castTime = GetSpellInfo(id)
-					if name then
-						name = strlower(name)
-						if
-							not Blacklist[icon] and
-							not strfind(name, "dnd") and
-							not strfind(name, "test") and
-							not strfind(name, "debug") and
-							not strfind(name, "bunny") and
-							not strfind(name, "visual") and
-							not strfind(name, "trigger") and
-							not strfind(name, "[%[%%%+%?]") and -- no brackets, plus signs, percent signs, or question marks
-							not strfind(name, "quest") and
-							not strfind(name, "vehicle") and
-							not strfind(name, "event") and
-							not strfind(name, ":%s?%d") and
-							not strfind(name, "camera")
-						then
-							GameTooltip_SetDefaultAnchor(Parser, UIParent)
-							Parser:SetSpellByID(id)
-							local r, g, b = TMWSUGParserTextLeft1:GetTextColor()
-							if g > .95 and r > .95 and b > .95 then
-								SUG.SpellCache[id] = name
-								if TMWSUGParserTextLeft2:GetText() == SPELL_CAST_CHANNELED or TMWSUGParserTextLeft3:GetText() == SPELL_CAST_CHANNELED or castTime > 0 then
-									SUG.CastCache[id] = name
-								end
-							end
-							Parser:Hide()
-							spellsFailed = 0
-						end
-					else
-						spellsFailed = spellsFailed + 1
-					end
-				else
-					TMWOptDB.IncompleteCache = false
-					TMWOptDB.CacheLength = id
-					f:SetScript("OnUpdate", nil)
-					SUG.Suggest.Speed:Hide()
-					SUG.Suggest.Status:Hide()
-
-					SUG.IsCaching = nil
-					SUG.SpellCache[1852] = nil -- GM spell named silenced, interferes with equiv
-					SUG.SpellCache[71216] = nil -- enraged
-					if SUG.onCompleteCache then
-						SUG.onCompleteCache = nil
-						TMW.SUG.redoIfSame = 1
-						SUG:NameOnCursor()
-					end
-					collectgarbage()
-					return
+			local Blacklist = {
+				["Interface\\Icons\\Trade_Alchemy"] = true,
+				["Interface\\Icons\\Trade_BlackSmithing"] = true,
+				["Interface\\Icons\\Trade_BrewPoison"] = true,
+				["Interface\\Icons\\Trade_Engineering"] = true,
+				["Interface\\Icons\\Trade_Engraving"] = true,
+				["Interface\\Icons\\Trade_Fishing"] = true,
+				["Interface\\Icons\\Trade_Herbalism"] = true,
+				["Interface\\Icons\\Trade_LeatherWorking"] = true,
+				["Interface\\Icons\\Trade_Mining"] = true,
+				["Interface\\Icons\\Trade_Tailoring"] = true,
+				["Interface\\Icons\\INV_Inscription_Tradeskill01"] = true,
+				["Interface\\Icons\\Temp"] = true,
+			}
+			local index, spellsFailed = 0, 0
+			TMWOptDB.CacheLength = TMWOptDB.CacheLength or 100000
+			SUG.Suggest.Status:Show()
+			SUG.Suggest.Status.texture:SetTexture(LSM:Fetch("statusbar", db.profile.TextureName))
+			SUG.Suggest.Status:SetMinMaxValues(1, TMWOptDB.CacheLength)
+			SUG.Suggest.Speed:Show()
+			if TMWOptDB.WoWVersion and TMWOptDB.WoWVersion < clientVersion then
+				wipe(SUG.SpellCache)
+				wipe(SUG.CastCache)
+			elseif TMWOptDB.IncompleteCache then
+				for id in pairs(SUG.SpellCache) do
+					index = max(index, id)
 				end
 			end
-			index = index + 1 + SUG.NumCachePerFrame
-		end
-		f:SetScript("OnUpdate", SpellCacher)
-		SUG.IsCaching = true
-		didrunhook = true
-	end)
+			TMWOptDB.WoWVersion = clientVersion
+
+			local Parser = CreateFrame("GameTooltip", "TMWSUGParser", TMW, "GameTooltipTemplate")
+			local f = CreateFrame("Frame")
+			local function SpellCacher()
+				for id = index, index + SUG.NumCachePerFrame do
+					SUG.Suggest.Status:SetValue(id)
+					if spellsFailed < 1000 then
+						local name, rank, icon, _, _, _, castTime = GetSpellInfo(id)
+						if name then
+							name = strlower(name)
+							if
+								not Blacklist[icon] and
+								not strfind(name, "dnd") and
+								not strfind(name, "test") and
+								not strfind(name, "debug") and
+								not strfind(name, "bunny") and
+								not strfind(name, "visual") and
+								not strfind(name, "trigger") and
+								not strfind(name, "[%[%%%+%?]") and -- no brackets, plus signs, percent signs, or question marks
+								not strfind(name, "quest") and
+								not strfind(name, "vehicle") and
+								not strfind(name, "event") and
+								not strfind(name, ":%s?%d") and
+								not strfind(name, "camera")
+							then
+								GameTooltip_SetDefaultAnchor(Parser, UIParent)
+								Parser:SetSpellByID(id)
+								local r, g, b = TMWSUGParserTextLeft1:GetTextColor()
+								if g > .95 and r > .95 and b > .95 then
+									SUG.SpellCache[id] = name
+									if TMWSUGParserTextLeft2:GetText() == SPELL_CAST_CHANNELED or TMWSUGParserTextLeft3:GetText() == SPELL_CAST_CHANNELED or castTime > 0 then
+										SUG.CastCache[id] = name
+									end
+								end
+								Parser:Hide()
+								spellsFailed = 0
+							end
+						else
+							spellsFailed = spellsFailed + 1
+						end
+					else
+						TMWOptDB.IncompleteCache = false
+						TMWOptDB.CacheLength = id
+						f:SetScript("OnUpdate", nil)
+						SUG.Suggest.Speed:Hide()
+						SUG.Suggest.Status:Hide()
+
+						SUG.IsCaching = nil
+						SUG.SpellCache[1852] = nil -- GM spell named silenced, interferes with equiv
+						SUG.SpellCache[71216] = nil -- enraged
+						if SUG.onCompleteCache then
+							SUG.onCompleteCache = nil
+							TMW.SUG.redoIfSame = 1
+							SUG:NameOnCursor()
+						end
+						collectgarbage()
+						return
+					end
+				end
+				index = index + 1 + SUG.NumCachePerFrame
+			end
+			f:SetScript("OnUpdate", SpellCacher)
+			SUG.IsCaching = true
+			didrunhook = true
+		end)
 	end
 end
 
@@ -3295,9 +3297,9 @@ end
 CNDT = TMW.CNDT
 
 function CNDT:TypeMenuOnClick(frame, data)
-	UIDropDownMenu_SetSelectedValue(frame, self.value)
-	UIDropDownMenu_SetText(frame, data.text)
-	local group = frame:GetParent()
+	UIDropDownMenu_SetSelectedValue(UIDROPDOWNMENU_OPEN_MENU, self.value)
+	UIDropDownMenu_SetText(UIDROPDOWNMENU_OPEN_MENU, data.text)
+	local group = UIDROPDOWNMENU_OPEN_MENU:GetParent()
 	local showval = CNDT:TypeCheck(group, data)
 	CNDT:SetSliderMinMax(group)
 	if showval then
@@ -3309,10 +3311,85 @@ function CNDT:TypeMenuOnClick(frame, data)
 	CloseDropDownMenus()
 end
 
-local addedcategories = {}
+local addedThings = {}
+local usedCount = {}
+local commonConditions = {
+	"COMBAT",
+	"VEHICLE",
+	"HEALTH",
+	"DEFAULT",
+	"STANCE",
+}
+
+local function AddConditionToDropDown(v)
+	if v.hidden then return end
+	local info = UIDropDownMenu_CreateInfo()
+	info.func = CNDT.TypeMenuOnClick
+	info.text = v.text
+	info.tooltipTitle = v.text
+	info.tooltipText = v.tooltip
+	info.tooltipOnButton = true
+	info.value = v.value
+	info.arg1 = frame
+	info.arg2 = v
+	if type(v.icon) == "function" then
+		info.icon = v.icon()
+	else
+		info.icon = v.icon
+	end
+	if v.tcoords then
+		info.tCoordLeft = v.tcoords[1]
+		info.tCoordRight = v.tcoords[2]
+		info.tCoordTop = v.tcoords[3]
+		info.tCoordBottom = v.tcoords[4]
+	end
+	UIDropDownMenu_AddButton(info, UIDROPDOWNMENU_MENU_LEVEL)
+end
+
 function CNDT:TypeMenu_DropDown()
-	wipe(addedcategories)
-	for k, v in pairs(CNDT.Types) do
+	if UIDROPDOWNMENU_MENU_LEVEL == 1 then
+		wipe(usedCount)
+		for ics in TMW:InIconSettings() do
+			for k, condition in pairs(ics.Conditions) do
+				usedCount[condition.Type] = (usedCount[condition.Type] or 0) + 1
+			end
+		end
+		
+		local info = UIDropDownMenu_CreateInfo()
+		info.text = L["CNDTCAT_FREQUENTLYUSED"]
+		info.value = "FREQ"
+		info.notCheckable = true
+		info.hasArrow = true
+		UIDropDownMenu_AddButton(info, UIDROPDOWNMENU_MENU_LEVEL)
+		
+		local info = UIDropDownMenu_CreateInfo()
+		info.text = ""
+		info.isTitle = true
+		info.notCheckable = true
+		UIDropDownMenu_AddButton(info, UIDROPDOWNMENU_MENU_LEVEL)
+	end
+	
+	if UIDROPDOWNMENU_MENU_LEVEL == 2 and UIDROPDOWNMENU_MENU_VALUE == "FREQ" then
+		local num = 0
+		wipe(addedThings)
+		for _, k in ipairs(commonConditions) do
+			AddConditionToDropDown(CNDT.ConditionsByType[k])
+			addedThings[k] = 1
+			num = num + 1
+			if num > 20 then break end
+		end
+		for k, n in TMW:OrderedPairs(usedCount, "values", true) do
+			if not addedThings[k] then
+				AddConditionToDropDown(CNDT.ConditionsByType[k])
+				addedThings[k] = 1
+				num = num + 1
+				if num > 20 then break end
+			end
+		end
+	end
+	
+	wipe(addedThings)
+	for k, v in ipairs(CNDT.Types) do
 		if ((UIDROPDOWNMENU_MENU_LEVEL == 2 and v.category == UIDROPDOWNMENU_MENU_VALUE) or (UIDROPDOWNMENU_MENU_LEVEL == 1 and not v.category)) and not v.hidden then
 			if v.spacebefore then
 				local info = UIDropDownMenu_CreateInfo()
@@ -3321,34 +3398,15 @@ function CNDT:TypeMenu_DropDown()
 				info.notCheckable = true
 				UIDropDownMenu_AddButton(info, UIDROPDOWNMENU_MENU_LEVEL)
 			end
-			local info = UIDropDownMenu_CreateInfo()
-			info.func = CNDT.TypeMenuOnClick
-			info.text = v.text
-			info.tooltipTitle = v.text
-			info.tooltipText = v.tooltip
-			info.tooltipOnButton = true
-			info.value = v.value
-			info.arg1 = self
-			info.arg2 = v
-			if type(v.icon) == "function" then
-				info.icon = v.icon()
-			else
-				info.icon = v.icon
-			end
-			if v.tcoords then
-				info.tCoordLeft = v.tcoords[1]
-				info.tCoordRight = v.tcoords[2]
-				info.tCoordTop = v.tcoords[3]
-				info.tCoordBottom = v.tcoords[4]
-			end
-			UIDropDownMenu_AddButton(info, UIDROPDOWNMENU_MENU_LEVEL)
-		elseif UIDROPDOWNMENU_MENU_LEVEL == 1 and v.category and not addedcategories[v.category] then
+			
+			AddConditionToDropDown(v)
+		elseif UIDROPDOWNMENU_MENU_LEVEL == 1 and v.category and not addedThings[v.category] then
 			local info = UIDropDownMenu_CreateInfo()
 			info.text = v.category
 			info.value = v.category
 			info.notCheckable = true
 			info.hasArrow = true
-			addedcategories[v.category] = true
+			addedThings[v.category] = true
 			UIDropDownMenu_AddButton(info, UIDROPDOWNMENU_MENU_LEVEL)
 		end
 	end

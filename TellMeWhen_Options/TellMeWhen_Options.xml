@@ -316,19 +316,24 @@
 			<OnValueChanged>
 				_G[self:GetName() .. "Val"]:SetText(self:GetValue() .. "%")
 				local groupID, iconID = TMW.CI.g, TMW.CI.i
-				if TMW.db then
-					TMW.db.profile.Groups[groupID].Icons[iconID][self.setting] = self:GetValue() / 100
+				if TMW.CI.ics and not self.fakeNextSetValue then
+					TMW.CI.ics[self.setting] = self:GetValue() / 100
 					TMW.IE:ScheduleIconUpdate(groupID, iconID)
 				end
 			</OnValueChanged>
 			<OnLoad>
 				self:EnableMouseWheel(true)
+				TMW.print("KJDFKJDKFJKDJFKKDFJKDJF", self.setting)
 			</OnLoad>
 			<OnEnable>
 				self:SetAlpha(1)
+				self:SetValue(TMW.CI.ics[self.setting]*100)
 			</OnEnable>
 			<OnDisable>
 				self:SetAlpha(0.4)
+				self.fakeNextSetValue = 1
+				self:SetValue(0)
+				self.fakeNextSetValue = nil
 			</OnDisable>
 			<OnMouseWheel>
 				self:SetValue(self:GetValue()+delta)
@@ -1592,7 +1597,6 @@
 	</Button>
 
 	
-	
 	<Frame name="TellMeWhen_IconEditor" hidden="true" movable="true" enableMouse="true" frameStrata="DIALOG">
 		<Anchors>
 			<Anchor point="CENTER" relativeTo="UIParent">
@@ -1707,7 +1711,6 @@
 					</OnLoad>
 				</Scripts>
 			</Frame>
-			
 			
 			<Frame name="$parentSuggest" parentKey="Suggest" hidden="true" enableMouse="true">
 				<Size x="220"/>
@@ -1951,10 +1954,12 @@
 								if not self.isOver then return end
 								GameTooltip:Hide()
 								GameTooltip_SetDefaultAnchor(GameTooltip, self)
+								GameTooltip:AddLine(self.TTtitle, HIGHLIGHT_FONT_COLOR.r, HIGHLIGHT_FONT_COLOR.g, HIGHLIGHT_FONT_COLOR.b, 1)
 								if IsModifierKeyDown() then
+								--	GameTooltip:AddLine(self.TTtitle, HIGHLIGHT_FONT_COLOR.r, HIGHLIGHT_FONT_COLOR.g, HIGHLIGHT_FONT_COLOR.b, 1)
 									GameTooltip:AddLine(TMW.IE:GetRealNames(self), NORMAL_FONT_COLOR.r, NORMAL_FONT_COLOR.g, NORMAL_FONT_COLOR.b, 1)
 								else
-									GameTooltip:AddLine(self.TTtitle, HIGHLIGHT_FONT_COLOR.r, HIGHLIGHT_FONT_COLOR.g, HIGHLIGHT_FONT_COLOR.b, 1)
+								--	GameTooltip:AddLine(self.TTtitle, HIGHLIGHT_FONT_COLOR.r, HIGHLIGHT_FONT_COLOR.g, HIGHLIGHT_FONT_COLOR.b, 1)
 									GameTooltip:AddLine(self.TTtext, NORMAL_FONT_COLOR.r, NORMAL_FONT_COLOR.g, NORMAL_FONT_COLOR.b, 1)
 								end
 								GameTooltip:Show()
@@ -1970,7 +1975,7 @@
 								self:GetScript("OnTextChanged")(self)
 								TMW.SUG.Suggest:Hide()
 								
-								if TMW.Types[TMW.CI.t].DurationSyntax then
+								if TMW.CI.t and TMW.Types[TMW.CI.t].DurationSyntax then
 									local s = ""
 									local array = TMW:GetSpellNames(nil, self:GetText())
 									for k, v in pairs(TMW:GetSpellDurations(nil, self:GetText())) do
@@ -3195,6 +3200,7 @@
 								</Anchors>
 								<Scripts>
 									<OnLoad>
+										self.wrapTooltips = 1
 										_G[self:GetName() .. "Left"]:Hide()
 										_G[self:GetName() .. "Middle"]:Hide()
 										_G[self:GetName() .. "Right"]:Hide()

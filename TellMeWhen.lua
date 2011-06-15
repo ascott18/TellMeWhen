@@ -32,7 +32,7 @@ local DRData = LibStub("DRData-1.0", true)
 TELLMEWHEN_VERSION = "4.4.0"
 TELLMEWHEN_VERSION_MINOR = strmatch(" @project-version@", " r%d+") or ""
 TELLMEWHEN_VERSION_FULL = TELLMEWHEN_VERSION .. TELLMEWHEN_VERSION_MINOR
-TELLMEWHEN_VERSIONNUMBER = 44008 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
+TELLMEWHEN_VERSIONNUMBER = 44009 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
 if TELLMEWHEN_VERSIONNUMBER > 45000 or TELLMEWHEN_VERSIONNUMBER < 44000 then error("YOU SCREWED UP THE VERSION NUMBER OR DIDNT CHANGE THE SAFETY LIMITS") return end -- safety check because i accidentally made the version number 414069 once
 
 TELLMEWHEN_MAXGROUPS = 1 	--this is a default, used by SetTheory (addon), so dont rename
@@ -152,7 +152,7 @@ do -- Iterators
 					--if there is another icon and the group is valid but the icon settings dont exist, move to the next icon
 					ci = ci + 1
 				elseif cg <= mg and (ci > mi or not rawget(db.profile.Groups, cg)) then
-					-- if there is another group and either the icon exceeds the max or the group has no settings, move to the next group
+					-- if there is another group and either the icon exceeds the max or the group has no settings, move to the first icon of the next group
 					cg = cg + 1
 					ci = 1
 				elseif cg > mg then
@@ -256,16 +256,32 @@ do -- Iterators
 		local tables = {}
 		local unused = {}
 		
+		local sortByValues, reverse
 		local function sorter(a, b)
+			if sortByValues then
+				a, b = sortByValues[a], sortByValues[b]
+			end
 			local ta, tb = type(a), type(b)
 			if ta ~= tb then
+				if reverse then
+					return ta > tb
+				end
 				return ta < tb
 			elseif ta == "number" and tb == "number"
 				or ta == "string" and tb == "string" then
+				if reverse then
+					return a > b
+				end
 				return a < b
 			elseif ta == "boolean" and tb == "boolean" then
+				if reverse then
+					return b == true
+				end
 				return a == true
 			else
+				if reverse then
+					return tostring(a) > tostring(b)
+				end
 				return tostring(a) < tostring(b)
 			end
 		end
@@ -294,10 +310,17 @@ do -- Iterators
 			return
 		end
 
-		function TMW:OrderedPairs(t, func)
+		function TMW:OrderedPairs(t, func, rev)
 			local orderedIndex = tremove(unused) or {}
 			for key in pairs(t) do
 				orderedIndex[#orderedIndex + 1] = key
+			end
+			reverse = rev
+			if func == "values" then
+				func = sorter
+				sortByValues = t
+			else
+				sortByValues = nil
 			end
 			sort(orderedIndex, func or sorter)
 			tables[t] = orderedIndex
@@ -307,15 +330,13 @@ do -- Iterators
 	end
 end
 
+local RelevantToAll = {
+	Enabled = true,
+	Type = true,
+	Events = true,
+	Conditions = true,
+}
 TMW.Types = {
-	all = {
-		RelevantSettings = {
-			Enabled = true,
-			Type = true,
-			Events = true,
-			Conditions = true,
-		},
-	},
 	[""] = {
 		Setup = function(Type, icon)
 			if icon.Name ~= "" then
@@ -323,6 +344,7 @@ TMW.Types = {
 			else
 				icon:SetTexture(nil)
 			end
+			icon:SetAlpha(0)
 		end,
 		Update = function() end,
 		HideBars = true,
@@ -331,175 +353,178 @@ TMW.Types = {
 		},
 	},
 }
+for k, v in pairs(RelevantToAll) do
+	TMW.Types[""].RelevantSettings[k] = v
+end
+setmetatable(TMW.Types, {
+	__index = function() return TMW.Types[""] end
+})
 
 TMW.Defaults = {
-profile = {
---	Version 	= 	TELLMEWHEN_VERSIONNUMBER,  -- DO NOT DEFINE VERSION AS A DEFAULT, OTHERWISE WE CANT TRACK IF A USER HAS AN OLD VERSION BECAUSE IT WILL ALWAYS DEFAULT TO THE LATEST
-	Locked 		= 	false,
-	NumGroups	=	1,
-	Interval	=	UPD_INTV,
-	EffThreshold=	15,
-	CDCOColor 	= 	{r=0, g=1, b=0, a=1},
-	CDSTColor 	= 	{r=1, g=0, b=0, a=1},
-	PRESENTColor=	{r=1, g=1, b=1, a=1},
-	ABSENTColor	=	{r=1, g=0.35, b=0.35, a=1},
-	OORColor	=	{r=0.5, g=0.5, b=0.5, a=1},
-	OOMColor	=	{r=0.5, g=0.5, b=0.5, a=1},
-	TextureName = 	"Blizzard",
-	DrawEdge	=	false,
-	TestOn 		= 	false, -- not used anymore, just here to keep SV file cleaner
-	HasImported	=	false,
-	MasterSound	=	false,
-	ReceiveComm	=	true,
-	WarnInvalids=	true,
-	BarGCD		=	true,
-	ClockGCD	=	true,
-	WpnEnchDurs	=	{
-		["*"] = 0,
-	},
-	EditorScale	=	0.9,
-	CheckOrder	=	-1,
-	Groups 		= 	{
-		[1] = {
-			Enabled			= true,
+	global = {
+		WpnEnchDurs	=	{
+			["*"] = 0,
 		},
-		["**"] = {
-			Enabled			= false,
-			Locked			= false,
-			Name			= "",
-			Scale			= 2.0,
-			Level			= 10,
-			Rows			= 1,
-			Columns			= 4,
-			Spacing			= 0,
-			CheckOrder		= -1,
-			PrimarySpec		= true,
-			SecondarySpec	= true,
-			Tree1			= true,
-			Tree2			= true,
-			Tree3			= true,
-			Point = {
-				point = "CENTER",
-				relativeTo = "UIParent",
-				relativePoint = "CENTER",
-				x = 0,
-				y = 0,
+		SeenNewDurSyntax = false,
+		HasImported	=	false,
+	},
+	profile = {
+	--	Version 	= 	TELLMEWHEN_VERSIONNUMBER,  -- DO NOT DEFINE VERSION AS A DEFAULT, OTHERWISE WE CANT TRACK IF A USER HAS AN OLD VERSION BECAUSE IT WILL ALWAYS DEFAULT TO THE LATEST
+		Locked 		= 	false,
+		NumGroups	=	1,
+		Interval	=	UPD_INTV,
+		EffThreshold=	15,
+		CDCOColor 	= 	{r=0, g=1, b=0, a=1},
+		CDSTColor 	= 	{r=1, g=0, b=0, a=1},
+		PRESENTColor=	{r=1, g=1, b=1, a=1},
+		ABSENTColor	=	{r=1, g=0.35, b=0.35, a=1},
+		OORColor	=	{r=0.5, g=0.5, b=0.5, a=1},
+		OOMColor	=	{r=0.5, g=0.5, b=0.5, a=1},
+		TextureName = 	"Blizzard",
+		DrawEdge	=	false,
+		MasterSound	=	false,
+		ReceiveComm	=	true,
+		WarnInvalids=	true,
+		BarGCD		=	true,
+		ClockGCD	=	true,
+		EditorScale	=	0.9,
+		CheckOrder	=	-1,
+		Groups 		= 	{
+			[1] = {
+				Enabled			= true,
 			},
-			LBF	= {
-				Gloss = 0,
-				Colors = {},
-				Backdrop = false,
-				SkinID = "Blizzard",
-			},
-			Font = {
-				Name = "Arial Narrow",
-				Size = 12,
-				Outline = "THICKOUTLINE",
-				x = -2,
-				y = 2,
-				OverrideLBFPos = false,
-			},
-			--[[Colors = { -- not going to implement this unless people actually want it.
-				CCO = 	{r=0,	g=1,	b=0		},	-- cooldown bar complete
-				CST = 	{r=1,	g=0,	b=0		},	-- cooldown bar start
-				OOR	=	{r=0.5,	g=0.5,	b=0.5	},	-- out of range
-				OOM	=	{r=0.5,	g=0.5,	b=0.5	},	-- out of mana
+			["**"] = {
+				Enabled			= false,
+				Locked			= false,
+				Name			= "",
+				Scale			= 2.0,
+				Level			= 10,
+				Rows			= 1,
+				Columns			= 4,
+				Spacing			= 0,
+				CheckOrder		= -1,
+				PrimarySpec		= true,
+				SecondarySpec	= true,
+				Tree1			= true,
+				Tree2			= true,
+				Tree3			= true,
+				Point = {
+					point = "CENTER",
+					relativeTo = "UIParent",
+					relativePoint = "CENTER",
+					x = 0,
+					y = 0,
+				},
+				LBF	= {
+					Gloss = 0,
+					Colors = {},
+					Backdrop = false,
+					SkinID = "Blizzard",
+				},
+				Font = {
+					Name = "Arial Narrow",
+					Size = 12,
+					Outline = "THICKOUTLINE",
+					x = -2,
+					y = 2,
+					OverrideLBFPos = false,
+				},
+				--[[Colors = { -- not going to implement this unless people actually want it.
+					CCO = 	{r=0,	g=1,	b=0		},	-- cooldown bar complete
+					CST = 	{r=1,	g=0,	b=0		},	-- cooldown bar start
+					OOR	=	{r=0.5,	g=0.5,	b=0.5	},	-- out of range
+					OOM	=	{r=0.5,	g=0.5,	b=0.5	},	-- out of mana
 
-				PTA	=	{r=1,	g=1,	b=1		},	-- presnt/usable with timer always
-				POA	=	{r=1,	g=1,	b=1		},	-- presnt/usable withOUT timer always
-				PTS	=	{r=1,	g=1,	b=1		},	-- presnt/usable with timer somtimes
-				POS	=	{r=1,	g=1,	b=1		},	-- presnt/usable withOUT timer somtimes
+					PTA	=	{r=1,	g=1,	b=1		},	-- presnt/usable with timer always
+					POA	=	{r=1,	g=1,	b=1		},	-- presnt/usable withOUT timer always
+					PTS	=	{r=1,	g=1,	b=1		},	-- presnt/usable with timer somtimes
+					POS	=	{r=1,	g=1,	b=1		},	-- presnt/usable withOUT timer somtimes
 
-				ATA	=	{r=1,	g=1,	b=1		},	-- absent/unusable with timer always
-				AOA	=	{r=1,	g=1,	b=1		},	-- absent/unusable withOUT timer always
-				ATS	=	{r=1,	g=1,	b=1		},	-- absent/unusable with timer somtimes
-				AOS	=	{r=1,	g=1,	b=1		},	-- absent/unusable withOUT timer somtimes
-			},]]
-			Icons = {
-				["**"] = {
-					BuffOrDebuff		= "HELPFUL",
-					ShowWhen			= "alpha",
-					CooldownType		= "spell",
-					Enabled				= false,
-					Name				= "",
-					OnlyMine			= false,
-					ShowTimer			= false,
-					ShowTimerText		= true,
-					ShowPBar			= false,
-					ShowCBar			= false,
-					PBarOffs			= 0,
-					CBarOffs			= 0,
-					InvertBars			= false,
-					Type				= "",
-					Unit				= "player",
-					WpnEnchantType		= "MainHandSlot",
-					Icons				= {},
-					Alpha				= 1,
-					UnAlpha				= 1,
-					ConditionAlpha		= 0,
-					RangeCheck			= false,
-					ManaCheck			= false,
-					CooldownCheck		= false,
-					IgnoreRunes			= false,
-				--	StackAlpha			= 0,
-					StackMin			= 0,
-					StackMax			= 0,
-					StackMinEnabled		= false,
-					StackMaxEnabled		= false,
-					DurationMin			= 0,
-					DurationMax			= 0,
-					DurationMinEnabled	= false,
-					DurationMaxEnabled	= false,
-				--	DurationAlpha		= 0,
-					FakeHidden			= false,
-					HideUnequipped		= false,
-					Interruptible		= false,
-					ICDType				= "aura",
-					CheckNext			= false,
-					DontRefresh			= false,
-					UseActvtnOverlay	= false,
-					OnlyEquipped		= false,
-					EnableStacks		= false,
-					OnlyInBags			= false,
-					OnlySeen			= false,
-					TotemSlots			= "1111",
-					Events = {
-						["**"] = {
-							Sound = "None",
-							Text = "",
-							Channel = "",
-							Location = "",
-							Sticky = false,
-							Icon = true,
-							r = 1,
-							g = 1,
-							b = 1,
-							Size = 0,
+					ATA	=	{r=1,	g=1,	b=1		},	-- absent/unusable with timer always
+					AOA	=	{r=1,	g=1,	b=1		},	-- absent/unusable withOUT timer always
+					ATS	=	{r=1,	g=1,	b=1		},	-- absent/unusable with timer somtimes
+					AOS	=	{r=1,	g=1,	b=1		},	-- absent/unusable withOUT timer somtimes
+				},]]
+				Icons = {
+					["**"] = {
+						BuffOrDebuff		= "HELPFUL",
+						ShowWhen			= "alpha",
+						CooldownType		= "spell",
+						Enabled				= false,
+						Name				= "",
+						OnlyMine			= false,
+						ShowTimer			= false,
+						ShowTimerText		= true,
+						ShowPBar			= false,
+						ShowCBar			= false,
+						PBarOffs			= 0,
+						CBarOffs			= 0,
+						InvertBars			= false,
+						Type				= "",
+						Unit				= "player",
+						WpnEnchantType		= "MainHandSlot",
+						Icons				= {},
+						Alpha				= 1,
+						UnAlpha				= 1,
+						ConditionAlpha		= 0,
+						RangeCheck			= false,
+						ManaCheck			= false,
+						CooldownCheck		= false,
+						IgnoreRunes			= false,
+						StackMin			= 0,
+						StackMax			= 0,
+						StackMinEnabled		= false,
+						StackMaxEnabled		= false,
+						DurationMin			= 0,
+						DurationMax			= 0,
+						DurationMinEnabled	= false,
+						DurationMaxEnabled	= false,
+						FakeHidden			= false,
+						HideUnequipped		= false,
+						Interruptible		= false,
+						ICDType				= "aura",
+						CheckNext			= false,
+						DontRefresh			= false,
+						UseActvtnOverlay	= false,
+						OnlyEquipped		= false,
+						EnableStacks		= false,
+						OnlyInBags			= false,
+						OnlySeen			= false,
+						TotemSlots			= "1111",
+						Events = {
+							["**"] = {
+								Sound = "None",
+								Text = "",
+								Channel = "",
+								Location = "",
+								Sticky = false,
+								Icon = true,
+								r = 1,
+								g = 1,
+								b = 1,
+								Size = 0,
+							},
 						},
-					},
-					Conditions = {
-						["**"] = {
-							AndOr = "AND",
-							Type = "HEALTH",
-							Icon = "",
-							Operator = "==",
-							Level = 0,
-							Unit = "player",
-							Name = "",
-							PrtsBefore = 0,
-							PrtsAfter = 0,
-							Checked = false,
-							Runes = {},
+						Conditions = {
+							["**"] = {
+								AndOr = "AND",
+								Type = "HEALTH",
+								Icon = "",
+								Operator = "==",
+								Level = 0,
+								Unit = "player",
+								Name = "",
+								PrtsBefore = 0,
+								PrtsAfter = 0,
+								Checked = false,
+								Runes = {},
+							},
 						},
 					},
 				},
 			},
 		},
 	},
-},
-global = {
-	SeenNewDurSyntax = false,
-}
 }
 TMW.Group_Defaults = TMW.Defaults.profile.Groups["**"]
 TMW.Icon_Defaults = TMW.Group_Defaults.Icons["**"]
@@ -1007,7 +1032,7 @@ function TMW:OnCommReceived(prefix, text, channel, who)
 		TMW.Recieved = TMW.Recieved or {}
 		TMW.Recieved[text] = who or true
 		if who then
-			if db.profile.HasImported then
+			if db.global.HasImported then
 				TMW:Printf(L["MESSAGERECIEVE_SHORT"], who)
 			else
 				TMW:Printf(L["MESSAGERECIEVE"], who)
@@ -1142,6 +1167,17 @@ local upgradeTable
 function TMW:GetUpgradeTable() -- upgrade functions
 	if upgradeTable then return upgradeTable end
 	local t = {
+		[44009] = {
+			global = function()
+				if type(db.profile.WpnEnchDurs) == "table" then
+					for k, v in pairs(db.profile.WpnEnchDurs) do
+						db.global.WpnEnchDurs[k] = max(db.global.WpnEnchDurs[k] or 0, v)
+					end
+					db.profile.WpnEnchDurs = nil
+				end
+				db.profile.HasImported = nil
+			end,
+		},
 		[44003] = {
 			icon = function(ics)
 				if ics.Type == "unitcooldown" or ics.Type == "icd" then
@@ -2341,7 +2377,7 @@ local function SetInfo(icon, alpha, color, texture, start, duration, checkGCD, p
 		(d > 0 and ((icon.DurationMinEnabled and icon.DurationMin > d) or (icon.DurationMaxEnabled and d > icon.DurationMax))) or
 		(count and ((icon.StackMinEnabled and icon.StackMin > count) or (icon.StackMaxEnabled and count > icon.StackMax)))
 	then
-		alpha = alpha ~= 0 and icon.ConditionAlpha or alpha
+		alpha = alpha ~= 0 and icon.ConditionAlpha or 0
 	end
 
 	if texture ~= nil and icon.__tex ~= texture then -- do this before events are processed because some text outputs use icon.__tex
@@ -2548,8 +2584,17 @@ local IconMetamethods = {
 
 
 function TMW:RegisterIconType(Type)
-	local t = CreateFrame("Frame")
-	if TMW.Types[Type] and TMW.debug then
+	local t = setmetatable({}, {
+		__newindex = function(t, k, v)
+			if k == "RelevantSettings" then
+				for setting in pairs(RelevantToAll) do
+					v[setting] = true
+				end
+			end
+			rawset(t, k, v)
+		end
+	})
+	if rawget(TMW.Types, Type) and TMW.debug then
 		-- for tweaking and recreating icon types inside of WowLua .. too lazy to change the type string each time.
 		Type = Type .. " - " .. date("%X")
 		t.nameOverride = Type
@@ -2653,6 +2698,7 @@ function TMW:Icon_Update(icon)
 	local iconID = icon:GetID()
 	local groupID = icon.group:GetID()
 	local group = icon.group
+	local ics = db.profile.Groups[groupID].Icons[iconID]
 
 	local dontreassign
 	if not runEvents then
@@ -2667,13 +2713,8 @@ function TMW:Icon_Update(icon)
 		icon[k] = nil --lets clear any settings that might get left behind.
 	end
 
-	for k in pairs(TMW.Types.all.RelevantSettings) do
-		icon[k] = db.profile.Groups[groupID].Icons[iconID][k]
-	end
-	if TMW.Types[icon.Type] then
-		for k in pairs(TMW.Types[icon.Type].RelevantSettings) do
-			icon[k] = db.profile.Groups[groupID].Icons[iconID][k]
-		end
+	for k in pairs(TMW.Types[ics.Type].RelevantSettings) do
+		icon[k] = ics[k]
 	end
 
 	local dontremove
@@ -2806,19 +2847,10 @@ function TMW:Icon_Update(icon)
 	
 	TMW.time = GetTime()
 	if icon.Enabled or not Locked then
-		if TMW.Types[icon.Type] then
-			TMW.Types[icon.Type]:Update()
-			local success, err = pcall(TMW.Types[icon.Type].Setup, TMW.Types[icon.Type], icon, groupID, iconID)
-			if not success then
-				geterrorhandler()(L["GROUPICON"]:format(groupID, iconID) .. ": " .. err)
-			end
-		else
-			if icon.Name ~= "" then
-				icon:SetTexture("Interface\\Icons\\INV_Misc_QuestionMark")
-			else
-				icon:SetTexture(nil)
-			end
-			icon:SetAlpha(0)
+		TMW.Types[icon.Type]:Update()
+		local success, err = pcall(TMW.Types[icon.Type].Setup, TMW.Types[icon.Type], icon, groupID, iconID)
+		if not success then
+			geterrorhandler()(L["GROUPICON"]:format(groupID, iconID) .. ": " .. err)
 		end
 	else
 		icon:SetAlpha(0)

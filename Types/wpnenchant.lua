@@ -91,7 +91,7 @@ function Type:Update()
 	db = TMW.db
 	UPD_INTV = db.profile.Interval
 	ClockGCD = db.profile.ClockGCD
-	WpnEnchDurs = db.profile.WpnEnchDurs
+	WpnEnchDurs = db.global.WpnEnchDurs
 	pr = db.profile.PRESENTColor
 	ab = db.profile.ABSENTColor
 	rc = db.profile.OORColor
