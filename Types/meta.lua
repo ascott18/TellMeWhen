@@ -3,6 +3,7 @@
 -- Originally by Nephthys of Hyjal <lieandswell@yahoo.com>
 
 -- Other contributions by
+-- Sweetmms of Blackrock
 -- Oozebull of Twisting Nether
 -- Banjankri of Blackrock
 -- Predeter of Proudmoore
@@ -32,7 +33,7 @@ Type.desc = L["ICONMENU_META_DESC"]
 Type.RelevantSettings = {
 	Icons = true,
 	CheckNext = true,
---	ConditionAlpha = true, TODO:implement conditionalpha for metas
+--	ConditionAlpha = true, TODO:implement conditionalpha for metas (problem is the icon editor UI)
 }
 
 function Type:Update()

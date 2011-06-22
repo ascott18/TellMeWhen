@@ -3,6 +3,7 @@
 -- Originally by Nephthys of Hyjal <lieandswell@yahoo.com>
 
 -- Other contributions by
+-- Sweetmms of Blackrock
 -- Oozebull of Twisting Nether
 -- Banjankri of Blackrock
 -- Predeter of Proudmoore

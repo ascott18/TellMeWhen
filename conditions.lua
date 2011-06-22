@@ -398,6 +398,7 @@ Env = {
 	IsItemInRange = IsItemInRange,
 	GetCurrencyInfo = GetCurrencyInfo,
 	SecureCmdOptionParse = SecureCmdOptionParse,
+	GetSpellAutocast = GetSpellAutocast,
 
 	AuraStacks = AuraStacks,
 	AuraDur = AuraDur,
@@ -999,6 +1000,22 @@ CNDT.Types = {
 		icon = function() return select(4, GetTalentTabInfo(1)) end,
 		tcoords = standardtcoords,
 		funcstr = [[CurrentTree c.Operator c.Level]],
+	},
+	
+	{ -- autocast
+		text = L["CONDITIONPANEL_AUTOCAST"],
+		category = L["CNDTCAT_STATUS"],
+		value = "AUTOCAST",
+		min = 0,
+		max = 1,
+		texttable = bool,
+		nooperator = true,
+		unit = PET,
+		name = function(editbox) TMW:TT(editbox, "CONDITIONPANEL_AUTOCAST", "CNDT_ONLYFIRST", nil, nil, 1) editbox.label = L["SPELLTOCHECK"] end,
+		useSUG = true,
+		icon = "Interface\\Icons\\ability_physical_taunt",
+		tcoords = standardtcoords,
+		funcstr = [[select(2, GetSpellAutocast(c.NameName)) == c.1nil]],
 	},
 
 

@@ -3,6 +3,7 @@
 -- Originally by Nephthys of Hyjal <lieandswell@yahoo.com>
 
 -- Other contributions by
+-- Sweetmms of Blackrock
 -- Oozebull of Twisting Nether
 -- Banjankri of Blackrock
 -- Predeter of Proudmoore
@@ -827,6 +828,7 @@ function TMW:Group_ResetPosition(groupID)
 	for k, v in pairs(TMW.Group_Defaults.Point) do
 		db.profile.Groups[groupID].Point[k] = v
 	end
+	db.profile.Groups[groupID].Scale = 1
 	LibStub("AceConfigRegistry-3.0"):NotifyChange("TellMeWhen Options")
 	TMW:Group_Update(groupID)
 end

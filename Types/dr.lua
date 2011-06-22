@@ -3,6 +3,7 @@
 -- Originally by Nephthys of Hyjal <lieandswell@yahoo.com>
 
 -- Other contributions by
+-- Sweetmms of Blackrock
 -- Oozebull of Twisting Nether
 -- Banjankri of Blackrock
 -- Predeter of Proudmoore
@@ -90,24 +91,26 @@ local CL_PET = COMBATLOG_OBJECT_CONTROL_PLAYER
 local DR_OnEvent
 local function DR_OnEvent(icon, _, _, p, ...)
 	if p == "SPELL_AURA_REMOVED" or p == "SPELL_AURA_REFRESH" or p == "SPELL_AURA_APPLIED" then
-		local g, f, i, n, t, _
+		local g, d, f, i, n, t, _
 		if clientVersion >= 40200 then
-			_, _, _, _, _, g, _, f, _, i, n, _, t = ...
+			_, _, _, _, _, g, d, f, _, i, n, _, t = ...
 		elseif clientVersion >= 40100 then
-			_, _, _, _, g, _, f, i, n, _, t = ...
+			_, _, _, _, g, d, f, i, n, _, t = ...
 		else
-			_, _, _, g, _, f, i, n, _, t = ...
+			_, _, _, g, d, f, i, n, _, t = ...
 		end
 		if t == "DEBUFF" then
 			local ND = icon.NameDictionary
 			if ND[i] or ND[strlowerCache[n]] then
-				if PvEDRs[i] or bitband(f, CL_PLAYER) == CL_PLAYER or bitband(f, CL_PET) == CL_PET then
+				if true then -- if PvEDRs[i] or bitband(f, CL_PLAYER) == CL_PLAYER or bitband(f, CL_PET) == CL_PET then
 					local dr = icon[g]
+					local _, _, _, _, _, dur = UnitDebuff(d, n)
 					if p == "SPELL_AURA_APPLIED" then
 						if dr and dr.start + dr.duration <= TMW.time then
 							dr.start = 0
 							dr.duration = 0
 							dr.amt = 100
+							dr.dur = dur
 						end
 					else
 						if not dr then
@@ -115,16 +118,22 @@ local function DR_OnEvent(icon, _, _, p, ...)
 								amt = 50,
 								start = TMW.time,
 								duration = 18,
-								tex = SpellTextures[i]
+								tex = SpellTextures[i],
+								dur = dur,
 							}
 							icon[g] = dr
 						else
 							local amt = dr.amt
-							if amt ~= 0 then
+							print(dur, dr.dur)
+							if amt ~= 0 and dur ~= dr.dur > 1 then
+								print("REDUCED", p, i, n)
 								dr.amt = amt > 25 and amt/2 or 0
 								dr.duration = 18
 								dr.start = TMW.time
 								dr.tex = SpellTextures[i]
+								dr.dur = dur
+							else
+								print("NOREDUCED", p, i, n)
 							end
 						end
 					end

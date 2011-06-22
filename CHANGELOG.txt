@@ -1,3 +1,6 @@
+===v4.4.1===
+ * New Condition: Spell autocasting
+
 ===v4.4.0===
  * Dramatically changed the way that Unit Cooldown and Internal Cooldown icons handle durations. Durations are now defined per spell within an icon, instead of having the same duration for all spells within an icon. More information is available by choosing one of these types in-game.
  * Added some custom sounds.
