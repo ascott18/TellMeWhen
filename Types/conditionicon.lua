@@ -5,6 +5,7 @@
 -- Other contributions by
 -- Sweetmms of Blackrock
 -- Oozebull of Twisting Nether
+-- Oodyboo of Mug'thol
 -- Banjankri of Blackrock
 -- Predeter of Proudmoore
 -- Xenyr of Aszune
@@ -57,8 +58,8 @@ function Type:Setup(icon, groupID, iconID)
 
 	if icon.Name == "" then
 		icon:SetTexture("Interface\\Icons\\INV_Misc_QuestionMark")
-	elseif GetSpellTexture(icon.NameFirst) then
-		icon:SetTexture(GetSpellTexture(icon.NameFirst))
+	elseif TMW.SpellTextures[icon.NameFirst] then
+		icon:SetTexture(TMW.SpellTextures[icon.NameFirst])
 	else
 		icon:SetTexture(icon.Name)
 		if not icon.texture:GetTexture() then

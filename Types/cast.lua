@@ -5,6 +5,7 @@
 -- Other contributions by
 -- Sweetmms of Blackrock
 -- Oozebull of Twisting Nether
+-- Oodyboo of Mug'thol
 -- Banjankri of Blackrock
 -- Predeter of Proudmoore
 -- Xenyr of Aszune
@@ -105,13 +106,7 @@ function Type:Setup(icon, groupID, iconID)
 	icon.NameNameDictionary = TMW:GetSpellNames(icon, icon.Name, nil, 1, 1)
 	icon.Units = TMW:GetUnits(icon, icon.Unit)
 
-	if icon.Name == "" then
-		icon:SetTexture("Interface\\Icons\\Temp")
-	elseif GetSpellTexture(icon.NameFirst) then
-		icon:SetTexture(GetSpellTexture(icon.NameFirst))
-	elseif TMW:DoSetTexture(icon) then
-		icon:SetTexture("Interface\\Icons\\Temp")
-	end
+	icon:SetTexture(TMW:GetConfigIconTexture(icon))
 
 	icon.ShowPBar = false
 	icon:SetScript("OnUpdate", Cast_OnUpdate)

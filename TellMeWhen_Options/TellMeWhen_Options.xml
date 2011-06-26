@@ -1956,10 +1956,8 @@
 								GameTooltip_SetDefaultAnchor(GameTooltip, self)
 								GameTooltip:AddLine(self.TTtitle, HIGHLIGHT_FONT_COLOR.r, HIGHLIGHT_FONT_COLOR.g, HIGHLIGHT_FONT_COLOR.b, 1)
 								if IsModifierKeyDown() then
-								--	GameTooltip:AddLine(self.TTtitle, HIGHLIGHT_FONT_COLOR.r, HIGHLIGHT_FONT_COLOR.g, HIGHLIGHT_FONT_COLOR.b, 1)
 									GameTooltip:AddLine(TMW.IE:GetRealNames(self), NORMAL_FONT_COLOR.r, NORMAL_FONT_COLOR.g, NORMAL_FONT_COLOR.b, 1)
 								else
-								--	GameTooltip:AddLine(self.TTtitle, HIGHLIGHT_FONT_COLOR.r, HIGHLIGHT_FONT_COLOR.g, HIGHLIGHT_FONT_COLOR.b, 1)
 									GameTooltip:AddLine(self.TTtext, NORMAL_FONT_COLOR.r, NORMAL_FONT_COLOR.g, NORMAL_FONT_COLOR.b, 1)
 								end
 								GameTooltip:Show()
@@ -2328,6 +2326,25 @@
 								local groupID, iconID = TMW.CI.g, TMW.CI.i
 								if TMW.db then
 									TMW.db.profile.Groups[groupID].Icons[iconID]["OnlySeen"] = not not self:GetChecked()
+									TMW.IE:ScheduleIconUpdate(groupID, iconID)
+								end
+							</OnClick>
+						</Scripts>
+					</CheckButton>
+					<CheckButton name="$parentCheckRefresh" inherits="TellMeWhen_CheckTemplate" parentKey="CheckRefresh">
+						<Anchors>
+							<Anchor point="CENTER" relativeTo="$parentOnlyMine"/>
+						</Anchors>
+						<Scripts>
+							<OnLoad>
+								TMW:TT(self, "ICONMENU_CHECKREFRESH", "ICONMENU_CHECKREFRESH_DESC")
+								self.text:SetText(TMW.L["ICONMENU_CHECKREFRESH"])
+								self.text:SetWidth(TELLMEWHEN_COLUMN1WIDTH)
+							</OnLoad>
+							<OnClick>
+								local groupID, iconID = TMW.CI.g, TMW.CI.i
+								if TMW.db then
+									TMW.db.profile.Groups[groupID].Icons[iconID]["CheckRefresh"] = not not self:GetChecked()
 									TMW.IE:ScheduleIconUpdate(groupID, iconID)
 								end
 							</OnClick>

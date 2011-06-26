@@ -5,6 +5,7 @@
 -- Other contributions by
 -- Sweetmms of Blackrock
 -- Oozebull of Twisting Nether
+-- Oodyboo of Mug'thol
 -- Banjankri of Blackrock
 -- Predeter of Proudmoore
 -- Xenyr of Aszune
@@ -30,6 +31,7 @@ local strlowerCache = TMW.strlowerCache
 
 local Type = TMW:RegisterIconType("totem")
 Type.name = pclass == "DRUID" and L["ICONMENU_MUSHROOMS"] or pclass == "DEATHKNIGHT" and L["ICONMENU_GHOUL"] or L["ICONMENU_TOTEM"]
+Type.usePocketWatch = 1
 if pclass == "SHAMAN" then
 	Type.TypeChecks = {
 		setting = "TotemSlots",
@@ -116,14 +118,14 @@ function Type:Setup(icon, groupID, iconID)
 		icon.Slots[i] = tonumber(strsub(icon.TotemSlots.."0000", i, i)) == 1
 	end
 	if pclass == "DEATHKNIGHT" then
-		icon.NameFirst = ""
+		icon.NameFirst = 46584
 		icon.NameName = GetSpellInfo(46584)
 		icon.Slots[1] = true -- there is only one slot for DKs, and they dont have options to check certain slots
 		icon.Slots[2] = nil
 		icon.Slots[3] = nil
 		icon.Slots[4] = nil
 	elseif pclass == "DRUID" then
-		icon.NameFirst = ""
+		icon.NameFirst = 88747
 		icon.NameName = GetSpellInfo(88747)
 		icon.Slots[4] = nil -- there is no mushroom 4
 	elseif pclass ~= "SHAMAN" then --enable all totems for people that dont have totem slot options (future-proof it)
@@ -135,18 +137,14 @@ function Type:Setup(icon, groupID, iconID)
 	icon.ShowPBar = false
 	icon:SetReverse(true)
 
-	icon.FirstTexture = icon.NameName and GetSpellTexture(icon.NameName)
+	icon.FirstTexture = icon.NameName and TMW.SpellTextures[icon.NameName]
 
 	if pclass == "DRUID" then
 		icon:SetTexture(GetSpellTexture(88747))
 	elseif pclass == "DEATHKNIGHT" then
 		icon:SetTexture(GetSpellTexture(46584))
-	elseif icon.Name == "" then
-		icon:SetTexture("Interface\\Icons\\INV_Misc_QuestionMark")
-	elseif GetSpellTexture(icon.NameFirst) then
-		icon:SetTexture(GetSpellTexture(icon.NameFirst))
-	elseif TMW:DoSetTexture(icon) then
-		icon:SetTexture("Interface\\Icons\\INV_Misc_PocketWatch_01")
+	else
+		icon:SetTexture(TMW:GetConfigIconTexture(icon))
 	end
 
 	icon:SetScript("OnUpdate", Totem_OnUpdate)

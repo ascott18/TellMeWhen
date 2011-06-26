@@ -5,6 +5,7 @@
 -- Other contributions by
 -- Sweetmms of Blackrock
 -- Oozebull of Twisting Nether
+-- Oodyboo of Mug'thol
 -- Banjankri of Blackrock
 -- Predeter of Proudmoore
 -- Xenyr of Aszune
@@ -26,6 +27,8 @@ local print = TMW.print
 local huge = math.huge
 local strlowerCache = TMW.strlowerCache
 local SpellTextures = TMW.SpellTextures
+local CL_PLAYER = COMBATLOG_OBJECT_TYPE_PLAYER
+local CL_PET = COMBATLOG_OBJECT_CONTROL_PLAYER
 
 local clientVersion = select(4, GetBuildInfo())
 
@@ -45,6 +48,7 @@ local Type = TMW:RegisterIconType("dr")
 LibStub("AceEvent-3.0"):Embed(Type)
 Type.name = L["ICONMENU_DR"]
 Type.desc = L["ICONMENU_DR_DESC"]
+Type.usePocketWatch = 1
 Type.WhenChecks = {
 	text = L["ICONMENU_SHOWWHEN"],
 	{ value = "alpha", 			text = L["ICONMENU_DRABSENT"], 		colorCode = "|cFF00FF00" },
@@ -72,6 +76,7 @@ Type.RelevantSettings = {
 	DurationMaxEnabled = true,
 	ConditionAlpha = true,
 	FakeHidden = true,
+	CheckRefresh = true,
 }
 
 
@@ -85,32 +90,26 @@ function Type:Update()
 	mc = db.profile.OOMColor
 end
 
-local CL_PLAYER = COMBATLOG_OBJECT_TYPE_PLAYER
-local CL_PET = COMBATLOG_OBJECT_CONTROL_PLAYER
-
-local DR_OnEvent
 local function DR_OnEvent(icon, _, _, p, ...)
-	if p == "SPELL_AURA_REMOVED" or p == "SPELL_AURA_REFRESH" or p == "SPELL_AURA_APPLIED" then
-		local g, d, f, i, n, t, _
+	if p == "SPELL_AURA_REMOVED" or p == "SPELL_AURA_APPLIED" or (icon.CheckRefresh and p == "SPELL_AURA_REFRESH") then
+		local g, f, i, n, t, _
 		if clientVersion >= 40200 then
-			_, _, _, _, _, g, d, f, _, i, n, _, t = ...
+			_, _, _, _, _, g, _, f, _, i, n, _, t = ...
 		elseif clientVersion >= 40100 then
-			_, _, _, _, g, d, f, i, n, _, t = ...
+			_, _, _, _, g, _, f, i, n, _, t = ...
 		else
-			_, _, _, g, d, f, i, n, _, t = ...
+			_, _, _, g, _, f, i, n, _, t = ...
 		end
 		if t == "DEBUFF" then
 			local ND = icon.NameDictionary
 			if ND[i] or ND[strlowerCache[n]] then
-				if true then -- if PvEDRs[i] or bitband(f, CL_PLAYER) == CL_PLAYER or bitband(f, CL_PET) == CL_PET then
+				if PvEDRs[i] or bitband(f, CL_PLAYER) == CL_PLAYER or bitband(f, CL_PET) == CL_PET then
 					local dr = icon[g]
-					local _, _, _, _, _, dur = UnitDebuff(d, n)
 					if p == "SPELL_AURA_APPLIED" then
 						if dr and dr.start + dr.duration <= TMW.time then
 							dr.start = 0
 							dr.duration = 0
 							dr.amt = 100
-							dr.dur = dur
 						end
 					else
 						if not dr then
@@ -118,22 +117,16 @@ local function DR_OnEvent(icon, _, _, p, ...)
 								amt = 50,
 								start = TMW.time,
 								duration = 18,
-								tex = SpellTextures[i],
-								dur = dur,
+								tex = SpellTextures[i]
 							}
 							icon[g] = dr
 						else
 							local amt = dr.amt
-							print(dur, dr.dur)
-							if amt ~= 0 and dur ~= dr.dur > 1 then
-								print("REDUCED", p, i, n)
+							if amt and amt ~= 0 then
 								dr.amt = amt > 25 and amt/2 or 0
 								dr.duration = 18
 								dr.start = TMW.time
 								dr.tex = SpellTextures[i]
-								dr.dur = dur
-							else
-								print("NOREDUCED", p, i, n)
 							end
 						end
 					end
@@ -207,14 +200,8 @@ function Type:Setup(icon, groupID, iconID)
 			end
 		end
 	end
-
-	if icon.Name == "" then
-		icon:SetTexture("Interface\\Icons\\INV_Misc_QuestionMark")
-	elseif GetSpellTexture(icon.NameFirst) then
-		icon:SetTexture(GetSpellTexture(icon.NameFirst))
-	elseif TMW:DoSetTexture(icon) then
-		icon:SetTexture("Interface\\Icons\\INV_Misc_PocketWatch_01")
-	end
+	
+	icon:SetTexture(TMW:GetConfigIconTexture(icon))
 
 	icon:SetScript("OnEvent", DR_OnEvent)
 	icon:RegisterEvent("COMBAT_LOG_EVENT_UNFILTERED")

@@ -5,6 +5,7 @@
 -- Other contributions by
 -- Sweetmms of Blackrock
 -- Oozebull of Twisting Nether
+-- Oodyboo of Mug'thol
 -- Banjankri of Blackrock
 -- Predeter of Proudmoore
 -- Xenyr of Aszune
@@ -35,6 +36,7 @@ end})
 
 local Type = TMW:RegisterIconType("buff")
 Type.name = L["ICONMENU_BUFFDEBUFF"]
+Type.usePocketWatch = 1
 Type.TypeChecks = {
 	text = L["ICONMENU_BUFFTYPE"],
 	setting = "BuffOrDebuff",
@@ -224,13 +226,8 @@ function Type:Setup(icon, groupID, iconID)
 	icon.NAL = icon.Sort and #icon.NameArray > 1 and EFF_THR + 1 or icon.NAL
 
 	icon.FirstTexture = SpellTextures[icon.NameFirst]
-	if icon.Name == "" then
-		icon:SetTexture("Interface\\Icons\\INV_Misc_QuestionMark")
-	elseif SpellTextures[icon.NameFirst] then
-		icon:SetTexture(SpellTextures[icon.NameFirst])
-	elseif TMW:DoSetTexture(icon) then
-		icon:SetTexture("Interface\\Icons\\INV_Misc_PocketWatch_01")
-	end
+	
+	icon:SetTexture(TMW:GetConfigIconTexture(icon))
 
 	icon:SetScript("OnUpdate", Buff_OnUpdate)
 	icon:OnUpdate(TMW.time)

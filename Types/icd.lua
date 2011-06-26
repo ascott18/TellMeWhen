@@ -5,6 +5,7 @@
 -- Other contributions by
 -- Sweetmms of Blackrock
 -- Oozebull of Twisting Nether
+-- Oodyboo of Mug'thol
 -- Banjankri of Blackrock
 -- Predeter of Proudmoore
 -- Xenyr of Aszune
@@ -20,8 +21,6 @@ local L = TMW.L
 local db, UPD_INTV, pr, ab
 local strlower =
 	  strlower
-local GetSpellTexture =
-	  GetSpellTexture
 local print = TMW.print
 local SpellTextures = TMW.SpellTextures
 
@@ -33,6 +32,7 @@ local strlowerCache = TMW.strlowerCache
 local Type = TMW:RegisterIconType("icd")
 Type.name = L["ICONMENU_ICD"]
 Type.desc = L["ICONMENU_ICD_DESC"]
+Type.usePocketWatch = 1
 Type.DurationSyntax = 1
 Type.TypeChecks = {
 	setting = "ICDType",
@@ -151,13 +151,7 @@ function Type:Setup(icon, groupID, iconID)
 	end
 	icon:SetScript("OnEvent", ICD_OnEvent)
 
-	if icon.Name == "" then
-		icon:SetTexture("Interface\\Icons\\INV_Misc_QuestionMark")
-	elseif SpellTextures[icon.NameFirst] then
-		icon:SetTexture(SpellTextures[icon.NameFirst])
-	elseif TMW:DoSetTexture(icon) then
-		icon:SetTexture("Interface\\Icons\\INV_Misc_PocketWatch_01")
-	end
+	icon:SetTexture(TMW:GetConfigIconTexture(icon))
 
 	icon:SetScript("OnUpdate", ICD_OnUpdate)
 	icon:OnUpdate(TMW.time)

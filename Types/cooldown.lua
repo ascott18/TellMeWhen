@@ -5,6 +5,7 @@
 -- Other contributions by
 -- Sweetmms of Blackrock
 -- Oozebull of Twisting Nether
+-- Oodyboo of Mug'thol
 -- Banjankri of Blackrock
 -- Predeter of Proudmoore
 -- Xenyr of Aszune
@@ -378,13 +379,7 @@ function Type:Setup(icon, groupID, iconID)
 		else
 			icon.FirstTexture = SpellTextures[icon.NameFirst]
 
-			if icon.Name == "" then
-				icon:SetTexture("Interface\\Icons\\INV_Misc_QuestionMark")
-			elseif icon.FirstTexture then
-				icon:SetTexture(icon.FirstTexture)
-			elseif TMW:DoSetTexture(icon) then
-				icon:SetTexture("Interface\\Icons\\INV_Misc_QuestionMark")
-			end
+			icon:SetTexture(TMW:GetConfigIconTexture(icon))
 			icon:SetScript("OnUpdate", SpellCooldown_OnUpdate)
 		end
 		
@@ -413,12 +408,7 @@ function Type:Setup(icon, groupID, iconID)
 			icon.OnlyInBags = true
 		end
 
-		local itemTexture = GetItemIcon(icon.NameFirst)
-		if itemTexture then
-			icon:SetTexture(itemTexture)
-		else
-			icon:SetTexture("Interface\\Icons\\INV_Misc_QuestionMark")
-		end
+		icon:SetTexture(TMW:GetConfigIconTexture(icon, 1))
 		
 		Type:RegisterEvent("BAG_UPDATE")
 		

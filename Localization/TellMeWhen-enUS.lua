@@ -1,6 +1,6 @@
 ﻿--GAME_LOCALE = "ruRU" --FOR TESTING
 local L = LibStub("AceLocale-3.0"):NewLocale("TellMeWhen", "enUS", true)
-
+--  /cast [@focus, pet:felhunter, exists, alive] spell lock; [@target, pet:felhunter, exists, alive] spell lock
 
 
 L["CMD_OPTIONS"] = "Options"
@@ -178,7 +178,7 @@ L["ICONMENU_DONTREFRESH"] = "Don't Refresh"
 L["ICONMENU_DONTREFRESH_DESC"] = "Check to force the cooldown to not reset if the trigger occurs while it is still counting down. Useful for talents such as Early Frost."
 
 L["SORTBY"] = "Prioritize"
-L["SORTBYNONE"] = "Don't prioritize"
+L["SORTBYNONE"] = "Normally"
 L["SORTBYNONE_DESC"] = "If checked, spells will be checked in and appear in the order that they were entered into the editbox. If this icon is a buff/debuff icon and the number of auras being checked exceeds the efficiency threshold setting, auras will be checked in the order that they would normally appear on the unit's unit frame."
 L["ICONMENU_SORTASC"] = "Low duration"
 L["ICONMENU_SORTASC_DESC"] = "Check this box to prioritize and show spells with the lowest duration."
@@ -220,6 +220,10 @@ L["ICONMENU_ONLYBAGS"] = "Only if in bags"
 L["ICONMENU_ONLYBAGS_DESC"] = "Check this to make the icon show only if the item is in your bags (or equipped). If 'Only if equipped' is enabled, this is also forcibly enabled."
 L["ICONMENU_ONLYSEEN"] = "Only if seen"
 L["ICONMENU_ONLYSEEN_DESC"] = "Check this to make the icon only show a cooldown if the unit has cast it at least once. You should check this if you are checking spells from different classes in one icon."
+L["ICONMENU_CHECKREFRESH"] = "Listen for refreshes"
+L["ICONMENU_CHECKREFRESH_DESC"] = [[Blizzard's combat log is very buggy when it comes to spell refreshes and fear (or other spells that break after a certain amount of damage). The combat log will say that the spell was refreshed when damage is dealt, even though it technically wasn't. Uncheck this box to disable listening to spell refreshes, but note that legitimate refreshes will be ignored as well.
+
+It is reccomended to leave this checked if the DRs you are checking for don't break after a certain amount of damage.]]
 
 
 -- -------------

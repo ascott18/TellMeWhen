@@ -5,6 +5,7 @@
 -- Other contributions by
 -- Sweetmms of Blackrock
 -- Oozebull of Twisting Nether
+-- Oodyboo of Mug'thol
 -- Banjankri of Blackrock
 -- Predeter of Proudmoore
 -- Xenyr of Aszune
@@ -182,13 +183,7 @@ function Type:Setup(icon, groupID, iconID)
 		icon:SetScript("OnEvent", Reactive_OnEvent)
 	end
 
-	if icon.Name == "" then
-		icon:SetTexture("Interface\\Icons\\INV_Misc_QuestionMark")
-	elseif icon.FirstTexture then
-		icon:SetTexture(icon.FirstTexture)
-	elseif TMW:DoSetTexture(icon) then
-		icon:SetTexture("Interface\\Icons\\INV_Misc_QuestionMark")
-	end
+	icon:SetTexture(TMW:GetConfigIconTexture(icon))
 
 	icon:SetScript("OnUpdate", Reactive_OnUpdate)
 	icon:OnUpdate(TMW.time)

@@ -5,6 +5,8 @@
 -- Other contributions by
 -- Sweetmms of Blackrock
 -- Oozebull of Twisting Nether
+-- Oodyboo of Mug'thol
+-- Oodyboo of Mug'thol
 -- Banjankri of Blackrock
 -- Predeter of Proudmoore
 -- Xenyr of Aszune
@@ -34,6 +36,7 @@ local Type = TMW:RegisterIconType("unitcooldown")
 LibStub("AceEvent-3.0"):Embed(Type)
 Type.name = L["ICONMENU_UNITCOOLDOWN"]
 Type.desc = L["ICONMENU_UNITCOOLDOWN_DESC"]:format(GetSpellInfo(42292))
+Type.usePocketWatch = 1
 Type.DurationSyntax = 1
 Type.WhenChecks = {
 	text = L["ICONMENU_SHOWWHEN"],
@@ -314,13 +317,7 @@ function Type:Setup(icon, groupID, iconID)
 	Type:RegisterEvent("COMBAT_LOG_EVENT_UNFILTERED")
 	Type:RegisterEvent("UNIT_SPELLCAST_SUCCEEDED")
 
-	if icon.Name == "" then
-		icon:SetTexture("Interface\\Icons\\INV_Misc_QuestionMark")
-	elseif SpellTextures[icon.NameFirst] then
-		icon:SetTexture(SpellTextures[icon.NameFirst])
-	elseif TMW:DoSetTexture(icon) then
-		icon:SetTexture("Interface\\Icons\\INV_Misc_PocketWatch_01")
-	end
+	icon:SetTexture(TMW:GetConfigIconTexture(icon))
 
 	icon:SetScript("OnUpdate", UnitCooldown_OnUpdate)
 	icon:OnUpdate(TMW.time)

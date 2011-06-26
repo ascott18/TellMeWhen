@@ -1,5 +1,9 @@
 ===v4.4.1===
  * New Condition: Spell autocasting
+ * Added a toggle to DR icons to help work around the buggy spell refresh behavior.
+ * Greatly improved config mode texture detection.
+ * Bug Fixes:
+ ** (r124) Inserting an equivalancy via the dropdown should now properly save the text in the editbox.
 
 ===v4.4.0===
  * Dramatically changed the way that Unit Cooldown and Internal Cooldown icons handle durations. Durations are now defined per spell within an icon, instead of having the same duration for all spells within an icon. More information is available by choosing one of these types in-game.
@@ -63,7 +67,7 @@
  ** Buff/Debuff - Number of - This conditions tracks the number of a buff or debuff that are active on a unit. This is not the number of stacks, but rather the actual number of auras (3 warlocks in your raid cast 3 corruptions, etc.).
  * Bug fixes:
  ** The "On Show" icon event should no longer erroneously trigger sometimes when changing zones.
- ** Item cooldown icons use item names instead of IDs that attempt to set themselves up before the required data is available will now attempt to fix themselves once that data becomes available instead of requring a full lock toggle.
+ ** Item cooldown icons use item names instead of IDs that attempt to set themselves up before the required data is available will now attempt to fix themselves once that data becomes available instead of requiring a full lock toggle.
  ** Icon settings are now resetting to the defaults in a more correct manner before icons are copied onto them.
  ** The suggestion list should now properly update to the current cursor position instead of the last cursor position when clicked.
  ** The suggestion list should now take an entire entry into consideration if the cursor is clicked on the middle of it.
@@ -202,11 +206,11 @@
  * Many conditions! Now, handle them!
  * Fixed an issue with cooldowns looking bad on circular LBF skins
  * Overlay bars now go underneath the border of LBF skins
- * Bars and timers will be set to ignore GCD in this version. You will need to toggle this off if you dont't want it. (Sorry, i screwed something up in beta9)
+ * Bars and timers will be set to ignore GCD in this version. You will need to toggle this off if you don't want it. (Sorry, i screwed something up in beta9)
  * Fixed a bug that caused icons that shouldn't be shown to not be hidden when switching profiles or removing rows/columns.
  * Textures should properly reset when switching profiles.
  * Switched to SVN instead of manual file uploads, yay!
- * New feature: Suggestion list. The suggestion list will take what you type and search though all known spells/items, as well as TMW equivalancies and dispel types, to suggest what you might be looking for. For example, if you are configuring a "Spell Cast" icon type, the list will show only spells with cast times, as well as the cast equivalancies. More information regarding this feature will be in the documentation that I will hopefully start writing soon. (If someone wants to help me out with that, send me a PM)
+ * New feature: Suggestion list. The suggestion list will take what you type and search though all known spells/items, as well as TMW equivalencies and dispel types, to suggest what you might be looking for. For example, if you are configuring a "Spell Cast" icon type, the list will show only spells with cast times, as well as the cast equivalencies. More information regarding this feature will be in the documentation that I will hopefully start writing soon. (If someone wants to help me out with that, send me a PM)
  * Equivalencies are no longer case-sensitive.
  * Reverted failed experimentation to force spell casts to match spellIDs
  * Colors on the suggestion list should now be final (known player auras are now shown with a different color than known NPC auras - if you installed the first version of 4.0.1 beta, you may see a few wrong spells, but they will be updated the next time you see them)
@@ -312,7 +316,7 @@
  * You can now drag a spell from your spellbook or an item from your bags/character sheet onto an icon to quickly set it up. If an icon is already configured, the name will be appended to the end of the list of names.
  * All icon types except multi-state cooldown icons now accept multiple spells/items.
  * Chakra states are no longer supported by reactive or cooldown icons. Use a multi-state cooldown icon in order to track chakra states from now on.
- * ICD icons now check for energize effects (mana/rage/enegy/etc gains).
+ * ICD icons now check for energize effects (mana/rage/energy/etc gains).
  * Custom alpha levels for failed conditions/stacks/durations have been removed. They were causing several problems that were limiting some features.
  * Fix several buff equivalencies (Feared, Stunned, Disoriented, Silenced, Rooted).
  * Spell names should now always check in the correct order.
@@ -543,7 +547,7 @@
 
 ===v1.5.3===
  * Added separate alpha settings for usable/present and unusable/absent icons
- * Fixed the glitch with hemorrage/glyph of hermorrage. If you have any other buffs/debuffs that share a name with something else, let me know and I will add them to the list to check for them.
+ * Fixed the glitch with hemorrhage/glyph of hemorrhage. If you have any other buffs/debuffs that share a name with something else, let me know and I will add them to the list to check for them.
  * Cleaned up a lot of code
  * Improved the efficiency of buff/debuff icons even more
 

@@ -5,6 +5,7 @@
 -- Other contributions by
 -- Sweetmms of Blackrock
 -- Oozebull of Twisting Nether
+-- Oodyboo of Mug'thol
 -- Banjankri of Blackrock
 -- Predeter of Proudmoore
 -- Xenyr of Aszune
@@ -47,6 +48,7 @@ local tonumber, tostring, type, pairs, ipairs, tinsert, tremove, sort, wipe, nex
 local strfind, strmatch, format, gsub, strsub, strtrim, max, min, strlower =
 	  strfind, strmatch, format, gsub, strsub, strtrim, max, min, strlower
 local strlowerCache = TMW.strlowerCache
+local SpellTextures = TMW.SpellTextures
 local _G, GetTime = _G, GetTime
 local tiptemp = {}
 local Types = TMW.Types
@@ -89,6 +91,30 @@ TMW.CI = setmetatable({}, {__index = function(tbl, k)
 		return ics and ics.Type == "cooldown" and ics.CooldownType == "multistate"
 	end
 end}) local CI = TMW.CI		--current icon
+
+local EquivFullIDLookup = {}
+local EquivFullNameLookup = {}
+local EquivFirstIDLookup = {}
+for category, b in pairs(TMW.OldBE) do
+	for equiv, str in pairs(b) do
+
+		-- create the lookup tables first, so that we can have the first ID even if it will be turned into a name
+		local first = strsplit(";", str)
+		first = strtrim(first, "; _")
+		EquivFirstIDLookup[equiv] = first -- this is used to display them in the list (tooltip, name, id display)
+
+		b[equiv] = gsub(str, "_", "") -- this is used to put icons into tooltips
+		EquivFullIDLookup[equiv] = ";" .. b[equiv]
+		local tbl = TMW:SplitNames(b[equiv])
+		for k, v in pairs(tbl) do
+			tbl[k] = GetSpellInfo(v) or v
+		end
+		EquivFullNameLookup[equiv] = ";" .. table.concat(tbl, ";")
+	end
+end TMW.OldBE.unlisted.Enraged = nil
+for dispeltype, icon in pairs(TMW.DS) do
+	EquivFirstIDLookup[dispeltype] = icon
+end
 
 function TMW:CopyWithMetatable(settings)
 	local copy = {}
@@ -161,9 +187,10 @@ function TMW:GuessIconTexture(data)
 	if (data.Name and data.Name ~= "" and data.Type ~= "meta" and data.Type ~= "wpnenchant") and not tex then
 		local name = TMW:GetSpellNames(nil, data.Name, 1)
 		if name then
-			tex = GetSpellTexture(name)
 			if data.Type == "cooldown" and data.CooldownType == "item" then
 				tex = GetItemIcon(name) or tex
+			else
+				tex = SpellTextures[name]
 			end
 		end
 	end
@@ -174,6 +201,9 @@ function TMW:GuessIconTexture(data)
 	if not tex then tex = "Interface\\Icons\\INV_Misc_QuestionMark" end
 	return tex
 end
+
+--[[function TMW:GetConfigIconTexture(icon, isItem)
+end]]
 
 function TMW:GetGroupName(n, g, short)
 	if (not n) or n == "" then
@@ -1275,6 +1305,7 @@ IE.Checks = { --1=check box, 2=editbox, 3=slider(x100), 4=custom, table=subkeys 
 	FakeHidden = 1,
 	DontRefresh = 1,
 	EnableStacks = 1,
+	CheckRefresh = 1,
 }
 IE.Tabs = {
 	[1] = "Main",
@@ -1302,29 +1333,6 @@ IE.Units = {
 	{ value = "maintank|cFFFF0000#|r", 		text = L["MAINTANK"], 	range = "|cFFFF0000#|r = 1-" .. MAX_RAID_MEMBERS},
 	{ value = "mainassist|cFFFF0000#|r", 	text = L["MAINASSIST"], range = "|cFFFF0000#|r = 1-" .. MAX_RAID_MEMBERS},
 }
-local EquivFullIDLookup = {}
-local EquivFullNameLookup = {}
-local EquivFirstIDLookup = {}
-for category, b in pairs(TMW.OldBE) do
-	for equiv, str in pairs(b) do
-
-		-- create the lookup tables first, so that we can have the first ID even if it will be turned into a name
-		local first = strsplit(";", str)
-		first = strtrim(first, "; _")
-		EquivFirstIDLookup[equiv] = first -- this is used to display them in the list (tooltip, name, id display)
-
-		b[equiv] = gsub(str, "_", "") -- this is used to put icons into tooltips
-		EquivFullIDLookup[equiv] = ";" .. b[equiv]
-		local tbl = TMW:SplitNames(b[equiv])
-		for k, v in pairs(tbl) do
-			tbl[k] = GetSpellInfo(v) or v
-		end
-		EquivFullNameLookup[equiv] = ";" .. table.concat(tbl, ";")
-	end
-end TMW.OldBE.unlisted.Enraged = nil
-for dispeltype, icon in pairs(TMW.DS) do
-	EquivFirstIDLookup[dispeltype] = icon
-end
 
 function IE:TabClick(self)
 	PanelTemplates_Tab_OnClick(self, self:GetParent())
@@ -1642,7 +1650,7 @@ function IE:Equiv_DropDown()
 				info.tooltipTitle = k
 				local text = IE:Equiv_GenerateTips(k)
 
-				info.icon = GetSpellTexture(EquivFirstIDLookup[k])
+				info.icon = TMW.SpellTextures[EquivFirstIDLookup[k]]
 				info.tCoordLeft = 0.07
 				info.tCoordRight = 0.93
 				info.tCoordTop = 0.07
@@ -1710,8 +1718,17 @@ end
 function IE:Equiv_DropDown_OnClick(value)
 	local e = IE.Main.Name
 	e:Insert("; " .. value .. "; ")
-	e:SetText(TMW:CleanString(e:GetText()))
-	e:SetCursorPosition(select(2, e:GetText():find(value:gsub("([%-])", "%%%1"))) + 1)
+	local new = TMW:CleanString(e:GetText())
+	e:SetText(new)
+	local _, position = strfind(new, gsub(value, "([%-])", "%%%1"))
+	position = tonumber(position) + 2
+	
+	-- WARNING: lame coding from here to the end of this function.
+	e:SetFocus()
+	e:ClearFocus()
+	e:SetFocus()
+	e:HighlightText(0, 0)
+	e:SetCursorPosition(position)
 	CloseDropDownMenus()
 end
 
@@ -2151,6 +2168,7 @@ function IE:GetRealNames()
 	for k, v in pairs(tbl) do
 		local name, _, texture = GetSpellInfo(v)
 		name = name or v
+		texture = texture or SpellTextures[name]
 		if not tiptemp[name] then --prevents display of the same name twice when there are multiple spellIDs.
 			local time = Types[CI.t].DurationSyntax and " ("..formatSeconds(durations[k])..")" or ""
 			str = str .. (texture and ("|T" .. texture .. ":0|t") or "") .. name .. time .. (k ~= #tbl and "; " or "")
@@ -2615,23 +2633,25 @@ end
 SUG = TMW:NewModule("Suggester", "AceEvent-3.0", "AceComm-3.0", "AceSerializer-3.0") TMW.SUG = SUG
 local inputType
 local SUGIMS, SUGSoI
-
+local SUGpreTable = {}
+local SUGPlayerSpells = {}
 local ActionCache, pclassSpellCache, ClassSpellLookup, AuraCache, ItemCache, SpellCache, CastCache
 
 function SUG:OnInitialize()
 	TMWOptDB = TMWOptDB or {}
 
-	CNDT:CURRENCY_DISPLAY_UPDATE() -- im in ur SUG, hijackin ur OnInitialize
+	CNDT:CURRENCY_DISPLAY_UPDATE() -- im in ur SUG, hijackin' ur OnInitialize
 
 	TMWOptDB.SpellCache = TMWOptDB.SpellCache or {}
 	TMWOptDB.CastCache = TMWOptDB.CastCache or {}
 	TMWOptDB.ItemCache = TMWOptDB.ItemCache or {}
 	TMWOptDB.AuraCache = TMWOptDB.AuraCache or {}
-	TMWOptDB.ClassSpellCache = TMWOptDB.ClassSpellCache or {}
+	TMWOptDB.ClassSpellCache = nil -- this is old, get rid of it
 
 	for k, v in pairs(TMWOptDB) do
 		SUG[k] = v
 	end
+	SUG.ClassSpellCache = TMW.ClassSpellCache -- just in case
 
 	if TMW.AuraCache ~= SUG.AuraCache then -- desprate attempt to fix the problem where the aura cache randomly decides to reset itself. LATER: YAY, I FIGURED IT OUT. I was calling SUG:OnInitialize() in some testing, which was causing it to delete all of its keys. this check will prevent that from now on.
 		for k, v in pairs(TMW.AuraCache) do
@@ -2646,8 +2666,7 @@ function SUG:OnInitialize()
 	SUG.RequestedFrom = {}
 	SUG.commThrowaway = {}
 	SUG.Box = IE.Main.Name
-
-	SUG.ClassSpellCache[pclass] = SUG.ClassSpellCache[pclass] or {}
+	
 	SUG:PLAYER_TALENT_UPDATE()
 	SUG:BuildClassSpellLookup() -- must go before the local versions (ClassSpellLookup) are defined
 	SUG.doUpdateItemCache = true
@@ -2666,7 +2685,7 @@ function SUG:OnInitialize()
 	end
 
 	ActionCache, pclassSpellCache, ClassSpellLookup, AuraCache, ItemCache, SpellCache, CastCache =
-	SUG.ActionCache, SUG.ClassSpellCache[pclass], SUG.ClassSpellLookup, SUG.AuraCache, SUG.ItemCache, SUG.SpellCache, SUG.CastCache
+	SUG.ActionCache, TMW.ClassSpellCache[pclass], SUG.ClassSpellLookup, SUG.AuraCache, SUG.ItemCache, SUG.SpellCache, SUG.CastCache
 
 	SUG:PLAYER_ENTERING_WORLD()
 
@@ -2776,21 +2795,19 @@ function SUG:OnInitialize()
 end
 
 function SUG:UNIT_PET(event, unit)
-	if unit == "player" then
-		if not TMWOptDB.ClassSpellCache then return end
-		if HasPetSpells() then
-			local ClassSpellCache = SUG.ClassSpellCache[pclass]
-			local i = 1
-			while true do
-				local _, id = GetSpellBookItemInfo(i, "pet")
-				if id then
-					ClassSpellCache[id] = 1
-				else
-					break
-				end
-				i=i+1
+	if unit == "player" and HasPetSpells() then
+		local Cache = TMW.ClassSpellCache.PET
+		local i = 1
+		while true do
+			local _, id = GetSpellBookItemInfo(i, "pet")
+			if id then
+				Cache[id] = pclass
+			else
+				break
 			end
+			i=i+1
 		end
+		SUG.updatePlayerSpells = 1
 	end
 end
 
@@ -2815,13 +2832,22 @@ function SUG:PLAYER_ENTERING_WORLD()
 end
 
 function SUG:PLAYER_TALENT_UPDATE()
-	local _, _, offs, numspells = GetSpellTabInfo(GetNumSpellTabs())
+	local t = TMW.ClassSpellCache[pclass]
+	local _, RACIAL = GetSpellInfo(20572) -- blood fury, we need the localized "Racial" string
+	local  _, _, _, endgeneral = GetSpellTabInfo(1)
+	local _, _, offs, numspells = GetSpellTabInfo(4)
 	for i = 1, offs + numspells do
 		local _, id = GetSpellBookItemInfo(i, "player")
 		if id then
-			SUG.ClassSpellCache[pclass][id] = 1
+			local name, rank = GetSpellInfo(id)
+			if rank == RACIAL then
+				TMW.ClassSpellCache.RACIAL[id] = UnitRace("player")
+			elseif i > endgeneral then
+				t[id] = 1
+			end
 		end
 	end
+	SUG.updatePlayerSpells = 1
 end
 
 function SUG:BAG_UPDATE()
@@ -2845,6 +2871,7 @@ function SUG:OnCommReceived(prefix, text, channel, who)
 			wipe(SUG.commThrowaway)
 			local RecievedClassSpellLength = arg2
 			SUG:BuildClassSpellLookup()
+			if not RecievedClassSpellLength.RACIAL then return end -- VERY IMPORTANT - OLD VERSIONS WILL NOT HAVE THE RACIAL TABLE, THIS IS HOW I AM GOING TO DISTINGUISH BETWEEN OLD AND NEW VERSIONS (NEW VERSION BEING 4.4.1+; STORES CLASS SPELLS IN DB.PROFILE.GLOBAL)
 			for class, length in pairs(RecievedClassSpellLength) do
 				if (not SUG.ClassSpellLength[class]) or (SUG.ClassSpellLength[class] < length) then
 					tinsert(SUG.commThrowaway, class)
@@ -2856,17 +2883,13 @@ function SUG:OnCommReceived(prefix, text, channel, who)
 		elseif arg1 == "RCSC" then
 			wipe(SUG.commThrowaway)
 			for _, class in pairs(arg2) do
-				SUG.commThrowaway[class] = SUG.ClassSpellCache[class]
+				SUG.commThrowaway[class] = TMW.ClassSpellCache[class]
 			end
 			SUG:SendCommMessage("TMWSUG", SUG:Serialize("CSC", SUG.commThrowaway), "WHISPER", who)
 		elseif arg1 == "CSC" then
 			for class, tbl in pairs(arg2) do
-				if SUG.ClassSpellCache[class] then
-					for id in pairs(tbl) do
-						SUG.ClassSpellCache[class][id] = 1
-					end
-				else
-					SUG.ClassSpellCache[class] = tbl
+				for id in pairs(tbl) do
+					TMW.ClassSpellCache[class][id] = 1
 				end
 			end
 			SUG:BuildClassSpellLookup()
@@ -2880,8 +2903,6 @@ function GameTooltip:SetTMWEquiv(equiv)
 	GameTooltip:AddLine(L[equiv], HIGHLIGHT_FONT_COLOR.r, HIGHLIGHT_FONT_COLOR.g, HIGHLIGHT_FONT_COLOR.b, 1)
 	GameTooltip:AddLine(IE:Equiv_GenerateTips(equiv), NORMAL_FONT_COLOR.r, NORMAL_FONT_COLOR.g, NORMAL_FONT_COLOR.b, 1)
 end
-
-local SUGpreTable = {}
 
 function SUG.Sorter(a, b)
 	--[[PRIORITY:
@@ -2916,7 +2937,7 @@ function SUG.Sorter(a, b)
 
 	if SUGSoI == "spell" then
 		--player's spells (pclass)
-		local haveA, haveB = pclassSpellCache[a], pclassSpellCache[b]
+		local haveA, haveB = SUGPlayerSpells[a], SUGPlayerSpells[b]
 		if (haveA and not haveB) or (haveB and not haveA) then
 			return haveA
 		end
@@ -3062,7 +3083,7 @@ function SUG:SuggestingComplete(doSort)
 				f.tooltipmethod = "SetTMWEquiv"
 				f.tooltiparg = equiv
 
-				f.Icon:SetTexture(GetSpellTexture(firstid))
+				f.Icon:SetTexture(SpellTextures[firstid])
 				if TMW.BE.buffs[equiv] then
 					f.Background:SetVertexColor(.2, .9, .2, 1) -- lightish green
 				elseif TMW.BE.debuffs[equiv] then
@@ -3096,13 +3117,13 @@ function SUG:SuggestingComplete(doSort)
 
 					f.insert = inputType == "number" and id or name
 
-					f.Icon:SetTexture(GetSpellTexture(id))
+					f.Icon:SetTexture(SpellTextures[id])
 					if SUGIMS and SUG.ActionCache[id] then
 						f.Background:SetVertexColor(0, .44, .87, 1) --color actions that are on your action bars if the type is a multistate cooldown shaman blue
-					elseif SUG.ClassSpellCache[pclass][id] then
+					elseif SUGPlayerSpells[id] then
 						f.Background:SetVertexColor(.41, .8, .94, 1) --color all other spells that you have in your/your pet's spellbook mage blue
 					else
-						for class, tbl in pairs(SUG.ClassSpellCache) do
+						for class, tbl in pairs(TMW.ClassSpellCache) do
 							if tbl[id] then
 								f.Background:SetVertexColor(.96, .55, .73, 1) --color all other known class spells paladin pink
 								break
@@ -3182,6 +3203,24 @@ function SUG:NameOnCursor(isClick)
 	else
 		SUG.Suggest:Show()
 	end
+	
+	if SUG.updatePlayerSpells then
+		wipe(SUGPlayerSpells)
+		for k, v in pairs(pclassSpellCache) do
+			SUGPlayerSpells[k] = 1
+		end
+		for k, v in pairs(TMW.ClassSpellCache.PET) do
+			if v == pclass then
+				SUGPlayerSpells[k] = 1
+			end
+		end
+		for k, v in pairs(TMW.ClassSpellCache.RACIAL) do
+			if v == UnitRace("player") then
+				SUGPlayerSpells[k] = 1
+			end
+		end
+		SUG.updatePlayerSpells = nil
+	end
 
 	inputType = type(tonumber(SUG.lastName) or SUG.lastName)
 
@@ -3237,7 +3276,6 @@ function SUG:CacheItems()
 			local id = GetContainerItemID(container, slot)
 			if id then
 				ItemCache[id] = strlower(GetItemInfo(id))
-		--		local
 			end
 		end
 	end
@@ -3245,7 +3283,6 @@ function SUG:CacheItems()
 		local id = GetInventoryItemID("player", slot)
 		if id then
 			ItemCache[id] = strlower(GetItemInfo(id))
-	--		local
 		end
 	end
 	SUG.doUpdateItemCache = nil
@@ -3266,7 +3303,7 @@ end
 function SUG:BuildClassSpellLookup()
 	SUG.ClassSpellLength = SUG.ClassSpellLength or {}
 	SUG.ClassSpellLookup = SUG.ClassSpellLookup or {}
-	for class, tbl in pairs(SUG.ClassSpellCache) do
+	for class, tbl in pairs(TMW.ClassSpellCache) do
 		SUG.ClassSpellLength[class] = 0
 		for id in pairs(tbl) do
 			SUG.ClassSpellLookup[id] = 1

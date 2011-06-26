@@ -5,6 +5,7 @@
 -- Other contributions by
 -- Sweetmms of Blackrock
 -- Oozebull of Twisting Nether
+-- Oodyboo of Mug'thol
 -- Banjankri of Blackrock
 -- Predeter of Proudmoore
 -- Xenyr of Aszune
@@ -33,7 +34,7 @@ local DRData = LibStub("DRData-1.0", true)
 TELLMEWHEN_VERSION = "4.4.1"
 TELLMEWHEN_VERSION_MINOR = strmatch(" @project-version@", " r%d+") or ""
 TELLMEWHEN_VERSION_FULL = TELLMEWHEN_VERSION .. TELLMEWHEN_VERSION_MINOR
-TELLMEWHEN_VERSIONNUMBER = 44100 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
+TELLMEWHEN_VERSIONNUMBER = 44102 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
 if TELLMEWHEN_VERSIONNUMBER > 45000 or TELLMEWHEN_VERSIONNUMBER < 44000 then error("YOU SCREWED UP THE VERSION NUMBER OR DIDNT CHANGE THE SAFETY LIMITS") return end -- safety check because i accidentally made the version number 414069 once
 
 TELLMEWHEN_MAXGROUPS = 1 	--this is a default, used by SetTheory (addon), so dont rename
@@ -76,30 +77,48 @@ TMW.Warn = setmetatable({}, {__call = function(tbl, text)
 		tinsert(tbl, text)
 	end
 end})
-TMW.SpellTextures = setmetatable(
-	{
-		--hack for pvp tinkets
-		[42292] = "Interface\\Icons\\inv_jewelry_trinketpvp_0" .. (UnitFactionGroup("player") == "Horde" and "2" or "1"),
-	},
-	{__index = function(t, name)
-		local tex
-		if strlower(name) == strlower(GetSpellInfo(42292)) then --hack for pvp tinkets
-			tex = t[42292]
+
+TMW.strlowerCache = setmetatable({}, {
+	__index = function(t, i)
+		if not i then return end
+		local o
+		if type(i) == "number" then
+			o = i
 		else
-			tex = GetSpellTexture(name)
+			o = strlower(i)
 		end
+		t[i] = o
+		return o
+	end,
+	__call = function(t, i)
+		return t[i]
+	end,
+}) local strlowerCache = TMW.strlowerCache
+
+TMW.SpellTextures = setmetatable(
+{
+	--hack for pvp tinkets
+	[42292] = "Interface\\Icons\\inv_jewelry_trinketpvp_0" .. (UnitFactionGroup("player") == "Horde" and "2" or "1"),
+	[strlowerCache[GetSpellInfo(42292)]] = "Interface\\Icons\\inv_jewelry_trinketpvp_0" .. (UnitFactionGroup("player") == "Horde" and "2" or "1"),
+},
+{
+	__index = function(t, name)
+		-- rawget the strlower because hardcoded entries (talents, mainly) are put into the table as lowercase
+		local tex = rawget(t, strlowerCache[name]) or GetSpellTexture(name)
 		
 		t[name] = tex
 		return tex
-end	}) local SpellTextures = TMW.SpellTextures
-TMW.strlowerCache = setmetatable({}, {__index = function(t, i)
-	local o = strlower(i)
-	t[i] = o
-	return o
-end,
-__call = function(t, i)
-	return t[i]
-end})
+	end,
+	__call = function(t, i)
+		return t[i]
+	end,
+}) local SpellTextures = TMW.SpellTextures
+for tab = 1, GetNumTalentTabs() do
+	for talent = 1, GetNumTalents(tab) do
+		local name, tex = GetTalentInfo(tab, talent)
+		SpellTextures[strlowerCache[name]] = tex
+	end
+end
 
 TMW.Icons = {}
 TMW.IconsLookup = {}
@@ -353,18 +372,21 @@ TMW.Types = {
 			Name = true,
 		},
 	},
-}
+} local Types = TMW.Types
 for k, v in pairs(RelevantToAll) do
-	TMW.Types[""].RelevantSettings[k] = v
+	Types[""].RelevantSettings[k] = v
 end
-setmetatable(TMW.Types, {
-	__index = function() return TMW.Types[""] end
+setmetatable(Types, {
+	__index = function() return Types[""] end
 })
 
 TMW.Defaults = {
 	global = {
-		WpnEnchDurs	=	{
+		WpnEnchDurs	= {
 			["*"] = 0,
+		},
+		ClassSpellCache	= {
+			["*"] = {},
 		},
 		SeenNewDurSyntax = false,
 		HasImported	=	false,
@@ -491,6 +513,7 @@ TMW.Defaults = {
 						EnableStacks		= false,
 						OnlyInBags			= false,
 						OnlySeen			= false,
+						CheckRefresh		= true,
 						TotemSlots			= "1111",
 						Events = {
 							["**"] = {
@@ -538,6 +561,9 @@ TMW.DS = {
 	Poison = "Interface\\Icons\\spell_nature_corrosivebreath",
 	Enraged = "Interface\\Icons\\ability_druid_challangingroar",
 }
+for dispeltype, icon in pairs(TMW.DS) do
+	SpellTextures[dispeltype] = icon
+end
 TMW.BE = {
 	--Much of these are thanks to Malazee @ US-Dalaran's chart: http://forums.wow-petopia.com/download/file.php?mode=view&id=4979 and spreadsheet https://spreadsheets.google.com/ccc?key=0Aox2ZHZE6e_SdHhTc0tZam05QVJDU0lONnp0ZVgzdkE&hl=en#gid=18
 	--Many more new spells/corrections were provided by Catok of Curse
@@ -638,9 +664,9 @@ for category, b in pairs(TMW.OldBE) do
 			local id = strmatch(str, "_%d+")
 			if id then
 				local name = GetSpellInfo(strtrim(id, " _"))
-				if name then -- this should never ever ever happen except in new patches if spellIDs were wrong (experience talking)
+				if name then
 					str = gsub(str, id, name)
-				else
+				else  -- this should never ever ever happen except in new patches if spellIDs were wrong (experience talking)
 					geterrorhandler()("Invalid spellID found: " .. id .. "! Please report this on TMW's CurseForge page if you are currently on the PTR!")
 				end
 			end
@@ -950,6 +976,31 @@ function TMW:OnInitialize()
 	db.RegisterCallback(TMW, "OnNewProfile", "OnProfile")
 	db.RegisterCallback(TMW, "OnProfileShutdown", "ShutdownProfile")
 	db.RegisterCallback(TMW, "OnDatabaseShutdown", "ShutdownProfile")
+	
+	
+	TMW.ClassSpellCache = db.global.ClassSpellCache
+	local function AddID(id)
+		local name, _, tex = GetSpellInfo(id)
+		name = strlowerCache[name]
+		if name and not SpellTextures[name] then
+			SpellTextures[name] = tex
+		end
+	end
+	for id in pairs(TMW.ClassSpellCache[pclass]) do
+		-- do current class's spells first to discourage overwrites
+		AddID(id)
+	end
+	for class, tbl in pairs(TMW.ClassSpellCache) do
+		if class ~= pclass and class ~= "PET" then
+			for id in pairs(tbl) do
+				AddID(id)
+			end
+		end
+	end
+	for id in pairs(TMW.ClassSpellCache.PET) do
+		-- do pets last so pet spells dont take the place of class spells
+		AddID(id)
+	end
 
 
 	if LBF then
@@ -2595,12 +2646,12 @@ function TMW:RegisterIconType(Type)
 			rawset(t, k, v)
 		end
 	})
-	if rawget(TMW.Types, Type) and TMW.debug then
+	if rawget(Types, Type) and TMW.debug then
 		-- for tweaking and recreating icon types inside of WowLua .. too lazy to change the type string each time.
 		Type = Type .. " - " .. date("%X")
 		t.nameOverride = Type
 	end
-	TMW.Types[Type] = t
+	Types[Type] = t
 	t.type = Type
 	tinsert(TMW.OrderedTypes, t)
 	return t
@@ -2714,7 +2765,7 @@ function TMW:Icon_Update(icon)
 		icon[k] = nil --lets clear any settings that might get left behind.
 	end
 
-	for k in pairs(TMW.Types[ics.Type].RelevantSettings) do
+	for k in pairs(Types[ics.Type].RelevantSettings) do
 		icon[k] = ics[k]
 	end
 
@@ -2851,8 +2902,8 @@ function TMW:Icon_Update(icon)
 	
 	TMW.time = GetTime()
 	if icon.Enabled or not Locked then
-		TMW.Types[icon.Type]:Update()
-		local success, err = pcall(TMW.Types[icon.Type].Setup, TMW.Types[icon.Type], icon, groupID, iconID)
+		Types[icon.Type]:Update()
+		local success, err = pcall(Types[icon.Type].Setup, Types[icon.Type], icon, groupID, iconID)
 		if not success then
 			geterrorhandler()(L["GROUPICON"]:format(groupID, iconID) .. ": " .. err)
 		end
@@ -2877,7 +2928,7 @@ function TMW:Icon_Update(icon)
 			icon:SetTexture(nil)
 		end
 		icon:EnableMouse(0)
-		if (not icon.Enabled) or (icon.Name == "" and not TMW.Types[icon.Type].AllowNoName) then
+		if (not icon.Enabled) or (icon.Name == "" and not Types[icon.Type].AllowNoName) then
 			ClearScripts(icon)
 			icon:Hide()
 		end
@@ -3036,8 +3087,8 @@ function TMW:GetSpellNames(icon, setting, firstOnly, toname, dictionary, keepDur
 	if not keepDurations then
 		for k, buffName in pairs(buffNames) do
 			if strfind(buffName, ":[%d:%s%.]*$") then
-				buffNames[k] = strmatch(buffName, "(.-):[%d:%s%.]*$")
-				buffNames[k] = tonumber(buffNames[k]) or buffNames[k] -- turn it into a number if it is one
+				local new = strmatch(buffName, "(.-):[%d:%s%.]*$")
+				buffNames[k] = tonumber(new) or new -- turn it into a number if it is one
 			end
 		end
 	end
@@ -3239,6 +3290,25 @@ function TMW:DoSetTexture(icon)
 	t == "Interface\\Icons\\INV_Misc_QuestionMark" or
 	t == "Interface\\Icons\\Temp" then
 		return true
+	end
+end
+
+function TMW:GetConfigIconTexture(icon)
+	if icon.Name == "" then
+		return "Interface\\Icons\\INV_Misc_QuestionMark"
+	else
+	
+		local tbl = isItem and TMW:GetItemIDs(icon, icon.Name) or TMW:GetSpellNames(icon, icon.Name)
+	
+		for _, name in ipairs(tbl) do
+			local t = SpellTextures[name]
+			if t then return t end
+		end
+		if Types[icon.Type].usePocketWatch then
+			return "Interface\\Icons\\INV_Misc_PocketWatch_01"
+		else
+			return "Interface\\Icons\\INV_Misc_QuestionMark"
+		end
 	end
 end
 
