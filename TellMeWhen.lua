@@ -34,7 +34,7 @@ local DRData = LibStub("DRData-1.0", true)
 TELLMEWHEN_VERSION = "4.4.1"
 TELLMEWHEN_VERSION_MINOR = strmatch(" @project-version@", " r%d+") or ""
 TELLMEWHEN_VERSION_FULL = TELLMEWHEN_VERSION .. TELLMEWHEN_VERSION_MINOR
-TELLMEWHEN_VERSIONNUMBER = 44102 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
+TELLMEWHEN_VERSIONNUMBER = 44103 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
 if TELLMEWHEN_VERSIONNUMBER > 45000 or TELLMEWHEN_VERSIONNUMBER < 44000 then error("YOU SCREWED UP THE VERSION NUMBER OR DIDNT CHANGE THE SAFETY LIMITS") return end -- safety check because i accidentally made the version number 414069 once
 
 TELLMEWHEN_MAXGROUPS = 1 	--this is a default, used by SetTheory (addon), so dont rename
@@ -659,6 +659,8 @@ end
 TMW.OldBE = CopyTable(TMW.BE)
 for category, b in pairs(TMW.OldBE) do
 	for equiv, str in pairs(b) do
+		b[equiv] = gsub(str, "_", "") -- REMOVE UNDERSCORES FROM OLDBE
+		
 		-- turn all IDs prefixed with "_" into their localized name. Dont do this on every single one, but do use it for spells that do not have any other spells with the same name but different effects.
 		while strfind(str, "_") do
 			local id = strmatch(str, "_%d+")
@@ -667,7 +669,7 @@ for category, b in pairs(TMW.OldBE) do
 				if name then
 					str = gsub(str, id, name)
 				else  -- this should never ever ever happen except in new patches if spellIDs were wrong (experience talking)
-					geterrorhandler()("Invalid spellID found: " .. id .. "! Please report this on TMW's CurseForge page if you are currently on the PTR!")
+					geterrorhandler()("Invalid spellID found: " .. id .. "! Please report this on TMW's CurseForge page, especially if you are currently on the PTR!")
 				end
 			end
 		end
@@ -930,6 +932,11 @@ function TMW:OnInitialize()
 
 	TMW.db = AceDB:New("TellMeWhenDB", TMW.Defaults)
 	db = TMW.db
+	local XPac = tonumber(strsub(clientVersion, 1, 1))
+	db.global.XPac = db.global.XPac or XPac
+	if db.global.XPac ~= XPac then
+		wipe(db.global.ClassSpellCache)
+	end
 
 	LSM:Register("sound", "Rubber Ducky", [[Sound\Doodad\Goblin_Lottery_Open01.wav]])
 	LSM:Register("sound", "Cartoon FX", [[Sound\Doodad\Goblin_Lottery_Open03.wav]])
@@ -3295,19 +3302,25 @@ end
 
 function TMW:GetConfigIconTexture(icon)
 	if icon.Name == "" then
-		return "Interface\\Icons\\INV_Misc_QuestionMark"
+		return "Interface\\Icons\\INV_Misc_QuestionMark", nil
 	else
 	
-		local tbl = isItem and TMW:GetItemIDs(icon, icon.Name) or TMW:GetSpellNames(icon, icon.Name)
+		local BEbackup = TMW.BE
+		TMW.BE = TMW.OldBE
+		-- the level of hackyness here is sickening. Note that OldBE does not contain the enrage equiv (intended so we dont flood the tooltip)
+		-- by passing false in for arg3 (firstOnly), it creates a unique cache string and therefore a unique cache value
+		-- nessecary because we arent using the real TMW.BE
+		local tbl = isItem and TMW:GetItemIDs(icon, icon.Name, false) or TMW:GetSpellNames(icon, icon.Name, false)
+		TMW.BE = BEbackup -- unhack
 	
 		for _, name in ipairs(tbl) do
 			local t = SpellTextures[name]
-			if t then return t end
+			if t then return t, true end
 		end
 		if Types[icon.Type].usePocketWatch then
-			return "Interface\\Icons\\INV_Misc_PocketWatch_01"
+			return "Interface\\Icons\\INV_Misc_PocketWatch_01", false
 		else
-			return "Interface\\Icons\\INV_Misc_QuestionMark"
+			return "Interface\\Icons\\INV_Misc_QuestionMark", false
 		end
 	end
 end

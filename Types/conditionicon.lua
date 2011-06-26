@@ -56,11 +56,9 @@ Type.HideBars = true
 function Type:Setup(icon, groupID, iconID)
 	icon.NameFirst = TMW:GetSpellNames(icon, icon.Name, 1)
 
-	if icon.Name == "" then
-		icon:SetTexture("Interface\\Icons\\INV_Misc_QuestionMark")
-	elseif TMW.SpellTextures[icon.NameFirst] then
-		icon:SetTexture(TMW.SpellTextures[icon.NameFirst])
-	else
+	local tex, reason = TMW:GetConfigIconTexture(icon)
+	icon:SetTexture(tex)
+	if reason == false then
 		icon:SetTexture(icon.Name)
 		if not icon.texture:GetTexture() then
 			icon:SetTexture("Interface\\Icons\\" .. icon.Name)
@@ -74,7 +72,7 @@ function Type:Setup(icon, groupID, iconID)
 	icon.__vrtxcolor = 1
 
 	icon:SetScript("OnUpdate", ConditionIcon_OnUpdate)
-	--icon:OnUpdate(TMW.time)
+	--icon:OnUpdate(TMW.time) -- dont do this!
 end
 
 function Type:IE_TypeLoaded()

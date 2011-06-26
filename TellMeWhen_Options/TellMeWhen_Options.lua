@@ -99,13 +99,10 @@ for category, b in pairs(TMW.OldBE) do
 	for equiv, str in pairs(b) do
 
 		-- create the lookup tables first, so that we can have the first ID even if it will be turned into a name
-		local first = strsplit(";", str)
-		first = strtrim(first, "; _")
-		EquivFirstIDLookup[equiv] = first -- this is used to display them in the list (tooltip, name, id display)
+		EquivFirstIDLookup[equiv] = strsplit(";", str) -- this is used to display them in the list (tooltip, name, id display)
 
-		b[equiv] = gsub(str, "_", "") -- this is used to put icons into tooltips
-		EquivFullIDLookup[equiv] = ";" .. b[equiv]
-		local tbl = TMW:SplitNames(b[equiv])
+		EquivFullIDLookup[equiv] = ";" .. str
+		local tbl = TMW:SplitNames(str)
 		for k, v in pairs(tbl) do
 			tbl[k] = GetSpellInfo(v) or v
 		end
@@ -2636,6 +2633,11 @@ local SUGIMS, SUGSoI
 local SUGpreTable = {}
 local SUGPlayerSpells = {}
 local ActionCache, pclassSpellCache, ClassSpellLookup, AuraCache, ItemCache, SpellCache, CastCache
+local TrackingCache = {}
+for i = 1, GetNumTrackingTypes() do
+	local name, _, active = GetTrackingInfo(i)
+	TrackingCache[i] = strlower(name)
+end
 
 function SUG:OnInitialize()
 	TMWOptDB = TMWOptDB or {}
@@ -2958,7 +2960,7 @@ function SUG.Sorter(a, b)
 		end
 	end
 
-	if inputType == "number" then
+	if inputType == "number" or SUGSoI == "tracking" then
 		--sort by id
 		return a < b
 	else
@@ -3019,6 +3021,8 @@ function SUG:DoSuggest()
 	local tbl
 	if SUGSoI == "item" then
 		tbl = ItemCache
+	elseif SUGSoI == "tracking" then
+		tbl = TrackingCache
 	elseif t == "cast" and not overrideSoI then
 		tbl = CastCache
 	else
@@ -3105,6 +3109,19 @@ function SUG:SuggestingComplete(doSort)
 					f.tooltiparg = link
 
 					f.Icon:SetTexture(GetItemIcon(id))
+
+				elseif SUGSoI == "tracking" then 
+					local name, texture = GetTrackingInfo(id)
+
+					f.Name:SetText(name)
+					f.ID:SetText(nil)
+
+					f.insert = name
+
+					f.tooltipmethod = nil
+					f.tooltiparg = nil
+
+					f.Icon:SetTexture(texture)
 
 				else -- the entry must be just a normal spell
 					local name = GetSpellInfo(id)
@@ -3360,6 +3377,17 @@ local commonConditions = {
 	"STANCE",
 }
 
+local function get(value, ...)
+	local type = type(value)
+	if type == "function" then
+		return value(...)
+	elseif type == "table" then
+		return value[...]
+	else
+		return value
+	end
+end
+
 local function AddConditionToDropDown(v)
 	if v.hidden then return end
 	local info = UIDropDownMenu_CreateInfo()
@@ -3371,11 +3399,7 @@ local function AddConditionToDropDown(v)
 	info.value = v.value
 	info.arg1 = frame
 	info.arg2 = v
-	if type(v.icon) == "function" then
-		info.icon = v.icon()
-	else
-		info.icon = v.icon
-	end
+	info.icon = get(v.icon)
 	if v.tcoords then
 		info.tCoordLeft = v.tcoords[1]
 		info.tCoordRight = v.tcoords[2]
@@ -3387,13 +3411,6 @@ end
 
 function CNDT:TypeMenu_DropDown()
 	if UIDROPDOWNMENU_MENU_LEVEL == 1 then
-		wipe(usedCount)
-		for ics in TMW:InIconSettings() do
-			for k, condition in pairs(ics.Conditions) do
-				usedCount[condition.Type] = (usedCount[condition.Type] or 0) + 1
-			end
-		end
-		
 		local info = UIDropDownMenu_CreateInfo()
 		info.text = L["CNDTCAT_FREQUENTLYUSED"]
 		info.value = "FREQ"
@@ -3416,6 +3433,12 @@ function CNDT:TypeMenu_DropDown()
 			addedThings[k] = 1
 			num = num + 1
 			if num > 20 then break end
+		end
+		wipe(usedCount)
+		for ics in TMW:InIconSettings() do
+			for k, condition in pairs(ics.Conditions) do
+				usedCount[condition.Type] = (usedCount[condition.Type] or 0) + 1
+			end
 		end
 		for k, n in TMW:OrderedPairs(usedCount, "values", true) do
 			if not addedThings[k] then
@@ -3686,19 +3709,19 @@ function CNDT:OK()
 	if not groupID then return end
 
 	local Conditions = CNDT.settings
-	Conditions["**"] = nil -- i dont know why these occasionally pop up, but this seems like a good place to get rid of them
+	Conditions["**"] = nil -- i failed at copying defaults properly, get rid of these whenever they are seen
 	local i = 1
 	while CNDT[i] and CNDT[i]:IsShown() do
 		local group = CNDT[i]
 		local condition = Conditions[i]
-
+		
 		condition.Type = UIDropDownMenu_GetSelectedValue(group.Type) or "HEALTH"
 		condition.Unit = strtrim(group.Unit:GetText()) or "player"
 		condition.Operator = UIDropDownMenu_GetSelectedValue(group.Operator) or "=="
 		condition.Icon = UIDropDownMenu_GetSelectedValue(group.Icon) or ""
 		condition.Level = tonumber(group.Slider:GetValue()) or 0
 		condition.AndOr = group.And:GetChecked() and "AND" or "OR"
-		condition.Name = strtrim(group.EditBox:GetText()) or ""
+		condition.Name = get(CNDT.ConditionsByType[condition.Type].storename, condition.Level) or strtrim(group.EditBox:GetText()) or ""
 		condition.Checked = not not group.Check:GetChecked()
 
 		for k, rune in pairs(group.Runes) do
@@ -3896,10 +3919,7 @@ function CNDT:SetValText(group)
 	if TMW.Initd and group.ValText then
 		local val = group.Slider:GetValue()
 		local v = CNDT.ConditionsByType[UIDropDownMenu_GetSelectedValue(group.Type)]
-		if v.texttable then
-			val = v.texttable[val]
-		end
-		group.ValText:SetText(val)
+		group.ValText:SetText(get(v.texttable, val) or val)
 	end
 end
 
@@ -3908,6 +3928,8 @@ function CNDT:SetSliderMinMax(group, level)
 	local v = CNDT.ConditionsByType[UIDropDownMenu_GetSelectedValue(group.Type)]
 	if not v then return end
 	local Slider = group.Slider
+	local vmin = get(v.min)
+	local vmax = get(v.max)
 	if v.range then
 		local deviation = v.range/2
 		local val = level or Slider:GetValue()
@@ -3916,15 +3938,14 @@ function CNDT:SetSliderMinMax(group, level)
 		local newmax = max(deviation, val + deviation)
 
 		Slider:SetMinMaxValues(newmin, newmax)
-
-		_G[Slider:GetName() .. "Low"]:SetText((v.texttable and v.texttable[newmin]) or newmin)
+		_G[Slider:GetName() .. "Low"]:SetText(get(v.texttable, newmin) or newmin)
 		_G[Slider:GetName() .. "Mid"]:SetText(nil)
-		_G[Slider:GetName() .. "High"]:SetText((v.texttable and v.texttable[newmax]) or newmax)
+		_G[Slider:GetName() .. "High"]:SetText(get(v.texttable, newmax) or newmax)
 	else
-		Slider:SetMinMaxValues(v.min or 0, v.max or 1)
-		_G[Slider:GetName() .. "Low"]:SetText((v.texttable and v.texttable[v.min]) or v.mint or v.min or 0)
+		Slider:SetMinMaxValues(vmin or 0, vmax or 1)
+		_G[Slider:GetName() .. "Low"]:SetText(get(v.texttable, vmin) or v.mint or vmin or 0)
 		_G[Slider:GetName() .. "Mid"]:SetText(v.midt)
-		_G[Slider:GetName() .. "High"]:SetText((v.texttable and v.texttable[v.max]) or v.maxt or v.max or 1)
+		_G[Slider:GetName() .. "High"]:SetText(get(v.texttable, vmax) or v.maxt or vmax or 1)
 	end
 	Slider.step = v.step or 1
 	Slider:SetValueStep(Slider.step)
@@ -3971,6 +3992,12 @@ function CNDT:TypeCheck(group, data)
 			group.Check:Hide()
 		end
 		group.EditBox.useSUG = data.useSUG
+		if data.useSUG then
+			SUG.redoIfSame = 1
+			SUG.Box = group.EditBox
+			SUG.overrideSoI = (data.useSUG == true and "spell") or data.useSUG
+			SUG:NameOnCursor()
+		end
 	else
 		group.EditBox:Hide()
 		group.Check:Hide()

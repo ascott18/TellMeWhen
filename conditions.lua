@@ -355,6 +355,14 @@ local function TotemDuration(slot, time)
 	return duration and duration ~= 0 and (duration - (time - start)) or 0
 end
 
+local trackingmap = {}
+function CNDT:MINIMAP_UPDATE_TRACKING()
+	for i = 1, GetNumTrackingTypes() do
+		local name, _, active = GetTrackingInfo(i)
+		Env.Tracking[strlower(name)] = active
+	end
+end
+
 Env = {
 	UnitHealth = UnitHealth,
 	UnitHealthMax = UnitHealthMax,
@@ -416,7 +424,8 @@ Env = {
 	NumPartyMembers = 0,
 	NumRaidMembers = 0,
 	print = TMW.print,
-	time = GetTime()
+	time = GetTime(),
+	Tracking = {},
 } CNDT.Env = Env
 
 CNDT.Operators  =  {
@@ -997,13 +1006,12 @@ CNDT.Types = {
 		value = "TREE",
 		min = 1,
 		max = 3,
-		texttable = setmetatable({}, {__index=function(t, i) return select(2, GetTalentTabInfo(i)) end}),
+		texttable = function() return select(2, GetTalentTabInfo(i)) end,
 		unit = PLAYER,
 		icon = function() return select(4, GetTalentTabInfo(1)) end,
 		tcoords = standardtcoords,
 		funcstr = [[CurrentTree c.Operator c.Level]],
 	},
-	
 	{ -- autocast
 		text = L["CONDITIONPANEL_AUTOCAST"],
 		category = L["CNDTCAT_STATUS"],
@@ -1018,6 +1026,22 @@ CNDT.Types = {
 		icon = "Interface\\Icons\\ability_physical_taunt",
 		tcoords = standardtcoords,
 		funcstr = [[select(2, GetSpellAutocast(c.NameName)) == c.1nil]],
+	},
+	{ -- tracking
+		text = L["CONDITIONPANEL_TRACKING"],
+		category = L["CNDTCAT_STATUS"],
+		value = "TRACKING",
+		min = 0,
+		max = 1,
+		texttable = bool,
+		nooperator = true,
+		unit = PLAYER,
+		name = function(editbox) TMW:TT(editbox, "CONDITIONPANEL_TRACKING", "CNDT_ONLYFIRST", nil, nil, 1) editbox.label = L["SPELLTOCHECK"] end,
+		useSUG = "tracking",
+		icon = "Interface\\MINIMAP\\TRACKING\\None",
+		tcoords = standardtcoords,
+		funcstr = [[Tracking[c.NameName] == c.1nil]],
+		events = {"MINIMAP_UPDATE_TRACKING"},
 	},
 
 

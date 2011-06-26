@@ -657,8 +657,8 @@
 						if self.useSUG then
 							TMW.SUG.redoIfSame = nil
 							TMW.SUG.Box = self
-							TMW.SUG:NameOnCursor()
 							TMW.SUG.overrideSoI = (self.useSUG == true and "spell") or self.useSUG
+							TMW.SUG:NameOnCursor()
 						end
 					</OnEditFocusGained>
 					<OnTextChanged>
