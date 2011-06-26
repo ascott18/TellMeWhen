@@ -3,8 +3,9 @@
  * New Condition: Tracking active
  * Added a toggle to DR icons to help work around the buggy spell refresh behavior.
  * Greatly improved config mode texture detection.
+ * Added Wing Clip to the slowed equivalency.
  * Bug Fixes:
- ** (r124) Inserting an equivalancy via the dropdown should now properly save the text in the editbox.
+ ** (r124) Inserting an equivalency via the dropdown should now properly save the text in the editbox.
 
 ===v4.4.0===
  * Dramatically changed the way that Unit Cooldown and Internal Cooldown icons handle durations. Durations are now defined per spell within an icon, instead of having the same duration for all spells within an icon. More information is available by choosing one of these types in-game.
