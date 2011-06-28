@@ -1,6 +1,7 @@
 ===v4.4.1===
  * New Condition: Spell autocasting
  * New Condition: Tracking active
+ * New option for buff icons (mage only): Only stealable.
  * Added a toggle to DR icons to help work around the buggy spell refresh behavior.
  * Greatly improved config mode texture detection.
  * Added Wing Clip to the slowed equivalency.

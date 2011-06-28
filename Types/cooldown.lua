@@ -464,5 +464,15 @@ function Type:IE_TypeLoaded()
 		IE.Main.StackMinEnabled:Hide()
 		IE.Main.StackMaxEnabled:Hide()
 	end
+	
+	local Name = TMW.IE.Main.Name
+	Name.TTtext = TMW.CI.IMS and L["CHOOSENAME_DIALOG_MSCD"] or L["CHOOSENAME_DIALOG"]
+	Name:GetScript("OnTextChanged")(Name)
+end
+
+function Type:IE_TypeUnloaded()
+	local Name = TMW.IE.Main.Name
+	Name.TTtext = L["CHOOSENAME_DIALOG"]
+	Name:GetScript("OnTextChanged")(Name)
 end
 

@@ -772,11 +772,18 @@ function TMW:CompileOptions() -- options
 						TMW:Group_Update(g)
 					end,
 					get = function(info) return db.profile.Groups[findid(info)][info[#info]] end,
-					args = {},
+					args = {
+						addgroupgroup = {
+							type = "group",
+							name = L["UIPANEL_ADDGROUP"],
+							args = {},
+						},
+					},
 				},
 			},
 		}
 		TMW.OptionsTable.args.groups.args.addgroup = TMW.OptionsTable.args.main.args.addgroup
+		TMW.OptionsTable.args.groups.args.addgroupgroup.args.addgroup = TMW.OptionsTable.args.main.args.addgroup
 		TMW.OptionsTable.args.profiles = LibStub("AceDBOptions-3.0"):GetOptionsTable(db)
 	end
 
@@ -790,6 +797,7 @@ function TMW:CompileOptions() -- options
 	for g = 1, TELLMEWHEN_MAXGROUPS do
 		TMW.OptionsTable.args.groups.args["Group " .. g] = groupConfigTemplate
 	end
+	TMW.OptionsTable.args.groups.args.addgroup.order = TELLMEWHEN_MAXGROUPS + 1
 
 	LibStub("AceConfig-3.0"):RegisterOptionsTable("TellMeWhen Options", TMW.OptionsTable)
 	LibStub("AceConfigDialog-3.0"):SetDefaultSize("TellMeWhen Options", 781, 512)
@@ -1303,6 +1311,7 @@ IE.Checks = { --1=check box, 2=editbox, 3=slider(x100), 4=custom, table=subkeys 
 	DontRefresh = 1,
 	EnableStacks = 1,
 	CheckRefresh = 1,
+	Stealable = 1,
 }
 IE.Tabs = {
 	[1] = "Main",
@@ -1313,7 +1322,7 @@ IE.Tabs = {
 	[6] = "Conditions",
 }
 IE.Units = {
-	{ value = "player", 					text = PLAYER },
+	{ value = "player", 					text = PLAYER .. " " .. L["PLAYER_DESC"]  },
 	{ value = "target", 					text = TARGET },
 	{ value = "targettarget", 				text = L["ICONMENU_TARGETTARGET"] },
 	{ value = "focus", 						text = L["ICONMENU_FOCUS"] },

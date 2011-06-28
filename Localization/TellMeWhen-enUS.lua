@@ -25,7 +25,7 @@ L["FROMNEWERVERSION"] = "You are importing an icon that was created in a newer v
 -- ICONMENU
 -- -------------
 
-L["ICONMENU_CHOOSENAME"] = "Choose name/ID"
+L["ICONMENU_CHOOSENAME"] = "Choose name(s)/ID(s)"
 L["ICONMENU_CHOOSENAME_CNDTIC"] = "Choose name/ID/texture path"
 L["ICONMENU_ENABLE"] = "Enabled"
 L["CHOOSENAME_EQUIVS_TOOLTIP"] = "You can select a predefined set of buffs/debuffs, spell casts, or dispel types (Magic, Curse, etc.) from this menu to insert into the editbox."
@@ -33,13 +33,11 @@ L["CHOOSENAME_DIALOG_DDDEFAULT"] = "Predefined Spell Sets/Dispel Types"
 L["CHOOSENAME_DIALOG"] = [=[Enter the Name or ID of what you want this icon to monitor. You can add multiple things (except for multi-state cooldowns) by separating them with semicolons (;).
 
 |cFFFF5959PET ABILITIES|r must use SpellIDs.]=]
+L["CHOOSENAME_DIALOG_MSCD"] = [=[Enter the Name or ID of what the cooldown that you want this icon to monitor. Only the first spell/item will be checked - semicolon-delimited lists are not valid for this icon type.]=]
 L["CHOOSENAME_DIALOG_CNDTIC"] = "Enter the Name or ID of the spell that has the texture that you want to use. You may also enter a texture path, such as 'Interface/Icons/spell_nature_healingtouch', or just 'spell_nature_healingtouch' if the path is 'Interface/Icons'"
-L["CHOOSENAME_DIALOG_ICD"] = "ICD/duration"
-L["CHOOSENAME_DIALOG_ICD_DESC"] = "Enter the internal cooldown length or the duration of the spell that you want to track."
-L["CHOOSENAME_DIALOG_UCD_DESC"] = "Enter the cooldown length of the spell(s) that you want to track."
 
 L["ICONMENU_ALPHA"] = "Transparency"
-L["CONDITIONALPHA"] = "Condition/Duration/Stacks"
+L["CONDITIONALPHA"] = "Failed Cndt/Dur./Stack"
 L["CONDITIONALPHA_DESC"] = "This will be used when conditions fail, or if the duration or stack requirements are not met."
 L["ICONMENU_TYPE"] = "Icon type"
 L["ICONMENU_COOLDOWN"] = "Cooldown"
@@ -216,6 +214,8 @@ L["ICONMENU_ONLYEQPPD"] = "Only if equipped"
 L["ICONMENU_ONLYEQPPD_DESC"] = "Check this to make the icon show only if the item is equipped."
 L["ICONMENU_SHOWSTACKS"] = "Show stacks"
 L["ICONMENU_SHOWSTACKS_DESC"] = "Check this to show the number of stacks of the item you have."
+L["ICONMENU_STEALABLE"] = "Only stealable"
+L["ICONMENU_STEALABLE_DESC"] = "Check this to only show buffs that can be spellstolen. Best used when checking for the 'Magic' dispel type"
 L["ICONMENU_ONLYBAGS"] = "Only if in bags"
 L["ICONMENU_ONLYBAGS_DESC"] = "Check this to make the icon show only if the item is in your bags (or equipped). If 'Only if equipped' is enabled, this is also forcibly enabled."
 L["ICONMENU_ONLYSEEN"] = "Only if seen"
@@ -506,6 +506,8 @@ L["MESSAGERECIEVE"] = "%s has sent you a TellMeWhen icon! You can import this ic
 L["MESSAGERECIEVE_SHORT"] = "%s has sent you a TellMeWhen icon!"
 L["ALLOWCOMM"] = "Allow icon importing"
 L["NEWVERSION"] = "A new version of TellMeWhen is available: %s"
+L["PLAYER_DESC"] = "(You)"
+
 
 
 L["CACHING"] = "TellMeWhen is caching and filtering all spells in the game. This only needs to be done once per WoW patch. You can speed up or slow down the process using the slider below."

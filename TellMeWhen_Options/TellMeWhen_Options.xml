@@ -2521,12 +2521,32 @@
 							</OnClick>
 						</Scripts>
 					</CheckButton>
+					<CheckButton name="$parentStealable" inherits="TellMeWhen_CheckTemplate" parentKey="Stealable">
+						<Anchors>
+							<Anchor point="TOPLEFT" relativeTo="$parentOnlyMine" relativePoint="BOTTOMLEFT" x="0" y="4" />
+						</Anchors>
+						<Scripts>
+							<OnLoad>
+								TMW:TT(self, "ICONMENU_STEALABLE", "ICONMENU_STEALABLE_DESC")
+								self.text:SetText(TMW.L["ICONMENU_STEALABLE"])
+								self.text:SetWidth(TELLMEWHEN_COLUMN1WIDTH)
+							</OnLoad>
+							<OnClick>
+								local groupID, iconID = TMW.CI.g, TMW.CI.i
+								if TMW.db then
+									TMW.db.profile.Groups[groupID].Icons[iconID]["Stealable"] = not not self:GetChecked()
+									TMW.IE:ScheduleIconUpdate(groupID, iconID)
+								end
+								TMW.IE:ShowHide()
+							</OnClick>
+						</Scripts>
+					</CheckButton>
 
 					<Frame name="$parentSortChecks" parentKey="Sort">
 						<Size x="140" y="90"/>
 						<Anchors>
 							<Anchor point="TOPLEFT" relativeTo="$parentRangeCheck" relativePoint="BOTTOMLEFT">
-								<Offset x="0" y="0" />
+								<Offset x="0" y="-10" />
 							</Anchor>
 						</Anchors>
 						<Layers>
