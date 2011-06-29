@@ -1,5 +1,10 @@
 ===v4.4.3===
  * Sorta rewrote condition configuration.
+ * New Conditions:
+ ** Spell cooldown duration comparison
+ ** Item Cooldown duration comparison
+ ** Buff duration comparison
+ ** Debuff duration comparison
  * Bug Fixes:
  ** (r133) attempt to compare number with nil (In spell cooldown conditions)
  ** (r133) conditions.lua:1009: Usage: GetTalentTabInfo(tabIndex[, isInspect[, isPet[, groupIndex]]])

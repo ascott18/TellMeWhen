@@ -681,6 +681,49 @@
 					</OnMouseUp>
 				</Scripts>
 			</EditBox>
+			<EditBox name="$parentEditBox2" inherits="TellMeWhen_InputBoxTemplate" parentKey="EditBox2" autoFocus="false">
+				<Size x="302" y="18"/>
+				<Anchors>
+					<Anchor point="LEFT" relativeTo="$parentEditBox" relativePoint="RIGHT">
+						<Offset x="5" y="" />
+					</Anchor>
+				</Anchors>
+				<Scripts>
+					<OnEditFocusLost>
+						EditBox_ClearHighlight(self)
+						self:SetText(TMW:CleanString(self:GetText()))
+						TMW.SUG.Suggest:Hide()
+						TMW.CNDT:OK()
+					</OnEditFocusLost>
+					<OnEditFocusGained>
+						EditBox_HighlightText(self)
+						self.BackgroundText:SetText(nil)
+						if self.useSUG then
+							TMW.SUG.redoIfSame = nil
+							TMW.SUG.Box = self
+							TMW.SUG.overrideSoI = (self.useSUG == true and "spell") or self.useSUG
+							TMW.SUG:NameOnCursor()
+						end
+					</OnEditFocusGained>
+					<OnTextChanged>
+						local text = self:GetText()
+						if text == "" then
+							self.BackgroundText:SetText(self.label)
+						else
+							self.BackgroundText:SetText(nil)
+						end
+						if userInput and self.useSUG then
+							TMW.SUG.redoIfSame = nil
+							TMW.SUG:NameOnCursor()
+						end
+					</OnTextChanged>
+					<OnMouseUp>
+						if self.useSUG then
+							TMW.SUG:NameOnCursor(1)
+						end
+					</OnMouseUp>
+				</Scripts>
+			</EditBox>
 			<Frame name="$parentRunes" parentKey="Runes" hidden="true">
 				<Size x="1" y="1"/>
 				<Anchors>
@@ -926,6 +969,22 @@
 			<CheckButton name="$parentCheck" inherits="TellMeWhen_CheckTemplate" parentKey="Check">
 				<Anchors>
 					<Anchor point="RIGHT" relativeTo="$parentEditBox" >
+						<Offset x="5" y="-1" />
+					</Anchor>
+				</Anchors>
+				<Scripts>
+					<OnLoad>
+						self:SetFrameLevel(self:GetParent().EditBox:GetFrameLevel() + 1)
+						self:GetNormalTexture():SetVertexColor(1, 0, 0, 1)
+					</OnLoad>
+					<OnClick>
+						TMW.CNDT:OK()
+					</OnClick>
+				</Scripts>
+			</CheckButton>
+			<CheckButton name="$parentCheck2" inherits="TellMeWhen_CheckTemplate" parentKey="Check2">
+				<Anchors>
+					<Anchor point="RIGHT" relativeTo="$parentEditBox2" >
 						<Offset x="5" y="-1" />
 					</Anchor>
 				</Anchors>

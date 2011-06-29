@@ -1054,16 +1054,28 @@ CNDT.Types = {
 		category = L["CNDTCAT_SPELLSABILITIES"],
 		range = 30,
 		step = 0.1,
-		name = function(editbox) TMW:TT(editbox, L["COOLDOWN"] .. " - " .. L["ICONMENU_SPELL"], "CNDT_ONLYFIRST", 1, nil, 1) editbox.label = L["SPELLTOCHECK"] end,
+		name = function(editbox) TMW:TT(editbox, "SPELLTOCHECK", "CNDT_ONLYFIRST", nil, nil, 1) editbox.label = L["SPELLTOCHECK"] end,
 		useSUG = true,
 		unit = PLAYER,
 		texttable = setmetatable({[0] = formatSeconds(0).." ("..L["ICONMENU_USABLE"]..")"}, {__index = function(tbl, k) return formatSeconds(k) end}),
 		icon = "Interface\\Icons\\spell_holy_divineintervention",
 		tcoords = standardtcoords,
 		funcstr = [[CooldownDuration(c.NameFirst, time) c.Operator c.Level]],
---		spacebefore = true,
 	},
-	{ -- reactive
+	{ -- spell cooldown compare
+		text = L["COOLDOWN"] .. " - " .. L["ICONMENU_SPELL"] .. " - " .. L["COMPARISON"],
+		value = "SPELLCDCOMP",
+		category = L["CNDTCAT_SPELLSABILITIES"],
+		noslide = true,
+		name = function(editbox) TMW:TT(editbox, "SPELLTOCOMP1", "CNDT_ONLYFIRST", nil, nil, 1) editbox.label = L["SPELLTOCOMP1"] end,
+		name2 = function(editbox) TMW:TT(editbox, "SPELLTOCOMP2", "CNDT_ONLYFIRST", nil, nil, 1) editbox.label = L["SPELLTOCOMP2"] end,
+		useSUG = true,
+		unit = PLAYER,
+		icon = "Interface\\Icons\\spell_holy_divineintervention",
+		tcoords = standardtcoords,
+		funcstr = [[CooldownDuration(c.NameFirst, time) c.Operator CooldownDuration(c.NameFirst2, time)]],
+	},
+	{ -- spell reactivity
 		text = L["ICONMENU_REACTIVE"],
 		tooltip = L["REACTIVECNDT_DESC"],
 		value = "REACTIVE",
@@ -1079,7 +1091,7 @@ CNDT.Types = {
 		tcoords = standardtcoords,
 		funcstr = [[c.1nil == IsUsableSpell(c.NameFirst)]],
 	},
-	{ -- mana
+	{ -- spell has mana
 		text = L["CONDITIONPANEL_MANAUSABLE"],
 		value = "MANAUSABLE",
 		category = L["CNDTCAT_SPELLSABILITIES"],
@@ -1125,6 +1137,19 @@ CNDT.Types = {
 		tcoords = standardtcoords,
 		funcstr = [[ItemCooldownDuration(c.ItemID, time) c.Operator c.Level]],
 		spacebefore = true,
+	},
+	{ -- item cooldown compare
+		text = L["ITEMCOOLDOWN"] .. " - " .. L["COMPARISON"],
+		value = "ITEMCDCOMP",
+		category = L["CNDTCAT_SPELLSABILITIES"],
+		noslide = true,
+		name = function(editbox) TMW:TT(editbox, "ITEMTOCOMP1", "CNDT_ONLYFIRST", nil, nil, 1) editbox.label = L["ITEMTOCOMP1"] end,
+		name2 = function(editbox) TMW:TT(editbox, "ITEMTOCOMP2", "CNDT_ONLYFIRST", nil, nil, 1) editbox.label = L["ITEMTOCOMP2"] end,
+		useSUG = "item",
+		unit = PLAYER,
+		icon = "Interface\\Icons\\inv_jewelry_trinketpvp_01",
+		tcoords = standardtcoords,
+		funcstr = [[ItemCooldownDuration(c.ItemID, time) c.Operator ItemCooldownDuration(c.ItemID2, time)]],
 	},
 	{ -- item range
 		text = L["CONDITIONPANEL_ITEMRANGE"],
@@ -1189,6 +1214,22 @@ CNDT.Types = {
 		end,
 		spacebefore = true,
 	},
+	{ -- unit buff duration compare
+		text = L["ICONMENU_BUFF"] .. " - " .. L["DURATIONPANEL_TITLE"] .. " - " .. L["COMPARISON"],
+		value = "BUFFDURCOMP",
+		category = L["CNDTCAT_SPELLSABILITIES"],
+		noslide = true,
+		name = function(editbox) TMW:TT(editbox, "BUFFTOCOMP1", "CNDT_ONLYFIRST", nil, nil, 1) editbox.label = L["BUFFTOCOMP1"] end,
+		check = function(check) TMW:TT(check, "ONLYCHECKMINE", "ONLYCHECKMINE_DESC", nil, nil, 1) end,
+		name2 = function(editbox) TMW:TT(editbox, "BUFFTOCOMP2", "CNDT_ONLYFIRST", nil, nil, 1) editbox.label = L["BUFFTOCOMP2"] end,
+		check2 = function(check) TMW:TT(check, "ONLYCHECKMINE", "ONLYCHECKMINE_DESC", nil, nil, 1) end,
+		useSUG = true,
+		icon = "Interface\\Icons\\spell_nature_rejuvenation",
+		tcoords = standardtcoords,
+		funcstr = function(c)
+			return [[AuraDur(c.Unit, c.NameName, "HELPFUL]] .. (c.Checked and "|PLAYER" or "") .. [[", time) c.Operator AuraDur(c.Unit, c.NameName2, "HELPFUL]] .. (c.Checked2 and "|PLAYER" or "") .. [[", time)]]
+		end,
+	},
 	{ -- unit buff stacks
 		text = L["ICONMENU_BUFF"] .. " - " .. L["STACKSPANEL_TITLE"],
 		value = "BUFFSTACKS",
@@ -1236,6 +1277,22 @@ CNDT.Types = {
 		tcoords = standardtcoords,
 		funcstr = function(c)
 			return [[AuraDur(c.Unit, c.NameName, "HARMFUL]] .. (c.Checked and "|PLAYER" or "") .. [[", time) c.Operator c.Level]]
+		end,
+	},
+	{ -- unit buff duration compare
+		text = L["ICONMENU_DEBUFF"] .. " - " .. L["DURATIONPANEL_TITLE"] .. " - " .. L["COMPARISON"],
+		value = "DEBUFFDURCOMP",
+		category = L["CNDTCAT_SPELLSABILITIES"],
+		noslide = true,
+		name = function(editbox) TMW:TT(editbox, "DEBUFFTOCOMP1", "CNDT_ONLYFIRST", nil, nil, 1) editbox.label = L["DEBUFFTOCOMP1"] end,
+		check = function(check) TMW:TT(check, "ONLYCHECKMINE", "ONLYCHECKMINE_DESC", nil, nil, 1) end,
+		name2 = function(editbox) TMW:TT(editbox, "DEBUFFTOCOMP2", "CNDT_ONLYFIRST", nil, nil, 1) editbox.label = L["DEBUFFTOCOMP2"] end,
+		check2 = function(check) TMW:TT(check, "ONLYCHECKMINE", "ONLYCHECKMINE_DESC", nil, nil, 1) end,
+		useSUG = true,
+		icon = "Interface\\Icons\\spell_shadow_abominationexplosion",
+		tcoords = standardtcoords,
+		funcstr = function(c)
+			return [[AuraDur(c.Unit, c.NameName, "HARMFUL]] .. (c.Checked and "|PLAYER" or "") .. [[", time) c.Operator AuraDur(c.Unit, c.NameName2, "HARMFUL]] .. (c.Checked2 and "|PLAYER" or "") .. [[", time)]]
 		end,
 	},
 	{ -- unit debuff stacks
@@ -1799,6 +1856,13 @@ function CNDT:ProcessConditions(icon)
 			name = gsub(name, ";;", ";")
 			name = strtrim(name)
 			name = strlower(name)
+			
+			local name2 = gsub((c.Name2 or ""), "; ", ";")
+			name2 = gsub(name2, " ;", ";")
+			name2 = ";" .. name2 .. ";"
+			name2 = gsub(name2, ";;", ";")
+			name2 = strtrim(name2)
+			name2 = strlower(name2)
 			local andor
 			if c.AndOr == "OR" then
 				andor = "or " --have a space so they are both 3 chars long
@@ -1846,6 +1910,11 @@ function CNDT:ProcessConditions(icon)
 
 				thisstr = thisstr:
 				gsub("c.Operator", 		c.Operator):
+				gsub("c.NameFirst2", 	"\"" .. TMW:GetSpellNames(nil, name2, 1) .. "\""):
+				gsub("c.NameName2", 	"\"" .. TMW:GetSpellNames(nil, name2, 1, 1) .. "\""):
+				gsub("c.ItemID2", 		TMW:GetItemIDs(nil, name2, 1)):
+				gsub("c.Name2", 		"\"" .. name2 .. "\""):
+				
 				gsub("c.NameFirst", 	"\"" .. TMW:GetSpellNames(nil, name, 1) .. "\""):
 				gsub("c.NameName", 		"\"" .. TMW:GetSpellNames(nil, name, 1, 1) .. "\""):
 				gsub("c.ItemID", 		TMW:GetItemIDs(nil, name, 1)):
@@ -1864,7 +1933,7 @@ function CNDT:ProcessConditions(icon)
 		else
 			]]..icon:GetName()..[[.CndtFailed = nil
 		end]]
-	else
+	else -- its a group condition
 		funcstr = [[if not (]] .. strsub(funcstr, 4) .. [[) then
 			]] .. icon:GetName() .. [[:Hide()
 		else

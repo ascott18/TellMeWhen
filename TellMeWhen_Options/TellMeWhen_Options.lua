@@ -3791,6 +3791,118 @@ end
 CNDT.AddIns = {}
 local AddIns = CNDT.AddIns
 
+function AddIns.TypeCheck(group, data)
+	if data then
+		local unit = data.unit
+
+		group.Icon:Hide() --it bugs sometimes so just do it by default
+		group.Runes:Hide()
+		local showval = true
+		group:SetTitles()
+		group.Unit:Show()
+		if unit then
+			group.Unit:Hide()
+			group.TextUnitDef:SetText(unit)
+		elseif unit == false then -- must be == false
+			group.TextUnitOrIcon:SetText(nil)
+			group.Unit:Hide()
+			group.TextUnitDef:SetText(nil)
+		end
+
+		if data.name then
+			group.EditBox:Show()
+			if type(data.name) == "function" then
+				data.name(group.EditBox)
+				group.EditBox:GetScript("OnTextChanged")(group.EditBox)
+			else
+				TMW:TT(group.EditBox, nil, nil, nil, nil, 1)
+			end
+			if data.check then
+				data.check(group.Check)
+				group.Check:Show()
+			else
+				group.Check:Hide()
+			end
+			group.EditBox.useSUG = data.useSUG
+			if data.useSUG then
+				SUG.redoIfSame = 1
+				SUG.Box = group.EditBox
+				SUG.overrideSoI = (data.useSUG == true and "spell") or data.useSUG
+				SUG:NameOnCursor()
+			end
+			group.Slider:SetWidth(200)
+			if data.noslide then
+				group.EditBox:SetWidth(520)
+			else
+				group.EditBox:SetWidth(312)
+			end
+		else
+			group.EditBox:Hide()
+			group.Check:Hide()
+			group.Slider:SetWidth(523)
+			group.EditBox.useSUG = nil
+		end
+		if data.name2 then
+			group.EditBox2:Show()
+			if type(data.name2) == "function" then
+				data.name2(group.EditBox2)
+				group.EditBox2:GetScript("OnTextChanged")(group.EditBox2)
+			else
+				TMW:TT(group.EditBox2, nil, nil, nil, nil, 1)
+			end
+			if data.check2 then
+				data.check2(group.Check2)
+				group.Check2:Show()
+			else
+				group.Check2:Hide()
+			end
+			group.EditBox2.useSUG = data.useSUG
+			group.EditBox:SetWidth(250)
+			group.EditBox2:SetWidth(250)
+		else
+			group.Check2:Hide()
+			group.EditBox2:Hide()
+			group.EditBox2.useSUG = nil
+		end
+		
+		if data.nooperator then
+			group.TextOperator:SetText("")
+			group.Operator:Hide()
+		else
+			group.Operator:Show()
+		end
+		
+		if data.noslide then
+			showval = false
+			group.Slider:Hide()
+			group.TextValue:SetText("")
+			group.ValText:Hide()
+		else
+			group.ValText:Show()
+			group.Slider:Show()
+		end
+		
+		if data.showhide then
+			data.showhide(group, data)
+		end
+		return showval
+	else
+		group.Unit:Hide()
+		group.Check:Hide()
+		group.EditBox:Hide()
+		group.Check:Hide()
+		group.Operator:Hide()
+		group.ValText:Hide()
+		group.Slider:Hide()
+		
+		group.TextUnitOrIcon:SetText(nil)
+		group.TextUnitDef:SetText(nil)
+		group.TextOperator:SetText(nil)
+		group.TextValue:SetText(nil)
+	
+	end
+end
+
 function AddIns.Save(group)
 	local condition = CNDT.settings[group:GetID()]
 	
@@ -3801,7 +3913,9 @@ function AddIns.Save(group)
 	condition.Level = tonumber(group.Slider:GetValue()) or 0
 	condition.AndOr = group.And:GetChecked() and "AND" or "OR"
 	condition.Name = strtrim(group.EditBox:GetText()) or ""
+	condition.Name2 = strtrim(group.EditBox2:GetText()) or ""
 	condition.Checked = not not group.Check:GetChecked()
+	condition.Checked2 = not not group.Check2:GetChecked()
 	
 	for k, rune in pairs(group.Runes) do
 		if type(rune) == "table" then
@@ -3842,7 +3956,9 @@ function AddIns.Load(group)
 	
 	group.Unit:SetText(condition.Unit)
 	group.EditBox:SetText(condition.Name)
+	group.EditBox2:SetText(condition.Name2)
 	group.Check:SetChecked(condition.Checked)
+	group.Check2:SetChecked(condition.Checked2)
 	CNDT:SetUIDropdownText(group.Icon, condition.Icon, TMW.Icons)
 
 	local v = CNDT:SetUIDropdownText(group.Operator, condition.Operator, CNDT.Operators)
@@ -3973,92 +4089,6 @@ function AddIns.SetSliderMinMax(group, level)
 	end
 end
 
-function AddIns.TypeCheck(group, data)
-	if data then
-		local unit = data.unit
-
-		group.Icon:Hide() --it bugs sometimes so just do it by default
-		group.Runes:Hide()
-		local showval = true
-		group:SetTitles()
-		group.Unit:Show()
-		if unit then
-			group.Unit:Hide()
-			group.TextUnitDef:SetText(unit)
-		elseif unit == false then -- must be == false
-			group.TextUnitOrIcon:SetText(nil)
-			group.Unit:Hide()
-			group.TextUnitDef:SetText(nil)
-		end
-
-		if data.name then
-			group.EditBox:Show()
-			if type(data.name) == "function" then
-				data.name(group.EditBox)
-				group.EditBox:GetScript("OnTextChanged")(group.EditBox)
-			else
-				TMW:TT(group.EditBox, nil, nil, nil, nil, 1)
-			end
-			group.Slider:SetWidth(200)
-			if data.noslide then
-				group.EditBox:SetWidth(520)
-			else
-				group.EditBox:SetWidth(312)
-			end
-			if data.check then
-				data.check(group.Check)
-				group.Check:Show()
-			else
-				group.Check:Hide()
-			end
-			group.EditBox.useSUG = data.useSUG
-			if data.useSUG then
-				SUG.redoIfSame = 1
-				SUG.Box = group.EditBox
-				SUG.overrideSoI = (data.useSUG == true and "spell") or data.useSUG
-				SUG:NameOnCursor()
-			end
-		else
-			group.EditBox:Hide()
-			group.Check:Hide()
-			group.Slider:SetWidth(523)
-			group.EditBox.useSUG = nil
-		end
-		if data.nooperator then
-			group.TextOperator:SetText("")
-			group.Operator:Hide()
-		else
-			group.Operator:Show()
-		end
-		if data.noslide then
-			showval = false
-			group.Slider:Hide()
-			group.TextValue:SetText("")
-			group.ValText:Hide()
-		else
-			group.ValText:Show()
-			group.Slider:Show()
-		end
-		if data.showhide then
-			data.showhide(group, data)
-		end
-		return showval
-	else
-		group.Unit:Hide()
-		group.Check:Hide()
-		group.EditBox:Hide()
-		group.Check:Hide()
-		group.Operator:Hide()
-		group.ValText:Hide()
-		group.Slider:Hide()
-		
-		group.TextUnitOrIcon:SetText(nil)
-		group.TextUnitDef:SetText(nil)
-		group.TextOperator:SetText(nil)
-		group.TextValue:SetText(nil)
-	
-	end
-end
 
 
 
