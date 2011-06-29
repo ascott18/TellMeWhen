@@ -1,3 +1,6 @@
+===v4.4.2===
+ * Misc. updates.
+
 ===v4.4.1===
  * New Condition: Spell autocasting
  * New Condition: Tracking active

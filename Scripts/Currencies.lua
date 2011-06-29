@@ -19,4 +19,6 @@
 	401,	--Tol\'vir Archaeology Fragment
 	402,	--Chef\'s Award
 	416,	--Mark of the World Tree
+	483,	--Conquest Arena Meta
+	484,	--Conquest BG Meta
 }

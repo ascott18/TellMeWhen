@@ -1729,27 +1729,32 @@
 						<AbsValue val="32" />
 					</EdgeSize>
 				</Backdrop>
+				<Layers>
+					<Layer level="OVERLAY">
+						<FontString name="$parentHeader" inherits="GameFontNormalLarge" parentKey="Header" justifyH="LEFT" text="SUGGESTIONS">
+							<Anchors>
+								<Anchor point="TOP" relativeTo="$parent">
+									<Offset x="0" y="-12"/>
+								</Anchor>
+							</Anchors>
+						</FontString>
+					</Layer>
+					<Layer level="ARTWORK">
+						<FontString name="$parentInfoText" parentKey="InfoText" hidden="true" inherits="GameFontHighlight">
+							<Size x="165" />
+							<Anchors>
+								<Anchor point="TOP" y="-45"/>
+							</Anchors>
+						</FontString>
+					</Layer>
+				</Layers>
 				<Frames>
 					<Button name="$parentItem1" inherits="TellMeWhen_SpellSuggestTemplate" parentKey="Item1" id="1"/>
 					<Slider name="$parentSpeed" inherits="OptionsSliderTemplate" parentKey="Speed" hidden="true">
 						<Size x="160" y="18"/>
-						<Scripts>
-							<OnLoad>
-								self.exponent = 4
-								self.text:SetText(TMW.L["CACHINGSPEED"])
-								self:SetMinMaxValues(1, (1000^(1/self.exponent)))
-								_G[self:GetName() .. "Low"]:SetText(1)
-								_G[self:GetName() .. "High"]:SetText(1000)
-								self.val:SetText(TMW.SUG.NumCachePerFrame)
-								self.infotext:SetText(TMW.L["CACHING"])
-								self:SetValue(TMW.SUG.NumCachePerFrame or 0)
-							</OnLoad>
-							<OnValueChanged>
-								value = value^self.exponent
-								TMW.SUG.NumCachePerFrame = floor(value)-1
-								self.val:SetText(floor(value+0.5))
-							</OnValueChanged>
-						</Scripts>
+						<Anchors>
+							<Anchor point="TOP" relativeTo="$parentInfoText" relativePoint="BOTTOM" y="-25"/>
+						</Anchors>
 						<Layers>
 							<Layer level="ARTWORK">
 								<FontString name="$parentVal" parentKey="val" inherits="GameFontHighlightSmall" text="HIGH">
@@ -1766,20 +1771,31 @@
 										</Anchor>
 									</Anchors>
 								</FontString>
-
-								<FontString name="$parentInfoText" parentKey="infotext" inherits="GameFontHighlight">
-									<Size x="165" />
-									<Anchors>
-										<Anchor point="BOTTOM" relativePoint="TOP">
-											<Offset x="0" y="20"/>
-										</Anchor>
-									</Anchors>
-								</FontString>
 							</Layer>
 						</Layers>
-						<Anchors>
-							<Anchor point="CENTER" />
-						</Anchors>
+						<Scripts>
+							<OnLoad>
+								self.exponent = 4
+								self.max = 1000
+								self.text:SetText(TMW.L["CACHINGSPEED"])
+								self:SetMinMaxValues(1, (self.max^(1/self.exponent)))
+								_G[self:GetName() .. "Low"]:SetText(1)
+								_G[self:GetName() .. "High"]:SetText(self.max)
+								self.val:SetText(TMW.SUG.NumCachePerFrame)
+								self:SetValue(TMW.SUG.NumCachePerFrame or 0)
+							</OnLoad>
+							<OnValueChanged>
+								value = min(floor(value^self.exponent+0.5), self.max)
+								TMW.SUG.NumCachePerFrame = value
+								self.val:SetText(value)
+							</OnValueChanged>
+							<OnShow>
+								self:GetParent().InfoText:Show()
+							</OnShow>
+							<OnHide>
+								self:GetParent().InfoText:Hide()
+							</OnHide>
+						</Scripts>
 					</Slider>
 					<StatusBar name="$parentStatus" parentKey="Status" hidden="true">
 						<Size x="170" y="25"/>
@@ -1812,7 +1828,7 @@
 							</OnValueChanged>
 						</Scripts>
 					</StatusBar>
-					<Button name="HelpMicroButton" inherits="MainMenuBarMicroButton" hidden="false">
+					<Button name="$parentHelp" inherits="MainMenuBarMicroButton" hidden="false">
 						<Anchors>
 							<Anchor point="TOPRIGHT" relativeTo="$parent" relativePoint="TOPRIGHT">
 								<Offset x="-15" y="9" />
@@ -1835,21 +1851,11 @@
 						</Scripts>
 					</Button>
 				</Frames>
-				<Layers>
-					<Layer level="OVERLAY">
-						<FontString name="$parentHeader" inherits="GameFontNormalLarge" parentKey="Header" justifyH="LEFT" text="SUGGESTIONS">
-							<Anchors>
-								<Anchor point="TOP" relativeTo="$parent">
-									<Offset x="0" y="-12"/>
-								</Anchor>
-							</Anchors>
-						</FontString>
-					</Layer>
-				</Layers>
 				<Scripts>
 					<OnLoad>
 						TMW.SUG.Suggest = self
 						self.Header:SetText(TMW.L["SUGGESTIONS"])
+						self.InfoText:SetText(TMW.L["CACHING"])
 						local previous = self.Item1
 						TMW.SUG[1] = self.Item1
 						self.Item1:SetPoint("TOPLEFT", self, "TOPLEFT", 12, -12-self.Item1:GetHeight())

@@ -2706,7 +2706,7 @@ function SUG:OnInitialize()
 		TellMeWhen_IconEditor:HookScript("OnShow", function()
 			if didrunhook then return end
 			TMWOptDB.IncompleteCache = true
-			SUG.NumCachePerFrame = 0 -- 0 is actually 1. Yeah, i know, its lame. I'm lazy.
+			SUG.NumCachePerFrame = 1 -- 0 is actually 1. Yeah, i know, its lame. I'm lazy.
 
 			local Blacklist = {
 				["Interface\\Icons\\Trade_Alchemy"] = true,
@@ -2741,7 +2741,7 @@ function SUG:OnInitialize()
 			local Parser = CreateFrame("GameTooltip", "TMWSUGParser", TMW, "GameTooltipTemplate")
 			local f = CreateFrame("Frame")
 			local function SpellCacher()
-				for id = index, index + SUG.NumCachePerFrame do
+				for id = index, index + SUG.NumCachePerFrame - 1 do
 					SUG.Suggest.Status:SetValue(id)
 					if spellsFailed < 1000 then
 						local name, rank, icon, _, _, _, castTime = GetSpellInfo(id)
@@ -2759,7 +2759,7 @@ function SUG:OnInitialize()
 								not strfind(name, "quest") and
 								not strfind(name, "vehicle") and
 								not strfind(name, "event") and
-								not strfind(name, ":%s?%d") and
+								not strfind(name, ":%s?%d") and -- interferes with colon duration syntax
 								not strfind(name, "camera")
 							then
 								GameTooltip_SetDefaultAnchor(Parser, UIParent)
@@ -2796,7 +2796,7 @@ function SUG:OnInitialize()
 						return
 					end
 				end
-				index = index + 1 + SUG.NumCachePerFrame
+				index = index + SUG.NumCachePerFrame
 			end
 			f:SetScript("OnUpdate", SpellCacher)
 			SUG.IsCaching = true

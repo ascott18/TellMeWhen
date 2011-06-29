@@ -1682,11 +1682,15 @@ CNDT.Types = {
 
 local currencies = {
 	-- currencies were extracted using the script in the /Scripts folder (source is wowhead)
-	-- make sure and order them here in a way that makes sense (most common first, blah blah derp)
+	-- make sure and order them here in a way that makes sense (most common first, blah blah derp herping)
 	395,	--Justice Points
 	396,	--Valor Points
 	392,	--Honor Points
 	390,	--Conquest Points
+	
+	-- i dont know what these are. They wont show up unless the user sees them, though, so whatever
+	483,	--Conquest Arena Meta
+	484,	--Conquest BG Meta
 	
 	391,	--Tol Barad Commendation
 	416,	--Mark of the World Tree

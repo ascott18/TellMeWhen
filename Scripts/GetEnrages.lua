@@ -18,5 +18,6 @@ for id in string.gmatch(src, "'id': (%d+)") do
 end
 
 str = table.concat(t, ";")
+print(str)
 
 io.open("B:\\Games\\World Of Warcraft\\Interface\\AddOns\\TellMeWhen\\Scripts\\Enrages.txt", "w"):write(str)

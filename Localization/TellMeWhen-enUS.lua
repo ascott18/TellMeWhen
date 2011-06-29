@@ -1,6 +1,5 @@
 ﻿--GAME_LOCALE = "ruRU" --FOR TESTING
 local L = LibStub("AceLocale-3.0"):NewLocale("TellMeWhen", "enUS", true)
---  /cast [@focus, pet:felhunter, exists, alive] spell lock; [@target, pet:felhunter, exists, alive] spell lock
 
 
 L["CMD_OPTIONS"] = "Options"
@@ -28,9 +27,9 @@ L["FROMNEWERVERSION"] = "You are importing an icon that was created in a newer v
 L["ICONMENU_CHOOSENAME"] = "Choose name(s)/ID(s)"
 L["ICONMENU_CHOOSENAME_CNDTIC"] = "Choose name/ID/texture path"
 L["ICONMENU_ENABLE"] = "Enabled"
-L["CHOOSENAME_EQUIVS_TOOLTIP"] = "You can select a predefined set of buffs/debuffs, spell casts, or dispel types (Magic, Curse, etc.) from this menu to insert into the editbox."
+L["CHOOSENAME_EQUIVS_TOOLTIP"] = "You can select predefined sets of buffs, debuffs, spell casts, diminishing returns, or dispel types (Magic, Curse, etc.) from this menu to insert into the editbox."
 L["CHOOSENAME_DIALOG_DDDEFAULT"] = "Predefined Spell Sets/Dispel Types"
-L["CHOOSENAME_DIALOG"] = [=[Enter the Name or ID of what you want this icon to monitor. You can add multiple things (except for multi-state cooldowns) by separating them with semicolons (;).
+L["CHOOSENAME_DIALOG"] = [=[Enter the Name or ID of what you want this icon to monitor. You can add multiple entries (any combination of names, IDs, and equivalencies) by separating them with semicolons (;).
 
 |cFFFF5959PET ABILITIES|r must use SpellIDs.]=]
 L["CHOOSENAME_DIALOG_MSCD"] = [=[Enter the Name or ID of what the cooldown that you want this icon to monitor. Only the first spell/item will be checked - semicolon-delimited lists are not valid for this icon type.]=]
@@ -510,7 +509,9 @@ L["PLAYER_DESC"] = "(You)"
 
 
 
-L["CACHING"] = "TellMeWhen is caching and filtering all spells in the game. This only needs to be done once per WoW patch. You can speed up or slow down the process using the slider below."
+L["CACHING"] = [[TellMeWhen is caching and filtering all spells in the game. This only needs to be done once per WoW patch. You can speed up or slow down the process using the slider below.
+
+You do not have to wait for this process to complete in order to use TellMeWhen. Only the suggestion list is dependent on the completion of the spell cache.]]
 L["CACHINGSPEED"] = "Spells per frame:"
 L["SUGGESTIONS"] = "Suggestions:"
 L["SUG_TOOLTIPTITLE"] = [[As you type, TellMeWhen will look through its cache and determine the spells that you were most likely looking for.
