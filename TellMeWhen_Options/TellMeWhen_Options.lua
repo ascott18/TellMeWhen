@@ -3365,10 +3365,10 @@ function CNDT:TypeMenuOnClick(frame, data)
 	UIDropDownMenu_SetSelectedValue(UIDROPDOWNMENU_OPEN_MENU, self.value)
 	UIDropDownMenu_SetText(UIDROPDOWNMENU_OPEN_MENU, data.text)
 	local group = UIDROPDOWNMENU_OPEN_MENU:GetParent()
-	local showval = CNDT:TypeCheck(group, data)
-	CNDT:SetSliderMinMax(group)
+	local showval = group:TypeCheck(data)
+	group:SetSliderMinMax()
 	if showval then
-		CNDT:SetValText(group)
+		group:SetValText()
 	else
 		group.ValText:SetText("")
 	end
@@ -3398,7 +3398,7 @@ local function get(value, ...)
 end
 
 local function AddConditionToDropDown(v)
-	if v.hidden then return end
+	if not v or v.hidden then return end
 	local info = UIDropDownMenu_CreateInfo()
 	info.func = CNDT.TypeMenuOnClick
 	info.text = v.text
@@ -3588,22 +3588,24 @@ function CNDT:ValidateParenthesis()
 	local numclose, numopen, runningcount = 0, 0, 0
 	local unopened
 	for k, v in ipairs(CNDT) do
-		if v:IsShown() and v.OpenParenthesis:IsShown() then
-			for k, v in ipairs(v.OpenParenthesis) do
-				if v:GetChecked() then
-					numopen = numopen + 1
-					runningcount = runningcount + 1
+		if v:IsShown() then
+			if v.OpenParenthesis:IsShown() then
+				for k, v in ipairs(v.OpenParenthesis) do
+					if v:GetChecked() then
+						numopen = numopen + 1
+						runningcount = runningcount + 1
+					end
+					if runningcount < 0 then unopened = 1 end
 				end
-				if runningcount < 0 then unopened = 1 end
 			end
-		end
-		if v:IsShown() and v.CloseParenthesis:IsShown() then
-			for k, v in ipairs(v.CloseParenthesis) do
-				if v:GetChecked() then
-					numclose = numclose + 1
-					runningcount = runningcount - 1
+			if v.CloseParenthesis:IsShown() then
+				for k, v in ipairs(v.CloseParenthesis) do
+					if v:GetChecked() then
+						numclose = numclose + 1
+						runningcount = runningcount - 1
+					end
+					if runningcount < 0 then unopened = 1 end
 				end
-				if runningcount < 0 then unopened = 1 end
 			end
 		end
 	end
@@ -3640,6 +3642,28 @@ function CNDT:ValidateParenthesis()
 	PanelTemplates_TabResize(tab, -6)
 end
 
+function CNDT:CreateGroups(num)
+	local start = TELLMEWHEN_MAXCONDITIONS
+	while CNDT[start] do
+		start = start + 1
+	end
+	for i=start, num do
+		local group = CNDT[i] or CreateFrame("Frame", "TellMeWhen_IconEditorConditionsGroupsGroup" .. i, TellMeWhen_IconEditor.Conditions.Groups, "TellMeWhen_ConditionGroup", i)
+		for k, v in pairs(CNDT.AddIns) do
+			group[k] = v
+		end
+		
+		group:SetPoint("TOPLEFT", CNDT[i-1], "BOTTOMLEFT", 0, -16)
+		group.AddDelete:ClearAllPoints()
+		local p, _, rp, x, y = TMW.CNDT[1].AddDelete:GetPoint()
+		group.AddDelete:SetPoint(p, CNDT[i], rp, x, y)
+		group:Clear()
+		group:SetTitles()
+	end
+	if num > TELLMEWHEN_MAXCONDITIONS then
+		TELLMEWHEN_MAXCONDITIONS = num
+	end
+end
 
 function CNDT:AddRemoveHandler()
 	local i=1
@@ -3693,78 +3717,18 @@ function CNDT:AddRemoveHandler()
 	PanelTemplates_TabResize(tab, -6)
 end
 
-function CNDT:AddDelete(group)
-	if group:IsShown() then
-		tremove(CNDT.settings, group:GetID())
-	else
-		local condition = CNDT.settings[group:GetID()] -- cheesy way to invoke the metamethod and create a new condition table
-	end
-	CNDT:AddRemoveHandler()
-	CNDT:Load()
-end
-
-function CNDT:UpOrDown(ID, delta)
-	local settings = CNDT.settings
-	local curdata, destinationdata
-	curdata = settings[ID]
-	destinationdata = settings[ID+delta]
-	settings[ID] = destinationdata
-	settings[ID+delta] = curdata
-	CNDT:Load()
-end
-
 function CNDT:OK()
 	local groupID, iconID = CI.g, CI.i
 	if not groupID then return end
 
 	local Conditions = CNDT.settings
-	Conditions["**"] = nil -- i failed at copying defaults properly, get rid of these whenever they are seen
-	local i = 1
-	while CNDT[i] and CNDT[i]:IsShown() do
-		local group = CNDT[i]
-		local condition = Conditions[i]
-		
-		condition.Type = UIDropDownMenu_GetSelectedValue(group.Type) or "HEALTH"
-		condition.Unit = strtrim(group.Unit:GetText()) or "player"
-		condition.Operator = UIDropDownMenu_GetSelectedValue(group.Operator) or "=="
-		condition.Icon = UIDropDownMenu_GetSelectedValue(group.Icon) or ""
-		condition.Level = tonumber(group.Slider:GetValue()) or 0
-		condition.AndOr = group.And:GetChecked() and "AND" or "OR"
-		condition.Name = get(CNDT.ConditionsByType[condition.Type].storename, condition.Level) or strtrim(group.EditBox:GetText()) or ""
-		condition.Checked = not not group.Check:GetChecked()
-
-		for k, rune in pairs(group.Runes) do
-			if type(rune) == "table" then
-				condition.Runes[rune:GetID()] = rune:GetChecked()
-			end
+	
+	for i, group in ipairs(CNDT) do
+		if group:IsShown() then
+			group:Save()
+		else
+			Conditions[i] = nil
 		end
-
-		local n = 0
-		if group.OpenParenthesis:IsShown() then
-			for k, frame in pairs(group.OpenParenthesis) do
-				if type(frame) == "table" and frame:GetChecked() then
-					n = n + 1
-				end
-			end
-		end
-		condition.PrtsBefore = n
-
-		n = 0
-		if group.CloseParenthesis:IsShown() then
-			for k, frame in pairs(group.CloseParenthesis) do
-				if type(frame) == "table" and frame:GetChecked() then
-					n = n + 1
-				end
-			end
-		end
-		condition.PrtsAfter = n
-
-
-		i=i+1
-	end
-	while CNDT[i] and not CNDT[i]:IsShown() do
-		Conditions[i] = nil
-		i=i+1
 	end
 
 	if CNDT.type == "icon" then
@@ -3777,56 +3741,15 @@ end
 function CNDT:Load()
 	local Conditions = CNDT.settings
 	IE.Conditions.Warning:SetText(nil)
-	Conditions["**"] = nil -- i dont know why these occasionally pop up, but this seems like a good place to get rid of them
 
 	if Conditions and #Conditions > 0 then
 		for i = #Conditions, TELLMEWHEN_MAXCONDITIONS do
-			CNDT:ClearGroup(CNDT[i])
+			CNDT[i]:Clear()
 		end
 		CNDT:CreateGroups(#Conditions+1)
 
-		local i = 1
-		while #Conditions >= i do
-			local group = CNDT[i]
-			local condition = Conditions[i]
-
-			CNDT:SetUIDropdownText(group.Type, condition.Type, CNDT.Types)
-			group.Unit:SetText(condition.Unit)
-			group.EditBox:SetText(condition.Name)
-			group.Check:SetChecked(condition.Checked)
-			CNDT:SetUIDropdownText(group.Icon, condition.Icon, TMW.Icons)
-
-			local v = CNDT:SetUIDropdownText(group.Operator, condition.Operator, CNDT.Operators)
-			if v then
-				TMW:TT(group.Operator, v.tooltipText, nil, 1, nil, 1)
-			end
-
-			CNDT:SetSliderMinMax(group, condition.Level or 0)
-			CNDT:SetValText(group)
-
-			for k, rune in pairs(group.Runes) do
-				if type(rune) == "table" then
-					rune:SetChecked(condition.Runes[rune:GetID()])
-				end
-			end
-
-			for k, frame in pairs(group.OpenParenthesis) do
-				if type(frame) == "table" then
-					group.OpenParenthesis[k]:SetChecked(condition.PrtsBefore >= k)
-				end
-			end
-			for k, frame in pairs(group.CloseParenthesis) do
-				if type(frame) == "table" then
-					group.CloseParenthesis[k]:SetChecked(condition.PrtsAfter >= k)
-				end
-			end
-
-			group.And:SetChecked(condition.AndOr == "AND")
-			group.Or:SetChecked(condition.AndOr == "OR")
-
-			group:Show()
-
-			i=i+1
+		for i=1, #Conditions do
+			CNDT[i]:Load()
 		end
 	else
 		CNDT:ClearDialog()
@@ -3834,7 +3757,127 @@ function CNDT:Load()
 	CNDT:AddRemoveHandler()
 end
 
-function CNDT:ClearGroup(group)
+function CNDT:ClearDialog()
+	for i=1, TELLMEWHEN_MAXCONDITIONS do
+		CNDT[i]:Clear()
+		CNDT[i]:SetTitles()
+	end
+	CNDT:AddRemoveHandler()
+end
+
+function CNDT:SetUIDropdownText(frame, value, tbl)
+	UIDropDownMenu_SetSelectedValue(frame, value)
+	local group = frame:GetParent()
+
+	if tbl == CNDT.Types then
+		group:TypeCheck(CNDT.ConditionsByType[value])
+	elseif tbl == TMW.Icons then
+		for k, v in pairs(tbl) do
+			if v == value then
+				UIDropDownMenu_SetText(frame, TMW:GetIconMenuText(nil, nil, _G[v]))
+				return _G[v]
+			end
+		end
+	end
+	for k, v in pairs(tbl) do
+		if v.value == value then
+			UIDropDownMenu_SetText(frame, v.text)
+			return v
+		end
+	end
+	UIDropDownMenu_SetText(frame, "")
+end
+
+CNDT.AddIns = {}
+local AddIns = CNDT.AddIns
+
+function AddIns.Save(group)
+	local condition = CNDT.settings[group:GetID()]
+	
+	condition.Type = UIDropDownMenu_GetSelectedValue(group.Type) or "HEALTH"
+	condition.Unit = strtrim(group.Unit:GetText()) or "player"
+	condition.Operator = UIDropDownMenu_GetSelectedValue(group.Operator) or "=="
+	condition.Icon = UIDropDownMenu_GetSelectedValue(group.Icon) or ""
+	condition.Level = tonumber(group.Slider:GetValue()) or 0
+	condition.AndOr = group.And:GetChecked() and "AND" or "OR"
+	condition.Name = strtrim(group.EditBox:GetText()) or ""
+	condition.Checked = not not group.Check:GetChecked()
+	
+	for k, rune in pairs(group.Runes) do
+		if type(rune) == "table" then
+			condition.Runes[rune:GetID()] = rune:GetChecked()
+		end
+	end
+
+	local n = 0
+	if group.OpenParenthesis:IsShown() then
+		for k, frame in pairs(group.OpenParenthesis) do
+			if type(frame) == "table" and frame:GetChecked() then
+				n = n + 1
+			end
+		end
+	end
+	condition.PrtsBefore = n
+
+	n = 0
+	if group.CloseParenthesis:IsShown() then
+		for k, frame in pairs(group.CloseParenthesis) do
+			if type(frame) == "table" and frame:GetChecked() then
+				n = n + 1
+			end
+		end
+	end
+	condition.PrtsAfter = n
+end
+
+function AddIns.Load(group)
+
+	local condition = CNDT.settings[group:GetID()]
+	local data = CNDT.ConditionsByType[condition.Type]
+
+	UIDropDownMenu_SetSelectedValue(group.Type, condition.Type)
+	UIDropDownMenu_SetText(group.Type, data and data.text or ("UNKNOWN TYPE: " .. condition.Type))
+	group:TypeCheck(data)
+
+	
+	group.Unit:SetText(condition.Unit)
+	group.EditBox:SetText(condition.Name)
+	group.Check:SetChecked(condition.Checked)
+	CNDT:SetUIDropdownText(group.Icon, condition.Icon, TMW.Icons)
+
+	local v = CNDT:SetUIDropdownText(group.Operator, condition.Operator, CNDT.Operators)
+	if v then
+		TMW:TT(group.Operator, v.tooltipText, nil, 1, nil, 1)
+	end
+
+	group:SetSliderMinMax(condition.Level or 0)
+	group:SetValText()
+
+	for k, rune in pairs(group.Runes) do
+		if type(rune) == "table" then
+			rune:SetChecked(condition.Runes[rune:GetID()])
+		end
+	end
+
+	for k, frame in pairs(group.OpenParenthesis) do
+		if type(frame) == "table" then
+			group.OpenParenthesis[k]:SetChecked(condition.PrtsBefore >= k)
+		end
+	end
+	for k, frame in pairs(group.CloseParenthesis) do
+		if type(frame) == "table" then
+			group.CloseParenthesis[k]:SetChecked(condition.PrtsAfter >= k)
+		end
+	end
+
+	group.And:SetChecked(condition.AndOr == "AND")
+	group.Or:SetChecked(condition.AndOr == "OR")
+
+	group:Show()
+
+end
+
+function AddIns.Clear(group)
 	group.Unit:SetText("player")
 	group.EditBox:SetText("")
 	group.Check:SetChecked(nil)
@@ -3855,84 +3898,51 @@ function CNDT:ClearGroup(group)
 	group.Icon:Hide()
 	group.Runes:Hide()
 	group.EditBox:Hide()
-	CNDT:SetSliderMinMax(group)
-	CNDT:SetValText(group)
+	group:SetSliderMinMax()
+	group:SetValText()
 end
 
-function CNDT:ClearDialog()
-	for i=1, TELLMEWHEN_MAXCONDITIONS do
-		CNDT:ClearGroup(CNDT[i])
-	end
-	CNDT:AddRemoveHandler()
-	CNDT:SetTitles()
-end
-
-
-function CNDT:CreateGroups(num)
-	local start = TELLMEWHEN_MAXCONDITIONS
-	while CNDT[start] do
-		start = start + 1
-	end
-	for i=start, num do
-		local group = CNDT[i] or CreateFrame("Frame", "TellMeWhen_IconEditorConditionsGroupsGroup" .. i, TellMeWhen_IconEditor.Conditions.Groups, "TellMeWhen_ConditionGroup", i)
-		group:SetPoint("TOPLEFT", CNDT[i-1], "BOTTOMLEFT", 0, -16)
-		group.AddDelete:ClearAllPoints()
-		local p, _, rp, x, y = TMW.CNDT[1].AddDelete:GetPoint()
-		group.AddDelete:SetPoint(p, CNDT[i], rp, x, y)
-		CNDT:ClearGroup(group)
-		CNDT:SetTitles(group)
-	end
-	if num > TELLMEWHEN_MAXCONDITIONS then
-		TELLMEWHEN_MAXCONDITIONS = num
-	end
-end
-
-function CNDT:SetUIDropdownText(frame, value, tbl)
-	UIDropDownMenu_SetSelectedValue(frame, value)
-	local group = frame:GetParent()
-
-	if tbl == CNDT.Types then
-		CNDT:TypeCheck(group, CNDT.ConditionsByType[value])
-	elseif tbl == TMW.Icons then
-		for k, v in pairs(tbl) do
-			if v == value then
-				UIDropDownMenu_SetText(frame, TMW:GetIconMenuText(nil, nil, _G[v]))
-				return _G[v]
-			end
-		end
-	end
-	for k, v in pairs(tbl) do
-		if v.value == value then
-			UIDropDownMenu_SetText(frame, v.text)
-			return v
-		end
-	end
-	UIDropDownMenu_SetText(frame, "")
-end
-
-function CNDT:SetTitles(onlygroup)
-	for i=1, TELLMEWHEN_MAXCONDITIONS do
-		local group = onlygroup or CNDT[i]
-		if not (group and group.TextType) then return end
-		group.TextType:SetText(L["CONDITIONPANEL_TYPE"])
-		group.TextUnitOrIcon:SetText(L["CONDITIONPANEL_UNIT"])
-		group.TextUnitDef:SetText("")
-		group.TextOperator:SetText(L["CONDITIONPANEL_OPERATOR"])
-	--	group.AndOrTxt:SetText(L["CONDITIONPANEL_ANDOR"])
-		group.TextValue:SetText(L["CONDITIONPANEL_VALUEN"])
-		if onlygroup then return end
-	end
-end
-
-function CNDT:SetValText(group)
+function AddIns.SetValText(group)
 	if TMW.Initd and group.ValText then
 		local val = group.Slider:GetValue()
 		local v = CNDT.ConditionsByType[UIDropDownMenu_GetSelectedValue(group.Type)]
-		group.ValText:SetText(get(v.texttable, val) or val)
+		if v then
+			group.ValText:SetText(get(v.texttable, val) or val)
+		end
 	end
 end
 
-function CNDT:SetSliderMinMax(group, level)
+function AddIns.UpOrDown(group, delta)
+	local ID = groups:GetID()
+	local settings = CNDT.settings
+	local curdata, destinationdata
+	curdata = settings[ID]
+	destinationdata = settings[ID+delta]
+	settings[ID] = destinationdata
+	settings[ID+delta] = curdata
+	CNDT:Load()
+end
+
+function AddIns.AddDeleteHandler(group)
+	if group:IsShown() then
+		tremove(CNDT.settings, group:GetID())
+	else
+		local condition = CNDT.settings[group:GetID()] -- cheesy way to invoke the metamethod and create a new condition table
+	end
+	CNDT:AddRemoveHandler()
+	CNDT:Load()
+end
+
+function AddIns.SetTitles(group)
+	if not group.TextType then return end
+	group.TextType:SetText(L["CONDITIONPANEL_TYPE"])
+	group.TextUnitOrIcon:SetText(L["CONDITIONPANEL_UNIT"])
+	group.TextUnitDef:SetText("")
+	group.TextOperator:SetText(L["CONDITIONPANEL_OPERATOR"])
+	group.TextValue:SetText(L["CONDITIONPANEL_VALUEN"])
+end
+
+function AddIns.SetSliderMinMax(group, level)
 	-- level is passed in only when the setting is changing or being loaded
 	local v = CNDT.ConditionsByType[UIDropDownMenu_GetSelectedValue(group.Type)]
 	if not v then return end
@@ -3963,76 +3973,94 @@ function CNDT:SetSliderMinMax(group, level)
 	end
 end
 
-function CNDT:TypeCheck(group, data)
-	local unit = data.unit
+function AddIns.TypeCheck(group, data)
+	if data then
+		local unit = data.unit
 
-	group.Icon:Hide() --it bugs sometimes so just do it by default
-	group.Runes:Hide()
-	local showval = true
-	CNDT:SetTitles(group)
-	group.Unit:Show()
-	if unit then
-		group.Unit:Hide()
-		group.TextUnitDef:SetText(unit)
-	elseif unit == false then -- must be == false
-		group.TextUnitOrIcon:SetText(nil)
-		group.Unit:Hide()
-		group.TextUnitDef:SetText(nil)
-	end
+		group.Icon:Hide() --it bugs sometimes so just do it by default
+		group.Runes:Hide()
+		local showval = true
+		group:SetTitles()
+		group.Unit:Show()
+		if unit then
+			group.Unit:Hide()
+			group.TextUnitDef:SetText(unit)
+		elseif unit == false then -- must be == false
+			group.TextUnitOrIcon:SetText(nil)
+			group.Unit:Hide()
+			group.TextUnitDef:SetText(nil)
+		end
 
-	if data.name then
-		group.EditBox:Show()
-		if type(data.name) == "function" then
-			data.name(group.EditBox)
-			group.EditBox:GetScript("OnTextChanged")(group.EditBox)
+		if data.name then
+			group.EditBox:Show()
+			if type(data.name) == "function" then
+				data.name(group.EditBox)
+				group.EditBox:GetScript("OnTextChanged")(group.EditBox)
+			else
+				TMW:TT(group.EditBox, nil, nil, nil, nil, 1)
+			end
+			group.Slider:SetWidth(200)
+			if data.noslide then
+				group.EditBox:SetWidth(520)
+			else
+				group.EditBox:SetWidth(312)
+			end
+			if data.check then
+				data.check(group.Check)
+				group.Check:Show()
+			else
+				group.Check:Hide()
+			end
+			group.EditBox.useSUG = data.useSUG
+			if data.useSUG then
+				SUG.redoIfSame = 1
+				SUG.Box = group.EditBox
+				SUG.overrideSoI = (data.useSUG == true and "spell") or data.useSUG
+				SUG:NameOnCursor()
+			end
 		else
-			TMW:TT(group.EditBox, nil, nil, nil, nil, 1)
-		end
-		group.Slider:SetWidth(200)
-		if data.noslide then
-			group.EditBox:SetWidth(520)
-		else
-			group.EditBox:SetWidth(312)
-		end
-		if data.check then
-			data.check(group.Check)
-			group.Check:Show()
-		else
+			group.EditBox:Hide()
 			group.Check:Hide()
+			group.Slider:SetWidth(523)
+			group.EditBox.useSUG = nil
 		end
-		group.EditBox.useSUG = data.useSUG
-		if data.useSUG then
-			SUG.redoIfSame = 1
-			SUG.Box = group.EditBox
-			SUG.overrideSoI = (data.useSUG == true and "spell") or data.useSUG
-			SUG:NameOnCursor()
+		if data.nooperator then
+			group.TextOperator:SetText("")
+			group.Operator:Hide()
+		else
+			group.Operator:Show()
 		end
+		if data.noslide then
+			showval = false
+			group.Slider:Hide()
+			group.TextValue:SetText("")
+			group.ValText:Hide()
+		else
+			group.ValText:Show()
+			group.Slider:Show()
+		end
+		if data.showhide then
+			data.showhide(group, data)
+		end
+		return showval
 	else
+		group.Unit:Hide()
+		group.Check:Hide()
 		group.EditBox:Hide()
 		group.Check:Hide()
-		group.Slider:SetWidth(523)
-		group.EditBox.useSUG = nil
-	end
-	if data.nooperator then
-		group.TextOperator:SetText("")
 		group.Operator:Hide()
-	else
-		group.Operator:Show()
-	end
-	if data.noslide then
-		showval = false
-		group.Slider:Hide()
-		group.TextValue:SetText("")
 		group.ValText:Hide()
-	else
-		group.ValText:Show()
-		group.Slider:Show()
+		group.Slider:Hide()
+		
+		group.TextUnitOrIcon:SetText(nil)
+		group.TextUnitDef:SetText(nil)
+		group.TextOperator:SetText(nil)
+		group.TextValue:SetText(nil)
+	
 	end
-	if data.showhide then
-		data.showhide(group, data)
-	end
-	return showval
 end
+
+
 
 
 

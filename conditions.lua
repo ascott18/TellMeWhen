@@ -288,9 +288,7 @@ local OnGCD = TMW.OnGCD
 local GetSpellCooldown = GetSpellCooldown
 local function CooldownDuration(spell, time)
 	local start, duration = GetSpellCooldown(spell)
-	if duration then
-		return ((duration == 0 or OnGCD(duration)) and 0) or (duration - (time - start))
-	end
+	return (duration and ((duration == 0 or OnGCD(duration)) and 0) or (duration - (time - start))) or 0
 end
 
 local GetItemCooldown = GetItemCooldown
@@ -428,7 +426,7 @@ Env = {
 	Tracking = {},
 } CNDT.Env = Env
 
-CNDT.Operators  =  {
+CNDT.Operators = {
 	{ tooltipText = L["CONDITIONPANEL_EQUALS"], 		value = "==", 	text = "==" },
 	{ tooltipText = L["CONDITIONPANEL_NOTEQUAL"], 	 	value = "~=", 	text = "~=" },
 	{ tooltipText = L["CONDITIONPANEL_LESS"], 			value = "<", 	text = "<" 	},
@@ -436,6 +434,10 @@ CNDT.Operators  =  {
 	{ tooltipText = L["CONDITIONPANEL_GREATER"], 		value = ">", 	text = ">" 	},
 	{ tooltipText = L["CONDITIONPANEL_GREATEREQUAL"], 	value = ">=", 	text = ">=" },
 }
+CNDT.OperatorTooltips = {}
+for k, v in pairs(CNDT.Operators) do
+	CNDT.OperatorTooltips[v.value] = v.tooltipText
+end
 
 CNDT.AndOrs = {
 	{ text=L["CONDITIONPANEL_AND"], value="AND" },
@@ -1006,7 +1008,7 @@ CNDT.Types = {
 		value = "TREE",
 		min = 1,
 		max = 3,
-		texttable = function() return select(2, GetTalentTabInfo(i)) end,
+		texttable = function(i) return select(2, GetTalentTabInfo(i)) end,
 		unit = PLAYER,
 		icon = function() return select(4, GetTalentTabInfo(1)) end,
 		tcoords = standardtcoords,
@@ -1688,9 +1690,9 @@ local currencies = {
 	392,	--Honor Points
 	390,	--Conquest Points
 	
-	-- i dont know what these are. They wont show up unless the user sees them, though, so whatever
-	483,	--Conquest Arena Meta
-	484,	--Conquest BG Meta
+	-- i dont know what these are
+	--483,	--Conquest Arena Meta
+	--484,	--Conquest BG Meta
 	
 	391,	--Tol Barad Commendation
 	416,	--Mark of the World Tree
@@ -1780,77 +1782,79 @@ function CNDT:ProcessConditions(icon)
 		local c = Conditions[i]
 		local t = c.Type
 		local v = ConditionsByType[t]
-		if v and v.events then
-			for k, event in pairs(v.events) do
-				CNDT:RegisterEvent(event)
-				CNDT[event](CNDT, event, "player")
+		if v then
+			if v.events then
+				for k, event in pairs(v.events) do
+					CNDT:RegisterEvent(event)
+					CNDT[event](CNDT, event, "player")
+				end
 			end
-		end
-		if t == "LUA" then
-			luaUsed = 1
-			setmetatable(Env, EnvMeta)
-		end
-		local name = gsub((c.Name or ""), "; ", ";")
-		name = gsub(name, " ;", ";")
-		name = ";" .. name .. ";"
-		name = gsub(name, ";;", ";")
-		name = strtrim(name)
-		name = strlower(name)
-		local andor
-		if c.AndOr == "OR" then
-			andor = "or " --have a space so they are both 3 chars long
-		else
-			andor = "and"
-		end
-
-		local thiscondtstr = v.funcstr
-		if type(thiscondtstr) == "function" then
-			thiscondtstr = thiscondtstr(c)
-		end
-
-		if thiscondtstr then
-			local thisstr = andor .. "(" .. strrep("(", c.PrtsBefore) .. thiscondtstr .. strrep(")", c.PrtsAfter)  .. ")"
-
-			
-			if strfind(thisstr, "c.Unit2") and (strfind(c.Name, "maintank") or strfind(c.Name, "mainassist")) then
-				local unit = gsub(c.Name, "|cFFFF0000#|r", "1")
-				thisstr = gsub(thisstr, "c.Unit2",		unit) -- sub it in as a variable
-				Env[unit] = unit
-				TMW:RegisterEvent("RAID_ROSTER_UPDATE")
-				TMW:RAID_ROSTER_UPDATE()
+			if t == "LUA" then
+				luaUsed = 1
+				setmetatable(Env, EnvMeta)
+			end
+			local name = gsub((c.Name or ""), "; ", ";")
+			name = gsub(name, " ;", ";")
+			name = ";" .. name .. ";"
+			name = gsub(name, ";;", ";")
+			name = strtrim(name)
+			name = strlower(name)
+			local andor
+			if c.AndOr == "OR" then
+				andor = "or " --have a space so they are both 3 chars long
 			else
-				thisstr = gsub(thisstr, "c.Unit2",	"\"" .. c.Name .. "\"") -- sub it in as a string
-			end
-			
-			if strfind(thisstr, "c.Unit") and (strfind(c.Unit, "maintank") or strfind(c.Unit, "mainassist")) then
-				local unit = gsub(c.Unit, "|cFFFF0000#|r", "1")
-				thisstr = gsub(thisstr, "c.Unit",		unit) -- sub it in as a variable
-				Env[unit] = unit
-				TMW:RegisterEvent("RAID_ROSTER_UPDATE")
-				TMW:RAID_ROSTER_UPDATE()
-			else
-				thisstr = gsub(thisstr, "c.Unit",	"\"" .. c.Unit .. "\"") -- sub it in as a string
-			end
-			
-
-			if v.percent then
-				thisstr = gsub(thisstr, "c.Level", 		c.Level/100)
-			else
-				thisstr = gsub(thisstr, "c.Level", 		c.Level)
-				thisstr = gsub(thisstr, "c.1nil", 		c.Level == 0 and 1 or "nil")
-				thisstr = gsub(thisstr, "c.nil1", 		c.Level == 1 and 1 or "nil") -- reverse 1nil
+				andor = "and"
 			end
 
-			thisstr = thisstr:
-			gsub("c.Operator", 		c.Operator):
-			gsub("c.NameFirst", 	"\"" .. TMW:GetSpellNames(nil, name, 1) .. "\""):
-			gsub("c.NameName", 		"\"" .. TMW:GetSpellNames(nil, name, 1, 1) .. "\""):
-			gsub("c.ItemID", 		TMW:GetItemIDs(nil, name, 1)):
-			gsub("c.Name", 			"\"" .. name .. "\""):
+			local thiscondtstr = v.funcstr
+			if type(thiscondtstr) == "function" then
+				thiscondtstr = thiscondtstr(c)
+			end
 
-			gsub("c.True", 			tostring(c.Level == 0)):
-			gsub("c.False", 		tostring(c.Level == 1))
-			funcstr = funcstr .. thisstr
+			if thiscondtstr then
+				local thisstr = andor .. "(" .. strrep("(", c.PrtsBefore) .. thiscondtstr .. strrep(")", c.PrtsAfter)  .. ")"
+
+				
+				if strfind(thisstr, "c.Unit2") and (strfind(c.Name, "maintank") or strfind(c.Name, "mainassist")) then
+					local unit = gsub(c.Name, "|cFFFF0000#|r", "1")
+					thisstr = gsub(thisstr, "c.Unit2",		unit) -- sub it in as a variable
+					Env[unit] = unit
+					TMW:RegisterEvent("RAID_ROSTER_UPDATE")
+					TMW:RAID_ROSTER_UPDATE()
+				else
+					thisstr = gsub(thisstr, "c.Unit2",	"\"" .. c.Name .. "\"") -- sub it in as a string
+				end
+				
+				if strfind(thisstr, "c.Unit") and (strfind(c.Unit, "maintank") or strfind(c.Unit, "mainassist")) then
+					local unit = gsub(c.Unit, "|cFFFF0000#|r", "1")
+					thisstr = gsub(thisstr, "c.Unit",		unit) -- sub it in as a variable
+					Env[unit] = unit
+					TMW:RegisterEvent("RAID_ROSTER_UPDATE")
+					TMW:RAID_ROSTER_UPDATE()
+				else
+					thisstr = gsub(thisstr, "c.Unit",	"\"" .. c.Unit .. "\"") -- sub it in as a string
+				end
+				
+
+				if v.percent then
+					thisstr = gsub(thisstr, "c.Level", 		c.Level/100)
+				else
+					thisstr = gsub(thisstr, "c.Level", 		c.Level)
+					thisstr = gsub(thisstr, "c.1nil", 		c.Level == 0 and 1 or "nil")
+					thisstr = gsub(thisstr, "c.nil1", 		c.Level == 1 and 1 or "nil") -- reverse 1nil
+				end
+
+				thisstr = thisstr:
+				gsub("c.Operator", 		c.Operator):
+				gsub("c.NameFirst", 	"\"" .. TMW:GetSpellNames(nil, name, 1) .. "\""):
+				gsub("c.NameName", 		"\"" .. TMW:GetSpellNames(nil, name, 1, 1) .. "\""):
+				gsub("c.ItemID", 		TMW:GetItemIDs(nil, name, 1)):
+				gsub("c.Name", 			"\"" .. name .. "\""):
+
+				gsub("c.True", 			tostring(c.Level == 0)):
+				gsub("c.False", 		tostring(c.Level == 1))
+				funcstr = funcstr .. thisstr
+			end
 		end
 	end
 

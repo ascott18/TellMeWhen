@@ -607,10 +607,11 @@
 				</Layers>
 				<Scripts>
 					<OnValueChanged>
-						TMW.CNDT:SetValText(self:GetParent())
+						local group = self:GetParent()
+						if group.SetValText then group:SetValText() end
 					</OnValueChanged>
 					<OnMouseUp>
-						TMW.CNDT:SetSliderMinMax(self:GetParent())
+						self:GetParent():SetSliderMinMax()
 						TMW.CNDT:OK()
 					</OnMouseUp>
 					<OnLoad>
@@ -632,7 +633,7 @@
 						if delta == 1 or delta == -1 then
 							delta = delta*(self.step or 1)
 						end
-						TMW.CNDT:SetSliderMinMax(self:GetParent(), self:GetValue()+delta)
+						self:GetParent():SetSliderMinMax(self:GetValue()+delta)
 						TMW.CNDT:OK()
 					</OnMouseWheel>
 				</Scripts>
@@ -1042,7 +1043,7 @@
 				</Anchors>
 				<Scripts>
 					<OnLoad>TMW:TT(self, "METAPANEL_UP") self:SetScale(0.8)</OnLoad>
-					 <OnClick>TMW.CNDT:UpOrDown(self:GetParent():GetID(), -1)</OnClick>
+					 <OnClick>self:GetParent():UpOrDown(-1)</OnClick>
 				</Scripts>
 				<NormalTexture urgency="5" file="Interface\ChatFrame\UI-ChatIcon-ScrollUp-Up">
 					<TexCoords left="0.21875" right="0.6875" top="0.34375" bottom="0.65625"/>
@@ -1062,7 +1063,7 @@
 				</Anchors>
 				<Scripts>
 					<OnLoad>TMW:TT(self, "METAPANEL_DOWN") self:SetScale(0.8)</OnLoad>
-					 <OnClick>TMW.CNDT:UpOrDown(self:GetParent():GetID(), 1)</OnClick>
+					 <OnClick>self:GetParent():UpOrDown(1)</OnClick>
 				</Scripts>
 				<NormalTexture urgency="5" file="Interface\ChatFrame\UI-ChatIcon-ScrollDown-Up">
 					<TexCoords left="0.21875" right="0.6875" top="0.34375" bottom="0.65625"/>
@@ -1085,7 +1086,7 @@
 						self.RealParent = self:GetParent()
 						self:SetParent(self:GetParent():GetParent()) -- dont hide it when the group is hidden
 					</OnLoad>
-					<OnClick>TMW.CNDT:AddDelete(self.RealParent) TMW.CNDT:OK()</OnClick>
+					<OnClick>self.RealParent:AddDeleteHandler() TMW.CNDT:OK()</OnClick>
 				</Scripts>
 				<NormalTexture urgency="5" file="Interface\AddOns\TellMeWhen_Options\Textures\Plus-Up"/>
 				<PushedTexture file="Interface\AddOns\TellMeWhen_Options\Textures\Plus-Down"/>
@@ -3425,6 +3426,9 @@
 										</Anchors>
 										<Scripts>
 											<OnLoad>
+												for k, v in pairs(TMW.CNDT.AddIns) do
+													self[k] = v
+												end
 												self.And:Hide()
 												self.Or:Hide()
 												self.CloseParenthesis:Hide()
@@ -3435,7 +3439,7 @@
 									</Frame>
 								</Frames>
 								<Scripts>
-									<OnLoad> self:RegisterForDrag("LeftButton")</OnLoad>
+									<OnLoad> self:RegisterForDrag("LeftButton") </OnLoad>
 									<OnDragStart> TellMeWhen_IconEditor:StartMoving() </OnDragStart>
 									<OnDragStop> TellMeWhen_IconEditor:StopMovingOrSizing() </OnDragStop>
 								</Scripts>
