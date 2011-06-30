@@ -4035,7 +4035,7 @@ function AddIns.SetValText(group)
 end
 
 function AddIns.UpOrDown(group, delta)
-	local ID = groups:GetID()
+	local ID = group:GetID()
 	local settings = CNDT.settings
 	local curdata, destinationdata
 	curdata = settings[ID]
