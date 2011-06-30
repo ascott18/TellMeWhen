@@ -8,6 +8,7 @@
  * Bug Fixes:
  ** (r133) attempt to compare number with nil (In spell cooldown conditions)
  ** (r133) conditions.lua:1009: Usage: GetTalentTabInfo(tabIndex[, isInspect[, isPet[, groupIndex]]])
+ ** (r136) TellMeWhen-4.4.3.lua:1630: attempt to index field "Font" (a nil value)
  
 ===v4.4.2===
  * Misc. updates.

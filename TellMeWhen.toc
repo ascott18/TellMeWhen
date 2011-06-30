@@ -3,10 +3,9 @@
 
 # Dont forget to toc bump TellMeWhen_Options too
 ## Interface: 40200
-# X-Compatible-With: 40200
 ## Title: TellMeWhen
 
-## Version: 4.3.0
+## Version: 4.4.3
 ## Author: Cybeloras of Mal'Ganis
 ## Notes: Notifications about cooldowns, buffs, etc.
 ## OptionalDeps: ButtonFacade, Masque, Ace3, OmniCC, tullaCC, sct, sctd, MikScrollingBattleText, Parrot

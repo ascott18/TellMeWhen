@@ -437,6 +437,7 @@ Env = {
 	classifications = classifications,
 	roles = roles,
 	
+	ActivePetMode = 0,
 	ZoneType = 0,
 	NumPartyMembers = 0,
 	NumRaidMembers = 0,
