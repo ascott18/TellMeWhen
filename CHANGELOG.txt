@@ -1,6 +1,6 @@
 ===v4.4.3===
- * Sorta rewrote condition configuration.
  * New Conditions:
+ ** Pet attack mode
  ** Spell cooldown duration comparison
  ** Item Cooldown duration comparison
  ** Buff duration comparison

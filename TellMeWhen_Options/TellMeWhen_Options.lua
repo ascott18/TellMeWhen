@@ -3766,11 +3766,12 @@ function CNDT:ClearDialog()
 end
 
 function CNDT:SetUIDropdownText(frame, value, tbl)
-	UIDropDownMenu_SetSelectedValue(frame, value)
-	local group = frame:GetParent()
+	if frame.selectedValue ~= value or not frame.selectedValue then
+		UIDropDownMenu_SetSelectedValue(frame, value)
+	end
 
 	if tbl == CNDT.Types then
-		group:TypeCheck(CNDT.ConditionsByType[value])
+		frame:GetParent():TypeCheck(CNDT.ConditionsByType[value])
 	elseif tbl == TMW.Icons then
 		for k, v in pairs(tbl) do
 			if v == value then
@@ -3996,8 +3997,12 @@ end
 function AddIns.Clear(group)
 	group.Unit:SetText("player")
 	group.EditBox:SetText("")
+	group.EditBox2:SetText("")
 	group.Check:SetChecked(nil)
-	UIDropDownMenu_SetSelectedValue(group.Icon, "")
+	group.Check2:SetChecked(nil)
+	if group.Icon.selectedValue ~= "" then
+		UIDropDownMenu_SetSelectedValue(group.Icon, "")
+	end
 	CNDT:SetUIDropdownText(group.Type, "HEALTH", CNDT.Types)
 	CNDT:SetUIDropdownText(group.Operator, "==", CNDT.Operators)
 	group.And:SetChecked(1)
@@ -4014,6 +4019,7 @@ function AddIns.Clear(group)
 	group.Icon:Hide()
 	group.Runes:Hide()
 	group.EditBox:Hide()
+	group.EditBox2:Hide()
 	group:SetSliderMinMax()
 	group:SetValText()
 end

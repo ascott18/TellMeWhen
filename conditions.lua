@@ -54,6 +54,7 @@ local UnitAura =
 
 local _G = _G
 local print = TMW.print
+local clientVersion = select(4, GetBuildInfo())
 
 local CNDT = TMW:NewModule("Conditions", "AceEvent-3.0") TMW.CNDT = CNDT
 
@@ -283,6 +284,31 @@ function CNDT:UNIT_VEHICLE(_, unit)
 	end
 end
 
+local PetModes = {
+    clientVersion >= 40200 and "PET_MODE_ASSIST" or "PET_MODE_AGGRESSIVE",
+    "PET_MODE_DEFENSIVE",
+    "PET_MODE_PASSIVE",
+}
+local PetModesLookup = {}
+for k, v in pairs(PetModes) do PetModesLookup[v] = k end
+function CNDT:PET_BAR_UPDATE()
+	for i = NUM_PET_ACTION_SLOTS, 1, -1 do -- go backwards since they are probably at the end of the action bar
+		local name, _, _, isToken, isActive = GetPetActionInfo(i)
+		if isToken and isActive and PetModesLookup[name] then
+			Env.ActivePetMode = PetModesLookup[name]
+			break
+		end
+	end
+end
+
+local trackingmap = {}
+function CNDT:MINIMAP_UPDATE_TRACKING()
+	for i = 1, GetNumTrackingTypes() do
+		local name, _, active = GetTrackingInfo(i)
+		Env.Tracking[strlower(name)] = active
+	end
+end
+
 -- helper functions
 local OnGCD = TMW.OnGCD
 local GetSpellCooldown = GetSpellCooldown
@@ -353,13 +379,6 @@ local function TotemDuration(slot, time)
 	return duration and duration ~= 0 and (duration - (time - start)) or 0
 end
 
-local trackingmap = {}
-function CNDT:MINIMAP_UPDATE_TRACKING()
-	for i = 1, GetNumTrackingTypes() do
-		local name, _, active = GetTrackingInfo(i)
-		Env.Tracking[strlower(name)] = active
-	end
-end
 
 Env = {
 	UnitHealth = UnitHealth,
@@ -1014,7 +1033,7 @@ CNDT.Types = {
 		tcoords = standardtcoords,
 		funcstr = [[CurrentTree c.Operator c.Level]],
 	},
-	{ -- autocast
+	{ -- pet autocast
 		text = L["CONDITIONPANEL_AUTOCAST"],
 		category = L["CNDTCAT_STATUS"],
 		value = "AUTOCAST",
@@ -1028,6 +1047,19 @@ CNDT.Types = {
 		icon = "Interface\\Icons\\ability_physical_taunt",
 		tcoords = standardtcoords,
 		funcstr = [[select(2, GetSpellAutocast(c.NameName)) == c.1nil]],
+	},
+	{ -- pet attack mode
+		text = L["CONDITIONPANEL_PETMODE"],
+		category = L["CNDTCAT_STATUS"],
+		value = "PETMODE",
+		min = 1,
+		max = 3,
+		texttable = function(k) return _G[PetModes[k]] end,
+		unit = PET,
+		icon = PET_ASSIST_TEXTURE,
+		tcoords = standardtcoords,
+		funcstr = [[ActivePetMode c.Operator c.Level]],
+		events = {"PET_BAR_UPDATE"},
 	},
 	{ -- tracking
 		text = L["CONDITIONPANEL_TRACKING"],
