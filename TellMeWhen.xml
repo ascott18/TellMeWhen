@@ -78,7 +78,7 @@
 					<Anchor point="TOPRIGHT" relativeTo="$parentIcon" relativePoint="TOPRIGHT" x="0" y="0"/>
 				</Anchors>
 				<Layers>
-					<Layer level="ARTWORK">
+					<Layer level="OVERLAY">
 						<Texture name="$parenttexture" parentKey="texture" file="Interface\TargetingFrame\UI-StatusBar">
 							<Size x="30" y="30"/>
 						</Texture>
@@ -100,7 +100,7 @@
 					<Anchor point="BOTTOMRIGHT" relativeTo="$parentIcon" relativePoint="BOTTOMRIGHT" x="0" y="0"/>
 				</Anchors>
 				<Layers>
-					<Layer level="ARTWORK">
+					<Layer level="OVERLAY">
 						<Texture name="$parenttexture" parentKey="texture" file="Interface\TargetingFrame\UI-StatusBar">
 							<Size x="30" y="30"/>
 						</Texture>

@@ -34,7 +34,7 @@ local DRData = LibStub("DRData-1.0", true)
 TELLMEWHEN_VERSION = "4.4.3"
 TELLMEWHEN_VERSION_MINOR = strmatch(" @project-version@", " r%d+") or ""
 TELLMEWHEN_VERSION_FULL = TELLMEWHEN_VERSION .. TELLMEWHEN_VERSION_MINOR
-TELLMEWHEN_VERSIONNUMBER = 44305 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
+TELLMEWHEN_VERSIONNUMBER = 44306 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
 if TELLMEWHEN_VERSIONNUMBER > 45000 or TELLMEWHEN_VERSIONNUMBER < 44000 then error("YOU SCREWED UP THE VERSION NUMBER OR DIDNT CHANGE THE SAFETY LIMITS") return end -- safety check because i accidentally made the version number 414069 once
 
 TELLMEWHEN_MAXGROUPS = 1 	--this is a default, used by SetTheory (addon), so dont rename
@@ -2756,7 +2756,6 @@ function TMW:Icon_UpdateBars(icon)
 		cbar.start = cbar.start or 0
 		cbar.duration = cbar.duration or 0
 		icon.CBarOffs = nil --reduce table clutter, we dont need this anymore
-	--	cbar:SetFrameLevel(icon:GetFrameLevel() - 1)
 		cbar.InvertBars = icon.InvertBars
 		cbar:SetScript("OnValueChanged", CDBarOnValueChanged)
 	else
@@ -2866,9 +2865,6 @@ function TMW:Icon_Update(icon)
 			ct:SetPoint("BOTTOMRIGHT", icon, "BOTTOMRIGHT", f.x, f.y)
 		end
 
-		cd:SetFrameLevel(icon:GetFrameLevel() - 2)
-		icon.cbar:SetFrameLevel(icon:GetFrameLevel() - 1)
-		icon.pbar:SetFrameLevel(icon:GetFrameLevel() - 1)
 	elseif LBF then
 		TMW.DontRun = true -- TMW:Update() is ran in the LBF skin callback, which just causes an infinite loop. This tells it not to
 		local lbfs = db.profile.Groups[groupID].LBF
@@ -2886,23 +2882,19 @@ function TMW:Icon_Update(icon)
 			ct:SetPoint("BOTTOMRIGHT", icon, "BOTTOMRIGHT", f.x, f.y)
 		end
 
-		cd:SetFrameLevel(icon:GetFrameLevel() - 2)
-		icon.cbar:SetFrameLevel(icon:GetFrameLevel() -1)
-		icon.pbar:SetFrameLevel(icon:GetFrameLevel() - 1)
 	else
 		ct:ClearAllPoints()
 		ct:SetPoint("BOTTOMRIGHT", icon, "BOTTOMRIGHT", f.x, f.y)
-		cd:SetFrameLevel(icon:GetFrameLevel() + 1)
-		icon.cbar:SetFrameLevel(icon:GetFrameLevel() + 1)
-		icon.pbar:SetFrameLevel(icon:GetFrameLevel() + 1)
 	end
+	icon.cbar:SetFrameLevel(icon:GetFrameLevel() + 1)
+	icon.pbar:SetFrameLevel(icon:GetFrameLevel() + 1)
 
 	icon.__normaltex = icon.__LBF_Normal or icon.__MSQ_NormalTexture or icon:GetNormalTexture()
 	if (not LBF and not LMB) or not group.SkinID or group.SkinID == "Blizzard" then
 		icon.__normaltex:Hide()
 		cd:SetFrameLevel(icon:GetFrameLevel() + 1)
-		icon.cbar:SetFrameLevel(icon:GetFrameLevel() + 1)
-		icon.pbar:SetFrameLevel(icon:GetFrameLevel() + 1)
+		icon.cbar:SetFrameLevel(icon:GetFrameLevel() + 2)
+		icon.pbar:SetFrameLevel(icon:GetFrameLevel() + 2)
 	else
 		icon.__normaltex:Show()
 	end
