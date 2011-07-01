@@ -128,11 +128,11 @@ function Type:Setup(icon, groupID, iconID)
 		icon.NameFirst = 88747
 		icon.NameName = GetSpellInfo(88747)
 		icon.Slots[4] = nil -- there is no mushroom 4
---[[	elseif pclass ~= "SHAMAN" then --enable all totems for people that dont have totem slot options (future-proof it)
+	elseif pclass ~= "SHAMAN" then --enable all totems for people that dont have totem slot options (future-proof it)
 		icon.Slots[1] = true
 		icon.Slots[2] = true
 		icon.Slots[3] = true
-		icon.Slots[4] = true]]
+		icon.Slots[4] = true
 	end
 	icon.ShowPBar = false
 	icon:SetReverse(true)
