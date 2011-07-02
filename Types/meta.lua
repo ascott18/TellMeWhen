@@ -51,7 +51,7 @@ local function Meta_OnUpdate(icon, time)
 			local ic = _G[Icons[n]]
 			if ic and ic.OnUpdate and ic.__shown and (not CheckNext or (CheckNext and not AlreadyChecked[ic])) then
 				ic:OnUpdate(time)
-				local alpha = ic.FakeAlpha
+				local alpha = ic.__alpha
 				if alpha > 0 and ic.__shown then
 
 					if (LBF or LMB) and ic ~= icon.__previcon  then -- i dont like the way that ButtonFacade handles this (inefficient), so i'll do it myself

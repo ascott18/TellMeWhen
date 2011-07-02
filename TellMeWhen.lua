@@ -34,7 +34,7 @@ local DRData = LibStub("DRData-1.0", true)
 TELLMEWHEN_VERSION = "4.4.3"
 TELLMEWHEN_VERSION_MINOR = strmatch(" @project-version@", " r%d+") or ""
 TELLMEWHEN_VERSION_FULL = TELLMEWHEN_VERSION .. TELLMEWHEN_VERSION_MINOR
-TELLMEWHEN_VERSIONNUMBER = 44307 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
+TELLMEWHEN_VERSIONNUMBER = 44308 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
 if TELLMEWHEN_VERSIONNUMBER > 45000 or TELLMEWHEN_VERSIONNUMBER < 44000 then error("YOU SCREWED UP THE VERSION NUMBER OR DIDNT CHANGE THE SAFETY LIMITS") return end -- safety check because i accidentally made the version number 414069 once
 
 TELLMEWHEN_MAXGROUPS = 1 	--this is a default, used by SetTheory (addon), so dont rename
@@ -2305,21 +2305,15 @@ local function SetAlpha(icon, alpha)
 			if data then
 				icon:HandleEvent(data)
 			end
-		elseif icon.FakeAlpha == 0 then
+		elseif icon.__alpha == 0 then
 			local data = runEvents and icon.OnShow
 			if data then
 				icon:HandleEvent(data)
 			end
 		end
-		if icon.FakeHidden then
-			icon:setalpha(0) -- setalpha(lowercase) is the old, raw SetAlpha.
-			icon.__alpha = 0
-		else
-			icon:setalpha(alpha)
-			icon.__alpha = alpha
-		end
+		icon:setalpha(icon.FakeHidden or alpha) -- setalpha(lowercase) is the old, raw SetAlpha.
+		icon.__alpha = alpha
 	end
-	icon.FakeAlpha = alpha
 end
 
 local function IconScriptSort(iconA, iconB)
@@ -2461,23 +2455,17 @@ local function SetInfo(icon, alpha, color, texture, start, duration, checkGCD, p
 		if alpha == 0 then
 			local data = runEvents and icon.OnHide
 			if data then
-				played, announced = icon:HandleEvent(data)
+				icon:HandleEvent(data)
 			end
-		elseif icon.FakeAlpha == 0 then
+		elseif icon.__alpha == 0 then
 			local data = runEvents and icon.OnShow
 			if data then
-				played, announced = icon:HandleEvent(data)
+				icon:HandleEvent(data)
 			end
 		end
-		if icon.FakeHidden then
-			icon:setalpha(0) -- setalpha(lowercase) is the old, raw SetAlpha. Use it to override FakeAlpha, although this really should never happen ourside of here
-			icon.__alpha = 0
-		else
-			icon:setalpha(alpha)
-			icon.__alpha = alpha
-		end
+		icon:setalpha(icon.FakeHidden or alpha) -- setalpha(lowercase) is the old, raw SetAlpha.
+		icon.__alpha = alpha
 	end
-	icon.FakeAlpha = alpha
 
 	if icon.__start ~= start or icon.__duration ~= duration then
 		local isGCD
@@ -2815,7 +2803,7 @@ function TMW:Icon_Update(icon)
 	end
 
 	icon.UpdateTimer 	= 0
-	icon.FakeAlpha 		= 0
+	icon.FakeHidden = icon.FakeHidden and 0
 	if pclass ~= "DEATHKNIGHT" then
 		icon.IgnoreRunes = nil
 	end

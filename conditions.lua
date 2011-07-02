@@ -1730,9 +1730,9 @@ CNDT.Types = {
 			if c.Icon == "" then return [[true]] end
 			local str = [[(c.Icon and c.Icon.__shown and c.Icon.OnUpdate and not c.Icon:OnUpdate(time))]]
 			if c.Level == 0 then
-				str = str .. [[and c.Icon.FakeAlpha > 0]]
+				str = str .. [[and c.Icon.__alpha > 0]]
 			else
-				str = str .. [[and c.Icon.FakeAlpha == 0]]
+				str = str .. [[and c.Icon.__alpha == 0]]
 			end
 			return gsub(str, "c.Icon", c.Icon)
 		end,
