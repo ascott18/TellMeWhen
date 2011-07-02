@@ -25,6 +25,10 @@ local GetItemCooldown, IsItemInRange, IsEquippedItem, GetItemIcon, GetItemCount 
 	  GetItemCooldown, IsItemInRange, IsEquippedItem, GetItemIcon, GetItemCount
 local GetActionCooldown, IsActionInRange, IsUsableAction, GetActionTexture, GetActionInfo =
 	  GetActionCooldown, IsActionInRange, IsUsableAction, GetActionTexture, GetActionInfo
+local UnitRangedDamage =
+	  UnitRangedDamage
+local pairs =
+	  pairs
 local OnGCD = TMW.OnGCD
 local print = TMW.print
 local _, pclass = UnitClass("Player")
@@ -274,7 +278,7 @@ local function ItemCooldown_OnUpdate(icon, time)
 		end
 		if n > 1 then -- if there is more than 1 spell that was checked then we need to get these again for the first spell, otherwise reuse the values obtained above since they are just for the first one
 			start, duration = GetItemCooldown(NameFirst2)
-			inrange, count = 1, ItemCount[iName]
+			inrange, count = 1, ItemCount[NameFirst2]
 			if RangeCheck then
 				inrange = IsItemInRange(NameFirst2, "target") or 1
 			end

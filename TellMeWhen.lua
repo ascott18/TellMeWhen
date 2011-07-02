@@ -34,7 +34,7 @@ local DRData = LibStub("DRData-1.0", true)
 TELLMEWHEN_VERSION = "4.4.3"
 TELLMEWHEN_VERSION_MINOR = strmatch(" @project-version@", " r%d+") or ""
 TELLMEWHEN_VERSION_FULL = TELLMEWHEN_VERSION .. TELLMEWHEN_VERSION_MINOR
-TELLMEWHEN_VERSIONNUMBER = 44308 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
+TELLMEWHEN_VERSIONNUMBER = 44309 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
 if TELLMEWHEN_VERSIONNUMBER > 45000 or TELLMEWHEN_VERSIONNUMBER < 44000 then error("YOU SCREWED UP THE VERSION NUMBER OR DIDNT CHANGE THE SAFETY LIMITS") return end -- safety check because i accidentally made the version number 414069 once
 
 TELLMEWHEN_MAXGROUPS = 1 	--this is a default, used by SetTheory (addon), so dont rename
@@ -113,17 +113,6 @@ TMW.SpellTextures = setmetatable(
 		return t[i]
 	end,
 }) local SpellTextures = TMW.SpellTextures
-for tab = 1, GetNumTalentTabs() do
-	for talent = 1, GetNumTalents(tab) do
-		local name, tex = GetTalentInfo(tab, talent)
-		local lower = name and strlowerCache[name]
-		if lower then
-			SpellTextures[lower] = tex
-		else
-			print(name, tex, tab, talent)
-		end
-	end
-end
 
 TMW.Icons = {}
 TMW.IconsLookup = {}
@@ -1025,8 +1014,8 @@ function TMW:OnInitialize()
 	TMW.AuraCache = TellMeWhenDB.AuraCache
 	TMW:RegisterEvent("COMBAT_LOG_EVENT_UNFILTERED")
 	TMW:RegisterEvent("PLAYER_ENTERING_WORLD")
-	TMW:RegisterEvent("PLAYER_TALENT_UPDATE", "ScheduleUpdate")
-	TMW:RegisterEvent("ACTIVE_TALENT_GROUP_CHANGED", "ScheduleUpdate")
+	TMW:RegisterEvent("PLAYER_TALENT_UPDATE")
+	TMW:RegisterEvent("ACTIVE_TALENT_GROUP_CHANGED")
 
 	if db.profile.ReceiveComm then
 		TMW:RegisterComm("TMW")
@@ -1078,12 +1067,9 @@ function TMW:ShutdownProfile()
 	end
 end
 
-function TMW:ScheduleUpdate(timetill)
-	--ghetto bucket
-
-	timetill = tonumber(timetill) or 1 -- careful, timetill is actually the event if this is being called from the event handlers
+function TMW:ScheduleUpdate(delay)
 	TMW:CancelTimer(updatehandler, 1)
-	updatehandler = TMW:ScheduleTimer("Update", timetill)
+	updatehandler = TMW:ScheduleTimer("Update", delay)
 end
 
 function TMW:OnCommReceived(prefix, text, channel, who)
@@ -2047,6 +2033,28 @@ end
 
 function TMW:SPELL_UPDATE_USABLE()
 	updatePBar = 1
+end
+
+function TMW:PLAYER_TALENT_UPDATE()
+	if not TMW.AddedTalentsToTextures then
+		for tab = 1, GetNumTalentTabs() do
+			for talent = 1, GetNumTalents(tab) do
+				local name, tex = GetTalentInfo(tab, talent)
+				local lower = name and strlowerCache[name]
+				if lower then
+					SpellTextures[lower] = tex
+				else
+					print(name, tex, tab, talent)
+				end
+			end
+		end
+		TMW.AddedTalentsToTextures = 1
+	end
+	TMW:ScheduleUpdate(1)
+end
+
+function TMW:ACTIVE_TALENT_GROUP_CHANGED()
+	TMW:ScheduleUpdate(1)
 end
 
 function TMW:ValidateIcon(icon)

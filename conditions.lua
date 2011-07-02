@@ -27,12 +27,12 @@ local Env
 local L = TMW.L
 local _, pclass = UnitClass("Player")
 
-local strlower, min =
-	  strlower, min
+local strlower, min, gsub, tostring, strfind, strsub, type, pairs, strtrim =
+	  strlower, min, gsub, tostring, strfind, strsub, type, pairs, strtrim
 local NONE, MAX_SPELL_SCHOOLS =
 	  NONE, MAX_SPELL_SCHOOLS
-local GetEclipseDirection, IsResting =
-	  GetEclipseDirection, IsResting
+local GetEclipseDirection, IsResting, GetPetActionInfo, GetTotemInfo, GetTalentTabInfo =
+	  GetEclipseDirection, IsResting, GetPetActionInfo, GetTotemInfo, GetTalentTabInfo
 local IsInInstance, GetInstanceDifficulty =
 	  IsInInstance, GetInstanceDifficulty
 local GetNumPartyMembers, GetNumRaidMembers =
@@ -49,8 +49,10 @@ local GetSpellBonusDamage, GetSpellBonusHealing =
 	  GetSpellBonusDamage, GetSpellBonusHealing
 local GetExpertise, GetMastery, UnitStat =
 	  GetExpertise, GetMastery, UnitStat
-local UnitAura =
-	  UnitAura
+local UnitAura, UnitAffectingCombat, UnitHasVehicleUI =
+	  UnitAura, UnitAffectingCombat, UnitHasVehicleUI
+local GetNumTrackingTypes, GetTrackingInfo =
+	  GetNumTrackingTypes, GetTrackingInfo
 
 local _G = _G
 local print = TMW.print

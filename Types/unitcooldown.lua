@@ -20,10 +20,10 @@ if not TMW then return end
 local L = TMW.L
 
 local db, UPD_INTV, ClockGCD, pr, ab, rc, mc
-local strlower, type =
-	  strlower, type
-local UnitGUID =
-	  UnitGUID
+local strlower, type, wipe, pairs =
+	  strlower, type, wipe, pairs
+local UnitGUID, IsInInstance =
+	  UnitGUID, IsInInstance
 local print = TMW.print
 local huge = math.huge
 local strlowerCache = TMW.strlowerCache
@@ -213,6 +213,48 @@ function Type:UNIT_SPELLCAST_SUCCEEDED(e, u, n, _, _, i)--Unit, spellName, spell
 	local c = Cooldowns[UnitGUID(u)]
 	c[strlowerCache[n]] = i
 	c[i] = TMW.time
+end
+
+
+local isArena
+local resetForArena = {}
+function Type:PLAYER_ENTERING_WORLD()
+	local _, z = IsInInstance()
+	local wasArena = isArena
+	isArena = z == "arena"
+	if isArena and not wasArena then
+		wipe(resetForArena)
+		Type:RegisterEvent("RAID_ROSTER_UPDATE")
+		Type:RegisterEvent("ARENA_OPPONENT_UPDATE")
+	elseif not isArena then
+		Type:UnregisterEvent("RAID_ROSTER_UPDATE")
+		Type:UnregisterEvent("ARENA_OPPONENT_UPDATE")
+	end
+end
+Type:RegisterEvent("PLAYER_ENTERING_WORLD")
+
+function Type:RAID_ROSTER_UPDATE()
+	for i = 1, 40 do
+		local guid = UnitGUID("raid" .. i)
+		if not guid then
+			return
+		elseif not resetForArena[guid] then
+			wipe(Cooldowns[guid])
+			resetForArena[guid] = 1
+		end
+	end
+end
+
+function Type:ARENA_OPPONENT_UPDATE()
+	for i = 1, 5 do
+		local guid = UnitGUID("arena" .. i)
+		if not guid then
+			return
+		elseif not resetForArena[guid] then
+			wipe(Cooldowns[guid])
+			resetForArena[guid] = 1
+		end
+	end
 end
 
 
