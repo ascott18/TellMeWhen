@@ -275,6 +275,30 @@ function TMW:CleanDefaults(settings, defaults, blocker)
 	return settings
 end
 
+function TMW:SetUIDropdownText(frame, value, tbl)
+	if frame.selectedValue ~= value or not frame.selectedValue then
+		UIDropDownMenu_SetSelectedValue(frame, value)
+	end
+
+	if tbl == CNDT.Types then
+		frame:GetParent():TypeCheck(CNDT.ConditionsByType[value])
+	elseif tbl == TMW.Icons then
+		for k, v in pairs(tbl) do
+			if v == value then
+				UIDropDownMenu_SetText(frame, TMW:GetIconMenuText(nil, nil, _G[v]))
+				return _G[v]
+			end
+		end
+	end
+	for k, v in pairs(tbl) do
+		if v.value == value then
+			UIDropDownMenu_SetText(frame, v.text)
+			return v
+		end
+	end
+	UIDropDownMenu_SetText(frame, "")
+end
+
 GameTooltip.OldAddLine = GameTooltip.AddLine
 function GameTooltip:AddLine(text, r, g, b, wrap, ...)
 	-- this fixes the problem where tooltips in blizz dropdowns dont wrap, nor do they have a setting to do it.
@@ -1168,12 +1192,7 @@ function ME:UpOrDown(self, delta)
 end
 
 function ME:Insert(where)
-	local groupID, iconID = CI.g, CI.i
-	if not CI.ics.Icons[1] then
-		CI.ics.Icons[1] = TMW.Icons[1]
-		UIDropDownMenu_SetSelectedValue(ME[1], TMW.Icons[1])
-		UIDropDownMenu_SetText(ME[1], TMW.Icons[1])
-	end
+	CI.ics.Icons[1] = CI.ics.Icons[1] or TMW.Icons[1]
 	tinsert(CI.ics.Icons, where, TMW.Icons[1])
 	ME:Update()
 end
@@ -1185,8 +1204,7 @@ end
 
 function ME:Update()
 	local groupID, iconID = CI.g, CI.i
-	db.profile.Groups[groupID].Icons[iconID].Icons = db.profile.Groups[groupID].Icons[iconID].Icons or {}
-	local settings = db.profile.Groups[groupID].Icons[iconID].Icons
+	local settings = CI.ics.Icons
 	UIDropDownMenu_SetSelectedValue(ME[1].icon, nil)
 	UIDropDownMenu_SetText(ME[1].icon, "")
 
@@ -1200,9 +1218,9 @@ function ME:Update()
 			mg:SetPoint("TOP", ME[k-1], "BOTTOM", 0, 0)
 		end
 		mg:SetFrameLevel(IE.Main.Icons:GetFrameLevel()+2)
-		UIDropDownMenu_SetSelectedValue(mg.icon, v)
-		local text = TMW:GetIconMenuText(strmatch(v, "TellMeWhen_Group(%d+)_Icon(%d+)"))
-		UIDropDownMenu_SetText(mg.icon, text)
+		
+		TMW:SetUIDropdownText(mg.icon, v, TMW.Icons)
+		
 		mg.icontexture:SetTexture(_G[v] and _G[v].texture:GetTexture())
 	end
 
@@ -2587,6 +2605,12 @@ function ANN:SelectChannel(channel)
 		else
 			ANN.Size:Hide()
 		end
+		if channelsettings.editbox then
+			ANN.EditBox:SetText(EventSettings.Location)
+			ANN.EditBox:Show()
+		else
+			ANN.EditBox:Hide()
+		end
 	end
 
 	if channelFrame then
@@ -3813,30 +3837,6 @@ function CNDT:ClearDialog()
 	CNDT:AddRemoveHandler()
 end
 
-function CNDT:SetUIDropdownText(frame, value, tbl)
-	if frame.selectedValue ~= value or not frame.selectedValue then
-		UIDropDownMenu_SetSelectedValue(frame, value)
-	end
-
-	if tbl == CNDT.Types then
-		frame:GetParent():TypeCheck(CNDT.ConditionsByType[value])
-	elseif tbl == TMW.Icons then
-		for k, v in pairs(tbl) do
-			if v == value then
-				UIDropDownMenu_SetText(frame, TMW:GetIconMenuText(nil, nil, _G[v]))
-				return _G[v]
-			end
-		end
-	end
-	for k, v in pairs(tbl) do
-		if v.value == value then
-			UIDropDownMenu_SetText(frame, v.text)
-			return v
-		end
-	end
-	UIDropDownMenu_SetText(frame, "")
-end
-
 CNDT.AddIns = {}
 local AddIns = CNDT.AddIns
 
@@ -4003,9 +4003,9 @@ function AddIns.Load(group)
 	group.EditBox2:SetText(condition.Name2)
 	group.Check:SetChecked(condition.Checked)
 	group.Check2:SetChecked(condition.Checked2)
-	CNDT:SetUIDropdownText(group.Icon, condition.Icon, TMW.Icons)
+	TMW:SetUIDropdownText(group.Icon, condition.Icon, TMW.Icons)
 
-	local v = CNDT:SetUIDropdownText(group.Operator, condition.Operator, CNDT.Operators)
+	local v = TMW:SetUIDropdownText(group.Operator, condition.Operator, CNDT.Operators)
 	if v then
 		TMW:TT(group.Operator, v.tooltipText, nil, 1, nil, 1)
 	end
@@ -4046,8 +4046,8 @@ function AddIns.Clear(group)
 	if group.Icon.selectedValue ~= "" then
 		UIDropDownMenu_SetSelectedValue(group.Icon, "")
 	end
-	CNDT:SetUIDropdownText(group.Type, "HEALTH", CNDT.Types)
-	CNDT:SetUIDropdownText(group.Operator, "==", CNDT.Operators)
+	TMW:SetUIDropdownText(group.Type, "HEALTH", CNDT.Types)
+	TMW:SetUIDropdownText(group.Operator, "==", CNDT.Operators)
 	group.And:SetChecked(1)
 	group.Or:SetChecked(nil)
 	for k, rune in pairs(group.Runes) do

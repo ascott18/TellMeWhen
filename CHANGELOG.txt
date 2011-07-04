@@ -1,5 +1,6 @@
 ===v4.4.3===
  * You can now specify a custom texture to be used for an icon.
+ * Added whisper as a text output destination.
  * Shuffled around some framelevels in hopes of fixing the timer bug.
  * Attempted to force cooldowns to reset upon entering an arena. (UNTESTED)
  * Added a dialog to warn users of the dangers of configuration mode.

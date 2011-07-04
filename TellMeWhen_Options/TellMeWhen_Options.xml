@@ -3879,17 +3879,13 @@
 					</Frame>
 					<Frame name="$parentLocation" inherits="UIDropDownMenuTemplate" parentKey="Location">
 						<Anchors>
-							<Anchor point="TOPLEFT" relativeTo="$parentChannels" relativePoint="TOPRIGHT">
-								<Offset x="5" y="0" />
-							</Anchor>
+							<Anchor point="TOPLEFT" relativeTo="$parentChannels" relativePoint="TOPRIGHT" x="5" y="0" />
 						</Anchors>
 						<Layers>
 							<Layer level="OVERLAY">
 								<FontString name="$parentHeader" inherits="GameFontNormalLarge" parentKey="Header" justifyH="LEFT" text="">
 									<Anchors>
-										<Anchor point="BOTTOM" relativeTo="$parent" relativePoint="TOP">
-											<Offset x="0" y="1"/>
-										</Anchor>
+										<Anchor point="BOTTOM" relativeTo="$parent" relativePoint="TOP" x="0" y="1"/>
 									</Anchors>
 								</FontString>
 							</Layer>
@@ -3906,6 +3902,31 @@
 							</OnLoad>
 						</Scripts>
 					</Frame>
+					<EditBox name="$parentEditBox" inherits="TellMeWhen_InputBoxTemplate" parentKey="EditBox" autoFocus="false">
+						<Size x="135" y="15"/>
+						<Anchors>
+							<Anchor point="TOPLEFT" relativeTo="$parentChannels" relativePoint="TOPRIGHT" x="20" y="0" />
+						</Anchors>
+						<Scripts>
+							<OnLoad>
+								TMW:TT(self, "ANN_WHISPERTARGET", "ANN_WHISPERTARGET_DESC")
+								self.label = TMW.L["ANN_WHISPERTARGET"]
+								self.BackgroundText:SetWidth(self:GetWidth())
+								TMW.SUG:EnableEditbox(self, true, true)
+							</OnLoad>
+							<OnEditFocusLost>
+								EditBox_ClearHighlight(self)
+								local groupID, iconID = TMW.CI.g, TMW.CI.i
+								self:SetText(TMW:CleanString(self:GetText()))
+								if TMW.CI.ics then
+									TMW.CI.ics.Events[TMW.ANN.currentEvent].Location = self:GetText()
+								end
+								TMW.IE:ScheduleIconUpdate(groupID, iconID)
+								self:GetScript("OnTextChanged")(self)
+							</OnEditFocusLost>
+						</Scripts>
+					</EditBox>
+					
 					<CheckButton name="$parentSticky" inherits="TellMeWhen_CheckTemplate" parentKey="Sticky">
 						<Anchors>
 							<Anchor point="TOPLEFT" relativeTo="$parentLocation" relativePoint="BOTTOMLEFT">

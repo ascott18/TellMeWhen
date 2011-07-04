@@ -583,6 +583,8 @@ L["ANN_STICKY"] = "Sticky"
 L["ANN_SHOWICON"] = "Show icon texture"
 L["ANN_SHOWICON_DESC"] = "Some text destinations can show a texture along with the text. Check this to enable that feature."
 L["ANN_SUB_CHANNEL"] = "Sub section"
+L["ANN_WHISPERTARGET"] = "Whisper target"
+L["ANN_WHISPERTARGET_DESC"] = "Input the name of the player that you would like to whisper. Normal server/faction whisper requirements apply."
 
 
 

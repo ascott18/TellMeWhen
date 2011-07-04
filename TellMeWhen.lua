@@ -34,7 +34,7 @@ local DRData = LibStub("DRData-1.0", true)
 TELLMEWHEN_VERSION = "4.4.3"
 TELLMEWHEN_VERSION_MINOR = strmatch(" @project-version@", " r%d+") or ""
 TELLMEWHEN_VERSION_FULL = TELLMEWHEN_VERSION .. TELLMEWHEN_VERSION_MINOR
-TELLMEWHEN_VERSIONNUMBER = 44311 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
+TELLMEWHEN_VERSIONNUMBER = 44312 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
 if TELLMEWHEN_VERSIONNUMBER > 45000 or TELLMEWHEN_VERSIONNUMBER < 44000 then error("YOU SCREWED UP THE VERSION NUMBER OR DIDNT CHANGE THE SAFETY LIMITS") return end -- safety check because i accidentally made the version number 414069 once
 
 TELLMEWHEN_MAXGROUPS = 1 	--this is a default, used by SetTheory (addon), so dont rename
@@ -703,6 +703,12 @@ TMW.ChannelList = {
 		text = CHAT_MSG_YELL,
 		channel = "YELL",
 		isBlizz = 1,
+	},
+	{
+		text = WHISPER,
+		channel = "WHISPER",
+		isBlizz = 1,
+		editbox = 1,
 	},
 	{
 		text = CHAT_MSG_PARTY,
@@ -2306,7 +2312,7 @@ local function HandleEvent(icon, data, played, announced)
 		else
 			local chandata = ChannelLookup[Channel]
 			if Text and chandata and chandata.isBlizz then
-				SendChatMessage(Text, Channel)
+				SendChatMessage(Text, Channel, nil, data.Location)
 			end
 		end
 		announced = 1
