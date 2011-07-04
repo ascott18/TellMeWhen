@@ -76,6 +76,17 @@ local function approachTable(...)
     return t
 end
 
+local function get(value, ...)
+	local type = type(value)
+	if type == "function" then
+		return value(...)
+	elseif type == "table" then
+		return value[...]
+	else
+		return value
+	end
+end
+
 TMW.CI = setmetatable({}, {__index = function(tbl, k)
 	if k == "ics" then
 		-- take no chances with errors occuring here
@@ -198,9 +209,6 @@ function TMW:GuessIconTexture(data)
 	if not tex then tex = "Interface\\Icons\\INV_Misc_QuestionMark" end
 	return tex
 end
-
---[[function TMW:GetConfigIconTexture(icon, isItem)
-end]]
 
 function TMW:GetGroupName(n, g, short)
 	if (not n) or n == "" then
@@ -1269,6 +1277,7 @@ end
 IE = TMW:NewModule("IconEditor", "AceEvent-3.0") TMW.IE = IE
 IE.Checks = { --1=check box, 2=editbox, 3=slider(x100), 4=custom, table=subkeys are settings
 	Name = 2,
+	CustomTex = 2,
 	RangeCheck = 1,
 	ManaCheck = 1,
 	CooldownCheck = 1,
@@ -3354,6 +3363,56 @@ function SUG:ColorHelp(frame)
 	GameTooltip:Show()
 end
 
+function SUG:EnableEditbox(editbox, inputType, setOverride)
+	editbox.SUG_Enabled = 1
+	
+	inputType = get(inputType)
+	inputType = (inputType == true and "spell") or inputType
+	if not inputType then
+		return SUG:DisableEditbox(editbox)
+	end
+	editbox.SUG_type = inputType
+	editbox.SUG_setOverride = setOverride
+	
+	--[[SUG.redoIfSame = 1
+	SUG.Box = editbox
+	SUG.overrideSoI = setOverride and inputType
+	SUG:NameOnCursor()]]
+	
+	if not editbox.SUG_hooked then
+		editbox:HookScript("OnEditFocusLost", function(self)
+			if self.SUG_Enabled then
+				SUG.Suggest:Hide()
+			end
+		end)
+		editbox:HookScript("OnEditFocusGained", function(self)
+			if self.SUG_Enabled then
+				SUG.redoIfSame = nil
+				SUG.Box = self
+				SUG.overrideSoI = self.SUG_setOverride and self.SUG_type
+				SUG:NameOnCursor()
+			end
+		end)
+		editbox:HookScript("OnTextChanged", function(self, userInput)
+			if userInput and self.SUG_Enabled then
+				SUG.redoIfSame = nil
+				SUG:NameOnCursor()
+			end
+		end)
+		editbox:HookScript("OnMouseUp", function(self)
+			if self.SUG_Enabled then
+				SUG:NameOnCursor(1)
+			end
+		end)
+		editbox.SUG_hooked = 1
+	end
+
+end
+
+function SUG:DisableEditbox(editbox)
+	editbox.SUG_Enabled = nil
+end
+
 
 -- -----------------------
 -- CONDITION EDITOR DIALOG
@@ -3385,17 +3444,6 @@ local commonConditions = {
 	"DEFAULT",
 	"STANCE",
 }
-
-local function get(value, ...)
-	local type = type(value)
-	if type == "function" then
-		return value(...)
-	elseif type == "table" then
-		return value[...]
-	else
-		return value
-	end
-end
 
 local function AddConditionToDropDown(v)
 	if not v or v.hidden then return end
@@ -3824,13 +3872,8 @@ function AddIns.TypeCheck(group, data)
 			else
 				group.Check:Hide()
 			end
-			group.EditBox.useSUG = data.useSUG
-			if data.useSUG then
-				SUG.redoIfSame = 1
-				SUG.Box = group.EditBox
-				SUG.overrideSoI = (data.useSUG == true and "spell") or data.useSUG
-				SUG:NameOnCursor()
-			end
+			SUG:EnableEditbox(group.EditBox, data.useSUG, true)
+			
 			group.Slider:SetWidth(200)
 			if data.noslide then
 				group.EditBox:SetWidth(520)
@@ -3841,7 +3884,7 @@ function AddIns.TypeCheck(group, data)
 			group.EditBox:Hide()
 			group.Check:Hide()
 			group.Slider:SetWidth(523)
-			group.EditBox.useSUG = nil
+			SUG:DisableEditbox(group.EditBox)
 		end
 		if data.name2 then
 			group.EditBox2:Show()
@@ -3857,13 +3900,13 @@ function AddIns.TypeCheck(group, data)
 			else
 				group.Check2:Hide()
 			end
-			group.EditBox2.useSUG = data.useSUG
+			SUG:EnableEditbox(group.EditBox2, data.useSUG, true)
 			group.EditBox:SetWidth(250)
 			group.EditBox2:SetWidth(250)
 		else
 			group.Check2:Hide()
 			group.EditBox2:Hide()
-			group.EditBox2.useSUG = nil
+			SUG:DisableEditbox(group.EditBox2)
 		end
 		
 		if data.nooperator then

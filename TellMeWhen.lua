@@ -34,7 +34,7 @@ local DRData = LibStub("DRData-1.0", true)
 TELLMEWHEN_VERSION = "4.4.3"
 TELLMEWHEN_VERSION_MINOR = strmatch(" @project-version@", " r%d+") or ""
 TELLMEWHEN_VERSION_FULL = TELLMEWHEN_VERSION .. TELLMEWHEN_VERSION_MINOR
-TELLMEWHEN_VERSIONNUMBER = 44309 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
+TELLMEWHEN_VERSIONNUMBER = 44311 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
 if TELLMEWHEN_VERSIONNUMBER > 45000 or TELLMEWHEN_VERSIONNUMBER < 44000 then error("YOU SCREWED UP THE VERSION NUMBER OR DIDNT CHANGE THE SAFETY LIMITS") return end -- safety check because i accidentally made the version number 414069 once
 
 TELLMEWHEN_MAXGROUPS = 1 	--this is a default, used by SetTheory (addon), so dont rename
@@ -382,8 +382,9 @@ TMW.Defaults = {
 		ClassSpellCache	= {
 			["*"] = {},
 		},
-		SeenNewDurSyntax = false,
-		HasImported	=	false,
+		SeenNewDurSyntax	= false,
+		HasImported			= false,
+		ConfigWarning		= true,
 	},
 	profile = {
 	--	Version 	= 	TELLMEWHEN_VERSIONNUMBER,  -- DO NOT DEFINE VERSION AS A DEFAULT, OTHERWISE WE CANT TRACK IF A USER HAS AN OLD VERSION BECAUSE IT WILL ALWAYS DEFAULT TO THE LATEST
@@ -469,6 +470,7 @@ TMW.Defaults = {
 						CooldownType		= "spell",
 						Enabled				= false,
 						Name				= "",
+						CustomTex			= "",
 						OnlyMine			= false,
 						ShowTimer			= false,
 						ShowTimerText		= true,
@@ -567,7 +569,7 @@ TMW.BE = {
 	--NOTE: any id prefixed with "_" will have its localized name substituted in instead of being forced to match as an ID
 	debuffs = {
 		CrowdControl = "_118;_339;2637;33786;_1499;_19503;_19386;20066;10326;_9484;_6770;_2094;_51514;76780;_710;_5782;_6358;_49203;_605;82691", -- originally by calico0 of Curse
-		Bleeding = "_1822;_1079;9007;33745;1943;703;_94009;43104;89775",
+		Bleeding = "_94009;_1822;_1079;9007;33745;1943;703;43104;89775",
 		Incapacitated = "20066;1776;49203",
 		Feared = "_5782;5246;_8122;10326;1513;_5484;_6789;87204",
 		Slowed = "_116;_120;_15571;13810;_5116;_8056;3600;_1715;_12323;45524;_18223;_15407;_3409;26679;_51693;_2974;_58180;61391;_50434;_55741;44614;_7302;_8034;_63529", -- by algus2
@@ -1160,9 +1162,17 @@ function TMW:Update()
 		if not TMW.IE then
 			TMW:LoadOptions()
 		end
+		if db.global.ConfigWarning then
+			TellMeWhen_ConfigWarning:Show()
+		else
+			TellMeWhen_ConfigWarning:Hide()
+		end
 		TMW:SetScript("OnUpdate", nil)
 		TMW:OnUpdate()
 	else
+		if TellMeWhen_ConfigWarning then
+			TellMeWhen_ConfigWarning:Hide()
+		end
 		TMW:SetScript("OnUpdate", TMW.OnUpdate)
 	end
 
@@ -2043,8 +2053,6 @@ function TMW:PLAYER_TALENT_UPDATE()
 				local lower = name and strlowerCache[name]
 				if lower then
 					SpellTextures[lower] = tex
-				else
-					print(name, tex, tab, talent)
 				end
 			end
 		end
@@ -2350,6 +2358,7 @@ end
 
 local function SetTexture(icon, tex)
 	--if icon.__tex ~= tex then ------dont check for this, checking is done before this method is even called
+	tex = icon.OverrideTex or tex
 	icon.__tex = tex
 	icon.texture:SetTexture(tex)
 end
@@ -2453,7 +2462,8 @@ local function SetInfo(icon, alpha, color, texture, start, duration, checkGCD, p
 	then
 		alpha = alpha ~= 0 and icon.ConditionAlpha or 0
 	end
-
+	
+	texture = icon.OverrideTex or texture
 	if texture ~= nil and icon.__tex ~= texture then -- do this before events are processed because some text outputs use icon.__tex
 		icon.__tex = texture
 		icon.texture:SetTexture(texture)
@@ -2815,6 +2825,7 @@ function TMW:Icon_Update(icon)
 	if pclass ~= "DEATHKNIGHT" then
 		icon.IgnoreRunes = nil
 	end
+	TMW:GetCustomTexture(icon)
 
 	if icon.__hasEvents then
 		-- UnregisterAllEvents uses a ton of CPU
@@ -2931,6 +2942,7 @@ function TMW:Icon_Update(icon)
 	icon:Show()
 	local pbar = icon.pbar
 	local cbar = icon.cbar
+	if icon.OverrideTex then icon:SetTexture(icon.OverrideTex) end 
 	if Locked then
 		if icon.texture:GetTexture() == "Interface\\AddOns\\TellMeWhen\\Textures\\Disabled" then
 			icon:SetTexture(nil)
@@ -3034,6 +3046,8 @@ end
 local eqttcache = {}
 function TMW:EquivToTable(name)
 	name = strlower(name)
+	local eqname, duration = strmatch(name, "(.-):([%d:%s%.]*)$")
+	name = eqname or name
 	local names
 	for k, v in pairs(TMW.BE) do -- check in subtables ('buffs', 'debuffs', 'casts', etc)
 		for equiv, str in pairs(v) do
@@ -3045,15 +3059,20 @@ function TMW:EquivToTable(name)
 		if names then break end
 	end
 	if not names then return end -- if we didnt find an equivalency string then gtfo
-
-	if eqttcache[names] then return eqttcache[names] end -- if we already made a table of this string, then use it
+	
+	local cachestring = tostring(names) .. tostring(duration)
+	if eqttcache[cachestring] then return eqttcache[cachestring] end -- if we already made a table of this string, then use it
 
 	local tbl = { strsplit(";", names) } -- split the string into a table
 	for a, b in pairs(tbl) do
 		local new = strtrim(b) -- take off trailing spaces
-		tbl[a] = tonumber(new) or new -- make sure it is a number if it can be
+		new = tonumber(new) or new -- make sure it is a number if it can be
+		if duration then
+			new = new .. ":" .. duration
+		end
+		tbl[a] = new
 	end
-	eqttcache[names] = tbl
+	eqttcache[cachestring] = tbl
 	return tbl
 end
 
@@ -3258,21 +3277,21 @@ function TMW:GetUnits(icon, setting)
 	return Units
 end
 
+local function replace(text, find, rep)
+	-- using this allows for the replacement of ";       " to "; " in one call
+	while strfind(text, find) do
+		text = gsub(text, find, rep)
+	end
+	return text
+end
 function TMW:CleanString(text)
 	text = strtrim(text, "; \t\r\n")-- remove all leading and trailing semicolons, spaces, tabs, and newlines
-	while strfind(text, "[^:] ;") do
-		text = gsub(text, "[^:] ;", "; ") -- remove all spaces before semicolons
-	end
-	while strfind(text, "; ") do
-		text = gsub(text, "; ", ";") -- remove all spaces after semicolons
-	end
-	while strfind(text, ";;") do
-		text = gsub(text, ";;", ";") -- remove all double semicolons
-	end
-	while strfind(text, ":  ") do
-		text = gsub(text, ":  ", ": ") -- remove all double spaces after colons (DONT REMOVE ALL DOUBLE SPACES, SOME SPELLS HAVE TYPO'd NAMES WITH 2 SPACES!)
-	end
-	text = gsub(text, ";", "; ") -- add spaces after all semicolons. Never used to do this, but it just looks so much better.
+	text = replace(text, "[^:] ;", "; ") -- remove all spaces before semicolons
+	text = replace(text, "; ", ";") -- remove all spaces after semicolons
+	text = replace(text, ";;", ";") -- remove all double semicolons
+	text = replace(text, " :", ":") -- remove all single spaces before colons
+	text = replace(text, ":  ", ": ") -- remove all double spaces after colons (DONT REMOVE ALL DOUBLE SPACES EVERYWHERE, SOME SPELLS HAVE TYPO'd NAMES WITH 2 SPACES!)
+	text = gsub(text, ";", "; ") -- add spaces after all semicolons. Never used to do this, but it just looks so much better (DONT USE replace!).
 	return text
 end
 
@@ -3301,7 +3320,7 @@ function TMW:DoSetTexture(icon)
 	end
 end
 
-function TMW:GetConfigIconTexture(icon)
+function TMW:GetConfigIconTexture(icon, isItem)
 	if icon.Name == "" then
 		return "Interface\\Icons\\INV_Misc_QuestionMark", nil
 	else
@@ -3311,11 +3330,12 @@ function TMW:GetConfigIconTexture(icon)
 		-- the level of hackyness here is sickening. Note that OldBE does not contain the enrage equiv (intended so we dont flood the tooltip)
 		-- by passing false in for arg3 (firstOnly), it creates a unique cache string and therefore a unique cache value
 		-- nessecary because we arent using the real TMW.BE
+		
 		local tbl = isItem and TMW:GetItemIDs(icon, icon.Name, false) or TMW:GetSpellNames(icon, icon.Name, false)
 		TMW.BE = BEbackup -- unhack
 	
 		for _, name in ipairs(tbl) do
-			local t = SpellTextures[name]
+			local t = isItem and GetItemIcon(name) or SpellTextures[name]
 			if t then return t, true end
 		end
 		if Types[icon.Type].usePocketWatch then
@@ -3323,6 +3343,23 @@ function TMW:GetConfigIconTexture(icon)
 		else
 			return "Interface\\Icons\\INV_Misc_QuestionMark", false
 		end
+	end
+end
+
+TMW.TestTex = TMW:CreateTexture()
+function TMW:GetCustomTexture(icon)
+	icon.OverrideTex = nil
+	icon.CustomTex = icon.CustomTex ~= "" and icon.CustomTex
+	if icon.CustomTex then
+		TMW.TestTex:SetTexture(SpellTextures[icon.CustomTex])
+		if not TMW.TestTex:GetTexture() then
+			TMW.TestTex:SetTexture(icon.CustomTex)
+		end
+		if not TMW.TestTex:GetTexture() then
+			TMW.TestTex:SetTexture("Interface\\Icons\\" .. icon.CustomTex)
+		end
+		icon.OverrideTex = TMW.TestTex:GetTexture()
+		return icon.OverrideTex
 	end
 end
 

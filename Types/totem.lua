@@ -58,6 +58,7 @@ Type.WhenChecks = {
 }
 Type.RelevantSettings = {
 	Name = pclass ~= "DRUID" and pclass ~= "DEATHKNIGHT",
+	CustomTex = true,
 	ShowTimer = true,
 	ShowTimerText = true,
 	ShowWhen = true,

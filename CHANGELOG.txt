@@ -1,6 +1,8 @@
 ===v4.4.3===
+ * You can now specify a custom texture to be used for an icon.
  * Shuffled around some framelevels in hopes of fixing the timer bug.
  * Attempted to force cooldowns to reset upon entering an arena. (UNTESTED)
+ * Added a dialog to warn users of the dangers of configuration mode.
  * New Conditions:
  ** Pet attack mode
  ** Spell cooldown duration comparison
@@ -13,6 +15,8 @@
  ** (r136) TellMeWhen-4.4.3.lua:1630: attempt to index field "Font" (a nil value)
  ** (r137) TellMeWhen_Options.lua:4038: attempt to index global "groups" (a nil value)
  ** (r140) Icon's OnHide events should now properly fire when Always Hide is checked.
+ ** (r142) Using equivalencies with the new duration syntax should now cause the duration to be applied to all spells in the equivalency.
+ ** (r142) Fixed item textures in config mode.
  
 ===v4.4.2===
  * Misc. updates.

@@ -10,6 +10,9 @@ L["LDB_TOOLTIP2"] = "|cff7fffffRight-click|r to show the main TMW options"
 L["LOADERROR"] = "TellMeWhen_Options could not be loaded: "
 L["LOADINGOPT"] = "Loading TellMeWhen_Options."
 L["ENABLINGOPT"] = "TellMeWhen_Options is disabled. Enabling..."
+L["CONFIGMODE"] = "TellMeWhen is in configuration mode. Icons will not be functional until you leave configuration mode. Type '/tmw' to toggle configuration mode on and off."
+L["CONFIGMODE_EXIT"] = "Exit config mode"
+L["CONFIGMODE_NEVERSHOW"] = "Don't show again"
 
 L["LOCKED"] = "Locked"
 L["RESIZE"] = "Resize"
@@ -24,7 +27,7 @@ L["FROMNEWERVERSION"] = "You are importing an icon that was created in a newer v
 -- ICONMENU
 -- -------------
 
-L["ICONMENU_CHOOSENAME"] = "Choose name(s)/ID(s)"
+L["ICONMENU_CHOOSENAME"] = "Choose name(s)/ID(s) to check"
 L["ICONMENU_CHOOSENAME_CNDTIC"] = "Choose name/ID/texture path"
 L["ICONMENU_ENABLE"] = "Enabled"
 L["CHOOSENAME_EQUIVS_TOOLTIP"] = "You can select predefined sets of buffs, debuffs, spell casts, diminishing returns, or dispel types (Magic, Curse, etc.) from this menu to insert into the editbox."
@@ -96,6 +99,10 @@ L["ICONMENU_CHECKNEXT_DESC"] = "Checking this box will cause this icon to check 
 L["ICONMENU_DISPEL"] = "Dispel Type"
 L["ICONMENU_CASTS"] = "Spell Casts"
 L["ICONMENU_DRS"] = "Diminishing Returns"
+
+L["ICONMENU_CUSTOMTEX"] = "Custom Texture"
+L["ICONMENU_CUSTOMTEX_DESC"] = "If you want to override the texture shown by this icon, enter the Name or ID of the spell that has the texture that you want to use. You may also enter a texture path, such as 'Interface/Icons/spell_nature_healingtouch', or just 'spell_nature_healingtouch' if the path is 'Interface/Icons'"
+
 
 L["ICONMENU_UNITSTOWATCH"] = "Units to watch"
 L["ICONMENU_UNITS"] = "Units"

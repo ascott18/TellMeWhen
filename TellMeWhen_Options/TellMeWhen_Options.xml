@@ -323,7 +323,6 @@
 			</OnValueChanged>
 			<OnLoad>
 				self:EnableMouseWheel(true)
-				TMW.print("KJDFKJDKFJKDJFKKDFJKDJF", self.setting)
 			</OnLoad>
 			<OnEnable>
 				self:SetAlpha(1)
@@ -649,18 +648,11 @@
 					<OnEditFocusLost>
 						EditBox_ClearHighlight(self)
 						self:SetText(TMW:CleanString(self:GetText()))
-						TMW.SUG.Suggest:Hide()
 						TMW.CNDT:OK()
 					</OnEditFocusLost>
 					<OnEditFocusGained>
 						EditBox_HighlightText(self)
 						self.BackgroundText:SetText(nil)
-						if self.useSUG then
-							TMW.SUG.redoIfSame = nil
-							TMW.SUG.Box = self
-							TMW.SUG.overrideSoI = (self.useSUG == true and "spell") or self.useSUG
-							TMW.SUG:NameOnCursor()
-						end
 					</OnEditFocusGained>
 					<OnTextChanged>
 						local text = self:GetText()
@@ -669,16 +661,7 @@
 						else
 							self.BackgroundText:SetText(nil)
 						end
-						if userInput and self.useSUG then
-							TMW.SUG.redoIfSame = nil
-							TMW.SUG:NameOnCursor()
-						end
 					</OnTextChanged>
-					<OnMouseUp>
-						if self.useSUG then
-							TMW.SUG:NameOnCursor(1)
-						end
-					</OnMouseUp>
 				</Scripts>
 			</EditBox>
 			<EditBox name="$parentEditBox2" inherits="TellMeWhen_InputBoxTemplate" parentKey="EditBox2" autoFocus="false">
@@ -698,12 +681,6 @@
 					<OnEditFocusGained>
 						EditBox_HighlightText(self)
 						self.BackgroundText:SetText(nil)
-						if self.useSUG then
-							TMW.SUG.redoIfSame = nil
-							TMW.SUG.Box = self
-							TMW.SUG.overrideSoI = (self.useSUG == true and "spell") or self.useSUG
-							TMW.SUG:NameOnCursor()
-						end
 					</OnEditFocusGained>
 					<OnTextChanged>
 						local text = self:GetText()
@@ -712,16 +689,7 @@
 						else
 							self.BackgroundText:SetText(nil)
 						end
-						if userInput and self.useSUG then
-							TMW.SUG.redoIfSame = nil
-							TMW.SUG:NameOnCursor()
-						end
 					</OnTextChanged>
-					<OnMouseUp>
-						if self.useSUG then
-							TMW.SUG:NameOnCursor(1)
-						end
-					</OnMouseUp>
 				</Scripts>
 			</EditBox>
 			<Frame name="$parentRunes" parentKey="Runes" hidden="true">
@@ -1656,12 +1624,10 @@
 		</Frames>
 	</Button>
 
-	
-	<Frame name="TellMeWhen_IconEditor" hidden="true" movable="true" enableMouse="true" frameStrata="DIALOG">
+	<Frame name="TellMeWhen_ConfigWarning" hidden="true" movable="true" toplevel="true" clampedToScreen="true" enableMouse="true" frameStrata="DIALOG">
+		<Size x="300" />
 		<Anchors>
-			<Anchor point="CENTER" relativeTo="UIParent">
-				<Offset x="0" y="0" />
-			</Anchor>
+			<Anchor point="TOP" relativeTo="UIParent" x="0" y="-40" />
 		</Anchors>
 		<Backdrop bgFile="Interface\DialogFrame\UI-DialogBox-Background-Dark" edgeFile="Interface\DialogFrame\UI-DialogBox-Border" tile="true">
 			<BackgroundInsets>
@@ -1674,9 +1640,85 @@
 				<AbsValue val="32" />
 			</EdgeSize>
 		</Backdrop>
-		<Size>
-			<AbsDimension x="600" y="380" />
-		</Size>
+		<TitleRegion name="$parentTitleRegion" setAllPoints="true"/>
+		<Frames>
+			<Button name="$parentExit" parentKey="Exit" inherits="UIPanelButtonTemplate">
+				<Size>
+					<AbsDimension x="120" y="17" />
+				</Size>
+				<Anchors>
+					<Anchor point="BOTTOMLEFT">
+						<Offset x="15" y="13" />
+					</Anchor>
+				</Anchors>
+				<Scripts>
+					<OnLoad> self:SetText(TMW.L["CONFIGMODE_EXIT"]) </OnLoad>
+					<OnClick>TMW:LockToggle() </OnClick>
+				</Scripts>
+			</Button>
+			<Button name="$parentNeverAgain" parentKey="NeverAgain" inherits="UIPanelButtonTemplate">
+				<Size>
+					<AbsDimension x="120" y="17" />
+				</Size>
+				<Anchors>
+					<Anchor point="BOTTOMRIGHT">
+						<Offset x="-15" y="13" />
+					</Anchor>
+				</Anchors>
+				<Scripts>
+					<OnLoad> self:SetText(TMW.L["CONFIGMODE_NEVERSHOW"]) </OnLoad>
+					<OnClick>TMW.db.global.ConfigWarning = false self:GetParent():Hide() </OnClick>
+				</Scripts>
+			</Button>
+		</Frames>
+		<Layers>
+			<Layer level="ARTWORK">
+				<Texture file="Interface\DialogFrame\UI-DialogBox-Header" parentKey="header">
+					<Size x="256" y="64"/>
+					<Anchors>
+						<Anchor point="TOP" x="0" y="12"/>
+					</Anchors>
+				</Texture>
+				<FontString name="$parentTitle" parentKey="title" inherits="GameFontNormal" justifyH="CENTER">
+					<Anchors>
+						<Anchor point="TOP" relativeTo="$parent" relativePoint="TOP" x="0" y="-2" />
+					</Anchors>
+				</FontString>
+				<FontString name="$parentDesc" parentKey="desc" inherits="GameFontHighlight" justifyH="CENTER" justifyV="TOP">
+					<Size x="290"/>
+					<Anchors>
+						<Anchor point="TOP" y="-32" />
+					</Anchors>
+				</FontString>
+			</Layer>
+		</Layers>
+		<Scripts>
+			<OnLoad>
+				self.title:SetText(TMW.L["ICON_TOOLTIP1"])
+				self.desc:SetText(TMW.L["CONFIGMODE"])
+				self:SetScale(0.8)
+				self.desc:SetWidth(self:GetWidth() - 20)
+				self:SetHeight(self.desc:GetHeight() + 70)
+			</OnLoad>
+		</Scripts>
+	</Frame>
+	
+	<Frame name="TellMeWhen_IconEditor" hidden="true" movable="true" enableMouse="true" frameStrata="DIALOG">
+		<Size x="600" y="380" />
+		<Anchors>
+			<Anchor point="CENTER" relativeTo="UIParent" x="0" y="0" />
+		</Anchors>
+		<Backdrop bgFile="Interface\DialogFrame\UI-DialogBox-Background-Dark" edgeFile="Interface\DialogFrame\UI-DialogBox-Border" tile="true">
+			<BackgroundInsets>
+				<AbsInset left="8" right="8" top="8" bottom="8" />
+			</BackgroundInsets>
+			<TileSize>
+				<AbsValue val="32" />
+			</TileSize>
+			<EdgeSize>
+				<AbsValue val="32" />
+			</EdgeSize>
+		</Backdrop>
 		<Frames>
 			<Button name="$parentTab1" parentKey="MainTab" inherits="TellMeWhen_TabTemplate" id="1">
 				<Anchors>
@@ -2015,6 +2057,7 @@
 								self.TTtitle = TMW.L["ICONMENU_CHOOSENAME"]
 								self.TTtext = TMW.L["CHOOSENAME_DIALOG"]
 								self.BackgroundText:SetWidth(self:GetWidth())
+								TMW.SUG:EnableEditbox(self, true)
 							</OnLoad>
 							<OnEvent>
 								if not self.isOver then return end
@@ -2037,7 +2080,6 @@
 								end
 								TMW.IE:ScheduleIconUpdate(groupID, iconID)
 								self:GetScript("OnTextChanged")(self)
-								TMW.SUG.Suggest:Hide()
 								
 								if TMW.CI.t and TMW.Types[TMW.CI.t].DurationSyntax then
 									local s = ""
@@ -2059,10 +2101,6 @@
 							<OnEditFocusGained>
 								EditBox_HighlightText(self)
 								self.BackgroundText:SetText(nil)
-							--	TMW.SUG.redoIfSame = nil
-								TMW.SUG.Box = self
-								TMW.SUG:NameOnCursor()
-								TMW.SUG.overrideSoI = nil
 							</OnEditFocusGained>
 							<OnEnter>
 								self.isOver = true
@@ -2077,7 +2115,6 @@
 							</OnReceiveDrag>
 							<OnMouseUp>
 								TMW.ID:SpellItemToIcon(TMW.CI.g, TMW.CI.i)
-								TMW.SUG:NameOnCursor(1)
 							</OnMouseUp>
 							<OnTextChanged>
 								local text = self:GetText()
@@ -2085,10 +2122,6 @@
 									self.BackgroundText:SetText(self.label)
 								else
 									self.BackgroundText:SetText(nil)
-								end
-								if userInput then
-									TMW.SUG.redoIfSame = nil
-									TMW.SUG:NameOnCursor()
 								end
 							</OnTextChanged>
 						</Scripts>
@@ -2162,26 +2195,43 @@
 						</Scripts>
 					</Frame>
 
-					<EditBox name="$parentUnit" inherits="TellMeWhen_InputBoxTemplate" parentKey="Unit" autoFocus="false">
+					<EditBox name="$parentCustomTex" inherits="TellMeWhen_InputBoxTemplate" parentKey="CustomTex" autoFocus="false">
 						<Size>
-							<AbsDimension x="545" y="15"/>
+							<AbsDimension x="270" y="15"/>
 						</Size>
 						<Anchors>
 							<Anchor point="TOPLEFT" relativeTo="$parentName" relativePoint="BOTTOMLEFT">
 								<Offset x="0" y="-4" />
 							</Anchor>
 						</Anchors>
-						<Layers>
-							<Layer level="ARTWORK">
-								<FontString name="$parentFS1" inherits="GameFontHighlightSmall" parentKey="text" justifyH="LEFT">
-									<Anchors>
-										<Anchor point="LEFT" relativePoint="RIGHT">
-											<Offset x="19" y="-1" />
-										</Anchor>
-									</Anchors>
-								</FontString>
-							</Layer>
-						</Layers>
+						<Scripts>
+							<OnLoad>
+								TMW:TT(self, "ICONMENU_CUSTOMTEX", "ICONMENU_CUSTOMTEX_DESC")
+								self.label = TMW.L["ICONMENU_CUSTOMTEX"]
+								self.BackgroundText:SetWidth(self:GetWidth())
+								TMW.SUG:EnableEditbox(self, true, true)
+							</OnLoad>
+							<OnEditFocusLost>
+								EditBox_ClearHighlight(self)
+								local groupID, iconID = TMW.CI.g, TMW.CI.i
+								self:SetText(TMW:CleanString(self:GetText()))
+								if TMW.CI.ics then
+									TMW.CI.ics.CustomTex = strtrim(self:GetText())
+								end
+								TMW.IE:ScheduleIconUpdate(groupID, iconID)
+								self:GetScript("OnTextChanged")(self)
+							</OnEditFocusLost>
+						</Scripts>
+					</EditBox>
+					<EditBox name="$parentUnit" inherits="TellMeWhen_InputBoxTemplate" parentKey="Unit" autoFocus="false">
+						<Size>
+							<AbsDimension x="270" y="15"/>
+						</Size>
+						<Anchors>
+							<Anchor point="LEFT" relativeTo="$parentCustomTex" relativePoint="RIGHT">
+								<Offset x="5" y="0" />
+							</Anchor>
+						</Anchors>
 						<Frames>
 							<Frame name="$parentIns" inherits="UIDropDownMenuTemplate" parentKey="Ins">
 								<Anchors>
@@ -2228,7 +2278,7 @@
 					
 					<CheckButton name="$parentShowTimer" inherits="TellMeWhen_CheckTemplate" parentKey="ShowTimer">
 						<Anchors>
-							<Anchor point="TOPLEFT" relativeTo="$parentUnit" relativePoint="BOTTOMLEFT">
+							<Anchor point="TOPLEFT" relativeTo="$parentCustomTex" relativePoint="BOTTOMLEFT">
 								<Offset x="-5" y="-5" />
 							</Anchor>
 						</Anchors>
@@ -2682,7 +2732,7 @@
 					<Frame name="$parentTypeChecks" parentKey="TypeChecks">
 						<Size x="140" y="100"/>
 						<Anchors>
-							<Anchor point="TOPLEFT" relativeTo="$parentUnit" relativePoint="BOTTOMLEFT">
+							<Anchor point="TOPLEFT" relativeTo="$parentCustomTex" relativePoint="BOTTOMLEFT">
 								<Offset x="200" y="-15" />
 							</Anchor>
 						</Anchors>

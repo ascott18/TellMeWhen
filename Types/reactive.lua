@@ -38,6 +38,7 @@ Type.WhenChecks = {
 }
 Type.RelevantSettings = {
 	Name = true,
+	CustomTex = true,
 	ShowTimer = true,
 	ShowTimerText = true,
 	ShowWhen = true,

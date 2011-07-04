@@ -46,6 +46,7 @@ Type.WhenChecks = {
 }
 Type.RelevantSettings = {
 	Name = true,
+	CustomTex = true,
 	ShowTimer = true,
 	ShowTimerText = true,
 	ShowWhen = true,
@@ -232,6 +233,7 @@ function Type:PLAYER_ENTERING_WORLD()
 	end
 end
 Type:RegisterEvent("PLAYER_ENTERING_WORLD")
+Type:RegisterEvent("ZONE_CHANGED_NEW_AREA", "PLAYER_ENTERING_WORLD")
 
 function Type:RAID_ROSTER_UPDATE()
 	for i = 1, 40 do
