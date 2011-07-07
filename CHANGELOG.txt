@@ -1,3 +1,7 @@
+===v4.4.4===
+ * Bug Fixes:
+ ** (r145) Totem icons now work for mushrooms/DK ghouls
+
 ===v4.4.3===
  * You can now specify a custom texture to be used for an icon.
  * Added whisper as a text output destination.

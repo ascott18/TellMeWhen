@@ -119,14 +119,14 @@ function Type:Setup(icon, groupID, iconID)
 		icon.Slots[i] = tonumber(strsub(icon.TotemSlots.."0000", i, i)) == 1
 	end
 	if pclass == "DEATHKNIGHT" then
-		icon.NameFirst = 46584
+		icon.NameFirst = ""
 		icon.NameName = GetSpellInfo(46584)
 		icon.Slots[1] = true -- there is only one slot for DKs, and they dont have options to check certain slots
 		icon.Slots[2] = nil
 		icon.Slots[3] = nil
 		icon.Slots[4] = nil
 	elseif pclass == "DRUID" then
-		icon.NameFirst = 88747
+		icon.NameFirst = ""
 		icon.NameName = GetSpellInfo(88747)
 		icon.Slots[4] = nil -- there is no mushroom 4
 	elseif pclass ~= "SHAMAN" then --enable all totems for people that dont have totem slot options (future-proof it)
