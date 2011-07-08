@@ -140,6 +140,7 @@
 				GameTooltip:Hide()
 			</OnLeave>
 			<OnMouseUp>
+				print(icon, "MU")
 				if TMW.ID.isMoving then
 					TMW:Group_StopMoving(TMW.ID.isMoving)
 				end
@@ -158,12 +159,14 @@
 				end
 			</OnMouseUp>
 			<OnMouseDown>
+				print(icon, "MD")
 				local ID = TMW.ID
 				ID.DraggingInfo = nil
 				ID.F:Hide()
 				ID.IsDragging = nil
 			</OnMouseDown>
 			<OnDragStart>
+				print(icon, "DS")
 				if button == "RightButton" and TMW.ID then
 					TMW.ID.srcgroupID = self:GetParent():GetID()
 					TMW.ID.srciconID = self:GetID()
@@ -192,6 +195,10 @@
 				end
 			</OnClick>
 			<OnDragStop>
+				print(icon, "DSt")
+				if TMW.ID.isMoving then
+					TMW:Group_StopMoving(TMW.ID.isMoving)
+				end
 				if TMW.ID and TMW.ID.IsDragging then
 					TMW.ID:Stop()
 				elseif not self:GetParent().Locked then

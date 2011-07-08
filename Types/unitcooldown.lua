@@ -264,19 +264,18 @@ local function UnitCooldown_OnUpdate(icon, time)
 	if icon.UpdateTimer <= time - UPD_INTV then
 		icon.UpdateTimer = time
 		local CndtCheck = icon.CndtCheck if CndtCheck and CndtCheck() then return end
-		local unstart, unname, unduration, usename
+		local unstart, unname, unduration, usename, dobreak
 		local Alpha, Units, NameArray, OnlySeen, Sort, Durations = icon.Alpha, icon.Units, icon.NameArray, icon.OnlySeen, icon.Sort, icon.Durations
 		local NAL = #NameArray
 		local d = Sort == -1 and huge or 0
 		local UnAlpha = icon.UnAlpha
-		local dobreak
 
 		for u = 1, #Units do
 			local unit = Units[u]
 			
-			local uguid = UnitGUID(unit)
-			if uguid then
-				local cooldowns = Cooldowns[uguid]
+			local guid = UnitGUID(unit)
+			if guid then
+				local cooldowns = Cooldowns[guid]
 				for i = 1, NAL do
 					local iName = NameArray[i]
 					if type(iName) == "string" then
@@ -290,8 +289,9 @@ local function UnitCooldown_OnUpdate(icon, time)
 					end
 					
 					if _start then
-						local tms = time-_start -- Time Minus Start - time since the unit's last cast of the spell (not neccesarily the time it has been on cooldown)
-						local _d = (tms > Durations[i]) and 0 or tms -- real duration remaining on the cooldown
+						local _duration = Durations[i]
+						local tms = time - _start -- Time Minus Start - time since the unit's last cast of the spell (not neccesarily the time it has been on cooldown)
+						local _d = (tms > _duration) and 0 or _duration - tms -- real duration remaining on the cooldown
 
 						if Sort then
 							if _d ~= 0 then -- found an unusable cooldown
@@ -299,20 +299,16 @@ local function UnitCooldown_OnUpdate(icon, time)
 									d = _d
 									unname = iName
 									unstart = _start
-									unduration = Durations[i]
+									unduration = _duration
 								end
-							elseif not usename then -- we found the first usable cooldown
-								usename = iName
-								if Alpha ~= 0 then -- we care about usable cooldowns, so stop looking
-									dobreak = 1
-									break
-								end
+							else -- we found the first usable cooldown
+								usename = usename or iName
 							end
 						else
 							if _d ~= 0 and not unname then -- we found the first UNusable cooldown
 								unname = iName
 								unstart = _start
-								unduration = Durations[i]
+								unduration = _duration
 								if Alpha == 0 then -- we DONT care about usable cooldowns, so stop looking
 									dobreak = 1
 									break
@@ -349,7 +345,6 @@ function Type:Setup(icon, groupID, iconID)
 	icon.NameArray = TMW:GetSpellNames(icon, icon.Name)
 	icon.Durations = TMW:GetSpellDurations(icon, icon.Name)
 	icon.Units = TMW:GetUnits(icon, icon.Unit)
-	icon.Sort = icon.Sort and -icon.Sort -- i wish i could figue out why this is backwards
 
 	for k, v in pairs(icon.NameArray) do
 		-- this is for looking up the spellID in Cooldowns[GUID] - spell names are stored lowercase
