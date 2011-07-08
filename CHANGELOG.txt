@@ -2,7 +2,7 @@
  * Bug Fixes:
  ** (r145) Totem icons now work for mushrooms/DK ghouls
  ** (r146) Unit cooldown icons now properly sort
- ** (r147) Fixed an extremely frustrating and elusive bug that was making it impossible to stop moving a group after you started dragging either a spell cooldown or reactive icon that was either checking an ability that was entered by spell name (IDs were fine) that the current character did not have in his/her spellbook, or checking nothing at all.
+ ** (r146) Fixed an extremely frustrating and elusive bug that was making it impossible to stop moving a group after you started dragging either a spell cooldown or reactive icon that was either checking an ability that was entered by spell name (IDs were fine) that the current character did not have in his/her spellbook, or checking nothing at all.
 
 ===v4.4.3===
  * You can now specify a custom texture to be used for an icon.
