@@ -200,7 +200,6 @@ local function SpellCooldown_OnUpdate(icon, time)
 
 			icon:SetInfo(alpha, color, icon.FirstTexture, start, duration, true, NameFirst)
 		else
-			icon:SetScript("OnUpdate", nil)
 			icon:SetAlpha(0)
 		end
 	end

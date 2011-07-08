@@ -162,7 +162,6 @@ local function Reactive_OnUpdate(icon, time)
 
 			return
 		else
-			icon:SetScript("OnUpdate", nil)
 			icon:SetAlpha(0)
 		end
 	end
