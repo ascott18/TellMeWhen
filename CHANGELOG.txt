@@ -1,6 +1,6 @@
 ===v4.4.5===
  * Bug Fixes:
- ** conditions.lua line 319: attempt to perform arithmetic on local 'start' (a nil value)
+ ** (r151) conditions.lua line 319: attempt to perform arithmetic on local 'start' (a nil value)
  
 ===v4.4.4===
  * Bug Fixes:
