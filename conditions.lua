@@ -311,79 +311,6 @@ function CNDT:MINIMAP_UPDATE_TRACKING()
 	end
 end
 
--- helper functions
-local OnGCD = TMW.OnGCD
-local GetSpellCooldown = GetSpellCooldown
-local function CooldownDuration(spell, time)
-	local start, duration = GetSpellCooldown(spell)
-	if duration then
-		return ((duration == 0 or OnGCD(duration)) and 0) or (duration - (time - start))
-	end
-	return 0
-end
-
-local GetItemCooldown = GetItemCooldown
-local function ItemCooldownDuration(itemID, time)
-	local start, duration = GetItemCooldown(itemID)
-	if duration then
-		return ((duration == 0 or OnGCD(duration)) and 0) or (duration - (time - start))
-	end
-	return 0
-end
-
-local UnitCastingInfo, UnitChannelInfo = UnitCastingInfo, UnitChannelInfo
-local function UnitCast(unit, level)
-	local name, _, _, _, _, _, _, _, notInterruptible = UnitCastingInfo(unit)
-	if not name then
-		name, _, _, _, _, _, _, notInterruptible = UnitChannelInfo(unit)
-	end
-	if level == 0 then -- only interruptible
-		return name and not notInterruptible
-	elseif level == 1 then -- present
-		return name
-	else
-		return not name -- absent
-	end
-end
-
-local function AuraStacks(unit, name, filter)
-	local buffName, _, _, count = UnitAura(unit, name, nil, filter)
-	if not buffName then
-		return 0
-	elseif buffName and count == 0 then
-		return 1
-	else
-		return count
-	end
-end
-
-local function AuraCount(unit, name, filter)
-	local n = 0
-	for i = 1, 60 do
-		local buffName = UnitAura(unit, i, filter)
-		if not buffName then
-			return n
-		elseif strlower(buffName) == name then
-			n = n + 1
-		end
-	end
-	return n
-end
-
-local huge = math.huge
-local function AuraDur(unit, name, filter, time)
-	local buffName, _, _, _, _, duration, expirationTime = UnitAura(unit, name, nil, filter)
-	if not buffName then
-		return 0
-	else
-		return expirationTime == 0 and huge or expirationTime - time
-	end
-end
-
-local function TotemDuration(slot, time)
-	local have, name, start, duration = GetTotemInfo(slot)
-	return duration and duration ~= 0 and (duration - (time - start)) or 0
-end
 
 
 Env = {
@@ -433,13 +360,6 @@ Env = {
 	SecureCmdOptionParse = SecureCmdOptionParse,
 	GetSpellAutocast = GetSpellAutocast,
 
-	AuraStacks = AuraStacks,
-	AuraDur = AuraDur,
-	AuraCount = AuraCount,
-	CooldownDuration = CooldownDuration,
-	TotemDuration = TotemDuration,
-	ItemCooldownDuration = ItemCooldownDuration,
-
 	classifications = classifications,
 	roles = roles,
 	
@@ -451,6 +371,81 @@ Env = {
 	time = GetTime(),
 	Tracking = {},
 } CNDT.Env = Env
+
+-- helper functions
+local OnGCD = TMW.OnGCD
+local GetSpellCooldown = GetSpellCooldown
+function Env.CooldownDuration(spell, time)
+	local start, duration = GetSpellCooldown(spell)
+	if duration then
+		return ((duration == 0 or OnGCD(duration)) and 0) or (duration - (time - start))
+	end
+	return 0
+end
+
+local GetItemCooldown = GetItemCooldown
+function Env.ItemCooldownDuration(itemID, time)
+	local start, duration = GetItemCooldown(itemID)
+	if duration then
+		return ((duration == 0 or OnGCD(duration)) and 0) or (duration - (time - start))
+	end
+	return 0
+end
+
+local UnitCastingInfo, UnitChannelInfo = UnitCastingInfo, UnitChannelInfo
+function Env.UnitCast(unit, level)
+	local name, _, _, _, _, _, _, _, notInterruptible = UnitCastingInfo(unit)
+	if not name then
+		name, _, _, _, _, _, _, notInterruptible = UnitChannelInfo(unit)
+	end
+	if level == 0 then -- only interruptible
+		return name and not notInterruptible
+	elseif level == 1 then -- present
+		return name
+	else
+		return not name -- absent
+	end
+end
+
+function Env.AuraStacks(unit, name, filter)
+	local buffName, _, _, count = UnitAura(unit, name, nil, filter)
+	if not buffName then
+		return 0
+	elseif buffName and count == 0 then
+		return 1
+	else
+		return count
+	end
+end
+
+function Env.AuraCount(unit, name, filter)
+	local n = 0
+	for i = 1, 60 do
+		local buffName = UnitAura(unit, i, filter)
+		if not buffName then
+			return n
+		elseif strlower(buffName) == name then
+			n = n + 1
+		end
+	end
+	return n
+end
+
+local huge = math.huge
+function Env.AuraDur(unit, name, filter, time)
+	local buffName, _, _, _, _, duration, expirationTime = UnitAura(unit, name, nil, filter)
+	if not buffName then
+		return 0
+	else
+		return expirationTime == 0 and huge or expirationTime - time
+	end
+end
+
+function Env.TotemDuration(slot, time)
+	local have, name, start, duration = GetTotemInfo(slot)
+	return duration and duration ~= 0 and (duration - (time - start)) or 0
+end
+
 
 CNDT.Operators = {
 	{ tooltipText = L["CONDITIONPANEL_EQUALS"], 		value = "==", 	text = "==" },
