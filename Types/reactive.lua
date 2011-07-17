@@ -106,6 +106,7 @@ local function Reactive_OnUpdate(icon, time)
 					inrange = IsSpellInRange(NameNameArray[i], "target") or 1
 				end
 				usable, nomana = IsUsableSpell(iName)
+				usable = usable or nomana
 				if not ManaCheck then
 					nomana = nil
 				end
@@ -159,8 +160,6 @@ local function Reactive_OnUpdate(icon, time)
 			end
 
 			icon:SetInfo(alpha, color, icon.FirstTexture, start, duration, true, NameFirst)
-
-			return
 		else
 			icon:SetAlpha(0)
 		end

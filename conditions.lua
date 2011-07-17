@@ -392,6 +392,12 @@ function Env.ItemCooldownDuration(itemID, time)
 	return 0
 end
 
+local IsUsableSpell = IsUsableSpell
+function Env.ReactiveHelper(NameFirst)
+	local usable, nomana = IsUsableSpell(NameFirst)
+	return usable or nomana
+end
+
 local UnitCastingInfo, UnitChannelInfo = UnitCastingInfo, UnitChannelInfo
 function Env.UnitCast(unit, level)
 	local name, _, _, _, _, _, _, _, notInterruptible = UnitCastingInfo(unit)
@@ -1123,7 +1129,7 @@ CNDT.Types = {
 		texttable = usableunusable,
 		icon = "Interface\\Icons\\ability_warrior_revenge",
 		tcoords = standardtcoords,
-		funcstr = [[c.1nil == IsUsableSpell(c.NameFirst)]],
+		funcstr = [[c.1nil == ReactiveHelper(c.NameFirst)]],
 	},
 	{ -- spell has mana
 		text = L["CONDITIONPANEL_MANAUSABLE"],
