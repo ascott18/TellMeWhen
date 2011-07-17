@@ -1,5 +1,7 @@
 ===v4.4.7===
- * Reactive icons and conditions should now more accurately reflect the state of the abilities that they are checking
+ * Moving/resizing a group that is anchored to a frame other than UIParent will adjust the offsets instead of resetting the anchor to UIParent.
+ * Reactive icons and conditions should now more accurately reflect the state of the abilities that they are checking.
+ 
 ===v4.4.6===
  * Bug Fixes:
  ** (r151) conditions.lua line 319: attempt to perform arithmetic on local 'start' (a nil value)

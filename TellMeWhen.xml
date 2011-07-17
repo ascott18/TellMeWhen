@@ -197,8 +197,6 @@
 				end
 				if TMW.ID and TMW.ID.IsDragging then
 					TMW.ID:Stop()
-				elseif not self:GetParent().Locked then
-					TMW:Group_StopMoving(self:GetParent())
 				end
 			</OnDragStop>
 			<OnShow>

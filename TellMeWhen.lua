@@ -31,10 +31,10 @@ local AceDB = LibStub("AceDB-3.0")
 local LSM = LibStub("LibSharedMedia-3.0")
 local DRData = LibStub("DRData-1.0", true)
 
-TELLMEWHEN_VERSION = "4.4.6"
+TELLMEWHEN_VERSION = "4.4.7"
 TELLMEWHEN_VERSION_MINOR = strmatch(" @project-version@", " r%d+") or ""
 TELLMEWHEN_VERSION_FULL = TELLMEWHEN_VERSION .. TELLMEWHEN_VERSION_MINOR
-TELLMEWHEN_VERSIONNUMBER = 44601 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
+TELLMEWHEN_VERSIONNUMBER = 44702 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
 if TELLMEWHEN_VERSIONNUMBER > 45000 or TELLMEWHEN_VERSIONNUMBER < 44000 then error("YOU SCREWED UP THE VERSION NUMBER OR DIDNT CHANGE THE SAFETY LIMITS") return end -- safety check because i accidentally made the version number 414069 once
 
 TELLMEWHEN_MAXGROUPS = 1 	--this is a default, used by SetTheory (addon), so dont rename
@@ -1112,10 +1112,10 @@ function TMW:OnUpdate() -- this is where all icon OnUpdate scripts are actually 
 		
 		if FramesToFind then
 			-- I hate to do this, but this is the only way to detect frames that are created by an upvalued CreateFrame (*cough* VuhDo) (Unless i raw hook it, but CreateFrame should be secure)
-			for groupID, frameName in pairs(FramesToFind) do
+			for group, frameName in pairs(FramesToFind) do
 				if _G[frameName] then
-					TMW:Group_SetPos(groupID)
-					FramesToFind[groupID] = nil
+					group:SetPos()
+					FramesToFind[group] = nil
 					if not next(FramesToFind) then
 						FramesToFind = nil
 						break
@@ -1211,7 +1211,7 @@ function TMW:Update()
 	TMW.dontSetGroupPos = nil
 	for groupID = 1, TELLMEWHEN_MAXGROUPS do
 		-- the reason that this is separated is because groups may be anchored to other groups with higher groupIDs, but those groups must exist first before anchoring.
-		TMW:Group_SetPos(groupID)
+		TMW[groupID]:SetPos()
 	end
 
 	if not Locked then
@@ -2096,13 +2096,14 @@ end
 -- -----------
 -- GROUPS
 -- -----------
+local ProtoGroup = {}
 
-local function GroupScriptSort(groupA, groupB)
+function GroupScriptSort(groupA, groupB)
 	local gOrder = -db.profile.CheckOrder
 	return groupA:GetID()*gOrder < groupB:GetID()*gOrder
 end
 
-local function GroupSetScript(group, handler, func)
+function ProtoGroup.SetScript(group, handler, func)
 	group[handler] = func
 	if handler ~= "OnUpdate" then
 		group:setscript(handler, func)
@@ -2115,25 +2116,38 @@ local function GroupSetScript(group, handler, func)
 	end
 end
 
-local function Show(group)
+function ProtoGroup.Show(group)
 	if not group.__shown then
 		group:show()
 		group.__shown = 1
 	end
 end
 
-local function Hide(group)
+function ProtoGroup.Hide(group)
 	if group.__shown then
 		group:hide()
 		group.__shown = nil
 	end
 end
 
-local GroupAddIns = {
-	SetScript	=	GroupSetScript,
-	Show 		=	Show,
-	Hide 		=	Hide,
-}
+function ProtoGroup.SetPos(group)
+	local groupID = group:GetID()
+	local s = db.profile.Groups[groupID]
+	local p = s.Point
+	group:ClearAllPoints()
+	local relativeTo = _G[p.relativeTo]
+	if not relativeTo then
+		FramesToFind = FramesToFind or {}
+		FramesToFind[group] = p.relativeTo
+		group:SetPoint("CENTER", UIParent)
+	else
+		group:SetPoint(p.point, relativeTo, p.relativePoint, p.x, p.y)
+	end
+	group:SetScale(s.Scale)
+	local Spacing = s.Spacing
+	group:SetSize(s.Columns*(30+Spacing)-Spacing, s.Rows*(30+Spacing)-Spacing)
+	group:SetFrameLevel(s.Level)
+end
 
 function TMW:GetShapeshiftForm()
 	-- very hackey function because of inconsistencies in blizzard's GetShapeshiftForm
@@ -2155,32 +2169,13 @@ local function CreateGroup(groupID)
 	CNDT.Env[group:GetName()] = group
 	group:SetID(groupID)
 
-	for k, v in pairs(GroupAddIns) do
+	for k, v in pairs(ProtoGroup) do
 		if type(group[k]) == "function" then -- if the method already exists on the icon
 			group[strlower(k)] = group[k] -- store the old method as the lowercase same name
 		end
 		group[k] = v
 	end
 	return group
-end
-
-function TMW:Group_SetPos(groupID)
-	local group = TMW[groupID]
-	local s = db.profile.Groups[groupID]
-	local p = s.Point
-	group:ClearAllPoints()
-	local relativeTo = _G[p.relativeTo]
-	if not relativeTo then
-		FramesToFind = FramesToFind or {}
-		FramesToFind[groupID] = p.relativeTo
-		group:SetPoint("CENTER", UIParent)
-	else
-		group:SetPoint(p.point, relativeTo, p.relativePoint, p.x, p.y)
-	end
-	group:SetScale(s.Scale)
-	local Spacing = s.Spacing
-	group:SetSize(s.Columns*(30+Spacing)-Spacing, s.Rows*(30+Spacing)-Spacing)
-	group:SetFrameLevel(s.Level)
 end
 
 function TMW:Group_Update(groupID)
@@ -2247,7 +2242,7 @@ function TMW:Group_Update(groupID)
 	end
 
 	if not TMW.dontSetGroupPos then
-		TMW:Group_SetPos(groupID)
+		group:SetPos()
 	end
 
 	if group.Enabled and group.CorrectSpec and Locked then
@@ -2271,6 +2266,7 @@ end
 -- ------------------
 -- ICONS
 -- ------------------
+local ProtoIcon = {}
 
 local function LMBSkinHook(self)
 	if self and self.Addon == "TellMeWhen" then
@@ -2284,60 +2280,6 @@ local function OnGCD(d)
 	return GCD == d and d > 0 -- if the duration passed in is the same as the GCD spell, and the duration isnt zero, then it is a GCD
 end	TMW.OnGCD = OnGCD
 
-local function HandleEvent(icon, data, played, announced)
-	local Sound = data.SoundData
-	if Sound and not played then
-		PlaySoundFile(Sound, SndChan)
-		played = 1
-	end
-	local Channel, Text = data.Channel, data.Text
-	if Channel ~= "" and not announced then
-		if Channel == "MSBT" then
-			if MikSBT then
-				local Size = data.Size
-				if Size == 0 then Size = nil end
-				MikSBT.DisplayMessage(Text, data.Location, data.Sticky, data.r*255, data.g*255, data.b*255, Size, nil, data.Icon and icon.__tex)
-			end
-		elseif Channel == "SCT" then
-			if SCT then
-				sctcolor.r, sctcolor.g, sctcolor.b = data.r, data.g, data.b
-				SCT:DisplayCustomEvent(Text, sctcolor, data.Sticky, data.Location, nil, data.Icon and icon.__tex)
-			end
-		elseif Channel == "PARROT" then
-			if Parrot then
-				local Size = data.Size
-				if Size == 0 then Size = nil end
-				Parrot:ShowMessage(Text, data.Location, data.Sticky, data.r, data.g, data.b, nil, Size, nil, data.Icon and icon.__tex)
-			end
-		else
-			local chandata = ChannelLookup[Channel]
-			if Text and chandata and chandata.isBlizz then
-				SendChatMessage(Text, Channel, nil, data.Location)
-			end
-		end
-		announced = 1
-	end
-	return played, announced
-end
-
-local function SetAlpha(icon, alpha)
-	if alpha ~= icon.__alpha then
-		if alpha == 0 then
-			local data = runEvents and icon.OnHide
-			if data then
-				icon:HandleEvent(data)
-			end
-		elseif icon.__alpha == 0 then
-			local data = runEvents and icon.OnShow
-			if data then
-				icon:HandleEvent(data)
-			end
-		end
-		icon:setalpha(icon.FakeHidden or alpha) -- setalpha(lowercase) is the old, raw SetAlpha.
-		icon.__alpha = alpha
-	end
-end
-
 local function IconScriptSort(iconA, iconB)
 	local gOrder = -db.profile.CheckOrder
 	local gA = iconA.group:GetID()
@@ -2347,36 +2289,6 @@ local function IconScriptSort(iconA, iconB)
 		return iconA:GetID()*iOrder < iconB:GetID()*iOrder
 	end
 	return gA*gOrder < gB*gOrder
-end
-
-local function IconSetScript(icon, handler, func)
-	icon[handler] = func
-	if handler ~= "OnUpdate" then
-		icon:setscript(handler, func)
-	else
-		tDeleteItem(IconUpdateFuncs, icon)
-		if func then
-			IconUpdateFuncs[#IconUpdateFuncs+1] = icon
-		end
-		sort(IconUpdateFuncs, IconScriptSort)
-	end
-end
-
-local function SetTexture(icon, tex)
-	--if icon.__tex ~= tex then ------dont check for this, checking is done before this method is even called
-	tex = icon.OverrideTex or tex
-	icon.__tex = tex
-	icon.texture:SetTexture(tex)
-end
-
-local function RegisterEvent(icon, event)
-	icon:registerevent(event)
-	icon.__hasEvents = 1
-end
-
-local function SetReverse(icon, reverse)
-	icon.__reverse = reverse
-	icon.cooldown:SetReverse(reverse)
 end
 
 local function CDBarOnUpdate(bar)
@@ -2444,7 +2356,91 @@ local function PwrBarOnUpdate(bar)
 	end
 end
 
-local function SetInfo(icon, alpha, color, texture, start, duration, checkGCD, pbName, reverse, count, countText)
+function ProtoIcon.HandleEvent(icon, data, played, announced)
+	local Sound = data.SoundData
+	if Sound and not played then
+		PlaySoundFile(Sound, SndChan)
+		played = 1
+	end
+	local Channel, Text = data.Channel, data.Text
+	if Channel ~= "" and not announced then
+		if Channel == "MSBT" then
+			if MikSBT then
+				local Size = data.Size
+				if Size == 0 then Size = nil end
+				MikSBT.DisplayMessage(Text, data.Location, data.Sticky, data.r*255, data.g*255, data.b*255, Size, nil, data.Icon and icon.__tex)
+			end
+		elseif Channel == "SCT" then
+			if SCT then
+				sctcolor.r, sctcolor.g, sctcolor.b = data.r, data.g, data.b
+				SCT:DisplayCustomEvent(Text, sctcolor, data.Sticky, data.Location, nil, data.Icon and icon.__tex)
+			end
+		elseif Channel == "PARROT" then
+			if Parrot then
+				local Size = data.Size
+				if Size == 0 then Size = nil end
+				Parrot:ShowMessage(Text, data.Location, data.Sticky, data.r, data.g, data.b, nil, Size, nil, data.Icon and icon.__tex)
+			end
+		else
+			local chandata = ChannelLookup[Channel]
+			if Text and chandata and chandata.isBlizz then
+				SendChatMessage(Text, Channel, nil, data.Location)
+			end
+		end
+		announced = 1
+	end
+	return played, announced
+end
+
+function ProtoIcon.SetAlpha(icon, alpha)
+	if alpha ~= icon.__alpha then
+		if alpha == 0 then
+			local data = runEvents and icon.OnHide
+			if data then
+				icon:HandleEvent(data)
+			end
+		elseif icon.__alpha == 0 then
+			local data = runEvents and icon.OnShow
+			if data then
+				icon:HandleEvent(data)
+			end
+		end
+		icon:setalpha(icon.FakeHidden or alpha) -- setalpha(lowercase) is the old, raw SetAlpha.
+		icon.__alpha = alpha
+	end
+end
+
+function ProtoIcon.SetScript(icon, handler, func)
+	icon[handler] = func
+	if handler ~= "OnUpdate" then
+		icon:setscript(handler, func)
+	else
+		tDeleteItem(IconUpdateFuncs, icon)
+		if func then
+			IconUpdateFuncs[#IconUpdateFuncs+1] = icon
+		end
+		sort(IconUpdateFuncs, IconScriptSort)
+	end
+end
+
+function ProtoIcon.SetTexture(icon, tex)
+	--if icon.__tex ~= tex then ------dont check for this, checking is done before this method is even called
+	tex = icon.OverrideTex or tex
+	icon.__tex = tex
+	icon.texture:SetTexture(tex)
+end
+
+function ProtoIcon.RegisterEvent(icon, event)
+	icon:registerevent(event)
+	icon.__hasEvents = 1
+end
+
+function ProtoIcon.SetReverse(icon, reverse)
+	icon.__reverse = reverse
+	icon.cooldown:SetReverse(reverse)
+end
+
+function ProtoIcon.SetInfo(icon, alpha, color, texture, start, duration, checkGCD, pbName, reverse, count, countText)
 	-- icon			- the icon object to set the attributes on (frame) (but call as icon:SetInfo(alpha, ...) )
 	-- alpha		- the alpha to set the icon to (number)
 	-- color		- the value(s) to call SetVertexColor with. Either a (number) that will be used as the r, g, and b; or a (table) with keys r, g, b
@@ -2641,16 +2637,6 @@ local function SetInfo(icon, alpha, color, texture, start, duration, checkGCD, p
 
 end
 
-local IconAddIns = {
-	HandleEvent		=	HandleEvent,
-	SetInfo			=	SetInfo,
-	SetAlpha		= 	SetAlpha,
-	SetScript		= 	IconSetScript,
-	SetTexture		=	SetTexture,
-	SetReverse		=	SetReverse,
-	RegisterEvent	=	RegisterEvent,
-}
-
 local IconMetamethods = {
 	__lt = function(icon1, icon2)
 		local g1 = icon1.group:GetID()
@@ -2698,7 +2684,7 @@ function TMW:CreateIcon(group, groupID, iconID)
 	for k, v in pairs(IconMetamethods) do
 		mt[k] = v
 	end
-	for k, v in pairs(IconAddIns) do
+	for k, v in pairs(ProtoIcon) do
 		if type(icon[k]) == "function" then -- if the method already exists on the icon
 			icon[strlower(k)] = icon[k] -- store the old method as the lowercase same name
 		end

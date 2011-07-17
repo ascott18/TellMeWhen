@@ -491,7 +491,7 @@ local groupConfigTemplate = {
 			set = function(info, val)
 				local g = findid(info)
 				db.profile.Groups[g].Point[info[#info]] = val
-				TMW:Group_SetPos(g)
+				TMW[g]:SetPos()
 			end,
 			get = function(info)
 				return db.profile.Groups[findid(info)].Point[info[#info]]
@@ -545,7 +545,7 @@ local groupConfigTemplate = {
 					set = function(info, val)
 						local g = findid(info)
 						db.profile.Groups[g].Scale = val
-						TMW:Group_SetPos(g)
+						TMW[g]:SetPos()
 					end,
 					get = function(info) return db.profile.Groups[findid(info)].Scale end,
 				},
@@ -559,7 +559,7 @@ local groupConfigTemplate = {
 					set = function(info, val)
 						local g = findid(info)
 						db.profile.Groups[g].Level = val
-						TMW:Group_SetPos(g)
+						TMW[g]:SetPos()
 					end,
 					get = function(info) return db.profile.Groups[findid(info)].Level end,
 				},
@@ -845,10 +845,63 @@ end
 -- GROUP CONFIG
 -- -------------
 
+local Ruler = CreateFrame("Frame")
+local function GetAnchoredPoints(group)
+	-- original implementation: shitty because there is an offset that should not exist that increases expomentially as distance from (0,0) increases
+	--[[function AnchoredPoints(group)
+    local p = TMW.db.profile.Groups[group:GetID()].Point
+    local X, Y
+    if strfind(p.point, "RIGHT") then
+        X = group:GetRight()
+    elseif strfind(p.point, "LEFT") then
+        X = group:GetLeft()
+    else
+        X = group:GetCenter()
+    end
+    if strfind(p.point, "TOP") then
+        Y = group:GetTop()
+    elseif strfind(p.point, "BOTTOM") then
+        Y = group:GetBottom()
+    else
+        _, Y = group:GetCenter()
+    end
+    X, Y = X*group:GetScale(), Y*group:GetScale()
+    
+    local X2, Y2
+	local relframe = _G[p.relativeTo] or UIParent
+    if strfind(p.relativePoint, "RIGHT") then
+        X2 = relframe:GetRight()
+    elseif strfind(p.relativePoint, "LEFT") then
+        X2 = relframe:GetLeft()
+    else
+        X2 = relframe:GetCenter()
+    end
+    if strfind(p.relativePoint, "TOP") then
+        Y2 = relframe:GetTop()
+    elseif strfind(p.relativePoint, "BOTTOM") then
+        Y2 = relframe:GetBottom()
+    else
+        _, Y2 = relframe:GetCenter()
+    end
+    X2, Y2 = X2*relframe:GetScale(), Y2*relframe:GetScale()
+    return print(p.point, relframe:GetName(), p.relativePoint, X - X2, Y - Y2)
+end]]
+    local p = TMW.db.profile.Groups[group:GetID()].Point
+    Ruler:ClearAllPoints()
+    Ruler:SetPoint("TOPLEFT", group, p.point)
+    
+    local relframe = _G[p.relativeTo] or UIParent
+    Ruler:SetPoint("BOTTOMRIGHT", relframe, p.relativePoint)
+    
+    local X = Ruler:GetWidth()/UIParent:GetScale()/group:GetScale()
+    local Y = Ruler:GetHeight()/UIParent:GetScale()/group:GetScale()
+    return p.point, relframe:GetName(), p.relativePoint, -X, Y
+end
+
 local function Group_SizeUpdate(resizeButton)
 	local uiScale = UIParent:GetScale()
 	local group = resizeButton:GetParent()
-	local cursorX, cursorY = GetCursorPosition(UIParent)
+	local cursorX, cursorY = GetCursorPosition()
 
 	-- calculate new scale
 	local newXScale = group.oldScale * (cursorX/uiScale - group.oldX*group.oldScale) / (resizeButton.oldCursorX/uiScale - group.oldX*group.oldScale)
@@ -875,19 +928,19 @@ end
 function TMW:Group_StopSizing(resizeButton)
 	resizeButton:SetScript("OnUpdate", nil)
 	local group = resizeButton:GetParent()
-	db.profile.Groups[group:GetID()]["Scale"] = group:GetScale()
-	local p = db.profile.Groups[group:GetID()]["Point"]
-	p.point, p.relativeTo, p.relativePoint, p.x, p.y = group:GetPoint(1)
-	p.relativeTo = p.relativeTo and p.relativeTo:GetName() or "UIParent"
+	db.profile.Groups[group:GetID()].Scale = group:GetScale()
+	local p = db.profile.Groups[group:GetID()].Point
+	p.point, p.relativeTo, p.relativePoint, p.x, p.y = GetAnchoredPoints(group)
+	group:SetPos()
 	LibStub("AceConfigRegistry-3.0"):NotifyChange("TellMeWhen Options")
 end
 
 function TMW:Group_StopMoving(group)
 	group:StopMovingOrSizing()
 	ID.isMoving = nil
-	local p = db.profile.Groups[group:GetID()]["Point"]
-	p.point, p.relativeTo, p.relativePoint, p.x, p.y = group:GetPoint(1)
-	p.relativeTo = p.relativeTo and p.relativeTo.GetName and p.relativeTo:GetName() or "UIParent"
+	local p = db.profile.Groups[group:GetID()].Point
+	p.point, p.relativeTo, p.relativePoint, p.x, p.y = GetAnchoredPoints(group)
+	group:SetPos()
 	LibStub("AceConfigRegistry-3.0"):NotifyChange("TellMeWhen Options")
 end
 
