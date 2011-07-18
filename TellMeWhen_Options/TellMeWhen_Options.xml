@@ -1740,23 +1740,24 @@
 				</Anchors>
 				<Scripts> <OnLoad> self:SetText(TMW.L["ANN_TAB"]) </OnLoad> </Scripts>
 			</Button>
-			<Button name="$parentTab6" parentKey="GroupConditionTab" inherits="TellMeWhen_TabTemplate" id="6">
+			<Button name="$parentTab5" parentKey="GroupConditionTab" inherits="TellMeWhen_TabTemplate" id="5">
 				<Anchors>
 				   <Anchor point="LEFT" relativeTo="$parentTab4" relativePoint="RIGHT" x="-18" y="0"/>
 				</Anchors>
 				<Scripts> <OnLoad> self:SetText(TMW.L["GROUPCONDITIONS"]) TMW.GRCNDTTab = self:GetID() </OnLoad> </Scripts>
 			</Button>
-			<Button name="$parentTab5" parentKey="GroupTab" inherits="TellMeWhen_TabTemplate" id="5">
+			<Button name="$parentTab6" parentKey="GroupTab" inherits="TellMeWhen_TabTemplate" id="6">
 				<Anchors>
-				   <Anchor point="LEFT" relativeTo="$parentTab6" relativePoint="RIGHT" x="-18" y="0"/>
+				   <Anchor point="LEFT" relativeTo="$parentTab5" relativePoint="RIGHT" x="-18" y="0"/>
 				</Anchors>
 				<Scripts>
 					<OnLoad> self:SetText(TMW.L["GROUPADDONSETTINGS"]) </OnLoad>
-					<OnClick>
+					<OnMouseUp>
 						TMW:CompileOptions()
-						LibStub("AceConfigDialog-3.0"):Open("TellMeWhen Options")
-						LibStub("AceConfigDialog-3.0"):SelectGroup("TellMeWhen Options", "groups", "Group " .. TMW.CI.g)
-					</OnClick>
+						LibStub("AceConfigDialog-3.0"):Open("TMW IEOptions", TMW.IE.MainOptionsWidget)
+						LibStub("AceConfigDialog-3.0").OpenFrames["TMW IEOptions"] = TMW.IE.MainOptionsWidget
+						LibStub("AceConfigDialog-3.0"):SelectGroup("TMW IEOptions", "groups", "Group " .. TMW.CI.g)
+					</OnMouseUp>
 				</Scripts>
 			</Button>
 
@@ -1970,11 +1971,7 @@
 				</Scripts>
 			</Frame>
 
-			<Frame name="$parentMain" enableMouse="true" hidden="true" parentKey="Main">
-				<Anchors>
-					<Anchor point="TOPLEFT" relativeTo="$parent" relativePoint="TOPLEFT"/>
-					<Anchor point="BOTTOMRIGHT" relativeTo="$parent" relativePoint="BOTTOMRIGHT"/>
-				</Anchors>
+			<Frame name="$parentMain" enableMouse="true" hidden="true" setAllPoints="true" parentKey="Main">
 				<Frames>
 					<Frame name="$parentType" inherits="UIDropDownMenuTemplate" parentKey="Type">
 						<Anchors>
@@ -3485,11 +3482,7 @@
 					<OnDragStop> TellMeWhen_IconEditor:StopMovingOrSizing() </OnDragStop>
 				</Scripts>
 			</Frame>
-			<Frame name="$parentConditions" hidden="true" parentKey="Conditions">
-				<Anchors>
-					<Anchor point="TOPLEFT" relativeTo="$parent" relativePoint="TOPLEFT"/>
-					<Anchor point="BOTTOMRIGHT" relativeTo="$parent" relativePoint="BOTTOMRIGHT"/>
-				</Anchors>
+			<Frame name="$parentConditions" hidden="true" setAllPoints="true" parentKey="Conditions">
 				<Frames>
 					<Frame name="$parentUnitDD" parentKey="UnitDD" inherits="UIDropDownMenuTemplate" hidden="true">
 						<Scripts>
@@ -3592,11 +3585,7 @@
 					</Layer>
 				</Layers>
 			</Frame>
-			<Frame name="$parentSound" enableMouse="true" hidden="true" parentKey="Sound">
-				<Anchors>
-					<Anchor point="TOPLEFT" relativeTo="$parent" relativePoint="TOPLEFT"/>
-					<Anchor point="BOTTOMRIGHT" relativeTo="$parent" relativePoint="BOTTOMRIGHT"/>
-				</Anchors>
+			<Frame name="$parentSound" enableMouse="true" hidden="true" setAllPoints="true" parentKey="Sound">
 				<Frames>
 					<Frame name="$parentEvents" parentKey="Events">
 						<Size x="200" y="280"/>
@@ -3791,11 +3780,7 @@
 					<OnDragStop> TellMeWhen_IconEditor:StopMovingOrSizing() </OnDragStop>
 				</Scripts>
 			</Frame>
-			<Frame name="$parentAnnouncements" enableMouse="true" hidden="true" parentKey="Announcements">
-				<Anchors>
-					<Anchor point="TOPLEFT" relativeTo="$parent" relativePoint="TOPLEFT"/>
-					<Anchor point="BOTTOMRIGHT" relativeTo="$parent" relativePoint="BOTTOMRIGHT"/>
-				</Anchors>
+			<Frame name="$parentAnnouncements" enableMouse="true" hidden="true" setAllPoints="true" parentKey="Announcements">
 				<Frames>
 					<EditBox name="$parentEditbox" inherits="TellMeWhen_InputBoxTemplate" parentKey="Editbox" autoFocus="false">
 						<Size>
@@ -4077,6 +4062,46 @@
 								TMW.ANN[k] = v
 							end
 						end
+					</OnLoad>
+					<OnDragStart> TellMeWhen_IconEditor:StartMoving() </OnDragStart>
+					<OnDragStop> TellMeWhen_IconEditor:StopMovingOrSizing() </OnDragStop>
+				</Scripts>
+			</Frame>
+			<Frame name="$parentMainOptions" enableMouse="true" hidden="true" setAllPoints="true" parentKey="MainOptions" >
+				<Frames>
+					<Frame parentKey="content">
+						<Anchors>
+							<Anchor point="TOPLEFT" x="14" y="-42" />
+							<Anchor point="BOTTOMRIGHT" x="-14" y="40" />
+						</Anchors>
+					</Frame>
+				</Frames>
+				<Scripts>
+					<OnLoad>
+						self:RegisterForDrag("LeftButton")
+						self:SetScale(0.77)
+						
+						local widget = {
+							localstatus = {},
+							content     = self.content,
+							frame       = self,
+							type        = "TMWGroupOptions",
+							OnAcquire = function(self) end,
+							OnRelease = function(self) end,
+							Hide = function(self) end,
+							Show = function(self) end,
+							ApplyStatus = function() end,
+							SetTitle = function() end,
+							SetStatusTable = function(self, status)
+								assert(type(status) == "table")
+								self.status = status
+							end,
+						}
+						
+						local AceGUI = LibStub("AceGUI-3.0")
+						AceGUI:RegisterAsContainer(widget)
+						AceGUI:RegisterWidgetType("TMWGroupOptions", function() return widget end, 1)
+						TMW.IE.MainOptionsWidget = AceGUI:Create("TMWGroupOptions")
 					</OnLoad>
 					<OnDragStart> TellMeWhen_IconEditor:StartMoving() </OnDragStart>
 					<OnDragStop> TellMeWhen_IconEditor:StopMovingOrSizing() </OnDragStop>

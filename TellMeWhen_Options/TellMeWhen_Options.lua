@@ -704,30 +704,6 @@ function TMW:CompileOptions() -- options
 							style = "dropdown",
 							order = 30,
 						},
-						addgroup = {
-							name = L["UIPANEL_ADDGROUP"],
-							desc = L["UIPANEL_ADDGROUP_DESC"],
-							type = "execute",
-							order = 41,
-							func = function()
-								local groupID = db.profile.NumGroups + 1
-								db.profile.NumGroups = groupID
-								db.profile.Groups[db.profile.NumGroups].Enabled = true
-								TMW:Update()
-								local stub = LMB or LBF
-								if stub then
-									local parent = stub:Group("TellMeWhen")
-									local group = stub:Group("TellMeWhen", format(L["fGROUP"], groupID))
-
-									group.SkinID, group.Gloss, group.Backdrop, group.Colors =
-									parent.SkinID, parent.Gloss, parent.Backdrop, parent.Colors
-
-									group:ReSkin()
-								end
-								TMW:Group_Update(groupID)
-								TMW:CompileOptions()
-							end,
-						},
 						resetall = {
 							name = L["UIPANEL_ALLRESET"],
 							desc = L["UIPANEL_TOOLTIP_ALLRESET"],
@@ -808,14 +784,43 @@ function TMW:CompileOptions() -- options
 						addgroupgroup = {
 							type = "group",
 							name = L["UIPANEL_ADDGROUP"],
-							args = {},
+							args = {
+								hack = {
+									name = "",
+									type = "input",
+									order = 1,
+									width = "full",
+									get = function(info)
+										-- this wins by a landside as the most disgusting hack i have ever done.
+										-- hopefully, this will only be called when the frame shows itself.
+										local groupID = db.profile.NumGroups + 1
+										db.profile.NumGroups = groupID
+										db.profile.Groups[db.profile.NumGroups].Enabled = true
+										TMW:Update()
+										local stub = LMB or LBF
+										if stub then
+											local parent = stub:Group("TellMeWhen")
+											local group = stub:Group("TellMeWhen", format(L["fGROUP"], groupID))
+
+											group.SkinID, group.Gloss, group.Backdrop, group.Colors =
+											parent.SkinID, parent.Gloss, parent.Backdrop, parent.Colors
+
+											group:ReSkin()
+										end
+										TMW:Group_Update(groupID)
+										TMW:CompileOptions()
+										LibStub("AceConfigRegistry-3.0"):NotifyChange("TMW Options")
+										LibStub("AceConfigRegistry-3.0"):NotifyChange("TMW IEOptions")
+										LibStub("AceConfigDialog-3.0"):SelectGroup("TMW Options", "groups", "Group " .. groupID)
+										LibStub("AceConfigDialog-3.0"):SelectGroup("TMW IEOptions", "groups", "Group " .. groupID)
+									end,
+								}
+							},
 						},
 					},
 				},
 			},
 		}
-		TMW.OptionsTable.args.groups.args.addgroup = TMW.OptionsTable.args.main.args.addgroup
-		TMW.OptionsTable.args.groups.args.addgroupgroup.args.addgroup = TMW.OptionsTable.args.main.args.addgroup
 		TMW.OptionsTable.args.profiles = LibStub("AceDBOptions-3.0"):GetOptionsTable(db)
 	end
 
@@ -829,15 +834,16 @@ function TMW:CompileOptions() -- options
 	for g = 1, TELLMEWHEN_MAXGROUPS do
 		TMW.OptionsTable.args.groups.args["Group " .. g] = groupConfigTemplate
 	end
-	TMW.OptionsTable.args.groups.args.addgroup.order = TELLMEWHEN_MAXGROUPS + 1
+	TMW.OptionsTable.args.groups.args.addgroupgroup.order = TELLMEWHEN_MAXGROUPS + 1
 
-	LibStub("AceConfig-3.0"):RegisterOptionsTable("TellMeWhen Options", TMW.OptionsTable)
-	LibStub("AceConfigDialog-3.0"):SetDefaultSize("TellMeWhen Options", 781, 512)
+	LibStub("AceConfig-3.0"):RegisterOptionsTable("TMW Options", TMW.OptionsTable)
+	LibStub("AceConfigDialog-3.0"):SetDefaultSize("TMW Options", 781, 512)
+	LibStub("AceConfig-3.0"):RegisterOptionsTable("TMW IEOptions", TMW.OptionsTable)
 	if not TMW.AddedToBlizz then
-		TMW.AddedToBlizz = LibStub("AceConfigDialog-3.0"):AddToBlizOptions("TellMeWhen Options", L["ICON_TOOLTIP1"])
-	else
-		LibStub("AceConfigRegistry-3.0"):NotifyChange("TellMeWhen Options")
+		TMW.AddedToBlizz = LibStub("AceConfigDialog-3.0"):AddToBlizOptions("TMW Options", L["ICON_TOOLTIP1"])
 	end
+	LibStub("AceConfigRegistry-3.0"):NotifyChange("TMW Options")
+	LibStub("AceConfigRegistry-3.0"):NotifyChange("TMW IEOptions")
 end
 
 
@@ -932,7 +938,8 @@ function TMW:Group_StopSizing(resizeButton)
 	local p = db.profile.Groups[group:GetID()].Point
 	p.point, p.relativeTo, p.relativePoint, p.x, p.y = GetAnchoredPoints(group)
 	group:SetPos()
-	LibStub("AceConfigRegistry-3.0"):NotifyChange("TellMeWhen Options")
+	LibStub("AceConfigRegistry-3.0"):NotifyChange("TMW Options")
+	LibStub("AceConfigRegistry-3.0"):NotifyChange("TMW IEOptions")
 end
 
 function TMW:Group_StopMoving(group)
@@ -941,7 +948,8 @@ function TMW:Group_StopMoving(group)
 	local p = db.profile.Groups[group:GetID()].Point
 	p.point, p.relativeTo, p.relativePoint, p.x, p.y = GetAnchoredPoints(group)
 	group:SetPos()
-	LibStub("AceConfigRegistry-3.0"):NotifyChange("TellMeWhen Options")
+	LibStub("AceConfigRegistry-3.0"):NotifyChange("TMW Options")
+	LibStub("AceConfigRegistry-3.0"):NotifyChange("TMW IEOptions")
 end
 
 function TMW:Group_ResetPosition(groupID)
@@ -949,7 +957,8 @@ function TMW:Group_ResetPosition(groupID)
 		db.profile.Groups[groupID].Point[k] = v
 	end
 	db.profile.Groups[groupID].Scale = 1
-	LibStub("AceConfigRegistry-3.0"):NotifyChange("TellMeWhen Options")
+	LibStub("AceConfigRegistry-3.0"):NotifyChange("TMW Options")
+	LibStub("AceConfigRegistry-3.0"):NotifyChange("TMW IEOptions")
 	TMW:Group_Update(groupID)
 end
 
@@ -1055,6 +1064,12 @@ function ID:Drag_DropDown(a)
 			info.func = ID.Meta
 			UIDropDownMenu_AddButton(info)
 		end
+	end
+	
+	if ID.srcgroupID ~= ID.destgroupID then
+		info.text = L["ICONMENU_ANCHOR"]:format(TMW:GetGroupName(db.profile.Groups[ID.destgroupID].Name, ID.destgroupID, 1))
+		info.func = ID.Anchor
+		UIDropDownMenu_AddButton(info)
 	end
 
 	info.text = CANCEL
@@ -1221,6 +1236,13 @@ function ID:Condition()
 	TMW:Update()
 end
 
+ID.FS = CreateFrame("GameTooltip", "TMWIDFS")
+function ID:Anchor()
+	if ID.destgroupID == ID.srcgroupID then return end
+	db.profile.Groups[ID.srcgroupID].Point.relativeTo = TMW[ID.destgroupID]:GetName()
+	TMW:Group_StopMoving(TMW[ID.srcgroupID]) -- i cheat
+	TMW:Update()
+end
 
 -- ----------------------
 -- ICON EDITOR
@@ -1398,8 +1420,8 @@ IE.Tabs = {
 	[2] = "Conditions",
 	[3] = "Sound",
 	[4] = "Announcements",
-	[5] = "Group",
-	[6] = "Conditions",
+	[5] = "Conditions",
+	[6] = "MainOptions",
 }
 IE.Units = {
 	{ value = "player", 					text = PLAYER .. " " .. L["PLAYER_DESC"]  },

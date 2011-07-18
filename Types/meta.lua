@@ -101,7 +101,6 @@ Type.HideBars = true
 local preTable = {}
 function Type:Setup(icon, groupID, iconID)
 	icon.NameFirst = "" --need to set this to something for bars update
-	icon.ProcessedAt = 1
 
 	if icon.CheckNext then
 		TMW.DoWipeAC = true

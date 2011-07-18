@@ -34,8 +34,8 @@ local DRData = LibStub("DRData-1.0", true)
 TELLMEWHEN_VERSION = "4.4.7"
 TELLMEWHEN_VERSION_MINOR = strmatch(" @project-version@", " r%d+") or ""
 TELLMEWHEN_VERSION_FULL = TELLMEWHEN_VERSION .. TELLMEWHEN_VERSION_MINOR
-TELLMEWHEN_VERSIONNUMBER = 44702 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
-if TELLMEWHEN_VERSIONNUMBER > 45000 or TELLMEWHEN_VERSIONNUMBER < 44000 then error("YOU SCREWED UP THE VERSION NUMBER OR DIDNT CHANGE THE SAFETY LIMITS") return end -- safety check because i accidentally made the version number 414069 once
+TELLMEWHEN_VERSIONNUMBER = 44703 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
+if TELLMEWHEN_VERSIONNUMBER > 45000 or TELLMEWHEN_VERSIONNUMBER < 44000 then return error("YOU SCREWED UP THE VERSION NUMBER OR DIDNT CHANGE THE SAFETY LIMITS") end -- safety check because i accidentally made the version number 414069 once
 
 TELLMEWHEN_MAXGROUPS = 1 	--this is a default, used by SetTheory (addon), so dont rename
 TELLMEWHEN_MAXROWS = 20
@@ -3397,7 +3397,7 @@ function TMW:SlashCommand(str)
 		if not TMW.IE then
 			TMW:LoadOptions()
 		end
-		LibStub("AceConfigDialog-3.0"):Open("TellMeWhen Options")
+		LibStub("AceConfigDialog-3.0"):Open("TMW Options")
 	else
 		TMW:LockToggle()
 	end
