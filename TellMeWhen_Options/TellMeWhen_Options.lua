@@ -329,92 +329,98 @@ local checkorder = {
 }
 local groupConfigTemplate = {
 	type = "group",
+	childGroups = "tab",
 	name = function(info) local g=findid(info) return TMW:GetGroupName(db.profile.Groups[g].Name, g) end,
 	order = function(info) return findid(info) end,
 	args = {
-		Name = {
-			name = L["UIPANEL_GROUPNAME"],
-			type = "input",
+		main = {
+			type = "group",
+			name = L["MAIN"],
 			order = 1,
-			width = "full",
-			set = function(info, val)
-				local g = findid(info)
-				db.profile.Groups[g].Name = strtrim(val)
-				TMW:Group_Update(g)
-			end,
-		},
-		Enabled = {
-			name = L["UIPANEL_ENABLEGROUP"],
-			desc = L["UIPANEL_TOOLTIP_ENABLEGROUP"],
-			type = "toggle",
-			order = 2,
-		},
-		PrimarySpec = {
-			name = L["UIPANEL_PRIMARYSPEC"],
-			desc = L["UIPANEL_TOOLTIP_PRIMARYSPEC"],
-			type = "toggle",
-			order = 6,
-		},
-		SecondarySpec = {
-			name = L["UIPANEL_SECONDARYSPEC"],
-			desc = L["UIPANEL_TOOLTIP_SECONDARYSPEC"],
-			type = "toggle",
-			order = 7,
-		},
-		Columns = {
-			name = L["UIPANEL_COLUMNS"],
-			desc = L["UIPANEL_TOOLTIP_COLUMNS"],
-			type = "range",
-			order = 20,
-			min = 1,
-			max = TELLMEWHEN_MAXROWS,
-			step = 1,
-			bigStep = 1,
-		},
-		Rows = {
-			name = L["UIPANEL_ROWS"],
-			desc = L["UIPANEL_TOOLTIP_ROWS"],
-			type = "range",
-			order = 21,
-			min = 1,
-			max = TELLMEWHEN_MAXROWS,
-			step = 1,
-			bigStep = 1,
-		},
-		Spacing = {
-			name = L["UIPANEL_ICONSPACING"],
-			desc = L["UIPANEL_ICONSPACING_DESC"],
-			type = "range",
-			order = 22,
-			min = 0,
-			softMax = 20,
-			step = 0.1,
-			bigStep = 1,
-		},
-		CheckOrder = {
-			name = L["CHECKORDER"],
-			desc = L["CHECKORDER_ICONDESC"],
-			type = "select",
-			values = checkorder,
-			style = "dropdown",
-			order = 24,
-		},
-		delete = {
-			name = L["UIPANEL_DELGROUP"],
-			desc = L["UIPANEL_DELGROUP_DESC"],
-			type = "execute",
-			order = 50,
-			func = function(info)
-				TMW:Group_OnDelete(findid(info))
-			end,
-			confirm = true,
+			args = {
+				Name = {
+					name = L["UIPANEL_GROUPNAME"],
+					type = "input",
+					order = 1,
+					width = "full",
+					set = function(info, val)
+						local g = findid(info)
+						db.profile.Groups[g].Name = strtrim(val)
+						TMW:Group_Update(g)
+					end,
+				},
+				Enabled = {
+					name = L["UIPANEL_ENABLEGROUP"],
+					desc = L["UIPANEL_TOOLTIP_ENABLEGROUP"],
+					type = "toggle",
+					order = 2,
+				},
+				PrimarySpec = {
+					name = L["UIPANEL_PRIMARYSPEC"],
+					desc = L["UIPANEL_TOOLTIP_PRIMARYSPEC"],
+					type = "toggle",
+					order = 6,
+				},
+				SecondarySpec = {
+					name = L["UIPANEL_SECONDARYSPEC"],
+					desc = L["UIPANEL_TOOLTIP_SECONDARYSPEC"],
+					type = "toggle",
+					order = 7,
+				},
+				Columns = {
+					name = L["UIPANEL_COLUMNS"],
+					desc = L["UIPANEL_TOOLTIP_COLUMNS"],
+					type = "range",
+					order = 20,
+					min = 1,
+					max = TELLMEWHEN_MAXROWS,
+					step = 1,
+					bigStep = 1,
+				},
+				Rows = {
+					name = L["UIPANEL_ROWS"],
+					desc = L["UIPANEL_TOOLTIP_ROWS"],
+					type = "range",
+					order = 21,
+					min = 1,
+					max = TELLMEWHEN_MAXROWS,
+					step = 1,
+					bigStep = 1,
+				},
+				Spacing = {
+					name = L["UIPANEL_ICONSPACING"],
+					desc = L["UIPANEL_ICONSPACING_DESC"],
+					type = "range",
+					order = 22,
+					min = 0,
+					softMax = 20,
+					step = 0.1,
+					bigStep = 1,
+				},
+				CheckOrder = {
+					name = L["CHECKORDER"],
+					desc = L["CHECKORDER_ICONDESC"],
+					type = "select",
+					values = checkorder,
+					style = "dropdown",
+					order = 24,
+				},
+				delete = {
+					name = L["UIPANEL_DELGROUP"],
+					desc = L["UIPANEL_DELGROUP_DESC"],
+					type = "execute",
+					order = 50,
+					func = function(info)
+						TMW:Group_OnDelete(findid(info))
+					end,
+					confirm = true,
+				},
+			},
 		},
 		countfont = {
 			type = "group",
 			name = L["UIPANEL_FONT"],
 			order = 39,
-			guiInline = true,
-			dialogInline = true,
 			set = function(info, val)
 				local g = findid(info)
 				db.profile.Groups[g].Font[info[#info]] = val
@@ -484,10 +490,8 @@ local groupConfigTemplate = {
 		},
 		position = {
 			type = "group",
-			order = 40,
+			order = 2,
 			name = L["UIPANEL_POSITION"],
-			guiInline = true,
-			dialogInline = true,
 			set = function(info, val)
 				local g = findid(info)
 				db.profile.Groups[g].Point[info[#info]] = val
@@ -588,7 +592,7 @@ local groupConfigTemplate = {
 }
 for i = 1, GetNumTalentTabs() do
 	local _, name = GetTalentTabInfo(i)
-	groupConfigTemplate.args["Tree"..i] = {
+	groupConfigTemplate.args.main.args["Tree"..i] = {
 		type = "toggle",
 		name = name,
 		desc = L["UIPANEL_TREE_DESC"],

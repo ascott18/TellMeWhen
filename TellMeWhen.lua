@@ -34,7 +34,7 @@ local DRData = LibStub("DRData-1.0", true)
 TELLMEWHEN_VERSION = "4.4.7"
 TELLMEWHEN_VERSION_MINOR = strmatch(" @project-version@", " r%d+") or ""
 TELLMEWHEN_VERSION_FULL = TELLMEWHEN_VERSION .. TELLMEWHEN_VERSION_MINOR
-TELLMEWHEN_VERSIONNUMBER = 44703 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
+TELLMEWHEN_VERSIONNUMBER = 44704 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
 if TELLMEWHEN_VERSIONNUMBER > 45000 or TELLMEWHEN_VERSIONNUMBER < 44000 then return error("YOU SCREWED UP THE VERSION NUMBER OR DIDNT CHANGE THE SAFETY LIMITS") end -- safety check because i accidentally made the version number 414069 once
 
 TELLMEWHEN_MAXGROUPS = 1 	--this is a default, used by SetTheory (addon), so dont rename
@@ -1873,9 +1873,9 @@ end
 
 function TMW:LoadOptions(n)
 	n = n or 1
-	TMW:Print(L["LOADINGOPT"])
 	local loaded, reason = LoadAddOn("TellMeWhen_Options")
 	if not loaded then
+		TMW:Print(L["LOADINGOPT"])
 		if reason == "DISABLED" and (n < 2) then -- prevent accidental recursion
 			TMW:Print(L["ENABLINGOPT"])
 			EnableAddOn("TellMeWhen_Options")
@@ -1894,7 +1894,6 @@ function TMW:LoadOptions(n)
 			end
 		end
 		TMW:CompileOptions()
-		collectgarbage()
 	end
 end
 

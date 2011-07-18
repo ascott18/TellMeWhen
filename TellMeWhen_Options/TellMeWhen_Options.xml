@@ -1752,10 +1752,13 @@
 				</Anchors>
 				<Scripts>
 					<OnLoad> self:SetText(TMW.L["GROUPADDONSETTINGS"]) </OnLoad>
+					<OnClick>
+						--nope!
+					</OnClick>
 					<OnMouseUp>
 						TMW:CompileOptions()
+						TMW.IE:TabClick(self)
 						LibStub("AceConfigDialog-3.0"):Open("TMW IEOptions", TMW.IE.MainOptionsWidget)
-						LibStub("AceConfigDialog-3.0").OpenFrames["TMW IEOptions"] = TMW.IE.MainOptionsWidget
 						LibStub("AceConfigDialog-3.0"):SelectGroup("TMW IEOptions", "groups", "Group " .. TMW.CI.g)
 					</OnMouseUp>
 				</Scripts>
@@ -4081,15 +4084,30 @@
 						self:RegisterForDrag("LeftButton")
 						self:SetScale(0.77)
 						
-						local widget = {
-							localstatus = {},
-							content     = self.content,
-							frame       = self,
-							type        = "TMWGroupOptions",
-							OnAcquire = function(self) end,
-							OnRelease = function(self) end,
-							Hide = function(self) end,
-							Show = function(self) end,
+						local AceGUI = LibStub("AceGUI-3.0", true)
+						local Type, Version = "TMWGroupOptions", 1
+
+						local methods = {
+							OnAcquire = function(self)
+								if TMW.IE.MainOptionsWidget then
+									AceGUI:Release(TMW.IE.MainOptionsWidget)
+								end
+								TMW.IE.MainOptionsWidget = self
+								self.frame:SetParent(TellMeWhen_IconEditor)
+								self.frame:SetAllPoints()
+								self.frame:Show()
+							end,
+							OnRelease = function(self)
+								TMW.IE.MainOptionsWidget = nil
+								self.status = nil
+								wipe(self.localstatus)
+							end,
+							Hide = function(self)
+								self.frame:Hide()
+							end,
+							Show = function(self)
+								self.frame:Show()
+							end,
 							ApplyStatus = function() end,
 							SetTitle = function() end,
 							SetStatusTable = function(self, status)
@@ -4097,12 +4115,36 @@
 								self.status = status
 							end,
 						}
-						
-						local AceGUI = LibStub("AceGUI-3.0")
-						AceGUI:RegisterAsContainer(widget)
-						AceGUI:RegisterWidgetType("TMWGroupOptions", function() return widget end, 1)
-						TMW.IE.MainOptionsWidget = AceGUI:Create("TMWGroupOptions")
+
+						local function Constructor()
+							local frame = TMW.IE.MainOptions
+							
+							local widget = {
+								localstatus = {},
+								content     = TMW.IE.MainOptions.content,
+								frame       = TMW.IE.MainOptions,
+								type        = Type
+							}
+							for method, func in pairs(methods) do
+								widget[method] = func
+							end
+							
+							return  AceGUI:RegisterAsContainer(widget)
+						end
+						AceGUI:RegisterWidgetType(Type, Constructor, Version)
 					</OnLoad>
+					<OnShow>
+						if not TMW.IE.MainOptionsWidget then
+							LibStub("AceGUI-3.0", true):Create("TMWGroupOptions")
+						end
+						LibStub("AceConfigDialog-3.0").OpenFrames["TMW IEOptions"] = TMW.IE.MainOptionsWidget
+					</OnShow>
+					<OnHide>
+						if TMW.IE.MainOptionsWidget then
+							LibStub("AceGUI-3.0", true):Release(TMW.IE.MainOptionsWidget)
+						end
+						LibStub("AceConfigDialog-3.0").OpenFrames["TMW IEOptions"] = nil
+					</OnHide>
 					<OnDragStart> TellMeWhen_IconEditor:StartMoving() </OnDragStart>
 					<OnDragStop> TellMeWhen_IconEditor:StopMovingOrSizing() </OnDragStop>
 				</Scripts>
