@@ -789,12 +789,12 @@ function TMW:CompileOptions() -- options
 							type = "group",
 							name = L["UIPANEL_ADDGROUP"],
 							args = {
-								hack = {
-									name = "",
-									type = "input",
-									order = 1,
-									width = "full",
-									get = function(info)
+								addgroup = {
+									name = L["UIPANEL_ADDGROUP"],
+									desc = L["UIPANEL_ADDGROUP_DESC"],
+									type = "execute",
+									order = 41,
+									func = function()
 										-- this wins by a landside as the most disgusting hack i have ever done.
 										-- hopefully, this will only be called when the frame shows itself.
 										local groupID = db.profile.NumGroups + 1
@@ -813,12 +813,9 @@ function TMW:CompileOptions() -- options
 										end
 										TMW:Group_Update(groupID)
 										TMW:CompileOptions()
-										LibStub("AceConfigRegistry-3.0"):NotifyChange("TMW Options")
-										LibStub("AceConfigRegistry-3.0"):NotifyChange("TMW IEOptions")
-										LibStub("AceConfigDialog-3.0"):SelectGroup("TMW Options", "groups", "Group " .. groupID)
-										LibStub("AceConfigDialog-3.0"):SelectGroup("TMW IEOptions", "groups", "Group " .. groupID)
+										IE:NotifyChanges("groups", "Group " .. groupID)
 									end,
-								}
+								},
 							},
 						},
 					},
@@ -846,8 +843,7 @@ function TMW:CompileOptions() -- options
 	if not TMW.AddedToBlizz then
 		TMW.AddedToBlizz = LibStub("AceConfigDialog-3.0"):AddToBlizOptions("TMW Options", L["ICON_TOOLTIP1"])
 	end
-	LibStub("AceConfigRegistry-3.0"):NotifyChange("TMW Options")
-	LibStub("AceConfigRegistry-3.0"):NotifyChange("TMW IEOptions")
+	IE:NotifyChanges()
 end
 
 
@@ -857,45 +853,6 @@ end
 
 local Ruler = CreateFrame("Frame")
 local function GetAnchoredPoints(group)
-	-- original implementation: shitty because there is an offset that should not exist that increases expomentially as distance from (0,0) increases
-	--[[function AnchoredPoints(group)
-    local p = TMW.db.profile.Groups[group:GetID()].Point
-    local X, Y
-    if strfind(p.point, "RIGHT") then
-        X = group:GetRight()
-    elseif strfind(p.point, "LEFT") then
-        X = group:GetLeft()
-    else
-        X = group:GetCenter()
-    end
-    if strfind(p.point, "TOP") then
-        Y = group:GetTop()
-    elseif strfind(p.point, "BOTTOM") then
-        Y = group:GetBottom()
-    else
-        _, Y = group:GetCenter()
-    end
-    X, Y = X*group:GetScale(), Y*group:GetScale()
-    
-    local X2, Y2
-	local relframe = _G[p.relativeTo] or UIParent
-    if strfind(p.relativePoint, "RIGHT") then
-        X2 = relframe:GetRight()
-    elseif strfind(p.relativePoint, "LEFT") then
-        X2 = relframe:GetLeft()
-    else
-        X2 = relframe:GetCenter()
-    end
-    if strfind(p.relativePoint, "TOP") then
-        Y2 = relframe:GetTop()
-    elseif strfind(p.relativePoint, "BOTTOM") then
-        Y2 = relframe:GetBottom()
-    else
-        _, Y2 = relframe:GetCenter()
-    end
-    X2, Y2 = X2*relframe:GetScale(), Y2*relframe:GetScale()
-    return print(p.point, relframe:GetName(), p.relativePoint, X - X2, Y - Y2)
-end]]
     local p = TMW.db.profile.Groups[group:GetID()].Point
     Ruler:ClearAllPoints()
     Ruler:SetPoint("TOPLEFT", group, p.point)
@@ -942,8 +899,7 @@ function TMW:Group_StopSizing(resizeButton)
 	local p = db.profile.Groups[group:GetID()].Point
 	p.point, p.relativeTo, p.relativePoint, p.x, p.y = GetAnchoredPoints(group)
 	group:SetPos()
-	LibStub("AceConfigRegistry-3.0"):NotifyChange("TMW Options")
-	LibStub("AceConfigRegistry-3.0"):NotifyChange("TMW IEOptions")
+	IE:NotifyChanges()
 end
 
 function TMW:Group_StopMoving(group)
@@ -952,8 +908,7 @@ function TMW:Group_StopMoving(group)
 	local p = db.profile.Groups[group:GetID()].Point
 	p.point, p.relativeTo, p.relativePoint, p.x, p.y = GetAnchoredPoints(group)
 	group:SetPos()
-	LibStub("AceConfigRegistry-3.0"):NotifyChange("TMW Options")
-	LibStub("AceConfigRegistry-3.0"):NotifyChange("TMW IEOptions")
+	IE:NotifyChanges()
 end
 
 function TMW:Group_ResetPosition(groupID)
@@ -961,8 +916,7 @@ function TMW:Group_ResetPosition(groupID)
 		db.profile.Groups[groupID].Point[k] = v
 	end
 	db.profile.Groups[groupID].Scale = 1
-	LibStub("AceConfigRegistry-3.0"):NotifyChange("TMW Options")
-	LibStub("AceConfigRegistry-3.0"):NotifyChange("TMW IEOptions")
+	IE:NotifyChanges()
 	TMW:Group_Update(groupID)
 end
 
@@ -1465,6 +1419,20 @@ function IE:TabClick(self)
 	end
 	IE[IE.Tabs[self:GetID()]]:Show()
 	TellMeWhen_IconEditor:Show()
+end
+
+function IE:NotifyChanges(...)
+	local hasPath = ...
+	LibStub("AceConfigRegistry-3.0"):NotifyChange("TMW Options")
+	if hasPath then
+		LibStub("AceConfigDialog-3.0"):SelectGroup("TMW Options", ...)
+	end
+	if TMW.IE.MainOptionsWidget then
+		LibStub("AceConfigDialog-3.0"):Open("TMW IEOptions", TMW.IE.MainOptionsWidget)
+		if hasPath then
+			LibStub("AceConfigDialog-3.0"):SelectGroup("TMW IEOptions", ...)
+		end
+	end
 end
 
 function IE:SetupRadios()

@@ -1746,20 +1746,20 @@
 				</Anchors>
 				<Scripts> <OnLoad> self:SetText(TMW.L["GROUPCONDITIONS"]) TMW.GRCNDTTab = self:GetID() </OnLoad> </Scripts>
 			</Button>
-			<Button name="$parentTab6" parentKey="GroupTab" inherits="TellMeWhen_TabTemplate" id="6">
+			<Button name="$parentTab6" parentKey="MainOptionsTab" inherits="TellMeWhen_TabTemplate" id="6">
 				<Anchors>
 				   <Anchor point="LEFT" relativeTo="$parentTab5" relativePoint="RIGHT" x="-18" y="0"/>
 				</Anchors>
 				<Scripts>
-					<OnLoad> self:SetText(TMW.L["GROUPADDONSETTINGS"]) </OnLoad>
+					<OnLoad> self:SetText(TMW.L["GROUPADDONSETTINGS"]) TMW.MOTab = self:GetID() </OnLoad>
 					<OnClick>
-						--nope!
+						--handled in OnMouseUp
 					</OnClick>
 					<OnMouseUp>
 						TMW:CompileOptions()
 						TMW.IE:TabClick(self)
-						LibStub("AceConfigDialog-3.0"):Open("TMW IEOptions", TMW.IE.MainOptionsWidget)
 						LibStub("AceConfigDialog-3.0"):SelectGroup("TMW IEOptions", "groups", "Group " .. TMW.CI.g)
+						LibStub("AceConfigDialog-3.0"):Open("TMW IEOptions", TMW.IE.MainOptionsWidget)
 					</OnMouseUp>
 				</Scripts>
 			</Button>
@@ -4137,13 +4137,11 @@
 						if not TMW.IE.MainOptionsWidget then
 							LibStub("AceGUI-3.0", true):Create("TMWGroupOptions")
 						end
-						LibStub("AceConfigDialog-3.0").OpenFrames["TMW IEOptions"] = TMW.IE.MainOptionsWidget
 					</OnShow>
 					<OnHide>
 						if TMW.IE.MainOptionsWidget then
 							LibStub("AceGUI-3.0", true):Release(TMW.IE.MainOptionsWidget)
 						end
-						LibStub("AceConfigDialog-3.0").OpenFrames["TMW IEOptions"] = nil
 					</OnHide>
 					<OnDragStart> TellMeWhen_IconEditor:StartMoving() </OnDragStart>
 					<OnDragStop> TellMeWhen_IconEditor:StopMovingOrSizing() </OnDragStop>
@@ -4365,6 +4363,16 @@
 			</Layer>
 		</Layers>
 		<Scripts>
+			<OnShow>
+				self.OkayButton:Show()
+				self.CloseButton:Show()
+				self.resizeButton:Show()
+			</OnShow>
+			<OnHide>
+				self.OkayButton:Hide()
+				self.CloseButton:Hide()
+				self.resizeButton:Hide()
+			</OnHide>
 			<OnLoad>
 				self:RegisterForDrag("LeftButton")
 				for k, v in pairs(self) do
@@ -4380,14 +4388,15 @@
 			<OnUpdate>
 				local groupID, iconID = TMW.CI.g, TMW.CI.i
 				local ic = TMW.CI.ic
-				local t
-				if TMW.CNDT and TMW.CNDT.type == "group" and self.selectedTab == TMW.GRCNDTTab then
+				if (TMW.CNDT and TMW.CNDT.type == "group" and self.selectedTab == TMW.GRCNDTTab) or self.selectedTab == TMW.MOTab then
 					self.FS1:SetFormattedText(TMW.L["fGROUP"], TMW:GetGroupName(TMW.db.profile.Groups[groupID].Name, groupID, 1))
+					self.icontexture:Hide()
 				else
 					self.FS1:SetFormattedText(TMW.L["GROUPICON"], TMW:GetGroupName(TMW.db.profile.Groups[groupID].Name, groupID, 1), iconID)
-				end
-				if ic then
-					self.icontexture:SetTexture(ic.texture:GetTexture())
+					if ic then
+						self.icontexture:Show()
+						self.icontexture:SetTexture(ic.texture:GetTexture())
+					end
 				end
 			</OnUpdate>
 			<OnDragStart> self:StartMoving() </OnDragStart>

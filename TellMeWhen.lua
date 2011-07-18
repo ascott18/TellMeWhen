@@ -34,7 +34,7 @@ local DRData = LibStub("DRData-1.0", true)
 TELLMEWHEN_VERSION = "4.4.7"
 TELLMEWHEN_VERSION_MINOR = strmatch(" @project-version@", " r%d+") or ""
 TELLMEWHEN_VERSION_FULL = TELLMEWHEN_VERSION .. TELLMEWHEN_VERSION_MINOR
-TELLMEWHEN_VERSIONNUMBER = 44704 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
+TELLMEWHEN_VERSIONNUMBER = 44705 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
 if TELLMEWHEN_VERSIONNUMBER > 45000 or TELLMEWHEN_VERSIONNUMBER < 44000 then return error("YOU SCREWED UP THE VERSION NUMBER OR DIDNT CHANGE THE SAFETY LIMITS") end -- safety check because i accidentally made the version number 414069 once
 
 TELLMEWHEN_MAXGROUPS = 1 	--this is a default, used by SetTheory (addon), so dont rename
@@ -1123,6 +1123,7 @@ function TMW:OnUpdate() -- this is where all icon OnUpdate scripts are actually 
 				end
 			end
 		end
+		if not Locked then return end
 		
 		for i = 1, #GroupUpdateFuncs do
 			local CndtCheck = GroupUpdateFuncs[i].CndtCheck
@@ -1173,14 +1174,12 @@ function TMW:Update()
 		else
 			TellMeWhen_ConfigWarning:Hide()
 		end
-		TMW:SetScript("OnUpdate", nil)
-		TMW:OnUpdate()
 	else
 		if TellMeWhen_ConfigWarning then
 			TellMeWhen_ConfigWarning:Hide()
 		end
-		TMW:SetScript("OnUpdate", TMW.OnUpdate)
 	end
+	TMW:SetScript("OnUpdate", TMW.OnUpdate)
 
 	if TMW.IE then
 		TMW.IE:SaveSettings()
@@ -1204,14 +1203,8 @@ function TMW:Update()
 	wipe(TMW.Icons)
 	wipe(TMW.IconsLookup)
 
-	TMW.dontSetGroupPos = true
 	for groupID = 1, TELLMEWHEN_MAXGROUPS do -- dont use TMW.InGroups() because that will setup every group that exists, even if it shouldn't be setup (i.e. it has been deleted or the user changed profiles)
 		TMW:Group_Update(groupID)
-	end
-	TMW.dontSetGroupPos = nil
-	for groupID = 1, TELLMEWHEN_MAXGROUPS do
-		-- the reason that this is separated is because groups may be anchored to other groups with higher groupIDs, but those groups must exist first before anchoring.
-		TMW[groupID]:SetPos()
 	end
 
 	if not Locked then
@@ -2240,9 +2233,7 @@ function TMW:Group_Update(groupID)
 		end
 	end
 
-	if not TMW.dontSetGroupPos then
-		group:SetPos()
-	end
+	group:SetPos()
 
 	if group.Enabled and group.CorrectSpec and Locked then
 		group:Show()
