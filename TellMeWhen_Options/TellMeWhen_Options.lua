@@ -2314,6 +2314,16 @@ TMW.EventList = {
 		text = L["SOUND_EVENT_ONFINISH"],
 		desc = L["SOUND_EVENT_ONFINISH_DESC"],
 	},
+	{
+		name = "OnAlphaInc",
+		text = L["SOUND_EVENT_ONALPHAINC"],
+		desc = L["SOUND_EVENT_ONALPHAINC_DESC"],
+	},
+	{
+		name = "OnAlphaDec",
+		text = L["SOUND_EVENT_ONALPHADEC"],
+		desc = L["SOUND_EVENT_ONALPHADEC_DESC"],
+	},
 }
 for k, v in pairs(SND.List) do
 	if v == "None" then
@@ -2403,7 +2413,7 @@ function SND:SelectSound(name)
 	end
 
 	if listID and (listID > SND.Sounds[#SND.Sounds].listID or listID < SND.Sounds[1].listID) then
-		SND.Sounds.ScrollBar:SetValue(listID)
+		SND.Sounds.ScrollBar:SetValue(listID-1)
 	end
 
 	for i=1, #SND.Sounds do

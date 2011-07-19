@@ -1,7 +1,10 @@
-===v4.4.7===
+===v4.5.0===
  * Fully integrated main addon settings/group settings into the icon editor.
  * Moving/resizing a group that is anchored to a frame other than UIParent will adjust the offsets instead of resetting the anchor to UIParent.
  * Reactive icons and conditions should now more accurately reflect the state of the abilities that they are checking.
+ * New icon events:
+ ** On Alpha Increase
+ ** On Alpha Decrease
  
 ===v4.4.6===
  * Bug Fixes:

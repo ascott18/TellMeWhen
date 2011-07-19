@@ -556,9 +556,24 @@ L["SOUND_EVENT_ONSHOW_DESC"] = "This event triggers when the icon becomes shown 
 L["SOUND_EVENT_ONHIDE"] = "On Hide"
 L["SOUND_EVENT_ONHIDE_DESC"] = "This event triggers when the icon is hidden (even if 'Always Hide' is checked)."
 L["SOUND_EVENT_ONSTART"] = "On Start"
-L["SOUND_EVENT_ONSTART_DESC"] = "This event triggers when the cooldown becomes unusable, the buff/debuff is applied, etc. NOTE: This event will never trigger at the same time as the OnShow event."
+L["SOUND_EVENT_ONSTART_DESC"] = [[This event triggers when the cooldown becomes unusable, the buff/debuff is applied, etc.
+
+NOTE: This event will never trigger at the same time as the OnShow event.]]
 L["SOUND_EVENT_ONFINISH"] = "On Finish"
-L["SOUND_EVENT_ONFINISH_DESC"] = "This event triggers when the cooldown becomes usable, the buff/debuff falls off, etc. NOTE: This event will never trigger at the same time as the OnHide event."
+L["SOUND_EVENT_ONFINISH_DESC"] = [[This event triggers when the cooldown becomes usable, the buff/debuff falls off, etc.
+
+NOTE: This event will never trigger at the same time as the OnHide event.]]
+
+L["SOUND_EVENT_ONALPHAINC"] = "On Alpha Increase"
+L["SOUND_EVENT_ONALPHAINC_DESC"] = [[This event triggers when the opacity of an icon increases.
+
+NOTE: This event will never trigger at the same time as the OnShow event.]]
+L["SOUND_EVENT_ONALPHADEC"] = "On Alpha Decrease"
+L["SOUND_EVENT_ONALPHADEC_DESC"] = [[This event triggers when the opacity of an icon decreases.
+
+NOTE: This event will never trigger at the same time as the OnHide event.]]
+
+
 L["SOUND_EVENTS"] = "Icon Events"
 L["SOUND_SOUNDTOPLAY"] = "Sound to Play"
 L["SOUND_CUSTOM"] = "Custom sound file"

@@ -31,11 +31,11 @@ local AceDB = LibStub("AceDB-3.0")
 local LSM = LibStub("LibSharedMedia-3.0")
 local DRData = LibStub("DRData-1.0", true)
 
-TELLMEWHEN_VERSION = "4.4.7"
+TELLMEWHEN_VERSION = "4.5.0"
 TELLMEWHEN_VERSION_MINOR = strmatch(" @project-version@", " r%d+") or ""
 TELLMEWHEN_VERSION_FULL = TELLMEWHEN_VERSION .. TELLMEWHEN_VERSION_MINOR
-TELLMEWHEN_VERSIONNUMBER = 44705 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
-if TELLMEWHEN_VERSIONNUMBER > 45000 or TELLMEWHEN_VERSIONNUMBER < 44000 then return error("YOU SCREWED UP THE VERSION NUMBER OR DIDNT CHANGE THE SAFETY LIMITS") end -- safety check because i accidentally made the version number 414069 once
+TELLMEWHEN_VERSIONNUMBER = 45001 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
+if TELLMEWHEN_VERSIONNUMBER > 46000 or TELLMEWHEN_VERSIONNUMBER < 45000 then return error("YOU SCREWED UP THE VERSION NUMBER OR DIDNT CHANGE THE SAFETY LIMITS") end -- safety check because i accidentally made the version number 414069 once
 
 TELLMEWHEN_MAXGROUPS = 1 	--this is a default, used by SetTheory (addon), so dont rename
 TELLMEWHEN_MAXROWS = 20
@@ -2384,15 +2384,27 @@ end
 
 function ProtoIcon.SetAlpha(icon, alpha)
 	if alpha ~= icon.__alpha then
+		local played, announced
 		if alpha == 0 then
 			local data = runEvents and icon.OnHide
 			if data then
-				icon:HandleEvent(data)
+				played, announced = icon:HandleEvent(data)
 			end
 		elseif icon.__alpha == 0 then
 			local data = runEvents and icon.OnShow
 			if data then
-				icon:HandleEvent(data)
+				played, announced = icon:HandleEvent(data)
+			end
+		end
+		if alpha > icon.__alpha then
+			local data = runEvents and icon.OnAlphaInc
+			if data then
+				played, announced = icon:HandleEvent(data, played, announced)
+			end
+		else -- it must be less than, because it isnt greater than and it isnt the same --if alpha < icon.__alpha then
+			local data = runEvents and icon.OnAlphaDec
+			if data then
+				played, announced = icon:HandleEvent(data, played, announced)
 			end
 		end
 		icon:setalpha(icon.FakeHidden or alpha) -- setalpha(lowercase) is the old, raw SetAlpha.
@@ -2465,14 +2477,26 @@ function ProtoIcon.SetInfo(icon, alpha, color, texture, start, duration, checkGC
 		if alpha == 0 then
 			local data = runEvents and icon.OnHide
 			if data then
-				icon:HandleEvent(data)
+				played, announced = icon:HandleEvent(data)
 			end
 		elseif icon.__alpha == 0 then
 			local data = runEvents and icon.OnShow
 			if data then
-				icon:HandleEvent(data)
+				played, announced = icon:HandleEvent(data)
 			end
 		end
+		if alpha > icon.__alpha then
+			local data = runEvents and icon.OnAlphaInc
+			if data then
+				played, announced = icon:HandleEvent(data, played, announced)
+			end
+		else -- it must be less than, because it isnt greater than and it isnt the same --if alpha < icon.__alpha then
+			local data = runEvents and icon.OnAlphaDec
+			if data then
+				played, announced = icon:HandleEvent(data, played, announced)
+			end
+		end
+		
 		icon:setalpha(icon.FakeHidden or alpha) -- setalpha(lowercase) is the old, raw SetAlpha.
 		icon.__alpha = alpha
 	end
@@ -2889,7 +2913,7 @@ function TMW:Icon_Update(icon)
 	end
 
 	icon.__previcon = nil
-	icon.__alpha = nil
+	icon.__alpha = -1
 	icon.__count = "UPDATE ME!"
 	icon.__tex = icon.texture:GetTexture()
 	icon.__realDuration = icon.__realDuration or 0
