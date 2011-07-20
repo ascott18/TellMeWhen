@@ -119,7 +119,7 @@ for category, b in pairs(TMW.OldBE) do
 		end
 		EquivFullNameLookup[equiv] = ";" .. table.concat(tbl, ";")
 	end
-end TMW.OldBE.unlisted.Enraged = nil
+end
 for dispeltype, icon in pairs(TMW.DS) do
 	EquivFirstIDLookup[dispeltype] = icon
 end
@@ -2235,25 +2235,28 @@ function IE:GetRealNames()
 	local tbl
 	local BEbackup = TMW.BE
 	TMW.BE = TMW.OldBE -- the level of hackyness here is sickening. Note that OldBE does not contain the enrage equiv (intended so we dont flood the tooltip)
-	-- by passing false in for arg3 (firstOnly), it creates a unique cache string and therefore a unique cache value - nessecary because we arent using the real TMW.BE
 	if CI.SoI == "item" then
 		tbl = TMW:GetItemIDs(nil, text, false)
 	else
-		tbl = TMW:GetSpellNames(nil, text, false)
+		tbl = TMW:GetSpellNames(nil, text)
 	end
 	local durations = Types[CI.t].DurationSyntax and TMW:GetSpellDurations(nil, text) -- needs to happen before unhacking
 	TMW.BE = BEbackup -- unhack
-
+	
 	local str = ""
+	numadded = 0
 	for k, v in pairs(tbl) do
 		local name, _, texture = GetSpellInfo(v)
 		name = name or v
 		texture = texture or SpellTextures[name]
 		if not tiptemp[name] then --prevents display of the same name twice when there are multiple spellIDs.
+			numadded = numadded + 1
 			local time = Types[CI.t].DurationSyntax and " ("..formatSeconds(durations[k])..")" or ""
-			str = str .. (texture and ("|T" .. texture .. ":0|t") or "") .. name .. time .. (k ~= #tbl and "; " or "")
-			if #tbl < 50 then -- dont use 1 per line if there a bunch
-				str = str .. "\r\n"
+			str = str .. (texture and ("|T" .. texture .. ":0|t") or "") .. name .. time .. (k ~= #tbl and "; " or "") -- :0:0:-7
+			local numlines = 60
+			if #tbl > numlines then -- dont use 1 per line if there's a bunch
+				local numperline = ceil(#tbl/numlines)
+				str = str .. (floor(numadded/numperline) == numadded/numperline and "\r\n" or "")
 			end
 		end
 		tiptemp[name] = true

@@ -62,6 +62,8 @@ Type.RelevantSettings = {
 	ShowTimer = true,
 	ShowTimerText = true,
 	ShowWhen = true,
+	ShowPBar = true,
+	PBarOffs = true,
 	ShowCBar = true,
 	CBarOffs = true,
 	InvertBars = true,
@@ -97,7 +99,7 @@ local function Totem_OnUpdate(icon, time)
 			if Slots[iSlot] then
 				local _, totemName, start, duration, totemIcon = GetTotemInfo(iSlot)
 				if start ~= 0 and totemName and ((NameFirst == "") or NameNameDictionary[strlowerCache[totemName]]) then
-					icon:SetInfo(icon.Alpha, icon.UnAlpha ~= 0 and pr or 1, totemIcon, start, duration)
+					icon:SetInfo(icon.Alpha, icon.UnAlpha ~= 0 and pr or 1, totemIcon, start, duration, nil, totemName)
 					return
 				end
 			end
@@ -135,7 +137,6 @@ function Type:Setup(icon, groupID, iconID)
 		icon.Slots[3] = true
 		icon.Slots[4] = true
 	end
-	icon.ShowPBar = false
 	icon:SetReverse(true)
 
 	icon.FirstTexture = icon.NameName and TMW.SpellTextures[icon.NameName]

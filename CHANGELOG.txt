@@ -5,6 +5,8 @@
  * New icon events:
  ** On Alpha Increase
  ** On Alpha Decrease
+ * New Conditions:
+ ** Buff/Debuff - Tooltip Scan
  
 ===v4.4.6===
  * Bug Fixes:

@@ -34,7 +34,7 @@ local DRData = LibStub("DRData-1.0", true)
 TELLMEWHEN_VERSION = "4.5.0"
 TELLMEWHEN_VERSION_MINOR = strmatch(" @project-version@", " r%d+") or ""
 TELLMEWHEN_VERSION_FULL = TELLMEWHEN_VERSION .. TELLMEWHEN_VERSION_MINOR
-TELLMEWHEN_VERSIONNUMBER = 45001 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
+TELLMEWHEN_VERSIONNUMBER = 45002 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
 if TELLMEWHEN_VERSIONNUMBER > 46000 or TELLMEWHEN_VERSIONNUMBER < 45000 then return error("YOU SCREWED UP THE VERSION NUMBER OR DIDNT CHANGE THE SAFETY LIMITS") end -- safety check because i accidentally made the version number 414069 once
 
 TELLMEWHEN_MAXGROUPS = 1 	--this is a default, used by SetTheory (addon), so dont rename
@@ -619,6 +619,7 @@ TMW.BE = {
 		Heals = "50464;5185;8936;740;2050;2060;2061;32546;596;64843;635;82326;19750;331;77472;8004;1064;73920",
 		PvPSpells = "33786;339;20484;1513;982;64901;_605;453;5782;5484;79268;10326;51514;118;12051",
 		Tier11Interrupts = "_83703;_82752;_82636;_83070;_79710;_77896;_77569;_80734;_82411",
+		Tier12Interrupts = "_97202;_100094",
 	},
 	dr = {
 	},
@@ -1143,6 +1144,7 @@ function TMW:OnUpdate() -- this is where all icon OnUpdate scripts are actually 
 			wipe(TMW.AlreadyChecked)
 		end
 		updatePBar = nil
+		CNDT.playerAuraChanged = nil
 	end
 end
 
@@ -3051,13 +3053,14 @@ end
 
 local eqttcache = {}
 function TMW:EquivToTable(name)
+	if eqttcache[name] then return eqttcache[name] end -- if we already made a table of this string, then use it
 	name = strlower(name)
 	local eqname, duration = strmatch(name, "(.-):([%d:%s%.]*)$")
 	name = eqname or name
 	local names
 	for k, v in pairs(TMW.BE) do -- check in subtables ('buffs', 'debuffs', 'casts', etc)
 		for equiv, str in pairs(v) do
-			if strlower(equiv) == name then
+			if strlower(equiv) == name and (TMW.BE ~= TMW.OldBE or equiv ~= "Enraged") then -- dont expand the enrage equiv if we are hacking with OldBE
 				names = str
 				break
 			end
@@ -3066,8 +3069,6 @@ function TMW:EquivToTable(name)
 	end
 	if not names then return end -- if we didnt find an equivalency string then gtfo
 	
-	local cachestring = tostring(names) .. tostring(duration)
-	if eqttcache[cachestring] then return eqttcache[cachestring] end -- if we already made a table of this string, then use it
 
 	local tbl = { strsplit(";", names) } -- split the string into a table
 	for a, b in pairs(tbl) do
@@ -3078,13 +3079,13 @@ function TMW:EquivToTable(name)
 		end
 		tbl[a] = new
 	end
-	eqttcache[cachestring] = tbl
+	eqttcache[name] = tbl
 	return tbl
 end
 
 local gsncache = {}
 function TMW:GetSpellNames(icon, setting, firstOnly, toname, dictionary, keepDurations)
-	local cachestring = setting .. tostring(firstOnly) .. tostring(toname) .. tostring(dictionary) .. tostring(keepDurations) -- a unique key for the cache table, turn possible nils into strings
+	local cachestring = strconcat(tostringall(setting, firstOnly, toname, dictionary, keepDurations, TMW.BE)) -- a unique key for the cache table, turn possible nils into strings
 	if gsncache[cachestring] then return gsncache[cachestring] end --why make a bunch of tables and do a bunch of stuff if we dont need to
 
 	local buffNames = TMW:SplitNames(setting) -- get a table of everything
@@ -3334,10 +3335,8 @@ function TMW:GetConfigIconTexture(icon, isItem)
 		local BEbackup = TMW.BE
 		TMW.BE = TMW.OldBE
 		-- the level of hackyness here is sickening. Note that OldBE does not contain the enrage equiv (intended so we dont flood the tooltip)
-		-- by passing false in for arg3 (firstOnly), it creates a unique cache string and therefore a unique cache value
-		-- nessecary because we arent using the real TMW.BE
 		
-		local tbl = isItem and TMW:GetItemIDs(icon, icon.Name, false) or TMW:GetSpellNames(icon, icon.Name, false)
+		local tbl = isItem and TMW:GetItemIDs(nil, icon.Name) or TMW:GetSpellNames(nil, icon.Name)
 		TMW.BE = BEbackup -- unhack
 	
 		for _, name in ipairs(tbl) do

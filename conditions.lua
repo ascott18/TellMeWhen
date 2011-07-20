@@ -57,6 +57,7 @@ local GetNumTrackingTypes, GetTrackingInfo =
 local _G = _G
 local print = TMW.print
 local clientVersion = select(4, GetBuildInfo())
+local strlowerCache = TMW.strlowerCache
 
 local CNDT = TMW:NewModule("Conditions", "AceEvent-3.0") TMW.CNDT = CNDT
 
@@ -286,6 +287,15 @@ function CNDT:UNIT_VEHICLE(_, unit)
 	end
 end
 
+local Parser = CreateFrame("GameTooltip", "TMWCNDTParser", TMW, "GameTooltipTemplate")
+
+local playerAuraTooltipCache = {}
+function CNDT:UNIT_AURA(_, unit)
+	if unit == "player" then
+		CNDT.playerAuraChanged = true
+	end
+end
+
 local PetModes = {
     clientVersion >= 40200 and "PET_MODE_ASSIST" or "PET_MODE_AGGRESSIVE",
     "PET_MODE_DEFENSIVE",
@@ -450,6 +460,34 @@ end
 function Env.TotemDuration(slot, time)
 	local have, name, start, duration = GetTotemInfo(slot)
 	return duration and duration ~= 0 and (duration - (time - start)) or 0
+end
+
+function Env.GetTooltipNumber(unit, name, filter)
+	if unit == "player" and not CNDT.playerAuraChanged and playerAuraTooltipCache[name..filter] then
+		return playerAuraTooltipCache[name..filter]
+	end
+	local n
+	for i = 1, 60 do
+		local buffName, _, iconTexture, count, dispelType, duration, expirationTime, _, canSteal, _, id = UnitAura(unit, i, filter)
+		if not buffName then 
+			break
+		elseif id == name or strlowerCache[buffName] == name then
+			n = i
+			break
+		end
+	end
+	local ret = 0
+	if n then
+		GameTooltip_SetDefaultAnchor(Parser, UIParent)
+		Parser:SetUnitAura(unit, n, filter)
+		local text = TMWCNDTParserTextLeft2:GetText()
+		Parser:Hide()
+		ret = text and tonumber(strmatch(text, "%d+")) or 0
+	end
+	if unit == "player" then
+		playerAuraTooltipCache[name..filter] = ret
+	end
+	return ret
 end
 
 
@@ -649,7 +687,7 @@ CNDT.Types = {
 		tcoords = {0.55859375, 0.64843750, 0.57031250, 0.75000000},
 		funcstr = [[c.Level == EclipseDir]],
 		hidden = pclass ~= "DRUID",
-		events = {"ECLIPSE_DIRECTION_CHANGE"},
+		events = "ECLIPSE_DIRECTION_CHANGE",
 	},
 	{ -- pet happiness
 		text = HAPPINESS,
@@ -939,7 +977,7 @@ CNDT.Types = {
 		icon = "Interface\\Icons\\Spell_Frost_Stun",
 		tcoords = standardtcoords,
 		funcstr = [[ZoneType c.Operator c.Level]],
-		events = {"ZONE_CHANGED_NEW_AREA"},
+		events = "ZONE_CHANGED_NEW_AREA",
 	},
 	{ -- grouptype
 		text = L["CONDITIONPANEL_GROUPTYPE"],
@@ -952,7 +990,7 @@ CNDT.Types = {
 		icon = "Interface\\Calendar\\MeetingIcon",
 		tcoords = standardtcoords,
 		funcstr = [[((NumRaidMembers > 0 and 2) or (NumPartyMembers > 0 and 1) or 0) c.Operator c.Level]], -- this one was harder than it should have been to figure out; keep it in mind for future condition creating
-		events = {"PARTY_MEMBERS_CHANGED", "RAID_ROSTER_UPDATE"},
+		events = "PARTY_MEMBERS_CHANGED RAID_ROSTER_UPDATE",
 	},
 	{ -- mounted
 		text = L["CONDITIONPANEL_MOUNTED"],
@@ -992,7 +1030,7 @@ CNDT.Types = {
 		icon = "Interface\\CHARACTERFRAME\\UI-StateIcon",
 		tcoords = {0.0625, 0.453125, 0.046875, 0.421875},
 		funcstr = [[c.1nil == Resting]],
-		events = {"PLAYER_UPDATE_RESTING"},
+		events = "PLAYER_UPDATE_RESTING",
 	},
 	{ -- stance
 		text = 	pclass == "HUNTER" and L["ASPECT"] or
@@ -1010,7 +1048,7 @@ CNDT.Types = {
 		icon = function() return firststanceid and GetSpellTexture(firststanceid) end,
 		tcoords = standardtcoords,
 		funcstr = [[ShapeshiftForm c.Operator c.Level]],
-		events = {"UPDATE_SHAPESHIFT_FORM"},
+		events = "UPDATE_SHAPESHIFT_FORM",
 		hidden = #TMW.CSN == 0,
 	},
 	{ -- talent spec
@@ -1067,7 +1105,7 @@ CNDT.Types = {
 		icon = PET_ASSIST_TEXTURE,
 		tcoords = standardtcoords,
 		funcstr = [[ActivePetMode c.Operator c.Level]],
-		events = {"PET_BAR_UPDATE"},
+		events = "PET_BAR_UPDATE",
 	},
 	{ -- tracking
 		text = L["CONDITIONPANEL_TRACKING"],
@@ -1083,7 +1121,7 @@ CNDT.Types = {
 		icon = "Interface\\MINIMAP\\TRACKING\\None",
 		tcoords = standardtcoords,
 		funcstr = [[Tracking[c.NameName] == c.1nil]],
-		events = {"MINIMAP_UPDATE_TRACKING"},
+		events = "MINIMAP_UPDATE_TRACKING",
 	},
 
 
@@ -1286,6 +1324,22 @@ CNDT.Types = {
 			return [[AuraStacks(c.Unit, c.NameName, "HELPFUL]] .. (c.Checked and "|PLAYER" or "") .. [[") c.Operator c.Level]]
 		end,
 	},
+	{ -- unit buff tooltip
+		text = L["ICONMENU_BUFF"] .. " - " .. L["TOOLTIPSCAN"],
+		tooltip = L["TOOLTIPSCAN_DESC"],
+		value = "BUFFTOOLTIP",
+		category = L["CNDTCAT_SPELLSABILITIES"],
+		range = 500,
+		name = function(editbox) TMW:TT(editbox, L["ICONMENU_BUFF"] .. " - " .. L["TOOLTIPSCAN"], "TOOLTIPSCAN_DESC", 1, nil, 1) editbox.label = L["BUFFTOCHECK"] end,
+		useSUG = true,
+		check = function(check) TMW:TT(check, "ONLYCHECKMINE", "ONLYCHECKMINE_DESC", nil, nil, 1) end,
+		icon = "Interface\\Icons\\inv_elemental_primal_mana",
+		tcoords = standardtcoords,
+		events = "UNIT_AURA",
+		funcstr = function(c)
+			return [[GetTooltipNumber(c.Unit, "]]..strlower(TMW:GetSpellNames(nil, c.Name, 1))..[[", "HELPFUL]] .. (c.Checked and "|PLAYER" or "") .. [[") c.Operator c.Level]]
+		end,
+	},
 	{ -- unit buff number
 		text = L["ICONMENU_BUFF"] .. " - " .. L["NUMAURAS"],
 		tooltip = L["NUMAURAS_DESC"],
@@ -1349,6 +1403,22 @@ CNDT.Types = {
 		tcoords = standardtcoords,
 		funcstr = function(c)
 			return [[AuraStacks(c.Unit, c.NameName, "HARMFUL]] .. (c.Checked and "|PLAYER" or "") .. [[") c.Operator c.Level]]
+		end,
+	},
+	{ -- unit debuff tooltip
+		text = L["ICONMENU_DEBUFF"] .. " - " .. L["TOOLTIPSCAN"],
+		tooltip = L["TOOLTIPSCAN_DESC"],
+		value = "DEBUFFTOOLTIP",
+		category = L["CNDTCAT_SPELLSABILITIES"],
+		range = 500,
+		name = function(editbox) TMW:TT(editbox, L["ICONMENU_DEBUFF"] .. " - " .. L["TOOLTIPSCAN"], "TOOLTIPSCAN_DESC", 1, nil, 1) editbox.label = L["BUFFTOCHECK"] end,
+		useSUG = true,
+		check = function(check) TMW:TT(check, "ONLYCHECKMINE", "ONLYCHECKMINE_DESC", nil, nil, 1) end,
+		icon = "Interface\\Icons\\spell_shadow_lifedrain",
+		tcoords = standardtcoords,
+		events = "UNIT_AURA",
+		funcstr = function(c)
+			return [[GetTooltipNumber(c.Unit, "]]..strlower(TMW:GetSpellNames(nil, c.Name, 1))..[[", "HARMFUL]] .. (c.Checked and "|PLAYER" or "") .. [[") c.Operator c.Level]]
 		end,
 	},
 	{ -- unit debuff number
@@ -1485,7 +1555,7 @@ CNDT.Types = {
 		icon = "Interface\\Icons\\spell_nature_strength",
 		tcoords = standardtcoords,
 		funcstr = [[UnitStat1 c.Operator c.Level]],
-		events = {"UNIT_STATS"},
+		events = "UNIT_STATS",
 	},
 	{ -- agility
 		text = _G["SPELL_STAT2_NAME"],
@@ -1496,7 +1566,7 @@ CNDT.Types = {
 		icon = "Interface\\Icons\\spell_holy_blessingofagility",
 		tcoords = standardtcoords,
 		funcstr = [[UnitStat2 c.Operator c.Level]],
-		events = {"UNIT_STATS"},
+		events = "UNIT_STATS",
 	},
 	{ -- stamina
 		text = _G["SPELL_STAT3_NAME"],
@@ -1507,7 +1577,7 @@ CNDT.Types = {
 		icon = "Interface\\Icons\\spell_holy_wordfortitude",
 		tcoords = standardtcoords,
 		funcstr = [[UnitStat3 c.Operator c.Level]],
-		events = {"UNIT_STATS"},
+		events = "UNIT_STATS",
 	},
 	{ -- intellect
 		text = _G["SPELL_STAT4_NAME"],
@@ -1518,7 +1588,7 @@ CNDT.Types = {
 		icon = "Interface\\Icons\\spell_holy_magicalsentry",
 		tcoords = standardtcoords,
 		funcstr = [[UnitStat4 c.Operator c.Level]],
-		events = {"UNIT_STATS"},
+		events = "UNIT_STATS",
 	},
 	{ -- spirit
 		text = _G["SPELL_STAT5_NAME"],
@@ -1529,7 +1599,7 @@ CNDT.Types = {
 		icon = "Interface\\Icons\\spell_shadow_burningspirit",
 		tcoords = standardtcoords,
 		funcstr = [[UnitStat5 c.Operator c.Level]],
-		events = {"UNIT_STATS"},
+		events = "UNIT_STATS",
 	},
 	{ -- mastery
 		text = STAT_MASTERY,
@@ -1541,7 +1611,7 @@ CNDT.Types = {
 		icon = "Interface\\Icons\\spell_holy_championsbond",
 		tcoords = standardtcoords,
 		funcstr = [[Mastery c.Operator c.Level]],
-		events = {"MASTERY_UPDATE"},
+		events = "MASTERY_UPDATE",
 	},
 
 	{ -- melee AP
@@ -1553,7 +1623,7 @@ CNDT.Types = {
 		icon = "Interface\\Icons\\INV_Sword_04",
 		tcoords = standardtcoords,
 		funcstr = [[MeleeAttackPower c.Operator c.Level]],
-		events = {"UNIT_ATTACK_POWER"},
+		events = "UNIT_ATTACK_POWER",
 		spacebefore = true,
 	},
 	{ -- melee crit
@@ -1568,7 +1638,7 @@ CNDT.Types = {
 		icon = "Interface\\Icons\\Ability_CriticalStrike",
 		tcoords = standardtcoords,
 		funcstr = [[MeleeCrit c.Operator c.Level]],
-		events = {"COMBAT_RATING_UPDATE"},
+		events = "COMBAT_RATING_UPDATE",
 	},
 	{ -- melee haste
 		text = L["MELEEHASTE"],
@@ -1582,7 +1652,7 @@ CNDT.Types = {
 		icon = "Interface\\Icons\\spell_nature_bloodlust",
 		tcoords = standardtcoords,
 		funcstr = [[MeleeHaste c.Operator c.Level]],
-		events = {"UNIT_ATTACK_SPEED"},
+		events = "UNIT_ATTACK_SPEED",
 	},
 	{ -- expertise
 		text = _G["COMBAT_RATING_NAME"..CR_EXPERTISE],
@@ -1594,7 +1664,7 @@ CNDT.Types = {
 		icon = "Interface\\Icons\\ability_rogue_shadowstrikes",
 		tcoords = standardtcoords,
 		funcstr = [[Expertise c.Operator c.Level]],
-		events = {"COMBAT_RATING_UPDATE"},
+		events = "COMBAT_RATING_UPDATE",
 	},
 
 	{ -- ranged AP
@@ -1606,7 +1676,7 @@ CNDT.Types = {
 		icon = "Interface\\Icons\\INV_Weapon_Bow_07",
 		tcoords = standardtcoords,
 		funcstr = [[RangeAttackPower c.Operator c.Level]],
-		events = {"UNIT_RANGED_ATTACK_POWER"},
+		events = "UNIT_RANGED_ATTACK_POWER",
 		spacebefore = true,
 	},
 	{ -- range crit
@@ -1621,7 +1691,7 @@ CNDT.Types = {
 		icon = "Interface\\Icons\\Ability_CriticalStrike",
 		tcoords = standardtcoords,
 		funcstr = [[RangeCrit c.Operator c.Level]],
-		events = {"COMBAT_RATING_UPDATE"},
+		events = "COMBAT_RATING_UPDATE",
 	},
 	{ -- range haste
 		text = L["RANGEDHASTE"],
@@ -1635,7 +1705,7 @@ CNDT.Types = {
 		icon = "Interface\\Icons\\ability_hunter_runningshot",
 		tcoords = standardtcoords,
 		funcstr = [[RangeHaste c.Operator c.Level]],
-		events = {"UNIT_RANGEDDAMAGE"},
+		events = "UNIT_RANGEDDAMAGE",
 	},
 
 
@@ -1648,7 +1718,7 @@ CNDT.Types = {
 		icon = "Interface\\Icons\\spell_fire_flamebolt",
 		tcoords = standardtcoords,
 		funcstr = [[SpellDamage c.Operator c.Level]],
-		events = {"PLAYER_DAMAGE_DONE_MODS"},
+		events = "PLAYER_DAMAGE_DONE_MODS",
 		spacebefore = true,
 	},
 	{ -- spell healing
@@ -1660,7 +1730,7 @@ CNDT.Types = {
 		icon = "Interface\\Icons\\spell_nature_healingtouch",
 		tcoords = standardtcoords,
 		funcstr = [[SpellHealing c.Operator c.Level]],
-		events = {"PLAYER_DAMAGE_DONE_MODS"},
+		events = "PLAYER_DAMAGE_DONE_MODS",
 	},
 	{ -- spell crit
 		text = L["SPELLCRIT"],
@@ -1674,7 +1744,7 @@ CNDT.Types = {
 		icon = "Interface\\Icons\\inv_gizmo_supersappercharge",
 		tcoords = standardtcoords,
 		funcstr = [[SpellCrit c.Operator c.Level]],
-		events = {"COMBAT_RATING_UPDATE"},
+		events = "COMBAT_RATING_UPDATE",
 	},
 	{ -- spell haste
 		text = L["SPELLHASTE"],
@@ -1688,7 +1758,7 @@ CNDT.Types = {
 		icon = "Interface\\Icons\\ability_mage_timewarp",
 		tcoords = standardtcoords,
 		funcstr = [[SpellHaste c.Operator c.Level]],
-		events = {"COMBAT_RATING_UPDATE"},
+		events = "COMBAT_RATING_UPDATE",
 	},
 	{ -- mana regen
 		text = MANA_REGEN,
@@ -1881,7 +1951,7 @@ function CNDT:ProcessConditions(icon)
 		local v = ConditionsByType[t]
 		if v then
 			if v.events then
-				for k, event in pairs(v.events) do
+				for k, event in TMW:Vararg(strsplit(" ", v.events)) do
 					CNDT:RegisterEvent(event)
 					CNDT[event](CNDT, event, "player")
 				end

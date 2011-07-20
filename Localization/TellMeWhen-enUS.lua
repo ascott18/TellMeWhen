@@ -38,7 +38,7 @@ L["CHOOSENAME_DIALOG"] = [=[Enter the Name or ID of what you want this icon to m
 L["CHOOSENAME_DIALOG_MSCD"] = [=[Enter the Name or ID of what the cooldown that you want this icon to monitor. Only the first spell/item will be checked - semicolon-delimited lists are not valid for this icon type.]=]
 L["CHOOSENAME_DIALOG_CNDTIC"] = "Enter the Name or ID of the spell that has the texture that you want to use. You may also enter a texture path, such as 'Interface/Icons/spell_nature_healingtouch', or just 'spell_nature_healingtouch' if the path is 'Interface/Icons'"
 
-L["ICONMENU_ALPHA"] = "Transparency"
+L["ICONMENU_ALPHA"] = "Opacity"
 L["CONDITIONALPHA"] = "Failed Cndt/Dur./Stack"
 L["CONDITIONALPHA_DESC"] = "This will be used when conditions fail, or if the duration or stack requirements are not met."
 L["ICONMENU_TYPE"] = "Icon type"
@@ -480,7 +480,8 @@ L["NUMAURAS"] = "Number of"
 L["ACTIVE"] = "%d Active"
 L["NUMAURAS_DESC"] = [[This condition checks the number of an aura active - not to be confused with the number of stacks of an aura.  This is for checking things like if you have both weapon enchant procs active at the same time.  Use sparingly, as the process used to count the numbers is a bit CPU intensive.]]
 L["COOLDOWN"] = "Cooldown"
-
+L["TOOLTIPSCAN"] = "Tooltip scan"
+L["TOOLTIPSCAN_DESC"] = "This condition type will allow you to check the first number in the tooltip of a buff/debuff on a unit. Useful for trinkets that store up a certain amount of health/mana/etc."
 
 
 
@@ -558,11 +559,11 @@ L["SOUND_EVENT_ONHIDE_DESC"] = "This event triggers when the icon is hidden (eve
 L["SOUND_EVENT_ONSTART"] = "On Start"
 L["SOUND_EVENT_ONSTART_DESC"] = [[This event triggers when the cooldown becomes unusable, the buff/debuff is applied, etc.
 
-NOTE: This event will never trigger at the same time as the OnShow event.]]
+NOTE: This event will never trigger at the same time as the OnShow or OnHide events.]]
 L["SOUND_EVENT_ONFINISH"] = "On Finish"
 L["SOUND_EVENT_ONFINISH_DESC"] = [[This event triggers when the cooldown becomes usable, the buff/debuff falls off, etc.
 
-NOTE: This event will never trigger at the same time as the OnHide event.]]
+NOTE: This event will never trigger at the same time as the OnShow or OnHide events.]]
 
 L["SOUND_EVENT_ONALPHAINC"] = "On Alpha Increase"
 L["SOUND_EVENT_ONALPHAINC_DESC"] = [[This event triggers when the opacity of an icon increases.
@@ -687,6 +688,7 @@ L["DamageBuffs"] = "Damage Buffs"
 L["Heals"] = "Player Heals"
 L["PvPSpells"] = "PvP Crowd Control, etc."
 L["Tier11Interrupts"] = "Tier 11 Interruptibles"
+L["Tier12Interrupts"] = "Tier 12 Interruptibles"
 
 L["Magic"] = "Magic"
 L["Curse"] = "Curse"
