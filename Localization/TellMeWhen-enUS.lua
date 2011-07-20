@@ -497,7 +497,7 @@ L["IMPORTCOPY"] = "Copy/Import"
 L["COPYPOS"] = "Copy position/scale"
 L["COPYALL"] = "Copy entire group"
 
-L["GROUPADDONSETTINGS"] = "Group settings"
+L["GROUPADDONSETTINGS"] = "Group Settings"
 L["CONDITIONS"] = "Conditions"
 L["GROUPCONDITIONS"] = "Group Conditions"
 L["MAIN"] = "Main"

@@ -28,11 +28,7 @@ local DS = TMW.DS
 local SpellTextures = TMW.SpellTextures
 local strlowerCache = TMW.strlowerCache
 local _, pclass = UnitClass("Player")
-local isNumber = setmetatable({}, {__index = function(t, i)
-	local o = not not tonumber(i)
-	t[i] = o
-	return o
-end})
+local isNumber = TMW.isNumber
 
 
 local Type = TMW:RegisterIconType("buff")

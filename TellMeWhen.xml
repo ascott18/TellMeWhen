@@ -214,20 +214,6 @@
 
 	<!-- END TEMPLATES -->
 
-	<Frame name="TellMeWhen_BlizzOptionsStub" hidden="true">
-		<Scripts>
-			<OnLoad>
-				self.name = TMW.L["ICON_TOOLTIP1"]
-				InterfaceOptions_AddCategory(self)
-			</OnLoad>
-			<OnShow>
-				if not TMW.IE then
-					TMW:LoadOptions()
-				end
-				InterfaceOptionsFrame_OpenToCategory(TMW.AddedToBlizz)
-			</OnShow>
-		</Scripts>
-	</Frame>
 </Ui>
 
 

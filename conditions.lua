@@ -58,6 +58,7 @@ local _G = _G
 local print = TMW.print
 local clientVersion = select(4, GetBuildInfo())
 local strlowerCache = TMW.strlowerCache
+local isNumber = TMW.isNumber
 
 local CNDT = TMW:NewModule("Conditions", "AceEvent-3.0") TMW.CNDT = CNDT
 
@@ -468,7 +469,7 @@ function Env.GetTooltipNumber(unit, name, filter)
 	end
 	local n
 	for i = 1, 60 do
-		local buffName, _, iconTexture, count, dispelType, duration, expirationTime, _, canSteal, _, id = UnitAura(unit, i, filter)
+		local buffName, _, _, _, _, _, _, _, _, _, id = UnitAura(unit, i, filter)
 		if not buffName then 
 			break
 		elseif id == name or strlowerCache[buffName] == name then
@@ -1337,7 +1338,9 @@ CNDT.Types = {
 		tcoords = standardtcoords,
 		events = "UNIT_AURA",
 		funcstr = function(c)
-			return [[GetTooltipNumber(c.Unit, "]]..strlower(TMW:GetSpellNames(nil, c.Name, 1))..[[", "HELPFUL]] .. (c.Checked and "|PLAYER" or "") .. [[") c.Operator c.Level]]
+			local name = TMW:GetSpellNames(nil, c.Name, 1)
+			name = tonumber(name) or strlower(name)
+			return [[GetTooltipNumber(c.Unit, "]]..name..[[", "HELPFUL]] .. (c.Checked and "|PLAYER" or "") .. [[") c.Operator c.Level]]
 		end,
 	},
 	{ -- unit buff number
@@ -1418,7 +1421,9 @@ CNDT.Types = {
 		tcoords = standardtcoords,
 		events = "UNIT_AURA",
 		funcstr = function(c)
-			return [[GetTooltipNumber(c.Unit, "]]..strlower(TMW:GetSpellNames(nil, c.Name, 1))..[[", "HARMFUL]] .. (c.Checked and "|PLAYER" or "") .. [[") c.Operator c.Level]]
+			local name = TMW:GetSpellNames(nil, c.Name, 1)
+			name = tonumber(name) or strlower(name)
+			return [[GetTooltipNumber(c.Unit, "]]..name..[[", "HARMFUL]] .. (c.Checked and "|PLAYER" or "") .. [[") c.Operator c.Level]]
 		end,
 	},
 	{ -- unit debuff number
