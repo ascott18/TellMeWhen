@@ -2,7 +2,6 @@
  * Fully integrated main addon settings/group settings into the icon editor.
  * Moving/resizing a group that is anchored to a frame other than UIParent will adjust the offsets instead of resetting the anchor to UIParent.
  * Reactive icons and conditions should now more accurately reflect the state of the abilities that they are checking.
- * TellMeWhen's main options can no longer be found in the Blizzard interface menu if TMW's options module is not yet loaded. They can still be accessed via '/tmw options', or though the "Group Settings" tab of the icon editor.
  * New icon events:
  ** On Alpha Increase
  ** On Alpha Decrease

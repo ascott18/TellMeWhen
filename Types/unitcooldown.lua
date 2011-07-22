@@ -365,8 +365,7 @@ end
 
 function Type:IE_TypeLoaded()
 	if not TMW.db.global.SeenNewDurSyntax then
-		TMW.IE:ShowHelp(L["HELP_FIRSTUCD"]:format(GetSpellInfo(65547), GetSpellInfo(47528), GetSpellInfo(2139), GetSpellInfo(62618), GetSpellInfo(62618)) 
-		, TMW.IE.Main.Type, 20, 0)
+		TMW.IE:ShowHelp(L["HELP_FIRSTUCD"], TMW.IE.Main.Type, 20, 0)
 		TMW.db.global.SeenNewDurSyntax = 1
 	end
 end

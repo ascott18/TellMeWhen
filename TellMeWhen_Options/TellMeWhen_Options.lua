@@ -854,10 +854,15 @@ end
 local Ruler = CreateFrame("Frame")
 local function GetAnchoredPoints(group)
     local p = TMW.db.profile.Groups[group:GetID()].Point
-    Ruler:ClearAllPoints()
-    Ruler:SetPoint("TOPLEFT", group, p.point)
     
     local relframe = _G[p.relativeTo] or UIParent
+	if relframe == UIParent then
+		local p, _, r, x, y = group:GetPoint(1)
+		return p, "UIParent", r, x, y
+	end
+	
+    Ruler:ClearAllPoints()
+    Ruler:SetPoint("TOPLEFT", group, p.point)
     Ruler:SetPoint("BOTTOMRIGHT", relframe, p.relativePoint)
     
     local X = Ruler:GetWidth()/UIParent:GetScale()/group:GetScale()
@@ -3750,13 +3755,13 @@ function CNDT:ValidateParenthesis()
 			suffix = " +" .. numclose-numopen .. " ')'"
 		end
 		IE.Conditions.Warning:SetText(L["PARENTHESISWARNING"] .. suffix)
-		CNDT.invalid = 1
+		CNDT[CNDT.type.."invalid"] = 1
 	elseif unopened then
 		IE.Conditions.Warning:SetText(L["PARENTHESISWARNING2"])
-		CNDT.invalid = 1
+		CNDT[CNDT.type.."invalid"] = 1
 	else
 		IE.Conditions.Warning:SetText(nil)
-		CNDT.invalid = nil
+		CNDT[CNDT.type.."invalid"] = nil
 	end
 
 	local n = 1
@@ -3767,7 +3772,7 @@ function CNDT:ValidateParenthesis()
 
 	local tab = (CNDT.type == "icon" and IE.IconConditionTab) or IE.GroupConditionTab
 	if n > 0 then
-		tab:SetText((CNDT.invalid and "|TInterface\\AddOns\\TellMeWhen_Options\\Textures\\Alert:0:2|t|cFFFF0000" or "") .. L[CNDT.type == "icon" and "CONDITIONS" or "GROUPCONDITIONS"] .. " |cFFFF5959(" .. n .. ")")
+		tab:SetText((CNDT[CNDT.type.."invalid"] and "|TInterface\\AddOns\\TellMeWhen_Options\\Textures\\Alert:0:2|t|cFFFF0000" or "") .. L[CNDT.type == "icon" and "CONDITIONS" or "GROUPCONDITIONS"] .. " |cFFFF5959(" .. n .. ")")
 	else
 		tab:SetText(L[CNDT.type == "icon" and "CONDITIONS" or "GROUPCONDITIONS"] .. " (" .. n .. ")")
 	end
@@ -3839,10 +3844,10 @@ function CNDT:AddRemoveHandler()
 			CNDT[i].OpenParenthesis:Hide()
 		end
 	end
-
+	
 	local tab = (CNDT.type == "icon" and IE.IconConditionTab) or IE.GroupConditionTab
 	if n > 0 then
-		tab:SetText((CNDT.invalid and "|TInterface\\AddOns\\TellMeWhen_Options\\Textures\\Alert:0:2|t|cFFFF0000" or "") .. L[CNDT.type == "icon" and "CONDITIONS" or "GROUPCONDITIONS"] .. " |cFFFF5959(" .. n .. ")")
+		tab:SetText((CNDT[CNDT.type.."invalid"] and "|TInterface\\AddOns\\TellMeWhen_Options\\Textures\\Alert:0:2|t|cFFFF0000" or "") .. L[CNDT.type == "icon" and "CONDITIONS" or "GROUPCONDITIONS"] .. " |cFFFF5959(" .. n .. ")")
 	else
 		tab:SetText(L[CNDT.type == "icon" and "CONDITIONS" or "GROUPCONDITIONS"] .. " (" .. n .. ")")
 	end

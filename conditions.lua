@@ -510,16 +510,11 @@ CNDT.AndOrs = {
 	{ text=L["CONDITIONPANEL_OR"], 	value="OR" 	},
 }
 
--- preset text tables that are frequently used
-local percent = setmetatable({}, {__index = function(t, k) return k.."%" end})
-local pluspercent = setmetatable({}, {__index = function(t, k) return "+"..k.."%" end})
-local bool = {[0] = L["TRUE"],[1] = L["FALSE"],}
-local usableunusable = {[0] = L["ICONMENU_USABLE"],[1] = L["ICONMENU_UNUSABLE"],}
-local presentabsent = {[0] = L["ICONMENU_PRESENT"],[1] = L["ICONMENU_ABSENT"],}
-local standardtcoords = {0.07, 0.93, 0.07, 0.93}
 
-local function formatSeconds(seconds)
-	--seconds =  floor(seconds * 100 + 0.5) / 100
+local function formatSeconds(seconds, arg2)
+	if type(seconds) == "table" then
+		seconds = arg2
+	end
 	local d =  seconds / 86400
 	local h = (seconds % 86400) / 3600
 	local m = (seconds % 86400  % 3600) / 60
@@ -534,6 +529,16 @@ local function formatSeconds(seconds)
 	if h >= 1 then return format("%d:%02d:%s", h, m, s) end
 	return format("%d:%s", m, s)
 end
+
+-- preset text tables that are frequently used
+local percent = function(k) return k.."%" end
+local pluspercent = function(k) return "+"..k.."%" end
+local bool = {[0] = L["TRUE"],[1] = L["FALSE"],}
+local usableunusable = {[0] = L["ICONMENU_USABLE"],[1] = L["ICONMENU_UNUSABLE"],}
+local presentabsent = {[0] = L["ICONMENU_PRESENT"],[1] = L["ICONMENU_ABSENT"],}
+local absentseconds = setmetatable({[0] = formatSeconds(0).." ("..L["ICONMENU_ABSENT"]..")"}, {__index = formatSeconds})
+local standardtcoords = {0.07, 0.93, 0.07, 0.93}
+
 
 CNDT.Types = {
 
@@ -696,7 +701,7 @@ CNDT.Types = {
 		category = L["CNDTCAT_RESOURCES"],
 		min = 1,
 		max = 3,
-		texttable = setmetatable({}, {__index = function(t, k) return _G["PET_HAPPINESS" .. k] end}),
+		texttable = function(k) return _G["PET_HAPPINESS" .. k] end,
 		unit = PET,
 		icon = "Interface\\PetPaperDollFrame\\UI-PetHappiness",
 		tcoords = {0.390625, 0.5491, 0.03, 0.3305},
@@ -884,7 +889,7 @@ CNDT.Types = {
 		value = "LEVEL",
 		min = -1,
 		max = 90,
-		texttable = setmetatable({[-1] = BOSS}, {__index = function(t, k) return k end}),
+		texttable = {[-1] = BOSS},
 		icon = "Interface\\TargetingFrame\\UI-TargetingFrame-Skull",
 		tcoords = {0.05, 0.95, 0.03, 0.97},
 		funcstr = [[UnitLevel(c.Unit) c.Operator c.Level]],
@@ -895,7 +900,7 @@ CNDT.Types = {
 		value = "CLASS",
 		min = 1,
 		max = #classes,
-		texttable = setmetatable({}, {__index = function(t, k) return classes[k] and LOCALIZED_CLASS_NAMES_MALE[classes[k]] end}),
+		texttable = function(k) return classes[k] and LOCALIZED_CLASS_NAMES_MALE[classes[k]] end,
 		icon = "Interface\\GLUES\\CHARACTERCREATE\\UI-CHARACTERCREATE-CLASSES",
 		nooperator = true,
 		tcoords = {
@@ -914,7 +919,7 @@ CNDT.Types = {
 		value = "CLASSIFICATION",
 		min = 1,
 		max = #classifications,
-		texttable = setmetatable({}, {__index = function(t, k) return L[classifications[k]] end}),
+		texttable = function(k) return L[classifications[k]] end,
 		icon = "Interface\\Icons\\achievement_pvp_h_03",
 		tcoords = standardtcoords,
 		funcstr = [[(classifications[UnitClassification(c.Unit)] or 1) c.Operator c.Level]],
@@ -948,7 +953,7 @@ CNDT.Types = {
 		min = 0,
 		max = 1,
 		nooperator = true,
-		texttable = setmetatable({}, {__index = function(t, k) return L[classifications[k]] end}),
+		texttable = function(k) return L[classifications[k]] end,
 		name = function(editbox) TMW:TT(editbox, "UNITTWO", "CONDITIONPANEL_UNITISUNIT_EBDESC", nil, nil, 1) editbox.label = L["UNITTWO"] end,
 		texttable = bool,
 		icon = "Interface\\Icons\\spell_holy_prayerofhealing",
@@ -1128,7 +1133,7 @@ CNDT.Types = {
 
 -------------------------------------icon functions
 	{ -- spell cooldown
-		text = L["COOLDOWN"] .. " - " .. L["ICONMENU_SPELL"],
+		text = L["SPELLCOOLDOWN"],
 		value = "SPELLCD",
 		category = L["CNDTCAT_SPELLSABILITIES"],
 		range = 30,
@@ -1136,13 +1141,13 @@ CNDT.Types = {
 		name = function(editbox) TMW:TT(editbox, "SPELLTOCHECK", "CNDT_ONLYFIRST", nil, nil, 1) editbox.label = L["SPELLTOCHECK"] end,
 		useSUG = true,
 		unit = PLAYER,
-		texttable = setmetatable({[0] = formatSeconds(0).." ("..L["ICONMENU_USABLE"]..")"}, {__index = function(tbl, k) return formatSeconds(k) end}),
+		texttable = setmetatable({[0] = formatSeconds(0).." ("..L["ICONMENU_USABLE"]..")"}, {__index = formatSeconds}),
 		icon = "Interface\\Icons\\spell_holy_divineintervention",
 		tcoords = standardtcoords,
 		funcstr = [[CooldownDuration(c.NameFirst, time) c.Operator c.Level]],
 	},
 	{ -- spell cooldown compare
-		text = L["COOLDOWN"] .. " - " .. L["ICONMENU_SPELL"] .. " - " .. L["COMPARISON"],
+		text = L["SPELLCOOLDOWN"] .. " - " .. L["COMPARISON"],
 		value = "SPELLCDCOMP",
 		category = L["CNDTCAT_SPELLSABILITIES"],
 		noslide = true,
@@ -1155,7 +1160,7 @@ CNDT.Types = {
 		funcstr = [[CooldownDuration(c.NameFirst, time) c.Operator CooldownDuration(c.NameFirst2, time)]],
 	},
 	{ -- spell reactivity
-		text = L["ICONMENU_REACTIVE"],
+		text = L["SPELLREACTIVITY"],
 		tooltip = L["REACTIVECNDT_DESC"],
 		value = "REACTIVE",
 		category = L["CNDTCAT_SPELLSABILITIES"],
@@ -1211,7 +1216,7 @@ CNDT.Types = {
 		name = function(editbox) TMW:TT(editbox, L["ITEMCOOLDOWN"], "CNDT_ONLYFIRST", 1, nil, 1) editbox.label = L["ITEMTOCHECK"] end,
 		useSUG = "item",
 		unit = PLAYER,
-		texttable = setmetatable({[0] = formatSeconds(0).." ("..L["ICONMENU_USABLE"]..")"}, {__index = function(tbl, k) return formatSeconds(k) end}),
+		texttable = setmetatable({[0] = formatSeconds(0).." ("..L["ICONMENU_USABLE"]..")"}, {__index = formatSeconds}),
 		icon = "Interface\\Icons\\inv_jewelry_trinketpvp_01",
 		tcoords = standardtcoords,
 		funcstr = [[ItemCooldownDuration(c.ItemID, time) c.Operator c.Level]],
@@ -1252,7 +1257,7 @@ CNDT.Types = {
 		category = L["CNDTCAT_SPELLSABILITIES"],
 		min = 0,
 		max = 50,
-		texttable = setmetatable({}, {__index = function(tbl, k) return format(ITEM_SPELL_CHARGES, k) end}),
+		texttable = function(k) return format(ITEM_SPELL_CHARGES, k) end,
 		name = function(editbox) TMW:TT(editbox, "ITEMINBAGS", "CNDT_ONLYFIRST", nil, nil, 1) editbox.label = L["ITEMTOCHECK"] end,
 		useSUG = "item",
 		unit = false,
@@ -1285,7 +1290,7 @@ CNDT.Types = {
 		name = function(editbox) TMW:TT(editbox, L["ICONMENU_BUFF"] .. " - " .. L["DURATIONPANEL_TITLE"], "BUFFCNDT_DESC", 1, nil, 1) editbox.label = L["BUFFTOCHECK"] end,
 		useSUG = true,
 		check = function(check) TMW:TT(check, "ONLYCHECKMINE", "ONLYCHECKMINE_DESC", nil, nil, 1) end,
-		texttable = setmetatable({[0] = formatSeconds(0).." ("..L["ICONMENU_ABSENT"]..")"}, {__index = function(tbl, k) return formatSeconds(k) end}),
+		texttable = absentseconds,
 		icon = "Interface\\Icons\\spell_nature_rejuvenation",
 		tcoords = standardtcoords,
 		funcstr = function(c)
@@ -1331,6 +1336,7 @@ CNDT.Types = {
 		value = "BUFFTOOLTIP",
 		category = L["CNDTCAT_SPELLSABILITIES"],
 		range = 500,
+		texttable = {[0] = "0 ("..L["ICONMENU_ABSENT"]..")"},
 		name = function(editbox) TMW:TT(editbox, L["ICONMENU_BUFF"] .. " - " .. L["TOOLTIPSCAN"], "TOOLTIPSCAN_DESC", 1, nil, 1) editbox.label = L["BUFFTOCHECK"] end,
 		useSUG = true,
 		check = function(check) TMW:TT(check, "ONLYCHECKMINE", "ONLYCHECKMINE_DESC", nil, nil, 1) end,
@@ -1353,7 +1359,7 @@ CNDT.Types = {
 		name = function(editbox) TMW:TT(editbox, L["ICONMENU_BUFF"] .. " - " .. L["NUMAURAS"], "BUFFCNDT_DESC", 1, nil, 1) editbox.label = L["BUFFTOCHECK"] end,
 		useSUG = true,
 		check = function(check) TMW:TT(check, "ONLYCHECKMINE", "ONLYCHECKMINE_DESC", nil, nil, 1) end,
-		texttable = setmetatable({}, {__index = function(tbl, k) return format(L["ACTIVE"], k) end}),
+		texttable = function(k) return format(L["ACTIVE"], k) end,
 		icon = "Interface\\Icons\\ability_paladin_sacredcleansing",
 		tcoords = standardtcoords,
 		funcstr = function(c)
@@ -1369,7 +1375,7 @@ CNDT.Types = {
 		name = function(editbox) TMW:TT(editbox, L["ICONMENU_DEBUFF"] .. " - " .. L["DURATIONPANEL_TITLE"], "BUFFCNDT_DESC", 1, nil, 1) editbox.label = L["DEBUFFTOCHECK"] end,
 		useSUG = true,
 		check = function(check) TMW:TT(check, "ONLYCHECKMINE", "ONLYCHECKMINE_DESC", nil, nil, 1) end,
-		texttable = setmetatable({[0] = formatSeconds(0).." ("..L["ICONMENU_ABSENT"]..")"}, {__index = function(tbl, k) return formatSeconds(k) end}),
+		texttable = absentseconds,
 		icon = "Interface\\Icons\\spell_shadow_abominationexplosion",
 		tcoords = standardtcoords,
 		funcstr = function(c)
@@ -1414,6 +1420,7 @@ CNDT.Types = {
 		value = "DEBUFFTOOLTIP",
 		category = L["CNDTCAT_SPELLSABILITIES"],
 		range = 500,
+		texttable = {[0] = "0 ("..L["ICONMENU_ABSENT"]..")"},
 		name = function(editbox) TMW:TT(editbox, L["ICONMENU_DEBUFF"] .. " - " .. L["TOOLTIPSCAN"], "TOOLTIPSCAN_DESC", 1, nil, 1) editbox.label = L["BUFFTOCHECK"] end,
 		useSUG = true,
 		check = function(check) TMW:TT(check, "ONLYCHECKMINE", "ONLYCHECKMINE_DESC", nil, nil, 1) end,
@@ -1436,7 +1443,7 @@ CNDT.Types = {
 		name = function(editbox) TMW:TT(editbox, L["ICONMENU_DEBUFF"] .. " - " .. L["NUMAURAS"], "BUFFCNDT_DESC", 1, nil, 1) editbox.label = L["DEBUFFTOCHECK"]end,
 		useSUG = true,
 		check = function(check) TMW:TT(check, "ONLYCHECKMINE", "ONLYCHECKMINE_DESC", nil, nil, 1) end,
-		texttable = setmetatable({}, {__index = function(tbl, k) return format(L["ACTIVE"], k) end}),
+		texttable = function(k) return format(L["ACTIVE"], k) end,
 		icon = "Interface\\Icons\\spell_deathknight_frostfever",
 		tcoords = standardtcoords,
 		funcstr = function(c)
@@ -1450,7 +1457,7 @@ CNDT.Types = {
 		category = L["CNDTCAT_SPELLSABILITIES"],
 		range = 120,
 		unit = false,
-		texttable = setmetatable({[0] = formatSeconds(0).." ("..L["ICONMENU_ABSENT"]..")"}, {__index = function(tbl, k) return formatSeconds(k) end}),
+		texttable = absentseconds,
 		icon = function() return GetInventoryItemTexture("player", GetInventorySlotInfo("MainHandSlot")) or "Interface\\Icons\\inv_weapon_shortblade_14" end,
 		tcoords = standardtcoords,
 		funcstr = [[(select(2, GetWeaponEnchantInfo()) or 0)/1000 c.Operator c.Level]],
@@ -1462,7 +1469,7 @@ CNDT.Types = {
 		category = L["CNDTCAT_SPELLSABILITIES"],
 		range = 120,
 		unit = false,
-		texttable = setmetatable({[0] = formatSeconds(0).." ("..L["ICONMENU_ABSENT"]..")"}, {__index = function(tbl, k) return formatSeconds(k) end}),
+		texttable = absentseconds,
 		icon = function() return GetInventoryItemTexture("player", GetInventorySlotInfo("SecondaryHandSlot")) or "Interface\\Icons\\inv_weapon_shortblade_15" end,
 		tcoords = standardtcoords,
 		funcstr = [[(select(5, GetWeaponEnchantInfo()) or 0)/1000 c.Operator c.Level]],
@@ -1473,7 +1480,7 @@ CNDT.Types = {
 		category = L["CNDTCAT_SPELLSABILITIES"],
 		range = 120,
 		unit = false,
-		texttable = setmetatable({[0] = formatSeconds(0).." ("..L["ICONMENU_ABSENT"]..")"}, {__index = function(tbl, k) return formatSeconds(k) end}),
+		texttable = absentseconds,
 		icon = function() return GetInventoryItemTexture("player", GetInventorySlotInfo("RangedSlot")) or "Interface\\Icons\\inv_throwingknife_06" end,
 		tcoords = standardtcoords,
 		funcstr = [[(select(8, GetWeaponEnchantInfo()) or 0)/1000 c.Operator c.Level]],
@@ -1486,7 +1493,7 @@ CNDT.Types = {
 		category = L["CNDTCAT_SPELLSABILITIES"],
 		range = 60,
 		unit = false,
-		texttable = setmetatable({[0] = formatSeconds(0).." ("..L["ICONMENU_ABSENT"]..")"}, {__index = function(tbl, k) return formatSeconds(k) end}),
+		texttable = absentseconds,
 		icon = totemtex[1],
 		tcoords = standardtcoords,
 		funcstr = [[TotemDuration(1, time) c.Operator c.Level]],
@@ -1499,7 +1506,7 @@ CNDT.Types = {
 		category = L["CNDTCAT_SPELLSABILITIES"],
 		range = 60,
 		unit = false,
-		texttable = setmetatable({[0] = formatSeconds(0).." ("..L["ICONMENU_ABSENT"]..")"}, {__index = function(tbl, k) return formatSeconds(k) end}),
+		texttable = absentseconds,
 		icon = totemtex[2],
 		tcoords = standardtcoords,
 		funcstr = [[TotemDuration(2, time) c.Operator c.Level]],
@@ -1511,7 +1518,7 @@ CNDT.Types = {
 		category = L["CNDTCAT_SPELLSABILITIES"],
 		range = 60,
 		unit = false,
-		texttable = setmetatable({[0] = formatSeconds(0).." ("..L["ICONMENU_ABSENT"]..")"}, {__index = function(tbl, k) return formatSeconds(k) end}),
+		texttable = absentseconds,
 		icon = totemtex[3],
 		tcoords = standardtcoords,
 		funcstr = [[TotemDuration(3, time) c.Operator c.Level]],
@@ -1523,7 +1530,7 @@ CNDT.Types = {
 		category = L["CNDTCAT_SPELLSABILITIES"],
 		range = 60,
 		unit = false,
-		texttable = setmetatable({[0] = formatSeconds(0).." ("..L["ICONMENU_ABSENT"]..")"}, {__index = function(tbl, k) return formatSeconds(k) end}),
+		texttable = absentseconds,
 		icon = totemtex[4],
 		tcoords = standardtcoords,
 		funcstr = [[TotemDuration(4, time) c.Operator c.Level]],
@@ -1771,7 +1778,7 @@ CNDT.Types = {
 		category = L["CNDTCAT_STATS"],
 		range = 1000/5,
 		unit = PLAYER,
-		texttable = setmetatable({}, {__index = function(t, k) return format(L["MP5"], k*5) end}),
+		texttable = function(k) return format(L["MP5"], k*5) end,
 		icon = "Interface\\Icons\\spell_magic_managain",
 		tcoords = standardtcoords,
 		funcstr = [[GetManaRegen() c.Operator c.Level]], -- anyone know of an event that can be reliably listened to to get this?
@@ -1782,7 +1789,7 @@ CNDT.Types = {
 		category = L["CNDTCAT_STATS"],
 		range = 1000/5,
 		unit = PLAYER,
-		texttable = setmetatable({}, {__index = function(t, k) return format(L["MP5"], k*5) end}),
+		texttable = function(k) return format(L["MP5"], k*5) end,
 		icon = "Interface\\Icons\\spell_frost_summonwaterelemental",
 		tcoords = standardtcoords,
 		funcstr = [[select(2,GetManaRegen()) c.Operator c.Level]],

@@ -95,7 +95,7 @@ local function Buff_OnUpdate(icon, time)
 		icon.UpdateTimer = time
 		local CndtCheck = icon.CndtCheck if CndtCheck and CndtCheck() then return end
 
-		local Units, NameArray, NameNameArray, NameDictionary, Filter, Filterh, Sort = icon.Units, icon.NameArray, icon.NameNameArray, icon.NameDictionary, icon.Filter, icon.Filterh, icon.Sort
+		local Units, NameArray, NameNameArray, NameHash, Filter, Filterh, Sort = icon.Units, icon.NameArray, icon.NameNameArray, icon.NameHash, icon.Filter, icon.Filterh, icon.Sort
 		local NotStealable = not icon.Stealable
 		local NAL = icon.NAL
 
@@ -110,7 +110,7 @@ local function Buff_OnUpdate(icon, time)
 						local _buffName, _, _iconTexture, _count, _dispelType, _duration, _expirationTime, _, canSteal, _, _id = UnitAura(unit, z, Filter)
 						if not _buffName then
 							break
-						elseif (NameDictionary[_id] or NameDictionary[_dispelType] or NameDictionary[strlowerCache[_buffName]]) and (NotStealable or canSteal) then
+						elseif (NameHash[_id] or NameHash[_dispelType] or NameHash[strlowerCache[_buffName]]) and (NotStealable or canSteal) then
 							if Sort then
 								local _d = (_expirationTime == 0 and huge) or _expirationTime - time
 								if (Sort == 1 and d < _d) or (Sort == -1 and d > _d) then
@@ -129,7 +129,7 @@ local function Buff_OnUpdate(icon, time)
 							local _buffName, _, _iconTexture, _count, _dispelType, _duration, _expirationTime, _, canSteal, _, _id = UnitAura(unit, z, Filterh)
 							if not _buffName then
 								break
-							elseif (NameDictionary[_id] or NameDictionary[_dispelType] or NameDictionary[strlowerCache[_buffName]]) and (NotStealable or canSteal) then
+							elseif (NameHash[_id] or NameHash[_dispelType] or NameHash[strlowerCache[_buffName]]) and (NotStealable or canSteal) then
 								if Sort then
 									local _d = (_expirationTime == 0 and huge) or _expirationTime - time
 									if (Sort == 1 and d < _d) or (Sort == -1 and d > _d) then
@@ -212,8 +212,8 @@ function Type:Setup(icon, groupID, iconID)
 	icon.NameName = TMW:GetSpellNames(icon, icon.Name, 1, 1)
 	icon.NameArray = TMW:GetSpellNames(icon, icon.Name)
 	icon.NameNameArray = TMW:GetSpellNames(icon, icon.Name, nil, 1)
-	icon.NameDictionary = TMW:GetSpellNames(icon, icon.Name, nil, nil, 1)
-	icon.NameNameDictionary = TMW:GetSpellNames(icon, icon.Name, nil, 1, 1)
+	icon.NameHash = TMW:GetSpellNames(icon, icon.Name, nil, nil, 1)
+	icon.NameNameHash = TMW:GetSpellNames(icon, icon.Name, nil, 1, 1)
 	icon.Units = TMW:GetUnits(icon, icon.Unit)
 
 	icon.Filter = icon.BuffOrDebuff
@@ -223,7 +223,7 @@ function Type:Setup(icon, groupID, iconID)
 		if icon.Filterh then icon.Filterh = icon.Filterh .. "|PLAYER" end
 	end
 	icon:SetReverse(true)
-	icon.NAL = icon.NameNameDictionary[strlower(GetSpellInfo(8921))] and EFF_THR + 1 or #icon.NameArray -- need to force any icon looking for moonfire to check all auras on the target because of a blizzard bug in WoW 4.1.
+	icon.NAL = icon.NameNameHash[strlower(GetSpellInfo(8921))] and EFF_THR + 1 or #icon.NameArray -- need to force any icon looking for moonfire to check all auras on the target because of a blizzard bug in WoW 4.1.
 	icon.NAL = icon.Sort and #icon.NameArray > 1 and EFF_THR + 1 or icon.NAL
 
 	icon.FirstTexture = SpellTextures[icon.NameFirst]

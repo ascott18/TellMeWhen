@@ -319,11 +319,14 @@
 				_G[self:GetName() .. "High"]:SetText(maxValue .. "%")
 			</OnMinMaxChanged>
 			<OnValueChanged>
-				_G[self:GetName() .. "Val"]:SetText(self:GetValue() .. "%")
+				_G[self:GetName() .. "Val"]:SetText(value .. "%")
 				local groupID, iconID = TMW.CI.g, TMW.CI.i
 				if TMW.CI.ics and not self.fakeNextSetValue then
-					TMW.CI.ics[self.setting] = self:GetValue() / 100
+					TMW.CI.ics[self.setting] = value / 100
 					TMW.IE:ScheduleIconUpdate(groupID, iconID)
+					if (value == 0 and self.setting ~= "ConditionAlpha") or (value == 100 and self.setting == "ConditionAlpha") then
+						_G[self:GetName() .. "Val"]:SetText("|cffff7400" .. value .. "%")
+					end
 				end
 			</OnValueChanged>
 			<OnLoad>
@@ -632,7 +635,7 @@
 							delta = delta*10
 						end
 						if IsLeftControlKeyDown() or IsRightControlKeyDown() then
-							delta = delta*60
+							delta = delta*60 -- (60 seconds)
 						end
 						if delta == 1 or delta == -1 then
 							delta = delta*(self.step or 1)
@@ -2086,7 +2089,7 @@
 										end
 									end
 									if s ~= "" then
-										TMW.IE:ShowHelp(TMW.L["HELP_MISSINGDURS"]:format(s, GetSpellInfo(1766)), self, 0, 0)
+										TMW.IE:ShowHelp(TMW.L["HELP_MISSINGDURS"]:format(s), self, 0, 0)
 									else
 										TMW.IE.Help:Hide()
 									end

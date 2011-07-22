@@ -40,7 +40,7 @@ L["CHOOSENAME_DIALOG_CNDTIC"] = "Enter the Name or ID of the spell that has the 
 
 L["ICONMENU_ALPHA"] = "Opacity"
 L["CONDITIONALPHA"] = "Failed Cndt/Dur./Stack"
-L["CONDITIONALPHA_DESC"] = "This will be used when conditions fail, or if the duration or stack requirements are not met."
+L["CONDITIONALPHA_DESC"] = "This will be used when conditions fail, or if the duration or stack requirements are not met. This setting will be ignored if the icon is already hidden by the other two opacity settings."
 L["ICONMENU_TYPE"] = "Icon type"
 L["ICONMENU_COOLDOWN"] = "Cooldown"
 L["ICONMENU_BUFFDEBUFF"] = "Buff/Debuff"
@@ -347,8 +347,10 @@ L["TRUE"] = "True"
 L["FALSE"] = "False"
 L["CONDITIONPANEL_TYPE"] = "Type"
 L["CONDITIONPANEL_UNIT"] = "Unit"
-L["CONDITIONPANEL_UNIT_DESC"] = "Enter the unit to watch in this box. The unit can be inserted from the dropdown to the right, or advanced users can insert their own unit. Standard units (player, target, mouseover, etc.) may be used, or friendly player names (Cybeloras, Nephthys, etc.)"
-L["CONDITIONPANEL_UNITDROPDOWN_DESC"] = "You can select a unit from this menu to insert into the editbox. Units that end with '|cFFFF0000#|r' require that the '|cFFFF0000#|r' be replaced with a number corresponding to the appropriate unit. E.g. change 'raid|cFFFF0000#|r' to 'raid25' to track the 25th raid member. NOTE: Conditions only accept one unit."
+L["CONDITIONPANEL_UNIT_DESC"] = "Enter the unit to watch in this box. The unit can be inserted from the dropdown to the right, or advanced users can insert their own unit. Standard units (player, target, mouseover, etc.) may be used, or friendly player names (%s, Cybeloras, etc.)"
+L["CONDITIONPANEL_UNITDROPDOWN_DESC"] = [[You can select a unit from this menu to insert into the editbox. Units that end with '|cFFFF0000#|r' require that the '|cFFFF0000#|r' be replaced with a number corresponding to the appropriate unit. E.g. change 'raid|cFFFF0000#|r' to 'raid25' to track the 25th raid member.
+
+NOTE: Conditions only accept one unit.]]
 L["CONDITIONPANEL_OPERATOR"] = "Operator"
 L["CONDITIONPANEL_VALUE"] = "Percent"
 L["CONDITIONPANEL_VALUEN"] = "Value"
@@ -453,15 +455,17 @@ L["SPELLCRIT"] = "Spell Crit"
 L["ITEMINBAGS"] = "Item count (includes charges)"
 L["ITEMEQUIPPED"] = "Item is equipped"
 L["ITEMCOOLDOWN"] = "Item cooldown"
+L["SPELLCOOLDOWN"] = "Spell cooldown"
+L["SPELLREACTIVITY"] = "Spell reactivity"
 L["MP5"] = "%d MP5"
 L["REACTIVECNDT_DESC"] = "This condition only checks the reactive state of the ability, not the cooldown of it."
 L["BUFFCNDT_DESC"] = "Only the first spell will be checked, all others will be ignored. Spells entered as IDs will not be forced to have their ID match an aura found; only the name will have to match."
 L["CNDT_ONLYFIRST"] = "Only the first spell/item will be checked - semicolon-delimited lists are not valid for this condition type."
 
 L["CNDTCAT_FREQUENTLYUSED"] = "Frequently Used"
-L["CNDTCAT_SPELLSABILITIES"] = "Abilities/Items/Buffs/etc."
-L["CNDTCAT_STATUS"] = "Attributes/Status"
-L["CNDTCAT_STATS"] = "Combat Statistics"
+L["CNDTCAT_SPELLSABILITIES"] = "Spells/Items"
+L["CNDTCAT_STATUS"] = "Attributes"
+L["CNDTCAT_STATS"] = "Combat Stats"
 L["CNDTCAT_RESOURCES"] = "Resources"
 L["CNDTCAT_CURRENCIES"] = "Currencies"
 
@@ -607,7 +611,7 @@ L["ANN_WHISPERTARGET_DESC"] = "Input the name of the player that you would like 
 
 L["HELP_FIRSTUCD"] = [[It looks like this is your first time using an icon type that uses the special duration syntax! Spells that are added to the name editbox must define their duration immediately after a spell using the following syntax:
 
-Spell:Duration
+Spell: Duration
 
 For example:
 

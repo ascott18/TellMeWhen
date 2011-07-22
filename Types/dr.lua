@@ -102,7 +102,7 @@ local function DR_OnEvent(icon, _, _, p, ...)
 			_, _, _, g, _, f, i, n, _, t = ...
 		end
 		if t == "DEBUFF" then
-			local ND = icon.NameDictionary
+			local ND = icon.NameHash
 			if ND[i] or ND[strlowerCache[n]] then
 				if PvEDRs[i] or bitband(f, CL_PLAYER) == CL_PLAYER or bitband(f, CL_PET) == CL_PET then
 					local dr = icon[g]
@@ -175,14 +175,14 @@ local warnedMismatch = {}
 function Type:Setup(icon, groupID, iconID)
 	icon.ShowPBar = false
 	icon.NameFirst = TMW:GetSpellNames(icon, icon.Name, 1)
-	icon.NameDictionary = TMW:GetSpellNames(icon, icon.Name, nil, nil, 1)
+	icon.NameHash = TMW:GetSpellNames(icon, icon.Name, nil, nil, 1)
 	icon.Units = TMW:GetUnits(icon, icon.Unit)
 	icon.FirstTexture = SpellTextures[icon.NameFirst]
 
 	if not db.profile.Locked and not warnedMismatch[icon] then
 		-- Do the Right Thing and tell people if their DRs mismatch
 		local firstCategory, dobreak
-		for spellID in pairs(icon.NameDictionary) do
+		for spellID in pairs(icon.NameHash) do
 			for category, str in pairs(TMW.BE.dr) do
 				if strfind(";"..str..";", ";"..spellID..";") then
 					if not firstCategory then

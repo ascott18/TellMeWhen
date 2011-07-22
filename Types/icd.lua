@@ -96,8 +96,8 @@ local function ICD_OnEvent(icon, event, ...)
 	end
 	
 	if valid then
-		local NameDictionary = icon.NameDictionary
-		local Key = NameDictionary[i] or NameDictionary[strlowerCache[n]]
+		local NameHash = icon.NameHash
+		local Key = NameHash[i] or NameHash[strlowerCache[n]]
 		if Key and not (icon.DontRefresh and (TMW.time - icon.ICDStartTime) < icon.Durations[Key]) then
 			local t = SpellTextures[i]
 			if t ~= icon.__tex then icon:SetTexture(t) end
@@ -134,7 +134,7 @@ end
 function Type:Setup(icon, groupID, iconID)
 	icon.ShowPBar = false
 	icon.NameFirst = TMW:GetSpellNames(icon, icon.Name, 1)
-	icon.NameDictionary = TMW:GetSpellNames(icon, icon.Name, nil, nil, 1)
+	icon.NameHash = TMW:GetSpellNames(icon, icon.Name, nil, nil, 1)
 	icon.Durations = TMW:GetSpellDurations(icon, icon.Name)
 
 	icon.ICDStartTime = icon.ICDStartTime or 0
@@ -161,8 +161,7 @@ end
 
 function Type:IE_TypeLoaded()
 	if not TMW.db.global.SeenNewDurSyntax then
-		TMW.IE:ShowHelp(L["HELP_FIRSTUCD"]:format(GetSpellInfo(65547), GetSpellInfo(47528), GetSpellInfo(2139), GetSpellInfo(62618), GetSpellInfo(62618)) 
-		, TMW.IE.Main.Type, 20, 0)
+		TMW.IE:ShowHelp(L["HELP_FIRSTUCD"], TMW.IE.Main.Type, 20, 0)
 		TMW.db.global.SeenNewDurSyntax = 1
 	end
 end

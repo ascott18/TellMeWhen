@@ -94,11 +94,11 @@ local function Totem_OnUpdate(icon, time)
 		icon.UpdateTimer = time
 		local CndtCheck = icon.CndtCheck if CndtCheck and CndtCheck() then return end
 
-		local Slots, NameNameDictionary, NameFirst = icon.Slots, icon.NameNameDictionary, icon.NameFirst
+		local Slots, NameNameHash, NameFirst = icon.Slots, icon.NameNameHash, icon.NameFirst
 		for iSlot = 1, #Slots do -- be careful here. slots that are explicitly disabled by the user are set false. slots that are disabled internally are set nil.
 			if Slots[iSlot] then
 				local _, totemName, start, duration, totemIcon = GetTotemInfo(iSlot)
-				if start ~= 0 and totemName and ((NameFirst == "") or NameNameDictionary[strlowerCache[totemName]]) then
+				if start ~= 0 and totemName and ((NameFirst == "") or NameNameHash[strlowerCache[totemName]]) then
 					icon:SetInfo(icon.Alpha, icon.UnAlpha ~= 0 and pr or 1, totemIcon, start, duration, nil, totemName)
 					return
 				end
@@ -114,7 +114,7 @@ function Type:Setup(icon, groupID, iconID)
 	if icon.Name then
 		icon.NameFirst = TMW:GetSpellNames(icon, icon.Name, 1)
 		icon.NameName = TMW:GetSpellNames(icon, icon.Name, 1, 1)
-		icon.NameNameDictionary = TMW:GetSpellNames(icon, icon.Name, nil, 1, 1)
+		icon.NameNameHash = TMW:GetSpellNames(icon, icon.Name, nil, 1, 1)
 	end
 	icon.Slots = wipe(icon.Slots or {})
 	for i=1, 4 do

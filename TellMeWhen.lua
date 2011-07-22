@@ -34,7 +34,7 @@ local DRData = LibStub("DRData-1.0", true)
 TELLMEWHEN_VERSION = "4.5.0"
 TELLMEWHEN_VERSION_MINOR = strmatch(" @project-version@", " r%d+") or ""
 TELLMEWHEN_VERSION_FULL = TELLMEWHEN_VERSION .. TELLMEWHEN_VERSION_MINOR
-TELLMEWHEN_VERSIONNUMBER = 45004 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
+TELLMEWHEN_VERSIONNUMBER = 45005 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
 if TELLMEWHEN_VERSIONNUMBER > 46000 or TELLMEWHEN_VERSIONNUMBER < 45000 then return error("YOU SCREWED UP THE VERSION NUMBER OR DIDNT CHANGE THE SAFETY LIMITS") end -- safety check because i accidentally made the version number 414069 once
 
 TELLMEWHEN_MAXGROUPS = 1 	--this is a default, used by SetTheory (addon), so dont rename
@@ -292,13 +292,12 @@ do -- Iterators
 					return ta > tb
 				end
 				return ta < tb
-			elseif ta == "number" and tb == "number"
-				or ta == "string" and tb == "string" then
+			elseif ta == "number" or ta == "string" then
 				if reverse then
 					return a > b
 				end
 				return a < b
-			elseif ta == "boolean" and tb == "boolean" then
+			elseif ta == "boolean" then
 				if reverse then
 					return b == true
 				end
@@ -1179,9 +1178,7 @@ function TMW:Update()
 	CNDT.Env.Locked = Locked
 	TMW.DoWipeAC = false
 	if not Locked then
-		if not TMW.IE then
-			TMW:LoadOptions()
-		end
+		TMW:LoadOptions()
 		if db.global.ConfigWarning then
 			TellMeWhen_ConfigWarning:Show()
 		else
@@ -1879,9 +1876,12 @@ end
 
 function TMW:LoadOptions(n)
 	n = n or 1
+	if IsAddOnLoaded("TellMeWhen_Options") then
+		return true
+	end
+	TMW:Print(L["LOADINGOPT"])
 	local loaded, reason = LoadAddOn("TellMeWhen_Options")
 	if not loaded then
-		TMW:Print(L["LOADINGOPT"])
 		if reason == "DISABLED" and (n < 2) then -- prevent accidental recursion
 			TMW:Print(L["ENABLINGOPT"])
 			EnableAddOn("TellMeWhen_Options")
@@ -1892,6 +1892,13 @@ function TMW:LoadOptions(n)
 			geterrorhandler()(err, 0) -- non breaking error
 		end
 	else
+		for k, v in pairs(INTERFACEOPTIONS_ADDONCATEGORIES) do
+			if v.name == "TellMeWhen" and not v.obj then
+				tremove(INTERFACEOPTIONS_ADDONCATEGORIES, k)
+				InterfaceAddOnsList_Update()
+				break
+			end
+		end
 		TMW:CompileOptions()
 		collectgarbage()
 	end
@@ -2134,6 +2141,7 @@ function ProtoGroup.SetPos(group)
 	local s = db.profile.Groups[groupID]
 	local p = s.Point
 	group:ClearAllPoints()
+	p.relativeTo = type(p.relativeTo) == "table" and p.relativeTo:GetName() or p.relativeTo
 	local relativeTo = _G[p.relativeTo]
 	if not relativeTo then
 		FramesToFind = FramesToFind or {}
@@ -2391,27 +2399,25 @@ end
 
 function ProtoIcon.SetAlpha(icon, alpha)
 	if alpha ~= icon.__alpha then
-		local played, announced
 		if alpha == 0 then
 			local data = runEvents and icon.OnHide
 			if data then
-				played, announced = icon:HandleEvent(data)
+				icon:HandleEvent(data)
 			end
 		elseif icon.__alpha == 0 then
 			local data = runEvents and icon.OnShow
 			if data then
-				played, announced = icon:HandleEvent(data)
+				icon:HandleEvent(data)
 			end
-		end
-		if alpha > icon.__alpha then
+		elseif alpha > icon.__alpha then
 			local data = runEvents and icon.OnAlphaInc
 			if data then
-				played, announced = icon:HandleEvent(data, played, announced)
+				icon:HandleEvent(data)
 			end
 		else -- it must be less than, because it isnt greater than and it isnt the same --if alpha < icon.__alpha then
 			local data = runEvents and icon.OnAlphaDec
 			if data then
-				played, announced = icon:HandleEvent(data, played, announced)
+				icon:HandleEvent(data)
 			end
 		end
 		icon:setalpha(icon.FakeHidden or alpha) -- setalpha(lowercase) is the old, raw SetAlpha.
@@ -2491,8 +2497,7 @@ function ProtoIcon.SetInfo(icon, alpha, color, texture, start, duration, checkGC
 			if data then
 				played, announced = icon:HandleEvent(data)
 			end
-		end
-		if alpha > icon.__alpha then
+		elseif alpha > icon.__alpha then
 			local data = runEvents and icon.OnAlphaInc
 			if data then
 				played, announced = icon:HandleEvent(data, played, announced)
@@ -2921,7 +2926,9 @@ function TMW:Icon_Update(icon)
 
 	icon.__previcon = nil
 	icon.__alpha = -1
-	icon.__count = "UPDATE ME!"
+	icon.__count = nil
+	icon.__countText = nil
+	icon.countText:SetText(nil)
 	icon.__tex = icon.texture:GetTexture()
 	icon.__realDuration = icon.__realDuration or 0
 	icon.CndtFailed = nil
@@ -3089,8 +3096,8 @@ function TMW:EquivToTable(name)
 end
 
 local gsncache = {}
-function TMW:GetSpellNames(icon, setting, firstOnly, toname, dictionary, keepDurations)
-	local cachestring = strconcat(tostringall(setting, firstOnly, toname, dictionary, keepDurations, TMW.BE)) -- a unique key for the cache table, turn possible nils into strings
+function TMW:GetSpellNames(icon, setting, firstOnly, toname, hash, keepDurations)
+	local cachestring = strconcat(tostringall(setting, firstOnly, toname, hash, keepDurations, TMW.BE)) -- a unique key for the cache table, turn possible nils into strings
 	if gsncache[cachestring] then return gsncache[cachestring] end --why make a bunch of tables and do a bunch of stuff if we dont need to
 
 	local buffNames = TMW:SplitNames(setting) -- get a table of everything
@@ -3132,13 +3139,13 @@ function TMW:GetSpellNames(icon, setting, firstOnly, toname, dictionary, keepDur
 		end
 	end
 
-	if dictionary then
-		local dictionary = {}
+	if hash then
+		local hash = {}
 		for k, v in ipairs(buffNames) do
 			if toname then
 				v = GetSpellInfo(v or "") or v -- turn the value into a name if needed
 			end
-			if type(v) == "string" then -- all dictionary table lookups use the lowercase string to negate case sensitivity
+			if type(v) == "string" then -- all hash table lookups use the lowercase string to negate case sensitivity
 				v = strlower(v)
 			end
 			for ds in pairs(TMW.DS) do	--EXCEPT dispel types, they retain their capitalization. Restore it here.
@@ -3146,10 +3153,10 @@ function TMW:GetSpellNames(icon, setting, firstOnly, toname, dictionary, keepDur
 					v = ds
 				end
 			end
-			dictionary[v] = k -- put the final value in the table as well (may or may not be the same as the original value. Value should be NameArrray's key, for use with the duration table.
+			hash[v] = k -- put the final value in the table as well (may or may not be the same as the original value. Value should be NameArrray's key, for use with the duration table.
 		end
-		gsncache[cachestring] = dictionary
-		return dictionary
+		gsncache[cachestring] = hash
+		return hash
 	end
 	if toname then
 		if firstOnly then
@@ -3412,9 +3419,7 @@ function TMW:SlashCommand(str)
 	local cmd = TMW:GetArgs(str)
 	cmd = strlower(cmd or "")
 	if cmd == strlower(L["CMD_OPTIONS"]) or cmd == "options" then --allow unlocalized "options" too
-		if not TMW.IE then
-			TMW:LoadOptions()
-		end
+		TMW:LoadOptions()
 		LibStub("AceConfigDialog-3.0"):Open("TMW Options")
 	else
 		TMW:LockToggle()

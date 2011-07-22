@@ -72,7 +72,7 @@ local function Cast_OnUpdate(icon, time)
 		icon.UpdateTimer = time
 		local CndtCheck = icon.CndtCheck if CndtCheck and CndtCheck() then return end
 
-		local NameFirst, NameNameDictionary, Units, Interruptible = icon.NameFirst, icon.NameNameDictionary, icon.Units, icon.Interruptible
+		local NameFirst, NameNameHash, Units, Interruptible = icon.NameFirst, icon.NameNameHash, icon.Units, icon.Interruptible
 
 		for u = 1, #Units do
 			local unit = Units[u]
@@ -84,7 +84,7 @@ local function Cast_OnUpdate(icon, time)
 					reverse = true
 				end
 
-				if name and not (notInterruptible and Interruptible) and (NameFirst == "" or NameNameDictionary[strlowerCache[name]]) then
+				if name and not (notInterruptible and Interruptible) and (NameFirst == "" or NameNameHash[strlowerCache[name]]) then
 					start, endTime = start/1000, endTime/1000
 					local duration = endTime - start
 
@@ -103,8 +103,8 @@ end
 Type.AllowNoName = true
 function Type:Setup(icon, groupID, iconID)
 	icon.NameFirst = TMW:GetSpellNames(icon, icon.Name, 1)
---	icon.NameDictionary = TMW:GetSpellNames(icon, icon.Name, nil, nil, 1)
-	icon.NameNameDictionary = TMW:GetSpellNames(icon, icon.Name, nil, 1, 1)
+--	icon.NameHash = TMW:GetSpellNames(icon, icon.Name, nil, nil, 1)
+	icon.NameNameHash = TMW:GetSpellNames(icon, icon.Name, nil, 1, 1)
 	icon.Units = TMW:GetUnits(icon, icon.Unit)
 
 	icon:SetTexture(TMW:GetConfigIconTexture(icon))
