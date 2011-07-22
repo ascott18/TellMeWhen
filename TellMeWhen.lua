@@ -34,7 +34,7 @@ local DRData = LibStub("DRData-1.0", true)
 TELLMEWHEN_VERSION = "4.5.0"
 TELLMEWHEN_VERSION_MINOR = strmatch(" @project-version@", " r%d+") or ""
 TELLMEWHEN_VERSION_FULL = TELLMEWHEN_VERSION .. TELLMEWHEN_VERSION_MINOR
-TELLMEWHEN_VERSIONNUMBER = 45005 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
+TELLMEWHEN_VERSIONNUMBER = 45006 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
 if TELLMEWHEN_VERSIONNUMBER > 46000 or TELLMEWHEN_VERSIONNUMBER < 45000 then return error("YOU SCREWED UP THE VERSION NUMBER OR DIDNT CHANGE THE SAFETY LIMITS") end -- safety check because i accidentally made the version number 414069 once
 
 TELLMEWHEN_MAXGROUPS = 1 	--this is a default, used by SetTheory (addon), so dont rename
@@ -1096,10 +1096,13 @@ function TMW:OnCommReceived(prefix, text, channel, who)
 	if prefix == "TMWV" and strsub(text, 1, 1) == "M" and not TMW.VersionWarned then
 		local major, minor, revision = strmatch(text, "M:(.*)%^m:(.*)%^R:(.*)%^")
 		revision = tonumber(revision)
-		if revision and major and minor and revision > TELLMEWHEN_VERSIONNUMBER and revision ~= 414069 then
-			TMW.VersionWarned = true
-			TMW:Printf(L["NEWVERSION"], major .. minor)
+		if not (revision and major and minor and revision > TELLMEWHEN_VERSIONNUMBER and revision ~= 414069) then
+			return
+		elseif not ((minor == "" and who ~= "Cybeloras") or (tonumber(strsub(revision, 1, 3)) > tonumber(strsub(TELLMEWHEN_VERSIONNUMBER, 1, 3)) + 1)) then
+			return
 		end
+		TMW.VersionWarned = true
+		TMW:Printf(L["NEWVERSION"], major .. minor)
 	elseif prefix == "TMW" and channel == "WHISPER" and db.profile.ReceiveComm then
 		TMW.Recieved = TMW.Recieved or {}
 		TMW.Recieved[text] = who or true
