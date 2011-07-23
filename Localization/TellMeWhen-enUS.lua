@@ -1,4 +1,4 @@
-﻿GAME_LOCALE = "ruRU" --FOR TESTING
+﻿--GAME_LOCALE = "ruRU" --FOR TESTING
 local L = LibStub("AceLocale-3.0"):NewLocale("TellMeWhen", "enUS", true)
 
 
