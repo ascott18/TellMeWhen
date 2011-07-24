@@ -34,7 +34,7 @@ local DRData = LibStub("DRData-1.0", true)
 TELLMEWHEN_VERSION = "4.5.0"
 TELLMEWHEN_VERSION_MINOR = strmatch(" @project-version@", " r%d+") or ""
 TELLMEWHEN_VERSION_FULL = TELLMEWHEN_VERSION .. TELLMEWHEN_VERSION_MINOR
-TELLMEWHEN_VERSIONNUMBER = 45010 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
+TELLMEWHEN_VERSIONNUMBER = 45011 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
 if TELLMEWHEN_VERSIONNUMBER > 46000 or TELLMEWHEN_VERSIONNUMBER < 45000 then return error("YOU SCREWED UP THE VERSION NUMBER OR DIDNT CHANGE THE SAFETY LIMITS") end -- safety check because i accidentally made the version number 414069 once
 
 TELLMEWHEN_MAXGROUPS = 1 	--this is a default, used by SetTheory (addon), so dont rename
@@ -3084,20 +3084,26 @@ function string:toseconds()
     return seconds
     
 end
-local function lower(str)
+function TMW:lower(str)
+	if type(str) == "table" then
+		for k, v in pairs(str) do
+			str[k] = TMW:lower(v)
+		end
+		return str
+	end
 	return tonumber(str) or strlower(str)
 end
 
 local eqttcache = {}
 function TMW:EquivToTable(name)
 	if eqttcache[name] then return eqttcache[name] end -- if we already made a table of this string, then use it
-	name = lower(name)
+	name = strlower(name)
 	local eqname, duration = strmatch(name, "(.-):([%d:%s%.]*)$")
 	name = eqname or name
 	local names
 	for k, v in pairs(TMW.BE) do -- check in subtables ('buffs', 'debuffs', 'casts', etc)
 		for equiv, str in pairs(v) do
-			if lower(equiv) == name and (TMW.BE ~= TMW.OldBE or equiv ~= "Enraged") then -- dont expand the enrage equiv if we are hacking with OldBE
+			if strlower(equiv) == name and (TMW.BE ~= TMW.OldBE or equiv ~= "Enraged") then -- dont expand the enrage equiv if we are hacking with OldBE
 				names = str
 				break
 			end
@@ -3109,7 +3115,8 @@ function TMW:EquivToTable(name)
 
 	local tbl = { strsplit(";", names) } -- split the string into a table
 	for a, b in pairs(tbl) do
-		local new = lower(strtrim(b)) -- take off trailing spaces
+		local new = strtrim(b) -- take off trailing spaces
+		new = tonumber(new) or new -- make sure it is a number if it can be
 		if duration then
 			new = new .. ":" .. duration
 		end
@@ -3157,9 +3164,13 @@ function TMW:GetSpellNames(icon, setting, firstOnly, toname, hash, keepDurations
 	if not keepDurations then
 		for k, buffName in pairs(buffNames) do
 			if strfind(buffName, ":[%d:%s%.]*$") then
-				buffNames[k] = lower(strmatch(buffName, "(.-):[%d:%s%.]*$"))
+				local new = strmatch(buffName, "(.-):[%d:%s%.]*$")
+				buffNames[k] = tonumber(new) or new -- turn it into a number if it is one
 			end
 		end
+	end
+	if icon then
+		TMW:lower(buffNames)
 	end
 
 	if hash then
@@ -3169,10 +3180,10 @@ function TMW:GetSpellNames(icon, setting, firstOnly, toname, hash, keepDurations
 				v = GetSpellInfo(v or "") or v -- turn the value into a name if needed
 			end
 			if type(v) == "string" then -- all hash table lookups use the lowercase string to negate case sensitivity
-				v = lower(v)
+				v = strlower(v)
 			end
 			for ds in pairs(TMW.DS) do	--EXCEPT dispel types, they retain their capitalization. Restore it here.
-				if lower(ds) == v then
+				if strlower(ds) == v then
 					v = ds
 				end
 			end
@@ -3183,20 +3194,23 @@ function TMW:GetSpellNames(icon, setting, firstOnly, toname, hash, keepDurations
 	end
 	if toname then
 		if firstOnly then
-			local ret = lower(GetSpellInfo(buffNames[1] or "") or buffNames[1]) -- turn the first value into a name and return it
+			local ret = GetSpellInfo(buffNames[1] or "") or buffNames[1] -- turn the first value into a name and return it
+			if icon then ret = TMW:lower(ret) end
 			gsncache[cachestring] = ret
 			return ret
 		else
 			for k, v in ipairs(buffNames) do
-				buffNames[k] = lower(GetSpellInfo(v or "") or v) --convert everything to a name
+				buffNames[k] = GetSpellInfo(v or "") or v --convert everything to a name
 			end
+			if icon then TMW:lower(buffNames) end
 			gsncache[cachestring] = buffNames
 			return buffNames
 		end
 	end
 	if firstOnly then
-		gsncache[cachestring] = lower(buffNames[1] or "")
-		return gsncache[cachestring]
+		local ret = buffNames[1] or ""
+		gsncache[cachestring] = ret
+		return ret
 	end
 	gsncache[cachestring] = buffNames
 	return buffNames
@@ -3342,7 +3356,8 @@ function TMW:SplitNames(input)
 	local tbl = { strsplit(";", input) }
 
 	for a, b in ipairs(tbl) do
-		tbl[a] = lower(strtrim(b))
+		local new = strtrim(b) --remove spaces from the beginning and end of each name
+		tbl[a] = tonumber(new) or new -- turn it into a number if it is one
 	end
 	return tbl
 end
