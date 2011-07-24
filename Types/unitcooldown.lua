@@ -32,7 +32,7 @@ local SpellTextures = TMW.SpellTextures
 local clientVersion = select(4, GetBuildInfo())
 
 
-local Type = TMW:RegisterIconType("unitcooldown")
+local Type = {}
 LibStub("AceEvent-3.0"):Embed(Type)
 Type.name = L["ICONMENU_UNITCOOLDOWN"]
 Type.desc = L["ICONMENU_UNITCOOLDOWN_DESC"]:format(GetSpellInfo(42292))
@@ -45,15 +45,8 @@ Type.WhenChecks = {
 	{ value = "always", 		text = L["ICONMENU_ALWAYS"] },
 }
 Type.RelevantSettings = {
-	Name = true,
-	CustomTex = true,
-	ShowTimer = true,
-	ShowTimerText = true,
-	ShowWhen = true,
 	Unit = true,
 	OnlySeen = true,
-	Alpha = true,
-	UnAlpha = true,
 	ShowCBar = true,
 	InvertBars = true,
 	CBarOffs = true,
@@ -61,8 +54,6 @@ Type.RelevantSettings = {
 	DurationMax = true,
 	DurationMinEnabled = true,
 	DurationMaxEnabled = true,
-	ConditionAlpha = true,
-	FakeHidden = true,
 	Sort = true,
 }
 
@@ -375,3 +366,5 @@ function Type:IE_TypeUnloaded()
 		TMW.IE.Help:Hide()
 	end
 end
+
+TMW:RegisterIconType(Type, "unitcooldown")

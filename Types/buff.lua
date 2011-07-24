@@ -31,7 +31,7 @@ local _, pclass = UnitClass("Player")
 local isNumber = TMW.isNumber
 
 
-local Type = TMW:RegisterIconType("buff")
+local Type = {}
 Type.name = L["ICONMENU_BUFFDEBUFF"]
 Type.usePocketWatch = 1
 Type.TypeChecks = {
@@ -48,12 +48,7 @@ Type.WhenChecks = {
 	{ value = "always", 		text = L["ICONMENU_ALWAYS"] },
 }
 Type.RelevantSettings = {
-	Name = true,
-	CustomTex = true,
-	ShowTimer = true,
-	ShowTimerText = true,
 	BuffOrDebuff = true,
-	ShowWhen = true,
 	OnlyMine = true,
 	Unit = true,
 	StackMin = true,
@@ -65,15 +60,11 @@ Type.RelevantSettings = {
 	ShowCBar = true,
 	CBarOffs = true,
 	InvertBars = true,
-	Alpha = true,
-	UnAlpha = true,
 	Sort = true,
-	ConditionAlpha = true,
 	DurationMin = true,
 	DurationMax = true,
 	DurationMinEnabled = true,
 	DurationMaxEnabled = true,
-	FakeHidden = true,
 	Stealable = pclass == "MAGE",
 }
 
@@ -234,5 +225,5 @@ function Type:Setup(icon, groupID, iconID)
 	icon:OnUpdate(TMW.time)
 end
 
-
+TMW:RegisterIconType(Type, "buff")
 

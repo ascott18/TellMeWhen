@@ -29,7 +29,7 @@ local print = TMW.print
 local strlowerCache = TMW.strlowerCache
 
 
-local Type = TMW:RegisterIconType("totem")
+local Type = {}
 Type.name = pclass == "DRUID" and L["ICONMENU_MUSHROOMS"] or pclass == "DEATHKNIGHT" and L["ICONMENU_GHOUL"] or L["ICONMENU_TOTEM"]
 Type.usePocketWatch = 1
 if pclass == "SHAMAN" then
@@ -58,24 +58,16 @@ Type.WhenChecks = {
 }
 Type.RelevantSettings = {
 	Name = pclass ~= "DRUID" and pclass ~= "DEATHKNIGHT",
-	CustomTex = true,
-	ShowTimer = true,
-	ShowTimerText = true,
-	ShowWhen = true,
 	ShowPBar = true,
 	PBarOffs = true,
 	ShowCBar = true,
 	CBarOffs = true,
 	InvertBars = true,
-	Alpha = true,
-	UnAlpha = true,
-	ConditionAlpha = true,
 	DurationMin = true,
 	DurationMax = true,
 	DurationMinEnabled = true,
 	DurationMaxEnabled = true,
 	TotemSlots = true,
-	FakeHidden = true,
 }
 
 
@@ -153,4 +145,4 @@ function Type:Setup(icon, groupID, iconID)
 	icon:OnUpdate(TMW.time)
 end
 
-
+TMW:RegisterIconType(Type, "totem")

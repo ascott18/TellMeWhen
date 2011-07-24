@@ -44,7 +44,7 @@ for spellID, category in pairs(DRSpells) do
 end
 
 
-local Type = TMW:RegisterIconType("dr")
+local Type = {}
 LibStub("AceEvent-3.0"):Embed(Type)
 Type.name = L["ICONMENU_DR"]
 Type.desc = L["ICONMENU_DR_DESC"]
@@ -56,14 +56,7 @@ Type.WhenChecks = {
 	{ value = "always", 		text = L["ICONMENU_ALWAYS"] },
 }
 Type.RelevantSettings = {
-	Name = true,
-	CustomTex = true,
-	ShowTimer = true,
-	ShowTimerText = true,
-	ShowWhen = true,
 	Unit = true,
-	Alpha = true,
-	UnAlpha = true,
 	ShowCBar = true,
 	InvertBars = true,
 	CBarOffs = true,
@@ -75,8 +68,6 @@ Type.RelevantSettings = {
 	DurationMax = true,
 	DurationMinEnabled = true,
 	DurationMaxEnabled = true,
-	ConditionAlpha = true,
-	FakeHidden = true,
 	CheckRefresh = true,
 }
 
@@ -210,3 +201,5 @@ function Type:Setup(icon, groupID, iconID)
 	icon:SetScript("OnUpdate", DR_OnUpdate)
 	icon:OnUpdate(TMW.time)
 end
+
+TMW:RegisterIconType(Type, "dr")

@@ -28,13 +28,20 @@ local AlreadyChecked = {} TMW.AlreadyChecked = AlreadyChecked
 
 
 
-local Type = TMW:RegisterIconType("meta")
+local Type = {}
 Type.name = L["ICONMENU_META"]
 Type.desc = L["ICONMENU_META_DESC"]
 Type.RelevantSettings = {
 	Icons = true,
 	CheckNext = true,
---	ConditionAlpha = true, TODO:implement conditionalpha for metas (problem is the icon editor UI)
+	Name = false,
+	BindText = false,
+	CustomTex = false,
+	ShowTimer = false,
+	ShowTimerText = false,
+	ShowWhen = false,
+	FakeHidden = false,
+	ConditionAlpha = false, --TODO:implement conditionalpha for metas (problem is the icon editor UI)
 }
 
 function Type:Update()
@@ -49,16 +56,20 @@ local function Meta_OnUpdate(icon, time)
 		local CheckNext, Icons = icon.CheckNext, icon.Icons
 		for n = 1, #Icons do
 			local ic = _G[Icons[n]]
-			if ic and ic.OnUpdate and ic.__shown and (not CheckNext or (CheckNext and not AlreadyChecked[ic])) then
+			if ic and ic.OnUpdate and ic.__shown and not (CheckNext and AlreadyChecked[ic]) then
 				ic:OnUpdate(time)
 				local alpha = ic.__alpha
 				if alpha > 0 and ic.__shown then
 
-					if (LBF or LMB) and ic ~= icon.__previcon  then -- i dont like the way that ButtonFacade handles this (inefficient), so i'll do it myself
-						local icnt = ic.__normaltex -- icon.__normaltex = icon.__LBF_Normal or icon:GetNormalTexture() -- set during Icon_Update()
-						local iconnt = icon.__normaltex
-						if icnt and iconnt then
-							iconnt:SetVertexColor(icnt:GetVertexColor())
+					if ic ~= icon.__previcon then 
+						icon.BindText = ic.BindText
+						icon.bindText:SetText(icon.BindText)
+						if (LBF or LMB) then -- i dont like the way that ButtonFacade handles this (inefficient), so i'll do it myself
+							local icnt = ic.__normaltex -- icon.__normaltex = icon.__LBF_Normal or icon:GetNormalTexture() -- set during Icon_Update()
+							local iconnt = icon.__normaltex
+							if icnt and iconnt then
+								iconnt:SetVertexColor(icnt:GetVertexColor())
+							end
 						end
 						icon.__previcon = ic
 					end
@@ -117,3 +128,4 @@ function Type:Setup(icon, groupID, iconID)
 	icon:SetScript("OnUpdate", Meta_OnUpdate)
 end
 
+TMW:RegisterIconType(Type, "meta")

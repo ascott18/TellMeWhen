@@ -49,23 +49,23 @@
 		</Frames>
 	</Frame>
 	<Button name="TellMeWhen_IconTemplate" virtual="true" enableMouse="true">
-		<Size>
-			<AbsDimension x="30" y="30"/>
-		</Size>
+		<Size x="30" y="30"/>
 		<Layers>
-			<Layer level="ARTWORK">
+			<Layer level="BACKGROUND">
 				<Texture name="$parentIcon" parentKey="texture" file="Interface\Icons\INV_Misc_QuestionMark">
-					<Size>
-						<AbsDimension x="30" y="30"/>
-					</Size>
+					<Size x="30" y="30"/>
 				</Texture>
 			</Layer>
-			<Layer level="OVERLAY">
+			<Layer level="ARTWORK">
 				<FontString name="$parentCount" parentKey="countText" inherits="NumberFontNormalSmall" justifyH="RIGHT">
 					<Anchors>
-						<Anchor point="BOTTOMRIGHT" relativeTo="$parent" relativePoint="BOTTOMRIGHT">
-							<Offset x="-2" y="2"/>
-						</Anchor>
+						<Anchor point="BOTTOMRIGHT" relativeTo="$parent" relativePoint="BOTTOMRIGHT" x="-2" y="2"/>
+					</Anchors>
+				</FontString>
+				<FontString name="$parentHotKey" parentKey="bindText" inherits="NumberFontNormalSmallGray" justifyH="RIGHT">
+					<Size x="30" y="10"/>
+					<Anchors>
+						<Anchor point="TOPLEFT" relativeTo="$parent" relativePoint="TOPLEFT" x="-2" y="-2"/>
 					</Anchors>
 				</FontString>
 			</Layer>
@@ -127,7 +127,8 @@
 				self:RegisterForDrag("LeftButton", "RightButton")
 			</OnLoad>
 			<OnEnter>
-				local line1 = TMW.L["ICON_TOOLTIP1"] .. " " .. format(TMW.L["GROUPICON"], TMW:GetGroupName(self:GetParent().Name, self:GetParent():GetID(), 1), self:GetID())
+				local groupID = self:GetParent():GetID()
+				local line1 = TMW.L["ICON_TOOLTIP1"] .. " " .. format(TMW.L["GROUPICON"], TMW:GetGroupName(groupID, groupID, 1), self:GetID())
 				if self:GetParent().Locked then
 					line1 = line1 .. " (" .. TMW.L["LOCKED"] .. ")"
 				end
@@ -144,14 +145,7 @@
 					TMW:Group_StopMoving(TMW.ID.isMoving)
 				end
 				if button == "RightButton" then
-					PlaySound("igCharacterInfoTab")
-					TMW.IE:SaveSettings()
-					TMW.CNDT:ClearDialog()
-					TMW.CI.i = self:GetID()		-- yay for dirty hacks
-					TMW.CI.g = self:GetParent():GetID()
-					TMW.CI.ic = self
-					TMW.CI.t = self.Type
-					TMW.IE:Load()
+					TMW.IE:Load(nil, self)
 				end
 				if TMW.IE then
 					TMW.IE:ScheduleIconUpdate(self:GetParent():GetID(), self:GetID())

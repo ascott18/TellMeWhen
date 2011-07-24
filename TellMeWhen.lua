@@ -34,7 +34,7 @@ local DRData = LibStub("DRData-1.0", true)
 TELLMEWHEN_VERSION = "4.5.0"
 TELLMEWHEN_VERSION_MINOR = strmatch(" @project-version@", " r%d+") or ""
 TELLMEWHEN_VERSION_FULL = TELLMEWHEN_VERSION .. TELLMEWHEN_VERSION_MINOR
-TELLMEWHEN_VERSIONNUMBER = 45007 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
+TELLMEWHEN_VERSIONNUMBER = 45008 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
 if TELLMEWHEN_VERSIONNUMBER > 46000 or TELLMEWHEN_VERSIONNUMBER < 45000 then return error("YOU SCREWED UP THE VERSION NUMBER OR DIDNT CHANGE THE SAFETY LIMITS") end -- safety check because i accidentally made the version number 414069 once
 
 TELLMEWHEN_MAXGROUPS = 1 	--this is a default, used by SetTheory (addon), so dont rename
@@ -355,10 +355,21 @@ do -- Iterators
 end
 
 local RelevantToAll = {
+	-- (or almost all, use false to override)
 	Enabled = true,
+	Name = true,
 	Type = true,
 	Events = true,
 	Conditions = true,
+	BindText = true,
+	CustomTex = true,
+	ShowTimer = true,
+	ShowTimerText = true,
+	ShowWhen = true,
+	FakeHidden = true,
+	Alpha = true,
+	UnAlpha = true,
+	ConditionAlpha = true
 }
 TMW.Types = {
 	[""] = {
@@ -373,12 +384,22 @@ TMW.Types = {
 		Update = function() end,
 		HideBars = true,
 		RelevantSettings = {
-			Name = true,
+			BindText = false,
+			CustomTex = false,
+			ShowTimer = false,
+			ShowTimerText = false,
+			ShowWhen = false,
+			FakeHidden = false,
+			Alpha = false,
+			UnAlpha = false,
+			ConditionAlpha = false,
 		},
 	},
 } local Types = TMW.Types
 for k, v in pairs(RelevantToAll) do
-	Types[""].RelevantSettings[k] = v
+	if Types[""].RelevantSettings[k] == nil then
+		Types[""].RelevantSettings[k] = v
+	end
 end
 setmetatable(Types, {
 	__index = function() return Types[""] end
@@ -386,6 +407,7 @@ setmetatable(Types, {
 
 TMW.Defaults = {
 	global = {
+		EditorScale	=	0.9,
 		WpnEnchDurs	= {
 			["*"] = 0,
 		},
@@ -415,7 +437,6 @@ TMW.Defaults = {
 		WarnInvalids=	true,
 		BarGCD		=	true,
 		ClockGCD	=	true,
-		EditorScale	=	0.9,
 		CheckOrder	=	-1,
 		Groups 		= 	{
 			[1] = {
@@ -449,30 +470,21 @@ TMW.Defaults = {
 					Backdrop = false,
 					SkinID = "Blizzard",
 				},
-				Font = {
-					Name = "Arial Narrow",
-					Size = 12,
-					Outline = "THICKOUTLINE",
-					x = -2,
-					y = 2,
-					OverrideLBFPos = false,
+				Fonts = {
+					["**"] = {
+						Name = "Arial Narrow",
+						Size = 12,
+						x = -2,
+						y = 2,
+						Outline = "THICKOUTLINE",
+						OverrideLBFPos = false,
+					},
+					Count = {
+					},
+					Bind = {
+						y = -2,
+					},
 				},
-				--[[Colors = { -- not going to implement this unless people actually want it.
-					CCO = 	{r=0,	g=1,	b=0		},	-- cooldown bar complete
-					CST = 	{r=1,	g=0,	b=0		},	-- cooldown bar start
-					OOR	=	{r=0.5,	g=0.5,	b=0.5	},	-- out of range
-					OOM	=	{r=0.5,	g=0.5,	b=0.5	},	-- out of mana
-
-					PTA	=	{r=1,	g=1,	b=1		},	-- presnt/usable with timer always
-					POA	=	{r=1,	g=1,	b=1		},	-- presnt/usable withOUT timer always
-					PTS	=	{r=1,	g=1,	b=1		},	-- presnt/usable with timer somtimes
-					POS	=	{r=1,	g=1,	b=1		},	-- presnt/usable withOUT timer somtimes
-
-					ATA	=	{r=1,	g=1,	b=1		},	-- absent/unusable with timer always
-					AOA	=	{r=1,	g=1,	b=1		},	-- absent/unusable withOUT timer always
-					ATS	=	{r=1,	g=1,	b=1		},	-- absent/unusable with timer somtimes
-					AOS	=	{r=1,	g=1,	b=1		},	-- absent/unusable withOUT timer somtimes
-				},]]
 				Icons = {
 					["**"] = {
 						BuffOrDebuff		= "HELPFUL",
@@ -522,6 +534,7 @@ TMW.Defaults = {
 						Stealable			= false,
 						CheckRefresh		= true,
 						TotemSlots			= "1111",
+						BindText			= "",
 						Events = {
 							["**"] = {
 								Sound = "None",
@@ -1058,7 +1071,10 @@ function TMW:OnProfile()
 	for icon in TMW:InIcons() do
 		icon:SetTexture(nil)
 	end
+	
 	TMW:Update()
+	TMW.IE:Load(1, TMW:InIcons()())
+	
 	if TMW.CompileOptions then TMW:CompileOptions() end -- redo groups in the options
 end
 
@@ -1072,14 +1088,6 @@ TMW.DatabaseCleanups = {
 	end,
 }
 function TMW:ShutdownProfile()
-	-- the current icon might not exist in the new profile
-	if TMW.CI then
-		for k, v in pairs(TMW.CI) do
-			TMW.CI[k] = nil
-		end
-		TellMeWhen_IconEditor:Hide()
-	end
-
 	-- get rid of settings that are stored in database tables for convenience, but dont need to be kept.
 	for ics in TMW:InIconSettings() do
 		TMW.DatabaseCleanups.icon(ics)
@@ -1224,9 +1232,6 @@ function TMW:Update()
 		TMW:CheckForInvalidIcons()
 	end
 
-	if TMW.IE then
-		TMW.IE:Load(1) -- for reloading icon editor after copying/dragging something onto an icon in case the icon copied to is the current icon
-	end
 	for group in TMW.InGroups() do
 		-- attempt at a fix for the cooldown clock frame level bug - seems to work most of the time
 		group:SetFrameLevel(group:GetFrameLevel() + 1)
@@ -1242,6 +1247,16 @@ local upgradeTable
 function TMW:GetUpgradeTable() -- upgrade functions
 	if upgradeTable then return upgradeTable end
 	local t = {
+		[45008] = {
+			group = function(gs)
+				if gs.Font then
+					for k, v in pairs(gs.Font) do
+						gs.Fonts.Count[k] = v
+						gs.Font[k] = nil
+					end
+				end
+			end,
+		},
 		[44202] = {
 			icon = function(ics)
 				ics.Conditions["**"] = nil
@@ -2503,12 +2518,12 @@ function ProtoIcon.SetInfo(icon, alpha, color, texture, start, duration, checkGC
 		elseif alpha > icon.__alpha then
 			local data = runEvents and icon.OnAlphaInc
 			if data then
-				played, announced = icon:HandleEvent(data, played, announced)
+				played, announced = icon:HandleEvent(data)
 			end
 		else -- it must be less than, because it isnt greater than and it isnt the same --if alpha < icon.__alpha then
 			local data = runEvents and icon.OnAlphaDec
 			if data then
-				played, announced = icon:HandleEvent(data, played, announced)
+				played, announced = icon:HandleEvent(data)
 			end
 		end
 		
@@ -2682,26 +2697,22 @@ local IconMetamethods = {
 }
 
 
-function TMW:RegisterIconType(Type)
-	local t = setmetatable({}, {
-		__newindex = function(t, k, v)
-			if k == "RelevantSettings" then
-				for setting in pairs(RelevantToAll) do
-					v[setting] = true
-				end
-			end
-			rawset(t, k, v)
+function TMW:RegisterIconType(Type, str)
+	local v = Type.RelevantSettings
+	for setting, b in pairs(RelevantToAll) do
+		if v[setting] == nil then -- must be == nil
+			v[setting] = b
 		end
-	})
-	if rawget(Types, Type) and TMW.debug then
-		-- for tweaking and recreating icon types inside of WowLua .. too lazy to change the type string each time.
-		Type = Type .. " - " .. date("%X")
-		t.nameOverride = Type
 	end
-	Types[Type] = t
-	t.type = Type
-	tinsert(TMW.OrderedTypes, t)
-	return t
+	if TMW.debug and rawget(Types, str) then
+		-- for tweaking and recreating icon types inside of WowLua .. too lazy to change the type string each time.
+		str = str .. " - " .. date("%X")
+		Type.nameOverride = str
+	end
+	Types[str] = Type
+	Type.type = str
+	tinsert(TMW.OrderedTypes, Type)
+	return Type
 end
 
 function TMW:CreateIcon(group, groupID, iconID)
@@ -2811,8 +2822,8 @@ function TMW:Icon_Update(icon)
 		icon[k] = nil --lets clear any settings that might get left behind.
 	end
 
-	for k in pairs(Types[ics.Type].RelevantSettings) do
-		icon[k] = ics[k]
+	for k, v in pairs(Types[ics.Type].RelevantSettings) do
+		icon[k] = v and ics[k]
 	end
 
 	local dontremove
@@ -2872,9 +2883,14 @@ function TMW:Icon_Update(icon)
 	cd:SetDrawEdge(db.profile.DrawEdge)
 	icon:SetReverse(false)
 
-	local f = group.Font
+	local ctf = group.Fonts.Count
 	local ct = icon.countText
-	ct:SetFont(LSM:Fetch("font", f.Name), f.Size, f.Outline)
+	local btf = group.Fonts.Bind
+	local bt = icon.bindText
+	if not ctf then print("LBCODING", iconID, groupID) LBCode(CopyTable(db.profile)) end
+	ct:SetFont(LSM:Fetch("font", ctf.Name), ctf.Size, ctf.Outline)
+	bt:SetFont(LSM:Fetch("font", btf.Name), btf.Size, btf.Outline)
+	bt:SetText(icon.BindText)
 	if LMB then
 		local g = LMB:Group("TellMeWhen", format(L["fGROUP"], groupID))
 		if not hookedLMBSkin and g.__Skin and g.__Disable then
@@ -2887,12 +2903,6 @@ function TMW:Icon_Update(icon)
 		if g.Disabled then
 			group.SkinID = "Blizzard"
 		end
-
-		if f.OverrideLBFPos then
-			ct:ClearAllPoints()
-			ct:SetPoint("BOTTOMRIGHT", icon, "BOTTOMRIGHT", f.x, f.y)
-		end
-
 	elseif LBF then
 		TMW.DontRun = true -- TMW:Update() is ran in the LBF skin callback, which just causes an infinite loop. This tells it not to
 		local lbfs = db.profile.Groups[groupID].LBF
@@ -2902,17 +2912,25 @@ function TMW:Icon_Update(icon)
 		group.SkinID = lbfs.SkinID or g.SkinID or "Blizzard"
 		local tbl = LBF:GetSkins()
 		if tbl and tbl[group.SkinID] then
-			ct:SetFont(LSM:Fetch("font", f.Name), tbl and tbl[group.SkinID].Count.FontSize or f.Size, f.Outline)
+			ct:SetFont(LSM:Fetch("font", ctf.Name), tbl and tbl[group.SkinID].Count.FontSize or ctf.Size, ctf.Outline)
+			bt:SetFont(LSM:Fetch("font", btf.Name), tbl and tbl[group.SkinID].Count.FontSize or btf.Size, btf.Outline)
 		end
-
-		if f.OverrideLBFPos then
-			ct:ClearAllPoints()
-			ct:SetPoint("BOTTOMRIGHT", icon, "BOTTOMRIGHT", f.x, f.y)
-		end
-
 	else
 		ct:ClearAllPoints()
-		ct:SetPoint("BOTTOMRIGHT", icon, "BOTTOMRIGHT", f.x, f.y)
+		ct:SetPoint("BOTTOMRIGHT", icon, "BOTTOMRIGHT", ctf.x, ctf.y)
+		bt:ClearAllPoints()
+		bt:SetPoint("BOTTOMRIGHT", icon, "BOTTOMRIGHT", btf.x, btf.y)
+	end
+	
+	if LMB or LBF then
+		if ctf.OverrideLBFPos then
+			ct:ClearAllPoints()
+			ct:SetPoint("BOTTOMRIGHT", icon, "BOTTOMRIGHT", ctf.x, ctf.y)
+		end
+		if btf.OverrideLBFPos then
+			bt:ClearAllPoints()
+			bt:SetPoint("TOPLEFT", icon, "TOPLEFT", btf.x, btf.y)
+		end
 	end
 	icon.cbar:SetFrameLevel(icon:GetFrameLevel() + 1)
 	icon.pbar:SetFrameLevel(icon:GetFrameLevel() + 1)

@@ -28,7 +28,7 @@ local UIParent = UIParent
 local strlowerCache = TMW.strlowerCache
 
 
-local Type = TMW:RegisterIconType("wpnenchant")
+local Type = {}
 Type.name = L["ICONMENU_WPNENCHANT"]
 Type.desc = L["ICONMENU_WPNENCHANT_DESC"]
 Type.TypeChecks = {
@@ -45,23 +45,14 @@ Type.WhenChecks = {
 	{ value = "always", 		text = L["ICONMENU_ALWAYS"] },
 }
 Type.RelevantSettings = {
-	Name = true,
-	CustomTex = true,
-	ShowTimer = true,
-	ShowTimerText = true,
 	HideUnequipped = true,
 	WpnEnchantType = true,
-	ShowWhen = true,
-	Alpha = true,
-	UnAlpha = true,
 	ShowCBar = true,
 	CBarOffs = true,
-	ConditionAlpha = true,
 	DurationMin = true,
 	DurationMax = true,
 	DurationMinEnabled = true,
 	DurationMaxEnabled = true,
-	FakeHidden = true,
 }
 
 local Parser = CreateFrame("GameTooltip", "TellMeWhen_Parser", TMW, "GameTooltipTemplate")
@@ -188,3 +179,4 @@ function Type:Setup(icon, groupID, iconID)
 	icon:OnEvent(nil, "player")
 end
 
+TMW:RegisterIconType(Type, "wpnenchant")

@@ -35,7 +35,7 @@ local _, pclass = UnitClass("Player")
 local SpellTextures = TMW.SpellTextures
 
 
-local Type = TMW:RegisterIconType("cooldown")
+local Type = {}
 LibStub("AceEvent-3.0"):Embed(Type)
 Type.name = L["ICONMENU_COOLDOWN"]
 Type.TypeChecks = {
@@ -52,11 +52,6 @@ Type.WhenChecks = {
 	{ value = "always", 		text = L["ICONMENU_ALWAYS"] },
 }
 Type.RelevantSettings = {
-	Name = true,
-	CustomTex = true,
-	ShowTimer = true,
-	ShowTimerText = true,
-	ShowWhen = true,
 	CooldownType = true,
 	RangeCheck = true,
 	ManaCheck = true,
@@ -65,9 +60,6 @@ Type.RelevantSettings = {
 	ShowCBar = true,
 	CBarOffs = true,
 	InvertBars = true,
-	Alpha = true,
-	UnAlpha = true,
-	ConditionAlpha = true,
 	DurationMin = true,
 	DurationMax = true,
 	DurationMinEnabled = true,
@@ -80,7 +72,6 @@ Type.RelevantSettings = {
 	StackMax = true,
 	StackMinEnabled = true,
 	StackMaxEnabled = true,
-	FakeHidden = true,
 }
 
 
@@ -481,3 +472,4 @@ function Type:IE_TypeUnloaded()
 	Name:GetScript("OnTextChanged")(Name)
 end
 
+TMW:RegisterIconType(Type, "cooldown")

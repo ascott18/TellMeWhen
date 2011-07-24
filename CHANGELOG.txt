@@ -1,5 +1,6 @@
 ===v4.5.0===
  * Fully integrated main addon settings/group settings into the icon editor.
+ * You can now set custom text to be displayed where a keybinding would normally be displayed in order to remind you of your keybindings directly on TMW icons.
  * Moving/resizing a group that is anchored to a frame other than UIParent will adjust the offsets instead of resetting the anchor to UIParent.
  * Reactive icons and conditions should now more accurately reflect the state of the abilities that they are checking.
  * Version warnings should be slightly less annoying.

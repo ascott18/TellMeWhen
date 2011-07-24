@@ -29,7 +29,7 @@ local clientVersion = select(4, GetBuildInfo())
 local strlowerCache = TMW.strlowerCache
 
 
-local Type = TMW:RegisterIconType("icd")
+local Type = {}
 Type.name = L["ICONMENU_ICD"]
 Type.desc = L["ICONMENU_ICD_DESC"]
 Type.usePocketWatch = 1
@@ -48,24 +48,15 @@ Type.WhenChecks = {
 	{ value = "always", 		text = L["ICONMENU_ALWAYS"] },
 }
 Type.RelevantSettings = {
-	Name = true,
-	CustomTex = true,
-	ShowTimer = true,
-	ShowTimerText = true,
 	ICDType = true,
 	DontRefresh = true,
-	ShowWhen = true,
 	ShowCBar = true,
 	CBarOffs = true,
 	InvertBars = true,
-	Alpha = true,
-	UnAlpha = true,
-	ConditionAlpha = true,
 	DurationMin = true,
 	DurationMax = true,
 	DurationMinEnabled = true,
 	DurationMaxEnabled = true,
-	FakeHidden = true,
 }
 
 
@@ -172,3 +163,4 @@ function Type:IE_TypeUnloaded()
 	end
 end
 
+TMW:RegisterIconType(Type, "icd")

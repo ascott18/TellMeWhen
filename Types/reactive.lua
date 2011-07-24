@@ -27,7 +27,7 @@ local _, pclass = UnitClass("Player")
 local SpellTextures = TMW.SpellTextures
 
 
-local Type = TMW:RegisterIconType("reactive")
+local Type = {}
 Type.name = L["ICONMENU_REACTIVE"]
 Type.desc = L["ICONMENU_REACTIVE_DESC"]
 Type.WhenChecks = {
@@ -37,11 +37,6 @@ Type.WhenChecks = {
 	{ value = "always", 		text = L["ICONMENU_ALWAYS"] },
 }
 Type.RelevantSettings = {
-	Name = true,
-	CustomTex = true,
-	ShowTimer = true,
-	ShowTimerText = true,
-	ShowWhen = true,
 	RangeCheck = true,
 	ManaCheck = true,
 	CooldownCheck = true,
@@ -50,16 +45,12 @@ Type.RelevantSettings = {
 	ShowCBar = true,
 	CBarOffs = true,
 	InvertBars = true,
-	Alpha = true,
-	UnAlpha = true,
-	ConditionAlpha = true,
 	DurationMin = true,
 	DurationMax = true,
 	DurationMinEnabled = true,
 	DurationMaxEnabled = true,
 	UseActvtnOverlay = true,
 	IgnoreRunes = (pclass == "DEATHKNIGHT"),
-	FakeHidden = true,
 }
 
 
@@ -188,4 +179,4 @@ function Type:Setup(icon, groupID, iconID)
 	icon:OnUpdate(TMW.time)
 end
 
-
+TMW:RegisterIconType(Type, "reactive")

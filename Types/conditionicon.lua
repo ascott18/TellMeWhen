@@ -24,13 +24,16 @@ local print = TMW.print
 
 
 
-local Type = TMW:RegisterIconType("conditionicon")
+local Type = {}
 Type.name = L["ICONMENU_CNDTIC"]
 Type.desc = L["ICONMENU_CNDTIC_DESC"]
 Type.RelevantSettings = {
-	Name = true,
-	FakeHidden = true,
-	ConditionAlpha = true,
+	CustomTex = false,
+	ShowTimer = false,
+	ShowTimerText = false,
+	ShowWhen = false,
+	Alpha = false,
+	UnAlpha = false,
 }
 
 function Type:Update()
@@ -91,4 +94,4 @@ function Type:IE_TypeUnloaded()
 	Name:GetScript("OnTextChanged")(Name)
 end
 
-
+TMW:RegisterIconType(Type, "conditionicon")

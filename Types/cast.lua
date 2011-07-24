@@ -29,7 +29,7 @@ local strlowerCache = TMW.strlowerCache
 local clientVersion = select(4, GetBuildInfo())
 
 
-local Type = TMW:RegisterIconType("cast")
+local Type = {}
 LibStub("AceEvent-3.0"):Embed(Type)
 Type.name = L["ICONMENU_CAST"]
 Type.WhenChecks = {
@@ -39,24 +39,15 @@ Type.WhenChecks = {
 	{ value = "always", 		text = L["ICONMENU_ALWAYS"] },
 }
 Type.RelevantSettings = {
-	Name = true,
-	CustomTex = true,
-	ShowTimer = true,
-	ShowTimerText = true,
-	ShowWhen = true,
 	Interruptible = true,
 	Unit = true,
 	ShowCBar = true,
 	CBarOffs = true,
 	InvertBars = true,
-	Alpha = true,
-	UnAlpha = true,
-	ConditionAlpha = true,
 	DurationMin = true,
 	DurationMax = true,
 	DurationMinEnabled = true,
 	DurationMaxEnabled = true,
-	FakeHidden = true,
 }
 
 
@@ -114,5 +105,5 @@ function Type:Setup(icon, groupID, iconID)
 	icon:OnUpdate(TMW.time)
 end
 
-
+TMW:RegisterIconType(Type, "cast")
 

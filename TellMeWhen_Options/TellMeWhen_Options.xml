@@ -105,7 +105,7 @@
 				</Texture>
 			</Layer>
 			<Layer level="OVERLAY">
-				<FontString name="$parentBackgroundText" parentKey="BackgroundText" justifyH="CENTER" inherits="GameFontHighlightSmall">
+				<FontString name="$parentBackgroundText" parentKey="BackgroundText" justifyH="CENTER" wordwrap="false" inherits="GameFontHighlightSmall">
 					<Anchors>
 						<Anchor point="LEFT"/>
 						<Anchor point="RIGHT"/>
@@ -1989,7 +1989,7 @@
 							<OnLoad>
 								self.wrapTooltips = 1
 								TMW:TT(self, "ICONMENU_TYPE")
-								UIDropDownMenu_SetWidth(self, 220)
+								UIDropDownMenu_SetWidth(self, 180)
 								_G[self:GetName() .. "Button"]:SetScript("PreClick", function()
 									UIDropDownMenu_Initialize(self, TMW.IE.Type_DropDown, "DROPDOWN")
 									_G[self:GetName() .. "Button"]:SetScript("PreClick", nil)
@@ -2053,8 +2053,8 @@
 							<OnLoad>
 								self:RegisterEvent("MODIFIER_STATE_CHANGED")
 								self.label = TMW.L["ICONMENU_CHOOSENAME"]
-								self.TTtitle = TMW.L["ICONMENU_CHOOSENAME"]
-								self.TTtext = TMW.L["CHOOSENAME_DIALOG"]
+								self.__title = TMW.L["ICONMENU_CHOOSENAME"]
+								self.__text = TMW.L["CHOOSENAME_DIALOG"]
 								self.BackgroundText:SetWidth(self:GetWidth())
 								TMW.SUG:EnableEditbox(self, true)
 							</OnLoad>
@@ -2062,11 +2062,11 @@
 								if not self.isOver then return end
 								GameTooltip:Hide()
 								GameTooltip_SetDefaultAnchor(GameTooltip, self)
-								GameTooltip:AddLine(self.TTtitle, HIGHLIGHT_FONT_COLOR.r, HIGHLIGHT_FONT_COLOR.g, HIGHLIGHT_FONT_COLOR.b, 1)
+								GameTooltip:AddLine(self.__title, HIGHLIGHT_FONT_COLOR.r, HIGHLIGHT_FONT_COLOR.g, HIGHLIGHT_FONT_COLOR.b, 1)
 								if IsModifierKeyDown() then
 									GameTooltip:AddLine(TMW.IE:GetRealNames(self), NORMAL_FONT_COLOR.r, NORMAL_FONT_COLOR.g, NORMAL_FONT_COLOR.b, 1)
 								else
-									GameTooltip:AddLine(self.TTtext, NORMAL_FONT_COLOR.r, NORMAL_FONT_COLOR.g, NORMAL_FONT_COLOR.b, 1)
+									GameTooltip:AddLine(self.__text, NORMAL_FONT_COLOR.r, NORMAL_FONT_COLOR.g, NORMAL_FONT_COLOR.b, 1)
 								end
 								GameTooltip:Show()
 							</OnEvent>
@@ -3395,6 +3395,7 @@
 						<Scripts>
 							<OnLoad>
 								self.text:SetText(TMW.L["ICONMENU_ENABLE"])
+								self.text:SetWidth(85)
 							</OnLoad>
 							<OnClick>
 								local groupID, iconID = TMW.CI.g, TMW.CI.i
@@ -3407,15 +3408,13 @@
 					</CheckButton>
 					<CheckButton name="$parentFakeHidden" parentKey="FakeHidden" inherits="TellMeWhen_CheckTemplate">
 						<Anchors>
-							<Anchor point="LEFT" relativeTo="$parentEnabled" relativePoint="RIGHT">
-								<Offset x="110" y="0" />
-							</Anchor>
+							<Anchor point="LEFT" relativeTo="$parentEnabled" relativePoint="RIGHT" x="80" y="0" />
 						</Anchors>
 						<Scripts>
 							<OnLoad>
 								TMW:TT(self, "ICONALPHAPANEL_FAKEHIDDEN", "ICONALPHAPANEL_FAKEHIDDEN_DESC")
 								self.text:SetText(TMW.L["ICONALPHAPANEL_FAKEHIDDEN"])
-								self.text:SetWidth(140)
+								self.text:SetWidth(135)
 								self.text:SetFontObject("GameFontHighlight")
 							</OnLoad>
 							<OnClick>
@@ -3435,7 +3434,7 @@
 							<OnLoad>
 								TMW:TT(self, "ICONMENU_CHECKNEXT", "ICONMENU_CHECKNEXT_DESC")
 								self.text:SetText(TMW.L["ICONMENU_CHECKNEXT"])
-								self.text:SetWidth(140)
+								self.text:SetWidth(self:GetParent().FakeHidden.text:GetWidth())
 							</OnLoad>
 							<OnClick>
 								local groupID, iconID = TMW.CI.g, TMW.CI.i
@@ -3446,6 +3445,32 @@
 							</OnClick>
 						</Scripts>
 					</CheckButton>
+					
+					<EditBox name="$parentBindText" inherits="TellMeWhen_InputBoxTemplate" parentKey="BindText" autoFocus="false">
+						<Size y="15"/>
+						<Anchors>
+							<Anchor point="LEFT" relativeTo="$parentFakeHidden" relativePoint="RIGHT" x="135" y="0" />
+							<Anchor point="RIGHT" relativeTo="$parent" relativePoint="RIGHT" x="-16" y="0" />
+						</Anchors>
+						<Scripts>
+							<OnLoad>
+								TMW:TT(self, "UIPANEL_FONT_Bind", "ICONMENU_BINDTEXT_DESC")
+								self.label = TMW.L["UIPANEL_FONT_Bind"]
+								self.BackgroundText:SetWidth(self:GetWidth())
+							</OnLoad>
+							<OnEditFocusLost>
+								EditBox_ClearHighlight(self)
+								local groupID, iconID = TMW.CI.g, TMW.CI.i
+								self:SetText(TMW:CleanString(self:GetText()))
+								if TMW.CI.ics then
+									TMW.CI.ics.BindText = self:GetText()
+								end
+								TMW.IE:ScheduleIconUpdate(groupID, iconID)
+								self:GetScript("OnTextChanged")(self)
+							</OnEditFocusLost>
+						</Scripts>
+					</EditBox>
+					
 
 				</Frames>
 				<Layers>
@@ -4332,7 +4357,7 @@
 					</OnMouseDown>
 					<OnMouseUp>
 						self:SetScript("OnUpdate", nil)
-						TMW.db.profile.EditorScale = self:GetParent():GetScale()
+						TMW.db.global.EditorScale = self:GetParent():GetScale()
 					</OnMouseUp>
 					<OnEnter>
 						_G[self:GetName() .. "Texture"]:SetVertexColor(1, 1, 1)
@@ -4392,10 +4417,10 @@
 				local groupID, iconID = TMW.CI.g, TMW.CI.i
 				local ic = TMW.CI.ic
 				if (TMW.CNDT and TMW.CNDT.type == "group" and self.selectedTab == TMW.GRCNDTTab) or self.selectedTab == TMW.MOTab then
-					self.FS1:SetFormattedText(TMW.L["fGROUP"], TMW:GetGroupName(TMW.db.profile.Groups[groupID].Name, groupID, 1))
+					self.FS1:SetFormattedText(TMW.L["fGROUP"], TMW:GetGroupName(groupID, groupID, 1))
 					self.icontexture:Hide()
 				else
-					self.FS1:SetFormattedText(TMW.L["GROUPICON"], TMW:GetGroupName(TMW.db.profile.Groups[groupID].Name, groupID, 1), iconID)
+					self.FS1:SetFormattedText(TMW.L["GROUPICON"], TMW:GetGroupName(groupID, groupID, 1), iconID)
 					if ic then
 						self.icontexture:Show()
 						self.icontexture:SetTexture(ic.texture:GetTexture())

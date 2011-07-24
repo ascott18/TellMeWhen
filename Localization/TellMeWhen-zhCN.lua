@@ -1,4 +1,5 @@
 ﻿--[[ Credit for these translations goes to:
+	lsjyzjl
 	wowuicn
 --]]
 local L = LibStub("AceLocale-3.0"):NewLocale("TellMeWhen", "zhCN", false)

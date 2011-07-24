@@ -1,4 +1,4 @@
-﻿--GAME_LOCALE = "ruRU" --FOR TESTING
+﻿--GAME_LOCALE = UnitName("player") == "Cybeloras" and "zhCN" --FOR TESTING
 local L = LibStub("AceLocale-3.0"):NewLocale("TellMeWhen", "enUS", true)
 
 
@@ -102,6 +102,11 @@ L["ICONMENU_DRS"] = "Diminishing Returns"
 
 L["ICONMENU_CUSTOMTEX"] = "Custom Texture"
 L["ICONMENU_CUSTOMTEX_DESC"] = "If you want to override the texture shown by this icon, enter the Name or ID of the spell that has the texture that you want to use. You may also enter a texture path, such as 'Interface/Icons/spell_nature_healingtouch', or just 'spell_nature_healingtouch' if the path is 'Interface/Icons'"
+
+L["ICONMENU_BINDTEXT_DESC"] = [[Any text in this editbox will be shown on the icon where the keybinding is normally displayed on an action bar. Use this to remind yourself of what your keybinds are if you do not have your action bars shown.
+
+This does NOT set a keybinding to this TellMeWhen icon. It is simply a visual reminder that will be shown on the icon.]]
+
 
 
 L["ICONMENU_UNITSTOWATCH"] = "Units to watch"
@@ -305,7 +310,8 @@ L["UIPANEL_STANCE"] = "Show while in:"
 L["NONE"] = "None of these"
 L["CASTERFORM"] = "Caster Form"
 
-L["UIPANEL_FONT"] = "Stack Text"
+L["UIPANEL_FONT_Count"] = "Stack Text"
+L["UIPANEL_FONT_Bind"] = "Binding Text"
 L["UIPANEL_FONTFACE"] = "Font Face"
 L["UIPANEL_FONT_DESC"] = "Chose the font to be used by the stack text on icons."
 L["UIPANEL_FONT_SIZE"] = "Font Size"
@@ -500,6 +506,8 @@ L["DISABLED"] = "Disabled"
 L["IMPORTCOPY"] = "Copy/Import"
 L["COPYPOS"] = "Copy position/scale"
 L["COPYALL"] = "Copy entire group"
+L["OVERWRITEGROUP"] = "Overwrite group: %s"
+L["MAKENEWGROUP"] = "Create new group"
 
 L["GROUPADDONSETTINGS"] = "Group Settings"
 L["CONDITIONS"] = "Conditions"
@@ -563,20 +571,22 @@ L["SOUND_EVENT_ONHIDE_DESC"] = "This event triggers when the icon is hidden (eve
 L["SOUND_EVENT_ONSTART"] = "On Start"
 L["SOUND_EVENT_ONSTART_DESC"] = [[This event triggers when the cooldown becomes unusable, the buff/debuff is applied, etc.
 
-NOTE: This event will never trigger at the same time as the OnShow or OnHide events.]]
+NOTE: This event handler will never execute after executing an On Show or On Hide event.]]
 L["SOUND_EVENT_ONFINISH"] = "On Finish"
 L["SOUND_EVENT_ONFINISH_DESC"] = [[This event triggers when the cooldown becomes usable, the buff/debuff falls off, etc.
 
-NOTE: This event will never trigger at the same time as the OnShow or OnHide events.]]
+NOTE: This event handler will never execute after executing an On Show or On Hide event.]]
 
 L["SOUND_EVENT_ONALPHAINC"] = "On Alpha Increase"
 L["SOUND_EVENT_ONALPHAINC_DESC"] = [[This event triggers when the opacity of an icon increases.
 
-NOTE: This event will never trigger at the same time as the OnShow event.]]
+NOTE: This event will not trigger when increasing from 0% opacity (On Show).]]
 L["SOUND_EVENT_ONALPHADEC"] = "On Alpha Decrease"
 L["SOUND_EVENT_ONALPHADEC_DESC"] = [[This event triggers when the opacity of an icon decreases.
 
-NOTE: This event will never trigger at the same time as the OnHide event.]]
+NOTE: This event will not trigger when decreasing to 0% opacity (On Hide).]]
+
+L["SOUND_EVENT_GLOBALDESC"] = "Events are checked from top to bottom in this list. If an event is triggered that has a sound to play, no events below that event will play a sound."
 
 
 L["SOUND_EVENTS"] = "Icon Events"
@@ -606,6 +616,7 @@ L["ANN_SHOWICON_DESC"] = "Some text destinations can show a texture along with t
 L["ANN_SUB_CHANNEL"] = "Sub section"
 L["ANN_WHISPERTARGET"] = "Whisper target"
 L["ANN_WHISPERTARGET_DESC"] = "Input the name of the player that you would like to whisper. Normal server/faction whisper requirements apply."
+L["ANN_EVENT_GLOBALDESC"] = "Events are checked from top to bottom in this list. If an event is triggered that has text to output, no events below that event will output any text."
 
 
 
