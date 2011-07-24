@@ -33,7 +33,7 @@ local OnGCD = TMW.OnGCD
 local print = TMW.print
 local _, pclass = UnitClass("Player")
 local SpellTextures = TMW.SpellTextures
-
+local mindfreeze = strlower(GetSpellInfo(47528))
 
 local Type = {}
 LibStub("AceEvent-3.0"):Embed(Type)
@@ -122,6 +122,7 @@ local function AutoShot_OnUpdate(icon, time)
 	end
 end
 
+
 local function SpellCooldown_OnUpdate(icon, time)
 	if icon.UpdateTimer <= time - UPD_INTV then
 		icon.UpdateTimer = time
@@ -135,10 +136,8 @@ local function SpellCooldown_OnUpdate(icon, time)
 			n = i
 			start, duration = GetSpellCooldown(iName)
 			if duration then
-				if IgnoreRunes then
-					if start == GetSpellCooldown(45477) or start == GetSpellCooldown(45462) or start == GetSpellCooldown(45902) then
-						start, duration = 0, 0
-					end
+				if IgnoreRunes and duration == 10 and NameNameArray[i] ~= mindfreeze then
+					start, duration = 0, 0
 				end
 				inrange, nomana = 1
 				if RangeCheck then
@@ -165,10 +164,8 @@ local function SpellCooldown_OnUpdate(icon, time)
 			if ManaCheck then
 				_, nomana = IsUsableSpell(NameFirst)
 			end
-			if IgnoreRunes then
-				if start == GetSpellCooldown(45477) or start == GetSpellCooldown(45462) or start == GetSpellCooldown(45902) then
-					start, duration = 0, 0
-				end
+			if IgnoreRunes and duration == 10 and NameNameArray[i] ~= mindfreeze then
+				start, duration = 0, 0
 			end
 			isGCD = OnGCD(duration)
 		end
@@ -363,7 +360,7 @@ function Type:Setup(icon, groupID, iconID)
 		icon.NameArray = TMW:GetSpellNames(icon, icon.Name)
 		icon.NameNameArray = TMW:GetSpellNames(icon, icon.Name, nil, 1)
 		
-		if strlower(icon.NameName) == strlower(GetSpellInfo(75)) and not icon.NameArray[2] then
+		if icon.NameName == strlower(GetSpellInfo(75)) and not icon.NameArray[2] then
 			icon:SetTexture(GetSpellTexture(75))
 			icon.asStart = icon.asStart or 0
 			icon.asDuration = icon.asDuration or 0

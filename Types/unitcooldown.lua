@@ -26,6 +26,7 @@ local UnitGUID, IsInInstance =
 	  UnitGUID, IsInInstance
 local print = TMW.print
 local huge = math.huge
+local isNumber = TMW.isNumber
 local strlowerCache = TMW.strlowerCache
 local SpellTextures = TMW.SpellTextures
 
@@ -269,7 +270,7 @@ local function UnitCooldown_OnUpdate(icon, time)
 				local cooldowns = Cooldowns[guid]
 				for i = 1, NAL do
 					local iName = NameArray[i]
-					if type(iName) == "string" then
+					if not isNumber[iName] then
 						iName = cooldowns[iName] or iName-- spell name keys have values that are the spellid of the name, we need the spellid for the texture (thats why i did it like this)
 					end
 					local _start
@@ -336,13 +337,6 @@ function Type:Setup(icon, groupID, iconID)
 	icon.NameArray = TMW:GetSpellNames(icon, icon.Name)
 	icon.Durations = TMW:GetSpellDurations(icon, icon.Name)
 	icon.Units = TMW:GetUnits(icon, icon.Unit)
-
-	for k, v in pairs(icon.NameArray) do
-		-- this is for looking up the spellID in Cooldowns[GUID] - spell names are stored lowercase
-		if type(v) == "string" then
-			icon.NameArray[k] = strlower(v)
-		end
-	end
 
 	Type:RegisterEvent("COMBAT_LOG_EVENT_UNFILTERED")
 	Type:RegisterEvent("UNIT_SPELLCAST_SUCCEEDED")

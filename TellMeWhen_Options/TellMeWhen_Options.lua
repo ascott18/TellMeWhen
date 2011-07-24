@@ -3161,7 +3161,7 @@ function SUG:DoSuggest()
 				if 	(long and (
 						(strfind(strlowerCache[equiv], lastName)) or
 						(strfind(strlowerCache[L[equiv]], lastName)) or
-						((inputType == "string" and strfind(strlowerCache[EquivFullNameLookup[equiv]], semiLN)) or
+						((inputType == "string" and strfind(EquivFullNameLookup[equiv], semiLN)) or
 						(inputType == "number" and strfind(EquivFullIDLookup[equiv], semiLN))))
 				) or
 					(not long and (

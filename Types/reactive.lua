@@ -25,6 +25,7 @@ local OnGCD = TMW.OnGCD
 local print = TMW.print
 local _, pclass = UnitClass("Player")
 local SpellTextures = TMW.SpellTextures
+local mindfreeze = strlower(GetSpellInfo(47528))
 
 
 local Type = {}
@@ -102,10 +103,8 @@ local function Reactive_OnUpdate(icon, time)
 					nomana = nil
 				end
 				if CooldownCheck then
-					if IgnoreRunes then
-						if start == GetSpellCooldown(45477) or start == GetSpellCooldown(45462) or start == GetSpellCooldown(45902) then
-							start, duration = 0, 0
-						end
+					if IgnoreRunes and duration == 10 and NameNameArray[i] ~= mindfreeze then
+						start, duration = 0, 0
 					end
 					CD = not (duration == 0 or OnGCD(duration))
 				end
@@ -122,10 +121,8 @@ local function Reactive_OnUpdate(icon, time)
 		local NameFirst = icon.NameFirst
 		if n > 1 then -- if more than 1 spell was checked, we need to get these again for the first spell, otherwise reuse the values obtained above since they are just for the first one
 			start, duration = GetSpellCooldown(NameFirst)
-			if IgnoreRunes then
-				if start == GetSpellCooldown(45477) or start == GetSpellCooldown(45462) or start == GetSpellCooldown(45902) then
-					start, duration = 0, 0
-				end
+			if IgnoreRunes and duration == 10 and NameNameArray[i] ~= mindfreeze then
+				start, duration = 0, 0
 			end
 			inrange, nomana = 1
 			if RangeCheck then
