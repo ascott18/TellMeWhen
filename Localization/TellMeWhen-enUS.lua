@@ -321,6 +321,7 @@ L["UIPANEL_FONT_OUTLINE_DESC"] = "Sets the outline style for the stack text on i
 L["OUTLINE_NO"] = "No Outline"
 L["OUTLINE_THIN"] = "Thin Outline"
 L["OUTLINE_THICK"] = "Thick Outline"
+L["OUTLINE_MONOCHORME"] = "Monochrome"
 L["UIPANEL_FONT_OVERRIDELBF"] = "Override ButtonFacade"
 L["UIPANEL_FONT_OVERRIDELBF_DESC"] = "Check this to override the position of the stack text that is defined in your ButtonFacade skin."
 L["UIPANEL_FONT_XOFFS"] = "X Offset"

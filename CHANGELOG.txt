@@ -4,8 +4,8 @@
  * Moving/resizing a group that is anchored to a frame other than UIParent will adjust the offsets instead of resetting the anchor to UIParent.
  * Reactive icons and conditions should now more accurately reflect the state of the abilities that they are checking.
  * Improved rune cooldown detection.
- * NOTE TO TESTERS: BE ON THE LOOKOUT FOR THINGS THAT DONT WORK PROPERLY WITH SPELL NAMES! THERE WERE SOME CHANGES THAT COULD AFFECT THIS!
  * Version warnings should be slightly less annoying.
+ * Added monochrome as a font outline option.
  * New icon events:
  ** On Alpha Increase
  ** On Alpha Decrease

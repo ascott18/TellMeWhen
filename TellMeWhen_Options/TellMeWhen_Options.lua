@@ -395,6 +395,7 @@ local groupFontConfigTemplate = {
 				[""] = L["OUTLINE_NO"],
 				OUTLINE = L["OUTLINE_THIN"],
 				THICKOUTLINE = L["OUTLINE_THICK"],
+				MONOCHORME = L["OUTLINE_MONOCHORME"],
 			},
 			style = "dropdown",
 			order = 40,
