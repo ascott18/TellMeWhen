@@ -13,6 +13,8 @@
  ** Buff/Debuff - Tooltip Scan
  * Bug Fixes
  ** (r164) Tooltip scan conditions should now properly function with spellID input
+ ** (r170) TellMeWhen_Options-r169.lua:215: attempt to index field "?" (a nil value)
+ ** (r170) TellMeWhen_Options-r169.lua:1674: attempt to index field "?" (a nil value)
  
 ===v4.4.6===
  * Bug Fixes:

@@ -508,6 +508,8 @@ L["COPYPOS"] = "Copy position/scale"
 L["COPYALL"] = "Copy entire group"
 L["OVERWRITEGROUP"] = "Overwrite group: %s"
 L["MAKENEWGROUP"] = "Create new group"
+L["CONFIRMOVERWRITE"] = "Confirm overwrite"
+
 
 L["GROUPADDONSETTINGS"] = "Group Settings"
 L["CONDITIONS"] = "Conditions"

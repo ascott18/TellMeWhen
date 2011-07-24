@@ -211,7 +211,7 @@ function TMW:GuessIconTexture(data)
 end
 
 function TMW:GetGroupName(n, g, short)
-	if n == g then
+	if n and n == g then
 		n = db.profile.Groups[g].Name
 	end
 	if (not n) or n == "" then
@@ -1012,8 +1012,16 @@ function ID:OnInitialize()
 	ID.DD.wrapTooltips = 1
 end
 
-function ID:Drag_DropDown(a)
+function ID:Drag_DropDown()
 	local info = UIDropDownMenu_CreateInfo()
+	if UIDROPDOWNMENU_MENU_LEVEL == 2 then
+		info.text = L["CONFIRMOVERWRITE"]
+		info.notCheckable = true
+		info.func = UIDROPDOWNMENU_MENU_VALUE
+		UIDropDownMenu_AddButton(info, UIDROPDOWNMENU_MENU_LEVEL)
+		return
+	end
+	
 	local append = ""
 	if ID.desticon.texture:GetTexture() ~= "Interface\\AddOns\\TellMeWhen\\Textures\\Disabled" then
 		append = "|TInterface\\AddOns\\TellMeWhen_Options\\Textures\\Alert:0:2|t"
@@ -1021,38 +1029,57 @@ function ID:Drag_DropDown(a)
 	
 	info.text = L["ICONMENU_MOVEHERE"] .. append
 	info.notCheckable = true
-	info.func = ID.Move
-	UIDropDownMenu_AddButton(info)
+	if append ~= "" then
+		info.hasArrow = true
+		info.value = ID.Move
+		info.func = nil
+	else
+		info.hasArrow = nil
+		info.value = nil
+		info.func = ID.Move
+	end
+	UIDropDownMenu_AddButton(info, UIDROPDOWNMENU_MENU_LEVEL)
 
 	info.text = L["ICONMENU_COPYHERE"] .. append
-	info.func = ID.Copy
-	UIDropDownMenu_AddButton(info)
+	if append ~= "" then
+		info.hasArrow = true
+		info.value = ID.Copy
+		info.func = nil
+	else
+		info.hasArrow = nil
+		info.value = nil
+		info.func = ID.Copy
+	end
+	UIDropDownMenu_AddButton(info, UIDROPDOWNMENU_MENU_LEVEL)
+	
+	info.hasArrow = nil -- inherit for the rest
+	info.value = nil -- inherit for the rest
 
 	info.text = L["ICONMENU_SWAPWITH"]
 	info.func = ID.Swap
-	UIDropDownMenu_AddButton(info)
+	UIDropDownMenu_AddButton(info, UIDROPDOWNMENU_MENU_LEVEL)
 
 	if TMW:IsIconValid(ID.srcicon) then
 		info.text = L["ICONMENU_APPENDCONDT"]
 		info.func = ID.Condition
-		UIDropDownMenu_AddButton(info)
+		UIDropDownMenu_AddButton(info, UIDROPDOWNMENU_MENU_LEVEL)
 
 		if ID.desticon.Type == "meta" then
 			info.text = L["ICONMENU_ADDMETA"]
 			info.func = ID.Meta
-			UIDropDownMenu_AddButton(info)
+			UIDropDownMenu_AddButton(info, UIDROPDOWNMENU_MENU_LEVEL)
 		end
 	end
 	
 	if ID.srcgroupID ~= ID.destgroupID then
 		info.text = L["ICONMENU_ANCHOR"]:format(TMW:GetGroupName(ID.destgroupID, ID.destgroupID, 1))
 		info.func = ID.Anchor
-		UIDropDownMenu_AddButton(info)
+		UIDropDownMenu_AddButton(info, UIDROPDOWNMENU_MENU_LEVEL)
 	end
 
 	info.text = CANCEL
 	info.func = nil
-	UIDropDownMenu_AddButton(info)
+	UIDropDownMenu_AddButton(info, UIDROPDOWNMENU_MENU_LEVEL)
 
 	UIDropDownMenu_JustifyText(self, "LEFT")
 end
@@ -1131,6 +1158,7 @@ function ID:SetIsDraggingFalse()
 end
 
 function ID:Move()
+	CloseDropDownMenus()
 	if ID.destgroupID == ID.srcgroupID and ID.desticonID == ID.srciconID then return end
 	IE:SaveSettings()
 	db.profile.Groups[ID.destgroupID].Icons[ID.desticonID] = db.profile.Groups[ID.srcgroupID].Icons[ID.srciconID]
@@ -1153,19 +1181,21 @@ function ID:Move()
 	end
 
 	TMW:Update()
-	IE:Load()
+	IE:Load(1)
 end
 
 function ID:Copy()
+	CloseDropDownMenus()
 	if ID.destgroupID == ID.srcgroupID and ID.desticonID == ID.srciconID then return end
 	IE:SaveSettings()
 	db.profile.Groups[ID.destgroupID].Icons[ID.desticonID] = TMW:CopyWithMetatable(db.profile.Groups[ID.srcgroupID].Icons[ID.srciconID])
 	ID.desticon.texture:SetTexture(ID.srcicon.texture:GetTexture()) -- preserve buff/debuff/other types textures
 	TMW:Update()
-	IE:Load()
+	IE:Load(1)
 end
 
 function ID:Swap()
+	CloseDropDownMenus()
 	if ID.destgroupID == ID.srcgroupID and ID.desticonID == ID.srciconID then return end
 	IE:SaveSettings()
 	local dest = db.profile.Groups[ID.destgroupID].Icons[ID.desticonID]
@@ -1195,18 +1225,20 @@ function ID:Swap()
 	end
 
 	TMW:Update()
-	IE:Load()
+	IE:Load(1)
 end
 
 function ID:Meta()
+	CloseDropDownMenus()
 	if ID.destgroupID == ID.srcgroupID and ID.desticonID == ID.srciconID then return end
 	IE:SaveSettings()
 	tinsert(db.profile.Groups[ID.destgroupID].Icons[ID.desticonID].Icons, ID.srcicon:GetName())
 	TMW:Update()
-	IE:Load()
+	IE:Load(1)
 end
 
 function ID:Condition()
+	CloseDropDownMenus()
 	if ID.destgroupID == ID.srcgroupID and ID.desticonID == ID.srciconID then return end
 	IE:SaveSettings()
 
@@ -1216,16 +1248,16 @@ function ID:Condition()
 	condition.Icon = ID.srcicon:GetName()
 
 	TMW:Update()
-	IE:Load()
+	IE:Load(1)
 end
 
-ID.FS = CreateFrame("GameTooltip", "TMWIDFS")
 function ID:Anchor()
+	CloseDropDownMenus()
 	if ID.destgroupID == ID.srcgroupID then return end
 	db.profile.Groups[ID.srcgroupID].Point.relativeTo = TMW[ID.destgroupID]:GetName()
 	TMW:Group_StopMoving(TMW[ID.srcgroupID]) -- i cheat
 	TMW:Update()
-	IE:Load()
+	IE:Load(1)
 end
 
 -- ----------------------
@@ -1665,6 +1697,7 @@ function IE:Load(isRefresh, icon)
 	end
 
 	local groupID, iconID = CI.g, CI.i
+	if not groupID or not iconID then return end
 
 	IE.Main.Name:ClearFocus()
 	IE.Main.Unit:ClearFocus()
@@ -2341,13 +2374,10 @@ function IE:ScheduleIconUpdate(icon, groupID, iconID)
 		icon = TMW[groupID] and TMW[groupID][iconID]
 	end
 	if not icon then return end
-	print(CI.ic)
-	TMW:Icon_Update(icon)
-	--[[
 	if not TMW.tContains(iconsToUpdate, icon) then
 		tinsert(iconsToUpdate, icon)
 	end
-	IconUpdater:SetScript("OnUpdate", UpdateIcons)]]
+	IconUpdater:SetScript("OnUpdate", UpdateIcons)
 end
 
 
