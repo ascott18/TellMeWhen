@@ -3,6 +3,7 @@
  * You can now set custom text to be displayed where a keybinding would normally be displayed in order to remind you of your keybindings directly on TMW icons.
  * Moving/resizing a group that is anchored to a frame other than UIParent will adjust the offsets instead of resetting the anchor to UIParent.
  * Reactive icons and conditions should now more accurately reflect the state of the abilities that they are checking.
+ * Greatly increased the versatility and customizability of condition icons.
  * Improved rune cooldown detection.
  * Version warnings should be slightly less annoying.
  * Added monochrome as a font outline option.

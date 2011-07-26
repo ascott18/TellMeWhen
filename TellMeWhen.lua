@@ -34,7 +34,7 @@ local DRData = LibStub("DRData-1.0", true)
 TELLMEWHEN_VERSION = "4.5.0"
 TELLMEWHEN_VERSION_MINOR = strmatch(" @project-version@", " r%d+") or ""
 TELLMEWHEN_VERSION_FULL = TELLMEWHEN_VERSION .. TELLMEWHEN_VERSION_MINOR
-TELLMEWHEN_VERSIONNUMBER = 45012 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
+TELLMEWHEN_VERSIONNUMBER = 45013 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
 if TELLMEWHEN_VERSIONNUMBER > 46000 or TELLMEWHEN_VERSIONNUMBER < 45000 then return error("YOU SCREWED UP THE VERSION NUMBER OR DIDNT CHANGE THE SAFETY LIMITS") end -- safety check because i accidentally made the version number 414069 once
 
 TELLMEWHEN_MAXGROUPS = 1 	--this is a default, used by SetTheory (addon), so dont rename
@@ -535,6 +535,10 @@ TMW.Defaults = {
 						CheckRefresh		= true,
 						TotemSlots			= "1111",
 						BindText			= "",
+						ConditionDur		= 0,
+						UnConditionDur		= 0,
+						ConditionDurEnabled	= false,
+						UnConditionDurEnabled= false,
 						Events = {
 							["**"] = {
 								Sound = "None",
@@ -1232,11 +1236,11 @@ function TMW:Update()
 		TMW:CheckForInvalidIcons()
 	end
 
-	for group in TMW.InGroups() do
+	--[[for group in TMW.InGroups() do
 		-- attempt at a fix for the cooldown clock frame level bug - seems to work most of the time
 		group:SetFrameLevel(group:GetFrameLevel() + 1)
 		group:SetFrameLevel(group:GetFrameLevel() - 1)
-	end
+	end]]
 
 	time = GetTime() TMW.time = time
 	TMW:ScheduleTimer("RestoreSound", UPD_INTV*2.1)
@@ -1247,6 +1251,15 @@ local upgradeTable
 function TMW:GetUpgradeTable() -- upgrade functions
 	if upgradeTable then return upgradeTable end
 	local t = {
+		[45013] = {
+			icon = function(ics)
+				if ics.Type == "conditionicon" then
+					ics.Alpha = 1
+					ics.UnAlpha = ics.ConditionAlpha
+					ics.ConditionAlpha = 0
+				end
+			end,
+		},
 		[45008] = {
 			group = function(gs)
 				if gs.Font then
@@ -3341,6 +3354,7 @@ local function replace(text, find, rep)
 	return text
 end
 function TMW:CleanString(text)
+	if not text then return print(text, debugstack()) end
 	text = strtrim(text, "; \t\r\n")-- remove all leading and trailing semicolons, spaces, tabs, and newlines
 	text = replace(text, "[^:] ;", "; ") -- remove all spaces before semicolons
 	text = replace(text, "; ", ";") -- remove all spaces after semicolons

@@ -131,6 +131,10 @@ L["ICONMENU_PRESENT"] = "Present"
 L["ICONMENU_ABSENT"] = "Absent"
 L["ICONMENU_ALWAYS"] = "Always"
 
+L["ICONMENU_CNDTSHOWWHEN"] = "Show when conditions"
+L["ICONMENU_FAIL"] = "Fail"
+L["ICONMENU_SUCCEED"] = "Succeed"
+
 L["ICONMENU_CASTSHOWWHEN"] = "Show when a cast is"
 L["ICONMENU_ONLYINTERRUPTIBLE"] = "Only Interruptible"
 L["ICONMENU_ONLYINTERRUPTIBLE_DESC"] = "Check this box to only show spell casts that are interruptible"
@@ -209,6 +213,10 @@ L["ICONMENU_STACKS_MAX_DESC"] = "Maximum number of stacks of the aura allowed to
 L["DURATIONPANEL_TITLE"] = "Duration"
 L["ICONMENU_DURATION_MIN_DESC"] = "Minimum duration needed to show the icon"
 L["ICONMENU_DURATION_MAX_DESC"] = "Maximum duration allowed to show the icon"
+
+L["CONDITION_TIMERS_HEADER"] = "Timers"
+L["CONDITION_TIMERS_SUCCEED_DESC"] = "Duration of timer to set on the icon when conditions succeeding"
+L["CONDITION_TIMERS_FAIL_DESC"] = "Duration of timer to set on the icon when conditions begin failing"
 
 L["METAPANEL_TITLE"] = "Meta Icon Editor"
 L["METAPANEL_UP"] = "Move up"

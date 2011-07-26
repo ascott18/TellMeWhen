@@ -2001,7 +2001,7 @@ function CNDT:ProcessConditions(icon)
 				local thisstr = andor .. "(" .. strrep("(", c.PrtsBefore) .. thiscondtstr .. strrep(")", c.PrtsAfter)  .. ")"
 
 				
-				if strfind(thisstr, "c.Unit2") and (strfind(c.Name, "maintank") or strfind(c.Name, "mainassist")) then
+				if strfind(thisstr, "c.Unit2") and (strfind(c.Name, "maintank") or strfind(c.Name, "mainassist")) then -- Unit2 MUST be before Unit
 					local unit = gsub(c.Name, "|cFFFF0000#|r", "1")
 					thisstr = gsub(thisstr, "c.Unit2",		unit) -- sub it in as a variable
 					Env[unit] = unit
@@ -2032,7 +2032,7 @@ function CNDT:ProcessConditions(icon)
 
 				thisstr = thisstr:
 				gsub("c.Operator", 		c.Operator):
-				gsub("c.NameFirst2", 	"\"" .. TMW:GetSpellNames(nil, name2, 1) .. "\""):
+				gsub("c.NameFirst2", 	"\"" .. TMW:GetSpellNames(nil, name2, 1) .. "\""): --Name2 must be before Name
 				gsub("c.NameName2", 	"\"" .. TMW:GetSpellNames(nil, name2, 1, 1) .. "\""):
 				gsub("c.ItemID2", 		TMW:GetItemIDs(nil, name2, 1)):
 				gsub("c.Name2", 		"\"" .. name2 .. "\""):
@@ -2051,15 +2051,15 @@ function CNDT:ProcessConditions(icon)
 
 	if strfind(icon:GetName(), "Icon") then
 		funcstr = [[if not (]] .. strsub(funcstr, 4) .. [[) then
-			]] .. (icon.ConditionAlpha == 0 and (icon:GetName()..[[:SetAlpha(0) return true]]) or (icon:GetName()..[[.CndtFailed = 1]])) .. [[
+			]] .. (icon.ConditionAlpha == 0 and (icon:GetName()..[[:SetAlpha(0) return true, false]]) or (icon:GetName()..[[.CndtFailed = 1 return false, false]])) .. [[
 		else
-			]]..icon:GetName()..[[.CndtFailed = nil
+			]]..icon:GetName()..[[.CndtFailed = nil return false, true
 		end]]
 	else -- its a group condition
 		funcstr = [[if not (]] .. strsub(funcstr, 4) .. [[) then
-			]] .. icon:GetName() .. [[:Hide()
+			]] .. icon:GetName() .. [[:Hide() return false, false
 		else
-			]] .. icon:GetName() .. [[:Show()
+			]] .. icon:GetName() .. [[:Show() return false, true
 		end]]
 	end
 

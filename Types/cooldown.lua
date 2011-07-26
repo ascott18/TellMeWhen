@@ -459,13 +459,13 @@ function Type:IE_TypeLoaded()
 	end
 	
 	local Name = TMW.IE.Main.Name
-	Name.TTtext = TMW.CI.IMS and L["CHOOSENAME_DIALOG_MSCD"] or L["CHOOSENAME_DIALOG"]
+	Name.__text = TMW.CI.IMS and L["CHOOSENAME_DIALOG_MSCD"] or L["CHOOSENAME_DIALOG"]
 	Name:GetScript("OnTextChanged")(Name)
 end
 
 function Type:IE_TypeUnloaded()
 	local Name = TMW.IE.Main.Name
-	Name.TTtext = L["CHOOSENAME_DIALOG"]
+	Name.__text = L["CHOOSENAME_DIALOG"]
 	Name:GetScript("OnTextChanged")(Name)
 end
 

@@ -3157,6 +3157,89 @@
 							</OnClick>
 						</Scripts>
 					</CheckButton>
+					
+					<EditBox name="$parentConditionDur" parentKey="ConditionDur" inherits="TellMeWhen_TimeEditBoxTemplate">
+						<Anchors>
+							<Anchor point="LEFT" relativeTo="$parentTypeChecks" relativePoint="RIGHT" x="35" y="0" />
+							<Anchor point="TOP" relativeTo="$parentUnit" relativePoint="BOTTOM" x="0" y="-32" />
+						</Anchors>
+						<Scripts>
+							<OnLoad>
+								TMW:TT(self, "ICONMENU_SUCCEED", "CONDITION_TIMERS_SUCCEED_DESC")
+								self.text:SetText(TMW.L["ICONMENU_SUCCEED"])
+								self.setting = "ConditionDur"
+							</OnLoad>
+							<OnShow>
+								TMW.IE.Main.ConditionDurHeader:Show()
+							</OnShow>
+							<OnHide>
+								TMW.IE.Main.ConditionDurHeader:Hide()
+							</OnHide>
+						</Scripts>
+					</EditBox>
+					<EditBox name="$parentUnConditionDur" parentKey="UnConditionDur" inherits="TellMeWhen_TimeEditBoxTemplate">
+						<Anchors>
+							<Anchor point="LEFT" relativeTo="$parentConditionDur" relativePoint="RIGHT" x="40" y="0" />
+						</Anchors>
+						<Scripts>
+							<OnLoad>
+								TMW:TT(self, "ICONMENU_FAIL", "CONDITION_TIMERS_FAIL_DESC")
+								self.text:SetText(TMW.L["ICONMENU_FAIL"])
+								self.setting = "UnConditionDur"
+							</OnLoad>
+						</Scripts>
+
+					</EditBox>
+					<CheckButton name="$parentConditionDurEnabled" parentKey="ConditionDurEnabled" inherits="TellMeWhen_CheckTemplate">
+						<Size x="25" y="25" />
+						<Anchors>
+							<Anchor point="RIGHT" relativeto="$parentConditionDur" relativePoint="LEFT" x="-3" y="0" />
+						</Anchors>
+						<Scripts>
+							<OnClick>
+								local f = self:GetParent().ConditionDur
+								local checked = not not self:GetChecked()
+								if checked then
+									f:SetAlpha(1)
+								else
+									f:SetAlpha(.4)
+								end
+								f:EnableKeyboard(checked)
+								f:EnableMouse(checked)
+
+								local groupID, iconID = TMW.CI.g, TMW.CI.i
+								if TMW.db then
+									TMW.db.profile.Groups[groupID].Icons[iconID]["ConditionDurEnabled"] = checked
+									TMW.IE:ScheduleIconUpdate(groupID, iconID)
+								end
+							</OnClick>
+						</Scripts>
+					</CheckButton>
+					<CheckButton name="$parentUnConditionDurEnabled" parentKey="UnConditionDurEnabled" inherits="TellMeWhen_CheckTemplate">
+						<Size x="25" y="25" />
+						<Anchors>
+							<Anchor point="RIGHT" relativeto="$parentUnConditionDur" relativePoint="LEFT" x="-3" y="0" />
+						</Anchors>
+						<Scripts>
+							<OnClick>
+								local f = self:GetParent().UnConditionDur
+								local checked = not not self:GetChecked()
+								if checked then
+									f:SetAlpha(1)
+								else
+									f:SetAlpha(.4)
+								end
+								f:EnableKeyboard(checked)
+								f:EnableMouse(checked)
+
+								local groupID, iconID = TMW.CI.g, TMW.CI.i
+								if TMW.db then
+									TMW.db.profile.Groups[groupID].Icons[iconID]["UnConditionDurEnabled"] = checked
+									TMW.IE:ScheduleIconUpdate(groupID, iconID)
+								end
+							</OnClick>
+						</Scripts>
+					</CheckButton>
 
 					<EditBox name="$parentStackMin" parentKey="StackMin" inherits="TellMeWhen_TimeEditBoxTemplate">
 						<Anchors>
@@ -3475,6 +3558,15 @@
 				</Frames>
 				<Layers>
 					<Layer level="OVERLAY">
+						<FontString name="$parentConditionDurHeader" parentKey="ConditionDurHeader" inherits="GameFontNormal" justifyH="CENTER">
+							<Anchors>
+								<Anchor point="LEFT" relativeTo="$parentConditionDur" relativePoint="LEFT"/>
+								<Anchor point="RIGHT" relativeTo="$parentUnConditionDur" relativePoint="RIGHT"/>
+								<Anchor point="BOTTOM" relativeTo="$parentConditionDur" relativePoint="TOP">
+									<Offset x="0" y="14" />
+								</Anchor>
+							</Anchors>
+						</FontString>
 						<FontString name="$parentDurationHeader" parentKey="DurationHeader" inherits="GameFontNormal" justifyH="CENTER">
 							<Anchors>
 								<Anchor point="LEFT" relativeTo="$parentDurationMin" relativePoint="LEFT"/>
@@ -3506,6 +3598,7 @@
 					<OnLoad>
 						self:RegisterForDrag("LeftButton")
 						self.DurationHeader:SetText(TMW.L["DURATIONPANEL_TITLE"])
+						self.ConditionDurHeader:SetText(TMW.L["CONDITION_TIMERS_HEADER"])
 						self.StackHeader:SetText(TMW.L["STACKSPANEL_TITLE"])
 						self.TransparencyHeader:SetText(TMW.L["ICONMENU_ALPHA"] .. ":")
 					</OnLoad>
