@@ -7,6 +7,7 @@
  * Improved rune cooldown detection.
  * Version warnings should be slightly less annoying.
  * Added monochrome as a font outline option.
+ * Buff/debuff icons can now display the first number found in the tooltip of the aura that has been found on the icon.
  * New icon events:
  ** On Alpha Increase
  ** On Alpha Decrease

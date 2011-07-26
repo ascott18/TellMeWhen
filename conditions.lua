@@ -288,14 +288,7 @@ function CNDT:UNIT_VEHICLE(_, unit)
 	end
 end
 
-local Parser = CreateFrame("GameTooltip", "TMWCNDTParser", TMW, "GameTooltipTemplate")
 
-local playerAuraTooltipCache = {}
-function CNDT:UNIT_AURA(_, unit)
-	if unit == "player" then
-		CNDT.playerAuraChanged = true
-	end
-end
 
 local PetModes = {
     clientVersion >= 40200 and "PET_MODE_ASSIST" or "PET_MODE_AGGRESSIVE",
@@ -472,34 +465,6 @@ end
 function Env.TotemDuration(slot, time)
 	local have, name, start, duration = GetTotemInfo(slot)
 	return duration and duration ~= 0 and (duration - (time - start)) or 0
-end
-
-function Env.GetTooltipNumber(unit, name, filter)
-	if unit == "player" and not CNDT.playerAuraChanged and playerAuraTooltipCache[name..filter] then
-		return playerAuraTooltipCache[name..filter]
-	end
-	local n
-	for i = 1, 60 do
-		local buffName, _, _, _, _, _, _, _, _, _, id = UnitAura(unit, i, filter)
-		if not buffName then 
-			break
-		elseif id == name or strlowerCache[buffName] == name then
-			n = i
-			break
-		end
-	end
-	local ret = 0
-	if n then
-		GameTooltip_SetDefaultAnchor(Parser, UIParent)
-		Parser:SetUnitAura(unit, n, filter)
-		local text = TMWCNDTParserTextLeft2:GetText()
-		Parser:Hide()
-		ret = text and tonumber(strmatch(text, "%d+")) or 0
-	end
-	if unit == "player" then
-		playerAuraTooltipCache[name..filter] = ret
-	end
-	return ret
 end
 
 
@@ -1367,8 +1332,8 @@ CNDT.Types = {
 		check = function(check) TMW:TT(check, "ONLYCHECKMINE", "ONLYCHECKMINE_DESC", nil, nil, 1) end,
 		icon = "Interface\\Icons\\inv_elemental_primal_mana",
 		tcoords = standardtcoords,
-		events = "UNIT_AURA",
 		funcstr = function(c)
+			TMW:EnableTooltipParsing()
 			local name = TMW:GetSpellNames(nil, c.Name, 1)
 			name = tonumber(name) or strlower(name)
 			return [[GetTooltipNumber(c.Unit, "]]..name..[[", "HELPFUL]] .. (c.Checked and "|PLAYER" or "") .. [[") c.Operator c.Level]]
@@ -1451,8 +1416,8 @@ CNDT.Types = {
 		check = function(check) TMW:TT(check, "ONLYCHECKMINE", "ONLYCHECKMINE_DESC", nil, nil, 1) end,
 		icon = "Interface\\Icons\\spell_shadow_lifedrain",
 		tcoords = standardtcoords,
-		events = "UNIT_AURA",
 		funcstr = function(c)
+			TMW:EnableTooltipParsing()
 			local name = TMW:GetSpellNames(nil, c.Name, 1)
 			name = tonumber(name) or strlower(name)
 			return [[GetTooltipNumber(c.Unit, "]]..name..[[", "HARMFUL]] .. (c.Checked and "|PLAYER" or "") .. [[") c.Operator c.Level]]

@@ -1436,6 +1436,7 @@ IE.Checks = { --1=check box, 2=editbox, 3=slider(x100), 4=custom, table=subkeys 
 	EnableStacks = 1,
 	CheckRefresh = 1,
 	Stealable = 1,
+	ShowTTText = 1,
 }
 IE.Tabs = {
 	[1] = "Main",

@@ -179,6 +179,8 @@ L["AIR"] = "Air"
 L["MUSHROOMS"] = "Mushrooms to check"
 L["MUSHROOM"] = "Mushroom %d"
 
+L["ICONMENU_SHOWTTTEXT"] = "Show tooltip text"
+L["ICONMENU_SHOWTTTEXT_DESC"] = "Check this to display the first number found in the buff/debuff's tooltip in place of the stack text."
 L["ICONMENU_RANGECHECK"] = "Range check"
 L["ICONMENU_RANGECHECK_DESC"] = "Check this to enable changing the color of the icon when you are out of range"
 L["ICONMENU_MANACHECK"] = "Power check"

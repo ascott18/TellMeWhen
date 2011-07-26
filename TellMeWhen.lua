@@ -34,7 +34,7 @@ local DRData = LibStub("DRData-1.0", true)
 TELLMEWHEN_VERSION = "4.5.0"
 TELLMEWHEN_VERSION_MINOR = strmatch(" @project-version@", " r%d+") or ""
 TELLMEWHEN_VERSION_FULL = TELLMEWHEN_VERSION .. TELLMEWHEN_VERSION_MINOR
-TELLMEWHEN_VERSIONNUMBER = 45015 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
+TELLMEWHEN_VERSIONNUMBER = 45016 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
 if TELLMEWHEN_VERSIONNUMBER > 46000 or TELLMEWHEN_VERSIONNUMBER < 45000 then return error("YOU SCREWED UP THE VERSION NUMBER OR DIDNT CHANGE THE SAFETY LIMITS") end -- safety check because i accidentally made the version number 414069 once
 
 TELLMEWHEN_MAXGROUPS = 1 	--this is a default, used by SetTheory (addon), so dont rename
@@ -60,7 +60,7 @@ local MikSBT, Parrot, SCT =
 local CL_PLAYER = COMBATLOG_OBJECT_TYPE_PLAYER
 local CL_PET = COMBATLOG_OBJECT_CONTROL_PLAYER
 local bitband = bit.band
-local st, co, updatehandler, BarGCD, ClockGCD, Locked, CNDT, SndChan, FramesToFind
+local st, co, updatehandler, BarGCD, ClockGCD, Locked, CNDT, SndChan, FramesToFind, UnitsToUpdate
 local runEvents, updatePBar = 1, 1
 local GCD, NumShapeshiftForms, UpdateTimer = 0, 0, 0
 local IconUpdateFuncs, GroupUpdateFuncs, unitsToChange = {}, {}, {}
@@ -123,7 +123,7 @@ TMW.isNumber = setmetatable(
 		local o = tonumber(i) or false
 		t[i] = o
 		return o
-end})
+end}) local isNumber = TMW.isNumber
 
 TMW.Icons = {}
 TMW.IconsLookup = {}
@@ -532,6 +532,7 @@ TMW.Defaults = {
 						OnlyInBags			= false,
 						OnlySeen			= false,
 						Stealable			= false,
+						ShowTTText			= false,
 						CheckRefresh		= true,
 						TotemSlots			= "1111",
 						BindText			= "",
@@ -1169,7 +1170,9 @@ function TMW:OnUpdate() -- this is where all icon OnUpdate scripts are actually 
 			wipe(TMW.AlreadyChecked)
 		end
 		updatePBar = nil
-		CNDT.playerAuraChanged = nil
+		if UnitsToUpdate then
+			wipe(UnitsToUpdate)
+		end
 	end
 end
 
@@ -3076,6 +3079,76 @@ end
 -- ------------------
 -- NAME/ETC FUNCTIONS
 -- ------------------
+
+
+function TMW:EnableTooltipParsing()
+	if TMW.TooltipParsingEnabled then return end
+	local Parser = CreateFrame("GameTooltip", "TMWParser", TMW, "GameTooltipTemplate")
+	UnitsToUpdate = {}
+
+	local auraTooltipCache = {}
+	local cachableUnits = {
+		player = true,
+		target = true,
+		focus = true,
+		pet = true,
+	}
+	function TMW:UNIT_AURA(_, unit)
+		if cachableUnits[unit] then
+			UnitsToUpdate[unit] = true
+		end
+	end
+	function TMW:PLAYER_TARGET_CHANGED()
+		UnitsToUpdate.target = true
+	end
+	function TMW:UNIT_PET(_, owner)
+		if owner == "player" then
+			UnitsToUpdate.pet = true
+		end
+	end
+	function TMW:PLAYER_FOCUS_CHANGED()
+		UnitsToUpdate.focus = true
+	end
+	TMW:RegisterEvent("UNIT_AURA")
+	TMW:RegisterEvent("PLAYER_TARGET_CHANGED")
+	TMW:RegisterEvent("UNIT_PET")
+	TMW:RegisterEvent("PLAYER_FOCUS_CHANGED")
+
+	function TMW.GetTooltipNumber(unit, name, filter, n)
+		local cachestr = unit..name..filter
+		if cachableUnits[unit] and not UnitsToUpdate[unit] and auraTooltipCache[cachestr] then
+			return auraTooltipCache[cachestr]
+		end
+		if not n then
+			for i = 1, 60 do
+				local buffName, _, _, _, _, _, _, _, _, _, id = UnitAura(unit, i, filter)
+				if not buffName then 
+					break
+				elseif id == name or strlowerCache[buffName] == strlowerCache[name] then
+					n = i
+					break
+				end
+			end
+		end
+		local ret = 0
+		if n then
+			GameTooltip_SetDefaultAnchor(Parser, UIParent)
+			Parser:SetUnitAura(unit, n, filter)
+			local text = TMWParserTextLeft2:GetText()
+			Parser:Hide()
+			ret = text and isNumber[strmatch(text, "%d+")] or 0
+		end
+		if cachableUnits[unit] then
+			auraTooltipCache[cachestr] = ret
+		end
+		return ret
+	end
+	TMW.CNDT.Env.GetTooltipNumber = TMW.GetTooltipNumber
+	Types.buff:Update()
+	TMW.TooltipParsingEnabled = 1
+end
+
+
 
 local mult = {
     1,
