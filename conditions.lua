@@ -322,7 +322,17 @@ function CNDT:MINIMAP_UPDATE_TRACKING()
 	end
 end
 
-
+function CNDT:PLAYER_TALENT_UPDATE()
+	for tab = 1, GetNumTalentTabs() do
+		for talent = 1, GetNumTalents(tab) do
+			local name, _, _, _, rank = GetTalentInfo(tab, talent)
+			local lower = name and strlowerCache[name]
+			if lower then
+				Env.TalentMap[lower] = rank or 0
+			end
+		end
+	end
+end
 
 Env = {
 	UnitHealth = UnitHealth,
@@ -381,6 +391,7 @@ Env = {
 	print = TMW.print,
 	time = GetTime(),
 	Tracking = {},
+	TalentMap = {},
 } CNDT.Env = Env
 
 -- helper functions
@@ -1084,6 +1095,20 @@ CNDT.Types = {
 		icon = function() return select(4, GetTalentTabInfo(1)) end,
 		tcoords = standardtcoords,
 		funcstr = [[CurrentTree c.Operator c.Level]],
+	}, 
+	{ -- points in talent
+		text = L["UIPANEL_PTSINTAL"],
+		category = L["CNDTCAT_STATUS"],
+		value = "PTSINTAL",
+		min = 0,
+		max = 5,
+		unit = PLAYER,
+		name = function(editbox) TMW:TT(editbox, "SPELLTOCHECK", "CNDT_ONLYFIRST", nil, nil, 1) editbox.label = L["SPELLTOCHECK"] end,
+		useSUG = true,
+		icon = function() return select(2, GetTalentInfo(1, 1)) end,
+		tcoords = standardtcoords,
+		funcstr = [[(TalentMap[c.NameName] or 0) c.Operator c.Level]],
+		events = "PLAYER_TALENT_UPDATE",
 	},
 	{ -- pet autocast
 		text = L["CONDITIONPANEL_AUTOCAST"],

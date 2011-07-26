@@ -3161,8 +3161,7 @@
 					
 					<EditBox name="$parentConditionDur" parentKey="ConditionDur" inherits="TellMeWhen_TimeEditBoxTemplate">
 						<Anchors>
-							<Anchor point="LEFT" relativeTo="$parentTypeChecks" relativePoint="RIGHT" x="35" y="0" />
-							<Anchor point="TOP" relativeTo="$parentUnit" relativePoint="BOTTOM" x="0" y="-32" />
+							<Anchor point="TOPLEFT" relativeTo="$parentShowTText" relativePoint="BOTTOMLEFT" x="25" y="-30" />
 						</Anchors>
 						<Scripts>
 							<OnLoad>

@@ -12,6 +12,7 @@
  ** On Alpha Decrease
  * New Conditions:
  ** Buff/Debuff - Tooltip Scan
+ ** Points in talent
  * Bug Fixes
  ** (r164) Tooltip scan conditions should now properly function with spellID input
  ** (r170) TellMeWhen_Options-r169.lua:215: attempt to index field "?" (a nil value)
