@@ -319,13 +319,13 @@
 				_G[self:GetName() .. "High"]:SetText(maxValue .. "%")
 			</OnMinMaxChanged>
 			<OnValueChanged>
-				_G[self:GetName() .. "Val"]:SetText(value .. "%")
+				self.val:SetText(value .. "%")
 				local groupID, iconID = TMW.CI.g, TMW.CI.i
 				if TMW.CI.ics and not self.fakeNextSetValue then
 					TMW.CI.ics[self.setting] = value / 100
 					TMW.IE:ScheduleIconUpdate(groupID, iconID)
-					if (value == 0 and self.setting ~= "ConditionAlpha") or (value == 100 and self.setting == "ConditionAlpha") then
-						_G[self:GetName() .. "Val"]:SetText("|cffff7400" .. value .. "%")
+					if self:IsEnabled() and ((value == 0 and self.setting ~= "ConditionAlpha") or (value == 100 and self.setting == "ConditionAlpha")) then
+						self.val:SetText("|cffff7400" .. value .. "%")
 					end
 				end
 			</OnValueChanged>
@@ -340,6 +340,7 @@
 				self:SetAlpha(0.4)
 				self.fakeNextSetValue = 1
 				self:SetValue(0)
+				self.val:SetText("0%")
 				self.fakeNextSetValue = nil
 			</OnDisable>
 			<OnMouseWheel>
