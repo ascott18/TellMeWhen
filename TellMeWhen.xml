@@ -13,7 +13,7 @@
 			</Layer>
 		</Layers>
 		<Frames>
-			<Button name="$parent_ResizeButton" parentKey="resizeButton" frameStrata="HIGH">
+			<Button name="$parent_ResizeButton" parentKey="resizeButton">
 				<Size>
 					<AbsDimension x="10" y="10"/>
 				</Size>

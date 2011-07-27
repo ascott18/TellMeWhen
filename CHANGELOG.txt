@@ -1,3 +1,7 @@
+===v4.5.1===
+ * Bug Fixes:
+ ** The "Ignore Runes" setting should no longer appear for item cooldown icons
+
 ===v4.5.0===
  * Fully integrated main addon settings/group settings into the icon editor.
  * You can now set custom text to be displayed where a keybinding would normally be displayed in order to remind you of your keybindings directly on TMW icons.
