@@ -1,4 +1,6 @@
 ===v4.5.1===
+ * You can now shift-click links into the Announcement Editbox.
+ * You can now shift-click links into the Choose Name/ID Editbox to insert a spellID/itemID.
  * Bug Fixes:
  ** The "Ignore Runes" setting should no longer appear for item cooldown icons
  ** Meta icons should now inherit icon properties from other icons a little better.

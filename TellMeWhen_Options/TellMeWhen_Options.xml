@@ -165,7 +165,7 @@
 				self.Background:SetVertexColor(0, 1, 0)
 			</OnLoad>
 			<OnClick>
-				TMW.SUG.OnClick(self)
+				TMW.SUG:OnClick(self)
 			</OnClick>
 			<OnEnter>
 				GameTooltip_SetDefaultAnchor(GameTooltip, self)
@@ -274,7 +274,7 @@
 				EditBox_ClearHighlight(self)
 				local groupID, iconID = TMW.CI.g, TMW.CI.i
 
-				local t = TMW:CleanString(self:GetText())
+				local t = TMW:CleanString(self)
 				if strfind(self.setting, "Duration") and strfind(t, ":") then
 					t = t:toseconds()
 				end
@@ -567,7 +567,7 @@
 					</OnLoad>
 					<OnEditFocusLost>
 						EditBox_ClearHighlight(self)
-						self:SetText(TMW:CleanString(self:GetText()))
+						TMW:CleanString(self)
 						TMW.CNDT:OK()
 					</OnEditFocusLost>
 				</Scripts>
@@ -656,7 +656,7 @@
 				<Scripts>
 					<OnEditFocusLost>
 						EditBox_ClearHighlight(self)
-						self:SetText(TMW:CleanString(self:GetText()))
+						TMW:CleanString(self)
 						TMW.CNDT:OK()
 					</OnEditFocusLost>
 					<OnEditFocusGained>
@@ -683,7 +683,7 @@
 				<Scripts>
 					<OnEditFocusLost>
 						EditBox_ClearHighlight(self)
-						self:SetText(TMW:CleanString(self:GetText()))
+						TMW:CleanString(self)
 						TMW.SUG.Suggest:Hide()
 						TMW.CNDT:OK()
 					</OnEditFocusLost>
@@ -2074,7 +2074,7 @@
 							<OnEditFocusLost>
 								EditBox_ClearHighlight(self)
 								local groupID, iconID = TMW.CI.g, TMW.CI.i
-								self:SetText(TMW:CleanString(self:GetText()))
+								TMW:CleanString(self)
 								if TMW.CI.ics then
 									TMW.CI.ics["Name"] = TMW:CleanString(self:GetText())
 								end
@@ -2214,7 +2214,7 @@
 							<OnEditFocusLost>
 								EditBox_ClearHighlight(self)
 								local groupID, iconID = TMW.CI.g, TMW.CI.i
-								self:SetText(TMW:CleanString(self:GetText()))
+								TMW:CleanString(self)
 								if TMW.CI.ics then
 									TMW.CI.ics.CustomTex = strtrim(self:GetText())
 								end
@@ -2266,7 +2266,7 @@
 							<OnEditFocusLost>
 								EditBox_ClearHighlight(self)
 								local groupID, iconID = TMW.CI.g, TMW.CI.i
-								self:SetText(TMW:CleanString(self:GetText()))
+								TMW:CleanString(self)
 								if TMW.CI.ics then
 									TMW.CI.ics.Unit = strtrim(self:GetText())
 								end
@@ -3481,7 +3481,7 @@
 							</OnLoad>
 							<OnEditFocusLost>
 								EditBox_ClearHighlight(self)
-								self:SetText(TMW:CleanString(self:GetText()))
+								TMW:CleanString(self)
 								self:GetScript("OnTextChanged")(self)
 							</OnEditFocusLost>
 						</Scripts>
@@ -3562,7 +3562,7 @@
 							<OnEditFocusLost>
 								EditBox_ClearHighlight(self)
 								local groupID, iconID = TMW.CI.g, TMW.CI.i
-								self:SetText(TMW:CleanString(self:GetText()))
+								TMW:CleanString(self)
 								if TMW.CI.ics then
 									TMW.CI.ics.BindText = self:GetText()
 								end
@@ -3868,7 +3868,7 @@
 								EditBox_ClearHighlight(self)
 								local groupID, iconID = TMW.CI.g, TMW.CI.i
 
-								local t = TMW:CleanString(self:GetText())
+								local t = TMW:CleanString(self)
 								t = gsub(t, "/", "\\")
 								local wt
 
@@ -3944,7 +3944,7 @@
 							<OnEditFocusLost>
 								EditBox_ClearHighlight(self)
 								local groupID, iconID = TMW.CI.g, TMW.CI.i
-								self:SetText(TMW:CleanString(self:GetText()))
+								TMW:CleanString(self)
 								if TMW.CI.ics and TMW.ANN.currentEvent then
 									TMW.CI.ics.Events[TMW.ANN.currentEvent].Text = self:GetText()
 								end
@@ -4022,7 +4022,7 @@
 							</OnLoad>
 						</Scripts>
 					</Frame>
-					<EditBox name="$parentEditBox" inherits="TellMeWhen_InputBoxTemplate" parentKey="EditBox" autoFocus="false">
+					<EditBox name="$parentWhisperTarget" inherits="TellMeWhen_InputBoxTemplate" parentKey="WhisperTarget" autoFocus="false">
 						<Size x="135" y="15"/>
 						<Anchors>
 							<Anchor point="TOPLEFT" relativeTo="$parentChannels" relativePoint="TOPRIGHT" x="20" y="0" />
@@ -4037,7 +4037,7 @@
 							<OnEditFocusLost>
 								EditBox_ClearHighlight(self)
 								local groupID, iconID = TMW.CI.g, TMW.CI.i
-								self:SetText(TMW:CleanString(self:GetText()))
+								TMW:CleanString(self)
 								if TMW.CI.ics then
 									TMW.CI.ics.Events[TMW.ANN.currentEvent].Location = self:GetText()
 								end

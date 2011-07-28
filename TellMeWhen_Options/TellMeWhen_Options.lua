@@ -1875,7 +1875,7 @@ end
 function IE:Equiv_DropDown_OnClick(value)
 	local e = IE.Main.Name
 	e:Insert("; " .. value .. "; ")
-	local new = TMW:CleanString(e:GetText())
+	local new = TMW:CleanString(e)
 	e:SetText(new)
 	local _, position = strfind(new, gsub(value, "([%-])", "%%%1"))
 	position = tonumber(position) + 2
@@ -1963,7 +1963,7 @@ end
 function IE:Unit_DropDown_OnClick()
 	local e = IE.Main.Unit
 	e:Insert(";" .. self.value .. ";")
-	e:SetText(TMW:CleanString(e:GetText()))
+	TMW:CleanString(e)
 	local groupID, iconID = CI.g, CI.i
 	db.profile.Groups[groupID].Icons[iconID].Unit = e:GetText()
 	IE:ScheduleIconUpdate(groupID, iconID)
@@ -2317,7 +2317,7 @@ end
 local cachednames = {}
 function IE:GetRealNames()
 	-- gets a string to set as a tooltip of all of the spells names in the name box in the IE. Splits up equivalancies and turns IDs into names
-	local text = TMW:CleanString(IE.Main.Name:GetText())
+	local text = TMW:CleanString(IE.Main.Name)
 	if cachednames[CI.t .. CI.SoI .. text] then return cachednames[CI.t .. CI.SoI .. text] end
 
 	local tbl
@@ -2657,6 +2657,51 @@ end
 ANN = TMW:NewModule("Announcements") TMW.ANN = ANN
 local ChannelLookup = TMW.ChannelLookup
 
+local old_ChatEdit_InsertLink = ChatEdit_InsertLink
+function ChatEdit_InsertLink(...)
+	local text = ...
+	if ANN.Editbox:HasFocus() then
+		ANN.Editbox:Insert(text)
+		return true
+	elseif IE.Main.Name:HasFocus() then
+		if strmatch(text, "|H(.-):%d+") ~= CI.SoI then
+			return false
+		end
+		local Name = IE.Main.Name
+		local NameText = Name:GetText()
+		local start = Name:GetNumLetters()
+		for i = Name:GetCursorPosition(), start, 1 do
+			if strsub(NameText, i, i) == ";" then
+				start = i+1
+				break
+			end
+		end
+		Name:SetCursorPosition(start)
+		local new = strmatch(text, ":(%d+)") or ""
+		text = "; " .. new .. "; "
+		IE.Main.Name:Insert(text)
+		TMW:CleanString(IE.Main.Name)
+		Name:SetCursorPosition(start + #new + 2)
+		return true
+	elseif IE.Main.CustomTex:HasFocus() then
+		local new = strmatch(text, ":(%d+)")
+		if not new then return false end
+		local Type = strmatch(text, "|H(.-):%d+")
+		print(new, Type)
+		if Type == "spell" then
+			IE.Main.CustomTex:SetText(new)
+			return true
+		elseif Type == "item" then
+			IE.Main.CustomTex:SetText(GetItemIcon(new))
+			return true
+		elseif Type == "achievement" then
+			IE.Main.CustomTex:SetText(select(10, GetAchievementInfo(new)))
+			return true
+		end
+	end
+	return old_ChatEdit_InsertLink(...)
+end
+
 function ANN:OnInitialize()
 	local Events = ANN.Events
 	Events.Header:SetText(L["SOUND_EVENTS"])
@@ -2780,10 +2825,10 @@ function ANN:SelectChannel(channel)
 			ANN.Size:Hide()
 		end
 		if channelsettings.editbox then
-			ANN.EditBox:SetText(EventSettings.Location)
-			ANN.EditBox:Show()
+			ANN.WhisperTarget:SetText(EventSettings.Location)
+			ANN.WhisperTarget:Show()
 		else
-			ANN.EditBox:Hide()
+			ANN.WhisperTarget:Hide()
 		end
 	end
 
