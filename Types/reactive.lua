@@ -111,7 +111,7 @@ local function Reactive_OnUpdate(icon, time)
 				usable = Usable or usable
 				if usable and not CD and not nomana and inrange == 1 then --usable
 
-					icon:SetInfo(icon.Alpha, 1, SpellTextures[iName], start, duration, true, iName)
+					icon:SetInfo(icon.Alpha, 1, SpellTextures[iName], start, duration, iName)
 
 					return
 				end
@@ -147,7 +147,7 @@ local function Reactive_OnUpdate(icon, time)
 				alpha, color = icon.UnAlpha, 1
 			end
 
-			icon:SetInfo(alpha, color, icon.FirstTexture, start, duration, true, NameFirst)
+			icon:SetInfo(alpha, color, icon.FirstTexture, start, duration, NameFirst)
 		else
 			icon:SetAlpha(0)
 		end

@@ -1,6 +1,7 @@
 ===v4.5.1===
  * Bug Fixes:
  ** The "Ignore Runes" setting should no longer appear for item cooldown icons
+ ** Meta icons should now inherit icon properties from other icons a little better.
 
 ===v4.5.0===
  * Fully integrated main addon settings/group settings into the icon editor.

@@ -91,7 +91,7 @@ local function Totem_OnUpdate(icon, time)
 			if Slots[iSlot] then
 				local _, totemName, start, duration, totemIcon = GetTotemInfo(iSlot)
 				if start ~= 0 and totemName and ((NameFirst == "") or NameNameHash[strlowerCache[totemName]]) then
-					icon:SetInfo(icon.Alpha, icon.UnAlpha ~= 0 and pr or 1, totemIcon, start, duration, nil, totemName)
+					icon:SetInfo(icon.Alpha, icon.UnAlpha ~= 0 and pr or 1, totemIcon, start, duration, totemName)
 					return
 				end
 			end

@@ -146,7 +146,7 @@ local function DR_OnUpdate(icon, time)
 					end
 				else
 					local amt = dr.amt
-					icon:SetInfo(UnAlpha, (not icon.ShowTimer and Alpha ~= 0) and .5 or 1, dr.tex, dr.start, dr.duration, nil, nil, nil, amt, amt .. "%")
+					icon:SetInfo(UnAlpha, (not icon.ShowTimer and Alpha ~= 0) and .5 or 1, dr.tex, dr.start, dr.duration, nil, nil, amt, amt .. "%")
 					if UnAlpha > 0 then
 						return
 					end
@@ -170,18 +170,22 @@ function Type:Setup(icon, groupID, iconID)
 	icon.Units = TMW:GetUnits(icon, icon.Unit)
 	icon.FirstTexture = SpellTextures[icon.NameFirst]
 
-	if not db.profile.Locked and not warnedMismatch[icon] then
+	if not db.profile.Locked and (not warnedMismatch[icon] or TMW.IE.Main.Name:IsShown()) then
 		-- Do the Right Thing and tell people if their DRs mismatch
 		local firstCategory, dobreak
-		for spellID in pairs(icon.NameHash) do
+		for IDorName in pairs(icon.NameHash) do
 			for category, str in pairs(TMW.BE.dr) do
-				if strfind(";"..str..";", ";"..spellID..";") then
+				if strfind(";"..str..";", ";"..IDorName..";") or TMW:GetSpellNames(icon, str, nil, 1, 1)[IDorName] then
 					if not firstCategory then
 						firstCategory = category
 					end
 					if firstCategory ~= category then
-						TMW:Printf(L["WARN_DRMISMATCH"], groupID, iconID)
-						warnedMismatch[icon] = 1
+						if not warnedMismatch[icon] then
+							TMW:Printf(L["WARN_DRMISMATCH"], groupID, iconID)
+							warnedMismatch[icon] = 1
+						end
+						
+						TMW.IE:ShowHelp(L["WARN_DRMISMATCH"]:format(groupID, iconID), TMW.IE.Main.Name, 0, 0)
 						dobreak=1
 						break
 					end

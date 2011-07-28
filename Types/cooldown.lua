@@ -117,7 +117,7 @@ local function AutoShot_OnUpdate(icon, time)
 			else
 				alpha, color = icon.UnAlpha, 1
 			end
-			icon:SetInfo(alpha, color, nil, icon.asStart, icon.asDuration, true)
+			icon:SetInfo(alpha, color, nil, icon.asStart, icon.asDuration)
 		end
 	end
 end
@@ -148,7 +148,7 @@ local function SpellCooldown_OnUpdate(icon, time)
 				end
 				isGCD = (ClockGCD or duration ~= 0) and OnGCD(duration)
 				if inrange == 1 and not nomana and (duration == 0 or isGCD) then --usable
-					icon:SetInfo(icon.Alpha, icon.UnAlpha ~= 0 and pr or 1, SpellTextures[iName], start, duration, true, iName)
+					icon:SetInfo(icon.Alpha, icon.UnAlpha ~= 0 and pr or 1, SpellTextures[iName], start, duration, iName)
 					return
 				end
 			end
@@ -186,7 +186,7 @@ local function SpellCooldown_OnUpdate(icon, time)
 				alpha, color = icon.UnAlpha, 1
 			end
 
-			icon:SetInfo(alpha, color, icon.FirstTexture, start, duration, true, NameFirst)
+			icon:SetInfo(alpha, color, icon.FirstTexture, start, duration, NameFirst)
 		else
 			icon:SetAlpha(0)
 		end
@@ -242,7 +242,7 @@ local function ItemCooldown_OnUpdate(icon, time)
 				isGCD = OnGCD(duration)
 				if equipped and inrange == 1 and (duration == 0 or isGCD) then --usable
 
-					icon:SetInfo(icon.Alpha, 1, GetItemIcon(iName) or "Interface\\Icons\\INV_Misc_QuestionMark", start, duration, true, nil, nil, count, EnableStacks and count > 1 and count or "")
+					icon:SetInfo(icon.Alpha, 1, GetItemIcon(iName) or "Interface\\Icons\\INV_Misc_QuestionMark", start, duration, nil, nil, count, EnableStacks and count > 1 and count or "")
 
 					return
 				end
@@ -287,7 +287,7 @@ local function ItemCooldown_OnUpdate(icon, time)
 			else
 				alpha, color = icon.UnAlpha, 1
 			end
-			icon:SetInfo(alpha, color, GetItemIcon(NameFirst2), start, duration, true, nil, nil, count, EnableStacks and count > 1 and count or "")
+			icon:SetInfo(alpha, color, GetItemIcon(NameFirst2), start, duration, nil, nil, count, EnableStacks and count > 1 and count or "")
 		else
 			icon:SetAlpha(0)
 		end
@@ -346,7 +346,7 @@ local function MultiStateCD_OnUpdate(icon, time)
 				alpha, color = icon.UnAlpha, 1
 			end
 
-			icon:SetInfo(alpha, color, GetActionTexture(Slot) or "Interface\\Icons\\INV_Misc_QuestionMark", start, duration, true, icon.NameFirst)
+			icon:SetInfo(alpha, color, GetActionTexture(Slot) or "Interface\\Icons\\INV_Misc_QuestionMark", start, duration, icon.NameFirst)
 		end
 	end
 end

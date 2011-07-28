@@ -79,7 +79,7 @@ local function Cast_OnUpdate(icon, time)
 					start, endTime = start/1000, endTime/1000
 					local duration = endTime - start
 
-					icon:SetInfo(icon.Alpha, icon.UnAlpha ~= 0 and pr or 1, iconTexture, start, duration, nil, nil, reverse)
+					icon:SetInfo(icon.Alpha, icon.UnAlpha ~= 0 and pr or 1, iconTexture, start, duration, nil, reverse)
 
 					return
 				end

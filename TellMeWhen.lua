@@ -34,7 +34,7 @@ local DRData = LibStub("DRData-1.0", true)
 TELLMEWHEN_VERSION = "4.5.1"
 TELLMEWHEN_VERSION_MINOR = strmatch(" @project-version@", " r%d+") or ""
 TELLMEWHEN_VERSION_FULL = TELLMEWHEN_VERSION .. TELLMEWHEN_VERSION_MINOR
-TELLMEWHEN_VERSIONNUMBER = 45101 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
+TELLMEWHEN_VERSIONNUMBER = 45102 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
 if TELLMEWHEN_VERSIONNUMBER > 46000 or TELLMEWHEN_VERSIONNUMBER < 45000 then return error("YOU SCREWED UP THE VERSION NUMBER OR DIDNT CHANGE THE SAFETY LIMITS") end -- safety check because i accidentally made the version number 414069 once
 
 TELLMEWHEN_MAXGROUPS = 1 	--this is a default, used by SetTheory (addon), so dont rename
@@ -106,6 +106,7 @@ TMW.SpellTextures = setmetatable(
 },
 {
 	__index = function(t, name)
+		if not name then return end
 		-- rawget the strlower because hardcoded entries (talents, mainly) are put into the table as lowercase
 		local tex = rawget(t, strlowerCache[name]) or GetSpellTexture(name)
 		
@@ -2305,7 +2306,7 @@ end
 -- ------------------
 -- ICONS
 -- ------------------
-local ProtoIcon = {}
+local IconBase = {}
 
 local function LMBSkinHook(self)
 	if self and self.Addon == "TellMeWhen" then
@@ -2359,28 +2360,25 @@ local function CDBarOnValueChanged(bar)
 		if duration ~= 0 then
 			pct = (time - start) / duration
 			local inv = 1-pct
-		--	bar.texture:SetTexCoord(0, min(inv, 1), 0, 1)
 			bar:SetStatusBarColor(
-				(co.r*pct) + (st.r * inv),
-				(co.g*pct) + (st.g * inv),
-				(co.b*pct) + (st.b * inv),
-				(co.a*pct) + (st.a * inv)
+				(co.r * pct) + (st.r * inv),
+				(co.g * pct) + (st.g * inv),
+				(co.b * pct) + (st.b * inv),
+				(co.a * pct) + (st.a * inv)
 			)
 		end
 	else
 		--inverted
 		if duration == 0 then
 			bar:SetStatusBarColor(co.r, co.g, co.b, co.a)
-		--	bar.texture:SetTexCoord(0, 1, 0, 1)
 		else
 			pct = (time - start) / duration
 			local inv = 1-pct
-	--		bar.texture:SetTexCoord(0, min(pct, 1), 0, 1)
 			bar:SetStatusBarColor(
-				(co.r*pct) + (st.r * inv),
-				(co.g*pct) + (st.g * inv),
-				(co.b*pct) + (st.b * inv),
-				(co.a*pct) + (st.a * inv)
+				(co.r * pct) + (st.r * inv),
+				(co.g * pct) + (st.g * inv),
+				(co.b * pct) + (st.b * inv),
+				(co.a * pct) + (st.a * inv)
 			)
 		end
 	end
@@ -2395,7 +2393,70 @@ local function PwrBarOnUpdate(bar)
 	end
 end
 
-function ProtoIcon.HandleEvent(icon, data, played, announced)
+function IconBase.ForceBarUpdates(icon)
+	if icon.ShowPBar then
+		local pbName = icon.__pbName
+		if pbName then
+			local _, _, _, cost, _, powerType = GetSpellInfo(pbName)
+			if cost then
+				local pbar = icon.pbar
+				cost = powerType == 9 and 3 or cost
+				pbar.Max = cost
+				pbar.InvertBars = icon.InvertBars
+
+				if powerType ~= pbar.powerType then
+					local colorinfo = PowerBarColor[powerType]
+					pbar:SetStatusBarColor(colorinfo.r, colorinfo.g, colorinfo.b, 0.9)
+					pbar.powerType = powerType
+				end
+
+				pbar:SetMinMaxValues(0, cost)
+				if not pbar.UpdateSet then
+					pbar:SetScript("OnUpdate", PwrBarOnUpdate)
+					PwrBarOnUpdate(pbar)
+					pbar.UpdateSet = true
+				end
+				pbar:SetMinMaxValues(0, cost)
+			end
+		elseif icon.pbar.UpdateSet then
+			local pbar = icon.pbar
+			pbar:SetScript("OnUpdate", nil)
+			pbar.UpdateSet = false
+			pbar:SetValue(icon.InvertBars and pbar.Max or 0)
+		end
+		icon.__pbName = pbName
+	end
+	
+	if icon.ShowCBar then
+		local start, duration = icon.__start, icon.__duration
+		local bar = icon.cbar
+		bar.duration = duration
+		bar.start = start
+		bar.InvertBars = icon.InvertBars
+		if duration > 0 then
+			if isGCD and BarGCD then
+				bar.duration = 0
+			end
+
+			if not bar.UpdateSet then
+				bar:SetScript("OnUpdate", CDBarOnUpdate)
+				bar.UpdateSet = true
+			end
+		else
+			if bar.UpdateSet then
+				bar:SetScript("OnUpdate", nil)
+				bar.UpdateSet = false
+			end
+			if bar.InvertBars then
+				bar:SetValue(bar.Max)
+			else
+				bar:SetValue(0)
+			end
+		end
+	end
+end
+
+function IconBase.HandleEvent(icon, data, played, announced)
 	local Sound = data.SoundData
 	if Sound and not played then
 		PlaySoundFile(Sound, SndChan)
@@ -2431,7 +2492,7 @@ function ProtoIcon.HandleEvent(icon, data, played, announced)
 	return played, announced
 end
 
-function ProtoIcon.SetAlpha(icon, alpha)
+function IconBase.SetAlpha(icon, alpha)
 	if alpha ~= icon.__alpha then
 		if alpha == 0 then
 			local data = runEvents and icon.OnHide
@@ -2459,7 +2520,7 @@ function ProtoIcon.SetAlpha(icon, alpha)
 	end
 end
 
-function ProtoIcon.SetScript(icon, handler, func)
+function IconBase.SetScript(icon, handler, func)
 	icon[handler] = func
 	if handler ~= "OnUpdate" then
 		icon:setscript(handler, func)
@@ -2472,35 +2533,35 @@ function ProtoIcon.SetScript(icon, handler, func)
 	end
 end
 
-function ProtoIcon.SetTexture(icon, tex)
+function IconBase.SetTexture(icon, tex)
 	--if icon.__tex ~= tex then ------dont check for this, checking is done before this method is even called
 	tex = icon.OverrideTex or tex
 	icon.__tex = tex
 	icon.texture:SetTexture(tex)
 end
 
-function ProtoIcon.RegisterEvent(icon, event)
+function IconBase.RegisterEvent(icon, event)
 	icon:registerevent(event)
 	icon.__hasEvents = 1
 end
 
-function ProtoIcon.SetReverse(icon, reverse)
+function IconBase.SetReverse(icon, reverse)
 	icon.__reverse = reverse
 	icon.cooldown:SetReverse(reverse)
 end
 
-function ProtoIcon.SetInfo(icon, alpha, color, texture, start, duration, checkGCD, pbName, reverse, count, countText)
+function IconBase.SetInfo(icon, alpha, color, texture, start, duration, pbName, reverse, count, countText, forceupdate)
 	-- icon			- the icon object to set the attributes on (frame) (but call as icon:SetInfo(alpha, ...) )
 	-- alpha		- the alpha to set the icon to (number)
 	-- color		- the value(s) to call SetVertexColor with. Either a (number) that will be used as the r, g, and b; or a (table) with keys r, g, b
 	-- [texture]	- the texture path to set the icon to (string). Pass nil to leave unchanged.
 	-- start		- the start time of the cooldow/duration, as passsed to icon.cooldown:SetCooldown(start, duration)
 	-- duration		- the duration of the cooldow/duration, as passsed to icon.cooldown:SetCooldown(start, duration)
-	-- [checkGCD] 	- true if the icon should check to see if the cooldown is a GCD before setting a cooldown, should only be used for icons that actually track cooldowns (boolean/nil)
 	-- [pbName]		- the name or ID of the spell to be used for the icons power bar overlay (string/number)
 	-- [reverse]	- true/false to set icon.cooldown:SetReverse(reverse), nil to not change (boolean/nil)
 	-- [count]		- the number of stacks to be used for comparison, nil/false to hide (number/nil/false)
 	-- [countText]	- the actual stack TEXT to be set on the icon, will use count if nil (number/string/nil/false)
+	-- [forceupdate]- for meta icons, will force an update on things even if args didnt change.
 
 	local played, announced
 
@@ -2547,7 +2608,7 @@ function ProtoIcon.SetInfo(icon, alpha, color, texture, start, duration, checkGC
 		icon.__alpha = alpha
 	end
 
-	if icon.__start ~= start or icon.__duration ~= duration then
+	if icon.__start ~= start or icon.__duration ~= duration or forceupdate then
 		local isGCD
 		if duration == 1 then
 			isGCD = true
@@ -2572,7 +2633,7 @@ function ProtoIcon.SetInfo(icon, alpha, color, texture, start, duration, checkGC
 			end
 			icon.__realDuration = realDuration
 		end
-		if alpha == 0 then-- doing this twice is intended. It shouldn't return until after all playsounds have happened, but dont go as far to set the timer or cooldown bars if not needed
+		if alpha == 0 then-- doing this twice is intended. It shouldn't return until after all events have been handled, but dont go as far to set the timer or cooldown bars if not needed
 			return
 		end
 
@@ -2586,7 +2647,7 @@ function ProtoIcon.SetInfo(icon, alpha, color, texture, start, duration, checkGC
 				end
 
 				-- cd.s is only used in this function and is used to prevent finish effect spam (and to increase efficiency) while GCDs are being triggered. icon.__start isnt used because that just records the start time passed in, which may be a GCD, so it will change frequently
-				if cd.s ~= s then
+				if cd.s ~= s or forceupdate then
 					cd:SetCooldown(s, d)
 					cd:Show()
 					if reverse ~= nil and icon.__reverse ~= reverse then -- must be ( ~= nil )
@@ -2605,31 +2666,29 @@ function ProtoIcon.SetInfo(icon, alpha, color, texture, start, duration, checkGC
 
 		if icon.ShowCBar then
 			local bar = icon.cbar
+			bar.duration = duration
+			bar.start = start
+			bar.InvertBars = icon.InvertBars
 			if duration > 0 then
-				bar.start = start
 				if isGCD and BarGCD then
 					bar.duration = 0
-				else
-					bar.duration = duration
 				end
 
-				bar.InvertBars = icon.InvertBars
 				if not bar.UpdateSet then
 					bar:SetScript("OnUpdate", CDBarOnUpdate)
 					bar.UpdateSet = true
 				end
-			elseif bar.UpdateSet then
-				bar:SetScript("OnUpdate", nil)
-				bar.UpdateSet = false
-				if icon.InvertBars then
+			else
+				if bar.UpdateSet then
+					bar:SetScript("OnUpdate", nil)
+					bar.UpdateSet = false
+				end
+				if bar.InvertBars then
 					bar:SetValue(bar.Max)
 				else
 					bar:SetValue(0)
 				end
 			end
-			bar:Show()
-		else
-			icon.cbar:Hide()
 		end
 
 		icon.__start = start
@@ -2637,7 +2696,7 @@ function ProtoIcon.SetInfo(icon, alpha, color, texture, start, duration, checkGC
 	end
 
 	if alpha == 0 then
-		-- doing this twice is intended. It shouldn't return until after all playsounds have happened, but dont go as far to set the timer or cooldown bars if not needed
+		-- doing this twice is intended. It shouldn't return until after all events are handled, but dont go as far to set the timer or cooldown bars if not needed
 		return
 	end
 
@@ -2651,13 +2710,12 @@ function ProtoIcon.SetInfo(icon, alpha, color, texture, start, duration, checkGC
 		icon.__vrtxcolor = color
 	end
 
-	if icon.ShowPBar then
-		local pbar = icon.pbar
-		if pbName and (updatePBar or icon.__pbName ~= pbName) then
+	if icon.ShowPBar and (updatePBar or icon.__pbName ~= pbName or forceupdate) then
+		if pbName then
 			local _, _, _, cost, _, powerType = GetSpellInfo(pbName)
 			if cost then
+				local pbar = icon.pbar
 				cost = powerType == 9 and 3 or cost
-				pbar:SetMinMaxValues(0, cost)
 				pbar.Max = cost
 				pbar.InvertBars = icon.InvertBars
 
@@ -2667,23 +2725,24 @@ function ProtoIcon.SetInfo(icon, alpha, color, texture, start, duration, checkGC
 					pbar.powerType = powerType
 				end
 
+				pbar:SetMinMaxValues(0, cost)
 				if not pbar.UpdateSet then
 					pbar:SetScript("OnUpdate", PwrBarOnUpdate)
+					PwrBarOnUpdate(pbar)
 					pbar.UpdateSet = true
 				end
+				pbar:SetMinMaxValues(0, cost)
 			end
-		elseif not pbName and pbar.UpdateSet then
+		elseif icon.pbar.UpdateSet then
+			local pbar = icon.pbar
 			pbar:SetScript("OnUpdate", nil)
 			pbar.UpdateSet = false
 			pbar:SetValue(icon.InvertBars and pbar.Max or 0)
 		end
 		icon.__pbName = pbName
-		pbar:Show()
-	else
-		icon.pbar:Hide()
 	end
 
-	if icon.__count ~= count then
+	if icon.__count ~= count or icon.__countText ~= countText then
 		if count then
 			icon.countText:SetText(countText or count)
 		else
@@ -2692,8 +2751,6 @@ function ProtoIcon.SetInfo(icon, alpha, color, texture, start, duration, checkGC
 		icon.__count = count
 		icon.__countText = countText
 	end
-
-	icon.__checkGCD = checkGCD
 
 end
 
@@ -2708,7 +2765,7 @@ local IconMetamethods = {
 		end
 	end,
 	__tostring = function(icon)
-		return icon:GetName() or ""
+		return icon:GetName() or tostring(icon)
 	end
 }
 
@@ -2740,7 +2797,7 @@ function TMW:CreateIcon(group, groupID, iconID)
 	for k, v in pairs(IconMetamethods) do
 		mt[k] = v
 	end
-	for k, v in pairs(ProtoIcon) do
+	for k, v in pairs(IconBase) do
 		if type(icon[k]) == "function" then -- if the method already exists on the icon
 			icon[strlower(k)] = icon[k] -- store the old method as the lowercase same name
 		end
@@ -2788,7 +2845,6 @@ function TMW:Icon_UpdateBars(icon)
 		pbar.offset = icon.PBarOffs or 0
 		pbar.InvertBars = icon.InvertBars
 		icon.PBarOffs = nil --reduce table clutter, we dont need this anymore
-	--	pbar:SetScript("OnValueChanged", PwrBarOnValueChanged)
 	else
 		pbar:Hide()
 	end
@@ -3011,14 +3067,22 @@ function TMW:Icon_Update(icon)
 			icon:Hide()
 		end
 
-		pbar:SetValue(0)
+		pbar:SetValue(100)
+	--	pbar:SetValue(0)
 		pbar:SetAlpha(.9)
+		if icon.ShowPar then
+			PwrBarOnUpdate(pbar)
+		end
 		if icon.InvertBars then
 			cbar:SetValue(cbar.Max)
 		else
 			cbar:SetValue(0)
 		end
 		cbar:SetAlpha(.9)
+		if icon.ShowCBar then
+			CDBarOnUpdate(cbar)
+			CDBarOnValueChanged(cbar)
+		end
 	else
 		ClearScripts(icon)
 
@@ -3040,7 +3104,7 @@ function TMW:Icon_Update(icon)
 			end
 		end
 
-		icon:SetInfo(1, 1, nil, 0, 0, nil, nil, nil, testCount, testCountText) -- alpha is set to 1 here so it doesnt return early
+		icon:SetInfo(1, 1, nil, 0, 0, nil, nil, testCount, testCountText) -- alpha is set to 1 here so it doesnt return early
 		if icon.Enabled then
 			icon:setalpha(1)
 		else
@@ -3084,6 +3148,7 @@ end
 function TMW:EnableTooltipParsing()
 	if TMW.TooltipParsingEnabled then return end
 	local Parser = CreateFrame("GameTooltip", "TMWParser", TMW, "GameTooltipTemplate")
+	LibStub("AceEvent-3.0"):Embed(Parser)
 	UnitsToUpdate = {}
 
 	local auraTooltipCache = {}
@@ -3093,26 +3158,26 @@ function TMW:EnableTooltipParsing()
 		focus = true,
 		pet = true,
 	}
-	function TMW:UNIT_AURA(_, unit)
+	function Parser:UNIT_AURA(_, unit)
 		if cachableUnits[unit] then
 			UnitsToUpdate[unit] = true
 		end
 	end
-	function TMW:PLAYER_TARGET_CHANGED()
+	function Parser:PLAYER_TARGET_CHANGED()
 		UnitsToUpdate.target = true
 	end
-	function TMW:UNIT_PET(_, owner)
+	function Parser:UNIT_PET(_, owner)
 		if owner == "player" then
 			UnitsToUpdate.pet = true
 		end
 	end
-	function TMW:PLAYER_FOCUS_CHANGED()
+	function Parser:PLAYER_FOCUS_CHANGED()
 		UnitsToUpdate.focus = true
 	end
-	TMW:RegisterEvent("UNIT_AURA")
-	TMW:RegisterEvent("PLAYER_TARGET_CHANGED")
-	TMW:RegisterEvent("UNIT_PET")
-	TMW:RegisterEvent("PLAYER_FOCUS_CHANGED")
+	Parser:RegisterEvent("UNIT_AURA")
+	Parser:RegisterEvent("PLAYER_TARGET_CHANGED")
+	Parser:RegisterEvent("UNIT_PET")
+	Parser:RegisterEvent("PLAYER_FOCUS_CHANGED")
 
 	function TMW.GetTooltipNumber(unit, name, filter, n)
 		local cachestr = unit..name..filter
@@ -3171,6 +3236,7 @@ function string:toseconds()
     
 end
 function TMW:lower(str)
+	if TMW.DS[str] then return str end
 	if type(str) == "table" then
 		for k, v in pairs(str) do
 			str[k] = TMW:lower(v)
@@ -3214,7 +3280,7 @@ end
 
 local gsncache = {}
 function TMW:GetSpellNames(icon, setting, firstOnly, toname, hash, keepDurations)
-	local cachestring = strconcat(tostringall(setting, firstOnly, toname, hash, keepDurations, TMW.BE)) -- a unique key for the cache table, turn possible nils into strings
+	local cachestring = strconcat(tostringall(icon, setting, firstOnly, toname, hash, keepDurations, TMW.BE)) -- a unique key for the cache table, turn possible nils into strings
 	if gsncache[cachestring] then return gsncache[cachestring] end --why make a bunch of tables and do a bunch of stuff if we dont need to
 
 	local buffNames = TMW:SplitNames(setting) -- get a table of everything
@@ -3256,7 +3322,7 @@ function TMW:GetSpellNames(icon, setting, firstOnly, toname, hash, keepDurations
 		end
 	end
 	if icon then
-		TMW:lower(buffNames)
+		buffNames = TMW:lower(buffNames)
 	end
 
 	if hash then

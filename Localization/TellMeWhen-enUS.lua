@@ -20,7 +20,7 @@ L["RESIZE_TOOLTIP"] = "Click and drag to change size"
 
 L["HPSSWARN"] = "Warning! Any icon conditions that you had set that checked for holy power or soul shards may be messed up! Check them to prevent later confusion!"
 L["CONDITIONORMETA_CHECKINGINVALID"] = "Warning! Group %d, Icon %d is checking an invalid icon (Group %d, Icon %d)"
-L["WARN_DRMISMATCH"] = "Warning! Group %d, Icon %d is checking the diminishing returns on spells from two different known categories. All spells should be from the same category. You will only see this once per icon per sesson."
+L["WARN_DRMISMATCH"] = "Warning! Group %d, Icon %d is checking the diminishing returns on spells from two different known categories. All spells should be from the same category."
 L["FROMNEWERVERSION"] = "You are importing an icon that was created in a newer version of TellMeWhen than your version. Some settings might not work until you upgrade to the latest version."
 
 -- -------------

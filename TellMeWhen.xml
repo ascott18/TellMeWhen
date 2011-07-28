@@ -89,6 +89,7 @@
 						self:SetFrameLevel(self:GetParent():GetFrameLevel() + 2)
 						self.icon = self:GetParent()
 						self:SetStatusBarTexture(self.texture)
+						self.offset = 0
 					</OnLoad>
 				</Scripts>
 			</StatusBar>
@@ -111,6 +112,7 @@
 						self:SetFrameLevel(self:GetParent():GetFrameLevel() + 2)
 						self.icon = self:GetParent()
 						self:SetStatusBarTexture(self.texture)
+						self.offset = 0
 					</OnLoad>
 				</Scripts>
 			</StatusBar>

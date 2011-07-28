@@ -42,6 +42,8 @@ Type.RelevantSettings = {
 	ShowWhen = false,
 	FakeHidden = false,
 	ConditionAlpha = false, --TODO:implement conditionalpha for metas (problem is the icon editor UI)
+	Alpha = false,
+	UnAlpha = false,
 }
 
 function Type:Update()
@@ -61,9 +63,11 @@ local function Meta_OnUpdate(icon, time)
 				local alpha = ic.__alpha
 				if alpha > 0 and ic.__shown then
 
+					local force
 					if ic ~= icon.__previcon then 
 						icon.BindText = ic.BindText
 						icon.bindText:SetText(icon.BindText)
+						
 						if (LBF or LMB) then -- i dont like the way that ButtonFacade handles this (inefficient), so i'll do it myself
 							local icnt = ic.__normaltex -- icon.__normaltex = icon.__LBF_Normal or icon:GetNormalTexture() -- set during Icon_Update()
 							local iconnt = icon.__normaltex
@@ -71,17 +75,33 @@ local function Meta_OnUpdate(icon, time)
 								iconnt:SetVertexColor(icnt:GetVertexColor())
 							end
 						end
+
+						local icSCB, icSPB = ic.ShowCBar, ic.ShowPBar
+						if icSPB then
+							icon.pbar.offset = ic.pbar.offset
+							icon.pbar:Show()
+						else
+							icon.pbar:Hide()
+						end
+						if icSCB then
+							icon.cbar.offset = ic.cbar.offset
+							icon.cbar:Show()
+						else
+							icon.cbar:Hide()
+						end
+						icon.ShowCBar, icon.ShowPBar = icSCB, icSPB
+						
+						icon.InvertBars = ic.InvertBars
+						icon.ShowTimer = ic.ShowTimer
+						icon.cooldown.noCooldownCount = ic.cooldown.noCooldownCount
+						
+						force = 1
+						
 						icon.__previcon = ic
 					end
-
-					icon.ShowCBar, icon.ShowPBar = ic.ShowCBar, ic.ShowPBar
-					icon.InvertBars = ic.InvertBars
-					icon.ShowTimer = ic.ShowTimer
-					icon.cooldown.noCooldownCount = ic.cooldown.noCooldownCount
-
-					icon:SetInfo(alpha, ic.__vrtxcolor, ic.__tex, ic.__start, ic.__duration, ic.__checkGCD, ic.__pbName, ic.__reverse, ic.__count, ic.__countText)
-
+					
 					AlreadyChecked[ic] = true
+					icon:SetInfo(alpha, ic.__vrtxcolor, ic.__tex, ic.__start, ic.__duration, ic.__pbName, ic.__reverse, ic.__count, ic.__countText, force)
 					return
 				end
 			end

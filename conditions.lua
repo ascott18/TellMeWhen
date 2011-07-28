@@ -27,8 +27,8 @@ local Env
 local L = TMW.L
 local _, pclass = UnitClass("Player")
 
-local strlower, min, gsub, tostring, strfind, strsub, type, pairs, strtrim =
-	  strlower, min, gsub, tostring, strfind, strsub, type, pairs, strtrim
+local strlower, min, gsub, tostring, strfind, strsub, type, pairs, strtrim, select, format, tonumber =
+	  strlower, min, gsub, tostring, strfind, strsub, type, pairs, strtrim, select, format, tonumber
 local NONE, MAX_SPELL_SCHOOLS =
 	  NONE, MAX_SPELL_SCHOOLS
 local GetEclipseDirection, IsResting, GetPetActionInfo, GetTotemInfo, GetTalentTabInfo =

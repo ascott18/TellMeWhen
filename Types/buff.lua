@@ -93,7 +93,7 @@ local function Buff_OnUpdate(icon, time)
 		local NotStealable = not icon.Stealable
 		local NAL = icon.NAL
 
-		local buffName, _, iconTexture, count, dispelType, duration, expirationTime, canSteal, id
+		local buffName, _, iconTexture, count, dispelType, duration, expirationTime, canSteal, id, filterUsed, zUsed, unitUsed
 		local d = Sort == -1 and huge or 0
 
 		for u = 1, #Units do
@@ -107,15 +107,13 @@ local function Buff_OnUpdate(icon, time)
 						elseif (NameHash[_id] or NameHash[_dispelType] or NameHash[strlowerCache[_buffName]]) and (NotStealable or canSteal) then
 							if Sort then
 								local _d = (_expirationTime == 0 and huge) or _expirationTime - time
-								if (Sort == 1 and d < _d) or (Sort == -1 and d > _d) then
-									buffName, iconTexture, count, dispelType, duration, expirationTime, d =
-									 _buffName, _iconTexture, _count, _dispelType, _duration, _expirationTime, _d
-									count = ShowTTText and GetTooltipNumber(unit, _id, Filter, z) or count
+								if d*Sort < _d*Sort then
+									buffName, iconTexture, count, duration, expirationTime, id, filterUsed, zUsed, unitUsed, d =
+									_buffName, _iconTexture, _count, _duration, _expirationTime, _id, Filter, z, unit, _d
 								end
 							else
-								buffName, iconTexture, count, dispelType, duration, expirationTime =
-								 _buffName, _iconTexture, _count, _dispelType, _duration, _expirationTime
-								count = ShowTTText and GetTooltipNumber(unit, _id, Filter, z) or count
+								buffName, iconTexture, count, duration, expirationTime, id, filterUsed, zUsed, unitUsed =
+								_buffName, _iconTexture, _count, _duration, _expirationTime, _id, Filter, z, unit
 								break
 							end
 						end
@@ -128,15 +126,13 @@ local function Buff_OnUpdate(icon, time)
 							elseif (NameHash[_id] or NameHash[_dispelType] or NameHash[strlowerCache[_buffName]]) and (NotStealable or canSteal) then
 								if Sort then
 									local _d = (_expirationTime == 0 and huge) or _expirationTime - time
-									if (Sort == 1 and d < _d) or (Sort == -1 and d > _d) then
-										buffName, iconTexture, count, duration, expirationTime, d =
-										 _buffName, _iconTexture, _count, _duration, _expirationTime, _d
-										count = ShowTTText and GetTooltipNumber(unit, _id, Filterh, z) or count
+									if d*Sort < _d*Sort then
+										buffName, iconTexture, count, duration, expirationTime, id, filterUsed, zUsed, unitUsed, d =
+										_buffName, _iconTexture, _count, _duration, _expirationTime, _id, Filterh, z, unit, _d
 									end
 								else
-									buffName, iconTexture, count, duration, expirationTime =
-									 _buffName, _iconTexture, _count, _duration, _expirationTime
-									count = ShowTTText and GetTooltipNumber(unit, _id, Filterh, z) or count
+									buffName, iconTexture, count, duration, expirationTime, id, filterUsed, zUsed, unitUsed =
+									 _buffName, _iconTexture, _count, _duration, _expirationTime, _id, Filterh, z, unit
 									break
 								end
 							end
@@ -154,7 +150,7 @@ local function Buff_OnUpdate(icon, time)
 								if not buffName then
 									break
 								elseif dispelType == iName and (NotStealable or canSteal) then
-									count = ShowTTText and GetTooltipNumber(unit, id, Filter, z) or count
+									filterUsed, zUsed, unitUsed = Filter, z, unit
 									break
 								end
 							end
@@ -164,37 +160,37 @@ local function Buff_OnUpdate(icon, time)
 									if not buffName then
 										break
 									elseif dispelType == iName and (NotStealable or canSteal) then
-										count = ShowTTText and GetTooltipNumber(unit, id, Filterh, z) or count
+										filterUsed, zUsed, unitUsed = Filterh, z, unit
 										break
 									end
 								end
 							end
 						else
 							-- stealable checks here are done before breaking the loop
-							buffName, _, iconTexture, count, dispelType, duration, expirationTime, _, canSteal, _, id = UnitAura(unit, NameNameArray[i], nil, Filter)
-							count = ShowTTText and buffName and GetTooltipNumber(unit, buffName, Filter) or count
+							buffName, _, iconTexture, count, _, duration, expirationTime, _, canSteal, _, id = UnitAura(unit, NameNameArray[i], nil, Filter)
+							filterUsed, zUsed, unitUsed = Filter, nil, unit
 							if Filterh and not buffName then
-								buffName, _, iconTexture, count, dispelType, duration, expirationTime, _, canSteal, _, id = UnitAura(unit, NameNameArray[i], nil, Filterh)
-								count = ShowTTText and buffName and GetTooltipNumber(unit, buffName, Filterh) or count
+								buffName, _, iconTexture, count, _, duration, expirationTime, _, canSteal, _, id = UnitAura(unit, NameNameArray[i], nil, Filterh)
+								filterUsed, zUsed, unitUsed = Filterh, nil, unit
 							end
 						end
 						if buffName and id ~= iName and isNumber[iName] then
 							for z=1, 60 do
-								buffName, _, iconTexture, count, dispelType, duration, expirationTime, _, canSteal, _, id = UnitAura(unit, z, Filter)
+								buffName, _, iconTexture, count, _, duration, expirationTime, _, canSteal, _, id = UnitAura(unit, z, Filter)
 								if not id then
 									break
 								elseif id == iName then -- and (NotStealable or canSteal) then -- no reason to check stealable here. It will be checked right before breaking the loop. Once it finds an ID match, any spell of that ID will have the same stealable status as any other, so just match ID and dont check for stealable here. Wow, that was repetetive.
-									count = ShowTTText and GetTooltipNumber(unit, id, Filter, z) or count
+									filterUsed, zUsed, unitUsed = Filter, z, unit
 									break
 								end
 							end
 							if Filterh and not id then
 								for z=1, 60 do
-									buffName, _, iconTexture, count, dispelType, duration, expirationTime, _, canSteal, _, id = UnitAura(unit, z, Filterh)
+									buffName, _, iconTexture, count, _, duration, expirationTime, _, canSteal, _, id = UnitAura(unit, z, Filterh)
 									if not id then
 										break
 									elseif id == iName then -- and (NotStealable or canSteal) then -- no reason to check stealable here. It will be checked right before breaking the loop. Once it finds an ID match, any spell of that ID will have the same stealable status as any other, so just match ID and dont check for stealable here. Wow, that was repetetive.
-										count = ShowTTText and GetTooltipNumber(unit, id, Filterh, z) or count
+										filterUsed, zUsed, unitUsed = Filterh, z, unit
 										break
 									end
 								end
@@ -211,9 +207,10 @@ local function Buff_OnUpdate(icon, time)
 			end
 		end
 		if buffName then
-			icon:SetInfo(icon.Alpha, icon.UnAlpha ~= 0 and pr or 1, iconTexture, expirationTime - duration, duration, nil, buffName, nil, count, count > 1 and count or "")
+			count = icon.ShowTTText and GetTooltipNumber(unitUsed, id, filterUsed, zUsed) or count
+			icon:SetInfo(icon.Alpha, icon.UnAlpha ~= 0 and pr or 1, iconTexture, expirationTime - duration, duration, buffName, nil, count, count > 1 and count or "")
 		else
-			icon:SetInfo(icon.UnAlpha, icon.Alpha ~= 0 and ab or 1, icon.FirstTexture, 0, 0, nil, icon.NameFirst)
+			icon:SetInfo(icon.UnAlpha, icon.Alpha ~= 0 and ab or 1, icon.FirstTexture, 0, 0, icon.NameFirst)
 		end
 	end
 end
@@ -238,8 +235,14 @@ function Type:Setup(icon, groupID, iconID)
 		TMW:EnableTooltipParsing()
 	end
 	icon:SetReverse(true)
-	icon.NAL = icon.NameNameHash[strlower(GetSpellInfo(8921))] and EFF_THR + 1 or #icon.NameArray -- need to force any icon looking for moonfire to check all auras on the target because of a blizzard bug in WoW 4.1.
-	icon.NAL = icon.Sort and #icon.NameArray > 1 and EFF_THR + 1 or icon.NAL -- also force icons that sort to check all
+	icon.NAL = icon.NameNameHash[strlower(GetSpellInfo(8921))] and EFF_THR + 1 or #icon.NameArray
+	-- need to force any icon looking for moonfire to check all auras on the target because of a blizzard bug in WoW 4.1.
+	
+	icon.NAL = icon.Sort and (#icon.NameArray > 1 or TMW.DS[icon.NameFirst]) and EFF_THR + 1 or icon.NAL
+	-- Force icons that sort to check all because it must find check all auras
+	-- in order to make a final decision on whether or not something has the highest/lowest duration.
+	-- Two buffs with the same name/ID can have different durations on a unit.
+	-- Normal aura checking will stop when it finds the first one and go to check the next item in NameArray.
 
 	icon.FirstTexture = SpellTextures[icon.NameFirst]
 	

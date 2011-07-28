@@ -2336,7 +2336,7 @@ function IE:GetRealNames()
 	local numadded = 0
 	local numlines = 50
 	local numperline = ceil(#tbl/numlines)
-	local texend = numperline == 1 and ":0:0:0:-7|t" or ":0|t"
+	local texend = ":0:0:0:-5|t" --numperline ~= 1 and ":0:0:0:-7|t" or ":0|t"
 	for k, v in pairs(tbl) do
 		local name, texture
 		if CI.SoI == "item" then
@@ -2344,9 +2344,25 @@ function IE:GetRealNames()
 			texture = GetItemIcon(v)
 		else
 			name, _, texture = GetSpellInfo(v)
-			name = name or v
+			texture = texture or SpellTextures[name or v]
+			if not name and SUG.SpellCache then
+				local lowerv = strlower(v)
+				for id, lowername in pairs(SUG.SpellCache) do
+					if lowername == lowerv then
+						local newname, _, newtex = GetSpellInfo(id)
+						name = newname
+						if not texture then
+							texture = newtex
+						end
+						break
+					end
+				end
+			end
+			name = name or v or ""
 			texture = texture or SpellTextures[name]
 		end
+	--	local beginning, first, ending = strmatch(name, "(^[\"' ]*)(.)(.*)")
+	--	name = beginning .. strupper(first) .. ending
 		if not tiptemp[name] then --prevents display of the same name twice when there are multiple spellIDs.
 			numadded = numadded + 1
 			local dur = Types[CI.t].DurationSyntax and " ("..formatSeconds(durations[k])..")" or ""
@@ -2931,6 +2947,7 @@ function SUG:OnInitialize()
 
 			local Parser = CreateFrame("GameTooltip", "TMWSUGParser", TMW, "GameTooltipTemplate")
 			local f = CreateFrame("Frame")
+			
 			local function SpellCacher()
 				for id = index, index + SUG.NumCachePerFrame - 1 do
 					SUG.Suggest.Status:SetValue(id)
@@ -2951,7 +2968,8 @@ function SUG:OnInitialize()
 								not strfind(name, "vehicle") and
 								not strfind(name, "event") and
 								not strfind(name, ":%s?%d") and -- interferes with colon duration syntax
-								not strfind(name, "camera")
+								not strfind(name, "camera") and
+								not strfind(name, "dmg")
 							then
 								GameTooltip_SetDefaultAnchor(Parser, UIParent)
 								Parser:SetSpellByID(id)
@@ -3197,13 +3215,13 @@ function SUG:DoSuggest()
 				if 	(long and (
 						(strfind(strlowerCache[equiv], lastName)) or
 						(strfind(strlowerCache[L[equiv]], lastName)) or
-						((inputType == "string" and strfind(EquivFullNameLookup[equiv], semiLN)) or
-						(inputType == "number" and strfind(EquivFullIDLookup[equiv], semiLN))))
-				) or
+						((inputType == "string" and strfind(strlowerCache[EquivFullNameLookup[equiv]], semiLN)) or
+						(inputType == "number" and strfind(EquivFullIDLookup[equiv], semiLN)))
+				)) or
 					(not long and (
 						(strfind(strlowerCache[equiv], atBeginning)) or
-						(strfind(strlowerCache[L[equiv]], atBeginning)))
-				) then
+						(strfind(strlowerCache[L[equiv]], atBeginning))
+				)) then
 					SUGpreTable[#SUGpreTable + 1] = equiv
 				end
 			end
