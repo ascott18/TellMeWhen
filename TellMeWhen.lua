@@ -34,7 +34,7 @@ local DRData = LibStub("DRData-1.0", true)
 TELLMEWHEN_VERSION = "4.5.1"
 TELLMEWHEN_VERSION_MINOR = strmatch(" @project-version@", " r%d+") or ""
 TELLMEWHEN_VERSION_FULL = TELLMEWHEN_VERSION .. TELLMEWHEN_VERSION_MINOR
-TELLMEWHEN_VERSIONNUMBER = 45103 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
+TELLMEWHEN_VERSIONNUMBER = 45104 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
 if TELLMEWHEN_VERSIONNUMBER > 46000 or TELLMEWHEN_VERSIONNUMBER < 45000 then return error("YOU SCREWED UP THE VERSION NUMBER OR DIDNT CHANGE THE SAFETY LIMITS") end -- safety check because i accidentally made the version number 414069 once
 
 TELLMEWHEN_MAXGROUPS = 1 	--this is a default, used by SetTheory (addon), so dont rename
@@ -761,6 +761,12 @@ TMW.ChannelList = {
 		isBlizz = 1,
 	},
 	{
+		text = L["CHAT_MSG_SMART"],
+		desc = L["CHAT_MSG_SMART_DESC"],
+		channel = "SMART",
+		--isBlizz = nil, -- even though it uses blizzard output, SMART isnt a blizz channel - it uses a custom handler. 
+	},
+	{
 		text = CHAT_MSG_GUILD,
 		channel = "GUILD",
 		isBlizz = 1,
@@ -774,6 +780,40 @@ TMW.ChannelList = {
 		text = CHAT_MSG_EMOTE,
 		channel = "EMOTE",
 		isBlizz = 1,
+	},
+	{
+		text = L["CHAT_FRAME"],
+		channel = "FRAME",
+		icon = 1,
+		color = 1,
+		defaultlocation = function() return DEFAULT_CHAT_FRAME.name end,
+		dropdown = function()
+			local i = 1
+			while _G["ChatFrame"..i] do 
+				local _, _, _, _, _, _, shown = FCF_GetChatWindowInfo(i);
+				if shown then
+					local name = _G["ChatFrame"..i].name
+					local info = UIDropDownMenu_CreateInfo()
+					info.func = TMW.ANN.LocDropdownFunc
+					info.text = name
+					info.arg1 = name
+					info.value = name
+					info.checked = name == TMW.CI.ics.Events[TMW.ANN.currentEvent].Location
+					UIDropDownMenu_AddButton(info, UIDROPDOWNMENU_MENU_LEVEL) 
+				end
+				i = i + 1
+			end
+		end,
+		ddtext = function(value)
+			-- also a verification function
+			local i = 1
+			while _G["ChatFrame"..i] do 
+				if _G["ChatFrame"..i].name == value then
+					return value
+				end
+				i = i + 1
+			end
+		end,
 	},
 	{
 		text = "Scrolling Combat Text",
@@ -2481,6 +2521,31 @@ function IconBase.HandleEvent(icon, data, played, announced)
 				if Size == 0 then Size = nil end
 				Parrot:ShowMessage(Text, data.Location, data.Sticky, data.r, data.g, data.b, nil, Size, nil, data.Icon and icon.__tex)
 			end
+		elseif Channel == "FRAME" then
+			local i = 1
+			while _G["ChatFrame"..i] do
+				local frame = _G["ChatFrame"..i]
+				local Location = data.Location
+				if Location == frame.name then
+					if data.Icon then
+						Text = "|T" .. (icon.__tex or "") .. ":0|t " .. Text
+					end
+					frame:AddMessage(Text, data.r, data.g, data.b, 1)
+					break
+				end
+				i = i+1
+			end
+		elseif Channel == "SMART" then
+			local channel = "SAY"
+			if UnitInBattleground("player") then
+				channel = "BATTLEGROUND"
+			elseif UnitInRaid("player") then
+				channel = "RAID"
+			elseif GetNumPartyMembers() > 1 then
+				channel = "PARTY"
+			end
+			SendChatMessage(Text, channel)
+		
 		else
 			local chandata = ChannelLookup[Channel]
 			if Text and chandata and chandata.isBlizz then

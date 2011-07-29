@@ -3622,6 +3622,12 @@
 					</OnLoad>
 					<OnDragStart> TellMeWhen_IconEditor:StartMoving() </OnDragStart>
 					<OnDragStop> TellMeWhen_IconEditor:StopMovingOrSizing() </OnDragStop>
+					<OnReceiveDrag>
+						TMW.ID:SpellItemToIcon(TMW.CI.g, TMW.CI.i)
+					</OnReceiveDrag>
+					<OnMouseUp>
+						TMW.ID:SpellItemToIcon(TMW.CI.g, TMW.CI.i)
+					</OnMouseUp>
 				</Scripts>
 			</Frame>
 			<Frame name="$parentConditions" hidden="true" setAllPoints="true" parentKey="Conditions">
@@ -4226,11 +4232,13 @@
 						local AceGUI = LibStub("AceGUI-3.0", true)
 						local Type, Version = "TMWGroupOptions", 1
 
-						local methods = {
+						local widget = {
+							localstatus = {},
+							content     = self.content,
+							frame       = self,
+							type        = Type,
+								
 							OnAcquire = function(self)
-								if TMW.IE.MainOptionsWidget then
-									AceGUI:Release(TMW.IE.MainOptionsWidget)
-								end
 								TMW.IE.MainOptionsWidget = self
 								self.frame:SetParent(TellMeWhen_IconEditor)
 								self.frame:SetAllPoints()
@@ -4256,18 +4264,6 @@
 						}
 
 						local function Constructor()
-							local frame = TMW.IE.MainOptions
-							
-							local widget = {
-								localstatus = {},
-								content     = TMW.IE.MainOptions.content,
-								frame       = TMW.IE.MainOptions,
-								type        = Type
-							}
-							for method, func in pairs(methods) do
-								widget[method] = func
-							end
-							
 							return  AceGUI:RegisterAsContainer(widget)
 						end
 						AceGUI:RegisterWidgetType(Type, Constructor, Version)
@@ -4278,9 +4274,7 @@
 						end
 					</OnShow>
 					<OnHide>
-						if TMW.IE.MainOptionsWidget then
-							LibStub("AceGUI-3.0", true):Release(TMW.IE.MainOptionsWidget)
-						end
+						TMW.IE.MainOptionsWidget:ReleaseChildren()
 					</OnHide>
 					<OnDragStart> TellMeWhen_IconEditor:StartMoving() </OnDragStart>
 					<OnDragStop> TellMeWhen_IconEditor:StopMovingOrSizing() </OnDragStop>

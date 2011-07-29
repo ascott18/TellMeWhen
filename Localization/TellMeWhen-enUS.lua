@@ -34,6 +34,8 @@ L["CHOOSENAME_EQUIVS_TOOLTIP"] = "You can select predefined sets of buffs, debuf
 L["CHOOSENAME_DIALOG_DDDEFAULT"] = "Predefined Spell Sets/Dispel Types"
 L["CHOOSENAME_DIALOG"] = [=[Enter the Name or ID of what you want this icon to monitor. You can add multiple entries (any combination of names, IDs, and equivalencies) by separating them with semicolons (;).
 
+You can shift-click spells/items/chat links or drag spells/items to insert them into this editbox.
+
 |cFFFF5959PET ABILITIES|r must use SpellIDs.]=]
 L["CHOOSENAME_DIALOG_MSCD"] = [=[Enter the Name or ID of what the cooldown that you want this icon to monitor. Only the first spell/item will be checked - semicolon-delimited lists are not valid for this icon type.]=]
 L["CHOOSENAME_DIALOG_CNDTIC"] = "Enter the Name or ID of the spell that has the texture that you want to use. You may also enter a texture path, such as 'Interface/Icons/spell_nature_healingtouch', or just 'spell_nature_healingtouch' if the path is 'Interface/Icons'"
@@ -631,7 +633,9 @@ L["ANN_SUB_CHANNEL"] = "Sub section"
 L["ANN_WHISPERTARGET"] = "Whisper target"
 L["ANN_WHISPERTARGET_DESC"] = "Input the name of the player that you would like to whisper. Normal server/faction whisper requirements apply."
 L["ANN_EVENT_GLOBALDESC"] = "Events are checked from top to bottom in this list. If an event is triggered that has text to output, no events below that event will output any text."
-
+L["CHAT_MSG_SMART"] = "Smart Channel"
+L["CHAT_MSG_SMART_DESC"] = "Will output to Battleground, Raid, Party, or Say - whichever is appropriate."
+L["CHAT_FRAME"] = "Chat Frame"
 
 
 L["HELP_FIRSTUCD"] = [[It looks like this is your first time using an icon type that uses the special duration syntax! Spells that are added to the name editbox must define their duration immediately after a spell using the following syntax:

@@ -1103,11 +1103,13 @@ function ID:SpellItemToIcon(groupID, iconID)
 	end
 	if not input then return end
 	local icondata = db.profile.Groups[groupID].Icons[iconID]
-	icondata.Name = TMW:CleanString(icondata.Name .. ";" .. input)
 	if icondata.Type == "" then
 		icondata.Type = "cooldown"
 		icondata.CooldownType = t
 		icondata.Enabled = true
+	end
+	if (icondata.Type ~= "cooldown") or (icondata.CooldownType == "item" and t == "item") or (icondata.CooldownType ~= "item" and t ~= "item") then
+		icondata.Name = TMW:CleanString(icondata.Name .. ";" .. input)
 	end
 	ClearCursor()
 	TMW:Icon_Update(TMW[groupID][iconID])
@@ -2735,7 +2737,7 @@ function ANN:OnInitialize()
 			f.channel = t.channel
 			f.Name:SetText(t.text)
 			f:Show()
-			TMW:TT(f, t.text, t.addon, 1, 1)
+			TMW:TT(f, t.text, t.desc, 1, 1)
 		else
 			offs = offs - 1
 		end
@@ -2800,11 +2802,12 @@ function ANN:SelectChannel(channel)
 			ANN.Icon:Hide()
 		end
 		if channelsettings.defaultlocation then
+			local defaultlocation = get(channelsettings.defaultlocation)
 			local location = EventSettings.Location
-			location = location and location ~= "" and location or channelsettings.defaultlocation
-			location = channelsettings.ddtext(location) and location or channelsettings.defaultlocation
+			location = location and location ~= "" and location or defaultlocation
+			location = channelsettings.ddtext(location) and location or defaultlocation
 			EventSettings.Location = location
-			loc = channelsettings.ddtext(location)
+			local loc = channelsettings.ddtext(location)
 			UIDropDownMenu_SetSelectedValue(ANN.Location, location)
 			UIDropDownMenu_SetText(ANN.Location, loc)
 			ANN.Location:Show()
@@ -3517,8 +3520,8 @@ function SUG:NameOnCursor(isClick)
 
 end
 
-function SUG:OnClick()
-	if self.insert then
+function SUG:OnClick(frame)
+	if frame.insert then
 		local currenttext = SUG.Box:GetText()
 		local start = SUG.startpos-1
 		local firsthalf
@@ -3530,7 +3533,7 @@ function SUG:OnClick()
 		local lasthalf = strsub(currenttext, SUG.endpos+1)
 		
 		local addcolon = (SUG.duration or (Types[CI.t].DurationSyntax and not SUG.overrideSoI))
-		local insert = (addcolon and self.insert .. ": " .. (SUG.duration or "")) or self.insert
+		local insert = (addcolon and frame.insert .. ": " .. (SUG.duration or "")) or frame.insert
 		local newtext = firsthalf .. "; " .. insert .. "; " .. lasthalf
 		SUG.Box:SetText(TMW:CleanString(newtext))
 		SUG.Box:SetCursorPosition(SUG.endpos + (#tostring(insert) - #tostring(SUG.lastName)))
