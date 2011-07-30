@@ -105,16 +105,9 @@ local function ICD_OnUpdate(icon, time)
 		local CndtCheck = icon.CndtCheck if CndtCheck and CndtCheck() then return end
 
 		local ICDStartTime = icon.ICDStartTime
-		local timesince = time - ICDStartTime
 		local ICDDuration = icon.ICDDuration
 
-		local d = ICDDuration - timesince
-		if (icon.DurationMinEnabled and icon.DurationMin > d) or (icon.DurationMaxEnabled and d > icon.DurationMax) then
-			icon:SetAlpha(0)
-			return
-		end
-
-		if timesince > ICDDuration then
+		if time - ICDStartTime > ICDDuration then
 			icon:SetInfo(icon.Alpha, 1, nil, 0, 0)
 		else
 			icon:SetInfo(icon.UnAlpha, icon.Alpha ~= 0 and (icon.ShowTimer and 1 or .5) or 1, nil, ICDStartTime, ICDDuration)

@@ -314,6 +314,10 @@ function GameTooltip:AddLine(text, r, g, b, wrap, ...)
 	self:OldAddLine(text, r, g, b, wrap, ...)
 end
 
+function GameTooltip:TMW_SetEquiv(equiv)
+	GameTooltip:AddLine(L[equiv], HIGHLIGHT_FONT_COLOR.r, HIGHLIGHT_FONT_COLOR.g, HIGHLIGHT_FONT_COLOR.b, 1)
+	GameTooltip:AddLine(IE:Equiv_GenerateTips(equiv), NORMAL_FONT_COLOR.r, NORMAL_FONT_COLOR.g, NORMAL_FONT_COLOR.b, 1)
+end
 -- --------------
 -- MAIN OPTIONS
 -- --------------
@@ -1628,10 +1632,20 @@ function IE:ShowHide()
 	end
 end
 
-function IE:SaveSettings()
+function IE:SaveSettings(frame)
+	for k, t in pairs(IE.Checks) do
+		if t == 2 then
+			IE.Main[k]:ClearFocus()
+		end
+	end
+	ANN.EditBox:ClearFocus()
+	SND.Custom:ClearFocus()
 	if TellMeWhen_IconEditor:IsShown() then
-		IE.Main.Name:ClearFocus()
-		IE.Main.Unit:ClearFocus()
+		for i, frame in ipairs(CNDT) do
+			frame.Unit:ClearFocus()
+			frame.EditBox:ClearFocus()
+			frame.EditBox2:ClearFocus()
+		end
 	end
 end
 
@@ -2662,8 +2676,8 @@ local ChannelLookup = TMW.ChannelLookup
 local old_ChatEdit_InsertLink = ChatEdit_InsertLink
 function ChatEdit_InsertLink(...)
 	local text = ...
-	if ANN.Editbox:HasFocus() then
-		ANN.Editbox:Insert(text)
+	if ANN.EditBox:HasFocus() then
+		ANN.EditBox:Insert(text)
 		return true
 	elseif IE.Main.Name:HasFocus() then
 		if strmatch(text, "|H(.-):%d+") ~= CI.SoI then
@@ -2748,7 +2762,7 @@ function ANN:OnInitialize()
 end
 
 function ANN:SelectEvent(id)
-	ANN.Editbox:ClearFocus()
+	ANN.EditBox:ClearFocus()
 	ANN.currentEventID = id
 	ANN.currentEvent = ANN.Events[id].event
 
@@ -2766,7 +2780,7 @@ function ANN:SelectEvent(id)
 	if CI.ics then
 		local EventSettings = CI.ics.Events[eventFrame.event]
 		ANN:SelectChannel(EventSettings.Channel)
-		ANN.Editbox:SetText(EventSettings.Text)
+		ANN.EditBox:SetText(EventSettings.Text)
 	end
 end
 
@@ -3156,8 +3170,8 @@ function SUG:OnCommReceived(prefix, text, channel, who)
 			SUG:SendCommMessage("TMWSUG", SUG:Serialize("CSC", SUG.commThrowaway), "WHISPER", who)
 		elseif arg1 == "CSC" then
 			for class, tbl in pairs(arg2) do
-				for id in pairs(tbl) do
-					TMW.ClassSpellCache[class][id] = 1
+				for id, val in pairs(tbl) do
+					TMW.ClassSpellCache[class][id] = val
 				end
 			end
 			SUG:BuildClassSpellLookup()
@@ -3165,11 +3179,6 @@ function SUG:OnCommReceived(prefix, text, channel, who)
 	elseif TMW.debug then
 		geterrorhandler()(arg1)
 	end
-end
-
-function GameTooltip:TMW_SetEquiv(equiv)
-	GameTooltip:AddLine(L[equiv], HIGHLIGHT_FONT_COLOR.r, HIGHLIGHT_FONT_COLOR.g, HIGHLIGHT_FONT_COLOR.b, 1)
-	GameTooltip:AddLine(IE:Equiv_GenerateTips(equiv), NORMAL_FONT_COLOR.r, NORMAL_FONT_COLOR.g, NORMAL_FONT_COLOR.b, 1)
 end
 
 function SUG.Sorter(a, b)
@@ -3611,13 +3620,13 @@ function SUG:ColorHelp(frame)
 	GameTooltip:Show()
 end
 
-function SUG:EnableEditbox(editbox, inputType, setOverride)
+function SUG:EnableEditBox(editbox, inputType, setOverride)
 	editbox.SUG_Enabled = 1
 	
 	inputType = get(inputType)
 	inputType = (inputType == true and "spell") or inputType
 	if not inputType then
-		return SUG:DisableEditbox(editbox)
+		return SUG:DisableEditBox(editbox)
 	end
 	editbox.SUG_type = inputType
 	editbox.SUG_setOverride = setOverride
@@ -3657,7 +3666,7 @@ function SUG:EnableEditbox(editbox, inputType, setOverride)
 
 end
 
-function SUG:DisableEditbox(editbox)
+function SUG:DisableEditBox(editbox)
 	editbox.SUG_Enabled = nil
 end
 
@@ -4096,7 +4105,7 @@ function AddIns.TypeCheck(group, data)
 			else
 				group.Check:Hide()
 			end
-			SUG:EnableEditbox(group.EditBox, data.useSUG, true)
+			SUG:EnableEditBox(group.EditBox, data.useSUG, true)
 			
 			group.Slider:SetWidth(200)
 			if data.noslide then
@@ -4108,7 +4117,7 @@ function AddIns.TypeCheck(group, data)
 			group.EditBox:Hide()
 			group.Check:Hide()
 			group.Slider:SetWidth(523)
-			SUG:DisableEditbox(group.EditBox)
+			SUG:DisableEditBox(group.EditBox)
 		end
 		if data.name2 then
 			group.EditBox2:Show()
@@ -4124,13 +4133,13 @@ function AddIns.TypeCheck(group, data)
 			else
 				group.Check2:Hide()
 			end
-			SUG:EnableEditbox(group.EditBox2, data.useSUG, true)
+			SUG:EnableEditBox(group.EditBox2, data.useSUG, true)
 			group.EditBox:SetWidth(250)
 			group.EditBox2:SetWidth(250)
 		else
 			group.Check2:Hide()
 			group.EditBox2:Hide()
-			SUG:DisableEditbox(group.EditBox2)
+			SUG:DisableEditBox(group.EditBox2)
 		end
 		
 		if data.nooperator then
@@ -4347,14 +4356,21 @@ function AddIns.SetSliderMinMax(group, level)
 
 		Slider:SetMinMaxValues(newmin, newmax)
 		_G[Slider:GetName() .. "Low"]:SetText(get(v.texttable, newmin) or newmin)
-		_G[Slider:GetName() .. "Mid"]:SetText(nil)
 		_G[Slider:GetName() .. "High"]:SetText(get(v.texttable, newmax) or newmax)
 	else
 		Slider:SetMinMaxValues(vmin or 0, vmax or 1)
 		_G[Slider:GetName() .. "Low"]:SetText(get(v.texttable, vmin) or v.mint or vmin or 0)
-		_G[Slider:GetName() .. "Mid"]:SetText(v.midt)
 		_G[Slider:GetName() .. "High"]:SetText(get(v.texttable, vmax) or v.maxt or vmax or 1)
 	end
+		
+	local Min, Max, midt = Slider:GetMinMaxValues()
+	if v.midt == true then
+		midt = get(v.texttable, ((Max-Min)/2)+Min) or ((Max-Min)/2)+Min
+	else
+		midt = get(v.midt, ((Max-Min)/2)+Min)
+	end
+	_G[Slider:GetName() .. "Mid"]:SetText(midt)
+		
 	Slider.step = v.step or 1
 	Slider:SetValueStep(Slider.step)
 	if level then

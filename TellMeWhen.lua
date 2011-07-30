@@ -34,7 +34,7 @@ local DRData = LibStub("DRData-1.0", true)
 TELLMEWHEN_VERSION = "4.5.1"
 TELLMEWHEN_VERSION_MINOR = strmatch(" @project-version@", " r%d+") or ""
 TELLMEWHEN_VERSION_FULL = TELLMEWHEN_VERSION .. TELLMEWHEN_VERSION_MINOR
-TELLMEWHEN_VERSIONNUMBER = 45104 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
+TELLMEWHEN_VERSIONNUMBER = 45105 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
 if TELLMEWHEN_VERSIONNUMBER > 46000 or TELLMEWHEN_VERSIONNUMBER < 45000 then return error("YOU SCREWED UP THE VERSION NUMBER OR DIDNT CHANGE THE SAFETY LIMITS") end -- safety check because i accidentally made the version number 414069 once
 
 TELLMEWHEN_MAXGROUPS = 1 	--this is a default, used by SetTheory (addon), so dont rename
@@ -2979,7 +2979,7 @@ function TMW:Icon_Update(icon)
 						dontremove = 1
 					else
 						tbl.SoundData = nil
-						print("Hmmm, it seems that this sound setting managed to make it past all the checks for invalidness (or it is a LSM sound that doesnt exist anymore:", v)
+						print("Hmmm, it seems that this sound setting managed to make it past all the checks for invalidness (or it is a LSM sound that doesnt exist anymore:", data, icon)
 					end
 				end
 			elseif key == "Channel" and data ~= "" then

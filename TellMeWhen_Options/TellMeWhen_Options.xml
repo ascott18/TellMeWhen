@@ -2057,7 +2057,7 @@
 								self.__title = TMW.L["ICONMENU_CHOOSENAME"]
 								self.__text = TMW.L["CHOOSENAME_DIALOG"]
 								self.BackgroundText:SetWidth(self:GetWidth())
-								TMW.SUG:EnableEditbox(self, true)
+								TMW.SUG:EnableEditBox(self, true)
 							</OnLoad>
 							<OnEvent>
 								if not self.isOver then return end
@@ -2209,7 +2209,7 @@
 								TMW:TT(self, "ICONMENU_CUSTOMTEX", "ICONMENU_CUSTOMTEX_DESC")
 								self.label = TMW.L["ICONMENU_CUSTOMTEX"]
 								self.BackgroundText:SetWidth(self:GetWidth())
-								TMW.SUG:EnableEditbox(self, true, true)
+								TMW.SUG:EnableEditBox(self, true, true)
 							</OnLoad>
 							<OnEditFocusLost>
 								EditBox_ClearHighlight(self)
@@ -3432,7 +3432,7 @@
 							</OnLoad>
 						</Scripts>
 					</Frame>
-					<Editbox name="$parentExportBox" inherits="TellMeWhen_InputBoxTemplate" parentKey="ExportBox">
+					<EditBox name="$parentExportBox" inherits="TellMeWhen_InputBoxTemplate" parentKey="ExportBox">
 						<Size x="235" y="15"/>
 						<Anchors>
 							<Anchor point="LEFT" relativeTo="$parentCopy" relativePoint="RIGHT">
@@ -3485,7 +3485,7 @@
 								self:GetScript("OnTextChanged")(self)
 							</OnEditFocusLost>
 						</Scripts>
-					</Editbox>
+					</EditBox>
 
 					<CheckButton name="$parentEnabled" inherits="TellMeWhen_CheckTemplate" parentKey="Enabled">
 						<Anchors>
@@ -3930,7 +3930,7 @@
 			</Frame>
 			<Frame name="$parentAnnouncements" enableMouse="true" hidden="true" setAllPoints="true" parentKey="Announcements">
 				<Frames>
-					<EditBox name="$parentEditbox" inherits="TellMeWhen_InputBoxTemplate" parentKey="Editbox" autoFocus="false">
+					<EditBox name="$parentEditBox" inherits="TellMeWhen_InputBoxTemplate" parentKey="EditBox" autoFocus="false">
 						<Size>
 							<AbsDimension x="540" y="15"/>
 						</Size>
@@ -4038,7 +4038,7 @@
 								TMW:TT(self, "ANN_WHISPERTARGET", "ANN_WHISPERTARGET_DESC")
 								self.label = TMW.L["ANN_WHISPERTARGET"]
 								self.BackgroundText:SetWidth(self:GetWidth())
-								TMW.SUG:EnableEditbox(self, true, true)
+								TMW.SUG:EnableEditBox(self, true, true)
 							</OnLoad>
 							<OnEditFocusLost>
 								EditBox_ClearHighlight(self)
@@ -4274,7 +4274,10 @@
 						end
 					</OnShow>
 					<OnHide>
-						TMW.IE.MainOptionsWidget:ReleaseChildren()
+						if TMW.IE.MainOptionsWidget then
+							LibStub("AceGUI-3.0", true):Release(TMW.IE.MainOptionsWidget)
+						end
+						--TMW.IE.MainOptionsWidget:ReleaseChildren()
 					</OnHide>
 					<OnDragStart> TellMeWhen_IconEditor:StartMoving() </OnDragStart>
 					<OnDragStop> TellMeWhen_IconEditor:StopMovingOrSizing() </OnDragStop>
