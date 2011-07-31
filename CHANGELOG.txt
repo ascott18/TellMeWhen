@@ -1,6 +1,7 @@
 ===v4.5.1===
  * You can now shift-click links into the Announcement EditBox.
  * You can now shift-click links into the Choose Name/ID EditBox to insert a spellID/itemID.
+ * Suggesting a spellID is now about 75% more efficient.
  * New text output locations:
  ** Smart Channel
  ** Chat Frame
@@ -9,6 +10,7 @@
  ** (r179) Meta icons should now inherit icon properties from other icons a little better.
  ** (r181) Attempted a possible fix to the error 132s that some people are getting when they close the icon editor after viewing the group settings tab.
  ** (r182) ICD icons should now properly use the failed duration alpha setting when the duration requirements fail.
+ ** (r183) Fixed texture alignment in the spell breakdown tooltip that appears when hovering over the choose name/ID editbox with a modifier key pressed.
 
 ===v4.5.0===
  * Fully integrated main addon settings/group settings into the icon editor.

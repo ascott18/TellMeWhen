@@ -45,8 +45,8 @@ local GetSpellInfo, GetContainerItemID, GetContainerItemLink =
 	  GetSpellInfo, GetContainerItemID, GetContainerItemLink
 local tonumber, tostring, type, pairs, ipairs, tinsert, tremove, sort, wipe, next =
 	  tonumber, tostring, type, pairs, ipairs, tinsert, tremove, sort, wipe, next
-local strfind, strmatch, format, gsub, strsub, strtrim, max, min, strlower =
-	  strfind, strmatch, format, gsub, strsub, strtrim, max, min, strlower
+local strfind, strmatch, format, gsub, strsub, strtrim, max, min, strlower, floor, log10 =
+	  strfind, strmatch, format, gsub, strsub, strtrim, max, min, strlower, floor, log10
 local strlowerCache = TMW.strlowerCache
 local SpellTextures = TMW.SpellTextures
 local _G, GetTime = _G, GetTime
@@ -2352,7 +2352,7 @@ function IE:GetRealNames()
 	local numadded = 0
 	local numlines = 50
 	local numperline = ceil(#tbl/numlines)
-	local texend = ":0:0:0:-5|t" --numperline ~= 1 and ":0:0:0:-7|t" or ":0|t"
+	
 	for k, v in pairs(tbl) do
 		local name, texture
 		if CI.SoI == "item" then
@@ -2377,17 +2377,16 @@ function IE:GetRealNames()
 			name = name or v or ""
 			texture = texture or SpellTextures[name]
 		end
-	--	local beginning, first, ending = strmatch(name, "(^[\"' ]*)(.)(.*)")
-	--	name = beginning .. strupper(first) .. ending
+		
 		if not tiptemp[name] then --prevents display of the same name twice when there are multiple spellIDs.
 			numadded = numadded + 1
 			local dur = Types[CI.t].DurationSyntax and " ("..formatSeconds(durations[k])..")" or ""
 			str = str ..
-			(texture and ("|T" .. texture .. texend) or "") ..
+			(texture and ("|T" .. texture .. ":0|t") or "") ..
 			name ..
 			dur ..
 			(k ~= #tbl and "; " or "") ..
-			(floor(numadded/numperline) == numadded/numperline and "\r\n" or "")
+			(floor(numadded/numperline) == numadded/numperline and k ~= #tbl and "\r\n" or "")
 		end
 		tiptemp[name] = true
 	end
@@ -2693,25 +2692,29 @@ function ChatEdit_InsertLink(...)
 			end
 		end
 		Name:SetCursorPosition(start)
-		local new = strmatch(text, ":(%d+)") or ""
-		text = "; " .. new .. "; "
+		local id = strmatch(text, ":(%d+)") or ""
+		text = "; " .. id .. "; "
 		IE.Main.Name:Insert(text)
 		TMW:CleanString(IE.Main.Name)
-		Name:SetCursorPosition(start + #new + 2)
+		Name:SetCursorPosition(start + #id + 2)
 		return true
 	elseif IE.Main.CustomTex:HasFocus() then
-		local new = strmatch(text, ":(%d+)")
-		if not new then return false end
+		local id = strmatch(text, ":(%d+)")
+		if not id then return false end
 		local Type = strmatch(text, "|H(.-):%d+")
-		print(new, Type)
+		print(id, Type)
+		local tex
 		if Type == "spell" then
-			IE.Main.CustomTex:SetText(new)
-			return true
+			tex = id
 		elseif Type == "item" then
-			IE.Main.CustomTex:SetText(GetItemIcon(new))
-			return true
+			tex = GetItemIcon(id)
 		elseif Type == "achievement" then
-			IE.Main.CustomTex:SetText(select(10, GetAchievementInfo(new)))
+			tex = select(10, GetAchievementInfo(id))
+		end
+		if tex then
+			tex = gsub(tex, "INTERFACE\\ICONS\\", "")
+			tex = gsub(tex, "Interface\\Icons\\", "")
+			IE.Main.CustomTex:SetText(tex)
 			return true
 		end
 	end
@@ -3009,36 +3012,37 @@ function SUG:OnInitialize()
 
 			local Parser = CreateFrame("GameTooltip", "TMWSUGParser", TMW, "GameTooltipTemplate")
 			local f = CreateFrame("Frame")
-			
+			local SPELL_CAST_CHANNELED = SPELL_CAST_CHANNELED
 			local function SpellCacher()
 				for id = index, index + SUG.NumCachePerFrame - 1 do
-					SUG.Suggest.Status:SetValue(id)
 					if spellsFailed < 1000 then
 						local name, rank, icon, _, _, _, castTime = GetSpellInfo(id)
 						if name then
 							name = strlower(name)
-							if
-								not Blacklist[icon] and
-								not strfind(name, "dnd") and
-								not strfind(name, "test") and
-								not strfind(name, "debug") and
-								not strfind(name, "bunny") and
-								not strfind(name, "visual") and
-								not strfind(name, "trigger") and
-								not strfind(name, "[%[%%%+%?]") and -- no brackets, plus signs, percent signs, or question marks
-								not strfind(name, "quest") and
-								not strfind(name, "vehicle") and
-								not strfind(name, "event") and
-								not strfind(name, ":%s?%d") and -- interferes with colon duration syntax
-								not strfind(name, "camera") and
-								not strfind(name, "dmg")
-							then
+							
+							local fail = 
+								Blacklist[icon] or
+								strfind(name, "dnd") or
+								strfind(name, "test") or
+								strfind(name, "debug") or
+								strfind(name, "bunny") or
+								strfind(name, "visual") or
+								strfind(name, "trigger") or
+								strfind(name, "[%[%%%+%?]") or -- no brackets, plus signs, percent signs, or question marks
+								strfind(name, "quest") or
+								strfind(name, "vehicle") or
+								strfind(name, "event") or
+								strfind(name, ":%s?%d") or -- interferes with colon duration syntax
+								strfind(name, "camera") or
+								strfind(name, "dmg")
+								
+							if not fail then
 								GameTooltip_SetDefaultAnchor(Parser, UIParent)
 								Parser:SetSpellByID(id)
 								local r, g, b = TMWSUGParserTextLeft1:GetTextColor()
 								if g > .95 and r > .95 and b > .95 then
 									SUG.SpellCache[id] = name
-									if TMWSUGParserTextLeft2:GetText() == SPELL_CAST_CHANNELED or TMWSUGParserTextLeft3:GetText() == SPELL_CAST_CHANNELED or castTime > 0 then
+									if castTime > 0 or TMWSUGParserTextLeft2:GetText() == SPELL_CAST_CHANNELED or TMWSUGParserTextLeft3:GetText() == SPELL_CAST_CHANNELED then
 										SUG.CastCache[id] = name
 									end
 								end
@@ -3068,6 +3072,7 @@ function SUG:OnInitialize()
 					end
 				end
 				index = index + SUG.NumCachePerFrame
+				SUG.Suggest.Status:SetValue(index)
 			end
 			f:SetScript("OnUpdate", SpellCacher)
 			SUG.IsCaching = true
@@ -3304,12 +3309,17 @@ function SUG:DoSuggest()
 		tbl = SpellCache
 	end
 	
-	for id, name in pairs(tbl) do
-		if inputType == "number" then
-			if strfind(id, atBeginning) then
+	if inputType == "number" then
+		local len = #SUG.lastName - 1
+		local match = tonumber(SUG.lastName)
+		for id in pairs(tbl) do
+			if min(id, floor(id / 10^(floor(log10(id)) - len))) == match then -- this looks like shit, but is is approx 70% more efficient than the below commented line
+		--	if strfind(id, atBeginning) then
 				SUGpreTable[#SUGpreTable + 1] = id
 			end
-		else
+		end
+	else
+		for id, name in pairs(tbl) do
 			if strfind(name, atBeginning) then
 				SUGpreTable[#SUGpreTable + 1] = id
 			end
