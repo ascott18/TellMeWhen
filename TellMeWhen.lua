@@ -31,10 +31,10 @@ local AceDB = LibStub("AceDB-3.0")
 local LSM = LibStub("LibSharedMedia-3.0")
 local DRData = LibStub("DRData-1.0", true)
 
-TELLMEWHEN_VERSION = "4.5.1"
+TELLMEWHEN_VERSION = "4.5.2"
 TELLMEWHEN_VERSION_MINOR = strmatch(" @project-version@", " r%d+") or ""
 TELLMEWHEN_VERSION_FULL = TELLMEWHEN_VERSION .. TELLMEWHEN_VERSION_MINOR
-TELLMEWHEN_VERSIONNUMBER = 45106 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
+TELLMEWHEN_VERSIONNUMBER = 45201 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
 if TELLMEWHEN_VERSIONNUMBER > 46000 or TELLMEWHEN_VERSIONNUMBER < 45000 then return error("YOU SCREWED UP THE VERSION NUMBER OR DIDNT CHANGE THE SAFETY LIMITS") end -- safety check because i accidentally made the version number 414069 once
 
 TELLMEWHEN_MAXGROUPS = 1 	--this is a default, used by SetTheory (addon), so dont rename
@@ -764,7 +764,7 @@ TMW.ChannelList = {
 		text = L["CHAT_MSG_SMART"],
 		desc = L["CHAT_MSG_SMART_DESC"],
 		channel = "SMART",
-		--isBlizz = nil, -- even though it uses blizzard output, SMART isnt a blizz channel - it uses a custom handler. 
+		isBlizz = 1, -- flagged to not use override %t and %f substitutions
 	},
 	{
 		text = CHAT_MSG_GUILD,
@@ -2177,14 +2177,14 @@ end
 -- -----------
 -- GROUPS
 -- -----------
-local ProtoGroup = {}
+local GroupBase = {}
 
 function GroupScriptSort(groupA, groupB)
 	local gOrder = -db.profile.CheckOrder
 	return groupA:GetID()*gOrder < groupB:GetID()*gOrder
 end
 
-function ProtoGroup.SetScript(group, handler, func)
+function GroupBase.SetScript(group, handler, func)
 	group[handler] = func
 	if handler ~= "OnUpdate" then
 		group:setscript(handler, func)
@@ -2197,21 +2197,21 @@ function ProtoGroup.SetScript(group, handler, func)
 	end
 end
 
-function ProtoGroup.Show(group)
+function GroupBase.Show(group)
 	if not group.__shown then
 		group:show()
 		group.__shown = 1
 	end
 end
 
-function ProtoGroup.Hide(group)
+function GroupBase.Hide(group)
 	if group.__shown then
 		group:hide()
 		group.__shown = nil
 	end
 end
 
-function ProtoGroup.SetPos(group)
+function GroupBase.SetPos(group)
 	local groupID = group:GetID()
 	local s = db.profile.Groups[groupID]
 	local p = s.Point
@@ -2251,7 +2251,7 @@ local function CreateGroup(groupID)
 	CNDT.Env[group:GetName()] = group
 	group:SetID(groupID)
 
-	for k, v in pairs(ProtoGroup) do
+	for k, v in pairs(GroupBase) do
 		if type(group[k]) == "function" then -- if the method already exists on the icon
 			group[strlower(k)] = group[k] -- store the old method as the lowercase same name
 		end
@@ -2502,8 +2502,22 @@ function IconBase.HandleEvent(icon, data, played, announced)
 		PlaySoundFile(Sound, SndChan)
 		played = 1
 	end
-	local Channel, Text = data.Channel, data.Text
+	local Channel = data.Channel
 	if Channel ~= "" and not announced then
+		local Text = data.Text
+		local chandata = ChannelLookup[Channel]
+		if not chandata.isBlizz then
+			if strfind(Text, "%%[Tt]") then
+				Text = gsub(Text, "%%[Tt]", UnitName("target") or TARGET_TOKEN_NOT_FOUND)
+			end
+			if strfind(Text, "%%[Ff]") then
+				Text = gsub(Text, "%%[Ff]", UnitName("focus") or FOCUS_TOKEN_NOT_FOUND)
+			end
+		end
+		if strfind(Text, "%%[Mm]") then
+			Text = gsub(Text, "%%[Mm]", UnitName("mouseover") or L.MOUSEOVER_TOKEN_NOT_FOUND)
+		end
+		
 		if Channel == "MSBT" then
 			if MikSBT then
 				local Size = data.Size
@@ -2547,7 +2561,6 @@ function IconBase.HandleEvent(icon, data, played, announced)
 			SendChatMessage(Text, channel)
 		
 		else
-			local chandata = ChannelLookup[Channel]
 			if Text and chandata and chandata.isBlizz then
 				SendChatMessage(Text, Channel, nil, data.Location)
 			end

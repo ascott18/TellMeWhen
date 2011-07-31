@@ -275,7 +275,7 @@
 				local groupID, iconID = TMW.CI.g, TMW.CI.i
 
 				local t = TMW:CleanString(self)
-				if strfind(self.setting, "Duration") and strfind(t, ":") then
+				if strfind(self.setting, "Dur") and strfind(t, ":") then
 					t = t:toseconds()
 				end
 				t = tonumber(t) or 0

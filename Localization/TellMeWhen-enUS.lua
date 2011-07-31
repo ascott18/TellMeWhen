@@ -625,7 +625,12 @@ L["SOUNDERROR3"] = "|cFFFFD100Only OGG and MP3 files are supported!"
 L["ANN_TAB"] = "Text Output"
 L["ANN_CHANTOUSE"] = "Channel to Use"
 L["ANN_EDITBOX"] = "Text to be outputted"
-L["ANN_EDITBOX_DESC"] = [[Type the text that you wish to be outputted when the event triggers. Standard substitutions "%t" for your target and "%f" for your focus may be used for output to chat (say/yell/raid/etc.)]]
+L["ANN_EDITBOX_DESC"] = [[Type the text that you wish to be outputted when the event triggers. The following substitutions may be used:
+
+"%t" - Target's Name
+"%f" - Focus's Name
+"%m" - Mouseover's Name]]
+L["MOUSEOVER_TOKEN_NOT_FOUND"] = "<no mouseover>"
 L["ANN_STICKY"] = "Sticky"
 L["ANN_SHOWICON"] = "Show icon texture"
 L["ANN_SHOWICON_DESC"] = "Some text destinations can show a texture along with the text. Check this to enable that feature."

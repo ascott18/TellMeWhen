@@ -3062,6 +3062,7 @@ function SUG:OnInitialize()
 						SUG.IsCaching = nil
 						SUG.SpellCache[1852] = nil -- GM spell named silenced, interferes with equiv
 						SUG.SpellCache[71216] = nil -- enraged
+						SUG.SpellCache[100000] = GetSpellInfo(100000) and strlower(GetSpellInfo(100000)) -- filted out by default but this spell really needs to be in the list because of how cool it is
 						if SUG.onCompleteCache then
 							SUG.onCompleteCache = nil
 							TMW.SUG.redoIfSame = 1
@@ -3123,12 +3124,13 @@ function SUG:PLAYER_TALENT_UPDATE()
 	local _, RACIAL = GetSpellInfo(20572) -- blood fury, we need the localized "Racial" string
 	local  _, _, _, endgeneral = GetSpellTabInfo(1)
 	local _, _, offs, numspells = GetSpellTabInfo(4)
+	local _, race = UnitRace("player")
 	for i = 1, offs + numspells do
 		local _, id = GetSpellBookItemInfo(i, "player")
 		if id then
 			local name, rank = GetSpellInfo(id)
 			if rank == RACIAL then
-				TMW.ClassSpellCache.RACIAL[id] = UnitRace("player")
+				TMW.ClassSpellCache.RACIAL[id] = race
 			elseif i > endgeneral then
 				t[id] = 1
 			end
@@ -3516,8 +3518,9 @@ function SUG:NameOnCursor(isClick)
 				SUGPlayerSpells[k] = 1
 			end
 		end
+		local _, race = UnitRace("player")
 		for k, v in pairs(TMW.ClassSpellCache.RACIAL) do
-			if v == UnitRace("player") then
+			if v == race then
 				SUGPlayerSpells[k] = 1
 			end
 		end
