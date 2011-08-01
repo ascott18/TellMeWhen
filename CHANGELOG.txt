@@ -1,6 +1,8 @@
 ===v4.5.2===
  * Added "%m" as a text substitution for the name of the unit that you are currently mousing over.
  * Existing substitutions "%t" and "%f" now work in all output locations.
+ * New Condition:
+ ** GCD active
 
 ===v4.5.1===
  * You can now shift-click links into the Announcement EditBox.
@@ -32,7 +34,7 @@
  * New Conditions:
  ** Buff/Debuff - Tooltip Scan
  ** Points in talent
- * Bug Fixes
+ * Bug Fixes:
  ** (r164) Tooltip scan conditions should now properly function with spellID input
  ** (r170) TellMeWhen_Options-r169.lua:215: attempt to index field "?" (a nil value)
  ** (r170) TellMeWhen_Options-r169.lua:1674: attempt to index field "?" (a nil value)

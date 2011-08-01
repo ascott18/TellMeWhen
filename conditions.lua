@@ -1200,7 +1200,21 @@ CNDT.Types = {
 			return 1-c.Level .. [[ == (IsSpellInRange(c.NameName, c.Unit) or 0)]]
 		end,
 	},
-
+	{ -- GCD active
+		text = L["GCD_ACTIVE"],
+		value = "GCD",
+		category = L["CNDTCAT_SPELLSABILITIES"],
+		min = 0,
+		max = 1,
+		nooperator = true,
+		useSUG = true,
+		unit = PLAYER,
+		texttable = bool,
+		icon = "Interface\\Icons\\ability_hunter_steadyshot",
+		tcoords = standardtcoords,
+		funcstr = [[(GCD > 0 and GCD < 1.7) == c.True]],
+	},
+	
 	{ -- item cooldown
 		text = L["ITEMCOOLDOWN"],
 		value = "ITEMCD",

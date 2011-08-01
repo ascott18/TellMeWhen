@@ -60,7 +60,7 @@ local MikSBT, Parrot, SCT =
 local CL_PLAYER = COMBATLOG_OBJECT_TYPE_PLAYER
 local CL_PET = COMBATLOG_OBJECT_CONTROL_PLAYER
 local bitband = bit.band
-local st, co, updatehandler, BarGCD, ClockGCD, Locked, CNDT, SndChan, FramesToFind, UnitsToUpdate
+local st, co, updatehandler, BarGCD, ClockGCD, Locked, CNDT, SndChan, FramesToFind, UnitsToUpdate, CNDTEnv
 local runEvents, updatePBar = 1, 1
 local GCD, NumShapeshiftForms, UpdateTimer = 0, 0, 0
 local IconUpdateFuncs, GroupUpdateFuncs, unitsToChange = {}, {}, {}
@@ -1172,11 +1172,12 @@ end
 
 function TMW:OnUpdate() -- this is where all icon OnUpdate scripts are actually called
 	time = GetTime()
-	CNDT.Env.time = time
+	CNDTEnv.time = time
 	TMW.time = time
 	if UpdateTimer <= time - UPD_INTV then
 		UpdateTimer = time
 		_, GCD=GetSpellCooldown(GCDSpell)
+		CNDTEnv.GCD = GCD
 		
 		if FramesToFind then
 			-- I hate to do this, but this is the only way to detect frames that are created by an upvalued CreateFrame (*cough* VuhDo) (Unless i raw hook it, but CreateFrame should be secure)
@@ -1234,7 +1235,8 @@ function TMW:Update()
 	updatePBar = 1
 
 	Locked = db.profile.Locked
-	CNDT.Env.Locked = Locked
+	CNDTEnv = CNDT.Env
+	CNDTEnv.Locked = Locked
 	TMW.DoWipeAC = false
 	if not Locked then
 		TMW:LoadOptions()
@@ -1256,8 +1258,8 @@ function TMW:Update()
 
 	UPD_INTV = db.profile.Interval
 	TELLMEWHEN_MAXGROUPS = db.profile.NumGroups
-	CNDT.Env.CurrentSpec = GetActiveTalentGroup()
-	CNDT.Env.CurrentTree = GetPrimaryTalentTree()
+	CNDTEnv.CurrentSpec = GetActiveTalentGroup()
+	CNDTEnv.CurrentTree = GetPrimaryTalentTree()
 	NumShapeshiftForms = GetNumShapeshiftForms()
 
 	BarGCD = db.profile.BarGCD
@@ -2083,25 +2085,24 @@ function TMW:RAID_ROSTER_UPDATE()
 			end
 		end
 	end
-	local Env = CNDT.Env
-	for oldunit in pairs(Env) do
+	for oldunit in pairs(CNDTEnv) do
 		if strfind(oldunit, "maintank") then
 			local newunit = gsub(oldunit, "maintank", "raid")
 			local oldnumber = tonumber(strmatch(newunit, "(%d+)"))
 			local newnumber = oldnumber and mtTranslations[oldnumber]
 			if newnumber then
-				Env[oldunit] = gsub(newunit, oldnumber, newnumber)
+				CNDTEnv[oldunit] = gsub(newunit, oldnumber, newnumber)
 			else
-				Env[oldunit] = oldunit
+				CNDTEnv[oldunit] = oldunit
 			end
 		elseif strfind(oldunit, "mainassist") then
 			local newunit = gsub(oldunit, "mainassist", "raid")
 			local oldnumber = tonumber(strmatch(newunit, "(%d+)"))
 			local newnumber = oldnumber and maTranslations[oldnumber]
 			if newnumber then
-				Env[oldunit] = gsub(u, oldnumber, newnumber)
+				CNDTEnv[oldunit] = gsub(u, oldnumber, newnumber)
 			else
-				Env[oldunit] = oldunit
+				CNDTEnv[oldunit] = oldunit
 			end
 		end
 	end
@@ -2248,7 +2249,7 @@ end local GetShapeshiftForm = TMW.GetShapeshiftForm
 local function CreateGroup(groupID)
 	local group = CreateFrame("Frame", "TellMeWhen_Group" .. groupID, UIParent, "TellMeWhen_GroupTemplate", groupID)
 	TMW[groupID] = group
-	CNDT.Env[group:GetName()] = group
+	CNDTEnv[group:GetName()] = group
 	group:SetID(groupID)
 
 	for k, v in pairs(GroupBase) do
@@ -2870,7 +2871,7 @@ function TMW:CreateIcon(group, groupID, iconID)
 	local icon = CreateFrame("Button", "TellMeWhen_Group" .. groupID .. "_Icon" .. iconID, group, "TellMeWhen_IconTemplate", iconID)
 	icon.group = group
 	group[iconID] = icon
-	CNDT.Env[icon:GetName()] = icon
+	CNDTEnv[icon:GetName()] = icon
 	local mt = getmetatable(icon)
 	for k, v in pairs(IconMetamethods) do
 		mt[k] = v
@@ -3286,7 +3287,7 @@ function TMW:EnableTooltipParsing()
 		end
 		return ret
 	end
-	TMW.CNDT.Env.GetTooltipNumber = TMW.GetTooltipNumber
+	CNDTEnv.GetTooltipNumber = TMW.GetTooltipNumber
 	Types.buff:Update()
 	TMW.TooltipParsingEnabled = 1
 end
