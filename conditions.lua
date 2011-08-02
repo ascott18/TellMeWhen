@@ -408,9 +408,13 @@ function Env.ItemCooldownDuration(itemID, time)
 end
 
 local IsUsableSpell = IsUsableSpell
-function Env.ReactiveHelper(NameFirst)
+function Env.ReactiveHelper(NameFirst, Checked)
 	local usable, nomana = IsUsableSpell(NameFirst)
-	return usable or nomana
+	if Checked then
+		return usable or nomana
+	else
+		return usable
+	end
 end
 
 local UnitCastingInfo, UnitChannelInfo = UnitCastingInfo, UnitChannelInfo
@@ -1161,13 +1165,14 @@ CNDT.Types = {
 		min = 0,
 		max = 1,
 		name = function(editbox) TMW:TT(editbox, "ICONMENU_REACTIVE", "CNDT_ONLYFIRST", nil, nil, 1) editbox.label = L["SPELLTOCHECK"] end,
+		check = function(check) TMW:TT(check, "ICONMENU_IGNORENOMANA", "ICONMENU_IGNORENOMANA_DESC", nil, nil, 1) end,
 		useSUG = true,
 		nooperator = true,
 		unit = false,
 		texttable = usableunusable,
 		icon = "Interface\\Icons\\ability_warrior_revenge",
 		tcoords = standardtcoords,
-		funcstr = [[c.1nil == ReactiveHelper(c.NameFirst)]],
+		funcstr = [[c.1nil == ReactiveHelper(c.NameFirst, c.Checked)]], 
 	},
 	{ -- spell has mana
 		text = L["CONDITIONPANEL_MANAUSABLE"],
@@ -2039,6 +2044,7 @@ function CNDT:ProcessConditions(icon)
 				end
 
 				thisstr = thisstr:
+				gsub("c.Checked", 		tostring(c.Checked)):
 				gsub("c.Operator", 		c.Operator):
 				gsub("c.NameFirst2", 	"\"" .. TMW:GetSpellNames(nil, name2, 1) .. "\""): --Name2 must be before Name
 				gsub("c.NameName2", 	"\"" .. TMW:GetSpellNames(nil, name2, 1, 1) .. "\""):

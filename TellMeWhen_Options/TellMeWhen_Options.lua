@@ -1442,6 +1442,7 @@ IE.Checks = { --1=check box, 2=editbox, 3=slider(x100), 4=custom, table=subkeys 
 	EnableStacks = 1,
 	CheckRefresh = 1,
 	Stealable = 1,
+	IgnoreNomana = 1,
 	ShowTTText = 1,
 }
 IE.Tabs = {
@@ -3633,6 +3634,32 @@ function SUG:ColorHelp(frame)
 	GameTooltip:Show()
 end
 
+local EditboxHooks = {
+	OnEditFocusLost = function(self)
+		if self.SUG_Enabled then
+			SUG.Suggest:Hide()
+		end
+	end,
+	OnEditFocusGained = function(self)
+		if self.SUG_Enabled then
+			SUG.redoIfSame = nil
+			SUG.Box = self
+			SUG.overrideSoI = self.SUG_setOverride and self.SUG_type
+			SUG:NameOnCursor()
+		end
+	end,
+	OnTextChanged = function(self, userInput)
+		if userInput and self.SUG_Enabled then
+			SUG.redoIfSame = nil
+			SUG:NameOnCursor()
+		end
+	end,
+	OnMouseUp = function(self)
+		if self.SUG_Enabled then
+			SUG:NameOnCursor(1)
+		end
+	end,
+}
 function SUG:EnableEditBox(editbox, inputType, setOverride)
 	editbox.SUG_Enabled = 1
 	
@@ -3644,36 +3671,10 @@ function SUG:EnableEditBox(editbox, inputType, setOverride)
 	editbox.SUG_type = inputType
 	editbox.SUG_setOverride = setOverride
 	
-	--[[SUG.redoIfSame = 1
-	SUG.Box = editbox
-	SUG.overrideSoI = setOverride and inputType
-	SUG:NameOnCursor()]]
-	
 	if not editbox.SUG_hooked then
-		editbox:HookScript("OnEditFocusLost", function(self)
-			if self.SUG_Enabled then
-				SUG.Suggest:Hide()
-			end
-		end)
-		editbox:HookScript("OnEditFocusGained", function(self)
-			if self.SUG_Enabled then
-				SUG.redoIfSame = nil
-				SUG.Box = self
-				SUG.overrideSoI = self.SUG_setOverride and self.SUG_type
-				SUG:NameOnCursor()
-			end
-		end)
-		editbox:HookScript("OnTextChanged", function(self, userInput)
-			if userInput and self.SUG_Enabled then
-				SUG.redoIfSame = nil
-				SUG:NameOnCursor()
-			end
-		end)
-		editbox:HookScript("OnMouseUp", function(self)
-			if self.SUG_Enabled then
-				SUG:NameOnCursor(1)
-			end
-		end)
+		for k, v in pairs(EditboxHooks) do
+			editbox:HookScript(k, v)
+		end
 		editbox.SUG_hooked = 1
 	end
 

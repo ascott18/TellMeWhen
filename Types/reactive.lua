@@ -51,6 +51,7 @@ Type.RelevantSettings = {
 	DurationMinEnabled = true,
 	DurationMaxEnabled = true,
 	UseActvtnOverlay = true,
+	IgnoreNomana = true,
 	IgnoreRunes = (pclass == "DEATHKNIGHT"),
 }
 
@@ -85,8 +86,8 @@ local function Reactive_OnUpdate(icon, time)
 		local CndtCheck = icon.CndtCheck if CndtCheck and CndtCheck() then return end
 
 		local n, inrange, nomana, start, duration, CD, usable = 1
-		local NameArray, NameNameArray, RangeCheck, ManaCheck, CooldownCheck, IgnoreRunes, Usable =
-		 icon.NameArray, icon.NameNameArray, icon.RangeCheck, icon.ManaCheck, icon.CooldownCheck, icon.IgnoreRunes, icon.Usable
+		local NameArray, NameNameArray, RangeCheck, ManaCheck, CooldownCheck, IgnoreRunes, Usable, IgnoreNomana =
+		 icon.NameArray, icon.NameNameArray, icon.RangeCheck, icon.ManaCheck, icon.CooldownCheck, icon.IgnoreRunes, icon.Usable, icon.IgnoreNomana
 
 		for i = 1, #NameArray do
 			local iName = NameArray[i]
@@ -98,7 +99,9 @@ local function Reactive_OnUpdate(icon, time)
 					inrange = IsSpellInRange(NameNameArray[i], "target") or 1
 				end
 				usable, nomana = IsUsableSpell(iName)
-				usable = usable or nomana
+				if IgnoreNomana then
+					usable = usable or nomana
+				end
 				if not ManaCheck then
 					nomana = nil
 				end

@@ -248,6 +248,10 @@ L["ICONMENU_CHECKREFRESH"] = "Listen for refreshes"
 L["ICONMENU_CHECKREFRESH_DESC"] = [[Blizzard's combat log is very buggy when it comes to spell refreshes and fear (or other spells that break after a certain amount of damage). The combat log will say that the spell was refreshed when damage is dealt, even though it technically wasn't. Uncheck this box to disable listening to spell refreshes, but note that legitimate refreshes will be ignored as well.
 
 It is reccomended to leave this checked if the DRs you are checking for don't break after a certain amount of damage.]]
+L["ICONMENU_IGNORENOMANA"] = "Ignore lack of power"
+L["ICONMENU_IGNORENOMANA_DESC"] = [[Check this to cause the ability to not be treated as unusable if there is only a lack of power to use it.
+
+Useful for abilies such as %s or %s]]
 
 
 -- -------------

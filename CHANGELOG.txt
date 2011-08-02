@@ -1,6 +1,7 @@
 ===v4.5.2===
  * Added "%m" as a text substitution for the name of the unit that you are currently mousing over.
  * Existing substitutions "%t" and "%f" now work in all output locations.
+ * The change made in 4.5.0 to reactve icons and conditions has been made optional. Those checking abilities such as raging blow or execute should probably enable this option.
  * New Condition:
  ** GCD active
 
