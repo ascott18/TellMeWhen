@@ -414,6 +414,16 @@ L["CONDITIONPANEL_UNITISUNIT"] = "Unit is Unit"
 L["CONDITIONPANEL_UNITISUNIT_DESC"] = "This condition will pass if the unit in the first editbox and the second editbox are the same entity."
 L["CONDITIONPANEL_UNITISUNIT_EBDESC"] = "Enter a unit in this editbox to be compared with the first unit."
 L["UNITTWO"] = "Second Unit"
+L["CONDITIONPANEL_THREAT_SCALED"] = "Unit Threat - Scaled"
+L["CONDITIONPANEL_THREAT_SCALED_DESC"] = [[This condition checks your scaled threat percentage on a unit.
+
+100% indicates that you are tanking the unit.]]
+L["CONDITIONPANEL_THREAT_RAW"] = "Unit Threat - Raw"
+L["CONDITIONPANEL_THREAT_RAW_DESC"] = [[This condition checks your raw threat percentage on a unit.
+
+Players in melee range pull aggro at 110%
+Players at range pull aggro at 130%
+Players with aggro have a raw threat percentage of 255%]]
 L["CONDITIONPANEL_NAME"] = "Unit Name"
 L["CONDITIONPANEL_NAMETOOLTIP"] = "Separate multiple names with semicolons (;)"
 L["CONDITIONPANEL_INSTANCETYPE"] = "Instance Type"

@@ -343,6 +343,7 @@ Env = {
 	UnitClass = UnitClass,
 	UnitClassification = UnitClassification,
 	UnitGroupRolesAssigned = UnitGroupRolesAssigned,
+	UnitDetailedThreatSituation = UnitDetailedThreatSituation,
 	GetNumRaidMembers = GetNumRaidMembers,
 	GetNumPartyMembers = GetNumPartyMembers,
 	GetRaidTargetIndex = GetRaidTargetIndex,
@@ -934,12 +935,35 @@ CNDT.Types = {
 		min = 0,
 		max = 1,
 		nooperator = true,
-		texttable = function(k) return L[classifications[k]] end,
 		name = function(editbox) TMW:TT(editbox, "UNITTWO", "CONDITIONPANEL_UNITISUNIT_EBDESC", nil, nil, 1) editbox.label = L["UNITTWO"] end,
 		texttable = bool,
 		icon = "Interface\\Icons\\spell_holy_prayerofhealing",
 		tcoords = standardtcoords,
 		funcstr = [[UnitIsUnit(c.Unit, c.Unit2) == c.1nil]],
+	},
+	{ -- unit threat scaled
+		text = L["CONDITIONPANEL_THREAT_SCALED"],
+		tooltip = L["CONDITIONPANEL_THREAT_SCALED_DESC"],
+		category = L["CNDTCAT_STATUS"],
+		value = "THREATSCALED",
+		min = 0,
+		max = 100,
+		texttable = percent,
+		icon = "Interface\\Icons\\spell_misc_emotionangry",
+		tcoords = standardtcoords,
+		funcstr = [[(select(3, UnitDetailedThreatSituation("player", c.Unit)) or 0) c.Operator c.Level]],
+	},
+	{ -- unit threat raw
+		text = L["CONDITIONPANEL_THREAT_RAW"],
+		tooltip = L["CONDITIONPANEL_THREAT_RAW_DESC"],
+		category = L["CNDTCAT_STATUS"],
+		value = "THREATRAW",
+		min = 0,
+		max = 130,
+		texttable = percent,
+		icon = "Interface\\Icons\\spell_misc_emotionhappy",
+		tcoords = standardtcoords,
+		funcstr = [[(select(4, UnitDetailedThreatSituation("player", c.Unit)) or 0) c.Operator c.Level]],
 	},
 
 	{ -- instance type
@@ -1974,6 +1998,14 @@ function CNDT:ProcessConditions(icon)
 		local c = Conditions[i]
 		local t = c.Type
 		local v = ConditionsByType[t]
+		
+		local andor
+		if c.AndOr == "OR" then
+			andor = "or " --have a space so they are both 3 chars long
+		else
+			andor = "and"
+		end
+		
 		if v then
 			if v.events then
 				for k, event in TMW:Vararg(strsplit(" ", v.events)) do
@@ -1998,12 +2030,6 @@ function CNDT:ProcessConditions(icon)
 			name2 = gsub(name2, ";;", ";")
 			name2 = strtrim(name2)
 			name2 = strlower(name2)
-			local andor
-			if c.AndOr == "OR" then
-				andor = "or " --have a space so they are both 3 chars long
-			else
-				andor = "and"
-			end
 
 			local thiscondtstr = v.funcstr
 			if type(thiscondtstr) == "function" then
@@ -2059,7 +2085,11 @@ function CNDT:ProcessConditions(icon)
 				gsub("c.True", 			tostring(c.Level == 0)):
 				gsub("c.False", 		tostring(c.Level == 1))
 				funcstr = funcstr .. thisstr
+			else
+				funcstr = funcstr .. (andor .. "(" .. strrep("(", c.PrtsBefore) .. "true" .. strrep(")", c.PrtsAfter)  .. ")")
 			end
+		else
+			funcstr = funcstr .. (andor .. "(" .. strrep("(", c.PrtsBefore) .. "true" .. strrep(")", c.PrtsAfter)  .. ")")
 		end
 	end
 
