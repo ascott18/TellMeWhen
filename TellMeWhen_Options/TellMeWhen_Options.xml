@@ -412,15 +412,17 @@
 		<Scripts>
 			<OnLoad>
 				if strfind(self:GetParent():GetName(), "Close") then
-					self.text:SetText(")")
+					self.type = ")"
 				else
-					self.text:SetText("(")
+					self.type = "("
 				end
+				self.text:SetText(self.type)
 				function self:SetChecked(checked)
 					self:Show()
+					local oldstate = self.checked
 					self.checked = checked
 					if checked then
-						self.text:SetTextColor(0, 1, 0, 1)
+						--self.text:SetTextColor(0, 1, 0, 1)
 						local next = self:GetParent()[self:GetID() + 1]
 						if next then
 							next:Show()
@@ -433,7 +435,7 @@
 							next:SetChecked(nil)
 						end
 					else
-						self.text:SetTextColor(.4, .4, .4, 1)
+						--self.text:SetTextColor(.4, .4, .4, 1)
 						local last = self:GetParent()[self:GetID() - 1]
 						if type(last) == "table" and not last.checked then
 							self:Hide()
@@ -444,7 +446,9 @@
 						end
 					end
 
-					TMW.CNDT:ValidateParenthesis()
+					if oldstate ~= checked then
+						TMW.CNDT:ValidateParenthesis()
+					end
 				end
 
 				function self:GetChecked()
@@ -456,12 +460,6 @@
 				self:SetChecked(not self.checked)
 				TMW.CNDT:OK()
 			</OnClick>
-			<OnShow>
-				TMW.CNDT:ValidateParenthesis()
-			</OnShow>
-			<OnHide>
-				TMW.CNDT:ValidateParenthesis()
-			</OnHide>
 		</Scripts>
 		<HighlightTexture urgency="5" file="Interface\Buttons\UI-CheckBox-Highlight" alphaMode="ADD"/>
 	</CheckButton>
@@ -3740,6 +3738,9 @@
 					</OnLoad>
 					<OnDragStart> TellMeWhen_IconEditor:StartMoving() </OnDragStart>
 					<OnDragStop> TellMeWhen_IconEditor:StopMovingOrSizing() </OnDragStop>
+					<OnShow>
+						TMW.CNDT:ValidateParenthesis()
+					</OnShow>
 				</Scripts>
 				<Layers>
 					<Layer level="OVERLAY">

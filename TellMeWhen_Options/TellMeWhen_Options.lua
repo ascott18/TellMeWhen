@@ -1777,7 +1777,9 @@ function IE:ShowHelp(text, frame, x, y)
 	IE.Help:Show()
 end
 
+local equivTipCache = {}
 function IE:Equiv_GenerateTips(equiv)
+	if equivTipCache[equiv] then return equivTipCache[equiv] end
 	local r = "" --tconcat doesnt allow me to exclude duplicates unless i make another garbage table, so lets just do this
 	local tbl = TMW:SplitNames(EquivFullIDLookup[equiv])
 	for k, v in pairs(tbl) do
@@ -1791,15 +1793,13 @@ function IE:Equiv_GenerateTips(equiv)
 			end
 		end
 		if not tiptemp[name] then --prevents display of the same name twice when there are multiple ranks.
-			if k ~= #tbl then
-				r = r .. "|T" .. texture .. ":0|t" .. name .. "\r\n"
-			else
-				r = r .. "|T" .. texture .. ":0|t" .. name
-			end
+			r = r .. "|T" .. texture .. ":0|t" .. name .. "\r\n"
 		end
 		tiptemp[name] = true
 	end
 	wipe(tiptemp)
+	r = strtrim(r, "\r\n ;")
+	equivTipCache[equiv] = r
 	return r
 end
 
@@ -2386,12 +2386,13 @@ function IE:GetRealNames()
 			(texture and ("|T" .. texture .. ":0|t") or "") ..
 			name ..
 			dur ..
-			(k ~= #tbl and "; " or "") ..
-			(floor(numadded/numperline) == numadded/numperline and k ~= #tbl and "\r\n" or "")
+			"; " ..
+			(floor(numadded/numperline) == numadded/numperline and "\r\n" or "")
 		end
 		tiptemp[name] = true
 	end
 	wipe(tiptemp)
+	str = strtrim(str, "\r\n ;")
 	cachednames[CI.t .. CI.SoI .. text] = str
 	return str
 end
@@ -2996,7 +2997,7 @@ function SUG:OnInitialize()
 				["Interface\\Icons\\Temp"] = true,
 			}
 			local index, spellsFailed = 0, 0
-			TMWOptDB.CacheLength = TMWOptDB.CacheLength or 100000
+			TMWOptDB.CacheLength = TMWOptDB.CacheLength or 103000
 			SUG.Suggest.Status:Show()
 			SUG.Suggest.Status.texture:SetTexture(LSM:Fetch("statusbar", db.profile.TextureName))
 			SUG.Suggest.Status:SetMinMaxValues(1, TMWOptDB.CacheLength)
@@ -3242,7 +3243,7 @@ function SUG.Sorter(a, b)
 			--if they both were auras, and they were auras of the same type (player, NPC) then procede on to the rest of the code to sort them by name/id
 		end
 	end
-
+	
 	if inputType == "number" or SUGSoI == "tracking" then
 		--sort by id
 		return a < b
@@ -3902,33 +3903,128 @@ function CNDT:RuneHandler(rune)
 	end
 end
 
+CNDT.colors = setmetatable(
+	{ -- hardcode the first few colors to make sure they look good
+		"|cff00ff00",
+		"|cff0026ff",
+		"|cffff004d",
+		"|cff009bff",
+		"|cffff00c2",
+		"|cffe9ff00",
+		"|cff00ff7c",
+		"|cffff6700",
+		"|cffaf79ff",
+	},
+	{ __index = function(t, k)
+		-- start reusing colors
+		if k < 1 then return "" end
+		while k >= #t do
+			k = k - #t
+		end
+		return rawget(t, k) or ""
+		
+		--[[local s = (k-1)*8.86065+.3333333
+		
+		local h = (s*6)
+		while h >= 6 do
+			h = h - 6
+		end
+		
+		local i = floor( h )
+		local v1 = 1 - ( h - i )
+		local v2 = 1 - ( 1 - ( h - i ) )
+		
+		local r, g, b
+		if i == 0 then
+			r = 1		g = v2		b = 0
+		elseif i == 1 then
+			r = v1		g = 1		b = 0 
+		elseif i == 2 then
+			r = 0		g = 1		b = v2 
+		elseif i == 3 then
+			r = 0		g = v1		b = 1
+		elseif i == 4 then
+			r = v2		g = 0		b = 1 
+		else
+			r = 1		g = 0		b = v1
+		end
+		local c = format("|cff%02x%02x%02x", r * 255, g * 255, b * 255)
+		t[k] = c
+		return c]]
+end})
+	
 function CNDT:ValidateParenthesis()
 	if not IE.Conditions:IsShown() then return end
+	CNDT.Parens = wipe(CNDT.Parens or {})
 	local numclose, numopen, runningcount = 0, 0, 0
 	local unopened
 	for k, v in ipairs(CNDT) do
 		if v:IsShown() then
 			if v.OpenParenthesis:IsShown() then
 				for k, v in ipairs(v.OpenParenthesis) do
+					v.text:SetText("|cff444444" .. v.type)
 					if v:GetChecked() then
 						numopen = numopen + 1
 						runningcount = runningcount + 1
+						tinsert(CNDT.Parens, v)
 					end
 					if runningcount < 0 then unopened = 1 end
 				end
 			end
 			if v.CloseParenthesis:IsShown() then
-				for k, v in ipairs(v.CloseParenthesis) do
+				for k = #v.CloseParenthesis, 1, -1 do
+					local v = v.CloseParenthesis[k]
+					v.text:SetText("|cff444444" .. v.type)
 					if v:GetChecked() then
 						numclose = numclose + 1
 						runningcount = runningcount - 1
+						tinsert(CNDT.Parens, v)
 					end
 					if runningcount < 0 then unopened = 1 end
 				end
 			end
 		end
 	end
-
+	
+	local color = 1
+	while true do
+		local numopen, nestinglevel, open, found, currentcolor = 0, 0
+		for i, v in ipairs(CNDT.Parens) do
+			if v == true then
+				nestinglevel = nestinglevel + 1
+			elseif v == false then
+				nestinglevel = nestinglevel - 1
+			elseif v.type == "(" then
+				numopen = numopen + 1
+				nestinglevel = nestinglevel + 1
+				if not open then
+					open = i
+					CNDT.Parens[open].text:SetText(CNDT.colors[nestinglevel] .. "(")
+					currentcolor = nestinglevel
+				end
+			else
+				numopen = numopen - 1
+				nestinglevel = nestinglevel - 1
+				if open and numopen == 0 then
+					CNDT.Parens[i].text:SetText(CNDT.colors[currentcolor] .. ")")
+					CNDT.Parens[i] = false
+					found = 1
+					break
+				end
+			end		
+		end
+		if open then
+			CNDT.Parens[open] = true
+		else
+			break
+		end
+	end
+	for i, v in ipairs(CNDT.Parens) do
+		if type(v) == "table" then
+			v.text:SetText(v.type)
+		end
+	end
+	
 	if numopen ~= numclose then
 		local suffix = ""
 		if numopen > numclose then
@@ -3945,13 +4041,13 @@ function CNDT:ValidateParenthesis()
 		IE.Conditions.Warning:SetText(nil)
 		CNDT[CNDT.type.."invalid"] = nil
 	end
-
+	
 	local n = 1
 	while CNDT[n] and CNDT[n]:IsShown() do
 		n = n + 1
 	end
 	n = n - 1
-
+	
 	local tab = (CNDT.type == "icon" and IE.IconConditionTab) or IE.GroupConditionTab
 	if n > 0 then
 		tab:SetText((CNDT[CNDT.type.."invalid"] and "|TInterface\\AddOns\\TellMeWhen_Options\\Textures\\Alert:0:2|t|cFFFF0000" or "") .. L[CNDT.type == "icon" and "CONDITIONS" or "GROUPCONDITIONS"] .. " |cFFFF5959(" .. n .. ")")
@@ -3959,7 +4055,7 @@ function CNDT:ValidateParenthesis()
 		tab:SetText(L[CNDT.type == "icon" and "CONDITIONS" or "GROUPCONDITIONS"] .. " (" .. n .. ")")
 	end
 	PanelTemplates_TabResize(tab, -6)
-end
+end	
 
 function CNDT:CreateGroups(num)
 	local start = TELLMEWHEN_MAXCONDITIONS

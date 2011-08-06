@@ -34,7 +34,7 @@ local DRData = LibStub("DRData-1.0", true)
 TELLMEWHEN_VERSION = "4.5.2"
 TELLMEWHEN_VERSION_MINOR = strmatch(" @project-version@", " r%d+") or ""
 TELLMEWHEN_VERSION_FULL = TELLMEWHEN_VERSION .. TELLMEWHEN_VERSION_MINOR
-TELLMEWHEN_VERSIONNUMBER = 45203 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
+TELLMEWHEN_VERSIONNUMBER = 45204 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
 if TELLMEWHEN_VERSIONNUMBER > 46000 or TELLMEWHEN_VERSIONNUMBER < 45000 then return error("YOU SCREWED UP THE VERSION NUMBER OR DIDNT CHANGE THE SAFETY LIMITS") end -- safety check because i accidentally made the version number 414069 once
 
 TELLMEWHEN_MAXGROUPS = 1 	--this is a default, used by SetTheory (addon), so dont rename
@@ -3658,13 +3658,19 @@ function TMW:GetCustomTexture(icon)
 	end
 end
 
-local TTShow = function(self)
+local function TTOnEnter(self)
+	if self.__oldOnEnter then
+		self:__oldOnEnter()
+	end
 	GameTooltip_SetDefaultAnchor(GameTooltip, self)
 	GameTooltip:AddLine(self.__title, HIGHLIGHT_FONT_COLOR.r, HIGHLIGHT_FONT_COLOR.g, HIGHLIGHT_FONT_COLOR.b, 1)
 	GameTooltip:AddLine(self.__text, NORMAL_FONT_COLOR.r, NORMAL_FONT_COLOR.g, NORMAL_FONT_COLOR.b, 1)
 	GameTooltip:Show()
 end
-local TTHide = function(self)
+local function TTOnLeave(self)
+	if self.__oldOnLeave then
+		self:__oldOnLeave()
+	end
 	GameTooltip:Hide()
 end
 function TMW:TT(f, title, text, actualtitle, actualtext, override)
@@ -3677,13 +3683,23 @@ function TMW:TT(f, title, text, actualtitle, actualtext, override)
 	if text then
 		f.__text = (actualtext and text) or _G[text] or L[text]
 	end
-
+	
 	if override then -- completely overwrite the old enter and leave scripts if the tooltip can be changed on a frame, rather than a set it and forget it tooltip
-		f:SetScript("OnEnter", TTShow)
-		f:SetScript("OnLeave", TTHide)
+		if not f.__savedOldScripts then
+			if not f.__oldOnEnter and f:GetScript("OnEnter") then
+				f.__oldOnEnter = f:GetScript("OnEnter")
+			end
+			if not f.__oldOnLeave and f:GetScript("OnLeave") then
+				f.__oldOnLeave = f:GetScript("OnLeave")
+			end
+			f.__savedOldScripts = 1
+		end
+		
+		f:SetScript("OnEnter", TTOnEnter)
+		f:SetScript("OnLeave", TTOnLeave)
 	else
-		f:HookScript("OnEnter", TTShow)
-		f:HookScript("OnLeave", TTHide)
+		f:HookScript("OnEnter", TTOnEnter)
+		f:HookScript("OnLeave", TTOnLeave)
 	end
 end
 
