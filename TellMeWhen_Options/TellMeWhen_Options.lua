@@ -3560,17 +3560,15 @@ function SUG:OnClick(frame)
 		local insert = (addcolon and frame.insert .. ": " .. (SUG.duration or "")) or frame.insert
 		local newtext = firsthalf .. "; " .. insert .. "; " .. lasthalf
 		SUG.Box:SetText(TMW:CleanString(newtext))
-		SUG.Box:SetCursorPosition(SUG.endpos + (#tostring(insert) - #tostring(SUG.lastName)))
+		SUG.Box:SetCursorPosition(SUG.endpos + (#tostring(insert) - #tostring(SUG.lastName)) + 2)
 		
-		local offset = 0
 		if SUG.Box:GetCursorPosition() == SUG.Box:GetNumLetters() and not SUG.overrideSoI then -- if we are at the end of the exitbox then put a semicolon in anyway for convenience
 			SUG.Box:SetText(SUG.Box:GetText().. (addcolon and " " or "") .. "; ")
-			offset = 2 
 		elseif SUG.overrideSoI then
 			SUG.Box:ClearFocus()
 		end
 		if addcolon then
-			SUG.Box:SetCursorPosition(SUG.Box:GetCursorPosition() - offset)
+			SUG.Box:SetCursorPosition(SUG.Box:GetCursorPosition() - 2)
 		end
 		SUG.Suggest:Hide()
 	end
@@ -3922,35 +3920,6 @@ CNDT.colors = setmetatable(
 			k = k - #t
 		end
 		return rawget(t, k) or ""
-		
-		--[[local s = (k-1)*8.86065+.3333333
-		
-		local h = (s*6)
-		while h >= 6 do
-			h = h - 6
-		end
-		
-		local i = floor( h )
-		local v1 = 1 - ( h - i )
-		local v2 = 1 - ( 1 - ( h - i ) )
-		
-		local r, g, b
-		if i == 0 then
-			r = 1		g = v2		b = 0
-		elseif i == 1 then
-			r = v1		g = 1		b = 0 
-		elseif i == 2 then
-			r = 0		g = 1		b = v2 
-		elseif i == 3 then
-			r = 0		g = v1		b = 1
-		elseif i == 4 then
-			r = v2		g = 0		b = 1 
-		else
-			r = 1		g = 0		b = v1
-		end
-		local c = format("|cff%02x%02x%02x", r * 255, g * 255, b * 255)
-		t[k] = c
-		return c]]
 end})
 	
 function CNDT:ValidateParenthesis()

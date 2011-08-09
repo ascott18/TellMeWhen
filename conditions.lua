@@ -472,6 +472,19 @@ function Env.TotemDuration(slot, time)
 	return duration and duration ~= 0 and (duration - (time - start)) or 0
 end
 
+function Env.GetTooltipNumber(unit, name, filter)
+	local buffName, _, _, count, _, _, _, _, _, _, _, _, _, v1, v2, v3 = UnitAura(unit, name, nil, filter)
+	if v1 then
+		if v1 > 0 then
+			return v1
+		elseif v2 > 0 then
+			return v2
+		elseif v3 > 0 then
+			return v3
+		end
+	end
+	return 0
+end
 
 CNDT.Operators = {
 	{ tooltipText = L["CONDITIONPANEL_EQUALS"], 		value = "==", 	text = "==" },
@@ -1380,10 +1393,7 @@ CNDT.Types = {
 		icon = "Interface\\Icons\\inv_elemental_primal_mana",
 		tcoords = standardtcoords,
 		funcstr = function(c)
-			TMW:EnableTooltipParsing()
-			local name = TMW:GetSpellNames(nil, c.Name, 1)
-			name = tonumber(name) or strlower(name)
-			return [[GetTooltipNumber(c.Unit, "]]..name..[[", "HELPFUL]] .. (c.Checked and "|PLAYER" or "") .. [[") c.Operator c.Level]]
+			return [[GetTooltipNumber(c.Unit, c.NameName, "HELPFUL]] .. (c.Checked and "|PLAYER" or "") .. [[") c.Operator c.Level]]
 		end,
 	},
 	{ -- unit buff number
@@ -1464,10 +1474,7 @@ CNDT.Types = {
 		icon = "Interface\\Icons\\spell_shadow_lifedrain",
 		tcoords = standardtcoords,
 		funcstr = function(c)
-			TMW:EnableTooltipParsing()
-			local name = TMW:GetSpellNames(nil, c.Name, 1)
-			name = tonumber(name) or strlower(name)
-			return [[GetTooltipNumber(c.Unit, "]]..name..[[", "HARMFUL]] .. (c.Checked and "|PLAYER" or "") .. [[") c.Operator c.Level]]
+			return [[GetTooltipNumber(c.Unit, c.NameName, "HARMFUL]] .. (c.Checked and "|PLAYER" or "") .. [[") c.Operator c.Level]]
 		end,
 	},
 	{ -- unit debuff number

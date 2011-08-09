@@ -181,8 +181,8 @@ L["AIR"] = "Air"
 L["MUSHROOMS"] = "Mushrooms to check"
 L["MUSHROOM"] = "Mushroom %d"
 
-L["ICONMENU_SHOWTTTEXT"] = "Show tooltip text"
-L["ICONMENU_SHOWTTTEXT_DESC"] = "Check this to display the first number found in the buff/debuff's tooltip in place of the stack text."
+L["ICONMENU_SHOWTTTEXT"] = "Show variable text"
+L["ICONMENU_SHOWTTTEXT_DESC"] = "Check this to display the first variable associated with the aura that is beind displayed. Numbers are provided by Blizzard API and do not necessarily match numbers found on the tooltip of the aura. There is also no guarentee that a number will be shown for an aura. In most practical cases, though, the correct numer will be shown."
 L["ICONMENU_RANGECHECK"] = "Range check"
 L["ICONMENU_RANGECHECK_DESC"] = "Check this to enable changing the color of the icon when you are out of range"
 L["ICONMENU_MANACHECK"] = "Power check"
@@ -520,7 +520,7 @@ L["ACTIVE"] = "%d Active"
 L["NUMAURAS_DESC"] = [[This condition checks the number of an aura active - not to be confused with the number of stacks of an aura.  This is for checking things like if you have both weapon enchant procs active at the same time.  Use sparingly, as the process used to count the numbers is a bit CPU intensive.]]
 L["COOLDOWN"] = "Cooldown"
 L["TOOLTIPSCAN"] = "Tooltip scan"
-L["TOOLTIPSCAN_DESC"] = "This condition type will allow you to check the first number in the tooltip of a buff/debuff on a unit. Useful for trinkets that store up a certain amount of health/mana/etc."
+L["TOOLTIPSCAN_DESC"] = "This condition type will allow you to check the first variable associated with an aura. Numbers are provided by Blizzard API and do not necessarily match numbers found on the tooltip of the aura. There is also no guarentee that a number will be obtained for an aura. In most practical cases, though, the correct numer will be checked."
 
 
 

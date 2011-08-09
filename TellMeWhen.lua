@@ -34,7 +34,7 @@ local DRData = LibStub("DRData-1.0", true)
 TELLMEWHEN_VERSION = "4.5.2"
 TELLMEWHEN_VERSION_MINOR = strmatch(" @project-version@", " r%d+") or ""
 TELLMEWHEN_VERSION_FULL = TELLMEWHEN_VERSION .. TELLMEWHEN_VERSION_MINOR
-TELLMEWHEN_VERSIONNUMBER = 45204 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
+TELLMEWHEN_VERSIONNUMBER = 45205 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
 if TELLMEWHEN_VERSIONNUMBER > 46000 or TELLMEWHEN_VERSIONNUMBER < 45000 then return error("YOU SCREWED UP THE VERSION NUMBER OR DIDNT CHANGE THE SAFETY LIMITS") end -- safety check because i accidentally made the version number 414069 once
 
 TELLMEWHEN_MAXGROUPS = 1 	--this is a default, used by SetTheory (addon), so dont rename
@@ -3223,77 +3223,6 @@ end
 -- ------------------
 -- NAME/ETC FUNCTIONS
 -- ------------------
-
-
-function TMW:EnableTooltipParsing()
-	if TMW.TooltipParsingEnabled then return end
-	local Parser = CreateFrame("GameTooltip", "TMWParser", TMW, "GameTooltipTemplate")
-	LibStub("AceEvent-3.0"):Embed(Parser)
-	UnitsToUpdate = {}
-
-	local auraTooltipCache = {}
-	local cachableUnits = {
-		player = true,
-		target = true,
-		focus = true,
-		pet = true,
-	}
-	function Parser:UNIT_AURA(_, unit)
-		if cachableUnits[unit] then
-			UnitsToUpdate[unit] = true
-		end
-	end
-	function Parser:PLAYER_TARGET_CHANGED()
-		UnitsToUpdate.target = true
-	end
-	function Parser:UNIT_PET(_, owner)
-		if owner == "player" then
-			UnitsToUpdate.pet = true
-		end
-	end
-	function Parser:PLAYER_FOCUS_CHANGED()
-		UnitsToUpdate.focus = true
-	end
-	Parser:RegisterEvent("UNIT_AURA")
-	Parser:RegisterEvent("PLAYER_TARGET_CHANGED")
-	Parser:RegisterEvent("UNIT_PET")
-	Parser:RegisterEvent("PLAYER_FOCUS_CHANGED")
-
-	function TMW.GetTooltipNumber(unit, name, filter, n)
-		local cachestr = unit..name..filter
-		if cachableUnits[unit] and not UnitsToUpdate[unit] and auraTooltipCache[cachestr] then
-			return auraTooltipCache[cachestr]
-		end
-		if not n then
-			for i = 1, 60 do
-				local buffName, _, _, _, _, _, _, _, _, _, id = UnitAura(unit, i, filter)
-				if not buffName then 
-					break
-				elseif id == name or strlowerCache[buffName] == strlowerCache[name] then
-					n = i
-					break
-				end
-			end
-		end
-		local ret = 0
-		if n then
-			GameTooltip_SetDefaultAnchor(Parser, UIParent)
-			Parser:SetUnitAura(unit, n, filter)
-			local text = TMWParserTextLeft2:GetText()
-			Parser:Hide()
-			ret = text and isNumber[strmatch(text, "%d+")] or 0
-		end
-		if cachableUnits[unit] then
-			auraTooltipCache[cachestr] = ret
-		end
-		return ret
-	end
-	CNDTEnv.GetTooltipNumber = TMW.GetTooltipNumber
-	Types.buff:Update()
-	TMW.TooltipParsingEnabled = 1
-end
-
-
 
 local mult = {
     1,
