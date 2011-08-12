@@ -35,11 +35,18 @@ Type.WhenChecks = {
 }
 Type.RelevantSettings = {
 	CustomTex = false,
-	ConditionAlpha = false,
+	--ConditionAlpha = false,
 	ConditionDur = true,
 	ConditionDurEnabled = true,
 	UnConditionDur = true,
 	UnConditionDurEnabled = true,
+	ShowCBar = true,
+	CBarOffs = true,
+	InvertBars = true,
+	DurationMin = true,
+	DurationMax = true,
+	DurationMinEnabled = true,
+	DurationMaxEnabled = true,
 }
 
 function Type:Update()
@@ -53,14 +60,17 @@ local function ConditionIcon_OnUpdate(icon, time)
 		local CndtCheck = icon.CndtCheck
 		if CndtCheck then
 			local shouldReturn, succeeded = CndtCheck() -- we dont use shouldreturn.
+			icon.CndtFailed = nil -- you are a pirate (actually, you hack your own code, but close enough)
 			local alpha = succeeded and icon.Alpha or icon.UnAlpha
+			
 			if succeeded and not icon.__succeeded and icon.ConditionDurEnabled then
 				icon:SetInfo(alpha, 1, nil, time, icon.ConditionDur)
 			elseif not succeeded and icon.__succeeded and icon.UnConditionDurEnabled  then
 				icon:SetInfo(alpha, 1, nil, time, icon.UnConditionDur)
 			else
-				icon:SetAlpha(alpha)
+				icon:SetInfo(alpha, 1, nil, icon.__start, icon.__duration)
 			end
+			
 			icon.__succeeded = succeeded
 		else
 			icon:SetAlpha(1)
@@ -69,12 +79,10 @@ local function ConditionIcon_OnUpdate(icon, time)
 end
 
 
-
 Type.AllowNoName = true
-Type.HideBars = true
 function Type:Setup(icon, groupID, iconID)
 	icon.NameFirst = TMW:GetSpellNames(icon, icon.Name, 1)
-	icon.ConditionAlpha = icon.UnAlpha
+	--icon.ConditionAlpha = icon.UnAlpha
 	
 	local tex, reason = TMW:GetConfigIconTexture(icon)
 	icon:SetTexture(tex)
@@ -101,6 +109,9 @@ function Type:IE_TypeLoaded()
 	Name.__title = L["ICONMENU_CHOOSENAME_CNDTIC"]
 	Name.__text = L["CHOOSENAME_DIALOG_CNDTIC"]
 	Name:GetScript("OnTextChanged")(Name)
+	
+	TMW.IE.Main.ConditionAlpha.text:SetText(L["CONDITIONALPHA_CONDITIONICON"])
+	TMW:TT(TMW.IE.Main.ConditionAlpha, "CONDITIONALPHA_CONDITIONICON", "CONDITIONALPHA_CONDITIONICON_DESC")
 end
 
 function Type:IE_TypeUnloaded()
@@ -109,6 +120,9 @@ function Type:IE_TypeUnloaded()
 	Name.__title = L["ICONMENU_CHOOSENAME"]
 	Name.__text = L["CHOOSENAME_DIALOG"]
 	Name:GetScript("OnTextChanged")(Name)
+	
+	TMW.IE.Main.ConditionAlpha.text:SetText(L["CONDITIONALPHA"])
+	TMW:TT(TMW.IE.Main.ConditionAlpha, "CONDITIONALPHA", "CONDITIONALPHA_DESC")
 end
 
 TMW:RegisterIconType(Type, "conditionicon")

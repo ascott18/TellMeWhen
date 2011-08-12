@@ -9,9 +9,9 @@ for _, path in pairs(paths) do
 	local orig = t
 	print("\r\n" .. filepath)
 	print("Start length:", #t)
-	t = t:gsub(" ?>\n\t-<Offset>\n\t-<AbsDimension (.-) ?/>\n\t-</Offset>\n\t-</Anchor>", " %1/>")
-	t = t:gsub(" ?>\n\t-<Offset (.-) ?/>\n\t-</Anchor>", " %1/>")
-	t = t:gsub(" ?>\n\t-<AbsDimension (.-) ?/>\n\t-</Size>", " %1/>")
+	t = t:gsub(" ?>\n\t-<Offset>\n\t-<AbsDimension ([^\r\n]-) ?/>\n\t-</Offset>\n\t-</Anchor>", " %1/>")
+	t = t:gsub(" ?>\n\t-<Offset ([^\r\n]-) ?/>\n\t-</Anchor>", " %1/>")
+	t = t:gsub(" ?>\n\t-<AbsDimension ([^\r\n]-) ?/>\n\t-</Size>", " %1/>")
 	t = t:gsub(" ?relativeTo=\"$parent\"", "")
 	t = t:gsub(" x=\"0\"", "")
 	t = t:gsub(" y=\"0\"", "")

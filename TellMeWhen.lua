@@ -34,7 +34,7 @@ local DRData = LibStub("DRData-1.0", true)
 TELLMEWHEN_VERSION = "4.5.2"
 TELLMEWHEN_VERSION_MINOR = strmatch(" @project-version@", " r%d+") or ""
 TELLMEWHEN_VERSION_FULL = TELLMEWHEN_VERSION .. TELLMEWHEN_VERSION_MINOR
-TELLMEWHEN_VERSIONNUMBER = 45206 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
+TELLMEWHEN_VERSIONNUMBER = 45207 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
 if TELLMEWHEN_VERSIONNUMBER > 46000 or TELLMEWHEN_VERSIONNUMBER < 45000 then return error("YOU SCREWED UP THE VERSION NUMBER OR DIDNT CHANGE THE SAFETY LIMITS") end -- safety check because i accidentally made the version number 414069 once
 
 TELLMEWHEN_MAXGROUPS = 1 	--this is a default, used by SetTheory (addon), so dont rename
@@ -825,10 +825,10 @@ TMW.ChannelList = {
 		color = 1,
 		defaultlocation = SCT and SCT.FRAME1,
 		frames = SCT and {
-		  [SCT.FRAME1] = "Frame 1",
-		  [SCT.FRAME2] = "Frame 2",
-		  [SCT.FRAME3 or SCT.MSG] = "SCTD", -- cheesy, i know
-		  [SCT.MSG] = "Messages",
+			[SCT.FRAME1] = "Frame 1",
+			[SCT.FRAME2] = "Frame 2",
+			[SCT.FRAME3 or SCT.MSG] = "SCTD", -- cheesy, i know
+			[SCT.MSG] = "Messages",
 		},
 		dropdown = function()
 			if not SCT then return end
@@ -1282,12 +1282,6 @@ function TMW:Update()
 	if not Locked then
 		TMW:CheckForInvalidIcons()
 	end
-
-	--[[for group in TMW.InGroups() do
-		-- attempt at a fix for the cooldown clock frame level bug - seems to work most of the time
-		group:SetFrameLevel(group:GetFrameLevel() + 1)
-		group:SetFrameLevel(group:GetFrameLevel() - 1)
-	end]]
 
 	time = GetTime() TMW.time = time
 	TMW:ScheduleTimer("RestoreSound", UPD_INTV*2.1)
@@ -2713,9 +2707,6 @@ function IconBase.SetInfo(icon, alpha, color, texture, start, duration, pbName, 
 			end
 			icon.__realDuration = realDuration
 		end
-		if alpha == 0 then-- doing this twice is intended. It shouldn't return until after all events have been handled, but dont go as far to set the timer or cooldown bars if not needed
-			return
-		end
 
 		if icon.ShowTimer then
 			local cd = icon.cooldown
@@ -2776,10 +2767,8 @@ function IconBase.SetInfo(icon, alpha, color, texture, start, duration, pbName, 
 	end
 
 	if alpha == 0 then
-		-- doing this twice is intended. It shouldn't return until after all events are handled, but dont go as far to set the timer or cooldown bars if not needed
 		return
 	end
-
 
 	if icon.__vrtxcolor ~= color then
 		if type(color) == "table" then
@@ -3225,23 +3214,23 @@ end
 -- ------------------
 
 local mult = {
-    1,
-    60,
-    60*60,
-    60*60*24,
-    60*60*24*365.242199,
+	1,
+	60,
+	60*60,
+	60*60*24,
+	60*60*24*365.242199,
 }
 function string:toseconds()
-    self = ":" .. self:trim(": ")
-    local _, numcolon = self:gsub(":", ":") -- let the cheesy coding commence!
-    local seconds = 0
-    for num in self:gmatch(":([0-9%.]*)") do
-        if tonumber(num) and mult[numcolon] then
-            seconds = seconds + mult[numcolon]*num
-        end
-        numcolon = numcolon - 1
-    end
-    return seconds
+	self = ":" .. self:trim(": ")
+	local _, numcolon = self:gsub(":", ":") -- let the cheesy coding commence!
+	local seconds = 0
+	for num in self:gmatch(":([0-9%.]*)") do
+		if tonumber(num) and mult[numcolon] then
+			seconds = seconds + mult[numcolon]*num
+		end
+		numcolon = numcolon - 1
+	end
+	return seconds
 end
 
 function TMW:lower(str)
@@ -3588,21 +3577,17 @@ function TMW:GetCustomTexture(icon)
 end
 
 local function TTOnEnter(self)
-	if self.__oldOnEnter then
-		self:__oldOnEnter()
+	if self.__title or self.__text then
+		GameTooltip_SetDefaultAnchor(GameTooltip, self)
+		GameTooltip:AddLine(self.__title, HIGHLIGHT_FONT_COLOR.r, HIGHLIGHT_FONT_COLOR.g, HIGHLIGHT_FONT_COLOR.b, 1)
+		GameTooltip:AddLine(self.__text, NORMAL_FONT_COLOR.r, NORMAL_FONT_COLOR.g, NORMAL_FONT_COLOR.b, 1)
+		GameTooltip:Show()
 	end
-	GameTooltip_SetDefaultAnchor(GameTooltip, self)
-	GameTooltip:AddLine(self.__title, HIGHLIGHT_FONT_COLOR.r, HIGHLIGHT_FONT_COLOR.g, HIGHLIGHT_FONT_COLOR.b, 1)
-	GameTooltip:AddLine(self.__text, NORMAL_FONT_COLOR.r, NORMAL_FONT_COLOR.g, NORMAL_FONT_COLOR.b, 1)
-	GameTooltip:Show()
 end
 local function TTOnLeave(self)
-	if self.__oldOnLeave then
-		self:__oldOnLeave()
-	end
 	GameTooltip:Hide()
 end
-function TMW:TT(f, title, text, actualtitle, actualtext, override)
+function TMW:TT(f, title, text, actualtitle, actualtext)
 	-- setting actualtitle or actualtext true cause it to use exactly what is passed in for title or text as the text in the tooltip
 	-- if these variables arent set, then it will attempt to see if the string is a global variable (e.g. "MAXIMUM")
 	-- if they arent set and it isnt a global, then it must be a TMW localized string, so use that
@@ -3613,20 +3598,8 @@ function TMW:TT(f, title, text, actualtitle, actualtext, override)
 		f.__text = (actualtext and text) or _G[text] or L[text]
 	end
 	
-	if override then -- completely overwrite the old enter and leave scripts if the tooltip can be changed on a frame, rather than a set it and forget it tooltip
-		if not f.__savedOldScripts then
-			if not f.__oldOnEnter and f:GetScript("OnEnter") then
-				f.__oldOnEnter = f:GetScript("OnEnter")
-			end
-			if not f.__oldOnLeave and f:GetScript("OnLeave") then
-				f.__oldOnLeave = f:GetScript("OnLeave")
-			end
-			f.__savedOldScripts = 1
-		end
-		
-		f:SetScript("OnEnter", TTOnEnter)
-		f:SetScript("OnLeave", TTOnLeave)
-	else
+	if not f.__ttHooked then
+		f.__ttHooked = 1
 		f:HookScript("OnEnter", TTOnEnter)
 		f:HookScript("OnLeave", TTOnLeave)
 	end

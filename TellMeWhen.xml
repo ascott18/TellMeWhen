@@ -205,7 +205,14 @@
 
 	<!-- END TEMPLATES -->
 	
-	
+	<Cooldown hidden="true"> <!-- cooldown bug fixer -->
+		<Scripts>
+			<OnLoad>
+				self:SetCooldown(GetTime(), 1)
+			</OnLoad>
+		</Scripts>
+	</Cooldown>
+			
 	<Frame name="TellMeWhen_BlizzOptionsStub" hidden="true">
 		<Scripts>
 			<OnLoad>

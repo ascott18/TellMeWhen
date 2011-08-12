@@ -43,6 +43,10 @@ L["CHOOSENAME_DIALOG_CNDTIC"] = "Enter the Name or ID of the spell that has the 
 L["ICONMENU_ALPHA"] = "Opacity"
 L["CONDITIONALPHA"] = "Failed Cndt/Dur./Stack"
 L["CONDITIONALPHA_DESC"] = "This will be used when conditions fail, or if the duration or stack requirements are not met. This setting will be ignored if the icon is already hidden by the other two opacity settings."
+L["CONDITIONALPHA_CONDITIONICON"] = "Failed Duration"
+L["CONDITIONALPHA_CONDITIONICON_DESC"] = "This will be used when the duration requirements are not met. This setting will be ignored if the icon is already hidden by the other two opacity settings."
+
+
 L["ICONMENU_TYPE"] = "Icon type"
 L["ICONMENU_COOLDOWN"] = "Cooldown"
 L["ICONMENU_BUFFDEBUFF"] = "Buff/Debuff"

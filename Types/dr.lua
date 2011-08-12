@@ -52,7 +52,7 @@ Type.usePocketWatch = 1
 Type.WhenChecks = {
 	text = L["ICONMENU_SHOWWHEN"],
 	{ value = "alpha", 			text = L["ICONMENU_DRABSENT"], 		colorCode = "|cFF00FF00" },
-	{ value = "unalpha",  		text = L["ICONMENU_DRPRESENT"], 	colorCode = "|cFFFF0000" },
+	{ value = "unalpha",		text = L["ICONMENU_DRPRESENT"], 	colorCode = "|cFFFF0000" },
 	{ value = "always", 		text = L["ICONMENU_ALWAYS"] },
 }
 Type.RelevantSettings = {

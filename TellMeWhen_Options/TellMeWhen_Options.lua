@@ -60,13 +60,13 @@ local points = {
 local print = TMW.print
 
 local function approachTable(...)
-    local t = ...
-    if not t then return end
-    for i=2, select("#", ...) do
-        t = t[select(i, ...)]
-        if not t then return end
-    end
-    return t
+	local t = ...
+	if not t then return end
+	for i=2, select("#", ...) do
+		t = t[select(i, ...)]
+		if not t then return end
+	end
+	return t
 end
 
 local function get(value, ...)
@@ -298,7 +298,6 @@ end
 
 function TMW:CleanDefaults(settings, defaults, blocker)
 	-- make sure and pass in a COPY of the settings, not the original settings
-
 	-- the following function is a slightly modified version of the one that AceDB uses to strip defaults.
 
 	-- remove all metatables from the db, so we don't accidentally create new sub-tables through them
@@ -907,21 +906,21 @@ end
 
 local Ruler = CreateFrame("Frame")
 local function GetAnchoredPoints(group)
-    local p = TMW.db.profile.Groups[group:GetID()].Point
-    
-    local relframe = _G[p.relativeTo] or UIParent
+	local p = TMW.db.profile.Groups[group:GetID()].Point
+
+	local relframe = _G[p.relativeTo] or UIParent
 	if relframe == UIParent then
 		local p, _, r, x, y = group:GetPoint(1)
 		return p, "UIParent", r, x, y
 	end
-	
-    Ruler:ClearAllPoints()
-    Ruler:SetPoint("TOPLEFT", group, p.point)
-    Ruler:SetPoint("BOTTOMRIGHT", relframe, p.relativePoint)
-    
-    local X = Ruler:GetWidth()/UIParent:GetScale()/group:GetScale()
-    local Y = Ruler:GetHeight()/UIParent:GetScale()/group:GetScale()
-    return p.point, relframe:GetName(), p.relativePoint, -X, Y
+
+	Ruler:ClearAllPoints()
+	Ruler:SetPoint("TOPLEFT", group, p.point)
+	Ruler:SetPoint("BOTTOMRIGHT", relframe, p.relativePoint)
+
+	local X = Ruler:GetWidth()/UIParent:GetScale()/group:GetScale()
+	local Y = Ruler:GetHeight()/UIParent:GetScale()/group:GetScale()
+	return p.point, relframe:GetName(), p.relativePoint, -X, Y
 end
 
 local function Group_SizeUpdate(resizeButton)
@@ -1582,7 +1581,7 @@ function IE:SetupRadios()
 					frame.value = info.value
 					frame.text:SetText((info.colorCode or "") .. info.text .. "|r")
 					if info.tooltipText then
-						TMW:TT(frame, info.text, info.tooltipText, 1, 1, 1)
+						TMW:TT(frame, info.text, info.tooltipText, 1)
 					else
 						frame:SetScript("OnEnter", nil)
 					end
@@ -1606,7 +1605,7 @@ function IE:SetupRadios()
 					frame.value = info.value
 					frame.text:SetText((info.colorCode or "") .. info.text .. "|r")
 					if info.tooltipText then
-						TMW:TT(frame, info.text, info.tooltipText, 1, 1, 1)
+						TMW:TT(frame, info.text, info.tooltipText, 1)
 					else
 						frame:SetScript("OnEnter", nil)
 					end
@@ -3008,6 +3007,7 @@ function SUG:OnInitialize()
 			SUG.Suggest.Status.texture:SetTexture(LSM:Fetch("statusbar", db.profile.TextureName))
 			SUG.Suggest.Status:SetMinMaxValues(1, TMWOptDB.CacheLength)
 			SUG.Suggest.Speed:Show()
+			SUG.Suggest.Finish:Show()
 			if TMWOptDB.WoWVersion and TMWOptDB.WoWVersion < clientVersion then
 				wipe(SUG.SpellCache)
 				wipe(SUG.CastCache)
@@ -3890,7 +3890,7 @@ end
 
 function CNDT:OperatorMenuOnClick(frame)
 	UIDropDownMenu_SetSelectedValue(frame, self.value)
-	TMW:TT(frame, self.tooltipTitle, nil, 1, nil, 1)
+	TMW:TT(frame, self.tooltipTitle, nil, 1)
 	CNDT:OK()
 end
 
@@ -4197,7 +4197,7 @@ function AddIns.TypeCheck(group, data)
 				data.name(group.EditBox)
 				group.EditBox:GetScript("OnTextChanged")(group.EditBox)
 			else
-				TMW:TT(group.EditBox, nil, nil, nil, nil, 1)
+				TMW:TT(group.EditBox)
 			end
 			if data.check then
 				data.check(group.Check)
@@ -4225,7 +4225,7 @@ function AddIns.TypeCheck(group, data)
 				data.name2(group.EditBox2)
 				group.EditBox2:GetScript("OnTextChanged")(group.EditBox2)
 			else
-				TMW:TT(group.EditBox2, nil, nil, nil, nil, 1)
+				TMW:TT(group.EditBox2)
 			end
 			if data.check2 then
 				data.check2(group.Check2)
@@ -4340,7 +4340,7 @@ function AddIns.Load(group)
 
 	local v = TMW:SetUIDropdownText(group.Operator, condition.Operator, CNDT.Operators)
 	if v then
-		TMW:TT(group.Operator, v.tooltipText, nil, 1, nil, 1)
+		TMW:TT(group.Operator, v.tooltipText, nil, 1)
 	end
 
 	group:SetSliderMinMax(condition.Level or 0)

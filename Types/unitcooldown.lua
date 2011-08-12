@@ -42,7 +42,7 @@ Type.DurationSyntax = 1
 Type.WhenChecks = {
 	text = L["ICONMENU_SHOWWHEN"],
 	{ value = "alpha", 			text = L["ICONMENU_USABLE"], 			colorCode = "|cFF00FF00" },
-	{ value = "unalpha",  		text = L["ICONMENU_UNUSABLE"], 			colorCode = "|cFFFF0000" },
+	{ value = "unalpha",		text = L["ICONMENU_UNUSABLE"], 			colorCode = "|cFFFF0000" },
 	{ value = "always", 		text = L["ICONMENU_ALWAYS"] },
 }
 Type.RelevantSettings = {

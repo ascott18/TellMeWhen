@@ -1013,13 +1013,13 @@
 				self.AddDelete:SetNormalTexture("Interface\\Buttons\\UI-Panel-MinimizeButton-Up")
 				self.AddDelete:SetPushedTexture("Interface\\Buttons\\UI-Panel-MinimizeButton-Down")
 				self.AddDelete:SetHighlightTexture("Interface\\Buttons\\UI-Panel-MinimizeButton-Highlight", "ADD")
-				TMW:TT(self.AddDelete, "CONDITIONPANEL_REMOVE", nil, nil, nil, 1)
+				TMW:TT(self.AddDelete, "CONDITIONPANEL_REMOVE")
 			</OnShow>
 			<OnHide>
 				self.AddDelete:SetNormalTexture("Interface\\AddOns\\TellMeWhen_Options\\Textures\\Plus-Up")
 				self.AddDelete:SetPushedTexture("Interface\\AddOns\\TellMeWhen_Options\\Textures\\Plus-Down")
 				self.AddDelete:SetHighlightTexture("Interface\\AddOns\\TellMeWhen_Options\\Textures\\Plus-Highlight", "ADD")
-				TMW:TT(self.AddDelete, "CONDITIONPANEL_ADD", nil, nil, nil, 1)
+				TMW:TT(self.AddDelete, "CONDITIONPANEL_ADD")
 			</OnHide>
 
 		</Scripts>
@@ -1456,31 +1456,31 @@
 			</Button>
 			<Button name="$parentTab2" parentKey="IconConditionTab" inherits="TellMeWhen_TabTemplate" id="2">
 				<Anchors>
-				   <Anchor point="LEFT" relativeTo="$parentTab1" relativePoint="RIGHT" x="-18"/>
+					<Anchor point="LEFT" relativeTo="$parentTab1" relativePoint="RIGHT" x="-18"/>
 				</Anchors>
 				<Scripts> <OnLoad> self:SetText(TMW.L["CONDITIONS"]) TMW.ICCNDTTab = self:GetID() </OnLoad> </Scripts>
 			</Button>
 			<Button name="$parentTab3" parentKey="SoundTab" inherits="TellMeWhen_TabTemplate" id="3">
 				<Anchors>
-				   <Anchor point="LEFT" relativeTo="$parentTab2" relativePoint="RIGHT" x="-18"/>
+					<Anchor point="LEFT" relativeTo="$parentTab2" relativePoint="RIGHT" x="-18"/>
 				</Anchors>
 				<Scripts> <OnLoad> self:SetText(TMW.L["SOUND_TAB"]) </OnLoad> </Scripts>
 			</Button>
 			<Button name="$parentTab4" parentKey="AnnounceTab" inherits="TellMeWhen_TabTemplate" id="4">
 				<Anchors>
-				   <Anchor point="LEFT" relativeTo="$parentTab3" relativePoint="RIGHT" x="-18"/>
+					<Anchor point="LEFT" relativeTo="$parentTab3" relativePoint="RIGHT" x="-18"/>
 				</Anchors>
 				<Scripts> <OnLoad> self:SetText(TMW.L["ANN_TAB"]) </OnLoad> </Scripts>
 			</Button>
 			<Button name="$parentTab5" parentKey="GroupConditionTab" inherits="TellMeWhen_TabTemplate" id="5">
 				<Anchors>
-				   <Anchor point="LEFT" relativeTo="$parentTab4" relativePoint="RIGHT" x="-18"/>
+					<Anchor point="LEFT" relativeTo="$parentTab4" relativePoint="RIGHT" x="-18"/>
 				</Anchors>
 				<Scripts> <OnLoad> self:SetText(TMW.L["GROUPCONDITIONS"]) TMW.GRCNDTTab = self:GetID() </OnLoad> </Scripts>
 			</Button>
 			<Button name="$parentTab6" parentKey="MainOptionsTab" inherits="TellMeWhen_TabTemplate" id="6">
 				<Anchors>
-				   <Anchor point="LEFT" relativeTo="$parentTab5" relativePoint="RIGHT" x="-18"/>
+					<Anchor point="LEFT" relativeTo="$parentTab5" relativePoint="RIGHT" x="-18"/>
 				</Anchors>
 				<Scripts>
 					<OnLoad> self:SetText(TMW.L["GROUPADDONSETTINGS"]) TMW.MOTab = self:GetID() </OnLoad>
@@ -1674,7 +1674,7 @@
 							</OnLeave>
 						</Scripts>
 					</Button>
-					<Button name="$parentFinish" parentKey="Finish" inherits="TellMeWhen_ButtonTemplate" hidden="false">
+					<Button name="$parentFinish" parentKey="Finish" inherits="TellMeWhen_ButtonTemplate" hidden="true">
 						<Anchors>
 							<Anchor point="BOTTOM" y="20"/>
 						</Anchors>
@@ -3753,9 +3753,9 @@
 
 						local widget = {
 							localstatus = {},
-							content     = self.content,
-							frame       = self,
-							type        = Type,
+							content		= self.content,
+							frame		= self,
+							type		= Type,
 								
 							OnAcquire = function(self)
 								TMW.IE.MainOptionsWidget = self
@@ -3783,7 +3783,7 @@
 						}
 
 						local function Constructor()
-							return  AceGUI:RegisterAsContainer(widget)
+							return AceGUI:RegisterAsContainer(widget)
 						end
 						AceGUI:RegisterWidgetType(Type, Constructor, Version)
 					</OnLoad>
