@@ -4,16 +4,12 @@
 
 	<!-- TEMPLATES -->
 	<CheckButton name="TellMeWhen_CheckTemplate" virtual="true">
-		<Size>
-			<AbsDimension x="30" y="30"/>
-		</Size>
+		<Size x="30" y="30"/>
 		<Layers>
 			<Layer level="ARTWORK">
 				<FontString name="$parentText" parentKey="text" justifyH="LEFT" inherits="GameFontHighlight">
 					<Anchors>
-						<Anchor point="LEFT" relativePoint="RIGHT">
-							<Offset x="-2" y="0"/>
-						</Anchor>
+						<Anchor point="LEFT" relativePoint="RIGHT" x="-2"/>
 					</Anchors>
 				</FontString>
 			</Layer>
@@ -72,31 +68,21 @@
 		<Layers>
 			<Layer level="BACKGROUND">
 				<Texture name="$parentLeft" urgency="5" file="Interface\Common\Common-Input-Border">
-					<Size>
-						<AbsDimension x="8" y="20"/>
-					</Size>
+					<Size x="8" y="20"/>
 					<Anchors>
-						<Anchor point="LEFT">
-							<Offset x="-5" y="0"/>
-						</Anchor>
+						<Anchor point="LEFT" x="-5"/>
 					</Anchors>
 					<TexCoords left="0" right="0.0625" top="0" bottom="0.625"/>
 				</Texture>
 				<Texture name="$parentRight" urgency="5" file="Interface\Common\Common-Input-Border">
-					<Size>
-						<AbsDimension x="8" y="20"/>
-					</Size>
+					<Size x="8" y="20"/>
 					<Anchors>
-						<Anchor point="RIGHT">
-							<Offset x="0" y="0"/>
-						</Anchor>
+						<Anchor point="RIGHT"/>
 					</Anchors>
 					<TexCoords left="0.9375" right="1.0" top="0" bottom="0.625"/>
 				</Texture>
 				<Texture name="$parentMiddle" urgency="5" file="Interface\Common\Common-Input-Border">
-					<Size>
-						<AbsDimension x="10" y="20"/>
-					</Size>
+					<Size x="10" y="20"/>
 					<Anchors>
 						<Anchor point="LEFT" relativeTo="$parentLeft" relativePoint="RIGHT"/>
 						<Anchor point="RIGHT" relativeTo="$parentRight" relativePoint="LEFT"/>
@@ -157,9 +143,7 @@
 	</Button>
 
 	<Button name="TellMeWhen_SpellSuggestTemplate" virtual="true" hidden="true">
-		<Size>
-			<AbsDimension y="18.6"/>
-		</Size>
+		<Size y="18.6"/>
 		<Scripts>
 			<OnLoad>
 				self.Background:SetVertexColor(0, 1, 0)
@@ -197,74 +181,48 @@
 		<HighlightFont style="GameFontHighlight"/>
 		<HighlightTexture file="Interface\QuestFrame\UI-QuestLogTitleHighlight" alphaMode="ADD">
 			<Anchors>
-				<Anchor point="TOPLEFT">
-					<Offset>
-						<AbsDimension x="0" y="1"/>
-					</Offset>
-				</Anchor>
-				<Anchor point="BOTTOMRIGHT">
-					<Offset>
-						<AbsDimension x="0" y="1"/>
-					</Offset>
-				</Anchor>
+				<Anchor point="TOPLEFT" y="1"/>
+				<Anchor point="BOTTOMRIGHT" y="1"/>
 			</Anchors>
 		</HighlightTexture>
 		<Layers>
 			<Layer level="BACKGROUND">
 				<Texture name="$parentBackground" parentKey="Background" file="Interface\QuestFrame\UI-QuestLogTitleHighlight">
 					<Anchors>
-						<Anchor point="TOPLEFT">
-							<Offset>
-								<AbsDimension x="0" y="1"/>
-							</Offset>
-						</Anchor>
-						<Anchor point="BOTTOMRIGHT">
-							<Offset>
-								<AbsDimension x="0" y="1"/>
-							</Offset>
-						</Anchor>
+						<Anchor point="TOPLEFT" y="1"/>
+						<Anchor point="BOTTOMRIGHT" y="1"/>
 					</Anchors>
 				</Texture>
 			</Layer>
 			<Layer level="OVERLAY">
 				<Texture name="$parentIcon" parentKey="Icon" file="Interface\Icons\INV_Misc_QuestionMark">
 					<Size x="18" y="18"/>
-					<TexCoords left="0.07" right="0.93" top="0.07" bottom="0.93" />
+					<TexCoords left="0.07" right="0.93" top="0.07" bottom="0.93"/>
 					<Anchors>
 						<Anchor point="LEFT"/>
 					</Anchors>
 				</Texture>
 				<FontString name="$parentID" parentKey="ID" inherits="GameFontHighlight" justifyH="RIGHT" text="12345">
 					<Anchors>
-						<Anchor point="RIGHT">
-							<Offset x="-3" y="1"/>
-						</Anchor>
+						<Anchor point="RIGHT" x="-3" y="1"/>
 					</Anchors>
 				</FontString>
 				<FontString name="$parentName" parentKey="Name" inherits="GameFontHighlight" justifyH="LEFT" text="Serpent Sting Sting Sting Sting">
 					<Anchors>
-						<Anchor point="LEFT" relativeTo="$parentIcon" relativePoint="RIGHT">
-							<Offset x="3" y="0"/>
-						</Anchor>
-						<Anchor point="RIGHT" relativeTo="$parentID" relativePoint="LEFT">
-							<Offset x="-1" y="0"/>
-						</Anchor>
+						<Anchor point="LEFT" relativeTo="$parentIcon" relativePoint="RIGHT" x="3"/>
+						<Anchor point="RIGHT" relativeTo="$parentID" relativePoint="LEFT" x="-1"/>
 					</Anchors>
 				</FontString>
 			</Layer>
 		</Layers>
 	</Button>
 	<EditBox name="TellMeWhen_TimeEditBoxTemplate" inherits="TellMeWhen_InputBoxTemplate" virtual="true">
-		<Size>
-			<AbsDimension x="60" y="15"/>
-		</Size>
+		<Size x="60" y="15"/>
 		<Layers>
 			<Layer level="ARTWORK">
 				<FontString name="$parentText" parentKey="text" inherits="GameFontHighlight">
 					<Anchors>
-						<Anchor point="BOTTOM" relativePoint="TOP">
-							<Offset x="0" y="2"/>
-						</Anchor>
+						<Anchor point="BOTTOM" relativePoint="TOP" y="2"/>
 					</Anchors>
 				</FontString>
 			</Layer>
@@ -298,16 +256,12 @@
 			<Layer level="ARTWORK">
 				<FontString name="$parentVal" parentKey="val" inherits="GameFontHighlightSmall" text="HIGH">
 					<Anchors>
-						<Anchor point="TOP" relativePoint="BOTTOM">
-							<Offset x="0" y="3"/>
-						</Anchor>
+						<Anchor point="TOP" relativePoint="BOTTOM" y="3"/>
 					</Anchors>
 				</FontString>
 				<FontString name="$parentText" parentKey="text" inherits="GameFontHighlight">
 					<Anchors>
-						<Anchor point="BOTTOM" relativePoint="TOP">
-							<Offset x="0" y="-1"/>
-						</Anchor>
+						<Anchor point="BOTTOM" relativePoint="TOP" y="-1"/>
 					</Anchors>
 				</FontString>
 			</Layer>
@@ -350,14 +304,12 @@
 	</Slider>
 
 	<Button name="TellMeWhen_ConditionEditorRuneCheckTemplate" virtual="true">
-		<Size>
-			<AbsDimension x="35" y="29" />
-		</Size>
+		<Size x="35" y="29"/>
 		<Layers>
 			<Layer level="OVERLAY">
 				<Texture name="$parentCheck" parentKey="Check" file="">
 					<Anchors>
-						<Anchor point="CENTER" relativeTo="$parent" relativePoint="CENTER"/>
+						<Anchor point="CENTER"/>
 					</Anchors>
 					<Size x="27" y="27"/>
 				</Texture>
@@ -464,31 +416,25 @@
 		<HighlightTexture urgency="5" file="Interface\Buttons\UI-CheckBox-Highlight" alphaMode="ADD"/>
 	</CheckButton>
 	<Frame name="TellMeWhen_ConditionGroup" virtual="true">
-		<Size>
-			<AbsDimension x="559" y="59" />
-		</Size>
+		<Size x="559" y="59"/>
 		<Backdrop bgFile="Interface\DialogFrame\UI-DialogBox-Background" tile="true">
 			<EdgeSize>
 				<AbsValue val="10"/>
 			</EdgeSize>
 			<BackgroundInsets>
-				<AbsInset left="0" right="0" top="0" bottom="0" />
+				<AbsInset left="0" right="0" top="0" bottom="0"/>
 			</BackgroundInsets>
 			<TileSize>
-				<AbsValue val="32" />
+				<AbsValue val="32"/>
 			</TileSize>
 		</Backdrop>
 		<Anchors>
-			<Anchor point="TOPLEFT">
-				<Offset x="0" y="0" />
-			</Anchor>
+			<Anchor point="TOPLEFT"/>
 		</Anchors>
 		<Frames>
 			<Frame name="$parentType" parentKey="Type" inherits="UIDropDownMenuTemplate">
 				<Anchors>
-					<Anchor point="TOPLEFT">
-						<Offset x="9" y="-10" />
-					</Anchor>
+					<Anchor point="TOPLEFT" x="9" y="-10"/>
 				</Anchors>
 				<Scripts>
 					<OnLoad>
@@ -504,9 +450,7 @@
 			</Frame>
 			<Frame name="$parentIcon" parentKey="Icon" inherits="UIDropDownMenuTemplate">
 				<Anchors>
-					<Anchor point="LEFT" relativeTo="$parentType" relativePoint="RIGHT">
-						<Offset x="-27" y="0" />
-					</Anchor>
+					<Anchor point="LEFT" relativeTo="$parentType" relativePoint="RIGHT" x="-27"/>
 				</Anchors>
 				<Scripts>
 					<OnLoad>
@@ -524,23 +468,13 @@
 			<EditBox name="$parentUnit" inherits="TellMeWhen_InputBoxTemplate" parentKey="Unit" autoFocus="false">
 				<Size x="95" y="32"/>
 				<Anchors>
-					<Anchor point="LEFT" relativeTo="$parentType" relativePoint="RIGHT">
-						<Offset>
-							<AbsDimension x="-5" y="3" />
-						</Offset>
-					</Anchor>
+					<Anchor point="LEFT" relativeTo="$parentType" relativePoint="RIGHT" x="-5" y="3"/>
 				</Anchors>
 				<Frames>
 					<Button name="$parentButton" motionScriptsWhileDisabled="true" parentKey="Button">
-						<Size>
-							<AbsDimension x="24" y="24"/>
-						</Size>
+						<Size x="24" y="24"/>
 						<Anchors>
-							<Anchor point="LEFT" relativeTo="$parent" relativePoint="RIGHT">
-								<Offset>
-									<AbsDimension x="-3" y="-1"/>
-								</Offset>
-							</Anchor>
+							<Anchor point="LEFT" relativePoint="RIGHT" x="-3" y="-1"/>
 						</Anchors>
 						<Scripts>
 							<OnClick>
@@ -572,11 +506,7 @@
 			</EditBox>
 			<Frame name="$parentOperator" parentKey="Operator" inherits="UIDropDownMenuTemplate">
 				<Anchors>
-					<Anchor point="LEFT" relativeTo="$parentUnit" relativePoint="RIGHT">
-						<Offset>
-							<AbsDimension x="5" y="-3" />
-						</Offset>
-					</Anchor>
+					<Anchor point="LEFT" relativeTo="$parentUnit" relativePoint="RIGHT" x="5" y="-3"/>
 				</Anchors>
 				<Scripts>
 					<OnLoad>
@@ -594,19 +524,13 @@
 			<Slider name="$parentSlider" parentKey="Slider" inherits="OptionsSliderTemplate" minvalue="0" maxvalue="100" valuestep="1" defaultvalue="100">
 				<Size x="523" y="17"/>
 				<Anchors>
-					<Anchor point="TOPRIGHT">
-						<Offset x="-5" y="-35" />
-					</Anchor>
+					<Anchor point="TOPRIGHT" x="-5" y="-35"/>
 				</Anchors>
 				<Layers>
 					<Layer level="ARTWORK">
 						<FontString name="$parentMid" inherits="GameFontHighlightSmall">
 							<Anchors>
-								<Anchor point="TOP" relativePoint="BOTTOM">
-									<Offset>
-										<AbsDimension x="0" y="3"/>
-									</Offset>
-								</Anchor>
+								<Anchor point="TOP" relativePoint="BOTTOM" y="3"/>
 							</Anchors>
 						</FontString>
 					</Layer>
@@ -647,9 +571,7 @@
 			<EditBox name="$parentEditBox" inherits="TellMeWhen_InputBoxTemplate" parentKey="EditBox" autoFocus="false">
 				<Size x="302" y="18"/>
 				<Anchors>
-					<Anchor point="TOPLEFT" relativeTo="$parentType" relativePoint="BOTTOMLEFT">
-						<Offset x="23" y="5" />
-					</Anchor>
+					<Anchor point="TOPLEFT" relativeTo="$parentType" relativePoint="BOTTOMLEFT" x="23" y="5"/>
 				</Anchors>
 				<Scripts>
 					<OnEditFocusLost>
@@ -674,9 +596,7 @@
 			<EditBox name="$parentEditBox2" inherits="TellMeWhen_InputBoxTemplate" parentKey="EditBox2" autoFocus="false">
 				<Size x="302" y="18"/>
 				<Anchors>
-					<Anchor point="LEFT" relativeTo="$parentEditBox" relativePoint="RIGHT">
-						<Offset x="5" y="" />
-					</Anchor>
+					<Anchor point="LEFT" relativeTo="$parentEditBox" relativePoint="RIGHT" x="5" y=""/>
 				</Anchors>
 				<Scripts>
 					<OnEditFocusLost>
@@ -702,121 +622,95 @@
 			<Frame name="$parentRunes" parentKey="Runes" hidden="true">
 				<Size x="1" y="1"/>
 				<Anchors>
-					<Anchor point="TOPLEFT" relativeTo="$parentType" relativePoint="TOPRIGHT">
-						<Offset x="10" y="9" />
-					</Anchor>
+					<Anchor point="TOPLEFT" relativeTo="$parentType" relativePoint="TOPRIGHT" x="10" y="9"/>
 				</Anchors>
 				<Frames>
 					<Button name="$parentBlood1" parentKey="blood1" inherits="TellMeWhen_ConditionEditorRuneCheckTemplate" id="1">
 						<Anchors>
-							<Anchor point="TOPLEFT">
-								<Offset x="0" y="0" />
-							</Anchor>
+							<Anchor point="TOPLEFT"/>
 						</Anchors>
 						<Layers>
 							<Layer level="ARTWORK">
 								<Texture name="$parentRune" file="Interface\PlayerFrame\UI-PlayerFrame-Deathknight-Blood">
 									<Anchors>
-										<Anchor point="CENTER" relativeTo="$parent" relativePoint="CENTER"/>
+										<Anchor point="CENTER"/>
 									</Anchors>
-									<Size>
-										<AbsDimension x="28" y="28"/>
-									</Size>
+									<Size x="28" y="28"/>
 								</Texture>
 							</Layer>
 						</Layers>
 					</Button>
 					<Button name="$parentBlood2" parentKey="blood2" inherits="TellMeWhen_ConditionEditorRuneCheckTemplate" id="2">
 						<Anchors>
-							<Anchor point="LEFT" relativeTo="$parentBlood1" relativePoint="RIGHT">
-								<Offset x="0" y="0" />
-							</Anchor>
+							<Anchor point="LEFT" relativeTo="$parentBlood1" relativePoint="RIGHT"/>
 						</Anchors>
 						<Layers>
 							<Layer level="ARTWORK">
 								<Texture name="$parentRune" file="Interface\PlayerFrame\UI-PlayerFrame-Deathknight-Blood">
 									<Anchors>
-										<Anchor point="CENTER" relativeTo="$parent" relativePoint="CENTER"/>
+										<Anchor point="CENTER"/>
 									</Anchors>
-									<Size>
-										<AbsDimension x="28" y="28"/>
-									</Size>
+									<Size x="28" y="28"/>
 								</Texture>
 							</Layer>
 						</Layers>
 					</Button>
 		 			<Button name="$parentFrost1" parentKey="frost1" inherits="TellMeWhen_ConditionEditorRuneCheckTemplate" id="5">
 						<Anchors>
-							<Anchor point="LEFT" relativeTo="$parentBlood2" relativePoint="RIGHT">
-								<Offset x="0" y="0" />
-							</Anchor>
+							<Anchor point="LEFT" relativeTo="$parentBlood2" relativePoint="RIGHT"/>
 						</Anchors>
 						<Layers>
 							<Layer level="ARTWORK">
 								<Texture name="$parentRune" file="Interface\PlayerFrame\UI-PlayerFrame-Deathknight-Frost">
 									<Anchors>
-										<Anchor point="CENTER" relativeTo="$parent" relativePoint="CENTER"/>
+										<Anchor point="CENTER"/>
 									</Anchors>
-									<Size>
-										<AbsDimension x="28" y="28"/>
-									</Size>
+									<Size x="28" y="28"/>
 								</Texture>
 							</Layer>
 						</Layers>
 					</Button>
 					<Button name="$parentFrost2" parentKey="frost2" inherits="TellMeWhen_ConditionEditorRuneCheckTemplate" id="6">
 						<Anchors>
-							<Anchor point="LEFT" relativeTo="$parentFrost1" relativePoint="RIGHT">
-								<Offset x="0" y="0" />
-							</Anchor>
+							<Anchor point="LEFT" relativeTo="$parentFrost1" relativePoint="RIGHT"/>
 						</Anchors>
 						<Layers>
 							<Layer level="ARTWORK">
 								<Texture name="$parentRune" file="Interface\PlayerFrame\UI-PlayerFrame-Deathknight-Frost">
 									<Anchors>
-										<Anchor point="CENTER" relativeTo="$parent" relativePoint="CENTER"/>
+										<Anchor point="CENTER"/>
 									</Anchors>
-									<Size>
-										<AbsDimension x="28" y="28"/>
-									</Size>
+									<Size x="28" y="28"/>
 								</Texture>
 							</Layer>
 						</Layers>
 					</Button>
 					<Button name="$parentUnholy1" parentKey="unholy1" inherits="TellMeWhen_ConditionEditorRuneCheckTemplate" id="3">
 						<Anchors>
-							<Anchor point="LEFT" relativeTo="$parentFrost2" relativePoint="RIGHT">
-								<Offset x="0" y="0" />
-							</Anchor>
+							<Anchor point="LEFT" relativeTo="$parentFrost2" relativePoint="RIGHT"/>
 						</Anchors>
 						<Layers>
 							<Layer level="ARTWORK">
 								<Texture name="$parentRune" file="Interface\PlayerFrame\UI-PlayerFrame-Deathknight-Unholy">
 									<Anchors>
-										<Anchor point="CENTER" relativeTo="$parent" relativePoint="CENTER"/>
+										<Anchor point="CENTER"/>
 									</Anchors>
-									<Size>
-										<AbsDimension x="28" y="28"/>
-									</Size>
+									<Size x="28" y="28"/>
 								</Texture>
 							</Layer>
 						</Layers>
 					</Button>
 					<Button name="$parentUnholy2" parentKey="unholy2" inherits="TellMeWhen_ConditionEditorRuneCheckTemplate" id="4">
 						<Anchors>
-							<Anchor point="LEFT" relativeTo="$parentUnholy1" relativePoint="RIGHT">
-								<Offset x="0" y="0" />
-							</Anchor>
+							<Anchor point="LEFT" relativeTo="$parentUnholy1" relativePoint="RIGHT"/>
 						</Anchors>
 						<Layers>
 							<Layer level="ARTWORK">
 								<Texture name="$parentRune" file="Interface\PlayerFrame\UI-PlayerFrame-Deathknight-Unholy">
 									<Anchors>
-										<Anchor point="CENTER" relativeTo="$parent" relativePoint="CENTER"/>
+										<Anchor point="CENTER"/>
 									</Anchors>
-									<Size>
-										<AbsDimension x="28" y="28"/>
-									</Size>
+									<Size x="28" y="28"/>
 								</Texture>
 							</Layer>
 						</Layers>
@@ -825,114 +719,90 @@
 
 					<Button name="$parentBlood1Death" parentKey="blood1death" inherits="TellMeWhen_ConditionEditorRuneCheckTemplate" id="7">
 						<Anchors>
-							<Anchor point="TOP" relativeTo="$parentBlood1" relativePoint="BOTTOM">
-								<Offset x="0" y="0" />
-							</Anchor>
+							<Anchor point="TOP" relativeTo="$parentBlood1" relativePoint="BOTTOM"/>
 						</Anchors>
 						<Layers>
 							<Layer level="ARTWORK">
 								<Texture name="$parentRune" file="Interface\AddOns\TellMeWhen_Options\Textures\Blood">
 									<Anchors>
-										<Anchor point="CENTER" relativeTo="$parent" relativePoint="CENTER"/>
+										<Anchor point="CENTER"/>
 									</Anchors>
-									<Size>
-										<AbsDimension x="28" y="28"/>
-									</Size>
+									<Size x="28" y="28"/>
 								</Texture>
 							</Layer>
 						</Layers>
 					</Button>
 					<Button name="$parentBlood2Death" parentKey="blood2death" inherits="TellMeWhen_ConditionEditorRuneCheckTemplate" id="8">
 						<Anchors>
-							<Anchor point="LEFT" relativeTo="$parentBlood1Death" relativePoint="RIGHT">
-								<Offset x="0" y="0" />
-							</Anchor>
+							<Anchor point="LEFT" relativeTo="$parentBlood1Death" relativePoint="RIGHT"/>
 						</Anchors>
 						<Layers>
 							<Layer level="ARTWORK">
 								<Texture name="$parentRune" file="Interface\AddOns\TellMeWhen_Options\Textures\Blood">
 									<Anchors>
-										<Anchor point="CENTER" relativeTo="$parent" relativePoint="CENTER"/>
+										<Anchor point="CENTER"/>
 									</Anchors>
-									<Size>
-										<AbsDimension x="28" y="28"/>
-									</Size>
+									<Size x="28" y="28"/>
 								</Texture>
 							</Layer>
 						</Layers>
 					</Button>
 					<Button name="$parentFrost1Death" parentKey="frost1death" inherits="TellMeWhen_ConditionEditorRuneCheckTemplate" id="11">
 						<Anchors>
-							<Anchor point="LEFT" relativeTo="$parentBlood2Death" relativePoint="RIGHT">
-								<Offset x="0" y="0" />
-							</Anchor>
+							<Anchor point="LEFT" relativeTo="$parentBlood2Death" relativePoint="RIGHT"/>
 						</Anchors>
 						<Layers>
 							<Layer level="ARTWORK">
 								<Texture name="$parentRune" file="Interface\AddOns\TellMeWhen_Options\Textures\Frost">
 									<Anchors>
-										<Anchor point="CENTER" relativeTo="$parent" relativePoint="CENTER"/>
+										<Anchor point="CENTER"/>
 									</Anchors>
-									<Size>
-										<AbsDimension x="28" y="28"/>
-									</Size>
+									<Size x="28" y="28"/>
 								</Texture>
 							</Layer>
 						</Layers>
 					</Button>
 					<Button name="$parentFrost2Death" parentKey="frost2death" inherits="TellMeWhen_ConditionEditorRuneCheckTemplate" id="12">
 						<Anchors>
-							<Anchor point="LEFT" relativeTo="$parentFrost1Death" relativePoint="RIGHT">
-								<Offset x="0" y="0" />
-							</Anchor>
+							<Anchor point="LEFT" relativeTo="$parentFrost1Death" relativePoint="RIGHT"/>
 						</Anchors>
 						<Layers>
 							<Layer level="ARTWORK">
 								<Texture name="$parentRune" file="Interface\AddOns\TellMeWhen_Options\Textures\Frost">
 									<Anchors>
-										<Anchor point="CENTER" relativeTo="$parent" relativePoint="CENTER"/>
+										<Anchor point="CENTER"/>
 									</Anchors>
-									<Size>
-										<AbsDimension x="28" y="28"/>
-									</Size>
+									<Size x="28" y="28"/>
 								</Texture>
 							</Layer>
 						</Layers>
 					</Button>
 					<Button name="$parentUnholy1Death" parentKey="unholy1death" inherits="TellMeWhen_ConditionEditorRuneCheckTemplate" id="9">
 						<Anchors>
-							<Anchor point="LEFT" relativeTo="$parentFrost2Death" relativePoint="RIGHT">
-								<Offset x="0" y="0" />
-							</Anchor>
+							<Anchor point="LEFT" relativeTo="$parentFrost2Death" relativePoint="RIGHT"/>
 						</Anchors>
 						<Layers>
 							<Layer level="ARTWORK">
 								<Texture name="$parentRune" file="Interface\AddOns\TellMeWhen_Options\Textures\Unholy">
 									<Anchors>
-										<Anchor point="CENTER" relativeTo="$parent" relativePoint="CENTER"/>
+										<Anchor point="CENTER"/>
 									</Anchors>
-									<Size>
-										<AbsDimension x="28" y="28"/>
-									</Size>
+									<Size x="28" y="28"/>
 								</Texture>
 							</Layer>
 						</Layers>
 					</Button>
 					<Button name="$parentUnholy2Death" parentKey="unholy2death" inherits="TellMeWhen_ConditionEditorRuneCheckTemplate" id="10">
 						<Anchors>
-							<Anchor point="LEFT" relativeTo="$parentUnholy1Death" relativePoint="RIGHT">
-								<Offset x="0" y="0" />
-							</Anchor>
+							<Anchor point="LEFT" relativeTo="$parentUnholy1Death" relativePoint="RIGHT"/>
 						</Anchors>
 						<Layers>
 							<Layer level="ARTWORK">
 								<Texture name="$parentRune" file="Interface\AddOns\TellMeWhen_Options\Textures\Unholy">
 									<Anchors>
-										<Anchor point="CENTER" relativeTo="$parent" relativePoint="CENTER"/>
+										<Anchor point="CENTER"/>
 									</Anchors>
-									<Size>
-										<AbsDimension x="28" y="28"/>
-									</Size>
+									<Size x="28" y="28"/>
 								</Texture>
 							</Layer>
 						</Layers>
@@ -943,9 +813,7 @@
 			</Frame>
 			<CheckButton name="$parentCheck" inherits="TellMeWhen_CheckTemplate" parentKey="Check">
 				<Anchors>
-					<Anchor point="RIGHT" relativeTo="$parentEditBox" >
-						<Offset x="5" y="-1" />
-					</Anchor>
+					<Anchor point="RIGHT" relativeTo="$parentEditBox" x="5" y="-1"/>
 				</Anchors>
 				<Scripts>
 					<OnLoad>
@@ -959,9 +827,7 @@
 			</CheckButton>
 			<CheckButton name="$parentCheck2" inherits="TellMeWhen_CheckTemplate" parentKey="Check2">
 				<Anchors>
-					<Anchor point="RIGHT" relativeTo="$parentEditBox2" >
-						<Offset x="5" y="-1" />
-					</Anchor>
+					<Anchor point="RIGHT" relativeTo="$parentEditBox2" x="5" y="-1"/>
 				</Anchors>
 				<Scripts>
 					<OnLoad>
@@ -978,9 +844,7 @@
 			<CheckButton name="$parentAnd" inherits="TellMeWhen_CheckTemplate" parentKey="And">
 				<Size x="20" y="20"/>
 				<!-- <Anchors>
-					<Anchor point="TOPRIGHT">
-						<Offset x="-68" y="21" />
-					</Anchor>
+					<Anchor point="TOPRIGHT" x="-68" y="21"/>
 				</Anchors> -->
 				<Scripts>
 					<OnLoad>
@@ -999,9 +863,7 @@
 			<CheckButton name="$parentOr" inherits="TellMeWhen_CheckTemplate" parentKey="Or">
 				<Size x="20" y="20"/>
 				<Anchors>
-					<Anchor point="BOTTOMLEFT" relativeTo="$parent" relativePoint="TOP">
-						<Offset x="1" y="-3" />
-					</Anchor>
+					<Anchor point="BOTTOMLEFT" relativePoint="TOP" x="1" y="-3"/>
 				</Anchors>
 				<Scripts>
 					<OnLoad>
@@ -1020,23 +882,17 @@
 			<Frame name="$parentOpenParenthesis" parentKey="OpenParenthesis">
 				<Size x="100" y="20"/>
 				<Anchors>
-					<Anchor point="BOTTOMRIGHT" relativeTo="$parent" relativePoint="TOPRIGHT">
-						<Offset x="-80" y="-2" />
-					</Anchor>
+					<Anchor point="BOTTOMRIGHT" relativePoint="TOPRIGHT" x="-80" y="-2"/>
 				</Anchors>
 				<Frames>
 					<CheckButton name="$parent1" inherits="TellMeWhen_ConditionEditorParenthesisTemplate" id="1">
 						<Anchors>
-							<Anchor point="LEFT" relativeTo="$parent" relativePoint="LEFT">
-								<Offset x="0" y="0" />
-							</Anchor>
+							<Anchor point="LEFT"/>
 						</Anchors>
 					</CheckButton>
 					<CheckButton name="$parent2" inherits="TellMeWhen_ConditionEditorParenthesisTemplate" id="2">
 						<Anchors>
-							<Anchor point="LEFT" relativeTo="$parent1" relativePoint="RIGHT">
-								<Offset x="-8" y="0" />
-							</Anchor>
+							<Anchor point="LEFT" relativeTo="$parent1" relativePoint="RIGHT" x="-8"/>
 						</Anchors>
 					</CheckButton>
 				</Frames>
@@ -1044,36 +900,26 @@
 			<Frame name="$parentCloseParenthesis" parentKey="CloseParenthesis">
 				<Size x="100" y="20"/>
 				<Anchors>
-					<Anchor point="TOPLEFT" relativeTo="$parent" relativePoint="BOTTOMLEFT">
-						<Offset x="80" y="2" />
-					</Anchor>
+					<Anchor point="TOPLEFT" relativePoint="BOTTOMLEFT" x="80" y="2"/>
 				</Anchors>
 				<Frames>
 					<CheckButton name="$parent1" inherits="TellMeWhen_ConditionEditorParenthesisTemplate" id="1">
 						<Anchors>
-							<Anchor point="RIGHT" relativeTo="$parent" relativePoint="RIGHT">
-								<Offset x="0" y="0" />
-							</Anchor>
+							<Anchor point="RIGHT"/>
 						</Anchors>
 					</CheckButton>
 					<CheckButton name="$parent2" inherits="TellMeWhen_ConditionEditorParenthesisTemplate" id="2">
 						<Anchors>
-							<Anchor point="RIGHT" relativeTo="$parent1" relativePoint="LEFT">
-								<Offset x="8" y="0" />
-							</Anchor>
+							<Anchor point="RIGHT" relativeTo="$parent1" relativePoint="LEFT" x="8"/>
 						</Anchors>
 					</CheckButton>
 				</Frames>
 			</Frame>
 
 			<Button name="$parentUp" parentKey="Up">
-				<Size>
-					<AbsDimension x="15" y="15" />
-				</Size>
+				<Size x="15" y="15"/>
 				<Anchors>
-					<Anchor point="TOPLEFT">
-						<Offset x="0" y="-25" />
-					</Anchor>
+					<Anchor point="TOPLEFT" y="-25"/>
 				</Anchors>
 				<Scripts>
 					<OnLoad>TMW:TT(self, "METAPANEL_UP") self:SetScale(0.8)</OnLoad>
@@ -1087,13 +933,9 @@
 				</HighlightTexture>
 			</Button>
 			<Button name="$parentDown" parentKey="Down">
-				<Size>
-					<AbsDimension x="15" y="15" />
-				</Size>
+				<Size x="15" y="15"/>
 				<Anchors>
-					<Anchor point="LEFT" relativeTo="$parentUp" relativePoint="RIGHT">
-						<Offset x="0" y="0" />
-					</Anchor>
+					<Anchor point="LEFT" relativeTo="$parentUp" relativePoint="RIGHT"/>
 				</Anchors>
 				<Scripts>
 					<OnLoad>TMW:TT(self, "METAPANEL_DOWN") self:SetScale(0.8)</OnLoad>
@@ -1107,13 +949,9 @@
 				</HighlightTexture>
 			</Button>
 			<Button name="$parentAddDelete" parentKey="AddDelete">
-				<Size>
-					<AbsDimension x="30" y="30" />
-				</Size>
+				<Size x="30" y="30"/>
 				<Anchors>
-					<Anchor point="TOPLEFT" relativeto="$parent">
-						<Offset x="-4" y="6" />
-					</Anchor>
+					<Anchor point="TOPLEFT" relativeto="$parent" x="-4" y="6"/>
 				</Anchors>
 				<Scripts>
 					<OnLoad>
@@ -1131,51 +969,37 @@
 			<Layer level="OVERLAY">
 				<FontString name="$parentTextType" parentKey="TextType" inherits="GameFontNormalSmall" justifyH="CENTER">
 					<Anchors>
-						<Anchor point="BOTTOM" relativeto="$parentType" relativePoint="TOP">
-							<Offset x="0" y="-1" />
-						</Anchor>
+						<Anchor point="BOTTOM" relativeto="$parentType" relativePoint="TOP" y="-1"/>
 					</Anchors>
 				</FontString>
 				<FontString name="$parentTextUnitOrIcon" parentKey="TextUnitOrIcon" inherits="GameFontNormalSmall" justifyH="CENTER">
 					<Anchors>
-						<Anchor point="BOTTOM" relativeto="$parentUnit" relativePoint="TOP">
-							<Offset x="0" y="-5" />
-						</Anchor>
+						<Anchor point="BOTTOM" relativeto="$parentUnit" relativePoint="TOP" y="-5"/>
 					</Anchors>
 				</FontString>
 				<FontString name="$parentTextOperator" parentKey="TextOperator" inherits="GameFontNormalSmall" justifyH="CENTER">
 					<Anchors>
-						<Anchor point="BOTTOM" relativeto="$parentOperator" relativePoint="TOP">
-							<Offset x="0" y="-1" />
-						</Anchor>
+						<Anchor point="BOTTOM" relativeto="$parentOperator" relativePoint="TOP" y="-1"/>
 					</Anchors>
 				</FontString>
 				<FontString name="$parentTextValue" parentKey="TextValue" inherits="GameFontNormalSmall" justifyH="CENTER">
 					<Anchors>
-						<Anchor point="BOTTOMLEFT" relativeto="$parentOperator" relativePoint="TOPRIGHT">
-							<Offset x="-10" y="-1" />
-						</Anchor>
+						<Anchor point="BOTTOMLEFT" relativeto="$parentOperator" relativePoint="TOPRIGHT" x="-10" y="-1"/>
 					</Anchors>
 				</FontString>
 				<FontString name="$parentValText" parentKey="ValText" inherits="GameFontNormalLarge" justifyH="LEFT">
 					<Anchors>
-						<Anchor point="LEFT" relativeto="$parentOperator" relativePoint="RIGHT">
-							<Offset x="-10" y="2" />
-						</Anchor>
+						<Anchor point="LEFT" relativeto="$parentOperator" relativePoint="RIGHT" x="-10" y="2"/>
 					</Anchors>
 				</FontString>
 				<FontString name="$parentTextUnitDef" parentKey="TextUnitDef" inherits="GameFontNormalLarge" justifyH="CENTER">
 					<Anchors>
-						<Anchor point="CENTER" relativeto="$parentUnit" relativePoint="CENTER">
-							<Offset x="0" y="-2" />
-						</Anchor>
+						<Anchor point="CENTER" relativeto="$parentUnit" y="-2"/>
 					</Anchors>
 				</FontString>
 				<FontString name="$parentSliderMid" parentKey="SliderMid" inherits="GameFontHighlightSmall">
 					<Anchors>
-						<Anchor point="TOP" relativeto="$parentSlider" relativePoint="BOTTOM">
-							<Offset x="0" y="3"/>
-						</Anchor>
+						<Anchor point="TOP" relativeto="$parentSlider" relativePoint="BOTTOM" y="3"/>
 					</Anchors>
 				</FontString>
 			</Layer>
@@ -1201,15 +1025,11 @@
 		</Scripts>
 	</Frame>
 	<Frame name="TellMeWhen_MetaGroup" virtual="true">
-		<Size>
-			<AbsDimension x="440" y="30" />
-		</Size>
+		<Size x="440" y="30"/>
 		<Frames>
 			<Frame name="$parentIcon" parentKey="icon" inherits="UIDropDownMenuTemplate">
 				<Anchors>
-					<Anchor point="LEFT">
-						<Offset x="-13" y="-2" />
-					</Anchor>
+					<Anchor point="LEFT" x="-13" y="-2"/>
 				</Anchors>
 				<Scripts>
 					<OnLoad>
@@ -1225,13 +1045,9 @@
 				</Scripts>
 			</Frame>
 			<Button name="$parentUp" parentKey="up">
-				<Size>
-					<AbsDimension x="30" y="30" />
-				</Size>
+				<Size x="30" y="30"/>
 				<Anchors>
-					<Anchor point="LEFT" relativeTo="$parentIcon" relativePoint="RIGHT">
-						<Offset x="-15" y="2" />
-					</Anchor>
+					<Anchor point="LEFT" relativeTo="$parentIcon" relativePoint="RIGHT" x="-15" y="2"/>
 				</Anchors>
 				<Scripts>
 					<OnLoad>TMW:TT(self, "METAPANEL_UP")</OnLoad>
@@ -1243,13 +1059,9 @@
 				<HighlightTexture file="Interface\Buttons\UI-Common-MouseHilight" alphaMode="ADD"/>
 			</Button>
 			<Button name="$parentDown" parentKey="down">
-				<Size>
-					<AbsDimension x="30" y="30" />
-				</Size>
+				<Size x="30" y="30"/>
 				<Anchors>
-					<Anchor point="LEFT" relativeTo="$parentUp" relativePoint="RIGHT">
-						<Offset x="0" y="0" />
-					</Anchor>
+					<Anchor point="LEFT" relativeTo="$parentUp" relativePoint="RIGHT"/>
 				</Anchors>
 				<Scripts>
 					<OnLoad>TMW:TT(self, "METAPANEL_DOWN")</OnLoad>
@@ -1262,9 +1074,7 @@
 			</Button>
 			<Button name="$parentDelete" parentKey="delete" inherits="UIPanelCloseButton">
 				<Anchors>
-					<Anchor point="LEFT" relativeTo="$parentDown" relativePoint="RIGHT">
-						<Offset x="-4" y="0" />
-					</Anchor>
+					<Anchor point="LEFT" relativeTo="$parentDown" relativePoint="RIGHT" x="-4"/>
 				</Anchors>
 				<Scripts>
 					<OnLoad>TMW:TT(self, "METAPANEL_REMOVE")</OnLoad>
@@ -1272,13 +1082,9 @@
 				</Scripts>
 			</Button>
 			<Button name="$parentInsert" parentKey="insert">
-				<Size>
-					<AbsDimension x="30" y="30" />
-				</Size>
+				<Size x="30" y="30"/>
 				<Anchors>
-					<Anchor point="LEFT" relativeTo="$parent" relativePoint="BOTTOMRIGHT">
-						<Offset x="11" y="0" />
-					</Anchor>
+					<Anchor point="LEFT" relativePoint="BOTTOMRIGHT" x="11"/>
 				</Anchors>
 				<NormalTexture urgency="5" file="Interface\AddOns\TellMeWhen_Options\Textures\Plus-Up"/>
 				<PushedTexture file="Interface\AddOns\TellMeWhen_Options\Textures\Plus-Down"/>
@@ -1295,20 +1101,14 @@
 			<Layer level="OVERLAY">
 				<FontString name="$parentValText" inherits="GameFontNormalLarge" justifyH="LEFT">
 					<Anchors>
-						<Anchor point="LEFT" relativePoint="TOPLEFT">
-							<Offset x="440" y="-14" />
-						</Anchor>
+						<Anchor point="LEFT" relativePoint="TOPLEFT" x="440" y="-14"/>
 					</Anchors>
 				</FontString>
 				<Texture name="$parentIconTexture" parentKey="icontexture">
-					<TexCoords left="0.07" right="0.93" top="0.07" bottom="0.93" />
-					<Size>
-						<AbsDimension x="24" y="24"/>
-					</Size>
+					<TexCoords left="0.07" right="0.93" top="0.07" bottom="0.93"/>
+					<Size x="24" y="24"/>
 					<Anchors>
-						<Anchor point="RIGHT" relativeTo="$parentIcon" relativePoint="LEFT">
-							<Offset x="13" y="3" />
-						</Anchor>
+						<Anchor point="RIGHT" relativeTo="$parentIcon" relativePoint="LEFT" x="13" y="3"/>
 					</Anchors>
 				</Texture>
 			</Layer>
@@ -1321,9 +1121,7 @@
 	</Frame>
 
 	<Button name="TellMeWhen_SoundSelectButton" virtual="true" >
-		<Size>
-			<AbsDimension y="14"/>
-		</Size>
+		<Size y="14"/>
 		<Scripts>
 			<OnLoad>
 			--	self.Background:SetVertexColor(0, 1, 0)
@@ -1359,16 +1157,8 @@
 		<HighlightFont style="GameFontHighlight"/>
 		<HighlightTexture file="Interface\QuestFrame\UI-QuestLogTitleHighlight" alphaMode="ADD">
 			<Anchors>
-				<Anchor point="TOPLEFT">
-					<Offset>
-						<AbsDimension x="0" y="1"/>
-					</Offset>
-				</Anchor>
-				<Anchor point="BOTTOMRIGHT">
-					<Offset>
-						<AbsDimension x="0" y="1"/>
-					</Offset>
-				</Anchor>
+				<Anchor point="TOPLEFT" y="1"/>
+				<Anchor point="BOTTOMRIGHT" y="1"/>
 			</Anchors>
 		</HighlightTexture>
 		<Frames>
@@ -1390,9 +1180,7 @@
 				</Scripts>
 				<Size x="15" y="15"/>
 				<Anchors>
-					<Anchor point="RIGHT">
-						<Offset x="0" y="1" />
-					</Anchor>
+					<Anchor point="RIGHT" y="1"/>
 				</Anchors>
 			</Button>
 		</Frames>
@@ -1400,21 +1188,15 @@
 			<Layer level="OVERLAY">
 				<FontString name="$parentName" parentKey="Name" inherits="GameFontHighlight" justifyH="LEFT" text="Serpent Sting Sting Sting Sting">
 					<Anchors>
-						<Anchor point="LEFT">
-							<Offset x="3" y="0"/>
-						</Anchor>
-						<Anchor point="RIGHT" relativeTo="$parentPlay" relativePoint="LEFT">
-							<Offset x="-1" y="0"/>
-						</Anchor>
+						<Anchor point="LEFT" x="3"/>
+						<Anchor point="RIGHT" relativeTo="$parentPlay" relativePoint="LEFT" x="-1"/>
 					</Anchors>
 				</FontString>
 			</Layer>
 		</Layers>
 	</Button>
 	<Button name="TellMeWhen_SoundEvent" virtual="true" >
-		<Size>
-			<AbsDimension y="30"/>
-		</Size>
+		<Size y="30"/>
 		<Scripts>
 			<OnClick>
 				TMW.SND:SelectEvent(self:GetID())
@@ -1424,16 +1206,8 @@
 		<HighlightFont style="GameFontHighlight"/>
 		<HighlightTexture file="Interface\QuestFrame\UI-QuestLogTitleHighlight" alphaMode="ADD">
 			<Anchors>
-				<Anchor point="TOPLEFT">
-					<Offset>
-						<AbsDimension x="0" y="1"/>
-					</Offset>
-				</Anchor>
-				<Anchor point="BOTTOMRIGHT">
-					<Offset>
-						<AbsDimension x="0" y="1"/>
-					</Offset>
-				</Anchor>
+				<Anchor point="TOPLEFT" y="1"/>
+				<Anchor point="BOTTOMRIGHT" y="1"/>
 			</Anchors>
 		</HighlightTexture>
 		<Frames>
@@ -1464,9 +1238,7 @@
 				</Scripts>
 				<Size x="15" y="15"/>
 				<Anchors>
-					<Anchor point="TOPRIGHT">
-						<Offset x="0" y="0" />
-					</Anchor>
+					<Anchor point="TOPRIGHT"/>
 				</Anchors>
 			</Button>
 		</Frames>
@@ -1474,19 +1246,13 @@
 			<Layer level="OVERLAY">
 				<FontString name="$parentEventName" parentKey="EventName" inherits="GameFontNormal" justifyH="LEFT" text="Serpent Sting Sting Sting Sting Sting">
 					<Anchors>
-						<Anchor point="TOPLEFT">
-							<Offset x="3" y="-2"/>
-						</Anchor>
-						<Anchor point="RIGHT" relativeTo="$parentPlay" relativePoint="LEFT">
-							<Offset x="-1" y="0"/>
-						</Anchor>
+						<Anchor point="TOPLEFT" x="3" y="-2"/>
+						<Anchor point="RIGHT" relativeTo="$parentPlay" relativePoint="LEFT" x="-1"/>
 					</Anchors>
 				</FontString>
 				<FontString name="$parentSoundName" parentKey="SoundName" inherits="GameFontHighlight" justifyH="LEFT" text="Serpent Sting Sting Sting Sting Sting">
 					<Anchors>
-						<Anchor point="BOTTOMLEFT">
-							<Offset x="3" y="2"/>
-						</Anchor>
+						<Anchor point="BOTTOMLEFT" x="3" y="2"/>
 						<Anchor point="RIGHT"/>
 					</Anchors>
 				</FontString>
@@ -1495,9 +1261,7 @@
 	</Button>
 
 	<Button name="TellMeWhen_ChannelSelectButton" virtual="true" >
-		<Size>
-			<AbsDimension y="14"/>
-		</Size>
+		<Size y="14"/>
 		<Scripts>
 			<OnClick>
 				TMW.ANN:SelectChannel(self.channel)
@@ -1514,37 +1278,23 @@
 		<HighlightFont style="GameFontHighlight"/>
 		<HighlightTexture file="Interface\QuestFrame\UI-QuestLogTitleHighlight" alphaMode="ADD">
 			<Anchors>
-				<Anchor point="TOPLEFT">
-					<Offset>
-						<AbsDimension x="0" y="1"/>
-					</Offset>
-				</Anchor>
-				<Anchor point="BOTTOMRIGHT">
-					<Offset>
-						<AbsDimension x="0" y="1"/>
-					</Offset>
-				</Anchor>
+				<Anchor point="TOPLEFT" y="1"/>
+				<Anchor point="BOTTOMRIGHT" y="1"/>
 			</Anchors>
 		</HighlightTexture>
 		<Layers>
 			<Layer level="OVERLAY">
 				<FontString name="$parentName" parentKey="Name" inherits="GameFontHighlight" justifyH="LEFT" text="Serpent Sting Sting Sting Sting">
 					<Anchors>
-						<Anchor point="LEFT">
-							<Offset x="3" y="0"/>
-						</Anchor>
-						<Anchor point="RIGHT">
-							<Offset x="-1" y="0"/>
-						</Anchor>
+						<Anchor point="LEFT" x="3"/>
+						<Anchor point="RIGHT" x="-1"/>
 					</Anchors>
 				</FontString>
 			</Layer>
 		</Layers>
 	</Button>
 	<Button name="TellMeWhen_AnnounceEvent" virtual="true" >
-		<Size>
-			<AbsDimension y="30"/>
-		</Size>
+		<Size y="30"/>
 		<Scripts>
 			<OnLoad>
 			--	self.Background:SetVertexColor(0, 1, 0)
@@ -1557,35 +1307,21 @@
 		<HighlightFont style="GameFontHighlight"/>
 		<HighlightTexture file="Interface\QuestFrame\UI-QuestLogTitleHighlight" alphaMode="ADD">
 			<Anchors>
-				<Anchor point="TOPLEFT">
-					<Offset>
-						<AbsDimension x="0" y="1"/>
-					</Offset>
-				</Anchor>
-				<Anchor point="BOTTOMRIGHT">
-					<Offset>
-						<AbsDimension x="0" y="1"/>
-					</Offset>
-				</Anchor>
+				<Anchor point="TOPLEFT" y="1"/>
+				<Anchor point="BOTTOMRIGHT" y="1"/>
 			</Anchors>
 		</HighlightTexture>
 		<Layers>
 			<Layer level="OVERLAY">
 				<FontString name="$parentEventName" parentKey="EventName" inherits="GameFontNormal" justifyH="LEFT" text="Serpent Sting Sting Sting Sting Sting">
 					<Anchors>
-						<Anchor point="TOPLEFT">
-							<Offset x="3" y="-2"/>
-						</Anchor>
-						<Anchor point="RIGHT" relativeTo="$parentPlay" relativePoint="LEFT">
-							<Offset x="-1" y="0"/>
-						</Anchor>
+						<Anchor point="TOPLEFT" x="3" y="-2"/>
+						<Anchor point="RIGHT" relativeTo="$parentPlay" relativePoint="LEFT" x="-1"/>
 					</Anchors>
 				</FontString>
 				<FontString name="$parentChannelName" parentKey="ChannelName" inherits="GameFontHighlight" justifyH="LEFT" text="Serpent Sting Sting Sting Sting Sting">
 					<Anchors>
-						<Anchor point="BOTTOMLEFT">
-							<Offset x="3" y="2"/>
-						</Anchor>
+						<Anchor point="BOTTOMLEFT" x="3" y="2"/>
 						<Anchor point="RIGHT"/>
 					</Anchors>
 				</FontString>
@@ -1596,22 +1332,16 @@
 	<!-- END TEMPLATES -->
 
 	<Button name="TellMeWhen_IconDragger" hidden="true" enableMouse="false" frameStrata="HIGH">
-		<Size>
-			<AbsDimension x="30" y="30"/>
-		</Size>
+		<Size x="30" y="30"/>
 		<Layers>
 			<Layer level="ARTWORK">
 				<Texture name="$parentIcon" parentKey="texture" file="Interface\Icons\INV_Misc_QuestionMark">
-					<Size>
-						<AbsDimension x="30" y="30"/>
-					</Size>
+					<Size x="30" y="30"/>
 				</Texture>
 			</Layer>
 			<Layer level="BACKGROUND">
 				<Texture name="$parentBack" parentKey="back" file="Interface\Buttons\UI-EmptySlot-Disabled">
-					<Size>
-						<AbsDimension x="46" y="46"/>
-					</Size>
+					<Size x="46" y="46"/>
 				</Texture>
 			</Layer>
 		</Layers>
@@ -1632,27 +1362,27 @@
 	</Button>
 
 	<Frame name="TellMeWhen_ConfigWarning" hidden="true" movable="true" toplevel="true" clampedToScreen="true" enableMouse="true" frameStrata="DIALOG">
-		<Size x="330" />
+		<Size x="330"/>
 		<Anchors>
-			<Anchor point="TOP" relativeTo="UIParent" x="0" y="-60" />
+			<Anchor point="TOP" relativeTo="UIParent" y="-60"/>
 		</Anchors>
 		<Backdrop bgFile="Interface\DialogFrame\UI-DialogBox-Background-Dark" edgeFile="Interface\DialogFrame\UI-DialogBox-Border" tile="true">
 			<BackgroundInsets>
-				<AbsInset left="8" right="8" top="8" bottom="8" />
+				<AbsInset left="8" right="8" top="8" bottom="8"/>
 			</BackgroundInsets>
 			<TileSize>
-				<AbsValue val="32" />
+				<AbsValue val="32"/>
 			</TileSize>
 			<EdgeSize>
-				<AbsValue val="32" />
+				<AbsValue val="32"/>
 			</EdgeSize>
 		</Backdrop>
 		<TitleRegion name="$parentTitleRegion" setAllPoints="true"/>
 		<Frames>
 			<Button name="$parentExit" parentKey="Exit" inherits="TellMeWhen_ButtonTemplate">
-				<Size x="150" y="20" />
+				<Size x="150" y="20"/>
 				<Anchors>
-					<Anchor point="BOTTOMLEFT" x="13" y="13" />
+					<Anchor point="BOTTOMLEFT" x="13" y="13"/>
 				</Anchors>
 				<Scripts>
 					<OnLoad> self:SetText(TMW.L["CONFIGMODE_EXIT"]) </OnLoad>
@@ -1660,9 +1390,9 @@
 				</Scripts>
 			</Button>
 			<Button name="$parentNeverAgain" parentKey="NeverAgain" inherits="TellMeWhen_ButtonTemplate">
-				<Size x="150" y="20" />
+				<Size x="150" y="20"/>
 				<Anchors>
-					<Anchor point="BOTTOMRIGHT" x="-13" y="13" />
+					<Anchor point="BOTTOMRIGHT" x="-13" y="13"/>
 				</Anchors>
 				<Scripts>
 					<OnLoad> self:SetText(TMW.L["CONFIGMODE_NEVERSHOW"]) </OnLoad>
@@ -1675,17 +1405,17 @@
 				<Texture file="Interface\DialogFrame\UI-DialogBox-Header" parentKey="header">
 					<Size x="256" y="64"/>
 					<Anchors>
-						<Anchor point="TOP" x="0" y="12"/>
+						<Anchor point="TOP" y="12"/>
 					</Anchors>
 				</Texture>
 				<FontString name="$parentTitle" parentKey="title" inherits="GameFontNormal" justifyH="CENTER">
 					<Anchors>
-						<Anchor point="TOP" relativeTo="$parent" relativePoint="TOP" x="0" y="-2" />
+						<Anchor point="TOP" y="-2"/>
 					</Anchors>
 				</FontString>
 				<FontString name="$parentDesc" parentKey="desc" inherits="GameFontHighlight" justifyH="CENTER" justifyV="TOP">
 					<Anchors>
-						<Anchor point="TOP" y="-32" />
+						<Anchor point="TOP" y="-32"/>
 					</Anchors>
 				</FontString>
 			</Layer>
@@ -1702,19 +1432,19 @@
 	</Frame>
 	
 	<Frame name="TellMeWhen_IconEditor" hidden="true" movable="true" enableMouse="true" frameStrata="DIALOG">
-		<Size x="600" y="380" />
+		<Size x="600" y="380"/>
 		<Anchors>
-			<Anchor point="CENTER" relativeTo="UIParent" x="0" y="0" />
+			<Anchor point="CENTER" relativeTo="UIParent"/>
 		</Anchors>
 		<Backdrop bgFile="Interface\DialogFrame\UI-DialogBox-Background-Dark" edgeFile="Interface\DialogFrame\UI-DialogBox-Border" tile="true">
 			<BackgroundInsets>
-				<AbsInset left="8" right="8" top="8" bottom="8" />
+				<AbsInset left="8" right="8" top="8" bottom="8"/>
 			</BackgroundInsets>
 			<TileSize>
-				<AbsValue val="32" />
+				<AbsValue val="32"/>
 			</TileSize>
 			<EdgeSize>
-				<AbsValue val="32" />
+				<AbsValue val="32"/>
 			</EdgeSize>
 		</Backdrop>
 		<Frames>
@@ -1726,31 +1456,31 @@
 			</Button>
 			<Button name="$parentTab2" parentKey="IconConditionTab" inherits="TellMeWhen_TabTemplate" id="2">
 				<Anchors>
-				   <Anchor point="LEFT" relativeTo="$parentTab1" relativePoint="RIGHT" x="-18" y="0"/>
+				   <Anchor point="LEFT" relativeTo="$parentTab1" relativePoint="RIGHT" x="-18"/>
 				</Anchors>
 				<Scripts> <OnLoad> self:SetText(TMW.L["CONDITIONS"]) TMW.ICCNDTTab = self:GetID() </OnLoad> </Scripts>
 			</Button>
 			<Button name="$parentTab3" parentKey="SoundTab" inherits="TellMeWhen_TabTemplate" id="3">
 				<Anchors>
-				   <Anchor point="LEFT" relativeTo="$parentTab2" relativePoint="RIGHT" x="-18" y="0"/>
+				   <Anchor point="LEFT" relativeTo="$parentTab2" relativePoint="RIGHT" x="-18"/>
 				</Anchors>
 				<Scripts> <OnLoad> self:SetText(TMW.L["SOUND_TAB"]) </OnLoad> </Scripts>
 			</Button>
 			<Button name="$parentTab4" parentKey="AnnounceTab" inherits="TellMeWhen_TabTemplate" id="4">
 				<Anchors>
-				   <Anchor point="LEFT" relativeTo="$parentTab3" relativePoint="RIGHT" x="-18" y="0"/>
+				   <Anchor point="LEFT" relativeTo="$parentTab3" relativePoint="RIGHT" x="-18"/>
 				</Anchors>
 				<Scripts> <OnLoad> self:SetText(TMW.L["ANN_TAB"]) </OnLoad> </Scripts>
 			</Button>
 			<Button name="$parentTab5" parentKey="GroupConditionTab" inherits="TellMeWhen_TabTemplate" id="5">
 				<Anchors>
-				   <Anchor point="LEFT" relativeTo="$parentTab4" relativePoint="RIGHT" x="-18" y="0"/>
+				   <Anchor point="LEFT" relativeTo="$parentTab4" relativePoint="RIGHT" x="-18"/>
 				</Anchors>
 				<Scripts> <OnLoad> self:SetText(TMW.L["GROUPCONDITIONS"]) TMW.GRCNDTTab = self:GetID() </OnLoad> </Scripts>
 			</Button>
 			<Button name="$parentTab6" parentKey="MainOptionsTab" inherits="TellMeWhen_TabTemplate" id="6">
 				<Anchors>
-				   <Anchor point="LEFT" relativeTo="$parentTab5" relativePoint="RIGHT" x="-18" y="0"/>
+				   <Anchor point="LEFT" relativeTo="$parentTab5" relativePoint="RIGHT" x="-18"/>
 				</Anchors>
 				<Scripts>
 					<OnLoad> self:SetText(TMW.L["GROUPADDONSETTINGS"]) TMW.MOTab = self:GetID() </OnLoad>
@@ -1774,7 +1504,7 @@
 				<Layers>
 					<Layer level="OVERLAY">
 						<FontString name="$parentText" parentKey="text" inherits="GameFontHighlightLeft" justifyV="TOP" >
-							<Size x="208" y="0"/>
+							<Size x="208"/>
 							<Anchors>
 								<Anchor point="TOPLEFT" x="10" y="-24"/>
 							</Anchors>
@@ -1794,7 +1524,7 @@
 					</Button>
 					<Frame name="$parentArrow" parentKey="arrow" inherits="GlowBoxArrowTemplate">
 						<Anchors>
-							<Anchor point="TOPLEFT" relativePoint="TOPRIGHT" x="0" y="0"/>
+							<Anchor point="TOPLEFT" relativePoint="TOPRIGHT"/>
 						</Anchors>
 					</Frame>
 				</Frames>
@@ -1819,33 +1549,31 @@
 			<Frame name="$parentSuggest" parentKey="Suggest" hidden="true" enableMouse="true">
 				<Size x="220"/>
 				<Anchors>
-					<Anchor point="TOPLEFT" relativeTo="$parent" relativePoint="TOPRIGHT" x="-12" y="0" />
-					<Anchor point="BOTTOMLEFT" relativeTo="$parent" relativePoint="BOTTOMRIGHT" x="-12" y="0" />
+					<Anchor point="TOPLEFT" relativePoint="TOPRIGHT" x="-12"/>
+					<Anchor point="BOTTOMLEFT" relativePoint="BOTTOMRIGHT" x="-12"/>
 				</Anchors>
 				<Backdrop bgFile="Interface\DialogFrame\UI-DialogBox-Background-Dark" edgeFile="Interface\DialogFrame\UI-DialogBox-Border" tile="true">
 					<BackgroundInsets>
-						<AbsInset left="11" right="12" top="12" bottom="11" />
+						<AbsInset left="11" right="12" top="12" bottom="11"/>
 					</BackgroundInsets>
 					<TileSize>
-						<AbsValue val="32" />
+						<AbsValue val="32"/>
 					</TileSize>
 					<EdgeSize>
-						<AbsValue val="32" />
+						<AbsValue val="32"/>
 					</EdgeSize>
 				</Backdrop>
 				<Layers>
 					<Layer level="OVERLAY">
 						<FontString name="$parentHeader" inherits="GameFontNormalLarge" parentKey="Header" justifyH="LEFT" text="SUGGESTIONS">
 							<Anchors>
-								<Anchor point="TOP" relativeTo="$parent">
-									<Offset x="0" y="-12"/>
-								</Anchor>
+								<Anchor point="TOP" y="-12"/>
 							</Anchors>
 						</FontString>
 					</Layer>
 					<Layer level="ARTWORK">
 						<FontString name="$parentInfoText" parentKey="InfoText" hidden="true" inherits="GameFontHighlight">
-							<Size x="165" />
+							<Size x="165"/>
 							<Anchors>
 								<Anchor point="TOP" y="-45"/>
 							</Anchors>
@@ -1863,16 +1591,12 @@
 							<Layer level="ARTWORK">
 								<FontString name="$parentVal" parentKey="val" inherits="GameFontHighlightSmall" text="HIGH">
 									<Anchors>
-										<Anchor point="TOP" relativePoint="BOTTOM">
-											<Offset x="0" y="3"/>
-										</Anchor>
+										<Anchor point="TOP" relativePoint="BOTTOM" y="3"/>
 									</Anchors>
 								</FontString>
 								<FontString name="$parentText" parentKey="text" inherits="GameFontHighlight">
 									<Anchors>
-										<Anchor point="BOTTOM" relativePoint="TOP">
-											<Offset x="0" y="-1"/>
-										</Anchor>
+										<Anchor point="BOTTOM" relativePoint="TOP" y="-1"/>
 									</Anchors>
 								</FontString>
 							</Layer>
@@ -1904,9 +1628,7 @@
 					<StatusBar name="$parentStatus" parentKey="Status" hidden="true">
 						<Size x="170" y="25"/>
 						<Anchors>
-							<Anchor point="TOP" relativeTo="$parentSpeed" relativePoint="BOTTOM">
-								<Offset x="0" y="-10"/>
-							</Anchor>
+							<Anchor point="TOP" relativeTo="$parentSpeed" relativePoint="BOTTOM" y="-10"/>
 						</Anchors>
 						<Layers>
 							<Layer level="ARTWORK">
@@ -1916,7 +1638,7 @@
 							<Layer level="OVERLAY">
 								<FontString name="$parentText" parentKey="text" inherits="GameFontHighlight">
 									<Anchors>
-										<Anchor point="CENTER" />
+										<Anchor point="CENTER"/>
 									</Anchors>
 								</FontString>
 							</Layer>
@@ -1934,9 +1656,7 @@
 					</StatusBar>
 					<Button name="$parentHelp" inherits="MainMenuBarMicroButton" hidden="false">
 						<Anchors>
-							<Anchor point="TOPRIGHT" relativeTo="$parent" relativePoint="TOPRIGHT">
-								<Offset x="-15" y="9" />
-							</Anchor>
+							<Anchor point="TOPRIGHT" x="-15" y="9"/>
 						</Anchors>
 						<Scripts>
 							<OnLoad>
@@ -1952,6 +1672,20 @@
 							<OnLeave>
 								GameTooltip:Hide()
 							</OnLeave>
+						</Scripts>
+					</Button>
+					<Button name="$parentFinish" parentKey="Finish" inherits="TellMeWhen_ButtonTemplate" hidden="false">
+						<Anchors>
+							<Anchor point="BOTTOM" y="20"/>
+						</Anchors>
+						<Scripts>
+							<OnLoad>
+								self:SetText(TMW.L["SUG_FINISHHIM"])
+								TMW:TT(self, "SUG_FINISHHIM", "SUG_FINISHHIM_DESC")
+							</OnLoad>
+							<OnClick>
+								TMW.SUG.NumCachePerFrame = math.huge -- why the hell not?
+							</OnClick>
 						</Scripts>
 					</Button>
 				</Frames>
@@ -1980,9 +1714,7 @@
 				<Frames>
 					<Frame name="$parentType" inherits="UIDropDownMenuTemplate" parentKey="Type">
 						<Anchors>
-							<Anchor point="TOPLEFT" relativeTo="$parent" relativePoint="TOPLEFT">
-								<Offset x="-2" y="-35" />
-							</Anchor>
+							<Anchor point="TOPLEFT" x="-2" y="-35"/>
 						</Anchors>
 						<Scripts>
 							<OnLoad>
@@ -2004,23 +1736,15 @@
 						</Scripts>
 					</Frame>
 					<EditBox name="$parentName" inherits="TellMeWhen_InputBoxTemplate" parentKey="Name" autoFocus="false">
-						<Size>
-							<AbsDimension x="545" y="15"/>
-						</Size>
+						<Size x="545" y="15"/>
 						<Anchors>
-							<Anchor point="TOPLEFT" relativeTo="$parentType" relativePoint="BOTTOMLEFT">
-								<Offset>
-									<AbsDimension x="23" y="1" />
-								</Offset>
-							</Anchor>
+							<Anchor point="TOPLEFT" relativeTo="$parentType" relativePoint="BOTTOMLEFT" x="23" y="1"/>
 						</Anchors>
 						<Layers>
 							<Layer level="ARTWORK">
 								<FontString name="$parentFS1" inherits="GameFontHighlightSmall" parentKey="text" justifyH="LEFT">
 									<Anchors>
-										<Anchor point="LEFT" relativePoint="RIGHT">
-											<Offset x="19" y="-1" />
-										</Anchor>
+										<Anchor point="LEFT" relativePoint="RIGHT" x="19" y="-1"/>
 									</Anchors>
 								</FontString>
 							</Layer>
@@ -2028,9 +1752,7 @@
 						<Frames>
 							<Frame name="$parentEquivs" inherits="UIDropDownMenuTemplate" parentKey="Equivs">
 								<Anchors>
-									<Anchor point="LEFT" relativeTo="$parent" relativePoint="RIGHT">
-										<Offset x="-15" y="-4" />
-									</Anchor>
+									<Anchor point="LEFT" relativePoint="RIGHT" x="-15" y="-4"/>
 								</Anchors>
 								<Scripts>
 									<OnLoad>
@@ -2126,12 +1848,8 @@
 					</EditBox>
 					<Frame name="$parentIcons[DND]" hidden="true" parentKey="Icons">
 						<Anchors>
-							<Anchor point="TOPLEFT" relativeTo="$parentType" relativePoint="BOTTOMLEFT">
-								<Offset x="-10" y="2" />
-							</Anchor>
-							<Anchor point="BOTTOMRIGHT" relativeTo="$parent" relativePoint="BOTTOMRIGHT">
-								<Offset x="0" y="34" />
-							</Anchor>
+							<Anchor point="TOPLEFT" relativeTo="$parentType" relativePoint="BOTTOMLEFT" x="-10" y="2"/>
+							<Anchor point="BOTTOMRIGHT" y="34"/>
 						</Anchors>
 						<Frames>
 							<ScrollFrame name="$parentSF" parentKey="ScrollFrame" inherits="UIPanelScrollFrameCodeTemplate" movable="true" enableMouse="true">
@@ -2141,15 +1859,11 @@
 								</Anchors>
 								<ScrollChild>
 									<Frame name="TellMeWhen_IconEditorMainIcons" parentKey="Icons" movable="true" enableMouse="true" >
-										<Size>
-											<AbsDimension x="580" y="150" />
-										</Size>
+										<Size x="580" y="150"/>
 										<Frames>
 											<Frame name="$parent1" inherits="TellMeWhen_MetaGroup" id="1">
 												<Anchors>
-													<Anchor point="TOP" relativeTo="$parent" relativePoint="TOP">
-														<Offset x="0" y="2" />
-													</Anchor>
+													<Anchor point="TOP" y="2"/>
 												</Anchors>
 											</Frame>
 										</Frames>
@@ -2167,20 +1881,10 @@
 								</Scripts>
 								<Frames>
 									<Slider name="$parentScrollBar" inherits="MinimalScrollBarTemplate" parentKey="ScrollBar">
-										<Size>
-											<AbsDimension x="17" y="0"/>
-										</Size>
+										<Size x="17"/>
 										<Anchors>
-											<Anchor point="TOPRIGHT" relativeTo="$parent" relativePoint="TOPRIGHT">
-												<Offset>
-													<AbsDimension x="-10" y="-17"/>
-												</Offset>
-											</Anchor>
-											<Anchor point="BOTTOMRIGHT" relativeTo="$parent" relativePoint="BOTTOMRIGHT">
-												<Offset>
-													<AbsDimension x="-10" y="17"/>
-												</Offset>
-											</Anchor>
+											<Anchor point="TOPRIGHT" x="-10" y="-17"/>
+											<Anchor point="BOTTOMRIGHT" x="-10" y="17"/>
 										</Anchors>
 									</Slider>
 								</Frames>
@@ -2194,13 +1898,9 @@
 					</Frame>
 
 					<EditBox name="$parentCustomTex" inherits="TellMeWhen_InputBoxTemplate" parentKey="CustomTex" autoFocus="false">
-						<Size>
-							<AbsDimension x="270" y="15"/>
-						</Size>
+						<Size x="270" y="15"/>
 						<Anchors>
-							<Anchor point="TOPLEFT" relativeTo="$parentName" relativePoint="BOTTOMLEFT">
-								<Offset x="0" y="-4" />
-							</Anchor>
+							<Anchor point="TOPLEFT" relativeTo="$parentName" relativePoint="BOTTOMLEFT" y="-4"/>
 						</Anchors>
 						<Scripts>
 							<OnLoad>
@@ -2222,22 +1922,14 @@
 						</Scripts>
 					</EditBox>
 					<EditBox name="$parentUnit" inherits="TellMeWhen_InputBoxTemplate" parentKey="Unit" autoFocus="false">
-						<Size>
-							<AbsDimension x="270" y="15"/>
-						</Size>
+						<Size x="270" y="15"/>
 						<Anchors>
-							<Anchor point="LEFT" relativeTo="$parentCustomTex" relativePoint="RIGHT">
-								<Offset x="5" y="0" />
-							</Anchor>
+							<Anchor point="LEFT" relativeTo="$parentCustomTex" relativePoint="RIGHT" x="5"/>
 						</Anchors>
 						<Frames>
 							<Frame name="$parentIns" inherits="UIDropDownMenuTemplate" parentKey="Ins">
 								<Anchors>
-									<Anchor point="LEFT" relativeTo="$parent" relativePoint="RIGHT">
-										<Offset>
-											<AbsDimension x="-15" y="-4" />
-										</Offset>
-									</Anchor>
+									<Anchor point="LEFT" relativePoint="RIGHT" x="-15" y="-4"/>
 								</Anchors>
 								<Scripts>
 									<OnLoad>
@@ -2276,9 +1968,7 @@
 					
 					<CheckButton name="$parentShowTimer" inherits="TellMeWhen_CheckTemplate" parentKey="ShowTimer">
 						<Anchors>
-							<Anchor point="TOPLEFT" relativeTo="$parentCustomTex" relativePoint="BOTTOMLEFT">
-								<Offset x="-5" y="-5" />
-							</Anchor>
+							<Anchor point="TOPLEFT" relativeTo="$parentCustomTex" relativePoint="BOTTOMLEFT" x="-5" y="-5"/>
 						</Anchors>
 						<Scripts>
 							<OnLoad>
@@ -2302,9 +1992,7 @@
 					</CheckButton>
 					<CheckButton name="$parentShowTText" inherits="TellMeWhen_CheckTemplate" parentKey="ShowTimerText">
 						<Anchors>
-							<Anchor point="TOP" relativeTo="$parentShowTimer" relativePoint="BOTTOM">
-								<Offset x="0" y="4" />
-							</Anchor>
+							<Anchor point="TOP" relativeTo="$parentShowTimer" relativePoint="BOTTOM" y="4"/>
 						</Anchors>
 						<Scripts>
 							<OnLoad>
@@ -2331,9 +2019,7 @@
 					</CheckButton>
 					<CheckButton name="$parentOnlyMine" inherits="TellMeWhen_CheckTemplate" parentKey="OnlyMine">
 						<Anchors>
-							<Anchor point="TOP" relativeTo="$parentShowTText" relativePoint="BOTTOM">
-								<Offset x="0" y="4" />
-							</Anchor>
+							<Anchor point="TOP" relativeTo="$parentShowTText" relativePoint="BOTTOM" y="4"/>
 						</Anchors>
 						<Scripts>
 							<OnLoad>
@@ -2351,9 +2037,7 @@
 					</CheckButton>
 					<CheckButton name="$parentDontRefresh" inherits="TellMeWhen_CheckTemplate" parentKey="DontRefresh">
 						<Anchors>
-							<Anchor point="TOP" relativeTo="$parentShowTText" relativePoint="BOTTOM">
-								<Offset x="0" y="4" />
-							</Anchor>
+							<Anchor point="TOP" relativeTo="$parentShowTText" relativePoint="BOTTOM" y="4"/>
 						</Anchors>
 						<Scripts>
 							<OnLoad>
@@ -2466,7 +2150,7 @@
 					</CheckButton>
 					<CheckButton name="$parentShowTTText" inherits="TellMeWhen_CheckTemplate" parentKey="ShowTTText">
 						<Anchors>
-							<Anchor point="TOP" relativeTo="$parentOnlyMine" relativePoint="BOTTOM" x="0" y="4" />
+							<Anchor point="TOP" relativeTo="$parentOnlyMine" relativePoint="BOTTOM" y="4"/>
 						</Anchors>
 						<Scripts>
 							<OnLoad>
@@ -2485,9 +2169,7 @@
 					</CheckButton>
 					<CheckButton name="$parentRangeCheck" inherits="TellMeWhen_CheckTemplate" parentKey="RangeCheck">
 						<Anchors>
-							<Anchor point="TOP" relativeTo="$parentOnlyMine" relativePoint="BOTTOM">
-								<Offset x="0" y="4" />
-							</Anchor>
+							<Anchor point="TOP" relativeTo="$parentOnlyMine" relativePoint="BOTTOM" y="4"/>
 						</Anchors>
 						<Scripts>
 							<OnLoad>
@@ -2506,9 +2188,7 @@
 					</CheckButton>
 					<CheckButton name="$parentManaCheck" inherits="TellMeWhen_CheckTemplate" parentKey="ManaCheck">
 						<Anchors>
-							<Anchor point="TOPLEFT" relativeTo="$parentRangeCheck" relativePoint="BOTTOMLEFT">
-								<Offset x="0" y="4" />
-							</Anchor>
+							<Anchor point="TOPLEFT" relativeTo="$parentRangeCheck" relativePoint="BOTTOMLEFT" y="4"/>
 						</Anchors>
 						<Scripts>
 							<OnLoad>
@@ -2527,9 +2207,7 @@
 					</CheckButton>
 					<CheckButton name="$parentCooldownCheck" inherits="TellMeWhen_CheckTemplate" parentKey="CooldownCheck">
 						<Anchors>
-							<Anchor point="TOPLEFT" relativeTo="$parentManaCheck" relativePoint="BOTTOMLEFT">
-								<Offset x="0" y="4" />
-							</Anchor>
+							<Anchor point="TOPLEFT" relativeTo="$parentManaCheck" relativePoint="BOTTOMLEFT" y="4"/>
 						</Anchors>
 						<Scripts>
 							<OnLoad>
@@ -2565,9 +2243,7 @@
 					</CheckButton>
 					<CheckButton name="$parentIgnoreRunes" inherits="TellMeWhen_CheckTemplate" parentKey="IgnoreRunes">
 						<Anchors>
-							<Anchor point="TOPLEFT" relativeTo="$parentManaCheck" relativePoint="BOTTOMLEFT">
-								<Offset x="0" y="4" />
-							</Anchor>
+							<Anchor point="TOPLEFT" relativeTo="$parentManaCheck" relativePoint="BOTTOMLEFT" y="4"/>
 						</Anchors>
 						<Scripts>
 							<OnLoad>
@@ -2586,7 +2262,7 @@
 					</CheckButton>
 					<CheckButton name="$parentOnlyInBags" inherits="TellMeWhen_CheckTemplate" parentKey="OnlyInBags">
 						<Anchors>
-							<Anchor point="TOPLEFT" relativeTo="$parentRangeCheck" relativePoint="BOTTOMLEFT" x="0" y="4" />
+							<Anchor point="TOPLEFT" relativeTo="$parentRangeCheck" relativePoint="BOTTOMLEFT" y="4"/>
 						</Anchors>
 						<Scripts>
 							<OnLoad>
@@ -2606,7 +2282,7 @@
 					</CheckButton>
 					<CheckButton name="$parentOnlyEquipped" inherits="TellMeWhen_CheckTemplate" parentKey="OnlyEquipped">
 						<Anchors>
-							<Anchor point="TOPLEFT" relativeTo="$parentOnlyInBags" relativePoint="BOTTOMLEFT" x="0" y="4" />
+							<Anchor point="TOPLEFT" relativeTo="$parentOnlyInBags" relativePoint="BOTTOMLEFT" y="4"/>
 						</Anchors>
 						<Scripts>
 							<OnLoad>
@@ -2635,7 +2311,7 @@
 					</CheckButton>
 					<CheckButton name="$parentEnableStacks" inherits="TellMeWhen_CheckTemplate" parentKey="EnableStacks">
 						<Anchors>
-							<Anchor point="TOPLEFT" relativeTo="$parentOnlyEquipped" relativePoint="BOTTOMLEFT" x="0" y="4" />
+							<Anchor point="TOPLEFT" relativeTo="$parentOnlyEquipped" relativePoint="BOTTOMLEFT" y="4"/>
 						</Anchors>
 						<Scripts>
 							<OnLoad>
@@ -2655,7 +2331,7 @@
 					</CheckButton>
 					<CheckButton name="$parentStealable" inherits="TellMeWhen_CheckTemplate" parentKey="Stealable">
 						<Anchors>
-							<Anchor point="TOPLEFT" relativeTo="$parentOnlyMine" relativePoint="BOTTOMLEFT" x="0" y="4" />
+							<Anchor point="TOPLEFT" relativeTo="$parentOnlyMine" relativePoint="BOTTOMLEFT" y="4"/>
 						</Anchors>
 						<Scripts>
 							<OnLoad>
@@ -2675,7 +2351,7 @@
 					</CheckButton>
 					<CheckButton name="$parentIgnoreNomana" inherits="TellMeWhen_CheckTemplate" parentKey="IgnoreNomana">
 						<Anchors>
-							<Anchor point="TOPLEFT" relativeTo="$parentCooldownCheck" relativePoint="BOTTOMLEFT" x="0" y="4" />
+							<Anchor point="TOPLEFT" relativeTo="$parentCooldownCheck" relativePoint="BOTTOMLEFT" y="4"/>
 						</Anchors>
 						<Scripts>
 							<OnLoad>
@@ -2697,17 +2373,13 @@
 					<Frame name="$parentSortChecks" parentKey="Sort">
 						<Size x="140" y="90"/>
 						<Anchors>
-							<Anchor point="TOPLEFT" relativeTo="$parentRangeCheck" relativePoint="BOTTOMLEFT">
-								<Offset x="0" y="-10" />
-							</Anchor>
+							<Anchor point="TOPLEFT" relativeTo="$parentRangeCheck" relativePoint="BOTTOMLEFT" y="-10"/>
 						</Anchors>
 						<Layers>
 							<Layer level="ARTWORK">
 								<FontString name="$parentFS1" inherits="GameFontNormal" parentKey="text" justifyH="LEFT">
 									<Anchors>
-										<Anchor point="TOPLEFT" relativePoint="TOPLEFT">
-											<Offset x="0" y="10" />
-										</Anchor>
+										<Anchor point="TOPLEFT" y="10"/>
 									</Anchors>
 								</FontString>
 							</Layer>
@@ -2715,7 +2387,7 @@
 						<Frames>
 							<CheckButton name="$parent1" inherits="TellMeWhen_RadioCheckTemplate" parentKey="Radio1" id="1">
 								<Anchors>
-									<Anchor point="TOPLEFT" relativeTo="$parent" relativePoint="TOPLEFT" x="0" y="0" />
+									<Anchor point="TOPLEFT"/>
 								</Anchors>
 								<Scripts>
 									<OnLoad>
@@ -2730,7 +2402,7 @@
 							</CheckButton>
 							<CheckButton name="$parent2" inherits="TellMeWhen_RadioCheckTemplate" parentKey="Radio2" id="2">
 								<Anchors>
-									<Anchor point="TOP" relativeTo="$parent1" relativePoint="BOTTOM" x="0" y="5" />
+									<Anchor point="TOP" relativeTo="$parent1" relativePoint="BOTTOM" y="5"/>
 								</Anchors>
 								<Scripts>
 									<OnLoad>
@@ -2745,7 +2417,7 @@
 							</CheckButton>
 							<CheckButton name="$parent3" inherits="TellMeWhen_RadioCheckTemplate" parentKey="Radio3" id="3">
 								<Anchors>
-									<Anchor point="TOP" relativeTo="$parent2" relativePoint="BOTTOM" x="0" y="5" />
+									<Anchor point="TOP" relativeTo="$parent2" relativePoint="BOTTOM" y="5"/>
 								</Anchors>
 								<Scripts>
 									<OnLoad>
@@ -2768,17 +2440,13 @@
 					<Frame name="$parentTypeChecks" parentKey="TypeChecks">
 						<Size x="140" y="100"/>
 						<Anchors>
-							<Anchor point="TOPLEFT" relativeTo="$parentCustomTex" relativePoint="BOTTOMLEFT">
-								<Offset x="200" y="-15" />
-							</Anchor>
+							<Anchor point="TOPLEFT" relativeTo="$parentCustomTex" relativePoint="BOTTOMLEFT" x="200" y="-15"/>
 						</Anchors>
 						<Layers>
 							<Layer level="ARTWORK">
 								<FontString name="$parentFS1" inherits="GameFontNormal" parentKey="text" justifyH="LEFT">
 									<Anchors>
-										<Anchor point="TOPLEFT" relativePoint="TOPLEFT">
-											<Offset x="-10" y="10" />
-										</Anchor>
+										<Anchor point="TOPLEFT" x="-10" y="10"/>
 									</Anchors>
 								</FontString>
 							</Layer>
@@ -2786,30 +2454,22 @@
 						<Frames>
 							<CheckButton name="$parent1" inherits="TellMeWhen_RadioCheckTemplate" parentKey="Radio1" id="1">
 								<Anchors>
-									<Anchor point="TOPLEFT" relativeTo="$parent" relativePoint="TOPLEFT">
-										<Offset x="0" y="0" />
-									</Anchor>
+									<Anchor point="TOPLEFT"/>
 								</Anchors>
 							</CheckButton>
 							<CheckButton name="$parent2" inherits="TellMeWhen_RadioCheckTemplate" parentKey="Radio2" id="2">
 								<Anchors>
-									<Anchor point="TOP" relativeTo="$parent1" relativePoint="BOTTOM">
-										<Offset x="0" y="5" />
-									</Anchor>
+									<Anchor point="TOP" relativeTo="$parent1" relativePoint="BOTTOM" y="5"/>
 								</Anchors>
 							</CheckButton>
 							<CheckButton name="$parent3" inherits="TellMeWhen_RadioCheckTemplate" parentKey="Radio3" id="3">
 								<Anchors>
-									<Anchor point="TOP" relativeTo="$parent2" relativePoint="BOTTOM">
-										<Offset x="0" y="5" />
-									</Anchor>
+									<Anchor point="TOP" relativeTo="$parent2" relativePoint="BOTTOM" y="5"/>
 								</Anchors>
 							</CheckButton>
 							<CheckButton name="$parent4" inherits="TellMeWhen_RadioCheckTemplate" parentKey="Radio4" id="4">
 								<Anchors>
-									<Anchor point="TOP" relativeTo="$parent3" relativePoint="BOTTOM">
-										<Offset x="0" y="5" />
-									</Anchor>
+									<Anchor point="TOP" relativeTo="$parent3" relativePoint="BOTTOM" y="5"/>
 								</Anchors>
 							</CheckButton>
 						</Frames>
@@ -2840,17 +2500,13 @@
 					<Frame name="$parentWhenChecks" parentKey="WhenChecks">
 						<Size x="140" y="90"/>
 						<Anchors>
-							<Anchor point="TOPLEFT" relativeTo="$parentTypeChecks" relativePoint="BOTTOMLEFT">
-								<Offset x="0" y="7" />
-							</Anchor>
+							<Anchor point="TOPLEFT" relativeTo="$parentTypeChecks" relativePoint="BOTTOMLEFT" y="7"/>
 						</Anchors>
 						<Layers>
 							<Layer level="ARTWORK">
 								<FontString name="$parentFS1" inherits="GameFontNormal" parentKey="text" justifyH="LEFT">
 									<Anchors>
-										<Anchor point="TOPLEFT" relativePoint="TOPLEFT">
-											<Offset x="-10" y="10" />
-										</Anchor>
+										<Anchor point="TOPLEFT" x="-10" y="10"/>
 									</Anchors>
 								</FontString>
 							</Layer>
@@ -2858,23 +2514,17 @@
 						<Frames>
 							<CheckButton name="$parent1" inherits="TellMeWhen_RadioCheckTemplate" parentKey="Radio1" id="1">
 								<Anchors>
-									<Anchor point="TOPLEFT" relativeTo="$parent" relativePoint="TOPLEFT">
-										<Offset x="0" y="0" />
-									</Anchor>
+									<Anchor point="TOPLEFT"/>
 								</Anchors>
 							</CheckButton>
 							<CheckButton name="$parent2" inherits="TellMeWhen_RadioCheckTemplate" parentKey="Radio2" id="2">
 								<Anchors>
-									<Anchor point="TOP" relativeTo="$parent1" relativePoint="BOTTOM">
-										<Offset x="0" y="5" />
-									</Anchor>
+									<Anchor point="TOP" relativeTo="$parent1" relativePoint="BOTTOM" y="5"/>
 								</Anchors>
 							</CheckButton>
 							<CheckButton name="$parent3" inherits="TellMeWhen_RadioCheckTemplate" parentKey="Radio3" id="3">
 								<Anchors>
-									<Anchor point="TOP" relativeTo="$parent2" relativePoint="BOTTOM">
-										<Offset x="0" y="5" />
-									</Anchor>
+									<Anchor point="TOP" relativeTo="$parent2" relativePoint="BOTTOM" y="5"/>
 								</Anchors>
 							</CheckButton>
 						</Frames>
@@ -2883,16 +2533,12 @@
 					<Frame name="$parentShowPBar" parentKey="ShowPBar">
 						<Size x="110" y="55"/>
 						<Anchors>
-							<Anchor point="TOPLEFT" relativeTo="$parentTypeChecks" relativePoint="TOPRIGHT">
-								<Offset x="0" y="11" />
-							</Anchor>
+							<Anchor point="TOPLEFT" relativeTo="$parentTypeChecks" relativePoint="TOPRIGHT" y="11"/>
 						</Anchors>
 						<Frames>
 							<CheckButton name="$parentShowPBar" inherits="TellMeWhen_CheckTemplate" parentKey="ShowPBar" id="1">
 								<Anchors>
-									<Anchor point="TOPLEFT" relativeTo="$parent" relativePoint="TOPLEFT">
-										<Offset x="0" y="0" />
-									</Anchor>
+									<Anchor point="TOPLEFT"/>
 								</Anchors>
 								<Scripts>
 									<OnLoad>
@@ -2911,21 +2557,15 @@
 								</Scripts>
 							</CheckButton>
 							<EditBox name="$parentPBarOffs" inherits="TellMeWhen_InputBoxTemplate" parentKey="PBarOffs" autoFocus="false">
-								<Size>
-									<AbsDimension x="40" y="32"/>
-								</Size>
+								<Size x="40" y="32"/>
 								<Anchors>
-									<Anchor point="TOPLEFT" relativeTo="$parentShowPBar" relativePoint="BOTTOMLEFT">
-										<Offset x="14" y="7" />
-									</Anchor>
+									<Anchor point="TOPLEFT" relativeTo="$parentShowPBar" relativePoint="BOTTOMLEFT" x="14" y="7"/>
 								</Anchors>
 								<Layers>
 									<Layer level="ARTWORK">
 										<FontString name="$parentFS1" inherits="GameFontHighlight" parentKey="text" justifyH="LEFT">
 											<Anchors>
-												<Anchor point="LEFT" relativePoint="RIGHT">
-													<Offset x="5" y="-1" />
-												</Anchor>
+												<Anchor point="LEFT" relativePoint="RIGHT" x="5" y="-1"/>
 											</Anchors>
 										</FontString>
 									</Layer>
@@ -2979,16 +2619,12 @@
 					<Frame name="$parentShowCBar" parentKey="ShowCBar">
 						<Size x="110" y="55"/>
 						<Anchors>
-							<Anchor point="TOPLEFT" relativeTo="$parentShowPBar" relativePoint="TOPRIGHT">
-								<Offset x="0" y="0" />
-							</Anchor>
+							<Anchor point="TOPLEFT" relativeTo="$parentShowPBar" relativePoint="TOPRIGHT"/>
 						</Anchors>
 						<Frames>
 							<CheckButton name="$parentShowCBar" inherits="TellMeWhen_CheckTemplate" parentKey="ShowCBar">
 								<Anchors>
-									<Anchor point="TOPLEFT" relativeTo="$parent" relativePoint="TOPLEFT">
-										<Offset x="0" y="0" />
-									</Anchor>
+									<Anchor point="TOPLEFT"/>
 								</Anchors>
 								<Scripts>
 									<OnLoad>
@@ -3007,21 +2643,15 @@
 								</Scripts>
 							</CheckButton>
 							<EditBox name="$parentCBarOffs" inherits="TellMeWhen_InputBoxTemplate" parentKey="CBarOffs" autoFocus="false">
-								<Size>
-									<AbsDimension x="40" y="32"/>
-								</Size>
+								<Size x="40" y="32"/>
 								<Anchors>
-									<Anchor point="TOPLEFT" relativeTo="$parentShowCBar" relativePoint="BOTTOMLEFT">
-										<Offset x="14" y="7" />
-									</Anchor>
+									<Anchor point="TOPLEFT" relativeTo="$parentShowCBar" relativePoint="BOTTOMLEFT" x="14" y="7"/>
 								</Anchors>
 								<Layers>
 									<Layer level="ARTWORK">
 										<FontString name="$parentFS1" inherits="GameFontHighlight" parentKey="text" justifyH="LEFT">
 											<Anchors>
-												<Anchor point="LEFT" relativePoint="RIGHT">
-													<Offset x="5" y="-1" />
-												</Anchor>
+												<Anchor point="LEFT" relativePoint="RIGHT" x="5" y="-1"/>
 											</Anchors>
 										</FontString>
 									</Layer>
@@ -3073,9 +2703,7 @@
 					</Frame>
 					<CheckButton name="$parentInvertBars" inherits="TellMeWhen_CheckTemplate" parentKey="InvertBars" id="3">
 						<Anchors>
-							<Anchor point="TOPLEFT" relativeTo="$parentShowPBar" relativePoint="BOTTOMLEFT">
-								<Offset x="0" y="7" />
-							</Anchor>
+							<Anchor point="TOPLEFT" relativeTo="$parentShowPBar" relativePoint="BOTTOMLEFT" y="7"/>
 						</Anchors>
 						<Scripts>
 							<OnLoad>
@@ -3100,12 +2728,8 @@
 
 					<EditBox name="$parentDurationMin" parentKey="DurationMin" inherits="TellMeWhen_TimeEditBoxTemplate">
 						<Anchors>
-							<Anchor point="LEFT" relativeTo="$parentTypeChecks" relativePoint="RIGHT">
-								<Offset x="35" y="0" />
-							</Anchor>
-							<Anchor point="TOP" relativeTo="$parentInvertBars" relativePoint="BOTTOM">
-								<Offset x="0" y="-32" />
-							</Anchor>
+							<Anchor point="LEFT" relativeTo="$parentTypeChecks" relativePoint="RIGHT" x="35"/>
+							<Anchor point="TOP" relativeTo="$parentInvertBars" relativePoint="BOTTOM" y="-32"/>
 						</Anchors>
 						<Scripts>
 							<OnLoad>
@@ -3123,9 +2747,7 @@
 					</EditBox>
 					<EditBox name="$parentDurationMax" parentKey="DurationMax" inherits="TellMeWhen_TimeEditBoxTemplate">
 						<Anchors>
-							<Anchor point="LEFT" relativeTo="$parentDurationMin" relativePoint="RIGHT">
-								<Offset x="40" y="0" />
-							</Anchor>
+							<Anchor point="LEFT" relativeTo="$parentDurationMin" relativePoint="RIGHT" x="40"/>
 						</Anchors>
 						<Scripts>
 							<OnLoad>
@@ -3137,13 +2759,9 @@
 
 					</EditBox>
 					<CheckButton name="$parentDurationMinEnabled" parentKey="DurationMinEnabled" inherits="TellMeWhen_CheckTemplate">
-						<Size>
-							<AbsDimension x="25" y="25" />
-						</Size>
+						<Size x="25" y="25"/>
 						<Anchors>
-							<Anchor point="RIGHT" relativeto="$parentDurationMin" relativePoint="LEFT">
-								<Offset x="-3" y="0" />
-							</Anchor>
+							<Anchor point="RIGHT" relativeto="$parentDurationMin" relativePoint="LEFT" x="-3"/>
 						</Anchors>
 						<Scripts>
 							<OnClick>
@@ -3166,13 +2784,9 @@
 						</Scripts>
 					</CheckButton>
 					<CheckButton name="$parentDurationMaxEnabled" parentKey="DurationMaxEnabled" inherits="TellMeWhen_CheckTemplate">
-						<Size>
-							<AbsDimension x="25" y="25" />
-						</Size>
+						<Size x="25" y="25"/>
 						<Anchors>
-							<Anchor point="RIGHT" relativeto="$parentDurationMax" relativePoint="LEFT">
-								<Offset x="-3" y="0" />
-							</Anchor>
+							<Anchor point="RIGHT" relativeto="$parentDurationMax" relativePoint="LEFT" x="-3"/>
 						</Anchors>
 						<Scripts>
 							<OnClick>
@@ -3197,7 +2811,7 @@
 					
 					<EditBox name="$parentConditionDur" parentKey="ConditionDur" inherits="TellMeWhen_TimeEditBoxTemplate">
 						<Anchors>
-							<Anchor point="TOPLEFT" relativeTo="$parentShowTText" relativePoint="BOTTOMLEFT" x="25" y="-30" />
+							<Anchor point="TOPLEFT" relativeTo="$parentShowTText" relativePoint="BOTTOMLEFT" x="25" y="-30"/>
 						</Anchors>
 						<Scripts>
 							<OnLoad>
@@ -3215,7 +2829,7 @@
 					</EditBox>
 					<EditBox name="$parentUnConditionDur" parentKey="UnConditionDur" inherits="TellMeWhen_TimeEditBoxTemplate">
 						<Anchors>
-							<Anchor point="LEFT" relativeTo="$parentConditionDur" relativePoint="RIGHT" x="40" y="0" />
+							<Anchor point="LEFT" relativeTo="$parentConditionDur" relativePoint="RIGHT" x="40"/>
 						</Anchors>
 						<Scripts>
 							<OnLoad>
@@ -3227,9 +2841,9 @@
 
 					</EditBox>
 					<CheckButton name="$parentConditionDurEnabled" parentKey="ConditionDurEnabled" inherits="TellMeWhen_CheckTemplate">
-						<Size x="25" y="25" />
+						<Size x="25" y="25"/>
 						<Anchors>
-							<Anchor point="RIGHT" relativeto="$parentConditionDur" relativePoint="LEFT" x="-3" y="0" />
+							<Anchor point="RIGHT" relativeto="$parentConditionDur" relativePoint="LEFT" x="-3"/>
 						</Anchors>
 						<Scripts>
 							<OnClick>
@@ -3252,9 +2866,9 @@
 						</Scripts>
 					</CheckButton>
 					<CheckButton name="$parentUnConditionDurEnabled" parentKey="UnConditionDurEnabled" inherits="TellMeWhen_CheckTemplate">
-						<Size x="25" y="25" />
+						<Size x="25" y="25"/>
 						<Anchors>
-							<Anchor point="RIGHT" relativeto="$parentUnConditionDur" relativePoint="LEFT" x="-3" y="0" />
+							<Anchor point="RIGHT" relativeto="$parentUnConditionDur" relativePoint="LEFT" x="-3"/>
 						</Anchors>
 						<Scripts>
 							<OnClick>
@@ -3279,9 +2893,7 @@
 
 					<EditBox name="$parentStackMin" parentKey="StackMin" inherits="TellMeWhen_TimeEditBoxTemplate">
 						<Anchors>
-							<Anchor point="TOPLEFT" relativeTo="$parentDurationMin" relativePoint="BOTTOMLEFT">
-								<Offset x="0" y="-40" />
-							</Anchor>
+							<Anchor point="TOPLEFT" relativeTo="$parentDurationMin" relativePoint="BOTTOMLEFT" y="-40"/>
 						</Anchors>
 						<Scripts>
 							<OnLoad>
@@ -3299,9 +2911,7 @@
 					</EditBox>
 					<EditBox name="$parentStackMax" parentKey="StackMax" inherits="TellMeWhen_TimeEditBoxTemplate">
 						<Anchors>
-							<Anchor point="LEFT" relativeTo="$parentStackMin" relativePoint="RIGHT">
-								<Offset x="40" y="0" />
-							</Anchor>
+							<Anchor point="LEFT" relativeTo="$parentStackMin" relativePoint="RIGHT" x="40"/>
 						</Anchors>
 						<Scripts>
 							<OnLoad>
@@ -3313,13 +2923,9 @@
 
 					</EditBox>
 					<CheckButton name="$parentStackMinEnabled" parentKey="StackMinEnabled" inherits="TellMeWhen_CheckTemplate">
-						<Size>
-							<AbsDimension x="25" y="25" />
-						</Size>
+						<Size x="25" y="25"/>
 						<Anchors>
-							<Anchor point="RIGHT" relativeto="$parentStackMin" relativePoint="LEFT">
-								<Offset x="-3" y="0" />
-							</Anchor>
+							<Anchor point="RIGHT" relativeto="$parentStackMin" relativePoint="LEFT" x="-3"/>
 						</Anchors>
 						<Scripts>
 							<OnClick>
@@ -3342,13 +2948,9 @@
 						</Scripts>
 					</CheckButton>
 					<CheckButton name="$parentStackMaxEnabled" parentKey="StackMaxEnabled" inherits="TellMeWhen_CheckTemplate">
-						<Size>
-							<AbsDimension x="25" y="25" />
-						</Size>
+						<Size x="25" y="25"/>
 						<Anchors>
-							<Anchor point="RIGHT" relativeto="$parentStackMax" relativePoint="LEFT">
-								<Offset x="-3" y="0" />
-							</Anchor>
+							<Anchor point="RIGHT" relativeto="$parentStackMax" relativePoint="LEFT" x="-3"/>
 						</Anchors>
 						<Scripts>
 							<OnClick>
@@ -3373,9 +2975,7 @@
 
 					<Slider name="$parentAlpha" parentKey="Alpha" inherits="TellMeWhen_AlphaSliderTemplate" valuestep="1">
 						<Anchors>
-							<Anchor point="BOTTOMLEFT" relativeTo="$parent" relativePoint="BOTTOMLEFT">
-								<Offset x="18" y="47" />
-							</Anchor>
+							<Anchor point="BOTTOMLEFT" x="18" y="47"/>
 						</Anchors>
 						<Scripts>
 							<OnLoad>
@@ -3391,9 +2991,7 @@
 					</Slider>
 					<Slider name="$parentUnAlpha" parentKey="UnAlpha" inherits="TellMeWhen_AlphaSliderTemplate" valuestep="1">
 						<Anchors>
-							<Anchor point="LEFT" relativeTo="$parentAlpha" relativePoint="RIGHT">
-								<Offset x="17" y="0" />
-							</Anchor>
+							<Anchor point="LEFT" relativeTo="$parentAlpha" relativePoint="RIGHT" x="17"/>
 						</Anchors>
 						<Scripts>
 							<OnLoad>
@@ -3403,9 +3001,7 @@
 					</Slider>
 					<Slider name="$parentConditionAlpha" parentKey="ConditionAlpha" inherits="TellMeWhen_AlphaSliderTemplate" valuestep="1">
 						<Anchors>
-							<Anchor point="LEFT" relativeTo="$parentUnAlpha" relativePoint="RIGHT">
-								<Offset x="17" y="0" />
-							</Anchor>
+							<Anchor point="LEFT" relativeTo="$parentUnAlpha" relativePoint="RIGHT" x="17"/>
 						</Anchors>
 						<Scripts>
 							<OnLoad>
@@ -3417,13 +3013,9 @@
 					</Slider>
 
 					<Button name="$parentReset" parentKey="ResetButton" inherits="TellMeWhen_ButtonTemplate" text="RESET">
-						<Size>
-							<AbsDimension x="100" y="17" />
-						</Size>
+						<Size x="100" y="17"/>
 						<Anchors>
-							<Anchor point="BOTTOMLEFT">
-								<Offset x="15" y="13" />
-							</Anchor>
+							<Anchor point="BOTTOMLEFT" x="15" y="13"/>
 						</Anchors>
 						<Scripts>
 							<OnLoad> self:SetFrameLevel(self:GetFrameLevel()+2)</OnLoad>
@@ -3433,9 +3025,7 @@
 
 					<Frame name="$parentCopy" inherits="UIDropDownMenuTemplate" parentKey="Copy">
 						<Anchors>
-							<Anchor point="LEFT" relativeTo="$parentReset" relativePoint="RIGHT">
-								<Offset x="-15" y="0" />
-							</Anchor>
+							<Anchor point="LEFT" relativeTo="$parentReset" relativePoint="RIGHT" x="-15"/>
 						</Anchors>
 						<Scripts>
 							<OnLoad>
@@ -3453,18 +3043,12 @@
 					<EditBox name="$parentExportBox" inherits="TellMeWhen_InputBoxTemplate" parentKey="ExportBox">
 						<Size x="235" y="15"/>
 						<Anchors>
-							<Anchor point="LEFT" relativeTo="$parentCopy" relativePoint="RIGHT">
-								<Offset x="-8" y="2" />
-							</Anchor>
+							<Anchor point="LEFT" relativeTo="$parentCopy" relativePoint="RIGHT" x="-8" y="2"/>
 						</Anchors>
 						<Frames>
 							<Frame name="$parentDD" inherits="UIDropDownMenuTemplate" parentKey="DD">
 								<Anchors>
-									<Anchor point="LEFT" relativeTo="$parent" relativePoint="RIGHT">
-										<Offset>
-											<AbsDimension x="-15" y="-4" />
-										</Offset>
-									</Anchor>
+									<Anchor point="LEFT" relativePoint="RIGHT" x="-15" y="-4"/>
 								</Anchors>
 								<Scripts>
 									<OnLoad>
@@ -3507,9 +3091,7 @@
 
 					<CheckButton name="$parentEnabled" inherits="TellMeWhen_CheckTemplate" parentKey="Enabled">
 						<Anchors>
-							<Anchor point="LEFT" relativeTo="$parentType" relativePoint="RIGHT">
-								<Offset x="-12" y="2" />
-							</Anchor>
+							<Anchor point="LEFT" relativeTo="$parentType" relativePoint="RIGHT" x="-12" y="2"/>
 						</Anchors>
 						<Scripts>
 							<OnLoad>
@@ -3527,7 +3109,7 @@
 					</CheckButton>
 					<CheckButton name="$parentFakeHidden" parentKey="FakeHidden" inherits="TellMeWhen_CheckTemplate">
 						<Anchors>
-							<Anchor point="LEFT" relativeTo="$parentEnabled" relativePoint="RIGHT" x="80" y="0" />
+							<Anchor point="LEFT" relativeTo="$parentEnabled" relativePoint="RIGHT" x="80"/>
 						</Anchors>
 						<Scripts>
 							<OnLoad>
@@ -3568,8 +3150,8 @@
 					<EditBox name="$parentBindText" inherits="TellMeWhen_InputBoxTemplate" parentKey="BindText" autoFocus="false">
 						<Size y="15"/>
 						<Anchors>
-							<Anchor point="LEFT" relativeTo="$parentFakeHidden" relativePoint="RIGHT" x="135" y="0" />
-							<Anchor point="RIGHT" relativeTo="$parent" relativePoint="RIGHT" x="-16" y="0" />
+							<Anchor point="LEFT" relativeTo="$parentFakeHidden" relativePoint="RIGHT" x="135"/>
+							<Anchor point="RIGHT" x="-16"/>
 						</Anchors>
 						<Scripts>
 							<OnLoad>
@@ -3596,36 +3178,28 @@
 					<Layer level="OVERLAY">
 						<FontString name="$parentConditionDurHeader" parentKey="ConditionDurHeader" inherits="GameFontNormal" justifyH="CENTER">
 							<Anchors>
-								<Anchor point="LEFT" relativeTo="$parentConditionDur" relativePoint="LEFT"/>
-								<Anchor point="RIGHT" relativeTo="$parentUnConditionDur" relativePoint="RIGHT"/>
-								<Anchor point="BOTTOM" relativeTo="$parentConditionDur" relativePoint="TOP">
-									<Offset x="0" y="14" />
-								</Anchor>
+								<Anchor point="LEFT" relativeTo="$parentConditionDur"/>
+								<Anchor point="RIGHT" relativeTo="$parentUnConditionDur"/>
+								<Anchor point="BOTTOM" relativeTo="$parentConditionDur" relativePoint="TOP" y="14"/>
 							</Anchors>
 						</FontString>
 						<FontString name="$parentDurationHeader" parentKey="DurationHeader" inherits="GameFontNormal" justifyH="CENTER">
 							<Anchors>
-								<Anchor point="LEFT" relativeTo="$parentDurationMin" relativePoint="LEFT"/>
-								<Anchor point="RIGHT" relativeTo="$parentDurationMax" relativePoint="RIGHT"/>
-								<Anchor point="BOTTOM" relativeTo="$parentDurationMin" relativePoint="TOP">
-									<Offset x="0" y="14" />
-								</Anchor>
+								<Anchor point="LEFT" relativeTo="$parentDurationMin"/>
+								<Anchor point="RIGHT" relativeTo="$parentDurationMax"/>
+								<Anchor point="BOTTOM" relativeTo="$parentDurationMin" relativePoint="TOP" y="14"/>
 							</Anchors>
 						</FontString>
 						<FontString name="$parentStackHeader" parentKey="StackHeader" inherits="GameFontNormal" justifyH="CENTER">
 							<Anchors>
-								<Anchor point="LEFT" relativeTo="$parentStackMin" relativePoint="LEFT"/>
-								<Anchor point="RIGHT" relativeTo="$parentStackMax" relativePoint="RIGHT"/>
-								<Anchor point="BOTTOM" relativeTo="$parentStackMin" relativePoint="TOP">
-									<Offset x="0" y="14" />
-								</Anchor>
+								<Anchor point="LEFT" relativeTo="$parentStackMin"/>
+								<Anchor point="RIGHT" relativeTo="$parentStackMax"/>
+								<Anchor point="BOTTOM" relativeTo="$parentStackMin" relativePoint="TOP" y="14"/>
 							</Anchors>
 						</FontString>
 						<FontString name="$parentTransparencyHeader" parentKey="TransparencyHeader" inherits="GameFontNormal" justifyH="RIGHT">
 							<Anchors>
-								<Anchor point="BOTTOM" relativeTo="$parentUnAlpha" relativePoint="TOP">
-									<Offset x="0" y="14" />
-								</Anchor>
+								<Anchor point="BOTTOM" relativeTo="$parentUnAlpha" relativePoint="TOP" y="14"/>
 							</Anchors>
 						</FontString>
 					</Layer>
@@ -3662,28 +3236,16 @@
 					</Frame>
 					<ScrollFrame name="$parentScrollFrame" parentKey="ScrollFrame" inherits="UIPanelScrollFrameCodeTemplate" movable="true" enableMouse="true">
 						<Anchors>
-							<Anchor point="TOPLEFT" relativePoint="TOPLEFT">
-								<Offset>
-									<AbsDimension x="0" y="-30"/>
-								</Offset>
-							</Anchor>
-							<Anchor point="BOTTOMRIGHT" relativePoint="BOTTOMRIGHT">
-								<Offset>
-									<AbsDimension x="0" y="30"/>
-								</Offset>
-							</Anchor>
+							<Anchor point="TOPLEFT" y="-30"/>
+							<Anchor point="BOTTOMRIGHT" y="30"/>
 						</Anchors>
 						<ScrollChild>
 							<Frame name="$parentGroups" parent="TellMeWhen_IconEditorConditions" parentKey="Groups" movable="true" enableMouse="true" >
-								<Size>
-									<AbsDimension x="580" y="150" />
-								</Size>
+								<Size x="580" y="150"/>
 								<Frames>
 									<Frame name="$parentGroup1" inherits="TellMeWhen_ConditionGroup" id="1">
 										<Anchors>
-											<Anchor point="TOPLEFT">
-												<Offset x="12" y="-16" />
-											</Anchor>
+											<Anchor point="TOPLEFT" x="12" y="-16"/>
 										</Anchors>
 										<Scripts>
 											<OnLoad>
@@ -3713,18 +3275,10 @@
 						</Scripts>
 						<Frames>
 							<Slider name="$parentScrollBar" inherits="MinimalScrollBarTemplate" parentKey="ScrollBar">
-								<Size x="17" y="0"/>
+								<Size x="17"/>
 								<Anchors>
-									<Anchor point="TOPRIGHT" relativeTo="TellMeWhen_IconEditorConditions" relativePoint="TOPRIGHT">
-										<Offset>
-											<AbsDimension x="-10" y="-52"/>
-										</Offset>
-									</Anchor>
-									<Anchor point="BOTTOMRIGHT" relativeTo="TellMeWhen_IconEditorConditions" relativePoint="BOTTOMRIGHT">
-										<Offset>
-											<AbsDimension x="-10" y="50"/>
-										</Offset>
-									</Anchor>
+									<Anchor point="TOPRIGHT" relativeTo="TellMeWhen_IconEditorConditions" x="-10" y="-52"/>
+									<Anchor point="BOTTOMRIGHT" relativeTo="TellMeWhen_IconEditorConditions" x="-10" y="50"/>
 								</Anchors>
 							</Slider>
 						</Frames>
@@ -3746,9 +3300,7 @@
 					<Layer level="OVERLAY">
 						<FontString name="$parentWarning" parentKey="Warning" inherits="GameFontNormalLeftRed" justifyH="RIGHT">
 							<Anchors>
-								<Anchor point="BOTTOMLEFT" >
-									<Offset x="20" y="17" />
-								</Anchor>
+								<Anchor point="BOTTOMLEFT" x="20" y="17"/>
 							</Anchors>
 						</FontString>
 					</Layer>
@@ -3759,18 +3311,14 @@
 					<Frame name="$parentEvents" parentKey="Events">
 						<Size x="200" y="280"/>
 						<Anchors>
-							<Anchor point="TOPLEFT" relativeTo="$parent" relativePoint="TOPLEFT">
-								<Offset x="20" y="-50"/>
-							</Anchor>
+							<Anchor point="TOPLEFT" x="20" y="-50"/>
 						</Anchors>
 						<Backdrop bgFile="Interface\DialogFrame\UI-DialogBox-Background-Dark" tile="true"/>
 						<Layers>
 							<Layer level="OVERLAY">
 								<FontString name="$parentHeader" inherits="GameFontNormalLarge" parentKey="Header" justifyH="LEFT" text="">
 									<Anchors>
-										<Anchor point="BOTTOM" relativeTo="$parent" relativePoint="TOP">
-											<Offset x="0" y="1"/>
-										</Anchor>
+										<Anchor point="BOTTOM" relativePoint="TOP" y="1"/>
 									</Anchors>
 								</FontString>
 							</Layer>
@@ -3779,29 +3327,17 @@
 					<Frame name="$parentSounds" parentKey="Sounds">
 						<Size x="320" y="266"/>
 						<Anchors>
-							<Anchor point="TOPLEFT" relativeTo="$parent" relativePoint="TOPLEFT">
-								<Offset x="235" y="-50"/>
-							</Anchor>
+							<Anchor point="TOPLEFT" x="235" y="-50"/>
 						</Anchors>
 						<Frames>
 							<Button name="$parentNone" inherits="TellMeWhen_SoundSelectButton" parentKey="None" id="0"/>
 
 
 							<Slider name="$parentScrollBar" inherits="MinimalScrollBarTemplate" parentKey="ScrollBar">
-								<Size>
-									<AbsDimension x="17" y="0"/>
-								</Size>
+								<Size x="17"/>
 								<Anchors>
-									<Anchor point="TOPLEFT" relativeTo="$parent" relativePoint="TOPRIGHT">
-										<Offset>
-											<AbsDimension x="1" y="-17"/>
-										</Offset>
-									</Anchor>
-									<Anchor point="BOTTOMLEFT" relativeTo="$parent" relativePoint="BOTTOMRIGHT">
-										<Offset>
-											<AbsDimension x="1" y="17"/>
-										</Offset>
-									</Anchor>
+									<Anchor point="TOPLEFT" relativePoint="TOPRIGHT" x="1" y="-17"/>
+									<Anchor point="BOTTOMLEFT" relativePoint="BOTTOMRIGHT" x="1" y="17"/>
 								</Anchors>
 								<Scripts>
 									<OnLoad>
@@ -3820,9 +3356,7 @@
 							<Layer level="OVERLAY">
 								<FontString name="$parentHeader" inherits="GameFontNormalLarge" parentKey="Header" justifyH="LEFT" text="">
 									<Anchors>
-										<Anchor point="BOTTOM" relativeTo="$parent" relativePoint="TOP">
-											<Offset x="0" y="1"/>
-										</Anchor>
+										<Anchor point="BOTTOM" relativePoint="TOP" y="1"/>
 									</Anchors>
 								</FontString>
 							</Layer>
@@ -3831,12 +3365,8 @@
 					<EditBox name="$parentCustom" parentKey="Custom" inherits="TellMeWhen_InputBoxTemplate">
 						<Size y="15"/>
 						<Anchors>
-							<Anchor point="TOPLEFT" relativeTo="$parentSounds" relativePoint="BOTTOMLEFT">
-								<Offset x="5" y="-5" />
-							</Anchor>
-							<Anchor point="TOPRIGHT" relativeTo="$parentSounds" relativePoint="BOTTOMRIGHT">
-								<Offset x="0" y="-5" />
-							</Anchor>
+							<Anchor point="TOPLEFT" relativeTo="$parentSounds" relativePoint="BOTTOMLEFT" x="5" y="-5"/>
+							<Anchor point="TOPRIGHT" relativeTo="$parentSounds" relativePoint="BOTTOMRIGHT" y="-5"/>
 						</Anchors>
 						<Frames>
 							<Button name="$parentPlay" parentKey="Play" virtual="true">
@@ -3857,23 +3387,15 @@
 								</Scripts>
 								<Size x="20" y="20"/>
 								<Anchors>
-									<Anchor point="LEFT" relativeTo="$parent" relativePoint="RIGHT"/>
+									<Anchor point="LEFT" relativePoint="RIGHT"/>
 								</Anchors>
 							</Button>
 						</Frames>
 						<Layers>
 							<Layer level="BACKGROUND">
 								<Texture name="$parentBackground" parentKey="Background" file="Interface\QuestFrame\UI-QuestLogTitleHighlight" hidden="true">
-									<Anchor point="TOPLEFT">
-										<Offset>
-											<AbsDimension x="0" y="1"/>
-										</Offset>
-									</Anchor>
-									<Anchor point="BOTTOMRIGHT">
-										<Offset>
-											<AbsDimension x="0" y="1"/>
-										</Offset>
-									</Anchor>
+									<Anchor point="TOPLEFT" y="1"/>
+									<Anchor point="BOTTOMRIGHT" y="1"/>
 								</Texture>
 							</Layer>
 						</Layers>
@@ -3927,9 +3449,7 @@
 					<Layer level="OVERLAY">
 						<FontString name="$parentWarning" parentKey="Warning" inherits="GameFontNormalLeftRed" justifyH="RIGHT">
 							<Anchors>
-								<Anchor point="BOTTOMLEFT" >
-									<Offset x="20" y="17" />
-								</Anchor>
+								<Anchor point="BOTTOMLEFT" x="20" y="17"/>
 							</Anchors>
 						</FontString>
 					</Layer>
@@ -3952,15 +3472,9 @@
 			<Frame name="$parentAnnouncements" enableMouse="true" hidden="true" setAllPoints="true" parentKey="Announcements">
 				<Frames>
 					<EditBox name="$parentEditBox" inherits="TellMeWhen_InputBoxTemplate" parentKey="EditBox" autoFocus="false">
-						<Size>
-							<AbsDimension x="540" y="15"/>
-						</Size>
+						<Size x="540" y="15"/>
 						<Anchors>
-							<Anchor point="TOPLEFT" relativeTo="$parent" relativePoint="TOPLEFT">
-								<Offset>
-									<AbsDimension x="25" y="-40" />
-								</Offset>
-							</Anchor>
+							<Anchor point="TOPLEFT" x="25" y="-40"/>
 						</Anchors>
 						<Scripts>
 							<OnLoad>
@@ -3984,18 +3498,14 @@
 					<Frame name="$parentEvents" parentKey="Events">
 						<Size x="200" y="280"/>
 						<Anchors>
-							<Anchor point="TOPLEFT" relativeTo="$parent" relativePoint="TOPLEFT">
-								<Offset x="20" y="-80"/>
-							</Anchor>
+							<Anchor point="TOPLEFT" x="20" y="-80"/>
 						</Anchors>
 						<Backdrop bgFile="Interface\DialogFrame\UI-DialogBox-Background-Dark" tile="true"/>
 						<Layers>
 							<Layer level="OVERLAY">
 								<FontString name="$parentHeader" inherits="GameFontNormalLarge" parentKey="Header" justifyH="LEFT" text="">
 									<Anchors>
-										<Anchor point="BOTTOM" relativeTo="$parent" relativePoint="TOP">
-											<Offset x="0" y="1"/>
-										</Anchor>
+										<Anchor point="BOTTOM" relativePoint="TOP" y="1"/>
 									</Anchors>
 								</FontString>
 							</Layer>
@@ -4004,9 +3514,7 @@
 					<Frame name="$parentChannels" parentKey="Channels">
 						<Size x="170" y="266"/>
 						<Anchors>
-							<Anchor point="TOPLEFT" relativeTo="$parent" relativePoint="TOPLEFT">
-								<Offset x="235" y="-80"/>
-							</Anchor>
+							<Anchor point="TOPLEFT" x="235" y="-80"/>
 						</Anchors>
 						<Frames>
 							<Button name="$parentNone" inherits="TellMeWhen_ChannelSelectButton" parentKey="None" id="1"/>
@@ -4016,9 +3524,7 @@
 							<Layer level="OVERLAY">
 								<FontString name="$parentHeader" inherits="GameFontNormalLarge" parentKey="Header" justifyH="LEFT" text="">
 									<Anchors>
-										<Anchor point="BOTTOM" relativeTo="$parent" relativePoint="TOP">
-											<Offset x="0" y="1"/>
-										</Anchor>
+										<Anchor point="BOTTOM" relativePoint="TOP" y="1"/>
 									</Anchors>
 								</FontString>
 							</Layer>
@@ -4026,13 +3532,13 @@
 					</Frame>
 					<Frame name="$parentLocation" inherits="UIDropDownMenuTemplate" parentKey="Location">
 						<Anchors>
-							<Anchor point="TOPLEFT" relativeTo="$parentChannels" relativePoint="TOPRIGHT" x="5" y="0" />
+							<Anchor point="TOPLEFT" relativeTo="$parentChannels" relativePoint="TOPRIGHT" x="5"/>
 						</Anchors>
 						<Layers>
 							<Layer level="OVERLAY">
 								<FontString name="$parentHeader" inherits="GameFontNormalLarge" parentKey="Header" justifyH="LEFT" text="">
 									<Anchors>
-										<Anchor point="BOTTOM" relativeTo="$parent" relativePoint="TOP" x="0" y="1"/>
+										<Anchor point="BOTTOM" relativePoint="TOP" y="1"/>
 									</Anchors>
 								</FontString>
 							</Layer>
@@ -4052,7 +3558,7 @@
 					<EditBox name="$parentWhisperTarget" inherits="TellMeWhen_InputBoxTemplate" parentKey="WhisperTarget" autoFocus="false">
 						<Size x="135" y="15"/>
 						<Anchors>
-							<Anchor point="TOPLEFT" relativeTo="$parentChannels" relativePoint="TOPRIGHT" x="20" y="0" />
+							<Anchor point="TOPLEFT" relativeTo="$parentChannels" relativePoint="TOPRIGHT" x="20"/>
 						</Anchors>
 						<Scripts>
 							<OnLoad>
@@ -4076,9 +3582,7 @@
 					
 					<CheckButton name="$parentSticky" inherits="TellMeWhen_CheckTemplate" parentKey="Sticky">
 						<Anchors>
-							<Anchor point="TOPLEFT" relativeTo="$parentLocation" relativePoint="BOTTOMLEFT">
-								<Offset x="12" y="-5" />
-							</Anchor>
+							<Anchor point="TOPLEFT" relativeTo="$parentLocation" relativePoint="BOTTOMLEFT" x="12" y="-5"/>
 						</Anchors>
 						<Scripts>
 							<OnLoad>
@@ -4091,7 +3595,7 @@
 					</CheckButton>
 					<CheckButton name="$parentIcon" inherits="TellMeWhen_CheckTemplate" parentKey="Icon">
 						<Anchors>
-							<Anchor point="TOP" relativeTo="$parentSticky" relativePoint="BOTTOM" x="0" y="4" />
+							<Anchor point="TOP" relativeTo="$parentSticky" relativePoint="BOTTOM" y="4"/>
 						</Anchors>
 						<Scripts>
 							<OnLoad>
@@ -4120,7 +3624,7 @@
 								</Texture>
 								<FontString name="$parenttext" parentKey="text" justifyH="LEFT" inherits="GameFontHighlight">
 									<Anchors>
-										<Anchor point="LEFT" relativeTo="$parent" relativePoint="RIGHT" x="2"/>
+										<Anchor point="LEFT" relativePoint="RIGHT" x="2"/>
 									</Anchors>
 								</FontString>
 							</Layer>
@@ -4164,22 +3668,18 @@
 					<Slider name="$parentSize" inherits="OptionsSliderTemplate" parentKey="Size" minvalue="0" maxvalue="38" valuestep="1">
 						<Size x="150" y="17"/>
 						<Anchors>
-							<Anchor point="TOPLEFT" relativeTo="$parentColor" relativePoint="BOTTOMLEFT" x="0" y="-17" />
+							<Anchor point="TOPLEFT" relativeTo="$parentColor" relativePoint="BOTTOMLEFT" y="-17"/>
 						</Anchors>
 						<Layers>
 							<Layer level="ARTWORK">
 								<FontString name="$parentVal" parentKey="val" inherits="GameFontHighlightSmall" text="HIGH">
 									<Anchors>
-										<Anchor point="TOP" relativePoint="BOTTOM">
-											<Offset x="0" y="3"/>
-										</Anchor>
+										<Anchor point="TOP" relativePoint="BOTTOM" y="3"/>
 									</Anchors>
 								</FontString>
 								<FontString name="$parentText" parentKey="text" inherits="GameFontHighlight">
 									<Anchors>
-										<Anchor point="BOTTOM" relativePoint="TOP">
-											<Offset x="0" y="-1"/>
-										</Anchor>
+										<Anchor point="BOTTOM" relativePoint="TOP" y="-1"/>
 									</Anchors>
 								</FontString>
 							</Layer>
@@ -4214,9 +3714,7 @@
 					<Layer level="OVERLAY">
 						<FontString name="$parentWarning" parentKey="Warning" inherits="GameFontNormalLeftRed" justifyH="RIGHT">
 							<Anchors>
-								<Anchor point="BOTTOMLEFT" >
-									<Offset x="20" y="17" />
-								</Anchor>
+								<Anchor point="BOTTOMLEFT" x="20" y="17"/>
 							</Anchors>
 						</FontString>
 					</Layer>
@@ -4240,8 +3738,8 @@
 				<Frames>
 					<Frame parentKey="content">
 						<Anchors>
-							<Anchor point="TOPLEFT" x="14" y="-42" />
-							<Anchor point="BOTTOMRIGHT" x="-14" y="40" />
+							<Anchor point="TOPLEFT" x="14" y="-42"/>
+							<Anchor point="BOTTOMRIGHT" x="-14" y="40"/>
 						</Anchors>
 					</Frame>
 				</Frames>
@@ -4307,8 +3805,8 @@
 			<!--
 			<Frame name="$parentASD" hidden="true" parentKey="ASD">
 				<Anchors>
-					<Anchor point="TOPLEFT" relativeTo="$parent" relativePoint="TOPLEFT"/>
-					<Anchor point="BOTTOMRIGHT" relativeTo="$parent" relativePoint="BOTTOMRIGHT"/>
+					<Anchor point="TOPLEFT"/>
+					<Anchor point="BOTTOMRIGHT"/>
 				</Anchors>
 				<Frames>
 
@@ -4316,40 +3814,28 @@
 					<Frame name="$parentColorModeContainer" parentKey="ColorModeContainer">
 						<Backdrop bgFile="Interface\DialogFrame\UI-DialogBox-Background" tile="true">
 							<BackgroundInsets>
-								<AbsInset left="0" right="0" top="0" bottom="0" />
+								<AbsInset left="0" right="0" top="0" bottom="0"/>
 							</BackgroundInsets>
 							<TileSize>
-								<AbsValue val="32" />
+								<AbsValue val="32"/>
 							</TileSize>
 						</Backdrop>
 						<Anchors>
-							<Anchor point="TOPLEFT" relativeTo="$parent" relativePoint="TOPLEFT">
-								<Offset>
-									<AbsDimension x="17" y="-40" />
-								</Offset>
-							</Anchor>
-							<Anchor point="BOTTOMLEFT" relativeTo="$parent" relativePoint="BOTTOMLEFT">
-								<Offset>
-									<AbsDimension x="17" y="40" />
-								</Offset>
-							</Anchor>
+							<Anchor point="TOPLEFT" x="17" y="-40"/>
+							<Anchor point="BOTTOMLEFT" x="17" y="40"/>
 						</Anchors>
 						<Frames>
 							<Button name="$parentButton1" parentKey="Button1" inherits="TellMeWhen_ColorModeButtonTemplate">
 								<Anchors>
-									<Anchor point="TOPLEFT" relativeTo="$parent" relativePoint="TOPLEFT"/>
+									<Anchor point="TOPLEFT"/>
 								</Anchors>
 							</Button>
 						</Frames>
-						<Size>
-							<AbsDimension x="150"/>
-						</Size>
+						<Size x="150"/>
 					</Frame>
 
 					<ColorSelect name="$parentColorSelect">
-						<Size>
-							<AbsDimension x="176" y="128"/>
-						</Size>
+						<Size x="176" y="128"/>
 						<Anchors>
 							<Anchor point="CENTER"/>
 						</Anchors>
@@ -4359,49 +3845,31 @@
 							</OnColorSelect>
 						</Scripts>
 						<ColorWheelTexture>
-							<Size>
-								<AbsDimension x="128" y="128"/>
-							</Size>
+							<Size x="128" y="128"/>
 							<Anchors>
 								<Anchor point="TOPLEFT"/>
 							</Anchors>
 						</ColorWheelTexture>
 						<ColorWheelThumbTexture file="Interface\Buttons\UI-ColorPicker-Buttons">
-							<Size>
-								<AbsDimension x="10" y="10"/>
-							</Size>
+							<Size x="10" y="10"/>
 							<TexCoords left="0" right="0.15625" top="0" bottom="0.625"/>
 						</ColorWheelThumbTexture>
 						<ColorValueTexture>
-							<Size>
-								<AbsDimension x="32" y="128"/>
-							</Size>
+							<Size x="32" y="128"/>
 							<Anchors>
-								<Anchor point="TOPRIGHT">
-									<Offset>
-										<AbsDimension x="-5" y="0"/>
-									</Offset>
-								</Anchor>
+								<Anchor point="TOPRIGHT" x="-5"/>
 							</Anchors>
 						</ColorValueTexture>
 						<ColorValueThumbTexture file="Interface\Buttons\UI-ColorPicker-Buttons">
-							<Size>
-								<AbsDimension x="48" y="14"/>
-							</Size>
+							<Size x="48" y="14"/>
 							<TexCoords left="0.25" right="1.0" top="0" bottom="0.875"/>
 						</ColorValueThumbTexture>
 						<Layers>
 							<Layer level="ARTWORK">
 								<Texture name="$parentSwatch" parentKey="Swatch">
-									<Size>
-										<AbsDimension x="32" y="32"/>
-									</Size>
+									<Size x="32" y="32"/>
 									<Anchors>
-										<Anchor point="TOPLEFT" relativePoint="TOPRIGHT">
-											<Offset>
-												<AbsDimension x="5" y="0"/>
-											</Offset>
-										</Anchor>
+										<Anchor point="TOPLEFT" relativePoint="TOPRIGHT" x="5"/>
 									</Anchors>
 									<Color r="1.0" g="1.0" b="1.0" a="1.0"/>
 								</Texture>
@@ -4419,9 +3887,9 @@
 			</Frame> -->
 
 			<Button name="$parentOkay" parentKey="OkayButton" inherits="TellMeWhen_ButtonTemplate" text="OKAY">
-				<Size x="60" y="17" />
+				<Size x="60" y="17"/>
 				<Anchors>
-					<Anchor point="BOTTOMRIGHT" x="-15" y="13" />
+					<Anchor point="BOTTOMRIGHT" x="-15" y="13"/>
 				</Anchors>
 				<Scripts>
 					<OnLoad> self:SetFrameLevel(self:GetParent():GetFrameLevel()+4) </OnLoad>
@@ -4430,11 +3898,7 @@
 			</Button>
 			<Button name="$parentClose" parentKey="CloseButton" inherits="UIPanelCloseButton">
 				<Anchors>
-					<Anchor point="CENTER" relativeTo="$parent" relativePoint="TOPRIGHT">
-						<Offset>
-							<AbsDimension x="-22" y="-22" />
-						</Offset>
-					</Anchor>
+					<Anchor point="CENTER" relativePoint="TOPRIGHT" x="-22" y="-22"/>
 				</Anchors>
 				<Scripts>
 					<OnLoad>self:SetFrameLevel(self:GetFrameLevel() + 2)</OnLoad>
@@ -4442,11 +3906,9 @@
 				</Scripts>
 			</Button>
 			<Button name="$parentResize" parentKey="resizeButton">
-				<Size>
-					<AbsDimension x="25" y="25"/>
-				</Size>
+				<Size x="25" y="25"/>
 				<Anchors>
-					<Anchor point="BOTTOMRIGHT" relativeTo="$parent" relativePoint="BOTTOMRIGHT"/>
+					<Anchor point="BOTTOMRIGHT"/>
 				</Anchors>
 				<Layers>
 					<Layer level="OVERLAY">
@@ -4501,20 +3963,14 @@
 			<Layer level="OVERLAY">
 				<FontString name="$parentFS1" parentKey="FS1" inherits="GameFontNormal" justifyH="CENTER">
 					<Anchors>
-						<Anchor point="TOP">
-							<Offset x="0" y="-15" />
-						</Anchor>
+						<Anchor point="TOP" y="-15"/>
 					</Anchors>
 				</FontString>
 				<Texture name="$parentIconTexture" parentKey="icontexture">
-					<TexCoords left="0.07" right="0.93" top="0.07" bottom="0.93" />
-					<Size>
-						<AbsDimension x="20" y="20"/>
-					</Size>
+					<TexCoords left="0.07" right="0.93" top="0.07" bottom="0.93"/>
+					<Size x="20" y="20"/>
 					<Anchors>
-						<Anchor point="TOPLEFT" relativeTo="$parent" relativePoint="TOPLEFT">
-							<Offset x="15" y="-12" />
-						</Anchor>
+						<Anchor point="TOPLEFT" x="15" y="-12"/>
 					</Anchors>
 				</Texture>
 			</Layer>

@@ -2,9 +2,7 @@
 
 	<!-- TEMPLATES -->
 	<Frame name="TellMeWhen_GroupTemplate" enableMouse="false" toplevel="true" movable="true" parent="UIParent" virtual="true">
-		<Size>
-			<AbsDimension x="1" y="1"/>
-		</Size>
+		<Size x="1" y="1"/>
 		<Layers>
 			<Layer level="BACKGROUND">
 				<Texture setAllPoints="true">
@@ -14,11 +12,9 @@
 		</Layers>
 		<Frames>
 			<Button name="$parent_ResizeButton" parentKey="resizeButton">
-				<Size>
-					<AbsDimension x="10" y="10"/>
-				</Size>
+				<Size x="10" y="10"/>
 				<Anchors>
-					<Anchor point="BOTTOMRIGHT" relativeTo="$parent" relativePoint="BOTTOMRIGHT"/>
+					<Anchor point="BOTTOMRIGHT"/>
 				</Anchors>
 				<Layers>
 					<Layer level="BACKGROUND">
@@ -59,12 +55,12 @@
 			<Layer level="ARTWORK">
 				<FontString name="$parentCount" parentKey="countText" inherits="NumberFontNormalSmall" justifyH="RIGHT">
 					<Anchors>
-						<Anchor point="BOTTOMRIGHT" relativeTo="$parent" relativePoint="BOTTOMRIGHT" x="-2" y="2"/>
+						<Anchor point="BOTTOMRIGHT" x="-2" y="2"/>
 					</Anchors>
 				</FontString>
 				<FontString name="$parentHotKey" parentKey="bindText" inherits="NumberFontNormalSmallGray" justifyH="RIGHT">
 					<Anchors>
-						<Anchor point="TOPLEFT" relativeTo="$parent" relativePoint="TOPLEFT" x="-2" y="-2"/>
+						<Anchor point="TOPLEFT" x="-2" y="-2"/>
 					</Anchors>
 				</FontString>
 			</Layer>
@@ -72,9 +68,9 @@
 		<Frames>
 			<StatusBar name="$parentPowerBar" parentKey="pbar" hidden="true">
 				<Anchors>
-					<Anchor point="BOTTOM" relativeTo="$parentIcon" relativePoint="CENTER" x="0" y="0.5"/>
-					<Anchor point="TOPLEFT" relativeTo="$parentIcon" relativePoint="TOPLEFT" x="0" y="0"/>
-					<Anchor point="TOPRIGHT" relativeTo="$parentIcon" relativePoint="TOPRIGHT" x="0" y="0"/>
+					<Anchor point="BOTTOM" relativeTo="$parentIcon" relativePoint="CENTER" y="0.5"/>
+					<Anchor point="TOPLEFT" relativeTo="$parentIcon"/>
+					<Anchor point="TOPRIGHT" relativeTo="$parentIcon"/>
 				</Anchors>
 				<Layers>
 					<Layer level="OVERLAY">
@@ -95,9 +91,9 @@
 			</StatusBar>
 			<StatusBar name="$parentCooldownBar" parentKey="cbar" minvalue="0" maxvalue="1" defaultvalue="0" hidden="true">
 				<Anchors>
-					<Anchor point="TOP" relativeTo="$parentIcon" relativePoint="CENTER" x="0" y="-0.5"/>
-					<Anchor point="BOTTOMLEFT" relativeTo="$parentIcon" relativePoint="BOTTOMLEFT" x="0" y="0"/>
-					<Anchor point="BOTTOMRIGHT" relativeTo="$parentIcon" relativePoint="BOTTOMRIGHT" x="0" y="0"/>
+					<Anchor point="TOP" relativeTo="$parentIcon" relativePoint="CENTER" y="-0.5"/>
+					<Anchor point="BOTTOMLEFT" relativeTo="$parentIcon"/>
+					<Anchor point="BOTTOMRIGHT" relativeTo="$parentIcon"/>
 				</Anchors>
 				<Layers>
 					<Layer level="OVERLAY">

@@ -1060,9 +1060,9 @@ CNDT.Types = {
 	{ -- stance
 		text = 	pclass == "HUNTER" and L["ASPECT"] or
 				pclass == "PALADIN" and L["AURA"] or
-				pclass == "WARRIOR" and L["STANCE"] or
 				pclass == "DEATHKNIGHT" and L["PRESENCE"] or
 				pclass == "DRUID" and L["SHAPESHIFT"] or
+				--pclass == "WARRIOR" and L["STANCE"] or
 				L["STANCE"],
 		category = L["CNDTCAT_STATUS"],
 		value = "STANCE",

@@ -14,18 +14,11 @@
 -- Cybeloras of Mal'Ganis
 -- --------------------
 
---[[todo list/notes (this really should be here, but im in a hurry)
-Parsing tooltips for numbers (recaptured mana, empowered shadows) - in the icon type's onupdate, call a function to scan a unit/index/filter (unit should probably be player only)
--the parser listens to UNIT_AURA to determine if the tooltip/data needs updating - if it does, update it, if not, then return cached data
--create the tooltip as a child of the icon
-]]
-
 
 if not TMW then return end
 
 local TMW = TMW
 local db = TMW.db
-local debug = TMW.debug
 
 -- -----------------------
 -- LOCALS/GLOBALS/UTILITIES
@@ -123,6 +116,82 @@ end
 for dispeltype, icon in pairs(TMW.DS) do
 	EquivFirstIDLookup[dispeltype] = icon
 end
+
+
+-- ----------------------
+-- WOW API HOOKS
+-- ----------------------
+
+GameTooltip.TMW_OldAddLine = GameTooltip.AddLine
+function GameTooltip:AddLine(text, r, g, b, wrap, ...)
+	-- this fixes the problem where tooltips in blizz dropdowns dont wrap, nor do they have a setting to do it.
+	-- Pretty hackey fix, but it works
+	-- Only force the wrap option if the current dropdown has wrapTooltips set true, the dropdown is shown, and the mouse is over the dropdown menu (not DDL.isCounting)
+	local DDL = DropDownList1
+	if DDL and not DDL.isCounting and DDL.dropdown and DDL.dropdown.wrapTooltips and DDL:IsShown() then
+		wrap = 1
+	end
+	self:TMW_OldAddLine(text, r, g, b, wrap, ...)
+end
+
+function GameTooltip:TMW_SetEquiv(equiv)
+	GameTooltip:AddLine(L[equiv], HIGHLIGHT_FONT_COLOR.r, HIGHLIGHT_FONT_COLOR.g, HIGHLIGHT_FONT_COLOR.b, 1)
+	GameTooltip:AddLine(IE:Equiv_GenerateTips(equiv), NORMAL_FONT_COLOR.r, NORMAL_FONT_COLOR.g, NORMAL_FONT_COLOR.b, 1)
+end
+
+local old_ChatEdit_InsertLink = ChatEdit_InsertLink
+function ChatEdit_InsertLink(...)
+	local text = ...
+	local Type, id = strmatch(text, "|H(.-):(%d+)")
+	if not id then return false end
+	
+	if ANN.EditBox:HasFocus() then
+		ANN.EditBox:Insert(text)
+		return true
+	elseif IE.Main.Name:HasFocus() then
+		if CI.SoI == "item" and Type ~= "item" then
+			return false
+		elseif CI.SoE ~= "item" and Type ~= "spell" and Type ~= "enchant" then
+			return false
+		end
+		local Name = IE.Main.Name
+		local NameText = Name:GetText()
+		local start = Name:GetNumLetters()
+		for i = Name:GetCursorPosition(), start, 1 do
+			if strsub(NameText, i, i) == ";" then
+				start = i+1
+				break
+			end
+		end
+		Name:SetCursorPosition(start)
+		text = "; " .. id .. "; "
+		IE.Main.Name:Insert(text)
+		TMW:CleanString(IE.Main.Name)
+		Name:SetCursorPosition(start + #id + 2)
+		return true
+	elseif IE.Main.CustomTex:HasFocus() then
+		local tex
+		if Type == "spell" or Type == "enchant" then
+			tex = id
+		elseif Type == "item" then
+			tex = GetItemIcon(id)
+		elseif Type == "achievement" then
+			tex = select(10, GetAchievementInfo(id))
+		end
+		if tex then
+			tex = gsub(tex, "INTERFACE\\ICONS\\", "")
+			tex = gsub(tex, "Interface\\Icons\\", "")
+			IE.Main.CustomTex:SetText(tex)
+			return true
+		end
+	end
+	return old_ChatEdit_InsertLink(...)
+end
+
+
+-- ----------------------
+-- GENERAL CONFIG FUNCTIONS
+-- ----------------------
 
 function TMW:CopyWithMetatable(settings)
 	local copy = {}
@@ -302,22 +371,7 @@ function TMW:SetUIDropdownText(frame, value, tbl)
 	UIDropDownMenu_SetText(frame, "")
 end
 
-GameTooltip.OldAddLine = GameTooltip.AddLine
-function GameTooltip:AddLine(text, r, g, b, wrap, ...)
-	-- this fixes the problem where tooltips in blizz dropdowns dont wrap, nor do they have a setting to do it.
-	-- Pretty hackey fix, but it works
-	-- Only force the wrap option if the current dropdown has wrapTooltips set true, the dropdown is shown, and the mouse is over the dropdown menu (not DDL.isCounting)
-	local DDL = DropDownList1
-	if DDL and not DDL.isCounting and DDL.dropdown and DDL.dropdown.wrapTooltips and DDL:IsShown() then
-		wrap = 1
-	end
-	self:OldAddLine(text, r, g, b, wrap, ...)
-end
 
-function GameTooltip:TMW_SetEquiv(equiv)
-	GameTooltip:AddLine(L[equiv], HIGHLIGHT_FONT_COLOR.r, HIGHLIGHT_FONT_COLOR.g, HIGHLIGHT_FONT_COLOR.b, 1)
-	GameTooltip:AddLine(IE:Equiv_GenerateTips(equiv), NORMAL_FONT_COLOR.r, NORMAL_FONT_COLOR.g, NORMAL_FONT_COLOR.b, 1)
-end
 -- --------------
 -- MAIN OPTIONS
 -- --------------
@@ -328,7 +382,6 @@ local function findid(info)
 		if n then return n end
 	end
 end
-
 local checkorder = {
 	-- NOTE: these are actually backwards so they sort logically in AceConfig, but have their signs switched in the actual function (1 = -1; -1 = 1).
 	[-1] = L["ASCENDING"],
@@ -991,6 +1044,7 @@ function TMW:Group_Add()
 	return groupID, TMW[groupID]
 end
 
+
 -- ----------------------
 -- ICON DRAGGER
 -- ----------------------
@@ -1266,6 +1320,7 @@ function ID:Anchor()
 	TMW:Update()
 	IE:Load(1)
 end
+
 
 -- ----------------------
 -- ICON EDITOR
@@ -2674,55 +2729,6 @@ end
 ANN = TMW:NewModule("Announcements") TMW.ANN = ANN
 local ChannelLookup = TMW.ChannelLookup
 
-local old_ChatEdit_InsertLink = ChatEdit_InsertLink
-function ChatEdit_InsertLink(...)
-	local text = ...
-	if ANN.EditBox:HasFocus() then
-		ANN.EditBox:Insert(text)
-		return true
-	elseif IE.Main.Name:HasFocus() then
-		if strmatch(text, "|H(.-):%d+") ~= CI.SoI then
-			return false
-		end
-		local Name = IE.Main.Name
-		local NameText = Name:GetText()
-		local start = Name:GetNumLetters()
-		for i = Name:GetCursorPosition(), start, 1 do
-			if strsub(NameText, i, i) == ";" then
-				start = i+1
-				break
-			end
-		end
-		Name:SetCursorPosition(start)
-		local id = strmatch(text, ":(%d+)") or ""
-		text = "; " .. id .. "; "
-		IE.Main.Name:Insert(text)
-		TMW:CleanString(IE.Main.Name)
-		Name:SetCursorPosition(start + #id + 2)
-		return true
-	elseif IE.Main.CustomTex:HasFocus() then
-		local id = strmatch(text, ":(%d+)")
-		if not id then return false end
-		local Type = strmatch(text, "|H(.-):%d+")
-		print(id, Type)
-		local tex
-		if Type == "spell" then
-			tex = id
-		elseif Type == "item" then
-			tex = GetItemIcon(id)
-		elseif Type == "achievement" then
-			tex = select(10, GetAchievementInfo(id))
-		end
-		if tex then
-			tex = gsub(tex, "INTERFACE\\ICONS\\", "")
-			tex = gsub(tex, "Interface\\Icons\\", "")
-			IE.Main.CustomTex:SetText(tex)
-			return true
-		end
-	end
-	return old_ChatEdit_InsertLink(...)
-end
-
 function ANN:OnInitialize()
 	local Events = ANN.Events
 	Events.Header:SetText(L["SOUND_EVENTS"])
@@ -3012,55 +3018,74 @@ function SUG:OnInitialize()
 			end
 			TMWOptDB.WoWVersion = clientVersion
 
-			local Parser = CreateFrame("GameTooltip", "TMWSUGParser", TMW, "GameTooltipTemplate")
+			local Parser = CreateFrame("GameTooltip")
+			local Text1 = Parser:CreateFontString()
+			Parser:AddFontStrings(Text1, Parser:CreateFontString())
+			local Text2 = Parser:CreateFontString()
+			Parser:AddFontStrings(Text2, Parser:CreateFontString())
+			local Text3 = Parser:CreateFontString()
+			Parser:AddFontStrings(Text3, Parser:CreateFontString())
+
+			Parser:SetOwner(UIParent, "ANCHOR_NONE")
 			local f = CreateFrame("Frame")
 			local SPELL_CAST_CHANNELED = SPELL_CAST_CHANNELED
+			local yield, resume = coroutine.yield, coroutine.resume
+
 			local function SpellCacher()
-				for id = index, index + SUG.NumCachePerFrame - 1 do
-					if spellsFailed < 1000 then
-						local name, rank, icon, _, _, _, castTime = GetSpellInfo(id)
-						if name then
-							name = strlower(name)
-							
-							local fail = 
-								Blacklist[icon] or
-								strfind(name, "dnd") or
-								strfind(name, "test") or
-								strfind(name, "debug") or
-								strfind(name, "bunny") or
-								strfind(name, "visual") or
-								strfind(name, "trigger") or
-								strfind(name, "[%[%%%+%?]") or -- no brackets, plus signs, percent signs, or question marks
-								strfind(name, "quest") or
-								strfind(name, "vehicle") or
-								strfind(name, "event") or
-								strfind(name, ":%s?%d") or -- interferes with colon duration syntax
-								strfind(name, "camera") or
-								strfind(name, "dmg")
-								
-							if not fail then
-								GameTooltip_SetDefaultAnchor(Parser, UIParent)
-								Parser:SetSpellByID(id)
-								local r, g, b = TMWSUGParserTextLeft1:GetTextColor()
-								if g > .95 and r > .95 and b > .95 then
-									SUG.SpellCache[id] = name
-									if castTime > 0 or TMWSUGParserTextLeft2:GetText() == SPELL_CAST_CHANNELED or TMWSUGParserTextLeft3:GetText() == SPELL_CAST_CHANNELED then
-										SUG.CastCache[id] = name
-									end
+				while spellsFailed < 1000 do
+					
+					local name, rank, icon, _, _, _, castTime = GetSpellInfo(index)
+					if name then
+						name = strlower(name)
+						
+						local fail = 
+						Blacklist[icon] or
+						strfind(name, "dnd") or
+						strfind(name, "test") or
+						strfind(name, "debug") or
+						strfind(name, "bunny") or
+						strfind(name, "visual") or
+						strfind(name, "trigger") or
+						strfind(name, "[%[%%%+%?]") or -- no brackets, plus signs, percent signs, or question marks
+						strfind(name, "quest") or
+						strfind(name, "vehicle") or
+						strfind(name, "event") or
+						strfind(name, ":%s?%d") or -- interferes with colon duration syntax
+						strfind(name, "camera") or
+						strfind(name, "dmg")
+						
+						if not fail then
+							Parser:SetSpellByID(index)
+							local r, g, b = Text1:GetTextColor()
+							if g > .95 and r > .95 and b > .95 then
+								SUG.SpellCache[index] = name
+								if castTime > 0 or Text2:GetText() == SPELL_CAST_CHANNELED or Text3:GetText() == SPELL_CAST_CHANNELED then
+									SUG.CastCache[index] = name
 								end
-								Parser:Hide()
-								spellsFailed = 0
 							end
-						else
-							spellsFailed = spellsFailed + 1
+							spellsFailed = 0
 						end
 					else
+						spellsFailed = spellsFailed + 1
+					end
+					index = index + 1
+					
+					if index % SUG.NumCachePerFrame == 0 then
+						SUG.Suggest.Status:SetValue(index)
+						yield()
+					end
+				end
+			end
+			local co = coroutine.create(SpellCacher)
+			f:SetScript("OnUpdate", function()
+					if not resume(co) then
 						TMWOptDB.IncompleteCache = false
-						TMWOptDB.CacheLength = id
+						TMWOptDB.CacheLength = index
 						f:SetScript("OnUpdate", nil)
 						SUG.Suggest.Speed:Hide()
 						SUG.Suggest.Status:Hide()
-
+						SUG.Suggest.Finish:Hide()
+						
 						SUG.IsCaching = nil
 						SUG.SpellCache[1852] = nil -- GM spell named silenced, interferes with equiv
 						SUG.SpellCache[71216] = nil -- enraged
@@ -3070,14 +3095,11 @@ function SUG:OnInitialize()
 							TMW.SUG.redoIfSame = 1
 							SUG:NameOnCursor()
 						end
+						co = nil
+						Parser:Hide()
 						collectgarbage()
-						return
 					end
-				end
-				index = index + SUG.NumCachePerFrame
-				SUG.Suggest.Status:SetValue(index)
-			end
-			f:SetScript("OnUpdate", SpellCacher)
+			end)
 			SUG.IsCaching = true
 			didrunhook = true
 		end)
@@ -3737,20 +3759,6 @@ local function AddConditionToDropDown(v)
 end
 
 function CNDT:TypeMenu_DropDown()
-	if UIDROPDOWNMENU_MENU_LEVEL == 1 then
-		local info = UIDropDownMenu_CreateInfo()
-		info.text = L["CNDTCAT_FREQUENTLYUSED"]
-		info.value = "FREQ"
-		info.notCheckable = true
-		info.hasArrow = true
-		UIDropDownMenu_AddButton(info, UIDROPDOWNMENU_MENU_LEVEL)
-		
-		local info = UIDropDownMenu_CreateInfo()
-		info.text = ""
-		info.isTitle = true
-		info.notCheckable = true
-		UIDropDownMenu_AddButton(info, UIDROPDOWNMENU_MENU_LEVEL)
-	end
 	
 	if UIDROPDOWNMENU_MENU_LEVEL == 2 and UIDROPDOWNMENU_MENU_VALUE == "FREQ" then
 		local num = 0
@@ -3768,7 +3776,7 @@ function CNDT:TypeMenu_DropDown()
 			end
 		end
 		for k, n in TMW:OrderedPairs(usedCount, "values", true) do
-			if not addedThings[k] then
+			if not addedThings[k] and n > 1 then
 				AddConditionToDropDown(CNDT.ConditionsByType[k])
 				addedThings[k] = 1
 				num = num + 1
@@ -3778,7 +3786,18 @@ function CNDT:TypeMenu_DropDown()
 	end
 	
 	wipe(addedThings)
+	local addedFreq
 	for k, v in ipairs(CNDT.Types) do
+		if not v.category and not addedFreq and UIDROPDOWNMENU_MENU_LEVEL == 1 then
+			local info = UIDropDownMenu_CreateInfo()
+			info.text = L["CNDTCAT_FREQUENTLYUSED"]
+			info.value = "FREQ"
+			info.notCheckable = true
+			info.hasArrow = true
+			UIDropDownMenu_AddButton(info, UIDROPDOWNMENU_MENU_LEVEL)
+			addedFreq = 1
+		end
+		
 		if ((UIDROPDOWNMENU_MENU_LEVEL == 2 and v.category == UIDROPDOWNMENU_MENU_VALUE) or (UIDROPDOWNMENU_MENU_LEVEL == 1 and not v.category)) and not v.hidden then
 			if v.spacebefore then
 				local info = UIDropDownMenu_CreateInfo()
@@ -4099,6 +4118,7 @@ function CNDT:AddRemoveHandler()
 		tab:SetText(L[CNDT.type == "icon" and "CONDITIONS" or "GROUPCONDITIONS"] .. " (" .. n .. ")")
 	end
 	PanelTemplates_TabResize(tab, -6)
+	CNDT:ValidateParenthesis()
 end
 
 function CNDT:OK()
@@ -4148,6 +4168,7 @@ function CNDT:ClearDialog()
 	end
 	CNDT:AddRemoveHandler()
 end
+
 
 CNDT.AddIns = {}
 local AddIns = CNDT.AddIns

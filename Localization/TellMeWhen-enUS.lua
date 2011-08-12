@@ -519,7 +519,7 @@ L["NUMAURAS"] = "Number of"
 L["ACTIVE"] = "%d Active"
 L["NUMAURAS_DESC"] = [[This condition checks the number of an aura active - not to be confused with the number of stacks of an aura.  This is for checking things like if you have both weapon enchant procs active at the same time.  Use sparingly, as the process used to count the numbers is a bit CPU intensive.]]
 L["COOLDOWN"] = "Cooldown"
-L["TOOLTIPSCAN"] = "Tooltip scan"
+L["TOOLTIPSCAN"] = "Aura Variable"
 L["TOOLTIPSCAN_DESC"] = "This condition type will allow you to check the first variable associated with an aura. Numbers are provided by Blizzard API and do not necessarily match numbers found on the tooltip of the aura. There is also no guarentee that a number will be obtained for an aura. In most practical cases, though, the correct numer will be checked."
 
 
@@ -593,6 +593,8 @@ L["SUG_CLASSSPELLS"] = "Known PC/pet spells"
 L["SUG_NPCAURAS"] = "Known NPC buffs/debuffs"
 L["SUG_PLAYERAURAS"] = "Known PC/pet buffs/debuffs"
 L["SUG_MISC"] = "Miscellaneous"
+L["SUG_FINISHHIM"] = "Finish Caching Now"
+L["SUG_FINISHHIM_DESC"] = "Click to immediately finish the caching/filtering process. Note that your computer may freeze for a few seconds."
 
 
 L["SOUND_EVENT_ONSHOW"] = "On Show"

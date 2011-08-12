@@ -3,7 +3,8 @@
  * Existing substitutions "%t" and "%f" now work in all output locations.
  * The change made in 4.5.0 to reactve icons and conditions has been made optional. Those checking abilities such as raging blow or execute should probably enable this option.
  * Parenthesis in the condition editor are prettier now
- * Tooltip scan conditions now use the new return values of UnitAura added in WoW 4.2. The result is an increase in efficiency at the cost of a bit of accuracy in some obscure cases.
+ * Tooltip scan conditions now use the new return values of UnitAura added in WoW 4.2, and have been appropriately renamed to "Aura Variable". The result is an increase in efficiency at the cost of a bit of accuracy in some obscure cases.
+ * Spell caching and filtering is now between 1500% and 2000% faster. (Seriously.)
  * New Conditions:
  ** GCD active
  ** Unit Threat - Scaled
