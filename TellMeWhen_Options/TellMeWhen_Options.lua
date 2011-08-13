@@ -1581,7 +1581,7 @@ function IE:SetupRadios()
 					frame.value = info.value
 					frame.text:SetText((info.colorCode or "") .. info.text .. "|r")
 					if info.tooltipText then
-						TMW:TT(frame, info.text, info.tooltipText, 1)
+						TMW:TT(frame, info.text, info.tooltipText, 1, 1)
 					else
 						frame:SetScript("OnEnter", nil)
 					end

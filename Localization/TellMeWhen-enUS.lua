@@ -60,7 +60,9 @@ L["ICONMENU_TOTEM"] = "Totem"
 L["ICONMENU_GHOUL"] = "Non-MoG ghoul"
 L["ICONMENU_MUSHROOMS"] = "Wild Mushrooms"
 L["ICONMENU_MULTISTATECD"] = "Multi-state ability"
-L["ICONMENU_MULTISTATECD_DESC"] = "This should be used when you want to track multiple states/textures/etc of a cooldown. Some examples are Holy Word: Chastise and Dark Simulacrum. |cFFFF5959IMPORTANT|r: The action being tracked MUST be on your action bars for this icon type to work. You should also make sure that the ability is in its default state before leaving config mode."
+L["ICONMENU_MULTISTATECD_DESC"] = [[This should be used when you want to track multiple states/textures/etc of a cooldown. Some examples are Holy Word: Chastise and Dark Simulacrum.
+
+|cFFFF5959IMPORTANT|r: The action being tracked MUST be on your action bars for this icon type to work. You should also make sure that the ability is in its default state before leaving config mode.]]
 L["ICONMENU_UNITCOOLDOWN"] = "Unit Cooldown"
 L["ICONMENU_UNITCOOLDOWN_DESC"] = [=[This icon type allows you to track the cooldowns of your friends or your enemies.  You must enter the duration of the cooldown in the editbox to the right of the unit input.
 
@@ -503,6 +505,7 @@ L["GCD_ACTIVE"] = "GCD active"
 
 L["CNDTCAT_FREQUENTLYUSED"] = "Frequently Used"
 L["CNDTCAT_SPELLSABILITIES"] = "Spells/Items"
+L["CNDTCAT_BUFFSDEBUFFS"] = "Buffs/Debuffs"
 L["CNDTCAT_STATUS"] = "Attributes"
 L["CNDTCAT_STATS"] = "Combat Stats"
 L["CNDTCAT_RESOURCES"] = "Resources"
