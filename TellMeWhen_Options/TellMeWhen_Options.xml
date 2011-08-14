@@ -1432,7 +1432,7 @@
 	</Frame>
 	
 	<Frame name="TellMeWhen_IconEditor" hidden="true" movable="true" enableMouse="true" frameStrata="DIALOG">
-		<Size x="600" y="380"/>
+		<Size x="600" y="390"/>
 		<Anchors>
 			<Anchor point="CENTER" relativeTo="UIParent"/>
 		</Anchors>
@@ -1852,11 +1852,7 @@
 							<Anchor point="BOTTOMRIGHT" y="34"/>
 						</Anchors>
 						<Frames>
-							<ScrollFrame name="$parentSF" parentKey="ScrollFrame" inherits="UIPanelScrollFrameCodeTemplate" movable="true" enableMouse="true">
-								<Anchors>
-									<Anchor point="TOPLEFT"/>
-									<Anchor point="BOTTOMRIGHT"/>
-								</Anchors>
+							<ScrollFrame name="$parentSF" parentKey="ScrollFrame" inherits="UIPanelScrollFrameCodeTemplate" setAllPoints="true" movable="true" enableMouse="true">
 								<ScrollChild>
 									<Frame name="TellMeWhen_IconEditorMainIcons" parentKey="Icons" movable="true" enableMouse="true" >
 										<Size x="580" y="150"/>
@@ -2205,61 +2201,6 @@
 							</OnClick>
 						</Scripts>
 					</CheckButton>
-					<CheckButton name="$parentCooldownCheck" inherits="TellMeWhen_CheckTemplate" parentKey="CooldownCheck">
-						<Anchors>
-							<Anchor point="TOPLEFT" relativeTo="$parentManaCheck" relativePoint="BOTTOMLEFT" y="4"/>
-						</Anchors>
-						<Scripts>
-							<OnLoad>
-								self.text:SetText(TMW.L["ICONMENU_COOLDOWNCHECK"])
-								TMW:TT(self, "ICONMENU_COOLDOWNCHECK", "ICONMENU_COOLDOWNCHECK_DESC")
-								self.text:SetWidth(TELLMEWHEN_COLUMN1WIDTH)
-							</OnLoad>
-							<OnClick>
-								local groupID, iconID = TMW.CI.g, TMW.CI.i
-								if TMW.db then
-									TMW.db.profile.Groups[groupID].Icons[iconID]["CooldownCheck"] = not not self:GetChecked()
-									TMW.IE:ScheduleIconUpdate(groupID, iconID)
-								end
-								if self:GetChecked() or TMW.CI.t ~= "reactive" then
-									self:GetParent().IgnoreRunes:Enable()
-									self:GetParent().IgnoreRunes:SetAlpha(1)
-								else
-									self:GetParent().IgnoreRunes:Disable()
-									self:GetParent().IgnoreRunes:SetAlpha(0.4)
-								end
-							</OnClick>
-							<OnHide>
-								local f = self:GetParent().IgnoreRunes
-								f:ClearAllPoints()
-								f:SetPoint(self:GetPoint(1))
-							</OnHide>
-							<OnShow>
-								local f = self:GetParent().IgnoreRunes
-								f:ClearAllPoints()
-								f:SetPoint("TOPLEFT", self, "BOTTOMLEFT", 0, 3)
-							</OnShow>
-						</Scripts>
-					</CheckButton>
-					<CheckButton name="$parentIgnoreRunes" inherits="TellMeWhen_CheckTemplate" parentKey="IgnoreRunes">
-						<Anchors>
-							<Anchor point="TOPLEFT" relativeTo="$parentManaCheck" relativePoint="BOTTOMLEFT" y="4"/>
-						</Anchors>
-						<Scripts>
-							<OnLoad>
-								self.text:SetText(TMW.L["ICONMENU_IGNORERUNES"])
-								TMW:TT(self, "ICONMENU_IGNORERUNES", "ICONMENU_IGNORERUNES_DESC")
-								self.text:SetWidth(TELLMEWHEN_COLUMN1WIDTH)
-							</OnLoad>
-							<OnClick>
-								local groupID, iconID = TMW.CI.g, TMW.CI.i
-								if TMW.db then
-									TMW.db.profile.Groups[groupID].Icons[iconID]["IgnoreRunes"] = not not self:GetChecked()
-									TMW.IE:ScheduleIconUpdate(groupID, iconID)
-								end
-							</OnClick>
-						</Scripts>
-					</CheckButton>
 					<CheckButton name="$parentOnlyInBags" inherits="TellMeWhen_CheckTemplate" parentKey="OnlyInBags">
 						<Anchors>
 							<Anchor point="TOPLEFT" relativeTo="$parentRangeCheck" relativePoint="BOTTOMLEFT" y="4"/>
@@ -2351,7 +2292,7 @@
 					</CheckButton>
 					<CheckButton name="$parentIgnoreNomana" inherits="TellMeWhen_CheckTemplate" parentKey="IgnoreNomana">
 						<Anchors>
-							<Anchor point="TOPLEFT" relativeTo="$parentCooldownCheck" relativePoint="BOTTOMLEFT" y="4"/>
+							<Anchor point="TOPLEFT" relativeTo="$parentManaCheck" relativePoint="BOTTOMLEFT" y="4"/>
 						</Anchors>
 						<Scripts>
 							<OnLoad>
@@ -2367,6 +2308,70 @@
 								end
 								TMW.IE:ShowHide()
 							</OnClick>
+						</Scripts>
+					</CheckButton>
+					<CheckButton name="$parentCooldownCheck" inherits="TellMeWhen_CheckTemplate" parentKey="CooldownCheck">
+						<Anchors>
+							<Anchor point="TOPLEFT" relativeTo="$parentIgnoreNomana" relativePoint="BOTTOMLEFT" y="4"/>
+						</Anchors>
+						<Scripts>
+							<OnLoad>
+								self.text:SetText(TMW.L["ICONMENU_COOLDOWNCHECK"])
+								TMW:TT(self, "ICONMENU_COOLDOWNCHECK", "ICONMENU_COOLDOWNCHECK_DESC")
+								self.text:SetWidth(TELLMEWHEN_COLUMN1WIDTH)
+							</OnLoad>
+							<OnClick>
+								local groupID, iconID = TMW.CI.g, TMW.CI.i
+								if TMW.db then
+									TMW.db.profile.Groups[groupID].Icons[iconID]["CooldownCheck"] = not not self:GetChecked()
+									TMW.IE:ScheduleIconUpdate(groupID, iconID)
+								end
+								if self:GetChecked() or TMW.CI.t ~= "reactive" then
+									self:GetParent().IgnoreRunes:Enable()
+									self:GetParent().IgnoreRunes:SetAlpha(1)
+								else
+									self:GetParent().IgnoreRunes:Disable()
+									self:GetParent().IgnoreRunes:SetAlpha(0.4)
+								end
+							</OnClick>
+							<OnHide>
+								local f = self:GetParent().IgnoreRunes
+								f:ClearAllPoints()
+								f:SetPoint("TOPLEFT", self:GetParent().ManaCheck, "BOTTOMLEFT", 0, 4)
+							</OnHide>
+							<OnShow>
+								local f = self:GetParent().IgnoreRunes
+								f:ClearAllPoints()
+								f:SetPoint("TOPLEFT", self, "BOTTOMLEFT", 0, 4)
+							</OnShow>
+						</Scripts>
+					</CheckButton>
+					<CheckButton name="$parentIgnoreRunes" inherits="TellMeWhen_CheckTemplate" parentKey="IgnoreRunes">
+						<Anchors>
+							<Anchor point="TOPLEFT" relativeTo="$parentManaCheck" relativePoint="BOTTOMLEFT" y="4"/>
+						</Anchors>
+						<Scripts>
+							<OnLoad>
+								self.text:SetText(TMW.L["ICONMENU_IGNORERUNES"])
+								TMW:TT(self, "ICONMENU_IGNORERUNES", "ICONMENU_IGNORERUNES_DESC")
+								self.text:SetWidth(TELLMEWHEN_COLUMN1WIDTH)
+								self:SetMotionScriptsWhileDisabled(true)
+							</OnLoad>
+							<OnClick>
+								local groupID, iconID = TMW.CI.g, TMW.CI.i
+								if TMW.db then
+									TMW.db.profile.Groups[groupID].Icons[iconID]["IgnoreRunes"] = not not self:GetChecked()
+									TMW.IE:ScheduleIconUpdate(groupID, iconID)
+								end
+							</OnClick>
+							<OnEnable>
+								self:SetAlpha(1)
+								TMW:TT(self, "ICONMENU_IGNORERUNES", "ICONMENU_IGNORERUNES_DESC")
+							</OnEnable>
+							<OnDisable>
+								self:SetAlpha(0.4)
+								TMW:TT(self, "ICONMENU_IGNORERUNES", "ICONMENU_IGNORERUNES_DESC_DISABLED")
+							</OnDisable>
 						</Scripts>
 					</CheckButton>
 

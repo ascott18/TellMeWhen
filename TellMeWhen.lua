@@ -34,7 +34,7 @@ local DRData = LibStub("DRData-1.0", true)
 TELLMEWHEN_VERSION = "4.5.2"
 TELLMEWHEN_VERSION_MINOR = strmatch(" @project-version@", " r%d+") or ""
 TELLMEWHEN_VERSION_FULL = TELLMEWHEN_VERSION .. TELLMEWHEN_VERSION_MINOR
-TELLMEWHEN_VERSIONNUMBER = 45208 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
+TELLMEWHEN_VERSIONNUMBER = 45209 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
 if TELLMEWHEN_VERSIONNUMBER > 46000 or TELLMEWHEN_VERSIONNUMBER < 45000 then return error("YOU SCREWED UP THE VERSION NUMBER OR DIDNT CHANGE THE SAFETY LIMITS") end -- safety check because i accidentally made the version number 414069 once
 
 TELLMEWHEN_MAXGROUPS = 1 	--this is a default, used by SetTheory (addon), so dont rename
@@ -3602,6 +3602,13 @@ function TMW:TT(f, title, text, actualtitle, actualtext)
 		f.__ttHooked = 1
 		f:HookScript("OnEnter", TTOnEnter)
 		f:HookScript("OnLeave", TTOnLeave)
+	else
+		if not f:GetScript("OnEnter") then
+			f:HookScript("OnEnter", TTOnEnter)
+		end
+		if not f:GetScript("OnLeave") then
+			f:HookScript("OnLeave", TTOnLeave)
+		end
 	end
 end
 
