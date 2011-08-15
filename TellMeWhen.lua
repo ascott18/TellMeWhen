@@ -26,15 +26,15 @@ local L = LibStub("AceLocale-3.0"):GetLocale("TellMeWhen", true)
 --L = setmetatable({}, {__index = function() return "| ! | ! | ! | ! | ! | ! | ! | ! | ! | ! | ! | ! | ! | ! | ! | ! | ! " end}) -- stress testing for text widths
 TMW.L = L
 local LBF = LibStub("LibButtonFacade", true)
-local LMB = LibMasque and LibMasque("Button")
+local LMB = LibStub("Masque", true) or (LibMasque and LibMasque("Button"))
 local AceDB = LibStub("AceDB-3.0")
 local LSM = LibStub("LibSharedMedia-3.0")
 local DRData = LibStub("DRData-1.0", true)
 
-TELLMEWHEN_VERSION = "4.5.2"
+TELLMEWHEN_VERSION = "4.5.3"
 TELLMEWHEN_VERSION_MINOR = strmatch(" @project-version@", " r%d+") or ""
 TELLMEWHEN_VERSION_FULL = TELLMEWHEN_VERSION .. TELLMEWHEN_VERSION_MINOR
-TELLMEWHEN_VERSIONNUMBER = 45209 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
+TELLMEWHEN_VERSIONNUMBER = 45301 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
 if TELLMEWHEN_VERSIONNUMBER > 46000 or TELLMEWHEN_VERSIONNUMBER < 45000 then return error("YOU SCREWED UP THE VERSION NUMBER OR DIDNT CHANGE THE SAFETY LIMITS") end -- safety check because i accidentally made the version number 414069 once
 
 TELLMEWHEN_MAXGROUPS = 1 	--this is a default, used by SetTheory (addon), so dont rename
@@ -3428,18 +3428,44 @@ function TMW:GetItemIDs(icon, setting, firstOnly, toname)
 end
 
 local unitcache = {}
-function TMW:GetUnits(icon, setting)
-	if unitcache[setting] then return unitcache[setting] end --why make a bunch of tables and do a bunch of stuff if we dont need to
+TMW.Units = {
+	{ value = "player", 			text = PLAYER .. " " .. L["PLAYER_DESC"]  },
+	{ value = "target", 			text = TARGET },
+	{ value = "targettarget", 		text = L["ICONMENU_TARGETTARGET"] },
+	{ value = "focus", 				text = L["ICONMENU_FOCUS"] },
+	{ value = "focustarget", 		text = L["ICONMENU_FOCUSTARGET"] },
+	{ value = "pet", 				text = PET },
+	{ value = "pettarget", 			text = L["ICONMENU_PETTARGET"] },
+	{ value = "mouseover", 			text = L["ICONMENU_MOUSEOVER"] },
+	{ value = "mouseovertarget",	text = L["ICONMENU_MOUSEOVERTARGET"]  },
+	{ value = "vehicle", 			text = L["ICONMENU_VEHICLE"] },
+	{ value = "party", 				text = PARTY, 			range = MAX_PARTY_MEMBERS},
+	{ value = "raid", 				text = RAID, 			range = MAX_RAID_MEMBERS},
+	{ value = "arena",				text = ARENA, 			range = 5},
+	{ value = "boss", 				text = BOSS, 			range = MAX_BOSS_FRAMES},
+	{ value = "maintank", 			text = L["MAINTANK"], 	range = MAX_RAID_MEMBERS},
+	{ value = "mainassist", 		text = L["MAINASSIST"], range = MAX_RAID_MEMBERS},
+}
+function TMW:GetUnits(icon, setting, dontreplace)
+	if unitcache[setting..tostring(dontreplace)] then return unitcache[setting..tostring(dontreplace)] end --why make a bunch of tables and do a bunch of stuff if we dont need to
 
 	setting = TMW:CleanString(setting)
 	setting = strlower(setting)
 
+	--SUBSTITUTE "|cffff0000#|r WITH 1-10, 1-40, etc (NOTE LOWERCASE COLOR ESCAPE SEQUENCE)
+	for wholething, unit in gmatch(setting, "(([^; %-]-) ?|cffff0000#|r)") do
+		unit = strtrim(unit)
+		for k, v in pairs(TMW.Units) do
+			if v.value == unit then
+				setting = gsub(setting, wholething, unit .. "1-" .. v.range)
+				break
+			end
+		end
+	end
+	
 	--SUBSTITUTE RAID1-10 WITH RAID1;RAID2;RAID3;...RAID10
 	local startpos, endpos = 0, 0
-	while true do
-		startpos, endpos = strfind(setting, "(%a+) ?(%d+) ?%- ?(%d+) ?;?", endpos+1)
-		if not startpos then break end
-		local wholething, unit, firstnum, lastnum = strmatch(setting, "((%a+) ?(%d+) ?%- ?(%d+)) ?;?", startpos)
+	for wholething, unit, firstnum, lastnum in gmatch(setting, "((%a+) ?(%d+) ?%- ?(%d+)) ?;?") do
 		if unit and firstnum and lastnum then
 			local str = ""
 			local order = firstnum > lastnum and -1 or 1
@@ -3469,17 +3495,19 @@ function TMW:GetUnits(icon, setting)
 		end
 	end
 
-	--DETECT maintank#, mainassist#, etc, and make them substitute in real unitIDs -- MUST BE LAST
-	for k, unit in pairs(Units) do
-		if strfind(unit, "^maintank") or strfind(unit, "^mainassist") then
-			local original = CopyTable(Units) 	-- copy the original unit table so we know what units to scan for when they may have changed
-			unitsToChange[original] = Units 	-- store the table that will be getting changed with the original
-			TMW:RegisterEvent("RAID_ROSTER_UPDATE")
-			TMW:RAID_ROSTER_UPDATE()
+	if not dontreplace then -- flag to set to not put it into the replacement engine. Used for shift-hover tooltips (maybe)
+		--DETECT maintank#, mainassist#, etc, and make them substitute in real unitIDs -- MUST BE LAST
+		for k, unit in pairs(Units) do
+			if strfind(unit, "^maintank") or strfind(unit, "^mainassist") then
+				local original = CopyTable(Units) 	-- copy the original unit table so we know what units to scan for when they may have changed
+				unitsToChange[original] = Units 	-- store the table that will be getting changed with the original
+				TMW:RegisterEvent("RAID_ROSTER_UPDATE")
+				TMW:RAID_ROSTER_UPDATE()
+			end
 		end
 	end
 
-	unitcache[setting] = Units
+	unitcache[setting..tostring(dontreplace)] = Units
 	return Units
 end
 

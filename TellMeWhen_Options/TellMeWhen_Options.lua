@@ -1507,24 +1507,6 @@ IE.Tabs = {
 	[5] = "Conditions",
 	[6] = "MainOptions",
 }
-IE.Units = {
-	{ value = "player", 					text = PLAYER .. " " .. L["PLAYER_DESC"]  },
-	{ value = "target", 					text = TARGET },
-	{ value = "targettarget", 				text = L["ICONMENU_TARGETTARGET"] },
-	{ value = "focus", 						text = L["ICONMENU_FOCUS"] },
-	{ value = "focustarget", 				text = L["ICONMENU_FOCUSTARGET"] },
-	{ value = "pet", 						text = PET },
-	{ value = "pettarget", 					text = L["ICONMENU_PETTARGET"] },
-	{ value = "mouseover", 					text = L["ICONMENU_MOUSEOVER"] },
-	{ value = "mouseovertarget",			text = L["ICONMENU_MOUSEOVERTARGET"]  },
-	{ value = "vehicle", 					text = L["ICONMENU_VEHICLE"] },
-	{ value = "party|cFFFF0000#|r", 		text = PARTY, 			range = "|cFFFF0000#|r = 1-" .. MAX_PARTY_MEMBERS},
-	{ value = "raid|cFFFF0000#|r", 			text = RAID, 			range = "|cFFFF0000#|r = 1-" .. MAX_RAID_MEMBERS},
-	{ value = "arena|cFFFF0000#|r",			text = ARENA, 			range = "|cFFFF0000#|r = 1-5"},
-	{ value = "boss|cFFFF0000#|r", 			text = BOSS, 			range = "|cFFFF0000#|r = 1-" .. MAX_BOSS_FRAMES},
-	{ value = "maintank|cFFFF0000#|r", 		text = L["MAINTANK"], 	range = "|cFFFF0000#|r = 1-" .. MAX_RAID_MEMBERS},
-	{ value = "mainassist|cFFFF0000#|r", 	text = L["MAINASSIST"], range = "|cFFFF0000#|r = 1-" .. MAX_RAID_MEMBERS},
-}
 
 function IE:TabClick(self)
 	PanelTemplates_Tab_OnClick(self, self:GetParent())
@@ -2015,25 +1997,29 @@ function IE:Unit_DropDown()
 	if not e:HasFocus() then
 		e:HighlightText()
 	end
-	for k, v in pairs(IE.Units) do
+	for k, v in pairs(TMW.Units) do
 		local info = UIDropDownMenu_CreateInfo()
 		info.text = v.text
 		info.value = v.value
 		if v.range then
 			info.tooltipTitle = v.tooltipTitle or v.text
-			info.tooltipText = v.range
+			info.tooltipText = "|cFFFF0000#|r = 1-" .. v.range
 			info.tooltipOnButton = true
 		end
 		info.notCheckable = true
 		info.func = IE.Unit_DropDown_OnClick
-		info.arg1 = self
+		info.arg1 = v
 		UIDropDownMenu_AddButton(info, UIDROPDOWNMENU_MENU_LEVEL)
 	end
 end
 
-function IE:Unit_DropDown_OnClick()
+function IE:Unit_DropDown_OnClick(v)
 	local e = IE.Main.Unit
-	e:Insert(";" .. self.value .. ";")
+	local ins = v.value
+	if v.range then
+		ins = v.value .. "|cFFFF0000#|r"
+	end
+	e:Insert(";" .. ins .. ";")
 	TMW:CleanString(e)
 	local groupID, iconID = CI.g, CI.i
 	db.profile.Groups[groupID].Icons[iconID].Unit = e:GetText()
@@ -2448,6 +2434,35 @@ function IE:GetRealNames()
 	wipe(tiptemp)
 	str = strtrim(str, "\r\n ;")
 	cachednames[CI.t .. CI.SoI .. text] = str
+	return str
+end
+local cachedunits = {}
+function IE:GetRealUnits()
+	-- gets a string to set as a tooltip of all of the spells names in the name box in the IE. Splits up equivalancies and turns IDs into names
+	local text = TMW:CleanString(IE.Main.Unit)
+	if cachedunits[text] then return cachedunits[text] end
+
+	local tbl = TMW:GetUnits(nil, text, true)
+	
+	local str = ""
+	local numadded = 0
+	local numlines = 50
+	local numperline = ceil(#tbl/numlines)
+	
+	for k, v in pairs(tbl) do
+		
+		if not tiptemp[v] then --prevents display of the same name twice when there are multiple units... or something. I copy-pasted this.
+			numadded = numadded + 1
+			str = str ..
+			v ..
+			"; " ..
+			(floor(numadded/numperline) == numadded/numperline and "\r\n" or "")
+		end
+		tiptemp[name] = true
+	end
+	wipe(tiptemp)
+	str = strtrim(str, "\r\n ;")
+	cachedunits[text] = str
 	return str
 end
 
@@ -3821,23 +3836,32 @@ function CNDT:TypeMenu_DropDown()
 end
 
 function CNDT:UnitMenu_DropDown()
-	for k, v in pairs(IE.Units) do
+	for k, v in pairs(TMW.Units) do
 		local info = UIDropDownMenu_CreateInfo()
-		info.func = function(self, frame)
-			frame:GetParent():SetText(v.value)
+		info.func = function(self, frame, v)
+			local ins = v.value
+			if v.range then
+				ins = v.value .. "|cFFFF0000#|r"
+			end
+			frame:GetParent():SetText(ins)
 			CNDT:OK()
 		end
 		if v.range then
 			info.tooltipTitle = v.tooltipTitle or v.text
-			info.tooltipText = v.range
+			info.tooltipText = "|cFFFF0000#|r = 1-" .. v.range
 			info.tooltipOnButton = true
 		end
 		info.text = v.text
 		info.value = v.value
 		info.hasArrow = v.hasArrow
 		info.notCheckable = true
-		info.arg1 = self
+		info.arg1 = v
 		UIDropDownMenu_AddButton(info)
+	end
+	
+	for k, v in pairs(TMW.Units) do
+		info.value = v.value
+		UIDropDownMenu_AddButton(info, UIDROPDOWNMENU_MENU_LEVEL)
 	end
 end
 

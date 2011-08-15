@@ -1496,7 +1496,7 @@
 				</Scripts>
 			</Button>
 
-			<Frame name="Help" parentKey="Help" inherits="GlowBoxTemplate" enableMouse="true" hidden="true" >
+			<Frame name="$parentHelp" parentKey="Help" inherits="GlowBoxTemplate" enableMouse="true" hidden="true" >
 				<Size x="230" y="200"/>
 				<Anchors>
 					<Anchor point="TOPRIGHT" relativePoint="LEFT" x="-30" y="-15"/>
@@ -1543,6 +1543,9 @@
 						
 						self.text:SetSpacing(4)
 					</OnLoad>
+					<OnShow>
+						self:SetFrameLevel(TMW.IE.Main:GetFrameLevel() + 10)
+					</OnShow>
 				</Scripts>
 			</Frame>
 			
@@ -1779,18 +1782,6 @@
 								self.BackgroundText:SetWidth(self:GetWidth())
 								TMW.SUG:EnableEditBox(self, true)
 							</OnLoad>
-							<OnEvent>
-								if not self.isOver then return end
-								GameTooltip:Hide()
-								GameTooltip_SetDefaultAnchor(GameTooltip, self)
-								GameTooltip:AddLine(self.__title, HIGHLIGHT_FONT_COLOR.r, HIGHLIGHT_FONT_COLOR.g, HIGHLIGHT_FONT_COLOR.b, 1)
-								if IsModifierKeyDown() then
-									GameTooltip:AddLine(TMW.IE:GetRealNames(self), NORMAL_FONT_COLOR.r, NORMAL_FONT_COLOR.g, NORMAL_FONT_COLOR.b, 1)
-								else
-									GameTooltip:AddLine(self.__text, NORMAL_FONT_COLOR.r, NORMAL_FONT_COLOR.g, NORMAL_FONT_COLOR.b, 1)
-								end
-								GameTooltip:Show()
-							</OnEvent>
 							<OnEditFocusLost>
 								EditBox_ClearHighlight(self)
 								local groupID, iconID = TMW.CI.g, TMW.CI.i
@@ -1822,6 +1813,18 @@
 								EditBox_HighlightText(self)
 								self.BackgroundText:SetText(nil)
 							</OnEditFocusGained>
+							<OnEvent>
+								if not self.isOver then return end
+								GameTooltip:Hide()
+								GameTooltip_SetDefaultAnchor(GameTooltip, self)
+								GameTooltip:AddLine(self.__title, HIGHLIGHT_FONT_COLOR.r, HIGHLIGHT_FONT_COLOR.g, HIGHLIGHT_FONT_COLOR.b, 1)
+								if IsModifierKeyDown() then
+									GameTooltip:AddLine(TMW.IE:GetRealNames(self), NORMAL_FONT_COLOR.r, NORMAL_FONT_COLOR.g, NORMAL_FONT_COLOR.b, 1)
+								else
+									GameTooltip:AddLine(self.__text, NORMAL_FONT_COLOR.r, NORMAL_FONT_COLOR.g, NORMAL_FONT_COLOR.b, 1)
+								end
+								GameTooltip:Show()
+							</OnEvent>
 							<OnEnter>
 								self.isOver = true
 								self:GetScript("OnEvent")(self)
@@ -1945,20 +1948,54 @@
 						</Frames>
 						<Scripts>
 							<OnLoad>
-								TMW:TT(self, "ICONMENU_UNITSTOWATCH", "ICONMENU_UNIT_DESC")
+								self:RegisterEvent("MODIFIER_STATE_CHANGED")
 								self.label = TMW.L["ICONMENU_UNITSTOWATCH"]
+								self.__title = TMW.L["ICONMENU_UNITSTOWATCH"]
+								self.__text = TMW.L["ICONMENU_UNIT_DESC"]
 								self.BackgroundText:SetWidth(self:GetWidth())
 							</OnLoad>
 							<OnEditFocusLost>
 								EditBox_ClearHighlight(self)
 								local groupID, iconID = TMW.CI.g, TMW.CI.i
-								TMW:CleanString(self)
+								
 								if TMW.CI.ics then
-									TMW.CI.ics.Unit = strtrim(self:GetText())
+									TMW.CI.ics.Unit = TMW:CleanString(self)
 								end
 								TMW.IE:ScheduleIconUpdate(groupID, iconID)
 								self:GetScript("OnTextChanged")(self)
+								
+								--[[local text = self:GetText()
+								local s = ""
+								for match in gmatch(text, "([^; %-]-) ?|cFFFF0000#|r") do
+									TMW.print(match)
+									s = s .. match .. "; "
+								end
+								s = strtrim(s, "; ")
+								if s ~= "" then
+									TMW.IE:ShowHelp(TMW.L["HELP_MISSINGUNITNUMS"]:format(s), self, 0, 0)
+								end]]
+								
 							</OnEditFocusLost>
+							<OnEvent>
+								if not self.isOver then return end
+								GameTooltip:Hide()
+								GameTooltip_SetDefaultAnchor(GameTooltip, self)
+								GameTooltip:AddLine(self.__title, HIGHLIGHT_FONT_COLOR.r, HIGHLIGHT_FONT_COLOR.g, HIGHLIGHT_FONT_COLOR.b, 1)
+								if IsModifierKeyDown() then
+									GameTooltip:AddLine(TMW.IE:GetRealUnits(self), NORMAL_FONT_COLOR.r, NORMAL_FONT_COLOR.g, NORMAL_FONT_COLOR.b, 1)
+								else
+									GameTooltip:AddLine(self.__text, NORMAL_FONT_COLOR.r, NORMAL_FONT_COLOR.g, NORMAL_FONT_COLOR.b, 1)
+								end
+								GameTooltip:Show()
+							</OnEvent>
+							<OnEnter>
+								self.isOver = true
+								self:GetScript("OnEvent")(self)
+							</OnEnter>
+							<OnLeave>
+								self.isOver = false
+								GameTooltip:Hide()
+							</OnLeave>
 						</Scripts>
 					</EditBox>
 					
@@ -3798,10 +3835,11 @@
 						end
 					</OnShow>
 					<OnHide>
-						if TMW.IE.MainOptionsWidget then
+						--[[if TMW.IE.MainOptionsWidget then -- WARNING WARNING WARNING - CAUSES ERROR 132 CRASHES
 							LibStub("AceGUI-3.0", true):Release(TMW.IE.MainOptionsWidget)
-						end
-						--TMW.IE.MainOptionsWidget:ReleaseChildren()
+						end]]
+						
+						TMW.IE.MainOptionsWidget:ReleaseChildren() -- safer
 					</OnHide>
 					<OnDragStart> TellMeWhen_IconEditor:StartMoving() </OnDragStart>
 					<OnDragStop> TellMeWhen_IconEditor:StopMovingOrSizing() </OnDragStop>

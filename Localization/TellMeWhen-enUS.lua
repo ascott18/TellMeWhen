@@ -688,6 +688,15 @@ To add durations, use the following syntax:
 Spell Name: Duration
 
 E.g. "%s: 10"]]
+L["HELP_MISSINGUNITNUMS"] = [[The following units are missing numbers or ranges:
+
+%s
+
+Replace the red |cFFFF0000#|r with a number or a range of numbers.
+
+E.g:
+arena1
+raid1-40]]
 
 
 L["TOPLEFT"] = "Top Left"

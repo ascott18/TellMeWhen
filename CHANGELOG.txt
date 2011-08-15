@@ -1,3 +1,9 @@
+===v4.5.3===
+ * Improved configurations for units. Leaving the red '#' in will now default the unit to its full range, and there is now a tooltip showing all units being checked when holding down a modifier key, similar to the name editbox.
+ * Bug Fixes:
+ ** I accidentally commented out the fix for the error 132 crash. Oops.
+ ** Updated for Masque r366
+ 
 ===v4.5.2===
  * Added "%m" as a text substitution for the name of the unit that you are currently mousing over.
  * Existing substitutions "%t" and "%f" now work in all output locations.

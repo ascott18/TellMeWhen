@@ -5,7 +5,7 @@
 ## Interface: 40200
 ## Title: TellMeWhen
 
-## Version: 4.5.2
+## Version: 4.5.3
 ## Author: Cybeloras of Mal'Ganis
 ## Notes: Notifications about cooldowns, buffs, etc.
 ## OptionalDeps: ButtonFacade, Masque, Ace3, OmniCC, tullaCC, sct, sctd, MikScrollingBattleText, Parrot
