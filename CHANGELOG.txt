@@ -5,6 +5,7 @@
  ** (r196) I accidentally commented out the fix for the error 132 crash. Oops.
  ** (r196) Updated for Masque r366
  ** (r197) TellMeWhen_Options\TellMeWhen_Options-r196.lua:3863: attempt to index global "info" (a nil value)
+ ** (r198) Updated bar edge offsets for Masque r366+
  
 ===v4.5.2===
  * Added "%m" as a text substitution for the name of the unit that you are currently mousing over.

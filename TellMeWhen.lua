@@ -34,7 +34,7 @@ local DRData = LibStub("DRData-1.0", true)
 TELLMEWHEN_VERSION = "4.5.3"
 TELLMEWHEN_VERSION_MINOR = strmatch(" @project-version@", " r%d+") or ""
 TELLMEWHEN_VERSION_FULL = TELLMEWHEN_VERSION .. TELLMEWHEN_VERSION_MINOR
-TELLMEWHEN_VERSIONNUMBER = 45302 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
+TELLMEWHEN_VERSIONNUMBER = 45303 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
 if TELLMEWHEN_VERSIONNUMBER > 46000 or TELLMEWHEN_VERSIONNUMBER < 45000 then return error("YOU SCREWED UP THE VERSION NUMBER OR DIDNT CHANGE THE SAFETY LIMITS") end -- safety check because i accidentally made the version number 414069 once
 
 TELLMEWHEN_MAXGROUPS = 1 	--this is a default, used by SetTheory (addon), so dont rename
@@ -3043,7 +3043,7 @@ function TMW:Icon_Update(icon)
 			hookedLMBSkin = 1
 		end
 		g:AddButton(icon)
-		group.SkinID = g.SkinID
+		group.SkinID = g.SkinID or (g.db and g.db.SkinID)
 		if g.Disabled then
 			group.SkinID = "Blizzard"
 		end
@@ -3053,7 +3053,7 @@ function TMW:Icon_Update(icon)
 		local g = LBF:Group("TellMeWhen", format(L["fGROUP"], groupID))
 		g:AddButton(icon)
 
-		group.SkinID = lbfs.SkinID or g.SkinID or "Blizzard"
+		group.SkinID = lbfs.SkinID or g.SkinID or (g.db and g.db.SkinID) or "Blizzard" -- i dont think LBF ever had (g.db and g.db.SkinID), but whatever
 		local tbl = LBF:GetSkins()
 		if tbl and tbl[group.SkinID] then
 			ct:SetFont(LSM:Fetch("font", ctf.Name), tbl and tbl[group.SkinID].Count.FontSize or ctf.Size, ctf.Outline)
