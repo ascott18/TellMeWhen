@@ -1498,6 +1498,7 @@ IE.Checks = { --1=check box, 2=editbox, 3=slider(x100), 4=custom, table=subkeys 
 	Stealable = 1,
 	IgnoreNomana = 1,
 	ShowTTText = 1,
+	OnlyIfCounting = 1,
 }
 IE.Tabs = {
 	[1] = "Main",
@@ -3805,6 +3806,12 @@ function CNDT:TypeMenu_DropDown()
 	for k, v in ipairs(CNDT.Types) do
 		if not v.category and not addedFreq and UIDROPDOWNMENU_MENU_LEVEL == 1 then
 			local info = UIDropDownMenu_CreateInfo()
+			info.text = ""
+			info.isTitle = true
+			info.notCheckable = true
+			UIDropDownMenu_AddButton(info, UIDROPDOWNMENU_MENU_LEVEL)
+				
+			local info = UIDropDownMenu_CreateInfo()
 			info.text = L["CNDTCAT_FREQUENTLYUSED"]
 			info.value = "FREQ"
 			info.notCheckable = true
@@ -3835,17 +3842,20 @@ function CNDT:TypeMenu_DropDown()
 	end
 end
 
+function CNDT:UnitMenu_DropDown_OnClick(frame, v)
+	local ins = v.value
+	if v.range then
+		ins = v.value .. "|cFFFF0000#|r"
+	end
+	frame:GetParent():SetText(ins)
+	CNDT:OK()
+	CloseDropDownMenus()
+end
+
 function CNDT:UnitMenu_DropDown()
 	for k, v in pairs(TMW.Units) do
 		local info = UIDropDownMenu_CreateInfo()
-		info.func = function(self, frame, v)
-			local ins = v.value
-			if v.range then
-				ins = v.value .. "|cFFFF0000#|r"
-			end
-			frame:GetParent():SetText(ins)
-			CNDT:OK()
-		end
+		info.func = CNDT.UnitMenu_DropDown_OnClick
 		if v.range then
 			info.tooltipTitle = v.tooltipTitle or v.text
 			info.tooltipText = "|cFFFF0000#|r = 1-" .. v.range
@@ -3855,13 +3865,9 @@ function CNDT:UnitMenu_DropDown()
 		info.value = v.value
 		info.hasArrow = v.hasArrow
 		info.notCheckable = true
-		info.arg1 = v
+		info.arg1 = self
+		info.arg2 = v
 		UIDropDownMenu_AddButton(info)
-	end
-	
-	for k, v in pairs(TMW.Units) do
-		info.value = v.value
-		UIDropDownMenu_AddButton(info, UIDROPDOWNMENU_MENU_LEVEL)
 	end
 end
 

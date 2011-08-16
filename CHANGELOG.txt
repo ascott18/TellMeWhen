@@ -1,8 +1,10 @@
 ===v4.5.3===
  * Improved configurations for units. Leaving the red '#' in will now default the unit to its full range, and there is now a tooltip showing all units being checked when holding down a modifier key, similar to the name editbox.
+ * Added a new option to condition icons: "Only show if timer is active". If enabled, forces the icon to be hidden if there is not an active timer on the icon.
  * Bug Fixes:
- ** I accidentally commented out the fix for the error 132 crash. Oops.
- ** Updated for Masque r366
+ ** (r196) I accidentally commented out the fix for the error 132 crash. Oops.
+ ** (r196) Updated for Masque r366
+ ** (r197) TellMeWhen_Options\TellMeWhen_Options-r196.lua:3863: attempt to index global "info" (a nil value)
  
 ===v4.5.2===
  * Added "%m" as a text substitution for the name of the unit that you are currently mousing over.
@@ -11,11 +13,12 @@
  * Parenthesis in the condition editor are prettier now
  * Tooltip scan conditions now use the new return values of UnitAura added in WoW 4.2, and have been appropriately renamed to "Aura Variable". The result is an increase in efficiency at the cost of a bit of accuracy in some obscure cases.
  * Spell caching and filtering is now between 1500% and 2000% faster. (Seriously.)
- * Put the final nail in the coffin of the cooldown clock framelevel bug.
  * New Conditions:
  ** GCD active
  ** Unit Threat - Scaled
  ** Unit Threat - Raw
+ * Bug Fixes:
+ ** (r192) Put the final nail in the coffin of the cooldown clock framelevel bug.
 
 ===v4.5.1===
  * You can now shift-click links into the Announcement EditBox.

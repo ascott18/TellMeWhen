@@ -47,6 +47,7 @@ Type.RelevantSettings = {
 	DurationMax = true,
 	DurationMinEnabled = true,
 	DurationMaxEnabled = true,
+	OnlyIfCounting = true,
 }
 
 function Type:Update()
@@ -63,12 +64,21 @@ local function ConditionIcon_OnUpdate(icon, time)
 			icon.CndtFailed = nil -- you are a pirate (actually, you hack your own code, but close enough)
 			local alpha = succeeded and icon.Alpha or icon.UnAlpha
 			
+			local d 
+			
 			if succeeded and not icon.__succeeded and icon.ConditionDurEnabled then
-				icon:SetInfo(alpha, 1, nil, time, icon.ConditionDur)
-			elseif not succeeded and icon.__succeeded and icon.UnConditionDurEnabled  then
-				icon:SetInfo(alpha, 1, nil, time, icon.UnConditionDur)
+				d = icon.ConditionDur
+				icon:SetInfo(alpha, 1, nil, time, d)
+			elseif not succeeded and icon.__succeeded and icon.UnConditionDurEnabled then
+				d = icon.UnConditionDur
+				icon:SetInfo(alpha, 1, nil, time, d)
 			else
+				d = icon.__duration - (time - icon.__start)
 				icon:SetInfo(alpha, 1, nil, icon.__start, icon.__duration)
+			end
+			
+			if icon.OnlyIfCounting and d <= 0 then
+				icon:SetAlpha(0)			
 			end
 			
 			icon.__succeeded = succeeded

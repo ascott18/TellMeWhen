@@ -2932,7 +2932,27 @@
 							</OnClick>
 						</Scripts>
 					</CheckButton>
-
+					<CheckButton name="$parentOnlyIfCounting" inherits="TellMeWhen_CheckTemplate" parentKey="OnlyIfCounting">
+						<Anchors>
+							<Anchor point="TOPLEFT" relativeTo="$parentConditionDur" relativePoint="BOTTOMLEFT" x="-25" y="-10"/>
+						</Anchors>
+						<Scripts>
+							<OnLoad>
+								self.text:SetText(TMW.L["ICONMENU_ONLYIFCOUNTING"])
+								TMW:TT(self, "ICONMENU_ONLYIFCOUNTING", "ICONMENU_ONLYIFCOUNTING_DESC")
+								self:SetMotionScriptsWhileDisabled(true)
+								self.text:SetWidth(TELLMEWHEN_COLUMN1WIDTH)
+							</OnLoad>
+							<OnClick>
+								local groupID, iconID = TMW.CI.g, TMW.CI.i
+								if TMW.db then
+									TMW.db.profile.Groups[groupID].Icons[iconID]["OnlyIfCounting"] = not not self:GetChecked()
+									TMW.IE:ScheduleIconUpdate(groupID, iconID)
+								end
+							</OnClick>
+						</Scripts>
+					</CheckButton>
+					
 					<EditBox name="$parentStackMin" parentKey="StackMin" inherits="TellMeWhen_TimeEditBoxTemplate">
 						<Anchors>
 							<Anchor point="TOPLEFT" relativeTo="$parentDurationMin" relativePoint="BOTTOMLEFT" y="-40"/>

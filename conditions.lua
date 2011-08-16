@@ -2050,36 +2050,32 @@ function CNDT:ProcessConditions(icon)
 				local thisstr = andor .. "(" .. strrep("(", c.PrtsBefore) .. thiscondtstr .. strrep(")", c.PrtsAfter)  .. ")"
 
 				
-				if strfind(thisstr, "c.Unit2") and (strfind(c.Name, "maintank") or strfind(c.Name, "mainassist")) then -- Unit2 MUST be before Unit
-					local unit = gsub(c.Name, "|cFFFF0000#|r", "1")
-					thisstr = gsub(thisstr, "c.Unit2",		unit) -- sub it in as a variable
-					Env[unit] = unit
-					TMW:RegisterEvent("RAID_ROSTER_UPDATE")
-					TMW:RAID_ROSTER_UPDATE()
-				else
-					thisstr = gsub(thisstr, "c.Unit2",	"\"" .. c.Name .. "\"") -- sub it in as a string
+				if strfind(thisstr, "c.Unit2") then  -- Unit2 MUST be before Unit
+					local unit = TMW:GetUnits(nil, c.Name, true)[1]
+					if (strfind(unit, "maintank") or strfind(unit, "mainassist")) then
+						thisstr = gsub(thisstr, "c.Unit2",		unit) -- sub it in as a variable
+						Env[unit] = unit
+						TMW:RegisterEvent("RAID_ROSTER_UPDATE")
+						TMW:RAID_ROSTER_UPDATE()
+					else
+						thisstr = gsub(thisstr, "c.Unit2",	"\"" .. unit .. "\"") -- sub it in as a string
+					end
 				end
 				
-				if strfind(thisstr, "c.Unit") and (strfind(c.Unit, "maintank") or strfind(c.Unit, "mainassist")) then
-					local unit = gsub(c.Unit, "|cFFFF0000#|r", "1")
-					thisstr = gsub(thisstr, "c.Unit",		unit) -- sub it in as a variable
-					Env[unit] = unit
-					TMW:RegisterEvent("RAID_ROSTER_UPDATE")
-					TMW:RAID_ROSTER_UPDATE()
-				else
-					thisstr = gsub(thisstr, "c.Unit",	"\"" .. c.Unit .. "\"") -- sub it in as a string
-				end
-				
-
-				if v.percent then
-					thisstr = gsub(thisstr, "c.Level", 		c.Level/100)
-				else
-					thisstr = gsub(thisstr, "c.Level", 		c.Level)
-					thisstr = gsub(thisstr, "c.1nil", 		c.Level == 0 and 1 or "nil")
-					thisstr = gsub(thisstr, "c.nil1", 		c.Level == 1 and 1 or "nil") -- reverse 1nil
+				if strfind(thisstr, "c.Unit") then
+					local unit = TMW:GetUnits(nil, c.Unit, true)[1]
+					if (strfind(unit, "maintank") or strfind(unit, "mainassist")) then
+						thisstr = gsub(thisstr, "c.Unit",		unit) -- sub it in as a variable
+						Env[unit] = unit
+						TMW:RegisterEvent("RAID_ROSTER_UPDATE")
+						TMW:RAID_ROSTER_UPDATE()
+					else
+						thisstr = gsub(thisstr, "c.Unit",	"\"" .. unit .. "\"") -- sub it in as a string
+					end
 				end
 
 				thisstr = thisstr:
+				gsub("c.Level", 		v.percent and c.Level/100 or c.Level):
 				gsub("c.Checked", 		tostring(c.Checked)):
 				gsub("c.Operator", 		c.Operator):
 				gsub("c.NameFirst2", 	"\"" .. TMW:GetSpellNames(nil, name2, 1) .. "\""): --Name2 must be before Name
@@ -2093,7 +2089,9 @@ function CNDT:ProcessConditions(icon)
 				gsub("c.Name", 			"\"" .. name .. "\""):
 
 				gsub("c.True", 			tostring(c.Level == 0)):
-				gsub("c.False", 		tostring(c.Level == 1))
+				gsub("c.False", 		tostring(c.Level == 1)):
+				gsub("c.1nil", 			c.Level == 0 and 1 or "nil"):
+				gsub("c.nil1", 			c.Level == 1 and 1 or "nil") -- reverse 1nil
 				funcstr = funcstr .. thisstr
 			else
 				funcstr = funcstr .. (andor .. "(" .. strrep("(", c.PrtsBefore) .. "true" .. strrep(")", c.PrtsAfter)  .. ")")
@@ -2127,6 +2125,7 @@ function CNDT:ProcessConditions(icon)
 	if func then
 		func = setfenv(func, Env)
 		icon.CndtCheck = func
+		icon.CndtString = funcstr
 		functionCache[funcstr] = func
 		return func
 	elseif (TMW.debug or luaUsed) and err then
