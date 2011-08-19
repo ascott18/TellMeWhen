@@ -143,7 +143,7 @@
 	</Button>
 
 	<Button name="TellMeWhen_SpellSuggestTemplate" virtual="true" hidden="true">
-		<Size y="18.6"/>
+		<Size y="18.45"/>
 		<Scripts>
 			<OnLoad>
 				self.Background:SetVertexColor(0, 1, 0)
@@ -259,7 +259,7 @@
 						<Anchor point="TOP" relativePoint="BOTTOM" y="3"/>
 					</Anchors>
 				</FontString>
-				<FontString name="$parentText" parentKey="text" inherits="GameFontHighlight">
+				<FontString name="$parentText" parentKey="text" inherits="GameFontHighlight" justifyH="CENTER" justifyV="BOTTOM">
 					<Anchors>
 						<Anchor point="BOTTOM" relativePoint="TOP" y="-1"/>
 					</Anchors>
@@ -300,6 +300,9 @@
 			<OnMouseWheel>
 				self:SetValue(self:GetValue()+delta)
 			</OnMouseWheel>
+			<OnShow>
+				self.text:SetWidth(self:GetWidth())
+			</OnShow>
 		</Scripts>
 	</Slider>
 
@@ -1911,9 +1914,9 @@
 							<OnEditFocusLost>
 								EditBox_ClearHighlight(self)
 								local groupID, iconID = TMW.CI.g, TMW.CI.i
-								TMW:CleanString(self)
+								self:SetText(self:GetText():gsub([[\\]], [[\]]))
 								if TMW.CI.ics then
-									TMW.CI.ics.CustomTex = strtrim(self:GetText())
+									TMW.CI.ics.CustomTex = TMW:CleanString(self)
 								end
 								TMW.IE:ScheduleIconUpdate(groupID, iconID)
 								self:GetScript("OnTextChanged")(self)
@@ -2042,10 +2045,12 @@
 							</OnClick>
 							<OnEnable>
 								self:SetAlpha(1)
+								self:SetChecked(TMW.CI.ics.ShowTimerText)
 								self:SetScript("OnEnter", nil)
 							</OnEnable>
 							<OnDisable>
 								self:SetAlpha(0.4)
+								self:SetChecked(nil)
 								TMW:TT(self, "ICONMENU_SHOWTIMERTEXT", "ICONMENU_SHOWTIMERTEXT_DESC")
 							</OnDisable>
 						</Scripts>

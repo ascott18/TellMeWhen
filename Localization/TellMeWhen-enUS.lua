@@ -41,7 +41,7 @@ L["CHOOSENAME_DIALOG_MSCD"] = [=[Enter the Name or ID of what the cooldown that 
 L["CHOOSENAME_DIALOG_CNDTIC"] = "Enter the Name or ID of the spell that has the texture that you want to use. You may also enter a texture path, such as 'Interface/Icons/spell_nature_healingtouch', or just 'spell_nature_healingtouch' if the path is 'Interface/Icons'"
 
 L["ICONMENU_ALPHA"] = "Opacity"
-L["CONDITIONALPHA"] = "Failed Cndt/Dur./Stack"
+L["CONDITIONALPHA"] = "Failed Conditions/Reqs."
 L["CONDITIONALPHA_DESC"] = "This will be used when conditions fail, or if the duration or stack requirements are not met. This setting will be ignored if the icon is already hidden by the other two opacity settings."
 L["CONDITIONALPHA_CONDITIONICON"] = "Failed Duration"
 L["CONDITIONALPHA_CONDITIONICON_DESC"] = "This will be used when the duration requirements are not met. This setting will be ignored if the icon is already hidden by the other two opacity settings."
@@ -217,10 +217,12 @@ L["ICONMENU_APPENDCONDT"] = "Add as 'Icon Shown' condition"
 L["ICONMENU_ANCHOR"] = "Anchor to Group: %s"
 
 
+L["STACKS"] = "Stacks"
 L["STACKSPANEL_TITLE"] = "Stacks"
 L["ICONMENU_STACKS_MIN_DESC"] = "Minimum number of stacks of the aura needed to show the icon"
 L["ICONMENU_STACKS_MAX_DESC"] = "Maximum number of stacks of the aura allowed to show the icon"
 
+L["DURATION"] = "Duration"
 L["DURATIONPANEL_TITLE"] = "Duration"
 L["ICONMENU_DURATION_MIN_DESC"] = "Minimum duration needed to show the icon"
 L["ICONMENU_DURATION_MAX_DESC"] = "Maximum duration allowed to show the icon"

@@ -6,6 +6,7 @@
  ** (r196) Updated for Masque r366
  ** (r197) TellMeWhen_Options\TellMeWhen_Options-r196.lua:3863: attempt to index global "info" (a nil value)
  ** (r198) Updated bar edge offsets for Masque r366+
+ ** (r199) TellMeWhen.lua:1404: attempt to index field 'Font' (a nil value)
  
 ===v4.5.2===
  * Added "%m" as a text substitution for the name of the unit that you are currently mousing over.

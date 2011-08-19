@@ -1403,12 +1403,12 @@ CNDT.Types = {
 
 -------------------------------------buffs/debuffs
 	{ -- unit buff duration
-		text = L["ICONMENU_BUFF"] .. " - " .. L["DURATIONPANEL_TITLE"],
+		text = L["ICONMENU_BUFF"] .. " - " .. L["DURATION"],
 		value = "BUFFDUR",
 		category = L["CNDTCAT_BUFFSDEBUFFS"],
 		range = 30,
 		step = 0.1,
-		name = function(editbox) TMW:TT(editbox, L["ICONMENU_BUFF"] .. " - " .. L["DURATIONPANEL_TITLE"], "BUFFCNDT_DESC", 1) editbox.label = L["BUFFTOCHECK"] end,
+		name = function(editbox) TMW:TT(editbox, L["ICONMENU_BUFF"] .. " - " .. L["DURATION"], "BUFFCNDT_DESC", 1) editbox.label = L["BUFFTOCHECK"] end,
 		useSUG = true,
 		check = function(check) TMW:TT(check, "ONLYCHECKMINE", "ONLYCHECKMINE_DESC") end,
 		texttable = absentseconds,
@@ -1419,7 +1419,7 @@ CNDT.Types = {
 		end,
 	},
 	{ -- unit buff duration compare
-		text = L["ICONMENU_BUFF"] .. " - " .. L["DURATIONPANEL_TITLE"] .. " - " .. L["COMPARISON"],
+		text = L["ICONMENU_BUFF"] .. " - " .. L["DURATION"] .. " - " .. L["COMPARISON"],
 		value = "BUFFDURCOMP",
 		category = L["CNDTCAT_BUFFSDEBUFFS"],
 		noslide = true,
@@ -1435,12 +1435,12 @@ CNDT.Types = {
 		end,
 	},
 	{ -- unit buff stacks
-		text = L["ICONMENU_BUFF"] .. " - " .. L["STACKSPANEL_TITLE"],
+		text = L["ICONMENU_BUFF"] .. " - " .. L["STACKS"],
 		value = "BUFFSTACKS",
 		category = L["CNDTCAT_BUFFSDEBUFFS"],
 		min = 0,
 		max = 20,
-		name = function(editbox) TMW:TT(editbox, L["ICONMENU_BUFF"] .. " - " .. L["STACKSPANEL_TITLE"], "BUFFCNDT_DESC", 1) editbox.label = L["BUFFTOCHECK"] end,
+		name = function(editbox) TMW:TT(editbox, L["ICONMENU_BUFF"] .. " - " .. L["STACKS"], "BUFFCNDT_DESC", 1) editbox.label = L["BUFFTOCHECK"] end,
 		useSUG = true,
 		check = function(check) TMW:TT(check, "ONLYCHECKMINE", "ONLYCHECKMINE_DESC") end,
 		texttable = setmetatable({[0] = format(STACKS, 0).." ("..L["ICONMENU_ABSENT"]..")"}, {__index = function(tbl, k) return format(STACKS, k) end}),
@@ -1485,12 +1485,12 @@ CNDT.Types = {
 	},
 	
 	{ -- unit debuff duration
-		text = L["ICONMENU_DEBUFF"] .. " - " .. L["DURATIONPANEL_TITLE"],
+		text = L["ICONMENU_DEBUFF"] .. " - " .. L["DURATION"],
 		value = "DEBUFFDUR",
 		category = L["CNDTCAT_BUFFSDEBUFFS"],
 		range = 30,
 		step = 0.1,
-		name = function(editbox) TMW:TT(editbox, L["ICONMENU_DEBUFF"] .. " - " .. L["DURATIONPANEL_TITLE"], "BUFFCNDT_DESC", 1) editbox.label = L["DEBUFFTOCHECK"] end,
+		name = function(editbox) TMW:TT(editbox, L["ICONMENU_DEBUFF"] .. " - " .. L["DURATION"], "BUFFCNDT_DESC", 1) editbox.label = L["DEBUFFTOCHECK"] end,
 		useSUG = true,
 		check = function(check) TMW:TT(check, "ONLYCHECKMINE", "ONLYCHECKMINE_DESC") end,
 		texttable = absentseconds,
@@ -1502,7 +1502,7 @@ CNDT.Types = {
 		spacebefore = true,
 	},
 	{ -- unit debuff duration compare
-		text = L["ICONMENU_DEBUFF"] .. " - " .. L["DURATIONPANEL_TITLE"] .. " - " .. L["COMPARISON"],
+		text = L["ICONMENU_DEBUFF"] .. " - " .. L["DURATION"] .. " - " .. L["COMPARISON"],
 		value = "DEBUFFDURCOMP",
 		category = L["CNDTCAT_BUFFSDEBUFFS"],
 		noslide = true,
@@ -1518,12 +1518,12 @@ CNDT.Types = {
 		end,
 	},
 	{ -- unit debuff stacks
-		text = L["ICONMENU_DEBUFF"] .. " - " .. L["STACKSPANEL_TITLE"],
+		text = L["ICONMENU_DEBUFF"] .. " - " .. L["STACKS"],
 		value = "DEBUFFSTACKS",
 		category = L["CNDTCAT_BUFFSDEBUFFS"],
 		min = 0,
 		max = 20,
-		name = function(editbox) TMW:TT(editbox, L["ICONMENU_DEBUFF"] .. " - " .. L["STACKSPANEL_TITLE"], "BUFFCNDT_DESC", 1) editbox.label = L["DEBUFFTOCHECK"]end,
+		name = function(editbox) TMW:TT(editbox, L["ICONMENU_DEBUFF"] .. " - " .. L["STACKS"], "BUFFCNDT_DESC", 1) editbox.label = L["DEBUFFTOCHECK"]end,
 		useSUG = true,
 		check = function(check) TMW:TT(check, "ONLYCHECKMINE", "ONLYCHECKMINE_DESC") end,
 		texttable = setmetatable({[0] = format(STACKS, 0).." ("..L["ICONMENU_ABSENT"]..")"}, {__index = function(tbl, k) return format(STACKS, k) end}),
@@ -1900,11 +1900,11 @@ CNDT.Types = {
 		max = 1,
 		nooperator = true,
 		noslide = true,
-		name = function(editbox) TMW:TT(editbox, "LUACONDITION", gsub(L["LUACONDITION_DESC"], "\n", " ")) editbox.label = L["CODETOEXE"] end,
+		name = function(editbox) TMW:TT(editbox, "LUACONDITION", "LUACONDITION_DESC") editbox.label = L["CODETOEXE"] end,
 		unit = false,
 		icon = "Interface\\Icons\\INV_Misc_Gear_01",
 		tcoords = standardtcoords,
-		funcstr = function(c) return c.Name end,
+		funcstr = function(c) return c.Name ~= "" and c.Name or "true" end,
 	},
 }
 

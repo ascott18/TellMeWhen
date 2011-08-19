@@ -34,7 +34,7 @@ local DRData = LibStub("DRData-1.0", true)
 TELLMEWHEN_VERSION = "4.5.3"
 TELLMEWHEN_VERSION_MINOR = strmatch(" @project-version@", " r%d+") or ""
 TELLMEWHEN_VERSION_FULL = TELLMEWHEN_VERSION .. TELLMEWHEN_VERSION_MINOR
-TELLMEWHEN_VERSIONNUMBER = 45303 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
+TELLMEWHEN_VERSIONNUMBER = 45304 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
 if TELLMEWHEN_VERSIONNUMBER > 46000 or TELLMEWHEN_VERSIONNUMBER < 45000 then return error("YOU SCREWED UP THE VERSION NUMBER OR DIDNT CHANGE THE SAFETY LIMITS") end -- safety check because i accidentally made the version number 414069 once
 
 TELLMEWHEN_MAXGROUPS = 1 	--this is a default, used by SetTheory (addon), so dont rename
@@ -1294,6 +1294,8 @@ local upgradeTable
 function TMW:GetUpgradeTable() -- upgrade functions
 	if upgradeTable then return upgradeTable end
 	local t = {
+	
+	
 		[45013] = {
 			icon = function(ics)
 				if ics.Type == "conditionicon" then
@@ -1400,6 +1402,7 @@ function TMW:GetUpgradeTable() -- upgrade functions
 		[43001] = {
 			group = function(gs)
 				if db.profile.Font then
+					gs.Font = gs.Font or {}
 					for k, v in pairs(db.profile.Font) do
 						gs.Font[k] = v
 					end
@@ -3459,6 +3462,17 @@ function TMW:GetUnits(icon, setting, dontreplace)
 		unit = strtrim(unit)
 		for k, v in pairs(TMW.Units) do
 			if v.value == unit then
+				setting = gsub(setting, wholething, unit .. "1-" .. v.range)
+				break
+			end
+		end
+	end
+	
+	--SUBSTITUTE "party" with "party1-4", etc
+	for _, wholething in TMW:Vararg(strsplit(";", setting)) do
+		local unit = strtrim(wholething)
+		for k, v in pairs(TMW.Units) do
+			if v.value == unit and v.range then
 				setting = gsub(setting, wholething, unit .. "1-" .. v.range)
 				break
 			end

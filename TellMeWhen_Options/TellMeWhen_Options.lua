@@ -1666,6 +1666,7 @@ function IE:ShowHide()
 	if IE.Main.ShowTimer:GetChecked() and (IsAddOnLoaded("OmniCC") or IsAddOnLoaded("tullaCC")) then
 		stt:Enable()
 	else
+		stt:Enable() -- force scripts
 		stt:Disable()
 	end
 end
@@ -1696,7 +1697,7 @@ function IE:LoadSettings()
 			f:SetChecked(ics[setting])
 			f:GetScript("OnClick")(f)
 		elseif settingtype == 2 then
-			f:SetText(ics[setting])
+			f:SetText(ics[setting] or "")
 			f:SetCursorPosition(0)
 		elseif settingtype == 3 then
 			f:SetValue(ics[setting]*100)
@@ -1712,7 +1713,7 @@ function IE:LoadSettings()
 		end
 	end
 
-	for _, parent in pairs({IE.Main.TypeChecks, IE.Main.WhenChecks, IE.Main.Sort}) do
+	for _, parent in TMW:Vararg(IE.Main.TypeChecks, IE.Main.WhenChecks, IE.Main.Sort) do
 		for k, frame in pairs(parent) do
 			if strfind(k, "Radio") then
 				if frame.setting == "TotemSlots" then
@@ -2459,7 +2460,7 @@ function IE:GetRealUnits()
 			"; " ..
 			(floor(numadded/numperline) == numadded/numperline and "\r\n" or "")
 		end
-		tiptemp[name] = true
+		tiptemp[v] = true
 	end
 	wipe(tiptemp)
 	str = strtrim(str, "\r\n ;")

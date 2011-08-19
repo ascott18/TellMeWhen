@@ -91,15 +91,15 @@ end
 
 Type.AllowNoName = true
 function Type:Setup(icon, groupID, iconID)
-	icon.NameFirst = TMW:GetSpellNames(icon, icon.Name, 1)
-	--icon.ConditionAlpha = icon.UnAlpha
+	local Name = gsub(icon.Name, [[\\]], [[\]])
+	icon.NameFirst = TMW:GetSpellNames(icon, Name, 1)
 	
 	local tex, reason = TMW:GetConfigIconTexture(icon)
 	icon:SetTexture(tex)
 	if reason == false then
-		icon:SetTexture(icon.Name)
+		icon:SetTexture(Name)
 		if not icon.texture:GetTexture() then
-			icon:SetTexture("Interface\\Icons\\" .. icon.Name)
+			icon:SetTexture("Interface\\Icons\\" .. Name)
 		end
 		if not icon.texture:GetTexture() then
 			icon:SetTexture("Interface\\Icons\\INV_Misc_QuestionMark")
