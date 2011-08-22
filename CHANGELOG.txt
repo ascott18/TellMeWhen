@@ -7,7 +7,7 @@
  ** (r197) TellMeWhen_Options-r196.lua:3863: attempt to index global "info" (a nil value)
  ** (r198) Updated bar edge offsets for Masque r366+
  ** (r199) TellMeWhen.lua:1404: attempt to index field 'Font' (a nil value)
- ** (r200) The suggestion list will now update its display when new item information is obtained from the server
+ ** (r201) The suggestion list will now update its display when new item information is obtained from the server
 
  
 ===v4.5.2===
