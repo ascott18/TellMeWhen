@@ -2932,7 +2932,7 @@ end
 -- SUGGESTER
 -- ----------------------
 
-SUG = TMW:NewModule("Suggester", "AceEvent-3.0", "AceComm-3.0", "AceSerializer-3.0") TMW.SUG = SUG
+SUG = TMW:NewModule("Suggester", "AceEvent-3.0", "AceComm-3.0", "AceSerializer-3.0", "AceTimer-3.0") TMW.SUG = SUG
 local inputType
 local SUGIMS, SUGSoI
 local SUGpreTable = {}
@@ -3002,8 +3002,31 @@ function SUG:OnInitialize()
 		local didrunhook
 		TellMeWhen_IconEditor:HookScript("OnShow", function()
 			if didrunhook then return end
+			
+			do	--validate all old items in the item cache
+				local handle
+				function SUG:ValidateItemIDs()
+					--all data should be in by now, see what actually exists.
+					for id in pairs(ItemCache) do
+						if not GetItemInfo(id) then
+							print("TEST", id)
+							ItemCache[id] = nil
+						end
+					end
+					SUG.ValidateItemIDs = nil
+				end
+					
+				--start the requests
+				for id in pairs(ItemCache) do
+					GetItemInfo(id)
+				end
+				
+				SUG:ScheduleTimer("ValidateItemIDs", 5)
+			end
+					
+					
 			TMWOptDB.IncompleteCache = true
-			SUG.NumCachePerFrame = 1 -- 0 is actually 1. Yeah, i know, its lame. I'm lazy.
+			SUG.NumCachePerFrame = 1
 
 			local Blacklist = {
 				["Interface\\Icons\\Trade_Alchemy"] = true,
@@ -3076,9 +3099,9 @@ function SUG:OnInitialize()
 							Parser:SetSpellByID(index)
 							local r, g, b = Text1:GetTextColor()
 							if g > .95 and r > .95 and b > .95 then
-								SUG.SpellCache[index] = name
+								SpellCache[index] = name
 								if castTime > 0 or Text2:GetText() == SPELL_CAST_CHANNELED or Text3:GetText() == SPELL_CAST_CHANNELED then
-									SUG.CastCache[index] = name
+									CastCache[index] = name
 								end
 							end
 							spellsFailed = 0
@@ -3096,27 +3119,28 @@ function SUG:OnInitialize()
 			end
 			local co = coroutine.create(SpellCacher)
 			f:SetScript("OnUpdate", function()
-					if not resume(co) then
-						TMWOptDB.IncompleteCache = false
-						TMWOptDB.CacheLength = index
-						f:SetScript("OnUpdate", nil)
-						SUG.Suggest.Speed:Hide()
-						SUG.Suggest.Status:Hide()
-						SUG.Suggest.Finish:Hide()
-						
-						SUG.IsCaching = nil
-						SUG.SpellCache[1852] = nil -- GM spell named silenced, interferes with equiv
-						SUG.SpellCache[71216] = nil -- enraged
-						SUG.SpellCache[100000] = GetSpellInfo(100000) and strlower(GetSpellInfo(100000)) -- filted out by default but this spell really needs to be in the list because of how cool it is
-						if SUG.onCompleteCache then
-							SUG.onCompleteCache = nil
-							TMW.SUG.redoIfSame = 1
-							SUG:NameOnCursor()
-						end
-						co = nil
-						Parser:Hide()
-						collectgarbage()
+				if not resume(co) then
+					TMWOptDB.IncompleteCache = false
+					TMWOptDB.CacheLength = index
+					f:SetScript("OnUpdate", nil)
+					SUG.Suggest.Speed:Hide()
+					SUG.Suggest.Status:Hide()
+					SUG.Suggest.Finish:Hide()
+					
+					SUG.IsCaching = nil
+					SpellCache[1852] = nil -- GM spell named silenced, interferes with equiv
+					SpellCache[71216] = nil -- enraged
+					SpellCache[100000] = GetSpellInfo(100000) and strlower(GetSpellInfo(100000)) -- filted out by default but this spell really needs to be in the list because of how cool it is
+					if SUG.onCompleteCache then
+						SUG.onCompleteCache = nil
+						TMW.SUG.redoIfSame = 1
+						SUG:NameOnCursor()
 					end
+
+					co = nil
+					Parser:Hide()
+					collectgarbage()
+				end
 			end)
 			SUG.IsCaching = true
 			didrunhook = true

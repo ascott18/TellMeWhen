@@ -8,7 +8,8 @@
  ** (r198) Updated bar edge offsets for Masque r366+
  ** (r199) TellMeWhen.lua:1404: attempt to index field 'Font' (a nil value)
  ** (r201) The suggestion list will now update its display when new item information is obtained from the server
- ** (r202) TellMeWhen_Options.lua:2432: attempt to concatenate local "name" (a nil value)
+ ** (r203) TellMeWhen_Options.lua:2432: attempt to concatenate local "name" (a nil value)
+ ** (r204) Invalid itemIDs are now checked and purged from the cache when a new version of WoW is detected.
 
  
 ===v4.5.2===
