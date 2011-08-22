@@ -2399,7 +2399,7 @@ function IE:GetRealNames()
 	for k, v in pairs(tbl) do
 		local name, texture
 		if CI.SoI == "item" then
-			name = GetItemInfo(v)
+			name = GetItemInfo(v) or v or ""
 			texture = GetItemIcon(v)
 		else
 			name, _, texture = GetSpellInfo(v)
