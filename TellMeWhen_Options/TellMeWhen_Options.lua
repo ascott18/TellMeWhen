@@ -2986,6 +2986,7 @@ function SUG:OnInitialize()
 	SUG:RegisterEvent("BAG_UPDATE")
 	SUG:RegisterEvent("BANKFRAME_OPENED", "BAG_UPDATE")
 	SUG:RegisterEvent("ACTIONBAR_SLOT_CHANGED")
+	SUG:RegisterEvent("GET_ITEM_INFO_RECEIVED")
 
 	if IsInGuild() then
 		SUG:SendCommMessage("TMWSUG", SUG:Serialize("RCSL"), "GUILD")
@@ -3186,6 +3187,12 @@ end
 
 function SUG:ACTIONBAR_SLOT_CHANGED()
 	SUG.doUpdateActionCache = true
+end
+
+function SUG:GET_ITEM_INFO_RECEIVED()
+	if (SUG.overrideSoI or CI.SoI) == "item" and SUG.Suggest:IsShown() then
+		SUG:SuggestingComplete()
+	end
 end
 
 function SUG:OnCommReceived(prefix, text, channel, who)
