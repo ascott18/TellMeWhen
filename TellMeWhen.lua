@@ -3454,11 +3454,14 @@ TMW.Units = {
 function TMW:GetUnits(icon, setting, dontreplace)
 	if unitcache[setting..tostring(dontreplace)] then return unitcache[setting..tostring(dontreplace)] end --why make a bunch of tables and do a bunch of stuff if we dont need to
 
-	setting = TMW:CleanString(setting)
-	setting = strlower(setting)
+	setting = TMW:CleanString(setting):
+	lower():
+	gsub("|cffff0000", ""): -- strip color codes
+	gsub("|r", "")
+	
 
-	--SUBSTITUTE "|cffff0000#|r WITH 1-10, 1-40, etc (NOTE LOWERCASE COLOR ESCAPE SEQUENCE)
-	for wholething, unit in gmatch(setting, "(([^; %-]-) ?|cffff0000#|r)") do
+	--SUBSTITUTE "# WITH 1-10, 1-40, etc (NOTE LOWERCASE COLOR ESCAPE SEQUENCE)
+	for wholething, unit in gmatch(setting, "(([^; %-]-) ?#)") do
 		unit = strtrim(unit)
 		for k, v in pairs(TMW.Units) do
 			if v.value == unit then
