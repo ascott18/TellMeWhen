@@ -1487,15 +1487,6 @@
 				</Anchors>
 				<Scripts>
 					<OnLoad> self:SetText(TMW.L["GROUPADDONSETTINGS"]) TMW.MOTab = self:GetID() </OnLoad>
-					<OnClick>
-						--handled in OnMouseUp
-					</OnClick>
-					<OnMouseUp>
-						TMW:CompileOptions()
-						TMW.IE:TabClick(self)
-						LibStub("AceConfigDialog-3.0"):SelectGroup("TMW IEOptions", "groups", "Group " .. TMW.CI.g)
-						LibStub("AceConfigDialog-3.0"):Open("TMW IEOptions", TMW.IE.MainOptionsWidget)
-					</OnMouseUp>
 				</Scripts>
 			</Button>
 

@@ -1517,6 +1517,11 @@ function IE:TabClick(self)
 			IE[frame]:Hide()
 		end
 	end
+	
+	IE[IE.Tabs[self:GetID()]]:Show()
+	IE.CurrentTab = self
+	TellMeWhen_IconEditor:Show()
+	
 	if self:GetID() == TMW.ICCNDTTab then
 		CNDT.settings = db.profile.Groups[CI.g].Icons[CI.i].Conditions
 		CNDT.type = "icon"
@@ -1525,9 +1530,11 @@ function IE:TabClick(self)
 		CNDT.settings = db.profile.Groups[CI.g].Conditions
 		CNDT.type = "group"
 		CNDT:Load()
+	elseif self:GetID() == TMW.MOTab then
+		TMW:CompileOptions()
+		LibStub("AceConfigDialog-3.0"):SelectGroup("TMW IEOptions", "groups", "Group " .. CI.g)
+		LibStub("AceConfigDialog-3.0"):Open("TMW IEOptions", IE.MainOptionsWidget)
 	end
-	IE[IE.Tabs[self:GetID()]]:Show()
-	TellMeWhen_IconEditor:Show()
 end
 
 function IE:NotifyChanges(...)
@@ -1754,6 +1761,10 @@ function IE:Load(isRefresh, icon)
 			return
 		else
 			IE:TabClick(IE.MainTab)
+		end
+	else
+		if IE.CurrentTab:GetID() == TMW.MOTab then
+			IE:TabClick(IE.MainOptionsTab)
 		end
 	end
 

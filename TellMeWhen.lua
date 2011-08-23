@@ -1122,7 +1122,7 @@ function TMW:OnProfile()
 	end
 	
 	TMW:Update()
-	TMW.IE:Load(1, TMW:InIcons()())
+	TMW.IE:Load(1, TMW:InIcons()()) -- hack to get the first icon that exists
 	
 	if TMW.CompileOptions then TMW:CompileOptions() end -- redo groups in the options
 end
@@ -2217,6 +2217,9 @@ function GroupBase.SetPos(group)
 	local s = db.profile.Groups[groupID]
 	local p = s.Point
 	group:ClearAllPoints()
+	if p.relativeTo == "" then
+		p.relativeTo = "UIParent"
+	end
 	p.relativeTo = type(p.relativeTo) == "table" and p.relativeTo:GetName() or p.relativeTo
 	local relativeTo = _G[p.relativeTo]
 	if not relativeTo then
