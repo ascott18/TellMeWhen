@@ -530,7 +530,7 @@ local groupConfigTemplate = {
 					desc = L["UIPANEL_ICONSPACING_DESC"],
 					type = "range",
 					order = 22,
-					min = 0,
+					min = -5,
 					softMax = 20,
 					step = 0.1,
 					bigStep = 1,
@@ -3009,7 +3009,6 @@ function SUG:OnInitialize()
 					--all data should be in by now, see what actually exists.
 					for id in pairs(ItemCache) do
 						if not GetItemInfo(id) then
-							print("TEST", id)
 							ItemCache[id] = nil
 						end
 					end

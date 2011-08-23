@@ -1,6 +1,7 @@
 ===v4.5.3===
  * Improved configurations for units. Leaving the red '#' in will now default the unit to its full range, and there is now a tooltip showing all units being checked when holding down a modifier key, similar to the name editbox.
  * Added a new option to condition icons: "Only show if timer is active". If enabled, forces the icon to be hidden if there is not an active timer on the icon.
+ * Updated Masque/ButtonFacade code again.
  * Bug Fixes:
  ** (r196) I accidentally commented out the fix for the error 132 crash. Oops.
  ** (r196) Updated for Masque r366

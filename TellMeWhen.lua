@@ -34,7 +34,7 @@ local DRData = LibStub("DRData-1.0", true)
 TELLMEWHEN_VERSION = "4.5.3"
 TELLMEWHEN_VERSION_MINOR = strmatch(" @project-version@", " r%d+") or ""
 TELLMEWHEN_VERSION_FULL = TELLMEWHEN_VERSION .. TELLMEWHEN_VERSION_MINOR
-TELLMEWHEN_VERSIONNUMBER = 45309 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
+TELLMEWHEN_VERSIONNUMBER = 45310 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
 if TELLMEWHEN_VERSIONNUMBER > 46000 or TELLMEWHEN_VERSIONNUMBER < 45000 then return error("YOU SCREWED UP THE VERSION NUMBER OR DIDNT CHANGE THE SAFETY LIMITS") end -- safety check because i accidentally made the version number 414069 once
 
 TELLMEWHEN_MAXGROUPS = 1 	--this is a default, used by SetTheory (addon), so dont rename
@@ -2894,21 +2894,16 @@ function TMW.IconsSort(a, b)
 end
 
 function TMW:Icon_UpdateBars(icon)
-	local blizzEdgeInsets = 1.5
+	local blizzEdgeInsets = icon.group.barInsets or 0
 	local pbar = icon.pbar
 	local cbar = icon.cbar
 	if icon.ShowPBar and icon.NameFirst then
 		TMW:RegisterEvent("SPELL_UPDATE_USABLE")
+		pbar:SetPoint("BOTTOM", icon.texture, "CENTER", 0, 0.5)
+		pbar:SetPoint("TOPLEFT", icon.texture, "TOPLEFT", blizzEdgeInsets, -blizzEdgeInsets)
+		pbar:SetPoint("TOPRIGHT", icon.texture, "TOPRIGHT", -blizzEdgeInsets, -blizzEdgeInsets)
+		
 		local _, _, _, cost, _, powerType = GetSpellInfo(icon.NameFirst)
-		if (not LBF and not LMB) or not icon.group.SkinID or icon.group.SkinID == "Blizzard" then
-			pbar:SetPoint("BOTTOM", icon.texture, "CENTER", 0, 0.5)
-			pbar:SetPoint("TOPLEFT", icon.texture, "TOPLEFT", blizzEdgeInsets, -blizzEdgeInsets)
-			pbar:SetPoint("TOPRIGHT", icon.texture, "TOPRIGHT", -blizzEdgeInsets, -blizzEdgeInsets)
-		else
-			pbar:SetPoint("BOTTOM", icon.texture, "CENTER", 0, 0.5)
-			pbar:SetPoint("TOPLEFT", icon.texture, "TOPLEFT", 0, 0)
-			pbar:SetPoint("TOPRIGHT", icon.texture, "TOPRIGHT", 0, 0)
-		end
 		cost = cost or 0
 		pbar:SetMinMaxValues(0, cost)
 		pbar.Max = cost
@@ -2926,15 +2921,9 @@ function TMW:Icon_UpdateBars(icon)
 	end
 	if icon.ShowCBar then
 		cbar.texture:SetTexture(LSM:Fetch("statusbar", db.profile.TextureName))
-		if (not LBF and not LMB) or not icon.group.SkinID or icon.group.SkinID == "Blizzard" then
-			cbar:SetPoint("TOP", icon.texture, "CENTER", 0, -0.5)
-			cbar:SetPoint("BOTTOMLEFT", icon.texture, "BOTTOMLEFT", blizzEdgeInsets, blizzEdgeInsets)
-			cbar:SetPoint("BOTTOMRIGHT", icon.texture, "BOTTOMRIGHT", -blizzEdgeInsets, blizzEdgeInsets)
-		else
-			cbar:SetPoint("TOP", icon.texture, "CENTER", 0, -0.5)
-			cbar:SetPoint("BOTTOMLEFT", icon.texture, "BOTTOMLEFT", 0, 0)
-			cbar:SetPoint("BOTTOMRIGHT", icon.texture, "BOTTOMRIGHT", 0, 0)
-		end
+		cbar:SetPoint("TOP", icon.texture, "CENTER", 0, -0.5)
+		cbar:SetPoint("BOTTOMLEFT", icon.texture, "BOTTOMLEFT", blizzEdgeInsets, blizzEdgeInsets)
+		cbar:SetPoint("BOTTOMRIGHT", icon.texture, "BOTTOMRIGHT", -blizzEdgeInsets, blizzEdgeInsets)
 		cbar:SetMinMaxValues(0, 1)
 		cbar.Max = 1
 		cbar:Show()
@@ -3037,20 +3026,27 @@ function TMW:Icon_Update(icon)
 	local ct = icon.countText
 	local btf = group.Fonts.Bind
 	local bt = icon.bindText
+	local isDefault
 	ct:SetFont(LSM:Fetch("font", ctf.Name), ctf.Size, ctf.Outline)
 	bt:SetFont(LSM:Fetch("font", btf.Name), btf.Size, btf.Outline)
 	bt:SetText(icon.BindText)
+	icon.__normaltex = icon.__LBF_Normal or icon.__MSQ_NormalTexture or icon:GetNormalTexture()
 	if LMB then
 		local g = LMB:Group("TellMeWhen", format(L["fGROUP"], groupID))
-		if not hookedLMBSkin and g.__Skin and g.__Disable then
-			hooksecurefunc(g, "__Skin", LMBSkinHook)
-			hooksecurefunc(g, "__Disable", LMBSkinHook)
+		if not hookedLMBSkin and g.Skin and g.Disable and g.Enable then
+			hooksecurefunc(g, "Skin", LMBSkinHook)
+			hooksecurefunc(g, "Disable", LMBSkinHook)
+			hooksecurefunc(g, "Enable", LMBSkinHook)
 			hookedLMBSkin = 1
 		end
 		g:AddButton(icon)
 		group.SkinID = g.SkinID or (g.db and g.db.SkinID)
-		if g.Disabled then
+		if g.Disabled or (g.db and g.db.Disabled) then
 			group.SkinID = "Blizzard"
+			print(icon:GetNormalTexture(), icon:GetNormalTexture():GetTexture())
+			if not icon.__normaltex:GetTexture() then
+				isDefault = 1
+			end
 		end
 	elseif LBF then
 		TMW.DontRun = true -- TMW:Update() is ran in the LBF skin callback, which just causes an infinite loop. This tells it not to
@@ -3059,6 +3055,10 @@ function TMW:Icon_Update(icon)
 		g:AddButton(icon)
 
 		group.SkinID = lbfs.SkinID or g.SkinID or (g.db and g.db.SkinID) or "Blizzard" -- i dont think LBF ever had (g.db and g.db.SkinID), but whatever
+		if group.SkinID == "Blizzard" then
+			icon.__normaltex:Hide()
+			isDefault = 1
+		end
 		local tbl = LBF:GetSkins()
 		if tbl and tbl[group.SkinID] then
 			ct:SetFont(LSM:Fetch("font", ctf.Name), tbl and tbl[group.SkinID].Count.FontSize or ctf.Size, ctf.Outline)
@@ -3069,6 +3069,7 @@ function TMW:Icon_Update(icon)
 		ct:SetPoint("BOTTOMRIGHT", icon, "BOTTOMRIGHT", ctf.x, ctf.y)
 		bt:ClearAllPoints()
 		bt:SetPoint("BOTTOMRIGHT", icon, "BOTTOMRIGHT", btf.x, btf.y)
+		isDefault = 1
 	end
 	
 	if LMB or LBF then
@@ -3081,17 +3082,15 @@ function TMW:Icon_Update(icon)
 			bt:SetPoint("TOPLEFT", icon, "TOPLEFT", btf.x, btf.y)
 		end
 	end
-	icon.cbar:SetFrameLevel(icon:GetFrameLevel() + 1)
-	icon.pbar:SetFrameLevel(icon:GetFrameLevel() + 1)
+	icon.cbar:SetFrameLevel(icon:GetFrameLevel() - 1)
+	icon.pbar:SetFrameLevel(icon:GetFrameLevel() - 1)
 
-	icon.__normaltex = icon.__LBF_Normal or icon.__MSQ_NormalTexture or icon:GetNormalTexture()
-	if (not LBF and not LMB) or not group.SkinID or group.SkinID == "Blizzard" then
-		icon.__normaltex:Hide()
-		cd:SetFrameLevel(icon:GetFrameLevel() + 1)
-		icon.cbar:SetFrameLevel(icon:GetFrameLevel() + 2)
-		icon.pbar:SetFrameLevel(icon:GetFrameLevel() + 2)
+	if isDefault then
+		group.barInsets = 1.5
+		icon.cbar:SetFrameLevel(icon:GetFrameLevel() + 1)
+		icon.pbar:SetFrameLevel(icon:GetFrameLevel() + 1)
 	else
-		icon.__normaltex:Show()
+		group.barInsets = 0
 	end
 
 	icon.__previcon = nil
