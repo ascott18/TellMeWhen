@@ -1998,6 +1998,8 @@ local EnvMeta = {
 }
 
 local functionCache = {} CNDT.functionCache = functionCache
+local groupCombatCondition = {Unit = "player"}
+
 function CNDT:ProcessConditions(icon)
 	if TMW.debug and test then test() end
 	local Conditions = icon.Conditions
@@ -2108,7 +2110,17 @@ function CNDT:ProcessConditions(icon)
 			]]..icon:GetName()..[[.CndtFailed = nil return false, true
 		end]]
 	else -- its a group condition
-		funcstr = [[if not (]] .. strsub(funcstr, 4) .. [[) then
+		funcstr = strsub(funcstr, 4)
+		if icon.OnlyInCombat then
+			CNDT.ConditionsByType.COMBAT.funcstr(groupCombatCondition)
+			if funcstr == "" then
+				funcstr = "PlayerInCombat"
+			else
+				funcstr = "(" .. funcstr .. ") and PlayerInCombat"
+			end
+		end
+		
+		funcstr = [[if not (]] .. funcstr .. [[) then
 			]] .. icon:GetName() .. [[:Hide() return false, false
 		else
 			]] .. icon:GetName() .. [[:Show() return false, true

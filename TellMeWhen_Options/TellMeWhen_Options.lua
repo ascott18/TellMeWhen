@@ -1536,8 +1536,8 @@ function IE:NotifyChanges(...)
 	if hasPath then
 		LibStub("AceConfigDialog-3.0"):SelectGroup("TMW Options", ...)
 	end
-	if TMW.IE.MainOptionsWidget then
-		LibStub("AceConfigDialog-3.0"):Open("TMW IEOptions", TMW.IE.MainOptionsWidget)
+	if IE.MainOptionsWidget and IE.MainOptions:IsShown() then
+		LibStub("AceConfigDialog-3.0"):Open("TMW IEOptions", IE.MainOptionsWidget)
 		if hasPath then
 			LibStub("AceConfigDialog-3.0"):SelectGroup("TMW IEOptions", ...)
 		end

@@ -34,7 +34,7 @@ local DRData = LibStub("DRData-1.0", true)
 TELLMEWHEN_VERSION = "4.5.3"
 TELLMEWHEN_VERSION_MINOR = strmatch(" @project-version@", " r%d+") or ""
 TELLMEWHEN_VERSION_FULL = TELLMEWHEN_VERSION .. TELLMEWHEN_VERSION_MINOR
-TELLMEWHEN_VERSIONNUMBER = 45308 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
+TELLMEWHEN_VERSIONNUMBER = 45309 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
 if TELLMEWHEN_VERSIONNUMBER > 46000 or TELLMEWHEN_VERSIONNUMBER < 45000 then return error("YOU SCREWED UP THE VERSION NUMBER OR DIDNT CHANGE THE SAFETY LIMITS") end -- safety check because i accidentally made the version number 414069 once
 
 TELLMEWHEN_MAXGROUPS = 1 	--this is a default, used by SetTheory (addon), so dont rename
@@ -1183,7 +1183,7 @@ function TMW:OnUpdate() -- this is where all icon OnUpdate scripts are actually 
 		CNDTEnv.GCD = GCD
 		
 		if FramesToFind then
-			-- I hate to do this, but this is the only way to detect frames that are created by an upvalued CreateFrame (*cough* VuhDo) (Unless i raw hook it, but CreateFrame should be secure)
+			-- I hate to do this, but this is the only way to detect frames that are created by an upvalued CreateFrame (*cough* VuhDo) (Unless i raw hook it, but CreateFrame should probably be secure)
 			for group, frameName in pairs(FramesToFind) do
 				if _G[frameName] then
 					group:SetPos()
@@ -2328,8 +2328,8 @@ function TMW:Group_Update(groupID)
 
 	if group.Enabled and group.CorrectSpec and Locked then
 		group:Show()
-		if #group.Conditions > 0 then
-			group:SetScript("OnUpdate", TMW.CNDT:ProcessConditions(group)) -- dont be alarmed, this is handled by GroupSetScript
+		if #group.Conditions > 0 or group.OnlyInCombat then
+			group:SetScript("OnUpdate", CNDT:ProcessConditions(group)) -- dont be alarmed, this is handled by GroupSetScript
 		else
 			group:SetScript("OnUpdate", nil)
 		end
@@ -2828,7 +2828,7 @@ function IconBase.SetInfo(icon, alpha, color, texture, start, duration, pbName, 
 
 end
 
-local IconMetamethods = {
+local iconMT = {
 	__lt = function(icon1, icon2)
 		local g1 = icon1.group:GetID()
 		local g2 = icon2.group:GetID()
@@ -2840,7 +2840,8 @@ local IconMetamethods = {
 	end,
 	__tostring = function(icon)
 		return icon:GetName() or tostring(icon)
-	end
+	end,
+	__index = getmetatable(CreateFrame("Button")).__index,
 }
 
 
@@ -2867,10 +2868,11 @@ function TMW:CreateIcon(group, groupID, iconID)
 	icon.group = group
 	group[iconID] = icon
 	CNDTEnv[icon:GetName()] = icon
-	local mt = getmetatable(icon)
+	--[[local mt = getmetatable(icon)
 	for k, v in pairs(IconMetamethods) do
 		mt[k] = v
-	end
+	end]]
+	setmetatable(icon, iconMT)
 	for k, v in pairs(IconBase) do
 		if type(icon[k]) == "function" then -- if the method already exists on the icon
 			icon[strlower(k)] = icon[k] -- store the old method as the lowercase same name
@@ -3015,7 +3017,7 @@ function TMW:Icon_Update(icon)
 	ClearScripts(icon)
 
 	if #icon.Conditions > 0 and Locked then -- dont define conditions if we are unlocked so that i dont have to deal with meta icons checking icons during config. I think i solved this somewhere else too without thinking about it, but what the hell
-		TMW.CNDT:ProcessConditions(icon)
+		CNDT:ProcessConditions(icon)
 	else
 		icon.CndtCheck = nil
 	end

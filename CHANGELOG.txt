@@ -11,6 +11,7 @@
  ** (r203) TellMeWhen_Options.lua:2432: attempt to concatenate local "name" (a nil value)
  ** (r204) Invalid itemIDs are now checked and purged from the cache when a new version of WoW is detected
  ** (r205) Spell durations are now removed from item cooldown name data when it is parsed
+ ** (r206) The group settings interface will now longer incorrectly show in the icon editor after moving a group if the group settings tab is not selected
 
  
 ===v4.5.2===

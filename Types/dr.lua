@@ -35,7 +35,7 @@ local clientVersion = select(4, GetBuildInfo())
 local DRData = LibStub("DRData-1.0", true)
 if not DRData then return end
 local DRSpells = DRData.spells
-local DRReset = DRData.RESET_TIME
+local DRReset = 18
 local PvEDRs = {}
 for spellID, category in pairs(DRSpells) do
 	if DRData.pveDR[category] then
@@ -108,7 +108,7 @@ local function DR_OnEvent(icon, _, _, p, ...)
 							dr = {
 								amt = 50,
 								start = TMW.time,
-								duration = 18,
+								duration = DRReset,
 								tex = SpellTextures[i]
 							}
 							icon[g] = dr
@@ -116,7 +116,7 @@ local function DR_OnEvent(icon, _, _, p, ...)
 							local amt = dr.amt
 							if amt and amt ~= 0 then
 								dr.amt = amt > 25 and amt/2 or 0
-								dr.duration = 18
+								dr.duration = DRReset
 								dr.start = TMW.time
 								dr.tex = SpellTextures[i]
 							end
