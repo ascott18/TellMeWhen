@@ -241,18 +241,25 @@ function TMW:GetIconMenuText(g, i, data)
 		elseif data.WpnEnchantType == "SecondaryHandSlot" then text = INVTYPE_WEAPONOFFHAND
 		elseif data.WpnEnchantType == "RangedSlot" then text = INVTYPE_THROWN end
 		text = text .. " ((" .. L["ICONMENU_WPNENCHANT"] .. "))"
+		
 	elseif data.Type == "meta" then
 		text = "((" .. L["ICONMENU_META"] .. "))"
+		
+	elseif data.Type == "runes" then
+		text = "((" .. L["ICONMENU_RUNES"] .. "))"
+		
 	elseif data.Type == "cast" and text == "" then
 		text = "((" .. L["ICONMENU_CAST"] .. "))"
+		
 	elseif data.Type == "totem" and text == "" then
 		text = "((" .. L["ICONMENU_TOTEM"] .. "))"
 	end
+	
 	text = text == "" and L["UNNAMED"] or text
 	local textshort = strsub(text, 1, 35)
 	if strlen(text) > 35 then textshort = textshort .. "..." end
 
-	local tooltip =	((data.Name and data.Name ~= "" and data.Type ~= "meta" and data.Type ~= "wpnenchant") and data.Name .. "\r\n" or "") ..
+	local tooltip =	((data.Name and data.Name ~= "" and data.Type ~= "meta" and data.Type ~= "wpnenchant" and data.Type ~= "runes") and data.Name .. "\r\n" or "") ..
 					((Types[data.Type].name) or "") ..
 					((data.Enabled and "") or "\r\n(" .. L["DISABLED"] .. ")")
 
@@ -261,7 +268,7 @@ end
 
 function TMW:GuessIconTexture(data)
 	local tex = nil
-	if (data.Name and data.Name ~= "" and data.Type ~= "meta" and data.Type ~= "wpnenchant") and not tex then
+	if (data.Name and data.Name ~= "" and data.Type ~= "meta" and data.Type ~= "wpnenchant" and data.Type ~= "runes") and not tex then
 		local name = TMW:GetSpellNames(nil, data.Name, 1)
 		if name then
 			if data.Type == "cooldown" and data.CooldownType == "item" then
@@ -274,6 +281,7 @@ function TMW:GuessIconTexture(data)
 	if data.Type == "cast" and not tex then tex = "Interface\\Icons\\Temp"
 	elseif data.Type == "buff" and not tex then tex = "Interface\\Icons\\INV_Misc_PocketWatch_01"
 	elseif data.Type == "meta" and not tex then tex = "Interface\\Icons\\LevelUpIcon-LFD"
+	elseif data.Type == "runes" and not tex then tex = "Interface\\Icons\\Spell_Deathknight_BloodPresence"
 	elseif data.Type == "wpnenchant" and not tex then tex = GetInventoryItemTexture("player", GetInventorySlotInfo(data.WpnEnchantType or "MainHandSlot")) or GetInventoryItemTexture("player", "MainHandSlot") end
 	if not tex then tex = "Interface\\Icons\\INV_Misc_QuestionMark" end
 	return tex
@@ -387,7 +395,6 @@ local checkorder = {
 	[1] = L["DESCENDING"],
 }
 local fontorder = {
-	-- NOTE: these are actually backwards so they sort logically in AceConfig, but have their signs switched in the actual function (1 = -1; -1 = 1).
 	Count = 40,
 	Bind = 50,
 }
@@ -476,22 +483,28 @@ local groupConfigTemplate = {
 			name = L["MAIN"],
 			order = 1,
 			args = {
+				Enabled = {
+					name = L["UIPANEL_ENABLEGROUP"],
+					desc = L["UIPANEL_TOOLTIP_ENABLEGROUP"],
+					type = "toggle",
+					order = 1,
+				},
 				Name = {
 					name = L["UIPANEL_GROUPNAME"],
 					type = "input",
-					order = 1,
-					width = "full",
+					order = 2,
+					width = "double",
 					set = function(info, val)
 						local g = findid(info)
 						db.profile.Groups[g].Name = strtrim(val)
 						TMW:Group_Update(g)
 					end,
 				},
-				Enabled = {
-					name = L["UIPANEL_ENABLEGROUP"],
-					desc = L["UIPANEL_TOOLTIP_ENABLEGROUP"],
+				OnlyInCombat = {
+					name = L["UIPANEL_ONLYINCOMBAT"],
+					desc = L["UIPANEL_TOOLTIP_ONLYINCOMBAT"],
 					type = "toggle",
-					order = 2,
+					order = 3,
 				},
 				PrimarySpec = {
 					name = L["UIPANEL_PRIMARYSPEC"],
@@ -1720,29 +1733,40 @@ function IE:LoadSettings()
 		end
 	end
 
-	for _, parent in TMW:Vararg(IE.Main.TypeChecks, IE.Main.WhenChecks, IE.Main.Sort) do
-		for k, frame in pairs(parent) do
-			if strfind(k, "Radio") then
-				if frame.setting == "TotemSlots" then
-					frame:SetChecked(strsub(ics[frame.setting], frame:GetID(), frame:GetID()) == "1")
-				else
-					local checked = ics[frame.setting] == frame.value
-					frame:SetChecked(checked)
-					if checked and parent == IE.Main.WhenChecks then
-						if frame:GetID() == 1 then
-							IE.Main.Alpha:Enable()
-							IE.Main.UnAlpha:Disable()
-						elseif frame:GetID() == 2 then
-							IE.Main.Alpha:Disable()
-							IE.Main.UnAlpha:Enable()
-						elseif frame:GetID() == 3 then
-							IE.Main.Alpha:Enable()
-							IE.Main.UnAlpha:Enable()
+	for _, parent in TMW:Vararg(CI.t ~= "runes" and IE.Main.TypeChecks, IE.Main.WhenChecks, IE.Main.Sort) do
+		if parent then
+			for k, frame in pairs(parent) do
+				if strfind(k, "Radio") then
+					if frame.setting == "TotemSlots" then
+						frame:SetChecked(strsub(ics[frame.setting], frame:GetID(), frame:GetID()) == "1")
+					else
+						local checked = ics[frame.setting] == frame.value
+						frame:SetChecked(checked)
+						if checked and parent == IE.Main.WhenChecks then
+							if frame:GetID() == 1 then
+								IE.Main.Alpha:Enable()
+								IE.Main.UnAlpha:Disable()
+							elseif frame:GetID() == 2 then
+								IE.Main.Alpha:Disable()
+								IE.Main.UnAlpha:Enable()
+							elseif frame:GetID() == 3 then
+								IE.Main.Alpha:Enable()
+								IE.Main.UnAlpha:Enable()
+							end
 						end
 					end
 				end
 			end
 		end
+	end
+	IE.Main.TypeChecks.Runes:Hide()
+	if CI.t == "runes" then
+		for k, frame in pairs(IE.Main.TypeChecks.Runes) do
+			if k ~= 0 then
+				frame:SetChecked(strsub(ics.TotemSlots, frame:GetID(), frame:GetID()) == "1")
+			end
+		end
+		IE.Main.TypeChecks.Runes:Show()
 	end
 end
 
@@ -1971,9 +1995,16 @@ function IE:Type_DropDown()
 	info.disabled = true
 	info.notCheckable = true
 	UIDropDownMenu_AddButton(info)
-
+	
 	for _, Type in ipairs(TMW.OrderedTypes) do -- order in the order in which they are loaded in the .toc file
 		if not Type.hidden then
+			if Type.spacebefore then
+				local info = UIDropDownMenu_CreateInfo()
+				info.text = ""
+				info.isTitle = true
+				info.notCheckable = true
+				UIDropDownMenu_AddButton(info, UIDROPDOWNMENU_MENU_LEVEL)
+			end
 			local info = UIDropDownMenu_CreateInfo()
 			info.text = Type.nameOverride or Type.name
 			info.value = Type.type
@@ -2494,7 +2525,9 @@ function IE:ScheduleIconUpdate(icon, groupID, iconID)
 		groupID = icon
 		icon = TMW[groupID] and TMW[groupID][iconID]
 	end
-	if not icon then return end
+	if not icon then
+		icon = CI.ic
+	end
 	if not TMW.tContains(iconsToUpdate, icon) then
 		tinsert(iconsToUpdate, icon)
 	end

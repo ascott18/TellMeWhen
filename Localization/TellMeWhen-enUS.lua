@@ -87,6 +87,7 @@ L["ICONMENU_DR"] = "Diminishing Returns"
 L["ICONMENU_DR_DESC"] = [=[This icon type can be used to track the length and extent of the diminishing returns of a category of spells.
 
 Spells from different diminishing returns categories should not be checked in one icon.  For example, do not put Polymorph and Cheap Shot in the same icon, as they are not in the same category. It is advised that you used the predefined DR-<category> equivalancies that TMW provides.]=]
+L["ICONMENU_RUNES"] = "Rune Cooldown"
 
 L["ICONMENU_COOLDOWNTYPE"] = "Cooldown type"
 L["ICONMENU_SPELL"] = "Spell or ability"
@@ -186,6 +187,10 @@ L["WATER"] = "Water"
 L["AIR"] = "Air"
 L["MUSHROOMS"] = "Mushrooms to check"
 L["MUSHROOM"] = "Mushroom %d"
+L["RUNES"] = "Rune(s) to check"
+L["RUNE_BLOOD"] = "Blood rune %d"
+L["RUNE_FROST"] = "Frost rune %d"
+L["RUNE_UNHOLY"] = "Unholy rune %d"
 
 L["ICONMENU_SHOWTTTEXT"] = "Show variable text"
 L["ICONMENU_SHOWTTTEXT_DESC"] = "Check this to display the first variable associated with the aura that is beind displayed. Numbers are provided by Blizzard API and do not necessarily match numbers found on the tooltip of the aura. There is also no guarentee that a number will be shown for an aura. In most practical cases, though, the correct numer will be shown."
@@ -310,7 +315,7 @@ L["UIPANEL_DELGROUP_DESC"] = "Any groups after this group will have their ID shi
 L["UIPANEL_TOOLTIP_ENABLEGROUP"] = "Show and enable this group"
 L["UIPANEL_TOOLTIP_ROWS"] = "Set the number of rows in this group"
 L["UIPANEL_TOOLTIP_COLUMNS"] = "Set the number of columns in this group"
-L["UIPANEL_TOOLTIP_ONLYINCOMBAT"] = "Check to only show this group while in combat"
+L["UIPANEL_TOOLTIP_ONLYINCOMBAT"] = "Check to cause this group to only be shown in combat"
 L["UIPANEL_TOOLTIP_NOTINVEHICLE"] = "Check to hide this group when you are in a vehicle and your action bars have changed to that vehicle's abilities"
 L["UIPANEL_TOOLTIP_PRIMARYSPEC"] = "Check to show this group while your primary spec is active"
 L["UIPANEL_TOOLTIP_SECONDARYSPEC"] = "Check to show this group while your secondary spec is active"

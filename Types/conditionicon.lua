@@ -27,6 +27,7 @@ local print = TMW.print
 local Type = {}
 Type.name = L["ICONMENU_CNDTIC"]
 Type.desc = L["ICONMENU_CNDTIC_DESC"]
+Type.spacebefore = true
 Type.WhenChecks = {
 	text = L["ICONMENU_CNDTSHOWWHEN"],
 	{ value = "alpha",			text = L["ICONMENU_SUCCEED"],			colorCode = "|cFF00FF00" },

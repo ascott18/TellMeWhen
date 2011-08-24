@@ -14,9 +14,7 @@ local ldb = LibStub("LibDataBroker-1.1")
 local dataobj = ldb:GetDataObjectByName("TellMeWhen") or
 	ldb:NewDataObject("TellMeWhen", {
 		type = "launcher",
-		--icon = "Interface\\Icons\\Spell_Nature_TimeStop",
-		--iconCoords = {0.07, 0.93, 0.07, 0.93},
-		icon = "Interface\\Addons\\TellMeWhen\\LDB Icon",
+		icon = "Interface\\Addons\\TellMeWhen\\Textures\\LDB Icon",
 	})
 
 dataobj.OnClick = function(self, button)

@@ -29,7 +29,7 @@
 				local groupID, iconID = TMW.CI.g, TMW.CI.i
 				if self.setting == "TotemSlots" then
 					local s = ""
-					for k = 1, 4 do
+					for k = 1, 6 do
 						s = s .. (self:GetParent()["Radio"..k]:GetChecked() and 1 or 0)
 					end
 					TMW.db.profile.Groups[groupID].Icons[iconID][self.setting] = s
@@ -1122,6 +1122,42 @@
 			</OnLoad>
 		</Scripts>
 	</Frame>
+
+	<Button name="TellMeWhen_TypeCheckRuneTemplate" virtual="true" inherits="TellMeWhen_ConditionEditorRuneCheckTemplate">
+		<Size x="35" y="26"/>
+		<Scripts>
+			<OnClick>
+				if self.checked then
+					self.checked = nil
+					self.Check:SetTexture(nil)
+				else
+					self.checked = true
+					self.Check:SetTexture("Interface\\RAIDFRAME\\ReadyCheck-Ready")
+				end
+				
+				local s = ""
+				for k = 1, 6 do
+					s = s .. (self:GetParent()[tostring(k)].checked and 1 or 0)
+				end
+				TMW.CI.ics.TotemSlots = s
+				TMW.IE:ScheduleIconUpdate()
+			</OnClick>
+			<OnLoad>
+				function self:GetChecked()
+					return self.checked
+				end
+				function self:SetChecked(checked)
+					self.checked = checked
+					if checked then
+						self.Check:SetTexture("Interface\\RAIDFRAME\\ReadyCheck-Ready")
+					else
+						self.Check:SetTexture(nil)
+					end
+				end
+			</OnLoad>
+		</Scripts>
+	</Button>
+	
 
 	<Button name="TellMeWhen_SoundSelectButton" virtual="true" >
 		<Size y="14"/>
@@ -2510,6 +2546,105 @@
 									<Anchor point="TOP" relativeTo="$parent3" relativePoint="BOTTOM" y="5"/>
 								</Anchors>
 							</CheckButton>
+							<Frame name="$parentRunes" parentKey="Runes" hidden="true">
+								<Size x="1" y="1"/>
+								<Anchors>
+									<Anchor point="TOPLEFT" y="-5"/>
+								</Anchors>
+								<Frames>
+									<Button name="$parentBlood1" parentKey="1" inherits="TellMeWhen_TypeCheckRuneTemplate" id="1">
+										<Anchors>
+											<Anchor point="TOPLEFT"/>
+										</Anchors>
+										<Layers>
+											<Layer level="ARTWORK">
+												<Texture name="$parentRune" file="Interface\PlayerFrame\UI-PlayerFrame-Deathknight-Blood">
+													<Anchors>
+														<Anchor point="CENTER"/>
+													</Anchors>
+													<Size x="28" y="28"/>
+												</Texture>
+											</Layer>
+										</Layers>
+									</Button>
+									<Button name="$parentBlood2" parentKey="2" inherits="TellMeWhen_TypeCheckRuneTemplate" id="2">
+										<Anchors>
+											<Anchor point="LEFT" relativeTo="$parentBlood1" relativePoint="RIGHT"/>
+										</Anchors>
+										<Layers>
+											<Layer level="ARTWORK">
+												<Texture name="$parentRune" file="Interface\PlayerFrame\UI-PlayerFrame-Deathknight-Blood">
+													<Anchors>
+														<Anchor point="CENTER"/>
+													</Anchors>
+													<Size x="28" y="28"/>
+												</Texture>
+											</Layer>
+										</Layers>
+									</Button>
+									<Button name="$parentUnholy1" parentKey="3" inherits="TellMeWhen_TypeCheckRuneTemplate" id="3">
+										<Anchors>
+											<Anchor point="TOPLEFT" relativeTo="$parentBlood1" relativePoint="BOTTOMLEFT"/>
+										</Anchors>
+										<Layers>
+											<Layer level="ARTWORK">
+												<Texture name="$parentRune" file="Interface\PlayerFrame\UI-PlayerFrame-Deathknight-Unholy">
+													<Anchors>
+														<Anchor point="CENTER"/>
+													</Anchors>
+													<Size x="28" y="28"/>
+												</Texture>
+											</Layer>
+										</Layers>
+									</Button>
+									<Button name="$parentUnholy2" parentKey="4" inherits="TellMeWhen_TypeCheckRuneTemplate" id="4">
+										<Anchors>
+											<Anchor point="LEFT" relativeTo="$parentUnholy1" relativePoint="RIGHT"/>
+										</Anchors>
+										<Layers>
+											<Layer level="ARTWORK">
+												<Texture name="$parentRune" file="Interface\PlayerFrame\UI-PlayerFrame-Deathknight-Unholy">
+													<Anchors>
+														<Anchor point="CENTER"/>
+													</Anchors>
+													<Size x="28" y="28"/>
+												</Texture>
+											</Layer>
+										</Layers>
+									</Button>
+									<Button name="$parentFrost1" parentKey="5" inherits="TellMeWhen_TypeCheckRuneTemplate" id="5">
+										<Anchors>
+											<Anchor point="TOPLEFT" relativeTo="$parentUnholy1" relativePoint="BOTTOMLEFT"/>
+										</Anchors>
+										<Layers>
+											<Layer level="ARTWORK">
+												<Texture name="$parentRune" file="Interface\PlayerFrame\UI-PlayerFrame-Deathknight-Frost">
+													<Anchors>
+														<Anchor point="CENTER"/>
+													</Anchors>
+													<Size x="28" y="28"/>
+												</Texture>
+											</Layer>
+										</Layers>
+									</Button>
+									<Button name="$parentFrost2" parentKey="6" inherits="TellMeWhen_TypeCheckRuneTemplate" id="6">
+										<Anchors>
+											<Anchor point="LEFT" relativeTo="$parentFrost1" relativePoint="RIGHT"/>
+										</Anchors>
+										<Layers>
+											<Layer level="ARTWORK">
+												<Texture name="$parentRune" file="Interface\PlayerFrame\UI-PlayerFrame-Deathknight-Frost">
+													<Anchors>
+														<Anchor point="CENTER"/>
+													</Anchors>
+													<Size x="28" y="28"/>
+												</Texture>
+											</Layer>
+										</Layers>
+									</Button>
+								</Frames>
+							</Frame>
+			
 						</Frames>
 						<Scripts>
 							<OnLoad>

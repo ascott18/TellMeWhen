@@ -1,3 +1,7 @@
+===v4.5.4===
+ * New icon type: Rune Cooldown. Does what you would expect it to do.
+ * Re-implemented the "Only in Combat" option for groups (since it is such a common option, having it only as a condition is a bit tricky for new users to figure out).
+
 ===v4.5.3===
  * Improved configurations for units. Leaving the red '#' in will now default the unit to its full range, and there is now a tooltip showing all units being checked when holding down a modifier key, similar to the name editbox.
  * Added a new option to condition icons: "Only show if timer is active". If enabled, forces the icon to be hidden if there is not an active timer on the icon.

@@ -31,10 +31,10 @@ local AceDB = LibStub("AceDB-3.0")
 local LSM = LibStub("LibSharedMedia-3.0")
 local DRData = LibStub("DRData-1.0", true)
 
-TELLMEWHEN_VERSION = "4.5.3"
+TELLMEWHEN_VERSION = "4.5.43"
 TELLMEWHEN_VERSION_MINOR = strmatch(" @project-version@", " r%d+") or ""
 TELLMEWHEN_VERSION_FULL = TELLMEWHEN_VERSION .. TELLMEWHEN_VERSION_MINOR
-TELLMEWHEN_VERSIONNUMBER = 45310 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
+TELLMEWHEN_VERSIONNUMBER = 45402 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
 if TELLMEWHEN_VERSIONNUMBER > 46000 or TELLMEWHEN_VERSIONNUMBER < 45000 then return error("YOU SCREWED UP THE VERSION NUMBER OR DIDNT CHANGE THE SAFETY LIMITS") end -- safety check because i accidentally made the version number 414069 once
 
 TELLMEWHEN_MAXGROUPS = 1 	--this is a default, used by SetTheory (addon), so dont rename
@@ -446,6 +446,7 @@ TMW.Defaults = {
 			},
 			["**"] = {
 				Enabled			= false,
+				OnlyInCombat	= false,
 				Locked			= false,
 				Name			= "",
 				Scale			= 2.0,
@@ -1296,6 +1297,11 @@ function TMW:GetUpgradeTable() -- upgrade functions
 	local t = {
 	
 	
+		[45402] = {
+			group = function(gs)
+				gs.OnlyInCombat = false
+			end,
+		},
 		[45013] = {
 			icon = function(ics)
 				if ics.Type == "conditionicon" then
@@ -2647,6 +2653,7 @@ function IconBase.SetInfo(icon, alpha, color, texture, start, duration, pbName, 
 
 	local played, announced
 
+	if duration == 0.001 then duration = 0 end -- hardcode fix for tricks of the trade. fuck you, blizzard
 	local d = duration - (time - start)
 
 	if
