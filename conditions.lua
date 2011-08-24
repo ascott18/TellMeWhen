@@ -2112,7 +2112,7 @@ function CNDT:ProcessConditions(icon)
 	else -- its a group condition
 		funcstr = strsub(funcstr, 4)
 		if icon.OnlyInCombat then
-			CNDT.ConditionsByType.COMBAT.funcstr(groupCombatCondition)
+			CNDT.ConditionsByType.COMBAT.funcstr(groupCombatCondition) -- hackily initialize the events for PlayerInCombat
 			if funcstr == "" then
 				funcstr = "PlayerInCombat"
 			else

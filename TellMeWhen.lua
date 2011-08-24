@@ -31,10 +31,10 @@ local AceDB = LibStub("AceDB-3.0")
 local LSM = LibStub("LibSharedMedia-3.0")
 local DRData = LibStub("DRData-1.0", true)
 
-TELLMEWHEN_VERSION = "4.5.43"
+TELLMEWHEN_VERSION = "4.5.4"
 TELLMEWHEN_VERSION_MINOR = strmatch(" @project-version@", " r%d+") or ""
 TELLMEWHEN_VERSION_FULL = TELLMEWHEN_VERSION .. TELLMEWHEN_VERSION_MINOR
-TELLMEWHEN_VERSIONNUMBER = 45402 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
+TELLMEWHEN_VERSIONNUMBER = 45403 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
 if TELLMEWHEN_VERSIONNUMBER > 46000 or TELLMEWHEN_VERSIONNUMBER < 45000 then return error("YOU SCREWED UP THE VERSION NUMBER OR DIDNT CHANGE THE SAFETY LIMITS") end -- safety check because i accidentally made the version number 414069 once
 
 TELLMEWHEN_MAXGROUPS = 1 	--this is a default, used by SetTheory (addon), so dont rename
@@ -3092,13 +3092,14 @@ function TMW:Icon_Update(icon)
 			bt:SetPoint("TOPLEFT", icon, "TOPLEFT", btf.x, btf.y)
 		end
 	end
-	icon.cbar:SetFrameLevel(icon:GetFrameLevel() - 1)
-	icon.pbar:SetFrameLevel(icon:GetFrameLevel() - 1)
+	icon.cbar:SetFrameLevel(icon:GetFrameLevel() + 1)
+	icon.pbar:SetFrameLevel(icon:GetFrameLevel() + 1)
 
 	if isDefault then
 		group.barInsets = 1.5
-		icon.cbar:SetFrameLevel(icon:GetFrameLevel() + 1)
-		icon.pbar:SetFrameLevel(icon:GetFrameLevel() + 1)
+		cd:SetFrameLevel(icon:GetFrameLevel() + 1)
+		icon.cbar:SetFrameLevel(icon:GetFrameLevel() + 2)
+		icon.pbar:SetFrameLevel(icon:GetFrameLevel() + 2)
 	else
 		group.barInsets = 0
 	end

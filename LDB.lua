@@ -1,12 +1,18 @@
 ﻿-- --------------------
 -- TellMeWhen
 -- Originally by Nephthys of Hyjal <lieandswell@yahoo.com>
--- Major updates by
+
+-- Other contributions by
+-- Sweetmms of Blackrock
 -- Oozebull of Twisting Nether
--- Banjankri of Blackrock 
+-- Oodyboo of Mug'thol
+-- Banjankri of Blackrock
+-- Predeter of Proudmoore
+-- Xenyr of Aszune
+
+-- Currently maintained by
 -- Cybeloras of Mal'Ganis
 -- --------------------
-
 
 local L = TMW and TMW.L
 
