@@ -2399,10 +2399,11 @@ end
 
 local function formatSeconds(seconds)
 	-- note that this is different from the one in conditions.lua
-	local d =  seconds / 86400
-	local h = (seconds % 86400) / 3600
-	local m = (seconds % 86400  % 3600) / 60
-	local s =  seconds % 86400  % 3600  % 60
+	local y =  seconds / 31556925.9936
+	local d = (seconds % 31556925.9936) / 86400
+	local h = (seconds % 31556925.9936 % 86400) / 3600
+	local m = (seconds % 31556925.9936 % 86400  % 3600) / 60
+	local s = (seconds % 31556925.9936 % 86400  % 3600  % 60)
 
 	s = tonumber(format("%.1f", s))
 	local ns = s
@@ -2410,6 +2411,7 @@ local function formatSeconds(seconds)
 		ns = "0" .. s
 	end
 
+	if y >= 1 then return format("%d:%d:%02d:%02d:%s", y, d, h, m, ns) end
 	if d >= 1 then return format("%d:%02d:%02d:%s", d, h, m, ns) end
 	if h >= 1 then return format("%d:%02d:%s", h, m, ns) end
 	if m >= 1 then return format("%d:%s", m, ns) end

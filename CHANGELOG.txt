@@ -1,6 +1,11 @@
+===v4.5.5===
+ * Bug Fixes:
+ ** (r213) The cooldown bar offset editbox now uses TellMeWhen_TimeEditBoxTemplate (and on a related note, huge time strings will now format to the year level for fun)
+
 ===v4.5.4===
  * New icon type: Rune Cooldown. Does what you would expect it to do.
  * Re-implemented the "Only in Combat" option for groups (since it is such a common option, having it only as a condition is a bit tricky for new users to figure out).
+ * Bug Fixes:
  ** (r210) Fixed frame levels that I broke in the last revision of 4.5.3.
  
 ===v4.5.3===

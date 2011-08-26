@@ -506,19 +506,21 @@ CNDT.AndOrs = {
 
 
 local function formatSeconds(seconds, arg2)
-	if type(seconds) == "table" then
+	if type(seconds) == "table" then -- if i set it directly as a metamethod
 		seconds = arg2
 	end
-	local d =  seconds / 86400
-	local h = (seconds % 86400) / 3600
-	local m = (seconds % 86400  % 3600) / 60
-	local s =  seconds % 86400  % 3600  % 60
+	local y =  seconds / 31556925.9936
+	local d = (seconds % 31556925.9936) / 86400
+	local h = (seconds % 31556925.9936 % 86400) / 3600
+	local m = (seconds % 31556925.9936 % 86400  % 3600) / 60
+	local s = (seconds % 31556925.9936 % 86400  % 3600  % 60)
 
 	s = tonumber(format("%.1f", s))
 	if s < 10 then
 		s = "0" .. s
 	end
 
+	if y >= 1 then return format("%d:%d:%02d:%02d:%s", y, d, h, m, ns) end
 	if d >= 1 then return format("%d:%02d:%02d:%s", d, h, m, s) end
 	if h >= 1 then return format("%d:%02d:%s", h, m, s) end
 	return format("%d:%s", m, s)

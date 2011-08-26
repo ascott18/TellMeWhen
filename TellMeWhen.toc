@@ -5,14 +5,14 @@
 ## Interface: 40200
 ## Title: TellMeWhen
 
-## Version: 4.5.4
+## Version: 4.5.5
 ## Author: Cybeloras of Mal'Ganis
 ## Notes: Notifications about cooldowns, buffs, etc.
-## OptionalDeps: ButtonFacade, Masque, Ace3, OmniCC, tullaCC, sct, sctd, MikScrollingBattleText, Parrot
+## OptionalDeps: ButtonFacade, Masque, Ace3, OmniCC, tullaCC, sct, sctd, MikScrollingBattleText, Parrot, DRData-1.0
 # The per character settings are the old settings, but we still need them to upgrade to the new ones
 ## SavedVariablesPerCharacter: TellMeWhen_Settings
 ## SavedVariables: TellMeWhenDB
-## X-Embeds: LibStub, Ace3, AceGUI-3.0-SharedMediaWidgets, LibSharedMedia-3.0, LibDataBroker-1.1
+## X-Embeds: LibStub, Ace3, AceGUI-3.0-SharedMediaWidgets, LibSharedMedia-3.0, LibDataBroker-1.1, DRData-1.0
 ## X-Category: Combat
 
 

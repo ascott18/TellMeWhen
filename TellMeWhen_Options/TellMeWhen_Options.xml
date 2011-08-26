@@ -141,7 +141,6 @@
 		<HighlightFont style="GameFontHighlight"/>
 		<DisabledFont style="GameFontDisable"/>
 	</Button>
-
 	<Button name="TellMeWhen_SpellSuggestTemplate" virtual="true" hidden="true">
 		<Size y="18.45"/>
 		<Scripts>
@@ -233,13 +232,10 @@
 				local groupID, iconID = TMW.CI.g, TMW.CI.i
 
 				local t = TMW:CleanString(self)
-				if strfind(self.setting, "Dur") and strfind(t, ":") then
+				if strfind(t, ":") then
 					t = t:toseconds()
 				end
 				t = tonumber(t) or 0
-				if strfind(self.setting, "Stack") then
-					t = floor(t)
-				end
 				self:SetText(t)
 				local groupID, iconID = TMW.CI.g, TMW.CI.i
 				if TMW.db then
@@ -2815,7 +2811,7 @@
 									</OnClick>
 								</Scripts>
 							</CheckButton>
-							<EditBox name="$parentCBarOffs" inherits="TellMeWhen_InputBoxTemplate" parentKey="CBarOffs" autoFocus="false">
+							<EditBox name="$parentCBarOffs" inherits="TellMeWhen_TimeEditBoxTemplate" parentKey="CBarOffs" autoFocus="false">
 								<Size x="40" y="32"/>
 								<Anchors>
 									<Anchor point="TOPLEFT" relativeTo="$parentShowCBar" relativePoint="BOTTOMLEFT" x="14" y="7"/>
@@ -2834,6 +2830,8 @@
 										self.text:SetText(TMW.L["ICONMENU_OFFS"])
 										self.text:SetWidth(58)
 										TMW:TT(self, "ICONMENU_OFFS", "ICONMENU_BAROFFS")
+										self.setting = "CBarOffs"
+								
 										function self:SetEnabled(arg1)
 											if arg1 then
 												self:SetAlpha(1)
@@ -2846,15 +2844,6 @@
 											self.enabled = arg1
 										end
 									</OnLoad>
-									<OnEditFocusLost>
-										EditBox_ClearHighlight(self)
-										local groupID, iconID = TMW.CI.g, TMW.CI.i
-										if TMW.db then
-											TMW.db.profile.Groups[groupID].Icons[iconID].CBarOffs = tonumber(strtrim(self:GetText())) or 0
-											self:SetText(TMW.db.profile.Groups[groupID].Icons[iconID].CBarOffs)
-										end
-										TMW.IE:ScheduleIconUpdate(groupID, iconID)
-									</OnEditFocusLost>
 								</Scripts>
 							</EditBox>
 						</Frames>
@@ -3084,16 +3073,38 @@
 						</Scripts>
 					</CheckButton>
 					
-					<EditBox name="$parentStackMin" parentKey="StackMin" inherits="TellMeWhen_TimeEditBoxTemplate">
+					<EditBox name="$parentStackMin" parentKey="StackMin" inherits="TellMeWhen_InputBoxTemplate">
 						<Anchors>
 							<Anchor point="TOPLEFT" relativeTo="$parentDurationMin" relativePoint="BOTTOMLEFT" y="-40"/>
 						</Anchors>
+						<Layers>
+							<Layer level="ARTWORK">
+								<FontString name="$parentText" parentKey="text" inherits="GameFontHighlight">
+									<Anchors>
+										<Anchor point="BOTTOM" relativePoint="TOP" y="2"/>
+									</Anchors>
+								</FontString>
+							</Layer>
+						</Layers>
 						<Scripts>
 							<OnLoad>
 								TMW:TT(self, "MINIMUM", "ICONMENU_STACKS_MIN_DESC")
 								self.text:SetText(MINIMUM)
-								self.setting = "StackMin"
 							</OnLoad>
+							<OnEditFocusLost>
+								EditBox_ClearHighlight(self)
+								local groupID, iconID = TMW.CI.g, TMW.CI.i
+
+								local t = TMW:CleanString(self)
+								t = floor(tonumber(t) or 0)
+								self:SetText(t)
+								local groupID, iconID = TMW.CI.g, TMW.CI.i
+								if TMW.db then
+									TMW.db.profile.Groups[groupID].Icons[iconID].StackMin = t
+									TMW.IE:ScheduleIconUpdate(groupID, iconID)
+								end
+								self:GetScript("OnTextChanged")(self)
+							</OnEditFocusLost>
 							<OnShow>
 								TMW.IE.Main.StackHeader:Show()
 							</OnShow>
@@ -3102,16 +3113,38 @@
 							</OnHide>
 						</Scripts>
 					</EditBox>
-					<EditBox name="$parentStackMax" parentKey="StackMax" inherits="TellMeWhen_TimeEditBoxTemplate">
+					<EditBox name="$parentStackMax" parentKey="StackMax" inherits="TellMeWhen_InputBoxTemplate">
 						<Anchors>
 							<Anchor point="LEFT" relativeTo="$parentStackMin" relativePoint="RIGHT" x="40"/>
 						</Anchors>
+						<Layers>
+							<Layer level="ARTWORK">
+								<FontString name="$parentText" parentKey="text" inherits="GameFontHighlight">
+									<Anchors>
+										<Anchor point="BOTTOM" relativePoint="TOP" y="2"/>
+									</Anchors>
+								</FontString>
+							</Layer>
+						</Layers>
 						<Scripts>
 							<OnLoad>
 								TMW:TT(self, "MAXIMUM", "ICONMENU_STACKS_MAX_DESC")
 								self.text:SetText(MAXIMUM)
-								self.setting = "StackMax"
 							</OnLoad>
+							<OnEditFocusLost>
+								EditBox_ClearHighlight(self)
+								local groupID, iconID = TMW.CI.g, TMW.CI.i
+
+								local t = TMW:CleanString(self)
+								t = floor(tonumber(t) or 0)
+								self:SetText(t)
+								local groupID, iconID = TMW.CI.g, TMW.CI.i
+								if TMW.db then
+									TMW.db.profile.Groups[groupID].Icons[iconID].StackMax = t
+									TMW.IE:ScheduleIconUpdate(groupID, iconID)
+								end
+								self:GetScript("OnTextChanged")(self)
+							</OnEditFocusLost>
 						</Scripts>
 
 					</EditBox>

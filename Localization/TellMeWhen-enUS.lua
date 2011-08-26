@@ -30,7 +30,7 @@ L["FROMNEWERVERSION"] = "You are importing an icon that was created in a newer v
 L["ICONMENU_CHOOSENAME"] = "Choose name(s)/ID(s) to check"
 L["ICONMENU_CHOOSENAME_CNDTIC"] = "Choose name/ID/texture path"
 L["ICONMENU_ENABLE"] = "Enabled"
-L["CHOOSENAME_EQUIVS_TOOLTIP"] = "You can select predefined sets of buffs, debuffs, spell casts, diminishing returns, or dispel types (Magic, Curse, etc.) from this menu to insert into the editbox."
+L["CHOOSENAME_EQUIVS_TOOLTIP"] = [[You can select predefined sets of buffs, debuffs, spell casts, diminishing returns, or dispel types (Magic, Curse, etc.) from this menu to insert into the "%s" editbox.]]
 L["CHOOSENAME_DIALOG_DDDEFAULT"] = "Predefined Spell Sets/Dispel Types"
 L["CHOOSENAME_DIALOG"] = [=[Enter the Name or ID of what you want this icon to monitor. You can add multiple entries (any combination of names, IDs, and equivalencies) by separating them with semicolons (;).
 
@@ -64,7 +64,7 @@ L["ICONMENU_MULTISTATECD_DESC"] = [[This should be used when you want to track m
 
 |cFFFF5959IMPORTANT|r: The action being tracked MUST be on your action bars for this icon type to work. You should also make sure that the ability is in its default state before leaving config mode.]]
 L["ICONMENU_UNITCOOLDOWN"] = "Unit Cooldown"
-L["ICONMENU_UNITCOOLDOWN_DESC"] = [=[This icon type allows you to track the cooldowns of your friends or your enemies.  You must enter the duration of the cooldown in the editbox to the right of the unit input.
+L["ICONMENU_UNITCOOLDOWN_DESC"] = [=[This icon type allows you to track the cooldowns of your friends or your enemies.  You must enter the duration of the cooldown of each spell by adding a colon after each spell, followed by the duration.
 
 Note regarding pvp trinkets: they can be tracked using '%s' as the name.]=]
 L["ICONMENU_ICD"] = "Internal Cooldown"
@@ -72,13 +72,13 @@ L["ICONMENU_ICD_DESC"] = [=[This icon type can be used to track either the inter
 
 Enter the spellID or name of the buff/debuff that is placed when the cooldown starts, or the name of the spell that you would like to track the duration of. Semicolon-delimited lists are valid.
 
-If the cooldown can be reset by an ability or proc, it is advised that you instead use the "Unit Cooldown" icon type to track the cooldown instead of this icon type]=]
+If the cooldown can be reset by another ability or proc, it is advised that you instead use the "Unit Cooldown" icon type to track the cooldown instead of this icon type]=]
 L["ICONMENU_CAST"] = "Spell Cast"
 L["ICONMENU_CAST_DESC"] = [=[The name dialog can be left blank to show the icon for any cast, or in order to only shown the icon for certain spells, you can enter a single spell, or a semicolon-delimited list of spells.]=]
 L["ICONMENU_CNDTIC"] = "Condition Icon"
 L["ICONMENU_CNDTIC_DESC"] = [=[This icon type is for simply checking a condition.
 
-The icon can be set to a specific spell texture or texture path via the name editbox.]=]
+The icon can be set to a specific spell texture or texture path via the "%s" editbox.]=]
 L["ICONMENU_META"] = "Meta Icon"
 L["ICONMENU_META_DESC"] = [=[This icon type can be used to combine several icons into one.
 
@@ -171,11 +171,15 @@ L["ICONMENU_ICDTYPE"] = "Triggered by"
 L["ICONMENU_SPELLCAST_COMPLETE"] = "Spell Cast Finish/Instant Cast"
 L["ICONMENU_SPELLCAST_START"] = "Spell Cast Start"
 L["ICONMENU_ICDBDE"] = "Buff/Debuff/Energize"
-L["ICONMENU_SPELLCAST_COMPLETE_DESC"] = "Select this option if the internal cooldown begins when you finish casting the spell that you chose, or if the spell is an instant cast spell."
-L["ICONMENU_SPELLCAST_START_DESC"] = "Select this option if the internal cooldown begins when you start casting the spell that you chose"
-L["ICONMENU_ICDAURA_DESC"] = "Select this option if the internal cooldown begins when you apply the buff or debuff that you chose, or if the effect energizes you with mana/rage/etc."
-L["ICONMENU_ICDUSABLE"] = "Usable CD/Expired spell"
-L["ICONMENU_ICDUNUSABLE"] = "Unusable CD/Present spell"
+L["ICONMENU_SPELLCAST_COMPLETE_DESC"] = [[Select this option if the internal cooldown begins when you finish casting a spell, or when you cast an instant cast spell.
+
+You need to enter the name/ID of the spell that triggers the internal cooldown into the "%s" editbox.]]
+L["ICONMENU_SPELLCAST_START_DESC"] = [[Select this option if the internal cooldown begins when you start casting a spell.
+
+You need to enter the name/ID of the spell that triggers the internal cooldown into the "%s" editbox.]]
+L["ICONMENU_ICDAURA_DESC"] = [[Select this option if the internal cooldown begins when a buff or debuff is applied by yourself (includes procs), or if the effect energizes you with mana/rage/etc.
+
+You need to enter the name/ID of the buff/debuff that you gain when the internal cooldown is triggered, or the name of the energize effect (check your combat log), into the "%s" editbox.]]
 
 L["ICONMENU_DRPRESENT"] = "Diminished"
 L["ICONMENU_DRABSENT"] = "Undiminished"
@@ -188,9 +192,6 @@ L["AIR"] = "Air"
 L["MUSHROOMS"] = "Mushrooms to check"
 L["MUSHROOM"] = "Mushroom %d"
 L["RUNES"] = "Rune(s) to check"
-L["RUNE_BLOOD"] = "Blood rune %d"
-L["RUNE_FROST"] = "Frost rune %d"
-L["RUNE_UNHOLY"] = "Unholy rune %d"
 
 L["ICONMENU_SHOWTTTEXT"] = "Show variable text"
 L["ICONMENU_SHOWTTTEXT_DESC"] = "Check this to display the first variable associated with the aura that is beind displayed. Numbers are provided by Blizzard API and do not necessarily match numbers found on the tooltip of the aura. There is also no guarentee that a number will be shown for an aura. In most practical cases, though, the correct numer will be shown."
@@ -208,7 +209,7 @@ L["ICONMENU_DONTREFRESH_DESC"] = "Check to force the cooldown to not reset if th
 
 L["SORTBY"] = "Prioritize"
 L["SORTBYNONE"] = "Normally"
-L["SORTBYNONE_DESC"] = "If checked, spells will be checked in and appear in the order that they were entered into the editbox. If this icon is a buff/debuff icon and the number of auras being checked exceeds the efficiency threshold setting, auras will be checked in the order that they would normally appear on the unit's unit frame."
+L["SORTBYNONE_DESC"] = [[If checked, spells will be checked in and appear in the order that they were entered into the "%s" editbox. If this icon is a buff/debuff icon and the number of auras being checked exceeds the efficiency threshold setting, auras will be checked in the order that they would normally appear on the unit's unit frame.]]
 L["ICONMENU_SORTASC"] = "Low duration"
 L["ICONMENU_SORTASC_DESC"] = "Check this box to prioritize and show spells with the lowest duration."
 L["ICONMENU_SORTDESC"] = "High duration"
@@ -599,7 +600,7 @@ Spells are categorized and colored as per the list below. Note that the categori
 
 Clicking on an entry will insert it into the editbox.
 
-]]
+]]--extra newlines intended
 L["SUG_DISPELTYPES"] = "Dispel Types"
 L["SUG_BUFFEQUIVS"] = "Buff Equivalencies"
 L["SUG_DEBUFFEQUIVS"] = "Debuff Equivalencies"
@@ -677,7 +678,7 @@ L["CHAT_MSG_SMART_DESC"] = "Will output to Battleground, Raid, Party, or Say - w
 L["CHAT_FRAME"] = "Chat Frame"
 
 
-L["HELP_FIRSTUCD"] = [[It looks like this is your first time using an icon type that uses the special duration syntax! Spells that are added to the name editbox must define their duration immediately after a spell using the following syntax:
+L["HELP_FIRSTUCD"] = [[It looks like this is your first time using an icon type that uses the special duration syntax! Spells that are added to the "%s" editbox must define their duration immediately after a spell using the following syntax:
 
 Spell: Duration
 
