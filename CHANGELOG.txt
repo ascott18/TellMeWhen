@@ -1,4 +1,5 @@
 ===v4.5.5===
+ * Added Brazillian Portuguese localization file. Translators wanted!
  * Bug Fixes:
  ** (r213) The cooldown bar offset editbox now uses TellMeWhen_TimeEditBoxTemplate (and on a related note, huge time strings will now format to the year level for fun)
 

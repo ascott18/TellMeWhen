@@ -38,6 +38,7 @@ Localization\TellMeWhen-koKR.lua
 Localization\TellMeWhen-ruRU.lua
 Localization\TellMeWhen-zhCN.lua
 Localization\TellMeWhen-zhTW.lua
+Localization\TellMeWhen-ptBR.lua
 Localization\StaticFormats.lua
 
 TellMeWhen.lua
