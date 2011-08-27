@@ -3074,6 +3074,7 @@
 					</CheckButton>
 					
 					<EditBox name="$parentStackMin" parentKey="StackMin" inherits="TellMeWhen_InputBoxTemplate">
+						<Size x="60" y="15"/>
 						<Anchors>
 							<Anchor point="TOPLEFT" relativeTo="$parentDurationMin" relativePoint="BOTTOMLEFT" y="-40"/>
 						</Anchors>
@@ -3114,6 +3115,7 @@
 						</Scripts>
 					</EditBox>
 					<EditBox name="$parentStackMax" parentKey="StackMax" inherits="TellMeWhen_InputBoxTemplate">
+						<Size x="60" y="15"/>
 						<Anchors>
 							<Anchor point="LEFT" relativeTo="$parentStackMin" relativePoint="RIGHT" x="40"/>
 						</Anchors>
