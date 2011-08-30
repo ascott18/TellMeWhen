@@ -2105,7 +2105,7 @@ function IE:ImpExp_DropDown()
 		IE:SaveSettings()
 		local settings = CopyTable(db.profile.Groups[CI.g].Icons[CI.i])
 		TMW:CleanIconSettings(settings)
-		local s = TMW:Serialize(settings, TELLMEWHEN_VERSIONNUMBER):
+		local s = TMW:Serialize(settings, TELLMEWHEN_VERSIONNUMBER, " "):
 		gsub("(^[^tT%d][^^]*^[^^]*)", "%1 "): -- add spaces to clean it up a little
 		gsub("%^ ^", "^^") -- remove double space at the end
 		e:SetText(s)
@@ -2124,9 +2124,15 @@ function IE:ImpExp_DropDown()
 		local t = strtrim(e:GetText())
 		if t and t ~= "" then
 			t = t:gsub("||", "|")
-			local success, settings, version = TMW:Deserialize(t)
+			local success, settings, version, spaceControl = TMW:Deserialize(t)
+			if spaceControl == "`" then
+				t = t:gsub("`", "~`")
+				TMW:Print(L["IMPORTERROR_CORRUPTSPACES"])
+				success, settings, version, spaceControl = TMW:Deserialize(t)
+			end
 			if not success then
-				error("There was an error processing the string. Ensure that you copied the entire string from the source.")
+				TMW:Print(L["IMPORTERROR_FAILEDPARSE"])
+				return
 			end
 			e:SetText("")
 			e:ClearFocus()
@@ -2401,9 +2407,9 @@ local function formatSeconds(seconds)
 	-- note that this is different from the one in conditions.lua
 	local y =  seconds / 31556925.9936
 	local d = (seconds % 31556925.9936) / 86400
-	local h = (seconds % 31556925.9936 % 86400) / 3600
-	local m = (seconds % 31556925.9936 % 86400  % 3600) / 60
-	local s = (seconds % 31556925.9936 % 86400  % 3600  % 60)
+	local h = (seconds % 31556925.9936  % 86400) / 3600
+	local m = (seconds % 31556925.9936  % 86400  % 3600) / 60
+	local s = (seconds % 31556925.9936  % 86400  % 3600  % 60)
 
 	s = tonumber(format("%.1f", s))
 	local ns = s

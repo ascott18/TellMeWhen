@@ -13,6 +13,8 @@ L["ENABLINGOPT"] = "TellMeWhen_Options is disabled. Enabling..."
 L["CONFIGMODE"] = "TellMeWhen is in configuration mode. Icons will not be functional until you leave configuration mode. Type '/tmw' to toggle configuration mode on and off."
 L["CONFIGMODE_EXIT"] = "Exit config mode"
 L["CONFIGMODE_NEVERSHOW"] = "Don't show again"
+L["IMPORTERROR_CORRUPTSPACES"] = "Invalid formatting detected in import string. This was probably caused by the source of the string using an incorrect markup type. TellMeWhen has attempted a fix."
+L["IMPORTERROR_FAILEDPARSE"] = "There was an error processing the string. Ensure that you copied the entire string from the source."
 
 L["LOCKED"] = "Locked"
 L["RESIZE"] = "Resize"
@@ -53,7 +55,7 @@ L["ICONMENU_BUFFDEBUFF"] = "Buff/Debuff"
 L["ICONMENU_REACTIVE"] = "Reactive Ability"
 L["ICONMENU_REACTIVE_DESC"] = "Reactive abilities are things like Kill Shot, Revenge, and Conflagrate - abilities that are only usable when certain conditions are met.  Use this icon type to track their usability."
 L["ICONMENU_WPNENCHANT"] = "Weapon Enchant"
-L["ICONMENU_WPNENCHANT_DESC"] = [=[This icon type tracks the status of temporary weapon enchants on your weapons - most useful for shaman.
+L["ICONMENU_WPNENCHANT_DESC"] = [=[This icon type tracks the status of temporary weapon enchants on your weapons - most useful for rogues and shaman.
 
 The name field can be left blank to track any weapon enchant in the specified slot, or you can insert the names of weapon enchants to only show it for specific enchants.  The names that must be entered are the names that appear in the tooltip of your weapon while the enchant is active, e.g "Flametongue", not "Flametongue Weapon."]=]
 L["ICONMENU_TOTEM"] = "Totem"

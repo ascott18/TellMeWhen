@@ -7,7 +7,11 @@
 
 ## Version: 4.5.5
 ## Author: Cybeloras of Mal'Ganis
-## Notes: Notifications about cooldowns, buffs, etc.
+## Notes: Provides visual, auditory, and textual notifications about cooldowns, buffs, and pretty much everything else.
+## Notes-zhCH: 为冷却、增益/减益及其它几乎所有的东西提供视觉、听觉以及文字上的通知。
+## Notes-zhTW: 為冷卻、增益/減益及其它幾乎所有的東西提供視覺、聽覺以及文字上的通知。
+## Notes-deDE: Bietet visuelle, akustische und schriftliche Benachrichtigungen über Cooldowns, Buffs and so ziemlich alles andere.
+
 ## OptionalDeps: ButtonFacade, Masque, Ace3, OmniCC, tullaCC, sct, sctd, MikScrollingBattleText, Parrot, DRData-1.0
 # The per character settings are the old settings, but we still need them to upgrade to the new ones
 ## SavedVariablesPerCharacter: TellMeWhen_Settings

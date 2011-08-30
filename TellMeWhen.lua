@@ -1244,7 +1244,7 @@ function TMW:Update()
 	TMW.DoWipeAC = false
 	if not Locked then
 		TMW:LoadOptions()
-		if db.global.ConfigWarning then
+		if db.global.ConfigWarning then -- oh no! confguration code in the main addon!
 			TellMeWhen_ConfigWarning:Show()
 		else
 			TellMeWhen_ConfigWarning:Hide()
@@ -1790,11 +1790,10 @@ function TMW:GetUpgradeTable() -- upgrade functions
 		[22100] = {
 			icon = function(ics)
 				if ics.UnitReact and ics.UnitReact ~= 0 then
-					tinsert(ics.Conditions, {
-						Type = "REACT",
-						Level = ics.UnitReact,
-						Unit = "target",
-					})
+					local condition = ics.Conditions[#ics.Conditions + 1]
+					condition.Type = "REACT"
+					condition.Level = ics.UnitReact
+					condition.Unit = "target"
 				end
 			end,
 		},
@@ -1957,18 +1956,17 @@ function TMW:Upgrade()
 	db.profile.Version = TELLMEWHEN_VERSIONNUMBER
 end
 
-function TMW:LoadOptions(n)
-	n = n or 1
+function TMW:LoadOptions(recursed)
 	if IsAddOnLoaded("TellMeWhen_Options") then
 		return true
 	end
 	TMW:Print(L["LOADINGOPT"])
 	local loaded, reason = LoadAddOn("TellMeWhen_Options")
 	if not loaded then
-		if reason == "DISABLED" and (n < 2) then -- prevent accidental recursion
+		if reason == "DISABLED" and not recursed then -- prevent accidental recursion
 			TMW:Print(L["ENABLINGOPT"])
 			EnableAddOn("TellMeWhen_Options")
-			TMW:LoadOptions(n+1)
+			TMW:LoadOptions(1)
 		else
 			local err = L["LOADERROR"] .. _G["ADDON_"..reason]
 			TMW:Print(err)
