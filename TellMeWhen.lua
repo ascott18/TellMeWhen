@@ -3090,8 +3090,8 @@ function TMW:Icon_Update(icon)
 			bt:ClearAllPoints()
 			bt:SetPoint("TOPLEFT", icon, "TOPLEFT", btf.x, btf.y)
 		end
-		icon.cbar:SetFrameLevel(icon:GetFrameLevel() - 1)
-		icon.pbar:SetFrameLevel(icon:GetFrameLevel() - 1)
+		icon.cbar:SetFrameLevel(icon:GetFrameLevel())
+		icon.pbar:SetFrameLevel(icon:GetFrameLevel())
 	end
 
 	if isDefault then
