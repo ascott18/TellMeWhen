@@ -1040,10 +1040,10 @@ function TMW:Group_Add()
 	db.profile.NumGroups = groupID
 	db.profile.Groups[db.profile.NumGroups].Enabled = true
 	TMW:Update()
-	local stub = LMB or LBF
-	if stub then
-		local parent = stub:Group("TellMeWhen")
-		local group = stub:Group("TellMeWhen", format(L["fGROUP"], groupID))
+	
+	if LBF then -- LMB now integrates this
+		local parent = LBF:Group("TellMeWhen")
+		local group = LBF:Group("TellMeWhen", format(L["fGROUP"], groupID))
 
 		group.SkinID, group.Gloss, group.Backdrop, group.Colors =
 		parent.SkinID, parent.Gloss, parent.Backdrop, parent.Colors

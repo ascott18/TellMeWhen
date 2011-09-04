@@ -31,10 +31,10 @@ local AceDB = LibStub("AceDB-3.0")
 local LSM = LibStub("LibSharedMedia-3.0")
 local DRData = LibStub("DRData-1.0", true)
 
-TELLMEWHEN_VERSION = "4.5.5"
+TELLMEWHEN_VERSION = "4.5.6"
 TELLMEWHEN_VERSION_MINOR = strmatch(" @project-version@", " r%d+") or ""
 TELLMEWHEN_VERSION_FULL = TELLMEWHEN_VERSION .. TELLMEWHEN_VERSION_MINOR
-TELLMEWHEN_VERSIONNUMBER = 45501 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
+TELLMEWHEN_VERSIONNUMBER = 45601 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
 if TELLMEWHEN_VERSIONNUMBER > 46000 or TELLMEWHEN_VERSIONNUMBER < 45000 then return error("YOU SCREWED UP THE VERSION NUMBER OR DIDNT CHANGE THE SAFETY LIMITS") end -- safety check because i accidentally made the version number 414069 once
 
 TELLMEWHEN_MAXGROUPS = 1 	--this is a default, used by SetTheory (addon), so dont rename
@@ -978,8 +978,6 @@ if LBF then
 		end
 		if not TMW.DontRun then
 			TMW:Update()
-		else
-			TMW.DontRun = false
 		end
 	end
 
@@ -1232,6 +1230,8 @@ function TMW:Update()
 			TMW:Print(v)
 		end
 	end
+	
+	TMW.DontRun = true -- TMW:Update() is ran in the LBF skin callback, which just causes an infinite loop. This tells it not to
 
 	time = GetTime() TMW.time = time
 	UpdateTimer = time - 10
@@ -1289,6 +1289,7 @@ function TMW:Update()
 	time = GetTime() TMW.time = time
 	TMW:ScheduleTimer("RestoreSound", UPD_INTV*2.1)
 	TMW.Initd = true
+	TMW.DontRun = false
 end
 
 local upgradeTable
@@ -2285,7 +2286,6 @@ function TMW:Group_Update(groupID)
 	if LMB then
 		db.profile.Groups[groupID].LBF = nil -- if people get masque then they dont need these settings anymore. If they want to downgrade then they will just have to set things up again, sorry
 	elseif LBF then
-		TMW.DontRun = true
 		local lbfs = db.profile.Groups[groupID]["LBF"]
 		LBF:Group("TellMeWhen", format(L["fGROUP"], groupID))
 		if lbfs.SkinID then
@@ -3056,7 +3056,6 @@ function TMW:Icon_Update(icon)
 			end
 		end
 	elseif LBF then
-		TMW.DontRun = true -- TMW:Update() is ran in the LBF skin callback, which just causes an infinite loop. This tells it not to
 		local lbfs = db.profile.Groups[groupID].LBF
 		local g = LBF:Group("TellMeWhen", format(L["fGROUP"], groupID))
 		g:AddButton(icon)
@@ -3079,6 +3078,9 @@ function TMW:Icon_Update(icon)
 		isDefault = 1
 	end
 	
+	icon.cbar:SetFrameLevel(icon:GetFrameLevel() + 1)
+	icon.pbar:SetFrameLevel(icon:GetFrameLevel() + 1)
+	
 	if LMB or LBF then
 		if ctf.OverrideLBFPos then
 			ct:ClearAllPoints()
@@ -3088,9 +3090,9 @@ function TMW:Icon_Update(icon)
 			bt:ClearAllPoints()
 			bt:SetPoint("TOPLEFT", icon, "TOPLEFT", btf.x, btf.y)
 		end
+		icon.cbar:SetFrameLevel(icon:GetFrameLevel() - 1)
+		icon.pbar:SetFrameLevel(icon:GetFrameLevel() - 1)
 	end
-	icon.cbar:SetFrameLevel(icon:GetFrameLevel() + 1)
-	icon.pbar:SetFrameLevel(icon:GetFrameLevel() + 1)
 
 	if isDefault then
 		group.barInsets = 1.5
