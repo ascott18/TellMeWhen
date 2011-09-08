@@ -34,7 +34,7 @@ local DRData = LibStub("DRData-1.0", true)
 TELLMEWHEN_VERSION = "4.5.6"
 TELLMEWHEN_VERSION_MINOR = strmatch(" @project-version@", " r%d+") or ""
 TELLMEWHEN_VERSION_FULL = TELLMEWHEN_VERSION .. TELLMEWHEN_VERSION_MINOR
-TELLMEWHEN_VERSIONNUMBER = 45601 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
+TELLMEWHEN_VERSIONNUMBER = 45602 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
 if TELLMEWHEN_VERSIONNUMBER > 46000 or TELLMEWHEN_VERSIONNUMBER < 45000 then return error("YOU SCREWED UP THE VERSION NUMBER OR DIDNT CHANGE THE SAFETY LIMITS") end -- safety check because i accidentally made the version number 414069 once
 
 TELLMEWHEN_MAXGROUPS = 1 	--this is a default, used by SetTheory (addon), so dont rename
@@ -3260,6 +3260,10 @@ function TMW:lower(str)
 	return tonumber(str) or strlower(str)
 end
 
+local function getCacheString(...)
+	return strconcat(tostringall(...))
+end
+
 local eqttcache = {}
 function TMW:EquivToTable(name)
 	if eqttcache[name] then return eqttcache[name] end -- if we already made a table of this string, then use it
@@ -3294,7 +3298,7 @@ end
 
 local gsncache = {}
 function TMW:GetSpellNames(icon, setting, firstOnly, toname, hash, keepDurations)
-	local cachestring = strconcat(tostringall(icon, setting, firstOnly, toname, hash, keepDurations, TMW.BE)) -- a unique key for the cache table, turn possible nils into strings
+	local cachestring = getCacheString(icon, setting, firstOnly, toname, hash, keepDurations, TMW.BE) -- a unique key for the cache table, turn possible nils into strings
 	if gsncache[cachestring] then return gsncache[cachestring] end --why make a bunch of tables and do a bunch of stuff if we dont need to
 
 	local buffNames = TMW:SplitNames(setting) -- get a table of everything
@@ -3474,16 +3478,18 @@ TMW.Units = {
 	{ value = "mainassist", 		text = L["MAINASSIST"], range = MAX_RAID_MEMBERS},
 }
 function TMW:GetUnits(icon, setting, dontreplace)
-	if unitcache[setting..tostring(dontreplace)] then return unitcache[setting..tostring(dontreplace)] end --why make a bunch of tables and do a bunch of stuff if we dont need to
+	local cachestring = getCacheString(setting, dontreplace)
+	if unitcache[cachestring] then return unitcache[cachestring] end --why make a bunch of tables and do a bunch of stuff if we dont need to
 
 	setting = TMW:CleanString(setting):
 	lower():
-	gsub("|cffff0000", ""): -- strip color codes
+	gsub("|cffff0000", ""): -- strip color codes (NOTE LOWERCASE)
+	gsub("#", ""):
 	gsub("|r", "")
 	
 
-	--SUBSTITUTE "# WITH 1-10, 1-40, etc (NOTE LOWERCASE COLOR ESCAPE SEQUENCE)
-	for wholething, unit in gmatch(setting, "(([^; %-]-) ?#)") do
+	--SUBSTITUTE "# WITH 1-10, 1-40, etc 
+	--[[for wholething, unit in gmatch(setting, "(([^; %-]-) ?#)") do
 		unit = strtrim(unit)
 		for k, v in pairs(TMW.Units) do
 			if v.value == unit then
@@ -3491,7 +3497,7 @@ function TMW:GetUnits(icon, setting, dontreplace)
 				break
 			end
 		end
-	end
+	end]]
 	
 	--SUBSTITUTE "party" with "party1-4", etc
 	for _, wholething in TMW:Vararg(strsplit(";", setting)) do
@@ -3549,7 +3555,7 @@ function TMW:GetUnits(icon, setting, dontreplace)
 		end
 	end
 
-	unitcache[setting..tostring(dontreplace)] = Units
+	unitcache[cachestring] = Units
 	return Units
 end
 
