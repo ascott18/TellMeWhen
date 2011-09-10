@@ -30,6 +30,7 @@ local strlowerCache = TMW.strlowerCache
 
 
 local Type = {}
+Type.type = "totem"
 Type.name = pclass == "DRUID" and L["ICONMENU_MUSHROOMS"] or pclass == "DEATHKNIGHT" and L["ICONMENU_GHOUL"] or L["ICONMENU_TOTEM"]
 Type.usePocketWatch = 1
 if pclass == "SHAMAN" then
@@ -145,4 +146,4 @@ function Type:Setup(icon, groupID, iconID)
 	icon:OnUpdate(TMW.time)
 end
 
-TMW:RegisterIconType(Type, "totem")
+TMW:RegisterIconType(Type)

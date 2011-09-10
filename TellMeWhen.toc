@@ -48,6 +48,7 @@ Localization\StaticFormats.lua
 
 TellMeWhen.lua
 
+Types\default.lua
 Types\cooldown.lua
 Types\buff.lua
 Types\reactive.lua

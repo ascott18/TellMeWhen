@@ -30,6 +30,7 @@ local clientVersion = select(4, GetBuildInfo())
 
 
 local Type = {}
+Type.type = "cast"
 LibStub("AceEvent-3.0"):Embed(Type)
 Type.name = L["ICONMENU_CAST"]
 Type.WhenChecks = {
@@ -105,5 +106,5 @@ function Type:Setup(icon, groupID, iconID)
 	icon:OnUpdate(TMW.time)
 end
 
-TMW:RegisterIconType(Type, "cast")
+TMW:RegisterIconType(Type)
 

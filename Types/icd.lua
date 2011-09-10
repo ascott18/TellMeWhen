@@ -30,6 +30,7 @@ local strlowerCache = TMW.strlowerCache
 
 
 local Type = {}
+Type.type = "icd"
 Type.name = L["ICONMENU_ICD"]
 Type.desc = L["ICONMENU_ICD_DESC"]
 Type.usePocketWatch = 1
@@ -156,4 +157,4 @@ function Type:IE_TypeUnloaded()
 	end
 end
 
-TMW:RegisterIconType(Type, "icd")
+TMW:RegisterIconType(Type)

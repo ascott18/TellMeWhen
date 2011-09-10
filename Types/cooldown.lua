@@ -37,6 +37,7 @@ local mindfreeze = strlower(GetSpellInfo(47528))
 
 local Type = {}
 LibStub("AceEvent-3.0"):Embed(Type)
+Type.type = "cooldown"
 Type.name = L["ICONMENU_COOLDOWN"]
 Type.TypeChecks = {
 	text = L["ICONMENU_COOLDOWNTYPE"],
@@ -470,4 +471,4 @@ function Type:IE_TypeUnloaded()
 	Name:GetScript("OnTextChanged")(Name)
 end
 
-TMW:RegisterIconType(Type, "cooldown")
+TMW:RegisterIconType(Type)

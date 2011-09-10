@@ -47,6 +47,7 @@ end
 
 
 local Type = {}
+Type.type = "dr"
 LibStub("AceEvent-3.0"):Embed(Type)
 Type.name = L["ICONMENU_DR"]
 Type.desc = L["ICONMENU_DR_DESC"]
@@ -209,4 +210,4 @@ function Type:Setup(icon, groupID, iconID)
 	icon:OnUpdate(TMW.time)
 end
 
-TMW:RegisterIconType(Type, "dr")
+TMW:RegisterIconType(Type)

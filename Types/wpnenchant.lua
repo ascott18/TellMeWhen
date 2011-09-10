@@ -29,6 +29,7 @@ local strlowerCache = TMW.strlowerCache
 
 
 local Type = {}
+Type.type = "wpnenchant"
 Type.name = L["ICONMENU_WPNENCHANT"]
 Type.desc = L["ICONMENU_WPNENCHANT_DESC"]
 Type.TypeChecks = {
@@ -179,4 +180,4 @@ function Type:Setup(icon, groupID, iconID)
 	icon:OnEvent(nil, "player")
 end
 
-TMW:RegisterIconType(Type, "wpnenchant")
+TMW:RegisterIconType(Type)

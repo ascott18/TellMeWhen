@@ -34,6 +34,7 @@ local clientVersion = select(4, GetBuildInfo())
 
 
 local Type = {}
+Type.type = "unitcooldown"
 LibStub("AceEvent-3.0"):Embed(Type)
 Type.name = L["ICONMENU_UNITCOOLDOWN"]
 Type.desc = L["ICONMENU_UNITCOOLDOWN_DESC"]:format(GetSpellInfo(42292))
@@ -361,4 +362,4 @@ function Type:IE_TypeUnloaded()
 	end
 end
 
-TMW:RegisterIconType(Type, "unitcooldown")
+TMW:RegisterIconType(Type)

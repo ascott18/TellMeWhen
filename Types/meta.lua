@@ -29,6 +29,7 @@ local AlreadyChecked = {} TMW.AlreadyChecked = AlreadyChecked
 
 
 local Type = {}
+Type.type = "meta"
 Type.name = L["ICONMENU_META"]
 Type.desc = L["ICONMENU_META_DESC"]
 Type.RelevantSettings = {
@@ -148,4 +149,4 @@ function Type:Setup(icon, groupID, iconID)
 	icon:SetScript("OnUpdate", Meta_OnUpdate)
 end
 
-TMW:RegisterIconType(Type, "meta")
+TMW:RegisterIconType(Type)

@@ -32,6 +32,7 @@ local isNumber = TMW.isNumber
 
 
 local Type = {}
+Type.type = "buff"
 Type.name = L["ICONMENU_BUFFDEBUFF"]
 Type.usePocketWatch = 1
 Type.TypeChecks = {
@@ -142,7 +143,7 @@ local function Buff_OnUpdate(icon, time)
 					end
 				else
 					for i = 1, NAL do
-						local iName = NameArray[i]
+						local iName = strlowerCache[NameArray[i]]
 						if DS[iName] then --Handle dispel types. Enrage wont be handled here because it will always have more auras than the efficiency threshold (max 40, there are about 120 enrages i think), ant it shouldnt be, because it is essentially just an equiv
 							for z=1, 60 do
 								buffName, _, iconTexture, count, dispelType, duration, expirationTime, _, canSteal, _, id, _, _, v1, v2, v3 = UnitAura(unit, z, Filter)
@@ -245,5 +246,5 @@ function Type:Setup(icon, groupID, iconID)
 	icon:OnUpdate(TMW.time)
 end
 
-TMW:RegisterIconType(Type, "buff")
+TMW:RegisterIconType(Type)
 

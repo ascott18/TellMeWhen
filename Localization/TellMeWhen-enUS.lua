@@ -15,6 +15,7 @@ L["CONFIGMODE_EXIT"] = "Exit config mode"
 L["CONFIGMODE_NEVERSHOW"] = "Don't show again"
 L["IMPORTERROR_CORRUPTSPACES"] = "Invalid formatting detected in import string. This was probably caused by the source of the string using an incorrect markup type. TellMeWhen has attempted a fix."
 L["IMPORTERROR_FAILEDPARSE"] = "There was an error processing the string. Ensure that you copied the entire string from the source."
+L["ERROR_MISSINGFILE"] = "A complete restart of WoW is required to use TellMeWhen %s (%s was not found). Would you like to restart WoW now?"
 
 L["LOCKED"] = "Locked"
 L["RESIZE"] = "Resize"

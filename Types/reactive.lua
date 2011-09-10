@@ -29,6 +29,7 @@ local mindfreeze = strlower(GetSpellInfo(47528))
 
 
 local Type = {}
+Type.type = "reactive"
 Type.name = L["ICONMENU_REACTIVE"]
 Type.desc = L["ICONMENU_REACTIVE_DESC"]
 Type.WhenChecks = {
@@ -179,4 +180,4 @@ function Type:Setup(icon, groupID, iconID)
 	icon:OnUpdate(TMW.time)
 end
 
-TMW:RegisterIconType(Type, "reactive")
+TMW:RegisterIconType(Type)

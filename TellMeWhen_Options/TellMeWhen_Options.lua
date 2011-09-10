@@ -378,6 +378,13 @@ function TMW:SetUIDropdownText(frame, value, tbl)
 	UIDropDownMenu_SetText(frame, "")
 end
 
+local function AddDropdownSpacer()
+	local info = UIDropDownMenu_CreateInfo()
+	info.text = ""
+	info.isTitle = true
+	info.notCheckable = true
+	UIDropDownMenu_AddButton(info, UIDROPDOWNMENU_MENU_LEVEL)
+end
 
 -- --------------
 -- MAIN OPTIONS
@@ -1982,31 +1989,15 @@ end
 function IE:Type_DropDown()
 	if not db then return end
 	local groupID, iconID = CI.g, CI.i
-
-	local info = UIDropDownMenu_CreateInfo()
-	info.text = L["ICONMENU_TYPE"]
-	info.value = ""
-	info.checked = info.value == db.profile.Groups[groupID].Icons[iconID].Type
-	info.func = IE.Type_Dropdown_OnClick
-	UIDropDownMenu_AddButton(info, UIDROPDOWNMENU_MENU_LEVEL)
-
-	local info = UIDropDownMenu_CreateInfo()
-	info.text = ""
-	info.disabled = true
-	info.notCheckable = true
-	UIDropDownMenu_AddButton(info)
 	
 	for _, Type in ipairs(TMW.OrderedTypes) do -- order in the order in which they are loaded in the .toc file
 		if not Type.hidden then
 			if Type.spacebefore then
-				local info = UIDropDownMenu_CreateInfo()
-				info.text = ""
-				info.isTitle = true
-				info.notCheckable = true
-				UIDropDownMenu_AddButton(info, UIDROPDOWNMENU_MENU_LEVEL)
+				AddDropdownSpacer()
 			end
+			
 			local info = UIDropDownMenu_CreateInfo()
-			info.text = Type.nameOverride or Type.name
+			info.text = Type.name
 			info.value = Type.type
 			if Type.desc then
 				info.tooltipTitle = Type.tooltipTitle or Type.name
@@ -2017,6 +2008,10 @@ function IE:Type_DropDown()
 			info.func = IE.Type_Dropdown_OnClick
 			info.arg1 = Type
 			UIDropDownMenu_AddButton(info, UIDROPDOWNMENU_MENU_LEVEL)
+			
+			if Type.spaceafter then
+				AddDropdownSpacer()
+			end
 		end
 	end
 end
@@ -2200,11 +2195,7 @@ function IE:Copy_DropDown()
 		end
 
 		if next(deserialized) or db.profiles[current] then
-			info = UIDropDownMenu_CreateInfo()
-			info.text = ""
-			info.isTitle = true
-			info.notCheckable = true
-			UIDropDownMenu_AddButton(info, UIDROPDOWNMENU_MENU_LEVEL)
+			AddDropdownSpacer()
 		end
 
 		for profilename, profiletable in TMW:OrderedPairs(db.profiles) do
@@ -2339,11 +2330,8 @@ function IE:Copy_DropDown()
 
 		if db.profiles[n].Groups[g].Icons and #db.profiles[n].Groups[g].Icons > 0 then
 
-			info = UIDropDownMenu_CreateInfo()
-			info.text = ""
-			info.isTitle = true
-			info.notCheckable = true
-			UIDropDownMenu_AddButton(info, UIDROPDOWNMENU_MENU_LEVEL)
+			AddDropdownSpacer()
+			
 			for i, d in TMW:OrderedPairs(db.profiles[n].Groups[g].Icons) do
 				local nsettings = 0
 				for icondatakey, icondatadata in pairs(d) do
@@ -3888,11 +3876,7 @@ function CNDT:TypeMenu_DropDown()
 	local addedFreq
 	for k, v in ipairs(CNDT.Types) do
 		if not v.category and not addedFreq and UIDROPDOWNMENU_MENU_LEVEL == 1 then
-			local info = UIDropDownMenu_CreateInfo()
-			info.text = ""
-			info.isTitle = true
-			info.notCheckable = true
-			UIDropDownMenu_AddButton(info, UIDROPDOWNMENU_MENU_LEVEL)
+			AddDropdownSpacer()
 				
 			local info = UIDropDownMenu_CreateInfo()
 			info.text = L["CNDTCAT_FREQUENTLYUSED"]
@@ -3905,11 +3889,7 @@ function CNDT:TypeMenu_DropDown()
 		
 		if ((UIDROPDOWNMENU_MENU_LEVEL == 2 and v.category == UIDROPDOWNMENU_MENU_VALUE) or (UIDROPDOWNMENU_MENU_LEVEL == 1 and not v.category)) and not v.hidden then
 			if v.spacebefore then
-				local info = UIDropDownMenu_CreateInfo()
-				info.text = ""
-				info.isTitle = true
-				info.notCheckable = true
-				UIDropDownMenu_AddButton(info, UIDROPDOWNMENU_MENU_LEVEL)
+				AddDropdownSpacer()
 			end
 			
 			AddConditionToDropDown(v)

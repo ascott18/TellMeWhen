@@ -27,6 +27,7 @@ local _, pclass = UnitClass("Player")
 local SpellTextures = TMW.SpellTextures
 
 local Type = {}
+Type.type = "runes"
 LibStub("AceEvent-3.0"):Embed(Type)
 Type.name = L["ICONMENU_RUNES"]
 Type.hidden = pclass ~= "DEATHKNIGHT"
@@ -144,4 +145,4 @@ function Type:Setup(icon, groupID, iconID)
 end
 
 
-TMW:RegisterIconType(Type, "runes")
+TMW:RegisterIconType(Type)

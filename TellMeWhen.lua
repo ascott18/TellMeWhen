@@ -34,7 +34,7 @@ local DRData = LibStub("DRData-1.0", true)
 TELLMEWHEN_VERSION = "4.5.6"
 TELLMEWHEN_VERSION_MINOR = strmatch(" @project-version@", " r%d+") or ""
 TELLMEWHEN_VERSION_FULL = TELLMEWHEN_VERSION .. TELLMEWHEN_VERSION_MINOR
-TELLMEWHEN_VERSIONNUMBER = 45602 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
+TELLMEWHEN_VERSIONNUMBER = 45603 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
 if TELLMEWHEN_VERSIONNUMBER > 46000 or TELLMEWHEN_VERSIONNUMBER < 45000 then return error("YOU SCREWED UP THE VERSION NUMBER OR DIDNT CHANGE THE SAFETY LIMITS") end -- safety check because i accidentally made the version number 414069 once
 
 TELLMEWHEN_MAXGROUPS = 1 	--this is a default, used by SetTheory (addon), so dont rename
@@ -64,6 +64,7 @@ local st, co, updatehandler, BarGCD, ClockGCD, Locked, CNDT, SndChan, FramesToFi
 local runEvents, updatePBar = 1, 1
 local GCD, NumShapeshiftForms, UpdateTimer = 0, 0, 0
 local IconUpdateFuncs, GroupUpdateFuncs, unitsToChange = {}, {}, {}
+local GroupBase, IconBase = {}, {}
 local time = GetTime() TMW.time = time
 local sctcolor = {r=1, b=1, g=1}
 local clientVersion = select(4, GetBuildInfo())
@@ -372,40 +373,17 @@ local RelevantToAll = {
 	UnAlpha = true,
 	ConditionAlpha = true
 }
-TMW.Types = {
-	[""] = {
-		Setup = function(Type, icon)
-			if icon.Name ~= "" then
-				icon:SetTexture("Interface\\Icons\\INV_Misc_QuestionMark")
-			else
-				icon:SetTexture(nil)
-			end
-			icon:SetAlpha(0)
-		end,
-		Update = function() end,
-		HideBars = true,
-		RelevantSettings = {
-			BindText = false,
-			CustomTex = false,
-			ShowTimer = false,
-			ShowTimerText = false,
-			ShowWhen = false,
-			FakeHidden = false,
-			Alpha = false,
-			UnAlpha = false,
-			ConditionAlpha = false,
-		},
-	},
-} local Types = TMW.Types
-for k, v in pairs(RelevantToAll) do
-	if Types[""].RelevantSettings[k] == nil then
-		Types[""].RelevantSettings[k] = v
-	end
-end
-setmetatable(Types, {
-	__index = function() return Types[""] end
-})
 
+local Types = setmetatable({}, {
+	__index = function(t, k)
+		if type(k) == "table" and k.base == IconBase then -- if the key is an icon, then return the icon's Type table
+			return t[k.Type]
+		else -- if no type exists, then use the fallback (default) type
+			return t[""]
+		end
+	end
+})
+TMW.Types = Types
 
 TMW.Defaults = {
 	global = {
@@ -986,20 +964,18 @@ end
 
 function TMW:OnInitialize()
 	CNDT = TMW.CNDT
-	if not CNDT then
-		-- this also includes upgrading from older than 3.0 (pre-Ace3 DB settings)
-		TMW.Warn("A complete restart of WoW is required to use TellMeWhen "..TELLMEWHEN_VERSION_FULL..". (conditions.lua not found)")
+	if not rawget(Types, "") then
+		-- this also includes upgrading from older than 3.0 (pre-Ace3 DB settings), and the addition of conditions.lua
 		StaticPopupDialogs["TMW_RESTARTNEEDED"] = {
-			text = "A complete restart of WoW is required to use TellMeWhen "..TELLMEWHEN_VERSION_FULL..". Would you like to restart WoW now?", --not worth translating imo, most people will never see it by the time it gets translated.
+			text = L["ERROR_MISSINGFILE"],
 			button1 = EXIT_GAME,
 			button2 = CANCEL,
 			OnAccept = ForceQuit,
-			OnCancel = function() StaticPopup_Hide("TMW_RESTARTNEEDED") end,
 			timeout = 0,
 			showAlert = true,
 			whileDead = true,
 		}
-		StaticPopup_Show("TMW_RESTARTNEEDED")
+		StaticPopup_Show("TMW_RESTARTNEEDED", TELLMEWHEN_VERSION_FULL, "default.lua")
 	end
 
 	if type(TellMeWhenDB) ~= "table" then
@@ -2054,7 +2030,9 @@ function TMW:RAID_ROSTER_UPDATE()
 	wipe(maTranslations)
 	local mtN = 1
 	local maN = 1
-	--setup a table with (key, value) pairs as (oldnumber, newnumber) (oldnumber is 7 for raid7, newnumber is 1 for raid7 when the current maintank/assist is the first one found, 2 for the 2nd one found, etc)
+	-- setup a table with (key, value) pairs as (oldnumber, newnumber)
+	-- oldnumber is 7 for raid7
+	-- newnumber is 1 for raid7 when the current maintank/assist is the 1st one found, 2 for the 2nd one found, etc)
 	for i = 1, GetNumRaidMembers() do
 		local raidunit = "raid" .. i
 		if GetPartyAssignment("MAINTANK", raidunit) then
@@ -2085,7 +2063,7 @@ function TMW:RAID_ROSTER_UPDATE()
 				if newnumber then
 					Units[#Units+1] = gsub(newunit, oldnumber, newnumber)
 				end
-			else
+			else -- it isnt a special unit, so put it back in as normal
 				Units[#Units+1] = oldunit
 			end
 		end
@@ -2159,16 +2137,16 @@ function TMW:ACTIVE_TALENT_GROUP_CHANGED()
 end
 
 function TMW:ValidateIcon(icon)
-	if type(icon) == "string" then icon = _G[icon] end
 	-- adds the icon to the list of icons that can be checked in metas/conditions
+	if type(icon) == "string" then icon = _G[icon] end
 	if not TMW.IconsLookup[icon] then
 		tinsert(TMW.Icons, icon:GetName())
 		TMW.IconsLookup[icon] = 1
 	end
 end
 function TMW:InvalidateIcon(icon)
-	if type(icon) == "string" then icon = _G[icon] end
 	-- removes the icon from the list of icons that can be checked in metas/conditions
+	if type(icon) == "string" then icon = _G[icon] end
 	if TMW.IconsLookup[icon] then
 		local k = tContains(TMW.Icons, icon:GetName())
 		if k then tremove(TMW.Icons, k) end
@@ -2176,6 +2154,7 @@ function TMW:InvalidateIcon(icon)
 	end
 end
 function TMW:IsIconValid(icon)
+	-- checks if the icon is in the list of icons that can be checked in metas/conditions
 	if type(icon) == "string" then icon = _G[icon] end
 	return TMW.IconsLookup[icon]
 end
@@ -2183,7 +2162,6 @@ end
 -- -----------
 -- GROUPS
 -- -----------
-local GroupBase = {}
 
 function GroupScriptSort(groupA, groupB)
 	local gOrder = -db.profile.CheckOrder
@@ -2258,7 +2236,7 @@ local function CreateGroup(groupID)
 	local group = CreateFrame("Frame", "TellMeWhen_Group" .. groupID, UIParent, "TellMeWhen_GroupTemplate", groupID)
 	TMW[groupID] = group
 	CNDTEnv[group:GetName()] = group
-	group:SetID(groupID)
+	group.base = GroupBase
 
 	for k, v in pairs(GroupBase) do
 		if type(group[k]) == "function" then -- if the method already exists on the icon
@@ -2354,7 +2332,6 @@ end
 -- ------------------
 -- ICONS
 -- ------------------
-local IconBase = {}
 
 local function LMBSkinHook(self)
 	if self and self.Addon == "TellMeWhen" then
@@ -2505,6 +2482,7 @@ function IconBase.ForceBarUpdates(icon)
 end
 
 function IconBase.HandleEvent(icon, data, played, announced)
+	if not runEvents then return end
 	local Sound = data.SoundData
 	if Sound and not played then
 		PlaySoundFile(Sound, SndChan)
@@ -2581,22 +2559,22 @@ end
 function IconBase.SetAlpha(icon, alpha)
 	if alpha ~= icon.__alpha then
 		if alpha == 0 then
-			local data = runEvents and icon.OnHide
+			local data = icon.OnHide
 			if data then
 				icon:HandleEvent(data)
 			end
 		elseif icon.__alpha == 0 then
-			local data = runEvents and icon.OnShow
+			local data = icon.OnShow
 			if data then
 				icon:HandleEvent(data)
 			end
 		elseif alpha > icon.__alpha then
-			local data = runEvents and icon.OnAlphaInc
+			local data = icon.OnAlphaInc
 			if data then
 				icon:HandleEvent(data)
 			end
 		else -- it must be less than, because it isnt greater than and it isnt the same --if alpha < icon.__alpha then
-			local data = runEvents and icon.OnAlphaDec
+			local data = icon.OnAlphaDec
 			if data then
 				icon:HandleEvent(data)
 			end
@@ -2651,41 +2629,42 @@ function IconBase.SetInfo(icon, alpha, color, texture, start, duration, pbName, 
 
 	local played, announced
 
-	if duration == 0.001 then duration = 0 end -- hardcode fix for tricks of the trade. fuck you, blizzard
+	if duration == 0.001 then duration = 0 end -- hardcode fix for tricks of the trade. nice hardcoding, blizzard
 	local d = duration - (time - start)
 
 	if
-		(icon.CndtFailed) or
-		(d > 0 and ((icon.DurationMinEnabled and icon.DurationMin > d) or (icon.DurationMaxEnabled and d > icon.DurationMax))) or
-		(count and ((icon.StackMinEnabled and icon.StackMin > count) or (icon.StackMaxEnabled and count > icon.StackMax)))
+		(icon.CndtFailed) or -- conditions failed
+		(d > 0 and ((icon.DurationMinEnabled and icon.DurationMin > d) or (icon.DurationMaxEnabled and d > icon.DurationMax))) or -- duration requirements failed
+		(count and ((icon.StackMinEnabled and icon.StackMin > count) or (icon.StackMaxEnabled and count > icon.StackMax))) -- stack requirements failed
 	then
-		alpha = alpha ~= 0 and icon.ConditionAlpha or 0
+		alpha = alpha ~= 0 and icon.ConditionAlpha or 0 -- use the alpha setting for failed stacks/duration/conditions, but only if the alpha isnt being hidden for another reason
 	end
 	
-	texture = icon.OverrideTex or texture
+	texture = icon.OverrideTex or texture -- if a texture override is specefied, then use it instead
 	if texture ~= nil and icon.__tex ~= texture then -- do this before events are processed because some text outputs use icon.__tex
 		icon.__tex = texture
 		icon.texture:SetTexture(texture)
 	end
 
 	if alpha ~= icon.__alpha then
+		-- detect events that occured, and handle them if they did
 		if alpha == 0 then
-			local data = runEvents and icon.OnHide
+			local data = icon.OnHide
 			if data then
 				played, announced = icon:HandleEvent(data)
 			end
 		elseif icon.__alpha == 0 then
-			local data = runEvents and icon.OnShow
+			local data = icon.OnShow
 			if data then
 				played, announced = icon:HandleEvent(data)
 			end
 		elseif alpha > icon.__alpha then
-			local data = runEvents and icon.OnAlphaInc
+			local data = icon.OnAlphaInc
 			if data then
 				played, announced = icon:HandleEvent(data)
 			end
-		else -- it must be less than, because it isnt greater than and it isnt the same --if alpha < icon.__alpha then
-			local data = runEvents and icon.OnAlphaDec
+		else -- it must be less than, because it isnt greater than and it isnt the same
+			local data = icon.OnAlphaDec
 			if data then
 				played, announced = icon:HandleEvent(data)
 			end
@@ -2705,15 +2684,16 @@ function IconBase.SetInfo(icon, alpha, color, texture, start, duration, pbName, 
 			isGCD = (GCD == duration and duration > 0)
 		end
 
-		local realDuration = isGCD and 0 or duration
+		local realDuration = isGCD and 0 or duration -- the duration of the cooldown, ignoring the GCD
 		if icon.__realDuration ~= realDuration then
+			-- detect events that occured, and handle them if they did
 			if realDuration == 0 then
-				local data = runEvents and icon.OnFinish
+				local data = icon.OnFinish
 				if data then
 					played, announced = icon:HandleEvent(data, played, announced)
 				end
 			else
-				local data = runEvents and icon.OnStart
+				local data = icon.OnStart
 				if data then
 					played, announced = icon:HandleEvent(data, played, announced)
 				end
@@ -2853,22 +2833,26 @@ local iconMT = {
 }
 
 
-function TMW:RegisterIconType(Type, str)
-	local v = Type.RelevantSettings
+function TMW:RegisterIconType(Type)
+	local typekey = Type.type
+	
 	for setting, b in pairs(RelevantToAll) do
-		if v[setting] == nil then -- must be == nil
-			v[setting] = b
+		-- merge settings that are relevant to all (or most) icon types into the RelevantSettings table.
+		-- values that are explicitly set false have been disabled for the icon type, so only set something on the table if the current value is nil.
+		if Type.RelevantSettings[setting] == nil then -- must be == nil
+			Type.RelevantSettings[setting] = b
 		end
 	end
-	if TMW.debug and rawget(Types, str) then
-		-- for tweaking and recreating icon types inside of WowLua .. too lazy to change the type string each time.
-		str = str .. " - " .. date("%X")
-		Type.nameOverride = str
+	
+	if TMW.debug and rawget(Types, typekey) then
+		-- for tweaking and recreating icon types inside of WowLua so that I don't have to change the typekey every time.
+		typekey = typekey .. " - " .. date("%X")
+		Type.name = typekey
 	end
-	Types[str] = Type
-	Type.type = str
-	tinsert(TMW.OrderedTypes, Type)
-	return Type
+	
+	Types[typekey] = Type -- put it in the main Types table
+	tinsert(TMW.OrderedTypes, Type) -- put it in the ordered types table (used to order the type selection dropdown in the icon editor)
+	return Type -- why not?
 end
 
 function TMW:CreateIcon(group, groupID, iconID)
@@ -2876,10 +2860,8 @@ function TMW:CreateIcon(group, groupID, iconID)
 	icon.group = group
 	group[iconID] = icon
 	CNDTEnv[icon:GetName()] = icon
-	--[[local mt = getmetatable(icon)
-	for k, v in pairs(IconMetamethods) do
-		mt[k] = v
-	end]]
+	icon.base = IconBase
+	
 	setmetatable(icon, iconMT)
 	for k, v in pairs(IconBase) do
 		if type(icon[k]) == "function" then -- if the method already exists on the icon
@@ -3204,16 +3186,15 @@ function TMW:Icon_Update(icon)
 		cbar:SetValue(cbar.Max)
 		cbar:SetAlpha(.7)
 		cbar:SetStatusBarColor(0, 1, 0, 0.5)
-	--	cbar.texture:SetTexCoord(0, 1, 0, 1)
 
 		ClearScripts(pbar)
 		pbar.UpdateSet = false
 		pbar:SetValue(2000000)
 		pbar:SetAlpha(.7)
-	--	pbar.texture:SetTexCoord(0, 1, 0, 1)
 
 		icon:EnableMouse(1)
 		if icon.Type == "meta" then
+			-- meta icons shouln't show bars in config, even though they are force enabled. I hate to do it like this
 			cbar:SetValue(0)
 			pbar:SetValue(0)
 		end
@@ -3230,28 +3211,29 @@ end
 -- ------------------
 
 local mult = {
-	1,
-	60,
-	60*60,
-	60*60*24,
-	60*60*24*365.242199,
+	1,						-- seconds per second
+	60,						-- seconds per minute
+	60*60,					-- seconds per hour
+	60*60*24,				-- seconds per day
+	60*60*24*365.242199,	-- seconds per year
 }
 function string:toseconds()
-	self = ":" .. self:trim(": ")
-	local _, numcolon = self:gsub(":", ":") -- let the cheesy coding commence!
-	local seconds = 0
-	for num in self:gmatch(":([0-9%.]*)") do
-		if tonumber(num) and mult[numcolon] then
-			seconds = seconds + mult[numcolon]*num
+	-- converts a string (e.g. "1:45:37") into the number of seconds that it represents (eg. 6337)
+	self = ":" .. self:trim(": ") -- a colon is needed at the beginning so that gmatch will catch the first unit of time in the string (minutes, hours, etc)
+	local _, numcolon = self:gsub(":", ":") -- HACK: count the number of colons in the string so that we can keep track of what multiplier we are on (since we start with the highest unit of time)
+	local seconds = 0 
+	for num in self:gmatch(":([0-9%.]*)") do -- iterate over all units of time and their value
+		if tonumber(num) and mult[numcolon] then -- make sure that it is valid (there is a number and it isnt a unit of time higher than a year)
+			seconds = seconds + mult[numcolon]*num -- multiply the number of units by the number of seconds in that unit and add the appropriate amount of time to the running count
 		end
-		numcolon = numcolon - 1
+		numcolon = numcolon - 1 -- decrease the current unit of time that is being worked with (even if it was an invalid unit and failed the above check)
 	end
-	return seconds
+	return seconds 
 end
 
 function TMW:lower(str)
-	if TMW.DS[str] then return str end
-	if type(str) == "table" then
+	-- converts a string, or all values of a table, to lowercase. Numbers are kept as numbers.
+	if type(str) == "table" then -- handle a table with recursion
 		for k, v in pairs(str) do
 			str[k] = TMW:lower(v)
 		end
@@ -3261,38 +3243,47 @@ function TMW:lower(str)
 end
 
 local function getCacheString(...)
+	-- returns a string containing all args
+	-- tostringall is a Blizzard function defined in UIParent.lua
 	return strconcat(tostringall(...))
 end
 
 local eqttcache = {}
 function TMW:EquivToTable(name)
-	if eqttcache[name] then return eqttcache[name] end -- if we already made a table of this string, then use it
-	name = strlower(name)
-	local eqname, duration = strmatch(name, "(.-):([%d:%s%.]*)$")
-	name = eqname or name
-	local names
+	-- this function checks to see if a string is a valid equivalency. If it is, all the spells that it represents will be put into an array and returned. If it isn't, nil will be returned.
+	local cachestring = getCacheString(name)
+	if eqttcache[cachestring] then return eqttcache[cachestring] end -- if we already made a table of this string, then reuse it to not create garbage
+	
+	name = strlower(name) -- everything in this function is handled as lowercase to prevent issues with user input capitalization
+	local eqname, duration = strmatch(name, "(.-):([%d:%s%.]*)$") -- see if the string being checked has a duration attached to it (it really shouldn't because there is currently no point in doing so, but a user did try this and made a bug report, so I fixed it anyway
+	name = eqname or name -- if there was a duration, then replace the old name with the actual name without the duration attached
+	
+	local names -- scope the variable
 	for k, v in pairs(TMW.BE) do -- check in subtables ('buffs', 'debuffs', 'casts', etc)
 		for equiv, str in pairs(v) do
 			if strlower(equiv) == name and (TMW.BE ~= TMW.OldBE or equiv ~= "Enraged") then -- dont expand the enrage equiv if we are hacking with OldBE
 				names = str
-				break
+				break -- break subtable loop
 			end
 		end
-		if names then break end
+		if names then break end -- break main loop
 	end
-	if not names then return end -- if we didnt find an equivalency string then gtfo
+	
+	if not names then return end -- if we didnt find an equivalency string then get out
 	
 
 	local tbl = { strsplit(";", names) } -- split the string into a table
 	for a, b in pairs(tbl) do
 		local new = strtrim(b) -- take off trailing spaces
 		new = tonumber(new) or new -- make sure it is a number if it can be
-		if duration then
+		if duration then -- tack on the duration that should be applied to all spells if there was one
 			new = new .. ":" .. duration
 		end
-		tbl[a] = new
+		tbl[a] = new -- stick it in the table
 	end
-	eqttcache[name] = tbl
+	
+	eqttcache[cachestring] = tbl -- cache the end result
+	
 	return tbl
 end
 
@@ -3351,11 +3342,6 @@ function TMW:GetSpellNames(icon, setting, firstOnly, toname, hash, keepDurations
 			end
 			if type(v) == "string" then -- all hash table lookups use the lowercase string to negate case sensitivity
 				v = strlower(v)
-			end
-			for ds in pairs(TMW.DS) do	--EXCEPT dispel types, they retain their capitalization. Restore it here.
-				if strlower(ds) == v then
-					v = ds
-				end
 			end
 			hash[v] = k -- put the final value in the table as well (may or may not be the same as the original value. Value should be NameArrray's key, for use with the duration table.
 		end

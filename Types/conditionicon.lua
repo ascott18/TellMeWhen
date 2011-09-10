@@ -25,6 +25,7 @@ local print = TMW.print
 
 
 local Type = {}
+Type.type = "conditionicon"
 Type.name = L["ICONMENU_CNDTIC"]
 Type.desc = L["ICONMENU_CNDTIC_DESC"]
 Type.spacebefore = true
@@ -136,4 +137,4 @@ function Type:IE_TypeUnloaded()
 	TMW:TT(TMW.IE.Main.ConditionAlpha, "CONDITIONALPHA", "CONDITIONALPHA_DESC")
 end
 
-TMW:RegisterIconType(Type, "conditionicon")
+TMW:RegisterIconType(Type)
