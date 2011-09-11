@@ -578,18 +578,6 @@
 						TMW:CleanString(self)
 						TMW.CNDT:OK()
 					</OnEditFocusLost>
-					<OnEditFocusGained>
-						EditBox_HighlightText(self)
-						self.BackgroundText:SetText(nil)
-					</OnEditFocusGained>
-					<OnTextChanged>
-						local text = self:GetText()
-						if text == "" then
-							self.BackgroundText:SetText(self.label)
-						else
-							self.BackgroundText:SetText(nil)
-						end
-					</OnTextChanged>
 				</Scripts>
 			</EditBox>
 			<EditBox name="$parentEditBox2" inherits="TellMeWhen_InputBoxTemplate" parentKey="EditBox2" autoFocus="false">
@@ -601,21 +589,8 @@
 					<OnEditFocusLost>
 						EditBox_ClearHighlight(self)
 						TMW:CleanString(self)
-						TMW.SUG.Suggest:Hide()
 						TMW.CNDT:OK()
 					</OnEditFocusLost>
-					<OnEditFocusGained>
-						EditBox_HighlightText(self)
-						self.BackgroundText:SetText(nil)
-					</OnEditFocusGained>
-					<OnTextChanged>
-						local text = self:GetText()
-						if text == "" then
-							self.BackgroundText:SetText(self.label)
-						else
-							self.BackgroundText:SetText(nil)
-						end
-					</OnTextChanged>
 				</Scripts>
 			</EditBox>
 			<Frame name="$parentRunes" parentKey="Runes" hidden="true">
@@ -1748,7 +1723,6 @@
 						<Scripts>
 							<OnLoad>
 								self.wrapTooltips = 1
-								TMW:TT(self, "ICONMENU_TYPE")
 								UIDropDownMenu_SetWidth(self, 180)
 								_G[self:GetName() .. "Button"]:SetScript("PreClick", function()
 									UIDropDownMenu_Initialize(self, TMW.IE.Type_DropDown, "DROPDOWN")
@@ -1757,11 +1731,19 @@
 								UIDropDownMenu_SetText(self, TMW.L["ICONMENU_TYPE"])
 								UIDropDownMenu_JustifyText(self, "LEFT")
 								_G[self:GetName() .. "Button"]:HookScript("OnClick", function(self)
-									local Main = self:GetParent():GetParent()
-									Main.Name:ClearFocus()
-									Main.Unit:ClearFocus()
+									TMW.IE:SaveSettings()
 								end)
 							</OnLoad>
+							<OnEnter>
+							local Type = TMW.Types[TMW.CI.t]
+								GameTooltip_SetDefaultAnchor(GameTooltip, self)
+								GameTooltip:AddLine(Type.name, HIGHLIGHT_FONT_COLOR.r, HIGHLIGHT_FONT_COLOR.g, HIGHLIGHT_FONT_COLOR.b, 1)
+								GameTooltip:AddLine(Type.desc, NORMAL_FONT_COLOR.r, NORMAL_FONT_COLOR.g, NORMAL_FONT_COLOR.b, 1)
+								GameTooltip:Show()
+							</OnEnter>
+							<OnLeave>
+								GameTooltip:Hide()
+							</OnLeave>
 						</Scripts>
 					</Frame>
 					<EditBox name="$parentName" inherits="TellMeWhen_InputBoxTemplate" parentKey="Name" autoFocus="false">
@@ -1868,7 +1850,12 @@
 							<OnTextChanged>
 								local text = self:GetText()
 								if text == "" then
-									self.BackgroundText:SetText(self.label)
+									local label = self.label
+									local append = TMW.Types[TMW.CI.t].appendNameLabel
+									if append then
+										label = label .. " " .. append
+									end
+									self.BackgroundText:SetText(label)
 								else
 									self.BackgroundText:SetText(nil)
 								end

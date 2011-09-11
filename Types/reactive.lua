@@ -125,7 +125,7 @@ local function Reactive_OnUpdate(icon, time)
 		local NameFirst = icon.NameFirst
 		if n > 1 then -- if more than 1 spell was checked, we need to get these again for the first spell, otherwise reuse the values obtained above since they are just for the first one
 			start, duration = GetSpellCooldown(NameFirst)
-			if IgnoreRunes and duration == 10 and NameNameArray[i] ~= mindfreeze then
+			if IgnoreRunes and duration == 10 and icon.NameName ~= mindfreeze then
 				start, duration = 0, 0
 			end
 			inrange, nomana = 1

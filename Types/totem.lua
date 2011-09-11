@@ -32,6 +32,7 @@ local strlowerCache = TMW.strlowerCache
 local Type = {}
 Type.type = "totem"
 Type.name = pclass == "DRUID" and L["ICONMENU_MUSHROOMS"] or pclass == "DEATHKNIGHT" and L["ICONMENU_GHOUL"] or L["ICONMENU_TOTEM"]
+Type.appendNameLabel = L["ICONMENU_CHOOSENAME_ORBLANK"]
 Type.usePocketWatch = 1
 if pclass == "SHAMAN" then
 	Type.TypeChecks = {

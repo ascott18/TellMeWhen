@@ -31,6 +31,7 @@ L["FROMNEWERVERSION"] = "You are importing an icon that was created in a newer v
 -- -------------
 
 L["ICONMENU_CHOOSENAME"] = "Choose name(s)/ID(s) to check"
+L["ICONMENU_CHOOSENAME_ORBLANK"] = "OR leave blank to track everything"
 L["ICONMENU_CHOOSENAME_CNDTIC"] = "Choose name/ID/texture path"
 L["ICONMENU_ENABLE"] = "Enabled"
 L["CHOOSENAME_EQUIVS_TOOLTIP"] = [[You can select predefined sets of buffs, debuffs, spell casts, diminishing returns, or dispel types (Magic, Curse, etc.) from this menu to insert into the "%s" editbox.]]

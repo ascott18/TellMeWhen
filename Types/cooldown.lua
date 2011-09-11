@@ -165,7 +165,7 @@ local function SpellCooldown_OnUpdate(icon, time)
 			if ManaCheck then
 				_, nomana = IsUsableSpell(NameFirst)
 			end
-			if IgnoreRunes and duration == 10 and NameNameArray[i] ~= mindfreeze then
+			if IgnoreRunes and duration == 10 and icon.NameName ~= mindfreeze then
 				start, duration = 0, 0
 			end
 			isGCD = OnGCD(duration)

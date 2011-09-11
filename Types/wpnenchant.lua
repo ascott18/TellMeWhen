@@ -32,6 +32,7 @@ local Type = {}
 Type.type = "wpnenchant"
 Type.name = L["ICONMENU_WPNENCHANT"]
 Type.desc = L["ICONMENU_WPNENCHANT_DESC"]
+Type.appendNameLabel = L["ICONMENU_CHOOSENAME_ORBLANK"]
 Type.TypeChecks = {
 	text = L["ICONMENU_WPNENCHANTTYPE"],
 	setting = "WpnEnchantType",

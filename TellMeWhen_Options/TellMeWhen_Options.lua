@@ -1802,8 +1802,6 @@ function IE:Load(isRefresh, icon)
 	local groupID, iconID = CI.g, CI.i
 	if not groupID or not iconID then return end
 
-	IE.Main.Name:ClearFocus()
-	IE.Main.Unit:ClearFocus()
 	IE.Main.ExportBox:SetText("")
 	TellMeWhen_IconEditor:SetScale(db.global.EditorScale)
 

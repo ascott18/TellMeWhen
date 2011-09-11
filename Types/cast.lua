@@ -33,6 +33,7 @@ local Type = {}
 Type.type = "cast"
 LibStub("AceEvent-3.0"):Embed(Type)
 Type.name = L["ICONMENU_CAST"]
+Type.appendNameLabel = L["ICONMENU_CHOOSENAME_ORBLANK"]
 Type.WhenChecks = {
 	text = L["ICONMENU_CASTSHOWWHEN"],
 	{ value = "alpha", 			text = L["ICONMENU_PRESENT"], 			colorCode = "|cFF00FF00" },
