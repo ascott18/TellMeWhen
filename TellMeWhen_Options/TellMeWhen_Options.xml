@@ -1498,7 +1498,7 @@
 			</Button>
 
 			<Frame name="$parentHelp" parentKey="Help" inherits="GlowBoxTemplate" enableMouse="true" hidden="true" >
-				<Size x="230" y="200"/>
+				<Size x="250" y="200"/>
 				<Anchors>
 					<Anchor point="TOPRIGHT" relativePoint="LEFT" x="-30" y="-15"/>
 				</Anchors>
@@ -1735,7 +1735,7 @@
 								end)
 							</OnLoad>
 							<OnEnter>
-							local Type = TMW.Types[TMW.CI.t]
+								local Type = TMW.Types[TMW.CI.t]
 								GameTooltip_SetDefaultAnchor(GameTooltip, self)
 								GameTooltip:AddLine(Type.name, HIGHLIGHT_FONT_COLOR.r, HIGHLIGHT_FONT_COLOR.g, HIGHLIGHT_FONT_COLOR.b, 1)
 								GameTooltip:AddLine(Type.desc, NORMAL_FONT_COLOR.r, NORMAL_FONT_COLOR.g, NORMAL_FONT_COLOR.b, 1)
@@ -4221,15 +4221,22 @@
 					self.FS1:SetFormattedText(TMW.L["fGROUP"], TMW:GetGroupName(groupID, groupID, 1))
 					self.icontexture:Hide()
 				else
-					self.FS1:SetFormattedText(TMW.L["GROUPICON"], TMW:GetGroupName(groupID, groupID, 1), iconID)
+				self.FS1:SetFormattedText(TMW.L["GROUPICON"], TMW:GetGroupName(groupID, groupID, 1), iconID)
 					if ic then
 						self.icontexture:Show()
 						self.icontexture:SetTexture(ic.texture:GetTexture())
 					end
 				end
 			</OnUpdate>
-			<OnDragStart> self:StartMoving() </OnDragStart>
-			<OnDragStop> self:StopMovingOrSizing() </OnDragStop>
+			<OnSizeChanged>
+			self.Help:SetHeight(self.Help.text:GetHeight() + 38)
+			</OnSizeChanged>
+			<OnDragStart>
+				self:StartMoving()
+			</OnDragStart>
+			<OnDragStop>
+				self:StopMovingOrSizing()
+			</OnDragStop>
 		</Scripts>
 	</Frame>
 

@@ -34,7 +34,7 @@ local DRData = LibStub("DRData-1.0", true)
 TELLMEWHEN_VERSION = "4.5.6"
 TELLMEWHEN_VERSION_MINOR = strmatch(" @project-version@", " r%d+") or ""
 TELLMEWHEN_VERSION_FULL = TELLMEWHEN_VERSION .. TELLMEWHEN_VERSION_MINOR
-TELLMEWHEN_VERSIONNUMBER = 45603 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
+TELLMEWHEN_VERSIONNUMBER = 45605 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
 if TELLMEWHEN_VERSIONNUMBER > 46000 or TELLMEWHEN_VERSIONNUMBER < 45000 then return error("YOU SCREWED UP THE VERSION NUMBER OR DIDNT CHANGE THE SAFETY LIMITS") end -- safety check because i accidentally made the version number 414069 once
 
 TELLMEWHEN_MAXGROUPS = 1 	--this is a default, used by SetTheory (addon), so dont rename
@@ -394,7 +394,8 @@ TMW.Defaults = {
 		ClassSpellCache	= {
 			["*"] = {},
 		},
-		SeenNewDurSyntax	= false,
+		HelpSettings = {
+		},
 		HasImported			= false,
 		ConfigWarning		= true,
 	},
@@ -1274,6 +1275,12 @@ function TMW:GetUpgradeTable() -- upgrade functions
 	local t = {
 	
 	
+		[45605] = {
+			global = function()
+				db.global.HelpSettings.NewDurSyntax = db.global.SeenNewDurSyntax
+				db.global.SeenNewDurSyntax = nil
+			end,
+		},
 		[45402] = {
 			group = function(gs)
 				gs.OnlyInCombat = false
@@ -3615,9 +3622,15 @@ function TMW:GetConfigIconTexture(icon, isItem)
 	
 		for _, name in ipairs(tbl) do
 			local t = isItem and GetItemIcon(name) or SpellTextures[name]
-			if t then return t, true end
+			if t then
+				return t, true
+			end
 		end
 		if Types[icon.Type].usePocketWatch then
+			if TMW.IE and TMW.CI.ic == icon and not db.global.HelpSettings.PocketWatch and TellMeWhen_IconEditor:IsShown() then
+				TMW.IE:ShowHelp(L["HELP_POCKETWATCH"], TMW.IE.icontexture, 0, 0)
+				db.global.HelpSettings.PocketWatch = 1
+			end
 			return "Interface\\Icons\\INV_Misc_PocketWatch_01", false
 		else
 			return "Interface\\Icons\\INV_Misc_QuestionMark", false

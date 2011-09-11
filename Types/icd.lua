@@ -145,9 +145,9 @@ end
 
 
 function Type:IE_TypeLoaded()
-	if not TMW.db.global.SeenNewDurSyntax then
+	if not TMW.db.global.HelpSettings.NewDurSyntax then
 		TMW.IE:ShowHelp(L["HELP_FIRSTUCD"], TMW.IE.Main.Type, 20, 0)
-		TMW.db.global.SeenNewDurSyntax = 1
+		TMW.db.global.HelpSettings.NewDurSyntax = 1
 	end
 end
 

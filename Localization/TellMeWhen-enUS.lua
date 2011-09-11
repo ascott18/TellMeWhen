@@ -711,6 +711,12 @@ Replace the red |cFFFF0000#|r with a number or a range of numbers.
 E.g:
 arena1
 raid1-40]]
+L["HELP_POCKETWATCH"] = [[|TInterface\Icons\INV_Misc_PocketWatch_01:20|t -- The pocket watch texture.
+This texture is being used because the first valid spell being checked was entered by name and isn't in your spellbook.
+
+The correct texture will be used once you have seen the spell as you play.
+
+Change the first spell being checked into a Spell ID to make the correct texture always be used. You can easily do this by clicking on the entry in the editbox and then clicking on the ID portion (right-hand side) of the correct entry in the suggestion list that appears.]]
 
 
 L["TOPLEFT"] = "Top Left"

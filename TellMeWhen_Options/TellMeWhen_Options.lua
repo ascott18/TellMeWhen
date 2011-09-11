@@ -1851,7 +1851,8 @@ function IE:ShowHelp(text, frame, x, y)
 	IE.Help:SetPoint("TOPRIGHT", frame, "LEFT", (x or 0) - 30, (y or 0) + 28)
 	IE.Help.text:SetText(text)
 	IE.Help:SetHeight(IE.Help.text:GetHeight() + 38)
-	IE.Help:SetParent(frame)
+	local parent = frame.CreateTexture and frame or frame:GetParent()
+	IE.Help:SetParent(parent)
 	IE.Help:Show()
 end
 
