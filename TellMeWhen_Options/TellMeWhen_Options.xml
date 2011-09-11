@@ -146,9 +146,16 @@
 		<Scripts>
 			<OnLoad>
 				self.Background:SetVertexColor(0, 1, 0)
+				self:RegisterForClicks("LeftButtonUp", "RightButtonUp")
 			</OnLoad>
 			<OnClick>
-				TMW.SUG:OnClick(self)
+				local insert
+				if button == "RightButton" and self.insert2 then
+					insert = self.insert2
+				else
+					insert = self.insert
+				end
+				TMW.SUG:Insert(insert)
 			</OnClick>
 			<OnEnter>
 				GameTooltip_SetDefaultAnchor(GameTooltip, self)
@@ -157,6 +164,19 @@
 				elseif self.tooltiptitle then
 					GameTooltip:AddLine(self.tooltiptitle, HIGHLIGHT_FONT_COLOR.r, HIGHLIGHT_FONT_COLOR.g, HIGHLIGHT_FONT_COLOR.b, 1)
 					GameTooltip:AddLine(self.tooltiptext, NORMAL_FONT_COLOR.r, NORMAL_FONT_COLOR.g, NORMAL_FONT_COLOR.b, 1)
+				end
+				if self.insert2 then
+					local first, second
+					
+					if TMW.SUG.inputType == "number" then
+						first, second = TMW.L["SUG_INSERTID_LEFT"], TMW.L["SUG_INSERTNAME_RIGHT"]
+					else
+						first, second = TMW.L["SUG_INSERTNAME_LEFT"], TMW.L["SUG_INSERTID_RIGHT"]
+					end
+					GameTooltip:AddLine(" ")
+					GameTooltip:AddLine(first, 0, .5, 1, 1)
+					GameTooltip:AddLine(second, 0, .5, 1, 1)
+				
 				end
 				GameTooltip:Show()
 			</OnEnter>
@@ -1702,6 +1722,7 @@
 						TMW.SUG[1] = self.Item1
 						self.Item1:SetPoint("TOPLEFT", self, "TOPLEFT", 12, -12-self.Item1:GetHeight())
 						self.Item1:SetWidth(self:GetWidth()-20)
+						
 						for i=2, self:GetHeight()/self.Item1:GetHeight()-2 do
 							local f = CreateFrame("Button", self:GetName().."Item"..i, self, "TellMeWhen_SpellSuggestTemplate")
 							self["Item"..i] = f

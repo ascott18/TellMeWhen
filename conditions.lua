@@ -486,6 +486,17 @@ function Env.GetTooltipNumber(unit, name, filter)
 	return 0
 end
 
+Env.UnitNameConcatCache = setmetatable(
+{}, {
+	__index = function(t, i)
+		if not i then return end
+		
+		local o = ";" .. strlowerCache[i] .. ";"
+		t[i] = o
+		return o
+	end,
+})
+
 CNDT.Operators = {
 	{ tooltipText = L["CONDITIONPANEL_EQUALS"], 		value = "==", 	text = "==" },
 	{ tooltipText = L["CONDITIONPANEL_NOTEQUAL"], 	 	value = "~=", 	text = "~=" },
@@ -873,12 +884,12 @@ CNDT.Types = {
 		value = "NAME",
 		min = 0,
 		max = 1,
-		name = function(editbox) TMW:TT(editbox, "CONDITIONPANEL_NAME", "CONDITIONPANEL_NAMETOOLTIP") editbox.label = L["CONDITIONPANEL_NAME"] end,
+		name = function(editbox) TMW:TT(editbox, "CONDITIONPANEL_NAMETOMATCH", "CONDITIONPANEL_NAMETOOLTIP") editbox.label = L["CONDITIONPANEL_NAMETOMATCH"] end,
 		nooperator = true,
 		texttable = bool,
 		icon = "Interface\\LFGFrame\\LFGFrame-SearchIcon-Background",
 		tcoords = standardtcoords,
-		funcstr = [[c.1nil == (strfind(c.Name, ";" .. strlowerCache[UnitName(c.Unit) or ""] .. ";") and 1)]],
+		funcstr = [[c.1nil == (strfind(c.Name, UnitNameConcatCache[UnitName(c.Unit) or ""]) and 1)]],
 	},
 	{ -- level
 		text = L["CONDITIONPANEL_LEVEL"],
@@ -2085,12 +2096,12 @@ function CNDT:ProcessConditions(icon)
 				gsub("c.NameFirst2", 	"\"" .. TMW:GetSpellNames(nil, name2, 1) .. "\""): --Name2 must be before Name
 				gsub("c.NameName2", 	"\"" .. TMW:GetSpellNames(nil, name2, 1, 1) .. "\""):
 				gsub("c.ItemID2", 		TMW:GetItemIDs(nil, name2, 1)):
-				gsub("c.Name2", 		"\"" .. name2 .. "\""):
+				gsub("c.Name2", 	"\"" .. name2 .. "\""):
 				
 				gsub("c.NameFirst", 	"\"" .. TMW:GetSpellNames(nil, name, 1) .. "\""):
 				gsub("c.NameName", 		"\"" .. TMW:GetSpellNames(nil, name, 1, 1) .. "\""):
 				gsub("c.ItemID", 		TMW:GetItemIDs(nil, name, 1)):
-				gsub("c.Name", 			"\"" .. name .. "\""):
+				gsub("c.Name", 	"\"" .. name .. "\""):
 
 				gsub("c.True", 			tostring(c.Level == 0)):
 				gsub("c.False", 		tostring(c.Level == 1)):

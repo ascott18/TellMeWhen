@@ -59,7 +59,7 @@ L["ICONMENU_REACTIVE_DESC"] = "Reactive abilities are things like Kill Shot, Rev
 L["ICONMENU_WPNENCHANT"] = "Weapon Enchant"
 L["ICONMENU_WPNENCHANT_DESC"] = [=[This icon type tracks the status of temporary weapon enchants on your weapons - most useful for rogues and shaman.
 
-The name field can be left blank to track any weapon enchant in the specified slot, or you can insert the names of weapon enchants to only show it for specific enchants.  The names that must be entered are the names that appear in the tooltip of your weapon while the enchant is active, e.g "Flametongue", not "Flametongue Weapon."]=]
+The name field can be left blank to track any weapon enchant in the specified slot, or you can insert the name(s) of weapon enchant(s) to only show it for specific enchants.  The name that must be entered is the name that appears on the tooltip of your weapon while the enchant is active, e.g. "Flametongue", not "Flametongue Weapon."]=]
 L["ICONMENU_TOTEM"] = "Totem"
 L["ICONMENU_GHOUL"] = "Non-MoG ghoul"
 L["ICONMENU_MUSHROOMS"] = "Wild Mushrooms"
@@ -72,7 +72,7 @@ L["ICONMENU_UNITCOOLDOWN_DESC"] = [=[This icon type allows you to track the cool
 
 Note regarding pvp trinkets: they can be tracked using '%s' as the name.]=]
 L["ICONMENU_ICD"] = "Internal Cooldown"
-L["ICONMENU_ICD_DESC"] = [=[This icon type can be used to track either the internal cooldown of something such as a proc from a talent or a trinket,or the duration of a spell (e.g. traps, mage orb), or even the duration of a summon (e.g. Infernal).
+L["ICONMENU_ICD_DESC"] = [=[This icon type can be used to track either the internal cooldown of something such as a proc from a talent or a trinket, or the duration of a spell (e.g. traps, mage orb), or even the duration of a summon (e.g. Infernal).
 
 Enter the spellID or name of the buff/debuff that is placed when the cooldown starts, or the name of the spell that you would like to track the duration of. Semicolon-delimited lists are valid.
 
@@ -90,7 +90,7 @@ Icons that have 'Always Hide' checked will still be shown in a meta icon if they
 L["ICONMENU_DR"] = "Diminishing Returns"
 L["ICONMENU_DR_DESC"] = [=[This icon type can be used to track the length and extent of the diminishing returns of a category of spells.
 
-Spells from different diminishing returns categories should not be checked in one icon.  For example, do not put Polymorph and Cheap Shot in the same icon, as they are not in the same category. It is advised that you used the predefined DR-<category> equivalancies that TMW provides.]=]
+Spells from different diminishing returns categories should not be checked in one icon.  For example, do not put Polymorph and Cheap Shot in the same icon, as they are not in the same category. It is advised that you used the predefined DR-<category> equivalencies that TMW provides.]=]
 L["ICONMENU_RUNES"] = "Rune Cooldown"
 
 L["ICONMENU_COOLDOWNTYPE"] = "Cooldown type"
@@ -124,7 +124,7 @@ This does NOT set a keybinding to this TellMeWhen icon. It is simply a visual re
 
 L["ICONMENU_UNITSTOWATCH"] = "Units to watch"
 L["ICONMENU_UNITS"] = "Units"
-L["ICONMENU_UNIT_DESC"] = [[Enter the units to watch in this box. Units can be inserted from the dropdown to the right, or advanced users can insert their own units. Separate each unit with a semicolon (;). 
+L["ICONMENU_UNIT_DESC"] = [[Enter the units to watch in this box. Units can be inserted from the dropdown at the right, or advanced users can type in their own units. Standard units (e.g. player) and/or friendly player names (e.g. %s) may be used as units. Separate multiple units with semicolons (;). 
 
 For more information about units, go to http://www.wowpedia.org/UnitId.]]
 L["DROPDOWN_UNIT_DESC"] = [[You can select units from this menu to insert into the editbox. Units that end with '|cFFFF0000#|r' require that the '|cFFFF0000#|r' be replaced with a number corresponding to the appropriate unit, or a range of numbers. E.g. change 'raid|cFFFF0000#|r' to 'raid25' to track the 25th raid member, or change it to 'raid1-25' to track the first 25 raid members.
@@ -198,7 +198,7 @@ L["MUSHROOM"] = "Mushroom %d"
 L["RUNES"] = "Rune(s) to check"
 
 L["ICONMENU_SHOWTTTEXT"] = "Show variable text"
-L["ICONMENU_SHOWTTTEXT_DESC"] = "Check this to display the first variable associated with the aura that is beind displayed. Numbers are provided by Blizzard API and do not necessarily match numbers found on the tooltip of the aura. There is also no guarentee that a number will be shown for an aura. In most practical cases, though, the correct numer will be shown."
+L["ICONMENU_SHOWTTTEXT_DESC"] = "Check this to display the first variable associated with the aura that is being displayed. Numbers are provided by Blizzard API and do not necessarily match numbers found on the tooltip of the aura. There is also no guarantee that a number will be shown for an aura. In most practical cases, though, the correct number will be shown."
 L["ICONMENU_RANGECHECK"] = "Range check"
 L["ICONMENU_RANGECHECK_DESC"] = "Check this to enable changing the color of the icon when you are out of range"
 L["ICONMENU_MANACHECK"] = "Power check"
@@ -266,11 +266,11 @@ L["ICONMENU_ONLYSEEN_DESC"] = "Check this to make the icon only show a cooldown 
 L["ICONMENU_CHECKREFRESH"] = "Listen for refreshes"
 L["ICONMENU_CHECKREFRESH_DESC"] = [[Blizzard's combat log is very buggy when it comes to spell refreshes and fear (or other spells that break after a certain amount of damage). The combat log will say that the spell was refreshed when damage is dealt, even though it technically wasn't. Uncheck this box to disable listening to spell refreshes, but note that legitimate refreshes will be ignored as well.
 
-It is reccomended to leave this checked if the DRs you are checking for don't break after a certain amount of damage.]]
+It is reccommended to leave this checked if the DRs you are checking for don't break after a certain amount of damage.]]
 L["ICONMENU_IGNORENOMANA"] = "Ignore lack of power"
 L["ICONMENU_IGNORENOMANA_DESC"] = [[Check this to cause the ability to not be treated as unusable if there is only a lack of power to use it.
 
-Useful for abilies such as %s or %s]]
+Useful for abilities such as %s or %s]]
 L["ICONMENU_ONLYIFCOUNTING"] = "Only show if timer is active"
 L["ICONMENU_ONLYIFCOUNTING_DESC"] = "Check this to make the icon show only if there is currently an active timer running on the icon with a duration greater than 0."
 
@@ -392,7 +392,7 @@ L["TRUE"] = "True"
 L["FALSE"] = "False"
 L["CONDITIONPANEL_TYPE"] = "Type"
 L["CONDITIONPANEL_UNIT"] = "Unit"
-L["CONDITIONPANEL_UNIT_DESC"] = "Enter the unit to watch in this box. The unit can be inserted from the dropdown to the right, or advanced users can insert their own unit. Standard units (player, target, mouseover, etc.) may be used, or friendly player names (%s, Cybeloras, etc.)"
+L["CONDITIONPANEL_UNIT_DESC"] = "Enter the unit to watch in this box. The unit can be inserted from the dropdown at the right, or advanced users can type in their own unit. Standard units (e.g. player) and/or friendly player names (e.g. %s) may be used as units."
 L["CONDITIONPANEL_UNITDROPDOWN_DESC"] = [[You can select a unit from this menu to insert into the editbox. Units that end with '|cFFFF0000#|r' require that the '|cFFFF0000#|r' be replaced with a number corresponding to the appropriate unit. E.g. change 'raid|cFFFF0000#|r' to 'raid25' to track the 25th raid member.
 
 NOTE: Conditions only accept one unit.]]
@@ -446,7 +446,8 @@ Players in melee range pull aggro at 110%
 Players at range pull aggro at 130%
 Players with aggro have a raw threat percentage of 255%]]
 L["CONDITIONPANEL_NAME"] = "Unit Name"
-L["CONDITIONPANEL_NAMETOOLTIP"] = "Separate multiple names with semicolons (;)"
+L["CONDITIONPANEL_NAMETOMATCH"] = "Name to Match"
+L["CONDITIONPANEL_NAMETOOLTIP"] = "You can enter multiple names to be matched by separating each one with a semicolon (;). The condition will pass if any names are matched."
 L["CONDITIONPANEL_INSTANCETYPE"] = "Instance Type"
 L["CONDITIONPANEL_GROUPTYPE"] = "Group Type"
 L["CONDITIONPANEL_SWIMMING"] = "Swimming"
@@ -464,7 +465,7 @@ L["LUACONDITION_DESC"] = [[This condition type allows you to evaluate Lua code t
 
 The input is not an 'if .. then' statement, nor is it a function closure. It is a regular statement to be evaluated, e.g. 'a and b or c'.  If complex functionality is required, use a call to a function, e.g. 'CheckStuff()', that is defined externally.
 
-If more help is needed (but not help about how to write Lua code), open a ticket on CurseForge. For help on how to write Lua, go to the interwebs.]]
+If more help is needed (but not help about how to write Lua code), open a ticket on CurseForge. For help on how to write Lua, go to the internet.]]
 L["MACROCONDITION"] = "Macro Conditional"
 L["MACROCONDITION_DESC"] = [[This condition will evaluate a macro conditional, and will pass if it passes. All macro conditionals can be prepended with "no" to reverse what they check.
 
@@ -542,7 +543,7 @@ L["ACTIVE"] = "%d Active"
 L["NUMAURAS_DESC"] = [[This condition checks the number of an aura active - not to be confused with the number of stacks of an aura.  This is for checking things like if you have both weapon enchant procs active at the same time.  Use sparingly, as the process used to count the numbers is a bit CPU intensive.]]
 L["COOLDOWN"] = "Cooldown"
 L["TOOLTIPSCAN"] = "Aura Variable"
-L["TOOLTIPSCAN_DESC"] = "This condition type will allow you to check the first variable associated with an aura. Numbers are provided by Blizzard API and do not necessarily match numbers found on the tooltip of the aura. There is also no guarentee that a number will be obtained for an aura. In most practical cases, though, the correct numer will be checked."
+L["TOOLTIPSCAN_DESC"] = "This condition type will allow you to check the first variable associated with an aura. Numbers are provided by Blizzard API and do not necessarily match numbers found on the tooltip of the aura. There is also no guarantee that a number will be obtained for an aura. In most practical cases, though, the correct number will be checked."
 
 
 
@@ -617,6 +618,10 @@ L["SUG_PLAYERAURAS"] = "Known PC/pet buffs/debuffs"
 L["SUG_MISC"] = "Miscellaneous"
 L["SUG_FINISHHIM"] = "Finish Caching Now"
 L["SUG_FINISHHIM_DESC"] = "Click to immediately finish the caching/filtering process. Note that your computer may freeze for a few seconds."
+L["SUG_INSERTNAME_LEFT"] = "Left-click to insert as a name"
+L["SUG_INSERTID_LEFT"] = "Left-click to insert as an ID"
+L["SUG_INSERTNAME_RIGHT"] = "Right-click to insert as a name"
+L["SUG_INSERTID_RIGHT"] = "Right-click to insert as an ID"
 
 
 L["SOUND_EVENT_ONSHOW"] = "On Show"
@@ -716,7 +721,7 @@ This texture is being used because the first valid spell being checked was enter
 
 The correct texture will be used once you have seen the spell as you play.
 
-Change the first spell being checked into a Spell ID to make the correct texture always be used. You can easily do this by clicking on the entry in the editbox and then clicking on the ID portion (right-hand side) of the correct entry in the suggestion list that appears.]]
+Change the first spell being checked into a Spell ID to make the correct texture always be used. You can easily do this by clicking on the entry in the editbox and then right-clicking the correct corresponding entry in the suggestion list that appears.]]
 
 
 L["TOPLEFT"] = "Top Left"
@@ -739,7 +744,7 @@ L["Feared"] = "Fear"
 L["Incapacitated"] = "Incapacitated"
 L["Stunned"] = "Stunned"
 L["Slowed"] = "Slowed"
---L["DontMelee"] = "Dont Melee"
+--L["DontMelee"] = "Don't Melee"
 L["ImmuneToStun"] = "Immune To Stun"
 L["ImmuneToMagicCC"] = "Immune To Magic CC"
 --L["MovementSlowed"] = "Movement Slowed"

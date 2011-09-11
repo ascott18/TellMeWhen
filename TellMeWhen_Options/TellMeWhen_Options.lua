@@ -2972,7 +2972,7 @@ end
 -- ----------------------
 
 SUG = TMW:NewModule("Suggester", "AceEvent-3.0", "AceComm-3.0", "AceSerializer-3.0", "AceTimer-3.0") TMW.SUG = SUG
-local inputType
+local SUGIsNumberInput
 local SUGIMS, SUGSoI
 local SUGpreTable = {}
 local SUGPlayerSpells = {}
@@ -3352,7 +3352,7 @@ function SUG.Sorter(a, b)
 		end
 	end
 	
-	if inputType == "number" or SUGSoI == "tracking" then
+	if SUGIsNumberInput or SUGSoI == "tracking" then
 		--sort by id
 		return a < b
 	else
@@ -3389,8 +3389,8 @@ function SUG:DoSuggest()
 				if 	(long and (
 						(strfind(strlowerCache[equiv], lastName)) or
 						(strfind(strlowerCache[L[equiv]], lastName)) or
-						((inputType == "string" and strfind(strlowerCache[EquivFullNameLookup[equiv]], semiLN)) or
-						(inputType == "number" and strfind(EquivFullIDLookup[equiv], semiLN)))
+						(not SUGIsNumberInput and strfind(strlowerCache[EquivFullNameLookup[equiv]], semiLN)) or
+						(SUGIsNumberInput and strfind(EquivFullIDLookup[equiv], semiLN))
 				)) or
 					(not long and (
 						(strfind(strlowerCache[equiv], atBeginning)) or
@@ -3421,7 +3421,7 @@ function SUG:DoSuggest()
 		tbl = SpellCache
 	end
 	
-	if inputType == "number" then
+	if SUG.inputType == "number" then
 		local len = #SUG.lastName - 1
 		local match = tonumber(SUG.lastName)
 		for id in pairs(tbl) do
@@ -3454,6 +3454,8 @@ function SUG:SuggestingComplete(doSort)
 	while SUG[i] do
 		local id = SUGpreTable[i+offset]
 		local f = SUG[i]
+		f.insert = nil
+		f.insert2 = nil
 		if id then
 			f.Background:SetVertexColor(0, 0, 0, 0)
 			if TMW.DS[id] then -- if the entry is a dispel type (magic, poison, etc)
@@ -3500,7 +3502,8 @@ function SUG:SuggestingComplete(doSort)
 					f.Name:SetText(link)
 					f.ID:SetText(id)
 
-					f.insert = inputType == "number" and id or name
+					f.insert = SUG.inputType == "number" and id or name
+					f.insert2 = SUG.inputType ~= "number" and id or name
 
 					f.tooltipmethod = "SetHyperlink"
 					f.tooltiparg = link
@@ -3529,7 +3532,8 @@ function SUG:SuggestingComplete(doSort)
 					f.tooltipmethod = "SetSpellByID"
 					f.tooltiparg = id
 
-					f.insert = inputType == "number" and id or name
+					f.insert = SUG.inputType == "number" and id or name
+					f.insert2 = SUG.inputType ~= "number" and id or name
 
 					f.Icon:SetTexture(SpellTextures[id])
 					if SUGIMS and SUG.ActionCache[id] then
@@ -3637,7 +3641,8 @@ function SUG:NameOnCursor(isClick)
 		SUG.updatePlayerSpells = nil
 	end
 
-	inputType = type(tonumber(SUG.lastName) or SUG.lastName)
+	SUG.inputType = type(tonumber(SUG.lastName) or SUG.lastName)
+	SUGIsNumberInput = SUG.inputType == "number"
 
 	if SUG.oldLastName ~= SUG.lastName or SUG.redoIfSame then
 		SUG.redoIfSame = nil
@@ -3652,8 +3657,8 @@ function SUG:NameOnCursor(isClick)
 
 end
 
-function SUG:OnClick(frame)
-	if frame.insert then
+function SUG:Insert(insert)
+	if insert then
 		local currenttext = SUG.Box:GetText()
 		local start = SUG.startpos-1
 		local firsthalf
@@ -3665,7 +3670,7 @@ function SUG:OnClick(frame)
 		local lasthalf = strsub(currenttext, SUG.endpos+1)
 		
 		local addcolon = (SUG.duration or (Types[CI.t].DurationSyntax and not SUG.overrideSoI))
-		local insert = (addcolon and frame.insert .. ": " .. (SUG.duration or "")) or frame.insert
+		local insert = (addcolon and insert .. ": " .. (SUG.duration or "")) or insert
 		local newtext = firsthalf .. "; " .. insert .. "; " .. lasthalf
 		SUG.Box:SetText(TMW:CleanString(newtext))
 		SUG.Box:SetCursorPosition(SUG.endpos + (#tostring(insert) - #tostring(SUG.lastName)) + 2)
