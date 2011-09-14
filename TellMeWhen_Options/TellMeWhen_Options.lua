@@ -2475,6 +2475,7 @@ function IE:GetRealNames()
 	cachednames[CI.t .. CI.SoI .. text] = str
 	return str
 end
+
 local cachedunits = {}
 function IE:GetRealUnits()
 	-- gets a string to set as a tooltip of all of the spells names in the name box in the IE. Splits up equivalancies and turns IDs into names

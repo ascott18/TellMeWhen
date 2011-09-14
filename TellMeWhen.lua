@@ -34,7 +34,7 @@ local DRData = LibStub("DRData-1.0", true)
 TELLMEWHEN_VERSION = "4.5.6"
 TELLMEWHEN_VERSION_MINOR = strmatch(" @project-version@", " r%d+") or ""
 TELLMEWHEN_VERSION_FULL = TELLMEWHEN_VERSION .. TELLMEWHEN_VERSION_MINOR
-TELLMEWHEN_VERSIONNUMBER = 45605 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
+TELLMEWHEN_VERSIONNUMBER = 45606 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
 if TELLMEWHEN_VERSIONNUMBER > 46000 or TELLMEWHEN_VERSIONNUMBER < 45000 then return error("YOU SCREWED UP THE VERSION NUMBER OR DIDNT CHANGE THE SAFETY LIMITS") end -- safety check because i accidentally made the version number 414069 once
 
 TELLMEWHEN_MAXGROUPS = 1 	--this is a default, used by SetTheory (addon), so dont rename
@@ -675,7 +675,7 @@ for category, b in pairs(TMW.OldBE) do
 		
 		-- turn all IDs prefixed with "_" into their localized name. Dont do this on every single one, but do use it for spells that do not have any other spells with the same name but different effects.
 		while strfind(str, "_") do
-			local id = strmatch(str, "_%d+")
+			local id = strmatch(str, "_%d+") -- id includes the underscore, trimmed off below
 			if id then
 				local name = GetSpellInfo(strtrim(id, " _"))
 				if name then
@@ -3238,14 +3238,22 @@ function string:toseconds()
 	return seconds 
 end
 
-function TMW:lower(str)
+function TMW:lowerNames(str)
 	-- converts a string, or all values of a table, to lowercase. Numbers are kept as numbers.
 	if type(str) == "table" then -- handle a table with recursion
 		for k, v in pairs(str) do
-			str[k] = TMW:lower(v)
+			str[k] = TMW:lowerNames(v)
 		end
 		return str
 	end
+	
+	-- Dispel types retain their capitalization. Restore it here.
+	for ds in pairs(TMW.DS) do
+		if strlower(ds) == strlower(str) then
+			return ds
+		end
+	end
+	
 	return tonumber(str) or strlower(str)
 end
 
@@ -3258,7 +3266,7 @@ end
 local eqttcache = {}
 function TMW:EquivToTable(name)
 	-- this function checks to see if a string is a valid equivalency. If it is, all the spells that it represents will be put into an array and returned. If it isn't, nil will be returned.
-	local cachestring = getCacheString(name)
+	local cachestring = getCacheString(name, TMW.BE)
 	if eqttcache[cachestring] then return eqttcache[cachestring] end -- if we already made a table of this string, then reuse it to not create garbage
 	
 	name = strlower(name) -- everything in this function is handled as lowercase to prevent issues with user input capitalization
@@ -3338,7 +3346,7 @@ function TMW:GetSpellNames(icon, setting, firstOnly, toname, hash, keepDurations
 		end
 	end
 	if icon then
-		buffNames = TMW:lower(buffNames)
+		buffNames = TMW:lowerNames(buffNames)
 	end
 
 	if hash then
@@ -3347,9 +3355,8 @@ function TMW:GetSpellNames(icon, setting, firstOnly, toname, hash, keepDurations
 			if toname then
 				v = GetSpellInfo(v or "") or v -- turn the value into a name if needed
 			end
-			if type(v) == "string" then -- all hash table lookups use the lowercase string to negate case sensitivity
-				v = strlower(v)
-			end
+			
+			v = TMW:lowerNames(v)
 			hash[v] = k -- put the final value in the table as well (may or may not be the same as the original value. Value should be NameArrray's key, for use with the duration table.
 		end
 		gsncache[cachestring] = hash
@@ -3358,14 +3365,14 @@ function TMW:GetSpellNames(icon, setting, firstOnly, toname, hash, keepDurations
 	if toname then
 		if firstOnly then
 			local ret = GetSpellInfo(buffNames[1] or "") or buffNames[1] -- turn the first value into a name and return it
-			if icon then ret = TMW:lower(ret) end
+			if icon then ret = TMW:lowerNames(ret) end
 			gsncache[cachestring] = ret
 			return ret
 		else
 			for k, v in ipairs(buffNames) do
 				buffNames[k] = GetSpellInfo(v or "") or v --convert everything to a name
 			end
-			if icon then TMW:lower(buffNames) end
+			if icon then TMW:lowerNames(buffNames) end
 			gsncache[cachestring] = buffNames
 			return buffNames
 		end
@@ -3413,7 +3420,7 @@ function TMW:GetItemIDs(icon, setting, firstOnly, toname)
 		end
 	end
 	if icon then
-		names = TMW:lower(names)
+		names = TMW:lowerNames(names)
 	end
 	
 	for k, item in ipairs(names) do
@@ -3615,7 +3622,7 @@ function TMW:GetConfigIconTexture(icon, isItem)
 	
 		local BEbackup = TMW.BE
 		TMW.BE = TMW.OldBE
-		-- the level of hackyness here is sickening. Note that OldBE does not contain the enrage equiv (intended so we dont flood the tooltip)
+		-- the level of hackyness here is sickening. Note that OldBE does not contain the enrage equiv
 		
 		local tbl = isItem and TMW:GetItemIDs(nil, icon.Name) or TMW:GetSpellNames(nil, icon.Name)
 		TMW.BE = BEbackup -- unhack

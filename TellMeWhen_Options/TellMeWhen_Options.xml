@@ -4242,7 +4242,7 @@
 					self.FS1:SetFormattedText(TMW.L["fGROUP"], TMW:GetGroupName(groupID, groupID, 1))
 					self.icontexture:Hide()
 				else
-				self.FS1:SetFormattedText(TMW.L["GROUPICON"], TMW:GetGroupName(groupID, groupID, 1), iconID)
+					self.FS1:SetFormattedText(TMW.L["GROUPICON"], TMW:GetGroupName(groupID, groupID, 1), iconID)
 					if ic then
 						self.icontexture:Show()
 						self.icontexture:SetTexture(ic.texture:GetTexture())
@@ -4250,7 +4250,7 @@
 				end
 			</OnUpdate>
 			<OnSizeChanged>
-			self.Help:SetHeight(self.Help.text:GetHeight() + 38)
+				self.Help:SetHeight(self.Help.text:GetHeight() + 38)
 			</OnSizeChanged>
 			<OnDragStart>
 				self:StartMoving()
