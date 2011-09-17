@@ -34,7 +34,7 @@ local DRData = LibStub("DRData-1.0", true)
 TELLMEWHEN_VERSION = "4.5.6"
 TELLMEWHEN_VERSION_MINOR = strmatch(" @project-version@", " r%d+") or ""
 TELLMEWHEN_VERSION_FULL = TELLMEWHEN_VERSION .. TELLMEWHEN_VERSION_MINOR
-TELLMEWHEN_VERSIONNUMBER = 45606 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
+TELLMEWHEN_VERSIONNUMBER = 45607 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
 if TELLMEWHEN_VERSIONNUMBER > 46000 or TELLMEWHEN_VERSIONNUMBER < 45000 then return error("YOU SCREWED UP THE VERSION NUMBER OR DIDNT CHANGE THE SAFETY LIMITS") end -- safety check because i accidentally made the version number 414069 once
 
 TELLMEWHEN_MAXGROUPS = 1 	--this is a default, used by SetTheory (addon), so dont rename
@@ -477,7 +477,7 @@ TMW.Defaults = {
 						CustomTex			= "",
 						OnlyMine			= false,
 						ShowTimer			= false,
-						ShowTimerText		= true,
+						ShowTimerText		= false,
 						ShowPBar			= false,
 						ShowCBar			= false,
 						PBarOffs			= 0,
@@ -517,7 +517,7 @@ TMW.Defaults = {
 						IgnoreNomana		= false,
 						ShowTTText			= false,
 						CheckRefresh		= true,
-						TotemSlots			= "1111",
+						TotemSlots			= "111111",
 						BindText			= "",
 						ConditionDur		= 0,
 						UnConditionDur		= 0,
@@ -1894,6 +1894,22 @@ function TMW:GlobalUpgrade()
 				end
 			end
 		end
+		
+		if TellMeWhenDB.Version < 45607 then
+			for _, p in pairs(TellMeWhenDB.profiles) do
+				if p.Groups then
+					for _, gs in pairs(p.Groups) do
+						if gs.Icons then
+							for _, ics in pairs(gs.Icons) do
+								if ics.ShowTimerText == nil then
+									ics.ShowTimerText = true
+								end
+							end
+						end
+					end
+				end
+			end
+		end
 	end
 	TellMeWhenDB.Version = TELLMEWHEN_VERSIONNUMBER -- pre-default upgrades complete!
 end
@@ -2708,7 +2724,7 @@ function IconBase.SetInfo(icon, alpha, color, texture, start, duration, pbName, 
 			icon.__realDuration = realDuration
 		end
 
-		if icon.ShowTimer then
+		if icon.ShowTimer or icon.ShowTimerText then
 			local cd = icon.cooldown
 			if duration > 0 then
 				local s, d = start, duration
@@ -2721,6 +2737,10 @@ function IconBase.SetInfo(icon, alpha, color, texture, start, duration, pbName, 
 				if cd.s ~= s or forceupdate then
 					cd:SetCooldown(s, d)
 					cd:Show()
+					if not icon.ShowTimer then
+						cd:SetAlpha(0)
+					end
+					print(icon.ShowTimer)
 					if reverse ~= nil and icon.__reverse ~= reverse then -- must be ( ~= nil )
 						icon.__reverse = reverse
 						cd:SetReverse(reverse)

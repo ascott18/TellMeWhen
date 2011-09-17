@@ -205,7 +205,10 @@
 
 	<!-- END TEMPLATES -->
 	
-	<Cooldown hidden="true"> <!-- cooldown bug fixer -->
+	<Cooldown hidden="true">
+		<!-- cooldown bug fixer.
+		Seems to fix the long-standing bug once and for all where cooldown models would
+		not show up until one was initiated somewhere outside a TMW icon -->
 		<Scripts>
 			<OnLoad>
 				self:SetCooldown(GetTime(), 1)

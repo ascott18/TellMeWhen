@@ -26,6 +26,8 @@ local print = TMW.print
 local _, pclass = UnitClass("Player")
 local SpellTextures = TMW.SpellTextures
 
+if not GetRuneType then return end
+
 local Type = {}
 Type.type = "runes"
 LibStub("AceEvent-3.0"):Embed(Type)
@@ -117,8 +119,6 @@ local function Runes_OnUpdate(icon, time)
 			icon:SetInfo(icon.Alpha, 1, textures[GetRuneType(readyslot)], 0, 0)
 		elseif unslot then
 			icon:SetInfo(icon.UnAlpha, 1, textures[GetRuneType(unslot)], unstart, unduration)
-		else
-			print("WTF?")
 		end
 	end
 end

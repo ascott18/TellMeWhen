@@ -2040,6 +2040,7 @@
 						<Scripts>
 							<OnLoad>
 								self.text:SetText(TMW.L["ICONMENU_SHOWTIMER"])
+								TMW:TT(self, "ICONMENU_SHOWTIMER", "ICONMENU_SHOWTIMER_DESC")
 								self.text:SetWidth(TELLMEWHEN_COLUMN1WIDTH)
 							</OnLoad>
 							<OnClick>
@@ -2047,12 +2048,6 @@
 								if TMW.db then
 									TMW.db.profile.Groups[groupID].Icons[iconID]["ShowTimer"] = not not self:GetChecked()
 									TMW.IE:ScheduleIconUpdate(groupID, iconID)
-								end
-								local stt = self:GetParent().ShowTimerText
-								if self:GetChecked() and (IsAddOnLoaded("OmniCC") or IsAddOnLoaded("tullaCC")) then
-									stt:Enable()
-								else
-									stt:Disable()
 								end
 							</OnClick>
 						</Scripts>
@@ -2064,8 +2059,16 @@
 						<Scripts>
 							<OnLoad>
 								self.text:SetText(TMW.L["ICONMENU_SHOWTIMERTEXT"])
+								TMW:TT(self, "ICONMENU_SHOWTIMERTEXT", "ICONMENU_SHOWTIMERTEXT_DESC")
 								self:SetMotionScriptsWhileDisabled(true)
 								self.text:SetWidth(TELLMEWHEN_COLUMN1WIDTH)
+								
+								if IsAddOnLoaded("OmniCC") or IsAddOnLoaded("tullaCC") then
+									self:Enable()
+								else
+									self:Enable() -- force scripts
+									self:Disable()
+								end
 							</OnLoad>
 							<OnClick>
 								local groupID, iconID = TMW.CI.g, TMW.CI.i
@@ -2077,12 +2080,10 @@
 							<OnEnable>
 								self:SetAlpha(1)
 								self:SetChecked(TMW.CI.ics.ShowTimerText)
-								self:SetScript("OnEnter", nil)
 							</OnEnable>
 							<OnDisable>
 								self:SetAlpha(0.4)
 								self:SetChecked(nil)
-								TMW:TT(self, "ICONMENU_SHOWTIMERTEXT", "ICONMENU_SHOWTIMERTEXT_DESC")
 							</OnDisable>
 						</Scripts>
 					</CheckButton>
@@ -2093,6 +2094,7 @@
 						<Scripts>
 							<OnLoad>
 								self.text:SetText(TMW.L["ICONMENU_ONLYMINE"])
+								TMW:TT(self, "ICONMENU_ONLYMINE", "ICONMENU_ONLYMINE_DESC")
 								self.text:SetWidth(TELLMEWHEN_COLUMN1WIDTH)
 							</OnLoad>
 							<OnClick>
@@ -2934,6 +2936,9 @@
 							<Anchor point="RIGHT" relativeto="$parentDurationMin" relativePoint="LEFT" x="-3"/>
 						</Anchors>
 						<Scripts>
+							<OnLoad>
+								TMW:TT(self, "ENABLE", TMW.L["GENERIC_NUMREQ_CHECK_DESC"]:format(TMW.L["ICONMENU_DURATION_MIN_DESC"]:gsub("^%u", strlower)), nil, 1)
+							</OnLoad>
 							<OnClick>
 								local f = self:GetParent().DurationMin
 								local checked = not not self:GetChecked()
@@ -2959,6 +2964,9 @@
 							<Anchor point="RIGHT" relativeto="$parentDurationMax" relativePoint="LEFT" x="-3"/>
 						</Anchors>
 						<Scripts>
+							<OnLoad>
+								TMW:TT(self, "ENABLE", TMW.L["GENERIC_NUMREQ_CHECK_DESC"]:format(TMW.L["ICONMENU_DURATION_MAX_DESC"]:gsub("^%u", strlower)), nil, 1)
+							</OnLoad>
 							<OnClick>
 								local f = self:GetParent().DurationMax
 								local checked = not not self:GetChecked()
@@ -3016,6 +3024,9 @@
 							<Anchor point="RIGHT" relativeto="$parentConditionDur" relativePoint="LEFT" x="-3"/>
 						</Anchors>
 						<Scripts>
+							<OnLoad>
+								TMW:TT(self, "ENABLE", TMW.L["GENERIC_NUMREQ_CHECK_DESC"]:format(TMW.L["CONDITION_TIMERS_SUCCEED_DESC"]:gsub("^%u", strlower)), nil, 1)
+							</OnLoad>
 							<OnClick>
 								local f = self:GetParent().ConditionDur
 								local checked = not not self:GetChecked()
@@ -3041,6 +3052,9 @@
 							<Anchor point="RIGHT" relativeto="$parentUnConditionDur" relativePoint="LEFT" x="-3"/>
 						</Anchors>
 						<Scripts>
+							<OnLoad>
+								TMW:TT(self, "ENABLE", TMW.L["GENERIC_NUMREQ_CHECK_DESC"]:format(TMW.L["CONDITION_TIMERS_FAIL_DESC"]:gsub("^%u", strlower)), nil, 1)
+							</OnLoad>
 							<OnClick>
 								local f = self:GetParent().UnConditionDur
 								local checked = not not self:GetChecked()
@@ -3164,6 +3178,9 @@
 							<Anchor point="RIGHT" relativeto="$parentStackMin" relativePoint="LEFT" x="-3"/>
 						</Anchors>
 						<Scripts>
+							<OnLoad>
+								TMW:TT(self, "ENABLE", TMW.L["GENERIC_NUMREQ_CHECK_DESC"]:format(TMW.L["ICONMENU_STACKS_MIN_DESC"]:gsub("^%u", strlower)), nil, 1)
+							</OnLoad>
 							<OnClick>
 								local f = self:GetParent().StackMin
 								local checked = not not self:GetChecked()
@@ -3189,6 +3206,9 @@
 							<Anchor point="RIGHT" relativeto="$parentStackMax" relativePoint="LEFT" x="-3"/>
 						</Anchors>
 						<Scripts>
+							<OnLoad>
+								TMW:TT(self, "ENABLE", TMW.L["GENERIC_NUMREQ_CHECK_DESC"]:format(TMW.L["ICONMENU_STACKS_MAX_DESC"]:gsub("^%u", strlower)), nil, 1)
+							</OnLoad>
 							<OnClick>
 								local f = self:GetParent().StackMax
 								local checked = not not self:GetChecked()

@@ -1689,13 +1689,6 @@ function IE:ShowHide()
 		scb.CBarOffs:SetEnabled(scb.ShowCBar:GetChecked())
 	end
 
-	local stt = IE.Main.ShowTimerText
-	if IE.Main.ShowTimer:GetChecked() and (IsAddOnLoaded("OmniCC") or IsAddOnLoaded("tullaCC")) then
-		stt:Enable()
-	else
-		stt:Enable() -- force scripts
-		stt:Disable()
-	end
 end
 
 function IE:SaveSettings(frame)
@@ -4257,6 +4250,10 @@ function CNDT:Load()
 		CNDT:ClearDialog()
 	end
 	CNDT:AddRemoveHandler()
+	
+	if IE.Conditions.ScrollFrame:GetVerticalScrollRange() == 0 then
+		TMW.IE.Conditions.ScrollFrame.ScrollBar:Hide()
+	end
 end
 
 function CNDT:ClearDialog()

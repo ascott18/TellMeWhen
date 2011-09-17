@@ -153,9 +153,13 @@ L["ICONMENU_ONLYINTERRUPTIBLE"] = "Only Interruptible"
 L["ICONMENU_ONLYINTERRUPTIBLE_DESC"] = "Check this box to only show spell casts that are interruptible"
 
 L["ICONMENU_ONLYMINE"] = "Only show mine"
+L["ICONMENU_ONLYMINE_DESC"] = "Check this option to cause this icon to only check for your own buffs/debuffs"
 L["ICONMENU_SHOWTIMER"] = "Show timer"
+L["ICONMENU_SHOWTIMER_DESC"] = "Check this option to display the standard cooldown sweep animation on the icon when applicable."
 L["ICONMENU_SHOWTIMERTEXT"] = "Show timer text"
-L["ICONMENU_SHOWTIMERTEXT_DESC"] = "This is only applicable if 'Show timer' is checked and OmniCC (or similar) is installed."
+L["ICONMENU_SHOWTIMERTEXT_DESC"] = [[Check this option to display a textual display of the remaining cooldown/duration on the icon.
+
+This is only applicable if 'OmniCC is installed.]]
 
 L["ICONMENU_BARS"] = "Bars"
 L["ICONMENU_SHOWPBARN"] = "Power bar"
@@ -198,7 +202,9 @@ L["MUSHROOM"] = "Mushroom %d"
 L["RUNES"] = "Rune(s) to check"
 
 L["ICONMENU_SHOWTTTEXT"] = "Show variable text"
-L["ICONMENU_SHOWTTTEXT_DESC"] = "Check this to display the first variable associated with the aura that is being displayed. Numbers are provided by Blizzard API and do not necessarily match numbers found on the tooltip of the aura. There is also no guarantee that a number will be shown for an aura. In most practical cases, though, the correct number will be shown."
+L["ICONMENU_SHOWTTTEXT_DESC"] = [[Check this to display the first variable associated with the aura that is being displayed. Practical uses include monitoring damage shield amounts.
+
+Numbers are provided by Blizzard API and do not necessarily match numbers found on the tooltip of the aura. In most practical cases, though, the correct number will be shown.]]
 L["ICONMENU_RANGECHECK"] = "Range check"
 L["ICONMENU_RANGECHECK_DESC"] = "Check this to enable changing the color of the icon when you are out of range"
 L["ICONMENU_MANACHECK"] = "Power check"
@@ -227,10 +233,13 @@ L["ICONMENU_APPENDCONDT"] = "Add as 'Icon Shown' condition"
 L["ICONMENU_ANCHOR"] = "Anchor to Group: %s"
 
 
+
+L["GENERIC_NUMREQ_CHECK_DESC"] = "Check to enable and configue the %s"
+
 L["STACKS"] = "Stacks"
 L["STACKSPANEL_TITLE"] = "Stacks"
-L["ICONMENU_STACKS_MIN_DESC"] = "Minimum number of stacks of the aura needed to show the icon"
-L["ICONMENU_STACKS_MAX_DESC"] = "Maximum number of stacks of the aura allowed to show the icon"
+L["ICONMENU_STACKS_MIN_DESC"] = "Minimum number of stacks needed to show the icon"
+L["ICONMENU_STACKS_MAX_DESC"] = "Maximum number of stacks allowed to show the icon"
 
 L["DURATION"] = "Duration"
 L["DURATIONPANEL_TITLE"] = "Duration"
@@ -238,8 +247,8 @@ L["ICONMENU_DURATION_MIN_DESC"] = "Minimum duration needed to show the icon"
 L["ICONMENU_DURATION_MAX_DESC"] = "Maximum duration allowed to show the icon"
 
 L["CONDITION_TIMERS_HEADER"] = "Timers"
-L["CONDITION_TIMERS_SUCCEED_DESC"] = "Duration of timer to set on the icon when conditions begin succeeding"
-L["CONDITION_TIMERS_FAIL_DESC"] = "Duration of timer to set on the icon when conditions begin failing"
+L["CONDITION_TIMERS_SUCCEED_DESC"] = "Duration of a timer to set on the icon when conditions begin succeeding"
+L["CONDITION_TIMERS_FAIL_DESC"] = "Duration of a timer to set on the icon when conditions begin failing"
 
 L["METAPANEL_TITLE"] = "Meta Icon Editor"
 L["METAPANEL_UP"] = "Move up"

@@ -3,6 +3,7 @@
  * Added clarification for icon types that will accept no name to check everything.
  * Added a help popup for the stop watch icon.
  * You can now right-click an entry in the suggestion list to insert the opposite type of what is being typed in.
+ * The option "Show timer text" no longer requires that "Show timer" be enabled. It does still require OmniCC, though.
  * Bug Fixes:
  ** (r219) Implemented a method to determine if an export string has become corrupt due to the source's formatting
  ** (r220) Fixed overlay bar frame levels
