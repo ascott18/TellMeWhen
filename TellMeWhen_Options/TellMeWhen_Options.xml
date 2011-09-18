@@ -1197,7 +1197,7 @@
 				<HighlightTexture file="Interface\Common\VoiceChat-On"/>
 				<Scripts>
 					<OnClick>
-						PlaySoundFile(self:GetParent().soundfile)
+						PlaySoundFile(self:GetParent().soundfile, "Master")
 					</OnClick>
 					<OnEnter>
 						self:GetParent():LockHighlight()
@@ -1255,7 +1255,7 @@
 						else
 							sound = TMW.SND.LSM:Fetch("sound", setting) or ""
 						end
-						PlaySoundFile(sound)
+						PlaySoundFile(sound, "Master")
 					</OnClick>
 					<OnEnter>
 						self:GetParent():LockHighlight()
@@ -1997,18 +1997,6 @@
 								end
 								TMW.IE:ScheduleIconUpdate(groupID, iconID)
 								self:GetScript("OnTextChanged")(self)
-								
-								--[[local text = self:GetText()
-								local s = ""
-								for match in gmatch(text, "([^; %-]-) ?|cFFFF0000#|r") do
-									TMW.print(match)
-									s = s .. match .. "; "
-								end
-								s = strtrim(s, "; ")
-								if s ~= "" then
-									TMW.IE:ShowHelp(TMW.L["HELP_MISSINGUNITNUMS"]:format(s), self, 0, 0)
-								end]]
-								
 							</OnEditFocusLost>
 							<OnEvent>
 								if not self.isOver then return end
@@ -2347,7 +2335,7 @@
 					</CheckButton>
 					<CheckButton name="$parentStealable" inherits="TellMeWhen_CheckTemplate" parentKey="Stealable">
 						<Anchors>
-							<Anchor point="TOPLEFT" relativeTo="$parentOnlyMine" relativePoint="BOTTOMLEFT" y="4"/>
+							<Anchor point="TOPLEFT" relativeTo="$parentOnlyMine" relativePoint="BOTTOMLEFT" x="60" y="-17"/>
 						</Anchors>
 						<Scripts>
 							<OnLoad>
@@ -2880,6 +2868,7 @@
 						<Scripts>
 							<OnLoad>
 								self.text:SetText(TMW.L["ICONMENU_INVERTBARS"])
+								TMW:TT(self, "ICONMENU_INVERTBARS", "ICONMENU_INVERTBARS_DESC")
 								self.text:SetWidth(self:GetParent():GetWidth()-20)
 							</OnLoad>
 							<OnClick>
@@ -3630,7 +3619,7 @@
 								<HighlightTexture file="Interface\Common\VoiceChat-On"/>
 								<Scripts>
 									<OnClick>
-										PlaySoundFile(self:GetParent():GetText())
+										PlaySoundFile(self:GetParent():GetText(), "Master")
 									</OnClick>
 									<OnEnter>
 										self:GetParent().Background:Show()

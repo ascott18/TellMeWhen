@@ -2530,7 +2530,6 @@ end
 
 SND = TMW:NewModule("Sound") TMW.SND = SND
 SND.LSM = LSM
-SND.List = CopyTable(LSM:List("sound"))
 TMW.EventList = {
 	{
 		name = "OnShow",
@@ -2563,28 +2562,32 @@ TMW.EventList = {
 		desc = L["SOUND_EVENT_ONFINISH_DESC"],
 	},
 }
-for k, v in pairs(SND.List) do
-	if v == "None" then
-		tremove(SND.List, k)
-		break
-	end
-end
-sort(SND.List, function(a, b)
-	local TMWa = strsub(a, 1, 3) == "TMW"
-	local TMWb = strsub(b, 1, 3) == "TMW"
-	if TMWa or TMWb then
-		if TMWa and TMWb then
-			return a < b
-		else
-			return TMWa
-		end
-	else
-		return a < b
-	end
-
-end)
 
 function SND:SetSoundsOffset(offs)
+	if not SND.List or #LSM:List("sound")-1 ~= #SND.List then
+		SND.List = CopyTable(LSM:List("sound"))
+		
+		for k, v in pairs(SND.List) do
+			if v == "None" then
+				tremove(SND.List, k)
+				break
+			end
+		end
+		sort(SND.List, function(a, b)
+			local TMWa = strsub(a, 1, 3) == "TMW"
+			local TMWb = strsub(b, 1, 3) == "TMW"
+			if TMWa or TMWb then
+				if TMWa and TMWb then
+					return a < b
+				else
+					return TMWa
+				end
+			else
+				return a < b
+			end
+
+		end)
+	end
 	SND.offs = offs
 
 	for i=1, #SND.Sounds do
@@ -2652,6 +2655,8 @@ function SND:SelectSound(name)
 
 	if listID and (listID > SND.Sounds[#SND.Sounds].listID or listID < SND.Sounds[1].listID) then
 		SND.Sounds.ScrollBar:SetValue(listID-1)
+	else
+		 SND:SetSoundsOffset(SND.offs)
 	end
 
 	for i=1, #SND.Sounds do
@@ -2729,25 +2734,6 @@ function SND:SetTabText()
 end
 
 function SND:OnInitialize()
-	local Events = SND.Events
-	Events.Header:SetText(L["SOUND_EVENTS"])
-	local previous
-	for i=1, #TMW.EventList do
-		local f = CreateFrame("Button", Events:GetName().."Event"..i, Events, "TellMeWhen_SoundEvent", i)
-		Events[i] = f
-		f:SetPoint("TOPLEFT", previous, "BOTTOMLEFT")
-		f:SetPoint("TOPRIGHT", previous, "BOTTOMRIGHT")
-		f.event = TMW.EventList[i].name
-		f.setting = "Sound" .. f.event
-		f.EventName:SetText(TMW.EventList[i].text)
-		TMW:TT(f, TMW.EventList[i].text, TMW.EventList[i].desc .. "\r\n\r\n" .. L["SOUND_EVENT_GLOBALDESC"], 1, 1)
-		previous = f
-	end
-	Events[1]:SetPoint("TOPLEFT", Events, "TOPLEFT", 0, 0)
-	Events[1]:SetPoint("TOPRIGHT", Events, "TOPRIGHT", 0, 0)
-	Events:SetHeight(#Events*Events[1]:GetHeight())
-	SND:SelectEvent(1)	
-	
 	local Sounds = SND.Sounds
 	Sounds.Header:SetText(L["SOUND_SOUNDTOPLAY"])
 	local previous = Sounds.None
@@ -2766,6 +2752,25 @@ function SND:OnInitialize()
 		previous = f
 	end
 	SND:SetSoundsOffset(0)
+	
+	local Events = SND.Events
+	Events.Header:SetText(L["SOUND_EVENTS"])
+	local previous
+	for i=1, #TMW.EventList do
+		local f = CreateFrame("Button", Events:GetName().."Event"..i, Events, "TellMeWhen_SoundEvent", i)
+		Events[i] = f
+		f:SetPoint("TOPLEFT", previous, "BOTTOMLEFT")
+		f:SetPoint("TOPRIGHT", previous, "BOTTOMRIGHT")
+		f.event = TMW.EventList[i].name
+		f.setting = "Sound" .. f.event
+		f.EventName:SetText(TMW.EventList[i].text)
+		TMW:TT(f, TMW.EventList[i].text, TMW.EventList[i].desc .. "\r\n\r\n" .. L["SOUND_EVENT_GLOBALDESC"], 1, 1)
+		previous = f
+	end
+	Events[1]:SetPoint("TOPLEFT", Events, "TOPLEFT", 0, 0)
+	Events[1]:SetPoint("TOPRIGHT", Events, "TOPRIGHT", 0, 0)
+	Events:SetHeight(#Events*Events[1]:GetHeight())
+	SND:SelectEvent(1)	
 	
 	SND.Sounds.ScrollBar:SetValue(0)
 end

@@ -159,7 +159,7 @@ L["ICONMENU_SHOWTIMER_DESC"] = "Check this option to display the standard cooldo
 L["ICONMENU_SHOWTIMERTEXT"] = "Show timer text"
 L["ICONMENU_SHOWTIMERTEXT_DESC"] = [[Check this option to display a textual display of the remaining cooldown/duration on the icon.
 
-This is only applicable if 'OmniCC is installed.]]
+This is only applicable if OmniCC is installed.]]
 
 L["ICONMENU_BARS"] = "Bars"
 L["ICONMENU_SHOWPBARN"] = "Power bar"
@@ -167,6 +167,7 @@ L["ICONMENU_SHOWCBARN"] = "Timer bar"
 L["ICONMENU_SHOWPBAR_DESC"] = "Shows a bar that is overlaid across the top half of the icon that will indicate the power still needed to cast the spell (or the power that you have when 'Fill bars up' is checked)"
 L["ICONMENU_SHOWCBAR_DESC"] = "Shows a bar that is overlaid across the bottom half of the icon that will indicate the cooldown/duration remaining (or the time that has passed if 'Fill bars up' is checked)"
 L["ICONMENU_INVERTBARS"] = "Fill bars up"
+L["ICONMENU_INVERTBARS_DESC"] = "Check this option to cause the overlay bars to fill up to cover the whole width of the icon as power become sufficient and duration reaches zero."
 L["ICONMENU_OFFS"] = "Offset"
 L["ICONMENU_BAROFFS"] = "This amount will be added to the bar in order to offset it. Useful for custom indicators of when you should begin casting a spell to prevent a buff from falling off, or to indicate the power required to cast a spell and still have some left over for an interrupt."
 
