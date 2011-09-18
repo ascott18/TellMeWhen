@@ -8,6 +8,7 @@
  ** (r219) Implemented a method to determine if an export string has become corrupt due to the source's formatting
  ** (r220) Fixed overlay bar frame levels
  ** (r226) Dispel types should now work regardless of capitalization
+ ** (r230) Fixed overlapping checkboxes, and completely revamped the way that the left column in the icon editor works to prevent this from ever occurring again.
  
 ===v4.5.5===
  * Added Brazillian Portuguese localization file. Translators wanted!

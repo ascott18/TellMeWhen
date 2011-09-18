@@ -26,7 +26,6 @@
 				<Scripts>
 					<OnLoad>
 						self.texture:SetVertexColor(0.6, 0.6, 0.6)
-						TMW:TT(self, "RESIZE", "RESIZE_TOOLTIP")
 					</OnLoad>
 					<OnMouseDown>
 						TMW:Group_StartSizing(self)
@@ -36,6 +35,10 @@
 					</OnMouseUp>
 					<OnEnter>
 						self.texture:SetVertexColor(1, 1, 1)
+						if TMW.TT and not self.__title then
+							TMW:TT(self, "RESIZE", "RESIZE_TOOLTIP")
+							self:GetScript("OnEnter")(self)
+						end
 					</OnEnter>
 					<OnLeave>
 						self.texture:SetVertexColor(0.6, 0.6, 0.6)

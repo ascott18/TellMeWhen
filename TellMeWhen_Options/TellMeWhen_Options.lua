@@ -193,6 +193,46 @@ end
 -- GENERAL CONFIG FUNCTIONS
 -- ----------------------
 
+local function TTOnEnter(self)
+	if self.__title or self.__text then
+		GameTooltip_SetDefaultAnchor(GameTooltip, self)
+		GameTooltip:AddLine(self.__title, HIGHLIGHT_FONT_COLOR.r, HIGHLIGHT_FONT_COLOR.g, HIGHLIGHT_FONT_COLOR.b, 1)
+		GameTooltip:AddLine(self.__text, NORMAL_FONT_COLOR.r, NORMAL_FONT_COLOR.g, NORMAL_FONT_COLOR.b, 1)
+		GameTooltip:Show()
+	end
+end
+local function TTOnLeave(self)
+	GameTooltip:Hide()
+end
+function TMW:TT(f, title, text, actualtitle, actualtext)
+	-- setting actualtitle or actualtext true cause it to use exactly what is passed in for title or text as the text in the tooltip
+	-- if these variables arent set, then it will attempt to see if the string is a global variable (e.g. "MAXIMUM")
+	-- if they arent set and it isnt a global, then it must be a TMW localized string, so use that
+	if title then
+		f.__title = (actualtitle and title) or _G[title] or L[title]
+	else
+		f.__title = title
+	end
+	if text then
+		f.__text = (actualtext and text) or _G[text] or L[text]
+	else
+		f.__text = text
+	end
+	
+	if not f.__ttHooked then
+		f.__ttHooked = 1
+		f:HookScript("OnEnter", TTOnEnter)
+		f:HookScript("OnLeave", TTOnLeave)
+	else
+		if not f:GetScript("OnEnter") then
+			f:HookScript("OnEnter", TTOnEnter)
+		end
+		if not f:GetScript("OnLeave") then
+			f:HookScript("OnLeave", TTOnLeave)
+		end
+	end
+end
+
 function TMW:CopyWithMetatable(settings)
 	local copy = {}
 	for k, v in pairs(settings) do
@@ -1465,19 +1505,19 @@ end
 
 
 IE = TMW:NewModule("IconEditor", "AceEvent-3.0") TMW.IE = IE
-IE.Checks = { --1=check box, 2=editbox, 3=slider(x100), 4=custom, table=subkeys are settings
+IE.Checks = { --0=left-side check, 1=check box, 2=editbox, 3=slider(x100), 4=custom, table=subkeys are settings
 	Name = 2,
 	BindText = 2,
 	CustomTex = 2,
-	RangeCheck = 1,
-	ManaCheck = 1,
-	CooldownCheck = 1,
-	IgnoreRunes = 1,
-	OnlyMine = 1,
-	HideUnequipped = 1,
-	OnlyInBags = 1,
-	ShowTimer = 1,
-	ShowTimerText = 1,
+	--RangeCheck = 0,
+	--ManaCheck = 0,
+	--CooldownCheck = 0,
+	--IgnoreRunes = 0,
+	--OnlyMine = 0,
+	--HideUnequipped = 0,
+	--OnlyInBags = 0,
+	--ShowTimer = 0,
+	--ShowTimerText = 0,
 	Icons = 4,
 	Sort = 4,
 	Unit = 2,
@@ -1490,12 +1530,12 @@ IE.Checks = { --1=check box, 2=editbox, 3=slider(x100), 4=custom, table=subkeys 
 		CBarOffs = 2,
 	},
 	InvertBars = 1,
-	Interruptible = 1,
+	--Interruptible = 0,
 	Enabled = 1,
 	CheckNext = 1,
-	UseActvtnOverlay = 1,
-	OnlyEquipped = 1,
-	OnlySeen = 1,
+	--UseActvtnOverlay = 0,
+	--OnlyEquipped = 0,
+	--OnlySeen = 0,
 	DurationMin = 2,
 	DurationMax = 2,
 	DurationMinEnabled = 1,
@@ -1512,12 +1552,12 @@ IE.Checks = { --1=check box, 2=editbox, 3=slider(x100), 4=custom, table=subkeys 
 	UnAlpha = 3,
 	ConditionAlpha = 3,
 	FakeHidden = 1,
-	DontRefresh = 1,
-	EnableStacks = 1,
-	CheckRefresh = 1,
-	Stealable = 1,
-	IgnoreNomana = 1,
-	ShowTTText = 1,
+	--DontRefresh = 0,
+	--EnableStacks = 0,
+	--CheckRefresh = 0,
+	--Stealable = 0,
+	--IgnoreNomana = 0,
+	--ShowTTText = 0,
 	OnlyIfCounting = 1,
 }
 IE.Tabs = {
@@ -1528,6 +1568,133 @@ IE.Tabs = {
 	[5] = "Conditions",
 	[6] = "MainOptions",
 }
+
+IE.LeftChecks = {
+	{
+		setting = "ShowTimer",
+		title = L["ICONMENU_SHOWTIMER"],
+		tooltip = L["ICONMENU_SHOWTIMER_DESC"],
+	},
+	{
+		setting = "ShowTimerText",
+		title = L["ICONMENU_SHOWTIMERTEXT"],
+		tooltip = L["ICONMENU_SHOWTIMERTEXT_DESC"],
+		disabled = function()
+			return not (IsAddOnLoaded("OmniCC") or IsAddOnLoaded("tullaCC"))
+		end,
+	},
+	{
+		setting = "OnlyMine",
+		title = L["ICONMENU_ONLYMINE"],
+		tooltip = L["ICONMENU_ONLYMINE_DESC"],
+	},
+	{
+		setting = "ShowTTText",
+		title = L["ICONMENU_SHOWTTTEXT"],
+		tooltip = L["ICONMENU_SHOWTTTEXT_DESC"],
+	},
+	{
+		setting = "Stealable",
+		title = L["ICONMENU_STEALABLE"],
+		tooltip = L["ICONMENU_STEALABLE_DESC"],
+	},
+	{
+		setting = "UseActvtnOverlay",
+		title = L["ICONMENU_USEACTIVATIONOVERLAY"],
+		tooltip = L["ICONMENU_USEACTIVATIONOVERLAY_DESC"],
+	},
+	{
+		setting = "IgnoreNomana",
+		title = L["ICONMENU_IGNORENOMANA"],
+		tooltip = L["ICONMENU_IGNORENOMANA_DESC"],
+	},
+	{
+		setting = "CheckRefresh",
+		title = L["ICONMENU_CHECKREFRESH"],
+		tooltip = L["ICONMENU_CHECKREFRESH_DESC"],
+	},
+	{
+		setting = "OnlySeen",
+		title = L["ICONMENU_ONLYSEEN"],
+		tooltip = L["ICONMENU_ONLYSEEN_DESC"],
+	},
+	{
+		setting = "DontRefresh",
+		title = L["ICONMENU_DONTREFRESH"],
+		tooltip = L["ICONMENU_DONTREFRESH_DESC"],
+	},
+	{
+		setting = "Interruptible",
+		title = L["ICONMENU_ONLYINTERRUPTIBLE"],
+		tooltip = L["ICONMENU_ONLYINTERRUPTIBLE_DESC"],
+	},
+	{
+		setting = "OnlyInBags",
+		title = L["ICONMENU_ONLYBAGS"],
+		tooltip = L["ICONMENU_ONLYBAGS_DESC"],
+		hidden = function() return CI.SoI ~= "item" end,
+	},
+	{
+		setting = "OnlyEquipped",
+		title = L["ICONMENU_ONLYEQPPD"],
+		tooltip = L["ICONMENU_ONLYEQPPD_DESC"],
+		hidden = function() return CI.SoI ~= "item" end,
+		clickhook = function(self, button)
+			if CI.ics and self:GetParent().OnlyInBags then
+				local checked = not not self:GetChecked()
+				if checked then
+					self:GetParent().OnlyInBags:SetChecked(true)
+					self:GetParent().OnlyInBags:Disable()
+					CI.ics.OnlyInBags = checked
+				else
+					self:GetParent().OnlyInBags:Enable()
+				end
+			end
+		end,
+	},
+	{
+		setting = "HideUnequipped",
+		title = L["ICONMENU_HIDEUNEQUIPPED"],
+		tooltip = L["ICONMENU_HIDEUNEQUIPPED_DESC"],
+	},
+	{
+		setting = "EnableStacks",
+		title = L["ICONMENU_SHOWSTACKS"],
+		tooltip = L["ICONMENU_SHOWSTACKS_DESC"],
+		hidden = function() return CI.SoI ~= "item" end,
+	},
+	{
+		setting = "RangeCheck",
+		title = L["ICONMENU_RANGECHECK"],
+		tooltip = L["ICONMENU_RANGECHECK_DESC"],
+	},
+	{
+		setting = "ManaCheck",
+		title = L["ICONMENU_MANACHECK"],
+		tooltip = L["ICONMENU_MANACHECK_DESC"],
+		hidden = function() return CI.SoI == "item" end,
+	},
+	{
+		setting = "CooldownCheck",
+		title = L["ICONMENU_COOLDOWNCHECK"],
+		tooltip = L["ICONMENU_COOLDOWNCHECK_DESC"],
+		clickhook = function(self, button)
+			if self:GetChecked() or TMW.CI.t ~= "reactive" then
+				self:GetParent().IgnoreRunes:Enable()
+			else
+				self:GetParent().IgnoreRunes:Disable()
+			end
+		end,
+	},
+	{
+		setting = "IgnoreRunes",
+		title = L["ICONMENU_IGNORERUNES"],
+		tooltip = L["ICONMENU_IGNORERUNES_DESC"],
+		disabledtooltip = L["ICONMENU_IGNORERUNES_DESC_DISABLED"],
+		hidden = function() return CI.SoI == "item" end,
+	},
+}
+
 
 function IE:TabClick(self)
 	PanelTemplates_Tab_OnClick(self, self:GetParent())
@@ -1645,7 +1812,7 @@ function IE:ShowHide()
 	if not t then return end
 
 	for k, v in pairs(IE.Checks) do
-		if Types[t].RelevantSettings[k] then
+		if Types[t].RelevantSettings[k] and IE.Main[k] then
 			IE.Main[k]:Show()
 			if IE.Main[k].SetEnabled then
 				IE.Main[k]:SetEnabled(1)
@@ -1708,6 +1875,26 @@ function IE:SaveSettings(frame)
 	end
 end
 
+local function LeftCheck_OnEnable(self, button)
+	self:SetAlpha(1)
+	if self.data.disabledtooltip then
+		TMW:TT(f, self.data.title, self.data.tooltip, 1, 1)
+	end
+end
+local function LeftCheck_OnDisable(self, button)
+	self:SetAlpha(0.4)
+	if self.data.disabledtooltip then
+		TMW:TT(f, self.data.title, self.data.disabledtooltip, 1, 1)
+	end
+end
+local function LeftCheck_OnClick(self, button)
+	if CI.ics and self.setting then
+		CI.ics[self.setting] = not not self:GetChecked()
+		IE:ScheduleIconUpdate(CI.ic)
+	end
+	get(self.data.clickhook, self, button) -- cheater! (we arent getting anything, im using this as a wrapper)
+end
+
 function IE:LoadSettings()
 	local groupID, iconID = CI.g, CI.i
 	local ics = CI.ics
@@ -1733,6 +1920,56 @@ function IE:LoadSettings()
 		end
 	end
 
+	local leftCheckNum = 1
+	for k, f in pairs(IE.Main.LeftChecks) do
+		if not tonumber(k) then
+			IE.Main.LeftChecks[k] = nil
+		end
+	end
+	for k, data in pairs(IE.LeftChecks) do
+		local setting = data.setting
+		if Types[CI.t].RelevantSettings[setting] and not get(data.hidden) then
+			f = IE.Main.LeftChecks[leftCheckNum]
+			if not f then
+				f = CreateFrame("CheckButton", "TellMeWhen_IconEditorMainLeftChecks" .. leftCheckNum, TMW.IE.Main.LeftChecks, "TellMeWhen_CheckTemplate", leftCheckNum)
+				IE.Main.LeftChecks[leftCheckNum] = f
+				if leftCheckNum == 1 then
+					f:SetPoint("TOPLEFT")
+				else
+					f:SetPoint("TOP", IE.Main.LeftChecks[leftCheckNum-1], "BOTTOM", 0, 6)
+				end
+				f.text:SetWidth(TELLMEWHEN_COLUMN1WIDTH)
+				f:SetScript("OnEnable", LeftCheck_OnEnable)
+				f:SetScript("OnDisable", LeftCheck_OnDisable)
+				f:SetScript("OnClick", LeftCheck_OnClick)
+				f:SetMotionScriptsWhileDisabled(true)
+			end
+			
+			f:Show()
+			f.data = data
+			f.setting = setting
+			IE.Main.LeftChecks[setting] = f
+			f.text:SetText(data.title)
+			TMW:TT(f, data.title, data.tooltip, 1, 1)
+			f:SetChecked(ics[setting])
+			if get(data.disabled) then
+				f:Enable() -- force scripts
+				f:Disable()
+			else
+				f:Enable()
+			end
+			leftCheckNum = leftCheckNum + 1
+		end
+	end
+	for i = leftCheckNum, #IE.Main.LeftChecks do
+		IE.Main.LeftChecks[i]:Hide()
+	end
+	for k, f in pairs(IE.Main.LeftChecks) do
+		if not tonumber(k) then
+			f:GetScript("OnClick")(f)
+		end
+	end
+		
 	for _, parent in TMW:Vararg(CI.t ~= "runes" and IE.Main.TypeChecks, IE.Main.WhenChecks, IE.Main.Sort) do
 		if parent then
 			for k, frame in pairs(parent) do

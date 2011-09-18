@@ -195,6 +195,7 @@ local function SpellCooldown_OnUpdate(icon, time)
 end
 
 
+-- yay for caching!
 local ItemCount = setmetatable({}, {__index = function(tbl, k)
 	if not k then return end
 	local count = GetItemCount(k, nil, 1)
@@ -436,24 +437,16 @@ end
 
 function Type:IE_TypeLoaded()
 	local IE = TMW.IE
+	IE:LoadSettings()
 	if TMW.CI.SoI == "item" then
 		IE.Main.ShowPBar:SetEnabled(nil)
 		IE.Main.ShowCBar:SetEnabled(1)
-	--	IE.Main.OnlyEquipped:Show()
-	--	IE.Main.EnableStacks:Show()
-	--	IE.Main.OnlyInBags:Show()
-		IE.Main.ManaCheck:Hide()
-		IE.Main.IgnoreRunes:Hide()
 		
 	--	IE.Main.StackMin:Show()
 	--	IE.Main.StackMax:Show()
 	--	IE.Main.StackMinEnabled:Show()
 	--	IE.Main.StackMaxEnabled:Show()
 	else
-		IE.Main.EnableStacks:Hide()
-		IE.Main.OnlyEquipped:Hide()
-		IE.Main.OnlyInBags:Hide()
-	--	IE.Main.ManaCheck:Show()
 		IE.Main.StackMin:Hide()
 		IE.Main.StackMax:Hide()
 		IE.Main.StackMinEnabled:Hide()

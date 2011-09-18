@@ -322,6 +322,7 @@ local function UnitCooldown_OnUpdate(icon, time)
 			end
 		end
 		if usename and Alpha > 0 then
+			print(usename)
 			icon:SetInfo(Alpha, 1, SpellTextures[usename] or "Interface\\Icons\\INV_Misc_PocketWatch_01", 0, 0)
 		elseif unname then
 			icon:SetInfo(UnAlpha, (not icon.ShowTimer and Alpha ~= 0) and .5 or 1, SpellTextures[unname], unstart, unduration)

@@ -34,7 +34,7 @@ local DRData = LibStub("DRData-1.0", true)
 TELLMEWHEN_VERSION = "4.5.6"
 TELLMEWHEN_VERSION_MINOR = strmatch(" @project-version@", " r%d+") or ""
 TELLMEWHEN_VERSION_FULL = TELLMEWHEN_VERSION .. TELLMEWHEN_VERSION_MINOR
-TELLMEWHEN_VERSIONNUMBER = 45609 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
+TELLMEWHEN_VERSIONNUMBER = 45610 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
 if TELLMEWHEN_VERSIONNUMBER > 46000 or TELLMEWHEN_VERSIONNUMBER < 45000 then return error("YOU SCREWED UP THE VERSION NUMBER OR DIDNT CHANGE THE SAFETY LIMITS") end -- safety check because i accidentally made the version number 414069 once
 
 TELLMEWHEN_MAXGROUPS = 1 	--this is a default, used by SetTheory (addon), so dont rename
@@ -1284,8 +1284,10 @@ function TMW:GetUpgradeTable() -- upgrade functions
 		},
 		[45605] = {
 			global = function()
-				db.global.HelpSettings.NewDurSyntax = db.global.SeenNewDurSyntax
-				db.global.SeenNewDurSyntax = nil
+				if db.global.SeenNewDurSyntax then
+					db.global.HelpSettings.NewDurSyntax = db.global.SeenNewDurSyntax
+					db.global.SeenNewDurSyntax = nil
+				end
 			end,
 		},
 		[45402] = {
@@ -3019,7 +3021,7 @@ function TMW:Icon_Update(icon)
 	if pclass ~= "DEATHKNIGHT" then
 		icon.IgnoreRunes = nil
 	end
-	TMW:GetCustomTexture(icon)
+	icon.OverrideTex = TMW:GetCustomTexture(icon)
 
 	if icon.__hasEvents then
 		-- UnregisterAllEvents uses a ton of CPU
@@ -3390,7 +3392,8 @@ function TMW:GetSpellNames(icon, setting, firstOnly, toname, hash, keepDurations
 	end
 	if toname then
 		if firstOnly then
-			local ret = GetSpellInfo(buffNames[1] or "") or buffNames[1] -- turn the first value into a name and return it
+			local ret = buffNames[1] or ""
+			ret = GetSpellInfo(ret) or ret -- turn the first value into a name and return it
 			if icon then ret = TMW:lowerNames(ret) end
 			gsncache[cachestring] = ret
 			return ret
@@ -3508,22 +3511,11 @@ function TMW:GetUnits(icon, setting, dontreplace)
 	if unitcache[cachestring] then return unitcache[cachestring] end --why make a bunch of tables and do a bunch of stuff if we dont need to
 
 	setting = TMW:CleanString(setting):
-	lower():
+	lower(): -- all units should be lowercase
 	gsub("|cffff0000", ""): -- strip color codes (NOTE LOWERCASE)
-	gsub("#", ""):
-	gsub("|r", "")
+	gsub("|r", ""):
+	gsub("#", "") -- strip the # from the dropdown
 	
-
-	--SUBSTITUTE "# WITH 1-10, 1-40, etc 
-	--[[for wholething, unit in gmatch(setting, "(([^; %-]-) ?#)") do
-		unit = strtrim(unit)
-		for k, v in pairs(TMW.Units) do
-			if v.value == unit then
-				setting = gsub(setting, wholething, unit .. "1-" .. v.range)
-				break
-			end
-		end
-	end]]
 	
 	--SUBSTITUTE "party" with "party1-4", etc
 	for _, wholething in TMW:Vararg(strsplit(";", setting)) do
@@ -3619,26 +3611,15 @@ end
 function TMW:SplitNames(input)
 	input = TMW:CleanString(input)
 	local tbl = { strsplit(";", input) }
+	if #tbl == 1 and tbl[1] == "" then
+		tbl[1] = nil
+	end
 
 	for a, b in ipairs(tbl) do
 		local new = strtrim(b) --remove spaces from the beginning and end of each name
 		tbl[a] = tonumber(new) or new -- turn it into a number if it is one
 	end
 	return tbl
-end
-
-function TMW:DoSetTexture(icon)
-	-- used to determine if the texture of an icon should be changed during config (basically, if it's a default texture used for unknowns then try and change it)
-	local t = icon.texture:GetTexture()
-	local oldname = icon.__previousNameFirst
-	local currentname = icon.NameFirst
-	if not t or
-	oldname ~= currentname or
-	t == "Interface\\Icons\\INV_Misc_PocketWatch_01" or
-	t == "Interface\\Icons\\INV_Misc_QuestionMark" or
-	t == "Interface\\Icons\\Temp" then
-		return true
-	end
 end
 
 function TMW:GetConfigIconTexture(icon, isItem)
@@ -3673,7 +3654,6 @@ end
 
 TMW.TestTex = TMW:CreateTexture()
 function TMW:GetCustomTexture(icon)
-	icon.OverrideTex = nil
 	icon.CustomTex = icon.CustomTex ~= "" and icon.CustomTex
 	if icon.CustomTex then
 		TMW.TestTex:SetTexture(SpellTextures[icon.CustomTex])
@@ -3683,44 +3663,7 @@ function TMW:GetCustomTexture(icon)
 		if not TMW.TestTex:GetTexture() then
 			TMW.TestTex:SetTexture("Interface\\Icons\\" .. icon.CustomTex)
 		end
-		icon.OverrideTex = TMW.TestTex:GetTexture()
-		return icon.OverrideTex
-	end
-end
-
-local function TTOnEnter(self)
-	if self.__title or self.__text then
-		GameTooltip_SetDefaultAnchor(GameTooltip, self)
-		GameTooltip:AddLine(self.__title, HIGHLIGHT_FONT_COLOR.r, HIGHLIGHT_FONT_COLOR.g, HIGHLIGHT_FONT_COLOR.b, 1)
-		GameTooltip:AddLine(self.__text, NORMAL_FONT_COLOR.r, NORMAL_FONT_COLOR.g, NORMAL_FONT_COLOR.b, 1)
-		GameTooltip:Show()
-	end
-end
-local function TTOnLeave(self)
-	GameTooltip:Hide()
-end
-function TMW:TT(f, title, text, actualtitle, actualtext)
-	-- setting actualtitle or actualtext true cause it to use exactly what is passed in for title or text as the text in the tooltip
-	-- if these variables arent set, then it will attempt to see if the string is a global variable (e.g. "MAXIMUM")
-	-- if they arent set and it isnt a global, then it must be a TMW localized string, so use that
-	if title then
-		f.__title = (actualtitle and title) or _G[title] or L[title]
-	end
-	if text then
-		f.__text = (actualtext and text) or _G[text] or L[text]
-	end
-	
-	if not f.__ttHooked then
-		f.__ttHooked = 1
-		f:HookScript("OnEnter", TTOnEnter)
-		f:HookScript("OnLeave", TTOnLeave)
-	else
-		if not f:GetScript("OnEnter") then
-			f:HookScript("OnEnter", TTOnEnter)
-		end
-		if not f:GetScript("OnLeave") then
-			f:HookScript("OnLeave", TTOnLeave)
-		end
+		return TMW.TestTex:GetTexture()
 	end
 end
 
