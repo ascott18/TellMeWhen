@@ -2030,9 +2030,9 @@
 					
 				
 					<Frame name="$parentSortChecks" parentKey="Sort">
-						<Size x="140" y="90"/>
+						<Size x="140" y="75"/>
 						<Anchors>
-							<Anchor point="TOPLEFT" relativeTo="$parentRangeCheck" relativePoint="BOTTOMLEFT" y="-10"/>
+							<Anchor point="BOTTOMLEFT" x="16" y="72"/>
 						</Anchors>
 						<Layers>
 							<Layer level="ARTWORK">
@@ -2569,7 +2569,7 @@
 					
 					<EditBox name="$parentConditionDur" parentKey="ConditionDur" inherits="TellMeWhen_TimeEditBoxTemplate">
 						<Anchors>
-							<Anchor point="TOPLEFT" relativeTo="$parentShowTText" relativePoint="BOTTOMLEFT" x="25" y="-30"/>
+							<Anchor point="TOPLEFT" relativeTo="$parentCustomTex" y="-100" x="20"/>
 						</Anchors>
 						<Scripts>
 							<OnLoad>

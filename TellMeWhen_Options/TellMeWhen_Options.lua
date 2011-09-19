@@ -408,6 +408,11 @@ function TMW:SetUIDropdownText(frame, value, tbl)
 				return _G[v]
 			end
 		end
+		local gID, iID = strmatch(value, "(%d+).*(%d+)")
+		if gID and iID then
+			UIDropDownMenu_SetText(frame, format(L["GROUPICON"], TMW:GetGroupName(gID, gID, 1), iID))
+			return
+		end
 	end
 	for k, v in pairs(tbl) do
 		if v.value == value then
@@ -1745,12 +1750,14 @@ function IE:SetupRadios()
 		for k, frame in pairs(IE.Main.TypeChecks) do
 			if strfind(k, "Radio") then
 				local info = Type.TypeChecks[frame:GetID()]
-				if pclass == "SHAMAN" and Type.TypeChecks.setting == "TotemSlots" and frame:GetID() > 1 then
-					local p, rt, rp, x, y = frame:GetPoint(1)
-					frame:SetPoint(p, rt, rp, x, 10)
-				elseif frame:GetID() > 1 then
-					local p, rt, rp, x, y = frame:GetPoint(1)
-					frame:SetPoint(p, rt, rp, x, 5)
+				if frame:GetID() > 1 then
+					if #Type.TypeChecks > 3 then
+						local p, rt, rp, x, y = frame:GetPoint(1)
+						frame:SetPoint(p, rt, rp, x, 11)
+					else
+						local p, rt, rp, x, y = frame:GetPoint(1)
+						frame:SetPoint(p, rt, rp, x, 5)
+					end
 				end
 				if info then
 					frame:Show()
