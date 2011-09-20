@@ -1,3 +1,7 @@
+===v4.5.7===
+ * Bug Fixes:
+ ** (r235) TellMeWhen_Options-4.5.6.lua:1690 attempt to index field "IgnoreRunes" (a nil value)
+
 ===v4.5.6===
  * Moved the default icon type into its own type file, because it technically is nothing more than another icon type.
  * Added clarification for icon types that will accept no name to check everything.

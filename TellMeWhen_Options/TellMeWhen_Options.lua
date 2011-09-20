@@ -1684,10 +1684,12 @@ IE.LeftChecks = {
 		title = L["ICONMENU_COOLDOWNCHECK"],
 		tooltip = L["ICONMENU_COOLDOWNCHECK_DESC"],
 		clickhook = function(self, button)
+			local IgnoreRunes = self:GetParent().IgnoreRunes
+			if not IgnoreRunes then return end
 			if self:GetChecked() or TMW.CI.t ~= "reactive" then
-				self:GetParent().IgnoreRunes:Enable()
+				IgnoreRunes:Enable()
 			else
-				self:GetParent().IgnoreRunes:Disable()
+				IgnoreRunes:Disable()
 			end
 		end,
 	},
