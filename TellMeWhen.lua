@@ -34,7 +34,7 @@ local DRData = LibStub("DRData-1.0", true)
 TELLMEWHEN_VERSION = "4.5.6"
 TELLMEWHEN_VERSION_MINOR = strmatch(" @project-version@", " r%d+") or ""
 TELLMEWHEN_VERSION_FULL = TELLMEWHEN_VERSION .. TELLMEWHEN_VERSION_MINOR
-TELLMEWHEN_VERSIONNUMBER = 45611 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
+TELLMEWHEN_VERSIONNUMBER = 45612 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
 if TELLMEWHEN_VERSIONNUMBER > 46000 or TELLMEWHEN_VERSIONNUMBER < 45000 then return error("YOU SCREWED UP THE VERSION NUMBER OR DIDNT CHANGE THE SAFETY LIMITS") end -- safety check because i accidentally made the version number 414069 once
 
 TELLMEWHEN_MAXGROUPS = 1 	--this is a default, used by SetTheory (addon), so dont rename
@@ -68,6 +68,7 @@ local GroupBase, IconBase = {}, {}
 local time = GetTime() TMW.time = time
 local sctcolor = {r=1, b=1, g=1}
 local clientVersion = select(4, GetBuildInfo())
+local addonVersion = tonumber(GetAddOnMetadata("TellMeWhen", "X-Interface"))
 local _, pclass = UnitClass("Player")
 
 TMW.Print = TMW.Print or _G.print
@@ -681,7 +682,11 @@ for category, b in pairs(TMW.OldBE) do
 				if name then
 					str = gsub(str, id, name)
 				else  -- this should never ever ever happen except in new patches if spellIDs were wrong (experience talking)
-					geterrorhandler()("Invalid spellID found: " .. id .. "! Please report this on TMW's CurseForge page, especially if you are currently on the PTR!")
+					local newID = strtrim(id, " _")
+					if clientVersion >= addonVersion then -- dont warn for old clients using newer versions
+						geterrorhandler()("Invalid spellID found: " .. newID .. "! Please report this on TMW's CurseForge page, especially if you are currently on the PTR!")
+					end
+					str = gsub(str, id, newID) -- still need to substitute it to prevent recusion
 				end
 			end
 		end

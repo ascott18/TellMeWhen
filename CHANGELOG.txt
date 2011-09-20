@@ -11,6 +11,7 @@
  ** (r230) Fixed overlapping checkboxes, and completely revamped the way that the left column in the icon editor works to prevent this from ever occurring again.
  ** (r231) Fixed missing settings caused by the left-column overhaul
  ** (r232) Meta icons now inherit timer settings properly
+ ** (r233) Fixed some deadly recusion
  
 ===v4.5.5===
  * Added Brazillian Portuguese localization file. Translators wanted!
