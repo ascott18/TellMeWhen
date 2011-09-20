@@ -94,6 +94,7 @@ local function Meta_OnUpdate(icon, time)
 						
 						icon.InvertBars = ic.InvertBars
 						icon.ShowTimer = ic.ShowTimer
+						icon.ShowTimerText = ic.ShowTimerText
 						icon.cooldown.noCooldownCount = ic.cooldown.noCooldownCount
 						
 						force = 1
