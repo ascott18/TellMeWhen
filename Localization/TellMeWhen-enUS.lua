@@ -179,7 +179,7 @@ L["ICONMENU_EITHER"] = "Any"
 L["ICONMENU_ICDTYPE"] = "Triggered by"
 L["ICONMENU_SPELLCAST_COMPLETE"] = "Spell Cast Finish/Instant Cast"
 L["ICONMENU_SPELLCAST_START"] = "Spell Cast Start"
-L["ICONMENU_ICDBDE"] = "Buff/Debuff/Energize"
+L["ICONMENU_ICDBDE"] = "Buff/Debuff/Energize/Summon"
 L["ICONMENU_SPELLCAST_COMPLETE_DESC"] = [[Select this option if the internal cooldown begins when you finish casting a spell, or when you cast an instant cast spell.
 
 You need to enter the name/ID of the spell that triggers the internal cooldown into the "%s" editbox.]]

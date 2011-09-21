@@ -1,3 +1,6 @@
+===v4.5.8===
+ * Internal Cooldown icons can now be triggered by a summon event (for the healing priest t12 4pc bonus)
+
 ===v4.5.7===
  * Bug Fixes:
  ** (r235) TellMeWhen_Options-4.5.6.lua:1690 attempt to index field "IgnoreRunes" (a nil value)

@@ -7,7 +7,7 @@
 ## X-Interface: 40200
 ## Title: TellMeWhen
 
-## Version: 4.5.7
+## Version: 4.5.8
 ## Author: Cybeloras of Mal'Ganis
 
 ## Notes: Provides visual, auditory, and textual notifications about cooldowns, buffs, and pretty much everything else.
