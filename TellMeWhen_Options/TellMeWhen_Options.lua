@@ -4553,11 +4553,11 @@ function AddIns.TypeCheck(group, data)
 			end
 			SUG:EnableEditBox(group.EditBox, data.useSUG, true)
 			
-			group.Slider:SetWidth(200)
+			group.Slider:SetWidth(217)
 			if data.noslide then
 				group.EditBox:SetWidth(520)
 			else
-				group.EditBox:SetWidth(312)
+				group.EditBox:SetWidth(295)
 			end
 		else
 			group.EditBox:Hide()

@@ -368,7 +368,6 @@ Env = {
 	GetWeaponEnchantInfo = GetWeaponEnchantInfo,
 	GetItemCount = GetItemCount,
 	IsEquippedItem = IsEquippedItem,
-	UnitCast = UnitCast,
 	IsSpellInRange = IsSpellInRange,
 	IsItemInRange = IsItemInRange,
 	GetCurrencyInfo = GetCurrencyInfo,
@@ -419,17 +418,21 @@ function Env.ReactiveHelper(NameFirst, Checked)
 end
 
 local UnitCastingInfo, UnitChannelInfo = UnitCastingInfo, UnitChannelInfo
-function Env.UnitCast(unit, level)
+function Env.UnitCast(unit, level, matchname)
 	local name, _, _, _, _, _, _, _, notInterruptible = UnitCastingInfo(unit)
 	if not name then
 		name, _, _, _, _, _, _, notInterruptible = UnitChannelInfo(unit)
 	end
+	name = strlowerCache[name]
+	if matchname == "" and name then
+		matchname = name
+	end
 	if level == 0 then -- only interruptible
-		return name and not notInterruptible
+		return not notInterruptible and (name == matchname)
 	elseif level == 1 then -- present
-		return name
+		return (name == matchname)
 	else
-		return not name -- absent
+		return not (name == matchname) -- absent
 	end
 end
 
@@ -1402,14 +1405,16 @@ CNDT.Types = {
 		max = 2,
 		nooperator = true,
 		texttable = {
-			[0] = L["ICONMENU_ONLYINTERRUPTIBLE"],
+			[0] = L["CONDITIONPANEL_INTERRUPTIBLE"],
 			[1] = L["ICONMENU_PRESENT"],
 			[2] = L["ICONMENU_ABSENT"],
 		},
 		midt = true,
 		icon = "Interface\\Icons\\Temp",
 		tcoords = standardtcoords,
-		funcstr = [[UnitCast(c.Unit, c.Level)]],
+		name = function(editbox) TMW:TT(editbox, "CONDITIONPANEL_CASTTOMATCH", "CONDITIONPANEL_CASTTOMATCH_DESC") editbox.label = L["CONDITIONPANEL_CASTTOMATCH"] end,
+		useSUG = true,
+		funcstr = [[UnitCast(c.Unit, c.Level, LOWER(c.NameName))]], -- LOWER is some gsub magic
 		spacebefore = true,
 	},
 
@@ -2096,17 +2101,20 @@ function CNDT:ProcessConditions(icon)
 				gsub("c.NameFirst2", 	"\"" .. TMW:GetSpellNames(nil, name2, 1) .. "\""): --Name2 must be before Name
 				gsub("c.NameName2", 	"\"" .. TMW:GetSpellNames(nil, name2, 1, 1) .. "\""):
 				gsub("c.ItemID2", 		TMW:GetItemIDs(nil, name2, 1)):
-				gsub("c.Name2", 	"\"" .. name2 .. "\""):
+				gsub("c.Name2", 		"\"" .. name2 .. "\""):
 				
 				gsub("c.NameFirst", 	"\"" .. TMW:GetSpellNames(nil, name, 1) .. "\""):
 				gsub("c.NameName", 		"\"" .. TMW:GetSpellNames(nil, name, 1, 1) .. "\""):
 				gsub("c.ItemID", 		TMW:GetItemIDs(nil, name, 1)):
-				gsub("c.Name", 	"\"" .. name .. "\""):
+				gsub("c.Name", 			"\"" .. name .. "\""):
 
 				gsub("c.True", 			tostring(c.Level == 0)):
 				gsub("c.False", 		tostring(c.Level == 1)):
 				gsub("c.1nil", 			c.Level == 0 and 1 or "nil"):
-				gsub("c.nil1", 			c.Level == 1 and 1 or "nil") -- reverse 1nil
+				gsub("c.nil1", 			c.Level == 1 and 1 or "nil"): -- reverse 1nil
+				
+				
+				gsub("LOWER%((.-)%)",	strlower)
 				funcstr = funcstr .. thisstr
 			else
 				funcstr = funcstr .. (andor .. "(" .. strrep("(", c.PrtsBefore) .. "true" .. strrep(")", c.PrtsAfter)  .. ")")

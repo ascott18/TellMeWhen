@@ -456,6 +456,9 @@ L["CONDITIONPANEL_THREAT_RAW_DESC"] = [[This condition checks your raw threat pe
 Players in melee range pull aggro at 110%
 Players at range pull aggro at 130%
 Players with aggro have a raw threat percentage of 255%]]
+L["CONDITIONPANEL_CASTTOMATCH"] = "Spell to Match"
+L["CONDITIONPANEL_CASTTOMATCH_DESC"] = "Enter a spell name here to make the condition only pass if the spell cast matches it exactly"
+L["CONDITIONPANEL_INTERRUPTIBLE"] = "Interruptible"
 L["CONDITIONPANEL_NAME"] = "Unit Name"
 L["CONDITIONPANEL_NAMETOMATCH"] = "Name to Match"
 L["CONDITIONPANEL_NAMETOOLTIP"] = "You can enter multiple names to be matched by separating each one with a semicolon (;). The condition will pass if any names are matched."
