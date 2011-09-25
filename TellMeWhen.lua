@@ -34,7 +34,7 @@ local DRData = LibStub("DRData-1.0", true)
 TELLMEWHEN_VERSION = "4.5.8"
 TELLMEWHEN_VERSION_MINOR = strmatch(" @project-version@", " r%d+") or ""
 TELLMEWHEN_VERSION_FULL = TELLMEWHEN_VERSION .. TELLMEWHEN_VERSION_MINOR
-TELLMEWHEN_VERSIONNUMBER = 45802 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
+TELLMEWHEN_VERSIONNUMBER = 45803 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
 if TELLMEWHEN_VERSIONNUMBER > 46000 or TELLMEWHEN_VERSIONNUMBER < 45000 then return error("YOU SCREWED UP THE VERSION NUMBER OR DIDNT CHANGE THE SAFETY LIMITS") end -- safety check because i accidentally made the version number 414069 once
 
 TELLMEWHEN_MAXGROUPS = 1 	--this is a default, used by SetTheory (addon), so dont rename
@@ -753,6 +753,38 @@ TMW.ChannelList = {
 		desc = L["CHAT_MSG_SMART_DESC"],
 		channel = "SMART",
 		isBlizz = 1, -- flagged to not use override %t and %f substitutions
+	},
+	{
+		text = L["CHAT_MSG_CHANNEL"],
+		desc = L["CHAT_MSG_CHANNEL_DESC"],
+		channel = "CHANNEL",
+		isBlizz = 1, -- flagged to not use override %t and %f substitutions
+		defaultlocation = function() return select(2, GetChannelList()) end,
+		dropdown = function()
+			for i = 1, math.huge, 2 do
+				local num, name = select(i, GetChannelList())
+				if not num then break end
+				
+				local info = UIDropDownMenu_CreateInfo()
+				info.func = TMW.ANN.LocDropdownFunc
+				info.text = name
+				info.arg1 = name
+				info.value = name
+				info.checked = name == TMW.CI.ics.Events[TMW.ANN.currentEvent].Location
+				UIDropDownMenu_AddButton(info, UIDROPDOWNMENU_MENU_LEVEL) 
+			end
+		end,
+		ddtext = function(value)
+			-- also a verification function
+			for i = 1, math.huge, 2 do
+				local num, name = select(i, GetChannelList())
+				if not num then return end
+				
+				if name == value then
+					return value
+				end
+			end
+		end,
 	},
 	{
 		text = CHAT_MSG_GUILD,
@@ -2590,7 +2622,17 @@ function IconBase.HandleEvent(icon, data, played, announced)
 				channel = "PARTY"
 			end
 			SendChatMessage(Text, channel)
-		
+			
+		elseif Channel == "CHANNEL" then
+			for i = 1, math.huge, 2 do
+				local num, name = select(i, GetChannelList())
+				if not num then break end
+				if strlowerCache[name] == strlowerCache[data.Location] then
+					SendChatMessage(Text, Channel, nil, num)
+					break
+				end
+			end
+			
 		else
 			if Text and chandata and chandata.isBlizz then
 				SendChatMessage(Text, Channel, nil, data.Location)

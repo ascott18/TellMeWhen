@@ -1,6 +1,8 @@
 ﻿--GAME_LOCALE = UnitName("player") == "Cybeloras" and "zhCN" --FOR TESTING
 local L = LibStub("AceLocale-3.0"):NewLocale("TellMeWhen", "enUS", true)
 
+L["!!Main Addon Description"] = "Provides visual, auditory, and textual notifications about cooldowns, buffs, and pretty much everything else." -- put it here so it doesnt get deleted on mass imports
+
 
 L["CMD_OPTIONS"] = "Options"
 L["ICON_TOOLTIP1"] = "TellMeWhen"
@@ -457,7 +459,9 @@ Players in melee range pull aggro at 110%
 Players at range pull aggro at 130%
 Players with aggro have a raw threat percentage of 255%]]
 L["CONDITIONPANEL_CASTTOMATCH"] = "Spell to Match"
-L["CONDITIONPANEL_CASTTOMATCH_DESC"] = "Enter a spell name here to make the condition only pass if the spell cast matches it exactly"
+L["CONDITIONPANEL_CASTTOMATCH_DESC"] = [[Enter a spell name here to make the condition only pass if the spell cast matches it exactly.
+
+You can leave this blank to check for any and all spell casts/channels]]
 L["CONDITIONPANEL_INTERRUPTIBLE"] = "Interruptible"
 L["CONDITIONPANEL_NAME"] = "Unit Name"
 L["CONDITIONPANEL_NAMETOMATCH"] = "Name to Match"
@@ -698,6 +702,9 @@ L["ANN_WHISPERTARGET_DESC"] = "Input the name of the player that you would like 
 L["ANN_EVENT_GLOBALDESC"] = "Events are checked from top to bottom in this list. If an event is triggered that has text to output, no events below that event will output any text."
 L["CHAT_MSG_SMART"] = "Smart Channel"
 L["CHAT_MSG_SMART_DESC"] = "Will output to Battleground, Raid, Party, or Say - whichever is appropriate."
+L["CHAT_MSG_CHANNEL"] = "Chat Channel"
+L["CHAT_MSG_CHANNEL_DESC"] = "Will output to a chat channel, such as Trade, or a custom channel that you have joined."
+
 L["CHAT_FRAME"] = "Chat Frame"
 
 

@@ -3396,12 +3396,21 @@
 						<Anchors>
 							<Anchor point="TOPLEFT" relativeTo="$parentChannels" relativePoint="TOPRIGHT" x="20"/>
 						</Anchors>
+						<Layers>
+							<Layer level="OVERLAY">
+								<FontString name="$parentHeader" inherits="GameFontNormalLarge" parentKey="Header" justifyH="LEFT" text="">
+									<Anchors>
+										<Anchor point="BOTTOM" relativePoint="TOP" y="1"/>
+									</Anchors>
+								</FontString>
+							</Layer>
+						</Layers>
 						<Scripts>
 							<OnLoad>
+								self.Header:SetText(TMW.L["ANN_WHISPERTARGET"])
 								TMW:TT(self, "ANN_WHISPERTARGET", "ANN_WHISPERTARGET_DESC")
 								self.label = TMW.L["ANN_WHISPERTARGET"]
 								self.BackgroundText:SetWidth(self:GetWidth())
-								TMW.SUG:EnableEditBox(self, true, true)
 							</OnLoad>
 							<OnEditFocusLost>
 								EditBox_ClearHighlight(self)
