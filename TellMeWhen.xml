@@ -133,8 +133,8 @@
 					line1 = line1 .. " (" .. TMW.L["LOCKED"] .. ")"
 				end
 				GameTooltip_SetDefaultAnchor(GameTooltip, self)
-				GameTooltip:AddLine(line1, HIGHLIGHT_FONT_COLOR.r, HIGHLIGHT_FONT_COLOR.g, HIGHLIGHT_FONT_COLOR.b, 1)
-				GameTooltip:AddLine(TMW.L["ICON_TOOLTIP2NEW"], NORMAL_FONT_COLOR.r, NORMAL_FONT_COLOR.g, NORMAL_FONT_COLOR.b, 1)
+				GameTooltip:AddLine(line1, HIGHLIGHT_FONT_COLOR.r, HIGHLIGHT_FONT_COLOR.g, HIGHLIGHT_FONT_COLOR.b)
+				GameTooltip:AddLine(TMW.L["ICON_TOOLTIP2NEW"], NORMAL_FONT_COLOR.r, NORMAL_FONT_COLOR.g, NORMAL_FONT_COLOR.b)
 				GameTooltip:Show()
 			</OnEnter>
 			<OnLeave>

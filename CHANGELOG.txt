@@ -2,6 +2,8 @@
  * Internal Cooldown icons can now be triggered by a summon event (for the healing priest t12 4pc bonus)
  * Spell Cast conditions can now match a name.
  * Chat channels are now a valid text output destination.
+ * Bug Fixes:
+ ** (r242) 1x AceConfigDialog-3.0\AceConfigDialog-3.0-54.lua:803: attempt to index field "rootframe" (a nil value)
 
 ===v4.5.7===
  * Bug Fixes:

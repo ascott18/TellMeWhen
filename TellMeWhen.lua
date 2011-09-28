@@ -34,7 +34,7 @@ local DRData = LibStub("DRData-1.0", true)
 TELLMEWHEN_VERSION = "4.5.8"
 TELLMEWHEN_VERSION_MINOR = strmatch(" @project-version@", " r%d+") or ""
 TELLMEWHEN_VERSION_FULL = TELLMEWHEN_VERSION .. TELLMEWHEN_VERSION_MINOR
-TELLMEWHEN_VERSIONNUMBER = 45803 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
+TELLMEWHEN_VERSIONNUMBER = 45804 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
 if TELLMEWHEN_VERSIONNUMBER > 46000 or TELLMEWHEN_VERSIONNUMBER < 45000 then return error("YOU SCREWED UP THE VERSION NUMBER OR DIDNT CHANGE THE SAFETY LIMITS") end -- safety check because i accidentally made the version number 414069 once
 
 TELLMEWHEN_MAXGROUPS = 1 	--this is a default, used by SetTheory (addon), so dont rename
@@ -2671,8 +2671,10 @@ function IconBase.SetAlpha(icon, alpha)
 	end
 end
 
-function IconBase.SetScript(icon, handler, func)
-	icon[handler] = func
+function IconBase.SetScript(icon, handler, func, dontnil)
+	if func ~= nil or not dontnil then
+		icon[handler] = func
+	end
 	if handler ~= "OnUpdate" then
 		icon:setscript(handler, func)
 	else
@@ -3201,6 +3203,7 @@ function TMW:Icon_Update(icon)
 		icon:SetAlpha(0)
 	end
 	if icon.FakeHidden and not dontremove then
+		icon:SetScript("OnUpdate", nil, true)
 		tDeleteItem(IconUpdateFuncs, icon)
 		if Locked then
 			icon:SetAlpha(0)

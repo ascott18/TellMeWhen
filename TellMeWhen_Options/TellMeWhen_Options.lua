@@ -961,7 +961,6 @@ function TMW:CompileOptions() -- options
 	if not TMW.AddedToBlizz then
 		TMW.AddedToBlizz = LibStub("AceConfigDialog-3.0"):AddToBlizOptions("TMW Options", L["ICON_TOOLTIP1"])
 	end
-	IE:NotifyChanges()
 end
 
 
@@ -1084,6 +1083,7 @@ function TMW:Group_Delete(groupID)
 	TMW:Update()
 	IE:Load()
 	TMW:CompileOptions()
+	IE:NotifyChanges()
 	CloseDropDownMenus()
 end
 
@@ -1707,13 +1707,12 @@ function IE:TabClick(self)
 	PanelTemplates_Tab_OnClick(self, self:GetParent())
 	PlaySound("igCharacterInfoTab")
 	for id, frame in pairs(IE.Tabs) do
-		if IE[frame] then
+		if IE[frame] and frame ~= IE.Tabs[self:GetID()] then
 			IE[frame]:Hide()
 		end
 	end
 	
 	IE[IE.Tabs[self:GetID()]]:Show()
-	IE.CurrentTab = self
 	TellMeWhen_IconEditor:Show()
 	
 	if self:GetID() == TMW.ICCNDTTab then
@@ -1726,9 +1725,9 @@ function IE:TabClick(self)
 		CNDT:Load()
 	elseif self:GetID() == TMW.MOTab then
 		TMW:CompileOptions()
-		LibStub("AceConfigDialog-3.0"):SelectGroup("TMW IEOptions", "groups", "Group " .. CI.g)
-		LibStub("AceConfigDialog-3.0"):Open("TMW IEOptions", IE.MainOptionsWidget)
+		IE:NotifyChanges("groups", "Group " .. CI.g)
 	end
+	IE.CurrentTab = self
 end
 
 function IE:NotifyChanges(...)
@@ -2033,9 +2032,7 @@ function IE:Load(isRefresh, icon)
 			IE:TabClick(IE.MainTab)
 		end
 	else
-		if IE.CurrentTab:GetID() == TMW.MOTab then
-			IE:TabClick(IE.MainOptionsTab)
-		end
+		IE:NotifyChanges("groups", "Group " .. CI.g)
 	end
 
 	local groupID, iconID = CI.g, CI.i
@@ -2056,7 +2053,6 @@ function IE:Load(isRefresh, icon)
 			UIDropDownMenu_SetText(IE.Main.Type, "UNKNOWN TYPE: " .. CI.t)
 		end
 	end
-
 	local eq2 = TellMeWhen_IconEditor.selectedTab == TMW.ICCNDTTab
 	CNDT.settings = eq2 and db.profile.Groups[groupID].Conditions or db.profile.Groups[groupID].Icons[iconID].Conditions
 	CNDT.type = eq2 and "group" or "icon"
@@ -2065,7 +2061,6 @@ function IE:Load(isRefresh, icon)
 	CNDT.settings = eq2 and db.profile.Groups[groupID].Icons[iconID].Conditions or db.profile.Groups[groupID].Conditions
 	CNDT.type = eq2 and "icon" or "group"
 	CNDT:Load()
-
 
 	ME:Update()
 	SND:Load()

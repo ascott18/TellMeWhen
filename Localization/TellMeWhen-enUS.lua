@@ -6,7 +6,10 @@ L["!!Main Addon Description"] = "Provides visual, auditory, and textual notifica
 
 L["CMD_OPTIONS"] = "Options"
 L["ICON_TOOLTIP1"] = "TellMeWhen"
-L["ICON_TOOLTIP2NEW"] = "Right click for icon options. Right click and drag to another icon to move/copy. Drag spells or items onto the icon for quick setup. Typing /tellmewhen or /tmw will lock and enable the addon."
+L["ICON_TOOLTIP2NEW"] = [[Right click for icon options.
+Right click and drag to another icon to move/copy.
+Drag spells or items onto the icon for quick setup.
+Typing /tellmewhen or /tmw will lock and enable the addon.]]
 L["LDB_TOOLTIP1"] = "|cff7fffffLeft-click|r to toggle the group locks"
 L["LDB_TOOLTIP2"] = "|cff7fffffRight-click|r to show the main TMW options"
 L["LOADERROR"] = "TellMeWhen_Options could not be loaded: "
