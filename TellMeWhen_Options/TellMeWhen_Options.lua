@@ -1733,6 +1733,7 @@ end
 function IE:NotifyChanges(...)
 	local hasPath = ...
 	LibStub("AceConfigRegistry-3.0"):NotifyChange("TMW Options")
+
 	if hasPath then
 		LibStub("AceConfigDialog-3.0"):SelectGroup("TMW Options", ...)
 	end
@@ -1741,6 +1742,7 @@ function IE:NotifyChanges(...)
 		if hasPath then
 			LibStub("AceConfigDialog-3.0"):SelectGroup("TMW IEOptions", ...)
 		end
+		LibStub("AceConfigRegistry-3.0"):NotifyChange("TMW IEOptions")
 	end
 end
 
@@ -2032,7 +2034,9 @@ function IE:Load(isRefresh, icon)
 			IE:TabClick(IE.MainTab)
 		end
 	else
-		IE:NotifyChanges("groups", "Group " .. CI.g)
+		if IE.CurrentTab:GetID() == TMW.MOTab then
+			IE:TabClick(IE.MainOptionsTab)
+		end
 	end
 
 	local groupID, iconID = CI.g, CI.i
