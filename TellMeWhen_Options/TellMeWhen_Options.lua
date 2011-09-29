@@ -1707,7 +1707,7 @@ function IE:TabClick(self)
 	PanelTemplates_Tab_OnClick(self, self:GetParent())
 	PlaySound("igCharacterInfoTab")
 	for id, frame in pairs(IE.Tabs) do
-		if IE[frame] and frame ~= IE.Tabs[self:GetID()] then
+		if IE[frame] then--and frame ~= IE.Tabs[self:GetID()] then
 			IE[frame]:Hide()
 		end
 	end
@@ -1726,6 +1726,7 @@ function IE:TabClick(self)
 	elseif self:GetID() == TMW.MOTab then
 		TMW:CompileOptions()
 		IE:NotifyChanges("groups", "Group " .. CI.g)
+		LibStub("AceConfigDialog-3.0"):Open("TMW IEOptions", IE.MainOptionsWidget)
 	end
 	IE.CurrentTab = self
 end
@@ -2032,10 +2033,6 @@ function IE:Load(isRefresh, icon)
 			return
 		else
 			IE:TabClick(IE.MainTab)
-		end
-	else
-		if IE.CurrentTab:GetID() == TMW.MOTab then
-			IE:TabClick(IE.MainOptionsTab)
 		end
 	end
 
