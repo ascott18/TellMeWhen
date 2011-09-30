@@ -4,6 +4,7 @@
  * Chat channels are now a valid text output destination.
  * Bug Fixes:
  ** (r242) 1x AceConfigDialog-3.0\AceConfigDialog-3.0-54.lua:803: attempt to index field "rootframe" (a nil value)
+ ** (r245) Fixed an error 132 crash in 4.3 when using the "Finish Caching Now" button.
 
 ===v4.5.7===
  * Bug Fixes:

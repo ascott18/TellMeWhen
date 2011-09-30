@@ -745,7 +745,7 @@ This texture is being used because the first valid spell being checked was enter
 
 The correct texture will be used once you have seen the spell as you play.
 
-Change the first spell being checked into a Spell ID to make the correct texture always be used. You can easily do this by clicking on the entry in the editbox and then right-clicking the correct corresponding entry in the suggestion list that appears.]]
+To see the correct texture now, change the first spell being checked into a Spell ID. You can easily do this by clicking on the entry in the editbox and right-clicking the correct corresponding entry in the suggestion list.]]
 
 
 L["TOPLEFT"] = "Top Left"

@@ -1597,7 +1597,7 @@
 					</Layer>
 					<Layer level="ARTWORK">
 						<FontString name="$parentInfoText" parentKey="InfoText" hidden="true" inherits="GameFontHighlight">
-							<Size x="165"/>
+							<Size x="180"/>
 							<Anchors>
 								<Anchor point="TOP" y="-45"/>
 							</Anchors>
@@ -1607,7 +1607,7 @@
 				<Frames>
 					<Button name="$parentItem1" inherits="TellMeWhen_SpellSuggestTemplate" parentKey="Item1" id="1"/>
 					<Slider name="$parentSpeed" inherits="OptionsSliderTemplate" parentKey="Speed" hidden="true">
-						<Size x="160" y="18"/>
+						<Size x="165" y="18"/>
 						<Anchors>
 							<Anchor point="TOP" relativeTo="$parentInfoText" relativePoint="BOTTOM" y="-25"/>
 						</Anchors>
@@ -1650,9 +1650,9 @@
 						</Scripts>
 					</Slider>
 					<StatusBar name="$parentStatus" parentKey="Status" hidden="true">
-						<Size x="170" y="25"/>
+						<Size x="175" y="25"/>
 						<Anchors>
-							<Anchor point="TOP" relativeTo="$parentSpeed" relativePoint="BOTTOM" y="-10"/>
+							<Anchor point="TOP" relativeTo="$parentSpeed" relativePoint="BOTTOM" y="-15"/>
 						</Anchors>
 						<Layers>
 							<Layer level="ARTWORK">
@@ -1670,6 +1670,7 @@
 						<Scripts>
 							<OnLoad>
 								self:SetStatusBarTexture(self.texture)
+								self.texture:SetTexture(LibStub("LibSharedMedia-3.0"):Fetch("statusbar", TMW.db.profile.TextureName))
 							</OnLoad>
 							<OnValueChanged>
 								if self:IsShown() then
@@ -1699,6 +1700,7 @@
 						</Scripts>
 					</Button>
 					<Button name="$parentFinish" parentKey="Finish" inherits="TellMeWhen_ButtonTemplate" hidden="true">
+						<Size x="190" y="17"/>
 						<Anchors>
 							<Anchor point="BOTTOM" y="20"/>
 						</Anchors>
@@ -1708,7 +1710,7 @@
 								TMW:TT(self, "SUG_FINISHHIM", "SUG_FINISHHIM_DESC")
 							</OnLoad>
 							<OnClick>
-								TMW.SUG.NumCachePerFrame = math.huge -- why the hell not?
+								TMW.SUG.NumCachePerFrame = 2^1023 -- why the hell not?
 							</OnClick>
 						</Scripts>
 					</Button>
