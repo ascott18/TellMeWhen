@@ -489,6 +489,24 @@ function Env.GetTooltipNumber(unit, name, filter)
 	return 0
 end
 
+function Env.HealthPercent(unit)
+	local max = UnitHealthMax(unit)
+	if max == 0 then
+		return 0
+	else
+		return UnitHealth(unit)/max
+	end
+end
+
+function Env.PowerPercent(unit, powerType)
+	local max = UnitPowerMax(unit, powerType)
+	if max == 0 then
+		return 0
+	else
+		return UnitPower(unit, powerType)/max
+	end
+end
+
 Env.UnitNameConcatCache = setmetatable(
 {}, {
 	__index = function(t, i)
@@ -563,7 +581,7 @@ CNDT.Types = {
 		max = 100,
 		icon = "Interface\\Icons\\inv_alchemy_elixir_05",
 		tcoords = standardtcoords,
-		funcstr = [[UnitHealth(c.Unit)/UnitHealthMax(c.Unit) c.Operator c.Level]],
+		funcstr = [[UnitHealthMax(c.Unit) ~= 0 and UnitHealth(c.Unit)/UnitHealthMax(c.Unit) c.Operator c.Level]],
 	},
 	{ -- primary resource
 		text = L["CONDITIONPANEL_POWER"],
@@ -576,7 +594,7 @@ CNDT.Types = {
 		max = 100,
 		icon = "Interface\\Icons\\inv_alchemy_elixir_02",
 		tcoords = standardtcoords,
-		funcstr = [[UnitPower(c.Unit)/UnitPowerMax(c.Unit) c.Operator c.Level]],
+		funcstr = [[UnitPowerMax(c.Unit) ~= 0 and UnitPower(c.Unit)/UnitPowerMax(c.Unit) c.Operator c.Level]],
 	},
 	{ -- mana
 		text = MANA,
@@ -588,7 +606,7 @@ CNDT.Types = {
 		max = 100,
 		icon = "Interface\\Icons\\inv_potion_126",
 		tcoords = standardtcoords,
-		funcstr = [[UnitPower(c.Unit, 0)/UnitPowerMax(c.Unit, 0) c.Operator c.Level]],
+		funcstr = [[UnitPowerMax(c.Unit, 0) ~= 0 and UnitPower(c.Unit, 0)/UnitPowerMax(c.Unit, 0) c.Operator c.Level]],
 	},
 	{ -- energy
 		text = ENERGY,
@@ -600,7 +618,7 @@ CNDT.Types = {
 		max = 100,
 		icon = "Interface\\Icons\\inv_potion_125",
 		tcoords = standardtcoords,
-		funcstr = [[UnitPower(c.Unit, 3)/UnitPowerMax(c.Unit, 3) c.Operator c.Level]],
+		funcstr = [[UnitPowerMax(c.Unit, 3) ~= 0 and UnitPower(c.Unit, 3)/UnitPowerMax(c.Unit, 3) c.Operator c.Level]],
 	},
 	{ -- rage
 		text = RAGE,
@@ -612,7 +630,7 @@ CNDT.Types = {
 		max = 100,
 		icon = "Interface\\Icons\\inv_potion_120",
 		tcoords = standardtcoords,
-		funcstr = [[UnitPower(c.Unit, 1)/UnitPowerMax(c.Unit, 1) c.Operator c.Level]],
+		funcstr = [[UnitPowerMax(c.Unit, 1) ~= 0 and UnitPower(c.Unit, 1)/UnitPowerMax(c.Unit, 1) c.Operator c.Level]],
 	},
 	{ -- focus
 		text = FOCUS,
@@ -624,7 +642,7 @@ CNDT.Types = {
 		max = 100,
 		icon = "Interface\\Icons\\inv_potion_124",
 		tcoords = standardtcoords,
-		funcstr = [[UnitPower(c.Unit, 2)/UnitPowerMax(c.Unit, 2) c.Operator c.Level]],
+		funcstr = [[UnitPowerMax(c.Unit, 2) ~= 0 and UnitPower(c.Unit, 2)/UnitPowerMax(c.Unit, 2) c.Operator c.Level]],
 	},
 	{ -- runic power
 		text = RUNIC_POWER,
@@ -636,7 +654,7 @@ CNDT.Types = {
 		max = 100,
 		icon = "Interface\\Icons\\inv_potion_128",
 		tcoords = standardtcoords,
-		funcstr = [[UnitPower(c.Unit, 6)/UnitPowerMax(c.Unit, 6) c.Operator c.Level]],
+		funcstr = [[UnitPowerMax(c.Unit, 6) ~= 0 and UnitPower(c.Unit, 6)/UnitPowerMax(c.Unit, 6) c.Operator c.Level]],
 	},
 	{ -- alternate power (atramedes, chogall, etc)
 		text = L["CONDITIONPANEL_ALTPOWER"],
@@ -649,7 +667,7 @@ CNDT.Types = {
 		max = 100,
 		icon = "Interface\\Icons\\spell_shadow_mindflay",
 		tcoords = standardtcoords,
-		funcstr = [[UnitPower(c.Unit, 10)/UnitPowerMax(c.Unit, 10) c.Operator c.Level]],
+		funcstr = [[UnitPowerMax(c.Unit, 10) ~= 0 and UnitPower(c.Unit, 10)/UnitPowerMax(c.Unit, 10) c.Operator c.Level]],
 	},
 	{ -- soul shards
 		text = SOUL_SHARDS,

@@ -34,7 +34,7 @@ local DRData = LibStub("DRData-1.0", true)
 TELLMEWHEN_VERSION = "4.5.8"
 TELLMEWHEN_VERSION_MINOR = strmatch(" @project-version@", " r%d+") or ""
 TELLMEWHEN_VERSION_FULL = TELLMEWHEN_VERSION .. TELLMEWHEN_VERSION_MINOR
-TELLMEWHEN_VERSIONNUMBER = 45807 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
+TELLMEWHEN_VERSIONNUMBER = 45808 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
 if TELLMEWHEN_VERSIONNUMBER > 46000 or TELLMEWHEN_VERSIONNUMBER < 45000 then return error("YOU SCREWED UP THE VERSION NUMBER OR DIDNT CHANGE THE SAFETY LIMITS") end -- safety check because i accidentally made the version number 414069 once
 
 TELLMEWHEN_MAXGROUPS = 1 	--this is a default, used by SetTheory (addon), so dont rename
@@ -2492,69 +2492,6 @@ local function PwrBarOnUpdate(bar)
 		bar:SetValue(bar.Max - power)
 	else
 		bar:SetValue(power)
-	end
-end
-
-function IconBase.ForceBarUpdates(icon)
-	if icon.ShowPBar then
-		local pbName = icon.__pbName
-		if pbName then
-			local _, _, _, cost, _, powerType = GetSpellInfo(pbName)
-			if cost then
-				local pbar = icon.pbar
-				cost = powerType == 9 and 3 or cost
-				pbar.Max = cost
-				pbar.InvertBars = icon.InvertBars
-
-				if powerType ~= pbar.powerType then
-					local colorinfo = PowerBarColor[powerType]
-					pbar:SetStatusBarColor(colorinfo.r, colorinfo.g, colorinfo.b, 0.9)
-					pbar.powerType = powerType
-				end
-
-				pbar:SetMinMaxValues(0, cost)
-				if not pbar.UpdateSet then
-					pbar:SetScript("OnUpdate", PwrBarOnUpdate)
-					PwrBarOnUpdate(pbar)
-					pbar.UpdateSet = true
-				end
-				pbar:SetMinMaxValues(0, cost)
-			end
-		elseif icon.pbar.UpdateSet then
-			local pbar = icon.pbar
-			pbar:SetScript("OnUpdate", nil)
-			pbar.UpdateSet = false
-			pbar:SetValue(icon.InvertBars and pbar.Max or 0)
-		end
-		icon.__pbName = pbName
-	end
-	
-	if icon.ShowCBar then
-		local start, duration = icon.__start, icon.__duration
-		local bar = icon.cbar
-		bar.duration = duration
-		bar.start = start
-		bar.InvertBars = icon.InvertBars
-		if duration > 0 then
-			if isGCD and BarGCD then
-				bar.duration = 0
-			end
-
-			if not bar.UpdateSet then
-				bar:SetScript("OnUpdate", CDBarOnUpdate)
-				bar.UpdateSet = true
-			end
-		else
-			if bar.UpdateSet then
-				bar:SetScript("OnUpdate", nil)
-				bar.UpdateSet = false
-			end
-			if bar.InvertBars then
-				bar:SetValue(bar.Max)
-			else
-				bar:SetValue(0)
-			end
-		end
 	end
 end
 
