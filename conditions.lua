@@ -489,24 +489,6 @@ function Env.GetTooltipNumber(unit, name, filter)
 	return 0
 end
 
-function Env.HealthPercent(unit)
-	local max = UnitHealthMax(unit)
-	if max == 0 then
-		return 0
-	else
-		return UnitHealth(unit)/max
-	end
-end
-
-function Env.PowerPercent(unit, powerType)
-	local max = UnitPowerMax(unit, powerType)
-	if max == 0 then
-		return 0
-	else
-		return UnitPower(unit, powerType)/max
-	end
-end
-
 Env.UnitNameConcatCache = setmetatable(
 {}, {
 	__index = function(t, i)

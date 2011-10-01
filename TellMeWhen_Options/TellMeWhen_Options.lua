@@ -29,7 +29,9 @@ TELLMEWHEN_COLUMN1WIDTH = 170
 
 
 local LSM = LibStub("LibSharedMedia-3.0")
-LibStub("AceSerializer-3.0"):Embed(TMW)
+if LibStub("AceSerializer-3.0").Embed then
+	LibStub("AceSerializer-3.0"):Embed(TMW)
+end
 local L = TMW.L
 local LBF = LibStub("LibButtonFacade", true)
 local LMB = LibMasque and LibMasque("Button")
@@ -3211,8 +3213,11 @@ end
 -- ----------------------
 -- SUGGESTER
 -- ----------------------
-
-SUG = TMW:NewModule("Suggester", "AceEvent-3.0", "AceComm-3.0", "AceSerializer-3.0", "AceTimer-3.0") TMW.SUG = SUG
+--SUG = TMW:NewModule("Suggester", "AceEvent-3.0", "AceComm-3.0", "AceSerializer-3.0", "AceTimer-3.0") TMW.SUG = SUG
+SUG = TMW:NewModule("Suggester", "AceEvent-3.0", "AceComm-3.0", "AceTimer-3.0") TMW.SUG = SUG --TEMP: 4.3 compat code with AceSerializer errors
+if LibStub("AceSerializer-3.0").Embed then
+	LibStub("AceSerializer-3.0"):Embed(TMW)
+end
 local SUGIsNumberInput
 local SUGIMS, SUGSoI
 local SUGpreTable = {}

@@ -6,6 +6,7 @@
  ** (r242) 1x AceConfigDialog-3.0\AceConfigDialog-3.0-54.lua:803: attempt to index field "rootframe" (a nil value)
  ** (r245) Fixed an error 132 crash in 4.3 when using the "Finish Caching Now" button
  ** (r246) Fixed conditions for 4.3
+ ** (r247) Temporary compatibility code to make the options function fully, with the exception of import/export functionality, until AceSerializer gets fixed.
 
 ===v4.5.7===
  * Bug Fixes:
