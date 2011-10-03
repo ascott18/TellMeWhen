@@ -31,11 +31,11 @@ local AceDB = LibStub("AceDB-3.0")
 local LSM = LibStub("LibSharedMedia-3.0")
 local DRData = LibStub("DRData-1.0", true)
 
-TELLMEWHEN_VERSION = "4.5.8"
+TELLMEWHEN_VERSION = "4.6.0"
 TELLMEWHEN_VERSION_MINOR = strmatch(" @project-version@", " r%d+") or ""
 TELLMEWHEN_VERSION_FULL = TELLMEWHEN_VERSION .. TELLMEWHEN_VERSION_MINOR
-TELLMEWHEN_VERSIONNUMBER = 45809 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
-if TELLMEWHEN_VERSIONNUMBER > 46000 or TELLMEWHEN_VERSIONNUMBER < 45000 then return error("YOU SCREWED UP THE VERSION NUMBER OR DIDNT CHANGE THE SAFETY LIMITS") end -- safety check because i accidentally made the version number 414069 once
+TELLMEWHEN_VERSIONNUMBER = 46001 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
+if TELLMEWHEN_VERSIONNUMBER > 47000 or TELLMEWHEN_VERSIONNUMBER < 46000 then return error("YOU SCREWED UP THE VERSION NUMBER OR DIDNT CHANGE THE SAFETY LIMITS") end -- safety check because i accidentally made the version number 414069 once
 
 TELLMEWHEN_MAXGROUPS = 1 	--this is a default, used by SetTheory (addon), so dont rename
 TELLMEWHEN_MAXROWS = 20
@@ -194,10 +194,10 @@ do -- Iterators
 			return rawget(db.profile.Groups, cg) and rawget(db.profile.Groups[cg].Icons,ci), cg, ci -- setting table, groupID, iconID
 		end
 
-		function TMW:InIconSettings()
-			cg = 1
+		function TMW:InIconSettings(groupID)
+			cg = groupID or 1
 			ci = 0
-			mg = TELLMEWHEN_MAXGROUPS
+			mg = groupID or TELLMEWHEN_MAXGROUPS
 			mi = TELLMEWHEN_MAXROWS*TELLMEWHEN_MAXROWS
 			return iter
 		end
@@ -1174,8 +1174,8 @@ function TMW:OnCommReceived(prefix, text, channel, who)
 		TMW.VersionWarned = true
 		TMW:Printf(L["NEWVERSION"], major .. minor)
 	elseif prefix == "TMW" and channel == "WHISPER" and db.profile.ReceiveComm then
-		TMW.Recieved = TMW.Recieved or {}
-		TMW.Recieved[text] = who or true
+		TMW.Received = TMW.Received or {}
+		TMW.Received[text] = who or true
 		if who then
 			if db.global.HasImported then
 				TMW:Printf(L["MESSAGERECIEVE_SHORT"], who)
@@ -1968,8 +1968,8 @@ function TMW:GlobalUpgrade()
 	TellMeWhenDB.Version = TELLMEWHEN_VERSIONNUMBER -- pre-default upgrades complete!
 end
 
-function TMW:Upgrade()
 
+function TMW:Upgrade()
 	if TellMeWhen_Settings then -- needs to be first
 		for k, v in pairs(TellMeWhen_Settings) do
 			db.profile[k] = v
@@ -1984,30 +1984,40 @@ function TMW:Upgrade()
 		v = v..strrep("0", 5-#v)	-- append zeroes to create a 5 digit number
 		db.profile.Version = tonumber(v)
 	end
+	
+	TMW:DoUpgrade(db.profile.Version, true)
 
+	--All Upgrades Complete
+	db.profile.Version = TELLMEWHEN_VERSIONNUMBER
+end
+
+function TMW:DoUpgrade(version, global, groupID, iconID)
 	for k, v in ipairs(TMW:GetUpgradeTable()) do
-		if v.Version > db.profile.Version then
-			if v.global then
+		if v.Version > version then
+			if global and v.global then
 				v.global(v)
+			elseif groupID and not iconID and v.group then
+				v.group(db.profile.Groups[groupID], v, groupID)
+				print(groupID)
+			elseif iconID and groupID and v.icon then
+				v.icon(db.profile.Groups[groupID].Icons[iconID], v, groupID, iconID)
+				print(groupID, iconID)
 			end
-			if v.group then
-				for group, groupID in TMW:InGroupSettings() do
-					v.group(group, v, groupID)
-				end
-			end
-			if v.icon then
-				for ics, groupID, iconID in TMW.InIconSettings() do
-					v.icon(ics, v, groupID, iconID)
-				end
-			end
-			if v.postglobal then
+			if global and v.postglobal then
 				v.postglobal(v)
 			end
 		end
 	end
-
-	--All Upgrades Complete
-	db.profile.Version = TELLMEWHEN_VERSIONNUMBER
+	
+	if global then
+		for gs, groupID in TMW:InGroupSettings() do
+			TMW:DoUpgrade(version, nil, groupID, nil)
+		end
+	elseif groupID and not iconID then
+		for ics, groupID, iconID in TMW:InIconSettings(groupID) do
+			TMW:DoUpgrade(version, nil, groupID, iconID)
+		end
+	end
 end
 
 function TMW:LoadOptions(recursed)
@@ -3637,7 +3647,7 @@ function TMW:GetConfigIconTexture(icon, isItem)
 		end
 		if Types[icon.Type].usePocketWatch then
 			if TMW.IE and TMW.CI.ic == icon and not db.global.HelpSettings.PocketWatch and TellMeWhen_IconEditor:IsShown() then
-				TMW.IE:ShowHelp(L["HELP_POCKETWATCH"], TMW.IE.icontexture, 0, 0)
+				TMW.IE:ShowHelp(L["HELP_POCKETWATCH"], TMW.IE.icontexture, 0, 0, icon)
 				db.global.HelpSettings.PocketWatch = 1
 			end
 			return "Interface\\Icons\\INV_Misc_PocketWatch_01", false

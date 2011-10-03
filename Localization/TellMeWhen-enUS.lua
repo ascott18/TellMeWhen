@@ -573,8 +573,9 @@ L["TOOLTIPSCAN_DESC"] = "This condition type will allow you to check the first v
 -- ----------
 
 L["GROUPICON"] = "Group: %s, Icon: %s"
-L["fGROUP"] = "Group %s"
-L["fICON"] = "Icon %s"
+L["fGROUP"] = "Group: %s"
+L["fICON"] = "Icon: %s"
+L["ICON"] = "Icon"
 L["DISABLED"] = "Disabled"
 L["IMPORTCOPY"] = "Copy/Import"
 L["COPYPOS"] = "Copy position/scale"
@@ -600,18 +601,54 @@ To import from a string, press CTRL+V to paste the string into the editbox after
 L["UNNAMED"] = "((Unnamed))"
 
 L["TOPLAYER"] = "Export to Player"
-L["TOPLAYER_DESC"] = "Type a player's name into the editbox and choose this option to send it to them. They must be somebody that you can whisper (same faction, server, online), and they must have TellMeWhen v4+"
+L["TOCOMM_DESC"] = "Type a player's name into the editbox and choose this option to send it to them. They must be somebody that you can whisper (same faction, server, online), and they must have TellMeWhen v4+"
 L["TOSTRING"] = "Export to String"
 L["TOSTRING_DESC"] = "A string containing all of this icon's settings will be pasted into the editbox.  Press Ctrl+C to copy it, and then paste it wherever you want to share it."
 L["FROMSTRING"] = "Import from String"
 L["FROMSTRING_DESC"] = "Press Ctrl+V to paste in an export string that you have copied to your clipboard from another source to be applied to this icon."
 
 L["SENDSUCCESSFUL"] = "Sent successfully"
-L["MESSAGERECIEVE"] = "%s has sent you a TellMeWhen icon! You can import this icon into a slot by using the 'Copy/Import' dropdown in the icon editor."
-L["MESSAGERECIEVE_SHORT"] = "%s has sent you a TellMeWhen icon!"
-L["ALLOWCOMM"] = "Allow icon importing"
+L["MESSAGERECIEVE"] = "%s has sent you some TellMeWhen data! You can import this data into TellMeWhen using the 'Import/Export' dropdown in the icon editor."
+L["MESSAGERECIEVE_SHORT"] = "%s has sent you some TellMeWhen data!"
+L["ALLOWCOMM"] = "Allow data importing"
 L["NEWVERSION"] = "A new version of TellMeWhen is available: %s"
 L["PLAYER_DESC"] = "(You)"
+
+
+L["IMPORT_EXPORT"] = "Import/Export"
+L["IMPORT_EXPORT_DESC"] = [[Click the dropdown arrow to the right of this editbox to import and export icons, groups, and profiles.
+
+Importing to or from a string, or exporting to another player, will require the use of this editbox. See the tooltips within the dropdown menu for details.]]
+
+L["IMPORT_HEADING"] = "Import"
+L["IMPORT_FROMLOCAL"] = "From Profile"
+L["IMPORT_FROMBACKUP"] = "From Backup"
+L["IMPORT_FROMBACKUP_WARNING"] = "BACKUP SETTINGS: %s"
+L["IMPORT_FROMBACKUP_DESC"] = "Settings restored from this settings menu will be as they were at: %s"
+L["IMPORT_FROMSTRING"] = "From String"
+L["IMPORT_FROMSTRING_DESC"] = [[Strings allow you to transfer TellMeWhen configuration data outside the game.
+
+To import from a string, press CTRL+V to paste the string into the editbox after you have copied it to your clipboard, and then navigate back to this sub-menu.]]
+L["IMPORT_FROMCOMM"] = "From Player"
+L["IMPORT_FROMCOMM_DESC"] = "If another user of TellMeWhen sends you any configuration data, you will be able to import that data from this submenu."
+L["IMPORT_PROFILE"] = "Copy Profile"
+L["IMPORT_PROFILE_OVERWRITE"] = "Overwrite %s"
+L["IMPORT_PROFILE_NEW"] = "Create New Profile"
+
+L["EXPORT_HEADING"] = "Export"
+L["EXPORT_TOSTRING"] = "To String"
+L["EXPORT_TOCOMM"] = "To Player"
+L["EXPORT_TOCOMM_DESC"] = "Type a player's name into the editbox and choose this option to send the data to them. They must be somebody that you can whisper (same faction, server, online), and they must have TellMeWhen v4.0.0+"
+L["EXPORT_TOSTRING_DESC"] = "A string containing the necessary data will be pasted into the editbox.  Press Ctrl+C to copy it, and then paste it wherever you want to share it."
+L["EXPORT_SPECIALDESC"] = "Other TellMeWhen users can only import entire groups or entire profiles if they have version 4.6.0+"
+L["EXPORT_f"] = "Export %s"
+L["EXPORT_GLOBAL_f"] = "Export profile %q"
+
+
+
+
+
+
 
 
 

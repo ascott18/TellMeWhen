@@ -174,7 +174,7 @@ function Type:Setup(icon, groupID, iconID)
 	icon.Units = TMW:GetUnits(icon, icon.Unit)
 	icon.FirstTexture = SpellTextures[icon.NameFirst]
 
-	if not db.profile.Locked and (not warnedMismatch[icon] or TMW.IE.Main.Name:IsShown()) then
+	if not db.profile.Locked and (not warnedMismatch[icon] or TMW.IE.Main.Name:IsVisible()) then
 		-- Do the Right Thing and tell people if their DRs mismatch
 		local firstCategory, dobreak
 		for IDorName in pairs(icon.NameHash) do
@@ -189,7 +189,7 @@ function Type:Setup(icon, groupID, iconID)
 							warnedMismatch[icon] = 1
 						end
 						
-						TMW.IE:ShowHelp(L["WARN_DRMISMATCH"]:format(groupID, iconID), TMW.IE.Main.Name, 0, 0)
+						TMW.IE:ShowHelp(L["WARN_DRMISMATCH"], TMW.IE.Main.Name, 0, 0, icon, groupID, iconID)
 						dobreak=1
 						break
 					end

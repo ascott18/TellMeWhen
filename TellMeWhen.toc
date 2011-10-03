@@ -5,9 +5,10 @@
 # Also dont forget to bump both of these - X-Interface is used to get the interface version in-game to check that the user is using a current client.
 ## Interface: 40200
 ## X-Interface: 40200
+## X-Compatible-With: 40300
 ## Title: TellMeWhen
 
-## Version: 4.5.8
+## Version: 4.6.0
 ## Author: Cybeloras of Mal'Ganis
 
 ## Notes: Provides visual, auditory, and textual notifications about cooldowns, buffs, and pretty much everything else.

@@ -125,6 +125,22 @@ function Type:Setup(icon, groupID, iconID)
 	icon.ICDStartTime = icon.ICDStartTime or 0
 	icon.ICDDuration = icon.ICDDuration or 0
 	
+	if TMW.IE and TMW.IE.Main.Name:IsVisible() then
+		local Name = TMW.IE.Main.Name
+		local s = ""
+		local array = TMW:GetSpellNames(nil, Name:GetText())
+		for k, v in pairs(TMW:GetSpellDurations(nil, Name:GetText())) do
+			if v == 0 then
+				s = s .. (s ~= "" and "; " or "") .. array[k]
+			end
+		end
+		if s ~= "" then
+			TMW.IE:ShowHelp(L["HELP_MISSINGDURS"], Name, 0, 0, icon, s)
+		else
+			TMW.IE.Help:Hide()
+		end
+	end
+	
 	--[[ keep these events per icon isntead of global like unitcooldowns are so that ...
 	well i had a reason here but it didnt make sense when i came back and read it a while later. Just do it. I guess.]]
 	if icon.ICDType == "spellcast" then
@@ -146,7 +162,7 @@ end
 
 function Type:IE_TypeLoaded()
 	if not TMW.db.global.HelpSettings.NewDurSyntax then
-		TMW.IE:ShowHelp(L["HELP_FIRSTUCD"], TMW.IE.Main.Type, 20, 0)
+		TMW.IE:ShowHelp(L["HELP_FIRSTUCD"], TMW.IE.Main.Type, 20, 0, TMW.CI.ic)
 		TMW.db.global.HelpSettings.NewDurSyntax = 1
 	end
 end

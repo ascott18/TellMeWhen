@@ -29,7 +29,7 @@ TELLMEWHEN_COLUMN1WIDTH = 170
 
 
 local LSM = LibStub("LibSharedMedia-3.0")
-if LibStub("AceSerializer-3.0").Embed then
+if LibStub("AceSerializer-3.0").Embed then--TEMP: 4.3 compat code with AceSerializer errors
 	LibStub("AceSerializer-3.0"):Embed(TMW)
 end
 local L = TMW.L
@@ -61,6 +61,9 @@ local points = {
 }
 local print = TMW.print
 
+TMW.Backupdb = CopyTable(TellMeWhenDB)
+TMW.BackupDate = date("%I:%M:%S %p")
+
 local function approachTable(...)
 	local t = ...
 	if not t then return end
@@ -86,6 +89,9 @@ TMW.CI = setmetatable({}, {__index = function(tbl, k)
 	if k == "ics" then
 		-- take no chances with errors occuring here
 		return approachTable(TMW.db, "profile", "Groups", tbl.g, "Icons", tbl.i)
+	elseif k == "gs" then
+		-- take no chances with errors occuring here
+		return approachTable(TMW.db, "profile", "Groups", tbl.g)
 	elseif k == "SoI" then -- spell or item
 		local ics = tbl.ics
 		if ics and ics.Type == "cooldown" and ics.CooldownType == "item" then
@@ -341,9 +347,65 @@ function TMW:GetGroupName(n, g, short)
 	return n .. " (" .. format(L["fGROUP"], g) .. ")"
 end
 
-function TMW:CleanIconSettings(settings)
-	TMW.DatabaseCleanups.icon(settings)
-	return TMW:CleanDefaults(settings, TMW.Icon_Defaults)
+function TMW:SerializeData(data, type, ...)
+	assert(data, "No data to serialize!")
+	assert(type, "No data type specified!")
+	return TMW:Serialize(data, TELLMEWHEN_VERSIONNUMBER, " ", type, ...)
+end
+
+function TMW:DeserializeData(string)
+	local success, data, version, spaceControl, type, arg1, arg2, arg3, arg4, arg5 = TMW:Deserialize(string)
+	if not success then
+		return
+	end
+	if spaceControl == "`" then
+		TMW:Print(L["IMPORTERROR_CORRUPTSPACES"])
+		string = string:gsub("`", "~`")
+		success, data, version, spaceControl, type, arg1, arg2, arg3, arg4, arg5 = TMW:Deserialize(string)
+	end
+	if version <= 45809 and not type and data.Type then -- 45809 was the last version to contain untyped data messages. It only supported icon imports/exports, so the type has to be an icon.
+		type = "icon"
+	end
+	
+	local result = {
+		data = data,
+		type = type,
+		version = version,
+		arg1 = arg1,
+		arg2 = arg2,
+		arg3 = arg3,
+		arg4 = arg4,
+		arg5 = arg5,
+	}
+	
+	return result
+	
+end
+
+function TMW:GetSettingsString(type, settings, defaults, ...)
+	assert(settings, "No data to serialize!")
+	assert(type, "No data type specified!")
+	assert(defaults, "No defaults specified!")
+	
+	-- ... contains additional data that may or may not be used/needed
+	IE:SaveSettings()
+	settings = CopyTable(settings)
+	settings = TMW:CleanSettings(type, settings, defaults)
+	return TMW:SerializeData(settings, type, ...)
+end
+
+function TMW:CleanSettings(type, settings, defaults)
+	local DatabaseCleanup = TMW.DatabaseCleanups[type]
+	if DatabaseCleanup then
+		DatabaseCleanup(settings)
+	end
+	return TMW:CleanDefaults(settings, defaults)
+end
+
+function TMW:MakeSerializedDataPretty(string)
+	return string:
+	gsub("(^[^tT%d][^^]*^[^^]*)", "%1 "): -- add spaces to clean it up a little
+	gsub("%^ ^", "^^") -- remove double space at the end
 end
 
 function TMW:CleanDefaults(settings, defaults, blocker)
@@ -1110,6 +1172,98 @@ function TMW:Group_Add()
 	return groupID, TMW[groupID]
 end
 
+
+TMW.ImportFunctions = {
+	icon = function(data, version, noOverwrite)
+		local groupID, iconID = CI.g, CI.i
+		db.profile.Groups[groupID].Icons[iconID] = nil -- restore defaults, table recreated when passed in to CTIPWM
+		TMW:CopyTableInPlaceWithMeta(data, db.profile.Groups[groupID].Icons[iconID])
+		
+		if version then
+			if version > TELLMEWHEN_VERSIONNUMBER then
+				TMW:Print(L["FROMNEWERVERSION"])
+			else
+				TMW:DoUpgrade(version, nil, groupID, iconID)
+			end
+		end
+	end,
+	group = function(data, version, noOverwrite, oldgroupID)
+		local groupID = CI.g
+		if noOverwrite then
+			groupID = TMW:Group_Add()
+		end
+		db.profile.Groups[groupID] = nil -- restore defaults, table recreated when passed in to CTIPWM
+		local gs = db.profile.Groups[groupID]
+		TMW:CopyTableInPlaceWithMeta(data, gs)
+		
+		if oldgroupID then
+			local srcgr, destgr = "TellMeWhen_Group"..oldgroupID, TMW[groupID]:GetName()
+			for ics in TMW:InIconSettings(groupID) do
+				for k, ic in pairs(ics.Icons) do
+					if ic:find(srcgr) then
+						ics.Icons[k] = ic:gsub(srcgr, destgr)
+					end
+				end
+				for k, condition in pairs(ics.Conditions) do
+					if condition.Icon:find(srcgr) then
+						condition.Icon = condition.Icon:gsub(srcgr, destgr)
+					end
+				end
+			end
+		end
+	
+		if version then
+			if version > TELLMEWHEN_VERSIONNUMBER then
+				TMW:Print(L["FROMNEWERVERSION"])
+			else
+				TMW:DoUpgrade(version, nil, groupID)
+			end
+		end
+	end,
+	global = function(data, version, noOverwrite)
+		if noOverwrite then -- noOverwrite is a name in this case.
+			db:SetProfile(noOverwrite)
+		else
+			db:ResetProfile()
+		end
+		TMW:CopyTableInPlaceWithMeta(data, db.profile)
+		
+		if version then
+			if version > TELLMEWHEN_VERSIONNUMBER then
+				TMW:Print(L["FROMNEWERVERSION"])
+			else
+				TMW:DoUpgrade(version, true)
+			end
+		end
+	end,
+}
+
+function TMW:ImportFromResult(result, ...)
+	if not result then
+		TMW:Print(L["IMPORTERROR_FAILEDPARSE"])
+		return
+	end
+	
+	TMW:Import(result.data, result.version, result.type, ...)
+end
+
+function TMW:Import(data, version, type, ...)
+	assert(data, "Missing data to import")
+	assert(version, "Missing version of data")
+	assert(type, "No data type specified!")
+	CloseDropDownMenus()
+	local groupID, iconID = CI.g, CI.i
+	local importfunc = TMW.ImportFunctions[type]
+	if importfunc then
+		importfunc(data, version, ...)
+
+
+		TMW:Update()
+		IE:Load(1)
+	else
+		TMW:Print(L["IMPORTERROR_INVALIDTYPE"])
+	end
+end
 
 -- ----------------------
 -- ICON DRAGGER
@@ -2083,7 +2237,15 @@ function IE:Reset()
 	IE:TabClick(IE.MainTab)
 end
 
-function IE:ShowHelp(text, frame, x, y)
+function IE:ShowHelp(text, frame, x, y, icon, ...)
+	text = format(text, ...)
+	local current = IE.Help.current
+		current.text = text
+		current.frame = frame
+		current.x = x
+		current.y = y
+		current.icon = icon
+		
 	IE.Help:ClearAllPoints()
 	IE.Help:SetPoint("TOPRIGHT", frame, "LEFT", (x or 0) - 30, (y or 0) + 28)
 	IE.Help.text:SetText(text)
@@ -2308,18 +2470,48 @@ function IE:ImpExp_DropDown()
 
 
 	local info = UIDropDownMenu_CreateInfo()
-	info.text = L["TOPLAYER"]
-	info.tooltipTitle = L["TOPLAYER"]
-	info.tooltipText = L["TOPLAYER_DESC"]
+	info.text = L["EXPORT_TOCOMM_ICON"]
+	info.tooltipTitle = L["EXPORT_TOCOMM_ICON"]
+	info.tooltipText = L["EXPORT_TOCOMM_DESC"]
 	info.tooltipOnButton = true
 	info.notCheckable = true
 	info.func = function()
-		IE:SaveSettings()
 		local player = strtrim(e:GetText())
 		if player and player ~= "" and #player > 1 and #player < 13 then
-			local settings = CopyTable(db.profile.Groups[CI.g].Icons[CI.i])
-			TMW:CleanIconSettings(settings)
-			local s = TMW:Serialize(settings, TELLMEWHEN_VERSIONNUMBER)
+			local s = TMW:GetSettingsString("icon", TMW.CI.ics, TMW.Icon_Defaults)
+
+			TMW:SendCommMessage("TMW", s, "WHISPER", player, "BULK", e.callback, e)
+		end
+	end
+	UIDropDownMenu_AddButton(info, UIDROPDOWNMENU_MENU_LEVEL)
+	
+	
+	local info = UIDropDownMenu_CreateInfo()
+	info.text = L["EXPORT_TOCOMM_GROUP"]
+	info.tooltipTitle = L["EXPORT_TOCOMM_GROUP"]
+	info.tooltipText = L["EXPORT_TOCOMM_DESC"]
+	info.tooltipOnButton = true
+	info.notCheckable = true
+	info.func = function()
+		local player = strtrim(e:GetText())
+		if player and player ~= "" and #player > 1 and #player < 13 then
+			local s = TMW:GetSettingsString("group", TMW.CI.gs, TMW.Group_Defaults, CI.g)
+
+			TMW:SendCommMessage("TMW", s, "WHISPER", player, "BULK", e.callback, e)
+		end
+	end
+	UIDropDownMenu_AddButton(info, UIDROPDOWNMENU_MENU_LEVEL)
+	
+	local info = UIDropDownMenu_CreateInfo()
+	info.text = L["EXPORT_TOCOMM_GLOBAL"]
+	info.tooltipTitle = L["EXPORT_TOCOMM_GLOBAL"]
+	info.tooltipText = L["EXPORT_TOCOMM_DESC"]
+	info.tooltipOnButton = true
+	info.notCheckable = true
+	info.func = function()
+		local player = strtrim(e:GetText())
+		if player and player ~= "" and #player > 1 and #player < 13 then
+			local s = TMW:GetSettingsString("global", TMW.db.profile, TMW.Defaults.profile, TMW.db:GetCurrentProfile())
 
 			TMW:SendCommMessage("TMW", s, "WHISPER", player, "BULK", e.callback, e)
 		end
@@ -2327,18 +2519,50 @@ function IE:ImpExp_DropDown()
 	UIDropDownMenu_AddButton(info, UIDROPDOWNMENU_MENU_LEVEL)
 
 	local info = UIDropDownMenu_CreateInfo()
-	info.text = L["TOSTRING"]
-	info.tooltipTitle = L["TOSTRING"]
-	info.tooltipText = L["TOSTRING_DESC"]
+	info.text = L["EXPORT_TOSTRING_ICON"]
+	info.tooltipTitle = L["EXPORT_TOSTRING_ICON"]
+	info.tooltipText = L["EXPORT_TOSTRING_DESC"]
 	info.tooltipOnButton = true
 	info.notCheckable = true
 	info.func = function()
-		IE:SaveSettings()
-		local settings = CopyTable(db.profile.Groups[CI.g].Icons[CI.i])
-		TMW:CleanIconSettings(settings)
-		local s = TMW:Serialize(settings, TELLMEWHEN_VERSIONNUMBER, " "):
-		gsub("(^[^tT%d][^^]*^[^^]*)", "%1 "): -- add spaces to clean it up a little
-		gsub("%^ ^", "^^") -- remove double space at the end
+	
+		local s = TMW:GetSettingsString("icon", TMW.CI.ics, TMW.Icon_Defaults)
+		s = TMW:MakeSerializedDataPretty(s)
+		
+		e:SetText(s)
+		e:HighlightText()
+		e:SetFocus()
+	end
+	UIDropDownMenu_AddButton(info, UIDROPDOWNMENU_MENU_LEVEL)
+	
+	local info = UIDropDownMenu_CreateInfo()
+	info.text = L["EXPORT_TOSTRING_GROUP"]
+	info.tooltipTitle = L["EXPORT_TOSTRING_GROUP"]
+	info.tooltipText = L["EXPORT_TOSTRING_DESC"]
+	info.tooltipOnButton = true
+	info.notCheckable = true
+	info.func = function()
+	
+		local s = TMW:GetSettingsString("group", TMW.CI.gs, TMW.Group_Defaults, CI.g)
+		s = TMW:MakeSerializedDataPretty(s)
+
+		e:SetText(s)
+		e:HighlightText()
+		e:SetFocus()
+	end
+	UIDropDownMenu_AddButton(info, UIDROPDOWNMENU_MENU_LEVEL)
+	
+	local info = UIDropDownMenu_CreateInfo()
+	info.text = L["EXPORT_TOSTRING_GLOBAL"]
+	info.tooltipTitle = L["EXPORT_TOSTRING_GLOBAL"]
+	info.tooltipText = L["EXPORT_TOSTRING_DESC"]
+	info.tooltipOnButton = true
+	info.notCheckable = true
+	info.func = function()
+	
+		local s = TMW:GetSettingsString("global", TMW.db.profile, TMW.Defaults.profile, TMW.db:GetCurrentProfile())
+		s = TMW:MakeSerializedDataPretty(s)
+
 		e:SetText(s)
 		e:HighlightText()
 		e:SetFocus()
@@ -2351,159 +2575,508 @@ function IE:ImpExp_DropDown()
 	info.tooltipText = L["FROMSTRING_DESC"]
 	info.tooltipOnButton = true
 	info.notCheckable = true
-	info.func = function()
-		local t = strtrim(e:GetText())
-		if t and t ~= "" then
-			t = t:gsub("||", "|")
-			local success, settings, version, spaceControl = TMW:Deserialize(t)
-			if spaceControl == "`" then
-				t = t:gsub("`", "~`")
-				TMW:Print(L["IMPORTERROR_CORRUPTSPACES"])
-				success, settings, version, spaceControl = TMW:Deserialize(t)
-			end
-			if not success then
-				TMW:Print(L["IMPORTERROR_FAILEDPARSE"])
-				return
-			end
-			e:SetText("")
-			e:ClearFocus()
-			CloseDropDownMenus()
-			local groupID, iconID = CI.g, CI.i
-
-			db.profile.Groups[groupID].Icons[iconID] = nil -- restore defaults, table recreated when passed in to CTIPWM
-			TMW:CopyTableInPlaceWithMeta(settings, db.profile.Groups[groupID].Icons[iconID])
-
-			if version then
-				if version > TELLMEWHEN_VERSIONNUMBER then
-					TMW:Print(L["FROMNEWERVERSION"])
-				else
-					for k, v in ipairs(TMW:GetUpgradeTable()) do
-						if version < k and v.icon then
-							v.icon(db.profile.Groups[groupID].Icons[iconID], groupID, iconID)
-						end
-					end
-				end
-			end
-
-			IE:ScheduleIconUpdate(groupID, iconID)
-			IE:Load(1)
-		end
-	end
+	info.func = TMW.ImportFromResult
+	info.arg1 = TMW
+	info.arg2 = noOverwrite
 	UIDropDownMenu_AddButton(info, UIDROPDOWNMENU_MENU_LEVEL)
 end
 
-local deserialized = {}
+function IE:AddIconToCopyDropdown(ics, groupID, iconID, profilename, group_src, version_src, force)
+	local nsettings = 0
+	for icondatakey, icondatadata in pairs(ics) do
+		if type(icondatadata) == "table" then if next(icondatadata) then nsettings = nsettings + 1 end
+		elseif TMW.Icon_Defaults[icondatakey] ~= icondatadata then
+			nsettings = nsettings + 1
+		end
+	end
+	if force or (nsettings > 0 and tonumber(iconID)) then
+		local tex
+		local ic = groupID and iconID and TMW[groupID] and TMW[groupID][iconID]
+		if db:GetCurrentProfile() == profilename and ic and ic.texture:GetTexture() then
+			tex = ic.texture:GetTexture()
+		else
+			tex = TMW:GuessIconTexture(ics)
+		end
+
+		local text, textshort, tooltipText = TMW:GetIconMenuText(nil, nil, ics)
+		info = UIDropDownMenu_CreateInfo()
+		info.text = textshort
+		info.tooltipTitle = groupID and format(L["GROUPICON"], TMW:GetGroupName(group_src and group_src.Name, groupID, 1), iconID) or L["ICON"]
+		info.tooltipText = tooltipText
+		info.tooltipOnButton = true
+		info.icon = tex
+		info.tCoordLeft = 0.07
+		info.tCoordRight = 0.93
+		info.tCoordTop = 0.07
+		info.tCoordBottom = 0.93
+		info.notCheckable = true
+		info.func = function()
+			TMW[CI.g][CI.i]:SetTexture(nil)
+			
+			TMW:Import(ics, version_src, "icon")
+		end
+		UIDropDownMenu_AddButton(info, UIDROPDOWNMENU_MENU_LEVEL)
+	end
+end
+
+local DeserializedData = {}
 function IE:Copy_DropDown()
 	local groupID, iconID = CI.g, CI.i
 	local icon = CI.ic
 	if not (icon and icon.Conditions) then return end
 	local info
-
-	if UIDROPDOWNMENU_MENU_LEVEL == 1 then
-		local current = db:GetCurrentProfile()
-		if db.profiles[current] then
-			info = UIDropDownMenu_CreateInfo()
-			info.text = current
-			info.value = current
-			info.hasArrow = true
-			info.notCheckable = true
-			UIDropDownMenu_AddButton(info, UIDROPDOWNMENU_MENU_LEVEL)
-		end
-
-		if TMW.Recieved then
-			for k, v in pairs(TMW.Recieved) do -- deserialize recieved icons because we dont do it as they are recieved; AceSerializer is only embedded in _Options
-				if type(k) == "string" and v then
-					local success, tbl, version = TMW:Deserialize(k)
-					if success and type(tbl) == "table" and tbl.Name and tbl.Type then -- checks to make sure that it is actually an icon because of my poor planning
-						deserialized[tbl] = version or TELLMEWHEN_VERSIONNUMBER
-						TMW.Recieved[k] = false
+	
+	do -- deserialize received comm
+		if TMW.Received then
+			for k, who in pairs(TMW.Received) do -- deserialize received icons because we dont do it as they are received; AceSerializer is only embedded in _Options
+				if type(k) == "string" and who then
+					local result = TMW:DeserializeData(k)
+					if result then
+						tinsert(DeserializedData, result)
+						result.who = who
+						TMW.Received[k] = nil
 					end
 				end
 			end
+			if not next(TMW.Received) then
+				TMW.Received = nil
+			end
 		end
-		if next(deserialized) then
-			info = UIDropDownMenu_CreateInfo()
-			info.text = L["RECEIVED"]
-			info.value = "Imports"
-			info.hasArrow = true
-			info.notCheckable = true
-			UIDropDownMenu_AddButton(info, UIDROPDOWNMENU_MENU_LEVEL)
-		end
+	end
+	
+	local t = strtrim(IE.Main.ExportBox:GetText()):gsub("||", "|")
+	local editboxResult = t ~= "" and TMW:DeserializeData(t)
+	t = nil
 
-		if next(deserialized) or db.profiles[current] then
-			AddDropdownSpacer()
+	
+	if type(UIDROPDOWNMENU_MENU_VALUE) == "string" and strfind(UIDROPDOWNMENU_MENU_VALUE, "^IMPORT_BACKUP") then
+		info = UIDropDownMenu_CreateInfo()
+		info.text = "|cffff0000" .. L["IMPORT_FROMBACKUP_WARNING"]:format(TMW.BackupDate)
+		info.isTitle = true
+		info.notCheckable = true
+		UIDropDownMenu_AddButton(info, UIDROPDOWNMENU_MENU_LEVEL)
+		
+		AddDropdownSpacer()
+	end
+	
+	if UIDROPDOWNMENU_MENU_LEVEL == 1 then -- main menu
+		----------IMPORT----------
+		
+		--heading
+		info = UIDropDownMenu_CreateInfo()
+		info.text = L["IMPORT_HEADING"]
+		info.isTitle = true
+		info.notCheckable = true
+		UIDropDownMenu_AddButton(info, UIDROPDOWNMENU_MENU_LEVEL)
+		
+		--import from local
+		info = UIDropDownMenu_CreateInfo()
+		info.text = L["IMPORT_FROMLOCAL"]
+		info.value = "IMPORT_FROMLOCAL"
+		info.hasArrow = true
+		info.notCheckable = true
+		UIDropDownMenu_AddButton(info, UIDROPDOWNMENU_MENU_LEVEL)
+		
+		--import from string
+		info = UIDropDownMenu_CreateInfo()
+		info.text = L["IMPORT_FROMSTRING"]
+		info.tooltipTitle = L["IMPORT_FROMSTRING"]
+		info.tooltipText = L["IMPORT_FROMSTRING_DESC"]
+		info.tooltipOnButton = true
+		info.tooltipWhileDisabled = true
+		local type = editboxResult and editboxResult.type
+		local value = "IMPORT_FROMSTRING_ICON"
+		if type == "global" then
+			value = "IMPORT_PROFILE_%EDITBOX"
+		elseif type == "group" then
+			value = "IMPORT_PROFILE_%EDITBOX_" .. editboxResult.arg1
 		end
-
-		for profilename, profiletable in TMW:OrderedPairs(db.profiles) do
-			local profiletable = db.profiles[profilename]
-			if not (profilename == current or profilename == "Default") then
+		info.value = value
+		info.hasArrow = true
+		info.notCheckable = true
+		info.disabled = not editboxResult
+		UIDropDownMenu_AddButton(info, UIDROPDOWNMENU_MENU_LEVEL)
+		
+		--import from comm
+		info = UIDropDownMenu_CreateInfo()
+		info.text = L["IMPORT_FROMCOMM"]
+		info.value = "IMPORT_FROMCOMM"
+		info.tooltipTitle = L["IMPORT_FROMCOMM"]
+		info.tooltipText = L["IMPORT_FROMCOMM_DESC"]
+		info.tooltipOnButton = true
+		info.tooltipWhileDisabled = true
+		info.hasArrow = true
+		info.notCheckable = true
+		info.disabled = not next(DeserializedData)
+		UIDropDownMenu_AddButton(info, UIDROPDOWNMENU_MENU_LEVEL)
+		
+		--import from backup
+		info = UIDropDownMenu_CreateInfo()
+		info.text = L["IMPORT_FROMBACKUP"]
+		info.tooltipTitle = L["IMPORT_FROMBACKUP"]
+		info.tooltipText = L["IMPORT_FROMBACKUP_DESC"]:format(TMW.BackupDate)
+		info.tooltipOnButton = true
+		info.tooltipWhileDisabled = true
+		info.value = "IMPORT_FROMBACKUP"
+		info.hasArrow = true
+		info.notCheckable = true
+		UIDropDownMenu_AddButton(info, UIDROPDOWNMENU_MENU_LEVEL)
+		
+		
+		AddDropdownSpacer()
+		----------EXPORT----------
+		
+		--heading
+		info = UIDropDownMenu_CreateInfo()
+		info.text = L["EXPORT_HEADING"]
+		info.isTitle = true
+		info.notCheckable = true
+		UIDropDownMenu_AddButton(info, UIDROPDOWNMENU_MENU_LEVEL)
+		
+		--export to string
+		info = UIDropDownMenu_CreateInfo()
+		info.text = L["EXPORT_TOSTRING"]
+		info.tooltipTitle = L["EXPORT_TOSTRING"]
+		info.tooltipText = L["EXPORT_TOSTRING_DESC"]
+		info.tooltipOnButton = true
+		info.value = "EXPORT_TOSTRING"
+		info.hasArrow = true
+		info.notCheckable = true
+		UIDropDownMenu_AddButton(info, UIDROPDOWNMENU_MENU_LEVEL)
+		
+		--export to comm
+		info = UIDropDownMenu_CreateInfo()
+		info.text = L["EXPORT_TOCOMM"]
+		info.tooltipTitle = L["EXPORT_TOCOMM"]
+		info.tooltipText = L["EXPORT_TOCOMM_DESC"]
+		info.tooltipOnButton = true
+		info.value = "EXPORT_TOCOMM"
+		info.hasArrow = true
+		info.notCheckable = true
+		UIDropDownMenu_AddButton(info, UIDROPDOWNMENU_MENU_LEVEL)
+	end
+	
+	if UIDROPDOWNMENU_MENU_LEVEL == 2 then
+	
+		if UIDROPDOWNMENU_MENU_VALUE == "IMPORT_FROMLOCAL" or UIDROPDOWNMENU_MENU_VALUE == "IMPORT_FROMBACKUP" then
+			local prefix
+			if UIDROPDOWNMENU_MENU_VALUE == "IMPORT_FROMLOCAL" then
+				prefix = "IMPORT_PROFILE_"
+			else
+				prefix = "IMPORT_BACKUP_"
+			end
+			-- current profile
+			local currentProfile = db:GetCurrentProfile()
+			if db.profiles[currentProfile] then
 				info = UIDropDownMenu_CreateInfo()
-				info.text = profilename
-				info.value = profilename
+				info.text = currentProfile
+				info.value = prefix .. currentProfile
+				info.hasArrow = true
+				info.notCheckable = true
+				UIDropDownMenu_AddButton(info, UIDROPDOWNMENU_MENU_LEVEL)
+			end
+
+			AddDropdownSpacer()
+			
+			--other profiles
+			for profilename, profiletable in TMW:OrderedPairs(db.profiles) do
+				local profiletable = profile_src
+				if profilename ~= currentProfile and profilename ~= "Default" then -- current profile and default are handled separately
+					info = UIDropDownMenu_CreateInfo()
+					info.text = profilename
+					info.value = prefix .. profilename
+					info.hasArrow = true
+					info.notCheckable = true
+					UIDropDownMenu_AddButton(info, UIDROPDOWNMENU_MENU_LEVEL)
+				end
+			end
+			
+			--default profile
+			if db.profiles["Default"] and currentProfile ~= "Default" then
+				info = UIDropDownMenu_CreateInfo()
+				info.text = "Default"
+				info.value = prefix .. "Default"
 				info.hasArrow = true
 				info.notCheckable = true
 				UIDropDownMenu_AddButton(info, UIDROPDOWNMENU_MENU_LEVEL)
 			end
 		end
-		if db.profiles["Default"] then
+		
+		if UIDROPDOWNMENU_MENU_VALUE == "IMPORT_FROMSTRING_ICON" and editboxResult then
+			IE:AddIconToCopyDropdown(editboxResult.data, nil, nil, nil, nil, editboxResult.version, true)
+			
+		end
+		
+		if UIDROPDOWNMENU_MENU_VALUE == "IMPORT_FROMCOMM" then
+			
+			for i, result in ipairs(DeserializedData) do
+				if result.type == "icon" then
+					IE:AddIconToCopyDropdown(result.data, nil, nil, nil, nil, result.version, true)
+				else
+					info = UIDropDownMenu_CreateInfo()
+					info.text = result.arg1
+					local value = "IMPORT_FROMCOMM_ICON"
+					if result.type == "global" then
+						value = "IMPORT_PROFILE_%COMM" .. i
+					elseif result.type == "group" then
+						assert(result.arg1, "Missing groupID for group import")
+						value = "IMPORT_PROFILE_%COMM" .. i .. "_" .. result.arg1
+					end
+					info.value = value
+					info.hasArrow = true
+					info.notCheckable = true
+					UIDropDownMenu_AddButton(info, UIDROPDOWNMENU_MENU_LEVEL)
+				end
+			end
+		end
+		
+		if UIDROPDOWNMENU_MENU_VALUE == "EXPORT_TOCOMM" then
+		
+			-- icon to comm
 			info = UIDropDownMenu_CreateInfo()
-			info.text = "Default"
-			info.value = "Default"
-			info.hasArrow = true
+			local text = L["EXPORT_f"]:format(L["GROUPICON"]:format(TMW:GetGroupName(CI.g, CI.g, 1), CI.i))
+			info.text = text
+			info.tooltipTitle = text
+			info.tooltipText = L["EXPORT_TOCOMM_DESC"]
+			info.tooltipOnButton = true
 			info.notCheckable = true
+			info.func = function()
+				local e = IE.Main.ExportBox
+				local player = strtrim(e:GetText())
+				if player and player ~= "" and #player > 1 and #player < 13 then
+					local s = TMW:GetSettingsString("icon", TMW.CI.ics, TMW.Icon_Defaults)
+
+					TMW:SendCommMessage("TMW", s, "WHISPER", player, "BULK", e.callback, e)
+				end
+			end
+			UIDropDownMenu_AddButton(info, UIDROPDOWNMENU_MENU_LEVEL)
+			
+			-- group to comm
+			info = UIDropDownMenu_CreateInfo()
+			local text = L["EXPORT_f"]:format(L["fGROUP"]:format(TMW:GetGroupName(CI.g, CI.g, 1)))
+			info.text = text
+			info.tooltipTitle = text
+			info.tooltipText = L["EXPORT_TOCOMM_DESC"] .. "\r\n\r\n" .. L["EXPORT_SPECIALDESC"]
+			info.tooltipOnButton = true
+			info.notCheckable = true
+			info.func = function()
+				local e = IE.Main.ExportBox
+				local player = strtrim(e:GetText())
+				if player and player ~= "" and #player > 1 and #player < 13 then
+					local s = TMW:GetSettingsString("group", TMW.CI.gs, TMW.Group_Defaults, CI.g)
+
+					TMW:SendCommMessage("TMW", s, "WHISPER", player, "BULK", e.callback, e)
+				end
+			end
+			UIDropDownMenu_AddButton(info, UIDROPDOWNMENU_MENU_LEVEL)
+			
+			-- global to comm
+			info = UIDropDownMenu_CreateInfo()
+			info.text = L["EXPORT_GLOBAL_f"]:format(db:GetCurrentProfile())
+			info.tooltipTitle = L["EXPORT_GLOBAL_f"]:format(db:GetCurrentProfile())
+			info.tooltipText = L["EXPORT_TOCOMM_DESC"] .. "\r\n\r\n" .. L["EXPORT_SPECIALDESC"]
+			info.tooltipOnButton = true
+			info.notCheckable = true
+			info.func = function()
+				local e = IE.Main.ExportBox
+				local player = strtrim(e:GetText())
+				if player and player ~= "" and #player > 1 and #player < 13 then
+					local s = TMW:GetSettingsString("global", TMW.db.profile, TMW.Defaults.profile, TMW.db:GetCurrentProfile())
+
+					TMW:SendCommMessage("TMW", s, "WHISPER", player, "BULK", e.callback, e)
+				end
+			end
+			UIDropDownMenu_AddButton(info, UIDROPDOWNMENU_MENU_LEVEL)
+		end
+		
+		if UIDROPDOWNMENU_MENU_VALUE == "EXPORT_TOSTRING" then
+		
+			-- icon to string
+			info = UIDropDownMenu_CreateInfo()
+			local text = L["EXPORT_f"]:format(L["GROUPICON"]:format(TMW:GetGroupName(CI.g, CI.g, 1), CI.i))
+			info.text = text
+			info.tooltipTitle = text
+			info.tooltipText = L["EXPORT_TOSTRING_DESC"]
+			info.tooltipOnButton = true
+			info.notCheckable = true
+			info.func = function()
+				local e = IE.Main.ExportBox
+				local s = TMW:GetSettingsString("icon", TMW.CI.ics, TMW.Icon_Defaults)
+				s = TMW:MakeSerializedDataPretty(s)
+				e:SetText(s)
+				e:HighlightText()
+				e:SetFocus()
+			end
+			UIDropDownMenu_AddButton(info, UIDROPDOWNMENU_MENU_LEVEL)
+			
+			-- group to string
+			info = UIDropDownMenu_CreateInfo()
+			local text = L["EXPORT_f"]:format(L["fGROUP"]:format(TMW:GetGroupName(CI.g, CI.g, 1)))
+			info.text = text
+			info.tooltipTitle = text
+			info.tooltipText = L["EXPORT_TOSTRING_DESC"] .. "\r\n\r\n" .. L["EXPORT_SPECIALDESC"]
+			info.tooltipOnButton = true
+			info.notCheckable = true
+			info.func = function()
+				local e = IE.Main.ExportBox
+				local s = TMW:GetSettingsString("group", TMW.CI.gs, TMW.Group_Defaults, CI.g)
+				s = TMW:MakeSerializedDataPretty(s)
+				e:SetText(s)
+				e:HighlightText()
+				e:SetFocus()
+			end
+			UIDropDownMenu_AddButton(info, UIDROPDOWNMENU_MENU_LEVEL)
+			
+			-- global to string
+			info = UIDropDownMenu_CreateInfo()
+			info.text = L["EXPORT_GLOBAL_f"]:format(db:GetCurrentProfile())
+			info.tooltipTitle = L["EXPORT_GLOBAL_f"]:format(db:GetCurrentProfile())
+			info.tooltipText = L["EXPORT_TOSTRING_DESC"] .. "\r\n\r\n" .. L["EXPORT_SPECIALDESC"]
+			info.tooltipOnButton = true
+			info.notCheckable = true
+			info.func = function()
+				local e = IE.Main.ExportBox
+				local s = TMW:GetSettingsString("global", TMW.db.profile, TMW.Defaults.profile, db:GetCurrentProfile())
+				s = TMW:MakeSerializedDataPretty(s)
+				e:SetText(s)
+				e:HighlightText()
+				e:SetFocus()
+			end
 			UIDropDownMenu_AddButton(info, UIDROPDOWNMENU_MENU_LEVEL)
 		end
 	end
 
-	if UIDROPDOWNMENU_MENU_LEVEL == 2 then
-		if UIDROPDOWNMENU_MENU_VALUE == "Imports" then
-			for tbl, version in pairs(deserialized) do
-				local info = UIDropDownMenu_CreateInfo()
-				local text, textshort, tooltipText = TMW:GetIconMenuText(nil, nil, tbl)
-				info.text = textshort
-				info.value = tbl
-				info.tooltipTitle = text
-				info.tooltipText = tooltipText
-				info.tooltipOnButton = true
-				info.notCheckable = true
-				info.icon = TMW:GuessIconTexture(tbl)
-				info.tCoordLeft = 0.07
-				info.tCoordRight = 0.93
-				info.tCoordTop = 0.07
-				info.tCoordBottom = 0.93
-				
-				info.func = function(self)
-					CloseDropDownMenus()
-					local groupID, iconID = CI.g, CI.i
-
-					db.profile.Groups[groupID].Icons[iconID] = nil -- restore defaults, table recreated when passed in to CTIPWM
-					TMW:CopyTableInPlaceWithMeta(self.value, db.profile.Groups[groupID].Icons[iconID])
-					if version > TELLMEWHEN_VERSIONNUMBER then
-						TMW:Print(L["FROMNEWERVERSION"])
-					else
-						for k, v in ipairs(TMW:GetUpgradeTable()) do
-							if version < k and v.icon then
-								v.icon(db.profile.Groups[groupID].Icons[iconID], groupID, iconID)
-							end
-						end
-					end
-
-					IE:ScheduleIconUpdate(groupID, iconID)
-					IE:Load(1)
-					db.global.HasImported = true
-				end
-				UIDropDownMenu_AddButton(info, UIDROPDOWNMENU_MENU_LEVEL)
-			end
-			return
+	if not UIDROPDOWNMENU_MENU_VALUE then return end
+	if type(UIDROPDOWNMENU_MENU_VALUE) ~= "string" then return end
+	
+	local IMPORT, PROFILE, profilename, groupID = strsplit("_", UIDROPDOWNMENU_MENU_VALUE)
+	if IMPORT ~= "IMPORT" then return end
+	groupID = tonumber(groupID)
+	local profile_src, version_src, group_src, icon_src
+	local result
+	local commID = profilename and strmatch(profilename, "%COMM(%d+)")
+	if profilename == "%EDITBOX" then
+		result = editboxResult
+	elseif commID then
+		result = DeserializedData[tonumber(commID)]
+	end
+	if result then
+		if result.type == "global" then
+			profile_src = result.data
+			group_src = profile_src.Groups[groupID]
+			profilename = result.arg1
+		elseif result.type == "group" then
+			group_src = result.data
+			profilename = nil
+		elseif result.type == "icon" then
+			icon_src = result.data
 		end
-		for g, v in TMW:OrderedPairs(db.profiles[UIDROPDOWNMENU_MENU_VALUE].Groups) do
-			if g <= (tonumber(db.profiles[UIDROPDOWNMENU_MENU_VALUE].NumGroups) or 10) then
+		version_src = result.version
+	else
+		if PROFILE == "PROFILE" then
+			profile_src = db.profiles[profilename]
+		elseif PROFILE == "BACKUP" then
+			profile_src = TMW.Backupdb.profiles[profilename]
+		end
+		if not profile_src then return end
+		group_src = profile_src and groupID and profile_src.Groups[groupID]
+		local VersionSetting = profile_src.Version
+		version_src = #gsub(VersionSetting, "[^%d]", "") >= 5 and tonumber(VersionSetting) or TELLMEWHEN_VERSIONNUMBER
+	end
+	
+	if groupID then
+		-- header
+		info = UIDropDownMenu_CreateInfo()
+		info.text = (profilename and profilename .. ": " or "") .. TMW:GetGroupName(group_src.Name, groupID)
+		info.isTitle = true
+		info.notCheckable = true
+		UIDropDownMenu_AddButton(info, UIDROPDOWNMENU_MENU_LEVEL)
+
+		-- copy group position
+		info = UIDropDownMenu_CreateInfo()
+		info.text = L["COPYPOS"]
+		info.func = function()
+			CloseDropDownMenus()
+			
+			local dest = db.profile.Groups[CI.g]
+			dest.Point = CopyTable(TMW.Group_Defaults.Point) -- not a special table (["**"]), so just normally copy it. Setting it nil won't recreate it like other settings tables, so re-copy from defaults
+			TMW:CopyTableInPlaceWithMeta(group_src.Point, dest.Point)
+
+			dest.Scale = group_src.Scale or TMW.Group_Defaults.Scale
+			dest.Level = group_src.Level or TMW.Group_Defaults.Level
+			TMW:Group_Update(CI.g)
+		end
+		info.notCheckable = true
+		UIDropDownMenu_AddButton(info, UIDROPDOWNMENU_MENU_LEVEL)
+
+		-- copy entire group - overwrite current
+		info = UIDropDownMenu_CreateInfo()
+		info.text = L["COPYALL"] .. " - " .. L["OVERWRITEGROUP"]:format(TMW:GetGroupName(CI.g, CI.g, 1))
+		info.func = function()
+			TMW:Import(group_src, version_src, "group", nil, groupID)
+		end
+		info.notCheckable = true
+		UIDropDownMenu_AddButton(info, UIDROPDOWNMENU_MENU_LEVEL)
+		
+		-- copy entire group - create new group
+		info = UIDropDownMenu_CreateInfo()
+		info.text = L["COPYALL"] .. " - " .. L["MAKENEWGROUP"]
+		info.func = function()
+			TMW:Import(group_src, version_src, "group", true, groupID) -- true forces a new group to be created
+		end
+		info.notCheckable = true
+		UIDropDownMenu_AddButton(info, UIDROPDOWNMENU_MENU_LEVEL)
+
+
+		if group_src.Icons and #group_src.Icons > 0 then
+			AddDropdownSpacer()
+			-- add individual icons
+			for iconID, ics in TMW:OrderedPairs(group_src.Icons) do
+				IE:AddIconToCopyDropdown(ics, groupID, iconID, profilename, group_src, version_src)
+			end
+		end
+	elseif profilename and profile_src then
+	
+		-- copy entire profile - overwrite current
+		info = UIDropDownMenu_CreateInfo()
+		info.text = L["IMPORT_PROFILE"] .. " - " .. L["IMPORT_PROFILE_OVERWRITE"]:format(db:GetCurrentProfile())
+		info.func = function()
+			TMW:Import(profile_src, version_src, "global")
+		end
+		info.notCheckable = true
+		UIDropDownMenu_AddButton(info, UIDROPDOWNMENU_MENU_LEVEL)
+		
+		-- copy entire profile - create new profile
+		info = UIDropDownMenu_CreateInfo()
+		info.text = L["IMPORT_PROFILE"] .. " - " .. L["IMPORT_PROFILE_NEW"]
+		info.func = function()
+			local newname = profilename
+			local oldnum = strmatch("Ganis (1)", "%((%d+)%)$")
+			local base = gsub(profilename, " %(%d+%)$", "")
+			local newnum = (oldnum or 1) + 1
+			
+			-- generate a new name if the profile already exists
+			newname = base .. " (" .. newnum .. ")"
+			while db.profiles[newname] do
+				newnum = newnum + 1
+				newname = base .. " (" .. newnum .. ")"
+			end
+			TMW:Import(profile_src, version_src, "global", newname) -- newname forces a new profile to be created named newname
+		end
+		info.notCheckable = true
+		UIDropDownMenu_AddButton(info, UIDROPDOWNMENU_MENU_LEVEL)
+		
+		AddDropdownSpacer()
+	
+		-- add groups to be copied
+		for groupID, v in TMW:OrderedPairs(profile_src.Groups) do
+			if type(groupID) == "number" and groupID <= (tonumber(profile_src.NumGroups) or 10) then -- group was a string once, so lets just be safe
 				info = UIDropDownMenu_CreateInfo()
-				info.text = TMW:GetGroupName(db.profiles[UIDROPDOWNMENU_MENU_VALUE].Groups[g].Name, g)
-				info.value = {profilename = UIDROPDOWNMENU_MENU_VALUE, groupid = g}
+				info.text = TMW:GetGroupName(profile_src.Groups[groupID].Name, groupID)
+				info.value = UIDROPDOWNMENU_MENU_VALUE .. "_" .. groupID
 				info.hasArrow = true
 				info.notCheckable = true
-				info.tooltipTitle = format(L["fGROUP"], g)
+				info.tooltipTitle = format(L["fGROUP"], groupID)
 				info.tooltipText = 	(L["UIPANEL_ROWS"] .. ": " .. (v.Rows or 1) .. "\r\n") ..
 								L["UIPANEL_COLUMNS"] .. ": " .. (v.Columns or 4) ..
 								((v.PrimarySpec or v.PrimarySpec == nil) and "\r\n" .. L["UIPANEL_PRIMARYSPEC"] or "") ..
@@ -2514,116 +3087,7 @@ function IE:Copy_DropDown()
 			end
 		end
 	end
-
-	if UIDROPDOWNMENU_MENU_LEVEL == 3 then
-		local g = UIDROPDOWNMENU_MENU_VALUE.groupid
-		local n = UIDROPDOWNMENU_MENU_VALUE.profilename
-
-		info = UIDropDownMenu_CreateInfo()
-		info.text = n .. ": " .. TMW:GetGroupName(db.profiles[n].Groups[g].Name, g)
-		info.isTitle = true
-		info.notCheckable = true
-		UIDropDownMenu_AddButton(info, UIDROPDOWNMENU_MENU_LEVEL)
-
-		info = UIDropDownMenu_CreateInfo()
-		info.text = L["COPYPOS"]
-		info.func = function()
-			CloseDropDownMenus()
-
-			db.profile.Groups[groupID].Point = CopyTable(TMW.Group_Defaults.Point) -- not a special table (["**"]), so just normally copy it. Setting it nil won't recreate it like other settings tables.
-			TMW:CopyTableInPlaceWithMeta(db.profiles[n].Groups[g].Point, db.profile.Groups[groupID].Point)
-
-			db.profile.Groups[groupID].Scale = db.profiles[n].Groups[g].Scale or TMW.Group_Defaults.Scale
-			db.profile.Groups[groupID].Level = db.profiles[n].Groups[g].Level or TMW.Group_Defaults.Level
-			TMW:Group_Update(groupID)
-		end
-		info.notCheckable = true
-		UIDropDownMenu_AddButton(info, UIDROPDOWNMENU_MENU_LEVEL)
-
-		info = UIDropDownMenu_CreateInfo()
-		info.text = L["COPYALL"] .. " - " .. L["OVERWRITEGROUP"]:format(TMW:GetGroupName(groupID, groupID, 1))
-		info.func = function()
-			CloseDropDownMenus()
-			db.profile.Groups[groupID] = nil -- restore defaults, table recreated when passed in to CTIPWM
-			TMW:CopyTableInPlaceWithMeta(db.profiles[n].Groups[g], db.profile.Groups[groupID])
-			TMW:Group_Update(groupID)
-			IE:Load(1)
-		end
-		info.notCheckable = true
-		UIDropDownMenu_AddButton(info, UIDROPDOWNMENU_MENU_LEVEL)
-		
-		info = UIDropDownMenu_CreateInfo()
-		info.text = L["COPYALL"] .. " - " .. L["MAKENEWGROUP"]
-		info.func = function()
-			CloseDropDownMenus()
-			local newGroupID = TMW:Group_Add()
-			TMW:CopyTableInPlaceWithMeta(db.profiles[n].Groups[g], db.profile.Groups[newGroupID])
-			TMW:Group_Update(newGroupID)
-			IE:Load(1)
-		end
-		info.notCheckable = true
-		UIDropDownMenu_AddButton(info, UIDROPDOWNMENU_MENU_LEVEL)
-
-		if db.profiles[n].Groups[g].Icons and #db.profiles[n].Groups[g].Icons > 0 then
-
-			AddDropdownSpacer()
-			
-			for i, d in TMW:OrderedPairs(db.profiles[n].Groups[g].Icons) do
-				local nsettings = 0
-				for icondatakey, icondatadata in pairs(d) do
-					if type(icondatadata) == "table" then if next(icondatadata) then nsettings = nsettings + 1 end
-					elseif TMW.Icon_Defaults[icondatakey] ~= icondatadata then
-						nsettings = nsettings + 1
-					end
-				end
-				if nsettings > 0 and tonumber(i) then
-					local tex
-					local ic = TMW[g] and TMW[g][i]
-					if db:GetCurrentProfile() == n and ic and ic.texture:GetTexture() then
-						tex = ic.texture:GetTexture()
-					else
-						tex = TMW:GuessIconTexture(d)
-					end
-
-					local text, textshort, tooltipText = TMW:GetIconMenuText(nil, nil, d)
-					info = UIDropDownMenu_CreateInfo()
-					info.text = textshort
-					info.tooltipTitle = format(L["GROUPICON"], TMW:GetGroupName(db.profiles[n].Groups[g].Name, g, 1), i)
-					info.tooltipText = tooltipText
-					info.tooltipOnButton = true
-					info.icon = tex
-					info.tCoordLeft = 0.07
-					info.tCoordRight = 0.93
-					info.tCoordTop = 0.07
-					info.tCoordBottom = 0.93
-					info.notCheckable = true
-					info.func = function()
-						CloseDropDownMenus()
-
-						db.profile.Groups[groupID].Icons[iconID] = nil -- restore defaults, table recreated when passed in to CTIPWM
-						TMW:CopyTableInPlaceWithMeta(db.profiles[n].Groups[g].Icons[i], db.profile.Groups[groupID].Icons[iconID])
-						local version = #tostring(gsub(db.profiles[n].Version, "[^%d]", "")) >= 5 and tonumber(db.profiles[n].Version)
-						if version then
-							if version > TELLMEWHEN_VERSIONNUMBER then
-								TMW:Print(L["FROMNEWERVERSION"])
-							else
-								for k, v in ipairs(TMW:GetUpgradeTable()) do
-									if version < k and v.icon then
-										v.icon(db.profile.Groups[groupID].Icons[iconID], groupID, iconID)
-									end
-								end
-							end
-						end
-
-						TMW[groupID][iconID]:SetTexture(nil)
-						TMW:Group_Update(groupID)
-						IE:Load(1)
-					end
-					UIDropDownMenu_AddButton(info, UIDROPDOWNMENU_MENU_LEVEL)
-				end
-			end
-		end
-	end
+	
 end
 
 
@@ -3216,7 +3680,7 @@ end
 --SUG = TMW:NewModule("Suggester", "AceEvent-3.0", "AceComm-3.0", "AceSerializer-3.0", "AceTimer-3.0") TMW.SUG = SUG
 SUG = TMW:NewModule("Suggester", "AceEvent-3.0", "AceComm-3.0", "AceTimer-3.0") TMW.SUG = SUG --TEMP: 4.3 compat code with AceSerializer errors
 if LibStub("AceSerializer-3.0").Embed then
-	LibStub("AceSerializer-3.0"):Embed(TMW)
+	LibStub("AceSerializer-3.0"):Embed(SUG)
 end
 local SUGIsNumberInput
 local SUGIMS, SUGSoI

@@ -338,6 +338,22 @@ function Type:Setup(icon, groupID, iconID)
 	icon.NameArray = TMW:GetSpellNames(icon, icon.Name)
 	icon.Durations = TMW:GetSpellDurations(icon, icon.Name)
 	icon.Units = TMW:GetUnits(icon, icon.Unit)
+	
+	if TMW.IE and TMW.IE.Main.Name:IsVisible() then
+		local Name = TMW.IE.Main.Name
+		local s = ""
+		local array = TMW:GetSpellNames(nil, Name:GetText())
+		for k, v in pairs(TMW:GetSpellDurations(nil, Name:GetText())) do
+			if v == 0 then
+				s = s .. (s ~= "" and "; " or "") .. array[k]
+			end
+		end
+		if s ~= "" then
+			TMW.IE:ShowHelp(L["HELP_MISSINGDURS"], Name, 0, 0, icon, s)
+		else
+			TMW.IE.Help:Hide()
+		end
+	end
 
 	Type:RegisterEvent("COMBAT_LOG_EVENT_UNFILTERED")
 	Type:RegisterEvent("UNIT_SPELLCAST_SUCCEEDED")
@@ -351,7 +367,7 @@ end
 
 function Type:IE_TypeLoaded()
 	if not TMW.db.global.HelpSettings.NewDurSyntax then
-		TMW.IE:ShowHelp(L["HELP_FIRSTUCD"], TMW.IE.Main.Type, 20, 0)
+		TMW.IE:ShowHelp(L["HELP_FIRSTUCD"], TMW.IE.Main.Type, 20, 0, TMW.CI.ic)
 		TMW.db.global.HelpSettings.NewDurSyntax = 1
 	end
 end

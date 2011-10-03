@@ -1551,6 +1551,8 @@
 				</Frames>
 				<Scripts>
 					<OnLoad>
+						self.current = {}
+						
 						local arrow = self.arrow
 						arrow:SetSize(21, 53)
 						
@@ -1823,22 +1825,6 @@
 								TMW.IE:ScheduleIconUpdate(groupID, iconID)
 								self:GetScript("OnTextChanged")(self)
 								
-								if TMW.CI.t and TMW.Types[TMW.CI.t].DurationSyntax then
-									local s = ""
-									local array = TMW:GetSpellNames(nil, self:GetText())
-									for k, v in pairs(TMW:GetSpellDurations(nil, self:GetText())) do
-										if v == 0 then
-											s = s .. (s ~= "" and "; " or "") .. array[k]
-										end
-									end
-									if s ~= "" then
-										TMW.IE:ShowHelp(TMW.L["HELP_MISSINGDURS"]:format(s), self, 0, 0)
-									else
-										TMW.IE.Help:Hide()
-									end
-								else
-									TMW.IE.Help:Hide()
-								end
 							</OnEditFocusLost>
 							<OnEditFocusGained>
 								EditBox_HighlightText(self)
@@ -2860,28 +2846,11 @@
 							<OnClick>TMW.IE:Reset()</OnClick>
 						</Scripts>
 					</Button>
-
-					<Frame name="$parentCopy" inherits="UIDropDownMenuTemplate" parentKey="Copy">
-						<Anchors>
-							<Anchor point="LEFT" relativeTo="$parentReset" relativePoint="RIGHT" x="-15"/>
-						</Anchors>
-						<Scripts>
-							<OnLoad>
-								self.wrapTooltips = 1
-								UIDropDownMenu_SetText(self, TMW.L["IMPORTCOPY"])
-								UIDropDownMenu_JustifyText(self, "LEFT")
-								UIDropDownMenu_SetWidth(self, 120)
-								_G[self:GetName() .. "Button"]:SetScript("PreClick", function()
-									UIDropDownMenu_Initialize(self, TMW.IE.Copy_DropDown, "DROPDOWN")
-									_G[self:GetName() .. "Button"]:SetScript("PreClick", nil)
-								end)
-							</OnLoad>
-						</Scripts>
-					</Frame>
+					
 					<EditBox name="$parentExportBox" inherits="TellMeWhen_InputBoxTemplate" parentKey="ExportBox">
-						<Size x="235" y="15"/>
+						<Size x="375" y="15"/>
 						<Anchors>
-							<Anchor point="LEFT" relativeTo="$parentCopy" relativePoint="RIGHT" x="-8" y="2"/>
+							<Anchor point="LEFT" relativeTo="$parentReset" relativePoint="RIGHT" x="10"/>
 						</Anchors>
 						<Frames>
 							<Frame name="$parentDD" inherits="UIDropDownMenuTemplate" parentKey="DD">
@@ -2897,7 +2866,7 @@
 										_G[self:GetName() .. "Text"]:Hide()
 										UIDropDownMenu_SetWidth(self, 1)
 										_G[self:GetName() .. "Button"]:SetScript("PreClick", function()
-											UIDropDownMenu_Initialize(self, TMW.IE.ImpExp_DropDown, "DROPDOWN")
+											UIDropDownMenu_Initialize(self, TMW.IE.Copy_DropDown, "DROPDOWN")
 											_G[self:GetName() .. "Button"]:SetScript("PreClick", nil)
 										end)
 									</OnLoad>
@@ -2906,8 +2875,8 @@
 						</Frames>
 						<Scripts>
 							<OnLoad>
-								self.label = TMW.L["EXPORT_LOLTITLE"]
-								TMW:TT(self, "EXPORT", "EXPORT_DESC")
+								self.label = TMW.L["IMPORT_EXPORT"]
+								TMW:TT(self, "IMPORT_EXPORT", "IMPORT_EXPORT_DESC")
 
 								function self:callback(soFar, total)
 									if soFar == total then
