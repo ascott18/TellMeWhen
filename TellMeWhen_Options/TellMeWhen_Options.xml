@@ -1569,6 +1569,9 @@
 					<OnShow>
 						self:SetFrameLevel(TMW.IE.Main:GetFrameLevel() + 10)
 					</OnShow>
+					<OnHide>
+						wipe(self.current)
+					</OnHide>
 				</Scripts>
 			</Frame>
 			
@@ -2872,6 +2875,66 @@
 									</OnLoad>
 								</Scripts>
 							</Frame>
+							<StatusBar name="$parentStatus" parentKey="Status" hidden="true">
+								<Anchors>
+									<Anchor point="TOPLEFT" x="-4" y="0"/>
+									<Anchor point="BOTTOMRIGHT" x="-2" y="-1"/>
+								</Anchors>
+								<Layers>
+									<Layer level="BACKGROUND">
+										<Texture name="$parenttexture" parentKey="texture" file="Interface\TargetingFrame\UI-StatusBar"/>
+									</Layer>
+
+									<Layer level="OVERLAY">
+										<FontString name="$parentText" parentKey="text" inherits="GameFontHighlight">
+											<Anchors>
+												<Anchor point="CENTER"/>
+											</Anchors>
+										</FontString>
+									</Layer>
+								</Layers>
+								
+								<Animations>
+									<AnimationGroup name="$parentFadeOut" parentKey="FadeOut">
+										<Alpha change="-1" duration="1" order="1"/>
+										<Scripts>
+											<OnFinished>
+												self:GetParent():Hide()
+											</OnFinished>
+										</Scripts>
+									</AnimationGroup>
+								</Animations>
+								<Scripts>
+									<OnLoad>
+										self:SetStatusBarTexture(self.texture)
+										self.texture:SetVertexColor(1, .5, .2, 1)
+										function self:Set(value, max)
+											self:Show()
+											self:SetMinMaxValues(0, max)
+											self:SetValue(value)
+											if value >= max then
+												self.FadeOut:Play()
+											end
+										end
+										self:SetFrameLevel(self:GetParent():GetFrameLevel() - 1)
+									</OnLoad>
+									<OnShow>
+										self.texture:SetTexture(LibStub("LibSharedMedia-3.0"):Fetch("statusbar", TMW.db.profile.TextureName))
+										self:GetParent().BackgroundText:Hide()
+									</OnShow>
+									<OnHide>
+										self:GetParent().BackgroundText:Show()
+									</OnHide>
+									<OnValueChanged>
+										local _, max = self:GetMinMaxValues()
+										if self:IsShown() then
+											self.text:SetFormattedText("%.0f%%", value/max*100)
+										end
+									</OnValueChanged>
+								</Scripts>
+							</StatusBar>
+					
+					
 						</Frames>
 						<Scripts>
 							<OnLoad>
@@ -2879,6 +2942,8 @@
 								TMW:TT(self, "IMPORT_EXPORT", "IMPORT_EXPORT_DESC")
 
 								function self:callback(soFar, total)
+									print(soFar, total)
+									self.Status:Set(soFar, total)
 									if soFar == total then
 										TMW:Print(TMW.L["SENDSUCCESSFUL"])
 									end

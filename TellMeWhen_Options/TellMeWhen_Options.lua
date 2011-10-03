@@ -2237,14 +2237,15 @@ function IE:Reset()
 	IE:TabClick(IE.MainTab)
 end
 
-function IE:ShowHelp(text, frame, x, y, icon, ...)
+function IE:ShowHelp(text, frame, x, y, noclose, ...)
 	text = format(text, ...)
+	if current.noclose then return end
 	local current = IE.Help.current
 		current.text = text
 		current.frame = frame
 		current.x = x
 		current.y = y
-		current.icon = icon
+		current.noclose = noclose
 		
 	IE.Help:ClearAllPoints()
 	IE.Help:SetPoint("TOPRIGHT", frame, "LEFT", (x or 0) - 30, (y or 0) + 28)
@@ -2464,123 +2465,6 @@ function IE:Unit_DropDown_OnClick(v)
 	CloseDropDownMenus()
 end
 
-function IE:ImpExp_DropDown()
-	if not db then return end
-	local e = TMW.IE.Main.ExportBox
-
-
-	local info = UIDropDownMenu_CreateInfo()
-	info.text = L["EXPORT_TOCOMM_ICON"]
-	info.tooltipTitle = L["EXPORT_TOCOMM_ICON"]
-	info.tooltipText = L["EXPORT_TOCOMM_DESC"]
-	info.tooltipOnButton = true
-	info.notCheckable = true
-	info.func = function()
-		local player = strtrim(e:GetText())
-		if player and player ~= "" and #player > 1 and #player < 13 then
-			local s = TMW:GetSettingsString("icon", TMW.CI.ics, TMW.Icon_Defaults)
-
-			TMW:SendCommMessage("TMW", s, "WHISPER", player, "BULK", e.callback, e)
-		end
-	end
-	UIDropDownMenu_AddButton(info, UIDROPDOWNMENU_MENU_LEVEL)
-	
-	
-	local info = UIDropDownMenu_CreateInfo()
-	info.text = L["EXPORT_TOCOMM_GROUP"]
-	info.tooltipTitle = L["EXPORT_TOCOMM_GROUP"]
-	info.tooltipText = L["EXPORT_TOCOMM_DESC"]
-	info.tooltipOnButton = true
-	info.notCheckable = true
-	info.func = function()
-		local player = strtrim(e:GetText())
-		if player and player ~= "" and #player > 1 and #player < 13 then
-			local s = TMW:GetSettingsString("group", TMW.CI.gs, TMW.Group_Defaults, CI.g)
-
-			TMW:SendCommMessage("TMW", s, "WHISPER", player, "BULK", e.callback, e)
-		end
-	end
-	UIDropDownMenu_AddButton(info, UIDROPDOWNMENU_MENU_LEVEL)
-	
-	local info = UIDropDownMenu_CreateInfo()
-	info.text = L["EXPORT_TOCOMM_GLOBAL"]
-	info.tooltipTitle = L["EXPORT_TOCOMM_GLOBAL"]
-	info.tooltipText = L["EXPORT_TOCOMM_DESC"]
-	info.tooltipOnButton = true
-	info.notCheckable = true
-	info.func = function()
-		local player = strtrim(e:GetText())
-		if player and player ~= "" and #player > 1 and #player < 13 then
-			local s = TMW:GetSettingsString("global", TMW.db.profile, TMW.Defaults.profile, TMW.db:GetCurrentProfile())
-
-			TMW:SendCommMessage("TMW", s, "WHISPER", player, "BULK", e.callback, e)
-		end
-	end
-	UIDropDownMenu_AddButton(info, UIDROPDOWNMENU_MENU_LEVEL)
-
-	local info = UIDropDownMenu_CreateInfo()
-	info.text = L["EXPORT_TOSTRING_ICON"]
-	info.tooltipTitle = L["EXPORT_TOSTRING_ICON"]
-	info.tooltipText = L["EXPORT_TOSTRING_DESC"]
-	info.tooltipOnButton = true
-	info.notCheckable = true
-	info.func = function()
-	
-		local s = TMW:GetSettingsString("icon", TMW.CI.ics, TMW.Icon_Defaults)
-		s = TMW:MakeSerializedDataPretty(s)
-		
-		e:SetText(s)
-		e:HighlightText()
-		e:SetFocus()
-	end
-	UIDropDownMenu_AddButton(info, UIDROPDOWNMENU_MENU_LEVEL)
-	
-	local info = UIDropDownMenu_CreateInfo()
-	info.text = L["EXPORT_TOSTRING_GROUP"]
-	info.tooltipTitle = L["EXPORT_TOSTRING_GROUP"]
-	info.tooltipText = L["EXPORT_TOSTRING_DESC"]
-	info.tooltipOnButton = true
-	info.notCheckable = true
-	info.func = function()
-	
-		local s = TMW:GetSettingsString("group", TMW.CI.gs, TMW.Group_Defaults, CI.g)
-		s = TMW:MakeSerializedDataPretty(s)
-
-		e:SetText(s)
-		e:HighlightText()
-		e:SetFocus()
-	end
-	UIDropDownMenu_AddButton(info, UIDROPDOWNMENU_MENU_LEVEL)
-	
-	local info = UIDropDownMenu_CreateInfo()
-	info.text = L["EXPORT_TOSTRING_GLOBAL"]
-	info.tooltipTitle = L["EXPORT_TOSTRING_GLOBAL"]
-	info.tooltipText = L["EXPORT_TOSTRING_DESC"]
-	info.tooltipOnButton = true
-	info.notCheckable = true
-	info.func = function()
-	
-		local s = TMW:GetSettingsString("global", TMW.db.profile, TMW.Defaults.profile, TMW.db:GetCurrentProfile())
-		s = TMW:MakeSerializedDataPretty(s)
-
-		e:SetText(s)
-		e:HighlightText()
-		e:SetFocus()
-	end
-	UIDropDownMenu_AddButton(info, UIDROPDOWNMENU_MENU_LEVEL)
-
-	local info = UIDropDownMenu_CreateInfo()
-	info.text = L["FROMSTRING"]
-	info.tooltipTitle = L["FROMSTRING"]
-	info.tooltipText = L["FROMSTRING_DESC"]
-	info.tooltipOnButton = true
-	info.notCheckable = true
-	info.func = TMW.ImportFromResult
-	info.arg1 = TMW
-	info.arg2 = noOverwrite
-	UIDropDownMenu_AddButton(info, UIDROPDOWNMENU_MENU_LEVEL)
-end
-
 function IE:AddIconToCopyDropdown(ics, groupID, iconID, profilename, group_src, version_src, force)
 	local nsettings = 0
 	for icondatakey, icondatadata in pairs(ics) do
@@ -2649,7 +2533,7 @@ function IE:Copy_DropDown()
 	t = nil
 
 	
-	if type(UIDROPDOWNMENU_MENU_VALUE) == "string" and strfind(UIDROPDOWNMENU_MENU_VALUE, "^IMPORT_BACKUP") then
+	if type(UIDROPDOWNMENU_MENU_VALUE) == "string" and (strfind(UIDROPDOWNMENU_MENU_VALUE, "^IMPORT_BACKUP") or strfind(UIDROPDOWNMENU_MENU_VALUE, "^IMPORT_FROMBACKUP")) then
 		info = UIDropDownMenu_CreateInfo()
 		info.text = "|cffff0000" .. L["IMPORT_FROMBACKUP_WARNING"]:format(TMW.BackupDate)
 		info.isTitle = true

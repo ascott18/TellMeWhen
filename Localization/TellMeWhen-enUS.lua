@@ -600,12 +600,6 @@ To import from a string, press CTRL+V to paste the string into the editbox after
 ]]
 L["UNNAMED"] = "((Unnamed))"
 
-L["TOPLAYER"] = "Export to Player"
-L["TOCOMM_DESC"] = "Type a player's name into the editbox and choose this option to send it to them. They must be somebody that you can whisper (same faction, server, online), and they must have TellMeWhen v4+"
-L["TOSTRING"] = "Export to String"
-L["TOSTRING_DESC"] = "A string containing all of this icon's settings will be pasted into the editbox.  Press Ctrl+C to copy it, and then paste it wherever you want to share it."
-L["FROMSTRING"] = "Import from String"
-L["FROMSTRING_DESC"] = "Press Ctrl+V to paste in an export string that you have copied to your clipboard from another source to be applied to this icon."
 
 L["SENDSUCCESSFUL"] = "Sent successfully"
 L["MESSAGERECIEVE"] = "%s has sent you some TellMeWhen data! You can import this data into TellMeWhen using the 'Import/Export' dropdown in the icon editor."
