@@ -34,7 +34,7 @@ local DRData = LibStub("DRData-1.0", true)
 TELLMEWHEN_VERSION = "4.6.0"
 TELLMEWHEN_VERSION_MINOR = strmatch(" @project-version@", " r%d+") or ""
 TELLMEWHEN_VERSION_FULL = TELLMEWHEN_VERSION .. TELLMEWHEN_VERSION_MINOR
-TELLMEWHEN_VERSIONNUMBER = 46002 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
+TELLMEWHEN_VERSIONNUMBER = 46003 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
 if TELLMEWHEN_VERSIONNUMBER > 47000 or TELLMEWHEN_VERSIONNUMBER < 46000 then return error("YOU SCREWED UP THE VERSION NUMBER OR DIDNT CHANGE THE SAFETY LIMITS") end -- safety check because i accidentally made the version number 414069 once
 
 TELLMEWHEN_MAXGROUPS = 1 	--this is a default, used by SetTheory (addon), so dont rename
@@ -684,7 +684,7 @@ for category, b in pairs(TMW.OldBE) do
 				else  -- this should never ever ever happen except in new patches if spellIDs were wrong (experience talking)
 					local newID = strtrim(id, " _")
 					if clientVersion >= addonVersion then -- dont warn for old clients using newer versions
-						geterrorhandler()("Invalid spellID found: " .. newID .. "! Please report this on TMW's CurseForge page, especially if you are currently on the PTR!")
+						TMW:Error("Invalid spellID found: " .. newID .. "! Please report this on TMW's CurseForge page, especially if you are currently on the PTR!")
 					end
 					str = gsub(str, id, newID) -- still need to substitute it to prevent recusion
 				end
@@ -1162,9 +1162,9 @@ function TMW:ScheduleUpdate(delay)
 end
 
 function TMW:OnCommReceived(prefix, text, channel, who)
-	print(prefix, text, channel, who)
 	if prefix == "TMWV" and strsub(text, 1, 1) == "M" and not TMW.VersionWarned then
 		local major, minor, revision = strmatch(text, "M:(.*)%^m:(.*)%^R:(.*)%^")
+		print(prefix, who, major, minor, revision)
 		revision = tonumber(revision)
 		if not (revision and major and minor and revision > TELLMEWHEN_VERSIONNUMBER and revision ~= 414069) then
 			return
@@ -1968,6 +1968,9 @@ function TMW:GlobalUpgrade()
 	TellMeWhenDB.Version = TELLMEWHEN_VERSIONNUMBER -- pre-default upgrades complete!
 end
 
+function TMW:Error(text, level)
+	geterrorhandler()("TellMeWhen: " .. (text or ""), level)
+end
 
 function TMW:Upgrade()
 	if TellMeWhen_Settings then -- needs to be first
@@ -1998,10 +2001,8 @@ function TMW:DoUpgrade(version, global, groupID, iconID)
 				v.global(v)
 			elseif groupID and not iconID and v.group then
 				v.group(db.profile.Groups[groupID], v, groupID)
-				print(groupID)
 			elseif iconID and groupID and v.icon then
 				v.icon(db.profile.Groups[groupID].Icons[iconID], v, groupID, iconID)
-				print(groupID, iconID)
 			end
 			if global and v.postglobal then
 				v.postglobal(v)
@@ -2034,7 +2035,7 @@ function TMW:LoadOptions(recursed)
 		else
 			local err = L["LOADERROR"] .. _G["ADDON_"..reason]
 			TMW:Print(err)
-			geterrorhandler()(err, 0) -- non breaking error
+			TMW:Error(err, 0) -- non breaking error
 		end
 	else
 		for k, v in pairs(INTERFACEOPTIONS_ADDONCATEGORIES) do
@@ -3012,7 +3013,6 @@ function TMW:Icon_Update(icon)
 						dontremove = 1
 					else
 						tbl.SoundData = nil
-						print("Hmmm, it seems that this sound setting managed to make it past all the checks for invalidness (or it is a LSM sound that doesnt exist anymore:", data, icon)
 					end
 				end
 			elseif key == "Channel" and data ~= "" then
@@ -3148,7 +3148,7 @@ function TMW:Icon_Update(icon)
 		Types[icon.Type]:Update()
 		local success, err = pcall(Types[icon.Type].Setup, Types[icon.Type], icon, groupID, iconID)
 		if not success then
-			geterrorhandler()(L["GROUPICON"]:format(groupID, iconID) .. ": " .. err)
+			TMW:Error(L["GROUPICON"]:format(groupID, iconID) .. ": " .. err)
 		end
 	else
 		icon:SetAlpha(0)
@@ -3588,10 +3588,7 @@ end
 
 local function replace(text, find, rep)
 	-- using this allows for the replacement of ";       " to "; " in one external call
-	if strfind(rep, find) then
-		print("RECURSION DETECTED: FIND=", find, "REP=", rep)
-		return text
-	end
+	assert(not strfind(rep, find), "RECURSION DETECTED: FIND=".. find.. " REP=".. rep)
 	while strfind(text, find) do
 		text = gsub(text, find, rep)
 	end
@@ -3603,7 +3600,7 @@ function TMW:CleanString(text)
 		isFrame = text
 		text = text:GetText()
 	end
-	if not text then return print(text, debugstack()) end
+	if not text then TMW:Error("No text to clean!") end
 	text = strtrim(text, "; \t\r\n")-- remove all leading and trailing semicolons, spaces, tabs, and newlines
 	text = replace(text, "[^:] ;", "; ") -- remove all spaces before semicolons
 	text = replace(text, "; ", ";") -- remove all spaces after semicolons

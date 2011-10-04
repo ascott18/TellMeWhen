@@ -2265,7 +2265,7 @@ function IE:Equiv_GenerateTips(equiv)
 		local name, _, texture = GetSpellInfo(v)
 		if not name then
 			if TMW.debug then
-				geterrorhandler()("INVALID ID FOUND: "..equiv..":"..v)
+				TMW:Error("INVALID ID FOUND: "..equiv..":"..v)
 			else
 				name = v
 				texture = "Interface\\Icons\\INV_Misc_QuestionMark"
@@ -2705,6 +2705,7 @@ function IE:Copy_DropDown()
 					elseif result.type == "group" then
 						assert(result.arg1, "Missing groupID for group import")
 						value = "IMPORT_PROFILE_%COMM" .. i .. "_" .. result.arg1
+						info.text = TMW:GetGroupName(result.data.Name, result.arg1)
 					end
 					info.value = value
 					info.hasArrow = true
@@ -2718,7 +2719,7 @@ function IE:Copy_DropDown()
 		
 			-- icon to comm
 			info = UIDropDownMenu_CreateInfo()
-			local text = L["EXPORT_f"]:format(L["GROUPICON"]:format(TMW:GetGroupName(CI.g, CI.g, 1), CI.i))
+			local text = L["EXPORT_f"]:format(L["ICONGROUP"]:format(CI.i, TMW:GetGroupName(CI.g, CI.g, 1)))
 			info.text = text
 			info.tooltipTitle = text
 			info.tooltipText = L["EXPORT_TOCOMM_DESC"]
@@ -2777,7 +2778,7 @@ function IE:Copy_DropDown()
 		
 			-- icon to string
 			info = UIDropDownMenu_CreateInfo()
-			local text = L["EXPORT_f"]:format(L["GROUPICON"]:format(TMW:GetGroupName(CI.g, CI.g, 1), CI.i))
+			local text = L["EXPORT_f"]:format(L["ICONGROUP"]:format(CI.i, TMW:GetGroupName(CI.g, CI.g, 1)))
 			info.text = text
 			info.tooltipTitle = text
 			info.tooltipText = L["EXPORT_TOSTRING_DESC"]
@@ -3852,7 +3853,6 @@ function SUG:GET_ITEM_INFO_RECEIVED()
 end
 
 function SUG:OnCommReceived(prefix, text, channel, who)
-	print(text, channel, who)
 	if prefix ~= "TMWSUG" or who == UnitName("player") then return end
 	local success, arg1, arg2 = SUG:Deserialize(text)
 	if success then
@@ -3888,7 +3888,7 @@ function SUG:OnCommReceived(prefix, text, channel, who)
 			SUG:BuildClassSpellLookup()
 		end
 	elseif TMW.debug then
-		geterrorhandler()(arg1)
+		TMW:Error(arg1)
 	end
 end
 

@@ -29,7 +29,7 @@ L["RESIZE_TOOLTIP"] = "Click and drag to change size"
 L["HPSSWARN"] = "Warning! Any icon conditions that you had set that checked for holy power or soul shards may be messed up! Check them to prevent later confusion!"
 L["CONDITIONORMETA_CHECKINGINVALID"] = "Warning! Group %d, Icon %d is checking an invalid icon (Group %d, Icon %d)"
 L["WARN_DRMISMATCH"] = "Warning! Group %d, Icon %d is checking the diminishing returns on spells from two different known categories. All spells should be from the same category."
-L["FROMNEWERVERSION"] = "You are importing an icon that was created in a newer version of TellMeWhen than your version. Some settings might not work until you upgrade to the latest version."
+L["FROMNEWERVERSION"] = "You are importing data that was created in a newer version of TellMeWhen than your version. Some settings might not work until you upgrade to the latest version."
 
 -- -------------
 -- ICONMENU
@@ -573,6 +573,7 @@ L["TOOLTIPSCAN_DESC"] = "This condition type will allow you to check the first v
 -- ----------
 
 L["GROUPICON"] = "Group: %s, Icon: %s"
+L["ICONGROUP"] = "Icon: %s (Group: %s)"
 L["fGROUP"] = "Group: %s"
 L["fICON"] = "Icon: %s"
 L["ICON"] = "Icon"
@@ -636,7 +637,7 @@ L["EXPORT_TOCOMM_DESC"] = "Type a player's name into the editbox and choose this
 L["EXPORT_TOSTRING_DESC"] = "A string containing the necessary data will be pasted into the editbox.  Press Ctrl+C to copy it, and then paste it wherever you want to share it."
 L["EXPORT_SPECIALDESC"] = "Other TellMeWhen users can only import entire groups or entire profiles if they have version 4.6.0+"
 L["EXPORT_f"] = "Export %s"
-L["EXPORT_GLOBAL_f"] = "Export profile %q"
+L["EXPORT_GLOBAL_f"] = "Export Profile: %s"
 
 
 

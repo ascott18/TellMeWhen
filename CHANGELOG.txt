@@ -10,6 +10,7 @@
  ** (r245) Fixed an error 132 crash in 4.3 when using the "Finish Caching Now" button
  ** (r246) Fixed conditions for 4.3
  ** (r247) Temporary compatibility code to make the options function fully, with the exception of import/export functionality, until AceSerializer gets fixed.
+ ** (r250) Removed print spam when sending comm
 
 ===v4.5.7===
  * Bug Fixes:

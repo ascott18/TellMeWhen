@@ -2942,7 +2942,6 @@
 								TMW:TT(self, "IMPORT_EXPORT", "IMPORT_EXPORT_DESC")
 
 								function self:callback(soFar, total)
-									print(soFar, total)
 									self.Status:Set(soFar, total)
 									if soFar == total then
 										TMW:Print(TMW.L["SENDSUCCESSFUL"])

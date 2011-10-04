@@ -2162,8 +2162,7 @@ function CNDT:ProcessConditions(icon)
 		functionCache[funcstr] = func
 		return func
 	elseif (TMW.debug or luaUsed) and err then
-		print(funcstr)
-		geterrorhandler()(err)
+		TMW:Error(err)
 	end
 end
 
