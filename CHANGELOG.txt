@@ -1,3 +1,8 @@
+===v4.6.1===
+ * Bug Fixes:
+ ** (r252) Removed spam when pasting a corrupt string
+ ** (r252) Importing very old strings should now work. (Very old means pre-v4.1.4)
+ 
 ===v4.6.0===
  * You can now import and export entire groups or entire profiles.
  * You can now import settings from a backup created when TellMeWhen_Options loads.
@@ -243,7 +248,7 @@
 ===v4.1.4===
  * New profiles now default to only one group instead of ten, and new/reset groups now place themselves in the center of the screen.
  * **//IMPORTANT//**: Because of the above change, there is a (very very small) chance that some of your groups moved. I apologize for the inconvenience. If you find that a group has been moved off the screen, type /tmw options, go to that group's config, and click the button to reset the group's position.
- * You can now import and exports icons in string format to other users of TMW, meaning that you can share them outside of the game or to players that you are not able to whisper.
+ * You can now import and export icons in string format to other users of TMW, meaning that you can share them outside of the game or to players that you are not able to whisper.
  * Imported icons will now be upgraded as needed to fully function with your current version of TMW. Icons received from newer versions of TMW that your current version may still have an occasional error, so please always ensure that you are upgraded to the latest version of TMW before reporting an error with importing.
  * New/changed conditions:
  ** Unit Classification (Normal, Elite, Rare, Rare-Elite, World Boss)

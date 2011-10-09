@@ -354,14 +354,18 @@ function TMW:SerializeData(data, type, ...)
 end
 
 function TMW:DeserializeData(string)
+	local original = string
+	
 	local success, data, version, spaceControl, type, arg1, arg2, arg3, arg4, arg5 = TMW:Deserialize(string)
 	if not success then
 		return
 	end
 	if spaceControl == "`" then
-		TMW:Print(L["IMPORTERROR_CORRUPTSPACES"])
 		string = string:gsub("`", "~`")
 		success, data, version, spaceControl, type, arg1, arg2, arg3, arg4, arg5 = TMW:Deserialize(string)
+	end
+	if not version then
+		version = 41403 -- the first version that had version checks with it.
 	end
 	if version <= 45809 and not type and data.Type then -- 45809 was the last version to contain untyped data messages. It only supported icon imports/exports, so the type has to be an icon.
 		type = "icon"
