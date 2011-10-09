@@ -2,6 +2,7 @@
  * Bug Fixes:
  ** (r252) Removed spam when pasting a corrupt string
  ** (r252) Importing very old strings should now work. (Very old means pre-v4.1.4)
+ ** (r253) TellMeWhen_Options\TellMeWhen_Options.lua:2246: attempt to index global "current" (a nil value)
  
 ===v4.6.0===
  * You can now import and export entire groups or entire profiles.
