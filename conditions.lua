@@ -261,6 +261,12 @@ function CNDT:COMBAT_RATING_UPDATE()
 	Env.SpellHaste = UnitSpellHaste("player")/100
 end
 
+function CNDT:UNIT_SPELL_HASTE(_, unit)
+	if unit == "player" then
+		Env.SpellHaste = UnitSpellHaste("player")/100
+	end
+end
+
 function CNDT:MASTERY_UPDATE()
 	Env.Mastery = GetMastery()
 end
@@ -1835,7 +1841,7 @@ CNDT.Types = {
 		icon = "Interface\\Icons\\ability_mage_timewarp",
 		tcoords = standardtcoords,
 		funcstr = [[SpellHaste c.Operator c.Level]],
-		events = "COMBAT_RATING_UPDATE",
+		events = "COMBAT_RATING_UPDATE UNIT_SPELL_HASTE",
 	},
 	{ -- mana regen
 		text = MANA_REGEN,

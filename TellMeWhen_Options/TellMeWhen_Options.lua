@@ -2244,12 +2244,14 @@ end
 function IE:ShowHelp(text, frame, x, y, noclose, ...)
 	text = format(text, ...)
 	local current = IE.Help.current
+	
 	if current.noclose then return end
-		current.text = text
-		current.frame = frame
-		current.x = x
-		current.y = y
-		current.noclose = noclose
+	
+	current.text = text
+	current.frame = frame
+	current.x = x
+	current.y = y
+	current.noclose = noclose
 		
 	IE.Help:ClearAllPoints()
 	IE.Help:SetPoint("TOPRIGHT", frame, "LEFT", (x or 0) - 30, (y or 0) + 28)
