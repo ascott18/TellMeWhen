@@ -94,8 +94,8 @@ local function Buff_OnUpdate(icon, time)
 		local NAL = icon.NAL
 
 		local buffName, _, iconTexture, count, dispelType, duration, expirationTime, canSteal, id, v1, v2, v3
+		local useUnit
 		local d = Sort == -1 and huge or 0
-
 		for u = 1, #Units do
 			local unit = Units[u]
 			if UnitExists(unit) then
@@ -184,6 +184,7 @@ local function Buff_OnUpdate(icon, time)
 							end
 						end
 						if buffName and (NotStealable or canSteal) then
+							useUnit = unit
 							break -- break spell loop
 						end
 					end
@@ -205,9 +206,11 @@ local function Buff_OnUpdate(icon, time)
 					count = 0
 				end
 			end
-			icon:SetInfo(icon.Alpha, icon.UnAlpha ~= 0 and pr or 1, iconTexture, expirationTime - duration, duration, buffName, nil, count, count > 1 and count or "")
+			
+		--icon:SetInfo(alpha, color, texture, start, duration, spellChecked, reverse, count, countText, forceupdate, unit)
+			icon:SetInfo(icon.Alpha, icon.UnAlpha ~= 0 and pr or 1, iconTexture, expirationTime - duration, duration, buffName, nil, count, count > 1 and count or "", nil, useUnit)
 		else
-			icon:SetInfo(icon.UnAlpha, icon.Alpha ~= 0 and ab or 1, icon.FirstTexture, 0, 0, icon.NameFirst)
+			icon:SetInfo(icon.UnAlpha, icon.Alpha ~= 0 and ab or 1, icon.FirstTexture, 0, 0, icon.NameFirst, nil, nil, nil, nil, Units[1])
 		end
 	end
 end

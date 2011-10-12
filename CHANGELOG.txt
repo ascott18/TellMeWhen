@@ -1,3 +1,8 @@
+===v4.6.2===
+ * Began work on unit and spell name substitutions for text output
+ * Bug Fixes:
+ ** (r257) Fixed warnings for missing durations (they weren't showing up)
+
 ===v4.6.1===
  * Bug Fixes:
  ** (r252) Removed spam when pasting a corrupt string

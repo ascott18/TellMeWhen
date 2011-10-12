@@ -103,12 +103,13 @@ local function Meta_OnUpdate(icon, time)
 					end
 					
 					AlreadyChecked[ic] = true
-					icon:SetInfo(alpha, ic.__vrtxcolor, ic.__tex, ic.__start, ic.__duration, ic.__pbName, ic.__reverse, ic.__count, ic.__countText, force)
+					--icon:SetInfo(alpha, color, texture, start, duration, spellChecked, reverse, count, countText, forceupdate, unit)
+					icon:SetInfo(alpha, ic.__vrtxcolor, ic.__tex, ic.__start, ic.__duration, ic.__spellChecked, ic.__reverse, ic.__count, ic.__countText, force, nil)
 					return
 				end
 			end
 		end
-		icon:SetAlpha(0)
+		icon:SetInfo(0)
 	end
 end
 

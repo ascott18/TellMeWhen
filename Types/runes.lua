@@ -62,6 +62,12 @@ local textures = {
 	"Interface\\Icons\\Spell_Deathknight_FrostPresence",
 	"Interface\\Addons\\TellMeWhen\\Textures\\DeathPresence",
 }
+local runeNames = {
+	COMBAT_TEXT_RUNE_BLOOD,
+	COMBAT_TEXT_RUNE_UNHOLY,
+	COMBAT_TEXT_RUNE_FROST,
+	COMBAT_TEXT_RUNE_DEATH,
+}
 
 function Type:Update()
 	db = TMW.db
@@ -115,10 +121,14 @@ local function Runes_OnUpdate(icon, time)
 				end
 			end
 		end
+		
+		--icon:SetInfo(alpha, color, texture, start, duration, spellChecked, reverse, count, countText, forceupdate, unit)
 		if readyslot then
-			icon:SetInfo(icon.Alpha, 1, textures[GetRuneType(readyslot)], 0, 0)
+			local type = GetRuneType(readyslot)
+			icon:SetInfo(icon.Alpha, 1, textures[type], 0, 0, runeNames[type], nil, nil, nil, nil, nil)
 		elseif unslot then
-			icon:SetInfo(icon.UnAlpha, 1, textures[GetRuneType(unslot)], unstart, unduration)
+			local type = GetRuneType(unslot)
+			icon:SetInfo(icon.UnAlpha, 1, textures[type], unstart, unduration, runeNames[type], nil, nil, nil, nil, nil)
 		end
 	end
 end

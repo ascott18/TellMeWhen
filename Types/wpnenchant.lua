@@ -101,6 +101,33 @@ local SlotsToNumbers = {
 }
 
 
+local function WpnEnchant_OnEvent(icon, event, unit)
+	if unit == "player" then
+		local Slot = icon.Slot
+		local wpnTexture = GetInventoryItemTexture("player", Slot)
+
+		local t = wpnTexture or "Interface\\Icons\\INV_Misc_QuestionMark"
+		if t ~= icon.__tex then icon:SetTexture(t) end
+
+		if not wpnTexture and icon.HideUnequipped then
+			icon:SetInfo(0)
+			if icon.OnUpdate then
+				icon:SetScript("OnUpdate", nil)
+			end
+		elseif not icon.OnUpdate then
+			icon:SetScript("OnUpdate", WpnEnchant_OnUpdate)
+		end
+		local EnchantName = GetWeaponEnchantName(Slot)
+		icon.EnchantName = EnchantName
+		if icon.Name == "" then
+			icon.CorrectEnchant = true
+		else
+			if EnchantName then
+				icon.CorrectEnchant = icon.NameHash[strlowerCache[EnchantName]]
+			end
+		end
+	end
+end
 
 local function WpnEnchant_OnUpdate(icon, time)
 	if icon.UpdateTimer <= time - UPD_INTV then
@@ -124,42 +151,15 @@ local function WpnEnchant_OnUpdate(icon, time)
 				duration = expiration
 			end
 			local start = floor(time - duration + expiration)
-
-			icon:SetInfo(icon.Alpha, icon.UnAlpha ~= 0 and pr or 1, nil, start, duration)
+			
+		--icon:SetInfo(alpha, color, texture, start, duration, spellChecked, reverse, count, countText, forceupdate, unit)
+			icon:SetInfo(icon.Alpha, icon.UnAlpha ~= 0 and pr or 1, nil, start, duration, EnchantName, nil, nil, nil, nil, nil)
 		else
-			icon:SetInfo(icon.UnAlpha, icon.Alpha ~= 0 and ab or 1, nil, 0, 0)
+			icon:SetInfo(icon.UnAlpha, icon.Alpha ~= 0 and ab or 1, nil, 0, 0, nil, nil, nil, nil, nil, nil) 
 		end
 	end
 end
 
-
-local function WpnEnchant_OnEvent(icon, event, unit)
-	if unit == "player" then
-		local Slot = icon.Slot
-		local wpnTexture = GetInventoryItemTexture("player", Slot)
-
-		local t = wpnTexture or "Interface\\Icons\\INV_Misc_QuestionMark"
-		if t ~= icon.__tex then icon:SetTexture(t) end
-
-		if not wpnTexture and icon.HideUnequipped then
-			icon:SetAlpha(0)
-			if icon.OnUpdate then
-				icon:SetScript("OnUpdate", nil)
-			end
-		elseif not icon.OnUpdate then
-			icon:SetScript("OnUpdate", WpnEnchant_OnUpdate)
-		end
-		local EnchantName = GetWeaponEnchantName(Slot)
-		icon.EnchantName = EnchantName
-		if icon.Name == "" then
-			icon.CorrectEnchant = true
-		else
-			if EnchantName then
-				icon.CorrectEnchant = icon.NameHash[strlowerCache[EnchantName]]
-			end
-		end
-	end
-end
 
 Type.AllowNoName = true
 function Type:Setup(icon, groupID, iconID)

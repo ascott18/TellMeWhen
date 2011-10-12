@@ -132,7 +132,6 @@ local function DR_OnEvent(icon, _, _, p, ...)
 	end
 end
 
-
 local function DR_OnUpdate(icon, time)
 	if icon.UpdateTimer <= time - UPD_INTV then
 		icon.UpdateTimer = time
@@ -142,27 +141,29 @@ local function DR_OnUpdate(icon, time)
 		for u = 1, #Units do
 			local unit = Units[u]
 			local dr = icon[UnitGUID(unit)]
+			
+			--icon:SetInfo(alpha, color, texture, start, duration, spellChecked, reverse, count, countText, forceupdate, unit)
 			if dr then
 				if dr.start + dr.duration <= time then
-					icon:SetInfo(Alpha, 1, dr.tex, 0, 0)
+					icon:SetInfo(Alpha, 1, dr.tex, 0, 0, icon.firstCategory, nil, nil, nil, nil, unit)
 					if Alpha > 0 then
 						return
 					end
 				else
 					local amt = dr.amt
-					icon:SetInfo(UnAlpha, (not icon.ShowTimer and Alpha ~= 0) and .5 or 1, dr.tex, dr.start, dr.duration, nil, nil, amt, amt .. "%")
+					icon:SetInfo(UnAlpha, (not icon.ShowTimer and Alpha ~= 0) and .5 or 1, dr.tex, dr.start, dr.duration, icon.firstCategory, nil, amt, amt .. "%", nil, unit)
 					if UnAlpha > 0 then
 						return
 					end
 				end
 			else
-				icon:SetInfo(Alpha, 1, icon.FirstTexture, 0, 0)
+				icon:SetInfo(Alpha, 1, icon.FirstTexture, 0, 0, icon.firstCategory, nil, nil, nil, nil, unit)
 				if Alpha > 0 then
 					return
 				end
 			end
 		end
-		icon:SetAlpha(0)
+		icon:SetInfo(0)
 	end
 end
 
@@ -174,30 +175,29 @@ function Type:Setup(icon, groupID, iconID)
 	icon.Units = TMW:GetUnits(icon, icon.Unit)
 	icon.FirstTexture = SpellTextures[icon.NameFirst]
 
-	if not db.profile.Locked and (not warnedMismatch[icon] or TMW.IE.Main.Name:IsVisible()) then
-		-- Do the Right Thing and tell people if their DRs mismatch
-		local firstCategory, dobreak
-		for IDorName in pairs(icon.NameHash) do
-			for category, str in pairs(TMW.BE.dr) do
-				if strfind(";"..str..";", ";"..IDorName..";") or TMW:GetSpellNames(icon, str, nil, 1, 1)[IDorName] then
-					if not firstCategory then
-						firstCategory = category
+	-- Do the Right Thing and tell people if their DRs mismatch
+	local firstCategory, dobreak
+	for IDorName in pairs(icon.NameHash) do
+		for category, str in pairs(TMW.BE.dr) do
+			if strfind(";"..str..";", ";"..IDorName..";") or TMW:GetSpellNames(icon, str, nil, 1, 1)[IDorName] then
+				if not firstCategory then
+					firstCategory = category
+					icon.firstCategory = category
+				end
+				if firstCategory ~= category and not db.profile.Locked and (not warnedMismatch[icon] or TMW.IE.Main.Name:IsVisible()) then
+					if not warnedMismatch[icon] then
+						TMW:Printf(L["WARN_DRMISMATCH"], groupID, iconID)
+						warnedMismatch[icon] = 1
 					end
-					if firstCategory ~= category then
-						if not warnedMismatch[icon] then
-							TMW:Printf(L["WARN_DRMISMATCH"], groupID, iconID)
-							warnedMismatch[icon] = 1
-						end
-						
-						TMW.IE:ShowHelp(L["WARN_DRMISMATCH"], TMW.IE.Main.Name, 0, 0, icon, groupID, iconID)
-						dobreak=1
-						break
-					end
+					
+					TMW.IE:ShowHelp(L["WARN_DRMISMATCH"], TMW.IE.Main.Name, 0, 0, nil, groupID, iconID)
+					dobreak=1
+					break
 				end
 			end
-			if dobreak then
-				break
-			end
+		end
+		if dobreak then
+			break
 		end
 	end
 	

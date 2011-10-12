@@ -31,16 +31,16 @@ local AceDB = LibStub("AceDB-3.0")
 local LSM = LibStub("LibSharedMedia-3.0")
 local DRData = LibStub("DRData-1.0", true)
 
-TELLMEWHEN_VERSION = "4.6.1"
+TELLMEWHEN_VERSION = "4.6.2"
 TELLMEWHEN_VERSION_MINOR = strmatch(" @project-version@", " r%d+") or ""
 TELLMEWHEN_VERSION_FULL = TELLMEWHEN_VERSION .. TELLMEWHEN_VERSION_MINOR
-TELLMEWHEN_VERSIONNUMBER = 46104 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
+TELLMEWHEN_VERSIONNUMBER = 46201 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
 if TELLMEWHEN_VERSIONNUMBER > 47000 or TELLMEWHEN_VERSIONNUMBER < 46000 then return error("YOU SCREWED UP THE VERSION NUMBER OR DIDNT CHANGE THE SAFETY LIMITS") end -- safety check because i accidentally made the version number 414069 once
 
 TELLMEWHEN_MAXGROUPS = 1 	--this is a default, used by SetTheory (addon), so dont rename
 TELLMEWHEN_MAXROWS = 20
-local UPD_INTV = 0.06	--this is a default, local because i use it in onupdate functions
 
+---------- Upvalues ----------
 local GetSpellCooldown, GetSpellInfo, GetSpellTexture =
 	  GetSpellCooldown, GetSpellInfo, GetSpellTexture
 local GetShapeshiftForm, GetNumRaidMembers, GetPartyAssignment =
@@ -60,7 +60,10 @@ local MikSBT, Parrot, SCT =
 local CL_PLAYER = COMBATLOG_OBJECT_TYPE_PLAYER
 local CL_PET = COMBATLOG_OBJECT_CONTROL_PLAYER
 local bitband = bit.band
+
+---------- Locals ----------
 local st, co, updatehandler, BarGCD, ClockGCD, Locked, CNDT, SndChan, FramesToFind, UnitsToUpdate, CNDTEnv
+local UPD_INTV = 0.06	--this is a default, local because i use it in onupdate functions
 local runEvents, updatePBar = 1, 1
 local GCD, NumShapeshiftForms, UpdateTimer = 0, 0, 0
 local IconUpdateFuncs, GroupUpdateFuncs, unitsToChange = {}, {}, {}
@@ -2528,6 +2531,12 @@ function IconBase.HandleEvent(icon, data, played, announced)
 		if strfind(Text, "%%[Mm]") then
 			Text = gsub(Text, "%%[Mm]", UnitName("mouseover") or L["MOUSEOVER_TOKEN_NOT_FOUND"])
 		end
+		if strfind(Text, "%%[Uu]") then
+			Text = gsub(Text, "%%[Uu]", UnitName(icon.__unit or "") or "")
+		end
+		if strfind(Text, "%%[Ss]") then
+			Text = gsub(Text, "%%[Ss]", icon.spellChecked or "")
+		end
 		
 		if Channel == "MSBT" then
 			if MikSBT then
@@ -2651,21 +2660,39 @@ function IconBase.SetReverse(icon, reverse)
 	icon.cooldown:SetReverse(reverse)
 end
 
-function IconBase.SetInfo(icon, alpha, color, texture, start, duration, pbName, reverse, count, countText, forceupdate)
-	-- icon			- the icon object to set the attributes on (frame) (but call as icon:SetInfo(alpha, ...) )
-	-- alpha		- the alpha to set the icon to (number)
-	-- color		- the value(s) to call SetVertexColor with. Either a (number) that will be used as the r, g, and b; or a (table) with keys r, g, b
-	-- [texture]	- the texture path to set the icon to (string). Pass nil to leave unchanged.
-	-- start		- the start time of the cooldow/duration, as passsed to icon.cooldown:SetCooldown(start, duration)
-	-- duration		- the duration of the cooldow/duration, as passsed to icon.cooldown:SetCooldown(start, duration)
-	-- [pbName]		- the name or ID of the spell to be used for the icons power bar overlay (string/number)
-	-- [reverse]	- true/false to set icon.cooldown:SetReverse(reverse), nil to not change (boolean/nil)
-	-- [count]		- the number of stacks to be used for comparison, nil/false to hide (number/nil/false)
-	-- [countText]	- the actual stack TEXT to be set on the icon, will use count if nil (number/string/nil/false)
-	-- [forceupdate]- for meta icons, will force an update on things even if args didnt change.
-
+function IconBase.SetInfo(icon, alpha, color, texture, start, duration, spellChecked, reverse, count, countText, forceupdate, unit)
+	-- icon				- the icon object to set the attributes on (frame) (but call as icon:SetInfo(alpha, ...) , nil, nil)
+	-- [alpha]			- the alpha to set the icon to (number); (nil) defaults to 0
+	-- [color]			- the value(s) to call SetVertexColor with. Either a (number) that will be used as the r, g, and b; or a (table) with keys r, g, b; or (nil) to leave unchanged
+	-- [texture]		- the texture path to set the icon to (string); or (nil) to leave unchanged
+	-- [start]			- the start time of the cooldow/duration, as passsed to icon.cooldown:SetCooldown(start, duration); (nil) defaults to 0
+	-- [duration]		- the duration of the cooldow/duration, as passsed to icon.cooldown:SetCooldown(start, duration); (nil) defaults to 0
+	-- [spellChecked]	- the name or ID of the spell to be used for the icons power bar overlay (string/number)
+	-- [reverse]		- true/false to set icon.cooldown:SetReverse(reverse), nil to not change (boolean/nil)
+	-- [count]			- the number of stacks to be used for comparison, nil/false to hide (number/nil/false)
+	-- [countText]		- the actual stack TEXT to be set on the icon, will use count if nil (number/string/nil/false)
+	-- [forceupdate]	- for meta icons, will force an update on things even if args didnt change.
+	-- [unit]			- the unit that the icon stopped checking on
+	
+	--[[
+		TO ADD AN ARG: (Notepad++)
+		1) Ctrl+F
+		2) Find regex		([^\-]+icon:SetInfo\(.*)\)
+		3) Replace with		\1, nil)
+		4) Find normal		alpha, color, texture, start, duration, spellChecked, reverse, count, countText, forceupdate, unit
+		5) Replace with		alpha, color, texture, start, duration, spellChecked, reverse, count, countText, forceupdate, unit, NEWARG
+			where newarg is the newarg
+		6) Handle arg in here
+	]]
+		
 	local played, announced
 
+	alpha = alpha or 0
+	duration = duration or 0
+	start = start or 0
+	icon.__unit = unit or (icon.Units and icon.Units[1])
+	icon.spellChecked = spellChecked or icon.spellChecked
+	
 	if duration == 0.001 then duration = 0 end -- hardcode fix for tricks of the trade. nice hardcoding, blizzard
 	local d = duration - (time - start)
 
@@ -2803,7 +2830,7 @@ function IconBase.SetInfo(icon, alpha, color, texture, start, duration, pbName, 
 		return
 	end
 
-	if icon.__vrtxcolor ~= color then
+	if icon.__vrtxcolor ~= color and color then
 		if type(color) == "table" then
 			icon.texture:SetVertexColor(color.r, color.g, color.b, 1)
 		else
@@ -2812,9 +2839,9 @@ function IconBase.SetInfo(icon, alpha, color, texture, start, duration, pbName, 
 		icon.__vrtxcolor = color
 	end
 
-	if icon.ShowPBar and (updatePBar or icon.__pbName ~= pbName or forceupdate) then
-		if pbName then
-			local _, _, _, cost, _, powerType = GetSpellInfo(pbName)
+	if icon.ShowPBar and (updatePBar or icon.__spellChecked ~= spellChecked or forceupdate) then
+		if spellChecked then
+			local _, _, _, cost, _, powerType = GetSpellInfo(spellChecked)
 			if cost then
 				local pbar = icon.pbar
 				cost = powerType == 9 and 3 or cost
@@ -2841,7 +2868,7 @@ function IconBase.SetInfo(icon, alpha, color, texture, start, duration, pbName, 
 			pbar.UpdateSet = false
 			pbar:SetValue(icon.InvertBars and pbar.Max or 0)
 		end
-		icon.__pbName = pbName
+		icon.__spellChecked = spellChecked
 	end
 
 	if icon.__count ~= count or icon.__countText ~= countText then
@@ -3214,8 +3241,9 @@ function TMW:Icon_Update(icon)
 				end
 			end
 		end
-
-		icon:SetInfo(1, 1, nil, 0, 0, nil, nil, testCount, testCountText) -- alpha is set to 1 here so it doesnt return early
+		
+		--icon:SetInfo(alpha, color, texture, start, duration, spellChecked, reverse, count, countText, forceupdate, unit, unit, nil)
+		icon:SetInfo(1, 1, nil, 0, 0, nil, nil, testCount, testCountText, nil, nil, nil) -- alpha is set to 1 here so it doesnt return early
 		if icon.Enabled then
 			icon:setalpha(1)
 		else

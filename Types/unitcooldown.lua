@@ -257,7 +257,7 @@ local function UnitCooldown_OnUpdate(icon, time)
 	if icon.UpdateTimer <= time - UPD_INTV then
 		icon.UpdateTimer = time
 		local CndtCheck = icon.CndtCheck if CndtCheck and CndtCheck() then return end
-		local unstart, unname, unduration, usename, dobreak
+		local unstart, unname, unduration, usename, dobreak, useUnit
 		local Alpha, Units, NameArray, OnlySeen, Sort, Durations = icon.Alpha, icon.Units, icon.NameArray, icon.OnlySeen, icon.Sort, icon.Durations
 		local NAL = #NameArray
 		local d = Sort == -1 and huge or 0
@@ -293,21 +293,27 @@ local function UnitCooldown_OnUpdate(icon, time)
 									unname = iName
 									unstart = _start
 									unduration = _duration
+									useUnit = unit
 								end
 							else -- we found the first usable cooldown
-								usename = usename or iName
+								if not usename then
+									usename = iName
+									useUnit = unit
+								end
 							end
 						else
 							if _d ~= 0 and not unname then -- we found the first UNusable cooldown
 								unname = iName
 								unstart = _start
 								unduration = _duration
+								useUnit = unit
 								if Alpha == 0 then -- we DONT care about usable cooldowns, so stop looking
 									dobreak = 1
 									break
 								end
 							elseif _d == 0 and not usename then -- we found the first usable cooldown
 								usename = iName
+								useUnit = unit
 								if Alpha ~= 0 then -- we care about usable cooldowns, so stop looking
 									dobreak = 1
 									break
@@ -321,12 +327,14 @@ local function UnitCooldown_OnUpdate(icon, time)
 				end
 			end
 		end
+		
+		--icon:SetInfo(alpha, color, texture, start, duration, spellChecked, reverse, count, countText, forceupdate, unit)
 		if usename and Alpha > 0 then
-			icon:SetInfo(Alpha, 1, SpellTextures[usename] or "Interface\\Icons\\INV_Misc_PocketWatch_01", 0, 0)
+			icon:SetInfo(Alpha, 1, SpellTextures[usename] or "Interface\\Icons\\INV_Misc_PocketWatch_01", 0, 0, usename, nil, nil, nil, nil, useUnit)
 		elseif unname then
-			icon:SetInfo(UnAlpha, (not icon.ShowTimer and Alpha ~= 0) and .5 or 1, SpellTextures[unname], unstart, unduration)
+			icon:SetInfo(UnAlpha, (not icon.ShowTimer and Alpha ~= 0) and .5 or 1, SpellTextures[unname], unstart, unduration, unname, nil, nil, nil, nil, useUnit)
 		else
-			icon:SetAlpha(0)
+			icon:SetInfo(0)
 		end
 	end
 end
@@ -339,7 +347,7 @@ function Type:Setup(icon, groupID, iconID)
 	icon.Durations = TMW:GetSpellDurations(icon, icon.Name)
 	icon.Units = TMW:GetUnits(icon, icon.Unit)
 	
-	if TMW.IE and TMW.IE.Main.Name:IsVisible() and TMW.CI.ics == icon then
+	if TMW.IE and TMW.IE.Main.Name:IsVisible() and TMW.CI.ic == icon then
 		local Name = TMW.IE.Main.Name
 		local s = ""
 		local array = TMW:GetSpellNames(nil, Name:GetText())
@@ -349,7 +357,7 @@ function Type:Setup(icon, groupID, iconID)
 			end
 		end
 		if s ~= "" then
-			TMW.IE:ShowHelp(L["HELP_MISSINGDURS"], Name, 0, 0, icon, s)
+			TMW.IE:ShowHelp(L["HELP_MISSINGDURS"], Name, 0, 0, nil, s)
 		else
 			TMW.IE.Help:Hide()
 		end

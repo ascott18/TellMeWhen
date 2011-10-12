@@ -4025,7 +4025,7 @@ function SUG:DoSuggest()
 		local len = #SUG.lastName - 1
 		local match = tonumber(SUG.lastName)
 		for id in pairs(tbl) do
-			if min(id, floor(id / 10^(floor(log10(id)) - len))) == match then -- this looks like shit, but is is approx 70% more efficient than the below commented line
+			if min(id, floor(id / 10^(floor(log10(id)) - len))) == match then -- this looks like shit, but is is approx 300% more efficient than the below commented line
 		--	if strfind(id, atBeginning) then
 				SUGpreTable[#SUGpreTable + 1] = id
 			end

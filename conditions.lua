@@ -2132,7 +2132,7 @@ function CNDT:ProcessConditions(icon)
 
 	if strfind(icon:GetName(), "Icon") then
 		funcstr = [[if not (]] .. strsub(funcstr, 4) .. [[) then
-			]] .. (icon.ConditionAlpha == 0 and (icon:GetName()..[[:SetAlpha(0) return true, false]]) or (icon:GetName()..[[.CndtFailed = 1 return false, false]])) .. [[
+			]] .. (icon.ConditionAlpha == 0 and (icon:GetName()..[[:SetInfo(0) return true, false]]) or (icon:GetName()..[[.CndtFailed = 1 return false, false]])) .. [[
 		else
 			]]..icon:GetName()..[[.CndtFailed = nil return false, true
 		end]]

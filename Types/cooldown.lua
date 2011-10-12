@@ -104,7 +104,9 @@ local function AutoShot_OnUpdate(icon, time)
 		local inrange = icon.RangeCheck and IsSpellInRange(icon.NameName, "target") or 1
 		
 		if ready and inrange then
-			icon:SetInfo(icon.Alpha, icon.UnAlpha ~= 0 and pr or 1, nil, 0, 0)
+			
+			--icon:SetInfo(alpha, color, texture, start, duration, spellChecked, reverse, count, countText, forceupdate, unit)
+			icon:SetInfo(icon.Alpha, icon.UnAlpha ~= 0 and pr or 1, nil, 0, 0, nil, nil, nil, nil, nil, nil)
 		else
 			local alpha, color
 			if icon.Alpha ~= 0 then
@@ -118,7 +120,9 @@ local function AutoShot_OnUpdate(icon, time)
 			else
 				alpha, color = icon.UnAlpha, 1
 			end
-			icon:SetInfo(alpha, color, nil, icon.asStart, icon.asDuration)
+			
+			--icon:SetInfo(alpha, color, texture, start, duration, spellChecked, reverse, count, countText, forceupdate, unit)
+			icon:SetInfo(alpha, color, nil, icon.asStart, icon.asDuration, nil, nil, nil, nil, nil, nil)
 		end
 	end
 end
@@ -149,7 +153,9 @@ local function SpellCooldown_OnUpdate(icon, time)
 				end
 				isGCD = (ClockGCD or duration ~= 0) and OnGCD(duration)
 				if inrange == 1 and not nomana and (duration == 0 or isGCD) then --usable
-					icon:SetInfo(icon.Alpha, icon.UnAlpha ~= 0 and pr or 1, SpellTextures[iName], start, duration, iName)
+					
+					--icon:SetInfo(alpha, color, texture, start, duration, spellChecked, reverse, count, countText, forceupdate, unit)
+					icon:SetInfo(icon.Alpha, icon.UnAlpha ~= 0 and pr or 1, SpellTextures[iName], start, duration, iName, nil, nil, nil, nil, nil)
 					return
 				end
 			end
@@ -187,9 +193,10 @@ local function SpellCooldown_OnUpdate(icon, time)
 				alpha, color = icon.UnAlpha, 1
 			end
 
-			icon:SetInfo(alpha, color, icon.FirstTexture, start, duration, NameFirst)
+			--icon:SetInfo(alpha, color, texture, start, duration, spellChecked, reverse, count, countText, forceupdate, unit)
+			icon:SetInfo(alpha, color, icon.FirstTexture, start, duration, NameFirst, nil, nil, nil, nil, nil)
 		else
-			icon:SetAlpha(0)
+			icon:SetInfo(0)
 		end
 	end
 end
@@ -221,6 +228,7 @@ local function ItemCooldown_OnUpdate(icon, time)
 			local Name = icon.Name
 			icon.NameFirst = TMW:GetItemIDs(icon, Name, 1)
 			icon.NameArray = TMW:GetItemIDs(icon, Name)
+			icon.NameNameArray = TMW:GetItemIDs(icon, icon.Name, nil, 1)
 			icon.DoUpdateIDs = nil
 		end
 
@@ -244,7 +252,8 @@ local function ItemCooldown_OnUpdate(icon, time)
 				isGCD = OnGCD(duration)
 				if equipped and inrange == 1 and (duration == 0 or isGCD) then --usable
 
-					icon:SetInfo(icon.Alpha, 1, GetItemIcon(iName) or "Interface\\Icons\\INV_Misc_QuestionMark", start, duration, nil, nil, count, EnableStacks and count > 1 and count or "")
+					--icon:SetInfo(alpha, color, texture, start, duration, spellChecked, reverse, count, countText, forceupdate, unit)
+					icon:SetInfo(icon.Alpha, 1, GetItemIcon(iName) or "Interface\\Icons\\INV_Misc_QuestionMark", start, duration, icon.NameNameArray[i], nil, count, EnableStacks and count > 1 and count or "", nil, nil)
 
 					return
 				end
@@ -261,7 +270,7 @@ local function ItemCooldown_OnUpdate(icon, time)
 				end
 			end
 			if not NameFirst2 then
-				icon:SetAlpha(0)
+				icon:SetInfo(0)
 				return
 			end
 		else
@@ -289,9 +298,12 @@ local function ItemCooldown_OnUpdate(icon, time)
 			else
 				alpha, color = icon.UnAlpha, 1
 			end
-			icon:SetInfo(alpha, color, GetItemIcon(NameFirst2), start, duration, nil, nil, count, EnableStacks and count > 1 and count or "")
+			local name, _, _, _, _, _, _, _, _, texture = GetItemInfo(NameFirst2)
+			
+			--icon:SetInfo(alpha, color, texture, start, duration, spellChecked, reverse, count, countText, forceupdate, unit)
+			icon:SetInfo(alpha, color, texture, start, duration, name, nil, count, EnableStacks and count > 1 and count or "", nil, nil)
 		else
-			icon:SetAlpha(0)
+			icon:SetInfo(0)
 		end
 	end
 end
@@ -348,7 +360,8 @@ local function MultiStateCD_OnUpdate(icon, time)
 				alpha, color = icon.UnAlpha, 1
 			end
 
-			icon:SetInfo(alpha, color, GetActionTexture(Slot) or "Interface\\Icons\\INV_Misc_QuestionMark", start, duration, icon.NameFirst)
+			--icon:SetInfo(alpha, color, texture, start, duration, spellChecked, reverse, count, countText, forceupdate, unit)
+			icon:SetInfo(alpha, color, GetActionTexture(Slot) or "Interface\\Icons\\INV_Misc_QuestionMark", start, duration, icon.NameFirst, nil, nil, nil, nil, nil)
 		end
 	end
 end
@@ -383,6 +396,8 @@ function Type:Setup(icon, groupID, iconID)
 	if icon.CooldownType == "item" then
 		icon.NameFirst = TMW:GetItemIDs(icon, icon.Name, 1)
 		icon.NameArray = TMW:GetItemIDs(icon, icon.Name)
+		icon.NameNameArray = TMW:GetItemIDs(icon, icon.Name, nil, 1)
+		icon.NameNameArray = TMW:GetItemIDs(icon, icon.Name, nil, 1)
 
 		if not icon.NameFirst or icon.NameFirst == 0 then
 			icon:RegisterEvent("UNIT_INVENTORY_CHANGED")

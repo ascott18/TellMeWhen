@@ -83,7 +83,7 @@ local function ICD_OnEvent(icon, event, ...)
 		end
 		valid = g == pGUID and (p == "SPELL_AURA_APPLIED" or p == "SPELL_AURA_REFRESH" or p == "SPELL_ENERGIZE" or p == "SPELL_AURA_APPLIED_DOSE" or p == "SPELL_SUMMON")
 	elseif event == "UNIT_SPELLCAST_SUCCEEDED" or event == "UNIT_SPELLCAST_CHANNEL_START" or event == "UNIT_SPELLCAST_START" then
-		valid, n, _, _, i = ... -- i cheat. valid is actually a unitID here.
+		valid, n, _, _, i = ... -- I cheat. valid is actually a unitID here.
 		valid = valid == "player"
 	end
 	
@@ -96,6 +96,7 @@ local function ICD_OnEvent(icon, event, ...)
 
 			icon.ICDStartTime = TMW.time
 			icon.ICDDuration = icon.Durations[Key]
+			icon.ICDID = i
 		end
 	end
 end
@@ -108,10 +109,11 @@ local function ICD_OnUpdate(icon, time)
 		local ICDStartTime = icon.ICDStartTime
 		local ICDDuration = icon.ICDDuration
 
+		--icon:SetInfo(alpha, color, texture, start, duration, spellChecked, reverse, count, countText, forceupdate, unit)
 		if time - ICDStartTime > ICDDuration then
-			icon:SetInfo(icon.Alpha, 1, nil, 0, 0)
+			icon:SetInfo(icon.Alpha, 1, nil, 0, 0, icon.ICDID, nil, nil, nil, nil, nil)
 		else
-			icon:SetInfo(icon.UnAlpha, icon.Alpha ~= 0 and (icon.ShowTimer and 1 or .5) or 1, nil, ICDStartTime, ICDDuration)
+			icon:SetInfo(icon.UnAlpha, icon.Alpha ~= 0 and (icon.ShowTimer and 1 or .5) or 1, nil, ICDStartTime, ICDDuration, icon.ICDID, nil, nil, nil, nil, nil)
 		end
 	end
 end
@@ -125,7 +127,7 @@ function Type:Setup(icon, groupID, iconID)
 	icon.ICDStartTime = icon.ICDStartTime or 0
 	icon.ICDDuration = icon.ICDDuration or 0
 	
-	if TMW.IE and TMW.IE.Main.Name:IsVisible() and TMW.CI.ics == icon then
+	if TMW.IE and TMW.IE.Main.Name:IsVisible() and TMW.CI.ic == icon then
 		local Name = TMW.IE.Main.Name
 		local s = ""
 		local array = TMW:GetSpellNames(nil, Name:GetText())
@@ -135,7 +137,7 @@ function Type:Setup(icon, groupID, iconID)
 			end
 		end
 		if s ~= "" then
-			TMW.IE:ShowHelp(L["HELP_MISSINGDURS"], Name, 0, 0, icon, s)
+			TMW.IE:ShowHelp(L["HELP_MISSINGDURS"], Name, 0, 0, nil, s)
 		else
 			TMW.IE.Help:Hide()
 		end
