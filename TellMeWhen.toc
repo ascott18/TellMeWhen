@@ -53,6 +53,7 @@ TellMeWhen.lua
 
 Types\default.lua
 Types\cooldown.lua
+Types\item.lua
 Types\buff.lua
 Types\reactive.lua
 Types\wpnenchant.lua

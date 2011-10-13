@@ -235,6 +235,7 @@ function Type:Setup(icon, groupID, iconID)
 	icon:SetReverse(true)
 	icon.NAL = icon.NameNameHash[strlower(GetSpellInfo(8921))] and EFF_THR + 1 or #icon.NameArray
 	-- need to force any icon looking for moonfire to check all auras on the target because of a blizzard bug in WoW 4.1.
+	-- TODO: verify that the issue persists
 	
 	icon.NAL = icon.Sort and (#icon.NameArray > 1 or TMW.DS[icon.NameFirst]) and EFF_THR + 1 or icon.NAL
 	-- Force icons that sort to check all because it must find check all auras

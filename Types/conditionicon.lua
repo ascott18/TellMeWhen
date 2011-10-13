@@ -91,6 +91,10 @@ local function ConditionIcon_OnUpdate(icon, time)
 	end
 end
 
+function Type:GetNameForDisplay(icon, data)
+	return ""
+end
+
 
 Type.AllowNoName = true
 function Type:Setup(icon, groupID, iconID)

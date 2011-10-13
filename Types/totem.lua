@@ -149,4 +149,13 @@ function Type:Setup(icon, groupID, iconID)
 	icon:OnUpdate(TMW.time)
 end
 
+function Type:GetNameForDisplay(icon, data)
+	print(data)
+	if data then
+		return data
+	else
+		return icon.NameFirst, 1
+	end
+end
+
 TMW:RegisterIconType(Type)

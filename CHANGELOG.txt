@@ -1,5 +1,6 @@
 ===v4.6.2===
- * Began work on unit and spell name substitutions for text output
+ * Item cooldowns now have their own icon type.
+ * Added text substitutions for unit and spell names.
  * Bug Fixes:
  ** (r257) Fixed warnings for missing durations (they weren't showing up)
 

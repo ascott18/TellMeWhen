@@ -21,8 +21,6 @@ local L = TMW.L
 local db, UPD_INTV, ClockGCD, rc, mc, pr, ab
 local GetSpellCooldown, IsSpellInRange, IsUsableSpell =
 	  GetSpellCooldown, IsSpellInRange, IsUsableSpell
-local GetItemCooldown, IsItemInRange, IsEquippedItem, GetItemIcon, GetItemCount =
-	  GetItemCooldown, IsItemInRange, IsEquippedItem, GetItemIcon, GetItemCount
 local GetActionCooldown, IsActionInRange, IsUsableAction, GetActionTexture, GetActionInfo =
 	  GetActionCooldown, IsActionInRange, IsUsableAction, GetActionTexture, GetActionInfo
 local UnitRangedDamage =
@@ -38,13 +36,12 @@ local mindfreeze = strlower(GetSpellInfo(47528))
 local Type = {}
 LibStub("AceEvent-3.0"):Embed(Type)
 Type.type = "cooldown"
-Type.name = L["ICONMENU_COOLDOWN"]
+Type.name = L["ICONMENU_SPELLCOOLDOWN"]
 Type.TypeChecks = {
 	text = L["ICONMENU_COOLDOWNTYPE"],
 	setting = "CooldownType",
 	{ value = "spell", 			text = L["ICONMENU_SPELL"] },
 	{ value = "multistate", 	text = L["ICONMENU_MULTISTATECD"], 		tooltipText = L["ICONMENU_MULTISTATECD_DESC"] },
-	{ value = "item", 			text = L["ICONMENU_ITEM"] },
 }
 Type.WhenChecks = {
 	text = L["ICONMENU_SHOWWHEN"],
@@ -66,13 +63,6 @@ Type.RelevantSettings = {
 	DurationMinEnabled = true,
 	DurationMaxEnabled = true,
 	IgnoreRunes = (pclass == "DEATHKNIGHT"),
-	OnlyEquipped = true,
-	OnlyInBags = true,
-	EnableStacks = true,
-	StackMin = true,
-	StackMax = true,
-	StackMinEnabled = true,
-	StackMaxEnabled = true,
 }
 
 
@@ -202,113 +192,6 @@ local function SpellCooldown_OnUpdate(icon, time)
 end
 
 
--- yay for caching!
-local ItemCount = setmetatable({}, {__index = function(tbl, k)
-	if not k then return end
-	local count = GetItemCount(k, nil, 1)
-	tbl[k] = count
-	return count
-end}) Type.ItemCount = ItemCount
-function Type:BAG_UPDATE()
-	for k in pairs(ItemCount) do
-		ItemCount[k] = GetItemCount(k, nil, 1)
-	end
-end
-
-local function ItemCooldown_OnEvent(icon)
-	-- the reason for doing it like this is because this event will fire several times at once sometimes,
-	-- but there is no reason to recheck things until they are needed next.
-	icon.DoUpdateIDs = true
-end
-
-local function ItemCooldown_OnUpdate(icon, time)
-	if icon.UpdateTimer <= time - UPD_INTV then
-		icon.UpdateTimer = time
-		if icon.DoUpdateIDs then
-			local Name = icon.Name
-			icon.NameFirst = TMW:GetItemIDs(icon, Name, 1)
-			icon.NameArray = TMW:GetItemIDs(icon, Name)
-			icon.NameNameArray = TMW:GetItemIDs(icon, icon.Name, nil, 1)
-			icon.DoUpdateIDs = nil
-		end
-
-		local CndtCheck = icon.CndtCheck if CndtCheck and CndtCheck() then return end
-
-		local n, inrange, equipped, start, duration, isGCD, count = 1
-		local RangeCheck, OnlyEquipped, OnlyInBags, NameArray, EnableStacks = icon.RangeCheck, icon.OnlyEquipped, icon.OnlyInBags, icon.NameArray, icon.EnableStacks
-		for i = 1, #NameArray do
-			local iName = NameArray[i]
-			n = i
-			start, duration = GetItemCooldown(iName)
-			if duration then
-				inrange, equipped, count = 1, true, ItemCount[iName]
-				if RangeCheck then
-					inrange = IsItemInRange(iName, "target") or 1
-				end
-
-				if (OnlyEquipped and not IsEquippedItem(iName)) or (OnlyInBags and (count == 0)) then
-					equipped = false
-				end
-				isGCD = OnGCD(duration)
-				if equipped and inrange == 1 and (duration == 0 or isGCD) then --usable
-
-					--icon:SetInfo(alpha, color, texture, start, duration, spellChecked, reverse, count, countText, forceupdate, unit)
-					icon:SetInfo(icon.Alpha, 1, GetItemIcon(iName) or "Interface\\Icons\\INV_Misc_QuestionMark", start, duration, icon.NameNameArray[i], nil, count, EnableStacks and count > 1 and count or "", nil, nil)
-
-					return
-				end
-			end
-		end
-
-		local NameFirst2
-		if OnlyInBags then
-			for i = 1, #NameArray do
-				local iName = NameArray[i]
-				if (OnlyEquipped and IsEquippedItem(iName)) or (not OnlyEquipped and ItemCount[iName] > 0) then
-					NameFirst2 = iName
-					break
-				end
-			end
-			if not NameFirst2 then
-				icon:SetInfo(0)
-				return
-			end
-		else
-			NameFirst2 = icon.NameFirst
-		end
-		if n > 1 then -- if there is more than 1 spell that was checked then we need to get these again for the first spell, otherwise reuse the values obtained above since they are just for the first one
-			start, duration = GetItemCooldown(NameFirst2)
-			inrange, count = 1, ItemCount[NameFirst2]
-			if RangeCheck then
-				inrange = IsItemInRange(NameFirst2, "target") or 1
-			end
-			isGCD = OnGCD(duration)
-		end
-		if duration then
-
-			local alpha, color
-			if icon.Alpha ~= 0 then
-				if inrange ~= 1 then
-					alpha, color = icon.UnAlpha*rc.a, rc
-				elseif not icon.ShowTimer then
-					alpha, color = icon.UnAlpha, 0.5
-				else
-					alpha, color = icon.UnAlpha, 1
-				end
-			else
-				alpha, color = icon.UnAlpha, 1
-			end
-			local name, _, _, _, _, _, _, _, _, texture = GetItemInfo(NameFirst2)
-			
-			--icon:SetInfo(alpha, color, texture, start, duration, spellChecked, reverse, count, countText, forceupdate, unit)
-			icon:SetInfo(alpha, color, texture, start, duration, name, nil, count, EnableStacks and count > 1 and count or "", nil, nil)
-		else
-			icon:SetInfo(0)
-		end
-	end
-end
-
-
 local function MultiStateCD_OnEvent(icon)
 	local actionType, spellID = GetActionInfo(icon.Slot) -- check the current slot first, because it probably didnt change
 		if actionType == "spell" and spellID == icon.NameFirst then
@@ -393,38 +276,6 @@ function Type:Setup(icon, groupID, iconID)
 		
 		icon:OnUpdate(TMW.time)
 	end
-	if icon.CooldownType == "item" then
-		icon.NameFirst = TMW:GetItemIDs(icon, icon.Name, 1)
-		icon.NameArray = TMW:GetItemIDs(icon, icon.Name)
-		icon.NameNameArray = TMW:GetItemIDs(icon, icon.Name, nil, 1)
-		icon.NameNameArray = TMW:GetItemIDs(icon, icon.Name, nil, 1)
-
-		if not icon.NameFirst or icon.NameFirst == 0 then
-			icon:RegisterEvent("UNIT_INVENTORY_CHANGED")
-			icon:SetScript("OnEvent", ItemCooldown_OnEvent)
-		else
-			for _, n in ipairs(TMW:SplitNames(icon.Name)) do
-				n = tonumber(strtrim(n))
-				if n and n <= 19 then
-					icon:RegisterEvent("PLAYER_EQUIPMENT_CHANGED")
-					icon:SetScript("OnEvent", ItemCooldown_OnEvent)
-					break
-				end
-			end
-		end
-
-		icon.ShowPBar = nil
-		if icon.OnlyEquipped then
-			icon.OnlyInBags = true
-		end
-
-		icon:SetTexture(TMW:GetConfigIconTexture(icon, 1))
-		
-		Type:RegisterEvent("BAG_UPDATE")
-		
-		icon:SetScript("OnUpdate", ItemCooldown_OnUpdate)
-		icon:OnUpdate(TMW.time)
-	end
 	if icon.CooldownType == "multistate" then
 		icon.NameFirst = TMW:GetSpellNames(icon, icon.Name, 1)
 
@@ -451,23 +302,6 @@ function Type:Setup(icon, groupID, iconID)
 end
 
 function Type:IE_TypeLoaded()
-	local IE = TMW.IE
-	IE:LoadSettings()
-	if TMW.CI.SoI == "item" then
-		IE.Main.ShowPBar:SetEnabled(nil)
-		IE.Main.ShowCBar:SetEnabled(1)
-		
-	--	IE.Main.StackMin:Show()
-	--	IE.Main.StackMax:Show()
-	--	IE.Main.StackMinEnabled:Show()
-	--	IE.Main.StackMaxEnabled:Show()
-	else
-		IE.Main.StackMin:Hide()
-		IE.Main.StackMax:Hide()
-		IE.Main.StackMinEnabled:Hide()
-		IE.Main.StackMaxEnabled:Hide()
-	end
-	
 	local Name = TMW.IE.Main.Name
 	Name.__text = TMW.CI.IMS and L["CHOOSENAME_DIALOG_MSCD"] or L["CHOOSENAME_DIALOG"]
 	Name:GetScript("OnTextChanged")(Name)

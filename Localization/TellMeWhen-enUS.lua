@@ -56,7 +56,8 @@ L["CONDITIONALPHA_CONDITIONICON_DESC"] = "This will be used when the duration re
 
 
 L["ICONMENU_TYPE"] = "Icon type"
-L["ICONMENU_COOLDOWN"] = "Cooldown"
+L["ICONMENU_SPELLCOOLDOWN"] = "Spell Cooldown"
+L["ICONMENU_ITEMCOOLDOWN"] = "Item Cooldown"
 L["ICONMENU_BUFFDEBUFF"] = "Buff/Debuff"
 L["ICONMENU_REACTIVE"] = "Reactive Ability"
 L["ICONMENU_REACTIVE_DESC"] = "Reactive abilities are things like Kill Shot, Revenge, and Conflagrate - abilities that are only usable when certain conditions are met.  Use this icon type to track their usability."
@@ -725,7 +726,10 @@ L["ANN_EDITBOX_DESC"] = [[Type the text that you wish to be outputted when the e
 
 "%t" - Target's Name
 "%f" - Focus's Name
-"%m" - Mouseover's Name]]
+"%m" - Mouseover's Name
+
+"%u" - Name of current unit being checked
+"%s" - Current spell/item being checked]]
 L["MOUSEOVER_TOKEN_NOT_FOUND"] = "<no mouseover>"
 L["ANN_STICKY"] = "Sticky"
 L["ANN_SHOWICON"] = "Show icon texture"

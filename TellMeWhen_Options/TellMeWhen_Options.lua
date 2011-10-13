@@ -1797,13 +1797,11 @@ IE.LeftChecks = {
 		setting = "OnlyInBags",
 		title = L["ICONMENU_ONLYBAGS"],
 		tooltip = L["ICONMENU_ONLYBAGS_DESC"],
-		hidden = function() return CI.SoI ~= "item" end,
 	},
 	{
 		setting = "OnlyEquipped",
 		title = L["ICONMENU_ONLYEQPPD"],
 		tooltip = L["ICONMENU_ONLYEQPPD_DESC"],
-		hidden = function() return CI.SoI ~= "item" end,
 		clickhook = function(self, button)
 			if CI.ics and self:GetParent().OnlyInBags then
 				local checked = not not self:GetChecked()
@@ -1826,7 +1824,6 @@ IE.LeftChecks = {
 		setting = "EnableStacks",
 		title = L["ICONMENU_SHOWSTACKS"],
 		tooltip = L["ICONMENU_SHOWSTACKS_DESC"],
-		hidden = function() return CI.SoI ~= "item" end,
 	},
 	{
 		setting = "RangeCheck",
@@ -1837,7 +1834,6 @@ IE.LeftChecks = {
 		setting = "ManaCheck",
 		title = L["ICONMENU_MANACHECK"],
 		tooltip = L["ICONMENU_MANACHECK_DESC"],
-		hidden = function() return CI.SoI == "item" end,
 	},
 	{
 		setting = "CooldownCheck",
@@ -1858,7 +1854,6 @@ IE.LeftChecks = {
 		title = L["ICONMENU_IGNORERUNES"],
 		tooltip = L["ICONMENU_IGNORERUNES_DESC"],
 		disabledtooltip = L["ICONMENU_IGNORERUNES_DESC_DISABLED"],
-		hidden = function() return CI.SoI == "item" end,
 	},
 }
 
@@ -2242,22 +2237,23 @@ function IE:Reset()
 end
 
 function IE:ShowHelp(text, frame, x, y, noclose, ...)
-	text = format(text, ...)
 	local current = IE.Help.current
 	
 	if current.noclose then return end
 	
+	text = format(text, ...)
 	current.text = text
 	current.frame = frame
 	current.x = x
 	current.y = y
 	current.noclose = noclose
-		
+	
 	IE.Help:ClearAllPoints()
 	IE.Help:SetPoint("TOPRIGHT", frame, "LEFT", (x or 0) - 30, (y or 0) + 28)
 	IE.Help.text:SetText(text)
 	IE.Help:SetHeight(IE.Help.text:GetHeight() + 38)
-	local parent = frame.CreateTexture and frame or frame:GetParent()
+	
+	local parent = frame.CreateTexture and frame or frame:GetParent() -- if the frame has the CreateTexture method, then it can be made the parent. Otherwise, the frame is actually a texture/font/etc object, so set 
 	IE.Help:SetParent(parent)
 	IE.Help:Show()
 end
@@ -3644,7 +3640,8 @@ function SUG:OnInitialize()
 			if didrunhook then return end
 			
 			do	--validate all old items in the item cache
-				local handle
+			
+				-- function to call once data about items has been collected from the server
 				function SUG:ValidateItemIDs()
 					--all data should be in by now, see what actually exists.
 					for id in pairs(ItemCache) do
@@ -3853,7 +3850,7 @@ function SUG:ACTIONBAR_SLOT_CHANGED()
 end
 
 function SUG:GET_ITEM_INFO_RECEIVED()
-	if (SUG.overrideSoI or CI.SoI) == "item" and SUG.Suggest:IsShown() then
+	if (SUG.overrideSoI or CI.t) == "item" and SUG.Suggest:IsShown() then
 		SUG:SuggestingComplete()
 	end
 end
@@ -3974,7 +3971,7 @@ function SUG.Sorter(a, b)
 end
 
 function SUG:DoSuggest()
-	SUGSoI = SUG.overrideSoI or CI.SoI
+	SUGSoI = (CI.t == "item" and "item") or SUG.overrideSoI or "spell" -- TODO: modularize this somehow so this hardcoded check for items isnt here
 	local atBeginning = SUG.atBeginning
 	local overrideSoI = SUG.overrideSoI
 	local t = CI.t
@@ -4044,7 +4041,7 @@ end
 function SUG:SuggestingComplete(doSort)
 	SUG.offset = min(SUG.offset, max(0, #SUGpreTable-#SUG+1))
 	local offset = SUG.offset
-	SUGSoI = SUG.overrideSoI or CI.SoI
+	SUGSoI = (CI.t == "item" and "item") or SUG.overrideSoI or "spell"
 	SUGIMS = CI.IMS
 	if doSort then
 		sort(SUGpreTable, SUG.Sorter)

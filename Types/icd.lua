@@ -127,7 +127,7 @@ function Type:Setup(icon, groupID, iconID)
 	icon.ICDStartTime = icon.ICDStartTime or 0
 	icon.ICDDuration = icon.ICDDuration or 0
 	
-	if TMW.IE and TMW.IE.Main.Name:IsVisible() and TMW.CI.ic == icon then
+	if icon:IsBeingEdited() == 1 then
 		local Name = TMW.IE.Main.Name
 		local s = ""
 		local array = TMW:GetSpellNames(nil, Name:GetText())

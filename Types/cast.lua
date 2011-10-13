@@ -93,6 +93,10 @@ local function Cast_OnUpdate(icon, time)
 	end
 end
 
+function Type:GetNameForDisplay(icon, data)
+	return data
+end
+
 
 
 Type.AllowNoName = true

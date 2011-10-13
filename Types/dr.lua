@@ -167,6 +167,10 @@ local function DR_OnUpdate(icon, time)
 	end
 end
 
+function Type:GetNameForDisplay(icon, data)
+	return data and (L[data] or gsub(data, "DR%-", ""))
+end
+
 local warnedMismatch = {}
 function Type:Setup(icon, groupID, iconID)
 	icon.ShowPBar = false
@@ -184,13 +188,14 @@ function Type:Setup(icon, groupID, iconID)
 					firstCategory = category
 					icon.firstCategory = category
 				end
-				if firstCategory ~= category and not db.profile.Locked and (not warnedMismatch[icon] or TMW.IE.Main.Name:IsVisible()) then
+				if firstCategory ~= category then
 					if not warnedMismatch[icon] then
 						TMW:Printf(L["WARN_DRMISMATCH"], groupID, iconID)
 						warnedMismatch[icon] = 1
 					end
-					
-					TMW.IE:ShowHelp(L["WARN_DRMISMATCH"], TMW.IE.Main.Name, 0, 0, nil, groupID, iconID)
+					if icon:IsBeingEdited() == 1 then
+						TMW.IE:ShowHelp(L["WARN_DRMISMATCH"], TMW.IE.Main.Name, 0, 0, nil, groupID, iconID)
+					end
 					dobreak=1
 					break
 				end

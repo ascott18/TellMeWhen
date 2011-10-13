@@ -34,7 +34,7 @@ local DRData = LibStub("DRData-1.0", true)
 TELLMEWHEN_VERSION = "4.6.2"
 TELLMEWHEN_VERSION_MINOR = strmatch(" @project-version@", " r%d+") or ""
 TELLMEWHEN_VERSION_FULL = TELLMEWHEN_VERSION .. TELLMEWHEN_VERSION_MINOR
-TELLMEWHEN_VERSIONNUMBER = 46201 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
+TELLMEWHEN_VERSIONNUMBER = 46203 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
 if TELLMEWHEN_VERSIONNUMBER > 47000 or TELLMEWHEN_VERSIONNUMBER < 46000 then return error("YOU SCREWED UP THE VERSION NUMBER OR DIDNT CHANGE THE SAFETY LIMITS") end -- safety check because i accidentally made the version number 414069 once
 
 TELLMEWHEN_MAXGROUPS = 1 	--this is a default, used by SetTheory (addon), so dont rename
@@ -68,6 +68,7 @@ local runEvents, updatePBar = 1, 1
 local GCD, NumShapeshiftForms, UpdateTimer = 0, 0, 0
 local IconUpdateFuncs, GroupUpdateFuncs, unitsToChange = {}, {}, {}
 local GroupBase, IconBase = {}, {}
+ loweredbackup = {}
 local time = GetTime() TMW.time = time
 local sctcolor = {r=1, b=1, g=1}
 local clientVersion = select(4, GetBuildInfo())
@@ -668,7 +669,7 @@ if DRData then
 	end
 	local dr = TMW.BE.dr
 	for spellID, category in pairs(DRData.spells) do
-		local k = myCategories[category] or print("DR-"..category, "MISSING DR CATEGORY!")
+		local k = myCategories[category] or TMW:Error("TMW: The DR category %q is undefined!", 0, category)
 		dr[k] = (dr[k] and (dr[k] .. ";" .. spellID)) or tostring(spellID)
 	end
 end
@@ -1005,8 +1006,8 @@ end
 
 function TMW:OnInitialize()
 	CNDT = TMW.CNDT
-	if not rawget(Types, "") then
-		-- this also includes upgrading from older than 3.0 (pre-Ace3 DB settings), and the addition of conditions.lua
+	if not rawget(Types, "item") then
+		-- this also includes upgrading from older than 3.0 (pre-Ace3 DB settings)
 		StaticPopupDialogs["TMW_RESTARTNEEDED"] = {
 			text = L["ERROR_MISSINGFILE"],
 			button1 = EXIT_GAME,
@@ -1016,7 +1017,7 @@ function TMW:OnInitialize()
 			showAlert = true,
 			whileDead = true,
 		}
-		StaticPopup_Show("TMW_RESTARTNEEDED", TELLMEWHEN_VERSION_FULL, "default.lua")
+		StaticPopup_Show("TMW_RESTARTNEEDED", TELLMEWHEN_VERSION_FULL, "item.lua")
 	end
 
 	if type(TellMeWhenDB) ~= "table" then
@@ -1314,6 +1315,14 @@ function TMW:GetUpgradeTable() -- upgrade functions
 	if upgradeTable then return upgradeTable end
 	local t = {
 	
+		[46202] = {
+			icon = function(ics)
+				if ics.CooldownType == "item" and ics.Type == "cooldown" then
+					ics.Type = "item"
+					ics.CooldownType = TMW.Icon_Defaults.CooldownType
+				end
+			end,
+		},
 		[45802] = {
 			icon = function(ics)
 				for i, condition in pairs(ics.Conditions) do
@@ -1971,8 +1980,10 @@ function TMW:GlobalUpgrade()
 	TellMeWhenDB.Version = TELLMEWHEN_VERSIONNUMBER -- pre-default upgrades complete!
 end
 
-function TMW:Error(text, level)
-	geterrorhandler()("TellMeWhen: " .. (text or ""), level)
+function TMW:Error(text, level, ...)
+	text = text or ""
+	text = format(text, ...)
+	geterrorhandler()("TellMeWhen: " .. (text), level)
 end
 
 function TMW:Upgrade()
@@ -2509,6 +2520,72 @@ local function PwrBarOnUpdate(bar)
 	end
 end
 
+function IconBase.SetAlpha(icon, alpha)
+	if alpha ~= icon.__alpha then
+		if alpha == 0 then
+			local data = icon.OnHide
+			if data then
+				icon:HandleEvent(data)
+			end
+		elseif icon.__alpha == 0 then
+			local data = icon.OnShow
+			if data then
+				icon:HandleEvent(data)
+			end
+		elseif alpha > icon.__alpha then
+			local data = icon.OnAlphaInc
+			if data then
+				icon:HandleEvent(data)
+			end
+		else -- it must be less than, because it isnt greater than and it isnt the same --if alpha < icon.__alpha then
+			local data = icon.OnAlphaDec
+			if data then
+				icon:HandleEvent(data)
+			end
+		end
+		icon:setalpha(icon.FakeHidden or alpha) -- setalpha(lowercase) is the old, raw SetAlpha.
+		icon.__alpha = alpha
+	end
+end
+
+function IconBase.SetScript(icon, handler, func, dontnil)
+	if func ~= nil or not dontnil then
+		icon[handler] = func
+	end
+	if handler ~= "OnUpdate" then
+		icon:setscript(handler, func)
+	else
+		tDeleteItem(IconUpdateFuncs, icon)
+		if func then
+			IconUpdateFuncs[#IconUpdateFuncs+1] = icon
+		end
+		sort(IconUpdateFuncs, IconScriptSort)
+	end
+end
+
+function IconBase.SetTexture(icon, tex)
+	--if icon.__tex ~= tex then ------dont check for this, checking is done before this method is even called
+	tex = icon.OverrideTex or tex
+	icon.__tex = tex
+	icon.texture:SetTexture(tex)
+end
+
+function IconBase.SetReverse(icon, reverse)
+	icon.__reverse = reverse
+	icon.cooldown:SetReverse(reverse)
+end
+
+function IconBase.IsBeingEdited(icon)
+	if TMW.IE and TMW.CI.ic == icon and TMW.IE.CurrentTab and TellMeWhen_IconEditor:IsVisible() then
+		return TMW.IE.CurrentTab:GetID()
+	end
+end
+
+function IconBase.RegisterEvent(icon, event)
+	icon:registerevent(event)
+	icon.__hasEvents = 1
+end
+
 function IconBase.HandleEvent(icon, data, played, announced)
 	if not runEvents then return end
 	local Sound = data.SoundData
@@ -2532,10 +2609,15 @@ function IconBase.HandleEvent(icon, data, played, announced)
 			Text = gsub(Text, "%%[Mm]", UnitName("mouseover") or L["MOUSEOVER_TOKEN_NOT_FOUND"])
 		end
 		if strfind(Text, "%%[Uu]") then
-			Text = gsub(Text, "%%[Uu]", UnitName(icon.__unit or "") or "")
+			Text = gsub(Text, "%%[Uu]", UnitName(icon.__CurrentUnit or "") or "?")
 		end
 		if strfind(Text, "%%[Ss]") then
-			Text = gsub(Text, "%%[Ss]", icon.spellChecked or "")
+			local name, checkcase = icon.typeData:GetNameForDisplay(icon, icon.__CurrentSpell)
+			name = name or "?"
+			if checkcase then
+				name = loweredbackup[name] or name
+			end
+			Text = gsub(Text, "%%[Ss]", name)
 		end
 		
 		if Channel == "MSBT" then
@@ -2600,66 +2682,6 @@ function IconBase.HandleEvent(icon, data, played, announced)
 	return played, announced
 end
 
-function IconBase.SetAlpha(icon, alpha)
-	if alpha ~= icon.__alpha then
-		if alpha == 0 then
-			local data = icon.OnHide
-			if data then
-				icon:HandleEvent(data)
-			end
-		elseif icon.__alpha == 0 then
-			local data = icon.OnShow
-			if data then
-				icon:HandleEvent(data)
-			end
-		elseif alpha > icon.__alpha then
-			local data = icon.OnAlphaInc
-			if data then
-				icon:HandleEvent(data)
-			end
-		else -- it must be less than, because it isnt greater than and it isnt the same --if alpha < icon.__alpha then
-			local data = icon.OnAlphaDec
-			if data then
-				icon:HandleEvent(data)
-			end
-		end
-		icon:setalpha(icon.FakeHidden or alpha) -- setalpha(lowercase) is the old, raw SetAlpha.
-		icon.__alpha = alpha
-	end
-end
-
-function IconBase.SetScript(icon, handler, func, dontnil)
-	if func ~= nil or not dontnil then
-		icon[handler] = func
-	end
-	if handler ~= "OnUpdate" then
-		icon:setscript(handler, func)
-	else
-		tDeleteItem(IconUpdateFuncs, icon)
-		if func then
-			IconUpdateFuncs[#IconUpdateFuncs+1] = icon
-		end
-		sort(IconUpdateFuncs, IconScriptSort)
-	end
-end
-
-function IconBase.SetTexture(icon, tex)
-	--if icon.__tex ~= tex then ------dont check for this, checking is done before this method is even called
-	tex = icon.OverrideTex or tex
-	icon.__tex = tex
-	icon.texture:SetTexture(tex)
-end
-
-function IconBase.RegisterEvent(icon, event)
-	icon:registerevent(event)
-	icon.__hasEvents = 1
-end
-
-function IconBase.SetReverse(icon, reverse)
-	icon.__reverse = reverse
-	icon.cooldown:SetReverse(reverse)
-end
-
 function IconBase.SetInfo(icon, alpha, color, texture, start, duration, spellChecked, reverse, count, countText, forceupdate, unit)
 	-- icon				- the icon object to set the attributes on (frame) (but call as icon:SetInfo(alpha, ...) , nil, nil)
 	-- [alpha]			- the alpha to set the icon to (number); (nil) defaults to 0
@@ -2690,8 +2712,8 @@ function IconBase.SetInfo(icon, alpha, color, texture, start, duration, spellChe
 	alpha = alpha or 0
 	duration = duration or 0
 	start = start or 0
-	icon.__unit = unit or (icon.Units and icon.Units[1])
-	icon.spellChecked = spellChecked or icon.spellChecked
+	icon.__CurrentUnit = unit or (icon.Units and icon.Units[1])
+	icon.__CurrentSpell = spellChecked
 	
 	if duration == 0.001 then duration = 0 end -- hardcode fix for tricks of the trade. nice hardcoding, blizzard
 	local d = duration - (time - start)
@@ -2900,9 +2922,19 @@ local iconMT = {
 }
 
 
+local TypeBase = {}
+local typeMT = {
+	__index = TypeBase,
+}
+
+function TypeBase:GetNameForDisplay(icon, data)
+	local name = data and GetSpellInfo(data) or data
+	return name, true
+end
+
 function TMW:RegisterIconType(Type)
 	local typekey = Type.type
-	
+	setmetatable(Type, typeMT)
 	for setting, b in pairs(RelevantToAll) do
 		-- merge settings that are relevant to all (or most) icon types into the RelevantSettings table.
 		-- values that are explicitly set false have been disabled for the icon type, so only set something on the table if the current value is nil.
@@ -3006,6 +3038,8 @@ function TMW:Icon_Update(icon)
 	local groupID = icon.group:GetID()
 	local group = icon.group
 	local ics = db.profile.Groups[groupID].Icons[iconID]
+	local typeData = Types[ics.Type]
+	icon.typeData = typeData
 
 	local dontreassign
 	if not runEvents then
@@ -3015,12 +3049,14 @@ function TMW:Icon_Update(icon)
 	end
 
 	icon.__previousNameFirst = icon.NameFirst -- used to detect changes in the name that would cause a texture change
+	icon.__CurrentUnit = nil
+	icon.__CurrentSpell = nil
 	
 	for k in pairs(TMW.Icon_Defaults) do
 		icon[k] = nil --lets clear any settings that might get left behind.
 	end
 
-	for k, v in pairs(Types[ics.Type].RelevantSettings) do
+	for k, v in pairs(typeData.RelevantSettings) do
 		icon[k] = v and ics[k]
 	end
 
@@ -3303,6 +3339,7 @@ function string:toseconds()
 	return seconds 
 end
 
+
 function TMW:lowerNames(str)
 	-- converts a string, or all values of a table, to lowercase. Numbers are kept as numbers.
 	if type(str) == "table" then -- handle a table with recursion
@@ -3319,7 +3356,10 @@ function TMW:lowerNames(str)
 		end
 	end
 	
-	return tonumber(str) or strlower(str)
+	local ret = tonumber(str) or strlower(str)
+	loweredbackup[ret] = str
+	
+	return ret
 end
 
 local function getCacheString(...)
@@ -3334,7 +3374,7 @@ function TMW:EquivToTable(name)
 	local cachestring = getCacheString(name, TMW.BE)
 	if eqttcache[cachestring] then return eqttcache[cachestring] end -- if we already made a table of this string, then reuse it to not create garbage
 	
-	name = strlower(name) -- everything in this function is handled as lowercase to prevent issues with user input capitalization
+	name = strlower(name) -- everything in this function is handled as lowercase to prevent issues with user input capitalization. DONT use TMW:lowerNames() here.
 	local eqname, duration = strmatch(name, "(.-):([%d:%s%.]*)$") -- see if the string being checked has a duration attached to it (it really shouldn't because there is currently no point in doing so, but a user did try this and made a bug report, so I fixed it anyway
 	name = eqname or name -- if there was a duration, then replace the old name with the actual name without the duration attached
 	

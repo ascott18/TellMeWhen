@@ -347,7 +347,7 @@ function Type:Setup(icon, groupID, iconID)
 	icon.Durations = TMW:GetSpellDurations(icon, icon.Name)
 	icon.Units = TMW:GetUnits(icon, icon.Unit)
 	
-	if TMW.IE and TMW.IE.Main.Name:IsVisible() and TMW.CI.ic == icon then
+	if icon:IsBeingEdited() == 1 then
 		local Name = TMW.IE.Main.Name
 		local s = ""
 		local array = TMW:GetSpellNames(nil, Name:GetText())
