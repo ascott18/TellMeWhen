@@ -59,6 +59,21 @@ local points = {
 	BOTTOM = L["BOTTOM"],
 	BOTTOMRIGHT = L["BOTTOMRIGHT"],
 }
+local stratas = {
+	"BACKGROUND",
+	"LOW",
+	"MEDIUM",
+	"HIGH",
+	"DIALOG",
+	"FULLSCREEN",
+	"FULLSCREEN_DIALOG",
+	"TOOLTIP",
+}
+local strataDisplay = {}
+for k, v in pairs(stratas) do
+	strataDisplay[k] = L["STRATA_"..v]
+end
+
 local print = TMW.print
 
 TMW.Backupdb = CopyTable(TellMeWhenDB)
@@ -789,7 +804,7 @@ local groupConfigTemplate = {
 					end,
 					get = function(info) return db.profile.Groups[findid(info)].Scale end,
 				},
-				level = {
+				Level = {
 					name = L["UIPANEL_LEVEL"],
 					type = "range",
 					order = 7,
@@ -803,11 +818,31 @@ local groupConfigTemplate = {
 					end,
 					get = function(info) return db.profile.Groups[findid(info)].Level end,
 				},
+				Strata = {
+					name = L["UIPANEL_STRATA"],
+					type = "select",
+					style = "dropdown",
+					order = 8,
+					set = function(info, val)
+						local g = findid(info)
+						db.profile.Groups[g].Strata = stratas[val]
+						TMW[g]:SetPos()
+					end,
+					get = function(info)
+						local val = db.profile.Groups[findid(info)].Strata
+						for k, v in pairs(stratas) do
+							if v == val then
+								return k
+							end
+						end
+					end,
+					values = strataDisplay,
+				},
 				lock = {
 					name = L["UIPANEL_LOCK"],
 					desc = L["UIPANEL_LOCK_DESC"],
 					type = "toggle",
-					order = 11,
+					order = 40,
 					set = function(info, val)
 						local g = findid(info)
 						db.profile.Groups[g].Locked = val
@@ -819,7 +854,7 @@ local groupConfigTemplate = {
 					name = L["UIPANEL_GROUPRESET"],
 					desc = L["UIPANEL_TOOLTIP_GROUPRESET"],
 					type = "execute",
-					order = 12,
+					order = 50,
 					func = function(info) TMW:Group_ResetPosition(findid(info)) end
 				},
 			},

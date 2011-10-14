@@ -126,7 +126,7 @@ L["ICONMENU_BINDTEXT_DESC"] = [[Any text in this editbox will be shown on the ic
 The following substitutions may be used to customize the text shown:
 
 "%u" - Name of current unit being checked
-"%s" - Current spell/item being checked]]
+"%s" - Current spell/item/etc being checked]]
 
 
 
@@ -400,6 +400,7 @@ L["ASCENDING"] = "Ascending"
 L["DESCENDING"] = "Descending"
 L["UIPANEL_SCALE"] = "Scale"
 L["UIPANEL_LEVEL"] = "Frame Level"
+L["UIPANEL_STRATA"] = "Frame Strata"
 L["UIPANEL_LOCK"] = "Lock Group"
 L["UIPANEL_LOCK_DESC"] = "Lock this group, preventing movement or sizing by dragging the group or the scale tab."
 
@@ -750,7 +751,7 @@ L["ANN_EDITBOX_DESC"] = [[Type the text that you wish to be outputted when the e
 "%m" - Mouseover's Name
 
 "%u" - Name of current unit being checked
-"%s" - Current spell/item being checked]]
+"%s" - Current spell/item/etc being checked]]
 L["MOUSEOVER_TOKEN_NOT_FOUND"] = "<no mouseover>"
 L["ANN_STICKY"] = "Sticky"
 L["ANN_SHOWICON"] = "Show icon texture"
@@ -813,6 +814,15 @@ L["RIGHT"] = "Right"
 L["BOTTOMLEFT"] = "Bottom Left"
 L["BOTTOM"] = "Bottom"
 L["BOTTOMRIGHT"] = "Bottom Right"
+
+L["STRATA_BACKGROUND"] = "Background"
+L["STRATA_LOW"] = "Low"
+L["STRATA_MEDIUM"] = "Medium"
+L["STRATA_HIGH"] = "High"
+L["STRATA_DIALOG"] = "Dialog"
+L["STRATA_FULLSCREEN"] = "Fullscreen"
+L["STRATA_FULLSCREEN_DIALOG"] = "Fullscreen Dialog"
+L["STRATA_TOOLTIP"] = "Tooltip"
 
 -- --------
 -- EQUIVS
