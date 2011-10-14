@@ -56,6 +56,9 @@ Type.RelevantSettings = {
 	StackMinEnabled = true,
 	StackMaxEnabled = true,
 }
+Type.DisabledEvents = {
+	OnUnit = true,
+}
 
 
 function Type:Update()

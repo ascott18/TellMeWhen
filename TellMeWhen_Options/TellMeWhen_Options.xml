@@ -1225,21 +1225,12 @@
 			</Layer>
 		</Layers>
 	</Button>
-	<Button name="TellMeWhen_SoundEvent" virtual="true" >
-		<Size y="30"/>
+	<Button name="TellMeWhen_SoundEvent" virtual="true" inherits="TellMeWhen_AnnounceEvent">
 		<Scripts>
 			<OnClick>
 				TMW.SND:SelectEvent(self:GetID())
 			</OnClick>
 		</Scripts>
-		<NormalFont style="GameFontNormal"/>
-		<HighlightFont style="GameFontHighlight"/>
-		<HighlightTexture file="Interface\QuestFrame\UI-QuestLogTitleHighlight" alphaMode="ADD">
-			<Anchors>
-				<Anchor point="TOPLEFT" y="1"/>
-				<Anchor point="BOTTOMRIGHT" y="1"/>
-			</Anchors>
-		</HighlightTexture>
 		<Frames>
 			<Button name="$parentPlay" parentKey="Play" virtual="true">
 				<NormalTexture file="Interface\Common\VoiceChat-Speaker"/>
@@ -1272,24 +1263,7 @@
 				</Anchors>
 			</Button>
 		</Frames>
-		<Layers>
-			<Layer level="OVERLAY">
-				<FontString name="$parentEventName" parentKey="EventName" inherits="GameFontNormal" justifyH="LEFT" text="Serpent Sting Sting Sting Sting Sting">
-					<Anchors>
-						<Anchor point="TOPLEFT" x="3" y="-2"/>
-						<Anchor point="RIGHT" relativeTo="$parentPlay" relativePoint="LEFT" x="-1"/>
-					</Anchors>
-				</FontString>
-				<FontString name="$parentSoundName" parentKey="SoundName" inherits="GameFontHighlight" justifyH="LEFT" text="Serpent Sting Sting Sting Sting Sting">
-					<Anchors>
-						<Anchor point="BOTTOMLEFT" x="3" y="2"/>
-						<Anchor point="RIGHT"/>
-					</Anchors>
-				</FontString>
-			</Layer>
-		</Layers>
 	</Button>
-
 	<Button name="TellMeWhen_ChannelSelectButton" virtual="true" >
 		<Size y="14"/>
 		<Scripts>
@@ -1326,12 +1300,23 @@
 	<Button name="TellMeWhen_AnnounceEvent" virtual="true" >
 		<Size y="30"/>
 		<Scripts>
-			<OnLoad>
-			--	self.Background:SetVertexColor(0, 1, 0)
-			</OnLoad>
 			<OnClick>
 				TMW.ANN:SelectEvent(self:GetID())
 			</OnClick>
+			<OnDisable>
+				self.EventName:SetFontObject(GameFontDisable)
+				self.DataText:SetFontObject(GameFontDisable)
+				if self.Play then
+					self.Play:Disable()
+				end
+			</OnDisable>
+			<OnEnable>
+				self.EventName:SetFontObject(GameFontNormal)
+				self.DataText:SetFontObject(GameFontHighlight)
+				if self.Play then
+					self.Play:Enable()
+				end
+			</OnEnable>
 		</Scripts>
 		<NormalFont style="GameFontNormal"/>
 		<HighlightFont style="GameFontHighlight"/>
@@ -1349,7 +1334,7 @@
 						<Anchor point="RIGHT" relativeTo="$parentPlay" relativePoint="LEFT" x="-1"/>
 					</Anchors>
 				</FontString>
-				<FontString name="$parentChannelName" parentKey="ChannelName" inherits="GameFontHighlight" justifyH="LEFT" text="Serpent Sting Sting Sting Sting Sting">
+				<FontString name="$parentDataText" parentKey="DataText" inherits="GameFontHighlight" justifyH="LEFT" >
 					<Anchors>
 						<Anchor point="BOTTOMLEFT" x="3" y="2"/>
 						<Anchor point="RIGHT"/>
@@ -1633,7 +1618,7 @@
 						<Scripts>
 							<OnLoad>
 								self.exponent = 4
-								self.max = 1000
+								self.max = 5000
 								self.text:SetText(TMW.L["CACHINGSPEED"])
 								self:SetMinMaxValues(1, (self.max^(1/self.exponent)))
 								_G[self:GetName() .. "Low"]:SetText(1)

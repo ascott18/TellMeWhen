@@ -121,11 +121,12 @@ L["ICONMENU_DRS"] = "Diminishing Returns"
 L["ICONMENU_CUSTOMTEX"] = "Custom Texture"
 L["ICONMENU_CUSTOMTEX_DESC"] = "If you want to override the texture shown by this icon, enter the Name or ID of the spell that has the texture that you want to use. You may also enter a texture path, such as 'Interface/Icons/spell_nature_healingtouch', or just 'spell_nature_healingtouch' if the path is 'Interface/Icons'"
 
-L["ICONMENU_BINDTEXT_DESC"] = [[Any text in this editbox will be shown on the icon where the keybinding is normally displayed on an action bar. Use this to remind yourself of what your keybinds are if you do not have your action bars shown.
+L["ICONMENU_BINDTEXT_DESC"] = [[Any text in this editbox will be shown on the icon where the keybinding is normally displayed on an action bar. This does NOT set a keybinding to this TellMeWhen icon. It is simply a visual reminder that will be shown on the icon. The text can be configured in this group's settings.
 
-This does NOT set a keybinding to this TellMeWhen icon. It is simply a visual reminder that will be shown on the icon.
+The following substitutions may be used to customize the text shown:
 
-The text can be configured in this group's settings.]]
+"%u" - Name of current unit being checked
+"%s" - Current spell/item being checked]]
 
 
 
@@ -684,14 +685,18 @@ L["SUG_INSERTNAME_RIGHT"] = "Right-click to insert as a name"
 L["SUG_INSERTID_RIGHT"] = "Right-click to insert as an ID"
 
 
+
 L["SOUND_EVENT_ONSHOW"] = "On Show"
 L["SOUND_EVENT_ONSHOW_DESC"] = "This event triggers when the icon becomes shown (even if 'Always Hide' is checked)."
+
 L["SOUND_EVENT_ONHIDE"] = "On Hide"
 L["SOUND_EVENT_ONHIDE_DESC"] = "This event triggers when the icon is hidden (even if 'Always Hide' is checked)."
+
 L["SOUND_EVENT_ONSTART"] = "On Start"
 L["SOUND_EVENT_ONSTART_DESC"] = [[This event triggers when the cooldown becomes unusable, the buff/debuff is applied, etc.
 
 NOTE: This event handler will never execute after executing an On Show or On Hide event.]]
+
 L["SOUND_EVENT_ONFINISH"] = "On Finish"
 L["SOUND_EVENT_ONFINISH_DESC"] = [[This event triggers when the cooldown becomes usable, the buff/debuff falls off, etc.
 
@@ -701,13 +706,22 @@ L["SOUND_EVENT_ONALPHAINC"] = "On Alpha Increase"
 L["SOUND_EVENT_ONALPHAINC_DESC"] = [[This event triggers when the opacity of an icon increases.
 
 NOTE: This event will not trigger when increasing from 0% opacity (On Show).]]
+
 L["SOUND_EVENT_ONALPHADEC"] = "On Alpha Decrease"
 L["SOUND_EVENT_ONALPHADEC_DESC"] = [[This event triggers when the opacity of an icon decreases.
 
 NOTE: This event will not trigger when decreasing to 0% opacity (On Hide).]]
 
-L["SOUND_EVENT_GLOBALDESC"] = "Events are checked from top to bottom in this list. If an event is triggered that has a sound to play, no events below that event will play a sound."
+L["SOUND_EVENT_ONUNIT"] = "On Unit Changed"
+L["SOUND_EVENT_ONUNIT_DESC"] = [[This event triggers when the unit that that the icon is displaying information for has changed.
 
+NOTE: This event only triggers for icons that check units.]]
+
+L["SOUND_EVENT_ONSPELL"] = "On Spell Changed"
+L["SOUND_EVENT_ONSPELL_DESC"] = [[This event triggers when the spell/item/etc. that that the icon is displaying information for has changed.]]
+
+L["SOUND_EVENT_GLOBALDESC"] = "Events are checked from top to bottom in this list. If an event is triggered that has a sound to play, no events below that event will play a sound."
+L["SOUND_EVENT_DISABLEDFORTYPE"] = "Not available for %s"
 
 L["SOUND_EVENTS"] = "Icon Events"
 L["SOUND_SOUNDTOPLAY"] = "Sound to Play"

@@ -29,6 +29,7 @@ Type.type = "conditionicon"
 Type.name = L["ICONMENU_CNDTIC"]
 Type.desc = L["ICONMENU_CNDTIC_DESC"]
 Type.spacebefore = true
+Type.AllowNoName = true
 Type.WhenChecks = {
 	text = L["ICONMENU_CNDTSHOWWHEN"],
 	{ value = "alpha",			text = L["ICONMENU_SUCCEED"],			colorCode = "|cFF00FF00" },
@@ -50,6 +51,10 @@ Type.RelevantSettings = {
 	DurationMinEnabled = true,
 	DurationMaxEnabled = true,
 	OnlyIfCounting = true,
+}
+Type.DisabledEvents = {
+	OnSpell = true,
+	OnUnit = true,
 }
 
 function Type:Update()
@@ -96,7 +101,6 @@ function Type:GetNameForDisplay(icon, data)
 end
 
 
-Type.AllowNoName = true
 function Type:Setup(icon, groupID, iconID)
 	local Name = gsub(icon.Name, [[\\]], [[\]])
 	icon.NameFirst = TMW:GetSpellNames(icon, Name, 1)

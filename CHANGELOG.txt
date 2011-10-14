@@ -2,9 +2,13 @@
  * Item cooldowns now have their own icon type.
  * Added text substitutions for unit and spell names.
  * Stack and binding texts are much more customizable now.
+ * Two icon events have been added:
+ ** On Unit Changed - fires when the unit for which information is being displayed on the icon changes. Only applicable to icon types that check units.
+ ** On Spell Changed - fires when the spell/item/etc for which information is being displayed on the icon changes.
  * Bug Fixes:
  ** (r257) Fixed warnings for missing durations (they weren't showing up)
  ** (r260) The list of chat frames that can be outputted to should now list all valid frames, shown or not.
+ ** (r261) The "Check Activation Overlay" setting for reactive icons should now function properly for spells entered as names.
 
 ===v4.6.1===
  * Bug Fixes:

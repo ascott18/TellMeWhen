@@ -34,7 +34,7 @@ local DRData = LibStub("DRData-1.0", true)
 TELLMEWHEN_VERSION = "4.6.2"
 TELLMEWHEN_VERSION_MINOR = strmatch(" @project-version@", " r%d+") or ""
 TELLMEWHEN_VERSION_FULL = TELLMEWHEN_VERSION .. TELLMEWHEN_VERSION_MINOR
-TELLMEWHEN_VERSIONNUMBER = 46205 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
+TELLMEWHEN_VERSIONNUMBER = 46206 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
 if TELLMEWHEN_VERSIONNUMBER > 47000 or TELLMEWHEN_VERSIONNUMBER < 46000 then return error("YOU SCREWED UP THE VERSION NUMBER OR DIDNT CHANGE THE SAFETY LIMITS") end -- safety check because i accidentally made the version number 414069 once
 
 TELLMEWHEN_MAXGROUPS = 1 	--this is a default, used by SetTheory (addon), so dont rename
@@ -2399,7 +2399,10 @@ function TMW:Group_Update(groupID)
 				elseif iconID == 1 then
 					icon:SetPoint("TOPLEFT", group, "TOPLEFT")
 				end
-				TMW:Icon_Update(icon)
+				local success, err = pcall(TMW.Icon_Update, TMW, icon)
+				if not success then
+					TMW:Error(L["GROUPICON"]:format(groupID, iconID) .. ": " .. err)
+				end
 			end
 		end
 		for iconID = (group.Rows*group.Columns)+1, TELLMEWHEN_MAXROWS*TELLMEWHEN_MAXROWS do
@@ -2583,6 +2586,10 @@ function IconBase.SetReverse(icon, reverse)
 	icon.cooldown:SetReverse(reverse)
 end
 
+function IconBase.UpdateBindText(icon)
+	icon.bindText:SetText(TMW:InjectDataIntoString(icon.BindText, icon, 1))
+end
+
 function IconBase.IsBeingEdited(icon)
 	if TMW.IE and TMW.CI.ic == icon and TMW.IE.CurrentTab and TellMeWhen_IconEditor:IsVisible() then
 		return TMW.IE.CurrentTab:GetID()
@@ -2605,28 +2612,8 @@ function IconBase.HandleEvent(icon, data, played, announced)
 	if Channel ~= "" and not announced then
 		local Text = data.Text
 		local chandata = ChannelLookup[Channel]
-		if not chandata.isBlizz then
-			if strfind(Text, "%%[Tt]") then
-				Text = gsub(Text, "%%[Tt]", UnitName("target") or TARGET_TOKEN_NOT_FOUND)
-			end
-			if strfind(Text, "%%[Ff]") then
-				Text = gsub(Text, "%%[Ff]", UnitName("focus") or FOCUS_TOKEN_NOT_FOUND)
-			end
-		end
-		if strfind(Text, "%%[Mm]") then
-			Text = gsub(Text, "%%[Mm]", UnitName("mouseover") or L["MOUSEOVER_TOKEN_NOT_FOUND"])
-		end
-		if strfind(Text, "%%[Uu]") then
-			Text = gsub(Text, "%%[Uu]", UnitName(icon.__CurrentUnit or "") or "?")
-		end
-		if strfind(Text, "%%[Ss]") then
-			local name, checkcase = icon.typeData:GetNameForDisplay(icon, icon.__CurrentSpell)
-			name = name or "?"
-			if checkcase then
-				name = loweredbackup[name] or name
-			end
-			Text = gsub(Text, "%%[Ss]", name)
-		end
+		
+		Text = TMW:InjectDataIntoString(Text, icon, not (chandata and chandata.isBlizz))
 		
 		if Channel == "MSBT" then
 			if MikSBT then
@@ -2712,6 +2699,7 @@ function IconBase.SetInfo(icon, alpha, color, texture, start, duration, spellChe
 		4) Find normal		alpha, color, texture, start, duration, spellChecked, reverse, count, countText, forceupdate, unit
 		5) Replace with		alpha, color, texture, start, duration, spellChecked, reverse, count, countText, forceupdate, unit, NEWARG
 			where newarg is the newarg
+		6) IMPORTANT: Update the meta icon with the new arg
 		6) Handle arg in here
 	]]
 		
@@ -2720,8 +2708,29 @@ function IconBase.SetInfo(icon, alpha, color, texture, start, duration, spellChe
 	alpha = alpha or 0
 	duration = duration or 0
 	start = start or 0
-	icon.__CurrentUnit = unit or (icon.Units and icon.Units[1])
-	icon.__CurrentSpell = spellChecked
+	
+	local queueOnUnit, queueOnSpell
+	
+	unit = unit or (icon.Units and icon.Units[1])
+	if icon.__unitChecked ~= unit then
+		queueOnUnit = true
+		icon.__unitChecked = unit
+	elseif unit then
+		local unitName = UnitName(unit)
+		if icon.__oldUnitName ~= unitName then
+			queueOnUnit = true
+			icon.__oldUnitName = unitName
+		end
+	end
+	
+	if icon.__spellChecked ~= spellChecked then
+		queueOnSpell = true
+		icon.__spellChecked = spellChecked
+	end
+	
+	if (queueOnSpell or queueOnUnit) and icon.doUpdateBindText then
+		icon:UpdateBindText()
+	end
 	
 	if duration == 0.001 then duration = 0 end -- hardcode fix for tricks of the trade. nice hardcoding, blizzard
 	local d = duration - (time - start)
@@ -2856,6 +2865,18 @@ function IconBase.SetInfo(icon, alpha, color, texture, start, duration, spellChe
 		icon.__duration = duration
 	end
 
+	local data = queueOnSpell and icon.OnSpell
+	if data then
+		played, announced = icon:HandleEvent(data, played, announced)
+	end
+	
+	local data = queueOnUnit and icon.OnUnit
+	if data then
+		played, announced = icon:HandleEvent(data, played, announced)
+	end
+	
+	
+	-- NO EVENT HANDLING PAST THIS POINT!
 	if alpha == 0 then
 		return
 	end
@@ -2869,7 +2890,7 @@ function IconBase.SetInfo(icon, alpha, color, texture, start, duration, spellChe
 		icon.__vrtxcolor = color
 	end
 
-	if icon.ShowPBar and (updatePBar or icon.__spellChecked ~= spellChecked or forceupdate) then
+	if icon.ShowPBar and (updatePBar or queueOnSpell or forceupdate) then
 		if spellChecked then
 			local _, _, _, cost, _, powerType = GetSpellInfo(spellChecked)
 			if cost then
@@ -2898,7 +2919,6 @@ function IconBase.SetInfo(icon, alpha, color, texture, start, duration, spellChe
 			pbar.UpdateSet = false
 			pbar:SetValue(icon.InvertBars and pbar.Max or 0)
 		end
-		icon.__spellChecked = spellChecked
 	end
 
 	if icon.__count ~= count or icon.__countText ~= countText then
@@ -2935,6 +2955,7 @@ local typeMT = {
 	__index = TypeBase,
 }
 
+TypeBase.DisabledEvents = {}
 function TypeBase:GetNameForDisplay(icon, data)
 	local name = data and GetSpellInfo(data) or data
 	return name, true
@@ -3057,8 +3078,8 @@ function TMW:Icon_Update(icon)
 	end
 
 	icon.__previousNameFirst = icon.NameFirst -- used to detect changes in the name that would cause a texture change
-	icon.__CurrentUnit = nil
-	icon.__CurrentSpell = nil
+	icon.__unitChecked = nil
+	icon.__spellChecked = nil
 	
 	for k in pairs(TMW.Icon_Defaults) do
 		icon[k] = nil --lets clear any settings that might get left behind.
@@ -3090,8 +3111,10 @@ function TMW:Icon_Update(icon)
 				dontremove = 1
 			end
 		end
-		if tbl.SoundData or tbl.Channel ~= "" then
+		if tbl.SoundData or tbl.Channel ~= "" and not typeData.DisabledEvents[event] then
 			icon[event] = tbl
+		else
+			icon[event] = nil
 		end
 	end
 
@@ -3126,6 +3149,7 @@ function TMW:Icon_Update(icon)
 	cd:SetDrawEdge(db.profile.DrawEdge)
 	icon:SetReverse(false)
 
+	
 	local ctf = group.Fonts.Count
 	local ct = icon.countText
 	local btf = group.Fonts.Bind
@@ -3202,7 +3226,7 @@ function TMW:Icon_Update(icon)
 	else
 		group.barInsets = 0
 	end
-
+	
 	icon.__previcon = nil
 	icon.__alpha = -1
 	icon.__count = nil
@@ -3212,6 +3236,9 @@ function TMW:Icon_Update(icon)
 	icon.__realDuration = icon.__realDuration or 0
 	icon.CndtFailed = nil
 	icon.ConditionAlpha = icon.ConditionAlpha or 0
+	
+	icon.doUpdateBindText = icon.BindText and strfind(icon.BindText, "%%[SsUu]")
+	
 	if icon.ShowWhen == "alpha" then
 		icon.UnAlpha = 0
 	elseif icon.ShowWhen == "unalpha" then
@@ -3228,6 +3255,7 @@ function TMW:Icon_Update(icon)
 	else
 		icon:SetAlpha(0)
 	end
+	
 	if icon.FakeHidden and not dontremove then
 		icon:SetScript("OnUpdate", nil, true)
 		tDeleteItem(IconUpdateFuncs, icon)
@@ -3290,8 +3318,8 @@ function TMW:Icon_Update(icon)
 			end
 		end
 		
-		--icon:SetInfo(alpha, color, texture, start, duration, spellChecked, reverse, count, countText, forceupdate, unit, unit, nil)
-		icon:SetInfo(1, 1, nil, 0, 0, nil, nil, testCount, testCountText, nil, nil, nil) -- alpha is set to 1 here so it doesnt return early
+		--icon:SetInfo(alpha, color, texture, start, duration, spellChecked, reverse, count, countText, forceupdate, unit)
+		icon:SetInfo(1, 1, nil, 0, 0, icon.__spellChecked, nil, testCount, testCountText, nil, nil, icon.__unitChecked) -- alpha is set to 1 here so it doesnt return early
 		if icon.Enabled then
 			icon:setalpha(1)
 		else
@@ -3325,6 +3353,37 @@ function TMW:Icon_Update(icon)
 	
 end
 
+function TMW:InjectDataIntoString(Text, icon, doBlizz)
+	if doBlizz then
+		if strfind(Text, "%%[Tt]") then
+			Text = gsub(Text, "%%[Tt]", UnitName("target") or TARGET_TOKEN_NOT_FOUND)
+		end
+		if strfind(Text, "%%[Ff]") then
+			Text = gsub(Text, "%%[Ff]", UnitName("focus") or FOCUS_TOKEN_NOT_FOUND)
+		end
+	end
+	
+	if strfind(Text, "%%[Mm]") then
+		Text = gsub(Text, "%%[Mm]", UnitName("mouseover") or L["MOUSEOVER_TOKEN_NOT_FOUND"])
+	end
+	
+	if icon then
+		if strfind(Text, "%%[Uu]") then
+			Text = gsub(Text, "%%[Uu]", UnitName(icon.__unitChecked or "") or "?")
+		end
+		
+		if strfind(Text, "%%[Ss]") then
+			local name, checkcase = icon.typeData:GetNameForDisplay(icon, icon.__spellChecked)
+			name = name or "?"
+			if checkcase then
+				name = loweredbackup[name] or name
+			end
+			Text = gsub(Text, "%%[Ss]", name)
+		end
+	end
+	
+	return Text
+end
 
 -- ------------------
 -- NAME/ETC FUNCTIONS
@@ -3350,7 +3409,6 @@ function string:toseconds()
 	end
 	return seconds 
 end
-
 
 function TMW:lowerNames(str)
 	-- converts a string, or all values of a table, to lowercase. Numbers are kept as numbers.

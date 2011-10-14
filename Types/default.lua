@@ -25,6 +25,7 @@ local Type = {}
 Type.type = ""
 Type.name = L["ICONMENU_TYPE"]
 Type.spaceafter = true
+Type.HideBars = true
 Type.RelevantSettings = {
 	BindText = false,
 	CustomTex = false,
@@ -41,7 +42,6 @@ function Type:Update()
 
 end
 
-Type.HideBars = true
 function Type:Setup(icon, groupID, iconID)
 	if icon.Name ~= "" then
 		icon:SetTexture("Interface\\Icons\\INV_Misc_QuestionMark")

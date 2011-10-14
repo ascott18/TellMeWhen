@@ -32,6 +32,8 @@ local Type = {}
 Type.type = "meta"
 Type.name = L["ICONMENU_META"]
 Type.desc = L["ICONMENU_META_DESC"]
+Type.AllowNoName = true
+Type.HideBars = true
 Type.RelevantSettings = {
 	Icons = true,
 	CheckNext = true,
@@ -45,6 +47,10 @@ Type.RelevantSettings = {
 	ConditionAlpha = false, --TODO:implement conditionalpha for metas (problem is the icon editor UI)
 	Alpha = false,
 	UnAlpha = false,
+}
+Type.DisabledEvents = {
+	OnSpell = true,
+	OnUnit = true,
 }
 
 function Type:Update()
@@ -65,9 +71,13 @@ local function Meta_OnUpdate(icon, time)
 				if alpha > 0 and ic.__shown then
 
 					local force
+					if ic.doUpdateBindText then
+						icon.bindText:SetText(ic.bindText:GetText())
+					end
 					if ic ~= icon.__previcon then 
-						icon.BindText = ic.BindText
-						icon.bindText:SetText(icon.BindText)
+						if not ic.doUpdateBindText then
+							icon.bindText:SetText(ic.bindText:GetText())
+						end
 						
 						if (LBF or LMB) then -- i dont like the way that ButtonFacade handles this (inefficient), so i'll do it myself
 							local icnt = ic.__normaltex -- icon.__normaltex = icon.__LBF_Normal or icon:GetNormalTexture() -- set during Icon_Update()
@@ -104,7 +114,7 @@ local function Meta_OnUpdate(icon, time)
 					
 					AlreadyChecked[ic] = true
 					--icon:SetInfo(alpha, color, texture, start, duration, spellChecked, reverse, count, countText, forceupdate, unit)
-					icon:SetInfo(alpha, ic.__vrtxcolor, ic.__tex, ic.__start, ic.__duration, ic.__spellChecked, ic.__reverse, ic.__count, ic.__countText, force, nil)
+					icon:SetInfo(alpha, ic.__vrtxcolor, ic.__tex, ic.__start, ic.__duration, ic.__spellChecked, ic.__reverse, ic.__count, ic.__countText, force, ic.__unitChecked)
 					return
 				end
 			end
@@ -130,9 +140,6 @@ local function GetFullIconTable(icons, tbl) -- check what all the possible icons
 end
 
 
-Type.AllowNoName = true
-Type.HideBars = true
-local preTable = {}
 function Type:Setup(icon, groupID, iconID)
 	icon.NameFirst = "" --need to set this to something for bars update
 
@@ -145,6 +152,7 @@ function Type:Setup(icon, groupID, iconID)
 	icon.ShowPBar = true
 	icon.ShowCBar = true
 	icon.InvertBars = false
+	
 	icon:SetTexture("Interface\\Icons\\LevelUpIcon-LFD")
 	icon.ConditionAlpha = 0
 

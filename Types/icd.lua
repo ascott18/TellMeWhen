@@ -59,6 +59,9 @@ Type.RelevantSettings = {
 	DurationMinEnabled = true,
 	DurationMaxEnabled = true,
 }
+Type.DisabledEvents = {
+	OnUnit = true,
+}
 
 
 function Type:Update()

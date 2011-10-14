@@ -33,6 +33,7 @@ Type.type = "runes"
 LibStub("AceEvent-3.0"):Embed(Type)
 Type.name = L["ICONMENU_RUNES"]
 Type.hidden = pclass ~= "DEATHKNIGHT"
+Type.AllowNoName = true
 Type.TypeChecks = {
 	setting = "TotemSlots",
 	text = L["RUNES"],
@@ -54,6 +55,9 @@ Type.RelevantSettings = {
 	DurationMax = true,
 	DurationMinEnabled = true,
 	DurationMaxEnabled = true,
+}
+Type.DisabledEvents = {
+	OnUnit = true,
 }
 
 local textures = {
@@ -138,7 +142,6 @@ function Type:GetNameForDisplay(icon, data)
 end
 
 
-Type.AllowNoName = true
 function Type:Setup(icon, groupID, iconID)
 	icon.Slots = wipe(icon.Slots or {})
 	for i=1, 6 do

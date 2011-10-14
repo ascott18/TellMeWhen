@@ -33,6 +33,7 @@ Type.type = "wpnenchant"
 Type.name = L["ICONMENU_WPNENCHANT"]
 Type.desc = L["ICONMENU_WPNENCHANT_DESC"]
 Type.appendNameLabel = L["ICONMENU_CHOOSENAME_ORBLANK"]
+Type.AllowNoName = true
 Type.TypeChecks = {
 	text = L["ICONMENU_WPNENCHANTTYPE"],
 	setting = "WpnEnchantType",
@@ -55,6 +56,9 @@ Type.RelevantSettings = {
 	DurationMax = true,
 	DurationMinEnabled = true,
 	DurationMaxEnabled = true,
+}
+Type.DisabledEvents = {
+	OnUnit = true,
 }
 
 local Parser = CreateFrame("GameTooltip", "TellMeWhen_Parser", TMW, "GameTooltipTemplate")
@@ -162,7 +166,6 @@ local function WpnEnchant_OnEvent(icon, event, unit)
 	end
 end
 
-Type.AllowNoName = true
 function Type:Setup(icon, groupID, iconID)
 	icon.NameHash = TMW:GetSpellNames(icon, icon.Name, nil, nil, 1)
 	icon.SelectIndex = SlotsToNumbers[icon.WpnEnchantType] or 1

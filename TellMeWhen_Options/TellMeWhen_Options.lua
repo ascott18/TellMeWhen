@@ -94,7 +94,7 @@ TMW.CI = setmetatable({}, {__index = function(tbl, k)
 		return approachTable(TMW.db, "profile", "Groups", tbl.g)
 	elseif k == "SoI" then -- spell or item
 		local ics = tbl.ics
-		if ics and ics.Type == "cooldown" and ics.CooldownType == "item" then
+		if ics and ics.Type == "item" then
 			return "item"
 		end
 		return "spell"
@@ -1231,6 +1231,7 @@ TMW.ImportFunctions = {
 		local gs = db.profile.Groups[groupID]
 		TMW:CopyTableInPlaceWithMeta(data, gs)
 		
+		-- change any meta icon components to the new group if the meta and components are/were in the same group (icon conditions, too)
 		if oldgroupID then
 			local srcgr, destgr = "TellMeWhen_Group"..oldgroupID, TMW[groupID]:GetName()
 			for ics in TMW:InIconSettings(groupID) do
@@ -1257,7 +1258,20 @@ TMW.ImportFunctions = {
 	end,
 	global = function(data, version, noOverwrite)
 		if noOverwrite then -- noOverwrite is a name in this case.
-			db:SetProfile(noOverwrite)
+		
+			local newname = noOverwrite
+			local oldnum = strmatch("Ganis (1)", "%((%d+)%)$")
+			local base = gsub(profilename, " %(%d+%)$", "")
+			local newnum = (oldnum or 1) + 1
+			
+			-- generate a new name if the profile already exists
+			newname = base .. " (" .. newnum .. ")"
+			while db.profiles[newname] do
+				newnum = newnum + 1
+				newname = base .. " (" .. newnum .. ")"
+			end
+			
+			db:SetProfile(newname)
 		else
 			db:ResetProfile()
 		end
@@ -2457,9 +2471,7 @@ function IE:Type_Dropdown_OnClick()
 	CI.t = self.value
 	SUG.redoIfSame = 1
 	SUG.Suggest:Hide()
-	IE:SetupRadios()
-	IE:LoadSettings()
-	IE:ShowHide()
+	IE:Load(1)
 end
 
 function IE:Unit_DropDown()
@@ -2968,18 +2980,7 @@ function IE:Copy_DropDown()
 		info = UIDropDownMenu_CreateInfo()
 		info.text = L["IMPORT_PROFILE"] .. " - " .. L["IMPORT_PROFILE_NEW"]
 		info.func = function()
-			local newname = profilename
-			local oldnum = strmatch("Ganis (1)", "%((%d+)%)$")
-			local base = gsub(profilename, " %(%d+%)$", "")
-			local newnum = (oldnum or 1) + 1
-			
-			-- generate a new name if the profile already exists
-			newname = base .. " (" .. newnum .. ")"
-			while db.profiles[newname] do
-				newnum = newnum + 1
-				newname = base .. " (" .. newnum .. ")"
-			end
-			TMW:Import(profile_src, version_src, "global", newname) -- newname forces a new profile to be created named newname
+			TMW:Import(profile_src, version_src, "global", profilename) -- newname forces a new profile to be created named newname
 		end
 		info.notCheckable = true
 		UIDropDownMenu_AddButton(info, UIDROPDOWNMENU_MENU_LEVEL)
@@ -3187,6 +3188,16 @@ TMW.EventList = {
 		text = L["SOUND_EVENT_ONFINISH"],
 		desc = L["SOUND_EVENT_ONFINISH_DESC"],
 	},
+	{
+		name = "OnSpell",
+		text = L["SOUND_EVENT_ONSPELL"],
+		desc = L["SOUND_EVENT_ONSPELL_DESC"],
+	},
+	{
+		name = "OnUnit",
+		text = L["SOUND_EVENT_ONUNIT"],
+		desc = L["SOUND_EVENT_ONUNIT_DESC"],
+	},
 }
 
 function SND:SetSoundsOffset(offs)
@@ -3317,16 +3328,26 @@ function SND:SelectSound(name)
 		SND.Custom.Background:SetVertexColor(NORMAL_FONT_COLOR.r, NORMAL_FONT_COLOR.g, NORMAL_FONT_COLOR.b, 1)
 		SND.Custom:SetText(name)
 	end
-	SND.Events[SND.currentEventID].SoundName:SetText(name)
+	SND.Events[SND.currentEventID].DataText:SetText(name)
 	SND:SetTabText()
 end
 
 function SND:Load()
+	local DisabledEvents = Types[CI.ic].DisabledEvents
 	local oldID = SND.currentEventID
 	for i = #SND.Events, 1, -1 do
-		SND:SelectEvent(i)
+		local frame = SND.Events[i]
+		if DisabledEvents[frame.event] then
+			frame:Disable()
+			if oldID == i then
+				oldID = oldID - 1
+			end
+		else
+			frame:Enable()
+			SND:SelectEvent(i)
+		end
 	end
-	if oldID then
+	if oldID and oldID > 0 then
 		SND:SelectEvent(oldID)
 	end
 	SND:SetTabText()
@@ -3545,17 +3566,28 @@ function ANN:SelectChannel(channel)
 		channelFrame:GetHighlightTexture():SetVertexColor(NORMAL_FONT_COLOR.r, NORMAL_FONT_COLOR.g, NORMAL_FONT_COLOR.b, 1)
 	end
 	if ANN.currentEventID and channelsettings then
-		ANN.Events[ANN.currentEventID].ChannelName:SetText(channelsettings.text)
+		ANN.Events[ANN.currentEventID].DataText:SetText(channelsettings.text)
 	end
 	ANN:SetTabText()
 end
 
 function ANN:Load()
+	local DisabledEvents = Types[CI.t].DisabledEvents
 	local oldID = ANN.currentEventID
 	for i = #ANN.Events, 1, -1 do
-		ANN:SelectEvent(i)
+		local frame = ANN.Events[i]
+		if DisabledEvents[frame.event] then
+			frame:Disable()
+			frame.DataText:SetFormattedText(L["SOUND_EVENT_DISABLEDFORTYPE"], Types[CI.t].name)
+			if oldID == i then
+				oldID = oldID - 1
+			end
+		else
+			frame:Enable()
+			ANN:SelectEvent(i)
+		end
 	end
-	if oldID then
+	if oldID and oldID > 0  then
 		ANN:SelectEvent(oldID)
 	end
 	ANN:SetTabText()

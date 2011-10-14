@@ -25,6 +25,7 @@ local OnGCD = TMW.OnGCD
 local print = TMW.print
 local _, pclass = UnitClass("Player")
 local SpellTextures = TMW.SpellTextures
+local strlowerCache = TMW.strlowerCache
 local mindfreeze = strlower(GetSpellInfo(47528))
 
 
@@ -55,6 +56,9 @@ Type.RelevantSettings = {
 	IgnoreNomana = true,
 	IgnoreRunes = (pclass == "DEATHKNIGHT"),
 }
+Type.DisabledEvents = {
+	OnUnit = true,
+}
 
 
 function Type:Update()
@@ -69,15 +73,8 @@ end
 
 
 local function Reactive_OnEvent(icon, event, spell)
-
-	if event == "SPELL_ACTIVATION_OVERLAY_GLOW_SHOW" then
-		if icon.NameFirst == spell or GetSpellInfo(spell) == icon.NameName then
-			icon.Usable = true
-		end
-	elseif event == "SPELL_ACTIVATION_OVERLAY_GLOW_HIDE" then
-		if icon.NameFirst == spell or GetSpellInfo(spell) == icon.NameName then
-			icon.Usable = false
-		end
+	if icon.NameFirst == spell or strlowerCache[GetSpellInfo(spell)] == icon.NameName then
+		icon.Usable = event == "SPELL_ACTIVATION_OVERLAY_GLOW_SHOW"
 	end
 end
 

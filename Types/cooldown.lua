@@ -64,6 +64,9 @@ Type.RelevantSettings = {
 	DurationMaxEnabled = true,
 	IgnoreRunes = (pclass == "DEATHKNIGHT"),
 }
+Type.DisabledEvents = {
+	OnUnit = true,
+}
 
 
 function Type:Update()

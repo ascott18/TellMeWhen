@@ -33,6 +33,7 @@ local Type = {}
 Type.type = "totem"
 Type.name = pclass == "DRUID" and L["ICONMENU_MUSHROOMS"] or pclass == "DEATHKNIGHT" and L["ICONMENU_GHOUL"] or L["ICONMENU_TOTEM"]
 Type.appendNameLabel = L["ICONMENU_CHOOSENAME_ORBLANK"]
+Type.AllowNoName = true
 Type.usePocketWatch = 1
 if pclass == "SHAMAN" then
 	Type.TypeChecks = {
@@ -71,6 +72,9 @@ Type.RelevantSettings = {
 	DurationMaxEnabled = true,
 	TotemSlots = true,
 }
+Type.DisabledEvents = {
+	OnUnit = true,
+}
 
 
 function Type:Update()
@@ -105,7 +109,6 @@ local function Totem_OnUpdate(icon, time)
 end
 
 
-Type.AllowNoName = true
 function Type:Setup(icon, groupID, iconID)
 	if icon.Name then
 		icon.NameFirst = TMW:GetSpellNames(icon, icon.Name, 1)
@@ -150,7 +153,6 @@ function Type:Setup(icon, groupID, iconID)
 end
 
 function Type:GetNameForDisplay(icon, data)
-	print(data)
 	if data then
 		return data
 	else
