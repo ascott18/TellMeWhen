@@ -34,7 +34,7 @@ local DRData = LibStub("DRData-1.0", true)
 TELLMEWHEN_VERSION = "4.6.2"
 TELLMEWHEN_VERSION_MINOR = strmatch(" @project-version@", " r%d+") or ""
 TELLMEWHEN_VERSION_FULL = TELLMEWHEN_VERSION .. TELLMEWHEN_VERSION_MINOR
-TELLMEWHEN_VERSIONNUMBER = 46203 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
+TELLMEWHEN_VERSIONNUMBER = 46204 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
 if TELLMEWHEN_VERSIONNUMBER > 47000 or TELLMEWHEN_VERSIONNUMBER < 46000 then return error("YOU SCREWED UP THE VERSION NUMBER OR DIDNT CHANGE THE SAFETY LIMITS") end -- safety check because i accidentally made the version number 414069 once
 
 TELLMEWHEN_MAXGROUPS = 1 	--this is a default, used by SetTheory (addon), so dont rename
@@ -463,13 +463,21 @@ TMW.Defaults = {
 						Size = 12,
 						x = -2,
 						y = 2,
+						point = "CENTER",
+						relativePoint = "CENTER",
 						Outline = "THICKOUTLINE",
 						OverrideLBFPos = false,
+						ConstrainWidth = true,
 					},
 					Count = {
+						ConstrainWidth = false,
+						point = "BOTTOMRIGHT",
+						relativePoint = "BOTTOMRIGHT",
 					},
 					Bind = {
 						y = -2,
+						point = "TOPLEFT",
+						relativePoint = "TOPLEFT",
 					},
 				},
 				Icons = {
@@ -3160,9 +3168,9 @@ function TMW:Icon_Update(icon)
 		end
 	else
 		ct:ClearAllPoints()
-		ct:SetPoint("BOTTOMRIGHT", icon, "BOTTOMRIGHT", ctf.x, ctf.y)
+		ct:SetPoint(ctf.point, icon, ctf.relativePoint, ctf.x, ctf.y)
 		bt:ClearAllPoints()
-		bt:SetPoint("BOTTOMRIGHT", icon, "BOTTOMRIGHT", btf.x, btf.y)
+		bt:SetPoint(btf.point, icon, btf.relativePoint, btf.x, btf.y)
 		isDefault = 1
 	end
 	
@@ -3172,15 +3180,19 @@ function TMW:Icon_Update(icon)
 	if LMB or LBF then
 		if ctf.OverrideLBFPos then
 			ct:ClearAllPoints()
-			ct:SetPoint("BOTTOMRIGHT", icon, "BOTTOMRIGHT", ctf.x, ctf.y)
+			local func = ct.__MSQ_SetPoint or ct.SetPoint
+			func(ct, ctf.point, icon, ctf.relativePoint, ctf.x, ctf.y)
 		end
 		if btf.OverrideLBFPos then
 			bt:ClearAllPoints()
-			bt:SetPoint("TOPLEFT", icon, "TOPLEFT", btf.x, btf.y)
+			local func = bt.__MSQ_SetPoint or bt.SetPoint
+			func(bt, btf.point, icon, btf.relativePoint, btf.x, btf.y)
 		end
 		icon.cbar:SetFrameLevel(icon:GetFrameLevel())
 		icon.pbar:SetFrameLevel(icon:GetFrameLevel())
 	end
+	ct:SetWidth(ctf.ConstrainWidth and icon.texture:GetWidth() or 0)
+	bt:SetWidth(btf.ConstrainWidth and icon.texture:GetWidth() or 0)
 
 	if isDefault then
 		group.barInsets = 1.5

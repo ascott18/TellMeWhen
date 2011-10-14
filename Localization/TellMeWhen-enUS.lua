@@ -123,7 +123,9 @@ L["ICONMENU_CUSTOMTEX_DESC"] = "If you want to override the texture shown by thi
 
 L["ICONMENU_BINDTEXT_DESC"] = [[Any text in this editbox will be shown on the icon where the keybinding is normally displayed on an action bar. Use this to remind yourself of what your keybinds are if you do not have your action bars shown.
 
-This does NOT set a keybinding to this TellMeWhen icon. It is simply a visual reminder that will be shown on the icon.]]
+This does NOT set a keybinding to this TellMeWhen icon. It is simply a visual reminder that will be shown on the icon.
+
+The text can be configured in this group's settings.]]
 
 
 
@@ -376,8 +378,13 @@ L["OUTLINE_NO"] = "No Outline"
 L["OUTLINE_THIN"] = "Thin Outline"
 L["OUTLINE_THICK"] = "Thick Outline"
 L["OUTLINE_MONOCHORME"] = "Monochrome"
-L["UIPANEL_FONT_OVERRIDELBF"] = "Override ButtonFacade"
-L["UIPANEL_FONT_OVERRIDELBF_DESC"] = "Check this to override the position of the stack text that is defined in your ButtonFacade skin."
+L["UIPANEL_FONT_OVERRIDELBF"] = "Override Masque/ButtonFacade position"
+L["UIPANEL_FONT_OVERRIDELBF_DESC"] = [[Check this to override the position of the stack text that is defined in your Masque/ButtonFacade skin.
+
+A UI Reload or a change of skin is required to restore the skin settings to the text should you choose to disable this option after enabling it.]]
+L["UIPANEL_FONT_CONSTRAINWIDTH"] = "Constrain Width"
+L["UIPANEL_FONT_CONSTRAINWIDTH_DESC"] = [[Check this to force the text to fit within the width of the icon if positioned appropriately.
+Uncheck to allow text to extend wider than the icon.]]
 L["UIPANEL_FONT_XOFFS"] = "X Offset"
 L["UIPANEL_FONT_YOFFS"] = "Y Offset"
 L["UIPANEL_POSITION"] = "Position"

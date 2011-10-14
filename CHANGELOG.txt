@@ -1,6 +1,7 @@
 ===v4.6.2===
  * Item cooldowns now have their own icon type.
  * Added text substitutions for unit and spell names.
+ * Stack and binding texts are much more customizable now.
  * Bug Fixes:
  ** (r257) Fixed warnings for missing durations (they weren't showing up)
 

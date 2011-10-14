@@ -34,7 +34,7 @@ if LibStub("AceSerializer-3.0").Embed then--TEMP: 4.3 compat code with AceSerial
 end
 local L = TMW.L
 local LBF = LibStub("LibButtonFacade", true)
-local LMB = LibMasque and LibMasque("Button")
+local LMB = LibStub("Masque", true) or (LibMasque and LibMasque("Button"))
 local _, pclass = UnitClass("Player")
 local GetSpellInfo, GetContainerItemID, GetContainerItemLink =
 	  GetSpellInfo, GetContainerItemID, GetContainerItemLink
@@ -518,6 +518,12 @@ local fontorder = {
 	Count = 40,
 	Bind = 50,
 }
+local fontDisabled = function(info)
+	if not (LBF or LMB) then
+		return false
+	end
+	return not db.profile.Groups[findid(info)].Fonts[info[#info-1]].OverrideLBFPos
+end
 local groupFontConfigTemplate = {
 	type = "group",
 	name = function(info) return L["UIPANEL_FONT_" .. info[#info]] end,
@@ -534,39 +540,11 @@ local groupFontConfigTemplate = {
 		return db.profile.Groups[findid(info)].Fonts[info[#info-1]][info[#info]]
 	end,
 	args = {
-		Size = {
-			name = L["UIPANEL_FONT_SIZE"],
-			desc = L["UIPANEL_FONT_SIZE_DESC"],
-			type = "range",
-			order = 1,
-			min = 6,
-			softMax = 26,
-			step = 1,
-			bigStep = 1,
-		},
-		x = {
-			name = L["UIPANEL_FONT_XOFFS"],
-			type = "range",
-			order = 10,
-			min = -30,
-			max = 30,
-			step = 1,
-			bigStep = 1,
-		},
-		y = {
-			name = L["UIPANEL_FONT_YOFFS"],
-			type = "range",
-			order = 20,
-			min = -30,
-			max = 30,
-			step = 1,
-			bigStep = 1,
-		},
 		Name = {
 			name = L["UIPANEL_FONTFACE"],
 			desc = L["UIPANEL_FONT_DESC"],
 			type = "select",
-			order = 30,
+			order = 1,
 			dialogControl = 'LSM30_Font',
 			values = LSM:HashTable("font"),
 		},
@@ -581,14 +559,67 @@ local groupFontConfigTemplate = {
 				MONOCHORME = L["OUTLINE_MONOCHORME"],
 			},
 			style = "dropdown",
-			order = 40,
+			order = 5,
+		},
+		Size = {
+			name = L["UIPANEL_FONT_SIZE"],
+			desc = L["UIPANEL_FONT_SIZE_DESC"],
+			type = "range",
+			order = 9,
+			min = 6,
+			softMax = 26,
+			step = 1,
+			bigStep = 1,
+		},
+		point = {
+			name = L["UIPANEL_POINT"],
+			type = "select",
+			values = points,
+			style = "dropdown",
+			order = 10,
+			disabled = fontDisabled,
+		},
+		relativePoint = {
+			name = L["UIPANEL_RELATIVEPOINT"],
+			type = "select",
+			values = points,
+			style = "dropdown",
+			order = 13,
+			disabled = fontDisabled,
+		},
+		ConstrainWidth = {
+			name = L["UIPANEL_FONT_CONSTRAINWIDTH"],
+			desc = L["UIPANEL_FONT_CONSTRAINWIDTH_DESC"],
+			type = "toggle",
+			order = 15,
+		},
+		x = {
+			name = L["UIPANEL_FONT_XOFFS"],
+			type = "range",
+			order = 20,
+			min = -30,
+			max = 30,
+			step = 1,
+			bigStep = 1,
+			disabled = fontDisabled,
+		},
+		y = {
+			name = L["UIPANEL_FONT_YOFFS"],
+			type = "range",
+			order = 21,
+			min = -30,
+			max = 30,
+			step = 1,
+			bigStep = 1,
+			disabled = fontDisabled,
 		},
 		OverrideLBFPos = {
 			name = L["UIPANEL_FONT_OVERRIDELBF"],
 			desc = L["UIPANEL_FONT_OVERRIDELBF_DESC"],
 			type = "toggle",
+			width = "double",
 			order = 50,
-			hidden = not (LibStub("LibButtonFacade", true) or (LibMasque and LibMasque("Button"))),
+			hidden = not (LBF or LMB),
 		},
 	},
 }
