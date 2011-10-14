@@ -4,6 +4,7 @@
  * Stack and binding texts are much more customizable now.
  * Bug Fixes:
  ** (r257) Fixed warnings for missing durations (they weren't showing up)
+ ** (r260) The list of chat frames that can be outputted to should now list all valid frames, shown or not.
 
 ===v4.6.1===
  * Bug Fixes:

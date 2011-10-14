@@ -34,7 +34,7 @@ local DRData = LibStub("DRData-1.0", true)
 TELLMEWHEN_VERSION = "4.6.2"
 TELLMEWHEN_VERSION_MINOR = strmatch(" @project-version@", " r%d+") or ""
 TELLMEWHEN_VERSION_FULL = TELLMEWHEN_VERSION .. TELLMEWHEN_VERSION_MINOR
-TELLMEWHEN_VERSIONNUMBER = 46204 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
+TELLMEWHEN_VERSIONNUMBER = 46205 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
 if TELLMEWHEN_VERSIONNUMBER > 47000 or TELLMEWHEN_VERSIONNUMBER < 46000 then return error("YOU SCREWED UP THE VERSION NUMBER OR DIDNT CHANGE THE SAFETY LIMITS") end -- safety check because i accidentally made the version number 414069 once
 
 TELLMEWHEN_MAXGROUPS = 1 	--this is a default, used by SetTheory (addon), so dont rename
@@ -822,8 +822,8 @@ TMW.ChannelList = {
 		dropdown = function()
 			local i = 1
 			while _G["ChatFrame"..i] do 
-				local _, _, _, _, _, _, shown = FCF_GetChatWindowInfo(i);
-				if shown then
+				local _, _, _, _, _, _, shown, _, docked = FCF_GetChatWindowInfo(i);
+				if shown or docked then
 					local name = _G["ChatFrame"..i].name
 					local info = UIDropDownMenu_CreateInfo()
 					info.func = TMW.ANN.LocDropdownFunc
