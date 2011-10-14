@@ -14,5 +14,6 @@ for id, name in string.gmatch(src, "id:(%d+),category.-name:'(.-)',icon") do
 end
 	
 str = str .. "}"
+print(str)
 
 io.open("B:\\Games\\World Of Warcraft\\Interface\\AddOns\\TellMeWhen\\Scripts\\Currencies.lua", "w"):write(str)

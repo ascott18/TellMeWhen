@@ -25,7 +25,6 @@ L["LOCKED"] = "Locked"
 L["RESIZE"] = "Resize"
 L["RESIZE_TOOLTIP"] = "Click and drag to change size"
 
-L["HPSSWARN"] = "Warning! Any icon conditions that you had set that checked for holy power or soul shards may be messed up! Check them to prevent later confusion!"
 L["CONDITIONORMETA_CHECKINGINVALID"] = "Warning! Group %d, Icon %d is checking an invalid icon (Group %d, Icon %d)"
 L["WARN_DRMISMATCH"] = "Warning! Group %d, Icon %d is checking the diminishing returns on spells from two different known categories. All spells should be from the same category."
 L["FROMNEWERVERSION"] = "You are importing data that was created in a newer version of TellMeWhen than your version. Some settings might not work until you upgrade to the latest version."
@@ -100,7 +99,6 @@ L["ICONMENU_RUNES"] = "Rune Cooldown"
 
 L["ICONMENU_COOLDOWNTYPE"] = "Cooldown type"
 L["ICONMENU_SPELL"] = "Spell or ability"
-L["ICONMENU_ITEM"] = "Item"
 
 L["ICONMENU_SHOWWHEN"] = "Show icon when"
 L["ICONMENU_USABLE"] = "Usable"
@@ -169,7 +167,6 @@ L["ICONMENU_SHOWTIMERTEXT_DESC"] = [[Check this option to display a textual disp
 
 This is only applicable if OmniCC is installed.]]
 
-L["ICONMENU_BARS"] = "Bars"
 L["ICONMENU_SHOWPBARN"] = "Power bar"
 L["ICONMENU_SHOWCBARN"] = "Timer bar"
 L["ICONMENU_SHOWPBAR_DESC"] = "Shows a bar that is overlaid across the top half of the icon that will indicate the power still needed to cast the spell (or the power that you have when 'Fill bars up' is checked)"
@@ -182,7 +179,6 @@ L["ICONMENU_BAROFFS"] = "This amount will be added to the bar in order to offset
 L["ICONMENU_REACT"] = "Unit Reaction"
 L["ICONMENU_FRIEND"] = "Friendly"
 L["ICONMENU_HOSTILE"] = "Hostile"
-L["ICONMENU_EITHER"] = "Any"
 
 L["ICONMENU_ICDTYPE"] = "Triggered by"
 L["ICONMENU_SPELLCAST_COMPLETE"] = "Spell Cast Finish/Instant Cast"
@@ -259,7 +255,6 @@ L["CONDITION_TIMERS_HEADER"] = "Timers"
 L["CONDITION_TIMERS_SUCCEED_DESC"] = "Duration of a timer to set on the icon when conditions begin succeeding"
 L["CONDITION_TIMERS_FAIL_DESC"] = "Duration of a timer to set on the icon when conditions begin failing"
 
-L["METAPANEL_TITLE"] = "Meta Icon Editor"
 L["METAPANEL_UP"] = "Move up"
 L["METAPANEL_DOWN"] = "Move down"
 L["METAPANEL_REMOVE"] = "Remove this icon"
@@ -299,16 +294,15 @@ L["ICONMENU_ONLYIFCOUNTING_DESC"] = "Check this to make the icon show only if th
 -- -------------
 
 L["UIPANEL_SUBTEXT2"] = "Icons work when locked. When unlocked, you can move/size icon groups and right click individual icons for more settings. You can also type /tellmewhen or /tmw to lock/unlock."
-L["UIPANEL_ICONGROUP"] = "Icon group "
 L["UIPANEL_MAINOPT"] = "Main Options"
 L["UIPANEL_GROUPS"] = "Groups"
+L["UIPANEL_ICONS"] = "Icons"
 L["UIPANEL_COLORS"] = "Colors"
 L["UIPANEL_ENABLEGROUP"] = "Enable Group"
 L["UIPANEL_GROUPNAME"] = "Rename Group"
 L["UIPANEL_ROWS"] = "Rows"
 L["UIPANEL_COLUMNS"] = "Columns"
 L["UIPANEL_ONLYINCOMBAT"] = "Only show in combat"
-L["UIPANEL_NOTINVEHICLE"] = "Hide in Vehicle"
 L["UIPANEL_SPEC"] = "Dual Spec"
 L["UIPANEL_TREE"] = "Talent Tree"
 L["UIPANEL_TREE_DESC"] = "Check to allow this group to show when this talent tree is active, or uncheck to cause it to hide when it is not active."
@@ -321,7 +315,6 @@ L["UIPANEL_ALLRESET"] = "Reset all"
 L["UIPANEL_TOOLTIP_ALLRESET"] = "Reset DATA and POSITION of all icons and groups, as well as any other settings."
 L["UIPANEL_LOCKUNLOCK"] = "Lock/Unlock AddOn"
 L["UIPANEL_BARTEXTURE"] = "Bar Texture"
-L["UIPANEL_NOCOUNT_DESC"] = "Enables/disables the text that displays the cooldown on the icon. It will only be shown if the icon's timer is enabled, this option is enabled, and OMNICC IS INSTALLED"
 L["UIPANEL_BARIGNOREGCD"] = "Bars Ignore GCD"
 L["UIPANEL_BARIGNOREGCD_DESC"] = "If checked, cooldown bars will not change values if the cooldown triggered is a global cooldown"
 L["UIPANEL_CLOCKIGNOREGCD"] = "Timers Ignore GCD"
@@ -340,10 +333,8 @@ L["UIPANEL_TOOLTIP_ENABLEGROUP"] = "Show and enable this group"
 L["UIPANEL_TOOLTIP_ROWS"] = "Set the number of rows in this group"
 L["UIPANEL_TOOLTIP_COLUMNS"] = "Set the number of columns in this group"
 L["UIPANEL_TOOLTIP_ONLYINCOMBAT"] = "Check to cause this group to only be shown in combat"
-L["UIPANEL_TOOLTIP_NOTINVEHICLE"] = "Check to hide this group when you are in a vehicle and your action bars have changed to that vehicle's abilities"
 L["UIPANEL_TOOLTIP_PRIMARYSPEC"] = "Check to show this group while your primary spec is active"
 L["UIPANEL_TOOLTIP_SECONDARYSPEC"] = "Check to show this group while your secondary spec is active"
-L["UIPANEL_COLOR"] = "Cooldown/Duration Bar Color"
 L["UIPANEL_COLOR_COMPLETE"] = "CD/Duration Complete"
 L["UIPANEL_COLOR_STARTED"] = "CD/Duration Begin"
 L["UIPANEL_COLOR_COMPLETE_DESC"] = "Color of the cooldown/duration overlay bar when the cooldown/duration is complete"
@@ -363,12 +354,16 @@ L["UIPANEL_COLOR_ABSENT_DESC"] = "The tint of the icon when the buff/debuff/ench
 L["FONTCOLOR"] = "Font Color"
 L["FONTSIZE"] = "Font Size"
 L["DEFAULT"] = "Default"
-L["UIPANEL_STANCE"] = "Show while in:"
 L["NONE"] = "None of these"
 L["CASTERFORM"] = "Caster Form"
 
-L["UIPANEL_FONT_Count"] = "Stack Text"
-L["UIPANEL_FONT_Bind"] = "Binding Text"
+L["RESET_ICON"] = "Reset Icon"
+L["RESET_NOTIFY"] = "Click the reset button again within 5 seconds to confirm the reset."
+L["RESET_EXPIRE"] = "Reset timer expired."
+L["RESET_CONFIRM"] = "Confirm Reset"
+
+L["UIPANEL_FONT_Count"] = "Stack Text" -- proper case endings intended
+L["UIPANEL_FONT_Bind"] = "Binding/Label Text"
 L["UIPANEL_FONTFACE"] = "Font Face"
 L["UIPANEL_FONT_DESC"] = "Chose the font to be used by the stack text on icons."
 L["UIPANEL_FONT_SIZE"] = "Font Size"
@@ -409,7 +404,6 @@ L["UIPANEL_LOCK_DESC"] = "Lock this group, preventing movement or sizing by drag
 -- CONDITION PANEL
 -- -------------
 
-L["CONDITIONPANEL_TITLE"] = "TellMeWhen Condition Editor"
 L["ICONTOCHECK"] = "Icon to check"
 L["MOON"] = "Moon"
 L["SUN"] = "Sun"
@@ -422,7 +416,6 @@ L["CONDITIONPANEL_UNITDROPDOWN_DESC"] = [[You can select a unit from this menu t
 
 NOTE: Conditions only accept one unit.]]
 L["CONDITIONPANEL_OPERATOR"] = "Operator"
-L["CONDITIONPANEL_VALUE"] = "Percent"
 L["CONDITIONPANEL_VALUEN"] = "Value"
 L["CONDITIONPANEL_ANDOR"] = "And / Or"
 L["CONDITIONPANEL_AND"] = "And"
@@ -444,7 +437,7 @@ L["CONDITIONPANEL_ICON_DESC"] = [=[The condition will pass if the icon specified
 
 If you don't want to display the icons that are being checked, check 'Always Hide' in the icon editor of the icon being checked.
 
-The group of the icon being checked must also be shown in order to check the icon, even if the condition is set to false.]=]
+The group of the icon being checked must be shown in order to check the icon, even if the condition is set to false.]=]
 L["CONDITIONPANEL_RUNES_DESC"] = [=[Use this condition type to only show the icon when the selected runes are available.
 
 Each rune is a check button. A check mark will require that the rune be usable, an 'X' will require that the rune be unusable, no mark will ignore the rune.
@@ -571,7 +564,6 @@ L["PARENTHESISWARNING2"] = "Some closing parentheses are missing openers!"
 L["NUMAURAS"] = "Number of"
 L["ACTIVE"] = "%d Active"
 L["NUMAURAS_DESC"] = [[This condition checks the number of an aura active - not to be confused with the number of stacks of an aura.  This is for checking things like if you have both weapon enchant procs active at the same time.  Use sparingly, as the process used to count the numbers is a bit CPU intensive.]]
-L["COOLDOWN"] = "Cooldown"
 L["TOOLTIPSCAN"] = "Aura Variable"
 L["TOOLTIPSCAN_DESC"] = "This condition type will allow you to check the first variable associated with an aura. Numbers are provided by Blizzard API and do not necessarily match numbers found on the tooltip of the aura. There is also no guarantee that a number will be obtained for an aura. In most practical cases, though, the correct number will be checked."
 
@@ -587,9 +579,8 @@ L["fGROUP"] = "Group: %s"
 L["fICON"] = "Icon: %s"
 L["ICON"] = "Icon"
 L["DISABLED"] = "Disabled"
-L["IMPORTCOPY"] = "Copy/Import"
-L["COPYPOS"] = "Copy position/scale"
-L["COPYALL"] = "Copy entire group"
+L["COPYPOSSCALE"] = "Copy position/scale"
+L["COPYGROUP"] = "Copy Group"
 L["OVERWRITEGROUP"] = "Overwrite group: %s"
 L["MAKENEWGROUP"] = "Create new group"
 L["CONFIRMOVERWRITE"] = "Confirm overwrite"
@@ -599,15 +590,6 @@ L["GROUPADDONSETTINGS"] = "Group Settings"
 L["CONDITIONS"] = "Conditions"
 L["GROUPCONDITIONS"] = "Group Conditions"
 L["MAIN"] = "Main"
-L["RECEIVED"] = "Received icons"
-L["EXPORT"] = "Export to string/player OR import from string"
-L["EXPORT_LOLTITLE"] = "The editbox of sharing..."
-L["EXPORT_DESC"] = [[To export to a player, type their name into this editbox and choose "Export to Player" in the dropdown menu at the right.
-
-To export to a string, simply choose "Export to String" in the dropdown menu at the right, and then press CTRL+C to copy it to your clipboard.
-
-To import from a string, press CTRL+V to paste the string into the editbox after you have copied it to your clipboard, and then choose "Import from String" from the dropdown menu at the right.
-]]
 L["UNNAMED"] = "((Unnamed))"
 
 
@@ -623,6 +605,8 @@ L["IMPORT_EXPORT"] = "Import/Export"
 L["IMPORT_EXPORT_DESC"] = [[Click the dropdown arrow to the right of this editbox to import and export icons, groups, and profiles.
 
 Importing to or from a string, or exporting to another player, will require the use of this editbox. See the tooltips within the dropdown menu for details.]]
+L["IMPORT_EXPORT_BUTTON_DESC"] = "Click this dropdown to import and export icons, groups, and profiles."
+L["IMPORT_EXPORT_DESC_INLINE"] = "Import and Export profiles, groups, icons to or from strings, other players, other profiles, or a backup of your settings."
 
 L["IMPORT_HEADING"] = "Import"
 L["IMPORT_FROMLOCAL"] = "From Profile"
@@ -646,7 +630,7 @@ L["EXPORT_TOCOMM_DESC"] = "Type a player's name into the editbox and choose this
 L["EXPORT_TOSTRING_DESC"] = "A string containing the necessary data will be pasted into the editbox.  Press Ctrl+C to copy it, and then paste it wherever you want to share it."
 L["EXPORT_SPECIALDESC"] = "Other TellMeWhen users can only import entire groups or entire profiles if they have version 4.6.0+"
 L["EXPORT_f"] = "Export %s"
-L["EXPORT_GLOBAL_f"] = "Export Profile: %s"
+L["fPROFILE"] = "Profile: %s"
 
 
 
@@ -788,15 +772,6 @@ To add durations, use the following syntax:
 Spell Name: Duration
 
 E.g. "%s: 10"]]
-L["HELP_MISSINGUNITNUMS"] = [[The following units are missing numbers or ranges:
-
-%s
-
-Replace the red |cFFFF0000#|r with a number or a range of numbers.
-
-E.g:
-arena1
-raid1-40]]
 L["HELP_POCKETWATCH"] = [[|TInterface\Icons\INV_Misc_PocketWatch_01:20|t -- The pocket watch texture.
 This texture is being used because the first valid spell being checked was entered by name and isn't in your spellbook.
 

@@ -15,6 +15,8 @@ Lib\AceConfig-3.0\AceConfig-3.0.xml
 Lib\AceDBOptions-3.0\AceDBOptions-3.0.xml
 Lib\AceSerializer-3.0\AceSerializer-3.0.xml
 
+widget-importexport.lua
+
 TellMeWhen_Options.lua
 
 TellMeWhen_Options.xml

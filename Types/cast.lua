@@ -33,6 +33,7 @@ local Type = {}
 Type.type = "cast"
 LibStub("AceEvent-3.0"):Embed(Type)
 Type.name = L["ICONMENU_CAST"]
+Type.desc = L["ICONMENU_CAST_DESC"]
 Type.appendNameLabel = L["ICONMENU_CHOOSENAME_ORBLANK"]
 Type.AllowNoName = true
 Type.WhenChecks = {
@@ -95,7 +96,7 @@ local function Cast_OnUpdate(icon, time)
 end
 
 function Type:GetNameForDisplay(icon, data)
-	return data
+	return data, 1
 end
 
 

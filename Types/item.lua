@@ -212,8 +212,7 @@ function Type:Setup(icon, groupID, iconID)
 end
 
 function Type:GetNameForDisplay(icon, data)
-	local name = GetItemInfo(data)
-	return name
+	return data and GetItemInfo(data)
 end
 
 TMW:RegisterIconType(Type)

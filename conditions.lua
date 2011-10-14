@@ -1897,6 +1897,34 @@ CNDT.Types = {
 			return gsub(str, "c.Icon", c.Icon)
 		end,
 	},
+	--[==[{ -- icon alpha I WAS GOING TO DO THIS BUT IT SEEMS POINTLESS
+		text = L["CONDITIONPANEL_ICONALPHA"],
+		tooltip = L["CONDITIONPANEL_ICONALPHA_DESC"],
+		value = "ICONALPHA",
+		percent = true,
+		texttable = percent,
+		min = 0,
+		max = 100,
+		isicon = true,
+		unit = false,
+		icon = "Interface\\Icons\\INV_Misc_PocketWatch_01",
+		tcoords = standardtcoords,
+		showhide = function(group)
+			group.TextUnitOrIcon:SetText(L["ICONTOCHECK"])
+			group.Icon:Show()
+		end,
+		funcstr = function(c)
+			if c.Icon == "" then return [[true]] end
+			local str = [[(c.Icon and c.Icon.__shown and c.Icon.OnUpdate and not c.Icon:OnUpdate(time)) and c.Icon.__alpha c.Operator c.Level]]
+			return gsub(str, "c.Icon", c.Icon)
+		end,
+L["CONDITIONPANEL_ICONALPHA"] = "Icon Alpha"
+L["CONDITIONPANEL_ICONALPHA_DESC"] = [=[The condition will pass if the icon's alpha is within the specified range.
+
+If you don't want to display the icons that are being checked, check 'Always Hide' in the icon editor of the icon being checked.
+
+The group of the icon being checked must be shown in order to check the icon.]=]
+	},]==]
 	{ -- macro conditional
 		text = L["MACROCONDITION"],
 		tooltip = L["MACROCONDITION_DESC"],

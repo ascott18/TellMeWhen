@@ -322,6 +322,159 @@
 		</Scripts>
 	</Slider>
 
+	<EditBox name="TellMeWhen_ExportBoxTemplate" inherits="TellMeWhen_InputBoxTemplate" virtual="true">
+		<Size y="15"/>
+		<Frames>
+			<Frame name="$parentDD" inherits="UIDropDownMenuTemplate" parentKey="DD">
+				<Anchors>
+					<Anchor point="LEFT" relativePoint="RIGHT" x="-15" y="-4"/>
+				</Anchors>
+				<Frames>
+					<Frame name="$parentDummy" parentKey="Dummy">
+						<Size x="1" y="1"/>
+						<Anchors>
+							<Anchor point="CENTER" relativeTo="$parentButton" />
+						</Anchors>
+						<Layers>
+							<Layer level="OVERLAY">
+								<Texture name="$parentGlow" file="Interface\Buttons\UI-Common-MouseHilight" parentKey="Glow" alphaMode="ADD">
+									<Size x="30" y="30"/>
+									<Anchors>
+										<Anchor point="CENTER"/>
+									</Anchors>
+									<Animations>
+										<AnimationGroup name="$parentAnim" parentKey="Anim" looping="REPEAT">
+											<Alpha change="1.0" duration="0.9" order="1"/>
+											<Alpha startDelay="0.3" change="-1.0" duration="0.9" order="2"/>
+										</AnimationGroup>
+									</Animations>
+								</Texture>
+							</Layer>
+						</Layers>
+					</Frame>
+				</Frames>
+				<Scripts>
+					<OnLoad>
+						self.wrapTooltips = 1
+						self.Dummy.Glow:SetAlpha(0)
+						self.Dummy.Glow:SetVertexColor(1, 1, 0)
+						_G[self:GetName() .. "Left"]:Hide()
+						_G[self:GetName() .. "Middle"]:Hide()
+						_G[self:GetName() .. "Right"]:Hide()
+						_G[self:GetName() .. "Text"]:Hide()
+						UIDropDownMenu_SetWidth(self, 1)
+						_G[self:GetName() .. "Button"]:SetScript("PreClick", function()
+							UIDropDownMenu_Initialize(self, TMW.IE.Copy_DropDown, "DROPDOWN")
+							_G[self:GetName() .. "Button"]:SetScript("PreClick", nil)
+						end)
+					</OnLoad>
+					<OnUpdate>
+						if not self.Dummy.Glow.Anim:IsPlaying() then
+							if TMW.DoPulseReceivedComm or self:GetParent().DoPulseValidString then
+								self.Dummy.Glow.Anim:Play()
+							end
+						elseif not self:GetParent().DoPulseValidString then
+							self.Dummy.Glow.Anim:Finish()
+						end
+					</OnUpdate>
+				</Scripts>
+			</Frame>
+			<StatusBar name="$parentStatus" parentKey="Status" hidden="true">
+				<Anchors>
+					<Anchor point="TOPLEFT" x="-4" y="0"/>
+					<Anchor point="BOTTOMRIGHT" x="-2" y="-1"/>
+				</Anchors>
+				<Layers>
+					<Layer level="BACKGROUND">
+						<Texture name="$parenttexture" parentKey="texture" file="Interface\TargetingFrame\UI-StatusBar"/>
+					</Layer>
+
+					<Layer level="OVERLAY">
+						<FontString name="$parentText" parentKey="text" inherits="GameFontHighlight">
+							<Anchors>
+								<Anchor point="CENTER"/>
+							</Anchors>
+						</FontString>
+					</Layer>
+				</Layers>
+				
+				<Animations>
+					<AnimationGroup name="$parentFadeOut" parentKey="FadeOut">
+						<Alpha change="-1" duration="1" order="1"/>
+						<Scripts>
+							<OnFinished>
+								self:GetParent():Hide()
+							</OnFinished>
+						</Scripts>
+					</AnimationGroup>
+				</Animations>
+				<Scripts>
+					<OnLoad>
+						self:SetStatusBarTexture(self.texture)
+						self.texture:SetVertexColor(1, .5, .2, 1)
+						function self:Set(value, max)
+							self:Show()
+							self:SetMinMaxValues(0, max)
+							self:SetValue(value)
+							if value >= max then
+								self.FadeOut:Play()
+							end
+						end
+						self:SetFrameLevel(self:GetParent():GetFrameLevel() - 1)
+					</OnLoad>
+					<OnShow>
+						self.texture:SetTexture(LibStub("LibSharedMedia-3.0"):Fetch("statusbar", TMW.db.profile.TextureName))
+						self:GetParent().BackgroundText:Hide()
+					</OnShow>
+					<OnHide>
+						self:GetParent().BackgroundText:Show()
+					</OnHide>
+					<OnValueChanged>
+						local _, max = self:GetMinMaxValues()
+						if self:IsShown() then
+							self.text:SetFormattedText("%.0f%%", value/max*100)
+						end
+					</OnValueChanged>
+				</Scripts>
+			</StatusBar>
+		</Frames>
+		<Scripts>
+			<OnLoad>
+				self.label = TMW.L["IMPORT_EXPORT"]
+				TMW:TT(self, "IMPORT_EXPORT", "IMPORT_EXPORT_DESC")
+				TMW:TT(self.DD, "IMPORT_EXPORT", "IMPORT_EXPORT_BUTTON_DESC")
+
+				function self:callback(soFar, total)
+					self.Status:Set(soFar, total)
+					if soFar == total then
+						TMW:Print(TMW.L["SENDSUCCESSFUL"])
+					end
+				end
+				
+				self:HookScript("OnTextChanged", function()
+					local text = self:GetText()
+					local editboxResult = TMW.LastExportedString ~= text and TMW:DeserializeData(text:gsub("||", "|"))
+					if editboxResult then
+						self.DoPulseValidString = 1
+					else
+						self.DoPulseValidString = nil
+					end
+				end)
+				
+				self:SetFrameLevel(self:GetParent():GetFrameLevel() + 2)
+			</OnLoad>
+			<OnEditFocusLost>
+				EditBox_ClearHighlight(self)
+				TMW:CleanString(self)
+				self:GetScript("OnTextChanged")(self)
+			</OnEditFocusLost>
+			<OnEnterPressed>
+				self:ClearFocus()
+				ToggleDropDownMenu(1, nil, self.DD)
+			</OnEnterPressed>
+		</Scripts>
+	</EditBox>
+			
 	<Button name="TellMeWhen_ConditionEditorRuneCheckTemplate" virtual="true">
 		<Size x="35" y="29"/>
 		<Layers>
@@ -2824,127 +2977,6 @@
 						</Scripts>
 					</Slider>
 
-					<Button name="$parentReset" parentKey="ResetButton" inherits="TellMeWhen_ButtonTemplate" text="RESET">
-						<Size x="100" y="17"/>
-						<Anchors>
-							<Anchor point="BOTTOMLEFT" x="15" y="13"/>
-						</Anchors>
-						<Scripts>
-							<OnLoad> self:SetFrameLevel(self:GetFrameLevel()+2)</OnLoad>
-							<OnClick>TMW.IE:Reset()</OnClick>
-						</Scripts>
-					</Button>
-					
-					<EditBox name="$parentExportBox" inherits="TellMeWhen_InputBoxTemplate" parentKey="ExportBox">
-						<Size x="375" y="15"/>
-						<Anchors>
-							<Anchor point="LEFT" relativeTo="$parentReset" relativePoint="RIGHT" x="10"/>
-						</Anchors>
-						<Frames>
-							<Frame name="$parentDD" inherits="UIDropDownMenuTemplate" parentKey="DD">
-								<Anchors>
-									<Anchor point="LEFT" relativePoint="RIGHT" x="-15" y="-4"/>
-								</Anchors>
-								<Scripts>
-									<OnLoad>
-										self.wrapTooltips = 1
-										_G[self:GetName() .. "Left"]:Hide()
-										_G[self:GetName() .. "Middle"]:Hide()
-										_G[self:GetName() .. "Right"]:Hide()
-										_G[self:GetName() .. "Text"]:Hide()
-										UIDropDownMenu_SetWidth(self, 1)
-										_G[self:GetName() .. "Button"]:SetScript("PreClick", function()
-											UIDropDownMenu_Initialize(self, TMW.IE.Copy_DropDown, "DROPDOWN")
-											_G[self:GetName() .. "Button"]:SetScript("PreClick", nil)
-										end)
-									</OnLoad>
-								</Scripts>
-							</Frame>
-							<StatusBar name="$parentStatus" parentKey="Status" hidden="true">
-								<Anchors>
-									<Anchor point="TOPLEFT" x="-4" y="0"/>
-									<Anchor point="BOTTOMRIGHT" x="-2" y="-1"/>
-								</Anchors>
-								<Layers>
-									<Layer level="BACKGROUND">
-										<Texture name="$parenttexture" parentKey="texture" file="Interface\TargetingFrame\UI-StatusBar"/>
-									</Layer>
-
-									<Layer level="OVERLAY">
-										<FontString name="$parentText" parentKey="text" inherits="GameFontHighlight">
-											<Anchors>
-												<Anchor point="CENTER"/>
-											</Anchors>
-										</FontString>
-									</Layer>
-								</Layers>
-								
-								<Animations>
-									<AnimationGroup name="$parentFadeOut" parentKey="FadeOut">
-										<Alpha change="-1" duration="1" order="1"/>
-										<Scripts>
-											<OnFinished>
-												self:GetParent():Hide()
-											</OnFinished>
-										</Scripts>
-									</AnimationGroup>
-								</Animations>
-								<Scripts>
-									<OnLoad>
-										self:SetStatusBarTexture(self.texture)
-										self.texture:SetVertexColor(1, .5, .2, 1)
-										function self:Set(value, max)
-											self:Show()
-											self:SetMinMaxValues(0, max)
-											self:SetValue(value)
-											if value >= max then
-												self.FadeOut:Play()
-											end
-										end
-										self:SetFrameLevel(self:GetParent():GetFrameLevel() - 1)
-									</OnLoad>
-									<OnShow>
-										self.texture:SetTexture(LibStub("LibSharedMedia-3.0"):Fetch("statusbar", TMW.db.profile.TextureName))
-										self:GetParent().BackgroundText:Hide()
-									</OnShow>
-									<OnHide>
-										self:GetParent().BackgroundText:Show()
-									</OnHide>
-									<OnValueChanged>
-										local _, max = self:GetMinMaxValues()
-										if self:IsShown() then
-											self.text:SetFormattedText("%.0f%%", value/max*100)
-										end
-									</OnValueChanged>
-								</Scripts>
-							</StatusBar>
-					
-					
-						</Frames>
-						<Scripts>
-							<OnLoad>
-								self.label = TMW.L["IMPORT_EXPORT"]
-								TMW:TT(self, "IMPORT_EXPORT", "IMPORT_EXPORT_DESC")
-
-								function self:callback(soFar, total)
-									self.Status:Set(soFar, total)
-									if soFar == total then
-										TMW:Print(TMW.L["SENDSUCCESSFUL"])
-									end
-								end
-								self:SetScript("OnEnterPressed", function()
-									self:ClearFocus()
-									ToggleDropDownMenu(1, nil, self.DD)
-								end)
-							</OnLoad>
-							<OnEditFocusLost>
-								EditBox_ClearHighlight(self)
-								TMW:CleanString(self)
-								self:GetScript("OnTextChanged")(self)
-							</OnEditFocusLost>
-						</Scripts>
-					</EditBox>
-
 					<CheckButton name="$parentEnabled" inherits="TellMeWhen_CheckTemplate" parentKey="Enabled">
 						<Anchors>
 							<Anchor point="LEFT" relativeTo="$parentType" relativePoint="RIGHT" x="-12" y="2"/>
@@ -3006,7 +3038,7 @@
 					<EditBox name="$parentBindText" inherits="TellMeWhen_InputBoxTemplate" parentKey="BindText" autoFocus="false">
 						<Size y="15"/>
 						<Anchors>
-							<Anchor point="LEFT" relativeTo="$parentFakeHidden" relativePoint="RIGHT" x="135"/>
+							<Anchor point="LEFT" relativeTo="$parentFakeHidden" relativePoint="RIGHT" x="105"/>
 							<Anchor point="RIGHT" x="-16"/>
 						</Anchors>
 						<Scripts>
@@ -3093,7 +3125,7 @@
 					<ScrollFrame name="$parentScrollFrame" parentKey="ScrollFrame" inherits="UIPanelScrollFrameCodeTemplate" movable="true" enableMouse="true">
 						<Anchors>
 							<Anchor point="TOPLEFT" y="-30"/>
-							<Anchor point="BOTTOMRIGHT" y="30"/>
+							<Anchor point="BOTTOMRIGHT" y="32"/>
 						</Anchors>
 						<ScrollChild>
 							<Frame name="$parentGroups" parent="TellMeWhen_IconEditorConditions" parentKey="Groups" movable="true" enableMouse="true" >
@@ -3668,90 +3700,7 @@
 					<OnDragStop> TellMeWhen_IconEditor:StopMovingOrSizing() </OnDragStop>
 				</Scripts>
 			</Frame>
-			<!--
-			<Frame name="$parentASD" hidden="true" parentKey="ASD">
-				<Anchors>
-					<Anchor point="TOPLEFT"/>
-					<Anchor point="BOTTOMRIGHT"/>
-				</Anchors>
-				<Frames>
-
-
-					<Frame name="$parentColorModeContainer" parentKey="ColorModeContainer">
-						<Backdrop bgFile="Interface\DialogFrame\UI-DialogBox-Background" tile="true">
-							<BackgroundInsets>
-								<AbsInset left="0" right="0" top="0" bottom="0"/>
-							</BackgroundInsets>
-							<TileSize>
-								<AbsValue val="32"/>
-							</TileSize>
-						</Backdrop>
-						<Anchors>
-							<Anchor point="TOPLEFT" x="17" y="-40"/>
-							<Anchor point="BOTTOMLEFT" x="17" y="40"/>
-						</Anchors>
-						<Frames>
-							<Button name="$parentButton1" parentKey="Button1" inherits="TellMeWhen_ColorModeButtonTemplate">
-								<Anchors>
-									<Anchor point="TOPLEFT"/>
-								</Anchors>
-							</Button>
-						</Frames>
-						<Size x="150"/>
-					</Frame>
-
-					<ColorSelect name="$parentColorSelect">
-						<Size x="176" y="128"/>
-						<Anchors>
-							<Anchor point="CENTER"/>
-						</Anchors>
-						<Scripts>
-							<OnColorSelect>
-								self.Swatch:SetTexture(r, g, b)
-							</OnColorSelect>
-						</Scripts>
-						<ColorWheelTexture>
-							<Size x="128" y="128"/>
-							<Anchors>
-								<Anchor point="TOPLEFT"/>
-							</Anchors>
-						</ColorWheelTexture>
-						<ColorWheelThumbTexture file="Interface\Buttons\UI-ColorPicker-Buttons">
-							<Size x="10" y="10"/>
-							<TexCoords left="0" right="0.15625" top="0" bottom="0.625"/>
-						</ColorWheelThumbTexture>
-						<ColorValueTexture>
-							<Size x="32" y="128"/>
-							<Anchors>
-								<Anchor point="TOPRIGHT" x="-5"/>
-							</Anchors>
-						</ColorValueTexture>
-						<ColorValueThumbTexture file="Interface\Buttons\UI-ColorPicker-Buttons">
-							<Size x="48" y="14"/>
-							<TexCoords left="0.25" right="1.0" top="0" bottom="0.875"/>
-						</ColorValueThumbTexture>
-						<Layers>
-							<Layer level="ARTWORK">
-								<Texture name="$parentSwatch" parentKey="Swatch">
-									<Size x="32" y="32"/>
-									<Anchors>
-										<Anchor point="TOPLEFT" relativePoint="TOPRIGHT" x="5"/>
-									</Anchors>
-									<Color r="1.0" g="1.0" b="1.0" a="1.0"/>
-								</Texture>
-							</Layer>
-						</Layers>
-					</ColorSelect>
-
-
-				</Frames>
-				<Scripts>
-					<OnLoad>self:RegisterForDrag("LeftButton")</OnLoad>
-					<OnDragStart> TellMeWhen_IconEditor:StartMoving() </OnDragStart>
-					<OnDragStop> TellMeWhen_IconEditor:StopMovingOrSizing() </OnDragStop>
-				</Scripts>
-			</Frame> -->
-
+			
 			<Button name="$parentOkay" parentKey="OkayButton" inherits="TellMeWhen_ButtonTemplate" text="OKAY">
 				<Size x="60" y="17"/>
 				<Anchors>
@@ -3760,6 +3709,69 @@
 				<Scripts>
 					<OnLoad> self:SetFrameLevel(self:GetParent():GetFrameLevel()+4) </OnLoad>
 					<OnClick>self:GetParent():Hide() </OnClick>
+				</Scripts>
+			</Button>
+			
+			<Button name="$parentReset" parentKey="ResetButton" inherits="TellMeWhen_ButtonTemplate" text="RESET">
+				<Size x="100" y="17"/>
+				<Anchors>
+					<Anchor point="BOTTOMLEFT" x="15" y="13"/>
+				</Anchors>
+				<Layers>
+					<Layer level="OVERLAY">
+						<Texture name="$parentGlow" file="Interface\Buttons\UI-Panel-Button-Highlight" parentKey="Glow" alphaMode="ADD" setAllPoints="true">
+							<TexCoords left="0" right="0.625" top="0" bottom="0.6875"/>
+							<Anchors>
+								<Anchor point="CENTER"/>
+							</Anchors>
+							<Animations>
+								<AnimationGroup name="$parentAnim" parentKey="Anim">
+									<Alpha change="1.0" duration="1" order="1"/>
+									<Alpha startDelay="0.5" change="-1.0" duration="1" order="2"/>
+									<Alpha change="1.0" duration="1" order="3"/>
+									<Alpha startDelay="0.5" change="-1.0" duration="1" order="4"/>
+									<Scripts>
+										<OnPlay>
+											self.preClicked = 1
+											TMW:Print(TMW.L["RESET_NOTIFY"])
+											self:GetParent():GetParent():SetText(TMW.L["RESET_CONFIRM"])
+										</OnPlay>
+										<OnFinished>
+											self.preClicked = nil
+											TMW:Print(TMW.L["RESET_EXPIRE"])
+											self:GetParent():GetParent():SetText(TMW.L["RESET_ICON"])
+										</OnFinished>
+									</Scripts>
+								</AnimationGroup>
+							</Animations>
+						</Texture>
+					</Layer>
+				</Layers>
+				<Scripts>
+					<OnLoad>
+						-- calculate ideal width
+						local texts = {
+							TMW.L["RESET_ICON"],
+							TMW.L["RESET_CONFIRM"],
+						}
+						local width = 0
+						for k, text in pairs(texts) do
+							self:SetText(text)
+							width = max(width, self:GetTextWidth())
+						end
+						self:SetWidth(width+25)
+						
+						self:SetText(TMW.L["RESET_ICON"])
+						self:SetFrameLevel(self:GetFrameLevel()+2)
+						self.Glow:SetAlpha(0)
+					</OnLoad>
+					<OnClick>
+						if not self.preClicked then
+							self.Glow.Anim:Play()
+						else
+							TMW.IE:Reset()
+						end
+					</OnClick>
 				</Scripts>
 			</Button>
 			<Button name="$parentClose" parentKey="CloseButton" inherits="UIPanelCloseButton">
@@ -3771,6 +3783,14 @@
 					<OnClick>self:GetParent():Hide()</OnClick>
 				</Scripts>
 			</Button>
+			 
+			<EditBox name="$parentExportBox" inherits="TellMeWhen_ExportBoxTemplate" parentKey="ExportBox">
+				<Anchors>
+					<Anchor point="LEFT" relativeTo="$parentReset" relativePoint="RIGHT" x="11"/>
+					<Anchor point="RIGHT" relativeTo="$parentOkay" relativePoint="LEFT" x="-22"/>
+				</Anchors>
+			</EditBox>
+
 			<Button name="$parentResize" parentKey="resizeButton">
 				<Size x="25" y="25"/>
 				<Anchors>
@@ -3842,7 +3862,7 @@
 			</Layer>
 		</Layers>
 		<Scripts>
-			<OnShow>
+			<!-- <OnShow>
 				self.OkayButton:Show()
 				self.CloseButton:Show()
 				self.resizeButton:Show()
@@ -3851,7 +3871,7 @@
 				self.OkayButton:Hide()
 				self.CloseButton:Hide()
 				self.resizeButton:Hide()
-			</OnHide>
+			</OnHide> -->
 			<OnLoad>
 				self:RegisterForDrag("LeftButton")
 				for k, v in pairs(self) do

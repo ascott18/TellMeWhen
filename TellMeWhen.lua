@@ -34,7 +34,7 @@ local DRData = LibStub("DRData-1.0", true)
 TELLMEWHEN_VERSION = "4.6.2"
 TELLMEWHEN_VERSION_MINOR = strmatch(" @project-version@", " r%d+") or ""
 TELLMEWHEN_VERSION_FULL = TELLMEWHEN_VERSION .. TELLMEWHEN_VERSION_MINOR
-TELLMEWHEN_VERSIONNUMBER = 46207 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
+TELLMEWHEN_VERSIONNUMBER = 46209 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
 if TELLMEWHEN_VERSIONNUMBER > 47000 or TELLMEWHEN_VERSIONNUMBER < 46000 then return error("YOU SCREWED UP THE VERSION NUMBER OR DIDNT CHANGE THE SAFETY LIMITS") end -- safety check because i accidentally made the version number 414069 once
 
 TELLMEWHEN_MAXGROUPS = 1 	--this is a default, used by SetTheory (addon), so dont rename
@@ -68,7 +68,7 @@ local runEvents, updatePBar = 1, 1
 local GCD, NumShapeshiftForms, UpdateTimer = 0, 0, 0
 local IconUpdateFuncs, GroupUpdateFuncs, unitsToChange = {}, {}, {}
 local GroupBase, IconBase = {}, {}
- loweredbackup = {}
+local loweredbackup = {}
 local time = GetTime() TMW.time = time
 local sctcolor = {r=1, b=1, g=1}
 local clientVersion = select(4, GetBuildInfo())
@@ -401,6 +401,8 @@ TMW.Defaults = {
 		},
 		HelpSettings = {
 		},
+		CodeSnippets = {
+		},
 		HasImported			= false,
 		ConfigWarning		= true,
 	},
@@ -424,6 +426,8 @@ TMW.Defaults = {
 		BarGCD		=	true,
 		ClockGCD	=	true,
 		CheckOrder	=	-1,
+		CodeSnippets = {
+		},
 		Groups 		= 	{
 			[1] = {
 				Enabled			= true,
@@ -1190,6 +1194,7 @@ function TMW:OnCommReceived(prefix, text, channel, who)
 		TMW.Received = TMW.Received or {}
 		TMW.Received[text] = who or true
 		if who then
+			TMW.DoPulseReceivedComm = true
 			if db.global.HasImported then
 				TMW:Printf(L["MESSAGERECIEVE_SHORT"], who)
 			else
@@ -2589,7 +2594,7 @@ function IconBase.SetReverse(icon, reverse)
 end
 
 function IconBase.UpdateBindText(icon)
-	icon.bindText:SetText(TMW:InjectDataIntoString(icon.BindText, icon, 1))
+	icon.bindText:SetText(TMW:InjectDataIntoString(icon.BindText, icon))
 end
 
 function IconBase.IsBeingEdited(icon)
@@ -2717,6 +2722,7 @@ function IconBase.SetInfo(icon, alpha, color, texture, start, duration, spellChe
 	if icon.__unitChecked ~= unit then
 		queueOnUnit = true
 		icon.__unitChecked = unit
+		icon.__oldUnitName = UnitName(unit)
 	elseif unit then
 		local unitName = UnitName(unit)
 		if icon.__oldUnitName ~= unitName then
@@ -3080,8 +3086,10 @@ function TMW:Icon_Update(icon)
 	end
 
 	icon.__previousNameFirst = icon.NameFirst -- used to detect changes in the name that would cause a texture change
-	icon.__unitChecked = nil
 	icon.__spellChecked = nil
+	icon.__unitChecked = nil
+	icon.__oldUnitName = nil
+	icon.Units = nil
 	
 	for k in pairs(TMW.Icon_Defaults) do
 		icon[k] = nil --lets clear any settings that might get left behind.
@@ -3153,13 +3161,13 @@ function TMW:Icon_Update(icon)
 
 	
 	local ctf = group.Fonts.Count
-	local ct = icon.countText
+	local countText = icon.countText
 	local btf = group.Fonts.Bind
-	local bt = icon.bindText
+	local bindText = icon.bindText
 	local isDefault
-	ct:SetFont(LSM:Fetch("font", ctf.Name), ctf.Size, ctf.Outline)
-	bt:SetFont(LSM:Fetch("font", btf.Name), btf.Size, btf.Outline)
-	bt:SetText(icon.BindText)
+	countText:SetFont(LSM:Fetch("font", ctf.Name), ctf.Size, ctf.Outline)
+	bindText:SetFont(LSM:Fetch("font", btf.Name), btf.Size, btf.Outline)
+	icon:UpdateBindText()
 	icon.__normaltex = icon.__LBF_Normal or icon.__MSQ_NormalTexture or icon:GetNormalTexture()
 	if LMB then
 		local g = LMB:Group("TellMeWhen", format(L["fGROUP"], groupID))
@@ -3189,14 +3197,14 @@ function TMW:Icon_Update(icon)
 		end
 		local tbl = LBF:GetSkins()
 		if tbl and tbl[group.SkinID] then
-			ct:SetFont(LSM:Fetch("font", ctf.Name), tbl and tbl[group.SkinID].Count.FontSize or ctf.Size, ctf.Outline)
-			bt:SetFont(LSM:Fetch("font", btf.Name), tbl and tbl[group.SkinID].Count.FontSize or btf.Size, btf.Outline)
+			countText:SetFont(LSM:Fetch("font", ctf.Name), tbl and tbl[group.SkinID].Count.FontSize or ctf.Size, ctf.Outline)
+			bindText:SetFont(LSM:Fetch("font", btf.Name), tbl and tbl[group.SkinID].Count.FontSize or btf.Size, btf.Outline)
 		end
 	else
-		ct:ClearAllPoints()
-		ct:SetPoint(ctf.point, icon, ctf.relativePoint, ctf.x, ctf.y)
-		bt:ClearAllPoints()
-		bt:SetPoint(btf.point, icon, btf.relativePoint, btf.x, btf.y)
+		countText:ClearAllPoints()
+		countText:SetPoint(ctf.point, icon, ctf.relativePoint, ctf.x, ctf.y)
+		bindText:ClearAllPoints()
+		bindText:SetPoint(btf.point, icon, btf.relativePoint, btf.x, btf.y)
 		isDefault = 1
 	end
 	
@@ -3205,20 +3213,20 @@ function TMW:Icon_Update(icon)
 	
 	if LMB or LBF then
 		if ctf.OverrideLBFPos then
-			ct:ClearAllPoints()
-			local func = ct.__MSQ_SetPoint or ct.SetPoint
-			func(ct, ctf.point, icon, ctf.relativePoint, ctf.x, ctf.y)
+			countText:ClearAllPoints()
+			local func = countText.__MSQ_SetPoint or countText.SetPoint
+			func(countText, ctf.point, icon, ctf.relativePoint, ctf.x, ctf.y)
 		end
 		if btf.OverrideLBFPos then
-			bt:ClearAllPoints()
-			local func = bt.__MSQ_SetPoint or bt.SetPoint
-			func(bt, btf.point, icon, btf.relativePoint, btf.x, btf.y)
+			bindText:ClearAllPoints()
+			local func = bindText.__MSQ_SetPoint or bindText.SetPoint
+			func(bindText, btf.point, icon, btf.relativePoint, btf.x, btf.y)
 		end
 		icon.cbar:SetFrameLevel(icon:GetFrameLevel())
 		icon.pbar:SetFrameLevel(icon:GetFrameLevel())
 	end
-	ct:SetWidth(ctf.ConstrainWidth and icon.texture:GetWidth() or 0)
-	bt:SetWidth(btf.ConstrainWidth and icon.texture:GetWidth() or 0)
+	countText:SetWidth(ctf.ConstrainWidth and icon.texture:GetWidth() or 0)
+	bindText:SetWidth(btf.ConstrainWidth and icon.texture:GetWidth() or 0)
 
 	if isDefault then
 		group.barInsets = 1.5
@@ -3356,6 +3364,8 @@ function TMW:Icon_Update(icon)
 end
 
 function TMW:InjectDataIntoString(Text, icon, doBlizz)
+	if not Text then return Text end
+	
 	if doBlizz then
 		if strfind(Text, "%%[Tt]") then
 			Text = gsub(Text, "%%[Tt]", UnitName("target") or TARGET_TOKEN_NOT_FOUND)
@@ -3371,7 +3381,7 @@ function TMW:InjectDataIntoString(Text, icon, doBlizz)
 	
 	if icon then
 		if strfind(Text, "%%[Uu]") then
-			Text = gsub(Text, "%%[Uu]", UnitName(icon.__unitChecked or "") or "?")
+			Text = gsub(Text, "%%[Uu]", icon.__oldUnitName or UnitName(icon.__unitChecked or "") or "?")
 		end
 		
 		if strfind(Text, "%%[Ss]") then

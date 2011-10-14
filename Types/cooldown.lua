@@ -93,13 +93,15 @@ local function AutoShot_OnUpdate(icon, time)
 		icon.UpdateTimer = time
 		local CndtCheck = icon.CndtCheck if CndtCheck and CndtCheck() then return end
 		
+		local NameName = icon.NameName
+		
 		local ready = time - icon.asStart > icon.asDuration
-		local inrange = icon.RangeCheck and IsSpellInRange(icon.NameName, "target") or 1
+		local inrange = icon.RangeCheck and IsSpellInRange(NameName, "target") or 1
 		
 		if ready and inrange then
 			
 			--icon:SetInfo(alpha, color, texture, start, duration, spellChecked, reverse, count, countText, forceupdate, unit)
-			icon:SetInfo(icon.Alpha, icon.UnAlpha ~= 0 and pr or 1, nil, 0, 0, nil, nil, nil, nil, nil, nil)
+			icon:SetInfo(icon.Alpha, icon.UnAlpha ~= 0 and pr or 1, nil, 0, 0, NameName, nil, nil, nil, nil, nil)
 		else
 			local alpha, color
 			if icon.Alpha ~= 0 then
@@ -115,7 +117,7 @@ local function AutoShot_OnUpdate(icon, time)
 			end
 			
 			--icon:SetInfo(alpha, color, texture, start, duration, spellChecked, reverse, count, countText, forceupdate, unit)
-			icon:SetInfo(alpha, color, nil, icon.asStart, icon.asDuration, nil, nil, nil, nil, nil, nil)
+			icon:SetInfo(alpha, color, nil, icon.asStart, icon.asDuration, NameName, nil, nil, nil, nil, nil)
 		end
 	end
 end
@@ -207,7 +209,6 @@ local function MultiStateCD_OnEvent(icon)
 			return
 		end
 	end
-
 end
 
 local function MultiStateCD_OnUpdate(icon, time)

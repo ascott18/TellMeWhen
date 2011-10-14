@@ -735,6 +735,13 @@ local groupConfigTemplate = {
 					end,
 					confirm = true,
 				},
+				ImportExport = {
+					name = L["IMPORT_EXPORT"],
+					type = "input",
+					order = 60,
+					width = "full",
+					dialogControl = 'TMW-ImportExport',
+				},
 			},
 		},
 		Count = groupFontConfigTemplate,
@@ -1074,7 +1081,19 @@ function TMW:CompileOptions() -- options
 				},
 			},
 		}
-		TMW.OptionsTable.args.profiles = LibStub("AceDBOptions-3.0"):GetOptionsTable(db)
+		TMW.OptionsTable.args.profiles = CopyTable(LibStub("AceDBOptions-3.0"):GetOptionsTable(db))
+		TMW.OptionsTable.args.profiles.args.importexportdesc = {
+			order = 90,
+			type = "description",
+			name = "\r\n" .. L["IMPORT_EXPORT_DESC_INLINE"],
+		}
+		TMW.OptionsTable.args.profiles.args.importexport = {
+			name = L["IMPORT_EXPORT"],
+			type = "input",
+			order = 100,
+			width = "full",
+			dialogControl = 'TMW-ImportExport',
+		}
 	end
 
 
@@ -1296,7 +1315,7 @@ TMW.ImportFunctions = {
 		
 			local newname = noOverwrite
 			local oldnum = strmatch("Ganis (1)", "%((%d+)%)$")
-			local base = gsub(profilename, " %(%d+%)$", "")
+			local base = gsub(noOverwrite, " %(%d+%)$", "")
 			local newnum = (oldnum or 1) + 1
 			
 			-- generate a new name if the profile already exists
@@ -1348,6 +1367,26 @@ function TMW:Import(data, version, type, ...)
 		TMW:Print(L["IMPORTERROR_INVALIDTYPE"])
 	end
 end
+
+function TMW:ExportToString(editbox, ...)
+	local s = TMW:GetSettingsString(...)
+	s = TMW:MakeSerializedDataPretty(s)
+	TMW.LastExportedString = s
+	editbox:SetText(s)
+	editbox:HighlightText()
+	editbox:SetFocus()
+	CloseDropDownMenus()
+end
+
+function TMW:ExportToComm(editbox, ...)
+	local player = strtrim(editbox:GetText())
+	if player and player ~= "" and #player > 1 and #player < 13 then
+		local s = TMW:GetSettingsString(...)
+
+		TMW:SendCommMessage("TMW", s, "WHISPER", player, "BULK", editbox.callback, editbox)
+	end
+end
+
 
 -- ----------------------
 -- ICON DRAGGER
@@ -2274,7 +2313,7 @@ function IE:Load(isRefresh, icon)
 	local groupID, iconID = CI.g, CI.i
 	if not groupID or not iconID then return end
 
-	IE.Main.ExportBox:SetText("")
+	IE.ExportBox:SetText("")
 	TellMeWhen_IconEditor:SetScale(db.global.EditorScale)
 
 	UIDropDownMenu_SetSelectedValue(IE.Main.Type, db.profile.Groups[groupID].Icons[iconID].Type)
@@ -2584,7 +2623,9 @@ function IE:AddIconToCopyDropdown(ics, groupID, iconID, profilename, group_src, 
 end
 
 local DeserializedData = {}
-function IE:Copy_DropDown()
+function IE:Copy_DropDown(...)
+	local DROPDOWN = self
+	local EDITBOX = DROPDOWN:GetParent()
 	local groupID, iconID = CI.g, CI.i
 	local icon = CI.ic
 	if not (icon and icon.Conditions) then return end
@@ -2608,7 +2649,7 @@ function IE:Copy_DropDown()
 		end
 	end
 	
-	local t = strtrim(IE.Main.ExportBox:GetText()):gsub("||", "|")
+	local t = strtrim(EDITBOX:GetText()):gsub("||", "|")
 	local editboxResult = t ~= "" and TMW:DeserializeData(t)
 	t = nil
 
@@ -2772,6 +2813,8 @@ function IE:Copy_DropDown()
 		end
 		
 		if UIDROPDOWNMENU_MENU_VALUE == "IMPORT_FROMCOMM" then
+			TMW.DoPulseReceivedComm = nil
+			DROPDOWN.Dummy.Glow.Anim:Finish()
 			
 			for i, result in ipairs(DeserializedData) do
 				if result.type == "icon" then
@@ -2799,57 +2842,39 @@ function IE:Copy_DropDown()
 		
 			-- icon to comm
 			info = UIDropDownMenu_CreateInfo()
-			local text = L["EXPORT_f"]:format(L["ICONGROUP"]:format(CI.i, TMW:GetGroupName(CI.g, CI.g, 1)))
+			local text = format(L["ICONGROUP"]:format(CI.i, TMW:GetGroupName(CI.g, CI.g, 1)))
 			info.text = text
 			info.tooltipTitle = text
 			info.tooltipText = L["EXPORT_TOCOMM_DESC"]
 			info.tooltipOnButton = true
 			info.notCheckable = true
-			info.func = function()
-				local e = IE.Main.ExportBox
-				local player = strtrim(e:GetText())
-				if player and player ~= "" and #player > 1 and #player < 13 then
-					local s = TMW:GetSettingsString("icon", TMW.CI.ics, TMW.Icon_Defaults)
-
-					TMW:SendCommMessage("TMW", s, "WHISPER", player, "BULK", e.callback, e)
-				end
+			info.func = function(...)
+				TMW:ExportToComm(EDITBOX, "icon", TMW.CI.ics, TMW.Icon_Defaults)
 			end
 			UIDropDownMenu_AddButton(info, UIDROPDOWNMENU_MENU_LEVEL)
 			
 			-- group to comm
 			info = UIDropDownMenu_CreateInfo()
-			local text = L["EXPORT_f"]:format(L["fGROUP"]:format(TMW:GetGroupName(CI.g, CI.g, 1)))
+			local text = format(L["fGROUP"]:format(TMW:GetGroupName(CI.g, CI.g, 1)))
 			info.text = text
 			info.tooltipTitle = text
 			info.tooltipText = L["EXPORT_TOCOMM_DESC"] .. "\r\n\r\n" .. L["EXPORT_SPECIALDESC"]
 			info.tooltipOnButton = true
 			info.notCheckable = true
 			info.func = function()
-				local e = IE.Main.ExportBox
-				local player = strtrim(e:GetText())
-				if player and player ~= "" and #player > 1 and #player < 13 then
-					local s = TMW:GetSettingsString("group", TMW.CI.gs, TMW.Group_Defaults, CI.g)
-
-					TMW:SendCommMessage("TMW", s, "WHISPER", player, "BULK", e.callback, e)
-				end
+				TMW:ExportToComm(EDITBOX, "group", TMW.CI.gs, TMW.Group_Defaults, CI.g)
 			end
 			UIDropDownMenu_AddButton(info, UIDROPDOWNMENU_MENU_LEVEL)
 			
 			-- global to comm
 			info = UIDropDownMenu_CreateInfo()
-			info.text = L["EXPORT_GLOBAL_f"]:format(db:GetCurrentProfile())
-			info.tooltipTitle = L["EXPORT_GLOBAL_f"]:format(db:GetCurrentProfile())
+			info.text = L["fPROFILE"]:format(db:GetCurrentProfile())
+			info.tooltipTitle = L["fPROFILE"]:format(db:GetCurrentProfile())
 			info.tooltipText = L["EXPORT_TOCOMM_DESC"] .. "\r\n\r\n" .. L["EXPORT_SPECIALDESC"]
 			info.tooltipOnButton = true
 			info.notCheckable = true
 			info.func = function()
-				local e = IE.Main.ExportBox
-				local player = strtrim(e:GetText())
-				if player and player ~= "" and #player > 1 and #player < 13 then
-					local s = TMW:GetSettingsString("global", TMW.db.profile, TMW.Defaults.profile, TMW.db:GetCurrentProfile())
-
-					TMW:SendCommMessage("TMW", s, "WHISPER", player, "BULK", e.callback, e)
-				end
+				TMW:ExportToComm(EDITBOX, "global", TMW.db.profile, TMW.Defaults.profile, TMW.db:GetCurrentProfile())
 			end
 			UIDropDownMenu_AddButton(info, UIDROPDOWNMENU_MENU_LEVEL)
 		end
@@ -2858,54 +2883,39 @@ function IE:Copy_DropDown()
 		
 			-- icon to string
 			info = UIDropDownMenu_CreateInfo()
-			local text = L["EXPORT_f"]:format(L["ICONGROUP"]:format(CI.i, TMW:GetGroupName(CI.g, CI.g, 1)))
+			local text = format(L["ICONGROUP"]:format(CI.i, TMW:GetGroupName(CI.g, CI.g, 1)))
 			info.text = text
 			info.tooltipTitle = text
 			info.tooltipText = L["EXPORT_TOSTRING_DESC"]
 			info.tooltipOnButton = true
 			info.notCheckable = true
 			info.func = function()
-				local e = IE.Main.ExportBox
-				local s = TMW:GetSettingsString("icon", TMW.CI.ics, TMW.Icon_Defaults)
-				s = TMW:MakeSerializedDataPretty(s)
-				e:SetText(s)
-				e:HighlightText()
-				e:SetFocus()
+				TMW:ExportToString(EDITBOX, "icon", TMW.CI.ics, TMW.Icon_Defaults)
 			end
 			UIDropDownMenu_AddButton(info, UIDROPDOWNMENU_MENU_LEVEL)
 			
 			-- group to string
 			info = UIDropDownMenu_CreateInfo()
-			local text = L["EXPORT_f"]:format(L["fGROUP"]:format(TMW:GetGroupName(CI.g, CI.g, 1)))
+			local text = format(L["fGROUP"]:format(TMW:GetGroupName(CI.g, CI.g, 1)))
 			info.text = text
 			info.tooltipTitle = text
 			info.tooltipText = L["EXPORT_TOSTRING_DESC"] .. "\r\n\r\n" .. L["EXPORT_SPECIALDESC"]
 			info.tooltipOnButton = true
 			info.notCheckable = true
 			info.func = function()
-				local e = IE.Main.ExportBox
-				local s = TMW:GetSettingsString("group", TMW.CI.gs, TMW.Group_Defaults, CI.g)
-				s = TMW:MakeSerializedDataPretty(s)
-				e:SetText(s)
-				e:HighlightText()
-				e:SetFocus()
+				TMW:ExportToString(EDITBOX, "group", TMW.CI.gs, TMW.Group_Defaults, CI.g)
 			end
 			UIDropDownMenu_AddButton(info, UIDROPDOWNMENU_MENU_LEVEL)
 			
 			-- global to string
 			info = UIDropDownMenu_CreateInfo()
-			info.text = L["EXPORT_GLOBAL_f"]:format(db:GetCurrentProfile())
-			info.tooltipTitle = L["EXPORT_GLOBAL_f"]:format(db:GetCurrentProfile())
+			info.text = L["fPROFILE"]:format(db:GetCurrentProfile())
+			info.tooltipTitle = L["fPROFILE"]:format(db:GetCurrentProfile())
 			info.tooltipText = L["EXPORT_TOSTRING_DESC"] .. "\r\n\r\n" .. L["EXPORT_SPECIALDESC"]
 			info.tooltipOnButton = true
 			info.notCheckable = true
 			info.func = function()
-				local e = IE.Main.ExportBox
-				local s = TMW:GetSettingsString("global", TMW.db.profile, TMW.Defaults.profile, db:GetCurrentProfile())
-				s = TMW:MakeSerializedDataPretty(s)
-				e:SetText(s)
-				e:HighlightText()
-				e:SetFocus()
+				TMW:ExportToString(EDITBOX, "global", TMW.db.profile, TMW.Defaults.profile, db:GetCurrentProfile())
 			end
 			UIDropDownMenu_AddButton(info, UIDROPDOWNMENU_MENU_LEVEL)
 		end
@@ -2959,7 +2969,7 @@ function IE:Copy_DropDown()
 
 		-- copy group position
 		info = UIDropDownMenu_CreateInfo()
-		info.text = L["COPYPOS"]
+		info.text = L["COPYGROUP"] .. " - " .. L["COPYPOSSCALE"]
 		info.func = function()
 			CloseDropDownMenus()
 			
@@ -2976,7 +2986,7 @@ function IE:Copy_DropDown()
 
 		-- copy entire group - overwrite current
 		info = UIDropDownMenu_CreateInfo()
-		info.text = L["COPYALL"] .. " - " .. L["OVERWRITEGROUP"]:format(TMW:GetGroupName(CI.g, CI.g, 1))
+		info.text = L["COPYGROUP"] .. " - " .. L["OVERWRITEGROUP"]:format(TMW:GetGroupName(CI.g, CI.g, 1))
 		info.func = function()
 			TMW:Import(group_src, version_src, "group", nil, groupID)
 		end
@@ -2985,22 +2995,36 @@ function IE:Copy_DropDown()
 		
 		-- copy entire group - create new group
 		info = UIDropDownMenu_CreateInfo()
-		info.text = L["COPYALL"] .. " - " .. L["MAKENEWGROUP"]
+		info.text = L["COPYGROUP"] .. " - " .. L["MAKENEWGROUP"]
 		info.func = function()
 			TMW:Import(group_src, version_src, "group", true, groupID) -- true forces a new group to be created
 		end
 		info.notCheckable = true
 		UIDropDownMenu_AddButton(info, UIDROPDOWNMENU_MENU_LEVEL)
 
-
 		if group_src.Icons and #group_src.Icons > 0 then
 			AddDropdownSpacer()
+			
+			-- icon header
+			info = UIDropDownMenu_CreateInfo()
+			info.text = L["UIPANEL_ICONS"]
+			info.isTitle = true
+			info.notCheckable = true
+			UIDropDownMenu_AddButton(info, UIDROPDOWNMENU_MENU_LEVEL)
+
+			
 			-- add individual icons
 			for iconID, ics in TMW:OrderedPairs(group_src.Icons) do
 				IE:AddIconToCopyDropdown(ics, groupID, iconID, profilename, group_src, version_src)
 			end
 		end
 	elseif profilename and profile_src then
+		-- header
+		info = UIDropDownMenu_CreateInfo()
+		info.text = profilename
+		info.isTitle = true
+		info.notCheckable = true
+		UIDropDownMenu_AddButton(info, UIDROPDOWNMENU_MENU_LEVEL)
 	
 		-- copy entire profile - overwrite current
 		info = UIDropDownMenu_CreateInfo()
@@ -3021,6 +3045,12 @@ function IE:Copy_DropDown()
 		UIDropDownMenu_AddButton(info, UIDROPDOWNMENU_MENU_LEVEL)
 		
 		AddDropdownSpacer()
+		-- group header
+		info = UIDropDownMenu_CreateInfo()
+		info.text = L["UIPANEL_GROUPS"]
+		info.isTitle = true
+		info.notCheckable = true
+		UIDropDownMenu_AddButton(info, UIDROPDOWNMENU_MENU_LEVEL)
 	
 		-- add groups to be copied
 		for groupID, v in TMW:OrderedPairs(profile_src.Groups) do
