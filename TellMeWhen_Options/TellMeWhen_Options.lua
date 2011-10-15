@@ -1094,7 +1094,7 @@ function TMW:CompileOptions() -- options
 			order = 90,
 			type = "description",
 			name = "\r\n" .. L["IMPORT_EXPORT_DESC_INLINE"],
-			hidden = function() return IE.ExportBox:IsVisible() end,
+			--hidden = function() return IE.ExportBox:IsVisible() end,
 		}
 		TMW.OptionsTable.args.profiles.args.importexport = importExportBoxTemplate
 	end
