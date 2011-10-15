@@ -1303,6 +1303,130 @@
 	</Button>
 	
 
+	<Button name="TellMeWhen_AnnounceEvent" virtual="true" >
+		<Size y="30"/>
+		<Scripts>
+			<OnClick>
+				TMW.ANN:SelectEvent(self:GetID())
+			</OnClick>
+			<OnDisable>
+				self.EventName:SetFontObject(GameFontDisable)
+				self.DataText:SetFontObject(GameFontDisable)
+				if self.Play then
+					self.Play:Disable()
+				end
+			</OnDisable>
+			<OnEnable>
+				self.EventName:SetFontObject(GameFontNormal)
+				self.DataText:SetFontObject(GameFontHighlight)
+				if self.Play then
+					self.Play:Enable()
+				end
+			</OnEnable>
+		</Scripts>
+		<NormalFont style="GameFontNormal"/>
+		<HighlightFont style="GameFontHighlight"/>
+		<HighlightTexture file="Interface\QuestFrame\UI-QuestLogTitleHighlight" alphaMode="ADD">
+			<Anchors>
+				<Anchor point="TOPLEFT" y="1"/>
+				<Anchor point="BOTTOMRIGHT" y="1"/>
+			</Anchors>
+		</HighlightTexture>
+		<Layers>
+			<Layer level="OVERLAY">
+				<FontString name="$parentEventName" parentKey="EventName" inherits="GameFontNormal" justifyH="LEFT" text="Serpent Sting Sting Sting Sting Sting">
+					<Anchors>
+						<Anchor point="TOPLEFT" x="3" y="-2"/>
+						<Anchor point="RIGHT" relativeTo="$parentPlay" relativePoint="LEFT" x="-1"/>
+					</Anchors>
+				</FontString>
+				<FontString name="$parentDataText" parentKey="DataText" inherits="GameFontHighlight" justifyH="LEFT" >
+					<Anchors>
+						<Anchor point="BOTTOMLEFT" x="3" y="2"/>
+						<Anchor point="RIGHT"/>
+					</Anchors>
+				</FontString>
+			</Layer>
+		</Layers>
+	</Button>
+	<Button name="TellMeWhen_SoundEvent" virtual="true" inherits="TellMeWhen_AnnounceEvent">
+		<Scripts>
+			<OnClick>
+				TMW.SND:SelectEvent(self:GetID())
+			</OnClick>
+		</Scripts>
+		<Frames>
+			<Button name="$parentPlay" parentKey="Play" virtual="true">
+				<NormalTexture file="Interface\Common\VoiceChat-Speaker"/>
+				<HighlightTexture file="Interface\Common\VoiceChat-On"/>
+				<Scripts>
+					<OnClick>
+						local groupID, iconID = TMW.CI.g, TMW.CI.i
+
+						local setting = TMW.db.profile.Groups[groupID].Icons[iconID].Events[self:GetParent().event].Sound or ""
+						local sound
+						if strfind(setting, "%.[^\\]+$") then
+							sound = setting
+						else
+							sound = TMW.SND.LSM:Fetch("sound", setting) or ""
+						end
+						PlaySoundFile(sound, "Master")
+					</OnClick>
+					<OnDisable>
+						self:GetNormalTexture():SetDesaturated(1)
+					</OnDisable>
+					<OnEnable>
+						self:GetNormalTexture():SetDesaturated(nil)
+					</OnEnable>
+					<OnEnter>
+						self:GetParent():LockHighlight()
+					</OnEnter>
+					<OnLeave>
+						if not self:GetParent().selected then
+							self:GetParent():UnlockHighlight()
+						end
+					</OnLeave>
+				</Scripts>
+				<Size x="15" y="15"/>
+				<Anchors>
+					<Anchor point="TOPRIGHT"/>
+				</Anchors>
+			</Button>
+		</Frames>
+	</Button>
+	<Button name="TellMeWhen_ChannelSelectButton" virtual="true" >
+		<Size y="14"/>
+		<Scripts>
+			<OnClick>
+				TMW.ANN:SelectChannel(self.channel)
+				assert(TMW.ANN.currentEvent)
+				local groupID, iconID = TMW.CI.g, TMW.CI.i
+				if TMW.CI.ics then
+					TMW.CI.ics.Events[TMW.ANN.currentEvent].Channel = self.channel
+					TMW.IE:ScheduleIconUpdate(groupID, iconID)
+				end
+				TMW.ANN:SetTabText()
+			</OnClick>
+		</Scripts>
+		<NormalFont style="GameFontNormal"/>
+		<HighlightFont style="GameFontHighlight"/>
+		<HighlightTexture file="Interface\QuestFrame\UI-QuestLogTitleHighlight" alphaMode="ADD">
+			<Anchors>
+				<Anchor point="TOPLEFT" y="1"/>
+				<Anchor point="BOTTOMRIGHT" y="1"/>
+			</Anchors>
+		</HighlightTexture>
+		<Layers>
+			<Layer level="OVERLAY">
+				<FontString name="$parentName" parentKey="Name" inherits="GameFontHighlight" justifyH="LEFT" text="Serpent Sting Sting Sting Sting">
+					<Anchors>
+						<Anchor point="LEFT" x="3"/>
+						<Anchor point="RIGHT" x="-1"/>
+					</Anchors>
+				</FontString>
+			</Layer>
+		</Layers>
+	</Button>
 	<Button name="TellMeWhen_SoundSelectButton" virtual="true" >
 		<Size y="14"/>
 		<Scripts>
@@ -1378,125 +1502,7 @@
 			</Layer>
 		</Layers>
 	</Button>
-	<Button name="TellMeWhen_SoundEvent" virtual="true" inherits="TellMeWhen_AnnounceEvent">
-		<Scripts>
-			<OnClick>
-				TMW.SND:SelectEvent(self:GetID())
-			</OnClick>
-		</Scripts>
-		<Frames>
-			<Button name="$parentPlay" parentKey="Play" virtual="true">
-				<NormalTexture file="Interface\Common\VoiceChat-Speaker"/>
-				<HighlightTexture file="Interface\Common\VoiceChat-On"/>
-				<Scripts>
-					<OnClick>
-						local groupID, iconID = TMW.CI.g, TMW.CI.i
-
-						local setting = TMW.db.profile.Groups[groupID].Icons[iconID].Events[self:GetParent().event].Sound or ""
-						local sound
-						if strfind(setting, "%.[^\\]+$") then
-							sound = setting
-						else
-							sound = TMW.SND.LSM:Fetch("sound", setting) or ""
-						end
-						PlaySoundFile(sound, "Master")
-					</OnClick>
-					<OnEnter>
-						self:GetParent():LockHighlight()
-					</OnEnter>
-					<OnLeave>
-						if not self:GetParent().selected then
-							self:GetParent():UnlockHighlight()
-						end
-					</OnLeave>
-				</Scripts>
-				<Size x="15" y="15"/>
-				<Anchors>
-					<Anchor point="TOPRIGHT"/>
-				</Anchors>
-			</Button>
-		</Frames>
-	</Button>
-	<Button name="TellMeWhen_ChannelSelectButton" virtual="true" >
-		<Size y="14"/>
-		<Scripts>
-			<OnClick>
-				TMW.ANN:SelectChannel(self.channel)
-				assert(TMW.ANN.currentEvent)
-				local groupID, iconID = TMW.CI.g, TMW.CI.i
-				if TMW.CI.ics then
-					TMW.CI.ics.Events[TMW.ANN.currentEvent].Channel = self.channel
-					TMW.IE:ScheduleIconUpdate(groupID, iconID)
-				end
-				TMW.ANN:SetTabText()
-			</OnClick>
-		</Scripts>
-		<NormalFont style="GameFontNormal"/>
-		<HighlightFont style="GameFontHighlight"/>
-		<HighlightTexture file="Interface\QuestFrame\UI-QuestLogTitleHighlight" alphaMode="ADD">
-			<Anchors>
-				<Anchor point="TOPLEFT" y="1"/>
-				<Anchor point="BOTTOMRIGHT" y="1"/>
-			</Anchors>
-		</HighlightTexture>
-		<Layers>
-			<Layer level="OVERLAY">
-				<FontString name="$parentName" parentKey="Name" inherits="GameFontHighlight" justifyH="LEFT" text="Serpent Sting Sting Sting Sting">
-					<Anchors>
-						<Anchor point="LEFT" x="3"/>
-						<Anchor point="RIGHT" x="-1"/>
-					</Anchors>
-				</FontString>
-			</Layer>
-		</Layers>
-	</Button>
-	<Button name="TellMeWhen_AnnounceEvent" virtual="true" >
-		<Size y="30"/>
-		<Scripts>
-			<OnClick>
-				TMW.ANN:SelectEvent(self:GetID())
-			</OnClick>
-			<OnDisable>
-				self.EventName:SetFontObject(GameFontDisable)
-				self.DataText:SetFontObject(GameFontDisable)
-				if self.Play then
-					self.Play:Disable()
-				end
-			</OnDisable>
-			<OnEnable>
-				self.EventName:SetFontObject(GameFontNormal)
-				self.DataText:SetFontObject(GameFontHighlight)
-				if self.Play then
-					self.Play:Enable()
-				end
-			</OnEnable>
-		</Scripts>
-		<NormalFont style="GameFontNormal"/>
-		<HighlightFont style="GameFontHighlight"/>
-		<HighlightTexture file="Interface\QuestFrame\UI-QuestLogTitleHighlight" alphaMode="ADD">
-			<Anchors>
-				<Anchor point="TOPLEFT" y="1"/>
-				<Anchor point="BOTTOMRIGHT" y="1"/>
-			</Anchors>
-		</HighlightTexture>
-		<Layers>
-			<Layer level="OVERLAY">
-				<FontString name="$parentEventName" parentKey="EventName" inherits="GameFontNormal" justifyH="LEFT" text="Serpent Sting Sting Sting Sting Sting">
-					<Anchors>
-						<Anchor point="TOPLEFT" x="3" y="-2"/>
-						<Anchor point="RIGHT" relativeTo="$parentPlay" relativePoint="LEFT" x="-1"/>
-					</Anchors>
-				</FontString>
-				<FontString name="$parentDataText" parentKey="DataText" inherits="GameFontHighlight" justifyH="LEFT" >
-					<Anchors>
-						<Anchor point="BOTTOMLEFT" x="3" y="2"/>
-						<Anchor point="RIGHT"/>
-					</Anchors>
-				</FontString>
-			</Layer>
-		</Layers>
-	</Button>
-
+	
 	<!-- END TEMPLATES -->
 
 	<Button name="TellMeWhen_IconDragger" hidden="true" enableMouse="false" frameStrata="HIGH">

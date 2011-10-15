@@ -34,7 +34,7 @@ local DRData = LibStub("DRData-1.0", true)
 TELLMEWHEN_VERSION = "4.6.2"
 TELLMEWHEN_VERSION_MINOR = strmatch(" @project-version@", " r%d+") or ""
 TELLMEWHEN_VERSION_FULL = TELLMEWHEN_VERSION .. TELLMEWHEN_VERSION_MINOR
-TELLMEWHEN_VERSIONNUMBER = 46209 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
+TELLMEWHEN_VERSIONNUMBER = 46210 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
 if TELLMEWHEN_VERSIONNUMBER > 47000 or TELLMEWHEN_VERSIONNUMBER < 46000 then return error("YOU SCREWED UP THE VERSION NUMBER OR DIDNT CHANGE THE SAFETY LIMITS") end -- safety check because i accidentally made the version number 414069 once
 
 TELLMEWHEN_MAXGROUPS = 1 	--this is a default, used by SetTheory (addon), so dont rename
@@ -2718,11 +2718,13 @@ function IconBase.SetInfo(icon, alpha, color, texture, start, duration, spellChe
 	
 	local queueOnUnit, queueOnSpell
 	
-	unit = unit or (icon.Units and icon.Units[1])
+	unit = unit or (icon.Units and icon.Units[1] or "player")
 	if icon.__unitChecked ~= unit then
 		queueOnUnit = true
 		icon.__unitChecked = unit
-		icon.__oldUnitName = UnitName(unit)
+		if unit then
+			icon.__oldUnitName = UnitName(unit)
+		end
 	elseif unit then
 		local unitName = UnitName(unit)
 		if icon.__oldUnitName ~= unitName then

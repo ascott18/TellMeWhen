@@ -539,6 +539,16 @@ local fontDisabled = function(info)
 	end
 	return not db.profile.Groups[findid(info)].Fonts[info[#info-1]].OverrideLBFPos
 end
+local importExportBoxTemplate = {
+	name = L["IMPORT_EXPORT"],
+	type = "input",
+	order = 200,
+	width = "full",
+	dialogControl = "TMW-ImportExport",
+	get = function() end,
+	set = function() end,
+	--hidden = function() return IE.ExportBox:IsVisible() end,
+}
 local groupFontConfigTemplate = {
 	type = "group",
 	name = function(info) return L["UIPANEL_FONT_" .. info[#info]] end,
@@ -735,13 +745,7 @@ local groupConfigTemplate = {
 					end,
 					confirm = true,
 				},
-				ImportExport = {
-					name = L["IMPORT_EXPORT"],
-					type = "input",
-					order = 60,
-					width = "full",
-					dialogControl = 'TMW-ImportExport',
-				},
+				ImportExport = importExportBoxTemplate,
 			},
 		},
 		Count = groupFontConfigTemplate,
@@ -868,6 +872,7 @@ local groupConfigTemplate = {
 		},
 	}
 }
+
 for i = 1, GetNumTalentTabs() do
 	local _, name = GetTalentTabInfo(i)
 	groupConfigTemplate.args.main.args["Tree"..i] = {
@@ -994,6 +999,7 @@ function TMW:CompileOptions() -- options
 							confirm = true,
 							func = function() db:ResetProfile() end,
 						},
+						importexport = importExportBoxTemplate,
 						coloropts = {
 							type = "group",
 							name = L["UIPANEL_COLORS"],
@@ -1075,25 +1081,22 @@ function TMW:CompileOptions() -- options
 									handler = TMW,
 									func = "Group_Add",
 								},
+								importexport = importExportBoxTemplate,
 							},
 						},
 					},
 				},
 			},
 		}
-		TMW.OptionsTable.args.profiles = CopyTable(LibStub("AceDBOptions-3.0"):GetOptionsTable(db))
+		TMW.OptionsTable.args.profiles = LibStub("AceDBOptions-3.0"):GetOptionsTable(db)
+		TMW.OptionsTable.args.profiles.args = CopyTable(TMW.OptionsTable.args.profiles.args) -- dont copy the entire table because it contains a reference to db ... and will copy the entire db.
 		TMW.OptionsTable.args.profiles.args.importexportdesc = {
 			order = 90,
 			type = "description",
 			name = "\r\n" .. L["IMPORT_EXPORT_DESC_INLINE"],
+			hidden = function() return IE.ExportBox:IsVisible() end,
 		}
-		TMW.OptionsTable.args.profiles.args.importexport = {
-			name = L["IMPORT_EXPORT"],
-			type = "input",
-			order = 100,
-			width = "full",
-			dialogControl = 'TMW-ImportExport',
-		}
+		TMW.OptionsTable.args.profiles.args.importexport = importExportBoxTemplate
 	end
 
 
@@ -1313,13 +1316,11 @@ TMW.ImportFunctions = {
 	global = function(data, version, noOverwrite)
 		if noOverwrite then -- noOverwrite is a name in this case.
 		
-			local newname = noOverwrite
-			local oldnum = strmatch("Ganis (1)", "%((%d+)%)$")
 			local base = gsub(noOverwrite, " %(%d+%)$", "")
-			local newnum = (oldnum or 1) + 1
+			local newnum = 2
 			
 			-- generate a new name if the profile already exists
-			newname = base .. " (" .. newnum .. ")"
+			local newname = base .. " (" .. newnum .. ")"
 			while db.profiles[newname] do
 				newnum = newnum + 1
 				newname = base .. " (" .. newnum .. ")"
@@ -1360,12 +1361,12 @@ function TMW:Import(data, version, type, ...)
 	if importfunc then
 		importfunc(data, version, ...)
 
-
 		TMW:Update()
 		IE:Load(1)
 	else
 		TMW:Print(L["IMPORTERROR_INVALIDTYPE"])
 	end
+	TMW:ScheduleTimer("CompileOptions", 0.1) -- i dont know why i have to delay it, but I do.
 end
 
 function TMW:ExportToString(editbox, ...)
@@ -3404,6 +3405,7 @@ function SND:Load()
 		local frame = SND.Events[i]
 		if DisabledEvents[frame.event] then
 			frame:Disable()
+			frame.DataText:SetFormattedText(L["SOUND_EVENT_DISABLEDFORTYPE"], Types[CI.t].name)
 			if oldID == i then
 				oldID = oldID - 1
 			end
