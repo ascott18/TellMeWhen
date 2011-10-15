@@ -316,9 +316,6 @@
 			<OnMouseWheel>
 				self:SetValue(self:GetValue()+delta)
 			</OnMouseWheel>
-			<OnShow>
-				self.text:SetWidth(self:GetWidth())
-			</OnShow>
 		</Scripts>
 	</Slider>
 
@@ -2950,6 +2947,7 @@
 						</Anchors>
 						<Scripts>
 							<OnLoad>
+								self.text:SetWidth(self:GetWidth())
 								self.setting = "Alpha"
 							</OnLoad>
 							<OnShow>
@@ -2966,6 +2964,7 @@
 						</Anchors>
 						<Scripts>
 							<OnLoad>
+								self.text:SetWidth(self:GetWidth())
 								self.setting = "UnAlpha"
 							</OnLoad>
 						</Scripts>
@@ -2976,6 +2975,7 @@
 						</Anchors>
 						<Scripts>
 							<OnLoad>
+								self.text:SetWidth(self:GetWidth())
 								self.setting = "ConditionAlpha"
 								self.text:SetText(TMW.L["CONDITIONALPHA"])
 								TMW:TT(self, "CONDITIONALPHA", "CONDITIONALPHA_DESC")
@@ -3894,12 +3894,12 @@
 				local groupID, iconID = TMW.CI.g, TMW.CI.i
 				local ic = TMW.CI.ic
 				if (TMW.CNDT and TMW.CNDT.type == "group" and self.selectedTab == TMW.GRCNDTTab) or self.selectedTab == TMW.MOTab then
-					self.FS1:SetFormattedText(TMW.L["fGROUP"], TMW:GetGroupName(groupID, groupID, 1))
-					self.icontexture:Hide()
+				--	self.FS1:SetFormattedText(TMW.L["fGROUP"], TMW:GetGroupName(groupID, groupID, 1))
+				--	self.icontexture:Hide()
 				else
 					self.FS1:SetFormattedText(TMW.L["GROUPICON"], TMW:GetGroupName(groupID, groupID, 1), iconID)
 					if ic then
-						self.icontexture:Show()
+				--		self.icontexture:Show()
 						self.icontexture:SetTexture(ic.texture:GetTexture())
 					end
 				end

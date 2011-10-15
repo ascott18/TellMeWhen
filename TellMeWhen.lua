@@ -1,4 +1,4 @@
-﻿-- --------------------
+﻿-- ---------------------------------
 -- TellMeWhen
 -- Originally by Nephthys of Hyjal <lieandswell@yahoo.com>
 
@@ -12,16 +12,15 @@
 
 -- Currently maintained by
 -- Cybeloras of Mal'Ganis
--- --------------------
+-- ---------------------------------
 
--- -------------
+-- ---------------------------------
 -- ADDON GLOBALS AND LOCALS
--- -------------
+-- ---------------------------------
 
-TMW = LibStub("AceAddon-3.0"):NewAddon(CreateFrame("Frame", "TellMeWhen"), "TellMeWhen", "AceEvent-3.0", "AceTimer-3.0", "AceConsole-3.0", "AceComm-3.0")
-local TMW = TMW
+local TMW = LibStub("AceAddon-3.0"):NewAddon(CreateFrame("Frame", "TMW", UIParent), "TellMeWhen", "AceEvent-3.0", "AceTimer-3.0", "AceConsole-3.0", "AceComm-3.0")
+TellMeWhen = TMW
 
-local db
 local L = LibStub("AceLocale-3.0"):GetLocale("TellMeWhen", true)
 --L = setmetatable({}, {__index = function() return "| ! | ! | ! | ! | ! | ! | ! | ! | ! | ! | ! | ! | ! | ! | ! | ! | ! " end}) -- stress testing for text widths
 TMW.L = L
@@ -62,7 +61,7 @@ local CL_PET = COMBATLOG_OBJECT_CONTROL_PLAYER
 local bitband = bit.band
 
 ---------- Locals ----------
-local st, co, updatehandler, BarGCD, ClockGCD, Locked, CNDT, SndChan, FramesToFind, UnitsToUpdate, CNDTEnv
+local db, st, co, updatehandler, BarGCD, ClockGCD, Locked, CNDT, SndChan, FramesToFind, UnitsToUpdate, CNDTEnv
 local UPD_INTV = 0.06	--this is a default, local because i use it in onupdate functions
 local runEvents, updatePBar = 1, 1
 local GCD, NumShapeshiftForms, UpdateTimer = 0, 0, 0
@@ -2350,7 +2349,7 @@ function TMW:GetShapeshiftForm()
 end local GetShapeshiftForm = TMW.GetShapeshiftForm
 
 local function CreateGroup(groupID)
-	local group = CreateFrame("Frame", "TellMeWhen_Group" .. groupID, UIParent, "TellMeWhen_GroupTemplate", groupID)
+	local group = CreateFrame("Frame", "TellMeWhen_Group" .. groupID, TMW, "TellMeWhen_GroupTemplate", groupID)
 	TMW[groupID] = group
 	CNDTEnv[group:GetName()] = group
 	group.base = GroupBase
