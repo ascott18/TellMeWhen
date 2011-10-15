@@ -1,3 +1,7 @@
+===v4.6.3===
+ * Bug Fixes:
+ ** (r268) The button to reset icons should now work properly
+ 
 ===v4.6.2===
  * Item cooldowns now have their own icon type.
  * Added text substitutions for unit and spell names.

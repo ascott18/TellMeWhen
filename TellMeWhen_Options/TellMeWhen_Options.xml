@@ -3738,15 +3738,22 @@
 									<Alpha startDelay="0.5" change="-1.0" duration="1" order="4"/>
 									<Scripts>
 										<OnPlay>
-											self.preClicked = 1
-											TMW:Print(TMW.L["RESET_NOTIFY"])
-											self:GetParent():GetParent():SetText(TMW.L["RESET_CONFIRM"])
+											self.Button.preClicked = 1
+											self.Button:SetText(TMW.L["RESET_CONFIRM"])
+											if 5 > TMW.db.global.HelpSettings.ResetCount then
+												TMW:Print(TMW.L["RESET_NOTIFY"])
+											end
 										</OnPlay>
 										<OnFinished>
-											self.preClicked = nil
-											TMW:Print(TMW.L["RESET_EXPIRE"])
-											self:GetParent():GetParent():SetText(TMW.L["RESET_ICON"])
+											self:GetScript("OnStop")(self)
+											if not requested and 5 > TMW.db.global.HelpSettings.ResetCount then
+												TMW:Print(TMW.L["RESET_EXPIRE"])
+											end
 										</OnFinished>
+										<OnStop>
+											self.Button.preClicked = nil
+											self.Button:SetText(TMW.L["RESET_ICON"])
+										</OnStop>
 									</Scripts>
 								</AnimationGroup>
 							</Animations>
@@ -3770,14 +3777,20 @@
 						self:SetText(TMW.L["RESET_ICON"])
 						self:SetFrameLevel(self:GetFrameLevel()+2)
 						self.Glow:SetAlpha(0)
+						self.Glow.Anim.Button = self
 					</OnLoad>
 					<OnClick>
 						if not self.preClicked then
 							self.Glow.Anim:Play()
 						else
 							TMW.IE:Reset()
+							TMW.db.global.HelpSettings.ResetCount = TMW.db.global.HelpSettings.ResetCount + 1
+							self.Glow.Anim:Stop()
 						end
 					</OnClick>
+					<OnHide>
+						self.Glow.Anim:Stop()
+					</OnHide>
 				</Scripts>
 			</Button>
 			<Button name="$parentClose" parentKey="CloseButton" inherits="UIPanelCloseButton">
