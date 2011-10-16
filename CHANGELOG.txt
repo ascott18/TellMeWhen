@@ -1,6 +1,7 @@
 ===v4.6.4===
  * Bug Fixes:
  ** (r270) Export strings with a pipe character should now work properly
+ ** (r271) Temporary fix for failed assertion when calling Parser:SetSpellByID(109388)
  
 ===v4.6.3===
  * Bug Fixes:

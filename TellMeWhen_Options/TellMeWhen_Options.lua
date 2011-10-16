@@ -3840,7 +3840,7 @@ function SUG:OnInitialize()
 			local yield, resume = coroutine.yield, coroutine.resume
 
 			local function SpellCacher()
-				while spellsFailed < 1000 do
+				while spellsFailed < 100000 do
 					
 					local name, rank, icon, _, _, _, castTime = GetSpellInfo(index)
 					if name then
@@ -3863,7 +3863,9 @@ function SUG:OnInitialize()
 						strfind(name, "dmg")
 						
 						if not fail then
-							Parser:SetSpellByID(index)
+							if index ~= 109388 then -- critical error if this gets set. See ticket 313. TODO: Check and see if this is still broken
+								Parser:SetSpellByID(index)
+							end
 							local r, g, b = Text1:GetTextColor()
 							if g > .95 and r > .95 and b > .95 then
 								SpellCache[index] = name

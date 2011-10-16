@@ -33,7 +33,7 @@ local DRData = LibStub("DRData-1.0", true)
 TELLMEWHEN_VERSION = "4.6.4"
 TELLMEWHEN_VERSION_MINOR = strmatch(" @project-version@", " r%d+") or ""
 TELLMEWHEN_VERSION_FULL = TELLMEWHEN_VERSION .. TELLMEWHEN_VERSION_MINOR
-TELLMEWHEN_VERSIONNUMBER = 46401 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
+TELLMEWHEN_VERSIONNUMBER = 46402 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
 if TELLMEWHEN_VERSIONNUMBER > 47000 or TELLMEWHEN_VERSIONNUMBER < 46000 then return error("YOU SCREWED UP THE VERSION NUMBER OR DIDNT CHANGE THE SAFETY LIMITS") end -- safety check because i accidentally made the version number 414069 once
 
 TELLMEWHEN_MAXGROUPS = 1 	--this is a default, used by SetTheory (addon), so dont rename
@@ -407,25 +407,25 @@ TMW.Defaults = {
 		ConfigWarning		= true,
 	},
 	profile = {
-	--	Version 	= 	TELLMEWHEN_VERSIONNUMBER,  -- DO NOT DEFINE VERSION AS A DEFAULT, OTHERWISE WE CANT TRACK IF A USER HAS AN OLD VERSION BECAUSE IT WILL ALWAYS DEFAULT TO THE LATEST
-		Locked 		= 	false,
-		NumGroups	=	1,
-		Interval	=	UPD_INTV,
-		EffThreshold=	15,
-		CDCOColor 	= 	{r=0, g=1, b=0, a=1},
-		CDSTColor 	= 	{r=1, g=0, b=0, a=1},
-		PRESENTColor=	{r=1, g=1, b=1, a=1},
-		ABSENTColor	=	{r=1, g=0.35, b=0.35, a=1},
-		OORColor	=	{r=0.5, g=0.5, b=0.5, a=1},
-		OOMColor	=	{r=0.5, g=0.5, b=0.5, a=1},
-		TextureName = 	"Blizzard",
-		DrawEdge	=	false,
-		MasterSound	=	false,
-		ReceiveComm	=	true,
-		WarnInvalids=	true,
-		BarGCD		=	true,
-		ClockGCD	=	true,
-		CheckOrder	=	-1,
+	--	Version 	 = 	TELLMEWHEN_VERSIONNUMBER,  -- DO NOT DEFINE VERSION AS A DEFAULT, OTHERWISE WE CANT TRACK IF A USER HAS AN OLD VERSION BECAUSE IT WILL ALWAYS DEFAULT TO THE LATEST
+		Locked 		 = 	false,
+		NumGroups	 =	1,
+		Interval	 =	UPD_INTV,
+		EffThreshold =	15,
+		CDCOColor 	 = 	{r=0, g=1, b=0, a=1},
+		CDSTColor 	 = 	{r=1, g=0, b=0, a=1},
+		PRESENTColor =	{r=1, g=1, b=1, a=1},
+		ABSENTColor	 =	{r=1, g=0.35, b=0.35, a=1},
+		OORColor	 =	{r=0.5, g=0.5, b=0.5, a=1},
+		OOMColor	 =	{r=0.5, g=0.5, b=0.5, a=1},
+		TextureName  = 	"Blizzard",
+		DrawEdge	 =	false,
+		MasterSound	 =	false,
+		ReceiveComm	 =	true,
+		WarnInvalids =	true,
+		BarGCD		 =	true,
+		ClockGCD	 =	true,
+		CheckOrder	 =	-1,
 		CodeSnippets = {
 		},
 		Groups 		= 	{
@@ -450,127 +450,127 @@ TMW.Defaults = {
 				Tree2			= true,
 				Tree3			= true,
 				Point = {
-					point = "CENTER",
-					relativeTo = "UIParent",
+					point 		  = "CENTER",
+					relativeTo 	  = "UIParent",
 					relativePoint = "CENTER",
-					x = 0,
-					y = 0,
+					x 			  = 0,
+					y 			  = 0,
 				},
 				LBF	= {
-					Gloss = 0,
-					Colors = {},
+					Gloss 	 = 0,
+					Colors 	 = {},
 					Backdrop = false,
-					SkinID = "Blizzard",
+					SkinID 	 = "Blizzard",
 				},
 				Fonts = {
 					["**"] = {
-						Name = "Arial Narrow",
-						Size = 12,
-						x = -2,
-						y = 2,
-						point = "CENTER",
-						relativePoint = "CENTER",
-						Outline = "THICKOUTLINE",
+						Name 		   = "Arial Narrow",
+						Size 		   = 12,
+						x 	 		   = -2,
+						y 	 		   = 2,
+						point 		   = "CENTER",
+						relativePoint  = "CENTER",
+						Outline 	   = "THICKOUTLINE",
 						OverrideLBFPos = false,
 						ConstrainWidth = true,
 					},
 					Count = {
 						ConstrainWidth = false,
-						point = "BOTTOMRIGHT",
-						relativePoint = "BOTTOMRIGHT",
+						point 		   = "BOTTOMRIGHT",
+						relativePoint  = "BOTTOMRIGHT",
 					},
 					Bind = {
-						y = -2,
-						point = "TOPLEFT",
+						y 			  = -2,
+						point 		  = "TOPLEFT",
 						relativePoint = "TOPLEFT",
 					},
 				},
 				Icons = {
 					["**"] = {
-						BuffOrDebuff		= "HELPFUL",
-						ShowWhen			= "alpha",
-						CooldownType		= "spell",
-						Enabled				= false,
-						Name				= "",
-						CustomTex			= "",
-						OnlyMine			= false,
-						ShowTimer			= false,
-						ShowTimerText		= false,
-						ShowPBar			= false,
-						ShowCBar			= false,
-						PBarOffs			= 0,
-						CBarOffs			= 0,
-						InvertBars			= false,
-						Type				= "",
-						Unit				= "player",
-						WpnEnchantType		= "MainHandSlot",
-						Icons				= {},
-						Alpha				= 1,
-						UnAlpha				= 1,
-						ConditionAlpha		= 0,
-						RangeCheck			= false,
-						ManaCheck			= false,
-						CooldownCheck		= false,
-						IgnoreRunes			= false,
-						StackMin			= 0,
-						StackMax			= 0,
-						StackMinEnabled		= false,
-						StackMaxEnabled		= false,
-						DurationMin			= 0,
-						DurationMax			= 0,
-						DurationMinEnabled	= false,
-						DurationMaxEnabled	= false,
-						FakeHidden			= false,
-						HideUnequipped		= false,
-						Interruptible		= false,
-						ICDType				= "aura",
-						CheckNext			= false,
-						DontRefresh			= false,
-						UseActvtnOverlay	= false,
-						OnlyEquipped		= false,
-						EnableStacks		= false,
-						OnlyInBags			= false,
-						OnlySeen			= false,
-						Stealable			= false,
-						IgnoreNomana		= false,
-						ShowTTText			= false,
-						CheckRefresh		= true,
-						TotemSlots			= "111111",
-						BindText			= "",
-						ConditionDur		= 0,
-						UnConditionDur		= 0,
-						ConditionDurEnabled	= false,
+						BuffOrDebuff		 = "HELPFUL",
+						ShowWhen			 = "alpha",
+						CooldownType		 = "spell",
+						Enabled				 = false,
+						Name				 = "",
+						CustomTex			 = "",
+						OnlyMine			 = false,
+						ShowTimer			 = false,
+						ShowTimerText		 = false,
+						ShowPBar			 = false,
+						ShowCBar			 = false,
+						PBarOffs			 = 0,
+						CBarOffs			 = 0,
+						InvertBars			 = false,
+						Type				 = "",
+						Unit				 = "player",
+						WpnEnchantType		 = "MainHandSlot",
+						Icons				 = {},
+						Alpha				 = 1,
+						UnAlpha				 = 1,
+						ConditionAlpha		 = 0,
+						RangeCheck			 = false,
+						ManaCheck			 = false,
+						CooldownCheck		 = false,
+						IgnoreRunes			 = false,
+						StackMin			 = 0,
+						StackMax			 = 0,
+						StackMinEnabled		 = false,
+						StackMaxEnabled		 = false,
+						DurationMin			 = 0,
+						DurationMax			 = 0,
+						DurationMinEnabled	 = false,
+						DurationMaxEnabled	 = false,
+						FakeHidden			 = false,
+						HideUnequipped		 = false,
+						Interruptible		 = false,
+						ICDType				 = "aura",
+						CheckNext			 = false,
+						DontRefresh			 = false,
+						UseActvtnOverlay	 = false,
+						OnlyEquipped		 = false,
+						EnableStacks		 = false,
+						OnlyInBags			 = false,
+						OnlySeen			 = false,
+						Stealable			 = false,
+						IgnoreNomana		 = false,
+						ShowTTText			 = false,
+						CheckRefresh		 = true,
+						TotemSlots			 = "111111",
+						BindText			 = "",
+						ConditionDur		 = 0,
+						UnConditionDur		 = 0,
+						ConditionDurEnabled	 = false,
 						UnConditionDurEnabled= false,
-						OnlyIfCounting		= false,
+						OnlyIfCounting		 = false,
 						Events = {
 							["**"] = {
-								Sound = "None",
-								Text = "",
-								Channel = "",
+								Sound 	 = "None",
+								Text 	 = "",
+								Channel  = "",
 								Location = "",
-								Sticky = false,
-								Icon = true,
-								r = 1,
-								g = 1,
-								b = 1,
-								Size = 0,
+								Sticky 	 = false,
+								Icon 	 = true,
+								r 		 = 1,
+								g 		 = 1,
+								b 		 = 1,
+								Size 	 = 0,
 							},
 						},
 						Conditions = {
 							["**"] = {
-								AndOr = "AND",
-								Type = "HEALTH",
-								Icon = "",
-								Operator = "==",
-								Level = 0,
-								Unit = "player",
-								Name = "",
-								Name2 = "",
+								AndOr 	   = "AND",
+								Type 	   = "HEALTH",
+								Icon 	   = "",
+								Operator   = "==",
+								Level 	   = 0,
+								Unit 	   = "player",
+								Name 	   = "",
+								Name2 	   = "",
 								PrtsBefore = 0,
-								PrtsAfter = 0,
-								Checked = false,
-								Checked2 = false,
-								Runes = {},
+								PrtsAfter  = 0,
+								Checked    = false,
+								Checked2   = false,
+								Runes 	   = {},
 							},
 						},
 					},
@@ -579,15 +579,15 @@ TMW.Defaults = {
 		},
 	},
 }
-TMW.Group_Defaults = TMW.Defaults.profile.Groups["**"]
-TMW.Icon_Defaults = TMW.Group_Defaults.Icons["**"]
+TMW.Group_Defaults 			  = TMW.Defaults.profile.Groups["**"]
+TMW.Icon_Defaults 			  = TMW.Group_Defaults.Icons["**"]
 TMW.Group_Defaults.Conditions = TMW.Icon_Defaults.Conditions
 
 TMW.DS = {
-	Magic = "Interface\\Icons\\spell_fire_immolation",
-	Curse = "Interface\\Icons\\spell_shadow_curseofsargeras",
+	Magic 	= "Interface\\Icons\\spell_fire_immolation",
+	Curse 	= "Interface\\Icons\\spell_shadow_curseofsargeras",
 	Disease = "Interface\\Icons\\spell_nature_nullifydisease",
-	Poison = "Interface\\Icons\\spell_nature_corrosivebreath",
+	Poison 	= "Interface\\Icons\\spell_nature_corrosivebreath",
 	Enraged = "Interface\\Icons\\ability_druid_challangingroar",
 }
 for dispeltype, icon in pairs(TMW.DS) do
@@ -598,84 +598,84 @@ TMW.BE = {
 	--Many more new spells/corrections were provided by Catok of Curse
 	--NOTE: any id prefixed with "_" will have its localized name substituted in instead of being forced to match as an ID
 	debuffs = {
-		CrowdControl = "_118;_339;2637;33786;_1499;_19503;_19386;20066;10326;_9484;_6770;_2094;_51514;76780;_710;_5782;_6358;_49203;_605;82691", -- originally by calico0 of Curse
-		Bleeding = "_94009;_1822;_1079;9007;33745;1943;703;43104;89775",
-		Incapacitated = "20066;1776;49203",
-		Feared = "_5782;5246;_8122;10326;1513;_5484;_6789;87204",
-		Slowed = "_116;_120;_15571;13810;_5116;_8056;3600;_1715;_12323;45524;_18223;_15407;_3409;26679;_51693;_2974;_58180;61391;_50434;_55741;44614;_7302;_8034;_63529", -- by algus2
-		Stunned = "_1833;_408;_91800;_5211;_56;9005;22570;19577;56626;44572;853;2812;85388;64044;20549;46968;30283;20253;65929;7922;12809;50519;91797;47481;12355;24394;83047;39796;93986;89766;54786",
-		--DontMelee = "5277;871;Retaliation;Dispersion;Hand of Sacrifice;Hand of Protection;Divine Shield;Divine Protection;Ice Block;Icebound Fortitude;Cyclone;Banish",  --does somebody want to update these for me?
-		--MovementSlowed = "Incapacitating Shout;Chains of Ice;Icy Clutch;Slow;Daze;Hamstring;Piercing Howl;Wing Clip;Ice Trap;Frostbolt;Cone of Cold;Blast Wave;Mind Flay;Crippling Poison;Deadly Throw;Frost Shock;Earthbind;Curse of Exhaustion",
-		Disoriented = "_19503;31661;_2094;_51514;90337;88625",
-		Silenced = "_47476;78675;34490;_55021;_15487;1330;_24259;_18498;_25046;81261;31935;18425;31117",
-		Disarmed = "_51722;_676;64058;50541;91644",
-		Rooted = "_339;_122;23694;58373;64695;_19185;33395;4167;54706;50245;90327;16979;83301;83302;45334;19306;55080;87195;63685;19387",
-		PhysicalDmgTaken = "30070;58683;81326;50518;55749",
-		SpellDamageTaken = "_1490;65142;_85547;60433;93068;34889;24844",
-		SpellCritTaken = "17800;22959",
-		BleedDamageTaken = "33878;33876;16511;_46857;50271;35290;57386",
-		ReducedAttackSpeed = "6343;55095;58180;68055;8042;90314;50285",
+		CrowdControl	    = "_118;_339;2637;33786;_1499;_19503;_19386;20066;10326;_9484;_6770;_2094;_51514;76780;_710;_5782;_6358;_49203;_605;82691", -- originally by calico0 of Curse
+		Bleeding		    = "_94009;_1822;_1079;9007;33745;1943;703;43104;89775",
+		Incapacitated	    = "20066;1776;49203",
+		Feared			    = "_5782;5246;_8122;10326;1513;_5484;_6789;87204",
+		Slowed			    = "_116;_120;_15571;13810;_5116;_8056;3600;_1715;_12323;45524;_18223;_15407;_3409;26679;_51693;_2974;_58180;61391;_50434;_55741;44614;_7302;_8034;_63529", -- by algus2
+		Stunned			    = "_1833;_408;_91800;_5211;_56;9005;22570;19577;56626;44572;853;2812;85388;64044;20549;46968;30283;20253;65929;7922;12809;50519;91797;47481;12355;24394;83047;39796;93986;89766;54786",
+		--DontMelee		    = "5277;871;Retaliation;Dispersion;Hand of Sacrifice;Hand of Protection;Divine Shield;Divine Protection;Ice Block;Icebound Fortitude;Cyclone;Banish",  --does somebody want to update these for me?
+		--MovementSlowed    = "Incapacitating Shout;Chains of Ice;Icy Clutch;Slow;Daze;Hamstring;Piercing Howl;Wing Clip;Ice Trap;Frostbolt;Cone of Cold;Blast Wave;Mind Flay;Crippling Poison;Deadly Throw;Frost Shock;Earthbind;Curse of Exhaustion",
+		Disoriented		    = "_19503;31661;_2094;_51514;90337;88625",
+		Silenced		    = "_47476;78675;34490;_55021;_15487;1330;_24259;_18498;_25046;81261;31935;18425;31117",
+		Disarmed		    = "_51722;_676;64058;50541;91644",
+		Rooted			    = "_339;_122;23694;58373;64695;_19185;33395;4167;54706;50245;90327;16979;83301;83302;45334;19306;55080;87195;63685;19387",
+		PhysicalDmgTaken    = "30070;58683;81326;50518;55749",
+		SpellDamageTaken    = "_1490;65142;_85547;60433;93068;34889;24844",
+		SpellCritTaken	    = "17800;22959",
+		BleedDamageTaken    = "33878;33876;16511;_46857;50271;35290;57386",
+		ReducedAttackSpeed  = "6343;55095;58180;68055;8042;90314;50285",
 		ReducedCastingSpeed = "1714;5760;31589;73975;50274;50498",
-		ReducedArmor = "58567;91565;8647;50498;35387",
-		ReducedHealing = "12294;13218;56112;48301;82654;30213;54680",
+		ReducedArmor	    = "58567;91565;8647;50498;35387",
+		ReducedHealing	    = "12294;13218;56112;48301;82654;30213;54680",
 		ReducedPhysicalDone = "1160;99;26017;81130;702;24423",
 	},
 	buffs = {
-		ImmuneToStun = "642;45438;34471;19574;48792;1022;33786;710;46924;19263;47585",
-		ImmuneToMagicCC = "642;45438;34471;19574;33786;710;46924;19263;47585;31224;8178;23920;49039",
-		IncreasedStats = "79061;79063;90363",
-		IncreasedDamage = "75447;82930",
-		IncreasedCrit = "24932;29801;51701;51470;24604;90309",
-		IncreasedAP = "79102;53138;19506;30808",
-		IncreasedSPsix = "_79058;_61316;_52109",
-		IncreasedSPten = "77747;53646",
-		IncreasedPhysHaste = "55610;53290;8515",
+		ImmuneToStun	    = "642;45438;34471;19574;48792;1022;33786;710;46924;19263;47585",
+		ImmuneToMagicCC	    = "642;45438;34471;19574;33786;710;46924;19263;47585;31224;8178;23920;49039",
+		IncreasedStats	    = "79061;79063;90363",
+		IncreasedDamage	    = "75447;82930",
+		IncreasedCrit	    = "24932;29801;51701;51470;24604;90309",
+		IncreasedAP		    = "79102;53138;19506;30808",
+		IncreasedSPsix	    = "_79058;_61316;_52109",
+		IncreasedSPten	    = "77747;53646",
+		IncreasedPhysHaste  = "55610;53290;8515",
 		IncreasedSpellHaste = "2895;24907;49868",
-		BurstHaste = "2825;32182;80353;90355",
-		BonusAgiStr = "6673;8076;57330;93435",
-		BonusStamina = "79105;469;6307;90364",
-		BonusArmor = "465;8072",
-		BonusMana = "_79058;_61316;54424",
-		ManaRegen = "54424;79102;5677",
-		BurstManaRegen = "29166;16191;64901",
-		PushbackResistance = "19746;87717",
-		Resistances = "19891;8185",
-		DefensiveBuffs = "48707;30823;33206;47585;871;48792;498;22812;61336;5277;74001;47788;19263;6940;_12976;31850",
-		MiscHelpfulBuffs = "89488;10060;23920;68992;31642;54428;2983;1850;29166;16689;53271;1044;31821;45182",
-		DamageBuffs = "1719;12292;85730;50334;5217;3045;77801;34692;31884;51713;49016;12472",
+		BurstHaste		    = "2825;32182;80353;90355",
+		BonusAgiStr		    = "6673;8076;57330;93435",
+		BonusStamina	    = "79105;469;6307;90364",
+		BonusArmor		    = "465;8072",
+		BonusMana		    = "_79058;_61316;54424",
+		ManaRegen		    = "54424;79102;5677",
+		BurstManaRegen	    = "29166;16191;64901",
+		PushbackResistance  = "19746;87717",
+		Resistances		    = "19891;8185",
+		DefensiveBuffs	    = "48707;30823;33206;47585;871;48792;498;22812;61336;5277;74001;47788;19263;6940;_12976;31850",
+		MiscHelpfulBuffs    = "89488;10060;23920;68992;31642;54428;2983;1850;29166;16689;53271;1044;31821;45182",
+		DamageBuffs		    = "1719;12292;85730;50334;5217;3045;77801;34692;31884;51713;49016;12472",
 	},
 	casts = {
 		--prefixing with _ doesnt really matter here since casts only match by ID, but it may prevent confusion if people try and use these as buff/debuff equivs
-		Heals = "50464;5185;8936;740;2050;2060;2061;32546;596;64843;635;82326;19750;331;77472;8004;1064;73920",
-		PvPSpells = "33786;339;20484;1513;982;64901;_605;453;5782;5484;79268;10326;51514;118;12051",
-		Tier11Interrupts = "_83703;_82752;_82636;_83070;_79710;_77896;_77569;_80734;_82411",
-		Tier12Interrupts = "_97202;_100094",
+		Heals			    = "50464;5185;8936;740;2050;2060;2061;32546;596;64843;635;82326;19750;331;77472;8004;1064;73920",
+		PvPSpells		    = "33786;339;20484;1513;982;64901;_605;453;5782;5484;79268;10326;51514;118;12051",
+		Tier11Interrupts    = "_83703;_82752;_82636;_83070;_79710;_77896;_77569;_80734;_82411",
+		Tier12Interrupts    = "_97202;_100094",
 	},
 	dr = {
 	},
 	unlisted = {
 		-- enrages were extracted using the script in the /Scripts folder (source is db.mmo-champion.com)
-		Enraged = "24689;18499;2687;29131;59465;39575;77238;52262;12292;54508;23257;66092;57733;58942;40076;8599;15061;15716;18501;19451;19812;22428;23128;23342;25503;26041;26051;28371;30485;31540;31915;32714;33958;34670;37605;37648;37975;38046;38166;38664;39031;41254;41447;42705;42745;43139;47399;48138;48142;48193;50420;51513;52470;54427;55285;56646;59697;59707;59828;60075;61369;63227;68541;70371;72143;72146;72147;72148;75998;76100;76862;78722;78943;80084;80467;86736;95436;95459;5229;12880;57514;57518;14201;57516;57519;14202;57520;14203;57521;14204;57522;51170;4146;76816;90872;82033;48702;52537;49029;67233;54781;56729;53361;79420;66759;67657;67658;67659;40601;51662;60177;63848;43292;90045;92946;52071;82759;60430;81772;48391;80158;101109;101110;54475;56769;63147;62071;52610;41364;81021;81022;81016;81017;34392;55462;50636;72203;49016;69052;43664;59694;91668;52461;54356;76691;81706;52309;29340;76487",
+		Enraged			    = "24689;18499;2687;29131;59465;39575;77238;52262;12292;54508;23257;66092;57733;58942;40076;8599;15061;15716;18501;19451;19812;22428;23128;23342;25503;26041;26051;28371;30485;31540;31915;32714;33958;34670;37605;37648;37975;38046;38166;38664;39031;41254;41447;42705;42745;43139;47399;48138;48142;48193;50420;51513;52470;54427;55285;56646;59697;59707;59828;60075;61369;63227;68541;70371;72143;72146;72147;72148;75998;76100;76862;78722;78943;80084;80467;86736;95436;95459;5229;12880;57514;57518;14201;57516;57519;14202;57520;14203;57521;14204;57522;51170;4146;76816;90872;82033;48702;52537;49029;67233;54781;56729;53361;79420;66759;67657;67658;67659;40601;51662;60177;63848;43292;90045;92946;52071;82759;60430;81772;48391;80158;101109;101110;54475;56769;63147;62071;52610;41364;81021;81022;81016;81017;34392;55462;50636;72203;49016;69052;43664;59694;91668;52461;54356;76691;81706;52309;29340;76487",
 	},
 }
 if DRData then
 	local myCategories = {
-		ctrlstun = "DR-ControlledStun",
-		scatters = "DR-Scatter",
-		fear = "DR-Fear",
-		rndstun = "DR-RandomStun",
-		silence = "DR-Silence",
-		banish = "DR-Banish",
-		mc = "DR-MindControl",
+		ctrlstun   = "DR-ControlledStun",
+		scatters   = "DR-Scatter",
+		fear 	   = "DR-Fear",
+		rndstun    = "DR-RandomStun",
+		silence    = "DR-Silence",
+		banish 	   = "DR-Banish",
+		mc 		   = "DR-MindControl",
 		entrapment = "DR-Entrapment",
-		taunt = "DR-Taunt",
-		disarm = "DR-Disarm",
-		horror = "DR-Horrify",
-		cyclone = "DR-Cyclone",
-		rndroot = "DR-RandomRoot",
-		disorient = "DR-Disorient",
-		ctrlroot = "DR-ControlledRoot",
-		dragons = "DR-DragonsBreath",
+		taunt 	   = "DR-Taunt",
+		disarm 	   = "DR-Disarm",
+		horror 	   = "DR-Horrify",
+		cyclone    = "DR-Cyclone",
+		rndroot    = "DR-RandomRoot",
+		disorient  = "DR-Disorient",
+		ctrlroot   = "DR-ControlledRoot",
+		dragons    = "DR-DragonsBreath",
 	}
 	if not GetSpellInfo(74347) then -- invalid
 		DRData.spells[74347] = nil
@@ -712,16 +712,16 @@ for category, b in pairs(TMW.OldBE) do
 end
 
 TMW.GCDSpells = {
-	ROGUE=1752, -- sinister strike
-	PRIEST=139, -- renew
-	DRUID=774, -- rejuvenation
-	WARRIOR=772, -- rend
-	MAGE=133, -- fireball
-	WARLOCK=687, -- demon armor
-	PALADIN=20154, -- seal of righteousness
-	SHAMAN=324, -- lightning shield
-	HUNTER=1978, -- serpent sting
-	DEATHKNIGHT=47541, -- death coil
+	ROGUE	   	= 1752, -- sinister strike
+	PRIEST	   	= 139, -- renew
+	DRUID	   	= 774, -- rejuvenation
+	WARRIOR	   	= 772, -- rend
+	MAGE	   	= 133, -- fireball
+	WARLOCK	   	= 687, -- demon armor
+	PALADIN	   	= 20154, -- seal of righteousness
+	SHAMAN	   	= 324, -- lightning shield
+	HUNTER	   	= 1978, -- serpent sting
+	DEATHKNIGHT = 47541, -- death coil
 } local GCDSpell = TMW.GCDSpells[pclass]
 
 TMW.ChannelList = {
@@ -981,7 +981,7 @@ do -- STANCES
 	}
 
 	TMW.CSN = {
-		[0] = NONE,
+		[0]    = NONE,
 	}
 
 	for k, v in ipairs(TMW.Stances) do
@@ -1046,22 +1046,22 @@ function TMW:OnInitialize()
 		wipe(db.global.ClassSpellCache)
 	end
 
-	LSM:Register("sound", "Rubber Ducky", [[Sound\Doodad\Goblin_Lottery_Open01.wav]])
-	LSM:Register("sound", "Cartoon FX", [[Sound\Doodad\Goblin_Lottery_Open03.wav]])
-	LSM:Register("sound", "Explosion", [[Sound\Doodad\Hellfire_Raid_FX_Explosion05.wav]])
-	LSM:Register("sound", "Shing!", [[Sound\Doodad\PortcullisActive_Closed.wav]])
-	LSM:Register("sound", "Wham!", [[Sound\Doodad\PVP_Lordaeron_Door_Open.wav]])
-	LSM:Register("sound", "Simon Chime", [[Sound\Doodad\SimonGame_LargeBlueTree.wav]])
-	LSM:Register("sound", "War Drums", [[Sound\Event Sounds\Event_wardrum_ogre.wav]])
-	LSM:Register("sound", "Cheer", [[Sound\Event Sounds\OgreEventCheerUnique.wav]])
-	LSM:Register("sound", "Humm", [[Sound\Spells\SimonGame_Visual_GameStart.wav]])
+	LSM:Register("sound", "Rubber Ducky",  [[Sound\Doodad\Goblin_Lottery_Open01.wav]])
+	LSM:Register("sound", "Cartoon FX",    [[Sound\Doodad\Goblin_Lottery_Open03.wav]])
+	LSM:Register("sound", "Explosion", 	   [[Sound\Doodad\Hellfire_Raid_FX_Explosion05.wav]])
+	LSM:Register("sound", "Shing!", 	   [[Sound\Doodad\PortcullisActive_Closed.wav]])
+	LSM:Register("sound", "Wham!", 		   [[Sound\Doodad\PVP_Lordaeron_Door_Open.wav]])
+	LSM:Register("sound", "Simon Chime",   [[Sound\Doodad\SimonGame_LargeBlueTree.wav]])
+	LSM:Register("sound", "War Drums", 	   [[Sound\Event Sounds\Event_wardrum_ogre.wav]])
+	LSM:Register("sound", "Cheer", 		   [[Sound\Event Sounds\OgreEventCheerUnique.wav]])
+	LSM:Register("sound", "Humm", 		   [[Sound\Spells\SimonGame_Visual_GameStart.wav]])
 	LSM:Register("sound", "Short Circuit", [[Sound\Spells\SimonGame_Visual_BadPress.wav]])
-	LSM:Register("sound", "Fel Portal", [[Sound\Spells\Sunwell_Fel_PortalStand.wav]])
-	LSM:Register("sound", "Fel Nova", [[Sound\Spells\SeepingGaseous_Fel_Nova.wav]])
+	LSM:Register("sound", "Fel Portal",    [[Sound\Spells\Sunwell_Fel_PortalStand.wav]])
+	LSM:Register("sound", "Fel Nova", 	   [[Sound\Spells\SeepingGaseous_Fel_Nova.wav]])
 	LSM:Register("sound", "You Will Die!", [[Sound\Creature\CThun\CThunYouWillDie.wav]])
 
-	LSM:Register("sound", "Die!", [[Sound\Creature\GruulTheDragonkiller\GRULLAIR_Gruul_Slay03.wav]])
-	LSM:Register("sound", "You Fail!", [[Sound\Creature\Kologarn\UR_Kologarn_slay02.wav]])
+	LSM:Register("sound", "Die!", 		   [[Sound\Creature\GruulTheDragonkiller\GRULLAIR_Gruul_Slay03.wav]])
+	LSM:Register("sound", "You Fail!", 	   [[Sound\Creature\Kologarn\UR_Kologarn_slay02.wav]])
 	
 	LSM:Register("sound", "TMW - Pling 1", [[Interface\Addons\TellMeWhen\Sounds\Pling1.ogg]])
 	LSM:Register("sound", "TMW - Pling 2", [[Interface\Addons\TellMeWhen\Sounds\Pling2.ogg]])
@@ -1069,15 +1069,15 @@ function TMW:OnInitialize()
 	LSM:Register("sound", "TMW - Pling 4", [[Interface\Addons\TellMeWhen\Sounds\Pling4.ogg]])
 	LSM:Register("sound", "TMW - Pling 5", [[Interface\Addons\TellMeWhen\Sounds\Pling5.ogg]])
 	LSM:Register("sound", "TMW - Pling 6", [[Interface\Addons\TellMeWhen\Sounds\Pling6.ogg]])
-	LSM:Register("sound", "TMW - Ding 1", [[Interface\Addons\TellMeWhen\Sounds\Ding1.ogg]])
-	LSM:Register("sound", "TMW - Ding 2", [[Interface\Addons\TellMeWhen\Sounds\Ding2.ogg]])
-	LSM:Register("sound", "TMW - Ding 3", [[Interface\Addons\TellMeWhen\Sounds\Ding3.ogg]])
-	LSM:Register("sound", "TMW - Ding 4", [[Interface\Addons\TellMeWhen\Sounds\Ding4.ogg]])
-	LSM:Register("sound", "TMW - Ding 5", [[Interface\Addons\TellMeWhen\Sounds\Ding5.ogg]])
-	LSM:Register("sound", "TMW - Ding 6", [[Interface\Addons\TellMeWhen\Sounds\Ding6.ogg]])
-	LSM:Register("sound", "TMW - Ding 7", [[Interface\Addons\TellMeWhen\Sounds\Ding7.ogg]])
-	LSM:Register("sound", "TMW - Ding 8", [[Interface\Addons\TellMeWhen\Sounds\Ding8.ogg]])
-	LSM:Register("sound", "TMW - Ding 9", [[Interface\Addons\TellMeWhen\Sounds\Ding9.ogg]])
+	LSM:Register("sound", "TMW - Ding 1",  [[Interface\Addons\TellMeWhen\Sounds\Ding1.ogg]])
+	LSM:Register("sound", "TMW - Ding 2",  [[Interface\Addons\TellMeWhen\Sounds\Ding2.ogg]])
+	LSM:Register("sound", "TMW - Ding 3",  [[Interface\Addons\TellMeWhen\Sounds\Ding3.ogg]])
+	LSM:Register("sound", "TMW - Ding 4",  [[Interface\Addons\TellMeWhen\Sounds\Ding4.ogg]])
+	LSM:Register("sound", "TMW - Ding 5",  [[Interface\Addons\TellMeWhen\Sounds\Ding5.ogg]])
+	LSM:Register("sound", "TMW - Ding 6",  [[Interface\Addons\TellMeWhen\Sounds\Ding6.ogg]])
+	LSM:Register("sound", "TMW - Ding 7",  [[Interface\Addons\TellMeWhen\Sounds\Ding7.ogg]])
+	LSM:Register("sound", "TMW - Ding 8",  [[Interface\Addons\TellMeWhen\Sounds\Ding8.ogg]])
+	LSM:Register("sound", "TMW - Ding 9",  [[Interface\Addons\TellMeWhen\Sounds\Ding9.ogg]])
 
 	TELLMEWHEN_MAXGROUPS = db.profile.NumGroups -- need to define before upgrading
 
@@ -1085,12 +1085,12 @@ function TMW:OnInitialize()
 	if TellMeWhen_Settings or (type(db.profile.Version) == "string") or (db.profile.Version < TELLMEWHEN_VERSIONNUMBER) then
 		TMW:Upgrade()
 	end
-	db.RegisterCallback(TMW, "OnProfileChanged", "OnProfile") -- must set callbacks after TMW:Upgrade() because the db is overwritten there when upgrading from 3.0.0
-	db.RegisterCallback(TMW, "OnProfileCopied", "OnProfile")
-	db.RegisterCallback(TMW, "OnProfileReset", "OnProfile")
-	db.RegisterCallback(TMW, "OnNewProfile", "OnProfile")
-	db.RegisterCallback(TMW, "OnProfileShutdown", "ShutdownProfile")
-	db.RegisterCallback(TMW, "OnDatabaseShutdown", "ShutdownProfile")
+	db.RegisterCallback(TMW, "OnProfileChanged",	"OnProfile") -- must set callbacks after TMW:Upgrade() because the db is overwritten there when upgrading from 3.0.0
+	db.RegisterCallback(TMW, "OnProfileCopied",		"OnProfile")
+	db.RegisterCallback(TMW, "OnProfileReset",		"OnProfile")
+	db.RegisterCallback(TMW, "OnNewProfile",		"OnProfile")
+	db.RegisterCallback(TMW, "OnProfileShutdown",	"ShutdownProfile")
+	db.RegisterCallback(TMW, "OnDatabaseShutdown",	"ShutdownProfile")
 	
 	
 	TMW.ClassSpellCache = db.global.ClassSpellCache
@@ -1276,7 +1276,7 @@ function TMW:Update()
 	TMW.DoWipeAC = false
 	if not Locked then
 		TMW:LoadOptions()
-		if db.global.ConfigWarning then -- oh no! confguration code in the main addon!
+		if db.global.ConfigWarning then -- oh no! configuration code in the main addon!
 			TellMeWhen_ConfigWarning:Show()
 		else
 			TellMeWhen_ConfigWarning:Hide()

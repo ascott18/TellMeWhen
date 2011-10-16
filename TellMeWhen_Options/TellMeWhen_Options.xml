@@ -471,7 +471,7 @@
 			</OnEnterPressed>
 		</Scripts>
 	</EditBox>
-			
+	
 	<Button name="TellMeWhen_ConditionEditorRuneCheckTemplate" virtual="true">
 		<Size x="35" y="29"/>
 		<Layers>
