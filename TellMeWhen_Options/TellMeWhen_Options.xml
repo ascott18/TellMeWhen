@@ -450,7 +450,7 @@
 				
 				self:HookScript("OnTextChanged", function()
 					local text = self:GetText()
-					local editboxResult = TMW.LastExportedString ~= text and TMW:DeserializeData(text:gsub("||", "|"))
+					local editboxResult = TMW.LastExportedString ~= text and TMW:DeserializeData(text)
 					if editboxResult then
 						self.DoPulseValidString = 1
 					else

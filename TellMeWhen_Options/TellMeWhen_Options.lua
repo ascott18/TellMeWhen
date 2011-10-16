@@ -2376,6 +2376,7 @@ function IE:ShowHelp(text, frame, x, y, noclose, ...)
 	local parent = frame.CreateTexture and frame or frame:GetParent() -- if the frame has the CreateTexture method, then it can be made the parent. Otherwise, the frame is actually a texture/font/etc object, so set 
 	IE.Help:SetParent(parent)
 	IE.Help:Show()
+	return 1 -- successfully shown
 end
 
 local equivTipCache = {}
@@ -2650,7 +2651,7 @@ function IE:Copy_DropDown(...)
 		end
 	end
 	
-	local t = strtrim(EDITBOX:GetText()):gsub("||", "|")
+	local t = strtrim(EDITBOX:GetText())
 	local editboxResult = t ~= "" and TMW:DeserializeData(t)
 	t = nil
 

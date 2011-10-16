@@ -30,10 +30,10 @@ local AceDB = LibStub("AceDB-3.0")
 local LSM = LibStub("LibSharedMedia-3.0")
 local DRData = LibStub("DRData-1.0", true)
 
-TELLMEWHEN_VERSION = "4.6.3"
+TELLMEWHEN_VERSION = "4.6.4"
 TELLMEWHEN_VERSION_MINOR = strmatch(" @project-version@", " r%d+") or ""
 TELLMEWHEN_VERSION_FULL = TELLMEWHEN_VERSION .. TELLMEWHEN_VERSION_MINOR
-TELLMEWHEN_VERSIONNUMBER = 46301 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
+TELLMEWHEN_VERSIONNUMBER = 46401 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
 if TELLMEWHEN_VERSIONNUMBER > 47000 or TELLMEWHEN_VERSIONNUMBER < 46000 then return error("YOU SCREWED UP THE VERSION NUMBER OR DIDNT CHANGE THE SAFETY LIMITS") end -- safety check because i accidentally made the version number 414069 once
 
 TELLMEWHEN_MAXGROUPS = 1 	--this is a default, used by SetTheory (addon), so dont rename
@@ -3800,8 +3800,7 @@ function TMW:GetConfigIconTexture(icon, isItem)
 		end
 		if Types[icon.Type].usePocketWatch then
 			if TMW.IE and TMW.CI.ic == icon and not db.global.HelpSettings.PocketWatch and TellMeWhen_IconEditor:IsShown() then
-				TMW.IE:ShowHelp(L["HELP_POCKETWATCH"], TMW.IE.icontexture, 0, 0, true)
-				db.global.HelpSettings.PocketWatch = 1
+				db.global.HelpSettings.PocketWatch = TMW.IE:ShowHelp(L["HELP_POCKETWATCH"], TMW.IE.icontexture, 0, 0, true)
 			end
 			return "Interface\\Icons\\INV_Misc_PocketWatch_01", false
 		else
