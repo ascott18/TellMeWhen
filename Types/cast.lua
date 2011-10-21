@@ -36,6 +36,7 @@ Type.name = L["ICONMENU_CAST"]
 Type.desc = L["ICONMENU_CAST_DESC"]
 Type.appendNameLabel = L["ICONMENU_CHOOSENAME_ORBLANK"]
 Type.AllowNoName = true
+Type.usePocketWatch = 1
 Type.WhenChecks = {
 	text = L["ICONMENU_CASTSHOWWHEN"],
 	{ value = "alpha", 			text = L["ICONMENU_PRESENT"], 			colorCode = "|cFF00FF00" },

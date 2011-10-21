@@ -33,7 +33,7 @@ local DRData = LibStub("DRData-1.0", true)
 TELLMEWHEN_VERSION = "4.6.4"
 TELLMEWHEN_VERSION_MINOR = strmatch(" @project-version@", " r%d+") or ""
 TELLMEWHEN_VERSION_FULL = TELLMEWHEN_VERSION .. TELLMEWHEN_VERSION_MINOR
-TELLMEWHEN_VERSIONNUMBER = 46402 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
+TELLMEWHEN_VERSIONNUMBER = 46403 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
 if TELLMEWHEN_VERSIONNUMBER > 47000 or TELLMEWHEN_VERSIONNUMBER < 46000 then return error("YOU SCREWED UP THE VERSION NUMBER OR DIDNT CHANGE THE SAFETY LIMITS") end -- safety check because i accidentally made the version number 414069 once
 
 TELLMEWHEN_MAXGROUPS = 1 	--this is a default, used by SetTheory (addon), so dont rename
@@ -579,135 +579,140 @@ TMW.Defaults = {
 		},
 	},
 }
-TMW.Group_Defaults 			  = TMW.Defaults.profile.Groups["**"]
-TMW.Icon_Defaults 			  = TMW.Group_Defaults.Icons["**"]
-TMW.Group_Defaults.Conditions = TMW.Icon_Defaults.Conditions
+TMW.Group_Defaults 			  = TMW.Defaults.profile.Groups["**"]	-- shortcut
+TMW.Icon_Defaults 			  = TMW.Group_Defaults.Icons["**"]		-- shortcut
+TMW.Group_Defaults.Conditions = TMW.Icon_Defaults.Conditions		-- functional replication
 
-TMW.DS = {
-	Magic 	= "Interface\\Icons\\spell_fire_immolation",
-	Curse 	= "Interface\\Icons\\spell_shadow_curseofsargeras",
-	Disease = "Interface\\Icons\\spell_nature_nullifydisease",
-	Poison 	= "Interface\\Icons\\spell_nature_corrosivebreath",
-	Enraged = "Interface\\Icons\\ability_druid_challangingroar",
-}
-for dispeltype, icon in pairs(TMW.DS) do
-	SpellTextures[dispeltype] = icon
-end
-TMW.BE = {
-	--Much of these are thanks to Malazee @ US-Dalaran's chart: http://forums.wow-petopia.com/download/file.php?mode=view&id=4979 and spreadsheet https://spreadsheets.google.com/ccc?key=0Aox2ZHZE6e_SdHhTc0tZam05QVJDU0lONnp0ZVgzdkE&hl=en#gid=18
-	--Many more new spells/corrections were provided by Catok of Curse
-	--NOTE: any id prefixed with "_" will have its localized name substituted in instead of being forced to match as an ID
-	debuffs = {
-		CrowdControl	    = "_118;_339;2637;33786;_1499;_19503;_19386;20066;10326;_9484;_6770;_2094;_51514;76780;_710;_5782;_6358;_49203;_605;82691", -- originally by calico0 of Curse
-		Bleeding		    = "_94009;_1822;_1079;9007;33745;1943;703;43104;89775",
-		Incapacitated	    = "20066;1776;49203",
-		Feared			    = "_5782;5246;_8122;10326;1513;_5484;_6789;87204",
-		Slowed			    = "_116;_120;_15571;13810;_5116;_8056;3600;_1715;_12323;45524;_18223;_15407;_3409;26679;_51693;_2974;_58180;61391;_50434;_55741;44614;_7302;_8034;_63529", -- by algus2
-		Stunned			    = "_1833;_408;_91800;_5211;_56;9005;22570;19577;56626;44572;853;2812;85388;64044;20549;46968;30283;20253;65929;7922;12809;50519;91797;47481;12355;24394;83047;39796;93986;89766;54786",
-		--DontMelee		    = "5277;871;Retaliation;Dispersion;Hand of Sacrifice;Hand of Protection;Divine Shield;Divine Protection;Ice Block;Icebound Fortitude;Cyclone;Banish",  --does somebody want to update these for me?
-		--MovementSlowed    = "Incapacitating Shout;Chains of Ice;Icy Clutch;Slow;Daze;Hamstring;Piercing Howl;Wing Clip;Ice Trap;Frostbolt;Cone of Cold;Blast Wave;Mind Flay;Crippling Poison;Deadly Throw;Frost Shock;Earthbind;Curse of Exhaustion",
-		Disoriented		    = "_19503;31661;_2094;_51514;90337;88625",
-		Silenced		    = "_47476;78675;34490;_55021;_15487;1330;_24259;_18498;_25046;81261;31935;18425;31117",
-		Disarmed		    = "_51722;_676;64058;50541;91644",
-		Rooted			    = "_339;_122;23694;58373;64695;_19185;33395;4167;54706;50245;90327;16979;83301;83302;45334;19306;55080;87195;63685;19387",
-		PhysicalDmgTaken    = "30070;58683;81326;50518;55749",
-		SpellDamageTaken    = "_1490;65142;_85547;60433;93068;34889;24844",
-		SpellCritTaken	    = "17800;22959",
-		BleedDamageTaken    = "33878;33876;16511;_46857;50271;35290;57386",
-		ReducedAttackSpeed  = "6343;55095;58180;68055;8042;90314;50285",
-		ReducedCastingSpeed = "1714;5760;31589;73975;50274;50498",
-		ReducedArmor	    = "58567;91565;8647;50498;35387",
-		ReducedHealing	    = "12294;13218;56112;48301;82654;30213;54680",
-		ReducedPhysicalDone = "1160;99;26017;81130;702;24423",
-	},
-	buffs = {
-		ImmuneToStun	    = "642;45438;34471;19574;48792;1022;33786;710;46924;19263;47585",
-		ImmuneToMagicCC	    = "642;45438;34471;19574;33786;710;46924;19263;47585;31224;8178;23920;49039",
-		IncreasedStats	    = "79061;79063;90363",
-		IncreasedDamage	    = "75447;82930",
-		IncreasedCrit	    = "24932;29801;51701;51470;24604;90309",
-		IncreasedAP		    = "79102;53138;19506;30808",
-		IncreasedSPsix	    = "_79058;_61316;_52109",
-		IncreasedSPten	    = "77747;53646",
-		IncreasedPhysHaste  = "55610;53290;8515",
-		IncreasedSpellHaste = "2895;24907;49868",
-		BurstHaste		    = "2825;32182;80353;90355",
-		BonusAgiStr		    = "6673;8076;57330;93435",
-		BonusStamina	    = "79105;469;6307;90364",
-		BonusArmor		    = "465;8072",
-		BonusMana		    = "_79058;_61316;54424",
-		ManaRegen		    = "54424;79102;5677",
-		BurstManaRegen	    = "29166;16191;64901",
-		PushbackResistance  = "19746;87717",
-		Resistances		    = "19891;8185",
-		DefensiveBuffs	    = "48707;30823;33206;47585;871;48792;498;22812;61336;5277;74001;47788;19263;6940;_12976;31850",
-		MiscHelpfulBuffs    = "89488;10060;23920;68992;31642;54428;2983;1850;29166;16689;53271;1044;31821;45182",
-		DamageBuffs		    = "1719;12292;85730;50334;5217;3045;77801;34692;31884;51713;49016;12472",
-	},
-	casts = {
-		--prefixing with _ doesnt really matter here since casts only match by ID, but it may prevent confusion if people try and use these as buff/debuff equivs
-		Heals			    = "50464;5185;8936;740;2050;2060;2061;32546;596;64843;635;82326;19750;331;77472;8004;1064;73920",
-		PvPSpells		    = "33786;339;20484;1513;982;64901;_605;453;5782;5484;79268;10326;51514;118;12051",
-		Tier11Interrupts    = "_83703;_82752;_82636;_83070;_79710;_77896;_77569;_80734;_82411",
-		Tier12Interrupts    = "_97202;_100094",
-	},
-	dr = {
-	},
-	unlisted = {
-		-- enrages were extracted using the script in the /Scripts folder (source is db.mmo-champion.com)
-		Enraged			    = "24689;18499;2687;29131;59465;39575;77238;52262;12292;54508;23257;66092;57733;58942;40076;8599;15061;15716;18501;19451;19812;22428;23128;23342;25503;26041;26051;28371;30485;31540;31915;32714;33958;34670;37605;37648;37975;38046;38166;38664;39031;41254;41447;42705;42745;43139;47399;48138;48142;48193;50420;51513;52470;54427;55285;56646;59697;59707;59828;60075;61369;63227;68541;70371;72143;72146;72147;72148;75998;76100;76862;78722;78943;80084;80467;86736;95436;95459;5229;12880;57514;57518;14201;57516;57519;14202;57520;14203;57521;14204;57522;51170;4146;76816;90872;82033;48702;52537;49029;67233;54781;56729;53361;79420;66759;67657;67658;67659;40601;51662;60177;63848;43292;90045;92946;52071;82759;60430;81772;48391;80158;101109;101110;54475;56769;63147;62071;52610;41364;81021;81022;81016;81017;34392;55462;50636;72203;49016;69052;43664;59694;91668;52461;54356;76691;81706;52309;29340;76487",
-	},
-}
-if DRData then
-	local myCategories = {
-		ctrlstun   = "DR-ControlledStun",
-		scatters   = "DR-Scatter",
-		fear 	   = "DR-Fear",
-		rndstun    = "DR-RandomStun",
-		silence    = "DR-Silence",
-		banish 	   = "DR-Banish",
-		mc 		   = "DR-MindControl",
-		entrapment = "DR-Entrapment",
-		taunt 	   = "DR-Taunt",
-		disarm 	   = "DR-Disarm",
-		horror 	   = "DR-Horrify",
-		cyclone    = "DR-Cyclone",
-		rndroot    = "DR-RandomRoot",
-		disorient  = "DR-Disorient",
-		ctrlroot   = "DR-ControlledRoot",
-		dragons    = "DR-DragonsBreath",
+function TMW:ProcessEquivalencies()
+	TMW.DS = {
+		Magic 	= "Interface\\Icons\\spell_fire_immolation",
+		Curse 	= "Interface\\Icons\\spell_shadow_curseofsargeras",
+		Disease = "Interface\\Icons\\spell_nature_nullifydisease",
+		Poison 	= "Interface\\Icons\\spell_nature_corrosivebreath",
+		Enraged = "Interface\\Icons\\ability_druid_challangingroar",
 	}
-	if not GetSpellInfo(74347) then -- invalid
-		DRData.spells[74347] = nil
+	for dispeltype, icon in pairs(TMW.DS) do
+		SpellTextures[dispeltype] = icon
 	end
-	local dr = TMW.BE.dr
-	for spellID, category in pairs(DRData.spells) do
-		local k = myCategories[category] or TMW:Error("TMW: The DR category %q is undefined!", 0, category)
-		dr[k] = (dr[k] and (dr[k] .. ";" .. spellID)) or tostring(spellID)
+	TMW.BE = {
+		--Much of these are thanks to Malazee @ US-Dalaran's chart: http://forums.wow-petopia.com/download/file.php?mode=view&id=4979 and spreadsheet https://spreadsheets.google.com/ccc?key=0Aox2ZHZE6e_SdHhTc0tZam05QVJDU0lONnp0ZVgzdkE&hl=en#gid=18
+		--Many more new spells/corrections were provided by Catok of Curse
+		--NOTE: any id prefixed with "_" will have its localized name substituted in instead of being forced to match as an ID
+		debuffs = {
+			CrowdControl	    = "_118;_339;2637;33786;_1499;_19503;_19386;20066;10326;_9484;_6770;_2094;_51514;76780;_710;_5782;_6358;_49203;_605;82691", -- originally by calico0 of Curse
+			Bleeding		    = "_94009;_1822;_1079;9007;33745;1943;703;43104;89775",
+			Incapacitated	    = "20066;1776;49203",
+			Feared			    = "_5782;5246;_8122;10326;1513;_5484;_6789;87204",
+			Slowed			    = "_116;_120;_15571;13810;_5116;_8056;3600;_1715;_12323;45524;_18223;_15407;_3409;26679;_51693;_2974;_58180;61391;_50434;_55741;44614;_7302;_8034;_63529", -- by algus2
+			Stunned			    = "_1833;_408;_91800;_5211;_56;9005;22570;19577;56626;44572;853;2812;85388;64044;20549;46968;30283;20253;65929;7922;12809;50519;91797;47481;12355;24394;83047;39796;93986;89766;54786",
+			--DontMelee		    = "5277;871;Retaliation;Dispersion;Hand of Sacrifice;Hand of Protection;Divine Shield;Divine Protection;Ice Block;Icebound Fortitude;Cyclone;Banish",  --does somebody want to update these for me?
+			--MovementSlowed    = "Incapacitating Shout;Chains of Ice;Icy Clutch;Slow;Daze;Hamstring;Piercing Howl;Wing Clip;Ice Trap;Frostbolt;Cone of Cold;Blast Wave;Mind Flay;Crippling Poison;Deadly Throw;Frost Shock;Earthbind;Curse of Exhaustion",
+			Disoriented		    = "_19503;31661;_2094;_51514;90337;88625",
+			Silenced		    = "_47476;78675;34490;_55021;_15487;1330;_24259;_18498;_25046;81261;31935;18425;31117",
+			Disarmed		    = "_51722;_676;64058;50541;91644",
+			Rooted			    = "_339;_122;23694;58373;64695;_19185;33395;4167;54706;50245;90327;16979;83301;83302;45334;19306;55080;87195;63685;19387",
+			PhysicalDmgTaken    = "30070;58683;81326;50518;55749",
+			SpellDamageTaken    = "_1490;65142;_85547;60433;93068;34889;24844",
+			SpellCritTaken	    = "17800;22959",
+			BleedDamageTaken    = "33878;33876;16511;_46857;50271;35290;57386",
+			ReducedAttackSpeed  = "6343;55095;58180;68055;8042;90314;50285",
+			ReducedCastingSpeed = "1714;5760;31589;73975;50274;50498",
+			ReducedArmor	    = "58567;91565;8647;50498;35387",
+			ReducedHealing	    = "12294;13218;56112;48301;82654;30213;54680",
+			ReducedPhysicalDone = "1160;99;26017;81130;702;24423",
+		},
+		buffs = {
+			ImmuneToStun	    = "642;45438;34471;19574;48792;1022;33786;710;46924;19263;47585",
+			ImmuneToMagicCC	    = "642;45438;34471;19574;33786;710;46924;19263;47585;31224;8178;23920;49039",
+			IncreasedStats	    = "79061;79063;90363",
+			IncreasedDamage	    = "75447;82930",
+			IncreasedCrit	    = "24932;29801;51701;51470;24604;90309",
+			IncreasedAP		    = "79102;53138;19506;30808",
+			IncreasedSPsix	    = "_79058;_61316;_52109",
+			IncreasedSPten	    = "77747;53646",
+			IncreasedPhysHaste  = "55610;53290;8515",
+			IncreasedSpellHaste = "2895;24907;49868",
+			BurstHaste		    = "2825;32182;80353;90355",
+			BonusAgiStr		    = "6673;8076;57330;93435",
+			BonusStamina	    = "79105;469;6307;90364",
+			BonusArmor		    = "465;8072",
+			BonusMana		    = "_79058;_61316;54424",
+			ManaRegen		    = "54424;79102;5677",
+			BurstManaRegen	    = "29166;16191;64901",
+			PushbackResistance  = "19746;87717",
+			Resistances		    = "19891;8185",
+			DefensiveBuffs	    = "48707;30823;33206;47585;871;48792;498;22812;61336;5277;74001;47788;19263;6940;_12976;31850",
+			MiscHelpfulBuffs    = "89488;10060;23920;68992;31642;54428;2983;1850;29166;16689;53271;1044;31821;45182",
+			DamageBuffs		    = "1719;12292;85730;50334;5217;3045;77801;34692;31884;51713;49016;12472",
+		},
+		casts = {
+			--prefixing with _ doesnt really matter here since casts only match by ID, but it may prevent confusion if people try and use these as buff/debuff equivs
+			Heals			    = "50464;5185;8936;740;2050;2060;2061;32546;596;64843;635;82326;19750;331;77472;8004;1064;73920",
+			PvPSpells		    = "33786;339;20484;1513;982;64901;_605;453;5782;5484;79268;10326;51514;118;12051",
+			Tier11Interrupts    = "_83703;_82752;_82636;_83070;_79710;_77896;_77569;_80734;_82411",
+			Tier12Interrupts    = "_97202;_100094",
+		},
+		dr = {
+		},
+		unlisted = {
+			-- enrages were extracted using the script in the /Scripts folder (source is db.mmo-champion.com)
+			Enraged			    = "24689;18499;2687;29131;59465;39575;77238;52262;12292;54508;23257;66092;57733;58942;40076;8599;15061;15716;18501;19451;19812;22428;23128;23342;25503;26041;26051;28371;30485;31540;31915;32714;33958;34670;37605;37648;37975;38046;38166;38664;39031;41254;41447;42705;42745;43139;47399;48138;48142;48193;50420;51513;52470;54427;55285;56646;59697;59707;59828;60075;61369;63227;68541;70371;72143;72146;72147;72148;75998;76100;76862;78722;78943;80084;80467;86736;95436;95459;5229;12880;57514;57518;14201;57516;57519;14202;57520;14203;57521;14204;57522;51170;4146;76816;90872;82033;48702;52537;49029;67233;54781;56729;53361;79420;66759;67657;67658;67659;40601;51662;60177;63848;43292;90045;92946;52071;82759;60430;81772;48391;80158;101109;101110;54475;56769;63147;62071;52610;41364;81021;81022;81016;81017;34392;55462;50636;72203;49016;69052;43664;59694;91668;52461;54356;76691;81706;52309;29340;76487",
+		},
+	}
+
+	if DRData then
+		local myCategories = {
+			ctrlstun   = "DR-ControlledStun",
+			scatters   = "DR-Scatter",
+			fear 	   = "DR-Fear",
+			rndstun    = "DR-RandomStun",
+			silence    = "DR-Silence",
+			banish 	   = "DR-Banish",
+			mc 		   = "DR-MindControl",
+			entrapment = "DR-Entrapment",
+			taunt 	   = "DR-Taunt",
+			disarm 	   = "DR-Disarm",
+			horror 	   = "DR-Horrify",
+			cyclone    = "DR-Cyclone",
+			rndroot    = "DR-RandomRoot",
+			disorient  = "DR-Disorient",
+			ctrlroot   = "DR-ControlledRoot",
+			dragons    = "DR-DragonsBreath",
+		}
+		if not GetSpellInfo(74347) then -- invalid
+			DRData.spells[74347] = nil
+		end
+		local dr = TMW.BE.dr
+		for spellID, category in pairs(DRData.spells) do
+			local k = myCategories[category] or TMW:Error("TMW: The DR category %q is undefined!", 0, category)
+			dr[k] = (dr[k] and (dr[k] .. ";" .. spellID)) or tostring(spellID)
+		end
 	end
-end
-TMW.OldBE = CopyTable(TMW.BE)
-for category, b in pairs(TMW.OldBE) do
-	for equiv, str in pairs(b) do
-		b[equiv] = gsub(str, "_", "") -- REMOVE UNDERSCORES FROM OLDBE
-		
-		-- turn all IDs prefixed with "_" into their localized name. Dont do this on every single one, but do use it for spells that do not have any other spells with the same name but different effects.
-		while strfind(str, "_") do
-			local id = strmatch(str, "_%d+") -- id includes the underscore, trimmed off below
-			if id then
-				local name = GetSpellInfo(strtrim(id, " _"))
-				if name then
-					str = gsub(str, id, name)
-				else  -- this should never ever ever happen except in new patches if spellIDs were wrong (experience talking)
-					local newID = strtrim(id, " _")
-					if clientVersion >= addonVersion then -- dont warn for old clients using newer versions
-						TMW:Error("Invalid spellID found: " .. newID .. "! Please report this on TMW's CurseForge page, especially if you are currently on the PTR!")
+	TMW.OldBE = CopyTable(TMW.BE)
+	TMW.BEBackup = TMW.BE -- never ever ever change this value
+	for category, b in pairs(TMW.OldBE) do
+		for equiv, str in pairs(b) do
+			b[equiv] = gsub(str, "_", "") -- REMOVE UNDERSCORES FROM OLDBE
+			
+			-- turn all IDs prefixed with "_" into their localized name. Dont do this on every single one, but do use it for spells that do not have any other spells with the same name but different effects.
+			while strfind(str, "_") do
+				local id = strmatch(str, "_%d+") -- id includes the underscore, trimmed off below
+				if id then
+					local name = GetSpellInfo(strtrim(id, " _"))
+					if name then
+						TMW:lowerNames(name) -- this will insert the spell name into the table of spells for capitalization restoration.
+						str = gsub(str, id, name)
+					else  -- this should never ever ever happen except in new patches if spellIDs were wrong (experience talking)
+						local newID = strtrim(id, " _")
+						if clientVersion >= addonVersion then -- dont warn for old clients using newer versions
+							TMW:Error("Invalid spellID found: " .. newID .. "! Please report this on TMW's CurseForge page, especially if you are currently on the PTR!")
+						end
+						str = gsub(str, id, newID) -- still need to substitute it to prevent recusion
 					end
-					str = gsub(str, id, newID) -- still need to substitute it to prevent recusion
 				end
 			end
+			TMW.BE[category][equiv] = str
 		end
-		TMW.BE[category][equiv] = str
 	end
 end
 
@@ -1032,6 +1037,8 @@ function TMW:OnInitialize()
 		}
 		StaticPopup_Show("TMW_RESTARTNEEDED", TELLMEWHEN_VERSION_FULL, "item.lua")
 	end
+	
+	TMW:ProcessEquivalencies()
 
 	if type(TellMeWhenDB) ~= "table" then
 		TellMeWhenDB = {Version = TELLMEWHEN_VERSIONNUMBER}
@@ -3441,7 +3448,32 @@ function TMW:lowerNames(str)
 	end
 	
 	local ret = tonumber(str) or strlower(str)
-	loweredbackup[ret] = str
+	if type(ret) == "string" then
+		if loweredbackup[ret] then
+			-- dont replace names that are proper case with names that arent.
+			-- Generally, assume that strings with more capitals after non-letters are more proper than ones with less
+			local _, oldcount = gsub(loweredbackup[ret], "[^%a]%u", "%1")
+			local _, newcount = gsub(str, "[^%a]%u", "%1")
+			
+			-- check the first letter of each string for a capital
+			if strfind(loweredbackup[ret], "^%u") then
+				oldcount = oldcount + 1
+			end
+			if strfind(str, "^%u") then
+				newcount = newcount + 1
+			end
+			
+			-- the new string has more than the old, so use it instead
+			if newcount > oldcount then
+				loweredbackup[ret] = str
+			end
+		else
+			-- there wasn't a string beforem so set the base
+			loweredbackup[ret] = str
+		end
+	end
+	
+	
 	
 	return ret
 end
@@ -3458,14 +3490,14 @@ function TMW:EquivToTable(name)
 	local cachestring = getCacheString(name, TMW.BE)
 	if eqttcache[cachestring] then return eqttcache[cachestring] end -- if we already made a table of this string, then reuse it to not create garbage
 	
-	name = strlower(name) -- everything in this function is handled as lowercase to prevent issues with user input capitalization. DONT use TMW:lowerNames() here.
+	name = strlower(name) -- everything in this function is handled as lowercase to prevent issues with user input capitalization. DONT use TMW:lowerNames() here, because the input is not the output
 	local eqname, duration = strmatch(name, "(.-):([%d:%s%.]*)$") -- see if the string being checked has a duration attached to it (it really shouldn't because there is currently no point in doing so, but a user did try this and made a bug report, so I fixed it anyway
 	name = eqname or name -- if there was a duration, then replace the old name with the actual name without the duration attached
 	
 	local names -- scope the variable
 	for k, v in pairs(TMW.BE) do -- check in subtables ('buffs', 'debuffs', 'casts', etc)
 		for equiv, str in pairs(v) do
-			if strlower(equiv) == name and (TMW.BE ~= TMW.OldBE or equiv ~= "Enraged") then -- dont expand the enrage equiv if we are hacking with OldBE
+			if strlower(equiv) == name and (not TMW.BEIsHacked or equiv ~= "Enraged") then -- dont expand the enrage equiv if we are hacking with OldBE
 				names = str
 				break -- break subtable loop
 			end
@@ -3780,17 +3812,25 @@ function TMW:SplitNames(input)
 	return tbl
 end
 
+function TMW:HackEquivs()
+	-- the level of hackyness here is sickening. Note that OldBE does not contain the enrage equiv
+	TMW.BE = TMW.OldBE
+	TMW.BEIsHacked = 1
+end
+
+function TMW:UnhackEquivs()
+	TMW.BE = TMW.BEBackup
+	TMW.BEIsHacked = nil
+end
+
 function TMW:GetConfigIconTexture(icon, isItem)
 	if icon.Name == "" then
 		return "Interface\\Icons\\INV_Misc_QuestionMark", nil
 	else
 	
-		local BEbackup = TMW.BE
-		TMW.BE = TMW.OldBE
-		-- the level of hackyness here is sickening. Note that OldBE does not contain the enrage equiv
-		
+		TMW:HackEquivs()
 		local tbl = isItem and TMW:GetItemIDs(nil, icon.Name) or TMW:GetSpellNames(nil, icon.Name)
-		TMW.BE = BEbackup -- unhack
+		TMW:UnhackEquivs()
 	
 		for _, name in ipairs(tbl) do
 			local t = isItem and GetItemIcon(name) or SpellTextures[name]

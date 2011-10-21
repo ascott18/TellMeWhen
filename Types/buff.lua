@@ -18,13 +18,12 @@ local TMW = TMW
 if not TMW then return end
 local L = TMW.L
 
-local db, UPD_INTV, EFF_THR, ClockGCD, rc, mc, pr, ab
+local db, UPD_INTV, EFF_THR, ClockGCD, rc, mc, pr, ab, DS
 local tonumber, strlower =
 	  tonumber, strlower
 local UnitAura, UnitExists =
 	  UnitAura, UnitExists
 local print = TMW.print
-local DS = TMW.DS
 local SpellTextures = TMW.SpellTextures
 local strlowerCache = TMW.strlowerCache
 local _, pclass = UnitClass("Player")
@@ -80,6 +79,7 @@ function Type:Update()
 	mc = db.profile.OOMColor
 	pr = db.profile.PRESENTColor
 	ab = db.profile.ABSENTColor
+	DS = TMW.DS
 end
 
 local huge = math.huge

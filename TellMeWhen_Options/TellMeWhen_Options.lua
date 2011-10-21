@@ -385,6 +385,9 @@ function TMW:DeserializeData(string)
 	if version <= 45809 and not type and data.Type then -- 45809 was the last version to contain untyped data messages. It only supported icon imports/exports, so the type has to be an icon.
 		type = "icon"
 	end
+	if not TMW.ImportFunctions[type] then
+		return
+	end
 	
 	local result = {
 		data = data,
@@ -1381,7 +1384,7 @@ end
 
 function TMW:ExportToComm(editbox, ...)
 	local player = strtrim(editbox:GetText())
-	if player and player ~= "" and #player > 1 and #player < 13 then
+	if player and #player > 1 then -- and #player < 13 you can send to cross server people in a battleground ("Cybeloras-Mal'Ganis"), so it can be more than 13
 		local s = TMW:GetSettingsString(...)
 
 		TMW:SendCommMessage("TMW", s, "WHISPER", player, "BULK", editbox.callback, editbox)
@@ -1497,8 +1500,12 @@ function ID:SpellItemToIcon(groupID, iconID)
 		t, data, subType = GetCursorInfo()
 	end
 	ID.DraggingInfo = nil
-
 	if t == "spell" then
+		t = "cooldown" -- make the code prettier. all spells will be in the regular "cooldown" icon.
+	end
+	
+	local Type = t
+	if t == "cooldown" then
 		_, input = GetSpellBookItemInfo(data, subType)
 	elseif t == "item" then
 		input = data
@@ -1506,11 +1513,10 @@ function ID:SpellItemToIcon(groupID, iconID)
 	if not input then return end
 	local icondata = db.profile.Groups[groupID].Icons[iconID]
 	if icondata.Type == "" then
-		icondata.Type = "cooldown"
-		icondata.CooldownType = t
+		icondata.Type = Type
 		icondata.Enabled = true
 	end
-	if (icondata.Type ~= "cooldown") or (icondata.CooldownType == "item" and t == "item") or (icondata.CooldownType ~= "item" and t ~= "item") then
+	if (icondata.Type ~= "cooldown" and icondata.Type ~= "item") or (icondata.Type == t) then
 		icondata.Name = TMW:CleanString(icondata.Name .. ";" .. input)
 	end
 	ClearCursor()
@@ -2686,17 +2692,19 @@ function IE:Copy_DropDown(...)
 		
 		--import from string
 		info = UIDropDownMenu_CreateInfo()
-		info.text = L["IMPORT_FROMSTRING"]
+		info.text = (EDITBOX.DoPulseValidString and "|cff00ff00" or "") .. L["IMPORT_FROMSTRING"]
 		info.tooltipTitle = L["IMPORT_FROMSTRING"]
 		info.tooltipText = L["IMPORT_FROMSTRING_DESC"]
 		info.tooltipOnButton = true
 		info.tooltipWhileDisabled = true
 		local type = editboxResult and editboxResult.type
-		local value = "IMPORT_FROMSTRING_ICON"
+		local value
 		if type == "global" then
 			value = "IMPORT_PROFILE_%EDITBOX"
-		elseif type == "group" then
+		elseif type == "group" and editboxResult.arg1 then
 			value = "IMPORT_PROFILE_%EDITBOX_" .. editboxResult.arg1
+		elseif type == "icon" then
+			value = "IMPORT_FROMSTRING_ICON"
 		end
 		info.value = value
 		info.hasArrow = true
@@ -2706,7 +2714,7 @@ function IE:Copy_DropDown(...)
 		
 		--import from comm
 		info = UIDropDownMenu_CreateInfo()
-		info.text = L["IMPORT_FROMCOMM"]
+		info.text = (TMW.DoPulseReceivedComm and "|cff33ff33" or "") ..  L["IMPORT_FROMCOMM"]
 		info.value = "IMPORT_FROMCOMM"
 		info.tooltipTitle = L["IMPORT_FROMCOMM"]
 		info.tooltipText = L["IMPORT_FROMCOMM_DESC"]
@@ -2757,9 +2765,13 @@ function IE:Copy_DropDown(...)
 		info.tooltipTitle = L["EXPORT_TOCOMM"]
 		info.tooltipText = L["EXPORT_TOCOMM_DESC"]
 		info.tooltipOnButton = true
+		info.tooltipWhileDisabled = true
 		info.value = "EXPORT_TOCOMM"
 		info.hasArrow = true
 		info.notCheckable = true
+		local player = strtrim(EDITBOX:GetText())
+		info.disabled = not (player and #player > 1)
+		
 		UIDropDownMenu_AddButton(info, UIDROPDOWNMENU_MENU_LEVEL)
 	end
 	
@@ -3104,8 +3116,7 @@ function IE:GetRealNames()
 	if cachednames[CI.t .. CI.SoI .. text] then return cachednames[CI.t .. CI.SoI .. text] end
 
 	local tbl
-	local BEbackup = TMW.BE
-	TMW.BE = TMW.OldBE -- the level of hackyness here is sickening. Note that OldBE does not contain the enrage equiv (intended so we dont flood the tooltip)
+	TMW:HackEquivs()
 	local GetSpellInfo = GetSpellInfo
 	if CI.SoI == "item" then
 		tbl = TMW:GetItemIDs(nil, text)
@@ -3113,7 +3124,7 @@ function IE:GetRealNames()
 		tbl = TMW:GetSpellNames(nil, text)
 	end
 	local durations = Types[CI.t].DurationSyntax and TMW:GetSpellDurations(nil, text) -- needs to happen before unhacking
-	TMW.BE = BEbackup -- unhack
+	TMW:UnhackEquivs()
 	
 	local str = ""
 	local numadded = 0
@@ -3695,11 +3706,7 @@ end
 -- ----------------------
 -- SUGGESTER
 -- ----------------------
---SUG = TMW:NewModule("Suggester", "AceEvent-3.0", "AceComm-3.0", "AceSerializer-3.0", "AceTimer-3.0") TMW.SUG = SUG
-SUG = TMW:NewModule("Suggester", "AceEvent-3.0", "AceComm-3.0", "AceTimer-3.0") TMW.SUG = SUG --TEMP: 4.3 compat code with AceSerializer errors
-if LibStub("AceSerializer-3.0").Embed then
-	LibStub("AceSerializer-3.0"):Embed(SUG)
-end
+SUG = TMW:NewModule("Suggester", "AceEvent-3.0", "AceComm-3.0", "AceSerializer-3.0", "AceTimer-3.0") TMW.SUG = SUG
 local SUGIsNumberInput
 local SUGIMS, SUGSoI
 local SUGpreTable = {}
@@ -3810,7 +3817,7 @@ function SUG:OnInitialize()
 				["Interface\\Icons\\Temp"] = true,
 			}
 			local index, spellsFailed = 0, 0
-			TMWOptDB.CacheLength = TMWOptDB.CacheLength or 103000
+			TMWOptDB.CacheLength = TMWOptDB.CacheLength or 11000
 			SUG.Suggest.Status:Show()
 			SUG.Suggest.Status.texture:SetTexture(LSM:Fetch("statusbar", db.profile.TextureName))
 			SUG.Suggest.Status:SetMinMaxValues(1, TMWOptDB.CacheLength)
@@ -3840,7 +3847,7 @@ function SUG:OnInitialize()
 			local yield, resume = coroutine.yield, coroutine.resume
 
 			local function SpellCacher()
-				while spellsFailed < 100000 do
+				while spellsFailed < 1000 do
 					
 					local name, rank, icon, _, _, _, castTime = GetSpellInfo(index)
 					if name then

@@ -246,9 +246,13 @@ local function MultiStateCD_OnUpdate(icon, time)
 			else
 				alpha, color = icon.UnAlpha, 1
 			end
-
+			
+			local actionType, spellID = GetActionInfo(Slot)
+			spellID = actionType == "spell" and spellID or icon.NameFirst
+			
+			
 			--icon:SetInfo(alpha, color, texture, start, duration, spellChecked, reverse, count, countText, forceupdate, unit)
-			icon:SetInfo(alpha, color, GetActionTexture(Slot) or "Interface\\Icons\\INV_Misc_QuestionMark", start, duration, icon.NameFirst, nil, nil, nil, nil, nil)
+			icon:SetInfo(alpha, color, GetActionTexture(Slot) or "Interface\\Icons\\INV_Misc_QuestionMark", start, duration, spellID, nil, nil, nil, nil, nil)
 		end
 	end
 end
