@@ -30,7 +30,8 @@
 				if self.setting == "TotemSlots" then
 					local s = ""
 					for k = 1, 6 do
-						s = s .. (self:GetParent()["Radio"..k]:GetChecked() and 1 or 0)
+						local frame = self:GetParent()["Radio"..k]
+						s = s .. (frame and frame:GetChecked() and 1 or 0)
 					end
 					TMW.db.profile.Groups[groupID].Icons[iconID][self.setting] = s
 				else

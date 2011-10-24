@@ -3,6 +3,7 @@
  ** (r270) Export strings with a pipe character should now work properly
  ** (r271) Temporary fix for failed assertion when calling Parser:SetSpellByID(109388)
  ** (r272) Multi-state cooldowns will now reflect the spell being displayed in their %s variable (bindings/text output).
+ ** (r273) The slot settings for Wild Mushroom icons and other totem icon variants can once again be configured without error.
  
 ===v4.6.3===
  * Bug Fixes:
