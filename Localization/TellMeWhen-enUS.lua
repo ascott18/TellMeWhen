@@ -104,7 +104,7 @@ L["ICONMENU_SHOWWHEN"] = "Show icon when"
 L["ICONMENU_USABLE"] = "Usable"
 L["ICONMENU_UNUSABLE"] = "Unusable"
 
-L["ICONMENU_BUFFTYPE"] = "Buff or debuff"
+L["ICONMENU_BUFFTYPE"] = "Buff or Debuff"
 L["ICONMENU_BUFF"] = "Buff"
 L["ICONMENU_DEBUFF"] = "Debuff"
 L["ICONMENU_BOTH"] = "Either"
@@ -417,9 +417,10 @@ L["CONDITIONPANEL_UNITDROPDOWN_DESC"] = [[You can select a unit from this menu t
 NOTE: Conditions only accept one unit.]]
 L["CONDITIONPANEL_OPERATOR"] = "Operator"
 L["CONDITIONPANEL_VALUEN"] = "Value"
-L["CONDITIONPANEL_ANDOR"] = "And / Or"
 L["CONDITIONPANEL_AND"] = "And"
 L["CONDITIONPANEL_OR"] = "Or"
+L["CONDITIONPANEL_ANDOR"] = "And / Or"
+L["CONDITIONPANEL_ANDOR_DESC"] = "Click to toggle between logical operators AND and OR"
 L["CONDITIONPANEL_POWER"] = "Primary Resource"
 L["CONDITIONPANEL_COMBO"] = "Combo Points"
 L["CONDITIONPANEL_ALTPOWER"] = "Alt. Power"
@@ -722,12 +723,13 @@ L["SOUND_TAB"] = "Sounds"
 L["SOUND_USEMASTER"] = "Always play sounds"
 L["SOUND_USEMASTER_DESC"] = "Check this to allow sounds to play even when the game sound has been muted. Uncheck to only play sounds while the game sound is enabled."
 L["SOUNDERROR1"] = "File must have an extension!"
-L["SOUNDERROR2"] = "Custom WAV files not supported by WoW 4.0+"
+L["SOUNDERROR2"] = "Custom WAV files are not supported by WoW 4.0+"
 L["SOUNDERROR3"] = "|cFFFFD100Only OGG and MP3 files are supported!"
 
 L["ANN_TAB"] = "Text Output"
 L["ANN_CHANTOUSE"] = "Channel to Use"
 L["ANN_EDITBOX"] = "Text to be outputted"
+L["ANN_EDITBOX_WARN"] = "Type the text you wish to be outputted here"
 L["ANN_EDITBOX_DESC"] = [[Type the text that you wish to be outputted when the event triggers. The following substitutions may be used:
 
 "%t" - Target's Name

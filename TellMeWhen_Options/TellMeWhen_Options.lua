@@ -509,6 +509,13 @@ function TMW:SetUIDropdownText(frame, value, tbl)
 	UIDropDownMenu_SetText(frame, "")
 end
 
+function TMW:FixDropdown(dropdown)
+	local height = 61.5
+	_G[dropdown:GetName() .. "Left"]:SetHeight(height)
+	_G[dropdown:GetName() .. "Middle"]:SetHeight(height)
+	_G[dropdown:GetName() .. "Right"]:SetHeight(height)
+end
+						
 local function AddDropdownSpacer()
 	local info = UIDropDownMenu_CreateInfo()
 	info.text = ""
@@ -3212,11 +3219,12 @@ local function UpdateIcons()
 	end
 	IconUpdater:SetScript("OnUpdate", nil)
 end
-function IE:ScheduleIconUpdate(icon, groupID, iconID)
+function IE:ScheduleIconUpdate(groupID, iconID)
 	-- this is a handler to prevent the spamming of Icon_Update and creating excessive garbage.
-	if type(icon) == "number" then --allow omission of icon
-		iconID = groupID
-		groupID = icon
+	local icon
+	if type(groupID) == "table" then --allow omission of icon
+		icon = groupID
+	else
 		icon = TMW[groupID] and TMW[groupID][iconID]
 	end
 	if not icon then
@@ -3232,6 +3240,7 @@ end
 -- ----------------------
 -- SOUNDS
 -- ----------------------
+
 
 SND = TMW:NewModule("Sound") TMW.SND = SND
 SND.LSM = LSM
@@ -3277,6 +3286,70 @@ TMW.EventList = {
 		desc = L["SOUND_EVENT_ONUNIT_DESC"],
 	},
 }
+
+function SND:OnInitialize()
+	local Sounds = SND.Sounds
+	Sounds.Header:SetText(L["SOUND_SOUNDTOPLAY"])
+	local previous = Sounds.None
+	SND[0] = previous
+	previous:SetPoint("TOPLEFT", Sounds, "TOPLEFT", 0, 0)
+	previous:SetPoint("TOPRIGHT", Sounds, "TOPRIGHT", 0, 0)
+	previous.Name:SetText(NONE)
+	previous.Play:Hide()
+	previous.soundfile = ""
+	previous.soundname = "None"
+	for i=1, floor(Sounds:GetHeight())/Sounds.None:GetHeight() do
+		local f = CreateFrame("Button", Sounds:GetName().."Sound"..i, Sounds, "TellMeWhen_SoundSelectButton", i)
+		Sounds[i] = f
+		f:SetPoint("TOPLEFT", previous, "BOTTOMLEFT", 0, 0)
+		f:SetPoint("TOPRIGHT", previous, "BOTTOMRIGHT", 0, 0)
+		previous = f
+	end
+	SND:SetSoundsOffset(0)
+	
+	local Events = SND.Events
+	Events.Header:SetText(L["SOUND_EVENTS"])
+	local previousFrame
+	for i, eventData in ipairs(TMW.EventList) do
+		local frame = CreateFrame("Button", Events:GetName().."Event"..i, Events, "TellMeWhen_SoundEvent", i)
+		Events[i] = frame
+		frame:SetPoint("TOPLEFT", previousFrame, "BOTTOMLEFT")
+		frame:SetPoint("TOPRIGHT", previousFrame, "BOTTOMRIGHT")
+		frame.event = eventData.name
+		frame.setting = "Sound" .. frame.event
+		frame.EventName:SetText(eventData.text)
+		TMW:TT(frame, eventData.text, eventData.desc .. "\r\n\r\n" .. L["SOUND_EVENT_GLOBALDESC"], 1, 1)
+		previousFrame = frame
+	end
+	Events[1]:SetPoint("TOPLEFT", Events, "TOPLEFT", 0, 0)
+	Events[1]:SetPoint("TOPRIGHT", Events, "TOPRIGHT", 0, 0)
+	Events:SetHeight(#Events*Events[1]:GetHeight())
+	SND:SelectEvent(1)	
+	
+	SND.Sounds.ScrollBar:SetValue(0)
+end
+
+function SND:Load()
+	local DisabledEvents = Types[CI.ic].DisabledEvents
+	local oldID = SND.currentEventID
+	for i, frame in ipairs(SND.Events) do
+		if DisabledEvents[frame.event] then
+			frame:Disable()
+			frame.DataText:SetFormattedText(L["SOUND_EVENT_DISABLEDFORTYPE"], Types[CI.t].name)
+			if oldID == i then
+				oldID = oldID + 1
+			end
+		else
+			frame:Enable()
+			SND:SetupEventDisplay(i)
+		end
+	end
+	if oldID and oldID > 0 then
+		oldID = oldID % #SND.Events
+		SND:SelectEvent(oldID)
+	end
+	SND:SetTabText()
+end
 
 function SND:SetSoundsOffset(offs)
 	if not SND.List or #LSM:List("sound")-1 ~= #SND.List then
@@ -3341,8 +3414,7 @@ function SND:SelectEvent(id)
 	SND.currentEvent = SND.Events[id].event
 
 	local eventFrame = SND.Events[id]
-	for i=1, #SND.Events do
-		local f = SND.Events[i]
+	for i, f in ipairs(SND.Events) do
 		f.selected = nil
 		f:UnlockHighlight()
 		f:GetHighlightTexture():SetVertexColor(1, 1, 1, 1)
@@ -3355,6 +3427,34 @@ function SND:SelectEvent(id)
 		SND:SelectSound(CI.ics.Events[eventFrame.event].Sound)
 	end
 
+end
+
+function SND:SetupEventDisplay(event)
+	-- event is either a string ("OnShow") or a frame id (1)
+	
+	-- determine eventID or eventString, whichever is unknown.
+	local eventID
+	local eventString
+	if type(event) == "string" then
+		eventString = event
+		for id, frame in ipairs(SND.Events) do
+			if frame.event == eventString then
+				eventID = id
+				break
+			end
+		end
+	else
+		eventID = event
+		eventString = SND.Events[eventID].event
+	end
+	
+	local name = CI.ics.Events[eventString].Sound
+	
+	if name == "None" then
+		name = "|cff808080" .. name
+	end
+	
+	SND.Events[eventID].DataText:SetText(name)
 end
 
 function SND:SelectSound(name)
@@ -3374,14 +3474,13 @@ function SND:SelectSound(name)
 		 SND:SetSoundsOffset(SND.offs)
 	end
 
-	for i=1, #SND.Sounds do
-		local f = SND.Sounds[i]
-		if f.soundname == name then
-			soundFrame = f
+	for i, frame in ipairs(SND.Sounds) do
+		if frame.soundname == name then
+			soundFrame = frame
 		end
-		f.selected = nil
-		f:UnlockHighlight()
-		f:GetHighlightTexture():SetVertexColor(1, 1, 1, 1)
+		frame.selected = nil
+		frame:UnlockHighlight()
+		frame:GetHighlightTexture():SetVertexColor(1, 1, 1, 1)
 	end
 
 	SND.selectedListID = 0
@@ -3406,37 +3505,14 @@ function SND:SelectSound(name)
 		SND.Custom.Background:SetVertexColor(NORMAL_FONT_COLOR.r, NORMAL_FONT_COLOR.g, NORMAL_FONT_COLOR.b, 1)
 		SND.Custom:SetText(name)
 	end
-	SND.Events[SND.currentEventID].DataText:SetText(name)
-	SND:SetTabText()
-end
-
-function SND:Load()
-	local DisabledEvents = Types[CI.ic].DisabledEvents
-	local oldID = SND.currentEventID
-	for i = #SND.Events, 1, -1 do
-		local frame = SND.Events[i]
-		if DisabledEvents[frame.event] then
-			frame:Disable()
-			frame.DataText:SetFormattedText(L["SOUND_EVENT_DISABLEDFORTYPE"], Types[CI.t].name)
-			if oldID == i then
-				oldID = oldID - 1
-			end
-		else
-			frame:Enable()
-			SND:SelectEvent(i)
-		end
-	end
-	if oldID and oldID > 0 then
-		SND:SelectEvent(oldID)
-	end
+	
 	SND:SetTabText()
 end
 
 function SND:SetTabText()
 	local groupID, iconID = CI.g, CI.i
 	local n = 0
-	for i = 1, #SND.Events do
-		local f = SND.Events[i]
+	for i, f in ipairs(SND.Events) do
 		local v = CI.ics.Events[f.event].Sound
 		if v == "" or v == "Interface\\Quiet.ogg" or v == "None" then
 			-- none
@@ -3459,49 +3535,6 @@ function SND:SetTabText()
 	PanelTemplates_TabResize(IE.SoundTab, -6)
 end
 
-function SND:OnInitialize()
-	local Sounds = SND.Sounds
-	Sounds.Header:SetText(L["SOUND_SOUNDTOPLAY"])
-	local previous = Sounds.None
-	SND[0] = previous
-	previous:SetPoint("TOPLEFT", Sounds, "TOPLEFT", 0, 0)
-	previous:SetPoint("TOPRIGHT", Sounds, "TOPRIGHT", 0, 0)
-	previous.Name:SetText(NONE)
-	previous.Play:Hide()
-	previous.soundfile = ""
-	previous.soundname = "None"
-	for i=1, floor(Sounds:GetHeight())/Sounds.None:GetHeight() do
-		local f = CreateFrame("Button", Sounds:GetName().."Sound"..i, Sounds, "TellMeWhen_SoundSelectButton", i)
-		Sounds[i] = f
-		f:SetPoint("TOPLEFT", previous, "BOTTOMLEFT", 0, 0)
-		f:SetPoint("TOPRIGHT", previous, "BOTTOMRIGHT", 0, 0)
-		previous = f
-	end
-	SND:SetSoundsOffset(0)
-	
-	local Events = SND.Events
-	Events.Header:SetText(L["SOUND_EVENTS"])
-	local previous
-	for i=1, #TMW.EventList do
-		local f = CreateFrame("Button", Events:GetName().."Event"..i, Events, "TellMeWhen_SoundEvent", i)
-		Events[i] = f
-		f:SetPoint("TOPLEFT", previous, "BOTTOMLEFT")
-		f:SetPoint("TOPRIGHT", previous, "BOTTOMRIGHT")
-		f.event = TMW.EventList[i].name
-		f.setting = "Sound" .. f.event
-		f.EventName:SetText(TMW.EventList[i].text)
-		TMW:TT(f, TMW.EventList[i].text, TMW.EventList[i].desc .. "\r\n\r\n" .. L["SOUND_EVENT_GLOBALDESC"], 1, 1)
-		previous = f
-	end
-	Events[1]:SetPoint("TOPLEFT", Events, "TOPLEFT", 0, 0)
-	Events[1]:SetPoint("TOPRIGHT", Events, "TOPRIGHT", 0, 0)
-	Events:SetHeight(#Events*Events[1]:GetHeight())
-	SND:SelectEvent(1)	
-	
-	SND.Sounds.ScrollBar:SetValue(0)
-end
-
-
 -- ----------------------
 -- ANNOUNCEMENTS
 -- ----------------------
@@ -3511,45 +3544,81 @@ local ChannelLookup = TMW.ChannelLookup
 
 function ANN:OnInitialize()
 	local Events = ANN.Events
+	local Channels = ANN.Channels
+	
 	Events.Header:SetText(L["SOUND_EVENTS"])
-	local previous
-	for i=1, #TMW.EventList do
-		local f = CreateFrame("Button", Events:GetName().."Event"..i, Events, "TellMeWhen_AnnounceEvent", i)
-		Events[i] = f
-		f:SetPoint("TOPLEFT", previous, "BOTTOMLEFT")
-		f:SetPoint("TOPRIGHT", previous, "BOTTOMRIGHT")
-		f.event = TMW.EventList[i].name
-		f.EventName:SetText(TMW.EventList[i].text)
-		TMW:TT(f, TMW.EventList[i].text, TMW.EventList[i].desc .. "\r\n\r\n" .. L["ANN_EVENT_GLOBALDESC"], 1, 1)
-		previous = f
+	Channels.Header:SetText(L["ANN_CHANTOUSE"])
+	
+	-- create event frames
+	local previousFrame
+	for i, eventData in ipairs(TMW.EventList) do
+		local frame = CreateFrame("Button", Events:GetName().."Event"..i, Events, "TellMeWhen_AnnounceEvent", i)
+		Events[i] = frame
+		frame:SetPoint("TOPLEFT", previousFrame, "BOTTOMLEFT")
+		frame:SetPoint("TOPRIGHT", previousFrame, "BOTTOMRIGHT")
+		
+		frame.event = eventData.name
+		
+		frame.EventName:SetText(eventData.text)
+		TMW:TT(frame, eventData.text, TMW.EventList[i].desc .. "\r\n\r\n" .. L["ANN_EVENT_GLOBALDESC"], 1, 1)
+		
+		previousFrame = frame
 	end
 	Events[1]:SetPoint("TOPLEFT", Events, "TOPLEFT", 0, 0)
 	Events[1]:SetPoint("TOPRIGHT", Events, "TOPRIGHT", 0, 0)
 	Events:SetHeight(#Events*Events[1]:GetHeight())
 	
-	local Channels = ANN.Channels
-	Channels.Header:SetText(L["ANN_CHANTOUSE"])
-	local previous
+	-- create channel frames
+	local previousFrame
 	local offs = 0
-	for i, t in ipairs(TMW.ChannelList) do
-		if not t.hidden then
+	for i, channelData in ipairs(TMW.ChannelList) do
+		if not channelData.hidden then
 			i = i + offs
-			local f = CreateFrame("Button", Channels:GetName().."Channel"..i, Channels, "TellMeWhen_ChannelSelectButton", i)
-			Channels[i] = f
-			f:SetPoint("TOPLEFT", previous, "BOTTOMLEFT", 0, 0)
-			f:SetPoint("TOPRIGHT", previous, "BOTTOMRIGHT", 0, 0)
-			previous = f
-			f.channel = t.channel
-			f.Name:SetText(t.text)
-			f:Show()
-			TMW:TT(f, t.text, t.desc, 1, 1)
+			local frame = CreateFrame("Button", Channels:GetName().."Channel"..i, Channels, "TellMeWhen_ChannelSelectButton", i)
+			Channels[i] = frame
+			frame:SetPoint("TOPLEFT", previousFrame, "BOTTOMLEFT", 0, 0)
+			frame:SetPoint("TOPRIGHT", previousFrame, "BOTTOMRIGHT", 0, 0)
+			frame:Show()
+			
+			frame.channel = channelData.channel
+			
+			frame.Name:SetText(channelData.text)
+			TMW:TT(frame, channelData.text, channelData.desc, 1, 1)
+			
+			previousFrame = frame
 		else
 			offs = offs - 1
 		end
 	end
+	
 	Channels[1]:SetPoint("TOPLEFT", Channels, "TOPLEFT", 0, 0)
 	Channels[1]:SetPoint("TOPRIGHT", Channels, "TOPRIGHT", 0, 0)
+	
 	Channels:SetHeight(#Channels*Channels[1]:GetHeight())
+	
+	ANN:SelectEvent(1)	
+end
+
+function ANN:Load()
+	local DisabledEvents = Types[CI.ic].DisabledEvents
+	local oldID = ANN.currentEventID
+	for i, frame in ipairs(ANN.Events) do
+		if DisabledEvents[frame.event] then
+			frame:Disable()
+			frame.DataText:SetFormattedText(L["SOUND_EVENT_DISABLEDFORTYPE"], Types[CI.t].name)
+			if oldID == i then
+				oldID = oldID + 1
+			end
+		else
+			frame:Enable()
+			ANN:SetupEventDisplay(i)
+		end
+	end
+	if oldID and oldID > 0 then
+		oldID = oldID % #ANN.Events
+		ANN:SelectEvent(oldID)
+	end
+	ANN:SetTabText()
 end
 
 function ANN:SelectEvent(id)
@@ -3558,8 +3627,7 @@ function ANN:SelectEvent(id)
 	ANN.currentEvent = ANN.Events[id].event
 
 	local eventFrame = ANN.Events[id]
-	for i=1, #ANN.Events do
-		local f = ANN.Events[i]
+	for i, f in ipairs(ANN.Events) do
 		f.selected = nil
 		f:UnlockHighlight()
 		f:GetHighlightTexture():SetVertexColor(1, 1, 1, 1)
@@ -3572,6 +3640,37 @@ function ANN:SelectEvent(id)
 		local EventSettings = CI.ics.Events[eventFrame.event]
 		ANN:SelectChannel(EventSettings.Channel)
 		ANN.EditBox:SetText(EventSettings.Text)
+	end
+end
+
+function ANN:SetupEventDisplay(event)
+	-- event is either a string ("OnShow") or a frame id (1)
+	
+	-- determine eventID or eventString, whichever is unknown.
+	local eventID
+	local eventString
+	if type(event) == "string" then
+		eventString = event
+		for id, frame in ipairs(ANN.Events) do
+			if frame.event == eventString then
+				eventID = id
+				break
+			end
+		end
+	else
+		eventID = event
+		eventString = ANN.Events[eventID].event
+	end
+	
+	local channel = CI.ics.Events[eventString].Channel
+	local channelsettings = ChannelLookup[channel]
+	
+	if channelsettings then
+		local text = channelsettings.text
+		if text == NONE then
+			text = "|cff808080" .. text
+		end
+		ANN.Events[eventID].DataText:SetText(text)
 	end
 end
 
@@ -3645,29 +3744,11 @@ function ANN:SelectChannel(channel)
 		channelFrame:GetHighlightTexture():SetVertexColor(NORMAL_FONT_COLOR.r, NORMAL_FONT_COLOR.g, NORMAL_FONT_COLOR.b, 1)
 	end
 	if ANN.currentEventID and channelsettings then
-		ANN.Events[ANN.currentEventID].DataText:SetText(channelsettings.text)
-	end
-	ANN:SetTabText()
-end
-
-function ANN:Load()
-	local DisabledEvents = Types[CI.t].DisabledEvents
-	local oldID = ANN.currentEventID
-	for i = #ANN.Events, 1, -1 do
-		local frame = ANN.Events[i]
-		if DisabledEvents[frame.event] then
-			frame:Disable()
-			frame.DataText:SetFormattedText(L["SOUND_EVENT_DISABLEDFORTYPE"], Types[CI.t].name)
-			if oldID == i then
-				oldID = oldID - 1
-			end
-		else
-			frame:Enable()
-			ANN:SelectEvent(i)
+		local text = channelsettings.text
+		if text == NONE then
+			text = "|cff808080" .. text
 		end
-	end
-	if oldID and oldID > 0  then
-		ANN:SelectEvent(oldID)
+		ANN.Events[ANN.currentEventID].DataText:SetText(text)
 	end
 	ANN:SetTabText()
 end
@@ -5126,7 +5207,7 @@ function AddIns.Save(group)
 	condition.Operator = UIDropDownMenu_GetSelectedValue(group.Operator) or "=="
 	condition.Icon = UIDropDownMenu_GetSelectedValue(group.Icon) or ""
 	condition.Level = tonumber(group.Slider:GetValue()) or 0
-	condition.AndOr = group.And:GetChecked() and "AND" or "OR"
+	condition.AndOr = group.AndOr:GetValue()
 	condition.Name = strtrim(group.EditBox:GetText()) or ""
 	condition.Name2 = strtrim(group.EditBox2:GetText()) or ""
 	condition.Checked = not not group.Check:GetChecked()
@@ -5201,8 +5282,7 @@ function AddIns.Load(group)
 		end
 	end
 
-	group.And:SetChecked(condition.AndOr == "AND")
-	group.Or:SetChecked(condition.AndOr == "OR")
+	group.AndOr:SetValue(condition.AndOr)
 
 	group:Show()
 
@@ -5219,8 +5299,7 @@ function AddIns.Clear(group)
 	end
 	TMW:SetUIDropdownText(group.Type, "HEALTH", CNDT.Types)
 	TMW:SetUIDropdownText(group.Operator, "==", CNDT.Operators)
-	group.And:SetChecked(1)
-	group.Or:SetChecked(nil)
+	group.AndOr:SetValue("AND")
 	for k, rune in pairs(group.Runes) do
 		if type(rune) == "table" then
 			rune:SetChecked(nil)

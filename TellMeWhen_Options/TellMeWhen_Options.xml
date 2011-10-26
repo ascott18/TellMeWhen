@@ -20,6 +20,45 @@
 		<CheckedTexture urgency="5" file="Interface\Buttons\UI-CheckBox-Check"/>
 		<DisabledCheckedTexture urgency="5" file="Interface\Buttons\UI-CheckBox-Check-Disabled"/>
 	</CheckButton>
+	<Frame name="TellMeWhen_DropdownTemplate" inherits="UIDropDownMenuTemplate" virtual="true">
+		<Layers>
+			<Layer level="ARTWORK">
+				<Texture name="$parentLeft" file="Interface\Glues\CharacterCreate\CharacterCreate-LabelFrame">
+					<Size>
+						<AbsDimension x="25" y="60"/>
+					</Size>
+					<Anchors>
+						<Anchor point="TOPLEFT">
+							<Offset>
+								<AbsDimension x="0" y="17"/>
+							</Offset>
+						</Anchor>
+					</Anchors>
+					<TexCoords left="0" right="0.1953125" top="0" bottom="1"/>
+				</Texture>
+				<Texture name="$parentMiddle" file="Interface\Glues\CharacterCreate\CharacterCreate-LabelFrame">
+					<Size>
+						<AbsDimension x="115" y="60"/>
+					</Size>
+					<Anchors>
+						<Anchor point="LEFT" relativeTo="$parentLeft" relativePoint="RIGHT"/>
+					</Anchors>
+					<TexCoords left="0.1953125" right="0.8046875" top="0" bottom="1"/>
+				</Texture>
+				<Texture name="$parentRight" file="Interface\Glues\CharacterCreate\CharacterCreate-LabelFrame">
+					<Size>
+						<AbsDimension x="25" y="60"/>
+					</Size>
+					<Anchors>
+						<Anchor point="LEFT" relativeTo="$parentMiddle" relativePoint="RIGHT"/>
+					</Anchors>
+					<TexCoords left="0.8046875" right="1" top="0" bottom="1"/>
+				</Texture>
+			</Layer>
+		</Layers>
+	</Frame>
+	
+	
 	<CheckButton name="TellMeWhen_RadioCheckTemplate" virtual="true" inherits="TellMeWhen_CheckTemplate">
 		<Scripts>
 			<OnLoad>
@@ -69,21 +108,21 @@
 		<Layers>
 			<Layer level="BACKGROUND">
 				<Texture name="$parentLeft" urgency="5" file="Interface\Common\Common-Input-Border">
-					<Size x="8" y="20"/>
+					<Size x="8" y="18"/>
 					<Anchors>
 						<Anchor point="LEFT" x="-5"/>
 					</Anchors>
 					<TexCoords left="0" right="0.0625" top="0" bottom="0.625"/>
 				</Texture>
 				<Texture name="$parentRight" urgency="5" file="Interface\Common\Common-Input-Border">
-					<Size x="8" y="20"/>
+					<Size x="8" y="18"/>
 					<Anchors>
 						<Anchor point="RIGHT"/>
 					</Anchors>
 					<TexCoords left="0.9375" right="1.0" top="0" bottom="0.625"/>
 				</Texture>
 				<Texture name="$parentMiddle" urgency="5" file="Interface\Common\Common-Input-Border">
-					<Size x="10" y="20"/>
+					<Size x="10" y="18"/>
 					<Anchors>
 						<Anchor point="LEFT" relativeTo="$parentLeft" relativePoint="RIGHT"/>
 						<Anchor point="RIGHT" relativeTo="$parentRight" relativePoint="LEFT"/>
@@ -615,6 +654,7 @@
 							UIDropDownMenu_Initialize(self, TMW.CNDT.TypeMenu_DropDown, "DROPDOWN")
 							_G[self:GetName() .. "Button"]:SetScript("PreClick", nil)
 						end)
+						TMW:FixDropdown(self)
 					</OnLoad>
 				</Scripts>
 			</Frame>
@@ -632,6 +672,7 @@
 							UIDropDownMenu_Initialize(self, TMW.CNDT.IconMenu_DropDown, "DROPDOWN")
 							_G[self:GetName() .. "Button"]:SetScript("PreClick", nil)
 						end)
+						TMW:FixDropdown(self)
 					</OnLoad>
 				</Scripts>
 			</Frame>
@@ -644,7 +685,7 @@
 					<Button name="$parentButton" motionScriptsWhileDisabled="true" parentKey="Button">
 						<Size x="24" y="24"/>
 						<Anchors>
-							<Anchor point="LEFT" relativePoint="RIGHT" x="-3" y="-1"/>
+							<Anchor point="LEFT" relativePoint="RIGHT" x="-5.5" y="-0.5"/>
 						</Anchors>
 						<Scripts>
 							<OnClick>
@@ -688,6 +729,7 @@
 							UIDropDownMenu_Initialize(self, TMW.CNDT.OperatorMenu_DropDown, "DROPDOWN")
 							_G[self:GetName() .. "Button"]:SetScript("PreClick", nil)
 						end)
+						TMW:FixDropdown(self)
 					</OnLoad>
 				</Scripts>
 			</Frame>
@@ -986,48 +1028,56 @@
 			</CheckButton>
 
 
-			<CheckButton name="$parentAnd" inherits="TellMeWhen_CheckTemplate" parentKey="And">
-				<Size x="20" y="20"/>
-				<!-- <Anchors>
-					<Anchor point="TOPRIGHT" x="-68" y="21"/>
-				</Anchors> -->
-				<Scripts>
-					<OnLoad>
-						TMW:TT(self, "CONDITIONPANEL_ANDOR", "CONDITIONPANEL_AND")
-						self.text:SetText(TMW.L["CONDITIONPANEL_AND"])
-						self.text:SetWidth(40)
-						self:SetPoint("BOTTOMRIGHT", self:GetParent(), "TOP", -self.text:GetWidth()-1, -3)
-					</OnLoad>
-					<OnClick>
-						self:GetParent().Or:SetChecked(nil)
-						self:SetChecked(1)
-						TMW.CNDT:OK()
-					</OnClick>
-				</Scripts>
-			</CheckButton>
-			<CheckButton name="$parentOr" inherits="TellMeWhen_CheckTemplate" parentKey="Or">
-				<Size x="20" y="20"/>
+			<Button name="$parentAndOr" parentKey="AndOr">
+				<Size x="40" y="20"/>
 				<Anchors>
-					<Anchor point="BOTTOMLEFT" relativePoint="TOP" x="1" y="-3"/>
+					<Anchor point="BOTTOM" relativePoint="TOP" x="1" y="-3"/>
 				</Anchors>
+				<Layers>
+					<Layer level="ARTWORK">
+						<FontString name="$parentText" parentKey="text" justifyH="CENTER" inherits="GameFontHighlight">
+							<Anchors>
+								<Anchor point="CENTER" />
+							</Anchors>
+						</FontString>
+					</Layer>
+				</Layers>
 				<Scripts>
 					<OnLoad>
-						TMW:TT(self, "CONDITIONPANEL_ANDOR", "CONDITIONPANEL_OR")
-						self.text:SetText(TMW.L["CONDITIONPANEL_OR"])
-						self.text:SetWidth(40)
+						function self:SetValue(value)
+							local text
+							
+							if value == "AND" then
+								text = "CONDITIONPANEL_AND"
+							elseif value == "OR" then
+								text = "CONDITIONPANEL_OR"
+							end
+							
+							self.text:SetText(TMW.L[text])
+							TMW:TT(self, "CONDITIONPANEL_ANDOR", "CONDITIONPANEL_ANDOR_DESC")
+							self.value = value
+						end
+						function self:GetValue()
+							return self.value
+						end
+						
+						self:SetValue("AND")
 					</OnLoad>
 					<OnClick>
-						self:GetParent().And:SetChecked(nil)
-						self:SetChecked(1)
+						if self.value == "AND" then
+							self:SetValue("OR")
+						elseif self.value == "OR" then
+							self:SetValue("AND")
+						end
 						TMW.CNDT:OK()
 					</OnClick>
 				</Scripts>
-			</CheckButton>
+			</Button>
 
 			<Frame name="$parentOpenParenthesis" parentKey="OpenParenthesis">
 				<Size x="100" y="20"/>
 				<Anchors>
-					<Anchor point="BOTTOMRIGHT" relativePoint="TOPRIGHT" x="-80" y="-2"/>
+					<Anchor point="BOTTOMRIGHT" relativePoint="TOPRIGHT" x="-155" y="-2"/>
 				</Anchors>
 				<Frames>
 					<CheckButton name="$parent1" inherits="TellMeWhen_ConditionEditorParenthesisTemplate" id="1">
@@ -1045,7 +1095,7 @@
 			<Frame name="$parentCloseParenthesis" parentKey="CloseParenthesis">
 				<Size x="100" y="20"/>
 				<Anchors>
-					<Anchor point="TOPLEFT" relativePoint="BOTTOMLEFT" x="80" y="2"/>
+					<Anchor point="TOPLEFT" relativePoint="BOTTOMLEFT" x="155" y="2"/>
 				</Anchors>
 				<Frames>
 					<CheckButton name="$parent1" inherits="TellMeWhen_ConditionEditorParenthesisTemplate" id="1">
@@ -1186,6 +1236,7 @@
 							_G[self:GetName() .. "Button"]:SetScript("PreClick", nil)
 						end)
 						_G[self:GetName() .. "Button"]:SetFrameLevel(self:GetFrameLevel()+1)
+						TMW:FixDropdown(self)
 					</OnLoad>
 				</Scripts>
 			</Frame>
@@ -1244,11 +1295,6 @@
 		</Frames>
 		<Layers>
 			<Layer level="OVERLAY">
-				<FontString name="$parentValText" inherits="GameFontNormalLarge" justifyH="LEFT">
-					<Anchors>
-						<Anchor point="LEFT" relativePoint="TOPLEFT" x="440" y="-14"/>
-					</Anchors>
-				</FontString>
 				<Texture name="$parentIconTexture" parentKey="icontexture">
 					<TexCoords left="0.07" right="0.93" top="0.07" bottom="0.93"/>
 					<Size x="24" y="24"/>
@@ -1432,13 +1478,13 @@
 			--	self.Background:SetVertexColor(0, 1, 0)
 			</OnLoad>
 			<OnClick>
-				TMW.SND:SelectSound(self.soundname)
-				assert(TMW.SND.currentEvent)
-				local groupID, iconID = TMW.CI.g, TMW.CI.i
-				if TMW.db then
-					TMW.db.profile.Groups[groupID].Icons[iconID].Events[TMW.SND.currentEvent].Sound = self.soundname
-					TMW.IE:ScheduleIconUpdate(groupID, iconID)
+				local name = self.soundname
+				TMW.SND:SelectSound(name)
+				if TMW.CI.ics then
+					TMW.CI.ics.Events[TMW.SND.currentEvent].Sound = name
+					TMW.IE:ScheduleIconUpdate(TMW.CI.ic)
 				end
+				TMW.SND:SetupEventDisplay(TMW.SND.currentEvent)
 				TMW.SND:SetTabText()
 			</OnClick>
 			<OnEnter>
@@ -1903,6 +1949,7 @@
 								_G[self:GetName() .. "Button"]:HookScript("OnClick", function(self)
 									TMW.IE:SaveSettings()
 								end)
+								TMW:FixDropdown(self)
 							</OnLoad>
 							<OnEnter>
 								local Type = TMW.Types[TMW.CI.t]
@@ -3147,8 +3194,7 @@
 												for k, v in pairs(TMW.CNDT.AddIns) do
 													self[k] = v
 												end
-												self.And:Hide()
-												self.Or:Hide()
+												self.AndOr:Hide()
 												self.CloseParenthesis:Hide()
 												TMW.CNDT[self:GetID()] = self
 												self:GetParent()[self:GetID()] = self
@@ -3344,7 +3390,7 @@
 					<Layer level="OVERLAY">
 						<FontString name="$parentWarning" parentKey="Warning" inherits="GameFontNormalLeftRed" justifyH="RIGHT">
 							<Anchors>
-								<Anchor point="BOTTOMLEFT" x="20" y="17"/>
+								<Anchor point="TOPLEFT" relativeTo="$parentCustom" relativePoint="BOTTOMLEFT" x="0" y="-5"/>
 							</Anchors>
 						</FontString>
 					</Layer>
@@ -3366,16 +3412,46 @@
 			</Frame>
 			<Frame name="$parentAnnouncements" enableMouse="true" hidden="true" setAllPoints="true" parentKey="Announcements">
 				<Frames>
-					<EditBox name="$parentEditBox" inherits="TellMeWhen_InputBoxTemplate" parentKey="EditBox" autoFocus="false">
-						<Size x="540" y="15"/>
+
+					<Frame name="$parentEvents" parentKey="Events">
+						<Size x="200" y="280"/>
 						<Anchors>
-							<Anchor point="TOPLEFT" x="25" y="-40"/>
+							<Anchor point="TOPLEFT" x="20" y="-50"/>
 						</Anchors>
+						<Backdrop bgFile="Interface\DialogFrame\UI-DialogBox-Background-Dark" tile="true"/>
+						<Layers>
+							<Layer level="OVERLAY">
+								<FontString name="$parentHeader" inherits="GameFontNormalLarge" parentKey="Header" justifyH="LEFT" text="">
+									<Anchors>
+										<Anchor point="BOTTOM" relativePoint="TOP" y="1"/>
+									</Anchors>
+								</FontString>
+							</Layer>
+						</Layers>
+					</Frame>
+					
+					
+					<EditBox name="$parentEditBox" inherits="TellMeWhen_InputBoxTemplate" parentKey="EditBox" autoFocus="false">
+						<Size y="15"/>
+						<Anchors>
+							<Anchor point="TOPLEFT" relativeTo="$parentEvents" relativePoint="TOPRIGHT" x="20"/>
+							<Anchor point="RIGHT" x="-20"/>
+						</Anchors>
+						<Layers>
+							<Layer level="OVERLAY">
+								<FontString name="$parentHeader" inherits="GameFontNormalLarge" parentKey="Header" justifyH="LEFT" text="">
+									<Anchors>
+										<Anchor point="BOTTOM" relativePoint="TOP" y="1"/>
+									</Anchors>
+								</FontString>
+							</Layer>
+						</Layers>
 						<Scripts>
 							<OnLoad>
 								TMW:TT(self, "ANN_EDITBOX", "ANN_EDITBOX_DESC")
-								self.label = TMW.L["ANN_EDITBOX"]
+								self.label = "|cFFFF9090" .. TMW.L["ANN_EDITBOX_WARN"]
 								self.BackgroundText:SetWidth(self:GetWidth())
+								self.Header:SetText(TMW.L["ANN_EDITBOX"])
 							</OnLoad>
 							<OnEditFocusLost>
 								EditBox_ClearHighlight(self)
@@ -3389,27 +3465,11 @@
 							</OnEditFocusLost>
 						</Scripts>
 					</EditBox>
-
-					<Frame name="$parentEvents" parentKey="Events">
-						<Size x="200" y="280"/>
-						<Anchors>
-							<Anchor point="TOPLEFT" x="20" y="-80"/>
-						</Anchors>
-						<Backdrop bgFile="Interface\DialogFrame\UI-DialogBox-Background-Dark" tile="true"/>
-						<Layers>
-							<Layer level="OVERLAY">
-								<FontString name="$parentHeader" inherits="GameFontNormalLarge" parentKey="Header" justifyH="LEFT" text="">
-									<Anchors>
-										<Anchor point="BOTTOM" relativePoint="TOP" y="1"/>
-									</Anchors>
-								</FontString>
-							</Layer>
-						</Layers>
-					</Frame>
+					
 					<Frame name="$parentChannels" parentKey="Channels">
 						<Size x="170" y="266"/>
 						<Anchors>
-							<Anchor point="TOPLEFT" x="235" y="-80"/>
+							<Anchor point="TOPLEFT" relativeTo="$parentEditBox" relativePoint="BOTTOMLEFT" x="-5" y="-25"/>
 						</Anchors>
 						<Frames>
 							<Button name="$parentNone" inherits="TellMeWhen_ChannelSelectButton" parentKey="None" id="1"/>
@@ -3425,6 +3485,7 @@
 							</Layer>
 						</Layers>
 					</Frame>
+					
 					<Frame name="$parentLocation" inherits="UIDropDownMenuTemplate" parentKey="Location">
 						<Anchors>
 							<Anchor point="TOPLEFT" relativeTo="$parentChannels" relativePoint="TOPRIGHT" x="5"/>
@@ -3447,6 +3508,7 @@
 									UIDropDownMenu_Initialize(self, TMW.ANN.DropDown, "DROPDOWN")
 									_G[self:GetName() .. "Button"]:SetScript("PreClick", nil)
 								end)
+								TMW:FixDropdown(self)
 							</OnLoad>
 						</Scripts>
 					</Frame>
