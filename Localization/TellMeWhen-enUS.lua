@@ -28,7 +28,7 @@ L["RESIZE_TOOLTIP"] = "Click and drag to change size"
 L["CONDITIONORMETA_CHECKINGINVALID"] = "Warning! Group %d, Icon %d is checking an invalid icon (Group %d, Icon %d)"
 L["WARN_DRMISMATCH"] = [[Warning! You are checking the diminishing returns on spells from two different known categories.
 
-All spells must be from the same diminishing returns category for the icon to function properly.]]
+All spells must be from the same diminishing returns category for the icon to function properly. The following categories and spells were detected:]]
 L["FROMNEWERVERSION"] = "You are importing data that was created in a newer version of TellMeWhen than your version. Some settings might not work until you upgrade to the latest version."
 
 -- -------------

@@ -171,40 +171,64 @@ function Type:GetNameForDisplay(icon, data)
 	return data and (L[data] or gsub(data, "DR%-", ""))
 end
 
+local categoryTEMP = setmetatable({}, {
+	__index = function(t, k)
+		-- a ghetto sort mechanism
+		local len = 1
+		for k, v in pairs(t) do
+			len = len + 1
+		end
+		local str = format("%3.0f\001", len)
+		t[k] = str
+		return str
+	end
+})
+
+local function CheckCategories(icon)
+	wipe(categoryTEMP)
+	local firstCategory, doWarn
+	
+	for i, IDorName in ipairs(icon.NameArray) do
+		for category, str in pairs(TMW.BE.dr) do
+			if TMW:StringIsInSemicolonList(str, IDorName) or TMW:GetSpellNames(icon, str, nil, 1, 1)[IDorName] then
+				if not firstCategory then
+					firstCategory = category
+					icon.firstCategory = category
+				end
+				categoryTEMP[category] = categoryTEMP[category] .. ";" .. TMW:RestoreCase(IDorName)
+				if firstCategory ~= category then
+					doWarn = true
+				end
+			end
+		end
+	end
+	
+	local append = ""
+	for category, string in TMW:OrderedPairs(categoryTEMP, "values") do
+		string = strmatch(string, ".*\001(.*)")
+		append = append .. format("\r\n\r\n%s:\r\n%s", L[category], TMW:CleanString(string))
+	end
+	
+	if icon:IsBeingEdited() == 1 then
+		if doWarn then
+			TMW.HELP:Show("ICON_DR_MISMATCH", icon, TMW.IE.Main.Name, 0, 0, L["WARN_DRMISMATCH"]..append)
+		else
+			TMW.HELP:Hide("ICON_DR_MISMATCH")
+		end
+	end
+end
+
+
 function Type:Setup(icon, groupID, iconID)
 	icon.ShowPBar = false
 	icon.NameFirst = TMW:GetSpellNames(icon, icon.Name, 1)
+	icon.NameArray = TMW:GetSpellNames(icon, icon.Name)
 	icon.NameHash = TMW:GetSpellNames(icon, icon.Name, nil, nil, 1)
 	icon.Units = TMW:GetUnits(icon, icon.Unit)
 	icon.FirstTexture = SpellTextures[icon.NameFirst]
 
 	-- Do the Right Thing and tell people if their DRs mismatch
-	if icon:IsBeingEdited() == 1 then
-		local firstCategory, dobreak
-		for IDorName in pairs(icon.NameHash) do
-			for category, str in pairs(TMW.BE.dr) do
-				if strfind(";"..str..";", ";"..IDorName..";") or TMW:GetSpellNames(icon, str, nil, 1, 1)[IDorName] then
-					if not firstCategory then
-						firstCategory = category
-						icon.firstCategory = category
-					end
-					if firstCategory ~= category then
-						if TMW.HELP then
-							TMW.HELP:Show("ICON_DR_MISMATCH", icon, TMW.IE.Main.Name, 0, 0, L["WARN_DRMISMATCH"], groupID, iconID)
-						end
-						dobreak=1
-						break
-					end
-				end
-			end
-			if dobreak then
-				break
-			end
-		end
-		if not dobreak then
-			TMW.HELP:Hide("ICON_DR_MISMATCH")
-		end
-	end
+	CheckCategories(icon)
 	
 	icon:SetTexture(TMW:GetConfigIconTexture(icon))
 

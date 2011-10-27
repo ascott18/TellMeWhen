@@ -33,7 +33,7 @@ local DRData = LibStub("DRData-1.0", true)
 TELLMEWHEN_VERSION = "4.6.4"
 TELLMEWHEN_VERSION_MINOR = strmatch(" @project-version@", " r%d+") or ""
 TELLMEWHEN_VERSION_FULL = TELLMEWHEN_VERSION .. TELLMEWHEN_VERSION_MINOR
-TELLMEWHEN_VERSIONNUMBER = 46407 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
+TELLMEWHEN_VERSIONNUMBER = 46408 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
 if TELLMEWHEN_VERSIONNUMBER > 47000 or TELLMEWHEN_VERSIONNUMBER < 46000 then return error("YOU SCREWED UP THE VERSION NUMBER OR DIDNT CHANGE THE SAFETY LIMITS") end -- safety check because i accidentally made the version number 414069 once
 
 TELLMEWHEN_MAXGROUPS = 1 	--this is a default, used by SetTheory (addon), so dont rename
@@ -3408,7 +3408,7 @@ function TMW:InjectDataIntoString(Text, icon, doBlizz)
 			local name, checkcase = icon.typeData:GetNameForDisplay(icon, icon.__spellChecked)
 			name = name or "?"
 			if checkcase then
-				name = loweredbackup[name] or name
+				name = TMW:RestoreCase(name)
 			end
 			Text = gsub(Text, "%%[Ss]", name)
 		end
@@ -3484,9 +3484,11 @@ function TMW:lowerNames(str)
 		end
 	end
 	
-	
-	
 	return ret
+end
+
+function TMW:RestoreCase(str)
+	return loweredbackup[str] or str
 end
 
 local function getCacheString(...)
@@ -3821,6 +3823,17 @@ function TMW:SplitNames(input)
 		tbl[a] = tonumber(new) or new -- turn it into a number if it is one
 	end
 	return tbl
+end
+
+function TMW:StringIsInSemicolonList(list, strtofind)
+	-- wheee, long function names
+	strtofind = tostring(strtofind)
+	
+	for i, str in TMW:Vararg(strsplit(";", list)) do
+		if strtofind == str then
+			return true
+		end
+	end
 end
 
 function TMW:HackEquivs()
