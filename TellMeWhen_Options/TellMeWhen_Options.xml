@@ -65,14 +65,13 @@
 				self.text:SetWidth(self:GetParent():GetWidth()-20)
 			</OnLoad>
 			<OnClick>
-				local groupID, iconID = TMW.CI.g, TMW.CI.i
 				if self.setting == "TotemSlots" then
 					local s = ""
 					for k = 1, 6 do
 						local frame = self:GetParent()["Radio"..k]
 						s = s .. (frame and frame:GetChecked() and 1 or 0)
 					end
-					TMW.db.profile.Groups[groupID].Icons[iconID][self.setting] = s
+					TMW.CI.ics[self.setting] = s
 				else
 					for k, frame in pairs(self:GetParent()) do
 						if strfind(k, "Radio") then
@@ -80,7 +79,7 @@
 						end
 					end
 					self:SetChecked(true)
-					TMW.db.profile.Groups[groupID].Icons[iconID][self.setting] = self.value
+					TMW.CI.ics[self.setting] = self.value
 					if strfind(self.setting, "ShowWhen") then
 						if self:GetID() == 1 then
 							TMW.IE.Main.Alpha:Enable()
@@ -99,7 +98,7 @@
 					TMW.SUG:NameOnCursor()
 				end
 				TMW.IE:ShowHide()
-				TMW.IE:ScheduleIconUpdate(groupID, iconID)
+				TMW.IE:ScheduleIconUpdate(TMW.CI.ic)
 			</OnClick>
 		</Scripts>
 	</CheckButton>
@@ -289,7 +288,6 @@
 		<Scripts>
 			<OnEditFocusLost>
 				EditBox_ClearHighlight(self)
-				local groupID, iconID = TMW.CI.g, TMW.CI.i
 
 				local t = TMW:CleanString(self)
 				if strfind(t, ":") then
@@ -297,10 +295,9 @@
 				end
 				t = tonumber(t) or 0
 				self:SetText(t)
-				local groupID, iconID = TMW.CI.g, TMW.CI.i
-				if TMW.db then
-					TMW.db.profile.Groups[groupID].Icons[iconID][self.setting] = t
-					TMW.IE:ScheduleIconUpdate(groupID, iconID)
+				if TMW.CI.ics then
+					TMW.CI.ics[self.setting] = t
+					TMW.IE:ScheduleIconUpdate(TMW.CI.ic)
 				end
 				self:GetScript("OnTextChanged")(self)
 			</OnEditFocusLost>
@@ -330,10 +327,9 @@
 			</OnMinMaxChanged>
 			<OnValueChanged>
 				self.val:SetText(value .. "%")
-				local groupID, iconID = TMW.CI.g, TMW.CI.i
 				if TMW.CI.ics and not self.fakeNextSetValue then
 					TMW.CI.ics[self.setting] = value / 100
-					TMW.IE:ScheduleIconUpdate(groupID, iconID)
+					TMW.IE:ScheduleIconUpdate(TMW.CI.ic)
 					if self:IsEnabled() and ((value == 0 and self.setting ~= "ConditionAlpha") or (value == 100 and self.setting == "ConditionAlpha")) then
 						self.val:SetText("|cffff7400" .. value .. "%")
 					end
@@ -596,7 +592,6 @@
 							next:SetChecked(nil)
 						end
 					else
-						--self.text:SetTextColor(.4, .4, .4, 1)
 						local last = self:GetParent()[self:GetID() - 1]
 						if type(last) == "table" and not last.checked then
 							self:Hide()
@@ -1044,23 +1039,30 @@
 				</Layers>
 				<Scripts>
 					<OnLoad>
+						local AND, OR = TMW.L["CONDITIONPANEL_AND"], TMW.L["CONDITIONPANEL_OR"]
+						local GRAY = "|cff222222"
+						local SLASH = "/"
+						local WHITE = "|r"
+						local AND_t = WHITE .. AND .. GRAY .. SLASH .. OR
+						local OR_t = GRAY .. AND .. SLASH .. WHITE .. OR
+						
 						function self:SetValue(value)
 							local text
 							
 							if value == "AND" then
-								text = "CONDITIONPANEL_AND"
+								text = AND_t
 							elseif value == "OR" then
-								text = "CONDITIONPANEL_OR"
+								text = OR_t
 							end
 							
-							self.text:SetText(TMW.L[text])
-							TMW:TT(self, "CONDITIONPANEL_ANDOR", "CONDITIONPANEL_ANDOR_DESC")
+							self.text:SetText(text)
 							self.value = value
 						end
 						function self:GetValue()
 							return self.value
 						end
 						
+						TMW:TT(self, "CONDITIONPANEL_ANDOR", "CONDITIONPANEL_ANDOR_DESC")
 						self:SetValue("AND")
 					</OnLoad>
 					<OnClick>
@@ -1077,7 +1079,7 @@
 			<Frame name="$parentOpenParenthesis" parentKey="OpenParenthesis">
 				<Size x="100" y="20"/>
 				<Anchors>
-					<Anchor point="BOTTOMRIGHT" relativePoint="TOPRIGHT" x="-155" y="-2"/>
+					<Anchor point="BOTTOMRIGHT" relativePoint="TOPRIGHT" x="-150" y="-2"/>
 				</Anchors>
 				<Frames>
 					<CheckButton name="$parent1" inherits="TellMeWhen_ConditionEditorParenthesisTemplate" id="1">
@@ -1095,7 +1097,7 @@
 			<Frame name="$parentCloseParenthesis" parentKey="CloseParenthesis">
 				<Size x="100" y="20"/>
 				<Anchors>
-					<Anchor point="TOPLEFT" relativePoint="BOTTOMLEFT" x="155" y="2"/>
+					<Anchor point="TOPLEFT" relativePoint="BOTTOMLEFT" x="150" y="2"/>
 				</Anchors>
 				<Frames>
 					<CheckButton name="$parent1" inherits="TellMeWhen_ConditionEditorParenthesisTemplate" id="1">
@@ -1443,11 +1445,9 @@
 		<Scripts>
 			<OnClick>
 				TMW.ANN:SelectChannel(self.channel)
-				assert(TMW.ANN.currentEvent)
-				local groupID, iconID = TMW.CI.g, TMW.CI.i
 				if TMW.CI.ics then
 					TMW.CI.ics.Events[TMW.ANN.currentEvent].Channel = self.channel
-					TMW.IE:ScheduleIconUpdate(groupID, iconID)
+					TMW.IE:ScheduleIconUpdate(TMW.CI.ic)
 				end
 				TMW.ANN:SetTabText()
 			</OnClick>
@@ -1728,6 +1728,7 @@
 						<Scripts>
 							<OnClick>
 								TMW.IE.Help:Hide()
+								TMW.HELP:OnClose()
 							</OnClick>
 						</Scripts>
 					</Button>
@@ -2009,14 +2010,14 @@
 							</OnLoad>
 							<OnEditFocusLost>
 								EditBox_ClearHighlight(self)
-								local groupID, iconID = TMW.CI.g, TMW.CI.i
 								TMW:CleanString(self)
-								if TMW.CI.ics then
-									TMW.CI.ics["Name"] = TMW:CleanString(self:GetText())
-								end
-								TMW.IE:ScheduleIconUpdate(groupID, iconID)
-								self:GetScript("OnTextChanged")(self)
 								
+								if TMW.CI.ics then
+									TMW.CI.ics.Name = TMW:CleanString(self:GetText())
+									TMW.IE:ScheduleIconUpdate(TMW.CI.ic)
+								end
+								
+								self:GetScript("OnTextChanged")(self)
 							</OnEditFocusLost>
 							<OnEditFocusGained>
 								EditBox_HighlightText(self)
@@ -2124,12 +2125,14 @@
 							</OnLoad>
 							<OnEditFocusLost>
 								EditBox_ClearHighlight(self)
-								local groupID, iconID = TMW.CI.g, TMW.CI.i
+								
 								self:SetText(self:GetText():gsub([[\\]], [[\]]))
+								
 								if TMW.CI.ics then
 									TMW.CI.ics.CustomTex = TMW:CleanString(self)
+									TMW.IE:ScheduleIconUpdate(TMW.CI.ic)
 								end
-								TMW.IE:ScheduleIconUpdate(groupID, iconID)
+								
 								self:GetScript("OnTextChanged")(self)
 							</OnEditFocusLost>
 						</Scripts>
@@ -2170,12 +2173,11 @@
 							</OnLoad>
 							<OnEditFocusLost>
 								EditBox_ClearHighlight(self)
-								local groupID, iconID = TMW.CI.g, TMW.CI.i
 								
 								if TMW.CI.ics then
 									TMW.CI.ics.Unit = TMW:CleanString(self)
+									TMW.IE:ScheduleIconUpdate(TMW.CI.ic)
 								end
-								TMW.IE:ScheduleIconUpdate(groupID, iconID)
 								self:GetScript("OnTextChanged")(self)
 							</OnEditFocusLost>
 							<OnEvent>
@@ -2485,12 +2487,11 @@
 										self.text:SetWidth(self:GetParent():GetWidth()-22)
 									</OnLoad>
 									<OnClick>
-										local groupID, iconID = TMW.CI.g, TMW.CI.i
-										if TMW.db then
-											TMW.db.profile.Groups[groupID].Icons[iconID].ShowPBar = not not self:GetChecked()
+										if TMW.CI.ics then
+											TMW.CI.ics.ShowPBar = not not self:GetChecked()
+											TMW.IE:ScheduleIconUpdate(TMW.CI.ic)
 										end
 										self:GetParent().PBarOffs:SetEnabled(self:GetChecked())
-										TMW.IE:ScheduleIconUpdate(groupID, iconID)
 									</OnClick>
 								</Scripts>
 							</CheckButton>
@@ -2528,12 +2529,11 @@
 									</OnLoad>
 									<OnEditFocusLost>
 										EditBox_ClearHighlight(self)
-										local groupID, iconID = TMW.CI.g, TMW.CI.i
-										if TMW.db then
-											TMW.db.profile.Groups[groupID].Icons[iconID].PBarOffs = tonumber(strtrim(self:GetText())) or 0
-											self:SetText(TMW.db.profile.Groups[groupID].Icons[iconID].PBarOffs)
+										if TMW.CI.ics then
+											TMW.CI.ics.PBarOffs = tonumber(strtrim(self:GetText())) or 0
+											self:SetText(TMW.CI.ics.PBarOffs)
+											TMW.IE:ScheduleIconUpdate(TMW.CI.ic)
 										end
-										TMW.IE:ScheduleIconUpdate(groupID, iconID)
 									</OnEditFocusLost>
 								</Scripts>
 							</EditBox>
@@ -2571,12 +2571,11 @@
 										self.text:SetWidth(self:GetParent():GetWidth()-22)
 									</OnLoad>
 									<OnClick>
-										local groupID, iconID = TMW.CI.g, TMW.CI.i
-										if TMW.db then
-											TMW.db.profile.Groups[groupID].Icons[iconID].ShowCBar = not not self:GetChecked()
+										if TMW.CI.ics then
+											TMW.CI.ics.ShowCBar = not not self:GetChecked()
+											TMW.IE:ScheduleIconUpdate(TMW.CI.ic)
 										end
 										self:GetParent().CBarOffs:SetEnabled(self:GetChecked())
-										TMW.IE:ScheduleIconUpdate(groupID, iconID)
 									</OnClick>
 								</Scripts>
 							</CheckButton>
@@ -2643,11 +2642,10 @@
 								self.text:SetWidth(self:GetParent():GetWidth()-20)
 							</OnLoad>
 							<OnClick>
-								local groupID, iconID = TMW.CI.g, TMW.CI.i
-								if TMW.db then
-									TMW.db.profile.Groups[groupID].Icons[iconID].InvertBars = not not self:GetChecked()
+								if TMW.CI.ics then
+									TMW.CI.ics.InvertBars = not not self:GetChecked()
+									TMW.IE:ScheduleIconUpdate(TMW.CI.ic)
 								end
-								TMW.IE:ScheduleIconUpdate(groupID, iconID)
 							</OnClick>
 							<OnEnable>
 								self:SetAlpha(1)
@@ -2710,10 +2708,9 @@
 								f:EnableKeyboard(checked)
 								f:EnableMouse(checked)
 
-								local groupID, iconID = TMW.CI.g, TMW.CI.i
-								if TMW.db then
-									TMW.db.profile.Groups[groupID].Icons[iconID]["DurationMinEnabled"] = checked
-									TMW.IE:ScheduleIconUpdate(groupID, iconID)
+								if TMW.CI.ics then
+									TMW.CI.ics.DurationMinEnabled = checked
+									TMW.IE:ScheduleIconUpdate(TMW.CI.ic)
 								end
 							</OnClick>
 						</Scripts>
@@ -2738,10 +2735,9 @@
 								f:EnableKeyboard(checked)
 								f:EnableMouse(checked)
 
-								local groupID, iconID = TMW.CI.g, TMW.CI.i
-								if TMW.db then
-									TMW.db.profile.Groups[groupID].Icons[iconID]["DurationMaxEnabled"] = checked
-									TMW.IE:ScheduleIconUpdate(groupID, iconID)
+								if TMW.CI.ics then
+									TMW.CI.ics.DurationMaxEnabled = checked
+									TMW.IE:ScheduleIconUpdate(TMW.CI.ic)
 								end
 							</OnClick>
 						</Scripts>
@@ -2798,10 +2794,9 @@
 								f:EnableKeyboard(checked)
 								f:EnableMouse(checked)
 
-								local groupID, iconID = TMW.CI.g, TMW.CI.i
-								if TMW.db then
-									TMW.db.profile.Groups[groupID].Icons[iconID]["ConditionDurEnabled"] = checked
-									TMW.IE:ScheduleIconUpdate(groupID, iconID)
+								if TMW.CI.ics then
+									TMW.CI.ics.ConditionDurEnabled = checked
+									TMW.IE:ScheduleIconUpdate(TMW.CI.ic)
 								end
 							</OnClick>
 						</Scripts>
@@ -2827,9 +2822,9 @@
 								f:EnableMouse(checked)
 
 								local groupID, iconID = TMW.CI.g, TMW.CI.i
-								if TMW.db then
-									TMW.db.profile.Groups[groupID].Icons[iconID]["UnConditionDurEnabled"] = checked
-									TMW.IE:ScheduleIconUpdate(groupID, iconID)
+								if TMW.CI.ics then
+									TMW.CI.ics.UnConditionDurEnabled = checked
+									TMW.IE:ScheduleIconUpdate(TMW.CI.ic)
 								end
 							</OnClick>
 						</Scripts>
@@ -2846,10 +2841,9 @@
 								self.text:SetWidth(TELLMEWHEN_COLUMN1WIDTH)
 							</OnLoad>
 							<OnClick>
-								local groupID, iconID = TMW.CI.g, TMW.CI.i
-								if TMW.db then
-									TMW.db.profile.Groups[groupID].Icons[iconID]["OnlyIfCounting"] = not not self:GetChecked()
-									TMW.IE:ScheduleIconUpdate(groupID, iconID)
+								if TMW.CI.ics then
+									TMW.CI.ics.OnlyIfCounting = not not self:GetChecked()
+									TMW.IE:ScheduleIconUpdate(TMW.CI.ic)
 								end
 							</OnClick>
 						</Scripts>
@@ -2876,15 +2870,14 @@
 							</OnLoad>
 							<OnEditFocusLost>
 								EditBox_ClearHighlight(self)
-								local groupID, iconID = TMW.CI.g, TMW.CI.i
 
 								local t = TMW:CleanString(self)
 								t = floor(tonumber(t) or 0)
 								self:SetText(t)
-								local groupID, iconID = TMW.CI.g, TMW.CI.i
-								if TMW.db then
-									TMW.db.profile.Groups[groupID].Icons[iconID].StackMin = t
-									TMW.IE:ScheduleIconUpdate(groupID, iconID)
+								
+								if TMW.CI.ics then
+									TMW.CI.ics.StackMin = t
+									TMW.IE:ScheduleIconUpdate(TMW.CI.ic)
 								end
 								self:GetScript("OnTextChanged")(self)
 							</OnEditFocusLost>
@@ -2917,15 +2910,14 @@
 							</OnLoad>
 							<OnEditFocusLost>
 								EditBox_ClearHighlight(self)
-								local groupID, iconID = TMW.CI.g, TMW.CI.i
 
 								local t = TMW:CleanString(self)
 								t = floor(tonumber(t) or 0)
 								self:SetText(t)
-								local groupID, iconID = TMW.CI.g, TMW.CI.i
-								if TMW.db then
-									TMW.db.profile.Groups[groupID].Icons[iconID].StackMax = t
-									TMW.IE:ScheduleIconUpdate(groupID, iconID)
+								
+								if TMW.CI.ics then
+									TMW.CI.ics.StackMax = t
+									TMW.IE:ScheduleIconUpdate(TMW.CI.ic)
 								end
 								self:GetScript("OnTextChanged")(self)
 							</OnEditFocusLost>
@@ -2952,10 +2944,9 @@
 								f:EnableKeyboard(checked)
 								f:EnableMouse(checked)
 
-								local groupID, iconID = TMW.CI.g, TMW.CI.i
-								if TMW.db then
-									TMW.db.profile.Groups[groupID].Icons[iconID]["StackMinEnabled"] = checked
-									TMW.IE:ScheduleIconUpdate(groupID, iconID)
+								if TMW.CI.ics then
+									TMW.CI.ics.StackMinEnabled = checked
+									TMW.IE:ScheduleIconUpdate(TMW.CI.ic)
 								end
 							</OnClick>
 						</Scripts>
@@ -2980,10 +2971,9 @@
 								f:EnableKeyboard(checked)
 								f:EnableMouse(checked)
 
-								local groupID, iconID = TMW.CI.g, TMW.CI.i
-								if TMW.db then
-									TMW.db.profile.Groups[groupID].Icons[iconID]["StackMaxEnabled"] = checked
-									TMW.IE:ScheduleIconUpdate(groupID, iconID)
+								if TMW.CI.ics then
+									TMW.CI.ics.StackMaxEnabled = checked
+									TMW.IE:ScheduleIconUpdate(TMW.CI.ic)
 								end
 							</OnClick>
 						</Scripts>
@@ -3041,10 +3031,9 @@
 								self.text:SetWidth(85)
 							</OnLoad>
 							<OnClick>
-								local groupID, iconID = TMW.CI.g, TMW.CI.i
-								if TMW.db then
-									TMW.db.profile.Groups[groupID].Icons[iconID]["Enabled"] = not not self:GetChecked()
-									TMW.IE:ScheduleIconUpdate(groupID, iconID)
+								if TMW.CI.ics then
+									TMW.CI.ics.Enabled = not not self:GetChecked()
+									TMW.IE:ScheduleIconUpdate(TMW.CI.ic)
 								end
 							</OnClick>
 						</Scripts>
@@ -3061,10 +3050,9 @@
 								self.text:SetFontObject("GameFontHighlight")
 							</OnLoad>
 							<OnClick>
-								local groupID, iconID = TMW.CI.g, TMW.CI.i
-								if TMW.db then
-									TMW.db.profile.Groups[groupID].Icons[iconID]["FakeHidden"] = not not self:GetChecked()
-									TMW.IE:ScheduleIconUpdate(groupID, iconID)
+								if TMW.CI.ics then
+									TMW.CI.ics.FakeHidden = not not self:GetChecked()
+									TMW.IE:ScheduleIconUpdate(TMW.CI.ic)
 								end
 							</OnClick>
 						</Scripts>
@@ -3080,10 +3068,9 @@
 								self.text:SetWidth(self:GetParent().FakeHidden.text:GetWidth())
 							</OnLoad>
 							<OnClick>
-								local groupID, iconID = TMW.CI.g, TMW.CI.i
-								if TMW.db then
-									TMW.db.profile.Groups[groupID].Icons[iconID]["CheckNext"] = not not self:GetChecked()
-									TMW.IE:ScheduleIconUpdate(groupID, iconID)
+								if TMW.CI.ics then
+									TMW.CI.ics.CheckNext = not not self:GetChecked()
+									TMW.IE:ScheduleIconUpdate(TMW.CI.ic)
 								end
 							</OnClick>
 						</Scripts>
@@ -3103,12 +3090,11 @@
 							</OnLoad>
 							<OnEditFocusLost>
 								EditBox_ClearHighlight(self)
-								local groupID, iconID = TMW.CI.g, TMW.CI.i
 								TMW:CleanString(self)
 								if TMW.CI.ics then
 									TMW.CI.ics.BindText = self:GetText()
 								end
-								TMW.IE:ScheduleIconUpdate(groupID, iconID)
+								TMW.IE:ScheduleIconUpdate(TMW.CI.ic)
 								self:GetScript("OnTextChanged")(self)
 							</OnEditFocusLost>
 						</Scripts>
@@ -3229,7 +3215,6 @@
 					<OnLoad>
 						self:RegisterForDrag("LeftButton")
 						self:Hide()
-						self.Warning:SetPoint("BOTTOMLEFT", self, 20, 15)
 					</OnLoad>
 					<OnDragStart> TellMeWhen_IconEditor:StartMoving() </OnDragStart>
 					<OnDragStop> TellMeWhen_IconEditor:StopMovingOrSizing() </OnDragStop>
@@ -3237,15 +3222,6 @@
 						TMW.CNDT:ValidateParenthesis()
 					</OnShow>
 				</Scripts>
-				<Layers>
-					<Layer level="OVERLAY">
-						<FontString name="$parentWarning" parentKey="Warning" inherits="GameFontNormalLeftRed" justifyH="RIGHT">
-							<Anchors>
-								<Anchor point="BOTTOMLEFT" x="20" y="17"/>
-							</Anchors>
-						</FontString>
-					</Layer>
-				</Layers>
 			</Frame>
 			<Frame name="$parentSound" enableMouse="true" hidden="true" setAllPoints="true" parentKey="Sound">
 				<Frames>
@@ -3356,7 +3332,6 @@
 							</OnLeave>
 							<OnEditFocusLost>
 								EditBox_ClearHighlight(self)
-								local groupID, iconID = TMW.CI.g, TMW.CI.i
 
 								local t = TMW:CleanString(self)
 								t = gsub(t, "/", "\\")
@@ -3373,28 +3348,24 @@
 								end
 
 								self:SetText(t)
-								TMW.IE.Sound.Warning:SetText(wt)
+								if wt then
+									TMW.HELP:Show("SND_INVALID_CUSTOM", nil, self, 0, 0, wt)
+								else
+									TMW.HELP:Hide("SND_INVALID_CUSTOM")
+								end
 
 								if TMW.CI.ics and TMW.SND.currentEvent then
 									TMW.CI.ics.Events[TMW.SND.currentEvent].Sound = t
 								end
 								TMW.SND:SelectSound(t)
-								TMW.IE:ScheduleIconUpdate(groupID, iconID)
+								TMW.IE:ScheduleIconUpdate(TMW.CI.ic)
 								self:GetScript("OnTextChanged")(self)
 								TMW.SND:SetTabText()
+								TMW.SND:SetupEventDisplay(TMW.SND.currentEvent)
 							</OnEditFocusLost>
 						</Scripts>
 					</EditBox>
 				</Frames>
-				<Layers>
-					<Layer level="OVERLAY">
-						<FontString name="$parentWarning" parentKey="Warning" inherits="GameFontNormalLeftRed" justifyH="RIGHT">
-							<Anchors>
-								<Anchor point="TOPLEFT" relativeTo="$parentCustom" relativePoint="BOTTOMLEFT" x="0" y="-5"/>
-							</Anchors>
-						</FontString>
-					</Layer>
-				</Layers>
 				<Scripts>
 					<OnLoad>
 						self:RegisterForDrag("LeftButton")
@@ -3455,12 +3426,11 @@
 							</OnLoad>
 							<OnEditFocusLost>
 								EditBox_ClearHighlight(self)
-								local groupID, iconID = TMW.CI.g, TMW.CI.i
 								TMW:CleanString(self)
 								if TMW.CI.ics and TMW.ANN.currentEvent then
 									TMW.CI.ics.Events[TMW.ANN.currentEvent].Text = self:GetText()
 								end
-								TMW.IE:ScheduleIconUpdate(groupID, iconID)
+								TMW.IE:ScheduleIconUpdate(TMW.CI.ic)
 								self:GetScript("OnTextChanged")(self)
 							</OnEditFocusLost>
 						</Scripts>
@@ -3535,12 +3505,11 @@
 							</OnLoad>
 							<OnEditFocusLost>
 								EditBox_ClearHighlight(self)
-								local groupID, iconID = TMW.CI.g, TMW.CI.i
 								TMW:CleanString(self)
 								if TMW.CI.ics then
 									TMW.CI.ics.Events[TMW.ANN.currentEvent].Location = self:GetText()
 								end
-								TMW.IE:ScheduleIconUpdate(groupID, iconID)
+								TMW.IE:ScheduleIconUpdate(TMW.CI.ic)
 								self:GetScript("OnTextChanged")(self)
 							</OnEditFocusLost>
 						</Scripts>
@@ -3659,10 +3628,9 @@
 							<OnValueChanged>
 								local val = self:GetValue()
 								_G[self:GetName() .. "Val"]:SetText(val == 0 and TMW.L["DEFAULT"] or val)
-								local groupID, iconID = TMW.CI.g, TMW.CI.i
 								if TMW.CI.ics then
 									TMW.CI.ics.Events[TMW.ANN.currentEvent].Size = val
-									TMW.IE:ScheduleIconUpdate(groupID, iconID)
+									TMW.IE:ScheduleIconUpdate(TMW.CI.ic)
 								end
 							</OnValueChanged>
 							<OnLoad>
@@ -3676,15 +3644,6 @@
 					</Slider>
 
 				</Frames>
-				<Layers>
-					<Layer level="OVERLAY">
-						<FontString name="$parentWarning" parentKey="Warning" inherits="GameFontNormalLeftRed" justifyH="RIGHT">
-							<Anchors>
-								<Anchor point="BOTTOMLEFT" x="20" y="17"/>
-							</Anchors>
-						</FontString>
-					</Layer>
-				</Layers>
 				<Scripts>
 					<OnLoad>
 						self:RegisterForDrag("LeftButton")

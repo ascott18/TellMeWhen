@@ -2308,6 +2308,7 @@ end
 
 function IE:Load(isRefresh, icon)
 	if type(icon) == "table" then
+		TMW.HELP:HideForIcon(CI.ic)
 		PlaySound("igCharacterInfoTab")
 		IE:SaveSettings()
 		CNDT:ClearDialog()
@@ -2358,38 +2359,17 @@ function IE:Load(isRefresh, icon)
 	IE:SetupRadios()
 	IE:LoadSettings()
 	IE:ShowHide()
+	
+	IE:ScheduleIconUpdate(CI.ic)
 end
 
 function IE:Reset()
 	local groupID, iconID = CI.g, CI.i
 	IE:SaveSettings() -- this is here just to clear the focus of editboxes, not to actually save things
 	db.profile.Groups[groupID].Icons[iconID] = nil
-	IE:ScheduleIconUpdate(groupID, iconID)
+	IE:ScheduleIconUpdate(CI.ic)
 	IE:Load(1)
 	IE:TabClick(IE.MainTab)
-end
-
-function IE:ShowHelp(text, frame, x, y, noclose, ...)
-	local current = IE.Help.current
-	
-	if current.noclose then return end
-	
-	text = format(text, ...)
-	current.text = text
-	current.frame = frame
-	current.x = x
-	current.y = y
-	current.noclose = noclose
-	
-	IE.Help:ClearAllPoints()
-	IE.Help:SetPoint("TOPRIGHT", frame, "LEFT", (x or 0) - 30, (y or 0) + 28)
-	IE.Help.text:SetText(text)
-	IE.Help:SetHeight(IE.Help.text:GetHeight() + 38)
-	
-	local parent = frame.CreateTexture and frame or frame:GetParent() -- if the frame has the CreateTexture method, then it can be made the parent. Otherwise, the frame is actually a texture/font/etc object, so set 
-	IE.Help:SetParent(parent)
-	IE.Help:Show()
-	return 1 -- successfully shown
 end
 
 local equivTipCache = {}
@@ -2552,14 +2532,14 @@ function IE:Type_DropDown()
 end
 
 function IE:Type_Dropdown_OnClick()
-	local groupID, iconID = CI.g, CI.i
-	db.profile.Groups[groupID].Icons[iconID].Type = self.value
+	CI.ics.Type = self.value
 	CI.ic.texture:SetTexture(nil)
-	IE:ScheduleIconUpdate(groupID, iconID)
+	IE:ScheduleIconUpdate(CI.ic)
 	UIDropDownMenu_SetSelectedValue(IE.Main.Type, self.value)
 	CI.t = self.value
 	SUG.redoIfSame = 1
 	SUG.Suggest:Hide()
+	TMW.HELP:HideForIcon(CI.ic)
 	IE:Load(1)
 end
 
@@ -2593,9 +2573,8 @@ function IE:Unit_DropDown_OnClick(v)
 	end
 	e:Insert(";" .. ins .. ";")
 	TMW:CleanString(e)
-	local groupID, iconID = CI.g, CI.i
-	db.profile.Groups[groupID].Icons[iconID].Unit = e:GetText()
-	IE:ScheduleIconUpdate(groupID, iconID)
+	CI.ics.Unit = e:GetText()
+	IE:ScheduleIconUpdate(CI.ic)
 	CloseDropDownMenus()
 end
 
@@ -4860,7 +4839,7 @@ function CNDT:ValidateParenthesis()
 	if not IE.Conditions:IsShown() then return end
 	CNDT.Parens = wipe(CNDT.Parens or {})
 	local numclose, numopen, runningcount = 0, 0, 0
-	local unopened
+	local unopened = 0
 	for k, v in ipairs(CNDT) do
 		if v:IsShown() then
 			if v.OpenParenthesis:IsShown() then
@@ -4871,7 +4850,7 @@ function CNDT:ValidateParenthesis()
 						runningcount = runningcount + 1
 						tinsert(CNDT.Parens, v)
 					end
-					if runningcount < 0 then unopened = 1 end
+					if runningcount < 0 then unopened = unopened + 1 end
 				end
 			end
 			if v.CloseParenthesis:IsShown() then
@@ -4883,7 +4862,7 @@ function CNDT:ValidateParenthesis()
 						runningcount = runningcount - 1
 						tinsert(CNDT.Parens, v)
 					end
-					if runningcount < 0 then unopened = 1 end
+					if runningcount < 0 then unopened = unopened + 1 end
 				end
 			end
 		end
@@ -4929,19 +4908,26 @@ function CNDT:ValidateParenthesis()
 	end
 	
 	if numopen ~= numclose then
-		local suffix = ""
+		local typeNeeded, num
 		if numopen > numclose then
-			suffix = " +" .. numopen-numclose .. " '('"
+			typeNeeded, num = ")", numopen-numclose
 		else
-			suffix = " +" .. numclose-numopen .. " ')'"
+			typeNeeded, num = "(", numclose-numopen
 		end
-		IE.Conditions.Warning:SetText(L["PARENTHESISWARNING"] .. suffix)
+		
+		TMW.HELP:Show("CNDT_PAREN_NOMATCH", nil, TMW.IE.Conditions, 0, 0, L["PARENTHESIS_WARNING1"], num, L["PARENTHESIS_TYPE_" .. typeNeeded])
+		TMW.HELP:Hide("CNDT_PAREN_NOOPENER")
+		
 		CNDT[CNDT.type.."invalid"] = 1
-	elseif unopened then
-		IE.Conditions.Warning:SetText(L["PARENTHESISWARNING2"])
+	elseif unopened > 0 then
+	
+		TMW.HELP:Show("CNDT_PAREN_NOOPENER", nil, TMW.IE.Conditions, 0, 0, L["PARENTHESIS_WARNING2"], unopened)
+		TMW.HELP:Hide("CNDT_PAREN_NOMATCH")
+		
 		CNDT[CNDT.type.."invalid"] = 1
 	else
-		IE.Conditions.Warning:SetText(nil)
+		TMW.HELP:Hide("CNDT_PAREN_NOMATCH")
+		TMW.HELP:Hide("CNDT_PAREN_NOOPENER")
 		CNDT[CNDT.type.."invalid"] = nil
 	end
 	
@@ -5051,7 +5037,7 @@ function CNDT:OK()
 	end
 
 	if CNDT.type == "icon" then
-		IE:ScheduleIconUpdate(groupID, iconID)
+		IE:ScheduleIconUpdate(CI.ic)
 	elseif CNDT.type == "group" then
 		TMW:Group_Update(groupID)
 	end
@@ -5059,7 +5045,6 @@ end
 
 function CNDT:Load()
 	local Conditions = CNDT.settings
-	IE.Conditions.Warning:SetText(nil)
 
 	if Conditions and #Conditions > 0 then
 		for i = #Conditions, TELLMEWHEN_MAXCONDITIONS do
@@ -5396,6 +5381,230 @@ function AddIns.SetSliderMinMax(group, level)
 end
 
 
+
+
+
+
+
+local HELP = TMW:NewModule("Help", "AceTimer-3.0") TMW.HELP = HELP
+local IE = TMW.IE
+HELP.Frame = IE.Help
+
+local L = TMW.L
+local db = TMW.db
+
+HELP.Codes = {
+	"ICON_POCKETWATCH_FIRSTSEE",
+	
+	"ICON_DURS_FIRSTSEE",
+	"ICON_DURS_MISSING",
+	
+	"ICON_DR_MISMATCH",
+	
+	
+	"CNDT_PAREN_NOMATCH",
+	"CNDT_PAREN_NOOPENER",
+	
+	"SND_INVALID_CUSTOM",
+}
+
+HELP.OnlyOnce = {
+	ICON_DURS_FIRSTSEE = true,
+	ICON_POCKETWATCH_FIRSTSEE = true,
+}
+
+-- Recycling functions
+local new, del, copy
+do
+	local pool = setmetatable({},{__mode="k"})
+	function new()
+		local t = next(pool)
+		if t then
+			pool[t] = nil
+			return t
+		else
+			return {}
+		end
+	end
+	function del(t)
+		wipe(t)
+		pool[t] = true
+	end
+end
+
+function HELP:OnInitialize()
+	db = TMW.db
+HELP.Frame = IE.Help
+end
+
+HELP.Queued = {}
+
+function HELP:New(code)
+	if HELP.Queued[code] then
+		return wipe(HELP.Queued[code])
+	else
+		return new()
+	end
+end
+
+function HELP:ShouldShowHelp(help)
+	if help.icon and not help.icon:IsBeingEdited() then
+		return false
+	elseif not help.parent:IsVisible() then
+		return false
+	end
+	return true
+end
+
+function HELP:Show(code, icon, frame, x, y, text, ...)
+
+	-- handle the code, determine the ID of the code.
+	assert(type(code) == "string")
+	local codeID
+	for i, c in pairs(HELP.Codes) do
+		if c == code then
+			codeID = i
+			break
+		end
+	end
+	assert(codeID, format("Code %q is not defined", code))
+	-- we can now safely proceded to process and queue the help
+	
+	-- create or retrieve the data table
+	local help = HELP:New(code)
+	
+	-- add the text format args to the data
+	for i = 1, select('#', ...) do
+		help[i] = select(i, ...)
+	end
+	-- add other data
+	help.code = code
+	help.codeID = codeID
+	help.icon = icon
+	help.frame = frame
+	help.x = x
+	help.y = y
+	help.text = text
+	 -- if the frame has the CreateTexture method, then it can be made the parent. Otherwise, the frame is actually a texture/font/etc object, so set its parent as the parent
+	help.parent = help.frame.CreateTexture and help.frame or help.frame:GetParent()
+	
+	-- determine if the code has a setting associated to only show it once.
+	help.setting = HELP.OnlyOnce[code] and code
+	
+	-- if it does and it has already been set true, then we dont need to show anything, so quit.
+	if help.setting and db.global.HelpSettings[help.setting] then
+		HELP.Queued[code] = nil
+		del(help)
+		return
+	end
+	
+	-- if the code is the same as what is currently shown, then replace what is currently being shown.
+	if HELP.showingHelp and HELP.showingHelp.code == code then
+		HELP.showingHelp = nil
+	end
+	
+	-- everything should be in order, so add the help to the queue.
+	HELP:Queue(help)
+	
+	-- notify that this help will eventually be shown
+	return 1
+end
+
+function HELP:Hide(code)
+	if HELP.Queued[code] then
+		HELP.Queued[code] = nil
+	elseif HELP.showingHelp and HELP.showingHelp.code == code then
+		HELP.showingHelp = nil
+		HELP:ShowNext()
+	end
+end
+
+function HELP:Queue(help)
+	-- add the help to the queue
+	HELP.Queued[help.code] = help
+	
+	-- notify the engine to start
+	HELP:ShowNext()
+end
+
+function HELP:OnClose()
+	HELP.showingHelp = nil
+	HELP:ShowNext()
+end
+
+function HELP:ShowNext()
+	-- if there nothing currently being displayed, hide the frame.
+	if not HELP.showingHelp then
+		HELP.Frame:Hide()
+	end
+	
+	-- if we are already showing something, then don't overwrite it.
+	if HELP.showingHelp then
+		-- but if the current help is tied to a specific icon and that icon is not being edited then stop showing it
+		if not HELP:ShouldShowHelp(HELP.showingHelp) then
+			HELP.showingHelp = nil
+			HELP:ShowNext()
+		end
+		return
+	end
+	
+	-- if there isn't a next help to show, then dont try.
+	if not next(HELP.Queued) then
+		return
+	end
+	
+	-- calculate the next help in line based on the order of HELP.Codes
+	local help
+	for order, code in ipairs(HELP.Codes) do
+		if HELP.Queued[code] and HELP:ShouldShowHelp(HELP.Queued[code]) then
+			help = HELP.Queued[code]
+			break
+		end
+	end
+	
+	if not help then
+		return
+	end
+	
+	-- show the frame with the data
+	local text = format(help.text, unpack(help))
+	
+	HELP.Frame:ClearAllPoints()
+	HELP.Frame:SetPoint("TOPRIGHT", help.frame, "LEFT", (help.x or 0) - 30, (help.y or 0) + 28)
+	HELP.Frame.text:SetText(text)
+	HELP.Frame:SetHeight(HELP.Frame.text:GetHeight() + 38)
+	
+	local parent = help.frame.CreateTexture and help.frame or help.frame:GetParent() -- if the frame has the CreateTexture method, then it can be made the parent. Otherwise, the frame is actually a texture/font/etc object, so set 
+	HELP.Frame:SetParent(parent)
+	HELP.Frame:Show()
+	
+	-- if the help had a setting associated, set it now
+	if help.setting then
+		db.global.HelpSettings[help.setting] = true
+	end
+	
+	-- remove the help from the queue and set it as the current help
+	HELP.Queued[help.code] = nil
+	HELP.showingHelp = help
+end
+
+function HELP:HideForIcon(icon)
+	for code, help in pairs(HELP.Queued) do
+		if help.icon == icon then
+			HELP.Queued[code] = nil
+		end
+	end
+	if HELP.showingHelp and HELP.showingHelp.icon == icon then
+		HELP.showingHelp = nil
+		HELP:ShowNext()
+	end
+end
+
+hooksecurefunc(IE, "Load", HELP.ShowNext)
+hooksecurefunc(IE, "TabClick", HELP.ShowNext)
+hooksecurefunc(IE, "Reset", function()
+	HELP:HideForIcon(CI.ic)
+end)
 
 
 

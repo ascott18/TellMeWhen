@@ -357,9 +357,9 @@ function Type:Setup(icon, groupID, iconID)
 			end
 		end
 		if s ~= "" then
-			TMW.IE:ShowHelp(L["HELP_MISSINGDURS"], Name, 0, 0, nil, s)
+			TMW.HELP:Show("ICON_DURS_MISSING", icon, Name, 0, 0, L["HELP_MISSINGDURS"], s)
 		else
-			TMW.IE.Help:Hide()
+			TMW.HELP:Hide("ICON_DURS_MISSING")
 		end
 	end
 
@@ -374,15 +374,7 @@ end
 
 
 function Type:IE_TypeLoaded()
-	if not TMW.db.global.HelpSettings.NewDurSyntax then
-		TMW.db.global.HelpSettings.NewDurSyntax = TMW.IE:ShowHelp(L["HELP_FIRSTUCD"], TMW.IE.Main.Type, 20, 0, true)
-	end
-end
-
-function Type:IE_TypeUnloaded()
-	if TMW.CI.t ~= "unitcooldown" and TMW.CI.t ~= "icd" then
-		TMW.IE.Help:Hide()
-	end
+	TMW.HELP:Show("ICON_DURS_FIRSTSEE", nil, TMW.IE.Main.Type, 20, 0, L["HELP_FIRSTUCD"])
 end
 
 TMW:RegisterIconType(Type)

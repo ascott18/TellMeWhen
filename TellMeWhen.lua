@@ -33,7 +33,7 @@ local DRData = LibStub("DRData-1.0", true)
 TELLMEWHEN_VERSION = "4.6.4"
 TELLMEWHEN_VERSION_MINOR = strmatch(" @project-version@", " r%d+") or ""
 TELLMEWHEN_VERSION_FULL = TELLMEWHEN_VERSION .. TELLMEWHEN_VERSION_MINOR
-TELLMEWHEN_VERSIONNUMBER = 46405 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
+TELLMEWHEN_VERSIONNUMBER = 46407 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
 if TELLMEWHEN_VERSIONNUMBER > 47000 or TELLMEWHEN_VERSIONNUMBER < 46000 then return error("YOU SCREWED UP THE VERSION NUMBER OR DIDNT CHANGE THE SAFETY LIMITS") end -- safety check because i accidentally made the version number 414069 once
 
 TELLMEWHEN_MAXGROUPS = 1 	--this is a default, used by SetTheory (addon), so dont rename
@@ -1211,7 +1211,7 @@ function TMW:OnCommReceived(prefix, text, channel, who)
 	end
 end
 
-function TMW:OnUpdate() -- this is where all icon OnUpdate scripts are actually called
+function TMW:OnUpdate()					-- this is where all icon OnUpdate scripts are actually called
 	time = GetTime()
 	CNDTEnv.time = time
 	TMW.time = time
@@ -1332,10 +1332,21 @@ function TMW:Update()
 end
 
 local upgradeTable
-function TMW:GetUpgradeTable() -- upgrade functions
+function TMW:GetUpgradeTable()			-- upgrade functions
 	if upgradeTable then return upgradeTable end
 	local t = {
 	
+		[46407] = {
+			global = function()
+				local HelpSettings = db.global.HelpSettings
+				
+				HelpSettings.ICON_DURS_FIRSTSEE = HelpSettings.NewDurSyntax
+				HelpSettings.NewDurSyntax = nil
+				
+				HelpSettings.ICON_POCKETWATCH_FIRSTSEE = HelpSettings.PocketWatch
+				HelpSettings.PocketWatch = nil
+			end,
+		},
 		[46202] = {
 			icon = function(ics)
 				if ics.CooldownType == "item" and ics.Type == "cooldown" then
@@ -2961,7 +2972,7 @@ local iconMT = {
 		end
 	end,
 	__tostring = function(icon)
-		return icon:GetName() or tostring(icon)
+		return icon:GetName()
 	end,
 	__index = getmetatable(CreateFrame("Button")).__index,
 }
@@ -3077,7 +3088,7 @@ function TMW:Icon_Update(icon)
 	if not icon then return end
 	
 	if TMW.IE and not TMW.IE.Help.current.noclose then
-		TMW.IE.Help:Hide()
+		--TMW.IE.Help:Hide()
 	end
 
 	local iconID = icon:GetID()
@@ -3839,8 +3850,8 @@ function TMW:GetConfigIconTexture(icon, isItem)
 			end
 		end
 		if Types[icon.Type].usePocketWatch then
-			if TMW.IE and TMW.CI.ic == icon and not db.global.HelpSettings.PocketWatch and TellMeWhen_IconEditor:IsShown() then
-				db.global.HelpSettings.PocketWatch = TMW.IE:ShowHelp(L["HELP_POCKETWATCH"], TMW.IE.icontexture, 0, 0, true)
+			if icon:IsBeingEdited() == 1 then
+				TMW.HELP:Show("ICON_POCKETWATCH_FIRSTSEE", nil, TMW.IE.icontexture, 0, 0, L["HELP_POCKETWATCH"])
 			end
 			return "Interface\\Icons\\INV_Misc_PocketWatch_01", false
 		else

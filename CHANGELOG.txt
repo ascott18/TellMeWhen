@@ -1,4 +1,5 @@
 ===v4.6.4===
+ * Rewrote the help module, and migrated/added some new warnings to it.
  * Bug Fixes:
  ** (r270) Export strings with a pipe character should now work properly
  ** (r271) Temporary fix for failed assertion when calling Parser:SetSpellByID(109388)

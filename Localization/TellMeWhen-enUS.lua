@@ -26,7 +26,9 @@ L["RESIZE"] = "Resize"
 L["RESIZE_TOOLTIP"] = "Click and drag to change size"
 
 L["CONDITIONORMETA_CHECKINGINVALID"] = "Warning! Group %d, Icon %d is checking an invalid icon (Group %d, Icon %d)"
-L["WARN_DRMISMATCH"] = "Warning! Group %d, Icon %d is checking the diminishing returns on spells from two different known categories. All spells should be from the same category."
+L["WARN_DRMISMATCH"] = [[Warning! You are checking the diminishing returns on spells from two different known categories.
+
+All spells must be from the same diminishing returns category for the icon to function properly.]]"
 L["FROMNEWERVERSION"] = "You are importing data that was created in a newer version of TellMeWhen than your version. Some settings might not work until you upgrade to the latest version."
 
 -- -------------
@@ -560,8 +562,14 @@ L["CONDITIONPANEL_GREATER"] = "Greater Than"
 L["CONDITIONPANEL_GREATEREQUAL"] = "Greater Than/Equal to"
 L["CONDITIONPANEL_REMOVE"] = "Remove this condition"
 L["CONDITIONPANEL_ADD"] = "Add a condition"
-L["PARENTHESISWARNING"] = "# of opening and closing parentheses isn't equal!"
-L["PARENTHESISWARNING2"] = "Some closing parentheses are missing openers!"
+L["PARENTHESIS_WARNING1"] = [[The number of opening and closing parentheses do not match!
+
+%d more %s |4parenthesis:parentheses; |4is:are; needed.]]
+L["PARENTHESIS_WARNING2"] = [[Some closing parentheses are missing openers!
+
+%d more opening |4parenthesis:parentheses; |4is:are; needed.]]
+L["PARENTHESIS_TYPE_("] = "opening"
+L["PARENTHESIS_TYPE_)"] = "closing"
 L["NUMAURAS"] = "Number of"
 L["ACTIVE"] = "%d Active"
 L["NUMAURAS_DESC"] = [[This condition checks the number of an aura active - not to be confused with the number of stacks of an aura.  This is for checking things like if you have both weapon enchant procs active at the same time.  Use sparingly, as the process used to count the numbers is a bit CPU intensive.]]
@@ -724,7 +732,7 @@ L["SOUND_USEMASTER"] = "Always play sounds"
 L["SOUND_USEMASTER_DESC"] = "Check this to allow sounds to play even when the game sound has been muted. Uncheck to only play sounds while the game sound is enabled."
 L["SOUNDERROR1"] = "File must have an extension!"
 L["SOUNDERROR2"] = "Custom WAV files are not supported by WoW 4.0+"
-L["SOUNDERROR3"] = "|cFFFFD100Only OGG and MP3 files are supported!"
+L["SOUNDERROR3"] = "Only OGG and MP3 files are supported!"
 
 L["ANN_TAB"] = "Text Output"
 L["ANN_CHANTOUSE"] = "Channel to Use"
@@ -754,7 +762,7 @@ L["CHAT_MSG_CHANNEL_DESC"] = "Will output to a chat channel, such as Trade, or a
 L["CHAT_FRAME"] = "Chat Frame"
 
 
-L["HELP_FIRSTUCD"] = [[It looks like this is your first time using an icon type that uses the special duration syntax! Spells that are added to the "%s" editbox must define their duration immediately after a spell using the following syntax:
+L["HELP_FIRSTUCD"] = [[You have used an icon type that uses the special duration syntax for the first time! Spells that are added to the %q editbox for certain icon types must define a duration immediately after each spell using the following syntax:
 
 Spell: Duration
 

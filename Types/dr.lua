@@ -171,7 +171,6 @@ function Type:GetNameForDisplay(icon, data)
 	return data and (L[data] or gsub(data, "DR%-", ""))
 end
 
-local warnedMismatch = {}
 function Type:Setup(icon, groupID, iconID)
 	icon.ShowPBar = false
 	icon.NameFirst = TMW:GetSpellNames(icon, icon.Name, 1)
@@ -180,29 +179,30 @@ function Type:Setup(icon, groupID, iconID)
 	icon.FirstTexture = SpellTextures[icon.NameFirst]
 
 	-- Do the Right Thing and tell people if their DRs mismatch
-	local firstCategory, dobreak
-	for IDorName in pairs(icon.NameHash) do
-		for category, str in pairs(TMW.BE.dr) do
-			if strfind(";"..str..";", ";"..IDorName..";") or TMW:GetSpellNames(icon, str, nil, 1, 1)[IDorName] then
-				if not firstCategory then
-					firstCategory = category
-					icon.firstCategory = category
-				end
-				if firstCategory ~= category then
-					if not warnedMismatch[icon] then
-						TMW:Printf(L["WARN_DRMISMATCH"], groupID, iconID)
-						warnedMismatch[icon] = 1
+	if icon:IsBeingEdited() == 1 then
+		local firstCategory, dobreak
+		for IDorName in pairs(icon.NameHash) do
+			for category, str in pairs(TMW.BE.dr) do
+				if strfind(";"..str..";", ";"..IDorName..";") or TMW:GetSpellNames(icon, str, nil, 1, 1)[IDorName] then
+					if not firstCategory then
+						firstCategory = category
+						icon.firstCategory = category
 					end
-					if icon:IsBeingEdited() == 1 then
-						TMW.IE:ShowHelp(L["WARN_DRMISMATCH"], TMW.IE.Main.Name, 0, 0, nil, groupID, iconID)
+					if firstCategory ~= category then
+						if TMW.HELP then
+							TMW.HELP:Show("ICON_DR_MISMATCH", icon, TMW.IE.Main.Name, 0, 0, L["WARN_DRMISMATCH"], groupID, iconID)
+						end
+						dobreak=1
+						break
 					end
-					dobreak=1
-					break
 				end
 			end
+			if dobreak then
+				break
+			end
 		end
-		if dobreak then
-			break
+		if not dobreak then
+			TMW.HELP:Hide("ICON_DR_MISMATCH")
 		end
 	end
 	
