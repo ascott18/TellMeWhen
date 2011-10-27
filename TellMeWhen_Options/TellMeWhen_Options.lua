@@ -2756,7 +2756,7 @@ function IE:Copy_DropDown(...)
 		info.hasArrow = true
 		info.notCheckable = true
 		local player = strtrim(EDITBOX:GetText())
-		info.disabled = not (player and #player > 1)
+		info.disabled = strfind(player, "[`~^%d]") or #player <= 1
 		
 		UIDropDownMenu_AddButton(info, UIDROPDOWNMENU_MENU_LEVEL)
 	end
