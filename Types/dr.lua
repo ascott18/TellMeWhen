@@ -189,23 +189,23 @@ local function CheckCategories(icon)
 	local firstCategory, doWarn
 	local append = ""
 	
-	if #icon.NameArray > 0 then
-	
-		for i, IDorName in ipairs(icon.NameArray) do
-			for category, str in pairs(TMW.BE.dr) do
-				if TMW:StringIsInSemicolonList(str, IDorName) or TMW:GetSpellNames(icon, str, nil, 1, 1)[IDorName] then
-					if not firstCategory then
-						firstCategory = category
-						icon.firstCategory = category
-					end
-					categoryTEMP[category] = categoryTEMP[category] .. ";" .. TMW:RestoreCase(IDorName)
-					if firstCategory ~= category then
-						doWarn = true
-					end
+	for i, IDorName in ipairs(icon.NameArray) do
+		for category, str in pairs(TMW.BE.dr) do
+			if TMW:StringIsInSemicolonList(str, IDorName) or TMW:GetSpellNames(icon, str, nil, 1, 1)[IDorName] then
+				if not firstCategory then
+					firstCategory = category
+					icon.firstCategory = category
+				end
+				print(linenum(), category)
+				categoryTEMP[category] = categoryTEMP[category] .. ";" .. TMW:RestoreCase(IDorName)
+				if firstCategory ~= category then
+					doWarn = true
 				end
 			end
 		end
-		
+	end
+	
+	if next(categoryTEMP) then
 		for category, string in TMW:OrderedPairs(categoryTEMP, "values") do
 			string = strmatch(string, ".*\001(.*)")
 			append = append .. format("\r\n\r\n%s:\r\n%s", L[category], TMW:CleanString(string))
