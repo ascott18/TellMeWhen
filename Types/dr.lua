@@ -187,26 +187,29 @@ local categoryTEMP = setmetatable({}, {
 local function CheckCategories(icon)
 	wipe(categoryTEMP)
 	local firstCategory, doWarn
+	local append = ""
 	
-	for i, IDorName in ipairs(icon.NameArray) do
-		for category, str in pairs(TMW.BE.dr) do
-			if TMW:StringIsInSemicolonList(str, IDorName) or TMW:GetSpellNames(icon, str, nil, 1, 1)[IDorName] then
-				if not firstCategory then
-					firstCategory = category
-					icon.firstCategory = category
-				end
-				categoryTEMP[category] = categoryTEMP[category] .. ";" .. TMW:RestoreCase(IDorName)
-				if firstCategory ~= category then
-					doWarn = true
+	if #icon.NameArray > 0 then
+	
+		for i, IDorName in ipairs(icon.NameArray) do
+			for category, str in pairs(TMW.BE.dr) do
+				if TMW:StringIsInSemicolonList(str, IDorName) or TMW:GetSpellNames(icon, str, nil, 1, 1)[IDorName] then
+					if not firstCategory then
+						firstCategory = category
+						icon.firstCategory = category
+					end
+					categoryTEMP[category] = categoryTEMP[category] .. ";" .. TMW:RestoreCase(IDorName)
+					if firstCategory ~= category then
+						doWarn = true
+					end
 				end
 			end
 		end
-	end
-	
-	local append = ""
-	for category, string in TMW:OrderedPairs(categoryTEMP, "values") do
-		string = strmatch(string, ".*\001(.*)")
-		append = append .. format("\r\n\r\n%s:\r\n%s", L[category], TMW:CleanString(string))
+		
+		for category, string in TMW:OrderedPairs(categoryTEMP, "values") do
+			string = strmatch(string, ".*\001(.*)")
+			append = append .. format("\r\n\r\n%s:\r\n%s", L[category], TMW:CleanString(string))
+		end
 	end
 	
 	if icon:IsBeingEdited() == 1 then

@@ -3763,7 +3763,7 @@
 										<OnPlay>
 											self.Button.preClicked = 1
 											self.Button:SetText(TMW.L["RESET_CONFIRM"])
-											if 5 > TMW.db.global.HelpSettings.ResetCount then
+											if 10 > TMW.db.global.HelpSettings.ResetCount then
 												TMW:Print(TMW.L["RESET_NOTIFY"])
 											end
 										</OnPlay>

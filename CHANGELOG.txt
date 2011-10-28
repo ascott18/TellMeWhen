@@ -9,6 +9,7 @@
  ** (r272) Multi-state cooldowns will now reflect the spell being displayed in their %s variable (bindings/text output).
  ** (r273) The slot settings for Wild Mushroom icons and other totem icon variants can once again be configured without error.
  ** (r276) Fixed a breaking typo in the enUS locale file.
+ ** (r280) TellMeWhen\Types\dr.lua:182 table index is nil
  
 ===v4.6.3===
  * Bug Fixes:
