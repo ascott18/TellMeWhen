@@ -1185,8 +1185,8 @@ CNDT.Types = {
 		max = 411,
 		midt = true,
 		texttable = {
-			[409] = GetSpellInfo(40538), -- tenacity
-			[410] = GetSpellInfo(33667), -- ferocity
+			[409] = L["PET_TYPE_TENACITY"],
+			[410] = L["PET_TYPE_FEROCITY"],
 			[411] = L["PET_TYPE_CUNNING"],
 		},
 		unit = PET,

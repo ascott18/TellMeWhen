@@ -529,7 +529,10 @@ L["DEBUFFTOCOMP2"] = "Second Debuff to Compare"
 L["CODETOEXE"] = "Code to Execute"
 L["MACROTOEVAL"] = "Macro Conditional(s) to Evaluate"
 L["COMPARISON"] = "Comparison"
+
 L["PET_TYPE_CUNNING"] = "Cunning"
+L["PET_TYPE_TENACITY"] = "Tenacity"
+L["PET_TYPE_FEROCITY"] = "Ferocity"
 
 L["MELEEHASTE"] = "Melee Haste"
 L["MELEECRIT"] = "Melee Crit"
