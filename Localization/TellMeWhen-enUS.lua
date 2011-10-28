@@ -128,6 +128,7 @@ The following substitutions may be used to customize the text shown:
 "%u" - Name of current unit being checked
 "%s" - Current spell/item/etc being checked]]
 
+L["ICONMENU_COMPONENTICONS"] = "Component Icons"
 
 
 L["ICONMENU_UNITSTOWATCH"] = "Units to watch"
@@ -483,6 +484,7 @@ L["CONDITIONPANEL_SPELLRANGE"] = "Spell in range of unit"
 L["CONDITIONPANEL_ITEMRANGE"] = "Item in range of unit"
 L["CONDITIONPANEL_AUTOCAST"] = "Spell autocasting"
 L["CONDITIONPANEL_PETMODE"] = "Pet attack mode"
+L["CONDITIONPANEL_PETTREE"] = "Pet talent tree"
 L["CONDITIONPANEL_TRACKING"] = "Tracking active"
 L["ONLYCHECKMINE"] = "Only Check Mine"
 L["ONLYCHECKMINE_DESC"] = "Check this to cause this condition to only check your own buffs/debuffs"
@@ -527,6 +529,7 @@ L["DEBUFFTOCOMP2"] = "Second Debuff to Compare"
 L["CODETOEXE"] = "Code to Execute"
 L["MACROTOEVAL"] = "Macro Conditional(s) to Evaluate"
 L["COMPARISON"] = "Comparison"
+L["PET_TYPE_CUNNING"] = "Cunning"
 
 L["MELEEHASTE"] = "Melee Haste"
 L["MELEECRIT"] = "Melee Crit"

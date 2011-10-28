@@ -616,14 +616,20 @@
 				self:SetChecked(not self.checked)
 				TMW.CNDT:OK()
 			</OnClick>
+			<OnEnter>
+				self.text:SetText(gsub(self.text:GetText(), "|cff222222", "|cffffffff"))
+			</OnEnter>
+			<OnLeave>
+				TMW.CNDT:ValidateParenthesis()
+			</OnLeave>
 		</Scripts>
-		<HighlightTexture urgency="5" file="Interface\Buttons\UI-CheckBox-Highlight" alphaMode="ADD"/>
+	<!-- 	<HighlightTexture urgency="5" file="Interface\Buttons\UI-CheckBox-Highlight" alphaMode="ADD"/> -->
 	</CheckButton>
 	<Frame name="TellMeWhen_ConditionGroup" virtual="true">
-		<Size x="559" y="59"/>
-		<Backdrop bgFile="Interface\DialogFrame\UI-DialogBox-Background" tile="true">
+		<Size x="559" y="64"/>
+		<Backdrop edgeFile="Interface\DialogFrame\UI-DialogBox-Background-Dark" tile="true">
 			<EdgeSize>
-				<AbsValue val="10"/>
+				<AbsValue val="1"/>
 			</EdgeSize>
 			<BackgroundInsets>
 				<AbsInset left="0" right="0" top="0" bottom="0"/>
@@ -638,7 +644,7 @@
 		<Frames>
 			<Frame name="$parentType" parentKey="Type" inherits="UIDropDownMenuTemplate">
 				<Anchors>
-					<Anchor point="TOPLEFT" x="9" y="-10"/>
+					<Anchor point="TOPLEFT" x="9" y="-12"/>
 				</Anchors>
 				<Scripts>
 					<OnLoad>
@@ -731,7 +737,7 @@
 			<Slider name="$parentSlider" parentKey="Slider" inherits="OptionsSliderTemplate" minvalue="0" maxvalue="100" valuestep="1" defaultvalue="100">
 				<Size x="523" y="17"/>
 				<Anchors>
-					<Anchor point="TOPRIGHT" x="-5" y="-35"/>
+					<Anchor point="TOPRIGHT" x="-5" y="-38"/>
 				</Anchors>
 				<Layers>
 					<Layer level="ARTWORK">
@@ -778,7 +784,7 @@
 			<EditBox name="$parentEditBox" inherits="TellMeWhen_InputBoxTemplate" parentKey="EditBox" autoFocus="false">
 				<Size x="302" y="18"/>
 				<Anchors>
-					<Anchor point="TOPLEFT" relativeTo="$parentType" relativePoint="BOTTOMLEFT" x="23" y="5"/>
+					<Anchor point="TOPLEFT" relativeTo="$parentType" relativePoint="BOTTOMLEFT" x="23" y="4"/>
 				</Anchors>
 				<Scripts>
 					<OnEditFocusLost>
@@ -791,7 +797,7 @@
 			<EditBox name="$parentEditBox2" inherits="TellMeWhen_InputBoxTemplate" parentKey="EditBox2" autoFocus="false">
 				<Size x="302" y="18"/>
 				<Anchors>
-					<Anchor point="LEFT" relativeTo="$parentEditBox" relativePoint="RIGHT" x="5" y=""/>
+					<Anchor point="LEFT" relativeTo="$parentEditBox" relativePoint="RIGHT" x="15" y="0"/>
 				</Anchors>
 				<Scripts>
 					<OnEditFocusLost>
@@ -804,7 +810,7 @@
 			<Frame name="$parentRunes" parentKey="Runes" hidden="true">
 				<Size x="1" y="1"/>
 				<Anchors>
-					<Anchor point="TOPLEFT" relativeTo="$parentType" relativePoint="TOPRIGHT" x="10" y="9"/>
+					<Anchor point="TOPLEFT" relativeTo="$parentType" relativePoint="TOPRIGHT" x="10" y="8"/>
 				</Anchors>
 				<Frames>
 					<Button name="$parentBlood1" parentKey="blood1" inherits="TellMeWhen_ConditionEditorRuneCheckTemplate" id="1">
@@ -994,6 +1000,7 @@
 				</Frames>
 			</Frame>
 			<CheckButton name="$parentCheck" inherits="TellMeWhen_CheckTemplate" parentKey="Check">
+				<Size x="26" y="26"/>
 				<Anchors>
 					<Anchor point="RIGHT" relativeTo="$parentEditBox" x="5" y="-1"/>
 				</Anchors>
@@ -1008,6 +1015,7 @@
 				</Scripts>
 			</CheckButton>
 			<CheckButton name="$parentCheck2" inherits="TellMeWhen_CheckTemplate" parentKey="Check2">
+				<Size x="26" y="26"/>
 				<Anchors>
 					<Anchor point="RIGHT" relativeTo="$parentEditBox2" x="5" y="-1"/>
 				</Anchors>
@@ -1116,13 +1124,13 @@
 			<Button name="$parentUp" parentKey="Up">
 				<Size x="15" y="15"/>
 				<Anchors>
-					<Anchor point="TOPLEFT" y="-25"/>
+					<Anchor point="TOPLEFT" y="-27"/>
 				</Anchors>
 				<Scripts>
 					<OnLoad>TMW:TT(self, "METAPANEL_UP") self:SetScale(0.8)</OnLoad>
 					 <OnClick>self:GetParent():UpOrDown(-1)</OnClick>
 				</Scripts>
-				<NormalTexture urgency="5" file="Interface\ChatFrame\UI-ChatIcon-ScrollUp-Up">
+				<NormalTexture urgency="5" file="Interface\ChatFrame\UI-ChatIcon-ScrollUp-Up" alphaMode="ADD">
 					<TexCoords left="0.21875" right="0.6875" top="0.34375" bottom="0.65625"/>
 				</NormalTexture>
 				<HighlightTexture urgency="5" file="Interface\ChatFrame\UI-ChatIcon-ScrollUp-Up" alphaMode="ADD">
@@ -1138,7 +1146,7 @@
 					<OnLoad>TMW:TT(self, "METAPANEL_DOWN") self:SetScale(0.8)</OnLoad>
 					 <OnClick>self:GetParent():UpOrDown(1)</OnClick>
 				</Scripts>
-				<NormalTexture urgency="5" file="Interface\ChatFrame\UI-ChatIcon-ScrollDown-Up">
+				<NormalTexture urgency="5" file="Interface\ChatFrame\UI-ChatIcon-ScrollDown-Up" alphaMode="ADD">
 					<TexCoords left="0.21875" right="0.6875" top="0.34375" bottom="0.65625"/>
 				</NormalTexture>
 				<HighlightTexture urgency="5" file="Interface\ChatFrame\UI-ChatIcon-ScrollDown-Up" alphaMode="ADD">
@@ -1148,7 +1156,7 @@
 			<Button name="$parentAddDelete" parentKey="AddDelete">
 				<Size x="30" y="30"/>
 				<Anchors>
-					<Anchor point="TOPLEFT" relativeto="$parent" x="-4" y="6"/>
+					<Anchor point="TOPLEFT" relativeto="$parent" x="-4" y="4"/>
 				</Anchors>
 				<Scripts>
 					<OnLoad>
@@ -1163,35 +1171,41 @@
 			</Button>
 		</Frames>
 		<Layers>
+			<Layer level="BACKGROUND">
+				<Texture name="$parentBackground" parentKey="Background" setAllPoints="true">
+					<Color r="0.5" g="0.5" b="0.5" a="1"/>
+					<Size x="27" y="27"/>
+				</Texture>
+			</Layer>
 			<Layer level="OVERLAY">
 				<FontString name="$parentTextType" parentKey="TextType" inherits="GameFontNormalSmall" justifyH="CENTER">
 					<Anchors>
-						<Anchor point="BOTTOM" relativeto="$parentType" relativePoint="TOP" y="-1"/>
+						<Anchor point="BOTTOM" relativeto="$parentType" relativePoint="TOP" y="0"/>
 					</Anchors>
 				</FontString>
 				<FontString name="$parentTextUnitOrIcon" parentKey="TextUnitOrIcon" inherits="GameFontNormalSmall" justifyH="CENTER">
 					<Anchors>
-						<Anchor point="BOTTOM" relativeto="$parentUnit" relativePoint="TOP" y="-5"/>
+						<Anchor point="BOTTOM" relativeto="$parentUnit" relativePoint="TOP" y="-3"/>
 					</Anchors>
 				</FontString>
 				<FontString name="$parentTextOperator" parentKey="TextOperator" inherits="GameFontNormalSmall" justifyH="CENTER">
 					<Anchors>
-						<Anchor point="BOTTOM" relativeto="$parentOperator" relativePoint="TOP" y="-1"/>
+						<Anchor point="BOTTOM" relativeto="$parentOperator" relativePoint="TOP" y="0"/>
 					</Anchors>
 				</FontString>
 				<FontString name="$parentTextValue" parentKey="TextValue" inherits="GameFontNormalSmall" justifyH="CENTER">
 					<Anchors>
-						<Anchor point="BOTTOMLEFT" relativeto="$parentOperator" relativePoint="TOPRIGHT" x="-10" y="-1"/>
+						<Anchor point="BOTTOMLEFT" relativeto="$parentOperator" relativePoint="TOPRIGHT" x="-8" y="-0"/>
 					</Anchors>
 				</FontString>
 				<FontString name="$parentValText" parentKey="ValText" inherits="GameFontNormalLarge" justifyH="LEFT">
 					<Anchors>
-						<Anchor point="LEFT" relativeto="$parentOperator" relativePoint="RIGHT" x="-10" y="2"/>
+						<Anchor point="LEFT" relativeto="$parentOperator" relativePoint="RIGHT" x="-10" y="3"/>
 					</Anchors>
 				</FontString>
 				<FontString name="$parentTextUnitDef" parentKey="TextUnitDef" inherits="GameFontNormalLarge" justifyH="CENTER">
 					<Anchors>
-						<Anchor point="CENTER" relativeto="$parentUnit" y="-2"/>
+						<Anchor point="CENTER" relativeto="$parentUnit" y="-0"/>
 					</Anchors>
 				</FontString>
 				<FontString name="$parentSliderMid" parentKey="SliderMid" inherits="GameFontHighlightSmall">
@@ -1204,7 +1218,7 @@
 		<Scripts>
 			<OnLoad>
 				TMW.CNDT[self:GetID()] = self
-				TMW.IE.Conditions.Groups[self:GetID()] = self
+				self.Background:SetTexture(1, 1, 1, 0.05)
 			</OnLoad>
 			<OnShow>
 				self.AddDelete:SetNormalTexture("Interface\\Buttons\\UI-Panel-MinimizeButton-Up")
@@ -1231,7 +1245,7 @@
 				<Scripts>
 					<OnLoad>
 						self.wrapTooltips = 1
-						UIDropDownMenu_SetWidth(self, 350)
+						UIDropDownMenu_SetWidth(self, 360)
 						UIDropDownMenu_JustifyText(self, "LEFT")
 						_G[self:GetName() .. "Button"]:SetScript("PreClick", function()
 							UIDropDownMenu_Initialize(self, TMW.ME.IconMenu, "DROPDOWN")
@@ -1282,7 +1296,8 @@
 			<Button name="$parentInsert" parentKey="insert">
 				<Size x="30" y="30"/>
 				<Anchors>
-					<Anchor point="LEFT" relativePoint="BOTTOMRIGHT" x="11"/>
+					<Anchor point="LEFT" relativeTo="$parentDelete" relativePoint="BOTTOMRIGHT" x="-8"/>
+					<Anchor point="BOTTOM" y="-15"/>
 				</Anchors>
 				<NormalTexture urgency="5" file="Interface\AddOns\TellMeWhen_Options\Textures\Plus-Up"/>
 				<PushedTexture file="Interface\AddOns\TellMeWhen_Options\Textures\Plus-Down"/>
@@ -1291,7 +1306,9 @@
 					 <OnLoad>
 						TMW:TT(self, "METAPANEL_INSERT")
 					</OnLoad>
-					<OnClick>TMW.ME:Insert(self:GetParent():GetID()+1)</OnClick>
+					<OnClick>
+						TMW.ME:Insert(self:GetParent():GetID()+1)
+					</OnClick>
 				</Scripts>
 			</Button>
 		</Frames>
@@ -1654,7 +1671,7 @@
 		<Anchors>
 			<Anchor point="CENTER" relativeTo="UIParent"/>
 		</Anchors>
-		<Backdrop bgFile="Interface\DialogFrame\UI-DialogBox-Background-Dark" edgeFile="Interface\DialogFrame\UI-DialogBox-Border" tile="true">
+		<Backdrop bgFile="Interface\FriendsFrame\UI-Toast-Background" edgeFile="Interface\DialogFrame\UI-DialogBox-Border" tile="true">
 			<BackgroundInsets>
 				<AbsInset left="8" right="8" top="8" bottom="8"/>
 			</BackgroundInsets>
@@ -2066,13 +2083,22 @@
 					</EditBox>
 					<Frame name="$parentIcons[DND]" hidden="true" parentKey="Icons">
 						<Anchors>
-							<Anchor point="TOPLEFT" relativeTo="$parentType" relativePoint="BOTTOMLEFT" x="-10" y="2"/>
+							<Anchor point="TOPLEFT" relativeTo="$parentType" relativePoint="BOTTOMLEFT" x="-10" y="-17"/>
 							<Anchor point="BOTTOMRIGHT" y="34"/>
 						</Anchors>
+						<Layers>
+							<Layer level="ARTWORK">
+								<FontString name="$parentFS1" inherits="GameFontNormal" parentKey="text" justifyH="LEFT">
+									<Anchors>
+										<Anchor point="BOTTOMLEFT" relativePoint="TOPLEFT" x="77" y="5"/>
+									</Anchors>
+								</FontString>
+							</Layer>
+						</Layers>
 						<Frames>
-							<ScrollFrame name="$parentSF" parentKey="ScrollFrame" inherits="UIPanelScrollFrameCodeTemplate" setAllPoints="true" movable="true" enableMouse="true">
+							<ScrollFrame name="$parentSF" parentKey="ScrollFrame" inherits="UIPanelScrollFrameCodeTemplate" setAllPoints="true" >
 								<ScrollChild>
-									<Frame name="TellMeWhen_IconEditorMainIcons" parentKey="Icons" movable="true" enableMouse="true" >
+									<Frame name="TellMeWhen_IconEditorMainIcons" parentKey="Icons" >
 										<Size x="580" y="150"/>
 										<Frames>
 											<Frame name="$parent1" inherits="TellMeWhen_MetaGroup" id="1">
@@ -2081,17 +2107,10 @@
 												</Anchors>
 											</Frame>
 										</Frames>
-										<Scripts>
-											<OnLoad> self:RegisterForDrag("LeftButton")</OnLoad>
-											<OnDragStart> TellMeWhen_IconEditor:StartMoving() </OnDragStart>
-											<OnDragStop> TellMeWhen_IconEditor:StopMovingOrSizing() </OnDragStop>
-										</Scripts>
 									</Frame>
 								</ScrollChild>
 								<Scripts>
-									<OnLoad> self:RegisterForDrag("LeftButton") self.scrollBarHideable = true</OnLoad>
-									<OnDragStart> TellMeWhen_IconEditor:StartMoving() </OnDragStart>
-									<OnDragStop> TellMeWhen_IconEditor:StopMovingOrSizing() </OnDragStop>
+									<OnLoad> self.scrollBarHideable = true</OnLoad>
 								</Scripts>
 								<Frames>
 									<Slider name="$parentScrollBar" inherits="MinimalScrollBarTemplate" parentKey="ScrollBar">
@@ -2105,9 +2124,7 @@
 							</ScrollFrame>
 						</Frames>
 						<Scripts>
-							<OnLoad> self:RegisterForDrag("LeftButton") self:Hide()</OnLoad>
-							<OnDragStart> TellMeWhen_IconEditor:StartMoving() </OnDragStart>
-							<OnDragStop> TellMeWhen_IconEditor:StopMovingOrSizing() </OnDragStop>
+							<OnLoad> self.text:SetText(TMW.L["ICONMENU_COMPONENTICONS"])</OnLoad>
 						</Scripts>
 					</Frame>
 
@@ -2170,6 +2187,7 @@
 								self.__title = TMW.L["ICONMENU_UNITSTOWATCH"]
 								self.__text = TMW.L["ICONMENU_UNIT_DESC"]
 								self.BackgroundText:SetWidth(self:GetWidth())
+								
 							</OnLoad>
 							<OnEditFocusLost>
 								EditBox_ClearHighlight(self)
@@ -3162,43 +3180,26 @@
 							</OnLoad>
 						</Scripts>
 					</Frame>
-					<ScrollFrame name="$parentScrollFrame" parentKey="ScrollFrame" inherits="UIPanelScrollFrameCodeTemplate" movable="true" enableMouse="true">
+					<ScrollFrame name="$parentScrollFrame" parentKey="ScrollFrame" inherits="UIPanelScrollFrameCodeTemplate" >
 						<Anchors>
-							<Anchor point="TOPLEFT" y="-30"/>
+							<Anchor point="TOPLEFT" y="-34"/>
 							<Anchor point="BOTTOMRIGHT" y="32"/>
 						</Anchors>
 						<ScrollChild>
-							<Frame name="$parentGroups" parent="TellMeWhen_IconEditorConditions" parentKey="Groups" movable="true" enableMouse="true" >
+							<Frame name="$parentGroups" parent="TellMeWhen_IconEditorConditions" parentKey="Groups" >
 								<Size x="580" y="150"/>
-								<Frames>
-									<Frame name="$parentGroup1" inherits="TellMeWhen_ConditionGroup" id="1">
-										<Anchors>
-											<Anchor point="TOPLEFT" x="12" y="-16"/>
-										</Anchors>
-										<Scripts>
-											<OnLoad>
-												for k, v in pairs(TMW.CNDT.AddIns) do
-													self[k] = v
-												end
-												self.AndOr:Hide()
-												self.CloseParenthesis:Hide()
-												TMW.CNDT[self:GetID()] = self
-												self:GetParent()[self:GetID()] = self
-											</OnLoad>
-										</Scripts>
-									</Frame>
-								</Frames>
 								<Scripts>
-									<OnLoad> self:RegisterForDrag("LeftButton") </OnLoad>
-									<OnDragStart> TellMeWhen_IconEditor:StartMoving() </OnDragStart>
-									<OnDragStop> TellMeWhen_IconEditor:StopMovingOrSizing() </OnDragStop>
+									<OnLoad>
+										TMW.CNDT:CreateGroups(1)
+										TMW.CNDT[1].AndOr:Hide()
+										TMW.CNDT[1].CloseParenthesis:Hide()
+										TMW.CNDT[1]:SetPoint("TOPLEFT", 12, -16)
+									</OnLoad>
 								</Scripts>
 							</Frame>
 						</ScrollChild>
 						<Scripts>
-							<OnLoad> self:RegisterForDrag("LeftButton") self.scrollBarHideable = true</OnLoad>
-							<OnDragStart> TellMeWhen_IconEditor:StartMoving() </OnDragStart>
-							<OnDragStop> TellMeWhen_IconEditor:StopMovingOrSizing() </OnDragStop>
+							<OnLoad>self.scrollBarHideable = true</OnLoad>
 						</Scripts>
 						<Frames>
 							<Slider name="$parentScrollBar" inherits="MinimalScrollBarTemplate" parentKey="ScrollBar">

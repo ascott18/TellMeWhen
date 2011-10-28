@@ -24,7 +24,6 @@ local db = TMW.db
 -- LOCALS/GLOBALS/UTILITIES
 -- -----------------------
 
-TELLMEWHEN_MAXCONDITIONS = 1 --this is a default
 TELLMEWHEN_COLUMN1WIDTH = 170
 
 
@@ -515,7 +514,7 @@ function TMW:FixDropdown(dropdown)
 	_G[dropdown:GetName() .. "Middle"]:SetHeight(height)
 	_G[dropdown:GetName() .. "Right"]:SetHeight(height)
 end
-						
+
 local function AddDropdownSpacer()
 	local info = UIDropDownMenu_CreateInfo()
 	info.text = ""
@@ -1753,6 +1752,9 @@ function ME:Update()
 		ME[1].delete:Hide()
 	end
 
+	if IE.Main.Icons.ScrollFrame:GetVerticalScrollRange() == 0 then
+		IE.Main.Icons.ScrollFrame.ScrollBar:Hide()
+	end
 end
 
 local addedGroups = {} -- this is also used for the condition icon menu, but its just a throwaway, so whatever
@@ -4600,21 +4602,6 @@ end
 
 CNDT = TMW.CNDT
 
-function CNDT:TypeMenuOnClick(frame, data)
-	UIDropDownMenu_SetSelectedValue(UIDROPDOWNMENU_OPEN_MENU, self.value)
-	UIDropDownMenu_SetText(UIDROPDOWNMENU_OPEN_MENU, data.text)
-	local group = UIDROPDOWNMENU_OPEN_MENU:GetParent()
-	local showval = group:TypeCheck(data)
-	group:SetSliderMinMax()
-	if showval then
-		group:SetValText()
-	else
-		group.ValText:SetText("")
-	end
-	CNDT:OK()
-	CloseDropDownMenus()
-end
-
 local addedThings = {}
 local usedCount = {}
 local commonConditions = {
@@ -4628,7 +4615,7 @@ local commonConditions = {
 local function AddConditionToDropDown(v)
 	if not v or v.hidden then return end
 	local info = UIDropDownMenu_CreateInfo()
-	info.func = CNDT.TypeMenuOnClick
+	info.func = CNDT.TypeMenu_DropDown_OnClick
 	info.text = v.text
 	info.tooltipTitle = v.text
 	info.tooltipText = v.tooltip
@@ -4704,6 +4691,24 @@ function CNDT:TypeMenu_DropDown()
 			UIDropDownMenu_AddButton(info, UIDROPDOWNMENU_MENU_LEVEL)
 		end
 	end
+end
+
+function CNDT:TypeMenu_DropDown_OnClick(frame, data)
+	UIDropDownMenu_SetSelectedValue(UIDROPDOWNMENU_OPEN_MENU, self.value)
+	UIDropDownMenu_SetText(UIDROPDOWNMENU_OPEN_MENU, data.text)
+	local group = UIDROPDOWNMENU_OPEN_MENU:GetParent()
+	local showval = group:TypeCheck(data)
+	if data.defaultUnit then
+		group.Unit:SetText(data.defaultUnit)
+	end
+	group:SetSliderMinMax()
+	if showval then
+		group:SetValText()
+	else
+		group.ValText:SetText("")
+	end
+	CNDT:OK()
+	CloseDropDownMenus()
 end
 
 function CNDT:UnitMenu_DropDown_OnClick(frame, v)
@@ -4844,7 +4849,7 @@ function CNDT:ValidateParenthesis()
 		if v:IsShown() then
 			if v.OpenParenthesis:IsShown() then
 				for k, v in ipairs(v.OpenParenthesis) do
-					v.text:SetText("|cff444444" .. v.type)
+					v.text:SetText("|cff222222" .. v.type)
 					if v:GetChecked() then
 						numopen = numopen + 1
 						runningcount = runningcount + 1
@@ -4856,7 +4861,7 @@ function CNDT:ValidateParenthesis()
 			if v.CloseParenthesis:IsShown() then
 				for k = #v.CloseParenthesis, 1, -1 do
 					local v = v.CloseParenthesis[k]
-					v.text:SetText("|cff444444" .. v.type)
+					v.text:SetText("|cff222222" .. v.type)
 					if v:GetChecked() then
 						numclose = numclose + 1
 						runningcount = runningcount - 1
@@ -4947,10 +4952,8 @@ function CNDT:ValidateParenthesis()
 end	
 
 function CNDT:CreateGroups(num)
-	local start = TELLMEWHEN_MAXCONDITIONS
-	while CNDT[start] do
-		start = start + 1
-	end
+	local start = #CNDT + 1
+	
 	for i=start, num do
 		local group = CNDT[i] or CreateFrame("Frame", "TellMeWhen_IconEditorConditionsGroupsGroup" .. i, TellMeWhen_IconEditor.Conditions.Groups, "TellMeWhen_ConditionGroup", i)
 		for k, v in pairs(CNDT.AddIns) do
@@ -4958,14 +4961,13 @@ function CNDT:CreateGroups(num)
 		end
 		
 		group:SetPoint("TOPLEFT", CNDT[i-1], "BOTTOMLEFT", 0, -16)
-		group.AddDelete:ClearAllPoints()
-		local p, _, rp, x, y = TMW.CNDT[1].AddDelete:GetPoint()
-		group.AddDelete:SetPoint(p, CNDT[i], rp, x, y)
+		--if i ~= 1 then
+			local p, _, rp, x, y = TMW.CNDT[1].AddDelete:GetPoint()
+			group.AddDelete:ClearAllPoints()
+			group.AddDelete:SetPoint(p, CNDT[i], rp, x, y)
+	--	end
 		group:Clear()
 		group:SetTitles()
-	end
-	if num > TELLMEWHEN_MAXCONDITIONS then
-		TELLMEWHEN_MAXCONDITIONS = num
 	end
 end
 
@@ -5047,7 +5049,7 @@ function CNDT:Load()
 	local Conditions = CNDT.settings
 
 	if Conditions and #Conditions > 0 then
-		for i = #Conditions, TELLMEWHEN_MAXCONDITIONS do
+		for i = #Conditions, #CNDT do
 			CNDT[i]:Clear()
 		end
 		CNDT:CreateGroups(#Conditions+1)
@@ -5066,7 +5068,7 @@ function CNDT:Load()
 end
 
 function CNDT:ClearDialog()
-	for i=1, TELLMEWHEN_MAXCONDITIONS do
+	for i=1, #CNDT do
 		CNDT[i]:Clear()
 		CNDT[i]:SetTitles()
 	end
@@ -5229,8 +5231,10 @@ function AddIns.Load(group)
 
 	local condition = CNDT.settings[group:GetID()]
 	local data = CNDT.ConditionsByType[condition.Type]
-
-	UIDropDownMenu_SetSelectedValue(group.Type, condition.Type)
+	
+	if group.Type.selectedValue ~= condition.Type or not group.Type.selectedValue then
+		UIDropDownMenu_SetSelectedValue(group.Type, condition.Type)
+	end
 	UIDropDownMenu_SetText(group.Type, data and data.text or ("UNKNOWN TYPE: " .. condition.Type))
 	group:TypeCheck(data)
 

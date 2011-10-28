@@ -294,6 +294,12 @@ function CNDT:UNIT_VEHICLE(_, unit)
 	end
 end
 
+function CNDT:UNIT_PET(_, unit)
+	if unit == "player" then
+		Env.PetTalentID = GetTalentTabInfo(1, nil, 1)
+	end
+end
+
 
 
 local PetModes = {
@@ -762,6 +768,7 @@ CNDT.Types = {
 		text = L["CONDITIONPANEL_COMBO"],
 		value = "COMBO",
 		category = L["CNDTCAT_RESOURCES"],
+		defaultUnit = "target",
 		min = 0,
 		max = 5,
 		icon = "Interface\\Icons\\ability_rogue_eviscerate",
@@ -1169,6 +1176,24 @@ CNDT.Types = {
 		tcoords = standardtcoords,
 		funcstr = [[ActivePetMode c.Operator c.Level]],
 		events = "PET_BAR_UPDATE",
+	},
+	{ -- pet talent tree
+		text = L["CONDITIONPANEL_PETTREE"],
+		category = L["CNDTCAT_STATUS"],
+		value = "PETTREE",
+		min = 409,
+		max = 411,
+		midt = true,
+		texttable = {
+			[409] = GetSpellInfo(40538), -- tenacity
+			[410] = GetSpellInfo(33667), -- ferocity
+			[411] = L["PET_TYPE_CUNNING"],
+		},
+		unit = PET,
+		icon = "Interface\\Icons\\Ability_Druid_DemoralizingRoar",
+		tcoords = standardtcoords,
+		funcstr = [[PetTalentID and PetTalentID c.Operator c.Level]],
+		events = "UNIT_PET",
 	},
 	{ -- tracking
 		text = L["CONDITIONPANEL_TRACKING"],
@@ -2147,8 +2172,8 @@ function CNDT:ProcessConditions(icon)
 				gsub("c.1nil", 			c.Level == 0 and 1 or "nil"):
 				gsub("c.nil1", 			c.Level == 1 and 1 or "nil"): -- reverse 1nil
 				
+				gsub("LOWER%((.-)%)",	strlower) -- fun stuff
 				
-				gsub("LOWER%((.-)%)",	strlower)
 				funcstr = funcstr .. thisstr
 			else
 				funcstr = funcstr .. (andor .. "(" .. strrep("(", c.PrtsBefore) .. "true" .. strrep(")", c.PrtsAfter)  .. ")")
