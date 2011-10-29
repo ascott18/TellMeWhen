@@ -2396,7 +2396,6 @@ function IE:LoadSettings()
 end
 
 function IE:Load(isRefresh, icon)
-	print(linenum(), #TMW[3][46].ics.Conditions)
 	if type(icon) == "table" then
 		TMW.HELP:HideForIcon(CI.ic)
 		PlaySound("igCharacterInfoTab")
@@ -2436,13 +2435,9 @@ function IE:Load(isRefresh, icon)
 			UIDropDownMenu_SetText(IE.Main.Type, "UNKNOWN TYPE: " .. CI.t)
 		end
 	end
-	print(linenum(), #TMW[3][46].ics.Conditions)
 	CNDT:SetTabText("icon")
-	print(linenum(), #TMW[3][46].ics.Conditions)
 	CNDT:SetTabText("group")
-	print(linenum(), #TMW[3][46].ics.Conditions)
 	CNDT:Load()
-	print(linenum(), #TMW[3][46].ics.Conditions)
 
 	ME:Update()
 	
@@ -5170,7 +5165,6 @@ function CNDT:Load(type)
 	CNDT.type, CNDT.settings = CNDT:GetTypeData(type)
 	
 	local Conditions = CNDT.settings
-	print(linenum(), #Conditions)
 	if Conditions and #Conditions > 0 then
 		for i = #Conditions + 1, #CNDT do
 			CNDT[i]:Clear()

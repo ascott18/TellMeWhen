@@ -196,7 +196,6 @@ local function CheckCategories(icon)
 					firstCategory = category
 					icon.firstCategory = category
 				end
-				print(linenum(), category)
 				categoryTEMP[category] = categoryTEMP[category] .. ";" .. TMW:RestoreCase(IDorName)
 				if firstCategory ~= category then
 					doWarn = true

@@ -159,10 +159,15 @@ local function ClearScripts(f)
 end
 function TMW.print(...)
 	if TMW.debug or not TMW.VarsLoaded then
+		local prefix = "|cffff0000TMW"
+		if linenum then
+			prefix = prefix..format(" %4.0f", linenum())
+		end
+		prefix = prefix..":|r "
 		if ... == TMW then
-			print("|cffff0000TMW:|r ", select(2,...))
+			print(prefix, select(2,...))
 		else
-			print("|cffff0000TMW:|r ", ...)
+			print(prefix, ...)
 		end
 	end
 	return ...
