@@ -579,7 +579,6 @@
 					local oldstate = self.checked
 					self.checked = checked
 					if checked then
-						--self.text:SetTextColor(0, 1, 0, 1)
 						local next = self:GetParent()[self:GetID() + 1]
 						if next then
 							next:Show()
@@ -603,7 +602,7 @@
 					end
 
 					if oldstate ~= checked then
-						TMW.CNDT:ValidateParenthesis()
+					--	TMW.CNDT:ColorizeParentheses()
 					end
 				end
 
@@ -615,12 +614,13 @@
 			<OnClick>
 				self:SetChecked(not self.checked)
 				TMW.CNDT:OK()
+				TMW.CNDT:ColorizeParentheses()
 			</OnClick>
 			<OnEnter>
 				self.text:SetText(gsub(self.text:GetText(), "|cff222222", "|cffffffff"))
 			</OnEnter>
 			<OnLeave>
-				TMW.CNDT:ValidateParenthesis()
+				TMW.CNDT:ColorizeParentheses()
 			</OnLeave>
 		</Scripts>
 	<!-- 	<HighlightTexture urgency="5" file="Interface\Buttons\UI-CheckBox-Highlight" alphaMode="ADD"/> -->
@@ -3220,7 +3220,7 @@
 					<OnDragStart> TellMeWhen_IconEditor:StartMoving() </OnDragStart>
 					<OnDragStop> TellMeWhen_IconEditor:StopMovingOrSizing() </OnDragStop>
 					<OnShow>
-						TMW.CNDT:ValidateParenthesis()
+					--	TMW.CNDT:ColorizeParentheses()
 					</OnShow>
 				</Scripts>
 			</Frame>
@@ -3816,6 +3816,51 @@
 					</OnHide>
 				</Scripts>
 			</Button>
+			<Button name="$parentUndo" parentKey="UndoButton" inherits="TellMeWhen_ButtonTemplate" >
+				<Size x="100" y="17"/>
+				<Anchors>
+					<Anchor point="BOTTOMLEFT" x="15" y="-40"/>
+				</Anchors>
+				<Scripts>
+					<OnLoad>
+						self:SetText(TMW.L["UNDO_ICON"])
+						self:SetWidth(self:GetTextWidth()+25)
+						self:SetFrameLevel(self:GetFrameLevel()+2)
+					</OnLoad>
+					<OnClick>
+						local ic = TMW.CI.ic
+						ic.historyState = ic.historyState - 1
+						
+						TMW:CopyTableInPlaceWithMeta(ic.history[ic.historyState], ic.ics)
+						
+						TMW.IE:Load(1)
+						TMW.IE:UndoRedoChanged()
+					</OnClick>
+				</Scripts>
+			</Button>
+			<Button name="$parentRedo" parentKey="RedoButton" inherits="TellMeWhen_ButtonTemplate" >
+				<Size x="100" y="17"/>
+				<Anchors>
+					<Anchor point="BOTTOMLEFT" x="15" y="-70"/>
+				</Anchors>
+				<Scripts>
+					<OnLoad>
+						self:SetText(TMW.L["REDO_ICON"])
+						self:SetWidth(self:GetTextWidth()+25)
+						self:SetFrameLevel(self:GetFrameLevel()+2)
+					</OnLoad>
+					<OnClick>
+						local ic = TMW.CI.ic
+						ic.historyState = ic.historyState + 1
+						
+						TMW:CopyTableInPlaceWithMeta(ic.history[ic.historyState], ic.ics)
+						
+						TMW.IE:Load(1)
+						TMW.IE:UndoRedoChanged()
+					</OnClick>
+				</Scripts>
+			</Button>
+			
 			<Button name="$parentClose" parentKey="CloseButton" inherits="UIPanelCloseButton">
 				<Anchors>
 					<Anchor point="CENTER" relativePoint="TOPRIGHT" x="-22" y="-22"/>
@@ -3929,15 +3974,22 @@
 			<OnUpdate>
 				local groupID, iconID = TMW.CI.g, TMW.CI.i
 				local ic = TMW.CI.ic
-				if (TMW.CNDT and TMW.CNDT.type == "group" and self.selectedTab == TMW.GRCNDTTab) or self.selectedTab == TMW.MOTab then
-				--	self.FS1:SetFormattedText(TMW.L["fGROUP"], TMW:GetGroupName(groupID, groupID, 1))
-				--	self.icontexture:Hide()
-				else
-					self.FS1:SetFormattedText(TMW.L["GROUPICON"], TMW:GetGroupName(groupID, groupID, 1), iconID)
-					if ic then
-				--		self.icontexture:Show()
-						self.icontexture:SetTexture(ic.texture:GetTexture())
+				self.FS1:SetFormattedText(TMW.L["GROUPICON"], TMW:GetGroupName(groupID, groupID, 1), iconID)
+				if ic then
+					self.icontexture:SetTexture(ic.texture:GetTexture())
+				end
+				
+				if not TMW:DeepCompare(ic.history[ic.historyState], ic.ics) then
+					
+					for i = ic.historyState + 1, #ic.history do
+						ic.history[i] = nil
 					end
+						
+					ic.history[#ic.history + 1] = CopyTable(ic.ics)
+					
+					ic.historyState = #ic.history
+					
+					TMW.IE:UndoRedoChanged()
 				end
 			</OnUpdate>
 			<OnSizeChanged>

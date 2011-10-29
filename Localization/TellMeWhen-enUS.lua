@@ -361,6 +361,8 @@ L["NONE"] = "None of these"
 L["CASTERFORM"] = "Caster Form"
 
 L["RESET_ICON"] = "Reset Icon"
+L["UNDO_ICON"] = "Undo"
+L["REDO_ICON"] = "Redo"
 L["RESET_NOTIFY"] = "Click the reset button again within 5 seconds to confirm the reset."
 L["RESET_EXPIRE"] = "Reset timer expired."
 L["RESET_CONFIRM"] = "Confirm Reset"

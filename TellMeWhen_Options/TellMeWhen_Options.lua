@@ -280,7 +280,7 @@ function TMW:CopyTableInPlace(src, dest)
 end
 
 function TMW:CopyTableInPlaceWithMeta(src, dest)
-	--src and dest must have congruent data structure, otherwise shit will blow up
+	--src and dest must have congruent data structure, otherwise shit will blow up. There are no safety checks to prevent this.
 	local metatemp = getmetatable(src) -- lets not go overwriting random metatables
 	setmetatable(src, getmetatable(dest))
 	for k in pairs(src) do
@@ -515,6 +515,16 @@ function TMW:FixDropdown(dropdown)
 	_G[dropdown:GetName() .. "Right"]:SetHeight(height)
 end
 
+function TMW:tMaxKey(t)
+	local n = 0
+	for k, v in pairs(t) do
+		if type(k) == "number" then
+			n = max(n, k)
+		end
+	end
+	return n
+end
+
 local function AddDropdownSpacer()
 	local info = UIDropDownMenu_CreateInfo()
 	info.text = ""
@@ -523,43 +533,70 @@ local function AddDropdownSpacer()
 	UIDropDownMenu_AddButton(info, UIDROPDOWNMENU_MENU_LEVEL)
 end
 
-local function DeepCompare(t1, t2, ignore_mt)
-    local ty1 = type(t1)
-    local ty2 = type(t2)
+function TMW:DeepCompare(t1, t2)
+	-- heavily modified version of http://snippets.luacode.org/snippets/Deep_Comparison_of_Two_Values_3
 	
-    if ty1 ~= ty2 then
+	-- attempt direct comparison
+	if t1 == t2 then
+		return true
+	end
+	
+	local ty1 = type(t1)
+	local ty2 = type(t2)
+	if ty1 ~= ty2 or ty1 ~= "table" then
 		return false
 	end
 	
-    -- non-table types can be directly compared
-    if ty1 ~= "table" and ty2 ~= "table" then
-		return t1 == t2
-	end
-	
-    -- as well as tables which have the metamethod __eq
-    if not ignore_mt then
-		local mt = getmetatable(t1)
-		if mt and mt.__eq then
-			return t1 == t2
+	-- compare table values
+	for k1, v1 in pairs(t1) do
+		local v2 = t2[k1]
+		if v2 == nil or not TMW:DeepCompare(v1, v2) then
+			return false
 		end
 	end
 	
-    for k1,v1 in pairs(t1) do
-        local v2 = t2[k1]
-        if v2 == nil or not TMW:DeepCompare(v1,v2) then
+	for k2, v2 in pairs(t2) do
+		local v1 = t1[k2]
+		if v1 == nil or not TMW:DeepCompare(v1, v2) then
 			return false
 		end
-    end
+	end
 	
-    for k2,v2 in pairs(t2) do
-        local v1 = t1[k2]
-        if v1 == nil or not TMW:DeepCompare(v1,v2) then
-			return false
-		end
-    end
-	
-    return true
+	return true
 end
+
+--[[
+function TMW:CopyChanges(t1, t2)
+	if type(t1) == "table" and type(t2) == "table" then
+		ret = {}
+		if not DeepCompare(t1, t2) then
+			for k1, v1 in pairs(t1) do
+				local v2 = t2[k1]
+				if v2 == nil or not DeepCompare(v1, v2) then
+					ret[k1] = TMW:CopyChanges(v1, v2)
+				end
+				
+			end
+			
+			for k2, v2 in pairs(t2) do
+				local v1 = t1[k2]
+				if v2 == nil or not DeepCompare(v1, v2) then
+					ret[k2] = TMW:CopyChanges(v1, v2)
+				end
+			end
+		end
+		return ret
+		
+	else
+		if not DeepCompare(t1, t2) then
+			return t2
+		else
+			return nil
+		end
+		
+	end
+end]]
+
 
 -- --------------
 -- MAIN OPTIONS
@@ -2039,24 +2076,20 @@ function IE:TabClick(self)
 			IE[frame]:Hide()
 		end
 	end
+	IE.CurrentTab = self
 	
 	IE[IE.Tabs[self:GetID()]]:Show()
 	TellMeWhen_IconEditor:Show()
 	
 	if self:GetID() == TMW.ICCNDTTab then
-		CNDT.settings = db.profile.Groups[CI.g].Icons[CI.i].Conditions
-		CNDT.type = "icon"
-		CNDT:Load()
+		CNDT:Load("icon")
 	elseif self:GetID() == TMW.GRCNDTTab then
-		CNDT.settings = db.profile.Groups[CI.g].Conditions
-		CNDT.type = "group"
-		CNDT:Load()
+		CNDT:Load("group")
 	elseif self:GetID() == TMW.MOTab then
 		TMW:CompileOptions()
 		IE:NotifyChanges("groups", "Group " .. CI.g)
 		LibStub("AceConfigDialog-3.0"):Open("TMW IEOptions", IE.MainOptionsWidget)
 	end
-	IE.CurrentTab = self
 end
 
 function IE:NotifyChanges(...)
@@ -2214,6 +2247,22 @@ function IE:SaveSettings(frame)
 	end
 end
 
+function IE:UndoRedoChanged()
+	local ic = TMW.CI.ic
+	
+	if ic.historyState - 1 < 1 then
+		IE.UndoButton:Disable()
+	else
+		IE.UndoButton:Enable()
+	end
+	
+	if ic.historyState + 1 > #ic.history then
+		IE.RedoButton:Disable()
+	else
+		IE.RedoButton:Enable()
+	end
+end
+
 local function LeftCheck_OnEnable(self, button)
 	self:SetAlpha(1)
 	if self.data.disabledtooltip then
@@ -2347,6 +2396,7 @@ function IE:LoadSettings()
 end
 
 function IE:Load(isRefresh, icon)
+	print(linenum(), #TMW[3][46].ics.Conditions)
 	if type(icon) == "table" then
 		TMW.HELP:HideForIcon(CI.ic)
 		PlaySound("igCharacterInfoTab")
@@ -2371,7 +2421,10 @@ function IE:Load(isRefresh, icon)
 	IE.ExportBox:SetText("")
 	TellMeWhen_IconEditor:SetScale(db.global.EditorScale)
 
-	UIDropDownMenu_SetSelectedValue(IE.Main.Type, db.profile.Groups[groupID].Icons[iconID].Type)
+	if IE.Main.Type.selectedValue ~= CI.t then
+		UIDropDownMenu_SetSelectedValue(IE.Main.Type, CI.t)
+	end
+	
 	CI.t = db.profile.Groups[groupID].Icons[iconID].Type
 	if CI.t == "" then
 		UIDropDownMenu_SetText(IE.Main.Type, L["ICONMENU_TYPE"])
@@ -2383,16 +2436,16 @@ function IE:Load(isRefresh, icon)
 			UIDropDownMenu_SetText(IE.Main.Type, "UNKNOWN TYPE: " .. CI.t)
 		end
 	end
-	local eq2 = TellMeWhen_IconEditor.selectedTab == TMW.ICCNDTTab
-	CNDT.settings = eq2 and db.profile.Groups[groupID].Conditions or db.profile.Groups[groupID].Icons[iconID].Conditions
-	CNDT.type = eq2 and "group" or "icon"
+	print(linenum(), #TMW[3][46].ics.Conditions)
+	CNDT:SetTabText("icon")
+	print(linenum(), #TMW[3][46].ics.Conditions)
+	CNDT:SetTabText("group")
+	print(linenum(), #TMW[3][46].ics.Conditions)
 	CNDT:Load()
-
-	CNDT.settings = eq2 and db.profile.Groups[groupID].Icons[iconID].Conditions or db.profile.Groups[groupID].Conditions
-	CNDT.type = eq2 and "icon" or "group"
-	CNDT:Load()
+	print(linenum(), #TMW[3][46].ics.Conditions)
 
 	ME:Update()
+	
 	SND:Load()
 	ANN:Load()
 
@@ -2401,6 +2454,14 @@ function IE:Load(isRefresh, icon)
 	IE:ShowHide()
 	
 	IE:ScheduleIconUpdate(CI.ic)
+	
+	if type(icon) == "table" and not icon.history then
+		-- It is intended that this happens at the end instead of the beginning.
+		-- Table accesses that trigger metamethods flesh out an icon's settings with new things that aren't there pre-load (usually)
+		icon.history = {CopyTable(icon.ics)}
+		icon.historyState = 1
+	end
+	IE:UndoRedoChanged()
 end
 
 function IE:Reset()
@@ -4878,42 +4939,80 @@ CNDT.colors = setmetatable(
 		return rawget(t, k) or ""
 end})
 	
-function CNDT:ValidateParenthesis()
-	if not IE.Conditions:IsShown() then return end
-	CNDT.Parens = wipe(CNDT.Parens or {})
+function CNDT:CheckParentheses(type)
+	local type, settings = CNDT:GetTypeData(type)
+	
 	local numclose, numopen, runningcount = 0, 0, 0
 	local unopened = 0
+	
+	for i = 1, TMW:tMaxKey(settings) do -- for i, condition in ipairs(settings) do 		is not used because if the first condition is a default one (player health == 0%) then it will break the loop entirely
+		local condition = settings[i]
+		for i = 1, condition.PrtsBefore do
+			numopen = numopen + 1
+			runningcount = runningcount + 1
+			if runningcount < 0 then unopened = unopened + 1 end
+		end
+		for i = 1, condition.PrtsAfter do
+			numclose = numclose + 1
+			runningcount = runningcount - 1
+			if runningcount < 0 then unopened = unopened + 1 end
+		end
+	end
+	
+	if numopen ~= numclose then
+		local typeNeeded, num
+		if numopen > numclose then
+			typeNeeded, num = ")", numopen-numclose
+		else
+			typeNeeded, num = "(", numclose-numopen
+		end
+		TMW.HELP:Show("CNDT_PAREN_NOMATCH", nil, TMW.IE.Conditions, 0, 0, L["PARENTHESIS_WARNING1"], num, L["PARENTHESIS_TYPE_" .. typeNeeded])
+		TMW.HELP:Hide("CNDT_PAREN_NOOPENER")
+		
+		CNDT[type.."invalid"] = 1
+	elseif unopened > 0 then
+	
+		TMW.HELP:Show("CNDT_PAREN_NOOPENER", nil, TMW.IE.Conditions, 0, 0, L["PARENTHESIS_WARNING2"], unopened)
+		TMW.HELP:Hide("CNDT_PAREN_NOMATCH")
+		
+		CNDT[type.."invalid"] = 1
+	else
+		TMW.HELP:Hide("CNDT_PAREN_NOMATCH")
+		TMW.HELP:Hide("CNDT_PAREN_NOOPENER")
+		CNDT[type.."invalid"] = nil
+	end
+end	
+
+function CNDT:ColorizeParentheses()
+	if not IE.Conditions:IsShown() then return end
+	
+	CNDT.Parens = wipe(CNDT.Parens or {})
+	
 	for k, v in ipairs(CNDT) do
 		if v:IsShown() then
 			if v.OpenParenthesis:IsShown() then
 				for k, v in ipairs(v.OpenParenthesis) do
 					v.text:SetText("|cff222222" .. v.type)
 					if v:GetChecked() then
-						numopen = numopen + 1
-						runningcount = runningcount + 1
 						tinsert(CNDT.Parens, v)
 					end
-					if runningcount < 0 then unopened = unopened + 1 end
 				end
 			end
+			
 			if v.CloseParenthesis:IsShown() then
 				for k = #v.CloseParenthesis, 1, -1 do
 					local v = v.CloseParenthesis[k]
 					v.text:SetText("|cff222222" .. v.type)
 					if v:GetChecked() then
-						numclose = numclose + 1
-						runningcount = runningcount - 1
 						tinsert(CNDT.Parens, v)
 					end
-					if runningcount < 0 then unopened = unopened + 1 end
 				end
 			end
 		end
 	end
 	
-	local color = 1
 	while true do
-		local numopen, nestinglevel, open, found, currentcolor = 0, 0
+		local numopen, nestinglevel, open, currentcolor = 0, 0
 		for i, v in ipairs(CNDT.Parens) do
 			if v == true then
 				nestinglevel = nestinglevel + 1
@@ -4933,7 +5032,6 @@ function CNDT:ValidateParenthesis()
 				if open and numopen == 0 then
 					CNDT.Parens[i].text:SetText(CNDT.colors[currentcolor] .. ")")
 					CNDT.Parens[i] = false
-					found = 1
 					break
 				end
 			end		
@@ -4950,43 +5048,7 @@ function CNDT:ValidateParenthesis()
 		end
 	end
 	
-	if numopen ~= numclose then
-		local typeNeeded, num
-		if numopen > numclose then
-			typeNeeded, num = ")", numopen-numclose
-		else
-			typeNeeded, num = "(", numclose-numopen
-		end
-		
-		TMW.HELP:Show("CNDT_PAREN_NOMATCH", nil, TMW.IE.Conditions, 0, 0, L["PARENTHESIS_WARNING1"], num, L["PARENTHESIS_TYPE_" .. typeNeeded])
-		TMW.HELP:Hide("CNDT_PAREN_NOOPENER")
-		
-		CNDT[CNDT.type.."invalid"] = 1
-	elseif unopened > 0 then
-	
-		TMW.HELP:Show("CNDT_PAREN_NOOPENER", nil, TMW.IE.Conditions, 0, 0, L["PARENTHESIS_WARNING2"], unopened)
-		TMW.HELP:Hide("CNDT_PAREN_NOMATCH")
-		
-		CNDT[CNDT.type.."invalid"] = 1
-	else
-		TMW.HELP:Hide("CNDT_PAREN_NOMATCH")
-		TMW.HELP:Hide("CNDT_PAREN_NOOPENER")
-		CNDT[CNDT.type.."invalid"] = nil
-	end
-	
-	local n = 1
-	while CNDT[n] and CNDT[n]:IsShown() do
-		n = n + 1
-	end
-	n = n - 1
-	
-	local tab = (CNDT.type == "icon" and IE.IconConditionTab) or IE.GroupConditionTab
-	if n > 0 then
-		tab:SetText((CNDT[CNDT.type.."invalid"] and "|TInterface\\AddOns\\TellMeWhen_Options\\Textures\\Alert:0:2|t|cFFFF0000" or "") .. L[CNDT.type == "icon" and "CONDITIONS" or "GROUPCONDITIONS"] .. " |cFFFF5959(" .. n .. ")")
-	else
-		tab:SetText(L[CNDT.type == "icon" and "CONDITIONS" or "GROUPCONDITIONS"] .. " (" .. n .. ")")
-	end
-	PanelTemplates_TabResize(tab, -6)
+	CNDT:SetTabText()
 end	
 
 function CNDT:CreateGroups(num)
@@ -5052,14 +5114,34 @@ function CNDT:AddRemoveHandler()
 		end
 	end
 	
-	local tab = (CNDT.type == "icon" and IE.IconConditionTab) or IE.GroupConditionTab
+	CNDT:ColorizeParentheses()
+end
+
+function CNDT:SetTabText(type)
+	local type, settings = CNDT:GetTypeData(type)
+	
+	CNDT:CheckParentheses(type)
+	
+	local tab = (type == "icon" and IE.IconConditionTab) or IE.GroupConditionTab
+	local n = #settings
+	
 	if n > 0 then
-		tab:SetText((CNDT[CNDT.type.."invalid"] and "|TInterface\\AddOns\\TellMeWhen_Options\\Textures\\Alert:0:2|t|cFFFF0000" or "") .. L[CNDT.type == "icon" and "CONDITIONS" or "GROUPCONDITIONS"] .. " |cFFFF5959(" .. n .. ")")
+		tab:SetText((CNDT[type.."invalid"] and "|TInterface\\AddOns\\TellMeWhen_Options\\Textures\\Alert:0:2|t|cFFFF0000" or "") .. L[type == "icon" and "CONDITIONS" or "GROUPCONDITIONS"] .. " |cFFFF5959(" .. n .. ")")
 	else
-		tab:SetText(L[CNDT.type == "icon" and "CONDITIONS" or "GROUPCONDITIONS"] .. " (" .. n .. ")")
+		tab:SetText(L[type == "icon" and "CONDITIONS" or "GROUPCONDITIONS"] .. " (" .. n .. ")")
 	end
+	
 	PanelTemplates_TabResize(tab, -6)
-	CNDT:ValidateParenthesis()
+end
+
+function CNDT:GetTypeData(type)
+	if type == "icon" then
+		return type, db.profile.Groups[CI.g].Icons[CI.i].Conditions
+	elseif type == "group" then
+		return type, db.profile.Groups[CI.g].Conditions
+	else
+		return CNDT.type, CNDT.settings
+	end
 end
 
 function CNDT:OK()
@@ -5083,11 +5165,14 @@ function CNDT:OK()
 	end
 end
 
-function CNDT:Load()
+function CNDT:Load(type)
+	type = type or CNDT.type or "icon"
+	CNDT.type, CNDT.settings = CNDT:GetTypeData(type)
+	
 	local Conditions = CNDT.settings
-
+	print(linenum(), #Conditions)
 	if Conditions and #Conditions > 0 then
-		for i = #Conditions, #CNDT do
+		for i = #Conditions + 1, #CNDT do
 			CNDT[i]:Clear()
 		end
 		CNDT:CreateGroups(#Conditions+1)
@@ -5266,38 +5351,37 @@ function AddIns.Save(group)
 end
 
 function AddIns.Load(group)
-
 	local condition = CNDT.settings[group:GetID()]
 	local data = CNDT.ConditionsByType[condition.Type]
-	
-	if group.Type.selectedValue ~= condition.Type or not group.Type.selectedValue then
+	if group.Type.selectedValue ~= condition.Type then
 		UIDropDownMenu_SetSelectedValue(group.Type, condition.Type)
 	end
 	UIDropDownMenu_SetText(group.Type, data and data.text or ("UNKNOWN TYPE: " .. condition.Type))
+	
 	group:TypeCheck(data)
-
 	
 	group.Unit:SetText(condition.Unit)
 	group.EditBox:SetText(condition.Name)
 	group.EditBox2:SetText(condition.Name2)
 	group.Check:SetChecked(condition.Checked)
 	group.Check2:SetChecked(condition.Checked2)
+	
 	TMW:SetUIDropdownText(group.Icon, condition.Icon, TMW.Icons)
-
+	
 	local v = TMW:SetUIDropdownText(group.Operator, condition.Operator, CNDT.Operators)
+	
 	if v then
 		TMW:TT(group.Operator, v.tooltipText, nil, 1)
 	end
-
+	
 	group:SetSliderMinMax(condition.Level or 0)
 	group:SetValText()
-
+	
 	for k, rune in pairs(group.Runes) do
 		if type(rune) == "table" then
 			rune:SetChecked(condition.Runes[rune:GetID()])
 		end
 	end
-
 	for k, frame in pairs(group.OpenParenthesis) do
 		if type(frame) == "table" then
 			group.OpenParenthesis[k]:SetChecked(condition.PrtsBefore >= k)
@@ -5308,11 +5392,9 @@ function AddIns.Load(group)
 			group.CloseParenthesis[k]:SetChecked(condition.PrtsAfter >= k)
 		end
 	end
-
+	
 	group.AndOr:SetValue(condition.AndOr)
-
 	group:Show()
-
 end
 
 function AddIns.Clear(group)
@@ -5369,7 +5451,7 @@ function AddIns.AddDeleteHandler(group)
 	if group:IsShown() then
 		tremove(CNDT.settings, group:GetID())
 	else
-		local condition = CNDT.settings[group:GetID()] -- cheesy way to invoke the metamethod and create a new condition table
+		local _ = CNDT.settings[group:GetID()] -- cheesy way to invoke the metamethod and create a new condition table
 	end
 	CNDT:AddRemoveHandler()
 	CNDT:Load()

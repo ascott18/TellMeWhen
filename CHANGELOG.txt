@@ -1,8 +1,9 @@
 ===v4.6.4===
  * New Condition: Pet talent tree.
+ * You can now undo and redo changes made to icon settings. (NOTE: NOT FULLY IMPLEMENTED YET!)
  * Rewrote the help module, and migrated/added some new warnings to it.
  * Diminishing return category mismatch warnings are now much more informative.
- * The condition editor is prettier now
+ * The condition editor is prettier now.
  * Bug Fixes:
  ** (r270) Export strings with a pipe character should now work properly
  ** (r271) Temporary fix for failed assertion when calling Parser:SetSpellByID(109388)
@@ -793,7 +794,7 @@
  * Fixed lists of spellIDs not working
 
 ===v1.4.6a===
- * Removed the stupid print()s that i accidentally left in
+ * Removed the stupid prints that i accidentally left in
  * Implemented Lord Helmchen of WoWInterface's fix for SplitNames
 
 ===v1.4.6===
