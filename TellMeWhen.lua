@@ -33,7 +33,7 @@ local DRData = LibStub("DRData-1.0", true)
 TELLMEWHEN_VERSION = "4.6.4"
 TELLMEWHEN_VERSION_MINOR = strmatch(" @project-version@", " r%d+") or ""
 TELLMEWHEN_VERSION_FULL = TELLMEWHEN_VERSION .. TELLMEWHEN_VERSION_MINOR
-TELLMEWHEN_VERSIONNUMBER = 46412 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
+TELLMEWHEN_VERSIONNUMBER = 46414 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
 if TELLMEWHEN_VERSIONNUMBER > 47000 or TELLMEWHEN_VERSIONNUMBER < 46000 then return error("YOU SCREWED UP THE VERSION NUMBER OR DIDNT CHANGE THE SAFETY LIMITS") end -- safety check because i accidentally made the version number 414069 once
 
 TELLMEWHEN_MAXGROUPS = 1 	--this is a default, used by SetTheory (addon), so dont rename
@@ -161,7 +161,7 @@ function TMW.print(...)
 	if TMW.debug or not TMW.VarsLoaded then
 		local prefix = "|cffff0000TMW"
 		if linenum then
-			prefix = prefix..format(" %4.0f", linenum())
+			prefix = prefix..format(" %4.0f", linenum(3))
 		end
 		prefix = prefix..":|r "
 		if ... == TMW then
@@ -564,7 +564,7 @@ TMW.Defaults = {
 						Conditions = {
 							["**"] = {
 								AndOr 	   = "AND",
-								Type 	   = "HEALTH",
+								Type 	   = "",
 								Icon 	   = "",
 								Operator   = "==",
 								Level 	   = 0,
@@ -2013,6 +2013,32 @@ function TMW:GlobalUpgrade()
 				end
 			end
 		end
+		if TellMeWhenDB.Version < 46413 then
+			for _, p in pairs(TellMeWhenDB.profiles) do
+				if p.Groups then
+					for _, gs in pairs(p.Groups) do
+						if gs.Conditions then
+							for _, Condition in pairs(gs.Conditions) do
+								if Condition.Type == nil then
+									Condition.Type = "HEALTH"
+								end
+							end
+						end
+						if gs.Icons then
+							for _, ics in pairs(gs.Icons) do
+								if ics.Conditions then
+									for _, Condition in pairs(ics.Conditions) do
+										if Condition.Type == nil then
+											Condition.Type = "HEALTH"
+										end
+									end
+								end
+							end
+						end
+					end
+				end
+			end
+		end
 	end
 	TellMeWhenDB.Version = TELLMEWHEN_VERSIONNUMBER -- pre-default upgrades complete!
 end
@@ -2898,12 +2924,12 @@ function IconBase.SetInfo(icon, alpha, color, texture, start, duration, spellChe
 		icon.__duration = duration
 	end
 
-	local data = queueOnSpell and icon.OnSpell
+	local data = queueOnSpell and alpha > 0 and icon.OnSpell
 	if data then
 		played, announced = icon:HandleEvent(data, played, announced)
 	end
 	
-	local data = queueOnUnit and icon.OnUnit
+	local data = queueOnUnit and alpha > 0 and icon.OnUnit
 	if data then
 		played, announced = icon:HandleEvent(data, played, announced)
 	end

@@ -549,14 +549,14 @@ function TMW:DeepCompare(t1, t2)
 	
 	-- compare table values
 	for k1, v1 in pairs(t1) do
-		local v2 = t2[k1]
+		local v2 = rawget(t2, k1)
 		if v2 == nil or not TMW:DeepCompare(v1, v2) then
 			return false
 		end
 	end
 	
 	for k2, v2 in pairs(t2) do
-		local v1 = t1[k2]
+		local v1 = rawget(t1, k2)
 		if v1 == nil or not TMW:DeepCompare(v1, v2) then
 			return false
 		end
@@ -2067,6 +2067,32 @@ IE.LeftChecks = {
 	},
 }
 
+function IE:OnUpdate()
+	local groupID, iconID = TMW.CI.g, TMW.CI.i
+	local ic = TMW.CI.ic
+	self.FS1:SetFormattedText(TMW.L["GROUPICON"], TMW:GetGroupName(groupID, groupID, 1), iconID)
+	if ic then
+		self.icontexture:SetTexture(ic.texture:GetTexture())
+	end
+	local time = TMW.time
+	if IE.UpdateTimer <= time - 1 then
+		IE.UpdateTimer = time
+		
+		if not TMW:DeepCompare(ic.history[ic.historyState], ic.ics) then
+			
+			for i = ic.historyState + 1, #ic.history do
+				ic.history[i] = nil
+			end
+				
+			ic.history[#ic.history + 1] = CopyTable(ic.ics)
+			
+			ic.historyState = #ic.history
+			
+			TMW.IE:UndoRedoChanged()
+		end
+	end
+	
+end
 
 function IE:TabClick(self)
 	PanelTemplates_Tab_OnClick(self, self:GetParent())
@@ -3421,6 +3447,9 @@ function SND:Load()
 	end
 	if oldID and oldID > 0 then
 		oldID = oldID % #SND.Events
+		if oldID == 0 then
+			oldID = #SND.Events
+		end
 		SND:SelectEvent(oldID)
 	end
 	SND:SetTabText()
@@ -3691,6 +3720,9 @@ function ANN:Load()
 	end
 	if oldID and oldID > 0 then
 		oldID = oldID % #ANN.Events
+		if oldID == 0 then
+			oldID = #ANN.Events
+		end
 		ANN:SelectEvent(oldID)
 	end
 	ANN:SetTabText()
@@ -5306,7 +5338,7 @@ end
 function AddIns.Save(group)
 	local condition = CNDT.settings[group:GetID()]
 	
-	condition.Type = UIDropDownMenu_GetSelectedValue(group.Type) or "HEALTH"
+	condition.Type = UIDropDownMenu_GetSelectedValue(group.Type) or ""
 	condition.Unit = strtrim(group.Unit:GetText()) or "player"
 	condition.Operator = UIDropDownMenu_GetSelectedValue(group.Operator) or "=="
 	condition.Icon = UIDropDownMenu_GetSelectedValue(group.Icon) or ""
@@ -5400,7 +5432,7 @@ function AddIns.Clear(group)
 	if group.Icon.selectedValue ~= "" then
 		UIDropDownMenu_SetSelectedValue(group.Icon, "")
 	end
-	TMW:SetUIDropdownText(group.Type, "HEALTH", CNDT.Types)
+	TMW:SetUIDropdownText(group.Type, "", CNDT.Types)
 	TMW:SetUIDropdownText(group.Operator, "==", CNDT.Operators)
 	group.AndOr:SetValue("AND")
 	for k, rune in pairs(group.Runes) do
@@ -5445,7 +5477,7 @@ function AddIns.AddDeleteHandler(group)
 	if group:IsShown() then
 		tremove(CNDT.settings, group:GetID())
 	else
-		local _ = CNDT.settings[group:GetID()] -- cheesy way to invoke the metamethod and create a new condition table
+		local _ = CNDT.settings[group:GetID()] -- cheesy way to invoke the db metamethod and create a new condition.
 	end
 	CNDT:AddRemoveHandler()
 	CNDT:Load()

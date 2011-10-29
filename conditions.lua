@@ -563,7 +563,6 @@ local standardtcoords = {0.07, 0.93, 0.07, 0.93}
 
 
 CNDT.Types = {
-
 -------------------------------------resources
 	{ -- health
 		text = HEALTH,
@@ -1983,6 +1982,20 @@ The group of the icon being checked must be shown in order to check the icon.]=]
 		tcoords = standardtcoords,
 		funcstr = function(c) return c.Name ~= "" and c.Name or "true" end,
 	},
+	
+	
+	{ -- default
+		text = L["CONDITIONPANEL_DEFAULT"],
+		value = "",
+		hidden = true,
+		noslide = true,
+		unit = false,
+		nooperator = true,
+		min = 0,
+		max = 100,
+		funcstr = [[true]],
+	},
+	
 }
 
 local currencies = {

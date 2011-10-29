@@ -414,6 +414,7 @@ L["MOON"] = "Moon"
 L["SUN"] = "Sun"
 L["TRUE"] = "True"
 L["FALSE"] = "False"
+L["CONDITIONPANEL_DEFAULT"] = "Choose a type..."
 L["CONDITIONPANEL_TYPE"] = "Type"
 L["CONDITIONPANEL_UNIT"] = "Unit"
 L["CONDITIONPANEL_UNIT_DESC"] = "Enter the unit to watch in this box. The unit can be inserted from the dropdown at the right, or advanced users can type in their own unit. Standard units (e.g. player) and/or friendly player names (e.g. %s) may be used as units."
@@ -717,10 +718,12 @@ NOTE: This event will not trigger when decreasing to 0% opacity (On Hide).]]
 L["SOUND_EVENT_ONUNIT"] = "On Unit Changed"
 L["SOUND_EVENT_ONUNIT_DESC"] = [[This event triggers when the unit that that the icon is displaying information for has changed.
 
-NOTE: This event only triggers for icons that check units.]]
+NOTE: This event only triggers if the icon is shown.]]
 
 L["SOUND_EVENT_ONSPELL"] = "On Spell Changed"
-L["SOUND_EVENT_ONSPELL_DESC"] = [[This event triggers when the spell/item/etc. that that the icon is displaying information for has changed.]]
+L["SOUND_EVENT_ONSPELL_DESC"] = [[This event triggers when the spell/item/etc. that that the icon is displaying information for has changed.
+
+NOTE: This event only triggers if the icon is shown.]]
 
 L["SOUND_EVENT_GLOBALDESC"] = "Events are checked from top to bottom in this list. If an event is triggered that has a sound to play, no events below that event will play a sound."
 L["SOUND_EVENT_DISABLEDFORTYPE"] = "Not available for %s"
