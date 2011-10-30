@@ -33,7 +33,7 @@ local DRData = LibStub("DRData-1.0", true)
 TELLMEWHEN_VERSION = "4.6.4"
 TELLMEWHEN_VERSION_MINOR = strmatch(" @project-version@", " r%d+") or ""
 TELLMEWHEN_VERSION_FULL = TELLMEWHEN_VERSION .. TELLMEWHEN_VERSION_MINOR
-TELLMEWHEN_VERSIONNUMBER = 46415 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
+TELLMEWHEN_VERSIONNUMBER = 46418 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
 if TELLMEWHEN_VERSIONNUMBER > 47000 or TELLMEWHEN_VERSIONNUMBER < 46000 then return error("YOU SCREWED UP THE VERSION NUMBER OR DIDNT CHANGE THE SAFETY LIMITS") end -- safety check because i accidentally made the version number 414069 once
 
 TELLMEWHEN_MAXGROUPS = 1 	--this is a default, used by SetTheory (addon), so dont rename
@@ -178,6 +178,63 @@ do -- Iterators
 	local mg = TELLMEWHEN_MAXGROUPS
 	local mi = TELLMEWHEN_MAXROWS*TELLMEWHEN_MAXROWS
 
+	
+	do -- InConditionSettings
+		
+		local stage, currentConditions, currentCondition, ci, cg, extIter
+		local function iter()
+			
+			currentCondition = currentCondition + 1
+			
+			if not currentConditions or currentCondition > currentConditions.n then
+				local settings
+				settings, cg, ci = extIter()
+				if not settings then
+					if stage == "icon" then
+						extIter = TMW:InGroupSettings()
+						stage = "group"
+						return iter()
+					else
+						return
+					end
+				end
+				currentConditions = settings.Conditions
+				currentCondition = 0
+				return iter()
+			end
+			local condition = rawget(currentConditions, currentCondition)
+			if not condition then return iter() end
+			return condition, currentCondition, cg, ci -- condition data, conditionID, groupID, iconID
+		end
+		
+		function TMW:InConditionSettings()
+			stage = "icon"
+			extIter = TMW:InIconSettings()
+			currentCondition = 0
+			return iter
+		end
+	end
+	
+	do -- InConditions
+		
+		local stage, Conditions, ConditionID, ci, cg, extIter
+		local function iter()
+			ConditionID = ConditionID + 1
+			
+			if ConditionID > (Conditions.n  or #Conditions) then -- #Conditions enables iteration over tables that have not yet been upgraded with an n key
+				return
+			end
+			local Condition = Conditions[ConditionID]
+			return Condition, ConditionID
+		end
+		
+		function TMW:InConditions(arg)
+			ConditionID = 0
+			Conditions = arg
+			return iter
+		end
+	end
+	
 	do -- InIconSettings
 		local cg = 1
 		local ci = 0
@@ -404,10 +461,9 @@ TMW.Defaults = {
 			["*"] = {},
 		},
 		HelpSettings = {
-			ResetCount = 0,
 		},
-		CodeSnippets = {
-		},
+		--[[CodeSnippets = {
+		},]]
 		HasImported			= false,
 		ConfigWarning		= true,
 	},
@@ -431,8 +487,8 @@ TMW.Defaults = {
 		BarGCD		 =	true,
 		ClockGCD	 =	true,
 		CheckOrder	 =	-1,
-		CodeSnippets = {
-		},
+	--[[	CodeSnippets = {
+		},]]
 		Groups 		= 	{
 			[1] = {
 				Enabled			= true,
@@ -562,6 +618,7 @@ TMW.Defaults = {
 							},
 						},
 						Conditions = {
+							n = 0,
 							["**"] = {
 								AndOr 	   = "AND",
 								Type 	   = "",
@@ -1341,6 +1398,33 @@ function TMW:GetUpgradeTable()			-- upgrade functions
 	if upgradeTable then return upgradeTable end
 	local t = {
 	
+		[46418] = {
+			-- cant use the conditions key here because it depends on Conditions.n, which is 0 until this is ran
+			global = function()
+				db.global.HelpSettings.ResetCount = nil
+			end,
+		},
+		[46417] = {
+			-- cant use the conditions key here because it depends on Conditions.n, which is 0 until this is ran
+			group = function(gs)
+				local n = 0
+				for k, v in pairs(gs.Conditions) do
+					if type(k) == "number" then
+						n = max(n, k)
+					end
+				end
+				gs.Conditions.n = n
+			end,
+			icon = function(ics)
+				local n = 0
+				for k, v in pairs(ics.Conditions) do
+					if type(k) == "number" then
+						n = max(n, k)
+					end
+				end
+				ics.Conditions.n = n
+			end,
+		},
 		[46407] = {
 			global = function()
 				local HelpSettings = db.global.HelpSettings
@@ -2075,23 +2159,48 @@ function TMW:DoUpgrade(version, global, groupID, iconID)
 	for k, v in ipairs(TMW:GetUpgradeTable()) do
 		if v.Version > version then
 			if global and v.global then
+				-- upgrade global settings
 				v.global(v)
+				
 			elseif groupID and not iconID and v.group then
+				-- upgrade group settings
 				v.group(db.profile.Groups[groupID], v, groupID)
+				
+				-- upgrade group conditions
+				if v.condition then
+					for condition, conditionID in TMW:InConditions(db.profile.Groups[groupID].Conditions) do
+						v.condition(condition, v, conditionID, groupID)
+					end
+				end
+				
 			elseif iconID and groupID and v.icon then
+				-- upgrade icon settings
 				v.icon(db.profile.Groups[groupID].Icons[iconID], v, groupID, iconID)
+				
+				-- upgrade icon conditions
+				if v.condition then
+					for condition, conditionID in TMW:InConditions(db.profile.Groups[groupID].Icons[iconID].Conditions) do
+						v.condition(condition, v, conditionID, groupID, iconID)
+					end
+				end
 			end
+			
 			if global and v.postglobal then
+				-- upgrade global things that should come after everything else
 				v.postglobal(v)
+				
 			end
 		end
 	end
 	
 	if global then
+		-- delegate upgrades to all groups
 		for gs, groupID in TMW:InGroupSettings() do
 			TMW:DoUpgrade(version, nil, groupID, nil)
 		end
+		
 	elseif groupID and not iconID then
+		-- delegate upgrades to all icons
 		for ics, groupID, iconID in TMW:InIconSettings(groupID) do
 			TMW:DoUpgrade(version, nil, groupID, iconID)
 		end
@@ -2129,29 +2238,26 @@ end
 
 function TMW:CheckForInvalidIcons()
 	if not db.profile.WarnInvalids then return end
-	for gID, gs in pairs(db.profile.Groups) do
-		local group = TMW[gID]
-		if group and group.Enabled and group.CorrectSpec then
-			for iID, is in pairs(gs.Icons) do
-				if is.Enabled then
-					for k, v in ipairs(is.Conditions) do
-						if v.Icon ~= "" and v.Type == "ICON" then
-							if not TMW:IsIconValid(v.Icon) then
-								local g, i = strmatch(v.Icon, "TellMeWhen_Group(%d+)_Icon(%d+)")
-								g, i = tonumber(g), tonumber(i)
-								TMW.Warn(format(L["CONDITIONORMETA_CHECKINGINVALID"], gID, iID, g, i))
-							end
-						end
-					end
-					if is.Type == "meta" then
-						for k, v in pairs(is.Icons) do
-							if not TMW:IsIconValid(v) then
-								local g, i = strmatch(v, "TellMeWhen_Group(%d+)_Icon(%d+)")
-								g, i = tonumber(g), tonumber(i)
-								TMW.Warn(format(L["CONDITIONORMETA_CHECKINGINVALID"], gID, iID, g, i))
-							end
-						end
-					end
+	
+	for condition, conditionID, groupID, iconID in TMW:InConditionSettings() do
+		local group = TMW[groupID]
+		if group and group.Enabled and group.CorrectSpec and (not group[iconID] or group[iconID].Enabled) then
+			if not TMW:IsIconValid(condition.Icon) and condition.Type == "ICON" then
+				local g, i = strmatch(condition.Icon, "TellMeWhen_Group(%d+)_Icon(%d+)")
+				g, i = tonumber(g), tonumber(i)
+				TMW.Warn(format(L["CONDITIONORMETA_CHECKINGINVALID"], groupID, iconID, g, i))
+			end
+		end
+	end
+	
+	for ics, groupID, iconID in TMW:InIconSettings() do
+		local group = TMW[groupID]
+		if group and group.Enabled and group.CorrectSpec and ics.Enabled and ics.Type == "meta" then
+			for k, v in pairs(ics.Icons) do
+				if not TMW:IsIconValid(v) then
+					local g, i = strmatch(v, "TellMeWhen_Group(%d+)_Icon(%d+)")
+					g, i = tonumber(g), tonumber(i)
+					TMW.Warn(format(L["CONDITIONORMETA_CHECKINGINVALID"], groupID, iconID, g, i))
 				end
 			end
 		end
@@ -3018,6 +3124,22 @@ TypeBase.DisabledEvents = {}
 function TypeBase:GetNameForDisplay(icon, data)
 	local name = data and GetSpellInfo(data) or data
 	return name, true
+end
+
+function TypeBase:DragReceived(icon, t, data, subType)
+	local ics = icon.ics
+	
+	if t ~= "spell" then
+		return
+	end
+	
+	local _, spellID = GetSpellBookItemInfo(data, subType)
+	if not spellID then
+		return
+	end
+	
+	ics.Name = TMW:CleanString(ics.Name .. ";" .. spellID)
+	return true -- signal success
 end
 
 function TMW:RegisterIconType(Type)

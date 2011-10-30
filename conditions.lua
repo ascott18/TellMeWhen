@@ -2096,7 +2096,7 @@ function CNDT:ProcessConditions(icon)
 	
 	local funcstr = ""
 	local luaUsed
-	for i = 1, #Conditions do
+	for i = 1, Conditions.n do
 		local c = Conditions[i]
 		local t = c.Type
 		local v = ConditionsByType[t]
@@ -2143,7 +2143,7 @@ function CNDT:ProcessConditions(icon)
 
 				
 				if strfind(thisstr, "c.Unit2") then  -- Unit2 MUST be before Unit
-					local unit = TMW:GetUnits(nil, c.Name, true)[1]
+					local unit = TMW:GetUnits(nil, c.Name, true)[1] or ""
 					if (strfind(unit, "maintank") or strfind(unit, "mainassist")) then
 						thisstr = gsub(thisstr, "c.Unit2",		unit) -- sub it in as a variable
 						Env[unit] = unit
@@ -2155,7 +2155,7 @@ function CNDT:ProcessConditions(icon)
 				end
 				
 				if strfind(thisstr, "c.Unit") then
-					local unit = TMW:GetUnits(nil, c.Unit, true)[1]
+					local unit = TMW:GetUnits(nil, c.Unit, true)[1] or ""
 					if (strfind(unit, "maintank") or strfind(unit, "mainassist")) then
 						thisstr = gsub(thisstr, "c.Unit",		unit) -- sub it in as a variable
 						Env[unit] = unit

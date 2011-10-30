@@ -25,6 +25,7 @@ L["LOCKED"] = "Locked"
 L["RESIZE"] = "Resize"
 L["RESIZE_TOOLTIP"] = "Click and drag to change size"
 
+L["ONGROUPDELETE_CHECKINGINVALID"] = "Warning! The following groups and icons were checking icons that were in the group that you just deleted:"
 L["CONDITIONORMETA_CHECKINGINVALID"] = "Warning! Group %d, Icon %d is checking an invalid icon (Group %d, Icon %d)"
 L["WARN_DRMISMATCH"] = [[Warning! You are checking the diminishing returns on spells from two different known categories.
 
@@ -360,7 +361,7 @@ L["DEFAULT"] = "Default"
 L["NONE"] = "None of these"
 L["CASTERFORM"] = "Caster Form"
 
-L["RESET_ICON"] = "Reset Icon"
+L["RESET_ICON"] = "Reset"
 L["UNDO_ICON"] = "Undo"
 L["REDO_ICON"] = "Redo"
 L["RESET_NOTIFY"] = "Click the reset button again within 5 seconds to confirm the reset."

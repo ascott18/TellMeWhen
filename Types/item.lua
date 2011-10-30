@@ -215,4 +215,16 @@ function Type:GetNameForDisplay(icon, data)
 	return data and GetItemInfo(data)
 end
 
+function Type:DragReceived(icon, t, data, subType)
+	local ics = icon.ics
+	
+	if t ~= "item" or not data then
+		return
+	end
+	
+	ics.Name = TMW:CleanString(ics.Name .. ";" .. data)
+	return true -- signal success
+end
+
+
 TMW:RegisterIconType(Type)

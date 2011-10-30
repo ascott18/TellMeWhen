@@ -3047,6 +3047,7 @@
 							<OnLoad>
 								self.text:SetText(TMW.L["ICONMENU_ENABLE"])
 								self.text:SetWidth(85)
+								self:SetFrameLevel(self:GetFrameLevel() + 2) -- sometimes it ends up under the type dropdown which makes half of the checkbox unclickable
 							</OnLoad>
 							<OnClick>
 								if TMW.CI.ics then
@@ -3746,85 +3747,27 @@
 				<Anchors>
 					<Anchor point="BOTTOMLEFT" x="15" y="13"/>
 				</Anchors>
-				<Layers>
-					<Layer level="OVERLAY">
-						<Texture name="$parentGlow" file="Interface\Buttons\UI-Panel-Button-Highlight" parentKey="Glow" alphaMode="ADD" setAllPoints="true">
-							<TexCoords left="0" right="0.625" top="0" bottom="0.6875"/>
-							<Anchors>
-								<Anchor point="CENTER"/>
-							</Anchors>
-							<Animations>
-								<AnimationGroup name="$parentAnim" parentKey="Anim">
-									<Alpha change="1.0" duration="1" order="1"/>
-									<Alpha startDelay="0.5" change="-1.0" duration="1" order="2"/>
-									<Alpha change="1.0" duration="1" order="3"/>
-									<Alpha startDelay="0.5" change="-1.0" duration="1" order="4"/>
-									<Scripts>
-										<OnPlay>
-											self.Button.preClicked = 1
-											self.Button:SetText(TMW.L["RESET_CONFIRM"])
-											if 10 > TMW.db.global.HelpSettings.ResetCount then
-												TMW:Print(TMW.L["RESET_NOTIFY"])
-											end
-										</OnPlay>
-										<OnFinished>
-											self:GetScript("OnStop")(self)
-											if not requested and 5 > TMW.db.global.HelpSettings.ResetCount then
-												TMW:Print(TMW.L["RESET_EXPIRE"])
-											end
-										</OnFinished>
-										<OnStop>
-											self.Button.preClicked = nil
-											self.Button:SetText(TMW.L["RESET_ICON"])
-										</OnStop>
-									</Scripts>
-								</AnimationGroup>
-							</Animations>
-						</Texture>
-					</Layer>
-				</Layers>
 				<Scripts>
 					<OnLoad>
-						-- calculate ideal width
-						local texts = {
-							TMW.L["RESET_ICON"],
-							TMW.L["RESET_CONFIRM"],
-						}
-						local width = 0
-						for k, text in pairs(texts) do
-							self:SetText(text)
-							width = max(width, self:GetTextWidth())
-						end
-						self:SetWidth(width+25)
-						
 						self:SetText(TMW.L["RESET_ICON"])
+						self:SetWidth(self:GetTextWidth()+30)
+						
 						self:SetFrameLevel(self:GetFrameLevel()+2)
-						self.Glow:SetAlpha(0)
-						self.Glow.Anim.Button = self
 					</OnLoad>
 					<OnClick>
-						if not self.preClicked then
-							self.Glow.Anim:Play()
-						else
-							TMW.IE:Reset()
-							TMW.db.global.HelpSettings.ResetCount = TMW.db.global.HelpSettings.ResetCount + 1
-							self.Glow.Anim:Stop()
-						end
+						TMW.IE:Reset()
 					</OnClick>
-					<OnHide>
-						self.Glow.Anim:Stop()
-					</OnHide>
 				</Scripts>
 			</Button>
 			<Button name="$parentUndo" parentKey="UndoButton" inherits="TellMeWhen_ButtonTemplate" >
 				<Size x="100" y="17"/>
 				<Anchors>
-					<Anchor point="BOTTOMLEFT" x="15" y="-40"/>
+					<Anchor point="LEFT" relativeTo="$parentReset" relativePoint="RIGHT" x="5" y="0"/>
 				</Anchors>
 				<Scripts>
 					<OnLoad>
 						self:SetText(TMW.L["UNDO_ICON"])
-						self:SetWidth(self:GetTextWidth()+25)
+						self:SetWidth(self:GetTextWidth()+30)
 						self:SetFrameLevel(self:GetFrameLevel()+2)
 					</OnLoad>
 					<OnClick>
@@ -3835,12 +3778,12 @@
 			<Button name="$parentRedo" parentKey="RedoButton" inherits="TellMeWhen_ButtonTemplate" >
 				<Size x="100" y="17"/>
 				<Anchors>
-					<Anchor point="BOTTOMLEFT" x="15" y="-70"/>
+					<Anchor point="LEFT" relativeTo="$parentUndo" relativePoint="RIGHT" x="0" y="0"/>
 				</Anchors>
 				<Scripts>
 					<OnLoad>
 						self:SetText(TMW.L["REDO_ICON"])
-						self:SetWidth(self:GetTextWidth()+25)
+						self:SetWidth(self:GetTextWidth()+30)
 						self:SetFrameLevel(self:GetFrameLevel()+2)
 					</OnLoad>
 					<OnClick>
@@ -3861,7 +3804,7 @@
 			 
 			<EditBox name="$parentExportBox" inherits="TellMeWhen_ExportBoxTemplate" parentKey="ExportBox">
 				<Anchors>
-					<Anchor point="LEFT" relativeTo="$parentReset" relativePoint="RIGHT" x="11"/>
+					<Anchor point="LEFT" relativeTo="$parentRedo" relativePoint="RIGHT" x="11"/>
 					<Anchor point="RIGHT" relativeTo="$parentOkay" relativePoint="LEFT" x="-22"/>
 				</Anchors>
 			</EditBox>

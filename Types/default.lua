@@ -51,4 +51,23 @@ function Type:Setup(icon, groupID, iconID)
 	icon:SetAlpha(0)
 end
 
+function Type:DragReceived(icon, t, data, subType)
+	local ics = icon.ics
+	
+	local newType
+	if t == "spell" then
+		_, input = GetSpellBookItemInfo(data, subType)
+		newType = "cooldown"
+	elseif t == "item" then
+		input = data
+		newType = "item"
+	end
+	if not input then return end
+	
+	ics.Type = newType
+	ics.Enabled = true
+	ics.Name = TMW:CleanString(ics.Name .. ";" .. input)
+	return true -- signal success
+end
+	
 TMW:RegisterIconType(Type)

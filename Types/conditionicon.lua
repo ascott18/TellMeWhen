@@ -124,6 +124,22 @@ function Type:Setup(icon, groupID, iconID)
 	--icon:OnUpdate(TMW.time) -- dont do this!
 end
 
+function Type:DragReceived(icon, t, data, subType)
+	local ics = icon.ics
+	
+	local _, input
+	if t == "spell" then
+		_, input = GetSpellBookItemInfo(data, subType)
+	elseif t == "item" then
+		input = GetItemIcon(data)
+	end
+	if not input then
+		return
+	end
+	
+	ics.Name = TMW:CleanString(input)
+	return true -- signal success
+end
 function Type:IE_TypeLoaded()
 	local Name = TMW.IE.Main.Name
 	Name.label = L["ICONMENU_CHOOSENAME_CNDTIC"]

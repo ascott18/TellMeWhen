@@ -1,6 +1,6 @@
 ===v4.6.4===
  * New Condition: Pet talent tree.
- * You can now undo and redo changes made to icon settings. (NOTE: NOT FULLY IMPLEMENTED YET!)
+ * You can now undo and redo changes made to icon settings.
  * Rewrote the help module, and migrated/added some new warnings to it.
  * Diminishing return category mismatch warnings are now much more informative.
  * The condition editor is prettier now.

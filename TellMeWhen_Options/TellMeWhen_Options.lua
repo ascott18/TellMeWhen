@@ -549,53 +549,22 @@ function TMW:DeepCompare(t1, t2, ...)
 	
 	-- compare table values
 	for k1, v1 in pairs(t1) do
-		local v2 = rawget(t2, k1)
+		local v2 = t2[k1]
 		if v2 == nil or not TMW:DeepCompare(v1, v2, k1, ...) then
-			return TMW:DeepCompare(v1, v2, type(v1), k1, ...)
+			return TMW:DeepCompare(v1, v2, k1, ...)
 		end
 	end
 	
 	for k2, v2 in pairs(t2) do
-		local v1 = rawget(t1, k2)
+		local v1 = t1[k2]
 		if v1 == nil or not TMW:DeepCompare(v1, v2, k2, ...) then
-			return TMW:DeepCompare(v1, v2, type(v2), k2, ...)
+			return TMW:DeepCompare(v1, v2, k2, ...)
 		end
 	end
 	
 	return true, ...
 end
 
---[[
-function TMW:CopyChanges(t1, t2)
-	if type(t1) == "table" and type(t2) == "table" then
-		ret = {}
-		if not DeepCompare(t1, t2) then
-			for k1, v1 in pairs(t1) do
-				local v2 = t2[k1]
-				if v2 == nil or not DeepCompare(v1, v2) then
-					ret[k1] = TMW:CopyChanges(v1, v2)
-				end
-				
-			end
-			
-			for k2, v2 in pairs(t2) do
-				local v1 = t1[k2]
-				if v2 == nil or not DeepCompare(v1, v2) then
-					ret[k2] = TMW:CopyChanges(v1, v2)
-				end
-			end
-		end
-		return ret
-		
-	else
-		if not DeepCompare(t1, t2) then
-			return t2
-		else
-			return nil
-		end
-		
-	end
-end]]
 
 
 -- --------------
@@ -1284,28 +1253,34 @@ end
 
 function TMW:Group_Delete(groupID)
 	tremove(db.profile.Groups, groupID)
-	local warntext = ""
-	for ics, gID, iID in TMW:InIconSettings() do
-		if ics.Conditions then
-			for k, v in ipairs(ics.Conditions) do
-				if v.Icon ~= "" and v.Type == "ICON" then
-					local g = tonumber(strmatch(v.Icon, "TellMeWhen_Group(%d+)_Icon"))
-					if g > groupID then
-						ics.Conditions[k].Icon = gsub(v.Icon, "_Group" .. g, "_Group" .. g-1)
-					elseif g == groupID then
-						warntext = warntext .. format(L["GROUPICON"], TMW:GetGroupName(gID, gID, 1), iID) .. ", "
-					end
+	local warntext = L["ONGROUPDELETE_CHECKINGINVALID"] .. " "
+	
+	-- shift condition icons
+	for condition, _, gID, iID in TMW:InConditionSettings() do
+		if condition.Icon ~= "" and condition.Type == "ICON" then
+			local g = tonumber(strmatch(condition.Icon, "TellMeWhen_Group(%d+)_Icon"))
+			if g > groupID then
+				ics.Conditions[k].Icon = gsub(condition.Icon, "_Group" .. g, "_Group" .. g-1)
+			elseif g == groupID then
+				if iID then
+					warntext = warntext .. format(L["GROUPICON"], TMW:GetGroupName(gID, gID, 1), iID) .. ";  "
+				else
+					warntext = warntext .. format(L["fGROUP"], TMW:GetGroupName(gID, gID, 1)) .. ";  "
 				end
 			end
 		end
+	end
+	
+	-- shift meta components
+	for ics, gID, iID in TMW:InIconSettings() do
 		if ics.Type == "meta" then
 			for k, v in pairs(ics.Icons) do
 				if v ~= "" then
-					local g =  tonumber(strmatch(v, "TellMeWhen_Group(%d+)_Icon"))
+					local g = tonumber(strmatch(v, "TellMeWhen_Group(%d+)_Icon"))
 					if g > groupID then
 						ics.Icons[k] = gsub(v, "_Group" .. g, "_Group" .. g-1)
 					elseif g == groupID then
-						warntext = warntext .. format(L["GROUPICON"], TMW:GetGroupName(gID, gID, 1), iID) .. ", "
+						warntext = warntext .. format(L["GROUPICON"], TMW:GetGroupName(gID, gID, 1), iID) .. ";  "
 					end
 				end
 			end
@@ -1376,15 +1351,26 @@ TMW.ImportFunctions = {
 		if oldgroupID then
 			local srcgr, destgr = "TellMeWhen_Group"..oldgroupID, TMW[groupID]:GetName()
 			for ics in TMW:InIconSettings(groupID) do
+			
+				-- update meta icons within the group
 				for k, ic in pairs(ics.Icons) do
 					if ic:find(srcgr) then
 						ics.Icons[k] = ic:gsub(srcgr, destgr)
 					end
 				end
-				for k, condition in pairs(ics.Conditions) do
-					if condition.Icon:find(srcgr) then
-						condition.Icon = condition.Icon:gsub(srcgr, destgr)
+				
+				-- update the conditions of icons within the group
+				for Condition in TMW:InConditions(ics.Conditions) do
+					if Condition.Icon:find(srcgr) then
+						Condition.Icon = Condition.Icon:gsub(srcgr, destgr)
 					end
+				end
+			end
+			
+			-- update group conditions
+			for Condition in TMW:InConditions(gs.Conditions) do
+				if Condition.Icon:find(srcgr) then
+					Condition.Icon = Condition.Icon:gsub(srcgr, destgr)
 				end
 			end
 		end
@@ -1410,6 +1396,7 @@ TMW.ImportFunctions = {
 				newname = base .. " (" .. newnum .. ")"
 			end
 			
+			-- this will create a new profile if one by this name does not exist
 			db:SetProfile(newname)
 		else
 			db:ResetProfile()
@@ -1501,77 +1488,57 @@ end
 
 function ID:Drag_DropDown()
 	local info = UIDropDownMenu_CreateInfo()
-	if UIDROPDOWNMENU_MENU_LEVEL == 2 then
-		info.text = L["CONFIRMOVERWRITE"]
-		info.notCheckable = true
-		info.func = UIDROPDOWNMENU_MENU_VALUE
-		UIDropDownMenu_AddButton(info, UIDROPDOWNMENU_MENU_LEVEL)
-		return
-	end
+	info.func = ID.Handler
 	
-	local append = ""
-	if ID.desticon.texture:GetTexture() ~= "Interface\\AddOns\\TellMeWhen\\Textures\\Disabled" then
-		append = "|TInterface\\AddOns\\TellMeWhen_Options\\Textures\\Alert:0:2|t"
-	end
-	
-	info.text = L["ICONMENU_MOVEHERE"] .. append
-	info.notCheckable = true
-	if append ~= "" then
-		info.hasArrow = true
-		info.value = ID.Move
-		info.func = nil
-	else
-		info.hasArrow = nil
-		info.value = nil
-		info.func = ID.Move
-	end
+	info.text = L["ICONMENU_MOVEHERE"]
+--	info.func = ID.Handler
+	info.arg1 = "Move"
 	UIDropDownMenu_AddButton(info, UIDROPDOWNMENU_MENU_LEVEL)
 
-	info.text = L["ICONMENU_COPYHERE"] .. append
-	if append ~= "" then
-		info.hasArrow = true
-		info.value = ID.Copy
-		info.func = nil
-	else
-		info.hasArrow = nil
-		info.value = nil
-		info.func = ID.Copy
-	end
+	info.text = L["ICONMENU_COPYHERE"]
+--	info.func = ID.Handler
+	info.arg1 = "Copy"
 	UIDropDownMenu_AddButton(info, UIDROPDOWNMENU_MENU_LEVEL)
 	
 	info.hasArrow = nil -- inherit for the rest
 	info.value = nil -- inherit for the rest
 
 	info.text = L["ICONMENU_SWAPWITH"]
-	info.func = ID.Swap
+	--info.func = ID.Handler
+	info.arg1 = "Swap"
 	UIDropDownMenu_AddButton(info, UIDROPDOWNMENU_MENU_LEVEL)
 
 	if TMW:IsIconValid(ID.srcicon) then
 		info.text = L["ICONMENU_APPENDCONDT"]
-		info.func = ID.Condition
+	--	info.func = ID.Handler
+		info.arg1 = "Condition"
 		UIDropDownMenu_AddButton(info, UIDROPDOWNMENU_MENU_LEVEL)
 
 		if ID.desticon.Type == "meta" then
 			info.text = L["ICONMENU_ADDMETA"]
-			info.func = ID.Meta
+			--info.func = ID.Handler
+			info.arg1 = "Meta"
 			UIDropDownMenu_AddButton(info, UIDROPDOWNMENU_MENU_LEVEL)
 		end
 	end
 	
 	if ID.srcgroupID ~= ID.destgroupID then
 		info.text = L["ICONMENU_ANCHOR"]:format(TMW:GetGroupName(ID.destgroupID, ID.destgroupID, 1))
-		info.func = ID.Anchor
+		--info.func = ID.Handler
+		info.arg1 = "Anchor"
 		UIDropDownMenu_AddButton(info, UIDROPDOWNMENU_MENU_LEVEL)
 	end
 
 	info.text = CANCEL
 	info.func = nil
+	info.arg1 = nil
 	UIDropDownMenu_AddButton(info, UIDROPDOWNMENU_MENU_LEVEL)
 
 	UIDropDownMenu_JustifyText(self, "LEFT")
 end
 
 function ID:SpellItemToIcon(groupID, iconID)
+	local icon = TMW[groupID][iconID]
 	local t, data, subType
 	local input
 	if not (CursorHasSpell() or CursorHasItem()) and ID.DraggingInfo then
@@ -1581,25 +1548,16 @@ function ID:SpellItemToIcon(groupID, iconID)
 		t, data, subType = GetCursorInfo()
 	end
 	ID.DraggingInfo = nil
-	if t == "spell" then
-		t = "cooldown" -- make the code prettier. all spells will be in the regular "cooldown" icon.
+	
+	-- create a backup before doing things
+	IE:AttemptBackup(icon)
+	
+	-- handle the drag based on icon type
+	local success = icon.typeData:DragReceived(icon, t, data, subType)
+	if not success then
+		return
 	end
 	
-	local Type = t
-	if t == "cooldown" then
-		_, input = GetSpellBookItemInfo(data, subType)
-	elseif t == "item" then
-		input = data
-	end
-	if not input then return end
-	local icondata = db.profile.Groups[groupID].Icons[iconID]
-	if icondata.Type == "" then
-		icondata.Type = Type
-		icondata.Enabled = true
-	end
-	if (icondata.Type ~= "cooldown" and icondata.Type ~= "item") or (icondata.Type == t) then
-		icondata.Name = TMW:CleanString(icondata.Name .. ";" .. input)
-	end
 	ClearCursor()
 	TMW:Icon_Update(TMW[groupID][iconID])
 	IE:Load(1)
@@ -1649,107 +1607,121 @@ function ID:SetIsDraggingFalse()
 	ID.IsDragging = false
 end
 
-function ID:Move()
+
+function ID:Handler(method)
+	-- close the menu
 	CloseDropDownMenus()
+	
+	-- dont operate on the exact same icon
 	if ID.destgroupID == ID.srcgroupID and ID.desticonID == ID.srciconID then return end
+	
+	-- save misc. settings
 	IE:SaveSettings()
+	
+	-- attempt to create a backup before doing anything
+	IE:AttemptBackup(ID.srcicon)
+	IE:AttemptBackup(ID.desticon)
+	
+	-- finally, invoke the method to handle the operation.
+	ID[method](ID)
+	
+	-- then, update things
+	TMW:Update()
+	IE:Load(1)
+end
+
+function ID:Move()
+	-- move the actual settings
 	db.profile.Groups[ID.destgroupID].Icons[ID.desticonID] = db.profile.Groups[ID.srcgroupID].Icons[ID.srciconID]
 	db.profile.Groups[ID.srcgroupID].Icons[ID.srciconID] = nil
-	ID.desticon.texture:SetTexture(ID.srcicon.texture:GetTexture()) -- preserve buff/debuff/other types textures
+	
+	-- preserve buff/debuff/other types textures
+	ID.desticon.texture:SetTexture(ID.srcicon.texture:GetTexture())
 
-	-- update meta icons and icon shown conditions
 	local srcicon, desticon = tostring(ID.srcicon), tostring(ID.desticon)
+	
+	-- update any changed icons in metas
 	for ics in TMW:InIconSettings() do
 		for k, ic in pairs(ics.Icons) do
 			if ic == srcicon then
 				ics.Icons[k] = desticon
 			end
 		end
-		for k, condition in pairs(ics.Conditions) do
-			if condition.Icon == srcicon then
-				condition.Icon = desticon
-			end
+	end
+	
+	-- update any changed icons in conditions
+	for Condition in TMW:InConditionSettings() do
+		if Condition.Icon == srcicon then
+			Condition.Icon = desticon
 		end
 	end
-
-	TMW:Update()
-	IE:Load(1)
 end
 
 function ID:Copy()
-	CloseDropDownMenus()
-	if ID.destgroupID == ID.srcgroupID and ID.desticonID == ID.srciconID then return end
-	IE:SaveSettings()
+	-- copy the settings
 	db.profile.Groups[ID.destgroupID].Icons[ID.desticonID] = TMW:CopyWithMetatable(db.profile.Groups[ID.srcgroupID].Icons[ID.srciconID])
-	ID.desticon.texture:SetTexture(ID.srcicon.texture:GetTexture()) -- preserve buff/debuff/other types textures
-	TMW:Update()
-	IE:Load(1)
+	
+	-- preserve buff/debuff/other types textures
+	ID.desticon.texture:SetTexture(ID.srcicon.texture:GetTexture()) 
 end
 
 function ID:Swap()
-	CloseDropDownMenus()
-	if ID.destgroupID == ID.srcgroupID and ID.desticonID == ID.srciconID then return end
-	IE:SaveSettings()
+	-- swap the actual settings
 	local dest = db.profile.Groups[ID.destgroupID].Icons[ID.desticonID]
 	db.profile.Groups[ID.destgroupID].Icons[ID.desticonID] = db.profile.Groups[ID.srcgroupID].Icons[ID.srciconID]
 	db.profile.Groups[ID.srcgroupID].Icons[ID.srciconID] = dest
-	local desttex = ID.desticon.texture:GetTexture() -- preserve buff/debuff/other types textures
+	
+	-- preserve buff/debuff/other types textures
+	local desttex = ID.desticon.texture:GetTexture() 
 	ID.desticon.texture:SetTexture(ID.srcicon.texture:GetTexture())
 	ID.srcicon.texture:SetTexture(desttex)
 
-	-- update meta icons and icon shown conditions
 	local srcicon, desticon = tostring(ID.srcicon), tostring(ID.desticon)
+	
+	-- update any changed icons in metas
 	for ics in TMW:InIconSettings() do
 		for k, ic in pairs(ics.Icons) do
-			if ic == tostring(ID.srcicon) then
+			if ic == srcicon then
 				ics.Icons[k] = desticon
 			elseif ic == desticon then
 				ics.Icons[k] = srcicon
 			end
 		end
-		for k, condition in pairs(ics.Conditions) do
-			if condition.Icon == srcicon then
-				condition.Icon = desticon
-			elseif condition.Icon == desticon then
-				condition.Icon = srcicon
-			end
+	end
+	
+	-- update any changed icons in conditions
+	for Condition in TMW:InConditionSettings() do
+		if Condition.Icon == srcicon then
+			Condition.Icon = desticon
+		elseif Condition.Icon == desticon then
+			Condition.Icon = srcicon
 		end
 	end
-
-	TMW:Update()
-	IE:Load(1)
 end
 
 function ID:Meta()
-	CloseDropDownMenus()
-	if ID.destgroupID == ID.srcgroupID and ID.desticonID == ID.srciconID then return end
-	IE:SaveSettings()
 	tinsert(db.profile.Groups[ID.destgroupID].Icons[ID.desticonID].Icons, ID.srcicon:GetName())
-	TMW:Update()
-	IE:Load(1)
 end
 
 function ID:Condition()
-	CloseDropDownMenus()
-	if ID.destgroupID == ID.srcgroupID and ID.desticonID == ID.srciconID then return end
-	IE:SaveSettings()
-
-	local conditions = db.profile.Groups[ID.destgroupID].Icons[ID.desticonID].Conditions
-	local condition = conditions[#conditions + 1]
-	condition.Type = "ICON"
-	condition.Icon = ID.srcicon:GetName()
-
-	TMW:Update()
-	IE:Load(1)
+	-- add a condition to the destination icon
+	local Condition = CNDT:AddCondition(db.profile.Groups[ID.destgroupID].Icons[ID.desticonID].Conditions)
+	
+	-- set the settings
+	Condition.Type = "ICON"
+	Condition.Icon = ID.srcicon:GetName()
 end
 
 function ID:Anchor()
-	CloseDropDownMenus()
+	 -- dont operate on the same group. the handler only checks for it being the same icon, so we need this:
 	if ID.destgroupID == ID.srcgroupID then return end
+	
+	-- set the setting
 	db.profile.Groups[ID.srcgroupID].Point.relativeTo = TMW[ID.destgroupID]:GetName()
-	TMW:Group_StopMoving(TMW[ID.srcgroupID]) -- i cheat
-	TMW:Update()
-	IE:Load(1)
+	
+	-- do adjustments and positioning
+	-- i cheat. we didnt really stop moving anything, but i'm going to hijack this function anyway.
+	TMW:Group_StopMoving(TMW[ID.srcgroupID])
 end
 
 
@@ -2077,54 +2049,75 @@ function IE:GetCompareResultsPath(match, ...)
 		return true
 	end
 	local path = ""
-	local changedType
+	local setting
 	for i, v, size in TMW:Vararg(...) do
 		if i == 1 then
-			changedType = v
-		else
-			path = path .. v .. "\001"
+			setting = v
 		end
+		path = path .. v .. "\001"
 	end
-	return path, changedType
+	return path, setting
 end
 
 function IE:DoUndoRedo(direction)
-	local icon = TMW.CI.ic
+	local icon = CI.ic
+	print("OLD HISTORY STATE", icon.historyState)
 	icon.historyState = icon.historyState + direction
+	print("NEW HISTORY STATE", icon.historyState)
 	
-	TMW.db.profile.Groups[TMW.CI.g].Icons[TMW.CI.i] = nil -- recreated when passed into CTIPWM
+	db.profile.Groups[CI.g].Icons[CI.i] = nil -- recreated when passed into CTIPWM
 	
-	TMW:CopyTableInPlaceWithMeta(icon.history[icon.historyState], TMW.db.profile.Groups[TMW.CI.g].Icons[TMW.CI.i])
-	
-	TMW.IE:Load(1)
-	TMW.IE:UndoRedoChanged()
+	TMW:CopyTableInPlaceWithMeta(icon.history[icon.historyState], db.profile.Groups[CI.g].Icons[CI.i])
+	IE:Load(1)
+	--IE:UndoRedoChanged()
 end
 
+IE.RapidSettings = {
+	-- settings that can be changed very rapidly, i.e. via mouse wheel or in a color picker
+	r = true,
+	g = true,
+	b = true,
+	Size = true,
+	Level = true,
+	Alpha = true,
+	UnAlpha = true,
+	ConditionAlpha = true,
+}
 function IE:AttemptBackup(icon)
-	if not icon.historyState then return end
-	local result, changedType = IE:GetCompareResultsPath(TMW:DeepCompare(icon.history[icon.historyState], icon.ics))
+	if not icon then return end
+	--print("-----------------------------------------------------------------------------------------------------------------------------")
+	--print("|cff888888", icon, debugstack(1))
 	
-	if type(result) == "string" then
-		
-		for i = icon.historyState + 1, #icon.history do
-			icon.history[i] = nil
-			print("ERASED HISTORY POINT", i)
-		end
-		
-		if icon.lastChangePath == result and changedType == "number" then
-			icon.history[#icon.history] = nil
-			icon.historyState = #icon.history
-			print("DELETING LAST HISTORY POINT")
-		end
-		icon.lastChangePath = result
-			
-		icon.history[#icon.history + 1] = CopyTable(icon.ics)
-		print("CREATING HISTORY POINT", #icon.history)
-		
+	if type(icon) == "table" and not icon.history then
+		icon.history = {TMW:CopyWithMetatable(icon.ics)}
 		icon.historyState = #icon.history
+		print("CREATED INITIAL HISTORY POINT", #icon.history)
+	else
+	
+		assert(icon.historyState)
+		local result, changedSetting = IE:GetCompareResultsPath(TMW:DeepCompare(icon.history[icon.historyState], icon.ics))
+		if type(result) == "string" then
 		
-		TMW.IE:UndoRedoChanged()
+			for i = icon.historyState + 1, #icon.history do
+				icon.history[i] = nil
+				print("ERASED HISTORY POINT", i)
+			end
+			
+			if icon.lastChangePath == result and IE.RapidSettings[changedSetting] then
+				print("DELETING LAST HISTORY POINT", #icon.history)
+				icon.history[#icon.history] = nil
+				icon.historyState = #icon.history
+			end
+			icon.lastChangePath = result
+			
+			
+			icon.history[#icon.history + 1] = TMW:CopyWithMetatable(icon.ics)
+			print("CREATED HISTORY POINT", #icon.history)
+			
+			icon.historyState = #icon.history
+		end
 	end
+	IE:UndoRedoChanged()
 end
 
 function IE:OnUpdate()
@@ -2323,15 +2316,16 @@ function IE:SaveSettings(frame)
 end
 
 function IE:UndoRedoChanged()
-	local ic = TMW.CI.ic
+	local icon = TMW.CI.ic
+	if not icon then return end
 	
-	if ic.historyState - 1 < 1 then
+	if icon.historyState - 1 < 1 then
 		IE.UndoButton:Disable()
 	else
 		IE.UndoButton:Enable()
 	end
 	
-	if ic.historyState + 1 > #ic.history then
+	if icon.historyState + 1 > #icon.history then
 		IE.RedoButton:Disable()
 	else
 		IE.RedoButton:Enable()
@@ -2525,11 +2519,10 @@ function IE:Load(isRefresh, icon)
 	
 	IE:ScheduleIconUpdate(CI.ic)
 	
-	if type(icon) == "table" and not icon.history then
-		-- It is intended that this happens at the end instead of the beginning.
-		-- Table accesses that trigger metamethods flesh out an icon's settings with new things that aren't there pre-load (usually)
-		icon.history = {CopyTable(icon.ics)}
-		icon.historyState = 1
+	-- It is intended that this happens at the end instead of the beginning.
+	-- Table accesses that trigger metamethods flesh out an icon's settings with new things that aren't there pre-load (usually)
+	if icon then
+		IE:AttemptBackup(CI.ic)
 	end
 	IE:UndoRedoChanged()
 end
@@ -4810,27 +4803,37 @@ end
 
 function CNDT:TypeMenu_DropDown()
 	
+	-- populate the "frequently used" submenu
 	if UIDROPDOWNMENU_MENU_LEVEL == 2 and UIDROPDOWNMENU_MENU_VALUE == "FREQ" then
-		local num = 0
+		
+		-- num is a count of how many we have added. We dont want to add more than maxNum things to the menu
+		local num, maxNum = 0, 20
+		
+		-- addedThings IN THIS CASE is a list of conditions that have been added to avoid duplicates between the two sources for the list (see below)
 		wipe(addedThings)
+		
+		-- add the conditions that should always be at the top of the list
 		for _, k in ipairs(commonConditions) do
 			AddConditionToDropDown(CNDT.ConditionsByType[k])
 			addedThings[k] = 1
 			num = num + 1
-			if num > 20 then break end
+			if num > maxNum then break end
 		end
+		
+		-- usedCount is a list of how many times a condition has been used.
+		-- We want to add the ones that get used the most to the rest of the menu
 		wipe(usedCount)
-		for ics in TMW:InIconSettings() do
-			for k, condition in pairs(ics.Conditions) do
-				usedCount[condition.Type] = (usedCount[condition.Type] or 0) + 1
-			end
+		for Condition in TMW:InConditionSettings() do
+			usedCount[Condition.Type] = (usedCount[Condition.Type] or 0) + 1
 		end
+		
+		-- add the most used conditions to the list
 		for k, n in TMW:OrderedPairs(usedCount, "values", true) do
 			if not addedThings[k] and n > 1 then
 				AddConditionToDropDown(CNDT.ConditionsByType[k])
 				addedThings[k] = 1
 				num = num + 1
-				if num > 20 then break end
+				if num > maxNum then break end
 			end
 		end
 	end
@@ -4838,6 +4841,8 @@ function CNDT:TypeMenu_DropDown()
 	wipe(addedThings)
 	local addedFreq
 	for k, v in ipairs(CNDT.Types) do
+		
+		-- add the frequently used submenu before the first condition that does not have a category
 		if not v.category and not addedFreq and UIDROPDOWNMENU_MENU_LEVEL == 1 then
 			AddDropdownSpacer()
 				
@@ -4847,7 +4852,7 @@ function CNDT:TypeMenu_DropDown()
 			info.notCheckable = true
 			info.hasArrow = true
 			UIDropDownMenu_AddButton(info, UIDROPDOWNMENU_MENU_LEVEL)
-			addedFreq = 1
+			addedFreq = true
 		end
 		
 		if ((UIDROPDOWNMENU_MENU_LEVEL == 2 and v.category == UIDROPDOWNMENU_MENU_VALUE) or (UIDROPDOWNMENU_MENU_LEVEL == 1 and not v.category)) and not v.hidden then
@@ -4855,8 +4860,11 @@ function CNDT:TypeMenu_DropDown()
 				AddDropdownSpacer()
 			end
 			
+			-- most conditions are added to the dropdown right here
 			AddConditionToDropDown(v)
+			
 		elseif UIDROPDOWNMENU_MENU_LEVEL == 1 and v.category and not addedThings[v.category] then
+			-- addedThings IN THIS CASE is a list of categories that have been added. Add ones here that have not been added yet.
 			local info = UIDropDownMenu_CreateInfo()
 			info.text = v.category
 			info.value = v.category
@@ -5021,14 +5029,13 @@ function CNDT:CheckParentheses(type)
 	local numclose, numopen, runningcount = 0, 0, 0
 	local unopened = 0
 	
-	for i = 1, TMW:tMaxKey(settings) do -- for i, condition in ipairs(settings) do 		is not used because if the first condition is a default one (player health == 0%) then it will break the loop entirely
-		local condition = settings[i]
-		for i = 1, condition.PrtsBefore do
+	for Condition in TMW:InConditions(settings) do
+		for i = 1, Condition.PrtsBefore do
 			numopen = numopen + 1
 			runningcount = runningcount + 1
 			if runningcount < 0 then unopened = unopened + 1 end
 		end
-		for i = 1, condition.PrtsAfter do
+		for i = 1, Condition.PrtsAfter do
 			numclose = numclose + 1
 			runningcount = runningcount - 1
 			if runningcount < 0 then unopened = unopened + 1 end
@@ -5137,11 +5144,9 @@ function CNDT:CreateGroups(num)
 		end
 		
 		group:SetPoint("TOPLEFT", CNDT[i-1], "BOTTOMLEFT", 0, -16)
-		--if i ~= 1 then
-			local p, _, rp, x, y = TMW.CNDT[1].AddDelete:GetPoint()
-			group.AddDelete:ClearAllPoints()
-			group.AddDelete:SetPoint(p, CNDT[i], rp, x, y)
-	--	end
+		local p, _, rp, x, y = TMW.CNDT[1].AddDelete:GetPoint()
+		group.AddDelete:ClearAllPoints()
+		group.AddDelete:SetPoint(p, CNDT[i], rp, x, y)
 		group:Clear()
 		group:SetTitles()
 	end
@@ -5194,12 +5199,12 @@ function CNDT:AddRemoveHandler()
 end
 
 function CNDT:SetTabText(type)
-	local type, settings = CNDT:GetTypeData(type)
+	local type, Conditions = CNDT:GetTypeData(type)
 	
 	CNDT:CheckParentheses(type)
 	
 	local tab = (type == "icon" and IE.IconConditionTab) or IE.GroupConditionTab
-	local n = #settings
+	local n = Conditions.n
 	
 	if n > 0 then
 		tab:SetText((CNDT[type.."invalid"] and "|TInterface\\AddOns\\TellMeWhen_Options\\Textures\\Alert:0:2|t|cFFFF0000" or "") .. L[type == "icon" and "CONDITIONS" or "GROUPCONDITIONS"] .. " |cFFFF5959(" .. n .. ")")
@@ -5244,16 +5249,27 @@ end
 function CNDT:Load(type)
 	type = type or CNDT.type or "icon"
 	CNDT.type, CNDT.settings = CNDT:GetTypeData(type)
-	print(CNDT.type, CNDT.settings)
 	
 	local Conditions = CNDT.settings
-	if Conditions and #Conditions > 0 then
-		for i = #Conditions + 1, #CNDT do
+	if not Conditions then return end
+	
+	local Num = 0
+	for i = 1, Conditions.n do
+		local Condition = Conditions[i]
+		if Condition.Type ~= "" then
+			Num = Num + 1
+		else
+			break
+		end
+	end
+	
+	if Conditions.n > 0 then
+		for i = Conditions.n + 1, #CNDT do
 			CNDT[i]:Clear()
 		end
-		CNDT:CreateGroups(#Conditions+1)
+		CNDT:CreateGroups(Conditions.n+1)
 
-		for i=1, #Conditions do
+		for i=1, Conditions.n do
 			CNDT[i]:Load()
 		end
 	else
@@ -5272,6 +5288,16 @@ function CNDT:ClearDialog()
 		CNDT[i]:SetTitles()
 	end
 	CNDT:AddRemoveHandler()
+end
+
+function CNDT:AddCondition(Conditions)
+	Conditions.n = Conditions.n + 1
+	return Conditions[Conditions.n]
+end
+
+function CNDT:DeleteCondition(Conditions, n)
+	Conditions.n = Conditions.n - 1
+	return tremove(Conditions, n)
 end
 
 
@@ -5525,9 +5551,9 @@ end
 
 function AddIns.AddDeleteHandler(group)
 	if group:IsShown() then
-		tremove(CNDT.settings, group:GetID())
+		CNDT:DeleteCondition(CNDT.settings, group:GetID())
 	else
-		local _ = CNDT.settings[group:GetID()] -- cheesy way to invoke the db metamethod and create a new condition.
+		CNDT:AddCondition(CNDT.settings)
 	end
 	CNDT:AddRemoveHandler()
 	CNDT:Load()
@@ -5685,7 +5711,8 @@ function HELP:Show(code, icon, frame, x, y, text, ...)
 	help.x = x
 	help.y = y
 	help.text = text
-	 -- if the frame has the CreateTexture method, then it can be made the parent. Otherwise, the frame is actually a texture/font/etc object, so set its parent as the parent
+	-- if the frame has the CreateTexture method, then it can be made the parent.
+	-- Otherwise, the frame is actually a texture/font/etc object, so set its parent as the parent.
 	help.parent = help.frame.CreateTexture and help.frame or help.frame:GetParent()
 	
 	-- determine if the code has a setting associated to only show it once.
