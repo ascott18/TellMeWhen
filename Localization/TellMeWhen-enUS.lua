@@ -37,8 +37,9 @@ L["FROMNEWERVERSION"] = "You are importing data that was created in a newer vers
 -- -------------
 
 L["ICONMENU_CHOOSENAME"] = "Choose name(s)/ID(s) to check"
-L["ICONMENU_CHOOSENAME_ORBLANK"] = "OR leave blank to track everything"
 L["ICONMENU_CHOOSENAME_CNDTIC"] = "Choose name/ID/texture path"
+L["ICONMENU_CHOOSENAME_ORBLANK"] = "OR leave blank to track everything"
+L["ICONMENU_CHOOSENAME_ORITEMSLOT"] = "OR equipment slot to check (%d-%d)"
 L["ICONMENU_ENABLE"] = "Enabled"
 L["CHOOSENAME_EQUIVS_TOOLTIP"] = [[You can select predefined sets of buffs, debuffs, spell casts, diminishing returns, or dispel types (Magic, Curse, etc.) from this menu to insert into the "%s" editbox.]]
 L["CHOOSENAME_DIALOG_DDDEFAULT"] = "Predefined Spell Sets/Dispel Types"
@@ -402,7 +403,7 @@ L["DESCENDING"] = "Descending"
 L["UIPANEL_SCALE"] = "Scale"
 L["UIPANEL_LEVEL"] = "Frame Level"
 L["UIPANEL_STRATA"] = "Frame Strata"
-L["UIPANEL_LOCK"] = "Lock Group"
+L["UIPANEL_LOCK"] = "Lock Position"
 L["UIPANEL_LOCK_DESC"] = "Lock this group, preventing movement or sizing by dragging the group or the scale tab."
 
 

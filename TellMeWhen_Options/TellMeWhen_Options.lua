@@ -163,20 +163,31 @@ end
 
 local old_ChatEdit_InsertLink = ChatEdit_InsertLink
 function ChatEdit_InsertLink(...)
+	-- attempt to extract data from shift-clicking things (chat links, spells, items, etc) and insert it into the icon editor
 	local text = ...
 	local Type, id = strmatch(text, "|H(.-):(%d+)")
 	if not id then return false end
 	
 	if ANN.EditBox:HasFocus() then
+		-- just flat out put the link into the ANN editbox if it is focued. The ability to yell out clickable links is cool.
 		ANN.EditBox:Insert(text)
+	
+		-- notify success
 		return true
 	elseif IE.Main.Name:HasFocus() then
-		if CI.SoI == "item" and Type ~= "item" then
+		if CI.t == "item" and Type ~= "item" then
+			-- notify failure if the icon is an item cooldown icon and the link is not an item link
 			return false
-		elseif CI.SoE ~= "item" and Type ~= "spell" and Type ~= "enchant" then
+		elseif CI.t ~= "item" and Type ~= "spell" and Type ~= "enchant" then
+			-- notify failure if the icon is not an item cooldown and the link isn't a spell or enchant link
+			-- DONT just check (CI.t ~= "item" and Type == "item") because there are link types we want to exclude, like achievements.
 			return false
 		end
+		
+		-- fun text insertion code
 		local Name = IE.Main.Name
+		
+		-- find the next semicolon in the string
 		local NameText = Name:GetText()
 		local start = Name:GetNumLetters()
 		for i = Name:GetCursorPosition(), start, 1 do
@@ -185,25 +196,42 @@ function ChatEdit_InsertLink(...)
 				break
 			end
 		end
+		
+		-- put the cursor right after the semicolon
 		Name:SetCursorPosition(start)
-		text = "; " .. id .. "; "
-		IE.Main.Name:Insert(text)
+		-- insert the text
+		IE.Main.Name:Insert("; " .. id .. "; ")
+		-- clean the text
 		TMW:CleanString(IE.Main.Name)
+		-- put the cursor after the newly inserted text
 		Name:SetCursorPosition(start + #id + 2)
+		
+		-- notify success
 		return true
 	elseif IE.Main.CustomTex:HasFocus() then
+		-- if the custom texture box is active,
+		-- attempt to extract either a spellID or a texture path from the data to use.
 		local tex
 		if Type == "spell" or Type == "enchant" then
+			-- spells and enchants can just use their spellID
 			tex = id
 		elseif Type == "item" then
+			-- items must get the texture path
 			tex = GetItemIcon(id)
 		elseif Type == "achievement" then
+			-- achievements also must get their texture path
 			tex = select(10, GetAchievementInfo(id))
 		end
 		if tex then
+			-- clean off the first part of the path, it does not need to be saved
+			-- it will be appended when the texture is used.
 			tex = gsub(tex, "INTERFACE\\ICONS\\", "")
 			tex = gsub(tex, "Interface\\Icons\\", "")
+			
+			-- set the text
 			IE.Main.CustomTex:SetText(tex)
+			
+			-- notify success
 			return true
 		end
 	end
@@ -2039,11 +2067,6 @@ IE.LeftChecks = {
 	},
 }
 
-function IE:OnInitialize()
-	IE.UpdateTimer = 0
-end
-
-
 function IE:GetCompareResultsPath(match, ...)
 	if match then
 		return true
@@ -2085,24 +2108,31 @@ IE.RapidSettings = {
 }
 function IE:AttemptBackup(icon)
 	if not icon then return end
-	--print("-----------------------------------------------------------------------------------------------------------------------------")
-	--print("|cff888888", icon, debugstack(1))
 	
 	if type(icon) == "table" and not icon.history then
+		-- create the needed infrastructure for storing icon history if it does not exist.
+		-- this includes creating the first history point
 		icon.history = {TMW:CopyWithMetatable(icon.ics)}
 		icon.historyState = #icon.history
-		print("CREATED INITIAL HISTORY POINT", #icon.history)
 	else
-	
-		assert(icon.historyState)
+		-- the needed stuff for undo and redu already exists, so lets delve into the meat of the process.
+		
+		-- compare the current icon settings with what we have in the currently used history point
+		-- the currently used history point may or may not be the most recent settings of the icon, but we want to check ics against what is being used.
+		-- result is either (true) if there were no changes in the settings, or a string representing the key path to the first setting change that was detected.
+		--(it was likely only one setting that changed, but not always)
 		local result, changedSetting = IE:GetCompareResultsPath(TMW:DeepCompare(icon.history[icon.historyState], icon.ics))
 		if type(result) == "string" then
 		
+			-- if we are using an old history point (i.e. we hit undo a few times and then made a change), 
+			-- delete all history points from the current one forward so that we dont jump around wildly when undoing and redoing
 			for i = icon.historyState + 1, #icon.history do
 				icon.history[i] = nil
-				print("ERASED HISTORY POINT", i)
 			end
 			
+			-- if the last setting that was changed is the same as the most recent setting that was changed,
+			-- and if the setting is one that can be changed very rapidly,
+			-- delete the previous history point so that we dont murder our memory usage and piss off the user as they undo a number from 1 to 10, 0.1 per click.
 			if icon.lastChangePath == result and IE.RapidSettings[changedSetting] then
 				print("DELETING LAST HISTORY POINT", #icon.history)
 				icon.history[#icon.history] = nil
@@ -2110,50 +2140,69 @@ function IE:AttemptBackup(icon)
 			end
 			icon.lastChangePath = result
 			
-			
+			-- finally, create the newest history point.
+			-- we copy with with the metatable so that when doing comparisons against the current icon settings, we can invoke metamethods.
+			-- this is needed because otherwise an empty event table (icon.ics.Events) will not match a fleshed out one that has no non-default data in it.
 			icon.history[#icon.history + 1] = TMW:CopyWithMetatable(icon.ics)
-			print("CREATED HISTORY POINT", #icon.history)
 			
+			-- set the history state to the latest point
 			icon.historyState = #icon.history
 		end
 	end
+	
+	-- notify the undo and redo buttons that there was a change so they can :Enable() or :Disable()
 	IE:UndoRedoChanged()
 end
 
 function IE:OnUpdate()
 	local groupID, iconID = TMW.CI.g, TMW.CI.i
 	local icon = TMW.CI.ic
+	
+	-- update the top of the icon editor with the information of the current icon.
+	-- this is done in an OnUpdate because it is just too hard to track when the texture changes sometimes.
+	-- I don't want to fill up the main addon with configuration code to notify the IE of texture changes
 	self.FS1:SetFormattedText(TMW.L["GROUPICON"], TMW:GetGroupName(groupID, groupID, 1), iconID)
 	if icon then
 		self.icontexture:SetTexture(icon.texture:GetTexture())
 	end
 	
-	local time = TMW.time
-	if IE.UpdateTimer <= time - 0 then
-		IE.UpdateTimer = time
-		
-		IE:AttemptBackup(icon)
-	end
+	-- check and see if the settings of the current icon have changed.
+	-- if they have, create a history point (or at least try to)
+	IE:AttemptBackup(icon)
 end
 
 function IE:TabClick(self)
+	-- invoke blizzard's tab click function to set the apperance of all the tabs
 	PanelTemplates_Tab_OnClick(self, self:GetParent())
 	PlaySound("igCharacterInfoTab")
+	
+	-- hide all tabs' frames, including the current tab so that the OnHide and OnShow scripts fire
 	for id, frame in pairs(IE.Tabs) do
-		if IE[frame] then--and frame ~= IE.Tabs[self:GetID()] then
+		if IE[frame] then
 			IE[frame]:Hide()
 		end
 	end
+	
+	-- state the current tab.
+	-- this is used in many other places, including inside some OnShow scripts, so it MUST go before the :Show()s below
 	IE.CurrentTab = self
 	
+	-- show the selected tab's frame
 	IE[IE.Tabs[self:GetID()]]:Show()
+	-- show the icon editor
 	TellMeWhen_IconEditor:Show()
 	
+	-- special handling for certain tabs. TODO: move this somewhere else.
 	if self:GetID() == TMW.ICCNDTTab then
+		-- the icon condition tab
 		CNDT:Load("icon")
+		
 	elseif self:GetID() == TMW.GRCNDTTab then
+		-- the group condition tab
 		CNDT:Load("group")
+		
 	elseif self:GetID() == TMW.MOTab then
+		-- the group settings tab
 		TMW:CompileOptions()
 		IE:NotifyChanges("groups", "Group " .. CI.g)
 		LibStub("AceConfigDialog-3.0"):Open("TMW IEOptions", IE.MainOptionsWidget)
@@ -2161,12 +2210,19 @@ function IE:TabClick(self)
 end
 
 function IE:NotifyChanges(...)
+	-- this is used to select the same group in all open TMW configuration windows
+	-- the path (...) is a list of keys in TMW.OptionsTable that leads to the desired group
+	
 	local hasPath = ...
+	
+	-- Notify standalone options panels of a change (Blizzard, slash command, LDB)
 	LibStub("AceConfigRegistry-3.0"):NotifyChange("TMW Options")
-
 	if hasPath then
 		LibStub("AceConfigDialog-3.0"):SelectGroup("TMW Options", ...)
 	end
+	
+	-- Notify the group settings tab in the icon editor of any changes
+	-- the order here is very specific and breaks if you change it. (:Open(), :SelectGroup(), :NotifyChange())
 	if IE.MainOptionsWidget and IE.MainOptions:IsShown() then
 		LibStub("AceConfigDialog-3.0"):Open("TMW IEOptions", IE.MainOptionsWidget)
 		if hasPath then
