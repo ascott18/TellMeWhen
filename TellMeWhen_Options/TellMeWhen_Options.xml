@@ -3828,13 +3828,7 @@
 						self:SetFrameLevel(self:GetFrameLevel()+2)
 					</OnLoad>
 					<OnClick>
-						local ic = TMW.CI.ic
-						ic.historyState = ic.historyState - 1
-						
-						TMW:CopyTableInPlaceWithMeta(ic.history[ic.historyState], ic.ics)
-						
-						TMW.IE:Load(1)
-						TMW.IE:UndoRedoChanged()
+						TMW.IE:DoUndoRedo(-1)
 					</OnClick>
 				</Scripts>
 			</Button>
@@ -3850,13 +3844,7 @@
 						self:SetFrameLevel(self:GetFrameLevel()+2)
 					</OnLoad>
 					<OnClick>
-						local ic = TMW.CI.ic
-						ic.historyState = ic.historyState + 1
-						
-						TMW:CopyTableInPlaceWithMeta(ic.history[ic.historyState], ic.ics)
-						
-						TMW.IE:Load(1)
-						TMW.IE:UndoRedoChanged()
+						TMW.IE:DoUndoRedo(1)
 					</OnClick>
 				</Scripts>
 			</Button>
@@ -3972,25 +3960,7 @@
 				tinsert(UISpecialFrames, self:GetName())
 			</OnLoad>
 			<OnUpdate>
-				local groupID, iconID = TMW.CI.g, TMW.CI.i
-				local ic = TMW.CI.ic
-				self.FS1:SetFormattedText(TMW.L["GROUPICON"], TMW:GetGroupName(groupID, groupID, 1), iconID)
-				if ic then
-					self.icontexture:SetTexture(ic.texture:GetTexture())
-				end
-				
-				if not TMW:DeepCompare(ic.history[ic.historyState], ic.ics) then
-					
-					for i = ic.historyState + 1, #ic.history do
-						ic.history[i] = nil
-					end
-						
-					ic.history[#ic.history + 1] = CopyTable(ic.ics)
-					
-					ic.historyState = #ic.history
-					
-					TMW.IE:UndoRedoChanged()
-				end
+				TMW.IE:OnUpdate()
 			</OnUpdate>
 			<OnSizeChanged>
 				self.Help:SetHeight(self.Help.text:GetHeight() + 38)

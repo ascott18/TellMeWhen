@@ -533,36 +533,36 @@ local function AddDropdownSpacer()
 	UIDropDownMenu_AddButton(info, UIDROPDOWNMENU_MENU_LEVEL)
 end
 
-function TMW:DeepCompare(t1, t2)
+function TMW:DeepCompare(t1, t2, ...)
 	-- heavily modified version of http://snippets.luacode.org/snippets/Deep_Comparison_of_Two_Values_3
 	
 	-- attempt direct comparison
 	if t1 == t2 then
-		return true
+		return true, ...
 	end
 	
 	local ty1 = type(t1)
 	local ty2 = type(t2)
 	if ty1 ~= ty2 or ty1 ~= "table" then
-		return false
+		return false, ...
 	end
 	
 	-- compare table values
 	for k1, v1 in pairs(t1) do
 		local v2 = rawget(t2, k1)
-		if v2 == nil or not TMW:DeepCompare(v1, v2) then
-			return false
+		if v2 == nil or not TMW:DeepCompare(v1, v2, k1, ...) then
+			return TMW:DeepCompare(v1, v2, type(v1), k1, ...)
 		end
 	end
 	
 	for k2, v2 in pairs(t2) do
 		local v1 = rawget(t1, k2)
-		if v1 == nil or not TMW:DeepCompare(v1, v2) then
-			return false
+		if v1 == nil or not TMW:DeepCompare(v1, v2, k2, ...) then
+			return TMW:DeepCompare(v1, v2, type(v2), k2, ...)
 		end
 	end
 	
-	return true
+	return true, ...
 end
 
 --[[
@@ -2067,31 +2067,80 @@ IE.LeftChecks = {
 	},
 }
 
-function IE:OnUpdate()
-	local groupID, iconID = TMW.CI.g, TMW.CI.i
-	local ic = TMW.CI.ic
-	self.FS1:SetFormattedText(TMW.L["GROUPICON"], TMW:GetGroupName(groupID, groupID, 1), iconID)
-	if ic then
-		self.icontexture:SetTexture(ic.texture:GetTexture())
+function IE:OnInitialize()
+	IE.UpdateTimer = 0
+end
+
+
+function IE:GetCompareResultsPath(match, ...)
+	if match then
+		return true
 	end
-	local time = TMW.time
-	if IE.UpdateTimer <= time - 1 then
-		IE.UpdateTimer = time
-		
-		if not TMW:DeepCompare(ic.history[ic.historyState], ic.ics) then
-			
-			for i = ic.historyState + 1, #ic.history do
-				ic.history[i] = nil
-			end
-				
-			ic.history[#ic.history + 1] = CopyTable(ic.ics)
-			
-			ic.historyState = #ic.history
-			
-			TMW.IE:UndoRedoChanged()
+	local path = ""
+	local changedType
+	for i, v, size in TMW:Vararg(...) do
+		if i == 1 then
+			changedType = v
+		else
+			path = path .. v .. "\001"
 		end
 	end
+	return path, changedType
+end
+
+function IE:DoUndoRedo(direction)
+	local icon = TMW.CI.ic
+	icon.historyState = icon.historyState + direction
 	
+	TMW.db.profile.Groups[TMW.CI.g].Icons[TMW.CI.i] = nil -- recreated when passed into CTIPWM
+	
+	TMW:CopyTableInPlaceWithMeta(icon.history[icon.historyState], TMW.db.profile.Groups[TMW.CI.g].Icons[TMW.CI.i])
+	
+	TMW.IE:Load(1)
+	TMW.IE:UndoRedoChanged()
+end
+
+function IE:AttemptBackup(icon)
+	if not icon.historyState then return end
+	local result, changedType = IE:GetCompareResultsPath(TMW:DeepCompare(icon.history[icon.historyState], icon.ics))
+	
+	if type(result) == "string" then
+		
+		for i = icon.historyState + 1, #icon.history do
+			icon.history[i] = nil
+			print("ERASED HISTORY POINT", i)
+		end
+		
+		if icon.lastChangePath == result and changedType == "number" then
+			icon.history[#icon.history] = nil
+			icon.historyState = #icon.history
+			print("DELETING LAST HISTORY POINT")
+		end
+		icon.lastChangePath = result
+			
+		icon.history[#icon.history + 1] = CopyTable(icon.ics)
+		print("CREATING HISTORY POINT", #icon.history)
+		
+		icon.historyState = #icon.history
+		
+		TMW.IE:UndoRedoChanged()
+	end
+end
+
+function IE:OnUpdate()
+	local groupID, iconID = TMW.CI.g, TMW.CI.i
+	local icon = TMW.CI.ic
+	self.FS1:SetFormattedText(TMW.L["GROUPICON"], TMW:GetGroupName(groupID, groupID, 1), iconID)
+	if icon then
+		self.icontexture:SetTexture(icon.texture:GetTexture())
+	end
+	
+	local time = TMW.time
+	if IE.UpdateTimer <= time - 0 then
+		IE.UpdateTimer = time
+		
+		IE:AttemptBackup(icon)
+	end
 end
 
 function IE:TabClick(self)
@@ -5195,6 +5244,7 @@ end
 function CNDT:Load(type)
 	type = type or CNDT.type or "icon"
 	CNDT.type, CNDT.settings = CNDT:GetTypeData(type)
+	print(CNDT.type, CNDT.settings)
 	
 	local Conditions = CNDT.settings
 	if Conditions and #Conditions > 0 then

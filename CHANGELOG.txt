@@ -4,6 +4,7 @@
  * Rewrote the help module, and migrated/added some new warnings to it.
  * Diminishing return category mismatch warnings are now much more informative.
  * The condition editor is prettier now.
+ * There is now a unique default condition type (instead of just using the health condition, which caused many issues.)
  * Bug Fixes:
  ** (r270) Export strings with a pipe character should now work properly
  ** (r271) Temporary fix for failed assertion when calling Parser:SetSpellByID(109388)
