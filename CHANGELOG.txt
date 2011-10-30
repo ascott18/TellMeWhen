@@ -13,6 +13,7 @@
  ** (r276) Fixed a breaking typo in the enUS locale file.
  ** (r281) TellMeWhen\Types\dr.lua:182 table index is nil
  ** (r282) Pet talent tree localization was incorrect for some languages due to my crafty attempts to be crafty
+ ** (r290) Blank icons will no longer be errenously added to the copy dropdown.
  
 ===v4.6.3===
  * Bug Fixes:

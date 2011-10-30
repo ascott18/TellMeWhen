@@ -418,7 +418,7 @@ function TMW:GuessIconTexture(data)
 	if (data.Name and data.Name ~= "" and data.Type ~= "meta" and data.Type ~= "wpnenchant" and data.Type ~= "runes") and not tex then
 		local name = TMW:GetSpellNames(nil, data.Name, 1)
 		if name then
-			if data.Type == "cooldown" and data.CooldownType == "item" then
+			if data.Type == "item" then
 				tex = GetItemIcon(name) or tex
 			else
 				tex = SpellTextures[name]
@@ -2877,15 +2877,17 @@ end
 
 
 ---------- Dropdown ----------
+local DEFAULT_ICON_SETTINGS = db.profile.Groups[0].Icons[0]
+db.profile.Groups[0] = nil
+
+function IE:Copy_DropDown_Icon_OnClick(ics, version)
+	TMW[CI.g][CI.i]:SetTexture(nil)
+	
+	TMW:Import(ics, version_src, "icon")
+end
+
 function IE:AddIconToCopyDropdown(ics, groupID, iconID, profilename, group_src, version_src, force)
-	local nsettings = 0
-	for icondatakey, icondatadata in pairs(ics) do
-		if type(icondatadata) == "table" then if next(icondatadata) then nsettings = nsettings + 1 end
-		elseif TMW.Icon_Defaults[icondatakey] ~= icondatadata then
-			nsettings = nsettings + 1
-		end
-	end
-	if force or (nsettings > 0 and tonumber(iconID)) then
+	if force or (tonumber(iconID) and not IE:DeepCompare(DEFAULT_ICON_SETTINGS, ics)) then
 		local tex
 		local ic = groupID and iconID and TMW[groupID] and TMW[groupID][iconID]
 		if db:GetCurrentProfile() == profilename and ic and ic.texture:GetTexture() then
@@ -2894,23 +2896,26 @@ function IE:AddIconToCopyDropdown(ics, groupID, iconID, profilename, group_src, 
 			tex = TMW:GuessIconTexture(ics)
 		end
 
-		local text, textshort, tooltipText = TMW:GetIconMenuText(nil, nil, ics)
 		info = UIDropDownMenu_CreateInfo()
+		
+		local text, textshort, tooltipText = TMW:GetIconMenuText(nil, nil, ics)
 		info.text = textshort
 		info.tooltipTitle = groupID and format(L["GROUPICON"], TMW:GetGroupName(group_src and group_src.Name, groupID, 1), iconID) or L["ICON"]
 		info.tooltipText = tooltipText
 		info.tooltipOnButton = true
+		
+		info.notCheckable = true
+		
 		info.icon = tex
 		info.tCoordLeft = 0.07
 		info.tCoordRight = 0.93
 		info.tCoordTop = 0.07
 		info.tCoordBottom = 0.93
-		info.notCheckable = true
-		info.func = function()
-			TMW[CI.g][CI.i]:SetTexture(nil)
-			
-			TMW:Import(ics, version_src, "icon")
-		end
+		
+		info.func = IE.Copy_DropDown_Icon_OnClick
+		info.arg1 = ics
+		info.arg2 = version_src
+		
 		UIDropDownMenu_AddButton(info, UIDROPDOWNMENU_MENU_LEVEL)
 	end
 end
