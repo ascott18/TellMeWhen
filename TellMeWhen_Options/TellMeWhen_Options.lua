@@ -569,23 +569,36 @@ function TMW:DeepCompare(t1, t2, ...)
 		return true, ...
 	end
 	
+	-- if the values are not the same (they made it through the check above) AND they are not both tables, then they cannot be the same, so exit.
 	local ty1 = type(t1)
-	local ty2 = type(t2)
-	if ty1 ~= ty2 or ty1 ~= "table" then
+	if ty1 ~= "table" or ty1 ~= type(t2) then
 		return false, ...
 	end
 	
 	-- compare table values
+	
+	-- compare table 1 with table 2
 	for k1, v1 in pairs(t1) do
 		local v2 = t2[k1]
-		if v2 == nil or not TMW:DeepCompare(v1, v2, k1, ...) then
+		
+		-- don't bother calling DeepCompare on the values if they are the same - it will just return true.
+		-- Only call it if the values are different (they are either 2 tables, or they actually are different non-table values)
+		-- by adding the (v1 ~= v2) check, efficiency is increased by about 300%.
+		if v1 ~= v2 and not TMW:DeepCompare(v1, v2, k1, ...) then
+		
+			-- it only reaches this point if there is a difference between the 2 tables somewhere
+			-- so i dont feel bad about calling DeepCompare with the same args again
+			-- i need to because the key of the setting that changed is in there, and AttemptBackup needs that key
 			return TMW:DeepCompare(v1, v2, k1, ...)
 		end
 	end
 	
+	-- compare table 2 with table 1
 	for k2, v2 in pairs(t2) do
 		local v1 = t1[k2]
-		if v1 == nil or not TMW:DeepCompare(v1, v2, k2, ...) then
+		
+		-- see comments for t1
+		if v1 ~= v2 and not TMW:DeepCompare(v1, v2, k2, ...) then
 			return TMW:DeepCompare(v1, v2, k2, ...)
 		end
 	end
@@ -2084,15 +2097,12 @@ end
 
 function IE:DoUndoRedo(direction)
 	local icon = CI.ic
-	print("OLD HISTORY STATE", icon.historyState)
 	icon.historyState = icon.historyState + direction
-	print("NEW HISTORY STATE", icon.historyState)
 	
 	db.profile.Groups[CI.g].Icons[CI.i] = nil -- recreated when passed into CTIPWM
 	
 	TMW:CopyTableInPlaceWithMeta(icon.history[icon.historyState], db.profile.Groups[CI.g].Icons[CI.i])
 	IE:Load(1)
-	--IE:UndoRedoChanged()
 end
 
 IE.RapidSettings = {
@@ -2114,6 +2124,9 @@ function IE:AttemptBackup(icon)
 		-- this includes creating the first history point
 		icon.history = {TMW:CopyWithMetatable(icon.ics)}
 		icon.historyState = #icon.history
+	
+		-- notify the undo and redo buttons that there was a change so they can :Enable() or :Disable()
+		IE:UndoRedoChanged()
 	else
 		-- the needed stuff for undo and redu already exists, so lets delve into the meat of the process.
 		
@@ -2123,7 +2136,6 @@ function IE:AttemptBackup(icon)
 		--(it was likely only one setting that changed, but not always)
 		local result, changedSetting = IE:GetCompareResultsPath(TMW:DeepCompare(icon.history[icon.historyState], icon.ics))
 		if type(result) == "string" then
-		
 			-- if we are using an old history point (i.e. we hit undo a few times and then made a change), 
 			-- delete all history points from the current one forward so that we dont jump around wildly when undoing and redoing
 			for i = icon.historyState + 1, #icon.history do
@@ -2134,7 +2146,6 @@ function IE:AttemptBackup(icon)
 			-- and if the setting is one that can be changed very rapidly,
 			-- delete the previous history point so that we dont murder our memory usage and piss off the user as they undo a number from 1 to 10, 0.1 per click.
 			if icon.lastChangePath == result and IE.RapidSettings[changedSetting] then
-				print("DELETING LAST HISTORY POINT", #icon.history)
 				icon.history[#icon.history] = nil
 				icon.historyState = #icon.history
 			end
@@ -2147,11 +2158,11 @@ function IE:AttemptBackup(icon)
 			
 			-- set the history state to the latest point
 			icon.historyState = #icon.history
+	
+			-- notify the undo and redo buttons that there was a change so they can :Enable() or :Disable()
+			IE:UndoRedoChanged()
 		end
 	end
-	
-	-- notify the undo and redo buttons that there was a change so they can :Enable() or :Disable()
-	IE:UndoRedoChanged()
 end
 
 function IE:OnUpdate()
@@ -2354,7 +2365,8 @@ function IE:ShowHide()
 
 end
 
-function IE:SaveSettings(frame)
+function IE:SaveSettings()
+	IE:AttemptBackup(CI.ic)
 	for k, t in pairs(IE.Checks) do
 		if t == 2 then
 			IE.Main[k]:ClearFocus()
@@ -2369,6 +2381,7 @@ function IE:SaveSettings(frame)
 			frame.EditBox2:ClearFocus()
 		end
 	end
+	IE:AttemptBackup(CI.ic)
 end
 
 function IE:UndoRedoChanged()
@@ -5058,6 +5071,21 @@ function CNDT:RuneHandler(rune)
 	end
 end
 
+function CNDT:Rune_GetChecked()
+	return self.checked
+end
+
+function CNDT:Rune_SetChecked(checked)
+	self.checked = checked
+	if checked then
+		self.Check:SetTexture("Interface\\RAIDFRAME\\ReadyCheck-Ready")
+	elseif checked == nil then
+		self.Check:SetTexture(nil)
+	elseif checked == false then
+		self.Check:SetTexture("Interface\\RAIDFRAME\\ReadyCheck-NotReady")
+	end
+end
+
 CNDT.colors = setmetatable(
 	{ -- hardcode the first few colors to make sure they look good
 		"|cff00ff00",
@@ -5105,19 +5133,16 @@ function CNDT:CheckParentheses(type)
 		else
 			typeNeeded, num = "(", numclose-numopen
 		end
-		TMW.HELP:Show("CNDT_PAREN_NOMATCH", nil, TMW.IE.Conditions, 0, 0, L["PARENTHESIS_WARNING1"], num, L["PARENTHESIS_TYPE_" .. typeNeeded])
-		TMW.HELP:Hide("CNDT_PAREN_NOOPENER")
+		TMW.HELP:Show("CNDT_PARENTHESES_ERROR", nil, TMW.IE.Conditions, 0, 0, L["PARENTHESIS_WARNING1"], num, L["PARENTHESIS_TYPE_" .. typeNeeded])
 		
 		CNDT[type.."invalid"] = 1
 	elseif unopened > 0 then
 	
-		TMW.HELP:Show("CNDT_PAREN_NOOPENER", nil, TMW.IE.Conditions, 0, 0, L["PARENTHESIS_WARNING2"], unopened)
-		TMW.HELP:Hide("CNDT_PAREN_NOMATCH")
+		TMW.HELP:Show("CNDT_PARENTHESES_ERROR", nil, TMW.IE.Conditions, 0, 0, L["PARENTHESIS_WARNING2"], unopened)
 		
 		CNDT[type.."invalid"] = 1
 	else
-		TMW.HELP:Hide("CNDT_PAREN_NOMATCH")
-		TMW.HELP:Hide("CNDT_PAREN_NOOPENER")
+		TMW.HELP:Hide("CNDT_PARENTHESES_ERROR")
 		CNDT[type.."invalid"] = nil
 	end
 end	
@@ -5684,8 +5709,7 @@ HELP.Codes = {
 	"ICON_DR_MISMATCH",
 	
 	
-	"CNDT_PAREN_NOMATCH",
-	"CNDT_PAREN_NOOPENER",
+	"CNDT_PARENTHESES_ERROR",
 	
 	"SND_INVALID_CUSTOM",
 }

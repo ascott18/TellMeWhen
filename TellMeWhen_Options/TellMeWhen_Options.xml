@@ -536,19 +536,8 @@
 				TMW.CNDT:OK()
 			</OnClick>
 			<OnLoad>
-				function self:GetChecked()
-					return self.checked
-				end
-				function self:SetChecked(checked)
-					self.checked = checked
-					if checked then
-						self.Check:SetTexture("Interface\\RAIDFRAME\\ReadyCheck-Ready")
-					elseif checked == nil then
-						self.Check:SetTexture(nil)
-					elseif checked == false then
-						self.Check:SetTexture("Interface\\RAIDFRAME\\ReadyCheck-NotReady")
-					end
-				end
+				self.GetChecked = TMW.CNDT.Rune_GetChecked
+				self.SetChecked = TMW.CNDT.Rune_SetChecked
 			</OnLoad>
 		</Scripts>
 	</Button>
