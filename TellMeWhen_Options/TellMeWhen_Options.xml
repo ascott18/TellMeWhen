@@ -224,10 +224,10 @@
 			</OnLeave>
 			<OnMouseWheel>
 				if (not TMW.SUG[#TMW.SUG]:IsShown() and delta == 1) or TMW.SUG[#TMW.SUG]:IsShown() then
-					if IsLeftShiftKeyDown() or IsRightShiftKeyDown() then
+					if IsShiftKeyDown() then
 						delta = delta*5
 					end
-					if IsLeftControlKeyDown() or IsRightControlKeyDown() then
+					if IsControlKeyDown() then
 						delta = delta*(#TMW.SUG-1)
 					end
 					TMW.SUG.offset = max(0, TMW.SUG.offset - delta)
@@ -533,7 +533,7 @@
 					self.Check:SetTexture("Interface\\RAIDFRAME\\ReadyCheck-Ready")
 				end
 				TMW.CNDT:RuneHandler(self)
-				TMW.CNDT:OK()
+				TMW.CNDT:Save()
 			</OnClick>
 			<OnLoad>
 				self.GetChecked = TMW.CNDT.Rune_GetChecked
@@ -602,7 +602,7 @@
 			</OnLoad>
 			<OnClick>
 				self:SetChecked(not self.checked)
-				TMW.CNDT:OK()
+				TMW.CNDT:Save()
 				TMW.CNDT:ColorizeParentheses()
 			</OnClick>
 			<OnEnter>
@@ -701,7 +701,7 @@
 					<OnEditFocusLost>
 						EditBox_ClearHighlight(self)
 						TMW:CleanString(self)
-						TMW.CNDT:OK()
+						TMW.CNDT:Save()
 					</OnEditFocusLost>
 				</Scripts>
 			</EditBox>
@@ -744,7 +744,7 @@
 					</OnValueChanged>
 					<OnMouseUp>
 						self:GetParent():SetSliderMinMax()
-						TMW.CNDT:OK()
+						TMW.CNDT:Save()
 					</OnMouseUp>
 					<OnLoad>
 						self:EnableMouseWheel(true)
@@ -756,17 +756,17 @@
 						end
 					</OnLoad>
 					<OnMouseWheel>
-						if IsLeftShiftKeyDown() or IsRightShiftKeyDown() then
+						if IsShiftKeyDown() then
 							delta = delta*10
 						end
-						if IsLeftControlKeyDown() or IsRightControlKeyDown() then
+						if IsControlKeyDown() then
 							delta = delta*60 -- (60 seconds)
 						end
 						if delta == 1 or delta == -1 then
 							delta = delta*(self.step or 1)
 						end
 						self:GetParent():SetSliderMinMax(self:GetValue()+delta)
-						TMW.CNDT:OK()
+						TMW.CNDT:Save()
 					</OnMouseWheel>
 				</Scripts>
 			</Slider>
@@ -779,7 +779,7 @@
 					<OnEditFocusLost>
 						EditBox_ClearHighlight(self)
 						TMW:CleanString(self)
-						TMW.CNDT:OK()
+						TMW.CNDT:Save()
 					</OnEditFocusLost>
 				</Scripts>
 			</EditBox>
@@ -792,7 +792,7 @@
 					<OnEditFocusLost>
 						EditBox_ClearHighlight(self)
 						TMW:CleanString(self)
-						TMW.CNDT:OK()
+						TMW.CNDT:Save()
 					</OnEditFocusLost>
 				</Scripts>
 			</EditBox>
@@ -999,7 +999,7 @@
 						self:GetNormalTexture():SetVertexColor(1, 0, 0, 1)
 					</OnLoad>
 					<OnClick>
-						TMW.CNDT:OK()
+						TMW.CNDT:Save()
 					</OnClick>
 				</Scripts>
 			</CheckButton>
@@ -1014,7 +1014,7 @@
 						self:GetNormalTexture():SetVertexColor(1, 0, 0, 1)
 					</OnLoad>
 					<OnClick>
-						TMW.CNDT:OK()
+						TMW.CNDT:Save()
 					</OnClick>
 				</Scripts>
 			</CheckButton>
@@ -1068,7 +1068,7 @@
 						elseif self.value == "OR" then
 							self:SetValue("AND")
 						end
-						TMW.CNDT:OK()
+						TMW.CNDT:Save()
 					</OnClick>
 				</Scripts>
 			</Button>
@@ -1152,7 +1152,7 @@
 						self.RealParent = self:GetParent()
 						self:SetParent(self:GetParent():GetParent()) -- dont hide it when the group is hidden
 					</OnLoad>
-					<OnClick>self.RealParent:AddDeleteHandler() TMW.CNDT:OK()</OnClick>
+					<OnClick>self.RealParent:AddDeleteHandler() TMW.CNDT:Save()</OnClick>
 				</Scripts>
 				<NormalTexture urgency="5" file="Interface\AddOns\TellMeWhen_Options\Textures\Plus-Up"/>
 				<PushedTexture file="Interface\AddOns\TellMeWhen_Options\Textures\Plus-Down"/>
@@ -1655,7 +1655,7 @@
 		</Scripts>
 	</Frame>
 	
-	<Frame name="TellMeWhen_IconEditor" hidden="true" movable="true" enableMouse="true" frameStrata="DIALOG">
+	<Frame name="TellMeWhen_IconEditor" hidden="true" movable="true" enableMouse="true" enableKeyboard="true" propagateKeyboardInput="true" frameStrata="DIALOG">
 		<Size x="600" y="390"/>
 		<Anchors>
 			<Anchor point="CENTER" relativeTo="UIParent"/>
@@ -2050,10 +2050,10 @@
 								GameTooltip:Hide()
 							</OnLeave>
 							<OnReceiveDrag>
-								TMW.ID:SpellItemToIcon(TMW.CI.g, TMW.CI.i)
+								TMW.ID:SpellItemToIcon(TMW.CI.ic)
 							</OnReceiveDrag>
 							<OnMouseUp>
-								TMW.ID:SpellItemToIcon(TMW.CI.g, TMW.CI.i)
+								TMW.ID:SpellItemToIcon(TMW.CI.ic)
 							</OnMouseUp>
 							<OnTextChanged>
 								local text = self:GetText()
@@ -2244,7 +2244,7 @@
 										self.value = nil
 										self.text:SetText(TMW.L["SORTBYNONE"])
 										TMW:TT(self, "SORTBYNONE", "SORTBYNONE_DESC")
-										self.text:SetWidth(TELLMEWHEN_COLUMN1WIDTH)
+										self.text:SetWidth(TMW.WidthCol1)
 									</OnLoad>
 								</Scripts>
 							</CheckButton>
@@ -2259,7 +2259,7 @@
 										self.value = -1
 										self.text:SetText(TMW.L["ICONMENU_SORTASC"])
 										TMW:TT(self, "ICONMENU_SORTASC", "ICONMENU_SORTASC_DESC")
-										self.text:SetWidth(TELLMEWHEN_COLUMN1WIDTH)
+										self.text:SetWidth(TMW.WidthCol1)
 									</OnLoad>
 								</Scripts>
 							</CheckButton>
@@ -2274,7 +2274,7 @@
 										self.value = 1
 										self.text:SetText(TMW.L["ICONMENU_SORTDESC"])
 										TMW:TT(self, "ICONMENU_SORTDESC", "ICONMENU_SORTDESC_DESC")
-										self.text:SetWidth(TELLMEWHEN_COLUMN1WIDTH)
+										self.text:SetWidth(TMW.WidthCol1)
 									</OnLoad>
 								</Scripts>
 							</CheckButton>
@@ -2845,7 +2845,7 @@
 								self.text:SetText(TMW.L["ICONMENU_ONLYIFCOUNTING"])
 								TMW:TT(self, "ICONMENU_ONLYIFCOUNTING", "ICONMENU_ONLYIFCOUNTING_DESC")
 								self:SetMotionScriptsWhileDisabled(true)
-								self.text:SetWidth(TELLMEWHEN_COLUMN1WIDTH)
+								self.text:SetWidth(TMW.WidthCol1)
 							</OnLoad>
 							<OnClick>
 								if TMW.CI.ics then
@@ -3151,10 +3151,10 @@
 					<OnDragStart> TellMeWhen_IconEditor:StartMoving() </OnDragStart>
 					<OnDragStop> TellMeWhen_IconEditor:StopMovingOrSizing() </OnDragStop>
 					<OnReceiveDrag>
-						TMW.ID:SpellItemToIcon(TMW.CI.g, TMW.CI.i)
+						TMW.ID:SpellItemToIcon(TMW.CI.ic)
 					</OnReceiveDrag>
 					<OnMouseUp>
-						TMW.ID:SpellItemToIcon(TMW.CI.g, TMW.CI.i)
+						TMW.ID:SpellItemToIcon(TMW.CI.ic)
 					</OnMouseUp>
 				</Scripts>
 			</Frame>
@@ -3756,6 +3756,16 @@
 				<Scripts>
 					<OnLoad>
 						self:SetText(TMW.L["UNDO_ICON"])
+						
+						local textfunc = function()
+							local binding = GetBindingKey("TELLMEWHEN_ICONEDITOR_UNDO")
+							if binding then
+								binding = "(" .. binding .. ")"
+							end
+							return TMW.L["UNDO_ICON_DESC"] .. "\r\n\r\n" .. (binding or TMW.L["UNDOREDO_ICON_NOBIND"])
+						end
+						TMW:TT(self, "UNDO_ICON", textfunc, nil, 1)
+						
 						self:SetWidth(self:GetTextWidth()+30)
 						self:SetFrameLevel(self:GetFrameLevel()+2)
 					</OnLoad>
@@ -3772,6 +3782,16 @@
 				<Scripts>
 					<OnLoad>
 						self:SetText(TMW.L["REDO_ICON"])
+						
+						local textfunc = function()
+							local binding = GetBindingKey("TELLMEWHEN_ICONEDITOR_REDO")
+							if binding then
+								binding = "(" .. binding .. ")"
+							end
+							return TMW.L["REDO_ICON_DESC"] .. "\r\n\r\n" .. (binding or TMW.L["UNDOREDO_ICON_NOBIND"])
+						end
+						TMW:TT(self, "REDO_ICON", textfunc, nil, 1)
+						
 						self:SetWidth(self:GetTextWidth()+30)
 						self:SetFrameLevel(self:GetFrameLevel()+2)
 					</OnLoad>
@@ -3869,16 +3889,6 @@
 			</Layer>
 		</Layers>
 		<Scripts>
-			<!-- <OnShow>
-				self.OkayButton:Show()
-				self.CloseButton:Show()
-				self.resizeButton:Show()
-			</OnShow>
-			<OnHide>
-				self.OkayButton:Hide()
-				self.CloseButton:Hide()
-				self.resizeButton:Hide()
-			</OnHide> -->
 			<OnLoad>
 				self:RegisterForDrag("LeftButton")
 				for k, v in pairs(self) do
@@ -3891,9 +3901,6 @@
 				end
 				tinsert(UISpecialFrames, self:GetName())
 			</OnLoad>
-			<OnUpdate>
-				TMW.IE:OnUpdate()
-			</OnUpdate>
 			<OnSizeChanged>
 				self.Help:SetHeight(self.Help.text:GetHeight() + 38)
 			</OnSizeChanged>
@@ -3905,9 +3912,9 @@
 			</OnDragStop>
 		</Scripts>
 	</Frame>
+	<Button name="TMW_DUMMY_BUTTON"/>
 
-
-	</Ui>
+</Ui>
 
 
 

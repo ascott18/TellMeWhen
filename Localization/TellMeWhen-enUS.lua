@@ -364,7 +364,11 @@ L["CASTERFORM"] = "Caster Form"
 
 L["RESET_ICON"] = "Reset"
 L["UNDO_ICON"] = "Undo"
+L["UNDO_ICON_DESC"] = "Undo the last change made to this icon's settings."
 L["REDO_ICON"] = "Redo"
+L["REDO_ICON_DESC"] = "Redo the last change made to this icon's settings."
+L["UNDOREDO_ICON_NOBIND"] = "You can set a keybinding for this action in the Blizzard keybinding interface."
+
 L["RESET_NOTIFY"] = "Click the reset button again within 5 seconds to confirm the reset."
 L["RESET_EXPIRE"] = "Reset timer expired."
 L["RESET_CONFIRM"] = "Confirm Reset"

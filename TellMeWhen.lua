@@ -33,11 +33,12 @@ local DRData = LibStub("DRData-1.0", true)
 TELLMEWHEN_VERSION = "4.6.4"
 TELLMEWHEN_VERSION_MINOR = strmatch(" @project-version@", " r%d+") or ""
 TELLMEWHEN_VERSION_FULL = TELLMEWHEN_VERSION .. TELLMEWHEN_VERSION_MINOR
-TELLMEWHEN_VERSIONNUMBER = 46419 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
+TELLMEWHEN_VERSIONNUMBER = 46420 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
 if TELLMEWHEN_VERSIONNUMBER > 47000 or TELLMEWHEN_VERSIONNUMBER < 46000 then return error("YOU SCREWED UP THE VERSION NUMBER OR DIDNT CHANGE THE SAFETY LIMITS") end -- safety check because i accidentally made the version number 414069 once
 
 TELLMEWHEN_MAXGROUPS = 1 	--this is a default, used by SetTheory (addon), so dont rename
 TELLMEWHEN_MAXROWS = 20
+
 
 ---------- Upvalues ----------
 local GetSpellCooldown, GetSpellInfo, GetSpellTexture =
@@ -59,6 +60,7 @@ local MikSBT, Parrot, SCT =
 local CL_PLAYER = COMBATLOG_OBJECT_TYPE_PLAYER
 local CL_PET = COMBATLOG_OBJECT_CONTROL_PLAYER
 local bitband = bit.band
+
 
 ---------- Locals ----------
 local db, st, co, updatehandler, BarGCD, ClockGCD, Locked, CNDT, SndChan, FramesToFind, UnitsToUpdate, CNDTEnv
@@ -2758,6 +2760,10 @@ function IconBase.IsBeingEdited(icon)
 	end
 end
 
+function IconBase.GetSettings(icon)
+	return db.profile.Groups[icon.group:GetID()].Icons[icon:GetID()]
+end
+
 function IconBase.RegisterEvent(icon, event)
 	icon:registerevent(event)
 	icon.__hasEvents = 1
@@ -3127,7 +3133,7 @@ function TypeBase:GetNameForDisplay(icon, data)
 end
 
 function TypeBase:DragReceived(icon, t, data, subType)
-	local ics = icon.ics
+	local ics = icon:GetSettings()
 	
 	if t ~= "spell" then
 		return
@@ -3247,10 +3253,9 @@ function TMW:Icon_Update(icon)
 	local iconID = icon:GetID()
 	local groupID = icon.group:GetID()
 	local group = icon.group
-	local ics = db.profile.Groups[groupID].Icons[iconID]
+	local ics = icon:GetSettings()
 	local typeData = Types[ics.Type]
 	icon.typeData = typeData
-	icon.ics = ics
 
 	local dontreassign
 	if not runEvents then

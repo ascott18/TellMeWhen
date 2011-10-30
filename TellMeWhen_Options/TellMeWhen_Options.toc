@@ -20,3 +20,4 @@ widget-importexport.lua
 TellMeWhen_Options.lua
 
 TellMeWhen_Options.xml
+Bindings.xml

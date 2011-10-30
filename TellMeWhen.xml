@@ -177,12 +177,12 @@
 			<OnReceiveDrag>
 				if TMW.ID then
 					TMW.ID:CompleteDrag(self)
-					TMW.ID:SpellItemToIcon(self:GetParent():GetID(), self:GetID())
+					TMW.ID:SpellItemToIcon(self)
 				end
 			</OnReceiveDrag>
 			<OnClick>
 				if TMW.ID then
-					TMW.ID:SpellItemToIcon(self:GetParent():GetID(), self:GetID())
+					TMW.ID:SpellItemToIcon(self)
 				end
 			</OnClick>
 			<OnDragStop>
