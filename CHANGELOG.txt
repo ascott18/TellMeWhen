@@ -1,3 +1,8 @@
+===v4.6.5===
+ * Bug Fixes:
+ ** (r294) Fixed a bug where conditions were being errenously attached to an icon/group after adding a condition and then removing all condiitions.
+ ** (r294) TellMeWhen.lua line 1452: attempt to index local 'condition' (a number value)
+ 
 ===v4.6.4===
  * New Condition: Pet talent tree.
  * You can now undo and redo changes made to icon settings.

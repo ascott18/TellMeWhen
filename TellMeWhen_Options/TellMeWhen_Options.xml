@@ -3148,8 +3148,8 @@
 						self.StackHeader:SetText(TMW.L["STACKSPANEL_TITLE"])
 						self.TransparencyHeader:SetText(TMW.L["ICONMENU_ALPHA"] .. ":")
 					</OnLoad>
-					<OnDragStart> TellMeWhen_IconEditor:StartMoving() </OnDragStart>
-					<OnDragStop> TellMeWhen_IconEditor:StopMovingOrSizing() </OnDragStop>
+					<OnDragStart> TMW.IE:StartMoving() </OnDragStart>
+					<OnDragStop> TMW.IE:StopMovingOrSizing() </OnDragStop>
 					<OnReceiveDrag>
 						TMW.ID:SpellItemToIcon(TMW.CI.ic)
 					</OnReceiveDrag>
@@ -3207,8 +3207,8 @@
 						self:RegisterForDrag("LeftButton")
 						self:Hide()
 					</OnLoad>
-					<OnDragStart> TellMeWhen_IconEditor:StartMoving() </OnDragStart>
-					<OnDragStop> TellMeWhen_IconEditor:StopMovingOrSizing() </OnDragStop>
+					<OnDragStart> TMW.IE:StartMoving() </OnDragStart>
+					<OnDragStop> TMW.IE:StopMovingOrSizing() </OnDragStop>
 					<OnShow>
 					--	TMW.CNDT:ColorizeParentheses()
 					</OnShow>
@@ -3368,8 +3368,8 @@
 							end
 						end
 					</OnLoad>
-					<OnDragStart> TellMeWhen_IconEditor:StartMoving() </OnDragStart>
-					<OnDragStop> TellMeWhen_IconEditor:StopMovingOrSizing() </OnDragStop>
+					<OnDragStart> TMW.IE:StartMoving() </OnDragStart>
+					<OnDragStop> TMW.IE:StopMovingOrSizing() </OnDragStop>
 				</Scripts>
 			</Frame>
 			<Frame name="$parentAnnouncements" enableMouse="true" hidden="true" setAllPoints="true" parentKey="Announcements">
@@ -3646,8 +3646,8 @@
 							end
 						end
 					</OnLoad>
-					<OnDragStart> TellMeWhen_IconEditor:StartMoving() </OnDragStart>
-					<OnDragStop> TellMeWhen_IconEditor:StopMovingOrSizing() </OnDragStop>
+					<OnDragStart> TMW.IE:StartMoving() </OnDragStart>
+					<OnDragStop> TMW.IE:StopMovingOrSizing() </OnDragStop>
 				</Scripts>
 			</Frame>
 			<Frame name="$parentMainOptions" enableMouse="true" hidden="true" setAllPoints="true" parentKey="MainOptions" >
@@ -3675,7 +3675,7 @@
 								
 							OnAcquire = function(self)
 								TMW.IE.MainOptionsWidget = self
-								self.frame:SetParent(TellMeWhen_IconEditor)
+								self.frame:SetParent(TMW.IE)
 								self.frame:SetAllPoints()
 								self.frame:Show()
 							end,
@@ -3715,8 +3715,8 @@
 						
 						TMW.IE.MainOptionsWidget:ReleaseChildren() -- safer
 					</OnHide>
-					<OnDragStart> TellMeWhen_IconEditor:StartMoving() </OnDragStart>
-					<OnDragStop> TellMeWhen_IconEditor:StopMovingOrSizing() </OnDragStop>
+					<OnDragStart> TMW.IE:StartMoving() </OnDragStart>
+					<OnDragStop> TMW.IE:StopMovingOrSizing() </OnDragStop>
 				</Scripts>
 			</Frame>
 			
@@ -3837,10 +3837,10 @@
 						self:SetFrameLevel(self:GetParent():GetFrameLevel() + 2)
 					</OnLoad>
 					<OnMouseDown>
-						TellMeWhen_IconEditor.oldScale = TellMeWhen_IconEditor:GetScale()
+						TMW.IE.oldScale = TMW.IE:GetScale()
 						self.oldCursorX, self.oldCursorY = GetCursorPosition(UIParent)
-						TellMeWhen_IconEditor.oldX = TellMeWhen_IconEditor:GetLeft()
-						TellMeWhen_IconEditor.oldY = TellMeWhen_IconEditor:GetTop()
+						TMW.IE.oldX = TMW.IE:GetLeft()
+						TMW.IE.oldY = TMW.IE:GetTop()
 						self:SetScript("OnUpdate", function(self)
 							local uiScale = UIParent:GetScale()
 							local editor = self:GetParent()
@@ -3892,11 +3892,9 @@
 			<OnLoad>
 				self:RegisterForDrag("LeftButton")
 				for k, v in pairs(self) do
-					if k ~= 0 then
-						TMW.IE[k] = v
-						if strfind(k, "Tab") and type(v) == "table" then
-							self.numTabs = max(self.numTabs or 0, v:GetID())
-						end
+					TMW.IE[k] = v
+					if strfind(k, "Tab") and type(v) == "table" then
+						self.numTabs = max(self.numTabs or 0, v:GetID())
 					end
 				end
 				tinsert(UISpecialFrames, self:GetName())

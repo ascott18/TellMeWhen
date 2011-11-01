@@ -30,12 +30,13 @@ local AceDB = LibStub("AceDB-3.0")
 local LSM = LibStub("LibSharedMedia-3.0")
 local DRData = LibStub("DRData-1.0", true)
 
-TELLMEWHEN_VERSION = "4.6.4"
+TELLMEWHEN_VERSION = "4.6.5"
 TELLMEWHEN_VERSION_MINOR = strmatch(" @project-version@", " r%d+") or ""
 TELLMEWHEN_VERSION_FULL = TELLMEWHEN_VERSION .. TELLMEWHEN_VERSION_MINOR
-TELLMEWHEN_VERSIONNUMBER = 46422 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
+TELLMEWHEN_VERSIONNUMBER = 46502 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
 if TELLMEWHEN_VERSIONNUMBER > 47000 or TELLMEWHEN_VERSIONNUMBER < 46000 then return error("YOU SCREWED UP THE VERSION NUMBER OR DIDNT CHANGE THE SAFETY LIMITS") end -- safety check because i accidentally made the version number 414069 once
-
+-- i'll just plop this here for a second....
+-- * Began rewriting the suggestion list. IT IS HIGHLY UNUSABLE RIGHT NOW. THIS IS AN ALPHA VERSION, SO DONT COMPLAIN.
 TELLMEWHEN_MAXGROUPS = 1 	--this is a default, used by SetTheory (addon), so dont rename
 TELLMEWHEN_MAXROWS = 20
 
@@ -219,11 +220,11 @@ do -- Iterators
 	
 	do -- InConditions
 		
-		local stage, Conditions, ConditionID, ci, cg, extIter
+		local Conditions, ConditionID
 		local function iter()
 			ConditionID = ConditionID + 1
 			
-			if ConditionID > (Conditions.n  or #Conditions) then -- #Conditions enables iteration over tables that have not yet been upgraded with an n key
+			if ConditionID > (Conditions.n  or #Conditions) then -- #Conditions enables iteration over tables that have not yet been upgraded with an n key (i.e. imported data from old versions)
 				return
 			end
 			local Condition = Conditions[ConditionID]
@@ -447,7 +448,7 @@ local Types = setmetatable({}, {
 		if type(k) == "table" and k.base == IconBase then -- if the key is an icon, then return the icon's Type table
 			return t[k.Type]
 		else -- if no type exists, then use the fallback (default) type
-			return t[""]
+			return rawget(t, "")
 		end
 	end
 })
@@ -1401,16 +1402,16 @@ function TMW:GetUpgradeTable()			-- upgrade functions
 	local t = {
 	
 		[46418] = {
-			-- cant use the conditions key here because it depends on Conditions.n, which is 0 until this is ran
 			global = function()
 				db.global.HelpSettings.ResetCount = nil
 			end,
 		},
 		[46417] = {
 			-- cant use the conditions key here because it depends on Conditions.n, which is 0 until this is ran
+			-- also, dont use TMW:InConditions because it will use conditions.n, which is 0 until the upgrade is complete
 			group = function(gs)
 				local n = 0
-				for k, v in pairs(gs.Conditions) do
+				for k in pairs(gs.Conditions) do
 					if type(k) == "number" then
 						n = max(n, k)
 					end
@@ -1419,7 +1420,7 @@ function TMW:GetUpgradeTable()			-- upgrade functions
 			end,
 			icon = function(ics)
 				local n = 0
-				for k, v in pairs(ics.Conditions) do
+				for k in pairs(ics.Conditions) do
 					if type(k) == "number" then
 						n = max(n, k)
 					end
@@ -1448,8 +1449,8 @@ function TMW:GetUpgradeTable()			-- upgrade functions
 		},
 		[45802] = {
 			icon = function(ics)
-				for i, condition in pairs(ics.Conditions) do
-					if condition.Type == "CASTING" then
+				for k, condition in TMW:InConditions(ics.Conditions) do
+					if type(k) == "number" and condition.Type == "CASTING" then
 						condition.Name = ""
 					end
 				end
@@ -1594,10 +1595,12 @@ function TMW:GetUpgradeTable()			-- upgrade functions
 		[42105] = {
 			-- cleanup some old stuff that i noticed is sticking around in my settings, probably in other peoples' settings too
 			icon = function(ics)
-				for _, condition in pairs(ics.Conditions) do
-					for k in pairs(condition) do
-						if strfind(k, "Condition") then
-							condition[k] = nil
+				for k, condition in pairs(ics.Conditions) do
+					if type(k) == "number" then
+						for k in pairs(condition) do
+							if strfind(k, "Condition") then
+								condition[k] = nil
+							end
 						end
 					end
 					condition.Names = nil
@@ -1719,7 +1722,7 @@ function TMW:GetUpgradeTable()			-- upgrade functions
 		[41206] = {
 			icon = function(ics)
 				for k, condition in pairs(ics.Conditions) do
-					if condition.Type == "STANCE" then
+					if type(k) == "number" and condition.Type == "STANCE" then
 						condition.Operator = "=="
 					end
 				end
@@ -1728,19 +1731,21 @@ function TMW:GetUpgradeTable()			-- upgrade functions
 		[41008] = {
 			icon = function(ics)
 				for k, condition in pairs(ics.Conditions) do
-					if condition.Type == "SPELLCD" or condition.Type == "ITEMCD" then
-						if condition.Level == 0 then
-							condition.Operator = "=="
-						elseif condition.Level == 1 then
-							condition.Operator = ">"
-							condition.Level = 0
-						end
-					elseif condition.Type == "MAINHAND" or condition.Type == "OFFHAND" or condition.Type == "THROWN" then
-						if condition.Level == 0 then
-							condition.Operator = ">"
-						elseif condition.Level == 1 then
-							condition.Operator = "=="
-							condition.Level = 0
+					if type(k) == "number" then
+						if condition.Type == "SPELLCD" or condition.Type == "ITEMCD" then
+							if condition.Level == 0 then
+								condition.Operator = "=="
+							elseif condition.Level == 1 then
+								condition.Operator = ">"
+								condition.Level = 0
+							end
+						elseif condition.Type == "MAINHAND" or condition.Type == "OFFHAND" or condition.Type == "THROWN" then
+							if condition.Level == 0 then
+								condition.Operator = ">"
+							elseif condition.Level == 1 then
+								condition.Operator = "=="
+								condition.Level = 0
+							end
 						end
 					end
 				end
@@ -1754,10 +1759,12 @@ function TMW:GetUpgradeTable()			-- upgrade functions
 		[41004] = {
 			icon = function(ics)
 				for k, condition in pairs(ics.Conditions) do
-					if condition.Type == "BUFF" then
-						condition.Type = "BUFFSTACKS"
-					elseif condition.Type == "DEBUFF" then
-						condition.Type = "DEBUFFSTACKS"
+					if type(k) == "number" then
+						if condition.Type == "BUFF" then
+							condition.Type = "BUFFSTACKS"
+						elseif condition.Type == "DEBUFF" then
+							condition.Type = "DEBUFFSTACKS"
+						end
 					end
 				end
 			end,
@@ -1770,7 +1777,7 @@ function TMW:GetUpgradeTable()			-- upgrade functions
 		[40115] = {
 			icon = function(ics)
 				for k, condition in pairs(ics.Conditions) do
-					if condition.Type == "BUFF" or condition.Type == "DEBUFF" then
+					if type(k) == "number" and (condition.Type == "BUFF" or condition.Type == "DEBUFF") then
 						if condition.Level == 0 then
 							condition.Operator = ">"
 						elseif condition.Level == 1 then
@@ -1784,7 +1791,7 @@ function TMW:GetUpgradeTable()			-- upgrade functions
 		[40112] = {
 			icon = function(ics)
 				for k, condition in pairs(ics.Conditions) do
-					if condition.Type == "CASTING" then
+					if type(k) == "number" and condition.Type == "CASTING" then
 						condition.Level = condition.Level + 1
 					end
 				end
@@ -1804,7 +1811,7 @@ function TMW:GetUpgradeTable()			-- upgrade functions
 		[40106] = {
 			icon = function(ics)
 				for k, condition in pairs(ics.Conditions) do
-					if condition.Type == "ITEMINBAGS" then
+					if type(k) == "number" and condition.Type == "ITEMINBAGS" then
 						if condition.Level == 0 then
 							condition.Operator = ">"
 						elseif condition.Level == 1 then
@@ -1822,7 +1829,7 @@ function TMW:GetUpgradeTable()			-- upgrade functions
 			end,
 			icon = function(ics)
 				for k, condition in pairs(ics.Conditions) do
-					if condition.Type == "NAME" then
+					if type(k) == "number" and condition.Type == "NAME" then
 						condition.Level = 0
 					end
 				end
@@ -1840,7 +1847,7 @@ function TMW:GetUpgradeTable()			-- upgrade functions
 				ics.StackMin = floor(ics.StackMin)
 				ics.StackMax = floor(ics.StackMax)
 				for k, v in pairs(ics.Conditions) do
-					if v.Type == "ECLIPSE_DIRECTION" and v.Level == -1 then
+					if type(k) == "number" and v.Type == "ECLIPSE_DIRECTION" and v.Level == -1 then
 						v.Level = 0
 					end
 				end
@@ -1972,10 +1979,12 @@ function TMW:GetUpgradeTable()			-- upgrade functions
 		},
 		[22010] = {
 			icon = function(ics)
-				for i, condition in ipairs(ics.Conditions) do
-					for k, v in pairs(condition) do
-						condition[k] = nil
-						condition[k:gsub("Condition", "")] = v
+				for k, condition in ipairs(ics.Conditions) do
+					if type(k) == "number" then
+						for k, v in pairs(condition) do
+							condition[k] = nil
+							condition[k:gsub("Condition", "")] = v
+						end
 					end
 				end
 			end,
@@ -1983,7 +1992,7 @@ function TMW:GetUpgradeTable()			-- upgrade functions
 		[22000] = {
 			icon = function(ics)
 				for k, v in ipairs(ics.Conditions) do
-					if ((v.ConditionType == "ICON") or (v.ConditionType == "EXISTS") or (v.ConditionType == "ALIVE")) then
+					if type(k) == "number" and ((v.ConditionType == "ICON") or (v.ConditionType == "EXISTS") or (v.ConditionType == "ALIVE")) then
 						v.ConditionLevel = 0
 					end
 				end
@@ -2004,7 +2013,7 @@ function TMW:GetUpgradeTable()			-- upgrade functions
 			icon = function(ics)
 				for k, v in ipairs(ics.Conditions) do
 					v.ConditionLevel = tonumber(v.ConditionLevel) or 0
-					if ((v.ConditionType == "SOUL_SHARDS") or (v.ConditionType == "HOLY_POWER")) and (v.ConditionLevel > 3) then
+					if type(k) == "number" and ((v.ConditionType == "SOUL_SHARDS") or (v.ConditionType == "HOLY_POWER")) and (v.ConditionLevel > 3) then
 						v.ConditionLevel = ceil((v.ConditionLevel/100)*3)
 					end
 				end
@@ -2104,8 +2113,8 @@ function TMW:GlobalUpgrade()
 				if p.Groups then
 					for _, gs in pairs(p.Groups) do
 						if gs.Conditions then
-							for _, Condition in pairs(gs.Conditions) do
-								if Condition.Type == nil then
+							for k, Condition in pairs(gs.Conditions) do
+								if type(k) == "number" and Condition.Type == nil then
 									Condition.Type = "HEALTH"
 								end
 							end
@@ -2113,8 +2122,8 @@ function TMW:GlobalUpgrade()
 						if gs.Icons then
 							for _, ics in pairs(gs.Icons) do
 								if ics.Conditions then
-									for _, Condition in pairs(ics.Conditions) do
-										if Condition.Type == nil then
+									for k, Condition in pairs(ics.Conditions) do
+										if type(k) == "number" and Condition.Type == nil then
 											Condition.Type = "HEALTH"
 										end
 									end
@@ -2590,7 +2599,7 @@ function TMW:Group_Update(groupID)
 
 	if group.Enabled and group.CorrectSpec and Locked then
 		group:Show()
-		if #group.Conditions > 0 or group.OnlyInCombat then
+		if group.Conditions.n > 0 or group.OnlyInCombat then
 			group:SetScript("OnUpdate", CNDT:ProcessConditions(group)) -- dont be alarmed, this is handled by GroupSetScript
 		else
 			group:SetScript("OnUpdate", nil)
@@ -2755,7 +2764,7 @@ function IconBase.UpdateBindText(icon)
 end
 
 function IconBase.IsBeingEdited(icon)
-	if TMW.IE and TMW.CI.ic == icon and TMW.IE.CurrentTab and TellMeWhen_IconEditor:IsVisible() then
+	if TMW.IE and TMW.CI.ic == icon and TMW.IE.CurrentTab and TMW.IE:IsVisible() then
 		return TMW.IE.CurrentTab:GetID()
 	end
 end
@@ -3325,7 +3334,7 @@ function TMW:Icon_Update(icon)
 	end
 	ClearScripts(icon)
 
-	if #icon.Conditions > 0 and Locked then -- dont define conditions if we are unlocked so that i dont have to deal with meta icons checking icons during config. I think i solved this somewhere else too without thinking about it, but what the hell
+	if icon.Conditions.n > 0 and Locked then -- dont define conditions if we are unlocked so that i dont have to deal with meta icons checking icons during config. I think i solved this somewhere else too without thinking about it, but what the hell
 		CNDT:ProcessConditions(icon)
 	else
 		icon.CndtCheck = nil

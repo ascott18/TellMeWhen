@@ -1805,12 +1805,20 @@ IE.Tabs = {
 }
 
 function IE:OnInitialize()
-	TellMeWhen_IconEditor:SetScript("OnUpdate", IE.OnUpdate)
+
+	-- they see me clonin'... they hatin'...
+	-- (make TMW.IE be the same as IE)
+	-- IE[0] = TellMeWhen_IconEditor[0] (already done in .xml)
+	local meta = CopyTable(getmetatable(IE))
+	meta.__index = getmetatable(TellMeWhen_IconEditor).__index
+	setmetatable(IE, meta)
+	
+	IE:SetScript("OnUpdate", IE.OnUpdate)
 	IE.iconsToUpdate = {}
 end
 
 function IE:OnUpdate()
-	-- self is TellMeWhen_IconEditor, not IE
+	-- self is IE, not IE, but since i made them the same thing, it doesnt matter
 	local groupID, iconID = TMW.CI.g, TMW.CI.i
 	local icon = TMW.CI.ic
 	
@@ -1844,8 +1852,9 @@ function IE:Load(isRefresh, icon)
 		CI.g = icon:GetParent():GetID()
 		CI.ic = icon
 		CI.t = icon.Type
+		--TMW.SUG:EnableEditBox(IE.Main.Name, icon.typeData.SUGType or "item") -- SUGHACK: item module forced
 	end
-	if not TellMeWhen_IconEditor:IsShown() then
+	if not IE:IsShown() then
 		if isRefresh then
 			return
 		else
@@ -1857,7 +1866,7 @@ function IE:Load(isRefresh, icon)
 	if not groupID or not iconID then return end
 
 	IE.ExportBox:SetText("")
-	TellMeWhen_IconEditor:SetScale(db.global.EditorScale)
+	IE:SetScale(db.global.EditorScale)
 
 	if IE.Main.Type.selectedValue ~= CI.t then
 		UIDropDownMenu_SetSelectedValue(IE.Main.Type, CI.t)
@@ -1918,7 +1927,7 @@ function IE:TabClick(self)
 	-- show the selected tab's frame
 	IE[IE.Tabs[self:GetID()]]:Show()
 	-- show the icon editor
-	TellMeWhen_IconEditor:Show()
+	IE:Show()
 	
 	-- special handling for certain tabs. TODO: move this somewhere else.
 	if self:GetID() == TMW.ICCNDTTab then
@@ -2238,7 +2247,7 @@ function IE:SaveSettings()
 	end
 	ANN.EditBox:ClearFocus()
 	SND.Custom:ClearFocus()
-	if TellMeWhen_IconEditor:IsShown() then
+	if IE:IsShown() then
 		for i, frame in ipairs(CNDT) do
 			frame.Unit:ClearFocus()
 			frame.EditBox:ClearFocus()
@@ -2423,7 +2432,7 @@ end
 
 function IE:Unit_DropDown()
 	if not db then return end
-	local e = TellMeWhen_IconEditor.Main.Unit
+	local e = IE.Main.Unit
 	if not e:HasFocus() then
 		e:HighlightText()
 	end
@@ -4065,7 +4074,7 @@ SUG = TMW:NewModule("Suggester", "AceEvent-3.0", "AceComm-3.0", "AceSerializer-3
 
 ---------- Locals/Data ----------
 local SUGIsNumberInput
-local SUGIMS, SUGSoI
+local SUGIMS
 local SUGpreTable = {}
 local SUGPlayerSpells = {}
 local ActionCache, pclassSpellCache, ClassSpellLookup, AuraCache, ItemCache, SpellCache, CastCache
@@ -4077,7 +4086,7 @@ end
 
 
 ---------- Initialization/Database/Spell Caching ----------
-function SUG:OnInitialize()
+function SUG:OnInitialize()	
 	TMWOptDB = TMWOptDB or {}
 
 	CNDT:CURRENCY_DISPLAY_UPDATE() -- im in ur SUG, hijackin' ur OnInitialize
@@ -4133,7 +4142,7 @@ function SUG:OnInitialize()
 	local _, _, _, clientVersion = GetBuildInfo()
 	if TMWOptDB.IncompleteCache or not TMWOptDB.WoWVersion or TMWOptDB.WoWVersion < clientVersion then
 		local didrunhook
-		TellMeWhen_IconEditor:HookScript("OnShow", function()
+		IE:HookScript("OnShow", function()
 			if didrunhook then return end
 			
 			do	--validate all old items in the item cache
@@ -4399,7 +4408,49 @@ function SUG:OnCommReceived(prefix, text, channel, who)
 end
 
 
----------- Suggesting ----------
+--[==[---------- Suggesting ----------
+function SUG:DoSuggest()
+	wipe(SUGpreTable)
+	
+	local tbl = SUG.CurrentModule:Table_Get()
+	
+--	SUG.CurrentModule:Table_GetSpecialSuggestions(tbl, SUGpreTable)
+	
+	SUG.CurrentModule:Table_GetNormalSuggestions(tbl, SUGpreTable)
+	
+	SUG:SuggestingComplete(1)
+end
+
+function SUG:SuggestingComplete(doSort)
+	SUG.offset = min(SUG.offset, max(0, #SUGpreTable-#SUG+1))
+	local offset = SUG.offset
+	SUGIMS = CI.IMS
+	
+	if doSort then
+		sort(SUGpreTable, SUG.CurrentModule:Table_GetSorter())
+	end
+
+	local i = 1
+	while SUG[i] do
+		local id = SUGpreTable[i+offset]
+		local f = SUG[i]
+		f.insert = nil
+		f.insert2 = nil
+		if id then
+			f.Background:SetVertexColor(0, 0, 0, 0)
+			
+			SUG.CurrentModule:Entry_AddToList(f, id)
+			
+			f:Show()
+		else
+			f:Hide()
+		end
+		i=i+1
+	end
+end
+]==]
+---------- Suggesting --------
+
 function SUG.Sorter(a, b)
 	--[[PRIORITY:
 		1)	Equivalancies/Dispel Types
@@ -4848,7 +4899,7 @@ local EditboxHooks = {
 		if self.SUG_Enabled then
 			SUG.redoIfSame = nil
 			SUG.Box = self
-			SUG.overrideSoI = self.SUG_setOverride and self.SUG_type
+			--SUG.CurrentModule = SUG:GetModule(self.SUG_type)
 			SUG:NameOnCursor()
 		end
 	end,
@@ -4905,6 +4956,207 @@ function SUG:ColorHelp(frame)
 	GameTooltip:AddLine(L["SUG_MISC"], .58, .51, .79, 1)
 	GameTooltip:Show()
 end
+
+--[===[
+local Module = SUG:NewModule("default")
+
+function Module:Table_Get()
+	return SpellCache
+end
+
+function Module.Sorter_ByName(a, b)
+	local nameA, nameB = SUG.SortTable[a], SUG.SortTable[b]
+	if nameA == nameB then
+		--sort identical names by ID
+		return a < b
+	else
+		--sort by name
+		return nameA < nameB
+	end
+end
+
+function Module:Table_GetSorter()
+	if SUG.inputType == "number" then
+		return nil -- use the default sort func
+	else
+		SUG.SortTable = self:Table_Get()
+		return self.Sorter_ByName
+	end
+end
+
+function Module:Table_GetNormalSuggestions(tbl, suggestions)
+	local atBeginning = SUG.atBeginning
+	
+	if SUG.inputType == "number" then
+		local len = #SUG.lastName - 1
+		local match = tonumber(SUG.lastName)
+		for id in pairs(tbl) do
+			if min(id, floor(id / 10^(floor(log10(id)) - len))) == match then -- this looks like shit, but is is approx 300% more efficient than the below commented line
+		--	if strfind(id, atBeginning) then
+				suggestions[#suggestions + 1] = id
+			end
+		end
+	else
+		for id, name in pairs(tbl) do
+			if strfind(name, atBeginning) then
+				suggestions[#suggestions + 1] = id
+			end
+		end
+	end
+end
+
+function Module:Entry_OnClick(frame, button)
+	local insert
+	if button == "RightButton" and frame.insert2 then
+		insert = frame.insert2
+	else
+		insert = frame.insert
+	end
+	TMW.SUG:Insert(insert)
+end
+
+
+
+local Module = SUG:NewModule("item", SUG:GetModule("default"))
+
+function Module:Table_Get()
+	return ItemCache
+end
+
+function Module:Entry_AddToList(frame, id)
+	local name, link = GetItemInfo(id)
+
+	frame.Name:SetText(link)
+	frame.ID:SetText(id)
+
+	frame.insert = SUG.inputType == "number" and id or name
+	frame.insert2 = SUG.inputType ~= "number" and id or name
+
+	frame.tooltipmethod = "SetHyperlink"
+	frame.tooltiparg = link
+
+	frame.Icon:SetTexture(GetItemIcon(id))
+end
+
+
+
+local Module = SUG:NewModule("spell", SUG:GetModule("default"))
+
+function Module:Table_Get()
+	return SpellCache
+end
+
+local function Sorter_ByName(a, b)
+	local nameA, nameB = SpellCache[a], SpellCache[b]
+	if nameA == nameB then
+		--sort identical names by ID
+		return a < b
+	else
+		--sort by name
+		return nameA < nameB
+	end
+end
+
+function Module:Table_GetSorter()
+	if SUG.inputType == "number" then
+		return nil -- use the default sort func
+	else
+		return Sorter_ByName
+	end
+end
+
+function Module:Entry_AddToList(f, id)
+	--[[local name = GetSpellInfo(id)
+
+	f.Name:SetText(name)
+	f.ID:SetText(id)
+
+	f.tooltipmethod = "SetSpellByID"
+	f.tooltiparg = id
+
+	f.insert = SUG.inputType == "number" and id or name
+	f.insert2 = SUG.inputType ~= "number" and id or name
+
+	f.Icon:SetTexture(SpellTextures[id])]]
+	if TMW.DS[id] then -- if the entry is a dispel type (magic, poison, etc)
+		local dispeltype = id
+
+		f.Name:SetText(dispeltype)
+		f.ID:SetText(nil)
+
+		f.insert = dispeltype
+
+		f.tooltipmethod = nil
+		f.tooltiptitle = dispeltype
+		f.tooltiptext = L["ICONMENU_DISPEL"]
+
+		f.Icon:SetTexture(TMW.DS[id])
+		f.Background:SetVertexColor(1, .49, .04, 1) -- druid orange
+
+	elseif EquivFirstIDLookup[id] then -- if the entry is an equivalacy (buff, cast, or whatever)
+		--NOTE: dispel types are put in EquivFirstIDLookup too for efficiency in the sorter func, but as long as dispel types are checked first, it wont matter
+		local equiv = id
+		local firstid = EquivFirstIDLookup[id]
+
+		f.Name:SetText(equiv)
+		f.ID:SetText(nil)
+
+		f.insert = equiv
+
+		f.tooltipmethod = "TMW_SetEquiv"
+		f.tooltiparg = equiv
+
+		f.Icon:SetTexture(SpellTextures[firstid])
+		if TMW.BE.buffs[equiv] then
+			f.Background:SetVertexColor(.2, .9, .2, 1) -- lightish green
+		elseif TMW.BE.debuffs[equiv] then
+			f.Background:SetVertexColor(.77, .12, .23, 1) -- deathknight red
+		elseif TMW.BE.casts[equiv] or TMW.BE.dr[equiv] then
+			f.Background:SetVertexColor(1, .96, .41, 1) -- rogue yellow
+		end
+
+	elseif tonumber(id) then --sanity check
+		
+		local name = GetSpellInfo(id)
+
+		f.Name:SetText(name)
+		f.ID:SetText(id)
+
+		f.tooltipmethod = "SetSpellByID"
+		f.tooltiparg = id
+
+		f.insert = SUG.inputType == "number" and id or name
+		f.insert2 = SUG.inputType ~= "number" and id or name
+
+		f.Icon:SetTexture(SpellTextures[id])
+		if SUGIMS and SUG.ActionCache[id] then
+			f.Background:SetVertexColor(0, .44, .87, 1) --color actions that are on your action bars if the type is a multistate cooldown shaman blue
+		elseif SUGPlayerSpells[id] then
+			f.Background:SetVertexColor(.41, .8, .94, 1) --color all other spells that you have in your/your pet's spellbook mage blue
+		else
+			for class, tbl in pairs(TMW.ClassSpellCache) do
+				if tbl[id] then
+					f.Background:SetVertexColor(.96, .55, .73, 1) --color all other known class spells paladin pink
+					break
+				end
+			end
+		end
+	end
+	local whoCasted = SUG.AuraCache[id]
+	if whoCasted then
+		local r, g, b, a = f.Background:GetVertexColor()
+		if a < .5 then -- only if nothing else has colored the entry yet
+			if whoCasted == 1 then
+				f.Background:SetVertexColor(.78, .61, .43, 1) -- color known NPC auras warrior brown
+			elseif whoCasted == 2 then
+				f.Background:SetVertexColor(.79, .30, 1, 1) -- color known PLAYER auras a bright pink ish pruple ish color that is similar to paladin pink but has sufficient contrast for distinguishing
+			end
+		end
+	end
+end
+
+
+]===]
 
 
 
