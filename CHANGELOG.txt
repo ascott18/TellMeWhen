@@ -1,8 +1,7 @@
 ===v4.6.5===
  * Bug Fixes:
- ** (r294) Fixed a bug where conditions were being errenously attached to an icon/group after adding a condition and then removing all condiitions.
+ ** (r294) Fixed a bug where conditions were being erroneously attached to an icon/group after adding a condition and then removing all conditions.
  ** (r294) TellMeWhen.lua line 1452: attempt to index local 'condition' (a number value)
- ** (r296) TellMeWhen_Options.lua:2703: Missing version of data
  
 ===v4.6.4===
  * New Condition: Pet talent tree.
@@ -19,7 +18,7 @@
  ** (r276) Fixed a breaking typo in the enUS locale file.
  ** (r281) TellMeWhen\Types\dr.lua:182 table index is nil
  ** (r282) Pet talent tree localization was incorrect for some languages due to my crafty attempts to be crafty
- ** (r290) Blank icons will no longer be errenously added to the copy dropdown.
+ ** (r290) Blank icons will no longer be erroneously added to the copy dropdown.
  
 ===v4.6.3===
  * Bug Fixes:
@@ -79,10 +78,10 @@
  ** (r230) Fixed overlapping checkboxes, and completely revamped the way that the left column in the icon editor works to prevent this from ever occurring again.
  ** (r231) Fixed missing settings caused by the left-column overhaul
  ** (r232) Meta icons now inherit timer settings properly
- ** (r233) Fixed some deadly recusion
+ ** (r233) Fixed some deadly recursion
  
 ===v4.5.5===
- * Added Brazillian Portuguese localization file. Translators wanted!
+ * Added Brazilian Portuguese localization file. Translators wanted!
  * Implemented a method of determining of an import string has become corrupt by using WikiCreole formatting on Curse (and then fix it if it has been).
  * Bug Fixes:
  ** (r213) The cooldown bar offset editbox now uses TellMeWhen_TimeEditBoxTemplate (and on a related note, huge time strings will now format to the year level for fun)
@@ -114,7 +113,7 @@
 ===v4.5.2===
  * Added "%m" as a text substitution for the name of the unit that you are currently mousing over.
  * Existing substitutions "%t" and "%f" now work in all output locations.
- * The change made in 4.5.0 to reactve icons and conditions has been made optional. Those checking abilities such as raging blow or execute should probably enable this option.
+ * The change made in 4.5.0 to reactive icons and conditions has been made optional. Those checking abilities such as raging blow or execute should probably enable this option.
  * Parenthesis in the condition editor are prettier now
  * Tooltip scan conditions now use the new return values of UnitAura added in WoW 4.2, and have been appropriately renamed to "Aura Variable". The result is an increase in efficiency at the cost of a bit of accuracy in some obscure cases.
  * Spell caching and filtering is now between 1500% and 2000% faster. (Seriously.)
