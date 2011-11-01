@@ -96,10 +96,6 @@ local function Cast_OnUpdate(icon, time)
 	end
 end
 
-function Type:GetNameForDisplay(icon, data)
-	return data, 1
-end
-
 
 function Type:Setup(icon, groupID, iconID)
 	icon.NameFirst = TMW:GetSpellNames(icon, icon.Name, 1)
@@ -112,6 +108,19 @@ function Type:Setup(icon, groupID, iconID)
 	icon.ShowPBar = false
 	icon:SetScript("OnUpdate", Cast_OnUpdate)
 	icon:OnUpdate(TMW.time)
+end
+
+function Type:GetNameForDisplay(icon, data)
+	return data, 1
+end
+
+function Type:GetIconMenuText(data)
+	local text = data.Name or ""
+	if text == "" then
+		text = "((" .. L["ICONMENU_CAST"] .. "))"
+	end
+
+	return text, data.Name and data.Name ~= "" and data.Name .. "\r\n" or ""
 end
 
 TMW:RegisterIconType(Type)

@@ -130,22 +130,6 @@ function Type:Setup(icon, groupID, iconID)
 	icon.ICDStartTime = icon.ICDStartTime or 0
 	icon.ICDDuration = icon.ICDDuration or 0
 	
-	if icon:IsBeingEdited() == 1 then
-		local Name = TMW.IE.Main.Name
-		local s = ""
-		local array = TMW:GetSpellNames(nil, Name:GetText())
-		for k, v in pairs(TMW:GetSpellDurations(nil, Name:GetText())) do
-			if v == 0 then
-				s = s .. (s ~= "" and "; " or "") .. array[k]
-			end
-		end
-		if s ~= "" then
-			TMW.HELP:Show("ICON_DURS_MISSING", icon, Name, 0, 0, L["HELP_MISSINGDURS"], s)
-		else
-			TMW.HELP:Hide("ICON_DURS_MISSING")
-		end
-	end
-	
 	--[[ keep these events per icon isntead of global like unitcooldowns are so that ...
 	well i had a reason here but it didnt make sense when i came back and read it a while later. Just do it. I guess.]]
 	if icon.ICDType == "spellcast" then
@@ -184,9 +168,5 @@ function Type:DragReceived(icon, t, data, subType)
 	return true -- signal success
 end
 
-
-function Type:IE_TypeLoaded()
-	TMW.HELP:Show("ICON_DURS_FIRSTSEE", nil, TMW.IE.Main.Type, 20, 0, L["HELP_FIRSTUCD"])
-end
 
 TMW:RegisterIconType(Type)

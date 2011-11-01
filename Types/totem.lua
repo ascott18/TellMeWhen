@@ -152,6 +152,15 @@ function Type:Setup(icon, groupID, iconID)
 	icon:OnUpdate(TMW.time)
 end
 
+function TypeIconMenuText(data)
+	local text = data.Name or ""
+	if text == "" then
+		text = "((" .. Type.name .. "))"
+	end
+	
+	return text, data.Name and data.Name ~= ""  and data.Name .. "\r\n" or ""
+end
+
 function Type:GetNameForDisplay(icon, data)
 	if data then
 		return data

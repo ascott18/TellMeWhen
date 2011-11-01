@@ -33,7 +33,7 @@ local DRData = LibStub("DRData-1.0", true)
 TELLMEWHEN_VERSION = "4.6.4"
 TELLMEWHEN_VERSION_MINOR = strmatch(" @project-version@", " r%d+") or ""
 TELLMEWHEN_VERSION_FULL = TELLMEWHEN_VERSION .. TELLMEWHEN_VERSION_MINOR
-TELLMEWHEN_VERSIONNUMBER = 46421 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
+TELLMEWHEN_VERSIONNUMBER = 46422 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
 if TELLMEWHEN_VERSIONNUMBER > 47000 or TELLMEWHEN_VERSIONNUMBER < 46000 then return error("YOU SCREWED UP THE VERSION NUMBER OR DIDNT CHANGE THE SAFETY LIMITS") end -- safety check because i accidentally made the version number 414069 once
 
 TELLMEWHEN_MAXGROUPS = 1 	--this is a default, used by SetTheory (addon), so dont rename
@@ -3148,6 +3148,13 @@ function TypeBase:DragReceived(icon, t, data, subType)
 	return true -- signal success
 end
 
+function TypeBase:GetIconMenuText(data)
+	local text = data.Name or ""
+	local tooltip =	data.Name and data.Name ~= "" and data.Name .. "\r\n" or ""
+
+	return text, tooltip
+end
+
 function TMW:RegisterIconType(Type)
 	local typekey = Type.type
 	setmetatable(Type, typeMT)
@@ -3169,6 +3176,7 @@ function TMW:RegisterIconType(Type)
 	tinsert(TMW.OrderedTypes, Type) -- put it in the ordered types table (used to order the type selection dropdown in the icon editor)
 	return Type -- why not?
 end
+
 
 function TMW:CreateIcon(group, groupID, iconID)
 	local icon = CreateFrame("Button", "TellMeWhen_Group" .. groupID .. "_Icon" .. iconID, group, "TellMeWhen_IconTemplate", iconID)
@@ -3246,10 +3254,6 @@ end
 function TMW:Icon_Update(icon)
 	if not icon then return end
 	
-	if TMW.IE and not TMW.IE.Help.current.noclose then
-		--TMW.IE.Help:Hide()
-	end
-
 	local iconID = icon:GetID()
 	local groupID = icon.group:GetID()
 	local group = icon.group
@@ -3443,6 +3447,25 @@ function TMW:Icon_Update(icon)
 		end
 	else
 		icon:SetAlpha(0)
+	end
+	
+	-- Warnings for missing durations and first-time instructions for duration syntax
+	if typeData.DurationSyntax and icon:IsBeingEdited() == 1 then
+		TMW.HELP:Show("ICON_DURS_FIRSTSEE", nil, TMW.IE.Main.Type, 20, 0, L["HELP_FIRSTUCD"])
+		
+		local Name = TMW.IE.Main.Name
+		local s = ""
+		local array = TMW:GetSpellNames(nil, Name:GetText())
+		for k, v in pairs(TMW:GetSpellDurations(nil, Name:GetText())) do
+			if v == 0 then
+				s = s .. (s ~= "" and "; " or "") .. array[k]
+			end
+		end
+		if s ~= "" then
+			TMW.HELP:Show("ICON_DURS_MISSING", icon, Name, 0, 0, L["HELP_MISSINGDURS"], s)
+		else
+			TMW.HELP:Hide("ICON_DURS_MISSING")
+		end
 	end
 	
 	if icon.FakeHidden and not dontremove then

@@ -346,22 +346,6 @@ function Type:Setup(icon, groupID, iconID)
 	icon.NameArray = TMW:GetSpellNames(icon, icon.Name)
 	icon.Durations = TMW:GetSpellDurations(icon, icon.Name)
 	icon.Units = TMW:GetUnits(icon, icon.Unit)
-	
-	if icon:IsBeingEdited() == 1 then
-		local Name = TMW.IE.Main.Name
-		local s = ""
-		local array = TMW:GetSpellNames(nil, Name:GetText())
-		for k, v in pairs(TMW:GetSpellDurations(nil, Name:GetText())) do
-			if v == 0 then
-				s = s .. (s ~= "" and "; " or "") .. array[k]
-			end
-		end
-		if s ~= "" then
-			TMW.HELP:Show("ICON_DURS_MISSING", icon, Name, 0, 0, L["HELP_MISSINGDURS"], s)
-		else
-			TMW.HELP:Hide("ICON_DURS_MISSING")
-		end
-	end
 
 	Type:RegisterEvent("COMBAT_LOG_EVENT_UNFILTERED")
 	Type:RegisterEvent("UNIT_SPELLCAST_SUCCEEDED")
@@ -392,8 +376,5 @@ function Type:DragReceived(icon, t, data, subType)
 	return true -- signal success
 end
 
-function Type:IE_TypeLoaded()
-	TMW.HELP:Show("ICON_DURS_FIRSTSEE", nil, TMW.IE.Main.Type, 20, 0, L["HELP_FIRSTUCD"])
-end
 
 TMW:RegisterIconType(Type)

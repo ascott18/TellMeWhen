@@ -194,27 +194,19 @@ function Type:GetNameForDisplay(icon, data)
 end
 
 function Type:GetIconMenuText(data)
-
-	local text = data.Name or ""
-	if text == "" then
-		if data.WpnEnchantType == "MainHandSlot" or not data.WpnEnchantType then
-			text = INVTYPE_WEAPONMAINHAND
-		elseif data.WpnEnchantType == "SecondaryHandSlot" then
-			text = INVTYPE_WEAPONOFFHAND
-		elseif data.WpnEnchantType == "RangedSlot" then
-			text = INVTYPE_THROWN
-		end
+	local text = ""
+	if data.WpnEnchantType == "MainHandSlot" or not data.WpnEnchantType then
+		text = INVTYPE_WEAPONMAINHAND
+	elseif data.WpnEnchantType == "SecondaryHandSlot" then
+		text = INVTYPE_WEAPONOFFHAND
+	elseif data.WpnEnchantType == "RangedSlot" then
+		text = INVTYPE_THROWN
 	end
+	text = text .. " ((" .. L["ICONMENU_WPNENCHANT"] .. "))"
 	
-	text = text == "" and L["UNNAMED"] or text
-	local textshort = strsub(text, 1, 35)
-	if strlen(text) > 35 then textshort = textshort .. "..." end
+	local tooltip =	(data.Name and data.Name ~= "" and data.Name .. "\r\n" or "")
 
-	local tooltip =	((data.Name and data.Name ~= "" and data.Type ~= "meta" and data.Type ~= "wpnenchant" and data.Type ~= "runes") and data.Name .. "\r\n" or "") ..
-					((Types[data.Type].name) or "") ..
-					((data.Enabled and "") or "\r\n(" .. L["DISABLED"] .. ")")
-
-	return text, textshort, tooltip
+	return text, tooltip
 end
 
 TMW:RegisterIconType(Type)

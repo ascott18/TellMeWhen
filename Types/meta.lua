@@ -159,4 +159,8 @@ function Type:Setup(icon, groupID, iconID)
 	icon:SetScript("OnUpdate", Meta_OnUpdate)
 end
 
+function Type:GetIconMenuText(data)
+	return "((" .. Type.name .. "))", ""
+end
+
 TMW:RegisterIconType(Type)

@@ -161,5 +161,8 @@ function Type:Setup(icon, groupID, iconID)
 	--icon:OnUpdate(TMW.time)
 end
 
+function Type:GetIconMenuText(data)
+	return "((" .. Type.name .. "))", ""
+end
 
 TMW:RegisterIconType(Type)
