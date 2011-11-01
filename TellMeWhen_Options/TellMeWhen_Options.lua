@@ -2877,7 +2877,7 @@ db.profile.Groups[0] = nil
 function IE:Copy_DropDown_Icon_OnClick(ics, version)
 	TMW[CI.g][CI.i]:SetTexture(nil)
 	
-	TMW:Import(ics, version_src, "icon")
+	TMW:Import(ics, version, "icon")
 end
 
 function IE:AddIconToCopyDropdown(ics, groupID, iconID, profilename, group_src, version_src, force)

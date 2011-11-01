@@ -2,6 +2,7 @@
  * Bug Fixes:
  ** (r294) Fixed a bug where conditions were being errenously attached to an icon/group after adding a condition and then removing all condiitions.
  ** (r294) TellMeWhen.lua line 1452: attempt to index local 'condition' (a number value)
+ ** (r296) TellMeWhen_Options.lua:2703: Missing version of data
  
 ===v4.6.4===
  * New Condition: Pet talent tree.
