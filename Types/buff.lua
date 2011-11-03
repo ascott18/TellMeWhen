@@ -34,6 +34,7 @@ local Type = {}
 Type.type = "buff"
 Type.name = L["ICONMENU_BUFFDEBUFF"]
 Type.usePocketWatch = 1
+Type.SUGType = "buff"
 Type.TypeChecks = {
 	text = L["ICONMENU_BUFFTYPE"],
 	setting = "BuffOrDebuff",

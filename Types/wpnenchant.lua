@@ -34,6 +34,7 @@ Type.name = L["ICONMENU_WPNENCHANT"]
 Type.desc = L["ICONMENU_WPNENCHANT_DESC"]
 Type.appendNameLabel = L["ICONMENU_CHOOSENAME_ORBLANK"]
 Type.AllowNoName = true
+Type.SUGType = "wpnenchant"
 Type.TypeChecks = {
 	text = L["ICONMENU_WPNENCHANTTYPE"],
 	setting = "WpnEnchantType",
@@ -62,8 +63,8 @@ Type.DisabledEvents = {
 }
 
 local Parser = CreateFrame("GameTooltip", "TellMeWhen_Parser", TMW, "GameTooltipTemplate")
+Parser:SetOwner(UIParent, "ANCHOR_NONE")
 local function GetWeaponEnchantName(slot)
-	Parser:SetOwner(UIParent, "ANCHOR_NONE");
 	local has = Parser:SetInventoryItem("player", slot)
 
 	if not has then Parser:Hide() return false end
@@ -72,18 +73,19 @@ local function GetWeaponEnchantName(slot)
 	while _G["TellMeWhen_ParserTextLeft" .. i] do
 		local t = _G["TellMeWhen_ParserTextLeft" .. i]:GetText()
 		if t and t ~= "" then
-			local r = strmatch(t, "([^%(]*)%((%d+)[^%.].*%)") -- should work with all locales and only get the weapon enchant name, not other things (like the weapon DPS)
+			-- old: ([^%(]*)%((%d+)[^%.].*%)
+			-- newer, but still not the best: "(.-)%((%d+)[^%.].*%)"
+			local r = strmatch(t, "(.+)%((%d+)[^%.]*[^%d]+%)") -- should work with all locales and only get the weapon enchant name, not other things (like the weapon DPS)
+			
 			if r then
 				r = strtrim(r)
 				if r ~= "" then
-					Parser:Hide()
 					return r
 				end
 			end
 		end
 		i=i+1
 	end
-	Parser:Hide()
 end
 
 
@@ -142,8 +144,7 @@ local function WpnEnchant_OnEvent(icon, event, unit)
 		local Slot = icon.Slot
 		local wpnTexture = GetInventoryItemTexture("player", Slot)
 
-		local t = wpnTexture or "Interface\\Icons\\INV_Misc_QuestionMark"
-		if t ~= icon.__tex then icon:SetTexture(t) end
+		icon:SetTexture(wpnTexture or "Interface\\Icons\\INV_Misc_QuestionMark")
 
 		if not wpnTexture and icon.HideUnequipped then
 			icon:SetInfo(0)
@@ -153,9 +154,11 @@ local function WpnEnchant_OnEvent(icon, event, unit)
 		elseif not icon.OnUpdate then
 			icon:SetScript("OnUpdate", WpnEnchant_OnUpdate)
 		end
+		
 		local EnchantName = GetWeaponEnchantName(Slot)
 		icon.LastEnchantName = icon.EnchantName or icon.LastEnchantName
 		icon.EnchantName = EnchantName
+		
 		if icon.Name == "" then
 			icon.CorrectEnchant = true
 		else

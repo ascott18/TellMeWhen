@@ -217,7 +217,7 @@ function Type:GetNameForDisplay(icon, data)
 end
 
 function Type:DragReceived(icon, t, data, subType)
-	local ics = icon.ics
+	local ics = icon:GetSettings()
 	
 	if t ~= "item" or not data then
 		return

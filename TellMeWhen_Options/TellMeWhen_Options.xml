@@ -218,9 +218,15 @@
 				
 				end
 				GameTooltip:Show()
+				
+				TMW.SUG.mousedOver = self
 			</OnEnter>
 			<OnLeave>
 				GameTooltip:Hide()
+				
+				if TMW.SUG.mousedOver == self then
+					TMW.SUG.mousedOver = nil
+				end
 			</OnLeave>
 			<OnMouseWheel>
 				if (not TMW.SUG[#TMW.SUG]:IsShown() and delta == 1) or TMW.SUG[#TMW.SUG]:IsShown() then
@@ -2012,7 +2018,6 @@
 								self.__title = TMW.L["ICONMENU_CHOOSENAME"]
 								self.__text = TMW.L["CHOOSENAME_DIALOG"]
 								self.BackgroundText:SetWidth(self:GetWidth())
-								TMW.SUG:EnableEditBox(self, true)
 							</OnLoad>
 							<OnEditFocusLost>
 								EditBox_ClearHighlight(self)
@@ -2026,7 +2031,7 @@
 								self:GetScript("OnTextChanged")(self)
 							</OnEditFocusLost>
 							<OnEditFocusGained>
-								EditBox_HighlightText(self)
+								TMW.SUG:EnableEditBox(self, TMW.CI.ic.typeData.SUGType)
 								self.BackgroundText:SetText(nil)
 							</OnEditFocusGained>
 							<OnEvent>
@@ -3841,9 +3846,9 @@
 						self.oldCursorX, self.oldCursorY = GetCursorPosition(UIParent)
 						TMW.IE.oldX = TMW.IE:GetLeft()
 						TMW.IE.oldY = TMW.IE:GetTop()
+						local editor = TMW.IE
 						self:SetScript("OnUpdate", function(self)
 							local uiScale = UIParent:GetScale()
-							local editor = self:GetParent()
 							local cursorX, cursorY = GetCursorPosition(UIParent)
 
 							-- calculate new scale
@@ -3910,8 +3915,7 @@
 			</OnDragStop>
 		</Scripts>
 	</Frame>
-	<Button name="TMW_DUMMY_BUTTON"/>
-
+	
 </Ui>
 
 

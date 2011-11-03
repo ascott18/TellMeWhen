@@ -6,9 +6,10 @@ L["!!Main Addon Description"] = "Provides visual, auditory, and textual notifica
 
 L["CMD_OPTIONS"] = "Options"
 L["ICON_TOOLTIP1"] = "TellMeWhen"
-L["ICON_TOOLTIP2NEW"] = [[Right click for icon options.
-Right click and drag to another icon to move/copy.
-Drag spells or items onto the icon for quick setup.
+L["ICON_TOOLTIP2NEW"] = [[|cff7fffffRight-click|r for icon options.
+|cff7fffffRight-click and drag|r to another icon to move/copy.
+|cff7fffffDrag|r spells or items onto the icon for quick setup.
+
 Typing /tellmewhen or /tmw will lock and enable the addon.]]
 L["LDB_TOOLTIP1"] = "|cff7fffffLeft-click|r to toggle the group locks"
 L["LDB_TOOLTIP2"] = "|cff7fffffRight-click|r to show the main TMW options"
@@ -692,6 +693,41 @@ L["SUG_INSERTNAME_LEFT"] = "Left-click to insert as a name"
 L["SUG_INSERTID_LEFT"] = "Left-click to insert as an ID"
 L["SUG_INSERTNAME_RIGHT"] = "Right-click to insert as a name"
 L["SUG_INSERTID_RIGHT"] = "Right-click to insert as an ID"
+
+L["SUG_PATTERNMATCH_FISHINGLURE"] = "Fishing Lure %(%+%d+ Fishing Skill%)" -- enUS
+L["SUG_PATTERNMATCH_WEIGHTSTONE"] = "Weighted %(%+%d+ Damage%)"
+L["SUG_PATTERNMATCH_SHARPENINGSTONE"] = "Sharpened %(%+%d+ Damage%)"
+
+--[[
+L["SUG_PATTERNMATCH_FISHINGLURE"] = "魚餌%(%+%d+釣魚技能%)" -- zhTW
+L["SUG_PATTERNMATCH_WEIGHTSTONE"] = "增重%(%+%d+傷害%)"
+L["SUG_PATTERNMATCH_SHARPENINGSTONE"] = "磨利%(%+%d+傷害%)"
+
+L["SUG_PATTERNMATCH_FISHINGLURE"] = "미끼 %(낚시 숙련도 %+%d+%)" -- koKR
+L["SUG_PATTERNMATCH_WEIGHTSTONE"] = "무게 증강 %(공격력 %+%d+%)"
+L["SUG_PATTERNMATCH_SHARPENINGSTONE"] = "무기 연마 %(공격력 %+%d+%)"
+
+L["SUG_PATTERNMATCH_FISHINGLURE"] = "Cebo de pesca %(%+%d+ habilidad para pescar%)" -- esMX, esES
+L["SUG_PATTERNMATCH_WEIGHTSTONE"] = "Pesado %(%+%d+ daño%)"
+L["SUG_PATTERNMATCH_SHARPENINGSTONE"] = "Afilado %(%+%d+ daño%)"
+
+L["SUG_PATTERNMATCH_FISHINGLURE"] = "Angelköder %(%+%d+ Angelfertigkeit%)" -- deDE
+L["SUG_PATTERNMATCH_WEIGHTSTONE"] = "Beschwert %(%+%d+ Schaden%)"
+L["SUG_PATTERNMATCH_SHARPENINGSTONE"] = "Geschärft %(%+%d+ Schaden%)"
+
+L["SUG_PATTERNMATCH_FISHINGLURE"] = "Appât de pêche %(%+%d+ compétence de pêche%)" -- frFR
+L["SUG_PATTERNMATCH_WEIGHTSTONE"] = "Équilibré %(%+%d+ points de dégâts%)"
+L["SUG_PATTERNMATCH_SHARPENINGSTONE"] = "Aiguisé %(%+%d+ points de dégâts%)" 
+
+L["SUG_PATTERNMATCH_FISHINGLURE"] = "Приманка %(рыбная ловля %+%d+%)" -- ruRU
+L["SUG_PATTERNMATCH_WEIGHTSTONE"] = "Оружие утяжелено %(%+%d+ к урону)"
+L["SUG_PATTERNMATCH_SHARPENINGSTONE"] = "Оружие заточено %(%+%d+ к урону)" 
+
+L["SUG_PATTERNMATCH_FISHINGLURE"] = "Isca de Pesca %(%+%d+ Pesca%)" -- ptBR
+L["SUG_PATTERNMATCH_WEIGHTSTONE"] = "Pesado %(%+%d+ Dano%)"
+L["SUG_PATTERNMATCH_SHARPENINGSTONE"] = "Afiado %(%+%d+ Dano%)"
+
+]]
 
 
 

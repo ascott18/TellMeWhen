@@ -33,7 +33,7 @@ local DRData = LibStub("DRData-1.0", true)
 TELLMEWHEN_VERSION = "4.6.5"
 TELLMEWHEN_VERSION_MINOR = strmatch(" @project-version@", " r%d+") or ""
 TELLMEWHEN_VERSION_FULL = TELLMEWHEN_VERSION .. TELLMEWHEN_VERSION_MINOR
-TELLMEWHEN_VERSIONNUMBER = 46503 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
+TELLMEWHEN_VERSIONNUMBER = 46601 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
 if TELLMEWHEN_VERSIONNUMBER > 47000 or TELLMEWHEN_VERSIONNUMBER < 46000 then return error("YOU SCREWED UP THE VERSION NUMBER OR DIDNT CHANGE THE SAFETY LIMITS") end -- safety check because i accidentally made the version number 414069 once
 -- i'll just plop this here for a second....
 -- * Began rewriting the suggestion list. IT IS HIGHLY UNUSABLE RIGHT NOW. THIS IS AN ALPHA VERSION, SO DONT COMPLAIN.
@@ -3136,6 +3136,7 @@ local typeMT = {
 }
 
 TypeBase.DisabledEvents = {}
+TypeBase.SUGType = "spell"
 function TypeBase:GetNameForDisplay(icon, data)
 	local name = data and GetSpellInfo(data) or data
 	return name, true

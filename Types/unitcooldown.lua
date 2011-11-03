@@ -357,7 +357,7 @@ function Type:Setup(icon, groupID, iconID)
 end
 
 function Type:DragReceived(icon, t, data, subType)
-	local ics = icon.ics
+	local ics = icon:GetSettings()
 	
 	if t ~= "spell" then
 		return
