@@ -188,35 +188,39 @@
 				self:RegisterForClicks("LeftButtonUp", "RightButtonUp")
 			</OnLoad>
 			<OnClick>
-				local insert
-				if button == "RightButton" and self.insert2 then
-					insert = self.insert2
-				else
-					insert = self.insert
-				end
-				TMW.SUG:Insert(insert)
+				TMW.SUG.CurrentModule:Entry_OnClick(self, button)
 			</OnClick>
 			<OnEnter>
 				GameTooltip_SetDefaultAnchor(GameTooltip, self)
-				if self.tooltipmethod and self.tooltiparg then
-					GameTooltip[self.tooltipmethod](GameTooltip, self.tooltiparg)
-				elseif self.tooltiptitle then
+				if self.tooltiptitle then
 					GameTooltip:AddLine(self.tooltiptitle, HIGHLIGHT_FONT_COLOR.r, HIGHLIGHT_FONT_COLOR.g, HIGHLIGHT_FONT_COLOR.b, 1)
 					GameTooltip:AddLine(self.tooltiptext, NORMAL_FONT_COLOR.r, NORMAL_FONT_COLOR.g, NORMAL_FONT_COLOR.b, 1)
 				end
-				if self.insert2 then
-					local first, second
-					
-					if TMW.SUG.inputType == "number" then
-						first, second = TMW.L["SUG_INSERTID_LEFT"], TMW.L["SUG_INSERTNAME_RIGHT"]
-					else
-						first, second = TMW.L["SUG_INSERTNAME_LEFT"], TMW.L["SUG_INSERTID_RIGHT"]
-					end
-					GameTooltip:AddLine(" ")
-					GameTooltip:AddLine(first, 0, .5, 1, 1)
-					GameTooltip:AddLine(second, 0, .5, 1, 1)
-				
+				if self.tooltipmethod and self.tooltiparg then
+					GameTooltip[self.tooltipmethod](GameTooltip, self.tooltiparg)
 				end
+				
+				local first, second
+				
+				if type(self.insert) == "number" then
+					first = self.overrideInsertID or TMW.L["SUG_INSERTID"]
+				else
+					first = self.overrideInsertName or TMW.L["SUG_INSERTNAME"]
+				end
+				if type(self.insert2) == "number" then
+					second = self.overrideInsertID or TMW.L["SUG_INSERTID"]
+				else
+					second = self.overrideInsertName or TMW.L["SUG_INSERTNAME"]
+				end
+				
+				GameTooltip:AddLine(" ")
+				if self.insert2 then
+					GameTooltip:AddLine(first:format(TMW.L["SUG_INSERT_LEFT"]), 0, .5, 1, nil)
+					GameTooltip:AddLine(second:format(TMW.L["SUG_INSERT_RIGHT"]), 0, .5, 1, nil)
+				else
+					GameTooltip:AddLine(first:format(TMW.L["SUG_INSERT_ANY"]), 0, .5, 1, nil)
+				end
+				
 				GameTooltip:Show()
 				
 				TMW.SUG.mousedOver = self
@@ -232,8 +236,7 @@
 				if (not TMW.SUG[#TMW.SUG]:IsShown() and delta == 1) or TMW.SUG[#TMW.SUG]:IsShown() then
 					if IsShiftKeyDown() then
 						delta = delta*5
-					end
-					if IsControlKeyDown() then
+					elseif IsControlKeyDown() then
 						delta = delta*(#TMW.SUG-1)
 					end
 					TMW.SUG.offset = max(0, TMW.SUG.offset - delta)
@@ -266,12 +269,12 @@
 						<Anchor point="LEFT"/>
 					</Anchors>
 				</Texture>
-				<FontString name="$parentID" parentKey="ID" inherits="GameFontHighlight" justifyH="RIGHT" text="12345">
+				<FontString name="$parentID" parentKey="ID" inherits="GameFontHighlight" justifyH="RIGHT">
 					<Anchors>
 						<Anchor point="RIGHT" x="-3" y="1"/>
 					</Anchors>
 				</FontString>
-				<FontString name="$parentName" parentKey="Name" inherits="GameFontHighlight" justifyH="LEFT" text="Serpent Sting Sting Sting Sting">
+				<FontString name="$parentName" parentKey="Name" inherits="GameFontHighlight" justifyH="LEFT">
 					<Anchors>
 						<Anchor point="LEFT" relativeTo="$parentIcon" relativePoint="RIGHT" x="3"/>
 						<Anchor point="RIGHT" relativeTo="$parentID" relativePoint="LEFT" x="-1"/>
@@ -2132,7 +2135,7 @@
 								TMW:TT(self, "ICONMENU_CUSTOMTEX", "ICONMENU_CUSTOMTEX_DESC")
 								self.label = TMW.L["ICONMENU_CUSTOMTEX"]
 								self.BackgroundText:SetWidth(self:GetWidth())
-								TMW.SUG:EnableEditBox(self, true, true)
+								TMW.SUG:EnableEditBox(self, "texture", true)
 							</OnLoad>
 							<OnEditFocusLost>
 								EditBox_ClearHighlight(self)

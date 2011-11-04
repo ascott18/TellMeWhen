@@ -553,6 +553,7 @@ L["SPELLCRIT"] = "Spell Crit"
 L["ITEMINBAGS"] = "Item count (includes charges)"
 L["ITEMEQUIPPED"] = "Item is equipped"
 L["ITEMCOOLDOWN"] = "Item cooldown"
+L["ITEMCOOLDOWN"] = "Item cooldown"
 L["SPELLCOOLDOWN"] = "Spell cooldown"
 L["SPELLREACTIVITY"] = "Spell reactivity"
 L["MP5"] = "%d MP5"
@@ -689,46 +690,19 @@ L["SUG_PLAYERAURAS"] = "Known PC/pet buffs/debuffs"
 L["SUG_MISC"] = "Miscellaneous"
 L["SUG_FINISHHIM"] = "Finish Caching Now"
 L["SUG_FINISHHIM_DESC"] = "Click to immediately finish the caching/filtering process. Note that your computer may freeze for a few seconds."
-L["SUG_INSERTNAME_LEFT"] = "Left-click to insert as a name"
-L["SUG_INSERTID_LEFT"] = "Left-click to insert as an ID"
-L["SUG_INSERTNAME_RIGHT"] = "Right-click to insert as a name"
-L["SUG_INSERTID_RIGHT"] = "Right-click to insert as an ID"
+
+
+L["SUG_INSERT_ANY"] = "|cff7fffffClick|r"
+L["SUG_INSERT_LEFT"] = "|cff7fffffLeft-click|r"
+L["SUG_INSERT_RIGHT"] = "|cff7fffffRight-click|r"
+
+L["SUG_INSERTNAME"] = "%s to insert as a name"
+L["SUG_INSERTID"] = "%s to insert as an ID"
+L["SUG_INSERTITEMSLOT"] = "%s to insert as an item slot ID"
 
 L["SUG_PATTERNMATCH_FISHINGLURE"] = "Fishing Lure %(%+%d+ Fishing Skill%)" -- enUS
 L["SUG_PATTERNMATCH_WEIGHTSTONE"] = "Weighted %(%+%d+ Damage%)"
 L["SUG_PATTERNMATCH_SHARPENINGSTONE"] = "Sharpened %(%+%d+ Damage%)"
-
---[[
-L["SUG_PATTERNMATCH_FISHINGLURE"] = "魚餌%(%+%d+釣魚技能%)" -- zhTW
-L["SUG_PATTERNMATCH_WEIGHTSTONE"] = "增重%(%+%d+傷害%)"
-L["SUG_PATTERNMATCH_SHARPENINGSTONE"] = "磨利%(%+%d+傷害%)"
-
-L["SUG_PATTERNMATCH_FISHINGLURE"] = "미끼 %(낚시 숙련도 %+%d+%)" -- koKR
-L["SUG_PATTERNMATCH_WEIGHTSTONE"] = "무게 증강 %(공격력 %+%d+%)"
-L["SUG_PATTERNMATCH_SHARPENINGSTONE"] = "무기 연마 %(공격력 %+%d+%)"
-
-L["SUG_PATTERNMATCH_FISHINGLURE"] = "Cebo de pesca %(%+%d+ habilidad para pescar%)" -- esMX, esES
-L["SUG_PATTERNMATCH_WEIGHTSTONE"] = "Pesado %(%+%d+ daño%)"
-L["SUG_PATTERNMATCH_SHARPENINGSTONE"] = "Afilado %(%+%d+ daño%)"
-
-L["SUG_PATTERNMATCH_FISHINGLURE"] = "Angelköder %(%+%d+ Angelfertigkeit%)" -- deDE
-L["SUG_PATTERNMATCH_WEIGHTSTONE"] = "Beschwert %(%+%d+ Schaden%)"
-L["SUG_PATTERNMATCH_SHARPENINGSTONE"] = "Geschärft %(%+%d+ Schaden%)"
-
-L["SUG_PATTERNMATCH_FISHINGLURE"] = "Appât de pêche %(%+%d+ compétence de pêche%)" -- frFR
-L["SUG_PATTERNMATCH_WEIGHTSTONE"] = "Équilibré %(%+%d+ points de dégâts%)"
-L["SUG_PATTERNMATCH_SHARPENINGSTONE"] = "Aiguisé %(%+%d+ points de dégâts%)" 
-
-L["SUG_PATTERNMATCH_FISHINGLURE"] = "Приманка %(рыбная ловля %+%d+%)" -- ruRU
-L["SUG_PATTERNMATCH_WEIGHTSTONE"] = "Оружие утяжелено %(%+%d+ к урону)"
-L["SUG_PATTERNMATCH_SHARPENINGSTONE"] = "Оружие заточено %(%+%d+ к урону)" 
-
-L["SUG_PATTERNMATCH_FISHINGLURE"] = "Isca de Pesca %(%+%d+ Pesca%)" -- ptBR
-L["SUG_PATTERNMATCH_WEIGHTSTONE"] = "Pesado %(%+%d+ Dano%)"
-L["SUG_PATTERNMATCH_SHARPENINGSTONE"] = "Afiado %(%+%d+ Dano%)"
-
-]]
-
 
 
 L["SOUND_EVENT_ONSHOW"] = "On Show"

@@ -53,6 +53,7 @@ Type.name = L["ICONMENU_DR"]
 Type.desc = L["ICONMENU_DR_DESC"]
 Type.usePocketWatch = 1
 Type.spacebefore = true
+Type.SUGType = "dr"
 Type.WhenChecks = {
 	text = L["ICONMENU_SHOWWHEN"],
 	{ value = "alpha", 			text = L["ICONMENU_DRABSENT"], 		colorCode = "|cFF00FF00" },

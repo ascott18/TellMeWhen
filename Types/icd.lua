@@ -35,6 +35,7 @@ Type.name = L["ICONMENU_ICD"]
 Type.desc = L["ICONMENU_ICD_DESC"]
 Type.usePocketWatch = 1
 Type.DurationSyntax = 1
+Type.SUGType = "spellwithduration"
 Type.TypeChecks = {
 	setting = "ICDType",
 	text = L["ICONMENU_ICDTYPE"],

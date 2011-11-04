@@ -30,6 +30,7 @@ Type.name = L["ICONMENU_CNDTIC"]
 Type.desc = L["ICONMENU_CNDTIC_DESC"]
 Type.spacebefore = true
 Type.AllowNoName = true
+Type.SUGType = "texture"
 Type.WhenChecks = {
 	text = L["ICONMENU_CNDTSHOWWHEN"],
 	{ value = "alpha",			text = L["ICONMENU_SUCCEED"],			colorCode = "|cFF00FF00" },

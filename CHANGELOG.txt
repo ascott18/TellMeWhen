@@ -1,7 +1,8 @@
 ===v4.6.6===
- * The suggestion list has been completely rewritten. It should be mostly functional (See ticket 326 for things that are NYI), please report any bugs in a new ticket.
+ * The suggestion list has been completely rewritten, and many features have been added
  * Bug Fixes:
- ** (r299) default.lua:67: attempt to index local 'ics' (a nil value)
+ ** (r300) default.lua:67: attempt to index local 'ics' (a nil value)
+ ** (r301) TellMeWhen_Options-4.6.4.lua:5575 bad argument #1 to "pairs" (table expected, got nil)
  
 ===v4.6.5===
  * Bug Fixes:

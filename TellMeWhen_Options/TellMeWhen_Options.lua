@@ -2088,7 +2088,7 @@ function IE:LoadSettings()
 	for k, data in pairs(IE.LeftChecks) do
 		local setting = data.setting
 		if Types[CI.t].RelevantSettings[setting] and not get(data.hidden) then
-			f = IE.Main.LeftChecks[leftCheckNum]
+			local f = IE.Main.LeftChecks[leftCheckNum]
 			if not f then
 				f = CreateFrame("CheckButton", "TellMeWhen_IconEditorMainLeftChecks" .. leftCheckNum, TMW.IE.Main.LeftChecks, "TellMeWhen_CheckTemplate", leftCheckNum)
 				IE.Main.LeftChecks[leftCheckNum] = f
@@ -4091,7 +4091,7 @@ function SUG:OnInitialize()
 	CNDT:CURRENCY_DISPLAY_UPDATE() -- im in ur SUG, hijackin' ur OnInitialize
 
 	TMWOptDB.SpellCache = TMWOptDB.SpellCache or {}
-	TMWOptDB.CastCache = TMWOptDB.CastCache or {}
+	TMWOptDB.CastCache = nil -- not used anymore, spells are validated as they are displayed now.
 	TMWOptDB.ItemCache = TMWOptDB.ItemCache or {}
 	TMWOptDB.AuraCache = TMWOptDB.AuraCache or {}
 	TMWOptDB.ClassSpellCache = nil -- this is old, get rid of it
@@ -4135,8 +4135,8 @@ function SUG:OnInitialize()
 		SUG:SendCommMessage("TMWSUG", SUG:Serialize("RCSL"), "GUILD")
 	end
 
-	ActionCache, pclassSpellCache, ClassSpellLookup, AuraCache, ItemCache, SpellCache, CastCache =
-	SUG.ActionCache, TMW.ClassSpellCache[pclass], SUG.ClassSpellLookup, SUG.AuraCache, SUG.ItemCache, SUG.SpellCache, SUG.CastCache
+	ActionCache,		pclassSpellCache,				ClassSpellLookup,		AuraCache,		ItemCache,		SpellCache =
+	SUG.ActionCache,	TMW.ClassSpellCache[pclass],	SUG.ClassSpellLookup,	SUG.AuraCache,	SUG.ItemCache,	SUG.SpellCache
 
 	SUG:PLAYER_ENTERING_WORLD()
 
@@ -4164,7 +4164,7 @@ function SUG:OnInitialize()
 					GetItemInfo(id)
 				end
 				
-				SUG:ScheduleTimer("ValidateItemIDs", 5)
+				SUG:ScheduleTimer("ValidateItemIDs", 60)
 			end
 					
 					
@@ -4185,16 +4185,19 @@ function SUG:OnInitialize()
 				["Interface\\Icons\\INV_Inscription_Tradeskill01"] = true,
 				["Interface\\Icons\\Temp"] = true,
 			}
+			
 			local index, spellsFailed = 0, 0
+			
 			TMWOptDB.CacheLength = TMWOptDB.CacheLength or 11000
+			
 			SUG.Suggest.Status:Show()
 			SUG.Suggest.Status.texture:SetTexture(LSM:Fetch("statusbar", db.profile.TextureName))
 			SUG.Suggest.Status:SetMinMaxValues(1, TMWOptDB.CacheLength)
 			SUG.Suggest.Speed:Show()
 			SUG.Suggest.Finish:Show()
+			
 			if TMWOptDB.WoWVersion and TMWOptDB.WoWVersion < clientVersion then
 				wipe(SUG.SpellCache)
-				wipe(SUG.CastCache)
 			elseif TMWOptDB.IncompleteCache then
 				for id in pairs(SUG.SpellCache) do
 					index = max(index, id)
@@ -4202,23 +4205,16 @@ function SUG:OnInitialize()
 			end
 			TMWOptDB.WoWVersion = clientVersion
 
-			local Parser = CreateFrame("GameTooltip")
-			local Text1 = Parser:CreateFontString()
-			Parser:AddFontStrings(Text1, Parser:CreateFontString())
-			local Text2 = Parser:CreateFontString()
-			Parser:AddFontStrings(Text2, Parser:CreateFontString())
-			local Text3 = Parser:CreateFontString()
-			Parser:AddFontStrings(Text3, Parser:CreateFontString())
-
-			Parser:SetOwner(UIParent, "ANCHOR_NONE")
-			local f = CreateFrame("Frame")
+			local Parser, LT1 = SUG:GetParser()
+			
 			local SPELL_CAST_CHANNELED = SPELL_CAST_CHANNELED
 			local yield, resume = coroutine.yield, coroutine.resume
 
 			local function SpellCacher()
+				
 				while spellsFailed < 1000 do
 					
-					local name, rank, icon, _, _, _, castTime = GetSpellInfo(index)
+					local name, rank, icon = GetSpellInfo(index)
 					if name then
 						name = strlower(name)
 						
@@ -4240,14 +4236,12 @@ function SUG:OnInitialize()
 						
 						if not fail then
 							if index ~= 109388 then -- critical error if this gets set. See ticket 313. TODO: Check and see if this is still broken
+								Parser:SetOwner(UIParent, "ANCHOR_NONE") -- must set the owner before text can be obtained.
 								Parser:SetSpellByID(index)
 							end
-							local r, g, b = Text1:GetTextColor()
+							local r, g, b = LT1:GetTextColor()
 							if g > .95 and r > .95 and b > .95 then
 								SpellCache[index] = name
-								if castTime > 0 or Text2:GetText() == SPELL_CAST_CHANNELED or Text3:GetText() == SPELL_CAST_CHANNELED then
-									CastCache[index] = name
-								end
 							end
 							spellsFailed = 0
 						end
@@ -4263,19 +4257,29 @@ function SUG:OnInitialize()
 				end
 			end
 			local co = coroutine.create(SpellCacher)
+			
+			local f = CreateFrame("Frame")
 			f:SetScript("OnUpdate", function()
 				if not resume(co) then
 					TMWOptDB.IncompleteCache = false
 					TMWOptDB.CacheLength = index
+					
 					f:SetScript("OnUpdate", nil)
+					
 					SUG.Suggest.Speed:Hide()
 					SUG.Suggest.Status:Hide()
 					SUG.Suggest.Finish:Hide()
 					
-					SUG.IsCaching = nil
+					
 					SpellCache[1852] = nil -- GM spell named silenced, interferes with equiv
+					SpellCache[47923] = nil -- spell named stunned, interferes
+					SpellCache[65918] = nil -- spell named stunned, interferes
+					SpellCache[78320] = nil -- spell named stunned, interferes
 					SpellCache[71216] = nil -- enraged
+					SpellCache[59208] = nil -- enraged
 					SpellCache[100000] = GetSpellInfo(100000) and strlower(GetSpellInfo(100000)) -- filted out by default but this spell really needs to be in the list because of how cool it is
+					
+					SUG.IsCaching = nil
 					if SUG.onCompleteCache then
 						SUG.onCompleteCache = nil
 						TMW.SUG.redoIfSame = 1
@@ -4293,6 +4297,27 @@ function SUG:OnInitialize()
 	end
 end
 
+do
+	local Parser, LT1, LT2, LT3, RT1, RT2, RT3
+	function SUG:GetParser()
+		if not Parser then
+			Parser = CreateFrame("GameTooltip")
+			
+			LT1 = Parser:CreateFontString()
+			RT1 = Parser:CreateFontString()
+			Parser:AddFontStrings(LT1, RT1)
+			
+			LT2 = Parser:CreateFontString()
+			RT2 = Parser:CreateFontString()
+			Parser:AddFontStrings(LT2, RT2)
+			
+			LT3 = Parser:CreateFontString()
+			RT3 = Parser:CreateFontString()
+			Parser:AddFontStrings(LT3, RT3)
+		end
+		return Parser, LT1, LT2, LT3, RT1, RT2, RT3
+	end
+end
 
 ---------- Events ----------
 function SUG:UNIT_PET(event, unit)
@@ -4433,13 +4458,48 @@ function SUG:SuggestingComplete(doSort)
 	end
 
 	local i = 1
+	local InvalidEntries = rawget(SUG.CurrentModule, "InvalidEntries")
+	if not InvalidEntries then
+		SUG.CurrentModule.InvalidEntries = {}
+		InvalidEntries = SUG.CurrentModule.InvalidEntries
+	end
+	
 	while SUG[i] do
-		local id = SUGpreTable[i+offset]
+		local key = i + SUG.offset
+		local id = SUGpreTable[key]
+		while id do
+			if InvalidEntries[id] == nil then
+				InvalidEntries[id] = not SUG.CurrentModule:Entry_IsValid(id)
+			end
+			if InvalidEntries[id] then
+				tremove(SUGpreTable, key)
+				id = SUGpreTable[key]
+				SUG.offset = min(SUG.offset, max(0, #SUGpreTable-#SUG+1))
+			else
+				break
+			end
+		end
+		
 		local f = SUG[i]
+		
 		f.insert = nil
 		f.insert2 = nil
+		f.tooltipmethod = nil
+		f.tooltiparg = nil
+		f.tooltiptitle = nil
+		f.tooltiptext = nil
+		f.tooltiptext = nil
+		f.overrideInsertID = nil
+		f.overrideInsertName = nil
+		f.Background:SetVertexColor(0, 0, 0, 0)
+		
+		if SUG.CurrentModule.noTexture then
+			f.Icon:SetWidth(0.001)
+		else
+			f.Icon:SetWidth(f.Icon:GetHeight())
+		end
+		
 		if id then
-			f.Background:SetVertexColor(0, 0, 0, 0)
 			
 			SUG.CurrentModule:Entry_AddToList(f, id)
 			
@@ -4467,287 +4527,6 @@ function SUG:SuggestingComplete(doSort)
 	end
 end
 
----------- Suggesting --------
---[==[  
-function SUG.Sorter(a, b)
-	--[[PRIORITY:
-		1)	Equivalancies/Dispel Types
-		2)	Abilities on player's action bar if current icon is a multistate cooldown
-		3)	Player's spells (pclass)
-		4)	All player spells (any class)
-		5)	Known auras
-			5a) Player Auras
-			5b) NPC Auras
-		6)	SpellID if input is an ID
-		7)	If input is a name
-			7a) Alphabetical if names are different
-			7b) SpellID if names are identical
-	]]
-
-	local haveA, haveB = EquivFirstIDLookup[a], EquivFirstIDLookup[b]
-	if haveA or haveB then
-		if haveA and haveB then
-			return a < b
-		else
-			return haveA
-		end
-	end
-
-	if SUGIMS then
-		local haveA, haveB = ActionCache[a], ActionCache[b]
-		if (haveA and not haveB) or (haveB and not haveA) then
-			return haveA
-		end
-	end
-
-	if SUGSoI == "spell" then
-		--player's spells (pclass)
-		local haveA, haveB = SUGPlayerSpells[a], SUGPlayerSpells[b]
-		if (haveA and not haveB) or (haveB and not haveA) then
-			return haveA
-		end
-
-		--all player spells (any class)
-		local haveA, haveB = ClassSpellLookup[a], ClassSpellLookup[b]
-		if (haveA and not haveB) or (haveB and not haveA) then
-			return haveA
-		elseif not (haveA or haveB) then
-
-			local haveA, haveB = AuraCache[a], AuraCache[b] -- Auras
-			if haveA and haveB and haveA ~= haveB then -- if both are auras (kind doesnt matter) AND if they are different aura types, then compare the types
-				return haveA > haveB -- greater than is intended.. player auras are 2 while npc auras are 1, player auras should go first
-			elseif (haveA and not haveB) or (haveB and not haveA) then --otherwise, if only one of them is an aura, then prioritize the one that is an aura
-				return haveA
-			end
-			--if they both were auras, and they were auras of the same type (player, NPC) then procede on to the rest of the code to sort them by name/id
-		end
-	end
-	
-	if SUGIsNumberInput or SUGSoI == "tracking" then
-		--sort by id
-		return a < b
-	else
-		--sort by name
-		local nameA, nameB
-		if SUGSoI == "item" then
-			nameA, nameB = ItemCache[a], ItemCache[b]
-		else
-			nameA, nameB = SpellCache[a], SpellCache[b]
-		end
-		if nameA == nameB then
-			--sort identical names by ID
-			return a < b
-		else
-			--sort by name
-			return nameA < nameB
-		end
-	end
-end
-
-function SUG:DoSuggest()
-	SUGSoI = (CI.t == "item" and "item") or SUG.overrideSoI or "spell" -- TODO: modularize this somehow so this hardcoded check for items isnt here
-	local atBeginning = SUG.atBeginning
-	local overrideSoI = SUG.overrideSoI
-	local t = CI.t
-	local lastName = SUG.lastName
-	local semiLN = ";"..lastName
-	local long = #lastName > 2
-	wipe(SUGpreTable)
-	if not overrideSoI then
-		for _, tbl in TMW:Vararg((t == "dr" and TMW.BE.dr) or (t == "cast" and TMW.BE.casts) or (t == "buff" and TMW.BE.buffs), (t == "buff" and TMW.BE.debuffs)) do
-			if not tbl then break end
-			for equiv in pairs(tbl) do
-				if 	(long and (
-						(strfind(strlowerCache[equiv], lastName)) or
-						(strfind(strlowerCache[L[equiv]], lastName)) or
-						(not SUGIsNumberInput and strfind(strlowerCache[EquivFullNameLookup[equiv]], semiLN)) or
-						(SUGIsNumberInput and strfind(EquivFullIDLookup[equiv], semiLN))
-				)) or
-					(not long and (
-						(strfind(strlowerCache[equiv], atBeginning)) or
-						(strfind(strlowerCache[L[equiv]], atBeginning))
-				)) then
-					SUGpreTable[#SUGpreTable + 1] = equiv
-				end
-			end
-		end
-		
-		if t == "buff" then
-			for dispeltype in pairs(TMW.DS) do
-				if strfind(strlowerCache[dispeltype], atBeginning) or strfind(strlowerCache[L[dispeltype]], atBeginning)  then
-					SUGpreTable[#SUGpreTable + 1] = dispeltype
-				end
-			end
-		end
-	end
-	
-	
-	
-	
-	
-	
-	
-	local tbl
-	if SUGSoI == "item" then
-		tbl = ItemCache
-	elseif SUGSoI == "tracking" then
-		tbl = TrackingCache
-	elseif t == "cast" and not overrideSoI then
-		tbl = CastCache
-	else
-		tbl = SpellCache
-	end
-	
-	if SUG.inputType == "number" then
-		local len = #SUG.lastName - 1
-		local match = tonumber(SUG.lastName)
-		for id in pairs(tbl) do
-			if min(id, floor(id / 10^(floor(log10(id)) - len))) == match then -- this looks like shit, but is is approx 300% more efficient than the below commented line
-		--	if strfind(id, atBeginning) then
-				SUGpreTable[#SUGpreTable + 1] = id
-			end
-		end
-	else
-		for id, name in pairs(tbl) do
-			if strfind(name, atBeginning) then
-				SUGpreTable[#SUGpreTable + 1] = id
-			end
-		end
-	end
-	
-	SUG:SuggestingComplete(1)
-end
-
-function SUG:SuggestingComplete(doSort)
-	SUG.offset = min(SUG.offset, max(0, #SUGpreTable-#SUG+1))
-	local offset = SUG.offset
-	SUGSoI = (CI.t == "item" and "item") or SUG.overrideSoI or "spell"
-	SUGIMS = CI.IMS
-	if doSort then
-		sort(SUGpreTable, SUG.Sorter)
-	end
-
-	local i = 1
-	while SUG[i] do
-		local id = SUGpreTable[i+offset]
-		local f = SUG[i]
-		f.insert = nil
-		f.insert2 = nil
-		if id then
-			f.Background:SetVertexColor(0, 0, 0, 0)
-			if TMW.DS[id] then -- if the entry is a dispel type (magic, poison, etc)
-				local dispeltype = id
-
-				f.Name:SetText(dispeltype)
-				f.ID:SetText(nil)
-
-				f.insert = dispeltype
-
-				f.tooltipmethod = nil
-				f.tooltiptitle = dispeltype
-				f.tooltiptext = L["ICONMENU_DISPEL"]
-
-				f.Icon:SetTexture(TMW.DS[id])
-				f.Background:SetVertexColor(1, .49, .04, 1) -- druid orange
-
-			elseif EquivFirstIDLookup[id] then -- if the entry is an equivalacy (buff, cast, or whatever)
-				--NOTE: dispel types are put in EquivFirstIDLookup too for efficiency in the sorter func, but as long as dispel types are checked first, it wont matter
-				local equiv = id
-				local firstid = EquivFirstIDLookup[id]
-
-				f.Name:SetText(equiv)
-				f.ID:SetText(nil)
-
-				f.insert = equiv
-
-				f.tooltipmethod = "TMW_SetEquiv"
-				f.tooltiparg = equiv
-
-				f.Icon:SetTexture(SpellTextures[firstid])
-				if TMW.BE.buffs[equiv] then
-					f.Background:SetVertexColor(.2, .9, .2, 1) -- lightish green
-				elseif TMW.BE.debuffs[equiv] then
-					f.Background:SetVertexColor(.77, .12, .23, 1) -- deathknight red
-				elseif TMW.BE.casts[equiv] or TMW.BE.dr[equiv] then
-					f.Background:SetVertexColor(1, .96, .41, 1) -- rogue yellow
-				end
-
-			elseif tonumber(id) then --sanity check
-				if SUGSoI == "item" then -- if the entry is an item
-					local name, link = GetItemInfo(id)
-
-					f.Name:SetText(link)
-					f.ID:SetText(id)
-
-					f.insert = SUG.inputType == "number" and id or name
-					f.insert2 = SUG.inputType ~= "number" and id or name
-
-					f.tooltipmethod = "SetHyperlink"
-					f.tooltiparg = link
-
-					f.Icon:SetTexture(GetItemIcon(id))
-
-				elseif SUGSoI == "tracking" then 
-					local name, texture = GetTrackingInfo(id)
-
-					f.Name:SetText(name)
-					f.ID:SetText(nil)
-
-					f.insert = name
-
-					f.tooltipmethod = nil
-					f.tooltiparg = nil
-
-					f.Icon:SetTexture(texture)
-
-				else -- the entry must be just a normal spell
-					local name = GetSpellInfo(id)
-
-					f.Name:SetText(name)
-					f.ID:SetText(id)
-
-					f.tooltipmethod = "SetSpellByID"
-					f.tooltiparg = id
-
-					f.insert = SUG.inputType == "number" and id or name
-					f.insert2 = SUG.inputType ~= "number" and id or name
-
-					f.Icon:SetTexture(SpellTextures[id])
-					if SUGIMS and SUG.ActionCache[id] then
-						f.Background:SetVertexColor(0, .44, .87, 1) --color actions that are on your action bars if the type is a multistate cooldown shaman blue
-					elseif SUGPlayerSpells[id] then
-						f.Background:SetVertexColor(.41, .8, .94, 1) --color all other spells that you have in your/your pet's spellbook mage blue
-					else
-						for class, tbl in pairs(TMW.ClassSpellCache) do
-							if tbl[id] then
-								f.Background:SetVertexColor(.96, .55, .73, 1) --color all other known class spells paladin pink
-								break
-							end
-						end
-					end
-				end
-			end
-			local whoCasted = (SUGSoI == "spell") and SUG.AuraCache[id]
-			if whoCasted then
-				local r, g, b, a = f.Background:GetVertexColor()
-				if a < .5 then -- only if nothing else has colored the entry yet
-					if whoCasted == 1 then
-						f.Background:SetVertexColor(.78, .61, .43, 1) -- color known NPC auras warrior brown
-					elseif whoCasted == 2 then
-						f.Background:SetVertexColor(.79, .30, 1, 1) -- color known PLAYER auras a bright pink ish pruple ish color that is similar to paladin pink but has sufficient contrast for distinguishing
-					end
-				end
-			end
-			f:Show()
-		else
-			f:Hide()
-		end
-		i=i+1
-	end
-end
-]==]
-
----------- Inserting ----------
 function SUG:NameOnCursor(isClick)
 	if SUG.IsCaching then
 		SUG.onCompleteCache = true
@@ -4764,6 +4543,7 @@ function SUG:NameOnCursor(isClick)
 			break
 		end
 	end
+	
 	if isClick then
 		SUG.endpos = #text
 		for i = SUG.startpos, #text do
@@ -4775,26 +4555,31 @@ function SUG:NameOnCursor(isClick)
 	else
 		SUG.endpos = SUG.Box:GetCursorPosition()
 	end
+	
 
 	SUG.lastName = strlower(TMW:CleanString(strsub(text, SUG.startpos, SUG.endpos)))
 	
 	if strfind(SUG.lastName, ":[%d:%s%.]*$") then
 		SUG.lastName, SUG.duration = strmatch(SUG.lastName, "(.-):([%d:%s%.]*)$")
 		SUG.duration = strtrim(SUG.duration, " :;.")
+		if SUG.duration == "" then
+			SUG.duration = nil
+		end
 	else
 		SUG.duration = nil
 	end
 
-	--disable pattern matches that will break/interfere, but dont do it for me because I will just manually escape things if they show up for whatever reason. I want them for debugging, blah blah blah
 	if not TMW.debug then
-		SUG.lastName = gsub(SUG.lastName, "([%(%)%*%%%[%]%-])", "%%%1")
+		-- do not escape the almighty wildcards if testing
+		SUG.lastName = gsub(SUG.lastName, "([%*%.])", "%%%1")
 	end
-
+	-- always escape parentheses, brackets, percent signs, minus signs, plus signs
+	SUG.lastName = gsub(SUG.lastName, "([%(%)%%%[%]%-%+])", "%%%1")
 
 	SUG.atBeginning = "^"..SUG.lastName
 
 	
-	if --[[(not TMW.debug and #SUG.lastName < 2) or]] SUG.lastName == "" or not strfind(SUG.lastName, "[^%.]") then
+	if not SUG.CurrentModule.noMin and (SUG.lastName == "" or not strfind(SUG.lastName, "[^%.]")) then
 		SUG.Suggest:Hide()
 		return
 	else
@@ -4825,45 +4610,11 @@ function SUG:NameOnCursor(isClick)
 
 	if SUG.oldLastName ~= SUG.lastName or SUG.redoIfSame then
 		SUG.redoIfSame = nil
-		SUG:CacheItems()
-		if CI.IMS then
-			SUG:CacheActions()
-		end
 
 		SUG.offset = 0
 		SUG:DoSuggest()
 	end
 
-end
-
-function SUG:Insert(insert)
-	if insert then
-		local currenttext = SUG.Box:GetText()
-		local start = SUG.startpos-1
-		local firsthalf
-		if start <= 0 then
-			firsthalf = ""
-		else
-			firsthalf = strsub(currenttext, 0, start)
-		end
-		local lasthalf = strsub(currenttext, SUG.endpos+1)
-		
-		local addcolon = (SUG.duration or (Types[CI.t].DurationSyntax and not SUG.overrideSoI))
-		local insert = (addcolon and insert .. ": " .. (SUG.duration or "")) or insert
-		local newtext = firsthalf .. "; " .. insert .. "; " .. lasthalf
-		SUG.Box:SetText(TMW:CleanString(newtext))
-		SUG.Box:SetCursorPosition(SUG.endpos + (#tostring(insert) - #tostring(SUG.lastName)) + 2)
-		
-		if SUG.Box:GetCursorPosition() == SUG.Box:GetNumLetters() and not SUG.overrideSoI then -- if we are at the end of the exitbox then put a semicolon in anyway for convenience
-			SUG.Box:SetText(SUG.Box:GetText().. (addcolon and " " or "") .. "; ")
-		elseif SUG.overrideSoI then
-			SUG.Box:ClearFocus()
-		end
-		if addcolon then
-			SUG.Box:SetCursorPosition(SUG.Box:GetCursorPosition() - 2)
-		end
-		SUG.Suggest:Hide()
-	end
 end
 
 
@@ -4957,7 +4708,7 @@ local EditboxHooks = {
 		end
 	end,
 }
-function SUG:EnableEditBox(editbox, inputType, setOverride)
+function SUG:EnableEditBox(editbox, inputType, onlyOneEntry)
 	editbox.SUG_Enabled = 1
 	
 	inputType = get(inputType)
@@ -4966,7 +4717,7 @@ function SUG:EnableEditBox(editbox, inputType, setOverride)
 		return SUG:DisableEditBox(editbox)
 	end
 	editbox.SUG_type = inputType
-	editbox.SUG_setOverride = setOverride
+	editbox.SUG_onlyOneEntry = onlyOneEntry
 	
 	if not editbox.SUG_hooked then
 		for k, v in pairs(EditboxHooks) do
@@ -5016,6 +4767,7 @@ function Module.Sorter_ByName(a, b)
 		return a < b
 	else
 		--sort by name
+		print(a, b, nameA, nameB)
 		return nameA < nameB
 	end
 end
@@ -5059,21 +4811,19 @@ function Module:Table_GetEquivSuggestions(suggestions, tbl, ...)
 	local semiLN = ";" .. lastName
 	local long = #lastName > 2
 	
-	if not SUG.overrideSoI then
-		for _, tbl in TMW:Vararg(...) do
-			for equiv in pairs(tbl) do
-				if 	(long and (
-						(strfind(strlowerCache[equiv], lastName)) or
-						(strfind(strlowerCache[L[equiv]], lastName)) or
-						(not SUGIsNumberInput and strfind(strlowerCache[EquivFullNameLookup[equiv]], semiLN)) or
-						(SUGIsNumberInput and strfind(EquivFullIDLookup[equiv], semiLN))
-				)) or
-					(not long and (
-						(strfind(strlowerCache[equiv], atBeginning)) or
-						(strfind(strlowerCache[L[equiv]], atBeginning))
-				)) then
-					suggestions[#suggestions + 1] = equiv
-				end
+	for _, tbl in TMW:Vararg(...) do
+		for equiv in pairs(tbl) do
+			if 	(long and (
+					(strfind(strlowerCache[equiv], lastName)) or
+					(strfind(strlowerCache[L[equiv]], lastName)) or
+					(not SUGIsNumberInput and strfind(strlowerCache[EquivFullNameLookup[equiv]], semiLN)) or
+					(SUGIsNumberInput and strfind(EquivFullIDLookup[equiv], semiLN))
+			)) or
+				(not long and (
+					(strfind(strlowerCache[equiv], atBeginning)) or
+					(strfind(strlowerCache[L[equiv]], atBeginning))
+			)) then
+				suggestions[#suggestions + 1] = equiv
 			end
 		end
 	end
@@ -5090,14 +4840,52 @@ function Module:Entry_OnClick(frame, button)
 	else
 		insert = frame.insert
 	end
-	TMW.SUG:Insert(insert)
+	self:Entry_Insert(insert)
 end
 
+function Module:Entry_Insert(insert)
+	if insert then
+		if SUG.Box.SUG_onlyOneEntry then
+			SUG.Box:SetText(TMW:CleanString(insert))
+			SUG.Box:ClearFocus()
+			return 
+		end
+		
+		-- determine the text before an after where we will be inserting to
+		local currenttext = SUG.Box:GetText()
+		local start = SUG.startpos-1
+		local firsthalf = start > 0 and strsub(currenttext, 0, start) or ""
+		local lasthalf = strsub(currenttext, SUG.endpos+1)
+		
+		-- the entire text with the insertion added in
+		local newtext = firsthalf .. "; " .. insert .. "; " .. lasthalf
+		-- clean it up
+		SUG.Box:SetText(TMW:CleanString(newtext))
+		
+		-- put the cursor after the newly inserted text
+		local _, newPos = SUG.Box:GetText():find(insert, max(0, SUG.startpos-1))
+		SUG.Box:SetCursorPosition(newPos + 2)
+		
+		-- if we are at the end of the exitbox then put a semicolon in anyway for convenience
+		if SUG.Box:GetCursorPosition() == SUG.Box:GetNumLetters() then 
+			SUG.Box:SetText(SUG.Box:GetText() .. "; ")
+		end
+		
+		-- attempt another suggestion (it will either be hidden or it will do another)
+		SUG:NameOnCursor(1)
+	end
+end
+
+function Module:Entry_IsValid(id)
+	return true
+end
 
 
 local Module = SUG:NewModule("item", SUG:GetModule("default"))
 
 function Module:Table_Get()
+	SUG:CacheItems()
+	
 	return ItemCache
 end
 
@@ -5114,6 +4902,88 @@ function Module:Entry_AddToList(f, id)
 	f.tooltiparg = link
 
 	f.Icon:SetTexture(GetItemIcon(id))
+end
+
+
+local Module = SUG:NewModule("itemwithslots", SUG:GetModule("item"))
+Module.Slots = {}
+
+function Module:Entry_AddToList(f, id)
+	local itemID, link, _
+	if id <= INVSLOT_LAST_EQUIPPED then
+		itemID = GetInventoryItemID("player", id) -- get the itemID of the slot
+		link = GetInventoryItemLink("player", id)
+		
+		f.overrideInsertID = L["SUG_INSERTITEMSLOT"]
+	else
+		itemID = id
+		_, link = GetItemInfo(itemID)
+	end
+	
+	local name = GetItemInfo(itemID)
+	
+	f.Name:SetText(link and link:gsub("[%[%]]", ""))
+	f.ID:SetText(id)
+
+	f.insert = SUG.inputType == "number" and id or name
+	f.insert2 = SUG.inputType ~= "number" and id or name
+
+	f.tooltipmethod = "SetHyperlink"
+	f.tooltiparg = link
+
+	f.Icon:SetTexture(GetItemIcon(itemID))
+end
+
+function Module:Table_GetSpecialSuggestions(suggestions, tbl, ...)
+	local atBeginning = SUG.atBeginning
+	
+	for i = INVSLOT_FIRST_EQUIPPED, INVSLOT_LAST_EQUIPPED do
+		local itemID = GetInventoryItemID("player", i) -- get the itemID of the slot
+		self.Slots[i] = itemID and GetItemInfo(itemID)
+	end
+	
+	if SUG.inputType == "number" then
+		local len = #SUG.lastName - 1
+		local match = tonumber(SUG.lastName)
+		for id in pairs(self.Slots) do
+			if min(id, floor(id / 10^(floor(log10(id)) - len))) == match then -- this looks like shit, but is is approx 300% more efficient than the below commented line
+		--	if strfind(id, atBeginning) then
+				suggestions[#suggestions + 1] = id
+			end
+		end
+	else
+		for id, name in pairs(self.Slots) do
+			if strfind(strlower(name), atBeginning) then
+				suggestions[#suggestions + 1] = id
+			end
+		end
+	end
+end
+
+function Module:Entry_Colorize_1(f, id)
+	if id <= INVSLOT_LAST_EQUIPPED then
+		f.Background:SetVertexColor(.58, .51, .79, 1) -- color item slots warlock purple
+	end
+end
+
+function Module.Sorter_ByName(a, b)
+	local haveA, haveB = Module.Slots[a], Module.Slots[b]
+	if haveA or haveB then
+		if haveA and haveB then
+			return a < b
+		else
+			return haveA
+		end
+	end
+	
+	local nameA, nameB = ItemCache[a], ItemCache[b]
+	if nameA == nameB then
+		--sort identical names by ID
+		return a < b
+	else
+		--sort by name
+		return nameA < nameB
+	end
 end
 
 
@@ -5215,11 +5085,142 @@ function Module:Entry_Colorize_1(f, id)
 end
 
 
+local Module = SUG:NewModule("texture", SUG:GetModule("spell"))
+
+function Module:Entry_AddToList(f, id)
+	if tonumber(id) then --sanity check
+		local name = GetSpellInfo(id)
+
+		f.Name:SetText(name)
+		f.ID:SetText(id)
+
+		f.tooltipmethod = "SetSpellByID"
+		f.tooltiparg = id
+ 
+		if pclassSpellCache[id] --[[name and GetSpellTexture(name)]] then
+			f.insert = SUG.inputType == "number" and id or name
+			f.insert2 = SUG.inputType ~= "number" and id or name
+		else
+			f.insert = id
+		end
+
+		f.Icon:SetTexture(SpellTextures[id])
+	end
+end
+
+
+local Module = SUG:NewModule("spellwithduration", SUG:GetModule("spell"))
+Module.doAddColon = true
+local MATCH_RECAST_TIME_MIN = SPELL_RECAST_TIME_MIN:gsub("%%%.3g", "(%%d+)")
+local MATCH_RECAST_TIME_SEC = SPELL_RECAST_TIME_SEC:gsub("%%%.3g", "(%%d+)")
+
+function Module:Entry_OnClick(f, button)
+	local insert
+	
+	local spellID = f.tooltiparg
+	local Parser, LT1, LT2, LT3, RT1, RT2, RT3 = SUG:GetParser()
+	Parser:SetOwner(UIParent, "ANCHOR_NONE")
+	Parser:SetSpellByID(spellID)
+	
+	local dur
+			
+	for _, text in TMW:Vararg(RT2:GetText(), RT3:GetText()) do
+		if text then
+			
+			local mins = text:match(MATCH_RECAST_TIME_MIN)
+			local secs = text:match(MATCH_RECAST_TIME_SEC)
+			if mins then
+				dur = mins .. ":00"
+			elseif secs then
+				dur = secs
+			end
+			
+			if dur then
+				break
+			end
+		end
+	end
+	
+	if button == "RightButton" and f.insert2 then
+		insert = f.insert2
+	else
+		insert = f.insert
+	end
+	
+	self:Entry_Insert(insert, dur)
+end
+
+function Module:Entry_Insert(insert, duration)
+	if insert then
+		if SUG.Box.SUG_onlyOneEntry then
+			SUG.Box:SetText(TMW:CleanString(insert))
+			SUG.Box:ClearFocus()
+			return 
+		end
+		
+		-- determine the text before an after where we will be inserting to
+		local currenttext = SUG.Box:GetText()
+		local start = SUG.startpos-1
+		local firsthalf = start > 0 and strsub(currenttext, 0, start) or ""
+		local lasthalf = strsub(currenttext, SUG.endpos+1)
+		
+		-- determine if we should add a colon to the inserted text. a colon should be added if:
+			-- one existed before (the user clicked on a spell with a duration defined or already typed it in)
+			-- the module requests (requires) one
+		local doAddColon = SUG.duration or SUG.CurrentModule.doAddColon
+		
+		-- determine if there is an actual duration to be added to the inserted spell
+		local hasDurationData = duration or SUG.duration
+		
+		-- the entire text to be inserted in
+		local insert = (doAddColon and insert .. ": " .. (hasDurationData or "")) or insert
+		
+		-- the entire text with the insertion added in
+		local newtext = firsthalf .. "; " .. insert .. "; " .. lasthalf
+		
+		
+		SUG.Box:SetText(TMW:CleanString(newtext))
+		
+		-- put the cursor after the newly inserted text
+		local _, newPos = SUG.Box:GetText():find(insert, max(0, SUG.startpos-1))
+		SUG.Box:SetCursorPosition(newPos + 2)
+		
+		-- if we are at the end of the exitbox then put a semicolon in anyway for convenience
+		if SUG.Box:GetCursorPosition() == SUG.Box:GetNumLetters() then 
+			SUG.Box:SetText(SUG.Box:GetText() .. (doAddColon and not hasDurationData and " " or "") .. "; ")
+		end
+		
+		-- if we added a colon but there was no duration information inserted, move the cursor back 2 characters so the user can type it in quickly
+		if doAddColon and not hasDurationData then
+			SUG.Box:SetCursorPosition(SUG.Box:GetCursorPosition() - 2)
+		end
+		
+		-- attempt another suggestion (it will either be hidden or it will do another)
+		SUG:NameOnCursor(1)
+	end
+end
+
+
+local Module = SUG:NewModule("cooldownwithduration", SUG:GetModule("spellwithduration"))
+
+function Module:Entry_IsValid(id)
+	local Parser, LT1, LT2, LT3, RT1, RT2, RT3 = SUG:GetParser()
+	Parser:SetOwner(UIParent, "ANCHOR_NONE")
+	Parser:SetSpellByID(id)
+	
+	for _, text in TMW:Vararg(RT2:GetText(), RT3:GetText()) do
+		if text and (text:match(MATCH_RECAST_TIME_MIN) or text:match(MATCH_RECAST_TIME_SEC)) then
+			return true
+		end
+	end
+end
+
+
 
 local Module = SUG:NewModule("cast", SUG:GetModule("spell"))
 
 function Module:Table_Get()
-	return CastCache, TMW.BE.casts
+	return SpellCache, TMW.BE.casts
 end
 
 function Module:Entry_AddToList(f, id)
@@ -5261,8 +5262,36 @@ function Module:Entry_Colorize_2(f, id)
 	end
 end
 
+function Module:Entry_IsValid(id)
+	if TMW.BE.casts[id] then
+		return true
+	end
+	
+	local _, _, _, _, _, _, castTime = GetSpellInfo(id)
+	if not castTime then
+		return false
+	elseif castTime > 0 then
+		return true
+	end
+	
+	local Parser, LT1, LT2, LT3 = SUG:GetParser()
+	
+	Parser:SetOwner(UIParent, "ANCHOR_NONE") -- must set the owner before text can be obtained.
+	Parser:SetSpellByID(id)
+	
+	if LT2:GetText() == SPELL_CAST_CHANNELED or LT3:GetText() == SPELL_CAST_CHANNELED then
+		return true
+	end
+end
+
+
 
 local Module = SUG:NewModule("multistate", SUG:GetModule("spell"))
+
+function Module:Table_Get()
+	SUG:CacheActions()
+	return SpellCache
+end
 
 function Module:Entry_Colorize_2(f, id)
 	if SUG.ActionCache[id] then
@@ -5296,7 +5325,6 @@ function Module:Entry_AddToList(f, id)
 
 		f.insert = dispeltype
 
-		f.tooltipmethod = nil
 		f.tooltiptitle = dispeltype
 		f.tooltiptext = L["ICONMENU_DISPEL"]
 
@@ -5344,9 +5372,56 @@ function Module:Table_GetSpecialSuggestions(suggestions, tbl, ...)
 end
 
 
+local Module = SUG:NewModule("dr", SUG:GetModule("spell"))
 
-local Module = SUG:NewModule("wpnenchant", SUG:GetModule("default"))
-Module.Items = {
+function Module:Table_Get()
+	return SpellCache, TMW.BE.dr
+end
+
+function Module:Entry_Colorize_2(f, id)
+	if TMW.BE.dr[id] then
+		f.Background:SetVertexColor(1, .96, .41, 1) -- rogue yellow
+	end
+end
+
+function Module:Entry_AddToList(f, id)
+	if EquivFirstIDLookup[id] then -- if the entry is an equivalacy (buff, cast, or whatever)
+		--NOTE: dispel types are put in EquivFirstIDLookup too for efficiency in the sorter func, but as long as dispel types are checked first, it wont matter
+		local equiv = id
+		local firstid = EquivFirstIDLookup[id]
+
+		f.Name:SetText(equiv)
+		f.ID:SetText(nil)
+
+		f.insert = equiv
+
+		f.tooltipmethod = "TMW_SetEquiv"
+		f.tooltiparg = equiv
+
+		f.Icon:SetTexture(SpellTextures[firstid])
+
+	elseif tonumber(id) then --sanity check
+		local name = GetSpellInfo(id)
+
+		f.Name:SetText(name)
+		f.ID:SetText(id)
+
+		f.tooltipmethod = "SetSpellByID"
+		f.tooltiparg = id
+
+		f.insert = SUG.inputType == "number" and id or name
+		f.insert2 = SUG.inputType ~= "number" and id or name
+
+		f.Icon:SetTexture(SpellTextures[id])
+	end
+end
+
+
+
+local Module = SUG:NewModule("wpnenchant", SUG:GetModule("default"), "AceEvent-3.0")
+Module.noMin = true
+
+Module.ItemIDs = {
 	-- item enhancements
 	43233,	--Deadly Poison
 	3775,	--Crippling Poison
@@ -5421,7 +5496,7 @@ Module.Items = {
 	--25679,	--Comfortable Insoles
 }
 
-Module.Spells = {
+Module.SpellIDs = {
 	-- Shaman Enchants
 	8024,	--Flametongue Weapon
 	8033,	--Frostbrand Weapon
@@ -5430,54 +5505,64 @@ Module.Spells = {
 	8017,	--Rockbiter Weapon
 }
 
-function Module:Table_Get()
-	if not self.Processed then
-		self.Processed = true 
-		
-		local items = {}
-		for k, id in pairs(self.Items) do
-			self.Items[k] = nil
-			local name = GetItemInfo(id)
-			items[name] = id
-		end
-		self.Items = items
-		
-		local spells = {}
-		for k, id in pairs(self.Spells) do
-			self.Spells[k] = nil
-			local name = GetSpellInfo(id)
-			for ench in pairs(TMW.db.global.WpnEnchDurs) do
-				if strfind(strlower(name), strlower(ench)) then
-					name = ench
-					break
-				end
+function Module:OnInitialize()
+	self.Items = {}
+	self.Spells = {}
+	self.Table = {}
+	
+	self:Table_DoItemLookups()		
+	
+	for k, id in pairs(self.SpellIDs) do
+		local name = GetSpellInfo(id)
+		local added
+		for ench in pairs(TMW.db.global.WpnEnchDurs) do
+			if strfind(strlower(name), strlower(ench)) then
+				self.Spells[ench] = id
+				added = 1
+				break
 			end
-			spells[name] = id
 		end
-		self.Spells = spells
-		
-		
-		
-		self.Table = {}
-		for k, v in pairs(self.Items) do
+		self.Spells[name] = id
+	end
+	
+	for k, v in pairs(self.Spells) do
+		if self.Table[k] then
+			TMW:Error("Attempted to add spellID %d, but an item already has that id.", nil, k)
+		else
 			self.Table[k] = v
-		end
-		
-		for k, v in pairs(self.Spells) do
-			if self.Table[k] then
-				TMW:Error("Attempted to add spellID %d, but an item already has that id.", nil, k)
-			else
-				self.Table[k] = v
-			end
-		end
-		
-		for k, v in pairs(TMW.db.global.WpnEnchDurs) do
-			if not self.Table[k] then
-				self.Table[k] = k
-			end
 		end
 	end
 	
+	for k, v in pairs(TMW.db.global.WpnEnchDurs) do
+		if not self.Table[k] then
+			self.Table[k] = k
+		end
+	end
+	
+	for name in pairs(self.Table) do
+		self:Etc_GetTexture(name) -- cache textures for the spell breakdown tooltip
+	end
+end
+
+function Module:Table_DoItemLookups()
+	self:UnregisterEvent("GET_ITEM_INFO_RECEIVED")
+	
+	for k, id in pairs(self.ItemIDs) do
+		local name = GetItemInfo(id)
+		if name then
+			self.Items[name] = id
+		else
+			self:RegisterEvent("GET_ITEM_INFO_RECEIVED", "Table_DoItemLookups")
+		end
+	end
+	
+	for k, v in pairs(self.Items) do
+		self.Table[k] = v
+	end
+end
+
+function Module:Table_Get()
+	SUG:CacheItems()
 	return self.Table
 end
 
@@ -5491,8 +5576,6 @@ function Module:Entry_AddToList(f, name)
 		f.tooltiparg = id
 
 		f.insert = name
-
-		f.Icon:SetTexture(SpellTextures[id])
 	elseif self.Items[name] then
 		local id = self.Items[name]
 		local name, link = GetItemInfo(id)
@@ -5504,18 +5587,25 @@ function Module:Entry_AddToList(f, name)
 
 		f.tooltipmethod = "SetHyperlink"
 		f.tooltiparg = link
-
-		f.Icon:SetTexture(GetItemIcon(id))
 	else
 		f.Name:SetText(name)
 		f.ID:SetText(nil)
 
-		f.tooltipmethod = nil
 		f.tooltiptitle = name
 
 		f.insert = name
+	end
+	
+	f.Icon:SetTexture(self:Etc_GetTexture(name))
+end
 
-		local tex
+function Module:Etc_GetTexture(name)
+	local tex
+	if self.Spells[name] then
+		tex = SpellTextures[self.Spells[name]]
+	elseif self.Items[name] then
+		tex = GetItemIcon(self.Items[name])
+	else
 		if name:match(L["SUG_PATTERNMATCH_FISHINGLURE"]) then
 			tex = "Interface\\Icons\\inv_fishingpole_02"
 		elseif name:match(L["SUG_PATTERNMATCH_WEIGHTSTONE"]) then
@@ -5523,8 +5613,12 @@ function Module:Entry_AddToList(f, name)
 		elseif name:match(L["SUG_PATTERNMATCH_SHARPENINGSTONE"]) then
 			tex = "Interface\\Icons\\inv_stone_sharpeningstone_01"
 		end
-		f.Icon:SetTexture(tex or "Interface\\Icons\\INV_Misc_QuestionMark")
 	end
+	
+	name = strlower(name)
+	SpellTextures[name] = SpellTextures[name] or tex
+	
+	return tex or "Interface\\Icons\\INV_Misc_QuestionMark"
 end
 
 function Module.Sorter(a, b)
@@ -5572,9 +5666,9 @@ end
 function Module:Table_GetNormalSuggestions(suggestions, tbl, ...)
 	local atBeginning = SUG.atBeginning
 	
-	for id, name in pairs(tbl) do
+	for name, id in pairs(tbl) do
 		if strfind(strlower(name), atBeginning) then
-			suggestions[#suggestions + 1] = id
+			suggestions[#suggestions + 1] = name
 		end
 	end
 end
@@ -5588,7 +5682,9 @@ function Module:Entry_Colorize_1(f, id)
 end
 
 
+
 local Module = SUG:NewModule("tracking", SUG:GetModule("default"))
+Module.noMin = true
 
 function Module:Table_Get()
 	return TrackingCache
@@ -5606,57 +5702,11 @@ function Module:Entry_AddToList(f, id)
 
 	f.insert = name
 
-	f.tooltipmethod = nil
-	f.tooltiparg = nil
-
 	f.Icon:SetTexture(texture)
 end
 
---[[
-function Module:Entry_Colorize(f, id)
-	f.Background:SetVertexColor(0, 0, 0, 0)
-	if TMW.DS[id] then -- if the entry is a dispel type (magic, poison, etc)
-		f.Background:SetVertexColor(1, .49, .04, 1) -- druid orange
 
-	elseif EquivFirstIDLookup[id] then -- if the entry is an equivalacy (buff, cast, or whatever)
-		--NOTE: dispel types are put in EquivFirstIDLookup too for efficiency in the sorter func, but as long as dispel types are checked first, it wont matter
-		
-		if TMW.BE.buffs[id] then
-			f.Background:SetVertexColor(.2, .9, .2, 1) -- lightish green
-		elseif TMW.BE.debuffs[id] then
-			f.Background:SetVertexColor(.77, .12, .23, 1) -- deathknight red
-		elseif TMW.BE.casts[id] or TMW.BE.dr[id] then
-			f.Background:SetVertexColor(1, .96, .41, 1) -- rogue yellow
-		end
 
-	elseif tonumber(id) then --sanity check
-		if SUGIMS and SUG.ActionCache[id] then
-			f.Background:SetVertexColor(0, .44, .87, 1) --color actions that are on your action bars if the type is a multistate cooldown shaman blue
-		elseif SUGPlayerSpells[id] then
-			f.Background:SetVertexColor(.41, .8, .94, 1) --color all other spells that you have in your/your pet's spellbook mage blue
-		else
-			for class, tbl in pairs(TMW.ClassSpellCache) do
-				if tbl[id] then
-					f.Background:SetVertexColor(.96, .55, .73, 1) --color all other known class spells paladin pink
-					break
-				end
-			end
-		end
-	end
-	
-	local whoCasted = (SUGSoI == "spell") and SUG.AuraCache[id]
-	if whoCasted then
-		local r, g, b, a = f.Background:GetVertexColor()
-		if a < .5 then -- only if nothing else has colored the entry yet
-			if whoCasted == 1 then
-				f.Background:SetVertexColor(.78, .61, .43, 1) -- color known NPC auras warrior brown
-			elseif whoCasted == 2 then
-				f.Background:SetVertexColor(.79, .30, 1, 1) -- color known PLAYER auras a bright pink ish pruple ish color that is similar to paladin pink but has sufficient contrast for distinguishing
-			end
-		end
-	end
-end
-]]
 
 -- -----------------------
 -- CONDITION EDITOR

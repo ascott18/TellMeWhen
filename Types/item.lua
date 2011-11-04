@@ -33,6 +33,7 @@ LibStub("AceEvent-3.0"):Embed(Type)
 Type.type = "item"
 Type.name = L["ICONMENU_ITEMCOOLDOWN"]
 Type.appendNameLabel = L["ICONMENU_CHOOSENAME_ORITEMSLOT"]
+Type.SUGType = "itemwithslots"
 Type.WhenChecks = {
 	text = L["ICONMENU_SHOWWHEN"],
 	{ value = "alpha", 			text = L["ICONMENU_USABLE"], 			colorCode = "|cFF00FF00" },
@@ -191,7 +192,7 @@ function Type:Setup(icon, groupID, iconID)
 	else
 		for _, n in ipairs(TMW:SplitNames(icon.Name)) do
 			n = tonumber(strtrim(n))
-			if n and n <= 19 then
+			if n and n <= INVSLOT_LAST_EQUIPPED then
 				icon:RegisterEvent("PLAYER_EQUIPMENT_CHANGED")
 				icon:SetScript("OnEvent", ItemCooldown_OnEvent)
 				break
