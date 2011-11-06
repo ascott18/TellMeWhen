@@ -1830,14 +1830,15 @@ function IE:OnUpdate()
 		self.icontexture:SetTexture(icon.texture:GetTexture())
 	end
 	
-	-- check and see if the settings of the current icon have changed.
-	-- if they have, create a history point (or at least try to)
-	IE:AttemptBackup(icon)
-	
 	-- run updates for any icons that are queued
 	for icon in pairs(IE.iconsToUpdate) do
 		TMW:Icon_Update(tremove(IE.iconsToUpdate, 1))
 	end
+	
+	-- check and see if the settings of the current icon have changed.
+	-- if they have, create a history point (or at least try to)
+	-- IMPORTANT: do this after running icon updates because SoundData is stored in the event table, which makes 2 changes over 2 frames in 1 user action, which screws thing up
+	IE:AttemptBackup(icon)
 end
 
 
@@ -2238,7 +2239,6 @@ function IE:SetupRadios()
 end
 
 function IE:SaveSettings()
-	--IE:AttemptBackup(CI.ic)
 	for k, t in pairs(IE.Checks) do
 		if t == 2 then
 			IE.Main[k]:ClearFocus()
@@ -2253,7 +2253,6 @@ function IE:SaveSettings()
 			frame.EditBox2:ClearFocus()
 		end
 	end
-	--IE:AttemptBackup(CI.ic)
 end
 
 
@@ -3461,6 +3460,7 @@ function IE:AttemptBackup(icon)
 		-- this includes creating the first history point
 		icon.history = {TMW:CopyWithMetatable(icon:GetSettings())}
 		icon.historyState = #icon.history
+		print("INIT")
 	
 		-- notify the undo and redo buttons that there was a change so they can :Enable() or :Disable()
 		IE:UndoRedoChanged()
@@ -3473,16 +3473,19 @@ function IE:AttemptBackup(icon)
 		--(it was likely only one setting that changed, but not always)
 		local result, changedSetting = IE:GetCompareResultsPath(IE:DeepCompare(icon.history[icon.historyState], icon:GetSettings()))
 		if type(result) == "string" then
+			print(result)
 			-- if we are using an old history point (i.e. we hit undo a few times and then made a change), 
 			-- delete all history points from the current one forward so that we dont jump around wildly when undoing and redoing
 			for i = icon.historyState + 1, #icon.history do
 				icon.history[i] = nil
+				print("DEL", i)
 			end
 			
 			-- if the last setting that was changed is the same as the most recent setting that was changed,
 			-- and if the setting is one that can be changed very rapidly,
 			-- delete the previous history point so that we dont murder our memory usage and piss off the user as they undo a number from 1 to 10, 0.1 per click.
 			if icon.lastChangePath == result and IE.RapidSettings[changedSetting] then
+				print("DEL", #icon.history)
 				icon.history[#icon.history] = nil
 				icon.historyState = #icon.history
 			end
@@ -3495,7 +3498,7 @@ function IE:AttemptBackup(icon)
 			
 			-- set the history state to the latest point
 			icon.historyState = #icon.history
-	
+			print("NEW", #icon.history)
 			-- notify the undo and redo buttons that there was a change so they can :Enable() or :Disable()
 			IE:UndoRedoChanged()
 		end
@@ -3657,7 +3660,7 @@ function SND:SetupEventDisplay(event)
 	local name = CI.ics.Events[eventString].Sound
 	
 	if name == "None" then
-		name = "|cff808080" .. name
+		name = "|cff808080" .. NONE
 	end
 	
 	SND.Events[eventID].DataText:SetText(name)
@@ -4909,29 +4912,39 @@ local Module = SUG:NewModule("itemwithslots", SUG:GetModule("item"))
 Module.Slots = {}
 
 function Module:Entry_AddToList(f, id)
-	local itemID, link, _
 	if id <= INVSLOT_LAST_EQUIPPED then
-		itemID = GetInventoryItemID("player", id) -- get the itemID of the slot
-		link = GetInventoryItemLink("player", id)
+		local itemID = GetInventoryItemID("player", id) -- get the itemID of the slot
+		local link = GetInventoryItemLink("player", id)
 		
 		f.overrideInsertID = L["SUG_INSERTITEMSLOT"]
+		
+		local name = GetItemInfo(itemID)
+	
+		f.Name:SetText(link and link:gsub("[%[%]]", ""))
+		f.ID:SetText("(" .. id .. ")")
+
+		f.insert = SUG.inputType == "number" and id or name
+		f.insert2 = SUG.inputType ~= "number" and id or name
+
+		f.tooltipmethod = "SetHyperlink"
+		f.tooltiparg = link
+
+		f.Icon:SetTexture(GetItemIcon(itemID))
 	else
 		itemID = id
-		_, link = GetItemInfo(itemID)
+		local name, link = GetItemInfo(id)
+	
+		f.Name:SetText(link and link:gsub("[%[%]]", ""))
+		f.ID:SetText(id)
+
+		f.insert = SUG.inputType == "number" and id or name
+		f.insert2 = SUG.inputType ~= "number" and id or name
+
+		f.tooltipmethod = "SetHyperlink"
+		f.tooltiparg = link
+
+		f.Icon:SetTexture(GetItemIcon(id))
 	end
-	
-	local name = GetItemInfo(itemID)
-	
-	f.Name:SetText(link and link:gsub("[%[%]]", ""))
-	f.ID:SetText(id)
-
-	f.insert = SUG.inputType == "number" and id or name
-	f.insert2 = SUG.inputType ~= "number" and id or name
-
-	f.tooltipmethod = "SetHyperlink"
-	f.tooltiparg = link
-
-	f.Icon:SetTexture(GetItemIcon(itemID))
 end
 
 function Module:Table_GetSpecialSuggestions(suggestions, tbl, ...)
@@ -5123,7 +5136,7 @@ function Module:Entry_OnClick(f, button)
 	Parser:SetSpellByID(spellID)
 	
 	local dur
-			
+	
 	for _, text in TMW:Vararg(RT2:GetText(), RT3:GetText()) do
 		if text then
 			
@@ -5139,6 +5152,9 @@ function Module:Entry_OnClick(f, button)
 				break
 			end
 		end
+	end
+	if spellID == 42292 then -- pvp trinket override
+		dur = "2:00"
 	end
 	
 	if button == "RightButton" and f.insert2 then
@@ -5183,6 +5199,7 @@ function Module:Entry_Insert(insert, duration)
 		
 		-- put the cursor after the newly inserted text
 		local _, newPos = SUG.Box:GetText():find(insert, max(0, SUG.startpos-1))
+		newPos = newPos or SUG.Box:GetNumLetters()
 		SUG.Box:SetCursorPosition(newPos + 2)
 		
 		-- if we are at the end of the exitbox then put a semicolon in anyway for convenience
@@ -5201,9 +5218,18 @@ function Module:Entry_Insert(insert, duration)
 end
 
 
-local Module = SUG:NewModule("cooldownwithduration", SUG:GetModule("spellwithduration"))
+--[[local Module = SUG:NewModule("cooldownwithduration", SUG:GetModule("spellwithduration"))
+
+i dont like filtering things out like this.
+There are reasons for someone to track a spell in a UCD icon that does not have a cooldown in the tooltip.
+Plus, exceptions are needed for pvp trinkets and such
 
 function Module:Entry_IsValid(id)
+	if id == 42292 then -- pvp trinket override
+		return true
+	end
+	
+	
 	local Parser, LT1, LT2, LT3, RT1, RT2, RT3 = SUG:GetParser()
 	Parser:SetOwner(UIParent, "ANCHOR_NONE")
 	Parser:SetSpellByID(id)
@@ -5213,7 +5239,7 @@ function Module:Entry_IsValid(id)
 			return true
 		end
 	end
-end
+end]]
 
 
 
@@ -5504,25 +5530,99 @@ Module.SpellIDs = {
 	51730,	--Earthliving Weapon
 	8017,	--Rockbiter Weapon
 }
+--[[
+--enUS
+	-- Weapon:	".* (Weapon)"
+	-- Enchant:	"(.*) Weapon"
+	
+--deDE -- tested
+	-- Weapon:	"(Waffe de[sr]) .-s?$"
+	-- Enchant:	"Waffe de[sr] (.-)s?$"
+	
+--esES, esMX -- tested
+	-- Weapon:	"(Arma ?d?e?) .*"
+	-- Enchant:	"Arma ?d?e? (.*)"
+	
+--zhTW -- tested
+	-- Weapon:	""
+	-- Enchant:	"(.*)"
+	
+--zhCN -- TOTAL GUESS HERE
+	-- Weapon:	""
+	-- Enchant:	"(.*)"
+	
+--ptBR -- tested
+	-- Weapon:	"(Arma ?d?[ae]?) .*"
+	-- Enchant:	"Arma ?d?[ae]? (.*)"
+	
+--frFR -- tested
+	-- Weapon:	"(Arme) [A-Z].*" or ""
+	-- Enchant:	"Arme ([A-Z].*)"
+	-- Enchant2:"(.*)"
+	
+--koKR
+	-- Weapon:	""
+	-- Enchant:	"(.*)" -- not really, but whatever. Earthliving is a strange exception
+	
+--ruRU -- tested
+	-- Weapon:	"(Оружие) .*"
+	-- Enchant:	"Оружие (........)" -- well, this is lame
+
+	ENCHMATCH = "(.*)"
+	ENCHMATCH2 = "(명)"
+	for k, id in pairs(self.SpellIDs) do -- DEBUG: REPLACE TMW.SUG:GetModule("wpnenchant") WITH SELF
+		local name = GetSpellInfo(id)
+		for _, enchant in TMW:Vararg(strsplit("|", L["SUG_MATCH_WPNENCH_ENCH"])) do
+			local dobreak
+			if enchant then
+				enchant = enchant:gsub("([%(%)%%%[%]%-%+%.%*])", "%%%1")
+				for ench in pairs(TMW.db.global.WpnEnchDurs) do
+					if strfind(strlower(ench), strlower(enchant)) then
+						self.Spells[ench] = id
+						dobreak = 1
+						break
+					end
+				end
+				if dobreak then
+					brek
+				end
+			end
+		end
+	end
+]]
 
 function Module:OnInitialize()
 	self.Items = {}
 	self.Spells = {}
 	self.Table = {}
+	self.SpellLookup = {}
 	
-	self:Table_DoItemLookups()		
+	
+	self:Etc_DoItemLookups()		
 	
 	for k, id in pairs(self.SpellIDs) do
 		local name = GetSpellInfo(id)
-		local added
-		for ench in pairs(TMW.db.global.WpnEnchDurs) do
-			if strfind(strlower(name), strlower(ench)) then
-				self.Spells[ench] = id
-				added = 1
-				break
+		for _, enchant in TMW:Vararg(strsplit("|", L["SUG_MATCH_WPNENCH_ENCH"])) do
+			local dobreak
+			enchant = name:match(enchant)
+			if enchant then
+				for ench in pairs(TMW.db.global.WpnEnchDurs) do
+					if strfind(strlower(ench), strlower(enchant:gsub("([%%%[%]%-%+])", "%%%1"))) then
+						-- the enchant was found in the list of known enchants, so add it
+						self.Spells[ench] = id
+						dobreak = 1
+						break
+					end
+				end
+				if dobreak then
+					break
+				elseif GetLocale() ~= "ruRU" or (GetLocale() == "koKR" and id ~= 51730) then
+					-- the enchant was not found in the list of known enchants, so take a guess and add it (but not for ruRU because it is just screwed up
+					-- koKR is screwed up for earthliving, so dont try it either
+					self.Spells[enchant] = id
+				end
 			end
 		end
-		self.Spells[name] = id
 	end
 	
 	for k, v in pairs(self.Spells) do
@@ -5544,7 +5644,7 @@ function Module:OnInitialize()
 	end
 end
 
-function Module:Table_DoItemLookups()
+function Module:Etc_DoItemLookups()
 	self:UnregisterEvent("GET_ITEM_INFO_RECEIVED")
 	
 	for k, id in pairs(self.ItemIDs) do
@@ -5552,7 +5652,7 @@ function Module:Table_DoItemLookups()
 		if name then
 			self.Items[name] = id
 		else
-			self:RegisterEvent("GET_ITEM_INFO_RECEIVED", "Table_DoItemLookups")
+			self:RegisterEvent("GET_ITEM_INFO_RECEIVED", "Etc_DoItemLookups")
 		end
 	end
 	
@@ -5577,7 +5677,7 @@ function Module:Entry_AddToList(f, name)
 
 		f.insert = name
 	elseif self.Items[name] then
-		local id = self.Items[name]
+		local id = CurrentItems[strlowerCache[name]] or self.Items[name]
 		local name, link = GetItemInfo(id)
 
 		f.Name:SetText(link:gsub("[%[%]]", ""))
@@ -5622,8 +5722,19 @@ function Module:Etc_GetTexture(name)
 end
 
 function Module.Sorter(a, b)
-	local haveA = (Module.Spells[a] and SUGPlayerSpells[a]) or (Module.Items[a] and (CurrentItems[a] or CurrentItems[ strlowerCache[ GetItemInfo(a) ]] ) )
-	local haveB = (Module.Spells[b] and SUGPlayerSpells[b]) or (Module.Items[b] and (CurrentItems[b] or CurrentItems[ strlowerCache[ GetItemInfo(b) ]] ) )
+	local haveA = Module.Spells[a] and SUGPlayerSpells[Module.Spells[a]]
+	local haveB = Module.Spells[b] and SUGPlayerSpells[Module.Spells[b]]
+	
+	if haveA or haveB then
+		if haveA and haveB then
+			return a < b
+		else
+			return haveA
+		end
+	end
+	
+	local haveA = Module.Items[a] and (CurrentItems[ strlowerCache[ a ]] )
+	local haveB = Module.Items[b] and (CurrentItems[ strlowerCache[ b ]] )
 	
 	if haveA or haveB then
 		if haveA and haveB then
@@ -5647,12 +5758,12 @@ function Module.Sorter(a, b)
 	
 	local nameA, nameB = Module.Table[a], Module.Table[b]
 		
-	if nameA == nameB then
+	if a == b then
 		--sort identical names by ID
-		return a < b
+		return Module.Table[a] < Module.Table[b]
 	else
 		--sort by name
-		return nameA < nameB
+		return a < b
 	end
 	
 end
@@ -5667,17 +5778,17 @@ function Module:Table_GetNormalSuggestions(suggestions, tbl, ...)
 	local atBeginning = SUG.atBeginning
 	
 	for name, id in pairs(tbl) do
-		if strfind(strlower(name), atBeginning) then
+		if SUG.inputType == "number" or strfind(strlower(name), atBeginning) then
 			suggestions[#suggestions + 1] = name
 		end
 	end
 end
 
-function Module:Entry_Colorize_1(f, id)
-	if SUGPlayerSpells[id] or CurrentItems[id] or CurrentItems[strlowerCache[GetItemInfo(id)]] then
-		f.Background:SetVertexColor(.41, .8, .94, 1) --color all other spells that you have in your/your pet's spellbook mage blue
-	elseif rawget(TMW.db.global.WpnEnchDurs, id) then
-		f.Background:SetVertexColor(.79, .30, 1, 1)
+function Module:Entry_Colorize_1(f, name)
+	if SUGPlayerSpells[Module.Spells[name]] or (CurrentItems[ strlowerCache[ name ]]) then
+		f.Background:SetVertexColor(.41, .8, .94, 1) --color all spells and items that you have mage blue
+	elseif rawget(TMW.db.global.WpnEnchDurs, name) then
+		f.Background:SetVertexColor(.79, .30, 1, 1) -- color all known weapon enchants purple
 	end
 end
 

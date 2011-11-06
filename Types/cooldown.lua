@@ -37,6 +37,7 @@ local Type = {}
 LibStub("AceEvent-3.0"):Embed(Type)
 Type.type = "cooldown"
 Type.name = L["ICONMENU_SPELLCOOLDOWN"]
+Type.desc = L["ICONMENU_SPELLCOOLDOWN_DESC"]
 Type.SUGType = function() return TMW.CI.ic.CooldownType end
 Type.TypeChecks = {
 	text = L["ICONMENU_COOLDOWNTYPE"],

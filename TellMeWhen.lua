@@ -33,7 +33,7 @@ local DRData = LibStub("DRData-1.0", true)
 TELLMEWHEN_VERSION = "4.6.6"
 TELLMEWHEN_VERSION_MINOR = strmatch(" @project-version@", " r%d+") or ""
 TELLMEWHEN_VERSION_FULL = TELLMEWHEN_VERSION .. TELLMEWHEN_VERSION_MINOR
-TELLMEWHEN_VERSIONNUMBER = 46602 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
+TELLMEWHEN_VERSIONNUMBER = 46603 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
 if TELLMEWHEN_VERSIONNUMBER > 47000 or TELLMEWHEN_VERSIONNUMBER < 46000 then return error("YOU SCREWED UP THE VERSION NUMBER OR DIDNT CHANGE THE SAFETY LIMITS") end -- safety check because i accidentally made the version number 414069 once
 -- i'll just plop this here for a second....
 -- * Began rewriting the suggestion list. IT IS HIGHLY UNUSABLE RIGHT NOW. THIS IS AN ALPHA VERSION, SO DONT COMPLAIN.
@@ -189,7 +189,7 @@ do -- Iterators
 			
 			currentCondition = currentCondition + 1
 			
-			if not currentConditions or currentCondition > currentConditions.n then
+			if not currentConditions or currentCondition > (currentConditions.n or #currentConditions) then
 				local settings
 				settings, cg, ci = extIter()
 				if not settings then
@@ -2255,8 +2255,12 @@ function TMW:CheckForInvalidIcons()
 		if group and group.Enabled and group.CorrectSpec and (not group[iconID] or group[iconID].Enabled) then
 			if not TMW:IsIconValid(condition.Icon) and condition.Type == "ICON" then
 				local g, i = strmatch(condition.Icon, "TellMeWhen_Group(%d+)_Icon(%d+)")
-				g, i = tonumber(g), tonumber(i)
-				TMW.Warn(format(L["CONDITIONORMETA_CHECKINGINVALID"], groupID, iconID, g, i))
+				g, i = tonumber(g) or 0, tonumber(i) or 0
+				if iconID then
+					TMW.Warn(format(L["CONDITIONORMETA_CHECKINGINVALID"], groupID, iconID, g, i))
+				else
+					TMW.Warn(format(L["CONDITIONORMETA_CHECKINGINVALID_GROUP"], groupID, g, i))
+				end
 			end
 		end
 	end
@@ -2267,7 +2271,7 @@ function TMW:CheckForInvalidIcons()
 			for k, v in pairs(ics.Icons) do
 				if not TMW:IsIconValid(v) then
 					local g, i = strmatch(v, "TellMeWhen_Group(%d+)_Icon(%d+)")
-					g, i = tonumber(g), tonumber(i)
+					g, i = tonumber(g) or 0, tonumber(i) or 0
 					TMW.Warn(format(L["CONDITIONORMETA_CHECKINGINVALID"], groupID, iconID, g, i))
 				end
 			end

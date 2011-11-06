@@ -28,6 +28,7 @@ L["RESIZE_TOOLTIP"] = "Click and drag to change size"
 
 L["ONGROUPDELETE_CHECKINGINVALID"] = "Warning! The following groups and icons were checking icons that were in the group that you just deleted:"
 L["CONDITIONORMETA_CHECKINGINVALID"] = "Warning! Group %d, Icon %d is checking an invalid icon (Group %d, Icon %d)"
+L["CONDITIONORMETA_CHECKINGINVALID_GROUP"] = "Warning! Group %d is checking an invalid icon (Group %d, Icon %d)"
 L["WARN_DRMISMATCH"] = [[Warning! You are checking the diminishing returns on spells from two different known categories.
 
 All spells must be from the same diminishing returns category for the icon to function properly. The following categories and spells were detected:]]
@@ -39,6 +40,7 @@ L["FROMNEWERVERSION"] = "You are importing data that was created in a newer vers
 
 L["ICONMENU_CHOOSENAME"] = "Choose name(s)/ID(s) to check"
 L["ICONMENU_CHOOSENAME_CNDTIC"] = "Choose name/ID/texture path"
+L["ICONMENU_CHOOSENAME_WPNENCH"] = "Choose enchant(s) to check"
 L["ICONMENU_CHOOSENAME_ORBLANK"] = "OR leave blank to track everything"
 L["ICONMENU_CHOOSENAME_ORITEMSLOT"] = "OR equipment slot to check (%d-%d)"
 L["ICONMENU_ENABLE"] = "Enabled"
@@ -60,47 +62,71 @@ L["CONDITIONALPHA_CONDITIONICON_DESC"] = "This will be used when the duration re
 
 
 L["ICONMENU_TYPE"] = "Icon type"
+
 L["ICONMENU_SPELLCOOLDOWN"] = "Spell Cooldown"
+L["ICONMENU_SPELLCOOLDOWN_DESC"] = [[Tracks the cooldowns of spells from your spellbook.]]
+
 L["ICONMENU_ITEMCOOLDOWN"] = "Item Cooldown"
+L["ICONMENU_ITEMCOOLDOWN_DESC"] = [[Tracks the cooldowns of items.]]
+
 L["ICONMENU_BUFFDEBUFF"] = "Buff/Debuff"
+L["ICONMENU_BUFFDEBUFF_DESC"] = [[Tracks buffs and/or debuffs.]]
+
 L["ICONMENU_REACTIVE"] = "Reactive Ability"
-L["ICONMENU_REACTIVE_DESC"] = "Reactive abilities are things like Kill Shot, Revenge, and Conflagrate - abilities that are only usable when certain conditions are met.  Use this icon type to track their usability."
+L["ICONMENU_REACTIVE_DESC"] = [[Tracks the usability of reactive abilities.
+
+Reactive abilities are things like %s, %s, and %s - abilities that are only usable when certain conditions are met.]]
+
 L["ICONMENU_WPNENCHANT"] = "Weapon Enchant"
-L["ICONMENU_WPNENCHANT_DESC"] = [=[This icon type tracks the status of temporary weapon enchants on your weapons - most useful for rogues and shaman.
+L["ICONMENU_WPNENCHANT_DESC"] = [=[Tracks temporary weapon enchants.
 
-The name field can be left blank to track any weapon enchant in the specified slot, or you can insert the name(s) of weapon enchant(s) to only show it for specific enchants.  The name that must be entered is the name that appears on the tooltip of your weapon while the enchant is active, e.g. "Flametongue", not "Flametongue Weapon."]=]
+If you want to check for specific enchants, enter the name of the enchant(s) as it appears on the tooltip of your weapon while the enchant is active (e.g. "Flametongue", not "Flametongue Weapon").]=]
+
 L["ICONMENU_TOTEM"] = "Totem"
+L["ICONMENU_TOTEM_DESC"] = [[Tracks your totems.]]
 L["ICONMENU_GHOUL"] = "Non-MoG ghoul"
-L["ICONMENU_MUSHROOMS"] = "Wild Mushrooms"
-L["ICONMENU_MULTISTATECD"] = "Multi-state ability"
-L["ICONMENU_MULTISTATECD_DESC"] = [[This should be used when you want to track multiple states/textures/etc of a cooldown. Some examples are Holy Word: Chastise and Dark Simulacrum.
+L["ICONMENU_GHOUL_DESC"] = [[Tracks your ghoul if you don't have the %s talent.]]
+L["ICONMENU_MUSHROOMS"] = "%s"
+L["ICONMENU_MUSHROOMS_DESC"] = [[Tracks a %s.]]
 
-|cFFFF5959IMPORTANT|r: The action being tracked MUST be on your action bars for this icon type to work. You should also make sure that the ability is in its default state before leaving config mode.]]
+L["ICONMENU_MULTISTATECD"] = "Multi-state Cooldown"
+L["ICONMENU_MULTISTATECD_DESC"] = [[Tracks an ability with multiple states.
+
+This should be used when you want to track the multiple states and textures of a cooldown such as %s or %s.]]
+
+
 L["ICONMENU_UNITCOOLDOWN"] = "Unit Cooldown"
-L["ICONMENU_UNITCOOLDOWN_DESC"] = [=[This icon type allows you to track the cooldowns of your friends or your enemies.  You must enter the duration of the cooldown of each spell by adding a colon after each spell, followed by the duration.
+L["ICONMENU_UNITCOOLDOWN_DESC"] = [[Tracks the cooldowns of someone else.
 
-Note regarding pvp trinkets: they can be tracked using '%s' as the name.]=]
+%s can be tracked using %q as the name.]]
+
 L["ICONMENU_ICD"] = "Internal Cooldown"
-L["ICONMENU_ICD_DESC"] = [=[This icon type can be used to track either the internal cooldown of something such as a proc from a talent or a trinket, or the duration of a spell (e.g. traps, mage orb), or even the duration of a summon (e.g. Infernal).
+L["ICONMENU_ICD_DESC"] = [=[Tracks the cooldown of a proc or a similar effect.
 
-Enter the spellID or name of the buff/debuff that is placed when the cooldown starts, or the name of the spell that you would like to track the duration of. Semicolon-delimited lists are valid.
+This icon type can be used to track either the internal cooldown of something such as a proc from a talent or a trinket, or the duration of a spell (e.g. %s, %s, %s).
 
-If the cooldown can be reset by another ability or proc, it is advised that you instead use the "Unit Cooldown" icon type to track the cooldown instead of this icon type]=]
+See the instructions under the %q settings for how to track each internal cooldown type.]=]
+
 L["ICONMENU_CAST"] = "Spell Cast"
-L["ICONMENU_CAST_DESC"] = [=[The name dialog can be left blank to show the icon for any cast, or in order to only shown the icon for certain spells, you can enter a single spell, or a semicolon-delimited list of spells.]=]
+L["ICONMENU_CAST_DESC"] = [=[Tracks spell casts and channels.]=]
+
 L["ICONMENU_CNDTIC"] = "Condition Icon"
-L["ICONMENU_CNDTIC_DESC"] = [=[This icon type is for simply checking a condition.
+L["ICONMENU_CNDTIC_DESC"] = [=[Tracks the state of conditions.]=]
 
-The icon can be set to a specific spell texture or texture path via the "%s" editbox.]=]
-L["ICONMENU_META"] = "Meta Icon"
-L["ICONMENU_META_DESC"] = [=[This icon type can be used to combine several icons into one.
-
-Icons that have 'Always Hide' checked will still be shown in a meta icon if they would otherwise be shown.]=]
 L["ICONMENU_DR"] = "Diminishing Returns"
-L["ICONMENU_DR_DESC"] = [=[This icon type can be used to track the length and extent of the diminishing returns of a category of spells.
+L["ICONMENU_DR_DESC"] = [=[Tracks the length and extent of diminishing returns.]=]
 
-Spells from different diminishing returns categories should not be checked in one icon.  For example, do not put Polymorph and Cheap Shot in the same icon, as they are not in the same category. It is advised that you used the predefined DR-<category> equivalencies that TMW provides.]=]
 L["ICONMENU_RUNES"] = "Rune Cooldown"
+L["ICONMENU_RUNES_DESC"] = [[Tracks rune cooldowns]]
+
+L["ICONMENU_META"] = "Meta Icon"
+L["ICONMENU_META_DESC"] = [=[Combines multiple icons into one.
+
+Icons that have %q checked will still be shown in a meta icon if they would otherwise be shown.]=]
+
+
+
+
 
 L["ICONMENU_COOLDOWNTYPE"] = "Cooldown type"
 L["ICONMENU_SPELL"] = "Spell or ability"
@@ -447,9 +473,11 @@ L["CONDITIONPANEL_POWER_DESC"] = [=[Will check for energy if the unit is a druid
 L["ECLIPSE_DIRECTION"] = "Eclipse Direction"
 L["CONDITIONPANEL_ECLIPSE_DESC"] = [=[Eclipse has a range of -100 (a lunar eclipse) to 100 (a solar eclipse).  Input -80 if you want the icon to work with a value of 80 lunar power.]=]
 L["CONDITIONPANEL_ICON"] = "Icon Shown"
-L["CONDITIONPANEL_ICON_DESC"] = [=[The condition will pass if the icon specified is currently shown with an alpha above 0%, or hidden with an alpha of 0% if set to false.
+L["CONDITIONPANEL_ICON_SHOWN"] = "Shown"
+L["CONDITIONPANEL_ICON_HIDDEN"] = "Hidden"
+L["CONDITIONPANEL_ICON_DESC"] = [=[The condition checks whether the icon specified is shown or hidden.
 
-If you don't want to display the icons that are being checked, check 'Always Hide' in the icon editor of the icon being checked.
+If you don't want to display the icons that are being checked, check %q in the icon editor of the icon being checked.
 
 The group of the icon being checked must be shown in order to check the icon, even if the condition is set to false.]=]
 L["CONDITIONPANEL_RUNES_DESC"] = [=[Use this condition type to only show the icon when the selected runes are available.
@@ -638,7 +666,7 @@ L["IMPORT_HEADING"] = "Import"
 L["IMPORT_FROMLOCAL"] = "From Profile"
 L["IMPORT_FROMBACKUP"] = "From Backup"
 L["IMPORT_FROMBACKUP_WARNING"] = "BACKUP SETTINGS: %s"
-L["IMPORT_FROMBACKUP_DESC"] = "Settings restored from this settings menu will be as they were at: %s"
+L["IMPORT_FROMBACKUP_DESC"] = "Settings restored from this menu will be as they were at: %s"
 L["IMPORT_FROMSTRING"] = "From String"
 L["IMPORT_FROMSTRING_DESC"] = [[Strings allow you to transfer TellMeWhen configuration data outside the game.
 
@@ -703,13 +731,14 @@ L["SUG_INSERTITEMSLOT"] = "%s to insert as an item slot ID"
 L["SUG_PATTERNMATCH_FISHINGLURE"] = "Fishing Lure %(%+%d+ Fishing Skill%)" -- enUS
 L["SUG_PATTERNMATCH_WEIGHTSTONE"] = "Weighted %(%+%d+ Damage%)"
 L["SUG_PATTERNMATCH_SHARPENINGSTONE"] = "Sharpened %(%+%d+ Damage%)"
+L["SUG_MATCH_WPNENCH_ENCH"] = "(.*) Weapon" -- inconsistent key. oops.
 
 
 L["SOUND_EVENT_ONSHOW"] = "On Show"
-L["SOUND_EVENT_ONSHOW_DESC"] = "This event triggers when the icon becomes shown (even if 'Always Hide' is checked)."
+L["SOUND_EVENT_ONSHOW_DESC"] = "This event triggers when the icon becomes shown (even if %q is checked)."
 
 L["SOUND_EVENT_ONHIDE"] = "On Hide"
-L["SOUND_EVENT_ONHIDE_DESC"] = "This event triggers when the icon is hidden (even if 'Always Hide' is checked)."
+L["SOUND_EVENT_ONHIDE_DESC"] = "This event triggers when the icon is hidden (even if %q is checked)."
 
 L["SOUND_EVENT_ONSTART"] = "On Start"
 L["SOUND_EVENT_ONSTART_DESC"] = [[This event triggers when the cooldown becomes unusable, the buff/debuff is applied, etc.
@@ -799,7 +828,9 @@ For example:
 "%s: 10; %s: 24"
 "%s: 180"
 "%s: 3:00"
-"62618: 3:00"]]
+"62618: 3:00"
+
+Inserting from the suggestion list automatically adds the duration from the tooltip.]]
 L["HELP_MISSINGDURS"] = [[The following spells are missing durations:
 
 %s
@@ -808,7 +839,9 @@ To add durations, use the following syntax:
 
 Spell Name: Duration
 
-E.g. "%s: 10"]]
+E.g. "%s: 10"
+
+Inserting from the suggestion list automatically adds the duration from the tooltip.]]
 L["HELP_POCKETWATCH"] = [[|TInterface\Icons\INV_Misc_PocketWatch_01:20|t -- The pocket watch texture.
 This texture is being used because the first valid spell being checked was entered by name and isn't in your spellbook.
 

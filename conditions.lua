@@ -1900,7 +1900,10 @@ CNDT.Types = {
 		spacebefore = true,
 		min = 0,
 		max = 1,
-		texttable = bool,
+		texttable = {
+			[0] = L["CONDITIONPANEL_ICON_SHOWN"],
+			[1] = L["CONDITIONPANEL_ICON_HIDDEN"],
+		},
 		isicon = true,
 		nooperator = true,
 		unit = false,

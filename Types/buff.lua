@@ -33,6 +33,7 @@ local isNumber = TMW.isNumber
 local Type = {}
 Type.type = "buff"
 Type.name = L["ICONMENU_BUFFDEBUFF"]
+Type.desc = L["ICONMENU_BUFFDEBUFF_DESC"]
 Type.usePocketWatch = 1
 Type.SUGType = "buff"
 Type.TypeChecks = {

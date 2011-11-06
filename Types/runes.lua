@@ -32,6 +32,7 @@ local Type = {}
 Type.type = "runes"
 LibStub("AceEvent-3.0"):Embed(Type)
 Type.name = L["ICONMENU_RUNES"]
+Type.desv = L["ICONMENU_RUNES_DESC"]
 Type.hidden = pclass ~= "DEATHKNIGHT"
 Type.AllowNoName = true
 Type.TypeChecks = {

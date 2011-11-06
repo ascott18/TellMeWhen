@@ -37,10 +37,10 @@ local Type = {}
 Type.type = "unitcooldown"
 LibStub("AceEvent-3.0"):Embed(Type)
 Type.name = L["ICONMENU_UNITCOOLDOWN"]
-Type.desc = L["ICONMENU_UNITCOOLDOWN_DESC"]:format(GetSpellInfo(42292))
+Type.desc = L["ICONMENU_UNITCOOLDOWN_DESC"]
 Type.usePocketWatch = 1
 Type.DurationSyntax = 1
-Type.SUGType = "cooldownwithduration"
+Type.SUGType = "spellwithduration"
 Type.WhenChecks = {
 	text = L["ICONMENU_SHOWWHEN"],
 	{ value = "alpha", 			text = L["ICONMENU_USABLE"], 			colorCode = "|cFF00FF00" },

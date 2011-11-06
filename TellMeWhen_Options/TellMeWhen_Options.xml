@@ -20,45 +20,7 @@
 		<CheckedTexture urgency="5" file="Interface\Buttons\UI-CheckBox-Check"/>
 		<DisabledCheckedTexture urgency="5" file="Interface\Buttons\UI-CheckBox-Check-Disabled"/>
 	</CheckButton>
-	<Frame name="TellMeWhen_DropdownTemplate" inherits="UIDropDownMenuTemplate" virtual="true">
-		<Layers>
-			<Layer level="ARTWORK">
-				<Texture name="$parentLeft" file="Interface\Glues\CharacterCreate\CharacterCreate-LabelFrame">
-					<Size>
-						<AbsDimension x="25" y="60"/>
-					</Size>
-					<Anchors>
-						<Anchor point="TOPLEFT">
-							<Offset>
-								<AbsDimension x="0" y="17"/>
-							</Offset>
-						</Anchor>
-					</Anchors>
-					<TexCoords left="0" right="0.1953125" top="0" bottom="1"/>
-				</Texture>
-				<Texture name="$parentMiddle" file="Interface\Glues\CharacterCreate\CharacterCreate-LabelFrame">
-					<Size>
-						<AbsDimension x="115" y="60"/>
-					</Size>
-					<Anchors>
-						<Anchor point="LEFT" relativeTo="$parentLeft" relativePoint="RIGHT"/>
-					</Anchors>
-					<TexCoords left="0.1953125" right="0.8046875" top="0" bottom="1"/>
-				</Texture>
-				<Texture name="$parentRight" file="Interface\Glues\CharacterCreate\CharacterCreate-LabelFrame">
-					<Size>
-						<AbsDimension x="25" y="60"/>
-					</Size>
-					<Anchors>
-						<Anchor point="LEFT" relativeTo="$parentMiddle" relativePoint="RIGHT"/>
-					</Anchors>
-					<TexCoords left="0.8046875" right="1" top="0" bottom="1"/>
-				</Texture>
-			</Layer>
-		</Layers>
-	</Frame>
-	
-	
+		
 	<CheckButton name="TellMeWhen_RadioCheckTemplate" virtual="true" inherits="TellMeWhen_CheckTemplate">
 		<Scripts>
 			<OnLoad>
@@ -106,7 +68,7 @@
 		<Size y="15"/>
 		<Layers>
 			<Layer level="BACKGROUND">
-				<Texture name="$parentLeft" urgency="5" file="Interface\Common\Common-Input-Border">
+			<Texture name="$parentLeft" urgency="5" file="Interface\Common\Common-Input-Border">
 					<Size x="8" y="18"/>
 					<Anchors>
 						<Anchor point="LEFT" x="-5"/>
@@ -128,6 +90,23 @@
 					</Anchors>
 					<TexCoords left="0.0625" right="0.9375" top="0" bottom="0.625"/>
 				</Texture>
+				
+			<!-- 	<Texture name="$parentBackground" parentKey="Background" >
+					<Size x="27" y="27"/>
+					<Anchors>
+						<Anchor point="TOPLEFT" x="-5" y="0"/>
+						<Anchor point="BOTTOMRIGHT" x="0" y="0"/>
+					</Anchors>
+					<Color r="1" g="1" b="1" a="0.3"/>
+				</Texture>
+				<Texture name="$parentOutline" parentKey="Outline" >
+					<Size x="27" y="27"/>
+					<Anchors>
+						<Anchor point="TOPLEFT" relativeTo="$parentBackground" x="-1" y="1"/>
+						<Anchor point="BOTTOMRIGHT" relativeTo="$parentBackground" x="1" y="-1"/>
+					</Anchors>
+					<Color r="0" g="0" b="0" a="1"/>
+				</Texture> -->
 			</Layer>
 			<Layer level="OVERLAY">
 				<FontString name="$parentBackgroundText" parentKey="BackgroundText" justifyH="CENTER" wordwrap="false" inherits="GameFontHighlightSmall">
@@ -364,10 +343,41 @@
 		</Scripts>
 	</Slider>
 
+	<Frame name="TMW_DropDownMenuTemplate" inherits="UIDropDownMenuTemplate" virtual="true">
+		<!-- <Layers>
+			<Layer level="BACKGROUND">
+				<Texture name="$parentBackground" parentKey="Background" >
+					<Size x="27" y="27"/>
+					<Anchors>
+						<Anchor point="TOPLEFT" x="24" y="-5"/>
+						<Anchor point="BOTTOMRIGHT" x="-20" y="11"/>
+					</Anchors>
+					<Color r="1" g="1" b="1" a="0.3"/>
+				</Texture>
+				<Texture name="$parentOutline" parentKey="Outline" >
+					<Size x="27" y="27"/>
+					<Anchors>
+						<Anchor point="TOPLEFT" relativeTo="$parentBackground" x="-1" y="1"/>
+						<Anchor point="BOTTOMRIGHT" relativeTo="$parentBackground" x="1" y="-1"/>
+					</Anchors>
+					<Color r="0" g="0" b="0" a="1"/>
+				</Texture>
+			</Layer>
+		</Layers>
+		<Scripts>
+			<OnShow>
+				_G[self:GetName() .. "Left"]:Hide()
+				_G[self:GetName() .. "Middle"]:Hide()
+				_G[self:GetName() .. "Right"]:Hide()
+			</OnShow>
+		</Scripts> -->
+	</Frame>
+			
+			
 	<EditBox name="TellMeWhen_ExportBoxTemplate" inherits="TellMeWhen_InputBoxTemplate" virtual="true">
 		<Size y="15"/>
 		<Frames>
-			<Frame name="$parentDD" inherits="UIDropDownMenuTemplate" parentKey="DD">
+			<Frame name="$parentDD" inherits="TMW_DropDownMenuTemplate" parentKey="DD">
 				<Anchors>
 					<Anchor point="LEFT" relativePoint="RIGHT" x="-15" y="-4"/>
 				</Anchors>
@@ -624,25 +634,19 @@
 	<!-- 	<HighlightTexture urgency="5" file="Interface\Buttons\UI-CheckBox-Highlight" alphaMode="ADD"/> -->
 	</CheckButton>
 	<Frame name="TellMeWhen_ConditionGroup" virtual="true">
-		<Size x="559" y="64"/>
+		<Size x="559" y="70"/>
 		<Backdrop edgeFile="Interface\DialogFrame\UI-DialogBox-Background-Dark" tile="true">
 			<EdgeSize>
 				<AbsValue val="1"/>
 			</EdgeSize>
-			<BackgroundInsets>
-				<AbsInset left="0" right="0" top="0" bottom="0"/>
-			</BackgroundInsets>
-			<TileSize>
-				<AbsValue val="32"/>
-			</TileSize>
 		</Backdrop>
 		<Anchors>
 			<Anchor point="TOPLEFT"/>
 		</Anchors>
 		<Frames>
-			<Frame name="$parentType" parentKey="Type" inherits="UIDropDownMenuTemplate">
+			<Frame name="$parentType" parentKey="Type" inherits="TMW_DropDownMenuTemplate">
 				<Anchors>
-					<Anchor point="TOPLEFT" x="9" y="-12"/>
+					<Anchor point="TOPLEFT" x="9" y="-15"/>
 				</Anchors>
 				<Scripts>
 					<OnLoad>
@@ -657,7 +661,7 @@
 					</OnLoad>
 				</Scripts>
 			</Frame>
-			<Frame name="$parentIcon" parentKey="Icon" inherits="UIDropDownMenuTemplate">
+			<Frame name="$parentIcon" parentKey="Icon" inherits="TMW_DropDownMenuTemplate">
 				<Anchors>
 					<Anchor point="LEFT" relativeTo="$parentType" relativePoint="RIGHT" x="-27"/>
 				</Anchors>
@@ -703,7 +707,7 @@
 				<Scripts>
 					<OnLoad>
 						self.Ins = TellMeWhen_IconEditorConditionsUnitDD
-						self.label = "|cffff0000" .. TMW.L["CONDITIONPANEL_UNIT"] .. "!|r"
+						self.label = "|cFFFF9090" .. TMW.L["CONDITIONPANEL_UNIT"] .. "!|r"
 						TMW:TT(self, "CONDITIONPANEL_UNIT", "CONDITIONPANEL_UNIT_DESC")
 						TMW:TT(self.Button, "CONDITIONPANEL_UNIT", "CONDITIONPANEL_UNITDROPDOWN_DESC")
 					</OnLoad>
@@ -714,7 +718,7 @@
 					</OnEditFocusLost>
 				</Scripts>
 			</EditBox>
-			<Frame name="$parentOperator" parentKey="Operator" inherits="UIDropDownMenuTemplate">
+			<Frame name="$parentOperator" parentKey="Operator" inherits="TMW_DropDownMenuTemplate">
 				<Anchors>
 					<Anchor point="LEFT" relativeTo="$parentUnit" relativePoint="RIGHT" x="5" y="-3"/>
 				</Anchors>
@@ -735,7 +739,7 @@
 			<Slider name="$parentSlider" parentKey="Slider" inherits="OptionsSliderTemplate" minvalue="0" maxvalue="100" valuestep="1" defaultvalue="100">
 				<Size x="523" y="17"/>
 				<Anchors>
-					<Anchor point="TOPRIGHT" x="-5" y="-38"/>
+					<Anchor point="TOPRIGHT" x="-5" y="-41"/>
 				</Anchors>
 				<Layers>
 					<Layer level="ARTWORK">
@@ -1171,7 +1175,7 @@
 		<Layers>
 			<Layer level="BACKGROUND">
 				<Texture name="$parentBackground" parentKey="Background" setAllPoints="true">
-					<Color r="0.5" g="0.5" b="0.5" a="1"/>
+					<Color r="1" g="1" b="1" a="0.05"/>
 					<Size x="27" y="27"/>
 				</Texture>
 			</Layer>
@@ -1216,7 +1220,6 @@
 		<Scripts>
 			<OnLoad>
 				TMW.CNDT[self:GetID()] = self
-				self.Background:SetTexture(1, 1, 1, 0.05)
 			</OnLoad>
 			<OnShow>
 				self.AddDelete:SetNormalTexture("Interface\\Buttons\\UI-Panel-MinimizeButton-Up")
@@ -1236,7 +1239,7 @@
 	<Frame name="TellMeWhen_MetaGroup" virtual="true">
 		<Size x="440" y="30"/>
 		<Frames>
-			<Frame name="$parentIcon" parentKey="icon" inherits="UIDropDownMenuTemplate">
+			<Frame name="$parentIcon" parentKey="icon" inherits="TMW_DropDownMenuTemplate">
 				<Anchors>
 					<Anchor point="LEFT" x="-13" y="-2"/>
 				</Anchors>
@@ -1590,7 +1593,7 @@
 			</OnLoad>
 		</Scripts>
 		<Frames>
-			<Frame name="$parentDD" inherits="UIDropDownMenuTemplate" parentKey="DD"/>
+			<Frame name="$parentDD" inherits="TMW_DropDownMenuTemplate" parentKey="DD"/>
 		</Frames>
 	</Button>
 
@@ -1948,7 +1951,7 @@
 
 			<Frame name="$parentMain" enableMouse="true" hidden="true" setAllPoints="true" parentKey="Main">
 				<Frames>
-					<Frame name="$parentType" inherits="UIDropDownMenuTemplate" parentKey="Type">
+					<Frame name="$parentType" inherits="TMW_DropDownMenuTemplate" parentKey="Type">
 						<Anchors>
 							<Anchor point="TOPLEFT" x="-2" y="-35"/>
 						</Anchors>
@@ -1994,7 +1997,7 @@
 							</Layer>
 						</Layers>
 						<Frames>
-							<Frame name="$parentEquivs" inherits="UIDropDownMenuTemplate" parentKey="Equivs">
+							<Frame name="$parentEquivs" inherits="TMW_DropDownMenuTemplate" parentKey="Equivs">
 								<Anchors>
 									<Anchor point="LEFT" relativePoint="RIGHT" x="-15" y="-4"/>
 								</Anchors>
@@ -2066,7 +2069,7 @@
 							<OnTextChanged>
 								local text = self:GetText()
 								if text == "" then
-									local label = self.label
+									local label = TMW.Types[TMW.CI.t].nameLabel or self.label
 									local append = TMW.Types[TMW.CI.t].appendNameLabel
 									if append then
 										label = label .. " " .. append
@@ -2157,7 +2160,7 @@
 							<Anchor point="LEFT" relativeTo="$parentCustomTex" relativePoint="RIGHT" x="5"/>
 						</Anchors>
 						<Frames>
-							<Frame name="$parentIns" inherits="UIDropDownMenuTemplate" parentKey="Ins">
+							<Frame name="$parentIns" inherits="TMW_DropDownMenuTemplate" parentKey="Ins">
 								<Anchors>
 									<Anchor point="LEFT" relativePoint="RIGHT" x="-15" y="-4"/>
 								</Anchors>
@@ -2180,7 +2183,7 @@
 						<Scripts>
 							<OnLoad>
 								self:RegisterEvent("MODIFIER_STATE_CHANGED")
-								self.label = TMW.L["ICONMENU_UNITSTOWATCH"]
+								self.label = "|cFFFF9090" .. TMW.L["ICONMENU_UNITSTOWATCH"]
 								self.__title = TMW.L["ICONMENU_UNITSTOWATCH"]
 								self.__text = TMW.L["ICONMENU_UNIT_DESC"]
 								self.BackgroundText:SetWidth(self:GetWidth())
@@ -3168,7 +3171,7 @@
 			</Frame>
 			<Frame name="$parentConditions" hidden="true" setAllPoints="true" parentKey="Conditions">
 				<Frames>
-					<Frame name="$parentUnitDD" parentKey="UnitDD" inherits="UIDropDownMenuTemplate" hidden="true">
+					<Frame name="$parentUnitDD" parentKey="UnitDD" inherits="TMW_DropDownMenuTemplate" hidden="true">
 						<Scripts>
 							<OnLoad>
 								function self:Init()
@@ -3180,7 +3183,7 @@
 					</Frame>
 					<ScrollFrame name="$parentScrollFrame" parentKey="ScrollFrame" inherits="UIPanelScrollFrameCodeTemplate" >
 						<Anchors>
-							<Anchor point="TOPLEFT" y="-34"/>
+							<Anchor point="TOPLEFT" y="-32"/>
 							<Anchor point="BOTTOMRIGHT" y="32"/>
 						</Anchors>
 						<ScrollChild>
@@ -3334,6 +3337,9 @@
 
 								local t = TMW:CleanString(self)
 								t = gsub(t, "/", "\\")
+								while strfind(t, "\\\\") do
+									t = gsub(t, "\\\\", "\\")
+								end
 								local wt
 
 								if not strfind(t, "%.[^\\]+$") then
@@ -3455,7 +3461,7 @@
 						</Layers>
 					</Frame>
 					
-					<Frame name="$parentLocation" inherits="UIDropDownMenuTemplate" parentKey="Location">
+					<Frame name="$parentLocation" inherits="TMW_DropDownMenuTemplate" parentKey="Location">
 						<Anchors>
 							<Anchor point="TOPLEFT" relativeTo="$parentChannels" relativePoint="TOPRIGHT" x="5"/>
 						</Anchors>
@@ -3889,7 +3895,7 @@
 				</FontString>
 				<Texture name="$parentIconTexture" parentKey="icontexture">
 					<TexCoords left="0.07" right="0.93" top="0.07" bottom="0.93"/>
-					<Size x="20" y="20"/>
+					<Size x="18" y="18"/>
 					<Anchors>
 						<Anchor point="TOPLEFT" x="15" y="-12"/>
 					</Anchors>

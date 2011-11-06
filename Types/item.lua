@@ -32,6 +32,7 @@ local Type = {}
 LibStub("AceEvent-3.0"):Embed(Type)
 Type.type = "item"
 Type.name = L["ICONMENU_ITEMCOOLDOWN"]
+Type.desc = L["ICONMENU_ITEMCOOLDOWN_DESC"]
 Type.appendNameLabel = L["ICONMENU_CHOOSENAME_ORITEMSLOT"]
 Type.SUGType = "itemwithslots"
 Type.WhenChecks = {

@@ -63,8 +63,8 @@ Type.DisabledEvents = {
 }
 
 local Parser = CreateFrame("GameTooltip", "TellMeWhen_Parser", TMW, "GameTooltipTemplate")
-Parser:SetOwner(UIParent, "ANCHOR_NONE")
 local function GetWeaponEnchantName(slot)
+	Parser:SetOwner(UIParent, "ANCHOR_NONE")
 	local has = Parser:SetInventoryItem("player", slot)
 
 	if not has then Parser:Hide() return false end
@@ -73,8 +73,6 @@ local function GetWeaponEnchantName(slot)
 	while _G["TellMeWhen_ParserTextLeft" .. i] do
 		local t = _G["TellMeWhen_ParserTextLeft" .. i]:GetText()
 		if t and t ~= "" then
-			-- old: ([^%(]*)%((%d+)[^%.].*%)
-			-- newer, but still not the best: "(.-)%((%d+)[^%.].*%)"
 			local r = strmatch(t, "(.+)%((%d+)[^%.]*[^%d]+%)") -- should work with all locales and only get the weapon enchant name, not other things (like the weapon DPS)
 			
 			if r then
@@ -88,6 +86,22 @@ local function GetWeaponEnchantName(slot)
 	end
 end
 
+local function UpdateWeaponEnchantInfo(slot, selectIndex)
+	local has, expiration = select(selectIndex, GetWeaponEnchantInfo())
+	
+	if has then
+		local EnchantName = GetWeaponEnchantName(slot)
+		
+		if EnchantName then
+			expiration = expiration/1000
+			local d = WpnEnchDurs[EnchantName]
+			
+			if d < expiration then
+				WpnEnchDurs[EnchantName] = ceil(expiration)
+			end
+		end
+	end
+end
 
 function Type:Update()
 	db = TMW.db
@@ -161,10 +175,8 @@ local function WpnEnchant_OnEvent(icon, event, unit)
 		
 		if icon.Name == "" then
 			icon.CorrectEnchant = true
-		else
-			if EnchantName then
-				icon.CorrectEnchant = icon.NameHash[strlowerCache[EnchantName]]
-			end
+		elseif EnchantName then
+			icon.CorrectEnchant = icon.NameHash[strlowerCache[EnchantName]]
 		end
 	end
 end
@@ -173,6 +185,8 @@ function Type:Setup(icon, groupID, iconID)
 	icon.NameHash = TMW:GetSpellNames(icon, icon.Name, nil, nil, 1)
 	icon.SelectIndex = SlotsToNumbers[icon.WpnEnchantType] or 1
 	icon.Slot = GetInventorySlotInfo(icon.WpnEnchantType)
+
+	UpdateWeaponEnchantInfo(icon.Slot, icon.SelectIndex)
 
 	icon.ShowPBar = false
 
