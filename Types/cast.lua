@@ -34,7 +34,7 @@ LibStub("AceEvent-3.0"):Embed(Type)
 Type.type = "cast"
 Type.name = L["ICONMENU_CAST"]
 Type.desc = L["ICONMENU_CAST_DESC"]
-Type.appendNameLabel = L["ICONMENU_CHOOSENAME_ORBLANK"]
+Type.chooseNameTitle = L["ICONMENU_CHOOSENAME"] .. " " .. L["ICONMENU_CHOOSENAME_ORBLANK"]
 Type.SUGType = "cast"
 Type.AllowNoName = true
 Type.usePocketWatch = 1

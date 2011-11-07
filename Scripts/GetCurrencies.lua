@@ -5,7 +5,7 @@
  
  
 local http = require("socket.http")
-local src = http.request("http://www.wowhead.com/currencies")
+local src = http.request("http://ptr.wowhead.com/currencies")
 
 local str = "{\n"
 

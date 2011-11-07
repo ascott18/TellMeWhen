@@ -22,8 +22,6 @@ local db, UPD_INTV
 local print = TMW.print
 
 
-
-
 local Type = {}
 Type.type = "conditionicon"
 Type.name = L["ICONMENU_CNDTIC"]
@@ -31,6 +29,9 @@ Type.desc = L["ICONMENU_CNDTIC_DESC"]
 Type.spacebefore = true
 Type.AllowNoName = true
 Type.SUGType = "texture"
+Type.chooseNameTitle = L["ICONMENU_CHOOSENAME_CNDTIC"]
+Type.chooseNameText = L["CHOOSENAME_DIALOG_CNDTIC"]
+	
 Type.WhenChecks = {
 	text = L["ICONMENU_CNDTSHOWWHEN"],
 	{ value = "alpha",			text = L["ICONMENU_SUCCEED"],			colorCode = "|cFF00FF00" },
@@ -141,24 +142,13 @@ function Type:DragReceived(icon, t, data, subType)
 	ics.Name = TMW:CleanString(input)
 	return true -- signal success
 end
+
 function Type:IE_TypeLoaded()
-	local Name = TMW.IE.Main.Name
-	Name.label = L["ICONMENU_CHOOSENAME_CNDTIC"]
-	Name.__title = L["ICONMENU_CHOOSENAME_CNDTIC"]
-	Name.__text = L["CHOOSENAME_DIALOG_CNDTIC"]
-	Name:GetScript("OnTextChanged")(Name)
-	
 	TMW.IE.Main.ConditionAlpha.text:SetText(L["CONDITIONALPHA_CONDITIONICON"])
 	TMW:TT(TMW.IE.Main.ConditionAlpha, "CONDITIONALPHA_CONDITIONICON", "CONDITIONALPHA_CONDITIONICON_DESC")
 end
 
 function Type:IE_TypeUnloaded()
-	local Name = TMW.IE.Main.Name
-	Name.label = L["ICONMENU_CHOOSENAME"]
-	Name.__title = L["ICONMENU_CHOOSENAME"]
-	Name.__text = L["CHOOSENAME_DIALOG"]
-	Name:GetScript("OnTextChanged")(Name)
-	
 	TMW.IE.Main.ConditionAlpha.text:SetText(L["CONDITIONALPHA"])
 	TMW:TT(TMW.IE.Main.ConditionAlpha, "CONDITIONALPHA", "CONDITIONALPHA_DESC")
 end

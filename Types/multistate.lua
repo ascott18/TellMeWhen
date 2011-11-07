@@ -19,25 +19,27 @@ if not TMW then return end
 local L = TMW.L
 
 local db, UPD_INTV, ClockGCD, rc, mc, pr, ab
-local GetSpellCooldown, IsSpellInRange, IsUsableSpell 									  =
+local GetSpellCooldown, IsSpellInRange, IsUsableSpell =
 	  GetSpellCooldown, IsSpellInRange, IsUsableSpell
 local GetActionCooldown, IsActionInRange, IsUsableAction, GetActionTexture, GetActionInfo =
 	  GetActionCooldown, IsActionInRange, IsUsableAction, GetActionTexture, GetActionInfo
-local UnitRangedDamage 																	  =
+local UnitRangedDamage  =
 	  UnitRangedDamage
-local pairs 																			  =
+local pairs =
 	  pairs
-local OnGCD 																			  = TMW.OnGCD
-local print 																			  = TMW.print
-local _, pclass 																		  = UnitClass("Player")
-local SpellTextures 																	  = TMW.SpellTextures
-local mindfreeze 																		  = strlower(GetSpellInfo(47528))
+local OnGCD = TMW.OnGCD
+local print = TMW.print
+local _, pclass = UnitClass("Player")
+local SpellTextures = TMW.SpellTextures
 
 local Type = {}
 LibStub("AceEvent-3.0"):Embed(Type)
 Type.type = "multistate"
-Type.name = L["ICONMENU_SPELLCOOLDOWN"]
+Type.name = L["ICONMENU_MULTISTATECD"]
+Type.desc = L["ICONMENU_MULTISTATECD_DESC"]
 Type.SUGType = "multistate"
+Type.chooseNameTitle = L["ICONMENU_CHOOSENAME_MULTISTATE"]
+Type.chooseNameText = L["CHOOSENAME_DIALOG_MSCD"]
 Type.WhenChecks = {
 	text = L["ICONMENU_SHOWWHEN"],
 	{ value = "alpha", 			text = L["ICONMENU_USABLE"], 			colorCode = "|cFF00FF00" },
@@ -45,7 +47,6 @@ Type.WhenChecks = {
 	{ value = "always", 		text = L["ICONMENU_ALWAYS"] },
 }
 Type.RelevantSettings = {
-	CooldownType = true,
 	RangeCheck = true,
 	ManaCheck = true,
 	ShowPBar = true,
@@ -136,7 +137,6 @@ local function MultiStateCD_OnUpdate(icon, time)
 end
 
 
-
 function Type:Setup(icon, groupID, iconID)
 	icon.NameFirst = TMW:GetSpellNames(icon, icon.Name, 1)
 
@@ -146,6 +146,14 @@ function Type:Setup(icon, groupID, iconID)
 	
 	icon.Slot = 0
 	MultiStateCD_OnEvent(icon)
+	
+	if icon:IsBeingEdited() == 1 then
+		if doWarn then
+			TMW.HELP:Show("ICON_DR_MISMATCH", icon, TMW.IE.Main.Name, 0, 0, L["WARN_DRMISMATCH"]..append)
+		else
+			TMW.HELP:Hide("ICON_DR_MISMATCH")
+		end
+	end
 
 	icon:SetTexture(GetActionTexture(icon.Slot) or "Interface\\Icons\\INV_Misc_QuestionMark")
 
@@ -156,17 +164,6 @@ function Type:Setup(icon, groupID, iconID)
 	icon:OnUpdate(TMW.time)
 end
 
-function Type:IE_TypeLoaded()
-	local Name = TMW.IE.Main.Name
-	Name.__text = L["CHOOSENAME_DIALOG_MSCD"]
-	Name:GetScript("OnTextChanged")(Name)
-end
-
-function Type:IE_TypeUnloaded()
-	local Name = TMW.IE.Main.Name
-	Name.__text = L["CHOOSENAME_DIALOG"]
-	Name:GetScript("OnTextChanged")(Name)
-end
 
 TMW:RegisterIconType(Type)
 

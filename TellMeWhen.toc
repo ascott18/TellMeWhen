@@ -23,7 +23,7 @@
 ## X-Embeds: LibStub, Ace3, AceGUI-3.0-SharedMediaWidgets, LibSharedMedia-3.0, LibDataBroker-1.1, DRData-1.0
 ## X-Category: Combat
 
-
+# @no-lib-strip@
 Lib\LibStub\LibStub.lua
 Lib\CallbackHandler-1.0\CallbackHandler-1.0.xml
 Lib\AceAddon-3.0\AceAddon-3.0.xml
@@ -36,6 +36,7 @@ Lib\AceComm-3.0\AceComm-3.0.xml
 Lib\LibSharedMedia-3.0\lib.xml
 Lib\libdatabroker-1-1\LibDataBroker-1.1.lua
 Lib\DRData-1.0\DRData-1.0.xml
+# @end-no-lib-strip@
 
 Localization\TellMeWhen-enUS.lua
 Localization\TellMeWhen-deDE.lua
@@ -51,20 +52,26 @@ Localization\StaticFormats.lua
 
 TellMeWhen.lua
 
+
 Types\default.lua
+
 Types\cooldown.lua
 Types\item.lua
-Types\buff.lua
-Types\reactive.lua
-Types\wpnenchant.lua
-Types\totem.lua
 Types\runes.lua
-Types\dr.lua
 Types\unitcooldown.lua
 Types\icd.lua
+Types\multistate.lua
+Types\reactive.lua
+
+Types\buff.lua
+Types\wpnenchant.lua
+Types\totem.lua
+Types\dr.lua
 Types\cast.lua
+
 Types\conditionicon.lua
 Types\meta.lua
+
 
 conditions.lua
 LDB.lua

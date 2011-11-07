@@ -2008,20 +2008,20 @@ local currencies = {
 	396,	--Valor Points
 	392,	--Honor Points
 	390,	--Conquest Points
-	
-	-- i dont know what these are
-	--483,	--Conquest Arena Meta
-	--484,	--Conquest BG Meta
-	
+	"SPACE",
 	391,	--Tol Barad Commendation
 	416,	--Mark of the World Tree
 	241,	--Champion\'s Seal
-	
+	515,	--Darkmoon Prize Ticket
+	"SPACE",
+	614,	--Mote of Darkness
+	615,	--Essence of Corrupted Deathwing
+	"SPACE",
 	361,	--Illustrious Jewelcrafter\'s Token
 	402,	--Chef\'s Award
 	61,		--Dalaran Jewelcrafter\'s Token
 	81,		--Dalaran Cooking Award
-	
+	"SPACE",
 	384,	--Dwarf Archaeology Fragment
 	398,	--Draenei Archaeology Fragment
 	393,	--Fossil Archaeology Fragment
@@ -2035,17 +2035,24 @@ local currencies = {
 for k, v in ipairs(CNDT.Types) do
 	if v == "CURRENCYPLACEHOLDER" then
 		CNDT.Types[k] = nil
+		local spacenext
 		for _, id in ipairs(currencies) do
-			tinsert(CNDT.Types, k, {
-				value = "CURRENCY"..id,
-				category = L["CNDTCAT_CURRENCIES"],
-				range = 500,
-				unit = false,
-				funcstr = [[select(2, GetCurrencyInfo(]]..id..[[)) c.Operator c.Level]],
-				tcoords = standardtcoords,
-				hidden = true,
-			})
-			k = k + 1
+			if id == "SPACE" then
+				spacenext = true
+			else
+				tinsert(CNDT.Types, k, {
+					value = "CURRENCY"..id,
+					category = L["CNDTCAT_CURRENCIES"],
+					range = 500,
+					unit = false,
+					funcstr = [[select(2, GetCurrencyInfo(]]..id..[[)) c.Operator c.Level]],
+					tcoords = standardtcoords,
+					spacebefore = spacenext,
+					hidden = true,
+				})
+				spacenext = nil
+				k = k + 1
+			end
 		end
 		break
 	end
@@ -2057,26 +2064,28 @@ for k, v in pairs(CNDT.Types) do
 end local ConditionsByType = CNDT.ConditionsByType
 function CNDT:CURRENCY_DISPLAY_UPDATE()
 	for _, id in pairs(currencies) do
-		local data = CNDT.ConditionsByType["CURRENCY"..id]
-		local name, amount, texture, _, _, totalMax = GetCurrencyInfo(id)
-		if name ~= "" then
-			data.text = name
-			data.icon = "Interface\\Icons\\"..texture
-			data.hidden = false
-			if TMWOptDB then
-				TMWOptDB.Currencies = TMWOptDB.Currencies or {}
-				TMWOptDB.Currencies[id] = name .. "^" .. texture
-			end
-			--[[if totalMax > 0 then -- not using this till blizzard fixes the bug where it shows the honor and conquest caps as 40,000
-				data.max = totalMax/100
-			end]]
-		elseif TMWOptDB and TMWOptDB.Currencies then
-			if TMWOptDB.Currencies[id] then
-				local name, texture = strmatch(TMWOptDB.Currencies[id], "(.*)^(.*)")
-				if name and texture then
-					data.text = name
-					data.icon = "Interface\\Icons\\"..texture
-					data.hidden = false
+		if id ~= "SPACE" then
+			local data = CNDT.ConditionsByType["CURRENCY"..id]
+			local name, amount, texture, _, _, totalMax = GetCurrencyInfo(id)
+			if name ~= "" then
+				data.text = name
+				data.icon = "Interface\\Icons\\"..texture
+				data.hidden = false
+				if TMWOptDB then
+					TMWOptDB.Currencies = TMWOptDB.Currencies or {}
+					TMWOptDB.Currencies[id] = name .. "^" .. texture
+				end
+				--[[if totalMax > 0 then -- not using this till blizzard fixes the bug where it shows the honor and conquest caps as 40,000
+					data.max = totalMax/100
+				end]]
+			elseif TMWOptDB and TMWOptDB.Currencies then
+				if TMWOptDB.Currencies[id] then
+					local name, texture = strmatch(TMWOptDB.Currencies[id], "(.*)^(.*)")
+					if name and texture then
+						data.text = name
+						data.icon = "Interface\\Icons\\"..texture
+						data.hidden = false
+					end
 				end
 			end
 		end

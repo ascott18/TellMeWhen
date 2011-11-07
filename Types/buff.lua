@@ -35,6 +35,7 @@ Type.type = "buff"
 Type.name = L["ICONMENU_BUFFDEBUFF"]
 Type.desc = L["ICONMENU_BUFFDEBUFF_DESC"]
 Type.usePocketWatch = 1
+Type.spacebefore = true
 Type.SUGType = "buff"
 Type.TypeChecks = {
 	text = L["ICONMENU_BUFFTYPE"],

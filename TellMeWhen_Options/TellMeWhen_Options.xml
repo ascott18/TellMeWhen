@@ -110,6 +110,7 @@
 			</Layer>
 			<Layer level="OVERLAY">
 				<FontString name="$parentBackgroundText" parentKey="BackgroundText" justifyH="CENTER" wordwrap="false" inherits="GameFontHighlightSmall">
+					<Color r="0.5" g="0.5" b="0.5"/>
 					<Anchors>
 						<Anchor point="LEFT"/>
 						<Anchor point="RIGHT"/>
@@ -707,7 +708,7 @@
 				<Scripts>
 					<OnLoad>
 						self.Ins = TellMeWhen_IconEditorConditionsUnitDD
-						self.label = "|cFFFF9090" .. TMW.L["CONDITIONPANEL_UNIT"] .. "!|r"
+						self.label = "|cFFFF5050" .. TMW.L["CONDITIONPANEL_UNIT"] .. "!|r"
 						TMW:TT(self, "CONDITIONPANEL_UNIT", "CONDITIONPANEL_UNIT_DESC")
 						TMW:TT(self.Button, "CONDITIONPANEL_UNIT", "CONDITIONPANEL_UNITDROPDOWN_DESC")
 					</OnLoad>
@@ -715,6 +716,10 @@
 						EditBox_ClearHighlight(self)
 						TMW:CleanString(self)
 						TMW.CNDT:Save()
+						
+						if self:GetText() == "" then
+							TMW.HELP:Show("CNDT_UNIT_MISSING", TMW.CI.ic, self:GetParent():GetParent():GetParent(), 0, 0, TMW.L["HELP_NOUNIT"])
+						end
 					</OnEditFocusLost>
 				</Scripts>
 			</EditBox>
@@ -2019,10 +2024,13 @@
 						</Frames>
 						<Scripts>
 							<OnLoad>
+								function self:SetLabels(title, text)
+									self.label = title
+									self.__title = title
+									self.__text = text
+								end
+								self:SetLabels(label, title, text)
 								self:RegisterEvent("MODIFIER_STATE_CHANGED")
-								self.label = TMW.L["ICONMENU_CHOOSENAME"]
-								self.__title = TMW.L["ICONMENU_CHOOSENAME"]
-								self.__text = TMW.L["CHOOSENAME_DIALOG"]
 								self.BackgroundText:SetWidth(self:GetWidth())
 							</OnLoad>
 							<OnEditFocusLost>
@@ -2069,7 +2077,7 @@
 							<OnTextChanged>
 								local text = self:GetText()
 								if text == "" then
-									local label = TMW.Types[TMW.CI.t].nameLabel or self.label
+									local label = self.label
 									local append = TMW.Types[TMW.CI.t].appendNameLabel
 									if append then
 										label = label .. " " .. append
@@ -2183,7 +2191,7 @@
 						<Scripts>
 							<OnLoad>
 								self:RegisterEvent("MODIFIER_STATE_CHANGED")
-								self.label = "|cFFFF9090" .. TMW.L["ICONMENU_UNITSTOWATCH"]
+								self.label = "|cFFFF5050" .. TMW.L["ICONMENU_UNITSTOWATCH"]
 								self.__title = TMW.L["ICONMENU_UNITSTOWATCH"]
 								self.__text = TMW.L["ICONMENU_UNIT_DESC"]
 								self.BackgroundText:SetWidth(self:GetWidth())
@@ -2218,6 +2226,16 @@
 								self.isOver = false
 								GameTooltip:Hide()
 							</OnLeave>
+							<OnTextChanged>
+								local text = self:GetText()
+								if text == "" then
+									self.BackgroundText:SetText(self.label)
+									TMW.HELP:Show("ICON_UNIT_MISSING", TMW.CI.ic, self, 0, 0, TMW.L["HELP_NOUNITS"])
+								else
+									self.BackgroundText:SetText(nil)
+									TMW.HELP:Hide("ICON_UNIT_MISSING")
+								end
+							</OnTextChanged>
 						</Scripts>
 					</EditBox>
 					
@@ -3425,7 +3443,7 @@
 						<Scripts>
 							<OnLoad>
 								TMW:TT(self, "ANN_EDITBOX", "ANN_EDITBOX_DESC")
-								self.label = "|cFFFF9090" .. TMW.L["ANN_EDITBOX_WARN"]
+								self.label = "|cFFFF5050" .. TMW.L["ANN_EDITBOX_WARN"]
 								self.BackgroundText:SetWidth(self:GetWidth())
 								self.Header:SetText(TMW.L["ANN_EDITBOX"])
 							</OnLoad>

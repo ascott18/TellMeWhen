@@ -38,13 +38,9 @@ LibStub("AceEvent-3.0"):Embed(Type)
 Type.type = "cooldown"
 Type.name = L["ICONMENU_SPELLCOOLDOWN"]
 Type.desc = L["ICONMENU_SPELLCOOLDOWN_DESC"]
-Type.SUGType = function() return TMW.CI.ic.CooldownType end
-Type.TypeChecks = {
-	text = L["ICONMENU_COOLDOWNTYPE"],
-	setting = "CooldownType",
-	{ value = "spell", 			text = L["ICONMENU_SPELL"] },
-	{ value = "multistate", 	text = L["ICONMENU_MULTISTATECD"], 		tooltipText = L["ICONMENU_MULTISTATECD_DESC"] },
-}
+Type.chooseNameText  = L["CHOOSENAME_DIALOG"] .. "\r\n\r\n" .. L["CHOOSENAME_DIALOG_PETABILITIES"]
+Type.SUGType = "cooldown"
+
 Type.WhenChecks = {
 	text = L["ICONMENU_SHOWWHEN"],
 	{ value = "alpha", 			text = L["ICONMENU_USABLE"], 			colorCode = "|cFF00FF00" },
@@ -52,7 +48,6 @@ Type.WhenChecks = {
 	{ value = "always", 		text = L["ICONMENU_ALWAYS"] },
 }
 Type.RelevantSettings = {
-	CooldownType = true,
 	RangeCheck = true,
 	ManaCheck = true,
 	ShowPBar = true,
@@ -199,128 +194,30 @@ local function SpellCooldown_OnUpdate(icon, time)
 end
 
 
-local function MultiStateCD_OnEvent(icon)
-	local actionType, spellID = GetActionInfo(icon.Slot) -- check the current slot first, because it probably didnt change
-		if actionType == "spell" and spellID == icon.NameFirst then
-		return
-	end
-	for i=1, 120 do
-		local actionType, spellID = GetActionInfo(i)
-		if actionType == "spell" and spellID == icon.NameFirst then
-			icon.Slot = i
-			return
-		end
-	end
-end
-
-local function MultiStateCD_OnUpdate(icon, time)
-	if icon.UpdateTimer <= time - UPD_INTV then
-		icon.UpdateTimer = time
-		local CndtCheck = icon.CndtCheck if CndtCheck and CndtCheck() then return end
-
-		local Slot = icon.Slot
-		local start, duration = GetActionCooldown(Slot)
-		if duration then
-
-			local inrange, nomana = 1
-
-			if icon.RangeCheck then
-				inrange = IsActionInRange(Slot, "target") or 1
-			end
-			if icon.ManaCheck then
-				_, nomana = IsUsableAction(Slot)
-			end
-
-
-			local alpha, color
-			if (duration == 0 or OnGCD(duration)) and inrange == 1 and not nomana then
-				alpha, color = icon.Alpha, 1
-			elseif icon.Alpha ~= 0 then
-				if inrange ~= 1 then
-					alpha, color = icon.UnAlpha*rc.a, rc
-				elseif nomana then
-					alpha, color = icon.UnAlpha*mc.a, mc
-				elseif not icon.ShowTimer then
-					alpha, color = icon.UnAlpha, 0.5
-				else
-					alpha, color = icon.UnAlpha, 1
-				end
-			else
-				alpha, color = icon.UnAlpha, 1
-			end
-			
-			local actionType, spellID = GetActionInfo(Slot)
-			spellID = actionType == "spell" and spellID or icon.NameFirst
-			
-			
-			--icon:SetInfo(alpha, color, texture, start, duration, spellChecked, reverse, count, countText, forceupdate, unit)
-			icon:SetInfo(alpha, color, GetActionTexture(Slot) or "Interface\\Icons\\INV_Misc_QuestionMark", start, duration, spellID, nil, nil, nil, nil, nil)
-		end
-	end
-end
-
-
-
 function Type:Setup(icon, groupID, iconID)
-	if icon.CooldownType == "spell" then
-		icon.NameFirst = TMW:GetSpellNames(icon, icon.Name, 1)
-		icon.NameName = TMW:GetSpellNames(icon, icon.Name, 1, 1)
-		icon.NameArray = TMW:GetSpellNames(icon, icon.Name)
-		icon.NameNameArray = TMW:GetSpellNames(icon, icon.Name, nil, 1)
+	icon.NameFirst = TMW:GetSpellNames(icon, icon.Name, 1)
+	icon.NameName = TMW:GetSpellNames(icon, icon.Name, 1, 1)
+	icon.NameArray = TMW:GetSpellNames(icon, icon.Name)
+	icon.NameNameArray = TMW:GetSpellNames(icon, icon.Name, nil, 1)
+	
+	if icon.NameName == strlower(GetSpellInfo(75)) and not icon.NameArray[2] then
+		icon:SetTexture(GetSpellTexture(75))
+		icon.asStart = icon.asStart or 0
+		icon.asDuration = icon.asDuration or 0
 		
-		if icon.NameName == strlower(GetSpellInfo(75)) and not icon.NameArray[2] then
-			icon:SetTexture(GetSpellTexture(75))
-			icon.asStart = icon.asStart or 0
-			icon.asDuration = icon.asDuration or 0
-			
-			icon:RegisterEvent("UNIT_SPELLCAST_SUCCEEDED")
-			icon:SetScript("OnEvent", AutoShot_OnEvent)
-			
-			icon:SetScript("OnUpdate", AutoShot_OnUpdate)
-		else
-			icon.FirstTexture = SpellTextures[icon.NameFirst]
-
-			icon:SetTexture(TMW:GetConfigIconTexture(icon))
-			icon:SetScript("OnUpdate", SpellCooldown_OnUpdate)
-		end
+		icon:RegisterEvent("UNIT_SPELLCAST_SUCCEEDED")
+		icon:SetScript("OnEvent", AutoShot_OnEvent)
 		
-		icon:OnUpdate(TMW.time)
+		icon:SetScript("OnUpdate", AutoShot_OnUpdate)
+	else
+		icon.FirstTexture = SpellTextures[icon.NameFirst]
+
+		icon:SetTexture(TMW:GetConfigIconTexture(icon))
+		icon:SetScript("OnUpdate", SpellCooldown_OnUpdate)
 	end
-	if icon.CooldownType == "multistate" then
-		icon.NameFirst = TMW:GetSpellNames(icon, icon.Name, 1)
-
-		if icon.NameFirst and icon.NameFirst ~= "" and GetSpellLink(icon.NameFirst) and not tonumber(icon.NameFirst) then
-			icon.NameFirst = tonumber(strmatch(GetSpellLink(icon.NameFirst), ":(%d+)")) -- extract the spellID from the link
-		end
-		icon.Slot = 0
-		for i=1, 120 do
-			local actionType, spellID = GetActionInfo(i)
-			if actionType == "spell" and spellID == icon.NameFirst then
-				icon.Slot = i
-				break
-			end
-		end
-
-		icon:SetTexture(GetActionTexture(icon.Slot) or "Interface\\Icons\\INV_Misc_QuestionMark")
-
-		icon:RegisterEvent("ACTIONBAR_SLOT_CHANGED")
-		icon:SetScript("OnEvent", MultiStateCD_OnEvent)
-
-		icon:SetScript("OnUpdate", MultiStateCD_OnUpdate)
-		icon:OnUpdate(TMW.time)
-	end
+	
+	icon:OnUpdate(TMW.time)
 end
 
-function Type:IE_TypeLoaded()
-	local Name = TMW.IE.Main.Name
-	Name.__text = TMW.CI.IMS and L["CHOOSENAME_DIALOG_MSCD"] or L["CHOOSENAME_DIALOG"]
-	Name:GetScript("OnTextChanged")(Name)
-end
-
-function Type:IE_TypeUnloaded()
-	local Name = TMW.IE.Main.Name
-	Name.__text = L["CHOOSENAME_DIALOG"]
-	Name:GetScript("OnTextChanged")(Name)
-end
 
 TMW:RegisterIconType(Type)

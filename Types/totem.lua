@@ -31,18 +31,12 @@ local strlowerCache = TMW.strlowerCache
 
 local Type = {}
 Type.type = "totem"
-
-local name = pclass == "DRUID" and L["ICONMENU_MUSHROOMS"	  ] or pclass == "DEATHKNIGHT" and L["ICONMENU_GHOUL"	  ] or pclass == "SHAMAN" and L["ICONMENU_TOTEM"	 ]
-Type.name = name or L["ICONMENU_TOTEM"]
-
-local desc = pclass == "DRUID" and L["ICONMENU_MUSHROOMS_DESC"] or pclass == "DEATHKNIGHT" and L["ICONMENU_GHOUL_DESC"] or pclass == "SHAMAN" and L["ICONMENU_TOTEM_DESC"]
-Type.desc = desc or L["ICONMENU_TOTEM_DESC"]
-
-Type.hidden = not name
-
-Type.appendNameLabel = L["ICONMENU_CHOOSENAME_ORBLANK"]
+Type.name = pclass == "DRUID" and L["ICONMENU_MUSHROOMS"]		or pclass == "DEATHKNIGHT" and L["ICONMENU_GHOUL"]		or L["ICONMENU_TOTEM"]
+Type.desc = pclass == "DRUID" and L["ICONMENU_MUSHROOMS_DESC"]	or pclass == "DEATHKNIGHT" and L["ICONMENU_GHOUL_DESC"]	or L["ICONMENU_TOTEM_DESC"]
+Type.chooseNameTitle = L["ICONMENU_CHOOSENAME"] .. " " .. L["ICONMENU_CHOOSENAME_ORBLANK"]
 Type.AllowNoName = true
 Type.usePocketWatch = 1
+
 if pclass == "SHAMAN" then
 	Type.TypeChecks = {
 		setting = "TotemSlots",

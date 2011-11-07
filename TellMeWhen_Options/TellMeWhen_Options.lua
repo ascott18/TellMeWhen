@@ -49,6 +49,8 @@ local CNDT = TMW.CNDT -- created in TellMeWhen/conditions.lua
 local _, pclass = UnitClass("Player")
 local tiptemp = {}
 local approachTable, get
+
+---------- Globals ----------
 BINDING_HEADER_TELLMEWHEN = L["ICON_TOOLTIP1"] 
 BINDING_NAME_TELLMEWHEN_ICONEDITOR_UNDO = L["UNDO_ICON"] 
 BINDING_NAME_TELLMEWHEN_ICONEDITOR_REDO = L["REDO_ICON"] 
@@ -165,7 +167,7 @@ TMW.CI = setmetatable({}, {__index = function(tbl, k)
 		return "spell"
 	elseif k == "IMS" then -- IsMultiState
 		local ics = TMW.CI.ics
-		return ics and ics.Type == "cooldown" and ics.CooldownType == "multistate"
+		return ics and ics.Type == "multistate"
 	end
 end}) local CI = TMW.CI		--current icon
 
@@ -1868,6 +1870,9 @@ function IE:Load(isRefresh, icon)
 	IE.ExportBox:SetText("")
 	IE:SetScale(db.global.EditorScale)
 
+	IE.Main.Name:SetLabels(TMW.Types[CI.t].chooseNameTitle, TMW.Types[CI.t].chooseNameText)
+	IE.Main.Name:GetScript("OnTextChanged")(IE.Main.Name)
+	
 	if IE.Main.Type.selectedValue ~= CI.t then
 		UIDropDownMenu_SetSelectedValue(IE.Main.Type, CI.t)
 	end
@@ -5832,6 +5837,7 @@ function CNDT:Load(type)
 	local Conditions = CNDT.settings
 	if not Conditions then return end
 	
+	HELP:Hide("CNDT_UNIT_MISSING")
 	if Conditions.n > 0 then
 		for i = Conditions.n + 1, #CNDT do
 			CNDT[i]:Clear()
@@ -6691,7 +6697,9 @@ HELP.Codes = {
 	
 	"ICON_DR_MISMATCH",
 	
+	"ICON_UNIT_MISSING",
 	
+	"CNDT_UNIT_MISSING",
 	"CNDT_PARENTHESES_ERROR",
 	
 	"SND_INVALID_CUSTOM",
@@ -6772,6 +6780,9 @@ function HELP:Hide(code)
 	end
 end
 
+function HELP:GetShown()
+	return HELP.showingHelp and HELP.showingHelp.code
+end
 
 ---------- Queue Management ----------
 function HELP:Queue(help)
@@ -6804,10 +6815,11 @@ function HELP:ShowNext()
 	
 	-- if we are already showing something, then don't overwrite it.
 	if HELP.showingHelp then
-		-- but if the current help is tied to a specific icon and that icon is not being edited then stop showing it
+		-- but if the current help should not be shown, then stop showing it, but stick it back in the queue to try again later
 		if not HELP:ShouldShowHelp(HELP.showingHelp) then
+			local current = HELP.showingHelp
 			HELP.showingHelp = nil
-			HELP:ShowNext()
+			HELP:Queue(current)
 		end
 		return
 	end
@@ -6837,10 +6849,12 @@ function HELP:ShowNext()
 	HELP.Frame:SetPoint("TOPRIGHT", help.frame, "LEFT", (help.x or 0) - 30, (help.y or 0) + 28)
 	HELP.Frame.text:SetText(text)
 	HELP.Frame:SetHeight(HELP.Frame.text:GetHeight() + 38)
+	HELP.Frame:SetWidth(min(250, HELP.Frame.text:GetStringWidth() + 30))
 	
 	local parent = help.frame.CreateTexture and help.frame or help.frame:GetParent() -- if the frame has the CreateTexture method, then it can be made the parent. Otherwise, the frame is actually a texture/font/etc object, so set 
 	HELP.Frame:SetParent(parent)
 	HELP.Frame:Show()
+	
 	
 	-- if the help had a setting associated, set it now
 	if help.setting then

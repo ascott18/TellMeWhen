@@ -33,7 +33,7 @@ local DRData = LibStub("DRData-1.0", true)
 TELLMEWHEN_VERSION = "4.6.6"
 TELLMEWHEN_VERSION_MINOR = strmatch(" @project-version@", " r%d+") or ""
 TELLMEWHEN_VERSION_FULL = TELLMEWHEN_VERSION .. TELLMEWHEN_VERSION_MINOR
-TELLMEWHEN_VERSIONNUMBER = 46603 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
+TELLMEWHEN_VERSIONNUMBER = 46605 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
 if TELLMEWHEN_VERSIONNUMBER > 47000 or TELLMEWHEN_VERSIONNUMBER < 46000 then return error("YOU SCREWED UP THE VERSION NUMBER OR DIDNT CHANGE THE SAFETY LIMITS") end -- safety check because i accidentally made the version number 414069 once
 -- i'll just plop this here for a second....
 -- * Began rewriting the suggestion list. IT IS HIGHLY UNUSABLE RIGHT NOW. THIS IS AN ALPHA VERSION, SO DONT COMPLAIN.
@@ -553,7 +553,6 @@ TMW.Defaults = {
 					["**"] = {
 						BuffOrDebuff		 = "HELPFUL",
 						ShowWhen			 = "alpha",
-						CooldownType		 = "spell",
 						Enabled				 = false,
 						Name				 = "",
 						CustomTex			 = "",
@@ -1401,6 +1400,14 @@ function TMW:GetUpgradeTable()			-- upgrade functions
 	if upgradeTable then return upgradeTable end
 	local t = {
 	
+		[46604] = {
+			icon = function(ics)
+				if ics.CooldownType == "multistate" and ics.Type == "cooldown" then
+					ics.Type = "multistate"
+					ics.CooldownType = TMW.Icon_Defaults.CooldownType
+				end
+			end,
+		},
 		[46418] = {
 			global = function()
 				db.global.HelpSettings.ResetCount = nil
@@ -1426,17 +1433,6 @@ function TMW:GetUpgradeTable()			-- upgrade functions
 					end
 				end
 				ics.Conditions.n = n
-			end,
-		},
-		[46407] = {
-			global = function()
-				local HelpSettings = db.global.HelpSettings
-				
-				HelpSettings.ICON_DURS_FIRSTSEE = HelpSettings.NewDurSyntax
-				HelpSettings.NewDurSyntax = nil
-				
-				HelpSettings.ICON_POCKETWATCH_FIRSTSEE = HelpSettings.PocketWatch
-				HelpSettings.PocketWatch = nil
 			end,
 		},
 		[46202] = {
@@ -2132,6 +2128,17 @@ function TMW:GlobalUpgrade()
 						end
 					end
 				end
+			end
+		end
+		if TellMeWhenDB.Version < 46407 then
+			local HelpSettings = TellMeWhenDB.global and TellMeWhenDB.global.HelpSettings
+			
+			if HelpSettings then
+				HelpSettings.ICON_DURS_FIRSTSEE = HelpSettings.NewDurSyntax
+				HelpSettings.NewDurSyntax = nil
+				
+				HelpSettings.ICON_POCKETWATCH_FIRSTSEE = HelpSettings.PocketWatch
+				HelpSettings.PocketWatch = nil
 			end
 		end
 	end
@@ -3141,6 +3148,9 @@ local typeMT = {
 
 TypeBase.DisabledEvents = {}
 TypeBase.SUGType = "spell"
+TypeBase.chooseNameTitle = L["ICONMENU_CHOOSENAME"]
+TypeBase.chooseNameText  = L["CHOOSENAME_DIALOG"]
+
 function TypeBase:GetNameForDisplay(icon, data)
 	local name = data and GetSpellInfo(data) or data
 	return name, true

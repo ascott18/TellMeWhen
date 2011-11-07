@@ -19,4 +19,7 @@
 	401,	--Tol\'vir Archaeology Fragment
 	402,	--Chef\'s Award
 	416,	--Mark of the World Tree
+	515,	--Darkmoon Prize Ticket
+	614,	--Mote of Darkness
+	615,	--Essence of Corrupted Deathwing
 }

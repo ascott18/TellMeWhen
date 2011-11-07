@@ -8,15 +8,13 @@ L["CMD_OPTIONS"] = "Options"
 L["ICON_TOOLTIP1"] = "TellMeWhen"
 L["ICON_TOOLTIP2NEW"] = [[|cff7fffffRight-click|r for icon options.
 |cff7fffffRight-click and drag|r to another icon to move/copy.
-|cff7fffffDrag|r spells or items onto the icon for quick setup.
-
-Typing /tellmewhen or /tmw will lock and enable the addon.]]
+|cff7fffffDrag|r spells or items onto the icon for quick setup.]]
 L["LDB_TOOLTIP1"] = "|cff7fffffLeft-click|r to toggle the group locks"
 L["LDB_TOOLTIP2"] = "|cff7fffffRight-click|r to show the main TMW options"
 L["LOADERROR"] = "TellMeWhen_Options could not be loaded: "
 L["LOADINGOPT"] = "Loading TellMeWhen_Options."
 L["ENABLINGOPT"] = "TellMeWhen_Options is disabled. Enabling..."
-L["CONFIGMODE"] = "TellMeWhen is in configuration mode. Icons will not be functional until you leave configuration mode. Type '/tmw' to toggle configuration mode on and off."
+L["CONFIGMODE"] = "TellMeWhen is in configuration mode. Icons will not be functional until you leave configuration mode. Type '/tellmewhen' or '/tmw' to toggle configuration mode on and off."
 L["CONFIGMODE_EXIT"] = "Exit config mode"
 L["CONFIGMODE_NEVERSHOW"] = "Don't show again"
 L["IMPORTERROR_FAILEDPARSE"] = "There was an error processing the string. Ensure that you copied the entire string from the source."
@@ -40,17 +38,28 @@ L["FROMNEWERVERSION"] = "You are importing data that was created in a newer vers
 
 L["ICONMENU_CHOOSENAME"] = "Choose name(s)/ID(s) to check"
 L["ICONMENU_CHOOSENAME_CNDTIC"] = "Choose name/ID/texture path"
+
 L["ICONMENU_CHOOSENAME_WPNENCH"] = "Choose enchant(s) to check"
+L["ICONMENU_CHOOSENAME_WPNENCH_DESC"] = [=[Enter the name(s) the weapon enchants you want this icon to monitor. You can add multiple entries by separating them with semicolons (;).
+
+|cFFFF5959IMPORTANT|r: Enchant names must be enterd exactly as they appear on the tooltip of your weapon while the enchant is active (e.g. "Flametongue", not "Flametongue Weapon").]=]
+
+L["ICONMENU_CHOOSENAME_ITEMSLOT"] = "Choose name(s)/ID(s)/equipment slot(s) (%d-%d) to check"
+L["ICONMENU_CHOOSENAME_ITEMSLOT_DESC"] = [=[Enter the Name, ID, or equipment slot of what you want this icon to monitor. You can add multiple entries (any combination of names, IDs, and equipment slots) by separating them with semicolons (;).
+
+You can shift-click items and chat links or drag items to insert them into this editbox.
+
+Equipment slots are numbered indexes that correspond to an equipped item. If you change the item equipped in that slot, the icon will reflect that.]=]
+
+L["ICONMENU_CHOOSENAME_MULTISTATE"] = "Choose name/ID to check"
 L["ICONMENU_CHOOSENAME_ORBLANK"] = "OR leave blank to track everything"
-L["ICONMENU_CHOOSENAME_ORITEMSLOT"] = "OR equipment slot to check (%d-%d)"
 L["ICONMENU_ENABLE"] = "Enabled"
 L["CHOOSENAME_EQUIVS_TOOLTIP"] = [[You can select predefined sets of buffs, debuffs, spell casts, diminishing returns, or dispel types (Magic, Curse, etc.) from this menu to insert into the "%s" editbox.]]
 L["CHOOSENAME_DIALOG_DDDEFAULT"] = "Predefined Spell Sets/Dispel Types"
 L["CHOOSENAME_DIALOG"] = [=[Enter the Name or ID of what you want this icon to monitor. You can add multiple entries (any combination of names, IDs, and equivalencies) by separating them with semicolons (;).
 
-You can shift-click spells/items/chat links or drag spells/items to insert them into this editbox.
-
-|cFFFF5959PET ABILITIES|r must use SpellIDs.]=]
+You can shift-click spells/items/chat links or drag spells/items to insert them into this editbox.]=]
+L["CHOOSENAME_DIALOG_PETABILITIES"] = "|cFFFF5959PET ABILITIES|r must use SpellIDs."
 L["CHOOSENAME_DIALOG_MSCD"] = [=[Enter the Name or ID of what the cooldown that you want this icon to monitor. Only the first spell/item will be checked - semicolon-delimited lists are not valid for this icon type.]=]
 L["CHOOSENAME_DIALOG_CNDTIC"] = "Enter the Name or ID of the spell that has the texture that you want to use. You may also enter a texture path, such as 'Interface/Icons/spell_nature_healingtouch', or just 'spell_nature_healingtouch' if the path is 'Interface/Icons'"
 
@@ -78,9 +87,7 @@ L["ICONMENU_REACTIVE_DESC"] = [[Tracks the usability of reactive abilities.
 Reactive abilities are things like %s, %s, and %s - abilities that are only usable when certain conditions are met.]]
 
 L["ICONMENU_WPNENCHANT"] = "Weapon Enchant"
-L["ICONMENU_WPNENCHANT_DESC"] = [=[Tracks temporary weapon enchants.
-
-If you want to check for specific enchants, enter the name of the enchant(s) as it appears on the tooltip of your weapon while the enchant is active (e.g. "Flametongue", not "Flametongue Weapon").]=]
+L["ICONMENU_WPNENCHANT_DESC"] = [=[Tracks temporary weapon enchants.]=]
 
 L["ICONMENU_TOTEM"] = "Totem"
 L["ICONMENU_TOTEM_DESC"] = [[Tracks your totems.]]
@@ -89,7 +96,7 @@ L["ICONMENU_GHOUL_DESC"] = [[Tracks your ghoul if you don't have the %s talent.]
 L["ICONMENU_MUSHROOMS"] = "%s"
 L["ICONMENU_MUSHROOMS_DESC"] = [[Tracks a %s.]]
 
-L["ICONMENU_MULTISTATECD"] = "Multi-state Cooldown"
+L["ICONMENU_MULTISTATECD"] = "Multi-state Ability"
 L["ICONMENU_MULTISTATECD_DESC"] = [[Tracks an ability with multiple states.
 
 This should be used when you want to track the multiple states and textures of a cooldown such as %s or %s.]]
@@ -103,9 +110,7 @@ L["ICONMENU_UNITCOOLDOWN_DESC"] = [[Tracks the cooldowns of someone else.
 L["ICONMENU_ICD"] = "Internal Cooldown"
 L["ICONMENU_ICD_DESC"] = [=[Tracks the cooldown of a proc or a similar effect.
 
-This icon type can be used to track either the internal cooldown of something such as a proc from a talent or a trinket, or the duration of a spell (e.g. %s, %s, %s).
-
-See the instructions under the %q settings for how to track each internal cooldown type.]=]
+|cFFFF5959IMPORTANT|r: See the tooltips under the %q settings for how to track each internal cooldown type.]=]
 
 L["ICONMENU_CAST"] = "Spell Cast"
 L["ICONMENU_CAST_DESC"] = [=[Tracks spell casts and channels.]=]
@@ -160,7 +165,7 @@ The following substitutions may be used to customize the text shown:
 L["ICONMENU_COMPONENTICONS"] = "Component Icons"
 
 
-L["ICONMENU_UNITSTOWATCH"] = "Units to watch"
+L["ICONMENU_UNITSTOWATCH"] = "Unit(s) to watch"
 L["ICONMENU_UNITS"] = "Units"
 L["ICONMENU_UNIT_DESC"] = [[Enter the units to watch in this box. Units can be inserted from the dropdown at the right, or advanced users can type in their own units. Standard units (e.g. player) and/or friendly player names (e.g. %s) may be used as units. Separate multiple units with semicolons (;). 
 
@@ -218,13 +223,13 @@ L["ICONMENU_SPELLCAST_START"] = "Spell Cast Start"
 L["ICONMENU_ICDBDE"] = "Buff/Debuff/Energize/Summon"
 L["ICONMENU_SPELLCAST_COMPLETE_DESC"] = [[Select this option if the internal cooldown begins when you finish casting a spell, or when you cast an instant cast spell.
 
-You need to enter the name/ID of the spell that triggers the internal cooldown into the "%s" editbox.]]
+You need to enter the name/ID of the spell cast that triggers the internal cooldown into the %q editbox.]]
 L["ICONMENU_SPELLCAST_START_DESC"] = [[Select this option if the internal cooldown begins when you start casting a spell.
 
-You need to enter the name/ID of the spell that triggers the internal cooldown into the "%s" editbox.]]
+You need to enter the name/ID of the spell cast that triggers the internal cooldown into the %q editbox.]]
 L["ICONMENU_ICDAURA_DESC"] = [[Select this option if the internal cooldown begins when a buff or debuff is applied by yourself (includes procs), or if the effect energizes you with mana/rage/etc.
 
-You need to enter the name/ID of the buff/debuff that you gain when the internal cooldown is triggered, or the name of the energize effect (check your combat log), into the "%s" editbox.]]
+You need to enter the name/ID of the buff/debuff that you gain when the internal cooldown is triggered, or the name of the energize effect (check your combat log), into the %q editbox.]]
 
 L["ICONMENU_DRPRESENT"] = "Diminished"
 L["ICONMENU_DRABSENT"] = "Undiminished"
@@ -831,6 +836,7 @@ For example:
 "62618: 3:00"
 
 Inserting from the suggestion list automatically adds the duration from the tooltip.]]
+
 L["HELP_MISSINGDURS"] = [[The following spells are missing durations:
 
 %s
@@ -842,12 +848,16 @@ Spell Name: Duration
 E.g. "%s: 10"
 
 Inserting from the suggestion list automatically adds the duration from the tooltip.]]
+
 L["HELP_POCKETWATCH"] = [[|TInterface\Icons\INV_Misc_PocketWatch_01:20|t -- The pocket watch texture.
 This texture is being used because the first valid spell being checked was entered by name and isn't in your spellbook.
 
 The correct texture will be used once you have seen the spell as you play.
 
 To see the correct texture now, change the first spell being checked into a Spell ID. You can easily do this by clicking on the entry in the editbox and right-clicking the correct corresponding entry in the suggestion list.]]
+
+L["HELP_NOUNITS"] = [[You must enter at least one unit!]]
+L["HELP_NOUNIT"] = [[You must enter a unit!]]
 
 
 L["TOPLEFT"] = "Top Left"

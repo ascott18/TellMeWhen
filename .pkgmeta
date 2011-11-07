@@ -24,11 +24,13 @@ optional-dependencies:
     - omni-cc
     - tullacc
     - libdatabroker-1-1
+
 manual-changelog:
     filename: CHANGELOG.txt
     markup-type: creole
+
 license-output: LICENSE.txt
-enable-nolib-creation: no
+enable-nolib-creation: yes
 
 move-folders:
     TellMeWhen/TellMeWhen_Options: TellMeWhen_Options
