@@ -222,7 +222,7 @@ function ChatEdit_InsertLink(...)
 		
 		-- find the next semicolon in the string
 		local NameText = Name:GetText()
-		local start = Name:GetNumLetters()
+		local start = #NameText
 		for i = Name:GetCursorPosition(), start, 1 do
 			if strsub(NameText, i, i) == ";" then
 				start = i+1
@@ -4871,11 +4871,15 @@ function Module:Entry_Insert(insert)
 		SUG.Box:SetText(TMW:CleanString(newtext))
 		
 		-- put the cursor after the newly inserted text
-		local _, newPos = SUG.Box:GetText():find(insert, max(0, SUG.startpos-1))
-		SUG.Box:SetCursorPosition(newPos + 2)
+		local _, newPos = SUG.Box:GetText():find(insert:gsub("([%(%)%%%[%]%-%+%.%*])", "%%%1"), max(0, SUG.startpos-1))
+		if newPos then
+			SUG.Box:SetCursorPosition(newPos + 2)
+		else
+			print("NO NEWPOS FOUND", SUG.Box:GetText(), insert, SUG.startpos-1, max(0, SUG.startpos-1))
+		end
 		
 		-- if we are at the end of the exitbox then put a semicolon in anyway for convenience
-		if SUG.Box:GetCursorPosition() == SUG.Box:GetNumLetters() then 
+		if SUG.Box:GetCursorPosition() == #SUG.Box:GetText() then 
 			SUG.Box:SetText(SUG.Box:GetText() .. "; ")
 		end
 		
@@ -5203,12 +5207,12 @@ function Module:Entry_Insert(insert, duration)
 		SUG.Box:SetText(TMW:CleanString(newtext))
 		
 		-- put the cursor after the newly inserted text
-		local _, newPos = SUG.Box:GetText():find(insert, max(0, SUG.startpos-1))
-		newPos = newPos or SUG.Box:GetNumLetters()
+		local _, newPos = SUG.Box:GetText():find(insert:gsub("([%(%)%%%[%]%-%+%.%*])", "%%%1"), max(0, SUG.startpos-1))
+		newPos = newPos or #SUG.Box:GetText()
 		SUG.Box:SetCursorPosition(newPos + 2)
 		
 		-- if we are at the end of the exitbox then put a semicolon in anyway for convenience
-		if SUG.Box:GetCursorPosition() == SUG.Box:GetNumLetters() then 
+		if SUG.Box:GetCursorPosition() == #SUG.Box:GetText() then 
 			SUG.Box:SetText(SUG.Box:GetText() .. (doAddColon and not hasDurationData and " " or "") .. "; ")
 		end
 		
@@ -5668,6 +5672,13 @@ end
 
 function Module:Table_Get()
 	SUG:CacheItems()
+	
+	for k, v in pairs(TMW.db.global.WpnEnchDurs) do
+		if not self.Table[k] then
+			self.Table[k] = k
+		end
+	end
+	
 	return self.Table
 end
 
@@ -6343,7 +6354,7 @@ function CNDT.GroupBase.TypeCheck(group, data)
 		else
 			group.EditBox:Hide()
 			group.Check:Hide()
-			group.Slider:SetWidth(523)
+			group.Slider:SetWidth(522)
 			SUG:DisableEditBox(group.EditBox)
 		end
 		if data.name2 then
@@ -6490,6 +6501,9 @@ function CNDT.GroupBase.Load(group)
 		if type(frame) == "table" then
 			group.CloseParenthesis[k]:SetChecked(condition.PrtsAfter >= k)
 		end
+	end
+	if CNDT[group:GetID() + 1] then
+		group.CloseParenthesis:SetPoint("RIGHT", CNDT[group:GetID() + 1].AndOr, "LEFT", -5, 0)
 	end
 	
 	group.AndOr:SetValue(condition.AndOr)
@@ -6661,7 +6675,7 @@ function CNDT:CreateGroups(num)
 			group[k] = v
 		end
 		
-		group:SetPoint("TOPLEFT", CNDT[i-1], "BOTTOMLEFT", 0, -16)
+		group:SetPoint("TOPLEFT", CNDT[i-1], "BOTTOMLEFT", 0, -14.5)
 		local p, _, rp, x, y = TMW.CNDT[1].AddDelete:GetPoint()
 		group.AddDelete:ClearAllPoints()
 		group.AddDelete:SetPoint(p, CNDT[i], rp, x, y)

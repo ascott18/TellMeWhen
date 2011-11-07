@@ -6,6 +6,7 @@
  ** (r302) You can now properly undo a change in sound file
  ** (r302) TellMeWhen-4.6.6.lua:2259: bad argument #3 to "format" (number expected, got nil)
  ** (r302) TellMeWhen-4.6.6.lua:192: attempt to compare nil with number
+ ** (r304) Fixed various bugs relating to inserting text into strings with multibyte characters (zhCN, zhTW, koKR, ruRU)
  
 ===v4.6.5===
  * Bug Fixes:

@@ -42,14 +42,14 @@ L["ICONMENU_CHOOSENAME_CNDTIC"] = "Choose name/ID/texture path"
 L["ICONMENU_CHOOSENAME_WPNENCH"] = "Choose enchant(s) to check"
 L["ICONMENU_CHOOSENAME_WPNENCH_DESC"] = [=[Enter the name(s) the weapon enchants you want this icon to monitor. You can add multiple entries by separating them with semicolons (;).
 
-|cFFFF5959IMPORTANT|r: Enchant names must be enterd exactly as they appear on the tooltip of your weapon while the enchant is active (e.g. "Flametongue", not "Flametongue Weapon").]=]
+|cFFFF5959IMPORTANT|r: Enchant names must be entered exactly as they appear on the tooltip of your weapon while the enchant is active (e.g. "Flametongue", not "Flametongue Weapon").]=]
 
 L["ICONMENU_CHOOSENAME_ITEMSLOT"] = "Choose name(s)/ID(s)/equipment slot(s) (%d-%d) to check"
 L["ICONMENU_CHOOSENAME_ITEMSLOT_DESC"] = [=[Enter the Name, ID, or equipment slot of what you want this icon to monitor. You can add multiple entries (any combination of names, IDs, and equipment slots) by separating them with semicolons (;).
 
-You can shift-click items and chat links or drag items to insert them into this editbox.
+Equipment slots are numbered indexes that correspond to an equipped item. If you change the item equipped in that slot, the icon will reflect that.
 
-Equipment slots are numbered indexes that correspond to an equipped item. If you change the item equipped in that slot, the icon will reflect that.]=]
+You can shift-click items and chat links or drag items to insert them into this editbox.]=]
 
 L["ICONMENU_CHOOSENAME_MULTISTATE"] = "Choose name/ID to check"
 L["ICONMENU_CHOOSENAME_ORBLANK"] = "OR leave blank to track everything"
@@ -598,7 +598,8 @@ L["GCD_ACTIVE"] = "GCD active"
 L["CNDTCAT_FREQUENTLYUSED"] = "Frequently Used"
 L["CNDTCAT_SPELLSABILITIES"] = "Spells/Items"
 L["CNDTCAT_BUFFSDEBUFFS"] = "Buffs/Debuffs"
-L["CNDTCAT_STATUS"] = "Attributes"
+L["CNDTCAT_ATTRIBUTES_UNIT"] = "Unit Attributes"
+L["CNDTCAT_ATTRIBUTES_PLAYER"] = "Player Attributes"
 L["CNDTCAT_STATS"] = "Combat Stats"
 L["CNDTCAT_RESOURCES"] = "Resources"
 L["CNDTCAT_CURRENCIES"] = "Currencies"

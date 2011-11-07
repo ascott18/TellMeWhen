@@ -68,21 +68,21 @@
 		<Size y="15"/>
 		<Layers>
 			<Layer level="BACKGROUND">
-			<Texture name="$parentLeft" urgency="5" file="Interface\Common\Common-Input-Border">
+				<Texture name="$parentLeft" urgency="5" file="Interface\AddOns\TellMeWhen_Options\Textures\EditboxTexture">
 					<Size x="8" y="18"/>
 					<Anchors>
 						<Anchor point="LEFT" x="-5"/>
 					</Anchors>
 					<TexCoords left="0" right="0.0625" top="0" bottom="0.625"/>
 				</Texture>
-				<Texture name="$parentRight" urgency="5" file="Interface\Common\Common-Input-Border">
+				<Texture name="$parentRight" urgency="5" file="Interface\AddOns\TellMeWhen_Options\Textures\EditboxTexture">
 					<Size x="8" y="18"/>
 					<Anchors>
 						<Anchor point="RIGHT"/>
 					</Anchors>
 					<TexCoords left="0.9375" right="1.0" top="0" bottom="0.625"/>
 				</Texture>
-				<Texture name="$parentMiddle" urgency="5" file="Interface\Common\Common-Input-Border">
+				<Texture name="$parentMiddle" urgency="5" file="Interface\AddOns\TellMeWhen_Options\Textures\EditboxTexture">
 					<Size x="10" y="18"/>
 					<Anchors>
 						<Anchor point="LEFT" relativeTo="$parentLeft" relativePoint="RIGHT"/>
@@ -90,23 +90,6 @@
 					</Anchors>
 					<TexCoords left="0.0625" right="0.9375" top="0" bottom="0.625"/>
 				</Texture>
-				
-			<!-- 	<Texture name="$parentBackground" parentKey="Background" >
-					<Size x="27" y="27"/>
-					<Anchors>
-						<Anchor point="TOPLEFT" x="-5" y="0"/>
-						<Anchor point="BOTTOMRIGHT" x="0" y="0"/>
-					</Anchors>
-					<Color r="1" g="1" b="1" a="0.3"/>
-				</Texture>
-				<Texture name="$parentOutline" parentKey="Outline" >
-					<Size x="27" y="27"/>
-					<Anchors>
-						<Anchor point="TOPLEFT" relativeTo="$parentBackground" x="-1" y="1"/>
-						<Anchor point="BOTTOMRIGHT" relativeTo="$parentBackground" x="1" y="-1"/>
-					</Anchors>
-					<Color r="0" g="0" b="0" a="1"/>
-				</Texture> -->
 			</Layer>
 			<Layer level="OVERLAY">
 				<FontString name="$parentBackgroundText" parentKey="BackgroundText" justifyH="CENTER" wordwrap="false" inherits="GameFontHighlightSmall">
@@ -161,7 +144,7 @@
 		<DisabledFont style="GameFontDisable"/>
 	</Button>
 	<Button name="TellMeWhen_SpellSuggestTemplate" virtual="true" hidden="true">
-		<Size y="18.45"/>
+		<Size y="18.95"/>
 		<Scripts>
 			<OnLoad>
 				self.Background:SetVertexColor(0, 1, 0)
@@ -344,37 +327,107 @@
 		</Scripts>
 	</Slider>
 
-	<Frame name="TMW_DropDownMenuTemplate" inherits="UIDropDownMenuTemplate" virtual="true">
-		<!-- <Layers>
-			<Layer level="BACKGROUND">
-				<Texture name="$parentBackground" parentKey="Background" >
-					<Size x="27" y="27"/>
+	<Frame name="TMW_DropDownMenuTemplate" inherits="" virtual="true">
+		<Size x="40" y="32"/>
+		<Layers>
+			<Layer level="ARTWORK">
+				<Texture name="$parentLeft" file="Interface\AddOns\TellMeWhen_Options\Textures\DropdownTexture">
+					<Size x="25" y="60"/>
 					<Anchors>
-						<Anchor point="TOPLEFT" x="24" y="-5"/>
-						<Anchor point="BOTTOMRIGHT" x="-20" y="11"/>
+						<Anchor point="TOPLEFT" y="17"/>
 					</Anchors>
-					<Color r="1" g="1" b="1" a="0.3"/>
+					<TexCoords left="0" right="0.1953125" top="0" bottom="1"/>
 				</Texture>
-				<Texture name="$parentOutline" parentKey="Outline" >
-					<Size x="27" y="27"/>
+				<Texture name="$parentMiddle" file="Interface\AddOns\TellMeWhen_Options\Textures\DropdownTexture">
+					<Size x="115" y="60"/>
 					<Anchors>
-						<Anchor point="TOPLEFT" relativeTo="$parentBackground" x="-1" y="1"/>
-						<Anchor point="BOTTOMRIGHT" relativeTo="$parentBackground" x="1" y="-1"/>
+						<Anchor point="LEFT" relativeTo="$parentLeft" relativePoint="RIGHT"/>
 					</Anchors>
-					<Color r="0" g="0" b="0" a="1"/>
+					<TexCoords left="0.1953125" right="0.8046875" top="0" bottom="1"/>
+				</Texture>
+				<Texture name="$parentRight" file="Interface\AddOns\TellMeWhen_Options\Textures\DropdownTexture">
+					<Size x="25" y="60"/>
+					<Anchors>
+						<Anchor point="LEFT" relativeTo="$parentMiddle" relativePoint="RIGHT"/>
+					</Anchors>
+					<TexCoords left="0.8046875" right="1" top="0" bottom="1"/>
+				</Texture>
+				<FontString name="$parentText" inherits="GameFontHighlightSmall" wordwrap="false" justifyH="LEFT" justifyV="CENTER">
+					<Size y="10"/>
+					<Anchors>
+						<Anchor point="LEFT" relativeTo="$parentLeft" x="27" y="1"/>
+					</Anchors>
+				</FontString>
+			</Layer>
+			<Layer level="OVERLAY">
+				<Texture name="$parentIcon" hidden="true">
+					<Size x="16" y="16"/>
+					<Anchors>
+						<Anchor point="LEFT" x="30" y="2"/>
+					</Anchors>
 				</Texture>
 			</Layer>
 		</Layers>
+		<Frames>
+			<Button name="$parentButton"  motionScriptsWhileDisabled="true" >
+				<Size x="22" y="22"/>
+				<Anchors>
+					<Anchor point="RIGHT" relativeTo="$parentRight" x="-16.5" y="1"/>
+				</Anchors>
+				<Scripts>
+					<OnEnter>
+						local parent = self:GetParent();
+						local myscript = parent:GetScript("OnEnter");
+						if(myscript ~= nil) then
+							myscript(parent);
+						end
+					</OnEnter>
+					<OnLeave>
+						local parent = self:GetParent();
+						local myscript = parent:GetScript("OnLeave");
+						if(myscript ~= nil) then
+							myscript(parent);
+						end
+					</OnLeave>
+					<OnClick>
+						ToggleDropDownMenu(nil, nil, self:GetParent());
+						PlaySound("igMainMenuOptionCheckBoxOn");
+					</OnClick>
+				</Scripts>
+				<NormalTexture name="$parentNormalTexture" file="Interface\ChatFrame\UI-ChatIcon-ScrollDown-Up">
+					<Size x="24" y="24"/>
+					<Anchors>
+						<Anchor point="RIGHT"/>
+					</Anchors>
+				</NormalTexture>
+				<PushedTexture name="$parentPushedTexture" file="Interface\ChatFrame\UI-ChatIcon-ScrollDown-Down">
+					<Size x="24" y="24"/>
+					<Anchors>
+						<Anchor point="RIGHT"/>
+					</Anchors>
+				</PushedTexture>
+				<DisabledTexture name="$parentDisabledTexture" file="Interface\ChatFrame\UI-ChatIcon-ScrollDown-Disabled">
+					<Size x="24" y="24"/>
+					<Anchors>
+						<Anchor point="RIGHT"/>
+					</Anchors>
+				</DisabledTexture>
+				<HighlightTexture name="$parentHighlightTexture" file="Interface\Buttons\UI-Common-MouseHilight" alphaMode="ADD">
+					<Size x="24" y="24"/>
+					<Anchors>
+						<Anchor point="RIGHT"/>
+					</Anchors>
+				</HighlightTexture>
+			</Button>
+		</Frames>
 		<Scripts>
-			<OnShow>
-				_G[self:GetName() .. "Left"]:Hide()
-				_G[self:GetName() .. "Middle"]:Hide()
-				_G[self:GetName() .. "Right"]:Hide()
-			</OnShow>
-		</Scripts> -->
+			<OnHide>
+				CloseDropDownMenus();
+			</OnHide>
+		</Scripts>
 	</Frame>
-			
-			
+	
+	
 	<EditBox name="TellMeWhen_ExportBoxTemplate" inherits="TellMeWhen_InputBoxTemplate" virtual="true">
 		<Size y="15"/>
 		<Frames>
@@ -386,7 +439,7 @@
 					<Frame name="$parentDummy" parentKey="Dummy">
 						<Size x="1" y="1"/>
 						<Anchors>
-							<Anchor point="CENTER" relativeTo="$parentButton" />
+							<Anchor point="CENTER" relativeTo="$parentButton"/>
 						</Anchors>
 						<Layers>
 							<Layer level="OVERLAY">
@@ -434,7 +487,7 @@
 			</Frame>
 			<StatusBar name="$parentStatus" parentKey="Status" hidden="true">
 				<Anchors>
-					<Anchor point="TOPLEFT" x="-4" y="0"/>
+					<Anchor point="TOPLEFT" x="-4"/>
 					<Anchor point="BOTTOMRIGHT" x="-2" y="-1"/>
 				</Anchors>
 				<Layers>
@@ -635,7 +688,7 @@
 	<!-- 	<HighlightTexture urgency="5" file="Interface\Buttons\UI-CheckBox-Highlight" alphaMode="ADD"/> -->
 	</CheckButton>
 	<Frame name="TellMeWhen_ConditionGroup" virtual="true">
-		<Size x="559" y="70"/>
+		<Size x="559" y="69"/>
 		<Backdrop edgeFile="Interface\DialogFrame\UI-DialogBox-Background-Dark" tile="true">
 			<EdgeSize>
 				<AbsValue val="1"/>
@@ -647,13 +700,13 @@
 		<Frames>
 			<Frame name="$parentType" parentKey="Type" inherits="TMW_DropDownMenuTemplate">
 				<Anchors>
-					<Anchor point="TOPLEFT" x="9" y="-15"/>
+					<Anchor point="TOPLEFT" x="9" y="-14.5"/>
 				</Anchors>
 				<Scripts>
 					<OnLoad>
 						self.wrapTooltips = 1
 						UIDropDownMenu_SetWidth(self, 160)
-						UIDropDownMenu_JustifyText(self, "LEFT")
+						--UIDropDownMenu_JustifyText(self, "LEFT")
 						_G[self:GetName() .. "Button"]:SetScript("PreClick", function()
 							UIDropDownMenu_Initialize(self, TMW.CNDT.TypeMenu_DropDown, "DROPDOWN")
 							_G[self:GetName() .. "Button"]:SetScript("PreClick", nil)
@@ -671,7 +724,7 @@
 						self.wrapTooltips = 1
 						self:Hide()
 						UIDropDownMenu_SetWidth(self, 168)
-						UIDropDownMenu_JustifyText(self, "LEFT")
+						--UIDropDownMenu_JustifyText(self, "LEFT")
 						_G[self:GetName() .. "Button"]:SetScript("PreClick", function()
 							UIDropDownMenu_Initialize(self, TMW.CNDT.IconMenu_DropDown, "DROPDOWN")
 							_G[self:GetName() .. "Button"]:SetScript("PreClick", nil)
@@ -732,7 +785,7 @@
 						self.wrapTooltips = 1
 						_G[self:GetName() .. "Text"]:SetFontObject(GameFontHighlightLarge)
 						UIDropDownMenu_SetWidth(self, 47)
-						UIDropDownMenu_JustifyText(self, "LEFT")
+						--UIDropDownMenu_JustifyText(self, "LEFT")
 						_G[self:GetName() .. "Button"]:SetScript("PreClick", function()
 							UIDropDownMenu_Initialize(self, TMW.CNDT.OperatorMenu_DropDown, "DROPDOWN")
 							_G[self:GetName() .. "Button"]:SetScript("PreClick", nil)
@@ -742,9 +795,9 @@
 				</Scripts>
 			</Frame>
 			<Slider name="$parentSlider" parentKey="Slider" inherits="OptionsSliderTemplate" minvalue="0" maxvalue="100" valuestep="1" defaultvalue="100">
-				<Size x="523" y="17"/>
+				<Size x="522" y="17"/>
 				<Anchors>
-					<Anchor point="TOPRIGHT" x="-5" y="-41"/>
+					<Anchor point="TOPRIGHT" x="-5" y="-39"/>
 				</Anchors>
 				<Layers>
 					<Layer level="ARTWORK">
@@ -791,7 +844,7 @@
 			<EditBox name="$parentEditBox" inherits="TellMeWhen_InputBoxTemplate" parentKey="EditBox" autoFocus="false">
 				<Size x="302" y="18"/>
 				<Anchors>
-					<Anchor point="TOPLEFT" relativeTo="$parentType" relativePoint="BOTTOMLEFT" x="23" y="4"/>
+					<Anchor point="TOPLEFT" relativeTo="$parentType" relativePoint="BOTTOMLEFT" x="23" y="7"/>
 				</Anchors>
 				<Scripts>
 					<OnEditFocusLost>
@@ -804,7 +857,7 @@
 			<EditBox name="$parentEditBox2" inherits="TellMeWhen_InputBoxTemplate" parentKey="EditBox2" autoFocus="false">
 				<Size x="302" y="18"/>
 				<Anchors>
-					<Anchor point="LEFT" relativeTo="$parentEditBox" relativePoint="RIGHT" x="15" y="0"/>
+					<Anchor point="LEFT" relativeTo="$parentEditBox" relativePoint="RIGHT" x="15"/>
 				</Anchors>
 				<Scripts>
 					<OnEditFocusLost>
@@ -1047,7 +1100,7 @@
 					<Layer level="ARTWORK">
 						<FontString name="$parentText" parentKey="text" justifyH="CENTER" inherits="GameFontHighlight">
 							<Anchors>
-								<Anchor point="CENTER" />
+								<Anchor point="CENTER"/>
 							</Anchors>
 						</FontString>
 					</Layer>
@@ -1072,6 +1125,7 @@
 							
 							self.text:SetText(text)
 							self.value = value
+							self:SetWidth(self.text:GetWidth())
 						end
 						function self:GetValue()
 							return self.value
@@ -1094,7 +1148,7 @@
 			<Frame name="$parentOpenParenthesis" parentKey="OpenParenthesis">
 				<Size x="100" y="20"/>
 				<Anchors>
-					<Anchor point="BOTTOMRIGHT" relativePoint="TOPRIGHT" x="-150" y="-2"/>
+					<Anchor point="LEFT" relativePoint="RIGHT" relativeTo="$parentAndOr" x="5" y="0"/>
 				</Anchors>
 				<Frames>
 					<CheckButton name="$parent1" inherits="TellMeWhen_ConditionEditorParenthesisTemplate" id="1">
@@ -1111,9 +1165,6 @@
 			</Frame>
 			<Frame name="$parentCloseParenthesis" parentKey="CloseParenthesis">
 				<Size x="100" y="20"/>
-				<Anchors>
-					<Anchor point="TOPLEFT" relativePoint="BOTTOMLEFT" x="150" y="2"/>
-				</Anchors>
 				<Frames>
 					<CheckButton name="$parent1" inherits="TellMeWhen_ConditionEditorParenthesisTemplate" id="1">
 						<Anchors>
@@ -1187,22 +1238,22 @@
 			<Layer level="OVERLAY">
 				<FontString name="$parentTextType" parentKey="TextType" inherits="GameFontNormalSmall" justifyH="CENTER">
 					<Anchors>
-						<Anchor point="BOTTOM" relativeto="$parentType" relativePoint="TOP" y="0"/>
+						<Anchor point="BOTTOM" relativeto="$parentType" relativePoint="TOP" y="-0.5"/>
 					</Anchors>
 				</FontString>
 				<FontString name="$parentTextUnitOrIcon" parentKey="TextUnitOrIcon" inherits="GameFontNormalSmall" justifyH="CENTER">
 					<Anchors>
-						<Anchor point="BOTTOM" relativeto="$parentUnit" relativePoint="TOP" y="-3"/>
+						<Anchor point="BOTTOM" relativeto="$parentUnit" relativePoint="TOP" y="-3.5"/>
 					</Anchors>
 				</FontString>
 				<FontString name="$parentTextOperator" parentKey="TextOperator" inherits="GameFontNormalSmall" justifyH="CENTER">
 					<Anchors>
-						<Anchor point="BOTTOM" relativeto="$parentOperator" relativePoint="TOP" y="0"/>
+						<Anchor point="BOTTOM" relativeto="$parentOperator" relativePoint="TOP" y="-0.5"/>
 					</Anchors>
 				</FontString>
 				<FontString name="$parentTextValue" parentKey="TextValue" inherits="GameFontNormalSmall" justifyH="CENTER">
 					<Anchors>
-						<Anchor point="BOTTOMLEFT" relativeto="$parentOperator" relativePoint="TOPRIGHT" x="-8" y="-0"/>
+						<Anchor point="BOTTOMLEFT" relativeto="$parentOperator" relativePoint="TOPRIGHT" x="-8" y="-0.5"/>
 					</Anchors>
 				</FontString>
 				<FontString name="$parentValText" parentKey="ValText" inherits="GameFontNormalLarge" justifyH="LEFT">
@@ -1252,7 +1303,7 @@
 					<OnLoad>
 						self.wrapTooltips = 1
 						UIDropDownMenu_SetWidth(self, 360)
-						UIDropDownMenu_JustifyText(self, "LEFT")
+						--UIDropDownMenu_JustifyText(self, "LEFT")
 						_G[self:GetName() .. "Button"]:SetScript("PreClick", function()
 							UIDropDownMenu_Initialize(self, TMW.ME.IconMenu, "DROPDOWN")
 							_G[self:GetName() .. "Button"]:SetScript("PreClick", nil)
@@ -1673,7 +1724,7 @@
 	</Frame>
 	
 	<Frame name="TellMeWhen_IconEditor" hidden="true" movable="true" enableMouse="true" enableKeyboard="true" propagateKeyboardInput="true" frameStrata="DIALOG">
-		<Size x="600" y="390"/>
+		<Size x="600" y="400"/>
 		<Anchors>
 			<Anchor point="CENTER" relativeTo="UIParent"/>
 		</Anchors>
@@ -1969,7 +2020,7 @@
 									_G[self:GetName() .. "Button"]:SetScript("PreClick", nil)
 								end)
 								UIDropDownMenu_SetText(self, TMW.L["ICONMENU_TYPE"])
-								UIDropDownMenu_JustifyText(self, "LEFT")
+								--UIDropDownMenu_JustifyText(self, "LEFT")
 								_G[self:GetName() .. "Button"]:HookScript("OnClick", function(self)
 									TMW.IE:SaveSettings()
 								end)
@@ -2054,7 +2105,7 @@
 								GameTooltip_SetDefaultAnchor(GameTooltip, self)
 								GameTooltip:AddLine(self.__title, HIGHLIGHT_FONT_COLOR.r, HIGHLIGHT_FONT_COLOR.g, HIGHLIGHT_FONT_COLOR.b, 1)
 								if IsModifierKeyDown() then
-									GameTooltip:AddLine(TMW.IE:GetRealNames(self), NORMAL_FONT_COLOR.r, NORMAL_FONT_COLOR.g, NORMAL_FONT_COLOR.b, 1)
+									GameTooltip:AddLine(TMW.IE:GetRealNames(self), NORMAL_FONT_COLOR.r, NORMAL_FONT_COLOR.g, NORMAL_FONT_COLOR.b, nil)
 								else
 									GameTooltip:AddLine(self.__text, NORMAL_FONT_COLOR.r, NORMAL_FONT_COLOR.g, NORMAL_FONT_COLOR.b, 1)
 								end
@@ -3201,7 +3252,7 @@
 					</Frame>
 					<ScrollFrame name="$parentScrollFrame" parentKey="ScrollFrame" inherits="UIPanelScrollFrameCodeTemplate" >
 						<Anchors>
-							<Anchor point="TOPLEFT" y="-32"/>
+							<Anchor point="TOPLEFT" y="-31"/>
 							<Anchor point="BOTTOMRIGHT" y="32"/>
 						</Anchors>
 						<ScrollChild>
@@ -3495,7 +3546,7 @@
 						<Scripts>
 							<OnLoad>
 								self.Header:SetText(TMW.L["ANN_SUB_CHANNEL"])
-								UIDropDownMenu_JustifyText(self, "LEFT")
+								--UIDropDownMenu_JustifyText(self, "LEFT")
 								UIDropDownMenu_SetWidth(self, 120)
 								_G[self:GetName() .. "Button"]:SetScript("PreClick", function()
 									UIDropDownMenu_Initialize(self, TMW.ANN.DropDown, "DROPDOWN")
@@ -3783,7 +3834,7 @@
 			<Button name="$parentUndo" parentKey="UndoButton" inherits="TellMeWhen_ButtonTemplate" >
 				<Size x="100" y="17"/>
 				<Anchors>
-					<Anchor point="LEFT" relativeTo="$parentReset" relativePoint="RIGHT" x="5" y="0"/>
+					<Anchor point="LEFT" relativeTo="$parentReset" relativePoint="RIGHT" x="5"/>
 				</Anchors>
 				<Scripts>
 					<OnLoad>
@@ -3809,7 +3860,7 @@
 			<Button name="$parentRedo" parentKey="RedoButton" inherits="TellMeWhen_ButtonTemplate" >
 				<Size x="100" y="17"/>
 				<Anchors>
-					<Anchor point="LEFT" relativeTo="$parentUndo" relativePoint="RIGHT" x="0" y="0"/>
+					<Anchor point="LEFT" relativeTo="$parentUndo" relativePoint="RIGHT"/>
 				</Anchors>
 				<Scripts>
 					<OnLoad>

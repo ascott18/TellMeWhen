@@ -776,10 +776,10 @@ CNDT.Types = {
 	},
 
 
--------------------------------------status/attributes
+-------------------------------------unit status/attributes
 	{ -- exists
 		text = L["CONDITIONPANEL_EXISTS"],
-		category = L["CNDTCAT_STATUS"],
+		category = L["CNDTCAT_ATTRIBUTES_UNIT"],
 		value = "EXISTS",
 		min = 0,
 		max = 1,
@@ -792,7 +792,7 @@ CNDT.Types = {
 	{ -- alive
 		text = L["CONDITIONPANEL_ALIVE"],
 		tooltip = L["CONDITIONPANEL_ALIVE_DESC"],
-		category = L["CNDTCAT_STATUS"],
+		category = L["CNDTCAT_ATTRIBUTES_UNIT"],
 		value = "ALIVE",
 		min = 0,
 		max = 1,
@@ -804,7 +804,7 @@ CNDT.Types = {
 	},
 	{ -- combat
 		text = L["CONDITIONPANEL_COMBAT"],
-		category = L["CNDTCAT_STATUS"],
+		category = L["CNDTCAT_ATTRIBUTES_UNIT"],
 		value = "COMBAT",
 		min = 0,
 		max = 1,
@@ -825,7 +825,7 @@ CNDT.Types = {
 	},
 	{ -- controlling vehicle
 		text = L["CONDITIONPANEL_VEHICLE"],
-		category = L["CNDTCAT_STATUS"],
+		category = L["CNDTCAT_ATTRIBUTES_UNIT"],
 		value = "VEHICLE",
 		min = 0,
 		max = 1,
@@ -846,7 +846,7 @@ CNDT.Types = {
 	},
 	{ -- pvp
 		text = L["CONDITIONPANEL_PVPFLAG"],
-		category = L["CNDTCAT_STATUS"],
+		category = L["CNDTCAT_ATTRIBUTES_UNIT"],
 		value = "PVPFLAG",
 		min = 0,
 		max = 1,
@@ -858,7 +858,7 @@ CNDT.Types = {
 	},
 	{ -- react
 		text = L["ICONMENU_REACT"],
-		category = L["CNDTCAT_STATUS"],
+		category = L["CNDTCAT_ATTRIBUTES_UNIT"],
 		value = "REACT",
 		min = 1,
 		max = 2,
@@ -871,7 +871,7 @@ CNDT.Types = {
 	{ -- speed
 		text = L["SPEED"],
 		tooltip = L["SPEED_DESC"],
-		category = L["CNDTCAT_STATUS"],
+		category = L["CNDTCAT_ATTRIBUTES_UNIT"],
 		value = "SPEED",
 		min = 0,
 		max = 500,
@@ -883,7 +883,7 @@ CNDT.Types = {
 	},
 	{ -- runspeed
 		text = L["RUNSPEED"],
-		category = L["CNDTCAT_STATUS"],
+		category = L["CNDTCAT_ATTRIBUTES_UNIT"],
 		value = "RUNSPEED",
 		min = 0,
 		max = 500,
@@ -895,7 +895,7 @@ CNDT.Types = {
 	},
 	{ -- name
 		text = L["CONDITIONPANEL_NAME"],
-		category = L["CNDTCAT_STATUS"],
+		category = L["CNDTCAT_ATTRIBUTES_UNIT"],
 		value = "NAME",
 		min = 0,
 		max = 1,
@@ -908,7 +908,7 @@ CNDT.Types = {
 	},
 	{ -- level
 		text = L["CONDITIONPANEL_LEVEL"],
-		category = L["CNDTCAT_STATUS"],
+		category = L["CNDTCAT_ATTRIBUTES_UNIT"],
 		value = "LEVEL",
 		min = -1,
 		max = 90,
@@ -919,7 +919,7 @@ CNDT.Types = {
 	},
 	{ -- class
 		text = L["CONDITIONPANEL_CLASS"],
-		category = L["CNDTCAT_STATUS"],
+		category = L["CNDTCAT_ATTRIBUTES_UNIT"],
 		value = "CLASS",
 		min = 1,
 		max = #classes,
@@ -938,7 +938,7 @@ CNDT.Types = {
 	},
 	{ -- classification
 		text = L["CONDITIONPANEL_CLASSIFICATION"],
-		category = L["CNDTCAT_STATUS"],
+		category = L["CNDTCAT_ATTRIBUTES_UNIT"],
 		value = "CLASSIFICATION",
 		min = 1,
 		max = #classifications,
@@ -949,7 +949,7 @@ CNDT.Types = {
 	},
 	{ -- role
 		text = L["CONDITIONPANEL_ROLE"],
-		category = L["CNDTCAT_STATUS"],
+		category = L["CNDTCAT_ATTRIBUTES_UNIT"],
 		value = "ROLE",
 		min = 1,
 		max = #roles,
@@ -960,7 +960,7 @@ CNDT.Types = {
 	},
 	{ -- raid icon
 		text = L["CONDITIONPANEL_RAIDICON"],
-		category = L["CNDTCAT_STATUS"],
+		category = L["CNDTCAT_ATTRIBUTES_UNIT"],
 		value = "RAIDICON",
 		min = 0,
 		max = 8,
@@ -971,7 +971,7 @@ CNDT.Types = {
 	{ -- unit is unit
 		text = L["CONDITIONPANEL_UNITISUNIT"],
 		tooltip = L["CONDITIONPANEL_UNITISUNIT_DESC"],
-		category = L["CNDTCAT_STATUS"],
+		category = L["CNDTCAT_ATTRIBUTES_UNIT"],
 		value = "UNITISUNIT",
 		min = 0,
 		max = 1,
@@ -985,7 +985,7 @@ CNDT.Types = {
 	{ -- unit threat scaled
 		text = L["CONDITIONPANEL_THREAT_SCALED"],
 		tooltip = L["CONDITIONPANEL_THREAT_SCALED_DESC"],
-		category = L["CNDTCAT_STATUS"],
+		category = L["CNDTCAT_ATTRIBUTES_UNIT"],
 		value = "THREATSCALED",
 		min = 0,
 		max = 100,
@@ -997,7 +997,7 @@ CNDT.Types = {
 	{ -- unit threat raw
 		text = L["CONDITIONPANEL_THREAT_RAW"],
 		tooltip = L["CONDITIONPANEL_THREAT_RAW_DESC"],
-		category = L["CNDTCAT_STATUS"],
+		category = L["CNDTCAT_ATTRIBUTES_UNIT"],
 		value = "THREATRAW",
 		min = 0,
 		max = 130,
@@ -1007,11 +1007,12 @@ CNDT.Types = {
 		funcstr = [[(select(4, UnitDetailedThreatSituation("player", c.Unit)) or 0) c.Operator c.Level]],
 	},
 
+	
+-------------------------------------player status/attributes
 	{ -- instance type
 		text = L["CONDITIONPANEL_INSTANCETYPE"],
-		category = L["CNDTCAT_STATUS"],
+		category = L["CNDTCAT_ATTRIBUTES_PLAYER"],
 		value = "INSTANCE",
-		spacebefore = true,
 		min = 0,
 		max = 8,
 		unit = false,
@@ -1033,7 +1034,7 @@ CNDT.Types = {
 	},
 	{ -- grouptype
 		text = L["CONDITIONPANEL_GROUPTYPE"],
-		category = L["CNDTCAT_STATUS"],
+		category = L["CNDTCAT_ATTRIBUTES_PLAYER"],
 		value = "GROUP",
 		min = 0,
 		max = 2,
@@ -1047,7 +1048,7 @@ CNDT.Types = {
 	},
 	{ -- mounted
 		text = L["CONDITIONPANEL_MOUNTED"],
-		category = L["CNDTCAT_STATUS"],
+		category = L["CNDTCAT_ATTRIBUTES_PLAYER"],
 		value = "MOUNTED",
 		min = 0,
 		max = 1,
@@ -1060,7 +1061,7 @@ CNDT.Types = {
 	},
 	{ -- swimming
 		text = L["CONDITIONPANEL_SWIMMING"],
-		category = L["CNDTCAT_STATUS"],
+		category = L["CNDTCAT_ATTRIBUTES_PLAYER"],
 		value = "SWIMMING",
 		min = 0,
 		max = 1,
@@ -1073,7 +1074,7 @@ CNDT.Types = {
 	},
 	{ -- resting
 		text = L["CONDITIONPANEL_RESTING"],
-		category = L["CNDTCAT_STATUS"],
+		category = L["CNDTCAT_ATTRIBUTES_PLAYER"],
 		value = "RESTING",
 		min = 0,
 		max = 1,
@@ -1092,7 +1093,7 @@ CNDT.Types = {
 				pclass == "DRUID" and L["SHAPESHIFT"] or
 				--pclass == "WARRIOR" and L["STANCE"] or
 				L["STANCE"],
-		category = L["CNDTCAT_STATUS"],
+		category = L["CNDTCAT_ATTRIBUTES_PLAYER"],
 		value = "STANCE",
 		min = 0,
 		max = #TMW.CSN,
@@ -1106,7 +1107,7 @@ CNDT.Types = {
 	},
 	{ -- talent spec
 		text = L["UIPANEL_SPEC"],
-		category = L["CNDTCAT_STATUS"],
+		category = L["CNDTCAT_ATTRIBUTES_PLAYER"],
 		value = "SPEC",
 		min = 1,
 		max = 2,
@@ -1122,7 +1123,7 @@ CNDT.Types = {
 	},
 	{ -- talent tree
 		text = L["UIPANEL_TREE"],
-		category = L["CNDTCAT_STATUS"],
+		category = L["CNDTCAT_ATTRIBUTES_PLAYER"],
 		value = "TREE",
 		min = 1,
 		max = 3,
@@ -1135,7 +1136,7 @@ CNDT.Types = {
 	}, 
 	{ -- points in talent
 		text = L["UIPANEL_PTSINTAL"],
-		category = L["CNDTCAT_STATUS"],
+		category = L["CNDTCAT_ATTRIBUTES_PLAYER"],
 		value = "PTSINTAL",
 		min = 0,
 		max = 5,
@@ -1149,7 +1150,7 @@ CNDT.Types = {
 	},
 	{ -- pet autocast
 		text = L["CONDITIONPANEL_AUTOCAST"],
-		category = L["CNDTCAT_STATUS"],
+		category = L["CNDTCAT_ATTRIBUTES_PLAYER"],
 		value = "AUTOCAST",
 		min = 0,
 		max = 1,
@@ -1164,7 +1165,7 @@ CNDT.Types = {
 	},
 	{ -- pet attack mode
 		text = L["CONDITIONPANEL_PETMODE"],
-		category = L["CNDTCAT_STATUS"],
+		category = L["CNDTCAT_ATTRIBUTES_PLAYER"],
 		value = "PETMODE",
 		min = 1,
 		max = 3,
@@ -1178,7 +1179,7 @@ CNDT.Types = {
 	},
 	{ -- pet talent tree
 		text = L["CONDITIONPANEL_PETTREE"],
-		category = L["CNDTCAT_STATUS"],
+		category = L["CNDTCAT_ATTRIBUTES_PLAYER"],
 		value = "PETTREE",
 		min = 409,
 		max = 411,
@@ -1196,7 +1197,7 @@ CNDT.Types = {
 	},
 	{ -- tracking
 		text = L["CONDITIONPANEL_TRACKING"],
-		category = L["CNDTCAT_STATUS"],
+		category = L["CNDTCAT_ATTRIBUTES_PLAYER"],
 		value = "TRACKING",
 		min = 0,
 		max = 1,
@@ -1486,8 +1487,7 @@ CNDT.Types = {
 		text = L["ICONMENU_BUFF"] .. " - " .. L["STACKS"],
 		value = "BUFFSTACKS",
 		category = L["CNDTCAT_BUFFSDEBUFFS"],
-		min = 0,
-		max = 20,
+		range = 20,
 		name = function(editbox) TMW:TT(editbox, L["ICONMENU_BUFF"] .. " - " .. L["STACKS"], "BUFFCNDT_DESC", 1) editbox.label = L["BUFFTOCHECK"] end,
 		useSUG = true,
 		check = function(check) TMW:TT(check, "ONLYCHECKMINE", "ONLYCHECKMINE_DESC") end,
@@ -1569,8 +1569,7 @@ CNDT.Types = {
 		text = L["ICONMENU_DEBUFF"] .. " - " .. L["STACKS"],
 		value = "DEBUFFSTACKS",
 		category = L["CNDTCAT_BUFFSDEBUFFS"],
-		min = 0,
-		max = 20,
+		range = 20,
 		name = function(editbox) TMW:TT(editbox, L["ICONMENU_DEBUFF"] .. " - " .. L["STACKS"], "BUFFCNDT_DESC", 1) editbox.label = L["DEBUFFTOCHECK"]end,
 		useSUG = true,
 		check = function(check) TMW:TT(check, "ONLYCHECKMINE", "ONLYCHECKMINE_DESC") end,
