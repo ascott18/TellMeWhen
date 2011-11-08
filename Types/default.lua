@@ -48,7 +48,7 @@ function Type:Setup(icon, groupID, iconID)
 	else
 		icon:SetTexture(nil)
 	end
-	icon:SetAlpha(0)
+	icon:SetInfo(0)
 end
 
 function Type:DragReceived(icon, t, data, subType)

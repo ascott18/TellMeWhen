@@ -24,7 +24,6 @@ TellMeWhen = TMW
 local L = LibStub("AceLocale-3.0"):GetLocale("TellMeWhen", true)
 --L = setmetatable({}, {__index = function() return "| ! | ! | ! | ! | ! | ! | ! | ! | ! | ! | ! | ! | ! | ! | ! | ! | ! " end}) -- stress testing for text widths
 TMW.L = L
-local LBF = LibStub("LibButtonFacade", true)
 local LMB = LibStub("Masque", true) or (LibMasque and LibMasque("Button"))
 local AceDB = LibStub("AceDB-3.0")
 local LSM = LibStub("LibSharedMedia-3.0")
@@ -33,10 +32,9 @@ local DRData = LibStub("DRData-1.0", true)
 TELLMEWHEN_VERSION = "4.6.6"
 TELLMEWHEN_VERSION_MINOR = strmatch(" @project-version@", " r%d+") or ""
 TELLMEWHEN_VERSION_FULL = TELLMEWHEN_VERSION .. TELLMEWHEN_VERSION_MINOR
-TELLMEWHEN_VERSIONNUMBER = 46606 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
+TELLMEWHEN_VERSIONNUMBER = 46607 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
 if TELLMEWHEN_VERSIONNUMBER > 47000 or TELLMEWHEN_VERSIONNUMBER < 46000 then return error("YOU SCREWED UP THE VERSION NUMBER OR DIDNT CHANGE THE SAFETY LIMITS") end -- safety check because i accidentally made the version number 414069 once
--- i'll just plop this here for a second....
--- * Began rewriting the suggestion list. IT IS HIGHLY UNUSABLE RIGHT NOW. THIS IS AN ALPHA VERSION, SO DONT COMPLAIN.
+
 TELLMEWHEN_MAXGROUPS = 1 	--this is a default, used by SetTheory (addon), so dont rename
 TELLMEWHEN_MAXROWS = 20
 
@@ -50,24 +48,28 @@ local UnitPower, PowerBarColor =
 	  UnitPower, PowerBarColor
 local PlaySoundFile, SendChatMessage =
 	  PlaySoundFile, SendChatMessage
-local tonumber, tostring, type, pairs, ipairs, tinsert, tremove, sort, select, wipe, rawget, tDeleteItem = --tDeleteItem is a blizzard function defined in UIParent.lua
-	  tonumber, tostring, type, pairs, ipairs, tinsert, tremove, sort, select, wipe, rawget, tDeleteItem
+local UnitName, UnitInBattleground, UnitInRaid, GetNumPartyMembers, GetChannelList =
+	  UnitName, UnitInBattleground, UnitInRaid, GetNumPartyMembers, GetChannelList
+local tonumber, tostring, type, pairs, ipairs, tinsert, tremove, sort, select, wipe, rawget, next, tDeleteItem = --tDeleteItem is a blizzard function defined in UIParent.lua
+	  tonumber, tostring, type, pairs, ipairs, tinsert, tremove, sort, select, wipe, rawget, next, tDeleteItem
 local strfind, strmatch, format, gsub, strsub, strtrim, strsplit, strlower, min, max, ceil, floor =
 	  strfind, strmatch, format, gsub, strsub, strtrim, strsplit, strlower, min, max, ceil, floor
 local _G, GetTime =
 	  _G, GetTime
 local MikSBT, Parrot, SCT =
 	  MikSBT, Parrot, SCT
+local TARGET_TOKEN_NOT_FOUND, FOCUS_TOKEN_NOT_FOUND =
+	  TARGET_TOKEN_NOT_FOUND, FOCUS_TOKEN_NOT_FOUND
 local CL_PLAYER = COMBATLOG_OBJECT_TYPE_PLAYER
 local CL_PET = COMBATLOG_OBJECT_CONTROL_PLAYER
 local bitband = bit.band
 
 
 ---------- Locals ----------
-local db, st, co, updatehandler, BarGCD, ClockGCD, Locked, CNDT, SndChan, FramesToFind, UnitsToUpdate, CNDTEnv
+local db, st, co, updatehandler, BarGCD, ClockGCD, Locked, SndChan, FramesToFind, UnitsToUpdate, CNDTEnv
 local UPD_INTV = 0.06	--this is a default, local because i use it in onupdate functions
 local runEvents, updatePBar = 1, 1
-local GCD, NumShapeshiftForms, UpdateTimer = 0, 0, 0
+local GCD, NumShapeshiftForms, LastUpdate = 0, 0, 0
 local IconUpdateFuncs, GroupUpdateFuncs, unitsToChange = {}, {}, {}
 local GroupBase, IconBase = {}, {}
 local loweredbackup = {}
@@ -76,6 +78,10 @@ local sctcolor = {r=1, b=1, g=1}
 local clientVersion = select(4, GetBuildInfo())
 local addonVersion = tonumber(GetAddOnMetadata("TellMeWhen", "X-Interface"))
 local _, pclass = UnitClass("Player")
+
+if LibStub("LibButtonFacade", true) and select(6, GetAddOnInfo("Masque")) == "MISSING" then
+	TMW.Warn("TellMeWhen no longer supports ButtonFacade. If you wish to continue to skin your icons, please upgrade to ButtonFacade's successor, Masque.")
+end
 
 TMW.Print = TMW.Print or _G.print
 TMW.Warn = setmetatable(
@@ -424,6 +430,8 @@ do -- Iterators
 		end
 	end
 end
+
+
 
 local RelevantToAll = {
 	-- (or almost all, use false to override)
@@ -1061,37 +1069,35 @@ do -- STANCES
 	end
 end local CSN = TMW.CSN
 
+do -- hook LMB
+	local meta = LMB and getmetatable(LMB:Group("TellMeWhen")).__index
+	
+	if meta and meta.Skin and meta.Disable and meta.Enable then
+		local function hook(self)
+			if self and self.Addon == "TellMeWhen" then
+				TMW:ScheduleUpdate(.2)
+			end
+		end
+
+		hooksecurefunc(meta, "Skin", hook)
+		hooksecurefunc(meta, "Disable", hook)
+		hooksecurefunc(meta, "Enable", hook)
+		hooksecurefunc(meta, "Update", hook)
+		hooksecurefunc(meta, "ReSkin", hook)
+	end
+end
 
 -- --------------------------
 -- EXECUTIVE FUNCTIONS, ETC
 -- --------------------------
 
 
-if LBF then
-	local function SkinCallback(arg1, SkinID, Gloss, Backdrop, Group, Button, Colors)
-		if Group and SkinID then
-			local groupID = tonumber(strmatch(Group, "%d+")) --Group is a string like "Group 5", so cant use :GetID()
-			if groupID then
-				db.profile.Groups[groupID]["LBF"]["SkinID"] = SkinID
-				db.profile.Groups[groupID]["LBF"]["Gloss"] = Gloss
-				db.profile.Groups[groupID]["LBF"]["Backdrop"] = Backdrop
-				db.profile.Groups[groupID]["LBF"]["Colors"] = Colors
-			end
-		end
-		if not TMW.DontRun then
-			TMW:Update()
-		end
-	end
-
-	LBF:RegisterSkinCallback("TellMeWhen", SkinCallback, TMW)
-end
-
 function TMW:OnInitialize()
-	CNDT = TMW.CNDT
-	if not rawget(Types, "item") then
+	if not rawget(Types, "multistate") then
 		-- this also includes upgrading from older than 3.0 (pre-Ace3 DB settings)
 		StaticPopupDialogs["TMW_RESTARTNEEDED"] = {
-			text = L["ERROR_MISSINGFILE"],
+			--text = L["ERROR_MISSINGFILE"],
+			text = L["ERROR_MISSINGFILE_NOREQ"],
 			button1 = EXIT_GAME,
 			button2 = CANCEL,
 			OnAccept = ForceQuit,
@@ -1099,7 +1105,7 @@ function TMW:OnInitialize()
 			showAlert = true,
 			whileDead = true,
 		}
-		StaticPopup_Show("TMW_RESTARTNEEDED", TELLMEWHEN_VERSION_FULL, "item.lua")
+		StaticPopup_Show("TMW_RESTARTNEEDED", TELLMEWHEN_VERSION_FULL, "multistate.lua")
 	end
 	
 	TMW:ProcessEquivalencies()
@@ -1163,6 +1169,8 @@ function TMW:OnInitialize()
 	db.RegisterCallback(TMW, "OnProfileShutdown",	"ShutdownProfile")
 	db.RegisterCallback(TMW, "OnDatabaseShutdown",	"ShutdownProfile")
 	
+	CNDTEnv = TMW.CNDT.Env
+	TMW:SetScript("OnUpdate", TMW.OnUpdate)
 	
 	TMW.ClassSpellCache = db.global.ClassSpellCache
 	local function AddID(id)
@@ -1173,7 +1181,7 @@ function TMW:OnInitialize()
 		end
 	end
 	for id in pairs(TMW.ClassSpellCache[pclass]) do
-		-- do current class's spells first to discourage overwrites
+		-- do current class spells first to discourage overwrites
 		AddID(id)
 	end
 	for class, tbl in pairs(TMW.ClassSpellCache) do
@@ -1188,10 +1196,6 @@ function TMW:OnInitialize()
 		AddID(id)
 	end
 
-
-	if LBF then
-		LBF:RegisterSkinCallback("TellMeWhen", TellMeWhen_SkinCallback, self)
-	end
 	TellMeWhenDB.AuraCache = TellMeWhenDB.AuraCache or {}
 	TMW.AuraCache = TellMeWhenDB.AuraCache
 	TMW:RegisterEvent("COMBAT_LOG_EVENT_UNFILTERED")
@@ -1279,8 +1283,9 @@ function TMW:OnUpdate()					-- this is where all icon OnUpdate scripts are actua
 	time = GetTime()
 	CNDTEnv.time = time
 	TMW.time = time
-	if UpdateTimer <= time - UPD_INTV then
-		UpdateTimer = time
+	
+	if LastUpdate <= time - UPD_INTV then
+		LastUpdate = time
 		_, GCD=GetSpellCooldown(GCDSpell)
 		CNDTEnv.GCD = GCD
 		
@@ -1333,16 +1338,12 @@ function TMW:Update()
 			TMW:Print(v)
 		end
 	end
-	
-	TMW.DontRun = true -- TMW:Update() is ran in the LBF skin callback, which just causes an infinite loop. This tells it not to
 
 	time = GetTime() TMW.time = time
-	UpdateTimer = time - 10
-	runEvents = nil
+	LastUpdate = time - 10
 	updatePBar = 1
 
 	Locked = db.profile.Locked
-	CNDTEnv = CNDT.Env
 	CNDTEnv.Locked = Locked
 	TMW.DoWipeAC = false
 	if not Locked then
@@ -1352,12 +1353,9 @@ function TMW:Update()
 		else
 			TellMeWhen_ConfigWarning:Hide()
 		end
-	else
-		if TellMeWhen_ConfigWarning then
-			TellMeWhen_ConfigWarning:Hide()
-		end
+	elseif TellMeWhen_ConfigWarning then
+		TellMeWhen_ConfigWarning:Hide()
 	end
-	TMW:SetScript("OnUpdate", TMW.OnUpdate)
 
 	if TMW.IE then
 		TMW.IE:SaveSettings()
@@ -1372,14 +1370,15 @@ function TMW:Update()
 	BarGCD = db.profile.BarGCD
 	ClockGCD = db.profile.ClockGCD
 	SndChan = db.profile.MasterSound and "Master" or nil
+	st = db.profile.CDSTColor
+	co = db.profile.CDCOColor
+
+	wipe(TMW.Icons)
+	wipe(TMW.IconsLookup)
 
 	for group in TMW.InGroups() do
 		group:Hide()
 	end
-	TMW:ColorUpdate()
-
-	wipe(TMW.Icons)
-	wipe(TMW.IconsLookup)
 
 	for groupID = 1, TELLMEWHEN_MAXGROUPS do -- dont use TMW.InGroups() because that will setup every group that exists, even if it shouldn't be setup (i.e. it has been deleted or the user changed profiles)
 		TMW:Group_Update(groupID)
@@ -1390,14 +1389,11 @@ function TMW:Update()
 	end
 
 	time = GetTime() TMW.time = time
-	TMW:ScheduleTimer("RestoreSound", UPD_INTV*2.1)
 	TMW.Initd = true
-	TMW.DontRun = false
 end
 
-local upgradeTable
 function TMW:GetUpgradeTable()			-- upgrade functions
-	if upgradeTable then return upgradeTable end
+	if TMW.UpgradeTable then return TMW.UpgradeTable end
 	local t = {
 	
 		[46604] = {
@@ -2037,12 +2033,12 @@ function TMW:GetUpgradeTable()			-- upgrade functions
 
 	}
 
-	upgradeTable = {}
+	TMW.UpgradeTable = {}
 	for k, v in pairs(t) do
 		v.Version = k
-		tinsert(upgradeTable, v)
+		tinsert(TMW.UpgradeTable, v)
 	end
-	sort(upgradeTable, function(a, b)
+	sort(TMW.UpgradeTable, function(a, b)
 		if a.priority or b.priority then
 			if a.priority and b.priority then
 				return a.priority < b.priority
@@ -2052,7 +2048,7 @@ function TMW:GetUpgradeTable()			-- upgrade functions
 		end
 		return a.Version < b.Version
 	end)
-	return upgradeTable
+	return TMW.UpgradeTable
 end
 
 function TMW:GlobalUpgrade()
@@ -2286,12 +2282,7 @@ function TMW:CheckForInvalidIcons()
 	end
 end
 
-function TMW:ColorUpdate()
-	st = db.profile.CDSTColor
-	co = db.profile.CDCOColor
-end
-
-function TMW:RestoreSound()
+function TMW:RestoreEvents()
 	runEvents = 1
 end
 
@@ -2452,11 +2443,12 @@ function TMW:IsIconValid(icon)
 	return TMW.IconsLookup[icon]
 end
 
+
 -- -----------
 -- GROUPS
 -- -----------
 
-function GroupScriptSort(groupA, groupB)
+local function GroupScriptSort(groupA, groupB)
 	local gOrder = -db.profile.CheckOrder
 	return groupA:GetID()*gOrder < groupB:GetID()*gOrder
 end
@@ -2557,12 +2549,6 @@ function TMW:Group_Update(groupID)
 
 	if LMB then
 		db.profile.Groups[groupID].LBF = nil -- if people get masque then they dont need these settings anymore. If they want to downgrade then they will just have to set things up again, sorry
-	elseif LBF then
-		local lbfs = db.profile.Groups[groupID]["LBF"]
-		LBF:Group("TellMeWhen", format(L["fGROUP"], groupID))
-		if lbfs.SkinID then
-			LBF:Group("TellMeWhen", format(L["fGROUP"], groupID)):Skin(lbfs.SkinID, lbfs.Gloss, lbfs.Backdrop, lbfs.Colors)
-		end
 	end
 	group.FontTest = (not Locked) and group.FontTest
 
@@ -2611,7 +2597,7 @@ function TMW:Group_Update(groupID)
 	if group.Enabled and group.CorrectSpec and Locked then
 		group:Show()
 		if group.Conditions.n > 0 or group.OnlyInCombat then
-			group:SetScript("OnUpdate", CNDT:ProcessConditions(group)) -- dont be alarmed, this is handled by GroupSetScript
+			group:SetScript("OnUpdate", TMW.CNDT:ProcessConditions(group)) -- dont be alarmed, this is handled by GroupSetScript
 		else
 			group:SetScript("OnUpdate", nil)
 		end
@@ -2629,12 +2615,9 @@ end
 -- ------------------
 -- ICONS
 -- ------------------
+	
+	
 
-local function LMBSkinHook(self)
-	if self and self.Addon == "TellMeWhen" then
-		TMW:ScheduleUpdate(.2)
-	end
-end local hookedLMBSkin
 
 local function OnGCD(d)
 	if d == 1 then return true end -- a cd of 1 is always a GCD (or at least isn't worth showing)
@@ -2715,34 +2698,6 @@ local function PwrBarOnUpdate(bar)
 	end
 end
 
-function IconBase.SetAlpha(icon, alpha)
-	if alpha ~= icon.__alpha then
-		if alpha == 0 then
-			local data = icon.OnHide
-			if data then
-				icon:HandleEvent(data)
-			end
-		elseif icon.__alpha == 0 then
-			local data = icon.OnShow
-			if data then
-				icon:HandleEvent(data)
-			end
-		elseif alpha > icon.__alpha then
-			local data = icon.OnAlphaInc
-			if data then
-				icon:HandleEvent(data)
-			end
-		else -- it must be less than, because it isnt greater than and it isnt the same --if alpha < icon.__alpha then
-			local data = icon.OnAlphaDec
-			if data then
-				icon:HandleEvent(data)
-			end
-		end
-		icon:setalpha(icon.FakeHidden or alpha) -- setalpha(lowercase) is the old, raw SetAlpha.
-		icon.__alpha = alpha
-	end
-end
-
 function IconBase.SetScript(icon, handler, func, dontnil)
 	if func ~= nil or not dontnil then
 		icon[handler] = func
@@ -2786,7 +2741,7 @@ end
 
 function IconBase.RegisterEvent(icon, event)
 	icon:registerevent(event)
-	icon.__hasEvents = 1
+	icon.hasEvents = 1
 end
 
 function IconBase.HandleEvent(icon, data, played, announced)
@@ -2964,7 +2919,7 @@ function IconBase.SetInfo(icon, alpha, color, texture, start, duration, spellChe
 			end
 		end
 		
-		icon:setalpha(icon.FakeHidden or alpha) -- setalpha(lowercase) is the old, raw SetAlpha.
+		icon:SetAlpha(icon.FakeHidden or alpha)
 		icon.__alpha = alpha
 	end
 
@@ -3068,7 +3023,7 @@ function IconBase.SetInfo(icon, alpha, color, texture, start, duration, spellChe
 	
 	
 	-- NO EVENT HANDLING PAST THIS POINT!
-	if alpha == 0 then
+	if alpha == 0 and not force then
 		return
 	end
 
@@ -3209,6 +3164,9 @@ function TMW:CreateIcon(group, groupID, iconID)
 	CNDTEnv[icon:GetName()] = icon
 	icon.base = IconBase
 	
+	icon.__alpha = icon:GetAlpha()
+	icon.__tex = icon.texture:GetTexture()
+	
 	setmetatable(icon, iconMT)
 	for k, v in pairs(IconBase) do
 		if type(icon[k]) == "function" then -- if the method already exists on the icon
@@ -3274,7 +3232,25 @@ function TMW:Icon_UpdateBars(icon)
 		cbar:Hide()
 	end
 end
-
+	
+function TMW:Icon_UpdateText(icon, fontString, settings)
+	fontString:SetWidth(settings.ConstrainWidth and icon.texture:GetWidth() or 0)
+	fontString:SetFont(LSM:Fetch("font", settings.Name), settings.Size, settings.Outline)
+	
+	if LMB then
+		if settings.OverrideLBFPos then
+			fontString:ClearAllPoints()
+			local func = fontString.__MSQ_SetPoint or fontString.SetPoint
+			func(fontString, settings.point, icon, settings.relativePoint, settings.x, settings.y)
+			
+			fontString:SetJustifyH(settings.point:match("LEFT") or settings.point:match("RIGHT") or "CENTER")
+		end
+	else
+		fontString:ClearAllPoints()
+		fontString:SetPoint(settings.point, icon, settings.relativePoint, settings.x, settings.y)
+	end
+end
+	
 function TMW:Icon_Update(icon)
 	if not icon then return end
 	
@@ -3285,14 +3261,9 @@ function TMW:Icon_Update(icon)
 	local typeData = Types[ics.Type]
 	icon.typeData = typeData
 
-	local dontreassign
-	if not runEvents then
-		dontreassign = true
-	else
-		runEvents = nil
-	end
+	runEvents = nil
+	TMW:ScheduleTimer("RestoreEvents", UPD_INTV*2.1)
 
-	icon.__previousNameFirst = icon.NameFirst -- used to detect changes in the name that would cause a texture change
 	icon.__spellChecked = nil
 	icon.__unitChecked = nil
 	icon.__oldUnitName = nil
@@ -3335,22 +3306,33 @@ function TMW:Icon_Update(icon)
 		end
 	end
 
-	icon.UpdateTimer 	= 0
+	
+	-- process alpha settings
+	if icon.ShowWhen == "alpha" then
+		icon.UnAlpha = 0
+	elseif icon.ShowWhen == "unalpha" then
+		icon.Alpha = 0
+	end
+	-- condition alpha may be nil via exclusion via RelevantSettings, so make sure it is always defined as something
+	icon.ConditionAlpha = icon.ConditionAlpha or 0
+	-- make fake hidden easier to process in SetInfo
 	icon.FakeHidden = icon.FakeHidden and 0
+	
 	if pclass ~= "DEATHKNIGHT" then
 		icon.IgnoreRunes = nil
 	end
 	icon.OverrideTex = TMW:GetCustomTexture(icon)
 
-	if icon.__hasEvents then
-		-- UnregisterAllEvents uses a ton of CPU
+	-- UnregisterAllEvents uses a metric fuckton of CPU, so only do it if needed
+	if icon.hasEvents then
 		icon:UnregisterAllEvents()
-		icon.__hasEvents = nil
+		icon.hasEvents = nil
 	end
 	ClearScripts(icon)
 
+	-- Conditions
 	if icon.Conditions.n > 0 and Locked then -- dont define conditions if we are unlocked so that i dont have to deal with meta icons checking icons during config. I think i solved this somewhere else too without thinking about it, but what the hell
-		CNDT:ProcessConditions(icon)
+		TMW.CNDT:ProcessConditions(icon)
 	else
 		icon.CndtCheck = nil
 	end
@@ -3364,26 +3346,14 @@ function TMW:Icon_Update(icon)
 	local cd = icon.cooldown
 	cd.noCooldownCount = not icon.ShowTimerText
 	cd:SetDrawEdge(db.profile.DrawEdge)
-	icon:SetReverse(false)
-
+	icon:SetReverse(false)	
 	
-	local ctf = group.Fonts.Count
-	local countText = icon.countText
-	local btf = group.Fonts.Bind
-	local bindText = icon.bindText
+	
+	-- Masque skinning
 	local isDefault
-	countText:SetFont(LSM:Fetch("font", ctf.Name), ctf.Size, ctf.Outline)
-	bindText:SetFont(LSM:Fetch("font", btf.Name), btf.Size, btf.Outline)
-	icon:UpdateBindText()
-	icon.__normaltex = icon.__LBF_Normal or icon.__MSQ_NormalTexture or icon:GetNormalTexture()
+	icon.__normaltex = icon.__MSQ_NormalTexture or icon:GetNormalTexture()
 	if LMB then
 		local g = LMB:Group("TellMeWhen", format(L["fGROUP"], groupID))
-		if not hookedLMBSkin and g.Skin and g.Disable and g.Enable then
-			hooksecurefunc(g, "Skin", LMBSkinHook)
-			hooksecurefunc(g, "Disable", LMBSkinHook)
-			hooksecurefunc(g, "Enable", LMBSkinHook)
-			hookedLMBSkin = 1
-		end
 		g:AddButton(icon)
 		group.SkinID = g.SkinID or (g.db and g.db.SkinID)
 		if g.Disabled or (g.db and g.db.Disabled) then
@@ -3392,49 +3362,10 @@ function TMW:Icon_Update(icon)
 				isDefault = 1
 			end
 		end
-	elseif LBF then
-		local lbfs = db.profile.Groups[groupID].LBF
-		local g = LBF:Group("TellMeWhen", format(L["fGROUP"], groupID))
-		g:AddButton(icon)
-
-		group.SkinID = lbfs.SkinID or g.SkinID or (g.db and g.db.SkinID) or "Blizzard" -- i dont think LBF ever had (g.db and g.db.SkinID), but whatever
-		if group.SkinID == "Blizzard" then
-			icon.__normaltex:Hide()
-			isDefault = 1
-		end
-		local tbl = LBF:GetSkins()
-		if tbl and tbl[group.SkinID] then
-			countText:SetFont(LSM:Fetch("font", ctf.Name), tbl and tbl[group.SkinID].Count.FontSize or ctf.Size, ctf.Outline)
-			bindText:SetFont(LSM:Fetch("font", btf.Name), tbl and tbl[group.SkinID].Count.FontSize or btf.Size, btf.Outline)
-		end
 	else
-		countText:ClearAllPoints()
-		countText:SetPoint(ctf.point, icon, ctf.relativePoint, ctf.x, ctf.y)
-		bindText:ClearAllPoints()
-		bindText:SetPoint(btf.point, icon, btf.relativePoint, btf.x, btf.y)
 		isDefault = 1
 	end
 	
-	icon.cbar:SetFrameLevel(icon:GetFrameLevel() + 1)
-	icon.pbar:SetFrameLevel(icon:GetFrameLevel() + 1)
-	
-	if LMB or LBF then
-		if ctf.OverrideLBFPos then
-			countText:ClearAllPoints()
-			local func = countText.__MSQ_SetPoint or countText.SetPoint
-			func(countText, ctf.point, icon, ctf.relativePoint, ctf.x, ctf.y)
-		end
-		if btf.OverrideLBFPos then
-			bindText:ClearAllPoints()
-			local func = bindText.__MSQ_SetPoint or bindText.SetPoint
-			func(bindText, btf.point, icon, btf.relativePoint, btf.x, btf.y)
-		end
-		icon.cbar:SetFrameLevel(icon:GetFrameLevel())
-		icon.pbar:SetFrameLevel(icon:GetFrameLevel())
-	end
-	countText:SetWidth(ctf.ConstrainWidth and icon.texture:GetWidth() or 0)
-	bindText:SetWidth(btf.ConstrainWidth and icon.texture:GetWidth() or 0)
-
 	if isDefault then
 		group.barInsets = 1.5
 		cd:SetFrameLevel(icon:GetFrameLevel() + 1)
@@ -3442,27 +3373,30 @@ function TMW:Icon_Update(icon)
 		icon.pbar:SetFrameLevel(icon:GetFrameLevel() + 2)
 	else
 		group.barInsets = 0
+		cd:SetFrameLevel(icon:GetFrameLevel() + -2)
+		icon.cbar:SetFrameLevel(icon:GetFrameLevel() + -1)
+		icon.pbar:SetFrameLevel(icon:GetFrameLevel() + -1)
 	end
 	
-	icon.__previcon = nil
-	icon.__alpha = -1
-	icon.__count = nil
-	icon.__countText = nil
-	icon.countText:SetText(nil)
-	icon.__tex = icon.texture:GetTexture()
-	icon.__realDuration = icon.__realDuration or 0
-	icon.CndtFailed = nil
-	icon.ConditionAlpha = icon.ConditionAlpha or 0
 	
+	-- update overlay texts
+	TMW:Icon_UpdateText(icon, icon.countText, group.Fonts.Count)
+	
+	TMW:Icon_UpdateText(icon, icon.bindText, group.Fonts.Bind)
 	icon.doUpdateBindText = icon.BindText and strfind(icon.BindText, "%%[SsUu]")
+	icon:UpdateBindText()
 	
-	if icon.ShowWhen == "alpha" then
-		icon.UnAlpha = 0
-	elseif icon.ShowWhen == "unalpha" then
-		icon.Alpha = 0
-	end
 	
+	
+	--reset things
+	--icon:SetInfo(alpha, color, texture, start, duration, spellChecked, reverse, count, countText, forceupdate, unit)
+	icon:SetInfo(0, nil, nil, nil, nil, nil, nil, nil, nil, 1, nil) -- forceupdate is set to 1 here so it doesnt return early
+	
+	
+	-- force an update
+	icon.LastUpdate = 0
 	TMW.time = GetTime()
+	-- actually run the icon's update function
 	if icon.Enabled or not Locked then
 		Types[icon.Type]:Update()
 		local success, err = pcall(Types[icon.Type].Setup, Types[icon.Type], icon, groupID, iconID)
@@ -3470,7 +3404,17 @@ function TMW:Icon_Update(icon)
 			TMW:Error(L["GROUPICON"]:format(groupID, iconID) .. ": " .. err)
 		end
 	else
-		icon:SetAlpha(0)
+		icon:SetInfo(0)
+	end
+	
+	-- if the icon is set to always hide and it isnt handling any events, then don't automatically update it.
+	-- Conditions and meta icons will update it as needed.
+	if icon.FakeHidden and not dontremove then
+		icon:SetScript("OnUpdate", nil, true)
+		tDeleteItem(IconUpdateFuncs, icon)
+		if Locked then
+			icon:SetInfo(0)
+		end
 	end
 	
 	-- Warnings for missing durations and first-time instructions for duration syntax
@@ -3491,22 +3435,13 @@ function TMW:Icon_Update(icon)
 			TMW.HELP:Hide("ICON_DURS_MISSING")
 		end
 	end
-	
-	if icon.FakeHidden and not dontremove then
-		icon:SetScript("OnUpdate", nil, true)
-		tDeleteItem(IconUpdateFuncs, icon)
-		if Locked then
-			icon:SetAlpha(0)
-		end
-	end
-
-	icon.__previousNameFirst = nil -- not needed now
 
 	TMW:Icon_UpdateBars(icon, groupID, iconID)
 	icon:Show()
 	local pbar = icon.pbar
 	local cbar = icon.cbar
 	if icon.OverrideTex then icon:SetTexture(icon.OverrideTex) end 
+	
 	if Locked then
 		if icon.texture:GetTexture() == "Interface\\AddOns\\TellMeWhen\\Textures\\Disabled" then
 			icon:SetTexture(nil)
@@ -3557,9 +3492,9 @@ function TMW:Icon_Update(icon)
 		--icon:SetInfo(alpha, color, texture, start, duration, spellChecked, reverse, count, countText, forceupdate, unit)
 		icon:SetInfo(1, 1, nil, 0, 0, icon.__spellChecked, nil, testCount, testCountText, nil, nil, icon.__unitChecked) -- alpha is set to 1 here so it doesnt return early
 		if icon.Enabled then
-			icon:setalpha(1)
+			icon:SetAlpha(1)
 		else
-			icon:setalpha(0.5)
+			icon:SetAlpha(0.5)
 		end
 		if not icon.texture:GetTexture() then
 			icon:SetTexture("Interface\\AddOns\\TellMeWhen\\Textures\\Disabled")
@@ -3582,9 +3517,6 @@ function TMW:Icon_Update(icon)
 			cbar:SetValue(0)
 			pbar:SetValue(0)
 		end
-	end
-	if not dontreassign then
-		TMW:ScheduleTimer("RestoreSound", UPD_INTV*2.1)
 	end
 	
 end

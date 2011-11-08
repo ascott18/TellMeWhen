@@ -21,7 +21,6 @@ TMW.WidthCol1 = 170
 
 ---------- Libraries ----------
 local LSM = LibStub("LibSharedMedia-3.0")
-local LBF = LibStub("LibButtonFacade", true)
 local LMB = LibStub("Masque", true) or (LibMasque and LibMasque("Button"))
 LibStub("AceSerializer-3.0"):Embed(TMW)
 
@@ -490,7 +489,7 @@ local fontorder = {
 	Bind = 50,
 }
 local fontDisabled = function(info)
-	if not (LBF or LMB) then
+	if not LMB then
 		return false
 	end
 	return not db.profile.Groups[findid(info)].Fonts[info[#info-1]].OverrideLBFPos
@@ -600,7 +599,7 @@ local groupFontConfigTemplate = {
 			type = "toggle",
 			width = "double",
 			order = 50,
-			hidden = not (LBF or LMB),
+			hidden = not (LMB),
 		},
 	},
 }
@@ -1216,15 +1215,6 @@ function TMW:Group_Add()
 	db.profile.Groups[db.profile.NumGroups].Enabled = true
 	TMW:Update()
 	
-	if LBF then -- LMB now integrates this
-		local parent = LBF:Group("TellMeWhen")
-		local group = LBF:Group("TellMeWhen", format(L["fGROUP"], groupID))
-
-		group.SkinID, group.Gloss, group.Backdrop, group.Colors =
-		parent.SkinID, parent.Gloss, parent.Backdrop, parent.Colors
-
-		group:ReSkin()
-	end
 	TMW:Group_Update(groupID)
 	TMW:CompileOptions()
 	IE:NotifyChanges("groups", "Group " .. groupID)
@@ -3465,7 +3455,6 @@ function IE:AttemptBackup(icon)
 		-- this includes creating the first history point
 		icon.history = {TMW:CopyWithMetatable(icon:GetSettings())}
 		icon.historyState = #icon.history
-		print("INIT")
 	
 		-- notify the undo and redo buttons that there was a change so they can :Enable() or :Disable()
 		IE:UndoRedoChanged()
@@ -3478,19 +3467,16 @@ function IE:AttemptBackup(icon)
 		--(it was likely only one setting that changed, but not always)
 		local result, changedSetting = IE:GetCompareResultsPath(IE:DeepCompare(icon.history[icon.historyState], icon:GetSettings()))
 		if type(result) == "string" then
-			print(result)
 			-- if we are using an old history point (i.e. we hit undo a few times and then made a change), 
 			-- delete all history points from the current one forward so that we dont jump around wildly when undoing and redoing
 			for i = icon.historyState + 1, #icon.history do
 				icon.history[i] = nil
-				print("DEL", i)
 			end
 			
 			-- if the last setting that was changed is the same as the most recent setting that was changed,
 			-- and if the setting is one that can be changed very rapidly,
 			-- delete the previous history point so that we dont murder our memory usage and piss off the user as they undo a number from 1 to 10, 0.1 per click.
 			if icon.lastChangePath == result and IE.RapidSettings[changedSetting] then
-				print("DEL", #icon.history)
 				icon.history[#icon.history] = nil
 				icon.historyState = #icon.history
 			end
@@ -3503,7 +3489,6 @@ function IE:AttemptBackup(icon)
 			
 			-- set the history state to the latest point
 			icon.historyState = #icon.history
-			print("NEW", #icon.history)
 			-- notify the undo and redo buttons that there was a change so they can :Enable() or :Disable()
 			IE:UndoRedoChanged()
 		end
@@ -4775,7 +4760,6 @@ function Module.Sorter_ByName(a, b)
 		return a < b
 	else
 		--sort by name
-		print(a, b, nameA, nameB)
 		return nameA < nameB
 	end
 end

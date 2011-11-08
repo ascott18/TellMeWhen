@@ -40,7 +40,6 @@ Type.WhenChecks = {
 }
 Type.RelevantSettings = {
 	CustomTex = false,
-	--ConditionAlpha = false,
 	ConditionDur = true,
 	ConditionDurEnabled = true,
 	UnConditionDur = true,
@@ -65,8 +64,8 @@ function Type:Update()
 end
 
 local function ConditionIcon_OnUpdate(icon, time)
-	if icon.UpdateTimer <= time - UPD_INTV then
-		icon.UpdateTimer = time
+	if icon.LastUpdate <= time - UPD_INTV then
+		icon.LastUpdate = time
 		local CndtCheck = icon.CndtCheck
 		if CndtCheck then
 			local shouldReturn, succeeded = CndtCheck() -- we dont use shouldreturn.

@@ -19,6 +19,7 @@ L["CONFIGMODE_EXIT"] = "Exit config mode"
 L["CONFIGMODE_NEVERSHOW"] = "Don't show again"
 L["IMPORTERROR_FAILEDPARSE"] = "There was an error processing the string. Ensure that you copied the entire string from the source."
 L["ERROR_MISSINGFILE"] = "A complete restart of WoW is required to use TellMeWhen %s (%s was not found). Would you like to restart WoW now?"
+L["ERROR_MISSINGFILE_NOREQ"] = "A complete restart of WoW may be required to fully use TellMeWhen %s (%s was not found). Would you like to restart WoW now?"
 
 L["LOCKED"] = "Locked"
 L["RESIZE"] = "Resize"
@@ -417,8 +418,8 @@ L["OUTLINE_NO"] = "No Outline"
 L["OUTLINE_THIN"] = "Thin Outline"
 L["OUTLINE_THICK"] = "Thick Outline"
 L["OUTLINE_MONOCHORME"] = "Monochrome"
-L["UIPANEL_FONT_OVERRIDELBF"] = "Override Masque/ButtonFacade position"
-L["UIPANEL_FONT_OVERRIDELBF_DESC"] = [[Check this to override the position of the stack text that is defined in your Masque/ButtonFacade skin.
+L["UIPANEL_FONT_OVERRIDELBF"] = "Override Masque position"
+L["UIPANEL_FONT_OVERRIDELBF_DESC"] = [[Check this to override the position of the stack text that is defined in your Masque skin.
 
 A UI Reload or a change of skin is required to restore the skin settings to the text should you choose to disable this option after enabling it.]]
 L["UIPANEL_FONT_CONSTRAINWIDTH"] = "Constrain Width"

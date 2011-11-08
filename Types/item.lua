@@ -96,8 +96,8 @@ local function ItemCooldown_OnEvent(icon)
 end
 
 local function ItemCooldown_OnUpdate(icon, time)
-	if icon.UpdateTimer <= time - UPD_INTV then
-		icon.UpdateTimer = time
+	if icon.LastUpdate <= time - UPD_INTV then
+		icon.LastUpdate = time
 		if icon.DoUpdateIDs then
 			local Name = icon.Name
 			icon.NameFirst = TMW:GetItemIDs(icon, Name, 1)

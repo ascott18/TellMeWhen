@@ -47,6 +47,7 @@
 			</Button>
 		</Frames>
 	</Frame>
+	
 	<Button name="TellMeWhen_IconTemplate" virtual="true" enableMouse="true">
 		<Size x="30" y="30"/>
 		<Layers>
@@ -218,7 +219,7 @@
 			</OnLoad>
 		</Scripts>
 	</Cooldown>
-			
+	
 	<Frame name="TellMeWhen_BlizzOptionsStub" hidden="true">
 		<Scripts>
 			<OnLoad>

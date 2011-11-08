@@ -2103,7 +2103,9 @@ local groupCombatCondition = {Unit = "player"}
 
 function CNDT:ProcessConditions(icon)
 	if TMW.debug and test then test() end
+	
 	local Conditions = icon.Conditions
+	icon.CndtFailed = nil
 	
 	local funcstr = ""
 	local luaUsed

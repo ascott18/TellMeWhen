@@ -17,7 +17,6 @@
 local TMW = TMW
 if not TMW then return end
 local L = TMW.L
-local LBF = LibStub("LibButtonFacade", true)
 local LMB = LibMasque and LibMasque("Button")
 
 local db, UPD_INTV
@@ -59,8 +58,8 @@ function Type:Update()
 end
 
 local function Meta_OnUpdate(icon, time)
-	if icon.UpdateTimer <= time - UPD_INTV then
-		icon.UpdateTimer = time
+	if icon.LastUpdate <= time - UPD_INTV then
+		icon.LastUpdate = time
 		local CndtCheck = icon.CndtCheck if CndtCheck and CndtCheck() then return end
 		local CheckNext, Icons = icon.CheckNext, icon.Icons
 		for n = 1, #Icons do
@@ -79,7 +78,7 @@ local function Meta_OnUpdate(icon, time)
 							icon.bindText:SetText(ic.bindText:GetText())
 						end
 						
-						if (LBF or LMB) then -- i dont like the way that ButtonFacade handles this (inefficient), so i'll do it myself
+						if (LMB) then -- i dont like the way that ButtonFacade handles this (inefficient), so i'll do it myself
 							local icnt = ic.__normaltex -- icon.__normaltex = icon.__LBF_Normal or icon:GetNormalTexture() -- set during Icon_Update()
 							local iconnt = icon.__normaltex
 							if icnt and iconnt then
@@ -141,6 +140,7 @@ end
 
 
 function Type:Setup(icon, groupID, iconID)
+	icon.__previcon = nil -- reset this
 	icon.NameFirst = "" --need to set this to something for bars update
 
 	if icon.CheckNext then

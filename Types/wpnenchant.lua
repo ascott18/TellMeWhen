@@ -123,8 +123,8 @@ local SlotsToNumbers = {
 
 
 local function WpnEnchant_OnUpdate(icon, time)
-	if icon.UpdateTimer <= time - UPD_INTV then
-		icon.UpdateTimer = time
+	if icon.LastUpdate <= time - UPD_INTV then
+		icon.LastUpdate = time
 		local CndtCheck = icon.CndtCheck if CndtCheck and CndtCheck() then return end
 		local has, expiration = select(icon.SelectIndex, GetWeaponEnchantInfo())
 		if has and icon.CorrectEnchant then

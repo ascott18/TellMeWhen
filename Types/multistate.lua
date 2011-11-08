@@ -58,7 +58,6 @@ Type.RelevantSettings = {
 	DurationMax = true,
 	DurationMinEnabled = true,
 	DurationMaxEnabled = true,
-	IgnoreRunes = (pclass == "DEATHKNIGHT"),
 }
 Type.DisabledEvents = {
 	OnUnit = true,
@@ -91,8 +90,8 @@ local function MultiStateCD_OnEvent(icon)
 end
 
 local function MultiStateCD_OnUpdate(icon, time)
-	if icon.UpdateTimer <= time - UPD_INTV then
-		icon.UpdateTimer = time
+	if icon.LastUpdate <= time - UPD_INTV then
+		icon.LastUpdate = time
 		local CndtCheck = icon.CndtCheck if CndtCheck and CndtCheck() then return end
 
 		local Slot = icon.Slot

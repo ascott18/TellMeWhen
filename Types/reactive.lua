@@ -81,8 +81,8 @@ local function Reactive_OnEvent(icon, event, spell)
 end
 
 local function Reactive_OnUpdate(icon, time)
-	if icon.UpdateTimer <= time - UPD_INTV then
-		icon.UpdateTimer = time
+	if icon.LastUpdate <= time - UPD_INTV then
+		icon.LastUpdate = time
 		local CndtCheck = icon.CndtCheck if CndtCheck and CndtCheck() then return end
 
 		local n, inrange, nomana, start, duration, CD, usable = 1

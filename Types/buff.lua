@@ -87,8 +87,8 @@ end
 
 local huge = math.huge
 local function Buff_OnUpdate(icon, time)
-	if icon.UpdateTimer <= time - UPD_INTV then
-		icon.UpdateTimer = time
+	if icon.LastUpdate <= time - UPD_INTV then
+		icon.LastUpdate = time
 		local CndtCheck = icon.CndtCheck if CndtCheck and CndtCheck() then return end
 
 		local Units, NameArray, NameNameArray, NameHash, Filter, Filterh, Sort, ShowTTText

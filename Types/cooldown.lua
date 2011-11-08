@@ -86,8 +86,8 @@ local function AutoShot_OnEvent(icon, event, unit, _, _, _, spellID)
 end
 
 local function AutoShot_OnUpdate(icon, time)
-	if icon.UpdateTimer <= time - UPD_INTV then
-		icon.UpdateTimer = time
+	if icon.LastUpdate <= time - UPD_INTV then
+		icon.LastUpdate = time
 		local CndtCheck = icon.CndtCheck if CndtCheck and CndtCheck() then return end
 		
 		local NameName = icon.NameName
@@ -121,8 +121,8 @@ end
 
 
 local function SpellCooldown_OnUpdate(icon, time)
-	if icon.UpdateTimer <= time - UPD_INTV then
-		icon.UpdateTimer = time
+	if icon.LastUpdate <= time - UPD_INTV then
+		icon.LastUpdate = time
 		local CndtCheck = icon.CndtCheck if CndtCheck and CndtCheck() then return end
 
 		local n, inrange, nomana, start, duration, isGCD = 1
