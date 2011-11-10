@@ -121,16 +121,29 @@ local function ICD_OnUpdate(icon, time)
 		end
 	end
 end
+local naturesGrace = strlower(GetSpellInfo(16886))
 
 function Type:Setup(icon, groupID, iconID)
 	icon.ShowPBar = false
 	icon.NameFirst = TMW:GetSpellNames(icon, icon.Name, 1)
 	icon.NameHash = TMW:GetSpellNames(icon, icon.Name, nil, nil, 1)
+	icon.NameNameArray = TMW:GetSpellNames(icon, icon.Name, nil, 1)
 	icon.Durations = TMW:GetSpellDurations(icon, icon.Name)
 
 	icon.ICDStartTime = icon.ICDStartTime or 0
 	icon.ICDDuration = icon.ICDDuration or 0
 	
+	for _, name in pairs(icon.NameNameArray) do
+		if name == naturesGrace then
+			if icon:IsBeingEdited() == 1 then
+				TMW.HELP:Show("ICON_ICD_NATURESGRACE", icon, TMW.IE.Main.Name, 0, 0, L["HELP_ICD_NATURESGRACE"])
+			else
+				TMW.HELP:Hide("ICON_ICD_NATURESGRACE")
+			end
+			break
+		end
+	end
+		
 	--[[ keep these events per icon isntead of global like unitcooldowns are so that ...
 	well i had a reason here but it didnt make sense when i came back and read it a while later. Just do it. I guess.]]
 	if icon.ICDType == "spellcast" then

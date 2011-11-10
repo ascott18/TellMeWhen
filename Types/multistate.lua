@@ -138,7 +138,8 @@ end
 
 function Type:Setup(icon, groupID, iconID)
 	icon.NameFirst = TMW:GetSpellNames(icon, icon.Name, 1)
-
+	local originalNameFirst = icon.NameFirst
+	
 	if icon.NameFirst and icon.NameFirst ~= "" and GetSpellLink(icon.NameFirst) and not tonumber(icon.NameFirst) then
 		icon.NameFirst = tonumber(strmatch(GetSpellLink(icon.NameFirst), ":(%d+)")) -- extract the spellID from the link
 	end
@@ -147,10 +148,10 @@ function Type:Setup(icon, groupID, iconID)
 	MultiStateCD_OnEvent(icon)
 	
 	if icon:IsBeingEdited() == 1 then
-		if doWarn then
-			TMW.HELP:Show("ICON_DR_MISMATCH", icon, TMW.IE.Main.Name, 0, 0, L["WARN_DRMISMATCH"]..append)
+		if icon.Slot == 0 and originalNameFirst and originalNameFirst ~= "" then
+			TMW.HELP:Show("ICON_MS_NOTFOUND", icon, TMW.IE.Main.Name, 0, 0, L["HELP_MS_NOFOUND"], originalNameFirst)
 		else
-			TMW.HELP:Hide("ICON_DR_MISMATCH")
+			TMW.HELP:Hide("ICON_MS_NOTFOUND")
 		end
 	end
 

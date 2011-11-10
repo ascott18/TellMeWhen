@@ -1780,10 +1780,7 @@
 			</Button>
 
 			<Frame name="$parentHelp" parentKey="Help" inherits="GlowBoxTemplate" enableMouse="true" hidden="true" >
-				<Size x="250" y="200"/>
-				<Anchors>
-					<Anchor point="TOPRIGHT" relativePoint="LEFT" x="-30" y="-15"/>
-				</Anchors>
+				<Size x="250"/>
 				<Layers>
 					<Layer level="OVERLAY">
 						<FontString name="$parentText" parentKey="text" inherits="GameFontHighlightLeft" justifyV="TOP" >

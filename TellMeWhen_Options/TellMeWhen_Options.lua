@@ -164,9 +164,6 @@ TMW.CI = setmetatable({}, {__index = function(tbl, k)
 			return "item"
 		end
 		return "spell"
-	elseif k == "IMS" then -- IsMultiState
-		local ics = TMW.CI.ics
-		return ics and ics.Type == "multistate"
 	end
 end}) local CI = TMW.CI		--current icon
 
@@ -2481,7 +2478,7 @@ local function formatSeconds(seconds)
 	return s
 end
 local cachednames = {}
-function IE:GetRealNames()
+function IE:GetRealNames() -- TODO: MODULARIZE THIS
 	-- gets a string to set as a tooltip of all of the spells names in the name box in the IE. Splits up equivalancies and turns IDs into names
 	local text = TMW:CleanString(IE.Main.Name)
 	if cachednames[CI.t .. CI.SoI .. text] then return cachednames[CI.t .. CI.SoI .. text] end
@@ -4066,10 +4063,9 @@ SUG = TMW:NewModule("Suggester", "AceEvent-3.0", "AceComm-3.0", "AceSerializer-3
 
 ---------- Locals/Data ----------
 local SUGIsNumberInput
-local SUGIMS
 local SUGpreTable = {}
 local SUGPlayerSpells = {}
-local ActionCache, pclassSpellCache, ClassSpellLookup, AuraCache, ItemCache, SpellCache, CastCache, CurrentItems
+local pclassSpellCache, ClassSpellLookup, AuraCache, ItemCache, SpellCache, CastCache, CurrentItems
 local TrackingCache = {}
 for i = 1, GetNumTrackingTypes() do
 	local name, _, active = GetTrackingInfo(i)
@@ -4105,7 +4101,6 @@ function SUG:OnInitialize()
 		TMW.AuraCache = SUG.AuraCache -- make new inserts go into the optionDB and this table
 	end
 
-	SUG.ActionCache = {} -- dont save this, it should be a list of things that are CURRENTLY on THIS CHARACTER'S action bars
 	SUG.RequestedFrom = {}
 	SUG.commThrowaway = {}
 	SUG.Box = IE.Main.Name
@@ -4113,7 +4108,6 @@ function SUG:OnInitialize()
 	SUG:PLAYER_TALENT_UPDATE()
 	SUG:BuildClassSpellLookup() -- must go before the local versions (ClassSpellLookup) are defined
 	SUG.doUpdateItemCache = true
-	SUG.doUpdateActionCache = true
 
 	SUG:RegisterComm("TMWSUG")
 	SUG:RegisterEvent("PLAYER_TALENT_UPDATE")
@@ -4121,15 +4115,14 @@ function SUG:OnInitialize()
 	SUG:RegisterEvent("UNIT_PET")
 	SUG:RegisterEvent("BAG_UPDATE")
 	SUG:RegisterEvent("BANKFRAME_OPENED", "BAG_UPDATE")
-	SUG:RegisterEvent("ACTIONBAR_SLOT_CHANGED")
 	SUG:RegisterEvent("GET_ITEM_INFO_RECEIVED")
 
 	if IsInGuild() then
 		SUG:SendCommMessage("TMWSUG", SUG:Serialize("RCSL"), "GUILD")
 	end
 
-	ActionCache,		pclassSpellCache,				ClassSpellLookup,		AuraCache,		ItemCache,		SpellCache =
-	SUG.ActionCache,	TMW.ClassSpellCache[pclass],	SUG.ClassSpellLookup,	SUG.AuraCache,	SUG.ItemCache,	SUG.SpellCache
+	pclassSpellCache,				ClassSpellLookup,		AuraCache,		ItemCache,		SpellCache =
+	TMW.ClassSpellCache[pclass],	SUG.ClassSpellLookup,	SUG.AuraCache,	SUG.ItemCache,	SUG.SpellCache
 
 	SUG:PLAYER_ENTERING_WORLD()
 
@@ -4374,10 +4367,6 @@ function SUG:BAG_UPDATE()
 	SUG.doUpdateItemCache = true
 end
 
-function SUG:ACTIONBAR_SLOT_CHANGED()
-	SUG.doUpdateActionCache = true
-end
-
 function SUG:GET_ITEM_INFO_RECEIVED()
 	if SUG.CurrentModule and SUG.CurrentModule.moduleName:find("item") then
 		SUG:SuggestingComplete()
@@ -4444,7 +4433,6 @@ end
 function SUG:SuggestingComplete(doSort)
 	SUG.offset = min(SUG.offset, max(0, #SUGpreTable-#SUG+1))
 	local offset = SUG.offset
-	SUGIMS = CI.IMS
 	
 	if doSort then
 		sort(SUGpreTable, SUG.CurrentModule:Table_GetSorter())
@@ -4487,7 +4475,7 @@ function SUG:SuggestingComplete(doSort)
 		f.Background:SetVertexColor(0, 0, 0, 0)
 		
 		if SUG.CurrentModule.noTexture then
-			f.Icon:SetWidth(0.001)
+			f.Icon:SetWidth(0.00001)
 		else
 			f.Icon:SetWidth(f.Icon:GetHeight())
 		end
@@ -4646,18 +4634,6 @@ function SUG:CacheItems()
 	end
 	
 	SUG.doUpdateItemCache = nil
-end
-
-function SUG:CacheActions()
-	if not SUG.doUpdateActionCache then return end
-	wipe(ActionCache)
-	for i=1, 120 do
-		local actionType, spellID = GetActionInfo(i)
-		if actionType == "spell" and spellID then
-			ActionCache[spellID] = i
-		end
-	end
-	SUG.doUpdateActionCache = nil
 end
 
 function SUG:BuildClassSpellLookup()
@@ -4837,6 +4813,7 @@ end
 
 function Module:Entry_Insert(insert)
 	if insert then
+		insert = tostring(insert)
 		if SUG.Box.SUG_onlyOneEntry then
 			SUG.Box:SetText(TMW:CleanString(insert))
 			SUG.Box:ClearFocus()
@@ -5161,6 +5138,7 @@ end
 
 function Module:Entry_Insert(insert, duration)
 	if insert then
+		insert = tostring(insert)
 		if SUG.Box.SUG_onlyOneEntry then
 			SUG.Box:SetText(TMW:CleanString(insert))
 			SUG.Box:ClearFocus()
@@ -5306,16 +5284,73 @@ end
 
 
 local Module = SUG:NewModule("multistate", SUG:GetModule("spell"))
+Module.ActionCache = {}
 
 function Module:Table_Get()
-	SUG:CacheActions()
+	wipe(self.ActionCache)
+	for i=1, 120 do
+		local actionType, spellID = GetActionInfo(i)
+		if actionType == "spell" and spellID then
+			self.ActionCache[spellID] = i
+		end
+	end
+	
 	return SpellCache
 end
 
 function Module:Entry_Colorize_2(f, id)
-	if SUG.ActionCache[id] then
+	if self.ActionCache[id] then
 		f.Background:SetVertexColor(0, .44, .87, 1) --color actions that are on your action bars shaman blue
 	end
+end
+
+function Module.Sorter_Spells(a, b)
+	--MSCDs
+	local haveA, haveB = Module.ActionCache[a], Module.ActionCache[b]
+	if (haveA and not haveB) or (haveB and not haveA) then
+		return haveA
+	end
+	
+	--player's spells (pclass)
+	local haveA, haveB = SUGPlayerSpells[a], SUGPlayerSpells[b]
+	if (haveA and not haveB) or (haveB and not haveA) then
+		return haveA
+	end
+
+	--all player spells (any class)
+	local haveA, haveB = ClassSpellLookup[a], ClassSpellLookup[b]
+	if (haveA and not haveB) or (haveB and not haveA) then
+		return haveA
+	elseif not (haveA or haveB) then
+
+		local haveA, haveB = AuraCache[a], AuraCache[b] -- Auras
+		if haveA and haveB and haveA ~= haveB then -- if both are auras (kind doesnt matter) AND if they are different aura types, then compare the types
+			return haveA > haveB -- greater than is intended.. player auras are 2 while npc auras are 1, player auras should go first
+		elseif (haveA and not haveB) or (haveB and not haveA) then --otherwise, if only one of them is an aura, then prioritize the one that is an aura
+			return haveA
+		end
+		--if they both were auras, and they were auras of the same type (player, NPC) then procede on to the rest of the code to sort them by name/id
+	end
+	
+	if SUGIsNumberInput then
+		--sort by id
+		return a < b
+	else
+		--sort by name
+		local nameA, nameB = SpellCache[a], SpellCache[b]
+			
+		if nameA == nameB then
+			--sort identical names by ID
+			return a < b
+		else
+			--sort by name
+			return nameA < nameB
+		end
+	end
+end
+
+function Module:Table_GetSorter()
+	return self.Sorter_Spells
 end
 
 
@@ -6694,6 +6729,8 @@ HELP.Codes = {
 	"ICON_DURS_MISSING",
 	
 	"ICON_DR_MISMATCH",
+	"ICON_MS_NOTFOUND",
+	"ICON_ICD_NATURESGRACE",
 	
 	"ICON_UNIT_MISSING",
 	
