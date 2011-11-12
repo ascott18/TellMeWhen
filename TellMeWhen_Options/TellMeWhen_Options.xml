@@ -7,7 +7,7 @@
 		<Size x="30" y="30"/>
 		<Layers>
 			<Layer level="ARTWORK">
-				<FontString name="$parentText" parentKey="text" justifyH="LEFT" inherits="GameFontHighlight">
+				<FontString name="$parentText" parentKey="text" justifyH="LEFT" inherits="GameFontHighlightSmall">
 					<Anchors>
 						<Anchor point="LEFT" relativePoint="RIGHT" x="-2"/>
 					</Anchors>
@@ -24,7 +24,7 @@
 	<CheckButton name="TellMeWhen_RadioCheckTemplate" virtual="true" inherits="TellMeWhen_CheckTemplate">
 		<Scripts>
 			<OnLoad>
-				self.text:SetWidth(self:GetParent():GetWidth()-20)
+				self.text:SetWidth(self:GetParent():GetWidth()-25)
 			</OnLoad>
 			<OnClick>
 				if self.setting == "TotemSlots" then
@@ -250,7 +250,7 @@
 		<Size x="60" y="15"/>
 		<Layers>
 			<Layer level="ARTWORK">
-				<FontString name="$parentText" parentKey="text" inherits="GameFontHighlight">
+				<FontString name="$parentText" parentKey="text" inherits="GameFontHighlightSmall">
 					<Anchors>
 						<Anchor point="BOTTOM" relativePoint="TOP" y="2"/>
 					</Anchors>
@@ -275,35 +275,66 @@
 			</OnEditFocusLost>
 		</Scripts>
 	</EditBox>
-	<Slider name="TellMeWhen_AlphaSliderTemplate" inherits="OptionsSliderTemplate" minvalue="0" maxvalue="100" valuestep="1" virtual="true">
-		<Size x="175" y="17"/>
+	
+	<Slider name="TellMeWhen_SliderTemplate" orientation="HORIZONTAL" virtual="true" enableMouse="true">
+		<Backdrop bgFile="Interface\Buttons\UI-SliderBar-Background" edgeFile="Interface\Buttons\UI-SliderBar-Border" tile="true">
+			<EdgeSize>
+				<AbsValue val="8"/>
+			</EdgeSize>
+			<TileSize>
+				<AbsValue val="8"/>
+			</TileSize>
+			<BackgroundInsets>
+				<AbsInset left="3" right="3" top="6" bottom="6"/>
+			</BackgroundInsets>
+		</Backdrop>
 		<Layers>
 			<Layer level="ARTWORK">
-				<FontString name="$parentVal" parentKey="val" inherits="GameFontHighlightSmall" text="HIGH">
-					<Anchors>
-						<Anchor point="TOP" relativePoint="BOTTOM" y="3"/>
-					</Anchors>
-				</FontString>
-				<FontString name="$parentText" parentKey="text" inherits="GameFontHighlight" justifyH="CENTER" justifyV="BOTTOM">
+				<FontString name="$parentText" parentKey="text" inherits="GameFontHighlightSmall" justifyH="CENTER" justifyV="BOTTOM">
 					<Anchors>
 						<Anchor point="BOTTOM" relativePoint="TOP" y="-1"/>
 					</Anchors>
 				</FontString>
+				<FontString name="$parentLow" inherits="GameFontHighlightSmall" parentKey="Low" text="LOW">
+					<Anchors>
+						<Anchor point="TOPLEFT" relativePoint="BOTTOMLEFT" x="-4" y="3"/>
+					</Anchors>
+				</FontString>
+				<FontString name="$parentMid" parentKey="Mid" inherits="GameFontHighlightSmall" text="">
+					<Anchors>
+						<Anchor point="TOP" relativePoint="BOTTOM" y="3"/>
+					</Anchors>
+				</FontString>
+				<FontString name="$parentHigh" inherits="GameFontHighlightSmall" parentKey="High" text="HIGH">
+					<Anchors>
+						<Anchor point="TOPRIGHT" relativePoint="BOTTOMRIGHT" x="4" y="3"/>
+					</Anchors>
+				</FontString>
 			</Layer>
 		</Layers>
+		<ThumbTexture name="$parentThumb" file="Interface\Buttons\UI-SliderBar-Button-Horizontal">
+			<Size x="32" y="32"/>
+		</ThumbTexture>
+	</Slider>
+	
+	<Slider name="TellMeWhen_AlphaSliderTemplate" inherits="TellMeWhen_SliderTemplate" minvalue="0" maxvalue="100" valuestep="1" virtual="true">
+		<Size x="175" y="17"/>
 		<Scripts>
 			<OnMinMaxChanged>
 				local minValue, maxValue = self:GetMinMaxValues()
-				_G[self:GetName() .. "Low"]:SetText(minValue .. "%")
-				_G[self:GetName() .. "High"]:SetText(maxValue .. "%")
+				self.Low:SetText(minValue .. "%")
+				self.High:SetText(maxValue .. "%")
+				local color = 34/255
+				self.Low:SetTextColor(color, color, color, 1)
+				self.High:SetTextColor(color, color, color, 1)
 			</OnMinMaxChanged>
 			<OnValueChanged>
-				self.val:SetText(value .. "%")
+				self.Mid:SetText(value .. "%")
 				if TMW.CI.ics and not self.fakeNextSetValue then
 					TMW.CI.ics[self.setting] = value / 100
 					TMW.IE:ScheduleIconUpdate(TMW.CI.ic)
 					if self:IsEnabled() and ((value == 0 and self.setting ~= "ConditionAlpha") or (value == 100 and self.setting == "ConditionAlpha")) then
-						self.val:SetText("|cffff7400" .. value .. "%")
+						self.Mid:SetText("|cffff7400" .. value .. "%")
 					end
 				end
 			</OnValueChanged>
@@ -318,7 +349,7 @@
 				self:SetAlpha(0.4)
 				self.fakeNextSetValue = 1
 				self:SetValue(0)
-				self.val:SetText("0%")
+				self.Mid:SetText("0%")
 				self.fakeNextSetValue = nil
 			</OnDisable>
 			<OnMouseWheel>
@@ -794,20 +825,11 @@
 					</OnLoad>
 				</Scripts>
 			</Frame>
-			<Slider name="$parentSlider" parentKey="Slider" inherits="OptionsSliderTemplate" minvalue="0" maxvalue="100" valuestep="1" defaultvalue="100">
+			<Slider name="$parentSlider" parentKey="Slider" inherits="TellMeWhen_SliderTemplate" minvalue="0" maxvalue="100" valuestep="1" defaultvalue="100">
 				<Size x="522" y="17"/>
 				<Anchors>
 					<Anchor point="TOPRIGHT" x="-5" y="-39"/>
 				</Anchors>
-				<Layers>
-					<Layer level="ARTWORK">
-						<FontString name="$parentMid" inherits="GameFontHighlightSmall">
-							<Anchors>
-								<Anchor point="TOP" relativePoint="BOTTOM" y="3"/>
-							</Anchors>
-						</FontString>
-					</Layer>
-				</Layers>
 				<Scripts>
 					<OnValueChanged>
 						local group = self:GetParent()
@@ -1182,14 +1204,20 @@
 			<Button name="$parentUp" parentKey="Up">
 				<Size x="15" y="15"/>
 				<Anchors>
-					<Anchor point="TOPLEFT" y="-27"/>
+					<Anchor point="TOPLEFT" x="4" y="-32"/>
 				</Anchors>
 				<Scripts>
-					<OnLoad>TMW:TT(self, "METAPANEL_UP") self:SetScale(0.8)</OnLoad>
-					 <OnClick>self:GetParent():UpOrDown(-1)</OnClick>
+					<OnLoad>
+						TMW:TT(self, "METAPANEL_UP")
+						self:SetScale(0.8)
+					</OnLoad>
+					<OnClick>
+						self:GetParent():UpOrDown(-1)
+					</OnClick>
 				</Scripts>
 				<NormalTexture urgency="5" file="Interface\ChatFrame\UI-ChatIcon-ScrollUp-Up" alphaMode="ADD">
 					<TexCoords left="0.21875" right="0.6875" top="0.34375" bottom="0.65625"/>
+					<Color r=".7" g=".7" b=".7" a="1"/>
 				</NormalTexture>
 				<HighlightTexture urgency="5" file="Interface\ChatFrame\UI-ChatIcon-ScrollUp-Up" alphaMode="ADD">
 					<TexCoords left="0.21875" right="0.6875" top="0.34375" bottom="0.65625"/>
@@ -1198,14 +1226,20 @@
 			<Button name="$parentDown" parentKey="Down">
 				<Size x="15" y="15"/>
 				<Anchors>
-					<Anchor point="LEFT" relativeTo="$parentUp" relativePoint="RIGHT"/>
+					<Anchor point="TOP" relativeTo="$parentUp" relativePoint="BOTTOM" y="-3"/>
 				</Anchors>
 				<Scripts>
-					<OnLoad>TMW:TT(self, "METAPANEL_DOWN") self:SetScale(0.8)</OnLoad>
-					 <OnClick>self:GetParent():UpOrDown(1)</OnClick>
+					<OnLoad>
+						TMW:TT(self, "METAPANEL_DOWN")
+						self:SetScale(0.8)
+					</OnLoad>
+					<OnClick>
+						self:GetParent():UpOrDown(1)
+					</OnClick>
 				</Scripts>
 				<NormalTexture urgency="5" file="Interface\ChatFrame\UI-ChatIcon-ScrollDown-Up" alphaMode="ADD">
 					<TexCoords left="0.21875" right="0.6875" top="0.34375" bottom="0.65625"/>
+					<Color r=".7" g=".7" b=".7" a="1"/>
 				</NormalTexture>
 				<HighlightTexture urgency="5" file="Interface\ChatFrame\UI-ChatIcon-ScrollDown-Up" alphaMode="ADD">
 					<TexCoords left="0.21875" right="0.6875" top="0.34375" bottom="0.65625"/>
@@ -1424,21 +1458,21 @@
 	
 
 	<Button name="TellMeWhen_AnnounceEvent" virtual="true" >
-		<Size y="30"/>
+		<Size y="25"/>
 		<Scripts>
 			<OnClick>
 				TMW.ANN:SelectEvent(self:GetID())
 			</OnClick>
 			<OnDisable>
-				self.EventName:SetFontObject(GameFontDisable)
-				self.DataText:SetFontObject(GameFontDisable)
+				self.EventName:SetFontObject(GameFontDisableSmall)
+				self.DataText:SetFontObject(GameFontDisableSmall)
 				if self.Play then
 					self.Play:Disable()
 				end
 			</OnDisable>
 			<OnEnable>
-				self.EventName:SetFontObject(GameFontNormal)
-				self.DataText:SetFontObject(GameFontHighlight)
+				self.EventName:SetFontObject(GameFontNormalSmall)
+				self.DataText:SetFontObject(GameFontHighlightSmall)
 				if self.Play then
 					self.Play:Enable()
 				end
@@ -1454,13 +1488,13 @@
 		</HighlightTexture>
 		<Layers>
 			<Layer level="OVERLAY">
-				<FontString name="$parentEventName" parentKey="EventName" inherits="GameFontNormal" justifyH="LEFT" text="Serpent Sting Sting Sting Sting Sting">
+				<FontString name="$parentEventName" parentKey="EventName" inherits="GameFontNormalSmall" justifyH="LEFT">
 					<Anchors>
 						<Anchor point="TOPLEFT" x="3" y="-2"/>
 						<Anchor point="RIGHT" relativeTo="$parentPlay" relativePoint="LEFT" x="-1"/>
 					</Anchors>
 				</FontString>
-				<FontString name="$parentDataText" parentKey="DataText" inherits="GameFontHighlight" justifyH="LEFT" >
+				<FontString name="$parentDataText" parentKey="DataText" inherits="GameFontHighlightSmall" justifyH="LEFT" >
 					<Anchors>
 						<Anchor point="BOTTOMLEFT" x="3" y="2"/>
 						<Anchor point="RIGHT"/>
@@ -1515,7 +1549,7 @@
 		</Frames>
 	</Button>
 	<Button name="TellMeWhen_ChannelSelectButton" virtual="true" >
-		<Size y="14"/>
+		<Size y="12"/>
 		<Scripts>
 			<OnClick>
 				TMW.ANN:SelectChannel(self.channel)
@@ -1526,8 +1560,6 @@
 				TMW.ANN:SetTabText()
 			</OnClick>
 		</Scripts>
-		<NormalFont style="GameFontNormal"/>
-		<HighlightFont style="GameFontHighlight"/>
 		<HighlightTexture file="Interface\QuestFrame\UI-QuestLogTitleHighlight" alphaMode="ADD">
 			<Anchors>
 				<Anchor point="TOPLEFT" y="1"/>
@@ -1536,7 +1568,7 @@
 		</HighlightTexture>
 		<Layers>
 			<Layer level="OVERLAY">
-				<FontString name="$parentName" parentKey="Name" inherits="GameFontHighlight" justifyH="LEFT" text="Serpent Sting Sting Sting Sting">
+				<FontString name="$parentName" parentKey="Name" inherits="GameFontHighlightSmall" justifyH="LEFT">
 					<Anchors>
 						<Anchor point="LEFT" x="3"/>
 						<Anchor point="RIGHT" x="-1"/>
@@ -1546,7 +1578,7 @@
 		</Layers>
 	</Button>
 	<Button name="TellMeWhen_SoundSelectButton" virtual="true" >
-		<Size y="14"/>
+		<Size y="12"/>
 		<Scripts>
 			<OnLoad>
 			--	self.Background:SetVertexColor(0, 1, 0)
@@ -1578,8 +1610,6 @@
 				self:GetParent().ScrollBar:SetValue(self:GetParent().ScrollBar:GetValue() - delta)
 			</OnMouseWheel>
 		</Scripts>
-		<NormalFont style="GameFontNormal"/>
-		<HighlightFont style="GameFontHighlight"/>
 		<HighlightTexture file="Interface\QuestFrame\UI-QuestLogTitleHighlight" alphaMode="ADD">
 			<Anchors>
 				<Anchor point="TOPLEFT" y="1"/>
@@ -1598,20 +1628,20 @@
 						self:GetParent():LockHighlight()
 					</OnEnter>
 					<OnLeave>
-						if TMW.SND.selectedListID ~= self.listID then
+						if TMW.SND.selectedListID ~= self:GetParent().listID then
 							self:GetParent():UnlockHighlight()
 						end
 					</OnLeave>
 				</Scripts>
 				<Size x="15" y="15"/>
 				<Anchors>
-					<Anchor point="RIGHT" y="1"/>
+					<Anchor point="RIGHT" x="-2" y="1"/>
 				</Anchors>
 			</Button>
 		</Frames>
 		<Layers>
 			<Layer level="OVERLAY">
-				<FontString name="$parentName" parentKey="Name" inherits="GameFontHighlight" justifyH="LEFT" text="Serpent Sting Sting Sting Sting">
+				<FontString name="$parentName" parentKey="Name" inherits="GameFontHighlightSmall" justifyH="LEFT">
 					<Anchors>
 						<Anchor point="LEFT" x="3"/>
 						<Anchor point="RIGHT" relativeTo="$parentPlay" relativePoint="LEFT" x="-1"/>
@@ -1620,6 +1650,52 @@
 			</Layer>
 		</Layers>
 	</Button>
+	<Frame name="TellMeWhen_EventSettings" virtual="true">
+		<Size y="1"/>
+		<Anchors>
+			<Anchor point="TOPLEFT" relativeTo="$parentEvents" relativePoint="BOTTOMLEFT" x="0" y="-15"/>
+			<Anchor point="TOPRIGHT" relativeTo="$parentEvents" relativePoint="BOTTOMRIGHT" x="0" y="-15"/>
+		</Anchors>
+		<Layers>
+			<Layer level="OVERLAY">
+				<FontString name="$parentHeader" inherits="GameFontNormalLarge" parentKey="Header" justifyH="LEFT">
+					<Anchors>
+						<Anchor point="TOP" y="0"/>
+					</Anchors>
+				</FontString>
+				<FontString name="$parentEventName" inherits="GameFontDisableSmall" parentKey="EventName" justifyH="LEFT">
+					<Anchors>
+						<Anchor point="TOP" relativeTo="$parentHeader" relativePoint="BOTTOM" y="0"/>
+					</Anchors>
+				</FontString>
+			</Layer>
+		</Layers>
+		<Frames>
+			<CheckButton name="$parentOnlyShown" inherits="TellMeWhen_CheckTemplate" parentKey="OnlyShown">
+				<Anchors>
+					<Anchor point="TOPLEFT" y="-25"/>
+				</Anchors>
+				<Scripts>
+					<OnLoad>
+						self.text:SetText(TMW.L["EVENTS_SETTINGS_ONLYSHOWN"])
+					</OnLoad>
+					<OnClick>
+						local parentModule = self:GetParent():GetParent().module
+						if TMW.CI.ics then
+							TMW.CI.ics.Events[parentModule.currentEvent].OnlyShown = not not self:GetChecked()
+							TMW.IE:ScheduleIconUpdate(TMW.CI.ic)
+						end
+					</OnClick>
+				</Scripts>
+			</CheckButton>
+		</Frames>
+		<Scripts>
+			<OnLoad>
+				self.Header:SetText(TMW.L["EVENTS_SETTINGS_HEADER"])
+			</OnLoad>
+		</Scripts>
+	</Frame>
+	
 	
 	<!-- END TEMPLATES -->
 
@@ -1871,40 +1947,26 @@
 				</Layers>
 				<Frames>
 					<Button name="$parentItem1" inherits="TellMeWhen_SpellSuggestTemplate" parentKey="Item1" id="1"/>
-					<Slider name="$parentSpeed" inherits="OptionsSliderTemplate" parentKey="Speed" hidden="true">
+					<Slider name="$parentSpeed" inherits="TellMeWhen_SliderTemplate" parentKey="Speed" hidden="true">
 						<Size x="165" y="18"/>
 						<Anchors>
 							<Anchor point="TOP" relativeTo="$parentInfoText" relativePoint="BOTTOM" y="-25"/>
 						</Anchors>
-						<Layers>
-							<Layer level="ARTWORK">
-								<FontString name="$parentVal" parentKey="val" inherits="GameFontHighlightSmall" text="HIGH">
-									<Anchors>
-										<Anchor point="TOP" relativePoint="BOTTOM" y="3"/>
-									</Anchors>
-								</FontString>
-								<FontString name="$parentText" parentKey="text" inherits="GameFontHighlight">
-									<Anchors>
-										<Anchor point="BOTTOM" relativePoint="TOP" y="-1"/>
-									</Anchors>
-								</FontString>
-							</Layer>
-						</Layers>
 						<Scripts>
 							<OnLoad>
 								self.exponent = 4
 								self.max = 5000
 								self.text:SetText(TMW.L["CACHINGSPEED"])
 								self:SetMinMaxValues(1, (self.max^(1/self.exponent)))
-								_G[self:GetName() .. "Low"]:SetText(1)
-								_G[self:GetName() .. "High"]:SetText(self.max)
-								self.val:SetText(TMW.SUG.NumCachePerFrame)
+								self.Low:SetText(1)
+								self.High:SetText(self.max)
+								self.Mid:SetText(TMW.SUG.NumCachePerFrame)
 								self:SetValue(TMW.SUG.NumCachePerFrame or 0)
 							</OnLoad>
 							<OnValueChanged>
 								value = min(floor(value^self.exponent+0.5), self.max)
 								TMW.SUG.NumCachePerFrame = value
-								self.val:SetText(value)
+								self.Mid:SetText(value)
 							</OnValueChanged>
 							<OnShow>
 								self:GetParent().InfoText:Show()
@@ -2582,11 +2644,11 @@
 							<EditBox name="$parentPBarOffs" inherits="TellMeWhen_InputBoxTemplate" parentKey="PBarOffs" autoFocus="false">
 								<Size x="40" y="32"/>
 								<Anchors>
-									<Anchor point="TOPLEFT" relativeTo="$parentShowPBar" relativePoint="BOTTOMLEFT" x="14" y="7"/>
+									<Anchor point="TOPLEFT" relativeTo="$parentShowPBar" relativePoint="BOTTOMLEFT" x="14" y="11"/>
 								</Anchors>
 								<Layers>
 									<Layer level="ARTWORK">
-										<FontString name="$parentFS1" inherits="GameFontHighlight" parentKey="text" justifyH="LEFT">
+										<FontString name="$parentFS1" inherits="GameFontHighlightSmall" parentKey="text" justifyH="LEFT">
 											<Anchors>
 												<Anchor point="LEFT" relativePoint="RIGHT" x="5" y="-1"/>
 											</Anchors>
@@ -2666,11 +2728,11 @@
 							<EditBox name="$parentCBarOffs" inherits="TellMeWhen_TimeEditBoxTemplate" parentKey="CBarOffs" autoFocus="false">
 								<Size x="40" y="32"/>
 								<Anchors>
-									<Anchor point="TOPLEFT" relativeTo="$parentShowCBar" relativePoint="BOTTOMLEFT" x="14" y="7"/>
+									<Anchor point="TOPLEFT" relativeTo="$parentShowCBar" relativePoint="BOTTOMLEFT" x="14" y="11"/>
 								</Anchors>
 								<Layers>
 									<Layer level="ARTWORK">
-										<FontString name="$parentFS1" inherits="GameFontHighlight" parentKey="text" justifyH="LEFT">
+										<FontString name="$parentFS1" inherits="GameFontHighlightSmall" parentKey="text" justifyH="LEFT">
 											<Anchors>
 												<Anchor point="LEFT" relativePoint="RIGHT" x="5" y="-1"/>
 											</Anchors>
@@ -2940,7 +3002,7 @@
 						</Anchors>
 						<Layers>
 							<Layer level="ARTWORK">
-								<FontString name="$parentText" parentKey="text" inherits="GameFontHighlight">
+								<FontString name="$parentText" parentKey="text" inherits="GameFontHighlightSmall">
 									<Anchors>
 										<Anchor point="BOTTOM" relativePoint="TOP" y="2"/>
 									</Anchors>
@@ -2980,7 +3042,7 @@
 						</Anchors>
 						<Layers>
 							<Layer level="ARTWORK">
-								<FontString name="$parentText" parentKey="text" inherits="GameFontHighlight">
+								<FontString name="$parentText" parentKey="text" inherits="GameFontHighlightSmall">
 									<Anchors>
 										<Anchor point="BOTTOM" relativePoint="TOP" y="2"/>
 									</Anchors>
@@ -3132,7 +3194,6 @@
 								TMW:TT(self, "ICONALPHAPANEL_FAKEHIDDEN", "ICONALPHAPANEL_FAKEHIDDEN_DESC")
 								self.text:SetText(TMW.L["ICONALPHAPANEL_FAKEHIDDEN"])
 								self.text:SetWidth(135)
-								self.text:SetFontObject("GameFontHighlight")
 							</OnLoad>
 							<OnClick>
 								if TMW.CI.ics then
@@ -3436,9 +3497,12 @@
 							</OnEditFocusLost>
 						</Scripts>
 					</EditBox>
+					
+					<Frame name="$parentEventSettings" inherits="TellMeWhen_EventSettings" parentKey="EventSettings"/>
 				</Frames>
 				<Scripts>
 					<OnLoad>
+						self.module = TMW.SND
 						self:RegisterForDrag("LeftButton")
 						self:Hide()
 
@@ -3628,7 +3692,7 @@
 									</Anchors>
 									<Color r="1.0" g="1.0" b="1.0"/>
 								</Texture>
-								<FontString name="$parenttext" parentKey="text" justifyH="LEFT" inherits="GameFontHighlight">
+								<FontString name="$parenttext" parentKey="text" justifyH="LEFT" inherits="GameFontHighlightSmall">
 									<Anchors>
 										<Anchor point="LEFT" relativePoint="RIGHT" x="2"/>
 									</Anchors>
@@ -3671,34 +3735,20 @@
 						<NormalTexture name="$parentNormalTexture" file="Interface\ChatFrame\ChatFrameColorSwatch"/>
 					</Button>
 
-					<Slider name="$parentSize" inherits="OptionsSliderTemplate" parentKey="Size" minvalue="0" maxvalue="38" valuestep="1">
+					<Slider name="$parentSize" inherits="TellMeWhen_SliderTemplate" parentKey="Size" minvalue="0" maxvalue="38" valuestep="1">
 						<Size x="150" y="17"/>
 						<Anchors>
 							<Anchor point="TOPLEFT" relativeTo="$parentColor" relativePoint="BOTTOMLEFT" y="-17"/>
 						</Anchors>
-						<Layers>
-							<Layer level="ARTWORK">
-								<FontString name="$parentVal" parentKey="val" inherits="GameFontHighlightSmall" text="HIGH">
-									<Anchors>
-										<Anchor point="TOP" relativePoint="BOTTOM" y="3"/>
-									</Anchors>
-								</FontString>
-								<FontString name="$parentText" parentKey="text" inherits="GameFontHighlight">
-									<Anchors>
-										<Anchor point="BOTTOM" relativePoint="TOP" y="-1"/>
-									</Anchors>
-								</FontString>
-							</Layer>
-						</Layers>
 						<Scripts>
 							<OnMinMaxChanged>
 								local minValue, maxValue = self:GetMinMaxValues()
-								_G[self:GetName() .. "Low"]:SetText(TMW.L["DEFAULT"])
-								_G[self:GetName() .. "High"]:SetText(maxValue)
+								self.Low:SetText(TMW.L["DEFAULT"])
+								self.High:SetText(maxValue)
 							</OnMinMaxChanged>
 							<OnValueChanged>
 								local val = self:GetValue()
-								_G[self:GetName() .. "Val"]:SetText(val == 0 and TMW.L["DEFAULT"] or val)
+								self.Mid:SetText(val == 0 and TMW.L["DEFAULT"] or val)
 								if TMW.CI.ics then
 									TMW.CI.ics.Events[TMW.ANN.currentEvent].Size = val
 									TMW.IE:ScheduleIconUpdate(TMW.CI.ic)
@@ -3714,9 +3764,11 @@
 						</Scripts>
 					</Slider>
 
+					<Frame name="$parentEventSettings" inherits="TellMeWhen_EventSettings" parentKey="EventSettings"/>
 				</Frames>
 				<Scripts>
 					<OnLoad>
+						self.module = TMW.ANN
 						self:RegisterForDrag("LeftButton")
 						self:Hide()
 

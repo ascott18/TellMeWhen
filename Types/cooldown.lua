@@ -39,7 +39,7 @@ Type.type = "cooldown"
 Type.name = L["ICONMENU_SPELLCOOLDOWN"]
 Type.desc = L["ICONMENU_SPELLCOOLDOWN_DESC"]
 Type.chooseNameText  = L["CHOOSENAME_DIALOG"] .. "\r\n\r\n" .. L["CHOOSENAME_DIALOG_PETABILITIES"]
-Type.SUGType = "cooldown"
+Type.SUGType = "spell"
 
 Type.WhenChecks = {
 	text = L["ICONMENU_SHOWWHEN"],

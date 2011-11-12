@@ -1084,18 +1084,21 @@ local function GetAnchoredPoints(group)
 	local p = TMW.db.profile.Groups[group:GetID()].Point
 
 	local relframe = _G[p.relativeTo] or UIParent
+	local point, relativePoint = p.point, p.relativePoint
+	
 	if relframe == UIParent then
-		local p, _, r, x, y = group:GetPoint(1)
-		return p, "UIParent", r, x, y
+		-- use the smart anchor points provided by UIParent anchoring if it is being used
+		local _
+		point, _, relativePoint = group:GetPoint(1)
 	end
 
 	Ruler:ClearAllPoints()
-	Ruler:SetPoint("TOPLEFT", group, p.point)
-	Ruler:SetPoint("BOTTOMRIGHT", relframe, p.relativePoint)
+	Ruler:SetPoint("TOPLEFT", group, point)
+	Ruler:SetPoint("BOTTOMRIGHT", relframe, relativePoint)
 
 	local X = Ruler:GetWidth()/UIParent:GetScale()/group:GetScale()
 	local Y = Ruler:GetHeight()/UIParent:GetScale()/group:GetScale()
-	return p.point, relframe:GetName(), p.relativePoint, -X, Y
+	return point, relframe:GetName(), relativePoint, -X, Y
 end
 
 local function Group_SizeUpdate(resizeButton)
@@ -1156,16 +1159,17 @@ end
 
 ---------- Add/Delete ----------
 function TMW:Group_Delete(groupID)
-	tremove(db.profile.Groups, groupID)
+	
 	local warntext = L["ONGROUPDELETE_CHECKINGINVALID"] .. " "
+	local originalwarn = warntext
 	
 	-- shift condition icons
 	for condition, _, gID, iID in TMW:InConditionSettings() do
 		if condition.Icon ~= "" and condition.Type == "ICON" then
 			local g = tonumber(strmatch(condition.Icon, "TellMeWhen_Group(%d+)_Icon"))
 			if g > groupID then
-				ics.Conditions[k].Icon = gsub(condition.Icon, "_Group" .. g, "_Group" .. g-1)
-			elseif g == groupID then
+				condition.Icon = gsub(condition.Icon, "_Group" .. g, "_Group" .. g-1)
+			elseif g == groupID and g ~= gID then
 				if iID then
 					warntext = warntext .. format(L["GROUPICON"], TMW:GetGroupName(gID, gID, 1), iID) .. ";  "
 				else
@@ -1183,22 +1187,42 @@ function TMW:Group_Delete(groupID)
 					local g = tonumber(strmatch(v, "TellMeWhen_Group(%d+)_Icon"))
 					if g > groupID then
 						ics.Icons[k] = gsub(v, "_Group" .. g, "_Group" .. g-1)
-					elseif g == groupID then
+					elseif g == groupID and g ~= gID  then
 						warntext = warntext .. format(L["GROUPICON"], TMW:GetGroupName(gID, gID, 1), iID) .. ";  "
 					end
 				end
 			end
 		end
 	end
-	if warntext ~= "" then
-		TMW:Print(strsub(warntext, 1, -3))
+	
+	-- shift anchors
+	for gs, gID in TMW:InGroupSettings() do
+		local g = gs.Point.relativeTo and tonumber(strmatch(gs.Point.relativeTo, "TellMeWhen_Group(%d+)"))
+		if g then
+			if g > groupID then
+				print(g, groupID)
+				gs.Point.relativeTo = gsub(gs.Point.relativeTo, "_Group" .. g, "_Group" .. g-1)
+			elseif g == groupID then
+				print(g, groupID)
+				gs.Point.relativeTo = "UIParent"
+				TMW:Group_StopMoving(TMW[gID])
+			end
+		end
 	end
+	
+	-- warn for invalid things
+	if originalwarn ~= warntext then
+		TMW:Print(warntext)
+	end
+	
+	tremove(db.profile.Groups, groupID)
 	db.profile.NumGroups = db.profile.NumGroups - 1
 	for k, v in pairs(TMW.Icons) do
 		if tonumber(strmatch(v, "TellMeWhen_Group(%d+)")) == groupID then
 			TMW:InvalidateIcon(k)
 		end
 	end
+	
 	TMW:Update()
 	IE:Load()
 	TMW:CompileOptions()
@@ -2731,7 +2755,7 @@ function TMW:SerializeData(data, type, ...)
 	-- nothing more than a wrapper for AceSerializer-3.0
 	assert(data, "No data to serialize!")
 	assert(type, "No data type specified!")
-	return TMW:Serialize(data, TELLMEWHEN_VERSIONNUMBER, " ", type, ...)
+	return TMW:Serialize(data, TELLMEWHEN_VERSIONNUMBER, " ~", type, ...)
 end
 
 function TMW:MakeSerializedDataPretty(string)
@@ -2745,12 +2769,6 @@ function TMW:DeserializeData(string)
 	if not success then
 		-- corrupt/incomplete string
 		return nil
-	end
-	
-	if spaceControl == "`" then
-		-- if spaces have become corrupt, then reformat them and... re-deserialize (lol)
-		string = string:gsub("`", "~`")
-		success, data, version, spaceControl, type, arg1, arg2, arg3, arg4, arg5 = TMW:Deserialize(string)
 	end
 	
 	if not version then
@@ -2771,6 +2789,18 @@ function TMW:DeserializeData(string)
 		return nil
 	end
 	
+	if spaceControl:find("`|") then
+		-- EVERYTHING is fucked up. try really hard to salvage it. It probably won't be completely successful
+		return TMW:DeserializeData(string:gsub("`", "~`"):gsub("~`|", "~`~|"))	
+	elseif spaceControl:find("`") then
+		-- if spaces have become corrupt, then reformat them and... re-deserialize (lol)
+		return TMW:DeserializeData(string:gsub("`", "~`"))	
+	elseif spaceControl:find("~|") then
+		-- if pipe characters have been screwed up by blizzard's cute little method of escaping things combined with AS-3.0's cute way of escaping things, try to fix them.
+		return TMW:DeserializeData(string:gsub("~||", "~|"))	
+	end
+	
+	
 	-- finally, we have everything we need. create a result object and return it.
 	local result = {
 		data = data,
@@ -2784,7 +2814,6 @@ function TMW:DeserializeData(string)
 	}
 	
 	return result
-	
 end
 
 
@@ -2930,8 +2959,10 @@ function IE:Copy_DropDown(...)
 			end
 		end
 	end
-	
+	--^1^T^SConditions^T ^N1^T ^SType^SHEALTH ^SOperator^S~|= ^t^Sn^N1 ^t^SName^Sthis|is|a|test|and|the|next||set~`was~`two~`things~`and~`so~`is~`the~`end~`here~`|| ^t^N46608^S~` ^Sicon^^
 	local t = strtrim(EDITBOX:GetText())
+--	print(t)
+	--t = gsub(t, "||", "|")
 	local editboxResult = t ~= "" and TMW:DeserializeData(t)
 	t = nil
 
@@ -3494,9 +3525,12 @@ end
 
 function IE:DoUndoRedo(direction)
 	local icon = CI.ic
-	icon.historyState = icon.historyState + direction
-	db.profile.Groups[CI.g].Icons[CI.i] = nil -- recreated when passed into CTIPWM
 	
+	if not icon.history[icon.historyState + direction] then return end -- not valid, so don't try
+		
+	icon.historyState = icon.historyState + direction
+	
+	db.profile.Groups[CI.g].Icons[CI.i] = nil -- recreated when passed into CTIPWM	
 	TMW:CopyTableInPlaceWithMeta(icon.history[icon.historyState], db.profile.Groups[CI.g].Icons[CI.i])
 	
 	TMW:Icon_Update(CI.ic) -- do an immediate update for good measure
@@ -3529,6 +3563,17 @@ end
 
 
 
+function IE:SetEventSettings(Module)
+	local EventSettings = Module.EventSettings
+	local Event = Module.currentEvent
+	
+	EventSettings.EventName:SetText(Module.Events[Module.currentEventID].settings.text)
+	
+	local Settings = TMW.CI.ics.Events[Event]
+	
+	EventSettings.OnlyShown:SetChecked(Settings.OnlyShown)
+end
+
 -- ----------------------
 -- SOUNDS
 -- ----------------------
@@ -3547,7 +3592,7 @@ function SND:OnInitialize()
 	previous.Play:Hide()
 	previous.soundfile = ""
 	previous.soundname = "None"
-	for i=1, floor(Sounds:GetHeight())/Sounds.None:GetHeight() do
+	for i=1, floor(Sounds:GetHeight()/Sounds.None:GetHeight()) - 1 do
 		local f = CreateFrame("Button", Sounds:GetName().."Sound"..i, Sounds, "TellMeWhen_SoundSelectButton", i)
 		Sounds[i] = f
 		f:SetPoint("TOPLEFT", previous, "BOTTOMLEFT", 0, 0)
@@ -3567,6 +3612,7 @@ function SND:OnInitialize()
 		frame.event = eventData.name
 		frame.setting = "Sound" .. frame.event
 		frame.EventName:SetText(eventData.text)
+		frame.settings = eventData
 		TMW:TT(frame, eventData.text, eventData.desc .. "\r\n\r\n" .. L["SOUND_EVENT_GLOBALDESC"], 1, 1)
 		previousFrame = frame
 	end
@@ -3621,8 +3667,8 @@ function SND:SelectEvent(id)
 
 	if CI.ics then
 		SND:SelectSound(CI.ics.Events[eventFrame.event].Sound)
+		IE:SetEventSettings(self)
 	end
-
 end
 
 function SND:SetupEventDisplay(event)
@@ -3818,6 +3864,7 @@ function ANN:OnInitialize()
 		frame:SetPoint("TOPRIGHT", previousFrame, "BOTTOMRIGHT")
 		
 		frame.event = eventData.name
+		frame.settings = eventData
 		
 		frame.EventName:SetText(eventData.text)
 		TMW:TT(frame, eventData.text, eventData.desc .. "\r\n\r\n" .. L["ANN_EVENT_GLOBALDESC"], 1, 1)
@@ -3905,6 +3952,7 @@ function ANN:SelectEvent(id)
 		local EventSettings = CI.ics.Events[eventFrame.event]
 		ANN:SelectChannel(EventSettings.Channel)
 		ANN.EditBox:SetText(EventSettings.Text)
+		IE:SetEventSettings(self)
 	end
 end
 
@@ -5558,66 +5606,6 @@ Module.SpellIDs = {
 	51730,	--Earthliving Weapon
 	8017,	--Rockbiter Weapon
 }
---[[
---enUS
-	-- Weapon:	".* (Weapon)"
-	-- Enchant:	"(.*) Weapon"
-	
---deDE -- tested
-	-- Weapon:	"(Waffe de[sr]) .-s?$"
-	-- Enchant:	"Waffe de[sr] (.-)s?$"
-	
---esES, esMX -- tested
-	-- Weapon:	"(Arma ?d?e?) .*"
-	-- Enchant:	"Arma ?d?e? (.*)"
-	
---zhTW -- tested
-	-- Weapon:	""
-	-- Enchant:	"(.*)"
-	
---zhCN -- TOTAL GUESS HERE
-	-- Weapon:	""
-	-- Enchant:	"(.*)"
-	
---ptBR -- tested
-	-- Weapon:	"(Arma ?d?[ae]?) .*"
-	-- Enchant:	"Arma ?d?[ae]? (.*)"
-	
---frFR -- tested
-	-- Weapon:	"(Arme) [A-Z].*" or ""
-	-- Enchant:	"Arme ([A-Z].*)"
-	-- Enchant2:"(.*)"
-	
---koKR
-	-- Weapon:	""
-	-- Enchant:	"(.*)" -- not really, but whatever. Earthliving is a strange exception
-	
---ruRU -- tested
-	-- Weapon:	"(Оружие) .*"
-	-- Enchant:	"Оружие (........)" -- well, this is lame
-
-	ENCHMATCH = "(.*)"
-	ENCHMATCH2 = "(명)"
-	for k, id in pairs(self.SpellIDs) do -- DEBUG: REPLACE TMW.SUG:GetModule("wpnenchant") WITH SELF
-		local name = GetSpellInfo(id)
-		for _, enchant in TMW:Vararg(strsplit("|", L["SUG_MATCH_WPNENCH_ENCH"])) do
-			local dobreak
-			if enchant then
-				enchant = enchant:gsub("([%(%)%%%[%]%-%+%.%*])", "%%%1")
-				for ench in pairs(TMW.db.global.WpnEnchDurs) do
-					if strfind(strlower(ench), strlower(enchant)) then
-						self.Spells[ench] = id
-						dobreak = 1
-						break
-					end
-				end
-				if dobreak then
-					brek
-				end
-			end
-		end
-	end
-]]
 
 function Module:OnInitialize()
 	self.Items = {}
@@ -6327,6 +6315,82 @@ function CNDT:ColorizeParentheses()
 end	
 
 
+---------- Condition Groups ----------
+function CNDT:AddRemoveHandler()
+	local i=1
+	CNDT[1].Up:Hide()
+	while CNDT[i] do
+		CNDT[i].CloseParenthesis:Show()
+		CNDT[i].OpenParenthesis:Show()
+		CNDT[i].Down:Show()
+		if CNDT[i+1] then
+			if CNDT[i]:IsShown() then
+				CNDT[i+1].AddDelete:Show()
+			else
+				CNDT[i]:Hide()
+				CNDT[i+1].AddDelete:Hide()
+				CNDT[i+1]:Hide()
+				if i > 1 then
+					CNDT[i-1].Down:Hide()
+				end
+			end
+		else -- this handles the last one in the frame
+			if CNDT[i]:IsShown() then
+				CNDT:CreateGroups(i+1)
+			else
+				if i > 1 then
+					CNDT[i-1].Down:Hide()
+				end
+			end
+		end
+		i=i+1
+	end
+
+	local n = 1
+	while CNDT[n] and CNDT[n]:IsShown() do
+		n = n + 1
+	end
+	n = n - 1
+
+	if n < 3 then
+		for i = 1, n do
+			CNDT[i].CloseParenthesis:Hide()
+			CNDT[i].OpenParenthesis:Hide()
+		end
+	end
+	
+	CNDT:ColorizeParentheses()
+end
+
+function CNDT:CreateGroups(num)
+	local start = #CNDT + 1
+	
+	for i=start, num do
+		local group = CNDT[i] or CreateFrame("Frame", "TellMeWhen_IconEditorConditionsGroupsGroup" .. i, TellMeWhen_IconEditor.Conditions.Groups, "TellMeWhen_ConditionGroup", i)
+		for k, v in pairs(CNDT.GroupBase) do
+			group[k] = v
+		end
+		
+		group:SetPoint("TOPLEFT", CNDT[i-1], "BOTTOMLEFT", 0, -14.5)
+		local p, _, rp, x, y = TMW.CNDT[1].AddDelete:GetPoint()
+		group.AddDelete:ClearAllPoints()
+		group.AddDelete:SetPoint(p, CNDT[i], rp, x, y)
+		group:Clear()
+		group:SetTitles()
+	end
+end
+
+function CNDT:AddCondition(Conditions)
+	Conditions.n = Conditions.n + 1
+	return Conditions[Conditions.n]
+end
+
+function CNDT:DeleteCondition(Conditions, n)
+	Conditions.n = Conditions.n - 1
+	return tremove(Conditions, n)
+end
+
+
 ---------- Group Class ----------
 CNDT.GroupBase = {}
 
@@ -6613,12 +6677,12 @@ function CNDT.GroupBase.SetSliderMinMax(group, level)
 		local newmax = max(deviation, val + deviation)
 
 		Slider:SetMinMaxValues(newmin, newmax)
-		_G[Slider:GetName() .. "Low"]:SetText(get(v.texttable, newmin) or newmin)
-		_G[Slider:GetName() .. "High"]:SetText(get(v.texttable, newmax) or newmax)
+		Slider.Low:SetText(get(v.texttable, newmin) or newmin)
+		Slider.High:SetText(get(v.texttable, newmax) or newmax)
 	else
 		Slider:SetMinMaxValues(vmin or 0, vmax or 1)
-		_G[Slider:GetName() .. "Low"]:SetText(get(v.texttable, vmin) or v.mint or vmin or 0)
-		_G[Slider:GetName() .. "High"]:SetText(get(v.texttable, vmax) or v.maxt or vmax or 1)
+		Slider.Low:SetText(get(v.texttable, vmin) or v.mint or vmin or 0)
+		Slider.High:SetText(get(v.texttable, vmax) or v.maxt or vmax or 1)
 	end
 		
 	local Min, Max, midt = Slider:GetMinMaxValues()
@@ -6627,7 +6691,7 @@ function CNDT.GroupBase.SetSliderMinMax(group, level)
 	else
 		midt = get(v.midt, ((Max-Min)/2)+Min)
 	end
-	_G[Slider:GetName() .. "Mid"]:SetText(midt)
+	Slider.Mid:SetText(midt)
 		
 	Slider.step = v.step or 1
 	Slider:SetValueStep(Slider.step)
@@ -6636,82 +6700,6 @@ function CNDT.GroupBase.SetSliderMinMax(group, level)
 	end
 end
 
-
-
----------- Condition Groups ----------
-function CNDT:AddRemoveHandler()
-	local i=1
-	CNDT[1].Up:Hide()
-	while CNDT[i] do
-		CNDT[i].CloseParenthesis:Show()
-		CNDT[i].OpenParenthesis:Show()
-		CNDT[i].Down:Show()
-		if CNDT[i+1] then
-			if CNDT[i]:IsShown() then
-				CNDT[i+1].AddDelete:Show()
-			else
-				CNDT[i]:Hide()
-				CNDT[i+1].AddDelete:Hide()
-				CNDT[i+1]:Hide()
-				if i > 1 then
-					CNDT[i-1].Down:Hide()
-				end
-			end
-		else -- this handles the last one in the frame
-			if CNDT[i]:IsShown() then
-				CNDT:CreateGroups(i+1)
-			else
-				if i > 1 then
-					CNDT[i-1].Down:Hide()
-				end
-			end
-		end
-		i=i+1
-	end
-
-	local n = 1
-	while CNDT[n] and CNDT[n]:IsShown() do
-		n = n + 1
-	end
-	n = n - 1
-
-	if n < 3 then
-		for i = 1, n do
-			CNDT[i].CloseParenthesis:Hide()
-			CNDT[i].OpenParenthesis:Hide()
-		end
-	end
-	
-	CNDT:ColorizeParentheses()
-end
-
-function CNDT:CreateGroups(num)
-	local start = #CNDT + 1
-	
-	for i=start, num do
-		local group = CNDT[i] or CreateFrame("Frame", "TellMeWhen_IconEditorConditionsGroupsGroup" .. i, TellMeWhen_IconEditor.Conditions.Groups, "TellMeWhen_ConditionGroup", i)
-		for k, v in pairs(CNDT.GroupBase) do
-			group[k] = v
-		end
-		
-		group:SetPoint("TOPLEFT", CNDT[i-1], "BOTTOMLEFT", 0, -14.5)
-		local p, _, rp, x, y = TMW.CNDT[1].AddDelete:GetPoint()
-		group.AddDelete:ClearAllPoints()
-		group.AddDelete:SetPoint(p, CNDT[i], rp, x, y)
-		group:Clear()
-		group:SetTitles()
-	end
-end
-
-function CNDT:AddCondition(Conditions)
-	Conditions.n = Conditions.n + 1
-	return Conditions[Conditions.n]
-end
-
-function CNDT:DeleteCondition(Conditions, n)
-	Conditions.n = Conditions.n - 1
-	return tremove(Conditions, n)
-end
 
 
 

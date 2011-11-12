@@ -2121,6 +2121,10 @@ function CNDT:ProcessConditions(icon)
 			andor = "and"
 		end
 		
+		if c.Operator == "~|=" then
+			c.Operator = "~=" -- fix potential corruption from importing the string (a single | becaomes || when pasted, "~=" in encoded as "~|=")
+		end
+		
 		if v then
 			if v.events then
 				for k, event in TMW:Vararg(strsplit(" ", v.events)) do

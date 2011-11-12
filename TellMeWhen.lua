@@ -32,7 +32,7 @@ local DRData = LibStub("DRData-1.0", true)
 TELLMEWHEN_VERSION = "4.6.6"
 TELLMEWHEN_VERSION_MINOR = strmatch(" @project-version@", " r%d+") or ""
 TELLMEWHEN_VERSION_FULL = TELLMEWHEN_VERSION .. TELLMEWHEN_VERSION_MINOR
-TELLMEWHEN_VERSIONNUMBER = 46608 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
+TELLMEWHEN_VERSIONNUMBER = 46609 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
 if TELLMEWHEN_VERSIONNUMBER > 47000 or TELLMEWHEN_VERSIONNUMBER < 46000 then return error("YOU SCREWED UP THE VERSION NUMBER OR DIDNT CHANGE THE SAFETY LIMITS") end -- safety check because i accidentally made the version number 414069 once
 
 TELLMEWHEN_MAXGROUPS = 1 	--this is a default, used by SetTheory (addon), so dont rename
@@ -94,6 +94,8 @@ TMW.Warn = setmetatable(
 		end
 end})
 
+
+---------- Caches ----------
 TMW.strlowerCache = setmetatable(
 {}, {
 	__index = function(t, i)
@@ -528,12 +530,6 @@ TMW.Defaults = {
 					x 			  = 0,
 					y 			  = 0,
 				},
-				LBF	= {
-					Gloss 	 = 0,
-					Colors 	 = {},
-					Backdrop = false,
-					SkinID 	 = "Blizzard",
-				},
 				Fonts = {
 					["**"] = {
 						Name 		   = "Arial Narrow",
@@ -615,16 +611,17 @@ TMW.Defaults = {
 						OnlyIfCounting		 = false,
 						Events = {
 							["**"] = {
-								Sound 	 = "None",
-								Text 	 = "",
-								Channel  = "",
-								Location = "",
-								Sticky 	 = false,
-								Icon 	 = true,
-								r 		 = 1,
-								g 		 = 1,
-								b 		 = 1,
-								Size 	 = 0,
+								Sound 	  = "None",
+								Text 	  = "",
+								Channel   = "",
+								Location  = "",
+								Sticky 	  = false,
+								Icon 	  = true,
+								OnlyShown = false,
+								r 		  = 1,
+								g 		  = 1,
+								b 		  = 1,
+								Size 	  = 0,
 							},
 						},
 						Conditions = {
@@ -669,13 +666,14 @@ function TMW:ProcessEquivalencies()
 	TMW.BE = {
 		--Most of these are thanks to Malazee @ US-Dalaran's chart: http://forums.wow-petopia.com/download/file.php?mode=view&id=4979 and spreadsheet https://spreadsheets.google.com/ccc?key=0Aox2ZHZE6e_SdHhTc0tZam05QVJDU0lONnp0ZVgzdkE&hl=en#gid=18
 		--Many more new spells/corrections were provided by Catok of Curse
+		
 		--NOTE: any id prefixed with "_" will have its localized name substituted in instead of being forced to match as an ID
 		debuffs = {
 			CrowdControl	    = "_118;_339;2637;33786;_1499;_19503;_19386;20066;10326;_9484;_6770;_2094;_51514;76780;_710;_5782;_6358;_49203;_605;82691", -- originally by calico0 of Curse
 			Bleeding		    = "_94009;_1822;_1079;9007;33745;1943;703;43104;89775",
 			Incapacitated	    = "20066;1776;49203",
 			Feared			    = "_5782;5246;_8122;10326;1513;_5484;_6789;87204",
-			Slowed			    = "_116;_120;_15571;13810;_5116;_8056;3600;_1715;_12323;45524;_18223;_15407;_3409;26679;_51693;_2974;_58180;61391;_50434;_55741;44614;_7302;_8034;_63529", -- by algus2
+			Slowed			    = "_116;_120;13810;_5116;_8056;3600;_1715;_12323;45524;_18223;_15407;_3409;26679;_51693;_2974;_58180;61391;_50434;_55741;44614;_7302;_8034;_63529;_15571", -- by algus2
 			Stunned			    = "_1833;_408;_91800;_5211;_56;9005;22570;19577;56626;44572;853;2812;85388;64044;20549;46968;30283;20253;65929;7922;12809;50519;91797;47481;12355;24394;83047;39796;93986;89766;54786",
 			--DontMelee		    = "5277;871;Retaliation;Dispersion;Hand of Sacrifice;Hand of Protection;Divine Shield;Divine Protection;Ice Block;Icebound Fortitude;Cyclone;Banish",  --does somebody want to update these for me?
 			--MovementSlowed    = "Incapacitating Shout;Chains of Ice;Icy Clutch;Slow;Daze;Hamstring;Piercing Howl;Wing Clip;Ice Trap;Frostbolt;Cone of Cold;Blast Wave;Mind Flay;Crippling Poison;Deadly Throw;Frost Shock;Earthbind;Curse of Exhaustion",
@@ -683,6 +681,7 @@ function TMW:ProcessEquivalencies()
 			Silenced		    = "_47476;78675;34490;_55021;_15487;1330;_24259;_18498;_25046;81261;31935;18425;31117",
 			Disarmed		    = "_51722;_676;64058;50541;91644",
 			Rooted			    = "_339;_122;23694;58373;64695;_19185;33395;4167;54706;50245;90327;16979;83301;83302;45334;19306;55080;87195;63685;19387",
+			Shatterable		    = "122;33395;_83302;_44572;_55080;_82691", -- by algus2
 			PhysicalDmgTaken    = "30070;58683;81326;50518;55749",
 			SpellDamageTaken    = "_1490;65142;_85547;60433;93068;34889;24844",
 			SpellCritTaken	    = "17800;22959",
@@ -2746,76 +2745,80 @@ end
 
 function IconBase.HandleEvent(icon, data, played, announced)
 	if not runEvents then return end
-	local Sound = data.SoundData
-	if Sound and not played then
-		PlaySoundFile(Sound, SndChan)
-		played = 1
-	end
-	local Channel = data.Channel
-	if Channel ~= "" and not announced then
-		local Text = data.Text
-		local chandata = ChannelLookup[Channel]
-		
-		Text = TMW:InjectDataIntoString(Text, icon, not (chandata and chandata.isBlizz))
-		
-		if Channel == "MSBT" then
-			if MikSBT then
-				local Size = data.Size
-				if Size == 0 then Size = nil end
-				MikSBT.DisplayMessage(Text, data.Location, data.Sticky, data.r*255, data.g*255, data.b*255, Size, nil, data.Icon and icon.__tex)
-			end
-		elseif Channel == "SCT" then
-			if SCT then
-				sctcolor.r, sctcolor.g, sctcolor.b = data.r, data.g, data.b
-				SCT:DisplayCustomEvent(Text, sctcolor, data.Sticky, data.Location, nil, data.Icon and icon.__tex)
-			end
-		elseif Channel == "PARROT" then
-			if Parrot then
-				local Size = data.Size
-				if Size == 0 then Size = nil end
-				Parrot:ShowMessage(Text, data.Location, data.Sticky, data.r, data.g, data.b, nil, Size, nil, data.Icon and icon.__tex)
-			end
-		elseif Channel == "FRAME" then
-			local i = 1
-			while _G["ChatFrame"..i] do
-				local frame = _G["ChatFrame"..i]
-				local Location = data.Location
-				if Location == frame.name then
-					if data.Icon then
-						Text = "|T" .. (icon.__tex or "") .. ":0|t " .. Text
-					end
-					frame:AddMessage(Text, data.r, data.g, data.b, 1)
-					break
-				end
-				i = i+1
-			end
-		elseif Channel == "SMART" then
-			local channel = "SAY"
-			if UnitInBattleground("player") then
-				channel = "BATTLEGROUND"
-			elseif UnitInRaid("player") then
-				channel = "RAID"
-			elseif GetNumPartyMembers() > 1 then
-				channel = "PARTY"
-			end
-			SendChatMessage(Text, channel)
-			
-		elseif Channel == "CHANNEL" then
-			for i = 1, math.huge, 2 do
-				local num, name = select(i, GetChannelList())
-				if not num then break end
-				if strlowerCache[name] == strlowerCache[data.Location] then
-					SendChatMessage(Text, Channel, nil, num)
-					break
-				end
-			end
-			
-		else
-			if Text and chandata and chandata.isBlizz then
-				SendChatMessage(Text, Channel, nil, data.Location)
-			end
+	
+	if ((not data.OnlyShown or icon.__alpha > 0) --[[or (not data.SecondSetting and icon.__someAttribute > 0)]]) then
+	
+		local Sound = data.SoundData
+		if Sound and not played then
+			PlaySoundFile(Sound, SndChan)
+			played = 1
 		end
-		announced = 1
+		local Channel = data.Channel
+		if Channel ~= "" and not announced then
+			local Text = data.Text
+			local chandata = ChannelLookup[Channel]
+			
+			Text = TMW:InjectDataIntoString(Text, icon, not (chandata and chandata.isBlizz))
+			
+			if Channel == "MSBT" then
+				if MikSBT then
+					local Size = data.Size
+					if Size == 0 then Size = nil end
+					MikSBT.DisplayMessage(Text, data.Location, data.Sticky, data.r*255, data.g*255, data.b*255, Size, nil, data.Icon and icon.__tex)
+				end
+			elseif Channel == "SCT" then
+				if SCT then
+					sctcolor.r, sctcolor.g, sctcolor.b = data.r, data.g, data.b
+					SCT:DisplayCustomEvent(Text, sctcolor, data.Sticky, data.Location, nil, data.Icon and icon.__tex)
+				end
+			elseif Channel == "PARROT" then
+				if Parrot then
+					local Size = data.Size
+					if Size == 0 then Size = nil end
+					Parrot:ShowMessage(Text, data.Location, data.Sticky, data.r, data.g, data.b, nil, Size, nil, data.Icon and icon.__tex)
+				end
+			elseif Channel == "FRAME" then
+				local i = 1
+				while _G["ChatFrame"..i] do
+					local frame = _G["ChatFrame"..i]
+					local Location = data.Location
+					if Location == frame.name then
+						if data.Icon then
+							Text = "|T" .. (icon.__tex or "") .. ":0|t " .. Text
+						end
+						frame:AddMessage(Text, data.r, data.g, data.b, 1)
+						break
+					end
+					i = i+1
+				end
+			elseif Channel == "SMART" then
+				local channel = "SAY"
+				if UnitInBattleground("player") then
+					channel = "BATTLEGROUND"
+				elseif UnitInRaid("player") then
+					channel = "RAID"
+				elseif GetNumPartyMembers() > 1 then
+					channel = "PARTY"
+				end
+				SendChatMessage(Text, channel)
+				
+			elseif Channel == "CHANNEL" then
+				for i = 1, math.huge, 2 do
+					local num, name = select(i, GetChannelList())
+					if not num then break end
+					if strlowerCache[name] == strlowerCache[data.Location] then
+						SendChatMessage(Text, Channel, nil, num)
+						break
+					end
+				end
+				
+			else
+				if Text and chandata and chandata.isBlizz then
+					SendChatMessage(Text, Channel, nil, data.Location)
+				end
+			end
+			announced = 1
+		end
 	end
 	return played, announced
 end
@@ -2896,18 +2899,23 @@ function IconBase.SetInfo(icon, alpha, color, texture, start, duration, spellChe
 	end
 
 	if alpha ~= icon.__alpha then
+		local oldalpha = icon.__alpha
+		
+		icon:SetAlpha(icon.FakeHidden or alpha)
+		icon.__alpha = alpha
+		
 		-- detect events that occured, and handle them if they did
 		if alpha == 0 then
 			local data = icon.OnHide
 			if data then
 				played, announced = icon:HandleEvent(data)
 			end
-		elseif icon.__alpha == 0 then
+		elseif oldalpha == 0 then
 			local data = icon.OnShow
 			if data then
 				played, announced = icon:HandleEvent(data)
 			end
-		elseif alpha > icon.__alpha then
+		elseif alpha > oldalpha then
 			local data = icon.OnAlphaInc
 			if data then
 				played, announced = icon:HandleEvent(data)
@@ -2918,9 +2926,6 @@ function IconBase.SetInfo(icon, alpha, color, texture, start, duration, spellChe
 				played, announced = icon:HandleEvent(data)
 			end
 		end
-		
-		icon:SetAlpha(icon.FakeHidden or alpha)
-		icon.__alpha = alpha
 	end
 
 	if icon.__start ~= start or icon.__duration ~= duration or forceupdate then
@@ -3011,12 +3016,12 @@ function IconBase.SetInfo(icon, alpha, color, texture, start, duration, spellChe
 		icon.__duration = duration
 	end
 
-	local data = queueOnSpell and alpha > 0 and icon.OnSpell
+	local data = queueOnSpell and icon.OnSpell
 	if data then
 		played, announced = icon:HandleEvent(data, played, announced)
 	end
 	
-	local data = queueOnUnit and alpha > 0 and icon.OnUnit
+	local data = queueOnUnit and icon.OnUnit
 	if data then
 		played, announced = icon:HandleEvent(data, played, announced)
 	end

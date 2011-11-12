@@ -655,14 +655,14 @@ L["UNNAMED"] = "((Unnamed))"
 
 
 L["SENDSUCCESSFUL"] = "Sent successfully"
-L["MESSAGERECIEVE"] = "%s has sent you some TellMeWhen data! You can import this data into TellMeWhen using the 'Import/Export' dropdown in the icon editor."
+L["MESSAGERECIEVE"] = "%s has sent you some TellMeWhen data! You can import this data into TellMeWhen using the %q dropdown in the icon editor."
 L["MESSAGERECIEVE_SHORT"] = "%s has sent you some TellMeWhen data!"
 L["ALLOWCOMM"] = "Allow data importing"
 L["NEWVERSION"] = "A new version of TellMeWhen is available: %s"
 L["PLAYER_DESC"] = "(You)"
 
 
-L["IMPORT_EXPORT"] = "Import/Export"
+L["IMPORT_EXPORT"] = "Import/Export/Restore"
 L["IMPORT_EXPORT_DESC"] = [[Click the dropdown arrow to the right of this editbox to import and export icons, groups, and profiles.
 
 Importing to or from a string, or exporting to another player, will require the use of this editbox. See the tooltips within the dropdown menu for details.]]
@@ -791,6 +791,12 @@ L["SOUND_CUSTOM_DESC"] = [[Insert the path to a custom sound to play. Here are s
 
 - "file.ext": a loose file in WoW's root directory ]]
 L["SOUND_TAB"] = "Sounds"
+
+
+L["EVENTS_SETTINGS_HEADER"] = "Event Settings"
+L["EVENTS_SETTINGS_ONLYSHOWN"] = "Only fire if icon shown"
+
+
 L["SOUND_USEMASTER"] = "Always play sounds"
 L["SOUND_USEMASTER_DESC"] = "Check this to allow sounds to play even when the game sound has been muted. Uncheck to only play sounds while the game sound is enabled."
 L["SOUNDERROR1"] = "File must have an extension!"
@@ -906,6 +912,7 @@ L["Disoriented"] = "Disoriented"
 L["Silenced"] = "Silenced"
 L["Disarmed"] = "Disarmed"
 L["Rooted"] = "Rooted"
+L["Shatterable"] = "Shatterable"
 L["IncreasedStats"] = "Increased Stats"
 L["IncreasedDamage"] = "Increased Damage Done"
 L["IncreasedCrit"] = "Increased Crit Chance"

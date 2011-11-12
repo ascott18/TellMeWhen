@@ -19,10 +19,11 @@ L["ICONMENU_MUSHROOMS"] 			  = L["ICONMENU_MUSHROOMS"]		 		 :format(GetSpellInfo
 L["ICONMENU_MUSHROOMS_DESC"] 		  = L["ICONMENU_MUSHROOMS_DESC"]	 	 :format(Spell(88747))
 L["ICONMENU_UNITCOOLDOWN_DESC"] 	  = L["ICONMENU_UNITCOOLDOWN_DESC"]		 :format(Spell(42292), GetSpellInfo(42292))
 L["ICONMENU_MULTISTATECD_DESC"] 	  = L["ICONMENU_MULTISTATECD_DESC"]		 :format(Spell(88625), Spell(77606))
-L["HELP_ICD_NATURESGRACE"] 	  		  = L["HELP_ICD_NATURESGRACE"]		 	 :format(Spell(16886), L["ICONMENU_UNITCOOLDOWN"])
+L["HELP_ICD_NATURESGRACE"] 	  		  = L["HELP_ICD_NATURESGRACE"]		 	 :format(Spell(16886), L["ICONMENU_UNITCOOLDOWN"], Spell(16886))
 
 
 L["ICONMENU_ICD_DESC"] 	  			  = L["ICONMENU_ICD_DESC"]		 		 :format(L["ICONMENU_ICDTYPE"])
+L["MESSAGERECIEVE"] 	  			  = L["MESSAGERECIEVE"]		 		 	 :format("%s", L["IMPORT_EXPORT"]) -- keep the first "%s" as "%s"
 
 
 local pname 						  = UnitName("player")

@@ -1,6 +1,7 @@
 ===v4.6.6===
  * The suggestion list has been completely rewritten, and many features have been added.
  * Seeing as Masque has been out for a month now, I think it is safe to say that ButtonFacade is now obsolete. Removed all support for ButtonFacade
+ * Added a setting to make events only fire if the icon is shown.
  * Bug Fixes:
  ** (r300) default.lua:67: attempt to index local 'ics' (a nil value)
  ** (r301) TellMeWhen_Options-4.6.4.lua:5575 bad argument #1 to "pairs" (table expected, got nil)
@@ -8,6 +9,8 @@
  ** (r302) TellMeWhen-4.6.6.lua:2259: bad argument #3 to "format" (number expected, got nil)
  ** (r302) TellMeWhen-4.6.6.lua:192: attempt to compare nil with number
  ** (r304) Fixed various bugs relating to inserting text into strings with multibyte characters (zhCN, zhTW, koKR, ruRU)
+ ** (r307) TellMeWhen_Options.lua:4662: Usage: GetModule(name, silent): "name" - Cannot find module "cooldown"
+ ** (r307) Imported strings created in r307+ into r307+ will now try extra hard to fix any errors casued by Blizzard's buggy editboxes.
  
 ===v4.6.5===
  * Bug Fixes:
