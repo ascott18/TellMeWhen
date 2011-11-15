@@ -1200,10 +1200,8 @@ function TMW:Group_Delete(groupID)
 		local g = gs.Point.relativeTo and tonumber(strmatch(gs.Point.relativeTo, "TellMeWhen_Group(%d+)"))
 		if g then
 			if g > groupID then
-				print(g, groupID)
 				gs.Point.relativeTo = gsub(gs.Point.relativeTo, "_Group" .. g, "_Group" .. g-1)
 			elseif g == groupID then
-				print(g, groupID)
 				gs.Point.relativeTo = "UIParent"
 				TMW:Group_StopMoving(TMW[gID])
 			end
@@ -2959,10 +2957,8 @@ function IE:Copy_DropDown(...)
 			end
 		end
 	end
-	--^1^T^SConditions^T ^N1^T ^SType^SHEALTH ^SOperator^S~|= ^t^Sn^N1 ^t^SName^Sthis|is|a|test|and|the|next||set~`was~`two~`things~`and~`so~`is~`the~`end~`here~`|| ^t^N46608^S~` ^Sicon^^
+	
 	local t = strtrim(EDITBOX:GetText())
---	print(t)
-	--t = gsub(t, "||", "|")
 	local editboxResult = t ~= "" and TMW:DeserializeData(t)
 	t = nil
 
@@ -3562,7 +3558,7 @@ function IE:UndoRedoChanged()
 end
 
 
-
+---------- Generic Events ----------
 function IE:SetEventSettings(Module)
 	local EventSettings = Module.EventSettings
 	local Event = Module.currentEvent
@@ -3573,6 +3569,44 @@ function IE:SetEventSettings(Module)
 	
 	EventSettings.OnlyShown:SetChecked(Settings.OnlyShown)
 end
+
+function IE:SetupEventButtons(Module, template, globalDescKey)
+	local Events = Module.Events
+	local previousFrame
+	
+	local yAdjustTitle, yAdjustText = 0, 0
+	local locale = GetLocale()
+	if locale == "zhCN" or locale == "zhTW" then
+		yAdjustTitle, yAdjustText = 3, -3
+	end
+	
+	for i, eventData in ipairs(TMW.EventList) do
+		local frame = CreateFrame("Button", Events:GetName().."Event"..i, Events, template, i)
+		Events[i] = frame
+		frame:SetPoint("TOPLEFT", previousFrame, "BOTTOMLEFT")
+		frame:SetPoint("TOPRIGHT", previousFrame, "BOTTOMRIGHT")
+		
+		local p, t, r, x, y = frame.EventName:GetPoint()
+		frame.EventName:SetPoint(p, t, r, x, y + yAdjustTitle)
+		local p, t, r, x, y = frame.DataText:GetPoint()
+		frame.DataText:SetPoint(p, t, r, x, y + yAdjustText)
+		
+		frame.event = eventData.name
+		frame.settings = eventData
+		
+		frame.EventName:SetText(eventData.text)
+		TMW:TT(frame, eventData.text, eventData.desc .. "\r\n\r\n" .. L[globalDescKey], 1, 1)
+		
+		previousFrame = frame
+	end
+	
+	Events[1]:SetPoint("TOPLEFT", Events, "TOPLEFT", 0, 0)
+	Events[1]:SetPoint("TOPRIGHT", Events, "TOPRIGHT", 0, 0)
+	Events:SetHeight(#Events*Events[1]:GetHeight())
+end
+
+
+
 
 -- ----------------------
 -- SOUNDS
@@ -3601,24 +3635,11 @@ function SND:OnInitialize()
 	end
 	SND:SetSoundsOffset(0)
 	
+	
+	IE:SetupEventButtons(SND, "TellMeWhen_SoundEvent", "SOUND_EVENT_GLOBALDESC")
+	
 	local Events = SND.Events
 	Events.Header:SetText(L["SOUND_EVENTS"])
-	local previousFrame
-	for i, eventData in ipairs(TMW.EventList) do
-		local frame = CreateFrame("Button", Events:GetName().."Event"..i, Events, "TellMeWhen_SoundEvent", i)
-		Events[i] = frame
-		frame:SetPoint("TOPLEFT", previousFrame, "BOTTOMLEFT")
-		frame:SetPoint("TOPRIGHT", previousFrame, "BOTTOMRIGHT")
-		frame.event = eventData.name
-		frame.setting = "Sound" .. frame.event
-		frame.EventName:SetText(eventData.text)
-		frame.settings = eventData
-		TMW:TT(frame, eventData.text, eventData.desc .. "\r\n\r\n" .. L["SOUND_EVENT_GLOBALDESC"], 1, 1)
-		previousFrame = frame
-	end
-	Events[1]:SetPoint("TOPLEFT", Events, "TOPLEFT", 0, 0)
-	Events[1]:SetPoint("TOPRIGHT", Events, "TOPRIGHT", 0, 0)
-	Events:SetHeight(#Events*Events[1]:GetHeight())
 	SND:SelectEvent(1)	
 	
 	SND.Sounds.ScrollBar:SetValue(0)
@@ -3647,6 +3668,10 @@ function SND:Load()
 		SND:SelectEvent(oldID)
 	end
 	SND:SetTabText()
+	
+	if CI.ics then
+		IE:SetEventSettings(self)
+	end
 end
 
 
@@ -3856,24 +3881,7 @@ function ANN:OnInitialize()
 	Channels.Header:SetText(L["ANN_CHANTOUSE"])
 	
 	-- create event frames
-	local previousFrame
-	for i, eventData in ipairs(TMW.EventList) do
-		local frame = CreateFrame("Button", Events:GetName().."Event"..i, Events, "TellMeWhen_AnnounceEvent", i)
-		Events[i] = frame
-		frame:SetPoint("TOPLEFT", previousFrame, "BOTTOMLEFT")
-		frame:SetPoint("TOPRIGHT", previousFrame, "BOTTOMRIGHT")
-		
-		frame.event = eventData.name
-		frame.settings = eventData
-		
-		frame.EventName:SetText(eventData.text)
-		TMW:TT(frame, eventData.text, eventData.desc .. "\r\n\r\n" .. L["ANN_EVENT_GLOBALDESC"], 1, 1)
-		
-		previousFrame = frame
-	end
-	Events[1]:SetPoint("TOPLEFT", Events, "TOPLEFT", 0, 0)
-	Events[1]:SetPoint("TOPRIGHT", Events, "TOPRIGHT", 0, 0)
-	Events:SetHeight(#Events*Events[1]:GetHeight())
+	IE:SetupEventButtons(ANN, "TellMeWhen_AnnounceEvent", "ANN_EVENT_GLOBALDESC")
 	
 	-- create channel frames
 	local previousFrame
@@ -3929,6 +3937,10 @@ function ANN:Load()
 		ANN:SelectEvent(oldID)
 	end
 	ANN:SetTabText()
+	
+	if CI.ics then
+		IE:SetEventSettings(self)
+	end
 end
 
 
@@ -4883,8 +4895,6 @@ function Module:Entry_Insert(insert)
 		local _, newPos = SUG.Box:GetText():find(insert:gsub("([%(%)%%%[%]%-%+%.%*])", "%%%1"), max(0, SUG.startpos-1))
 		if newPos then
 			SUG.Box:SetCursorPosition(newPos + 2)
-		else
-			print("NO NEWPOS FOUND", SUG.Box:GetText(), insert, SUG.startpos-1, max(0, SUG.startpos-1))
 		end
 		
 		-- if we are at the end of the exitbox then put a semicolon in anyway for convenience

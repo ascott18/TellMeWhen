@@ -1497,7 +1497,7 @@
 				<FontString name="$parentDataText" parentKey="DataText" inherits="GameFontHighlightSmall" justifyH="LEFT" >
 					<Anchors>
 						<Anchor point="BOTTOMLEFT" x="3" y="2"/>
-						<Anchor point="RIGHT"/>
+						<Anchor point="RIGHT" relativeTo="$parentPlay" relativePoint="LEFT" x="-1"/>
 					</Anchors>
 				</FontString>
 			</Layer>
@@ -1678,6 +1678,7 @@
 				<Scripts>
 					<OnLoad>
 						self.text:SetText(TMW.L["EVENTS_SETTINGS_ONLYSHOWN"])
+						TMW:TT(self, "EVENTS_SETTINGS_ONLYSHOWN", TMW.L["EVENTS_SETTINGS_ONLYSHOWN_DESC"] .. "\r\n\r\n" .. TMW.L["EVENTS_SETTINGS_GLOBAL_DESC"], nil, 1)
 					</OnLoad>
 					<OnClick>
 						local parentModule = self:GetParent():GetParent().module
@@ -3352,7 +3353,7 @@
 					</OnShow>
 				</Scripts>
 			</Frame>
-			<Frame name="$parentSound" enableMouse="true" hidden="true" setAllPoints="true" parentKey="Sound">
+			<Frame name="$parentSound" hidden="true" setAllPoints="true" parentKey="Sound">
 				<Frames>
 					<Frame name="$parentEvents" parentKey="Events">
 						<Size x="200" y="280"/>
@@ -3449,7 +3450,6 @@
 							<OnLoad>
 								TMW:TT(self, "SOUND_CUSTOM", "SOUND_CUSTOM_DESC")
 								self.label = TMW.L["SOUND_CUSTOM"]
-								self.setting = self:GetParent().setting
 							</OnLoad>
 							<OnEnter>
 								self.Background:Show()
@@ -3512,11 +3512,12 @@
 							end
 						end
 					</OnLoad>
-					<OnDragStart> TMW.IE:StartMoving() </OnDragStart>
-					<OnDragStop> TMW.IE:StopMovingOrSizing() </OnDragStop>
+					<OnShow>
+						self.module:Load()
+					</OnShow>
 				</Scripts>
 			</Frame>
-			<Frame name="$parentAnnouncements" enableMouse="true" hidden="true" setAllPoints="true" parentKey="Announcements">
+			<Frame name="$parentAnnouncements" hidden="true" setAllPoints="true" parentKey="Announcements">
 				<Frames>
 
 					<Frame name="$parentEvents" parentKey="Events">
@@ -3778,8 +3779,9 @@
 							end
 						end
 					</OnLoad>
-					<OnDragStart> TMW.IE:StartMoving() </OnDragStart>
-					<OnDragStop> TMW.IE:StopMovingOrSizing() </OnDragStop>
+					<OnShow>
+						self.module:Load()
+					</OnShow>
 				</Scripts>
 			</Frame>
 			<Frame name="$parentMainOptions" enableMouse="true" hidden="true" setAllPoints="true" parentKey="MainOptions" >

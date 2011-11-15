@@ -794,7 +794,9 @@ L["SOUND_TAB"] = "Sounds"
 
 
 L["EVENTS_SETTINGS_HEADER"] = "Event Settings"
-L["EVENTS_SETTINGS_ONLYSHOWN"] = "Only fire if icon shown"
+L["EVENTS_SETTINGS_ONLYSHOWN"] = "Only handle if icon is shown"
+L["EVENTS_SETTINGS_ONLYSHOWN_DESC"] = "Checking this setting will prevent the event from carrying out any associated actions if the icon is not shown."
+L["EVENTS_SETTINGS_GLOBAL_DESC"] = "Note that event settings affect the event across all outputs, including sound and text."
 
 
 L["SOUND_USEMASTER"] = "Always play sounds"

@@ -11,6 +11,8 @@
  ** (r304) Fixed various bugs relating to inserting text into strings with multibyte characters (zhCN, zhTW, koKR, ruRU)
  ** (r307) TellMeWhen_Options.lua:4662: Usage: GetModule(name, silent): "name" - Cannot find module "cooldown"
  ** (r307) Imported strings created in r307+ into r307+ will now try extra hard to fix any errors casued by Blizzard's buggy editboxes.
+ ** (r308) Event settings in the icon editor should now always updated to reflect their current setting.
+ ** (r308) Fixed buggy event button texts for zhCN and zhTW clients.
  
 ===v4.6.5===
  * Bug Fixes:
