@@ -1491,13 +1491,13 @@
 				<FontString name="$parentEventName" parentKey="EventName" inherits="GameFontNormalSmall" justifyH="LEFT">
 					<Anchors>
 						<Anchor point="TOPLEFT" x="3" y="-2"/>
-						<Anchor point="RIGHT" relativeTo="$parentPlay" relativePoint="LEFT" x="-1"/>
+						<Anchor point="RIGHT" x="-16"/>
 					</Anchors>
 				</FontString>
 				<FontString name="$parentDataText" parentKey="DataText" inherits="GameFontHighlightSmall" justifyH="LEFT" >
 					<Anchors>
 						<Anchor point="BOTTOMLEFT" x="3" y="2"/>
-						<Anchor point="RIGHT" relativeTo="$parentPlay" relativePoint="LEFT" x="-1"/>
+						<Anchor point="RIGHT" x="-1"/>
 					</Anchors>
 				</FontString>
 			</Layer>

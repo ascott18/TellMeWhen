@@ -1,3 +1,7 @@
+===v4.6.7===
+ * Bug Fixes:
+ ** (r310) Fixed sound event text overflow bug.
+ 
 ===v4.6.6===
  * The suggestion list has been completely rewritten, and many features have been added.
  * Seeing as Masque has been out for a month now, I think it is safe to say that ButtonFacade is now obsolete. Removed all support for ButtonFacade

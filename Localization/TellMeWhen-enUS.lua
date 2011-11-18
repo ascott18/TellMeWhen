@@ -299,7 +299,7 @@ L["METAPANEL_REMOVE"] = "Remove this icon"
 L["METAPANEL_INSERT"] = "Insert an icon"
 
 L["ICONALPHAPANEL_FAKEHIDDEN"] = "Always Hide"
-L["ICONALPHAPANEL_FAKEHIDDEN_DESC"] = "Causes the icon to be hidden all the time, but whilst still enabled in order to allow the conditions of other icons to check this icon, or for meta icons to include this icon."
+L["ICONALPHAPANEL_FAKEHIDDEN_DESC"] = "Causes the icon to be hidden all the time, but whilst still enabled in order to allow the conditions of other icons to check this icon, for meta icons to include this icon, and for this icon's sounds and text outputs to be processed."
 L["ICONMENU_WPNENCHANTTYPE"] = "Weapon slot to monitor"
 L["ICONMENU_HIDEUNEQUIPPED"] = "Hide when slot is empty"
 L["ICONMENU_HIDEUNEQUIPPED_DESC"] = "Check this to force the icon to be hidden if the weapon spot being checked does not have a weapon in it."
