@@ -32,7 +32,7 @@ local DRData = LibStub("DRData-1.0", true)
 TELLMEWHEN_VERSION = "4.6.7"
 TELLMEWHEN_VERSION_MINOR = strmatch(" @project-version@", " r%d+") or ""
 TELLMEWHEN_VERSION_FULL = TELLMEWHEN_VERSION .. TELLMEWHEN_VERSION_MINOR
-TELLMEWHEN_VERSIONNUMBER = 46701 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
+TELLMEWHEN_VERSIONNUMBER = 46702 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
 if TELLMEWHEN_VERSIONNUMBER > 47000 or TELLMEWHEN_VERSIONNUMBER < 46000 then return error("YOU SCREWED UP THE VERSION NUMBER OR DIDNT CHANGE THE SAFETY LIMITS") end -- safety check because i accidentally made the version number 414069 once
 
 TELLMEWHEN_MAXGROUPS = 1 	--this is a default, used by SetTheory (addon), so dont rename
@@ -1017,6 +1017,49 @@ TMW.ChannelLookup = {}
 for k, v in pairs(TMW.ChannelList) do
 	TMW.ChannelLookup[v.channel] = v
 end local ChannelLookup = TMW.ChannelLookup
+
+TMW.EventList = {
+	{
+		name = "OnShow",
+		text = L["SOUND_EVENT_ONSHOW"],
+		desc = L["SOUND_EVENT_ONSHOW_DESC"],
+	},
+	{
+		name = "OnHide",
+		text = L["SOUND_EVENT_ONHIDE"],
+		desc = L["SOUND_EVENT_ONHIDE_DESC"],
+	},
+	{
+		name = "OnAlphaInc",
+		text = L["SOUND_EVENT_ONALPHAINC"],
+		desc = L["SOUND_EVENT_ONALPHAINC_DESC"],
+	},
+	{
+		name = "OnAlphaDec",
+		text = L["SOUND_EVENT_ONALPHADEC"],
+		desc = L["SOUND_EVENT_ONALPHADEC_DESC"],
+	},
+	{
+		name = "OnStart",
+		text = L["SOUND_EVENT_ONSTART"],
+		desc = L["SOUND_EVENT_ONSTART_DESC"],
+	},
+	{
+		name = "OnFinish",
+		text = L["SOUND_EVENT_ONFINISH"],
+		desc = L["SOUND_EVENT_ONFINISH_DESC"],
+	},
+	{
+		name = "OnSpell",
+		text = L["SOUND_EVENT_ONSPELL"],
+		desc = L["SOUND_EVENT_ONSPELL_DESC"],
+	},
+	{
+		name = "OnUnit",
+		text = L["SOUND_EVENT_ONUNIT"],
+		desc = L["SOUND_EVENT_ONUNIT_DESC"],
+	},
+}
 
 do -- STANCES
 	TMW.Stances = {
@@ -3283,7 +3326,9 @@ function TMW:Icon_Update(icon)
 	end
 
 	local dontremove
-	for event, tbl in pairs(icon.Events) do
+	for _, t in pairs(TMW.EventList) do
+		local event = t.name
+		local tbl = icon.Events[event]
 		for key, data in pairs(tbl) do
 			if key == "Sound" then
 				if data == "" or data == "Interface\\Quiet.ogg" or data == "None" then

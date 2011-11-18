@@ -1,6 +1,7 @@
 ===v4.6.7===
  * Bug Fixes:
  ** (r310) Fixed sound event text overflow bug.
+ ** (r311) Possibly fixed a bug that was casuing the event settings of deleted groups to stick around.
  
 ===v4.6.6===
  * The suggestion list has been completely rewritten, and many features have been added.

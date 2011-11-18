@@ -103,49 +103,6 @@ for dispeltype, icon in pairs(TMW.DS) do
 	EquivFirstIDLookup[dispeltype] = icon
 end
 
-TMW.EventList = {
-	{
-		name = "OnShow",
-		text = L["SOUND_EVENT_ONSHOW"],
-		desc = L["SOUND_EVENT_ONSHOW_DESC"],
-	},
-	{
-		name = "OnHide",
-		text = L["SOUND_EVENT_ONHIDE"],
-		desc = L["SOUND_EVENT_ONHIDE_DESC"],
-	},
-	{
-		name = "OnAlphaInc",
-		text = L["SOUND_EVENT_ONALPHAINC"],
-		desc = L["SOUND_EVENT_ONALPHAINC_DESC"],
-	},
-	{
-		name = "OnAlphaDec",
-		text = L["SOUND_EVENT_ONALPHADEC"],
-		desc = L["SOUND_EVENT_ONALPHADEC_DESC"],
-	},
-	{
-		name = "OnStart",
-		text = L["SOUND_EVENT_ONSTART"],
-		desc = L["SOUND_EVENT_ONSTART_DESC"],
-	},
-	{
-		name = "OnFinish",
-		text = L["SOUND_EVENT_ONFINISH"],
-		desc = L["SOUND_EVENT_ONFINISH_DESC"],
-	},
-	{
-		name = "OnSpell",
-		text = L["SOUND_EVENT_ONSPELL"],
-		desc = L["SOUND_EVENT_ONSPELL_DESC"],
-	},
-	{
-		name = "OnUnit",
-		text = L["SOUND_EVENT_ONUNIT"],
-		desc = L["SOUND_EVENT_ONUNIT_DESC"],
-	},
-}
-
 
 ---------- Miscellaneous ----------
 TMW.Backupdb = CopyTable(TellMeWhenDB)
