@@ -155,6 +155,9 @@ local resetsOnAura = {
 	[50227] = { -- sword and board
 		[23922] = 1,
 	},
+	[52437] = { -- sudden death
+		[86346] = 1,
+	},
 
 }
 
