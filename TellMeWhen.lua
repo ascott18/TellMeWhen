@@ -32,7 +32,7 @@ local DRData = LibStub("DRData-1.0", true)
 TELLMEWHEN_VERSION = "4.6.7"
 TELLMEWHEN_VERSION_MINOR = strmatch(" @project-version@", " r%d+") or ""
 TELLMEWHEN_VERSION_FULL = TELLMEWHEN_VERSION .. TELLMEWHEN_VERSION_MINOR
-TELLMEWHEN_VERSIONNUMBER = 46704 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
+TELLMEWHEN_VERSIONNUMBER = 46705 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
 if TELLMEWHEN_VERSIONNUMBER > 47000 or TELLMEWHEN_VERSIONNUMBER < 46000 then return error("YOU SCREWED UP THE VERSION NUMBER OR DIDNT CHANGE THE SAFETY LIMITS") end -- safety check because i accidentally made the version number 414069 once
 
 TELLMEWHEN_MAXGROUPS = 1 	--this is a default, used by SetTheory (addon), so dont rename
@@ -498,6 +498,22 @@ TMW.Defaults = {
 		CheckOrder	 =	-1,
 	--[[	CodeSnippets = {
 		},]]
+		Colors = { -- not going to implement this unless people actually want it.
+			CCO = 	{r=0,	g=1,	b=0		},	-- cooldown bar complete
+			CST = 	{r=1,	g=0,	b=0		},	-- cooldown bar start
+			OOR	=	{r=0.5,	g=0.5,	b=0.5	},	-- out of range
+			OOM	=	{r=0.5,	g=0.5,	b=0.5	},	-- out of mana
+
+			PTA	=	{r=1,	g=1,	b=1		},	-- presnt/usable with timer always
+			POA	=	{r=1,	g=1,	b=1		},	-- presnt/usable withOUT timer always
+			PTS	=	{r=1,	g=1,	b=1		},	-- presnt/usable with timer somtimes
+			POS	=	{r=1,	g=1,	b=1		},	-- presnt/usable withOUT timer somtimes
+
+			ATA	=	{r=1,	g=1,	b=1		},	-- absent/unusable with timer always
+			AOA	=	{r=1,	g=1,	b=1		},	-- absent/unusable withOUT timer always
+			ATS	=	{r=1,	g=1,	b=1		},	-- absent/unusable with timer somtimes
+			AOS	=	{r=1,	g=1,	b=1		},	-- absent/unusable withOUT timer somtimes
+		},
 		Groups 		= 	{
 			[1] = {
 				Enabled			= true,

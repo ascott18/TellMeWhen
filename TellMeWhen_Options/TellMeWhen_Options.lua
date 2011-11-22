@@ -428,7 +428,7 @@ end
 
 ---------- Data/Templates ----------
 local function findid(info)
-	for i = #info, 0, -1 do
+	for i = #info, 1, -1 do
 		local n = tonumber(strmatch(info[i], "Group (%d+)"))
 		if n then return n end
 	end
@@ -781,6 +781,89 @@ local groupConfigTemplate = {
 		},
 	}
 }
+local colorOrder = {
+	"OOR",
+	"OOM",
+	
+	"CCO",
+	"CST",
+	
+	"PTA",
+	"POA",
+	"PTS",
+	"POS",
+	
+	"ATA",
+	"AOA",
+	"ATS",
+	"AOS",
+}
+local colorTemplate = {
+	type = "group",
+	order = 1,
+	name = "",
+	guiInline = true,
+	dialogInline = true,
+	width = "full",
+	order = function(info)
+		local this = info[#info]
+		for order, key in pairs(colorOrder) do
+			if key == this then
+				return order
+			end
+		end
+	end,
+	args = {
+		override = {
+			name = L["COLOR_OVERRIDEDEFAULT"],
+			desc = L["COLOR_OVERRIDEDEFAULT_DESC"],
+			type = "toggle",
+			order = 1,
+			set = function(info, val)
+				db.profile.Groups[findid(info)].Colors.Override = val
+			end,
+			get = function(info)
+				return db.profile.Groups[findid(info)].Colors.Override
+			end,
+			hidden = function(info)
+				return not findid(info)
+			end,
+		},
+		color = {
+			name = function(info)
+				return L["COLOR_" .. info[#info-1]]
+			end,
+			desc = function(info)
+				return L["COLOR_" .. info[#info-1] .. "_DESC"]
+			end,
+			type = "color",
+			order = 2,
+			hasAlpha = false,
+			set = function(info, r, g, b, a)
+				local base = db.profile
+				if findid(info) then
+					base = db.profile.Groups[findid(info)]
+				end
+				
+				local c = base.Colors[info[#info-1]]
+				
+				c.r = r c.g = g c.b = b c.a = a
+			end,
+			get = function(info)
+				local base = db.profile
+				if findid(info) then
+					base = db.profile.Groups[findid(info)]
+				end
+				
+				local c = base.Colors[info[#info-1]]
+				
+				return c.r, c.g, c.b, c.a
+			end,
+		}
+	}
+}
+
+
 for i = 1, GetNumTalentTabs() do
 	local _, name = GetTalentTabInfo(i)
 	groupConfigTemplate.args.main.args["Tree"..i] = {
@@ -914,7 +997,7 @@ function TMW:CompileOptions()
 							type = "group",
 							name = L["UIPANEL_COLORS"],
 							order = 3,
-							set = function(info, r, g, b, a) local c = db.profile[info[#info]] c.r = r c.g = g c.b = b c.a = a TMW:ColorUpdate() end,
+							set = function(info, r, g, b, a) local c = db.profile[info[#info]] c.r = r c.g = g c.b = b c.a = a end,
 							get = function(info) local c = db.profile[info[#info]] return c.r, c.g, c.b, c.a end,
 							args = {
 								CDSTColor = {
@@ -924,6 +1007,7 @@ function TMW:CompileOptions()
 									order = 31,
 									hasAlpha = true,
 								},
+						--		AOA = colorTemplate,
 								CDCOColor = {
 									name = L["UIPANEL_COLOR_COMPLETE"],
 									desc = L["UIPANEL_COLOR_COMPLETE_DESC"],
@@ -2892,7 +2976,7 @@ local DeserializedData = {}
 function IE:Copy_DropDown(...)
 	local DROPDOWN = self
 	local EDITBOX = DROPDOWN:GetParent()
-	if not groupID then
+	if not CI.ic then
 		TMW.IE:Load(1, TMW:InIcons()()) -- hack to get the first icon that exists
 	end
 	local info
