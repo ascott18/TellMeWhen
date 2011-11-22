@@ -678,6 +678,7 @@ L["IMPORT_FROMSTRING"] = "From String"
 L["IMPORT_FROMSTRING_DESC"] = [[Strings allow you to transfer TellMeWhen configuration data outside the game.
 
 To import from a string, press CTRL+V to paste the string into the editbox after you have copied it to your clipboard, and then navigate back to this sub-menu.]]
+L["IMPORT_FROMSTRING_ERR_NOICONS"] = "Use the icon editor to import icons"
 L["IMPORT_FROMCOMM"] = "From Player"
 L["IMPORT_FROMCOMM_DESC"] = "If another user of TellMeWhen sends you any configuration data, you will be able to import that data from this submenu."
 L["IMPORT_PROFILE"] = "Copy Profile"

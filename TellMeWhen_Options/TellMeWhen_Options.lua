@@ -2892,32 +2892,32 @@ local DeserializedData = {}
 function IE:Copy_DropDown(...)
 	local DROPDOWN = self
 	local EDITBOX = DROPDOWN:GetParent()
-	local groupID, iconID = CI.g, CI.i
-	local icon = CI.ic
-	if not (icon and icon.Conditions) then return end
+	if not groupID then
+		TMW.IE:Load(1, TMW:InIcons()()) -- hack to get the first icon that exists
+	end
 	local info
 	
-	do -- deserialize received comm
-		if TMW.Received then
-			for k, who in pairs(TMW.Received) do -- deserialize received icons because we dont do it as they are received; AceSerializer is only embedded in _Options
-				if type(k) == "string" and who then
-					local result = TMW:DeserializeData(k)
-					if result then
-						tinsert(DeserializedData, result)
-						result.who = who
-						TMW.Received[k] = nil
-					end
+	if TMW.Received then
+		 -- deserialize received comm
+		for k, who in pairs(TMW.Received) do
+			-- deserialize received data because we dont do it as they are received; AceSerializer is only embedded in _Options
+			if type(k) == "string" and who then
+				local result = TMW:DeserializeData(k)
+				if result then
+					tinsert(DeserializedData, result)
+					result.who = who
+					TMW.Received[k] = nil
 				end
 			end
-			if not next(TMW.Received) then
-				TMW.Received = nil
-			end
+		end
+		if not next(TMW.Received) then
+			TMW.Received = nil
 		end
 	end
 	
 	local t = strtrim(EDITBOX:GetText())
 	local editboxResult = t ~= "" and TMW:DeserializeData(t)
-	t = nil
+	t = nil -- we dont want any accidents...
 
 	
 	if type(UIDROPDOWNMENU_MENU_VALUE) == "string" and (strfind(UIDROPDOWNMENU_MENU_VALUE, "^IMPORT_BACKUP") or strfind(UIDROPDOWNMENU_MENU_VALUE, "^IMPORT_FROMBACKUP")) then
