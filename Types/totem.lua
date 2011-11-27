@@ -99,14 +99,20 @@ local function Totem_OnUpdate(icon, time)
 			if Slots[iSlot] then
 				local _, totemName, start, duration, totemIcon = GetTotemInfo(iSlot)
 				if start ~= 0 and totemName and ((NameFirst == "") or NameNameHash[strlowerCache[totemName]]) then
+				
+					local color = icon:CrunchColor(duration)
+					
 					--icon:SetInfo(alpha, color, texture, start, duration, spellChecked, reverse, count, countText, forceupdate, unit)
-					icon:SetInfo(icon.Alpha, icon.UnAlpha ~= 0 and pr or 1, totemIcon, start, duration, totemName, nil, nil, nil, nil, nil)
+					icon:SetInfo(icon.Alpha, color, totemIcon, start, duration, totemName, nil, nil, nil, nil, nil)
 					return
 				end
 			end
 		end
+		
+		local color = icon:CrunchColor()
+		
 		--icon:SetInfo(alpha, color, texture, start, duration, spellChecked, reverse, count, countText, forceupdate, unit)
-		icon:SetInfo(icon.UnAlpha, icon.Alpha ~= 0 and ab or 1, icon.FirstTexture, 0, 0, nil, nil, nil, nil, nil, nil)
+		icon:SetInfo(icon.UnAlpha, color, icon.FirstTexture, 0, 0, nil, nil, nil, nil, nil, nil)
 	end
 end
 

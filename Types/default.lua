@@ -26,6 +26,7 @@ Type.type = ""
 Type.name = L["ICONMENU_TYPE"]
 Type.spaceafter = true
 Type.HideBars = true
+Type.NoColorSettings = true
 Type.RelevantSettings = {
 	BindText = false,
 	CustomTex = false,

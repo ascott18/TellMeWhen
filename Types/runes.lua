@@ -130,10 +130,16 @@ local function Runes_OnUpdate(icon, time)
 		--icon:SetInfo(alpha, color, texture, start, duration, spellChecked, reverse, count, countText, forceupdate, unit)
 		if readyslot then
 			local type = GetRuneType(readyslot)
-			icon:SetInfo(icon.Alpha, 1, textures[type], 0, 0, type, nil, nil, nil, nil, nil)
+			
+			local color = icon:CrunchColor()
+			
+			icon:SetInfo(icon.Alpha, color, textures[type], 0, 0, type, nil, nil, nil, nil, nil)
 		elseif unslot then
 			local type = GetRuneType(unslot)
-			icon:SetInfo(icon.UnAlpha, 1, textures[type], unstart, unduration, type, nil, nil, nil, nil, nil)
+			
+			local color = icon:CrunchColor(unduration)
+			
+			icon:SetInfo(icon.UnAlpha, color, textures[type], unstart, unduration, type, nil, nil, nil, nil, nil)
 		end
 	end
 end

@@ -33,6 +33,7 @@ Type.name = L["ICONMENU_META"]
 Type.desc = L["ICONMENU_META_DESC"]
 Type.AllowNoName = true
 Type.HideBars = true
+Type.NoColorSettings = true
 Type.RelevantSettings = {
 	Icons = true,
 	CheckNext = true,
@@ -78,7 +79,7 @@ local function Meta_OnUpdate(icon, time)
 							icon.bindText:SetText(ic.bindText:GetText())
 						end
 						
-						if (LMB) then -- i dont like the way that ButtonFacade handles this (inefficient), so i'll do it myself
+						if LMB then -- i dont like the way that ButtonFacade handles this (inefficient), so i'll do it myself
 							local icnt = ic.__normaltex -- icon.__normaltex = icon.__LBF_Normal or icon:GetNormalTexture() -- set during Icon_Update()
 							local iconnt = icon.__normaltex
 							if icnt and iconnt then
@@ -87,6 +88,7 @@ local function Meta_OnUpdate(icon, time)
 						end
 
 						local icSCB, icSPB = ic.ShowCBar, ic.ShowPBar
+						icon.ShowCBar, icon.ShowPBar = icSCB, icSPB
 						if icSPB then
 							icon.pbar.offset = ic.pbar.offset
 							icon.pbar:Show()
@@ -95,11 +97,12 @@ local function Meta_OnUpdate(icon, time)
 						end
 						if icSCB then
 							icon.cbar.offset = ic.cbar.offset
+							icon.cbar.startColor = ic.cbar.startColor
+							icon.cbar.completeColor = ic.cbar.completeColor
 							icon.cbar:Show()
 						else
 							icon.cbar:Hide()
 						end
-						icon.ShowCBar, icon.ShowPBar = icSCB, icSPB
 						
 						icon.InvertBars = ic.InvertBars
 						icon.ShowTimer = ic.ShowTimer

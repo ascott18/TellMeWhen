@@ -91,30 +91,22 @@ local function AutoShot_OnUpdate(icon, time)
 		local CndtCheck = icon.CndtCheck if CndtCheck and CndtCheck() then return end
 		
 		local NameName = icon.NameName
+		local asDuration = icon.asDuration
 		
-		local ready = time - icon.asStart > icon.asDuration
+		local ready = time - icon.asStart > asDuration
 		local inrange = icon.RangeCheck and IsSpellInRange(NameName, "target") or 1
 		
-		if ready and inrange then
+		if ready and inrange == 1 then
+			local color = icon:CrunchColor()
 			
 			--icon:SetInfo(alpha, color, texture, start, duration, spellChecked, reverse, count, countText, forceupdate, unit)
 			icon:SetInfo(icon.Alpha, icon.UnAlpha ~= 0 and pr or 1, nil, 0, 0, NameName, nil, nil, nil, nil, nil)
 		else
-			local alpha, color
-			if icon.Alpha ~= 0 then
-				if inrange ~= 1 then
-					alpha, color = icon.UnAlpha*rc.a, rc
-				elseif not icon.ShowTimer then
-					alpha, color = icon.UnAlpha, 0.5
-				else
-					alpha, color = icon.UnAlpha, 1
-				end
-			else
-				alpha, color = icon.UnAlpha, 1
-			end
+			
+			local color = icon:CrunchColor(asDuration, inrange)
 			
 			--icon:SetInfo(alpha, color, texture, start, duration, spellChecked, reverse, count, countText, forceupdate, unit)
-			icon:SetInfo(alpha, color, nil, icon.asStart, icon.asDuration, NameName, nil, nil, nil, nil, nil)
+			icon:SetInfo(icon.UnAlpha, color, nil, icon.asStart, asDuration, NameName, nil, nil, nil, nil, nil)
 		end
 	end
 end
@@ -145,9 +137,10 @@ local function SpellCooldown_OnUpdate(icon, time)
 				end
 				isGCD = (ClockGCD or duration ~= 0) and OnGCD(duration)
 				if inrange == 1 and not nomana and (duration == 0 or isGCD) then --usable
-					
+				
+					local color = icon:CrunchColor()
 					--icon:SetInfo(alpha, color, texture, start, duration, spellChecked, reverse, count, countText, forceupdate, unit)
-					icon:SetInfo(icon.Alpha, icon.UnAlpha ~= 0 and pr or 1, SpellTextures[iName], start, duration, iName, nil, nil, nil, nil, nil)
+					icon:SetInfo(icon.Alpha, color, SpellTextures[iName], start, duration, iName, nil, nil, nil, nil, nil)
 					return
 				end
 			end
@@ -170,23 +163,10 @@ local function SpellCooldown_OnUpdate(icon, time)
 		end
 		if duration then
 
-			local alpha, color
-			if icon.Alpha ~= 0 then
-				if inrange ~= 1 then
-					alpha, color = icon.UnAlpha*rc.a, rc
-				elseif nomana then
-					alpha, color = icon.UnAlpha*mc.a, mc
-				elseif not icon.ShowTimer then
-					alpha, color = icon.UnAlpha, 0.5
-				else
-					alpha, color = icon.UnAlpha, 1
-				end
-			else
-				alpha, color = icon.UnAlpha, 1
-			end
-
+			local color = icon:CrunchColor(duration, inrange, nomana)
+			
 			--icon:SetInfo(alpha, color, texture, start, duration, spellChecked, reverse, count, countText, forceupdate, unit)
-			icon:SetInfo(alpha, color, icon.FirstTexture, start, duration, NameFirst, nil, nil, nil, nil, nil)
+			icon:SetInfo(icon.UnAlpha, color, icon.FirstTexture, start, duration, NameFirst, nil, nil, nil, nil, nil)
 		else
 			icon:SetInfo(0)
 		end

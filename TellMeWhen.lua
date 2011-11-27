@@ -29,11 +29,11 @@ local AceDB = LibStub("AceDB-3.0")
 local LSM = LibStub("LibSharedMedia-3.0")
 local DRData = LibStub("DRData-1.0", true)
 
-TELLMEWHEN_VERSION = "4.6.7"
+TELLMEWHEN_VERSION = "4.7.0"
 TELLMEWHEN_VERSION_MINOR = strmatch(" @project-version@", " r%d+") or ""
 TELLMEWHEN_VERSION_FULL = TELLMEWHEN_VERSION .. TELLMEWHEN_VERSION_MINOR
-TELLMEWHEN_VERSIONNUMBER = 46705 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
-if TELLMEWHEN_VERSIONNUMBER > 47000 or TELLMEWHEN_VERSIONNUMBER < 46000 then return error("YOU SCREWED UP THE VERSION NUMBER OR DIDNT CHANGE THE SAFETY LIMITS") end -- safety check because i accidentally made the version number 414069 once
+TELLMEWHEN_VERSIONNUMBER = 47002 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
+if TELLMEWHEN_VERSIONNUMBER > 48000 or TELLMEWHEN_VERSIONNUMBER < 47000 then return error("YOU SCREWED UP THE VERSION NUMBER OR DIDNT CHANGE THE SAFETY LIMITS") end -- safety check because i accidentally made the version number 414069 once
 
 TELLMEWHEN_MAXGROUPS = 1 	--this is a default, used by SetTheory (addon), so dont rename
 TELLMEWHEN_MAXROWS = 20
@@ -66,7 +66,7 @@ local bitband = bit.band
 
 
 ---------- Locals ----------
-local db, st, co, updatehandler, BarGCD, ClockGCD, Locked, SndChan, FramesToFind, UnitsToUpdate, CNDTEnv
+local db, updatehandler, BarGCD, ClockGCD, Locked, SndChan, FramesToFind, UnitsToUpdate, CNDTEnv
 local UPD_INTV = 0.06	--this is a default, local because i use it in onupdate functions
 local runEvents, updatePBar = 1, 1
 local GCD, NumShapeshiftForms, LastUpdate = 0, 0, 0
@@ -482,12 +482,6 @@ TMW.Defaults = {
 		NumGroups	 =	1,
 		Interval	 =	UPD_INTV,
 		EffThreshold =	15,
-		CDCOColor 	 = 	{r=0, g=1, b=0, a=1},
-		CDSTColor 	 = 	{r=1, g=0, b=0, a=1},
-		PRESENTColor =	{r=1, g=1, b=1, a=1},
-		ABSENTColor	 =	{r=1, g=0.35, b=0.35, a=1},
-		OORColor	 =	{r=0.5, g=0.5, b=0.5, a=1},
-		OOMColor	 =	{r=0.5, g=0.5, b=0.5, a=1},
 		TextureName  = 	"Blizzard",
 		DrawEdge	 =	false,
 		MasterSound	 =	false,
@@ -498,21 +492,23 @@ TMW.Defaults = {
 		CheckOrder	 =	-1,
 	--[[	CodeSnippets = {
 		},]]
-		Colors = { -- not going to implement this unless people actually want it.
-			CCO = 	{r=0,	g=1,	b=0		},	-- cooldown bar complete
-			CST = 	{r=1,	g=0,	b=0		},	-- cooldown bar start
-			OOR	=	{r=0.5,	g=0.5,	b=0.5	},	-- out of range
-			OOM	=	{r=0.5,	g=0.5,	b=0.5	},	-- out of mana
-
-			PTA	=	{r=1,	g=1,	b=1		},	-- presnt/usable with timer always
-			POA	=	{r=1,	g=1,	b=1		},	-- presnt/usable withOUT timer always
-			PTS	=	{r=1,	g=1,	b=1		},	-- presnt/usable with timer somtimes
-			POS	=	{r=1,	g=1,	b=1		},	-- presnt/usable withOUT timer somtimes
-
-			ATA	=	{r=1,	g=1,	b=1		},	-- absent/unusable with timer always
-			AOA	=	{r=1,	g=1,	b=1		},	-- absent/unusable withOUT timer always
-			ATS	=	{r=1,	g=1,	b=1		},	-- absent/unusable with timer somtimes
-			AOS	=	{r=1,	g=1,	b=1		},	-- absent/unusable withOUT timer somtimes
+		Colors = {
+			["**"] = {
+				CBC = 	{r=0,	g=1,	b=0,	Override = false,	a=1,	},	-- cooldown bar complete
+				CBS = 	{r=1,	g=0,	b=0,	Override = false,	a=1,	},	-- cooldown bar start
+				
+				OOR	=	{r=0.5,	g=0.5,	b=0.5,	Override = false,			},	-- out of range
+				OOM	=	{r=0.5,	g=0.5,	b=0.5,	Override = false,			},	-- out of mana
+				OORM=	{r=0.5,	g=0.5,	b=0.5,	Override = false,			},	-- out of range and mana
+						
+				CTA	=	{r=1,	g=1,	b=1,	Override = false,			},	-- counting with timer always
+				COA	=	{r=0.5,	g=0.5,	b=0.5,	Override = false,			},	-- counting withOUT timer always
+				CTS	=	{r=1,	g=1,	b=1,	Override = false,			},	-- counting with timer somtimes
+				COS	=	{r=1,	g=1,	b=1,	Override = false,			},	-- counting withOUT timer somtimes
+						
+				NA	=	{r=1,	g=1,	b=1,	Override = false,			},	-- not counting always
+				NS	=	{r=1,	g=1,	b=1,	Override = false,			},	-- not counting somtimes
+			},
 		},
 		Groups 		= 	{
 			[1] = {
@@ -1165,7 +1161,7 @@ function TMW:OnInitialize()
 	if LibStub("LibButtonFacade", true) and select(6, GetAddOnInfo("Masque")) == "MISSING" then
 		TMW.Warn("TellMeWhen no longer supports ButtonFacade. If you wish to continue to skin your icons, please upgrade to ButtonFacade's successor, Masque.")
 	end
-
+	
 	TMW:ProcessEquivalencies()
 
 	if type(TellMeWhenDB) ~= "table" then
@@ -1180,6 +1176,8 @@ function TMW:OnInitialize()
 	if db.global.XPac ~= XPac then
 		wipe(db.global.ClassSpellCache)
 	end
+	
+	CNDTEnv = TMW.CNDT.Env
 
 	LSM:Register("sound", "Rubber Ducky",  [[Sound\Doodad\Goblin_Lottery_Open01.wav]])
 	LSM:Register("sound", "Cartoon FX",    [[Sound\Doodad\Goblin_Lottery_Open03.wav]])
@@ -1214,6 +1212,7 @@ function TMW:OnInitialize()
 	LSM:Register("sound", "TMW - Ding 8",  [[Interface\Addons\TellMeWhen\Sounds\Ding8.ogg]])
 	LSM:Register("sound", "TMW - Ding 9",  [[Interface\Addons\TellMeWhen\Sounds\Ding9.ogg]])
 
+	
 	TELLMEWHEN_MAXGROUPS = db.profile.NumGroups -- need to define before upgrading
 
 	db.profile.Version = db.profile.Version or TELLMEWHEN_VERSIONNUMBER -- this only does anything for new profiles
@@ -1227,8 +1226,9 @@ function TMW:OnInitialize()
 	db.RegisterCallback(TMW, "OnProfileShutdown",	"ShutdownProfile")
 	db.RegisterCallback(TMW, "OnDatabaseShutdown",	"ShutdownProfile")
 	
-	CNDTEnv = TMW.CNDT.Env
 	TMW:SetScript("OnUpdate", TMW.OnUpdate)
+	
+	
 	
 	TMW.ClassSpellCache = db.global.ClassSpellCache
 	local function AddID(id)
@@ -1252,10 +1252,14 @@ function TMW:OnInitialize()
 	for id in pairs(TMW.ClassSpellCache.PET) do
 		-- do pets last so pet spells dont take the place of class spells
 		AddID(id)
-	end
+	end	
 
 	TellMeWhenDB.AuraCache = TellMeWhenDB.AuraCache or {}
 	TMW.AuraCache = TellMeWhenDB.AuraCache
+	
+	
+	
+	
 	TMW:RegisterEvent("COMBAT_LOG_EVENT_UNFILTERED")
 	TMW:RegisterEvent("PLAYER_ENTERING_WORLD")
 	TMW:RegisterEvent("PLAYER_TALENT_UPDATE")
@@ -1270,6 +1274,12 @@ function TMW:OnInitialize()
 		TMW:SendCommMessage("TMWV", "M:" .. TELLMEWHEN_VERSION .. "^m:" .. TELLMEWHEN_VERSION_MINOR .. "^R:" .. TELLMEWHEN_VERSIONNUMBER .. "^", "GUILD")
 	end
 	TMW:PLAYER_ENTERING_WORLD()
+	
+	
+	
+	for key, Type in pairs(TMW.Types) do
+		Type:UpdateColors()
+	end
 
 	TMW.VarsLoaded = true
 end
@@ -1428,8 +1438,6 @@ function TMW:Update()
 	BarGCD = db.profile.BarGCD
 	ClockGCD = db.profile.ClockGCD
 	SndChan = db.profile.MasterSound and "Master" or nil
-	st = db.profile.CDSTColor
-	co = db.profile.CDCOColor
 
 	wipe(TMW.Icons)
 	wipe(TMW.IconsLookup)
@@ -1454,6 +1462,34 @@ function TMW:GetUpgradeTable()			-- upgrade functions
 	if TMW.UpgradeTable then return TMW.UpgradeTable end
 	local t = {
 	
+		[47002] = {
+			translations = {
+				CBS = "CDSTColor",
+				CBC = "CDCOColor",
+				OOR = "OORColor",
+				OOM = "OOMColor",
+				OORM = "OORColor",
+				
+				-- i didn't upgrade these 2 because they suck
+				--PRESENTColor =	{r=1, g=1, b=1, a=1},
+				--ABSENTColor	 =	{r=1, g=0.35, b=0.35, a=1},
+			},
+			global = function(self)
+				for newKey, oldKey in pairs(self.translations) do
+					local old = db.profile[oldKey]
+					local new = db.profile.Colors.GLOBAL[newKey]
+					
+					if old then
+						for k, v in pairs(old) do
+							new[k] = v
+						end
+						
+						db.profile[oldKey] = nil
+					end
+				end
+				
+			end,
+		},
 		[46604] = {
 			icon = function(ics)
 				if ics.CooldownType == "multistate" and ics.Type == "cooldown" then
@@ -2592,6 +2628,7 @@ local function CreateGroup(groupID)
 end
 
 function TMW:Group_Update(groupID)
+	assert(groupID) -- possible bad things happening here?
 	local group = TMW[groupID] or CreateGroup(groupID)
 	group.CorrectStance = true
 	group.__shown = group:IsShown()
@@ -2719,6 +2756,11 @@ local function CDBarOnValueChanged(bar)
 	local start = bar.start
 	local duration = bar.duration
 	local pct
+	
+	local co = bar.completeColor
+	local st = bar.startColor
+	--wlp(co, st)
+	
 	if not bar.InvertBars then
 		if duration ~= 0 then
 			pct = (time - start) / duration
@@ -2802,7 +2844,7 @@ function IconBase.RegisterEvent(icon, event)
 	icon.hasEvents = 1
 end
 
-function IconBase.HandleEvent(icon, data, played, announced)
+function IconBase.FireEvent(icon, data, played, announced)
 	if not runEvents then return end
 	
 	if ((not data.OnlyShown or icon.__alpha > 0) --[[or (not data.SecondSetting and icon.__someAttribute > 0)]]) then
@@ -2882,6 +2924,59 @@ function IconBase.HandleEvent(icon, data, played, announced)
 	return played, announced
 end
 
+function IconBase.CrunchColor(icon, duration, inrange, nomana)
+--[[
+	CBC = 	{r=0,	g=1,	b=0		},	-- cooldown bar complete
+	CBS = 	{r=1,	g=0,	b=0		},	-- cooldown bar start
+	
+	OOR	=	{r=0.5,	g=0.5,	b=0.5	},	-- out of range
+	OOM	=	{r=0.5,	g=0.5,	b=0.5	},	-- out of mana
+	OORM=	{r=0.5,	g=0.5,	b=0.5	},	-- out of range and mana
+
+	CTA	=	{r=1,	g=1,	b=1		},	-- counting with timer always
+	COA	=	{r=1,	g=1,	b=1		},	-- counting withOUT timer always
+	CTS	=	{r=1,	g=1,	b=1		},	-- counting with timer somtimes
+	COS	=	{r=1,	g=1,	b=1		},	-- counting withOUT timer somtimes
+
+	NA	=	{r=1,	g=1,	b=1		},	-- not counting always
+	NS	=	{r=1,	g=1,	b=1		},	-- not counting somtimes]]
+	
+	if inrange == 0 and nomana then
+		return icon.typeData.OORM
+	elseif inrange == 0 then
+		return icon.typeData.OOR
+	elseif nomana then
+		return icon.typeData.OOM
+	end			
+	
+	
+	local s
+	
+	if not duration or duration == 0 then
+		s = "N" -- Not counting
+	else
+		s = "C" -- Counting
+	end
+	
+	if s == "C" then
+		if icon.ShowTimer then
+			s = s .. "T" -- Timer
+		else
+			s = s .. "O" -- nOtimer
+		end
+	end
+	
+	if (icon.ShowWhen or "always") == "always" then
+		s = s .. "A" -- Always
+	else
+		s = s .. "S" -- Sometimes
+	end
+	
+	assert(icon.typeData[s])
+	
+	return icon.typeData[s]
+end
+
 function IconBase.SetInfo(icon, alpha, color, texture, start, duration, spellChecked, reverse, count, countText, forceupdate, unit)
 	-- icon				- the icon object to set the attributes on (frame) (but call as icon:SetInfo(alpha, ...) , nil, nil)
 	-- [alpha]			- the alpha to set the icon to (number); (nil) defaults to 0
@@ -2907,8 +3002,6 @@ function IconBase.SetInfo(icon, alpha, color, texture, start, duration, spellChe
 		6) IMPORTANT: Update the meta icon with the new arg
 		6) Handle arg in here
 	]]
-		
-	local played, announced
 
 	alpha = alpha or 0
 	duration = duration or 0
@@ -2916,23 +3009,29 @@ function IconBase.SetInfo(icon, alpha, color, texture, start, duration, spellChe
 	
 	local queueOnUnit, queueOnSpell
 	
-	unit = unit or (icon.Units and icon.Units[1] or "player")
-	if icon.__unitChecked ~= unit then
-		queueOnUnit = true
-		icon.__unitChecked = unit
-		if unit then
-			icon.__oldUnitName = UnitName(unit)
+	unit = unit or icon.Units and icon.Units[1]
+	if unit then
+		if icon.__unitChecked ~= unit then
+			queueOnUnit = true
+			icon.__unitChecked = unit
 		end
-	elseif unit then
+		
 		local unitName = UnitName(unit)
 		if icon.__oldUnitName ~= unitName then
 			queueOnUnit = true
 			icon.__oldUnitName = unitName
 		end
+		
+		if queueOnUnit and icon.OnUnit then
+			icon.EventsToFire.OnUnit = true
+		end
 	end
 	
 	if icon.__spellChecked ~= spellChecked then
 		queueOnSpell = true
+		if icon.OnSpell then
+			icon.EventsToFire.OnSpell = true
+		end
 		icon.__spellChecked = spellChecked
 	end
 	
@@ -2965,24 +3064,20 @@ function IconBase.SetInfo(icon, alpha, color, texture, start, duration, spellChe
 		
 		-- detect events that occured, and handle them if they did
 		if alpha == 0 then
-			local data = icon.OnHide
-			if data then
-				played, announced = icon:HandleEvent(data)
+			if icon.OnHide then
+				icon.EventsToFire.OnHide = true
 			end
 		elseif oldalpha == 0 then
-			local data = icon.OnShow
-			if data then
-				played, announced = icon:HandleEvent(data)
+			if icon.OnShow then
+				icon.EventsToFire.OnShow = true
 			end
 		elseif alpha > oldalpha then
-			local data = icon.OnAlphaInc
-			if data then
-				played, announced = icon:HandleEvent(data)
+			if icon.OnAlphaInc then
+				icon.EventsToFire.OnAlphaInc = true
 			end
 		else -- it must be less than, because it isnt greater than and it isnt the same
-			local data = icon.OnAlphaDec
-			if data then
-				played, announced = icon:HandleEvent(data)
+			if icon.OnAlphaDec then
+				icon.EventsToFire.OnAlphaDec = true
 			end
 		end
 	end
@@ -3001,14 +3096,12 @@ function IconBase.SetInfo(icon, alpha, color, texture, start, duration, spellChe
 		if icon.__realDuration ~= realDuration then
 			-- detect events that occured, and handle them if they did
 			if realDuration == 0 then
-				local data = icon.OnFinish
-				if data then
-					played, announced = icon:HandleEvent(data, played, announced)
+				if icon.OnFinish then
+					icon.EventsToFire.OnFinish = true
 				end
 			else
-				local data = icon.OnStart
-				if data then
-					played, announced = icon:HandleEvent(data, played, announced)
+				if icon.OnStart then
+					icon.EventsToFire.OnStart = true
 				end
 			end
 			icon.__realDuration = realDuration
@@ -3074,28 +3167,32 @@ function IconBase.SetInfo(icon, alpha, color, texture, start, duration, spellChe
 		icon.__start = start
 		icon.__duration = duration
 	end
-
-	local data = queueOnSpell and icon.OnSpell
-	if data then
-		played, announced = icon:HandleEvent(data, played, announced)
-	end
-	
-	local data = queueOnUnit and icon.OnUnit
-	if data then
-		played, announced = icon:HandleEvent(data, played, announced)
-	end
-	
 	
 	-- NO EVENT HANDLING PAST THIS POINT!
+	if icon.EventsToFire and next(icon.EventsToFire) then
+		local played, announced
+		for i = 1, #TMW.EventList do
+			local event = TMW.EventList[i].name
+			if icon.EventsToFire[event] then
+				if not (played and announced) then
+					played, announced = icon:FireEvent(icon[event], played, announced)
+				end
+				icon.EventsToFire[event] = nil
+			end
+		end
+	end
+	
 	if alpha == 0 and not force then
 		return
 	end
 
-	if icon.__vrtxcolor ~= color and color then
+	if color and icon.__vrtxcolor ~= color then
 		if type(color) == "table" then
 			icon.texture:SetVertexColor(color.r, color.g, color.b, 1)
+			icon.texture:SetDesaturated(color.Gray)
 		else
 			icon.texture:SetVertexColor(color, color, color, 1)
+			icon.texture:SetDesaturated(false)
 		end
 		icon.__vrtxcolor = color
 	end
@@ -3170,6 +3267,25 @@ TypeBase.SUGType = "spell"
 TypeBase.chooseNameTitle = L["ICONMENU_CHOOSENAME"]
 TypeBase.chooseNameText  = L["CHOOSENAME_DIALOG"]
 
+function TypeBase:UpdateColors()
+	for k, v in pairs(db.profile.Colors[self.type]) do
+		if v.Override then
+			self[k] = v
+		else
+			self[k] = db.profile.Colors.GLOBAL[k]
+		end
+	end
+	self:UpdateIcons()
+end
+
+function TypeBase:UpdateIcons()
+	for icon in TMW:InIcons() do
+		if icon.typeData == self then
+			TMW:Icon_Update(icon)
+		end
+	end
+end
+
 function TypeBase:GetNameForDisplay(icon, data)
 	local name = data and GetSpellInfo(data) or data
 	return name, true
@@ -3223,11 +3339,12 @@ end
 
 function TMW:CreateIcon(group, groupID, iconID)
 	local icon = CreateFrame("Button", "TellMeWhen_Group" .. groupID .. "_Icon" .. iconID, group, "TellMeWhen_IconTemplate", iconID)
+	
 	icon.group = group
 	group[iconID] = icon
 	CNDTEnv[icon:GetName()] = icon
 	icon.base = IconBase
-	
+		
 	icon.__alpha = icon:GetAlpha()
 	icon.__tex = icon.texture:GetTexture()
 	
@@ -3289,6 +3406,8 @@ function TMW:Icon_UpdateBars(icon)
 		cbar.offset = icon.CBarOffs or 0
 		cbar.start = cbar.start or 0
 		cbar.duration = cbar.duration or 0
+		cbar.startColor = icon.typeData.CBS
+		cbar.completeColor = icon.typeData.CBC
 		icon.CBarOffs = nil --reduce table clutter, we dont need this anymore
 		cbar.InvertBars = icon.InvertBars
 		cbar:SetScript("OnValueChanged", CDBarOnValueChanged)
@@ -3331,6 +3450,7 @@ function TMW:Icon_Update(icon)
 	icon.__spellChecked = nil
 	icon.__unitChecked = nil
 	icon.__oldUnitName = nil
+	icon.__vrtxcolor = nil
 	icon.Units = nil
 	
 	for k in pairs(TMW.Icon_Defaults) do
@@ -3367,6 +3487,7 @@ function TMW:Icon_Update(icon)
 		end
 		if tbl.SoundData or tbl.Channel ~= "" and not typeData.DisabledEvents[event] then
 			icon[event] = tbl
+			icon.EventsToFire = icon.EventsToFire or {}
 		else
 			icon[event] = nil
 		end

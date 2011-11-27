@@ -125,9 +125,11 @@ local function ItemCooldown_OnUpdate(icon, time)
 				end
 				isGCD = OnGCD(duration)
 				if equipped and inrange == 1 and (duration == 0 or isGCD) then --usable
-
+				
+					local color = icon:CrunchColor()
+					
 					--icon:SetInfo(alpha, color, texture, start, duration, spellChecked, reverse, count, countText, forceupdate, unit)
-					icon:SetInfo(icon.Alpha, 1, GetItemIcon(iName) or "Interface\\Icons\\INV_Misc_QuestionMark", start, duration, iName, nil, count, EnableStacks and count > 1 and count or "", nil, nil)
+					icon:SetInfo(icon.Alpha, color, GetItemIcon(iName) or "Interface\\Icons\\INV_Misc_QuestionMark", start, duration, iName, nil, count, EnableStacks and count > 1 and count or "", nil, nil)
 
 					return
 				end
@@ -159,22 +161,11 @@ local function ItemCooldown_OnUpdate(icon, time)
 			isGCD = OnGCD(duration)
 		end
 		if duration then
-
-			local alpha, color
-			if icon.Alpha ~= 0 then
-				if inrange ~= 1 then
-					alpha, color = icon.UnAlpha*rc.a, rc
-				elseif not icon.ShowTimer then
-					alpha, color = icon.UnAlpha, 0.5
-				else
-					alpha, color = icon.UnAlpha, 1
-				end
-			else
-				alpha, color = icon.UnAlpha, 1
-			end
+			
+			local color = icon:CrunchColor(duration, inrange)
 			
 			--icon:SetInfo(alpha, color, texture, start, duration, spellChecked, reverse, count, countText, forceupdate, unit)
-			icon:SetInfo(alpha, color, GetItemIcon(NameFirst2), start, duration, NameFirst2, nil, count, EnableStacks and count > 1 and count or "", nil, nil)
+			icon:SetInfo(icon.UnAlpha, color, GetItemIcon(NameFirst2), start, duration, NameFirst2, nil, count, EnableStacks and count > 1 and count or "", nil, nil)
 		else
 			icon:SetInfo(0)
 		end

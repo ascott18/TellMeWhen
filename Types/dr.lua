@@ -145,19 +145,27 @@ local function DR_OnUpdate(icon, time)
 			--icon:SetInfo(alpha, color, texture, start, duration, spellChecked, reverse, count, countText, forceupdate, unit)
 			if dr then
 				if dr.start + dr.duration <= time then
-					icon:SetInfo(Alpha, 1, dr.tex, 0, 0, icon.firstCategory, nil, nil, nil, nil, unit)
+					local color = icon:CrunchColor()
+					
+					icon:SetInfo(Alpha, color, dr.tex, 0, 0, icon.firstCategory, nil, nil, nil, nil, unit)
 					if Alpha > 0 then
 						return
 					end
 				else
+					local duration = dr.duration
+					
+					local color = icon:CrunchColor(duration)
+					
 					local amt = dr.amt
-					icon:SetInfo(UnAlpha, (not icon.ShowTimer and Alpha ~= 0) and .5 or 1, dr.tex, dr.start, dr.duration, icon.firstCategory, nil, amt, amt .. "%", nil, unit)
+					icon:SetInfo(UnAlpha, (not icon.ShowTimer and Alpha ~= 0) and .5 or 1, dr.tex, dr.start, duration, icon.firstCategory, nil, amt, amt .. "%", nil, unit)
 					if UnAlpha > 0 then
 						return
 					end
 				end
 			else
-				icon:SetInfo(Alpha, 1, icon.FirstTexture, 0, 0, icon.firstCategory, nil, nil, nil, nil, unit)
+				local color = icon:CrunchColor()
+				
+				icon:SetInfo(Alpha, color, icon.FirstTexture, 0, 0, icon.firstCategory, nil, nil, nil, nil, unit)
 				if Alpha > 0 then
 					return
 				end

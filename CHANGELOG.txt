@@ -1,9 +1,14 @@
+===v4.7.0===
+ * Completely redid the color system. Colors are now defined (in the main optons) globally, with the option to configure them per icon type and override the global settings.
+ * Bug Fixes:
+ ** (r316) TellMeWhen_Options.lua:2831: attempt to index local "spaceControl" (a nil value)
+ 
 ===v4.6.7===
  * Bug Fixes:
  ** (r310) Fixed sound event text overflow bug
  ** (r311) Possibly fixed a bug that was causing the event settings of deleted groups to stick around
  ** (r312) Added Sudden Death/Colossus Smash to the cooldown reset tracker for Unit Cooldown icons
- ** (r313) TellMeWhen will no longer completely break when loading it with ButtonFacade but not Masque installed
+ ** (r313) TellMeWhen will no longer completely break when loading with ButtonFacade but not Masque installed
  
 ===v4.6.6===
  * The suggestion list has been completely rewritten, and many features have been added.

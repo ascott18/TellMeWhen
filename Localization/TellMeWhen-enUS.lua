@@ -392,8 +392,72 @@ L["UIPANEL_COLOR_PRESENT_DESC"] = "The tint of the icon when the buff/debuff/enc
 L["UIPANEL_COLOR_ABSENT"] = "Absent color"
 L["UIPANEL_COLOR_ABSENT_DESC"] = "The tint of the icon when the buff/debuff/enchant/totem is absent and the icon is set to always show."
 
-L["COLOR_OVERRIDEDEFAULT"] = "Override"
-L["COLOR_OVERRIDEDEFAULT_DESC"] = "Check this to override the color setting defined in the main options with this color for this group. Uncheck to use the main color."
+L["COLOR_DEFAULT"] = "*Global Colors*"
+L["COLOR_RESET_DESC"] = "Reset this setting to default values"
+L["COLOR_OVERRIDEDEFAULT"] = "Use"
+L["COLOR_OVERRIDEDEFAULT_DESC"] = "Check this to override the *Global Colors* setting and use this setting instead."
+L["COLOR_HEADER_DEFAULT"] = [[These colors will be used for any icon type that does not override them in the type's color settings.
+
+Solid white causes no change in the texture. Solid black will cause the texture to be sold black. Any gray or color in between will tint the icon.]]
+L["COLOR_HEADER"] = [[These colors will be used for %s icons if their %q settings are checked.
+
+Solid white causes no change in the texture. Solid black will cause the texture to be sold black. Any gray or color in between will tint the icon.]]
+L["COLOR_DESATURATE"] = "Grey"
+L["COLOR_DESATURATE_DESC"] = "Check to desaturate the icon when this color is used, removing all color and making the icon grayscale."
+L["COLOR_COLOR"] = "Color"
+
+
+L["COLOR_CBC"] 		 = "Cooldown Bar - Complete"	-- cooldown bar complete
+L["COLOR_CBC_DESC"]  = "Color of the cooldown/duration overlay bar when the cooldown/duration is complete"	-- cooldown bar complete
+L["COLOR_CBS"] 		 = "Cooldown Bar - Start"	-- cooldown bar start
+L["COLOR_CBS_DESC"]  = "Color of the cooldown/duration overlay bar when the cooldown/duration has just begun"	-- cooldown bar start
+
+L["COLOR_OOR"]		 = "Out of Range"	-- out of range
+L["COLOR_OOR_DESC"]	 = "Color of the icon when you are not in range to use an ability."	-- out of range
+L["COLOR_OOM"]		 = "Out of Mana"	-- out of mana
+L["COLOR_OOM_DESC"]	 = "Color of the icon when you lack the power to use an ability."	-- out of mana
+L["COLOR_OORM"] 	 = "Out of Range & Mana"	-- out of range and mana
+L["COLOR_OORM_DESC"] = "Color of the icon when you lack the power and are not in range to use an ability."	-- out of range and mana
+
+L["COLOR_CTA"]		 = "Counting, Timer Shown, Always Shown"	-- counting with timer always
+L["COLOR_CTA_DESC"]	 = [[Color of the icon when:
+
+The timer is active (unusable/present),
+%q is enabled,
+%q is set to %q]]
+
+L["COLOR_COA"]		 = "Counting, Timer Hidden, Always Shown"	-- counting withOUT timer always
+L["COLOR_COA_DESC"]	 = [[Color of the icon when:
+
+The timer is active (unusable/present),
+%q is disabled,
+%q is set to %q]]
+
+L["COLOR_CTS"]		 = "Counting, Timer Shown, Sometimes Shown"	-- counting with timer somtimes
+L["COLOR_CTS_DESC"]	 = [[Color of the icon when:
+
+The timer is active (unusable/present),
+%q is enabled,
+%q is not set to %q]]
+
+L["COLOR_COS"]		 = "Counting, Timer Hidden, Sometimes Shown"	-- counting withOUT timer somtimes
+L["COLOR_COS_DESC"]	 = [[Color of the icon when:
+
+The timer is active (unusable/present),
+%q is disabled,
+%q is not set to %q]]
+
+L["COLOR_NA"]		 = "Finished, Always Shown"	-- not counting always
+L["COLOR_NA_DESC"]	 = [[Color of the icon when:
+
+The timer is finished (usable/absent),
+%q is set to %q]]
+
+L["COLOR_NS"]		 = "Finished, Sometimes Shown"	-- not counting somtimes
+L["COLOR_NS_DESC"]	 = [[Color of the icon when:
+
+The timer is finished (usable/absent),
+%q is not set to %q]]
 
 
 L["FONTCOLOR"] = "Font Color"

@@ -115,9 +115,13 @@ local function ICD_OnUpdate(icon, time)
 
 		--icon:SetInfo(alpha, color, texture, start, duration, spellChecked, reverse, count, countText, forceupdate, unit)
 		if time - ICDStartTime > ICDDuration then
-			icon:SetInfo(icon.Alpha, 1, nil, 0, 0, icon.ICDID, nil, nil, nil, nil, nil)
+			local color = icon:CrunchColor()
+			
+			icon:SetInfo(icon.Alpha, color, nil, 0, 0, icon.ICDID, nil, nil, nil, nil, nil)
 		else
-			icon:SetInfo(icon.UnAlpha, icon.Alpha ~= 0 and (icon.ShowTimer and 1 or .5) or 1, nil, ICDStartTime, ICDDuration, icon.ICDID, nil, nil, nil, nil, nil)
+			local color = icon:CrunchColor(ICDDuration)
+			
+			icon:SetInfo(icon.UnAlpha, color, nil, ICDStartTime, ICDDuration, icon.ICDID, nil, nil, nil, nil, nil)
 		end
 	end
 end

@@ -781,26 +781,25 @@ local groupConfigTemplate = {
 		},
 	}
 }
+
 local colorOrder = {
-	"OOR",
-	"OOM",
-	
-	"CCO",
-	"CST",
-	
-	"PTA",
-	"POA",
-	"PTS",
-	"POS",
-	
-	"ATA",
-	"AOA",
-	"ATS",
-	"AOS",
+	"CBS",
+	"CBC", 
+    
+	"OOR",	
+	"OOM",	
+	"OORM",
+    
+	"CTA",	
+	"COA",	
+	"CTS",	
+	"COS",	
+    
+	"NA",	
+	"NS",	
 }
 local colorTemplate = {
 	type = "group",
-	order = 1,
 	name = "",
 	guiInline = true,
 	dialogInline = true,
@@ -813,56 +812,162 @@ local colorTemplate = {
 			end
 		end
 	end,
+	
 	args = {
+		header = {
+			order = 0,
+			type = "header",
+			name = function(info)
+				return L["COLOR_" .. info[#info-1]]
+			end,
+	disabled = function(info)
+		local this = info[#info-1]
+		local type = info[#info-2]
+		
+		if type == "GLOBAL" then return false end
+		
+		local RelevantSettings = TMW.Types[type].RelevantSettings
+		
+		if strsub(this, 1, 2) == "CB" and not RelevantSettings.ShowCBar then
+			return true
+		elseif this == "OOM" and not RelevantSettings.ManaCheck then 
+			return true
+		elseif this == "OOR" and not RelevantSettings.RangeCheck then 
+			return true
+		elseif this == "OORM" and not RelevantSettings.RangeCheck and not RelevantSettings.ManaCheck then 
+			return true
+		end
+	end,
+		},
+		color = {
+			name = L["COLOR_COLOR"],
+			desc = function(info)
+				local WhenChecks = TMW.Types[info[#info-2]].WhenChecks
+				local fmt = WhenChecks and WhenChecks.text or L["ICONMENU_SHOWWHEN"]
+				
+				return L["COLOR_" .. info[#info-1] .. "_DESC"]:format(fmt)
+			end,
+			type = "color",
+			order = 2,
+			--width = "double",
+			hasAlpha = false,
+			set = function(info, r, g, b, a)
+				local c = db.profile.Colors[info[#info-2]][info[#info-1]]
+				
+				c.r = r c.g = g c.b = b c.a = a
+				c.Override = true
+				TMW.Types[info[#info-2]]:UpdateColors()
+			end,
+			get = function(info)
+				local base = db.profile.Colors[info[#info-2]][info[#info-1]]
+				local c = base
+				if not base.Override then
+					c = db.profile.Colors["GLOBAL"][info[#info-1]]
+				end
+				
+				return c.r, c.g, c.b, c.a
+			end,
+			disabled = function(info)
+				return not (db.profile.Colors[info[#info-2]][info[#info-1]].Override and info[#info-2] ~= "GLOBAL")
+			end
+		},
 		override = {
 			name = L["COLOR_OVERRIDEDEFAULT"],
 			desc = L["COLOR_OVERRIDEDEFAULT_DESC"],
 			type = "toggle",
+			width = "half",
 			order = 1,
 			set = function(info, val)
-				db.profile.Groups[findid(info)].Colors.Override = val
+				db.profile.Colors[info[#info-2]][info[#info-1]].Override = val
+				TMW.Types[info[#info-2]]:UpdateColors()
 			end,
 			get = function(info)
-				return db.profile.Groups[findid(info)].Colors.Override
+				return db.profile.Colors[info[#info-2]][info[#info-1]].Override
 			end,
 			hidden = function(info)
-				return not findid(info)
+				return info[#info-2] == "GLOBAL"
 			end,
 		},
-		color = {
-			name = function(info)
-				return L["COLOR_" .. info[#info-1]]
-			end,
-			desc = function(info)
-				return L["COLOR_" .. info[#info-1] .. "_DESC"]
-			end,
-			type = "color",
-			order = 2,
-			hasAlpha = false,
-			set = function(info, r, g, b, a)
-				local base = db.profile
-				if findid(info) then
-					base = db.profile.Groups[findid(info)]
-				end
-				
-				local c = base.Colors[info[#info-1]]
-				
-				c.r = r c.g = g c.b = b c.a = a
+		gray = {
+			name = L["COLOR_DESATURATE"],
+			desc = L["COLOR_DESATURATE_DESC"],
+			type = "toggle",
+			width = "half",
+			order = 3,
+			set = function(info, val)
+				db.profile.Colors[info[#info-2]][info[#info-1]].Gray = val
+				TMW.Types[info[#info-2]]:UpdateColors()
 			end,
 			get = function(info)
-				local base = db.profile
-				if findid(info) then
-					base = db.profile.Groups[findid(info)]
+				return db.profile.Colors[info[#info-2]][info[#info-1]].Gray
+			end,
+			disabled = function(info)
+				return strsub(info[#info-1], 1, 2) == "CB" or not (db.profile.Colors[info[#info-2]][info[#info-1]].Override and info[#info-2] ~= "GLOBAL")
+			end
+		},
+		reset = {
+			name = RESET,
+			desc = L["COLOR_RESET_DESC"],
+			type = "execute",
+			width = "half",
+			order = 10,
+			func = function(info)
+				db.profile.Colors[info[#info-2]][info[#info-1]] = CopyTable(TellMeWhen.Defaults.profile.Colors["**"][info[#info-1]])
+			end,
+			disabled = function(info)
+				return not (db.profile.Colors[info[#info-2]][info[#info-1]].Override and info[#info-2] ~= "GLOBAL")
+			end
+		},
+	},
+}
+local colorIconTypeTemplate = {
+	type = "group",
+	name = function(info)
+		if info[#info] == "GLOBAL" then
+			return L["COLOR_DEFAULT"]
+		end
+		return TMW.Types[info[#info]].name
+	end,
+	order = function(info)
+		local this = info[#info]
+		
+		if this == "GLOBAL" then
+			return 0
+		end
+		
+		for order, type in pairs(TMW.OrderedTypes) do
+			if type.type == this then
+				return order
+			end
+		end
+	end,
+	args = {
+		desc = {
+			order = 0,
+			type = "description",
+			name = function(info)
+				local this = info[#info-1]
+				local t
+		
+				if this == "GLOBAL" then
+					t = L["COLOR_HEADER_DEFAULT"]
+				else 
+					t = L["COLOR_HEADER"]:format(TMW.Types[this].name)
 				end
-				
-				local c = base.Colors[info[#info-1]]
-				
-				return c.r, c.g, c.b, c.a
+				return t .. "\r\n"
 			end,
 		}
 	}
 }
 
+for k, v in pairs(colorOrder) do
+	if strsub(v, 1, 2) == "CB" then
+		colorIconTypeTemplate.args[v] = CopyTable(colorTemplate)
+		colorIconTypeTemplate.args[v].args.color.hasAlpha = true
+	else
+		colorIconTypeTemplate.args[v] = colorTemplate
+	end
+end
 
 for i = 1, GetNumTalentTabs() do
 	local _, name = GetTalentTabInfo(i)
@@ -993,7 +1098,14 @@ function TMW:CompileOptions()
 							func = function() db:ResetProfile() end,
 						},
 						importexport = importExportBoxTemplate,
-						coloropts = {
+						Colors = {
+							type = "group",
+							name = L["UIPANEL_COLORS"],
+							order = 3,
+							childGroups = "tree",
+							args = {},
+						},
+						--[==[coloropts = {
 							type = "group",
 							name = L["UIPANEL_COLORS"],
 							order = 3,
@@ -1048,8 +1160,7 @@ function TMW:CompileOptions()
 									order = 47,
 									hasAlpha = false,
 								},
-							},
-						},
+							},]==]
 					},
 				},
 				groups = {
@@ -1104,6 +1215,13 @@ function TMW:CompileOptions()
 		TMW.OptionsTable.args.groups.args["Group " .. g] = groupConfigTemplate
 	end
 	TMW.OptionsTable.args.groups.args.addgroupgroup.order = TELLMEWHEN_MAXGROUPS + 1
+	
+	TMW.OptionsTable.args.main.args.Colors.args.GLOBAL = colorIconTypeTemplate
+	for k, Type in pairs(TMW.Types) do
+		if not Type.NoColorSettings then
+			TMW.OptionsTable.args.main.args.Colors.args[k] = colorIconTypeTemplate
+		end
+	end
 
 	LibStub("AceConfig-3.0"):RegisterOptionsTable("TMW Options", TMW.OptionsTable)
 	LibStub("AceConfigDialog-3.0"):SetDefaultSize("TMW Options", 781, 512)
@@ -2828,15 +2946,17 @@ function TMW:DeserializeData(string)
 		return nil
 	end
 	
-	if spaceControl:find("`|") then
-		-- EVERYTHING is fucked up. try really hard to salvage it. It probably won't be completely successful
-		return TMW:DeserializeData(string:gsub("`", "~`"):gsub("~`|", "~`~|"))	
-	elseif spaceControl:find("`") then
-		-- if spaces have become corrupt, then reformat them and... re-deserialize (lol)
-		return TMW:DeserializeData(string:gsub("`", "~`"))	
-	elseif spaceControl:find("~|") then
-		-- if pipe characters have been screwed up by blizzard's cute little method of escaping things combined with AS-3.0's cute way of escaping things, try to fix them.
-		return TMW:DeserializeData(string:gsub("~||", "~|"))	
+	if spaceControl then
+		if spaceControl:find("`|") then
+			-- EVERYTHING is fucked up. try really hard to salvage it. It probably won't be completely successful
+			return TMW:DeserializeData(string:gsub("`", "~`"):gsub("~`|", "~`~|"))	
+		elseif spaceControl:find("`") then
+			-- if spaces have become corrupt, then reformat them and... re-deserialize (lol)
+			return TMW:DeserializeData(string:gsub("`", "~`"))	
+		elseif spaceControl:find("~|") then
+			-- if pipe characters have been screwed up by blizzard's cute little method of escaping things combined with AS-3.0's cute way of escaping things, try to fix them.
+			return TMW:DeserializeData(string:gsub("~||", "~|"))	
+		end
 	end
 	
 	

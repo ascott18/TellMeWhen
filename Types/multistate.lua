@@ -106,28 +106,19 @@ local function MultiStateCD_OnUpdate(icon, time)
 			if icon.ManaCheck then
 				_, nomana = IsUsableAction(Slot)
 			end
-
-
-			local alpha, color
-			if (duration == 0 or OnGCD(duration)) and inrange == 1 and not nomana then
-				alpha, color = icon.Alpha, 1
-			elseif icon.Alpha ~= 0 then
-				if inrange ~= 1 then
-					alpha, color = icon.UnAlpha*rc.a, rc
-				elseif nomana then
-					alpha, color = icon.UnAlpha*mc.a, mc
-				elseif not icon.ShowTimer then
-					alpha, color = icon.UnAlpha, 0.5
-				else
-					alpha, color = icon.UnAlpha, 1
-				end
-			else
-				alpha, color = icon.UnAlpha, 1
-			end
 			
 			local actionType, spellID = GetActionInfo(Slot)
 			spellID = actionType == "spell" and spellID or icon.NameFirst
 			
+			
+			local alpha, color
+			if (duration == 0 or OnGCD(duration)) and inrange == 1 and not nomana then
+				alpha = icon.Alpha
+				color = icon:CrunchColor()
+			else
+				alpha = icon.UnAlpha
+				color = icon:CrunchColor(duration, inrange, nomana)
+			end
 			
 			--icon:SetInfo(alpha, color, texture, start, duration, spellChecked, reverse, count, countText, forceupdate, unit)
 			icon:SetInfo(alpha, color, GetActionTexture(Slot) or "Interface\\Icons\\INV_Misc_QuestionMark", start, duration, spellID, nil, nil, nil, nil, nil)

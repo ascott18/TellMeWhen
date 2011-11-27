@@ -334,9 +334,13 @@ local function UnitCooldown_OnUpdate(icon, time)
 		
 		--icon:SetInfo(alpha, color, texture, start, duration, spellChecked, reverse, count, countText, forceupdate, unit)
 		if usename and Alpha > 0 then
-			icon:SetInfo(Alpha, 1, SpellTextures[usename] or "Interface\\Icons\\INV_Misc_PocketWatch_01", 0, 0, usename, nil, nil, nil, nil, useUnit)
+			local color = icon:CrunchColor()
+			
+			icon:SetInfo(Alpha, color, SpellTextures[usename] or "Interface\\Icons\\INV_Misc_PocketWatch_01", 0, 0, usename, nil, nil, nil, nil, useUnit)
 		elseif unname then
-			icon:SetInfo(UnAlpha, (not icon.ShowTimer and Alpha ~= 0) and .5 or 1, SpellTextures[unname], unstart, unduration, unname, nil, nil, nil, nil, useUnit)
+			local color = icon:CrunchColor(unduration)
+			
+			icon:SetInfo(UnAlpha, color, SpellTextures[unname], unstart, unduration, unname, nil, nil, nil, nil, useUnit)
 		else
 			icon:SetInfo(0)
 		end

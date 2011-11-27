@@ -77,13 +77,17 @@ local function ConditionIcon_OnUpdate(icon, time)
 			--icon:SetInfo(alpha, color, texture, start, duration, spellChecked, reverse, count, countText, forceupdate, unit)
 			if succeeded and not icon.__succeeded and icon.ConditionDurEnabled then
 				d = icon.ConditionDur
-				icon:SetInfo(alpha, 1, nil, time, d, nil, nil, nil, nil, nil, nil)
+				local color = icon:CrunchColor(d)
+				icon:SetInfo(alpha, color, nil, time, d, nil, nil, nil, nil, nil, nil)
 			elseif not succeeded and icon.__succeeded and icon.UnConditionDurEnabled then
 				d = icon.UnConditionDur
-				icon:SetInfo(alpha, 1, nil, time, d, nil, nil, nil, nil, nil, nil)
+				local color = icon:CrunchColor(d)
+				icon:SetInfo(alpha, color, nil, time, d, nil, nil, nil, nil, nil, nil)
 			else
 				d = icon.__duration - (time - icon.__start)
-				icon:SetInfo(alpha, 1, nil, icon.__start, icon.__duration, nil, nil, nil, nil, nil, nil)
+				
+				local color = icon:CrunchColor(d > 0 and d)
+				icon:SetInfo(alpha, color, nil, icon.__start, icon.__duration, nil, nil, nil, nil, nil, nil)
 			end
 			
 			if icon.OnlyIfCounting and d <= 0 then

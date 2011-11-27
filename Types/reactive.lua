@@ -114,8 +114,10 @@ local function Reactive_OnUpdate(icon, time)
 				usable = Usable or usable
 				if usable and not CD and not nomana and inrange == 1 then --usable
 
+					local color = icon:CrunchColor()
+					
 					--icon:SetInfo(alpha, color, texture, start, duration, spellChecked, reverse, count, countText, forceupdate, unit)
-					icon:SetInfo(icon.Alpha, 1, SpellTextures[iName], start, duration, iName, nil, nil, nil, nil, nil, nil)
+					icon:SetInfo(icon.Alpha, color, SpellTextures[iName], start, duration, iName, nil, nil, nil, nil, nil, nil)
 
 					return
 				end
@@ -137,22 +139,11 @@ local function Reactive_OnUpdate(icon, time)
 			end
 		end
 		if duration then
-
-			local alpha, color
-			if icon.Alpha ~= 0 then
-				if inrange ~= 1 then
-					alpha, color = icon.UnAlpha*rc.a, rc
-				elseif nomana then
-					alpha, color = icon.UnAlpha*mc.a, mc
-				else
-					alpha, color = icon.UnAlpha, 0.5
-				end
-			else
-				alpha, color = icon.UnAlpha, 1
-			end
+		
+			local color = icon:CrunchColor(duration, inrange, nomana)
 			
 			--icon:SetInfo(alpha, color, texture, start, duration, spellChecked, reverse, count, countText, forceupdate, unit)
-			icon:SetInfo(alpha, color, icon.FirstTexture, start, duration, NameFirst, nil, nil, nil, nil, nil, nil)
+			icon:SetInfo(icon.UnAlpha, color, icon.FirstTexture, start, duration, NameFirst, nil, nil, nil, nil, nil, nil)
 		else
 			icon:SetInfo(0)
 		end

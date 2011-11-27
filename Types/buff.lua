@@ -210,10 +210,14 @@ local function Buff_OnUpdate(icon, time)
 				end
 			end
 			
+			local color = icon:CrunchColor(duration)
+			
 			--icon:SetInfo(alpha, color, texture, start, duration, spellChecked, reverse, count, countText, forceupdate, unit)
-			icon:SetInfo(icon.Alpha, icon.UnAlpha ~= 0 and pr or 1, iconTexture, expirationTime - duration, duration, buffName, nil, count, count > 1 and count or "", nil, useUnit)
+			icon:SetInfo(icon.Alpha, color, iconTexture, expirationTime - duration, duration, buffName, nil, count, count > 1 and count or "", nil, useUnit)
 		else
-			icon:SetInfo(icon.UnAlpha, icon.Alpha ~= 0 and ab or 1, icon.FirstTexture, 0, 0, icon.NameFirst, nil, nil, nil, nil, Units[1])
+			local color = icon:CrunchColor()
+		
+			icon:SetInfo(icon.UnAlpha, color, icon.FirstTexture, 0, 0, icon.NameFirst, nil, nil, nil, nil, Units[1])
 		end
 	end
 end
