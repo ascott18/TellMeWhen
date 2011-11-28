@@ -103,7 +103,7 @@ local function AutoShot_OnUpdate(icon, time)
 			icon:SetInfo(icon.Alpha, icon.UnAlpha ~= 0 and pr or 1, nil, 0, 0, NameName, nil, nil, nil, nil, nil)
 		else
 			
-			local color = icon:CrunchColor(asDuration, inrange)
+			local color = icon:CrunchColor(asDuration > 0 and asDuration, inrange)
 			
 			--icon:SetInfo(alpha, color, texture, start, duration, spellChecked, reverse, count, countText, forceupdate, unit)
 			icon:SetInfo(icon.UnAlpha, color, nil, icon.asStart, asDuration, NameName, nil, nil, nil, nil, nil)

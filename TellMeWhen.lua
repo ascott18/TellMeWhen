@@ -28,7 +28,7 @@ local LMB = LibStub("Masque", true) or (LibMasque and LibMasque("Button"))
 local AceDB = LibStub("AceDB-3.0")
 local LSM = LibStub("LibSharedMedia-3.0")
 local DRData = LibStub("DRData-1.0", true)
-
+ 
 TELLMEWHEN_VERSION = "4.7.0"
 TELLMEWHEN_VERSION_MINOR = strmatch(" @project-version@", " r%d+") or ""
 TELLMEWHEN_VERSION_FULL = TELLMEWHEN_VERSION .. TELLMEWHEN_VERSION_MINOR
