@@ -1,5 +1,7 @@
 ===v4.7.0===
  * Completely redid the color system. Colors are now defined (in the main optons) globally, with the option to configure them per icon type and override the global settings.
+ * Addded "%p" as a substitution for the name of the previously checked unit.
+ * Unit substitutions can be used as the destination for a whisper text output.
  * Bug Fixes:
  ** (r316) TellMeWhen_Options.lua:2831: attempt to index local "spaceControl" (a nil value)
  

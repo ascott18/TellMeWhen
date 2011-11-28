@@ -32,7 +32,7 @@ local DRData = LibStub("DRData-1.0", true)
 TELLMEWHEN_VERSION = "4.7.0"
 TELLMEWHEN_VERSION_MINOR = strmatch(" @project-version@", " r%d+") or ""
 TELLMEWHEN_VERSION_FULL = TELLMEWHEN_VERSION .. TELLMEWHEN_VERSION_MINOR
-TELLMEWHEN_VERSIONNUMBER = 47002 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
+TELLMEWHEN_VERSIONNUMBER = 47003 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
 if TELLMEWHEN_VERSIONNUMBER > 48000 or TELLMEWHEN_VERSIONNUMBER < 47000 then return error("YOU SCREWED UP THE VERSION NUMBER OR DIDNT CHANGE THE SAFETY LIMITS") end -- safety check because i accidentally made the version number 414069 once
 
 TELLMEWHEN_MAXGROUPS = 1 	--this is a default, used by SetTheory (addon), so dont rename
@@ -2915,7 +2915,11 @@ function IconBase.FireEvent(icon, data, played, announced)
 				
 			else
 				if Text and chandata and chandata.isBlizz then
-					SendChatMessage(Text, Channel, nil, data.Location)
+					local Location = data.Location
+					if Channel == "WHISPER" then
+						Location = TMW:InjectDataIntoString(Location, icon, true)
+					end
+					SendChatMessage(Text, Channel, nil, Location)
 				end
 			end
 			announced = 1
@@ -3013,13 +3017,15 @@ function IconBase.SetInfo(icon, alpha, color, texture, start, duration, spellChe
 	if unit then
 		if icon.__unitChecked ~= unit then
 			queueOnUnit = true
+			icon.__lastUnitChecked = icon.__unitChecked
 			icon.__unitChecked = unit
 		end
 		
 		local unitName = UnitName(unit)
-		if icon.__oldUnitName ~= unitName then
+		if icon.__unitName ~= unitName then
 			queueOnUnit = true
-			icon.__oldUnitName = unitName
+			icon.__lastUnitName = icon.__unitName
+			icon.__unitName = unitName
 		end
 		
 		if queueOnUnit and icon.OnUnit then
@@ -3218,7 +3224,7 @@ function IconBase.SetInfo(icon, alpha, color, texture, start, duration, spellChe
 					PwrBarOnUpdate(pbar)
 					pbar.UpdateSet = true
 				end
-				pbar:SetMinMaxValues(0, cost)
+			--	pbar:SetMinMaxValues(0, cost)--why is this happening twice?
 			end
 		elseif icon.pbar.UpdateSet then
 			local pbar = icon.pbar
@@ -3348,6 +3354,31 @@ function TMW:CreateIcon(group, groupID, iconID)
 	icon.__alpha = icon:GetAlpha()
 	icon.__tex = icon.texture:GetTexture()
 	
+	
+	--explicitly define functions from metatables
+	icon.SetAlpha = icon.SetAlpha
+	
+	icon.cooldown.SetCooldown = icon.cooldown.SetCooldown
+	icon.cooldown.Show = icon.cooldown.Show
+	icon.cooldown.SetAlpha = icon.cooldown.SetAlpha
+	icon.cooldown.SetReverse = icon.cooldown.SetReverse
+	icon.cooldown.Hide = icon.cooldown.Hide
+	
+	icon.texture.SetVertexColor = icon.texture.SetVertexColor
+	icon.texture.SetDesaturated = icon.texture.SetDesaturated
+	icon.texture.SetTexture = icon.texture.SetTexture
+	
+	icon.cbar.SetScript = icon.cbar.SetScript
+	icon.cbar.SetValue = icon.cbar.SetValue
+	
+	icon.pbar.SetStatusBarColor = icon.pbar.SetStatusBarColor
+	icon.pbar.SetMinMaxValues = icon.pbar.SetMinMaxValues
+	icon.pbar.SetScript = icon.pbar.SetScript
+	icon.pbar.SetValue = icon.pbar.SetValue
+	
+	icon.countText.SetText = icon.countText.SetText
+	
+	
 	setmetatable(icon, iconMT)
 	for k, v in pairs(IconBase) do
 		if type(icon[k]) == "function" then -- if the method already exists on the icon
@@ -3449,7 +3480,7 @@ function TMW:Icon_Update(icon)
 
 	icon.__spellChecked = nil
 	icon.__unitChecked = nil
-	icon.__oldUnitName = nil
+	icon.__unitName = nil
 	icon.__vrtxcolor = nil
 	icon.Units = nil
 	
@@ -3725,8 +3756,11 @@ function TMW:InjectDataIntoString(Text, icon, doBlizz)
 	end
 	
 	if icon then
+		if strfind(Text, "%%[Pp]") then
+			Text = gsub(Text, "%%[Pp]", icon.__lastUnitName or UnitName(icon.__lastUnitChecked or "") or "?")
+		end
 		if strfind(Text, "%%[Uu]") then
-			Text = gsub(Text, "%%[Uu]", icon.__oldUnitName or UnitName(icon.__unitChecked or "") or "?")
+			Text = gsub(Text, "%%[Uu]", icon.__unitName or UnitName(icon.__unitChecked or "") or "?")
 		end
 		
 		if strfind(Text, "%%[Ss]") then

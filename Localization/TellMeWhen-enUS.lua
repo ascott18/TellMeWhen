@@ -878,16 +878,18 @@ L["SOUNDERROR2"] = "Custom WAV files are not supported by WoW 4.0+"
 L["SOUNDERROR3"] = "Only OGG and MP3 files are supported!"
 
 L["ANN_TAB"] = "Text Output"
+L["ANN_UNITSUBSTITUTIONS"] = [["%t" - Target's Name
+"%f" - Focus's Name
+"%m" - Mouseover's Name
+"%u" - Name of current unit being checked
+"%p" - Name of previously checked unit]]
 L["ANN_CHANTOUSE"] = "Channel to Use"
 L["ANN_EDITBOX"] = "Text to be outputted"
 L["ANN_EDITBOX_WARN"] = "Type the text you wish to be outputted here"
 L["ANN_EDITBOX_DESC"] = [[Type the text that you wish to be outputted when the event triggers. The following substitutions may be used:
 
-"%t" - Target's Name
-"%f" - Focus's Name
-"%m" - Mouseover's Name
+%s
 
-"%u" - Name of current unit being checked
 "%s" - Current spell/item/etc being checked]]
 L["MOUSEOVER_TOKEN_NOT_FOUND"] = "<no mouseover>"
 L["ANN_STICKY"] = "Sticky"
@@ -895,7 +897,9 @@ L["ANN_SHOWICON"] = "Show icon texture"
 L["ANN_SHOWICON_DESC"] = "Some text destinations can show a texture along with the text. Check this to enable that feature."
 L["ANN_SUB_CHANNEL"] = "Sub section"
 L["ANN_WHISPERTARGET"] = "Whisper target"
-L["ANN_WHISPERTARGET_DESC"] = "Input the name of the player that you would like to whisper. Normal server/faction whisper requirements apply."
+L["ANN_WHISPERTARGET_DESC"] = [[Input the name of the player that you would like to whisper. Normal server/faction whisper requirements apply. The following substitutions may be used:
+
+%s]]
 L["ANN_EVENT_GLOBALDESC"] = "Events are checked from top to bottom in this list. If an event is triggered that has text to output, no events below that event will output any text."
 L["CHAT_MSG_SMART"] = "Smart Channel"
 L["CHAT_MSG_SMART_DESC"] = "Will output to Battleground, Raid, Party, or Say - whichever is appropriate."
