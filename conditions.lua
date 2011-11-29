@@ -576,7 +576,7 @@ CNDT.Types = {
 		max = 100,
 		icon = "Interface\\Icons\\inv_alchemy_elixir_05",
 		tcoords = standardtcoords,
-		funcstr = [[UnitHealthMax(c.Unit) ~= 0 and UnitHealth(c.Unit)/UnitHealthMax(c.Unit) c.Operator c.Level]],
+		funcstr = [[UnitHealth(c.Unit)/(UnitHealthMax(c.Unit)+epsilon) c.Operator c.Level]],
 	},
 	{ -- primary resource
 		text = L["CONDITIONPANEL_POWER"],
@@ -649,7 +649,7 @@ CNDT.Types = {
 		max = 100,
 		icon = "Interface\\Icons\\inv_potion_128",
 		tcoords = standardtcoords,
-		funcstr = [[UnitPower(c.Unit, 0)/(UnitPowerMax(c.Unit, 0)+epsilon) c.Operator c.Level]],
+		funcstr = [[UnitPower(c.Unit, 6)/(UnitPowerMax(c.Unit, 6)+epsilon) c.Operator c.Level]],
 	},
 	{ -- alternate power (atramedes, chogall, etc)
 		text = L["CONDITIONPANEL_ALTPOWER"],
