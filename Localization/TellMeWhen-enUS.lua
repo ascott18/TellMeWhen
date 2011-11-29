@@ -738,6 +738,7 @@ L["SENDSUCCESSFUL"] = "Sent successfully"
 L["MESSAGERECIEVE"] = "%s has sent you some TellMeWhen data! You can import this data into TellMeWhen using the %q dropdown in the icon editor."
 L["MESSAGERECIEVE_SHORT"] = "%s has sent you some TellMeWhen data!"
 L["ALLOWCOMM"] = "Allow data importing"
+L["ALLOWVERSIONWARN"] = "Notify of new version"
 L["NEWVERSION"] = "A new version of TellMeWhen is available: %s"
 L["PLAYER_DESC"] = "(You)"
 

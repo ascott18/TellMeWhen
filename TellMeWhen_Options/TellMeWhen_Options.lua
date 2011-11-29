@@ -1079,6 +1079,15 @@ function TMW:CompileOptions()
 									type = "toggle",
 									order = 51,
 								},
+								VersionWarning = {
+									name = L["ALLOWVERSIONWARN"],
+									type = "toggle",
+									order = 52,
+									set = function(info, val)
+										db.global[info[#info]] = val
+									end,
+									get = function(info) return db.global[info[#info]] end,
+								},
 							},
 						},
 						CheckOrder = {
