@@ -273,7 +273,16 @@ L["ICONMENU_COPYHERE"] = "Copy here"
 L["ICONMENU_SWAPWITH"] = "Swap with"
 L["ICONMENU_ADDMETA"] = "Add to meta icon"
 L["ICONMENU_APPENDCONDT"] = "Add as 'Icon Shown' condition"
-L["ICONMENU_ANCHOR"] = "Anchor to Group: %s"
+L["ICONMENU_ANCHORTO"] = "Anchor to %s"
+L["ICONMENU_ANCHORTO_DESC"] = [[Anchor %s to %s, so that whenever %s moves, %s will move with it.
+
+Advanced anchor settings are available in the group options.]]
+L["ICONMENU_ANCHORTO_UIPARENT"] = "Reset anchor"
+L["ICONMENU_ANCHORTO_UIPARENT_DESC"] = [[Reset anchor of %s back to your screen (UIParent). It is currently anchored to %s.
+
+Advanced anchor settings are available in the group options.]]
+L["ICONMENU_SPLIT"] = "Split into new group"
+L["ICONMENU_SPLIT_DESC"] = "Create a new group and move this icon into it. Many group settings will carry over to the new group."
 
 
 

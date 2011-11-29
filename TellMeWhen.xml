@@ -160,8 +160,6 @@
 			</OnMouseDown>
 			<OnDragStart>
 				if button == "RightButton" and TMW.ID then
-					TMW.ID.srcgroupID = self:GetParent():GetID()
-					TMW.ID.srciconID = self:GetID()
 					TMW.ID.srcicon = self
 					TMW.ID:Start(self)
 				elseif button == "LeftButton" then
@@ -177,7 +175,7 @@
 			</OnDragStart>
 			<OnReceiveDrag>
 				if TMW.ID then
-					TMW.ID:CompleteDrag(self)
+					TMW.ID:CompleteDrag("OnReceiveDrag", self)
 					TMW.ID:SpellItemToIcon(self)
 				end
 			</OnReceiveDrag>
@@ -190,8 +188,9 @@
 				if TMW.ID.isMoving then
 					TMW:Group_StopMoving(TMW.ID.isMoving)
 				end
+				
 				if TMW.ID and TMW.ID.IsDragging then
-					TMW.ID:Stop()
+					TMW.ID:CompleteDrag("OnDragStop")
 				end
 			</OnDragStop>
 			<OnShow>

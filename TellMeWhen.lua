@@ -32,7 +32,7 @@ local DRData = LibStub("DRData-1.0", true)
 TELLMEWHEN_VERSION = "4.7.0"
 TELLMEWHEN_VERSION_MINOR = strmatch(" @project-version@", " r%d+") or ""
 TELLMEWHEN_VERSION_FULL = TELLMEWHEN_VERSION .. TELLMEWHEN_VERSION_MINOR
-TELLMEWHEN_VERSIONNUMBER = 47004 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
+TELLMEWHEN_VERSIONNUMBER = 47005 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
 if TELLMEWHEN_VERSIONNUMBER > 48000 or TELLMEWHEN_VERSIONNUMBER < 47000 then return error("YOU SCREWED UP THE VERSION NUMBER OR DIDNT CHANGE THE SAFETY LIMITS") end -- safety check because i accidentally made the version number 414069 once
 
 TELLMEWHEN_MAXGROUPS = 1 	--this is a default, used by SetTheory (addon), so dont rename
@@ -71,7 +71,6 @@ local UPD_INTV = 0.06	--this is a default, local because i use it in onupdate fu
 local runEvents, updatePBar = 1, 1
 local GCD, NumShapeshiftForms, LastUpdate = 0, 0, 0
 local IconUpdateFuncs, GroupUpdateFuncs, unitsToChange = {}, {}, {}
-local GroupBase, IconBase = {}, {}
 local loweredbackup = {}
 local time = GetTime() TMW.time = time
 local sctcolor = {r=1, b=1, g=1}
@@ -451,7 +450,7 @@ local RelevantToAll = {
 
 local Types = setmetatable({}, {
 	__index = function(t, k)
-		if type(k) == "table" and k.base == IconBase then -- if the key is an icon, then return the icon's Type table
+		if type(k) == "table" and k.base == TMW.IconBase then -- if the key is an icon, then return the icon's Type table
 			return t[k.Type]
 		else -- if no type exists, then use the fallback (default) type
 			return rawget(t, "")
@@ -2538,16 +2537,19 @@ function TMW:IsIconValid(icon)
 end
 
 
+
 -- -----------
 -- GROUPS
 -- -----------
+
+TMW.GroupBase = {}
 
 local function GroupScriptSort(groupA, groupB)
 	local gOrder = -db.profile.CheckOrder
 	return groupA:GetID()*gOrder < groupB:GetID()*gOrder
 end
 
-function GroupBase.SetScript(group, handler, func)
+function TMW.GroupBase.SetScript(group, handler, func)
 	group[handler] = func
 	if handler ~= "OnUpdate" then
 		group:setscript(handler, func)
@@ -2560,21 +2562,21 @@ function GroupBase.SetScript(group, handler, func)
 	end
 end
 
-function GroupBase.Show(group)
+function TMW.GroupBase.Show(group)
 	if not group.__shown then
 		group:show()
 		group.__shown = 1
 	end
 end
 
-function GroupBase.Hide(group)
+function TMW.GroupBase.Hide(group)
 	if group.__shown then
 		group:hide()
 		group.__shown = nil
 	end
 end
 
-function GroupBase.SetPos(group)
+function TMW.GroupBase.SetPos(group)
 	local groupID = group:GetID()
 	local s = db.profile.Groups[groupID]
 	local p = s.Point
@@ -2616,9 +2618,9 @@ local function CreateGroup(groupID)
 	local group = CreateFrame("Frame", "TellMeWhen_Group" .. groupID, TMW, "TellMeWhen_GroupTemplate", groupID)
 	TMW[groupID] = group
 	CNDTEnv[group:GetName()] = group
-	group.base = GroupBase
+	group.base = TMW.GroupBase
 
-	for k, v in pairs(GroupBase) do
+	for k, v in pairs(TMW.GroupBase) do
 		if type(group[k]) == "function" then -- if the method already exists on the icon
 			group[strlower(k)] = group[k] -- store the old method as the lowercase same name
 		end
@@ -2707,13 +2709,13 @@ function TMW:Group_Update(groupID)
 end
 
 
+
 -- ------------------
 -- ICONS
 -- ------------------
-	
-	
 
-
+TMW.IconBase = {}
+	
 local function OnGCD(d)
 	if d == 1 then return true end -- a cd of 1 is always a GCD (or at least isn't worth showing)
 	if GCD > 1.7 then return false end -- weed out a cooldown on the GCD spell that might be an interupt (counterspell, mind freeze, etc)
@@ -2798,7 +2800,7 @@ local function PwrBarOnUpdate(bar)
 	end
 end
 
-function IconBase.SetScript(icon, handler, func, dontnil)
+function TMW.IconBase.SetScript(icon, handler, func, dontnil)
 	if func ~= nil or not dontnil then
 		icon[handler] = func
 	end
@@ -2813,38 +2815,38 @@ function IconBase.SetScript(icon, handler, func, dontnil)
 	end
 end
 
-function IconBase.SetTexture(icon, tex)
+function TMW.IconBase.SetTexture(icon, tex)
 	--if icon.__tex ~= tex then ------dont check for this, checking is done before this method is even called
 	tex = icon.OverrideTex or tex
 	icon.__tex = tex
 	icon.texture:SetTexture(tex)
 end
 
-function IconBase.SetReverse(icon, reverse)
+function TMW.IconBase.SetReverse(icon, reverse)
 	icon.__reverse = reverse
 	icon.cooldown:SetReverse(reverse)
 end
 
-function IconBase.UpdateBindText(icon)
+function TMW.IconBase.UpdateBindText(icon)
 	icon.bindText:SetText(TMW:InjectDataIntoString(icon.BindText, icon))
 end
 
-function IconBase.IsBeingEdited(icon)
+function TMW.IconBase.IsBeingEdited(icon)
 	if TMW.IE and TMW.CI.ic == icon and TMW.IE.CurrentTab and TMW.IE:IsVisible() then
 		return TMW.IE.CurrentTab:GetID()
 	end
 end
 
-function IconBase.GetSettings(icon)
+function TMW.IconBase.GetSettings(icon)
 	return db.profile.Groups[icon.group:GetID()].Icons[icon:GetID()]
 end
 
-function IconBase.RegisterEvent(icon, event)
+function TMW.IconBase.RegisterEvent(icon, event)
 	icon:registerevent(event)
 	icon.hasEvents = 1
 end
 
-function IconBase.FireEvent(icon, data, played, announced)
+function TMW.IconBase.FireEvent(icon, data, played, announced)
 	if not runEvents then return end
 	
 	if ((not data.OnlyShown or icon.__alpha > 0) --[[or (not data.SecondSetting and icon.__someAttribute > 0)]]) then
@@ -2928,7 +2930,7 @@ function IconBase.FireEvent(icon, data, played, announced)
 	return played, announced
 end
 
-function IconBase.CrunchColor(icon, duration, inrange, nomana)
+function TMW.IconBase.CrunchColor(icon, duration, inrange, nomana)
 --[[
 	CBC = 	{r=0,	g=1,	b=0		},	-- cooldown bar complete
 	CBS = 	{r=1,	g=0,	b=0		},	-- cooldown bar start
@@ -2981,7 +2983,7 @@ function IconBase.CrunchColor(icon, duration, inrange, nomana)
 	return icon.typeData[s]
 end
 
-function IconBase.SetInfo(icon, alpha, color, texture, start, duration, spellChecked, reverse, count, countText, forceupdate, unit)
+function TMW.IconBase.SetInfo(icon, alpha, color, texture, start, duration, spellChecked, reverse, count, countText, forceupdate, unit)
 	-- icon				- the icon object to set the attributes on (frame) (but call as icon:SetInfo(alpha, ...) , nil, nil)
 	-- [alpha]			- the alpha to set the icon to (number); (nil) defaults to 0
 	-- [color]			- the value(s) to call SetVertexColor with. Either a (number) that will be used as the r, g, and b; or a (table) with keys r, g, b; or (nil) to leave unchanged
@@ -3349,7 +3351,7 @@ function TMW:CreateIcon(group, groupID, iconID)
 	icon.group = group
 	group[iconID] = icon
 	CNDTEnv[icon:GetName()] = icon
-	icon.base = IconBase
+	icon.base = TMW.IconBase
 		
 	icon.__alpha = icon:GetAlpha()
 	icon.__tex = icon.texture:GetTexture()
@@ -3380,7 +3382,7 @@ function TMW:CreateIcon(group, groupID, iconID)
 	
 	
 	setmetatable(icon, iconMT)
-	for k, v in pairs(IconBase) do
+	for k, v in pairs(TMW.IconBase) do
 		if type(icon[k]) == "function" then -- if the method already exists on the icon
 			icon[strlower(k)] = icon[k] -- store the old method as the lowercase same name
 		end

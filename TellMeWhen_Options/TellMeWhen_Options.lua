@@ -1408,7 +1408,6 @@ end
 ID = TMW:NewModule("IconDragger", "AceTimer-3.0", "AceEvent-3.0") TMW.ID = ID
 
 function ID:OnInitialize()
-	function ID:BAR_HIDEGRID() ID.DraggingInfo = nil end
 	hooksecurefunc("PickupSpellBookItem", function(...) ID.DraggingInfo = {...} end)
 	WorldFrame:HookScript("OnMouseDown", function() -- this contains other bug fix stuff too
 		ID.DraggingInfo = nil
@@ -1424,6 +1423,11 @@ function ID:OnInitialize()
 	
 	
 	ID.DD.wrapTooltips = 1
+end
+
+function ID:BAR_HIDEGRID()
+	ID.DraggingInfo = nil 
+	print(GetMouseFocus())
 end
 
 
@@ -1459,41 +1463,93 @@ function ID:DropDown()
 	local info = UIDropDownMenu_CreateInfo()
 	info.func = ID.Handler
 	info.notCheckable = true
+	info.tooltipOnButton = true
 	
-	info.text = L["ICONMENU_MOVEHERE"]
-	info.arg1 = "Move"
-	UIDropDownMenu_AddButton(info, UIDROPDOWNMENU_MENU_LEVEL)
-
-	info.text = L["ICONMENU_COPYHERE"]
-	info.arg1 = "Copy"
-	UIDropDownMenu_AddButton(info, UIDROPDOWNMENU_MENU_LEVEL)
-	
-	info.hasArrow = nil -- inherit for the rest
-	info.value = nil -- inherit for the rest
-
-	info.text = L["ICONMENU_SWAPWITH"]
-	info.arg1 = "Swap"
-	UIDropDownMenu_AddButton(info, UIDROPDOWNMENU_MENU_LEVEL)
-
-	if TMW:IsIconValid(ID.srcicon) then
-		info.text = L["ICONMENU_APPENDCONDT"]
-		info.arg1 = "Condition"
+	if ID.desticon then
+		-- Move
+		info.text = L["ICONMENU_MOVEHERE"]
+		info.tooltipTitle = nil
+		info.tooltipText = nil
+		info.arg1 = "Move"
 		UIDropDownMenu_AddButton(info, UIDROPDOWNMENU_MENU_LEVEL)
 
-		if ID.desticon.Type == "meta" then
-			info.text = L["ICONMENU_ADDMETA"]
-			info.arg1 = "Meta"
+		-- Copy
+		info.text = L["ICONMENU_COPYHERE"]
+		info.tooltipTitle = nil
+		info.tooltipText = nil
+		info.arg1 = "Copy"
+		UIDropDownMenu_AddButton(info, UIDROPDOWNMENU_MENU_LEVEL)
+
+		-- Swap
+		info.text = L["ICONMENU_SWAPWITH"]
+		info.tooltipTitle = nil
+		info.tooltipText = nil
+		info.arg1 = "Swap"
+		UIDropDownMenu_AddButton(info, UIDROPDOWNMENU_MENU_LEVEL)
+
+		if TMW:IsIconValid(ID.srcicon) then
+			-- Condition
+			info.text = L["ICONMENU_APPENDCONDT"]
+			info.tooltipTitle = nil
+			info.tooltipText = nil
+			info.arg1 = "Condition"
+			UIDropDownMenu_AddButton(info, UIDROPDOWNMENU_MENU_LEVEL)
+
+			-- Meta
+			if ID.desticon.Type == "meta" then
+				info.text = L["ICONMENU_ADDMETA"]
+				info.tooltipTitle = nil
+				info.tooltipText = nil
+				info.arg1 = "Meta"
+				UIDropDownMenu_AddButton(info, UIDROPDOWNMENU_MENU_LEVEL)
+			end
+		end
+	end
+	
+	-- Anchor
+	do
+		local name, desc
+		
+		local srcname = L["fGROUP"]:format(TMW:GetGroupName(ID.srcicon.group:GetID(), ID.srcicon.group:GetID(), 1))
+			
+		if ID.desticon and ID.srcicon.group:GetID() ~= ID.desticon.group:GetID() then
+			local destname = L["fGROUP"]:format(TMW:GetGroupName(ID.desticon.group:GetID(), ID.desticon.group:GetID(), 1))
+			name = L["ICONMENU_ANCHORTO"]:format(destname)
+			desc = L["ICONMENU_ANCHORTO_DESC"]:format(srcname, destname, destname, srcname)
+			
+		elseif ID.destFrame then
+			if ID.destFrame == WorldFrame and ID.srcicon.group.Point.relativeTo ~= "UIParent" then
+				name = L["ICONMENU_ANCHORTO_UIPARENT"]
+				desc = L["ICONMENU_ANCHORTO_UIPARENT_DESC"]
+				
+			elseif ID.destFrame ~= WorldFrame then
+				local destname = ID.destFrame:GetName()
+				name = L["ICONMENU_ANCHORTO"]:format(destname)
+				desc = L["ICONMENU_ANCHORTO_DESC"]:format(srcname, destname, destname, srcname)
+			end
+		end
+	
+		if name then
+			info.text = name
+			info.tooltipTitle = name
+			info.tooltipText = desc
+			info.arg1 = "Anchor"
 			UIDropDownMenu_AddButton(info, UIDROPDOWNMENU_MENU_LEVEL)
 		end
 	end
 	
-	if ID.srcgroupID ~= ID.destgroupID then
-		info.text = L["ICONMENU_ANCHOR"]:format(TMW:GetGroupName(ID.destgroupID, ID.destgroupID, 1))
-		info.arg1 = "Anchor"
+	-- Split
+	if ID.destFrame then
+		info.text = L["ICONMENU_SPLIT"]
+		info.tooltipTitle = L["ICONMENU_SPLIT"]
+		info.tooltipText = L["ICONMENU_SPLIT_DESC"]
+		info.arg1 = "Split"
 		UIDropDownMenu_AddButton(info, UIDROPDOWNMENU_MENU_LEVEL)
 	end
 
 	info.text = CANCEL
+	info.tooltipTitle = nil
+	info.tooltipText = nil
 	info.func = nil
 	info.arg1 = nil
 	UIDropDownMenu_AddButton(info, UIDROPDOWNMENU_MENU_LEVEL)
@@ -1509,7 +1565,7 @@ function ID:Start(icon)
 		ID.back:SetPoint("CENTER", UIParent, "BOTTOMLEFT", x/scale, y/scale )
 	end)
 	ID.F:SetScale(scale)
-	local t = TMW[ID.srcgroupID][ID.srciconID].texture:GetTexture()
+	local t = TMW[ID.srcicon.group:GetID()][ID.srcicon:GetID()].texture:GetTexture()
 	ID.texture:SetTexture(t)
 	if t then
 		ID.back:Hide()
@@ -1520,29 +1576,49 @@ function ID:Start(icon)
 	ID.IsDragging = true
 end
 
-function ID:Stop()
-	ID.F:SetScript("OnUpdate", nil)
-	ID.F:Hide()
-	ID:ScheduleTimer("SetIsDraggingFalse", 0.1)
-end
-
 function ID:SetIsDraggingFalse()
 	ID.IsDragging = false
 end
 
-function ID:CompleteDrag(icon)
+function ID:CompleteDrag(script, icon)
+
+	ID.F:SetScript("OnUpdate", nil)
+	ID.F:Hide()
+	ID:ScheduleTimer("SetIsDraggingFalse", 0.1)
+	
+	icon = icon or GetMouseFocus()
+	
 	-- icon here is the destination
 	if ID.IsDragging then
-		ID.desticon = icon
-		ID.desticonID = icon:GetID()
-		ID.destgroupID = icon.group:GetID()
-		ID:Stop()
-
-		if ID.destgroupID == ID.srcgroupID and ID.desticonID == ID.srciconID then return end
-
-		UIDropDownMenu_Initialize(ID.DD, ID.DropDown, "DROPDOWN")
-		UIDropDownMenu_SetAnchor(ID.DD, 0, 0, "TOPLEFT", icon, "BOTTOMLEFT")
-		ToggleDropDownMenu(1, nil, ID.DD)
+		
+		if type(icon) == "table" and icon.base == TMW.IconBase then -- if the frame that got the drag is an icon, set the destination stuff.
+			ID.desticon = icon
+			ID.destFrame = nil
+			
+			if script == "OnDragStop" then -- wait for OnDragReceived
+				return
+			end
+			
+			if ID.desticon.group:GetID() == ID.srcicon.group:GetID() and ID.desticon:GetID() == ID.srcicon:GetID() then
+				return
+			end
+			
+			UIDropDownMenu_SetAnchor(ID.DD, 0, 0, "TOPLEFT", icon, "BOTTOMLEFT")
+		else
+			ID.desticon = nil
+			ID.destFrame = icon -- not actually an icon. just some frame.
+			local cursorX, cursorY = GetCursorPosition()
+			local UIScale = UIParent:GetScale()
+			UIDropDownMenu_SetAnchor(ID.DD, cursorX/UIScale, cursorY/UIScale, nil, UIParent, "BOTTOMLEFT")
+		end
+		
+		if not DropDownList1:IsShown() or UIDROPDOWNMENU_OPEN_MENU ~= ID.DD then
+			if not ID.DD.Initialized then
+				UIDropDownMenu_Initialize(ID.DD, ID.DropDown, "DROPDOWN")
+				ID.DD.Initialized = true
+			end
+			ToggleDropDownMenu(1, nil, ID.DD)
+		end
 	end
 end
 
@@ -1551,9 +1627,6 @@ end
 function ID:Handler(method)
 	-- close the menu
 	CloseDropDownMenus()
-	
-	-- dont operate on the exact same icon
-	if ID.destgroupID == ID.srcgroupID and ID.desticonID == ID.srciconID then return end
 	
 	-- save misc. settings
 	IE:SaveSettings()
@@ -1574,8 +1647,8 @@ end
 ---------- Icon Methods ----------
 function ID:Move()
 	-- move the actual settings
-	db.profile.Groups[ID.destgroupID].Icons[ID.desticonID] = db.profile.Groups[ID.srcgroupID].Icons[ID.srciconID]
-	db.profile.Groups[ID.srcgroupID].Icons[ID.srciconID] = nil
+	db.profile.Groups[ID.desticon.group:GetID()].Icons[ID.desticon:GetID()] = db.profile.Groups[ID.srcicon.group:GetID()].Icons[ID.srcicon:GetID()]
+	db.profile.Groups[ID.srcicon.group:GetID()].Icons[ID.srcicon:GetID()] = nil
 	
 	-- preserve buff/debuff/other types textures
 	ID.desticon.texture:SetTexture(ID.srcicon.texture:GetTexture())
@@ -1601,7 +1674,7 @@ end
 
 function ID:Copy()
 	-- copy the settings
-	db.profile.Groups[ID.destgroupID].Icons[ID.desticonID] = TMW:CopyWithMetatable(db.profile.Groups[ID.srcgroupID].Icons[ID.srciconID])
+	db.profile.Groups[ID.desticon.group:GetID()].Icons[ID.desticon:GetID()] = TMW:CopyWithMetatable(db.profile.Groups[ID.srcicon.group:GetID()].Icons[ID.srcicon:GetID()])
 	
 	-- preserve buff/debuff/other types textures
 	ID.desticon.texture:SetTexture(ID.srcicon.texture:GetTexture()) 
@@ -1609,9 +1682,9 @@ end
 
 function ID:Swap()
 	-- swap the actual settings
-	local dest = db.profile.Groups[ID.destgroupID].Icons[ID.desticonID]
-	db.profile.Groups[ID.destgroupID].Icons[ID.desticonID] = db.profile.Groups[ID.srcgroupID].Icons[ID.srciconID]
-	db.profile.Groups[ID.srcgroupID].Icons[ID.srciconID] = dest
+	local dest = db.profile.Groups[ID.desticon.group:GetID()].Icons[ID.desticon:GetID()]
+	db.profile.Groups[ID.desticon.group:GetID()].Icons[ID.desticon:GetID()] = db.profile.Groups[ID.srcicon.group:GetID()].Icons[ID.srcicon:GetID()]
+	db.profile.Groups[ID.srcicon.group:GetID()].Icons[ID.srcicon:GetID()] = dest
 	
 	-- preserve buff/debuff/other types textures
 	local desttex = ID.desticon.texture:GetTexture() 
@@ -1642,12 +1715,12 @@ function ID:Swap()
 end
 
 function ID:Meta()
-	tinsert(db.profile.Groups[ID.destgroupID].Icons[ID.desticonID].Icons, ID.srcicon:GetName())
+	tinsert(db.profile.Groups[ID.desticon.group:GetID()].Icons[ID.desticon:GetID()].Icons, ID.srcicon:GetName())
 end
 
 function ID:Condition()
 	-- add a condition to the destination icon
-	local Condition = CNDT:AddCondition(db.profile.Groups[ID.destgroupID].Icons[ID.desticonID].Conditions)
+	local Condition = CNDT:AddCondition(db.profile.Groups[ID.desticon.group:GetID()].Icons[ID.desticon:GetID()].Conditions)
 	
 	-- set the settings
 	Condition.Type = "ICON"
@@ -1655,15 +1728,87 @@ function ID:Condition()
 end
 
 function ID:Anchor()
-	 -- dont operate on the same group. the handler only checks for it being the same icon, so we need this:
-	if ID.destgroupID == ID.srcgroupID then return end
-	
-	-- set the setting
-	db.profile.Groups[ID.srcgroupID].Point.relativeTo = TMW[ID.destgroupID]:GetName()
+	if ID.desticon then
+		-- we are anchoring to another TMW group, so dont operate on the same group.
+		if ID.desticon.group == ID.srcicon.group then
+			return
+		end
+		
+		-- set the setting
+		ID.srcicon.group.Point.relativeTo = ID.desticon.group:GetName()
+	else
+		local name = ID.destFrame:GetName()
+		-- we are anchoring to some other frame entirely.
+		if ID.destFrame == WorldFrame then
+			-- If it was dragged to WorldFrame then reset the anchor to UIParent (the text in the dropdown is custom for this circumstance)
+			name = "UIParent"
+		elseif not ID.destFrame:GetName() then
+			-- make sure it actually has a name
+			return
+		end
+		
+		-- set the setting
+		ID.srcicon.group.Point.relativeTo = name
+	end
 	
 	-- do adjustments and positioning
 	-- i cheat. we didnt really stop moving anything, but i'm going to hijack this function anyway.
-	TMW:Group_StopMoving(TMW[ID.srcgroupID])
+	TMW:Group_StopMoving(ID.srcicon.group)
+end
+
+function ID:Split()
+	print(ID.srcicon.group:GetID(), ID.srcicon.group:GetID())
+	
+	--if true then return end
+	local groupID, group = TMW:Group_Add()
+	local blankIcons = db.profile.Groups[groupID].Icons
+	
+	TMW:CopyTableInPlaceWithMeta(db.profile.Groups[ID.srcicon.group:GetID()], db.profile.Groups[groupID])
+	
+	local gs = db.profile.Groups[groupID]
+	gs.Icons = blankIcons
+	
+	-- adjustments and positioning
+	local p = gs.Point
+	p.point, p.relativeTo, p.relativePoint, p.x, p.y = ID.texture:GetPoint(2)
+	p.x, p.y = p.x/UIParent:GetScale()*.85, p.y/UIParent:GetScale()*.85
+	p.relativeTo = "UIParent"
+	TMW:Group_StopMoving(ID.srcicon.group)
+	
+	-- group tweaks
+	gs.Rows = 1
+	gs.Columns = 1
+	gs.Name = ""
+	
+	TMW:Group_Update(groupID)
+	
+	-- move the actual icon
+		-- move the actual settings
+		gs.Icons[1] = ID.srcicon.group.Icons[ID.srcicon:GetID()]
+		ID.srcicon.group.Icons[ID.srcicon:GetID()] = nil
+		
+		-- preserve buff/debuff/other types textures
+		group[1].texture:SetTexture(ID.srcicon.texture:GetTexture())
+
+		local srcicon, desticon = tostring(ID.srcicon), tostring(group[1])
+		
+		-- update any changed icons in metas
+		for ics in TMW:InIconSettings() do
+			for k, ic in pairs(ics.Icons) do
+				if ic == srcicon then
+					ics.Icons[k] = desticon
+				end
+			end
+		end
+		
+		-- update any changed icons in conditions
+		for Condition in TMW:InConditionSettings() do
+			if Condition.Icon == srcicon then
+				Condition.Icon = desticon
+			end
+		end
+	
+	TMW:Group_Update(groupID)
 end
 
 
