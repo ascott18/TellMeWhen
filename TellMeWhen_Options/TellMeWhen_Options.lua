@@ -1436,7 +1436,6 @@ end
 
 function ID:BAR_HIDEGRID()
 	ID.DraggingInfo = nil 
-	print(GetMouseFocus())
 end
 
 
@@ -1765,9 +1764,7 @@ function ID:Anchor()
 	TMW:Group_StopMoving(ID.srcicon.group)
 end
 
-function ID:Split()
-	print(ID.srcicon.group:GetID(), ID.srcicon.group:GetID())
-	
+function ID:Split()	
 	--if true then return end
 	local groupID, group = TMW:Group_Add()
 	local blankIcons = db.profile.Groups[groupID].Icons

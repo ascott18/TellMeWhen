@@ -17,7 +17,7 @@
 local TMW = TMW
 if not TMW then return end
 local L = TMW.L
-local LMB = LibMasque and LibMasque("Button")
+local LMB = LibStub("Masque", true) or (LibMasque and LibMasque("Button"))
 
 local db, UPD_INTV
 local _G, strmatch, tonumber, ipairs =
