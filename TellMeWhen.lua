@@ -32,7 +32,7 @@ local DRData = LibStub("DRData-1.0", true)
 TELLMEWHEN_VERSION = "4.7.0"
 TELLMEWHEN_VERSION_MINOR = strmatch(" @project-version@", " r%d+") or ""
 TELLMEWHEN_VERSION_FULL = TELLMEWHEN_VERSION .. TELLMEWHEN_VERSION_MINOR
-TELLMEWHEN_VERSIONNUMBER = 47009 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
+TELLMEWHEN_VERSIONNUMBER = 47010 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
 if TELLMEWHEN_VERSIONNUMBER > 48000 or TELLMEWHEN_VERSIONNUMBER < 47000 then return error("YOU SCREWED UP THE VERSION NUMBER OR DIDNT CHANGE THE SAFETY LIMITS") end -- safety check because i accidentally made the version number 414069 once
 
 TELLMEWHEN_MAXGROUPS = 1 	--this is a default, used by SetTheory (addon), so dont rename
@@ -71,6 +71,7 @@ local UPD_INTV = 0.06	--this is a default, local because i use it in onupdate fu
 local runEvents, updatePBar = 1, 1
 local GCD, NumShapeshiftForms, LastUpdate = 0, 0, 0
 local IconUpdateFuncs, GroupUpdateFuncs, unitsToChange = {}, {}, {}
+local BindUpdateFuncs
 local loweredbackup = {}
 local time = GetTime() TMW.time = time
 local sctcolor = {r=1, b=1, g=1}
@@ -1397,6 +1398,11 @@ function TMW:OnUpdate()					-- this is where all icon OnUpdate scripts are actua
 			wipe(UnitsToUpdate)
 		end
 	end
+	if BindUpdateFuncs then
+		for i = 1, #BindUpdateFuncs do
+			BindUpdateFuncs[i]:UpdateBindText()
+		end
+	end
 end
 
 
@@ -1445,6 +1451,7 @@ function TMW:Update()
 
 	wipe(TMW.Icons)
 	wipe(TMW.IconsLookup)
+	BindUpdateFuncs = nil
 
 	for group in TMW.InGroups() do
 		group:Hide()
@@ -3021,7 +3028,7 @@ function TMW.IconBase.SetInfo(icon, alpha, color, texture, start, duration, spel
 	duration = duration or 0
 	start = start or 0
 	
-	local queueOnUnit, queueOnSpell
+	local queueOnUnit, queueOnSpell, queueOnStack
 	
 	unit = unit or icon.Units and icon.Units[1]
 	if unit then
@@ -3049,10 +3056,6 @@ function TMW.IconBase.SetInfo(icon, alpha, color, texture, start, duration, spel
 			icon.EventsToFire.OnSpell = true
 		end
 		icon.__spellChecked = spellChecked
-	end
-	
-	if (queueOnSpell or queueOnUnit) and icon.doUpdateBindText then
-		icon:UpdateBindText()
 	end
 	
 	if duration == 0.001 then duration = 0 end -- hardcode fix for tricks of the trade. nice hardcoding, blizzard
@@ -3245,6 +3248,7 @@ function TMW.IconBase.SetInfo(icon, alpha, color, texture, start, duration, spel
 	end
 
 	if icon.__count ~= count or icon.__countText ~= countText then
+		queueOnStack = true
 		if count then
 			icon.countText:SetText(countText or count)
 		else
@@ -3253,7 +3257,14 @@ function TMW.IconBase.SetInfo(icon, alpha, color, texture, start, duration, spel
 		icon.__count = count
 		icon.__countText = countText
 	end
-
+	
+	if queueOnSpell and icon.UpdateBindText_Spell then
+		icon:UpdateBindText()
+	elseif queueOnUnit and icon.UpdateBindText_Unit then
+		icon:UpdateBindText()
+	elseif queueOnStack and icon.UpdateBindText_Stack then
+		icon:UpdateBindText()
+	end
 end
 
 local iconMT = {
@@ -3606,19 +3617,35 @@ function TMW:Icon_Update(icon)
 		icon.pbar:SetFrameLevel(icon:GetFrameLevel() + -1)
 	end
 	
-	
-	-- update overlay texts
-	TMW:Icon_UpdateText(icon, icon.countText, group.Fonts.Count)
-	
-	TMW:Icon_UpdateText(icon, icon.bindText, group.Fonts.Bind)
-	icon.doUpdateBindText = icon.BindText and strfind(icon.BindText, "%%[SsUu]")
-	icon:UpdateBindText()
-	
-	
-	
 	--reset things
 	--icon:SetInfo(alpha, color, texture, start, duration, spellChecked, reverse, count, countText, forceupdate, unit)
 	icon:SetInfo(0, nil, nil, nil, nil, nil, nil, nil, nil, 1, nil) -- forceupdate is set to 1 here so it doesnt return early
+	
+	-- update overlay texts
+	TMW:Icon_UpdateText(icon, icon.countText, group.Fonts.Count)
+	TMW:Icon_UpdateText(icon, icon.bindText, group.Fonts.Bind)
+	
+	icon.UpdateBindText_Spell = nil
+	icon.UpdateBindText_Unit = nil
+	icon.UpdateBindText_Stack = nil
+	if icon.BindText then
+		if strfind(icon.BindText, "%%[Dd]") then
+			BindUpdateFuncs = BindUpdateFuncs or {}
+			tDeleteItem(BindUpdateFuncs, icon)
+			tinsert(BindUpdateFuncs,icon)
+		else
+			if strfind(icon.BindText, "%%[Ss]") then
+				icon.UpdateBindText_Spell = true
+			end
+			if strfind(icon.BindText, "%%[Uu]") then
+				icon.UpdateBindText_Unit = true
+			end
+			if strfind(icon.BindText, "%%[Kk]") then
+				icon.UpdateBindText_Stack = true
+			end
+		end
+		icon:UpdateBindText()
+	end
 	
 	
 	-- force an update
@@ -3752,6 +3779,8 @@ end
 function TMW:InjectDataIntoString(Text, icon, doBlizz)
 	if not Text then return Text end
 	
+	--CURRENTLY USED: t, f, m, p, u, s, d, k
+	
 	if doBlizz then
 		if strfind(Text, "%%[Tt]") then
 			Text = gsub(Text, "%%[Tt]", UnitName("target") or TARGET_TOKEN_NOT_FOUND)
@@ -3780,6 +3809,23 @@ function TMW:InjectDataIntoString(Text, icon, doBlizz)
 				name = TMW:RestoreCase(name)
 			end
 			Text = gsub(Text, "%%[Ss]", name)
+		end
+		if strfind(Text, "%%[Dd]") then
+			local duration = icon.__duration - (TMW.time - icon.__start)
+			if duration < 0 then
+				duration = 0
+			end
+			Text = gsub(Text, "%%[Dd]", TMW:FormatSeconds(duration, duration == 0 or duration > 10, true))
+		end
+		if strfind(Text, "%%[Kk]") then
+			print(icon.__countText, icon.__count)
+			local count = icon.__countText or icon.__count
+			if count then
+				count = count:gsub("%%", "%%%%")
+			else
+				count = ""
+			end
+			Text = gsub(Text, "%%[Kk]", count)
 		end
 	end
 	
@@ -4267,6 +4313,35 @@ function TMW:GetGroupName(n, g, short)
 	end
 	if short then return n .. " (" .. g .. ")" end
 	return n .. " (" .. format(L["fGROUP"], g) .. ")"
+end
+
+function TMW:FormatSeconds(seconds, skipSmall, keepTrailing)
+	-- note that this is different from the one in conditions.lua
+	local y =  seconds / 31556925.9936
+	local d = (seconds % 31556925.9936) / 86400
+	local h = (seconds % 31556925.9936  % 86400) / 3600
+	local m = (seconds % 31556925.9936  % 86400  % 3600) / 60
+	local s = (seconds % 31556925.9936  % 86400  % 3600  % 60)
+	
+	local ns = s
+	if skipSmall then
+		ns = format("%d", s)
+	else
+		ns = format("%.1f", s)
+		if not keepTrailing then
+			ns = tonumber(ns)
+		end
+	end
+	if s < 10 and seconds >= 60 then
+		ns = "0" .. ns
+	end
+	
+	if y >= 1 then return format("%d:%d:%02d:%02d:%s", y, d, h, m, ns) end
+	if d >= 1 then return format("%d:%02d:%02d:%s", d, h, m, ns) end
+	if h >= 1 then return format("%d:%02d:%s", h, m, ns) end
+	if m >= 1 then return format("%d:%s", m, ns) end
+	
+	return ns
 end
 
 function TMW:LockToggle()

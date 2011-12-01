@@ -5,10 +5,12 @@
  * You can right-click-drag icons anywhere on screen to anchor them to any mouse enabled frame, or to move an icon into a new group.
  * Added a setting to disable new version warnings.
  * It is now easier to delete old groups.
+ * Added substitutions "%d" for duration and "%k" for stacks.
  * Bug Fixes:
  ** (r316) TellMeWhen_Options.lua:2831: attempt to index local "spaceControl" (a nil value)
  ** (r321) The runic power condition should now properly track runic power instead of mana.
  ** (r324) Meta icons should once again properly inherit colors from Masque.
+ ** (r327) TellMeWhen_Options.lua line 3189: attempt to call method 'IsVisible' (a nil value)
  
 ===v4.6.7===
  * Bug Fixes:

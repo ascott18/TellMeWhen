@@ -2773,26 +2773,6 @@ end
 
 
 ---------- Tooltips ----------
-local function formatSeconds(seconds)
-	-- note that this is different from the one in conditions.lua
-	local y =  seconds / 31556925.9936
-	local d = (seconds % 31556925.9936) / 86400
-	local h = (seconds % 31556925.9936  % 86400) / 3600
-	local m = (seconds % 31556925.9936  % 86400  % 3600) / 60
-	local s = (seconds % 31556925.9936  % 86400  % 3600  % 60)
-
-	s = tonumber(format("%.1f", s))
-	local ns = s
-	if s < 10 then
-		ns = "0" .. s
-	end
-
-	if y >= 1 then return format("%d:%d:%02d:%02d:%s", y, d, h, m, ns) end
-	if d >= 1 then return format("%d:%02d:%02d:%s", d, h, m, ns) end
-	if h >= 1 then return format("%d:%02d:%s", h, m, ns) end
-	if m >= 1 then return format("%d:%s", m, ns) end
-	return s
-end
 local cachednames = {}
 function IE:GetRealNames() -- TODO: MODULARIZE THIS
 	-- gets a string to set as a tooltip of all of the spells names in the name box in the IE. Splits up equivalancies and turns IDs into names
@@ -2842,7 +2822,7 @@ function IE:GetRealNames() -- TODO: MODULARIZE THIS
 		
 		if not tiptemp[name] then --prevents display of the same name twice when there are multiple spellIDs.
 			numadded = numadded + 1
-			local dur = Types[CI.t].DurationSyntax and " ("..formatSeconds(durations[k])..")" or ""
+			local dur = Types[CI.t].DurationSyntax and " ("..TMW:FormatSeconds(durations[k])..")" or ""
 			str = str ..
 			(texture and ("|T" .. texture .. ":0|t") or "") ..
 			name ..
@@ -3186,7 +3166,7 @@ end
 ---------- Dropdown ----------
 function IE:Copy_DropDown_Icon_OnClick(ics, version)
 	print(self.value) -- self.value is the profile name
-	if self.value and self.value:IsVisible() then
+	if type(self.value) == "table" and self.value.base == TMW.IconBase and self.value:IsVisible() then
 		TMW.HELP:Show("ICON_IMPORT_CURRENTPROFILE", nil, IE.ExportBox, 0, 0, L["HELP_IMPORT_CURRENTPROFILE"])
 	end
 	TMW[CI.g][CI.i]:SetTexture(nil)

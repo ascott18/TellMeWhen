@@ -903,7 +903,9 @@ L["ANN_EDITBOX_DESC"] = [[Type the text that you wish to be outputted when the e
 
 %s
 
-"%s" - Current spell/item/etc being checked]]
+"%s" - Current spell/item/etc being checked
+"%d" - Duration remaining on the icon's timer
+"%k" - Current stack text]]
 L["MOUSEOVER_TOKEN_NOT_FOUND"] = "<no mouseover>"
 L["ANN_STICKY"] = "Sticky"
 L["ANN_SHOWICON"] = "Show icon texture"

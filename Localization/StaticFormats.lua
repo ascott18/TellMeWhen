@@ -60,4 +60,4 @@ L["COLOR_HEADER"] 					  = L["COLOR_HEADER"]					 :format("%s", L["COLOR_OVERRID
 
 
 L["ANN_WHISPERTARGET_DESC"] 		  = L["ANN_WHISPERTARGET_DESC"]			 :format(L["ANN_UNITSUBSTITUTIONS"])
-L["ANN_EDITBOX_DESC"] 				  = L["ANN_EDITBOX_DESC"]				 :format(L["ANN_UNITSUBSTITUTIONS"], "%s")
+L["ANN_EDITBOX_DESC"] 				  = L["ANN_EDITBOX_DESC"]				 :gsub  ("%s", L["ANN_UNITSUBSTITUTIONS"], 1) -- this one has to use gsub because of the weirdness with having "%d" in the string

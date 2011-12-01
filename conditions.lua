@@ -527,11 +527,6 @@ for k, v in pairs(CNDT.Operators) do
 	CNDT.OperatorTooltips[v.value] = v.tooltipText
 end
 
-CNDT.AndOrs = {
-	{ text=L["CONDITIONPANEL_AND"], value="AND" },
-	{ text=L["CONDITIONPANEL_OR"], 	value="OR" 	},
-}
-
 
 local function formatSeconds(seconds, arg2)
 	if type(seconds) == "table" then -- if i set it directly as a metamethod
