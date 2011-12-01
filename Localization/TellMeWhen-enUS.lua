@@ -965,6 +965,12 @@ L["HELP_ICD_NATURESGRACE"] = [[Trying to track the cooldown of %s?
 
 It is recommended that you change the icon type to %q instead, which will track resets in the cooldown triggered by eclipse state changes.]]
 
+L["HELP_IMPORT_CURRENTPROFILE"] = [[Trying to move or copy an icon from this profile to another icon slot?
+
+You can do so easily by right-clicking on the icon and dragging it (hold down the mouse button) to another slot. When you release the mouse button, a menu will appear with many options.
+
+Try dragging an icon to a meta icon, another group, or another frame on your screen for other options.]]
+
 
 L["TOPLEFT"] = "Top Left"
 L["TOP"] = "Top"

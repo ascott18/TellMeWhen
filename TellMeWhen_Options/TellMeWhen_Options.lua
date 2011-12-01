@@ -124,6 +124,9 @@ TMW.CI = setmetatable({}, {__index = function(tbl, k)
 	end
 end}) local CI = TMW.CI		--current icon
 
+local DEFAULT_ICON_SETTINGS = db.profile.Groups[0].Icons[0]
+db.profile.Groups[0] = nil
+
 
 
 -- ----------------------
@@ -1349,16 +1352,13 @@ end
 
 ---------- Etc ----------
 function TMW:Group_HasIconData(groupID)
-	local blank = db.profile.Groups[0].Icons[0]
 	local has = false
 	for ics in TMW:InIconSettings(groupID) do
-		if not IE:DeepCompare(ics, blank) then
+		if not IE:DeepCompare(DEFAULT_ICON_SETTINGS, ics) then
 			has = true
 			break
 		end
 	end
-	
-	db.profile.Groups[0].Icons[0] = nil
 	
 	return has
 end
@@ -3184,10 +3184,11 @@ end
 
 
 ---------- Dropdown ----------
-local DEFAULT_ICON_SETTINGS = db.profile.Groups[0].Icons[0]
-db.profile.Groups[0] = nil
-
 function IE:Copy_DropDown_Icon_OnClick(ics, version)
+	print(self.value) -- self.value is the profile name
+	if self.value and self.value:IsVisible() then
+		TMW.HELP:Show("ICON_IMPORT_CURRENTPROFILE", nil, IE.ExportBox, 0, 0, L["HELP_IMPORT_CURRENTPROFILE"])
+	end
 	TMW[CI.g][CI.i]:SetTexture(nil)
 	
 	TMW:Import(ics, version, "icon")
@@ -3195,15 +3196,16 @@ end
 
 function IE:AddIconToCopyDropdown(ics, groupID, iconID, profilename, group_src, version_src, force)
 	if force or (tonumber(iconID) and not IE:DeepCompare(DEFAULT_ICON_SETTINGS, ics)) then
+		info = UIDropDownMenu_CreateInfo()
+		
 		local tex
 		local ic = groupID and iconID and TMW[groupID] and TMW[groupID][iconID]
 		if db:GetCurrentProfile() == profilename and ic and ic.texture:GetTexture() then
 			tex = ic.texture:GetTexture()
+			info.value = ic -- holy shit, is this hacktastic or what?
 		else
 			tex = TMW:GuessIconTexture(ics)
 		end
-
-		info = UIDropDownMenu_CreateInfo()
 		
 		local text, textshort, tooltipText = TMW:GetIconMenuText(nil, nil, ics)
 		info.text = textshort
@@ -7022,6 +7024,8 @@ HELP.Codes = {
 	"ICON_DURS_FIRSTSEE",
 	"ICON_DURS_MISSING",
 	
+	"ICON_IMPORT_CURRENTPROFILE",
+	
 	"ICON_DR_MISMATCH",
 	"ICON_MS_NOTFOUND",
 	"ICON_ICD_NATURESGRACE",
@@ -7037,6 +7041,7 @@ HELP.Codes = {
 HELP.OnlyOnce = {
 	ICON_DURS_FIRSTSEE = true,
 	ICON_POCKETWATCH_FIRSTSEE = true,
+	ICON_IMPORT_CURRENTPROFILE = true,
 }
 
 function HELP:OnInitialize()
