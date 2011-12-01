@@ -341,18 +341,6 @@ function TMW:GetIconMenuText(g, i, data)
 	return text, textshort, tooltip
 end
 
-function TMW:GetGroupName(n, g, short)
-	if n and n == g then
-		n = db.profile.Groups[g].Name
-	end
-	if (not n) or n == "" then
-		if short then return g end
-		return format(L["fGROUP"], g)
-	end
-	if short then return n .. " (" .. g .. ")" end
-	return n .. " (" .. format(L["fGROUP"], g) .. ")"
-end
-
 function TMW:GuessIconTexture(data)
 	local tex = nil
 	if (data.Name and data.Name ~= "" and data.Type ~= "meta" and data.Type ~= "wpnenchant" and data.Type ~= "runes") and not tex then
@@ -652,7 +640,14 @@ local groupConfigTemplate = {
 					disabled = function()
 						return db.profile.NumGroups == 1
 					end,
-					confirm = true,
+					confirm = function(info)
+						if IsControlKeyDown() then
+							return false
+						elseif TMW:Group_HasIconData(findid(info)) then
+							return true
+						end
+						return false
+					end,
 				},
 				ImportExport = importExportBoxTemplate,
 			},
@@ -820,24 +815,6 @@ local colorTemplate = {
 			name = function(info)
 				return L["COLOR_" .. info[#info-1]]
 			end,
-	disabled = function(info)
-		local this = info[#info-1]
-		local type = info[#info-2]
-		
-		if type == "GLOBAL" then return false end
-		
-		local RelevantSettings = TMW.Types[type].RelevantSettings
-		
-		if strsub(this, 1, 2) == "CB" and not RelevantSettings.ShowCBar then
-			return true
-		elseif this == "OOM" and not RelevantSettings.ManaCheck then 
-			return true
-		elseif this == "OOR" and not RelevantSettings.RangeCheck then 
-			return true
-		elseif this == "OORM" and not RelevantSettings.RangeCheck and not RelevantSettings.ManaCheck then 
-			return true
-		end
-	end,
 		},
 		color = {
 			name = L["COLOR_COLOR"],
@@ -862,13 +839,13 @@ local colorTemplate = {
 				local base = db.profile.Colors[info[#info-2]][info[#info-1]]
 				local c = base
 				if not base.Override then
-					c = db.profile.Colors["GLOBAL"][info[#info-1]]
+				--	c = db.profile.Colors["GLOBAL"][info[#info-1]] -- i don't like this. too confusing to see the color change when checking and unchecking the setting
 				end
 				
 				return c.r, c.g, c.b, c.a
 			end,
 			disabled = function(info)
-				return not (db.profile.Colors[info[#info-2]][info[#info-1]].Override and info[#info-2] ~= "GLOBAL")
+				return not db.profile.Colors[info[#info-2]][info[#info-1]].Override and info[#info-2] ~= "GLOBAL"
 			end
 		},
 		override = {
@@ -902,7 +879,7 @@ local colorTemplate = {
 				return db.profile.Colors[info[#info-2]][info[#info-1]].Gray
 			end,
 			disabled = function(info)
-				return strsub(info[#info-1], 1, 2) == "CB" or not (db.profile.Colors[info[#info-2]][info[#info-1]].Override and info[#info-2] ~= "GLOBAL")
+				return strsub(info[#info-1], 1, 2) == "CB" or (not db.profile.Colors[info[#info-2]][info[#info-1]].Override and info[#info-2] ~= "GLOBAL")
 			end
 		},
 		reset = {
@@ -914,9 +891,9 @@ local colorTemplate = {
 			func = function(info)
 				db.profile.Colors[info[#info-2]][info[#info-1]] = CopyTable(TellMeWhen.Defaults.profile.Colors["**"][info[#info-1]])
 			end,
-			disabled = function(info)
-				return not (db.profile.Colors[info[#info-2]][info[#info-1]].Override and info[#info-2] ~= "GLOBAL")
-			end
+		--[=[	disabled = function(info)
+				return not db.profile.Colors[info[#info-2]][info[#info-1]].Override and info[#info-2] ~= "GLOBAL"
+			end]=]
 		},
 	},
 }
@@ -1327,58 +1304,19 @@ end
 
 ---------- Add/Delete ----------
 function TMW:Group_Delete(groupID)
-	
-	local warntext = L["ONGROUPDELETE_CHECKINGINVALID"] .. " "
-	local originalwarn = warntext
-	
-	-- shift condition icons
-	for condition, _, gID, iID in TMW:InConditionSettings() do
-		if condition.Icon ~= "" and condition.Type == "ICON" then
-			local g = tonumber(strmatch(condition.Icon, "TellMeWhen_Group(%d+)_Icon"))
-			if g > groupID then
-				condition.Icon = gsub(condition.Icon, "_Group" .. g, "_Group" .. g-1)
-			elseif g == groupID and g ~= gID then
-				if iID then
-					warntext = warntext .. format(L["GROUPICON"], TMW:GetGroupName(gID, gID, 1), iID) .. ";  "
-				else
-					warntext = warntext .. format(L["fGROUP"], TMW:GetGroupName(gID, gID, 1)) .. ";  "
-				end
-			end
-		end
+	if db.profile.NumGroups == 1 then
+		return
 	end
 	
-	-- shift meta components
-	for ics, gID, iID in TMW:InIconSettings() do
-		if ics.Type == "meta" then
-			for k, v in pairs(ics.Icons) do
-				if v ~= "" then
-					local g = tonumber(strmatch(v, "TellMeWhen_Group(%d+)_Icon"))
-					if g > groupID then
-						ics.Icons[k] = gsub(v, "_Group" .. g, "_Group" .. g-1)
-					elseif g == groupID and g ~= gID  then
-						warntext = warntext .. format(L["GROUPICON"], TMW:GetGroupName(gID, gID, 1), iID) .. ";  "
-					end
-				end
-			end
-		end
-	end
-	
-	-- shift anchors
-	for gs, gID in TMW:InGroupSettings() do
-		local g = gs.Point.relativeTo and tonumber(strmatch(gs.Point.relativeTo, "TellMeWhen_Group(%d+)"))
-		if g then
-			if g > groupID then
-				gs.Point.relativeTo = gsub(gs.Point.relativeTo, "_Group" .. g, "_Group" .. g-1)
-			elseif g == groupID then
-				gs.Point.relativeTo = "UIParent"
-				TMW:Group_StopMoving(TMW[gID])
-			end
-		end
-	end
-	
-	-- warn for invalid things
-	if originalwarn ~= warntext then
-		TMW:Print(warntext)
+	for id = groupID + 1, db.profile.NumGroups do
+		local source = "TellMeWhen_Group" .. id
+		local destination = "TellMeWhen_Group" .. id - 1
+		
+		-- check for groups exactly
+	    TMW:ReconcileData(source, destination)
+		
+		-- check for any icons of a group.
+		TMW:ReconcileData(source, destination, source .. "_Icon", destination .. "_Icon")
 	end
 	
 	tremove(db.profile.Groups, groupID)
@@ -1409,6 +1347,21 @@ function TMW:Group_Add()
 end
 
 
+---------- Etc ----------
+function TMW:Group_HasIconData(groupID)
+	local blank = db.profile.Groups[0].Icons[0]
+	local has = false
+	for ics in TMW:InIconSettings(groupID) do
+		if not IE:DeepCompare(ics, blank) then
+			has = true
+			break
+		end
+	end
+	
+	db.profile.Groups[0].Icons[0] = nil
+	
+	return has
+end
 
 -- ----------------------
 -- ICON DRAGGER
@@ -1663,21 +1616,7 @@ function ID:Move()
 
 	local srcicon, desticon = tostring(ID.srcicon), tostring(ID.desticon)
 	
-	-- update any changed icons in metas
-	for ics in TMW:InIconSettings() do
-		for k, ic in pairs(ics.Icons) do
-			if ic == srcicon then
-				ics.Icons[k] = desticon
-			end
-		end
-	end
-	
-	-- update any changed icons in conditions
-	for Condition in TMW:InConditionSettings() do
-		if Condition.Icon == srcicon then
-			Condition.Icon = desticon
-		end
-	end
+	TMW:ReconcileData(srcicon, desticon)
 end
 
 function ID:Copy()
@@ -1699,27 +1638,66 @@ function ID:Swap()
 	ID.desticon.texture:SetTexture(ID.srcicon.texture:GetTexture())
 	ID.srcicon.texture:SetTexture(desttex)
 
-	local srcicon, desticon = tostring(ID.srcicon), tostring(ID.desticon)
+	local srcicon, desticon = tostring(ID.srcicon) .. "$", tostring(ID.desticon) .. "$"
 	
-	-- update any changed icons in metas
+	TMW:ReconcileData(srcicon, desticon, nil, nil, true)
+end
+
+function TMW:ReconcileData(source, destination, matchSource, matchDestination, swap)
+	-- update any changed icons that meta icons are checking
 	for ics in TMW:InIconSettings() do
 		for k, ic in pairs(ics.Icons) do
-			if ic == srcicon then
-				ics.Icons[k] = desticon
-			elseif ic == desticon then
-				ics.Icons[k] = srcicon
+			if type(ic) == "string" then
+				local string = ic
+			
+				if matchSource and string:find(matchSource) then
+					ics.Icons[k] = string:gsub(source, destination)
+				elseif not matchSource and source == string then
+					ics.Icons[k] = destination
+				elseif swap and matchDestination and string:find(matchDestination) then
+					ics.Icons[k] = string:gsub(destination, source)
+				elseif swap and not matchDestination and destination == string then
+					ics.Icons[k] = source
+				end
 			end
 		end
 	end
 	
 	-- update any changed icons in conditions
 	for Condition in TMW:InConditionSettings() do
-		if Condition.Icon == srcicon then
-			Condition.Icon = desticon
-		elseif Condition.Icon == desticon then
-			Condition.Icon = srcicon
+		if Condition.Icon ~= "" and type(Condition.Icon) == "string" then
+			local string = Condition.Icon
+			
+			if matchSource and string:find(matchSource) then
+				Condition.Icon = string:gsub(source, destination)
+			elseif not matchSource and source == string then
+				Condition.Icon = destination
+			elseif swap and matchDestination and string:find(matchDestination) then
+				Condition.Icon = string:gsub(destination, source)
+			elseif swap and not matchDestination and destination == string then
+				Condition.Icon = source
+			end
 		end
 	end
+	
+	-- update any anchors
+	for gs, gID in TMW:InGroupSettings() do
+		if type(gs.Point.relativeTo) == "string" then
+			local string = gs.Point.relativeTo
+			
+			if matchSource and string:find(matchSource) then
+				gs.Point.relativeTo = string:gsub(source, destination)
+			elseif not matchSource and source == string then
+				gs.Point.relativeTo = destination
+			elseif swap and matchDestination and string:find(matchDestination) then
+				gs.Point.relativeTo = string:gsub(destination, source)
+			elseif swap and not matchDestination and destination == string then
+				gs.Point.relativeTo = source
+			end
+		end
+	end
+	
+	--TMW:Update()
 end
 
 function ID:Meta()
@@ -1750,6 +1728,9 @@ function ID:Anchor()
 		if ID.destFrame == WorldFrame then
 			-- If it was dragged to WorldFrame then reset the anchor to UIParent (the text in the dropdown is custom for this circumstance)
 			name = "UIParent"
+		elseif ID.destFrame == ID.srcicon.group then
+			-- this should never ever ever ever ever ever ever ever ever happen.
+			return
 		elseif not ID.destFrame:GetName() then
 			-- make sure it actually has a name
 			return
@@ -1765,14 +1746,31 @@ function ID:Anchor()
 end
 
 function ID:Split()	
-	--if true then return end
 	local groupID, group = TMW:Group_Add()
-	local blankIcons = db.profile.Groups[groupID].Icons
 	
-	TMW:CopyTableInPlaceWithMeta(db.profile.Groups[ID.srcicon.group:GetID()], db.profile.Groups[groupID])
+	
+	-- back up the icon data of the source group
+	local SOURCE_ICONS = db.profile.Groups[ID.srcicon.group:GetID()].Icons
+	-- nullify it (we don't want to copy it)
+	db.profile.Groups[ID.srcicon.group:GetID()].Icons = nil
+	
+	-- copy the source group.
+	-- pcall so that, in the rare event of some unforseen error, we don't lose the user's settings (they haven't yet been restored)
+	local success, err = pcall(TMW.CopyTableInPlaceWithMeta, TMW, db.profile.Groups[ID.srcicon.group:GetID()], db.profile.Groups[groupID])
+	
+	-- restore the icon data of the source group
+	db.profile.Groups[ID.srcicon.group:GetID()].Icons = SOURCE_ICONS
+	-- now it is safe to error since we restored the old settings
+	assert(success, err)
+	
 	
 	local gs = db.profile.Groups[groupID]
-	gs.Icons = blankIcons
+	--gs.Icons = blankIcons
+	
+	-- group tweaks
+	gs.Rows = 1
+	gs.Columns = 1
+	gs.Name = ""
 	
 	-- adjustments and positioning
 	local p = gs.Point
@@ -1781,38 +1779,20 @@ function ID:Split()
 	p.relativeTo = "UIParent"
 	TMW:Group_StopMoving(ID.srcicon.group)
 	
-	-- group tweaks
-	gs.Rows = 1
-	gs.Columns = 1
-	gs.Name = ""
 	
 	TMW:Group_Update(groupID)
 	
 	-- move the actual icon
-		-- move the actual settings
-		gs.Icons[1] = ID.srcicon.group.Icons[ID.srcicon:GetID()]
-		ID.srcicon.group.Icons[ID.srcicon:GetID()] = nil
-		
-		-- preserve buff/debuff/other types textures
-		group[1].texture:SetTexture(ID.srcicon.texture:GetTexture())
+	-- move the actual settings
+	gs.Icons[1] = ID.srcicon.group.Icons[ID.srcicon:GetID()]
+	ID.srcicon.group.Icons[ID.srcicon:GetID()] = nil
+	
+	-- preserve buff/debuff/other types textures
+	group[1].texture:SetTexture(ID.srcicon.texture:GetTexture())
 
-		local srcicon, desticon = tostring(ID.srcicon), tostring(group[1])
-		
-		-- update any changed icons in metas
-		for ics in TMW:InIconSettings() do
-			for k, ic in pairs(ics.Icons) do
-				if ic == srcicon then
-					ics.Icons[k] = desticon
-				end
-			end
-		end
-		
-		-- update any changed icons in conditions
-		for Condition in TMW:InConditionSettings() do
-			if Condition.Icon == srcicon then
-				Condition.Icon = desticon
-			end
-		end
+	local srcicon, desticon = tostring(ID.srcicon), tostring(group[1])
+	
+	TMW:ReconcileData(srcicon, desticon)
 	
 	TMW:Group_Update(groupID)
 end
@@ -2142,6 +2122,10 @@ function IE:OnUpdate()
 	-- self is IE, not IE, but since i made them the same thing, it doesnt matter
 	local groupID, iconID = TMW.CI.g, TMW.CI.i
 	local icon = TMW.CI.ic
+	
+	if not groupID then
+		return
+	end
 	
 	-- update the top of the icon editor with the information of the current icon.
 	-- this is done in an OnUpdate because it is just too hard to track when the texture changes sometimes.
@@ -3681,7 +3665,7 @@ function IE:Copy_DropDown(...)
 	
 		-- add groups to be copied
 		for groupID, v in TMW:OrderedPairs(profile_src.Groups) do
-			if type(groupID) == "number" and groupID <= (tonumber(profile_src.NumGroups) or 10) then -- group was a string once, so lets just be safe
+			if type(groupID) == "number" and groupID >= 1 and groupID <= (tonumber(profile_src.NumGroups) or 10) then -- group was a string once, so lets just be safe
 				info = UIDropDownMenu_CreateInfo()
 				info.text = TMW:GetGroupName(profile_src.Groups[groupID].Name, groupID)
 				info.value = UIDROPDOWNMENU_MENU_VALUE .. "_" .. groupID

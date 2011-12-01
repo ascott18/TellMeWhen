@@ -4,6 +4,7 @@
  * Unit substitutions can be used as the destination for a whisper text output.
  * You can right-click-drag icons anywhere on screen to anchor them to any mouse enabled frame, or to move an icon into a new group.
  * Added a setting to disable new version warnings.
+ * It is now easier to delete old groups.
  * Bug Fixes:
  ** (r316) TellMeWhen_Options.lua:2831: attempt to index local "spaceControl" (a nil value)
  ** (r321) The runic power condition should now properly track runic power instead of mana.

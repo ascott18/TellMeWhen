@@ -20,6 +20,7 @@ L["CONFIGMODE_NEVERSHOW"] = "Don't show again"
 L["IMPORTERROR_FAILEDPARSE"] = "There was an error processing the string. Ensure that you copied the entire string from the source."
 L["ERROR_MISSINGFILE"] = "A complete restart of WoW is required to use TellMeWhen %s (%s was not found). Would you like to restart WoW now?"
 L["ERROR_MISSINGFILE_NOREQ"] = "A complete restart of WoW may be required to fully use TellMeWhen %s (%s was not found). Would you like to restart WoW now?"
+L["ERROR_ANCHORSELF"] = "%s was trying to anchor to itself, so TellMeWhen reset it's anchor to the center of the screen to prevent catastrophic failure."
 
 L["LOCKED"] = "Locked"
 L["RESIZE"] = "Resize"
@@ -375,7 +376,9 @@ L["UIPANEL_ICONSPACING_DESC"] = "Distance that icons within a group are away fro
 L["UIPANEL_ADDGROUP"] = "+ Add Another Group +"
 L["UIPANEL_ADDGROUP_DESC"] = "The new group will be assigned the next available groupID"
 L["UIPANEL_DELGROUP"] = "Delete this Group"
-L["UIPANEL_DELGROUP_DESC"] = "Any groups after this group will have their ID shifted up one, and any icons that are checking icons in groups that will be shifted will have their settings automatically updated."
+L["UIPANEL_DELGROUP_DESC"] = [[Any groups after this group will have their ID shifted up one, and any icons that are checking icons in groups that will be shifted will have their settings automatically updated.
+
+Hold |cff7fffffCtrl|r to bypass confirmation.]]
 L["UIPANEL_TOOLTIP_ENABLEGROUP"] = "Show and enable this group"
 L["UIPANEL_TOOLTIP_ROWS"] = "Set the number of rows in this group"
 L["UIPANEL_TOOLTIP_COLUMNS"] = "Set the number of columns in this group"
@@ -491,7 +494,7 @@ L["UIPANEL_FONT_Bind"] = "Binding/Label Text"
 L["UIPANEL_FONTFACE"] = "Font Face"
 L["UIPANEL_FONT_DESC"] = "Chose the font to be used by the stack text on icons."
 L["UIPANEL_FONT_SIZE"] = "Font Size"
-L["UIPANEL_FONT_SIZE_DESC"] = "Change the size of the font used for stack text on icons. If ButtonFacade is used and the set skin has a font size defined, then this value will be ignored."
+L["UIPANEL_FONT_SIZE_DESC"] = "Change the size of the font used for stack text on icons. If Masque is used and the set skin has a font size defined, then this value will be ignored."
 L["UIPANEL_FONT_OUTLINE"] = "Font Outline"
 L["UIPANEL_FONT_OUTLINE_DESC"] = "Sets the outline style for the stack text on icons."
 L["OUTLINE_NO"] = "No Outline"

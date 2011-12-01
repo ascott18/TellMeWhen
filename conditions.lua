@@ -1914,8 +1914,17 @@ CNDT.Types = {
 			group.TextUnitOrIcon:SetText(L["ICONTOCHECK"])
 			group.Icon:Show()
 		end,
-		funcstr = function(c)
+		funcstr = function(c, icon)
 			if c.Icon == "" then return [[true]] end
+			
+			local g, i = strmatch(c.Icon, "TellMeWhen_Group(%d+)_Icon(%d+)")
+			g, i = tonumber(g) or 0, tonumber(i) or 0
+			if icon.base == TMW.IconBase then
+				TMW:QueueValidityCheck(c.Icon, icon.group:GetID(), icon:GetID(), g, i)
+			else
+				TMW:QueueValidityCheck(c.Icon, icon:GetID(), nil, g, i)
+			end
+	
 			local str = [[(c.Icon and c.Icon.__shown and c.Icon.OnUpdate and not c.Icon:OnUpdate(time))]]
 			if c.Level == 0 then
 				str = str .. [[and c.Icon.__alpha > 0]]
@@ -1946,12 +1955,12 @@ CNDT.Types = {
 			local str = [[(c.Icon and c.Icon.__shown and c.Icon.OnUpdate and not c.Icon:OnUpdate(time)) and c.Icon.__alpha c.Operator c.Level]]
 			return gsub(str, "c.Icon", c.Icon)
 		end,
-L["CONDITIONPANEL_ICONALPHA"] = "Icon Alpha"
-L["CONDITIONPANEL_ICONALPHA_DESC"] = [=[The condition will pass if the icon's alpha is within the specified range.
+					L["CONDITIONPANEL_ICONALPHA"] = "Icon Alpha"
+					L["CONDITIONPANEL_ICONALPHA_DESC"] = [=[The condition will pass if the icon's alpha is within the specified range.
 
-If you don't want to display the icons that are being checked, check 'Always Hide' in the icon editor of the icon being checked.
+					If you don't want to display the icons that are being checked, check 'Always Hide' in the icon editor of the icon being checked.
 
-The group of the icon being checked must be shown in order to check the icon.]=]
+					The group of the icon being checked must be shown in order to check the icon.]=]
 	},]==]
 	{ -- macro conditional
 		text = L["MACROCONDITION"],
@@ -2154,7 +2163,7 @@ function CNDT:ProcessConditions(icon)
 
 			local thiscondtstr = v.funcstr
 			if type(thiscondtstr) == "function" then
-				thiscondtstr = thiscondtstr(c)
+				thiscondtstr = thiscondtstr(c, icon)
 			end
 
 			if thiscondtstr then

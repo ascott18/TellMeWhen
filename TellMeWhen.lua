@@ -32,7 +32,7 @@ local DRData = LibStub("DRData-1.0", true)
 TELLMEWHEN_VERSION = "4.7.0"
 TELLMEWHEN_VERSION_MINOR = strmatch(" @project-version@", " r%d+") or ""
 TELLMEWHEN_VERSION_FULL = TELLMEWHEN_VERSION .. TELLMEWHEN_VERSION_MINOR
-TELLMEWHEN_VERSIONNUMBER = 47007 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
+TELLMEWHEN_VERSIONNUMBER = 47008 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
 if TELLMEWHEN_VERSIONNUMBER > 48000 or TELLMEWHEN_VERSIONNUMBER < 47000 then return error("YOU SCREWED UP THE VERSION NUMBER OR DIDNT CHANGE THE SAFETY LIMITS") end -- safety check because i accidentally made the version number 414069 once
 
 TELLMEWHEN_MAXGROUPS = 1 	--this is a default, used by SetTheory (addon), so dont rename
@@ -82,8 +82,11 @@ TMW.Print = TMW.Print or _G.print
 TMW.Warn = setmetatable(
 {}, {
 	__call = function(tbl, text)
-		if TMW.Warned then
+		if tbl[text] then
+			return
+		elseif TMW.Warned then
 			TMW:Print(text)
+			tbl[text] = true
 		elseif not TMW.tContains(tbl, text) then
 			tinsert(tbl, text)
 		end
@@ -308,10 +311,10 @@ do -- Iterators
 			return TMW[cg] and TMW[cg][ci], cg, ci -- icon, groupID, iconID
 		end
 
-		function TMW:InIcons()
-			cg = 1
+		function TMW:InIcons(groupID)
+			cg = groupID or 1
 			ci = 0
-			mg = TELLMEWHEN_MAXGROUPS
+			mg = groupID or TELLMEWHEN_MAXGROUPS
 			mi = TELLMEWHEN_MAXROWS*TELLMEWHEN_MAXROWS
 			return iter
 		end
@@ -1401,10 +1404,11 @@ function TMW:Update()
 	if not (TMW.EnteredWorld and TMW.VarsLoaded) then return end
 
 	if not TMW.Warned then
-		TMW.Warned = true
 		for k, v in ipairs(TMW.Warn) do
 			TMW:Print(v)
+			TMW.Warn[text] = true
 		end
+		TMW.Warned = true
 	end
 
 	time = GetTime() TMW.time = time
@@ -1451,7 +1455,7 @@ function TMW:Update()
 	end
 
 	if not Locked then
-		TMW:CheckForInvalidIcons()
+		TMW:DoValidityCheck()
 	end
 
 	time = GetTime() TMW.time = time
@@ -2344,36 +2348,27 @@ function TMW:LoadOptions(recursed)
 	end
 end
 
-function TMW:CheckForInvalidIcons()
+TMW.ValidityCheckQueue = {}
+function TMW:QueueValidityCheck(icon, groupID, iconID, g, i)
 	if not db.profile.WarnInvalids then return end
 	
-	for condition, conditionID, groupID, iconID in TMW:InConditionSettings() do
-		local group = TMW[groupID]
-		if group and group.Enabled and group.CorrectSpec and (not group[iconID] or group[iconID].Enabled) then
-			if not TMW:IsIconValid(condition.Icon) and condition.Type == "ICON" then
-				local g, i = strmatch(condition.Icon, "TellMeWhen_Group(%d+)_Icon(%d+)")
-				g, i = tonumber(g) or 0, tonumber(i) or 0
-				if iconID then
-					TMW.Warn(format(L["CONDITIONORMETA_CHECKINGINVALID"], groupID, iconID, g, i))
-				else
-					TMW.Warn(format(L["CONDITIONORMETA_CHECKINGINVALID_GROUP"], groupID, g, i))
-				end
-			end
-		end
-	end
+	local str = icon .. "^" .. groupID .. "^" .. (iconID or "nil") .. "^" .. g .. "^" .. i
 	
-	for ics, groupID, iconID in TMW:InIconSettings() do
-		local group = TMW[groupID]
-		if group and group.Enabled and group.CorrectSpec and ics.Enabled and ics.Type == "meta" then
-			for k, v in pairs(ics.Icons) do
-				if not TMW:IsIconValid(v) then
-					local g, i = strmatch(v, "TellMeWhen_Group(%d+)_Icon(%d+)")
-					g, i = tonumber(g) or 0, tonumber(i) or 0
-					TMW.Warn(format(L["CONDITIONORMETA_CHECKINGINVALID"], groupID, iconID, g, i))
-				end
+	TMW.ValidityCheckQueue[str] = 1
+end
+
+function TMW:DoValidityCheck()
+	for str in ipairs(TMW.ValidityCheckQueue) do
+		local icon, groupID, iconID, g, i = strsplit("^", str)
+		if not TMW:IsIconValid(icon) then
+			if iconID ~= "nil" then
+				TMW.Warn(format(L["CONDITIONORMETA_CHECKINGINVALID"], groupID, iconID, g, i))
+			else
+				TMW.Warn(format(L["CONDITIONORMETA_CHECKINGINVALID_GROUP"], groupID, g, i))
 			end
 		end
 	end
+	wipe(TMW.ValidityCheckQueue)
 end
 
 function TMW:RestoreEvents()
@@ -2592,7 +2587,19 @@ function TMW.GroupBase.SetPos(group)
 		FramesToFind[group] = p.relativeTo
 		group:SetPoint("CENTER", UIParent)
 	else
-		group:SetPoint(p.point, relativeTo, p.relativePoint, p.x, p.y)
+		local success, err = pcall(group.SetPoint, group, p.point, relativeTo, p.relativePoint, p.x, p.y)
+		if not success and err:find("trying to anchor to itself") then
+			TMW:Error(err)
+			TMW:Print(L["ERROR_ANCHORSELF"]:format(L["fGROUP"]):format(TMW:GetGroupName(groupID, groupID, 1)))
+			
+			p.relativeTo = "UIParent"
+			p.point = "CENTER"
+			p.relativePoint = "CENTER"
+			p.x = 0
+			p.y = 0
+			
+			return group:SetPos()
+		end
 	end
 	group:SetScale(s.Scale)
 	local Spacing = s.Spacing
@@ -4250,7 +4257,25 @@ function TMW:GetCustomTexture(icon)
 	end
 end
 
+function TMW:GetGroupName(n, g, short)
+	if n and n == g then
+		n = db.profile.Groups[g].Name
+	end
+	if (not n) or n == "" then
+		if short then return g end
+		return format(L["fGROUP"], g)
+	end
+	if short then return n .. " (" .. g .. ")" end
+	return n .. " (" .. format(L["fGROUP"], g) .. ")"
+end
+
 function TMW:LockToggle()
+	for k, v in pairs(TMW.Warn) do
+		-- reset warnings so they can happen again
+		if type(k) == "string" then
+			TMW.Warn[k] = nil
+		end
+	end
 	db.profile.Locked = not db.profile.Locked
 	PlaySound("igCharacterInfoTab")
 	TMW:Update()

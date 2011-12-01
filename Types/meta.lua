@@ -79,7 +79,7 @@ local function Meta_OnUpdate(icon, time)
 							icon.bindText:SetText(ic.bindText:GetText())
 						end
 						
-						if LMB then -- i dont like the way that ButtonFacade handles this (inefficient), so i'll do it myself
+						if LMB then -- i dont like the way that Masque handles this (inefficient), so i'll do it myself
 							local icnt = ic.__normaltex -- icon.__normaltex = icon.__LBF_Normal or icon:GetNormalTexture() -- set during Icon_Update()
 							local iconnt = icon.__normaltex
 							if icnt and iconnt then
@@ -146,6 +146,12 @@ function Type:Setup(icon, groupID, iconID)
 	icon.__previcon = nil -- reset this
 	icon.NameFirst = "" --need to set this to something for bars update
 
+	for k, v in pairs(icon.Icons) do
+		local g, i = strmatch(v, "TellMeWhen_Group(%d+)_Icon(%d+)")
+		g, i = tonumber(g) or 0, tonumber(i) or 0
+		TMW:QueueValidityCheck(v, groupID, iconID, g, i)
+	end
+	
 	if icon.CheckNext then
 		TMW.DoWipeAC = true
 		wipe(alreadyinserted)
