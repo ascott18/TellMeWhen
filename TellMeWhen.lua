@@ -3621,7 +3621,6 @@ function TMW:Icon_Update(icon)
 	icon:SetInfo(0, nil, nil, nil, nil, nil, nil, nil, nil, 1, nil) -- forceupdate is set to 1 here so it doesnt return early
 	
 	-- update overlay texts
-	LBCode(group)
 	TMW:Icon_UpdateText(icon, icon.countText, group.Fonts.Count)
 	TMW:Icon_UpdateText(icon, icon.bindText, group.Fonts.Bind)
 	
