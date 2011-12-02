@@ -3894,7 +3894,7 @@
 						local textfunc = function()
 							local binding = GetBindingKey("TELLMEWHEN_ICONEDITOR_UNDO")
 							if binding then
-								binding = "(" .. binding .. ")"
+								binding = "(|cff7fffff" .. binding .. "|r)"
 							end
 							return TMW.L["UNDO_ICON_DESC"] .. "\r\n\r\n" .. (binding or TMW.L["UNDOREDO_ICON_NOBIND"])
 						end

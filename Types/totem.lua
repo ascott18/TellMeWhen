@@ -79,9 +79,9 @@ Type.DisabledEvents = {
 }
 
 
-function Type:Update()
+function Type:Update(upd_intv)
 	db = TMW.db
-	UPD_INTV = db.profile.Interval
+	UPD_INTV = upd_intv
 	ClockGCD = db.profile.ClockGCD
 	pr = db.profile.PRESENTColor
 	ab = db.profile.ABSENTColor

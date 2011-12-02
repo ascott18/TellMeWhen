@@ -3165,7 +3165,7 @@ end
 
 ---------- Dropdown ----------
 function IE:Copy_DropDown_Icon_OnClick(ics, version)
-	print(self.value) -- self.value is the profile name
+	-- self.value is the icon (maybe, if it's a string then we aren't importing from an icon in the current profile)
 	if type(self.value) == "table" and self.value.base == TMW.IconBase and self.value:IsVisible() then
 		TMW.HELP:Show("ICON_IMPORT_CURRENTPROFILE", nil, IE.ExportBox, 0, 0, L["HELP_IMPORT_CURRENTPROFILE"])
 	end
@@ -3185,6 +3185,7 @@ function IE:AddIconToCopyDropdown(ics, groupID, iconID, profilename, group_src, 
 			info.value = ic -- holy shit, is this hacktastic or what?
 		else
 			tex = TMW:GuessIconTexture(ics)
+			info.value = false
 		end
 		
 		local text, textshort, tooltipText = TMW:GetIconMenuText(nil, nil, ics)
@@ -6381,7 +6382,7 @@ function CNDT:IconMenu_DropDown()
 		for k, v in ipairs(TMW.Icons) do
 			local g, i = strmatch(v, "TellMeWhen_Group(%d+)_Icon(%d+)")
 			g, i = tonumber(g), tonumber(i)
-			if UIDROPDOWNMENU_MENU_VALUE == g then
+			if UIDROPDOWNMENU_MENU_VALUE == g and CI.ic ~= TMW[g][i] then
 				local info = UIDropDownMenu_CreateInfo()
 				info.func = CNDT.IconMenu_DropDown_OnClick
 				local text, textshort = TMW:GetIconMenuText(g, i)

@@ -104,9 +104,9 @@ local function UpdateWeaponEnchantInfo(slot, selectIndex)
 	end
 end
 
-function Type:Update()
+function Type:Update(upd_intv)
 	db = TMW.db
-	UPD_INTV = db.profile.Interval
+	UPD_INTV = upd_intv
 	ClockGCD = db.profile.ClockGCD
 	WpnEnchDurs = db.global.WpnEnchDurs
 	pr = db.profile.PRESENTColor

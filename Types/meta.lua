@@ -53,9 +53,9 @@ Type.DisabledEvents = {
 	OnUnit = true,
 }
 
-function Type:Update()
+function Type:Update(upd_intv)
 	db = TMW.db
-	UPD_INTV = db.profile.Interval
+	UPD_INTV = upd_intv
 end
 
 local function Meta_OnUpdate(icon, time)

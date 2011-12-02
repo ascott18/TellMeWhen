@@ -32,7 +32,7 @@ local DRData = LibStub("DRData-1.0", true)
 TELLMEWHEN_VERSION = "4.7.0"
 TELLMEWHEN_VERSION_MINOR = strmatch(" @project-version@", " r%d+") or ""
 TELLMEWHEN_VERSION_FULL = TELLMEWHEN_VERSION .. TELLMEWHEN_VERSION_MINOR
-TELLMEWHEN_VERSIONNUMBER = 47010 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
+TELLMEWHEN_VERSIONNUMBER = 47011 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
 if TELLMEWHEN_VERSIONNUMBER > 48000 or TELLMEWHEN_VERSIONNUMBER < 47000 then return error("YOU SCREWED UP THE VERSION NUMBER OR DIDNT CHANGE THE SAFETY LIMITS") end -- safety check because i accidentally made the version number 414069 once
 
 TELLMEWHEN_MAXGROUPS = 1 	--this is a default, used by SetTheory (addon), so dont rename
@@ -1278,12 +1278,6 @@ function TMW:OnInitialize()
 		TMW:SendCommMessage("TMWV", "M:" .. TELLMEWHEN_VERSION .. "^m:" .. TELLMEWHEN_VERSION_MINOR .. "^R:" .. TELLMEWHEN_VERSIONNUMBER .. "^", "GUILD")
 	end
 	TMW:PLAYER_ENTERING_WORLD()
-	
-	
-	
-	for key, Type in pairs(TMW.Types) do
-		Type:UpdateColors()
-	end
 
 	TMW.VarsLoaded = true
 end
@@ -1439,7 +1433,7 @@ function TMW:Update()
 		TMW.IE:SaveSettings()
 	end
 
-	UPD_INTV = db.profile.Interval
+	UPD_INTV = db.profile.Interval + 0.001 -- add a very small amount so that we don't call the name icon multiple times (through metas/conditionicons) in the same frame if the interval has been set 0
 	TELLMEWHEN_MAXGROUPS = db.profile.NumGroups
 	CNDTEnv.CurrentSpec = GetActiveTalentGroup()
 	CNDTEnv.CurrentTree = GetPrimaryTalentTree()
@@ -1452,7 +1446,11 @@ function TMW:Update()
 	wipe(TMW.Icons)
 	wipe(TMW.IconsLookup)
 	BindUpdateFuncs = nil
-
+	
+	for key, Type in pairs(TMW.Types) do
+		Type:UpdateColors()
+	end
+	
 	for group in TMW.InGroups() do
 		group:Hide()
 	end
@@ -2776,7 +2774,6 @@ local function CDBarOnValueChanged(bar)
 	
 	local co = bar.completeColor
 	local st = bar.startColor
-	--wlp(co, st)
 	
 	if not bar.InvertBars then
 		if duration ~= 0 then
@@ -3653,7 +3650,7 @@ function TMW:Icon_Update(icon)
 	TMW.time = GetTime()
 	-- actually run the icon's update function
 	if icon.Enabled or not Locked then
-		Types[icon.Type]:Update()
+		Types[icon.Type]:Update(UPD_INTV)
 		local success, err = pcall(Types[icon.Type].Setup, Types[icon.Type], icon, groupID, iconID)
 		if not success then
 			TMW:Error(L["GROUPICON"]:format(groupID, iconID) .. ": " .. err)
@@ -3818,7 +3815,6 @@ function TMW:InjectDataIntoString(Text, icon, doBlizz)
 			Text = gsub(Text, "%%[Dd]", TMW:FormatSeconds(duration, duration == 0 or duration > 10, true))
 		end
 		if strfind(Text, "%%[Kk]") then
-			print(icon.__countText, icon.__count)
 			local count = icon.__countText or icon.__count
 			if count then
 				count = count:gsub("%%", "%%%%")
