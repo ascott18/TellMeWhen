@@ -64,9 +64,7 @@ function Type:Update(upd_intv)
 end
 
 local function ConditionIcon_OnUpdate(icon, time)
-	print "CALL"
 	if icon.LastUpdate <= time - UPD_INTV then
-		print "RUN"
 		icon.LastUpdate = time
 		local CndtCheck = icon.CndtCheck
 		if CndtCheck then

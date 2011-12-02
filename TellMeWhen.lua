@@ -32,7 +32,7 @@ local DRData = LibStub("DRData-1.0", true)
 TELLMEWHEN_VERSION = "4.7.0"
 TELLMEWHEN_VERSION_MINOR = strmatch(" @project-version@", " r%d+") or ""
 TELLMEWHEN_VERSION_FULL = TELLMEWHEN_VERSION .. TELLMEWHEN_VERSION_MINOR
-TELLMEWHEN_VERSIONNUMBER = 47011 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
+TELLMEWHEN_VERSIONNUMBER = 47012 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
 if TELLMEWHEN_VERSIONNUMBER > 48000 or TELLMEWHEN_VERSIONNUMBER < 47000 then return error("YOU SCREWED UP THE VERSION NUMBER OR DIDNT CHANGE THE SAFETY LIMITS") end -- safety check because i accidentally made the version number 414069 once
 
 TELLMEWHEN_MAXGROUPS = 1 	--this is a default, used by SetTheory (addon), so dont rename
@@ -1447,12 +1447,12 @@ function TMW:Update()
 	wipe(TMW.IconsLookup)
 	BindUpdateFuncs = nil
 	
-	for key, Type in pairs(TMW.Types) do
-		Type:UpdateColors()
-	end
-	
 	for group in TMW.InGroups() do
 		group:Hide()
+	end
+	
+	for key, Type in pairs(TMW.Types) do
+		Type:UpdateColors(true)
 	end
 
 	for groupID = 1, TELLMEWHEN_MAXGROUPS do -- dont use TMW.InGroups() because that will setup every group that exists, even if it shouldn't be setup (i.e. it has been deleted or the user changed profiles)
@@ -3291,7 +3291,7 @@ TypeBase.SUGType = "spell"
 TypeBase.chooseNameTitle = L["ICONMENU_CHOOSENAME"]
 TypeBase.chooseNameText  = L["CHOOSENAME_DIALOG"]
 
-function TypeBase:UpdateColors()
+function TypeBase:UpdateColors(dontUpdateIcons)
 	for k, v in pairs(db.profile.Colors[self.type]) do
 		if v.Override then
 			self[k] = v
@@ -3299,7 +3299,9 @@ function TypeBase:UpdateColors()
 			self[k] = db.profile.Colors.GLOBAL[k]
 		end
 	end
-	self:UpdateIcons()
+	if not dontUpdateIcons then
+		self:UpdateIcons()
+	end
 end
 
 function TypeBase:UpdateIcons()
@@ -3619,6 +3621,7 @@ function TMW:Icon_Update(icon)
 	icon:SetInfo(0, nil, nil, nil, nil, nil, nil, nil, nil, 1, nil) -- forceupdate is set to 1 here so it doesnt return early
 	
 	-- update overlay texts
+	LBCode(group)
 	TMW:Icon_UpdateText(icon, icon.countText, group.Fonts.Count)
 	TMW:Icon_UpdateText(icon, icon.bindText, group.Fonts.Bind)
 	

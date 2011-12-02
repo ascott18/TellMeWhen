@@ -14,6 +14,7 @@
  ** (r327) TellMeWhen_Options.lua line 3189: attempt to call method 'IsVisible' (a nil value)
  ** (r328) It should no longer be possible to have an icon shown condition check the icon that it is a child of.
  ** (r328) Switching profiles while TMW is unlocked should no longer cause icon coloring to malfunction.
+ ** (r329) TellMeWhen-4.6.7.lua:3469: attempt to index local "settings" (a nil value)
  
 ===v4.6.7===
  * Bug Fixes:

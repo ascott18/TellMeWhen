@@ -1910,7 +1910,9 @@ CNDT.Types = {
 			group.Icon:Show()
 		end,
 		funcstr = function(c, icon)
-			if c.Icon == "" then return [[true]] end
+			if c.Icon == "" or c.Icon == icon:GetName() then
+				return [[true]]
+			end
 			
 			local g, i = strmatch(c.Icon, "TellMeWhen_Group(%d+)_Icon(%d+)")
 			g, i = tonumber(g) or 0, tonumber(i) or 0

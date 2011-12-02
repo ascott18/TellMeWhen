@@ -154,6 +154,7 @@
 			</OnMouseUp>
 			<OnMouseDown>
 				local ID = TMW.ID
+				if not ID then return end
 				ID.DraggingInfo = nil
 				ID.F:Hide()
 				ID.IsDragging = nil

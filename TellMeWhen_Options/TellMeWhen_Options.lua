@@ -347,7 +347,7 @@ end
 function TMW:GuessIconTexture(data)
 	local tex = nil
 	if (data.Name and data.Name ~= "" and data.Type ~= "meta" and data.Type ~= "wpnenchant" and data.Type ~= "runes") and not tex then
-		local name = TMW:GetSpellNames(nil, data.Name, 1)
+		local name = data.CustomTex or TMW:GetSpellNames(nil, data.Name, 1)
 		if name then
 			if data.Type == "item" then
 				tex = GetItemIcon(name) or tex
