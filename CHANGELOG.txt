@@ -6,6 +6,7 @@
  * Added a setting to disable new version warnings.
  * It is now easier to delete old groups.
  * Added substitutions "%d" for duration and "%k" for stacks.
+ * Added events for duration and stack changes, and expanded event settings.
  * Performance Increase: Icons should no longer update themselves multiple times within one update period when the update interval is set to zero and the icon is being checked by multiple metas/conditions.
  * Bug Fixes:
  ** (r316) TellMeWhen_Options.lua:2831: attempt to index local "spaceControl" (a nil value)

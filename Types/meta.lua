@@ -49,8 +49,8 @@ Type.RelevantSettings = {
 	UnAlpha = false,
 }
 Type.DisabledEvents = {
-	OnSpell = true,
-	OnUnit = true,
+	--OnSpell = true,
+	--OnUnit = true,
 }
 
 function Type:Update(upd_intv)

@@ -59,6 +59,7 @@ Type.RelevantSettings = {
 }
 Type.DisabledEvents = {
 	OnUnit = true,
+	OnStack = true,
 }
 
 local textures = {

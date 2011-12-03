@@ -59,6 +59,9 @@ Type.RelevantSettings = {
 	DurationMaxEnabled = true,
 	Sort = true,
 }
+Type.DisabledEvents = {
+	OnStack = true,
+}
 
 
 function Type:Update(upd_intv)

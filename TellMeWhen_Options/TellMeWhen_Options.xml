@@ -14,6 +14,14 @@
 				</FontString>
 			</Layer>
 		</Layers>
+		<Scripts>
+			<OnEnable>
+				self:SetAlpha(1)
+			</OnEnable>
+			<OnDisable>
+				self:SetAlpha(0.4)
+			</OnDisable>
+		</Scripts>
 		<NormalTexture urgency="5" file="Interface\Buttons\UI-CheckBox-Up"/>
 		<PushedTexture urgency="5" file="Interface\Buttons\UI-CheckBox-Down"/>
 		<HighlightTexture urgency="5" file="Interface\Buttons\UI-CheckBox-Highlight" alphaMode="ADD"/>
@@ -362,28 +370,28 @@
 		<Size x="40" y="32"/>
 		<Layers>
 			<Layer level="ARTWORK">
-				<Texture name="$parentLeft" file="Interface\AddOns\TellMeWhen_Options\Textures\DropdownTexture">
-					<Size x="25" y="60"/>
+				<Texture name="$parentLeft" parentKey="Left" file="Interface\AddOns\TellMeWhen_Options\Textures\DropdownTexture">
+					<Size x="25" y="61.5"/>
 					<Anchors>
 						<Anchor point="TOPLEFT" y="17"/>
 					</Anchors>
 					<TexCoords left="0" right="0.1953125" top="0" bottom="1"/>
 				</Texture>
-				<Texture name="$parentMiddle" file="Interface\AddOns\TellMeWhen_Options\Textures\DropdownTexture">
-					<Size x="115" y="60"/>
+				<Texture name="$parentMiddle" parentKey="Middle" file="Interface\AddOns\TellMeWhen_Options\Textures\DropdownTexture">
+					<Size x="115" y="61.5"/>
 					<Anchors>
 						<Anchor point="LEFT" relativeTo="$parentLeft" relativePoint="RIGHT"/>
 					</Anchors>
 					<TexCoords left="0.1953125" right="0.8046875" top="0" bottom="1"/>
 				</Texture>
-				<Texture name="$parentRight" file="Interface\AddOns\TellMeWhen_Options\Textures\DropdownTexture">
-					<Size x="25" y="60"/>
+				<Texture name="$parentRight" parentKey="Right" file="Interface\AddOns\TellMeWhen_Options\Textures\DropdownTexture">
+					<Size x="25" y="61.5"/>
 					<Anchors>
 						<Anchor point="LEFT" relativeTo="$parentMiddle" relativePoint="RIGHT"/>
 					</Anchors>
 					<TexCoords left="0.8046875" right="1" top="0" bottom="1"/>
 				</Texture>
-				<FontString name="$parentText" inherits="GameFontHighlightSmall" wordwrap="false" justifyH="LEFT" justifyV="CENTER">
+				<FontString name="$parentText" parentKey="Text" inherits="GameFontHighlightSmall" wordwrap="false" justifyH="LEFT" justifyV="CENTER">
 					<Size y="10"/>
 					<Anchors>
 						<Anchor point="LEFT" relativeTo="$parentLeft" x="27" y="1"/>
@@ -400,7 +408,7 @@
 			</Layer>
 		</Layers>
 		<Frames>
-			<Button name="$parentButton"  motionScriptsWhileDisabled="true" >
+			<Button name="$parentButton" parentKey="Button" motionScriptsWhileDisabled="true" >
 				<Size x="22" y="22"/>
 				<Anchors>
 					<Anchor point="RIGHT" relativeTo="$parentRight" x="-16.5" y="1"/>
@@ -424,6 +432,12 @@
 						ToggleDropDownMenu(nil, nil, self:GetParent());
 						PlaySound("igMainMenuOptionCheckBoxOn");
 					</OnClick>
+					<PreClick>
+						if self:GetParent().InitFunc then
+							UIDropDownMenu_Initialize(self:GetParent(), self:GetParent().InitFunc, "DROPDOWN")
+						end
+						self:SetScript("PreClick", nil)
+					</PreClick>
 				</Scripts>
 				<NormalTexture name="$parentNormalTexture" file="Interface\ChatFrame\UI-ChatIcon-ScrollDown-Up">
 					<Size x="24" y="24"/>
@@ -495,15 +509,12 @@
 						self.wrapTooltips = 1
 						self.Dummy.Glow:SetAlpha(0)
 						self.Dummy.Glow:SetVertexColor(1, 1, 0)
-						_G[self:GetName() .. "Left"]:Hide()
-						_G[self:GetName() .. "Middle"]:Hide()
-						_G[self:GetName() .. "Right"]:Hide()
-						_G[self:GetName() .. "Text"]:Hide()
+						self.Left:Hide()
+						self.Middle:Hide()
+						self.Right:Hide()
+						self.Text:Hide()
 						UIDropDownMenu_SetWidth(self, 1)
-						_G[self:GetName() .. "Button"]:SetScript("PreClick", function()
-							UIDropDownMenu_Initialize(self, TMW.IE.Copy_DropDown, "DROPDOWN")
-							_G[self:GetName() .. "Button"]:SetScript("PreClick", nil)
-						end)
+						self.InitFunc = TMW.IE.Copy_DropDown
 					</OnLoad>
 					<OnUpdate>
 						if not self.Dummy.Glow.Anim:IsPlaying() then
@@ -737,12 +748,7 @@
 					<OnLoad>
 						self.wrapTooltips = 1
 						UIDropDownMenu_SetWidth(self, 160)
-						--UIDropDownMenu_JustifyText(self, "LEFT")
-						_G[self:GetName() .. "Button"]:SetScript("PreClick", function()
-							UIDropDownMenu_Initialize(self, TMW.CNDT.TypeMenu_DropDown, "DROPDOWN")
-							_G[self:GetName() .. "Button"]:SetScript("PreClick", nil)
-						end)
-						TMW:FixDropdown(self)
+						self.InitFunc = TMW.CNDT.TypeMenu_DropDown
 					</OnLoad>
 				</Scripts>
 			</Frame>
@@ -755,12 +761,7 @@
 						self.wrapTooltips = 1
 						self:Hide()
 						UIDropDownMenu_SetWidth(self, 168)
-						--UIDropDownMenu_JustifyText(self, "LEFT")
-						_G[self:GetName() .. "Button"]:SetScript("PreClick", function()
-							UIDropDownMenu_Initialize(self, TMW.CNDT.IconMenu_DropDown, "DROPDOWN")
-							_G[self:GetName() .. "Button"]:SetScript("PreClick", nil)
-						end)
-						TMW:FixDropdown(self)
+						self.InitFunc = TMW.CNDT.IconMenu_DropDown
 					</OnLoad>
 				</Scripts>
 			</Frame>
@@ -814,14 +815,9 @@
 				<Scripts>
 					<OnLoad>
 						self.wrapTooltips = 1
-						_G[self:GetName() .. "Text"]:SetFontObject(GameFontHighlightLarge)
+						self.Text:SetFontObject(GameFontHighlightLarge)
 						UIDropDownMenu_SetWidth(self, 47)
-						--UIDropDownMenu_JustifyText(self, "LEFT")
-						_G[self:GetName() .. "Button"]:SetScript("PreClick", function()
-							UIDropDownMenu_Initialize(self, TMW.CNDT.OperatorMenu_DropDown, "DROPDOWN")
-							_G[self:GetName() .. "Button"]:SetScript("PreClick", nil)
-						end)
-						TMW:FixDropdown(self)
+						self.InitFunc = TMW.CNDT.OperatorMenu_DropDown
 					</OnLoad>
 				</Scripts>
 			</Frame>
@@ -1337,13 +1333,8 @@
 					<OnLoad>
 						self.wrapTooltips = 1
 						UIDropDownMenu_SetWidth(self, 360)
-						--UIDropDownMenu_JustifyText(self, "LEFT")
-						_G[self:GetName() .. "Button"]:SetScript("PreClick", function()
-							UIDropDownMenu_Initialize(self, TMW.ME.IconMenu, "DROPDOWN")
-							_G[self:GetName() .. "Button"]:SetScript("PreClick", nil)
-						end)
-						_G[self:GetName() .. "Button"]:SetFrameLevel(self:GetFrameLevel()+1)
-						TMW:FixDropdown(self)
+						self.InitFunc = TMW.ME.IconMenu
+						self.Button:SetFrameLevel(self:GetFrameLevel()+1)
 					</OnLoad>
 				</Scripts>
 			</Frame>
@@ -1457,8 +1448,8 @@
 	</Button>
 	
 
-	<Button name="TellMeWhen_AnnounceEvent" virtual="true" >
-		<Size y="25"/>
+	<Button name="TellMeWhen_AnnounceEvent" motionScriptsWhileDisabled="true" virtual="true" >
+		<Size y="15"/>
 		<Scripts>
 			<OnClick>
 				TMW.ANN:SelectEvent(self:GetID())
@@ -1490,14 +1481,13 @@
 			<Layer level="OVERLAY">
 				<FontString name="$parentEventName" parentKey="EventName" inherits="GameFontNormalSmall" justifyH="LEFT">
 					<Anchors>
-						<Anchor point="TOPLEFT" x="3" y="-2"/>
-						<Anchor point="RIGHT" x="-16"/>
+						<Anchor point="LEFT" x="3" y="0"/>
 					</Anchors>
 				</FontString>
 				<FontString name="$parentDataText" parentKey="DataText" inherits="GameFontHighlightSmall" justifyH="LEFT" >
 					<Anchors>
-						<Anchor point="BOTTOMLEFT" x="3" y="2"/>
-						<Anchor point="RIGHT" x="-1"/>
+						<Anchor point="LEFT" relativeTo="$parentEventName" relativePoint="RIGHT" x="3" y="0"/>
+						<Anchor point="RIGHT" x="-15"/>
 					</Anchors>
 				</FontString>
 			</Layer>
@@ -1650,6 +1640,21 @@
 			</Layer>
 		</Layers>
 	</Button>
+	
+	
+	<CheckButton name="TellMeWhen_EventSettings_CheckTemplate" inherits="TellMeWhen_CheckTemplate" virtual="true">
+		<Scripts>
+			<OnClick>
+				local parentModule = self:GetParent():GetParent().module
+				if TMW.CI.ics then
+					TMW.CI.ics.Events[parentModule.currentEvent][self.setting] = not not self:GetChecked()
+					TMW.IE:ScheduleIconUpdate(TMW.CI.ic)
+				end
+				parentModule:SetEventSettings()
+			</OnClick>
+		</Scripts>
+	</CheckButton>
+		
 	<Frame name="TellMeWhen_EventSettings" virtual="true">
 		<Size y="1"/>
 		<Anchors>
@@ -1671,24 +1676,135 @@
 			</Layer>
 		</Layers>
 		<Frames>
-			<CheckButton name="$parentOnlyShown" inherits="TellMeWhen_CheckTemplate" parentKey="OnlyShown">
+			<CheckButton name="$parentPassThrough" inherits="TellMeWhen_EventSettings_CheckTemplate" parentKey="PassThrough">
 				<Anchors>
 					<Anchor point="TOPLEFT" y="-25"/>
 				</Anchors>
 				<Scripts>
 					<OnLoad>
-						self.text:SetText(TMW.L["EVENTS_SETTINGS_ONLYSHOWN"])
-						TMW:TT(self, "EVENTS_SETTINGS_ONLYSHOWN", TMW.L["EVENTS_SETTINGS_ONLYSHOWN_DESC"] .. "\r\n\r\n" .. TMW.L["EVENTS_SETTINGS_GLOBAL_DESC"], nil, 1)
+						self.text:SetText(TMW.L["EVENTS_SETTINGS_PASSTHROUGH"])
+						local parentModule = TMW:GetModule(self:GetParent():GetParent():GetName():gsub("TellMeWhen_IconEditor", ""))
+						local fmt = parentModule.tabText
+						print(fmt)
+						TMW:TT(self, "EVENTS_SETTINGS_PASSTHROUGH", TMW.L["EVENTS_SETTINGS_PASSTHROUGH_DESC"]:format(fmt, fmt) .. "\r\n\r\n" .. TMW.L["EVENTS_SETTINGS_GLOBAL_DESC"], nil, 1)
+						self.setting = "PassThrough"
 					</OnLoad>
-					<OnClick>
-						local parentModule = self:GetParent():GetParent().module
-						if TMW.CI.ics then
-							TMW.CI.ics.Events[parentModule.currentEvent].OnlyShown = not not self:GetChecked()
-							TMW.IE:ScheduleIconUpdate(TMW.CI.ic)
-						end
-					</OnClick>
 				</Scripts>
 			</CheckButton>
+			
+			<CheckButton name="$parentOnlyShown" inherits="TellMeWhen_EventSettings_CheckTemplate" parentKey="OnlyShown">
+				<Anchors>
+					<Anchor point="TOP" relativeTo="$parentPassThrough" relativePoint="BOTTOM" y="6"/>
+				</Anchors>
+				<Scripts>
+					<OnLoad>
+						self.text:SetText(TMW.L["EVENTS_SETTINGS_ONLYSHOWN"])
+						TMW:TT(self, "EVENTS_SETTINGS_ONLYSHOWN", TMW.L["EVENTS_SETTINGS_ONLYSHOWN_DESC"] .. "\r\n\r\n" .. TMW.L["EVENTS_SETTINGS_GLOBAL_DESC"], nil, 1)
+						self.setting = "OnlyShown"
+					</OnLoad>
+				</Scripts>
+			</CheckButton>
+			
+			<CheckButton name="$parentPassingCndt" inherits="TellMeWhen_EventSettings_CheckTemplate" parentKey="PassingCndt">
+				<Anchors>
+					<Anchor point="TOP" relativeTo="$parentOnlyShown" relativePoint="BOTTOM" y="6"/>
+				</Anchors>
+				<Scripts>
+					<OnLoad>
+						self.text:SetText(TMW.L["EVENTS_SETTINGS_PASSINGCNDT"])
+						TMW:TT(self, "EVENTS_SETTINGS_PASSINGCNDT", TMW.L["EVENTS_SETTINGS_PASSINGCNDT_DESC"] .. "\r\n\r\n" .. TMW.L["EVENTS_SETTINGS_GLOBAL_DESC"], nil, 1)
+						self.setting = "PassingCndt"
+					</OnLoad>
+				</Scripts>
+			</CheckButton>
+			<Frame name="$parentOperator" parentKey="Operator" inherits="TMW_DropDownMenuTemplate">
+				<Anchors>
+					<Anchor point="TOP" relativeTo="$parentPassingCndt" relativePoint="BOTTOM" x="105" y="6"/>
+				</Anchors>
+				<Layers>
+					<Layer level="OVERLAY">
+						<FontString name="$parentValueLabel" inherits="GameFontHighlight" parentKey="ValueLabel" justifyH="RIGHT">
+							<Anchors>
+								<Anchor point="RIGHT" relativePoint="LEFT" x="12" y="3"/>
+							</Anchors>
+						</FontString>
+					</Layer>
+				</Layers>
+				<Scripts>
+					<OnLoad>
+						self.wrapTooltips = 1
+						self.Button:SetMotionScriptsWhileDisabled(false)
+						UIDropDownMenu_SetWidth(self, 47)
+						self.Text:SetFontObject(GameFontHighlightLarge)
+						self.InitFunc = TMW.EVENTS.OperatorMenu_DropDown
+						
+						function self:Disable()
+							self.Button:Disable()
+							self:SetAlpha(0.4)						
+						end
+						function self:Enable()
+							self.Button:Enable()
+							self:SetAlpha(1)						
+						end
+					</OnLoad>
+				</Scripts>
+			</Frame>
+			
+			<EditBox name="$parentValue" inherits="TellMeWhen_TimeEditBoxTemplate" parentKey="Value" autoFocus="false">
+				<Size x="45" y="18"/>
+				<Anchors>
+					<Anchor point="LEFT" relativeTo="$parentOperator" relativePoint="RIGHT" x="-5" y="4"/>
+				</Anchors>
+				<Layers>
+					<Layer level="OVERLAY">
+						<FontString name="$parentValueLabel" inherits="GameFontHighlightLarge" parentKey="ValueLabel" justifyH="RIGHT">
+							<Anchors>
+								<Anchor point="RIGHT" relativePoint="RIGHT" x="-3" y="0"/>
+							</Anchors>
+						</FontString>
+					</Layer>
+				</Layers>
+				<Scripts>
+					<OnEditFocusLost>
+						EditBox_ClearHighlight(self)
+						
+						local t = TMW:CleanString(self)
+						if strfind(t, ":") then
+							t = t:toseconds()
+						end
+						t = tonumber(t) or 0
+						self:SetText(t)
+						
+						if TMW.CI.ics then
+							local parentModule = self:GetParent():GetParent().module
+							TMW.CI.ics.Events[parentModule.currentEvent].Value = t
+							TMW.IE:ScheduleIconUpdate(TMW.CI.ic)
+						end
+						
+						self:GetScript("OnTextChanged")(self)						
+					</OnEditFocusLost>
+					<OnEnable>
+						self:SetAlpha(1)
+					</OnEnable>
+					<OnDisable>
+						self:SetAlpha(.4)
+					</OnDisable>
+				</Scripts>
+			</EditBox>
+			
+			<CheckButton name="$parentCndtJustPassed" inherits="TellMeWhen_EventSettings_CheckTemplate" parentKey="CndtJustPassed">
+				<Anchors>
+					<Anchor point="TOP" relativeTo="$parentPassingCndt" relativePoint="BOTTOM" y="-15" x="10"/>
+				</Anchors>
+				<Scripts>
+					<OnLoad>
+						self.text:SetText(TMW.L["EVENTS_SETTINGS_CNDTJUSTPASSED"])
+						TMW:TT(self, "EVENTS_SETTINGS_CNDTJUSTPASSED", TMW.L["EVENTS_SETTINGS_CNDTJUSTPASSED_DESC"] .. "\r\n\r\n" .. TMW.L["EVENTS_SETTINGS_GLOBAL_DESC"], nil, 1)
+						self.setting = "CndtJustPassed"
+					</OnLoad>
+				</Scripts>
+			</CheckButton>
+			
 		</Frames>
 		<Scripts>
 			<OnLoad>
@@ -2075,16 +2191,11 @@
 							<OnLoad>
 								self.wrapTooltips = 1
 								UIDropDownMenu_SetWidth(self, 180)
-								_G[self:GetName() .. "Button"]:SetScript("PreClick", function()
-									UIDropDownMenu_Initialize(self, TMW.IE.Type_DropDown, "DROPDOWN")
-									_G[self:GetName() .. "Button"]:SetScript("PreClick", nil)
-								end)
+								self.InitFunc = TMW.IE.Type_DropDown
 								UIDropDownMenu_SetText(self, TMW.L["ICONMENU_TYPE"])
-								--UIDropDownMenu_JustifyText(self, "LEFT")
-								_G[self:GetName() .. "Button"]:HookScript("OnClick", function(self)
+								self.Button:HookScript("OnClick", function(self)
 									TMW.IE:SaveSettings()
 								end)
-								TMW:FixDropdown(self)
 							</OnLoad>
 							<OnEnter>
 								local Type = TMW.Types[TMW.CI.t]
@@ -2119,16 +2230,13 @@
 								</Anchors>
 								<Scripts>
 									<OnLoad>
-										_G[self:GetName() .. "Left"]:Hide()
-										_G[self:GetName() .. "Middle"]:Hide()
-										_G[self:GetName() .. "Right"]:Hide()
-										_G[self:GetName() .. "Text"]:Hide()
+										self.Left:Hide()
+										self.Middle:Hide()
+										self.Right:Hide()
+										self.Text:Hide()
 										UIDropDownMenu_SetWidth(self, 1)
 										TMW:TT(self, "CHOOSENAME_DIALOG_DDDEFAULT", "CHOOSENAME_EQUIVS_TOOLTIP")
-										_G[self:GetName() .. "Button"]:SetScript("PreClick", function()
-											UIDropDownMenu_Initialize(self, TMW.IE.Equiv_DropDown, "DROPDOWN")
-											_G[self:GetName() .. "Button"]:SetScript("PreClick", nil)
-										end)
+										self.InitFunc = TMW.IE.Equiv_DropDown
 									</OnLoad>
 								</Scripts>
 							</Frame>
@@ -2161,9 +2269,11 @@
 							</OnEditFocusGained>
 							<OnEvent>
 								if not self.isOver then return end
+								
 								GameTooltip:Hide()
+								
 								GameTooltip_SetDefaultAnchor(GameTooltip, self)
-								GameTooltip:AddLine(self.__title, HIGHLIGHT_FONT_COLOR.r, HIGHLIGHT_FONT_COLOR.g, HIGHLIGHT_FONT_COLOR.b, 1)
+								GameTooltip:AddLine(self.__title, HIGHLIGHT_FONT_COLOR.r, HIGHLIGHT_FONT_COLOR.g, HIGHLIGHT_FONT_COLOR.b)
 								if IsModifierKeyDown() then
 									GameTooltip:AddLine(TMW.IE:GetRealNames(self), NORMAL_FONT_COLOR.r, NORMAL_FONT_COLOR.g, NORMAL_FONT_COLOR.b, nil)
 								else
@@ -2285,16 +2395,13 @@
 								</Anchors>
 								<Scripts>
 									<OnLoad>
-										_G[self:GetName() .. "Left"]:Hide()
-										_G[self:GetName() .. "Middle"]:Hide()
-										_G[self:GetName() .. "Right"]:Hide()
-										_G[self:GetName() .. "Text"]:Hide()
+										self.Left:Hide()
+										self.Middle:Hide()
+										self.Right:Hide()
+										self.Text:Hide()
 										TMW:TT(self, "ICONMENU_UNITS", "DROPDOWN_UNIT_DESC")
 										UIDropDownMenu_SetWidth(self, 1)
-										_G[self:GetName() .. "Button"]:SetScript("PreClick", function()
-											UIDropDownMenu_Initialize(self, TMW.IE.Unit_DropDown, "DROPDOWN")
-											_G[self:GetName() .. "Button"]:SetScript("PreClick", nil)
-										end)
+										self.InitFunc = TMW.IE.Unit_DropDown
 									</OnLoad>
 								</Scripts>
 							</Frame>
@@ -2643,9 +2750,9 @@
 								</Scripts>
 							</CheckButton>
 							<EditBox name="$parentPBarOffs" inherits="TellMeWhen_InputBoxTemplate" parentKey="PBarOffs" autoFocus="false">
-								<Size x="40" y="32"/>
+								<Size x="40" y="15"/>
 								<Anchors>
-									<Anchor point="TOPLEFT" relativeTo="$parentShowPBar" relativePoint="BOTTOMLEFT" x="14" y="11"/>
+									<Anchor point="TOPLEFT" relativeTo="$parentShowPBar" relativePoint="BOTTOMLEFT" x="14" y="2"/>
 								</Anchors>
 								<Layers>
 									<Layer level="ARTWORK">
@@ -2727,9 +2834,9 @@
 								</Scripts>
 							</CheckButton>
 							<EditBox name="$parentCBarOffs" inherits="TellMeWhen_TimeEditBoxTemplate" parentKey="CBarOffs" autoFocus="false">
-								<Size x="40" y="32"/>
+								<Size x="40" y="15"/>
 								<Anchors>
-									<Anchor point="TOPLEFT" relativeTo="$parentShowCBar" relativePoint="BOTTOMLEFT" x="14" y="11"/>
+									<Anchor point="TOPLEFT" relativeTo="$parentShowCBar" relativePoint="BOTTOMLEFT" x="14" y="2"/>
 								</Anchors>
 								<Layers>
 									<Layer level="ARTWORK">
@@ -2794,12 +2901,6 @@
 									TMW.IE:ScheduleIconUpdate(TMW.CI.ic)
 								end
 							</OnClick>
-							<OnEnable>
-								self:SetAlpha(1)
-							</OnEnable>
-							<OnDisable>
-								self:SetAlpha(0.4)
-							</OnDisable>
 						</Scripts>
 					</CheckButton>
 
@@ -3356,7 +3457,7 @@
 			<Frame name="$parentSound" hidden="true" setAllPoints="true" parentKey="Sound">
 				<Frames>
 					<Frame name="$parentEvents" parentKey="Events">
-						<Size x="200" y="280"/>
+						<Size x="230" y="280"/>
 						<Anchors>
 							<Anchor point="TOPLEFT" x="20" y="-50"/>
 						</Anchors>
@@ -3372,9 +3473,9 @@
 						</Layers>
 					</Frame>
 					<Frame name="$parentSounds" parentKey="Sounds">
-						<Size x="320" y="266"/>
+						<Size x="290" y="266"/>
 						<Anchors>
-							<Anchor point="TOPLEFT" x="235" y="-50"/>
+							<Anchor point="TOPLEFT" relativeTo="$parentEvents" relativePoint="TOPRIGHT" x="15"/>
 						</Anchors>
 						<Frames>
 							<Button name="$parentNone" inherits="TellMeWhen_SoundSelectButton" parentKey="None" id="0"/>
@@ -3521,7 +3622,7 @@
 				<Frames>
 
 					<Frame name="$parentEvents" parentKey="Events">
-						<Size x="200" y="280"/>
+						<Size x="230" y="280"/>
 						<Anchors>
 							<Anchor point="TOPLEFT" x="20" y="-50"/>
 						</Anchors>
@@ -3556,6 +3657,7 @@
 						<Scripts>
 							<OnLoad>
 								TMW:TT(self, "ANN_EDITBOX", "ANN_EDITBOX_DESC")
+								self.__noWrapTooltipText = true
 								self.label = "|cFFFF5050" .. TMW.L["ANN_EDITBOX_WARN"]
 								self.BackgroundText:SetWidth(self:GetWidth())
 								self.Header:SetText(TMW.L["ANN_EDITBOX"])
@@ -3573,7 +3675,7 @@
 					</EditBox>
 					
 					<Frame name="$parentChannels" parentKey="Channels">
-						<Size x="170" y="266"/>
+						<Size x="140" y="266"/>
 						<Anchors>
 							<Anchor point="TOPLEFT" relativeTo="$parentEditBox" relativePoint="BOTTOMLEFT" x="-5" y="-25"/>
 						</Anchors>
@@ -3608,13 +3710,8 @@
 						<Scripts>
 							<OnLoad>
 								self.Header:SetText(TMW.L["ANN_SUB_CHANNEL"])
-								--UIDropDownMenu_JustifyText(self, "LEFT")
 								UIDropDownMenu_SetWidth(self, 120)
-								_G[self:GetName() .. "Button"]:SetScript("PreClick", function()
-									UIDropDownMenu_Initialize(self, TMW.ANN.DropDown, "DROPDOWN")
-									_G[self:GetName() .. "Button"]:SetScript("PreClick", nil)
-								end)
-								TMW:FixDropdown(self)
+								self.InitFunc = TMW.ANN.DropDown
 							</OnLoad>
 						</Scripts>
 					</Frame>

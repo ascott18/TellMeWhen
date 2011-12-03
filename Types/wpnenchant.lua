@@ -61,6 +61,7 @@ Type.RelevantSettings = {
 }
 Type.DisabledEvents = {
 	OnUnit = true,
+	OnStack = true,
 }
 
 local Parser = CreateFrame("GameTooltip", "TellMeWhen_Parser", TMW, "GameTooltipTemplate")

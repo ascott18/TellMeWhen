@@ -477,6 +477,7 @@ L["FONTSIZE"] = "Font Size"
 L["DEFAULT"] = "Default"
 L["NONE"] = "None of these"
 L["CASTERFORM"] = "Caster Form"
+L["ALPHA"] = "Alpha"
 
 L["RESET_ICON"] = "Reset"
 L["UNDO_ICON"] = "Undo"
@@ -826,44 +827,47 @@ L["SUG_PATTERNMATCH_SHARPENINGSTONE"] = "Sharpened %(%+%d+ Damage%)"
 L["SUG_MATCH_WPNENCH_ENCH"] = "(.*) Weapon" -- inconsistent key. oops.
 
 
-L["SOUND_EVENT_ONSHOW"] = "On Show"
+L["SOUND_EVENT_ONSHOW"] = "Show"
 L["SOUND_EVENT_ONSHOW_DESC"] = "This event triggers when the icon becomes shown (even if %q is checked)."
 
-L["SOUND_EVENT_ONHIDE"] = "On Hide"
+L["SOUND_EVENT_ONHIDE"] = "Hide"
 L["SOUND_EVENT_ONHIDE_DESC"] = "This event triggers when the icon is hidden (even if %q is checked)."
 
-L["SOUND_EVENT_ONSTART"] = "On Start"
-L["SOUND_EVENT_ONSTART_DESC"] = [[This event triggers when the cooldown becomes unusable, the buff/debuff is applied, etc.
+L["SOUND_EVENT_ONSTART"] = "Start"
+L["SOUND_EVENT_ONSTART_DESC"] = [[This event triggers when the cooldown becomes unusable, the buff/debuff is applied, etc.]]
 
-NOTE: This event handler will never execute after executing an On Show or On Hide event.]]
+L["SOUND_EVENT_ONFINISH"] = "Finish"
+L["SOUND_EVENT_ONFINISH_DESC"] = [[This event triggers when the cooldown becomes usable, the buff/debuff falls off, etc.]]
 
-L["SOUND_EVENT_ONFINISH"] = "On Finish"
-L["SOUND_EVENT_ONFINISH_DESC"] = [[This event triggers when the cooldown becomes usable, the buff/debuff falls off, etc.
-
-NOTE: This event handler will never execute after executing an On Show or On Hide event.]]
-
-L["SOUND_EVENT_ONALPHAINC"] = "On Alpha Increase"
+L["SOUND_EVENT_ONALPHAINC"] = "Alpha Increase"
 L["SOUND_EVENT_ONALPHAINC_DESC"] = [[This event triggers when the opacity of an icon increases.
 
 NOTE: This event will not trigger when increasing from 0% opacity (On Show).]]
 
-L["SOUND_EVENT_ONALPHADEC"] = "On Alpha Decrease"
+L["SOUND_EVENT_ONALPHADEC"] = "Alpha Decrease"
 L["SOUND_EVENT_ONALPHADEC_DESC"] = [[This event triggers when the opacity of an icon decreases.
 
 NOTE: This event will not trigger when decreasing to 0% opacity (On Hide).]]
 
-L["SOUND_EVENT_ONUNIT"] = "On Unit Changed"
-L["SOUND_EVENT_ONUNIT_DESC"] = [[This event triggers when the unit that that the icon is displaying information for has changed.
+L["SOUND_EVENT_ONUNIT"] = "Unit Changed"
+L["SOUND_EVENT_ONUNIT_DESC"] = [[This event triggers when the unit that that the icon is displaying information for has changed.]]
 
-NOTE: This event only triggers if the icon is shown.]]
+L["SOUND_EVENT_ONSPELL"] = "Spell Changed"
+L["SOUND_EVENT_ONSPELL_DESC"] = [[This event triggers when the spell/item/etc. that that the icon is displaying information for has changed.]]
 
-L["SOUND_EVENT_ONSPELL"] = "On Spell Changed"
-L["SOUND_EVENT_ONSPELL_DESC"] = [[This event triggers when the spell/item/etc. that that the icon is displaying information for has changed.
+L["SOUND_EVENT_ONSTACK"] = "Stacks Changed"
+L["SOUND_EVENT_ONSTACK_DESC"] = [[This event triggers when the stacks of whatever the item is tracking has changed.
 
-NOTE: This event only triggers if the icon is shown.]]
+This includes the amount of diminishment for %s icons.]]
+
+L["SOUND_EVENT_ONDURATION"] = "Duration Changed"
+L["SOUND_EVENT_ONDURATION_DESC"] = [[This event triggers when the duration of the icon's timer changes.
+
+Because this event occurs every time the icon is updated while a timer is running, you must set a threshold, and the event will only occur when the state of that threshold changes.]]
 
 L["SOUND_EVENT_GLOBALDESC"] = "Events are checked from top to bottom in this list. If an event is triggered that has a sound to play, no events below that event will play a sound."
-L["SOUND_EVENT_DISABLEDFORTYPE"] = "Not available for %s"
+L["SOUND_EVENT_DISABLEDFORTYPE"] = "Not available"
+L["SOUND_EVENT_DISABLEDFORTYPE_DESC"] = "This event is not available for %s type icons."
 
 L["SOUND_EVENTS"] = "Icon Events"
 L["SOUND_SOUNDTOPLAY"] = "Sound to Play"
@@ -879,9 +883,23 @@ L["SOUND_TAB"] = "Sounds"
 
 
 L["EVENTS_SETTINGS_HEADER"] = "Event Settings"
-L["EVENTS_SETTINGS_ONLYSHOWN"] = "Only handle if icon is shown"
-L["EVENTS_SETTINGS_ONLYSHOWN_DESC"] = "Checking this setting will prevent the event from carrying out any associated actions if the icon is not shown."
+--L["EVENTS_SETTINGS_HEADER_SUB"] = "Only handle %s:"
 L["EVENTS_SETTINGS_GLOBAL_DESC"] = "Note that event settings affect the event across all outputs, including sound and text."
+
+L["EVENTS_SETTINGS_ONLYSHOWN"] = "Only handle if icon is shown"
+L["EVENTS_SETTINGS_ONLYSHOWN_DESC"] = "Prevents the event from being handled if the icon is not shown."
+
+L["EVENTS_SETTINGS_PASSINGCNDT"] = "Only handle if condition is passing:"
+L["EVENTS_SETTINGS_PASSINGCNDT_DESC"] = "Prevents the event from being handled unless the condition configured below succeeds."
+
+L["EVENTS_SETTINGS_CNDTJUSTPASSED"] = "And it just began passing"
+L["EVENTS_SETTINGS_CNDTJUSTPASSED_DESC"] = "Prevents the event from being handled unless the condition configured above has just begun succeeding."
+
+L["EVENTS_SETTINGS_PASSTHROUGH"] = "Continue to lower events"
+L["EVENTS_SETTINGS_PASSTHROUGH_DESC"] = [[Allows the handling of another event after this one if this one gets handled. If left unchecked, the icon will not process any %s after this event if this event does process and output some %s.
+
+Exeptions may apply, see individual event descriptions for details.]]
+
 
 
 L["SOUND_USEMASTER"] = "Always play sounds"
@@ -899,7 +917,9 @@ L["ANN_UNITSUBSTITUTIONS"] = [["%t" - Target's Name
 L["ANN_CHANTOUSE"] = "Channel to Use"
 L["ANN_EDITBOX"] = "Text to be outputted"
 L["ANN_EDITBOX_WARN"] = "Type the text you wish to be outputted here"
-L["ANN_EDITBOX_DESC"] = [[Type the text that you wish to be outputted when the event triggers. The following substitutions may be used:
+L["ANN_EDITBOX_DESC"] = [[Type the text that you wish to be outputted when the event triggers.
+
+The following text substitutions may be used:
 
 %s
 
@@ -1046,6 +1066,8 @@ L["Heals"] = "Player Heals"
 L["PvPSpells"] = "PvP Crowd Control, etc."
 L["Tier11Interrupts"] = "Tier 11 Interruptibles"
 L["Tier12Interrupts"] = "Tier 12 Interruptibles"
+
+L["GCD"] = "Global Cooldown"
 
 L["Magic"] = "Magic"
 L["Curse"] = "Curse"

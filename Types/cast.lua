@@ -55,7 +55,9 @@ Type.RelevantSettings = {
 	DurationMinEnabled = true,
 	DurationMaxEnabled = true,
 }
-
+Type.DisabledEvents = {
+	OnStack = true,
+}
 
 function Type:Update(upd_intv)
 	db = TMW.db

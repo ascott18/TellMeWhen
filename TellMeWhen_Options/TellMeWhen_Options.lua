@@ -235,7 +235,12 @@ end
 
 function approachTable(t, ...)
 	for i=1, select("#", ...) do
-		t = t[select(i, ...)]
+		local k = select(i, ...)
+		if type(k) == "function" then
+			t = k(t)
+		else
+			t = t[k]
+		end
 		if not t then return end
 	end
 	return t
@@ -257,8 +262,8 @@ end
 local function TTOnEnter(self)
 	if self.__title or self.__text then
 		GameTooltip_SetDefaultAnchor(GameTooltip, self)
-		GameTooltip:AddLine(get(self.__title), HIGHLIGHT_FONT_COLOR.r, HIGHLIGHT_FONT_COLOR.g, HIGHLIGHT_FONT_COLOR.b, 1)
-		GameTooltip:AddLine(get(self.__text), NORMAL_FONT_COLOR.r, NORMAL_FONT_COLOR.g, NORMAL_FONT_COLOR.b, 1)
+		GameTooltip:AddLine(get(self.__title), HIGHLIGHT_FONT_COLOR.r, HIGHLIGHT_FONT_COLOR.g, HIGHLIGHT_FONT_COLOR.b, false)
+		GameTooltip:AddLine(get(self.__text), NORMAL_FONT_COLOR.r, NORMAL_FONT_COLOR.g, NORMAL_FONT_COLOR.b, not self.__noWrapTooltipText)
 		GameTooltip:Show()
 	end
 end
@@ -274,6 +279,7 @@ function TMW:TT(f, title, text, actualtitle, actualtext)
 	else
 		f.__title = title
 	end
+	
 	if text then
 		f.__text = (actualtext and text) or _G[text] or L[text]
 	else
@@ -394,13 +400,6 @@ function TMW:SetUIDropdownText(frame, value, tbl)
 		end
 	end
 	UIDropDownMenu_SetText(frame, "")
-end
-
-function TMW:FixDropdown(dropdown)
-	local height = 61.5
-	_G[dropdown:GetName() .. "Left"]:SetHeight(height)
-	_G[dropdown:GetName() .. "Middle"]:SetHeight(height)
-	_G[dropdown:GetName() .. "Right"]:SetHeight(height)
 end
 
 local function AddDropdownSpacer()
@@ -3837,27 +3836,107 @@ function IE:UndoRedoChanged()
 end
 
 
----------- Generic Events ----------
-function IE:SetEventSettings(Module)
-	local EventSettings = Module.EventSettings
-	local Event = Module.currentEvent
+
+-- ----------------------
+-- EVENTS
+-- ----------------------
+
+local EVENTS = TMW:NewModule("Events") TMW.EVENTS = EVENTS
+
+function EVENTS:SetEventSettings()
+	local EventSettings = self.EventSettings
+	local eventData = self.Events[self.currentEventID].eventData
 	
-	EventSettings.EventName:SetText(Module.Events[Module.currentEventID].settings.text)
+	EventSettings.EventName:SetText(eventData.text) --L["EVENTS_SETTINGS_HEADER_SUB"]:format(eventData.text))
 	
-	local Settings = TMW.CI.ics.Events[Event]
+	local Settings = TMW.CI.ics.Events[self.currentEvent]
+	local settingsUsedByEvent = eventData.settings
 	
-	EventSettings.OnlyShown:SetChecked(Settings.OnlyShown)
+	--hide settings
+	EventSettings.Operator	 	 :Hide()
+	EventSettings.Value		 	 :Hide()
+	EventSettings.CndtJustPassed :Hide()
+	EventSettings.PassingCndt	 :Hide()
+	
+	--set settings
+	EventSettings.PassThrough	 :SetChecked(Settings.PassThrough)
+	EventSettings.OnlyShown	 	 :SetChecked(Settings.OnlyShown)
+	EventSettings.CndtJustPassed :SetChecked(Settings.CndtJustPassed)
+	EventSettings.PassingCndt	 :SetChecked(Settings.PassingCndt)
+	EventSettings.Value		 	 :SetText(Settings.Value)
+	
+	--show settings
+	if settingsUsedByEvent then
+		for setting, state in pairs(settingsUsedByEvent) do
+			if state == "FORCE" then
+				EventSettings[setting]:Disable()
+				EventSettings[setting]:SetAlpha(1)
+			else
+				EventSettings[setting]:Enable()
+			end
+			EventSettings[setting]:Show()
+		end
+	end
+	
+	if EventSettings.PassingCndt				:GetChecked() then
+		EventSettings.Operator.ValueLabel		:SetFontObject(GameFontHighlight)
+		EventSettings.Operator					:Enable()
+		EventSettings.Value						:Enable()
+		if not settingsUsedByEvent.CndtJustPassed == "FORCE" then
+			EventSettings.CndtJustPassed		:Enable()
+		end
+	else
+		EventSettings.Operator.ValueLabel		:SetFontObject(GameFontDisable)
+		EventSettings.Operator					:Disable()
+		EventSettings.Value						:Disable()
+		EventSettings.CndtJustPassed			:Disable()
+	end
+	
+	EventSettings.Operator.ValueLabel:SetText(eventData.valueName)
+	EventSettings.Value.ValueLabel:SetText(eventData.valueSuffix)
+	
+	local v = TMW:SetUIDropdownText(EventSettings.Operator, Settings.Operator, CNDT.Operators)
+	if v then
+		TMW:TT(EventSettings.Operator, v.tooltipText, nil, 1)
+	end	
 end
 
-function IE:SetupEventButtons(Module, template, globalDescKey)
-	local Events = Module.Events
+function EVENTS:OperatorMenu_DropDown()
+	local Module = self:GetParent():GetParent().module
+	local eventData = Module.Events[Module.currentEventID].eventData
+	
+	for k, v in pairs(CNDT.Operators) do
+		if not eventData.blacklistedOperators or not eventData.blacklistedOperators[v.value] then
+			local info = UIDropDownMenu_CreateInfo()
+			info.func = EVENTS.OperatorMenu_DropDown_OnClick
+			info.text = v.text
+			info.value = v.value
+			info.tooltipTitle = v.tooltipText
+			info.tooltipOnButton = true
+			info.arg1 = self
+			UIDropDownMenu_AddButton(info)
+		end
+	end
+end
+
+function EVENTS:OperatorMenu_DropDown_OnClick(frame)
+	local Module = frame:GetParent():GetParent().module
+	
+	UIDropDownMenu_SetSelectedValue(frame, self.value)
+	
+	TMW.CI.ics.Events[Module.currentEvent].Operator = self.value
+	TMW:TT(frame, self.tooltipTitle, nil, 1)
+end
+
+function EVENTS:SetupEventButtons(template, globalDescKey)
+	local Events = self.Events
 	local previousFrame
 	
-	local yAdjustTitle, yAdjustText = 0, 0
+	--[[local yAdjustTitle, yAdjustText = 0, 0 -- not needed for now
 	local locale = GetLocale()
 	if locale == "zhCN" or locale == "zhTW" then
 		yAdjustTitle, yAdjustText = 3, -3
-	end
+	end]]
 	
 	for i, eventData in ipairs(TMW.EventList) do
 		local frame = CreateFrame("Button", Events:GetName().."Event"..i, Events, template, i)
@@ -3866,15 +3945,17 @@ function IE:SetupEventButtons(Module, template, globalDescKey)
 		frame:SetPoint("TOPRIGHT", previousFrame, "BOTTOMRIGHT")
 		
 		local p, t, r, x, y = frame.EventName:GetPoint()
-		frame.EventName:SetPoint(p, t, r, x, y + yAdjustTitle)
+		frame.EventName:SetPoint(p, t, r, x, y --[[+ yAdjustTitle]])
 		local p, t, r, x, y = frame.DataText:GetPoint()
-		frame.DataText:SetPoint(p, t, r, x, y + yAdjustText)
+		frame.DataText:SetPoint(p, t, r, x, y --[[+ yAdjustText]])
 		
 		frame.event = eventData.name
-		frame.settings = eventData
+		frame.eventData = eventData
 		
-		frame.EventName:SetText(eventData.text)
-		TMW:TT(frame, eventData.text, eventData.desc .. "\r\n\r\n" .. L[globalDescKey], 1, 1)
+		frame.EventName:SetText(eventData.text .. ":")
+		
+		frame.normalDesc = eventData.desc --.. "\r\n\r\n" .. L[globalDescKey]
+		TMW:TT(frame, eventData.text, frame.normalDesc, 1, 1)
 		
 		previousFrame = frame
 	end
@@ -3884,6 +3965,95 @@ function IE:SetupEventButtons(Module, template, globalDescKey)
 	Events:SetHeight(#Events*Events[1]:GetHeight())
 end
 
+function EVENTS:EnableAndDisableEvents()
+	local DisabledEvents = Types[CI.ic].DisabledEvents
+	local oldID = self.currentEventID
+	for i, frame in ipairs(self.Events) do
+		if DisabledEvents[frame.event] then
+			frame:Disable()
+			frame.DataText:SetText(L["SOUND_EVENT_DISABLEDFORTYPE"])
+			TMW:TT(frame, frame.eventData.text, L["SOUND_EVENT_DISABLEDFORTYPE_DESC"]:format(Types[CI.t].name), 1, 1)
+			
+			if oldID == i then
+				oldID = oldID + 1
+			end
+		else
+			TMW:TT(frame, frame.eventData.text, frame.normalDesc, 1, 1)
+			frame:Enable()
+			self:SetupEventDisplay(i)
+		end
+	end
+	
+	return oldID
+end
+
+function EVENTS:ChooseEvent(id)
+	self.currentEventID = id
+	self.currentEvent = self.Events[id].event
+
+	local eventFrame = self.Events[id]
+	for i, f in ipairs(self.Events) do
+		f.selected = nil
+		f:UnlockHighlight()
+		f:GetHighlightTexture():SetVertexColor(1, 1, 1, 1)
+	end
+	eventFrame.selected = 1
+	eventFrame:LockHighlight()
+	eventFrame:GetHighlightTexture():SetVertexColor(NORMAL_FONT_COLOR.r, NORMAL_FONT_COLOR.g, NORMAL_FONT_COLOR.b, 1)
+	
+	return eventFrame
+end
+
+function EVENTS:GetDisplayInfo(event)
+
+	-- event is either a string ("OnShow") or a frame id (1)
+	
+	-- determine eventID or eventString, whichever is unknown.
+	local eventID
+	local eventString
+	if type(event) == "string" then
+		eventString = event
+		for id, frame in ipairs(self.Events) do
+			if frame.event == eventString then
+				eventID = id
+				break
+			end
+		end
+	else
+		eventID = event
+		eventString = self.Events[eventID].event
+	end
+	
+	return eventID, eventString
+end
+
+function EVENTS:Load()
+	local oldID = self:EnableAndDisableEvents()
+	
+	if oldID and oldID > 0 then
+		oldID = oldID % #self.Events
+		if oldID == 0 then
+			oldID = #self.Events
+		end
+		self:SelectEvent(oldID)
+	end
+	self:SetTabText()
+	
+	if CI.ics then
+		self:SetEventSettings()
+	end
+end
+
+function EVENTS:SetTabText()
+	local n = self:GetNumUsedEvents()
+	
+	if n > 0 then
+		self.tab:SetText(self.tabText .. " |cFFFF5959(" .. n .. ")")
+	else
+		self.tab:SetText(self.tabText .. " (" .. n .. ")")
+	end
+	PanelTemplates_TabResize(self.tab, -6)
+end
 
 
 
@@ -3891,10 +4061,13 @@ end
 -- SOUNDS
 -- ----------------------
 
-SND = TMW:NewModule("Sound") TMW.SND = SND
+SND = TMW:NewModule("Sound", EVENTS) TMW.SND = SND
+SND.tabText = L["SOUND_TAB"]
 SND.LSM = LSM
 
 function SND:OnInitialize()
+	SND.tab = IE.SoundTab
+
 	local Sounds = SND.Sounds
 	Sounds.Header:SetText(L["SOUND_SOUNDTOPLAY"])
 	local previous = Sounds.None
@@ -3915,7 +4088,7 @@ function SND:OnInitialize()
 	SND:SetSoundsOffset(0)
 	
 	
-	IE:SetupEventButtons(SND, "TellMeWhen_SoundEvent", "SOUND_EVENT_GLOBALDESC")
+	SND:SetupEventButtons("TellMeWhen_SoundEvent", "SOUND_EVENT_GLOBALDESC")
 	
 	local Events = SND.Events
 	Events.Header:SetText(L["SOUND_EVENTS"])
@@ -3924,75 +4097,19 @@ function SND:OnInitialize()
 	SND.Sounds.ScrollBar:SetValue(0)
 end
 
-function SND:Load()
-	local DisabledEvents = Types[CI.ic].DisabledEvents
-	local oldID = SND.currentEventID
-	for i, frame in ipairs(SND.Events) do
-		if DisabledEvents[frame.event] then
-			frame:Disable()
-			frame.DataText:SetFormattedText(L["SOUND_EVENT_DISABLEDFORTYPE"], Types[CI.t].name)
-			if oldID == i then
-				oldID = oldID + 1
-			end
-		else
-			frame:Enable()
-			SND:SetupEventDisplay(i)
-		end
-	end
-	if oldID and oldID > 0 then
-		oldID = oldID % #SND.Events
-		if oldID == 0 then
-			oldID = #SND.Events
-		end
-		SND:SelectEvent(oldID)
-	end
-	SND:SetTabText()
-	
-	if CI.ics then
-		IE:SetEventSettings(self)
-	end
-end
-
 
 ---------- Events ----------
 function SND:SelectEvent(id)
-	SND.currentEventID = id
-	SND.currentEvent = SND.Events[id].event
-
-	local eventFrame = SND.Events[id]
-	for i, f in ipairs(SND.Events) do
-		f.selected = nil
-		f:UnlockHighlight()
-		f:GetHighlightTexture():SetVertexColor(1, 1, 1, 1)
-	end
-	eventFrame.selected = 1
-	eventFrame:LockHighlight()
-	eventFrame:GetHighlightTexture():SetVertexColor(NORMAL_FONT_COLOR.r, NORMAL_FONT_COLOR.g, NORMAL_FONT_COLOR.b, 1)
-
+	local eventFrame = SND:ChooseEvent(id)
+	
 	if CI.ics then
 		SND:SelectSound(CI.ics.Events[eventFrame.event].Sound)
-		IE:SetEventSettings(self)
+		SND:SetEventSettings()
 	end
 end
 
 function SND:SetupEventDisplay(event)
-	-- event is either a string ("OnShow") or a frame id (1)
-	
-	-- determine eventID or eventString, whichever is unknown.
-	local eventID
-	local eventString
-	if type(event) == "string" then
-		eventString = event
-		for id, frame in ipairs(SND.Events) do
-			if frame.event == eventString then
-				eventID = id
-				break
-			end
-		end
-	else
-		eventID = event
-		eventString = SND.Events[eventID].event
-	end
+	local eventID, eventString = SND:GetDisplayInfo(event)
 	
 	local name = CI.ics.Events[eventString].Sound
 	
@@ -4117,8 +4234,7 @@ end
 
 
 ---------- Interface ----------
-function SND:SetTabText()
-	local groupID, iconID = CI.g, CI.i
+function SND:GetNumUsedEvents()
 	local n = 0
 	for i, f in ipairs(SND.Events) do
 		local v = CI.ics.Events[f.event].Sound
@@ -4135,12 +4251,8 @@ function SND:SetTabText()
 			end
 		end
 	end
-	if n > 0 then
-		IE.SoundTab:SetText(L["SOUND_TAB"] .. " |cFFFF5959(" .. n .. ")")
-	else
-		IE.SoundTab:SetText(L["SOUND_TAB"] .. " (" .. n .. ")")
-	end
-	PanelTemplates_TabResize(IE.SoundTab, -6)
+	
+	return n
 end
 
 
@@ -4149,10 +4261,13 @@ end
 -- ANNOUNCEMENTS
 -- ----------------------
 
-ANN = TMW:NewModule("Announcements") TMW.ANN = ANN
+ANN = TMW:NewModule("Announcements", EVENTS) TMW.ANN = ANN
+ANN.tabText = L["ANN_TAB"]
 local ChannelLookup = TMW.ChannelLookup
 
 function ANN:OnInitialize()
+	ANN.tab = IE.AnnounceTab
+	
 	local Events = ANN.Events
 	local Channels = ANN.Channels
 	
@@ -4160,7 +4275,7 @@ function ANN:OnInitialize()
 	Channels.Header:SetText(L["ANN_CHANTOUSE"])
 	
 	-- create event frames
-	IE:SetupEventButtons(ANN, "TellMeWhen_AnnounceEvent", "ANN_EVENT_GLOBALDESC")
+	ANN:SetupEventButtons("TellMeWhen_AnnounceEvent", "ANN_EVENT_GLOBALDESC")
 	
 	-- create channel frames
 	local previousFrame
@@ -4193,78 +4308,23 @@ function ANN:OnInitialize()
 	ANN:SelectEvent(1)	
 end
 
-function ANN:Load()
-	local DisabledEvents = Types[CI.ic].DisabledEvents
-	local oldID = ANN.currentEventID
-	for i, frame in ipairs(ANN.Events) do
-		if DisabledEvents[frame.event] then
-			frame:Disable()
-			frame.DataText:SetFormattedText(L["SOUND_EVENT_DISABLEDFORTYPE"], Types[CI.t].name)
-			if oldID == i then
-				oldID = oldID + 1
-			end
-		else
-			frame:Enable()
-			ANN:SetupEventDisplay(i)
-		end
-	end
-	if oldID and oldID > 0 then
-		oldID = oldID % #ANN.Events
-		if oldID == 0 then
-			oldID = #ANN.Events
-		end
-		ANN:SelectEvent(oldID)
-	end
-	ANN:SetTabText()
-	
-	if CI.ics then
-		IE:SetEventSettings(self)
-	end
-end
-
 
 ---------- Events ----------
 function ANN:SelectEvent(id)
 	ANN.EditBox:ClearFocus()
-	ANN.currentEventID = id
-	ANN.currentEvent = ANN.Events[id].event
-
-	local eventFrame = ANN.Events[id]
-	for i, f in ipairs(ANN.Events) do
-		f.selected = nil
-		f:UnlockHighlight()
-		f:GetHighlightTexture():SetVertexColor(1, 1, 1, 1)
-	end
-	eventFrame.selected = 1
-	eventFrame:LockHighlight()
-	eventFrame:GetHighlightTexture():SetVertexColor(NORMAL_FONT_COLOR.r, NORMAL_FONT_COLOR.g, NORMAL_FONT_COLOR.b, 1)
-
+	
+	local eventFrame = ANN:ChooseEvent(id)
+	
 	if CI.ics then
 		local EventSettings = CI.ics.Events[eventFrame.event]
 		ANN:SelectChannel(EventSettings.Channel)
 		ANN.EditBox:SetText(EventSettings.Text)
-		IE:SetEventSettings(self)
+		ANN:SetEventSettings()
 	end
 end
 
 function ANN:SetupEventDisplay(event)
-	-- event is either a string ("OnShow") or a frame id (1)
-	
-	-- determine eventID or eventString, whichever is unknown.
-	local eventID
-	local eventString
-	if type(event) == "string" then
-		eventString = event
-		for id, frame in ipairs(ANN.Events) do
-			if frame.event == eventString then
-				eventID = id
-				break
-			end
-		end
-	else
-		eventID = event
-		eventString = ANN.Events[eventID].event
-	end
+	local eventID, eventString = ANN:GetDisplayInfo(event)
 	
 	local channel = CI.ics.Events[eventString].Channel
 	local channelsettings = ChannelLookup[channel]
@@ -4361,7 +4421,7 @@ end
 
 
 ---------- Interface ----------
-function ANN:SetTabText()
+function ANN:GetNumUsedEvents()
 	local n = 0
 	for i = 1, #ANN.Events do
 		local f = ANN.Events[i]
@@ -4370,12 +4430,8 @@ function ANN:SetTabText()
 			n = n + 1
 		end
 	end
-	if n > 0 then
-		IE.AnnounceTab:SetText(L["ANN_TAB"] .. " |cFFFF5959(" .. n .. ")")
-	else
-		IE.AnnounceTab:SetText(L["ANN_TAB"] .. " (0)")
-	end
-	PanelTemplates_TabResize(IE.AnnounceTab, -6)
+	
+	return n
 end
 
 function ANN:LocDropdownFunc(text)
@@ -4820,8 +4876,21 @@ function SUG:SuggestingComplete(doSort)
 		end
 		
 		if id then
-			
-			SUG.CurrentModule:Entry_AddToList(f, id)
+			local addFunc = 1
+			while true do
+				local Entry_AddToList = SUG.CurrentModule["Entry_AddToList_" .. addFunc]
+				if not Entry_AddToList then
+					break
+				end
+				
+				Entry_AddToList(SUG.CurrentModule, f, id)
+				
+				if f.insert then
+					break
+				end
+				
+				addFunc = addFunc + 1
+			end
 			
 			local colorizeFunc = 1
 			while true do
@@ -5199,26 +5268,28 @@ function Module:Table_Get()
 	return ItemCache
 end
 
-function Module:Entry_AddToList(f, id)
-	local name, link = GetItemInfo(id)
-	
-	f.Name:SetText(link and link:gsub("[%[%]]", ""))
-	f.ID:SetText(id)
+function Module:Entry_AddToList_1(f, id)
+	if id > INVSLOT_LAST_EQUIPPED then
+		local name, link = GetItemInfo(id)
+		
+		f.Name:SetText(link and link:gsub("[%[%]]", ""))
+		f.ID:SetText(id)
 
-	f.insert = SUG.inputType == "number" and id or name
-	f.insert2 = SUG.inputType ~= "number" and id or name
+		f.insert = SUG.inputType == "number" and id or name
+		f.insert2 = SUG.inputType ~= "number" and id or name
 
-	f.tooltipmethod = "SetHyperlink"
-	f.tooltiparg = link
+		f.tooltipmethod = "SetHyperlink"
+		f.tooltiparg = link
 
-	f.Icon:SetTexture(GetItemIcon(id))
+		f.Icon:SetTexture(GetItemIcon(id))
+	end
 end
 
 
 local Module = SUG:NewModule("itemwithslots", SUG:GetModule("item"))
 Module.Slots = {}
 
-function Module:Entry_AddToList(f, id)
+function Module:Entry_AddToList_2(f, id)
 	if id <= INVSLOT_LAST_EQUIPPED then
 		local itemID = GetInventoryItemID("player", id) -- get the itemID of the slot
 		local link = GetInventoryItemLink("player", id)
@@ -5237,20 +5308,6 @@ function Module:Entry_AddToList(f, id)
 		f.tooltiparg = link
 
 		f.Icon:SetTexture(GetItemIcon(itemID))
-	else
-		itemID = id
-		local name, link = GetItemInfo(id)
-	
-		f.Name:SetText(link and link:gsub("[%[%]]", ""))
-		f.ID:SetText(id)
-
-		f.insert = SUG.inputType == "number" and id or name
-		f.insert2 = SUG.inputType ~= "number" and id or name
-
-		f.tooltipmethod = "SetHyperlink"
-		f.tooltiparg = link
-
-		f.Icon:SetTexture(GetItemIcon(id))
 	end
 end
 
@@ -5366,7 +5423,7 @@ function Module:Table_GetSorter()
 	return self.Sorter_Spells
 end
 
-function Module:Entry_AddToList(f, id)
+function Module:Entry_AddToList_1(f, id)
 	if tonumber(id) then --sanity check
 		local name = GetSpellInfo(id)
 
@@ -5405,9 +5462,42 @@ function Module:Entry_Colorize_1(f, id)
 end
 
 
+local Module = SUG:NewModule("cooldown", SUG:GetModule("spell"))
+
+function Module:Table_Get()
+	return SpellCache, TMW.BE.gcd
+end
+
+function Module:Entry_AddToList_2(f, id)
+	if TMW.BE.gcd[id] then
+		local equiv = id
+		id = EquivFirstIDLookup[id]
+		
+		local name = GetSpellInfo(id)
+
+		f.Name:SetText(L["GCD"])
+		f.ID:SetText(nil)
+
+		f.tooltipmethod = "SetSpellByID"
+		f.tooltiparg = id
+
+		f.insert = equiv
+
+		f.Icon:SetTexture(SpellTextures[id])
+	end
+end
+
+function Module:Entry_Colorize_2(f, id)
+	if TMW.BE.gcd[id] then
+		f.Background:SetVertexColor(.58, .51, .79, 1) -- color item slots warlock purple
+	end
+end
+
+
+
 local Module = SUG:NewModule("texture", SUG:GetModule("spell"))
 
-function Module:Entry_AddToList(f, id)
+function Module:Entry_AddToList_1(f, id)
 	if tonumber(id) then --sanity check
 		local name = GetSpellInfo(id)
 
@@ -5557,7 +5647,7 @@ function Module:Table_Get()
 	return SpellCache, TMW.BE.casts
 end
 
-function Module:Entry_AddToList(f, id)
+function Module:Entry_AddToList_2(f, id)
 	if TMW.BE.casts[id] then
 		-- the entry is an equivalacy
 		-- id is the equivalency name (e.g. Tier11Interrupts)
@@ -5572,21 +5662,6 @@ function Module:Entry_AddToList(f, id)
 		f.tooltiparg = id
 
 		f.Icon:SetTexture(SpellTextures[firstid])
-
-	elseif tonumber(id) then --sanity check
-		
-		local name = GetSpellInfo(id)
-
-		f.Name:SetText(name)
-		f.ID:SetText(id)
-
-		f.tooltipmethod = "SetSpellByID"
-		f.tooltiparg = id
-
-		f.insert = SUG.inputType == "number" and id or name
-		f.insert2 = SUG.inputType ~= "number" and id or name
-
-		f.Icon:SetTexture(SpellTextures[id])
 	end
 end
 
@@ -5707,7 +5782,7 @@ function Module:Entry_Colorize_2(f, id)
 	end
 end
 
-function Module:Entry_AddToList(f, id)
+function Module:Entry_AddToList_2(f, id)
 	if TMW.DS[id] then -- if the entry is a dispel type (magic, poison, etc)
 		local dispeltype = id
 
@@ -5735,20 +5810,6 @@ function Module:Entry_AddToList(f, id)
 		f.tooltiparg = equiv
 
 		f.Icon:SetTexture(SpellTextures[firstid])
-
-	elseif tonumber(id) then --sanity check
-		local name = GetSpellInfo(id)
-
-		f.Name:SetText(name)
-		f.ID:SetText(id)
-
-		f.tooltipmethod = "SetSpellByID"
-		f.tooltiparg = id
-
-		f.insert = SUG.inputType == "number" and id or name
-		f.insert2 = SUG.inputType ~= "number" and id or name
-
-		f.Icon:SetTexture(SpellTextures[id])
 	end
 end
 
@@ -5775,7 +5836,7 @@ function Module:Entry_Colorize_2(f, id)
 	end
 end
 
-function Module:Entry_AddToList(f, id)
+function Module:Entry_AddToList_2(f, id)
 	if EquivFirstIDLookup[id] then -- if the entry is an equivalacy (buff, cast, or whatever)
 		--NOTE: dispel types are put in EquivFirstIDLookup too for efficiency in the sorter func, but as long as dispel types are checked first, it wont matter
 		local equiv = id
@@ -5790,20 +5851,6 @@ function Module:Entry_AddToList(f, id)
 		f.tooltiparg = equiv
 
 		f.Icon:SetTexture(SpellTextures[firstid])
-
-	elseif tonumber(id) then --sanity check
-		local name = GetSpellInfo(id)
-
-		f.Name:SetText(name)
-		f.ID:SetText(id)
-
-		f.tooltipmethod = "SetSpellByID"
-		f.tooltiparg = id
-
-		f.insert = SUG.inputType == "number" and id or name
-		f.insert2 = SUG.inputType ~= "number" and id or name
-
-		f.Icon:SetTexture(SpellTextures[id])
 	end
 end
 
@@ -6117,7 +6164,7 @@ function Module:Table_GetSorter()
 	return nil
 end
 
-function Module:Entry_AddToList(f, id)
+function Module:Entry_AddToList_1(f, id)
 	local name, texture = GetTrackingInfo(id)
 
 	f.Name:SetText(name)
@@ -6851,7 +6898,6 @@ function CNDT.GroupBase.Load(group)
 	TMW:SetUIDropdownText(group.Icon, condition.Icon, TMW.Icons)
 	
 	local v = TMW:SetUIDropdownText(group.Operator, condition.Operator, CNDT.Operators)
-	
 	if v then
 		TMW:TT(group.Operator, v.tooltipText, nil, 1)
 	end

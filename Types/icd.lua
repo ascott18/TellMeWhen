@@ -62,6 +62,7 @@ Type.RelevantSettings = {
 }
 Type.DisabledEvents = {
 	OnUnit = true,
+	OnStack = true,
 }
 
 

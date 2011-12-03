@@ -74,6 +74,8 @@ Type.RelevantSettings = {
 	DurationMaxEnabled = true,
 	CheckRefresh = true,
 }
+Type.DisabledEvents = {
+}
 
 
 function Type:Update(upd_intv)
@@ -99,7 +101,7 @@ local function DR_OnEvent(icon, _, _, p, ...)
 		if t == "DEBUFF" then
 			local ND = icon.NameHash
 			if ND[i] or ND[strlowerCache[n]] then
-				if PvEDRs[i] or bitband(f, CL_PLAYER) == CL_PLAYER or bitband(f, CL_PET) == CL_PET then
+				if TMW.debug or PvEDRs[i] or bitband(f, CL_PLAYER) == CL_PLAYER or bitband(f, CL_PET) == CL_PET then
 					local dr = icon[g]
 					if p == "SPELL_AURA_APPLIED" then
 						if dr and dr.start + dr.duration <= TMW.time then

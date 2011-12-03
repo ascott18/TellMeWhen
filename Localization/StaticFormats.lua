@@ -30,6 +30,8 @@ local pname 						  = UnitName("player")
 L["CONDITIONPANEL_UNIT_DESC"] 		  = L["CONDITIONPANEL_UNIT_DESC"]		 :format(pname)
 L["ICONMENU_UNIT_DESC"] 			  = L["ICONMENU_UNIT_DESC"]				 :format(pname)
 
+L["SOUND_EVENT_ONSTACK_DESC"] 		  = L["SOUND_EVENT_ONSTACK_DESC"]		 :format(L["ICONMENU_DRS"])
+
 L["ICONMENU_SPELLCAST_COMPLETE_DESC"] = L["ICONMENU_SPELLCAST_COMPLETE_DESC"]:format(L["ICONMENU_CHOOSENAME"])
 L["ICONMENU_SPELLCAST_START_DESC"] 	  = L["ICONMENU_SPELLCAST_START_DESC"]	 :format(L["ICONMENU_CHOOSENAME"])
 L["ICONMENU_ICDAURA_DESC"] 			  = L["ICONMENU_ICDAURA_DESC"]			 :format(L["ICONMENU_CHOOSENAME"])
@@ -47,8 +49,6 @@ L["ICONMENU_META_DESC"]   			  = L["ICONMENU_META_DESC"]	 			 :format(L["ICONALP
 L["ICONMENU_CHOOSENAME_ITEMSLOT"]     = L["ICONMENU_CHOOSENAME_ITEMSLOT"]	 :format(INVSLOT_FIRST_EQUIPPED, INVSLOT_LAST_EQUIPPED)
 
 
-
-
 L["COLOR_CTA_DESC"]	 				  = L["COLOR_CTA_DESC"]					 :format(L["ICONMENU_SHOWTIMER"], "%s", L["ICONMENU_ALWAYS"])
 L["COLOR_COA_DESC"]	 				  = L["COLOR_COA_DESC"]					 :format(L["ICONMENU_SHOWTIMER"], "%s", L["ICONMENU_ALWAYS"])
 L["COLOR_CTS_DESC"]	 				  = L["COLOR_CTS_DESC"]					 :format(L["ICONMENU_SHOWTIMER"], "%s", L["ICONMENU_ALWAYS"])
@@ -60,4 +60,4 @@ L["COLOR_HEADER"] 					  = L["COLOR_HEADER"]					 :format("%s", L["COLOR_OVERRID
 
 
 L["ANN_WHISPERTARGET_DESC"] 		  = L["ANN_WHISPERTARGET_DESC"]			 :format(L["ANN_UNITSUBSTITUTIONS"])
-L["ANN_EDITBOX_DESC"] 				  = L["ANN_EDITBOX_DESC"]				 :gsub  ("%s", L["ANN_UNITSUBSTITUTIONS"], 1) -- this one has to use gsub because of the weirdness with having "%d" in the string
+L["ANN_EDITBOX_DESC"] 				  = L["ANN_EDITBOX_DESC"]				 :gsub  ("%%s", L["ANN_UNITSUBSTITUTIONS"]:gsub("%%", "%%%%"), 1) -- this one has to use gsub because of the weirdness with having "%d" in the string
