@@ -1192,8 +1192,13 @@
 					</CheckButton>
 				</Frames>
 			</Frame>
+			
 			<Frame name="$parentCloseParenthesis" parentKey="CloseParenthesis">
 				<Size x="100" y="20"/>
+				<Anchors>
+					<Anchor point="RIGHT" relativeTo="$parentAndOr" relativePoint="LEFT" x="-5" y="0"/>
+					<Anchor point="TOP" relativeTo="$parent" relativePoint="BOTTOM" x="0" y="3"/>
+				</Anchors>
 				<Frames>
 					<CheckButton name="$parent1" inherits="TellMeWhen_ConditionEditorParenthesisTemplate" id="1">
 						<Anchors>

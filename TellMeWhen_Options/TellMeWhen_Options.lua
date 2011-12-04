@@ -6936,9 +6936,6 @@ function CNDT.GroupBase.Load(group)
 			group.CloseParenthesis[k]:SetChecked(condition.PrtsAfter >= k)
 		end
 	end
-	if CNDT[group:GetID() + 1] then
-		group.CloseParenthesis:SetPoint("RIGHT", CNDT[group:GetID() + 1].AndOr, "LEFT", -5, 0)
-	end
 	
 	group.AndOr:SetValue(condition.AndOr)
 	group:Show()

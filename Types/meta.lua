@@ -43,7 +43,6 @@ Type.RelevantSettings = {
 	ShowTimer = false,
 	ShowTimerText = false,
 	ShowWhen = false,
-	FakeHidden = false,
 	ConditionAlpha = false, --TODO:implement conditionalpha for metas (problem is the icon editor UI)
 	Alpha = false,
 	UnAlpha = false,
@@ -119,6 +118,7 @@ local function Meta_OnUpdate(icon, time)
 					icon:SetInfo(alpha, ic.__vrtxcolor, ic.__tex, ic.__start, ic.__duration, ic.__spellChecked, ic.__reverse, ic.__count, ic.__countText, force, ic.__unitChecked)
 					return
 				end
+				AlreadyChecked[ic] = true
 			end
 		end
 		icon:SetInfo(0)
@@ -129,7 +129,7 @@ local InsertIcon,GetFullIconTable -- both need access to eachother, so scope the
 
 local alreadyinserted = {}
 function InsertIcon(icon, ics, ic)
-	if ics.Type ~= "meta" then
+	if ics.Type ~= "meta" or not icon.CheckNext then
 		alreadyinserted[ic] = true
 		tinsert(icon.CompiledIcons, ic)
 	elseif icon.CheckNext then

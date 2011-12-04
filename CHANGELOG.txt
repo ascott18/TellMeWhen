@@ -9,6 +9,7 @@
  * Added events for duration and stack changes, and expanded event settings.
  * Performance Increase: Icons should no longer update themselves multiple times within one update period when the update interval is set to zero and the icon is being checked by multiple metas/conditions.
  * You can now set a group as a component of a meta icon, causing the meta icon to check all icons that are part of the selected group.
+ * Meta icons now support the "Always Hide" setting.
  * Bug Fixes:
  ** (r316) TellMeWhen_Options.lua:2831: attempt to index local "spaceControl" (a nil value)
  ** (r321) The runic power condition should now properly track runic power instead of mana.
@@ -18,6 +19,7 @@
  ** (r328) Switching profiles while TMW is unlocked should no longer cause icon coloring to malfunction.
  ** (r329) TellMeWhen-4.6.7.lua:3469: attempt to index local "settings" (a nil value)
  ** (r332) Binding/label text should now properly clear when resetting an icon.
+ ** (r334) Fixed a bug with meta icons checking other meta icon without "Check sub-metas" enabled
  
 ===v4.6.7===
  * Bug Fixes:
