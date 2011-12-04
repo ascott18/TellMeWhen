@@ -32,7 +32,7 @@ local DRData = LibStub("DRData-1.0", true)
 TELLMEWHEN_VERSION = "4.7.0"
 TELLMEWHEN_VERSION_MINOR = strmatch(" @project-version@", " r%d+") or ""
 TELLMEWHEN_VERSION_FULL = TELLMEWHEN_VERSION .. TELLMEWHEN_VERSION_MINOR
-TELLMEWHEN_VERSIONNUMBER = 47014 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
+TELLMEWHEN_VERSIONNUMBER = 47015 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
 if TELLMEWHEN_VERSIONNUMBER > 48000 or TELLMEWHEN_VERSIONNUMBER < 47000 then return error("YOU SCREWED UP THE VERSION NUMBER OR DIDNT CHANGE THE SAFETY LIMITS") end -- safety check because i accidentally made the version number 414069 once
 
 TELLMEWHEN_MAXGROUPS = 1 	--this is a default, used by SetTheory (addon), so dont rename
@@ -2575,7 +2575,10 @@ end
 
 function TMW:ValidateIcon(icon)
 	-- adds the icon to the list of icons that can be checked in metas/conditions
-	if type(icon) == "string" then icon = _G[icon] end
+	if type(icon) == "string" then
+		icon = _G[icon]
+	end
+	
 	if not TMW.IconsLookup[icon] then
 		tinsert(TMW.Icons, icon:GetName())
 		TMW.IconsLookup[icon] = 1
@@ -2583,7 +2586,10 @@ function TMW:ValidateIcon(icon)
 end
 function TMW:InvalidateIcon(icon)
 	-- removes the icon from the list of icons that can be checked in metas/conditions
-	if type(icon) == "string" then icon = _G[icon] end
+	if type(icon) == "string" then
+		icon = _G[icon]
+	end
+	
 	if TMW.IconsLookup[icon] then
 		local k = tContains(TMW.Icons, icon:GetName())
 		if k then tremove(TMW.Icons, k) end
@@ -2592,7 +2598,9 @@ function TMW:InvalidateIcon(icon)
 end
 function TMW:IsIconValid(icon)
 	-- checks if the icon is in the list of icons that can be checked in metas/conditions
-	if type(icon) == "string" then icon = _G[icon] end
+	if type(icon) == "string" then
+		icon = _G[icon]
+	end
 	return TMW.IconsLookup[icon]
 end
 
@@ -2672,6 +2680,10 @@ function TMW.GroupBase.SetPos(group)
 	group:SetFrameLevel(s.Level)
 end
 
+function TMW.GroupBase.ShouldUpdateIcons(group)
+	return TMW:Group_ShouldUpdateIcons(group:GetID())
+end
+
 function TMW:GetShapeshiftForm()
 	-- very hackey function because of inconsistencies in blizzard's GetShapeshiftForm
 	local i = GetShapeshiftForm()
@@ -2701,19 +2713,32 @@ local function CreateGroup(groupID)
 	return group
 end
 
+function TMW:Group_ShouldUpdateIcons(groupID)
+	local gs = db.profile.Groups[groupID]
+	
+	if	(not gs.Enabled) or
+		(GetActiveTalentGroup() == 1 and not gs.PrimarySpec) or
+		(GetActiveTalentGroup() == 2 and not gs.SecondarySpec) or
+		(GetPrimaryTalentTree() and not gs["Tree" .. GetPrimaryTalentTree()])
+	then
+		return false
+	end
+	
+	return true
+end
+
 function TMW:Group_Update(groupID)
 	assert(groupID) -- possible bad things happening here?
+	if groupID > TELLMEWHEN_MAXGROUPS then
+		return
+	end
+	
 	local group = TMW[groupID] or CreateGroup(groupID)
 	group.CorrectStance = true
 	group.__shown = group:IsShown()
 
 	for k, v in pairs(TMW.Group_Defaults) do
 		group[k] = db.profile.Groups[groupID][k]
-	end
-
-	group.CorrectSpec = true
-	if (GetActiveTalentGroup()==1 and not group.PrimarySpec) or (GetActiveTalentGroup()==2 and not group.SecondarySpec) or (GetPrimaryTalentTree() and not group["Tree" .. GetPrimaryTalentTree()]) then
-		group.CorrectSpec = false
 	end
 
 	if LMB then
@@ -2723,7 +2748,8 @@ function TMW:Group_Update(groupID)
 
 	group:SetFrameLevel(group.Level)
 	local Spacing = group.Spacing
-	if group.Enabled and group.CorrectSpec then
+	
+	if group:ShouldUpdateIcons() then
 		for row = 1, group.Rows do
 			for column = 1, group.Columns do
 				local iconID = (row-1)*group.Columns + column
@@ -2763,7 +2789,7 @@ function TMW:Group_Update(groupID)
 
 	group:SetPos()
 
-	if group.Enabled and group.CorrectSpec and Locked then
+	if group:ShouldUpdateIcons() and Locked then
 		group:Show()
 		if group.Conditions.n > 0 or group.OnlyInCombat then
 			group:SetScript("OnUpdate", TMW.CNDT:ProcessConditions(group)) -- dont be alarmed, this is handled by GroupSetScript
@@ -2772,7 +2798,7 @@ function TMW:Group_Update(groupID)
 		end
 	else
 		group:SetScript("OnUpdate", nil)
-		if group.Enabled and group.CorrectSpec then
+		if group:ShouldUpdateIcons() then
 			group:Show()
 		else
 			group:Hide()
@@ -3675,7 +3701,7 @@ function TMW:Icon_Update(icon)
 		icon.CndtCheck = nil
 	end
 
-	if icon.Enabled and group.Enabled then
+	if icon.Enabled and group:ShouldUpdateIcons() then
 		TMW:ValidateIcon(icon)
 	else
 		TMW:InvalidateIcon(icon)
@@ -3744,6 +3770,8 @@ function TMW:Icon_Update(icon)
 			end
 		end
 		icon:UpdateBindText()
+	else
+		icon.bindText:SetText(nil)
 	end
 	
 	

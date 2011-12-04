@@ -148,7 +148,9 @@ L["ICONMENU_DEBUFF"] = "Debuff"
 L["ICONMENU_BOTH"] = "Either"
 
 L["ICONMENU_CHECKNEXT"] = "Check sub-metas"
-L["ICONMENU_CHECKNEXT_DESC"] = "Checking this box will cause this icon to check all the icons of any meta icons that it might be checking at any level. In addition, this icon will not show any icons that have already been shown by another meta icon with a group/icon ID closer to 1."
+L["ICONMENU_CHECKNEXT_DESC"] = [[Checking this box will cause this icon to check all the icons of any meta icons that it might be checking at any level.
+
+In addition, this icon will not show any icons that have already been shown by another meta icon that updates before this one. Update order can be changed in the main and group options.]]
 
 L["ICONMENU_DISPEL"] = "Dispel Type"
 L["ICONMENU_CASTS"] = "Spell Casts"
@@ -164,7 +166,7 @@ The following substitutions may be used to customize the text shown:
 "%u" - Name of current unit being checked
 "%s" - Current spell/item/etc being checked]]
 
-L["ICONMENU_COMPONENTICONS"] = "Component Icons"
+L["ICONMENU_COMPONENTICONS"] = "Component Icons & Groups"
 
 
 L["ICONMENU_UNITSTOWATCH"] = "Unit(s) to watch"
@@ -272,7 +274,7 @@ L["ICONMENU_SORTDESC_DESC"] = "Check this box to prioritize and show spells with
 L["ICONMENU_MOVEHERE"] = "Move here"
 L["ICONMENU_COPYHERE"] = "Copy here"
 L["ICONMENU_SWAPWITH"] = "Swap with"
-L["ICONMENU_ADDMETA"] = "Add to meta icon"
+L["ICONMENU_ADDMETA"] = "Add to Meta Icon"
 L["ICONMENU_APPENDCONDT"] = "Add as 'Icon Shown' condition"
 L["ICONMENU_ANCHORTO"] = "Anchor to %s"
 L["ICONMENU_ANCHORTO_DESC"] = [[Anchor %s to %s, so that whenever %s moves, %s will move with it.
@@ -863,7 +865,7 @@ This includes the amount of diminishment for %s icons.]]
 L["SOUND_EVENT_ONDURATION"] = "Duration Changed"
 L["SOUND_EVENT_ONDURATION_DESC"] = [[This event triggers when the duration of the icon's timer changes.
 
-Because this event occurs every time the icon is updated while a timer is running, you must set a threshold, and the event will only occur when the state of that threshold changes.]]
+Because this event occurs every time the icon is updated while a timer is running, you must set a condition, and the event will only occur when the state of that condition changes.]]
 
 L["SOUND_EVENT_GLOBALDESC"] = "Events are checked from top to bottom in this list. If an event is triggered that has a sound to play, no events below that event will play a sound."
 L["SOUND_EVENT_DISABLEDFORTYPE"] = "Not available"
@@ -992,6 +994,9 @@ L["HELP_IMPORT_CURRENTPROFILE"] = [[Trying to move or copy an icon from this pro
 You can do so easily by right-clicking on the icon and dragging it (hold down the mouse button) to another slot. When you release the mouse button, a menu will appear with many options.
 
 Try dragging an icon to a meta icon, another group, or another frame on your screen for other options.]]
+
+L["HELP_EXPORT_DOCOPY_WIN"] = [[Press |cff7fffffCTRL+C|r to copy]]
+L["HELP_EXPORT_DOCOPY_MAC"] = [[Press |cff7fffffCMD+C|r to copy]]
 
 
 L["TOPLEFT"] = "Top Left"

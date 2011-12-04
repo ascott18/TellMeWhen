@@ -387,9 +387,15 @@ function TMW:SetUIDropdownText(frame, value, tbl)
 				return _G[v]
 			end
 		end
-		local gID, iID = strmatch(value, "(%d+).*(%d+)")
+		local gID, iID = strmatch(value, "TellMeWhen_Group(%d+)_Icon(%d+)")
 		if gID and iID then
 			UIDropDownMenu_SetText(frame, format(L["GROUPICON"], TMW:GetGroupName(gID, gID, 1), iID))
+			return
+		else
+			local gID = tonumber(strmatch(value, "TellMeWhen_Group(%d+)$"))
+			if gID then
+				UIDropDownMenu_SetText(frame, TMW:GetGroupName(gID, gID))
+			end
 			return
 		end
 	end
@@ -1823,7 +1829,7 @@ function ME:Update()
 		
 		TMW:SetUIDropdownText(mg.icon, v, TMW.Icons)
 		
-		mg.icontexture:SetTexture(_G[v] and _G[v].texture:GetTexture())
+		mg.icontexture:SetTexture(_G[v] and _G[v].base == TMW.IconBase and _G[v].texture:GetTexture())
 	end
 
 	for f=#settings+1, #ME do
@@ -1880,40 +1886,50 @@ end
 local addedGroups = {}
 function ME:IconMenu()
 	sort(TMW.Icons, TMW.IconsSort)
-	if UIDROPDOWNMENU_MENU_LEVEL == 2 then
-		for k, v in ipairs(TMW.Icons) do
-			local g, i = strmatch(v, "TellMeWhen_Group(%d+)_Icon(%d+)")
-			g, i = tonumber(g), tonumber(i)
-			if UIDROPDOWNMENU_MENU_VALUE == g and CI.ic and v ~= CI.ic:GetName() then
-				local info = UIDropDownMenu_CreateInfo()
-				info.func = ME.IconMenuOnClick
-				local text, textshort = TMW:GetIconMenuText(g, i)
-				info.text = textshort
-				info.value = v
-				info.tooltipTitle = text
-				info.tooltipText = format(L["GROUPICON"], TMW:GetGroupName(g, g, 1), i)
-				info.tooltipOnButton = true
-				info.arg1 = self
-				info.icon = TMW[g][i].texture:GetTexture()
-				UIDropDownMenu_AddButton(info, UIDROPDOWNMENU_MENU_LEVEL)
-			end
-		end
-	elseif UIDROPDOWNMENU_MENU_LEVEL == 1 then
+	if UIDROPDOWNMENU_MENU_LEVEL == 1 then
 		wipe(addedGroups)
 		for k, v in ipairs(TMW.Icons) do
 			local g = tonumber(strmatch(v, "TellMeWhen_Group(%d+)"))
 			if not addedGroups[g] and v ~= CI.ic:GetName() then
 				local info = UIDropDownMenu_CreateInfo()
+				
 				info.text = TMW:GetGroupName(g, g, 1)
+				
+				info.value = "TellMeWhen_Group" .. g
+				
+				info.func = ME.IconMenuOnClick
+				info.arg1 = self
+				
 				info.hasArrow = true
-				info.notCheckable = true
-				info.value = g
 				UIDropDownMenu_AddButton(info, UIDROPDOWNMENU_MENU_LEVEL)
 				addedGroups[g] = true
 			end
 		end
+	elseif UIDROPDOWNMENU_MENU_LEVEL == 2 then
+		for k, v in ipairs(TMW.Icons) do
+			local g, i = strmatch(v, "TellMeWhen_Group(%d+)_Icon(%d+)")
+			g, i = tonumber(g), tonumber(i)
+			if tonumber(strmatch(UIDROPDOWNMENU_MENU_VALUE, "TellMeWhen_Group(%d+)")) == g and CI.ic and v ~= CI.ic:GetName() then
+				local info = UIDropDownMenu_CreateInfo()
+				
+				local text, textshort = TMW:GetIconMenuText(g, i)
+				info.text = textshort
+				info.tooltipTitle = text
+				info.tooltipText = format(L["GROUPICON"], TMW:GetGroupName(g, g, 1), i)
+				info.tooltipOnButton = true
+				
+				info.value = v
+				
+				info.func = ME.IconMenuOnClick
+				info.arg1 = self
+				
+				info.icon = TMW[g][i].texture:GetTexture()
+				UIDropDownMenu_AddButton(info, UIDROPDOWNMENU_MENU_LEVEL)
+			end
+		end
 	end
-	UIDropDownMenu_JustifyText(self, "LEFT")
+	
+	--UIDropDownMenu_JustifyText(self, "LEFT")
 end
 
 function ME:IconMenuOnClick(frame)
@@ -3009,6 +3025,7 @@ function TMW:ExportToString(editbox, ...)
 	editbox:HighlightText()
 	editbox:SetFocus()
 	CloseDropDownMenus()
+	HELP:Show("ICON_EXPORT_DOCOPY", nil, editbox, 0, 0, L["HELP_EXPORT_DOCOPY_" .. (IsMacClient() and "MAC" or "WIN")])
 end
 
 function TMW:ExportToComm(editbox, ...)
@@ -7052,6 +7069,7 @@ HELP.Codes = {
 	"ICON_DURS_MISSING",
 	
 	"ICON_IMPORT_CURRENTPROFILE",
+	"ICON_EXPORT_DOCOPY",
 	
 	"ICON_DR_MISMATCH",
 	"ICON_MS_NOTFOUND",
@@ -7069,6 +7087,7 @@ HELP.OnlyOnce = {
 	ICON_DURS_FIRSTSEE = true,
 	ICON_POCKETWATCH_FIRSTSEE = true,
 	ICON_IMPORT_CURRENTPROFILE = true,
+	ICON_EXPORT_DOCOPY = true,
 }
 
 function HELP:OnInitialize()

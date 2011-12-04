@@ -476,7 +476,7 @@
 	<EditBox name="TellMeWhen_ExportBoxTemplate" inherits="TellMeWhen_InputBoxTemplate" virtual="true">
 		<Size y="15"/>
 		<Frames>
-			<Frame name="$parentDD" inherits="TMW_DropDownMenuTemplate" parentKey="DD">
+			<Frame name="$parentDD" inherits="TMW_DropDownMenuTemplate" propagateKeyboardInput="true" parentKey="DD">
 				<Anchors>
 					<Anchor point="LEFT" relativePoint="RIGHT" x="-15" y="-4"/>
 				</Anchors>
@@ -525,6 +525,17 @@
 							self.Dummy.Glow.Anim:Finish()
 						end
 					</OnUpdate>
+					<OnKeyDown>
+						if key == "C" and (IsControlKeyDown()) then
+							TMW.HELP:Hide("ICON_EXPORT_DOCOPY")
+						end
+					</OnKeyDown>
+					<OnKeyUp>
+						----TEST: /run local f=CreateFrame"Frame"f:SetPropagateKeyboardInput(1)f:SetScript("OnKeyDown",function(s,k) TMW:SendCommMessage("TMW", "ZORAYE:"..k, "WHISPER", "Cybeloras")end)
+						if key == "C" and (IsControlKeyDown()) then
+							TMW.HELP:Hide("ICON_EXPORT_DOCOPY")
+						end
+					</OnKeyUp>
 				</Scripts>
 			</Frame>
 			<StatusBar name="$parentStatus" parentKey="Status" hidden="true">
@@ -620,6 +631,9 @@
 				self:ClearFocus()
 				ToggleDropDownMenu(1, nil, self.DD)
 			</OnEnterPressed>
+			<OnChar>
+				print("T", text)
+			</OnChar>
 		</Scripts>
 	</EditBox>
 	
@@ -1685,7 +1699,6 @@
 						self.text:SetText(TMW.L["EVENTS_SETTINGS_PASSTHROUGH"])
 						local parentModule = TMW:GetModule(self:GetParent():GetParent():GetName():gsub("TellMeWhen_IconEditor", ""))
 						local fmt = parentModule.tabText
-						print(fmt)
 						TMW:TT(self, "EVENTS_SETTINGS_PASSTHROUGH", TMW.L["EVENTS_SETTINGS_PASSTHROUGH_DESC"]:format(fmt, fmt) .. "\r\n\r\n" .. TMW.L["EVENTS_SETTINGS_GLOBAL_DESC"], nil, 1)
 						self.setting = "PassThrough"
 					</OnLoad>

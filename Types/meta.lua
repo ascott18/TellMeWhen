@@ -62,9 +62,9 @@ local function Meta_OnUpdate(icon, time)
 	if icon.LastUpdate <= time - UPD_INTV then
 		icon.LastUpdate = time
 		local CndtCheck = icon.CndtCheck if CndtCheck and CndtCheck() then return end
-		local CheckNext, Icons = icon.CheckNext, icon.Icons
-		for n = 1, #Icons do
-			local ic = _G[Icons[n]]
+		local CheckNext, CompiledIcons = icon.CheckNext, icon.CompiledIcons
+		for n = 1, #CompiledIcons do
+			local ic = _G[CompiledIcons[n]]
 			if ic and ic.OnUpdate and ic.__shown and not (CheckNext and AlreadyChecked[ic]) then
 				ic:OnUpdate(time)
 				local alpha = ic.__alpha
@@ -125,20 +125,43 @@ local function Meta_OnUpdate(icon, time)
 	end
 end
 
+local InsertIcon,GetFullIconTable -- both need access to eachother, so scope them above their definitions
+
 local alreadyinserted = {}
-local function GetFullIconTable(icons, tbl) -- check what all the possible icons it can show are, for use with setting CheckNext
-	tbl = tbl or {}
-	for i, ic in ipairs(icons) do
-		local g, i = strmatch(ic, "TellMeWhen_Group(%d+)_Icon(%d+)")
-		g, i = tonumber(g), tonumber(i)
-		if db.profile.Groups[g].Icons[i].Type ~= "meta" then
-			tinsert(tbl, ic)
-		elseif not alreadyinserted[ic] then
-			alreadyinserted[ic] = 1
-			GetFullIconTable(db.profile.Groups[g].Icons[i].Icons, tbl)
+function InsertIcon(icon, ics, ic)
+	if ics.Type ~= "meta" then
+		alreadyinserted[ic] = true
+		tinsert(icon.CompiledIcons, ic)
+	elseif icon.CheckNext then
+		GetFullIconTable(icon, ics.Icons, icon.CompiledIcons)
+	end
+end
+
+function GetFullIconTable(icon, icons) -- check what all the possible icons it can show are, for use with setting CheckNext
+	for _, ic in ipairs(icons) do
+		if not alreadyinserted[ic] then
+			alreadyinserted[ic] = true
+			
+			local i = tonumber(strmatch(ic, "TellMeWhen_Group%d+_Icon(%d+)"))
+			local g = tonumber(strmatch(ic, "TellMeWhen_Group(%d+)"))
+			
+			if g and not i then -- a group. Expand it into icons.
+				if TMW:Group_ShouldUpdateIcons(g) then
+					local gs = db.profile.Groups[g]
+					
+					for iconID, ics in ipairs(gs.Icons) do
+						if ics.Enabled and iconID <= gs.Rows*gs.Columns then
+							InsertIcon(icon, ics, ic .. "_Icon" .. iconID)
+						end
+					end
+				end
+				
+			elseif g and i then -- just an icon. put it in.
+				InsertIcon(icon, db.profile.Groups[g].Icons[i], ic)
+			end
 		end
 	end
-	return tbl
+	return icon.CompiledIcons
 end
 
 
@@ -146,6 +169,7 @@ function Type:Setup(icon, groupID, iconID)
 	icon.__previcon = nil -- reset this
 	icon.NameFirst = "" --need to set this to something for bars update
 
+	-- validity check)
 	for k, v in pairs(icon.Icons) do
 		local g, i = strmatch(v, "TellMeWhen_Group(%d+)_Icon(%d+)")
 		g, i = tonumber(g) or 0, tonumber(i) or 0
@@ -154,9 +178,10 @@ function Type:Setup(icon, groupID, iconID)
 	
 	if icon.CheckNext then
 		TMW.DoWipeAC = true
-		wipe(alreadyinserted)
-		icon.Icons = GetFullIconTable(icon.Icons)
 	end
+	wipe(alreadyinserted)
+	icon.CompiledIcons = wipe(icon.CompiledIcons or {})
+	icon.CompiledIcons = GetFullIconTable(icon, icon.Icons)
 
 	icon.ShowPBar = true
 	icon.ShowCBar = true
