@@ -69,7 +69,7 @@ end)
 local test
 --[[test = function()
 	test = nil
-	print("|cffffffffRUNNING CONDITION TESTS")
+	TMW:Debug("|cffffffffRUNNING CONDITION TESTS")
 	local icon = CreateFrame("Button", "TESTICON")
 	Env.TESTICON = icon
 	icon.Conditions = {}

@@ -631,9 +631,6 @@
 				self:ClearFocus()
 				ToggleDropDownMenu(1, nil, self.DD)
 			</OnEnterPressed>
-			<OnChar>
-				print("T", text)
-			</OnChar>
 		</Scripts>
 	</EditBox>
 	
@@ -2548,7 +2545,7 @@
 					<Frame name="$parentTypeChecks" parentKey="TypeChecks">
 						<Size x="140" y="100"/>
 						<Anchors>
-							<Anchor point="TOPLEFT" relativeTo="$parentCustomTex" relativePoint="BOTTOMLEFT" x="200" y="-15"/>
+							<Anchor point="TOPLEFT" relativeTo="$parentCustomTex" relativePoint="BOTTOMLEFT" x="200" y="-19"/>
 						</Anchors>
 						<Layers>
 							<Layer level="ARTWORK">
@@ -2740,7 +2737,7 @@
 					<Frame name="$parentShowPBar" parentKey="ShowPBar">
 						<Size x="110" y="55"/>
 						<Anchors>
-							<Anchor point="TOPLEFT" relativeTo="$parentTypeChecks" relativePoint="TOPRIGHT" y="11"/>
+							<Anchor point="TOPLEFT" relativeTo="$parentTypeChecks" relativePoint="TOPRIGHT" x="6" y="-1"/>
 						</Anchors>
 						<Frames>
 							<CheckButton name="$parentShowPBar" inherits="TellMeWhen_CheckTemplate" parentKey="ShowPBar" id="1">
@@ -2819,6 +2816,12 @@
 									self.PBarOffs:SetEnabled(arg1)
 								end
 							</OnLoad>
+							<OnShow>
+								TMW.IE.Main.BarHeader:Show()
+							</OnShow>
+							<OnHide>
+								TMW.IE.Main.BarHeader:Hide()
+							</OnHide>
 						</Scripts>
 					</Frame>
 					<Frame name="$parentShowCBar" parentKey="ShowCBar">
@@ -3320,7 +3323,8 @@
 					</CheckButton>
 					<CheckButton name="$parentCheckNext" inherits="TellMeWhen_CheckTemplate" parentKey="CheckNext">
 						<Anchors>
-							<Anchor point="CENTER" relativeTo="$parentFakeHidden"/>
+							<Anchor point="LEFT" relativeTo="$parentFakeHidden" relativePoint="RIGHT" x="80"/>
+							<!--Anchor point="CENTER" relativeTo="$parentFakeHidden"/-->
 						</Anchors>
 						<Scripts>
 							<OnLoad>
@@ -3386,6 +3390,13 @@
 								<Anchor point="BOTTOM" relativeTo="$parentStackMin" relativePoint="TOP" y="14"/>
 							</Anchors>
 						</FontString>
+						<FontString name="$parentBarHeader" parentKey="BarHeader" inherits="GameFontNormal" justifyH="CENTER">
+							<Anchors>
+								<Anchor point="LEFT" relativeTo="$parentShowPBar"/>
+								<Anchor point="RIGHT" relativeTo="$parentShowCBar"/>
+								<Anchor point="BOTTOM" relativeTo="$parentShowPBar" relativePoint="TOP" y="0"/>
+							</Anchors>
+						</FontString>
 						<FontString name="$parentTransparencyHeader" parentKey="TransparencyHeader" inherits="GameFontNormal" justifyH="RIGHT">
 							<Anchors>
 								<Anchor point="BOTTOM" relativeTo="$parentUnAlpha" relativePoint="TOP" y="14"/>
@@ -3399,6 +3410,7 @@
 						self.DurationHeader:SetText(TMW.L["DURATIONPANEL_TITLE"])
 						self.ConditionDurHeader:SetText(TMW.L["CONDITION_TIMERS_HEADER"])
 						self.StackHeader:SetText(TMW.L["STACKSPANEL_TITLE"])
+						self.BarHeader:SetText(TMW.L["ICONMENU_OVERLAYBARHEADER"])
 						self.TransparencyHeader:SetText(TMW.L["ICONMENU_ALPHA"] .. ":")
 					</OnLoad>
 					<OnDragStart> TMW.IE:StartMoving() </OnDragStart>

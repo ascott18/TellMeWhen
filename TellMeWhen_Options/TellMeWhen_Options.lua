@@ -374,38 +374,42 @@ end
 
 ---------- Dropdown Utilities ----------
 function TMW:SetUIDropdownText(frame, value, tbl)
-	if frame.selectedValue ~= value or not frame.selectedValue then
-		UIDropDownMenu_SetSelectedValue(frame, value)
-	end
-
-	if tbl == CNDT.Types then
-		frame:GetParent():TypeCheck(CNDT.ConditionsByType[value])
-	elseif tbl == TMW.Icons then
+	frame.selectedValue = value
+	
+	if tbl then
+		if tbl == CNDT.Types then
+			frame:GetParent():TypeCheck(CNDT.ConditionsByType[value])
+		elseif tbl == TMW.Icons then
+			for k, v in pairs(tbl) do
+				if v == value then
+					UIDropDownMenu_SetText(frame, TMW:GetIconMenuText(nil, nil, _G[v]))
+					return _G[v]
+				end
+			end
+			local gID, iID = strmatch(value, "TellMeWhen_Group(%d+)_Icon(%d+)")
+			if gID and iID then
+				UIDropDownMenu_SetText(frame, format(L["GROUPICON"], TMW:GetGroupName(gID, gID, 1), iID))
+				return
+			else
+				local gID = tonumber(strmatch(value, "TellMeWhen_Group(%d+)$"))
+				if gID then
+					UIDropDownMenu_SetText(frame, TMW:GetGroupName(gID, gID))
+				end
+				return
+			end
+		end
 		for k, v in pairs(tbl) do
-			if v == value then
-				UIDropDownMenu_SetText(frame, TMW:GetIconMenuText(nil, nil, _G[v]))
-				return _G[v]
+			if v.value == value then
+				UIDropDownMenu_SetText(frame, v.text)
+				return v
 			end
 		end
-		local gID, iID = strmatch(value, "TellMeWhen_Group(%d+)_Icon(%d+)")
-		if gID and iID then
-			UIDropDownMenu_SetText(frame, format(L["GROUPICON"], TMW:GetGroupName(gID, gID, 1), iID))
-			return
-		else
-			local gID = tonumber(strmatch(value, "TellMeWhen_Group(%d+)$"))
-			if gID then
-				UIDropDownMenu_SetText(frame, TMW:GetGroupName(gID, gID))
-			end
-			return
-		end
 	end
-	for k, v in pairs(tbl) do
-		if v.value == value then
-			UIDropDownMenu_SetText(frame, v.text)
-			return v
-		end
-	end
-	UIDropDownMenu_SetText(frame, "")
+	UIDropDownMenu_SetText(frame, value)
+end
+
+function TMW:SetUIDropdownValue(frame, value)
+
 end
 
 local function AddDropdownSpacer()
@@ -1813,8 +1817,7 @@ ME = TMW:NewModule("MetaEditor") TMW.ME = ME -- really part of the icon editor n
 function ME:Update()
 	local groupID, iconID = CI.g, CI.i
 	local settings = CI.ics.Icons
-	UIDropDownMenu_SetSelectedValue(ME[1].icon, nil)
-	UIDropDownMenu_SetText(ME[1].icon, "")
+	TMW:SetUIDropdownText(ME[1].icon, nil)
 
 	for k, v in pairs(settings) do
 		local mg = ME[k] or CreateFrame("Frame", "TellMeWhen_IconEditorMainIcons" .. k, IE.Main.Icons.ScrollFrame.Icons, "TellMeWhen_MetaGroup", k)
@@ -1934,7 +1937,6 @@ end
 
 function ME:IconMenuOnClick(frame)
 	db.profile.Groups[CI.g].Icons[CI.i].Icons[frame:GetParent():GetID()] = self.value
-	UIDropDownMenu_SetSelectedValue(frame, self.value)
 	ME:Update()
 	CloseDropDownMenus()
 end
@@ -2191,9 +2193,7 @@ function IE:Load(isRefresh, icon)
 	IE.Main.Name:SetLabels(TMW.Types[CI.t].chooseNameTitle, TMW.Types[CI.t].chooseNameText)
 	IE.Main.Name:GetScript("OnTextChanged")(IE.Main.Name)
 	
-	if IE.Main.Type.selectedValue ~= CI.t then
-		UIDropDownMenu_SetSelectedValue(IE.Main.Type, CI.t)
-	end
+	TMW:SetUIDropdownText(IE.Main.Type, CI.t)
 	
 	CI.t = db.profile.Groups[groupID].Icons[iconID].Type
 	if CI.t == "" then
@@ -2743,7 +2743,7 @@ function IE:Type_Dropdown_OnClick()
 	CI.ics.Type = self.value
 	CI.ic.texture:SetTexture(nil)
 	IE:ScheduleIconUpdate(CI.ic)
-	UIDropDownMenu_SetSelectedValue(IE.Main.Type, self.value)
+	TMW:SetUIDropdownText(IE.Main.Type, self.value)
 	CI.t = self.value
 	SUG.redoIfSame = 1
 	SUG.Suggest:Hide()
@@ -3939,7 +3939,7 @@ end
 function EVENTS:OperatorMenu_DropDown_OnClick(frame)
 	local Module = frame:GetParent():GetParent().module
 	
-	UIDropDownMenu_SetSelectedValue(frame, self.value)
+	TMW:SetUIDropdownText(frame, self.value)
 	
 	TMW.CI.ics.Events[Module.currentEvent].Operator = self.value
 	TMW:TT(frame, self.tooltipTitle, nil, 1)
@@ -4395,7 +4395,7 @@ function ANN:SelectChannel(channel)
 			location = channelsettings.ddtext(location) and location or defaultlocation
 			EventSettings.Location = location
 			local loc = channelsettings.ddtext(location)
-			UIDropDownMenu_SetSelectedValue(ANN.Location, location)
+			TMW:SetUIDropdownText(ANN.Location, location)
 			UIDropDownMenu_SetText(ANN.Location, loc)
 			ANN.Location:Show()
 		else
@@ -4452,7 +4452,7 @@ function ANN:GetNumUsedEvents()
 end
 
 function ANN:LocDropdownFunc(text)
-	UIDropDownMenu_SetSelectedValue(ANN.Location, self.value)
+	TMW:SetUIDropdownText(ANN.Location, self.value)
 	UIDropDownMenu_SetText(ANN.Location, text)
 	CI.ics.Events[ANN.currentEvent].Location = self.value
 end
@@ -6394,7 +6394,7 @@ function CNDT:TypeMenu_DropDown()
 end
 
 function CNDT:TypeMenu_DropDown_OnClick(frame, data)
-	UIDropDownMenu_SetSelectedValue(UIDROPDOWNMENU_OPEN_MENU, self.value)
+	TMW:SetUIDropdownText(UIDROPDOWNMENU_OPEN_MENU, self.value)
 	UIDropDownMenu_SetText(UIDROPDOWNMENU_OPEN_MENU, data.text)
 	local group = UIDROPDOWNMENU_OPEN_MENU:GetParent()
 	local showval = group:TypeCheck(data)
@@ -6482,7 +6482,7 @@ function CNDT:IconMenu_DropDown()
 end
 
 function CNDT:IconMenu_DropDown_OnClick(frame)
-	UIDropDownMenu_SetSelectedValue(frame, self.value)
+	TMW:SetUIDropdownText(frame, self.value)
 	CloseDropDownMenus()
 	CNDT:Save()
 end
@@ -6501,7 +6501,7 @@ function CNDT:OperatorMenu_DropDown()
 end
 
 function CNDT:OperatorMenu_DropDown_OnClick(frame)
-	UIDropDownMenu_SetSelectedValue(frame, self.value)
+	TMW:SetUIDropdownText(frame, self.value)
 	TMW:TT(frame, self.tooltipTitle, nil, 1)
 	CNDT:Save()
 end
@@ -6899,9 +6899,8 @@ end
 function CNDT.GroupBase.Load(group)
 	local condition = CNDT.settings[group:GetID()]
 	local data = CNDT.ConditionsByType[condition.Type]
-	if group.Type.selectedValue ~= condition.Type then
-		UIDropDownMenu_SetSelectedValue(group.Type, condition.Type)
-	end
+	
+	TMW:SetUIDropdownText(group.Type, condition.Type)
 	UIDropDownMenu_SetText(group.Type, data and data.text or ("UNKNOWN TYPE: " .. condition.Type))
 	
 	group:TypeCheck(data)
@@ -6951,9 +6950,8 @@ function CNDT.GroupBase.Clear(group)
 	group.EditBox2:SetText("")
 	group.Check:SetChecked(nil)
 	group.Check2:SetChecked(nil)
-	if group.Icon.selectedValue ~= "" then
-		UIDropDownMenu_SetSelectedValue(group.Icon, "")
-	end
+
+	TMW:SetUIDropdownText(group.Icon, "", TMW.Icons)
 	TMW:SetUIDropdownText(group.Type, "", CNDT.Types)
 	TMW:SetUIDropdownText(group.Operator, "==", CNDT.Operators)
 	group.AndOr:SetValue("AND")

@@ -208,6 +208,7 @@ L["ICONMENU_SHOWTIMERTEXT_DESC"] = [[Check this option to display a textual disp
 
 This is only applicable if OmniCC is installed.]]
 
+L["ICONMENU_OVERLAYBARHEADER"] = "Overlay Bars"
 L["ICONMENU_SHOWPBARN"] = "Power bar"
 L["ICONMENU_SHOWCBARN"] = "Timer bar"
 L["ICONMENU_SHOWPBAR_DESC"] = "Shows a bar that is overlaid across the top half of the icon that will indicate the power still needed to cast the spell (or the power that you have when 'Fill bars up' is checked)"

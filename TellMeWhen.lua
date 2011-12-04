@@ -32,7 +32,7 @@ local DRData = LibStub("DRData-1.0", true)
 TELLMEWHEN_VERSION = "4.7.0"
 TELLMEWHEN_VERSION_MINOR = strmatch(" @project-version@", " r%d+") or ""
 TELLMEWHEN_VERSION_FULL = TELLMEWHEN_VERSION .. TELLMEWHEN_VERSION_MINOR
-TELLMEWHEN_VERSIONNUMBER = 47015 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
+TELLMEWHEN_VERSIONNUMBER = 47016 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
 if TELLMEWHEN_VERSIONNUMBER > 48000 or TELLMEWHEN_VERSIONNUMBER < 47000 then return error("YOU SCREWED UP THE VERSION NUMBER OR DIDNT CHANGE THE SAFETY LIMITS") end -- safety check because i accidentally made the version number 414069 once
 
 TELLMEWHEN_MAXGROUPS = 1 	--this is a default, used by SetTheory (addon), so dont rename
@@ -160,6 +160,7 @@ function TMW.tContains(table, item, returnNum)
 	end
 	return firstkey, num
 end local tContains = TMW.tContains
+
 local function ClearScripts(f)
 	f:SetScript("OnEvent", nil)
 	f:SetScript("OnUpdate", nil)
@@ -167,6 +168,7 @@ local function ClearScripts(f)
 		f:SetScript("OnValueChanged", nil)
 	end
 end
+
 function TMW.print(...)
 	if TMW.debug or not TMW.VarsLoaded then
 		local prefix = "|cffff0000TMW"
@@ -174,15 +176,17 @@ function TMW.print(...)
 			prefix = prefix..format(" %4.0f", linenum(3))
 		end
 		prefix = prefix..":|r "
+		-- i did _G["print"] instead of just plain print so that this doesnt show up on a CTRL+F for "print ("
 		if ... == TMW then
-			print(prefix, select(2,...))
+			_G["print"](prefix, select(2,...))
 		else
-			print(prefix, ...)
+			_G["print"](prefix, ...)
 		end
 	end
 	return ...
 end
 local print = TMW.print
+TMW.Debug = TMW.print
 
 do -- Iterators
 	local mg = TELLMEWHEN_MAXGROUPS
@@ -1381,7 +1385,7 @@ end
 function TMW:OnCommReceived(prefix, text, channel, who)
 	if prefix == "TMWV" and strsub(text, 1, 1) == "M" and not TMW.VersionWarned and db.global.VersionWarning then
 		local major, minor, revision = strmatch(text, "M:(.*)%^m:(.*)%^R:(.*)%^")
-		print(prefix, who, major, minor, revision)
+		TMW:Debug(prefix, who, major, minor, revision)
 		revision = tonumber(revision)
 		if not (revision and major and minor and revision > TELLMEWHEN_VERSIONNUMBER and revision ~= 414069) then
 			return
