@@ -32,7 +32,7 @@ local DRData = LibStub("DRData-1.0", true)
 TELLMEWHEN_VERSION = "4.7.0"
 TELLMEWHEN_VERSION_MINOR = strmatch(" @project-version@", " r%d+") or ""
 TELLMEWHEN_VERSION_FULL = TELLMEWHEN_VERSION .. TELLMEWHEN_VERSION_MINOR
-TELLMEWHEN_VERSIONNUMBER = 47018 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
+TELLMEWHEN_VERSIONNUMBER = 47019 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
 if TELLMEWHEN_VERSIONNUMBER > 48000 or TELLMEWHEN_VERSIONNUMBER < 47000 then return error("YOU SCREWED UP THE VERSION NUMBER OR DIDNT CHANGE THE SAFETY LIMITS") end -- safety check because i accidentally made the version number 414069 once
 
 TELLMEWHEN_MAXGROUPS = 1 	--this is a default, used by SetTheory (addon), so dont rename
@@ -1767,8 +1767,8 @@ function TMW:GetUpgradeTable()			-- upgrade functions
 								condition[k] = nil
 							end
 						end
+						condition.Names = nil
 					end
-					condition.Names = nil
 				end
 				for _, t in pairs(ics.Events) do
 					if t.Sound == "" then -- major screw up
@@ -1790,22 +1790,18 @@ function TMW:GetUpgradeTable()			-- upgrade functions
 		[42102] = {
 			icon = function(ics)
 				local Events = ics.Events
-				Events.OnShow = {
-					Sound = ics.SoundOnShow or "None",
-					Announce = ics.ANNOnShow or "\001",
-				}
-				Events.OnHide = {
-					Sound = ics.SoundOnHide or "None",
-					Announce = ics.ANNOnHide or "\001",
-				}
-				Events.OnStart = {
-					Sound = ics.SoundOnStart or "None",
-					Announce = ics.ANNOnStart or "\001",
-				}
-				Events.OnFinish = {
-					Sound = ics.SoundOnFinish or "None",
-					Announce = ics.ANNOnFinish or "\001",
-				}
+				Events.OnShow.Sound = ics.SoundOnShow or "None"
+				Events.OnShow.Announce = ics.ANNOnShow or "\001"
+				
+				Events.OnHide.Sound = ics.SoundOnHide or "None"
+				Events.OnHide.Announce = ics.ANNOnHide or "\001"
+				
+				Events.OnStart.Sound = ics.SoundOnStart or "None"
+				Events.OnStart.Announce = ics.ANNOnStart or "\001"
+				
+				Events.OnFinish.Sound = ics.SoundOnFinish or "None"
+				Events.OnFinish.Announce = ics.ANNOnFinish or "\001"
+				
 				ics.SoundOnShow		= nil
 				ics.SoundOnHide		= nil
 				ics.SoundOnStart	= nil

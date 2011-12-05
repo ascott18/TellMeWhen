@@ -20,6 +20,8 @@
  ** (r329) TellMeWhen-4.6.7.lua:3469: attempt to index local "settings" (a nil value)
  ** (r332) Binding/label text should now properly clear when resetting an icon.
  ** (r334) Fixed a bug with meta icons checking other meta icon without "Check sub-metas" enabled
+ ** (r335) TellMeWhen-4.6.7.lua:1771: attempt to index local "condition" (a number value)
+ ** (r335) TellMeWhen_Options.lua:3883: Usage: TellMeWhen_IconEditorSoundEventSettingsValue:SetText("text")
  
 ===v4.6.7===
  * Bug Fixes:
