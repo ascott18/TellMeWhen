@@ -29,6 +29,7 @@ Type.desc = L["ICONMENU_CNDTIC_DESC"]
 Type.spacebefore = true
 Type.AllowNoName = true
 Type.SUGType = "texture"
+Type.DontSetInfoInCondition = true
 Type.chooseNameTitle = L["ICONMENU_CHOOSENAME_CNDTIC"]
 Type.chooseNameText = L["CHOOSENAME_DIALOG_CNDTIC"]
 	
@@ -70,7 +71,7 @@ local function ConditionIcon_OnUpdate(icon, time)
 		local CndtCheck = icon.CndtCheck
 		if CndtCheck then
 			local shouldReturn, succeeded = CndtCheck() -- we dont use shouldreturn.
-			icon.CndtFailed = nil -- you are a pirate (actually, you hack your own code, but close enough)
+			
 			local alpha = succeeded and icon.Alpha or icon.UnAlpha
 			
 			local d 

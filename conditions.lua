@@ -2220,15 +2220,23 @@ function CNDT:ProcessConditions(icon)
 		end
 	end
 
-	if strfind(icon:GetName(), "Icon") then
-		funcstr = [[if not (]] .. strsub(funcstr, 4) .. [[) then
-			]] .. (icon.ConditionAlpha == 0 and (icon:GetName()..[[:SetInfo(0) return true, false]]) or (icon:GetName()..[[.CndtFailed = 1 return false, false]])) .. [[
+	if icon.base == TMW.IconBase then
+		if icon.typeData.DontSetInfoInCondition then
+			funcstr = [[if not (]] .. strsub(funcstr, 4) .. [[) then
+				return false, false
+			else
+				return false, true
+			end]]
 		else
-			]]..icon:GetName()..[[.CndtFailed = nil return false, true
-		end]]
+			funcstr = [[if not (]] .. strsub(funcstr, 4) .. [[) then
+				]] .. (icon.ConditionAlpha == 0 and (icon:GetName()..[[:SetInfo(0) return true, false]]) or (icon:GetName()..[[.CndtFailed = 1 return false, false]])) .. [[
+			else
+				]]..icon:GetName()..[[.CndtFailed = nil return false, true
+			end]]
+		end
 	else -- its a group condition
 		funcstr = strsub(funcstr, 4)
-		if icon.OnlyInCombat then
+		if icon.OnlyInCombat then --icon is actually group
 			CNDT.ConditionsByType.COMBAT.funcstr(groupCombatCondition) -- hackily initialize the events for PlayerInCombat
 			if funcstr == "" then
 				funcstr = "PlayerInCombat"

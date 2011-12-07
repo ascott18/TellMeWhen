@@ -87,9 +87,13 @@ function Type:Update(upd_intv)
 	DS = TMW.DS
 end
 
+local function Buff_OnEvent(icon, event)
+	icon:OnUpdate(TMW.time, true)
+end
+
 local huge = math.huge
-local function Buff_OnUpdate(icon, time)
-	if icon.LastUpdate <= time - UPD_INTV then
+local function Buff_OnUpdate(icon, time, force)
+	if force or icon.LastUpdate <= time - UPD_INTV then
 		icon.LastUpdate = time
 		local CndtCheck = icon.CndtCheck if CndtCheck and CndtCheck() then return end
 
@@ -252,6 +256,14 @@ function Type:Setup(icon, groupID, iconID)
 	-- Two buffs with the same name/ID can have different durations on a unit.
 	-- Normal aura checking will stop when it finds the first one and go to check the next item in NameArray.
 
+	
+	for i, unit in pairs(icon.Units) do
+		if strfind(unit, "^mouseover") then 
+			icon:RegisterEvent("UPDATE_MOUSEOVER_UNIT") -- we want to force update the icon whenever the mouseover unit changes
+			break
+		end	
+	end
+	
 	icon.FirstTexture = SpellTextures[icon.NameFirst]
 	
 	icon:SetTexture(TMW:GetConfigIconTexture(icon))
