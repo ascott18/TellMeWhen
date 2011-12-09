@@ -550,6 +550,14 @@ local function formatSeconds(seconds, arg2)
 end
 
 -- preset text tables that are frequently used
+local commanumber = function(k)
+    k = gsub(k, "(%d)(%d%d%d)$", "%1,%2", 1)
+    repeat
+        k, found = gsub(k, "(%d)(%d%d%d),", "%1,%2,", 1)
+    until found == 0
+    
+    return k
+end
 local percent = function(k) return k.."%" end
 local pluspercent = function(k) return "+"..k.."%" end
 local bool = {[0] = L["TRUE"],[1] = L["FALSE"],}
@@ -658,7 +666,9 @@ CNDT.Types = {
 		icon = "Interface\\Icons\\spell_shadow_mindflay",
 		tcoords = standardtcoords,
 		funcstr = [[UnitPower(c.Unit, 10)/(UnitPowerMax(c.Unit, 10)+epsilon) c.Operator c.Level]],
+		spaceafter = true,
 	},
+	
 	{ -- soul shards
 		text = SOUL_SHARDS,
 		value = "SOUL_SHARDS",
@@ -772,11 +782,196 @@ CNDT.Types = {
 		funcstr = [[GetComboPoints("player", c.Unit) c.Operator c.Level]],
 	},
 
-
+	{ -- abs health
+		text = L["CONDITIONPANEL_ABSOLUTE"] .. " " .. HEALTH,
+		value = "HEALTH_ABS",
+		category = L["CNDTCAT_RESOURCES"],
+		texttable = commanumber,
+		range = 1000000,
+		step = 1000,
+		icon = "Interface\\Icons\\inv_alchemy_elixir_05",
+		tcoords = standardtcoords,
+		funcstr = [[UnitHealth(c.Unit) c.Operator c.Level]],
+		spacebefore = true,
+	},
+	{ -- abs primary resource
+		text = L["CONDITIONPANEL_ABSOLUTE"] .. " " .. L["CONDITIONPANEL_POWER"],
+		tooltip = L["CONDITIONPANEL_POWER_DESC"],
+		value = "DEFAULT_ABS",
+		category = L["CNDTCAT_RESOURCES"],
+		texttable = commanumber,
+		range = 40000,
+		step = 1,
+		icon = "Interface\\Icons\\inv_alchemy_elixir_02",
+		tcoords = standardtcoords,
+		funcstr = [[UnitPower(c.Unit) c.Operator c.Level]],
+	},
+	{ -- abs mana
+		text = L["CONDITIONPANEL_ABSOLUTE"] .. " " .. MANA,
+		value = "MANA_ABS",
+		category = L["CNDTCAT_RESOURCES"],
+		texttable = commanumber,
+		range = 40000,
+		step = 1,
+		icon = "Interface\\Icons\\inv_potion_126",
+		tcoords = standardtcoords,
+		funcstr = [[UnitPower(c.Unit, 0) c.Operator c.Level]],
+	},
+	{ -- abs energy
+		text = L["CONDITIONPANEL_ABSOLUTE"] .. " " .. ENERGY,
+		value = "ENERGY_ABS",
+		category = L["CNDTCAT_RESOURCES"],
+		texttable = commanumber,
+		range = 200,
+		step = 1,
+		icon = "Interface\\Icons\\inv_potion_125",
+		tcoords = standardtcoords,
+		funcstr = [[UnitPower(c.Unit, 3) c.Operator c.Level]],
+	},
+	{ -- abs rage
+		text = L["CONDITIONPANEL_ABSOLUTE"] .. " " .. RAGE,
+		value = "RAGE_ABS",
+		category = L["CNDTCAT_RESOURCES"],
+		texttable = commanumber,
+		range = 200,
+		step = 1,
+		icon = "Interface\\Icons\\inv_potion_120",
+		tcoords = standardtcoords,
+		funcstr = [[UnitPower(c.Unit, 1) c.Operator c.Level]],
+	},
+	{ -- abs focus
+		text = L["CONDITIONPANEL_ABSOLUTE"] .. " " .. FOCUS,
+		value = "FOCUS_ABS",
+		category = L["CNDTCAT_RESOURCES"],
+		texttable = commanumber,
+		range = 200,
+		step = 1,
+		icon = "Interface\\Icons\\inv_potion_124",
+		tcoords = standardtcoords,
+		funcstr = [[UnitPower(c.Unit, 2) c.Operator c.Level]],
+	},
+	{ -- abs runic power
+		text = L["CONDITIONPANEL_ABSOLUTE"] .. " " .. RUNIC_POWER,
+		value = "RUNIC_POWER_ABS",
+		category = L["CNDTCAT_RESOURCES"],
+		texttable = commanumber,
+		range = 200,
+		step = 1,
+		icon = "Interface\\Icons\\inv_potion_128",
+		tcoords = standardtcoords,
+		funcstr = [[UnitPower(c.Unit, 6) c.Operator c.Level]],
+	},
+	{ -- abs alternate power (atramedes, chogall, etc)
+		text = L["CONDITIONPANEL_ABSOLUTE"] .. " " .. L["CONDITIONPANEL_ALTPOWER"],
+		tooltip = L["CONDITIONPANEL_ALTPOWER_DESC"],
+		value = "ALTPOWER_ABS",
+		category = L["CNDTCAT_RESOURCES"],
+		texttable = commanumber,
+		range = 200,
+		step = 1,
+		icon = "Interface\\Icons\\spell_shadow_mindflay",
+		tcoords = standardtcoords,
+		funcstr = [[UnitPower(c.Unit, 10) c.Operator c.Level]],
+	},
+	
+	{ -- max health
+		text = L["CONDITIONPANEL_MAX"] .. " " .. HEALTH,
+		value = "HEALTH_MAX",
+		category = L["CNDTCAT_RESOURCES"],
+		texttable = commanumber,
+		range = 1000000,
+		step = 1000,
+		icon = "Interface\\Icons\\inv_alchemy_elixir_05",
+		tcoords = standardtcoords,
+		funcstr = [[UnitHealthMax(c.Unit) c.Operator c.Level]],
+		spacebefore = true,
+	},
+	{ -- max primary resource
+		text = L["CONDITIONPANEL_MAX"] .. " " .. L["CONDITIONPANEL_POWER"],
+		tooltip = L["CONDITIONPANEL_POWER_DESC"],
+		value = "DEFAULT_MAX",
+		category = L["CNDTCAT_RESOURCES"],
+		texttable = commanumber,
+		range = 40000,
+		step = 1,
+		icon = "Interface\\Icons\\inv_alchemy_elixir_02",
+		tcoords = standardtcoords,
+		funcstr = [[UnitPowerMax(c.Unit) c.Operator c.Level]],
+	},
+	{ -- max mana
+		text = L["CONDITIONPANEL_MAX"] .. " " .. MANA,
+		value = "MANA_MAX",
+		category = L["CNDTCAT_RESOURCES"],
+		texttable = commanumber,
+		range = 40000,
+		step = 1,
+		icon = "Interface\\Icons\\inv_potion_126",
+		tcoords = standardtcoords,
+		funcstr = [[UnitPowerMax(c.Unit, 0) c.Operator c.Level]],
+	},
+	{ -- max energy
+		text = L["CONDITIONPANEL_MAX"] .. " " .. ENERGY,
+		value = "ENERGY_MAX",
+		category = L["CNDTCAT_RESOURCES"],
+		texttable = commanumber,
+		range = 200,
+		step = 1,
+		icon = "Interface\\Icons\\inv_potion_125",
+		tcoords = standardtcoords,
+		funcstr = [[UnitPowerMax(c.Unit, 3) c.Operator c.Level]],
+	},
+	{ -- max rage
+		text = L["CONDITIONPANEL_MAX"] .. " " .. RAGE,
+		value = "RAGE_MAX",
+		category = L["CNDTCAT_RESOURCES"],
+		texttable = commanumber,
+		range = 200,
+		step = 1,
+		icon = "Interface\\Icons\\inv_potion_120",
+		tcoords = standardtcoords,
+		funcstr = [[UnitPowerMax(c.Unit, 1) c.Operator c.Level]],
+	},
+	{ -- max focus
+		text = L["CONDITIONPANEL_MAX"] .. " " .. FOCUS,
+		value = "FOCUS_MAX",
+		category = L["CNDTCAT_RESOURCES"],
+		texttable = commanumber,
+		range = 200,
+		step = 1,
+		icon = "Interface\\Icons\\inv_potion_124",
+		tcoords = standardtcoords,
+		funcstr = [[UnitPowerMax(c.Unit, 2) c.Operator c.Level]],
+	},
+	{ -- max runic power
+		text = L["CONDITIONPANEL_MAX"] .. " " .. RUNIC_POWER,
+		value = "RUNIC_POWER_MAX",
+		category = L["CNDTCAT_RESOURCES"],
+		texttable = commanumber,
+		range = 200,
+		step = 1,
+		icon = "Interface\\Icons\\inv_potion_128",
+		tcoords = standardtcoords,
+		funcstr = [[UnitPowerMax(c.Unit, 6) c.Operator c.Level]],
+	},
+	{ -- max alternate power (atramedes, chogall, etc)
+		text = L["CONDITIONPANEL_MAX"] .. " " .. L["CONDITIONPANEL_ALTPOWER"],
+		tooltip = L["CONDITIONPANEL_ALTPOWER_DESC"],
+		value = "ALTPOWER_MAX",
+		category = L["CNDTCAT_RESOURCES"],
+		texttable = commanumber,
+		range = 200,
+		step = 1,
+		icon = "Interface\\Icons\\spell_shadow_mindflay",
+		tcoords = standardtcoords,
+		funcstr = [[UnitPowerMax(c.Unit, 10) c.Operator c.Level]],
+	},
+	
+	
 -------------------------------------unit status/attributes
 	{ -- exists
 		text = L["CONDITIONPANEL_EXISTS"],
 		category = L["CNDTCAT_ATTRIBUTES_UNIT"],
+	--	categorySpacebefore = true,
 		value = "EXISTS",
 		min = 0,
 		max = 1,
@@ -1210,11 +1405,12 @@ CNDT.Types = {
 	},
 
 
--------------------------------------icon functions
+-------------------------------------spells/items
 	{ -- spell cooldown
 		text = L["SPELLCOOLDOWN"],
 		value = "SPELLCD",
 		category = L["CNDTCAT_SPELLSABILITIES"],
+		categorySpacebefore = true,
 		range = 30,
 		step = 0.1,
 		name = function(editbox) TMW:TT(editbox, "SPELLTOCHECK", "CNDT_ONLYFIRST") editbox.label = L["SPELLTOCHECK"] end,
@@ -1652,6 +1848,7 @@ CNDT.Types = {
 		text = _G["SPELL_STAT1_NAME"],
 		value = "STRENGTH",
 		category = L["CNDTCAT_STATS"],
+		categorySpacebefore = true,
 		range = 5000,
 		unit = PLAYER,
 		icon = "Interface\\Icons\\spell_nature_strength",

@@ -6358,7 +6358,7 @@ function CNDT:TypeMenu_DropDown()
 	end
 	
 	wipe(addedThings)
-	local addedFreq
+	local addedFreq = true -- FREQUENCY SUBMENU DISABLED BY SETTING THIS TRUE
 	for k, v in ipairs(CNDT.Types) do
 		
 		-- add the frequently used submenu before the first condition that does not have a category
@@ -6382,8 +6382,17 @@ function CNDT:TypeMenu_DropDown()
 			-- most conditions are added to the dropdown right here
 			AddConditionToDropDown(v)
 			
+			if v.spaceafter then
+				AddDropdownSpacer()
+			end
+			
 		elseif UIDROPDOWNMENU_MENU_LEVEL == 1 and v.category and not addedThings[v.category] then
 			-- addedThings IN THIS CASE is a list of categories that have been added. Add ones here that have not been added yet.
+			
+			if v.categorySpacebefore then
+				AddDropdownSpacer()
+			end
+			
 			local info = UIDropDownMenu_CreateInfo()
 			info.text = v.category
 			info.value = v.category
