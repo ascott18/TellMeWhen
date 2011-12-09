@@ -18,7 +18,7 @@ local TMW = TMW
 if not TMW then return end
 local L = TMW.L
 
-local db, UPD_INTV, ClockGCD, rc, mc, pr, ab
+local db, ClockGCD, rc, mc, pr, ab
 local GetSpellCooldown, IsSpellInRange, IsUsableSpell =
 	  GetSpellCooldown, IsSpellInRange, IsUsableSpell
 local GetActionCooldown, IsActionInRange, IsUsableAction, GetActionTexture, GetActionInfo =
@@ -65,9 +65,8 @@ Type.DisabledEvents = {
 }
 
 
-function Type:Update(upd_intv)
+function Type:Update()
 	db = TMW.db
-	UPD_INTV = upd_intv
 	ClockGCD = db.profile.ClockGCD
 	rc = db.profile.OORColor
 	mc = db.profile.OOMColor
@@ -91,39 +90,35 @@ local function MultiStateCD_OnEvent(icon)
 end
 
 local function MultiStateCD_OnUpdate(icon, time)
-	if icon.LastUpdate <= time - UPD_INTV then
-		icon.LastUpdate = time
-		local CndtCheck = icon.CndtCheck if CndtCheck and CndtCheck() then return end
 
-		local Slot = icon.Slot
-		local start, duration = GetActionCooldown(Slot)
-		if duration then
+	local Slot = icon.Slot
+	local start, duration = GetActionCooldown(Slot)
+	if duration then
 
-			local inrange, nomana = 1
+		local inrange, nomana = 1
 
-			if icon.RangeCheck then
-				inrange = IsActionInRange(Slot, "target") or 1
-			end
-			if icon.ManaCheck then
-				_, nomana = IsUsableAction(Slot)
-			end
-			
-			local actionType, spellID = GetActionInfo(Slot)
-			spellID = actionType == "spell" and spellID or icon.NameFirst
-			
-			
-			local alpha, color
-			if (duration == 0 or OnGCD(duration)) and inrange == 1 and not nomana then
-				alpha = icon.Alpha
-				color = icon:CrunchColor()
-			else
-				alpha = icon.UnAlpha
-				color = icon:CrunchColor(duration, inrange, nomana)
-			end
-			
-			--icon:SetInfo(alpha, color, texture, start, duration, spellChecked, reverse, count, countText, forceupdate, unit)
-			icon:SetInfo(alpha, color, GetActionTexture(Slot) or "Interface\\Icons\\INV_Misc_QuestionMark", start, duration, spellID, nil, nil, nil, nil, nil)
+		if icon.RangeCheck then
+			inrange = IsActionInRange(Slot, "target") or 1
 		end
+		if icon.ManaCheck then
+			_, nomana = IsUsableAction(Slot)
+		end
+		
+		local actionType, spellID = GetActionInfo(Slot)
+		spellID = actionType == "spell" and spellID or icon.NameFirst
+		
+		
+		local alpha, color
+		if (duration == 0 or OnGCD(duration)) and inrange == 1 and not nomana then
+			alpha = icon.Alpha
+			color = icon:CrunchColor()
+		else
+			alpha = icon.UnAlpha
+			color = icon:CrunchColor(duration, inrange, nomana)
+		end
+		
+		--icon:SetInfo(alpha, color, texture, start, duration, spellChecked, reverse, count, countText, forceupdate, unit)
+		icon:SetInfo(alpha, color, GetActionTexture(Slot) or "Interface\\Icons\\INV_Misc_QuestionMark", start, duration, spellID, nil, nil, nil, nil, nil)
 	end
 end
 
@@ -153,7 +148,7 @@ function Type:Setup(icon, groupID, iconID)
 	icon:SetScript("OnEvent", MultiStateCD_OnEvent)
 
 	icon:SetScript("OnUpdate", MultiStateCD_OnUpdate)
-	icon:OnUpdate(TMW.time)
+	icon:Update()
 end
 
 

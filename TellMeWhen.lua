@@ -32,7 +32,7 @@ local DRData = LibStub("DRData-1.0", true)
 TELLMEWHEN_VERSION = "4.7.0"
 TELLMEWHEN_VERSION_MINOR = strmatch(" @project-version@", " r%d+") or ""
 TELLMEWHEN_VERSION_FULL = TELLMEWHEN_VERSION .. TELLMEWHEN_VERSION_MINOR
-TELLMEWHEN_VERSIONNUMBER = 47021 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
+TELLMEWHEN_VERSIONNUMBER = 47022 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
 if TELLMEWHEN_VERSIONNUMBER > 48000 or TELLMEWHEN_VERSIONNUMBER < 47000 then return error("YOU SCREWED UP THE VERSION NUMBER OR DIDNT CHANGE THE SAFETY LIMITS") end -- safety check because i accidentally made the version number 414069 once
 
 TELLMEWHEN_MAXGROUPS = 1 	--this is a default, used by SetTheory (addon), so dont rename
@@ -1441,10 +1441,7 @@ function TMW:OnUpdate()					-- this is where all icon OnUpdate scripts are actua
 		end
 
 		for i = 1, #IconUpdateFuncs do
-			local icon = IconUpdateFuncs[i]
-			if icon.__shown then
-				icon:OnUpdate(time)
-			end
+			IconUpdateFuncs[i]:Update(time)
 		end
 
 		if TMW.DoWipeAC then
@@ -2912,6 +2909,26 @@ local function PwrBarOnUpdate(bar)
 	end
 end
 
+function TMW.IconBase.Update(icon, time)
+	time = time or TMW.time
+	
+	if icon.__shown and icon.LastUpdate <= time - UPD_INTV then
+		icon.LastUpdate = time
+		
+		local CndtCheck = icon.CndtCheck
+		if CndtCheck and CndtCheck() then
+			return
+		end
+	
+		icon:OnUpdate(time)
+		
+		local CndtCheckAfter = icon.CndtCheckAfter
+		if CndtCheckAfter then
+			CndtCheckAfter()
+		end
+	end
+end
+
 function TMW.IconBase.SetScript(icon, handler, func, dontnil)
 	if func ~= nil or not dontnil then
 		icon[handler] = func
@@ -3706,6 +3723,7 @@ function TMW:Icon_Update(icon)
 		TMW.CNDT:ProcessConditions(icon)
 	else
 		icon.CndtCheck = nil
+		icon.CndtCheckAfter = nil
 	end
 
 	if icon.Enabled and group:ShouldUpdateIcons() then
@@ -3757,22 +3775,27 @@ function TMW:Icon_Update(icon)
 	TMW:Icon_UpdateText(icon, icon.countText, group.Fonts.Count)
 	TMW:Icon_UpdateText(icon, icon.bindText, group.Fonts.Bind)
 	
+	icon.UpdateBindText_Any = nil -- this one is for metas
 	icon.UpdateBindText_Spell = nil
 	icon.UpdateBindText_Unit = nil
 	icon.UpdateBindText_Stack = nil
 	if icon.BindText then
 		if strfind(icon.BindText, "%%[Dd]") then
+			icon.UpdateBindText_Any = true
 			BindUpdateFuncs = BindUpdateFuncs or {}
 			tDeleteItem(BindUpdateFuncs, icon)
 			tinsert(BindUpdateFuncs,icon)
 		else
 			if strfind(icon.BindText, "%%[Ss]") then
+				icon.UpdateBindText_Any = true
 				icon.UpdateBindText_Spell = true
 			end
 			if strfind(icon.BindText, "%%[Uu]") then
+				icon.UpdateBindText_Any = true
 				icon.UpdateBindText_Unit = true
 			end
 			if strfind(icon.BindText, "%%[Kk]") then
+				icon.UpdateBindText_Any = true
 				icon.UpdateBindText_Stack = true
 			end
 		end
@@ -4243,22 +4266,23 @@ end
 
 local unitcache = {}
 TMW.Units = {
-	{ value = "player", 			text = PLAYER .. " " .. L["PLAYER_DESC"]  },
-	{ value = "target", 			text = TARGET },
-	{ value = "targettarget", 		text = L["ICONMENU_TARGETTARGET"] },
-	{ value = "focus", 				text = L["ICONMENU_FOCUS"] },
-	{ value = "focustarget", 		text = L["ICONMENU_FOCUSTARGET"] },
-	{ value = "pet", 				text = PET },
-	{ value = "pettarget", 			text = L["ICONMENU_PETTARGET"] },
-	{ value = "mouseover", 			text = L["ICONMENU_MOUSEOVER"] },
-	{ value = "mouseovertarget",	text = L["ICONMENU_MOUSEOVERTARGET"]  },
-	{ value = "vehicle", 			text = L["ICONMENU_VEHICLE"] },
-	{ value = "party", 				text = PARTY, 			range = MAX_PARTY_MEMBERS},
-	{ value = "raid", 				text = RAID, 			range = MAX_RAID_MEMBERS},
-	{ value = "arena",				text = ARENA, 			range = 5},
-	{ value = "boss", 				text = BOSS, 			range = MAX_BOSS_FRAMES},
-	{ value = "maintank", 			text = L["MAINTANK"], 	range = MAX_RAID_MEMBERS},
-	{ value = "mainassist", 		text = L["MAINASSIST"], range = MAX_RAID_MEMBERS},
+	{ value = "%u", 				text = L["ICONMENU_ICONUNIT"], 	desc = L["ICONMENU_ICONUNIT_DESC"], onlyCondition = true },
+	{ value = "player", 			text = PLAYER .. " " .. L["PLAYER_DESC"]  		  },
+	{ value = "target", 			text = TARGET 									  },
+	{ value = "targettarget", 		text = L["ICONMENU_TARGETTARGET"] 				  },
+	{ value = "focus", 				text = L["ICONMENU_FOCUS"] 						  },
+	{ value = "focustarget", 		text = L["ICONMENU_FOCUSTARGET"] 				  },
+	{ value = "pet", 				text = PET 										  },
+	{ value = "pettarget", 			text = L["ICONMENU_PETTARGET"] 					  },
+	{ value = "mouseover", 			text = L["ICONMENU_MOUSEOVER"] 					  },
+	{ value = "mouseovertarget",	text = L["ICONMENU_MOUSEOVERTARGET"]  			  },
+	{ value = "vehicle", 			text = L["ICONMENU_VEHICLE"] 					  },
+	{ value = "party", 				text = PARTY, 			range = MAX_PARTY_MEMBERS },
+	{ value = "raid", 				text = RAID, 			range = MAX_RAID_MEMBERS  },
+	{ value = "arena",				text = ARENA, 			range = 5				  },
+	{ value = "boss", 				text = BOSS, 			range = MAX_BOSS_FRAMES	  },
+	{ value = "maintank", 			text = L["MAINTANK"], 	range = MAX_RAID_MEMBERS  },
+	{ value = "mainassist", 		text = L["MAINASSIST"],	range = MAX_RAID_MEMBERS  },
 }
 function TMW:GetUnits(icon, setting, dontreplace)
 	local cachestring = getCacheString(setting, dontreplace)
@@ -4284,7 +4308,7 @@ function TMW:GetUnits(icon, setting, dontreplace)
 	
 	--SUBSTITUTE RAID1-10 WITH RAID1;RAID2;RAID3;...RAID10
 	local startpos, endpos = 0, 0
-	for wholething, unit, firstnum, lastnum in gmatch(setting, "((%a+) ?(%d+) ?%- ?(%d+)) ?;?") do
+	for wholething, unit, firstnum, lastnum, append in gmatch(setting, "((%a+) ?(%d+) ?%- ?(%d+) ?([%a]*)) ?;?") do
 		if unit and firstnum and lastnum then
 			local str = ""
 			local order = firstnum > lastnum and -1 or 1
@@ -4293,7 +4317,7 @@ function TMW:GetUnits(icon, setting, dontreplace)
 				TMW:Print("Why on Earth would you want to track more than 100", unit, "units? I'll just ignore it and save you from possibly crashing.")
 			else
 				for i = firstnum, lastnum, order do
-					str = str .. unit .. i .. ";"
+					str = str .. unit .. i .. append .. ";"
 				end
 				str = strtrim(str, " ;")
 				wholething = gsub(wholething, "%-", "%%-") -- need to escape the dash for it to work

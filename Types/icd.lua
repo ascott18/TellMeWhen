@@ -18,7 +18,7 @@ local TMW = TMW
 if not TMW then return end
 local L = TMW.L
 
-local db, UPD_INTV, pr, ab
+local db, pr, ab
 local strlower =
 	  strlower
 local print = TMW.print
@@ -66,9 +66,8 @@ Type.DisabledEvents = {
 }
 
 
-function Type:Update(upd_intv)
+function Type:Update()
 	db = TMW.db
-	UPD_INTV = upd_intv
 	pr = db.profile.PRESENTColor
 	ab = db.profile.ABSENTColor
 	pGUID = UnitGUID("player")
@@ -107,23 +106,19 @@ local function ICD_OnEvent(icon, event, ...)
 end
 
 local function ICD_OnUpdate(icon, time)
-	if icon.LastUpdate <= time - UPD_INTV then
-		icon.LastUpdate = time
-		local CndtCheck = icon.CndtCheck if CndtCheck and CndtCheck() then return end
 
-		local ICDStartTime = icon.ICDStartTime
-		local ICDDuration = icon.ICDDuration
+	local ICDStartTime = icon.ICDStartTime
+	local ICDDuration = icon.ICDDuration
 
-		--icon:SetInfo(alpha, color, texture, start, duration, spellChecked, reverse, count, countText, forceupdate, unit)
-		if time - ICDStartTime > ICDDuration then
-			local color = icon:CrunchColor()
-			
-			icon:SetInfo(icon.Alpha, color, nil, 0, 0, icon.ICDID, nil, nil, nil, nil, nil)
-		else
-			local color = icon:CrunchColor(ICDDuration)
-			
-			icon:SetInfo(icon.UnAlpha, color, nil, ICDStartTime, ICDDuration, icon.ICDID, nil, nil, nil, nil, nil)
-		end
+	--icon:SetInfo(alpha, color, texture, start, duration, spellChecked, reverse, count, countText, forceupdate, unit)
+	if time - ICDStartTime > ICDDuration then
+		local color = icon:CrunchColor()
+		
+		icon:SetInfo(icon.Alpha, color, nil, 0, 0, icon.ICDID, nil, nil, nil, nil, nil)
+	else
+		local color = icon:CrunchColor(ICDDuration)
+		
+		icon:SetInfo(icon.UnAlpha, color, nil, ICDStartTime, ICDDuration, icon.ICDID, nil, nil, nil, nil, nil)
 	end
 end
 local naturesGrace = strlower(GetSpellInfo(16886))
@@ -164,7 +159,7 @@ function Type:Setup(icon, groupID, iconID)
 	icon:SetTexture(TMW:GetConfigIconTexture(icon))
 
 	icon:SetScript("OnUpdate", ICD_OnUpdate)
-	icon:OnUpdate(TMW.time)
+	icon:Update()
 end
 
 function Type:DragReceived(icon, t, data, subType)

@@ -18,7 +18,7 @@ local TMW = TMW
 if not TMW then return end
 local L = TMW.L
 
-local db, UPD_INTV, ClockGCD, rc, mc, pr, ab
+local db, ClockGCD, rc, mc, pr, ab
 local GetItemCooldown, IsItemInRange, IsEquippedItem, GetItemIcon, GetItemCount =
 	  GetItemCooldown, IsItemInRange, IsEquippedItem, GetItemIcon, GetItemCount
 local pairs =
@@ -65,9 +65,8 @@ Type.DisabledEvents = {
 }
 
 
-function Type:Update(upd_intv)
+function Type:Update()
 	db = TMW.db
-	UPD_INTV = upd_intv
 	ClockGCD = db.profile.ClockGCD
 	rc = db.profile.OORColor
 	mc = db.profile.OOMColor
@@ -96,79 +95,74 @@ local function ItemCooldown_OnEvent(icon)
 end
 
 local function ItemCooldown_OnUpdate(icon, time)
-	if icon.LastUpdate <= time - UPD_INTV then
-		icon.LastUpdate = time
-		if icon.DoUpdateIDs then
-			local Name = icon.Name
-			icon.NameFirst = TMW:GetItemIDs(icon, Name, 1)
-			icon.NameArray = TMW:GetItemIDs(icon, Name)
-			icon.NameNameArray = TMW:GetItemIDs(icon, icon.Name, nil, 1)
-			icon.DoUpdateIDs = nil
-		end
+	if icon.DoUpdateIDs then
+		local Name = icon.Name
+		icon.NameFirst = TMW:GetItemIDs(icon, Name, 1)
+		icon.NameArray = TMW:GetItemIDs(icon, Name)
+		icon.NameNameArray = TMW:GetItemIDs(icon, icon.Name, nil, 1)
+		icon.DoUpdateIDs = nil
+	end
 
-		local CndtCheck = icon.CndtCheck if CndtCheck and CndtCheck() then return end
-
-		local n, inrange, equipped, start, duration, isGCD, count = 1
-		local RangeCheck, OnlyEquipped, OnlyInBags, NameArray, EnableStacks = icon.RangeCheck, icon.OnlyEquipped, icon.OnlyInBags, icon.NameArray, icon.EnableStacks
-		for i = 1, #NameArray do
-			local iName = NameArray[i]
-			n = i
-			start, duration = GetItemCooldown(iName)
-			if duration then
-				inrange, equipped, count = 1, true, ItemCount[iName]
-				if RangeCheck then
-					inrange = IsItemInRange(iName, "target") or 1
-				end
-
-				if (OnlyEquipped and not IsEquippedItem(iName)) or (OnlyInBags and (count == 0)) then
-					equipped = false
-				end
-				isGCD = OnGCD(duration)
-				if equipped and inrange == 1 and (duration == 0 or isGCD) then --usable
-				
-					local color = icon:CrunchColor()
-					
-					--icon:SetInfo(alpha, color, texture, start, duration, spellChecked, reverse, count, countText, forceupdate, unit)
-					icon:SetInfo(icon.Alpha, color, GetItemIcon(iName) or "Interface\\Icons\\INV_Misc_QuestionMark", start, duration, iName, nil, count, EnableStacks and count > 1 and count or "", nil, nil)
-
-					return
-				end
-			end
-		end
-
-		local NameFirst2
-		if OnlyInBags then
-			for i = 1, #NameArray do
-				local iName = NameArray[i]
-				if (OnlyEquipped and IsEquippedItem(iName)) or (not OnlyEquipped and ItemCount[iName] > 0) then
-					NameFirst2 = iName
-					break
-				end
-			end
-			if not NameFirst2 then
-				icon:SetInfo(0)
-				return
-			end
-		else
-			NameFirst2 = icon.NameFirst
-		end
-		if n > 1 then -- if there is more than 1 spell that was checked then we need to get these again for the first spell, otherwise reuse the values obtained above since they are just for the first one
-			start, duration = GetItemCooldown(NameFirst2)
-			inrange, count = 1, ItemCount[NameFirst2]
+	local n, inrange, equipped, start, duration, isGCD, count = 1
+	local RangeCheck, OnlyEquipped, OnlyInBags, NameArray, EnableStacks = icon.RangeCheck, icon.OnlyEquipped, icon.OnlyInBags, icon.NameArray, icon.EnableStacks
+	for i = 1, #NameArray do
+		local iName = NameArray[i]
+		n = i
+		start, duration = GetItemCooldown(iName)
+		if duration then
+			inrange, equipped, count = 1, true, ItemCount[iName]
 			if RangeCheck then
-				inrange = IsItemInRange(NameFirst2, "target") or 1
+				inrange = IsItemInRange(iName, "target") or 1
+			end
+
+			if (OnlyEquipped and not IsEquippedItem(iName)) or (OnlyInBags and (count == 0)) then
+				equipped = false
 			end
 			isGCD = OnGCD(duration)
+			if equipped and inrange == 1 and (duration == 0 or isGCD) then --usable
+			
+				local color = icon:CrunchColor()
+				
+				--icon:SetInfo(alpha, color, texture, start, duration, spellChecked, reverse, count, countText, forceupdate, unit)
+				icon:SetInfo(icon.Alpha, color, GetItemIcon(iName) or "Interface\\Icons\\INV_Misc_QuestionMark", start, duration, iName, nil, count, EnableStacks and count > 1 and count or "", nil, nil)
+
+				return
+			end
 		end
-		if duration then
-			
-			local color = icon:CrunchColor(duration, inrange)
-			
-			--icon:SetInfo(alpha, color, texture, start, duration, spellChecked, reverse, count, countText, forceupdate, unit)
-			icon:SetInfo(icon.UnAlpha, color, GetItemIcon(NameFirst2), start, duration, NameFirst2, nil, count, EnableStacks and count > 1 and count or "", nil, nil)
-		else
+	end
+
+	local NameFirst2
+	if OnlyInBags then
+		for i = 1, #NameArray do
+			local iName = NameArray[i]
+			if (OnlyEquipped and IsEquippedItem(iName)) or (not OnlyEquipped and ItemCount[iName] > 0) then
+				NameFirst2 = iName
+				break
+			end
+		end
+		if not NameFirst2 then
 			icon:SetInfo(0)
+			return
 		end
+	else
+		NameFirst2 = icon.NameFirst
+	end
+	if n > 1 then -- if there is more than 1 spell that was checked then we need to get these again for the first spell, otherwise reuse the values obtained above since they are just for the first one
+		start, duration = GetItemCooldown(NameFirst2)
+		inrange, count = 1, ItemCount[NameFirst2]
+		if RangeCheck then
+			inrange = IsItemInRange(NameFirst2, "target") or 1
+		end
+		isGCD = OnGCD(duration)
+	end
+	if duration then
+		
+		local color = icon:CrunchColor(duration, inrange)
+		
+		--icon:SetInfo(alpha, color, texture, start, duration, spellChecked, reverse, count, countText, forceupdate, unit)
+		icon:SetInfo(icon.UnAlpha, color, GetItemIcon(NameFirst2), start, duration, NameFirst2, nil, count, EnableStacks and count > 1 and count or "", nil, nil)
+	else
+		icon:SetInfo(0)
 	end
 end
 
@@ -203,7 +197,7 @@ function Type:Setup(icon, groupID, iconID)
 	Type:RegisterEvent("BAG_UPDATE")
 	
 	icon:SetScript("OnUpdate", ItemCooldown_OnUpdate)
-	icon:OnUpdate(TMW.time)
+	icon:Update()
 end
 
 function Type:GetNameForDisplay(icon, data)

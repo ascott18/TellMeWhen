@@ -39,7 +39,7 @@ Type.RelevantSettings = {
 	ConditionAlpha = false,
 }
 
-function Type:Update(upd_intv)
+function Type:Update()
 
 end
 

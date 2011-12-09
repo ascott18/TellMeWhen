@@ -18,7 +18,7 @@ local TMW = TMW
 if not TMW then return end
 local L = TMW.L
 
-local db, UPD_INTV, WpnEnchDurs, ClockGCD, pr, ab, rc, mc
+local db, WpnEnchDurs, ClockGCD, pr, ab, rc, mc
 local _G, strlower, strmatch, strtrim, select, floor, ceil =
 	  _G, strlower, strmatch, strtrim, select, floor, ceil
 local GetInventoryItemTexture, GetInventorySlotInfo, GetWeaponEnchantInfo =
@@ -105,9 +105,8 @@ local function UpdateWeaponEnchantInfo(slot, selectIndex)
 	end
 end
 
-function Type:Update(upd_intv)
+function Type:Update()
 	db = TMW.db
-	UPD_INTV = upd_intv
 	ClockGCD = db.profile.ClockGCD
 	WpnEnchDurs = db.global.WpnEnchDurs
 	pr = db.profile.PRESENTColor
@@ -124,37 +123,33 @@ local SlotsToNumbers = {
 
 
 local function WpnEnchant_OnUpdate(icon, time)
-	if icon.LastUpdate <= time - UPD_INTV then
-		icon.LastUpdate = time
-		local CndtCheck = icon.CndtCheck if CndtCheck and CndtCheck() then return end
-		local has, expiration = select(icon.SelectIndex, GetWeaponEnchantInfo())
-		if has and icon.CorrectEnchant then
-			expiration = expiration/1000
+	local has, expiration = select(icon.SelectIndex, GetWeaponEnchantInfo())
+	if has and icon.CorrectEnchant then
+		expiration = expiration/1000
 
-			local duration
-			local EnchantName = icon.EnchantName
-			if EnchantName then
-				local d = WpnEnchDurs[EnchantName]
-				if d < expiration then
-					WpnEnchDurs[EnchantName] = ceil(expiration)
-					duration = expiration
-				else
-					duration = d
-				end
-			else
+		local duration
+		local EnchantName = icon.EnchantName
+		if EnchantName then
+			local d = WpnEnchDurs[EnchantName]
+			if d < expiration then
+				WpnEnchDurs[EnchantName] = ceil(expiration)
 				duration = expiration
+			else
+				duration = d
 			end
-			local start = floor(time - duration + expiration)
-			
-			local color = icon:CrunchColor(duration)
-			
-			--icon:SetInfo(alpha, color, texture, start, duration, spellChecked, reverse, count, countText, forceupdate, unit)
-			icon:SetInfo(icon.Alpha, color, nil, start, duration, EnchantName, nil, nil, nil, nil, nil)
 		else
-			local color = icon:CrunchColor()
-			
-			icon:SetInfo(icon.UnAlpha, color, nil, 0, 0, nil, nil, nil, nil, nil, nil) 
+			duration = expiration
 		end
+		local start = floor(time - duration + expiration)
+		
+		local color = icon:CrunchColor(duration)
+		
+		--icon:SetInfo(alpha, color, texture, start, duration, spellChecked, reverse, count, countText, forceupdate, unit)
+		icon:SetInfo(icon.Alpha, color, nil, start, duration, EnchantName, nil, nil, nil, nil, nil)
+	else
+		local color = icon:CrunchColor()
+		
+		icon:SetInfo(icon.UnAlpha, color, nil, 0, 0, nil, nil, nil, nil, nil, nil) 
 	end
 end
 
@@ -205,7 +200,7 @@ function Type:Setup(icon, groupID, iconID)
 	icon.CorrectEnchant = nil		
 
 	icon:SetScript("OnUpdate", WpnEnchant_OnUpdate)
-	icon:OnUpdate(TMW.time)
+	icon:Update()
 
 	icon:RegisterEvent("UNIT_INVENTORY_CHANGED")
 	icon:SetScript("OnEvent", WpnEnchant_OnEvent)

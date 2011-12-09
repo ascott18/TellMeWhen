@@ -19,7 +19,7 @@ local TMW = TMW
 if not TMW then return end
 local L = TMW.L
 
-local db, UPD_INTV, ClockGCD, pr, ab, rc, mc
+local db, ClockGCD, pr, ab, rc, mc
 local strlower, type, wipe, pairs =
 	  strlower, type, wipe, pairs
 local UnitGUID, IsInInstance =
@@ -64,9 +64,8 @@ Type.DisabledEvents = {
 }
 
 
-function Type:Update(upd_intv)
+function Type:Update()
 	db = TMW.db
-	UPD_INTV = upd_intv
 	ClockGCD = db.profile.ClockGCD
 	pr = db.profile.PRESENTColor
 	ab = db.profile.ABSENTColor
@@ -261,92 +260,88 @@ end
 
 
 local function UnitCooldown_OnUpdate(icon, time)
-	if icon.LastUpdate <= time - UPD_INTV then
-		icon.LastUpdate = time
-		local CndtCheck = icon.CndtCheck if CndtCheck and CndtCheck() then return end
-		local unstart, unname, unduration, usename, dobreak, useUnit
-		local Alpha, Units, NameArray, OnlySeen, Sort, Durations = icon.Alpha, icon.Units, icon.NameArray, icon.OnlySeen, icon.Sort, icon.Durations
-		local NAL = #NameArray
-		local d = Sort == -1 and huge or 0
-		local UnAlpha = icon.UnAlpha
+	local unstart, unname, unduration, usename, dobreak, useUnit
+	local Alpha, Units, NameArray, OnlySeen, Sort, Durations = icon.Alpha, icon.Units, icon.NameArray, icon.OnlySeen, icon.Sort, icon.Durations
+	local NAL = #NameArray
+	local d = Sort == -1 and huge or 0
+	local UnAlpha = icon.UnAlpha
 
-		for u = 1, #Units do
-			local unit = Units[u]
-			
-			local guid = UnitGUID(unit)
-			if guid then
-				local cooldowns = Cooldowns[guid]
-				for i = 1, NAL do
-					local iName = NameArray[i]
-					if not isNumber[iName] then
-						iName = cooldowns[iName] or iName-- spell name keys have values that are the spellid of the name, we need the spellid for the texture (thats why i did it like this)
-					end
-					local _start
-					if OnlySeen then
-						_start = cooldowns[iName]
-					else
-						_start = cooldowns[iName] or 0
-					end
-					
-					if _start then
-						local _duration = Durations[i]
-						local tms = time - _start -- Time Minus Start - time since the unit's last cast of the spell (not neccesarily the time it has been on cooldown)
-						local _d = (tms > _duration) and 0 or _duration - tms -- real duration remaining on the cooldown
+	for u = 1, #Units do
+		local unit = Units[u]
+		
+		local guid = UnitGUID(unit)
+		if guid then
+			local cooldowns = Cooldowns[guid]
+			for i = 1, NAL do
+				local iName = NameArray[i]
+				if not isNumber[iName] then
+					iName = cooldowns[iName] or iName-- spell name keys have values that are the spellid of the name, we need the spellid for the texture (thats why i did it like this)
+				end
+				local _start
+				if OnlySeen then
+					_start = cooldowns[iName]
+				else
+					_start = cooldowns[iName] or 0
+				end
+				
+				if _start then
+					local _duration = Durations[i]
+					local tms = time - _start -- Time Minus Start - time since the unit's last cast of the spell (not neccesarily the time it has been on cooldown)
+					local _d = (tms > _duration) and 0 or _duration - tms -- real duration remaining on the cooldown
 
-						if Sort then
-							if _d ~= 0 then -- found an unusable cooldown
-								if (Sort == 1 and d < _d) or (Sort == -1 and d > _d) then -- the duration is lower or higher than the last duration that was going to be used
-									d = _d
-									unname = iName
-									unstart = _start
-									unduration = _duration
-									useUnit = unit
-								end
-							else -- we found the first usable cooldown
-								if not usename then
-									usename = iName
-									useUnit = unit
-								end
-							end
-						else
-							if _d ~= 0 and not unname then -- we found the first UNusable cooldown
+					if Sort then
+						if _d ~= 0 then -- found an unusable cooldown
+							if (Sort == 1 and d < _d) or (Sort == -1 and d > _d) then -- the duration is lower or higher than the last duration that was going to be used
+								d = _d
 								unname = iName
 								unstart = _start
 								unduration = _duration
 								useUnit = unit
-								if Alpha == 0 then -- we DONT care about usable cooldowns, so stop looking
-									dobreak = 1
-									break
-								end
-							elseif _d == 0 and not usename then -- we found the first usable cooldown
+							end
+						else -- we found the first usable cooldown
+							if not usename then
 								usename = iName
 								useUnit = unit
-								if Alpha ~= 0 then -- we care about usable cooldowns, so stop looking
-									dobreak = 1
-									break
-								end
+							end
+						end
+					else
+						if _d ~= 0 and not unname then -- we found the first UNusable cooldown
+							unname = iName
+							unstart = _start
+							unduration = _duration
+							useUnit = unit
+							if Alpha == 0 then -- we DONT care about usable cooldowns, so stop looking
+								dobreak = 1
+								break
+							end
+						elseif _d == 0 and not usename then -- we found the first usable cooldown
+							usename = iName
+							useUnit = unit
+							if Alpha ~= 0 then -- we care about usable cooldowns, so stop looking
+								dobreak = 1
+								break
 							end
 						end
 					end
 				end
-				if dobreak then
-					break
-				end
+			end
+			if dobreak then
+				break
 			end
 		end
+	end
+	
+	--icon:SetInfo(alpha, color, texture, start, duration, spellChecked, reverse, count, countText, forceupdate, unit)
+	if usename and Alpha > 0 then
+		local color = icon:CrunchColor()
 		
-		--icon:SetInfo(alpha, color, texture, start, duration, spellChecked, reverse, count, countText, forceupdate, unit)
-		if usename and Alpha > 0 then
-			local color = icon:CrunchColor()
-			
-			icon:SetInfo(Alpha, color, SpellTextures[usename] or "Interface\\Icons\\INV_Misc_PocketWatch_01", 0, 0, usename, nil, nil, nil, nil, useUnit)
-		elseif unname then
-			local color = icon:CrunchColor(unduration)
-			
-			icon:SetInfo(UnAlpha, color, SpellTextures[unname], unstart, unduration, unname, nil, nil, nil, nil, useUnit)
-		else
-			icon:SetInfo(0)
-		end
+		icon:SetInfo(Alpha, color, SpellTextures[usename] or "Interface\\Icons\\INV_Misc_PocketWatch_01", 0, 0, usename, nil, nil, nil, nil, useUnit)
+	elseif unname then
+		local color = icon:CrunchColor(unduration)
+		
+		icon:SetInfo(UnAlpha, color, SpellTextures[unname], unstart, unduration, unname, nil, nil, nil, nil, useUnit)
+	else
+		icon:SetInfo(0)
 	end
 end
 
@@ -364,7 +359,7 @@ function Type:Setup(icon, groupID, iconID)
 	icon:SetTexture(TMW:GetConfigIconTexture(icon))
 
 	icon:SetScript("OnUpdate", UnitCooldown_OnUpdate)
-	icon:OnUpdate(TMW.time)
+	icon:Update()
 end
 
 function Type:DragReceived(icon, t, data, subType)

@@ -18,7 +18,7 @@ local TMW = TMW
 if not TMW then return end
 local L = TMW.L
 
-local db, UPD_INTV, ClockGCD, pr, ab, rc, mc
+local db, ClockGCD, pr, ab, rc, mc
 local GetSpellCooldown, IsSpellInRange, IsUsableSpell, GetSpellInfo =
 	  GetSpellCooldown, IsSpellInRange, IsUsableSpell, GetSpellInfo
 local OnGCD = TMW.OnGCD
@@ -64,9 +64,8 @@ Type.DisabledEvents = {
 }
 
 
-function Type:Update(upd_intv)
+function Type:Update()
 	db = TMW.db
-	UPD_INTV = upd_intv
 	ClockGCD = db.profile.ClockGCD
 	pr = db.profile.PRESENTColor
 	ab = db.profile.ABSENTColor
@@ -82,72 +81,68 @@ local function Reactive_OnEvent(icon, event, spell)
 end
 
 local function Reactive_OnUpdate(icon, time)
-	if icon.LastUpdate <= time - UPD_INTV then
-		icon.LastUpdate = time
-		local CndtCheck = icon.CndtCheck if CndtCheck and CndtCheck() then return end
 
-		local n, inrange, nomana, start, duration, CD, usable = 1
-		local NameArray, NameNameArray, RangeCheck, ManaCheck, CooldownCheck, IgnoreRunes, Usable, IgnoreNomana =
-		 icon.NameArray, icon.NameNameArray, icon.RangeCheck, icon.ManaCheck, icon.CooldownCheck, icon.IgnoreRunes, icon.Usable, icon.IgnoreNomana
+	local n, inrange, nomana, start, duration, CD, usable = 1
+	local NameArray, NameNameArray, RangeCheck, ManaCheck, CooldownCheck, IgnoreRunes, Usable, IgnoreNomana =
+	 icon.NameArray, icon.NameNameArray, icon.RangeCheck, icon.ManaCheck, icon.CooldownCheck, icon.IgnoreRunes, icon.Usable, icon.IgnoreNomana
 
-		for i = 1, #NameArray do
-			local iName = NameArray[i]
-			n = i
-			start, duration = GetSpellCooldown(iName)
-			if duration then
-				inrange, CD = 1
-				if RangeCheck then
-					inrange = IsSpellInRange(NameNameArray[i], "target") or 1
-				end
-				usable, nomana = IsUsableSpell(iName)
-				if IgnoreNomana then
-					usable = usable or nomana
-				end
-				if not ManaCheck then
-					nomana = nil
-				end
-				if CooldownCheck then
-					if IgnoreRunes and duration == 10 and NameNameArray[i] ~= mindfreeze then
-						start, duration = 0, 0
-					end
-					CD = not (duration == 0 or OnGCD(duration))
-				end
-				usable = Usable or usable
-				if usable and not CD and not nomana and inrange == 1 then --usable
-
-					local color = icon:CrunchColor()
-					
-					--icon:SetInfo(alpha, color, texture, start, duration, spellChecked, reverse, count, countText, forceupdate, unit)
-					icon:SetInfo(icon.Alpha, color, SpellTextures[iName], start, duration, iName, nil, nil, nil, nil, nil, nil)
-
-					return
-				end
-			end
-		end
-
-		local NameFirst = icon.NameFirst
-		if n > 1 then -- if more than 1 spell was checked, we need to get these again for the first spell, otherwise reuse the values obtained above since they are just for the first one
-			start, duration = GetSpellCooldown(NameFirst)
-			if IgnoreRunes and duration == 10 and icon.NameName ~= mindfreeze then
-				start, duration = 0, 0
-			end
-			inrange, nomana = 1
-			if RangeCheck then
-				inrange = IsSpellInRange(icon.NameName, "target") or 1
-			end
-			if ManaCheck then
-				_, nomana = IsUsableSpell(NameFirst)
-			end
-		end
+	for i = 1, #NameArray do
+		local iName = NameArray[i]
+		n = i
+		start, duration = GetSpellCooldown(iName)
 		if duration then
-		
-			local color = icon:CrunchColor(duration, inrange, nomana)
-			
-			--icon:SetInfo(alpha, color, texture, start, duration, spellChecked, reverse, count, countText, forceupdate, unit)
-			icon:SetInfo(icon.UnAlpha, color, icon.FirstTexture, start, duration, NameFirst, nil, nil, nil, nil, nil, nil)
-		else
-			icon:SetInfo(0)
+			inrange, CD = 1
+			if RangeCheck then
+				inrange = IsSpellInRange(NameNameArray[i], "target") or 1
+			end
+			usable, nomana = IsUsableSpell(iName)
+			if IgnoreNomana then
+				usable = usable or nomana
+			end
+			if not ManaCheck then
+				nomana = nil
+			end
+			if CooldownCheck then
+				if IgnoreRunes and duration == 10 and NameNameArray[i] ~= mindfreeze then
+					start, duration = 0, 0
+				end
+				CD = not (duration == 0 or OnGCD(duration))
+			end
+			usable = Usable or usable
+			if usable and not CD and not nomana and inrange == 1 then --usable
+
+				local color = icon:CrunchColor()
+				
+				--icon:SetInfo(alpha, color, texture, start, duration, spellChecked, reverse, count, countText, forceupdate, unit)
+				icon:SetInfo(icon.Alpha, color, SpellTextures[iName], start, duration, iName, nil, nil, nil, nil, nil, nil)
+
+				return
+			end
 		end
+	end
+
+	local NameFirst = icon.NameFirst
+	if n > 1 then -- if more than 1 spell was checked, we need to get these again for the first spell, otherwise reuse the values obtained above since they are just for the first one
+		start, duration = GetSpellCooldown(NameFirst)
+		if IgnoreRunes and duration == 10 and icon.NameName ~= mindfreeze then
+			start, duration = 0, 0
+		end
+		inrange, nomana = 1
+		if RangeCheck then
+			inrange = IsSpellInRange(icon.NameName, "target") or 1
+		end
+		if ManaCheck then
+			_, nomana = IsUsableSpell(NameFirst)
+		end
+	end
+	if duration then
+	
+		local color = icon:CrunchColor(duration, inrange, nomana)
+		
+		--icon:SetInfo(alpha, color, texture, start, duration, spellChecked, reverse, count, countText, forceupdate, unit)
+		icon:SetInfo(icon.UnAlpha, color, icon.FirstTexture, start, duration, NameFirst, nil, nil, nil, nil, nil, nil)
+	else
+		icon:SetInfo(0)
 	end
 end
 
@@ -170,7 +165,7 @@ function Type:Setup(icon, groupID, iconID)
 	icon:SetTexture(TMW:GetConfigIconTexture(icon))
 
 	icon:SetScript("OnUpdate", Reactive_OnUpdate)
-	icon:OnUpdate(TMW.time)
+	icon:Update()
 end
 
 TMW:RegisterIconType(Type)

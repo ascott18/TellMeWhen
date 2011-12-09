@@ -18,7 +18,7 @@ local TMW = TMW
 if not TMW then return end
 local L = TMW.L
 
-local db, UPD_INTV
+local db
 local print = TMW.print
 
 
@@ -60,46 +60,42 @@ Type.DisabledEvents = {
 	OnStack = true,
 }
 
-function Type:Update(upd_intv)
+function Type:Update()
 	db = TMW.db
-	UPD_INTV = upd_intv
 end
 
 local function ConditionIcon_OnUpdate(icon, time)
-	if icon.LastUpdate <= time - UPD_INTV then
-		icon.LastUpdate = time
-		local CndtCheck = icon.CndtCheck
-		if CndtCheck then
-			local shouldReturn, succeeded = CndtCheck() -- we dont use shouldreturn.
-			
-			local alpha = succeeded and icon.Alpha or icon.UnAlpha
-			
-			local d 
-			
-			--icon:SetInfo(alpha, color, texture, start, duration, spellChecked, reverse, count, countText, forceupdate, unit)
-			if succeeded and not icon.__succeeded and icon.ConditionDurEnabled then
-				d = icon.ConditionDur
-				local color = icon:CrunchColor(d)
-				icon:SetInfo(alpha, color, nil, time, d, nil, nil, nil, nil, nil, nil)
-			elseif not succeeded and icon.__succeeded and icon.UnConditionDurEnabled then
-				d = icon.UnConditionDur
-				local color = icon:CrunchColor(d)
-				icon:SetInfo(alpha, color, nil, time, d, nil, nil, nil, nil, nil, nil)
-			else
-				d = icon.__duration - (time - icon.__start)
-				
-				local color = icon:CrunchColor(d > 0 and d)
-				icon:SetInfo(alpha, color, nil, icon.__start, icon.__duration, nil, nil, nil, nil, nil, nil)
-			end
-			
-			if icon.OnlyIfCounting and d <= 0 then
-				icon:SetInfo(0)		
-			end
-			
-			icon.__succeeded = succeeded
+	local CndtCheck = icon.CndtCheck_CNDTIC
+	if CndtCheck then
+		local shouldReturn, succeeded = CndtCheck() -- we dont use shouldreturn.
+		
+		local alpha = succeeded and icon.Alpha or icon.UnAlpha
+		
+		local d 
+		
+		--icon:SetInfo(alpha, color, texture, start, duration, spellChecked, reverse, count, countText, forceupdate, unit)
+		if succeeded and not icon.__succeeded and icon.ConditionDurEnabled then
+			d = icon.ConditionDur
+			local color = icon:CrunchColor(d)
+			icon:SetInfo(alpha, color, nil, time, d, nil, nil, nil, nil, nil, nil)
+		elseif not succeeded and icon.__succeeded and icon.UnConditionDurEnabled then
+			d = icon.UnConditionDur
+			local color = icon:CrunchColor(d)
+			icon:SetInfo(alpha, color, nil, time, d, nil, nil, nil, nil, nil, nil)
 		else
-			icon:SetInfo(1)
+			d = icon.__duration - (time - icon.__start)
+			
+			local color = icon:CrunchColor(d > 0 and d)
+			icon:SetInfo(alpha, color, nil, icon.__start, icon.__duration, nil, nil, nil, nil, nil, nil)
 		end
+		
+		if icon.OnlyIfCounting and d <= 0 then
+			icon:SetInfo(0)		
+		end
+		
+		icon.__succeeded = succeeded
+	else
+		icon:SetInfo(1)
 	end
 end
 
@@ -109,6 +105,11 @@ end
 
 
 function Type:Setup(icon, groupID, iconID)
+	icon.CndtCheck_CNDTIC = icon.CndtCheck or icon.CndtCheckAfter
+	icon.CndtCheck = nil
+	icon.CndtCheckAfter = nil
+	
+	
 	local Name = gsub(icon.Name, [[\\]], [[\]])
 	icon.NameFirst = TMW:GetSpellNames(icon, Name, 1)
 	
@@ -128,7 +129,7 @@ function Type:Setup(icon, groupID, iconID)
 	icon.__vrtxcolor = 1
 	
 	icon:SetScript("OnUpdate", ConditionIcon_OnUpdate)
-	--icon:OnUpdate(TMW.time) -- dont do this!
+	--icon:Update() -- dont do this!
 end
 
 function Type:DragReceived(icon, t, data, subType)

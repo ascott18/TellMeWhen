@@ -18,7 +18,7 @@ local TMW = TMW
 if not TMW then return end
 local L = TMW.L
 
-local db, UPD_INTV, ClockGCD, pr, ab, rc, mc
+local db, ClockGCD, pr, ab, rc, mc
 local strlower, bitband =
 	  strlower, bit.band
 local UnitGUID =
@@ -78,9 +78,8 @@ Type.DisabledEvents = {
 }
 
 
-function Type:Update(upd_intv)
+function Type:Update()
 	db = TMW.db
-	UPD_INTV = upd_intv
 	ClockGCD = db.profile.ClockGCD
 	pr = db.profile.PRESENTColor
 	ab = db.profile.ABSENTColor
@@ -135,46 +134,42 @@ local function DR_OnEvent(icon, _, _, p, ...)
 end
 
 local function DR_OnUpdate(icon, time)
-	if icon.LastUpdate <= time - UPD_INTV then
-		icon.LastUpdate = time
-		local CndtCheck = icon.CndtCheck if CndtCheck and CndtCheck() then return end
-		local Alpha, UnAlpha, Units = icon.Alpha, icon.UnAlpha, icon.Units
+	local Alpha, UnAlpha, Units = icon.Alpha, icon.UnAlpha, icon.Units
 
-		for u = 1, #Units do
-			local unit = Units[u]
-			local dr = icon[UnitGUID(unit)]
-			
-			--icon:SetInfo(alpha, color, texture, start, duration, spellChecked, reverse, count, countText, forceupdate, unit)
-			if dr then
-				if dr.start + dr.duration <= time then
-					local color = icon:CrunchColor()
-					
-					icon:SetInfo(Alpha, color, dr.tex, 0, 0, icon.firstCategory, nil, nil, nil, nil, unit)
-					if Alpha > 0 then
-						return
-					end
-				else
-					local duration = dr.duration
-					
-					local color = icon:CrunchColor(duration)
-					
-					local amt = dr.amt
-					icon:SetInfo(UnAlpha, (not icon.ShowTimer and Alpha ~= 0) and .5 or 1, dr.tex, dr.start, duration, icon.firstCategory, nil, amt, amt .. "%", nil, unit)
-					if UnAlpha > 0 then
-						return
-					end
-				end
-			else
+	for u = 1, #Units do
+		local unit = Units[u]
+		local dr = icon[UnitGUID(unit)]
+		
+		--icon:SetInfo(alpha, color, texture, start, duration, spellChecked, reverse, count, countText, forceupdate, unit)
+		if dr then
+			if dr.start + dr.duration <= time then
 				local color = icon:CrunchColor()
 				
-				icon:SetInfo(Alpha, color, icon.FirstTexture, 0, 0, icon.firstCategory, nil, nil, nil, nil, unit)
+				icon:SetInfo(Alpha, color, dr.tex, 0, 0, icon.firstCategory, nil, nil, nil, nil, unit)
 				if Alpha > 0 then
 					return
 				end
+			else
+				local duration = dr.duration
+				
+				local color = icon:CrunchColor(duration)
+				
+				local amt = dr.amt
+				icon:SetInfo(UnAlpha, (not icon.ShowTimer and Alpha ~= 0) and .5 or 1, dr.tex, dr.start, duration, icon.firstCategory, nil, amt, amt .. "%", nil, unit)
+				if UnAlpha > 0 then
+					return
+				end
+			end
+		else
+			local color = icon:CrunchColor()
+			
+			icon:SetInfo(Alpha, color, icon.FirstTexture, 0, 0, icon.firstCategory, nil, nil, nil, nil, unit)
+			if Alpha > 0 then
+				return
 			end
 		end
-		icon:SetInfo(0)
 	end
+	icon:SetInfo(0)
 end
 
 function Type:GetNameForDisplay(icon, data)
@@ -248,7 +243,7 @@ function Type:Setup(icon, groupID, iconID)
 	icon:RegisterEvent("COMBAT_LOG_EVENT_UNFILTERED")
 
 	icon:SetScript("OnUpdate", DR_OnUpdate)
-	icon:OnUpdate(TMW.time)
+	icon:Update()
 end
 
 TMW:RegisterIconType(Type)

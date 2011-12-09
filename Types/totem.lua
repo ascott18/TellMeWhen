@@ -20,7 +20,7 @@ local L = TMW.L
 
 local _, pclass = UnitClass("Player")
 
-local db, UPD_INTV, ClockGCD, pr, ab, rc, mc
+local db, ClockGCD, pr, ab, rc, mc
 local strlower =
 	  strlower
 local GetTotemInfo, GetSpellTexture =
@@ -80,9 +80,8 @@ Type.DisabledEvents = {
 }
 
 
-function Type:Update(upd_intv)
+function Type:Update()
 	db = TMW.db
-	UPD_INTV = upd_intv
 	ClockGCD = db.profile.ClockGCD
 	pr = db.profile.PRESENTColor
 	ab = db.profile.ABSENTColor
@@ -91,30 +90,26 @@ function Type:Update(upd_intv)
 end
 
 local function Totem_OnUpdate(icon, time)
-	if icon.LastUpdate <= time - UPD_INTV then
-		icon.LastUpdate = time
-		local CndtCheck = icon.CndtCheck if CndtCheck and CndtCheck() then return end
 
-		local Slots, NameNameHash, NameFirst = icon.Slots, icon.NameNameHash, icon.NameFirst
-		for iSlot = 1, #Slots do -- be careful here. slots that are explicitly disabled by the user are set false. slots that are disabled internally are set nil.
-			if Slots[iSlot] then
-				local _, totemName, start, duration, totemIcon = GetTotemInfo(iSlot)
-				if start ~= 0 and totemName and ((NameFirst == "") or NameNameHash[strlowerCache[totemName]]) then
+	local Slots, NameNameHash, NameFirst = icon.Slots, icon.NameNameHash, icon.NameFirst
+	for iSlot = 1, #Slots do -- be careful here. slots that are explicitly disabled by the user are set false. slots that are disabled internally are set nil.
+		if Slots[iSlot] then
+			local _, totemName, start, duration, totemIcon = GetTotemInfo(iSlot)
+			if start ~= 0 and totemName and ((NameFirst == "") or NameNameHash[strlowerCache[totemName]]) then
+			
+				local color = icon:CrunchColor(duration)
 				
-					local color = icon:CrunchColor(duration)
-					
-					--icon:SetInfo(alpha, color, texture, start, duration, spellChecked, reverse, count, countText, forceupdate, unit)
-					icon:SetInfo(icon.Alpha, color, totemIcon, start, duration, totemName, nil, nil, nil, nil, nil)
-					return
-				end
+				--icon:SetInfo(alpha, color, texture, start, duration, spellChecked, reverse, count, countText, forceupdate, unit)
+				icon:SetInfo(icon.Alpha, color, totemIcon, start, duration, totemName, nil, nil, nil, nil, nil)
+				return
 			end
 		end
-		
-		local color = icon:CrunchColor()
-		
-		--icon:SetInfo(alpha, color, texture, start, duration, spellChecked, reverse, count, countText, forceupdate, unit)
-		icon:SetInfo(icon.UnAlpha, color, icon.FirstTexture, 0, 0, nil, nil, nil, nil, nil, nil)
 	end
+	
+	local color = icon:CrunchColor()
+	
+	--icon:SetInfo(alpha, color, texture, start, duration, spellChecked, reverse, count, countText, forceupdate, unit)
+	icon:SetInfo(icon.UnAlpha, color, icon.FirstTexture, 0, 0, nil, nil, nil, nil, nil, nil)
 end
 
 
@@ -158,7 +153,7 @@ function Type:Setup(icon, groupID, iconID)
 	end
 
 	icon:SetScript("OnUpdate", Totem_OnUpdate)
-	icon:OnUpdate(TMW.time)
+	icon:Update()
 end
 
 function TypeIconMenuText(data)

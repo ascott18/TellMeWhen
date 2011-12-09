@@ -1921,7 +1921,7 @@ CNDT.Types = {
 				TMW:QueueValidityCheck(c.Icon, icon:GetID(), nil, g, i)
 			end
 	
-			local str = [[(c.Icon and c.Icon.__shown and c.Icon.OnUpdate and not c.Icon:OnUpdate(time))]]
+			local str = [[(c.Icon and c.Icon.__shown and c.Icon.OnUpdate and not c.Icon:Update(time))]]
 			if c.Level == 0 then
 				str = str .. [[and c.Icon.__alpha > 0]]
 			else
@@ -1948,7 +1948,7 @@ CNDT.Types = {
 		end,
 		funcstr = function(c)
 			if c.Icon == "" then return [[true]] end
-			local str = [[(c.Icon and c.Icon.__shown and c.Icon.OnUpdate and not c.Icon:OnUpdate(time)) and c.Icon.__alpha c.Operator c.Level]]
+			local str = [[(c.Icon and c.Icon.__shown and c.Icon.OnUpdate and not c.Icon:Update(time)) and c.Icon.__alpha c.Operator c.Level]]
 			return gsub(str, "c.Icon", c.Icon)
 		end,
 					L["CONDITIONPANEL_ICONALPHA"] = "Icon Alpha"
@@ -2116,6 +2116,8 @@ function CNDT:ProcessConditions(icon)
 	
 	local funcstr = ""
 	local luaUsed
+	local unitCheckedSubstitutionUsed
+	
 	for i = 1, Conditions.n do
 		local c = Conditions[i]
 		local t = c.Type
@@ -2173,6 +2175,9 @@ function CNDT:ProcessConditions(icon)
 						Env[unit] = unit
 						TMW:RegisterEvent("RAID_ROSTER_UPDATE")
 						TMW:RAID_ROSTER_UPDATE()
+					elseif strfind(unit, "%%[Uu]") then
+						thisstr = gsub(thisstr, "c.Unit2",		icon:GetName() .. ".__unitChecked or ''") -- sub it in as a variable
+						unitCheckedSubstitutionUsed = true
 					else
 						thisstr = gsub(thisstr, "c.Unit2",	"\"" .. unit .. "\"") -- sub it in as a string
 					end
@@ -2185,6 +2190,9 @@ function CNDT:ProcessConditions(icon)
 						Env[unit] = unit
 						TMW:RegisterEvent("RAID_ROSTER_UPDATE")
 						TMW:RAID_ROSTER_UPDATE()
+					elseif strfind(unit, "%%[Uu]") then
+						thisstr = gsub(thisstr, "c.Unit",		icon:GetName() .. ".__unitChecked or ''") -- sub it in as a variable
+						unitCheckedSubstitutionUsed = true
 					else
 						thisstr = gsub(thisstr, "c.Unit",	"\"" .. unit .. "\"") -- sub it in as a string
 					end
@@ -2253,20 +2261,34 @@ function CNDT:ProcessConditions(icon)
 	end
 
 
+	local func, err
+	
 	if functionCache[funcstr] then
-		icon.CndtCheck = functionCache[funcstr]
-		return functionCache[funcstr]
+		func = functionCache[funcstr]
+	else
+		func, err = loadstring(funcstr, icon:GetName() .. " Condition")
+		if func then
+			func = setfenv(func, Env)
+			functionCache[funcstr] = func
+		elseif (TMW.debug or luaUsed) and err then
+			TMW:Error(err)
+		end
 	end
 
-	local func, err = loadstring(funcstr, icon:GetName() .. " Condition")
 	if func then
-		func = setfenv(func, Env)
-		icon.CndtCheck = func
 		icon.CndtString = funcstr
-		functionCache[funcstr] = func
+		
+		if icon.base == TMW.IconBase then
+			local key = unitCheckedSubstitutionUsed and "CndtCheckAfter" or "CndtCheck"
+			local antikey = unitCheckedSubstitutionUsed and "CndtCheck" or "CndtCheckAfter"
+			
+			icon[key] = functionCache[funcstr]
+			icon[antikey] = nil
+		else
+			icon.CndtCheck = func
+		end
+		
 		return func
-	elseif (TMW.debug or luaUsed) and err then
-		TMW:Error(err)
 	end
 end
 

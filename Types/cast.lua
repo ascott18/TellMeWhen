@@ -18,7 +18,7 @@ local TMW = TMW
 if not TMW then return end
 local L = TMW.L
 
-local db, UPD_INTV, pr, ab
+local db, pr, ab
 local ipairs, strlower =
 	  ipairs, strlower
 local UnitCastingInfo, UnitChannelInfo, UnitExists, UnitGUID =
@@ -59,48 +59,43 @@ Type.DisabledEvents = {
 	OnStack = true,
 }
 
-function Type:Update(upd_intv)
+function Type:Update()
 	db = TMW.db
-	UPD_INTV = upd_intv
 	pr = db.profile.PRESENTColor
 	ab = db.profile.ABSENTColor
 end
 
 local function Cast_OnUpdate(icon, time)
-	if icon.LastUpdate <= time - UPD_INTV then
-		icon.LastUpdate = time
-		local CndtCheck = icon.CndtCheck if CndtCheck and CndtCheck() then return end
 
-		local NameFirst, NameNameHash, Units, Interruptible = icon.NameFirst, icon.NameNameHash, icon.Units, icon.Interruptible
+	local NameFirst, NameNameHash, Units, Interruptible = icon.NameFirst, icon.NameNameHash, icon.Units, icon.Interruptible
 
-		for u = 1, #Units do
-			local unit = Units[u]
-			if UnitExists(unit) then
-				local name, _, _, iconTexture, start, endTime, _, _, notInterruptible = UnitCastingInfo(unit)
-				local reverse = false -- must be false
-				if not name then
-					name, _, _, iconTexture, start, endTime, _, notInterruptible = UnitChannelInfo(unit)
-					reverse = true
-				end
+	for u = 1, #Units do
+		local unit = Units[u]
+		if UnitExists(unit) then
+			local name, _, _, iconTexture, start, endTime, _, _, notInterruptible = UnitCastingInfo(unit)
+			local reverse = false -- must be false
+			if not name then
+				name, _, _, iconTexture, start, endTime, _, notInterruptible = UnitChannelInfo(unit)
+				reverse = true
+			end
 
-				if name and not (notInterruptible and Interruptible) and (NameFirst == "" or NameNameHash[strlowerCache[name]]) then
-					start, endTime = start/1000, endTime/1000
-					local duration = endTime - start
+			if name and not (notInterruptible and Interruptible) and (NameFirst == "" or NameNameHash[strlowerCache[name]]) then
+				start, endTime = start/1000, endTime/1000
+				local duration = endTime - start
 
-					local color = icon:CrunchColor(duration)
-					
-					--icon:SetInfo(alpha, color, texture, start, duration, spellChecked, reverse, count, countText, forceupdate, unit)
-					icon:SetInfo(icon.Alpha, color, iconTexture, start, duration, name, reverse, nil, nil, nil, unit)
+				local color = icon:CrunchColor(duration)
+				
+				--icon:SetInfo(alpha, color, texture, start, duration, spellChecked, reverse, count, countText, forceupdate, unit)
+				icon:SetInfo(icon.Alpha, color, iconTexture, start, duration, name, reverse, nil, nil, nil, unit)
 
-					return
-				end
+				return
 			end
 		end
-		local color = icon:CrunchColor()
-		
-		--icon:SetInfo(alpha, color, texture, start, duration, spellChecked, reverse, count, countText, forceupdate, unit)
-		icon:SetInfo(icon.UnAlpha, color, nil, 0, 0, NameFirst, nil, nil, nil, nil, nil)
 	end
+	local color = icon:CrunchColor()
+	
+	--icon:SetInfo(alpha, color, texture, start, duration, spellChecked, reverse, count, countText, forceupdate, unit)
+	icon:SetInfo(icon.UnAlpha, color, nil, 0, 0, NameFirst, nil, nil, nil, nil, nil)
 end
 
 
@@ -114,7 +109,7 @@ function Type:Setup(icon, groupID, iconID)
 
 	icon.ShowPBar = false
 	icon:SetScript("OnUpdate", Cast_OnUpdate)
-	icon:OnUpdate(TMW.time)
+	icon:Update()
 end
 
 function Type:GetNameForDisplay(icon, data)

@@ -10,6 +10,7 @@
  * Performance Increase: Icons should no longer update themselves multiple times within one update period when the update interval is set to zero and the icon is being checked by multiple metas/conditions.
  * You can now set a group as a component of a meta icon, causing the meta icon to check all icons that are part of the selected group.
  * Meta icons now support the "Always Hide" setting.
+ * Conditions can now check "%u" as a unit, which will substitute in whatever unit the icon is currently checking.
  * Bug Fixes:
  ** (r316) TellMeWhen_Options.lua:2831: attempt to index local "spaceControl" (a nil value)
  ** (r321) The runic power condition should now properly track runic power instead of mana.

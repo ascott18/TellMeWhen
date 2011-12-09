@@ -18,7 +18,7 @@ local TMW = TMW
 if not TMW then return end
 local L = TMW.L
 
-local db, UPD_INTV, ClockGCD, rc, mc, pr, ab
+local db, ClockGCD, rc, mc, pr, ab
 local GetRuneType, GetRuneCooldown =
 	  GetRuneType, GetRuneCooldown
 local OnGCD = TMW.OnGCD
@@ -75,9 +75,8 @@ local runeNames = {
 	COMBAT_TEXT_RUNE_DEATH,
 }
 
-function Type:Update(upd_intv)
+function Type:Update()
 	db = TMW.db
-	UPD_INTV = upd_intv
 	ClockGCD = db.profile.ClockGCD
 	rc = db.profile.OORColor
 	mc = db.profile.OOMColor
@@ -87,61 +86,57 @@ end
 
 local huge = math.huge
 local function Runes_OnUpdate(icon, time)
-	if icon.LastUpdate <= time - UPD_INTV then
-		icon.LastUpdate = time
-		local CndtCheck = icon.CndtCheck if CndtCheck and CndtCheck() then return end
-		
-		local Slots, Sort = icon.Slots, icon.Sort
-		local readyslot
-		local unstart, unduration, unslot
-		local d = Sort == -1 and huge or 0
-		
-		for iSlot = 1, #Slots do -- be careful here. slots that are explicitly disabled by the user are set false. slots that are disabled internally are set nil.
-			if Slots[iSlot] then
-				local start, duration, runeReady = GetRuneCooldown(iSlot)
-				
-				if start == 0 then duration = 0 end
-				if start > time then runeReady = false end
-				
-				if runeReady then
-					if not readyslot then
-						readyslot = iSlot
-					end
-					if icon.Alpha > 0 then
-						break
+	
+	local Slots, Sort = icon.Slots, icon.Sort
+	local readyslot
+	local unstart, unduration, unslot
+	local d = Sort == -1 and huge or 0
+	
+	for iSlot = 1, #Slots do -- be careful here. slots that are explicitly disabled by the user are set false. slots that are disabled internally are set nil.
+		if Slots[iSlot] then
+			local start, duration, runeReady = GetRuneCooldown(iSlot)
+			
+			if start == 0 then duration = 0 end
+			if start > time then runeReady = false end
+			
+			if runeReady then
+				if not readyslot then
+					readyslot = iSlot
+				end
+				if icon.Alpha > 0 then
+					break
+				end
+			else
+				if Sort then
+					local _d = duration - (time - start)
+					if d*Sort < _d*Sort then
+						unstart, unduration, unslot, d = start, duration, iSlot, _d
 					end
 				else
-					if Sort then
-						local _d = duration - (time - start)
-						if d*Sort < _d*Sort then
-							unstart, unduration, unslot, d = start, duration, iSlot, _d
-						end
-					else
-						if not unstart or (unstart > time and start < time) then
-							unstart, unduration, unslot = start, duration, iSlot
-						end
-						if start < time and icon.Alpha == 0 then
-							break
-						end
+					if not unstart or (unstart > time and start < time) then
+						unstart, unduration, unslot = start, duration, iSlot
+					end
+					if start < time and icon.Alpha == 0 then
+						break
 					end
 				end
 			end
 		end
+	end
+	
+	--icon:SetInfo(alpha, color, texture, start, duration, spellChecked, reverse, count, countText, forceupdate, unit)
+	if readyslot then
+		local type = GetRuneType(readyslot)
 		
-		--icon:SetInfo(alpha, color, texture, start, duration, spellChecked, reverse, count, countText, forceupdate, unit)
-		if readyslot then
-			local type = GetRuneType(readyslot)
-			
-			local color = icon:CrunchColor()
-			
-			icon:SetInfo(icon.Alpha, color, textures[type], 0, 0, type, nil, nil, nil, nil, nil)
-		elseif unslot then
-			local type = GetRuneType(unslot)
-			
-			local color = icon:CrunchColor(unduration)
-			
-			icon:SetInfo(icon.UnAlpha, color, textures[type], unstart, unduration, type, nil, nil, nil, nil, nil)
-		end
+		local color = icon:CrunchColor()
+		
+		icon:SetInfo(icon.Alpha, color, textures[type], 0, 0, type, nil, nil, nil, nil, nil)
+	elseif unslot then
+		local type = GetRuneType(unslot)
+		
+		local color = icon:CrunchColor(unduration)
+		
+		icon:SetInfo(icon.UnAlpha, color, textures[type], unstart, unduration, type, nil, nil, nil, nil, nil)
 	end
 end
 
@@ -166,7 +161,7 @@ function Type:Setup(icon, groupID, iconID)
 	icon:SetTexture(icon.FirstTexture or "Interface\\Icons\\INV_Misc_QuestionMark")
 	
 	icon:SetScript("OnUpdate", Runes_OnUpdate)
-	--icon:OnUpdate(TMW.time)
+	--icon:Update()
 end
 
 function Type:GetIconMenuText(data)

@@ -2758,18 +2758,20 @@ function IE:Unit_DropDown()
 		e:HighlightText()
 	end
 	for k, v in pairs(TMW.Units) do
-		local info = UIDropDownMenu_CreateInfo()
-		info.text = v.text
-		info.value = v.value
-		if v.range then
-			info.tooltipTitle = v.tooltipTitle or v.text
-			info.tooltipText = "|cFFFF0000#|r = 1-" .. v.range
-			info.tooltipOnButton = true
+		if not v.onlyCondition then
+			local info = UIDropDownMenu_CreateInfo()
+			info.text = v.text
+			info.value = v.value
+			if v.range then
+				info.tooltipTitle = v.tooltipTitle or v.text
+				info.tooltipText = "|cFFFF0000#|r = 1-" .. v.range
+				info.tooltipOnButton = true
+			end
+			info.notCheckable = true
+			info.func = IE.Unit_DropDown_OnClick
+			info.arg1 = v
+			UIDropDownMenu_AddButton(info, UIDROPDOWNMENU_MENU_LEVEL)
 		end
-		info.notCheckable = true
-		info.func = IE.Unit_DropDown_OnClick
-		info.arg1 = v
-		UIDropDownMenu_AddButton(info, UIDROPDOWNMENU_MENU_LEVEL)
 	end
 end
 
@@ -6418,6 +6420,10 @@ function CNDT:UnitMenu_DropDown()
 		if v.range then
 			info.tooltipTitle = v.tooltipTitle or v.text
 			info.tooltipText = "|cFFFF0000#|r = 1-" .. v.range
+			info.tooltipOnButton = true
+		elseif v.desc then
+			info.tooltipTitle = v.tooltipTitle or v.text
+			info.tooltipText = v.desc
 			info.tooltipOnButton = true
 		end
 		info.text = v.text
