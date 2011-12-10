@@ -5481,16 +5481,16 @@ function Module:Entry_Colorize_1(f, id)
 end
 
 
-local Module = SUG:NewModule("cooldown", SUG:GetModule("spell"))
+local Module = SUG:NewModule("spellWithGCD", SUG:GetModule("spell"))
 
-function Module:Table_Get()
-	return SpellCache, TMW.BE.gcd
+function Module:Table_GetSpecialSuggestions(suggestions)
+	suggestions[#suggestions + 1] = "GCD"
 end
 
 function Module:Entry_AddToList_2(f, id)
-	if TMW.BE.gcd[id] then
+	if id == "GCD" then
 		local equiv = id
-		id = EquivFirstIDLookup[id]
+		id = TMW.GCDSpell --EquivFirstIDLookup[id]
 		
 		local name = GetSpellInfo(id)
 
@@ -5507,7 +5507,7 @@ function Module:Entry_AddToList_2(f, id)
 end
 
 function Module:Entry_Colorize_2(f, id)
-	if TMW.BE.gcd[id] then
+	if id == "GCD" then
 		f.Background:SetVertexColor(.58, .51, .79, 1) -- color item slots warlock purple
 	end
 end

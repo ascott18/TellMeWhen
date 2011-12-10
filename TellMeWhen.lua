@@ -32,7 +32,7 @@ local DRData = LibStub("DRData-1.0", true)
 TELLMEWHEN_VERSION = "4.7.0"
 TELLMEWHEN_VERSION_MINOR = strmatch(" @project-version@", " r%d+") or ""
 TELLMEWHEN_VERSION_FULL = TELLMEWHEN_VERSION .. TELLMEWHEN_VERSION_MINOR
-TELLMEWHEN_VERSIONNUMBER = 47023 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
+TELLMEWHEN_VERSIONNUMBER = 47024 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
 if TELLMEWHEN_VERSIONNUMBER > 48000 or TELLMEWHEN_VERSIONNUMBER < 47000 then return error("YOU SCREWED UP THE VERSION NUMBER OR DIDNT CHANGE THE SAFETY LIMITS") end -- safety check because i accidentally made the version number 414069 once
 
 TELLMEWHEN_MAXGROUPS = 1 	--this is a default, used by SetTheory (addon), so dont rename
@@ -690,7 +690,7 @@ TMW.GCDSpells = {
 	SHAMAN	   	= 324, -- lightning shield
 	HUNTER	   	= 1978, -- serpent sting
 	DEATHKNIGHT = 47541, -- death coil
-} local GCDSpell = TMW.GCDSpells[pclass]
+} local GCDSpell = TMW.GCDSpells[pclass] TMW.GCDSpell = GCDSpell
 
 function TMW:ProcessEquivalencies()
 	TMW.DS = {
@@ -764,9 +764,6 @@ function TMW:ProcessEquivalencies()
 			Tier12Interrupts    = "_97202;_100094",
 		},
 		dr = {
-		},
-		gcd = {
-			GCD			  		= tostring(GCDSpell),
 		},
 		unlisted = {
 			-- enrages were extracted using the script in the /Scripts folder (source is db.mmo-champion.com)

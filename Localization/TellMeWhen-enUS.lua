@@ -178,7 +178,7 @@ L["DROPDOWN_UNIT_DESC"] = [[You can select units from this menu to insert into t
 
 For more information about units, go to http://www.wowpedia.org/UnitId.]]
 L["ICONMENU_ICONUNIT"] = "<Icon's Unit>"
-L["ICONMENU_ICONUNIT_DESC"] = "Inserts the \"%u\" substitution, which will check whatever unit the icon is currently checking."
+L["ICONMENU_ICONUNIT_DESC"] = "Inserts the \"%u\" substitution, which will check whatever unit the icon is currently showing data for."
 L["ICONMENU_FOCUS"] = "Focus"
 L["ICONMENU_TARGETTARGET"] = "Target's target"
 L["ICONMENU_FOCUSTARGET"] = "Focus' target"

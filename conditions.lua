@@ -67,15 +67,17 @@ hooksecurefunc(TMW, "OnInitialize", function()
 end)
 
 local test
---[[test = function()
+--[[
+test = function()
 	test = nil
 	TMW:Debug("|cffffffffRUNNING CONDITION TESTS")
 	local icon = CreateFrame("Button", "TESTICON")
 	Env.TESTICON = icon
-	icon.Conditions = {}
+	icon.Conditions = {n = 0}
 	for k, v in ipairs(CNDT.Types) do
 		icon.Conditions[k] = CopyTable(TMW.Icon_Defaults.Conditions["**"])
 		icon.Conditions[k].Type = v.value
+		icon.Conditions.n = icon.Conditions.n + 1
 	end
 	CNDT:ProcessConditions(icon)
 	icon:CndtCheck()
@@ -87,7 +89,7 @@ local test
 	if #CNDT.Types ~= n then
 		error("you screwed up the value field somewhere")
 	end
-end]]
+end--]]
 
 local classes = {
 	"DEATHKNIGHT",
@@ -405,6 +407,11 @@ Env = {
 local OnGCD = TMW.OnGCD
 local GetSpellCooldown = GetSpellCooldown
 function Env.CooldownDuration(spell, time)
+	if spell == "gcd" then
+		local start, duration = GetSpellCooldown(TMW.GCDSpell)
+		return duration == 0 and 0 or (duration - (time - start))
+	end
+	
 	local start, duration = GetSpellCooldown(spell)
 	if duration then
 		return ((duration == 0 or OnGCD(duration)) and 0) or (duration - (time - start))
@@ -1414,7 +1421,7 @@ CNDT.Types = {
 		range = 30,
 		step = 0.1,
 		name = function(editbox) TMW:TT(editbox, "SPELLTOCHECK", "CNDT_ONLYFIRST") editbox.label = L["SPELLTOCHECK"] end,
-		useSUG = "cooldown",
+		useSUG = "spellWithGCD",
 		unit = PLAYER,
 		texttable = setmetatable({[0] = formatSeconds(0).." ("..L["ICONMENU_USABLE"]..")"}, {__index = formatSeconds}),
 		icon = "Interface\\Icons\\spell_holy_divineintervention",
@@ -1428,7 +1435,7 @@ CNDT.Types = {
 		noslide = true,
 		name = function(editbox) TMW:TT(editbox, "SPELLTOCOMP1", "CNDT_ONLYFIRST") editbox.label = L["SPELLTOCOMP1"] end,
 		name2 = function(editbox) TMW:TT(editbox, "SPELLTOCOMP2", "CNDT_ONLYFIRST") editbox.label = L["SPELLTOCOMP2"] end,
-		useSUG = "cooldown",
+		useSUG = "spellWithGCD",
 		unit = PLAYER,
 		icon = "Interface\\Icons\\spell_holy_divineintervention",
 		tcoords = standardtcoords,
@@ -1851,6 +1858,7 @@ CNDT.Types = {
 		categorySpacebefore = true,
 		range = 5000,
 		unit = PLAYER,
+		texttable = commanumber,
 		icon = "Interface\\Icons\\spell_nature_strength",
 		tcoords = standardtcoords,
 		funcstr = [[UnitStat1 c.Operator c.Level]],
@@ -1862,6 +1870,7 @@ CNDT.Types = {
 		category = L["CNDTCAT_STATS"],
 		range = 5000,
 		unit = PLAYER,
+		texttable = commanumber,
 		icon = "Interface\\Icons\\spell_holy_blessingofagility",
 		tcoords = standardtcoords,
 		funcstr = [[UnitStat2 c.Operator c.Level]],
@@ -1873,6 +1882,7 @@ CNDT.Types = {
 		category = L["CNDTCAT_STATS"],
 		range = 5000,
 		unit = PLAYER,
+		texttable = commanumber,
 		icon = "Interface\\Icons\\spell_holy_wordfortitude",
 		tcoords = standardtcoords,
 		funcstr = [[UnitStat3 c.Operator c.Level]],
@@ -1884,6 +1894,7 @@ CNDT.Types = {
 		category = L["CNDTCAT_STATS"],
 		range = 5000,
 		unit = PLAYER,
+		texttable = commanumber,
 		icon = "Interface\\Icons\\spell_holy_magicalsentry",
 		tcoords = standardtcoords,
 		funcstr = [[UnitStat4 c.Operator c.Level]],
@@ -1895,6 +1906,7 @@ CNDT.Types = {
 		category = L["CNDTCAT_STATS"],
 		range = 5000,
 		unit = PLAYER,
+		texttable = commanumber,
 		icon = "Interface\\Icons\\spell_shadow_burningspirit",
 		tcoords = standardtcoords,
 		funcstr = [[UnitStat5 c.Operator c.Level]],
@@ -1919,6 +1931,7 @@ CNDT.Types = {
 		category = L["CNDTCAT_STATS"],
 		range = 5000,
 		unit = PLAYER,
+		texttable = commanumber,
 		icon = "Interface\\Icons\\INV_Sword_04",
 		tcoords = standardtcoords,
 		funcstr = [[MeleeAttackPower c.Operator c.Level]],
@@ -1972,6 +1985,7 @@ CNDT.Types = {
 		category = L["CNDTCAT_STATS"],
 		range = 5000,
 		unit = PLAYER,
+		texttable = commanumber,
 		icon = "Interface\\Icons\\INV_Weapon_Bow_07",
 		tcoords = standardtcoords,
 		funcstr = [[RangeAttackPower c.Operator c.Level]],
@@ -2014,6 +2028,7 @@ CNDT.Types = {
 		category = L["CNDTCAT_STATS"],
 		range = 5000,
 		unit = PLAYER,
+		texttable = commanumber,
 		icon = "Interface\\Icons\\spell_fire_flamebolt",
 		tcoords = standardtcoords,
 		funcstr = [[SpellDamage c.Operator c.Level]],
@@ -2026,6 +2041,7 @@ CNDT.Types = {
 		category = L["CNDTCAT_STATS"],
 		range = 5000,
 		unit = PLAYER,
+		texttable = commanumber,
 		icon = "Interface\\Icons\\spell_nature_healingtouch",
 		tcoords = standardtcoords,
 		funcstr = [[SpellHealing c.Operator c.Level]],
@@ -2065,7 +2081,7 @@ CNDT.Types = {
 		category = L["CNDTCAT_STATS"],
 		range = 1000/5,
 		unit = PLAYER,
-		texttable = function(k) return format(L["MP5"], k*5) end,
+		texttable = function(k) return format(L["MP5"], commanumber(k)*5) end,
 		icon = "Interface\\Icons\\spell_magic_managain",
 		tcoords = standardtcoords,
 		funcstr = [[GetManaRegen() c.Operator c.Level]], -- anyone know of an event that can be reliably listened to to get this?
@@ -2076,7 +2092,7 @@ CNDT.Types = {
 		category = L["CNDTCAT_STATS"],
 		range = 1000/5,
 		unit = PLAYER,
-		texttable = function(k) return format(L["MP5"], k*5) end,
+		texttable = function(k) return format(L["MP5"], commanumber(k)*5) end,
 		icon = "Interface\\Icons\\spell_frost_summonwaterelemental",
 		tcoords = standardtcoords,
 		funcstr = [[select(2,GetManaRegen()) c.Operator c.Level]],
@@ -2373,7 +2389,7 @@ function CNDT:ProcessConditions(icon)
 						TMW:RegisterEvent("RAID_ROSTER_UPDATE")
 						TMW:RAID_ROSTER_UPDATE()
 					elseif strfind(unit, "%%[Uu]") then
-						thisstr = gsub(thisstr, "c.Unit2",		icon:GetName() .. ".__unitChecked or ''") -- sub it in as a variable
+						thisstr = gsub(thisstr, "c.Unit2",		"(" .. icon:GetName() .. ".__unitChecked or '')") -- sub it in as a variable
 						unitCheckedSubstitutionUsed = true
 					else
 						thisstr = gsub(thisstr, "c.Unit2",	"\"" .. unit .. "\"") -- sub it in as a string
@@ -2388,7 +2404,7 @@ function CNDT:ProcessConditions(icon)
 						TMW:RegisterEvent("RAID_ROSTER_UPDATE")
 						TMW:RAID_ROSTER_UPDATE()
 					elseif strfind(unit, "%%[Uu]") then
-						thisstr = gsub(thisstr, "c.Unit",		icon:GetName() .. ".__unitChecked or ''") -- sub it in as a variable
+						thisstr = gsub(thisstr, "c.Unit",		"(" .. icon:GetName() .. ".__unitChecked or '')") -- sub it in as a variable
 						unitCheckedSubstitutionUsed = true
 					else
 						thisstr = gsub(thisstr, "c.Unit",	"\"" .. unit .. "\"") -- sub it in as a string
