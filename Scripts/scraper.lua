@@ -122,7 +122,7 @@ print("")
 print(string.format("Found %d keys and/or strings total", totalLocalizedKeys))
 
 -- read the locale file
-L = {}
+local L = {}
 function LibStub()
 	local AceLocale = {}
 	function AceLocale:NewLocale()

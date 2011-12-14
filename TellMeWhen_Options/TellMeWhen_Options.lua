@@ -1103,62 +1103,6 @@ function TMW:CompileOptions()
 							childGroups = "tree",
 							args = {},
 						},
-						--[==[coloropts = {
-							type = "group",
-							name = L["UIPANEL_COLORS"],
-							order = 3,
-							set = function(info, r, g, b, a) local c = db.profile[info[#info]] c.r = r c.g = g c.b = b c.a = a end,
-							get = function(info) local c = db.profile[info[#info]] return c.r, c.g, c.b, c.a end,
-							args = {
-								CDSTColor = {
-									name = L["UIPANEL_COLOR_STARTED"],
-									desc = L["UIPANEL_COLOR_STARTED_DESC"],
-									type = "color",
-									order = 31,
-									hasAlpha = true,
-								},
-						--		AOA = colorTemplate,
-								CDCOColor = {
-									name = L["UIPANEL_COLOR_COMPLETE"],
-									desc = L["UIPANEL_COLOR_COMPLETE_DESC"],
-									type = "color",
-									order = 32,
-									hasAlpha = true,
-								},
-								OORColor = {
-									name = L["UIPANEL_COLOR_OOR"],
-									desc = L["UIPANEL_COLOR_OOR_DESC"],
-									type = "color",
-									order = 37,
-									hasAlpha = true,
-								},
-								OOMColor = {
-									name = L["UIPANEL_COLOR_OOM"],
-									desc = L["UIPANEL_COLOR_OOM_DESC"],
-									type = "color",
-									order = 38,
-									hasAlpha = true,
-								},
-								desc = {
-									name = L["UIPANEL_COLOR_DESC"],
-									type = "description",
-									order = 40,
-								},
-								PRESENTColor = {
-									name = L["UIPANEL_COLOR_PRESENT"],
-									desc = L["UIPANEL_COLOR_PRESENT_DESC"],
-									type = "color",
-									order = 45,
-									hasAlpha = false,
-								},
-								ABSENTColor = {
-									name = L["UIPANEL_COLOR_ABSENT"],
-									desc = L["UIPANEL_COLOR_ABSENT_DESC"],
-									type = "color",
-									order = 47,
-									hasAlpha = false,
-								},
-							},]==]
 					},
 				},
 				groups = {

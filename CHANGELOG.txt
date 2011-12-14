@@ -1,3 +1,7 @@
+===v4.7.2===
+ * Bug Fixes:
+ ** (r344) Temporary fix (I hope) for the bug where OmniCC timers would randomly stop after a timer was refreshed.
+
 ===v4.7.1===
  * Bug Fixes:
  ** (r342) Condition icons will no longer spam their event outputs when "Only show if timer is active" is enabled.

@@ -26,7 +26,6 @@ L["LOCKED"] = "Locked"
 L["RESIZE"] = "Resize"
 L["RESIZE_TOOLTIP"] = "Click and drag to change size"
 
-L["ONGROUPDELETE_CHECKINGINVALID"] = "Warning! The following groups and icons were checking icons that were in the group that you just deleted:"
 L["CONDITIONORMETA_CHECKINGINVALID"] = "Warning! Group %d, Icon %d is checking an invalid icon (Group %d, Icon %d)"
 L["CONDITIONORMETA_CHECKINGINVALID_GROUP"] = "Warning! Group %d is checking an invalid icon (Group %d, Icon %d)"
 L["WARN_DRMISMATCH"] = [[Warning! You are checking the diminishing returns on spells from two different known categories.
@@ -134,9 +133,6 @@ Icons that have %q checked will still be shown in a meta icon if they would othe
 
 
 
-
-L["ICONMENU_COOLDOWNTYPE"] = "Cooldown type"
-L["ICONMENU_SPELL"] = "Spell or ability"
 
 L["ICONMENU_SHOWWHEN"] = "Show icon when"
 L["ICONMENU_USABLE"] = "Usable"
@@ -395,20 +391,6 @@ L["UIPANEL_DRAWEDGE_DESC"] = "Highlights the edge of the cooldown timer (clock a
 L["UIPANEL_WARNINVALIDS"] = "Warn about invalid icons"
 
 
-L["UIPANEL_COLOR_COMPLETE"] = "CD/Duration Complete"
-L["UIPANEL_COLOR_STARTED"] = "CD/Duration Begin"
-L["UIPANEL_COLOR_COMPLETE_DESC"] = "Color of the cooldown/duration overlay bar when the cooldown/duration is complete"
-L["UIPANEL_COLOR_STARTED_DESC"] = "Color of the cooldown/duration overlay bar when the cooldown/duration has just begun"
-L["UIPANEL_COLOR_OOR"] = "Out of range color"
-L["UIPANEL_COLOR_OOR_DESC"] = "Tint and alpha of the icon when you are not in range of the target to cast the spell"
-L["UIPANEL_COLOR_OOM"] = "Out of power color"
-L["UIPANEL_COLOR_OOM_DESC"] = "Tint and alpha of the icon when you lack the mana/rage/energy/focus/runicpower to cast the spell"
-L["UIPANEL_COLOR_DESC"] = "The following options only affect the colors of icons when they are set to show all the time"
-L["UIPANEL_COLOR_PRESENT"] = "Present color"
-L["UIPANEL_COLOR_PRESENT_DESC"] = "The tint of the icon when the buff/debuff/enchant/totem is present and the icon is set to always show."
-L["UIPANEL_COLOR_ABSENT"] = "Absent color"
-L["UIPANEL_COLOR_ABSENT_DESC"] = "The tint of the icon when the buff/debuff/enchant/totem is absent and the icon is set to always show."
-
 L["COLOR_DEFAULT"] = "*Global Colors*"
 L["COLOR_RESET_DESC"] = "Reset this setting to default values"
 L["COLOR_OVERRIDEDEFAULT"] = "Use"
@@ -490,10 +472,6 @@ L["UNDO_ICON_DESC"] = "Undo the last change made to this icon's settings."
 L["REDO_ICON"] = "Redo"
 L["REDO_ICON_DESC"] = "Redo the last change made to this icon's settings."
 L["UNDOREDO_ICON_NOBIND"] = "You can set a keybinding for this action in the Blizzard keybinding interface."
-
-L["RESET_NOTIFY"] = "Click the reset button again within 5 seconds to confirm the reset."
-L["RESET_EXPIRE"] = "Reset timer expired."
-L["RESET_CONFIRM"] = "Confirm Reset"
 
 L["UIPANEL_FONT_Count"] = "Stack Text" -- proper case endings intended
 L["UIPANEL_FONT_Bind"] = "Binding/Label Text"
@@ -735,7 +713,6 @@ L["COPYPOSSCALE"] = "Copy position/scale"
 L["COPYGROUP"] = "Copy Group"
 L["OVERWRITEGROUP"] = "Overwrite group: %s"
 L["MAKENEWGROUP"] = "Create new group"
-L["CONFIRMOVERWRITE"] = "Confirm overwrite"
 
 
 L["GROUPADDONSETTINGS"] = "Group Settings"
@@ -770,7 +747,6 @@ L["IMPORT_FROMSTRING"] = "From String"
 L["IMPORT_FROMSTRING_DESC"] = [[Strings allow you to transfer TellMeWhen configuration data outside the game.
 
 To import from a string, press CTRL+V to paste the string into the editbox after you have copied it to your clipboard, and then navigate back to this sub-menu.]]
-L["IMPORT_FROMSTRING_ERR_NOICONS"] = "Use the icon editor to import icons"
 L["IMPORT_FROMCOMM"] = "From Player"
 L["IMPORT_FROMCOMM_DESC"] = "If another user of TellMeWhen sends you any configuration data, you will be able to import that data from this submenu."
 L["IMPORT_PROFILE"] = "Copy Profile"

@@ -29,10 +29,10 @@ local AceDB = LibStub("AceDB-3.0")
 local LSM = LibStub("LibSharedMedia-3.0")
 local DRData = LibStub("DRData-1.0", true)
  
-TELLMEWHEN_VERSION = "4.7.1"
+TELLMEWHEN_VERSION = "4.7.2"
 TELLMEWHEN_VERSION_MINOR = strmatch(" @project-version@", " r%d+") or ""
 TELLMEWHEN_VERSION_FULL = TELLMEWHEN_VERSION .. TELLMEWHEN_VERSION_MINOR
-TELLMEWHEN_VERSIONNUMBER = 47101 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
+TELLMEWHEN_VERSIONNUMBER = 47201 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
 if TELLMEWHEN_VERSIONNUMBER > 48000 or TELLMEWHEN_VERSIONNUMBER < 47000 then return error("YOU SCREWED UP THE VERSION NUMBER OR DIDNT CHANGE THE SAFETY LIMITS") end -- safety check because i accidentally made the version number 414069 once
 
 TELLMEWHEN_MAXGROUPS = 1 	--this is a default, used by SetTheory (addon), so dont rename
@@ -1391,9 +1391,10 @@ function TMW:OnCommReceived(prefix, text, channel, who)
 		end
 		TMW.VersionWarned = true
 		TMW:Printf(L["NEWVERSION"], major .. minor)
-	elseif prefix == "TMW" and channel == "WHISPER" and db.profile.ReceiveComm then
+	elseif prefix == "TMW" and db.profile.ReceiveComm then
 		TMW.Received = TMW.Received or {}
 		TMW.Received[text] = who or true
+		
 		if who then
 			TMW.DoPulseReceivedComm = true
 			if db.global.HasImported then
@@ -3258,7 +3259,8 @@ function TMW.IconBase.SetInfo(icon, alpha, color, texture, start, duration, spel
 
 				-- cd.s is only used in this function and is used to prevent finish effect spam (and to increase efficiency) while GCDs are being triggered. icon.__start isnt used because that just records the start time passed in, which may be a GCD, so it will change frequently
 				if cd.s ~= s or forceupdate then
-					cd:SetCooldown(s, d)
+					-- TEMPORARY HACK: subtract a small amount to the start time so that OmniCC doesnt think that (s > GetTime())
+					cd:SetCooldown(s - 1e-10, d)
 					cd:Show()
 					if not icon.ShowTimer then
 						cd:SetAlpha(0)
