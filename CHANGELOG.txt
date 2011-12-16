@@ -1,6 +1,7 @@
 ===v4.7.2===
  * Bug Fixes:
  ** (r344) Temporary fix (I hope) for the bug where OmniCC timers would randomly stop after a timer was refreshed.
+ ** (r345) TellMeWhen.lua:1467 table index is nil
 
 ===v4.7.1===
  * Bug Fixes:
