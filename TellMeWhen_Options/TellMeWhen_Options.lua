@@ -3865,6 +3865,7 @@ function EVENTS:SetEventSettings()
 end
 
 function EVENTS:OperatorMenu_DropDown()
+	-- self is not Module
 	local Module = self:GetParent():GetParent().module
 	local eventData = Module.Events[Module.currentEventID].eventData
 	
@@ -3883,6 +3884,7 @@ function EVENTS:OperatorMenu_DropDown()
 end
 
 function EVENTS:OperatorMenu_DropDown_OnClick(frame)
+	-- self is not Module
 	local Module = frame:GetParent():GetParent().module
 	
 	TMW:SetUIDropdownText(frame, self.value)
@@ -5988,7 +5990,7 @@ function Module:Table_Get()
 	return self.Table
 end
 
-function Module:Entry_AddToList(f, name)
+function Module:Entry_AddToList_1(f, name)
 	if self.Spells[name] then
 		local id = self.Spells[name]
 		f.Name:SetText(name)
