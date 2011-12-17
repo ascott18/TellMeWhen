@@ -36,6 +36,7 @@ Type.desc = pclass == "DRUID" and L["ICONMENU_MUSHROOMS_DESC"]	or pclass == "DEA
 Type.chooseNameTitle = L["ICONMENU_CHOOSENAME"] .. " " .. L["ICONMENU_CHOOSENAME_ORBLANK"]
 Type.AllowNoName = true
 Type.usePocketWatch = 1
+Type.hidden = pclass == "PRIEST" -- priest totems are lightwells, which is tracked with icon type "lightwell"
 
 if pclass == "SHAMAN" then
 	Type.TypeChecks = {
