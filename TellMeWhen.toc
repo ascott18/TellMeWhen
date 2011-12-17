@@ -70,6 +70,7 @@ Types\wpnenchant.lua
 Types\totem.lua
 Types\dr.lua
 Types\cast.lua
+Types\lightwell.lua
 
 Types\conditionicon.lua
 Types\meta.lua

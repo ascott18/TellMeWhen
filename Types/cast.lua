@@ -18,7 +18,7 @@ local TMW = TMW
 if not TMW then return end
 local L = TMW.L
 
-local db, pr, ab
+local db
 local ipairs, strlower =
 	  ipairs, strlower
 local UnitCastingInfo, UnitChannelInfo, UnitExists, UnitGUID =
@@ -61,8 +61,6 @@ Type.DisabledEvents = {
 
 function Type:Update()
 	db = TMW.db
-	pr = db.profile.PRESENTColor
-	ab = db.profile.ABSENTColor
 end
 
 local function Cast_OnUpdate(icon, time)

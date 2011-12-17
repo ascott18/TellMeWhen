@@ -20,7 +20,7 @@ local L = TMW.L
 
 local _, pclass = UnitClass("Player")
 
-local db, ClockGCD, pr, ab, rc, mc
+local db, ClockGCD
 local strlower =
 	  strlower
 local GetTotemInfo, GetSpellTexture =
@@ -83,10 +83,6 @@ Type.DisabledEvents = {
 function Type:Update()
 	db = TMW.db
 	ClockGCD = db.profile.ClockGCD
-	pr = db.profile.PRESENTColor
-	ab = db.profile.ABSENTColor
-	rc = db.profile.OORColor
-	mc = db.profile.OOMColor
 end
 
 local function Totem_OnUpdate(icon, time)

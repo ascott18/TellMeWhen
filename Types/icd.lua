@@ -18,7 +18,7 @@ local TMW = TMW
 if not TMW then return end
 local L = TMW.L
 
-local db, pr, ab
+local db
 local strlower =
 	  strlower
 local print = TMW.print
@@ -68,8 +68,6 @@ Type.DisabledEvents = {
 
 function Type:Update()
 	db = TMW.db
-	pr = db.profile.PRESENTColor
-	ab = db.profile.ABSENTColor
 	pGUID = UnitGUID("player")
 end
 

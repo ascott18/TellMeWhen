@@ -18,7 +18,7 @@ local TMW = TMW
 if not TMW then return end
 local L = TMW.L
 
-local db, EFF_THR, ClockGCD, rc, mc, pr, ab, DS
+local db, EFF_THR, ClockGCD, DS
 local tonumber, strlower =
 	  tonumber, strlower
 local UnitAura, UnitExists =
@@ -79,10 +79,6 @@ function Type:Update()
 	db = TMW.db
 	ClockGCD = db.profile.ClockGCD
 	EFF_THR = db.profile.EffThreshold
-	rc = db.profile.OORColor
-	mc = db.profile.OOMColor
-	pr = db.profile.PRESENTColor
-	ab = db.profile.ABSENTColor
 	DS = TMW.DS
 end
 

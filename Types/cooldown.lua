@@ -18,7 +18,7 @@ local TMW = TMW
 if not TMW then return end
 local L = TMW.L
 
-local db, ClockGCD, rc, mc, pr, ab
+local db, ClockGCD
 local GetSpellCooldown, IsSpellInRange, IsUsableSpell =
 	  GetSpellCooldown, IsSpellInRange, IsUsableSpell
 local GetActionCooldown, IsActionInRange, IsUsableAction, GetActionTexture, GetActionInfo =
@@ -69,10 +69,6 @@ Type.DisabledEvents = {
 function Type:Update()
 	db = TMW.db
 	ClockGCD = db.profile.ClockGCD
-	rc = db.profile.OORColor
-	mc = db.profile.OOMColor
-	pr = db.profile.PRESENTColor
-	ab = db.profile.ABSENTColor
 end
 
 

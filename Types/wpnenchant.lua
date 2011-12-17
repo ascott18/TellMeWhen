@@ -18,7 +18,7 @@ local TMW = TMW
 if not TMW then return end
 local L = TMW.L
 
-local db, WpnEnchDurs, ClockGCD, pr, ab, rc, mc
+local db, WpnEnchDurs, ClockGCD
 local _G, strlower, strmatch, strtrim, select, floor, ceil =
 	  _G, strlower, strmatch, strtrim, select, floor, ceil
 local GetInventoryItemTexture, GetInventorySlotInfo, GetWeaponEnchantInfo =
@@ -109,10 +109,6 @@ function Type:Update()
 	db = TMW.db
 	ClockGCD = db.profile.ClockGCD
 	WpnEnchDurs = db.global.WpnEnchDurs
-	pr = db.profile.PRESENTColor
-	ab = db.profile.ABSENTColor
-	rc = db.profile.OORColor
-	mc = db.profile.OOMColor
 end
 
 local SlotsToNumbers = {

@@ -122,6 +122,9 @@ L["ICONMENU_CNDTIC_DESC"] = [=[Tracks the state of conditions.]=]
 L["ICONMENU_DR"] = "Diminishing Returns"
 L["ICONMENU_DR_DESC"] = [=[Tracks the length and extent of diminishing returns.]=]
 
+L["ICONMENU_LIGHTWELL"] = "Lightwell"
+L["ICONMENU_LIGHTWELL_DESC"] = [=[Tracks the duration and charges of your lightwell.]=]
+
 L["ICONMENU_RUNES"] = "Rune Cooldown"
 L["ICONMENU_RUNES_DESC"] = [[Tracks rune cooldowns]]
 

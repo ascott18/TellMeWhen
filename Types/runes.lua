@@ -18,7 +18,7 @@ local TMW = TMW
 if not TMW then return end
 local L = TMW.L
 
-local db, ClockGCD, rc, mc, pr, ab
+local db, ClockGCD
 local GetRuneType, GetRuneCooldown =
 	  GetRuneType, GetRuneCooldown
 local OnGCD = TMW.OnGCD
@@ -32,7 +32,7 @@ local Type = {}
 Type.type = "runes"
 LibStub("AceEvent-3.0"):Embed(Type)
 Type.name = L["ICONMENU_RUNES"]
-Type.desv = L["ICONMENU_RUNES_DESC"]
+Type.desc = L["ICONMENU_RUNES_DESC"]
 Type.hidden = pclass ~= "DEATHKNIGHT"
 Type.AllowNoName = true
 Type.TypeChecks = {
@@ -78,10 +78,6 @@ local runeNames = {
 function Type:Update()
 	db = TMW.db
 	ClockGCD = db.profile.ClockGCD
-	rc = db.profile.OORColor
-	mc = db.profile.OOMColor
-	pr = db.profile.PRESENTColor
-	ab = db.profile.ABSENTColor
 end
 
 local huge = math.huge

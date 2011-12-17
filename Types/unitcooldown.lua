@@ -19,7 +19,7 @@ local TMW = TMW
 if not TMW then return end
 local L = TMW.L
 
-local db, ClockGCD, pr, ab, rc, mc
+local db, ClockGCD
 local strlower, type, wipe, pairs =
 	  strlower, type, wipe, pairs
 local UnitGUID, IsInInstance =
@@ -67,10 +67,6 @@ Type.DisabledEvents = {
 function Type:Update()
 	db = TMW.db
 	ClockGCD = db.profile.ClockGCD
-	pr = db.profile.PRESENTColor
-	ab = db.profile.ABSENTColor
-	rc = db.profile.OORColor
-	mc = db.profile.OOMColor
 end
 
 local Cooldowns = setmetatable({}, {__index = function(t, k)

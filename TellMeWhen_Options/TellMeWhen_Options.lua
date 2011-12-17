@@ -2147,7 +2147,7 @@ function IE:Load(isRefresh, icon)
 		if Type then
 			UIDropDownMenu_SetText(IE.Main.Type, Type.name)
 		else
-			UIDropDownMenu_SetText(IE.Main.Type, "UNKNOWN TYPE: " .. CI.t)
+			UIDropDownMenu_SetText(IE.Main.Type, CI.t .. ": UNKNOWN TYPE")
 		end
 	end
 	CNDT:SetTabText("icon")
@@ -6862,7 +6862,7 @@ function CNDT.GroupBase.Load(group)
 	local data = CNDT.ConditionsByType[condition.Type]
 	
 	TMW:SetUIDropdownText(group.Type, condition.Type)
-	UIDropDownMenu_SetText(group.Type, data and data.text or ("UNKNOWN TYPE: " .. condition.Type))
+	UIDropDownMenu_SetText(group.Type, data and data.text or (condition.Type .. ": UNKNOWN TYPE"))
 	
 	group:TypeCheck(data)
 	

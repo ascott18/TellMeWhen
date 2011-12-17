@@ -40,7 +40,7 @@ Type.WhenChecks = {
 	{ value = "always",			text = L["ICONMENU_ALWAYS"] },
 }
 Type.RelevantSettings = {
-	CustomTex = false,
+	Name = false,
 	ConditionDur = true,
 	ConditionDurEnabled = true,
 	UnConditionDur = true,
@@ -112,7 +112,7 @@ function Type:Setup(icon, groupID, iconID)
 	icon.CndtCheckAfter = nil
 	
 	
-	local Name = gsub(icon.Name, [[\\]], [[\]])
+	--[=[local Name = gsub(icon.Name, [[\\]], [[\]])
 	icon.NameFirst = TMW:GetSpellNames(icon, Name, 1)
 	
 	local tex, reason = TMW:GetConfigIconTexture(icon)
@@ -125,7 +125,7 @@ function Type:Setup(icon, groupID, iconID)
 		if not icon.texture:GetTexture() then
 			icon:SetTexture("Interface\\Icons\\INV_Misc_QuestionMark")
 		end
-	end
+	end]=]
 	icon.__start = icon.__start or 0 --TellMeWhen-4.2.1.2.lua:2115 attempt to perform arithmetic on local "start" (a nil value) -- caused because condition icons do necessarily define start/durations, even if shown.
 	icon.__duration = icon.__duration or 0
 	icon.__vrtxcolor = 1
