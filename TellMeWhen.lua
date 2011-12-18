@@ -32,7 +32,7 @@ local DRData = LibStub("DRData-1.0", true)
 TELLMEWHEN_VERSION = "4.7.2"
 TELLMEWHEN_VERSION_MINOR = strmatch(" @project-version@", " r%d+") or ""
 TELLMEWHEN_VERSION_FULL = TELLMEWHEN_VERSION .. TELLMEWHEN_VERSION_MINOR
-TELLMEWHEN_VERSIONNUMBER = 47206 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
+TELLMEWHEN_VERSIONNUMBER = 47207 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
 if TELLMEWHEN_VERSIONNUMBER > 48000 or TELLMEWHEN_VERSIONNUMBER < 47000 then return error("YOU SCREWED UP THE VERSION NUMBER OR DIDNT CHANGE THE SAFETY LIMITS") end -- safety check because i accidentally made the version number 414069 once
 
 TELLMEWHEN_MAXGROUPS = 1 	--this is a default, used by SetTheory (addon), so dont rename
@@ -933,7 +933,7 @@ TMW.ChannelList = {
 			local info = UIDropDownMenu_CreateInfo()
 			info.func = TMW.ANN.LocDropdownFunc
 			info.text = L[name]
-			info.arg1 = name
+			info.arg1 = L[name]
 			info.value = name
 			info.checked = name == TMW.CI.ics.Events[TMW.ANN.currentEvent].Location
 			UIDropDownMenu_AddButton(info, UIDROPDOWNMENU_MENU_LEVEL) 
@@ -956,12 +956,8 @@ TMW.ChannelList = {
 		end,
 		ddtext = function(value)
 			-- also a verification function
-			local directRef = _G[value]
-			if directRef and directRef.AddMessage then
-				if directRef.name then
-					return directRef.name
-				end
-				return directRef
+			if value == "RaidWarningFrame" then
+				return L[value]
 			end
 			
 			local i = 1
