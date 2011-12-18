@@ -161,7 +161,6 @@
 			</OnMouseDown>
 			<OnDragStart>
 				if button == "RightButton" and TMW.ID then
-					TMW.ID.srcicon = self
 					TMW.ID:Start(self)
 				elseif button == "LeftButton" then
 					local group = self:GetParent()

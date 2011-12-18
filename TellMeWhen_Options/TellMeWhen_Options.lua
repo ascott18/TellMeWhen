@@ -1321,6 +1321,8 @@ end
 -- ----------------------
 
 ID = TMW:NewModule("IconDragger", "AceTimer-3.0", "AceEvent-3.0") TMW.ID = ID
+ID.DormantPhantoms = {}
+ID.ActivePhantoms = {}
 
 function ID:OnInitialize()
 	hooksecurefunc("PickupSpellBookItem", function(...) ID.DraggingInfo = {...} end)
@@ -1431,7 +1433,7 @@ function ID:DropDown()
 			name = L["ICONMENU_ANCHORTO"]:format(destname)
 			desc = L["ICONMENU_ANCHORTO_DESC"]:format(srcname, destname, destname, srcname)
 			
-		elseif ID.destFrame then
+		elseif ID.destFrame and ID.destFrame:GetName() then
 			if ID.destFrame == WorldFrame and ID.srcicon.group.Point.relativeTo ~= "UIParent" then
 				name = L["ICONMENU_ANCHORTO_UIPARENT"]
 				desc = L["ICONMENU_ANCHORTO_UIPARENT_DESC"]
@@ -1472,6 +1474,8 @@ function ID:DropDown()
 end
 
 function ID:Start(icon)
+	ID.srcicon = icon
+	
 	local scale = icon.group:GetScale()*0.85
 	ID.F:SetScript("OnUpdate", function()
 		local x, y = GetCursorPosition()
@@ -1488,6 +1492,48 @@ function ID:Start(icon)
 	end
 	ID.F:Show()
 	ID.IsDragging = true
+	
+	
+	
+	for group in TMW:InGroups() do
+		if group:IsVisible() then
+			local groupID = group:GetID()
+			local gs = TMW.db.profile.Groups[groupID]
+
+			for row = 1, gs.Rows do
+				for column = 1, gs.Columns do
+					local iconID = (row-1)*gs.Columns + column
+					local icon = group[iconID]
+					
+					if row == 1 then
+						ID:AttachPhantom(group, "BOTTOM", icon, "TOP")
+						if column == 1 then
+							ID:AttachPhantom(group, "BOTTOMRIGHT", icon, "TOPLEFT")
+						end
+						if column == gs.Columns then
+							ID:AttachPhantom(group, "BOTTOMLEFT", icon, "TOPRIGHT")
+						end
+					end
+					if row == gs.Rows then
+						ID:AttachPhantom(group, "TOP", icon, "BOTTOM")
+						if column == 1 then
+							ID:AttachPhantom(group, "TOPRIGHT", icon, "BOTTOMLEFT")
+						end
+						if column == gs.Columns then
+							ID:AttachPhantom(group, "TOPLEFT", icon, "BOTTOMRIGHT")
+						end
+					end
+					
+					if column == 1 then
+						ID:AttachPhantom(group, "RIGHT", icon, "LEFT")
+					end
+					if column == gs.Columns then
+						ID:AttachPhantom(group, "LEFT", icon, "RIGHT")
+					end
+				end
+			end
+		end
+	end
 end
 
 function ID:SetIsDraggingFalse()
@@ -1495,7 +1541,10 @@ function ID:SetIsDraggingFalse()
 end
 
 function ID:CompleteDrag(script, icon)
-
+	for Phantom in pairs(ID.ActivePhantoms) do
+		ID:RetirePhantom(Phantom)
+	end
+	
 	ID.F:SetScript("OnUpdate", nil)
 	ID.F:Hide()
 	ID:ScheduleTimer("SetIsDraggingFalse", 0.1)
@@ -1506,6 +1555,7 @@ function ID:CompleteDrag(script, icon)
 	if ID.IsDragging then
 		
 		if type(icon) == "table" and icon.base == TMW.IconBase then -- if the frame that got the drag is an icon, set the destination stuff.
+		
 			ID.desticon = icon
 			ID.destFrame = nil
 			
@@ -1518,6 +1568,16 @@ function ID:CompleteDrag(script, icon)
 			end
 			
 			UIDropDownMenu_SetAnchor(ID.DD, 0, 0, "TOPLEFT", icon, "BOTTOMLEFT")
+		
+		elseif type(icon) == "table" and icon.IsPhantom then -- if the frame that got the drag is a phantom
+			local group = icon.group
+			local gs = group:GetSettings()
+			
+			--TODO:PROCESS SHIT HERE BY FUGURING OUT HOW ICONS NEED TO BE SHIFTED AND IF A GROUP AND/OR COLUMN SHOULD BE ADDED. THEN, TAIL CALL :CompleteDrag
+			
+			
+			
+			
 		else
 			ID.desticon = nil
 			ID.destFrame = icon -- not actually an icon. just some frame.
@@ -1535,6 +1595,40 @@ function ID:CompleteDrag(script, icon)
 		end
 	end
 end
+
+
+function ID:GetPhantom()
+	local Phantom = tremove(ID.DormantPhantoms)
+	if not Phantom then
+		Phantom = CreateFrame("Button", nil, UIParent, "TellMeWhen_IconPhantomTemplate")
+		Phantom.IsPhantom = true
+	end
+	return Phantom
+end
+
+function ID:RetirePhantom(Phantom)
+	Phantom:Hide()
+	ID.ActivePhantoms[Phantom] = nil
+	tinsert(ID.DormantPhantoms, Phantom)
+end
+
+function ID:AttachPhantom(group, point, relativeTo, relativePoint)
+	local Phantom = ID:GetPhantom()
+	
+	Phantom.group = group
+	Phantom.point = point
+	Phantom.relativeTo = relativeTo
+	Phantom.relativePoint = relativePoint
+	
+	Phantom:SetParent(group)
+	Phantom:ClearAllPoints()
+	Phantom:SetPoint(point, relativeTo, relativePoint, 0, 0)
+	Phantom:Show()
+	--print(Phantom, group, point, relativeTo, relativePoint)
+	
+	ID.ActivePhantoms[Phantom] = Phantom
+end
+
 
 
 ---------- Icon Handler ----------

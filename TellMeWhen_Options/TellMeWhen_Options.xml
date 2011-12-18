@@ -1463,6 +1463,56 @@
 		</Scripts>
 	</Button>
 	
+	<Button name="TellMeWhen_IconPhantomTemplate" virtual="true" enableMouse="true">
+		<Size x="30" y="30"/>
+		<Layers>
+			<Layer level="BACKGROUND">
+				<Texture name="$parentIcon" parentKey="texture" file="Interface\Icons\INV_Misc_QuestionMark">
+					<Size x="30" y="30"/>
+				</Texture>
+			</Layer>
+		</Layers>
+		<Scripts>
+			<OnLoad>
+			</OnLoad>
+			<!--OnEnter>
+				local groupID = self:GetParent():GetID()
+				local line1 = TMW.L["ICON_TOOLTIP1"] .. " " .. format(TMW.L["GROUPICON"], TMW:GetGroupName(groupID, groupID, 1), self:GetID())
+				if self:GetParent().Locked then
+					line1 = line1 .. " (" .. TMW.L["LOCKED"] .. ")"
+				end
+				GameTooltip_SetDefaultAnchor(GameTooltip, self)
+				GameTooltip:AddLine(line1, HIGHLIGHT_FONT_COLOR.r, HIGHLIGHT_FONT_COLOR.g, HIGHLIGHT_FONT_COLOR.b)
+				GameTooltip:AddLine(TMW.L["ICON_TOOLTIP2NEW"], NORMAL_FONT_COLOR.r, NORMAL_FONT_COLOR.g, NORMAL_FONT_COLOR.b)
+				GameTooltip:Show()
+			</OnEnter>
+			<OnLeave>
+				GameTooltip:Hide()
+			</OnLeave-->
+			<OnMouseUp>
+				if TMW.ID.isMoving then
+					TMW:Group_StopMoving(TMW.ID.isMoving)
+				end
+				if button == "RightButton" then
+					TMW.IE:Load(nil, self)
+				end
+				if TMW.IE then
+					TMW.IE:ScheduleIconUpdate(self:GetParent():GetID(), self:GetID())
+				end
+			</OnMouseUp>
+			<OnReceiveDrag>
+				if TMW.ID then
+					TMW.ID:CompleteDrag("OnReceiveDrag", self)
+					TMW.ID:SpellItemToIcon(self)
+				end
+			</OnReceiveDrag>
+		</Scripts>
+
+		<NormalTexture file=""/>
+		<HighlightTexture alphaMode="ADD" file="Interface\Buttons\ButtonHilight-Square"/>
+		<PushedTexture file="Interface\Buttons\UI-Quickslot-Depress"/>
+	</Button>
+	
 
 	<Button name="TellMeWhen_AnnounceEvent" motionScriptsWhileDisabled="true" virtual="true" >
 		<Size y="15"/>

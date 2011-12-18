@@ -32,7 +32,7 @@ local DRData = LibStub("DRData-1.0", true)
 TELLMEWHEN_VERSION = "4.7.2"
 TELLMEWHEN_VERSION_MINOR = strmatch(" @project-version@", " r%d+") or ""
 TELLMEWHEN_VERSION_FULL = TELLMEWHEN_VERSION .. TELLMEWHEN_VERSION_MINOR
-TELLMEWHEN_VERSIONNUMBER = 47205 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
+TELLMEWHEN_VERSIONNUMBER = 47206 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
 if TELLMEWHEN_VERSIONNUMBER > 48000 or TELLMEWHEN_VERSIONNUMBER < 47000 then return error("YOU SCREWED UP THE VERSION NUMBER OR DIDNT CHANGE THE SAFETY LIMITS") end -- safety check because i accidentally made the version number 414069 once
 
 TELLMEWHEN_MAXGROUPS = 1 	--this is a default, used by SetTheory (addon), so dont rename
@@ -928,6 +928,16 @@ TMW.ChannelList = {
 		color = 1,
 		defaultlocation = function() return DEFAULT_CHAT_FRAME.name end,
 		dropdown = function()
+		
+			local name = "RaidWarningFrame"
+			local info = UIDropDownMenu_CreateInfo()
+			info.func = TMW.ANN.LocDropdownFunc
+			info.text = L[name]
+			info.arg1 = name
+			info.value = name
+			info.checked = name == TMW.CI.ics.Events[TMW.ANN.currentEvent].Location
+			UIDropDownMenu_AddButton(info, UIDROPDOWNMENU_MENU_LEVEL) 
+					
 			local i = 1
 			while _G["ChatFrame"..i] do 
 				local _, _, _, _, _, _, shown, _, docked = FCF_GetChatWindowInfo(i);
@@ -946,6 +956,14 @@ TMW.ChannelList = {
 		end,
 		ddtext = function(value)
 			-- also a verification function
+			local directRef = _G[value]
+			if directRef and directRef.AddMessage then
+				if directRef.name then
+					return directRef.name
+				end
+				return directRef
+			end
+			
 			local i = 1
 			while _G["ChatFrame"..i] do 
 				if _G["ChatFrame"..i].name == value then
@@ -2693,6 +2711,10 @@ function TMW.GroupBase.ShouldUpdateIcons(group)
 	return TMW:Group_ShouldUpdateIcons(group:GetID())
 end
 
+function TMW.GroupBase.GetSettings(group)
+	return db.profile.Groups[group:GetID()]
+end
+
 function TMW:GetShapeshiftForm()
 	-- very hackey function because of inconsistencies in blizzard's GetShapeshiftForm
 	local i = GetShapeshiftForm()
@@ -3015,19 +3037,26 @@ function TMW.IconBase.FireEvent(icon, data, played, announced)
 					Parrot:ShowMessage(Text, data.Location, data.Sticky, data.r, data.g, data.b, nil, Size, nil, data.Icon and icon.__tex)
 				end
 			elseif Channel == "FRAME" then
-				local i = 1
-				while _G["ChatFrame"..i] do
-					local frame = _G["ChatFrame"..i]
-					local Location = data.Location
-					if Location == frame.name then
-						if data.Icon then
-							Text = "|T" .. (icon.__tex or "") .. ":0|t " .. Text
-						end
-						frame:AddMessage(Text, data.r, data.g, data.b, 1)
-						break
-					end
-					i = i+1
+				local Location = data.Location
+				
+				if data.Icon then
+					Text = "|T" .. (icon.__tex or "") .. ":0|t " .. Text
 				end
+				
+				if _G[Location] == RaidWarningFrame then
+					RaidNotice_AddMessage(RaidWarningFrame, Text, data)
+				else
+					local i = 1
+					while _G["ChatFrame"..i] do
+						local frame = _G["ChatFrame"..i]
+						if Location == frame.name then
+							frame:AddMessage(Text, data.r, data.g, data.b, 1)
+							break
+						end
+						i = i+1
+					end
+				end
+				
 			elseif Channel == "SMART" then
 				local channel = "SAY"
 				if UnitInBattleground("player") then
@@ -3266,8 +3295,7 @@ function TMW.IconBase.SetInfo(icon, alpha, color, texture, start, duration, spel
 
 				-- cd.s is only used in this function and is used to prevent finish effect spam (and to increase efficiency) while GCDs are being triggered. icon.__start isnt used because that just records the start time passed in, which may be a GCD, so it will change frequently
 				if cd.s ~= s or forceupdate then
-					-- TEMPORARY HACK: subtract a small amount to the start time so that OmniCC doesnt think that (s > GetTime())
-					cd:SetCooldown(s - 1e-10, d)
+					cd:SetCooldown(s, d)
 					cd:Show()
 					if not icon.ShowTimer then
 						cd:SetAlpha(0)
