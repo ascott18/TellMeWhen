@@ -268,10 +268,13 @@ L["ICONMENU_DONTREFRESH_DESC"] = "Check to force the cooldown to not reset if th
 L["SORTBY"] = "Prioritize"
 L["SORTBYNONE"] = "Normally"
 L["SORTBYNONE_DESC"] = [[If checked, spells will be checked in and appear in the order that they were entered into the "%s" editbox. If this icon is a buff/debuff icon and the number of auras being checked exceeds the efficiency threshold setting, auras will be checked in the order that they would normally appear on the unit's unit frame.]]
+L["SORTBYNONE_META_DESC"] = [[If checked, icons will be checked in the order that was configured above.]]
 L["ICONMENU_SORTASC"] = "Low duration"
 L["ICONMENU_SORTASC_DESC"] = "Check this box to prioritize and show spells with the lowest duration."
+L["ICONMENU_SORTASC_META_DESC"] = "Check this box to prioritize and show icons with the lowest duration."
 L["ICONMENU_SORTDESC"] = "High duration"
 L["ICONMENU_SORTDESC_DESC"] = "Check this box to prioritize and show spells with the highest duration."
+L["ICONMENU_SORTDESC_META_DESC"] = "Check this box to prioritize and show icons with the highest duration."
 
 L["ICONMENU_MOVEHERE"] = "Move here"
 L["ICONMENU_COPYHERE"] = "Copy here"

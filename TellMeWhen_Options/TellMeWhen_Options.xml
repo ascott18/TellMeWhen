@@ -1339,7 +1339,7 @@
 		</Scripts>
 	</Frame>
 	<Frame name="TellMeWhen_MetaGroup" virtual="true">
-		<Size x="440" y="30"/>
+		<Size x="440" y="29"/>
 		<Frames>
 			<Frame name="$parentIcon" parentKey="icon" inherits="TMW_DropDownMenuTemplate">
 				<Anchors>
@@ -2328,7 +2328,7 @@
 					<Frame name="$parentIcons[DND]" hidden="true" parentKey="Icons">
 						<Anchors>
 							<Anchor point="TOPLEFT" relativeTo="$parentType" relativePoint="BOTTOMLEFT" x="-10" y="-17"/>
-							<Anchor point="BOTTOMRIGHT" y="34"/>
+							<Anchor point="BOTTOMRIGHT" y="59"/>
 						</Anchors>
 						<Layers>
 							<Layer level="ARTWORK">
@@ -2479,7 +2479,6 @@
 						</Anchors>
 					</Frame>
 					
-				
 					<Frame name="$parentSortChecks" parentKey="Sort">
 						<Size x="140" y="75"/>
 						<Anchors>
