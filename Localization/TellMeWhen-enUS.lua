@@ -927,7 +927,7 @@ L["CHAT_MSG_SMART_DESC"] = "Will output to Battleground, Raid, Party, or Say - w
 L["CHAT_MSG_CHANNEL"] = "Chat Channel"
 L["CHAT_MSG_CHANNEL_DESC"] = "Will output to a chat channel, such as Trade, or a custom channel that you have joined."
 
-L["CHAT_FRAME"] = "Chat Frame"
+L["CHAT_FRAME"] = "Chat/Message Frame"
 
 
 L["HELP_FIRSTUCD"] = [[You have used an icon type that uses the special duration syntax for the first time! Spells that are added to the %q editbox for certain icon types must define a duration immediately after each spell using the following syntax:

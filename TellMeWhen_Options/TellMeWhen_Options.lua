@@ -1321,8 +1321,6 @@ end
 -- ----------------------
 
 ID = TMW:NewModule("IconDragger", "AceTimer-3.0", "AceEvent-3.0") TMW.ID = ID
-ID.DormantPhantoms = {}
-ID.ActivePhantoms = {}
 
 function ID:OnInitialize()
 	hooksecurefunc("PickupSpellBookItem", function(...) ID.DraggingInfo = {...} end)
@@ -1349,6 +1347,10 @@ end
 
 ---------- Spell/Item Dragging ----------
 function ID:SpellItemToIcon(icon)
+	if icon.base ~= TMW.IconBase then
+		return
+	end
+	
 	local t, data, subType
 	local input
 	if not (CursorHasSpell() or CursorHasItem()) and ID.DraggingInfo then
@@ -1492,58 +1494,13 @@ function ID:Start(icon)
 	end
 	ID.F:Show()
 	ID.IsDragging = true
-	
-	
-	
-	for group in TMW:InGroups() do
-		if group:IsVisible() then
-			local groupID = group:GetID()
-			local gs = TMW.db.profile.Groups[groupID]
-
-			for row = 1, gs.Rows do
-				for column = 1, gs.Columns do
-					local iconID = (row-1)*gs.Columns + column
-					local icon = group[iconID]
-					
-					if row == 1 then
-						ID:AttachPhantom(group, "BOTTOM", icon, "TOP")
-						if column == 1 then
-							ID:AttachPhantom(group, "BOTTOMRIGHT", icon, "TOPLEFT")
-						end
-						if column == gs.Columns then
-							ID:AttachPhantom(group, "BOTTOMLEFT", icon, "TOPRIGHT")
-						end
-					end
-					if row == gs.Rows then
-						ID:AttachPhantom(group, "TOP", icon, "BOTTOM")
-						if column == 1 then
-							ID:AttachPhantom(group, "TOPRIGHT", icon, "BOTTOMLEFT")
-						end
-						if column == gs.Columns then
-							ID:AttachPhantom(group, "TOPLEFT", icon, "BOTTOMRIGHT")
-						end
-					end
-					
-					if column == 1 then
-						ID:AttachPhantom(group, "RIGHT", icon, "LEFT")
-					end
-					if column == gs.Columns then
-						ID:AttachPhantom(group, "LEFT", icon, "RIGHT")
-					end
-				end
-			end
-		end
 	end
-end
 
 function ID:SetIsDraggingFalse()
 	ID.IsDragging = false
 end
 
 function ID:CompleteDrag(script, icon)
-	for Phantom in pairs(ID.ActivePhantoms) do
-		ID:RetirePhantom(Phantom)
-	end
 	
 	ID.F:SetScript("OnUpdate", nil)
 	ID.F:Hide()
@@ -1569,15 +1526,6 @@ function ID:CompleteDrag(script, icon)
 			
 			UIDropDownMenu_SetAnchor(ID.DD, 0, 0, "TOPLEFT", icon, "BOTTOMLEFT")
 		
-		elseif type(icon) == "table" and icon.IsPhantom then -- if the frame that got the drag is a phantom
-			local group = icon.group
-			local gs = group:GetSettings()
-			
-			--TODO:PROCESS SHIT HERE BY FUGURING OUT HOW ICONS NEED TO BE SHIFTED AND IF A GROUP AND/OR COLUMN SHOULD BE ADDED. THEN, TAIL CALL :CompleteDrag
-			
-			
-			
-			
 		else
 			ID.desticon = nil
 			ID.destFrame = icon -- not actually an icon. just some frame.
@@ -1595,40 +1543,6 @@ function ID:CompleteDrag(script, icon)
 		end
 	end
 end
-
-
-function ID:GetPhantom()
-	local Phantom = tremove(ID.DormantPhantoms)
-	if not Phantom then
-		Phantom = CreateFrame("Button", nil, UIParent, "TellMeWhen_IconPhantomTemplate")
-		Phantom.IsPhantom = true
-	end
-	return Phantom
-end
-
-function ID:RetirePhantom(Phantom)
-	Phantom:Hide()
-	ID.ActivePhantoms[Phantom] = nil
-	tinsert(ID.DormantPhantoms, Phantom)
-end
-
-function ID:AttachPhantom(group, point, relativeTo, relativePoint)
-	local Phantom = ID:GetPhantom()
-	
-	Phantom.group = group
-	Phantom.point = point
-	Phantom.relativeTo = relativeTo
-	Phantom.relativePoint = relativePoint
-	
-	Phantom:SetParent(group)
-	Phantom:ClearAllPoints()
-	Phantom:SetPoint(point, relativeTo, relativePoint, 0, 0)
-	Phantom:Show()
-	--print(Phantom, group, point, relativeTo, relativePoint)
-	
-	ID.ActivePhantoms[Phantom] = Phantom
-end
-
 
 
 ---------- Icon Handler ----------
@@ -1691,6 +1605,7 @@ function ID:Swap()
 end
 
 function TMW:ReconcileData(source, destination, matchSource, matchDestination, swap)
+	-- TODO: put this function in a better place
 	-- update any changed icons that meta icons are checking
 	for ics in TMW:InIconSettings() do
 		for k, ic in pairs(ics.Icons) do
@@ -3072,8 +2987,12 @@ function TMW:ExportToComm(editbox, ...)
 	local player = strtrim(editbox:GetText())
 	if player and #player > 1 then -- and #player < 13 you can send to cross server people in a battleground ("Cybeloras-Mal'Ganis"), so it can be more than 13
 		local s = TMW:GetSettingsString(...)
-
-		TMW:SendCommMessage("TMW", s, "WHISPER", player, "BULK", editbox.callback, editbox)
+		
+		if player == "RAID" or player == "GUILD" then -- note the upper case
+			TMW:SendCommMessage("TMW", s, player, nil, "BULK", editbox.callback, editbox)
+		else
+			TMW:SendCommMessage("TMW", s, "WHISPER", player, "BULK", editbox.callback, editbox)
+		end
 	end
 end
 
