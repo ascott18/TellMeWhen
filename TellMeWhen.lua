@@ -32,7 +32,7 @@ local DRData = LibStub("DRData-1.0", true)
 TELLMEWHEN_VERSION = "4.7.2"
 TELLMEWHEN_VERSION_MINOR = strmatch(" @project-version@", " r%d+") or ""
 TELLMEWHEN_VERSION_FULL = TELLMEWHEN_VERSION .. TELLMEWHEN_VERSION_MINOR
-TELLMEWHEN_VERSIONNUMBER = 47209 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
+TELLMEWHEN_VERSIONNUMBER = 47210 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
 if TELLMEWHEN_VERSIONNUMBER > 48000 or TELLMEWHEN_VERSIONNUMBER < 47000 then return error("YOU SCREWED UP THE VERSION NUMBER OR DIDNT CHANGE THE SAFETY LIMITS") end -- safety check because i accidentally made the version number 414069 once
 
 TELLMEWHEN_MAXGROUPS = 1 	--this is a default, used by SetTheory (addon), so dont rename
@@ -66,7 +66,7 @@ local bitband = bit.band
 
 
 ---------- Locals ----------
-local db, updatehandler, BarGCD, ClockGCD, Locked, SndChan, FramesToFind, UnitsToUpdate, CNDTEnv
+local db, updatehandler, BarGCD, ClockGCD, Locked, SndChan, FramesToFind, UnitsToUpdate, CNDTEnv, ColorMSQ, OnlyMSQ
 local UPD_INTV = 0.06	--this is a default, local because i use it in onupdate functions
 local runEvents, updatePBar = 1, 1
 local GCD, NumShapeshiftForms, LastUpdate = 0, 0, 0
@@ -500,6 +500,8 @@ TMW.Defaults = {
 		CheckOrder	 =	-1,
 	--[[	CodeSnippets = {
 		},]]
+		ColorMSQ	 = false,
+		OnlyMSQ		 = false,
 		Colors = {
 			["**"] = {
 				CBC = 	{r=0,	g=1,	b=0,	Override = false,	a=1,	},	-- cooldown bar complete
@@ -1513,7 +1515,10 @@ function TMW:Update()
 
 	BarGCD = db.profile.BarGCD
 	ClockGCD = db.profile.ClockGCD
+	ColorMSQ = db.profile.ColorMSQ
+	OnlyMSQ = db.profile.OnlyMSQ
 	SndChan = db.profile.MasterSound and "Master" or nil
+	
 
 	wipe(TMW.Icons)
 	wipe(TMW.IconsLookup)
@@ -3395,13 +3400,25 @@ function TMW.IconBase.SetInfo(icon, alpha, color, texture, start, duration, spel
 	end
 
 	if color and icon.__vrtxcolor ~= color then
+		local r, g, b, d
 		if type(color) == "table" then
-			icon.texture:SetVertexColor(color.r, color.g, color.b, 1)
-			icon.texture:SetDesaturated(color.Gray)
+			r, g, b, d = color.r, color.g, color.b, color.Gray
 		else
-			icon.texture:SetVertexColor(color, color, color, 1)
-			icon.texture:SetDesaturated(false)
+			r, g, b, d = color, color, color, false
 		end
+		
+		if not (LMB and OnlyMSQ) then
+			icon.texture:SetVertexColor(r, g, b, 1)
+		end
+		icon.texture:SetDesaturated(d)
+			
+		if LMB and ColorMSQ then
+			local iconnt = icon.__normaltex
+			if iconnt then
+				iconnt:SetVertexColor(r, g, b, 1)
+			end
+		end
+			
 		icon.__vrtxcolor = color
 	end
 

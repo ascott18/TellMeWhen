@@ -4,6 +4,7 @@
  * You can now output text to the raid warning frame without actually sending a raid warning to your raid.
  * You can now export icons to an entire raid or your entire guild by typing "RAID" or "GUILD" as the name to export to.
  * Meta icons can now sort their components based on their current duration.
+ * Added an option to color the border of Masque skins with the coloring applied to icons. This setting can be found under the *Global Colors* config in TMW's main options.
  * Bug Fixes:
  ** (r344) Temporary fix (I hope) for the bug where OmniCC timers would randomly stop after a timer was refreshed.
  ** (r345) TellMeWhen.lua:1467 table index is nil

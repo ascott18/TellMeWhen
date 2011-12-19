@@ -815,7 +815,7 @@ local colorTemplate = {
 		local this = info[#info]
 		for order, key in pairs(colorOrder) do
 			if key == this then
-				return order
+				return order + 10
 			end
 		end
 	end,
@@ -930,6 +930,16 @@ local colorIconTypeTemplate = {
 			end
 		end
 	end,
+	
+	--only inherited by ColorMSQ and OnlyMSQ:
+	set = function(info, val)
+		db.profile[info[#info]] = val
+		TMW:Update()
+	end,
+	get = function(info)
+		return db.profile[info[#info]]
+	end,
+	
 	args = {
 		desc = {
 			order = 0,
@@ -945,7 +955,30 @@ local colorIconTypeTemplate = {
 				end
 				return t .. "\r\n"
 			end,
-		}
+		}, 
+		
+		ColorMSQ = {
+			name = L["COLOR_MSQ_COLOR"],
+			desc = L["COLOR_MSQ_COLOR_DESC"],
+			type = "toggle",
+			order = 1,
+			hidden = function(info)
+				return info[#info-1] ~= "GLOBAL"
+			end,
+		},
+		OnlyMSQ = {
+			name = L["COLOR_MSQ_ONLY"],
+			desc = L["COLOR_MSQ_ONLY_DESC"],
+			type = "toggle",
+			width = "double",
+			order = 2,
+			hidden = function(info)
+				return info[#info-1] ~= "GLOBAL"
+			end,
+			disabled = function(info)
+				return not db.profile.ColorMSQ
+			end,
+		},
 	}
 }
 

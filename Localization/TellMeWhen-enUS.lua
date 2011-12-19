@@ -399,6 +399,10 @@ L["UIPANEL_WARNINVALIDS"] = "Warn about invalid icons"
 
 L["COLOR_DEFAULT"] = "*Global Colors*"
 L["COLOR_RESET_DESC"] = "Reset this setting to default values"
+L["COLOR_MSQ_COLOR"] = "Color Masque border"
+L["COLOR_MSQ_COLOR_DESC"] = "Checking this will cause the border of a Masque skin (if the skin you are using has a border) to be colored."
+L["COLOR_MSQ_ONLY"] = "Only color Masque border"
+L["COLOR_MSQ_ONLY_DESC"] = "Checking this will cause ONLY the border of a Masque skin (if the skin you are using has a border) to colored. Icons will NOT be colored"
 L["COLOR_OVERRIDEDEFAULT"] = "Use"
 L["COLOR_OVERRIDEDEFAULT_DESC"] = "Check this to override the *Global Colors* setting and use this setting instead."
 L["COLOR_HEADER_DEFAULT"] = [[These colors will be used for any icon type that does not override them in the type's color settings.
