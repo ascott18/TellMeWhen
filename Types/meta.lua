@@ -76,7 +76,6 @@ local function Meta_OnUpdate(icon, time)
 						_d = 0
 					end
 					if d*Sort < _d*Sort then
-						print("OLD", icToUse, d, "NEW", ic, _d)
 						icToUse = ic
 						d = _d
 					end

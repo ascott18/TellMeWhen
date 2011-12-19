@@ -32,7 +32,7 @@ local DRData = LibStub("DRData-1.0", true)
 TELLMEWHEN_VERSION = "4.7.2"
 TELLMEWHEN_VERSION_MINOR = strmatch(" @project-version@", " r%d+") or ""
 TELLMEWHEN_VERSION_FULL = TELLMEWHEN_VERSION .. TELLMEWHEN_VERSION_MINOR
-TELLMEWHEN_VERSIONNUMBER = 47210 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
+TELLMEWHEN_VERSIONNUMBER = 47211 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
 if TELLMEWHEN_VERSIONNUMBER > 48000 or TELLMEWHEN_VERSIONNUMBER < 47000 then return error("YOU SCREWED UP THE VERSION NUMBER OR DIDNT CHANGE THE SAFETY LIMITS") end -- safety check because i accidentally made the version number 414069 once
 
 TELLMEWHEN_MAXGROUPS = 1 	--this is a default, used by SetTheory (addon), so dont rename
@@ -4495,14 +4495,21 @@ end
 
 TMW.TestTex = TMW:CreateTexture()
 function TMW:GetCustomTexture(icon)
-	icon.CustomTex = icon.CustomTex ~= "" and icon.CustomTex
-	if icon.CustomTex then
-		TMW.TestTex:SetTexture(SpellTextures[icon.CustomTex])
+	local CustomTex
+	if type(icon) == "table" then
+		icon.CustomTex = icon.CustomTex ~= "" and icon.CustomTex
+		CustomTex = icon.CustomTex
+	else
+		CustomTex = icon
+	end
+	
+	if CustomTex then
+		TMW.TestTex:SetTexture(SpellTextures[CustomTex])
 		if not TMW.TestTex:GetTexture() then
-			TMW.TestTex:SetTexture(icon.CustomTex)
+			TMW.TestTex:SetTexture(CustomTex)
 		end
 		if not TMW.TestTex:GetTexture() then
-			TMW.TestTex:SetTexture("Interface\\Icons\\" .. icon.CustomTex)
+			TMW.TestTex:SetTexture("Interface\\Icons\\" .. CustomTex)
 		end
 		return TMW.TestTex:GetTexture()
 	end
