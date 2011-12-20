@@ -4482,10 +4482,18 @@ ANIM.AnimationList = {
 		animation = "",
 	},
 	{
-		text = L["ANIM_SHAKE"],
-		desc = L["ANIM_SHAKE_DESC"],
-		animation = "SHAKE",
+		text = L["ANIM_SCREENSHAKE"],
+		desc = L["ANIM_SCREENSHAKE_DESC"],
+		animation = "SCREENSHAKE",
 		duration = true,
+		magnitude = true,
+	},
+	{
+		text = L["ANIM_ICONSHAKE"],
+		desc = L["ANIM_ICONSHAKE_DESC"],
+		animation = "ICONSHAKE",
+		duration = true,
+		magnitude = true,
 	},
 	
 	
@@ -4601,6 +4609,12 @@ function ANIM:SelectAnimation(animation)
 			self.Duration:Show()
 		else
 			self.Duration:Hide()
+		end
+		if animationSettings.magnitude then
+			self.Magnitude:SetValue(EventSettings.Magnitude)
+			self.Magnitude:Show()
+		else
+			self.Magnitude:Hide()
 		end
 	end
 

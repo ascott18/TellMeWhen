@@ -32,7 +32,7 @@ local DRData = LibStub("DRData-1.0", true)
 TELLMEWHEN_VERSION = "4.7.3"
 TELLMEWHEN_VERSION_MINOR = strmatch(" @project-version@", " r%d+") or ""
 TELLMEWHEN_VERSION_FULL = TELLMEWHEN_VERSION .. TELLMEWHEN_VERSION_MINOR
-TELLMEWHEN_VERSIONNUMBER = 47301 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
+TELLMEWHEN_VERSIONNUMBER = 47302 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
 if TELLMEWHEN_VERSIONNUMBER > 48000 or TELLMEWHEN_VERSIONNUMBER < 47000 then return error("YOU SCREWED UP THE VERSION NUMBER OR DIDNT CHANGE THE SAFETY LIMITS") end -- safety check because i accidentally made the version number 414069 once
 
 TELLMEWHEN_MAXGROUPS = 1 	--this is a default, used by SetTheory (addon), so dont rename
@@ -67,13 +67,13 @@ local bitband = bit.band
 
 ---------- Locals ----------
 local db, updatehandler, BarGCD, ClockGCD, Locked, SndChan, FramesToFind, UnitsToUpdate, CNDTEnv, ColorMSQ, OnlyMSQ
-local ShakeDuration
 local UPD_INTV = 0.06	--this is a default, local because i use it in onupdate functions
 local runEvents, updatePBar = 1, 1
 local GCD, NumShapeshiftForms, LastUpdate = 0, 0, 0
 local IconUpdateFuncs, GroupUpdateFuncs, unitsToChange = {}, {}, {}
 local BindUpdateFuncs
 local loweredbackup = {}
+local Shakers = {}
 local time = GetTime() TMW.time = time
 local sctcolor = {r=1, b=1, g=1}
 local clientVersion = select(4, GetBuildInfo())
@@ -644,6 +644,7 @@ TMW.Defaults = {
 								
 								Animation      = "",
 								Duration       = .8,
+								Magnitude      = 10,
 								
 								OnlyShown 	   = false,
 								Operator 	   = "<",
@@ -1477,28 +1478,35 @@ function TMW:OnUpdate(elapsed)					-- this is where all icon OnUpdate scripts ar
 			BindUpdateFuncs[i]:UpdateBindText()
 		end
 	end
-	if ShakeDuration then
-		ShakeDuration = ShakeDuration - elapsed
-		if ShakeDuration < 0 then
-			ShakeDuration = 0
-		end
-		if not TMW.WorldFramePoints then
-			TMW.WorldFramePoints = {}
-			for i = 1, WorldFrame:GetNumPoints() do
-				TMW.WorldFramePoints[i] = { WorldFrame:GetPoint(i) }
+	
+	if next(Shakers) then
+		for frame, Duration in next, Shakers do
+			Duration = Duration - elapsed
+			if Duration < 0 then
+				Duration = nil
 			end
-		end
-		
-		local Amt = 10 / (1 + 10*(300^(-ShakeDuration)))
-        local moveX = random(-Amt, Amt) 
-        local moveY = random(-Amt, Amt) 
-        WorldFrame:ClearAllPoints()
-        for _, v in pairs(TMW.WorldFramePoints) do
-            WorldFrame:SetPoint(v[1], v[2], v[3], v[4] + moveX, v[5] + moveY)
-        end
-		
-		if ShakeDuration == 0 then
-			ShakeDuration = nil
+			Shakers[frame] = Duration
+			
+			local Amt = (frame.TMW_ShakeMagnitude or 10) / (1 + 10*(300^(-(Duration or 0))))
+			local moveX = random(-Amt, Amt) 
+			local moveY = random(-Amt, Amt) 
+				
+			if frame == WorldFrame then
+				if not TMW.WorldFramePoints then
+					TMW.WorldFramePoints = {}
+					for i = 1, frame:GetNumPoints() do
+						TMW.WorldFramePoints[i] = { frame:GetPoint(i) }
+					end
+				end
+				
+				frame:ClearAllPoints()
+				for _, v in pairs(TMW.WorldFramePoints) do
+					frame:SetPoint(v[1], v[2], v[3], v[4] + moveX, v[5] + moveY)
+				end
+				
+			elseif frame.base == TMW.IconBase then
+				frame:SetPoint("TOPLEFT", frame.x + moveX, frame.y + moveY)
+			end
 		end
 	end
 end
@@ -2819,13 +2827,11 @@ function TMW:Group_Update(groupID)
 
 				icon:Show()
 				icon:SetFrameLevel(group:GetFrameLevel() + 1)
-				if column > 1 then
-					icon:SetPoint("TOPLEFT", group[iconID-1], "TOPRIGHT", Spacing, 0)
-				elseif row > 1 and column == 1 then
-					icon:SetPoint("TOPLEFT", group[iconID-group.Columns], "BOTTOMLEFT", 0, -Spacing)
-				elseif iconID == 1 then
-					icon:SetPoint("TOPLEFT", group, "TOPLEFT")
-				end
+				
+				local x, y = (30 + Spacing)*(column-1), -(30 + Spacing)*(row-1)
+				icon.x, icon.y = x, y -- used for shakers
+				icon:SetPoint("TOPLEFT", x, y)
+				
 				local success, err = pcall(TMW.Icon_Update, TMW, icon)
 				if not success then
 					TMW:Error(L["GROUPICON"]:format(groupID, iconID) .. ": " .. err)
@@ -2840,7 +2846,7 @@ function TMW:Group_Update(groupID)
 			end
 		end
 
-		group.resizeButton:SetPoint("BOTTOMRIGHT", group[group.Rows*group.Columns], "BOTTOMRIGHT", 3, -3)
+		group.resizeButton:SetPoint("BOTTOMRIGHT", 3, -3)
 
 		if Locked or group.Locked then
 			group.resizeButton:Hide()
@@ -3127,8 +3133,14 @@ function TMW.IconBase.FireEvent(icon, data, played, announced, animated)
 		---------- Text ----------
 		local Animation = data.Animation
 		if Animation ~= "" and not animated then
-			if Animation == "SHAKE" then
-				ShakeDuration = ShakeDuration and max(ShakeDuration, data.Duration) or data.Duration
+			if Animation == "SCREENSHAKE" then
+				local Duration = Shakers[WorldFrame]
+				WorldFrame.TMW_ShakeMagnitude = data.Magnitude
+				Shakers[WorldFrame] = Duration and max(Duration, data.Duration) or data.Duration
+			elseif Animation == "ICONSHAKE" then
+				local Duration = Shakers[icon]
+				icon.TMW_ShakeMagnitude = data.Magnitude
+				Shakers[icon] = Duration and max(Duration, data.Duration) or data.Duration
 			end		
 			animated = 1
 		end

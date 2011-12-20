@@ -3930,7 +3930,7 @@
 						</Layers>
 					</Frame>
 					
-					<Slider name="$parentDuration" parentKey="Duration" inherits="TellMeWhen_SliderTemplate" minvalue="0" maxvalue="10" valuestep="0.1" defaultvalue="1">
+					<Slider name="$parentDuration" parentKey="Duration" inherits="TellMeWhen_SliderTemplate" minvalue="0.1" maxvalue="10" valuestep="0.1" >
 						<Size y="17"/>
 						<Anchors>
 							<Anchor point="TOPLEFT" relativeTo="$parentAnimations" relativePoint="TOPRIGHT" x="20" y="-20"/>
@@ -3960,6 +3960,39 @@
 							</OnLoad>
 							<OnMouseWheel>
 								self:SetValue(self:GetValue()+delta)
+							</OnMouseWheel>
+						</Scripts>
+					</Slider>
+					<Slider name="$parentMagnitude" parentKey="Magnitude" inherits="TellMeWhen_SliderTemplate" minvalue="1" maxvalue="20" valuestep="1">
+						<Size y="17"/>
+						<Anchors>
+							<Anchor point="TOPLEFT" relativeTo="$parentDuration" y="-35"/>
+							<Anchor point="TOPRIGHT" relativeTo="$parentDuration" y="-35"/>
+						</Anchors>
+						<Scripts>
+							<OnMinMaxChanged>
+								local minValue, maxValue = self:GetMinMaxValues()
+								minValue, maxValue = TMW:FormatSeconds(minValue), TMW:FormatSeconds(maxValue) 
+								self.Low:SetText(minValue)
+								self.High:SetText(maxValue)
+								local color = 34/255
+								self.Low:SetTextColor(color, color, color, 1)
+								self.High:SetTextColor(color, color, color, 1)
+							</OnMinMaxChanged>
+							<OnValueChanged>
+								self.Mid:SetText(value)
+								if TMW.CI.ics then
+									TMW.CI.ics.Events[TMW.ANIM.currentEvent].Magnitude = value
+									TMW.IE:ScheduleIconUpdate(TMW.CI.ic)
+								end
+							</OnValueChanged>
+							<OnLoad>
+								self.text:SetText(TMW.L["ANIM_MAGNITUDE"])
+								TMW:TT(self, "ANIM_MAGNITUDE", "ANIM_MAGNITUDE_DESC")
+								self:EnableMouseWheel(true)
+							</OnLoad>
+							<OnMouseWheel>
+								self:SetValue(self:GetValue()+(delta/self:GetValueStep()))
 							</OnMouseWheel>
 						</Scripts>
 					</Slider>
