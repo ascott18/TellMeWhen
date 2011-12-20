@@ -1,3 +1,8 @@
+===v4.7.3===
+ * New Feature: Animations. You can now pick animations to play when an icon event occurs, such as having the screen shake or an icon flash.
+ * Bug Fixes:
+ ** (r356) Attempted a fix for default.lua:70 attempt to concatenate global 'input' (a table value)
+ 
 ===v4.7.2===
  * New Icon Type: Lightwell
  * Condition icons now use the Custom Texture editbox to select their texture instead of the Choose Name editbox (for consistency)

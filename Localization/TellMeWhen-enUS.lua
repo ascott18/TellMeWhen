@@ -872,7 +872,7 @@ L["SOUND_CUSTOM_DESC"] = [[Insert the path to a custom sound to play. Here are s
 - "Interface\AddOns\file.ext": a loose file in the AddOns folder
 
 - "file.ext": a loose file in WoW's root directory ]]
-L["SOUND_TAB"] = "Sounds"
+L["SOUND_TAB"] = "Sound"
 
 
 L["EVENTS_SETTINGS_HEADER"] = "Event Settings"
@@ -901,7 +901,7 @@ L["SOUNDERROR1"] = "File must have an extension!"
 L["SOUNDERROR2"] = "Custom WAV files are not supported by WoW 4.0+"
 L["SOUNDERROR3"] = "Only OGG and MP3 files are supported!"
 
-L["ANN_TAB"] = "Text Output"
+L["ANN_TAB"] = "Text"
 L["ANN_UNITSUBSTITUTIONS"] = [["%t" - Target's Name
 "%f" - Focus's Name
 "%m" - Mouseover's Name
@@ -935,6 +935,21 @@ L["CHAT_MSG_CHANNEL"] = "Chat Channel"
 L["CHAT_MSG_CHANNEL_DESC"] = "Will output to a chat channel, such as Trade, or a custom channel that you have joined."
 
 L["CHAT_FRAME"] = "Chat/Message Frame"
+
+
+
+L["ANIM_TAB"] = "Animation"
+L["ANIM_ANIMTOUSE"] = "Animation To Use"
+L["ANIM_ANIMSETTINGS"] = "Settings"
+
+L["ANIM_SECONDS"] = "%s Seconds"
+L["ANIM_DURATION"] = "Animation Duration"
+L["ANIM_DURATION_DESC"] = "Set how long the animation should last after it is triggered."
+
+L["ANIM_SHAKE"] = "Screen: Shake"
+L["ANIM_SHAKE_DESC"] = "This animation will shake you entire screen when it is triggered."
+
+
 
 
 L["HELP_FIRSTUCD"] = [[You have used an icon type that uses the special duration syntax for the first time! Spells that are added to the %q editbox for certain icon types must define a duration immediately after each spell using the following syntax:

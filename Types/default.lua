@@ -55,7 +55,7 @@ end
 function Type:DragReceived(icon, t, data, subType)
 	local ics = icon:GetSettings()
 	
-	local newType
+	local newType, input
 	if t == "spell" then
 		_, input = GetSpellBookItemInfo(data, subType)
 		newType = "cooldown"
@@ -63,7 +63,7 @@ function Type:DragReceived(icon, t, data, subType)
 		input = data
 		newType = "item"
 	end
-	if not input then return end
+	if not (input and newType) then return end
 	
 	ics.Type = newType
 	ics.Enabled = true

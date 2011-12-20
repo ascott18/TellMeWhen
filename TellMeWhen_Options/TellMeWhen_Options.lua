@@ -40,7 +40,7 @@ local strlowerCache = TMW.strlowerCache
 local SpellTextures = TMW.SpellTextures
 local print = TMW.print
 local Types = TMW.Types
-local ME, CNDT, IE, SUG, ID, SND, ANN, HELP, HIST
+local ME, CNDT, IE, SUG, ID, SND, ANN, HELP, HIST, ANIM, EVENTS
 local CNDT = TMW.CNDT -- created in TellMeWhen/conditions.lua
 
 
@@ -2106,12 +2106,13 @@ IE.LeftChecks = {
 	},
 }
 IE.Tabs = {
-	[1] = "Main",
-	[2] = "Conditions",
-	[3] = "Sound",
-	[4] = "Announcements",
-	[5] = "Conditions",
-	[6] = "MainOptions",
+	"Main",	            -- [1]
+	"Conditions",       -- [2]
+	"Sound",            -- [3]
+	"Announcements",    -- [4]
+	"Animations",       -- [5]
+	"Conditions",       -- [6]
+	"MainOptions",      -- [7]
 }
 
 function IE:OnInitialize()
@@ -2206,6 +2207,7 @@ function IE:Load(isRefresh, icon)
 	
 	SND:Load()
 	ANN:Load()
+	ANIM:Load()
 
 	IE:SetupRadios()
 	IE:LoadSettings()
@@ -3856,7 +3858,7 @@ end
 -- EVENTS
 -- ----------------------
 
-local EVENTS = TMW:NewModule("Events") TMW.EVENTS = EVENTS
+EVENTS = TMW:NewModule("Events") TMW.EVENTS = EVENTS
 
 function EVENTS:SetEventSettings()
 	local EventSettings = self.EventSettings
@@ -3945,7 +3947,7 @@ function EVENTS:OperatorMenu_DropDown_OnClick(frame)
 	TMW:TT(frame, self.tooltipTitle, nil, 1)
 end
 
-function EVENTS:SetupEventButtons(template, globalDescKey)
+function EVENTS:SetupEventButtons(globalDescKey)
 	local Events = self.Events
 	local previousFrame
 	
@@ -3956,7 +3958,7 @@ function EVENTS:SetupEventButtons(template, globalDescKey)
 	end]]
 	
 	for i, eventData in ipairs(TMW.EventList) do
-		local frame = CreateFrame("Button", Events:GetName().."Event"..i, Events, template, i)
+		local frame = CreateFrame("Button", Events:GetName().."Event"..i, Events, "TellMeWhen_Event", i)
 		Events[i] = frame
 		frame:SetPoint("TOPLEFT", previousFrame, "BOTTOMLEFT")
 		frame:SetPoint("TOPRIGHT", previousFrame, "BOTTOMRIGHT")
@@ -3965,6 +3967,16 @@ function EVENTS:SetupEventButtons(template, globalDescKey)
 		frame.EventName:SetPoint(p, t, r, x, y --[[+ yAdjustTitle]])
 		local p, t, r, x, y = frame.DataText:GetPoint()
 		frame.DataText:SetPoint(p, t, r, x, y --[[+ yAdjustText]])
+		
+		for k, v in pairs(frame) do
+			if type(v) == "table" and v.ExclusiveTo then
+				if v.ExclusiveTo == self:GetName() then
+					v:Show()
+				else
+					v:Hide()
+				end
+			end
+		end
 		
 		frame.event = eventData.name
 		frame.eventData = eventData
@@ -4084,6 +4096,7 @@ SND.LSM = LSM
 
 function SND:OnInitialize()
 	SND.tab = IE.SoundTab
+	SND:SetupEventButtons("SOUND_EVENT_GLOBALDESC")
 
 	local Sounds = SND.Sounds
 	Sounds.Header:SetText(L["SOUND_SOUNDTOPLAY"])
@@ -4105,10 +4118,7 @@ function SND:OnInitialize()
 	SND:SetSoundsOffset(0)
 	
 	
-	SND:SetupEventButtons("TellMeWhen_SoundEvent", "SOUND_EVENT_GLOBALDESC")
-	
-	local Events = SND.Events
-	Events.Header:SetText(L["SOUND_EVENTS"])
+	SND.Events.Header:SetText(L["SOUND_EVENTS"])
 	SND:SelectEvent(1)	
 	
 	SND.Sounds.ScrollBar:SetValue(0)
@@ -4284,6 +4294,7 @@ local ChannelLookup = TMW.ChannelLookup
 
 function ANN:OnInitialize()
 	ANN.tab = IE.AnnounceTab
+	ANN:SetupEventButtons("ANN_EVENT_GLOBALDESC")
 	
 	local Events = ANN.Events
 	local Channels = ANN.Channels
@@ -4292,7 +4303,6 @@ function ANN:OnInitialize()
 	Channels.Header:SetText(L["ANN_CHANTOUSE"])
 	
 	-- create event frames
-	ANN:SetupEventButtons("TellMeWhen_AnnounceEvent", "ANN_EVENT_GLOBALDESC")
 	
 	-- create channel frames
 	local previousFrame
@@ -4341,7 +4351,7 @@ function ANN:SelectEvent(id)
 end
 
 function ANN:SetupEventDisplay(event)
-	local eventID, eventString = ANN:GetDisplayInfo(event)
+	local eventID, eventString = self:GetDisplayInfo(event)
 	
 	local channel = CI.ics.Events[eventString].Channel
 	local channelsettings = ChannelLookup[channel]
@@ -4351,18 +4361,18 @@ function ANN:SetupEventDisplay(event)
 		if text == NONE then
 			text = "|cff808080" .. text
 		end
-		ANN.Events[eventID].DataText:SetText(text)
+		self.Events[eventID].DataText:SetText(text)
 	end
 end
 
 
 ---------- Channels ----------
 function ANN:SelectChannel(channel)
-	local EventSettings = CI.ics.Events[ANN.Events[ANN.currentEventID].event]
+	local EventSettings = CI.ics.Events[self.Events[self.currentEventID].event]
 	local channelFrame
 
-	for i=1, #ANN.Channels do
-		local f = ANN.Channels[i]
+	for i=1, #self.Channels do
+		local f = self.Channels[i]
 		if f then
 			if f.channel == channel then
 				channelFrame = f
@@ -4372,21 +4382,21 @@ function ANN:SelectChannel(channel)
 			f:GetHighlightTexture():SetVertexColor(1, 1, 1, 1)
 		end
 	end
-	ANN.currentChannelSetting = channel
+	self.currentChannelSetting = channel
 
 	local channelsettings = ChannelLookup[channel]
 	if channelsettings then
 		if channelsettings.sticky then
-			ANN.Sticky:SetChecked(EventSettings.Sticky)
-			ANN.Sticky:Show()
+			self.Sticky:SetChecked(EventSettings.Sticky)
+			self.Sticky:Show()
 		else
-			ANN.Sticky:Hide()
+			self.Sticky:Hide()
 		end
 		if channelsettings.icon then
-			ANN.Icon:SetChecked(EventSettings.Icon)
-			ANN.Icon:Show()
+			self.Icon:SetChecked(EventSettings.Icon)
+			self.Icon:Show()
 		else
-			ANN.Icon:Hide()
+			self.Icon:Hide()
 		end
 		if channelsettings.defaultlocation then
 			local defaultlocation = get(channelsettings.defaultlocation)
@@ -4395,30 +4405,30 @@ function ANN:SelectChannel(channel)
 			location = channelsettings.ddtext(location) and location or defaultlocation
 			EventSettings.Location = location
 			local loc = channelsettings.ddtext(location)
-			TMW:SetUIDropdownText(ANN.Location, location)
-			UIDropDownMenu_SetText(ANN.Location, loc)
-			ANN.Location:Show()
+			TMW:SetUIDropdownText(self.Location, location)
+			UIDropDownMenu_SetText(self.Location, loc)
+			self.Location:Show()
 		else
-			ANN.Location:Hide()
+			self.Location:Hide()
 		end
 		if channelsettings.color then
 			local r, g, b = EventSettings.r, EventSettings.g, EventSettings.b
-			ANN.Color:GetNormalTexture():SetVertexColor(r, g, b, 1)
-			ANN.Color:Show()
+			self.Color:GetNormalTexture():SetVertexColor(r, g, b, 1)
+			self.Color:Show()
 		else
-			ANN.Color:Hide()
+			self.Color:Hide()
 		end
 		if channelsettings.size then
-			ANN.Size:SetValue(EventSettings.Size)
-			ANN.Size:Show()
+			self.Size:SetValue(EventSettings.Size)
+			self.Size:Show()
 		else
-			ANN.Size:Hide()
+			self.Size:Hide()
 		end
 		if channelsettings.editbox then
-			ANN.WhisperTarget:SetText(EventSettings.Location)
-			ANN.WhisperTarget:Show()
+			self.WhisperTarget:SetText(EventSettings.Location)
+			self.WhisperTarget:Show()
 		else
-			ANN.WhisperTarget:Hide()
+			self.WhisperTarget:Hide()
 		end
 	end
 
@@ -4426,14 +4436,9 @@ function ANN:SelectChannel(channel)
 		channelFrame:LockHighlight()
 		channelFrame:GetHighlightTexture():SetVertexColor(NORMAL_FONT_COLOR.r, NORMAL_FONT_COLOR.g, NORMAL_FONT_COLOR.b, 1)
 	end
-	if ANN.currentEventID and channelsettings then
-		local text = channelsettings.text
-		if text == NONE then
-			text = "|cff808080" .. text
-		end
-		ANN.Events[ANN.currentEventID].DataText:SetText(text)
-	end
-	ANN:SetTabText()
+	
+	self:SetupEventDisplay(self.currentEventID)
+	self:SetTabText()
 end
 
 
@@ -4462,6 +4467,178 @@ function ANN:DropDown()
 	if channelSettings and channelSettings.dropdown then
 		channelSettings.dropdown()
 	end
+end
+
+
+-- ----------------------
+-- ANIMATIONS
+-- ----------------------
+
+ANIM = TMW:NewModule("Animations", EVENTS) TMW.ANIM = ANIM
+ANIM.tabText = L["ANIM_TAB"]
+ANIM.AnimationList = {
+	{
+		text = NONE,
+		animation = "",
+	},
+	{
+		text = L["ANIM_SHAKE"],
+		desc = L["ANIM_SHAKE_DESC"],
+		animation = "SHAKE",
+		duration = true,
+	},
+	
+	
+	
+	{
+		text = "",
+		noclick = true,
+	},
+	{
+		text = "WORK IN PROGRESS!",
+		desc = "This is an alpha version of TellMeWhen, and the animation system has not been fully implemented yet. Animations that you do see in the list should be fully functional, but the list is not complete. More will be added.",
+		noclick = true,
+	},
+}
+ANIM.AnimationLookup = {}
+for k, v in pairs(ANIM.AnimationList) do
+	ANIM.AnimationLookup[v.animation or print("DEBUG")] = v
+end local AnimationLookup = ANIM.AnimationLookup
+
+function ANIM:OnInitialize()
+	self.tab = IE.AnimationsTab
+	self:SetupEventButtons("ANIM_EVENT_GLOBALDESC")
+	
+	local Events = self.Events
+	local Animations = self.Animations
+	
+	Events.Header:SetText(L["SOUND_EVENTS"])
+	Animations.Header:SetText(L["ANIM_ANIMTOUSE"])
+	self.SettingsHeader:SetText(L["ANIM_ANIMSETTINGS"])
+	
+	-- create event frames
+	
+	-- create channel frames
+	local previousFrame
+	local offs = 0
+	for i, animationData in ipairs(self.AnimationList) do
+		i = i + offs
+		local frame = CreateFrame("Button", Animations:GetName().."Animation"..i, Animations, "TellMeWhen_AnimationSelectButton", i)
+		Animations[i] = frame
+		frame:SetPoint("TOPLEFT", previousFrame, "BOTTOMLEFT", 0, 0)
+		frame:SetPoint("TOPRIGHT", previousFrame, "BOTTOMRIGHT", 0, 0)
+		frame:Show()
+		
+		frame.animationData = animationData
+		frame.animation = animationData.animation
+		
+		frame.Name:SetText(animationData.text)
+		TMW:TT(frame, animationData.text, animationData.desc, 1, 1)
+		
+		previousFrame = frame
+	end
+	
+	Animations[1]:SetPoint("TOPLEFT", Animations, "TOPLEFT", 0, 0)
+	Animations[1]:SetPoint("TOPRIGHT", Animations, "TOPRIGHT", 0, 0)
+	
+	Animations:SetHeight(#Animations*Animations[1]:GetHeight())
+	
+	self:SelectEvent(1)	
+end
+
+
+---------- Events ----------
+function ANIM:SelectEvent(id)
+	local eventFrame = self:ChooseEvent(id)
+	
+	if CI.ics then
+		local EventSettings = CI.ics.Events[eventFrame.event]
+		self:SelectAnimation(EventSettings.Animation)
+		self.Duration:SetValue(EventSettings.Duration)
+		self:SetEventSettings()
+	end
+end
+
+function ANIM:SetupEventDisplay(event)
+	local eventID, eventString = self:GetDisplayInfo(event)
+	
+	local animation = CI.ics.Events[eventString].Animation
+	local animationSettings = AnimationLookup[animation]
+	
+	if animationSettings then
+		local text = animationSettings.text
+		if text == NONE then
+			text = "|cff808080" .. text
+		end
+		
+		self.Events[eventID].DataText:SetText(text)
+	end
+end
+
+
+---------- Animations ----------
+function ANIM:SelectAnimation(animation)
+	local EventSettings = CI.ics.Events[self.Events[self.currentEventID].event]
+	local animationFrame
+
+	for i=1, #self.Animations do
+		local f = self.Animations[i]
+		if f then
+			if f.animation == animation then
+				animationFrame = f
+			end
+			f.selected = nil
+			f:UnlockHighlight()
+			f:GetHighlightTexture():SetVertexColor(1, 1, 1, 1)
+		end
+	end
+	self.currentAnimationSetting = animation
+
+	local animationSettings = AnimationLookup[animation]
+	if animationSettings then
+		if animationSettings.duration then
+			self.Duration:SetValue(EventSettings.Duration)
+			self.Duration:Show()
+		else
+			self.Duration:Hide()
+		end
+	end
+
+	if animationFrame then
+		animationFrame:LockHighlight()
+		animationFrame:GetHighlightTexture():SetVertexColor(NORMAL_FONT_COLOR.r, NORMAL_FONT_COLOR.g, NORMAL_FONT_COLOR.b, 1)
+	end
+	
+	self:SetupEventDisplay(self.currentEventID)
+	self:SetTabText()
+end
+
+
+---------- Interface ----------
+function ANIM:GetNumUsedEvents()
+	local n = 0
+	for i = 1, #self.Events do
+		local f = self.Events[i]
+		local animation = CI.ics.Events[f.event].Animation
+		if animation and animation ~= "" then
+			n = n + 1
+		end
+	end
+	
+	return n
+end
+
+function ANIM:LocDropdownFunc(text)
+	--[[TMW:SetUIDropdownText(ANN.Location, self.value)
+	UIDropDownMenu_SetText(ANN.Location, text)
+	CI.ics.Events[ANN.currentEvent].Location = self.value]]
+end
+
+function ANIM:DropDown()
+--[[	local channelSettings = ChannelLookup[ANN.currentChannelSetting]
+	if channelSettings and channelSettings.dropdown then
+		channelSettings.dropdown()
+	end]]
 end
 
 

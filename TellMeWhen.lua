@@ -29,10 +29,10 @@ local AceDB = LibStub("AceDB-3.0")
 local LSM = LibStub("LibSharedMedia-3.0")
 local DRData = LibStub("DRData-1.0", true)
  
-TELLMEWHEN_VERSION = "4.7.2"
+TELLMEWHEN_VERSION = "4.7.3"
 TELLMEWHEN_VERSION_MINOR = strmatch(" @project-version@", " r%d+") or ""
 TELLMEWHEN_VERSION_FULL = TELLMEWHEN_VERSION .. TELLMEWHEN_VERSION_MINOR
-TELLMEWHEN_VERSIONNUMBER = 47211 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
+TELLMEWHEN_VERSIONNUMBER = 47301 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
 if TELLMEWHEN_VERSIONNUMBER > 48000 or TELLMEWHEN_VERSIONNUMBER < 47000 then return error("YOU SCREWED UP THE VERSION NUMBER OR DIDNT CHANGE THE SAFETY LIMITS") end -- safety check because i accidentally made the version number 414069 once
 
 TELLMEWHEN_MAXGROUPS = 1 	--this is a default, used by SetTheory (addon), so dont rename
@@ -67,6 +67,7 @@ local bitband = bit.band
 
 ---------- Locals ----------
 local db, updatehandler, BarGCD, ClockGCD, Locked, SndChan, FramesToFind, UnitsToUpdate, CNDTEnv, ColorMSQ, OnlyMSQ
+local ShakeDuration
 local UPD_INTV = 0.06	--this is a default, local because i use it in onupdate functions
 local runEvents, updatePBar = 1, 1
 local GCD, NumShapeshiftForms, LastUpdate = 0, 0, 0
@@ -630,6 +631,7 @@ TMW.Defaults = {
 						Events = {
 							["**"] = {
 								Sound 	  	   = "None",
+								
 								Text 	  	   = "",
 								Channel   	   = "",
 								Location  	   = "",
@@ -639,6 +641,9 @@ TMW.Defaults = {
 								g 		  	   = 1,
 								b 		  	   = 1,
 								Size 	  	   = 0,
+								
+								Animation      = "",
+								Duration       = .8,
 								
 								OnlyShown 	   = false,
 								Operator 	   = "<",
@@ -1423,7 +1428,7 @@ function TMW:OnCommReceived(prefix, text, channel, who)
 	end
 end
 
-function TMW:OnUpdate()					-- this is where all icon OnUpdate scripts are actually called
+function TMW:OnUpdate(elapsed)					-- this is where all icon OnUpdate scripts are actually called
 	time = GetTime()
 	CNDTEnv.time = time
 	TMW.time = time
@@ -1470,6 +1475,30 @@ function TMW:OnUpdate()					-- this is where all icon OnUpdate scripts are actua
 	if BindUpdateFuncs then
 		for i = 1, #BindUpdateFuncs do
 			BindUpdateFuncs[i]:UpdateBindText()
+		end
+	end
+	if ShakeDuration then
+		ShakeDuration = ShakeDuration - elapsed
+		if ShakeDuration < 0 then
+			ShakeDuration = 0
+		end
+		if not TMW.WorldFramePoints then
+			TMW.WorldFramePoints = {}
+			for i = 1, WorldFrame:GetNumPoints() do
+				TMW.WorldFramePoints[i] = { WorldFrame:GetPoint(i) }
+			end
+		end
+		
+		local Amt = 10 / (1 + 10*(300^(-ShakeDuration)))
+        local moveX = random(-Amt, Amt) 
+        local moveY = random(-Amt, Amt) 
+        WorldFrame:ClearAllPoints()
+        for _, v in pairs(TMW.WorldFramePoints) do
+            WorldFrame:SetPoint(v[1], v[2], v[3], v[4] + moveX, v[5] + moveY)
+        end
+		
+		if ShakeDuration == 0 then
+			ShakeDuration = nil
 		end
 	end
 end
@@ -3004,16 +3033,19 @@ function TMW.IconBase.RegisterEvent(icon, event)
 	icon.hasEvents = 1
 end
 
-function TMW.IconBase.FireEvent(icon, data, played, announced)
+function TMW.IconBase.FireEvent(icon, data, played, announced, animated)
 	if not runEvents then return end
 	
 	if ((not data.OnlyShown or icon.__alpha > 0) --[[or (not data.SecondSetting and icon.__someAttribute > 0)]]) then
 	
+		---------- Sound ----------
 		local Sound = data.SoundData
 		if Sound and not played then
 			PlaySoundFile(Sound, SndChan)
 			played = 1
 		end
+		
+		---------- Text ----------
 		local Channel = data.Channel
 		if Channel ~= "" and not announced then
 			local Text = data.Text
@@ -3091,12 +3123,21 @@ function TMW.IconBase.FireEvent(icon, data, played, announced)
 			end
 			announced = 1
 		end
+		
+		---------- Text ----------
+		local Animation = data.Animation
+		if Animation ~= "" and not animated then
+			if Animation == "SHAKE" then
+				ShakeDuration = ShakeDuration and max(ShakeDuration, data.Duration) or data.Duration
+			end		
+			animated = 1
+		end
 	end
 	
 	if data.PassThrough then
 		return -- I didn't do anything! I swear!
 	end
-	return played, announced
+	return played, announced, animated
 end
 
 function TMW.IconBase.CrunchColor(icon, duration, inrange, nomana)
@@ -3364,7 +3405,7 @@ function TMW.IconBase.SetInfo(icon, alpha, color, texture, start, duration, spel
 	
 	-- NO EVENT HANDLING PAST THIS POINT!
 	if icon.EventsToFire and next(icon.EventsToFire) then
-		local played, announced
+		local played, announced, animated
 		for i = 1, #TMW.EventList do
 			local event = TMW.EventList[i].name
 			local doFireAndData = icon.EventsToFire[event]
@@ -3382,8 +3423,8 @@ function TMW.IconBase.SetInfo(icon, alpha, color, texture, start, duration, spel
 					end
 				end
 				
-				if doFireAndData and not (played and announced) then
-					played, announced = icon:FireEvent(data, played, announced)
+				if doFireAndData and not (played and announced and animated) then
+					played, announced, animated = icon:FireEvent(data, played, announced, animated)
 				end
 				
 				icon.EventsToFire[event] = nil
@@ -3730,11 +3771,13 @@ function TMW:Icon_Update(icon)
 						tbl.SoundData = nil
 					end
 				end
+			elseif key == "Animation" and data ~= "" then
+				dontremove = 1
 			elseif key == "Channel" and data ~= "" then
 				dontremove = 1
 			end
 		end
-		if tbl.SoundData or tbl.Channel ~= "" and not typeData.DisabledEvents[event] then
+		if (tbl.SoundData or tbl.Channel ~= "" or tbl.Animation ~= "") and not typeData.DisabledEvents[event] then
 			icon[event] = tbl
 			icon.EventsToFire = icon.EventsToFire or {}
 		else
