@@ -2,6 +2,8 @@
  * New Feature: Animations. You can now pick animations to play when an icon event occurs, such as having the screen shake or an icon flash.
  * Bug Fixes:
  ** (r356) Attempted a fix for default.lua:70 attempt to concatenate global 'input' (a table value)
+ ** (r358) Icons tracking multiple elements whose start times are exactly the same should now properly update their timers when the first element gives yield to the second after timer expiration.
+ ** (r358) Attempted a fix for TellMeWhen_Options.lua:2163: attempt to index upvalue 'HELP' (a nil value)
  
 ===v4.7.2===
  * New Icon Type: Lightwell

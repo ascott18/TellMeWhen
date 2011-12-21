@@ -945,9 +945,17 @@ L["ANIM_ANIMSETTINGS"] = "Settings"
 L["ANIM_SECONDS"] = "%s Seconds"
 L["ANIM_DURATION"] = "Animation Duration"
 L["ANIM_DURATION_DESC"] = "Set how long the animation should last after it is triggered."
+L["ANIM_MAGNITUDE"] = "Shake Magnitude"
+L["ANIM_MAGNITUDE_DESC"] = "Set how violent the shake should be."
 
-L["ANIM_SHAKE"] = "Screen: Shake"
-L["ANIM_SHAKE_DESC"] = "This animation will shake you entire screen when it is triggered."
+
+L["ANIM_SCREENSHAKE"] = "Screen: Shake"
+L["ANIM_SCREENSHAKE_DESC"] = [[This animation will shake you entire screen when it is triggered.
+
+NOTE: This will only work if you are either out of combat or if nameplates have not been enabled at all since you logged in.]]
+
+L["ANIM_ICONSHAKE"] = "Icon: Shake"
+L["ANIM_ICONSHAKE_DESC"] = "This animation will shake the icon when it is triggered."
 
 
 

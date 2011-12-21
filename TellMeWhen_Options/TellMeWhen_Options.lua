@@ -4670,10 +4670,6 @@ local SUGpreTable = {}
 local SUGPlayerSpells = {}
 local pclassSpellCache, ClassSpellLookup, AuraCache, ItemCache, SpellCache, CastCache, CurrentItems
 local TrackingCache = {}
-for i = 1, GetNumTrackingTypes() do
-	local name, _, active = GetTrackingInfo(i)
-	TrackingCache[i] = strlower(name)
-end
 
 
 ---------- Initialization/Database/Spell Caching ----------
@@ -4711,6 +4707,11 @@ function SUG:OnInitialize()
 	SUG:PLAYER_TALENT_UPDATE()
 	SUG:BuildClassSpellLookup() -- must go before the local versions (ClassSpellLookup) are defined
 	SUG.doUpdateItemCache = true
+	
+	for i = 1, GetNumTrackingTypes() do
+		local name, _, active = GetTrackingInfo(i)
+		TrackingCache[i] = strlower(name)
+	end
 
 	SUG:RegisterComm("TMWSUG")
 	SUG:RegisterEvent("PLAYER_TALENT_UPDATE")
@@ -5729,8 +5730,12 @@ end
 
 local Module = SUG:NewModule("spellwithduration", SUG:GetModule("spell"))
 Module.doAddColon = true
-local MATCH_RECAST_TIME_MIN = SPELL_RECAST_TIME_MIN:gsub("%%%.3g", "(%%d+)")
-local MATCH_RECAST_TIME_SEC = SPELL_RECAST_TIME_SEC:gsub("%%%.3g", "(%%d+)")
+local MATCH_RECAST_TIME_MIN, MATCH_RECAST_TIME_SEC
+
+function Module:OnInitialize()
+	MATCH_RECAST_TIME_MIN = SPELL_RECAST_TIME_MIN:gsub("%%%.3g", "(%%d+)")
+	MATCH_RECAST_TIME_SEC = SPELL_RECAST_TIME_SEC:gsub("%%%.3g", "(%%d+)")
+end
 
 function Module:Entry_OnClick(f, button)
 	local insert

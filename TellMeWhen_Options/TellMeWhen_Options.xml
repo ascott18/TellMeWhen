@@ -3966,8 +3966,8 @@
 					<Slider name="$parentMagnitude" parentKey="Magnitude" inherits="TellMeWhen_SliderTemplate" minvalue="1" maxvalue="20" valuestep="1">
 						<Size y="17"/>
 						<Anchors>
-							<Anchor point="TOPLEFT" relativeTo="$parentDuration" y="-35"/>
-							<Anchor point="TOPRIGHT" relativeTo="$parentDuration" y="-35"/>
+							<Anchor point="TOPLEFT" relativeTo="$parentDuration" relativePoint="BOTTOMLEFT" y="-25"/>
+							<Anchor point="TOPRIGHT" relativeTo="$parentDuration" relativePoint="BOTTOMRIGHT" y="-25"/>
 						</Anchors>
 						<Scripts>
 							<OnMinMaxChanged>

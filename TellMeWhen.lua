@@ -32,7 +32,7 @@ local DRData = LibStub("DRData-1.0", true)
 TELLMEWHEN_VERSION = "4.7.3"
 TELLMEWHEN_VERSION_MINOR = strmatch(" @project-version@", " r%d+") or ""
 TELLMEWHEN_VERSION_FULL = TELLMEWHEN_VERSION .. TELLMEWHEN_VERSION_MINOR
-TELLMEWHEN_VERSIONNUMBER = 47302 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
+TELLMEWHEN_VERSIONNUMBER = 47303 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
 if TELLMEWHEN_VERSIONNUMBER > 48000 or TELLMEWHEN_VERSIONNUMBER < 47000 then return error("YOU SCREWED UP THE VERSION NUMBER OR DIDNT CHANGE THE SAFETY LIMITS") end -- safety check because i accidentally made the version number 414069 once
 
 TELLMEWHEN_MAXGROUPS = 1 	--this is a default, used by SetTheory (addon), so dont rename
@@ -3133,7 +3133,7 @@ function TMW.IconBase.FireEvent(icon, data, played, announced, animated)
 		---------- Text ----------
 		local Animation = data.Animation
 		if Animation ~= "" and not animated then
-			if Animation == "SCREENSHAKE" then
+			if Animation == "SCREENSHAKE" and (not WorldFrame:IsProtected() or not InCombatLockdown()) then
 				local Duration = Shakers[WorldFrame]
 				WorldFrame.TMW_ShakeMagnitude = data.Magnitude
 				Shakers[WorldFrame] = Duration and max(Duration, data.Duration) or data.Duration
@@ -3349,7 +3349,7 @@ function TMW.IconBase.SetInfo(icon, alpha, color, texture, start, duration, spel
 				end
 
 				-- cd.s is only used in this function and is used to prevent finish effect spam (and to increase efficiency) while GCDs are being triggered. icon.__start isnt used because that just records the start time passed in, which may be a GCD, so it will change frequently
-				if cd.s ~= s or forceupdate then
+				if cd.s ~= s or cd.d ~= d or forceupdate then
 					cd:SetCooldown(s, d)
 					cd:Show()
 					if not icon.ShowTimer then
@@ -3360,9 +3360,11 @@ function TMW.IconBase.SetInfo(icon, alpha, color, texture, start, duration, spel
 						cd:SetReverse(reverse)
 					end
 					cd.s = s
+					cd.d = d
 				end
 			else
 				cd.s = 0
+				cd.d = 0
 				cd:Hide()
 			end
 		else
