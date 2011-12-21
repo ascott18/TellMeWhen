@@ -457,7 +457,7 @@ local RelevantToAll = {
 	ConditionAlpha = true
 }
 
-local Types = setmetatable({}, {
+TMW.Types = setmetatable({}, {
 	__index = function(t, k)
 		if type(k) == "table" and k.base == TMW.IconBase then -- if the key is an icon, then return the icon's Type table
 			return t[k.Type]
@@ -465,8 +465,7 @@ local Types = setmetatable({}, {
 			return rawget(t, "")
 		end
 	end
-})
-TMW.Types = Types
+}) local Types = TMW.Types
 
 TMW.Defaults = {
 	global = {
@@ -699,6 +698,19 @@ TMW.GCDSpells = {
 	HUNTER	   	= 1978, -- serpent sting
 	DEATHKNIGHT = 47541, -- death coil
 } local GCDSpell = TMW.GCDSpells[pclass] TMW.GCDSpell = GCDSpell
+
+TMW.DefaultPowerTypes = {
+	ROGUE	   	= 3, -- sinister strike
+	PRIEST	   	= 0, -- renew
+	DRUID	   	= 0, -- rejuvenation
+	WARRIOR	   	= 1, -- rend
+	MAGE	   	= 0, -- fireball
+	WARLOCK	   	= 0, -- demon armor
+	PALADIN	   	= 0, -- seal of righteousness
+	SHAMAN	   	= 0, -- lightning shield
+	HUNTER	   	= 2, -- serpent sting
+	DEATHKNIGHT = 6, -- death coil
+}
 
 function TMW:ProcessEquivalencies()
 	TMW.DS = {
@@ -1467,6 +1479,9 @@ function TMW:OnUpdate(elapsed)					-- THE MAGICAL ENGINE OF DOING EVERYTHING
 
 		if TMW.DoWipeAC then
 			wipe(TMW.AlreadyChecked)
+		end
+		if TMW.DoWipeChangedMetas then
+			wipe(TMW.ChangedMetas)
 		end
 		updatePBar = nil
 		if UnitsToUpdate then
@@ -3685,6 +3700,13 @@ function TMW:Icon_UpdateBars(icon)
 	pbar:SetMinMaxValues(0, 1)
 	pbar.offset = icon.PBarOffs or 0
 	pbar.InvertBars = icon.InvertBars
+	if not pbar.powerType then
+		local powerType = TMW.DefaultPowerTypes[pclass]
+		local colorinfo = PowerBarColor[powerType]
+		pbar:SetStatusBarColor(colorinfo.r, colorinfo.g, colorinfo.b, 0.9)
+		pbar.powerType = powerType
+	end
+	
 	if icon.ShowPBar and icon.NameFirst then
 		TMW:RegisterEvent("SPELL_UPDATE_USABLE")
 		pbar:Show()

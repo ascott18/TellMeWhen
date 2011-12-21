@@ -24,6 +24,7 @@ local _G, strmatch, tonumber, ipairs =
 	  _G, strmatch, tonumber, ipairs
 local print = TMW.print
 local AlreadyChecked = {} TMW.AlreadyChecked = AlreadyChecked
+local ChangedMetas = {} TMW.ChangedMetas = ChangedMetas
 
 
 
@@ -95,7 +96,9 @@ local function Meta_OnUpdate(icon, time)
 		if ic.UpdateBindText then
 			icon.bindText:SetText(ic.bindText:GetText())
 		end
-		if ic ~= icon.__previcon then 
+		if ic ~= icon.__previcon or ChangedMetas[ic] then 
+			ChangedMetas[icon] = true
+			
 			if not ic.UpdateBindText then
 				icon.bindText:SetText(ic.bindText:GetText())
 			end
@@ -143,7 +146,9 @@ local function Meta_OnUpdate(icon, time)
 	end
 end
 
-local InsertIcon,GetFullIconTable -- both need access to eachother, so scope them above their definitions
+
+
+local InsertIcon, GetFullIconTable -- both need access to eachother, so scope them above their definitions
 
 local alreadyinserted = {}
 function InsertIcon(icon, ics, ic)
@@ -197,6 +202,8 @@ function Type:Setup(icon, groupID, iconID)
 	if icon.CheckNext then
 		TMW.DoWipeAC = true
 	end
+	TMW.DoWipeChangedMetas = true
+	
 	wipe(alreadyinserted)
 	icon.CompiledIcons = wipe(icon.CompiledIcons or {})
 	icon.CompiledIcons = GetFullIconTable(icon, icon.Icons)
