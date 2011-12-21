@@ -3947,6 +3947,7 @@
 								self.High:SetTextColor(color, color, color, 1)
 							</OnMinMaxChanged>
 							<OnValueChanged>
+								value = floor(value*100)/100
 								self.Mid:SetText(TMW.L["ANIM_SECONDS"]:format(TMW:FormatSeconds(value, nil, true)))
 								if TMW.CI.ics then
 									TMW.CI.ics.Events[TMW.ANIM.currentEvent].Duration = value
@@ -3980,6 +3981,7 @@
 								self.High:SetTextColor(color, color, color, 1)
 							</OnMinMaxChanged>
 							<OnValueChanged>
+								value = floor(value*100)/100
 								self.Mid:SetText(value)
 								if TMW.CI.ics then
 									TMW.CI.ics.Events[TMW.ANIM.currentEvent].Magnitude = value

@@ -845,7 +845,9 @@ local colorTemplate = {
 			type = "color",
 			order = 2,
 			--width = "double",
-			hasAlpha = false,
+			hasAlpha = function(info)
+				return strsub(info[#info-1], 1, 2) == "CB"
+			end,
 			set = function(info, r, g, b, a)
 				local c = db.profile.Colors[info[#info-2]][info[#info-1]]
 				
@@ -989,12 +991,7 @@ local colorIconTypeTemplate = {
 }
 
 for k, v in pairs(colorOrder) do
-	if strsub(v, 1, 2) == "CB" then
-		colorIconTypeTemplate.args[v] = CopyTable(colorTemplate)
-		colorIconTypeTemplate.args[v].args.color.hasAlpha = true
-	else
-		colorIconTypeTemplate.args[v] = colorTemplate
-	end
+	colorIconTypeTemplate.args[v] = colorTemplate
 end
 
 for i = 1, GetNumTalentTabs() do

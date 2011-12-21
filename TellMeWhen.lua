@@ -32,7 +32,7 @@ local DRData = LibStub("DRData-1.0", true)
 TELLMEWHEN_VERSION = "4.7.3"
 TELLMEWHEN_VERSION_MINOR = strmatch(" @project-version@", " r%d+") or ""
 TELLMEWHEN_VERSION_FULL = TELLMEWHEN_VERSION .. TELLMEWHEN_VERSION_MINOR
-TELLMEWHEN_VERSIONNUMBER = 47303 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
+TELLMEWHEN_VERSIONNUMBER = 47304 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
 if TELLMEWHEN_VERSIONNUMBER > 48000 or TELLMEWHEN_VERSIONNUMBER < 47000 then return error("YOU SCREWED UP THE VERSION NUMBER OR DIDNT CHANGE THE SAFETY LIMITS") end -- safety check because i accidentally made the version number 414069 once
 
 TELLMEWHEN_MAXGROUPS = 1 	--this is a default, used by SetTheory (addon), so dont rename
@@ -73,7 +73,7 @@ local GCD, NumShapeshiftForms, LastUpdate = 0, 0, 0
 local IconUpdateFuncs, GroupUpdateFuncs, unitsToChange = {}, {}, {}
 local BindUpdateFuncs
 local loweredbackup = {}
-local Shakers = {}
+local Shakers, CDBarsToUpdate, PBarsToUpdate = {}, {}, {}
 local time = GetTime() TMW.time = time
 local sctcolor = {r=1, b=1, g=1}
 local clientVersion = select(4, GetBuildInfo())
@@ -1429,7 +1429,7 @@ function TMW:OnCommReceived(prefix, text, channel, who)
 	end
 end
 
-function TMW:OnUpdate(elapsed)					-- this is where all icon OnUpdate scripts are actually called
+function TMW:OnUpdate(elapsed)					-- THE MAGICAL ENGINE OF DOING EVERYTHING
 	time = GetTime()
 	CNDTEnv.time = time
 	TMW.time = time
@@ -1473,9 +1473,88 @@ function TMW:OnUpdate(elapsed)					-- this is where all icon OnUpdate scripts ar
 			wipe(UnitsToUpdate)
 		end
 	end
+	
 	if BindUpdateFuncs then
 		for i = 1, #BindUpdateFuncs do
 			BindUpdateFuncs[i]:UpdateBindText()
+		end
+	end
+	
+	if next(PBarsToUpdate) then
+		for bar in next, PBarsToUpdate do
+			local power = UnitPower("player", bar.powerType) + bar.offset
+			if not bar.InvertBars then
+				bar:SetValue(bar.Max - power)
+			else
+				bar:SetValue(power)
+			end
+		end
+	end
+	if next(CDBarsToUpdate) then
+		for bar in next, CDBarsToUpdate do
+			local value, doTerminate
+			
+			local start, duration, InvertBars = bar.start, bar.duration, bar.InvertBars
+			
+			if InvertBars then
+				if duration == 0 then
+					value = bar.Max
+				else
+					value = time - start + bar.offset
+				end
+				doTerminate = value >= bar.Max
+			else
+				if duration == 0 then
+					value = 0
+				else
+					value = duration - (time - start) + bar.offset
+				end
+				doTerminate = value <= 0
+			end
+			
+			if doTerminate then
+				CDBarsToUpdate[bar] = nil
+				if InvertBars then
+					value = bar.Max
+				else
+					value = 0
+				end
+			end
+			
+			if value ~= bar.__value then
+				bar:SetValue(value)
+				
+				local co = bar.completeColor
+				local st = bar.startColor
+				
+				if not InvertBars then
+					if duration ~= 0 then
+						local pct = (time - start) / duration
+						local inv = 1-pct
+						bar:SetStatusBarColor(
+							(co.r * pct) + (st.r * inv),
+							(co.g * pct) + (st.g * inv),
+							(co.b * pct) + (st.b * inv),
+							(co.a * pct) + (st.a * inv)
+						)
+					end
+				else
+					--inverted
+					if duration == 0 then
+						bar:SetStatusBarColor(co.r, co.g, co.b, co.a)
+					else
+						local pct = (time - start) / duration
+						local inv = 1-pct
+						bar:SetStatusBarColor(
+							(co.r * pct) + (st.r * inv),
+							(co.g * pct) + (st.g * inv),
+							(co.b * pct) + (st.b * inv),
+							(co.a * pct) + (st.a * inv)
+						)
+					end
+				end
+				bar.__value = value
+			end
 		end
 	end
 	
@@ -2883,12 +2962,13 @@ end
 TMW.IconBase = {}
 
 local CompareFuncs = {
-  ["=="] = function(a, b) return a == b  end,
-  ["~="] = function(a, b)  return a ~= b end,
-  [">="] = function(a, b)  return a >= b end,
-  ["<="] = function(a, b) return a <= b  end,
-  ["<"] = function(a, b) return a < b  end,
-  [">"] = function(a, b) return a > b end,
+	-- harkens back to the days of the conditions of old, but it is more efficient than a big elseif chain.
+	["=="] = function(a, b) return a == b  end,
+	["~="] = function(a, b)  return a ~= b end,
+	[">="] = function(a, b)  return a >= b end,
+	["<="] = function(a, b) return a <= b  end,
+	["<"] = function(a, b) return a < b  end,
+	[">"] = function(a, b) return a > b end,
 }
 local function OnGCD(d)
 	if d == 1 then return true end -- a cd of 1 is always a GCD (or at least isn't worth showing)
@@ -2905,72 +2985,6 @@ local function IconScriptSort(iconA, iconB)
 		return iconA:GetID()*iOrder < iconB:GetID()*iOrder
 	end
 	return gA*gOrder < gB*gOrder
-end
-
-local function CDBarOnUpdate(bar)
-	local duration = bar.duration
-	if bar.InvertBars then
-		if duration == 0 then
-			bar:SetValue(bar.Max)
-		else
-			bar:SetMinMaxValues(0, duration)
-			bar.Max = duration
-			bar:SetValue(time - bar.start + bar.offset)
-		end
-	else
-		if duration == 0 then
-			bar:SetValue(0)
-		else
-			bar:SetMinMaxValues(0,  duration)
-			bar.Max = duration
-			bar:SetValue(duration - (time - bar.start) + bar.offset)
-		end
-	end
-end
-
-local function CDBarOnValueChanged(bar)
-	local start = bar.start
-	local duration = bar.duration
-	local pct
-	
-	local co = bar.completeColor
-	local st = bar.startColor
-	
-	if not bar.InvertBars then
-		if duration ~= 0 then
-			pct = (time - start) / duration
-			local inv = 1-pct
-			bar:SetStatusBarColor(
-				(co.r * pct) + (st.r * inv),
-				(co.g * pct) + (st.g * inv),
-				(co.b * pct) + (st.b * inv),
-				(co.a * pct) + (st.a * inv)
-			)
-		end
-	else
-		--inverted
-		if duration == 0 then
-			bar:SetStatusBarColor(co.r, co.g, co.b, co.a)
-		else
-			pct = (time - start) / duration
-			local inv = 1-pct
-			bar:SetStatusBarColor(
-				(co.r * pct) + (st.r * inv),
-				(co.g * pct) + (st.g * inv),
-				(co.b * pct) + (st.b * inv),
-				(co.a * pct) + (st.a * inv)
-			)
-		end
-	end
-end
-
-local function PwrBarOnUpdate(bar)
-	local power = UnitPower("player", bar.powerType) + bar.offset
-	if not bar.InvertBars then
-		bar:SetValue(bar.Max - power)
-	else
-		bar:SetValue(power)
-	end
 end
 
 function TMW.IconBase.Update(icon, time)
@@ -3206,6 +3220,7 @@ function TMW.IconBase.CrunchColor(icon, duration, inrange, nomana)
 end
 
 function TMW.IconBase.SetInfo(icon, alpha, color, texture, start, duration, spellChecked, reverse, count, countText, forceupdate, unit)
+	--[[
 	-- icon				- the icon object to set the attributes on (frame) (but call as icon:SetInfo(alpha, ...) , nil, nil)
 	-- [alpha]			- the alpha to set the icon to (number); (nil) defaults to 0
 	-- [color]			- the value(s) to call SetVertexColor with. Either a (number) that will be used as the r, g, and b; or a (table) with keys r, g, b; or (nil) to leave unchanged
@@ -3219,7 +3234,7 @@ function TMW.IconBase.SetInfo(icon, alpha, color, texture, start, duration, spel
 	-- [forceupdate]	- for meta icons, will force an update on things even if args didnt change.
 	-- [unit]			- the unit that the icon stopped checking on
 	
-	--[[
+	
 		TO ADD AN ARG: (Notepad++)
 		1) Ctrl+F
 		2) Find regex		([^\-]+icon:SetInfo\(.*)\)
@@ -3381,20 +3396,10 @@ function TMW.IconBase.SetInfo(icon, alpha, color, texture, start, duration, spel
 					bar.duration = 0
 				end
 
-				if not bar.UpdateSet then
-					bar:SetScript("OnUpdate", CDBarOnUpdate)
-					bar.UpdateSet = true
-				end
-			else
-				if bar.UpdateSet then
-					bar:SetScript("OnUpdate", nil)
-					bar.UpdateSet = false
-				end
-				if bar.InvertBars then
-					bar:SetValue(bar.Max)
-				else
-					bar:SetValue(0)
-				end
+				bar.Max = duration
+				bar:SetMinMaxValues(0,  duration)
+				
+				CDBarsToUpdate[bar] = true
 			end
 		end
 
@@ -3478,10 +3483,10 @@ function TMW.IconBase.SetInfo(icon, alpha, color, texture, start, duration, spel
 	end
 
 	if icon.ShowPBar and (updatePBar or queueOnSpell or forceupdate) then
+		local pbar = icon.pbar
 		if spellChecked then
 			local _, _, _, cost, _, powerType = GetSpellInfo(spellChecked)
 			if cost then
-				local pbar = icon.pbar
 				cost = powerType == 9 and 3 or cost
 				pbar.Max = cost
 				pbar.InvertBars = icon.InvertBars
@@ -3493,17 +3498,14 @@ function TMW.IconBase.SetInfo(icon, alpha, color, texture, start, duration, spel
 				end
 
 				pbar:SetMinMaxValues(0, cost)
-				if not pbar.UpdateSet then
-					pbar:SetScript("OnUpdate", PwrBarOnUpdate)
-					PwrBarOnUpdate(pbar)
-					pbar.UpdateSet = true
-				end
-			--	pbar:SetMinMaxValues(0, cost)--why is this happening twice?
+				
+				PBarsToUpdate[pbar] = true
+			elseif PBarsToUpdate[pbar] then
+				PBarsToUpdate[pbar] = nil
+				pbar:SetValue(icon.InvertBars and pbar.Max or 0)
 			end
-		elseif icon.pbar.UpdateSet then
-			local pbar = icon.pbar
-			pbar:SetScript("OnUpdate", nil)
-			pbar.UpdateSet = false
+		elseif PBarsToUpdate[pbar] then
+			PBarsToUpdate[pbar] = nil
 			pbar:SetValue(icon.InvertBars and pbar.Max or 0)
 		end
 	end
@@ -3641,12 +3643,10 @@ function TMW:CreateIcon(group, groupID, iconID)
 	icon.texture.SetDesaturated = icon.texture.SetDesaturated
 	icon.texture.SetTexture = icon.texture.SetTexture
 	
-	icon.cbar.SetScript = icon.cbar.SetScript
 	icon.cbar.SetValue = icon.cbar.SetValue
 	
 	icon.pbar.SetStatusBarColor = icon.pbar.SetStatusBarColor
 	icon.pbar.SetMinMaxValues = icon.pbar.SetMinMaxValues
-	icon.pbar.SetScript = icon.pbar.SetScript
 	icon.pbar.SetValue = icon.pbar.SetValue
 	
 	icon.countText.SetText = icon.countText.SetText
@@ -3675,46 +3675,40 @@ end
 
 function TMW:Icon_UpdateBars(icon)
 	local blizzEdgeInsets = icon.group.barInsets or 0
+	
 	local pbar = icon.pbar
-	local cbar = icon.cbar
+	pbar.texture:SetTexture(LSM:Fetch("statusbar", db.profile.TextureName))
+	pbar:SetPoint("BOTTOM", icon.texture, "CENTER", 0, 0.5)
+	pbar:SetPoint("TOPLEFT", icon.texture, "TOPLEFT", blizzEdgeInsets, -blizzEdgeInsets)
+	pbar:SetPoint("TOPRIGHT", icon.texture, "TOPRIGHT", -blizzEdgeInsets, -blizzEdgeInsets)
+	
+	pbar:SetMinMaxValues(0, 1)
+	pbar.offset = icon.PBarOffs or 0
+	pbar.InvertBars = icon.InvertBars
 	if icon.ShowPBar and icon.NameFirst then
 		TMW:RegisterEvent("SPELL_UPDATE_USABLE")
-		pbar:SetPoint("BOTTOM", icon.texture, "CENTER", 0, 0.5)
-		pbar:SetPoint("TOPLEFT", icon.texture, "TOPLEFT", blizzEdgeInsets, -blizzEdgeInsets)
-		pbar:SetPoint("TOPRIGHT", icon.texture, "TOPRIGHT", -blizzEdgeInsets, -blizzEdgeInsets)
-		
-		local _, _, _, cost, _, powerType = GetSpellInfo(icon.NameFirst)
-		cost = cost or 0
-		pbar:SetMinMaxValues(0, cost)
-		pbar.Max = cost
-		pbar.texture:SetTexture(LSM:Fetch("statusbar", db.profile.TextureName))
-		if powerType then
-			local colorinfo = PowerBarColor[powerType]
-			pbar:SetStatusBarColor(colorinfo.r, colorinfo.g, colorinfo.b, 0.9)
-		end
 		pbar:Show()
-		pbar.offset = icon.PBarOffs or 0
-		pbar.InvertBars = icon.InvertBars
-		icon.PBarOffs = nil --reduce table clutter, we dont need this anymore
 	else
 		pbar:Hide()
 	end
-	if icon.ShowCBar then
-		cbar.texture:SetTexture(LSM:Fetch("statusbar", db.profile.TextureName))
-		cbar:SetPoint("TOP", icon.texture, "CENTER", 0, -0.5)
-		cbar:SetPoint("BOTTOMLEFT", icon.texture, "BOTTOMLEFT", blizzEdgeInsets, blizzEdgeInsets)
-		cbar:SetPoint("BOTTOMRIGHT", icon.texture, "BOTTOMRIGHT", -blizzEdgeInsets, blizzEdgeInsets)
-		cbar:SetMinMaxValues(0, 1)
-		cbar.Max = 1
+	
+	local cbar = icon.cbar
+	cbar.texture:SetTexture(LSM:Fetch("statusbar", db.profile.TextureName))
+	cbar:SetPoint("TOP", icon.texture, "CENTER", 0, -0.5)
+	cbar:SetPoint("BOTTOMLEFT", icon.texture, "BOTTOMLEFT", blizzEdgeInsets, blizzEdgeInsets)
+	cbar:SetPoint("BOTTOMRIGHT", icon.texture, "BOTTOMRIGHT", -blizzEdgeInsets, blizzEdgeInsets)
+	
+	cbar.Max = cbar.Max or 1
+	cbar.start = cbar.start or 0
+	cbar.duration = cbar.duration or 0
+	cbar:SetMinMaxValues(0, cbar.Max)
+	cbar.startColor = icon.typeData.CBS
+	cbar.completeColor = icon.typeData.CBC
+	
+	cbar.offset = icon.CBarOffs or 0
+	cbar.InvertBars = icon.InvertBars	
+	if icon.ShowCBar then	
 		cbar:Show()
-		cbar.offset = icon.CBarOffs or 0
-		cbar.start = cbar.start or 0
-		cbar.duration = cbar.duration or 0
-		cbar.startColor = icon.typeData.CBS
-		cbar.completeColor = icon.typeData.CBC
-		icon.CBarOffs = nil --reduce table clutter, we dont need this anymore
-		cbar.InvertBars = icon.InvertBars
-		cbar:SetScript("OnValueChanged", CDBarOnValueChanged)
 	else
 		cbar:Hide()
 	end
@@ -3957,6 +3951,10 @@ function TMW:Icon_Update(icon)
 	icon:Show()
 	local pbar = icon.pbar
 	local cbar = icon.cbar
+	cbar.__value = nil
+	CDBarsToUpdate[cbar] = icon.ShowCBar and true -- needs to be nil otherwise
+	PBarsToUpdate[cbar] = icon.ShowPBar and true -- needs to be nil otherwise
+	
 	if icon.OverrideTex then icon:SetTexture(icon.OverrideTex) end 
 	
 	if Locked then
@@ -3972,19 +3970,12 @@ function TMW:Icon_Update(icon)
 		pbar:SetValue(100)
 	--	pbar:SetValue(0)
 		pbar:SetAlpha(.9)
-		if icon.ShowPar then
-			PwrBarOnUpdate(pbar)
-		end
 		if icon.InvertBars then
 			cbar:SetValue(cbar.Max)
 		else
 			cbar:SetValue(0)
 		end
 		cbar:SetAlpha(.9)
-		if icon.ShowCBar then
-			CDBarOnUpdate(cbar)
-			CDBarOnValueChanged(cbar)
-		end
 	else
 		ClearScripts(icon)
 
