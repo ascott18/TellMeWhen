@@ -945,8 +945,14 @@ L["ANIM_ANIMSETTINGS"] = "Settings"
 L["ANIM_SECONDS"] = "%s Seconds"
 L["ANIM_DURATION"] = "Animation Duration"
 L["ANIM_DURATION_DESC"] = "Set how long the animation should last after it is triggered."
+L["ANIM_PERIOD"] = "Flash Period"
+L["ANIM_PERIOD_DESC"] = "Set how long each flash should take."
 L["ANIM_MAGNITUDE"] = "Shake Magnitude"
 L["ANIM_MAGNITUDE_DESC"] = "Set how violent the shake should be."
+L["ANIM_COLOR"] = "Color/Opacity"
+L["ANIM_COLOR_DESC"] = "Configure the color and the opacity of the flash."
+L["ANIM_FADE"] = "Fade Flashes"
+L["ANIM_FADE_DESC"] = "Check to have a smooth fade between each flash. Uncheck to instantly flash."
 
 
 L["ANIM_SCREENSHAKE"] = "Screen: Shake"
@@ -958,6 +964,10 @@ L["ANIM_ICONSHAKE"] = "Icon: Shake"
 L["ANIM_ICONSHAKE_DESC"] = "Shakes the icon when it is triggered."
 L["ANIM_ACTVTNGLOW"] = "Icon: Activation Border"
 L["ANIM_ACTVTNGLOW_DESC"] = "Displays the Blizzard spell activation border on the icon."
+L["ANIM_ICONFLASH"] = "Icon: Flash"
+L["ANIM_ICONFLASH_DESC"] = "Flashes a colored overlay across the icon."
+L["ANIM_SCREENFLASH"] = "Screen: Flash"
+L["ANIM_SCREENFLASH_DESC"] = "Flashes a colored overlay across the screen."
 
 
 

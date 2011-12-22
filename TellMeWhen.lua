@@ -32,7 +32,7 @@ local DRData = LibStub("DRData-1.0", true)
 TELLMEWHEN_VERSION = "4.7.3"
 TELLMEWHEN_VERSION_MINOR = strmatch(" @project-version@", " r%d+") or ""
 TELLMEWHEN_VERSION_FULL = TELLMEWHEN_VERSION .. TELLMEWHEN_VERSION_MINOR
-TELLMEWHEN_VERSIONNUMBER = 47305 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
+TELLMEWHEN_VERSIONNUMBER = 47306 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
 if TELLMEWHEN_VERSIONNUMBER > 48000 or TELLMEWHEN_VERSIONNUMBER < 47000 then return error("YOU SCREWED UP THE VERSION NUMBER OR DIDNT CHANGE THE SAFETY LIMITS") end -- safety check because i accidentally made the version number 414069 once
 
 TELLMEWHEN_MAXGROUPS = 1 	--this is a default, used by SetTheory (addon), so dont rename
@@ -66,14 +66,14 @@ local bitband = bit.band
 
 
 ---------- Locals ----------
-local db, updatehandler, BarGCD, ClockGCD, Locked, SndChan, FramesToFind, UnitsToUpdate, CNDTEnv, ColorMSQ, OnlyMSQ
+local db, updatehandler, BarGCD, ClockGCD, Locked, SndChan, FramesToFind, UnitsToUpdate, CNDTEnv, ColorMSQ, OnlyMSQ, WorldFrameFlasher
 local UPD_INTV = 0.06	--this is a default, local because i use it in onupdate functions
 local runEvents, updatePBar = 1, 1
 local GCD, NumShapeshiftForms, LastUpdate = 0, 0, 0
 local IconUpdateFuncs, GroupUpdateFuncs, unitsToChange = {}, {}, {}
 local BindUpdateFuncs
 local loweredbackup = {}
-local Shakers, ActivationGlows, CDBarsToUpdate, PBarsToUpdate = {}, {}, {}, {}
+local Shakers, ActivationGlows, FlashingFlashers, CDBarsToUpdate, PBarsToUpdate = {}, {}, {}, {}, {}
 local time = GetTime() TMW.time = time
 local sctcolor = {r=1, b=1, g=1}
 local clientVersion = select(4, GetBuildInfo())
@@ -629,32 +629,38 @@ TMW.Defaults = {
 						OnlyIfCounting		   = false,
 						Events = {
 							["**"] = {
-								Sound 	  	   = "None",
+								Sound 	  	   	= "None",
 								
-								Text 	  	   = "",
-								Channel   	   = "",
-								Location  	   = "",
-								Sticky 	  	   = false,
-								Icon 	  	   = true,
-								r 		  	   = 1,
-								g 		  	   = 1,
-								b 		  	   = 1,
-								Size 	  	   = 0,
+								Text 	  	   	= "",
+								Channel   	   	= "",
+								Location  	   	= "",
+								Sticky 	  	   	= false,
+								Icon 	  	   	= true,
+								r 		  	   	= 1,
+								g 		  	   	= 1,
+								b 		  	   	= 1,
+								Size 	  	   	= 0,
 								
-								Animation      = "",
-								Duration       = .8,
-								Magnitude      = 10,
+								Animation	  	= "",
+								Duration	   	= 0.8,
+								Magnitude	  	= 10,
+								Period			= 0.4,
+								Fade	  	   	= true,
+								r_anim	  	   	= 1,
+								g_anim	  	   	= 0,
+								b_anim	  	   	= 0,
+								a_anim	  	   	= 0.8,
 								
-								OnlyShown 	   = false,
-								Operator 	   = "<",
-								Value 		   = 0,
-								CndtJustPassed = false,
-								PassingCndt    = false,
-								PassThrough    = false,
+								OnlyShown 	   	= false,
+								Operator 	   	= "<",
+								Value 		   	= 0,
+								CndtJustPassed 	= false,
+								PassingCndt		= false,
+								PassThrough		= false,
 							},
 							OnDuration = {
 								CndtJustPassed = true,
-								PassingCndt    = true,
+								PassingCndt	= true,
 							}
 						},
 						Conditions = {
@@ -670,7 +676,7 @@ TMW.Defaults = {
 								Name2 	   = "",
 								PrtsBefore = 0,
 								PrtsAfter  = 0,
-								Checked    = false,
+								Checked	= false,
 								Checked2   = false,
 								Runes 	   = {},
 							},
@@ -729,66 +735,66 @@ function TMW:ProcessEquivalencies()
 		
 		--NOTE: any id prefixed with "_" will have its localized name substituted in instead of being forced to match as an ID
 		debuffs = {
-			CrowdControl	    = "_118;_339;2637;33786;_1499;_19503;_19386;20066;10326;_9484;_6770;_2094;_51514;76780;_710;_5782;_6358;_49203;_605;82691", -- originally by calico0 of Curse
-			Bleeding		    = "_94009;_1822;_1079;9007;33745;1943;703;43104;89775",
-			Incapacitated	    = "20066;1776;49203",
-			Feared			    = "_5782;5246;_8122;10326;1513;_5484;_6789;87204",
-			Slowed			    = "_116;_120;13810;_5116;_8056;3600;_1715;_12323;45524;_18223;_15407;_3409;26679;_51693;_2974;_58180;61391;_50434;_55741;44614;_7302;_8034;_63529;_15571", -- by algus2
-			Stunned			    = "_1833;_408;_91800;_5211;_56;9005;22570;19577;56626;44572;853;2812;85388;64044;20549;46968;30283;20253;65929;7922;12809;50519;91797;47481;12355;24394;83047;39796;93986;89766;54786",
-			--DontMelee		    = "5277;871;Retaliation;Dispersion;Hand of Sacrifice;Hand of Protection;Divine Shield;Divine Protection;Ice Block;Icebound Fortitude;Cyclone;Banish",  --does somebody want to update these for me?
-			--MovementSlowed    = "Incapacitating Shout;Chains of Ice;Icy Clutch;Slow;Daze;Hamstring;Piercing Howl;Wing Clip;Ice Trap;Frostbolt;Cone of Cold;Blast Wave;Mind Flay;Crippling Poison;Deadly Throw;Frost Shock;Earthbind;Curse of Exhaustion",
-			Disoriented		    = "_19503;31661;_2094;_51514;90337;88625",
-			Silenced		    = "_47476;78675;34490;_55021;_15487;1330;_24259;_18498;_25046;81261;31935;18425;31117",
-			Disarmed		    = "_51722;_676;64058;50541;91644",
-			Rooted			    = "_339;_122;23694;58373;64695;_19185;33395;4167;54706;50245;90327;16979;83301;83302;45334;19306;55080;87195;63685;19387",
-			Shatterable		    = "122;33395;_83302;_44572;_55080;_82691", -- by algus2
-			PhysicalDmgTaken    = "30070;58683;81326;50518;55749",
-			SpellDamageTaken    = "_1490;65142;_85547;60433;93068;34889;24844",
-			SpellCritTaken	    = "17800;22959",
-			BleedDamageTaken    = "33878;33876;16511;_46857;50271;35290;57386",
+			CrowdControl		= "_118;_339;2637;33786;_1499;_19503;_19386;20066;10326;_9484;_6770;_2094;_51514;76780;_710;_5782;_6358;_49203;_605;82691", -- originally by calico0 of Curse
+			Bleeding			= "_94009;_1822;_1079;9007;33745;1943;703;43104;89775",
+			Incapacitated		= "20066;1776;49203",
+			Feared				= "_5782;5246;_8122;10326;1513;_5484;_6789;87204",
+			Slowed				= "_116;_120;13810;_5116;_8056;3600;_1715;_12323;45524;_18223;_15407;_3409;26679;_51693;_2974;_58180;61391;_50434;_55741;44614;_7302;_8034;_63529;_15571", -- by algus2
+			Stunned				= "_1833;_408;_91800;_5211;_56;9005;22570;19577;56626;44572;853;2812;85388;64044;20549;46968;30283;20253;65929;7922;12809;50519;91797;47481;12355;24394;83047;39796;93986;89766;54786",
+			--DontMelee			= "5277;871;Retaliation;Dispersion;Hand of Sacrifice;Hand of Protection;Divine Shield;Divine Protection;Ice Block;Icebound Fortitude;Cyclone;Banish",  --does somebody want to update these for me?
+			--MovementSlowed	= "Incapacitating Shout;Chains of Ice;Icy Clutch;Slow;Daze;Hamstring;Piercing Howl;Wing Clip;Ice Trap;Frostbolt;Cone of Cold;Blast Wave;Mind Flay;Crippling Poison;Deadly Throw;Frost Shock;Earthbind;Curse of Exhaustion",
+			Disoriented			= "_19503;31661;_2094;_51514;90337;88625",
+			Silenced			= "_47476;78675;34490;_55021;_15487;1330;_24259;_18498;_25046;81261;31935;18425;31117",
+			Disarmed			= "_51722;_676;64058;50541;91644",
+			Rooted				= "_339;_122;23694;58373;64695;_19185;33395;4167;54706;50245;90327;16979;83301;83302;45334;19306;55080;87195;63685;19387",
+			Shatterable			= "122;33395;_83302;_44572;_55080;_82691", -- by algus2
+			PhysicalDmgTaken	= "30070;58683;81326;50518;55749",
+			SpellDamageTaken	= "_1490;65142;_85547;60433;93068;34889;24844",
+			SpellCritTaken		= "17800;22959",
+			BleedDamageTaken	= "33878;33876;16511;_46857;50271;35290;57386",
 			ReducedAttackSpeed  = "6343;55095;58180;68055;8042;90314;50285",
 			ReducedCastingSpeed = "1714;5760;31589;73975;50274;50498",
-			ReducedArmor	    = "58567;91565;8647;50498;35387",
-			ReducedHealing	    = "12294;13218;56112;48301;82654;30213;54680",
+			ReducedArmor		= "58567;91565;8647;50498;35387",
+			ReducedHealing		= "12294;13218;56112;48301;82654;30213;54680",
 			ReducedPhysicalDone = "1160;99;26017;81130;702;24423",
 		},
 		buffs = {
-			ImmuneToStun	    = "642;45438;34471;19574;48792;1022;33786;710;46924;19263;47585",
-			ImmuneToMagicCC	    = "642;45438;34471;19574;33786;710;46924;19263;47585;31224;8178;23920;49039",
-			IncreasedStats	    = "79061;79063;90363",
-			IncreasedDamage	    = "75447;82930",
-			IncreasedCrit	    = "24932;29801;51701;51470;24604;90309",
-			IncreasedAP		    = "79102;53138;19506;30808",
-			IncreasedSPsix	    = "_79058;_61316;_52109",
-			IncreasedSPten	    = "77747;53646",
+			ImmuneToStun		= "642;45438;34471;19574;48792;1022;33786;710;46924;19263;47585",
+			ImmuneToMagicCC		= "642;45438;34471;19574;33786;710;46924;19263;47585;31224;8178;23920;49039",
+			IncreasedStats		= "79061;79063;90363",
+			IncreasedDamage		= "75447;82930",
+			IncreasedCrit		= "24932;29801;51701;51470;24604;90309",
+			IncreasedAP			= "79102;53138;19506;30808",
+			IncreasedSPsix		= "_79058;_61316;_52109",
+			IncreasedSPten		= "77747;53646",
 			IncreasedPhysHaste  = "55610;53290;8515",
 			IncreasedSpellHaste = "2895;24907;49868",
-			BurstHaste		    = "2825;32182;80353;90355",
-			BonusAgiStr		    = "6673;8076;57330;93435",
-			BonusStamina	    = "79105;469;6307;90364",
-			BonusArmor		    = "465;8072",
-			BonusMana		    = "_79058;_61316;54424",
-			ManaRegen		    = "54424;79102;5677",
-			BurstManaRegen	    = "29166;16191;64901",
+			BurstHaste			= "2825;32182;80353;90355",
+			BonusAgiStr			= "6673;8076;57330;93435",
+			BonusStamina		= "79105;469;6307;90364",
+			BonusArmor			= "465;8072",
+			BonusMana			= "_79058;_61316;54424",
+			ManaRegen			= "54424;79102;5677",
+			BurstManaRegen		= "29166;16191;64901",
 			PushbackResistance  = "19746;87717",
-			Resistances		    = "19891;8185",
-			DefensiveBuffs	    = "48707;30823;33206;47585;871;48792;498;22812;61336;5277;74001;47788;19263;6940;_12976;31850",
-			MiscHelpfulBuffs    = "89488;10060;23920;68992;31642;54428;2983;1850;29166;16689;53271;1044;31821;45182",
-			DamageBuffs		    = "1719;12292;85730;50334;5217;3045;77801;34692;31884;51713;49016;12472",
+			Resistances			= "19891;8185",
+			DefensiveBuffs		= "48707;30823;33206;47585;871;48792;498;22812;61336;5277;74001;47788;19263;6940;_12976;31850",
+			MiscHelpfulBuffs	= "89488;10060;23920;68992;31642;54428;2983;1850;29166;16689;53271;1044;31821;45182",
+			DamageBuffs			= "1719;12292;85730;50334;5217;3045;77801;34692;31884;51713;49016;12472",
 		},
 		casts = {
 			--prefixing with _ doesnt really matter here since casts only match by ID, but it may prevent confusion if people try and use these as buff/debuff equivs
-			Heals			    = "50464;5185;8936;740;2050;2060;2061;32546;596;64843;635;82326;19750;331;77472;8004;1064;73920",
-			PvPSpells		    = "33786;339;20484;1513;982;64901;_605;453;5782;5484;79268;10326;51514;118;12051",
-			Tier11Interrupts    = "_83703;_82752;_82636;_83070;_79710;_77896;_77569;_80734;_82411",
-			Tier12Interrupts    = "_97202;_100094",
+			Heals				= "50464;5185;8936;740;2050;2060;2061;32546;596;64843;635;82326;19750;331;77472;8004;1064;73920",
+			PvPSpells			= "33786;339;20484;1513;982;64901;_605;453;5782;5484;79268;10326;51514;118;12051",
+			Tier11Interrupts	= "_83703;_82752;_82636;_83070;_79710;_77896;_77569;_80734;_82411",
+			Tier12Interrupts	= "_97202;_100094",
 		},
 		dr = {
 		},
 		unlisted = {
 			-- enrages were extracted using the script in the /Scripts folder (source is db.mmo-champion.com)
-			Enraged			    = "24689;18499;2687;29131;59465;39575;77238;52262;12292;54508;23257;66092;57733;58942;40076;8599;15061;15716;18501;19451;19812;22428;23128;23342;25503;26041;26051;28371;30485;31540;31915;32714;33958;34670;37605;37648;37975;38046;38166;38664;39031;41254;41447;42705;42745;43139;47399;48138;48142;48193;50420;51513;52470;54427;55285;56646;59697;59707;59828;60075;61369;63227;68541;70371;72143;72146;72147;72148;75998;76100;76862;78722;78943;80084;80467;86736;95436;95459;5229;12880;57514;57518;14201;57516;57519;14202;57520;14203;57521;14204;57522;51170;4146;76816;90872;82033;48702;52537;49029;67233;54781;56729;53361;79420;66759;67657;67658;67659;40601;51662;60177;63848;43292;90045;92946;52071;82759;60430;81772;48391;80158;101109;101110;54475;56769;63147;62071;52610;41364;81021;81022;81016;81017;34392;55462;50636;72203;49016;69052;43664;59694;91668;52461;54356;76691;81706;52309;29340;76487",
-			GCD			 	    = "GCD", -- a hack a day.... (used so that sorting doesnt break, so that GCD appears at the top of the list)
+			Enraged				= "24689;18499;2687;29131;59465;39575;77238;52262;12292;54508;23257;66092;57733;58942;40076;8599;15061;15716;18501;19451;19812;22428;23128;23342;25503;26041;26051;28371;30485;31540;31915;32714;33958;34670;37605;37648;37975;38046;38166;38664;39031;41254;41447;42705;42745;43139;47399;48138;48142;48193;50420;51513;52470;54427;55285;56646;59697;59707;59828;60075;61369;63227;68541;70371;72143;72146;72147;72148;75998;76100;76862;78722;78943;80084;80467;86736;95436;95459;5229;12880;57514;57518;14201;57516;57519;14202;57520;14203;57521;14204;57522;51170;4146;76816;90872;82033;48702;52537;49029;67233;54781;56729;53361;79420;66759;67657;67658;67659;40601;51662;60177;63848;43292;90045;92946;52071;82759;60430;81772;48391;80158;101109;101110;54475;56769;63147;62071;52610;41364;81021;81022;81016;81017;34392;55462;50636;72203;49016;69052;43664;59694;91668;52461;54356;76691;81706;52309;29340;76487",
+			GCD			 		= "GCD", -- a hack a day.... (used so that sorting doesnt break, so that GCD appears at the top of the list)
 		},
 	}
 
@@ -797,19 +803,19 @@ function TMW:ProcessEquivalencies()
 			ctrlstun   = "DR-ControlledStun",
 			scatters   = "DR-Scatter",
 			fear 	   = "DR-Fear",
-			rndstun    = "DR-RandomStun",
-			silence    = "DR-Silence",
+			rndstun	= "DR-RandomStun",
+			silence	= "DR-Silence",
 			banish 	   = "DR-Banish",
 			mc 		   = "DR-MindControl",
 			entrapment = "DR-Entrapment",
 			taunt 	   = "DR-Taunt",
 			disarm 	   = "DR-Disarm",
 			horror 	   = "DR-Horrify",
-			cyclone    = "DR-Cyclone",
-			rndroot    = "DR-RandomRoot",
+			cyclone	= "DR-Cyclone",
+			rndroot	= "DR-RandomRoot",
 			disorient  = "DR-Disorient",
 			ctrlroot   = "DR-ControlledRoot",
-			dragons    = "DR-DragonsBreath",
+			dragons	= "DR-DragonsBreath",
 		}
 		if not GetSpellInfo(74347) then -- invalid
 			DRData.spells[74347] = nil
@@ -1206,7 +1212,7 @@ do -- STANCES
 	}
 
 	TMW.CSN = {
-		[0]    = NONE,
+		[0]	= NONE,
 	}
 
 	for k, v in ipairs(TMW.Stances) do
@@ -1262,23 +1268,9 @@ function TMW:OnInitialize()
 	
 	TMW:ProcessEquivalencies()
 
-	if type(TellMeWhenDB) ~= "table" then
-		TellMeWhenDB = {Version = TELLMEWHEN_VERSIONNUMBER}
-	end
-	TMW:GlobalUpgrade() -- must happen before the db is created
-
-	TMW.db = AceDB:New("TellMeWhenDB", TMW.Defaults)
-	db = TMW.db
-	local XPac = tonumber(strsub(clientVersion, 1, 1))
-	db.global.XPac = db.global.XPac or XPac
-	if db.global.XPac ~= XPac then
-		wipe(db.global.ClassSpellCache)
-	end
-	
-	CNDTEnv = TMW.CNDT.Env
-
+	--------------- LSM ---------------
 	LSM:Register("sound", "Rubber Ducky",  [[Sound\Doodad\Goblin_Lottery_Open01.wav]])
-	LSM:Register("sound", "Cartoon FX",    [[Sound\Doodad\Goblin_Lottery_Open03.wav]])
+	LSM:Register("sound", "Cartoon FX",	[[Sound\Doodad\Goblin_Lottery_Open03.wav]])
 	LSM:Register("sound", "Explosion", 	   [[Sound\Doodad\Hellfire_Raid_FX_Explosion05.wav]])
 	LSM:Register("sound", "Shing!", 	   [[Sound\Doodad\PortcullisActive_Closed.wav]])
 	LSM:Register("sound", "Wham!", 		   [[Sound\Doodad\PVP_Lordaeron_Door_Open.wav]])
@@ -1287,7 +1279,7 @@ function TMW:OnInitialize()
 	LSM:Register("sound", "Cheer", 		   [[Sound\Event Sounds\OgreEventCheerUnique.wav]])
 	LSM:Register("sound", "Humm", 		   [[Sound\Spells\SimonGame_Visual_GameStart.wav]])
 	LSM:Register("sound", "Short Circuit", [[Sound\Spells\SimonGame_Visual_BadPress.wav]])
-	LSM:Register("sound", "Fel Portal",    [[Sound\Spells\Sunwell_Fel_PortalStand.wav]])
+	LSM:Register("sound", "Fel Portal",	[[Sound\Spells\Sunwell_Fel_PortalStand.wav]])
 	LSM:Register("sound", "Fel Nova", 	   [[Sound\Spells\SeepingGaseous_Fel_Nova.wav]])
 	LSM:Register("sound", "You Will Die!", [[Sound\Creature\CThun\CThunYouWillDie.wav]])
 
@@ -1311,8 +1303,23 @@ function TMW:OnInitialize()
 	LSM:Register("sound", "TMW - Ding 9",  [[Interface\Addons\TellMeWhen\Sounds\Ding9.ogg]])
 
 	
-	TELLMEWHEN_MAXGROUPS = db.profile.NumGroups -- need to define before upgrading
 
+	
+	--------------- Database ---------------
+	if type(TellMeWhenDB) ~= "table" then
+		TellMeWhenDB = {Version = TELLMEWHEN_VERSIONNUMBER}
+	end
+	TMW:GlobalUpgrade() -- must happen before the db is created
+
+	TMW.db = AceDB:New("TellMeWhenDB", TMW.Defaults)
+	db = TMW.db
+	local XPac = tonumber(strsub(clientVersion, 1, 1))
+	db.global.XPac = db.global.XPac or XPac
+	if db.global.XPac ~= XPac then
+		wipe(db.global.ClassSpellCache)
+	end
+	
+	TELLMEWHEN_MAXGROUPS = db.profile.NumGroups -- need to define before upgrading
 	db.profile.Version = db.profile.Version or TELLMEWHEN_VERSIONNUMBER -- this only does anything for new profiles
 	if TellMeWhen_Settings or (type(db.profile.Version) == "string") or (db.profile.Version < TELLMEWHEN_VERSIONNUMBER) then
 		TMW:Upgrade()
@@ -1324,10 +1331,10 @@ function TMW:OnInitialize()
 	db.RegisterCallback(TMW, "OnProfileShutdown",	"ShutdownProfile")
 	db.RegisterCallback(TMW, "OnDatabaseShutdown",	"ShutdownProfile")
 	
-	TMW:SetScript("OnUpdate", TMW.OnUpdate)
 	
 	
 	
+	--------------- Spell Caches ---------------
 	TMW.ClassSpellCache = db.global.ClassSpellCache
 	local function AddID(id)
 		local name, _, tex = GetSpellInfo(id)
@@ -1356,13 +1363,17 @@ function TMW:OnInitialize()
 	TMW.AuraCache = TellMeWhenDB.AuraCache
 	
 	
-	
+	--------------- Events/OnUpdate ---------------
+	CNDTEnv = TMW.CNDT.Env
+	TMW:SetScript("OnUpdate", TMW.OnUpdate)
 	
 	TMW:RegisterEvent("COMBAT_LOG_EVENT_UNFILTERED")
 	TMW:RegisterEvent("PLAYER_ENTERING_WORLD")
 	TMW:RegisterEvent("PLAYER_TALENT_UPDATE")
 	TMW:RegisterEvent("ACTIVE_TALENT_GROUP_CHANGED")
 
+	
+	--------------- Comm ---------------
 	if db.profile.ReceiveComm then
 		TMW:RegisterComm("TMW")
 	end
@@ -1373,6 +1384,8 @@ function TMW:OnInitialize()
 	end
 	TMW:PLAYER_ENTERING_WORLD()
 
+	
+	
 	TMW.VarsLoaded = true
 end
 
@@ -1495,81 +1508,78 @@ function TMW:OnUpdate(elapsed)					-- THE MAGICAL ENGINE OF DOING EVERYTHING
 		end
 	end
 	
-	if next(PBarsToUpdate) then
-		for bar in next, PBarsToUpdate do
-			local power = UnitPower("player", bar.powerType) + bar.offset
-			if not bar.InvertBars then
-				bar:SetValue(bar.Max - power)
-			else
-				bar:SetValue(power)
-			end
+	for bar in next, PBarsToUpdate do
+		local power = UnitPower("player", bar.powerType) + bar.offset
+		if not bar.InvertBars then
+			bar:SetValue(bar.Max - power)
+		else
+			bar:SetValue(power)
 		end
 	end
-	if next(CDBarsToUpdate) then
-		for bar in next, CDBarsToUpdate do
-			local value, doTerminate
-			
-			local start, duration, InvertBars = bar.start, bar.duration, bar.InvertBars
-			
-			if InvertBars then
-				if duration == 0 then
-					value = bar.Max
-				else
-					value = time - start + bar.offset
-				end
-				doTerminate = value >= bar.Max
+	
+	for bar in next, CDBarsToUpdate do
+		local value, doTerminate
+		
+		local start, duration, InvertBars = bar.start, bar.duration, bar.InvertBars
+		
+		if InvertBars then
+			if duration == 0 then
+				value = bar.Max
 			else
+				value = time - start + bar.offset
+			end
+			doTerminate = value >= bar.Max
+		else
+			if duration == 0 then
+				value = 0
+			else
+				value = duration - (time - start) + bar.offset
+			end
+			doTerminate = value <= 0
+		end
+		
+		if doTerminate then
+			CDBarsToUpdate[bar] = nil
+			if InvertBars then
+				value = bar.Max
+			else
+				value = 0
+			end
+		end
+		
+		if value ~= bar.__value then
+			bar:SetValue(value)
+			
+			local co = bar.completeColor
+			local st = bar.startColor
+			
+			if not InvertBars then
+				if duration ~= 0 then
+					local pct = (time - start) / duration
+					local inv = 1-pct
+					bar:SetStatusBarColor(
+						(co.r * pct) + (st.r * inv),
+						(co.g * pct) + (st.g * inv),
+						(co.b * pct) + (st.b * inv),
+						(co.a * pct) + (st.a * inv)
+					)
+				end
+			else
+				--inverted
 				if duration == 0 then
-					value = 0
+					bar:SetStatusBarColor(co.r, co.g, co.b, co.a)
 				else
-					value = duration - (time - start) + bar.offset
-				end
-				doTerminate = value <= 0
-			end
-			
-			if doTerminate then
-				CDBarsToUpdate[bar] = nil
-				if InvertBars then
-					value = bar.Max
-				else
-					value = 0
+					local pct = (time - start) / duration
+					local inv = 1-pct
+					bar:SetStatusBarColor(
+						(co.r * pct) + (st.r * inv),
+						(co.g * pct) + (st.g * inv),
+						(co.b * pct) + (st.b * inv),
+						(co.a * pct) + (st.a * inv)
+					)
 				end
 			end
-			
-			if value ~= bar.__value then
-				bar:SetValue(value)
-				
-				local co = bar.completeColor
-				local st = bar.startColor
-				
-				if not InvertBars then
-					if duration ~= 0 then
-						local pct = (time - start) / duration
-						local inv = 1-pct
-						bar:SetStatusBarColor(
-							(co.r * pct) + (st.r * inv),
-							(co.g * pct) + (st.g * inv),
-							(co.b * pct) + (st.b * inv),
-							(co.a * pct) + (st.a * inv)
-						)
-					end
-				else
-					--inverted
-					if duration == 0 then
-						bar:SetStatusBarColor(co.r, co.g, co.b, co.a)
-					else
-						local pct = (time - start) / duration
-						local inv = 1-pct
-						bar:SetStatusBarColor(
-							(co.r * pct) + (st.r * inv),
-							(co.g * pct) + (st.g * inv),
-							(co.b * pct) + (st.b * inv),
-							(co.a * pct) + (st.a * inv)
-						)
-					end
-				end
-				bar.__value = value
-			end
+			bar.__value = value
 		end
 	end
 	
@@ -1609,6 +1619,45 @@ function TMW:OnUpdate(elapsed)					-- THE MAGICAL ENGINE OF DOING EVERYTHING
 			ActionButton_HideOverlayGlow(icon) -- dont upvalue, can be hooked (masque does NOT, but maybe others)
 		end
 		ActivationGlows[icon] = Duration
+	end
+	
+	for flasher, Duration in next, FlashingFlashers do
+		Duration = Duration - elapsed
+		
+		local FlashPeriod = flasher.FlashPeriod
+		local FlashTime = flasher.FlashTime
+		FlashTime = FlashTime - elapsed
+
+		if flasher.FadeAlpha then
+			if flasher.fadingIn then
+				flasher:SetAlpha(flasher.FlashAlpha*(FlashPeriod-FlashTime/FlashPeriod))
+			else
+				flasher:SetAlpha(flasher.FlashAlpha*(FlashTime/FlashPeriod))
+			end
+		end
+			
+		if FlashTime <= 0 then
+			local overtime = -FlashTime
+			if overtime >= FlashPeriod then
+				overtime = 0
+			end
+			FlashTime = FlashPeriod - overtime
+			
+			if Duration < 0 and not flasher.fadingIn then -- we just finished the last flash, so dont do any more
+				Duration = nil
+				FlashTime = nil
+				flasher.FlashPeriod = nil
+				flasher:Hide()
+			end
+				
+			flasher.fadingIn = not flasher.fadingIn
+			if not flasher.FadeAlpha then
+				flasher:SetAlpha(flasher.fadingIn and flasher.FlashAlpha or 0)
+			end
+		end
+		
+		FlashingFlashers[flasher] = Duration
+		flasher.FlashTime = FlashTime
 	end
 end
 
@@ -2606,6 +2655,14 @@ function TMW:RestoreEvents()
 	runEvents = 1
 end
 
+function TMW:GetFlasher(parent)
+	Flasher = parent:CreateTexture(nil, "BACKGROUND")
+	Flasher:SetAllPoints(parent.base == TMW.IconBase and parent.texture)
+	Flasher:Hide()
+	
+	return Flasher
+end
+
 function TMW:PLAYER_ENTERING_WORLD()
 	if not TMW.VarsLoaded then return end
 	TMW.EnteredWorld = true
@@ -3174,13 +3231,26 @@ function TMW.IconBase.FireEvent(icon, data, played, announced, animated)
 				WorldFrame.TMW_ShakeMagnitude = data.Magnitude
 				Shakers[WorldFrame] = Duration and max(Duration, data.Duration) or data.Duration
 			elseif Animation == "ICONSHAKE" then
-				local Duration = Shakers[icon]
 				icon.TMW_ShakeMagnitude = data.Magnitude
-				Shakers[icon] = Duration and max(Duration, data.Duration) or data.Duration
+				Shakers[icon] = data.Duration
 			elseif Animation == "ACTVTNGLOW" then
-				local Duration = ActivationGlows[icon]
-				ActivationGlows[icon] = Duration and max(Duration, data.Duration) or data.Duration
 				ActionButton_ShowOverlayGlow(icon) -- dont upvalue, can be hooked (masque does, maybe others)
+				ActivationGlows[icon] = data.Duration
+			elseif Animation == "ICONFLASH" or Animation == "SCREENFLASH" then
+				local flasher
+				if Animation == "ICONFLASH" then
+					flasher = icon.flasher
+				elseif Animation == "SCREENFLASH" then
+					flasher = UIParent.TMW_Flasher
+				end
+				flasher.FlashPeriod = data.Period
+				flasher.FlashTime = data.Period
+				flasher.FlashAlpha = data.a_anim
+				flasher.FadeAlpha = data.Fade
+				flasher.fadingIn = true
+				flasher:Show()
+				flasher:SetTexture(data.r_anim, data.g_anim, data.b_anim, 1)
+				FlashingFlashers[flasher] = data.Duration
 			end		
 			animated = 1
 		end
@@ -3809,6 +3879,11 @@ function TMW:Icon_Update(icon)
 				end
 			elseif key == "Animation" and data ~= "" then
 				dontremove = 1
+				if data == "ICONFLASH" then
+					icon.flasher = icon.flasher or TMW:GetFlasher(icon)
+				elseif data == "SCREENFLASH" then
+					UIParent.TMW_Flasher = UIParent.TMW_Flasher or TMW:GetFlasher(UIParent)
+				end
 			elseif key == "Channel" and data ~= "" then
 				dontremove = 1
 			end
@@ -4477,7 +4552,7 @@ function TMW:GetUnits(icon, setting, dontreplace)
 end
 
 local function replace(text, find, rep)
-	-- using this allows for the replacement of ";       " to "; " in one external call
+	-- using this allows for the replacement of ";	   " to "; " in one external call
 	assert(not strfind(rep, find), "RECURSION DETECTED: FIND=".. find.. " REP=".. rep)
 	while strfind(text, find) do
 		text = gsub(text, find, rep)
@@ -4637,6 +4712,34 @@ function TMW:LockToggle()
 		end
 	end
 	db.profile.Locked = not db.profile.Locked
+	
+	if not db.profile.Locked then
+		for frame in next, FlashingFlashers do
+			frame:Hide()
+			FlashingFlashers[frame] = nil
+		end
+		
+		for frame, Duration in next, Shakers do
+			if frame == WorldFrame and TMW.WorldFramePoints then
+				frame:ClearAllPoints()
+				for _, v in pairs(TMW.WorldFramePoints) do
+					frame:SetPoint(v[1], v[2], v[3], v[4], v[5])
+				end
+				
+			elseif frame.base == TMW.IconBase then
+				frame:SetPoint("TOPLEFT", frame.x, frame.y)
+			end
+			Shakers[frame] = nil
+		end
+		
+		for icon, Duration in next, ActivationGlows do
+			ActionButton_HideOverlayGlow(icon)
+			ActivationGlows[icon] = nil
+		end
+	
+	
+	
+	end
 	PlaySound("igCharacterInfoTab")
 	TMW:Update()
 end

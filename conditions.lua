@@ -558,12 +558,12 @@ end
 
 -- preset text tables that are frequently used
 local commanumber = function(k)
-    k = gsub(k, "(%d)(%d%d%d)$", "%1,%2", 1)
-    repeat
-        k, found = gsub(k, "(%d)(%d%d%d),", "%1,%2,", 1)
-    until found == 0
-    
-    return k
+	k = gsub(k, "(%d)(%d%d%d)$", "%1,%2", 1)
+	repeat
+		k, found = gsub(k, "(%d)(%d%d%d),", "%1,%2,", 1)
+	until found == 0
+	
+	return k
 end
 local percent = function(k) return k.."%" end
 local pluspercent = function(k) return "+"..k.."%" end

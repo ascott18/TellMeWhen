@@ -798,16 +798,16 @@ local groupConfigTemplate = {
 local colorOrder = {
 	"CBS",
 	"CBC", 
-    
+	
 	"OOR",	
 	"OOM",	
 	"OORM",
-    
+	
 	"CTA",	
 	"COA",	
 	"CTS",	
 	"COS",	
-    
+	
 	"NA",	
 	"NS",	
 }
@@ -1305,7 +1305,7 @@ function TMW:Group_Delete(groupID)
 		local destination = "TellMeWhen_Group" .. id - 1
 		
 		-- check for groups exactly
-	    TMW:ReconcileData(source, destination)
+		TMW:ReconcileData(source, destination)
 		
 		-- check for any icons of a group.
 		TMW:ReconcileData(source, destination, source .. "_Icon", destination .. "_Icon")
@@ -2103,13 +2103,13 @@ IE.LeftChecks = {
 	},
 }
 IE.Tabs = {
-	"Main",	            -- [1]
-	"Conditions",       -- [2]
-	"Sound",            -- [3]
-	"Announcements",    -- [4]
-	"Animations",       -- [5]
-	"Conditions",       -- [6]
-	"MainOptions",      -- [7]
+	"Main",				-- [1]
+	"Conditions",	   -- [2]
+	"Sound",			-- [3]
+	"Announcements",	-- [4]
+	"Animations",	   -- [5]
+	"Conditions",	   -- [6]
+	"MainOptions",	  -- [7]
 }
 
 function IE:OnInitialize()
@@ -3692,11 +3692,19 @@ IE.RapidSettings = {
 	r = true,
 	g = true,
 	b = true,
+	a = true,
+	r_anim = true,
+	g_anim = true,
+	b_anim = true,
+	a_anim = true,
 	Size = true,
 	Level = true,
 	Alpha = true,
 	UnAlpha = true,
 	ConditionAlpha = true,
+	Duration = true,
+	Magnitude = true,
+	Period = true,
 }
 
 
@@ -4482,21 +4490,39 @@ ANIM.AnimationList = {
 		text = L["ANIM_SCREENSHAKE"],
 		desc = L["ANIM_SCREENSHAKE_DESC"],
 		animation = "SCREENSHAKE",
-		duration = true,
-		magnitude = true,
+		Duration = true,
+		Magnitude = true,
+	},
+	{
+		text = L["ANIM_SCREENFLASH"],
+		desc = L["ANIM_SCREENFLASH_DESC"],
+		animation = "SCREENFLASH",
+		Duration = true,
+		Period = true,
+		Color = true,
+		Fade = true,
 	},
 	{
 		text = L["ANIM_ICONSHAKE"],
 		desc = L["ANIM_ICONSHAKE_DESC"],
 		animation = "ICONSHAKE",
-		duration = true,
-		magnitude = true,
+		Duration = true,
+		Magnitude = true,
+	},
+	{
+		text = L["ANIM_ICONFLASH"],
+		desc = L["ANIM_ICONFLASH_DESC"],
+		animation = "ICONFLASH",
+		Duration = true,
+		Period = true,
+		Color = true,
+		Fade = true,
 	},
 	{
 		text = L["ANIM_ACTVTNGLOW"],
 		desc = L["ANIM_ACTVTNGLOW_DESC"],
 		animation = "ACTVTNGLOW",
-		duration = true,
+		Duration = true,
 	},
 	
 	
@@ -4607,17 +4633,29 @@ function ANIM:SelectAnimation(animation)
 
 	local animationSettings = AnimationLookup[animation]
 	if animationSettings then
-		if animationSettings.duration then
-			self.Duration:SetValue(EventSettings.Duration)
-			self.Duration:Show()
-		else
-			self.Duration:Hide()
+		for i, arg in TMW:Vararg("Duration", "Magnitude", "Period") do
+			if animationSettings[arg] then
+				self[arg]:SetValue(EventSettings[arg])
+				self[arg]:Show()
+			else
+				self[arg]:Hide()
+			end
 		end
-		if animationSettings.magnitude then
-			self.Magnitude:SetValue(EventSettings.Magnitude)
-			self.Magnitude:Show()
+		
+		if animationSettings.Color then
+			local r, g, b, a = EventSettings.r_anim, EventSettings.g_anim, EventSettings.b_anim, EventSettings.a_anim
+			self.Color:GetNormalTexture():SetVertexColor(r, g, b, 1)
+			self.Color.background:SetAlpha(a)
+			self.Color:Show()
 		else
-			self.Magnitude:Hide()
+			self.Color:Hide()
+		end
+		
+		if animationSettings.Fade then
+			self.Fade:SetChecked(EventSettings.Fade)
+			self.Fade:Show()
+		else
+			self.Fade:Hide()
 		end
 	end
 

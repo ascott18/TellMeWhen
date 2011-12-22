@@ -55,6 +55,12 @@
 				<Texture name="$parentIcon" parentKey="texture" file="Interface\Icons\INV_Misc_QuestionMark">
 					<Size x="30" y="30"/>
 				</Texture>
+				<Texture name="$parentFlasher" parentKey="flash" hidden="true">
+					<Anchors>
+						<Anchor point="TOPLEFT" relativeTo="$parentIcon"/>
+						<Anchor point="BOTTOMRIGHT" relativeTo="$parentIcon"/>
+					</Anchors>
+				</Texture>
 			</Layer>
 			<Layer level="ARTWORK">
 				<FontString name="$parentCount" parentKey="countText" inherits="NumberFontNormalSmall" justifyH="RIGHT">
