@@ -427,6 +427,27 @@ local function AddDropdownSpacer()
 end
 
 
+---------- Misc Utilities ----------
+local function testFrame(frame)
+    if frame then
+        local Module = TMW:FindModule(frame)
+        if Module then 
+            return Module
+        end
+    end
+end
+function TMW:FindModule(self)
+    if type(self) ~= "table" then
+        return
+    end
+    if self.baseName == "TellMeWhen_Options" then
+        return self
+    end
+    local Module = testFrame(self.GetParent and self:GetParent()) or testFrame(self.frame) or testFrame(self.Module) or testFrame(self.module)
+    if Module then 
+        return Module
+    end
+end
 
 -- --------------
 -- MAIN OPTIONS
@@ -4152,6 +4173,12 @@ function SND:SetupEventDisplay(event)
 	SND.Events[eventID].DataText:SetText(name)
 end
 
+function SND:TestEvent(event)
+	local settings = CI.ics.Events[event]
+	
+	TMW.CI.ic:FireEvent(settings, nil, 1, 1)
+end
+
 
 ---------- Sounds ----------
 function SND:SetSoundsOffset(offs)
@@ -4370,6 +4397,11 @@ function ANN:SetupEventDisplay(event)
 	end
 end
 
+function ANN:TestEvent(event)
+	local settings = CI.ics.Events[event]
+	
+	CI.ic:FireEvent(settings, 1, nil, 1)
+end
 
 ---------- Channels ----------
 function ANN:SelectChannel(channel)
@@ -4612,6 +4644,11 @@ function ANIM:SetupEventDisplay(event)
 	end
 end
 
+function ANIM:TestEvent(event)
+	local settings = CI.ics.Events[event]
+	
+	CI.ic:FireEvent(settings, 1, 1, nil)
+end
 
 ---------- Animations ----------
 function ANIM:SelectAnimation(animation)

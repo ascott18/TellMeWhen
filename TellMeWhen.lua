@@ -32,7 +32,7 @@ local DRData = LibStub("DRData-1.0", true)
 TELLMEWHEN_VERSION = "4.7.3"
 TELLMEWHEN_VERSION_MINOR = strmatch(" @project-version@", " r%d+") or ""
 TELLMEWHEN_VERSION_FULL = TELLMEWHEN_VERSION .. TELLMEWHEN_VERSION_MINOR
-TELLMEWHEN_VERSIONNUMBER = 47306 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
+TELLMEWHEN_VERSIONNUMBER = 47307 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
 if TELLMEWHEN_VERSIONNUMBER > 48000 or TELLMEWHEN_VERSIONNUMBER < 47000 then return error("YOU SCREWED UP THE VERSION NUMBER OR DIDNT CHANGE THE SAFETY LIMITS") end -- safety check because i accidentally made the version number 414069 once
 
 TELLMEWHEN_MAXGROUPS = 1 	--this is a default, used by SetTheory (addon), so dont rename
@@ -1477,28 +1477,29 @@ function TMW:OnUpdate(elapsed)					-- THE MAGICAL ENGINE OF DOING EVERYTHING
 				end
 			end
 		end
-		if not Locked then return end
+		if Locked then
 		
-		for i = 1, #GroupUpdateFuncs do
-			local CndtCheck = GroupUpdateFuncs[i].CndtCheck
-			if CndtCheck then
-				CndtCheck()
+			for i = 1, #GroupUpdateFuncs do
+				local CndtCheck = GroupUpdateFuncs[i].CndtCheck
+				if CndtCheck then
+					CndtCheck()
+				end
 			end
-		end
 
-		for i = 1, #IconUpdateFuncs do
-			IconUpdateFuncs[i]:Update(time)
-		end
+			for i = 1, #IconUpdateFuncs do
+				IconUpdateFuncs[i]:Update(time)
+			end
 
-		if TMW.DoWipeAC then
-			wipe(TMW.AlreadyChecked)
-		end
-		if TMW.DoWipeChangedMetas then
-			wipe(TMW.ChangedMetas)
-		end
-		updatePBar = nil
-		if UnitsToUpdate then
-			wipe(UnitsToUpdate)
+			if TMW.DoWipeAC then
+				wipe(TMW.AlreadyChecked)
+			end
+			if TMW.DoWipeChangedMetas then
+				wipe(TMW.ChangedMetas)
+			end
+			updatePBar = nil
+			if UnitsToUpdate then
+				wipe(UnitsToUpdate)
+			end
 		end
 	end
 	
@@ -4713,7 +4714,7 @@ function TMW:LockToggle()
 	end
 	db.profile.Locked = not db.profile.Locked
 	
-	if not db.profile.Locked then
+	--if not db.profile.Locked then
 		for frame in next, FlashingFlashers do
 			frame:Hide()
 			FlashingFlashers[frame] = nil
@@ -4736,10 +4737,8 @@ function TMW:LockToggle()
 			ActionButton_HideOverlayGlow(icon)
 			ActivationGlows[icon] = nil
 		end
+--	end
 	
-	
-	
-	end
 	PlaySound("igCharacterInfoTab")
 	TMW:Update()
 end

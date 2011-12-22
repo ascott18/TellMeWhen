@@ -1517,28 +1517,18 @@
 		</HighlightTexture>
 		
 		<Frames>
-			<Button name="$parentPlay" parentKey="Play" virtual="true">
+			
+			<Button name="$parentPlay" parentKey="Play">
 				<Size x="15" y="15"/>
 				<Anchors>
 					<Anchor point="TOPRIGHT"/>
 				</Anchors>
-				<NormalTexture file="Interface\Common\VoiceChat-Speaker"/>
-				<HighlightTexture file="Interface\Common\VoiceChat-On"/>
 				<Scripts>
 					<OnLoad>
-						self.ExclusiveTo = "Sound"
+						self:SetScale(0.8)
 					</OnLoad>
 					<OnClick>
-						local groupID, iconID = TMW.CI.g, TMW.CI.i
-
-						local setting = TMW.db.profile.Groups[groupID].Icons[iconID].Events[self:GetParent().event].Sound or ""
-						local sound
-						if strfind(setting, "%.[^\\]+$") then
-							sound = setting
-						else
-							sound = TMW.SND.LSM:Fetch("sound", setting) or ""
-						end
-						PlaySoundFile(sound, "Master")
+						TMW:FindModule(self):TestEvent(self:GetParent().event)
 					</OnClick>
 					<OnDisable>
 						self:GetNormalTexture():SetDesaturated(1)
@@ -1555,6 +1545,12 @@
 						end
 					</OnLeave>
 				</Scripts>
+				<NormalTexture urgency="5" file="Interface\Buttons\UI-SpellbookIcon-NextPage-Up" alphaMode="ADD">
+					<TexCoords left="0.3125" right="0.625" top="0.28125" bottom="0.71857"/>
+				</NormalTexture>
+				<HighlightTexture urgency="5" file="Interface\Buttons\UI-SpellbookIcon-NextPage-Up" alphaMode="ADD">
+					<TexCoords left="0.3125" right="0.625" top="0.28125" bottom="0.71857"/>
+				</HighlightTexture>
 			</Button>
 		</Frames>
 		<Layers>
