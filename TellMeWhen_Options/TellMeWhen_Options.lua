@@ -971,7 +971,7 @@ local colorIconTypeTemplate = {
 			type = "toggle",
 			order = 1,
 			hidden = function(info)
-				return info[#info-1] ~= "GLOBAL"
+				return not LMB or info[#info-1] ~= "GLOBAL"
 			end,
 		},
 		OnlyMSQ = {
@@ -981,7 +981,7 @@ local colorIconTypeTemplate = {
 			width = "double",
 			order = 2,
 			hidden = function(info)
-				return info[#info-1] ~= "GLOBAL"
+				return not LMB or info[#info-1] ~= "GLOBAL"
 			end,
 			disabled = function(info)
 				return not db.profile.ColorMSQ
@@ -4491,6 +4491,12 @@ ANIM.AnimationList = {
 		animation = "ICONSHAKE",
 		duration = true,
 		magnitude = true,
+	},
+	{
+		text = L["ANIM_ACTVTNGLOW"],
+		desc = L["ANIM_ACTVTNGLOW_DESC"],
+		animation = "ACTVTNGLOW",
+		duration = true,
 	},
 	
 	

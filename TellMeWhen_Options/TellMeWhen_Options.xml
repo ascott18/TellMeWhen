@@ -3960,7 +3960,7 @@
 								self:EnableMouseWheel(true)
 							</OnLoad>
 							<OnMouseWheel>
-								self:SetValue(self:GetValue()+delta)
+								self:SetValue(self:GetValue()+(delta*self:GetValueStep()))
 							</OnMouseWheel>
 						</Scripts>
 					</Slider>
@@ -3994,7 +3994,7 @@
 								self:EnableMouseWheel(true)
 							</OnLoad>
 							<OnMouseWheel>
-								self:SetValue(self:GetValue()+(delta/self:GetValueStep()))
+								self:SetValue(self:GetValue()+(delta*self:GetValueStep()))
 							</OnMouseWheel>
 						</Scripts>
 					</Slider>

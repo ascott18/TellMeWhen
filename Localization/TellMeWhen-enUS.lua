@@ -950,12 +950,14 @@ L["ANIM_MAGNITUDE_DESC"] = "Set how violent the shake should be."
 
 
 L["ANIM_SCREENSHAKE"] = "Screen: Shake"
-L["ANIM_SCREENSHAKE_DESC"] = [[This animation will shake you entire screen when it is triggered.
+L["ANIM_SCREENSHAKE_DESC"] = [[Shakes your entire screen when it is triggered.
 
 NOTE: This will only work if you are either out of combat or if nameplates have not been enabled at all since you logged in.]]
 
 L["ANIM_ICONSHAKE"] = "Icon: Shake"
-L["ANIM_ICONSHAKE_DESC"] = "This animation will shake the icon when it is triggered."
+L["ANIM_ICONSHAKE_DESC"] = "Shakes the icon when it is triggered."
+L["ANIM_ACTVTNGLOW"] = "Icon: Activation Border"
+L["ANIM_ACTVTNGLOW_DESC"] = "Displays the Blizzard spell activation border on the icon."
 
 
 

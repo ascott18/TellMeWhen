@@ -32,7 +32,7 @@ local DRData = LibStub("DRData-1.0", true)
 TELLMEWHEN_VERSION = "4.7.3"
 TELLMEWHEN_VERSION_MINOR = strmatch(" @project-version@", " r%d+") or ""
 TELLMEWHEN_VERSION_FULL = TELLMEWHEN_VERSION .. TELLMEWHEN_VERSION_MINOR
-TELLMEWHEN_VERSIONNUMBER = 47304 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
+TELLMEWHEN_VERSIONNUMBER = 47305 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
 if TELLMEWHEN_VERSIONNUMBER > 48000 or TELLMEWHEN_VERSIONNUMBER < 47000 then return error("YOU SCREWED UP THE VERSION NUMBER OR DIDNT CHANGE THE SAFETY LIMITS") end -- safety check because i accidentally made the version number 414069 once
 
 TELLMEWHEN_MAXGROUPS = 1 	--this is a default, used by SetTheory (addon), so dont rename
@@ -73,7 +73,7 @@ local GCD, NumShapeshiftForms, LastUpdate = 0, 0, 0
 local IconUpdateFuncs, GroupUpdateFuncs, unitsToChange = {}, {}, {}
 local BindUpdateFuncs
 local loweredbackup = {}
-local Shakers, CDBarsToUpdate, PBarsToUpdate = {}, {}, {}
+local Shakers, ActivationGlows, CDBarsToUpdate, PBarsToUpdate = {}, {}, {}, {}
 local time = GetTime() TMW.time = time
 local sctcolor = {r=1, b=1, g=1}
 local clientVersion = select(4, GetBuildInfo())
@@ -710,7 +710,7 @@ TMW.DefaultPowerTypes = {
 	SHAMAN	   	= 0, -- lightning shield
 	HUNTER	   	= 2, -- serpent sting
 	DEATHKNIGHT = 6, -- death coil
-}
+} local defaultPowerType = TMW.DefaultPowerTypes[pclass]
 
 function TMW:ProcessEquivalencies()
 	TMW.DS = {
@@ -1573,35 +1573,42 @@ function TMW:OnUpdate(elapsed)					-- THE MAGICAL ENGINE OF DOING EVERYTHING
 		end
 	end
 	
-	if next(Shakers) then
-		for frame, Duration in next, Shakers do
-			Duration = Duration - elapsed
-			if Duration < 0 then
-				Duration = nil
-			end
-			Shakers[frame] = Duration
-			
-			local Amt = (frame.TMW_ShakeMagnitude or 10) / (1 + 10*(300^(-(Duration or 0))))
-			local moveX = random(-Amt, Amt) 
-			local moveY = random(-Amt, Amt) 
-				
-			if frame == WorldFrame then
-				if not TMW.WorldFramePoints then
-					TMW.WorldFramePoints = {}
-					for i = 1, frame:GetNumPoints() do
-						TMW.WorldFramePoints[i] = { frame:GetPoint(i) }
-					end
-				end
-				
-				frame:ClearAllPoints()
-				for _, v in pairs(TMW.WorldFramePoints) do
-					frame:SetPoint(v[1], v[2], v[3], v[4] + moveX, v[5] + moveY)
-				end
-				
-			elseif frame.base == TMW.IconBase then
-				frame:SetPoint("TOPLEFT", frame.x + moveX, frame.y + moveY)
-			end
+	for frame, Duration in next, Shakers do
+		Duration = Duration - elapsed
+		if Duration < 0 then
+			Duration = nil
 		end
+		Shakers[frame] = Duration
+		
+		local Amt = (frame.TMW_ShakeMagnitude or 10) / (1 + 10*(300^(-(Duration or 0))))
+		local moveX = random(-Amt, Amt) 
+		local moveY = random(-Amt, Amt) 
+			
+		if frame == WorldFrame then
+			if not TMW.WorldFramePoints then
+				TMW.WorldFramePoints = {}
+				for i = 1, frame:GetNumPoints() do
+					TMW.WorldFramePoints[i] = { frame:GetPoint(i) }
+				end
+			end
+			
+			frame:ClearAllPoints()
+			for _, v in pairs(TMW.WorldFramePoints) do
+				frame:SetPoint(v[1], v[2], v[3], v[4] + moveX, v[5] + moveY)
+			end
+			
+		elseif frame.base == TMW.IconBase then
+			frame:SetPoint("TOPLEFT", frame.x + moveX, frame.y + moveY)
+		end
+	end
+	
+	for icon, Duration in next, ActivationGlows do
+		Duration = Duration - elapsed
+		if Duration < 0 then
+			Duration = nil
+			ActionButton_HideOverlayGlow(icon) -- dont upvalue, can be hooked (masque does NOT, but maybe others)
+		end
+		ActivationGlows[icon] = Duration
 	end
 end
 
@@ -3170,6 +3177,10 @@ function TMW.IconBase.FireEvent(icon, data, played, announced, animated)
 				local Duration = Shakers[icon]
 				icon.TMW_ShakeMagnitude = data.Magnitude
 				Shakers[icon] = Duration and max(Duration, data.Duration) or data.Duration
+			elseif Animation == "ACTVTNGLOW" then
+				local Duration = ActivationGlows[icon]
+				ActivationGlows[icon] = Duration and max(Duration, data.Duration) or data.Duration
+				ActionButton_ShowOverlayGlow(icon) -- dont upvalue, can be hooked (masque does, maybe others)
 			end		
 			animated = 1
 		end
@@ -3501,24 +3512,19 @@ function TMW.IconBase.SetInfo(icon, alpha, color, texture, start, duration, spel
 		local pbar = icon.pbar
 		if spellChecked then
 			local _, _, _, cost, _, powerType = GetSpellInfo(spellChecked)
-			if cost then
-				cost = powerType == 9 and 3 or cost
-				pbar.Max = cost
-				pbar.InvertBars = icon.InvertBars
-
-				if powerType ~= pbar.powerType then
-					local colorinfo = PowerBarColor[powerType]
-					pbar:SetStatusBarColor(colorinfo.r, colorinfo.g, colorinfo.b, 0.9)
-					pbar.powerType = powerType
-				end
-
-				pbar:SetMinMaxValues(0, cost)
-				
-				PBarsToUpdate[pbar] = true
-			elseif PBarsToUpdate[pbar] then
-				PBarsToUpdate[pbar] = nil
-				pbar:SetValue(icon.InvertBars and pbar.Max or 0)
+			cost = powerType == 9 and 3 or cost or 0
+			pbar.Max = cost
+			pbar.InvertBars = icon.InvertBars
+			powerType = powerType or defaultPowerType
+			if powerType ~= pbar.powerType then
+				local colorinfo = PowerBarColor[powerType]
+				pbar:SetStatusBarColor(colorinfo.r, colorinfo.g, colorinfo.b, 0.9)
+				pbar.powerType = powerType
 			end
+
+			pbar:SetMinMaxValues(0, cost)
+			
+			PBarsToUpdate[pbar] = true
 		elseif PBarsToUpdate[pbar] then
 			PBarsToUpdate[pbar] = nil
 			pbar:SetValue(icon.InvertBars and pbar.Max or 0)
@@ -3701,7 +3707,7 @@ function TMW:Icon_UpdateBars(icon)
 	pbar.offset = icon.PBarOffs or 0
 	pbar.InvertBars = icon.InvertBars
 	if not pbar.powerType then
-		local powerType = TMW.DefaultPowerTypes[pclass]
+		local powerType = defaultPowerType
 		local colorinfo = PowerBarColor[powerType]
 		pbar:SetStatusBarColor(colorinfo.r, colorinfo.g, colorinfo.b, 0.9)
 		pbar.powerType = powerType
@@ -3975,7 +3981,7 @@ function TMW:Icon_Update(icon)
 	local cbar = icon.cbar
 	cbar.__value = nil
 	CDBarsToUpdate[cbar] = icon.ShowCBar and true -- needs to be nil otherwise
-	PBarsToUpdate[cbar] = icon.ShowPBar and true -- needs to be nil otherwise
+--	PBarsToUpdate[cbar] = icon.ShowPBar and true -- needs to be nil otherwise
 	
 	if icon.OverrideTex then icon:SetTexture(icon.OverrideTex) end 
 	
@@ -4030,15 +4036,12 @@ function TMW:Icon_Update(icon)
 			icon:SetTexture("Interface\\AddOns\\TellMeWhen\\Textures\\Disabled")
 		end
 
-		ClearScripts(cbar)
-		cbar.UpdateSet = false
 		cbar:SetValue(cbar.Max)
 		cbar:SetAlpha(.7)
 		cbar:SetStatusBarColor(0, 1, 0, 0.5)
 
-		ClearScripts(pbar)
-		pbar.UpdateSet = false
-		pbar:SetValue(2000000)
+		pbar:SetMinMaxValues(0, 1)
+		pbar:SetValue(1)
 		pbar:SetAlpha(.7)
 
 		icon:EnableMouse(1)
