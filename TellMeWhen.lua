@@ -649,7 +649,7 @@ TMW.Defaults = {
 								r_anim	  	   	= 1,
 								g_anim	  	   	= 0,
 								b_anim	  	   	= 0,
-								a_anim	  	   	= 0.8,
+								a_anim	  	   	= 0.5,
 								
 								OnlyShown 	   	= false,
 								Operator 	   	= "<",
