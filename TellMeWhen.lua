@@ -177,7 +177,7 @@ function TMW.print(...)
 			prefix = prefix..format(" %4.0f", linenum(3))
 		end
 		prefix = prefix..":|r "
-		-- i did _G["print"] instead of just plain print so that this doesnt show up on a CTRL+F for "print ("
+		-- i did _G["print"] instead of just plain print so that this doesnt show up on a CTRL+F for "print (" without a space because i dont want this comment to show up either
 		if ... == TMW then
 			_G["print"](prefix, select(2,...))
 		else
@@ -727,7 +727,8 @@ function TMW:ProcessEquivalencies()
 		Enraged = "Interface\\Icons\\ability_druid_challangingroar",
 	}
 	for dispeltype, icon in pairs(TMW.DS) do
-		SpellTextures[dispeltype] = icon
+	--	SpellTextures[dispeltype] = icon
+		SpellTextures[strlower(dispeltype)] = icon
 	end
 	TMW.BE = {
 		--Most of these are thanks to Malazee @ US-Dalaran's chart: http://forums.wow-petopia.com/download/file.php?mode=view&id=4979 and spreadsheet https://spreadsheets.google.com/ccc?key=0Aox2ZHZE6e_SdHhTc0tZam05QVJDU0lONnp0ZVgzdkE&hl=en#gid=18
@@ -3136,125 +3137,123 @@ end
 function TMW.IconBase.FireEvent(icon, data, played, announced, animated)
 	if not runEvents then return end
 	
-	if ((not data.OnlyShown or icon.__alpha > 0) --[[or (not data.SecondSetting and icon.__someAttribute > 0)]]) then
 	
-		---------- Sound ----------
-		local Sound = data.SoundData
-		if Sound and not played then
-			PlaySoundFile(Sound, SndChan)
-			played = 1
-		end
+	---------- Sound ----------
+	local Sound = data.SoundData
+	if Sound and not played then
+		PlaySoundFile(Sound, SndChan)
+		played = 1
+	end
+	
+	---------- Text ----------
+	local Channel = data.Channel
+	if Channel ~= "" and not announced then
+		local Text = data.Text
+		local chandata = ChannelLookup[Channel]
 		
-		---------- Text ----------
-		local Channel = data.Channel
-		if Channel ~= "" and not announced then
-			local Text = data.Text
-			local chandata = ChannelLookup[Channel]
+		Text = TMW:InjectDataIntoString(Text, icon, not (chandata and chandata.isBlizz))
+		
+		if Channel == "MSBT" then
+			if MikSBT then
+				local Size = data.Size
+				if Size == 0 then Size = nil end
+				MikSBT.DisplayMessage(Text, data.Location, data.Sticky, data.r*255, data.g*255, data.b*255, Size, nil, data.Icon and icon.__tex)
+			end
+		elseif Channel == "SCT" then
+			if SCT then
+				sctcolor.r, sctcolor.g, sctcolor.b = data.r, data.g, data.b
+				SCT:DisplayCustomEvent(Text, sctcolor, data.Sticky, data.Location, nil, data.Icon and icon.__tex)
+			end
+		elseif Channel == "PARROT" then
+			if Parrot then
+				local Size = data.Size
+				if Size == 0 then Size = nil end
+				Parrot:ShowMessage(Text, data.Location, data.Sticky, data.r, data.g, data.b, nil, Size, nil, data.Icon and icon.__tex)
+			end
+		elseif Channel == "FRAME" then
+			local Location = data.Location
 			
-			Text = TMW:InjectDataIntoString(Text, icon, not (chandata and chandata.isBlizz))
+			if data.Icon then
+				Text = "|T" .. (icon.__tex or "") .. ":0|t " .. Text
+			end
 			
-			if Channel == "MSBT" then
-				if MikSBT then
-					local Size = data.Size
-					if Size == 0 then Size = nil end
-					MikSBT.DisplayMessage(Text, data.Location, data.Sticky, data.r*255, data.g*255, data.b*255, Size, nil, data.Icon and icon.__tex)
-				end
-			elseif Channel == "SCT" then
-				if SCT then
-					sctcolor.r, sctcolor.g, sctcolor.b = data.r, data.g, data.b
-					SCT:DisplayCustomEvent(Text, sctcolor, data.Sticky, data.Location, nil, data.Icon and icon.__tex)
-				end
-			elseif Channel == "PARROT" then
-				if Parrot then
-					local Size = data.Size
-					if Size == 0 then Size = nil end
-					Parrot:ShowMessage(Text, data.Location, data.Sticky, data.r, data.g, data.b, nil, Size, nil, data.Icon and icon.__tex)
-				end
-			elseif Channel == "FRAME" then
-				local Location = data.Location
-				
-				if data.Icon then
-					Text = "|T" .. (icon.__tex or "") .. ":0|t " .. Text
-				end
-				
-				if _G[Location] == RaidWarningFrame then
-					RaidNotice_AddMessage(RaidWarningFrame, Text, data)
-				else
-					local i = 1
-					while _G["ChatFrame"..i] do
-						local frame = _G["ChatFrame"..i]
-						if Location == frame.name then
-							frame:AddMessage(Text, data.r, data.g, data.b, 1)
-							break
-						end
-						i = i+1
-					end
-				end
-				
-			elseif Channel == "SMART" then
-				local channel = "SAY"
-				if UnitInBattleground("player") then
-					channel = "BATTLEGROUND"
-				elseif UnitInRaid("player") then
-					channel = "RAID"
-				elseif GetNumPartyMembers() > 1 then
-					channel = "PARTY"
-				end
-				SendChatMessage(Text, channel)
-				
-			elseif Channel == "CHANNEL" then
-				for i = 1, math.huge, 2 do
-					local num, name = select(i, GetChannelList())
-					if not num then break end
-					if strlowerCache[name] == strlowerCache[data.Location] then
-						SendChatMessage(Text, Channel, nil, num)
+			if _G[Location] == RaidWarningFrame then
+				RaidNotice_AddMessage(RaidWarningFrame, Text, data)
+			else
+				local i = 1
+				while _G["ChatFrame"..i] do
+					local frame = _G["ChatFrame"..i]
+					if Location == frame.name then
+						frame:AddMessage(Text, data.r, data.g, data.b, 1)
 						break
 					end
-				end
-				
-			else
-				if Text and chandata and chandata.isBlizz then
-					local Location = data.Location
-					if Channel == "WHISPER" then
-						Location = TMW:InjectDataIntoString(Location, icon, true)
-					end
-					SendChatMessage(Text, Channel, nil, Location)
+					i = i+1
 				end
 			end
-			announced = 1
-		end
-		
-		---------- Text ----------
-		local Animation = data.Animation
-		if Animation ~= "" and not animated then
-			if Animation == "SCREENSHAKE" and (not WorldFrame:IsProtected() or not InCombatLockdown()) then
-				local Duration = Shakers[WorldFrame]
-				WorldFrame.TMW_ShakeMagnitude = data.Magnitude
-				Shakers[WorldFrame] = Duration and max(Duration, data.Duration) or data.Duration
-			elseif Animation == "ICONSHAKE" then
-				icon.TMW_ShakeMagnitude = data.Magnitude
-				Shakers[icon] = data.Duration
-			elseif Animation == "ACTVTNGLOW" then
-				ActionButton_ShowOverlayGlow(icon) -- dont upvalue, can be hooked (masque does, maybe others)
-				ActivationGlows[icon] = data.Duration
-			elseif Animation == "ICONFLASH" or Animation == "SCREENFLASH" then
-				local flasher
-				if Animation == "ICONFLASH" then
-					flasher = icon.flasher
-				elseif Animation == "SCREENFLASH" then
-					flasher = UIParent.TMW_Flasher
+			
+		elseif Channel == "SMART" then
+			local channel = "SAY"
+			if UnitInBattleground("player") then
+				channel = "BATTLEGROUND"
+			elseif UnitInRaid("player") then
+				channel = "RAID"
+			elseif GetNumPartyMembers() > 1 then
+				channel = "PARTY"
+			end
+			SendChatMessage(Text, channel)
+			
+		elseif Channel == "CHANNEL" then
+			for i = 1, math.huge, 2 do
+				local num, name = select(i, GetChannelList())
+				if not num then break end
+				if strlowerCache[name] == strlowerCache[data.Location] then
+					SendChatMessage(Text, Channel, nil, num)
+					break
 				end
-				flasher.FlashPeriod = data.Period
-				flasher.FlashTime = data.Period
-				flasher.FlashAlpha = data.a_anim
-				flasher.FadeAlpha = data.Fade
-				flasher.fadingIn = true
-				flasher:Show()
-				flasher:SetTexture(data.r_anim, data.g_anim, data.b_anim, 1)
-				FlashingFlashers[flasher] = data.Duration
-			end		
-			animated = 1
+			end
+			
+		else
+			if Text and chandata and chandata.isBlizz then
+				local Location = data.Location
+				if Channel == "WHISPER" then
+					Location = TMW:InjectDataIntoString(Location, icon, true)
+				end
+				SendChatMessage(Text, Channel, nil, Location)
+			end
 		end
+		announced = 1
+	end
+	
+	---------- Animation ----------
+	local Animation = data.Animation
+	if Animation ~= "" and not animated then
+		if Animation == "SCREENSHAKE" and (not WorldFrame:IsProtected() or not InCombatLockdown()) then
+			local Duration = Shakers[WorldFrame]
+			WorldFrame.TMW_ShakeMagnitude = data.Magnitude
+			Shakers[WorldFrame] = Duration and max(Duration, data.Duration) or data.Duration
+		elseif Animation == "ICONSHAKE" then
+			icon.TMW_ShakeMagnitude = data.Magnitude
+			Shakers[icon] = data.Duration
+		elseif Animation == "ACTVTNGLOW" then
+			ActionButton_ShowOverlayGlow(icon) -- dont upvalue, can be hooked (masque does, maybe others)
+			ActivationGlows[icon] = data.Duration
+		elseif Animation == "ICONFLASH" or Animation == "SCREENFLASH" then
+			local flasher
+			if Animation == "ICONFLASH" then
+				flasher = icon.flasher
+			elseif Animation == "SCREENFLASH" then
+				flasher = UIParent.TMW_Flasher
+			end
+			flasher.FlashPeriod = data.Period
+			flasher.FlashTime = data.Period
+			flasher.FlashAlpha = data.a_anim
+			flasher.FadeAlpha = data.Fade
+			flasher.fadingIn = true
+			flasher:Show()
+			flasher:SetTexture(data.r_anim, data.g_anim, data.b_anim, 1)
+			FlashingFlashers[flasher] = data.Duration
+		end		
+		animated = 1
 	end
 	
 	if data.PassThrough then
@@ -3528,7 +3527,10 @@ function TMW.IconBase.SetInfo(icon, alpha, color, texture, start, duration, spel
 			if doFireAndData then
 				local data = icon[event]
 				
-				if data.PassingCndt then
+				if data.OnlyShown and icon.__alpha <= 0 then
+					doFireAndData = false
+				
+				elseif data.PassingCndt then
 					doFireAndData = CompareFuncs[data.Operator](doFireAndData, data.Value)
 					if data.CndtJustPassed then
 						if doFireAndData ~= data.wasPassingCondition then
@@ -4056,8 +4058,8 @@ function TMW:Icon_Update(icon)
 	local pbar = icon.pbar
 	local cbar = icon.cbar
 	cbar.__value = nil
-	CDBarsToUpdate[cbar] = icon.ShowCBar and true -- needs to be nil otherwise
---	PBarsToUpdate[cbar] = icon.ShowPBar and true -- needs to be nil otherwise
+	CDBarsToUpdate[cbar] = db.profile.Locked and icon.ShowCBar and true or nil
+	updatePBar = 1
 	
 	if icon.OverrideTex then icon:SetTexture(icon.OverrideTex) end 
 	
@@ -4070,15 +4072,8 @@ function TMW:Icon_Update(icon)
 			ClearScripts(icon)
 			icon:Hide()
 		end
-
-		pbar:SetValue(100)
-	--	pbar:SetValue(0)
+		
 		pbar:SetAlpha(.9)
-		if icon.InvertBars then
-			cbar:SetValue(cbar.Max)
-		else
-			cbar:SetValue(0)
-		end
 		cbar:SetAlpha(.9)
 	else
 		ClearScripts(icon)
@@ -4112,10 +4107,12 @@ function TMW:Icon_Update(icon)
 			icon:SetTexture("Interface\\AddOns\\TellMeWhen\\Textures\\Disabled")
 		end
 
+		CDBarsToUpdate[cbar] = nil
 		cbar:SetValue(cbar.Max)
 		cbar:SetAlpha(.7)
 		cbar:SetStatusBarColor(0, 1, 0, 0.5)
 
+		PBarsToUpdate[pbar] = nil
 		pbar:SetMinMaxValues(0, 1)
 		pbar:SetValue(1)
 		pbar:SetAlpha(.7)
@@ -4714,30 +4711,33 @@ function TMW:LockToggle()
 	end
 	db.profile.Locked = not db.profile.Locked
 	
-	--if not db.profile.Locked then
-		for frame in next, FlashingFlashers do
-			frame:Hide()
-			FlashingFlashers[frame] = nil
-		end
-		
-		for frame, Duration in next, Shakers do
-			if frame == WorldFrame and TMW.WorldFramePoints then
-				frame:ClearAllPoints()
-				for _, v in pairs(TMW.WorldFramePoints) do
-					frame:SetPoint(v[1], v[2], v[3], v[4], v[5])
-				end
-				
-			elseif frame.base == TMW.IconBase then
-				frame:SetPoint("TOPLEFT", frame.x, frame.y)
+	if not db.profile.Locked then
+		wipe(CDBarsToUpdate)
+		wipe(PBarsToUpdate)
+	end
+	
+	for frame in next, FlashingFlashers do
+		frame:Hide()
+		FlashingFlashers[frame] = nil
+	end
+	
+	for frame, Duration in next, Shakers do
+		if frame == WorldFrame and TMW.WorldFramePoints then
+			frame:ClearAllPoints()
+			for _, v in pairs(TMW.WorldFramePoints) do
+				frame:SetPoint(v[1], v[2], v[3], v[4], v[5])
 			end
-			Shakers[frame] = nil
+			
+		elseif frame.base == TMW.IconBase then
+			frame:SetPoint("TOPLEFT", frame.x, frame.y)
 		end
-		
-		for icon, Duration in next, ActivationGlows do
-			ActionButton_HideOverlayGlow(icon)
-			ActivationGlows[icon] = nil
-		end
---	end
+		Shakers[frame] = nil
+	end
+	
+	for icon, Duration in next, ActivationGlows do
+		ActionButton_HideOverlayGlow(icon)
+		ActivationGlows[icon] = nil
+	end
 	
 	PlaySound("igCharacterInfoTab")
 	TMW:Update()

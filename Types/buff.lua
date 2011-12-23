@@ -223,7 +223,7 @@ end
 
 function Type:Setup(icon, groupID, iconID)
 	icon.NameFirst = TMW:GetSpellNames(icon, icon.Name, 1)
-	icon.NameName = TMW:GetSpellNames(icon, icon.Name, 1, 1)
+	--icon.NameName = TMW:GetSpellNames(icon, icon.Name, 1, 1)
 	icon.NameArray = TMW:GetSpellNames(icon, icon.Name)
 	icon.NameNameArray = TMW:GetSpellNames(icon, icon.Name, nil, 1)
 	icon.NameHash = TMW:GetSpellNames(icon, icon.Name, nil, nil, 1)
