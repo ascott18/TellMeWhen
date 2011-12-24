@@ -32,7 +32,7 @@ local DRData = LibStub("DRData-1.0", true)
 TELLMEWHEN_VERSION = "4.7.3"
 TELLMEWHEN_VERSION_MINOR = strmatch(" @project-version@", " r%d+") or ""
 TELLMEWHEN_VERSION_FULL = TELLMEWHEN_VERSION .. TELLMEWHEN_VERSION_MINOR
-TELLMEWHEN_VERSIONNUMBER = 47308 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
+TELLMEWHEN_VERSIONNUMBER = 47309 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
 if TELLMEWHEN_VERSIONNUMBER > 48000 or TELLMEWHEN_VERSIONNUMBER < 47000 then return error("YOU SCREWED UP THE VERSION NUMBER OR DIDNT CHANGE THE SAFETY LIMITS") end -- safety check because i accidentally made the version number 414069 once
 
 TELLMEWHEN_MAXGROUPS = 1 	--this is a default, used by SetTheory (addon), so dont rename
@@ -1674,15 +1674,10 @@ function TMW:OnUpdate(elapsed)					-- THE MAGICAL ENGINE OF DOING EVERYTHING
 		else
 			
 			local FadeDuration = icon.FadeDuration
-			
 			local pct = Duration / FadeDuration
 			local inv = 1-pct
 	
-		--	if icon.FadeStart > icon.FadeEnd then
-		--		icon:SetAlpha(icon.FlashAlpha*(FadeDuration-Duration/FadeDuration))
-		--	else
-				icon:SetAlpha((icon.FadeStart * pct) + (icon.FadeEnd * inv))
-		--	end
+			icon:SetAlpha((icon.FadeStart * pct) + (icon.FadeEnd * inv))
 		end
 		
 		FadingIcons[icon] = Duration
@@ -3436,11 +3431,14 @@ function TMW.IconBase.SetInfo(icon, alpha, color, texture, start, duration, spel
 	if alpha ~= icon.__alpha then
 		local oldalpha = icon.__alpha
 		
+		icon.__alpha = alpha
+		if icon.DoesFades then
+			icon.__oldAlpha = icon:GetAlpha() -- much nicer than using oldalpha because it will transition from what is curently visible, not what should be visible after any current fades end
+		end
+		
 		if not icon.IsFading then
 			icon:SetAlpha(icon.FakeHidden or alpha)
 		end
-		icon.__alpha = alpha
-		icon.__oldAlpha = oldalpha
 		
 		-- detect events that occured, and handle them if they did
 		if alpha == 0 then
@@ -3898,6 +3896,7 @@ function TMW:Icon_Update(icon)
 	end
 
 	local dontremove
+	icon.DoesFades = false
 	for _, t in pairs(TMW.EventList) do
 		local event = t.name
 		local tbl = icon.Events[event]
@@ -3923,6 +3922,8 @@ function TMW:Icon_Update(icon)
 					icon.flasher = icon.flasher or TMW:GetFlasher(icon)
 				elseif data == "SCREENFLASH" then
 					UIParent.TMW_Flasher = UIParent.TMW_Flasher or TMW:GetFlasher(UIParent)
+				elseif data == "ICONFADE" then
+					icon.DoesFades = true
 				end
 			elseif key == "Channel" and data ~= "" then
 				dontremove = 1
