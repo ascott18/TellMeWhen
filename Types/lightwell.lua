@@ -67,6 +67,8 @@ Type.DisabledEvents = {
 function Type:Update()
 	db = TMW.db
 	pGUID = UnitGUID("player")
+	
+	self:GLYPH()
 end
 
 local MaxCharges = 10
@@ -82,11 +84,11 @@ function Type:GLYPH()
 	end
 	MaxCharges = 10
 end
-Type:RegisterEvent("GLYPH_ADDED", "GLYPH")
+Type:RegisterEvent("GLYPH_ADDED", 	 "GLYPH")
 Type:RegisterEvent("GLYPH_DISABLED", "GLYPH")
-Type:RegisterEvent("GLYPH_ENABLED", "GLYPH")
-Type:RegisterEvent("GLYPH_REMOVED", "GLYPH")
-Type:RegisterEvent("GLYPH_UPDATED", "GLYPH")
+Type:RegisterEvent("GLYPH_ENABLED",  "GLYPH")
+Type:RegisterEvent("GLYPH_REMOVED",  "GLYPH")
+Type:RegisterEvent("GLYPH_UPDATED",  "GLYPH")
 
 
 function Type:COMBAT_LOG_EVENT_UNFILTERED(_, _, event, _, sourceGUID, _, _, _, _, ...)

@@ -7,6 +7,7 @@
  ** (r358) Attempted a fix for TellMeWhen_Options.lua:2163: attempt to index upvalue 'HELP' (a nil value)
  ** (r360) If a meta icon is directly checking another meta icon, and the meta icon being checked changes the icon that is is checking, the meta icon checking the other meta icon should now properly update its inherited settings.
  ** (r365) Buff/Debuff icons tracking the "Enrage" dispel type only should now always show the correct texture in configuration.
+ ** (r368) Lightwell glyph detection was apparently a little iffy. Added some manual checks in case the events don't fire when they should.
  
 ===v4.7.2===
  * New Icon Type: Lightwell
