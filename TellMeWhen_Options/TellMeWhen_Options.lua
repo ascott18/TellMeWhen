@@ -2798,6 +2798,8 @@ function IE:Unit_DropDown_OnClick(v)
 	CI.ics.Unit = e:GetText()
 	IE:ScheduleIconUpdate(CI.ic)
 	CloseDropDownMenus()
+	
+	db.global.HelpSettings.HasChangedUnit = db.global.HelpSettings.HasChangedUnit + 1
 end
 
 

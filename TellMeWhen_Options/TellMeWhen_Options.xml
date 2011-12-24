@@ -2506,7 +2506,7 @@
 						<Scripts>
 							<OnLoad>
 								self:RegisterEvent("MODIFIER_STATE_CHANGED")
-								self.label = "|cFFFF5050" .. TMW.L["ICONMENU_UNITSTOWATCH"]
+								self.label = TMW.L["ICONMENU_UNITSTOWATCH"]
 								self.__title = TMW.L["ICONMENU_UNITSTOWATCH"]
 								self.__text = TMW.L["ICONMENU_UNIT_DESC"]
 								self.BackgroundText:SetWidth(self:GetWidth())
@@ -2518,6 +2518,9 @@
 								if TMW.CI.ics then
 									TMW.CI.ics.Unit = TMW:CleanString(self)
 									TMW.IE:ScheduleIconUpdate(TMW.CI.ic)
+									if TMW.CI.ics.Unit ~= "player" then
+										TMW.db.global.HelpSettings.HasChangedUnit = TMW.db.global.HelpSettings.HasChangedUnit + 1
+									end
 								end
 								self:GetScript("OnTextChanged")(self)
 							</OnEditFocusLost>
@@ -2544,8 +2547,10 @@
 							<OnTextChanged>
 								local text = self:GetText()
 								if text == "" then
-									self.BackgroundText:SetText(self.label)
+									self.BackgroundText:SetText("|cFFFF5050" .. self.label)
 									TMW.HELP:Show("ICON_UNIT_MISSING", TMW.CI.ic, self, 0, 0, TMW.L["HELP_NOUNITS"])
+								elseif text == "player" and 20 > TMW.db.global.HelpSettings.HasChangedUnit then
+									self.BackgroundText:SetText(self.label)
 								else
 									self.BackgroundText:SetText(nil)
 									TMW.HELP:Hide("ICON_UNIT_MISSING")
