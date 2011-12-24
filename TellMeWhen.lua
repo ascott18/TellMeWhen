@@ -32,7 +32,7 @@ local DRData = LibStub("DRData-1.0", true)
 TELLMEWHEN_VERSION = "4.7.3"
 TELLMEWHEN_VERSION_MINOR = strmatch(" @project-version@", " r%d+") or ""
 TELLMEWHEN_VERSION_FULL = TELLMEWHEN_VERSION .. TELLMEWHEN_VERSION_MINOR
-TELLMEWHEN_VERSIONNUMBER = 47307 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
+TELLMEWHEN_VERSIONNUMBER = 47308 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
 if TELLMEWHEN_VERSIONNUMBER > 48000 or TELLMEWHEN_VERSIONNUMBER < 47000 then return error("YOU SCREWED UP THE VERSION NUMBER OR DIDNT CHANGE THE SAFETY LIMITS") end -- safety check because i accidentally made the version number 414069 once
 
 TELLMEWHEN_MAXGROUPS = 1 	--this is a default, used by SetTheory (addon), so dont rename
@@ -73,7 +73,7 @@ local GCD, NumShapeshiftForms, LastUpdate = 0, 0, 0
 local IconUpdateFuncs, GroupUpdateFuncs, unitsToChange = {}, {}, {}
 local BindUpdateFuncs
 local loweredbackup = {}
-local Shakers, ActivationGlows, FlashingFlashers, CDBarsToUpdate, PBarsToUpdate = {}, {}, {}, {}, {}
+local Shakers, ActivationGlows, FlashingFlashers, FadingIcons, CDBarsToUpdate, PBarsToUpdate = {}, {}, {}, {}, {}, {}
 local time = GetTime() TMW.time = time
 local sctcolor = {r=1, b=1, g=1}
 local clientVersion = select(4, GetBuildInfo())
@@ -1661,6 +1661,32 @@ function TMW:OnUpdate(elapsed)					-- THE MAGICAL ENGINE OF DOING EVERYTHING
 		FlashingFlashers[flasher] = Duration
 		flasher.FlashTime = FlashTime
 	end
+	
+	for icon, Duration in next, FadingIcons do
+		Duration = Duration - elapsed
+		
+		if Duration < 0 then -- we just finished the fade
+			icon:SetAlpha(icon.FadeEnd)
+			icon.FadeEnd = nil
+			icon.FadeStart = nil
+			icon.IsFading = nil
+			Duration = nil
+		else
+			
+			local FadeDuration = icon.FadeDuration
+			
+			local pct = Duration / FadeDuration
+			local inv = 1-pct
+	
+		--	if icon.FadeStart > icon.FadeEnd then
+		--		icon:SetAlpha(icon.FlashAlpha*(FadeDuration-Duration/FadeDuration))
+		--	else
+				icon:SetAlpha((icon.FadeStart * pct) + (icon.FadeEnd * inv))
+		--	end
+		end
+		
+		FadingIcons[icon] = Duration
+	end
 end
 
 function TMW:Update()
@@ -3227,16 +3253,17 @@ function TMW.IconBase.FireEvent(icon, data, played, announced, animated)
 	---------- Animation ----------
 	local Animation = data.Animation
 	if Animation ~= "" and not animated then
+		local Duration = data.Duration
+		
 		if Animation == "SCREENSHAKE" and (not WorldFrame:IsProtected() or not InCombatLockdown()) then
-			local Duration = Shakers[WorldFrame]
 			WorldFrame.TMW_ShakeMagnitude = data.Magnitude
-			Shakers[WorldFrame] = Duration and max(Duration, data.Duration) or data.Duration
+			Shakers[WorldFrame] = Duration
 		elseif Animation == "ICONSHAKE" then
 			icon.TMW_ShakeMagnitude = data.Magnitude
-			Shakers[icon] = data.Duration
+			Shakers[icon] = Duration
 		elseif Animation == "ACTVTNGLOW" then
 			ActionButton_ShowOverlayGlow(icon) -- dont upvalue, can be hooked (masque does, maybe others)
-			ActivationGlows[icon] = data.Duration
+			ActivationGlows[icon] = Duration
 		elseif Animation == "ICONFLASH" or Animation == "SCREENFLASH" then
 			local flasher
 			if Animation == "ICONFLASH" then
@@ -3251,8 +3278,15 @@ function TMW.IconBase.FireEvent(icon, data, played, announced, animated)
 			flasher.fadingIn = true
 			flasher:Show()
 			flasher:SetTexture(data.r_anim, data.g_anim, data.b_anim, 1)
-			FlashingFlashers[flasher] = data.Duration
-		end		
+			FlashingFlashers[flasher] = Duration
+		elseif Animation == "ICONFADE" and not icon.FakeHidden then
+			icon.IsFading = Duration
+			icon.FadeStart = icon.__oldAlpha
+			icon.FadeEnd = icon.__alpha
+			icon.FadeDuration = Duration
+			FadingIcons[icon] = Duration
+		end
+		
 		animated = 1
 	end
 	
@@ -3402,8 +3436,11 @@ function TMW.IconBase.SetInfo(icon, alpha, color, texture, start, duration, spel
 	if alpha ~= icon.__alpha then
 		local oldalpha = icon.__alpha
 		
-		icon:SetAlpha(icon.FakeHidden or alpha)
+		if not icon.IsFading then
+			icon:SetAlpha(icon.FakeHidden or alpha)
+		end
 		icon.__alpha = alpha
+		icon.__oldAlpha = oldalpha
 		
 		-- detect events that occured, and handle them if they did
 		if alpha == 0 then

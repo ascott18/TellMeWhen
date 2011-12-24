@@ -871,7 +871,9 @@ L["SOUND_CUSTOM_DESC"] = [[Insert the path to a custom sound to play. Here are s
 
 - "Interface\AddOns\file.ext": a loose file in the AddOns folder
 
-- "file.ext": a loose file in WoW's root directory ]]
+- "file.ext": a loose file in WoW's root directory
+
+NOTE: WoW must be restarted before it will recognize files that did not exist when it was started up.]]
 L["SOUND_TAB"] = "Sound"
 
 
@@ -968,6 +970,8 @@ L["ANIM_ICONFLASH"] = "Icon: Flash"
 L["ANIM_ICONFLASH_DESC"] = "Flashes a colored overlay across the icon."
 L["ANIM_SCREENFLASH"] = "Screen: Flash"
 L["ANIM_SCREENFLASH_DESC"] = "Flashes a colored overlay across the screen."
+L["ANIM_ICONFADE"] = "Icon: Fade In/Out"
+L["ANIM_ICONFADE_DESC"] = "Smoothly applies any opacity changes that occured with the selected event."
 
 
 

@@ -4551,6 +4551,12 @@ ANIM.AnimationList = {
 		Fade = true,
 	},
 	{
+		text = L["ANIM_ICONFADE"],
+		desc = L["ANIM_ICONFADE_DESC"],
+		animation = "ICONFADE",
+		Duration = true,
+	},
+	{
 		text = L["ANIM_ACTVTNGLOW"],
 		desc = L["ANIM_ACTVTNGLOW_DESC"],
 		animation = "ACTVTNGLOW",
