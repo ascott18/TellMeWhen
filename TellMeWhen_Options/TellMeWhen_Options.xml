@@ -3402,7 +3402,7 @@
 							<OnLoad>
 								TMW:TT(self, "ICONALPHAPANEL_FAKEHIDDEN", "ICONALPHAPANEL_FAKEHIDDEN_DESC")
 								self.text:SetText(TMW.L["ICONALPHAPANEL_FAKEHIDDEN"])
-								self.text:SetWidth(135)
+								self.text:SetWidth(100)
 							</OnLoad>
 							<OnClick>
 								if TMW.CI.ics then

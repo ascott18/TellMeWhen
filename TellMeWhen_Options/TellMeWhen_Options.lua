@@ -2012,7 +2012,7 @@ IE.LeftChecks = {
 		title = L["ICONMENU_SHOWTIMERTEXT"],
 		tooltip = L["ICONMENU_SHOWTIMERTEXT_DESC"],
 		disabled = function()
-			return not (IsAddOnLoaded("OmniCC") or IsAddOnLoaded("tullaCC"))
+			return not (IsAddOnLoaded("OmniCC") or IsAddOnLoaded("tullaCC") or LibStub("AceAddon-3.0"):GetAddon("LUI_Cooldown"))
 		end,
 	},
 	{

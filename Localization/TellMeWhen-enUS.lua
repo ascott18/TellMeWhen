@@ -207,7 +207,7 @@ L["ICONMENU_SHOWTIMER_DESC"] = "Check this option to display the standard cooldo
 L["ICONMENU_SHOWTIMERTEXT"] = "Show timer text"
 L["ICONMENU_SHOWTIMERTEXT_DESC"] = [[Check this option to display a textual display of the remaining cooldown/duration on the icon.
 
-This is only applicable if OmniCC is installed.]]
+This is only applicable if OmniCC (or similar) is installed.]]
 
 L["ICONMENU_OVERLAYBARHEADER"] = "Overlay Bars"
 L["ICONMENU_SHOWPBARN"] = "Power bar"
