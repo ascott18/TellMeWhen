@@ -1575,7 +1575,7 @@
 		<Scripts>
 			<OnClick>
 				if TMW.CI.ics then
-					TMW.CI.ics.Events[TMW.ANN.currentEvent].Channel = self.channel
+					TMW.ANN:GetEventSettings().Channel = self.channel
 					TMW.IE:ScheduleIconUpdate(TMW.CI.ic)
 				end
 				TMW.ANN:SelectChannel(self.channel)
@@ -1609,7 +1609,7 @@
 				local name = self.soundname
 				TMW.SND:SelectSound(name)
 				if TMW.CI.ics then
-					TMW.CI.ics.Events[TMW.SND.currentEvent].Sound = name
+					TMW.SND:GetEventSettings().Sound = name
 					TMW.IE:ScheduleIconUpdate(TMW.CI.ic)
 				end
 				TMW.SND:SetupEventDisplay(TMW.SND.currentEvent)
@@ -1676,9 +1676,8 @@
 		<Size y="12"/>
 		<Scripts>
 			<OnClick>
-				if self.animationData.noclick then return end
 				if TMW.CI.ics then
-					TMW.CI.ics.Events[TMW.ANIM.currentEvent].Animation = self.animation
+					TMW.ANIM:GetEventSettings().Animation = self.animation
 					TMW.IE:ScheduleIconUpdate(TMW.CI.ic)
 				end
 				TMW.ANIM:SelectAnimation(self.animation)
@@ -1691,12 +1690,12 @@
 	<CheckButton name="TellMeWhen_EventSettings_CheckTemplate" inherits="TellMeWhen_CheckTemplate" virtual="true">
 		<Scripts>
 			<OnClick>
-				local parentModule = self:GetParent():GetParent().module
+				local parentModule = TMW:FindModule(self)
 				if TMW.CI.ics then
-					TMW.CI.ics.Events[parentModule.currentEvent][self.setting] = not not self:GetChecked()
+					parentModule:GetEventSettings()[self.setting] = not not self:GetChecked()
 					TMW.IE:ScheduleIconUpdate(TMW.CI.ic)
 				end
-				parentModule:SetEventSettings()
+				parentModule:SetupEventSettings()
 			</OnClick>
 		</Scripts>
 	</CheckButton>
@@ -1839,8 +1838,8 @@
 								self:SetText(t)
 								
 								if TMW.CI.ics then
-									local parentModule = self:GetParent():GetParent().module
-									TMW.CI.ics.Events[parentModule.currentEvent].Value = t
+									local parentModule = TMW:FindModule(self)
+									parentModule:GetEventSettings().Value = t
 									TMW.IE:ScheduleIconUpdate(TMW.CI.ic)
 								end
 								
@@ -3688,7 +3687,7 @@
 								end
 
 								if TMW.CI.ics and TMW.SND.currentEvent then
-									TMW.CI.ics.Events[TMW.SND.currentEvent].Sound = t
+									TMW.SND:GetEventSettings().Sound = t
 								end
 								TMW.SND:SelectSound(t)
 								TMW.IE:ScheduleIconUpdate(TMW.CI.ic)
@@ -3731,7 +3730,7 @@
 								EditBox_ClearHighlight(self)
 								TMW:CleanString(self)
 								if TMW.CI.ics and TMW.ANN.currentEvent then
-									TMW.CI.ics.Events[TMW.ANN.currentEvent].Text = self:GetText()
+									TMW.ANN:GetEventSettings().Text = self:GetText()
 								end
 								TMW.IE:ScheduleIconUpdate(TMW.CI.ic)
 								self:GetScript("OnTextChanged")(self)
@@ -3805,7 +3804,7 @@
 								EditBox_ClearHighlight(self)
 								TMW:CleanString(self)
 								if TMW.CI.ics then
-									TMW.CI.ics.Events[TMW.ANN.currentEvent].Location = self:GetText()
+									TMW.ANN:GetEventSettings().Location = self:GetText()
 								end
 								TMW.IE:ScheduleIconUpdate(TMW.CI.ic)
 								self:GetScript("OnTextChanged")(self)
@@ -3822,7 +3821,7 @@
 								self.text:SetText(TMW.L["ANN_STICKY"])
 							</OnLoad>
 							<OnClick>
-								TMW.CI.ics.Events[TMW.ANN.currentEvent].Sticky = not not self:GetChecked()
+								TMW.ANN:GetEventSettings().Sticky = not not self:GetChecked()
 							</OnClick>
 						</Scripts>
 					</CheckButton>
@@ -3836,7 +3835,7 @@
 								TMW:TT(self, "ANN_SHOWICON", "ANN_SHOWICON_DESC")
 							</OnLoad>
 							<OnClick>
-								TMW.CI.ics.Events[TMW.ANN.currentEvent].Icon = not not self:GetChecked()
+								TMW.ANN:GetEventSettings().Icon = not not self:GetChecked()
 								TMW.IE:ScheduleIconUpdate(TMW.CI.g, TMW.CI.i)
 							</OnClick>
 						</Scripts>
@@ -3866,7 +3865,7 @@
 							<OnLoad>
 								self.text:SetText(TMW.L["FONTCOLOR"])
 								self.func = function()
-									local settings = TMW.CI.ics.Events[TMW.ANN.currentEvent]
+									local settings = TMW.ANN:GetEventSettings()
 									local r, g, b = ColorPickerFrame:GetColorRGB()
 									settings.r = r
 									settings.g = g
@@ -3875,7 +3874,7 @@
 									TMW.IE:ScheduleIconUpdate(TMW.CI.g, TMW.CI.i)
 								end
 								self.cancel = function()
-									local settings = TMW.CI.ics.Events[TMW.ANN.currentEvent]
+									local settings = TMW.ANN:GetEventSettings()
 									local r, g, b = self.br, self.bg, self.bb
 									settings.r = r
 									settings.g = g
@@ -3885,7 +3884,7 @@
 								end
 							</OnLoad>
 							<OnClick>
-								local settings = TMW.CI.ics.Events[TMW.ANN.currentEvent]
+								local settings = TMW.ANN:GetEventSettings()
 								local r, g, b = settings.r, settings.g, settings.b
 								self.br, self.bg, self.bb = r, g, b
 								
@@ -3913,7 +3912,7 @@
 								local val = self:GetValue()
 								self.Mid:SetText(val == 0 and TMW.L["DEFAULT"] or val)
 								if TMW.CI.ics then
-									TMW.CI.ics.Events[TMW.ANN.currentEvent].Size = val
+									TMW.ANN:GetEventSettings().Size = val
 									TMW.IE:ScheduleIconUpdate(TMW.CI.ic)
 								end
 							</OnValueChanged>
@@ -3963,7 +3962,7 @@
 								value = max(value, 0.1)
 								self.Mid:SetText(TMW.L["ANIM_SECONDS"]:format(TMW:FormatSeconds(value, nil, true)))
 								if TMW.CI.ics then
-									TMW.CI.ics.Events[TMW.ANIM.currentEvent].Duration = value
+									TMW.ANIM:GetEventSettings().Duration = value
 									TMW.IE:ScheduleIconUpdate(TMW.CI.ic)
 								end
 							</OnValueChanged>
@@ -3985,7 +3984,7 @@
 								value = tonumber(format("%." .. (self.step) .. "f", value))
 								self.Mid:SetText(value)
 								if TMW.CI.ics then
-									TMW.CI.ics.Events[TMW.ANIM.currentEvent].Magnitude = value
+									TMW.ANIM:GetEventSettings().Magnitude = value
 									TMW.IE:ScheduleIconUpdate(TMW.CI.ic)
 								end
 							</OnValueChanged>
@@ -4008,7 +4007,7 @@
 								value = max(value, 0.1)
 								self.Mid:SetText(TMW.L["ANIM_SECONDS"]:format(TMW:FormatSeconds(value, nil, true)))
 								if TMW.CI.ics then
-									TMW.CI.ics.Events[TMW.ANIM.currentEvent].Period = value
+									TMW.ANIM:GetEventSettings().Period = value
 									TMW.IE:ScheduleIconUpdate(TMW.CI.ic)
 								end
 							</OnValueChanged>
@@ -4021,6 +4020,28 @@
 							</OnLoad>
 						</Scripts>
 					</Slider>
+					<!--Slider name="$parentScaleMagnitude" parentKey="ScaleMagnitude" inherits="TellMeWhen_AnimationSliderTemplate" minValue="0" maxValue="10" valuestep="0.1">
+						<Anchors>
+							<Anchor point="TOPLEFT" relativeTo="$parentPeriod" relativePoint="BOTTOMLEFT" y="-30"/>
+						</Anchors>
+						<Scripts>
+							<OnValueChanged>
+								value = tonumber(format("%." .. (self.step) .. "f", value))
+								value = max(value, 0.1)
+								self.Mid:SetText(value)
+								if TMW.CI.ics then
+									TMW.ANIM:GetEventSettings().ScaleMagnitude = value
+									TMW.IE:ScheduleIconUpdate(TMW.CI.ic)
+								end
+							</OnValueChanged>
+							<OnLoad>
+								self.text:SetText(TMW.L["ANIM_SCALEMAGNITUDE"])
+								TMW:TT(self, "ANIM_SCALEMAGNITUDE", "ANIM_SCALEMAGNITUDE_DESC")
+								self:EnableMouseWheel(true)
+								self.step = 10
+							</OnLoad>
+						</Scripts>
+					</Slider-->
 					
 					
 					<Button name="$parentColor" parentKey="Color">
@@ -4049,7 +4070,7 @@
 								self.text:SetText(TMW.L["ANIM_COLOR"])
 								TMW:TT(self, "ANIM_COLOR", "ANIM_COLOR_DESC")
 								self.func = function()
-									local settings = TMW.CI.ics.Events[TMW.ANIM.currentEvent]
+									local settings = TMW.ANIM:GetEventSettings()
 									local r, g, b = ColorPickerFrame:GetColorRGB()
 									settings.r_anim = r
 									settings.g_anim = g
@@ -4058,14 +4079,14 @@
 									TMW.IE:ScheduleIconUpdate(TMW.CI.g, TMW.CI.i)
 								end
 								self.opacityFunc = function()
-									local settings = TMW.CI.ics.Events[TMW.ANIM.currentEvent]
+									local settings = TMW.ANIM:GetEventSettings()
 									local a = OpacitySliderFrame:GetValue()
 									settings.a_anim = a
 									self.background:SetAlpha(a)
 									TMW.IE:ScheduleIconUpdate(TMW.CI.g, TMW.CI.i)
 								end
 								self.cancel = function()
-									local settings = TMW.CI.ics.Events[TMW.ANIM.currentEvent]
+									local settings = TMW.ANIM:GetEventSettings()
 									local r, g, b, a = self.br, self.bg, self.bb, self.ba
 									settings.r_anim = r
 									settings.g_anim = g
@@ -4077,7 +4098,7 @@
 								end
 							</OnLoad>
 							<OnClick>
-								local settings = TMW.CI.ics.Events[TMW.ANIM.currentEvent]
+								local settings = TMW.ANIM:GetEventSettings()
 								local r, g, b, a = settings.r_anim, settings.g_anim, settings.b_anim, settings.a_anim
 								self.br, self.bg, self.bb, self.ba = r, g, b, a
 								
@@ -4101,7 +4122,7 @@
 								TMW:TT(self, "ANIM_FADE", "ANIM_FADE_DESC")
 							</OnLoad>
 							<OnClick>
-								TMW.CI.ics.Events[TMW.ANIM.currentEvent].Fade = not not self:GetChecked()
+								TMW.ANIM:GetEventSettings().Fade = not not self:GetChecked()
 							</OnClick>
 						</Scripts>
 					</CheckButton>
@@ -4115,7 +4136,7 @@
 								TMW:TT(self, "ANN_SHOWICON", "ANN_SHOWICON_DESC")
 							</OnLoad>
 							<OnClick>
-								TMW.CI.ics.Events[TMW.ANN.currentEvent].Icon = not not self:GetChecked()
+								TMW.ANN:GetEventSettings().Icon = not not self:GetChecked()
 								TMW.IE:ScheduleIconUpdate(TMW.CI.g, TMW.CI.i)
 							</OnClick>
 						</Scripts>
@@ -4136,7 +4157,7 @@
 								local val = self:GetValue()
 								self.Mid:SetText(val == 0 and TMW.L["DEFAULT"] or val)
 								if TMW.CI.ics then
-									TMW.CI.ics.Events[TMW.ANN.currentEvent].Size = val
+									TMW.ANN:GetEventSettings().Size = val
 									TMW.IE:ScheduleIconUpdate(TMW.CI.ic)
 								end
 							</OnValueChanged>

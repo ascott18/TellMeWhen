@@ -428,25 +428,27 @@ end
 
 
 ---------- Misc Utilities ----------
-local function testFrame(frame)
-    if frame then
-        local Module = TMW:FindModule(frame)
-        if Module then 
-            return Module
-        end
-    end
-end
-function TMW:FindModule(self)
-    if type(self) ~= "table" then
-        return
-    end
-    if self.baseName == "TellMeWhen_Options" then
-        return self
-    end
-    local Module = testFrame(self.GetParent and self:GetParent()) or testFrame(self.frame) or testFrame(self.Module) or testFrame(self.module)
-    if Module then 
-        return Module
-    end
+do -- TMW:FindModule(self)
+	local function testFrame(frame)
+		if frame then
+			local Module = TMW:FindModule(frame)
+			if Module then 
+				return Module
+			end
+		end
+	end
+	function TMW:FindModule(self)
+		if type(self) ~= "table" then
+			return
+		end
+		if self.baseName == "TellMeWhen_Options" then
+			return self
+		end
+		local Module = testFrame(self.GetParent and self:GetParent()) or testFrame(self.frame) or testFrame(self.Module) or testFrame(self.module)
+		if Module then 
+			return Module
+		end
+	end
 end
 
 -- --------------
@@ -3897,13 +3899,13 @@ end
 
 EVENTS = TMW:NewModule("Events") TMW.EVENTS = EVENTS
 
-function EVENTS:SetEventSettings()
+function EVENTS:SetupEventSettings()
 	local EventSettings = self.EventSettings
 	local eventData = self.Events[self.currentEventID].eventData
 	
 	EventSettings.EventName:SetText(eventData.text) --L["EVENTS_SETTINGS_HEADER_SUB"]:format(eventData.text))
 	
-	local Settings = TMW.CI.ics.Events[self.currentEvent]
+	local Settings = self:GetEventSettings()
 	local settingsUsedByEvent = eventData.settings
 	
 	--hide settings
@@ -3975,13 +3977,13 @@ function EVENTS:OperatorMenu_DropDown()
 end
 
 function EVENTS:OperatorMenu_DropDown_OnClick(frame)
-	-- self is not Module
-	local Module = frame:GetParent():GetParent().module
+	local dropdown = self
+	local self = TMW:FindModule(frame)
 	
-	TMW:SetUIDropdownText(frame, self.value)
+	TMW:SetUIDropdownText(frame, dropdown.value)
 	
-	TMW.CI.ics.Events[Module.currentEvent].Operator = self.value
-	TMW:TT(frame, self.tooltipTitle, nil, 1)
+	self:GetEventSettings().Operator = dropdown.value
+	TMW:TT(frame, dropdown.tooltipTitle, nil, 1)
 end
 
 function EVENTS:SetupEventButtons(globalDescKey)
@@ -4054,10 +4056,10 @@ function EVENTS:EnableAndDisableEvents()
 end
 
 function EVENTS:ChooseEvent(id)
-	self.currentEventID = id
-	self.currentEvent = self.Events[id].event
-
 	local eventFrame = self.Events[id]
+	self.currentEventID = id
+	self.currentEvent = eventFrame.event
+
 	for i, f in ipairs(self.Events) do
 		f.selected = nil
 		f:UnlockHighlight()
@@ -4106,7 +4108,7 @@ function EVENTS:Load()
 	self:SetTabText()
 	
 	if CI.ics then
-		self:SetEventSettings()
+		self:SetupEventSettings()
 	end
 end
 
@@ -4121,7 +4123,9 @@ function EVENTS:SetTabText()
 	PanelTemplates_TabResize(self.tab, -6)
 end
 
-
+function EVENTS:GetEventSettings(event)
+	return TMW.CI.ics.Events[event or self.currentEvent]
+end
 
 -- ----------------------
 -- SOUNDS
@@ -4167,15 +4171,15 @@ function SND:SelectEvent(id)
 	local eventFrame = SND:ChooseEvent(id)
 	
 	if CI.ics then
-		SND:SelectSound(CI.ics.Events[eventFrame.event].Sound)
-		SND:SetEventSettings()
+		SND:SelectSound(self:GetEventSettings().Sound)
+		SND:SetupEventSettings()
 	end
 end
 
 function SND:SetupEventDisplay(event)
 	local eventID, eventString = SND:GetDisplayInfo(event)
 	
-	local name = CI.ics.Events[eventString].Sound
+	local name = self:GetEventSettings(eventString).Sound
 	
 	if name == "None" then
 		name = "|cff808080" .. NONE
@@ -4185,7 +4189,7 @@ function SND:SetupEventDisplay(event)
 end
 
 function SND:TestEvent(event)
-	local settings = CI.ics.Events[event]
+	local settings = self:GetEventSettings(event)
 	
 	TMW.CI.ic:FireEvent(settings, nil, 1, 1)
 end
@@ -4307,7 +4311,8 @@ end
 function SND:GetNumUsedEvents()
 	local n = 0
 	for i, f in ipairs(SND.Events) do
-		local v = CI.ics.Events[f.event].Sound
+		
+		local v = self:GetEventSettings(f.event).Sound
 		if v == "" or v == "Interface\\Quiet.ogg" or v == "None" then
 			-- none
 		elseif strfind(v, "%.[^\\]+$") then
@@ -4386,17 +4391,17 @@ function ANN:SelectEvent(id)
 	local eventFrame = ANN:ChooseEvent(id)
 	
 	if CI.ics then
-		local EventSettings = CI.ics.Events[eventFrame.event]
+		local EventSettings = self:GetEventSettings()
 		ANN:SelectChannel(EventSettings.Channel)
 		ANN.EditBox:SetText(EventSettings.Text)
-		ANN:SetEventSettings()
+		ANN:SetupEventSettings()
 	end
 end
 
 function ANN:SetupEventDisplay(event)
 	local eventID, eventString = self:GetDisplayInfo(event)
 	
-	local channel = CI.ics.Events[eventString].Channel
+	local channel = self:GetEventSettings(eventString).Channel
 	local channelsettings = ChannelLookup[channel]
 	
 	if channelsettings then
@@ -4409,14 +4414,14 @@ function ANN:SetupEventDisplay(event)
 end
 
 function ANN:TestEvent(event)
-	local settings = CI.ics.Events[event]
+	local settings = self:GetEventSettings(event)
 	
 	CI.ic:FireEvent(settings, 1, nil, 1)
 end
 
 ---------- Channels ----------
 function ANN:SelectChannel(channel)
-	local EventSettings = CI.ics.Events[self.Events[self.currentEventID].event]
+	local EventSettings = self:GetEventSettings()
 	local channelFrame
 
 	for i=1, #self.Channels do
@@ -4495,7 +4500,7 @@ function ANN:GetNumUsedEvents()
 	local n = 0
 	for i = 1, #ANN.Events do
 		local f = ANN.Events[i]
-		local channel = CI.ics.Events[f.event].Channel
+		local channel = self:GetEventSettings(f.event).Channel
 		if channel and #channel > 2 and channel ~= "None" then
 			n = n + 1
 		end
@@ -4505,9 +4510,11 @@ function ANN:GetNumUsedEvents()
 end
 
 function ANN:LocDropdownFunc(text)
-	TMW:SetUIDropdownText(ANN.Location, self.value)
-	UIDropDownMenu_SetText(ANN.Location, text)
-	CI.ics.Events[ANN.currentEvent].Location = self.value
+	local dropdown = self
+	local self = TMW:FindModule(UIDROPDOWNMENU_OPEN_MENU)
+	TMW:SetUIDropdownText(self.Location, dropdown.value)
+	UIDropDownMenu_SetText(self.Location, text)
+	self:GetEventSettings().Location = dropdown.value
 end
 
 function ANN:DropDown()
@@ -4567,28 +4574,24 @@ ANIM.AnimationList = {
 		animation = "ICONFADE",
 		Duration = true,
 	},
+	--[[{
+		text = L["ANIM_ICONSCALE"],
+		desc = L["ANIM_ICONSCALE_DESC"],
+		animation = "ICONSCALE",
+		Duration = true,
+		Period = true,
+		ScaleMagnitude = true,
+	},]]
 	{
 		text = L["ANIM_ACTVTNGLOW"],
 		desc = L["ANIM_ACTVTNGLOW_DESC"],
 		animation = "ACTVTNGLOW",
 		Duration = true,
 	},
-	
-	
-	
-	{
-		text = "",
-		noclick = true,
-	},
-	{
-		text = "WORK IN PROGRESS!",
-		desc = "This is an alpha version of TellMeWhen, and the animation system has not been fully implemented yet. Animations that you do see in the list should be fully functional, but the list is not complete. More will be added.",
-		noclick = true,
-	},
 }
 ANIM.AnimationLookup = {}
 for k, v in pairs(ANIM.AnimationList) do
-	ANIM.AnimationLookup[v.animation or print("DEBUG")] = v
+	ANIM.AnimationLookup[v.animation] = v
 end local AnimationLookup = ANIM.AnimationLookup
 
 function ANIM:OnInitialize()
@@ -4638,17 +4641,17 @@ function ANIM:SelectEvent(id)
 	local eventFrame = self:ChooseEvent(id)
 	
 	if CI.ics then
-		local EventSettings = CI.ics.Events[eventFrame.event]
+		local EventSettings = self:GetEventSettings()
 		self:SelectAnimation(EventSettings.Animation)
 		self.Duration:SetValue(EventSettings.Duration)
-		self:SetEventSettings()
+		self:SetupEventSettings()
 	end
 end
 
 function ANIM:SetupEventDisplay(event)
 	local eventID, eventString = self:GetDisplayInfo(event)
 	
-	local animation = CI.ics.Events[eventString].Animation
+	local animation = self:GetEventSettings(eventString).Animation
 	local animationSettings = AnimationLookup[animation]
 	
 	if animationSettings then
@@ -4662,14 +4665,14 @@ function ANIM:SetupEventDisplay(event)
 end
 
 function ANIM:TestEvent(event)
-	local settings = CI.ics.Events[event]
+	local settings = self:GetEventSettings(event)
 	
 	CI.ic:FireEvent(settings, 1, 1, nil)
 end
 
 ---------- Animations ----------
 function ANIM:SelectAnimation(animation)
-	local EventSettings = CI.ics.Events[self.Events[self.currentEventID].event]
+	local EventSettings = self:GetEventSettings()
 	local animationFrame
 
 	for i=1, #self.Animations do
@@ -4687,7 +4690,7 @@ function ANIM:SelectAnimation(animation)
 
 	local animationSettings = AnimationLookup[animation]
 	if animationSettings then
-		for i, arg in TMW:Vararg("Duration", "Magnitude", "Period") do
+		for i, arg in TMW:Vararg("Duration", "Magnitude", "Period"--[[, "ScaleMagnitude"]]) do
 			if animationSettings[arg] then
 				self[arg]:SetValue(EventSettings[arg])
 				self[arg]:Show()
@@ -4728,19 +4731,13 @@ function ANIM:GetNumUsedEvents()
 	local n = 0
 	for i = 1, #self.Events do
 		local f = self.Events[i]
-		local animation = CI.ics.Events[f.event].Animation
+		local animation = self:GetEventSettings(f.event).Animation
 		if animation and animation ~= "" then
 			n = n + 1
 		end
 	end
 	
 	return n
-end
-
-function ANIM:LocDropdownFunc(text)
-	--[[TMW:SetUIDropdownText(ANN.Location, self.value)
-	UIDropDownMenu_SetText(ANN.Location, text)
-	CI.ics.Events[ANN.currentEvent].Location = self.value]]
 end
 
 function ANIM:DropDown()
@@ -4920,10 +4917,10 @@ function SUG:OnInitialize()
 						strfind(name, "dmg")
 						
 						if not fail then
-							if index ~= 109388 then -- critical error if this gets set. See ticket 313. TODO: Check and see if this is still broken
+							--if index ~= 109388 then -- critical error if this gets set. See ticket 313. TODO: Check and see if this is still broken
 								Parser:SetOwner(UIParent, "ANCHOR_NONE") -- must set the owner before text can be obtained.
 								Parser:SetSpellByID(index)
-							end
+							--end
 							local r, g, b = LT1:GetTextColor()
 							if g > .95 and r > .95 and b > .95 then
 								SpellCache[index] = name
@@ -5435,12 +5432,11 @@ function SUG:ColorHelp(frame)
 end
 
 
+---------- Suggester Modules ----------
 local Module = SUG:NewModule("default")
-
 function Module:Table_Get()
 	return SpellCache
 end
-
 function Module.Sorter_ByName(a, b)
 	local nameA, nameB = SUG.SortTable[a], SUG.SortTable[b]
 	if nameA == nameB then
@@ -5451,7 +5447,6 @@ function Module.Sorter_ByName(a, b)
 		return nameA < nameB
 	end
 end
-
 function Module:Table_GetSorter()
 	if SUG.inputType == "number" then
 		return nil -- use the default sort func
@@ -5460,7 +5455,6 @@ function Module:Table_GetSorter()
 		return self.Sorter_ByName
 	end
 end
-
 function Module:Table_GetNormalSuggestions(suggestions, tbl, ...)
 	local atBeginning = SUG.atBeginning
 	local lastName = SUG.lastName
@@ -5484,7 +5478,6 @@ function Module:Table_GetNormalSuggestions(suggestions, tbl, ...)
 		end
 	end
 end
-
 function Module:Table_GetEquivSuggestions(suggestions, tbl, ...)
 	local atBeginning = SUG.atBeginning
 	local lastName = SUG.lastName
@@ -5508,11 +5501,9 @@ function Module:Table_GetEquivSuggestions(suggestions, tbl, ...)
 		end
 	end
 end
-
 function Module:Table_GetSpecialSuggestions(suggestions, tbl, ...)
 
 end
-
 function Module:Entry_OnClick(frame, button)
 	local insert
 	if button == "RightButton" and frame.insert2 then
@@ -5522,7 +5513,6 @@ function Module:Entry_OnClick(frame, button)
 	end
 	self:Entry_Insert(insert)
 end
-
 function Module:Entry_Insert(insert)
 	if insert then
 		insert = tostring(insert)
@@ -5558,20 +5548,17 @@ function Module:Entry_Insert(insert)
 		SUG:NameOnCursor(1)
 	end
 end
-
 function Module:Entry_IsValid(id)
 	return true
 end
 
 
 local Module = SUG:NewModule("item", SUG:GetModule("default"))
-
 function Module:Table_Get()
 	SUG:CacheItems()
 	
 	return ItemCache
 end
-
 function Module:Entry_AddToList_1(f, id)
 	if id > INVSLOT_LAST_EQUIPPED then
 		local name, link = GetItemInfo(id)
@@ -5592,7 +5579,6 @@ end
 
 local Module = SUG:NewModule("itemwithslots", SUG:GetModule("item"))
 Module.Slots = {}
-
 function Module:Entry_AddToList_2(f, id)
 	if id <= INVSLOT_LAST_EQUIPPED then
 		local itemID = GetInventoryItemID("player", id) -- get the itemID of the slot
@@ -5614,7 +5600,6 @@ function Module:Entry_AddToList_2(f, id)
 		f.Icon:SetTexture(GetItemIcon(itemID))
 	end
 end
-
 function Module:Table_GetSpecialSuggestions(suggestions, tbl, ...)
 	local atBeginning = SUG.atBeginning
 	
@@ -5640,13 +5625,11 @@ function Module:Table_GetSpecialSuggestions(suggestions, tbl, ...)
 		end
 	end
 end
-
 function Module:Entry_Colorize_1(f, id)
 	if id <= INVSLOT_LAST_EQUIPPED then
 		f.Background:SetVertexColor(.58, .51, .79, 1) -- color item slots warlock purple
 	end
 end
-
 function Module.Sorter_ByName(a, b)
 	local haveA, haveB = Module.Slots[a], Module.Slots[b]
 	if haveA or haveB then
@@ -5668,13 +5651,10 @@ function Module.Sorter_ByName(a, b)
 end
 
 
-
 local Module = SUG:NewModule("spell", SUG:GetModule("default"))
-
 function Module:Table_Get()
 	return SpellCache
 end
-
 function Module.Sorter_Spells(a, b)
 	local haveA, haveB = EquivFirstIDLookup[a], EquivFirstIDLookup[b]
 	if haveA or haveB then
@@ -5722,11 +5702,9 @@ function Module.Sorter_Spells(a, b)
 		end
 	end
 end
-
 function Module:Table_GetSorter()
 	return self.Sorter_Spells
 end
-
 function Module:Entry_AddToList_1(f, id)
 	if tonumber(id) then --sanity check
 		local name = GetSpellInfo(id)
@@ -5743,7 +5721,6 @@ function Module:Entry_AddToList_1(f, id)
 		f.Icon:SetTexture(SpellTextures[id])
 	end
 end
-
 function Module:Entry_Colorize_1(f, id)
 	if SUGPlayerSpells[id] then
 		f.Background:SetVertexColor(.41, .8, .94, 1) --color all other spells that you have in your/your pet's spellbook mage blue
@@ -5766,11 +5743,9 @@ function Module:Entry_Colorize_1(f, id)
 end
 
 
-
 local Module = SUG:NewModule("talents", SUG:GetModule("spell"))
 Module.noMin = true
 Module.table = {}
-
 function Module:OnInitialize()
 	for tab = 1, GetNumTalentTabs() do
 		for talent = 1, GetNumTalents(tab) do
@@ -5782,15 +5757,12 @@ function Module:OnInitialize()
 		end
 	end
 end
-
 function Module:Table_Get()
 	return self.table
 end
-
 function Module:Table_GetSorter()
 	return nil
 end
-
 function Module:Entry_AddToList_1(f, name)
 	local data = self.table[name]
 	name = GetTalentInfo(data[1], data[2]) -- restore case
@@ -5804,7 +5776,6 @@ function Module:Entry_AddToList_1(f, name)
 
 	f.Icon:SetTexture(data[3])
 end
-
 function Module:Table_GetNormalSuggestions(suggestions, tbl, ...)
 	local atBeginning = SUG.atBeginning
 	
@@ -5816,13 +5787,10 @@ function Module:Table_GetNormalSuggestions(suggestions, tbl, ...)
 end
 
 
-
 local Module = SUG:NewModule("spellWithGCD", SUG:GetModule("spell"))
-
 function Module:Table_GetSpecialSuggestions(suggestions)
 	suggestions[#suggestions + 1] = "GCD"
 end
-
 function Module:Entry_AddToList_2(f, id)
 	if id == "GCD" then
 		local equiv = id
@@ -5841,7 +5809,6 @@ function Module:Entry_AddToList_2(f, id)
 		f.Icon:SetTexture(SpellTextures[id])
 	end
 end
-
 function Module:Entry_Colorize_2(f, id)
 	if id == "GCD" then
 		f.Background:SetVertexColor(.58, .51, .79, 1) -- color item slots warlock purple
@@ -5849,9 +5816,7 @@ function Module:Entry_Colorize_2(f, id)
 end
 
 
-
 local Module = SUG:NewModule("texture", SUG:GetModule("spell"))
-
 function Module:Entry_AddToList_1(f, id)
 	if tonumber(id) then --sanity check
 		local name = GetSpellInfo(id)
@@ -5877,12 +5842,10 @@ end
 local Module = SUG:NewModule("spellwithduration", SUG:GetModule("spell"))
 Module.doAddColon = true
 local MATCH_RECAST_TIME_MIN, MATCH_RECAST_TIME_SEC
-
 function Module:OnInitialize()
 	MATCH_RECAST_TIME_MIN = SPELL_RECAST_TIME_MIN:gsub("%%%.3g", "(%%d+)")
 	MATCH_RECAST_TIME_SEC = SPELL_RECAST_TIME_SEC:gsub("%%%.3g", "(%%d+)")
 end
-
 function Module:Entry_OnClick(f, button)
 	local insert
 	
@@ -5921,7 +5884,6 @@ function Module:Entry_OnClick(f, button)
 	
 	self:Entry_Insert(insert, dur)
 end
-
 function Module:Entry_Insert(insert, duration)
 	if insert then
 		insert = tostring(insert)
@@ -5975,37 +5937,10 @@ function Module:Entry_Insert(insert, duration)
 end
 
 
---[[local Module = SUG:NewModule("cooldownwithduration", SUG:GetModule("spellwithduration"))
-
-i dont like filtering things out like this.
-There are reasons for someone to track a spell in a UCD icon that does not have a cooldown in the tooltip.
-Plus, exceptions are needed for pvp trinkets and such
-
-function Module:Entry_IsValid(id)
-	if id == 42292 then -- pvp trinket override
-		return true
-	end
-	
-	
-	local Parser, LT1, LT2, LT3, RT1, RT2, RT3 = SUG:GetParser()
-	Parser:SetOwner(UIParent, "ANCHOR_NONE")
-	Parser:SetSpellByID(id)
-	
-	for _, text in TMW:Vararg(RT2:GetText(), RT3:GetText()) do
-		if text and (text:match(MATCH_RECAST_TIME_MIN) or text:match(MATCH_RECAST_TIME_SEC)) then
-			return true
-		end
-	end
-end]]
-
-
-
 local Module = SUG:NewModule("cast", SUG:GetModule("spell"))
-
 function Module:Table_Get()
 	return SpellCache, TMW.BE.casts
 end
-
 function Module:Entry_AddToList_2(f, id)
 	if TMW.BE.casts[id] then
 		-- the entry is an equivalacy
@@ -6023,13 +5958,11 @@ function Module:Entry_AddToList_2(f, id)
 		f.Icon:SetTexture(SpellTextures[firstid])
 	end
 end
-
 function Module:Entry_Colorize_2(f, id)
 	if TMW.BE.casts[id] then
 		f.Background:SetVertexColor(1, .96, .41, 1) -- rogue yellow
 	end
 end
-
 function Module:Entry_IsValid(id)
 	if TMW.BE.casts[id] then
 		return true
@@ -6053,10 +5986,8 @@ function Module:Entry_IsValid(id)
 end
 
 
-
 local Module = SUG:NewModule("multistate", SUG:GetModule("spell"))
 Module.ActionCache = {}
-
 function Module:Table_Get()
 	wipe(self.ActionCache)
 	for i=1, 120 do
@@ -6068,13 +5999,11 @@ function Module:Table_Get()
 	
 	return SpellCache
 end
-
 function Module:Entry_Colorize_2(f, id)
 	if self.ActionCache[id] then
 		f.Background:SetVertexColor(0, .44, .87, 1) --color actions that are on your action bars shaman blue
 	end
 end
-
 function Module.Sorter_Spells(a, b)
 	--MSCDs
 	local haveA, haveB = Module.ActionCache[a], Module.ActionCache[b]
@@ -6119,18 +6048,15 @@ function Module.Sorter_Spells(a, b)
 		end
 	end
 end
-
 function Module:Table_GetSorter()
 	return self.Sorter_Spells
 end
 
 
 local Module = SUG:NewModule("buff", SUG:GetModule("spell"))
-
 function Module:Table_Get()
 	return SpellCache, TMW.BE.buffs, TMW.BE.debuffs
 end
-
 function Module:Entry_Colorize_2(f, id)
 	if TMW.DS[id] then
 		f.Background:SetVertexColor(1, .49, .04, 1) -- druid orange
@@ -6140,7 +6066,6 @@ function Module:Entry_Colorize_2(f, id)
 		f.Background:SetVertexColor(.77, .12, .23, 1) -- deathknight red
 	end
 end
-
 function Module:Entry_AddToList_2(f, id)
 	if TMW.DS[id] then -- if the entry is a dispel type (magic, poison, etc)
 		local dispeltype = id
@@ -6171,7 +6096,6 @@ function Module:Entry_AddToList_2(f, id)
 		f.Icon:SetTexture(SpellTextures[firstid])
 	end
 end
-
 function Module:Table_GetSpecialSuggestions(suggestions, tbl, ...)
 	local atBeginning = SUG.atBeginning
 
@@ -6184,17 +6108,14 @@ end
 
 
 local Module = SUG:NewModule("dr", SUG:GetModule("spell"))
-
 function Module:Table_Get()
 	return SpellCache, TMW.BE.dr
 end
-
 function Module:Entry_Colorize_2(f, id)
 	if TMW.BE.dr[id] then
 		f.Background:SetVertexColor(1, .96, .41, 1) -- rogue yellow
 	end
 end
-
 function Module:Entry_AddToList_2(f, id)
 	if EquivFirstIDLookup[id] then -- if the entry is an equivalacy (buff, cast, or whatever)
 		--NOTE: dispel types are put in EquivFirstIDLookup too for efficiency in the sorter func, but as long as dispel types are checked first, it wont matter
@@ -6214,10 +6135,8 @@ function Module:Entry_AddToList_2(f, id)
 end
 
 
-
 local Module = SUG:NewModule("wpnenchant", SUG:GetModule("default"), "AceEvent-3.0")
 Module.noMin = true
-
 Module.ItemIDs = {
 	-- item enhancements
 	43233,	--Deadly Poison
@@ -6292,7 +6211,6 @@ Module.ItemIDs = {
 	-- sharpening stone: 磨刀石
 	--25679,	--Comfortable Insoles
 }
-
 Module.SpellIDs = {
 	-- Shaman Enchants
 	8024,	--Flametongue Weapon
@@ -6301,7 +6219,6 @@ Module.SpellIDs = {
 	51730,	--Earthliving Weapon
 	8017,	--Rockbiter Weapon
 }
-
 function Module:OnInitialize()
 	self.Items = {}
 	self.Spells = {}
@@ -6354,7 +6271,6 @@ function Module:OnInitialize()
 		self:Etc_GetTexture(name) -- cache textures for the spell breakdown tooltip
 	end
 end
-
 function Module:Etc_DoItemLookups()
 	self:UnregisterEvent("GET_ITEM_INFO_RECEIVED")
 	
@@ -6371,7 +6287,6 @@ function Module:Etc_DoItemLookups()
 		self.Table[k] = v
 	end
 end
-
 function Module:Table_Get()
 	SUG:CacheItems()
 	
@@ -6383,7 +6298,6 @@ function Module:Table_Get()
 	
 	return self.Table
 end
-
 function Module:Entry_AddToList_1(f, name)
 	if self.Spells[name] then
 		local id = self.Spells[name]
@@ -6416,7 +6330,6 @@ function Module:Entry_AddToList_1(f, name)
 	
 	f.Icon:SetTexture(self:Etc_GetTexture(name))
 end
-
 function Module:Etc_GetTexture(name)
 	local tex
 	if self.Spells[name] then
@@ -6438,7 +6351,6 @@ function Module:Etc_GetTexture(name)
 	
 	return tex or "Interface\\Icons\\INV_Misc_QuestionMark"
 end
-
 function Module.Sorter(a, b)
 	local haveA = Module.Spells[a] and SUGPlayerSpells[Module.Spells[a]]
 	local haveB = Module.Spells[b] and SUGPlayerSpells[Module.Spells[b]]
@@ -6485,13 +6397,11 @@ function Module.Sorter(a, b)
 	end
 	
 end
-
 function Module:Table_GetSorter()
 	SUG.doUpdateItemCache = true
 	SUG:CacheItems()
 	return self.Sorter
 end
-
 function Module:Table_GetNormalSuggestions(suggestions, tbl, ...)
 	local atBeginning = SUG.atBeginning
 	
@@ -6501,7 +6411,6 @@ function Module:Table_GetNormalSuggestions(suggestions, tbl, ...)
 		end
 	end
 end
-
 function Module:Entry_Colorize_1(f, name)
 	if SUGPlayerSpells[Module.Spells[name]] or (CurrentItems[ strlowerCache[ name ]]) then
 		f.Background:SetVertexColor(.41, .8, .94, 1) --color all spells and items that you have mage blue
@@ -6511,18 +6420,14 @@ function Module:Entry_Colorize_1(f, name)
 end
 
 
-
 local Module = SUG:NewModule("tracking", SUG:GetModule("default"))
 Module.noMin = true
-
 function Module:Table_Get()
 	return TrackingCache
 end
-
 function Module:Table_GetSorter()
 	return nil
 end
-
 function Module:Entry_AddToList_1(f, id)
 	local name, texture = GetTrackingInfo(id)
 
