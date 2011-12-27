@@ -117,7 +117,6 @@ local SlotsToNumbers = {
 	RangedSlot = 7,
 }
 
-
 local function WpnEnchant_OnUpdate(icon, time)
 	local has, expiration = select(icon.SelectIndex, GetWeaponEnchantInfo())
 	if has and icon.CorrectEnchant then
@@ -153,18 +152,6 @@ local function WpnEnchant_OnEvent(icon, event, unit)
 	-- this function must be declared after _OnUpdate because it references _OnUpdate from inside it.
 	if unit == "player" then
 		local Slot = icon.Slot
-		local wpnTexture = GetInventoryItemTexture("player", Slot)
-
-		icon:SetTexture(wpnTexture or "Interface\\Icons\\INV_Misc_QuestionMark")
-
-		if not wpnTexture and icon.HideUnequipped then
-			icon:SetInfo(0)
-			if icon.OnUpdate then
-				icon:SetScript("OnUpdate", nil)
-			end
-		elseif not icon.OnUpdate then
-			icon:SetScript("OnUpdate", WpnEnchant_OnUpdate)
-		end
 		
 		local EnchantName = GetWeaponEnchantName(Slot)
 		icon.LastEnchantName = icon.EnchantName or icon.LastEnchantName
@@ -174,6 +161,31 @@ local function WpnEnchant_OnEvent(icon, event, unit)
 			icon.CorrectEnchant = true
 		elseif EnchantName then
 			icon.CorrectEnchant = icon.NameHash[strlowerCache[EnchantName]]
+		end
+		
+		local wpnTexture = GetInventoryItemTexture("player", Slot)
+
+		icon:SetTexture(wpnTexture or "Interface\\Icons\\INV_Misc_QuestionMark")
+
+		if icon.HideUnequipped then
+			if not wpnTexture and icon.OnUpdate then
+				icon:SetInfo(0)
+				icon:SetScript("OnUpdate", nil)
+				return
+			end
+			
+			local itemID = GetInventoryItemID("player", Slot)
+			if itemID then
+				local _, _, _, _, _, _, _, _, invType = GetItemInfo(itemID)
+				if (invType == "INVTYPE_HOLDABLE" or invType == "INVTYPE_RELIC" or invType == "INVTYPE_SHIELD") and icon.OnUpdate then
+					icon:SetInfo(0)
+					icon:SetScript("OnUpdate", nil)
+					return
+				end
+			end
+		end
+		if not icon.OnUpdate then
+			icon:SetScript("OnUpdate", WpnEnchant_OnUpdate)
 		end
 	end
 end

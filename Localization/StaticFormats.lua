@@ -1,5 +1,7 @@
 ﻿local L = LibStub("AceLocale-3.0"):GetLocale("TellMeWhen", true)
 
+local pname = UnitName("player")
+
 local spellFmt = "|T%s:0|t%s"
 local function Spell(id)
 	local name, _, tex = GetSpellInfo(id)
@@ -26,7 +28,6 @@ L["ICONMENU_ICD_DESC"] 	  			  = L["ICONMENU_ICD_DESC"]		 		 :format(L["ICONMENU
 L["MESSAGERECIEVE"] 	  			  = L["MESSAGERECIEVE"]		 		 	 :format("%s", L["IMPORT_EXPORT"]) -- keep the first "%s" as "%s"
 
 
-local pname 						  = UnitName("player")
 L["CONDITIONPANEL_UNIT_DESC"] 		  = L["CONDITIONPANEL_UNIT_DESC"]		 :format(pname)
 L["ICONMENU_UNIT_DESC"] 			  = L["ICONMENU_UNIT_DESC"]				 :format(pname)
 

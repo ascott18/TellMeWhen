@@ -1341,7 +1341,7 @@ CNDT.Types = {
 		max = 5,
 		unit = PLAYER,
 		name = function(editbox) TMW:TT(editbox, "SPELLTOCHECK", "CNDT_ONLYFIRST") editbox.label = L["SPELLTOCHECK"] end,
-		useSUG = true,
+		useSUG = "talents",
 		icon = function() return select(2, GetTalentInfo(1, 1)) end,
 		tcoords = standardtcoords,
 		funcstr = [[(TalentMap[c.NameName] or 0) c.Operator c.Level]],
