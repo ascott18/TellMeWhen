@@ -2027,44 +2027,81 @@
 				<Anchors>
 					<Anchor point="BOTTOMLEFT" x="0" y="-25"/>
 				</Anchors>
-				<Scripts> <OnLoad> self:SetText(TMW.L["MAIN"]) </OnLoad> </Scripts>
+				<Scripts>
+					<OnLoad>
+						self:SetText(TMW.L["MAIN"])
+					</OnLoad>
+				</Scripts>
 			</Button>
 			<Button name="$parentTab2" parentKey="IconConditionTab" inherits="TellMeWhen_TabTemplate" id="2">
 				<Anchors>
 					<Anchor point="LEFT" relativeTo="$parentTab1" relativePoint="RIGHT" x="-18"/>
 				</Anchors>
-				<Scripts> <OnLoad> self:SetText(TMW.L["CONDITIONS"]) TMW.ICCNDTTab = self:GetID() </OnLoad> </Scripts>
+				<Scripts>
+					<OnLoad>
+						self:SetText(TMW.L["CONDITIONS"])
+						function self:OnClick()
+							TMW.CNDT:Load("icon")
+						end
+					</OnLoad>
+				</Scripts>
 			</Button>
 			<Button name="$parentTab3" parentKey="SoundTab" inherits="TellMeWhen_TabTemplate" id="3">
 				<Anchors>
 					<Anchor point="LEFT" relativeTo="$parentTab2" relativePoint="RIGHT" x="-18"/>
 				</Anchors>
-				<Scripts> <OnLoad> self:SetText(TMW.L["SOUND_TAB"]) </OnLoad> </Scripts>
+				<Scripts>
+					<OnLoad>
+						self:SetText(TMW.L["SOUND_TAB"])
+					</OnLoad>
+				</Scripts>
 			</Button>
 			<Button name="$parentTab4" parentKey="AnnounceTab" inherits="TellMeWhen_TabTemplate" id="4">
 				<Anchors>
 					<Anchor point="LEFT" relativeTo="$parentTab3" relativePoint="RIGHT" x="-18"/>
 				</Anchors>
-				<Scripts> <OnLoad> self:SetText(TMW.L["ANN_TAB"]) </OnLoad> </Scripts>
+				<Scripts>
+					<OnLoad>
+						self:SetText(TMW.L["ANN_TAB"])
+					</OnLoad>
+				</Scripts>
 			</Button>
 			<Button name="$parentTab5" parentKey="AnimationsTab" inherits="TellMeWhen_TabTemplate" id="5">
 				<Anchors>
 					<Anchor point="LEFT" relativeTo="$parentTab4" relativePoint="RIGHT" x="-18"/>
 				</Anchors>
-				<Scripts> <OnLoad> self:SetText(TMW.L["ANIM_TAB"]) </OnLoad> </Scripts>
+				<Scripts>
+					<OnLoad>
+						self:SetText(TMW.L["ANIM_TAB"])
+					</OnLoad>
+				</Scripts>
 			</Button>
 			<Button name="$parentTab6" parentKey="GroupConditionTab" inherits="TellMeWhen_TabTemplate" id="6">
 				<Anchors>
 					<Anchor point="LEFT" relativeTo="$parentTab5" relativePoint="RIGHT" x="-18"/>
 				</Anchors>
-				<Scripts> <OnLoad> self:SetText(TMW.L["GROUPCONDITIONS"]) TMW.GRCNDTTab = self:GetID() </OnLoad> </Scripts>
+				<Scripts>
+					<OnLoad>
+						self:SetText(TMW.L["GROUPCONDITIONS"])
+						function self:OnClick()
+							TMW.CNDT:Load("group")
+						end
+					</OnLoad>
+				</Scripts>
 			</Button>
 			<Button name="$parentTab7" parentKey="MainOptionsTab" inherits="TellMeWhen_TabTemplate" id="7">
 				<Anchors>
 					<Anchor point="LEFT" relativeTo="$parentTab6" relativePoint="RIGHT" x="-18"/>
 				</Anchors>
 				<Scripts>
-					<OnLoad> self:SetText(TMW.L["GROUPADDONSETTINGS"]) TMW.MOTab = self:GetID() </OnLoad>
+					<OnLoad>
+						self:SetText(TMW.L["GROUPADDONSETTINGS"])
+						function self:OnClick()
+							TMW:CompileOptions()
+							TMW.IE:NotifyChanges("groups", "Group " .. TMW.CI.g)
+							LibStub("AceConfigDialog-3.0"):Open("TMW IEOptions", TMW.IE.MainOptionsWidget)
+						end
+					</OnLoad>
 				</Scripts>
 			</Button>
 

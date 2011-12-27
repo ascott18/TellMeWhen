@@ -134,11 +134,11 @@ if pclass == "SHAMAN" then
 		L["ICONMENU_TOTEM"] .. " - " .. L["WATER"],
 		L["ICONMENU_TOTEM"] .. " - " .. L["AIR"],
 	}
-	totemtex = { --TODO: change these to GetSpellTexture(#####)
-		"Interface\\Icons\\spell_nature_guardianward",
-		"Interface\\Icons\\spell_nature_stoneskintotem",
-		"Interface\\Icons\\spell_nature_manaregentotem",
-		"Interface\\Icons\\spell_nature_slowingtotem",
+	totemtex = {
+		GetSpellTexture(8227),	-- flametongue
+		GetSpellTexture(78222),	-- stoneskin
+		GetSpellTexture(5675),	-- mana spring
+		GetSpellTexture(3738),	-- wrath of air
 	}
 elseif pclass == "DRUID" then
 	totems = {

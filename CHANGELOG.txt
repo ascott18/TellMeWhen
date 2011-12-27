@@ -3,6 +3,7 @@
  * All event outlets have a "Play" button that you can test the event with.
  * You can now change the "Show Timer Text" option if LUI is the only addon enabled that can handle cooldown timer texts.
  * Changed the "Hide when slot is empty" to include hiding the icon if the slot being checked contains a shield or off-hand frill.
+ * Implemented the "Failed Conditions" opacity setting for meta icons.
  * Bug Fixes:
  ** (r356) Attempted a fix for default.lua:70 attempt to concatenate global 'input' (a table value)
  ** (r358) Icons tracking multiple elements whose start times are exactly the same should now properly update their timers when the first element gives yield to the second after timer expiration.

@@ -451,6 +451,65 @@ do -- TMW:FindModule(self)
 	end
 end
 
+function TMW:ReconcileData(source, destination, matchSource, matchDestination, swap)
+	-- update any changed icons that meta icons are checking
+	for ics in TMW:InIconSettings() do
+		for k, ic in pairs(ics.Icons) do
+			if type(ic) == "string" then
+				local string = ic
+			
+				if matchSource and string:find(matchSource) then
+					ics.Icons[k] = string:gsub(source, destination)
+				elseif not matchSource and source == string then
+					ics.Icons[k] = destination
+				elseif swap and matchDestination and string:find(matchDestination) then
+					ics.Icons[k] = string:gsub(destination, source)
+				elseif swap and not matchDestination and destination == string then
+					ics.Icons[k] = source
+				end
+			end
+		end
+	end
+	
+	-- update any changed icons in conditions
+	for Condition in TMW:InConditionSettings() do
+		if Condition.Icon ~= "" and type(Condition.Icon) == "string" then
+			local string = Condition.Icon
+			
+			if matchSource and string:find(matchSource) then
+				Condition.Icon = string:gsub(source, destination)
+			elseif not matchSource and source == string then
+				Condition.Icon = destination
+			elseif swap and matchDestination and string:find(matchDestination) then
+				Condition.Icon = string:gsub(destination, source)
+			elseif swap and not matchDestination and destination == string then
+				Condition.Icon = source
+			end
+		end
+	end
+	
+	-- update any anchors
+	for gs, gID in TMW:InGroupSettings() do
+		if type(gs.Point.relativeTo) == "string" then
+			local string = gs.Point.relativeTo
+			
+			if matchSource and string:find(matchSource) then
+				gs.Point.relativeTo = string:gsub(source, destination)
+			elseif not matchSource and source == string then
+				gs.Point.relativeTo = destination
+			elseif swap and matchDestination and string:find(matchDestination) then
+				gs.Point.relativeTo = string:gsub(destination, source)
+			elseif swap and not matchDestination and destination == string then
+				gs.Point.relativeTo = source
+			end
+		end
+	end
+	
+	--TMW:Update()
+end
+
+
+
 -- --------------
 -- MAIN OPTIONS
 -- --------------
@@ -1663,64 +1722,6 @@ function ID:Swap()
 	TMW:ReconcileData(srcicon, desticon, nil, nil, true)
 end
 
-function TMW:ReconcileData(source, destination, matchSource, matchDestination, swap)
-	-- TODO: put this function in a better place
-	-- update any changed icons that meta icons are checking
-	for ics in TMW:InIconSettings() do
-		for k, ic in pairs(ics.Icons) do
-			if type(ic) == "string" then
-				local string = ic
-			
-				if matchSource and string:find(matchSource) then
-					ics.Icons[k] = string:gsub(source, destination)
-				elseif not matchSource and source == string then
-					ics.Icons[k] = destination
-				elseif swap and matchDestination and string:find(matchDestination) then
-					ics.Icons[k] = string:gsub(destination, source)
-				elseif swap and not matchDestination and destination == string then
-					ics.Icons[k] = source
-				end
-			end
-		end
-	end
-	
-	-- update any changed icons in conditions
-	for Condition in TMW:InConditionSettings() do
-		if Condition.Icon ~= "" and type(Condition.Icon) == "string" then
-			local string = Condition.Icon
-			
-			if matchSource and string:find(matchSource) then
-				Condition.Icon = string:gsub(source, destination)
-			elseif not matchSource and source == string then
-				Condition.Icon = destination
-			elseif swap and matchDestination and string:find(matchDestination) then
-				Condition.Icon = string:gsub(destination, source)
-			elseif swap and not matchDestination and destination == string then
-				Condition.Icon = source
-			end
-		end
-	end
-	
-	-- update any anchors
-	for gs, gID in TMW:InGroupSettings() do
-		if type(gs.Point.relativeTo) == "string" then
-			local string = gs.Point.relativeTo
-			
-			if matchSource and string:find(matchSource) then
-				gs.Point.relativeTo = string:gsub(source, destination)
-			elseif not matchSource and source == string then
-				gs.Point.relativeTo = destination
-			elseif swap and matchDestination and string:find(matchDestination) then
-				gs.Point.relativeTo = string:gsub(destination, source)
-			elseif swap and not matchDestination and destination == string then
-				gs.Point.relativeTo = source
-			end
-		end
-	end
-	
-	--TMW:Update()
-end
-
 function ID:Meta()
 	tinsert(db.profile.Groups[ID.desticon.group:GetID()].Icons[ID.desticon:GetID()].Icons, ID.srcicon:GetName())
 end
@@ -2266,20 +2267,9 @@ function IE:TabClick(self)
 	-- show the icon editor
 	IE:Show()
 	
-	-- special handling for certain tabs. TODO: move this somewhere else.
-	if self:GetID() == TMW.ICCNDTTab then
-		-- the icon condition tab
-		CNDT:Load("icon")
-		
-	elseif self:GetID() == TMW.GRCNDTTab then
-		-- the group condition tab
-		CNDT:Load("group")
-		
-	elseif self:GetID() == TMW.MOTab then
-		-- the group settings tab
-		TMW:CompileOptions()
-		IE:NotifyChanges("groups", "Group " .. CI.g)
-		LibStub("AceConfigDialog-3.0"):Open("TMW IEOptions", IE.MainOptionsWidget)
+	-- special handling for certain tabs.
+	if self.OnClick then
+		self:OnClick()
 	end
 	
 	HELP:ShowNext() -- should happen after conditions are loaded
@@ -4917,10 +4907,8 @@ function SUG:OnInitialize()
 						strfind(name, "dmg")
 						
 						if not fail then
-							--if index ~= 109388 then -- critical error if this gets set. See ticket 313. TODO: Check and see if this is still broken
-								Parser:SetOwner(UIParent, "ANCHOR_NONE") -- must set the owner before text can be obtained.
-								Parser:SetSpellByID(index)
-							--end
+							Parser:SetOwner(UIParent, "ANCHOR_NONE") -- must set the owner before text can be obtained.
+							Parser:SetSpellByID(index)
 							local r, g, b = LT1:GetTextColor()
 							if g > .95 and r > .95 and b > .95 then
 								SpellCache[index] = name

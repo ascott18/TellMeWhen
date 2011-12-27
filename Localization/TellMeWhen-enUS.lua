@@ -69,7 +69,8 @@ L["CONDITIONALPHA"] = "Failed Conditions/Reqs."
 L["CONDITIONALPHA_DESC"] = "This will be used when conditions fail, or if the duration or stack requirements are not met. This setting will be ignored if the icon is already hidden by the other two opacity settings."
 L["CONDITIONALPHA_CONDITIONICON"] = "Failed Duration"
 L["CONDITIONALPHA_CONDITIONICON_DESC"] = "This will be used when the duration requirements are not met. This setting will be ignored if the icon is already hidden by the other two opacity settings."
-
+L["CONDITIONALPHA_METAICON"] = "Failed Conditions"
+L["CONDITIONALPHA_METAICON_DESC"] = "This opacity will be used when conditions fail."
 
 L["ICONMENU_TYPE"] = "Icon type"
 

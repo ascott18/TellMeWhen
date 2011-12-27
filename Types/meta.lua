@@ -44,7 +44,6 @@ Type.RelevantSettings = {
 	ShowTimer = false,
 	ShowTimerText = false,
 	ShowWhen = false,
-	ConditionAlpha = false, --TODO:implement conditionalpha for metas (problem is the icon editor UI)
 	Alpha = false,
 	UnAlpha = false,
 	Sort = true,
@@ -213,42 +212,57 @@ function Type:Setup(icon, groupID, iconID)
 	icon.InvertBars = false
 	
 	icon:SetTexture("Interface\\Icons\\LevelUpIcon-LFD")
-	icon.ConditionAlpha = 0
 
 	icon:SetScript("OnUpdate", Meta_OnUpdate)
 end
 
 function Type:IE_TypeLoaded()
-	TMW.IE.Main.Sort:SetPoint("BOTTOMLEFT", 65, -32)
+	local spacing = 70
+	TMW.IE.Main.Sort:SetPoint("BOTTOMLEFT", 20, -22)
+	TMW.IE.Main.Sort.text:SetWidth(spacing)
 	
-	TMW.IE.Main.Sort.Radio1:SetPoint("TOPLEFT", 80, 19)
+	TMW.IE.Main.Sort.Radio1:SetPoint("TOPLEFT", spacing, 19)
+	TMW.IE.Main.Sort.Radio1.text:SetWidth(spacing)
 	
 	TMW.IE.Main.Sort.Radio2:ClearAllPoints()
-	TMW.IE.Main.Sort.Radio2:SetPoint("LEFT", TMW.IE.Main.Sort.Radio1, "RIGHT", 80, 0)
+	TMW.IE.Main.Sort.Radio2:SetPoint("LEFT", TMW.IE.Main.Sort.Radio1, "RIGHT", spacing, 0)
+	TMW.IE.Main.Sort.Radio2.text:SetWidth(spacing)
 	
 	TMW.IE.Main.Sort.Radio3:ClearAllPoints()
-	TMW.IE.Main.Sort.Radio3:SetPoint("LEFT", TMW.IE.Main.Sort.Radio2, "RIGHT", 80, 0)
+	TMW.IE.Main.Sort.Radio3:SetPoint("LEFT", TMW.IE.Main.Sort.Radio2, "RIGHT", spacing, 0)
+	TMW.IE.Main.Sort.Radio3.text:SetWidth(spacing)
 	
 	TMW:TT(TMW.IE.Main.Sort.Radio1, "SORTBYNONE", "SORTBYNONE_META_DESC")
 	TMW:TT(TMW.IE.Main.Sort.Radio2, "ICONMENU_SORTASC", "ICONMENU_SORTASC_META_DESC")
 	TMW:TT(TMW.IE.Main.Sort.Radio3, "ICONMENU_SORTDESC", "ICONMENU_SORTDESC_META_DESC")
+	
+	TMW.IE.Main.ConditionAlpha.text:SetText(L["CONDITIONALPHA_METAICON"])
+	TMW:TT(TMW.IE.Main.ConditionAlpha, "CONDITIONALPHA_METAICON", "CONDITIONALPHA_METAICON_DESC")
 end
 
 function Type:IE_TypeUnloaded()
 	TMW.IE.Main.Sort:SetPoint("BOTTOMLEFT", 16, 72)
+	TMW.IE.Main.Sort.text:SetWidth(0)
 	
 	TMW.IE.Main.Sort.Radio1:SetPoint("TOPLEFT", 0, 1)
+	TMW.IE.Main.Sort.Radio1.text:SetWidth(TMW.WidthCol1)
 	
 	TMW.IE.Main.Sort.Radio2:ClearAllPoints()
 	TMW.IE.Main.Sort.Radio2:SetPoint("TOP", TMW.IE.Main.Sort.Radio1, "BOTTOM", 0, 8)
+	TMW.IE.Main.Sort.Radio2.text:SetWidth(TMW.WidthCol1)
 	
 	TMW.IE.Main.Sort.Radio3:ClearAllPoints()
 	TMW.IE.Main.Sort.Radio3:SetPoint("TOP", TMW.IE.Main.Sort.Radio2, "BOTTOM", 0, 8)
+	TMW.IE.Main.Sort.Radio3.text:SetWidth(TMW.WidthCol1)
 	
 	TMW:TT(TMW.IE.Main.Sort.Radio1, "SORTBYNONE", "SORTBYNONE_DESC")
 	TMW:TT(TMW.IE.Main.Sort.Radio2, "ICONMENU_SORTASC", "ICONMENU_SORTASC_DESC")
 	TMW:TT(TMW.IE.Main.Sort.Radio3, "ICONMENU_SORTDESC", "ICONMENU_SORTDESC_DESC")
+	
+	TMW.IE.Main.ConditionAlpha.text:SetText(L["CONDITIONALPHA"])
+	TMW:TT(TMW.IE.Main.ConditionAlpha, "CONDITIONALPHA", "CONDITIONALPHA_DESC")
 end
+
 
 
 function Type:GetIconMenuText(data)
