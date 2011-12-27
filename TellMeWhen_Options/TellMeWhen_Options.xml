@@ -2026,7 +2026,7 @@
 		<Frames>
 			<Button name="$parentTab1" parentKey="MainTab" inherits="TellMeWhen_TabTemplate" id="1">
 				<Anchors>
-					<Anchor point="BOTTOMLEFT" x="5" y="-25"/>
+					<Anchor point="BOTTOMLEFT" x="0" y="-25"/>
 				</Anchors>
 				<Scripts> <OnLoad> self:SetText(TMW.L["MAIN"]) </OnLoad> </Scripts>
 			</Button>
