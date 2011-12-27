@@ -2373,13 +2373,13 @@ function IE:LeftCheck_OnEnable()
 	-- self is the check box frame, not IE
 	self:SetAlpha(1)
 	if self.data.disabledtooltip then
-		TMW:TT(f, self.data.title, self.data.tooltip, 1, 1)
+		TMW:TT(self, self.data.title, self.data.tooltip, 1, 1)
 	end
 end
 function IE:LeftCheck_OnDisable()
 	self:SetAlpha(0.4)
 	if self.data.disabledtooltip then
-		TMW:TT(f, self.data.title, self.data.disabledtooltip, 1, 1)
+		TMW:TT(self, self.data.title, self.data.disabledtooltip, 1, 1)
 	end
 end
 function IE:LeftCheck_OnClick(button)
@@ -3306,6 +3306,18 @@ function IE:Copy_DropDown(...)
 		info.notCheckable = true
 		UIDropDownMenu_AddButton(info, UIDROPDOWNMENU_MENU_LEVEL)
 		
+		--import from backup
+		info = UIDropDownMenu_CreateInfo()
+		info.text = L["IMPORT_FROMBACKUP"]
+		info.tooltipTitle = L["IMPORT_FROMBACKUP"]
+		info.tooltipText = L["IMPORT_FROMBACKUP_DESC"]:format(TMW.BackupDate)
+		info.tooltipOnButton = true
+		info.tooltipWhileDisabled = true
+		info.value = "IMPORT_FROMBACKUP"
+		info.hasArrow = true
+		info.notCheckable = true
+		UIDropDownMenu_AddButton(info, UIDROPDOWNMENU_MENU_LEVEL)
+		
 		--import from string
 		info = UIDropDownMenu_CreateInfo()
 		info.text = (EDITBOX.DoPulseValidString and "|cff00ff00" or "") .. L["IMPORT_FROMSTRING"]
@@ -3323,9 +3335,9 @@ function IE:Copy_DropDown(...)
 			value = "IMPORT_FROMSTRING_ICON"
 		end
 		info.value = value
-		info.hasArrow = true
 		info.notCheckable = true
 		info.disabled = not editboxResult
+		info.hasArrow = not info.disabled
 		UIDropDownMenu_AddButton(info, UIDROPDOWNMENU_MENU_LEVEL)
 		
 		--import from comm
@@ -3336,21 +3348,9 @@ function IE:Copy_DropDown(...)
 		info.tooltipText = L["IMPORT_FROMCOMM_DESC"]
 		info.tooltipOnButton = true
 		info.tooltipWhileDisabled = true
-		info.hasArrow = true
 		info.notCheckable = true
 		info.disabled = not next(DeserializedData)
-		UIDropDownMenu_AddButton(info, UIDROPDOWNMENU_MENU_LEVEL)
-		
-		--import from backup
-		info = UIDropDownMenu_CreateInfo()
-		info.text = L["IMPORT_FROMBACKUP"]
-		info.tooltipTitle = L["IMPORT_FROMBACKUP"]
-		info.tooltipText = L["IMPORT_FROMBACKUP_DESC"]:format(TMW.BackupDate)
-		info.tooltipOnButton = true
-		info.tooltipWhileDisabled = true
-		info.value = "IMPORT_FROMBACKUP"
-		info.hasArrow = true
-		info.notCheckable = true
+		info.hasArrow = not info.disabled
 		UIDropDownMenu_AddButton(info, UIDROPDOWNMENU_MENU_LEVEL)
 		
 		
@@ -3377,16 +3377,25 @@ function IE:Copy_DropDown(...)
 		
 		--export to comm
 		info = UIDropDownMenu_CreateInfo()
-		info.text = L["EXPORT_TOCOMM"]
-		info.tooltipTitle = L["EXPORT_TOCOMM"]
+		local player = strtrim(EDITBOX:GetText())
+		info.disabled = (strfind(player, "[`~^%d]") or #player <= 1) and true
+		local text 
+		if player == "RAID" or player == "GUILD" then
+			text = L["EXPORT_TO" .. player]
+		else
+			text = L["EXPORT_TOCOMM"] 
+			if not info.disabled then
+				text = text .. ": " .. player
+			end
+		end
+		info.text = text
+		info.tooltipTitle = text
 		info.tooltipText = L["EXPORT_TOCOMM_DESC"]
 		info.tooltipOnButton = true
 		info.tooltipWhileDisabled = true
 		info.value = "EXPORT_TOCOMM"
-		info.hasArrow = true
+		info.hasArrow = not info.disabled
 		info.notCheckable = true
-		local player = strtrim(EDITBOX:GetText())
-		info.disabled = strfind(player, "[`~^%d]") or #player <= 1
 		
 		UIDropDownMenu_AddButton(info, UIDROPDOWNMENU_MENU_LEVEL)
 	end
@@ -5755,6 +5764,57 @@ function Module:Entry_Colorize_1(f, id)
 		f.Background:SetVertexColor(.79, .30, 1, 1) -- color known PLAYER auras a bright pink ish pruple ish color that is similar to paladin pink but has sufficient contrast for distinguishing
 	end
 end
+
+
+
+local Module = SUG:NewModule("talents", SUG:GetModule("spell"))
+Module.noMin = true
+Module.table = {}
+
+function Module:OnInitialize()
+	for tab = 1, GetNumTalentTabs() do
+		for talent = 1, GetNumTalents(tab) do
+			local name, tex, _, _, rank = GetTalentInfo(tab, talent)
+			local lower = name and strlowerCache[name]
+			if lower then
+				self.table[lower] = {tab, talent, tex}
+			end
+		end
+	end
+end
+
+function Module:Table_Get()
+	return self.table
+end
+
+function Module:Table_GetSorter()
+	return nil
+end
+
+function Module:Entry_AddToList_1(f, name)
+	local data = self.table[name]
+	name = GetTalentInfo(data[1], data[2]) -- restore case
+	
+	f.Name:SetText(name)
+
+	f.tooltipmethod = "SetHyperlink"
+	f.tooltiparg = GetTalentLink(data[1], data[2])
+
+	f.insert = name
+
+	f.Icon:SetTexture(data[3])
+end
+
+function Module:Table_GetNormalSuggestions(suggestions, tbl, ...)
+	local atBeginning = SUG.atBeginning
+	
+	for name in pairs(tbl) do
+		if strfind(name, atBeginning) then
+			suggestions[#suggestions + 1] = name
+		end
+	end
+end
+
 
 
 local Module = SUG:NewModule("spellWithGCD", SUG:GetModule("spell"))
