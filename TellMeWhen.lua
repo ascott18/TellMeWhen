@@ -73,7 +73,7 @@ local GCD, NumShapeshiftForms, LastUpdate = 0, 0, 0
 local IconUpdateFuncs, GroupUpdateFuncs, unitsToChange = {}, {}, {}
 local BindUpdateFuncs
 local loweredbackup = {}
-local Shakers, ActivationGlows, FlashingFlashers, FadingIcons, CDBarsToUpdate, PBarsToUpdate = {}, {}, {}, {}, {}, {}
+local Shakers, ActivationGlows, FlashingFlashers, --[[Scalers,]] FadingIcons, CDBarsToUpdate, PBarsToUpdate = {}, {}, {}, {}, {}, {}--[[, {}]]
 local time = GetTime() TMW.time = time
 local sctcolor = {r=1, b=1, g=1}
 local clientVersion = select(4, GetBuildInfo())
@@ -1616,6 +1616,42 @@ function TMW:OnUpdate(elapsed)					-- THE MAGICAL ENGINE OF DOING EVERYTHING
 		end
 	end
 	
+	--[[for icon, Duration in next, Scalers do
+		Duration = Duration - elapsed
+		
+		local ScalePeriod = icon.ScalePeriod
+		local ScaleTime = icon.ScaleTime
+		ScaleTime = ScaleTime - elapsed
+
+		if icon.ScaleMagnitude then
+			if icon.scalingUp then
+				icon:SetScale(icon.ScaleMagnitude*(ScalePeriod-ScaleTime/ScalePeriod))
+			else
+				icon:SetScale(icon.ScaleMagnitude*(ScaleTime/ScalePeriod))
+			end
+		end
+			
+		if ScaleTime <= 0 then
+			local overtime = -ScaleTime
+			if overtime >= ScalePeriod then
+				overtime = 0
+			end
+			ScaleTime = ScalePeriod - overtime
+			
+			if Duration < 0 and not icon.scalingUp then -- we just finished the last scale, so dont do any more
+				Duration = nil
+				ScaleTime = nil
+				icon.ScalePeriod = nil
+				icon:SetScale(1)
+			end
+				
+			icon.scalingUp = not icon.scalingUp
+		end
+		
+		Scalers[icon] = Duration
+		icon.ScaleTime = ScaleTime
+	end]]
+	
 	for icon, Duration in next, ActivationGlows do
 		Duration = Duration - elapsed
 		if Duration < 0 then
@@ -1760,6 +1796,11 @@ function TMW:GetUpgradeTable()			-- upgrade functions
 	if TMW.UpgradeTable then return TMW.UpgradeTable end
 	local t = {
 		
+		[47321] = {
+			icon = function(ics)
+				ics.Events["**"] = nil -- wtf?
+			end,
+		},
 		[47320] = {
 			icon = function(ics)
 				for k, Event in pairs(ics.Events) do
@@ -3302,6 +3343,12 @@ function TMW.IconBase.FireEvent(icon, data, played, announced, animated)
 			icon.FadeEnd = icon.__alpha
 			icon.FadeDuration = Duration
 			FadingIcons[icon] = Duration
+		--[[elseif Animation == "ICONSCALE" then
+			icon.ScalePeriod = data.Period
+			icon.ScaleTime = data.Period
+			icon.ScaleMagnitude = data.ScaleMagnitude
+			icon.fadingIn = true
+			Scalers[icon] = Duration]]
 		end
 		
 		animated = 1
@@ -4790,6 +4837,11 @@ function TMW:LockToggle()
 		frame:Hide()
 		FlashingFlashers[frame] = nil
 	end
+	
+	--[[for icon in next, Scalers do
+		icon:SetScale(1)
+		Scalers[icon] = nil
+	end]]
 	
 	for frame, Duration in next, Shakers do
 		if frame == WorldFrame and TMW.WorldFramePoints then
