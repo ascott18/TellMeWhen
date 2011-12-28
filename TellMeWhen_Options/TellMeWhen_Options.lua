@@ -428,7 +428,7 @@ end
 
 
 ---------- Misc Utilities ----------
-do -- TMW:FindModule(self)
+do -- TMW:FindModule()
 	local function testFrame(frame)
 		if frame then
 			local Module = TMW:FindModule(frame)
@@ -451,61 +451,56 @@ do -- TMW:FindModule(self)
 	end
 end
 
-function TMW:ReconcileData(source, destination, matchSource, matchDestination, swap)
-	-- update any changed icons that meta icons are checking
-	for ics in TMW:InIconSettings() do
-		for k, ic in pairs(ics.Icons) do
-			if type(ic) == "string" then
-				local string = ic
-			
-				if matchSource and string:find(matchSource) then
-					ics.Icons[k] = string:gsub(source, destination)
-				elseif not matchSource and source == string then
-					ics.Icons[k] = destination
-				elseif swap and matchDestination and string:find(matchDestination) then
-					ics.Icons[k] = string:gsub(destination, source)
-				elseif swap and not matchDestination and destination == string then
-					ics.Icons[k] = source
+do -- TMW:ReconcileData()
+	local function replace(table, key, source, destination, matchSource, matchDestination, swap)
+		local string = table[key]
+		
+		if matchSource and string:find(matchSource) then
+			table[key] = string:gsub(source, destination)
+		elseif not matchSource and source == string then
+			table[key] = destination
+		elseif swap and matchDestination and string:find(matchDestination) then
+			table[key] = string:gsub(destination, source)
+		elseif swap and not matchDestination and destination == string then
+			table[key] = source
+		end
+	end
+	
+	function TMW:ReconcileData(source, destination, matchSource, matchDestination, swap, limitSourceGroup)
+		assert(source)
+		assert(destination)
+		
+		-- update any changed icons that meta icons are checking
+		for ics, groupID in TMW:InIconSettings() do
+			if not limitSourceGroup or groupID == limitSourceGroup then
+				for k, ic in pairs(ics.Icons) do
+					if type(ic) == "string" then
+						replace(ics.Icons, k, source, destination, matchSource, matchDestination, swap)
+					end
 				end
 			end
 		end
-	end
-	
-	-- update any changed icons in conditions
-	for Condition in TMW:InConditionSettings() do
-		if Condition.Icon ~= "" and type(Condition.Icon) == "string" then
-			local string = Condition.Icon
-			
-			if matchSource and string:find(matchSource) then
-				Condition.Icon = string:gsub(source, destination)
-			elseif not matchSource and source == string then
-				Condition.Icon = destination
-			elseif swap and matchDestination and string:find(matchDestination) then
-				Condition.Icon = string:gsub(destination, source)
-			elseif swap and not matchDestination and destination == string then
-				Condition.Icon = source
+		
+		-- update any changed icons in conditions
+		for Condition, _, groupID in TMW:InConditionSettings() do
+			if not limitSourceGroup or groupID == limitSourceGroup then
+				if Condition.Icon ~= "" and type(Condition.Icon) == "string" then
+					replace(Condition, "Icon", source, destination, matchSource, matchDestination, swap)
+				end
 			end
 		end
-	end
-	
-	-- update any anchors
-	for gs, gID in TMW:InGroupSettings() do
-		if type(gs.Point.relativeTo) == "string" then
-			local string = gs.Point.relativeTo
-			
-			if matchSource and string:find(matchSource) then
-				gs.Point.relativeTo = string:gsub(source, destination)
-			elseif not matchSource and source == string then
-				gs.Point.relativeTo = destination
-			elseif swap and matchDestination and string:find(matchDestination) then
-				gs.Point.relativeTo = string:gsub(destination, source)
-			elseif swap and not matchDestination and destination == string then
-				gs.Point.relativeTo = source
+		
+		-- update any anchors
+		for gs, groupID in TMW:InGroupSettings() do
+			if not limitSourceGroup or groupID == limitSourceGroup then
+				if type(gs.Point.relativeTo) == "string" then
+					replace(gs.Point, "relativeTo", source, destination, matchSource, matchDestination, swap)
+				end
 			end
 		end
+		
+		--TMW:Update()
 	end
-	
-	--TMW:Update()
 end
 
 
@@ -1717,9 +1712,9 @@ function ID:Swap()
 	ID.desticon.texture:SetTexture(ID.srcicon.texture:GetTexture())
 	ID.srcicon.texture:SetTexture(desttex)
 
-	local srcicon, desticon = tostring(ID.srcicon) .. "$", tostring(ID.desticon) .. "$"
+	local srcicon, desticon = tostring(ID.srcicon), tostring(ID.desticon)
 	
-	TMW:ReconcileData(srcicon, desticon, nil, nil, true)
+	TMW:ReconcileData(srcicon, desticon, srcicon .. "$", desticon .. "$", true)
 end
 
 function ID:Meta()
@@ -2150,7 +2145,6 @@ function IE:OnInitialize()
 end
 
 function IE:OnUpdate()
-	-- self is IE, not IE, but since i made them the same thing, it doesnt matter
 	local groupID, iconID = TMW.CI.g, TMW.CI.i
 	local icon = TMW.CI.ic
 	
@@ -2161,9 +2155,15 @@ function IE:OnUpdate()
 	-- update the top of the icon editor with the information of the current icon.
 	-- this is done in an OnUpdate because it is just too hard to track when the texture changes sometimes.
 	-- I don't want to fill up the main addon with configuration code to notify the IE of texture changes
-	self.FS1:SetFormattedText(TMW.L["GROUPICON"], TMW:GetGroupName(groupID, groupID, 1), iconID)
-	if icon then
-		self.icontexture:SetTexture(icon.texture:GetTexture())
+	if IE.CurrentTab:GetID() > #IE.Tabs - 2 then
+		-- the last 2 tabs are group config, so dont show icon info
+		self.FS1:SetFormattedText(L["fGROUP"], TMW:GetGroupName(groupID, groupID, 1))
+		self.icontexture:SetTexture(nil)
+	else
+		self.FS1:SetFormattedText(L["GROUPICON"], TMW:GetGroupName(groupID, groupID, 1), iconID)
+		if icon then
+			self.icontexture:SetTexture(icon.texture:GetTexture())
+		end
 	end
 	
 	-- run updates for any icons that are queued
@@ -2173,7 +2173,7 @@ function IE:OnUpdate()
 	
 	-- check and see if the settings of the current icon have changed.
 	-- if they have, create a history point (or at least try to)
-	-- IMPORTANT: do this after running icon updates because SoundData is stored in the event table, which makes 2 changes over 2 frames in 1 user action, which screws thing up
+	-- IMPORTANT: do this after running icon updates because SoundData is stored in the event table, which makes 2 changes over 2 frames in 1 user action, which SEVERELY screws things up
 	IE:AttemptBackup(icon)
 end
 
@@ -2930,48 +2930,26 @@ TMW.ImportFunctions = {
 			end
 		end
 	end,
-	group = function(data, version, noOverwrite, oldgroupID)
-		local groupID = CI.g
+	group = function(data, version, noOverwrite, oldgroupID, destgroupID)
 		if noOverwrite then
-			groupID = TMW:Group_Add()
+			destgroupID = TMW:Group_Add()
 		end
-		db.profile.Groups[groupID] = nil -- restore defaults, table recreated when passed in to CTIPWM
-		local gs = db.profile.Groups[groupID]
+		db.profile.Groups[destgroupID] = nil -- restore defaults, table recreated when passed in to CTIPWM
+		local gs = db.profile.Groups[destgroupID]
 		TMW:CopyTableInPlaceWithMeta(data, gs)
 		
 		-- change any meta icon components to the new group if the meta and components are/were in the same group (icon conditions, too)
 		if oldgroupID then
-			local srcgr, destgr = "TellMeWhen_Group"..oldgroupID, TMW[groupID]:GetName()
-			for ics in TMW:InIconSettings(groupID) do
+			local srcgr, destgr = "TellMeWhen_Group"..oldgroupID, TMW[destgroupID]:GetName()
 			
-				-- update meta icons within the group
-				for k, ic in pairs(ics.Icons) do
-					if ic:find(srcgr) then
-						ics.Icons[k] = ic:gsub(srcgr, destgr)
-					end
-				end
-				
-				-- update the conditions of icons within the group
-				for Condition in TMW:InConditions(ics.Conditions) do
-					if Condition.Icon:find(srcgr) then
-						Condition.Icon = Condition.Icon:gsub(srcgr, destgr)
-					end
-				end
-			end
-			
-			-- update group conditions
-			for Condition in TMW:InConditions(gs.Conditions) do
-				if Condition.Icon:find(srcgr) then
-					Condition.Icon = Condition.Icon:gsub(srcgr, destgr)
-				end
-			end
+			TMW:ReconcileData(srcgr, destgr, srcgr, destgr, nil, destgroupID)
 		end
 	
 		if version then
 			if version > TELLMEWHEN_VERSIONNUMBER then
 				TMW:Print(L["FROMNEWERVERSION"])
 			else
-				TMW:DoUpgrade(version, nil, groupID)
+				TMW:DoUpgrade(version, nil, destgroupID)
 			end
 		end
 	end,
@@ -3012,7 +2990,7 @@ function TMW:Import(data, version, type, ...)
 	assert(version, "Missing version of data")
 	assert(type, "No data type specified!")
 	CloseDropDownMenus()
-	local groupID, iconID = CI.g, CI.i
+	
 	local importfunc = TMW.ImportFunctions[type]
 	if importfunc then
 		importfunc(data, version, ...)
@@ -3202,7 +3180,7 @@ function IE:Copy_DropDown_Icon_OnClick(ics, version)
 	TMW:Import(ics, version, "icon")
 end
 
-function IE:AddIconToCopyDropdown(ics, groupID, iconID, profilename, group_src, version_src, force)
+function IE:AddIconToCopyDropdown(ics, groupID, iconID, profilename, group_src, version_src, force, disabled)
 	if force or (tonumber(iconID) and not IE:DeepCompare(DEFAULT_ICON_SETTINGS, ics)) then
 		info = UIDropDownMenu_CreateInfo()
 		
@@ -3234,6 +3212,8 @@ function IE:AddIconToCopyDropdown(ics, groupID, iconID, profilename, group_src, 
 		info.arg1 = ics
 		info.arg2 = version_src
 		
+		info.disabled = disabled
+		
 		UIDropDownMenu_AddButton(info, UIDROPDOWNMENU_MENU_LEVEL)
 	end
 end
@@ -3242,6 +3222,16 @@ local DeserializedData = {}
 function IE:Copy_DropDown(...)
 	local DROPDOWN = self
 	local EDITBOX = DROPDOWN:GetParent()
+	
+	local iconIDCurrent = TMW.CI.i
+	local groupIDCurrent = TMW.CI.g
+	if EDITBOX.obj then -- ace3 gui widget
+		groupIDCurrent = findid(EDITBOX.obj.userdata) -- might be nil if the editbox isnt in a group's config 
+		iconIDCurrent = nil
+	elseif IE.CurrentTab:GetID() > #IE.Tabs - 2 then
+		iconIDCurrent = nil
+	end
+	
 	if not CI.ic then
 		TMW.IE:Load(1, TMW:InIcons()()) -- hack to get the first icon that exists
 	end
@@ -3439,7 +3429,7 @@ function IE:Copy_DropDown(...)
 		end
 		
 		if UIDROPDOWNMENU_MENU_VALUE == "IMPORT_FROMSTRING_ICON" and editboxResult then
-			IE:AddIconToCopyDropdown(editboxResult.data, nil, nil, nil, nil, editboxResult.version, true)
+			IE:AddIconToCopyDropdown(editboxResult.data, nil, nil, nil, nil, editboxResult.version, true, not iconIDCurrent)
 			
 		end
 		
@@ -3449,7 +3439,7 @@ function IE:Copy_DropDown(...)
 			
 			for i, result in ipairs(DeserializedData) do
 				if result.type == "icon" then
-					IE:AddIconToCopyDropdown(result.data, nil, nil, nil, nil, result.version, true)
+					IE:AddIconToCopyDropdown(result.data, nil, nil, nil, nil, result.version, true, not iconIDCurrent)
 				else
 					info = UIDropDownMenu_CreateInfo()
 					info.text = result.arg1
@@ -3472,30 +3462,34 @@ function IE:Copy_DropDown(...)
 		if UIDROPDOWNMENU_MENU_VALUE == "EXPORT_TOCOMM" then
 		
 			-- icon to comm
-			info = UIDropDownMenu_CreateInfo()
-			local text = format(L["fICON"]:format(CI.i, TMW:GetGroupName(CI.g, CI.g, 1)))
-			info.text = text
-			info.tooltipTitle = text
-			info.tooltipText = L["EXPORT_TOCOMM_DESC"]
-			info.tooltipOnButton = true
-			info.notCheckable = true
-			info.func = function(...)
-				TMW:ExportToComm(EDITBOX, "icon", TMW.CI.ics, TMW.Icon_Defaults)
+			if iconIDCurrent then
+				info = UIDropDownMenu_CreateInfo()
+				local text = format(L["fICON"]:format(iconIDCurrent, TMW:GetGroupName(groupIDCurrent, groupIDCurrent, 1)))
+				info.text = text
+				info.tooltipTitle = text
+				info.tooltipText = L["EXPORT_TOCOMM_DESC"]
+				info.tooltipOnButton = true
+				info.notCheckable = true
+				info.func = function(...)
+					TMW:ExportToComm(EDITBOX, "icon", TMW.CI.ics, TMW.Icon_Defaults)
+				end
+				UIDropDownMenu_AddButton(info, UIDROPDOWNMENU_MENU_LEVEL)
 			end
-			UIDropDownMenu_AddButton(info, UIDROPDOWNMENU_MENU_LEVEL)
 			
 			-- group to comm
-			info = UIDropDownMenu_CreateInfo()
-			local text = format(L["fGROUP"]:format(TMW:GetGroupName(CI.g, CI.g, 1)))
-			info.text = text
-			info.tooltipTitle = text
-			info.tooltipText = L["EXPORT_TOCOMM_DESC"] .. "\r\n\r\n" .. L["EXPORT_SPECIALDESC"]
-			info.tooltipOnButton = true
-			info.notCheckable = true
-			info.func = function()
-				TMW:ExportToComm(EDITBOX, "group", TMW.CI.gs, TMW.Group_Defaults, CI.g)
+			if groupIDCurrent then
+				info = UIDropDownMenu_CreateInfo()
+				local text = format(L["fGROUP"]:format(TMW:GetGroupName(groupIDCurrent, groupIDCurrent, 1)))
+				info.text = text
+				info.tooltipTitle = text
+				info.tooltipText = L["EXPORT_TOCOMM_DESC"] .. "\r\n\r\n" .. L["EXPORT_SPECIALDESC"]
+				info.tooltipOnButton = true
+				info.notCheckable = true
+				info.func = function()
+					TMW:ExportToComm(EDITBOX, "group", TMW.CI.gs, TMW.Group_Defaults, groupIDCurrent)
+				end
+				UIDropDownMenu_AddButton(info, UIDROPDOWNMENU_MENU_LEVEL)
 			end
-			UIDropDownMenu_AddButton(info, UIDROPDOWNMENU_MENU_LEVEL)
 			
 			-- global to comm
 			info = UIDropDownMenu_CreateInfo()
@@ -3513,30 +3507,34 @@ function IE:Copy_DropDown(...)
 		if UIDROPDOWNMENU_MENU_VALUE == "EXPORT_TOSTRING" then
 		
 			-- icon to string
-			info = UIDropDownMenu_CreateInfo()
-			local text = format(L["fICON"]:format(CI.i, TMW:GetGroupName(CI.g, CI.g, 1)))
-			info.text = text
-			info.tooltipTitle = text
-			info.tooltipText = L["EXPORT_TOSTRING_DESC"]
-			info.tooltipOnButton = true
-			info.notCheckable = true
-			info.func = function()
-				TMW:ExportToString(EDITBOX, "icon", TMW.CI.ics, TMW.Icon_Defaults)
+			if iconIDCurrent then
+				info = UIDropDownMenu_CreateInfo()
+				local text = format(L["fICON"]:format(iconIDCurrent, TMW:GetGroupName(groupIDCurrent, groupIDCurrent, 1)))
+				info.text = text
+				info.tooltipTitle = text
+				info.tooltipText = L["EXPORT_TOSTRING_DESC"]
+				info.tooltipOnButton = true
+				info.notCheckable = true
+				info.func = function()
+					TMW:ExportToString(EDITBOX, "icon", TMW.CI.ics, TMW.Icon_Defaults)
+				end
+				UIDropDownMenu_AddButton(info, UIDROPDOWNMENU_MENU_LEVEL)
 			end
-			UIDropDownMenu_AddButton(info, UIDROPDOWNMENU_MENU_LEVEL)
 			
 			-- group to string
-			info = UIDropDownMenu_CreateInfo()
-			local text = format(L["fGROUP"]:format(TMW:GetGroupName(CI.g, CI.g, 1)))
-			info.text = text
-			info.tooltipTitle = text
-			info.tooltipText = L["EXPORT_TOSTRING_DESC"] .. "\r\n\r\n" .. L["EXPORT_SPECIALDESC"]
-			info.tooltipOnButton = true
-			info.notCheckable = true
-			info.func = function()
-				TMW:ExportToString(EDITBOX, "group", TMW.CI.gs, TMW.Group_Defaults, CI.g)
+			if groupIDCurrent then
+				info = UIDropDownMenu_CreateInfo()
+				local text = format(L["fGROUP"]:format(TMW:GetGroupName(groupIDCurrent, groupIDCurrent, 1)))
+				info.text = text
+				info.tooltipTitle = text
+				info.tooltipText = L["EXPORT_TOSTRING_DESC"] .. "\r\n\r\n" .. L["EXPORT_SPECIALDESC"]
+				info.tooltipOnButton = true
+				info.notCheckable = true
+				info.func = function()
+					TMW:ExportToString(EDITBOX, "group", TMW.CI.gs, TMW.Group_Defaults, groupIDCurrent)
+				end
+				UIDropDownMenu_AddButton(info, UIDROPDOWNMENU_MENU_LEVEL)
 			end
-			UIDropDownMenu_AddButton(info, UIDROPDOWNMENU_MENU_LEVEL)
 			
 			-- global to string
 			info = UIDropDownMenu_CreateInfo()
@@ -3554,7 +3552,7 @@ function IE:Copy_DropDown(...)
 
 	if not UIDROPDOWNMENU_MENU_VALUE then return end
 	if type(UIDROPDOWNMENU_MENU_VALUE) ~= "string" then return end
-	
+		
 	local IMPORT, PROFILE, profilename, groupID = strsplit("_", UIDROPDOWNMENU_MENU_VALUE)
 	if IMPORT ~= "IMPORT" then return end
 	groupID = tonumber(groupID)
@@ -3613,22 +3611,24 @@ function IE:Copy_DropDown(...)
 			TMW:Group_Update(CI.g)
 		end
 		info.notCheckable = true
+		info.disabled = not groupIDCurrent
 		UIDropDownMenu_AddButton(info, UIDROPDOWNMENU_MENU_LEVEL)
-
+		
 		-- copy entire group - overwrite current
 		info = UIDropDownMenu_CreateInfo()
-		info.text = L["COPYGROUP"] .. " - " .. L["OVERWRITEGROUP"]:format(TMW:GetGroupName(CI.g, CI.g, 1))
+		info.text = L["COPYGROUP"] .. " - " .. L["OVERWRITEGROUP"]:format(groupIDCurrent and TMW:GetGroupName(groupIDCurrent, groupIDCurrent, 1) or "?")
 		info.func = function()
-			TMW:Import(group_src, version_src, "group", nil, groupID)
+			TMW:Import(group_src, version_src, "group", nil, groupID, groupIDCurrent)
 		end
 		info.notCheckable = true
+		info.disabled = not groupIDCurrent
 		UIDropDownMenu_AddButton(info, UIDROPDOWNMENU_MENU_LEVEL)
 		
 		-- copy entire group - create new group
 		info = UIDropDownMenu_CreateInfo()
 		info.text = L["COPYGROUP"] .. " - " .. L["MAKENEWGROUP"]
 		info.func = function()
-			TMW:Import(group_src, version_src, "group", true, groupID) -- true forces a new group to be created
+			TMW:Import(group_src, version_src, "group", true, groupID, groupIDCurrent) -- true forces a new group to be created
 		end
 		info.notCheckable = true
 		UIDropDownMenu_AddButton(info, UIDROPDOWNMENU_MENU_LEVEL)
@@ -3646,7 +3646,7 @@ function IE:Copy_DropDown(...)
 			
 			-- add individual icons
 			for iconID, ics in TMW:OrderedPairs(group_src.Icons) do
-				IE:AddIconToCopyDropdown(ics, groupID, iconID, profilename, group_src, version_src)
+				IE:AddIconToCopyDropdown(ics, groupID, iconID, profilename, group_src, version_src, nil, not iconIDCurrent)
 			end
 		end
 	elseif profilename and profile_src then
@@ -3676,6 +3676,7 @@ function IE:Copy_DropDown(...)
 		UIDropDownMenu_AddButton(info, UIDROPDOWNMENU_MENU_LEVEL)
 		
 		AddDropdownSpacer()
+		
 		-- group header
 		info = UIDropDownMenu_CreateInfo()
 		info.text = L["UIPANEL_GROUPS"]
@@ -6730,7 +6731,8 @@ function CNDT:IconMenu_DropDown()
 end
 
 function CNDT:IconMenu_DropDown_OnClick(frame)
-	TMW:SetUIDropdownText(frame, self.value)
+	TMW:SetUIDropdownText(frame, self.value, TMW.Icons)
+	frame.icontexture:SetTexture(_G[self.value].__tex)
 	CloseDropDownMenus()
 	CNDT:Save()
 end
@@ -7160,6 +7162,7 @@ function CNDT.GroupBase.Load(group)
 	group.Check2:SetChecked(condition.Checked2)
 	
 	TMW:SetUIDropdownText(group.Icon, condition.Icon, TMW.Icons)
+	group.Icon.icontexture:SetTexture(_G[condition.Icon] and _G[condition.Icon].__tex)
 	
 	local v = TMW:SetUIDropdownText(group.Operator, condition.Operator, CNDT.Operators)
 	if v then

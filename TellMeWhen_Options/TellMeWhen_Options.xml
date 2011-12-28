@@ -653,6 +653,17 @@
 				self:ClearFocus()
 				ToggleDropDownMenu(1, nil, self.DD)
 			</OnEnterPressed>
+			<OnTextChanged>
+				local text = self:GetText()
+				if text == "" then
+					self.BackgroundText:SetText(self.label)
+				else
+					self.BackgroundText:SetText(nil)
+				end
+				if userInput then
+					CloseDropDownMenus()
+				end
+			</OnTextChanged>
 		</Scripts>
 	</EditBox>
 	
@@ -787,16 +798,27 @@
 			</Frame>
 			<Frame name="$parentIcon" parentKey="Icon" inherits="TMW_DropDownMenuTemplate">
 				<Anchors>
-					<Anchor point="LEFT" relativeTo="$parentType" relativePoint="RIGHT" x="-27"/>
+					<Anchor point="LEFT" relativeTo="$parentType" relativePoint="RIGHT" x="-10"/>
 				</Anchors>
 				<Scripts>
 					<OnLoad>
 						self.wrapTooltips = 1
 						self:Hide()
-						UIDropDownMenu_SetWidth(self, 168)
+						UIDropDownMenu_SetWidth(self, 151)
 						self.InitFunc = TMW.CNDT.IconMenu_DropDown
 					</OnLoad>
 				</Scripts>
+				<Layers>
+					<Layer level="OVERLAY">
+						<Texture name="$parentIconTexture" parentKey="icontexture">
+							<TexCoords left="0.07" right="0.93" top="0.07" bottom="0.93"/>
+							<Size x="18" y="18"/>
+							<Anchors>
+								<Anchor point="RIGHT" relativePoint="LEFT" x="16.5" y="3"/>
+							</Anchors>
+						</Texture>
+					</Layer>
+				</Layers>
 			</Frame>
 			<EditBox name="$parentUnit" inherits="TellMeWhen_InputBoxTemplate" parentKey="Unit" autoFocus="false">
 				<Size x="95" y="32"/>
@@ -4359,7 +4381,7 @@
 						local textfunc = function()
 							local binding = GetBindingKey("TELLMEWHEN_ICONEDITOR_REDO")
 							if binding then
-								binding = "(" .. binding .. ")"
+								binding = "(|cff7fffff" .. binding .. "|r)"
 							end
 							return TMW.L["REDO_ICON_DESC"] .. "\r\n\r\n" .. (binding or TMW.L["UNDOREDO_ICON_NOBIND"])
 						end

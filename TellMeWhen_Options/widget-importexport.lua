@@ -48,7 +48,7 @@ local methods = {
 	
 	["SetFocus"] = function(self)
 		self.editbox:SetFocus()
-	end
+	end,
 }
 
 --[[-----------------------------------------------------------------------------

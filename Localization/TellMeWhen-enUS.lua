@@ -722,8 +722,8 @@ L["ICON"] = "Icon"
 L["DISABLED"] = "Disabled"
 L["COPYPOSSCALE"] = "Copy position/scale"
 L["COPYGROUP"] = "Copy Group"
-L["OVERWRITEGROUP"] = "Overwrite group: %s"
-L["MAKENEWGROUP"] = "Create new group"
+L["OVERWRITEGROUP"] = "|cFFFF5959Overwrite|r Group: %s"
+L["MAKENEWGROUP"] = "|cff59ff59Create|r New Group"
 
 
 L["GROUPADDONSETTINGS"] = "Group Settings"
@@ -761,8 +761,8 @@ To import from a string, press CTRL+V to paste the string into the editbox after
 L["IMPORT_FROMCOMM"] = "From Player"
 L["IMPORT_FROMCOMM_DESC"] = "If another user of TellMeWhen sends you any configuration data, you will be able to import that data from this submenu."
 L["IMPORT_PROFILE"] = "Copy Profile"
-L["IMPORT_PROFILE_OVERWRITE"] = "Overwrite %s"
-L["IMPORT_PROFILE_NEW"] = "Create New Profile"
+L["IMPORT_PROFILE_OVERWRITE"] = "|cFFFF5959Overwrite|r %s"
+L["IMPORT_PROFILE_NEW"] = "|cff59ff59Create|r New Profile"
 
 L["EXPORT_HEADING"] = "Export"
 L["EXPORT_TOSTRING"] = "To String"

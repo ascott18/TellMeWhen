@@ -32,7 +32,7 @@ local DRData = LibStub("DRData-1.0", true)
 TELLMEWHEN_VERSION = "4.7.3"
 TELLMEWHEN_VERSION_MINOR = strmatch(" @project-version@", " r%d+") or ""
 TELLMEWHEN_VERSION_FULL = TELLMEWHEN_VERSION .. TELLMEWHEN_VERSION_MINOR
-TELLMEWHEN_VERSIONNUMBER = 47318 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
+TELLMEWHEN_VERSIONNUMBER = 47319 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
 if TELLMEWHEN_VERSIONNUMBER > 48000 or TELLMEWHEN_VERSIONNUMBER < 47000 then return error("YOU SCREWED UP THE VERSION NUMBER OR DIDNT CHANGE THE SAFETY LIMITS") end -- safety check because i accidentally made the version number 414069 once
 
 TELLMEWHEN_MAXGROUPS = 1 	--this is a default, used by SetTheory (addon), so dont rename
@@ -271,7 +271,7 @@ do -- Iterators
 					break
 				end
 			end
-			return rawget(db.profile.Groups, cg) and rawget(db.profile.Groups[cg].Icons,ci), cg, ci -- setting table, groupID, iconID
+			return rawget(db.profile.Groups, cg) and rawget(db.profile.Groups[cg].Icons,ci), cg, ci -- ics, groupID, iconID
 		end
 
 		function TMW:InIconSettings(groupID)
@@ -2717,7 +2717,7 @@ function TMW:RestoreEvents()
 end
 
 function TMW:GetFlasher(parent)
-	Flasher = parent:CreateTexture(nil, "BACKGROUND")
+	Flasher = parent:CreateTexture(nil, "BACKGROUND", nil, 5)
 	Flasher:SetAllPoints(parent.base == TMW.IconBase and parent.texture)
 	Flasher:Hide()
 	

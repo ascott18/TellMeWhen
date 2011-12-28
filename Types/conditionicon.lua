@@ -136,6 +136,10 @@ function Type:DragReceived(icon, t, data, subType)
 	return true -- signal success
 end
 
+function Type:GetIconMenuText(data)
+	return "((" .. Type.name .. "))", ""
+end
+
 function Type:IE_TypeLoaded()
 	TMW.IE.Main.ConditionAlpha.text:SetText(L["CONDITIONALPHA_CONDITIONICON"])
 	TMW:TT(TMW.IE.Main.ConditionAlpha, "CONDITIONALPHA_CONDITIONICON", "CONDITIONALPHA_CONDITIONICON_DESC")

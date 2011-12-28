@@ -4,6 +4,7 @@
  * You can now change the "Show Timer Text" option if LUI is the only addon enabled that can handle cooldown timer texts.
  * Changed the "Hide when slot is empty" to include hiding the icon if the slot being checked contains a shield or off-hand frill.
  * Implemented the "Failed Conditions" opacity setting for meta icons.
+ * Slightly reworked the import dropdown to more accurately detect the group being edited, and to disallow importing of a data type where that data type is not being edited.
  * Bug Fixes:
  ** (r356) Attempted a fix for default.lua:70 attempt to concatenate global 'input' (a table value)
  ** (r358) Icons tracking multiple elements whose start times are exactly the same should now properly update their timers when the first element gives yield to the second after timer expiration.
@@ -13,6 +14,7 @@
  ** (r368) Lightwell glyph detection was apparently a little iffy. Added some manual checks in case the events don't fire when they should.
  ** (r370) The "ReducedArmor" equivalency should now track raptors' "Tear Armor" debuff properly.
  ** (r372) TellMeWhen_Options-r369.lua:278 attempt to index local "f" (a nil value)
+ ** (r378) Icon flashers should now work properly without Masque.
  
 ===v4.7.2===
  * New Icon Type: Lightwell
