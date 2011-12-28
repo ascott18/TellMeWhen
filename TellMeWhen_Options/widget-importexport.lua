@@ -57,13 +57,13 @@ Constructor
 local function Constructor()
 	local num  = AceGUI:GetNextWidgetNum(Type)
 	local frame = CreateFrame("Frame", nil, UIParent)
+	frame:SetHeight(26)
 	frame:Hide()
 	
 	local editbox = CreateFrame("EditBox", "TellMeWhen_ImpExpBox"..num, frame, "TellMeWhen_ExportBoxTemplate")
-	editbox:SetPoint("BOTTOMLEFT", 6, 0)
-	editbox:SetPoint("BOTTOMRIGHT", -18, 0)
+	--editbox:SetPoint("BOTTOMLEFT", 6, 0)
 	editbox:SetPoint("TOPLEFT", 6, 0)
-	frame:SetHeight(26)
+	editbox:SetPoint("RIGHT", -18, 0)
 	
 	local label = frame:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
 	label:SetPoint("TOPLEFT", 0, -2)

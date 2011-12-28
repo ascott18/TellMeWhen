@@ -262,8 +262,8 @@ end
 local function TTOnEnter(self)
 	if self.__title or self.__text then
 		GameTooltip_SetDefaultAnchor(GameTooltip, self)
-		GameTooltip:AddLine(get(self.__title), HIGHLIGHT_FONT_COLOR.r, HIGHLIGHT_FONT_COLOR.g, HIGHLIGHT_FONT_COLOR.b, false)
-		GameTooltip:AddLine(get(self.__text), NORMAL_FONT_COLOR.r, NORMAL_FONT_COLOR.g, NORMAL_FONT_COLOR.b, not self.__noWrapTooltipText)
+		GameTooltip:AddLine(get(self.__title, self), HIGHLIGHT_FONT_COLOR.r, HIGHLIGHT_FONT_COLOR.g, HIGHLIGHT_FONT_COLOR.b, false)
+		GameTooltip:AddLine(get(self.__text, self), NORMAL_FONT_COLOR.r, NORMAL_FONT_COLOR.g, NORMAL_FONT_COLOR.b, not self.__noWrapTooltipText)
 		GameTooltip:Show()
 	end
 end
@@ -296,6 +296,14 @@ function TMW:TT(f, title, text, actualtitle, actualtext)
 		end
 		if not f:GetScript("OnLeave") then
 			f:HookScript("OnLeave", TTOnLeave)
+		end
+	end
+end
+function TMW:TT_Update(f)
+	if f:IsMouseOver() then
+		f:GetScript("OnLeave")(f)
+		if not f.IsEnabled or f:IsEnabled() or f:GetMotionScriptsWhileDisabled() then
+			f:GetScript("OnEnter")(f)
 		end
 	end
 end
@@ -424,6 +432,19 @@ local function AddDropdownSpacer()
 	info.isTitle = true
 	info.notCheckable = true
 	UIDropDownMenu_AddButton(info, UIDROPDOWNMENU_MENU_LEVEL)
+end
+
+function TMW:SetIconPreviewIcon(icon)
+	if not icon or icon.base ~= TMW.IconBase then
+		self:Hide()
+		return
+	end
+	
+	local groupID = icon.group:GetID()
+	TMW:TT(self, format(L["GROUPICON"], TMW:GetGroupName(groupID, groupID, 1), icon:GetID()), "ICON_TOOLTIP2NEWSHORT", 1, nil)
+	self.icon = icon
+	self.texture:SetTexture(icon and icon.__tex)
+	self:Show()
 end
 
 
@@ -1840,7 +1861,7 @@ function ME:Update()
 		
 		TMW:SetUIDropdownText(mg.icon, v, TMW.Icons)
 		
-		mg.icontexture:SetTexture(_G[v] and _G[v].base == TMW.IconBase and _G[v].texture:GetTexture())
+		mg.IconPreview:SetIcon(_G[v])
 	end
 
 	for f=#settings+1, #ME do
@@ -2131,8 +2152,9 @@ IE.Tabs = {
 	"MainOptions",	  -- [7]
 }
 
-function IE:OnInitialize()
 
+function IE:OnInitialize()
+	
 	-- they see me clonin'... they hatin'...
 	-- (make TMW.IE be the same as IE)
 	-- IE[0] = TellMeWhen_IconEditor[0] (already done in .xml)
@@ -2142,6 +2164,9 @@ function IE:OnInitialize()
 	
 	IE:SetScript("OnUpdate", IE.OnUpdate)
 	IE.iconsToUpdate = {}
+	
+	IE.history = {}
+	IE.historyState = 0
 end
 
 function IE:OnUpdate()
@@ -2159,11 +2184,15 @@ function IE:OnUpdate()
 		-- the last 2 tabs are group config, so dont show icon info
 		self.FS1:SetFormattedText(L["fGROUP"], TMW:GetGroupName(groupID, groupID, 1))
 		self.icontexture:SetTexture(nil)
+		self.BackButton:Hide()
+		self.ForwardsButton:Hide()
 	else
 		self.FS1:SetFormattedText(L["GROUPICON"], TMW:GetGroupName(groupID, groupID, 1), iconID)
 		if icon then
 			self.icontexture:SetTexture(icon.texture:GetTexture())
 		end
+		self.BackButton:Show()
+		self.ForwardsButton:Show()
 	end
 	
 	-- run updates for any icons that are queued
@@ -2179,7 +2208,7 @@ end
 
 
 ---------- Interface ----------
-function IE:Load(isRefresh, icon)
+function IE:Load(isRefresh, icon, isHistoryChange)
 	if type(icon) == "table" then
 		HELP:HideForIcon(CI.ic)
 		PlaySound("igCharacterInfoTab")
@@ -2189,6 +2218,21 @@ function IE:Load(isRefresh, icon)
 		CI.g = icon:GetParent():GetID()
 		CI.ic = icon
 		CI.t = icon.Type
+	
+		if IE.history[#IE.history] ~= icon and not isHistoryChange then
+			-- if we are using an old history point (i.e. we hit back a few times and then loaded a new icon), 
+			-- delete all history points from the current one forward so that we dont jump around wildly when backing and forwarding
+			for i = IE.historyState + 1, #IE.history do
+				IE.history[i] = nil
+			end
+			
+			IE.history[#IE.history + 1] = icon
+			
+			-- set the history state to the latest point
+			IE.historyState = #IE.history
+			-- notify the back and forwards buttons that there was a change so they can :Enable() or :Disable()
+			IE:BackFowardsChanged()
+		end
 	end
 	if not IE:IsShown() then
 		if isRefresh then
@@ -2234,7 +2278,7 @@ function IE:Load(isRefresh, icon)
 	IE:LoadSettings()
 	IE:ShowHide()
 	
-	IE:ScheduleIconUpdate(CI.ic)
+	IE:ScheduleIconUpdate()
 	
 	HELP:ShowNext()
 	
@@ -2353,7 +2397,7 @@ function IE:Reset()
 	local groupID, iconID = CI.g, CI.i
 	IE:SaveSettings() -- this is here just to clear the focus of editboxes, not to actually save things
 	db.profile.Groups[groupID].Icons[iconID] = nil
-	IE:ScheduleIconUpdate(CI.ic)
+	IE:ScheduleIconUpdate()
 	IE:Load(1)
 	IE:TabClick(IE.MainTab)
 	HELP:HideForIcon(CI.ic)
@@ -2377,7 +2421,7 @@ end
 function IE:LeftCheck_OnClick(button)
 	if CI.ics and self.setting then
 		CI.ics[self.setting] = not not self:GetChecked()
-		IE:ScheduleIconUpdate(CI.ic)
+		IE:ScheduleIconUpdate()
 	end
 	get(self.data.clickhook, self, button) -- cheater! (we arent getting anything, im using this as a wrapper so i dont have to see if the function exists)
 end
@@ -2746,7 +2790,7 @@ end
 function IE:Type_Dropdown_OnClick()
 	CI.ics.Type = self.value
 	CI.ic.texture:SetTexture(nil)
-	IE:ScheduleIconUpdate(CI.ic)
+	IE:ScheduleIconUpdate()
 	TMW:SetUIDropdownText(IE.Main.Type, self.value)
 	CI.t = self.value
 	SUG.redoIfSame = 1
@@ -2788,7 +2832,7 @@ function IE:Unit_DropDown_OnClick(v)
 	e:Insert(";" .. ins .. ";")
 	TMW:CleanString(e)
 	CI.ics.Unit = e:GetText()
-	IE:ScheduleIconUpdate(CI.ic)
+	IE:ScheduleIconUpdate()
 	CloseDropDownMenus()
 	
 	db.global.HelpSettings.HasChangedUnit = db.global.HelpSettings.HasChangedUnit + 1
@@ -3486,7 +3530,7 @@ function IE:Copy_DropDown(...)
 				info.tooltipOnButton = true
 				info.notCheckable = true
 				info.func = function()
-					TMW:ExportToComm(EDITBOX, "group", TMW.CI.gs, TMW.Group_Defaults, groupIDCurrent)
+					TMW:ExportToComm(EDITBOX, "group", TMW[groupIDCurrent]:GetSettings(), TMW.Group_Defaults, groupIDCurrent)
 				end
 				UIDropDownMenu_AddButton(info, UIDROPDOWNMENU_MENU_LEVEL)
 			end
@@ -3531,7 +3575,7 @@ function IE:Copy_DropDown(...)
 				info.tooltipOnButton = true
 				info.notCheckable = true
 				info.func = function()
-					TMW:ExportToString(EDITBOX, "group", TMW.CI.gs, TMW.Group_Defaults, groupIDCurrent)
+					TMW:ExportToString(EDITBOX, "group", TMW[groupIDCurrent]:GetSettings(), TMW.Group_Defaults, groupIDCurrent)
 				end
 				UIDropDownMenu_AddButton(info, UIDROPDOWNMENU_MENU_LEVEL)
 			end
@@ -3633,7 +3677,7 @@ function IE:Copy_DropDown(...)
 		info.notCheckable = true
 		UIDropDownMenu_AddButton(info, UIDROPDOWNMENU_MENU_LEVEL)
 
-		if group_src.Icons and #group_src.Icons > 0 then
+		if group_src.Icons and next(group_src.Icons) then
 			AddDropdownSpacer()
 			
 			-- icon header
@@ -3879,6 +3923,36 @@ function IE:UndoRedoChanged()
 	else
 		IE.RedoButton:Enable()
 		IE.CanRedo = true
+	end
+end
+
+
+---------- Back/Fowards ----------
+function IE:DoBackForwards(direction)	
+	if not IE.history[IE.historyState + direction] then return end -- not valid, so don't try
+	
+	IE.historyState = IE.historyState + direction
+	
+	IE:Load(nil, IE.history[IE.historyState], true)
+	
+	IE:BackFowardsChanged()
+end
+
+function IE:BackFowardsChanged()
+	if IE.historyState - 1 < 1 then
+		IE.BackButton:Disable()
+		IE.CanBack = false
+	else
+		IE.BackButton:Enable()
+		IE.CanBack = true
+	end
+	
+	if IE.historyState + 1 > #IE.history then
+		IE.ForwardsButton:Disable()
+		IE.CanFowards = false
+	else
+		IE.ForwardsButton:Enable()
+		IE.CanFowards = true
 	end
 end
 
@@ -6479,7 +6553,7 @@ function CNDT:Save()
 	end
 
 	if CNDT.type == "icon" then
-		IE:ScheduleIconUpdate(CI.ic)
+		IE:ScheduleIconUpdate()
 	elseif CNDT.type == "group" then
 		TMW:Group_Update(groupID)
 	end
@@ -6732,7 +6806,7 @@ end
 
 function CNDT:IconMenu_DropDown_OnClick(frame)
 	TMW:SetUIDropdownText(frame, self.value, TMW.Icons)
-	frame.icontexture:SetTexture(_G[self.value].__tex)
+	frame:GetParent().IconPreview:SetIcon(_G[self.value])
 	CloseDropDownMenus()
 	CNDT:Save()
 end
@@ -7162,7 +7236,7 @@ function CNDT.GroupBase.Load(group)
 	group.Check2:SetChecked(condition.Checked2)
 	
 	TMW:SetUIDropdownText(group.Icon, condition.Icon, TMW.Icons)
-	group.Icon.icontexture:SetTexture(_G[condition.Icon] and _G[condition.Icon].__tex)
+	group.IconPreview:SetIcon(_G[condition.Icon])
 	
 	local v = TMW:SetUIDropdownText(group.Operator, condition.Operator, CNDT.Operators)
 	if v then

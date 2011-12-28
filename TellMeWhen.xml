@@ -16,6 +16,7 @@
 				<Anchors>
 					<Anchor point="BOTTOMRIGHT"/>
 				</Anchors>
+				<HitRectInsets left="3" right="0" top="3" bottom="0" />
 				<Layers>
 					<Layer level="BACKGROUND">
 						<Texture name="$parentTexture" parentKey="texture" file="Interface\AddOns\TellMeWhen\Textures\Resize">
@@ -54,12 +55,6 @@
 			<Layer level="BACKGROUND">
 				<Texture name="$parentIcon" parentKey="texture" file="Interface\Icons\INV_Misc_QuestionMark">
 					<Size x="30" y="30"/>
-				</Texture>
-				<Texture name="$parentFlasher" parentKey="flash" hidden="true">
-					<Anchors>
-						<Anchor point="TOPLEFT" relativeTo="$parentIcon"/>
-						<Anchor point="BOTTOMRIGHT" relativeTo="$parentIcon"/>
-					</Anchors>
 				</Texture>
 			</Layer>
 			<Layer level="ARTWORK">
@@ -134,19 +129,11 @@
 				self:RegisterForDrag("LeftButton", "RightButton")
 			</OnLoad>
 			<OnEnter>
-				local groupID = self:GetParent():GetID()
-				local line1 = TMW.L["ICON_TOOLTIP1"] .. " " .. format(TMW.L["GROUPICON"], TMW:GetGroupName(groupID, groupID, 1), self:GetID())
-				if self:GetParent().Locked then
-					line1 = line1 .. " (" .. TMW.L["LOCKED"] .. ")"
-				end
-				GameTooltip_SetDefaultAnchor(GameTooltip, self)
-				GameTooltip:AddLine(line1, HIGHLIGHT_FONT_COLOR.r, HIGHLIGHT_FONT_COLOR.g, HIGHLIGHT_FONT_COLOR.b)
-				GameTooltip:AddLine(TMW.L["ICON_TOOLTIP2NEW"], NORMAL_FONT_COLOR.r, NORMAL_FONT_COLOR.g, NORMAL_FONT_COLOR.b)
-				GameTooltip:Show()
+				self:SetScript("OnEnter", nil)
+				self.__noWrapTooltipText = true
+				TMW:TT(self, self.GetTooltipTitle, "ICON_TOOLTIP2NEW", 1, nil)
+				self:GetScript("OnEnter")(self)
 			</OnEnter>
-			<OnLeave>
-				GameTooltip:Hide()
-			</OnLeave>
 			<OnMouseUp>
 				if TMW.ID.isMoving then
 					TMW:Group_StopMoving(TMW.ID.isMoving)
@@ -155,7 +142,7 @@
 					TMW.IE:Load(nil, self)
 				end
 				if TMW.IE then
-					TMW.IE:ScheduleIconUpdate(self:GetParent():GetID(), self:GetID())
+					TMW.IE:ScheduleIconUpdate(self)
 				end
 			</OnMouseUp>
 			<OnMouseDown>
@@ -176,7 +163,7 @@
 					end
 				end
 				if TMW.IE then
-					TMW.IE:ScheduleIconUpdate(self:GetParent():GetID(), self:GetID())
+					TMW.IE:ScheduleIconUpdate(self)
 				end
 			</OnDragStart>
 			<OnReceiveDrag>

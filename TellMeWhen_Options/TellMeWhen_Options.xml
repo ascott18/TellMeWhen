@@ -68,7 +68,7 @@
 					TMW.SUG:NameOnCursor()
 				end
 				TMW.IE:ShowHide()
-				TMW.IE:ScheduleIconUpdate(TMW.CI.ic)
+				TMW.IE:ScheduleIconUpdate()
 			</OnClick>
 		</Scripts>
 	</CheckButton>
@@ -277,7 +277,7 @@
 				self:SetText(t)
 				if TMW.CI.ics then
 					TMW.CI.ics[self.setting] = t
-					TMW.IE:ScheduleIconUpdate(TMW.CI.ic)
+					TMW.IE:ScheduleIconUpdate()
 				end
 				self:GetScript("OnTextChanged")(self)
 			</OnEditFocusLost>
@@ -340,7 +340,7 @@
 				self.Mid:SetText(value .. "%")
 				if TMW.CI.ics and not self.fakeNextSetValue then
 					TMW.CI.ics[self.setting] = value / 100
-					TMW.IE:ScheduleIconUpdate(TMW.CI.ic)
+					TMW.IE:ScheduleIconUpdate()
 					if self:IsEnabled() and ((value == 0 and self.setting ~= "ConditionAlpha") or (value == 100 and self.setting == "ConditionAlpha")) then
 						self.Mid:SetText("|cffff7400" .. value .. "%")
 					end
@@ -383,7 +383,7 @@
 				self.High:SetTextColor(color, color, color, 1)
 			</OnMinMaxChanged>
 			<OnMouseWheel>
-				self:SetValue(self:GetValue()+(delta/self.step))
+				self:SetValue(self:GetValue()+(delta*self.step))
 			</OnMouseWheel>
 		</Scripts>
 	</Slider>
@@ -494,6 +494,32 @@
 		</Scripts>
 	</Frame>
 	
+	<Button name="TellMeWhen_IconPreviewTemplate" parentKey="IconPreview" virtual="true" enableMouse="true">
+		<Layers>
+			<Layer level="BACKGROUND">
+				<Texture name="$parentIcon" parentKey="texture" file="Interface\Icons\INV_Misc_QuestionMark" setAllPoints="true">
+					<TexCoords left="0.07" right="0.93" top="0.07" bottom="0.93"/>
+				</Texture>
+			</Layer>
+		</Layers>
+		<Scripts>
+			<OnLoad>
+				self.SetIcon = TMW.SetIconPreviewIcon
+			</OnLoad>
+			<OnMouseUp>
+				if button == "RightButton" then
+					TMW.IE:Load(nil, self.icon)
+				end
+				if TMW.IE then
+					TMW.IE:ScheduleIconUpdate(self.icon)
+				end
+			</OnMouseUp>
+		</Scripts>
+
+		<NormalTexture file=""/>
+		<HighlightTexture alphaMode="ADD" file="Interface\Buttons\ButtonHilight-Square"/>
+		<PushedTexture file="Interface\Buttons\UI-Quickslot-Depress"/>
+	</Button>
 	
 	<EditBox name="TellMeWhen_ExportBoxTemplate" inherits="TellMeWhen_InputBoxTemplate" virtual="true">
 		<Size y="15"/>
@@ -602,13 +628,15 @@
 							end
 						end
 						self:SetFrameLevel(self:GetParent():GetFrameLevel() - 1)
+						self.realParent = self:GetParent()
+						--self:SetParent(TellMeWhen_IconEditor)
 					</OnLoad>
 					<OnShow>
 						self.texture:SetTexture(LibStub("LibSharedMedia-3.0"):Fetch("statusbar", TMW.db.profile.TextureName))
-						self:GetParent().BackgroundText:Hide()
+						self.realParent.BackgroundText:Hide()
 					</OnShow>
 					<OnHide>
-						self:GetParent().BackgroundText:Show()
+						self.realParent.BackgroundText:Show()
 					</OnHide>
 					<OnValueChanged>
 						local _, max = self:GetMinMaxValues()
@@ -808,18 +836,13 @@
 						self.InitFunc = TMW.CNDT.IconMenu_DropDown
 					</OnLoad>
 				</Scripts>
-				<Layers>
-					<Layer level="OVERLAY">
-						<Texture name="$parentIconTexture" parentKey="icontexture">
-							<TexCoords left="0.07" right="0.93" top="0.07" bottom="0.93"/>
-							<Size x="18" y="18"/>
-							<Anchors>
-								<Anchor point="RIGHT" relativePoint="LEFT" x="16.5" y="3"/>
-							</Anchors>
-						</Texture>
-					</Layer>
-				</Layers>
 			</Frame>
+			<Button inherits="TellMeWhen_IconPreviewTemplate">
+				<Size x="18" y="18"/>
+				<Anchors>
+					<Anchor point="RIGHT" relativeTo="$parentIcon" relativePoint="LEFT" x="16.5" y="3"/>
+				</Anchors>
+			</Button>
 			<EditBox name="$parentUnit" inherits="TellMeWhen_InputBoxTemplate" parentKey="Unit" autoFocus="false">
 				<Size x="95" y="32"/>
 				<Anchors>
@@ -1273,6 +1296,7 @@
 				</Scripts>
 				<NormalTexture urgency="5" file="Interface\ChatFrame\UI-ChatIcon-ScrollUp-Up" alphaMode="ADD">
 					<TexCoords left="0.21875" right="0.6875" top="0.34375" bottom="0.65625"/>
+					ULx, 	ULy, 	LLx, 	  LLy,	   URx,	   URy,		LRx,	 LRy
 					<Color r=".7" g=".7" b=".7" a="1"/>
 				</NormalTexture>
 				<HighlightTexture urgency="5" file="Interface\ChatFrame\UI-ChatIcon-ScrollUp-Up" alphaMode="ADD">
@@ -1453,18 +1477,13 @@
 					</OnClick>
 				</Scripts>
 			</Button>
+			<Button inherits="TellMeWhen_IconPreviewTemplate">
+				<Size x="24" y="24"/>
+				<Anchors>
+					<Anchor point="RIGHT" relativeTo="$parentIcon" relativePoint="LEFT" x="13" y="3"/>
+				</Anchors>
+			</Button>
 		</Frames>
-		<Layers>
-			<Layer level="OVERLAY">
-				<Texture name="$parentIconTexture" parentKey="icontexture">
-					<TexCoords left="0.07" right="0.93" top="0.07" bottom="0.93"/>
-					<Size x="24" y="24"/>
-					<Anchors>
-						<Anchor point="RIGHT" relativeTo="$parentIcon" relativePoint="LEFT" x="13" y="3"/>
-					</Anchors>
-				</Texture>
-			</Layer>
-		</Layers>
 		<Scripts>
 			<OnLoad>
 				TMW.ME[self:GetID()] = self
@@ -1598,7 +1617,7 @@
 			<OnClick>
 				if TMW.CI.ics then
 					TMW.ANN:GetEventSettings().Channel = self.channel
-					TMW.IE:ScheduleIconUpdate(TMW.CI.ic)
+					TMW.IE:ScheduleIconUpdate()
 				end
 				TMW.ANN:SelectChannel(self.channel)
 				TMW.ANN:SetTabText()
@@ -1632,24 +1651,11 @@
 				TMW.SND:SelectSound(name)
 				if TMW.CI.ics then
 					TMW.SND:GetEventSettings().Sound = name
-					TMW.IE:ScheduleIconUpdate(TMW.CI.ic)
+					TMW.IE:ScheduleIconUpdate()
 				end
 				TMW.SND:SetupEventDisplay(TMW.SND.currentEvent)
 				TMW.SND:SetTabText()
 			</OnClick>
-			<OnEnter>
-			--[[	GameTooltip_SetDefaultAnchor(GameTooltip, self)
-				if self.tooltipmethod then
-					GameTooltip[self.tooltipmethod](GameTooltip, self.tooltiparg)
-				elseif self.tooltiptitle then
-					GameTooltip:AddLine(self.tooltiptitle, HIGHLIGHT_FONT_COLOR.r, HIGHLIGHT_FONT_COLOR.g, HIGHLIGHT_FONT_COLOR.b, 1)
-					GameTooltip:AddLine(self.tooltiptext, NORMAL_FONT_COLOR.r, NORMAL_FONT_COLOR.g, NORMAL_FONT_COLOR.b, 1)
-				end
-				GameTooltip:Show()]]
-			</OnEnter>
-			<OnLeave>
-			--	GameTooltip:Hide()
-			</OnLeave>
 			<OnMouseWheel>
 				self:GetParent().ScrollBar:SetValue(self:GetParent().ScrollBar:GetValue() - delta)
 			</OnMouseWheel>
@@ -1700,7 +1706,7 @@
 			<OnClick>
 				if TMW.CI.ics then
 					TMW.ANIM:GetEventSettings().Animation = self.animation
-					TMW.IE:ScheduleIconUpdate(TMW.CI.ic)
+					TMW.IE:ScheduleIconUpdate()
 				end
 				TMW.ANIM:SelectAnimation(self.animation)
 				TMW.ANIM:SetTabText()
@@ -1715,7 +1721,7 @@
 				local parentModule = TMW:FindModule(self)
 				if TMW.CI.ics then
 					parentModule:GetEventSettings()[self.setting] = not not self:GetChecked()
-					TMW.IE:ScheduleIconUpdate(TMW.CI.ic)
+					TMW.IE:ScheduleIconUpdate()
 				end
 				parentModule:SetupEventSettings()
 			</OnClick>
@@ -1862,7 +1868,7 @@
 								if TMW.CI.ics then
 									local parentModule = TMW:FindModule(self)
 									parentModule:GetEventSettings().Value = t
-									TMW.IE:ScheduleIconUpdate(TMW.CI.ic)
+									TMW.IE:ScheduleIconUpdate()
 								end
 								
 								self:GetScript("OnTextChanged")(self)						
@@ -2351,17 +2357,16 @@
 								self.Button:HookScript("OnClick", function(self)
 									TMW.IE:SaveSettings()
 								end)
+								
+								local title = function()
+									return TMW.Types[TMW.CI.t].name
+								end
+								local text = function()
+									return TMW.Types[TMW.CI.t].desc
+								end
+								
+								TMW:TT(self, title, text, 1, 1)
 							</OnLoad>
-							<OnEnter>
-								local Type = TMW.Types[TMW.CI.t]
-								GameTooltip_SetDefaultAnchor(GameTooltip, self)
-								GameTooltip:AddLine(Type.name, HIGHLIGHT_FONT_COLOR.r, HIGHLIGHT_FONT_COLOR.g, HIGHLIGHT_FONT_COLOR.b, 1)
-								GameTooltip:AddLine(Type.desc, NORMAL_FONT_COLOR.r, NORMAL_FONT_COLOR.g, NORMAL_FONT_COLOR.b, 1)
-								GameTooltip:Show()
-							</OnEnter>
-							<OnLeave>
-								GameTooltip:Hide()
-							</OnLeave>
 						</Scripts>
 					</Frame>
 					<EditBox name="$parentName" inherits="TellMeWhen_InputBoxTemplate" parentKey="Name" autoFocus="false">
@@ -2413,7 +2418,7 @@
 								
 								if TMW.CI.ics then
 									TMW.CI.ics.Name = TMW:CleanString(self:GetText())
-									TMW.IE:ScheduleIconUpdate(TMW.CI.ic)
+									TMW.IE:ScheduleIconUpdate()
 								end
 								
 								self:GetScript("OnTextChanged")(self)
@@ -2531,7 +2536,7 @@
 								
 								if TMW.CI.ics then
 									TMW.CI.ics.CustomTex = TMW:CleanString(self)
-									TMW.IE:ScheduleIconUpdate(TMW.CI.ic)
+									TMW.IE:ScheduleIconUpdate()
 								end
 								
 								self:GetScript("OnTextChanged")(self)
@@ -2565,17 +2570,23 @@
 							<OnLoad>
 								self:RegisterEvent("MODIFIER_STATE_CHANGED")
 								self.label = TMW.L["ICONMENU_UNITSTOWATCH"]
-								self.__title = TMW.L["ICONMENU_UNITSTOWATCH"]
-								self.__text = TMW.L["ICONMENU_UNIT_DESC"]
 								self.BackgroundText:SetWidth(self:GetWidth())
 								
+								local text = function()
+									if IsModifierKeyDown() then
+										return TMW.IE:GetRealUnits(self)
+									else
+										return TMW.L["ICONMENU_UNIT_DESC"]
+									end
+								end
+								TMW:TT(self, "ICONMENU_UNITSTOWATCH", text, nil, 1)
 							</OnLoad>
 							<OnEditFocusLost>
 								EditBox_ClearHighlight(self)
 								
 								if TMW.CI.ics then
 									TMW.CI.ics.Unit = TMW:CleanString(self)
-									TMW.IE:ScheduleIconUpdate(TMW.CI.ic)
+									TMW.IE:ScheduleIconUpdate()
 									if TMW.CI.ics.Unit ~= "player" then
 										TMW.db.global.HelpSettings.HasChangedUnit = TMW.db.global.HelpSettings.HasChangedUnit + 1
 									end
@@ -2583,25 +2594,8 @@
 								self:GetScript("OnTextChanged")(self)
 							</OnEditFocusLost>
 							<OnEvent>
-								if not self.isOver then return end
-								GameTooltip:Hide()
-								GameTooltip_SetDefaultAnchor(GameTooltip, self)
-								GameTooltip:AddLine(self.__title, HIGHLIGHT_FONT_COLOR.r, HIGHLIGHT_FONT_COLOR.g, HIGHLIGHT_FONT_COLOR.b, 1)
-								if IsModifierKeyDown() then
-									GameTooltip:AddLine(TMW.IE:GetRealUnits(self), NORMAL_FONT_COLOR.r, NORMAL_FONT_COLOR.g, NORMAL_FONT_COLOR.b, 1)
-								else
-									GameTooltip:AddLine(self.__text, NORMAL_FONT_COLOR.r, NORMAL_FONT_COLOR.g, NORMAL_FONT_COLOR.b, 1)
-								end
-								GameTooltip:Show()
+								TMW:TT_Update(self)
 							</OnEvent>
-							<OnEnter>
-								self.isOver = true
-								self:GetScript("OnEvent")(self)
-							</OnEnter>
-							<OnLeave>
-								self.isOver = false
-								GameTooltip:Hide()
-							</OnLeave>
 							<OnTextChanged>
 								local text = self:GetText()
 								if text == "" then
@@ -2902,7 +2896,7 @@
 									<OnClick>
 										if TMW.CI.ics then
 											TMW.CI.ics.ShowPBar = not not self:GetChecked()
-											TMW.IE:ScheduleIconUpdate(TMW.CI.ic)
+											TMW.IE:ScheduleIconUpdate()
 										end
 										self:GetParent().PBarOffs:SetEnabled(self:GetChecked())
 									</OnClick>
@@ -2945,7 +2939,7 @@
 										if TMW.CI.ics then
 											TMW.CI.ics.PBarOffs = tonumber(strtrim(self:GetText())) or 0
 											self:SetText(TMW.CI.ics.PBarOffs)
-											TMW.IE:ScheduleIconUpdate(TMW.CI.ic)
+											TMW.IE:ScheduleIconUpdate()
 										end
 									</OnEditFocusLost>
 								</Scripts>
@@ -2992,7 +2986,7 @@
 									<OnClick>
 										if TMW.CI.ics then
 											TMW.CI.ics.ShowCBar = not not self:GetChecked()
-											TMW.IE:ScheduleIconUpdate(TMW.CI.ic)
+											TMW.IE:ScheduleIconUpdate()
 										end
 										self:GetParent().CBarOffs:SetEnabled(self:GetChecked())
 									</OnClick>
@@ -3063,7 +3057,7 @@
 							<OnClick>
 								if TMW.CI.ics then
 									TMW.CI.ics.InvertBars = not not self:GetChecked()
-									TMW.IE:ScheduleIconUpdate(TMW.CI.ic)
+									TMW.IE:ScheduleIconUpdate()
 								end
 							</OnClick>
 						</Scripts>
@@ -3123,7 +3117,7 @@
 
 								if TMW.CI.ics then
 									TMW.CI.ics.DurationMinEnabled = checked
-									TMW.IE:ScheduleIconUpdate(TMW.CI.ic)
+									TMW.IE:ScheduleIconUpdate()
 								end
 							</OnClick>
 						</Scripts>
@@ -3150,7 +3144,7 @@
 
 								if TMW.CI.ics then
 									TMW.CI.ics.DurationMaxEnabled = checked
-									TMW.IE:ScheduleIconUpdate(TMW.CI.ic)
+									TMW.IE:ScheduleIconUpdate()
 								end
 							</OnClick>
 						</Scripts>
@@ -3209,7 +3203,7 @@
 
 								if TMW.CI.ics then
 									TMW.CI.ics.ConditionDurEnabled = checked
-									TMW.IE:ScheduleIconUpdate(TMW.CI.ic)
+									TMW.IE:ScheduleIconUpdate()
 								end
 							</OnClick>
 						</Scripts>
@@ -3237,7 +3231,7 @@
 								local groupID, iconID = TMW.CI.g, TMW.CI.i
 								if TMW.CI.ics then
 									TMW.CI.ics.UnConditionDurEnabled = checked
-									TMW.IE:ScheduleIconUpdate(TMW.CI.ic)
+									TMW.IE:ScheduleIconUpdate()
 								end
 							</OnClick>
 						</Scripts>
@@ -3256,7 +3250,7 @@
 							<OnClick>
 								if TMW.CI.ics then
 									TMW.CI.ics.OnlyIfCounting = not not self:GetChecked()
-									TMW.IE:ScheduleIconUpdate(TMW.CI.ic)
+									TMW.IE:ScheduleIconUpdate()
 								end
 							</OnClick>
 						</Scripts>
@@ -3290,7 +3284,7 @@
 								
 								if TMW.CI.ics then
 									TMW.CI.ics.StackMin = t
-									TMW.IE:ScheduleIconUpdate(TMW.CI.ic)
+									TMW.IE:ScheduleIconUpdate()
 								end
 								self:GetScript("OnTextChanged")(self)
 							</OnEditFocusLost>
@@ -3330,7 +3324,7 @@
 								
 								if TMW.CI.ics then
 									TMW.CI.ics.StackMax = t
-									TMW.IE:ScheduleIconUpdate(TMW.CI.ic)
+									TMW.IE:ScheduleIconUpdate()
 								end
 								self:GetScript("OnTextChanged")(self)
 							</OnEditFocusLost>
@@ -3359,7 +3353,7 @@
 
 								if TMW.CI.ics then
 									TMW.CI.ics.StackMinEnabled = checked
-									TMW.IE:ScheduleIconUpdate(TMW.CI.ic)
+									TMW.IE:ScheduleIconUpdate()
 								end
 							</OnClick>
 						</Scripts>
@@ -3386,7 +3380,7 @@
 
 								if TMW.CI.ics then
 									TMW.CI.ics.StackMaxEnabled = checked
-									TMW.IE:ScheduleIconUpdate(TMW.CI.ic)
+									TMW.IE:ScheduleIconUpdate()
 								end
 							</OnClick>
 						</Scripts>
@@ -3447,7 +3441,7 @@
 							<OnClick>
 								if TMW.CI.ics then
 									TMW.CI.ics.Enabled = not not self:GetChecked()
-									TMW.IE:ScheduleIconUpdate(TMW.CI.ic)
+									TMW.IE:ScheduleIconUpdate()
 								end
 							</OnClick>
 						</Scripts>
@@ -3465,7 +3459,7 @@
 							<OnClick>
 								if TMW.CI.ics then
 									TMW.CI.ics.FakeHidden = not not self:GetChecked()
-									TMW.IE:ScheduleIconUpdate(TMW.CI.ic)
+									TMW.IE:ScheduleIconUpdate()
 								end
 							</OnClick>
 						</Scripts>
@@ -3484,7 +3478,7 @@
 							<OnClick>
 								if TMW.CI.ics then
 									TMW.CI.ics.CheckNext = not not self:GetChecked()
-									TMW.IE:ScheduleIconUpdate(TMW.CI.ic)
+									TMW.IE:ScheduleIconUpdate()
 								end
 							</OnClick>
 						</Scripts>
@@ -3508,7 +3502,7 @@
 								if TMW.CI.ics then
 									TMW.CI.ics.BindText = self:GetText()
 								end
-								TMW.IE:ScheduleIconUpdate(TMW.CI.ic)
+								TMW.IE:ScheduleIconUpdate()
 								self:GetScript("OnTextChanged")(self)
 							</OnEditFocusLost>
 						</Scripts>
@@ -3749,7 +3743,7 @@
 									TMW.SND:GetEventSettings().Sound = t
 								end
 								TMW.SND:SelectSound(t)
-								TMW.IE:ScheduleIconUpdate(TMW.CI.ic)
+								TMW.IE:ScheduleIconUpdate()
 								self:GetScript("OnTextChanged")(self)
 								TMW.SND:SetTabText()
 								TMW.SND:SetupEventDisplay(TMW.SND.currentEvent)
@@ -3791,7 +3785,7 @@
 								if TMW.CI.ics and TMW.ANN.currentEvent then
 									TMW.ANN:GetEventSettings().Text = self:GetText()
 								end
-								TMW.IE:ScheduleIconUpdate(TMW.CI.ic)
+								TMW.IE:ScheduleIconUpdate()
 								self:GetScript("OnTextChanged")(self)
 							</OnEditFocusLost>
 						</Scripts>
@@ -3865,7 +3859,7 @@
 								if TMW.CI.ics then
 									TMW.ANN:GetEventSettings().Location = self:GetText()
 								end
-								TMW.IE:ScheduleIconUpdate(TMW.CI.ic)
+								TMW.IE:ScheduleIconUpdate()
 								self:GetScript("OnTextChanged")(self)
 							</OnEditFocusLost>
 						</Scripts>
@@ -3895,7 +3889,7 @@
 							</OnLoad>
 							<OnClick>
 								TMW.ANN:GetEventSettings().Icon = not not self:GetChecked()
-								TMW.IE:ScheduleIconUpdate(TMW.CI.g, TMW.CI.i)
+								TMW.IE:ScheduleIconUpdate()
 							</OnClick>
 						</Scripts>
 					</CheckButton>
@@ -3930,7 +3924,7 @@
 									settings.g = g
 									settings.b = b
 									self:GetNormalTexture():SetVertexColor(r, g, b, 1)
-									TMW.IE:ScheduleIconUpdate(TMW.CI.g, TMW.CI.i)
+									TMW.IE:ScheduleIconUpdate()
 								end
 								self.cancel = function()
 									local settings = TMW.ANN:GetEventSettings()
@@ -3939,7 +3933,7 @@
 									settings.g = g
 									settings.b = b
 									self:GetNormalTexture():SetVertexColor(r, g, b, 1)
-									TMW.IE:ScheduleIconUpdate(TMW.CI.g, TMW.CI.i)
+									TMW.IE:ScheduleIconUpdate()
 								end
 							</OnLoad>
 							<OnClick>
@@ -3972,7 +3966,7 @@
 								self.Mid:SetText(val == 0 and TMW.L["DEFAULT"] or val)
 								if TMW.CI.ics then
 									TMW.ANN:GetEventSettings().Size = val
-									TMW.IE:ScheduleIconUpdate(TMW.CI.ic)
+									TMW.IE:ScheduleIconUpdate()
 								end
 							</OnValueChanged>
 							<OnLoad>
@@ -4017,19 +4011,19 @@
 						</Anchors>
 						<Scripts>
 							<OnValueChanged>
-								value = tonumber(format("%." .. (self.step) .. "f", value))
+								value = tonumber(format("%" .. self.step .. "f", value))
 								value = max(value, 0.1)
 								self.Mid:SetText(TMW.L["ANIM_SECONDS"]:format(TMW:FormatSeconds(value, nil, true)))
 								if TMW.CI.ics then
 									TMW.ANIM:GetEventSettings().Duration = value
-									TMW.IE:ScheduleIconUpdate(TMW.CI.ic)
+									TMW.IE:ScheduleIconUpdate()
 								end
 							</OnValueChanged>
 							<OnLoad>
 								self.text:SetText(TMW.L["ANIM_DURATION"])
 								TMW:TT(self, "ANIM_DURATION", "ANIM_DURATION_DESC")
 								self:EnableMouseWheel(true)
-								self.step = 10
+								self.step = 0.1
 								self.isTime = true
 							</OnLoad>
 						</Scripts>
@@ -4040,11 +4034,11 @@
 						</Anchors>
 						<Scripts>
 							<OnValueChanged>
-								value = tonumber(format("%." .. (self.step) .. "f", value))
+								value = tonumber(format("%" .. self.step .. "f", value))
 								self.Mid:SetText(value)
 								if TMW.CI.ics then
 									TMW.ANIM:GetEventSettings().Magnitude = value
-									TMW.IE:ScheduleIconUpdate(TMW.CI.ic)
+									TMW.IE:ScheduleIconUpdate()
 								end
 							</OnValueChanged>
 							<OnLoad>
@@ -4062,12 +4056,12 @@
 						</Anchors>
 						<Scripts>
 							<OnValueChanged>
-								value = tonumber(format("%." .. (self.step) .. "f", value))
+								value = tonumber(format("%" .. self.step .. "f", value))
 								value = max(value, 0.1)
 								self.Mid:SetText(TMW.L["ANIM_SECONDS"]:format(TMW:FormatSeconds(value, nil, true)))
 								if TMW.CI.ics then
 									TMW.ANIM:GetEventSettings().Period = value
-									TMW.IE:ScheduleIconUpdate(TMW.CI.ic)
+									TMW.IE:ScheduleIconUpdate()
 								end
 							</OnValueChanged>
 							<OnLoad>
@@ -4075,7 +4069,7 @@
 								TMW:TT(self, "ANIM_PERIOD", "ANIM_PERIOD_DESC")
 								self:EnableMouseWheel(true)
 								self.isTime = true
-								self.step = 10
+								self.step = 0.1
 							</OnLoad>
 						</Scripts>
 					</Slider>
@@ -4090,7 +4084,7 @@
 								self.Mid:SetText(value)
 								if TMW.CI.ics then
 									TMW.ANIM:GetEventSettings().ScaleMagnitude = value
-									TMW.IE:ScheduleIconUpdate(TMW.CI.ic)
+									TMW.IE:ScheduleIconUpdate()
 								end
 							</OnValueChanged>
 							<OnLoad>
@@ -4135,14 +4129,14 @@
 									settings.g_anim = g
 									settings.b_anim = b
 									self:GetNormalTexture():SetVertexColor(r, g, b, 1)
-									TMW.IE:ScheduleIconUpdate(TMW.CI.g, TMW.CI.i)
+									TMW.IE:ScheduleIconUpdate()
 								end
 								self.opacityFunc = function()
 									local settings = TMW.ANIM:GetEventSettings()
 									local a = OpacitySliderFrame:GetValue()
 									settings.a_anim = a
 									self.background:SetAlpha(a)
-									TMW.IE:ScheduleIconUpdate(TMW.CI.g, TMW.CI.i)
+									TMW.IE:ScheduleIconUpdate()
 								end
 								self.cancel = function()
 									local settings = TMW.ANIM:GetEventSettings()
@@ -4153,7 +4147,7 @@
 									settings.a_anim = a
 									self:GetNormalTexture():SetVertexColor(r, g, b, 1)
 									self.background:SetAlpha(a)
-									TMW.IE:ScheduleIconUpdate(TMW.CI.g, TMW.CI.i)
+									TMW.IE:ScheduleIconUpdate()
 								end
 							</OnLoad>
 							<OnClick>
@@ -4196,7 +4190,7 @@
 							</OnLoad>
 							<OnClick>
 								TMW.ANN:GetEventSettings().Icon = not not self:GetChecked()
-								TMW.IE:ScheduleIconUpdate(TMW.CI.g, TMW.CI.i)
+								TMW.IE:ScheduleIconUpdate()
 							</OnClick>
 						</Scripts>
 					</CheckButton>
@@ -4217,7 +4211,7 @@
 								self.Mid:SetText(val == 0 and TMW.L["DEFAULT"] or val)
 								if TMW.CI.ics then
 									TMW.ANN:GetEventSettings().Size = val
-									TMW.IE:ScheduleIconUpdate(TMW.CI.ic)
+									TMW.IE:ScheduleIconUpdate()
 								end
 							</OnValueChanged>
 							<OnLoad>
@@ -4395,6 +4389,88 @@
 					</OnClick>
 				</Scripts>
 			</Button>
+			
+			<Button name="$parentBackButton" parentKey="BackButton" >
+				<Size x="18" y="18"/>
+				<Anchors>
+					<Anchor point="TOPLEFT" x="50" y="-18"/>
+				</Anchors>
+				<HitRectInsets left="-2" right="-2" top="-2" bottom="-2" />
+				<Scripts>
+					<OnLoad>
+						self:SetText(TMW.L["BACK_IE"])
+						local desc = function()
+							local icon = TMW.IE.history[TMW.IE.historyState - 1]
+							local iconID, groupID = icon:GetID(), icon.group:GetID()
+							return TMW.L["BACK_IE_DESC"]:format(TMW.L["GROUPICON"]:format(TMW:GetGroupName(groupID, groupID, 1), iconID), icon.__tex)
+						end
+						TMW:TT(self, "BACK_IE", desc, nil, 1)
+						
+						self:SetFrameLevel(self:GetFrameLevel()+2)
+						self:GetNormalTexture():SetTexCoord(0.6875, 0.34375, 0.21875, 0.34375, 0.6875, 0.65625, 0.21875, 0.65625)
+						self:GetHighlightTexture():SetTexCoord(0.6875, 0.34375, 0.21875, 0.34375, 0.6875, 0.65625, 0.21875, 0.65625)
+						self:GetDisabledTexture():SetTexCoord(0.6875, 0.34375, 0.21875, 0.34375, 0.6875, 0.65625, 0.21875, 0.65625)
+						self:SetScale(0.8)
+					</OnLoad>
+					<OnClick>
+						TMW.IE:DoBackForwards(-1)
+						TMW:TT_Update(self)
+					</OnClick>
+					<OnEnable>
+						self:SetAlpha(1)
+					</OnEnable>
+					<OnDisable>
+						self:SetAlpha(0.3)
+					</OnDisable>
+				</Scripts>
+				
+				<NormalTexture urgency="5" file="Interface\ChatFrame\UI-ChatIcon-ScrollUp-Up" alphaMode="ADD">
+					<Color r=".7" g=".7" b=".7" a="1"/>
+				</NormalTexture>
+				<HighlightTexture urgency="5" file="Interface\ChatFrame\UI-ChatIcon-ScrollUp-Up" alphaMode="ADD"/>
+				<DisabledTexture urgency="5" file="Interface\ChatFrame\UI-ChatIcon-ScrollUp-Disabled" alphaMode="ADD"/>
+			</Button>
+			<Button name="$parentForwardsButton" parentKey="ForwardsButton" >
+				<Size x="18" y="18"/>
+				<Anchors>
+					<Anchor point="LEFT" relativeTo="$parentBackButton" relativePoint="RIGHT" x="5"/>
+				</Anchors>
+				<HitRectInsets left="-2" right="-2" top="-2" bottom="-2" />
+				<Scripts>
+					<OnLoad>
+						self:SetText(TMW.L["FORWARDS_IE"])
+						local desc = function()
+							local icon = TMW.IE.history[TMW.IE.historyState + 1]
+							local iconID, groupID = icon:GetID(), icon.group:GetID()
+							return TMW.L["FORWARDS_IE_DESC"]:format(TMW.L["GROUPICON"]:format(TMW:GetGroupName(groupID, groupID, 1), iconID), icon.__tex)
+						end
+						TMW:TT(self, "FORWARDS_IE", desc, nil, 1)
+						
+						self:SetFrameLevel(self:GetFrameLevel()+2)
+						
+						self:GetNormalTexture():SetTexCoord(0.6875, 0.65625, 0.21875, 0.65625, 0.6875, 0.34375, 0.21875, 0.34375)
+						self:GetHighlightTexture():SetTexCoord(0.6875, 0.65625, 0.21875, 0.65625, 0.6875, 0.34375, 0.21875, 0.34375)
+						self:GetDisabledTexture():SetTexCoord(0.6875, 0.65625, 0.21875, 0.65625, 0.6875, 0.34375, 0.21875, 0.34375)
+						self:SetScale(0.8)
+					</OnLoad>
+					<OnClick>
+						TMW.IE:DoBackForwards(1)
+						TMW:TT_Update(self)
+					</OnClick>
+					<OnEnable>
+						self:SetAlpha(1)
+					</OnEnable>
+					<OnDisable>
+						self:SetAlpha(0.3)
+					</OnDisable>
+				</Scripts>
+				
+				<NormalTexture urgency="5" file="Interface\ChatFrame\UI-ChatIcon-ScrollUp-Up" alphaMode="ADD">
+					<Color r=".7" g=".7" b=".7" a="1"/>
+				</NormalTexture>
+				<HighlightTexture urgency="5" file="Interface\ChatFrame\UI-ChatIcon-ScrollUp-Up" alphaMode="ADD"/>
+				<DisabledTexture urgency="5" file="Interface\ChatFrame\UI-ChatIcon-ScrollUp-Disabled" alphaMode="ADD"/>
+			</Button>			
 			
 			<Button name="$parentClose" parentKey="CloseButton" inherits="UIPanelCloseButton">
 				<Anchors>

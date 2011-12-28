@@ -32,7 +32,7 @@ local DRData = LibStub("DRData-1.0", true)
 TELLMEWHEN_VERSION = "4.7.3"
 TELLMEWHEN_VERSION_MINOR = strmatch(" @project-version@", " r%d+") or ""
 TELLMEWHEN_VERSION_FULL = TELLMEWHEN_VERSION .. TELLMEWHEN_VERSION_MINOR
-TELLMEWHEN_VERSIONNUMBER = 47319 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
+TELLMEWHEN_VERSIONNUMBER = 47320 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
 if TELLMEWHEN_VERSIONNUMBER > 48000 or TELLMEWHEN_VERSIONNUMBER < 47000 then return error("YOU SCREWED UP THE VERSION NUMBER OR DIDNT CHANGE THE SAFETY LIMITS") end -- safety check because i accidentally made the version number 414069 once
 
 TELLMEWHEN_MAXGROUPS = 1 	--this is a default, used by SetTheory (addon), so dont rename
@@ -1796,6 +1796,16 @@ function TMW:GetUpgradeTable()			-- upgrade functions
 	if TMW.UpgradeTable then return TMW.UpgradeTable end
 	local t = {
 		
+		[47320] = {
+			icon = function(ics)
+				for k, Event in pairs(ics.Events) do
+					-- these numbers got really screwy (0.8000000119), put then back to what they should be (0.8)
+					Event.Duration 	= tonumber(format("%0.1f",	Event.Duration))
+					Event.Magnitude = tonumber(format("%1f",	Event.Magnitude))
+					Event.Period  	= tonumber(format("%0.1f",	Event.Period))
+				end
+			end,
+		},
 		[47204] = {
 			icon = function(ics)
 				if ics.Type == "conditionicon"  then
@@ -2337,17 +2347,18 @@ function TMW:GetUpgradeTable()			-- upgrade functions
 					end
 				end
 			end,
+			iconSettingsToClear = {
+				OORColor = true,
+				OOMColor = true,
+				Color = true,
+				ColorOverride = true,
+				UnColor = true,
+				DurationAndCD = true,
+				Shapeshift = true, -- i used this one during some initial testing for shapeshifts
+				UnitReact = true,
+			},
 			icon = function(ics, self, groupID, iconID)
-				for k in pairs({
-					OORColor = true,
-					OOMColor = true,
-					Color = true,
-					ColorOverride = true,
-					UnColor = true,
-					DurationAndCD = true,
-					Shapeshift = true, -- i used this one during some initial testing for shapeshifts
-					UnitReact = true,
-				}) do
+				for k in pairs(self.iconSettingsToClear) do
 					ics[k] = nil
 				end
 
@@ -3125,6 +3136,15 @@ local function IconScriptSort(iconA, iconB)
 		return iconA:GetID()*iOrder < iconB:GetID()*iOrder
 	end
 	return gA*gOrder < gB*gOrder
+end
+
+function TMW.IconBase.GetTooltipTitle(icon)
+	local groupID = icon:GetParent():GetID()
+	local line1 = L["ICON_TOOLTIP1"] .. " " .. format(L["GROUPICON"], TMW:GetGroupName(groupID, groupID, 1), icon:GetID())
+	if icon:GetParent().Locked then
+		line1 = line1 .. " (" .. L["LOCKED"] .. ")"
+	end
+	return line1
 end
 
 function TMW.IconBase.Update(icon, time)

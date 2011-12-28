@@ -9,6 +9,7 @@ L["ICON_TOOLTIP1"] = "TellMeWhen"
 L["ICON_TOOLTIP2NEW"] = [[|cff7fffffRight-click|r for icon options.
 |cff7fffffRight-click and drag|r to another icon to move/copy.
 |cff7fffffDrag|r spells or items onto the icon for quick setup.]]
+L["ICON_TOOLTIP2NEWSHORT"] = [[|cff7fffffRight-click|r for icon options.]]
 L["LDB_TOOLTIP1"] = "|cff7fffffLeft-click|r to toggle the group locks"
 L["LDB_TOOLTIP2"] = "|cff7fffffRight-click|r to show the main TMW options"
 L["LOADERROR"] = "TellMeWhen_Options could not be loaded: "
@@ -483,6 +484,10 @@ L["UNDO_ICON_DESC"] = "Undo the last change made to this icon's settings."
 L["REDO_ICON"] = "Redo"
 L["REDO_ICON_DESC"] = "Redo the last change made to this icon's settings."
 L["UNDOREDO_ICON_NOBIND"] = "You can set a keybinding for this action in the Blizzard keybinding interface."
+L["BACK_IE"] = "Back"
+L["BACK_IE_DESC"] = "Load the last icon that was edited (%s |T%s:0|t)."
+L["FORWARDS_IE"] = "Forwards"
+L["FORWARDS_IE_DESC"] = "Load the next icon that was edited (%s |T%s:0|t)."
 
 L["UIPANEL_FONT_Count"] = "Stack Text" -- proper case endings intended
 L["UIPANEL_FONT_Bind"] = "Binding/Label Text"
