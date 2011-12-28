@@ -168,7 +168,7 @@ local function WpnEnchant_OnEvent(icon, event, unit)
 		icon:SetTexture(wpnTexture or "Interface\\Icons\\INV_Misc_QuestionMark")
 
 		if icon.HideUnequipped then
-			if not wpnTexture and icon.OnUpdate then
+			if not wpnTexture then
 				icon:SetInfo(0)
 				icon:SetScript("OnUpdate", nil)
 				return
@@ -177,7 +177,7 @@ local function WpnEnchant_OnEvent(icon, event, unit)
 			local itemID = GetInventoryItemID("player", Slot)
 			if itemID then
 				local _, _, _, _, _, _, _, _, invType = GetItemInfo(itemID)
-				if (invType == "INVTYPE_HOLDABLE" or invType == "INVTYPE_RELIC" or invType == "INVTYPE_SHIELD") and icon.OnUpdate then
+				if invType == "INVTYPE_HOLDABLE" or invType == "INVTYPE_RELIC" or invType == "INVTYPE_SHIELD" then
 					icon:SetInfo(0)
 					icon:SetScript("OnUpdate", nil)
 					return
