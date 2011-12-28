@@ -32,7 +32,7 @@ local DRData = LibStub("DRData-1.0", true)
 TELLMEWHEN_VERSION = "4.7.3"
 TELLMEWHEN_VERSION_MINOR = strmatch(" @project-version@", " r%d+") or ""
 TELLMEWHEN_VERSION_FULL = TELLMEWHEN_VERSION .. TELLMEWHEN_VERSION_MINOR
-TELLMEWHEN_VERSIONNUMBER = 47320 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
+TELLMEWHEN_VERSIONNUMBER = 47321 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
 if TELLMEWHEN_VERSIONNUMBER > 48000 or TELLMEWHEN_VERSIONNUMBER < 47000 then return error("YOU SCREWED UP THE VERSION NUMBER OR DIDNT CHANGE THE SAFETY LIMITS") end -- safety check because i accidentally made the version number 414069 once
 
 TELLMEWHEN_MAXGROUPS = 1 	--this is a default, used by SetTheory (addon), so dont rename
@@ -73,7 +73,7 @@ local GCD, NumShapeshiftForms, LastUpdate = 0, 0, 0
 local IconUpdateFuncs, GroupUpdateFuncs, unitsToChange = {}, {}, {}
 local BindUpdateFuncs
 local loweredbackup = {}
-local Shakers, ActivationGlows, FlashingFlashers, --[[Scalers,]] FadingIcons, CDBarsToUpdate, PBarsToUpdate = {}, {}, {}, {}, {}, {}--[[, {}]]
+local Shakers, ActivationGlows, FlashingFlashers, FadingIcons, CDBarsToUpdate, PBarsToUpdate = {}, {}, {}, {}, {}, {}
 local time = GetTime() TMW.time = time
 local sctcolor = {r=1, b=1, g=1}
 local clientVersion = select(4, GetBuildInfo())
@@ -1616,42 +1616,6 @@ function TMW:OnUpdate(elapsed)					-- THE MAGICAL ENGINE OF DOING EVERYTHING
 		end
 	end
 	
-	--[[for icon, Duration in next, Scalers do
-		Duration = Duration - elapsed
-		
-		local ScalePeriod = icon.ScalePeriod
-		local ScaleTime = icon.ScaleTime
-		ScaleTime = ScaleTime - elapsed
-
-		if icon.ScaleMagnitude then
-			if icon.scalingUp then
-				icon:SetScale(icon.ScaleMagnitude*(ScalePeriod-ScaleTime/ScalePeriod))
-			else
-				icon:SetScale(icon.ScaleMagnitude*(ScaleTime/ScalePeriod))
-			end
-		end
-			
-		if ScaleTime <= 0 then
-			local overtime = -ScaleTime
-			if overtime >= ScalePeriod then
-				overtime = 0
-			end
-			ScaleTime = ScalePeriod - overtime
-			
-			if Duration < 0 and not icon.scalingUp then -- we just finished the last scale, so dont do any more
-				Duration = nil
-				ScaleTime = nil
-				icon.ScalePeriod = nil
-				icon:SetScale(1)
-			end
-				
-			icon.scalingUp = not icon.scalingUp
-		end
-		
-		Scalers[icon] = Duration
-		icon.ScaleTime = ScaleTime
-	end]]
-	
 	for icon, Duration in next, ActivationGlows do
 		Duration = Duration - elapsed
 		if Duration < 0 then
@@ -1800,9 +1764,9 @@ function TMW:GetUpgradeTable()			-- upgrade functions
 			icon = function(ics)
 				for k, Event in pairs(ics.Events) do
 					-- these numbers got really screwy (0.8000000119), put then back to what they should be (0.8)
-					Event.Duration 	= tonumber(format("%0.1f",	Event.Duration))
-					Event.Magnitude = tonumber(format("%1f",	Event.Magnitude))
-					Event.Period  	= tonumber(format("%0.1f",	Event.Period))
+					Event.Duration 	= Event.Duration  and tonumber(format("%0.1f",	Event.Duration))
+					Event.Magnitude = Event.Magnitude and tonumber(format("%1f",	Event.Magnitude))
+					Event.Period  	= Event.Period    and tonumber(format("%0.1f",	Event.Period))
 				end
 			end,
 		},
@@ -3338,12 +3302,6 @@ function TMW.IconBase.FireEvent(icon, data, played, announced, animated)
 			icon.FadeEnd = icon.__alpha
 			icon.FadeDuration = Duration
 			FadingIcons[icon] = Duration
-		--[[elseif Animation == "ICONSCALE" then
-			icon.ScalePeriod = data.Period
-			icon.ScaleTime = data.Period
-			icon.ScaleMagnitude = data.ScaleMagnitude
-			icon.fadingIn = true
-			Scalers[icon] = Duration]]
 		end
 		
 		animated = 1
@@ -4832,11 +4790,6 @@ function TMW:LockToggle()
 		frame:Hide()
 		FlashingFlashers[frame] = nil
 	end
-	
-	--[[for icon in next, Scalers do
-		icon:SetScale(1)
-		Scalers[icon] = nil
-	end]]
 	
 	for frame, Duration in next, Shakers do
 		if frame == WorldFrame and TMW.WorldFramePoints then

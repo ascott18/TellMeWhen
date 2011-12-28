@@ -18,6 +18,7 @@
  ** (r378) Icon flashers should now work properly without Masque.
  ** (r379) Fixed a bug that was preventing importing from a group in which the first icon is blank.
  ** (r379) Fixed (kinda) the status bar when exporting large pieces of data from TMW's Ace options dialogs.
+ ** (r380) TellMeWhen-r379.lua:1803 bad argument #2 to "format" (number expected, got nil)
  
 ===v4.7.2===
  * New Icon Type: Lightwell

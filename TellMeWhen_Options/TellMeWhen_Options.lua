@@ -4805,13 +4805,6 @@ function ANIM:GetNumUsedEvents()
 	return n
 end
 
-function ANIM:DropDown()
---[[	local channelSettings = ChannelLookup[ANN.currentChannelSetting]
-	if channelSettings and channelSettings.dropdown then
-		channelSettings.dropdown()
-	end]]
-end
-
 
 
 -- ----------------------
