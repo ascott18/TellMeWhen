@@ -83,44 +83,34 @@ function Type:Update()
 	ClockGCD = db.profile.ClockGCD
 end
 
-local function DR_OnEvent(icon, _, _, event, _, _, _, ...)
-	if event == "SPELL_AURA_REMOVED" or event == "SPELL_AURA_APPLIED" or (icon.CheckRefresh and event == "SPELL_AURA_REFRESH") then
-		local destGUID, destFlags, spellID, spellName, auraType, _
-		if clientVersion >= 40200 then
-			_, _, destGUID, _, destFlags, _, spellID, spellName, _, auraType = ...
-		elseif clientVersion >= 40100 then
-			_, destGUID, _, destFlags, spellID, spellName, _, auraType = ...
-		else
-			destGUID, _, destFlags, spellID, spellName, _, auraType = ...
-		end
-		if auraType == "DEBUFF" then
-			local ND = icon.NameHash
-			if ND[spellID] or ND[strlowerCache[spellName]] then
-				if TMW.debug or PvEDRs[spellID] or bitband(destFlags, CL_PLAYER) == CL_PLAYER or bitband(destFlags, CL_PET) == CL_PET then
-					local dr = icon[destGUID]
-					if event == "SPELL_AURA_APPLIED" then
-						if dr and dr.start + dr.duration <= TMW.time then
-							dr.start = 0
-							dr.duration = 0
-							dr.amt = 100
-						end
+local function DR_OnEvent(icon, _, _, event, _, _, _, _, _, destGUID, _, destFlags, _, spellID, spellName, _, auraType)
+	if auraType == "DEBUFF" and (event == "SPELL_AURA_REMOVED" or event == "SPELL_AURA_APPLIED" or (icon.CheckRefresh and event == "SPELL_AURA_REFRESH")) then
+		local ND = icon.NameHash
+		if ND[spellID] or ND[strlowerCache[spellName]] then
+			if TMW.debug or PvEDRs[spellID] or bitband(destFlags, CL_PLAYER) == CL_PLAYER or bitband(destFlags, CL_PET) == CL_PET then
+				local dr = icon[destGUID]
+				if event == "SPELL_AURA_APPLIED" then
+					if dr and dr.start + dr.duration <= TMW.time then
+						dr.start = 0
+						dr.duration = 0
+						dr.amt = 100
+					end
+				else
+					if not dr then
+						dr = {
+							amt = 50,
+							start = TMW.time,
+							duration = DRReset,
+							tex = SpellTextures[spellID]
+						}
+						icon[destGUID] = dr
 					else
-						if not dr then
-							dr = {
-								amt = 50,
-								start = TMW.time,
-								duration = DRReset,
-								tex = SpellTextures[spellID]
-							}
-							icon[destGUID] = dr
-						else
-							local amt = dr.amt
-							if amt and amt ~= 0 then
-								dr.amt = amt > 25 and amt/2 or 0
-								dr.duration = DRReset
-								dr.start = TMW.time
-								dr.tex = SpellTextures[spellID]
-							end
+						local amt = dr.amt
+						if amt and amt ~= 0 then
+							dr.amt = amt > 25 and amt/2 or 0
+							dr.duration = DRReset
+							dr.start = TMW.time
+							dr.tex = SpellTextures[spellID]
 						end
 					end
 				end

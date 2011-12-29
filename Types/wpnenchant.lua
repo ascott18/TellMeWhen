@@ -65,7 +65,7 @@ Type.DisabledEvents = {
 }
 
 local Parser = CreateFrame("GameTooltip", "TellMeWhen_Parser", TMW, "GameTooltipTemplate")
-local function GetWeaponEnchantName(slot)
+ function GetWeaponEnchantName(slot)
 	Parser:SetOwner(UIParent, "ANCHOR_NONE")
 	local has = Parser:SetInventoryItem("player", slot)
 
@@ -74,8 +74,8 @@ local function GetWeaponEnchantName(slot)
 	local i = 1
 	while _G["TellMeWhen_ParserTextLeft" .. i] do
 		local t = _G["TellMeWhen_ParserTextLeft" .. i]:GetText()
-		if t and t ~= "" then
-			local r = strmatch(t, "(.+)%((%d+)[^%.]*[^%d]+%)") -- should work with all locales and only get the weapon enchant name, not other things (like the weapon DPS)
+		if t and t ~= "" then --（） multibyte parenthesis are used in zhCH locale.
+			local r = strmatch(t, "(.+)[%(%（]%d+[^%.]*[^%d]+[%)%）]") -- should work with all locales and only get the weapon enchant name, not other things (like the weapon DPS)
 			
 			if r then
 				r = strtrim(r)

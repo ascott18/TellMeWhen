@@ -1,6 +1,8 @@
 ﻿--GAME_LOCALE = UnitName("player") == "Cybeloras" and "zhCN" --FOR TESTING
 local L = LibStub("AceLocale-3.0"):NewLocale("TellMeWhen", "enUS", true)
 
+-- WARNING! DO NOT EXPECT TO FIND ANY DECENT LEVEL OF ORGANIZATION IN THIS FILE, BECAUSE IT SIMPLY DOES NOT EXIST. MOVE ALONG.
+
 L["!!Main Addon Description"] = "Provides visual, auditory, and textual notifications about cooldowns, buffs, and pretty much everything else." -- put it here so it doesnt get deleted on mass imports
 
 
@@ -129,6 +131,11 @@ L["ICONMENU_LIGHTWELL_DESC"] = [=[Tracks the duration and charges of your lightw
 
 L["ICONMENU_RUNES"] = "Rune Cooldown"
 L["ICONMENU_RUNES_DESC"] = [[Tracks rune cooldowns]]
+
+L["ICONMENU_CLEU"] = "Combat Log Event"
+L["ICONMENU_CLEU_DESC"] = [=[Tracks combat log events.
+
+Examples include spell reflects, misses, instant casts, and deaths.]=]
 
 L["ICONMENU_META"] = "Meta Icon"
 L["ICONMENU_META_DESC"] = [=[Combines multiple icons into one.
@@ -937,32 +944,17 @@ L["SOUNDERROR2"] = "Custom WAV files are not supported by WoW 4.0+"
 L["SOUNDERROR3"] = "Only OGG and MP3 files are supported!"
 
 L["ANN_TAB"] = "Text"
-L["ANN_UNITSUBSTITUTIONS"] = [["%t" - Target's Name
-"%f" - Focus's Name
-"%m" - Mouseover's Name
-"%u" - Name of current unit being checked
-"%p" - Name of previously checked unit]]
 L["ANN_CHANTOUSE"] = "Channel to Use"
 L["ANN_EDITBOX"] = "Text to be outputted"
 L["ANN_EDITBOX_WARN"] = "Type the text you wish to be outputted here"
-L["ANN_EDITBOX_DESC"] = [[Type the text that you wish to be outputted when the event triggers.
-
-The following text substitutions may be used:
-
-%s
-
-"%s" - Current spell/item/etc being checked
-"%d" - Duration remaining on the icon's timer
-"%k" - Current stack text]]
+L["ANN_EDITBOX_DESC"] = [[Type the text that you wish to be outputted when the event triggers.]]
 L["MOUSEOVER_TOKEN_NOT_FOUND"] = "<no mouseover>"
 L["ANN_STICKY"] = "Sticky"
 L["ANN_SHOWICON"] = "Show icon texture"
 L["ANN_SHOWICON_DESC"] = "Some text destinations can show a texture along with the text. Check this to enable that feature."
 L["ANN_SUB_CHANNEL"] = "Sub section"
 L["ANN_WHISPERTARGET"] = "Whisper target"
-L["ANN_WHISPERTARGET_DESC"] = [[Input the name of the player that you would like to whisper. Normal server/faction whisper requirements apply. The following substitutions may be used:
-
-%s]]
+L["ANN_WHISPERTARGET_DESC"] = [[Input the name of the player that you would like to whisper. Normal server/faction whisper requirements apply. The following substitutions may be used:]]
 L["ANN_EVENT_GLOBALDESC"] = "Events are checked from top to bottom in this list. If an event is triggered that has text to output, no events below that event will output any text."
 L["CHAT_MSG_SMART"] = "Smart Channel"
 L["CHAT_MSG_SMART_DESC"] = "Will output to Battleground, Raid, Party, or Say - whichever is appropriate."
@@ -1005,6 +997,55 @@ L["ANIM_SCREENFLASH"] = "Screen: Flash"
 L["ANIM_SCREENFLASH_DESC"] = "Flashes a colored overlay across the screen."
 L["ANIM_ICONFADE"] = "Icon: Fade In/Out"
 L["ANIM_ICONFADE_DESC"] = "Smoothly applies any opacity changes that occured with the selected event."
+
+
+
+L["CLEU_"] = "Any event" -- match any event
+L["CLEU_DAMAGE_SHIELD"] = "Damage Shield"
+L["CLEU_DAMAGE_SHIELD_MISSED"] = "Damage Shield Missed"
+L["CLEU_ENCHANT_APPLIED"] = "Enchant Applied"
+L["CLEU_ENCHANT_REMOVED"] = "Enchant Removed"
+L["CLEU_ENVIRONMENTAL_DAMAGE"] = "Environmental Damage"
+L["CLEU_RANGE_DAMAGE"] = "Ranged Damage"
+L["CLEU_RANGE_MISSED"] = "Ranged Miss"
+L["CLEU_SPELL_AURA_APPLIED"] = "Aura Applied"
+L["CLEU_SPELL_AURA_BROKEN"] = "Aura Broken"
+L["CLEU_SPELL_AURA_REFRESH"] = "Aura Refreshed"
+L["CLEU_SPELL_AURA_REMOVED"] = "Aura Removed"
+L["CLEU_SPELL_AURA_STOLEN"] = "Aura Stolen"
+L["CLEU_SPELL_CAST_FAILED"] = "Spell Cast Failed"
+L["CLEU_SPELL_CAST_START"] = "Spell Cast Start"
+L["CLEU_SPELL_CAST_SUCCESS"] = "Spell Cast Success"
+L["CLEU_SPELL_DAMAGE"] = "Spell Damage"
+L["CLEU_SPELL_DISPEL"] = "Dispel"
+L["CLEU_SPELL_DISPEL_FAILED"] = "Dispel Failed"
+L["CLEU_SPELL_DRAIN"] = "Resource Drain"
+L["CLEU_SPELL_ENERGIZE"] = "Resource Gain"
+L["CLEU_SPELL_EXTRA_ATTACKS"] = "Extra Attacks"
+L["CLEU_SPELL_HEAL"] = "Heal"
+L["CLEU_SPELL_INSTAKILL"] = "Instant Kill"
+L["CLEU_SPELL_INTERRUPT"] = "Interrupt"
+L["CLEU_SPELL_LEECH"] = "Health Leech"
+L["CLEU_SPELL_MISSED"] = "Spell Miss"
+L["CLEU_SPELL_PERIODIC_DAMAGE"] = "Periodic Damage"
+L["CLEU_SPELL_PERIODIC_DRAIN"] = "Periodic Resource Drain"
+L["CLEU_SPELL_PERIODIC_ENERGIZE"] = "Periodic Resource Gain"
+L["CLEU_SPELL_PERIODIC_LEECH"] = "Periodic Leech"
+L["CLEU_SPELL_PERIODIC_HEAL"] = "Periodic Heal"
+L["CLEU_SPELL_PERIODIC_MISSED"] = "Periodic Miss"
+L["CLEU_SWING_DAMAGE"] = "Swing Damage"
+L["CLEU_SWING_MISSED"] = "Swing Miss"
+L["CLEU_UNIT_DESTROYED"] = "Unit Destroyed"
+L["CLEU_UNIT_DIED"] = "Unit Died"
+
+
+L["CLEU_EVENTS"] = "Events to check (%s)"
+L["CLEU_EVENTS_DESC"] = "Choose the combat log events that you would like the icon to react to."
+L["CLEU_SOURCEUNITS"] = "Source unit(s) to check"
+L["CLEU_SOURCEUNITS_DESC"] = "Choose the source units that you would like the icon to react to, or leave this blank to let the icon react to any event source."
+L["CLEU_DESTUNITS"] = "Destination unit(s) to check"
+L["CLEU_DESTUNITS_DESC"] = "Choose the destination units that you would like the icon to react to, or leave this blank to let the icon react to any event destination."
+
 
 
 

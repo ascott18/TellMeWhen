@@ -91,17 +91,8 @@ Type:RegisterEvent("GLYPH_REMOVED",  "GLYPH")
 Type:RegisterEvent("GLYPH_UPDATED",  "GLYPH")
 
 
-function Type:COMBAT_LOG_EVENT_UNFILTERED(_, _, event, _, sourceGUID, _, _, _, _, ...)
-	if sourceGUID == pGUID then
-		local spellID
-		if clientVersion >= 40200 then
-			_, _, _, spellID = ...
-		elseif clientVersion >= 40100 then
-			_, spellID = ...
-		else
-			spellID = ...
-		end
-		
+function Type:COMBAT_LOG_EVENT_UNFILTERED(_, _, event, _, sourceGUID, _, _, _, _, _, _, _, spellID)
+	if sourceGUID == pGUID then		
 		if event == "SPELL_SUMMON" and spellID == 724 then
 			CurrentCharges = MaxCharges
 			SummonTime = TMW.time

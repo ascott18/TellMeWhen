@@ -40,7 +40,7 @@ local strlowerCache = TMW.strlowerCache
 local SpellTextures = TMW.SpellTextures
 local print = TMW.print
 local Types = TMW.Types
-local ME, CNDT, IE, SUG, ID, SND, ANN, HELP, HIST, ANIM, EVENTS
+local ME, CNDT, IE, SUG, ID, SND, ANN, HELP, HIST, ANIM, EVENTS, CLEU
 local CNDT = TMW.CNDT -- created in TellMeWhen/conditions.lua
 
 
@@ -1973,36 +1973,81 @@ end
 
 
 -- ----------------------
---[[ CLEU EDITOR
+-- CLEU EDITOR
 -- ----------------------
 
 CLEU = TMW:NewModule("CLEUEditor") TMW.CLEU = CLEU
 CLEU.Events = {
 	"",
+	"SPELL_CAST_FAILED",
+	"SPELL_CAST_START",
 	"SPELL_CAST_SUCCESS",
+	
+	"RANGE_DAMAGE",
+	"RANGE_MISSED",
+	
+	"SWING_DAMAGE",
+	"SWING_MISSED",
+	
+	"SPELL_EXTRA_ATTACKS",
+	"SPELL_DAMAGE",
+	"SPELL_MISSED",
+	
+	"SPELL_HEAL",
+	
+	"SPELL_INTERRUPT",
+	
+	"SPELL_DISPEL",
+	"SPELL_DISPEL_FAILED",
+	
+	"SPELL_ENERGIZE",
+	"SPELL_DRAIN",
+	"SPELL_LEECH",
+	
+	"SPELL_AURA_APPLIED",
+	"SPELL_AURA_BROKEN",
+	"SPELL_AURA_REFRESH",
+	"SPELL_AURA_REMOVED",
+	"SPELL_AURA_STOLEN",
+	
+	"SPELL_PERIODIC_DAMAGE",
+	"SPELL_PERIODIC_DRAIN",
+	"SPELL_PERIODIC_ENERGIZE",
+	"SPELL_PERIODIC_LEECH",
+	"SPELL_PERIODIC_HEAL",
+	"SPELL_PERIODIC_MISSED",
+	
+	"DAMAGE_SHIELD",
+	"DAMAGE_SHIELD_MISSED",
+	
+	"ENCHANT_APPLIED",
+	"ENCHANT_REMOVED",
+	
+	"ENVIRONMENTAL_DAMAGE",
+	
+	"UNIT_DIED",
+	"SPELL_INSTAKILL",
+	"UNIT_DESTROYED",
 }
 
 function CLEU:OnInitialize()
-	CLEU:SetCurrentFilter(1)
 end
 
-function CLEU:SetCurrentFilter(i)
-	CLEU.CurrentFilter = i
-	if CI.ics then
-		TMW:SetUIDropdownText(IE.Main.CLEUFilters.Event, CLEU:GetCurrentFilterSettings().Event, nil, L["CLEU_" .. CLEU:GetCurrentFilterSettings().Event])
-		IE.Main.CLEUFilters.Source:SetText(CLEU:GetCurrentFilterSettings().Source)
-		IE.Main.CLEUFilters.Dest:SetText(CLEU:GetCurrentFilterSettings().Dest)
-	end
-end
-
-function CLEU:GetCurrentFilter()
-	return CLEU.CurrentFilter
-end
-
-function CLEU:GetCurrentFilterSettings()
-	return CI.ics.CLEUFilters[CLEU:GetCurrentFilter()]
+function CLEU:Load()
+	CLEU:EventMenu_SetText()
 end
 ---------- Dropdowns ----------
+
+function CLEU:EventMenu_SetText()
+	local n = 0
+	for k, v in pairs(CI.ics.CLEUEvents) do
+		if v then
+			n = n + 1
+		end
+	end
+	
+	UIDropDownMenu_SetText(IE.Main.CLEUEvents, L["CLEU_EVENTS"]:format(n))
+end
 
 function CLEU:EventMenu()
 	for _, event in ipairs(CLEU.Events) do
@@ -2011,7 +2056,9 @@ function CLEU:EventMenu()
 		info.text = L["CLEU_" .. event]
 		
 		info.value = event
-		
+		info.checked = CI.ics.CLEUEvents[event]
+		info.keepShownOnClick = true
+		info.isNotRadio = true
 		info.func = CLEU.EventMenu_OnClick
 		info.arg1 = self
 		
@@ -2020,12 +2067,18 @@ function CLEU:EventMenu()
 end
 
 function CLEU:EventMenu_OnClick(frame)
-	CLEU:GetCurrentFilterSettings().Event = self.value
-	TMW:SetUIDropdownText(frame, self.value, nil, L["CLEU_" .. self.value])
-	CloseDropDownMenus()
+	if self.value == "" and not CI.ics.CLEUEvents[""] then -- if we are checking "Any Event" then uncheck all others
+		wipe(CI.ics.CLEUEvents)
+		CloseDropDownMenus()
+	elseif self.value ~= "" and CI.ics.CLEUEvents[""] then -- if we are checking a specific event then uncheck "Any Event"
+		CI.ics.CLEUEvents[""] = false
+		CloseDropDownMenus()
+	end
+	CI.ics.CLEUEvents[self.value] = not CI.ics.CLEUEvents[self.value]
+	CLEU:EventMenu_SetText()
 end
 
-]]
+
 
 
 
@@ -2045,7 +2098,9 @@ IE.Checks = {
 	CustomTex = 2,
 	Icons = 4,
 	Sort = 4,
---	CLEUFilters = 4,
+	CLEUEvents = 4,
+	DestUnit = 2,
+	SourceUnit = 2,
 	Unit = 2,
 	ShowPBar = {
 		ShowPBar = 1,
@@ -2089,7 +2144,7 @@ IE.LeftChecks = {
 		title = L["ICONMENU_SHOWTIMERTEXT"],
 		tooltip = L["ICONMENU_SHOWTIMERTEXT_DESC"],
 		disabled = function()
-			return not (IsAddOnLoaded("OmniCC") or IsAddOnLoaded("tullaCC") or LibStub("AceAddon-3.0"):GetAddon("LUI_Cooldown"))
+			return not (IsAddOnLoaded("OmniCC") or IsAddOnLoaded("tullaCC") or LibStub("AceAddon-3.0"):GetAddon("LUI_Cooldown", true))
 		end,
 	},
 	{
@@ -2327,6 +2382,7 @@ function IE:Load(isRefresh, icon, isHistoryChange)
 	CNDT:Load()
 
 	ME:Update()
+	CLEU:Load()
 	
 	SND:Load()
 	ANN:Load()
@@ -2487,21 +2543,28 @@ end
 function IE:LoadSettings()
 	local groupID, iconID = CI.g, CI.i
 	local ics = CI.ics
+	
 	for setting, settingtype in pairs(IE.Checks) do
 		local f = IE.Main[setting]
 		if settingtype == 1 then
+			-- handle standard check boxes
 			f:SetChecked(ics[setting])
 			f:GetScript("OnClick")(f)
 		elseif settingtype == 2 then
+			-- handle standard editboxes
 			f:SetText(ics[setting] or "")
 			f:SetCursorPosition(0)
 		elseif settingtype == 3 then
+			-- handle sliders. Note the *100 - done to prevent the shitty behavior with having a value step less than 1
 			f:SetValue(ics[setting]*100)
 		elseif type(settingtype) == "table" then
+			-- currently handles CBars and PBars - the actual frames are inside of a container, this handles them
 			for subset, subtype in pairs(settingtype) do
 				if subtype == 1 then
+					-- handle check boxes
 					f[subset]:SetChecked(ics[subset])
 				elseif subtype == 2 then
+					-- handle editboxes
 					f[subset]:SetText(ics[subset])
 					f[subset]:SetCursorPosition(0)
 				end
@@ -2509,24 +2572,36 @@ function IE:LoadSettings()
 		end
 	end
 
-	local leftCheckNum = 1
+	-- checks are stored in IE.Main.LeftChecks as numbers (which is fine), but also are keyed as the setting that they are handling.
+	-- clear out the setting keys because they are about to change.
 	for k, f in pairs(IE.Main.LeftChecks) do
 		if not tonumber(k) then
 			IE.Main.LeftChecks[k] = nil
 		end
 	end
+	
+	local leftCheckNum = 1 -- ID of the current check being setup. will be incremented as checks are setup
+	
+	-- begin setting up the checks that are shown on the left side of the icon editor
 	for k, data in pairs(IE.LeftChecks) do
-		local setting = data.setting
+		local setting = data.setting -- the setting that the check will handle
+		
 		if Types[CI.t].RelevantSettings[setting] and not get(data.hidden) then
-			local f = IE.Main.LeftChecks[leftCheckNum]
+			-- the setting is used by the current icon type, and doesnt have an override that is "hiding" the check, so procede to set it up
+			
+			local f = IE.Main.LeftChecks[leftCheckNum] -- the check that will handle the setting
+			
 			if not f then
+				-- the check doesn't exist, so make it
 				f = CreateFrame("CheckButton", "TellMeWhen_IconEditorMainLeftChecks" .. leftCheckNum, TMW.IE.Main.LeftChecks, "TellMeWhen_CheckTemplate", leftCheckNum)
-				IE.Main.LeftChecks[leftCheckNum] = f
-				if leftCheckNum == 1 then
-					f:SetPoint("TOPLEFT")
-				else
+				IE.Main.LeftChecks[leftCheckNum] = f -- store with the ID as the key for future reusual.
+				
+				if leftCheckNum ~= 1 then
+					-- anchor it to the previous check if it isn't the first one. the first one gets handled after these are all setup
 					f:SetPoint("TOP", IE.Main.LeftChecks[leftCheckNum-1], "BOTTOM", 0, 6)
 				end
+				
+				-- setup other fun stuff
 				f.text:SetWidth(TMW.WidthCol1)
 				f:SetScript("OnEnable", IE.LeftCheck_OnEnable)
 				f:SetScript("OnDisable", IE.LeftCheck_OnDisable)
@@ -2534,31 +2609,49 @@ function IE:LoadSettings()
 				f:SetMotionScriptsWhileDisabled(true)
 			end
 			
-			f:Show()
+			-- store the check with the setting as the key for easy external reference
+			IE.Main.LeftChecks[setting] = f
+			
+			-- set appearance and settings
 			f.data = data
 			f.setting = setting
-			IE.Main.LeftChecks[setting] = f
 			f.text:SetText(data.title)
 			TMW:TT(f, data.title, data.tooltip, 1, 1)
 			f:SetChecked(ics[setting])
+			f:Show()
+			
+			-- check if it should be disabled
 			if get(data.disabled) then
-				f:Enable() -- force scripts
+				f:Enable() -- enable before disabling to force the OnDisable script to fire
 				f:Disable()
 			else
 				f:Enable()
 			end
+			
+			-- Done. Increment the current check being setup
 			leftCheckNum = leftCheckNum + 1
 		end
 	end
+	
+	if IE.Main.LeftChecks[1] then
+		-- anchor the first check to the top left of the container
+		-- some icon types might offset the start of the left checks to fit in some other setting, which is what Type.leftCheckYOffset is
+		IE.Main.LeftChecks[1]:SetPoint("TOPLEFT", 0,  Types[CI.t].leftCheckYOffset) 
+	end
+	
+	-- hide any extra checks that didn't get used
 	for i = leftCheckNum, #IE.Main.LeftChecks do
 		IE.Main.LeftChecks[i]:Hide()
 	end
+	
+	-- force the OnClick scripts to handle any hooks
 	for k, f in pairs(IE.Main.LeftChecks) do
 		if not tonumber(k) then
 			f:GetScript("OnClick")(f)
 		end
 	end
-		
+	
+	-- Phew! Left checks are done. Lets move onto the "Radio" checks, shall we? (settings that have several checks but only one can be checked)
 	for _, parent in TMW:Vararg(CI.t ~= "runes" and IE.Main.TypeChecks, IE.Main.WhenChecks, IE.Main.Sort) do
 		if parent then
 			for k, frame in pairs(parent) do
@@ -3959,6 +4052,7 @@ function IE:DoUndoRedo(direction)
 	
 	TMW:Icon_Update(CI.ic) -- do an immediate update for good measure
 	
+	CloseDropDownMenus()
 	IE:Load(1)
 end
 
@@ -3992,6 +4086,7 @@ function IE:DoBackForwards(direction)
 	
 	IE.historyState = IE.historyState + direction
 	
+	CloseDropDownMenus()
 	IE:Load(nil, IE.history[IE.historyState], true)
 	
 	IE:BackFowardsChanged()

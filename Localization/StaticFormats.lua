@@ -60,8 +60,7 @@ L["COLOR_NS_DESC"]	 				  = L["COLOR_NS_DESC"]					 :format("%s", L["ICONMENU_AL
 L["COLOR_HEADER"] 					  = L["COLOR_HEADER"]					 :format("%s", L["COLOR_OVERRIDEDEFAULT"])
 
 
-L["ANN_WHISPERTARGET_DESC"] 		  = L["ANN_WHISPERTARGET_DESC"]			 :format(L["ANN_UNITSUBSTITUTIONS"])
-L["ANN_EDITBOX_DESC"] 				  = L["ANN_EDITBOX_DESC"]				 :gsub  ("%%s", L["ANN_UNITSUBSTITUTIONS"]:gsub("%%", "%%%%"), 1) -- this one has to use gsub because of the weirdness with having "%d" in the string
-
-
 L["CONDITIONALPHA_METAICON"]		  = format("|cff%02x%02x%02x", NORMAL_FONT_COLOR.r*255, NORMAL_FONT_COLOR.g*255, NORMAL_FONT_COLOR.b*255) .. L["ICONMENU_ALPHA"] .. ":|r " .. L["CONDITIONALPHA_METAICON"]
+
+L["CLEU_SOURCEUNITS_DESC"] 			  = L["CLEU_SOURCEUNITS_DESC"] .. "\r\n\r\n" .. L["ICONMENU_UNIT_DESC"]
+L["CLEU_DESTUNITS_DESC"] 			  = L["CLEU_DESTUNITS_DESC"]   .. "\r\n\r\n" .. L["ICONMENU_UNIT_DESC"]

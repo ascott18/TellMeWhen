@@ -29,11 +29,11 @@ local AceDB = LibStub("AceDB-3.0")
 local LSM = LibStub("LibSharedMedia-3.0")
 local DRData = LibStub("DRData-1.0", true)
  
-TELLMEWHEN_VERSION = "4.7.3"
+TELLMEWHEN_VERSION = "4.8.0"
 TELLMEWHEN_VERSION_MINOR = strmatch(" @project-version@", " r%d+") or ""
 TELLMEWHEN_VERSION_FULL = TELLMEWHEN_VERSION .. TELLMEWHEN_VERSION_MINOR
-TELLMEWHEN_VERSIONNUMBER = 47322 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
-if TELLMEWHEN_VERSIONNUMBER > 48000 or TELLMEWHEN_VERSIONNUMBER < 47000 then return error("YOU SCREWED UP THE VERSION NUMBER OR DIDNT CHANGE THE SAFETY LIMITS") end -- safety check because i accidentally made the version number 414069 once
+TELLMEWHEN_VERSIONNUMBER = 48001 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
+if TELLMEWHEN_VERSIONNUMBER > 49000 or TELLMEWHEN_VERSIONNUMBER < 48000 then return error("YOU SCREWED UP THE VERSION NUMBER OR DIDNT CHANGE THE SAFETY LIMITS") end -- safety check because i accidentally made the version number 414069 once
 
 TELLMEWHEN_MAXGROUPS = 1 	--this is a default, used by SetTheory (addon), so dont rename
 TELLMEWHEN_MAXROWS = 20
@@ -628,6 +628,11 @@ TMW.Defaults = {
 						ConditionDurEnabled	   = false,
 						UnConditionDurEnabled  = false,
 						OnlyIfCounting		   = false,
+						SourceUnit 			   = "",
+						DestUnit 			   = "",
+						CLEUEvents 			   = {
+							["*"] = false						
+						},
 						Events = {
 							["**"] = {
 								Sound 	  	   	= "None",
@@ -681,11 +686,6 @@ TMW.Defaults = {
 								Checked	= false,
 								Checked2   = false,
 								Runes 	   = {},
-							},
-						},
-						CLEUFilters = {
-							["**"] = {
-								Event		= "",
 							},
 						},
 					},
@@ -2834,23 +2834,13 @@ function TMW:RAID_ROSTER_UPDATE()
 	end
 end
 
-function TMW:COMBAT_LOG_EVENT_UNFILTERED(_, _, p, ...)
+function TMW:COMBAT_LOG_EVENT_UNFILTERED(_, _, p,_, g, _, f, _, _, _, _, _, i)
 	-- This is only used for the suggester, but i want to to be listening all the times for auras, not just when you load the options
-	if p == "SPELL_AURA_APPLIED" then
-		local g, i, f, _
-		if clientVersion >= 40200 then
-			_, g, _, f, _, _, _, _, _, i = ...
-		elseif clientVersion >= 40100 then
-			_, g, _, f, _, _, _, i = ...
+	if p == "SPELL_AURA_APPLIED" and not TMW.AuraCache[i] then
+		if bitband(f, CL_PLAYER) == CL_PLAYER or bitband(f, CL_PET) == CL_PET then -- player or pet
+			TMW.AuraCache[i] = 2
 		else
-			g, _, f, _, _, _, i = ...
-		end
-		if not TMW.AuraCache[i] then
-			if bitband(f, CL_PLAYER) == CL_PLAYER or bitband(f, CL_PET) == CL_PET then -- player or pet
-				TMW.AuraCache[i] = 2
-			else
-				TMW.AuraCache[i] = 1
-			end
+			TMW.AuraCache[i] = 1
 		end
 	end
 end
@@ -3420,18 +3410,18 @@ end
 
 function TMW.IconBase.SetInfo(icon, alpha, color, texture, start, duration, spellChecked, reverse, count, countText, forceupdate, unit)
 	--[[
-	-- icon				- the icon object to set the attributes on (frame) (but call as icon:SetInfo(alpha, ...) , nil, nil)
-	-- [alpha]			- the alpha to set the icon to (number); (nil) defaults to 0
-	-- [color]			- the value(s) to call SetVertexColor with. Either a (number) that will be used as the r, g, and b; or a (table) with keys r, g, b; or (nil) to leave unchanged
-	-- [texture]		- the texture path to set the icon to (string); or (nil) to leave unchanged
-	-- [start]			- the start time of the cooldow/duration, as passsed to icon.cooldown:SetCooldown(start, duration); (nil) defaults to 0
-	-- [duration]		- the duration of the cooldow/duration, as passsed to icon.cooldown:SetCooldown(start, duration); (nil) defaults to 0
-	-- [spellChecked]	- the name or ID of the spell to be used for the icons power bar overlay (string/number)
-	-- [reverse]		- true/false to set icon.cooldown:SetReverse(reverse), nil to not change (boolean/nil)
-	-- [count]			- the number of stacks to be used for comparison, nil/false to hide (number/nil/false)
-	-- [countText]		- the actual stack TEXT to be set on the icon, will use count if nil (number/string/nil/false)
-	-- [forceupdate]	- for meta icons, will force an update on things even if args didnt change.
-	-- [unit]			- the unit that the icon stopped checking on
+	 icon			- the icon object to set the attributes on (frame) (but call as icon:SetInfo(alpha, ...))
+	[alpha]			- the alpha to set the icon to (number); (nil) to leave unchanged
+	[color]			- the value(s) to call SetVertexColor with. Either a (number) that will be used as the r, g, and b; or a (table) with keys r, g, b; or (nil) to leave unchanged
+	[texture]		- the texture path to set the icon to (string); or (nil) to leave unchanged
+	[start]			- the start time of the cooldow/duration, as passsed to icon.cooldown:SetCooldown(start, duration); (nil) to leave unchanged
+	[duration]		- the duration of the cooldow/duration, as passsed to icon.cooldown:SetCooldown(start, duration); (nil) to leave unchanged
+	[spellChecked]	- the name or ID of the spell to be used for the icons power bar overlay (string/number)
+	[reverse]		- true/false to set icon.cooldown:SetReverse(reverse), nil to not change (boolean/nil)
+	[count]			- the number of stacks to be used for comparison, nil/false to hide (number/nil/false)
+	[countText]		- the actual stack TEXT to be set on the icon, will use count if nil (number/string/nil/false)
+	[forceupdate]	- for meta icons, will force an update on things even if args didnt change.
+	[unit]			- the unit that the icon stopped checking on
 	
 	
 		TO ADD AN ARG: (Notepad++)
@@ -3444,10 +3434,10 @@ function TMW.IconBase.SetInfo(icon, alpha, color, texture, start, duration, spel
 		6) IMPORTANT: Update the meta icon with the new arg
 		6) Handle arg in here
 	]]
-
-	alpha = alpha or 0
-	duration = duration or 0
-	start = start or 0
+	
+	alpha = alpha or icon.__alpha or 0
+	duration = duration or icon.__duration or 0
+	start = start or icon.__start or 0
 	
 	local queueOnUnit, queueOnSpell, queueOnStack
 	
@@ -3747,6 +3737,7 @@ local typeMT = {
 
 TypeBase.DisabledEvents = {}
 TypeBase.SUGType = "spell"
+TypeBase.leftCheckYOffset = 0
 TypeBase.chooseNameTitle = L["ICONMENU_CHOOSENAME"]
 TypeBase.chooseNameText  = L["CHOOSENAME_DIALOG"]
 

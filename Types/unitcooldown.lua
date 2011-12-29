@@ -160,16 +160,8 @@ local resetsOnAura = {
 }
 
 
-function Type:COMBAT_LOG_EVENT_UNFILTERED(e, _, p, ...)-- tyPe, sourceGuid, spellId, spellName -- 2 NEW ARGS IN 4.2
+function Type:COMBAT_LOG_EVENT_UNFILTERED(e, _, p, _, g, _, _, _, _, _, _, _, i, n)-- tyPe, sourceGuid, spellId, spellName -- 2 NEW ARGS IN 4.2
 	if p == "SPELL_CAST_SUCCESS" or p == "SPELL_AURA_APPLIED" or p == "SPELL_AURA_REFRESH" or p == "SPELL_DAMAGE" or p == "SPELL_HEAL" or p == "SPELL_MISSED" then
-		local g, i, n, _
-		if clientVersion >= 40200 then
-			_, g, _, _, _, _, _, _, _, i, n = ...
-		elseif clientVersion >= 40100 then
-			_, g, _, _, _, _, _, i, n = ...
-		else
-			g, _, _, _, _, _, i, n = ...
-		end
 		local c = Cooldowns[g]
 		if p == "SPELL_AURA_APPLIED" then
 			if resetsOnAura[i] then

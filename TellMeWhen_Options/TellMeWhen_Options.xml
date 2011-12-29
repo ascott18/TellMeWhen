@@ -1493,15 +1493,19 @@
 
 	<Button name="TellMeWhen_TypeCheckRuneTemplate" virtual="true" inherits="TellMeWhen_ConditionEditorRuneCheckTemplate">
 		<Size x="35" y="26"/>
+		<Layers>
+			<Layer level="ARTWORK">
+				<Texture parentKey="texture" file="Interface\PlayerFrame\UI-PlayerFrame-Deathknight-Blood">
+					<Size x="28" y="28"/>
+					<Anchors>
+						<Anchor point="CENTER"/>
+					</Anchors>
+				</Texture>
+			</Layer>
+		</Layers>
 		<Scripts>
 			<OnClick>
-				if self.checked then
-					self.checked = nil
-					self.Check:SetTexture(nil)
-				else
-					self.checked = true
-					self.Check:SetTexture("Interface\\RAIDFRAME\\ReadyCheck-Ready")
-				end
+				self:SetChecked(not self:GetChecked())
 				
 				local s = ""
 				for k = 1, 6 do
@@ -1520,6 +1524,14 @@
 						self.Check:SetTexture("Interface\\RAIDFRAME\\ReadyCheck-Ready")
 					else
 						self.Check:SetTexture(nil)
+					end
+				end
+				
+				for k, v in pairs(self:GetParent()) do
+					if v == self then
+						local runeType = gsub(self:GetName(), self:GetParent():GetName(), "")
+						runeType = gsub(runeType, "%d", "")
+						self.texture:SetTexture("Interface\\PlayerFrame\\UI-PlayerFrame-Deathknight-" .. runeType)
 					end
 				end
 			</OnLoad>
@@ -1931,7 +1943,31 @@
 	
 	
 	
-	
+	<EditBox name="TellMeWhen_UnitEditbox" inherits="TellMeWhen_InputBoxTemplate" virtual="true" autoFocus="false">
+		<Frames>
+			<Frame name="$parentIns" inherits="TMW_DropDownMenuTemplate" parentKey="Ins">
+				<Anchors>
+					<Anchor point="LEFT" relativePoint="RIGHT" x="-15" y="-4"/>
+				</Anchors>
+				<Scripts>
+					<OnLoad>
+						self.Left:Hide()
+						self.Middle:Hide()
+						self.Right:Hide()
+						self.Text:Hide()
+						TMW:TT(self, "ICONMENU_UNITS", "DROPDOWN_UNIT_DESC")
+						UIDropDownMenu_SetWidth(self, 1)
+						self.InitFunc = TMW.IE.Unit_DropDown
+					</OnLoad>
+				</Scripts>
+			</Frame>
+		</Frames>
+		<Scripts>
+			<OnEvent>
+				TMW:TT_Update(self)
+			</OnEvent>
+		</Scripts>
+	</EditBox>
 	<!-- END TEMPLATES -->
 
 	<Button name="TellMeWhen_IconDragger" hidden="true" enableMouse="false" frameStrata="HIGH">
@@ -2517,6 +2553,101 @@
 						</Scripts>
 					</Frame>
 					
+					<Frame name="$parentCLEUEvents" inherits="TMW_DropDownMenuTemplate" parentKey="CLEUEvents">
+						<Anchors>
+							<Anchor point="TOPLEFT" relativeTo="$parentType" relativePoint="BOTTOMLEFT" x="15" y="-90"/>
+						</Anchors>
+						<Scripts>
+							<OnLoad>
+								self.wrapTooltips = 1
+								UIDropDownMenu_SetWidth(self, 280)
+								self.InitFunc = TMW.CLEU.EventMenu
+								UIDropDownMenu_SetText(self, TMW.L["CLEU_EVENTS"])
+								self.Button:HookScript("OnClick", function(self)
+									TMW.IE:SaveSettings()
+								end)
+								
+								TMW:TT(self, "CLEU_EVENTS", "CLEU_EVENTS_DESC")
+							</OnLoad>
+						</Scripts>
+					</Frame>
+					<EditBox name="$parentSourceUnit" inherits="TellMeWhen_UnitEditbox" parentKey="SourceUnit" autoFocus="false">
+						<Size x="270" y="15"/>
+						<Anchors>
+							<Anchor point="TOPLEFT" relativeTo="$parentCLEUEvents" relativePoint="BOTTOMLEFT" x="23" y="1"/>
+						</Anchors>
+						<Scripts>
+							<OnLoad>
+								self:RegisterEvent("MODIFIER_STATE_CHANGED")
+								self.label = TMW.L["CLEU_SOURCEUNITS"]
+								self.BackgroundText:SetWidth(self:GetWidth())
+								
+								local text = function()
+									if IsModifierKeyDown() then
+										return TMW.IE:GetRealUnits(self)
+									else
+										return TMW.L["CLEU_SOURCEUNITS_DESC"]
+									end
+								end
+								TMW:TT(self, "CLEU_SOURCEUNITS", text, nil, 1)
+							</OnLoad>
+							<OnEditFocusLost>
+								EditBox_ClearHighlight(self)
+								
+								if TMW.CI.ics then
+									TMW.CI.ics.SourceUnit = TMW:CleanString(self)
+									TMW.IE:ScheduleIconUpdate()
+								end
+								self:GetScript("OnTextChanged")(self)
+							</OnEditFocusLost>
+							<OnTextChanged>
+								if self:GetText() == "" then
+									self.BackgroundText:SetText(self.label)
+								else
+									self.BackgroundText:SetText(nil)
+								end
+							</OnTextChanged>
+						</Scripts>
+					</EditBox>
+					<EditBox name="$parentDestUnit" inherits="TellMeWhen_UnitEditbox" parentKey="DestUnit" autoFocus="false">
+						<Size x="270" y="15"/>
+						<Anchors>
+							<Anchor point="TOPLEFT" relativeTo="$parentSourceUnit" relativePoint="BOTTOMLEFT" x="0" y="-4"/>
+						</Anchors>
+						<Scripts>
+							<OnLoad>
+								self:RegisterEvent("MODIFIER_STATE_CHANGED")
+								self.label = TMW.L["CLEU_DESTUNITS"]
+								self.BackgroundText:SetWidth(self:GetWidth())
+								
+								local text = function()
+									if IsModifierKeyDown() then
+										return TMW.IE:GetRealUnits(self)
+									else
+										return TMW.L["CLEU_DESTUNITS_DESC"]
+									end
+								end
+								TMW:TT(self, "CLEU_DESTUNITS", text, nil, 1)
+							</OnLoad>
+							<OnEditFocusLost>
+								EditBox_ClearHighlight(self)
+								
+								if TMW.CI.ics then
+									TMW.CI.ics.DestUnit = TMW:CleanString(self)
+									TMW.IE:ScheduleIconUpdate()
+								end
+								self:GetScript("OnTextChanged")(self)
+							</OnEditFocusLost>
+							<OnTextChanged>
+								if self:GetText() == "" then
+									self.BackgroundText:SetText(self.label)
+								else
+									self.BackgroundText:SetText(nil)
+								end
+							</OnTextChanged>
+						</Scripts>
+					</EditBox>
+
 					<EditBox name="$parentCustomTex" inherits="TellMeWhen_InputBoxTemplate" parentKey="CustomTex" autoFocus="false">
 						<Size x="270" y="15"/>
 						<Anchors>
@@ -2543,29 +2674,11 @@
 							</OnEditFocusLost>
 						</Scripts>
 					</EditBox>
-					<EditBox name="$parentUnit" inherits="TellMeWhen_InputBoxTemplate" parentKey="Unit" autoFocus="false">
+					<EditBox name="$parentUnit" inherits="TellMeWhen_UnitEditbox" parentKey="Unit" autoFocus="false">
 						<Size x="270" y="15"/>
 						<Anchors>
 							<Anchor point="LEFT" relativeTo="$parentCustomTex" relativePoint="RIGHT" x="5"/>
 						</Anchors>
-						<Frames>
-							<Frame name="$parentIns" inherits="TMW_DropDownMenuTemplate" parentKey="Ins">
-								<Anchors>
-									<Anchor point="LEFT" relativePoint="RIGHT" x="-15" y="-4"/>
-								</Anchors>
-								<Scripts>
-									<OnLoad>
-										self.Left:Hide()
-										self.Middle:Hide()
-										self.Right:Hide()
-										self.Text:Hide()
-										TMW:TT(self, "ICONMENU_UNITS", "DROPDOWN_UNIT_DESC")
-										UIDropDownMenu_SetWidth(self, 1)
-										self.InitFunc = TMW.IE.Unit_DropDown
-									</OnLoad>
-								</Scripts>
-							</Frame>
-						</Frames>
 						<Scripts>
 							<OnLoad>
 								self:RegisterEvent("MODIFIER_STATE_CHANGED")
@@ -2593,9 +2706,6 @@
 								end
 								self:GetScript("OnTextChanged")(self)
 							</OnEditFocusLost>
-							<OnEvent>
-								TMW:TT_Update(self)
-							</OnEvent>
 							<OnTextChanged>
 								local text = self:GetText()
 								if text == "" then
@@ -2730,91 +2840,31 @@
 										<Anchors>
 											<Anchor point="TOPLEFT"/>
 										</Anchors>
-										<Layers>
-											<Layer level="ARTWORK">
-												<Texture name="$parentRune" file="Interface\PlayerFrame\UI-PlayerFrame-Deathknight-Blood">
-													<Anchors>
-														<Anchor point="CENTER"/>
-													</Anchors>
-													<Size x="28" y="28"/>
-												</Texture>
-											</Layer>
-										</Layers>
 									</Button>
 									<Button name="$parentBlood2" parentKey="2" inherits="TellMeWhen_TypeCheckRuneTemplate" id="2">
 										<Anchors>
 											<Anchor point="LEFT" relativeTo="$parentBlood1" relativePoint="RIGHT"/>
 										</Anchors>
-										<Layers>
-											<Layer level="ARTWORK">
-												<Texture name="$parentRune" file="Interface\PlayerFrame\UI-PlayerFrame-Deathknight-Blood">
-													<Anchors>
-														<Anchor point="CENTER"/>
-													</Anchors>
-													<Size x="28" y="28"/>
-												</Texture>
-											</Layer>
-										</Layers>
 									</Button>
 									<Button name="$parentUnholy1" parentKey="3" inherits="TellMeWhen_TypeCheckRuneTemplate" id="3">
 										<Anchors>
 											<Anchor point="TOPLEFT" relativeTo="$parentBlood1" relativePoint="BOTTOMLEFT"/>
 										</Anchors>
-										<Layers>
-											<Layer level="ARTWORK">
-												<Texture name="$parentRune" file="Interface\PlayerFrame\UI-PlayerFrame-Deathknight-Unholy">
-													<Anchors>
-														<Anchor point="CENTER"/>
-													</Anchors>
-													<Size x="28" y="28"/>
-												</Texture>
-											</Layer>
-										</Layers>
 									</Button>
 									<Button name="$parentUnholy2" parentKey="4" inherits="TellMeWhen_TypeCheckRuneTemplate" id="4">
 										<Anchors>
 											<Anchor point="LEFT" relativeTo="$parentUnholy1" relativePoint="RIGHT"/>
 										</Anchors>
-										<Layers>
-											<Layer level="ARTWORK">
-												<Texture name="$parentRune" file="Interface\PlayerFrame\UI-PlayerFrame-Deathknight-Unholy">
-													<Anchors>
-														<Anchor point="CENTER"/>
-													</Anchors>
-													<Size x="28" y="28"/>
-												</Texture>
-											</Layer>
-										</Layers>
 									</Button>
 									<Button name="$parentFrost1" parentKey="5" inherits="TellMeWhen_TypeCheckRuneTemplate" id="5">
 										<Anchors>
 											<Anchor point="TOPLEFT" relativeTo="$parentUnholy1" relativePoint="BOTTOMLEFT"/>
 										</Anchors>
-										<Layers>
-											<Layer level="ARTWORK">
-												<Texture name="$parentRune" file="Interface\PlayerFrame\UI-PlayerFrame-Deathknight-Frost">
-													<Anchors>
-														<Anchor point="CENTER"/>
-													</Anchors>
-													<Size x="28" y="28"/>
-												</Texture>
-											</Layer>
-										</Layers>
 									</Button>
 									<Button name="$parentFrost2" parentKey="6" inherits="TellMeWhen_TypeCheckRuneTemplate" id="6">
 										<Anchors>
 											<Anchor point="LEFT" relativeTo="$parentFrost1" relativePoint="RIGHT"/>
 										</Anchors>
-										<Layers>
-											<Layer level="ARTWORK">
-												<Texture name="$parentRune" file="Interface\PlayerFrame\UI-PlayerFrame-Deathknight-Frost">
-													<Anchors>
-														<Anchor point="CENTER"/>
-													</Anchors>
-													<Size x="28" y="28"/>
-												</Texture>
-											</Layer>
-										</Layers>
 									</Button>
 								</Frames>
 							</Frame>

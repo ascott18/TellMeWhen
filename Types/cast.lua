@@ -26,9 +26,6 @@ local UnitCastingInfo, UnitChannelInfo, UnitExists, UnitGUID =
 local print = TMW.print
 local strlowerCache = TMW.strlowerCache
 
-local clientVersion = select(4, GetBuildInfo())
-
-
 local Type = {}
 LibStub("AceEvent-3.0"):Embed(Type)
 Type.type = "cast"
