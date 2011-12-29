@@ -65,7 +65,7 @@ Type.DisabledEvents = {
 }
 
 local Parser = CreateFrame("GameTooltip", "TellMeWhen_Parser", TMW, "GameTooltipTemplate")
- function GetWeaponEnchantName(slot)
+local function GetWeaponEnchantName(slot)
 	Parser:SetOwner(UIParent, "ANCHOR_NONE")
 	local has = Parser:SetInventoryItem("player", slot)
 
@@ -166,7 +166,7 @@ local function WpnEnchant_OnEvent(icon, event, unit)
 		local wpnTexture = GetInventoryItemTexture("player", Slot)
 
 		icon:SetTexture(wpnTexture or "Interface\\Icons\\INV_Misc_QuestionMark")
-
+	
 		if icon.HideUnequipped then
 			if not wpnTexture then
 				icon:SetInfo(0)

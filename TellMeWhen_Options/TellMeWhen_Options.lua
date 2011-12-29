@@ -2764,7 +2764,6 @@ function IE:SaveSettings()
 	for k, t in pairs(IE.Checks) do
 		if t == 2 then
 			IE.Main[k]:ClearFocus()
-			IE.Main[k]:GetScript("OnEditFocusLost")(IE.Main[k])
 		end
 	end
 	ANN.EditBox:ClearFocus()
