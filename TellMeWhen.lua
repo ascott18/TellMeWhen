@@ -32,7 +32,7 @@ local DRData = LibStub("DRData-1.0", true)
 TELLMEWHEN_VERSION = "4.7.3"
 TELLMEWHEN_VERSION_MINOR = strmatch(" @project-version@", " r%d+") or ""
 TELLMEWHEN_VERSION_FULL = TELLMEWHEN_VERSION .. TELLMEWHEN_VERSION_MINOR
-TELLMEWHEN_VERSIONNUMBER = 47321 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
+TELLMEWHEN_VERSIONNUMBER = 47322 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
 if TELLMEWHEN_VERSIONNUMBER > 48000 or TELLMEWHEN_VERSIONNUMBER < 47000 then return error("YOU SCREWED UP THE VERSION NUMBER OR DIDNT CHANGE THE SAFETY LIMITS") end -- safety check because i accidentally made the version number 414069 once
 
 TELLMEWHEN_MAXGROUPS = 1 	--this is a default, used by SetTheory (addon), so dont rename
@@ -681,6 +681,11 @@ TMW.Defaults = {
 								Checked	= false,
 								Checked2   = false,
 								Runes 	   = {},
+							},
+						},
+						CLEUFilters = {
+							["**"] = {
+								Event		= "",
 							},
 						},
 					},
@@ -3200,7 +3205,7 @@ function TMW.IconBase.SetReverse(icon, reverse)
 end
 
 function TMW.IconBase.UpdateBindText(icon)
-	icon.bindText:SetText(TMW:InjectDataIntoString(icon.BindText, icon))
+	icon.bindText:SetText(TMW:InjectDataIntoString(icon.BindText, icon, true))
 end
 
 function TMW.IconBase.IsBeingEdited(icon)
@@ -4103,7 +4108,7 @@ function TMW:Icon_Update(icon)
 				icon.UpdateBindText_Any = true
 				icon.UpdateBindText_Spell = true
 			end
-			if strfind(icon.BindText, "%%[Uu]") then
+			if strfind(icon.BindText, "%%[UuPp]") then
 				icon.UpdateBindText_Any = true
 				icon.UpdateBindText_Unit = true
 			end

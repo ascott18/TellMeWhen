@@ -2208,7 +2208,7 @@
 				</Backdrop>
 				<Layers>
 					<Layer level="OVERLAY">
-						<FontString name="$parentHeader" inherits="GameFontNormalLarge" parentKey="Header" justifyH="LEFT" text="SUGGESTIONS">
+						<FontString name="$parentHeader" inherits="GameFontNormalLarge" parentKey="Header" justifyH="LEFT">
 							<Anchors>
 								<Anchor point="TOP" y="-12"/>
 							</Anchors>
@@ -2516,7 +2516,7 @@
 							<OnLoad> self.text:SetText(TMW.L["ICONMENU_COMPONENTICONS"])</OnLoad>
 						</Scripts>
 					</Frame>
-
+					
 					<EditBox name="$parentCustomTex" inherits="TellMeWhen_InputBoxTemplate" parentKey="CustomTex" autoFocus="false">
 						<Size x="270" y="15"/>
 						<Anchors>
@@ -3495,6 +3495,7 @@
 								TMW:TT(self, "UIPANEL_FONT_Bind", "ICONMENU_BINDTEXT_DESC")
 								self.label = TMW.L["UIPANEL_FONT_Bind"]
 								self.BackgroundText:SetWidth(self:GetWidth())
+								TMW.SUG:EnableEditBox(self, "textsubs")
 							</OnLoad>
 							<OnEditFocusLost>
 								EditBox_ClearHighlight(self)
@@ -3778,6 +3779,7 @@
 								self.label = "|cFFFF5050" .. TMW.L["ANN_EDITBOX_WARN"]
 								self.BackgroundText:SetWidth(self:GetWidth())
 								self.Header:SetText(TMW.L["ANN_EDITBOX"])
+								TMW.SUG:EnableEditBox(self, "textsubsANN")
 							</OnLoad>
 							<OnEditFocusLost>
 								EditBox_ClearHighlight(self)
@@ -3852,6 +3854,7 @@
 								TMW:TT(self, "ANN_WHISPERTARGET", "ANN_WHISPERTARGET_DESC")
 								self.label = TMW.L["ANN_WHISPERTARGET"]
 								self.BackgroundText:SetWidth(self:GetWidth())
+								TMW.SUG:EnableEditBox(self, "textsubsANNWhisper")
 							</OnLoad>
 							<OnEditFocusLost>
 								EditBox_ClearHighlight(self)

@@ -387,7 +387,7 @@ end
 
 
 ---------- Dropdown Utilities ----------
-function TMW:SetUIDropdownText(frame, value, tbl)
+function TMW:SetUIDropdownText(frame, value, tbl, text)
 	frame.selectedValue = value
 	
 	if tbl then
@@ -419,7 +419,7 @@ function TMW:SetUIDropdownText(frame, value, tbl)
 			end
 		end
 	end
-	UIDropDownMenu_SetText(frame, value)
+	UIDropDownMenu_SetText(frame, text or value)
 end
 
 function TMW:SetUIDropdownValue(frame, value)
@@ -1841,7 +1841,7 @@ end
 -- META EDITOR
 -- ----------------------
 
-ME = TMW:NewModule("MetaEditor") TMW.ME = ME -- really part of the icon editor now, but im too lazy to move it over
+ME = TMW:NewModule("MetaEditor") TMW.ME = ME
 
 function ME:Update()
 	local groupID, iconID = CI.g, CI.i
@@ -1973,6 +1973,63 @@ end
 
 
 -- ----------------------
+--[[ CLEU EDITOR
+-- ----------------------
+
+CLEU = TMW:NewModule("CLEUEditor") TMW.CLEU = CLEU
+CLEU.Events = {
+	"",
+	"SPELL_CAST_SUCCESS",
+}
+
+function CLEU:OnInitialize()
+	CLEU:SetCurrentFilter(1)
+end
+
+function CLEU:SetCurrentFilter(i)
+	CLEU.CurrentFilter = i
+	if CI.ics then
+		TMW:SetUIDropdownText(IE.Main.CLEUFilters.Event, CLEU:GetCurrentFilterSettings().Event, nil, L["CLEU_" .. CLEU:GetCurrentFilterSettings().Event])
+		IE.Main.CLEUFilters.Source:SetText(CLEU:GetCurrentFilterSettings().Source)
+		IE.Main.CLEUFilters.Dest:SetText(CLEU:GetCurrentFilterSettings().Dest)
+	end
+end
+
+function CLEU:GetCurrentFilter()
+	return CLEU.CurrentFilter
+end
+
+function CLEU:GetCurrentFilterSettings()
+	return CI.ics.CLEUFilters[CLEU:GetCurrentFilter()]
+end
+---------- Dropdowns ----------
+
+function CLEU:EventMenu()
+	for _, event in ipairs(CLEU.Events) do
+		local info = UIDropDownMenu_CreateInfo()
+		
+		info.text = L["CLEU_" .. event]
+		
+		info.value = event
+		
+		info.func = CLEU.EventMenu_OnClick
+		info.arg1 = self
+		
+		UIDropDownMenu_AddButton(info, UIDROPDOWNMENU_MENU_LEVEL)
+	end
+end
+
+function CLEU:EventMenu_OnClick(frame)
+	CLEU:GetCurrentFilterSettings().Event = self.value
+	TMW:SetUIDropdownText(frame, self.value, nil, L["CLEU_" .. self.value])
+	CloseDropDownMenus()
+end
+
+]]
+
+
+
+-- ----------------------
 -- ICON EDITOR
 -- ----------------------
 
@@ -1988,6 +2045,7 @@ IE.Checks = {
 	CustomTex = 2,
 	Icons = 4,
 	Sort = 4,
+--	CLEUFilters = 4,
 	Unit = 2,
 	ShowPBar = {
 		ShowPBar = 1,
@@ -2613,6 +2671,7 @@ function IE:SaveSettings()
 	for k, t in pairs(IE.Checks) do
 		if t == 2 then
 			IE.Main[k]:ClearFocus()
+			IE.Main[k]:GetScript("OnEditFocusLost")(IE.Main[k])
 		end
 	end
 	ANN.EditBox:ClearFocus()
@@ -2801,7 +2860,7 @@ end
 
 function IE:Unit_DropDown()
 	if not db then return end
-	local e = IE.Main.Unit
+	local e = self:GetParent()
 	if not e:HasFocus() then
 		e:HighlightText()
 	end
@@ -2818,20 +2877,20 @@ function IE:Unit_DropDown()
 			info.notCheckable = true
 			info.func = IE.Unit_DropDown_OnClick
 			info.arg1 = v
+			info.arg2 = e
 			UIDropDownMenu_AddButton(info, UIDROPDOWNMENU_MENU_LEVEL)
 		end
 	end
 end
 
-function IE:Unit_DropDown_OnClick(v)
-	local e = IE.Main.Unit
+function IE:Unit_DropDown_OnClick(v, e)
 	local ins = v.value
 	if v.range then
 		ins = v.value .. "|cFFFF0000#|r"
 	end
 	e:Insert(";" .. ins .. ";")
 	TMW:CleanString(e)
-	CI.ics.Unit = e:GetText()
+	--CI.ics.Unit = e:GetText()
 	IE:ScheduleIconUpdate()
 	CloseDropDownMenus()
 	
@@ -2906,9 +2965,9 @@ function IE:GetRealNames() -- TODO: MODULARIZE THIS
 end
 
 local cachedunits = {}
-function IE:GetRealUnits()
+function IE:GetRealUnits(editbox)
 	-- gets a string to set as a tooltip of all of the spells names in the name box in the IE. Splits up equivalancies and turns IDs into names
-	local text = TMW:CleanString(IE.Main.Unit)
+	local text = TMW:CleanString(editbox)
 	if cachedunits[text] then return cachedunits[text] end
 
 	local tbl = TMW:GetUnits(nil, text, true)
@@ -3829,7 +3888,7 @@ function IE:GetCompareResultsPath(match, ...)
 	end
 	local path = ""
 	local setting
-	for i, v, size in TMW:Vararg(...) do
+	for i, v in TMW:Vararg(...) do
 		if i == 1 then
 			setting = v
 		end
@@ -5186,7 +5245,7 @@ function SUG:SuggestingComplete(doSort)
 	SUG.offset = min(SUG.offset, max(0, #SUGpreTable-#SUG+1))
 	local offset = SUG.offset
 	
-	if doSort then
+	if doSort and not SUG.CurrentModule.dontSort then
 		sort(SUGpreTable, SUG.CurrentModule:Table_GetSorter())
 	end
 
@@ -5427,6 +5486,7 @@ local EditboxHooks = {
 			SUG.redoIfSame = SUG.CurrentModule ~= newModule
 			SUG.Box = self
 			SUG.CurrentModule = newModule
+			SUG.Suggest.Header:SetText(SUG.CurrentModule.headerText)
 			SUG:NameOnCursor()
 		end
 	end,
@@ -5473,23 +5533,28 @@ end
 ---------- Miscellaneous ----------
 function SUG:ColorHelp(frame)
 	GameTooltip_SetDefaultAnchor(GameTooltip, frame)
-	GameTooltip:AddLine(L["SUG_TOOLTIPTITLE"], NORMAL_FONT_COLOR.r, NORMAL_FONT_COLOR.g, NORMAL_FONT_COLOR.b, 1)
-	GameTooltip:AddLine(L["SUG_DISPELTYPES"], 1, .49, .04, 1)
-	GameTooltip:AddLine(L["SUG_BUFFEQUIVS"], .2, .9, .2, 1)
-	GameTooltip:AddLine(L["SUG_DEBUFFEQUIVS"], .77, .12, .23, 1)
-	GameTooltip:AddLine(L["SUG_OTHEREQUIVS"], 1, .96, .41, 1)
-	GameTooltip:AddLine(L["SUG_MSCDONBARS"], 0, .44, .87, 1)
-	GameTooltip:AddLine(L["SUG_PLAYERSPELLS"], .41, .8, .94, 1)
-	GameTooltip:AddLine(L["SUG_CLASSSPELLS"], .96, .55, .73, 1)
-	GameTooltip:AddLine(L["SUG_PLAYERAURAS"], .79, .30, 1, 1)
-	GameTooltip:AddLine(L["SUG_NPCAURAS"], .78, .61, .43, 1)
-	GameTooltip:AddLine(L["SUG_MISC"], .58, .51, .79, 1)
+	GameTooltip:AddLine(SUG.CurrentModule.helpText, NORMAL_FONT_COLOR.r, NORMAL_FONT_COLOR.g, NORMAL_FONT_COLOR.b, 1)
+	if SUG.CurrentModule.showColorHelp then
+		GameTooltip:AddLine(L["SUG_DISPELTYPES"], 1, .49, .04, 1)
+		GameTooltip:AddLine(L["SUG_BUFFEQUIVS"], .2, .9, .2, 1)
+		GameTooltip:AddLine(L["SUG_DEBUFFEQUIVS"], .77, .12, .23, 1)
+		GameTooltip:AddLine(L["SUG_OTHEREQUIVS"], 1, .96, .41, 1)
+		GameTooltip:AddLine(L["SUG_MSCDONBARS"], 0, .44, .87, 1)
+		GameTooltip:AddLine(L["SUG_PLAYERSPELLS"], .41, .8, .94, 1)
+		GameTooltip:AddLine(L["SUG_CLASSSPELLS"], .96, .55, .73, 1)
+		GameTooltip:AddLine(L["SUG_PLAYERAURAS"], .79, .30, 1, 1)
+		GameTooltip:AddLine(L["SUG_NPCAURAS"], .78, .61, .43, 1)
+		GameTooltip:AddLine(L["SUG_MISC"], .58, .51, .79, 1)
+	end
 	GameTooltip:Show()
 end
 
 
 ---------- Suggester Modules ----------
 local Module = SUG:NewModule("default")
+Module.headerText = L["SUGGESTIONS"]
+Module.helpText = L["SUG_TOOLTIPTITLE"]
+Module.showColorHelp = true
 function Module:Table_Get()
 	return SpellCache
 end
@@ -5606,6 +5671,71 @@ function Module:Entry_Insert(insert)
 end
 function Module:Entry_IsValid(id)
 	return true
+end
+
+
+local Module = SUG:NewModule("textsubs", SUG:GetModule("default"))
+Module.headerText = L["SUGGESTIONS_SUBSTITUTIONS"]
+Module.helpText = L["SUG_TOOLTIPTITLE_TEXTSUBS"]
+Module.showColorHelp = false
+Module.dontSort = true
+Module.noMin = true
+Module.noTexture = true
+function Module:Table_GetNormalSuggestions(suggestions, tbl, ...)
+	suggestions[#suggestions + 1] = "d"
+	
+	local typeData = Types[CI.t]
+	
+	if not typeData.DisabledEvents.OnUnit then
+		suggestions[#suggestions + 1] = "u"
+		suggestions[#suggestions + 1] = "p"
+	end
+	if not typeData.DisabledEvents.OnSpell then
+		suggestions[#suggestions + 1] = "s"
+	end
+	if not typeData.DisabledEvents.OnStack then
+		suggestions[#suggestions + 1] = "k"
+	end
+end
+function Module:Entry_Insert(insert)
+	if insert then
+		insert = tostring(insert)
+		SUG.Box:Insert(insert)
+		
+		-- attempt another suggestion (it will either be hidden or it will do another)
+		SUG:NameOnCursor(1)
+	end
+end
+function Module:Entry_AddToList_1(f, letter)
+	f.Name:SetText(L["SUG_SUBSTITUTION_" .. letter])
+	f.ID:SetText("%" .. letter)
+
+	f.insert = "%" .. letter
+	f.overrideInsertName = L["SUG_INSERTTEXTSUB"]
+
+	f.tooltiptitle = L["SUG_SUBSTITUTION_" .. letter]
+	f.tooltiptext = L["SUG_SUBSTITUTION_" .. letter .. "_DESC"]
+
+--	f.Icon:SetTexture(GetItemIcon(id))
+end
+
+
+local Module = SUG:NewModule("textsubsANN", SUG:GetModule("textsubs"))
+function Module:Table_GetSpecialSuggestions(suggestions, tbl, ...)
+	for _, letter in TMW:Vararg("t", "f", "m") do
+		suggestions[#suggestions + 1] = letter
+	end
+end
+
+
+local Module = SUG:NewModule("textsubsANNWhisper", SUG:GetModule("textsubsANN"))
+function Module:Table_GetNormalSuggestions(suggestions, tbl, ...)
+	local typeData = Types[CI.t]
+	
+	if not typeData.DisabledEvents.OnUnit then
+		suggestions[#suggestions + 1] = "u"
+		suggestions[#suggestions + 1] = "p"
+	end
 end
 
 

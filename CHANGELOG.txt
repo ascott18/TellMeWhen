@@ -6,6 +6,7 @@
  * Implemented the "Failed Conditions" opacity setting for meta icons.
  * Slightly reworked the import dropdown to more accurately detect the group being edited, and to disallow importing of a data type where that data type is not being edited.
  * Added buttons to the icon editor to allow easy switching between recently edited icons.
+ * Added suggestions for text substitutions.
  * Bug Fixes:
  ** (r356) Attempted a fix for default.lua:70 attempt to concatenate global 'input' (a table value)
  ** (r358) Icons tracking multiple elements whose start times are exactly the same should now properly update their timers when the first element gives yield to the second after timer expiration.

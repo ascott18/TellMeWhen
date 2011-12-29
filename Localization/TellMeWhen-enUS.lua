@@ -167,6 +167,24 @@ The following substitutions may be used to customize the text shown:
 "%u" - Name of current unit being checked
 "%s" - Current spell/item/etc being checked]]
 
+
+L["SUG_SUBSTITUTION_t"] = "Target's Name"
+L["SUG_SUBSTITUTION_t_DESC"] = "Name of the unit you are currently targeting"
+L["SUG_SUBSTITUTION_f"] = "Focus's Name"
+L["SUG_SUBSTITUTION_f_DESC"] = "Name of the unit you currently have focused"
+L["SUG_SUBSTITUTION_m"] = "Mouseover's Name"
+L["SUG_SUBSTITUTION_m_DESC"] = "Name of the unit you are currently mousing over"
+L["SUG_SUBSTITUTION_p"] = "Previous Unit"
+L["SUG_SUBSTITUTION_p_DESC"] = "Name of the unit that was checked before the current unit"
+L["SUG_SUBSTITUTION_u"] = "Current Unit"
+L["SUG_SUBSTITUTION_u_DESC"] = "Name of current unit being checked"
+L["SUG_SUBSTITUTION_s"] = "Current Spell/Item/Etc"
+L["SUG_SUBSTITUTION_s_DESC"] = "Name of the current spell/item/etc being checked"
+L["SUG_SUBSTITUTION_d"] = "Duration Remaining"
+L["SUG_SUBSTITUTION_d_DESC"] = "The duration remaining on the icon's timer"
+L["SUG_SUBSTITUTION_k"] = "Current Stacks"
+L["SUG_SUBSTITUTION_k_DESC"] = "Whatever is currently displayed as the icon's stack text"
+
 L["ICONMENU_COMPONENTICONS"] = "Component Icons & Groups"
 
 
@@ -795,6 +813,7 @@ L["CACHING"] = [[TellMeWhen is caching and filtering all spells in the game. Thi
 You do not have to wait for this process to complete in order to use TellMeWhen. Only the suggestion list is dependent on the completion of the spell cache.]]
 L["CACHINGSPEED"] = "Spells per frame:"
 L["SUGGESTIONS"] = "Suggestions:"
+L["SUGGESTIONS_SUBSTITUTIONS"] = "Substitutions:"
 L["SUG_TOOLTIPTITLE"] = [[As you type, TellMeWhen will look through its cache and determine the spells that you were most likely looking for.
 
 Spells are categorized and colored as per the list below. Note that the categories that begin with the word "Known" will not have spells put into them until they have been seen as you play or log onto different classes.
@@ -802,6 +821,9 @@ Spells are categorized and colored as per the list below. Note that the categori
 Clicking on an entry will insert it into the editbox.
 
 ]]--extra newlines intended
+L["SUG_TOOLTIPTITLE_TEXTSUBS"] = [[The following are substitutions that you may wish to use in this text display. Using a substitution will cause it to be replaced with the appropriate data wherever it is displayed.
+
+Clicking on an entry will insert it into the editbox.]]
 L["SUG_DISPELTYPES"] = "Dispel Types"
 L["SUG_BUFFEQUIVS"] = "Buff Equivalencies"
 L["SUG_DEBUFFEQUIVS"] = "Debuff Equivalencies"
@@ -823,6 +845,7 @@ L["SUG_INSERT_RIGHT"] = "|cff7fffffRight-click|r"
 L["SUG_INSERTNAME"] = "%s to insert as a name"
 L["SUG_INSERTID"] = "%s to insert as an ID"
 L["SUG_INSERTITEMSLOT"] = "%s to insert as an item slot ID"
+L["SUG_INSERTTEXTSUB"] = "%s to insert substitution"
 
 L["SUG_PATTERNMATCH_FISHINGLURE"] = "Fishing Lure %(%+%d+ Fishing Skill%)" -- enUS
 L["SUG_PATTERNMATCH_WEIGHTSTONE"] = "Weighted %(%+%d+ Damage%)"
