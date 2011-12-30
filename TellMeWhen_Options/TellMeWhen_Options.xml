@@ -2553,15 +2553,29 @@
 						</Scripts>
 					</Frame>
 					
+					<EditBox name="$parentCLEUDur" parentKey="CLEUDur" inherits="TellMeWhen_TimeEditBoxTemplate">
+						<Anchors>
+							<Anchor point="TOPLEFT" relativeTo="$parentType" relativePoint="BOTTOMLEFT" x="27" y="-107"/>
+						</Anchors>
+						<Scripts>
+							<OnLoad>
+								TMW:TT(self, "CLEU_TIMER", "CLEU_TIMER_DESC")
+								self.text:SetText(TMW.L["CLEU_TIMER"])
+								self.setting = "CLEUDur"
+								self.text:SetPoint("LEFT", 0, 0)
+							</OnLoad>
+						</Scripts>
+					</EditBox>
+					
 					<Frame name="$parentCLEUEvents" inherits="TMW_DropDownMenuTemplate" parentKey="CLEUEvents">
 						<Anchors>
-							<Anchor point="TOPLEFT" relativeTo="$parentType" relativePoint="BOTTOMLEFT" x="0" y="-57"/>
+							<Anchor point="TOPLEFT" relativeTo="$parentType" relativePoint="BOTTOMLEFT" x="5" y="-155"/>
 						</Anchors>
 						<Layers>
 							<Layer level="ARTWORK">
 								<FontString name="$parentFS1" inherits="GameFontNormal" parentKey="text" justifyH="LEFT">
 									<Anchors>
-										<Anchor point="BOTTOMLEFT" relativePoint="TOPLEFT" x="20" y="3"/>
+										<Anchor point="BOTTOMLEFT" relativePoint="TOPLEFT" x="15" y="3"/>
 									</Anchors>
 								</FontString>
 							</Layer>
@@ -2619,10 +2633,29 @@
 							</OnTextChanged>
 						</Scripts>
 					</EditBox>
+					<!--Frame name="$parentSourceFlags" inherits="TMW_DropDownMenuTemplate" parentKey="SourceFlags">
+						<Anchors>
+							<Anchor point="LEFT" relativeTo="$parentSourceUnit" relativePoint="RIGHT" x="5" y="0"/>
+						</Anchors>
+						<Scripts>
+							<OnLoad>
+								self.wrapTooltips = 1
+								UIDropDownMenu_SetWidth(self, 170)
+								self.InitFunc = TMW.CLEU.SourceFlagsMenu
+								UIDropDownMenu_SetText(self, TMW.L["CLEU_SOURCEFLAGS"])
+								self.Button:HookScript("OnClick", function(self)
+									TMW.IE:SaveSettings()
+								end)
+								
+								TMW:TT(self, "CLEU_SOURCEFLAGS", "CLEU_SOURCEFLAGS_DESC")
+							</OnLoad>
+						</Scripts>
+					</Frame-->
+					
 					<EditBox name="$parentDestUnit" inherits="TellMeWhen_UnitEditbox" parentKey="DestUnit" autoFocus="false">
 						<Size x="162" y="15"/>
 						<Anchors>
-							<Anchor point="TOPLEFT" relativeTo="$parentSourceUnit" relativePoint="BOTTOMLEFT" x="0" y="-5"/>
+							<Anchor point="TOPLEFT" relativeTo="$parentSourceUnit" relativePoint="BOTTOMLEFT" x="0" y="-10"/>
 						</Anchors>
 						<Scripts>
 							<OnLoad>
@@ -2657,6 +2690,7 @@
 							</OnTextChanged>
 						</Scripts>
 					</EditBox>
+					
 					
 
 					<EditBox name="$parentCustomTex" inherits="TellMeWhen_InputBoxTemplate" parentKey="CustomTex" autoFocus="false">

@@ -1994,6 +1994,7 @@ CLEU.Events = {
 	"SPELL_EXTRA_ATTACKS", -- normal
 	"SPELL_DAMAGE", -- normal
 	"SPELL_MISSED", -- normal
+	"SPELL_REFLECT", -- normal
 	
 	"SPELL_HEAL", -- normal
 	
@@ -2031,6 +2032,9 @@ CLEU.Events = {
 	"UNIT_DIED",
 	"SPELL_INSTAKILL",
 	"UNIT_DESTROYED",
+}
+CLEU.Flags = {
+
 }
 
 function CLEU:OnInitialize()
@@ -2093,6 +2097,35 @@ function CLEU:EventMenu_OnClick(frame)
 	CLEU:EventMenu_SetText()
 end
 
+function CLEU:SourceFlagsMenu()
+	for _, flag in ipairs(CLEU.Flags) do
+		local info = UIDropDownMenu_CreateInfo()
+		
+		info.text = L["CLEU_" .. event]
+		
+		info.value = flag
+		info.checked = CI.ics.CLEUEvents[event]
+		info.keepShownOnClick = true
+		info.isNotRadio = true
+		info.func = CLEU.EventMenu_OnClick
+		info.arg1 = self
+		
+		UIDropDownMenu_AddButton(info, UIDROPDOWNMENU_MENU_LEVEL)
+	end
+end
+
+function CLEU:EventMenu_OnClick(frame)
+	if self.value == "" and not CI.ics.CLEUEvents[""] then -- if we are checking "Any Event" then uncheck all others
+		wipe(CI.ics.CLEUEvents)
+		CloseDropDownMenus()
+	elseif self.value ~= "" and CI.ics.CLEUEvents[""] then -- if we are checking a specific event then uncheck "Any Event"
+		CI.ics.CLEUEvents[""] = false
+		CloseDropDownMenus()
+	end
+	CI.ics.CLEUEvents[self.value] = not CI.ics.CLEUEvents[self.value]
+	CLEU:EventMenu_SetText()
+end
+
 
 
 
@@ -2111,6 +2144,7 @@ IE.Checks = {
 	Name = 2,
 	BindText = 2,
 	CustomTex = 2,
+	CLEUDur = 2,
 	Icons = 4,
 	Sort = 4,
 	CLEUEvents = 4,

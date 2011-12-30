@@ -1046,6 +1046,7 @@ L["CLEU_SPELL_INSTAKILL"] = "Instant Kill"
 L["CLEU_SPELL_INTERRUPT"] = "Interrupt"
 L["CLEU_SPELL_LEECH"] = "Health Leech"
 L["CLEU_SPELL_MISSED"] = "Spell Miss"
+L["CLEU_SPELL_REFLECT"] = "Spell Reflect"
 L["CLEU_SPELL_PERIODIC_DAMAGE"] = "Periodic Damage"
 L["CLEU_SPELL_PERIODIC_DRAIN"] = "Periodic Resource Drain"
 L["CLEU_SPELL_PERIODIC_ENERGIZE"] = "Periodic Resource Gain"
@@ -1068,6 +1069,9 @@ L["CLEU_SOURCEUNITS"] = "Source unit(s) to check"
 L["CLEU_SOURCEUNITS_DESC"] = "Choose the source units that you would like the icon to react to, or leave this blank to let the icon react to any event source."
 L["CLEU_DESTUNITS"] = "Destination unit(s) to check"
 L["CLEU_DESTUNITS_DESC"] = "Choose the destination units that you would like the icon to react to, or leave this blank to let the icon react to any event destination."
+
+L["CLEU_TIMER"] = "Timer to set on event"
+L["CLEU_TIMER_DESC"] = "Duration of a timer to set on the icon when an event occurs"
 
 
 

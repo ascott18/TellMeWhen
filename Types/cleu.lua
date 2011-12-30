@@ -38,22 +38,18 @@ Type.AllowNoName = true
 Type.chooseNameTitle = L["ICONMENU_CHOOSENAME"] .. " " .. L["ICONMENU_CHOOSENAME_ORBLANK"]
 Type.DurationSyntax = 1
 Type.SUGType = "spell"
-Type.leftCheckYOffset = -110
---[[Type.TypeChecks = {
-	setting = "ICDType",
-	text = L["ICONMENU_ICDTYPE"],
-	{ value = "aura", 			text = L["ICONMENU_ICDBDE"], 				tooltipText = L["ICONMENU_ICDAURA_DESC"]},
-	{ value = "spellcast", 		text = L["ICONMENU_SPELLCAST_COMPLETE"], 	tooltipText = L["ICONMENU_SPELLCAST_COMPLETE_DESC"]},
-	{ value = "caststart", 		text = L["ICONMENU_SPELLCAST_START"], 		tooltipText = L["ICONMENU_SPELLCAST_START_DESC"]},
-}]]
+-- Type.leftCheckYOffset = -130 -- nevermind
+
+
 Type.WhenChecks = {
 	text = L["ICONMENU_SHOWWHEN"],
-	{ value = "alpha",			text = L["ICONMENU_NOTCOUNTING"], 		tooltipText = L["ICONMENU_NOTCOUNTING_DESC"],	colorCode = "|cFFFF0000" },
-	{ value = "unalpha", 		text = L["ICONMENU_COUNTING"], 			tooltipText = L["ICONMENU_COUNTING_DESC"],		colorCode = "|cFF00FF00" },
+	{ value = "alpha",			text = L["ICONMENU_COUNTING"], 		tooltipText = L["ICONMENU_COUNTING_DESC"],		colorCode = "|cFF00FF00" },
+	{ value = "unalpha", 		text = L["ICONMENU_NOTCOUNTING"], 	tooltipText = L["ICONMENU_NOTCOUNTING_DESC"],	colorCode = "|cFFFF0000" },
 	{ value = "always", 		text = L["ICONMENU_ALWAYS"] },
 }
 Type.RelevantSettings = {
 	CLEUEvents = true,
+	CLEUDur = true,
 	SourceUnit = true,
 	DestUnit = true,
 	ShowCBar = true,
@@ -83,9 +79,37 @@ local EnvironmentalTextures = {
 	SLIME = GetSpellTexture(49870),
 }
 
-
+local EventsWithoutSpells = {
+	SPELL_DISPEL_FAILED = true,
+	SPELL_AURA_BROKEN_SPELL = true,
+	SPELL_AURA_STOLEN = true,
+	ENCHANT_APPLIED = true,
+	ENCHANT_REMOVED = true,
+	SWING_DAMAGE = true,
+	SWING_MISSED = true,
+	UNIT_DIED = true,
+	UNIT_DESTROYED = true,
+	UNIT_DISSIPATES = true,
+	PARTY_KILL = true,
+	ENVIRONMENTAL_DAMAGE = true,
+	SPELL_INTERRUPT = true,
+	SPELL_DISPEL = true,
+}
 
 local function CLEU_OnEvent(icon, _, t, event, h, sourceGUID, sourceName, sourceFlags, sourceRaidFlags, destGUID, destName, destFlags, destRaidFlags, ...)
+	
+	if event == "SPELL_MISSED" then
+		-- make a fake event for spell reflects
+		local _, _, _, missType = ...
+		if missType == "REFLECT" then
+			event = "SPELL_REFLECT"
+			-- swap the source and the destination
+			local a, b, c, d = sourceGUID, sourceName, sourceFlags, sourceRaidFlags
+			sourceGUID, sourceName, sourceFlags, sourceRaidFlags = destGUID, destName, destFlags, destRaidFlags
+			destGUID, destName, destFlags, destRaidFlags = a, b, c, d
+		end
+	end
+	
 	if icon.AllowAnyEvents or icon.CLEUEvents[event] then
 	
 		local SourceUnits = icon.SourceUnits
@@ -124,23 +148,17 @@ local function CLEU_OnEvent(icon, _, t, event, h, sourceGUID, sourceName, source
 			end
 		end
 		
+		local spellID, spellName = ...
+		
 		local NameHash = icon.NameHash
-		local duration = icon.Duration
-		if NameHash then
-			local key = NameHash[""] or NameHash[strlowerCache[spellName]] or NameHash[spellID]
-			if not key then
+		if NameHash and not EventsWithoutSpells[event] then
+			if not NameHash[""] or NameHash[strlowerCache[spellName]] or NameHash[spellID] then
 				return
 			end
-			duration = icon.Durations[key]
 		end
-		
-		local spellID = ...
 			
 		local spell, tex, extra
-		-- sourceUnit, destUnit
-		if event == "SPELL_CAST_FAILED" or event == "SPELL_CAST_START" or event == "SPELL_CAST_SUCCESS" then
-			spell = spellID
-		elseif event == "SWING_DAMAGE" or event == "SWING_MISSED" then
+		if event == "SWING_DAMAGE" or event == "SWING_MISSED" then
 			spell = ACTION_SWING
 			tex = GetSpellTexture(6603)
 		elseif event == "ENCHANT_APPLIED" or event == "ENCHANT_REMOVED" then
@@ -162,12 +180,16 @@ local function CLEU_OnEvent(icon, _, t, event, h, sourceGUID, sourceName, source
 		elseif event == "UNIT_DIED" or event == "UNIT_DESTROYED" or event == "UNIT_DISSIPATES" or event == "PARTY_KILL" then
 			spell = L["CLEU_DIED"]
 			tex = "Interface\\Icons\\Ability_Rogue_FeignDeath"
+			if not sourceUnit then
+				sourceUnit = destUnit -- clone it
+			end
 		else
 			spell = spellID
-			--"RANGE_DAMAGE", -- normal
+			--[[--"RANGE_DAMAGE", -- normal
 			--"RANGE_MISSED", -- normal
 			--"SPELL_DAMAGE", -- normal
 			--"SPELL_MISSED", -- normal
+			--"SPELL_REFLECT", -- normal BUT  NOT ACTUALLY AN EVENT
 			--"SPELL_EXTRA_ATTACKS", -- normal
 			--"SPELL_HEAL", -- normal
 			--"SPELL_ENERGIZE", -- normal
@@ -195,6 +217,10 @@ local function CLEU_OnEvent(icon, _, t, event, h, sourceGUID, sourceName, source
 			--"SPELL_AURA_BROKEN" -- normal
 			--"SPELL_AURA_APPLIED_DOSE"					--SEMI-NORMAL, CONSIDER SPECIAL IMPLEMENTATION
 			--"SPELL_AURA_REMOVED_DOSE"					--SEMI-NORMAL, CONSIDER SPECIAL IMPLEMENTATION
+			--"SPELL_CAST_FAILED" -- normal
+			--"SPELL_CAST_START" -- normal
+			--"SPELL_CAST_SUCCESS" -- normal
+			]]
 		end
 		tex = tex or SpellTextures[spell] or SpellTextures[spellID]
 	
@@ -208,8 +234,6 @@ local function CLEU_OnEvent(icon, _, t, event, h, sourceGUID, sourceName, source
 		end
 		
 		icon.cleu_start = TMW.time
-		print(duration, 0)
-		icon.cleu_duration = duration or 0
 		icon.cleu_spell = spell
 		
 		icon.cleu_sourceUnit = sourceUnit 
@@ -234,27 +258,24 @@ local function CLEU_OnUpdate(icon, time, tex)
 	-- tex is passed in when calling from OnEvent, otherwise its nil
 	
 	local start = icon.cleu_start
-	local duration = icon.cleu_duration
+	local duration = icon.CLEUDur
 
 	--icon:SetInfo(alpha, color, texture, start, duration, spellChecked, reverse, count, countText, forceupdate, unit)
 	if time - start > duration then
 		local color = icon:CrunchColor()
 		
-		icon:SetInfo(icon.Alpha, color, tex, 0, 0, icon.cleu_spell, nil, nil, nil, nil, icon.cleu_destUnit or icon.cleu_sourceUnit)
+		icon:SetInfo(icon.UnAlpha, color, tex, 0, 0, icon.cleu_spell, nil, nil, nil, nil, icon.cleu_destUnit or icon.cleu_sourceUnit)
 	else
 		local color = icon:CrunchColor(duration)
 		
-		icon:SetInfo(icon.UnAlpha, color, tex, start, duration, icon.cleu_spell, nil, nil, nil, nil, icon.cleu_destUnit or icon.cleu_sourceUnit)
+		icon:SetInfo(icon.Alpha, color, tex, start, duration, icon.cleu_spell, nil, nil, nil, nil, icon.cleu_destUnit or icon.cleu_sourceUnit)
 	end
 	
 	icon.LastUpdate = time -- sometimes we call this function whenever the hell we want ("OnEvent"), so at least have the decency to delay the next update
 end
-local naturesGrace = strlower(GetSpellInfo(16886))
 
 function Type:Setup(icon, groupID, iconID)
-	icon.NameHash = icon.Name ~= "" and TMW:GetSpellNames(icon, icon.Name, nil, nil, 1)
---	icon.NameArray = icon.Name ~= "" and TMW:GetSpellNames(icon, icon.Name)
-	icon.Durations = TMW:GetSpellDurations(icon, icon.Name)
+	icon.NameHash = icon.Name ~= "" and TMW:GetSpellNames(icon, icon.Name, nil, nil, 1)	
 	
 	icon.SourceUnits = icon.SourceUnit ~= "" and TMW:GetUnits(icon, icon.SourceUnit)
 	icon.DestUnits = icon.DestUnit ~= "" and TMW:GetUnits(icon, icon.DestUnit)
@@ -286,7 +307,6 @@ function Type:Setup(icon, groupID, iconID)
 	
 	
 	icon.cleu_start = icon.cleu_start or 0
-	icon.cleu_duration = icon.cleu_duration or 0
 	
 	icon.cleu_spell = nil
 
@@ -297,30 +317,14 @@ function Type:Setup(icon, groupID, iconID)
 	icon:RegisterEvent("COMBAT_LOG_EVENT_UNFILTERED")
 	icon:SetScript("OnEvent", CLEU_OnEvent)
 	
-	icon:SetTexture(TMW:GetConfigIconTexture(icon))
+	local tex, otherArgWhichLacksADecentName = TMW:GetConfigIconTexture(icon)
+	if otherArgWhichLacksADecentName == nil then
+		tex = "Interface\\Icons\\INV_Misc_PocketWatch_01"
+	end
+	icon:SetTexture(tex)
 	
 	icon:SetScript("OnUpdate", CLEU_OnUpdate)
 	icon:Update()
-end
-
-function Type:DragReceived(icon, t, data, subType)
-	--[[local ics = icon:GetSettings()
-	
-	if t ~= "spell" then
-		return
-	end
-	
-	local _, spellID = GetSpellBookItemInfo(data, subType)
-	if not spellID then
-		return
-	end
-	
-	ics.Name = TMW:CleanString(ics.Name .. ";" .. spellID)
-	if TMW.CI.ic ~= icon then
-		TMW.IE:Load(nil, icon)
-		TMW.IE:TabClick(TMW.IE.MainTab)
-	end
-	return true -- signal success]]
 end
 
 
