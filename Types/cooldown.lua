@@ -60,10 +60,9 @@ Type.RelevantSettings = {
 	DurationMaxEnabled = true,
 	IgnoreRunes = (pclass == "DEATHKNIGHT"),
 }
-Type.DisabledEvents = {
-	OnUnit = true,
-	OnStack = true,
-}
+
+Type.EventDisabled_OnUnit = true
+Type.EventDisabled_OnStack = true
 
 
 function Type:Update()

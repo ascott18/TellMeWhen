@@ -59,10 +59,9 @@ Type.RelevantSettings = {
 	DurationMinEnabled = true,
 	DurationMaxEnabled = true,
 }
-Type.DisabledEvents = {
-	OnUnit = true,
-	OnSpell = true,
-}
+
+Type.EventDisabled_OnUnit = true
+Type.EventDisabled_OnSpell = true
 
 function Type:Update()
 	db = TMW.db

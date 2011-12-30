@@ -150,6 +150,13 @@ L["ICONMENU_SHOWWHEN"] = "Show icon when"
 L["ICONMENU_USABLE"] = "Usable"
 L["ICONMENU_UNUSABLE"] = "Unusable"
 
+
+L["ICONMENU_COUNTING"] = "Counting"
+L["ICONMENU_COUNTING_DESC"] = "Show the icon when the icon's timer is active."
+L["ICONMENU_NOTCOUNTING"] = "Not Counting"
+L["ICONMENU_NOTCOUNTING_DESC"] = "Show the icon when the icon's timer is not active."
+
+
 L["ICONMENU_BUFFTYPE"] = "Buff or Debuff"
 L["ICONMENU_BUFF"] = "Buff"
 L["ICONMENU_DEBUFF"] = "Debuff"
@@ -191,6 +198,12 @@ L["SUG_SUBSTITUTION_d"] = "Duration Remaining"
 L["SUG_SUBSTITUTION_d_DESC"] = "The duration remaining on the icon's timer"
 L["SUG_SUBSTITUTION_k"] = "Current Stacks"
 L["SUG_SUBSTITUTION_k_DESC"] = "Whatever is currently displayed as the icon's stack text"
+L["SUG_SUBSTITUTION_o"] = "Source Unit"
+L["SUG_SUBSTITUTION_o_DESC"] = "Whatever unit caused the action in the last combat log event."
+L["SUG_SUBSTITUTION_e"] = "Destination Unit"
+L["SUG_SUBSTITUTION_e_DESC"] = "Whatever unit received the action in the last combat log event."
+L["SUG_SUBSTITUTION_x"] = "Extra Spell"
+L["SUG_SUBSTITUTION_x_DESC"] = "Combat log events like dispels, interrupts, and aura breaking have additional data about which spell caused the event. This will substitute in that spell from the last combat log event."
 
 L["ICONMENU_COMPONENTICONS"] = "Component Icons & Groups"
 
@@ -898,6 +911,9 @@ L["SOUND_EVENT_ONDURATION_DESC"] = [[This event triggers when the duration of th
 
 Because this event occurs every time the icon is updated while a timer is running, you must set a condition, and the event will only occur when the state of that condition changes.]]
 
+L["SOUND_EVENT_ONCLEU"] = "Combat Log Event"
+L["SOUND_EVENT_ONCLEU_DESC"] = [[This event triggers when a combat log event that should be processed by the icon occurs.]]
+
 L["SOUND_EVENT_GLOBALDESC"] = "Events are checked from top to bottom in this list. If an event is triggered that has a sound to play, no events below that event will play a sound."
 L["SOUND_EVENT_DISABLEDFORTYPE"] = "Not available"
 L["SOUND_EVENT_DISABLEDFORTYPE_DESC"] = "This event is not available for %s type icons."
@@ -1003,15 +1019,18 @@ L["ANIM_ICONFADE_DESC"] = "Smoothly applies any opacity changes that occured wit
 L["CLEU_"] = "Any event" -- match any event
 L["CLEU_DAMAGE_SHIELD"] = "Damage Shield"
 L["CLEU_DAMAGE_SHIELD_MISSED"] = "Damage Shield Missed"
+L["CLEU_DAMAGE_SPLIT"] = "Damage Split"
 L["CLEU_ENCHANT_APPLIED"] = "Enchant Applied"
 L["CLEU_ENCHANT_REMOVED"] = "Enchant Removed"
 L["CLEU_ENVIRONMENTAL_DAMAGE"] = "Environmental Damage"
 L["CLEU_RANGE_DAMAGE"] = "Ranged Damage"
 L["CLEU_RANGE_MISSED"] = "Ranged Miss"
 L["CLEU_SPELL_AURA_APPLIED"] = "Aura Applied"
+L["CLEU_SPELL_AURA_APPLIED_DOSE"] = "Aura Stack Applied"
 L["CLEU_SPELL_AURA_BROKEN"] = "Aura Broken"
 L["CLEU_SPELL_AURA_REFRESH"] = "Aura Refreshed"
 L["CLEU_SPELL_AURA_REMOVED"] = "Aura Removed"
+L["CLEU_SPELL_AURA_REMOVED_DOSE"] = "Aura Stack Removed"
 L["CLEU_SPELL_AURA_STOLEN"] = "Aura Stolen"
 L["CLEU_SPELL_CAST_FAILED"] = "Spell Cast Failed"
 L["CLEU_SPELL_CAST_START"] = "Spell Cast Start"
@@ -1021,7 +1040,7 @@ L["CLEU_SPELL_DISPEL"] = "Dispel"
 L["CLEU_SPELL_DISPEL_FAILED"] = "Dispel Failed"
 L["CLEU_SPELL_DRAIN"] = "Resource Drain"
 L["CLEU_SPELL_ENERGIZE"] = "Resource Gain"
-L["CLEU_SPELL_EXTRA_ATTACKS"] = "Extra Attacks"
+L["CLEU_SPELL_EXTRA_ATTACKS"] = "Extra Attacks Gained"
 L["CLEU_SPELL_HEAL"] = "Heal"
 L["CLEU_SPELL_INSTAKILL"] = "Instant Kill"
 L["CLEU_SPELL_INTERRUPT"] = "Interrupt"
@@ -1038,14 +1057,17 @@ L["CLEU_SWING_MISSED"] = "Swing Miss"
 L["CLEU_UNIT_DESTROYED"] = "Unit Destroyed"
 L["CLEU_UNIT_DIED"] = "Unit Died"
 
+L["CLEU_DIED"] = "Death"
 
+
+L["CLEU_HEADER"] = "Combat Log Event Filters"
 L["CLEU_EVENTS"] = "Events to check (%s)"
+L["CLEU_EVENTS_ALL"] = "All"
 L["CLEU_EVENTS_DESC"] = "Choose the combat log events that you would like the icon to react to."
 L["CLEU_SOURCEUNITS"] = "Source unit(s) to check"
 L["CLEU_SOURCEUNITS_DESC"] = "Choose the source units that you would like the icon to react to, or leave this blank to let the icon react to any event source."
 L["CLEU_DESTUNITS"] = "Destination unit(s) to check"
 L["CLEU_DESTUNITS_DESC"] = "Choose the destination units that you would like the icon to react to, or leave this blank to let the icon react to any event destination."
-
 
 
 

@@ -52,9 +52,8 @@ Type.RelevantSettings = {
 	DurationMinEnabled = true,
 	DurationMaxEnabled = true,
 }
-Type.DisabledEvents = {
-	OnStack = true,
-}
+
+Type.EventDisabled_OnStack = true
 
 function Type:Update()
 	db = TMW.db

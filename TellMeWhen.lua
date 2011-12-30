@@ -32,7 +32,7 @@ local DRData = LibStub("DRData-1.0", true)
 TELLMEWHEN_VERSION = "4.8.0"
 TELLMEWHEN_VERSION_MINOR = strmatch(" @project-version@", " r%d+") or ""
 TELLMEWHEN_VERSION_FULL = TELLMEWHEN_VERSION .. TELLMEWHEN_VERSION_MINOR
-TELLMEWHEN_VERSIONNUMBER = 48002 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
+TELLMEWHEN_VERSIONNUMBER = 48003 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
 if TELLMEWHEN_VERSIONNUMBER > 49000 or TELLMEWHEN_VERSIONNUMBER < 48000 then return error("YOU SCREWED UP THE VERSION NUMBER OR DIDNT CHANGE THE SAFETY LIMITS") end -- safety check because i accidentally made the version number 414069 once
 
 TELLMEWHEN_MAXGROUPS = 1 	--this is a default, used by SetTheory (addon), so dont rename
@@ -1178,6 +1178,11 @@ TMW.EventList = {
 			["=="] = true,
 		},
 		valueName = L["DURATION"]
+	},
+	{
+		name = "OnCLEUEvent",
+		text = L["SOUND_EVENT_ONCLEU"],
+		desc = L["SOUND_EVENT_ONCLEU_DESC"],
 	},
 }
 
@@ -3411,11 +3416,11 @@ end
 function TMW.IconBase.SetInfo(icon, alpha, color, texture, start, duration, spellChecked, reverse, count, countText, forceupdate, unit)
 	--[[
 	 icon			- the icon object to set the attributes on (frame) (but call as icon:SetInfo(alpha, ...))
-	[alpha]			- the alpha to set the icon to (number); (nil) to leave unchanged
+	[alpha]			- the alpha to set the icon to (number); (nil) defaults to 0
 	[color]			- the value(s) to call SetVertexColor with. Either a (number) that will be used as the r, g, and b; or a (table) with keys r, g, b; or (nil) to leave unchanged
 	[texture]		- the texture path to set the icon to (string); or (nil) to leave unchanged
-	[start]			- the start time of the cooldow/duration, as passsed to icon.cooldown:SetCooldown(start, duration); (nil) to leave unchanged
-	[duration]		- the duration of the cooldow/duration, as passsed to icon.cooldown:SetCooldown(start, duration); (nil) to leave unchanged
+	[start]			- the start time of the cooldow/duration, as passsed to icon.cooldown:SetCooldown(start, duration); (nil) defaults to 0
+	[duration]		- the duration of the cooldow/duration, as passsed to icon.cooldown:SetCooldown(start, duration); (nil) defaults to 0
 	[spellChecked]	- the name or ID of the spell to be used for the icons power bar overlay (string/number)
 	[reverse]		- true/false to set icon.cooldown:SetReverse(reverse), nil to not change (boolean/nil)
 	[count]			- the number of stacks to be used for comparison, nil/false to hide (number/nil/false)
@@ -3435,9 +3440,10 @@ function TMW.IconBase.SetInfo(icon, alpha, color, texture, start, duration, spel
 		6) Handle arg in here
 	]]
 	
-	alpha = alpha or icon.__alpha or 0
-	duration = duration or icon.__duration or 0
-	start = start or icon.__start or 0
+	
+	alpha = alpha or 0
+	duration = duration or 0
+	start = start or 0
 	
 	local queueOnUnit, queueOnSpell, queueOnStack
 	
@@ -3478,18 +3484,13 @@ function TMW.IconBase.SetInfo(icon, alpha, color, texture, start, duration, spel
 		icon.__lastDur = d
 	end
 	
+	
 	if
 		(icon.CndtFailed) or -- conditions failed
 		(d > 0 and ((icon.DurationMinEnabled and icon.DurationMin > d) or (icon.DurationMaxEnabled and d > icon.DurationMax))) or -- duration requirements failed
 		(count and ((icon.StackMinEnabled and icon.StackMin > count) or (icon.StackMaxEnabled and count > icon.StackMax))) -- stack requirements failed
 	then
 		alpha = alpha ~= 0 and icon.ConditionAlpha or 0 -- use the alpha setting for failed stacks/duration/conditions, but only if the alpha isnt being hidden for another reason
-	end
-	
-	texture = icon.OverrideTex or texture -- if a texture override is specefied, then use it instead
-	if texture ~= nil and icon.__tex ~= texture then -- do this before events are processed because some text outputs use icon.__tex
-		icon.__tex = texture
-		icon.texture:SetTexture(texture)
 	end
 
 	if alpha ~= icon.__alpha then
@@ -3617,7 +3618,13 @@ function TMW.IconBase.SetInfo(icon, alpha, color, texture, start, duration, spel
 		end
 	end
 	
-	-- NO EVENT HANDLING PAST THIS POINT!
+	texture = icon.OverrideTex or texture -- if a texture override is specefied, then use it instead
+	if texture ~= nil and icon.__tex ~= texture then -- do this before events are processed because some text outputs use icon.__tex
+		icon.__tex = texture
+		icon.texture:SetTexture(texture)
+	end
+	
+	-- NO EVENT HANDLING PAST THIS POINT! -- well, actually it doesnt matter anymore, but whatever
 	if icon.EventsToFire and next(icon.EventsToFire) then
 		local played, announced, animated
 		for i = 1, #TMW.EventList do
@@ -3735,11 +3742,11 @@ local typeMT = {
 	__index = TypeBase,
 }
 
-TypeBase.DisabledEvents = {}
 TypeBase.SUGType = "spell"
 TypeBase.leftCheckYOffset = 0
 TypeBase.chooseNameTitle = L["ICONMENU_CHOOSENAME"]
 TypeBase.chooseNameText  = L["CHOOSENAME_DIALOG"]
+TypeBase.EventDisabled_OnCLEUEvent = true
 
 function TypeBase:UpdateColors(dontUpdateIcons)
 	for k, v in pairs(db.profile.Colors[self.type]) do
@@ -3995,7 +4002,7 @@ function TMW:Icon_Update(icon)
 				dontremove = 1
 			end
 		end
-		if (tbl.SoundData or tbl.Channel ~= "" or tbl.Animation ~= "") and not typeData.DisabledEvents[event] then
+		if (tbl.SoundData or tbl.Channel ~= "" or tbl.Animation ~= "") and not typeData["EventDisabled_" .. event] then
 			icon[event] = tbl
 			icon.EventsToFire = icon.EventsToFire or {}
 		else
@@ -4204,8 +4211,10 @@ function TMW:Icon_Update(icon)
 		icon:SetInfo(1, 1, nil, 0, 0, icon.__spellChecked, nil, testCount, testCountText, nil, nil, icon.__unitChecked) -- alpha is set to 1 here so it doesnt return early
 		if icon.Enabled then
 			icon:SetAlpha(1)
+			icon.__alpha = 1
 		else
 			icon:SetAlpha(0.5)
+			icon.__alpha = 0.5
 		end
 		if not icon.texture:GetTexture() then
 			icon:SetTexture("Interface\\AddOns\\TellMeWhen\\Textures\\Disabled")
@@ -4234,7 +4243,7 @@ end
 function TMW:InjectDataIntoString(Text, icon, doBlizz)
 	if not Text then return Text end
 	
-	--CURRENTLY USED: t, f, m, p, u, s, d, k
+	--CURRENTLY USED: t, f, m, p, u, s, d, k, e, o, x
 	
 	if doBlizz then
 		if strfind(Text, "%%[Tt]") then
@@ -4250,11 +4259,29 @@ function TMW:InjectDataIntoString(Text, icon, doBlizz)
 	end
 	
 	if icon then
+	
+		if icon.Type == "cleu" then
+			if strfind(Text, "%%[Oo]") then
+				Text = gsub(Text, "%%[Oo]", UnitName(icon.cleu_sourceUnit or "") or icon.cleu_sourceUnit or "?")
+			end
+			if strfind(Text, "%%[Ee]") then
+				Text = gsub(Text, "%%[Ee]", UnitName(icon.cleu_destUnit or "") or icon.cleu_destUnit or "?")
+			end
+			if strfind(Text, "%%[Xx]") then
+				local name, checkcase = icon.typeData:GetNameForDisplay(icon, icon.cleu_extraSpell)
+				name = name or "?"
+				if checkcase then
+					name = TMW:RestoreCase(name)
+				end
+				Text = gsub(Text, "%%[Xx]", name)
+			end
+		end
+		
 		if strfind(Text, "%%[Pp]") then
 			Text = gsub(Text, "%%[Pp]", icon.__lastUnitName or UnitName(icon.__lastUnitChecked or "") or "?")
 		end
 		if strfind(Text, "%%[Uu]") then
-			Text = gsub(Text, "%%[Uu]", icon.__unitName or UnitName(icon.__unitChecked or "") or "?")
+			Text = gsub(Text, "%%[Uu]", icon.__unitName or UnitName(icon.__unitChecked or "") or icon.__unitChecked or "?")
 		end
 		
 		if strfind(Text, "%%[Ss]") then

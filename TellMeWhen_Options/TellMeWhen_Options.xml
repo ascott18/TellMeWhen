@@ -2555,12 +2555,21 @@
 					
 					<Frame name="$parentCLEUEvents" inherits="TMW_DropDownMenuTemplate" parentKey="CLEUEvents">
 						<Anchors>
-							<Anchor point="TOPLEFT" relativeTo="$parentType" relativePoint="BOTTOMLEFT" x="15" y="-90"/>
+							<Anchor point="TOPLEFT" relativeTo="$parentType" relativePoint="BOTTOMLEFT" x="0" y="-57"/>
 						</Anchors>
+						<Layers>
+							<Layer level="ARTWORK">
+								<FontString name="$parentFS1" inherits="GameFontNormal" parentKey="text" justifyH="LEFT">
+									<Anchors>
+										<Anchor point="BOTTOMLEFT" relativePoint="TOPLEFT" x="20" y="3"/>
+									</Anchors>
+								</FontString>
+							</Layer>
+						</Layers>
 						<Scripts>
 							<OnLoad>
 								self.wrapTooltips = 1
-								UIDropDownMenu_SetWidth(self, 280)
+								UIDropDownMenu_SetWidth(self, 170)
 								self.InitFunc = TMW.CLEU.EventMenu
 								UIDropDownMenu_SetText(self, TMW.L["CLEU_EVENTS"])
 								self.Button:HookScript("OnClick", function(self)
@@ -2568,11 +2577,12 @@
 								end)
 								
 								TMW:TT(self, "CLEU_EVENTS", "CLEU_EVENTS_DESC")
+								self.text:SetText(TMW.L["CLEU_HEADER"])
 							</OnLoad>
 						</Scripts>
 					</Frame>
 					<EditBox name="$parentSourceUnit" inherits="TellMeWhen_UnitEditbox" parentKey="SourceUnit" autoFocus="false">
-						<Size x="270" y="15"/>
+						<Size x="162" y="15"/>
 						<Anchors>
 							<Anchor point="TOPLEFT" relativeTo="$parentCLEUEvents" relativePoint="BOTTOMLEFT" x="23" y="1"/>
 						</Anchors>
@@ -2610,9 +2620,9 @@
 						</Scripts>
 					</EditBox>
 					<EditBox name="$parentDestUnit" inherits="TellMeWhen_UnitEditbox" parentKey="DestUnit" autoFocus="false">
-						<Size x="270" y="15"/>
+						<Size x="162" y="15"/>
 						<Anchors>
-							<Anchor point="TOPLEFT" relativeTo="$parentSourceUnit" relativePoint="BOTTOMLEFT" x="0" y="-4"/>
+							<Anchor point="TOPLEFT" relativeTo="$parentSourceUnit" relativePoint="BOTTOMLEFT" x="0" y="-5"/>
 						</Anchors>
 						<Scripts>
 							<OnLoad>
@@ -2647,6 +2657,7 @@
 							</OnTextChanged>
 						</Scripts>
 					</EditBox>
+					
 
 					<EditBox name="$parentCustomTex" inherits="TellMeWhen_InputBoxTemplate" parentKey="CustomTex" autoFocus="false">
 						<Size x="270" y="15"/>
@@ -2760,7 +2771,7 @@
 							</CheckButton>
 							<CheckButton name="$parent2" inherits="TellMeWhen_RadioCheckTemplate" parentKey="Radio2" id="2">
 								<Anchors>
-									<Anchor point="TOP" relativeTo="$parent1" relativePoint="BOTTOM" y="8"/>
+									<Anchor point="TOPLEFT" relativeTo="$parent1" relativePoint="BOTTOMLEFT" y="8"/>
 								</Anchors>
 								<Scripts>
 									<OnLoad>
@@ -2775,7 +2786,7 @@
 							</CheckButton>
 							<CheckButton name="$parent3" inherits="TellMeWhen_RadioCheckTemplate" parentKey="Radio3" id="3">
 								<Anchors>
-									<Anchor point="TOP" relativeTo="$parent2" relativePoint="BOTTOM" y="8"/>
+									<Anchor point="TOPLEFT" relativeTo="$parent2" relativePoint="BOTTOMLEFT" y="8"/>
 								</Anchors>
 								<Scripts>
 									<OnLoad>

@@ -48,10 +48,7 @@ Type.RelevantSettings = {
 	UnAlpha = false,
 	Sort = true,
 }
-Type.DisabledEvents = {
-	--OnSpell = true,
-	--OnUnit = true,
-}
+
 
 function Type:Update()
 	db = TMW.db
@@ -224,12 +221,10 @@ function Type:IE_TypeLoaded()
 	TMW.IE.Main.Sort.Radio1:SetPoint("TOPLEFT", spacing, 19)
 	TMW.IE.Main.Sort.Radio1.text:SetWidth(spacing)
 	
-	TMW.IE.Main.Sort.Radio2:ClearAllPoints()
-	TMW.IE.Main.Sort.Radio2:SetPoint("LEFT", TMW.IE.Main.Sort.Radio1, "RIGHT", spacing, 0)
+	TMW.IE.Main.Sort.Radio2:SetPoint("TOPLEFT", TMW.IE.Main.Sort.Radio1, "TOPRIGHT", spacing, 0)
 	TMW.IE.Main.Sort.Radio2.text:SetWidth(spacing)
 	
-	TMW.IE.Main.Sort.Radio3:ClearAllPoints()
-	TMW.IE.Main.Sort.Radio3:SetPoint("LEFT", TMW.IE.Main.Sort.Radio2, "RIGHT", spacing, 0)
+	TMW.IE.Main.Sort.Radio3:SetPoint("TOPLEFT", TMW.IE.Main.Sort.Radio2, "TOPRIGHT", spacing, 0)
 	TMW.IE.Main.Sort.Radio3.text:SetWidth(spacing)
 	
 	TMW:TT(TMW.IE.Main.Sort.Radio1, "SORTBYNONE", "SORTBYNONE_META_DESC")
@@ -247,12 +242,10 @@ function Type:IE_TypeUnloaded()
 	TMW.IE.Main.Sort.Radio1:SetPoint("TOPLEFT", 0, 1)
 	TMW.IE.Main.Sort.Radio1.text:SetWidth(TMW.WidthCol1)
 	
-	TMW.IE.Main.Sort.Radio2:ClearAllPoints()
-	TMW.IE.Main.Sort.Radio2:SetPoint("TOP", TMW.IE.Main.Sort.Radio1, "BOTTOM", 0, 8)
+	TMW.IE.Main.Sort.Radio2:SetPoint("TOPLEFT", TMW.IE.Main.Sort.Radio1, "BOTTOMLEFT", 0, 8)
 	TMW.IE.Main.Sort.Radio2.text:SetWidth(TMW.WidthCol1)
 	
-	TMW.IE.Main.Sort.Radio3:ClearAllPoints()
-	TMW.IE.Main.Sort.Radio3:SetPoint("TOP", TMW.IE.Main.Sort.Radio2, "BOTTOM", 0, 8)
+	TMW.IE.Main.Sort.Radio3:SetPoint("TOPLEFT", TMW.IE.Main.Sort.Radio2, "BOTTOMLEFT", 0, 8)
 	TMW.IE.Main.Sort.Radio3.text:SetWidth(TMW.WidthCol1)
 	
 	TMW:TT(TMW.IE.Main.Sort.Radio1, "SORTBYNONE", "SORTBYNONE_DESC")

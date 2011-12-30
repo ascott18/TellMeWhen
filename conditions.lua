@@ -2449,11 +2449,11 @@ function CNDT:ProcessConditions(icon)
 				return false, true
 			end]]
 		else
-			funcstr = [[if not (]] .. strsub(funcstr, 4) .. [[) then
-				]] .. (icon.ConditionAlpha == 0 and (icon:GetName()..[[:SetInfo(0) return true, false]]) or (icon:GetName()..[[.CndtFailed = 1 return false, false]])) .. [[
+			funcstr = [[if not (]] .. strsub(funcstr, 4) .. (([[) then
+				icon.CndtFailed = 1 ]] .. (icon.ConditionAlpha == 0 and ([[icon:SetInfo(0) return true, false]]) or ([[return false, false]])) .. [[
 			else
-				]]..icon:GetName()..[[.CndtFailed = nil return false, true
-			end]]
+				icon.CndtFailed = nil return false, true
+			end]]):gsub("icon", icon:GetName()))
 		end
 	else -- its a group condition
 		funcstr = strsub(funcstr, 4)

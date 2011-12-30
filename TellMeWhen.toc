@@ -75,7 +75,7 @@ Types\cast.lua
 Types\conditionicon.lua
 Types\meta.lua
 
-# Types\cleu.lua
+Types\cleu.lua
 
 
 conditions.lua

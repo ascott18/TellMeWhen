@@ -74,8 +74,7 @@ Type.RelevantSettings = {
 	DurationMaxEnabled = true,
 	CheckRefresh = true,
 }
-Type.DisabledEvents = {
-}
+
 
 
 function Type:Update()

@@ -36,22 +36,22 @@ Type.desc = L["ICONMENU_CLEU_DESC"]
 Type.usePocketWatch = 1
 Type.AllowNoName = true
 Type.chooseNameTitle = L["ICONMENU_CHOOSENAME"] .. " " .. L["ICONMENU_CHOOSENAME_ORBLANK"]
---Type.DurationSyntax = 1
+Type.DurationSyntax = 1
 Type.SUGType = "spell"
-Type.leftCheckYOffset = -100
+Type.leftCheckYOffset = -110
 --[[Type.TypeChecks = {
 	setting = "ICDType",
 	text = L["ICONMENU_ICDTYPE"],
 	{ value = "aura", 			text = L["ICONMENU_ICDBDE"], 				tooltipText = L["ICONMENU_ICDAURA_DESC"]},
 	{ value = "spellcast", 		text = L["ICONMENU_SPELLCAST_COMPLETE"], 	tooltipText = L["ICONMENU_SPELLCAST_COMPLETE_DESC"]},
 	{ value = "caststart", 		text = L["ICONMENU_SPELLCAST_START"], 		tooltipText = L["ICONMENU_SPELLCAST_START_DESC"]},
-}
+}]]
 Type.WhenChecks = {
 	text = L["ICONMENU_SHOWWHEN"],
-	{ value = "alpha", 			text = L["ICONMENU_USABLE"], 			colorCode = "|cFF00FF00" },
-	{ value = "unalpha",		text = L["ICONMENU_UNUSABLE"], 			colorCode = "|cFFFF0000" },
+	{ value = "alpha",			text = L["ICONMENU_NOTCOUNTING"], 		tooltipText = L["ICONMENU_NOTCOUNTING_DESC"],	colorCode = "|cFFFF0000" },
+	{ value = "unalpha", 		text = L["ICONMENU_COUNTING"], 			tooltipText = L["ICONMENU_COUNTING_DESC"],		colorCode = "|cFF00FF00" },
 	{ value = "always", 		text = L["ICONMENU_ALWAYS"] },
-}]]
+}
 Type.RelevantSettings = {
 	CLEUEvents = true,
 	SourceUnit = true,
@@ -64,28 +64,39 @@ Type.RelevantSettings = {
 	DurationMinEnabled = true,
 	DurationMaxEnabled = true,
 }
-Type.DisabledEvents = {
-	OnUnit = true,
-	OnStack = true,
-}
+
+Type.EventDisabled_OnStack = true
+Type.EventDisabled_OnCLEUEvent = false
+
 
 
 function Type:Update()
 	db = TMW.db
 	pGUID = UnitGUID("player")
 end
+local EnvironmentalTextures = {
+	DROWNING = "Interface\\Icons\\Spell_Shadow_DemonBreath",
+	FALLING = GetSpellTexture(130),
+	FATIGUE = "Interface\\Icons\\Ability_Suffocate",
+	FIRE = GetSpellTexture(84668),
+	LAVA = GetSpellTexture(90373),
+	SLIME = GetSpellTexture(49870),
+}
 
 
-local function CLEU_OnEvent(icon, _, _, event, _, sourceGUID, sourceName, sourceFlags, sourceRaidFlags, destGUID, destName, destFlags, destRaidFlags, ...)
-	local spellID, spellName, spellSchool = ...
+
+local function CLEU_OnEvent(icon, _, t, event, h, sourceGUID, sourceName, sourceFlags, sourceRaidFlags, destGUID, destName, destFlags, destRaidFlags, ...)
 	if icon.AllowAnyEvents or icon.CLEUEvents[event] then
+	
 		local SourceUnits = icon.SourceUnits
-		if SourceUnits then
+		local sourceUnit = sourceName
+		if SourceUnits and sourceName then
 			local matched
 			for i = 1, #SourceUnits do
 				local unit = SourceUnits[i]
 				local sourceName = strlowerCache[sourceName]
 				if unit == sourceName or UnitGUID(unit) == sourceGUID then
+					sourceUnit = unit
 					matched = 1
 					break
 				end
@@ -96,12 +107,14 @@ local function CLEU_OnEvent(icon, _, _, event, _, sourceGUID, sourceName, source
 		end
 		
 		local DestUnits = icon.DestUnits
-		if DestUnits then
+		local destUnit = destName
+		if DestUnits and destName then
 			local matched
 			for i = 1, #DestUnits do
 				local unit = DestUnits[i]
 				local destName = strlowerCache[destName]
 				if unit == destName or UnitGUID(unit) == destGUID then
+					destUnit = unit
 					matched = 1
 					break
 				end
@@ -112,74 +125,182 @@ local function CLEU_OnEvent(icon, _, _, event, _, sourceGUID, sourceName, source
 		end
 		
 		local NameHash = icon.NameHash
+		local duration = icon.Duration
 		if NameHash then
-			if not (NameHash[strlowerCache[spellName]] or NameHash[spellID]) then
+			local key = NameHash[""] or NameHash[strlowerCache[spellName]] or NameHash[spellID]
+			if not key then
 				return
 			end
+			duration = icon.Durations[key]
 		end
 		
+		local spellID = ...
+			
+		local spell, tex, extra
+		-- sourceUnit, destUnit
+		if event == "SPELL_CAST_FAILED" or event == "SPELL_CAST_START" or event == "SPELL_CAST_SUCCESS" then
+			spell = spellID
+		elseif event == "SWING_DAMAGE" or event == "SWING_MISSED" then
+			spell = ACTION_SWING
+			tex = GetSpellTexture(6603)
+		elseif event == "ENCHANT_APPLIED" or event == "ENCHANT_REMOVED" then
+			local enchantName, itemID = ...
+			spell = enchantName
+			tex = GetItemIcon(itemID)
+		elseif event == "SPELL_INTERRUPT" or event == "SPELL_DISPEL" or event == "SPELL_DISPEL_FAILED" or event == "SPELL_AURA_BROKEN_SPELL" or event == "SPELL_AURA_STOLEN" then
+			local _, _, _, extraID = ...
+			extra = extraID
+			if icon.UseExtraID then
+				tex = SpellTextures[extraID]
+			else
+				tex = SpellTextures[spellID]
+			end
+			spell = spellID
+		elseif event == "ENVIRONMENTAL_DAMAGE" then
+			spell = _G["ACTION_ENVIRONMENTAL_DAMAGE_"..spellID]
+			tex = EnvironmentalTextures[spellID] or "Interface\\Icons\\INV_Misc_QuestionMark" -- spellID is actually environmentalType
+		elseif event == "UNIT_DIED" or event == "UNIT_DESTROYED" or event == "UNIT_DISSIPATES" or event == "PARTY_KILL" then
+			spell = L["CLEU_DIED"]
+			tex = "Interface\\Icons\\Ability_Rogue_FeignDeath"
+		else
+			spell = spellID
+			--"RANGE_DAMAGE", -- normal
+			--"RANGE_MISSED", -- normal
+			--"SPELL_DAMAGE", -- normal
+			--"SPELL_MISSED", -- normal
+			--"SPELL_EXTRA_ATTACKS", -- normal
+			--"SPELL_HEAL", -- normal
+			--"SPELL_ENERGIZE", -- normal
+			--"SPELL_DRAIN", -- normal
+			--"SPELL_LEECH", -- normal
+			--"SPELL_AURA_APPLIED", -- normal
+			--"SPELL_AURA_REFRESH", -- normal
+			--"SPELL_AURA_REMOVED", -- normal
+	
+			--"SPELL_PERIODIC_DAMAGE", -- normal
+			--"SPELL_PERIODIC_DRAIN", -- normal
+			--"SPELL_PERIODIC_ENERGIZE", -- normal
+			--"SPELL_PERIODIC_LEECH", -- normal
+			--"SPELL_PERIODIC_HEAL", -- normal
+			--"SPELL_PERIODIC_MISSED", -- normal
+			--"DAMAGE_SHIELD", -- normal
+			--"DAMAGE_SHIELD_MISSED", -- normal
+			--"DAMAGE_SPLIT", -- normal
+			--"SPELL_INSTAKILL", -- normal 
+			--"SPELL_SUMMON" -- normal
+			--"SPELL_RESURRECT" -- normal
+			--"SPELL_CREATE" -- normal
+			--"SPELL_DURABILITY_DAMAGE" -- normal
+			--"SPELL_DURABILITY_DAMAGE_ALL" -- normal
+			--"SPELL_AURA_BROKEN" -- normal
+			--"SPELL_AURA_APPLIED_DOSE"					--SEMI-NORMAL, CONSIDER SPECIAL IMPLEMENTATION
+			--"SPELL_AURA_REMOVED_DOSE"					--SEMI-NORMAL, CONSIDER SPECIAL IMPLEMENTATION
+		end
+		tex = tex or SpellTextures[spell] or SpellTextures[spellID]
+	
+		-- bind text updating
+		if icon.cleu_sourceUnit ~= sourceUnit and icon.UpdateBindText_SourceUnit then
+			icon:UpdateBindText()
+		elseif icon.cleu_destUnit ~= destUnit and icon.UpdateBindText_DestUnit then
+			icon:UpdateBindText()
+		elseif icon.cleu_extraSpell ~= extra and icon.UpdateBindText_ExtraSpell then
+			icon:UpdateBindText()
+		end
+		
+		icon.cleu_start = TMW.time
+		print(duration, 0)
+		icon.cleu_duration = duration or 0
+		icon.cleu_spell = spell
+		
+		icon.cleu_sourceUnit = sourceUnit 
+		icon.cleu_destUnit = destUnit 
+		icon.cleu_extraSpell = extra 
+		
+		if icon.OnCLEUEvent then
+			icon.EventsToFire.OnCLEUEvent = true
+		end
+		
+		icon:OnUpdate(TMW.time, tex)
+		
+		print(event, spell, "|T" .. tex .. ":0|t", sourceUnit, destUnit, extra)
+			
 		-- all checks complete. procede to do shit.
-		print("Event Passed", spellName, sourceName, destName, event)
+		--print(CombatLog_OnEvent(Blizzard_CombatLog_CurrentSettings, t, event, h, sourceGUID, sourceName, sourceFlags, sourceRaidFlags, destGUID, destName, destFlags, destRaidFlags, ...))
+	--	print("Event Passed", spellName, sourceName, destName, event)
 	end
 end
 
-local function ICD_OnUpdate(icon, time)
---[[
-	local ICDStartTime = icon.ICDStartTime
-	local ICDDuration = icon.ICDDuration
+local function CLEU_OnUpdate(icon, time, tex)
+	-- tex is passed in when calling from OnEvent, otherwise its nil
+	
+	local start = icon.cleu_start
+	local duration = icon.cleu_duration
 
 	--icon:SetInfo(alpha, color, texture, start, duration, spellChecked, reverse, count, countText, forceupdate, unit)
-	if time - ICDStartTime > ICDDuration then
+	if time - start > duration then
 		local color = icon:CrunchColor()
 		
-		icon:SetInfo(icon.Alpha, color, nil, 0, 0, icon.ICDID, nil, nil, nil, nil, nil)
+		icon:SetInfo(icon.Alpha, color, tex, 0, 0, icon.cleu_spell, nil, nil, nil, nil, icon.cleu_destUnit or icon.cleu_sourceUnit)
 	else
-		local color = icon:CrunchColor(ICDDuration)
+		local color = icon:CrunchColor(duration)
 		
-		icon:SetInfo(icon.UnAlpha, color, nil, ICDStartTime, ICDDuration, icon.ICDID, nil, nil, nil, nil, nil)
-	end]]
+		icon:SetInfo(icon.UnAlpha, color, tex, start, duration, icon.cleu_spell, nil, nil, nil, nil, icon.cleu_destUnit or icon.cleu_sourceUnit)
+	end
+	
+	icon.LastUpdate = time -- sometimes we call this function whenever the hell we want ("OnEvent"), so at least have the decency to delay the next update
 end
 local naturesGrace = strlower(GetSpellInfo(16886))
 
 function Type:Setup(icon, groupID, iconID)
 	icon.NameHash = icon.Name ~= "" and TMW:GetSpellNames(icon, icon.Name, nil, nil, 1)
+--	icon.NameArray = icon.Name ~= "" and TMW:GetSpellNames(icon, icon.Name)
+	icon.Durations = TMW:GetSpellDurations(icon, icon.Name)
 	
 	icon.SourceUnits = icon.SourceUnit ~= "" and TMW:GetUnits(icon, icon.SourceUnit)
 	icon.DestUnits = icon.DestUnit ~= "" and TMW:GetUnits(icon, icon.DestUnit)
 	
 	icon.AllowAnyEvents = icon.CLEUEvents[""]
+	
+	icon.UpdateBindText_SourceUnit = nil
+	icon.UpdateBindText_DestUnit = nil
+	icon.UpdateBindText_ExtraSpell = nil
+	if icon.BindText then
+		if strfind(icon.BindText, "%%[Oo]") then
+			icon.UpdateBindText_Any = true
+			icon.UpdateBindText_SourceUnit = nil
+		end
+		if strfind(icon.BindText, "%%[Ee]") then
+			icon.UpdateBindText_Any = true
+			icon.UpdateBindText_DestUnit = nil
+		end
+		if strfind(icon.BindText, "%%[Xx]") then
+			icon.UpdateBindText_Any = true
+			icon.UpdateBindText_ExtraSpell = nil
+		end
+	end
+	
 	if icon.AllowAnyEvents and not icon.SourceUnits and not icon.DestUnits and not icon.NameHash then
 		TMW:Error("No filters detected for " .. icon:GetName()) -- TODO: SOMETHING BETTER THAN THIS
 		return
 	end
+	
+	
+	icon.cleu_start = icon.cleu_start or 0
+	icon.cleu_duration = icon.cleu_duration or 0
+	
+	icon.cleu_spell = nil
+
+	icon.cleu_sourceUnit = nil
+	icon.cleu_destUnit = nil
+	icon.cleu_extraSpell = nil
+	
 	icon:RegisterEvent("COMBAT_LOG_EVENT_UNFILTERED")
 	icon:SetScript("OnEvent", CLEU_OnEvent)
 	
-	--[=[icon.ShowPBar = false
-	icon.NameFirst = TMW:GetSpellNames(icon, icon.Name, 1)
-	icon.NameHash = TMW:GetSpellNames(icon, icon.Name, nil, nil, 1)
-	icon.NameNameArray = TMW:GetSpellNames(icon, icon.Name, nil, 1)
-	icon.Durations = TMW:GetSpellDurations(icon, icon.Name)
-
-	icon.ICDStartTime = icon.ICDStartTime or 0
-	icon.ICDDuration = icon.ICDDuration or 0
-	
-		
-	--[[ keep these events per icon isntead of global like unitcooldowns are so that ...
-	well i had a reason here but it didnt make sense when i came back and read it a while later. Just do it. I guess.]]
-	if icon.ICDType == "spellcast" then
-		icon:RegisterEvent("UNIT_SPELLCAST_SUCCEEDED")
-	elseif icon.ICDType == "caststart" then
-		icon:RegisterEvent("UNIT_SPELLCAST_START")
-		icon:RegisterEvent("UNIT_SPELLCAST_CHANNEL_START")
-	elseif icon.ICDType == "aura" then
-		icon:RegisterEvent("COMBAT_LOG_EVENT_UNFILTERED")
-	end
-
 	icon:SetTexture(TMW:GetConfigIconTexture(icon))
-
-	icon:SetScript("OnUpdate", ICD_OnUpdate)
-	icon:Update()]=]
+	
+	icon:SetScript("OnUpdate", CLEU_OnUpdate)
+	icon:Update()
 end
 
 function Type:DragReceived(icon, t, data, subType)

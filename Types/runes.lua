@@ -57,10 +57,9 @@ Type.RelevantSettings = {
 	DurationMinEnabled = true,
 	DurationMaxEnabled = true,
 }
-Type.DisabledEvents = {
-	OnUnit = true,
-	OnStack = true,
-}
+
+Type.EventDisabled_OnUnit = true
+Type.EventDisabled_OnStack = true
 
 local textures = {
 	"Interface\\Icons\\Spell_Deathknight_BloodPresence",

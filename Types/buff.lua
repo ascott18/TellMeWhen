@@ -71,8 +71,7 @@ Type.RelevantSettings = {
 	ShowTTText = true,
 	Stealable = pclass == "MAGE",
 }
-Type.DisabledEvents = {
-}
+
 
 
 function Type:Update()

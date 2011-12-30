@@ -1983,32 +1983,34 @@ CLEU.Events = {
 	"SPELL_CAST_START",
 	"SPELL_CAST_SUCCESS",
 	
-	"RANGE_DAMAGE",
-	"RANGE_MISSED",
+	"SPELL_INTERRUPT",-- extraSpellID/name
 	
-	"SWING_DAMAGE",
-	"SWING_MISSED",
+	"RANGE_DAMAGE", -- normal
+	"RANGE_MISSED", -- normal
 	
-	"SPELL_EXTRA_ATTACKS",
-	"SPELL_DAMAGE",
-	"SPELL_MISSED",
+	"SWING_DAMAGE", -- normal
+	"SWING_MISSED", -- normal
 	
-	"SPELL_HEAL",
+	"SPELL_EXTRA_ATTACKS", -- normal
+	"SPELL_DAMAGE", -- normal
+	"SPELL_MISSED", -- normal
 	
-	"SPELL_INTERRUPT",
+	"SPELL_HEAL", -- normal
 	
-	"SPELL_DISPEL",
-	"SPELL_DISPEL_FAILED",
+	"SPELL_ENERGIZE", -- normal
+	"SPELL_DRAIN", -- normal
+	"SPELL_LEECH", -- normal
 	
-	"SPELL_ENERGIZE",
-	"SPELL_DRAIN",
-	"SPELL_LEECH",
+	"SPELL_DISPEL",-- extraSpellID/name
+	"SPELL_DISPEL_FAILED",-- extraSpellID/name
+	"SPELL_AURA_STOLEN",-- extraSpellID/name
 	
-	"SPELL_AURA_APPLIED",
-	"SPELL_AURA_BROKEN",
-	"SPELL_AURA_REFRESH",
-	"SPELL_AURA_REMOVED",
-	"SPELL_AURA_STOLEN",
+	"SPELL_AURA_APPLIED", -- normal
+	"SPELL_AURA_APPLIED_DOSE",
+	"SPELL_AURA_REFRESH", -- normal
+	"SPELL_AURA_REMOVED", -- normal
+	"SPELL_AURA_REMOVED_DOSE",	
+	"SPELL_AURA_BROKEN",-- extraSpellID/name
 	
 	"SPELL_PERIODIC_DAMAGE",
 	"SPELL_PERIODIC_DRAIN",
@@ -2019,6 +2021,7 @@ CLEU.Events = {
 	
 	"DAMAGE_SHIELD",
 	"DAMAGE_SHIELD_MISSED",
+	"DAMAGE_SPLIT",
 	
 	"ENCHANT_APPLIED",
 	"ENCHANT_REMOVED",
@@ -2031,6 +2034,11 @@ CLEU.Events = {
 }
 
 function CLEU:OnInitialize()
+	hooksecurefunc("UIDropDownMenu_StartCounting", function(frame)
+		if UIDROPDOWNMENU_OPEN_MENU == IE.Main.CLEUEvents then
+			frame.showTimer = 0 -- i want the dropdown to hide instantly after the cursor leaves it
+		end
+	end)
 end
 
 function CLEU:Load()
@@ -2040,10 +2048,17 @@ end
 
 function CLEU:EventMenu_SetText()
 	local n = 0
-	for k, v in pairs(CI.ics.CLEUEvents) do
-		if v then
-			n = n + 1
+	if CI.ics.CLEUEvents[""] then
+		n = L["CLEU_EVENTS_ALL"]
+	else
+		for k, v in pairs(CI.ics.CLEUEvents) do
+			if v then
+				n = n + 1
+			end
 		end
+	end
+	if n == 0 then
+		n = "|cFFFF59590|r"
 	end
 	
 	UIDropDownMenu_SetText(IE.Main.CLEUEvents, L["CLEU_EVENTS"]:format(n))
@@ -2735,7 +2750,7 @@ function IE:SetupRadios()
 					frame.value = info.value
 					frame.text:SetText((info.colorCode or "") .. info.text .. "|r")
 					if info.tooltipText then
-						TMW:TT(frame, info.text, info.tooltipText, 1)
+						TMW:TT(frame, info.text, info.tooltipText, 1, 1)
 					else
 						frame:SetScript("OnEnter", nil)
 					end
@@ -4255,7 +4270,7 @@ function EVENTS:EnableAndDisableEvents()
 	local DisabledEvents = Types[CI.ic].DisabledEvents
 	local oldID = self.currentEventID
 	for i, frame in ipairs(self.Events) do
-		if DisabledEvents[frame.event] then
+		if Types[CI.ic]["EventDisabled_" .. frame.event] then
 			frame:Disable()
 			frame.DataText:SetText(L["SOUND_EVENT_DISABLEDFORTYPE"])
 			TMW:TT(frame, frame.eventData.text, L["SOUND_EVENT_DISABLEDFORTYPE_DESC"]:format(Types[CI.t].name), 1, 1)
@@ -5776,19 +5791,25 @@ Module.dontSort = true
 Module.noMin = true
 Module.noTexture = true
 function Module:Table_GetNormalSuggestions(suggestions, tbl, ...)
-	suggestions[#suggestions + 1] = "d"
+	suggestions[#suggestions + 1] = "d" -- Duration
 	
 	local typeData = Types[CI.t]
+
+	if not typeData.EventDisabled_OnUnit then
+		suggestions[#suggestions + 1] = "u" -- current Unit
+		suggestions[#suggestions + 1] = "p" -- Previous unit
+	end
+	if not typeData.EventDisabled_OnSpell then
+		suggestions[#suggestions + 1] = "s" -- Spell
+	end
+	if not typeData.EventDisabled_OnStack then
+		suggestions[#suggestions + 1] = "k" -- stacK
+	end
 	
-	if not typeData.DisabledEvents.OnUnit then
-		suggestions[#suggestions + 1] = "u"
-		suggestions[#suggestions + 1] = "p"
-	end
-	if not typeData.DisabledEvents.OnSpell then
-		suggestions[#suggestions + 1] = "s"
-	end
-	if not typeData.DisabledEvents.OnStack then
-		suggestions[#suggestions + 1] = "k"
+	if CI.t == "cleu" then
+		for _, letter in TMW:Vararg("o", "e", "x") do -- sOurceunit, dEstunit, eXtraspell
+			suggestions[#suggestions + 1] = letter
+		end
 	end
 end
 function Module:Entry_Insert(insert)
@@ -5816,7 +5837,7 @@ end
 
 local Module = SUG:NewModule("textsubsANN", SUG:GetModule("textsubs"))
 function Module:Table_GetSpecialSuggestions(suggestions, tbl, ...)
-	for _, letter in TMW:Vararg("t", "f", "m") do
+	for _, letter in TMW:Vararg("t", "f", "m") do -- Target, Focus, Mouseover
 		suggestions[#suggestions + 1] = letter
 	end
 end
@@ -5826,9 +5847,14 @@ local Module = SUG:NewModule("textsubsANNWhisper", SUG:GetModule("textsubsANN"))
 function Module:Table_GetNormalSuggestions(suggestions, tbl, ...)
 	local typeData = Types[CI.t]
 	
-	if not typeData.DisabledEvents.OnUnit then
-		suggestions[#suggestions + 1] = "u"
-		suggestions[#suggestions + 1] = "p"
+	if not typeData.EventDisabled_OnUnit then
+		suggestions[#suggestions + 1] = "u" -- current Unit
+		suggestions[#suggestions + 1] = "p" -- Previous unit
+	end
+	
+	if CI.t == "cleu" then
+		suggestions[#suggestions + 1] = "o" -- sOurceunit
+		suggestions[#suggestions + 1] = "e" -- dEstunit
 	end
 end
 

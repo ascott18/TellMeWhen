@@ -75,10 +75,9 @@ Type.RelevantSettings = {
 	DurationMaxEnabled = true,
 	TotemSlots = true,
 }
-Type.DisabledEvents = {
-	OnUnit = true,
-	OnStack = true,
-}
+
+Type.EventDisabled_OnUnit = true
+Type.EventDisabled_OnStack = true
 
 
 function Type:Update()

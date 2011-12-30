@@ -1,5 +1,5 @@
 ===v4.8.0===
- * Started work on a combat log icon type, but it is not available yet
+ * New icon type: Combat Log Event. Displays information about combat events according to filters that you can set. Full support for events, including text output.
  * Bug Fixes:
  ** (r384) Weapon enchant should now be properly detected in zhCH clients
  ** (r384) The weapon enchant suggestion list should now properly display shaman enchants in zhTW clients
