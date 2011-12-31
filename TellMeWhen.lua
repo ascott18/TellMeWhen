@@ -32,7 +32,7 @@ local DRData = LibStub("DRData-1.0", true)
 TELLMEWHEN_VERSION = "4.8.0"
 TELLMEWHEN_VERSION_MINOR = strmatch(" @project-version@", " r%d+") or ""
 TELLMEWHEN_VERSION_FULL = TELLMEWHEN_VERSION .. TELLMEWHEN_VERSION_MINOR
-TELLMEWHEN_VERSIONNUMBER = 48004 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
+TELLMEWHEN_VERSIONNUMBER = 48005 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
 if TELLMEWHEN_VERSIONNUMBER > 49000 or TELLMEWHEN_VERSIONNUMBER < 48000 then return error("YOU SCREWED UP THE VERSION NUMBER OR DIDNT CHANGE THE SAFETY LIMITS") end -- safety check because i accidentally made the version number 414069 once
 
 TELLMEWHEN_MAXGROUPS = 1 	--this is a default, used by SetTheory (addon), so dont rename
@@ -630,6 +630,8 @@ TMW.Defaults = {
 						OnlyIfCounting			= false,
 						SourceUnit				= "",
 						DestUnit 				= "",
+						SourceFlags				= 2^32-1,
+						DestFlags				= 2^32-1,
 						CLEUDur					= 5,
 						CLEUEvents 				= {
 							["*"] 				= false						
@@ -667,26 +669,26 @@ TMW.Defaults = {
 								PassThrough		= false,
 							},
 							OnDuration = {
-								CndtJustPassed = true,
-								PassingCndt	= true,
+								CndtJustPassed 	= true,
+								PassingCndt		= true,
 							}
 						},
 						Conditions = {
-							n = 0,
+							n 					= 0,
 							["**"] = {
-								AndOr 	   	= "AND",
-								Type 	   	= "",
-								Icon 	   	= "",
-								Operator   	= "==",
-								Level 	   	= 0,
-								Unit 	   	= "player",
-								Name 	   	= "",
-								Name2 	   	= "",
-								PrtsBefore 	= 0,
-								PrtsAfter  	= 0,
-								Checked		= false,
-								Checked2   	= false,
-								Runes 	   	= {},
+								AndOr 	   		= "AND",
+								Type 	   		= "",
+								Icon 	   		= "",
+								Operator   		= "==",
+								Level 	   		= 0,
+								Unit 	   		= "player",
+								Name 	   		= "",
+								Name2 	   		= "",
+								PrtsBefore 		= 0,
+								PrtsAfter  		= 0,
+								Checked			= false,
+								Checked2   		= false,
+								Runes 	   		= {},
 							},
 						},
 					},
@@ -3153,10 +3155,10 @@ function TMW.IconBase.GetTooltipTitle(icon)
 	return line1
 end
 
-function TMW.IconBase.Update(icon, time)
+function TMW.IconBase.Update(icon, time, force, ...)
 	time = time or TMW.time
 	
-	if icon.__shown and icon.LastUpdate <= time - UPD_INTV then
+	if icon.__shown and (force or icon.LastUpdate <= time - UPD_INTV) then
 		icon.LastUpdate = time
 		
 		local CndtCheck = icon.CndtCheck
@@ -3164,7 +3166,7 @@ function TMW.IconBase.Update(icon, time)
 			return
 		end
 	
-		icon:OnUpdate(time)
+		icon:OnUpdate(time, ...)
 		
 		local CndtCheckAfter = icon.CndtCheckAfter
 		if CndtCheckAfter then

@@ -2633,24 +2633,25 @@
 							</OnTextChanged>
 						</Scripts>
 					</EditBox>
-					<!--Frame name="$parentSourceFlags" inherits="TMW_DropDownMenuTemplate" parentKey="SourceFlags">
+					<Frame name="$parentSourceFlags" inherits="TMW_DropDownMenuTemplate" parentKey="SourceFlags">
 						<Anchors>
-							<Anchor point="LEFT" relativeTo="$parentSourceUnit" relativePoint="RIGHT" x="5" y="0"/>
+							<Anchor point="LEFT" relativeTo="$parentSourceUnit" relativePoint="RIGHT" x="5" y="-4"/>
 						</Anchors>
 						<Scripts>
 							<OnLoad>
 								self.wrapTooltips = 1
-								UIDropDownMenu_SetWidth(self, 170)
-								self.InitFunc = TMW.CLEU.SourceFlagsMenu
-								UIDropDownMenu_SetText(self, TMW.L["CLEU_SOURCEFLAGS"])
+								UIDropDownMenu_SetWidth(self, 115)
+								self.InitFunc = TMW.CLEU.FlagsMenu
+								self.flagSet = "SourceFlags" -- the setting name, basically
+								UIDropDownMenu_SetText(self, TMW.L["CLEU_FLAGS"])
 								self.Button:HookScript("OnClick", function(self)
 									TMW.IE:SaveSettings()
 								end)
 								
-								TMW:TT(self, "CLEU_SOURCEFLAGS", "CLEU_SOURCEFLAGS_DESC")
+								TMW:TT(self, "CLEU_FLAGS", "CLEU_FLAGS_DESC")
 							</OnLoad>
 						</Scripts>
-					</Frame-->
+					</Frame>
 					
 					<EditBox name="$parentDestUnit" inherits="TellMeWhen_UnitEditbox" parentKey="DestUnit" autoFocus="false">
 						<Size x="162" y="15"/>
@@ -2690,8 +2691,25 @@
 							</OnTextChanged>
 						</Scripts>
 					</EditBox>
-					
-					
+					<Frame name="$parentDestFlags" inherits="TMW_DropDownMenuTemplate" parentKey="DestFlags">
+						<Anchors>
+							<Anchor point="LEFT" relativeTo="$parentDestUnit" relativePoint="RIGHT" x="5" y="-4"/>
+						</Anchors>
+						<Scripts>
+							<OnLoad>
+								self.wrapTooltips = 1
+								UIDropDownMenu_SetWidth(self, 115)
+								self.InitFunc = TMW.CLEU.FlagsMenu
+								self.flagSet = "DestFlags" -- the setting name, basically
+								UIDropDownMenu_SetText(self, TMW.L["CLEU_FLAGS"])
+								self.Button:HookScript("OnClick", function(self)
+									TMW.IE:SaveSettings()
+								end)
+								
+								TMW:TT(self, "CLEU_FLAGS", "CLEU_FLAGS_DESC")
+							</OnLoad>
+						</Scripts>
+					</Frame>
 
 					<EditBox name="$parentCustomTex" inherits="TellMeWhen_InputBoxTemplate" parentKey="CustomTex" autoFocus="false">
 						<Size x="270" y="15"/>

@@ -300,7 +300,7 @@ function TMW:TT(f, title, text, actualtitle, actualtext)
 	end
 end
 function TMW:TT_Update(f)
-	if f:IsMouseOver() then
+	if f:IsMouseOver() and f:IsVisible() then
 		f:GetScript("OnLeave")(f)
 		if not f.IsEnabled or f:IsEnabled() or f:GetMotionScriptsWhileDisabled() then
 			f:GetScript("OnEnter")(f)
@@ -2034,23 +2034,110 @@ CLEU.Events = {
 	"UNIT_DESTROYED",
 }
 CLEU.Flags = {
-
+					-- "COMBATLOG_OBJECT_REACTION_MASK",
+    "COMBATLOG_OBJECT_REACTION_FRIENDLY",
+    "COMBATLOG_OBJECT_REACTION_NEUTRAL",
+    "COMBATLOG_OBJECT_REACTION_HOSTILE",
+	
+    "SPACE",		-- "COMBATLOG_OBJECT_TYPE_MASK",
+    "COMBATLOG_OBJECT_TYPE_PLAYER",
+    "COMBATLOG_OBJECT_TYPE_NPC",
+    "COMBATLOG_OBJECT_TYPE_PET",
+    "COMBATLOG_OBJECT_TYPE_GUARDIAN",
+    "COMBATLOG_OBJECT_TYPE_OBJECT",
+	
+	"SPACE",		-- "COMBATLOG_OBJECT_CONTROL_MASK",
+    "COMBATLOG_OBJECT_CONTROL_PLAYER",
+    "COMBATLOG_OBJECT_CONTROL_NPC",
+	
+	"SPACE",		-- "COMBATLOG_OBJECT_AFFILIATION_MASK", 
+    "COMBATLOG_OBJECT_AFFILIATION_MINE",
+    "COMBATLOG_OBJECT_AFFILIATION_PARTY",
+    "COMBATLOG_OBJECT_AFFILIATION_RAID",
+    "COMBATLOG_OBJECT_AFFILIATION_OUTSIDER",
+	
+	"SPACE",		--"COMBATLOG_OBJECT_SPECIAL_MASK",
+	"COMBATLOG_OBJECT_TARGET",
+	"COMBATLOG_OBJECT_FOCUS",
+    "COMBATLOG_OBJECT_MAINTANK",
+    "COMBATLOG_OBJECT_MAINASSIST",
+    "COMBATLOG_OBJECT_NONE",
+}
+CLEU.BetterMasks = {
+	-- some of the default masks contain bits that arent used by any flags, so we will make our own
+	COMBATLOG_OBJECT_REACTION_MASK = bit.bor(
+		COMBATLOG_OBJECT_REACTION_FRIENDLY,
+		COMBATLOG_OBJECT_REACTION_NEUTRAL,
+		COMBATLOG_OBJECT_REACTION_HOSTILE
+	),
+    COMBATLOG_OBJECT_TYPE_MASK = bit.bor(
+		COMBATLOG_OBJECT_TYPE_PLAYER,
+		COMBATLOG_OBJECT_TYPE_NPC,
+		COMBATLOG_OBJECT_TYPE_PET,
+		COMBATLOG_OBJECT_TYPE_GUARDIAN,
+		COMBATLOG_OBJECT_TYPE_OBJECT
+	),
+	COMBATLOG_OBJECT_CONTROL_MASK = bit.bor(
+		COMBATLOG_OBJECT_CONTROL_PLAYER,
+		COMBATLOG_OBJECT_CONTROL_NPC
+	),
+	COMBATLOG_OBJECT_AFFILIATION_MASK = bit.bor( 
+		COMBATLOG_OBJECT_AFFILIATION_MINE,
+		COMBATLOG_OBJECT_AFFILIATION_PARTY,
+		COMBATLOG_OBJECT_AFFILIATION_RAID,
+		COMBATLOG_OBJECT_AFFILIATION_OUTSIDER
+	),
 }
 
 function CLEU:OnInitialize()
+	
 	hooksecurefunc("UIDropDownMenu_StartCounting", function(frame)
-		if UIDROPDOWNMENU_OPEN_MENU == IE.Main.CLEUEvents then
+		if	UIDROPDOWNMENU_OPEN_MENU == IE.Main.CLEUEvents 
+		or	UIDROPDOWNMENU_OPEN_MENU == IE.Main.SourceFlags 
+		or	UIDROPDOWNMENU_OPEN_MENU == IE.Main.DestFlags 
+		then
 			frame.showTimer = 0 -- i want the dropdown to hide instantly after the cursor leaves it
 		end
 	end)
 end
 
 function CLEU:Load()
-	CLEU:EventMenu_SetText()
+	CLEU:Menus_SetTexts()
+	
+	CLEU:CheckMasks()
 end
----------- Dropdowns ----------
 
-function CLEU:EventMenu_SetText()
+function CLEU:CheckMasks()
+	HELP:Hide("CLEU_WHOLECATEGORYEXCLUDED")
+	
+	for _, key in TMW:Vararg("SourceFlags", "DestFlags") do
+		if key then
+			for maskName, mask in pairs(CLEU.BetterMasks) do
+				if bit.band(CI.ics[key], mask) == 0 then
+					local category = L["CLEU_" .. maskName]
+					HELP:Show("CLEU_WHOLECATEGORYEXCLUDED", CI.ic, IE.Main[key], 23, 3, L["CLEU_WHOLECATEGORYEXCLUDED"], category)
+					return
+				end
+			end
+		end
+	end
+end
+
+function CLEU:CountDisabledBits(bitfield)
+	local n = 0
+	for _ = 1, 32 do
+		local digit = bit.band(bitfield, 1)
+		bitfield = bit.rshift(bitfield, 1)
+		if digit == 0 then
+			n = n + 1
+		end
+	end
+	return n 
+end
+
+
+---------- Dropdowns ----------
+function CLEU:Menus_SetTexts()
 	local n = 0
 	if CI.ics.CLEUEvents[""] then
 		n = L["CLEU_EVENTS_ALL"]
@@ -2062,10 +2149,27 @@ function CLEU:EventMenu_SetText()
 		end
 	end
 	if n == 0 then
-		n = "|cFFFF59590|r"
+		n = " |cFFFF5959(0)|r |TInterface\\AddOns\\TellMeWhen_Options\\Textures\\Alert:0:2|t"
+	else
+		n = " (" .. n .. ")"
 	end
+	UIDropDownMenu_SetText(IE.Main.CLEUEvents, L["CLEU_EVENTS"] .. n)
 	
-	UIDropDownMenu_SetText(IE.Main.CLEUEvents, L["CLEU_EVENTS"]:format(n))
+	local n = CLEU:CountDisabledBits(CI.ics.SourceFlags)
+	if n ~= 0 then
+		n = " |cFFFF5959(" .. n .. ")|r"
+	else
+		n = " (" .. n .. ")"
+	end
+	UIDropDownMenu_SetText(IE.Main.SourceFlags, L["CLEU_FLAGS"] .. n)
+	
+	local n = CLEU:CountDisabledBits(CI.ics.DestFlags)
+	if n ~= 0 then
+		n = " |cFFFF5959(" .. n .. ")|r"
+	else
+		n = " (" .. n .. ")"
+	end
+	UIDropDownMenu_SetText(IE.Main.DestFlags, L["CLEU_FLAGS"] .. n)
 end
 
 function CLEU:EventMenu()
@@ -2093,40 +2197,48 @@ function CLEU:EventMenu_OnClick(frame)
 		CI.ics.CLEUEvents[""] = false
 		CloseDropDownMenus()
 	end
+	
 	CI.ics.CLEUEvents[self.value] = not CI.ics.CLEUEvents[self.value]
-	CLEU:EventMenu_SetText()
+	
+	CLEU:Menus_SetTexts()
+	IE:ScheduleIconUpdate()
 end
 
-function CLEU:SourceFlagsMenu()
+function CLEU:FlagsMenu()
+	CLEU:CheckMasks()
+	
 	for _, flag in ipairs(CLEU.Flags) do
-		local info = UIDropDownMenu_CreateInfo()
-		
-		info.text = L["CLEU_" .. event]
-		
-		info.value = flag
-		info.checked = CI.ics.CLEUEvents[event]
-		info.keepShownOnClick = true
-		info.isNotRadio = true
-		info.func = CLEU.EventMenu_OnClick
-		info.arg1 = self
-		
-		UIDropDownMenu_AddButton(info, UIDROPDOWNMENU_MENU_LEVEL)
+		if flag == "SPACE" then
+			AddDropdownSpacer()
+		else
+			local info = UIDropDownMenu_CreateInfo()
+			
+			info.text = L["CLEU_" .. flag]
+			
+			info.tooltipTitle = L["CLEU_" .. flag]
+			info.tooltipText = L["CLEU_" .. flag .. "_DESC"]
+			info.tooltipOnButton = true
+			
+			info.value = flag
+			info.checked = bit.band(CI.ics[self.flagSet], _G[flag]) ~= _G[flag]
+			info.keepShownOnClick = true
+			info.isNotRadio = true
+			info.func = CLEU.FlagsMenu_OnClick
+			info.arg1 = self
+			
+			UIDropDownMenu_AddButton(info, UIDROPDOWNMENU_MENU_LEVEL)
+		end
 	end
 end
 
-function CLEU:EventMenu_OnClick(frame)
-	if self.value == "" and not CI.ics.CLEUEvents[""] then -- if we are checking "Any Event" then uncheck all others
-		wipe(CI.ics.CLEUEvents)
-		CloseDropDownMenus()
-	elseif self.value ~= "" and CI.ics.CLEUEvents[""] then -- if we are checking a specific event then uncheck "Any Event"
-		CI.ics.CLEUEvents[""] = false
-		CloseDropDownMenus()
-	end
-	CI.ics.CLEUEvents[self.value] = not CI.ics.CLEUEvents[self.value]
-	CLEU:EventMenu_SetText()
+function CLEU:FlagsMenu_OnClick(frame)
+	CI.ics[frame.flagSet] = bit.bxor(CI.ics[frame.flagSet], _G[self.value])
+	
+	CLEU:CheckMasks()
+	
+	CLEU:Menus_SetTexts()
+	IE:ScheduleIconUpdate()
 end
-
-
 
 
 
@@ -2150,6 +2262,8 @@ IE.Checks = {
 	CLEUEvents = 4,
 	DestUnit = 2,
 	SourceUnit = 2,
+	DestFlags = 4,
+	SourceFlags = 4,
 	Unit = 2,
 	ShowPBar = {
 		ShowPBar = 1,
@@ -7661,6 +7775,8 @@ HELP = TMW:NewModule("Help", "AceTimer-3.0") TMW.HELP = HELP
 
 HELP.Codes = {
 	"ICON_POCKETWATCH_FIRSTSEE",
+	
+	"CLEU_WHOLECATEGORYEXCLUDED",
 	
 	"ICON_DURS_FIRSTSEE",
 	"ICON_DURS_MISSING",

@@ -21,6 +21,7 @@ local L = TMW.L
 local db
 local strlower =
 	  strlower
+local bit_band = bit.band
 local print = TMW.print
 local SpellTextures = TMW.SpellTextures
 
@@ -36,7 +37,6 @@ Type.desc = L["ICONMENU_CLEU_DESC"]
 Type.usePocketWatch = 1
 Type.AllowNoName = true
 Type.chooseNameTitle = L["ICONMENU_CHOOSENAME"] .. " " .. L["ICONMENU_CHOOSENAME_ORBLANK"]
-Type.DurationSyntax = 1
 Type.SUGType = "spell"
 -- Type.leftCheckYOffset = -130 -- nevermind
 
@@ -52,6 +52,8 @@ Type.RelevantSettings = {
 	CLEUDur = true,
 	SourceUnit = true,
 	DestUnit = true,
+	SourceFlags = true,
+	DestFlags = true,
 	ShowCBar = true,
 	CBarOffs = true,
 	InvertBars = true,
@@ -96,22 +98,31 @@ local EventsWithoutSpells = {
 	SPELL_DISPEL = true,
 }
 
-local function CLEU_OnEvent(icon, _, t, event, h, sourceGUID, sourceName, sourceFlags, sourceRaidFlags, destGUID, destName, destFlags, destRaidFlags, ...)
+local function CLEU_OnEvent(icon, _, t, event, h, sourceGUID, sourceName, sourceFlags, sourceRaidFlags, destGUID, destName, destFlags, destRaidFlags, arg1, arg2, arg3, arg4, ...)
 	
-	if event == "SPELL_MISSED" then
-		-- make a fake event for spell reflects
-		local _, _, _, missType = ...
-		if missType == "REFLECT" then
-			event = "SPELL_REFLECT"
-			-- swap the source and the destination
-			local a, b, c, d = sourceGUID, sourceName, sourceFlags, sourceRaidFlags
-			sourceGUID, sourceName, sourceFlags, sourceRaidFlags = destGUID, destName, destFlags, destRaidFlags
-			destGUID, destName, destFlags, destRaidFlags = a, b, c, d
-		end
+	if event == "SPELL_MISSED" and arg4 == "REFLECT" then
+	-- make a fake event for spell reflects
+		event = "SPELL_REFLECT"
+		-- swap the source and the destination
+		local a, b, c, d = sourceGUID, sourceName, sourceFlags, sourceRaidFlags
+		sourceGUID, sourceName, sourceFlags, sourceRaidFlags = destGUID, destName, destFlags, destRaidFlags
+		destGUID, destName, destFlags, destRaidFlags = a, b, c, d
 	end
 	
 	if icon.AllowAnyEvents or icon.CLEUEvents[event] then
 	
+		if sourceName and sourceFlags and icon.SourceFlags then
+			if bit_band(icon.SourceFlags, sourceFlags) ~= sourceFlags then
+				return
+			end
+		end
+		
+		if destName and destFlags and icon.DestFlags then
+			if bit_band(icon.DestFlags, destFlags) ~= destFlags then
+				return
+			end
+		end
+		
 		local SourceUnits = icon.SourceUnits
 		local sourceUnit = sourceName
 		if SourceUnits and sourceName then
@@ -148,7 +159,7 @@ local function CLEU_OnEvent(icon, _, t, event, h, sourceGUID, sourceName, source
 			end
 		end
 		
-		local spellID, spellName = ...
+		local spellID, spellName = arg1, arg2
 		
 		local NameHash = icon.NameHash
 		if NameHash and not EventsWithoutSpells[event] then
@@ -162,14 +173,12 @@ local function CLEU_OnEvent(icon, _, t, event, h, sourceGUID, sourceName, source
 			spell = ACTION_SWING
 			tex = GetSpellTexture(6603)
 		elseif event == "ENCHANT_APPLIED" or event == "ENCHANT_REMOVED" then
-			local enchantName, itemID = ...
-			spell = enchantName
-			tex = GetItemIcon(itemID)
+			spell = arg1
+			tex = GetItemIcon(arg2)
 		elseif event == "SPELL_INTERRUPT" or event == "SPELL_DISPEL" or event == "SPELL_DISPEL_FAILED" or event == "SPELL_AURA_BROKEN_SPELL" or event == "SPELL_AURA_STOLEN" then
-			local _, _, _, extraID = ...
-			extra = extraID
+			extra = arg4
 			if icon.UseExtraID then
-				tex = SpellTextures[extraID]
+				tex = SpellTextures[arg4]
 			else
 				tex = SpellTextures[spellID]
 			end
@@ -244,18 +253,18 @@ local function CLEU_OnEvent(icon, _, t, event, h, sourceGUID, sourceName, source
 			icon.EventsToFire.OnCLEUEvent = true
 		end
 		
-		icon:OnUpdate(TMW.time, tex)
+		icon:Update(TMW.time, true, tex)
 		
 		print(event, spell, "|T" .. tex .. ":0|t", sourceUnit, destUnit, extra)
 			
 		-- all checks complete. procede to do shit.
-		--print(CombatLog_OnEvent(Blizzard_CombatLog_CurrentSettings, t, event, h, sourceGUID, sourceName, sourceFlags, sourceRaidFlags, destGUID, destName, destFlags, destRaidFlags, ...))
+		--print(CombatLog_OnEvent(Blizzard_CombatLog_CurrentSettings, t, event, h, sourceGUID, sourceName, sourceFlags, sourceRaidFlags, destGUID, destName, destFlags, destRaidFlags, arg1, arg2, arg3, arg4, ...))
 	--	print("Event Passed", spellName, sourceName, destName, event)
 	end
 end
 
 local function CLEU_OnUpdate(icon, time, tex)
-	-- tex is passed in when calling from OnEvent, otherwise its nil
+	-- tex is passed in when calling from OnEvent, otherwise its nil (causing there to be no update)
 	
 	local start = icon.cleu_start
 	local duration = icon.CLEUDur
@@ -277,11 +286,18 @@ end
 function Type:Setup(icon, groupID, iconID)
 	icon.NameHash = icon.Name ~= "" and TMW:GetSpellNames(icon, icon.Name, nil, nil, 1)	
 	
+	-- only define units if there are any units. we dont want to waste time iterating an empty table.
 	icon.SourceUnits = icon.SourceUnit ~= "" and TMW:GetUnits(icon, icon.SourceUnit)
 	icon.DestUnits = icon.DestUnit ~= "" and TMW:GetUnits(icon, icon.DestUnit)
 	
+	-- nil out flags if they are set to default (2^32-1)
+	icon.SourceFlags = icon.SourceFlags ~= 2^32-1 and icon.SourceFlags
+	icon.DestFlags = icon.DestFlags ~= 2^32-1 and icon.DestFlags
+	
+	-- more efficient than checking icon.CLEUEvents[""] every OnEvent
 	icon.AllowAnyEvents = icon.CLEUEvents[""]
 	
+	-- check for when bind texts should be updated (these are unique to cleu, so they are handled here, not in TMW:Icon_Update()
 	icon.UpdateBindText_SourceUnit = nil
 	icon.UpdateBindText_DestUnit = nil
 	icon.UpdateBindText_ExtraSpell = nil
@@ -300,28 +316,31 @@ function Type:Setup(icon, groupID, iconID)
 		end
 	end
 	
-	if icon.AllowAnyEvents and not icon.SourceUnits and not icon.DestUnits and not icon.NameHash then
-		TMW:Error("No filters detected for " .. icon:GetName()) -- TODO: SOMETHING BETTER THAN THIS
-		return
-	end
-	
-	
-	icon.cleu_start = icon.cleu_start or 0
-	
-	icon.cleu_spell = nil
-
-	icon.cleu_sourceUnit = nil
-	icon.cleu_destUnit = nil
-	icon.cleu_extraSpell = nil
-	
-	icon:RegisterEvent("COMBAT_LOG_EVENT_UNFILTERED")
-	icon:SetScript("OnEvent", CLEU_OnEvent)
-	
 	local tex, otherArgWhichLacksADecentName = TMW:GetConfigIconTexture(icon)
 	if otherArgWhichLacksADecentName == nil then
 		tex = "Interface\\Icons\\INV_Misc_PocketWatch_01"
 	end
 	icon:SetTexture(tex)
+	
+	-- type-specific data that events and OnUpdate use
+	icon.cleu_start = icon.cleu_start or 0
+	icon.cleu_spell = nil
+	
+	-- type-specific data that events use
+	icon.cleu_sourceUnit = nil
+	icon.cleu_destUnit = nil
+	icon.cleu_extraSpell = nil
+	
+	-- safety mechanism
+	if icon.AllowAnyEvents and not icon.SourceUnits and not icon.DestUnits and not icon.NameHash and not icon.SourceFlags and not icon.DestFlags then
+		if db.profile.Locked then
+			TMW.Warn(L["CLEU_NOFILTERS"]:format(L["GROUPICON"]:format(TMW:GetGroupName(groupID, groupID, 1), iconID)))
+		end
+		return
+	end
+	
+	icon:RegisterEvent("COMBAT_LOG_EVENT_UNFILTERED")
+	icon:SetScript("OnEvent", CLEU_OnEvent)
 	
 	icon:SetScript("OnUpdate", CLEU_OnUpdate)
 	icon:Update()

@@ -1046,7 +1046,7 @@ L["CLEU_SPELL_INSTAKILL"] = "Instant Kill"
 L["CLEU_SPELL_INTERRUPT"] = "Interrupt"
 L["CLEU_SPELL_LEECH"] = "Health Leech"
 L["CLEU_SPELL_MISSED"] = "Spell Miss"
-L["CLEU_SPELL_REFLECT"] = "Spell Reflect"
+L["CLEU_SPELL_REFLECT"] = "Spell Reflect" -- custom event
 L["CLEU_SPELL_PERIODIC_DAMAGE"] = "Periodic Damage"
 L["CLEU_SPELL_PERIODIC_DRAIN"] = "Periodic Resource Drain"
 L["CLEU_SPELL_PERIODIC_ENERGIZE"] = "Periodic Resource Gain"
@@ -1058,17 +1058,75 @@ L["CLEU_SWING_MISSED"] = "Swing Miss"
 L["CLEU_UNIT_DESTROYED"] = "Unit Destroyed"
 L["CLEU_UNIT_DIED"] = "Unit Died"
 
+
+L["CLEU_COMBATLOG_OBJECT_NONE"] = "Miscellaneous: Unknown Unit"
+L["CLEU_COMBATLOG_OBJECT_NONE_DESC"] = " Check to exclude units that are completely unknown to the WoW client."
+L["CLEU_COMBATLOG_OBJECT_MAINASSIST"] = "Miscellaneous: Main Assist"
+L["CLEU_COMBATLOG_OBJECT_MAINASSIST_DESC"] = "Check to exclude units marked as main assists in your raid."
+L["CLEU_COMBATLOG_OBJECT_MAINTANK"] = "Miscellaneous: Main Tank"
+L["CLEU_COMBATLOG_OBJECT_MAINTANK_DESC"] = "Check to exclude units marked as main tanks in your raid."
+L["CLEU_COMBATLOG_OBJECT_FOCUS"] = "Miscellaneous: Your Focus"
+L["CLEU_COMBATLOG_OBJECT_FOCUS_DESC"] = "Check to exclude the unit that you have set as your focus."
+L["CLEU_COMBATLOG_OBJECT_TARGET"] = "Miscellaneous: Your Target"
+L["CLEU_COMBATLOG_OBJECT_TARGET_DESC"] = "Check to exclude the unit that you are targeting."
+
+L["CLEU_COMBATLOG_OBJECT_TYPE_OBJECT"] = "Unit Type: Object"
+L["CLEU_COMBATLOG_OBJECT_TYPE_OBJECT_DESC"] = "Check to exclude units such as traps, fishing bobbers, or anything else that does not fall under the other \"Unit Type\" categories."
+L["CLEU_COMBATLOG_OBJECT_TYPE_GUARDIAN"] = "Unit Type: Guardian"
+L["CLEU_COMBATLOG_OBJECT_TYPE_GUARDIAN_DESC"] = "Check to exclude Guardians: Units that defend their controller but cannot be directly controlled."
+L["CLEU_COMBATLOG_OBJECT_TYPE_PET"] = "Unit Type: Pet"
+L["CLEU_COMBATLOG_OBJECT_TYPE_PET_DESC"] = "Check to exclude Pets: Units that defend their controller and can be directly controlled."
+L["CLEU_COMBATLOG_OBJECT_TYPE_NPC"] = "Unit Type: NPC"
+L["CLEU_COMBATLOG_OBJECT_TYPE_NPC_DESC"] = "Check to exclude non-player characters."
+L["CLEU_COMBATLOG_OBJECT_TYPE_PLAYER"] = "Unit Type: Player Character"
+L["CLEU_COMBATLOG_OBJECT_TYPE_PLAYER_DESC"] = "Check to exclude player characters."
+L["CLEU_COMBATLOG_OBJECT_TYPE_MASK"] = "Unit Type"
+
+L["CLEU_COMBATLOG_OBJECT_CONTROL_NPC"] = "Controller: Server"
+L["CLEU_COMBATLOG_OBJECT_CONTROL_NPC_DESC"] = "Check to exclude units that are controlled by the server, including their pets and guardians."
+L["CLEU_COMBATLOG_OBJECT_CONTROL_PLAYER"] = "Controller: Human"
+L["CLEU_COMBATLOG_OBJECT_CONTROL_PLAYER_DESC"] = "Check to exclude units that are controlled by human beings, including their pets and guardians."
+L["CLEU_COMBATLOG_OBJECT_CONTROL_MASK"] = "Controller"
+
+L["CLEU_COMBATLOG_OBJECT_REACTION_HOSTILE"] = "Unit Reaction: Hostile"
+L["CLEU_COMBATLOG_OBJECT_REACTION_HOSTILE_DESC"] = "Check to exclude units that are hostile towards you."
+L["CLEU_COMBATLOG_OBJECT_REACTION_NEUTRAL"] = "Unit Reaction: Neutral"
+L["CLEU_COMBATLOG_OBJECT_REACTION_NEUTRAL_DESC"] = "Check to exclude units that are neutral towards you."
+L["CLEU_COMBATLOG_OBJECT_REACTION_FRIENDLY"] = "Unit Reaction: Friendly"
+L["CLEU_COMBATLOG_OBJECT_REACTION_FRIENDLY_DESC"] = "Check to exclude units that are friendly towards you."
+L["CLEU_COMBATLOG_OBJECT_REACTION_MASK"] = "Unit Reaction"
+
+L["CLEU_COMBATLOG_OBJECT_AFFILIATION_OUTSIDER"] = "Controller Relationship: Outsiders"
+L["CLEU_COMBATLOG_OBJECT_AFFILIATION_OUTSIDER_DESC"] = "Check to exclude units that are controlled by someone who is grouped with you."
+L["CLEU_COMBATLOG_OBJECT_AFFILIATION_RAID"] = "Controller Relationship: Raid Members"
+L["CLEU_COMBATLOG_OBJECT_AFFILIATION_RAID_DESC"] = "Check to exclude units that are controlled by someone who is in your raid group."
+L["CLEU_COMBATLOG_OBJECT_AFFILIATION_PARTY"] = "Controller Relationship: Party Members"
+L["CLEU_COMBATLOG_OBJECT_AFFILIATION_PARTY_DESC"] = "Check to exclude units that are controlled by someone who is in your party."
+L["CLEU_COMBATLOG_OBJECT_AFFILIATION_MINE"] = "Controller Relationship: Player (You)"
+L["CLEU_COMBATLOG_OBJECT_AFFILIATION_MINE_DESC"] = "Check to exclude units that are controlled by you."
+L["CLEU_COMBATLOG_OBJECT_AFFILIATION_MASK"] = "Controller Relationship"
+
+
+L["CLEU_WHOLECATEGORYEXCLUDED"] = [[You have excluded every part of the %q category, which will cause this icon to never process any events.
+
+Uncheck at least one for proper functionality.]]
+
+L["CLEU_NOFILTERS"] = [[The %s icon in %s does not have any filters defined. It will not function until you define at least one filter.]]
+	
+	
 L["CLEU_DIED"] = "Death"
 
-
 L["CLEU_HEADER"] = "Combat Log Event Filters"
-L["CLEU_EVENTS"] = "Events to check (%s)"
+L["CLEU_EVENTS"] = "Events to check"
 L["CLEU_EVENTS_ALL"] = "All"
 L["CLEU_EVENTS_DESC"] = "Choose the combat log events that you would like the icon to react to."
 L["CLEU_SOURCEUNITS"] = "Source unit(s) to check"
 L["CLEU_SOURCEUNITS_DESC"] = "Choose the source units that you would like the icon to react to, or leave this blank to let the icon react to any event source."
 L["CLEU_DESTUNITS"] = "Destination unit(s) to check"
 L["CLEU_DESTUNITS_DESC"] = "Choose the destination units that you would like the icon to react to, or leave this blank to let the icon react to any event destination."
+
+L["CLEU_FLAGS"] = "Exclusions"
+L["CLEU_FLAGS_DESC"] = "Contains a list of attributes that can be used to exclude certain units from triggering the icon. If an exclusion is checked, and a unit has that attribute, the icon will not process the event that the unit was part of."
 
 L["CLEU_TIMER"] = "Timer to set on event"
 L["CLEU_TIMER_DESC"] = "Duration of a timer to set on the icon when an event occurs"
