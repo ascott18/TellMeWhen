@@ -865,6 +865,7 @@ L["SUG_INSERT_RIGHT"] = "|cff7fffffRight-click|r"
 L["SUG_INSERTNAME"] = "%s to insert as a name"
 L["SUG_INSERTID"] = "%s to insert as an ID"
 L["SUG_INSERTITEMSLOT"] = "%s to insert as an item slot ID"
+L["SUG_INSERTEQUIV"] = "%s to insert equivalency"
 L["SUG_INSERTTEXTSUB"] = "%s to insert substitution"
 
 L["SUG_PATTERNMATCH_FISHINGLURE"] = "Fishing Lure %(%+%d+ Fishing Skill%)" -- enUS

@@ -4912,68 +4912,6 @@ end
 
 ANIM = TMW:NewModule("Animations", EVENTS) TMW.ANIM = ANIM
 ANIM.tabText = L["ANIM_TAB"]
-ANIM.AnimationList = {
-	{
-		text = NONE,
-		animation = "",
-	},
-	{
-		text = L["ANIM_SCREENSHAKE"],
-		desc = L["ANIM_SCREENSHAKE_DESC"],
-		animation = "SCREENSHAKE",
-		Duration = true,
-		Magnitude = true,
-	},
-	{
-		text = L["ANIM_SCREENFLASH"],
-		desc = L["ANIM_SCREENFLASH_DESC"],
-		animation = "SCREENFLASH",
-		Duration = true,
-		Period = true,
-		Color = true,
-		Fade = true,
-	},
-	{
-		text = L["ANIM_ICONSHAKE"],
-		desc = L["ANIM_ICONSHAKE_DESC"],
-		animation = "ICONSHAKE",
-		Duration = true,
-		Magnitude = true,
-	},
-	{
-		text = L["ANIM_ICONFLASH"],
-		desc = L["ANIM_ICONFLASH_DESC"],
-		animation = "ICONFLASH",
-		Duration = true,
-		Period = true,
-		Color = true,
-		Fade = true,
-	},
-	{
-		text = L["ANIM_ICONFADE"],
-		desc = L["ANIM_ICONFADE_DESC"],
-		animation = "ICONFADE",
-		Duration = true,
-	},
-	--[[{
-		text = L["ANIM_ICONSCALE"],
-		desc = L["ANIM_ICONSCALE_DESC"],
-		animation = "ICONSCALE",
-		Duration = true,
-		Period = true,
-		ScaleMagnitude = true,
-	},]]
-	{
-		text = L["ANIM_ACTVTNGLOW"],
-		desc = L["ANIM_ACTVTNGLOW_DESC"],
-		animation = "ACTVTNGLOW",
-		Duration = true,
-	},
-}
-ANIM.AnimationLookup = {}
-for k, v in pairs(ANIM.AnimationList) do
-	ANIM.AnimationLookup[v.animation] = v
-end local AnimationLookup = ANIM.AnimationLookup
 
 function ANIM:OnInitialize()
 	self.tab = IE.AnimationsTab
@@ -4991,7 +4929,7 @@ function ANIM:OnInitialize()
 	-- create channel frames
 	local previousFrame
 	local offs = 0
-	for i, animationData in ipairs(self.AnimationList) do
+	for i, animationData in ipairs(TMW.AnimationList) do
 		i = i + offs
 		local frame = CreateFrame("Button", Animations:GetName().."Animation"..i, Animations, "TellMeWhen_AnimationSelectButton", i)
 		Animations[i] = frame
@@ -5033,7 +4971,7 @@ function ANIM:SetupEventDisplay(event)
 	local eventID, eventString = self:GetDisplayInfo(event)
 	
 	local animation = self:GetEventSettings(eventString).Animation
-	local animationSettings = AnimationLookup[animation]
+	local animationSettings = TMW.AnimationList[animation]
 	
 	if animationSettings then
 		local text = animationSettings.text
@@ -5069,7 +5007,7 @@ function ANIM:SelectAnimation(animation)
 	end
 	self.currentAnimationSetting = animation
 
-	local animationSettings = AnimationLookup[animation]
+	local animationSettings = TMW.AnimationList[animation]
 	if animationSettings then
 		for i, arg in TMW:Vararg("Duration", "Magnitude", "Period"--[[, "ScaleMagnitude"]]) do
 			if animationSettings[arg] then
@@ -6399,17 +6337,19 @@ function Module:Entry_AddToList_2(f, id)
 	if TMW.BE.casts[id] then
 		-- the entry is an equivalacy
 		-- id is the equivalency name (e.g. Tier11Interrupts)
-		local firstid = EquivFirstIDLookup[id]
+		local equiv = id
+		id = EquivFirstIDLookup[equiv]
 
-		f.Name:SetText(id)
+		f.Name:SetText(equiv)
 		f.ID:SetText(nil)
 
-		f.insert = id
+		f.insert = equiv
+		f.overrideInsertName = L["SUG_INSERTEQUIV"]
 
 		f.tooltipmethod = "TMW_SetEquiv"
-		f.tooltiparg = id
+		f.tooltiparg = equiv
 
-		f.Icon:SetTexture(SpellTextures[firstid])
+		f.Icon:SetTexture(SpellTextures[d])
 	end
 end
 function Module:Entry_Colorize_2(f, id)
@@ -6543,6 +6483,7 @@ function Module:Entry_AddToList_2(f, id)
 		f.ID:SetText(nil)
 
 		f.insert = equiv
+		f.overrideInsertName = L["SUG_INSERTEQUIV"]
 
 		f.tooltipmethod = "TMW_SetEquiv"
 		f.tooltiparg = equiv
@@ -6580,6 +6521,7 @@ function Module:Entry_AddToList_2(f, id)
 		f.ID:SetText(nil)
 
 		f.insert = equiv
+		f.overrideInsertName = L["SUG_INSERTEQUIV"]
 
 		f.tooltipmethod = "TMW_SetEquiv"
 		f.tooltiparg = equiv

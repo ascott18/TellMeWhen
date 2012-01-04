@@ -32,7 +32,7 @@ local DRData = LibStub("DRData-1.0", true)
 TELLMEWHEN_VERSION = "4.8.0"
 TELLMEWHEN_VERSION_MINOR = strmatch(" @project-version@", " r%d+") or ""
 TELLMEWHEN_VERSION_FULL = TELLMEWHEN_VERSION .. TELLMEWHEN_VERSION_MINOR
-TELLMEWHEN_VERSIONNUMBER = 48006 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
+TELLMEWHEN_VERSIONNUMBER = 48008 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
 if TELLMEWHEN_VERSIONNUMBER > 49000 or TELLMEWHEN_VERSIONNUMBER < 48000 then return error("YOU SCREWED UP THE VERSION NUMBER OR DIDNT CHANGE THE SAFETY LIMITS") end -- safety check because i accidentally made the version number 414069 once
 
 TELLMEWHEN_MAXGROUPS = 1 	--this is a default, used by SetTheory (addon), so dont rename
@@ -73,12 +73,17 @@ local GCD, NumShapeshiftForms, LastUpdate = 0, 0, 0
 local IconUpdateFuncs, GroupUpdateFuncs, unitsToChange = {}, {}, {}
 local BindUpdateFuncs
 local loweredbackup = {}
+local Animations = {}
 local Shakers, ActivationGlows, FlashingFlashers, --[[Scalers,]] FadingIcons, CDBarsToUpdate, PBarsToUpdate = {}, {}, {}, {}, {}, {}--[[, {}]]
 local time = GetTime() TMW.time = time
 local sctcolor = {r=1, b=1, g=1}
 local clientVersion = select(4, GetBuildInfo())
 local addonVersion = tonumber(GetAddOnMetadata("TellMeWhen", "X-Interface"))
 local _, pclass = UnitClass("Player")
+
+TMW.Icons = {}
+TMW.IconsLookup = {}
+TMW.OrderedTypes = {}
 
 TMW.Print = TMW.Print or _G.print
 TMW.Warn = setmetatable(
@@ -141,10 +146,6 @@ TMW.isNumber = setmetatable(
 		t[i] = o
 		return o
 end}) local isNumber = TMW.isNumber
-
-TMW.Icons = {}
-TMW.IconsLookup = {}
-TMW.OrderedTypes = {}
 
 function TMW.tContains(table, item, returnNum)
 	local firstkey
@@ -749,7 +750,7 @@ function TMW:ProcessEquivalencies()
 			CrowdControl		= "_118;_339;2637;33786;_1499;_19503;_19386;20066;10326;_9484;_6770;_2094;_51514;76780;_710;_5782;_6358;_49203;_605;82691", -- originally by calico0 of Curse
 			Bleeding			= "_94009;_1822;_1079;9007;33745;1943;703;43104;89775",
 			Incapacitated		= "20066;1776;49203",
-			Feared				= "_5782;5246;_8122;10326;1513;_5484;_6789;87204",
+			Feared				= "_5782;5246;_8122;10326;1513;_5484;_6789;87204;20511",
 			Slowed				= "_116;_120;13810;_5116;_8056;3600;_1715;_12323;45524;_18223;_15407;_3409;26679;_51693;_2974;_58180;61391;_50434;_55741;44614;_7302;_8034;_63529;_15571", -- by algus2
 			Stunned				= "_1833;_408;_91800;_5211;_56;9005;22570;19577;56626;44572;853;2812;85388;64044;20549;46968;30283;20253;65929;7922;12809;50519;91797;47481;12355;24394;83047;39796;93986;89766;54786",
 			--DontMelee			= "5277;871;Retaliation;Dispersion;Hand of Sacrifice;Hand of Protection;Divine Shield;Divine Protection;Ice Block;Icebound Fortitude;Cyclone;Banish",  --does somebody want to update these for me?
@@ -1600,92 +1601,153 @@ function TMW:OnUpdate(elapsed)					-- THE MAGICAL ENGINE OF DOING EVERYTHING
 		end
 	end
 	
-	for frame, Duration in next, Shakers do
+	for icon, animations in next, Animations do
+		for key, animationTable in next, animations do
+			local Animation = animationTable.Animation
+			
+			if Animation == "ICONSHAKE" then
+				local remaining = animationTable.Duration - (time - animationTable.Start)
+				
+				local Amt = (animationTable.Magnitude or 10) / (1 + 10*(300^(-(remaining))))
+				local moveX = random(-Amt, Amt) 
+				local moveY = random(-Amt, Amt) 
+				
+				icon:SetPoint("TOPLEFT", icon.x + moveX, icon.y + moveY)
+				
+				-- generic expiration
+				if remaining < 0 then
+					animations[key] = nil
+					local OnExpire = TMW.AnimationList[Animation].OnExpire
+					if OnExpire then
+						OnExpire(icon, animationTable)
+					end
+				end
+			
+			elseif Animation == "ACTVTNGLOW" then
+				local remaining = animationTable.Duration - (time - animationTable.Start)
+				
+				-- generic expiration
+				if remaining < 0 then
+					animations[key] = nil
+					local OnExpire = TMW.AnimationList[Animation].OnExpire
+					if OnExpire then
+						OnExpire(icon, animationTable)
+					end
+				end
+			elseif Animation == "ICONFLASH" then
+				--[[
+			icon:StartAnimation{
+				data = data,
+				Start = TMW.time,
+				Duration = Duration,
+				
+				Period = data.Period,
+				Time = time,
+				FadeAlpha = data.Fade,
+				fadingIn = true,
+				Alpha = data.a_anim,
+				r = data.r_anim,
+				g = data.g_anim,
+				b = data.b_anim,
+			}]]
+				
+				local FlashPeriod = animationTable.Period
+				local remainingFlash = FlashPeriod - (time - animationTable.Time)
+				
+				local flasher = icon.flasher 
+				
+
+				if animationTable.FadeAlpha then
+					if animationTable.fadingIn then
+						flasher:SetAlpha(animationTable.Alpha*(FlashPeriod-remainingFlash/FlashPeriod))
+					else
+						flasher:SetAlpha(animationTable.Alpha*(remainingFlash/FlashPeriod))
+					end
+				end
+				
+			--	print(remainingFlash)
+				if remainingFlash <= 0 then
+					local overtime = -remainingFlash
+					if overtime >= FlashPeriod then
+						overtime = 0
+					end
+					animationTable.Time = time + overtime
+					
+					-- (mostly) generic expiration -- we just finished the last flash, so dont do any more
+					local remaining = animationTable.Duration - (time - animationTable.Start)
+					if remaining < 0 and not animationTable.fadingIn then
+						animations[key] = nil
+						local OnExpire = TMW.AnimationList[Animation].OnExpire
+						if OnExpire then
+							OnExpire(icon, animationTable)
+						end
+					else
+						animationTable.fadingIn = not animationTable.fadingIn
+						if not animationTable.FadeAlpha then
+							flasher:SetAlpha(animationTable.fadingIn and animationTable.Alpha or 0)
+						end
+					end
+				end
+			elseif Animation == "ICONFADE" then
+				local remaining = animationTable.Duration - (time - animationTable.Start)
+				
+				-- generic expiration
+				if remaining < 0 then
+					animations[key] = nil
+					local OnExpire = TMW.AnimationList[Animation].OnExpire
+					if OnExpire then
+						OnExpire(icon, animationTable)
+					end
+				else				
+					local FadeDuration = animationTable.FadeDuration
+					local pct = remaining / FadeDuration
+					local inv = 1-pct
+			
+					--icon:SetAlpha((animationTable.StartAlpha * pct) + (animationTable.EndAlpha * inv))
+					icon:SetAlpha(print((icon.__oldAlpha * pct) + (icon.__alpha * inv), animationTable))
+				end
+			end
+		end
+	end
+	
+	if TMW.ScreenShakeDuration then
+		local Duration = TMW.ScreenShakeDuration
 		Duration = Duration - elapsed
 		if Duration < 0 then
 			Duration = nil
 		end
-		Shakers[frame] = Duration
+		TMW.ScreenShakeDuration = Duration
 		
-		local Amt = (frame.TMW_ShakeMagnitude or 10) / (1 + 10*(300^(-(Duration or 0))))
+		local Amt = (TMW.ScreenShakeMagnitude or 10) / (1 + 10*(300^(-(Duration or 0))))
 		local moveX = random(-Amt, Amt) 
 		local moveY = random(-Amt, Amt) 
 			
-		if frame == WorldFrame then
-			if not TMW.WorldFramePoints then
-				TMW.WorldFramePoints = {}
-				for i = 1, frame:GetNumPoints() do
-					TMW.WorldFramePoints[i] = { frame:GetPoint(i) }
-				end
+		if not TMW.WorldFramePoints then
+			TMW.WorldFramePoints = {}
+			for i = 1, WorldFrame:GetNumPoints() do
+				TMW.WorldFramePoints[i] = { WorldFrame:GetPoint(i) }
 			end
-			
-			frame:ClearAllPoints()
-			for _, v in pairs(TMW.WorldFramePoints) do
-				frame:SetPoint(v[1], v[2], v[3], v[4] + moveX, v[5] + moveY)
-			end
-			
-		elseif frame.base == TMW.IconBase then
-			frame:SetPoint("TOPLEFT", frame.x + moveX, frame.y + moveY)
+		end
+		
+		WorldFrame:ClearAllPoints()
+		for _, v in pairs(TMW.WorldFramePoints) do
+			WorldFrame:SetPoint(v[1], v[2], v[3], v[4] + moveX, v[5] + moveY)
 		end
 	end
 	
-	--[[for icon, Duration in next, Scalers do
+	if TMW.ScreenFlasher and TMW.ScreenFlasher.Duration then
+		local Duration = TMW.ScreenFlasher.Duration
 		Duration = Duration - elapsed
 		
-		local ScalePeriod = icon.ScalePeriod
-		local ScaleTime = icon.ScaleTime
-		ScaleTime = ScaleTime - elapsed
-
-		if icon.ScaleMagnitude then
-			if icon.scalingUp then
-				icon:SetScale(icon.ScaleMagnitude*(ScalePeriod-ScaleTime/ScalePeriod))
-			else
-				icon:SetScale(icon.ScaleMagnitude*(ScaleTime/ScalePeriod))
-			end
-		end
-			
-		if ScaleTime <= 0 then
-			local overtime = -ScaleTime
-			if overtime >= ScalePeriod then
-				overtime = 0
-			end
-			ScaleTime = ScalePeriod - overtime
-			
-			if Duration < 0 and not icon.scalingUp then -- we just finished the last scale, so dont do any more
-				Duration = nil
-				ScaleTime = nil
-				icon.ScalePeriod = nil
-				icon:SetScale(1)
-			end
-				
-			icon.scalingUp = not icon.scalingUp
-		end
-		
-		Scalers[icon] = Duration
-		icon.ScaleTime = ScaleTime
-	end]]
-	
-	for icon, Duration in next, ActivationGlows do
-		Duration = Duration - elapsed
-		if Duration < 0 then
-			Duration = nil
-			ActionButton_HideOverlayGlow(icon) -- dont upvalue, can be hooked (masque does NOT, but maybe others)
-		end
-		ActivationGlows[icon] = Duration
-	end
-	
-	for flasher, Duration in next, FlashingFlashers do
-		Duration = Duration - elapsed
-		
-		local FlashPeriod = flasher.FlashPeriod
-		local FlashTime = flasher.FlashTime
+		local FlashPeriod = TMW.ScreenFlasher.FlashPeriod
+		local FlashTime = TMW.ScreenFlasher.FlashTime
 		FlashTime = FlashTime - elapsed
 
-		if flasher.FadeAlpha then
-			if flasher.fadingIn then
-				flasher:SetAlpha(flasher.FlashAlpha*(FlashPeriod-FlashTime/FlashPeriod))
+		if TMW.ScreenFlasher.FadeAlpha then
+			if TMW.ScreenFlasher.fadingIn then
+				TMW.ScreenFlasher:SetAlpha(TMW.ScreenFlasher.FlashAlpha*(FlashPeriod-FlashTime/FlashPeriod))
 			else
-				flasher:SetAlpha(flasher.FlashAlpha*(FlashTime/FlashPeriod))
+				TMW.ScreenFlasher:SetAlpha(TMW.ScreenFlasher.FlashAlpha*(FlashTime/FlashPeriod))
 			end
 		end
 			
@@ -1696,42 +1758,21 @@ function TMW:OnUpdate(elapsed)					-- THE MAGICAL ENGINE OF DOING EVERYTHING
 			end
 			FlashTime = FlashPeriod - overtime
 			
-			if Duration < 0 and not flasher.fadingIn then -- we just finished the last flash, so dont do any more
+			if Duration < 0 and not TMW.ScreenFlasher.fadingIn then -- we just finished the last flash, so dont do any more
 				Duration = nil
 				FlashTime = nil
-				flasher.FlashPeriod = nil
-				flasher:Hide()
+				TMW.ScreenFlasher.FlashPeriod = nil
+				TMW.ScreenFlasher:Hide()
 			end
 				
-			flasher.fadingIn = not flasher.fadingIn
-			if not flasher.FadeAlpha then
-				flasher:SetAlpha(flasher.fadingIn and flasher.FlashAlpha or 0)
+			TMW.ScreenFlasher.fadingIn = not TMW.ScreenFlasher.fadingIn
+			if not TMW.ScreenFlasher.FadeAlpha then
+				TMW.ScreenFlasher:SetAlpha(TMW.ScreenFlasher.fadingIn and TMW.ScreenFlasher.FlashAlpha or 0)
 			end
 		end
 		
-		FlashingFlashers[flasher] = Duration
-		flasher.FlashTime = FlashTime
-	end
-	
-	for icon, Duration in next, FadingIcons do
-		Duration = Duration - elapsed
-		
-		if Duration < 0 then -- we just finished the fade
-			icon:SetAlpha(icon.FadeEnd)
-			icon.FadeEnd = nil
-			icon.FadeStart = nil
-			icon.IsFading = nil
-			Duration = nil
-		else
-			
-			local FadeDuration = icon.FadeDuration
-			local pct = Duration / FadeDuration
-			local inv = 1-pct
-	
-			icon:SetAlpha((icon.FadeStart * pct) + (icon.FadeEnd * inv))
-		end
-		
-		FadingIcons[icon] = Duration
+		TMW.ScreenFlasher.Duration = Duration
+		TMW.ScreenFlasher.FlashTime = FlashTime
 	end
 end
 
@@ -3117,6 +3158,99 @@ end
 -- ------------------
 -- ICONS
 -- ------------------
+TMW.AnimationList = {
+	{
+		text = NONE,
+		animation = "",
+	},
+	{
+		text = L["ANIM_SCREENSHAKE"],
+		desc = L["ANIM_SCREENSHAKE_DESC"],
+		animation = "SCREENSHAKE",
+		Duration = true,
+		Magnitude = true,
+	},
+	{
+		text = L["ANIM_SCREENFLASH"],
+		desc = L["ANIM_SCREENFLASH_DESC"],
+		animation = "SCREENFLASH",
+		Duration = true,
+		Period = true,
+		Color = true,
+		Fade = true,
+	},
+	{
+		text = L["ANIM_ICONSHAKE"],
+		desc = L["ANIM_ICONSHAKE_DESC"],
+		animation = "ICONSHAKE",
+		Duration = true,
+		Magnitude = true,
+		
+		OnExpire = function(icon, table)
+			icon:SetPoint("TOPLEFT", icon.x, icon.y)
+		end,
+	},
+	{
+		text = L["ANIM_ICONFLASH"],
+		desc = L["ANIM_ICONFLASH_DESC"],
+		animation = "ICONFLASH",
+		Duration = true,
+		Period = true,
+		Color = true,
+		Fade = true,
+		
+		OnStart = function(icon, table)
+			
+			local flasher 
+			if icon.flasher then
+				flasher = icon.flasher
+			else
+				flasher = TMW:GetFlasher(icon.group)
+				icon.flasher = flasher
+			end
+			
+			flasher:Show()
+			flasher:SetTexture(table.r, table.g, table.b, 1)
+		end,
+		OnExpire = function(icon, table)
+			icon.flasher:Hide()
+		end,
+	},
+	{
+		text = L["ANIM_ICONFADE"],
+		desc = L["ANIM_ICONFADE_DESC"],
+		animation = "ICONFADE",
+		Duration = true,
+		
+		OnStart = function(icon, table)
+			icon.IsFading = true
+		end,
+		
+		OnExpire = function(icon, table)
+			icon:SetAlpha(icon.__alpha)
+			icon.IsFading = nil
+		end,
+		
+		
+	},
+	{
+		text = L["ANIM_ACTVTNGLOW"],
+		desc = L["ANIM_ACTVTNGLOW_DESC"],
+		animation = "ACTVTNGLOW",
+		Duration = true,
+		
+		OnStart = function(icon, table)
+			ActionButton_ShowOverlayGlow(icon) -- dont upvalue, can be hooked (masque does, maybe others)
+		end,
+		OnExpire = function(icon, table)
+			ActionButton_HideOverlayGlow(icon) -- dont upvalue, can be hooked (masque doesn't, but maybe others)
+		end,
+	},
+}
+for k, v in pairs(TMW.AnimationList) do
+	TMW.AnimationList[v.animation] = v
+end
+
 
 TMW.IconBase = {}
 
@@ -3221,6 +3355,30 @@ function TMW.IconBase.RegisterEvent(icon, event)
 	icon.hasEvents = 1
 end
 
+function TMW.IconBase.GetAnimations(icon)
+	if not icon.animations then
+		local t = {}
+		Animations[icon] = t
+		icon.animations = t
+	end
+	return icon.animations
+end
+
+function TMW.IconBase.StartAnimation(icon, table)
+	local Animation = table.data.Animation
+	local AnimationData = Animation and TMW.AnimationList[Animation]
+	
+	if AnimationData then
+		icon:GetAnimations()[Animation] = table
+		
+		table.Animation = Animation
+	
+		if AnimationData.OnStart then
+			AnimationData.OnStart(icon, table)
+		end
+	end
+end
+
 function TMW.IconBase.FireEvent(icon, data, played, announced, animated)
 	if not runEvents then return end
 	
@@ -3316,42 +3474,63 @@ function TMW.IconBase.FireEvent(icon, data, played, announced, animated)
 	if Animation ~= "" and not animated then
 		local Duration = data.Duration
 		
-		if Animation == "SCREENSHAKE" and (not WorldFrame:IsProtected() or not InCombatLockdown()) then
-			WorldFrame.TMW_ShakeMagnitude = data.Magnitude
-			Shakers[WorldFrame] = Duration
-		elseif Animation == "ICONSHAKE" then
-			icon.TMW_ShakeMagnitude = data.Magnitude
-			Shakers[icon] = Duration
+		if Animation == "ICONSHAKE" then
+			icon:StartAnimation{
+				data = data,
+				Start = TMW.time,
+				Duration = Duration,
+				
+				Animation = Animation,
+				Magnitude = data.Magnitude,
+			}
 		elseif Animation == "ACTVTNGLOW" then
-			ActionButton_ShowOverlayGlow(icon) -- dont upvalue, can be hooked (masque does, maybe others)
-			ActivationGlows[icon] = Duration
-		elseif Animation == "ICONFLASH" or Animation == "SCREENFLASH" then
-			local flasher
-			if Animation == "ICONFLASH" then
-				flasher = icon.flasher
-			elseif Animation == "SCREENFLASH" then
-				flasher = UIParent.TMW_Flasher
-			end
-			flasher.FlashPeriod = data.Period
-			flasher.FlashTime = data.Period
-			flasher.FlashAlpha = data.a_anim
-			flasher.FadeAlpha = data.Fade
-			flasher.fadingIn = true
-			flasher:Show()
-			flasher:SetTexture(data.r_anim, data.g_anim, data.b_anim, 1)
-			FlashingFlashers[flasher] = Duration
-		elseif Animation == "ICONFADE" and not icon.FakeHidden then
-			icon.IsFading = Duration
-			icon.FadeStart = icon.__oldAlpha
-			icon.FadeEnd = icon.__alpha
-			icon.FadeDuration = Duration
-			FadingIcons[icon] = Duration
-		--[[elseif Animation == "ICONSCALE" then
-			icon.ScalePeriod = data.Period
-			icon.ScaleTime = data.Period
-			icon.ScaleMagnitude = data.ScaleMagnitude
-			icon.fadingIn = true
-			Scalers[icon] = Duration]]
+			icon:StartAnimation{
+				data = data,
+				Start = TMW.time,
+				Duration = Duration,
+			}
+		elseif Animation == "ICONFLASH" then
+			icon:StartAnimation{
+				data = data,
+				Start = TMW.time,
+				Duration = Duration,
+				
+				Period = data.Period,
+				Time = TMW.time,
+				FadeAlpha = data.Fade,
+				fadingIn = true,
+				Alpha = data.a_anim,
+				r = data.r_anim,
+				g = data.g_anim,
+				b = data.b_anim,
+			}
+		
+		elseif Animation == "ICONFADE" and not icon.FakeHidden then			
+			icon:StartAnimation{
+				data = data,
+				Start = TMW.time,
+				Duration = Duration,
+				
+				FadeDuration = Duration,
+			--	StartAlpha = icon.__oldAlpha,
+			--	EndAlpha = icon.__alpha,
+			}
+			
+			
+			
+		elseif Animation == "SCREENFLASH" then
+			local ScreenFlasher = TMW.ScreenFlasher
+			ScreenFlasher.FlashPeriod = data.Period
+			ScreenFlasher.FlashTime = data.Period
+			ScreenFlasher.FlashAlpha = data.a_anim
+			ScreenFlasher.FadeAlpha = data.Fade
+			ScreenFlasher.fadingIn = true
+			ScreenFlasher:Show()
+			ScreenFlasher:SetTexture(data.r_anim, data.g_anim, data.b_anim, 1)
+			ScreenFlasher.Duration = Duration
+		elseif Animation == "SCREENSHAKE" and (not WorldFrame:IsProtected() or not InCombatLockdown()) then
+			TMW.ScreenShakeDuration = Duration
+			TMW.ScreenShakeMagnitude = data.Magnitude
 		end
 		
 		animated = 1
@@ -3749,7 +3928,37 @@ TypeBase.SUGType = "spell"
 TypeBase.leftCheckYOffset = 0
 TypeBase.chooseNameTitle = L["ICONMENU_CHOOSENAME"]
 TypeBase.chooseNameText  = L["CHOOSENAME_DIALOG"]
-TypeBase.EventDisabled_OnCLEUEvent = true
+TypeBase.EventDisabled_OnCLEUEvent = true	
+
+do	-- TypeBase:InIcons(groupID)
+	local cg, ci, mg, mi, Type
+		
+	local function iter()
+		ci = ci + 1
+		while true do
+			if ci <= mi and TMW[cg] and (not TMW[cg][ci] or TMW[cg][ci].Type ~= Type.type) then
+				ci = ci + 1
+			elseif cg < mg and (ci > mi or not TMW[cg]) then
+				cg = cg + 1
+				ci = 1
+			elseif cg > mg then
+				return
+			else
+				break
+			end
+		end
+		return TMW[cg] and TMW[cg][ci], cg, ci -- icon, groupID, iconID
+	end
+		
+	function TypeBase:InIcons(groupID)
+		cg = groupID or 1
+		ci = 0
+		mg = groupID or TELLMEWHEN_MAXGROUPS
+		mi = TELLMEWHEN_MAXROWS*TELLMEWHEN_MAXROWS
+		Type = self
+		return iter
+	end
+end
 
 function TypeBase:UpdateColors(dontUpdateIcons)
 	for k, v in pairs(db.profile.Colors[self.type]) do
@@ -3997,7 +4206,7 @@ function TMW:Icon_Update(icon)
 				if data == "ICONFLASH" then
 					icon.flasher = icon.flasher or TMW:GetFlasher(icon)
 				elseif data == "SCREENFLASH" then
-					UIParent.TMW_Flasher = UIParent.TMW_Flasher or TMW:GetFlasher(UIParent)
+					TMW.ScreenFlasher = TMW.ScreenFlasher or TMW:GetFlasher(UIParent)
 				elseif data == "ICONFADE" then
 					icon.DoesFades = true
 				end

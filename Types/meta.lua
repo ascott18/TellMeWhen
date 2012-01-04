@@ -92,7 +92,7 @@ local function Meta_OnUpdate(icon, time)
 		if ic.UpdateBindText then
 			icon.bindText:SetText(ic.bindText:GetText())
 		end
-		if ic ~= icon.__previcon or ChangedMetas[ic] then 
+		if ic ~= icon.__currentIcon or ChangedMetas[ic] then 
 			ChangedMetas[icon] = true
 			
 			if not ic.UpdateBindText then
@@ -131,7 +131,7 @@ local function Meta_OnUpdate(icon, time)
 			
 			force = 1
 			
-			icon.__previcon = ic
+			icon.__currentIcon = ic
 		end
 		
 		AlreadyChecked[ic] = true
@@ -185,7 +185,7 @@ end
 
 
 function Type:Setup(icon, groupID, iconID)
-	icon.__previcon = nil -- reset this
+	icon.__currentIcon = nil -- reset this
 	icon.NameFirst = "" --need to set this to something for bars update
 
 	-- validity check)
