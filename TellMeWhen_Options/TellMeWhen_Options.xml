@@ -32,7 +32,7 @@
 	<CheckButton name="TellMeWhen_RadioCheckTemplate" virtual="true" inherits="TellMeWhen_CheckTemplate">
 		<Scripts>
 			<OnLoad>
-				self.text:SetWidth(self:GetParent():GetWidth()-25)
+				self.text:SetWidth(self:GetParent():GetWidth()-7)
 			</OnLoad>
 			<OnClick>
 				if self.setting == "TotemSlots" then
@@ -1941,8 +1941,6 @@
 		</Scripts>
 	</Frame>
 	
-	
-	
 	<EditBox name="TellMeWhen_UnitEditbox" inherits="TellMeWhen_InputBoxTemplate" virtual="true" autoFocus="false">
 		<Frames>
 			<Frame name="$parentIns" inherits="TMW_DropDownMenuTemplate" parentKey="Ins">
@@ -1970,6 +1968,7 @@
 	</EditBox>
 	<!-- END TEMPLATES -->
 
+	
 	<Button name="TellMeWhen_IconDragger" hidden="true" enableMouse="false" frameStrata="HIGH">
 		<Size x="30" y="30"/>
 		<Layers>
@@ -2509,7 +2508,7 @@
 					<Frame name="$parentIcons[DND]" hidden="true" parentKey="Icons">
 						<Anchors>
 							<Anchor point="TOPLEFT" relativeTo="$parentType" relativePoint="BOTTOMLEFT" x="-10" y="-17"/>
-							<Anchor point="BOTTOMRIGHT" y="59"/>
+							<Anchor point="BOTTOMRIGHT" y="77"/>
 						</Anchors>
 						<Layers>
 							<Layer level="ARTWORK">
@@ -2859,7 +2858,7 @@
 						</Scripts>
 					</Frame>
 					<Frame name="$parentTypeChecks" parentKey="TypeChecks">
-						<Size x="140" y="100"/>
+						<Size x="150" y="100"/>
 						<Anchors>
 							<Anchor point="TOPLEFT" relativeTo="$parentCustomTex" relativePoint="BOTTOMLEFT" x="200" y="-19"/>
 						</Anchors>
@@ -2958,7 +2957,7 @@
 						</Scripts>
 					</Frame>
 					<Frame name="$parentWhenChecks" parentKey="WhenChecks">
-						<Size x="140" y="90"/>
+						<Size x="150" y="90"/>
 						<Anchors>
 							<Anchor point="TOPLEFT" relativeTo="$parentTypeChecks" relativePoint="BOTTOMLEFT" y="7"/>
 						</Anchors>
@@ -2991,9 +2990,9 @@
 					</Frame>
 
 					<Frame name="$parentShowPBar" parentKey="ShowPBar">
-						<Size x="110" y="55"/>
+						<Size x="100" y="55"/>
 						<Anchors>
-							<Anchor point="TOPLEFT" relativeTo="$parentTypeChecks" relativePoint="TOPRIGHT" x="6" y="-1"/>
+							<Anchor point="TOPLEFT" relativeTo="$parentTypeChecks" relativePoint="TOPRIGHT" x="16" y="-1"/>
 						</Anchors>
 						<Frames>
 							<CheckButton name="$parentShowPBar" inherits="TellMeWhen_CheckTemplate" parentKey="ShowPBar" id="1">
@@ -3004,7 +3003,7 @@
 									<OnLoad>
 										self.text:SetText(TMW.L["ICONMENU_SHOWPBARN"])
 										TMW:TT(self, "ICONMENU_SHOWPBARN", "ICONMENU_SHOWPBAR_DESC")
-										self.text:SetWidth(self:GetParent():GetWidth()-22)
+										self.text:SetWidth(self:GetParent():GetWidth()-23)
 									</OnLoad>
 									<OnClick>
 										if TMW.CI.ics then
@@ -3032,7 +3031,7 @@
 								<Scripts>
 									<OnLoad>
 										self.text:SetText(TMW.L["ICONMENU_OFFS"])
-										self.text:SetWidth(58)
+										self.text:SetWidth(50)
 										TMW:TT(self, "ICONMENU_OFFS", "ICONMENU_BAROFFS")
 										function self:SetEnabled(arg1)
 											arg1 = self:GetParent().enabled and arg1
@@ -3081,7 +3080,7 @@
 						</Scripts>
 					</Frame>
 					<Frame name="$parentShowCBar" parentKey="ShowCBar">
-						<Size x="110" y="55"/>
+						<Size x="100" y="55"/>
 						<Anchors>
 							<Anchor point="TOPLEFT" relativeTo="$parentShowPBar" relativePoint="TOPRIGHT"/>
 						</Anchors>
@@ -3094,7 +3093,7 @@
 									<OnLoad>
 										self.text:SetText(TMW.L["ICONMENU_SHOWCBARN"])
 										TMW:TT(self, "ICONMENU_SHOWCBARN", "ICONMENU_SHOWCBAR_DESC")
-										self.text:SetWidth(self:GetParent():GetWidth()-22)
+										self.text:SetWidth(self:GetParent():GetWidth()-23)
 									</OnLoad>
 									<OnClick>
 										if TMW.CI.ics then
@@ -3122,7 +3121,7 @@
 								<Scripts>
 									<OnLoad>
 										self.text:SetText(TMW.L["ICONMENU_OFFS"])
-										self.text:SetWidth(58)
+										self.text:SetWidth(50)
 										TMW:TT(self, "ICONMENU_OFFS", "ICONMENU_BAROFFS")
 										self.setting = "CBarOffs"
 								
@@ -3178,7 +3177,7 @@
 
 					<EditBox name="$parentDurationMin" parentKey="DurationMin" inherits="TellMeWhen_TimeEditBoxTemplate">
 						<Anchors>
-							<Anchor point="LEFT" relativeTo="$parentTypeChecks" relativePoint="RIGHT" x="35"/>
+							<Anchor point="LEFT" relativeTo="$parentTypeChecks" relativePoint="RIGHT" x="45"/>
 							<Anchor point="TOP" relativeTo="$parentInvertBars" relativePoint="BOTTOM" y="-32"/>
 						</Anchors>
 						<Scripts>

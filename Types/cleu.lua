@@ -38,6 +38,7 @@ Type.usePocketWatch = 1
 Type.AllowNoName = true
 Type.chooseNameTitle = L["ICONMENU_CHOOSENAME"] .. " " .. L["ICONMENU_CHOOSENAME_ORBLANK"]
 Type.SUGType = "spell"
+Type.spaceBefore = true
 -- Type.leftCheckYOffset = -130 -- nevermind
 
 
@@ -159,13 +160,10 @@ local function CLEU_OnEvent(icon, _, t, event, h, sourceGUID, sourceName, source
 			end
 		end
 		
-		local spellID, spellName = arg1, arg2
-		
+		local spellID, spellName = arg1, arg2 -- this may or may not be true, depends on the event
 		local NameHash = icon.NameHash
-		if NameHash and not EventsWithoutSpells[event] then
-			if not NameHash[""] or NameHash[strlowerCache[spellName]] or NameHash[spellID] then
-				return
-			end
+		if NameHash and not EventsWithoutSpells[event] and not (NameHash[strlowerCache[spellName]] or NameHash[spellID]) then
+			return
 		end
 			
 		local spell, tex, extra
@@ -254,8 +252,6 @@ local function CLEU_OnEvent(icon, _, t, event, h, sourceGUID, sourceName, source
 		end
 		
 		icon:Update(TMW.time, true, tex)
-		
-		print(event, spell, "|T" .. tex .. ":0|t", sourceUnit, destUnit, extra)
 			
 		-- all checks complete. procede to do shit.
 		--print(CombatLog_OnEvent(Blizzard_CombatLog_CurrentSettings, t, event, h, sourceGUID, sourceName, sourceFlags, sourceRaidFlags, destGUID, destName, destFlags, destRaidFlags, arg1, arg2, arg3, arg4, ...))
@@ -333,7 +329,7 @@ function Type:Setup(icon, groupID, iconID)
 	
 	-- safety mechanism
 	if icon.AllowAnyEvents and not icon.SourceUnits and not icon.DestUnits and not icon.NameHash and not icon.SourceFlags and not icon.DestFlags then
-		if db.profile.Locked then
+		if db.profile.Locked and icon.Enabled then
 			TMW.Warn(L["CLEU_NOFILTERS"]:format(L["GROUPICON"]:format(TMW:GetGroupName(groupID, groupID, 1), iconID)))
 		end
 		return

@@ -266,16 +266,16 @@ L["ICONMENU_HOSTILE"] = "Hostile"
 L["ICONMENU_ICDTYPE"] = "Triggered by"
 L["ICONMENU_SPELLCAST_COMPLETE"] = "Spell Cast Finish/Instant Cast"
 L["ICONMENU_SPELLCAST_START"] = "Spell Cast Start"
-L["ICONMENU_ICDBDE"] = "Buff/Debuff/Energize/Summon"
+L["ICONMENU_ICDBDE"] = "Buff/Debuff/Damage/Energize/Summon"
 L["ICONMENU_SPELLCAST_COMPLETE_DESC"] = [[Select this option if the internal cooldown begins when you finish casting a spell, or when you cast an instant cast spell.
 
 You need to enter the name/ID of the spell cast that triggers the internal cooldown into the %q editbox.]]
 L["ICONMENU_SPELLCAST_START_DESC"] = [[Select this option if the internal cooldown begins when you start casting a spell.
 
 You need to enter the name/ID of the spell cast that triggers the internal cooldown into the %q editbox.]]
-L["ICONMENU_ICDAURA_DESC"] = [[Select this option if the internal cooldown begins when a buff or debuff is applied by yourself (includes procs), or if the effect energizes you with mana/rage/etc.
+L["ICONMENU_ICDAURA_DESC"] = [[Select this option if the internal cooldown begins when a buff or debuff is applied by yourself (includes procs), if the effect deals damage, or if the effect energizes you with mana/rage/etc.
 
-You need to enter the name/ID of the buff/debuff that you gain when the internal cooldown is triggered, or the name of the energize effect (check your combat log), into the %q editbox.]]
+You need to enter the name/ID of the buff/debuff that you gain when the internal cooldown is triggered, or the name of the energize effect, or the name of the spell that does damage (check your combat log), into the %q editbox.]]
 
 L["ICONMENU_DRPRESENT"] = "Diminished"
 L["ICONMENU_DRABSENT"] = "Undiminished"

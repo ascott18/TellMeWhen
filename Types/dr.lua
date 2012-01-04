@@ -86,7 +86,7 @@ local function DR_OnEvent(icon, _, _, event, _, _, _, _, _, destGUID, _, destFla
 	if auraType == "DEBUFF" and (event == "SPELL_AURA_REMOVED" or event == "SPELL_AURA_APPLIED" or (icon.CheckRefresh and event == "SPELL_AURA_REFRESH")) then
 		local ND = icon.NameHash
 		if ND[spellID] or ND[strlowerCache[spellName]] then
-			if TMW.debug or PvEDRs[spellID] or bitband(destFlags, CL_PLAYER) == CL_PLAYER or bitband(destFlags, CL_PET) == CL_PET then
+			if PvEDRs[spellID] or bitband(destFlags, CL_PLAYER) == CL_PLAYER or bitband(destFlags, CL_PET) == CL_PET then
 				local dr = icon[destGUID]
 				if event == "SPELL_AURA_APPLIED" then
 					if dr and dr.start + dr.duration <= TMW.time then

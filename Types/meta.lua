@@ -219,13 +219,13 @@ function Type:IE_TypeLoaded()
 	TMW.IE.Main.Sort.text:SetWidth(spacing)
 	
 	TMW.IE.Main.Sort.Radio1:SetPoint("TOPLEFT", spacing, 19)
-	TMW.IE.Main.Sort.Radio1.text:SetWidth(spacing)
+	TMW.IE.Main.Sort.Radio1.text:SetWidth(spacing + 2)
 	
 	TMW.IE.Main.Sort.Radio2:SetPoint("TOPLEFT", TMW.IE.Main.Sort.Radio1, "TOPRIGHT", spacing, 0)
-	TMW.IE.Main.Sort.Radio2.text:SetWidth(spacing)
+	TMW.IE.Main.Sort.Radio2.text:SetWidth(spacing + 2)
 	
 	TMW.IE.Main.Sort.Radio3:SetPoint("TOPLEFT", TMW.IE.Main.Sort.Radio2, "TOPRIGHT", spacing, 0)
-	TMW.IE.Main.Sort.Radio3.text:SetWidth(spacing)
+	TMW.IE.Main.Sort.Radio3.text:SetWidth(spacing + 2)
 	
 	TMW:TT(TMW.IE.Main.Sort.Radio1, "SORTBYNONE", "SORTBYNONE_META_DESC")
 	TMW:TT(TMW.IE.Main.Sort.Radio2, "ICONMENU_SORTASC", "ICONMENU_SORTASC_META_DESC")

@@ -72,10 +72,10 @@ Types\lightwell.lua
 Types\dr.lua
 Types\cast.lua
 
+Types\cleu.lua
+
 Types\conditionicon.lua
 Types\meta.lua
-
-Types\cleu.lua
 
 
 conditions.lua

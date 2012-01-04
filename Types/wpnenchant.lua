@@ -73,19 +73,20 @@ local function GetWeaponEnchantName(slot)
 	local i = 1
 	while _G["TellMeWhen_ParserTextLeft" .. i] do
 		local t = _G["TellMeWhen_ParserTextLeft" .. i]:GetText()
-		if t and t ~= "" then --（） multibyte parenthesis are used in zhCH locale.
+		if t and t ~= "" then --（） multibyte parenthesis are used in zhCN locale.
 			local r = strmatch(t, "(.+)[%(%（]%d+[^%.]*[^%d]+[%)%）]") -- should work with all locales and only get the weapon enchant name, not other things (like the weapon DPS)
 			
 			if r then
 				r = strtrim(r)
 				if r ~= "" then
-					return r
+					return print(r)
 				end
 			end
 		end
 		i=i+1
 	end
 end
+_G.GetWeaponEnchantName = GetWeaponEnchantName
 
 local function UpdateWeaponEnchantInfo(slot, selectIndex)
 	local has, expiration = select(selectIndex, GetWeaponEnchantInfo())
@@ -152,7 +153,10 @@ local function WpnEnchant_OnEvent(icon, event, unit)
 	if unit == "player" then
 		local Slot = icon.Slot
 		
+	--	UpdateWeaponEnchantInfo(Slot, icon.SelectIndex)
+		
 		local EnchantName = GetWeaponEnchantName(Slot)
+		print(icon, event, unit, Slot, EnchantName)
 		icon.LastEnchantName = icon.EnchantName or icon.LastEnchantName
 		icon.EnchantName = EnchantName
 		

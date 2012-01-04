@@ -77,7 +77,7 @@ local function ICD_OnEvent(icon, event, ...)
 		local p, g -- make these local separate from i and n
 		_, p, _, g, _, _, _, _, _, _, _, i, n = ...
 		
-		valid = g == pGUID and (p == "SPELL_AURA_APPLIED" or p == "SPELL_AURA_REFRESH" or p == "SPELL_ENERGIZE" or p == "SPELL_AURA_APPLIED_DOSE" or p == "SPELL_SUMMON")
+		valid = g == pGUID and (p == "SPELL_AURA_APPLIED" or p == "SPELL_AURA_REFRESH" or p == "SPELL_ENERGIZE" or p == "SPELL_AURA_APPLIED_DOSE" or p == "SPELL_SUMMON" or p == "SPELL_DAMAGE" or p == "SPELL_MISSED")
 	elseif event == "UNIT_SPELLCAST_SUCCEEDED" or event == "UNIT_SPELLCAST_CHANNEL_START" or event == "UNIT_SPELLCAST_START" then
 		valid, n, _, _, i = ... -- I cheat. valid is actually a unitID here.
 		
