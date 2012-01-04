@@ -29,6 +29,7 @@ local strlowerCache = TMW.strlowerCache
 
 
 local Type = {}
+LibStub("AceTimer-3.0"):Embed(Type)
 Type.type = "wpnenchant"
 Type.name = L["ICONMENU_WPNENCHANT"]
 Type.desc = L["ICONMENU_WPNENCHANT_DESC"]
@@ -79,7 +80,7 @@ local function GetWeaponEnchantName(slot)
 			if r then
 				r = strtrim(r)
 				if r ~= "" then
-					return print(r)
+					return r
 				end
 			end
 		end
@@ -150,13 +151,10 @@ end
 
 local function WpnEnchant_OnEvent(icon, event, unit)
 	-- this function must be declared after _OnUpdate because it references _OnUpdate from inside it.
-	if unit == "player" then
+	if not unit or unit == "player" then -- (not unit) covers calls from the timers set below
 		local Slot = icon.Slot
 		
-	--	UpdateWeaponEnchantInfo(Slot, icon.SelectIndex)
-		
 		local EnchantName = GetWeaponEnchantName(Slot)
-		print(icon, event, unit, Slot, EnchantName)
 		icon.LastEnchantName = icon.EnchantName or icon.LastEnchantName
 		icon.EnchantName = EnchantName
 		
@@ -164,6 +162,14 @@ local function WpnEnchant_OnEvent(icon, event, unit)
 			icon.CorrectEnchant = true
 		elseif EnchantName then
 			icon.CorrectEnchant = icon.NameHash[strlowerCache[EnchantName]]
+		elseif unit then
+			-- we couldn't get an enchant name.
+			-- Either we checked too early, or there is no enchant.
+			-- Assume that we checked too early, and check again in a little bit.
+			-- We check that unit is defined because if we are calling from a timer, it will be false, and we dont want to endlessly chain timers.
+			-- A single func calling itself in 2 timers will create perpetual performance loss to the point of lockup.
+			Type:ScheduleTimer(WpnEnchant_OnEvent, 0.1, icon)
+			Type:ScheduleTimer(WpnEnchant_OnEvent, 1, icon)
 		end
 		
 		local wpnTexture = GetInventoryItemTexture("player", Slot)

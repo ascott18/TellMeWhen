@@ -3,8 +3,9 @@
  * Bug Fixes:
  ** (r384) Weapon enchant should now be properly detected in zhCH clients
  ** (r384) The weapon enchant suggestion list should now properly display shaman enchants in zhTW clients
- ** (r384) TellMeWhen_Options.lua:2092 Usage: GetAddon(name): 'name' - Cannot find an AceAddon 'LUI_Cooldown'.
- ** (r385) Moving/Swapping an icon that the icon editor is editing shouldn't cause the old settings to stick around.
+ ** (r384) TellMeWhen_Options.lua:2092 Usage: GetAddon(name): 'name' - Cannot find an AceAddon 'LUI_Cooldown'
+ ** (r385) Moving/Swapping an icon that the icon editor is editing shouldn't cause the old settings to stick around
+ ** (r390) Weapon enchant icons should now always detect the current weapon enchant in a timely manner for rogue characters.
 
 ===v4.7.3===
  * New Feature: Animations. You can now pick animations to play when an icon event occurs, such as having the screen shake or an icon flash.
