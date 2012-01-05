@@ -99,6 +99,15 @@ local function Meta_OnUpdate(icon, time)
 				icon.bindText:SetText(ic.bindText:GetText())
 			end
 			
+			if ic.animations then
+				for k, v in pairs(icon:GetAnimations()) do
+					icon:StopAnimation(v)
+				end
+				for k, v in pairs(ic.animations) do
+					icon:StartAnimation(v)
+				end
+			end
+			
 			if LMB then -- i dont like the way that Masque handles this (inefficient), so i'll do it myself
 				local icnt = ic.__normaltex -- icon.__normaltex = icon.__LBF_Normal or icon:GetNormalTexture() -- set during Icon_Update()
 				local iconnt = icon.__normaltex
@@ -207,6 +216,10 @@ function Type:Setup(icon, groupID, iconID)
 	icon.ShowPBar = true
 	icon.ShowCBar = true
 	icon.InvertBars = false
+	
+	for k, v in pairs(icon:GetAnimations()) do
+		icon:StopAnimation(v)
+	end
 	
 	icon:SetTexture("Interface\\Icons\\LevelUpIcon-LFD")
 

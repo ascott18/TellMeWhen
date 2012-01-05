@@ -385,6 +385,17 @@ function TMW:GuessIconTexture(data)
 	return tex
 end
 
+function TMW.IconsSort(a, b)
+	local icon1, icon2 = _G[a], _G[b]
+	local g1 = icon1.group:GetID()
+	local g2 = icon2.group:GetID()
+	if g1 ~= g2 then
+		return g1 < g2
+	else
+		return icon1:GetID() < icon2:GetID()
+	end
+end
+
 
 ---------- Dropdown Utilities ----------
 function TMW:SetUIDropdownText(frame, value, tbl, text)
@@ -1413,7 +1424,7 @@ function TMW:Group_Delete(groupID)
 	db.profile.NumGroups = db.profile.NumGroups - 1
 	for k, v in pairs(TMW.Icons) do
 		if tonumber(strmatch(v, "TellMeWhen_Group(%d+)")) == groupID then
-			TMW:InvalidateIcon(k)
+			TMW:Icon_Invalidate(k)
 		end
 	end
 	
@@ -1539,7 +1550,7 @@ function ID:DropDown()
 		info.arg1 = "Swap"
 		UIDropDownMenu_AddButton(info, UIDROPDOWNMENU_MENU_LEVEL)
 
-		if TMW:IsIconValid(ID.srcicon) then
+		if TMW:Icon_IsValid(ID.srcicon) then
 			-- Condition
 			info.text = L["ICONMENU_APPENDCONDT"]
 			info.tooltipTitle = nil
@@ -4310,6 +4321,9 @@ function EVENTS:SetupEventSettings()
 			if state == "FORCE" then
 				EventSettings[setting]:Disable()
 				EventSettings[setting]:SetAlpha(1)
+			elseif state == "FORCEDISABLED" then
+				EventSettings[setting]:Disable()
+				EventSettings[setting]:SetAlpha(0.4)
 			else
 				EventSettings[setting]:Enable()
 			end
@@ -4721,7 +4735,7 @@ end
 
 ANN = TMW:NewModule("Announcements", EVENTS) TMW.ANN = ANN
 ANN.tabText = L["ANN_TAB"]
-local ChannelLookup = TMW.ChannelLookup
+local ChannelList = TMW.ChannelList
 
 function ANN:OnInitialize()
 	ANN.tab = IE.AnnounceTab
@@ -4785,7 +4799,7 @@ function ANN:SetupEventDisplay(event)
 	local eventID, eventString = self:GetDisplayInfo(event)
 	
 	local channel = self:GetEventSettings(eventString).Channel
-	local channelsettings = ChannelLookup[channel]
+	local channelsettings = ChannelList[channel]
 	
 	if channelsettings then
 		local text = channelsettings.text
@@ -4820,7 +4834,7 @@ function ANN:SelectChannel(channel)
 	end
 	self.currentChannelSetting = channel
 
-	local channelsettings = ChannelLookup[channel]
+	local channelsettings = ChannelList[channel]
 	if channelsettings then
 		if channelsettings.sticky then
 			self.Sticky:SetChecked(EventSettings.Sticky)
@@ -4901,7 +4915,7 @@ function ANN:LocDropdownFunc(text)
 end
 
 function ANN:DropDown()
-	local channelSettings = ChannelLookup[ANN.currentChannelSetting]
+	local channelSettings = ChannelList[ANN.currentChannelSetting]
 	if channelSettings and channelSettings.dropdown then
 		channelSettings.dropdown()
 	end

@@ -32,7 +32,7 @@ local DRData = LibStub("DRData-1.0", true)
 TELLMEWHEN_VERSION = "4.8.0"
 TELLMEWHEN_VERSION_MINOR = strmatch(" @project-version@", " r%d+") or ""
 TELLMEWHEN_VERSION_FULL = TELLMEWHEN_VERSION .. TELLMEWHEN_VERSION_MINOR
-TELLMEWHEN_VERSIONNUMBER = 48009 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
+TELLMEWHEN_VERSIONNUMBER = 48011 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
 if TELLMEWHEN_VERSIONNUMBER > 49000 or TELLMEWHEN_VERSIONNUMBER < 48000 then return error("YOU SCREWED UP THE VERSION NUMBER OR DIDNT CHANGE THE SAFETY LIMITS") end -- safety check because i accidentally made the version number 414069 once
 
 TELLMEWHEN_MAXGROUPS = 1 	--this is a default, used by SetTheory (addon), so dont rename
@@ -73,7 +73,7 @@ local GCD, NumShapeshiftForms, LastUpdate = 0, 0, 0
 local IconUpdateFuncs, GroupUpdateFuncs, unitsToChange = {}, {}, {}
 local BindUpdateFuncs
 local loweredbackup = {}
-local Animations = {}
+local Animations = {[UIParent] = {}, [WorldFrame] = {}}
 local Shakers, ActivationGlows, FlashingFlashers, --[[Scalers,]] FadingIcons, CDBarsToUpdate, PBarsToUpdate = {}, {}, {}, {}, {}, {}--[[, {}]]
 local time = GetTime() TMW.time = time
 local sctcolor = {r=1, b=1, g=1}
@@ -672,7 +672,7 @@ TMW.Defaults = {
 							OnDuration = {
 								CndtJustPassed 	= true,
 								PassingCndt		= true,
-							}
+							},
 						},
 						Conditions = {
 							n 					= 0,
@@ -729,142 +729,177 @@ TMW.DefaultPowerTypes = {
 	DEATHKNIGHT = 6, -- death coil
 } local defaultPowerType = TMW.DefaultPowerTypes[pclass]
 
-function TMW:ProcessEquivalencies()
-	TMW.DS = {
-		Magic 	= "Interface\\Icons\\spell_fire_immolation",
-		Curse 	= "Interface\\Icons\\spell_shadow_curseofsargeras",
-		Disease = "Interface\\Icons\\spell_nature_nullifydisease",
-		Poison 	= "Interface\\Icons\\spell_nature_corrosivebreath",
-		Enraged = "Interface\\Icons\\ability_druid_challangingroar",
-	}
-	for dispeltype, icon in pairs(TMW.DS) do
-	--	SpellTextures[dispeltype] = icon
-		SpellTextures[strlower(dispeltype)] = icon
-	end
-	TMW.BE = {
-		--Most of these are thanks to Malazee @ US-Dalaran's chart: http://forums.wow-petopia.com/download/file.php?mode=view&id=4979 and spreadsheet https://spreadsheets.google.com/ccc?key=0Aox2ZHZE6e_SdHhTc0tZam05QVJDU0lONnp0ZVgzdkE&hl=en#gid=18
-		--Many more new spells/corrections were provided by Catok of Curse
-		
-		--NOTE: any id prefixed with "_" will have its localized name substituted in instead of being forced to match as an ID
-		debuffs = {
-			CrowdControl		= "_118;_339;2637;33786;_1499;_19503;_19386;20066;10326;_9484;_6770;_2094;_51514;76780;_710;_5782;_6358;_49203;_605;82691", -- originally by calico0 of Curse
-			Bleeding			= "_94009;_1822;_1079;9007;33745;1943;703;43104;89775",
-			Incapacitated		= "20066;1776;49203",
-			Feared				= "_5782;5246;_8122;10326;1513;_5484;_6789;87204;20511",
-			Slowed				= "_116;_120;13810;_5116;_8056;3600;_1715;_12323;45524;_18223;_15407;_3409;26679;_51693;_2974;_58180;61391;_50434;_55741;44614;_7302;_8034;_63529;_15571", -- by algus2
-			Stunned				= "_1833;_408;_91800;_5211;_56;9005;22570;19577;56626;44572;853;2812;85388;64044;20549;46968;30283;20253;65929;7922;12809;50519;91797;47481;12355;24394;83047;39796;93986;89766;54786",
-			--DontMelee			= "5277;871;Retaliation;Dispersion;Hand of Sacrifice;Hand of Protection;Divine Shield;Divine Protection;Ice Block;Icebound Fortitude;Cyclone;Banish",  --does somebody want to update these for me?
-			--MovementSlowed	= "Incapacitating Shout;Chains of Ice;Icy Clutch;Slow;Daze;Hamstring;Piercing Howl;Wing Clip;Ice Trap;Frostbolt;Cone of Cold;Blast Wave;Mind Flay;Crippling Poison;Deadly Throw;Frost Shock;Earthbind;Curse of Exhaustion",
-			Disoriented			= "_19503;31661;_2094;_51514;90337;88625",
-			Silenced			= "_47476;78675;34490;_55021;_15487;1330;_24259;_18498;_25046;81261;31935;18425;31117",
-			Disarmed			= "_51722;_676;64058;50541;91644",
-			Rooted				= "_339;_122;23694;58373;64695;_19185;33395;4167;54706;50245;90327;16979;83301;83302;45334;19306;55080;87195;63685;19387",
-			Shatterable			= "122;33395;_83302;_44572;_55080;_82691", -- by algus2
-			PhysicalDmgTaken	= "30070;58683;81326;50518;55749",
-			SpellDamageTaken	= "_1490;65142;_85547;60433;93068;34889;24844",
-			SpellCritTaken		= "17800;22959",
-			BleedDamageTaken	= "33878;33876;16511;_46857;50271;35290;57386",
-			ReducedAttackSpeed  = "6343;55095;58180;68055;8042;90314;50285",
-			ReducedCastingSpeed = "1714;5760;31589;73975;50274;50498",
-			ReducedArmor		= "_58567;91565;8647;_50498;35387",
-			ReducedHealing		= "12294;13218;56112;48301;82654;30213;54680",
-			ReducedPhysicalDone = "1160;99;26017;81130;702;24423",
-		},
-		buffs = {
-			ImmuneToStun		= "642;45438;34471;19574;48792;1022;33786;710;46924;19263;47585",
-			ImmuneToMagicCC		= "642;45438;34471;19574;33786;710;46924;19263;47585;31224;8178;23920;49039",
-			IncreasedStats		= "79061;79063;90363",
-			IncreasedDamage		= "75447;82930",
-			IncreasedCrit		= "24932;29801;51701;51470;24604;90309",
-			IncreasedAP			= "79102;53138;19506;30808",
-			IncreasedSPsix		= "_79058;_61316;_52109",
-			IncreasedSPten		= "77747;53646",
-			IncreasedPhysHaste  = "55610;53290;8515",
-			IncreasedSpellHaste = "2895;24907;49868",
-			BurstHaste			= "2825;32182;80353;90355",
-			BonusAgiStr			= "6673;8076;57330;93435",
-			BonusStamina		= "79105;469;6307;90364",
-			BonusArmor			= "465;8072",
-			BonusMana			= "_79058;_61316;54424",
-			ManaRegen			= "54424;79102;5677",
-			BurstManaRegen		= "29166;16191;64901",
-			PushbackResistance  = "19746;87717",
-			Resistances			= "19891;8185",
-			DefensiveBuffs		= "48707;30823;33206;47585;871;48792;498;22812;61336;5277;74001;47788;19263;6940;_12976;31850",
-			MiscHelpfulBuffs	= "89488;10060;23920;68992;31642;54428;2983;1850;29166;16689;53271;1044;31821;45182",
-			DamageBuffs			= "1719;12292;85730;50334;5217;3045;77801;34692;31884;51713;49016;12472",
-		},
-		casts = {
-			--prefixing with _ doesnt really matter here since casts only match by ID, but it may prevent confusion if people try and use these as buff/debuff equivs
-			Heals				= "50464;5185;8936;740;2050;2060;2061;32546;596;64843;635;82326;19750;331;77472;8004;1064;73920",
-			PvPSpells			= "33786;339;20484;1513;982;64901;_605;453;5782;5484;79268;10326;51514;118;12051",
-			Tier11Interrupts	= "_83703;_82752;_82636;_83070;_79710;_77896;_77569;_80734;_82411",
-			Tier12Interrupts	= "_97202;_100094",
-		},
-		dr = {
-		},
-		unlisted = {
-			-- enrages were extracted using the script in the /Scripts folder (source is db.mmo-champion.com)
-			Enraged				= "24689;18499;2687;29131;59465;39575;77238;52262;12292;54508;23257;66092;57733;58942;40076;8599;15061;15716;18501;19451;19812;22428;23128;23342;25503;26041;26051;28371;30485;31540;31915;32714;33958;34670;37605;37648;37975;38046;38166;38664;39031;41254;41447;42705;42745;43139;47399;48138;48142;48193;50420;51513;52470;54427;55285;56646;59697;59707;59828;60075;61369;63227;68541;70371;72143;72146;72147;72148;75998;76100;76862;78722;78943;80084;80467;86736;95436;95459;5229;12880;57514;57518;14201;57516;57519;14202;57520;14203;57521;14204;57522;51170;4146;76816;90872;82033;48702;52537;49029;67233;54781;56729;53361;79420;66759;67657;67658;67659;40601;51662;60177;63848;43292;90045;92946;52071;82759;60430;81772;48391;80158;101109;101110;54475;56769;63147;62071;52610;41364;81021;81022;81016;81017;34392;55462;50636;72203;49016;69052;43664;59694;91668;52461;54356;76691;81706;52309;29340;76487",
-			GCD			 		= "GCD", -- a hack a day.... (used so that sorting doesnt break, so that GCD appears at the top of the list)
-		},
-	}
+TMW.DS = {
+	Magic 	= "Interface\\Icons\\spell_fire_immolation",
+	Curse 	= "Interface\\Icons\\spell_shadow_curseofsargeras",
+	Disease = "Interface\\Icons\\spell_nature_nullifydisease",
+	Poison 	= "Interface\\Icons\\spell_nature_corrosivebreath",
+	Enraged = "Interface\\Icons\\ability_druid_challangingroar",
+}
 
-	if DRData then
-		local myCategories = {
-			ctrlstun   = "DR-ControlledStun",
-			scatters   = "DR-Scatter",
-			fear 	   = "DR-Fear",
-			rndstun	= "DR-RandomStun",
-			silence	= "DR-Silence",
-			banish 	   = "DR-Banish",
-			mc 		   = "DR-MindControl",
-			entrapment = "DR-Entrapment",
-			taunt 	   = "DR-Taunt",
-			disarm 	   = "DR-Disarm",
-			horror 	   = "DR-Horrify",
-			cyclone	= "DR-Cyclone",
-			rndroot	= "DR-RandomRoot",
-			disorient  = "DR-Disorient",
-			ctrlroot   = "DR-ControlledRoot",
-			dragons	= "DR-DragonsBreath",
-		}
-		if not GetSpellInfo(74347) then -- invalid
-			DRData.spells[74347] = nil
-		end
-		local dr = TMW.BE.dr
-		for spellID, category in pairs(DRData.spells) do
-			local k = myCategories[category] or TMW:Error("TMW: The DR category %q is undefined!", 0, category)
-			dr[k] = (dr[k] and (dr[k] .. ";" .. spellID)) or tostring(spellID)
-		end
-	end
-	TMW.OldBE = CopyTable(TMW.BE)
-	TMW.BEBackup = TMW.BE -- never ever ever change this value
-	for category, b in pairs(TMW.OldBE) do
-		for equiv, str in pairs(b) do
-			b[equiv] = gsub(str, "_", "") -- REMOVE UNDERSCORES FROM OLDBE
-			
-			-- turn all IDs prefixed with "_" into their localized name. Dont do this on every single one, but do use it for spells that do not have any other spells with the same name but different effects.
-			while strfind(str, "_") do
-				local id = strmatch(str, "_%d+") -- id includes the underscore, trimmed off below
-				if id then
-					local name = GetSpellInfo(strtrim(id, " _"))
-					if name then
-						TMW:lowerNames(name) -- this will insert the spell name into the table of spells for capitalization restoration.
-						str = gsub(str, id, name)
-					else  -- this should never ever ever happen except in new patches if spellIDs were wrong (experience talking)
-						local newID = strtrim(id, " _")
-						if clientVersion >= addonVersion then -- dont warn for old clients using newer versions
-							TMW:Error("Invalid spellID found: " .. newID .. "! Please report this on TMW's CurseForge page, especially if you are currently on the PTR!")
-						end
-						str = gsub(str, id, newID) -- still need to substitute it to prevent recusion
-					end
-				end
-			end
-			TMW.BE[category][equiv] = str
-		end
-	end
-end
+TMW.BE = {
+	--Most of these are thanks to Malazee @ US-Dalaran's chart: http://forums.wow-petopia.com/download/file.php?mode=view&id=4979 and spreadsheet https://spreadsheets.google.com/ccc?key=0Aox2ZHZE6e_SdHhTc0tZam05QVJDU0lONnp0ZVgzdkE&hl=en#gid=18
+	--Many more new spells/corrections were provided by Catok of Curse
+	
+	--NOTE: any id prefixed with "_" will have its localized name substituted in instead of being forced to match as an ID
+	debuffs = {
+		CrowdControl		= "_118;_339;2637;33786;_1499;_19503;_19386;20066;10326;_9484;_6770;_2094;_51514;76780;_710;_5782;_6358;_49203;_605;82691", -- originally by calico0 of Curse
+		Bleeding			= "_94009;_1822;_1079;9007;33745;1943;703;43104;89775",
+		Incapacitated		= "20066;1776;49203",
+		Feared				= "_5782;5246;_8122;10326;1513;_5484;_6789;87204;20511",
+		Slowed				= "_116;_120;13810;_5116;_8056;3600;_1715;_12323;45524;_18223;_15407;_3409;26679;_51693;_2974;_58180;61391;_50434;_55741;44614;_7302;_8034;_63529;_15571", -- by algus2
+		Stunned				= "_1833;_408;_91800;_5211;_56;9005;22570;19577;56626;44572;853;2812;85388;64044;20549;46968;30283;20253;65929;7922;12809;50519;91797;47481;12355;24394;83047;39796;93986;89766;54786",
+		--DontMelee			= "5277;871;Retaliation;Dispersion;Hand of Sacrifice;Hand of Protection;Divine Shield;Divine Protection;Ice Block;Icebound Fortitude;Cyclone;Banish",  --does somebody want to update these for me?
+		--MovementSlowed	= "Incapacitating Shout;Chains of Ice;Icy Clutch;Slow;Daze;Hamstring;Piercing Howl;Wing Clip;Ice Trap;Frostbolt;Cone of Cold;Blast Wave;Mind Flay;Crippling Poison;Deadly Throw;Frost Shock;Earthbind;Curse of Exhaustion",
+		Disoriented			= "_19503;31661;_2094;_51514;90337;88625",
+		Silenced			= "_47476;78675;34490;_55021;_15487;1330;_24259;_18498;_25046;81261;31935;18425;31117",
+		Disarmed			= "_51722;_676;64058;50541;91644",
+		Rooted				= "_339;_122;23694;58373;64695;_19185;33395;4167;54706;50245;90327;16979;83301;83302;45334;19306;55080;87195;63685;19387",
+		Shatterable			= "122;33395;_83302;_44572;_55080;_82691", -- by algus2
+		PhysicalDmgTaken	= "30070;58683;81326;50518;55749",
+		SpellDamageTaken	= "_1490;65142;_85547;60433;93068;34889;24844",
+		SpellCritTaken		= "17800;22959",
+		BleedDamageTaken	= "33878;33876;16511;_46857;50271;35290;57386",
+		ReducedAttackSpeed  = "6343;55095;58180;68055;8042;90314;50285",
+		ReducedCastingSpeed = "1714;5760;31589;73975;50274;50498",
+		ReducedArmor		= "_58567;91565;8647;_50498;35387",
+		ReducedHealing		= "12294;13218;56112;48301;82654;30213;54680",
+		ReducedPhysicalDone = "1160;99;26017;81130;702;24423",
+	},
+	buffs = {
+		ImmuneToStun		= "642;45438;34471;19574;48792;1022;33786;710;46924;19263;47585",
+		ImmuneToMagicCC		= "642;45438;34471;19574;33786;710;46924;19263;47585;31224;8178;23920;49039",
+		IncreasedStats		= "79061;79063;90363",
+		IncreasedDamage		= "75447;82930",
+		IncreasedCrit		= "24932;29801;51701;51470;24604;90309",
+		IncreasedAP			= "79102;53138;19506;30808",
+		IncreasedSPsix		= "_79058;_61316;_52109",
+		IncreasedSPten		= "77747;53646",
+		IncreasedPhysHaste  = "55610;53290;8515",
+		IncreasedSpellHaste = "2895;24907;49868",
+		BurstHaste			= "2825;32182;80353;90355",
+		BonusAgiStr			= "6673;8076;57330;93435",
+		BonusStamina		= "79105;469;6307;90364",
+		BonusArmor			= "465;8072",
+		BonusMana			= "_79058;_61316;54424",
+		ManaRegen			= "54424;79102;5677",
+		BurstManaRegen		= "29166;16191;64901",
+		PushbackResistance  = "19746;87717",
+		Resistances			= "19891;8185",
+		DefensiveBuffs		= "48707;30823;33206;47585;871;48792;498;22812;61336;5277;74001;47788;19263;6940;_12976;31850",
+		MiscHelpfulBuffs	= "89488;10060;23920;68992;31642;54428;2983;1850;29166;16689;53271;1044;31821;45182",
+		DamageBuffs			= "1719;12292;85730;50334;5217;3045;77801;34692;31884;51713;49016;12472",
+	},
+	casts = {
+		--prefixing with _ doesnt really matter here since casts only match by ID, but it may prevent confusion if people try and use these as buff/debuff equivs
+		Heals				= "50464;5185;8936;740;2050;2060;2061;32546;596;64843;635;82326;19750;331;77472;8004;1064;73920",
+		PvPSpells			= "33786;339;20484;1513;982;64901;_605;453;5782;5484;79268;10326;51514;118;12051",
+		Tier11Interrupts	= "_83703;_82752;_82636;_83070;_79710;_77896;_77569;_80734;_82411",
+		Tier12Interrupts	= "_97202;_100094",
+	},
+	dr = {
+	},
+	unlisted = {
+		-- enrages were extracted using the script in the /Scripts folder (source is db.mmo-champion.com)
+		Enraged				= "24689;18499;2687;29131;59465;39575;77238;52262;12292;54508;23257;66092;57733;58942;40076;8599;15061;15716;18501;19451;19812;22428;23128;23342;25503;26041;26051;28371;30485;31540;31915;32714;33958;34670;37605;37648;37975;38046;38166;38664;39031;41254;41447;42705;42745;43139;47399;48138;48142;48193;50420;51513;52470;54427;55285;56646;59697;59707;59828;60075;61369;63227;68541;70371;72143;72146;72147;72148;75998;76100;76862;78722;78943;80084;80467;86736;95436;95459;5229;12880;57514;57518;14201;57516;57519;14202;57520;14203;57521;14204;57522;51170;4146;76816;90872;82033;48702;52537;49029;67233;54781;56729;53361;79420;66759;67657;67658;67659;40601;51662;60177;63848;43292;90045;92946;52071;82759;60430;81772;48391;80158;101109;101110;54475;56769;63147;62071;52610;41364;81021;81022;81016;81017;34392;55462;50636;72203;49016;69052;43664;59694;91668;52461;54356;76691;81706;52309;29340;76487",
+		GCD			 		= "GCD", -- a hack a day.... (used so that sorting doesnt break, so that GCD appears at the top of the list)
+	},
+}
+
+TMW.EventList = {
+	{
+		name = "OnShow",
+		text = L["SOUND_EVENT_ONSHOW"],
+		desc = L["SOUND_EVENT_ONSHOW_DESC"],
+	},
+	{
+		name = "OnHide",
+		text = L["SOUND_EVENT_ONHIDE"],
+		desc = L["SOUND_EVENT_ONHIDE_DESC"],
+		settings = {
+			OnlyShown = "FORCEDISABLED",
+		},
+	},
+	{
+		name = "OnAlphaInc",
+		text = L["SOUND_EVENT_ONALPHAINC"],
+		desc = L["SOUND_EVENT_ONALPHAINC_DESC"],
+		settings = {
+			Operator = true,
+			Value = true,
+			CndtJustPassed = true,
+			PassingCndt = true,
+		},
+		valueName = L["ALPHA"],
+		valueSuffix = "%",
+	},
+	{
+		name = "OnAlphaDec",
+		text = L["SOUND_EVENT_ONALPHADEC"],
+		desc = L["SOUND_EVENT_ONALPHADEC_DESC"],
+		settings = {
+			Operator = true,
+			Value = true,
+			CndtJustPassed = true,
+			PassingCndt = true,
+		},
+		valueName = L["ALPHA"],
+		valueSuffix = "%",
+	},
+	{
+		name = "OnStart",
+		text = L["SOUND_EVENT_ONSTART"],
+		desc = L["SOUND_EVENT_ONSTART_DESC"],
+	},
+	{
+		name = "OnFinish",
+		text = L["SOUND_EVENT_ONFINISH"],
+		desc = L["SOUND_EVENT_ONFINISH_DESC"],
+	},
+	{
+		name = "OnSpell",
+		text = L["SOUND_EVENT_ONSPELL"],
+		desc = L["SOUND_EVENT_ONSPELL_DESC"],
+	},
+	{
+		name = "OnUnit",
+		text = L["SOUND_EVENT_ONUNIT"],
+		desc = L["SOUND_EVENT_ONUNIT_DESC"],
+	},
+	{
+		name = "OnStack",
+		text = L["SOUND_EVENT_ONSTACK"],
+		desc = L["SOUND_EVENT_ONSTACK_DESC"],
+		settings = {
+			Operator = true,
+			Value = true,
+			CndtJustPassed = true,
+			PassingCndt = true,
+		},
+		valueName = L["STACKS"]
+	},
+	{
+		name = "OnDuration",
+		text = L["SOUND_EVENT_ONDURATION"],
+		desc = L["SOUND_EVENT_ONDURATION_DESC"],
+		settings = {
+			Operator = true,
+			Value = true,
+			CndtJustPassed = "FORCE",
+			PassingCndt = "FORCE",
+		},
+		blacklistedOperators = {
+			["~="] = true,
+			["=="] = true,
+		},
+		valueName = L["DURATION"]
+	},
+	{
+		name = "OnCLEUEvent",
+		text = L["SOUND_EVENT_ONCLEU"],
+		desc = L["SOUND_EVENT_ONCLEU_DESC"],
+	},
+}
 
 TMW.ChannelList = {
 	{
@@ -1024,7 +1059,7 @@ TMW.ChannelList = {
 		},
 		dropdown = function()
 			if not SCT then return end
-			for id, name in pairs(TMW.ChannelLookup.SCT.frames) do
+			for id, name in pairs(TMW.ChannelList.SCT.frames) do
 				local info = UIDropDownMenu_CreateInfo()
 				info.func = TMW.ANN.LocDropdownFunc
 				info.text = name
@@ -1036,7 +1071,7 @@ TMW.ChannelList = {
 		end,
 		ddtext = function(value)
 			if not SCT then return end
-			return TMW.ChannelLookup.SCT.frames[value]
+			return TMW.ChannelList.SCT.frames[value]
 		end,
 	},
 	{
@@ -1093,102 +1128,315 @@ TMW.ChannelList = {
 		end,
 	},
 }
-TMW.ChannelLookup = {}
 for k, v in pairs(TMW.ChannelList) do
-	TMW.ChannelLookup[v.channel] = v
-end local ChannelLookup = TMW.ChannelLookup
+	TMW.ChannelList[v.channel] = v
+end local ChannelList = TMW.ChannelList
 
-TMW.EventList = {
+TMW.AnimationList = {
 	{
-		name = "OnShow",
-		text = L["SOUND_EVENT_ONSHOW"],
-		desc = L["SOUND_EVENT_ONSHOW_DESC"],
+		text = NONE,
+		animation = "",
 	},
 	{
-		name = "OnHide",
-		text = L["SOUND_EVENT_ONHIDE"],
-		desc = L["SOUND_EVENT_ONHIDE_DESC"],
+		text = L["ANIM_SCREENSHAKE"],
+		desc = L["ANIM_SCREENSHAKE_DESC"],
+		animation = "SCREENSHAKE",
+		Duration = true,
+		Magnitude = true,
+		
+		Play = function(icon, data)
+			if not WorldFrame:IsProtected() or not InCombatLockdown() then
+				local Animation = data.Animation
+				
+				local table = {
+					data = data,
+					Start = TMW.time,
+					Duration = data.Duration,
+					
+					Animation = Animation,
+					Magnitude = data.Magnitude,
+				}
+				
+				-- manual version of :StartAnimation
+				Animations[WorldFrame][Animation] = table
+				TMW.AnimationList[Animation].OnStart(WorldFrame, table)
+			end
+		end,
+		
+		OnUpdate = function(WorldFrame, table)
+			local remaining = table.Duration - (TMW.time - table.Start)
+			
+			if remaining < 0 then
+				-- manual version of :StopAnimation	
+				local Animation = table.Animation
+				
+				Animations[WorldFrame][Animation] = nil
+				TMW.AnimationList[Animation].OnExpire(WorldFrame, table)
+			else
+				local Amt = (table.Magnitude or 10) / (1 + 10*(300^(-(remaining))))
+				local moveX = random(-Amt, Amt) 
+				local moveY = random(-Amt, Amt) 
+				
+				WorldFrame:ClearAllPoints()
+				for _, v in pairs(TMW.WorldFramePoints) do
+					WorldFrame:SetPoint(v[1], v[2], v[3], v[4] + moveX, v[5] + moveY)
+				end
+			end
+		end,
+		OnStart = function(WorldFrame, table)
+			if not TMW.WorldFramePoints then
+				TMW.WorldFramePoints = {}
+				for i = 1, WorldFrame:GetNumPoints() do
+					TMW.WorldFramePoints[i] = { WorldFrame:GetPoint(i) }
+				end
+			end
+		end,
+		OnExpire = function(WorldFrame, table)
+			WorldFrame:ClearAllPoints()
+			for _, v in pairs(TMW.WorldFramePoints) do
+				WorldFrame:SetPoint(v[1], v[2], v[3], v[4], v[5])
+			end
+		end,
 	},
 	{
-		name = "OnAlphaInc",
-		text = L["SOUND_EVENT_ONALPHAINC"],
-		desc = L["SOUND_EVENT_ONALPHAINC_DESC"],
-		settings = {
-			Operator = true,
-			Value = true,
-			CndtJustPassed = true,
-			PassingCndt = true,
-		},
-		valueName = L["ALPHA"],
-		valueSuffix = "%",
+		text = L["ANIM_SCREENFLASH"],
+		desc = L["ANIM_SCREENFLASH_DESC"],
+		animation = "SCREENFLASH",
+		Duration = true,
+		Period = true,
+		Color = true,
+		Fade = true,
+		
+		Play = function(icon, data)
+			local Animation = data.Animation
+			local AnimationData = TMW.AnimationList[Animation]
+			
+			local table = {
+				data = data,
+				Start = TMW.time,
+				Duration = data.Duration,
+				
+				Period = data.Period,
+				FadeAlpha = data.Fade,
+				Alpha = data.a_anim,
+				r = data.r_anim,
+				g = data.g_anim,
+				b = data.b_anim,
+				
+				Animation = Animation
+			}
+			
+		
+			-- inherit from ICONFLASH
+			if not AnimationData.OnStart then
+				local ICONFLASH = TMW.AnimationList.ICONFLASH
+				AnimationData.OnStart = ICONFLASH.OnStart
+				AnimationData.OnExpire = ICONFLASH.OnExpire
+			end
+			
+			-- manual version of :StartAnimation
+			Animations[UIParent][Animation] = table
+			TMW.AnimationList[Animation].OnStart(UIParent, table)
+		end,
+		
+		OnUpdate = function(UIParent, table)
+			local FlashPeriod = table.Period
+			local flasher = UIParent.flasher
+			
+			local remaining = table.Duration - (TMW.time - table.Start)
+			local fadingIn = floor(remaining/FlashPeriod) % 2 == 0
+
+			if table.FadeAlpha then
+				local remainingFlash = remaining % FlashPeriod
+				if fadingIn then
+					flasher:SetAlpha(table.Alpha*((FlashPeriod-remainingFlash)/FlashPeriod))
+				else
+					flasher:SetAlpha(table.Alpha*(remainingFlash/FlashPeriod))
+				end
+			else
+				flasher:SetAlpha(fadingIn and table.Alpha or 0)
+			end
+			
+			if remaining < 0 and fadingIn then
+				-- manual version of :StopAnimation	
+				local Animation = table.Animation
+				
+				Animations[UIParent][Animation] = nil
+				TMW.AnimationList[Animation].OnExpire(UIParent, table)
+			end
+		end,
 	},
 	{
-		name = "OnAlphaDec",
-		text = L["SOUND_EVENT_ONALPHADEC"],
-		desc = L["SOUND_EVENT_ONALPHADEC_DESC"],
-		settings = {
-			Operator = true,
-			Value = true,
-			CndtJustPassed = true,
-			PassingCndt = true,
-		},
-		valueName = L["ALPHA"],
-		valueSuffix = "%",
+		text = L["ANIM_ICONSHAKE"],
+		desc = L["ANIM_ICONSHAKE_DESC"],
+		animation = "ICONSHAKE",
+		Duration = true,
+		Magnitude = true,
+		
+		Play = function(icon, data)
+			icon:StartAnimation{
+				data = data,
+				Start = TMW.time,
+				Duration = data.Duration,
+				
+				Animation = Animation,
+				Magnitude = data.Magnitude,
+			}
+		end,
+		
+		OnUpdate = function(icon, table)
+			local remaining = table.Duration - (TMW.time - table.Start)
+			
+			local Amt = (table.Magnitude or 10) / (1 + 10*(300^(-(remaining))))
+			local moveX = random(-Amt, Amt) 
+			local moveY = random(-Amt, Amt) 
+			
+			icon:SetPoint("TOPLEFT", icon.x + moveX, icon.y + moveY)
+			
+			-- generic expiration
+			if remaining < 0 then
+				icon:StopAnimation(table)
+			end
+		end,
+		OnExpire = function(icon, table)
+			icon:SetPoint("TOPLEFT", icon.x, icon.y)
+		end,
 	},
 	{
-		name = "OnStart",
-		text = L["SOUND_EVENT_ONSTART"],
-		desc = L["SOUND_EVENT_ONSTART_DESC"],
+		text = L["ANIM_ICONFLASH"],
+		desc = L["ANIM_ICONFLASH_DESC"],
+		animation = "ICONFLASH",
+		Duration = true,
+		Period = true,
+		Color = true,
+		Fade = true,
+		
+		Play = function(icon, data)
+			icon:StartAnimation{
+				data = data,
+				Start = TMW.time,
+				Duration = data.Duration,
+				
+				Period = data.Period,
+				FadeAlpha = data.Fade,
+				Alpha = data.a_anim,
+				r = data.r_anim,
+				g = data.g_anim,
+				b = data.b_anim,
+			}
+		end,
+		
+		OnUpdate = function(icon, table)
+			local FlashPeriod = table.Period
+			local flasher = icon.flasher 
+			
+			local remaining = table.Duration - (TMW.time - table.Start)
+			local fadingIn = floor(remaining/FlashPeriod) % 2 == 0
+
+			if table.FadeAlpha then
+				local remainingFlash = remaining % FlashPeriod
+				if fadingIn then
+					flasher:SetAlpha(table.Alpha*((FlashPeriod-remainingFlash)/FlashPeriod))
+				else
+					flasher:SetAlpha(table.Alpha*(remainingFlash/FlashPeriod))
+				end
+			else
+				flasher:SetAlpha(fadingIn and table.Alpha or 0)
+			end
+			
+			-- (mostly) generic expiration -- we just finished the last flash, so dont do any more
+			if remaining < 0 and fadingIn then
+				icon:StopAnimation(table)
+			end
+		end,
+		OnStart = function(icon, table)
+			local flasher 
+			if icon.flasher then
+				flasher = icon.flasher
+			else
+				flasher = TMW:GetFlasher(icon)
+				icon.flasher = flasher
+			end
+			
+			flasher:Show()
+			flasher:SetTexture(table.r, table.g, table.b, 1)
+		end,
+		OnExpire = function(icon, table)
+			icon.flasher:Hide()
+		end,
 	},
 	{
-		name = "OnFinish",
-		text = L["SOUND_EVENT_ONFINISH"],
-		desc = L["SOUND_EVENT_ONFINISH_DESC"],
+		text = L["ANIM_ICONFADE"],
+		desc = L["ANIM_ICONFADE_DESC"],
+		animation = "ICONFADE",
+		Duration = true,
+		
+		Play = function(icon, data)
+			if not icon.FakeHidden then
+				icon:StartAnimation{
+					data = data,
+					Start = TMW.time,
+					Duration = data.Duration,
+					
+					FadeDuration = data.Duration,
+				}
+			end
+		end,
+		
+		OnUpdate = function(icon, table)
+			local remaining = table.Duration - (TMW.time - table.Start)
+			
+			-- generic expiration
+			if remaining < 0 then
+				icon:StopAnimation(table)
+			else				
+				local pct = remaining / table.FadeDuration
+				local inv = 1-pct
+		
+				icon:SetAlpha((icon.__oldAlpha * pct) + (icon.__alpha * inv))
+			end
+		end,
+		OnStart = function(icon, table)
+			icon.IsFading = true
+		end,
+		OnExpire = function(icon, table)
+			icon:SetAlpha(icon.__alpha)
+			icon.IsFading = nil
+		end,
+		
+		
 	},
 	{
-		name = "OnSpell",
-		text = L["SOUND_EVENT_ONSPELL"],
-		desc = L["SOUND_EVENT_ONSPELL_DESC"],
-	},
-	{
-		name = "OnUnit",
-		text = L["SOUND_EVENT_ONUNIT"],
-		desc = L["SOUND_EVENT_ONUNIT_DESC"],
-	},
-	{
-		name = "OnStack",
-		text = L["SOUND_EVENT_ONSTACK"],
-		desc = L["SOUND_EVENT_ONSTACK_DESC"],
-		settings = {
-			Operator = true,
-			Value = true,
-			CndtJustPassed = true,
-			PassingCndt = true,
-		},
-		valueName = L["STACKS"]
-	},
-	{
-		name = "OnDuration",
-		text = L["SOUND_EVENT_ONDURATION"],
-		desc = L["SOUND_EVENT_ONDURATION_DESC"],
-		settings = {
-			Operator = true,
-			Value = true,
-			CndtJustPassed = "FORCE",
-			PassingCndt = "FORCE",
-		},
-		blacklistedOperators = {
-			["~="] = true,
-			["=="] = true,
-		},
-		valueName = L["DURATION"]
-	},
-	{
-		name = "OnCLEUEvent",
-		text = L["SOUND_EVENT_ONCLEU"],
-		desc = L["SOUND_EVENT_ONCLEU_DESC"],
+		text = L["ANIM_ACTVTNGLOW"],
+		desc = L["ANIM_ACTVTNGLOW_DESC"],
+		animation = "ACTVTNGLOW",
+		Duration = true,
+		
+		Play = function(icon, data)
+			icon:StartAnimation{
+				data = data,
+				Start = TMW.time,
+				Duration = data.Duration,
+			}
+		end,
+		
+		OnUpdate = function(icon, table)
+			if table.Duration - (TMW.time - table.Start) < 0 then
+				icon:StopAnimation(table)
+			end
+		end,
+		OnStart = function(icon, table)
+			ActionButton_ShowOverlayGlow(icon) -- dont upvalue, can be hooked (masque does, maybe others)
+		end,
+		OnExpire = function(icon, table)
+			ActionButton_HideOverlayGlow(icon) -- dont upvalue, can be hooked (masque doesn't, but maybe others)
+		end,
 	},
 }
+for k, v in pairs(TMW.AnimationList) do
+	TMW.AnimationList[v.animation] = v
+end local AnimationList = TMW.AnimationList
+
 
 do -- STANCES
 	TMW.Stances = {
@@ -1258,10 +1506,12 @@ do -- hook LMB
 	end
 end
 
+
+
+
 -- --------------------------
 -- EXECUTIVE FUNCTIONS, ETC
 -- --------------------------
-
 
 function TMW:OnInitialize()
 	if not rawget(Types, "multistate") then
@@ -1603,178 +1853,12 @@ function TMW:OnUpdate(elapsed)					-- THE MAGICAL ENGINE OF DOING EVERYTHING
 	
 	for icon, animations in next, Animations do
 		for key, animationTable in next, animations do
-			local Animation = animationTable.Animation
-			
-			if Animation == "ICONSHAKE" then
-				local remaining = animationTable.Duration - (time - animationTable.Start)
-				
-				local Amt = (animationTable.Magnitude or 10) / (1 + 10*(300^(-(remaining))))
-				local moveX = random(-Amt, Amt) 
-				local moveY = random(-Amt, Amt) 
-				
-				icon:SetPoint("TOPLEFT", icon.x + moveX, icon.y + moveY)
-				
-				-- generic expiration
-				if remaining < 0 then
-					animations[key] = nil
-					local OnExpire = TMW.AnimationList[Animation].OnExpire
-					if OnExpire then
-						OnExpire(icon, animationTable)
-					end
-				end
-			
-			elseif Animation == "ACTVTNGLOW" then
-				local remaining = animationTable.Duration - (time - animationTable.Start)
-				
-				-- generic expiration
-				if remaining < 0 then
-					animations[key] = nil
-					local OnExpire = TMW.AnimationList[Animation].OnExpire
-					if OnExpire then
-						OnExpire(icon, animationTable)
-					end
-				end
-			elseif Animation == "ICONFLASH" then
-				--[[
-			icon:StartAnimation{
-				data = data,
-				Start = TMW.time,
-				Duration = Duration,
-				
-				Period = data.Period,
-				Time = time,
-				FadeAlpha = data.Fade,
-				fadingIn = true,
-				Alpha = data.a_anim,
-				r = data.r_anim,
-				g = data.g_anim,
-				b = data.b_anim,
-			}]]
-				
-				local FlashPeriod = animationTable.Period
-				local remainingFlash = FlashPeriod - (time - animationTable.Time)
-				
-				local flasher = icon.flasher 
-				
-
-				if animationTable.FadeAlpha then
-					if animationTable.fadingIn then
-						flasher:SetAlpha(animationTable.Alpha*(FlashPeriod-remainingFlash/FlashPeriod))
-					else
-						flasher:SetAlpha(animationTable.Alpha*(remainingFlash/FlashPeriod))
-					end
-				end
-				
-			--	print(remainingFlash)
-				if remainingFlash <= 0 then
-					local overtime = -remainingFlash
-					if overtime >= FlashPeriod then
-						overtime = 0
-					end
-					animationTable.Time = time + overtime
-					
-					-- (mostly) generic expiration -- we just finished the last flash, so dont do any more
-					local remaining = animationTable.Duration - (time - animationTable.Start)
-					if remaining < 0 and not animationTable.fadingIn then
-						animations[key] = nil
-						local OnExpire = TMW.AnimationList[Animation].OnExpire
-						if OnExpire then
-							OnExpire(icon, animationTable)
-						end
-					else
-						animationTable.fadingIn = not animationTable.fadingIn
-						if not animationTable.FadeAlpha then
-							flasher:SetAlpha(animationTable.fadingIn and animationTable.Alpha or 0)
-						end
-					end
-				end
-			elseif Animation == "ICONFADE" then
-				local remaining = animationTable.Duration - (time - animationTable.Start)
-				
-				-- generic expiration
-				if remaining < 0 then
-					animations[key] = nil
-					local OnExpire = TMW.AnimationList[Animation].OnExpire
-					if OnExpire then
-						OnExpire(icon, animationTable)
-					end
-				else				
-					local FadeDuration = animationTable.FadeDuration
-					local pct = remaining / FadeDuration
-					local inv = 1-pct
-			
-					--icon:SetAlpha((animationTable.StartAlpha * pct) + (animationTable.EndAlpha * inv))
-					icon:SetAlpha((icon.__oldAlpha * pct) + (icon.__alpha * inv), animationTable)
-				end
-			end
+			-- its the magical modular tour, and its coming to take you awayyy......
+			AnimationList[animationTable.Animation].OnUpdate(icon, animationTable)
 		end
-	end
-	
-	if TMW.ScreenShakeDuration then
-		local Duration = TMW.ScreenShakeDuration
-		Duration = Duration - elapsed
-		if Duration < 0 then
-			Duration = nil
-		end
-		TMW.ScreenShakeDuration = Duration
-		
-		local Amt = (TMW.ScreenShakeMagnitude or 10) / (1 + 10*(300^(-(Duration or 0))))
-		local moveX = random(-Amt, Amt) 
-		local moveY = random(-Amt, Amt) 
-			
-		if not TMW.WorldFramePoints then
-			TMW.WorldFramePoints = {}
-			for i = 1, WorldFrame:GetNumPoints() do
-				TMW.WorldFramePoints[i] = { WorldFrame:GetPoint(i) }
-			end
-		end
-		
-		WorldFrame:ClearAllPoints()
-		for _, v in pairs(TMW.WorldFramePoints) do
-			WorldFrame:SetPoint(v[1], v[2], v[3], v[4] + moveX, v[5] + moveY)
-		end
-	end
-	
-	if TMW.ScreenFlasher and TMW.ScreenFlasher.Duration then
-		local Duration = TMW.ScreenFlasher.Duration
-		Duration = Duration - elapsed
-		
-		local FlashPeriod = TMW.ScreenFlasher.FlashPeriod
-		local FlashTime = TMW.ScreenFlasher.FlashTime
-		FlashTime = FlashTime - elapsed
-
-		if TMW.ScreenFlasher.FadeAlpha then
-			if TMW.ScreenFlasher.fadingIn then
-				TMW.ScreenFlasher:SetAlpha(TMW.ScreenFlasher.FlashAlpha*(FlashPeriod-FlashTime/FlashPeriod))
-			else
-				TMW.ScreenFlasher:SetAlpha(TMW.ScreenFlasher.FlashAlpha*(FlashTime/FlashPeriod))
-			end
-		end
-			
-		if FlashTime <= 0 then
-			local overtime = -FlashTime
-			if overtime >= FlashPeriod then
-				overtime = 0
-			end
-			FlashTime = FlashPeriod - overtime
-			
-			if Duration < 0 and not TMW.ScreenFlasher.fadingIn then -- we just finished the last flash, so dont do any more
-				Duration = nil
-				FlashTime = nil
-				TMW.ScreenFlasher.FlashPeriod = nil
-				TMW.ScreenFlasher:Hide()
-			end
-				
-			TMW.ScreenFlasher.fadingIn = not TMW.ScreenFlasher.fadingIn
-			if not TMW.ScreenFlasher.FadeAlpha then
-				TMW.ScreenFlasher:SetAlpha(TMW.ScreenFlasher.fadingIn and TMW.ScreenFlasher.FlashAlpha or 0)
-			end
-		end
-		
-		TMW.ScreenFlasher.Duration = Duration
-		TMW.ScreenFlasher.FlashTime = FlashTime
 	end
 end
+
 
 function TMW:Update()
 	if not (TMW.EnteredWorld and TMW.VarsLoaded) then return end
@@ -1850,6 +1934,15 @@ function TMW:GetUpgradeTable()			-- upgrade functions
 	if TMW.UpgradeTable then return TMW.UpgradeTable end
 	local t = {
 		
+		[48010] = {
+			icon = function(ics)
+				-- OnlyShown was disabled for OnHide (not togglable anymore), so make sure that icons dont get stuck with it enabled
+				local OnHide = rawget(ics.Events, "OnHide")
+				if OnHide then
+					OnHide.OnlyShown = false
+				end
+			end,
+		},
 		[47321] = {
 			icon = function(ics)
 				ics.Events["**"] = nil -- wtf?
@@ -2771,7 +2864,7 @@ end
 function TMW:DoValidityCheck()
 	for str in ipairs(TMW.ValidityCheckQueue) do
 		local icon, groupID, iconID, g, i = strsplit("^", str)
-		if not TMW:IsIconValid(icon) then
+		if not TMW:Icon_IsValid(icon) then
 			if iconID ~= "nil" then
 				TMW.Warn(format(L["CONDITIONORMETA_CHECKINGINVALID"], groupID, iconID, g, i))
 			else
@@ -2918,38 +3011,143 @@ function TMW:ACTIVE_TALENT_GROUP_CHANGED()
 	TMW:ScheduleUpdate(1)
 end
 
-function TMW:ValidateIcon(icon)
-	-- adds the icon to the list of icons that can be checked in metas/conditions
-	if type(icon) == "string" then
-		icon = _G[icon]
+
+function TMW:ProcessEquivalencies()
+	for dispeltype, icon in pairs(TMW.DS) do
+	--	SpellTextures[dispeltype] = icon
+		SpellTextures[strlower(dispeltype)] = icon
 	end
 	
-	if not TMW.IconsLookup[icon] then
-		tinsert(TMW.Icons, icon:GetName())
-		TMW.IconsLookup[icon] = 1
+	if DRData then
+		local myCategories = {
+			ctrlstun   = "DR-ControlledStun",
+			scatters   = "DR-Scatter",
+			fear 	   = "DR-Fear",
+			rndstun	= "DR-RandomStun",
+			silence	= "DR-Silence",
+			banish 	   = "DR-Banish",
+			mc 		   = "DR-MindControl",
+			entrapment = "DR-Entrapment",
+			taunt 	   = "DR-Taunt",
+			disarm 	   = "DR-Disarm",
+			horror 	   = "DR-Horrify",
+			cyclone	= "DR-Cyclone",
+			rndroot	= "DR-RandomRoot",
+			disorient  = "DR-Disorient",
+			ctrlroot   = "DR-ControlledRoot",
+			dragons	= "DR-DragonsBreath",
+		}
+		if not GetSpellInfo(74347) then -- invalid
+			DRData.spells[74347] = nil
+		end
+		local dr = TMW.BE.dr
+		for spellID, category in pairs(DRData.spells) do
+			local k = myCategories[category] or TMW:Error("TMW: The DR category %q is undefined!", 0, category)
+			dr[k] = (dr[k] and (dr[k] .. ";" .. spellID)) or tostring(spellID)
+		end
 	end
-end
-function TMW:InvalidateIcon(icon)
-	-- removes the icon from the list of icons that can be checked in metas/conditions
-	if type(icon) == "string" then
-		icon = _G[icon]
+	TMW.OldBE = CopyTable(TMW.BE)
+	TMW.BEBackup = TMW.BE -- never ever ever change this value
+	for category, b in pairs(TMW.OldBE) do
+		for equiv, str in pairs(b) do
+			b[equiv] = gsub(str, "_", "") -- REMOVE UNDERSCORES FROM OLDBE
+			
+			-- turn all IDs prefixed with "_" into their localized name. Dont do this on every single one, but do use it for spells that do not have any other spells with the same name but different effects.
+			while strfind(str, "_") do
+				local id = strmatch(str, "_%d+") -- id includes the underscore, trimmed off below
+				if id then
+					local name = GetSpellInfo(strtrim(id, " _"))
+					if name then
+						TMW:lowerNames(name) -- this will insert the spell name into the table of spells for capitalization restoration.
+						str = gsub(str, id, name)
+					else  -- this should never ever ever happen except in new patches if spellIDs were wrong (experience talking)
+						local newID = strtrim(id, " _")
+						if clientVersion >= addonVersion then -- dont warn for old clients using newer versions
+							TMW:Error("Invalid spellID found: " .. newID .. "! Please report this on TMW's CurseForge page, especially if you are currently on the PTR!")
+						end
+						str = gsub(str, id, newID) -- still need to substitute it to prevent recusion
+					end
+				end
+			end
+			TMW.BE[category][equiv] = str
+		end
 	end
-	
-	if TMW.IconsLookup[icon] then
-		local k = tContains(TMW.Icons, icon:GetName())
-		if k then tremove(TMW.Icons, k) end
-		TMW.IconsLookup[icon] = nil
-	end
-end
-function TMW:IsIconValid(icon)
-	-- checks if the icon is in the list of icons that can be checked in metas/conditions
-	if type(icon) == "string" then
-		icon = _G[icon]
-	end
-	return TMW.IconsLookup[icon]
 end
 
 
+
+function TMW:InjectDataIntoString(Text, icon, doBlizz)
+	if not Text then return Text end
+	
+	--CURRENTLY USED: t, f, m, p, u, s, d, k, e, o, x
+	
+	if doBlizz then
+		if strfind(Text, "%%[Tt]") then
+			Text = gsub(Text, "%%[Tt]", UnitName("target") or TARGET_TOKEN_NOT_FOUND)
+		end
+		if strfind(Text, "%%[Ff]") then
+			Text = gsub(Text, "%%[Ff]", UnitName("focus") or FOCUS_TOKEN_NOT_FOUND)
+		end
+	end
+	
+	if strfind(Text, "%%[Mm]") then
+		Text = gsub(Text, "%%[Mm]", UnitName("mouseover") or L["MOUSEOVER_TOKEN_NOT_FOUND"])
+	end
+	
+	if icon then
+	
+		if icon.Type == "cleu" then
+			if strfind(Text, "%%[Oo]") then
+				Text = gsub(Text, "%%[Oo]", UnitName(icon.cleu_sourceUnit or "") or icon.cleu_sourceUnit or "?")
+			end
+			if strfind(Text, "%%[Ee]") then
+				Text = gsub(Text, "%%[Ee]", UnitName(icon.cleu_destUnit or "") or icon.cleu_destUnit or "?")
+			end
+			if strfind(Text, "%%[Xx]") then
+				local name, checkcase = icon.typeData:GetNameForDisplay(icon, icon.cleu_extraSpell)
+				name = name or "?"
+				if checkcase then
+					name = TMW:RestoreCase(name)
+				end
+				Text = gsub(Text, "%%[Xx]", name)
+			end
+		end
+		
+		if strfind(Text, "%%[Pp]") then
+			Text = gsub(Text, "%%[Pp]", icon.__lastUnitName or UnitName(icon.__lastUnitChecked or "") or "?")
+		end
+		if strfind(Text, "%%[Uu]") then
+			Text = gsub(Text, "%%[Uu]", icon.__unitName or UnitName(icon.__unitChecked or "") or icon.__unitChecked or "?")
+		end
+		
+		if strfind(Text, "%%[Ss]") then
+			local name, checkcase = icon.typeData:GetNameForDisplay(icon, icon.__spellChecked)
+			name = name or "?"
+			if checkcase then
+				name = TMW:RestoreCase(name)
+			end
+			Text = gsub(Text, "%%[Ss]", name)
+		end
+		if strfind(Text, "%%[Dd]") then
+			local duration = icon.__duration - (TMW.time - icon.__start)
+			if duration < 0 then
+				duration = 0
+			end
+			Text = gsub(Text, "%%[Dd]", TMW:FormatSeconds(duration, duration == 0 or duration > 10, true))
+		end
+		if strfind(Text, "%%[Kk]") then
+			local count = icon.__countText or icon.__count
+			if count then
+				count = gsub(count, "%%", "%%%%")
+			else
+				count = ""
+			end
+			Text = gsub(Text, "%%[Kk]", count)
+		end
+	end
+	
+	return Text
+end
 
 -- -----------
 -- GROUPS
@@ -3102,7 +3300,7 @@ function TMW:Group_Update(groupID)
 		for row = 1, group.Rows do
 			for column = 1, group.Columns do
 				local iconID = (row-1)*group.Columns + column
-				local icon = group[iconID] or TMW:CreateIcon(group, groupID, iconID)
+				local icon = group[iconID] or TMW:Icon_Create(group, groupID, iconID)
 
 				icon:Show()
 				icon:SetFrameLevel(group:GetFrameLevel() + 1)
@@ -3158,99 +3356,6 @@ end
 -- ------------------
 -- ICONS
 -- ------------------
-TMW.AnimationList = {
-	{
-		text = NONE,
-		animation = "",
-	},
-	{
-		text = L["ANIM_SCREENSHAKE"],
-		desc = L["ANIM_SCREENSHAKE_DESC"],
-		animation = "SCREENSHAKE",
-		Duration = true,
-		Magnitude = true,
-	},
-	{
-		text = L["ANIM_SCREENFLASH"],
-		desc = L["ANIM_SCREENFLASH_DESC"],
-		animation = "SCREENFLASH",
-		Duration = true,
-		Period = true,
-		Color = true,
-		Fade = true,
-	},
-	{
-		text = L["ANIM_ICONSHAKE"],
-		desc = L["ANIM_ICONSHAKE_DESC"],
-		animation = "ICONSHAKE",
-		Duration = true,
-		Magnitude = true,
-		
-		OnExpire = function(icon, table)
-			icon:SetPoint("TOPLEFT", icon.x, icon.y)
-		end,
-	},
-	{
-		text = L["ANIM_ICONFLASH"],
-		desc = L["ANIM_ICONFLASH_DESC"],
-		animation = "ICONFLASH",
-		Duration = true,
-		Period = true,
-		Color = true,
-		Fade = true,
-		
-		OnStart = function(icon, table)
-			
-			local flasher 
-			if icon.flasher then
-				flasher = icon.flasher
-			else
-				flasher = TMW:GetFlasher(icon.group)
-				icon.flasher = flasher
-			end
-			
-			flasher:Show()
-			flasher:SetTexture(table.r, table.g, table.b, 1)
-		end,
-		OnExpire = function(icon, table)
-			icon.flasher:Hide()
-		end,
-	},
-	{
-		text = L["ANIM_ICONFADE"],
-		desc = L["ANIM_ICONFADE_DESC"],
-		animation = "ICONFADE",
-		Duration = true,
-		
-		OnStart = function(icon, table)
-			icon.IsFading = true
-		end,
-		
-		OnExpire = function(icon, table)
-			icon:SetAlpha(icon.__alpha)
-			icon.IsFading = nil
-		end,
-		
-		
-	},
-	{
-		text = L["ANIM_ACTVTNGLOW"],
-		desc = L["ANIM_ACTVTNGLOW_DESC"],
-		animation = "ACTVTNGLOW",
-		Duration = true,
-		
-		OnStart = function(icon, table)
-			ActionButton_ShowOverlayGlow(icon) -- dont upvalue, can be hooked (masque does, maybe others)
-		end,
-		OnExpire = function(icon, table)
-			ActionButton_HideOverlayGlow(icon) -- dont upvalue, can be hooked (masque doesn't, but maybe others)
-		end,
-	},
-}
-for k, v in pairs(TMW.AnimationList) do
-	TMW.AnimationList[v.animation] = v
-end
-
 
 TMW.IconBase = {}
 
@@ -3366,7 +3471,7 @@ end
 
 function TMW.IconBase.StartAnimation(icon, table)
 	local Animation = table.data.Animation
-	local AnimationData = Animation and TMW.AnimationList[Animation]
+	local AnimationData = Animation and AnimationList[Animation]
 	
 	if AnimationData then
 		icon:GetAnimations()[Animation] = table
@@ -3375,6 +3480,38 @@ function TMW.IconBase.StartAnimation(icon, table)
 	
 		if AnimationData.OnStart then
 			AnimationData.OnStart(icon, table)
+		end
+		
+		-- meta inheritance
+		for ic in Types.meta:InIcons() do
+			if ic.__currentIcon == icon then
+				ic:StartAnimation(table)
+			end
+		end
+	end
+end
+
+function TMW.IconBase.StopAnimation(icon, arg1)
+	local animations = icon:GetAnimations()
+	
+	local Animation, table
+	if type(arg1) == "table" then
+		table = arg1
+		Animation = table.Animation
+	else
+		table = animations[arg1]
+		Animation = arg1
+	end
+	
+	assert((Animation and table), "TellMeWhen: Animation: " .. tostring(Animation) .. "Table: " .. tostring(table))
+	
+	local AnimationData = AnimationList[Animation]
+	
+	if AnimationData then
+		icon:GetAnimations()[Animation] = nil
+	
+		if AnimationData.OnExpire then
+			AnimationData.OnExpire(icon, table)
 		end
 	end
 end
@@ -3394,7 +3531,7 @@ function TMW.IconBase.FireEvent(icon, data, played, announced, animated)
 	local Channel = data.Channel
 	if Channel ~= "" and not announced then
 		local Text = data.Text
-		local chandata = ChannelLookup[Channel]
+		local chandata = ChannelList[Channel]
 		
 		Text = TMW:InjectDataIntoString(Text, icon, not (chandata and chandata.isBlizz))
 		
@@ -3472,68 +3609,13 @@ function TMW.IconBase.FireEvent(icon, data, played, announced, animated)
 	---------- Animation ----------
 	local Animation = data.Animation
 	if Animation ~= "" and not animated then
-		local Duration = data.Duration
 		
-		if Animation == "ICONSHAKE" then
-			icon:StartAnimation{
-				data = data,
-				Start = TMW.time,
-				Duration = Duration,
-				
-				Animation = Animation,
-				Magnitude = data.Magnitude,
-			}
-		elseif Animation == "ACTVTNGLOW" then
-			icon:StartAnimation{
-				data = data,
-				Start = TMW.time,
-				Duration = Duration,
-			}
-		elseif Animation == "ICONFLASH" then
-			icon:StartAnimation{
-				data = data,
-				Start = TMW.time,
-				Duration = Duration,
-				
-				Period = data.Period,
-				Time = TMW.time,
-				FadeAlpha = data.Fade,
-				fadingIn = true,
-				Alpha = data.a_anim,
-				r = data.r_anim,
-				g = data.g_anim,
-				b = data.b_anim,
-			}
-		
-		elseif Animation == "ICONFADE" and not icon.FakeHidden then			
-			icon:StartAnimation{
-				data = data,
-				Start = TMW.time,
-				Duration = Duration,
-				
-				FadeDuration = Duration,
-			--	StartAlpha = icon.__oldAlpha,
-			--	EndAlpha = icon.__alpha,
-			}
-			
-			
-			
-		elseif Animation == "SCREENFLASH" then
-			local ScreenFlasher = TMW.ScreenFlasher
-			ScreenFlasher.FlashPeriod = data.Period
-			ScreenFlasher.FlashTime = data.Period
-			ScreenFlasher.FlashAlpha = data.a_anim
-			ScreenFlasher.FadeAlpha = data.Fade
-			ScreenFlasher.fadingIn = true
-			ScreenFlasher:Show()
-			ScreenFlasher:SetTexture(data.r_anim, data.g_anim, data.b_anim, 1)
-			ScreenFlasher.Duration = Duration
-		elseif Animation == "SCREENSHAKE" and (not WorldFrame:IsProtected() or not InCombatLockdown()) then
-			TMW.ScreenShakeDuration = Duration
-			TMW.ScreenShakeMagnitude = data.Magnitude
+		-- what a cute little handler. TODO: make text like this.
+		local AnimationData = AnimationList[Animation]
+		if AnimationData then
+			AnimationData.Play(icon, data)
+			animated = 1
 		end
-		
-		animated = 1
 	end
 	
 	if data.PassThrough then
@@ -3679,9 +3761,7 @@ function TMW.IconBase.SetInfo(icon, alpha, color, texture, start, duration, spel
 		local oldalpha = icon.__alpha
 		
 		icon.__alpha = alpha
-		if icon.DoesFades then
-			icon.__oldAlpha = icon:GetAlpha() -- much nicer than using oldalpha because it will transition from what is curently visible, not what should be visible after any current fades end
-		end
+		icon.__oldAlpha = icon:GetAlpha() -- For ICONFADE. much nicer than using __alpha because it will transition from what is curently visible, not what should be visible after any current fades end
 		
 		if not icon.IsFading then
 			icon:SetAlpha(icon.FakeHidden or alpha)
@@ -4032,7 +4112,7 @@ function TMW:RegisterIconType(Type)
 end
 
 
-function TMW:CreateIcon(group, groupID, iconID)
+function TMW:Icon_Create(group, groupID, iconID)
 	local icon = CreateFrame("Button", "TellMeWhen_Group" .. groupID .. "_Icon" .. iconID, group, "TellMeWhen_IconTemplate", iconID)
 	
 	icon.group = group
@@ -4074,17 +4154,6 @@ function TMW:CreateIcon(group, groupID, iconID)
 		icon[k] = v
 	end
 	return icon
-end
-
-function TMW.IconsSort(a, b)
-	local icon1, icon2 = _G[a], _G[b]
-	local g1 = icon1.group:GetID()
-	local g2 = icon2.group:GetID()
-	if g1 ~= g2 then
-		return g1 < g2
-	else
-		return icon1:GetID() < icon2:GetID()
-	end
 end
 
 function TMW:Icon_UpdateBars(icon)
@@ -4181,7 +4250,6 @@ function TMW:Icon_Update(icon)
 	end
 
 	local dontremove
-	icon.DoesFades = false
 	for _, t in pairs(TMW.EventList) do
 		local event = t.name
 		local tbl = icon.Events[event]
@@ -4203,13 +4271,6 @@ function TMW:Icon_Update(icon)
 				end
 			elseif key == "Animation" and data ~= "" then
 				dontremove = 1
-				if data == "ICONFLASH" then
-					icon.flasher = icon.flasher or TMW:GetFlasher(icon)
-				elseif data == "SCREENFLASH" then
-					TMW.ScreenFlasher = TMW.ScreenFlasher or TMW:GetFlasher(UIParent)
-				elseif data == "ICONFADE" then
-					icon.DoesFades = true
-				end
 			elseif key == "Channel" and data ~= "" then
 				dontremove = 1
 			end
@@ -4255,9 +4316,9 @@ function TMW:Icon_Update(icon)
 	end
 
 	if icon.Enabled and group:ShouldUpdateIcons() then
-		TMW:ValidateIcon(icon)
+		TMW:Icon_Validate(icon)
 	else
-		TMW:InvalidateIcon(icon)
+		TMW:Icon_Invalidate(icon)
 	end
 
 	local cd = icon.cooldown
@@ -4452,78 +4513,40 @@ function TMW:Icon_Update(icon)
 	
 end
 
-function TMW:InjectDataIntoString(Text, icon, doBlizz)
-	if not Text then return Text end
-	
-	--CURRENTLY USED: t, f, m, p, u, s, d, k, e, o, x
-	
-	if doBlizz then
-		if strfind(Text, "%%[Tt]") then
-			Text = gsub(Text, "%%[Tt]", UnitName("target") or TARGET_TOKEN_NOT_FOUND)
-		end
-		if strfind(Text, "%%[Ff]") then
-			Text = gsub(Text, "%%[Ff]", UnitName("focus") or FOCUS_TOKEN_NOT_FOUND)
-		end
+function TMW:Icon_Validate(icon)
+	-- adds the icon to the list of icons that can be checked in metas/conditions
+	if type(icon) == "string" then
+		icon = _G[icon]
 	end
 	
-	if strfind(Text, "%%[Mm]") then
-		Text = gsub(Text, "%%[Mm]", UnitName("mouseover") or L["MOUSEOVER_TOKEN_NOT_FOUND"])
+	if not TMW.IconsLookup[icon] then
+		tinsert(TMW.Icons, icon:GetName())
+		TMW.IconsLookup[icon] = 1
 	end
-	
-	if icon then
-	
-		if icon.Type == "cleu" then
-			if strfind(Text, "%%[Oo]") then
-				Text = gsub(Text, "%%[Oo]", UnitName(icon.cleu_sourceUnit or "") or icon.cleu_sourceUnit or "?")
-			end
-			if strfind(Text, "%%[Ee]") then
-				Text = gsub(Text, "%%[Ee]", UnitName(icon.cleu_destUnit or "") or icon.cleu_destUnit or "?")
-			end
-			if strfind(Text, "%%[Xx]") then
-				local name, checkcase = icon.typeData:GetNameForDisplay(icon, icon.cleu_extraSpell)
-				name = name or "?"
-				if checkcase then
-					name = TMW:RestoreCase(name)
-				end
-				Text = gsub(Text, "%%[Xx]", name)
-			end
-		end
-		
-		if strfind(Text, "%%[Pp]") then
-			Text = gsub(Text, "%%[Pp]", icon.__lastUnitName or UnitName(icon.__lastUnitChecked or "") or "?")
-		end
-		if strfind(Text, "%%[Uu]") then
-			Text = gsub(Text, "%%[Uu]", icon.__unitName or UnitName(icon.__unitChecked or "") or icon.__unitChecked or "?")
-		end
-		
-		if strfind(Text, "%%[Ss]") then
-			local name, checkcase = icon.typeData:GetNameForDisplay(icon, icon.__spellChecked)
-			name = name or "?"
-			if checkcase then
-				name = TMW:RestoreCase(name)
-			end
-			Text = gsub(Text, "%%[Ss]", name)
-		end
-		if strfind(Text, "%%[Dd]") then
-			local duration = icon.__duration - (TMW.time - icon.__start)
-			if duration < 0 then
-				duration = 0
-			end
-			Text = gsub(Text, "%%[Dd]", TMW:FormatSeconds(duration, duration == 0 or duration > 10, true))
-		end
-		if strfind(Text, "%%[Kk]") then
-			local count = icon.__countText or icon.__count
-			if count then
-				count = gsub(count, "%%", "%%%%")
-			else
-				count = ""
-			end
-			Text = gsub(Text, "%%[Kk]", count)
-		end
-	end
-	
-	return Text
 end
+
+function TMW:Icon_Invalidate(icon)
+	-- removes the icon from the list of icons that can be checked in metas/conditions
+	if type(icon) == "string" then
+		icon = _G[icon]
+	end
+	
+	if TMW.IconsLookup[icon] then
+		local k = tContains(TMW.Icons, icon:GetName())
+		if k then tremove(TMW.Icons, k) end
+		TMW.IconsLookup[icon] = nil
+	end
+end
+
+function TMW:Icon_IsValid(icon)
+	-- checks if the icon is in the list of icons that can be checked in metas/conditions
+	if type(icon) == "string" then
+		icon = _G[icon]
+	end
+	return TMW.IconsLookup[icon]
+end
+
+
 
 -- ------------------
 -- NAME/ETC FUNCTIONS
