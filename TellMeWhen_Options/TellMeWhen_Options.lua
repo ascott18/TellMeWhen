@@ -2004,14 +2004,16 @@ CLEU.Events = {
 	
 	"SPELL_DISPEL",-- extraSpellID/name
 	"SPELL_DISPEL_FAILED",-- extraSpellID/name
-	"SPELL_AURA_STOLEN",-- extraSpellID/name
+	"SPELL_STOLEN",-- extraSpellID/name
 	
 	"SPELL_AURA_APPLIED", -- normal
 	"SPELL_AURA_APPLIED_DOSE",
 	"SPELL_AURA_REFRESH", -- normal
 	"SPELL_AURA_REMOVED", -- normal
 	"SPELL_AURA_REMOVED_DOSE",	
-	"SPELL_AURA_BROKEN",-- extraSpellID/name
+	"SPELL_AURA_BROKEN",
+	
+	"SPELL_AURA_BROKEN_SPELL",-- extraSpellID/name
 	
 	"SPELL_PERIODIC_DAMAGE",
 	"SPELL_PERIODIC_DRAIN",

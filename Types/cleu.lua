@@ -83,9 +83,6 @@ local EnvironmentalTextures = {
 }
 
 local EventsWithoutSpells = {
-	SPELL_DISPEL_FAILED = true,
-	SPELL_AURA_BROKEN_SPELL = true,
-	SPELL_AURA_STOLEN = true,
 	ENCHANT_APPLIED = true,
 	ENCHANT_REMOVED = true,
 	SWING_DAMAGE = true,
@@ -95,11 +92,9 @@ local EventsWithoutSpells = {
 	UNIT_DISSIPATES = true,
 	PARTY_KILL = true,
 	ENVIRONMENTAL_DAMAGE = true,
-	SPELL_INTERRUPT = true,
-	SPELL_DISPEL = true,
 }
 
-local function CLEU_OnEvent(icon, _, t, event, h, sourceGUID, sourceName, sourceFlags, sourceRaidFlags, destGUID, destName, destFlags, destRaidFlags, arg1, arg2, arg3, arg4, ...)
+local function CLEU_OnEvent(icon, _, t, event, h, sourceGUID, sourceName, sourceFlags, sourceRaidFlags, destGUID, destName, destFlags, destRaidFlags, arg1, arg2, arg3, arg4, arg5, ...)
 	
 	if event == "SPELL_MISSED" and arg4 == "REFLECT" then
 	-- make a fake event for spell reflects
@@ -131,8 +126,11 @@ local function CLEU_OnEvent(icon, _, t, event, h, sourceGUID, sourceName, source
 			for i = 1, #SourceUnits do
 				local unit = SourceUnits[i]
 				local sourceName = strlowerCache[sourceName]
-				if unit == sourceName or UnitGUID(unit) == sourceGUID then
-					sourceUnit = unit
+				if unit == sourceName then -- match by name
+					matched = 1
+					break
+				elseif UnitGUID(unit) == sourceGUID then
+					destUnit = unit -- replace with the actual unitID
 					matched = 1
 					break
 				end
@@ -149,8 +147,11 @@ local function CLEU_OnEvent(icon, _, t, event, h, sourceGUID, sourceName, source
 			for i = 1, #DestUnits do
 				local unit = DestUnits[i]
 				local destName = strlowerCache[destName]
-				if unit == destName or UnitGUID(unit) == destGUID then
-					destUnit = unit
+				if unit == destName then -- match by name
+					matched = 1
+					break
+				elseif UnitGUID(unit) == destGUID then
+					destUnit = unit -- replace with the actual unitID
 					matched = 1
 					break
 				end
@@ -160,38 +161,41 @@ local function CLEU_OnEvent(icon, _, t, event, h, sourceGUID, sourceName, source
 			end
 		end
 		
-		local spellID, spellName = arg1, arg2 -- this may or may not be true, depends on the event
-		local NameHash = icon.NameHash
-		if NameHash and not EventsWithoutSpells[event] and not (NameHash[strlowerCache[spellName]] or NameHash[spellID]) then
-			return
-		end
+		--local spellID, spellName = arg1, arg2 -- this may or may not be true, depends on the event
 			
-		local spell, tex, extra
+		local tex, spellID, spellName, extraID, extraName
 		if event == "SWING_DAMAGE" or event == "SWING_MISSED" then
-			spell = ACTION_SWING
+			spellName = ACTION_SWING
+			-- dont define spellID here so that ACTION_SWING will be used in %s substitutions
 			tex = GetSpellTexture(6603)
 		elseif event == "ENCHANT_APPLIED" or event == "ENCHANT_REMOVED" then
-			spell = arg1
+			spellID = arg1
+			spellName = arg2
 			tex = GetItemIcon(arg2)
-		elseif event == "SPELL_INTERRUPT" or event == "SPELL_DISPEL" or event == "SPELL_DISPEL_FAILED" or event == "SPELL_AURA_BROKEN_SPELL" or event == "SPELL_AURA_STOLEN" then
-			extra = arg4
-			if icon.UseExtraID then
-				tex = SpellTextures[arg4]
-			else
-				tex = SpellTextures[spellID]
-			end
-			spell = spellID
+		elseif event == "SPELL_INTERRUPT" or event == "SPELL_DISPEL" or event == "SPELL_DISPEL_FAILED" or event == "SPELL_STOLEN" then
+			extraID = arg1 -- the spell used (kick, cleanse, spellsteal)
+			extraName = arg2
+			spellID = arg4 -- the other spell (polymorph, greater heal, arcane intellect, corruption)
+			spellName = arg5
+			tex = SpellTextures[spellID]
+		elseif event == "SPELL_AURA_BROKEN_SPELL" then
+			extraID = arg4 -- the spell that broke it
+			extraName = arg5
+			spellID = arg1 -- the spell that was broken
+			spellName = arg2
+			tex = SpellTextures[spellID]
 		elseif event == "ENVIRONMENTAL_DAMAGE" then
-			spell = _G["ACTION_ENVIRONMENTAL_DAMAGE_"..spellID]
-			tex = EnvironmentalTextures[spellID] or "Interface\\Icons\\INV_Misc_QuestionMark" -- spellID is actually environmentalType
+			spellName = _G["ACTION_ENVIRONMENTAL_DAMAGE_" .. arg1]
+			tex = EnvironmentalTextures[arg1] or "Interface\\Icons\\INV_Misc_QuestionMark" -- arg1 is
 		elseif event == "UNIT_DIED" or event == "UNIT_DESTROYED" or event == "UNIT_DISSIPATES" or event == "PARTY_KILL" then
-			spell = L["CLEU_DIED"]
+			spellName = L["CLEU_DIED"]
 			tex = "Interface\\Icons\\Ability_Rogue_FeignDeath"
 			if not sourceUnit then
 				sourceUnit = destUnit -- clone it
 			end
 		else
-			spell = spellID
+			spellID = arg1
+			spellName = arg2
 			--[[--"RANGE_DAMAGE", -- normal
 			--"RANGE_MISSED", -- normal
 			--"SPELL_DAMAGE", -- normal
@@ -229,23 +233,28 @@ local function CLEU_OnEvent(icon, _, t, event, h, sourceGUID, sourceName, source
 			--"SPELL_CAST_SUCCESS" -- normal
 			]]
 		end
-		tex = tex or SpellTextures[spell] or SpellTextures[spellID]
+		tex = tex or SpellTextures[spellID] or SpellTextures[spellName] -- [spellName] should never be used, but whatever
 	
+		local NameHash = icon.NameHash
+		if NameHash and not EventsWithoutSpells[event] and not (NameHash[spellID] or NameHash[strlowerCache[spellName]]) then
+			return
+		end
+		
 		-- bind text updating
 		if icon.cleu_sourceUnit ~= sourceUnit and icon.UpdateBindText_SourceUnit then
 			icon:UpdateBindText()
 		elseif icon.cleu_destUnit ~= destUnit and icon.UpdateBindText_DestUnit then
 			icon:UpdateBindText()
-		elseif icon.cleu_extraSpell ~= extra and icon.UpdateBindText_ExtraSpell then
+		elseif icon.cleu_extraSpell ~= extraID and icon.UpdateBindText_ExtraSpell then
 			icon:UpdateBindText()
 		end
 		
 		icon.cleu_start = TMW.time
-		icon.cleu_spell = spell
+		icon.cleu_spell = spellID or spellName -- perfer ID over name, but events without real names (DIED, ENVIRONMENTAL_DAMAGE, SWING) dont have spellIDs, so pass the spellName the be displayed on the icon
 		
 		icon.cleu_sourceUnit = sourceUnit 
 		icon.cleu_destUnit = destUnit 
-		icon.cleu_extraSpell = extra 
+		icon.cleu_extraSpell = extraID 
 		
 		if icon.OnCLEUEvent then
 			icon.EventsToFire.OnCLEUEvent = true
