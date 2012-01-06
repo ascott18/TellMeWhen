@@ -1019,36 +1019,64 @@ L["ANIM_ICONFADE_DESC"] = "Smoothly applies any opacity changes that occured wit
 
 L["CLEU_"] = "Any event" -- match any event
 L["CLEU_DAMAGE_SHIELD"] = "Damage Shield"
+L["CLEU_DAMAGE_SHIELD_DESC"] = "Occurs when a damage shield (%s, %s, etc., but not %s) damage a unit."
 L["CLEU_DAMAGE_SHIELD_MISSED"] = "Damage Shield Missed"
+L["CLEU_DAMAGE_SHIELD_MISSED_DESC"] = "Occurs when a damage shield (%s, %s, etc., but not %s) fails to damage a unit."
 L["CLEU_DAMAGE_SPLIT"] = "Damage Split"
+L["CLEU_DAMAGE_SPLIT_DESC"] = "Occurs when damage is split between two or more targets."
 L["CLEU_ENCHANT_APPLIED"] = "Enchant Applied"
+L["CLEU_ENCHANT_APPLIED_DESC"] = "Covers temporary weapon enchants like rogue poisons and shaman imbues."
 L["CLEU_ENCHANT_REMOVED"] = "Enchant Removed"
+L["CLEU_ENCHANT_REMOVED_DESC"] = "Covers temporary weapon enchants like rogue poisons and shaman imbues."
 L["CLEU_ENVIRONMENTAL_DAMAGE"] = "Environmental Damage"
+L["CLEU_ENVIRONMENTAL_DAMAGE_DESC"] = "Includes damage from lava, fatigue, downing, and falling."
 L["CLEU_RANGE_DAMAGE"] = "Ranged Damage"
 L["CLEU_RANGE_MISSED"] = "Ranged Miss"
 L["CLEU_SPELL_AURA_APPLIED"] = "Aura Applied"
 L["CLEU_SPELL_AURA_APPLIED_DOSE"] = "Aura Stack Applied"
 L["CLEU_SPELL_AURA_BROKEN"] = "Aura Broken"
 L["CLEU_SPELL_AURA_BROKEN_SPELL"] = "Aura Broken by Spell"
+L["CLEU_SPELL_AURA_BROKEN_SPELL_DESC"] = [[Occurs when an aura, usually some form of crowd control, is broken by damage from a spell.
+
+The aura that was broken is what the icon filters by; the spell that broke it can be accessed with the substitution '%x' in text displays.]]
 L["CLEU_SPELL_AURA_REFRESH"] = "Aura Refreshed"
 L["CLEU_SPELL_AURA_REMOVED"] = "Aura Removed"
 L["CLEU_SPELL_AURA_REMOVED_DOSE"] = "Aura Stack Removed"
 L["CLEU_SPELL_STOLEN"] = "Aura Stolen"
+L["CLEU_SPELL_STOLEN_DESC"] = [[Occurs when a buff is spellstolen, probably by %s.
+
+Icon can be filtered by the spell that was stolen.]]
 L["CLEU_SPELL_CAST_FAILED"] = "Spell Cast Failed"
 L["CLEU_SPELL_CAST_START"] = "Spell Cast Start"
 L["CLEU_SPELL_CAST_SUCCESS"] = "Spell Cast Success"
 L["CLEU_SPELL_DAMAGE"] = "Spell Damage"
 L["CLEU_SPELL_DISPEL"] = "Dispel"
+L["CLEU_SPELL_DISPEL_DESC"] = [[Occurs when an aura is dispelled.
+
+Icon can be filtered by the aura that was dispelled. The spell that dispelled it can be accessed with the substitution '%x' in text displays.]]
 L["CLEU_SPELL_DISPEL_FAILED"] = "Dispel Failed"
+L["CLEU_SPELL_DISPEL_FAILED_DESC"] = [[Occurs when an aura fails to be dispelled.
+
+Icon can be filtered by the aura that was attempted to be dispelled. The spell that attempted it can be accessed with the substitution '%x' in text displays.]]
 L["CLEU_SPELL_DRAIN"] = "Resource Drain"
+L["CLEU_SPELL_DRAIN_DESC"] = "Occurs when resources (health/mana/rage/energy/etc) are removed from a unit."
 L["CLEU_SPELL_ENERGIZE"] = "Resource Gain"
+L["CLEU_SPELL_ENERGIZE_DESC"] = "Occurs when resources (health/mana/rage/energy/etc) are gained by a unit."
 L["CLEU_SPELL_EXTRA_ATTACKS"] = "Extra Attacks Gained"
+L["CLEU_SPELL_EXTRA_ATTACKS_DESC"] = "Occurs when you are granted extra melee swings from procs."
 L["CLEU_SPELL_HEAL"] = "Heal"
 L["CLEU_SPELL_INSTAKILL"] = "Instant Kill"
 L["CLEU_SPELL_INTERRUPT"] = "Interrupt"
-L["CLEU_SPELL_LEECH"] = "Health Leech"
+L["CLEU_SPELL_STOLEN_DESC"] = [[Occurs when a spell cast is interrupted.
+
+Icon can be filtered by the spell that was interrupted. The interrupt spell that interrupted it can be accessed with the substitution '%x' in text displays.]]
+L["CLEU_SPELL_LEECH"] = "Resource Leech"
+L["CLEU_SPELL_LEECH_DESC"] = "Occurs when resources (health/mana/rage/energy/etc) are removed from one unit and simultaneously given to another."
 L["CLEU_SPELL_MISSED"] = "Spell Miss"
 L["CLEU_SPELL_REFLECT"] = "Spell Reflect" -- custom event
+L["CLEU_SPELL_REFLECT_DESC"] = [[Occurs when you reflect a spell back at its caster.
+
+The source unit is whoever reflected it, the destination unit is whoever it was reflected back at]]
 L["CLEU_SPELL_PERIODIC_DAMAGE"] = "Periodic Damage"
 L["CLEU_SPELL_PERIODIC_DRAIN"] = "Periodic Resource Drain"
 L["CLEU_SPELL_PERIODIC_ENERGIZE"] = "Periodic Resource Gain"
@@ -1058,7 +1086,14 @@ L["CLEU_SPELL_PERIODIC_MISSED"] = "Periodic Miss"
 L["CLEU_SWING_DAMAGE"] = "Swing Damage"
 L["CLEU_SWING_MISSED"] = "Swing Miss"
 L["CLEU_UNIT_DESTROYED"] = "Unit Destroyed"
+L["CLEU_UNIT_DESTROYED_DESC"] = "Occurs when a unit such as a totem is destroyed."
 L["CLEU_UNIT_DIED"] = "Unit Died"
+
+L["CLEU_CAT_CAST"] = "Casts"
+L["CLEU_CAT_SWING"] = "Melee/Ranged"
+L["CLEU_CAT_SPELL"] = "Spells"
+L["CLEU_CAT_AURA"] = "Buffs/Debuffs"
+L["CLEU_CAT_MISC"] = "Miscellaneous"
 
 
 L["CLEU_COMBATLOG_OBJECT_NONE"] = "Miscellaneous: Unknown Unit"

@@ -1990,33 +1990,37 @@ end
 CLEU = TMW:NewModule("CLEUEditor") TMW.CLEU = CLEU
 CLEU.Events = {
 	"",
-	"SPELL_CAST_FAILED",
-	"SPELL_CAST_START",
-	"SPELL_CAST_SUCCESS",
-	
-	"SPELL_INTERRUPT",-- extraSpellID/name
-	
+"SPACE",
+
+"CAT_SWING",
+	"SWING_DAMAGE", -- normal
+	"SWING_MISSED", -- normal
+	"SPELL_EXTRA_ATTACKS", -- normal
+"SPACE",
 	"RANGE_DAMAGE", -- normal
 	"RANGE_MISSED", -- normal
 	
-	"SWING_DAMAGE", -- normal
-	"SWING_MISSED", -- normal
 	
-	"SPELL_EXTRA_ATTACKS", -- normal
+"CAT_SPELL",
 	"SPELL_DAMAGE", -- normal
 	"SPELL_MISSED", -- normal
 	"SPELL_REFLECT", -- normal
-	
+"SPACE",
 	"SPELL_HEAL", -- normal
-	
+"SPACE",
 	"SPELL_ENERGIZE", -- normal
 	"SPELL_DRAIN", -- normal
 	"SPELL_LEECH", -- normal
+"SPACE",
+	"DAMAGE_SHIELD", -- normal
+	"DAMAGE_SHIELD_MISSED", -- normal
 	
+	
+"CAT_AURA",
 	"SPELL_DISPEL",-- extraSpellID/name
 	"SPELL_DISPEL_FAILED",-- extraSpellID/name
 	"SPELL_STOLEN",-- extraSpellID/name
-	
+"SPACE",
 	"SPELL_AURA_APPLIED", -- normal
 	"SPELL_AURA_APPLIED_DOSE",
 	"SPELL_AURA_REFRESH", -- normal
@@ -2025,7 +2029,7 @@ CLEU.Events = {
 	"SPELL_AURA_BROKEN",
 	
 	"SPELL_AURA_BROKEN_SPELL",-- extraSpellID/name
-	
+"SPACE",
 	"SPELL_PERIODIC_DAMAGE",
 	"SPELL_PERIODIC_DRAIN",
 	"SPELL_PERIODIC_ENERGIZE",
@@ -2033,18 +2037,26 @@ CLEU.Events = {
 	"SPELL_PERIODIC_HEAL",
 	"SPELL_PERIODIC_MISSED",
 	
-	"DAMAGE_SHIELD",
-	"DAMAGE_SHIELD_MISSED",
-	"DAMAGE_SPLIT",
 	
+"CAT_CAST",
+	"SPELL_CAST_FAILED",
+	"SPELL_CAST_START",
+	"SPELL_CAST_SUCCESS",
+"SPACE",
+	"SPELL_INTERRUPT",-- extraSpellID/name
+	
+	
+"CAT_MISC",	
+	"DAMAGE_SPLIT",
+"SPACE",
 	"ENCHANT_APPLIED",
 	"ENCHANT_REMOVED",
-	
+"SPACE",
 	"ENVIRONMENTAL_DAMAGE",
-	
+"SPACE",
 	"UNIT_DIED",
-	"SPELL_INSTAKILL",
 	"UNIT_DESTROYED",
+	"SPELL_INSTAKILL",
 }
 CLEU.Flags = {
 					-- "COMBATLOG_OBJECT_REACTION_MASK",
@@ -2109,7 +2121,7 @@ function CLEU:OnInitialize()
 		or	UIDROPDOWNMENU_OPEN_MENU == IE.Main.SourceFlags 
 		or	UIDROPDOWNMENU_OPEN_MENU == IE.Main.DestFlags 
 		then
-			frame.showTimer = 0 -- i want the dropdown to hide instantly after the cursor leaves it
+			frame.showTimer = 0.5 -- i want the dropdown to hide much quicker (default is 2) after the cursor leaves it
 		end
 	end)
 end
@@ -2186,6 +2198,62 @@ function CLEU:Menus_SetTexts()
 end
 
 function CLEU:EventMenu()
+	local currentCategory
+	for _, event in ipairs(CLEU.Events) do
+		if event:find("^CAT_") then --and event ~= currentCategory then
+			if UIDROPDOWNMENU_MENU_LEVEL == 1 then
+				local info = UIDropDownMenu_CreateInfo()
+				info.text = L["CLEU_" .. event]
+				info.value = event
+				info.notCheckable = true
+				info.hasArrow = true
+				UIDropDownMenu_AddButton(info, UIDROPDOWNMENU_MENU_LEVEL)
+			end
+			currentCategory = event
+			
+		elseif (UIDROPDOWNMENU_MENU_LEVEL == 1 and not currentCategory) or (UIDROPDOWNMENU_MENU_LEVEL == 2 and UIDROPDOWNMENU_MENU_VALUE == currentCategory) then
+			if event == "SPACE" then
+				
+				AddDropdownSpacer()
+			else
+				local info = UIDropDownMenu_CreateInfo()
+				
+				info.text = L["CLEU_" .. event]
+				
+				local tooltipText = rawget(L, "CLEU_" .. event .. "_DESC")
+				if tooltipText then
+					info.tooltipTitle = info.text
+					info.tooltipText = tooltipText
+					info.tooltipOnButton = true
+				end
+				
+				info.value = event
+				info.checked = CI.ics.CLEUEvents[event]
+				info.keepShownOnClick = true
+				info.isNotRadio = true
+				info.func = CLEU.EventMenu_OnClick
+				info.arg1 = self
+				
+				UIDropDownMenu_AddButton(info, UIDROPDOWNMENU_MENU_LEVEL)
+			end
+		end
+		--[[if UIDROPDOWNMENU_MENU_LEVEL == 1 and v.category and not addedThings[v.category] then
+			-- addedThings IN THIS CASE is a list of categories that have been added. Add ones here that have not been added yet.
+			
+			if v.categorySpacebefore then
+				AddDropdownSpacer()
+			end
+			
+			local info = UIDropDownMenu_CreateInfo()
+			info.text = v.category
+			info.value = v.category
+			info.notCheckable = true
+			info.hasArrow = true
+			addedThings[v.category] = true
+			UIDropDownMenu_AddButton(info, UIDROPDOWNMENU_MENU_LEVEL)
+		end]]
+	end
+	--[[
 	for _, event in ipairs(CLEU.Events) do
 		local info = UIDropDownMenu_CreateInfo()
 		
@@ -2199,7 +2267,7 @@ function CLEU:EventMenu()
 		info.arg1 = self
 		
 		UIDropDownMenu_AddButton(info, UIDROPDOWNMENU_MENU_LEVEL)
-	end
+	end]]
 end
 
 function CLEU:EventMenu_OnClick(frame)
@@ -2997,7 +3065,6 @@ function IE:Equiv_DropDown()
 				local info = UIDropDownMenu_CreateInfo()
 				info.func = IE.Equiv_DropDown_OnClick
 				info.text = L[k]
-				info.tooltipTitle = k
 				local text = IE:Equiv_GenerateTips(k)
 
 				info.icon = TMW.SpellTextures[EquivFirstIDLookup[k]]
@@ -3006,6 +3073,7 @@ function IE:Equiv_DropDown()
 				info.tCoordTop = 0.07
 				info.tCoordBottom = 0.93
 
+				info.tooltipTitle = k
 				info.tooltipText = text
 				info.tooltipOnButton = true
 				info.value = k
