@@ -6,7 +6,8 @@ local L = LibStub("AceLocale-3.0"):NewLocale("TellMeWhen", "enUS", true)
 L["!!Main Addon Description"] = "Provides visual, auditory, and textual notifications about cooldowns, buffs, and pretty much everything else." -- put it here so it doesnt get deleted on mass imports
 
 
-L["CMD_OPTIONS"] = "Options"
+L["CMD_OPTIONS"] = "options"
+
 L["ICON_TOOLTIP1"] = "TellMeWhen"
 L["ICON_TOOLTIP2NEW"] = [[|cff7fffffRight-click|r for icon options.
 |cff7fffffRight-click and drag|r to another icon to move/copy.
@@ -132,10 +133,10 @@ L["ICONMENU_LIGHTWELL_DESC"] = [=[Tracks the duration and charges of your lightw
 L["ICONMENU_RUNES"] = "Rune Cooldown"
 L["ICONMENU_RUNES_DESC"] = [[Tracks rune cooldowns]]
 
-L["ICONMENU_CLEU"] = "Combat Log Event"
-L["ICONMENU_CLEU_DESC"] = [=[Tracks combat log events.
+L["ICONMENU_CLEU"] = "Combat Event"
+L["ICONMENU_CLEU_DESC"] = [=[Tracks combat events.
 
-Examples include spell reflects, misses, instant casts, and deaths.]=]
+Examples include spell reflects, misses, instant casts, and deaths, but the icon can track virtually anything.]=]
 
 L["ICONMENU_META"] = "Meta Icon"
 L["ICONMENU_META_DESC"] = [=[Combines multiple icons into one.
@@ -199,11 +200,11 @@ L["SUG_SUBSTITUTION_d_DESC"] = "The duration remaining on the icon's timer"
 L["SUG_SUBSTITUTION_k"] = "Current Stacks"
 L["SUG_SUBSTITUTION_k_DESC"] = "Whatever is currently displayed as the icon's stack text"
 L["SUG_SUBSTITUTION_o"] = "Source Unit"
-L["SUG_SUBSTITUTION_o_DESC"] = "Whatever unit caused the action in the last combat log event."
+L["SUG_SUBSTITUTION_o_DESC"] = "Whatever unit caused the action in the last combat event that the icon handled."
 L["SUG_SUBSTITUTION_e"] = "Destination Unit"
-L["SUG_SUBSTITUTION_e_DESC"] = "Whatever unit received the action in the last combat log event."
+L["SUG_SUBSTITUTION_e_DESC"] = "Whatever unit received the action in the last combat event that the icon handled."
 L["SUG_SUBSTITUTION_x"] = "Extra Spell"
-L["SUG_SUBSTITUTION_x_DESC"] = "Combat log events like dispels, interrupts, and aura breaking have additional data about which spell caused the event. This will substitute in that spell from the last combat log event."
+L["SUG_SUBSTITUTION_x_DESC"] = "Combat events like dispels, interrupts, and aura breaking have additional data about which spell caused the event. This will substitute in that spell from the last combat log event."
 
 L["ICONMENU_COMPONENTICONS"] = "Component Icons & Groups"
 
@@ -912,8 +913,8 @@ L["SOUND_EVENT_ONDURATION_DESC"] = [[This event triggers when the duration of th
 
 Because this event occurs every time the icon is updated while a timer is running, you must set a condition, and the event will only occur when the state of that condition changes.]]
 
-L["SOUND_EVENT_ONCLEU"] = "Combat Log Event"
-L["SOUND_EVENT_ONCLEU_DESC"] = [[This event triggers when a combat log event that should be processed by the icon occurs.]]
+L["SOUND_EVENT_ONCLEU"] = "Combat Event"
+L["SOUND_EVENT_ONCLEU_DESC"] = [[This event triggers when a combat event that should be processed by the icon occurs.]]
 
 L["SOUND_EVENT_GLOBALDESC"] = "Events are checked from top to bottom in this list. If an event is triggered that has a sound to play, no events below that event will play a sound."
 L["SOUND_EVENT_DISABLEDFORTYPE"] = "Not available"
@@ -1048,7 +1049,13 @@ L["CLEU_SPELL_STOLEN_DESC"] = [[Occurs when a buff is spellstolen, probably by %
 Icon can be filtered by the spell that was stolen.]]
 L["CLEU_SPELL_CAST_FAILED"] = "Spell Cast Failed"
 L["CLEU_SPELL_CAST_START"] = "Spell Cast Start"
+L["CLEU_SPELL_CAST_START_DESC"] = [[Occurs when a spell begins casting.
+
+NOTE: To prevent potential abuse, Blizzard has excluded the destination unit from this event, so you cannot filter by it.]]
 L["CLEU_SPELL_CAST_SUCCESS"] = "Spell Cast Success"
+L["CLEU_SPELL_CAST_SUCCESS_DESC"] = [[Occurs when a spell finishes casting, including instant cast spells.
+
+NOTE: To prevent potential abuse, Blizzard has excluded the destination unit from this event, so you cannot filter by it.]]
 L["CLEU_SPELL_DAMAGE"] = "Spell Damage"
 L["CLEU_SPELL_DISPEL"] = "Dispel"
 L["CLEU_SPELL_DISPEL_DESC"] = [[Occurs when an aura is dispelled.
@@ -1097,7 +1104,7 @@ L["CLEU_CAT_MISC"] = "Miscellaneous"
 
 
 L["CLEU_COMBATLOG_OBJECT_NONE"] = "Miscellaneous: Unknown Unit"
-L["CLEU_COMBATLOG_OBJECT_NONE_DESC"] = " Check to exclude units that are completely unknown to the WoW client."
+L["CLEU_COMBATLOG_OBJECT_NONE_DESC"] = "Check to exclude units that are completely unknown to the WoW client."
 L["CLEU_COMBATLOG_OBJECT_MAINASSIST"] = "Miscellaneous: Main Assist"
 L["CLEU_COMBATLOG_OBJECT_MAINASSIST_DESC"] = "Check to exclude units marked as main assists in your raid."
 L["CLEU_COMBATLOG_OBJECT_MAINTANK"] = "Miscellaneous: Main Tank"
@@ -1110,9 +1117,9 @@ L["CLEU_COMBATLOG_OBJECT_TARGET_DESC"] = "Check to exclude the unit that you are
 L["CLEU_COMBATLOG_OBJECT_TYPE_OBJECT"] = "Unit Type: Object"
 L["CLEU_COMBATLOG_OBJECT_TYPE_OBJECT_DESC"] = "Check to exclude units such as traps, fishing bobbers, or anything else that does not fall under the other \"Unit Type\" categories."
 L["CLEU_COMBATLOG_OBJECT_TYPE_GUARDIAN"] = "Unit Type: Guardian"
-L["CLEU_COMBATLOG_OBJECT_TYPE_GUARDIAN_DESC"] = "Check to exclude Guardians: Units that defend their controller but cannot be directly controlled."
+L["CLEU_COMBATLOG_OBJECT_TYPE_GUARDIAN_DESC"] = "Check to exclude Guardians. Guardians are units that defend their controller but cannot be directly controlled."
 L["CLEU_COMBATLOG_OBJECT_TYPE_PET"] = "Unit Type: Pet"
-L["CLEU_COMBATLOG_OBJECT_TYPE_PET_DESC"] = "Check to exclude Pets: Units that defend their controller and can be directly controlled."
+L["CLEU_COMBATLOG_OBJECT_TYPE_PET_DESC"] = "Check to exclude Pets. Pets are units that defend their controller and can be directly controlled."
 L["CLEU_COMBATLOG_OBJECT_TYPE_NPC"] = "Unit Type: NPC"
 L["CLEU_COMBATLOG_OBJECT_TYPE_NPC_DESC"] = "Check to exclude non-player characters."
 L["CLEU_COMBATLOG_OBJECT_TYPE_PLAYER"] = "Unit Type: Player Character"
@@ -1153,10 +1160,10 @@ L["CLEU_NOFILTERS"] = [[The %s icon in %s does not have any filters defined. It 
 	
 L["CLEU_DIED"] = "Death"
 
-L["CLEU_HEADER"] = "Combat Log Event Filters"
+L["CLEU_HEADER"] = "Combat Event Filters"
 L["CLEU_EVENTS"] = "Events to check"
 L["CLEU_EVENTS_ALL"] = "All"
-L["CLEU_EVENTS_DESC"] = "Choose the combat log events that you would like the icon to react to."
+L["CLEU_EVENTS_DESC"] = "Choose the combat events that you would like the icon to react to."
 L["CLEU_SOURCEUNITS"] = "Source unit(s) to check"
 L["CLEU_SOURCEUNITS_DESC"] = "Choose the source units that you would like the icon to react to, or leave this blank to let the icon react to any event source."
 L["CLEU_DESTUNITS"] = "Destination unit(s) to check"

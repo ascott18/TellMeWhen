@@ -163,9 +163,10 @@ end
 
 function Type:GetNameForDisplay(icon, data)
 	if data then
-		return data
+		return data and GetSpellLink(data) or data
 	else
-		return icon.NameFirst, 1
+		data = icon.NameFirst
+		return data and GetSpellLink(data) or data, 1
 	end
 end
 

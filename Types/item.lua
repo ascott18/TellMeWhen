@@ -196,7 +196,11 @@ function Type:Setup(icon, groupID, iconID)
 end
 
 function Type:GetNameForDisplay(icon, data)
-	return data and GetItemInfo(data)
+	if data then
+		local name, link = GetItemInfo(data)
+		data = link or name or data
+	end
+	return data
 end
 
 function Type:DragReceived(icon, t, data, subType)

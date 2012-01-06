@@ -107,7 +107,7 @@ function Type:Setup(icon, groupID, iconID)
 end
 
 function Type:GetNameForDisplay(icon, data)
-	return data, 1
+	return data and GetSpellLink(data) or data, 1
 end
 
 function Type:GetIconMenuText(data)

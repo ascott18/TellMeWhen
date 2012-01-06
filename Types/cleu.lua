@@ -38,7 +38,7 @@ Type.usePocketWatch = 1
 Type.AllowNoName = true
 Type.chooseNameTitle = L["ICONMENU_CHOOSENAME"] .. " " .. L["ICONMENU_CHOOSENAME_ORBLANK"]
 Type.SUGType = "spell"
-Type.spaceBefore = true
+Type.spacebefore = true
 -- Type.leftCheckYOffset = -130 -- nevermind
 
 
@@ -97,8 +97,9 @@ local EventsWithoutSpells = {
 local function CLEU_OnEvent(icon, _, t, event, h, sourceGUID, sourceName, sourceFlags, sourceRaidFlags, destGUID, destName, destFlags, destRaidFlags, arg1, arg2, arg3, arg4, arg5, ...)
 	
 	if event == "SPELL_MISSED" and arg4 == "REFLECT" then
-	-- make a fake event for spell reflects
+		-- make a fake event for spell reflects
 		event = "SPELL_REFLECT"
+		
 		-- swap the source and the destination
 		local a, b, c, d = sourceGUID, sourceName, sourceFlags, sourceRaidFlags
 		sourceGUID, sourceName, sourceFlags, sourceRaidFlags = destGUID, destName, destFlags, destRaidFlags

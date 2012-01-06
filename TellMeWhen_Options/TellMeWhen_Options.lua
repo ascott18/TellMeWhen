@@ -6715,7 +6715,7 @@ function Module:OnInitialize()
 			enchant = name:match(enchant)
 			if enchant then
 				for ench in pairs(TMW.db.global.WpnEnchDurs) do
-					if strfind(strlower(ench), strlower(enchant:gsub("([%%%[%]%-%+])", "%%%1"))) then
+					if ench:lower():find(enchant:gsub("([%%%[%]%-%+])", "%%%1"):lower()) then
 						-- the enchant was found in the list of known enchants, so add it
 						self.Spells[ench] = id
 						dobreak = 1
