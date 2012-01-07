@@ -258,7 +258,9 @@ L["ICONMENU_SHOWCBAR_DESC"] = "Shows a bar that is overlaid across the bottom ha
 L["ICONMENU_INVERTBARS"] = "Fill bars up"
 L["ICONMENU_INVERTBARS_DESC"] = "Check this option to cause the overlay bars to fill up to cover the whole width of the icon as power become sufficient and duration reaches zero."
 L["ICONMENU_OFFS"] = "Offset"
-L["ICONMENU_BAROFFS"] = "This amount will be added to the bar in order to offset it. Useful for custom indicators of when you should begin casting a spell to prevent a buff from falling off, or to indicate the power required to cast a spell and still have some left over for an interrupt."
+L["ICONMENU_BAROFFS"] = [[This amount will be added to the bar in order to offset it.
+
+Useful for custom indicators of when you should begin casting a spell to prevent a buff from falling off, or to indicate the power required to cast a spell and still have some left over for an interrupt.]]
 
 L["ICONMENU_REACT"] = "Unit Reaction"
 L["ICONMENU_FRIEND"] = "Friendly"

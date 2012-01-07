@@ -173,6 +173,7 @@ function Type:COMBAT_LOG_EVENT_UNFILTERED(e, _, p, _, g, _, _, _, _, _, _, _, i,
 				end
 			end
 		end
+		-- DONT ELSEIF HERE
 		if p == "SPELL_CAST_SUCCESS" then
 			if resetsOnCast[i] then
 				for id in pairs(resetsOnCast[i]) do
@@ -202,7 +203,7 @@ function Type:UNIT_SPELLCAST_SUCCEEDED(e, u, n, _, _, i)--Unit, spellName, spell
 	c[i] = TMW.time
 end
 
-
+-- wiping cooldowns for arenas
 local isArena
 local resetForArena = {}
 function Type:PLAYER_ENTERING_WORLD()

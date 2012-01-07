@@ -10,7 +10,8 @@
  ** (r390) Weapon enchant icons should now always detect the current weapon enchant in a timely manner for rogue characters
  ** (r391) Added the debuff that results from being the the target of a warrior who casts intimidating shout with the glyph
  ** (r396) Buff/debuff icons should now set an ID as their spell checked rather than a name, allowing them to function more completely with the hyperlink feature of r395
- ** (r396) Animations inherited by a meta icon should now properly cancel when the meta icon changes to an icon with no animations.
+ ** (r397) Animations inherited by a meta icon should now properly cancel when the meta icon changes to an icon with no animations
+ ** (r398) Both ranks of Shattered Barrier should now be included in the "Rooted" equivalency
 
 ===v4.7.3===
  * New Feature: Animations. You can now pick animations to play when an icon event occurs, such as having the screen shake or an icon flash.
