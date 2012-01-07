@@ -2382,7 +2382,12 @@ function CNDT:ProcessConditions(icon)
 
 				for _, append in TMW:Vararg("2", "") do -- Unit2 MUST be before Unit
 					if strfind(thisstr, "c.Unit" .. append) then 
-						local unit = TMW:GetUnits(nil, c.Name, true)[1] or ""
+						local unit
+						if append == "2" then
+							unit = TMW:GetUnits(nil, c.Name, true)[1] or ""
+						elseif append == "" then
+							unit = TMW:GetUnits(nil, c.Unit, true)[1] or ""
+						end
 						if (strfind(unit, "maintank") or strfind(unit, "mainassist")) then
 							thisstr = gsub(thisstr, "c.Unit" .. append,		unit) -- sub it in as a variable
 							Env[unit] = unit
