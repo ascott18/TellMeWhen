@@ -1203,14 +1203,22 @@ function TMW:CompileOptions()
 									type = "toggle",
 									order = 41,
 								},
-								WarnInvalids = {
-									name = L["UIPANEL_WARNINVALIDS"],
+								SUG_atBeginning = {
+									name = L["SUG_ATBEGINING"],
+									desc = L["SUG_ATBEGINING_DESC"],
+									width = "double",
 									type = "toggle",
-									order = 50,
+									order = 42,
 								},
 								ReceiveComm = {
 									name = L["ALLOWCOMM"],
 									type = "toggle",
+									order = 50,
+								},
+								WarnInvalids = {
+									name = L["UIPANEL_WARNINVALIDS"],
+									type = "toggle",
+									width = "double",
 									order = 51,
 								},
 								VersionWarning = {
@@ -1496,6 +1504,7 @@ function ID:SpellItemToIcon(icon)
 		return
 	end
 	
+	
 	local t, data, subType
 	local input
 	if not (CursorHasSpell() or CursorHasItem()) and ID.DraggingInfo then
@@ -1505,6 +1514,12 @@ function ID:SpellItemToIcon(icon)
 		t, data, subType = GetCursorInfo()
 	end
 	ID.DraggingInfo = nil
+	
+	if not t then
+		return
+	end
+	
+	IE:SaveSettings()
 	
 	-- create a backup before doing things
 	IE:AttemptBackup(icon)
@@ -5660,7 +5675,11 @@ function SUG:NameOnCursor(isClick)
 	-- always escape parentheses, brackets, percent signs, minus signs, plus signs
 	SUG.lastName = gsub(SUG.lastName, "([%(%)%%%[%]%-%+])", "%%%1")
 
-	SUG.atBeginning = "^"..SUG.lastName
+	if db.profile.SUG_atBeginning then
+		SUG.atBeginning = "^" .. SUG.lastName
+	else
+		SUG.atBeginning = SUG.lastName
+	end
 
 	
 	if not SUG.CurrentModule.noMin and (SUG.lastName == "" or not strfind(SUG.lastName, "[^%.]")) then

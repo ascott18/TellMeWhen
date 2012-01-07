@@ -99,10 +99,12 @@ local function Meta_OnUpdate(icon, time)
 				icon.bindText:SetText(ic.bindText:GetText())
 			end
 			
-			if ic.animations then
+			if icon.animations then
 				for k, v in pairs(icon:GetAnimations()) do
 					icon:StopAnimation(v)
 				end
+			end
+			if ic.animations then
 				for k, v in pairs(ic.animations) do
 					icon:StartAnimation(v)
 				end
