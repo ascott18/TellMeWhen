@@ -2380,34 +2380,20 @@ function CNDT:ProcessConditions(icon)
 			if thiscondtstr then
 				local thisstr = andor .. "(" .. strrep("(", c.PrtsBefore) .. thiscondtstr .. strrep(")", c.PrtsAfter)  .. ")"
 
-				
-				if strfind(thisstr, "c.Unit2") then  -- Unit2 MUST be before Unit
-					local unit = TMW:GetUnits(nil, c.Name, true)[1] or ""
-					if (strfind(unit, "maintank") or strfind(unit, "mainassist")) then
-						thisstr = gsub(thisstr, "c.Unit2",		unit) -- sub it in as a variable
-						Env[unit] = unit
-						TMW:RegisterEvent("RAID_ROSTER_UPDATE")
-						TMW:RAID_ROSTER_UPDATE()
-					elseif strfind(unit, "%%[Uu]") then
-						thisstr = gsub(thisstr, "c.Unit2",		"(" .. icon:GetName() .. ".__unitChecked or '')") -- sub it in as a variable
-						unitCheckedSubstitutionUsed = true
-					else
-						thisstr = gsub(thisstr, "c.Unit2",	"\"" .. unit .. "\"") -- sub it in as a string
-					end
-				end
-				
-				if strfind(thisstr, "c.Unit") then
-					local unit = TMW:GetUnits(nil, c.Unit, true)[1] or ""
-					if (strfind(unit, "maintank") or strfind(unit, "mainassist")) then
-						thisstr = gsub(thisstr, "c.Unit",		unit) -- sub it in as a variable
-						Env[unit] = unit
-						TMW:RegisterEvent("RAID_ROSTER_UPDATE")
-						TMW:RAID_ROSTER_UPDATE()
-					elseif strfind(unit, "%%[Uu]") then
-						thisstr = gsub(thisstr, "c.Unit",		"(" .. icon:GetName() .. ".__unitChecked or '')") -- sub it in as a variable
-						unitCheckedSubstitutionUsed = true
-					else
-						thisstr = gsub(thisstr, "c.Unit",	"\"" .. unit .. "\"") -- sub it in as a string
+				for _, append in TMW:Vararg("2", "") do -- Unit2 MUST be before Unit
+					if strfind(thisstr, "c.Unit" .. append) then 
+						local unit = TMW:GetUnits(nil, c.Name, true)[1] or ""
+						if (strfind(unit, "maintank") or strfind(unit, "mainassist")) then
+							thisstr = gsub(thisstr, "c.Unit" .. append,		unit) -- sub it in as a variable
+							Env[unit] = unit
+							TMW:RegisterEvent("RAID_ROSTER_UPDATE")
+							TMW:RAID_ROSTER_UPDATE()
+						elseif strfind(unit, "%%[Uu]") then
+							thisstr = gsub(thisstr, "c.Unit" .. append,		"(" .. icon:GetName() .. ".__unitChecked or '')") -- sub it in as a variable
+							unitCheckedSubstitutionUsed = true
+						else
+							thisstr = gsub(thisstr, "c.Unit" .. append,	"\"" .. unit .. "\"") -- sub it in as a string
+						end
 					end
 				end
 

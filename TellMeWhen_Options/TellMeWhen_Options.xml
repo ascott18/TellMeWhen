@@ -2711,7 +2711,7 @@
 					</Frame>
 
 					<EditBox name="$parentCustomTex" inherits="TellMeWhen_InputBoxTemplate" parentKey="CustomTex" autoFocus="false">
-						<Size x="270" y="15"/>
+						<Size x="250" y="15"/>
 						<Anchors>
 							<Anchor point="TOPLEFT" relativeTo="$parentName" relativePoint="BOTTOMLEFT" y="-4"/>
 						</Anchors>
@@ -2737,7 +2737,7 @@
 						</Scripts>
 					</EditBox>
 					<EditBox name="$parentUnit" inherits="TellMeWhen_UnitEditbox" parentKey="Unit" autoFocus="false">
-						<Size x="270" y="15"/>
+						<Size x="290" y="15"/>
 						<Anchors>
 							<Anchor point="LEFT" relativeTo="$parentCustomTex" relativePoint="RIGHT" x="5"/>
 						</Anchors>
@@ -2754,6 +2754,12 @@
 										return TMW.L["ICONMENU_UNIT_DESC"]
 									end
 								end
+								
+								function self:SetLabels(title)
+									self.label = title
+									self.__title = title
+								end
+								
 								TMW:TT(self, "ICONMENU_UNITSTOWATCH", text, nil, 1)
 							</OnLoad>
 							<OnEditFocusLost>
@@ -2770,10 +2776,16 @@
 							</OnEditFocusLost>
 							<OnTextChanged>
 								local text = self:GetText()
+								
 								if text == "" then
-									self.BackgroundText:SetText("|cFFFF5050" .. self.label)
-									TMW.HELP:Show("ICON_UNIT_MISSING", TMW.CI.ic, self, 0, 0, TMW.L["HELP_NOUNITS"])
-								elseif text == "player" and 20 > TMW.db.global.HelpSettings.HasChangedUnit then
+									if TMW.Types[TMW.CI.t].AllowNoUnit then
+										self.BackgroundText:SetText(self.label)
+										TMW.HELP:Hide("ICON_UNIT_MISSING")
+									else
+										self.BackgroundText:SetText("|cFFFF5050" .. self.label)
+										TMW.HELP:Show("ICON_UNIT_MISSING", TMW.CI.ic, self, 0, 0, TMW.L["HELP_NOUNITS"])
+									end
+								elseif text == "player" and (20 > TMW.db.global.HelpSettings.HasChangedUnit or TMW.Types[TMW.CI.t].AllowNoUnit) then
 									self.BackgroundText:SetText(self.label)
 								else
 									self.BackgroundText:SetText(nil)

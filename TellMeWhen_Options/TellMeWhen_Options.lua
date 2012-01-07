@@ -2623,6 +2623,9 @@ function IE:Load(isRefresh, icon, isHistoryChange)
 	IE.Main.Name:SetLabels(TMW.Types[CI.t].chooseNameTitle, TMW.Types[CI.t].chooseNameText)
 	IE.Main.Name:GetScript("OnTextChanged")(IE.Main.Name)
 	
+	IE.Main.Unit:SetLabels(TMW.Types[CI.t].unitTitle)
+	IE.Main.Unit:GetScript("OnTextChanged")(IE.Main.Unit)
+	
 	TMW:SetUIDropdownText(IE.Main.Type, CI.t)
 	
 	CI.t = db.profile.Groups[groupID].Icons[iconID].Type

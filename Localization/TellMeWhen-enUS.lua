@@ -210,6 +210,7 @@ L["ICONMENU_COMPONENTICONS"] = "Component Icons & Groups"
 
 
 L["ICONMENU_UNITSTOWATCH"] = "Unit(s) to watch"
+L["ICONMENU_UNITSTOWATCH_ALL"] = "OR leave blank to track all"
 L["ICONMENU_UNITS"] = "Units"
 L["ICONMENU_UNIT_DESC"] = [[Enter the units to watch in this box. Units can be inserted from the dropdown at the right, or advanced users can type in their own units. Standard units (e.g. player) and/or friendly player names (e.g. %s) may be used as units. Separate multiple units with semicolons (;). 
 

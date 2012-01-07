@@ -41,6 +41,8 @@ Type.desc = L["ICONMENU_UNITCOOLDOWN_DESC"]
 Type.usePocketWatch = 1
 Type.DurationSyntax = 1
 Type.SUGType = "spellwithduration"
+Type.AllowNoUnit = true
+Type.unitTitle = L["ICONMENU_UNITSTOWATCH"] .. " " .. L["ICONMENU_UNITSTOWATCH_ALL"]
 Type.WhenChecks = {
 	text = L["ICONMENU_SHOWWHEN"],
 	{ value = "alpha", 			text = L["ICONMENU_USABLE"], 			colorCode = "|cFF00FF00" },
@@ -73,6 +75,7 @@ local Cooldowns = setmetatable({}, {__index = function(t, k)
 	t[k] = n
 	return n
 end}) TMW.Cooldowns = Cooldowns
+local GUIDsToNames = {}
 
 local resetsOnCast = {
 	[23989] = { -- readiness
@@ -159,8 +162,10 @@ local resetsOnAura = {
 }
 
 
-function Type:COMBAT_LOG_EVENT_UNFILTERED(e, _, p, _, g, _, _, _, _, _, _, _, i, n)-- tyPe, sourceGuid, spellId, spellName -- 2 NEW ARGS IN 4.2
+function Type:COMBAT_LOG_EVENT_UNFILTERED(e, _, p, _, g, a, _, _, _, _, _, _, i, n)-- tyPe, sourceGuid, sourcenAme, spellId, spellName -- 2 NEW ARGS IN 4.2
 	if p == "SPELL_CAST_SUCCESS" or p == "SPELL_AURA_APPLIED" or p == "SPELL_AURA_REFRESH" or p == "SPELL_DAMAGE" or p == "SPELL_HEAL" or p == "SPELL_MISSED" then
+		GUIDsToNames[g] = a
+		
 		local c = Cooldowns[g]
 		if p == "SPELL_AURA_APPLIED" then
 			if resetsOnAura[i] then
@@ -248,18 +253,27 @@ end
 
 
 local function UnitCooldown_OnUpdate(icon, time)
-	local unstart, unname, unduration, usename, dobreak, useUnit
-	local Alpha, Units, NameArray, OnlySeen, Sort, Durations = icon.Alpha, icon.Units, icon.NameArray, icon.OnlySeen, icon.Sort, icon.Durations
+	local unstart, unname, unduration, usename, dobreak, useUnit, unUnit
+	local Alpha, NameArray, OnlySeen, Sort, Durations, TableToIterate = icon.Alpha, icon.NameArray, icon.OnlySeen, icon.Sort, icon.Durations, icon.TableToIterate
 	local NAL = #NameArray
 	local d = Sort == -1 and huge or 0
 	local UnAlpha = icon.UnAlpha
 
-	for u = 1, #Units do
-		local unit = Units[u]
+	for k, v in next, TableToIterate do
+		local unit, guid, cooldowns
+		if TableToIterate == Cooldowns then
+			guid = k
+			unit = GUIDsToNames[guid] -- unit is a name here, not a unitID
+			cooldowns = v
+		else--if TableToIterate == icon.Units then
+			unit = v
+			guid = UnitGUID(unit)
+			cooldowns = guid and Cooldowns[guid]
+		end
+	--[[for u = 1, #Units do
+		local unit = Units[u] ]]
 		
-		local guid = UnitGUID(unit)
-		if guid then
-			local cooldowns = Cooldowns[guid]
+		if cooldowns then
 			for i = 1, NAL do
 				local iName = NameArray[i]
 				if not isNumber[iName] then
@@ -284,7 +298,7 @@ local function UnitCooldown_OnUpdate(icon, time)
 								unname = iName
 								unstart = _start
 								unduration = _duration
-								useUnit = unit
+								unUnit = unit
 							end
 						else -- we found the first usable cooldown
 							if not usename then
@@ -297,7 +311,7 @@ local function UnitCooldown_OnUpdate(icon, time)
 							unname = iName
 							unstart = _start
 							unduration = _duration
-							useUnit = unit
+							unUnit = unit
 							if Alpha == 0 then -- we DONT care about usable cooldowns, so stop looking
 								dobreak = 1
 								break
@@ -327,7 +341,7 @@ local function UnitCooldown_OnUpdate(icon, time)
 	elseif unname then
 		local color = icon:CrunchColor(unduration)
 		
-		icon:SetInfo(UnAlpha, color, SpellTextures[unname], unstart, unduration, unname, nil, nil, nil, nil, useUnit)
+		icon:SetInfo(UnAlpha, color, SpellTextures[unname], unstart, unduration, unname, nil, nil, nil, nil, unUnit)
 	else
 		icon:SetInfo(0)
 	end
@@ -339,7 +353,14 @@ function Type:Setup(icon, groupID, iconID)
 	icon.NameFirst = TMW:GetSpellNames(icon, icon.Name, 1)
 	icon.NameArray = TMW:GetSpellNames(icon, icon.Name)
 	icon.Durations = TMW:GetSpellDurations(icon, icon.Name)
-	icon.Units = TMW:GetUnits(icon, icon.Unit)
+	
+	if icon.Unit == "" then
+		icon.Units = nil
+		icon.TableToIterate = Cooldowns
+	else
+		icon.Units = TMW:GetUnits(icon, icon.Unit)
+		icon.TableToIterate = icon.Units
+	end
 
 	Type:RegisterEvent("COMBAT_LOG_EVENT_UNFILTERED")
 	Type:RegisterEvent("UNIT_SPELLCAST_SUCCEEDED")
