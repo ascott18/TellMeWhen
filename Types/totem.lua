@@ -117,7 +117,8 @@ function Type:Setup(icon, groupID, iconID)
 	end
 	icon.Slots = wipe(icon.Slots or {})
 	for i=1, 4 do
-		icon.Slots[i] = tonumber(strsub(icon.TotemSlots.."0000", i, i)) == 1
+		local settingBit = i > 1 and bit.lshift(1, i - 1) or 1
+		icon.Slots[i] = bit.band(icon.TotemSlots, settingBit) == settingBit
 	end
 	if pclass == "DEATHKNIGHT" then
 		icon.NameFirst = ""

@@ -32,7 +32,7 @@ local DRData = LibStub("DRData-1.0", true)
 TELLMEWHEN_VERSION = "4.8.0"
 TELLMEWHEN_VERSION_MINOR = strmatch(" @project-version@", " r%d+") or ""
 TELLMEWHEN_VERSION_FULL = TELLMEWHEN_VERSION .. TELLMEWHEN_VERSION_MINOR
-TELLMEWHEN_VERSIONNUMBER = 48016 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
+TELLMEWHEN_VERSIONNUMBER = 48017 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
 if TELLMEWHEN_VERSIONNUMBER > 49000 or TELLMEWHEN_VERSIONNUMBER < 48000 then return error("YOU SCREWED UP THE VERSION NUMBER OR DIDNT CHANGE THE SAFETY LIMITS") end -- safety check because i accidentally made the version number 414069 once
 
 TELLMEWHEN_MAXGROUPS = 1 	--this is a default, used by SetTheory (addon), so dont rename
@@ -624,7 +624,7 @@ TMW.Defaults = {
 						IgnoreNomana			= false,
 						ShowTTText				= false,
 						CheckRefresh			= true,
-						TotemSlots				= "111111",
+						TotemSlots				= 2^6-1,
 						BindText				= "",
 						ConditionDur			= 0,
 						UnConditionDur			= 0,
@@ -1936,6 +1936,14 @@ function TMW:GetUpgradeTable()			-- upgrade functions
 	if TMW.UpgradeTable then return TMW.UpgradeTable end
 	local t = {
 		
+		[48017] = {
+			icon = function(ics)
+				-- convert from some stupid string thing i made up to a bitfield
+				if type(ics.TotemSlots) == "string" then
+					ics.TotemSlots = tonumber(ics.TotemSlots:reverse(), 2)
+				end
+			end,
+		},
 		[48010] = {
 			icon = function(ics)
 				-- OnlyShown was disabled for OnHide (not togglable anymore), so make sure that icons dont get stuck with it enabled

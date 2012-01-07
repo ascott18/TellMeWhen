@@ -32,16 +32,13 @@
 	<CheckButton name="TellMeWhen_RadioCheckTemplate" virtual="true" inherits="TellMeWhen_CheckTemplate">
 		<Scripts>
 			<OnLoad>
+				self.bit = self:GetID() > 1 and bit.lshift(1, self:GetID() - 1) or 1
+				
 				self.text:SetWidth(self:GetParent():GetWidth()-7)
 			</OnLoad>
 			<OnClick>
 				if self.setting == "TotemSlots" then
-					local s = ""
-					for k = 1, 6 do
-						local frame = self:GetParent()["Radio"..k]
-						s = s .. (frame and frame:GetChecked() and 1 or 0)
-					end
-					TMW.CI.ics[self.setting] = s
+					TMW.CI.ics[self.setting] = bit.bxor(TMW.CI.ics.TotemSlots, self.bit)
 				else
 					for k, frame in pairs(self:GetParent()) do
 						if strfind(k, "Radio") then
@@ -1507,14 +1504,17 @@
 			<OnClick>
 				self:SetChecked(not self:GetChecked())
 				
-				local s = ""
+				--[[local s = ""
 				for k = 1, 6 do
 					s = s .. (self:GetParent()[tostring(k)].checked and 1 or 0)
-				end
-				TMW.CI.ics.TotemSlots = s
+				end]]
+				
+				TMW.CI.ics.TotemSlots = bit.bxor(TMW.CI.ics.TotemSlots, self.bit)
 				TMW.IE:ScheduleIconUpdate()
 			</OnClick>
 			<OnLoad>
+				self.bit = self:GetID() > 1 and bit.lshift(1, self:GetID() - 1) or 1
+				
 				function self:GetChecked()
 					return self.checked
 				end
@@ -1527,6 +1527,7 @@
 					end
 				end
 				
+				-- detect what texture should be used
 				for k, v in pairs(self:GetParent()) do
 					if v == self then
 						local runeType = gsub(self:GetName(), self:GetParent():GetName(), "")

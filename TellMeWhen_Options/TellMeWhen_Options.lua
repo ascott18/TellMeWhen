@@ -2919,7 +2919,7 @@ function IE:LoadSettings()
 			for k, frame in pairs(parent) do
 				if strfind(k, "Radio") then
 					if frame.setting == "TotemSlots" then
-						frame:SetChecked(strsub(ics[frame.setting], frame:GetID(), frame:GetID()) == "1")
+						frame:SetChecked(bit.band(ics.TotemSlots, frame.bit) == frame.bit)
 					else
 						local checked = ics[frame.setting] == frame.value
 						frame:SetChecked(checked)
@@ -2944,7 +2944,7 @@ function IE:LoadSettings()
 	if CI.t == "runes" then
 		for k, frame in pairs(IE.Main.TypeChecks.Runes) do
 			if k ~= 0 then
-				frame:SetChecked(strsub(ics.TotemSlots, frame:GetID(), frame:GetID()) == "1")
+				frame:SetChecked(bit.band(ics.TotemSlots, frame.bit) == frame.bit)
 			end
 		end
 		IE.Main.TypeChecks.Runes:Show()

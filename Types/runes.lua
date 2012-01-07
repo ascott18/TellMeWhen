@@ -143,7 +143,8 @@ end
 function Type:Setup(icon, groupID, iconID)
 	icon.Slots = wipe(icon.Slots or {})
 	for i=1, 6 do
-		icon.Slots[i] = tonumber(strsub(icon.TotemSlots.."000000", i, i)) == 1
+		local settingBit = i > 1 and bit.lshift(1, i - 1) or 1
+		icon.Slots[i] = bit.band(icon.TotemSlots, settingBit) == settingBit
 	end
 	
 	for k, v in ipairs(icon.Slots) do
