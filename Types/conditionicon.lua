@@ -67,7 +67,7 @@ local function ConditionIcon_OnUpdate(icon, time)
 	local CndtCheck = icon.CndtCheck_CNDTIC
 	if CndtCheck then
 		local shouldReturn, succeeded = CndtCheck() -- we dont use shouldreturn.
-		
+				
 		local alpha = succeeded and icon.Alpha or icon.UnAlpha
 		
 		local d, start, duration

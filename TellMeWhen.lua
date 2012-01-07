@@ -32,7 +32,7 @@ local DRData = LibStub("DRData-1.0", true)
 TELLMEWHEN_VERSION = "4.8.0"
 TELLMEWHEN_VERSION_MINOR = strmatch(" @project-version@", " r%d+") or ""
 TELLMEWHEN_VERSION_FULL = TELLMEWHEN_VERSION .. TELLMEWHEN_VERSION_MINOR
-TELLMEWHEN_VERSIONNUMBER = 48018 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
+TELLMEWHEN_VERSIONNUMBER = 48019 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
 if TELLMEWHEN_VERSIONNUMBER > 49000 or TELLMEWHEN_VERSIONNUMBER < 48000 then return error("YOU SCREWED UP THE VERSION NUMBER OR DIDNT CHANGE THE SAFETY LIMITS") end -- safety check because i accidentally made the version number 414069 once
 
 TELLMEWHEN_MAXGROUPS = 1 	--this is a default, used by SetTheory (addon), so dont rename
@@ -342,21 +342,34 @@ do -- Iterators
 	end
 
 	do -- vararg
-		local i, t, l = 0, {}
-		local function iter(...)
+		local handlers = {}
+		local function gethandler(...)
+			local handler = wipe(tremove(handlers) or {})
+			
+			handler.i = 0
+			handler.l = select("#", ...)
+			
+			for n = 1, handler.l do
+				handler[n] = select(n, ...)
+			end
+			
+			return handler
+		end
+		
+		local function iter(handler)
+			local i = handler.i
 			i = i + 1
-			if i > l then return end
-			return i, t[i], #t
+			if i > handler.l then
+				tinsert(handlers, handler)
+				return
+			end
+			handler.i = i
+			
+			return i, handler[i], handler.l
 		end
 
 		function TMW:Vararg(...)
-			i = 0
-			wipe(t)
-			l = select("#", ...)
-			for n = 1, l do
-				t[n] = select(n, ...)
-			end
-			return iter
+			return iter, gethandler(...)
 		end
 	end
 

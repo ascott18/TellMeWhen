@@ -2464,7 +2464,6 @@ function CNDT:ProcessConditions(icon)
 		end]]
 	end
 
-
 	local func, err
 	
 	if functionCache[funcstr] then

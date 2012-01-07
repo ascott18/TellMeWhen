@@ -14,6 +14,7 @@
  ** (r397) Animations inherited by a meta icon should now properly cancel when the meta icon changes to an icon with no animations
  ** (r398) Both ranks of Shattered Barrier should now be included in the "Rooted" equivalency
  ** (r401) Conditions that check units should now work again (oops)
+ ** (r402) Condition:1: attempt to index global "c" (a nil value)
 
 ===v4.7.3===
  * New Feature: Animations. You can now pick animations to play when an icon event occurs, such as having the screen shake or an icon flash.
