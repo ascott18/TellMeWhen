@@ -1794,8 +1794,8 @@
 			<Frame name="$parentEventSettings" parentKey="EventSettings">
 				<Size y="1"/>
 				<Anchors>
-					<Anchor point="TOPLEFT" relativeTo="$parentEvents" relativePoint="BOTTOMLEFT" x="0" y="-15"/>
-					<Anchor point="TOPRIGHT" relativeTo="$parentEvents" relativePoint="BOTTOMRIGHT" x="0" y="-15"/>
+					<Anchor point="TOPLEFT" relativeTo="$parentEvents" relativePoint="BOTTOMLEFT" x="0" y="-10"/>
+					<Anchor point="TOPRIGHT" relativeTo="$parentEvents" relativePoint="BOTTOMRIGHT" x="0" y="-10"/>
 				</Anchors>
 				<Layers>
 					<Layer level="OVERLAY">

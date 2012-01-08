@@ -84,7 +84,11 @@ local function ConditionIcon_OnUpdate(icon, time)
 		else
 			d = icon.__duration - (time - icon.__start)
 			d = d > 0 and d or 0
-			start, duration = icon.__start, icon.__duration
+			if d > 0 then
+				start, duration = icon.__start, icon.__duration
+			else
+				start, duration = 0, 0
+			end
 		end
 		
 		if icon.OnlyIfCounting and d <= 0 then

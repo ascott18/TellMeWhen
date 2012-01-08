@@ -18,6 +18,7 @@
  ** (r401) Conditions that check units should now work again (oops)
  ** (r402) Condition:1: attempt to index global "c" (a nil value)
  ** (r403) StaticFormats.lua line 27: bad argument #1 to 'format' (number expected, got string)
+ ** (r406) Fixed a small bug with the timers on Condition Icons
 
 ===v4.7.3===
  * New Feature: Animations. You can now pick animations to play when an icon event occurs, such as having the screen shake or an icon flash.
