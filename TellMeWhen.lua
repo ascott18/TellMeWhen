@@ -32,7 +32,7 @@ local DRData = LibStub("DRData-1.0", true)
 TELLMEWHEN_VERSION = "4.8.0"
 TELLMEWHEN_VERSION_MINOR = strmatch(" @project-version@", " r%d+") or ""
 TELLMEWHEN_VERSION_FULL = TELLMEWHEN_VERSION .. TELLMEWHEN_VERSION_MINOR
-TELLMEWHEN_VERSIONNUMBER = 48020 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
+TELLMEWHEN_VERSIONNUMBER = 48021 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
 if TELLMEWHEN_VERSIONNUMBER > 49000 or TELLMEWHEN_VERSIONNUMBER < 48000 then return error("YOU SCREWED UP THE VERSION NUMBER OR DIDNT CHANGE THE SAFETY LIMITS") end -- safety check because i accidentally made the version number 414069 once
 
 TELLMEWHEN_MAXGROUPS = 1 	--this is a default, used by SetTheory (addon), so dont rename
@@ -1226,12 +1226,18 @@ TMW.AnimationList = {
 			local Animation = data.Animation
 			local AnimationData = TMW.AnimationList[Animation]
 			
+			local Duration = 0
+			local Period = data.Period
+			while Duration < data.Duration do
+				Duration = Duration + (Period * 2)
+			end
+			
 			local table = {
 				data = data,
 				Start = TMW.time,
-				Duration = data.Duration,
+				Duration = Duration,
 				
-				Period = data.Period,
+				Period = Period,
 				FadeAlpha = data.Fade,
 				Alpha = data.a_anim,
 				r = data.r_anim,
@@ -1239,8 +1245,7 @@ TMW.AnimationList = {
 				b = data.b_anim,
 				
 				Animation = Animation
-			}
-			
+			}			
 		
 			-- inherit from ICONFLASH
 			if not AnimationData.OnStart then
@@ -1258,11 +1263,11 @@ TMW.AnimationList = {
 			local FlashPeriod = table.Period
 			local flasher = UIParent.flasher
 			
-			local remaining = table.Duration - (TMW.time - table.Start)
-			local fadingIn = floor(remaining/FlashPeriod) % 2 == 0
+			local timePassed = TMW.time - table.Start
+			local fadingIn = floor(timePassed/FlashPeriod) % 2 == 1
 
 			if table.FadeAlpha then
-				local remainingFlash = remaining % FlashPeriod
+				local remainingFlash = timePassed % FlashPeriod
 				if fadingIn then
 					flasher:SetAlpha(table.Alpha*((FlashPeriod-remainingFlash)/FlashPeriod))
 				else
@@ -1272,7 +1277,7 @@ TMW.AnimationList = {
 				flasher:SetAlpha(fadingIn and table.Alpha or 0)
 			end
 			
-			if remaining < 0 and fadingIn then
+			if timePassed > table.Duration then
 				-- manual version of :StopAnimation	
 				local Animation = table.Animation
 				
@@ -1327,12 +1332,18 @@ TMW.AnimationList = {
 		Fade = true,
 		
 		Play = function(icon, data)
+			local Duration = 0
+			local Period = data.Period
+			while Duration < data.Duration do
+				Duration = Duration + (Period * 2)
+			end
+			
 			icon:StartAnimation{
 				data = data,
 				Start = TMW.time,
-				Duration = data.Duration,
+				Duration = Duration,
 				
-				Period = data.Period,
+				Period = Period,
 				FadeAlpha = data.Fade,
 				Alpha = data.a_anim,
 				r = data.r_anim,
@@ -1345,11 +1356,11 @@ TMW.AnimationList = {
 			local FlashPeriod = table.Period
 			local flasher = icon.flasher 
 			
-			local remaining = table.Duration - (TMW.time - table.Start)
-			local fadingIn = floor(remaining/FlashPeriod) % 2 == 0
+			local timePassed = TMW.time - table.Start
+			local fadingIn = floor(timePassed/FlashPeriod) % 2 == 1
 
 			if table.FadeAlpha then
-				local remainingFlash = remaining % FlashPeriod
+				local remainingFlash = timePassed % FlashPeriod
 				if fadingIn then
 					flasher:SetAlpha(table.Alpha*((FlashPeriod-remainingFlash)/FlashPeriod))
 				else
@@ -1360,7 +1371,7 @@ TMW.AnimationList = {
 			end
 			
 			-- (mostly) generic expiration -- we just finished the last flash, so dont do any more
-			if remaining < 0 and fadingIn then
+			if timePassed > table.Duration then
 				icon:StopAnimation(table)
 			end
 		end,
@@ -1381,42 +1392,99 @@ TMW.AnimationList = {
 		end,
 	},
 	{
+		text = L["ANIM_ICONALPHAFLASH"],
+		desc = L["ANIM_ICONALPHAFLASH_DESC"],
+		animation = "ICONALPHAFLASH",
+		Duration = true,
+		Period = true,
+		Fade = true,
+		
+		Play = function(icon, data)	
+			local Duration = 0
+			local Period = data.Period
+			while Duration < data.Duration do
+				Duration = Duration + (Period * 2)
+			end
+			
+			icon:StartAnimation{
+				data = data,
+				Start = TMW.time,
+				Duration = Duration,
+				
+				Period = Period,
+				FadeAlpha = data.Fade,
+			}
+		end,
+		
+		OnUpdate = function(icon, table)
+			local FlashPeriod = table.Period
+			
+			local timePassed = TMW.time - table.Start
+			local fadingIn = floor(timePassed/FlashPeriod) % 2 == 0
+			
+			if table.FadeAlpha then
+				local remainingFlash = timePassed % FlashPeriod
+				if fadingIn then
+					icon:SetAlpha(icon.__alpha*((FlashPeriod-remainingFlash)/FlashPeriod))
+				else
+					icon:SetAlpha(icon.__alpha*(remainingFlash/FlashPeriod))
+				end
+			else
+				icon:SetAlpha(fadingIn and icon.__alpha or 0)
+			end
+			
+			-- (mostly) generic expiration -- we just finished the last flash, so dont do any more
+			if timePassed > table.Duration then
+				icon:StopAnimation(table)
+			end
+		end,
+		OnStart = function(icon, table)
+			icon.IsFading = (icon.IsFading or 0) + 1
+		end,
+		OnExpire = function(icon, table)
+			icon:SetAlpha(icon.__alpha)
+			local IsFading = (icon.IsFading or 1) - 1
+			icon.IsFading = IsFading > 0 and IsFading or nil
+		end,
+	},
+	{
 		text = L["ANIM_ICONFADE"],
 		desc = L["ANIM_ICONFADE_DESC"],
 		animation = "ICONFADE",
 		Duration = true,
 		
 		Play = function(icon, data)
-			if not icon.FakeHidden then
-				icon:StartAnimation{
-					data = data,
-					Start = TMW.time,
-					Duration = data.Duration,
-					
-					FadeDuration = data.Duration,
-				}
-			end
+			icon:StartAnimation{
+				data = data,
+				Start = TMW.time,
+				Duration = data.Duration,
+				
+				FadeDuration = data.Duration,
+			}
 		end,
 		
 		OnUpdate = function(icon, table)
-			local remaining = table.Duration - (TMW.time - table.Start)
+			if not icon.FakeHidden then
+				local remaining = table.Duration - (TMW.time - table.Start)
+				
+				-- generic expiration
+				if remaining < 0 then
+					icon:StopAnimation(table)
+				else				
+					local pct = remaining / table.FadeDuration
+					local inv = 1-pct
 			
-			-- generic expiration
-			if remaining < 0 then
-				icon:StopAnimation(table)
-			else				
-				local pct = remaining / table.FadeDuration
-				local inv = 1-pct
-		
-				icon:SetAlpha((icon.__oldAlpha * pct) + (icon.__alpha * inv))
+					icon:SetAlpha((icon.__oldAlpha * pct) + (icon.__alpha * inv))
+				end
 			end
 		end,
 		OnStart = function(icon, table)
-			icon.IsFading = true
+			icon.IsFading = (icon.IsFading or 0) + 1
 		end,
 		OnExpire = function(icon, table)
 			icon:SetAlpha(icon.__alpha)
-			icon.IsFading = nil
+			local IsFading = (icon.IsFading or 1) - 1
+			icon.IsFading = IsFading > 0 and IsFading or nil
 		end,
 		
 		
