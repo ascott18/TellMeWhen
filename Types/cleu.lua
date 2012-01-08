@@ -95,7 +95,7 @@ local EventsWithoutSpells = {
 }
 
 local function CLEU_OnEvent(icon, _, t, event, h, sourceGUID, sourceName, sourceFlags, sourceRaidFlags, destGUID, destName, destFlags, destRaidFlags, arg1, arg2, arg3, arg4, arg5, ...)
-	
+
 	if event == "SPELL_MISSED" and arg4 == "REFLECT" then
 		-- make a fake event for spell reflects
 		event = "SPELL_REFLECT"
@@ -104,6 +104,10 @@ local function CLEU_OnEvent(icon, _, t, event, h, sourceGUID, sourceName, source
 		local a, b, c, d = sourceGUID, sourceName, sourceFlags, sourceRaidFlags
 		sourceGUID, sourceName, sourceFlags, sourceRaidFlags = destGUID, destName, destFlags, destRaidFlags
 		destGUID, destName, destFlags, destRaidFlags = a, b, c, d
+	elseif event == "SPELL_INTERRUPT" then
+		-- fake an event that allow filtering based on the spell that caused an interrupt rather than the spell that was interrupted.
+		-- fire it in addition to, not in place of, SPELL_INTERRUPT
+		CLEU_OnEvent(icon, _, t, "SPELL_INTERRUPT_SPELL", h, sourceGUID, sourceName, sourceFlags, sourceRaidFlags, destGUID, destName, destFlags, destRaidFlags, arg1, arg2, arg3, arg4, arg5, ...)
 	end
 	
 	if icon.AllowAnyEvents or icon.CLEUEvents[event] then
@@ -179,7 +183,7 @@ local function CLEU_OnEvent(icon, _, t, event, h, sourceGUID, sourceName, source
 			spellID = arg4 -- the other spell (polymorph, greater heal, arcane intellect, corruption)
 			spellName = arg5
 			tex = SpellTextures[spellID]
-		elseif event == "SPELL_AURA_BROKEN_SPELL" then
+		elseif event == "SPELL_AURA_BROKEN_SPELL" or event == "SPELL_INTERRUPT_SPELL" then
 			extraID = arg4 -- the spell that broke it
 			extraName = arg5
 			spellID = arg1 -- the spell that was broken
@@ -237,8 +241,14 @@ local function CLEU_OnEvent(icon, _, t, event, h, sourceGUID, sourceName, source
 		tex = tex or SpellTextures[spellID] or SpellTextures[spellName] -- [spellName] should never be used, but whatever
 	
 		local NameHash = icon.NameHash
-		if NameHash and not EventsWithoutSpells[event] and not (NameHash[spellID] or NameHash[strlowerCache[spellName]]) then
-			return
+		local duration
+		if NameHash and not EventsWithoutSpells[event] then
+			local key = (NameHash[spellID] or NameHash[strlowerCache[spellName]])
+			if not key then
+				return
+			else
+				duration = icon.Durations[key]
+			end
 		end
 		
 		-- bind text updating
@@ -251,6 +261,7 @@ local function CLEU_OnEvent(icon, _, t, event, h, sourceGUID, sourceName, source
 		end
 		
 		icon.cleu_start = TMW.time
+		icon.cleu_duration = duration or icon.CLEUDur
 		icon.cleu_spell = spellID or spellName -- perfer ID over name, but events without real names (DIED, ENVIRONMENTAL_DAMAGE, SWING) dont have spellIDs, so pass the spellName the be displayed on the icon
 		
 		icon.cleu_sourceUnit = sourceUnit 
@@ -273,7 +284,7 @@ local function CLEU_OnUpdate(icon, time, tex)
 	-- tex is passed in when calling from OnEvent, otherwise its nil (causing there to be no update)
 	
 	local start = icon.cleu_start
-	local duration = icon.CLEUDur
+	local duration = icon.cleu_duration
 
 	--icon:SetInfo(alpha, color, texture, start, duration, spellChecked, reverse, count, countText, forceupdate, unit)
 	if time - start > duration then
@@ -291,6 +302,7 @@ end
 
 function Type:Setup(icon, groupID, iconID)
 	icon.NameHash = icon.Name ~= "" and TMW:GetSpellNames(icon, icon.Name, nil, nil, 1)	
+	icon.Durations = TMW:GetSpellDurations(icon, icon.Name)
 	
 	-- only define units if there are any units. we dont want to waste time iterating an empty table.
 	icon.SourceUnits = icon.SourceUnit ~= "" and TMW:GetUnits(icon, icon.SourceUnit)
@@ -330,6 +342,7 @@ function Type:Setup(icon, groupID, iconID)
 	
 	-- type-specific data that events and OnUpdate use
 	icon.cleu_start = icon.cleu_start or 0
+	icon.cleu_duration = icon.cleu_duration or 0
 	icon.cleu_spell = nil
 	
 	-- type-specific data that events use

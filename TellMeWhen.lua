@@ -32,7 +32,7 @@ local DRData = LibStub("DRData-1.0", true)
 TELLMEWHEN_VERSION = "4.8.0"
 TELLMEWHEN_VERSION_MINOR = strmatch(" @project-version@", " r%d+") or ""
 TELLMEWHEN_VERSION_FULL = TELLMEWHEN_VERSION .. TELLMEWHEN_VERSION_MINOR
-TELLMEWHEN_VERSIONNUMBER = 48023 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
+TELLMEWHEN_VERSIONNUMBER = 48024 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
 if TELLMEWHEN_VERSIONNUMBER > 49000 or TELLMEWHEN_VERSIONNUMBER < 48000 then return error("YOU SCREWED UP THE VERSION NUMBER OR DIDNT CHANGE THE SAFETY LIMITS") end -- safety check because i accidentally made the version number 414069 once
 
 TELLMEWHEN_MAXGROUPS = 1 	--this is a default, used by SetTheory (addon), so dont rename
@@ -4013,7 +4013,7 @@ function TMW.IconBase.SetInfo(icon, alpha, color, texture, start, duration, spel
 		icon.texture:SetTexture(texture)
 	end
 	
-	-- NO EVENT HANDLING PAST THIS POINT! -- well, actually it doesnt matter anymore, but whatever
+	-- NO EVENT HANDLING PAST THIS POINT! -- well, actually it doesnt matter that much anymore, but they still won't be handled till the next update
 	if icon.EventsToFire and next(icon.EventsToFire) then
 		local played, announced, animated
 		for i = 1, #TMW.EventList do
@@ -4022,7 +4022,6 @@ function TMW.IconBase.SetInfo(icon, alpha, color, texture, start, duration, spel
 			if doFireAndData then
 				
 				local data = icon[event]
-				print(icon, data and data.Animation, data, doFireAndData) 
 				
 				if data.OnlyShown and icon.__alpha <= 0 then
 					doFireAndData = false

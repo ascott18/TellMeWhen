@@ -2059,6 +2059,7 @@ CLEU.Events = {
 	"SPELL_CAST_SUCCESS",
 "SPACE",
 	"SPELL_INTERRUPT",-- extraSpellID/name
+	"SPELL_INTERRUPT_SPELL",-- extraSpellID/name
 	
 	
 "CAT_MISC",	
@@ -5976,6 +5977,22 @@ function Module:Entry_Insert(insert)
 		local firsthalf = start > 0 and strsub(currenttext, 0, start) or ""
 		local lasthalf = strsub(currenttext, SUG.endpos+1)
 		
+		
+		-- DURATION STUFF:
+		-- determine if we should add a colon to the inserted text. a colon should be added if:
+			-- one existed before (the user clicked on a spell with a duration defined or already typed it in)
+			-- the module requests (requires) one
+		local doAddColon = SUG.duration or SUG.CurrentModule.doAddColon
+		
+		-- determine if there is an actual duration to be added to the inserted spell
+		local hasDurationData = SUG.duration
+		
+		if doAddColon then
+		-- the entire text to be inserted in
+			insert = insert .. ": " .. (hasDurationData or "")
+		end		
+		
+		
 		-- the entire text with the insertion added in
 		local newtext = firsthalf .. "; " .. insert .. "; " .. lasthalf
 		-- clean it up
@@ -5988,8 +6005,17 @@ function Module:Entry_Insert(insert)
 		end
 		
 		-- if we are at the end of the exitbox then put a semicolon in anyway for convenience
-		if SUG.Box:GetCursorPosition() == #SUG.Box:GetText() then 
-			SUG.Box:SetText(SUG.Box:GetText() .. "; ")
+		if SUG.Box:GetCursorPosition() == #SUG.Box:GetText() then
+			local append = "; "
+			if doAddColon then
+				append = (not hasDurationData and " " or "") .. append
+			end
+			SUG.Box:SetText(SUG.Box:GetText() .. append)
+		end
+
+		-- if we added a colon but there was no duration information inserted, move the cursor back 2 characters so the user can type it in quickly
+		if doAddColon and not hasDurationData then
+			SUG.Box:SetCursorPosition(SUG.Box:GetCursorPosition() - 2)
 		end
 		
 		-- attempt another suggestion (it will either be hidden or it will do another)

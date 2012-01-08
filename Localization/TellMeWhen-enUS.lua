@@ -1086,10 +1086,18 @@ L["CLEU_SPELL_EXTRA_ATTACKS"] = "Extra Attacks Gained"
 L["CLEU_SPELL_EXTRA_ATTACKS_DESC"] = "Occurs when you are granted extra melee swings from procs."
 L["CLEU_SPELL_HEAL"] = "Heal"
 L["CLEU_SPELL_INSTAKILL"] = "Instant Kill"
-L["CLEU_SPELL_INTERRUPT"] = "Interrupt"
+L["CLEU_SPELL_INTERRUPT"] = "Interrupt - Spell Interrupted"
 L["CLEU_SPELL_INTERRUPT_DESC"] = [[Occurs when a spell cast is interrupted.
 
-Icon can be filtered by the spell that was interrupted. The interrupt spell that interrupted it can be accessed with the substitution '%x' in text displays.]]
+Icon can be filtered by the spell that was interrupted. The interrupt spell that interrupted it can be accessed with the substitution '%x' in text displays.
+
+Note the difference between the two interrupt events - both will always occur when a spell is interrupted, but each filters the spells involved differently.]]
+L["CLEU_SPELL_INTERRUPT_SPELL"] = "Interrupt - Interrupt Spell Used"
+L["CLEU_SPELL_INTERRUPT_SPELL_DESC"] = [[Occurs when a spell cast is interrupted.
+
+Icon can be filtered by the spell that caused the interrupt. The spell that was interrupted can be accessed with the substitution '%x' in text displays.
+
+Note the difference between the two interrupt events - both will always occur when a spell is interrupted, but each filters the spells involved differently.]]
 L["CLEU_SPELL_LEECH"] = "Resource Leech"
 L["CLEU_SPELL_LEECH_DESC"] = "Occurs when resources (health/mana/rage/energy/etc) are removed from one unit and simultaneously given to another."
 L["CLEU_SPELL_MISSED"] = "Spell Miss"
@@ -1186,8 +1194,11 @@ L["CLEU_FLAGS"] = "Exclusions"
 L["CLEU_FLAGS_DESC"] = "Contains a list of attributes that can be used to exclude certain units from triggering the icon. If an exclusion is checked, and a unit has that attribute, the icon will not process the event that the unit was part of."
 
 L["CLEU_TIMER"] = "Timer to set on event"
-L["CLEU_TIMER_DESC"] = "Duration of a timer to set on the icon when an event occurs"
+L["CLEU_TIMER_DESC"] = [[Duration of a timer to set on the icon when an event occurs.
 
+You may also set durations using the "Spell: Duration" syntax in the %q editbox to be used whenever an event is handled using a spell that you have set as a filter.
+
+If no duration is defined for a spell, or you do not have any spell filter set (the editbox is blank), then this duration will be used.]]
 
 
 
