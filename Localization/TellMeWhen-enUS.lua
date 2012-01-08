@@ -1081,7 +1081,7 @@ L["CLEU_SPELL_EXTRA_ATTACKS_DESC"] = "Occurs when you are granted extra melee sw
 L["CLEU_SPELL_HEAL"] = "Heal"
 L["CLEU_SPELL_INSTAKILL"] = "Instant Kill"
 L["CLEU_SPELL_INTERRUPT"] = "Interrupt"
-L["CLEU_SPELL_STOLEN_DESC"] = [[Occurs when a spell cast is interrupted.
+L["CLEU_SPELL_INTERRUPT_DESC"] = [[Occurs when a spell cast is interrupted.
 
 Icon can be filtered by the spell that was interrupted. The interrupt spell that interrupted it can be accessed with the substitution '%x' in text displays.]]
 L["CLEU_SPELL_LEECH"] = "Resource Leech"
