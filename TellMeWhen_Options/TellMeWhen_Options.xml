@@ -368,20 +368,52 @@
 			<Anchor point="RIGHT" x="-20"/>
 		</Anchors>
 		<Scripts>
-			<OnMinMaxChanged>
-				local minValue, maxValue = self:GetMinMaxValues()
-				if self.isTime then
-					minValue, maxValue = TMW:FormatSeconds(minValue), TMW:FormatSeconds(maxValue) 
+			<OnMouseUp>
+				TMW.ANIM:SetSliderMinMax(self)
+			</OnMouseUp>
+			<OnLoad>
+				local frameName = self:GetName():gsub(self:GetParent():GetName(), ""):upper()
+				
+				self.text:SetText(TMW.L["ANIM_" .. frameName])
+				TMW:TT(self, "ANIM_" .. frameName, "ANIM_" .. frameName .. "_DESC")
+				
+				self.step = self:GetValueStep() -- 0.1
+				self.step = floor((self.step*10^5) + .5) / 10^5 -- attempt to get a half decent number here instead of 0.1000000000000327826 -- seriously, wtf?
+				self.range = 10
+				
+				--self:SetValueStep(self.step)
+				TMW.ANIM:SetSliderMinMax(self)
+				
+				self:EnableMouseWheel(true)
+				self.getvalue = self.GetValue
+				function self:GetValue()
+					local step = self.step or 1
+					local val = self:getvalue()
+					return floor(val * (1/step) + 0.5) / (1/step)
 				end
-				self.Low:SetText(minValue)
-				self.High:SetText(maxValue)
+				
 				local color = 34/255
 				self.Low:SetTextColor(color, color, color, 1)
 				self.High:SetTextColor(color, color, color, 1)
-			</OnMinMaxChanged>
+			</OnLoad>
 			<OnMouseWheel>
-				self:SetValue(self:GetValue()+(delta*self.step))
+				if IsShiftKeyDown() then
+					delta = delta*10
+				end
+				if IsControlKeyDown() then
+					delta = delta*60 -- (60 seconds)
+				end
+				if delta == 1 or delta == -1 then
+					delta = delta*(self.step or 1)
+				end
+				TMW.ANIM:SetSliderMinMax(self, self:GetValue()+delta)
 			</OnMouseWheel>
+			<OnEnable>
+				self:SetAlpha(1)
+			</OnEnable>
+			<OnDisable>
+				self:SetAlpha(0.4)
+			</OnDisable>
 		</Scripts>
 	</Slider>
 
@@ -4133,72 +4165,84 @@
 						</Layers>
 					</Frame>
 					
-					<Slider name="$parentDuration" parentKey="Duration" inherits="TellMeWhen_AnimationSliderTemplate" minValue="0" maxValue="10" valuestep="0.1" >
+					<Slider name="$parentDuration" parentKey="Duration" inherits="TellMeWhen_AnimationSliderTemplate" valuestep="0.1" >
 						<Anchors>
 							<Anchor point="TOPLEFT" relativeTo="$parentAnimations" relativePoint="TOPRIGHT" x="20" y="-20"/>
 						</Anchors>
 						<Scripts>
 							<OnValueChanged>
-								value = tonumber(format("%" .. self.step .. "f", value))
-								value = max(value, 0.1)
+								value = max(self:GetValue(), 0.1)
+								
 								self.Mid:SetText(TMW.L["ANIM_SECONDS"]:format(TMW:FormatSeconds(value, nil, true)))
+							--	TMW.ANIM:SetSliderMinMax(self, value)
+								
 								if TMW.CI.ics then
 									TMW.ANIM:GetEventSettings().Duration = value
 									TMW.IE:ScheduleIconUpdate()
 								end
 							</OnValueChanged>
-							<OnLoad>
-								self.text:SetText(TMW.L["ANIM_DURATION"])
-								TMW:TT(self, "ANIM_DURATION", "ANIM_DURATION_DESC")
-								self:EnableMouseWheel(true)
-								self.step = 0.1
-								self.isTime = true
-							</OnLoad>
 						</Scripts>
 					</Slider>
-					<Slider name="$parentMagnitude" parentKey="Magnitude" inherits="TellMeWhen_AnimationSliderTemplate" minValue="1" maxValue="20" valuestep="1">
+					
+					<CheckButton name="$parentInfinite" inherits="TellMeWhen_CheckTemplate" parentKey="Infinite">
 						<Anchors>
-							<Anchor point="TOPLEFT" relativeTo="$parentDuration" relativePoint="BOTTOMLEFT" y="-30"/>
+							<Anchor point="TOPLEFT" relativeTo="$parentDuration" relativePoint="BOTTOMLEFT" y="-10"/>
+						</Anchors>
+						<Scripts>
+							<OnLoad>
+								self.text:SetText(TMW.L["ANIM_INFINITE"])
+								TMW:TT(self, "ANIM_INFINITE", "ANIM_INFINITE_DESC")
+								
+								hooksecurefunc(self, "SetChecked", function(self, value)
+									if value then
+										self:GetParent().Duration:Disable()
+									else
+										self:GetParent().Duration:Enable()
+									end								
+								end)
+							</OnLoad>
+							<OnClick>
+								self:SetChecked(self:GetChecked()) -- trigger the hook
+								TMW.ANIM:GetEventSettings().Infinite = not not self:GetChecked()
+							</OnClick>
+						</Scripts>
+					</CheckButton>
+					
+					<Slider name="$parentMagnitude" parentKey="Magnitude" inherits="TellMeWhen_AnimationSliderTemplate" valuestep="1">
+						<Anchors>
+							<Anchor point="TOPLEFT" relativeTo="$parentDuration" relativePoint="BOTTOMLEFT" y="-60"/>
 						</Anchors>
 						<Scripts>
 							<OnValueChanged>
-								value = tonumber(format("%" .. self.step .. "f", value))
+								value = self:GetValue() --max(self:GetValue(), 0.1)
+								
 								self.Mid:SetText(value)
+							--	TMW.ANIM:SetSliderMinMax(self, value)
+								
 								if TMW.CI.ics then
 									TMW.ANIM:GetEventSettings().Magnitude = value
 									TMW.IE:ScheduleIconUpdate()
 								end
 							</OnValueChanged>
-							<OnLoad>
-								self.text:SetText(TMW.L["ANIM_MAGNITUDE"])
-								TMW:TT(self, "ANIM_MAGNITUDE", "ANIM_MAGNITUDE_DESC")
-								self:EnableMouseWheel(true)
-								self.step = 1
-							</OnLoad>
 						</Scripts>
 					</Slider>
-					<Slider name="$parentPeriod" parentKey="Period" inherits="TellMeWhen_AnimationSliderTemplate" minValue="0" maxValue="10" valuestep="0.1" >
+					<Slider name="$parentPeriod" parentKey="Period" inherits="TellMeWhen_AnimationSliderTemplate" valuestep="0.1" >
 						<Size y="17"/>
 						<Anchors>
-							<Anchor point="TOPLEFT" relativeTo="$parentDuration" relativePoint="BOTTOMLEFT" y="-30"/>
+							<Anchor point="TOPLEFT" relativeTo="$parentMagnitude" />
 						</Anchors>
 						<Scripts>
 							<OnValueChanged>
-								value = tonumber(format("%" .. self.step .. "f", value))
-								value = max(value, 0.1)
+								value = max(self:GetValue(), 0.1)
+								
 								self.Mid:SetText(TMW.L["ANIM_SECONDS"]:format(TMW:FormatSeconds(value, nil, true)))
+							--	TMW.ANIM:SetSliderMinMax(self, value)
+								
 								if TMW.CI.ics then
 									TMW.ANIM:GetEventSettings().Period = value
 									TMW.IE:ScheduleIconUpdate()
 								end
 							</OnValueChanged>
-							<OnLoad>
-								self.text:SetText(TMW.L["ANIM_PERIOD"])
-								TMW:TT(self, "ANIM_PERIOD", "ANIM_PERIOD_DESC")
-								self:EnableMouseWheel(true)
-								self.isTime = true
-								self.step = 0.1
-							</OnLoad>
 						</Scripts>
 					</Slider>
 					<!--Slider name="$parentScaleMagnitude" parentKey="ScaleMagnitude" inherits="TellMeWhen_AnimationSliderTemplate" minValue="0" maxValue="10" valuestep="0.1">
@@ -4307,6 +4351,7 @@
 							</OnClick>
 						</Scripts>
 					</CheckButton>
+					
 					<!--CheckButton name="$parentIcon" inherits="TellMeWhen_CheckTemplate" parentKey="Icon">
 						<Anchors>
 							<Anchor point="TOP" relativeTo="$parentSticky" relativePoint="BOTTOM" y="4"/>

@@ -4,6 +4,7 @@
  * Text outputs now substitute a hyperlink for '%s' when appropriate.
  * You can now leave the unit cooldown icon's "Unit(s) to watch" field blank to track all known units.
  * New animation: Icon: Alpha Flash.
+ * Icon animations can now be set to play indefinitely (or until stopped by the Icon: Stop Animations animation trigger).
  * Bug Fixes:
  ** (r384) Weapon enchant should now be properly detected in zhCH clients
  ** (r384) The weapon enchant suggestion list should now properly display shaman enchants in zhTW clients

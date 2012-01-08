@@ -1005,6 +1005,8 @@ L["ANIM_COLOR"] = "Color/Opacity"
 L["ANIM_COLOR_DESC"] = "Configure the color and the opacity of the flash."
 L["ANIM_FADE"] = "Fade Flashes"
 L["ANIM_FADE_DESC"] = "Check to have a smooth fade between each flash. Uncheck to instantly flash."
+L["ANIM_INFINITE"] = "Play Indefinitely"
+L["ANIM_INFINITE_DESC"] = "Check to cause the animation to play until it is overwritten by another animation on the icon of the same type, or until the %q animation is played."
 
 
 L["ANIM_SCREENSHAKE"] = "Screen: Shake"
@@ -1024,6 +1026,8 @@ L["ANIM_SCREENFLASH"] = "Screen: Flash"
 L["ANIM_SCREENFLASH_DESC"] = "Flashes a colored overlay across the screen."
 L["ANIM_ICONFADE"] = "Icon: Fade In/Out"
 L["ANIM_ICONFADE_DESC"] = "Smoothly applies any opacity changes that occured with the selected event."
+L["ANIM_ICONCLEAR"] = "Icon: Stop Animations"
+L["ANIM_ICONCLEAR_DESC"] = "Stops all animations that are playing on the current icon."
 
 
 

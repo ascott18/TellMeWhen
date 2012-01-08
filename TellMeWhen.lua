@@ -32,7 +32,7 @@ local DRData = LibStub("DRData-1.0", true)
 TELLMEWHEN_VERSION = "4.8.0"
 TELLMEWHEN_VERSION_MINOR = strmatch(" @project-version@", " r%d+") or ""
 TELLMEWHEN_VERSION_FULL = TELLMEWHEN_VERSION .. TELLMEWHEN_VERSION_MINOR
-TELLMEWHEN_VERSIONNUMBER = 48021 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
+TELLMEWHEN_VERSIONNUMBER = 48022 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
 if TELLMEWHEN_VERSIONNUMBER > 49000 or TELLMEWHEN_VERSIONNUMBER < 48000 then return error("YOU SCREWED UP THE VERSION NUMBER OR DIDNT CHANGE THE SAFETY LIMITS") end -- safety check because i accidentally made the version number 414069 once
 
 TELLMEWHEN_MAXGROUPS = 1 	--this is a default, used by SetTheory (addon), so dont rename
@@ -672,6 +672,7 @@ TMW.Defaults = {
 								ScaleMagnitude 	= 2,
 								Period			= 0.4,
 								Fade	  		= true,
+								Infinite  		= false,
 								r_anim	  		= 1,
 								g_anim	  		= 0,
 								b_anim	  		= 0,
@@ -1186,7 +1187,7 @@ TMW.AnimationList = {
 				local Animation = table.Animation
 				
 				Animations[WorldFrame][Animation] = nil
-				TMW.AnimationList[Animation].OnExpire(WorldFrame, table)
+				TMW.AnimationList[Animation].OnStop(WorldFrame, table)
 			else
 				local Amt = (table.Magnitude or 10) / (1 + 10*(300^(-(remaining))))
 				local moveX = random(-Amt, Amt) 
@@ -1206,7 +1207,7 @@ TMW.AnimationList = {
 				end
 			end
 		end,
-		OnExpire = function(WorldFrame, table)
+		OnStop = function(WorldFrame, table)
 			WorldFrame:ClearAllPoints()
 			for _, v in pairs(TMW.WorldFramePoints) do
 				WorldFrame:SetPoint(v[1], v[2], v[3], v[4], v[5])
@@ -1238,7 +1239,7 @@ TMW.AnimationList = {
 				Duration = Duration,
 				
 				Period = Period,
-				FadeAlpha = data.Fade,
+				Fade = data.Fade,
 				Alpha = data.a_anim,
 				r = data.r_anim,
 				g = data.g_anim,
@@ -1251,7 +1252,7 @@ TMW.AnimationList = {
 			if not AnimationData.OnStart then
 				local ICONFLASH = TMW.AnimationList.ICONFLASH
 				AnimationData.OnStart = ICONFLASH.OnStart
-				AnimationData.OnExpire = ICONFLASH.OnExpire
+				AnimationData.OnStop = ICONFLASH.OnStop
 			end
 			
 			-- manual version of :StartAnimation
@@ -1266,7 +1267,7 @@ TMW.AnimationList = {
 			local timePassed = TMW.time - table.Start
 			local fadingIn = floor(timePassed/FlashPeriod) % 2 == 1
 
-			if table.FadeAlpha then
+			if table.Fade then
 				local remainingFlash = timePassed % FlashPeriod
 				if fadingIn then
 					flasher:SetAlpha(table.Alpha*((FlashPeriod-remainingFlash)/FlashPeriod))
@@ -1282,7 +1283,7 @@ TMW.AnimationList = {
 				local Animation = table.Animation
 				
 				Animations[UIParent][Animation] = nil
-				TMW.AnimationList[Animation].OnExpire(UIParent, table)
+				TMW.AnimationList[Animation].OnStop(UIParent, table)
 			end
 		end,
 	},
@@ -1292,12 +1293,13 @@ TMW.AnimationList = {
 		animation = "ICONSHAKE",
 		Duration = true,
 		Magnitude = true,
+		Infinite = true,
 		
 		Play = function(icon, data)
 			icon:StartAnimation{
 				data = data,
 				Start = TMW.time,
-				Duration = data.Duration,
+				Duration = data.Infinite and math.huge or data.Duration,
 				
 				Animation = Animation,
 				Magnitude = data.Magnitude,
@@ -1318,7 +1320,7 @@ TMW.AnimationList = {
 				icon:StopAnimation(table)
 			end
 		end,
-		OnExpire = function(icon, table)
+		OnStop = function(icon, table)
 			icon:SetPoint("TOPLEFT", icon.x, icon.y)
 		end,
 	},
@@ -1330,12 +1332,17 @@ TMW.AnimationList = {
 		Period = true,
 		Color = true,
 		Fade = true,
+		Infinite = true,
 		
 		Play = function(icon, data)
 			local Duration = 0
 			local Period = data.Period
-			while Duration < data.Duration do
-				Duration = Duration + (Period * 2)
+			if data.Infinite then
+				Duration = math.huge
+			else
+				while Duration < data.Duration do
+					Duration = Duration + (Period * 2)
+				end
 			end
 			
 			icon:StartAnimation{
@@ -1344,7 +1351,7 @@ TMW.AnimationList = {
 				Duration = Duration,
 				
 				Period = Period,
-				FadeAlpha = data.Fade,
+				Fade = data.Fade,
 				Alpha = data.a_anim,
 				r = data.r_anim,
 				g = data.g_anim,
@@ -1359,7 +1366,7 @@ TMW.AnimationList = {
 			local timePassed = TMW.time - table.Start
 			local fadingIn = floor(timePassed/FlashPeriod) % 2 == 1
 
-			if table.FadeAlpha then
+			if table.Fade then
 				local remainingFlash = timePassed % FlashPeriod
 				if fadingIn then
 					flasher:SetAlpha(table.Alpha*((FlashPeriod-remainingFlash)/FlashPeriod))
@@ -1387,7 +1394,7 @@ TMW.AnimationList = {
 			flasher:Show()
 			flasher:SetTexture(table.r, table.g, table.b, 1)
 		end,
-		OnExpire = function(icon, table)
+		OnStop = function(icon, table)
 			icon.flasher:Hide()
 		end,
 	},
@@ -1398,12 +1405,17 @@ TMW.AnimationList = {
 		Duration = true,
 		Period = true,
 		Fade = true,
+		Infinite = true,
 		
 		Play = function(icon, data)	
 			local Duration = 0
 			local Period = data.Period
-			while Duration < data.Duration do
-				Duration = Duration + (Period * 2)
+			if data.Infinite then
+				Duration = math.huge
+			else
+				while Duration < data.Duration do
+					Duration = Duration + (Period * 2)
+				end
 			end
 			
 			icon:StartAnimation{
@@ -1412,7 +1424,7 @@ TMW.AnimationList = {
 				Duration = Duration,
 				
 				Period = Period,
-				FadeAlpha = data.Fade,
+				Fade = data.Fade,
 			}
 		end,
 		
@@ -1422,7 +1434,7 @@ TMW.AnimationList = {
 			local timePassed = TMW.time - table.Start
 			local fadingIn = floor(timePassed/FlashPeriod) % 2 == 0
 			
-			if table.FadeAlpha then
+			if table.Fade then
 				local remainingFlash = timePassed % FlashPeriod
 				if fadingIn then
 					icon:SetAlpha(icon.__alpha*((FlashPeriod-remainingFlash)/FlashPeriod))
@@ -1441,7 +1453,7 @@ TMW.AnimationList = {
 		OnStart = function(icon, table)
 			icon.IsFading = (icon.IsFading or 0) + 1
 		end,
-		OnExpire = function(icon, table)
+		OnStop = function(icon, table)
 			icon:SetAlpha(icon.__alpha)
 			local IsFading = (icon.IsFading or 1) - 1
 			icon.IsFading = IsFading > 0 and IsFading or nil
@@ -1481,7 +1493,7 @@ TMW.AnimationList = {
 		OnStart = function(icon, table)
 			icon.IsFading = (icon.IsFading or 0) + 1
 		end,
-		OnExpire = function(icon, table)
+		OnStop = function(icon, table)
 			icon:SetAlpha(icon.__alpha)
 			local IsFading = (icon.IsFading or 1) - 1
 			icon.IsFading = IsFading > 0 and IsFading or nil
@@ -1494,12 +1506,13 @@ TMW.AnimationList = {
 		desc = L["ANIM_ACTVTNGLOW_DESC"],
 		animation = "ACTVTNGLOW",
 		Duration = true,
+		Infinite = true,
 		
 		Play = function(icon, data)
 			icon:StartAnimation{
 				data = data,
 				Start = TMW.time,
-				Duration = data.Duration,
+				Duration = data.Infinite and math.huge or data.Duration,
 			}
 		end,
 		
@@ -1511,13 +1524,30 @@ TMW.AnimationList = {
 		OnStart = function(icon, table)
 			ActionButton_ShowOverlayGlow(icon) -- dont upvalue, can be hooked (masque does, maybe others)
 		end,
-		OnExpire = function(icon, table)
+		OnStop = function(icon, table)
 			ActionButton_HideOverlayGlow(icon) -- dont upvalue, can be hooked (masque doesn't, but maybe others)
+		end,
+	},
+	{
+		noclick = true,
+	},
+	{
+		text = L["ANIM_ICONCLEAR"],
+		desc = L["ANIM_ICONCLEAR_DESC"],
+		animation = "ICONCLEAR",
+		
+		Play = function(icon, data)
+			for k, v in pairs(icon:GetAnimations()) do
+				-- instead of just calling :StopAnimation() right here, set this attribute so that meta icons inheriting the animation will also stop it.
+				v.HALTED = true
+			end
 		end,
 	},
 }
 for k, v in pairs(TMW.AnimationList) do
-	TMW.AnimationList[v.animation] = v
+	if v.animation then
+		TMW.AnimationList[v.animation] = v
+	end
 end local AnimationList = TMW.AnimationList
 
 
@@ -1937,7 +1967,12 @@ function TMW:OnUpdate(elapsed)					-- THE MAGICAL ENGINE OF DOING EVERYTHING
 	for icon, animations in next, Animations do
 		for key, animationTable in next, animations do
 			-- its the magical modular tour, and its coming to take you awayyy......
-			AnimationList[animationTable.Animation].OnUpdate(icon, animationTable)
+			
+			if animationTable.HALTED then
+				icon:StopAnimation(animationTable)
+			else
+				AnimationList[animationTable.Animation].OnUpdate(icon, animationTable)
+			end
 		end
 	end
 end
@@ -3599,8 +3634,8 @@ function TMW.IconBase.StopAnimation(icon, arg1)
 	if AnimationData then
 		icon:GetAnimations()[Animation] = nil
 	
-		if AnimationData.OnExpire then
-			AnimationData.OnExpire(icon, table)
+		if AnimationData.OnStop then
+			AnimationData.OnStop(icon, table)
 		end
 	end
 end

@@ -5042,6 +5042,11 @@ function ANIM:OnInitialize()
 		frame.animationData = animationData
 		frame.animation = animationData.animation
 		
+		if animationData.noclick then
+			frame:SetScript("OnClick", nil)
+			frame:GetHighlightTexture():SetTexture(nil)
+		end
+		
 		frame.Name:SetText(animationData.text)
 		TMW:TT(frame, animationData.text, animationData.desc, 1, 1)
 		
@@ -5091,6 +5096,7 @@ function ANIM:TestEvent(event)
 	CI.ic:FireEvent(settings, 1, 1, nil)
 end
 
+
 ---------- Animations ----------
 function ANIM:SelectAnimation(animation)
 	local EventSettings = self:GetEventSettings()
@@ -5111,9 +5117,19 @@ function ANIM:SelectAnimation(animation)
 
 	local animationSettings = TMW.AnimationList[animation]
 	if animationSettings then
-		for i, arg in TMW:Vararg("Duration", "Magnitude", "Period"--[[, "ScaleMagnitude"]]) do
+		for i, arg in TMW:Vararg("Duration", "Magnitude", "Period") do
 			if animationSettings[arg] then
-				self[arg]:SetValue(EventSettings[arg])
+				self:SetSliderMinMax(self[arg], EventSettings[arg])
+				self[arg]:Show()
+				self[arg]:Enable()
+			else
+				self[arg]:Hide()
+			end
+		end
+		
+		for i, arg in TMW:Vararg("Fade", "Infinite") do
+			if animationSettings[arg] then
+				self[arg]:SetChecked(EventSettings[arg])
 				self[arg]:Show()
 			else
 				self[arg]:Hide()
@@ -5127,13 +5143,6 @@ function ANIM:SelectAnimation(animation)
 			self.Color:Show()
 		else
 			self.Color:Hide()
-		end
-		
-		if animationSettings.Fade then
-			self.Fade:SetChecked(EventSettings.Fade)
-			self.Fade:Show()
-		else
-			self.Fade:Hide()
 		end
 	end
 
@@ -5161,7 +5170,24 @@ function ANIM:GetNumUsedEvents()
 	return n
 end
 
+function ANIM:SetSliderMinMax(Slider, level)
+	-- level is passed in only when the setting is changing or being loaded
+	if Slider.range then
+		local deviation = Slider.range/2
+		local val = level or Slider:GetValue()
 
+		local newmin = max(0, val-deviation)
+		local newmax = max(deviation, val + deviation)
+		
+		Slider:SetMinMaxValues(newmin, newmax)
+		Slider.Low:SetText(newmin)
+		Slider.High:SetText(newmax)
+	end
+
+	if level then
+		Slider:SetValue(level)
+	end
+end
 
 -- ----------------------
 -- SUGGESTER
@@ -7778,8 +7804,6 @@ function CNDT.GroupBase.SetSliderMinMax(group, level)
 	local v = CNDT.ConditionsByType[UIDropDownMenu_GetSelectedValue(group.Type)]
 	if not v then return end
 	local Slider = group.Slider
-	local vmin = get(v.min)
-	local vmax = get(v.max)
 	if v.range then
 		local deviation = v.range/2
 		local val = level or Slider:GetValue()
@@ -7791,19 +7815,22 @@ function CNDT.GroupBase.SetSliderMinMax(group, level)
 		Slider.Low:SetText(get(v.texttable, newmin) or newmin)
 		Slider.High:SetText(get(v.texttable, newmax) or newmax)
 	else
+		local vmin = get(v.min)
+		local vmax = get(v.max)
 		Slider:SetMinMaxValues(vmin or 0, vmax or 1)
 		Slider.Low:SetText(get(v.texttable, vmin) or v.mint or vmin or 0)
 		Slider.High:SetText(get(v.texttable, vmax) or v.maxt or vmax or 1)
 	end
 		
-	local Min, Max, midt = Slider:GetMinMaxValues()
-	if v.midt == true then
-		midt = get(v.texttable, ((Max-Min)/2)+Min) or ((Max-Min)/2)+Min
+	local Min, Max = Slider:GetMinMaxValues()
+	local Mid
+	if v.Mid == true then
+		Mid = get(v.texttable, ((Max-Min)/2)+Min) or ((Max-Min)/2)+Min
 	else
-		midt = get(v.midt, ((Max-Min)/2)+Min)
+		Mid = get(v.midt, ((Max-Min)/2)+Min)
 	end
-	Slider.Mid:SetText(midt)
-		
+	Slider.Mid:SetText(Mid)
+	
 	Slider.step = v.step or 1
 	Slider:SetValueStep(Slider.step)
 	if level then
