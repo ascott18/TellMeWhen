@@ -75,7 +75,7 @@ local Cooldowns = setmetatable({}, {__index = function(t, k)
 	t[k] = n
 	return n
 end}) TMW.Cooldowns = Cooldowns
-local GUIDsToNames = {}
+--local GUIDsToNames = {}
 
 local resetsOnCast = {
 	[23989] = { -- readiness
@@ -164,7 +164,7 @@ local resetsOnAura = {
 
 function Type:COMBAT_LOG_EVENT_UNFILTERED(e, _, p, _, g, a, _, _, _, _, _, _, i, n)-- tyPe, sourceGuid, sourcenAme, spellId, spellName -- 2 NEW ARGS IN 4.2
 	if p == "SPELL_CAST_SUCCESS" or p == "SPELL_AURA_APPLIED" or p == "SPELL_AURA_REFRESH" or p == "SPELL_DAMAGE" or p == "SPELL_HEAL" or p == "SPELL_MISSED" then
-		GUIDsToNames[g] = a
+	--	GUIDsToNames[g] = a
 		
 		local c = Cooldowns[g]
 		if p == "SPELL_AURA_APPLIED" then
