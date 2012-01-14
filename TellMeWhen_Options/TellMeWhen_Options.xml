@@ -4305,7 +4305,7 @@
 								end
 								self.opacityFunc = function()
 									local settings = TMW.ANIM:GetEventSettings()
-									local a = OpacitySliderFrame:GetValue()
+									local a = 1 - OpacitySliderFrame:GetValue()
 									settings.a_anim = a
 									self.background:SetAlpha(a)
 									TMW.IE:ScheduleIconUpdate()
@@ -4330,7 +4330,7 @@
 								ColorPickerFrame.func, ColorPickerFrame.opacityFunc, ColorPickerFrame.cancelFunc = self.func, self.opacityFunc, self.cancel
 								ColorPickerFrame:SetColorRGB(r, g, b)
 								ColorPickerFrame.hasOpacity = true
-								ColorPickerFrame.opacity = a
+								ColorPickerFrame.opacity = 1 - a
 								ColorPickerFrame:Show()
 							</OnClick>
 						</Scripts>

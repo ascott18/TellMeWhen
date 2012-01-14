@@ -41,8 +41,8 @@ Type.desc = L["ICONMENU_UNITCOOLDOWN_DESC"]
 Type.usePocketWatch = 1
 Type.DurationSyntax = 1
 Type.SUGType = "spellwithduration"
-Type.AllowNoUnit = true
-Type.unitTitle = L["ICONMENU_UNITSTOWATCH"] .. " " .. L["ICONMENU_UNITSTOWATCH_ALL"]
+--Type.AllowNoUnit = true
+--Type.unitTitle = L["ICONMENU_UNITSTOWATCH"] .. " " .. L["ICONMENU_UNITSTOWATCH_ALL"]
 Type.WhenChecks = {
 	text = L["ICONMENU_SHOWWHEN"],
 	{ value = "alpha", 			text = L["ICONMENU_USABLE"], 			colorCode = "|cFF00FF00" },
@@ -259,7 +259,7 @@ local function UnitCooldown_OnUpdate(icon, time)
 	local d = Sort == -1 and huge or 0
 	local UnAlpha = icon.UnAlpha
 
-	for k, v in next, TableToIterate do
+	--[[for k, v in next, TableToIterate do
 		local unit, guid, cooldowns
 		if TableToIterate == Cooldowns then
 			guid = k
@@ -269,9 +269,11 @@ local function UnitCooldown_OnUpdate(icon, time)
 			unit = v
 			guid = UnitGUID(unit)
 			cooldowns = guid and Cooldowns[guid]
-		end
-	--[[for u = 1, #Units do
-		local unit = Units[u] ]]
+		end]]
+	for u = 1, #TableToIterate do -- TableToIterate is icon.Units - i want to keep compatability with the other code that allows all units (for now)
+		local unit = TableToIterate[u]
+		local guid = UnitGUID(unit)
+		local cooldowns = guid and Cooldowns[guid]
 		
 		if cooldowns then
 			for i = 1, NAL do
@@ -354,13 +356,13 @@ function Type:Setup(icon, groupID, iconID)
 	icon.NameArray = TMW:GetSpellNames(icon, icon.Name)
 	icon.Durations = TMW:GetSpellDurations(icon, icon.Name)
 	
-	if icon.Unit == "" then
-		icon.Units = nil
-		icon.TableToIterate = Cooldowns
-	else
+	--if icon.Unit == "" then
+	--	icon.Units = nil
+	--	icon.TableToIterate = Cooldowns
+	--else
 		icon.Units = TMW:GetUnits(icon, icon.Unit)
 		icon.TableToIterate = icon.Units
-	end
+	--end
 
 	Type:RegisterEvent("COMBAT_LOG_EVENT_UNFILTERED")
 	Type:RegisterEvent("UNIT_SPELLCAST_SUCCEEDED")

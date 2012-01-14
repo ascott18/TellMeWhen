@@ -6393,8 +6393,8 @@ local Module = SUG:NewModule("spellwithduration", SUG:GetModule("spell"))
 Module.doAddColon = true
 local MATCH_RECAST_TIME_MIN, MATCH_RECAST_TIME_SEC
 function Module:OnInitialize()
-	MATCH_RECAST_TIME_MIN = SPELL_RECAST_TIME_MIN:gsub("%%%.3g", "(%%d+)")
-	MATCH_RECAST_TIME_SEC = SPELL_RECAST_TIME_SEC:gsub("%%%.3g", "(%%d+)")
+	MATCH_RECAST_TIME_MIN = SPELL_RECAST_TIME_MIN:gsub("%%%.3g", "([%%d%%.]+)")
+	MATCH_RECAST_TIME_SEC = SPELL_RECAST_TIME_SEC:gsub("%%%.3g", "([%%d%%.]+)")
 end
 function Module:Entry_OnClick(f, button)
 	local insert

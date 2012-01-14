@@ -2,7 +2,7 @@
  * New icon type: Combat Event. Displays information about combat events according to filters that you can set. Full support for events, including text output.
  * Rewrote the entire animation system to allow meta icons to inherit icon animations.
  * Text outputs now substitute a hyperlink for '%s' when appropriate.
- * You can now leave the unit cooldown icon's "Unit(s) to watch" field blank to track all known units.
+ * --You can now leave the unit cooldown icon's "Unit(s) to watch" field blank to track all known units.
  * New animation: Icon: Alpha Flash.
  * Icon animations can now be set to play indefinitely (or until stopped by the Icon: Stop Animations animation trigger).
  * Removed Entangling Roots from the CrowdControl debuff equivalency.
@@ -12,7 +12,7 @@
  ** (r384) TellMeWhen_Options.lua:2092 Usage: GetAddon(name): 'name' - Cannot find an AceAddon 'LUI_Cooldown'
  ** (r385) Moving/Swapping an icon that the icon editor is editing shouldn't cause the old settings to stick around
  ** (r390) Weapon enchant icons should now always detect the current weapon enchant in a timely manner for rogue characters
- ** (r391) Added the debuff that results from being the the target of a warrior who casts intimidating shout with the glyph
+ ** (r391) Added the debuff that results from being the the target of a warrior who casts intimidating shout with the glyph to the Feared debuff equivalency
  ** (r396) Buff/debuff icons should now set an ID as their spell checked rather than a name, allowing them to function more completely with the hyperlink feature of r395
  ** (r397) Animations inherited by a meta icon should now properly cancel when the meta icon changes to an icon with no animations
  ** (r398) Both ranks of Shattered Barrier should now be included in the "Rooted" equivalency
@@ -20,6 +20,7 @@
  ** (r402) Condition:1: attempt to index global "c" (a nil value)
  ** (r403) StaticFormats.lua line 27: bad argument #1 to 'format' (number expected, got string)
  ** (r406) Fixed a small bug with the timers on Condition Icons
+ ** (r409) Spell durations containing a decimal should now be properly inserted via the suggestion list when durations are inserted
 
 ===v4.7.3===
  * New Feature: Animations. You can now pick animations to play when an icon event occurs, such as having the screen shake or an icon flash.
@@ -947,7 +948,7 @@
  * Fixed the ugly memory leak
  * Also greatly reduced CPU usage in the process
 
-v.1.4.3
+===v1.4.3===
  * Added stance checking per group. This can be configured in the group options in the interface options panel.
 
 ===v1.4.2a===
@@ -975,7 +976,7 @@ v.1.4.3
  * Fixed Item cooldowns
 
 ===v1.3.1a===
- * Removed a call to an function that was part of the old config UI,
+ * Removed a call to an function that was part of the old config UI
 
 ===v1.3.1===
  * The interface options configuration now uses Ace3 for a much cleaner and more functional look

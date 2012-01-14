@@ -20,4 +20,4 @@ end
 str = table.concat(t, ";")
 print(str)
 
-io.open("B:\\Games\\World Of Warcraft\\Interface\\AddOns\\TellMeWhen\\Scripts\\Enrages.lua", "w"):write(str)
+io.open("C:\\Program Files\\World Of Warcraft\\Interface\\AddOns\\TellMeWhen\\Scripts\\Enrages.lua", "w"):write(str)
