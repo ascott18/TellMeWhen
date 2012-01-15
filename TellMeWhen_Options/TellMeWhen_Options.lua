@@ -473,7 +473,7 @@ do -- TMW:FindModule()
 		if type(self) ~= "table" then
 			return
 		end
-		if self.baseName == "TellMeWhen_Options" then
+		if self.baseName == "TellMeWhen_Options" or self.baseName == "TellMeWhen" then
 			return self
 		end
 		local Module = testFrame(self.GetParent and self:GetParent()) or testFrame(self.frame) or testFrame(self.Module) or testFrame(self.module)
@@ -4378,7 +4378,7 @@ end
 -- EVENTS
 -- ----------------------
 
-EVENTS = TMW:NewModule("Events") TMW.EVENTS = EVENTS
+EVENTS = TMW.EVENTS
 
 function EVENTS:SetupEventSettings()
 	local EventSettings = self.EventSettings
@@ -4611,15 +4611,22 @@ function EVENTS:GetEventSettings(event)
 	return TMW.CI.ics.Events[event or self.currentEvent]
 end
 
+function EVENTS:TestEvent(event)
+	local settings = self:GetEventSettings(event)
+	
+	self:HandleEvent(CI.ic, settings)
+end
+
+
 -- ----------------------
 -- SOUNDS
 -- ----------------------
 
-SND = TMW:NewModule("Sound", EVENTS) TMW.SND = SND
+SND = TMW.SND
 SND.tabText = L["SOUND_TAB"]
 SND.LSM = LSM
 
-function SND:OnInitialize()
+function SND:OnOptionsLoaded()
 	SND.tab = IE.SoundTab
 	SND:SetupEventButtons("SOUND_EVENT_GLOBALDESC")
 
@@ -4672,11 +4679,6 @@ function SND:SetupEventDisplay(event)
 	SND.Events[eventID].DataText:SetText(name)
 end
 
-function SND:TestEvent(event)
-	local settings = self:GetEventSettings(event)
-	
-	TMW.CI.ic:FireEvent(settings, nil, 1, 1)
-end
 
 
 ---------- Sounds ----------
@@ -4820,11 +4822,11 @@ end
 -- ANNOUNCEMENTS
 -- ----------------------
 
-ANN = TMW:NewModule("Announcements", EVENTS) TMW.ANN = ANN
+ANN = TMW.ANN
 ANN.tabText = L["ANN_TAB"]
 local ChannelList = TMW.ChannelList
 
-function ANN:OnInitialize()
+function ANN:OnOptionsLoaded()
 	ANN.tab = IE.AnnounceTab
 	ANN:SetupEventButtons("ANN_EVENT_GLOBALDESC")
 	
@@ -4897,11 +4899,6 @@ function ANN:SetupEventDisplay(event)
 	end
 end
 
-function ANN:TestEvent(event)
-	local settings = self:GetEventSettings(event)
-	
-	CI.ic:FireEvent(settings, 1, nil, 1)
-end
 
 ---------- Channels ----------
 function ANN:SelectChannel(channel)
@@ -5013,10 +5010,10 @@ end
 -- ANIMATIONS
 -- ----------------------
 
-ANIM = TMW:NewModule("Animations", EVENTS) TMW.ANIM = ANIM
+ANIM = TMW.ANIM
 ANIM.tabText = L["ANIM_TAB"]
 
-function ANIM:OnInitialize()
+function ANIM:OnOptionsLoaded()
 	self.tab = IE.AnimationsTab
 	self:SetupEventButtons("ANIM_EVENT_GLOBALDESC")
 	
@@ -5032,7 +5029,7 @@ function ANIM:OnInitialize()
 	-- create channel frames
 	local previousFrame
 	local offs = 0
-	for i, animationData in ipairs(TMW.AnimationList) do
+	for i, animationData in ipairs(self.AnimationList) do
 		i = i + offs
 		local frame = CreateFrame("Button", Animations:GetName().."Animation"..i, Animations, "TellMeWhen_AnimationSelectButton", i)
 		Animations[i] = frame
@@ -5079,7 +5076,7 @@ function ANIM:SetupEventDisplay(event)
 	local eventID, eventString = self:GetDisplayInfo(event)
 	
 	local animation = self:GetEventSettings(eventString).Animation
-	local animationSettings = TMW.AnimationList[animation]
+	local animationSettings = self.AnimationList[animation]
 	
 	if animationSettings then
 		local text = animationSettings.text
@@ -5091,11 +5088,6 @@ function ANIM:SetupEventDisplay(event)
 	end
 end
 
-function ANIM:TestEvent(event)
-	local settings = self:GetEventSettings(event)
-	
-	CI.ic:FireEvent(settings, 1, 1, nil)
-end
 
 
 ---------- Animations ----------
@@ -5116,7 +5108,7 @@ function ANIM:SelectAnimation(animation)
 	end
 	self.currentAnimationSetting = animation
 
-	local animationSettings = TMW.AnimationList[animation]
+	local animationSettings = self.AnimationList[animation]
 	if animationSettings then
 		for i, arg in TMW:Vararg("Duration", "Magnitude", "Period") do
 			if animationSettings[arg] then

@@ -66,7 +66,7 @@ local bitband = bit.band
 
 
 ---------- Locals ----------
-local db, updatehandler, BarGCD, ClockGCD, Locked, SndChan, FramesToFind, UnitsToUpdate, CNDTEnv, ColorMSQ, OnlyMSQ, WorldFrameFlasher
+local db, updatehandler, BarGCD, ClockGCD, Locked, SndChan, FramesToFind, UnitsToUpdate, CNDTEnv, ColorMSQ, OnlyMSQ, AnimationList
 local UPD_INTV = 0.06	--this is a default, local because i use it in onupdate functions
 local runEvents, updatePBar = 1, 1
 local GCD, NumShapeshiftForms, LastUpdate = 0, 0, 0
@@ -74,7 +74,7 @@ local IconUpdateFuncs, GroupUpdateFuncs, unitsToChange = {}, {}, {}
 local BindUpdateFuncs
 local loweredbackup = {}
 local Animations = {[UIParent] = {}, [WorldFrame] = {}}
-local Shakers, ActivationGlows, FlashingFlashers, --[[Scalers,]] FadingIcons, CDBarsToUpdate, PBarsToUpdate = {}, {}, {}, {}, {}, {}--[[, {}]]
+local CDBarsToUpdate, PBarsToUpdate = {}, {}
 local time = GetTime() TMW.time = time
 local sctcolor = {r=1, b=1, g=1}
 local clientVersion = select(4, GetBuildInfo())
@@ -455,20 +455,22 @@ end
 
 local RelevantToAll = {
 	-- (or almost all, use false to override)
-	Enabled = true,
-	Name = true,
-	Type = true,
-	Events = true,
-	Conditions = true,
-	BindText = true,
-	CustomTex = true,
-	ShowTimer = true,
-	ShowTimerText = true,
-	ShowWhen = true,
-	FakeHidden = true,
-	Alpha = true,
-	UnAlpha = true,
-	ConditionAlpha = true
+	__index = {
+		Enabled = true,
+		Name = true,
+		Type = true,
+		Events = true,
+		Conditions = true,
+		BindText = true,
+		CustomTex = true,
+		ShowTimer = true,
+		ShowTimerText = true,
+		ShowWhen = true,
+		FakeHidden = true,
+		Alpha = true,
+		UnAlpha = true,
+		ConditionAlpha = true
+	}
 }
 
 TMW.Types = setmetatable({}, {
@@ -1148,409 +1150,6 @@ for k, v in pairs(TMW.ChannelList) do
 	TMW.ChannelList[v.channel] = v
 end local ChannelList = TMW.ChannelList
 
-TMW.AnimationList = {
-	{
-		text = NONE,
-		animation = "",
-	},
-	{
-		text = L["ANIM_SCREENSHAKE"],
-		desc = L["ANIM_SCREENSHAKE_DESC"],
-		animation = "SCREENSHAKE",
-		Duration = true,
-		Magnitude = true,
-		
-		Play = function(icon, data)
-			if not WorldFrame:IsProtected() or not InCombatLockdown() then
-				local Animation = data.Animation
-				
-				local table = {
-					data = data,
-					Start = TMW.time,
-					Duration = data.Duration,
-					
-					Animation = Animation,
-					Magnitude = data.Magnitude,
-				}
-				
-				-- manual version of :StartAnimation
-				Animations[WorldFrame][Animation] = table
-				TMW.AnimationList[Animation].OnStart(WorldFrame, table)
-			end
-		end,
-		
-		OnUpdate = function(WorldFrame, table)
-			local remaining = table.Duration - (TMW.time - table.Start)
-			
-			if remaining < 0 then
-				-- manual version of :StopAnimation	
-				local Animation = table.Animation
-				
-				Animations[WorldFrame][Animation] = nil
-				TMW.AnimationList[Animation].OnStop(WorldFrame, table)
-			else
-				local Amt = (table.Magnitude or 10) / (1 + 10*(300^(-(remaining))))
-				local moveX = random(-Amt, Amt) 
-				local moveY = random(-Amt, Amt) 
-				
-				WorldFrame:ClearAllPoints()
-				for _, v in pairs(TMW.WorldFramePoints) do
-					WorldFrame:SetPoint(v[1], v[2], v[3], v[4] + moveX, v[5] + moveY)
-				end
-			end
-		end,
-		OnStart = function(WorldFrame, table)
-			if not TMW.WorldFramePoints then
-				TMW.WorldFramePoints = {}
-				for i = 1, WorldFrame:GetNumPoints() do
-					TMW.WorldFramePoints[i] = { WorldFrame:GetPoint(i) }
-				end
-			end
-		end,
-		OnStop = function(WorldFrame, table)
-			WorldFrame:ClearAllPoints()
-			for _, v in pairs(TMW.WorldFramePoints) do
-				WorldFrame:SetPoint(v[1], v[2], v[3], v[4], v[5])
-			end
-		end,
-	},
-	{
-		text = L["ANIM_SCREENFLASH"],
-		desc = L["ANIM_SCREENFLASH_DESC"],
-		animation = "SCREENFLASH",
-		Duration = true,
-		Period = true,
-		Color = true,
-		Fade = true,
-		
-		Play = function(icon, data)
-			local Animation = data.Animation
-			local AnimationData = TMW.AnimationList[Animation]
-			
-			local Duration = 0
-			local Period = data.Period
-			while Duration < data.Duration do
-				Duration = Duration + (Period * 2)
-			end
-			
-			local table = {
-				data = data,
-				Start = TMW.time,
-				Duration = Duration,
-				
-				Period = Period,
-				Fade = data.Fade,
-				Alpha = data.a_anim,
-				r = data.r_anim,
-				g = data.g_anim,
-				b = data.b_anim,
-				
-				Animation = Animation
-			}			
-		
-			-- inherit from ICONFLASH
-			if not AnimationData.OnStart then
-				local ICONFLASH = TMW.AnimationList.ICONFLASH
-				AnimationData.OnStart = ICONFLASH.OnStart
-				AnimationData.OnStop = ICONFLASH.OnStop
-			end
-			
-			-- manual version of :StartAnimation
-			Animations[UIParent][Animation] = table
-			TMW.AnimationList[Animation].OnStart(UIParent, table)
-		end,
-		
-		OnUpdate = function(UIParent, table)
-			local FlashPeriod = table.Period
-			local flasher = UIParent.flasher
-			
-			local timePassed = TMW.time - table.Start
-			local fadingIn = floor(timePassed/FlashPeriod) % 2 == 1
-
-			if table.Fade then
-				local remainingFlash = timePassed % FlashPeriod
-				if fadingIn then
-					flasher:SetAlpha(table.Alpha*((FlashPeriod-remainingFlash)/FlashPeriod))
-				else
-					flasher:SetAlpha(table.Alpha*(remainingFlash/FlashPeriod))
-				end
-			else
-				flasher:SetAlpha(fadingIn and table.Alpha or 0)
-			end
-			
-			if timePassed > table.Duration then
-				-- manual version of :StopAnimation	
-				local Animation = table.Animation
-				
-				Animations[UIParent][Animation] = nil
-				TMW.AnimationList[Animation].OnStop(UIParent, table)
-			end
-		end,
-	},
-	{
-		text = L["ANIM_ICONSHAKE"],
-		desc = L["ANIM_ICONSHAKE_DESC"],
-		animation = "ICONSHAKE",
-		Duration = true,
-		Magnitude = true,
-		Infinite = true,
-		
-		Play = function(icon, data)
-			icon:StartAnimation{
-				data = data,
-				Start = TMW.time,
-				Duration = data.Infinite and math.huge or data.Duration,
-				
-				Animation = Animation,
-				Magnitude = data.Magnitude,
-			}
-		end,
-		
-		OnUpdate = function(icon, table)
-			local remaining = table.Duration - (TMW.time - table.Start)
-			
-			local Amt = (table.Magnitude or 10) / (1 + 10*(300^(-(remaining))))
-			local moveX = random(-Amt, Amt) 
-			local moveY = random(-Amt, Amt) 
-			
-			icon:SetPoint("TOPLEFT", icon.x + moveX, icon.y + moveY)
-			
-			-- generic expiration
-			if remaining < 0 then
-				icon:StopAnimation(table)
-			end
-		end,
-		OnStop = function(icon, table)
-			icon:SetPoint("TOPLEFT", icon.x, icon.y)
-		end,
-	},
-	{
-		text = L["ANIM_ICONFLASH"],
-		desc = L["ANIM_ICONFLASH_DESC"],
-		animation = "ICONFLASH",
-		Duration = true,
-		Period = true,
-		Color = true,
-		Fade = true,
-		Infinite = true,
-		
-		Play = function(icon, data)
-			local Duration = 0
-			local Period = data.Period
-			if data.Infinite then
-				Duration = math.huge
-			else
-				while Duration < data.Duration do
-					Duration = Duration + (Period * 2)
-				end
-			end
-			
-			icon:StartAnimation{
-				data = data,
-				Start = TMW.time,
-				Duration = Duration,
-				
-				Period = Period,
-				Fade = data.Fade,
-				Alpha = data.a_anim,
-				r = data.r_anim,
-				g = data.g_anim,
-				b = data.b_anim,
-			}
-		end,
-		
-		OnUpdate = function(icon, table)
-			local FlashPeriod = table.Period
-			local flasher = icon.flasher 
-			
-			local timePassed = TMW.time - table.Start
-			local fadingIn = floor(timePassed/FlashPeriod) % 2 == 1
-
-			if table.Fade then
-				local remainingFlash = timePassed % FlashPeriod
-				if fadingIn then
-					flasher:SetAlpha(table.Alpha*((FlashPeriod-remainingFlash)/FlashPeriod))
-				else
-					flasher:SetAlpha(table.Alpha*(remainingFlash/FlashPeriod))
-				end
-			else
-				flasher:SetAlpha(fadingIn and table.Alpha or 0)
-			end
-			
-			-- (mostly) generic expiration -- we just finished the last flash, so dont do any more
-			if timePassed > table.Duration then
-				icon:StopAnimation(table)
-			end
-		end,
-		OnStart = function(icon, table)
-			local flasher 
-			if icon.flasher then
-				flasher = icon.flasher
-			else
-				flasher = TMW:GetFlasher(icon)
-				icon.flasher = flasher
-			end
-			
-			flasher:Show()
-			flasher:SetTexture(table.r, table.g, table.b, 1)
-		end,
-		OnStop = function(icon, table)
-			icon.flasher:Hide()
-		end,
-	},
-	{
-		text = L["ANIM_ICONALPHAFLASH"],
-		desc = L["ANIM_ICONALPHAFLASH_DESC"],
-		animation = "ICONALPHAFLASH",
-		Duration = true,
-		Period = true,
-		Fade = true,
-		Infinite = true,
-		
-		Play = function(icon, data)	
-			local Duration = 0
-			local Period = data.Period
-			if data.Infinite then
-				Duration = math.huge
-			else
-				while Duration < data.Duration do
-					Duration = Duration + (Period * 2)
-				end
-			end
-			
-			icon:StartAnimation{
-				data = data,
-				Start = TMW.time,
-				Duration = Duration,
-				
-				Period = Period,
-				Fade = data.Fade,
-			}
-		end,
-		
-		OnUpdate = function(icon, table)
-			local FlashPeriod = table.Period
-			
-			local timePassed = TMW.time - table.Start
-			local fadingIn = floor(timePassed/FlashPeriod) % 2 == 0
-			
-			if table.Fade then
-				local remainingFlash = timePassed % FlashPeriod
-				if fadingIn then
-					icon:SetAlpha(icon.__alpha*((FlashPeriod-remainingFlash)/FlashPeriod))
-				else
-					icon:SetAlpha(icon.__alpha*(remainingFlash/FlashPeriod))
-				end
-			else
-				icon:SetAlpha(fadingIn and icon.__alpha or 0)
-			end
-			
-			-- (mostly) generic expiration -- we just finished the last flash, so dont do any more
-			if timePassed > table.Duration then
-				icon:StopAnimation(table)
-			end
-		end,
-		OnStart = function(icon, table)
-			icon.IsFading = (icon.IsFading or 0) + 1
-		end,
-		OnStop = function(icon, table)
-			icon:SetAlpha(icon.__alpha)
-			local IsFading = (icon.IsFading or 1) - 1
-			icon.IsFading = IsFading > 0 and IsFading or nil
-		end,
-	},
-	{
-		text = L["ANIM_ICONFADE"],
-		desc = L["ANIM_ICONFADE_DESC"],
-		animation = "ICONFADE",
-		Duration = true,
-		
-		Play = function(icon, data)
-			icon:StartAnimation{
-				data = data,
-				Start = TMW.time,
-				Duration = data.Duration,
-				
-				FadeDuration = data.Duration,
-			}
-		end,
-		
-		OnUpdate = function(icon, table)
-			if not icon.FakeHidden then
-				local remaining = table.Duration - (TMW.time - table.Start)
-				
-				-- generic expiration
-				if remaining < 0 then
-					icon:StopAnimation(table)
-				else				
-					local pct = remaining / table.FadeDuration
-					local inv = 1-pct
-			
-					icon:SetAlpha((icon.__oldAlpha * pct) + (icon.__alpha * inv))
-				end
-			end
-		end,
-		OnStart = function(icon, table)
-			icon.IsFading = (icon.IsFading or 0) + 1
-		end,
-		OnStop = function(icon, table)
-			icon:SetAlpha(icon.__alpha)
-			local IsFading = (icon.IsFading or 1) - 1
-			icon.IsFading = IsFading > 0 and IsFading or nil
-		end,
-		
-		
-	},
-	{
-		text = L["ANIM_ACTVTNGLOW"],
-		desc = L["ANIM_ACTVTNGLOW_DESC"],
-		animation = "ACTVTNGLOW",
-		Duration = true,
-		Infinite = true,
-		
-		Play = function(icon, data)
-			icon:StartAnimation{
-				data = data,
-				Start = TMW.time,
-				Duration = data.Infinite and math.huge or data.Duration,
-			}
-		end,
-		
-		OnUpdate = function(icon, table)
-			if table.Duration - (TMW.time - table.Start) < 0 then
-				icon:StopAnimation(table)
-			end
-		end,
-		OnStart = function(icon, table)
-			ActionButton_ShowOverlayGlow(icon) -- dont upvalue, can be hooked (masque does, maybe others)
-		end,
-		OnStop = function(icon, table)
-			ActionButton_HideOverlayGlow(icon) -- dont upvalue, can be hooked (masque doesn't, but maybe others)
-		end,
-	},
-	{
-		noclick = true,
-	},
-	{
-		text = L["ANIM_ICONCLEAR"],
-		desc = L["ANIM_ICONCLEAR_DESC"],
-		animation = "ICONCLEAR",
-		
-		Play = function(icon, data)
-			for k, v in pairs(icon:GetAnimations()) do
-				-- instead of just calling :StopAnimation() right here, set this attribute so that meta icons inheriting the animation will also stop it.
-				v.HALTED = true
-			end
-		end,
-	},
-}
-for k, v in pairs(TMW.AnimationList) do
-	if v.animation then
-		TMW.AnimationList[v.animation] = v
-	end
-end local AnimationList = TMW.AnimationList
-
-
 do -- STANCES
 	TMW.Stances = {
 		{class = "WARRIOR", 	id = 2457}, 	-- Battle Stance
@@ -2208,7 +1807,7 @@ function TMW:GetUpgradeTable()			-- upgrade functions
 			icon = function(ics)
 				if ics.Type == "conditionicon" then
 					ics.Alpha = 1
-					ics.UnAlpha = ics.ConditionAlpha
+					ics.UnAlpha = ics.ConditionAlpha or 0
 					ics.ConditionAlpha = 0
 				end
 			end,
@@ -3205,8 +2804,6 @@ function TMW:ProcessEquivalencies()
 	end
 end
 
-
-
 function TMW:InjectDataIntoString(Text, icon, doBlizz)
 	if not Text then return Text end
 	
@@ -3279,6 +2876,559 @@ function TMW:InjectDataIntoString(Text, icon, doBlizz)
 	
 	return Text
 end
+
+
+
+local EVENTS = TMW:NewModule("Events", "AceEvent-3.0") TMW.EVENTS = EVENTS
+function EVENTS:OnInitialize()
+	function EVENTS:ADDON_LOADED(_, addon)
+		if addon == "TellMeWhen_Options" then
+			for _, Module in self:IterateModules() do
+				Module:OnOptionsLoaded()
+			end
+		end
+	end
+	
+	self:RegisterEvent("ADDON_LOADED")
+end
+
+local SND = EVENTS:NewModule("Sound", EVENTS) TMW.SND = SND
+function SND:ProcessIconEventSettings(eventSettings)
+	local data = eventSettings.Sound
+	if data == "" or data == "Interface\\Quiet.ogg" or data == "None" then
+		eventSettings.SoundData = nil
+	elseif strfind(data, "%.[^\\]+$") then
+		eventSettings.SoundData = data
+		return true
+	else
+		local s = LSM:Fetch("sound", data)
+		if s and s ~= "Interface\\Quiet.ogg" and s ~= "" then
+			eventSettings.SoundData = s
+			return true
+		else
+			eventSettings.SoundData = nil
+		end
+	end
+end
+function SND:HandleEvent(icon, data)
+	local Sound = data.SoundData
+	if Sound then
+		PlaySoundFile(Sound, SndChan)
+		return true
+	end
+end
+
+
+local ANN = EVENTS:NewModule("Announcements", EVENTS) TMW.ANN = ANN
+function ANN:ProcessIconEventSettings(eventSettings)
+	if eventSettings.Channel ~= "" then
+		return true
+	end
+end
+function ANN:HandleEvent(icon, data)
+	local Channel = data.Channel
+	if Channel ~= "" then
+		local Text = data.Text
+		local chandata = ChannelList[Channel]
+		
+		Text = TMW:InjectDataIntoString(Text, icon, not (chandata and chandata.isBlizz))
+		
+		if Channel == "MSBT" then
+			if MikSBT then
+				local Size = data.Size
+				if Size == 0 then Size = nil end
+				MikSBT.DisplayMessage(Text, data.Location, data.Sticky, data.r*255, data.g*255, data.b*255, Size, nil, data.Icon and icon.__tex)
+			end
+		elseif Channel == "SCT" then
+			if SCT then
+				sctcolor.r, sctcolor.g, sctcolor.b = data.r, data.g, data.b
+				SCT:DisplayCustomEvent(Text, sctcolor, data.Sticky, data.Location, nil, data.Icon and icon.__tex)
+			end
+		elseif Channel == "PARROT" then
+			if Parrot then
+				local Size = data.Size
+				if Size == 0 then Size = nil end
+				Parrot:ShowMessage(Text, data.Location, data.Sticky, data.r, data.g, data.b, nil, Size, nil, data.Icon and icon.__tex)
+			end
+		elseif Channel == "FRAME" then
+			local Location = data.Location
+			
+			if data.Icon then
+				Text = "|T" .. (icon.__tex or "") .. ":0|t " .. Text
+			end
+			
+			if _G[Location] == RaidWarningFrame then
+				RaidNotice_AddMessage(RaidWarningFrame, Text, data)
+			else
+				local i = 1
+				while _G["ChatFrame"..i] do
+					local frame = _G["ChatFrame"..i]
+					if Location == frame.name then
+						frame:AddMessage(Text, data.r, data.g, data.b, 1)
+						break
+					end
+					i = i+1
+				end
+			end
+			
+		elseif Channel == "SMART" then
+			local channel = "SAY"
+			if UnitInBattleground("player") then
+				channel = "BATTLEGROUND"
+			elseif UnitInRaid("player") then
+				channel = "RAID"
+			elseif GetNumPartyMembers() > 1 then
+				channel = "PARTY"
+			end
+			SendChatMessage(Text, channel)
+			
+		elseif Channel == "CHANNEL" then
+			for i = 1, math.huge, 2 do
+				local num, name = select(i, GetChannelList())
+				if not num then break end
+				if strlowerCache[name] == strlowerCache[data.Location] then
+					SendChatMessage(Text, Channel, nil, num)
+					break
+				end
+			end
+			
+		else
+			if Text and chandata and chandata.isBlizz then
+				local Location = data.Location
+				if Channel == "WHISPER" then
+					Location = TMW:InjectDataIntoString(Location, icon, true)
+				end
+				SendChatMessage(Text, Channel, nil, Location)
+			end
+		end
+		
+		return true
+	end
+end
+
+
+local ANIM = EVENTS:NewModule("Animations", EVENTS) TMW.ANIM = ANIM
+ANIM.AnimationList = {
+	{
+		text = NONE,
+		animation = "",
+	},
+	{
+		text = L["ANIM_SCREENSHAKE"],
+		desc = L["ANIM_SCREENSHAKE_DESC"],
+		animation = "SCREENSHAKE",
+		Duration = true,
+		Magnitude = true,
+		
+		Play = function(icon, data)
+			if not WorldFrame:IsProtected() or not InCombatLockdown() then
+				local Animation = data.Animation
+				
+				local table = {
+					data = data,
+					Start = TMW.time,
+					Duration = data.Duration,
+					
+					Animation = Animation,
+					Magnitude = data.Magnitude,
+				}
+				
+				-- manual version of :StartAnimation
+				Animations[WorldFrame][Animation] = table
+				AnimationList[Animation].OnStart(WorldFrame, table)
+			end
+		end,
+		
+		OnUpdate = function(WorldFrame, table)
+			local remaining = table.Duration - (TMW.time - table.Start)
+			
+			if remaining < 0 then
+				-- manual version of :StopAnimation	
+				local Animation = table.Animation
+				
+				Animations[WorldFrame][Animation] = nil
+				AnimationList[Animation].OnStop(WorldFrame, table)
+			else
+				local Amt = (table.Magnitude or 10) / (1 + 10*(300^(-(remaining))))
+				local moveX = random(-Amt, Amt) 
+				local moveY = random(-Amt, Amt) 
+				
+				WorldFrame:ClearAllPoints()
+				for _, v in pairs(TMW.WorldFramePoints) do
+					WorldFrame:SetPoint(v[1], v[2], v[3], v[4] + moveX, v[5] + moveY)
+				end
+			end
+		end,
+		OnStart = function(WorldFrame, table)
+			if not TMW.WorldFramePoints then
+				TMW.WorldFramePoints = {}
+				for i = 1, WorldFrame:GetNumPoints() do
+					TMW.WorldFramePoints[i] = { WorldFrame:GetPoint(i) }
+				end
+			end
+		end,
+		OnStop = function(WorldFrame, table)
+			WorldFrame:ClearAllPoints()
+			for _, v in pairs(TMW.WorldFramePoints) do
+				WorldFrame:SetPoint(v[1], v[2], v[3], v[4], v[5])
+			end
+		end,
+	},
+	{
+		text = L["ANIM_SCREENFLASH"],
+		desc = L["ANIM_SCREENFLASH_DESC"],
+		animation = "SCREENFLASH",
+		Duration = true,
+		Period = true,
+		Color = true,
+		Fade = true,
+		
+		Play = function(icon, data)
+			local Animation = data.Animation
+			local AnimationData = AnimationList[Animation]
+			
+			local Duration = 0
+			local Period = data.Period
+			while Duration < data.Duration do
+				Duration = Duration + (Period * 2)
+			end
+			
+			local table = {
+				data = data,
+				Start = TMW.time,
+				Duration = Duration,
+				
+				Period = Period,
+				Fade = data.Fade,
+				Alpha = data.a_anim,
+				r = data.r_anim,
+				g = data.g_anim,
+				b = data.b_anim,
+				
+				Animation = Animation
+			}			
+		
+			-- inherit from ICONFLASH
+			if not AnimationData.OnStart then
+				local ICONFLASH = AnimationList.ICONFLASH
+				AnimationData.OnStart = ICONFLASH.OnStart
+				AnimationData.OnStop = ICONFLASH.OnStop
+			end
+			
+			-- manual version of :StartAnimation
+			Animations[UIParent][Animation] = table
+			AnimationList[Animation].OnStart(UIParent, table)
+		end,
+		
+		OnUpdate = function(UIParent, table)
+			local FlashPeriod = table.Period
+			local flasher = UIParent.flasher
+			
+			local timePassed = TMW.time - table.Start
+			local fadingIn = floor(timePassed/FlashPeriod) % 2 == 1
+
+			if table.Fade then
+				local remainingFlash = timePassed % FlashPeriod
+				if fadingIn then
+					flasher:SetAlpha(table.Alpha*((FlashPeriod-remainingFlash)/FlashPeriod))
+				else
+					flasher:SetAlpha(table.Alpha*(remainingFlash/FlashPeriod))
+				end
+			else
+				flasher:SetAlpha(fadingIn and table.Alpha or 0)
+			end
+			
+			if timePassed > table.Duration then
+				-- manual version of :StopAnimation	
+				local Animation = table.Animation
+				
+				Animations[UIParent][Animation] = nil
+				AnimationList[Animation].OnStop(UIParent, table)
+			end
+		end,
+	},
+	{
+		text = L["ANIM_ICONSHAKE"],
+		desc = L["ANIM_ICONSHAKE_DESC"],
+		animation = "ICONSHAKE",
+		Duration = true,
+		Magnitude = true,
+		Infinite = true,
+		
+		Play = function(icon, data)
+			icon:StartAnimation{
+				data = data,
+				Start = TMW.time,
+				Duration = data.Infinite and math.huge or data.Duration,
+				
+				Animation = Animation,
+				Magnitude = data.Magnitude,
+			}
+		end,
+		
+		OnUpdate = function(icon, table)
+			local remaining = table.Duration - (TMW.time - table.Start)
+			
+			local Amt = (table.Magnitude or 10) / (1 + 10*(300^(-(remaining))))
+			local moveX = random(-Amt, Amt) 
+			local moveY = random(-Amt, Amt) 
+			
+			icon:SetPoint("TOPLEFT", icon.x + moveX, icon.y + moveY)
+			
+			-- generic expiration
+			if remaining < 0 then
+				icon:StopAnimation(table)
+			end
+		end,
+		OnStop = function(icon, table)
+			icon:SetPoint("TOPLEFT", icon.x, icon.y)
+		end,
+	},
+	{
+		text = L["ANIM_ICONFLASH"],
+		desc = L["ANIM_ICONFLASH_DESC"],
+		animation = "ICONFLASH",
+		Duration = true,
+		Period = true,
+		Color = true,
+		Fade = true,
+		Infinite = true,
+		
+		Play = function(icon, data)
+			local Duration = 0
+			local Period = data.Period
+			if data.Infinite then
+				Duration = math.huge
+			else
+				while Duration < data.Duration do
+					Duration = Duration + (Period * 2)
+				end
+			end
+			
+			icon:StartAnimation{
+				data = data,
+				Start = TMW.time,
+				Duration = Duration,
+				
+				Period = Period,
+				Fade = data.Fade,
+				Alpha = data.a_anim,
+				r = data.r_anim,
+				g = data.g_anim,
+				b = data.b_anim,
+			}
+		end,
+		
+		OnUpdate = function(icon, table)
+			local FlashPeriod = table.Period
+			local flasher = icon.flasher 
+			
+			local timePassed = TMW.time - table.Start
+			local fadingIn = floor(timePassed/FlashPeriod) % 2 == 1
+
+			if table.Fade then
+				local remainingFlash = timePassed % FlashPeriod
+				if fadingIn then
+					flasher:SetAlpha(table.Alpha*((FlashPeriod-remainingFlash)/FlashPeriod))
+				else
+					flasher:SetAlpha(table.Alpha*(remainingFlash/FlashPeriod))
+				end
+			else
+				flasher:SetAlpha(fadingIn and table.Alpha or 0)
+			end
+			
+			-- (mostly) generic expiration -- we just finished the last flash, so dont do any more
+			if timePassed > table.Duration then
+				icon:StopAnimation(table)
+			end
+		end,
+		OnStart = function(icon, table)
+			local flasher 
+			if icon.flasher then
+				flasher = icon.flasher
+			else
+				flasher = TMW:GetFlasher(icon)
+				icon.flasher = flasher
+			end
+			
+			flasher:Show()
+			flasher:SetTexture(table.r, table.g, table.b, 1)
+		end,
+		OnStop = function(icon, table)
+			icon.flasher:Hide()
+		end,
+	},
+	{
+		text = L["ANIM_ICONALPHAFLASH"],
+		desc = L["ANIM_ICONALPHAFLASH_DESC"],
+		animation = "ICONALPHAFLASH",
+		Duration = true,
+		Period = true,
+		Fade = true,
+		Infinite = true,
+		
+		Play = function(icon, data)	
+			local Duration = 0
+			local Period = data.Period
+			if data.Infinite then
+				Duration = math.huge
+			else
+				while Duration < data.Duration do
+					Duration = Duration + (Period * 2)
+				end
+			end
+			
+			icon:StartAnimation{
+				data = data,
+				Start = TMW.time,
+				Duration = Duration,
+				
+				Period = Period,
+				Fade = data.Fade,
+			}
+		end,
+		
+		OnUpdate = function(icon, table)
+			local FlashPeriod = table.Period
+			
+			local timePassed = TMW.time - table.Start
+			local fadingIn = floor(timePassed/FlashPeriod) % 2 == 0
+			
+			if table.Fade then
+				local remainingFlash = timePassed % FlashPeriod
+				if fadingIn then
+					icon:SetAlpha(icon.__alpha*((FlashPeriod-remainingFlash)/FlashPeriod))
+				else
+					icon:SetAlpha(icon.__alpha*(remainingFlash/FlashPeriod))
+				end
+			else
+				icon:SetAlpha(fadingIn and icon.__alpha or 0)
+			end
+			
+			-- (mostly) generic expiration -- we just finished the last flash, so dont do any more
+			if timePassed > table.Duration then
+				icon:StopAnimation(table)
+			end
+		end,
+		OnStart = function(icon, table)
+			icon.IsFading = (icon.IsFading or 0) + 1
+		end,
+		OnStop = function(icon, table)
+			icon:SetAlpha(icon.__alpha)
+			local IsFading = (icon.IsFading or 1) - 1
+			icon.IsFading = IsFading > 0 and IsFading or nil
+		end,
+	},
+	{
+		text = L["ANIM_ICONFADE"],
+		desc = L["ANIM_ICONFADE_DESC"],
+		animation = "ICONFADE",
+		Duration = true,
+		
+		Play = function(icon, data)
+			icon:StartAnimation{
+				data = data,
+				Start = TMW.time,
+				Duration = data.Duration,
+				
+				FadeDuration = data.Duration,
+			}
+		end,
+		
+		OnUpdate = function(icon, table)
+			if not icon.FakeHidden then
+				local remaining = table.Duration - (TMW.time - table.Start)
+				
+				-- generic expiration
+				if remaining < 0 then
+					icon:StopAnimation(table)
+				else				
+					local pct = remaining / table.FadeDuration
+					local inv = 1-pct
+			
+					icon:SetAlpha((icon.__oldAlpha * pct) + (icon.__alpha * inv))
+				end
+			end
+		end,
+		OnStart = function(icon, table)
+			icon.IsFading = (icon.IsFading or 0) + 1
+		end,
+		OnStop = function(icon, table)
+			icon:SetAlpha(icon.__alpha)
+			local IsFading = (icon.IsFading or 1) - 1
+			icon.IsFading = IsFading > 0 and IsFading or nil
+		end,
+		
+		
+	},
+	{
+		text = L["ANIM_ACTVTNGLOW"],
+		desc = L["ANIM_ACTVTNGLOW_DESC"],
+		animation = "ACTVTNGLOW",
+		Duration = true,
+		Infinite = true,
+		
+		Play = function(icon, data)
+			icon:StartAnimation{
+				data = data,
+				Start = TMW.time,
+				Duration = data.Infinite and math.huge or data.Duration,
+			}
+		end,
+		
+		OnUpdate = function(icon, table)
+			if table.Duration - (TMW.time - table.Start) < 0 then
+				icon:StopAnimation(table)
+			end
+		end,
+		OnStart = function(icon, table)
+			ActionButton_ShowOverlayGlow(icon) -- dont upvalue, can be hooked (masque does, maybe others)
+		end,
+		OnStop = function(icon, table)
+			ActionButton_HideOverlayGlow(icon) -- dont upvalue, can be hooked (masque doesn't, but maybe others)
+		end,
+	},
+	{
+		noclick = true,
+	},
+	{
+		text = L["ANIM_ICONCLEAR"],
+		desc = L["ANIM_ICONCLEAR_DESC"],
+		animation = "ICONCLEAR",
+		
+		Play = function(icon, data)
+			for k, v in pairs(icon:GetAnimations()) do
+				-- instead of just calling :StopAnimation() right here, set this attribute so that meta icons inheriting the animation will also stop it.
+				v.HALTED = true
+			end
+		end,
+	},
+}	AnimationList = ANIM.AnimationList
+for k, v in pairs(AnimationList) do
+	if v.animation then
+		AnimationList[v.animation] = v
+	end
+end
+function ANIM:ProcessIconEventSettings(eventSettings)
+	if eventSettings.Animation ~= "" then
+		return true
+	end
+end
+function ANIM:HandleEvent(icon, data)
+	local Animation = data.Animation
+	if Animation ~= "" then
+		
+		-- what a cute little handler. TODO: make text like this.
+		local AnimationData = AnimationList[Animation]
+		if AnimationData then
+			AnimationData.Play(icon, data)
+			return true
+		end
+	end
+	
+end
+
+
 
 -- -----------
 -- GROUPS
@@ -3645,115 +3795,6 @@ function TMW.IconBase.StopAnimation(icon, arg1)
 	end
 end
 
-function TMW.IconBase.FireEvent(icon, data, played, announced, animated)
-	if not runEvents then return end
-	
-	
-	---------- Sound ----------
-	local Sound = data.SoundData
-	if Sound and not played then
-		PlaySoundFile(Sound, SndChan)
-		played = 1
-	end
-	
-	---------- Text ----------
-	local Channel = data.Channel
-	if Channel ~= "" and not announced then
-		local Text = data.Text
-		local chandata = ChannelList[Channel]
-		
-		Text = TMW:InjectDataIntoString(Text, icon, not (chandata and chandata.isBlizz))
-		
-		if Channel == "MSBT" then
-			if MikSBT then
-				local Size = data.Size
-				if Size == 0 then Size = nil end
-				MikSBT.DisplayMessage(Text, data.Location, data.Sticky, data.r*255, data.g*255, data.b*255, Size, nil, data.Icon and icon.__tex)
-			end
-		elseif Channel == "SCT" then
-			if SCT then
-				sctcolor.r, sctcolor.g, sctcolor.b = data.r, data.g, data.b
-				SCT:DisplayCustomEvent(Text, sctcolor, data.Sticky, data.Location, nil, data.Icon and icon.__tex)
-			end
-		elseif Channel == "PARROT" then
-			if Parrot then
-				local Size = data.Size
-				if Size == 0 then Size = nil end
-				Parrot:ShowMessage(Text, data.Location, data.Sticky, data.r, data.g, data.b, nil, Size, nil, data.Icon and icon.__tex)
-			end
-		elseif Channel == "FRAME" then
-			local Location = data.Location
-			
-			if data.Icon then
-				Text = "|T" .. (icon.__tex or "") .. ":0|t " .. Text
-			end
-			
-			if _G[Location] == RaidWarningFrame then
-				RaidNotice_AddMessage(RaidWarningFrame, Text, data)
-			else
-				local i = 1
-				while _G["ChatFrame"..i] do
-					local frame = _G["ChatFrame"..i]
-					if Location == frame.name then
-						frame:AddMessage(Text, data.r, data.g, data.b, 1)
-						break
-					end
-					i = i+1
-				end
-			end
-			
-		elseif Channel == "SMART" then
-			local channel = "SAY"
-			if UnitInBattleground("player") then
-				channel = "BATTLEGROUND"
-			elseif UnitInRaid("player") then
-				channel = "RAID"
-			elseif GetNumPartyMembers() > 1 then
-				channel = "PARTY"
-			end
-			SendChatMessage(Text, channel)
-			
-		elseif Channel == "CHANNEL" then
-			for i = 1, math.huge, 2 do
-				local num, name = select(i, GetChannelList())
-				if not num then break end
-				if strlowerCache[name] == strlowerCache[data.Location] then
-					SendChatMessage(Text, Channel, nil, num)
-					break
-				end
-			end
-			
-		else
-			if Text and chandata and chandata.isBlizz then
-				local Location = data.Location
-				if Channel == "WHISPER" then
-					Location = TMW:InjectDataIntoString(Location, icon, true)
-				end
-				SendChatMessage(Text, Channel, nil, Location)
-			end
-		end
-		announced = 1
-	end
-	
-	
-	---------- Animation ----------
-	local Animation = data.Animation
-	if Animation ~= "" and not animated then
-		
-		-- what a cute little handler. TODO: make text like this.
-		local AnimationData = AnimationList[Animation]
-		if AnimationData then
-			AnimationData.Play(icon, data)
-			animated = 1
-		end
-	end
-	
-	if data.PassThrough then
-		return -- I didn't do anything! I swear!
-	end
-	return played, announced, animated
-end
-
 function TMW.IconBase.CrunchColor(icon, duration, inrange, nomana)
 --[[
 	CBC = 	{r=0,	g=1,	b=0		},	-- cooldown bar complete
@@ -4020,39 +4061,36 @@ function TMW.IconBase.SetInfo(icon, alpha, color, texture, start, duration, spel
 	
 	-- NO EVENT HANDLING PAST THIS POINT! -- well, actually it doesnt matter that much anymore, but they still won't be handled till the next update
 	if icon.EventsToFire and next(icon.EventsToFire) then
-		local played, announced, animated
-		for i = 1, #TMW.EventList do
-			local event = TMW.EventList[i].name
-			local doFireAndData = icon.EventsToFire[event]
-			if doFireAndData then
-				
-				local data = icon[event]
-				
-				if data.OnlyShown and icon.__alpha <= 0 then
-					doFireAndData = false
-				
-				elseif data.PassingCndt then
-					doFireAndData = CompareFuncs[data.Operator](doFireAndData, data.Value)
-					if data.CndtJustPassed then
-						if doFireAndData ~= data.wasPassingCondition then
-							data.wasPassingCondition = doFireAndData
-						else
-							doFireAndData = false
+		for _, Module in EVENTS:IterateModules() do
+			for i = 1, #TMW.EventList do
+				local event = TMW.EventList[i].name
+				local doFireAndData = icon.EventsToFire[event]
+				if doFireAndData then					
+					local data = icon[event]
+					
+					if data.OnlyShown and icon.__alpha <= 0 then
+						doFireAndData = false
+					
+					elseif data.PassingCndt then
+						doFireAndData = CompareFuncs[data.Operator](doFireAndData, data.Value)
+						if data.CndtJustPassed then
+							if doFireAndData ~= data.wasPassingCondition then
+								data.wasPassingCondition = doFireAndData
+							else
+								doFireAndData = false
+							end
+						end
+					end
+					
+					if doFireAndData and runEvents then
+						if Module:HandleEvent(icon, data) and not data.PassThrough then
+							break
 						end
 					end
 				end
-				
-				if doFireAndData and not (played and announced and animated) then
-					played, announced, animated = icon:FireEvent(data, played, announced, animated)
-				end
-				
-				icon.EventsToFire[event] = nil
-				
-				if played and announced and animated then
-					break
-				end
 			end
 		end
+		wipe(icon.EventsToFire)
 	end
 	
 	--[[if alpha == 0 and not force and not icon.IsFading then
@@ -4226,13 +4264,7 @@ end
 function TMW:RegisterIconType(Type)
 	local typekey = Type.type
 	setmetatable(Type, typeMT)
-	for setting, b in pairs(RelevantToAll) do
-		-- merge settings that are relevant to all (or most) icon types into the RelevantSettings table.
-		-- values that are explicitly set false have been disabled for the icon type, so only set something on the table if the current value is nil.
-		if Type.RelevantSettings[setting] == nil then -- must be == nil
-			Type.RelevantSettings[setting] = b
-		end
-	end
+	setmetatable(Type.RelevantSettings, RelevantToAll)
 	
 	if TMW.debug and rawget(Types, typekey) then
 		-- for tweaking and recreating icon types inside of WowLua so that I don't have to change the typekey every time.
@@ -4376,41 +4408,23 @@ function TMW:Icon_Update(icon)
 	icon.Units = nil
 	
 	for k in pairs(TMW.Icon_Defaults) do
-		icon[k] = nil --lets clear any settings that might get left behind.
+		icon[k] = typeData.RelevantSettings[k] and ics[k] or nil
 	end
 
-	for k, v in pairs(typeData.RelevantSettings) do
-		icon[k] = v and ics[k]
-	end
-
-	local dontremove
-	for _, t in pairs(TMW.EventList) do
-		local event = t.name
-		local tbl = icon.Events[event]
-		for key, data in pairs(tbl) do
-			if key == "Sound" then
-				if data == "" or data == "Interface\\Quiet.ogg" or data == "None" then
-					tbl.SoundData = nil
-				elseif strfind(data, "%.[^\\]+$") then
-					tbl.SoundData = data
-					dontremove = 1
-				else
-					local s = LSM:Fetch("sound", data)
-					if s and s ~= "Interface\\Quiet.ogg" and s ~= "" then
-						tbl.SoundData = s
-						dontremove = 1
-					else
-						tbl.SoundData = nil
-					end
-				end
-			elseif key == "Animation" and data ~= "" then
-				dontremove = 1
-			elseif key == "Channel" and data ~= "" then
-				dontremove = 1
-			end
+	local hasEventHandlers
+	for _, eventData in ipairs(TMW.EventList) do
+		local event = eventData.name
+		local eventSettings = icon.Events[event]
+		
+		local thisHasEventHandlers
+		for _, Module in EVENTS:IterateModules() do
+			thisHasEventHandlers = Module:ProcessIconEventSettings(eventSettings) or thisHasEventHandlers
 		end
-		if (tbl.SoundData or tbl.Channel ~= "" or tbl.Animation ~= "") and not typeData["EventDisabled_" .. event] then
-			icon[event] = tbl
+		
+		hasEventHandlers = hasEventHandlers or thisHasEventHandlers
+		
+		if thisHasEventHandlers and not typeData["EventDisabled_" .. event] then
+			icon[event] = eventSettings
 			icon.EventsToFire = icon.EventsToFire or {}
 		else
 			icon[event] = nil
@@ -4424,8 +4438,7 @@ function TMW:Icon_Update(icon)
 	elseif icon.ShowWhen == "unalpha" then
 		icon.Alpha = 0
 	end
-	-- condition alpha may be nil via exclusion via RelevantSettings, so make sure it is always defined as something
-	icon.ConditionAlpha = icon.ConditionAlpha or 0
+	
 	-- make fake hidden easier to process in SetInfo
 	icon.FakeHidden = icon.FakeHidden and 0
 	
@@ -4544,7 +4557,7 @@ function TMW:Icon_Update(icon)
 	
 	-- if the icon is set to always hide and it isnt handling any events, then don't automatically update it.
 	-- Conditions and meta icons will update it as needed.
-	if icon.FakeHidden and not dontremove then
+	if icon.FakeHidden and not hasEventHandlers then
 		icon:SetScript("OnUpdate", nil, true)
 		tDeleteItem(IconUpdateFuncs, icon)
 		if Locked then
@@ -5227,34 +5240,6 @@ function TMW:LockToggle()
 	if not db.profile.Locked then
 		wipe(CDBarsToUpdate)
 		wipe(PBarsToUpdate)
-	end
-	
-	for frame in next, FlashingFlashers do
-		frame:Hide()
-		FlashingFlashers[frame] = nil
-	end
-	
-	--[[for icon in next, Scalers do
-		icon:SetScale(1)
-		Scalers[icon] = nil
-	end]]
-	
-	for frame, Duration in next, Shakers do
-		if frame == WorldFrame and TMW.WorldFramePoints then
-			frame:ClearAllPoints()
-			for _, v in pairs(TMW.WorldFramePoints) do
-				frame:SetPoint(v[1], v[2], v[3], v[4], v[5])
-			end
-			
-		elseif frame.base == TMW.IconBase then
-			frame:SetPoint("TOPLEFT", frame.x, frame.y)
-		end
-		Shakers[frame] = nil
-	end
-	
-	for icon, Duration in next, ActivationGlows do
-		ActionButton_HideOverlayGlow(icon)
-		ActivationGlows[icon] = nil
 	end
 	
 	PlaySound("igCharacterInfoTab")

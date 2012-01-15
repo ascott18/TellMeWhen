@@ -1819,7 +1819,7 @@
 						<Scripts>
 							<OnLoad>
 								self.text:SetText(TMW.L["EVENTS_SETTINGS_PASSTHROUGH"])
-								local parentModule = TMW:GetModule(self:GetParent():GetParent():GetName():gsub("TellMeWhen_IconEditor", ""))
+								local parentModule = TMW.EVENTS:GetModule(self:GetParent():GetParent():GetName():gsub("TellMeWhen_IconEditor", ""))
 								local fmt = parentModule.tabText
 								TMW:TT(self, "EVENTS_SETTINGS_PASSTHROUGH", TMW.L["EVENTS_SETTINGS_PASSTHROUGH_DESC"]:format(fmt, fmt) .. "\r\n\r\n" .. TMW.L["EVENTS_SETTINGS_GLOBAL_DESC"], nil, 1)
 								self.setting = "PassThrough"
@@ -1953,7 +1953,7 @@
 			<OnLoad>
 				for k, v in pairs(self:GetParent()) do
 					if self == v then
-						self.module = TMW:GetModule(k)
+						self.module = TMW.EVENTS:GetModule(k)
 						break
 					end
 				end

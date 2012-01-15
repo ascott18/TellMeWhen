@@ -2441,7 +2441,7 @@ function CNDT:ProcessConditions(icon)
 			end]]
 		else
 			funcstr = [[if not (]] .. strsub(funcstr, 4) .. (([[) then
-				icon.CndtFailed = 1 ]] .. (icon.ConditionAlpha == 0 and ([[icon:SetInfo(0) return true, false]]) or ([[return false, false]])) .. [[
+				icon.CndtFailed = 1 ]] .. ((icon.ConditionAlpha or 0) == 0 and ([[icon:SetInfo(0) return true, false]]) or ([[return false, false]])) .. [[
 			else
 				icon.CndtFailed = nil return false, true
 			end]]):gsub("icon", icon:GetName()))

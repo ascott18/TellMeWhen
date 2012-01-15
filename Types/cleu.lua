@@ -248,6 +248,9 @@ local function CLEU_OnEvent(icon, _, t, event, h, sourceGUID, sourceName, source
 				return
 			else
 				duration = icon.Durations[key]
+				if duration == 0 then
+					duration = nil
+				end
 			end
 		end
 		
