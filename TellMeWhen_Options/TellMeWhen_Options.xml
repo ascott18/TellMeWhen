@@ -2858,7 +2858,7 @@
 									<OnLoad>
 										self:Show()
 										self.setting = "Sort"
-										self.value = nil
+										self.value = false
 										self.text:SetText(TMW.L["SORTBYNONE"])
 										TMW:TT(self, "SORTBYNONE", "SORTBYNONE_DESC")
 										self.text:SetWidth(TMW.WidthCol1)

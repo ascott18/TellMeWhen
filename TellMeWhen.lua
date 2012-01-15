@@ -32,7 +32,7 @@ local DRData = LibStub("DRData-1.0", true)
 TELLMEWHEN_VERSION = "4.8.1"
 TELLMEWHEN_VERSION_MINOR = strmatch(" @project-version@", " r%d+") or ""
 TELLMEWHEN_VERSION_FULL = TELLMEWHEN_VERSION .. TELLMEWHEN_VERSION_MINOR
-TELLMEWHEN_VERSIONNUMBER = 48103 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
+TELLMEWHEN_VERSIONNUMBER = 48104 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
 if TELLMEWHEN_VERSIONNUMBER > 49000 or TELLMEWHEN_VERSIONNUMBER < 48000 then return error("YOU SCREWED UP THE VERSION NUMBER OR DIDNT CHANGE THE SAFETY LIMITS") end -- safety check because i accidentally made the version number 414069 once
 
 TELLMEWHEN_MAXGROUPS = 1 	--this is a default, used by SetTheory (addon), so dont rename
@@ -639,6 +639,7 @@ TMW.Defaults = {
 						IgnoreNomana			= false,
 						ShowTTText				= false,
 						CheckRefresh			= true,
+						Sort					= false,
 						TotemSlots				= 2^6-1,
 						BindText				= "",
 						ConditionDur			= 0,
@@ -4408,7 +4409,11 @@ function TMW:Icon_Update(icon)
 	icon.Units = nil
 	
 	for k in pairs(TMW.Icon_Defaults) do
-		icon[k] = typeData.RelevantSettings[k] and ics[k] or nil
+		if typeData.RelevantSettings[k] then
+			icon[k] = ics[k]
+		else
+			icon[k] = nil
+		end
 	end
 
 	local hasEventHandlers

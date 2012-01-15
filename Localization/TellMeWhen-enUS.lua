@@ -1101,6 +1101,12 @@ Note the difference between the two interrupt events - both will always occur wh
 L["CLEU_SPELL_LEECH"] = "Resource Leech"
 L["CLEU_SPELL_LEECH_DESC"] = "Occurs when resources (health/mana/rage/energy/etc) are removed from one unit and simultaneously given to another."
 L["CLEU_SPELL_MISSED"] = "Spell Miss"
+L["CLEU_SPELL_CREATE"] = "Spell Create"
+L["CLEU_SPELL_CREATE_DESC"] = "Occurs when an object, such as a hunter trap or a mage portal, is created."
+L["CLEU_SPELL_SUMMON"] = "Spell Summon"
+L["CLEU_SPELL_SUMMON_DESC"] = "Occurs when an NPC, such as a pet or a totem, is summoned or spawned."
+L["CLEU_SPELL_RESURRECT"] = "Resurrection"
+L["CLEU_SPELL_RESURRECT_DESC"] = "Occurs when a unit is resurrected from death."
 L["CLEU_SPELL_REFLECT"] = "Spell Reflect" -- custom event
 L["CLEU_SPELL_REFLECT_DESC"] = [[Occurs when you reflect a spell back at its caster.
 

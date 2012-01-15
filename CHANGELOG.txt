@@ -3,6 +3,7 @@
  ** (r412) icd.lua:134 attempt to index field 'HELP' (a nil value)
  ** (r413) Meta icons that are sorted by high duration should now diplay the first icon shown if no icons have an active timer
  ** (r414) Combat log icons that have spell filters without defined durations should now properly fall back to the icon-wide duration
+ ** (r416) Meta icons that are set to sort should once again sort
 
 ===v4.8.0===
  * New icon type: Combat Event. Displays information about combat events according to filters that you can set. Full support for events, including text output.

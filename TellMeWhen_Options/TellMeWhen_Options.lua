@@ -2021,7 +2021,11 @@ CLEU.Events = {
 	"SPELL_MISSED", -- normal
 	"SPELL_REFLECT", -- normal
 "SPACE",
+	"SPELL_CREATE", -- normal
+	"SPELL_SUMMON", -- normal
+"SPACE",
 	"SPELL_HEAL", -- normal
+	"SPELL_RESURRECT", -- normal
 "SPACE",
 	"SPELL_ENERGIZE", -- normal
 	"SPELL_DRAIN", -- normal
