@@ -130,7 +130,7 @@ function Type:Setup(icon, groupID, iconID)
 		if name == naturesGrace then
 			if icon:IsBeingEdited() == 1 then
 				TMW.HELP:Show("ICON_ICD_NATURESGRACE", icon, TMW.IE.Main.Name, 0, 0, L["HELP_ICD_NATURESGRACE"])
-			else
+			elseif TMW.HELP then
 				TMW.HELP:Hide("ICON_ICD_NATURESGRACE")
 			end
 			break

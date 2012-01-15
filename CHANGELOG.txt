@@ -1,3 +1,7 @@
+===v4.8.1===
+ * Bug Fixes:
+ ** (r412) icd.lua:134 attempt to index field 'HELP' (a nil value)
+
 ===v4.8.0===
  * New icon type: Combat Event. Displays information about combat events according to filters that you can set. Full support for events, including text output.
  * Rewrote the entire animation system to allow meta icons to inherit icon animations.
