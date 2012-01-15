@@ -72,7 +72,7 @@ local function Meta_OnUpdate(icon, time)
 					if _d < 0 then
 						_d = 0
 					end
-					if d*Sort < _d*Sort then
+					if not icToUse or d*Sort < _d*Sort then
 						icToUse = ic
 						d = _d
 					end
