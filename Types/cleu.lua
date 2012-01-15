@@ -277,7 +277,6 @@ local function CLEU_OnEvent(icon, _, t, event, h, sourceGUID, sourceName, source
 		
 		icon:Update(TMW.time, true, tex)
 			
-		-- all checks complete. procede to do shit.
 		--print(CombatLog_OnEvent(Blizzard_CombatLog_CurrentSettings, t, event, h, sourceGUID, sourceName, sourceFlags, sourceRaidFlags, destGUID, destName, destFlags, destRaidFlags, arg1, arg2, arg3, arg4, ...))
 	--	print("Event Passed", spellName, sourceName, destName, event)
 	end
