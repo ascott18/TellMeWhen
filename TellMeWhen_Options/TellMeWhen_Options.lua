@@ -3249,7 +3249,7 @@ function IE:Unit_DropDown_OnClick(v, e)
 	end
 	e:Insert(";" .. ins .. ";")
 	TMW:CleanString(e)
-	--CI.ics.Unit = e:GetText()
+	CI.ics.Unit = e:GetText()
 	IE:ScheduleIconUpdate()
 	CloseDropDownMenus()
 	

@@ -243,7 +243,7 @@ L["ICONMENU_ONLYINTERRUPTIBLE"] = "Only Interruptible"
 L["ICONMENU_ONLYINTERRUPTIBLE_DESC"] = "Check this box to only show spell casts that are interruptible"
 
 L["ICONMENU_ONLYMINE"] = "Only check mine"
-L["ICONMENU_ONLYMINE_DESC"] = "Check this option to cause this icon to only check for your own buffs/debuffs"
+L["ICONMENU_ONLYMINE_DESC"] = "Check this option to cause this icon to only check for buffs/debuffs that you casted"
 L["ICONMENU_SHOWTIMER"] = "Show timer"
 L["ICONMENU_SHOWTIMER_DESC"] = "Check this option to display the standard cooldown sweep animation on the icon when applicable."
 L["ICONMENU_SHOWTIMERTEXT"] = "Show timer text"
