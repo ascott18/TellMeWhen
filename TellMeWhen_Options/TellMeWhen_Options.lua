@@ -6202,6 +6202,10 @@ function Module:Table_Get()
 	return SpellCache
 end
 function Module.Sorter_Spells(a, b)
+	if a == "GCD" or b == "GCD" then
+		return a == "GCD"
+	end
+	
 	local haveA, haveB = EquivFirstIDLookup[a], EquivFirstIDLookup[b]
 	if haveA or haveB then
 		if haveA and haveB then

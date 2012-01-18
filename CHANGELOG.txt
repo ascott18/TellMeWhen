@@ -1,4 +1,8 @@
-===v4.8.1===
+===v4.8.2===
+ * Bug Fixes:
+ ** (r419) You should no longer lock up when using the GCD condition
+ 
+ ===v4.8.1===
  * Bug Fixes:
  ** (r412) icd.lua:134 attempt to index field 'HELP' (a nil value)
  ** (r413) Meta icons that are sorted by high duration should now diplay the first icon shown if no icons have an active timer
