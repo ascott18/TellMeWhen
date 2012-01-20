@@ -32,7 +32,7 @@ local DRData = LibStub("DRData-1.0", true)
 TELLMEWHEN_VERSION = "4.8.2"
 TELLMEWHEN_VERSION_MINOR = strmatch(" @project-version@", " r%d+") or ""
 TELLMEWHEN_VERSION_FULL = TELLMEWHEN_VERSION .. TELLMEWHEN_VERSION_MINOR
-TELLMEWHEN_VERSIONNUMBER = 48201 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
+TELLMEWHEN_VERSIONNUMBER = 48202 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
 if TELLMEWHEN_VERSIONNUMBER > 49000 or TELLMEWHEN_VERSIONNUMBER < 48000 then return error("YOU SCREWED UP THE VERSION NUMBER OR DIDNT CHANGE THE SAFETY LIMITS") end -- safety check because i accidentally made the version number 414069 once
 
 TELLMEWHEN_MAXGROUPS = 1 	--this is a default, used by SetTheory (addon), so dont rename
@@ -3910,7 +3910,7 @@ function TMW.IconBase.SetInfo(icon, alpha, color, texture, start, duration, spel
 		icon.__spellChecked = spellChecked
 	end
 	
-	if duration == 0.001 then duration = 0 end -- hardcode fix for tricks of the trade. nice hardcoding, blizzard
+	if duration == 0.001 then duration = 0 end -- hardcode fix for tricks of the trade. nice hardcoding on your part too, blizzard
 	local d = duration - (time - start)
 
 	if icon.OnDuration then
@@ -4061,6 +4061,8 @@ function TMW.IconBase.SetInfo(icon, alpha, color, texture, start, duration, spel
 	
 	-- NO EVENT HANDLING PAST THIS POINT! -- well, actually it doesnt matter that much anymore, but they still won't be handled till the next update
 	if icon.EventsToFire and next(icon.EventsToFire) then
+		local doSecondIteration
+		
 		for _, Module in EVENTS:IterateModules() do
 			for i = 1, #TMW.EventList do
 				local event = TMW.EventList[i].name
@@ -4070,8 +4072,13 @@ function TMW.IconBase.SetInfo(icon, alpha, color, texture, start, duration, spel
 					
 					if data.OnlyShown and icon.__alpha <= 0 then
 						doFireAndData = false
-					
-					elseif data.PassingCndt then
+						
+						-- the same test is preformed for all modules,
+						-- so we can save the result of it within the module iteration without adverse effects
+						-- it actually results an a performance increase.
+						icon.EventsToFire[event] = doFireAndData
+						
+					elseif data.PassingCndt and isNumber[doFireAndData] then
 						doFireAndData = CompareFuncs[data.Operator](doFireAndData, data.Value)
 						if data.CndtJustPassed then
 							if doFireAndData ~= data.wasPassingCondition then
@@ -4080,16 +4087,38 @@ function TMW.IconBase.SetInfo(icon, alpha, color, texture, start, duration, spel
 								doFireAndData = false
 							end
 						end
+						
+						-- the same test is preformed for all modules,
+						-- so we can save the result of it within the module iteration without adverse effects
+						-- it actually results an a performance increase.
+						icon.EventsToFire[event] =  doFireAndData
 					end
 					
+					
 					if doFireAndData and runEvents then
-						if Module:HandleEvent(icon, data) and not data.PassThrough then
+						local handled = Module:HandleEvent(icon, data)
+						if handled and not data.PassThrough then
 							break
 						end
 					end
 				end
 			end
 		end
+		
+		if doSecondIteration then
+			for event, doFireAndData in next, icon.EventsToFire do			
+				local data = icon[event]
+				
+				if data.PassingCndt and data.CndtJustPassed then
+					doFireAndData = CompareFuncs[data.Operator](doFireAndData, data.Value)
+					if doFireAndData ~= data.wasPassingCondition then
+						print(icon, event, "CNDTCHANGE", doFireAndData)
+						data.wasPassingCondition = doFireAndData
+					end
+				end
+			end
+		end
+			
 		wipe(icon.EventsToFire)
 	end
 	

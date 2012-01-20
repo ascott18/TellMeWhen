@@ -1,6 +1,7 @@
 ===v4.8.2===
  * Bug Fixes:
- ** (r419) You should no longer lock up when using the GCD condition
+ ** (r421) You should no longer lock up when using the GCD condition
+ ** (r422) Events with conditions (Duration, Stacks changed) should now handle animations and sound properly.
  
  ===v4.8.1===
  * Bug Fixes:
