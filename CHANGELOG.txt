@@ -1,3 +1,9 @@
+===v?.?.?===
+ * (Im not sure if this will be 4.9.0 or 5.0.0 - For now, its still 4.8.3 till I decide how far I want to go)
+ * Conditions are now almost entirely event driven, resulting in a (tremendous) performance increase.
+ * Enrage is now a proper dispel type, and no longer relies on a pre-defined list of enrages.
+ * Implemented a proper class-based inheritance system for many objects (Icons, Icon Types, Groups, Condition Groups).
+
 ===v4.8.3===
  * Bug Fixes:
  ** (r423) Events with conditions (Duration, Stacks changed) should now handle animations and sound properly.
@@ -940,7 +946,7 @@
  * The fix for pet cooldown icons should actually work now
  * Added option to check for range or not. Being angry at me has a small chance to get something implemented.
  * Added option to check for power(mana/rage/energy/focus/runic) or not
- * Hopefully fixed the stance checking for all classes
+ * Hopefully fixed the stance checking for all Classes
  * Fixed the bug where icons would move when the addon was locked after having their size changed
  * Fixed the toggling of the show/hide in combat state of each group
 

@@ -375,7 +375,7 @@ L["ICONMENU_STEALABLE_DESC"] = "Check this to only show buffs that can be spells
 L["ICONMENU_ONLYBAGS"] = "Only if in bags"
 L["ICONMENU_ONLYBAGS_DESC"] = "Check this to make the icon show only if the item is in your bags (or equipped). If 'Only if equipped' is enabled, this is also forcibly enabled."
 L["ICONMENU_ONLYSEEN"] = "Only if seen"
-L["ICONMENU_ONLYSEEN_DESC"] = "Check this to make the icon only show a cooldown if the unit has cast it at least once. You should check this if you are checking spells from different classes in one icon."
+L["ICONMENU_ONLYSEEN_DESC"] = "Check this to make the icon only show a cooldown if the unit has cast it at least once. You should check this if you are checking spells from different Classes in one icon."
 L["ICONMENU_CHECKREFRESH"] = "Listen for refreshes"
 L["ICONMENU_CHECKREFRESH_DESC"] = [[Blizzard's combat log is very buggy when it comes to spell refreshes and fear (or other spells that break after a certain amount of damage). The combat log will say that the spell was refreshed when damage is dealt, even though it technically wasn't. Uncheck this box to disable listening to spell refreshes, but note that legitimate refreshes will be ignored as well.
 
@@ -658,7 +658,7 @@ L["CONDITIONPANEL_PETMODE"] = "Pet attack mode"
 L["CONDITIONPANEL_PETTREE"] = "Pet talent tree"
 L["CONDITIONPANEL_TRACKING"] = "Tracking active"
 L["ONLYCHECKMINE"] = "Only Check Mine"
-L["ONLYCHECKMINE_DESC"] = "Check this to cause this condition to only check your own buffs/debuffs"
+L["ONLYCHECKMINE_DESC"] = "Check this to cause this condition to only check for buffs/debuffs that you casted"
 L["LUACONDITION"] = "Lua (Advanced)"
 L["LUACONDITION_DESC"] = [[This condition type allows you to evaluate Lua code to determine the state of a condition.
 
@@ -840,7 +840,7 @@ L["SUGGESTIONS"] = "Suggestions:"
 L["SUGGESTIONS_SUBSTITUTIONS"] = "Substitutions:"
 L["SUG_TOOLTIPTITLE"] = [[As you type, TellMeWhen will look through its cache and determine the spells that you were most likely looking for.
 
-Spells are categorized and colored as per the list below. Note that the categories that begin with the word "Known" will not have spells put into them until they have been seen as you play or log onto different classes.
+Spells are categorized and colored as per the list below. Note that the categories that begin with the word "Known" will not have spells put into them until they have been seen as you play or log onto different Classes.
 
 Clicking on an entry will insert it into the editbox.
 

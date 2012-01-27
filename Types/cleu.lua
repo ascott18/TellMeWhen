@@ -30,7 +30,7 @@ local clientVersion = select(4, GetBuildInfo())
 local strlowerCache = TMW.strlowerCache
 
 
-local Type = {}
+local Type = TMW.Classes.IconType:New()
 Type.type = "cleu"
 Type.name = L["ICONMENU_CLEU"]
 Type.desc = L["ICONMENU_CLEU_DESC"]
@@ -276,9 +276,6 @@ local function CLEU_OnEvent(icon, _, t, event, h, sourceGUID, sourceName, source
 		end
 		
 		icon:Update(TMW.time, true, tex)
-			
-		--print(CombatLog_OnEvent(Blizzard_CombatLog_CurrentSettings, t, event, h, sourceGUID, sourceName, sourceFlags, sourceRaidFlags, destGUID, destName, destFlags, destRaidFlags, arg1, arg2, arg3, arg4, ...))
-	--	print("Event Passed", spellName, sourceName, destName, event)
 	end
 end
 
@@ -317,7 +314,7 @@ function Type:Setup(icon, groupID, iconID)
 	-- more efficient than checking icon.CLEUEvents[""] every OnEvent
 	icon.AllowAnyEvents = icon.CLEUEvents[""]
 	
-	-- check for when bind texts should be updated (these are unique to cleu, so they are handled here, not in TMW:Icon_Update()
+	-- check for when bind texts should be updated (these are unique to cleu, so they are handled here, not in icon:Setup()
 	icon.UpdateBindText_SourceUnit = nil
 	icon.UpdateBindText_DestUnit = nil
 	icon.UpdateBindText_ExtraSpell = nil
@@ -368,4 +365,4 @@ function Type:Setup(icon, groupID, iconID)
 end
 
 
-TMW:RegisterIconType(Type)
+Type:Register()

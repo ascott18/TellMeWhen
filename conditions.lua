@@ -35,8 +35,6 @@ local GetEclipseDirection, IsResting, GetPetActionInfo, GetTotemInfo, GetTalentT
 	  GetEclipseDirection, IsResting, GetPetActionInfo, GetTotemInfo, GetTalentTabInfo
 local IsInInstance, GetInstanceDifficulty =
 	  IsInInstance, GetInstanceDifficulty
-local GetNumPartyMembers, GetNumRaidMembers =
-	  GetNumPartyMembers, GetNumRaidMembers
 local GetShapeshiftFormInfo =
 	  GetShapeshiftFormInfo
 local UnitAttackPower, UnitRangedAttackPower =
@@ -62,9 +60,21 @@ local isNumber = TMW.isNumber
 
 local CNDT = TMW:NewModule("Conditions", "AceEvent-3.0") TMW.CNDT = CNDT
 
-hooksecurefunc(TMW, "OnInitialize", function()
+local functionCache = {} CNDT.functionCache = functionCache
+
+
+
+function CNDT:OnInitialize()
 	db = TMW.db
-end)
+end
+
+function CNDT:MINIMAP_UPDATE_TRACKING()
+	for i = 1, GetNumTrackingTypes() do
+		local name, _, active = GetTrackingInfo(i)
+		Env.Tracking[strlower(name)] = active
+	end
+end
+
 
 local test
 --[[
@@ -91,7 +101,7 @@ test = function()
 	end
 end--]]
 
-local classes = {
+local Classes = {
 	"DEATHKNIGHT",
 	"DRUID",
 	"HUNTER",
@@ -162,190 +172,70 @@ end
 
 
 local firststanceid
-for k, v in ipairs(TMW.Stances) do
-	if v.class == pclass then
-		firststanceid = v.id
-		break
-	end
-end
+do -- STANCES
+	local Stances = {
+		{class = "WARRIOR", 	id = 2457}, 	-- Battle Stance
+		{class = "WARRIOR", 	id = 71}, 		-- Defensive Stance
+		{class = "WARRIOR", 	id = 2458}, 	-- Berserker Stance
 
-function CNDT:ECLIPSE_DIRECTION_CHANGE()
-	Env.EclipseDir = GetEclipseDirection() == "sun" and 1 or 0
-end
+		{class = "DRUID", 		id = 5487}, 	-- Bear Form
+		{class = "DRUID", 		id = 768}, 		-- Cat Form
+		{class = "DRUID", 		id = 1066}, 	-- Aquatic Form
+		{class = "DRUID", 		id = 783}, 		-- Travel Form
+		{class = "DRUID", 		id = 24858}, 	-- Moonkin Form
+		{class = "DRUID", 		id = 33891}, 	-- Tree of Life
+		{class = "DRUID", 		id = 33943}, 	-- Flight Form
+		{class = "DRUID", 		id = 40120}, 	-- Swift Flight Form
 
-function CNDT:ZONE_CHANGED_NEW_AREA()
-	local _, z = IsInInstance()
-	if z == "pvp" then
-		Env.ZoneType = 1
-	elseif z == "arena" then
-		Env.ZoneType = 2
-	elseif z == "party" then
-		Env.ZoneType = 2 + GetInstanceDifficulty() --3-4
-	elseif z == "raid" then
-		Env.ZoneType = 4 + GetInstanceDifficulty() --5-8
-	else
-		Env.ZoneType = 0
-	end
-end
+		{class = "PRIEST", 		id = 15473}, 	-- Shadowform
 
-function CNDT:PLAYER_UPDATE_RESTING()
-	Env.Resting = IsResting()
-end
+		{class = "ROGUE", 		id = 1784}, 	-- Stealth
 
-function CNDT:PARTY_MEMBERS_CHANGED()
-	Env.NumPartyMembers = GetNumPartyMembers()
-end
+		{class = "HUNTER", 		id = 82661}, 	-- Aspect of the Fox
+		{class = "HUNTER", 		id = 13165}, 	-- Aspect of the Hawk
+		{class = "HUNTER", 		id = 5118}, 	-- Aspect of the Cheetah
+		{class = "HUNTER", 		id = 13159}, 	-- Aspect of the Pack
+		{class = "HUNTER", 		id = 20043}, 	-- Aspect of the Wild
 
-function CNDT:RAID_ROSTER_UPDATE()
-	Env.NumRaidMembers = GetNumRaidMembers()
-end
+		{class = "DEATHKNIGHT", id = 48263}, 	-- Blood Presence
+		{class = "DEATHKNIGHT", id = 48266}, 	-- Frost Presence
+		{class = "DEATHKNIGHT", id = 48265}, 	-- Unholy Presence
 
-local GetShapeshiftForm = TMW.GetShapeshiftForm
-local RevCSN = {}
-for k, v in pairs(TMW.CSN) do
-	RevCSN[v] = k
-end
-function CNDT:UPDATE_SHAPESHIFT_FORM()
-	local i = GetShapeshiftForm()
-	if i == 0 then
-		Env.ShapeshiftForm = 0
-	else
-		local _, n = GetShapeshiftFormInfo(i)
-		Env.ShapeshiftForm = RevCSN[n] or 0
-	end
-end
+		{class = "PALADIN", 	id = 19746}, 	-- Concentration Aura
+		{class = "PALADIN", 	id = 32223}, 	-- Crusader Aura
+		{class = "PALADIN", 	id = 465}, 		-- Devotion Aura
+		{class = "PALADIN", 	id = 19891}, 	-- Resistance Aura
+		{class = "PALADIN", 	id = 7294}, 	-- Retribution Aura
 
-function CNDT:UNIT_STATS(_, unit)
-	if unit == "player" then
-		for i = 1, 5 do
-			local _, val = UnitStat("player", i)
-			Env["UnitStat" .. i] = val
+		{class = "WARLOCK", 	id = 47241}, 	-- Metamorphosis
+	}
+
+	TMW.CSN = {
+		[0]	= NONE,
+	}
+
+	for k, v in ipairs(Stances) do
+		if v.class == pclass then
+			firststanceid = firststanceid or v.id
+			local z = GetSpellInfo(v.id)
+			tinsert(TMW.CSN, z)
 		end
 	end
-end
-
-function CNDT:UNIT_ATTACK_POWER(_, unit)
-	if unit == "player" then
-		local base, pos, neg = UnitAttackPower("player")
-		Env.MeleeAttackPower = base + pos + neg
-	end
-end
-
-function CNDT:UNIT_ATTACK_SPEED(_, unit)
-	if unit == "player" then
-		Env.MeleeHaste = GetMeleeHaste()/100
-	end
-end
-
-function CNDT:UNIT_RANGED_ATTACK_POWER(_, unit)
-	if unit == "player" then
-		local base, pos, neg = UnitRangedAttackPower("player")
-		Env.RangeAttackPower = base + pos + neg
-	end
-end
-
-function CNDT:UNIT_RANGEDDAMAGE(_, unit)
-	if unit == "player" then
-		Env.RangeHaste = GetRangedHaste()/100
-	end
-end
-
-function CNDT:COMBAT_RATING_UPDATE()
-	Env.Expertise = GetExpertise()
-	Env.MeleeCrit = GetCritChance()/100
-	Env.RangeCrit = GetRangedCritChance()/100
-
-	local minCrit = GetSpellCritChance(2)
-	for i=3, MAX_SPELL_SCHOOLS do
-		minCrit = min(minCrit, GetSpellCritChance(i))
-	end
-	Env.SpellCrit = minCrit/100
-	Env.SpellHaste = UnitSpellHaste("player")/100
-end
-
-function CNDT:UNIT_SPELL_HASTE(_, unit)
-	if unit == "player" then
-		Env.SpellHaste = UnitSpellHaste("player")/100
-	end
-end
-
-function CNDT:MASTERY_UPDATE()
-	Env.Mastery = GetMastery()
-end
-
-function CNDT:PLAYER_DAMAGE_DONE_MODS()
-	local minModifier = GetSpellBonusDamage(2)
-	for i=3, MAX_SPELL_SCHOOLS do
-		minModifier = min(minModifier, GetSpellBonusDamage(i))
-	end
-	Env.SpellDamage = minModifier
-	Env.SpellHealing = GetSpellBonusHealing()
-end
-
-function CNDT:PLAYER_REGEN_ENABLED()
-	Env.PlayerInCombat = nil
-end
-
-function CNDT:PLAYER_REGEN_DISABLED()
-	Env.PlayerInCombat = 1
-end
-
-function CNDT:UNIT_VEHICLE(_, unit)
-	if unit == "player" then
-		Env.PlayerInVehicle = UnitHasVehicleUI("player")
-	end
-end
-
-function CNDT:UNIT_PET(_, unit)
-	if unit == "player" then
-		Env.PetTalentID = GetTalentTabInfo(1, nil, 1)
+	
+	for k, v in pairs(TMW.CSN) do
+		TMW.CSN[v] = k
 	end
 end
 
 
 
-local PetModes = {
-	clientVersion >= 40200 and "PET_MODE_ASSIST" or "PET_MODE_AGGRESSIVE",
-	"PET_MODE_DEFENSIVE",
-	"PET_MODE_PASSIVE",
-}
-local PetModesLookup = {}
-for k, v in pairs(PetModes) do PetModesLookup[v] = k end
-function CNDT:PET_BAR_UPDATE()
-	for i = NUM_PET_ACTION_SLOTS, 1, -1 do -- go backwards since they are probably at the end of the action bar
-		local name, _, _, isToken, isActive = GetPetActionInfo(i)
-		if isToken and isActive and PetModesLookup[name] then
-			Env.ActivePetMode = PetModesLookup[name]
-			break
-		end
-	end
-end
-
-local trackingmap = {}
-function CNDT:MINIMAP_UPDATE_TRACKING()
-	for i = 1, GetNumTrackingTypes() do
-		local name, _, active = GetTrackingInfo(i)
-		Env.Tracking[strlower(name)] = active
-	end
-end
-
-function CNDT:PLAYER_TALENT_UPDATE()
-	for tab = 1, GetNumTalentTabs() do
-		for talent = 1, GetNumTalents(tab) do
-			local name, _, _, _, rank = GetTalentInfo(tab, talent)
-			local lower = name and strlowerCache[name]
-			if lower then
-				Env.TalentMap[lower] = rank or 0
-			end
-		end
-	end
-end
 
 Env = {
 	UnitHealth = UnitHealth,
 	UnitHealthMax = UnitHealthMax,
 	UnitPower = UnitPower,
 	UnitPowerMax = UnitPowerMax,
+	UnitAura = UnitAura,
 	GetPetHappiness = GetPetHappiness,
 	UnitName = UnitName,
 	GetComboPoints = GetComboPoints,
@@ -358,20 +248,23 @@ Env = {
 	UnitClassification = UnitClassification,
 	UnitGroupRolesAssigned = UnitGroupRolesAssigned,
 	UnitDetailedThreatSituation = UnitDetailedThreatSituation,
-	GetNumRaidMembers = GetNumRaidMembers,
-	GetNumPartyMembers = GetNumPartyMembers,
 	GetRaidTargetIndex = GetRaidTargetIndex,
+	GetNumPartyMembers = GetNumPartyMembers,
+	GetNumRaidMembers = GetNumRaidMembers,
 	UnitIsEnemy = UnitIsEnemy,
 	UnitIsUnit = UnitIsUnit,
 	UnitReaction = UnitReaction,
 	GetRuneType = GetRuneType,
 	GetRuneCount = GetRuneCount,
+	GetSpellCooldown = GetSpellCooldown,
+	GetItemCooldown = GetItemCooldown,
 	UnitLevel = UnitLevel,
 	strlower = strlower,
 	strlowerCache = TMW.strlowerCache,
 	strfind = strfind,
 	floor = floor,
 	select = select,
+	min = min,
 	IsMounted = IsMounted,
 	IsSwimming = IsSwimming,
 	GetUnitSpeed = GetUnitSpeed,
@@ -387,20 +280,37 @@ Env = {
 	GetCurrencyInfo = GetCurrencyInfo,
 	SecureCmdOptionParse = SecureCmdOptionParse,
 	GetSpellAutocast = GetSpellAutocast,
+	GetTalentTabInfo = GetTalentTabInfo,
+	GetActiveTalentGroup = GetActiveTalentGroup,
+	
+	UnitStat = UnitStat,
+	UnitAttackPower = UnitAttackPower,
+	UnitRangedAttackPower = UnitRangedAttackPower,
+	UnitSpellHaste = UnitSpellHaste,
+	GetMeleeHaste = GetMeleeHaste,
+	GetRangedHaste = GetRangedHaste,
+	GetExpertise = GetExpertise,
+	GetCritChance = GetCritChance,
+	GetRangedCritChance = GetRangedCritChance,
+	GetSpellCritChance = GetSpellCritChance,
+	GetMastery = GetMastery,
+	GetSpellBonusDamage = GetSpellBonusDamage,
+	GetSpellBonusHealing = GetSpellBonusHealing,
 
 	classifications = classifications,
 	roles = roles,
 	
 	ActivePetMode = 0,
-	ZoneType = 0,
 	NumPartyMembers = 0,
-	NumRaidMembers = 0,
 	print = TMW.print,
 	time = GetTime(),
+	huge = math.huge,
 	epsilon = 1e-255,
 	
 	Tracking = {},
 	TalentMap = {},
+	TMW = TMW,
+	GCDSpell = TMW.GCDSpell,
 } CNDT.Env = Env
 
 -- helper functions
@@ -510,6 +420,97 @@ function Env.GetTooltipNumber(unit, name, filter)
 	return 0
 end
 
+function Env.GetZoneType()
+	local _, z = IsInInstance()
+	if z == "pvp" then
+		return 1
+	elseif z == "arena" then
+		return 2
+	elseif z == "party" then
+		return 2 + GetInstanceDifficulty() --3-4
+	elseif z == "raid" then
+		return 4 + GetInstanceDifficulty() --5-8
+	else
+		return 0
+	end
+end
+
+function Env.GetShapeshiftForm()
+	-- very hackey function because of inconsistencies in blizzard's GetShapeshiftForm
+	local i = GetShapeshiftForm()
+	if pclass == "WARLOCK" and i == 2 then  --metamorphosis is index 2 for some reason
+		i = 1
+	elseif pclass == "ROGUE" and i > 1 then	--vanish and shadow dance return 3 when active, vanish returns 2 when shadow dance isnt learned. Just treat everything as stealth
+		i = 1
+	end
+	if i > NumShapeshiftForms then 	--many Classes return an invalid number on login, but not anymore!
+		i = 0
+	end
+	
+	if i == 0 then
+		return 0
+	else
+		local _, n = GetShapeshiftFormInfo(i)
+		return TMW.CSN[n] or 0
+	end
+end
+
+
+local UnitAttackPower = UnitAttackPower
+function Env.UnitAttackPower(unit)
+	local base, pos, neg = UnitAttackPower(unit)
+	return base + pos + neg
+end
+
+local UnitRangedAttackPower = UnitRangedAttackPower
+function Env.UnitRangedAttackPower(unit)
+	local base, pos, neg = UnitRangedAttackPower(unit)
+	return base + pos + neg
+end
+
+local GetSpellCritChance = GetSpellCritChance
+function Env.GetSpellCritChance()
+	return min(
+		GetSpellCritChance(2), 
+		GetSpellCritChance(3),
+		GetSpellCritChance(4),
+		GetSpellCritChance(5),
+		GetSpellCritChance(6),
+		GetSpellCritChance(7)
+	)
+end
+
+local GetSpellBonusDamage = GetSpellBonusDamage
+function Env.GetSpellBonusDamage()
+	return min(
+		GetSpellBonusDamage(2), 
+		GetSpellBonusDamage(3),
+		GetSpellBonusDamage(4),
+		GetSpellBonusDamage(5),
+		GetSpellBonusDamage(6),
+		GetSpellBonusDamage(7)
+	)
+end
+
+if MAX_SPELL_SCHOOLS ~= 7 then
+	TMW:Error("MAX_SPELL_SCHOOLS has changed, so the spell school dependent conditions need updating")
+end
+
+local PetModes = {
+	clientVersion >= 40200 and "PET_MODE_ASSIST" or "PET_MODE_AGGRESSIVE",
+	"PET_MODE_DEFENSIVE",
+	"PET_MODE_PASSIVE",
+}
+for k, v in pairs(PetModes) do PetModes[v] = k end
+function Env.GetActivePetMode()
+	for i = NUM_PET_ACTION_SLOTS, 1, -1 do -- go backwards since they are probably at the end of the action bar
+		local name, _, _, isToken, isActive = GetPetActionInfo(i)
+		if isToken and isActive and PetModes[name] then
+			return PetModes[name]
+		end
+	end
+end
+
 Env.UnitNameConcatCache = setmetatable(
 {}, {
 	__index = function(t, i)
@@ -521,18 +522,6 @@ Env.UnitNameConcatCache = setmetatable(
 	end,
 })
 
-CNDT.Operators = {
-	{ tooltipText = L["CONDITIONPANEL_EQUALS"], 		value = "==", 	text = "==" },
-	{ tooltipText = L["CONDITIONPANEL_NOTEQUAL"], 	 	value = "~=", 	text = "~=" },
-	{ tooltipText = L["CONDITIONPANEL_LESS"], 			value = "<", 	text = "<" 	},
-	{ tooltipText = L["CONDITIONPANEL_LESSEQUAL"], 		value = "<=", 	text = "<=" },
-	{ tooltipText = L["CONDITIONPANEL_GREATER"], 		value = ">", 	text = ">" 	},
-	{ tooltipText = L["CONDITIONPANEL_GREATEREQUAL"], 	value = ">=", 	text = ">=" },
-}
-CNDT.OperatorTooltips = {}
-for k, v in pairs(CNDT.Operators) do
-	CNDT.OperatorTooltips[v.value] = v.tooltipText
-end
 
 
 local function formatSeconds(seconds, arg2)
@@ -550,7 +539,7 @@ local function formatSeconds(seconds, arg2)
 		s = "0" .. s
 	end
 
-	if y >= 1 then return format("%d:%d:%02d:%02d:%s", y, d, h, m, ns) end
+	if y >= 1 then return format("%d:%d:%02d:%02d:%s", y, d, h, m, s) end
 	if d >= 1 then return format("%d:%02d:%02d:%s", d, h, m, s) end
 	if h >= 1 then return format("%d:%02d:%s", h, m, s) end
 	return format("%d:%s", m, s)
@@ -559,6 +548,7 @@ end
 -- preset text tables that are frequently used
 local commanumber = function(k)
 	k = gsub(k, "(%d)(%d%d%d)$", "%1,%2", 1)
+	local found
 	repeat
 		k, found = gsub(k, "(%d)(%d%d%d),", "%1,%2,", 1)
 	until found == 0
@@ -571,7 +561,191 @@ local bool = {[0] = L["TRUE"],[1] = L["FALSE"],}
 local usableunusable = {[0] = L["ICONMENU_USABLE"],[1] = L["ICONMENU_UNUSABLE"],}
 local presentabsent = {[0] = L["ICONMENU_PRESENT"],[1] = L["ICONMENU_ABSENT"],}
 local absentseconds = setmetatable({[0] = formatSeconds(0).." ("..L["ICONMENU_ABSENT"]..")"}, {__index = formatSeconds})
+local usableseconds = setmetatable({[0] = formatSeconds(0).." ("..L["ICONMENU_USABLE"]..")"}, {__index = formatSeconds})
 local standardtcoords = {0.07, 0.93, 0.07, 0.93}
+
+local activeEventsReusable = {}
+function CNDT:CompileUpdateFunction(icon, activeEvents)
+	icon.conditionAnticipateFunc = nil
+	
+	local Conditions = icon.Conditions
+	activeEvents = activeEvents or wipe(activeEventsReusable)
+	local numAnticipatorArgs = 0
+	local anticipatorstr = ""
+	
+	for i = 1, Conditions.n do
+		local c = Conditions[i]
+		local t = c.Type
+		local v = CNDT.ConditionsByType[t]
+		if v and v.events then
+			local voidNext
+			for n, value in TMW:Vararg(TMW.get(v.events, c)) do
+				if value == "OnUpdate" then
+					icon.conditionUpdateMethod = "OnUpdate"
+					return value
+				end
+				
+				if voidNext then
+					-- voidNext is an event. value should be a unitID that we are going to associate with the event
+					assert(not value:find("[A-Z]"))
+					activeEvents[voidNext .. "|'" .. value .. "'"] = true
+					voidNext = nil
+				else
+					-- value is an event
+					if value == "unit_changed_event" then
+						if c.Unit == "target" then
+							activeEvents.PLAYER_TARGET_CHANGED = true
+						elseif c.Unit == "pet" then
+							activeEvents["UNIT_PET|'player'"] = true
+						elseif c.Unit == "focus" then
+							activeEvents.PLAYER_FOCUS_CHANGED = true
+						elseif c.Unit:find("^raid%d+$") then
+							activeEvents.RAID_ROSTER_UPDATE = true
+						elseif c.Unit:find("^party%d+$") then
+							activeEvents.PARTY_MEMBERS_CHANGED = true
+						elseif c.Unit:find("^boss%d+$") then
+							activeEvents.INSTANCE_ENCOUNTER_ENGAGE_UNIT = true
+						elseif c.Unit:find("^arena%d+$") then
+							activeEvents.ARENA_OPPONENT_UPDATE = true
+						end
+					elseif value:find("^UNIT_") then
+						voidNext = value -- tell the iterator to listen to the next value as a unitID
+					else
+						activeEvents[value] = true
+					end
+				end
+			end
+		else
+			icon.conditionUpdateMethod = "OnUpdate"
+			return "OnUpdate"
+		end
+		
+		-- handle code that anticipates when a change in state will occur.
+		-- this is usually used to predict when a duration threshold will be used, but you could really use it for whatever you want.
+		if v.anticipate then
+			numAnticipatorArgs = numAnticipatorArgs + 1
+			
+			local thisstr = TMW.get(v.anticipate, c) -- get the anticipator string from the condition data
+			thisstr = CNDT:DoConditionSubstitutions(icon, v, c, thisstr) -- substitute in any user settings
+
+			-- append a check to make sure that the smallest value out of all anticipation checks isnt less than the current time.
+			thisstr = thisstr .. [[
+			if VALUE <= time then
+				VALUE = huge
+			end]]
+			
+			-- change VALUE to the appropriate ARGUMENT#
+			thisstr = thisstr:gsub("VALUE", "ARGUMENT" .. numAnticipatorArgs)
+			
+			anticipatorstr = anticipatorstr .. "\r\n" .. thisstr
+		end
+	end
+	
+	if not next(activeEvents) then
+		icon.conditionUpdateMethod = "OnUpdate"
+		return "OnUpdate"
+	end
+	
+	local doesAnticipate
+	if anticipatorstr ~= "" then
+		local allVars = ""
+		for i = 1, numAnticipatorArgs do
+			allVars = allVars .. "ARGUMENT" .. i .. ","
+		end
+		allVars = allVars:sub(1, -2)
+		
+		anticipatorstr = anticipatorstr .. ([[
+		local nextTime = %s
+		if nextTime == 0 then
+			nextTime = huge
+		end
+		%s.nextConditionUpdate = nextTime]]):format((numAnticipatorArgs == 1 and allVars or "min(" .. allVars .. ")"), icon:GetName())
+		
+		doesAnticipate = true
+	end
+	
+	icon.conditionUpdateMethod = "OnEvent" --DEBUG: COMMENTING THIS LINE FORCES ALL CONDITIONS TO BE ONUPDATE DRIVEN
+	icon.conditionsNeedUpdate = true
+	
+	local numberOfIfs = 0
+	local funcstr = [[
+	local event, arg1 = ...
+	if not event then
+		return
+	elseif (]]
+	for event in pairs(activeEvents) do
+		local thisstr
+		
+		if event:find("|") then
+			-- event contains both the event and a arg to check, separated by "|".
+			-- args should be string wrapped if they are supposed to be strings, because we want to allow variable substitution too
+			local realEvent, arg = strsplit("|", event)
+			activeEvents[event] = realEvent --associate the entry with the real event
+			
+			thisstr = ([[event == %q and arg1 == %s]]):format(realEvent, arg)
+		else
+			thisstr = ([[event == %q]]):format(event)
+		end
+		
+		funcstr = funcstr .. [[(]] .. thisstr .. [[) or ]]
+	end
+		
+	funcstr = funcstr:sub(1, -5) .. [[) then
+		]] .. icon:GetName() .. [[.conditionsNeedUpdate = true
+	end]]
+	
+	funcstr = anticipatorstr .. "\r\n" .. funcstr
+	
+	-- clear out all existing funcs for the icon
+	for event, funcs in pairs(CNDT.EventEngine.funcs) do
+		for func, ic in pairs(funcs) do
+			if icon == ic then
+				funcs[func] = nil
+			end
+		end
+	end
+	
+	local func
+	if functionCache[funcstr] then
+		func = functionCache[funcstr]
+	else
+		local err
+		func, err = loadstring(funcstr, icon:GetName() .. " Condition Events")
+		if func then
+			func = setfenv(func, Env)
+			functionCache[funcstr] = func
+		elseif (TMW.debug or luaUsed) and err then
+			TMW:Error(err)
+		end
+	end
+	icon.CndtEventString = funcstr
+	
+	icon.conditionAnticipatorFunc = doesAnticipate and func
+	
+	if func then
+		for event, realEvent in pairs(activeEvents) do
+			if realEvent ~= true then
+				event = realEvent
+			end
+			CNDT.EventEngine:Register(event, func, icon)
+		end
+	end
+end
+
+function CNDT:IsUnitEventUnit(unit)
+	if	unit == "player"
+	or	unit == "pet"
+	or	unit == "target"
+	or	unit == "focus"
+	or	unit:find("^raid%d+$")
+	or	unit:find("^party%d+$")
+	or	unit:find("^boss%d+$")
+	or	unit:find("^arena%d+$")
+	then
+		return "unit_changed_event"
+	end
+	return "OnUpdate"
+end
 
 
 CNDT.Types = {
@@ -587,6 +761,9 @@ CNDT.Types = {
 		icon = "Interface\\Icons\\inv_alchemy_elixir_05",
 		tcoords = standardtcoords,
 		funcstr = [[UnitHealth(c.Unit)/(UnitHealthMax(c.Unit)+epsilon) c.Operator c.Level]],
+		events = function(c)
+			return CNDT:IsUnitEventUnit(c.Unit), "UNIT_HEALTH_FREQUENT", c.Unit, "UNIT_MAXHEALTH", c.Unit
+		end,
 	},
 	{ -- primary resource
 		text = L["CONDITIONPANEL_POWER"],
@@ -600,6 +777,9 @@ CNDT.Types = {
 		icon = "Interface\\Icons\\inv_alchemy_elixir_02",
 		tcoords = standardtcoords,
 		funcstr = [[UnitPower(c.Unit)/(UnitPowerMax(c.Unit)+epsilon) c.Operator c.Level]],
+		events = function(c)
+			return CNDT:IsUnitEventUnit(c.Unit), "UNIT_POWER_FREQUENT", c.Unit, "UNIT_MAXPOWER", c.Unit, "UNIT_DISPLAYPOWER", c.Unit
+		end,
 	},
 	{ -- mana
 		text = MANA,
@@ -612,6 +792,9 @@ CNDT.Types = {
 		icon = "Interface\\Icons\\inv_potion_126",
 		tcoords = standardtcoords,
 		funcstr = [[UnitPower(c.Unit, 0)/(UnitPowerMax(c.Unit, 0)+epsilon) c.Operator c.Level]],
+		events = function(c)
+			return CNDT:IsUnitEventUnit(c.Unit), "UNIT_POWER_FREQUENT", c.Unit, "UNIT_MAXPOWER", c.Unit
+		end,
 	},
 	{ -- energy
 		text = ENERGY,
@@ -624,6 +807,9 @@ CNDT.Types = {
 		icon = "Interface\\Icons\\inv_potion_125",
 		tcoords = standardtcoords,
 		funcstr = [[UnitPower(c.Unit, 3)/(UnitPowerMax(c.Unit, 3)+epsilon) c.Operator c.Level]],
+		events = function(c)
+			return CNDT:IsUnitEventUnit(c.Unit), "UNIT_POWER_FREQUENT", c.Unit, "UNIT_MAXPOWER", c.Unit
+		end,
 	},
 	{ -- rage
 		text = RAGE,
@@ -636,6 +822,9 @@ CNDT.Types = {
 		icon = "Interface\\Icons\\inv_potion_120",
 		tcoords = standardtcoords,
 		funcstr = [[UnitPower(c.Unit, 1)/(UnitPowerMax(c.Unit, 1)+epsilon) c.Operator c.Level]],
+		events = function(c)
+			return CNDT:IsUnitEventUnit(c.Unit), "UNIT_POWER_FREQUENT", c.Unit, "UNIT_MAXPOWER", c.Unit
+		end,
 	},
 	{ -- focus
 		text = FOCUS,
@@ -648,6 +837,9 @@ CNDT.Types = {
 		icon = "Interface\\Icons\\inv_potion_124",
 		tcoords = standardtcoords,
 		funcstr = [[UnitPower(c.Unit, 2)/(UnitPowerMax(c.Unit, 2)+epsilon) c.Operator c.Level]],
+		events = function(c)
+			return CNDT:IsUnitEventUnit(c.Unit), "UNIT_POWER_FREQUENT", c.Unit, "UNIT_MAXPOWER", c.Unit
+		end,
 	},
 	{ -- runic power
 		text = RUNIC_POWER,
@@ -660,6 +852,9 @@ CNDT.Types = {
 		icon = "Interface\\Icons\\inv_potion_128",
 		tcoords = standardtcoords,
 		funcstr = [[UnitPower(c.Unit, 6)/(UnitPowerMax(c.Unit, 6)+epsilon) c.Operator c.Level]],
+		events = function(c)
+			return CNDT:IsUnitEventUnit(c.Unit), "UNIT_POWER_FREQUENT", c.Unit, "UNIT_MAXPOWER", c.Unit
+		end,
 	},
 	{ -- alternate power (atramedes, chogall, etc)
 		text = L["CONDITIONPANEL_ALTPOWER"],
@@ -673,6 +868,9 @@ CNDT.Types = {
 		icon = "Interface\\Icons\\spell_shadow_mindflay",
 		tcoords = standardtcoords,
 		funcstr = [[UnitPower(c.Unit, 10)/(UnitPowerMax(c.Unit, 10)+epsilon) c.Operator c.Level]],
+		events = function(c)
+			return CNDT:IsUnitEventUnit(c.Unit), "UNIT_POWER_FREQUENT", c.Unit, "UNIT_MAXPOWER", c.Unit, "UNIT_POWER_BAR_SHOW", c.Unit, "UNIT_POWER_BAR_HIDE", c.Unit
+		end,
 		spaceafter = true,
 	},
 	
@@ -686,6 +884,9 @@ CNDT.Types = {
 		icon = "Interface\\Icons\\inv_misc_gem_amethyst_02",
 		tcoords = standardtcoords,
 		funcstr = [[UnitPower(c.Unit, 7) c.Operator c.Level]],
+		events = function(c)
+			return CNDT:IsUnitEventUnit(c.Unit), "UNIT_POWER", c.Unit
+		end,
 		hidden = pclass ~= "WARLOCK",
 	},
 	{ -- holy power
@@ -698,6 +899,9 @@ CNDT.Types = {
 		icon = "Interface\\Icons\\Spell_Holy_Rune",
 		tcoords = standardtcoords,
 		funcstr = [[UnitPower(c.Unit, 9) c.Operator c.Level]],
+		events = function(c)
+			return CNDT:IsUnitEventUnit(c.Unit), "UNIT_POWER", c.Unit
+		end,
 		hidden = pclass ~= "PALADIN",
 	},
 	{ -- eclipse
@@ -713,6 +917,9 @@ CNDT.Types = {
 		icon = "Interface\\PlayerFrame\\UI-DruidEclipse",
 		tcoords = {0.65625000, 0.74609375, 0.37500000, 0.55468750},
 		funcstr = [[UnitPower(c.Unit, 8) c.Operator c.Level]],
+		events = function(c)
+			return CNDT:IsUnitEventUnit(c.Unit), "UNIT_POWER", c.Unit
+		end,
 		hidden = pclass ~= "DRUID",
 	},
 	{ -- eclipse direction
@@ -726,7 +933,7 @@ CNDT.Types = {
 		nooperator = true,
 		icon = "Interface\\PlayerFrame\\UI-DruidEclipse",
 		tcoords = {0.55859375, 0.64843750, 0.57031250, 0.75000000},
-		funcstr = [[c.Level == EclipseDir]],
+		funcstr = [[c.Level == GetEclipseDirection() == "sun" and 1 or 0]],
 		hidden = pclass ~= "DRUID",
 		events = "ECLIPSE_DIRECTION_CHANGE",
 	},
@@ -743,6 +950,9 @@ CNDT.Types = {
 		tcoords = {0.390625, 0.5491, 0.03, 0.3305},
 		funcstr = GetPetHappiness and [[(GetPetHappiness() or 0) c.Operator c.Level]] or [[true]], -- dummy string to keep support for wowCN
 		hidden = not GetPetHappiness or pclass ~= "HUNTER", -- dont show if GetPetHappiness doesnt exist (if happiness is removed in the client version), not not because it must be false, not nil
+		events = function()
+			return "UNIT_HAPPINESS", "pet", "UNIT_POWER", "pet"
+		end,
 	},
 	{ -- runes
 		text = RUNES,
@@ -775,6 +985,9 @@ CNDT.Types = {
 				return [[true]] -- just a cheesy error prevention if no runes are checked
 			end
 		end,
+		events = function(c)
+			return "RUNE_POWER_UPDATE", "RUNE_TYPE_UPDATE"
+		end,
 		hidden = pclass ~= "DEATHKNIGHT",
 	},
 	{ -- combo
@@ -787,6 +1000,7 @@ CNDT.Types = {
 		icon = "Interface\\Icons\\ability_rogue_eviscerate",
 		tcoords = standardtcoords,
 		funcstr = [[GetComboPoints("player", c.Unit) c.Operator c.Level]],
+		events = "UNIT_COMBO_POINTS",
 	},
 
 	{ -- abs health
@@ -795,10 +1009,13 @@ CNDT.Types = {
 		category = L["CNDTCAT_RESOURCES"],
 		texttable = commanumber,
 		range = 1000000,
-		step = 1000,
+		step = 1,
 		icon = "Interface\\Icons\\inv_alchemy_elixir_05",
 		tcoords = standardtcoords,
 		funcstr = [[UnitHealth(c.Unit) c.Operator c.Level]],
+		events = function(c)
+			return CNDT:IsUnitEventUnit(c.Unit), "UNIT_HEALTH_FREQUENT", c.Unit
+		end,
 		spacebefore = true,
 	},
 	{ -- abs primary resource
@@ -812,6 +1029,9 @@ CNDT.Types = {
 		icon = "Interface\\Icons\\inv_alchemy_elixir_02",
 		tcoords = standardtcoords,
 		funcstr = [[UnitPower(c.Unit) c.Operator c.Level]],
+		events = function(c)
+			return CNDT:IsUnitEventUnit(c.Unit), "UNIT_POWER_FREQUENT", c.Unit, "UNIT_DISPLAYPOWER", c.Unit
+		end,
 	},
 	{ -- abs mana
 		text = L["CONDITIONPANEL_ABSOLUTE"] .. " " .. MANA,
@@ -823,6 +1043,9 @@ CNDT.Types = {
 		icon = "Interface\\Icons\\inv_potion_126",
 		tcoords = standardtcoords,
 		funcstr = [[UnitPower(c.Unit, 0) c.Operator c.Level]],
+		events = function(c)
+			return CNDT:IsUnitEventUnit(c.Unit), "UNIT_POWER_FREQUENT", c.Unit
+		end,
 	},
 	{ -- abs energy
 		text = L["CONDITIONPANEL_ABSOLUTE"] .. " " .. ENERGY,
@@ -834,6 +1057,9 @@ CNDT.Types = {
 		icon = "Interface\\Icons\\inv_potion_125",
 		tcoords = standardtcoords,
 		funcstr = [[UnitPower(c.Unit, 3) c.Operator c.Level]],
+		events = function(c)
+			return CNDT:IsUnitEventUnit(c.Unit), "UNIT_POWER_FREQUENT", c.Unit
+		end,
 	},
 	{ -- abs rage
 		text = L["CONDITIONPANEL_ABSOLUTE"] .. " " .. RAGE,
@@ -845,6 +1071,9 @@ CNDT.Types = {
 		icon = "Interface\\Icons\\inv_potion_120",
 		tcoords = standardtcoords,
 		funcstr = [[UnitPower(c.Unit, 1) c.Operator c.Level]],
+		events = function(c)
+			return CNDT:IsUnitEventUnit(c.Unit), "UNIT_POWER_FREQUENT", c.Unit
+		end,
 	},
 	{ -- abs focus
 		text = L["CONDITIONPANEL_ABSOLUTE"] .. " " .. FOCUS,
@@ -856,6 +1085,9 @@ CNDT.Types = {
 		icon = "Interface\\Icons\\inv_potion_124",
 		tcoords = standardtcoords,
 		funcstr = [[UnitPower(c.Unit, 2) c.Operator c.Level]],
+		events = function(c)
+			return CNDT:IsUnitEventUnit(c.Unit), "UNIT_POWER_FREQUENT", c.Unit
+		end,
 	},
 	{ -- abs runic power
 		text = L["CONDITIONPANEL_ABSOLUTE"] .. " " .. RUNIC_POWER,
@@ -867,6 +1099,9 @@ CNDT.Types = {
 		icon = "Interface\\Icons\\inv_potion_128",
 		tcoords = standardtcoords,
 		funcstr = [[UnitPower(c.Unit, 6) c.Operator c.Level]],
+		events = function(c)
+			return CNDT:IsUnitEventUnit(c.Unit), "UNIT_POWER_FREQUENT", c.Unit
+		end,
 	},
 	{ -- abs alternate power (atramedes, chogall, etc)
 		text = L["CONDITIONPANEL_ABSOLUTE"] .. " " .. L["CONDITIONPANEL_ALTPOWER"],
@@ -879,6 +1114,9 @@ CNDT.Types = {
 		icon = "Interface\\Icons\\spell_shadow_mindflay",
 		tcoords = standardtcoords,
 		funcstr = [[UnitPower(c.Unit, 10) c.Operator c.Level]],
+		events = function(c)
+			return CNDT:IsUnitEventUnit(c.Unit), "UNIT_POWER_FREQUENT", c.Unit, "UNIT_POWER_BAR_SHOW", c.Unit, "UNIT_POWER_BAR_HIDE", c.Unit
+		end,
 	},
 	
 	{ -- max health
@@ -887,10 +1125,13 @@ CNDT.Types = {
 		category = L["CNDTCAT_RESOURCES"],
 		texttable = commanumber,
 		range = 1000000,
-		step = 1000,
+		step = 100,
 		icon = "Interface\\Icons\\inv_alchemy_elixir_05",
 		tcoords = standardtcoords,
 		funcstr = [[UnitHealthMax(c.Unit) c.Operator c.Level]],
+		events = function(c)
+			return CNDT:IsUnitEventUnit(c.Unit), "UNIT_MAXHEALTH", c.Unit
+		end,
 		spacebefore = true,
 	},
 	{ -- max primary resource
@@ -900,10 +1141,13 @@ CNDT.Types = {
 		category = L["CNDTCAT_RESOURCES"],
 		texttable = commanumber,
 		range = 40000,
-		step = 1,
+		step = 100,
 		icon = "Interface\\Icons\\inv_alchemy_elixir_02",
 		tcoords = standardtcoords,
 		funcstr = [[UnitPowerMax(c.Unit) c.Operator c.Level]],
+		events = function(c)
+			return CNDT:IsUnitEventUnit(c.Unit), "UNIT_MAXPOWER", c.Unit, "UNIT_DISPLAYPOWER", c.Unit
+		end,
 	},
 	{ -- max mana
 		text = L["CONDITIONPANEL_MAX"] .. " " .. MANA,
@@ -915,6 +1159,9 @@ CNDT.Types = {
 		icon = "Interface\\Icons\\inv_potion_126",
 		tcoords = standardtcoords,
 		funcstr = [[UnitPowerMax(c.Unit, 0) c.Operator c.Level]],
+		events = function(c)
+			return CNDT:IsUnitEventUnit(c.Unit), "UNIT_MAXPOWER", c.Unit
+		end,
 	},
 	{ -- max energy
 		text = L["CONDITIONPANEL_MAX"] .. " " .. ENERGY,
@@ -926,6 +1173,9 @@ CNDT.Types = {
 		icon = "Interface\\Icons\\inv_potion_125",
 		tcoords = standardtcoords,
 		funcstr = [[UnitPowerMax(c.Unit, 3) c.Operator c.Level]],
+		events = function(c)
+			return CNDT:IsUnitEventUnit(c.Unit), "UNIT_MAXPOWER", c.Unit
+		end,
 	},
 	{ -- max rage
 		text = L["CONDITIONPANEL_MAX"] .. " " .. RAGE,
@@ -937,6 +1187,9 @@ CNDT.Types = {
 		icon = "Interface\\Icons\\inv_potion_120",
 		tcoords = standardtcoords,
 		funcstr = [[UnitPowerMax(c.Unit, 1) c.Operator c.Level]],
+		events = function(c)
+			return CNDT:IsUnitEventUnit(c.Unit), "UNIT_MAXPOWER", c.Unit
+		end,
 	},
 	{ -- max focus
 		text = L["CONDITIONPANEL_MAX"] .. " " .. FOCUS,
@@ -948,6 +1201,9 @@ CNDT.Types = {
 		icon = "Interface\\Icons\\inv_potion_124",
 		tcoords = standardtcoords,
 		funcstr = [[UnitPowerMax(c.Unit, 2) c.Operator c.Level]],
+		events = function(c)
+			return CNDT:IsUnitEventUnit(c.Unit), "UNIT_MAXPOWER", c.Unit
+		end,
 	},
 	{ -- max runic power
 		text = L["CONDITIONPANEL_MAX"] .. " " .. RUNIC_POWER,
@@ -959,6 +1215,9 @@ CNDT.Types = {
 		icon = "Interface\\Icons\\inv_potion_128",
 		tcoords = standardtcoords,
 		funcstr = [[UnitPowerMax(c.Unit, 6) c.Operator c.Level]],
+		events = function(c)
+			return CNDT:IsUnitEventUnit(c.Unit), "UNIT_MAXPOWER", c.Unit
+		end,
 	},
 	{ -- max alternate power (atramedes, chogall, etc)
 		text = L["CONDITIONPANEL_MAX"] .. " " .. L["CONDITIONPANEL_ALTPOWER"],
@@ -971,6 +1230,9 @@ CNDT.Types = {
 		icon = "Interface\\Icons\\spell_shadow_mindflay",
 		tcoords = standardtcoords,
 		funcstr = [[UnitPowerMax(c.Unit, 10) c.Operator c.Level]],
+		events = function(c)
+			return CNDT:IsUnitEventUnit(c.Unit), "UNIT_MAXPOWER", c.Unit, "UNIT_POWER_BAR_SHOW", c.Unit, "UNIT_POWER_BAR_HIDE", c.Unit
+		end,
 	},
 	
 	
@@ -986,7 +1248,20 @@ CNDT.Types = {
 		nooperator = true,
 		icon = "Interface\\Icons\\ABILITY_SEAL",
 		tcoords = standardtcoords,
-		funcstr = [[c.1nil == UnitExists(c.Unit)]],
+		funcstr = function(c)
+			if c.Unit == "player" then
+				return [[true]]
+			else
+				return [[c.1nil == UnitExists(c.Unit)]]
+			end
+		end,
+		events = function(c)
+			--if c.Unit == "mouseover" then -- there is no event for when you are no longer mousing over a unit, so we cant use this
+			--	return "UPDATE_MOUSEOVER_UNIT"
+			--else
+				return CNDT:IsUnitEventUnit(c.Unit) -- this should work
+			--end
+		end,
 	},
 	{ -- alive
 		text = L["CONDITIONPANEL_ALIVE"],
@@ -1000,6 +1275,9 @@ CNDT.Types = {
 		icon = "Interface\\Icons\\Ability_Vanish",
 		tcoords = standardtcoords,
 		funcstr = [[c.nil1 == UnitIsDeadOrGhost(c.Unit)]], -- note usage of nil1, not 1nil
+		events = function(c)
+			return CNDT:IsUnitEventUnit(c.Unit), "UNIT_HEALTH", c.Unit
+		end,
 	},
 	{ -- combat
 		text = L["CONDITIONPANEL_COMBAT"],
@@ -1012,13 +1290,13 @@ CNDT.Types = {
 		icon = "Interface\\CharacterFrame\\UI-StateIcon",
 		tcoords = {0.53, 0.92, 0.05, 0.42},
 		funcstr = function(c)
-			if strlower(c.Unit) == "player" then
-				CNDT:RegisterEvent("PLAYER_REGEN_ENABLED")
-				CNDT:RegisterEvent("PLAYER_REGEN_DISABLED")
-				Env.PlayerInCombat = UnitAffectingCombat("player")
-				return [[c.1nil == PlayerInCombat]]
+			return [[c.1nil == UnitAffectingCombat(c.Unit)]]
+		end,
+		events = function(c)
+			if c.Unit == "player" then
+				return "PLAYER_REGEN_ENABLED", "PLAYER_REGEN_DISABLED"
 			else
-				return [[c.1nil == UnitAffectingCombat(c.Unit)]]
+				return CNDT:IsUnitEventUnit(c.Unit), "UNIT_FLAGS", c.Unit, "UNIT_DYNAMIC_FLAGS", c.Unit -- idk if UNIT_DYNAMIC_FLAGS is needed. but lets do it anyway.
 			end
 		end,
 	},
@@ -1033,14 +1311,10 @@ CNDT.Types = {
 		icon = "Interface\\Icons\\Ability_Vehicle_SiegeEngineCharge",
 		tcoords = standardtcoords,
 		funcstr = function(c)
-			if strlower(c.Unit) == "player" then
-				CNDT:RegisterEvent("UNIT_ENTERED_VEHICLE", "UNIT_VEHICLE")
-				CNDT:RegisterEvent("UNIT_EXITED_VEHICLE", "UNIT_VEHICLE")
-				Env.PlayerInVehicle = UnitHasVehicleUI("player")
-				return [[c.True == PlayerInVehicle]]
-			else
-				return [[c.True == UnitHasVehicleUI(c.Unit)]]
-			end
+			return [[c.True == UnitHasVehicleUI(c.Unit)]]
+		end,
+		events = function(c)
+			return CNDT:IsUnitEventUnit(c.Unit), "UNIT_ENTERED_VEHICLE", c.Unit, "UNIT_EXITED_VEHICLE", c.Unit, "UNIT_VEHICLE", c.Unit
 		end,
 	},
 	{ -- pvp
@@ -1054,6 +1328,9 @@ CNDT.Types = {
 		icon = "Interface\\TargetingFrame\\UI-PVP-" .. UnitFactionGroup("player"),
 		tcoords = {0.046875, 0.609375, 0.015625, 0.59375},
 		funcstr = [[c.1nil == UnitIsPVP(c.Unit)]],
+		events = function(c)
+			return CNDT:IsUnitEventUnit(c.Unit), "UNIT_FACTION", c.Unit
+		end,		
 	},
 	{ -- react
 		text = L["ICONMENU_REACT"],
@@ -1066,6 +1343,9 @@ CNDT.Types = {
 		icon = "Interface\\Icons\\Warrior_talent_icon_FuryInTheBlood",
 		tcoords = standardtcoords,
 		funcstr = [[(((UnitIsEnemy("player", c.Unit) or ((UnitReaction("player", c.Unit) or 5) <= 4)) and 1) or 2) == c.Level]],
+		events = function(c)
+			return CNDT:IsUnitEventUnit(c.Unit), "UNIT_FLAGS", c.Unit, "UNIT_DYNAMIC_FLAGS", c.Unit
+		end,	
 	},
 	{ -- speed
 		text = L["SPEED"],
@@ -1079,6 +1359,7 @@ CNDT.Types = {
 		icon = "Interface\\Icons\\ability_rogue_sprint",
 		tcoords = standardtcoords,
 		funcstr = [[GetUnitSpeed(c.Unit)/]].. BASE_MOVEMENT_SPEED ..[[ c.Operator c.Level]],
+		-- events = absolutely no events
 	},
 	{ -- runspeed
 		text = L["RUNSPEED"],
@@ -1091,6 +1372,7 @@ CNDT.Types = {
 		icon = "Interface\\Icons\\ability_rogue_sprint",
 		tcoords = standardtcoords,
 		funcstr = [[select(2, GetUnitSpeed(c.Unit))/]].. BASE_MOVEMENT_SPEED ..[[ c.Operator c.Level]],
+		-- events = absolutely no events
 	},
 	{ -- name
 		text = L["CONDITIONPANEL_NAME"],
@@ -1104,6 +1386,9 @@ CNDT.Types = {
 		icon = "Interface\\LFGFrame\\LFGFrame-SearchIcon-Background",
 		tcoords = standardtcoords,
 		funcstr = [[c.1nil == (strfind(c.Name, UnitNameConcatCache[UnitName(c.Unit) or ""]) and 1)]],
+		events = function(c)
+			return CNDT:IsUnitEventUnit(c.Unit), "UNIT_NAME_UPDATE", c.Unit
+		end,	
 	},
 	{ -- level
 		text = L["CONDITIONPANEL_LEVEL"],
@@ -1115,14 +1400,17 @@ CNDT.Types = {
 		icon = "Interface\\TargetingFrame\\UI-TargetingFrame-Skull",
 		tcoords = {0.05, 0.95, 0.03, 0.97},
 		funcstr = [[UnitLevel(c.Unit) c.Operator c.Level]],
+		events = function(c)
+			return CNDT:IsUnitEventUnit(c.Unit), "UNIT_LEVEL", c.Unit
+		end,	
 	},
 	{ -- class
 		text = L["CONDITIONPANEL_CLASS"],
 		category = L["CNDTCAT_ATTRIBUTES_UNIT"],
 		value = "CLASS",
 		min = 1,
-		max = #classes,
-		texttable = function(k) return classes[k] and LOCALIZED_CLASS_NAMES_MALE[classes[k]] end,
+		max = #Classes,
+		texttable = function(k) return Classes[k] and LOCALIZED_CLASS_NAMES_MALE[Classes[k]] end,
 		icon = "Interface\\GLUES\\CHARACTERCREATE\\UI-CHARACTERCREATE-CLASSES",
 		nooperator = true,
 		tcoords = {
@@ -1132,8 +1420,11 @@ CNDT.Types = {
 			CLASS_ICON_TCOORDS[pclass][4]-.02,
 		},
 		funcstr = function(c)
-			return [[select(2, UnitClass(c.Unit)) == "]] .. (classes[c.Level] or "whoops") .. "\""
+			return [[select(2, UnitClass(c.Unit)) == "]] .. (Classes[c.Level] or "whoops") .. "\""
 		end,
+		events = function(c)
+			return CNDT:IsUnitEventUnit(c.Unit) -- classes cant change, so this is all we should need
+		end,	
 	},
 	{ -- classification
 		text = L["CONDITIONPANEL_CLASSIFICATION"],
@@ -1145,6 +1436,9 @@ CNDT.Types = {
 		icon = "Interface\\Icons\\achievement_pvp_h_03",
 		tcoords = standardtcoords,
 		funcstr = [[(classifications[UnitClassification(c.Unit)] or 1) c.Operator c.Level]],
+		events = function(c)
+			return CNDT:IsUnitEventUnit(c.Unit), "UNIT_CLASSIFICATION_CHANGED", c.Unit
+		end,	
 	},
 	{ -- role
 		text = L["CONDITIONPANEL_ROLE"],
@@ -1156,6 +1450,12 @@ CNDT.Types = {
 		icon = "Interface\\LFGFrame\\UI-LFG-ICON-ROLES",
 		tcoords = {GetTexCoordsForRole("DAMAGER")},
 		funcstr = [[(roles[UnitGroupRolesAssigned(c.Unit)] or 1) c.Operator c.Level]],
+		events = function(c)
+			-- the unit change events should actually cover many of the changes (at least for party and raid units, but roles only exist in party and raid anyway.)
+			return CNDT:IsUnitEventUnit(c.Unit), "PLAYER_ROLES_ASSIGNED", "ROLE_CHANGED_INFORM"
+		end,
+		
+		
 	},
 	{ -- raid icon
 		text = L["CONDITIONPANEL_RAIDICON"],
@@ -1166,6 +1466,7 @@ CNDT.Types = {
 		texttable = setmetatable({[0]=NONE}, {__index = function(t, k) return "|TInterface\\TargetingFrame\\UI-RaidTargetingIcon_"..k..":0|t ".._G["RAID_TARGET_"..k] end}),
 		icon = "Interface\\TargetingFrame\\UI-RaidTargetingIcon_8",
 		funcstr = [[(GetRaidTargetIndex(c.Unit) or 0) c.Operator c.Level]],
+		events = "RAID_TARGET_UPDATE",
 	},
 	{ -- unit is unit
 		text = L["CONDITIONPANEL_UNITISUNIT"],
@@ -1180,6 +1481,9 @@ CNDT.Types = {
 		icon = "Interface\\Icons\\spell_holy_prayerofhealing",
 		tcoords = standardtcoords,
 		funcstr = [[UnitIsUnit(c.Unit, c.Unit2) == c.1nil]],
+		events = function(c)
+			return CNDT:IsUnitEventUnit(c.Unit), CNDT:IsUnitEventUnit(c.Name)
+		end,
 	},
 	{ -- unit threat scaled
 		text = L["CONDITIONPANEL_THREAT_SCALED"],
@@ -1192,6 +1496,7 @@ CNDT.Types = {
 		icon = "Interface\\Icons\\spell_misc_emotionangry",
 		tcoords = standardtcoords,
 		funcstr = [[(select(3, UnitDetailedThreatSituation("player", c.Unit)) or 0) c.Operator c.Level]],
+		-- events = absolutely no events
 	},
 	{ -- unit threat raw
 		text = L["CONDITIONPANEL_THREAT_RAW"],
@@ -1204,6 +1509,7 @@ CNDT.Types = {
 		icon = "Interface\\Icons\\spell_misc_emotionhappy",
 		tcoords = standardtcoords,
 		funcstr = [[(select(4, UnitDetailedThreatSituation("player", c.Unit)) or 0) c.Operator c.Level]],
+		-- events = absolutely no events
 	},
 
 	
@@ -1228,8 +1534,10 @@ CNDT.Types = {
 		},
 		icon = "Interface\\Icons\\Spell_Frost_Stun",
 		tcoords = standardtcoords,
-		funcstr = [[ZoneType c.Operator c.Level]],
-		events = "ZONE_CHANGED_NEW_AREA",
+		funcstr = [[GetZoneType() c.Operator c.Level]],
+		events = function(c)
+			return "ZONE_CHANGED_NEW_AREA", "PLAYER_DIFFICULTY_CHANGED"
+		end,
 	},
 	{ -- grouptype
 		text = L["CONDITIONPANEL_GROUPTYPE"],
@@ -1242,8 +1550,10 @@ CNDT.Types = {
 		texttable = {[0] = SOLO, [1] = PARTY, [2] = RAID},
 		icon = "Interface\\Calendar\\MeetingIcon",
 		tcoords = standardtcoords,
-		funcstr = [[((NumRaidMembers > 0 and 2) or (NumPartyMembers > 0 and 1) or 0) c.Operator c.Level]], -- this one was harder than it should have been to figure out; keep it in mind for future condition creating
-		events = "PARTY_MEMBERS_CHANGED RAID_ROSTER_UPDATE",
+		funcstr = [[((GetNumRaidMembers() > 0 and 2) or (GetNumPartyMembers() > 0 and 1) or 0) c.Operator c.Level]], -- this one was harder than it should have been to figure out; keep it in mind for future condition creating
+		events = function(c)
+			return "PARTY_MEMBERS_CHANGED", "RAID_ROSTER_UPDATE"
+		end,
 	},
 	{ -- mounted
 		text = L["CONDITIONPANEL_MOUNTED"],
@@ -1257,6 +1567,9 @@ CNDT.Types = {
 		icon = "Interface\\Icons\\Ability_Mount_Charger",
 		tcoords = standardtcoords,
 		funcstr = [[c.1nil == IsMounted()]],
+		events = function(c)
+			return "UNIT_AURA", "player" -- hopefully this is adequate
+		end,
 	},
 	{ -- swimming
 		text = L["CONDITIONPANEL_SWIMMING"],
@@ -1270,6 +1583,7 @@ CNDT.Types = {
 		icon = "Interface\\Icons\\Spell_Shadow_DemonBreath",
 		tcoords = standardtcoords,
 		funcstr = [[c.1nil == IsSwimming()]],
+		--events = absolutely no events (SPELL_UPDATE_USABLE is close, but not close enough)
 	},
 	{ -- resting
 		text = L["CONDITIONPANEL_RESTING"],
@@ -1282,7 +1596,7 @@ CNDT.Types = {
 		unit = PLAYER,
 		icon = "Interface\\CHARACTERFRAME\\UI-StateIcon",
 		tcoords = {0.0625, 0.453125, 0.046875, 0.421875},
-		funcstr = [[c.1nil == Resting]],
+		funcstr = [[c.1nil == IsResting()]],
 		events = "PLAYER_UPDATE_RESTING",
 	},
 	{ -- stance
@@ -1298,9 +1612,11 @@ CNDT.Types = {
 		max = #TMW.CSN,
 		texttable = TMW.CSN, -- now isn't this convenient? too bad i have to track them by ID so they wont upgrade properly when stances are added/removed
 		unit = PLAYER,
-		icon = function() return firststanceid and GetSpellTexture(firststanceid) end,
+		icon = function()
+			return firststanceid and GetSpellTexture(firststanceid)
+		end,
 		tcoords = standardtcoords,
-		funcstr = [[ShapeshiftForm c.Operator c.Level]],
+		funcstr = [[GetShapeshiftForm() c.Operator c.Level]],
 		events = "UPDATE_SHAPESHIFT_FORM",
 		hidden = #TMW.CSN == 0,
 	},
@@ -1318,7 +1634,10 @@ CNDT.Types = {
 		unit = PLAYER,
 		icon = "Interface\\Icons\\achievement_general",
 		tcoords = standardtcoords,
-		funcstr = [[c.Level == CurrentSpec]],
+		funcstr = [[c.Level == GetActiveTalentGroup()]],
+		events = function(c)
+			return "PLAYER_TALENT_UPDATE", "ACTIVE_TALENT_GROUP_CHANGED"
+		end,
 	},
 	{ -- talent tree
 		text = L["UIPANEL_TREE"],
@@ -1331,7 +1650,10 @@ CNDT.Types = {
 		unit = PLAYER,
 		icon = function() return select(4, GetTalentTabInfo(1)) end,
 		tcoords = standardtcoords,
-		funcstr = [[CurrentTree c.Operator c.Level]],
+		funcstr = [[GetPrimaryTalentTree() c.Operator c.Level]],
+		events = function(c)
+			return "PLAYER_TALENT_UPDATE", "ACTIVE_TALENT_GROUP_CHANGED"
+		end,
 	}, 
 	{ -- points in talent
 		text = L["UIPANEL_PTSINTAL"],
@@ -1345,7 +1667,14 @@ CNDT.Types = {
 		icon = function() return select(2, GetTalentInfo(1, 1)) end,
 		tcoords = standardtcoords,
 		funcstr = [[(TalentMap[c.NameName] or 0) c.Operator c.Level]],
-		events = "PLAYER_TALENT_UPDATE",
+		events = function(c)
+			-- this is handled externally because TalentMap is so extensive a process,
+			-- and if it does get stuck in an OnUpdate condition, it could be very bad.
+			CNDT:RegisterEvent("PLAYER_TALENT_UPDATE")
+			CNDT:PLAYER_TALENT_UPDATE()
+			-- we still only need to update the condition when talents change, though.
+			return "PLAYER_TALENT_UPDATE", "ACTIVE_TALENT_GROUP_CHANGED"
+		end,
 	},
 	{ -- pet autocast
 		text = L["CONDITIONPANEL_AUTOCAST"],
@@ -1361,6 +1690,7 @@ CNDT.Types = {
 		icon = "Interface\\Icons\\ability_physical_taunt",
 		tcoords = standardtcoords,
 		funcstr = [[select(2, GetSpellAutocast(c.NameName)) == c.1nil]],
+		events = "PET_BAR_UPDATE",
 	},
 	{ -- pet attack mode
 		text = L["CONDITIONPANEL_PETMODE"],
@@ -1373,7 +1703,7 @@ CNDT.Types = {
 		unit = PET,
 		icon = PET_ASSIST_TEXTURE,
 		tcoords = standardtcoords,
-		funcstr = [[ActivePetMode c.Operator c.Level]],
+		funcstr = [[GetActivePetMode() c.Operator c.Level]],
 		events = "PET_BAR_UPDATE",
 	},
 	{ -- pet talent tree
@@ -1391,8 +1721,10 @@ CNDT.Types = {
 		unit = PET,
 		icon = "Interface\\Icons\\Ability_Druid_DemoralizingRoar",
 		tcoords = standardtcoords,
-		funcstr = [[PetTalentID and PetTalentID c.Operator c.Level]],
-		events = "UNIT_PET",
+		funcstr = [[(GetTalentTabInfo(1, nil, 1) or 0) c.Operator c.Level]],
+		events = function()
+			return "UNIT_PET", "player"
+		end,
 	},
 	{ -- tracking
 		text = L["CONDITIONPANEL_TRACKING"],
@@ -1408,7 +1740,12 @@ CNDT.Types = {
 		icon = "Interface\\MINIMAP\\TRACKING\\None",
 		tcoords = standardtcoords,
 		funcstr = [[Tracking[c.NameName] == c.1nil]],
-		events = "MINIMAP_UPDATE_TRACKING",
+		events = function()
+			-- keep this event based because it is so extensive
+			CNDT:RegisterEvent("MINIMAP_UPDATE_TRACKING")
+			CNDT:MINIMAP_UPDATE_TRACKING()
+			return "MINIMAP_UPDATE_TRACKING"
+		end,
 	},
 
 
@@ -1423,10 +1760,17 @@ CNDT.Types = {
 		name = function(editbox) TMW:TT(editbox, "SPELLTOCHECK", "CNDT_ONLYFIRST") editbox.label = L["SPELLTOCHECK"] end,
 		useSUG = "spellWithGCD",
 		unit = PLAYER,
-		texttable = setmetatable({[0] = formatSeconds(0).." ("..L["ICONMENU_USABLE"]..")"}, {__index = formatSeconds}),
+		texttable = usableseconds,
 		icon = "Interface\\Icons\\spell_holy_divineintervention",
 		tcoords = standardtcoords,
 		funcstr = [[CooldownDuration(c.NameFirst, time) c.Operator c.Level]],
+		events = function(c)
+			return "SPELL_UPDATE_COOLDOWN", "SPELL_UPDATE_USABLE"
+		end,
+		anticipate = [[
+			local start, duration = GetSpellCooldown(c.GCDReplacedNameFirst)
+			local VALUE = duration and start + (duration - c.Level) or huge
+		]],
 	},
 	{ -- spell cooldown compare
 		text = L["SPELLCOOLDOWN"] .. " - " .. L["COMPARISON"],
@@ -1440,6 +1784,25 @@ CNDT.Types = {
 		icon = "Interface\\Icons\\spell_holy_divineintervention",
 		tcoords = standardtcoords,
 		funcstr = [[CooldownDuration(c.NameFirst, time) c.Operator CooldownDuration(c.NameFirst2, time)]],
+		events = function(c)
+			return "SPELL_UPDATE_COOLDOWN", "SPELL_UPDATE_USABLE"
+		end,
+		-- what a shitty anticipate func
+		anticipate = [[
+			local start, duration = GetSpellCooldown(c.GCDReplacedNameFirst)
+			local start2, duration2 = GetSpellCooldown(c.GCDReplacedNameFirst2)
+			local VALUE
+			if duration and duration2 then
+				local v1, v2 = start + duration, start2 + duration2
+				VALUE = v1 < v2 and v1 or v2
+			elseif duration then
+				VALUE = start + duration
+			elseif duration2 then
+				VALUE = start2 + duration2
+			else
+				VALUE = huge
+			end
+		]],
 	},
 	{ -- spell reactivity
 		text = L["SPELLREACTIVITY"],
@@ -1457,8 +1820,9 @@ CNDT.Types = {
 		icon = "Interface\\Icons\\ability_warrior_revenge",
 		tcoords = standardtcoords,
 		funcstr = [[c.1nil == ReactiveHelper(c.NameFirst, c.Checked)]], 
+		events = "SPELL_UPDATE_USABLE",
 	},
-	{ -- spell has mana
+		{ -- spell has mana
 		text = L["CONDITIONPANEL_MANAUSABLE"],
 		value = "MANAUSABLE",
 		category = L["CNDTCAT_SPELLSABILITIES"],
@@ -1473,7 +1837,7 @@ CNDT.Types = {
 		tcoords = standardtcoords,
 		funcstr = [[c.nil1 == select(2, IsUsableSpell(c.NameFirst))]],
 	},
-	{ -- spell range
+		{ -- spell range
 		text = L["CONDITIONPANEL_SPELLRANGE"],
 		value = "SPELLRANGE",
 		category = L["CNDTCAT_SPELLSABILITIES"],
@@ -1501,6 +1865,13 @@ CNDT.Types = {
 		icon = "Interface\\Icons\\ability_hunter_steadyshot",
 		tcoords = standardtcoords,
 		funcstr = [[(GCD > 0 and GCD < 1.7) == c.True]],
+		events = function(c)
+			return "SPELL_UPDATE_COOLDOWN", "SPELL_UPDATE_USABLE"
+		end,
+		anticipate = [[
+			local start, duration = GetSpellCooldown(TMW.GCDSpell)
+			local VALUE = start + duration -- the time at which we need to update again. (when the GCD ends)
+		]],
 	},
 	
 	{ -- item cooldown
@@ -1512,11 +1883,16 @@ CNDT.Types = {
 		name = function(editbox) TMW:TT(editbox, L["ITEMCOOLDOWN"], "CNDT_ONLYFIRST", 1) editbox.label = L["ITEMTOCHECK"] end,
 		useSUG = "item",
 		unit = PLAYER,
-		texttable = setmetatable({[0] = formatSeconds(0).." ("..L["ICONMENU_USABLE"]..")"}, {__index = formatSeconds}),
+		texttable = usableseconds,
 		icon = "Interface\\Icons\\inv_jewelry_trinketpvp_01",
 		tcoords = standardtcoords,
 		funcstr = [[ItemCooldownDuration(c.ItemID, time) c.Operator c.Level]],
 		spacebefore = true,
+		events = "BAG_UPDATE_COOLDOWN",
+		anticipate = [[
+			local start, duration = GetItemCooldown(c.ItemID)
+			local VALUE = duration and start + (duration - c.Level) or huge
+		]],
 	},
 	{ -- item cooldown compare
 		text = L["ITEMCOOLDOWN"] .. " - " .. L["COMPARISON"],
@@ -1530,6 +1906,23 @@ CNDT.Types = {
 		icon = "Interface\\Icons\\inv_jewelry_trinketpvp_01",
 		tcoords = standardtcoords,
 		funcstr = [[ItemCooldownDuration(c.ItemID, time) c.Operator ItemCooldownDuration(c.ItemID2, time)]],
+		events = "BAG_UPDATE_COOLDOWN",
+		-- what a shitty anticipate func
+		anticipate = [[
+			local start, duration = GetItemCooldown(c.ItemID)
+			local start2, duration2 = GetItemCooldown(c.ItemID2)
+			local VALUE
+			if duration and duration2 then
+				local v1, v2 = start + duration, start2 + duration2
+				VALUE = v1 < v2 and v1 or v2
+			elseif duration then
+				VALUE = start + duration
+			elseif duration2 then
+				VALUE = start2 + duration2
+			else
+				VALUE = huge
+			end
+		]],
 	},
 	{ -- item range
 		text = L["CONDITIONPANEL_ITEMRANGE"],
@@ -1546,6 +1939,7 @@ CNDT.Types = {
 		funcstr = function(c)
 			return 1-c.Level .. [[ == (IsItemInRange(c.ItemID, c.Unit) or 0)]]
 		end,
+		-- events = absolutely none
 	},
 	{ -- item in bags
 		text = L["ITEMINBAGS"],
@@ -1560,6 +1954,9 @@ CNDT.Types = {
 		icon = "Interface\\Icons\\inv_misc_bag_08",
 		tcoords = standardtcoords,
 		funcstr = [[GetItemCount(c.ItemID, nil, 1) c.Operator c.Level]],
+		events = function(c)
+			return "BAG_UPDATE", "UNIT_INVENTROY_CHANGED", "player"
+		end,
 	},
 	{ -- item equipped
 		text = L["ITEMEQUIPPED"],
@@ -1575,6 +1972,9 @@ CNDT.Types = {
 		icon = "Interface\\PaperDoll\\UI-PaperDoll-Slot-MainHand",
 		tcoords = standardtcoords,
 		funcstr = [[c.1nil == IsEquippedItem(c.ItemID)]],
+		events = function(c)
+			return "BAG_UPDATE", "UNIT_INVENTROY_CHANGED", "player"
+		end,
 	},
 
 	{ -- totem1
@@ -1587,6 +1987,10 @@ CNDT.Types = {
 		icon = totemtex[1],
 		tcoords = standardtcoords,
 		funcstr = [[TotemDuration(1, time) c.Operator c.Level]],
+		events = "PLAYER_TOTEM_UPDATE",
+		anticipate = function(c)
+			return [[local VALUE = time + TotemDuration(1, time) - c.Level]]
+		end,
 		hidden = not totems[1],
 		spacebefore = true,
 	},
@@ -1600,6 +2004,10 @@ CNDT.Types = {
 		icon = totemtex[2],
 		tcoords = standardtcoords,
 		funcstr = [[TotemDuration(2, time) c.Operator c.Level]],
+		events = "PLAYER_TOTEM_UPDATE",
+		anticipate = function(c)
+			return [[local VALUE = time + TotemDuration(2, time) - c.Level]]
+		end,
 		hidden = not totems[2],
 	},
 	{ -- totem3
@@ -1612,6 +2020,10 @@ CNDT.Types = {
 		icon = totemtex[3],
 		tcoords = standardtcoords,
 		funcstr = [[TotemDuration(3, time) c.Operator c.Level]],
+		events = "PLAYER_TOTEM_UPDATE",
+		anticipate = function(c)
+			return [[local VALUE = time + TotemDuration(3, time) - c.Level]]
+		end,
 		hidden = not totems[3],
 	},
 	{ -- totem4
@@ -1624,6 +2036,10 @@ CNDT.Types = {
 		icon = totemtex[4],
 		tcoords = standardtcoords,
 		funcstr = [[TotemDuration(4, time) c.Operator c.Level]],
+		events = "PLAYER_TOTEM_UPDATE",
+		anticipate = function(c)
+			return [[local VALUE = time + TotemDuration(4, time) - c.Level]]
+		end,
 		hidden = not totems[4],
 	},
 
@@ -1645,6 +2061,21 @@ CNDT.Types = {
 		name = function(editbox) TMW:TT(editbox, "CONDITIONPANEL_CASTTOMATCH", "CONDITIONPANEL_CASTTOMATCH_DESC") editbox.label = L["CONDITIONPANEL_CASTTOMATCH"] .. " " .. L["ICONMENU_CHOOSENAME_ORBLANK"] end,
 		useSUG = true,
 		funcstr = [[UnitCast(c.Unit, c.Level, LOWER(c.NameName))]], -- LOWER is some gsub magic
+		events = function(c)
+			-- holy shit
+			return CNDT:IsUnitEventUnit(c.Unit), 
+			"UNIT_SPELLCAST_START", c.Unit,
+			"UNIT_SPELLCAST_STOP", c.Unit,
+			"UNIT_SPELLCAST_FAILED", c.Unit,
+			"UNIT_SPELLCAST_DELAYED", c.Unit,
+			"UNIT_SPELLCAST_INTERRUPTED", c.Unit,
+			"UNIT_SPELLCAST_CHANNEL_START", c.Unit,
+			"UNIT_SPELLCAST_CHANNEL_UPDATE", c.Unit,
+			"UNIT_SPELLCAST_CHANNEL_STOP", c.Unit,
+			"UNIT_SPELLCAST_CHANNEL_INTERRUPTED", c.Unit,
+			"UNIT_SPELLCAST_INTERRUPTIBLE", c.Unit,
+			"UNIT_SPELLCAST_NOT_INTERRUPTIBLE", c.Unit
+		end,
 		spacebefore = true,
 	},
 
@@ -1665,6 +2096,13 @@ CNDT.Types = {
 		funcstr = function(c)
 			return [[AuraDur(c.Unit, c.NameName, "HELPFUL]] .. (c.Checked and "|PLAYER" or "") .. [[", time) c.Operator c.Level]]
 		end,
+		events = function(c)
+			return CNDT:IsUnitEventUnit(c.Unit), "UNIT_AURA", c.Unit
+		end,
+		anticipate = function(c)
+			return [[local _, _, _, _, _, _, expirationTime = UnitAura(c.Unit, c.NameName, nil, "HELPFUL]] .. (c.Checked and "|PLAYER" or "") .. [[")
+			local VALUE = expirationTime and expirationTime - c.Level or 0]]
+		end,
 	},
 	{ -- unit buff duration compare
 		text = L["ICONMENU_BUFF"] .. " - " .. L["DURATION"] .. " - " .. L["COMPARISON"],
@@ -1681,6 +2119,9 @@ CNDT.Types = {
 		funcstr = function(c)
 			return [[AuraDur(c.Unit, c.NameName, "HELPFUL]] .. (c.Checked and "|PLAYER" or "") .. [[", time) c.Operator AuraDur(c.Unit, c.NameName2, "HELPFUL]] .. (c.Checked2 and "|PLAYER" or "") .. [[", time)]]
 		end,
+		events = function(c)
+			return CNDT:IsUnitEventUnit(c.Unit), "UNIT_AURA", c.Unit
+		end,
 	},
 	{ -- unit buff stacks
 		text = L["ICONMENU_BUFF"] .. " - " .. L["STACKS"],
@@ -1695,6 +2136,9 @@ CNDT.Types = {
 		tcoords = standardtcoords,
 		funcstr = function(c)
 			return [[AuraStacks(c.Unit, c.NameName, "HELPFUL]] .. (c.Checked and "|PLAYER" or "") .. [[") c.Operator c.Level]]
+		end,
+		events = function(c)
+			return CNDT:IsUnitEventUnit(c.Unit), "UNIT_AURA", c.Unit
 		end,
 	},
 	{ -- unit buff tooltip
@@ -1711,6 +2155,9 @@ CNDT.Types = {
 		tcoords = standardtcoords,
 		funcstr = function(c)
 			return [[GetTooltipNumber(c.Unit, c.NameName, "HELPFUL]] .. (c.Checked and "|PLAYER" or "") .. [[") c.Operator c.Level]]
+		end,
+		events = function(c)
+			return CNDT:IsUnitEventUnit(c.Unit), "UNIT_AURA", c.Unit
 		end,
 	},
 	{ -- unit buff number
@@ -1729,6 +2176,9 @@ CNDT.Types = {
 		funcstr = function(c)
 			return [[AuraCount(c.Unit, "]]..strlower(TMW:GetSpellNames(nil, c.Name, 1, 1))..[[", "HELPFUL]] .. (c.Checked and "|PLAYER" or "") .. [[") c.Operator c.Level]]
 		end,
+		events = function(c)
+			return CNDT:IsUnitEventUnit(c.Unit), "UNIT_AURA", c.Unit
+		end,
 	},
 	
 	{ -- unit debuff duration
@@ -1745,6 +2195,13 @@ CNDT.Types = {
 		tcoords = standardtcoords,
 		funcstr = function(c)
 			return [[AuraDur(c.Unit, c.NameName, "HARMFUL]] .. (c.Checked and "|PLAYER" or "") .. [[", time) c.Operator c.Level]]
+		end,
+		events = function(c)
+			return CNDT:IsUnitEventUnit(c.Unit), "UNIT_AURA", c.Unit
+		end,
+		anticipate = function(c)
+			return [[local _, _, _, _, _, _, expirationTime = UnitAura(c.Unit, c.NameName, nil, "HARMFUL]] .. (c.Checked and "|PLAYER" or "") .. [[")
+			local VALUE = expirationTime and expirationTime - c.Level or 0]]
 		end,
 		spacebefore = true,
 	},
@@ -1763,6 +2220,10 @@ CNDT.Types = {
 		funcstr = function(c)
 			return [[AuraDur(c.Unit, c.NameName, "HARMFUL]] .. (c.Checked and "|PLAYER" or "") .. [[", time) c.Operator AuraDur(c.Unit, c.NameName2, "HARMFUL]] .. (c.Checked2 and "|PLAYER" or "") .. [[", time)]]
 		end,
+		events = function(c)
+			return CNDT:IsUnitEventUnit(c.Unit), "UNIT_AURA", c.Unit
+		end,
+		-- anticipate: no anticipator is needed because the durations will always remain the same relative to eachother until at least a UNIT_AURA fires
 	},
 	{ -- unit debuff stacks
 		text = L["ICONMENU_DEBUFF"] .. " - " .. L["STACKS"],
@@ -1777,6 +2238,9 @@ CNDT.Types = {
 		tcoords = standardtcoords,
 		funcstr = function(c)
 			return [[AuraStacks(c.Unit, c.NameName, "HARMFUL]] .. (c.Checked and "|PLAYER" or "") .. [[") c.Operator c.Level]]
+		end,
+		events = function(c)
+			return CNDT:IsUnitEventUnit(c.Unit), "UNIT_AURA", c.Unit
 		end,
 	},
 	{ -- unit debuff tooltip
@@ -1793,6 +2257,9 @@ CNDT.Types = {
 		tcoords = standardtcoords,
 		funcstr = function(c)
 			return [[GetTooltipNumber(c.Unit, c.NameName, "HARMFUL]] .. (c.Checked and "|PLAYER" or "") .. [[") c.Operator c.Level]]
+		end,
+		events = function(c)
+			return CNDT:IsUnitEventUnit(c.Unit), "UNIT_AURA", c.Unit
 		end,
 	},
 	{ -- unit debuff number
@@ -1811,6 +2278,9 @@ CNDT.Types = {
 		funcstr = function(c)
 			return [[AuraCount(c.Unit, "]]..strlower(TMW:GetSpellNames(nil, c.Name, 1, 1))..[[", "HARMFUL]] .. (c.Checked and "|PLAYER" or "") .. [[") c.Operator c.Level]]
 		end,
+		events = function(c)
+			return CNDT:IsUnitEventUnit(c.Unit), "UNIT_AURA", c.Unit
+		end,
 	},
 
 	{ -- mainhand
@@ -1823,6 +2293,11 @@ CNDT.Types = {
 		icon = function() return GetInventoryItemTexture("player", GetInventorySlotInfo("MainHandSlot")) or "Interface\\Icons\\inv_weapon_shortblade_14" end,
 		tcoords = standardtcoords,
 		funcstr = [[(select(2, GetWeaponEnchantInfo()) or 0)/1000 c.Operator c.Level]],
+		events = function()
+			return "UNIT_INVENTORY_CHANGED", "player"
+		end,
+		anticipate = [[local _, dur = GetWeaponEnchantInfo()
+			local VALUE = time + (dur/1000) - c.Level]],
 		spacebefore = true,
 	},
 	{ -- offhand
@@ -1835,6 +2310,11 @@ CNDT.Types = {
 		icon = function() return GetInventoryItemTexture("player", GetInventorySlotInfo("SecondaryHandSlot")) or "Interface\\Icons\\inv_weapon_shortblade_15" end,
 		tcoords = standardtcoords,
 		funcstr = [[(select(5, GetWeaponEnchantInfo()) or 0)/1000 c.Operator c.Level]],
+		events = function()
+			return "UNIT_INVENTORY_CHANGED", "player"
+		end,
+		anticipate = [[local _, _, _, _, dur = GetWeaponEnchantInfo()
+			local VALUE = time + (dur/1000) - c.Level]],
 	},
 	{ -- thrown
 		text = L["ICONMENU_WPNENCHANT"] .. " - " .. INVTYPE_THROWN,
@@ -1846,6 +2326,11 @@ CNDT.Types = {
 		icon = function() return GetInventoryItemTexture("player", GetInventorySlotInfo("RangedSlot")) or "Interface\\Icons\\inv_throwingknife_06" end,
 		tcoords = standardtcoords,
 		funcstr = [[(select(8, GetWeaponEnchantInfo()) or 0)/1000 c.Operator c.Level]],
+		events = function()
+			return "UNIT_INVENTORY_CHANGED", "player"
+		end,
+		anticipate = [[local _, _, _, _, _, _, _, dur = GetWeaponEnchantInfo()
+			local VALUE = time + (dur/1000) - c.Level]],
 		hidden = pclass ~= "ROGUE",
 	},
 	
@@ -1861,8 +2346,8 @@ CNDT.Types = {
 		texttable = commanumber,
 		icon = "Interface\\Icons\\spell_nature_strength",
 		tcoords = standardtcoords,
-		funcstr = [[UnitStat1 c.Operator c.Level]],
-		events = "UNIT_STATS",
+		funcstr = [[UnitStat("player", 1) c.Operator c.Level]],
+		events = function() return "UNIT_STATS", "player" end,
 	},
 	{ -- agility
 		text = _G["SPELL_STAT2_NAME"],
@@ -1873,8 +2358,8 @@ CNDT.Types = {
 		texttable = commanumber,
 		icon = "Interface\\Icons\\spell_holy_blessingofagility",
 		tcoords = standardtcoords,
-		funcstr = [[UnitStat2 c.Operator c.Level]],
-		events = "UNIT_STATS",
+		funcstr = [[UnitStat("player", 2) c.Operator c.Level]],
+		events = function() return "UNIT_STATS", "player" end,
 	},
 	{ -- stamina
 		text = _G["SPELL_STAT3_NAME"],
@@ -1885,8 +2370,8 @@ CNDT.Types = {
 		texttable = commanumber,
 		icon = "Interface\\Icons\\spell_holy_wordfortitude",
 		tcoords = standardtcoords,
-		funcstr = [[UnitStat3 c.Operator c.Level]],
-		events = "UNIT_STATS",
+		funcstr = [[UnitStat("player", 3) c.Operator c.Level]],
+		events = function() return "UNIT_STATS", "player" end,
 	},
 	{ -- intellect
 		text = _G["SPELL_STAT4_NAME"],
@@ -1897,8 +2382,8 @@ CNDT.Types = {
 		texttable = commanumber,
 		icon = "Interface\\Icons\\spell_holy_magicalsentry",
 		tcoords = standardtcoords,
-		funcstr = [[UnitStat4 c.Operator c.Level]],
-		events = "UNIT_STATS",
+		funcstr = [[UnitStat("player", 4) c.Operator c.Level]],
+		events = function() return "UNIT_STATS", "player" end,
 	},
 	{ -- spirit
 		text = _G["SPELL_STAT5_NAME"],
@@ -1909,8 +2394,8 @@ CNDT.Types = {
 		texttable = commanumber,
 		icon = "Interface\\Icons\\spell_shadow_burningspirit",
 		tcoords = standardtcoords,
-		funcstr = [[UnitStat5 c.Operator c.Level]],
-		events = "UNIT_STATS",
+		funcstr = [[UnitStat("player", 1) c.Operator c.Level]],
+		events = function() return "UNIT_STATS", "player" end,
 	},
 	{ -- mastery
 		text = STAT_MASTERY,
@@ -1921,7 +2406,7 @@ CNDT.Types = {
 		unit = PLAYER,
 		icon = "Interface\\Icons\\spell_holy_championsbond",
 		tcoords = standardtcoords,
-		funcstr = [[Mastery c.Operator c.Level]],
+		funcstr = [[GetMastery() c.Operator c.Level]],
 		events = "MASTERY_UPDATE",
 	},
 
@@ -1934,8 +2419,8 @@ CNDT.Types = {
 		texttable = commanumber,
 		icon = "Interface\\Icons\\INV_Sword_04",
 		tcoords = standardtcoords,
-		funcstr = [[MeleeAttackPower c.Operator c.Level]],
-		events = "UNIT_ATTACK_POWER",
+		funcstr = [[UnitAttackPower("player") c.Operator c.Level]],
+		events = function() return "UNIT_ATTACK_POWER", "player" end,
 		spacebefore = true,
 	},
 	{ -- melee crit
@@ -1949,7 +2434,7 @@ CNDT.Types = {
 		unit = PLAYER,
 		icon = "Interface\\Icons\\Ability_CriticalStrike",
 		tcoords = standardtcoords,
-		funcstr = [[MeleeCrit c.Operator c.Level]],
+		funcstr = [[GetCritChance()/100 c.Operator c.Level]],
 		events = "COMBAT_RATING_UPDATE",
 	},
 	{ -- melee haste
@@ -1963,8 +2448,8 @@ CNDT.Types = {
 		unit = PLAYER,
 		icon = "Interface\\Icons\\spell_nature_bloodlust",
 		tcoords = standardtcoords,
-		funcstr = [[MeleeHaste c.Operator c.Level]],
-		events = "UNIT_ATTACK_SPEED",
+		funcstr = [[GetMeleeHaste()/100 c.Operator c.Level]],
+		events = function() return "UNIT_ATTACK_SPEED", "player" end,
 	},
 	{ -- expertise
 		text = _G["COMBAT_RATING_NAME"..CR_EXPERTISE],
@@ -1975,7 +2460,7 @@ CNDT.Types = {
 		unit = PLAYER,
 		icon = "Interface\\Icons\\ability_rogue_shadowstrikes",
 		tcoords = standardtcoords,
-		funcstr = [[Expertise c.Operator c.Level]],
+		funcstr = [[GetExpertise() c.Operator c.Level]],
 		events = "COMBAT_RATING_UPDATE",
 	},
 
@@ -1988,8 +2473,8 @@ CNDT.Types = {
 		texttable = commanumber,
 		icon = "Interface\\Icons\\INV_Weapon_Bow_07",
 		tcoords = standardtcoords,
-		funcstr = [[RangeAttackPower c.Operator c.Level]],
-		events = "UNIT_RANGED_ATTACK_POWER",
+		funcstr = [[UnitRangedAttackPower("player") c.Operator c.Level]],
+		events = function() return "UNIT_RANGED_ATTACK_POWER", "player" end,
 		spacebefore = true,
 	},
 	{ -- range crit
@@ -2003,7 +2488,7 @@ CNDT.Types = {
 		unit = PLAYER,
 		icon = "Interface\\Icons\\Ability_CriticalStrike",
 		tcoords = standardtcoords,
-		funcstr = [[RangeCrit c.Operator c.Level]],
+		funcstr = [[GetRangedCritChance()/100 c.Operator c.Level]],
 		events = "COMBAT_RATING_UPDATE",
 	},
 	{ -- range haste
@@ -2017,8 +2502,8 @@ CNDT.Types = {
 		unit = PLAYER,
 		icon = "Interface\\Icons\\ability_hunter_runningshot",
 		tcoords = standardtcoords,
-		funcstr = [[RangeHaste c.Operator c.Level]],
-		events = "UNIT_RANGEDDAMAGE",
+		funcstr = [[GetRangedHaste()/100 c.Operator c.Level]],
+		events = function() return "UNIT_RANGEDDAMAGE", "player" end,
 	},
 
 
@@ -2031,7 +2516,7 @@ CNDT.Types = {
 		texttable = commanumber,
 		icon = "Interface\\Icons\\spell_fire_flamebolt",
 		tcoords = standardtcoords,
-		funcstr = [[SpellDamage c.Operator c.Level]],
+		funcstr = [[GetSpellBonusDamage() c.Operator c.Level]],
 		events = "PLAYER_DAMAGE_DONE_MODS",
 		spacebefore = true,
 	},
@@ -2044,7 +2529,7 @@ CNDT.Types = {
 		texttable = commanumber,
 		icon = "Interface\\Icons\\spell_nature_healingtouch",
 		tcoords = standardtcoords,
-		funcstr = [[SpellHealing c.Operator c.Level]],
+		funcstr = [[GetSpellBonusHealing() c.Operator c.Level]],
 		events = "PLAYER_DAMAGE_DONE_MODS",
 	},
 	{ -- spell crit
@@ -2058,7 +2543,7 @@ CNDT.Types = {
 		unit = PLAYER,
 		icon = "Interface\\Icons\\inv_gizmo_supersappercharge",
 		tcoords = standardtcoords,
-		funcstr = [[SpellCrit c.Operator c.Level]],
+		funcstr = [[GetSpellCritChance() c.Operator c.Level]],
 		events = "COMBAT_RATING_UPDATE",
 	},
 	{ -- spell haste
@@ -2072,10 +2557,10 @@ CNDT.Types = {
 		unit = PLAYER,
 		icon = "Interface\\Icons\\ability_mage_timewarp",
 		tcoords = standardtcoords,
-		funcstr = [[SpellHaste c.Operator c.Level]],
-		events = "COMBAT_RATING_UPDATE UNIT_SPELL_HASTE",
+		funcstr = [[UnitSpellHaste("player")/100 c.Operator c.Level]],
+		events = function() return "COMBAT_RATING_UPDATE", "UNIT_SPELL_HASTE", "player" end,
 	},
-	{ -- mana regen
+		{ -- mana regen
 		text = MANA_REGEN,
 		value = "MANAREGEN",
 		category = L["CNDTCAT_STATS"],
@@ -2085,8 +2570,9 @@ CNDT.Types = {
 		icon = "Interface\\Icons\\spell_magic_managain",
 		tcoords = standardtcoords,
 		funcstr = [[GetManaRegen() c.Operator c.Level]], -- anyone know of an event that can be reliably listened to to get this?
+		-- events = EVENTS NEEDED FOR THIS!!
 	},
-	{ -- mana in combat
+		{ -- mana in combat
 		text = MANA_REGEN_COMBAT,
 		value = "MANAREGENCOMBAT",
 		category = L["CNDTCAT_STATS"],
@@ -2095,7 +2581,8 @@ CNDT.Types = {
 		texttable = function(k) return format(L["MP5"], commanumber(k)*5) end,
 		icon = "Interface\\Icons\\spell_frost_summonwaterelemental",
 		tcoords = standardtcoords,
-		funcstr = [[select(2,GetManaRegen()) c.Operator c.Level]],
+		funcstr = [[select(2, GetManaRegen()) c.Operator c.Level]],
+		-- events = EVENTS NEEDED FOR THIS!!
 	},
 
 
@@ -2128,7 +2615,7 @@ CNDT.Types = {
 			
 			local g, i = strmatch(c.Icon, "TellMeWhen_Group(%d+)_Icon(%d+)")
 			g, i = tonumber(g) or 0, tonumber(i) or 0
-			if icon.base == TMW.IconBase then
+			if icon.class == TMW.Classes.Icon then
 				TMW:QueueValidityCheck(c.Icon, icon.group:GetID(), icon:GetID(), g, i)
 			else
 				TMW:QueueValidityCheck(c.Icon, icon:GetID(), nil, g, i)
@@ -2142,35 +2629,11 @@ CNDT.Types = {
 			end
 			return gsub(str, "c.Icon", c.Icon)
 		end,
+		events = function(c)
+			TMW:RegisterCallback("TMW_ICON_SHOWN_CHANGED", CNDT.EventEngine.OnEvent, CNDT.EventEngine) 
+			return "TMW_ICON_SHOWN_CHANGED|" .. c.Icon
+		end
 	},
-	--[==[{ -- icon alpha I WAS GOING TO DO THIS BUT IT SEEMS POINTLESS
-		text = L["CONDITIONPANEL_ICONALPHA"],
-		tooltip = L["CONDITIONPANEL_ICONALPHA_DESC"],
-		value = "ICONALPHA",
-		percent = true,
-		texttable = percent,
-		min = 0,
-		max = 100,
-		isicon = true,
-		unit = false,
-		icon = "Interface\\Icons\\INV_Misc_PocketWatch_01",
-		tcoords = standardtcoords,
-		showhide = function(group)
-			group.TextUnitOrIcon:SetText(L["ICONTOCHECK"])
-			group.Icon:Show()
-		end,
-		funcstr = function(c)
-			if c.Icon == "" then return [[true]] end
-			local str = [[(c.Icon and c.Icon.__shown and c.Icon.OnUpdate and not c.Icon:Update(time)) and c.Icon.__alpha c.Operator c.Level]]
-			return gsub(str, "c.Icon", c.Icon)
-		end,
-					L["CONDITIONPANEL_ICONALPHA"] = "Icon Alpha"
-					L["CONDITIONPANEL_ICONALPHA_DESC"] = [=[The condition will pass if the icon's alpha is within the specified range.
-
-					If you don't want to display the icons that are being checked, check 'Always Hide' in the icon editor of the icon being checked.
-
-					The group of the icon being checked must be shown in order to check the icon.]=]
-	},]==]
 	{ -- macro conditional
 		text = L["MACROCONDITION"],
 		tooltip = L["MACROCONDITION_DESC"],
@@ -2189,6 +2652,7 @@ CNDT.Types = {
 			text = (not strfind(text, "%]$") and (text .. "]")) or text
 			return [[SecureCmdOptionParse("]] .. text .. [[")]]
 		end,
+		-- events = absolutely no events
 	},
 	{ -- Lua
 		text = L["LUACONDITION"],
@@ -2203,6 +2667,7 @@ CNDT.Types = {
 		icon = "Interface\\Icons\\INV_Misc_Gear_01",
 		tcoords = standardtcoords,
 		funcstr = function(c) return c.Name ~= "" and c.Name or "true" end,
+		-- events = absolutely no events
 	},
 	
 	
@@ -2255,6 +2720,7 @@ for k, v in ipairs(CNDT.Types) do
 	if v == "CURRENCYPLACEHOLDER" then
 		CNDT.Types[k] = nil
 		local spacenext
+		
 		for _, id in ipairs(currencies) do
 			if id == "SPACE" then
 				spacenext = true
@@ -2268,6 +2734,7 @@ for k, v in ipairs(CNDT.Types) do
 					tcoords = standardtcoords,
 					spacebefore = spacenext,
 					hidden = true,
+					events = "CURRENCY_DISPLAY_UPDATE",
 				})
 				spacenext = nil
 				k = k + 1
@@ -2318,8 +2785,92 @@ local EnvMeta = {
 	--__newindex = _G,
 }
 
-local functionCache = {} CNDT.functionCache = functionCache
-local groupCombatCondition = {Unit = "player"}
+function CNDT:TMW_GLOBAL_UPDATE()
+	Env.Locked = db.profile.Locked
+end
+TMW:RegisterCallback("TMW_GLOBAL_UPDATE", CNDT)
+
+function CNDT:DoConditionSubstitutions(icon, v, c, thisstr)
+	for _, append in TMW:Vararg("2", "") do -- Unit2 MUST be before Unit
+		if strfind(thisstr, "c.Unit" .. append) then 
+			local unit
+			if append == "2" then
+				unit = TMW:GetUnits(nil, c.Name, true)[1] or ""
+			elseif append == "" then
+				unit = TMW:GetUnits(nil, c.Unit, true)[1] or ""
+			end
+			if (strfind(unit, "maintank") or strfind(unit, "mainassist")) then
+				thisstr = gsub(thisstr, "c.Unit" .. append,		unit) -- sub it in as a variable
+				Env[unit] = unit
+				TMW:RegisterEvent("RAID_ROSTER_UPDATE")
+				TMW:RAID_ROSTER_UPDATE()
+			elseif strfind(unit, "^%%[Uu]") then
+				local after = strmatch(unit, "^%%[Uu]%-?(.*)")
+				local sub = "(" .. icon:GetName() .. ".__unitChecked or '')"
+				if after and after ~= "" then
+					sub = "(" .. sub .. " .. \"-" .. after .. "\")"				
+				end
+				thisstr = gsub(thisstr, "c.Unit" .. append,		sub) -- sub it in as a variable
+				doCheckAfter = true
+			else
+				thisstr = gsub(thisstr, "c.Unit" .. append,	"\"" .. unit .. "\"") -- sub it in as a string
+			end
+		end
+	end
+	
+	local name = gsub((c.Name or ""), "; ", ";")
+	name = gsub(name, " ;", ";")
+	name = ";" .. name .. ";"
+	name = gsub(name, ";;", ";")
+	name = strtrim(name)
+	name = strlower(name)
+	
+	local name2 = gsub((c.Name2 or ""), "; ", ";")
+	name2 = gsub(name2, " ;", ";")
+	name2 = ";" .. name2 .. ";"
+	name2 = gsub(name2, ";;", ";")
+	name2 = strtrim(name2)
+	name2 = strlower(name2)
+
+	thisstr = thisstr:
+	gsub("c.Level", 		v.percent and c.Level/100 or c.Level):
+	gsub("c.Checked", 		tostring(c.Checked)):
+	gsub("c.Operator", 		c.Operator):
+	gsub("c.NameFirst2", 	"\"" .. TMW:GetSpellNames(nil, name2, 1) .. "\""): --Name2 must be before Name
+	gsub("c.NameName2", 	"\"" .. TMW:GetSpellNames(nil, name2, 1, 1) .. "\""):
+	gsub("c.ItemID2", 		TMW:GetItemIDs(nil, name2, 1)):
+	gsub("c.Name2", 		"\"" .. name2 .. "\""):
+	
+	gsub("c.NameFirst", 	"\"" .. TMW:GetSpellNames(nil, name, 1) .. "\""):
+	gsub("c.NameName", 		"\"" .. TMW:GetSpellNames(nil, name, 1, 1) .. "\""):
+	gsub("c.ItemID", 		TMW:GetItemIDs(nil, name, 1)):
+	gsub("c.Name", 			"\"" .. name .. "\""):
+
+	gsub("c.True", 			tostring(c.Level == 0)):
+	gsub("c.False", 		tostring(c.Level == 1)):
+	gsub("c.1nil", 			c.Level == 0 and 1 or "nil"):
+	gsub("c.nil1", 			c.Level == 1 and 1 or "nil"): -- reverse 1nil
+	
+	gsub("LOWER%((.-)%)",	strlower) -- fun gsub magic stuff
+	
+	-- extra fun stuff
+	if thisstr:find("c.GCDReplacedNameFirst2") then
+		local name = TMW:GetSpellNames(nil, name2, 1)
+		if name == "gcd" then
+			name = TMW.GCDSpell
+		end
+		thisstr = thisstr:gsub("c.GCDReplacedNameFirst2", "\"" .. name .. "\"")
+	end
+	if thisstr:find("c.GCDReplacedNameFirst") then
+		local name = TMW:GetSpellNames(nil, name, 1)
+		if name == "gcd" then
+			name = TMW.GCDSpell
+		end
+		thisstr = thisstr:gsub("c.GCDReplacedNameFirst", "\"" .. name .. "\"")
+	end
+	
+	return thisstr
+end
 
 function CNDT:ProcessConditions(icon)
 	if TMW.debug and test then test() end
@@ -2329,7 +2880,7 @@ function CNDT:ProcessConditions(icon)
 	
 	local funcstr = ""
 	local luaUsed
-	local unitCheckedSubstitutionUsed
+	local doCheckAfter
 	
 	for i = 1, Conditions.n do
 		local c = Conditions[i]
@@ -2344,33 +2895,14 @@ function CNDT:ProcessConditions(icon)
 		end
 		
 		if c.Operator == "~|=" then
-			c.Operator = "~=" -- fix potential corruption from importing the string (a single | becaomes || when pasted, "~=" in encoded as "~|=")
+			c.Operator = "~=" -- fix potential corruption from importing a string (a single | becaomes || when pasted, "~=" in encoded as "~|=")
 		end
 		
 		if v then
-			if v.events then
-				for k, event in TMW:Vararg(strsplit(" ", v.events)) do
-					CNDT:RegisterEvent(event)
-					CNDT[event](CNDT, event, "player")
-				end
-			end
 			if t == "LUA" then
 				luaUsed = 1
 				setmetatable(Env, EnvMeta)
 			end
-			local name = gsub((c.Name or ""), "; ", ";")
-			name = gsub(name, " ;", ";")
-			name = ";" .. name .. ";"
-			name = gsub(name, ";;", ";")
-			name = strtrim(name)
-			name = strlower(name)
-			
-			local name2 = gsub((c.Name2 or ""), "; ", ";")
-			name2 = gsub(name2, " ;", ";")
-			name2 = ";" .. name2 .. ";"
-			name2 = gsub(name2, ";;", ";")
-			name2 = strtrim(name2)
-			name2 = strlower(name2)
 
 			local thiscondtstr = v.funcstr
 			if type(thiscondtstr) == "function" then
@@ -2379,49 +2911,8 @@ function CNDT:ProcessConditions(icon)
 
 			if thiscondtstr then
 				local thisstr = andor .. "(" .. strrep("(", c.PrtsBefore) .. thiscondtstr .. strrep(")", c.PrtsAfter)  .. ")"
-
-				for _, append in TMW:Vararg("2", "") do -- Unit2 MUST be before Unit
-					if strfind(thisstr, "c.Unit" .. append) then 
-						local unit
-						if append == "2" then
-							unit = TMW:GetUnits(nil, c.Name, true)[1] or ""
-						elseif append == "" then
-							unit = TMW:GetUnits(nil, c.Unit, true)[1] or ""
-						end
-						if (strfind(unit, "maintank") or strfind(unit, "mainassist")) then
-							thisstr = gsub(thisstr, "c.Unit" .. append,		unit) -- sub it in as a variable
-							Env[unit] = unit
-							TMW:RegisterEvent("RAID_ROSTER_UPDATE")
-							TMW:RAID_ROSTER_UPDATE()
-						elseif strfind(unit, "%%[Uu]") then
-							thisstr = gsub(thisstr, "c.Unit" .. append,		"(" .. icon:GetName() .. ".__unitChecked or '')") -- sub it in as a variable
-							unitCheckedSubstitutionUsed = true
-						else
-							thisstr = gsub(thisstr, "c.Unit" .. append,	"\"" .. unit .. "\"") -- sub it in as a string
-						end
-					end
-				end
-
-				thisstr = thisstr:
-				gsub("c.Level", 		v.percent and c.Level/100 or c.Level):
-				gsub("c.Checked", 		tostring(c.Checked)):
-				gsub("c.Operator", 		c.Operator):
-				gsub("c.NameFirst2", 	"\"" .. TMW:GetSpellNames(nil, name2, 1) .. "\""): --Name2 must be before Name
-				gsub("c.NameName2", 	"\"" .. TMW:GetSpellNames(nil, name2, 1, 1) .. "\""):
-				gsub("c.ItemID2", 		TMW:GetItemIDs(nil, name2, 1)):
-				gsub("c.Name2", 		"\"" .. name2 .. "\""):
 				
-				gsub("c.NameFirst", 	"\"" .. TMW:GetSpellNames(nil, name, 1) .. "\""):
-				gsub("c.NameName", 		"\"" .. TMW:GetSpellNames(nil, name, 1, 1) .. "\""):
-				gsub("c.ItemID", 		TMW:GetItemIDs(nil, name, 1)):
-				gsub("c.Name", 			"\"" .. name .. "\""):
-
-				gsub("c.True", 			tostring(c.Level == 0)):
-				gsub("c.False", 		tostring(c.Level == 1)):
-				gsub("c.1nil", 			c.Level == 0 and 1 or "nil"):
-				gsub("c.nil1", 			c.Level == 1 and 1 or "nil"): -- reverse 1nil
-				
-				gsub("LOWER%((.-)%)",	strlower) -- fun stuff
+				thisstr = CNDT:DoConditionSubstitutions(icon, v, c, thisstr)
 				
 				funcstr = funcstr .. thisstr
 			else
@@ -2432,44 +2923,37 @@ function CNDT:ProcessConditions(icon)
 		end
 	end
 
-	if icon.base == TMW.IconBase then
-		if icon.typeData.DontSetInfoInCondition then
-			funcstr = [[if not (]] .. strsub(funcstr, 4) .. [[) then
-				return false, false
-			else
-				return false, true
-			end]]
-		else
-			funcstr = [[if not (]] .. strsub(funcstr, 4) .. (([[) then
-				icon.CndtFailed = 1 ]] .. ((icon.ConditionAlpha or 0) == 0 and ([[icon:SetInfo(0) return true, false]]) or ([[return false, false]])) .. [[
-			else
-				icon.CndtFailed = nil return false, true
-			end]]):gsub("icon", icon:GetName()))
+	local funcstr, name, key = icon:FinishCompilingConditions(funcstr:sub(4))
+	
+	icon.nextConditionUpdate = icon.nextConditionUpdate or math.huge
+	funcstr = (
+	[[if %s.nextConditionUpdate < time then
+		%s.nextConditionUpdate = huge
+	end
+	if not (%s) then
+		%s.%s = 1
+	else
+		%s.%s = nil
+	end]]):format(name, name, funcstr, name, key, name, key)
+	
+	if icon.conditionUpdateMethod == "OnEvent" then
+		local prepend = name .. [[.conditionsNeedUpdate = nil
+		]]
+		if icon.conditionAnticipatorFunc then
+			prepend = prepend .. icon:GetName() .. [[.conditionAnticipatorFunc()
+			]]
 		end
-	else -- its a group condition
-		funcstr = strsub(funcstr, 4)
-		if icon.OnlyInCombat then --icon is actually group
-			CNDT.ConditionsByType.COMBAT.funcstr(groupCombatCondition) -- hackily initialize the events for PlayerInCombat
-			if funcstr == "" then
-				funcstr = "PlayerInCombat"
-			else
-				funcstr = "(" .. funcstr .. ") and PlayerInCombat"
-			end
-		end
-		
-		funcstr = [[if not (]] .. funcstr .. [[) then
-			]] .. icon:GetName() .. [[:Hide() return false, false
-		else
-			]] .. icon:GetName() .. [[:Show() return false, true
-		end]]
+		funcstr = prepend .. funcstr
 	end
 
-	local func, err
+	local func
 	
+	icon.CndtString = funcstr
 	if functionCache[funcstr] then
 		func = functionCache[funcstr]
 	else
-		func, err = loadstring(funcstr, icon:GetName() .. " Condition")
+		local err
+		func, err = loadstring(funcstr, name .. " Condition")
 		if func then
 			func = setfenv(func, Env)
 			functionCache[funcstr] = func
@@ -2478,22 +2962,27 @@ function CNDT:ProcessConditions(icon)
 		end
 	end
 
-	if func then
-		icon.CndtString = funcstr
-		
-		if icon.base == TMW.IconBase then
-			local key = unitCheckedSubstitutionUsed and "CndtCheckAfter" or "CndtCheck"
-			local antikey = unitCheckedSubstitutionUsed and "CndtCheck" or "CndtCheckAfter"
-			
-			icon[key] = functionCache[funcstr]
-			icon[antikey] = nil
-		else
-			icon.CndtCheck = func
-		end
-		
-		return func
-	end
+	icon:ProcessConditionFunction(func, doCheckAfter)	
+	
+	return func
 end
 
 
 
+CNDT.EventEngine = CreateFrame("Frame")
+CNDT.EventEngine.funcs = {}
+function CNDT.EventEngine:Register(event, func, icon)
+	self:RegisterEvent(event)
+	CNDT.EventEngine.funcs[event] = CNDT.EventEngine.funcs[event] or {}
+	CNDT.EventEngine.funcs[event][func] = icon
+end
+
+function CNDT.EventEngine:OnEvent(event, arg1)
+	local funcs = self.funcs[event]
+	if funcs then
+		for func in next, funcs do
+			func(event, arg1)
+		end
+	end
+end
+CNDT.EventEngine:SetScript("OnEvent", CNDT.EventEngine.OnEvent)

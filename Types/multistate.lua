@@ -32,7 +32,7 @@ local print = TMW.print
 local _, pclass = UnitClass("Player")
 local SpellTextures = TMW.SpellTextures
 
-local Type = {}
+local Type = TMW.Classes.IconType:New()
 LibStub("AceEvent-3.0"):Embed(Type)
 Type.type = "multistate"
 Type.name = L["ICONMENU_MULTISTATECD"]
@@ -147,7 +147,7 @@ function Type:Setup(icon, groupID, iconID)
 end
 
 
-TMW:RegisterIconType(Type)
+Type:Register()
 
 
 

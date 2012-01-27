@@ -25,10 +25,11 @@ local _G, strmatch, tonumber, ipairs =
 local print = TMW.print
 local AlreadyChecked = {} TMW.AlreadyChecked = AlreadyChecked
 local ChangedMetas = {} TMW.ChangedMetas = ChangedMetas
+local Locked
 
 
 
-local Type = {}
+local Type = TMW.Classes.IconType:New()
 Type.type = "meta"
 Type.name = L["ICONMENU_META"]
 Type.desc = L["ICONMENU_META_DESC"]
@@ -54,8 +55,12 @@ function Type:Update()
 	db = TMW.db
 end
 
+
+
+
 local huge = math.huge
 local function Meta_OnUpdate(icon, time)
+--	icon.updateQueued = nil
 	local Sort, CheckNext, CompiledIcons = icon.Sort, icon.CheckNext, icon.CompiledIcons
 	
 	local icToUse
@@ -92,6 +97,7 @@ local function Meta_OnUpdate(icon, time)
 		if ic.UpdateBindText then
 			icon.bindText:SetText(ic.bindText:GetText())
 		end
+		
 		if ic ~= icon.__currentIcon or ChangedMetas[ic] then 
 			ChangedMetas[icon] = true
 			
@@ -111,8 +117,8 @@ local function Meta_OnUpdate(icon, time)
 			end
 			
 			if LMB then -- i dont like the way that Masque handles this (inefficient), so i'll do it myself
-				local icnt = ic.__normaltex -- icon.__normaltex = icon.__LBF_Normal or icon:GetNormalTexture() -- set during Icon_Update()
-				local iconnt = icon.__normaltex
+				local icnt = ic.normaltex -- icon.normaltex = icon.__LBF_Normal or icon:GetNormalTexture() -- set during icon:Setup()
+				local iconnt = icon.normaltex
 				if icnt and iconnt then
 					iconnt:SetVertexColor(icnt:GetVertexColor())
 				end
@@ -143,6 +149,8 @@ local function Meta_OnUpdate(icon, time)
 			force = 1
 			
 			icon.__currentIcon = ic
+		--	TMW:Fire("TMW_ICON_UPDATED", ic)
+		--	TMW:Fire("TMW_ICON_UPDATED", icon)
 		end
 		
 		AlreadyChecked[ic] = true
@@ -154,6 +162,11 @@ local function Meta_OnUpdate(icon, time)
 end
 
 
+--[[local function TMW_ICON_UPDATED(icon, event, ic)
+	if Locked and icon.IconsLookup[ic:GetName()] then
+		icon.updateQueued = true
+	end
+end]]
 
 local InsertIcon, GetFullIconTable -- both need access to eachother, so scope them above their definitions
 
@@ -172,22 +185,25 @@ function GetFullIconTable(icon, icons) -- check what all the possible icons it c
 		if not alreadyinserted[ic] then
 			alreadyinserted[ic] = true
 			
-			local i = tonumber(strmatch(ic, "TellMeWhen_Group%d+_Icon(%d+)"))
-			local g = tonumber(strmatch(ic, "TellMeWhen_Group(%d+)"))
+			local iconID = tonumber(strmatch(ic, "TellMeWhen_Group%d+_Icon(%d+)"))
+			local groupID = tonumber(strmatch(ic, "TellMeWhen_Group(%d+)"))
 			
-			if g and not i then -- a group. Expand it into icons.
-				if TMW:Group_ShouldUpdateIcons(g) then
-					local gs = db.profile.Groups[g]
+			if groupID and not iconID then -- a group. Expand it into icons.
+				local group = TMW[groupID]
+				
+				if group:ShouldUpdateIcons() then
+					local gs = group:GetSettings()
 					
-					for iconID, ics in ipairs(gs.Icons) do
-						if ics.Enabled and iconID <= gs.Rows*gs.Columns then
+					for ics, _, icID in TMW:InIconSettings(groupID) do
+						if ics.Enabled and icID <= gs.Rows*gs.Columns then
+							-- ic here is a group name
 							InsertIcon(icon, ics, ic .. "_Icon" .. iconID)
 						end
 					end
 				end
 				
-			elseif g and i then -- just an icon. put it in.
-				InsertIcon(icon, db.profile.Groups[g].Icons[i], ic)
+			elseif groupID and iconID then -- just an icon. put it in.
+				InsertIcon(icon, db.profile.Groups[groupID].Icons[iconID], ic)
 			end
 		end
 	end
@@ -214,6 +230,13 @@ function Type:Setup(icon, groupID, iconID)
 	wipe(alreadyinserted)
 	icon.CompiledIcons = wipe(icon.CompiledIcons or {})
 	icon.CompiledIcons = GetFullIconTable(icon, icon.Icons)
+	--[[icon.IconsLookup = wipe(icon.IconsLookup or {})
+	for _, ic in pairs(icon.CompiledIcons) do
+		icon.IconsLookup[ic] = true
+	end
+	for _, ic in pairs(icon.Icons) do -- make sure to get meta icons in the table even if they get expanded
+		icon.IconsLookup[ic] = true
+	end]]
 
 	icon.ShowPBar = true
 	icon.ShowCBar = true
@@ -226,6 +249,7 @@ function Type:Setup(icon, groupID, iconID)
 	icon:SetTexture("Interface\\Icons\\LevelUpIcon-LFD")
 
 	icon:SetScript("OnUpdate", Meta_OnUpdate)
+	--TMW:RegisterCallback("TMW_ICON_UPDATED", TMW_ICON_UPDATED, icon)
 end
 
 function Type:IE_TypeLoaded()
@@ -271,10 +295,39 @@ function Type:IE_TypeUnloaded()
 	TMW:TT(TMW.IE.Main.ConditionAlpha, "CONDITIONALPHA", "CONDITIONALPHA_DESC")
 end
 
+function Type:TMW_ICON_SETUP(event, icon)
+	if icon.Type ~= self.type then
+	--	TMW:UnregisterCallback("TMW_ICON_UPDATED", TMW_ICON_UPDATED, icon)
+	else
+		if not Locked then
+			-- meta icons shouln't show bars in config, even though they are force enabled.
+			icon.cbar:SetValue(0)
+			icon.pbar:SetValue(0)
+		end
+	end
+end
+TMW:RegisterCallback("TMW_ICON_SETUP", Type)
 
+function Type:TMW_GLOBAL_UPDATE()
+	TMW.DoWipeAC = false
+	Locked = TMW.db.profile.Locked
+end
+TMW:RegisterCallback("TMW_GLOBAL_UPDATE", Type)
+
+function Type:GetFontTestValues(icon)
+	-- its the best of both worlds!
+	local rand = random(1, 23)
+	local testCount = rand == 1 and 0 or rand == 2 and 25 or rand == 3 and 50 or rand - 3
+	local testCountText
+	if rand < 4 then
+		testCountText = testCount.."%"
+	end
+	
+	return testCount, testCountText
+end
 
 function Type:GetIconMenuText(data)
 	return "((" .. Type.name .. "))", ""
 end
 
-TMW:RegisterIconType(Type)
+Type:Register()

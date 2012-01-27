@@ -29,7 +29,7 @@ local print = TMW.print
 local strlowerCache = TMW.strlowerCache
 
 
-local Type = {}
+local Type = TMW.Classes.IconType:New()
 Type.type = "totem"
 Type.name = pclass == "DRUID" and L["ICONMENU_MUSHROOMS"]		or pclass == "DEATHKNIGHT" and L["ICONMENU_GHOUL"]		or L["ICONMENU_TOTEM"]
 Type.desc = pclass == "DRUID" and L["ICONMENU_MUSHROOMS_DESC"]	or pclass == "DEATHKNIGHT" and L["ICONMENU_GHOUL_DESC"]	or L["ICONMENU_TOTEM_DESC"]
@@ -171,4 +171,4 @@ function Type:GetNameForDisplay(icon, data)
 	end
 end
 
-TMW:RegisterIconType(Type)
+Type:Register()

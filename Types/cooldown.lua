@@ -33,7 +33,7 @@ local _, pclass = UnitClass("Player")
 local SpellTextures = TMW.SpellTextures
 local mindfreeze = strlower(GetSpellInfo(47528))
 
-local Type = {}
+local Type = TMW.Classes.IconType:New()
 LibStub("AceEvent-3.0"):Embed(Type)
 Type.type = "cooldown"
 Type.name = L["ICONMENU_SPELLCOOLDOWN"]
@@ -186,4 +186,4 @@ function Type:Setup(icon, groupID, iconID)
 end
 
 
-TMW:RegisterIconType(Type)
+Type:Register()

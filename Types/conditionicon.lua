@@ -22,7 +22,7 @@ local db
 local print = TMW.print
 
 
-local Type = {}
+local Type = TMW.Classes.IconType:New()
 Type.type = "conditionicon"
 Type.name = L["ICONMENU_CNDTIC"]
 Type.desc = L["ICONMENU_CNDTIC_DESC"]
@@ -66,8 +66,11 @@ end
 local function ConditionIcon_OnUpdate(icon, time)
 	local CndtCheck = icon.CndtCheck_CNDTIC
 	if CndtCheck then
-		local shouldReturn, succeeded = CndtCheck() -- we dont use shouldreturn.
-				
+		if icon.conditionUpdateMethod == "OnUpdate" or icon.conditionsNeedUpdate or icon.nextConditionUpdate < time then
+			CndtCheck()
+		end
+		local succeeded = not icon.ConditionsFailed
+		
 		local alpha = succeeded and icon.Alpha or icon.UnAlpha
 		
 		local d, start, duration
@@ -108,12 +111,17 @@ function Type:GetNameForDisplay(icon, data)
 	return ""
 end
 
+function Type:FinishCompilingConditions(icon, funcstr)
+	return funcstr, icon:GetName(), "ConditionsFailed"
+end
 
-function Type:Setup(icon, groupID, iconID)
-	icon.CndtCheck_CNDTIC = icon.CndtCheck or icon.CndtCheckAfter
+function Type:ProcessConditionFunction(icon, func, doCheckAfter)
 	icon.CndtCheck = nil
 	icon.CndtCheckAfter = nil
-	
+	icon.CndtCheck_CNDTIC = func
+end
+
+function Type:Setup(icon, groupID, iconID)
 	icon.__start = icon.__start or 0 --TellMeWhen-4.2.1.2.lua:2115 attempt to perform arithmetic on local "start" (a nil value) -- caused because condition icons do necessarily define start/durations, even if shown.
 	icon.__duration = icon.__duration or 0
 	icon.__vrtxcolor = 1
@@ -135,7 +143,7 @@ function Type:DragReceived(icon, t, data, subType)
 		return
 	end
 	
-	ics.Name = TMW:CleanString(input)
+	ics.CustomTex = TMW:CleanString(input)
 	return true -- signal success
 end
 
@@ -153,4 +161,4 @@ function Type:IE_TypeUnloaded()
 	TMW:TT(TMW.IE.Main.ConditionAlpha, "CONDITIONALPHA", "CONDITIONALPHA_DESC")
 end
 
-TMW:RegisterIconType(Type)
+Type:Register()

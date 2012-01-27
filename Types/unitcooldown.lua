@@ -33,7 +33,7 @@ local SpellTextures = TMW.SpellTextures
 local clientVersion = select(4, GetBuildInfo())
 
 
-local Type = {}
+local Type = TMW.Classes.IconType:New()
 Type.type = "unitcooldown"
 LibStub("AceEvent-3.0"):Embed(Type)
 Type.name = L["ICONMENU_UNITCOOLDOWN"]
@@ -394,4 +394,4 @@ function Type:DragReceived(icon, t, data, subType)
 end
 
 
-TMW:RegisterIconType(Type)
+Type:Register()

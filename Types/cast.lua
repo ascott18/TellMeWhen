@@ -26,7 +26,7 @@ local UnitCastingInfo, UnitChannelInfo, UnitExists, UnitGUID =
 local print = TMW.print
 local strlowerCache = TMW.strlowerCache
 
-local Type = {}
+local Type = TMW.Classes.IconType:New()
 LibStub("AceEvent-3.0"):Embed(Type)
 Type.type = "cast"
 Type.name = L["ICONMENU_CAST"]
@@ -89,7 +89,7 @@ local function Cast_OnUpdate(icon, time)
 	local color = icon:CrunchColor()
 	
 	--icon:SetInfo(alpha, color, texture, start, duration, spellChecked, reverse, count, countText, forceupdate, unit)
-	icon:SetInfo(icon.UnAlpha, color, nil, 0, 0, NameFirst, nil, nil, nil, nil, nil)
+	icon:SetInfo(icon.UnAlpha, color, nil, 0, 0, NameFirst, nil, nil, nil, nil, Units[1])
 end
 
 
@@ -119,5 +119,5 @@ function Type:GetIconMenuText(data)
 	return text, data.Name and data.Name ~= "" and data.Name .. "\r\n" or ""
 end
 
-TMW:RegisterIconType(Type)
+Type:Register()
 

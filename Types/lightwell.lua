@@ -31,7 +31,7 @@ local pGUID = UnitGUID("player") -- this isnt actually defined right here (it re
 local clientVersion = select(4, GetBuildInfo())
 
 
-local Type = {}
+local Type = TMW.Classes.IconType:New()
 Type.type = "lightwell"
 LibStub("AceEvent-3.0"):Embed(Type)
 Type.name = L["ICONMENU_LIGHTWELL"]
@@ -134,4 +134,4 @@ function Type:Setup(icon, groupID, iconID)
 	icon:Update()
 end
 
-TMW:RegisterIconType(Type)
+Type:Register()

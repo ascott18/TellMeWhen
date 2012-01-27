@@ -21,7 +21,7 @@ local L = TMW.L
 local print = TMW.print
 
 
-local Type = {}
+local Type = TMW.Classes.IconType:New()
 Type.type = ""
 Type.name = L["ICONMENU_TYPE"]
 Type.spaceafter = true
@@ -71,4 +71,4 @@ function Type:DragReceived(icon, t, data, subType)
 	return true -- signal success
 end
 	
-TMW:RegisterIconType(Type)
+Type:Register()

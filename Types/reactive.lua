@@ -29,7 +29,7 @@ local strlowerCache = TMW.strlowerCache
 local mindfreeze = strlower(GetSpellInfo(47528))
 
 
-local Type = {}
+local Type = TMW.Classes.IconType:New()
 Type.type = "reactive"
 Type.name = L["ICONMENU_REACTIVE"]
 Type.desc = L["ICONMENU_REACTIVE_DESC"]
@@ -163,4 +163,4 @@ function Type:Setup(icon, groupID, iconID)
 	icon:Update()
 end
 
-TMW:RegisterIconType(Type)
+Type:Register()

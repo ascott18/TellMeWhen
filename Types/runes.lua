@@ -28,7 +28,7 @@ local SpellTextures = TMW.SpellTextures
 
 if not GetRuneType then return end
 
-local Type = {}
+local Type = TMW.Classes.IconType:New()
 Type.type = "runes"
 LibStub("AceEvent-3.0"):Embed(Type)
 Type.name = L["ICONMENU_RUNES"]
@@ -164,4 +164,4 @@ function Type:GetIconMenuText(data)
 	return "((" .. Type.name .. "))", ""
 end
 
-TMW:RegisterIconType(Type)
+Type:Register()

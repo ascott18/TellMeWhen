@@ -30,7 +30,7 @@ local _, pclass = UnitClass("Player")
 local isNumber = TMW.isNumber
 
 
-local Type = {}
+local Type = TMW.Classes.IconType:New()
 Type.type = "buff"
 Type.name = L["ICONMENU_BUFFDEBUFF"]
 Type.desc = L["ICONMENU_BUFFDEBUFF_DESC"]
@@ -98,6 +98,7 @@ local function Buff_OnUpdate(icon, time)
 			if NAL > EFF_THR then
 				for z=1, 60 do --60 because i can and it breaks when there are no more buffs anyway
 					local _buffName, _, _iconTexture, _count, _dispelType, _duration, _expirationTime, _, canSteal, _, _id, _, _, _v1, _v2, _v3 = UnitAura(unit, z, Filter)
+					_dispelType = _dispelType == "" and "Enraged" or _dispelType -- Bug: Enraged is an empty string
 					if not _buffName then
 						break
 					elseif (NameHash[_id] or NameHash[_dispelType] or NameHash[strlowerCache[_buffName]]) and (NotStealable or canSteal) then
@@ -117,6 +118,7 @@ local function Buff_OnUpdate(icon, time)
 				if Filterh and not buffName then
 					for z=1, 60 do
 						local _buffName, _, _iconTexture, _count, _dispelType, _duration, _expirationTime, _, canSteal, _, _id, _, _, _v1, _v2, _v3 = UnitAura(unit, z, Filterh)
+						_dispelType = _dispelType == "" and "Enraged" or _dispelType -- Bug: Enraged is an empty string
 						if not _buffName then
 							break
 						elseif (NameHash[_id] or NameHash[_dispelType] or NameHash[strlowerCache[_buffName]]) and (NotStealable or canSteal) then
@@ -139,11 +141,12 @@ local function Buff_OnUpdate(icon, time)
 				end
 			else
 				for i = 1, NAL do
-					--local iName = strlowerCache[NameArray[i]] -- STRLOWERING IT BREAKS DISPEL TYPES!
+					--local iName = strlowerCache[NameArray[i]] -- STRLOWERING IT BREAKS DISPEL TYPES! it should already be strlowered, except dispel types
 					local iName = NameArray[i]
-					if DS[iName] then --Handle dispel types. Enrage wont be handled here because it will always have more auras than the efficiency threshold (max 40, there are about 120 enrages i think), ant it shouldnt be, because it is essentially just an equiv
+					if DS[iName] then --Handle dispel types.
 						for z=1, 60 do
 							buffName, _, iconTexture, count, dispelType, duration, expirationTime, _, canSteal, _, id, _, _, v1, v2, v3 = UnitAura(unit, z, Filter)
+							dispelType = dispelType == "" and "Enraged" or dispelType -- Bug: Enraged is an empty string
 							if (not buffName) or (dispelType == iName and (NotStealable or canSteal)) then
 								break
 							end
@@ -151,6 +154,7 @@ local function Buff_OnUpdate(icon, time)
 						if Filterh and not buffName then
 							for z=1, 60 do
 								buffName, _, iconTexture, count, dispelType, duration, expirationTime, _, canSteal, _, id, _, _, v1, v2, v3 = UnitAura(unit, z, Filterh)
+								dispelType = dispelType == "" and "Enraged" or dispelType -- Bug: Enraged is an empty string
 								if (not buffName) or (dispelType == iName and (NotStealable or canSteal)) then
 									break
 								end
@@ -258,5 +262,9 @@ function Type:Setup(icon, groupID, iconID)
 	icon:Update()
 end
 
-TMW:RegisterIconType(Type)
+function Type:GetFontTestValues(icon)
+	return random(1, 20), nil
+end
+
+Type:Register()
 

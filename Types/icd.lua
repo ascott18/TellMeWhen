@@ -29,7 +29,7 @@ local clientVersion = select(4, GetBuildInfo())
 local strlowerCache = TMW.strlowerCache
 
 
-local Type = {}
+local Type = TMW.Classes.IconType:New()
 Type.type = "icd"
 Type.name = L["ICONMENU_ICD"]
 Type.desc = L["ICONMENU_ICD_DESC"]
@@ -176,4 +176,4 @@ function Type:DragReceived(icon, t, data, subType)
 end
 
 
-TMW:RegisterIconType(Type)
+Type:Register()

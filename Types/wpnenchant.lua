@@ -28,7 +28,7 @@ local UIParent = UIParent
 local strlowerCache = TMW.strlowerCache
 
 
-local Type = {}
+local Type = TMW.Classes.IconType:New()
 LibStub("AceTimer-3.0"):Embed(Type)
 Type.type = "wpnenchant"
 Type.name = L["ICONMENU_WPNENCHANT"]
@@ -244,4 +244,4 @@ function Type:GetIconMenuText(data)
 	return text, tooltip
 end
 
-TMW:RegisterIconType(Type)
+Type:Register()

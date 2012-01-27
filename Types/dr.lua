@@ -46,7 +46,7 @@ for spellID, category in pairs(DRSpells) do
 end
 
 
-local Type = {}
+local Type = TMW.Classes.IconType:New()
 Type.type = "dr"
 LibStub("AceEvent-3.0"):Embed(Type)
 Type.name = L["ICONMENU_DR"]
@@ -231,4 +231,12 @@ function Type:Setup(icon, groupID, iconID)
 	icon:Update()
 end
 
-TMW:RegisterIconType(Type)
+function Type:GetFontTestValues(icon)
+	local rand = random(1, 3)
+	local testCount = rand == 1 and 0 or rand == 2 and 25 or rand == 3 and 50
+	local testCountText = testCount.."%"
+	
+	return testCount, testCountText
+end
+
+Type:Register()

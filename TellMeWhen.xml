@@ -142,7 +142,7 @@
 					TMW.IE:Load(nil, self)
 				end
 				if TMW.IE then
-					TMW.IE:ScheduleIconUpdate(self)
+					TMW.IE:ScheduleIconSetup(self)
 				end
 			</OnMouseUp>
 			<OnMouseDown>
@@ -163,7 +163,7 @@
 					end
 				end
 				if TMW.IE then
-					TMW.IE:ScheduleIconUpdate(self)
+					TMW.IE:ScheduleIconSetup(self)
 				end
 			</OnDragStart>
 			<OnReceiveDrag>
@@ -188,9 +188,11 @@
 			</OnDragStop>
 			<OnShow>
 				self.__shown = 1
+				TMW:Fire("TMW_ICON_SHOWN_CHANGED", self)
 			</OnShow>
 			<OnHide>
 				self.__shown = nil
+				TMW:Fire("TMW_ICON_SHOWN_CHANGED", self)
 			</OnHide>
 		</Scripts>
 

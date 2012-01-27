@@ -65,7 +65,7 @@
 					TMW.SUG:NameOnCursor()
 				end
 				TMW.IE:ShowHide()
-				TMW.IE:ScheduleIconUpdate()
+				TMW.IE:ScheduleIconSetup()
 			</OnClick>
 		</Scripts>
 	</CheckButton>
@@ -274,7 +274,7 @@
 				self:SetText(t)
 				if TMW.CI.ics then
 					TMW.CI.ics[self.setting] = t
-					TMW.IE:ScheduleIconUpdate()
+					TMW.IE:ScheduleIconSetup()
 				end
 				self:GetScript("OnTextChanged")(self)
 			</OnEditFocusLost>
@@ -337,7 +337,7 @@
 				self.Mid:SetText(value .. "%")
 				if TMW.CI.ics and not self.fakeNextSetValue then
 					TMW.CI.ics[self.setting] = value / 100
-					TMW.IE:ScheduleIconUpdate()
+					TMW.IE:ScheduleIconSetup()
 					if self:IsEnabled() and ((value == 0 and self.setting ~= "ConditionAlpha") or (value == 100 and self.setting == "ConditionAlpha")) then
 						self.Mid:SetText("|cffff7400" .. value .. "%")
 					end
@@ -540,7 +540,7 @@
 					TMW.IE:Load(nil, self.icon)
 				end
 				if TMW.IE then
-					TMW.IE:ScheduleIconUpdate(self.icon)
+					TMW.IE:ScheduleIconSetup(self.icon)
 				end
 			</OnMouseUp>
 		</Scripts>
@@ -735,6 +735,14 @@
 					<Size x="27" y="27"/>
 				</Texture>
 			</Layer>
+			<Layer level="ARTWORK">
+				<Texture parentKey="texture">
+					<Anchors>
+						<Anchor point="CENTER"/>
+					</Anchors>
+					<Size x="28" y="28"/>
+				</Texture>
+			</Layer>
 		</Layers>
 		<Scripts>
 			<OnClick>
@@ -754,6 +762,22 @@
 			<OnLoad>
 				self.GetChecked = TMW.CNDT.Rune_GetChecked
 				self.SetChecked = TMW.CNDT.Rune_SetChecked
+				
+				
+				-- detect what texture should be used
+				for k, v in pairs(self:GetParent()) do
+					if v == self then
+						local runeName = gsub(self:GetName(), self:GetParent():GetName(), "")
+						local runeType, death = runeName:match("(.*)%d(.*)")
+						
+						if death and death ~= "" then
+							self.texture:SetTexture("Interface\\AddOns\\TellMeWhen_Options\\Textures\\" .. runeType)
+						else
+							self.texture:SetTexture("Interface\\PlayerFrame\\UI-PlayerFrame-Deathknight-" .. runeType)
+						end
+					end
+				end
+				
 			</OnLoad>
 		</Scripts>
 	</Button>
@@ -1002,91 +1026,31 @@
 						<Anchors>
 							<Anchor point="TOPLEFT"/>
 						</Anchors>
-						<Layers>
-							<Layer level="ARTWORK">
-								<Texture name="$parentRune" file="Interface\PlayerFrame\UI-PlayerFrame-Deathknight-Blood">
-									<Anchors>
-										<Anchor point="CENTER"/>
-									</Anchors>
-									<Size x="28" y="28"/>
-								</Texture>
-							</Layer>
-						</Layers>
 					</Button>
 					<Button name="$parentBlood2" parentKey="blood2" inherits="TellMeWhen_ConditionEditorRuneCheckTemplate" id="2">
 						<Anchors>
 							<Anchor point="LEFT" relativeTo="$parentBlood1" relativePoint="RIGHT"/>
 						</Anchors>
-						<Layers>
-							<Layer level="ARTWORK">
-								<Texture name="$parentRune" file="Interface\PlayerFrame\UI-PlayerFrame-Deathknight-Blood">
-									<Anchors>
-										<Anchor point="CENTER"/>
-									</Anchors>
-									<Size x="28" y="28"/>
-								</Texture>
-							</Layer>
-						</Layers>
 					</Button>
 		 			<Button name="$parentFrost1" parentKey="frost1" inherits="TellMeWhen_ConditionEditorRuneCheckTemplate" id="5">
 						<Anchors>
 							<Anchor point="LEFT" relativeTo="$parentBlood2" relativePoint="RIGHT"/>
 						</Anchors>
-						<Layers>
-							<Layer level="ARTWORK">
-								<Texture name="$parentRune" file="Interface\PlayerFrame\UI-PlayerFrame-Deathknight-Frost">
-									<Anchors>
-										<Anchor point="CENTER"/>
-									</Anchors>
-									<Size x="28" y="28"/>
-								</Texture>
-							</Layer>
-						</Layers>
 					</Button>
 					<Button name="$parentFrost2" parentKey="frost2" inherits="TellMeWhen_ConditionEditorRuneCheckTemplate" id="6">
 						<Anchors>
 							<Anchor point="LEFT" relativeTo="$parentFrost1" relativePoint="RIGHT"/>
 						</Anchors>
-						<Layers>
-							<Layer level="ARTWORK">
-								<Texture name="$parentRune" file="Interface\PlayerFrame\UI-PlayerFrame-Deathknight-Frost">
-									<Anchors>
-										<Anchor point="CENTER"/>
-									</Anchors>
-									<Size x="28" y="28"/>
-								</Texture>
-							</Layer>
-						</Layers>
 					</Button>
 					<Button name="$parentUnholy1" parentKey="unholy1" inherits="TellMeWhen_ConditionEditorRuneCheckTemplate" id="3">
 						<Anchors>
 							<Anchor point="LEFT" relativeTo="$parentFrost2" relativePoint="RIGHT"/>
 						</Anchors>
-						<Layers>
-							<Layer level="ARTWORK">
-								<Texture name="$parentRune" file="Interface\PlayerFrame\UI-PlayerFrame-Deathknight-Unholy">
-									<Anchors>
-										<Anchor point="CENTER"/>
-									</Anchors>
-									<Size x="28" y="28"/>
-								</Texture>
-							</Layer>
-						</Layers>
 					</Button>
 					<Button name="$parentUnholy2" parentKey="unholy2" inherits="TellMeWhen_ConditionEditorRuneCheckTemplate" id="4">
 						<Anchors>
 							<Anchor point="LEFT" relativeTo="$parentUnholy1" relativePoint="RIGHT"/>
 						</Anchors>
-						<Layers>
-							<Layer level="ARTWORK">
-								<Texture name="$parentRune" file="Interface\PlayerFrame\UI-PlayerFrame-Deathknight-Unholy">
-									<Anchors>
-										<Anchor point="CENTER"/>
-									</Anchors>
-									<Size x="28" y="28"/>
-								</Texture>
-							</Layer>
-						</Layers>
 					</Button>
 
 
@@ -1094,91 +1058,31 @@
 						<Anchors>
 							<Anchor point="TOP" relativeTo="$parentBlood1" relativePoint="BOTTOM"/>
 						</Anchors>
-						<Layers>
-							<Layer level="ARTWORK">
-								<Texture name="$parentRune" file="Interface\AddOns\TellMeWhen_Options\Textures\Blood">
-									<Anchors>
-										<Anchor point="CENTER"/>
-									</Anchors>
-									<Size x="28" y="28"/>
-								</Texture>
-							</Layer>
-						</Layers>
 					</Button>
 					<Button name="$parentBlood2Death" parentKey="blood2death" inherits="TellMeWhen_ConditionEditorRuneCheckTemplate" id="8">
 						<Anchors>
 							<Anchor point="LEFT" relativeTo="$parentBlood1Death" relativePoint="RIGHT"/>
 						</Anchors>
-						<Layers>
-							<Layer level="ARTWORK">
-								<Texture name="$parentRune" file="Interface\AddOns\TellMeWhen_Options\Textures\Blood">
-									<Anchors>
-										<Anchor point="CENTER"/>
-									</Anchors>
-									<Size x="28" y="28"/>
-								</Texture>
-							</Layer>
-						</Layers>
 					</Button>
 					<Button name="$parentFrost1Death" parentKey="frost1death" inherits="TellMeWhen_ConditionEditorRuneCheckTemplate" id="11">
 						<Anchors>
 							<Anchor point="LEFT" relativeTo="$parentBlood2Death" relativePoint="RIGHT"/>
 						</Anchors>
-						<Layers>
-							<Layer level="ARTWORK">
-								<Texture name="$parentRune" file="Interface\AddOns\TellMeWhen_Options\Textures\Frost">
-									<Anchors>
-										<Anchor point="CENTER"/>
-									</Anchors>
-									<Size x="28" y="28"/>
-								</Texture>
-							</Layer>
-						</Layers>
 					</Button>
 					<Button name="$parentFrost2Death" parentKey="frost2death" inherits="TellMeWhen_ConditionEditorRuneCheckTemplate" id="12">
 						<Anchors>
 							<Anchor point="LEFT" relativeTo="$parentFrost1Death" relativePoint="RIGHT"/>
 						</Anchors>
-						<Layers>
-							<Layer level="ARTWORK">
-								<Texture name="$parentRune" file="Interface\AddOns\TellMeWhen_Options\Textures\Frost">
-									<Anchors>
-										<Anchor point="CENTER"/>
-									</Anchors>
-									<Size x="28" y="28"/>
-								</Texture>
-							</Layer>
-						</Layers>
 					</Button>
 					<Button name="$parentUnholy1Death" parentKey="unholy1death" inherits="TellMeWhen_ConditionEditorRuneCheckTemplate" id="9">
 						<Anchors>
 							<Anchor point="LEFT" relativeTo="$parentFrost2Death" relativePoint="RIGHT"/>
 						</Anchors>
-						<Layers>
-							<Layer level="ARTWORK">
-								<Texture name="$parentRune" file="Interface\AddOns\TellMeWhen_Options\Textures\Unholy">
-									<Anchors>
-										<Anchor point="CENTER"/>
-									</Anchors>
-									<Size x="28" y="28"/>
-								</Texture>
-							</Layer>
-						</Layers>
 					</Button>
 					<Button name="$parentUnholy2Death" parentKey="unholy2death" inherits="TellMeWhen_ConditionEditorRuneCheckTemplate" id="10">
 						<Anchors>
 							<Anchor point="LEFT" relativeTo="$parentUnholy1Death" relativePoint="RIGHT"/>
 						</Anchors>
-						<Layers>
-							<Layer level="ARTWORK">
-								<Texture name="$parentRune" file="Interface\AddOns\TellMeWhen_Options\Textures\Unholy">
-									<Anchors>
-										<Anchor point="CENTER"/>
-									</Anchors>
-									<Size x="28" y="28"/>
-								</Texture>
-							</Layer>
-						</Layers>
 					</Button>
 
 
@@ -1364,7 +1268,10 @@
 						self.RealParent = self:GetParent()
 						self:SetParent(self:GetParent():GetParent()) -- dont hide it when the group is hidden
 					</OnLoad>
-					<OnClick>self.RealParent:AddDeleteHandler() TMW.CNDT:Save()</OnClick>
+					<OnClick>
+						self.RealParent:AddDeleteHandler()
+						TMW.CNDT:Save()
+					</OnClick>
 				</Scripts>
 				<NormalTexture urgency="5" file="Interface\AddOns\TellMeWhen_Options\Textures\Plus-Up"/>
 				<PushedTexture file="Interface\AddOns\TellMeWhen_Options\Textures\Plus-Down"/>
@@ -1417,9 +1324,6 @@
 			</Layer>
 		</Layers>
 		<Scripts>
-			<OnLoad>
-				TMW.CNDT[self:GetID()] = self
-			</OnLoad>
 			<OnShow>
 				self.AddDelete:SetNormalTexture("Interface\\Buttons\\UI-Panel-MinimizeButton-Up")
 				self.AddDelete:SetPushedTexture("Interface\\Buttons\\UI-Panel-MinimizeButton-Down")
@@ -1536,13 +1440,8 @@
 			<OnClick>
 				self:SetChecked(not self:GetChecked())
 				
-				--[[local s = ""
-				for k = 1, 6 do
-					s = s .. (self:GetParent()[tostring(k)].checked and 1 or 0)
-				end]]
-				
 				TMW.CI.ics.TotemSlots = bit.bxor(TMW.CI.ics.TotemSlots, self.bit)
-				TMW.IE:ScheduleIconUpdate()
+				TMW.IE:ScheduleIconSetup()
 			</OnClick>
 			<OnLoad>
 				self.bit = self:GetID() > 1 and bit.lshift(1, self:GetID() - 1) or 1
@@ -1662,7 +1561,7 @@
 			<OnClick>
 				if TMW.CI.ics then
 					TMW.ANN:GetEventSettings().Channel = self.channel
-					TMW.IE:ScheduleIconUpdate()
+					TMW.IE:ScheduleIconSetup()
 				end
 				TMW.ANN:SelectChannel(self.channel)
 				TMW.ANN:SetTabText()
@@ -1696,7 +1595,7 @@
 				TMW.SND:SelectSound(name)
 				if TMW.CI.ics then
 					TMW.SND:GetEventSettings().Sound = name
-					TMW.IE:ScheduleIconUpdate()
+					TMW.IE:ScheduleIconSetup()
 				end
 				TMW.SND:SetupEventDisplay(TMW.SND.currentEvent)
 				TMW.SND:SetTabText()
@@ -1751,7 +1650,7 @@
 			<OnClick>
 				if TMW.CI.ics then
 					TMW.ANIM:GetEventSettings().Animation = self.animation
-					TMW.IE:ScheduleIconUpdate()
+					TMW.IE:ScheduleIconSetup()
 				end
 				TMW.ANIM:SelectAnimation(self.animation)
 				TMW.ANIM:SetTabText()
@@ -1766,7 +1665,7 @@
 				local parentModule = TMW:FindModule(self)
 				if TMW.CI.ics then
 					parentModule:GetEventSettings()[self.setting] = not not self:GetChecked()
-					TMW.IE:ScheduleIconUpdate()
+					TMW.IE:ScheduleIconSetup()
 				end
 				parentModule:SetupEventSettings()
 			</OnClick>
@@ -1913,7 +1812,7 @@
 								if TMW.CI.ics then
 									local parentModule = TMW:FindModule(self)
 									parentModule:GetEventSettings().Value = t
-									TMW.IE:ScheduleIconUpdate()
+									TMW.IE:ScheduleIconSetup()
 								end
 								
 								self:GetScript("OnTextChanged")(self)						
@@ -1969,7 +1868,7 @@
 				end
 			</OnLoad>
 			<OnShow>
-				self.module:Load()
+				self.module:LoadConfig()
 			</OnShow>
 		</Scripts>
 	</Frame>
@@ -2137,7 +2036,7 @@
 					<OnLoad>
 						self:SetText(TMW.L["CONDITIONS"])
 						function self:OnClick()
-							TMW.CNDT:Load("icon")
+							TMW.CNDT:LoadConfig("icon")
 						end
 					</OnLoad>
 				</Scripts>
@@ -2180,7 +2079,7 @@
 					<OnLoad>
 						self:SetText(TMW.L["GROUPCONDITIONS"])
 						function self:OnClick()
-							TMW.CNDT:Load("group")
+							TMW.CNDT:LoadConfig("group")
 						end
 					</OnLoad>
 				</Scripts>
@@ -2307,7 +2206,7 @@
 								self.Low:SetText(1)
 								self.High:SetText(self.max)
 								self.Mid:SetText(TMW.SUG.NumCachePerFrame)
-								self:SetValue(TMW.SUG.NumCachePerFrame or 0)
+								self:SetValue(TMW.SUG.NumCachePerFrame or 10)
 							</OnLoad>
 							<OnValueChanged>
 								value = min(floor(value^self.exponent+0.5), self.max)
@@ -2486,7 +2385,7 @@
 								
 								if TMW.CI.ics then
 									TMW.CI.ics.Name = TMW:CleanString(self:GetText())
-									TMW.IE:ScheduleIconUpdate()
+									TMW.IE:ScheduleIconSetup()
 								end
 								
 								self:GetScript("OnTextChanged")(self)
@@ -2652,7 +2551,7 @@
 								
 								if TMW.CI.ics then
 									TMW.CI.ics.SourceUnit = TMW:CleanString(self)
-									TMW.IE:ScheduleIconUpdate()
+									TMW.IE:ScheduleIconSetup()
 								end
 								self:GetScript("OnTextChanged")(self)
 							</OnEditFocusLost>
@@ -2710,7 +2609,7 @@
 								
 								if TMW.CI.ics then
 									TMW.CI.ics.DestUnit = TMW:CleanString(self)
-									TMW.IE:ScheduleIconUpdate()
+									TMW.IE:ScheduleIconSetup()
 								end
 								self:GetScript("OnTextChanged")(self)
 							</OnEditFocusLost>
@@ -2762,7 +2661,7 @@
 								
 								if TMW.CI.ics then
 									TMW.CI.ics.CustomTex = TMW:CleanString(self)
-									TMW.IE:ScheduleIconUpdate()
+									TMW.IE:ScheduleIconSetup()
 								end
 								
 								self:GetScript("OnTextChanged")(self)
@@ -2800,7 +2699,7 @@
 								
 								if TMW.CI.ics then
 									TMW.CI.ics.Unit = TMW:CleanString(self)
-									TMW.IE:ScheduleIconUpdate()
+									TMW.IE:ScheduleIconSetup()
 									if TMW.CI.ics.Unit ~= "player" then
 										TMW.db.global.HelpSettings.HasChangedUnit = TMW.db.global.HelpSettings.HasChangedUnit + 1
 									end
@@ -3053,7 +2952,7 @@
 									<OnClick>
 										if TMW.CI.ics then
 											TMW.CI.ics.ShowPBar = not not self:GetChecked()
-											TMW.IE:ScheduleIconUpdate()
+											TMW.IE:ScheduleIconSetup()
 										end
 										self:GetParent().PBarOffs:SetEnabled(self:GetChecked())
 									</OnClick>
@@ -3096,7 +2995,7 @@
 										if TMW.CI.ics then
 											TMW.CI.ics.PBarOffs = tonumber(strtrim(self:GetText())) or 0
 											self:SetText(TMW.CI.ics.PBarOffs)
-											TMW.IE:ScheduleIconUpdate()
+											TMW.IE:ScheduleIconSetup()
 										end
 									</OnEditFocusLost>
 								</Scripts>
@@ -3143,7 +3042,7 @@
 									<OnClick>
 										if TMW.CI.ics then
 											TMW.CI.ics.ShowCBar = not not self:GetChecked()
-											TMW.IE:ScheduleIconUpdate()
+											TMW.IE:ScheduleIconSetup()
 										end
 										self:GetParent().CBarOffs:SetEnabled(self:GetChecked())
 									</OnClick>
@@ -3214,7 +3113,7 @@
 							<OnClick>
 								if TMW.CI.ics then
 									TMW.CI.ics.InvertBars = not not self:GetChecked()
-									TMW.IE:ScheduleIconUpdate()
+									TMW.IE:ScheduleIconSetup()
 								end
 							</OnClick>
 						</Scripts>
@@ -3274,7 +3173,7 @@
 
 								if TMW.CI.ics then
 									TMW.CI.ics.DurationMinEnabled = checked
-									TMW.IE:ScheduleIconUpdate()
+									TMW.IE:ScheduleIconSetup()
 								end
 							</OnClick>
 						</Scripts>
@@ -3301,7 +3200,7 @@
 
 								if TMW.CI.ics then
 									TMW.CI.ics.DurationMaxEnabled = checked
-									TMW.IE:ScheduleIconUpdate()
+									TMW.IE:ScheduleIconSetup()
 								end
 							</OnClick>
 						</Scripts>
@@ -3360,7 +3259,7 @@
 
 								if TMW.CI.ics then
 									TMW.CI.ics.ConditionDurEnabled = checked
-									TMW.IE:ScheduleIconUpdate()
+									TMW.IE:ScheduleIconSetup()
 								end
 							</OnClick>
 						</Scripts>
@@ -3388,7 +3287,7 @@
 								local groupID, iconID = TMW.CI.g, TMW.CI.i
 								if TMW.CI.ics then
 									TMW.CI.ics.UnConditionDurEnabled = checked
-									TMW.IE:ScheduleIconUpdate()
+									TMW.IE:ScheduleIconSetup()
 								end
 							</OnClick>
 						</Scripts>
@@ -3407,7 +3306,7 @@
 							<OnClick>
 								if TMW.CI.ics then
 									TMW.CI.ics.OnlyIfCounting = not not self:GetChecked()
-									TMW.IE:ScheduleIconUpdate()
+									TMW.IE:ScheduleIconSetup()
 								end
 							</OnClick>
 						</Scripts>
@@ -3441,7 +3340,7 @@
 								
 								if TMW.CI.ics then
 									TMW.CI.ics.StackMin = t
-									TMW.IE:ScheduleIconUpdate()
+									TMW.IE:ScheduleIconSetup()
 								end
 								self:GetScript("OnTextChanged")(self)
 							</OnEditFocusLost>
@@ -3481,7 +3380,7 @@
 								
 								if TMW.CI.ics then
 									TMW.CI.ics.StackMax = t
-									TMW.IE:ScheduleIconUpdate()
+									TMW.IE:ScheduleIconSetup()
 								end
 								self:GetScript("OnTextChanged")(self)
 							</OnEditFocusLost>
@@ -3510,7 +3409,7 @@
 
 								if TMW.CI.ics then
 									TMW.CI.ics.StackMinEnabled = checked
-									TMW.IE:ScheduleIconUpdate()
+									TMW.IE:ScheduleIconSetup()
 								end
 							</OnClick>
 						</Scripts>
@@ -3537,7 +3436,7 @@
 
 								if TMW.CI.ics then
 									TMW.CI.ics.StackMaxEnabled = checked
-									TMW.IE:ScheduleIconUpdate()
+									TMW.IE:ScheduleIconSetup()
 								end
 							</OnClick>
 						</Scripts>
@@ -3598,7 +3497,7 @@
 							<OnClick>
 								if TMW.CI.ics then
 									TMW.CI.ics.Enabled = not not self:GetChecked()
-									TMW.IE:ScheduleIconUpdate()
+									TMW.IE:ScheduleIconSetup()
 								end
 							</OnClick>
 						</Scripts>
@@ -3616,7 +3515,7 @@
 							<OnClick>
 								if TMW.CI.ics then
 									TMW.CI.ics.FakeHidden = not not self:GetChecked()
-									TMW.IE:ScheduleIconUpdate()
+									TMW.IE:ScheduleIconSetup()
 								end
 							</OnClick>
 						</Scripts>
@@ -3635,7 +3534,7 @@
 							<OnClick>
 								if TMW.CI.ics then
 									TMW.CI.ics.CheckNext = not not self:GetChecked()
-									TMW.IE:ScheduleIconUpdate()
+									TMW.IE:ScheduleIconSetup()
 								end
 							</OnClick>
 						</Scripts>
@@ -3660,7 +3559,7 @@
 								if TMW.CI.ics then
 									TMW.CI.ics.BindText = self:GetText()
 								end
-								TMW.IE:ScheduleIconUpdate()
+								TMW.IE:ScheduleIconSetup()
 								self:GetScript("OnTextChanged")(self)
 							</OnEditFocusLost>
 						</Scripts>
@@ -3901,7 +3800,7 @@
 									TMW.SND:GetEventSettings().Sound = t
 								end
 								TMW.SND:SelectSound(t)
-								TMW.IE:ScheduleIconUpdate()
+								TMW.IE:ScheduleIconSetup()
 								self:GetScript("OnTextChanged")(self)
 								TMW.SND:SetTabText()
 								TMW.SND:SetupEventDisplay(TMW.SND.currentEvent)
@@ -3944,7 +3843,7 @@
 								if TMW.CI.ics and TMW.ANN.currentEvent then
 									TMW.ANN:GetEventSettings().Text = self:GetText()
 								end
-								TMW.IE:ScheduleIconUpdate()
+								TMW.IE:ScheduleIconSetup()
 								self:GetScript("OnTextChanged")(self)
 							</OnEditFocusLost>
 						</Scripts>
@@ -4019,7 +3918,7 @@
 								if TMW.CI.ics then
 									TMW.ANN:GetEventSettings().Location = self:GetText()
 								end
-								TMW.IE:ScheduleIconUpdate()
+								TMW.IE:ScheduleIconSetup()
 								self:GetScript("OnTextChanged")(self)
 							</OnEditFocusLost>
 						</Scripts>
@@ -4049,7 +3948,7 @@
 							</OnLoad>
 							<OnClick>
 								TMW.ANN:GetEventSettings().Icon = not not self:GetChecked()
-								TMW.IE:ScheduleIconUpdate()
+								TMW.IE:ScheduleIconSetup()
 							</OnClick>
 						</Scripts>
 					</CheckButton>
@@ -4084,7 +3983,7 @@
 									settings.g = g
 									settings.b = b
 									self:GetNormalTexture():SetVertexColor(r, g, b, 1)
-									TMW.IE:ScheduleIconUpdate()
+									TMW.IE:ScheduleIconSetup()
 								end
 								self.cancel = function()
 									local settings = TMW.ANN:GetEventSettings()
@@ -4093,7 +3992,7 @@
 									settings.g = g
 									settings.b = b
 									self:GetNormalTexture():SetVertexColor(r, g, b, 1)
-									TMW.IE:ScheduleIconUpdate()
+									TMW.IE:ScheduleIconSetup()
 								end
 							</OnLoad>
 							<OnClick>
@@ -4126,7 +4025,7 @@
 								self.Mid:SetText(val == 0 and TMW.L["DEFAULT"] or val)
 								if TMW.CI.ics then
 									TMW.ANN:GetEventSettings().Size = val
-									TMW.IE:ScheduleIconUpdate()
+									TMW.IE:ScheduleIconSetup()
 								end
 							</OnValueChanged>
 							<OnLoad>
@@ -4174,11 +4073,10 @@
 								value = max(self:GetValue(), 0.1)
 								
 								self.Mid:SetText(TMW.L["ANIM_SECONDS"]:format(TMW:FormatSeconds(value, nil, true)))
-							--	TMW.ANIM:SetSliderMinMax(self, value)
 								
 								if TMW.CI.ics then
 									TMW.ANIM:GetEventSettings().Duration = value
-									TMW.IE:ScheduleIconUpdate()
+									TMW.IE:ScheduleIconSetup()
 								end
 							</OnValueChanged>
 						</Scripts>
@@ -4214,14 +4112,13 @@
 						</Anchors>
 						<Scripts>
 							<OnValueChanged>
-								value = self:GetValue() --max(self:GetValue(), 0.1)
+								value = self:GetValue()
 								
 								self.Mid:SetText(value)
-							--	TMW.ANIM:SetSliderMinMax(self, value)
 								
 								if TMW.CI.ics then
 									TMW.ANIM:GetEventSettings().Magnitude = value
-									TMW.IE:ScheduleIconUpdate()
+									TMW.IE:ScheduleIconSetup()
 								end
 							</OnValueChanged>
 						</Scripts>
@@ -4236,11 +4133,10 @@
 								value = max(self:GetValue(), 0.1)
 								
 								self.Mid:SetText(TMW.L["ANIM_SECONDS"]:format(TMW:FormatSeconds(value, nil, true)))
-							--	TMW.ANIM:SetSliderMinMax(self, value)
 								
 								if TMW.CI.ics then
 									TMW.ANIM:GetEventSettings().Period = value
-									TMW.IE:ScheduleIconUpdate()
+									TMW.IE:ScheduleIconSetup()
 								end
 							</OnValueChanged>
 						</Scripts>
@@ -4256,7 +4152,7 @@
 								self.Mid:SetText(value)
 								if TMW.CI.ics then
 									TMW.ANIM:GetEventSettings().ScaleMagnitude = value
-									TMW.IE:ScheduleIconUpdate()
+									TMW.IE:ScheduleIconSetup()
 								end
 							</OnValueChanged>
 							<OnLoad>
@@ -4301,14 +4197,14 @@
 									settings.g_anim = g
 									settings.b_anim = b
 									self:GetNormalTexture():SetVertexColor(r, g, b, 1)
-									TMW.IE:ScheduleIconUpdate()
+									TMW.IE:ScheduleIconSetup()
 								end
 								self.opacityFunc = function()
 									local settings = TMW.ANIM:GetEventSettings()
 									local a = 1 - OpacitySliderFrame:GetValue()
 									settings.a_anim = a
 									self.background:SetAlpha(a)
-									TMW.IE:ScheduleIconUpdate()
+									TMW.IE:ScheduleIconSetup()
 								end
 								self.cancel = function()
 									local settings = TMW.ANIM:GetEventSettings()
@@ -4319,7 +4215,7 @@
 									settings.a_anim = 1 - a
 									self:GetNormalTexture():SetVertexColor(r, g, b, 1)
 									self.background:SetAlpha(a)
-									TMW.IE:ScheduleIconUpdate()
+									TMW.IE:ScheduleIconSetup()
 								end
 							</OnLoad>
 							<OnClick>
@@ -4363,7 +4259,7 @@
 							</OnLoad>
 							<OnClick>
 								TMW.ANN:GetEventSettings().Icon = not not self:GetChecked()
-								TMW.IE:ScheduleIconUpdate()
+								TMW.IE:ScheduleIconSetup()
 							</OnClick>
 						</Scripts>
 					</CheckButton>
@@ -4384,7 +4280,7 @@
 								self.Mid:SetText(val == 0 and TMW.L["DEFAULT"] or val)
 								if TMW.CI.ics then
 									TMW.ANN:GetEventSettings().Size = val
-									TMW.IE:ScheduleIconUpdate()
+									TMW.IE:ScheduleIconSetup()
 								end
 							</OnValueChanged>
 							<OnLoad>

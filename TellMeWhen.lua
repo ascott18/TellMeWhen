@@ -32,7 +32,7 @@ local DRData = LibStub("DRData-1.0", true)
 TELLMEWHEN_VERSION = "4.8.3"
 TELLMEWHEN_VERSION_MINOR = strmatch(" @project-version@", " r%d+") or ""
 TELLMEWHEN_VERSION_FULL = TELLMEWHEN_VERSION .. TELLMEWHEN_VERSION_MINOR
-TELLMEWHEN_VERSIONNUMBER = 48301 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
+TELLMEWHEN_VERSIONNUMBER = 48302 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
 if TELLMEWHEN_VERSIONNUMBER > 49000 or TELLMEWHEN_VERSIONNUMBER < 48000 then return error("YOU SCREWED UP THE VERSION NUMBER OR DIDNT CHANGE THE SAFETY LIMITS") end -- safety check because i accidentally made the version number 414069 once
 
 TELLMEWHEN_MAXGROUPS = 1 	--this is a default, used by SetTheory (addon), so dont rename
@@ -42,8 +42,8 @@ TELLMEWHEN_MAXROWS = 20
 ---------- Upvalues ----------
 local GetSpellCooldown, GetSpellInfo, GetSpellTexture =
 	  GetSpellCooldown, GetSpellInfo, GetSpellTexture
-local GetShapeshiftForm, GetNumRaidMembers, GetPartyAssignment =
-	  GetShapeshiftForm, GetNumRaidMembers, GetPartyAssignment
+local GetNumRaidMembers, GetPartyAssignment =
+	  GetNumRaidMembers, GetPartyAssignment
 local UnitPower, PowerBarColor =
 	  UnitPower, PowerBarColor
 local PlaySoundFile, SendChatMessage =
@@ -70,7 +70,7 @@ local db, updatehandler, BarGCD, ClockGCD, Locked, SndChan, FramesToFind, UnitsT
 local UPD_INTV = 0.06	--this is a default, local because i use it in onupdate functions
 local runEvents, updatePBar = 1, 1
 local GCD, NumShapeshiftForms, LastUpdate = 0, 0, 0
-local IconUpdateFuncs, GroupUpdateFuncs, unitsToChange = {}, {}, {}
+local IconUpdateFuncs, GroupsToUpdate, unitsToChange = {}, {}, {}
 local BindUpdateFuncs
 local loweredbackup = {}
 local Animations = {[UIParent] = {}, [WorldFrame] = {}}
@@ -99,6 +99,93 @@ TMW.Warn = setmetatable(
 		end
 end})
 
+do	-- Class Lib
+	TMW.Classes = {}
+	TMW.Metamethods = {
+		__add = true,
+		__call = true,
+		__concat = true,
+		__div = true,
+		__le = true,
+		__lt = true,
+		__mod = true,
+		__mul = true,
+		__pow = true,
+		__sub = true,
+		__tostring = true,
+		__unm = true,
+	}
+	local function writeerror(self, key, value)
+		TMW:Error(("Cannot write value %q to key %q on class %q because an instance has already been created"):format(value, key, self.name))
+	end
+
+	local function New(self, ...)
+		local instance
+		if ... then
+			instance = CreateFrame(...)
+		else
+			instance = {}
+		end
+		
+		-- if this is the first instance of the class, do some magic to it:
+		if not next(self.instances) then 
+			-- set any defined metamethods
+			for k, v in pairs(self.instancemeta.__index) do
+				if TMW.Metamethods[k] then
+					self.instancemeta[k] = v
+				end
+			end
+			
+			getmetatable(self).__newindex = writeerror
+		end
+		
+		instance.class = self
+		instance.className = self.name
+		
+		setmetatable(instance, self.instancemeta)
+		
+		self.instances[instance] = true
+		
+		if self.OnNewInstance then
+			self.OnNewInstance(instance, ...)
+		end
+		
+		return instance
+	end
+
+	function TMW:NewClass(className, frameType, inherit)		
+		local metatable
+		
+		if frameType then
+			metatable = CopyTable(getmetatable(CreateFrame(frameType:upper())))
+			
+		elseif inherit then
+			if type(inherit) == "string" then
+				assert(TMW.Classes[inherit], ("Inheritance class %s does not exist."):format(inherit))
+				metatable = CopyTable(getmetatable(TMW.Classes[inherit]))
+			elseif type(inherit) == "table" then
+				metatable = CopyTable(getmetatable(inherit))
+			end
+		else
+			metatable = {__index = {}}
+		end
+		
+		metatable.__newindex = metatable.__index
+		
+		local class = {
+			name = className,
+			instances = {},
+			New = New,
+			instancemeta = {__index = metatable.__index},
+		}
+		
+		setmetatable(class, metatable)
+		
+		TMW.Classes[className] = class
+		
+		return class
+	end
+end
 
 ---------- Caches ----------
 TMW.strlowerCache = setmetatable(
@@ -189,6 +276,17 @@ function TMW.print(...)
 end
 local print = TMW.print
 TMW.Debug = TMW.print
+
+function TMW.get(value, ...)
+	local type = type(value)
+	if type == "function" then
+		return value(...)
+	elseif type == "table" then
+		return value[...]
+	else
+		return value
+	end
+end
 
 do -- Iterators
 	local mg = TELLMEWHEN_MAXGROUPS
@@ -475,7 +573,7 @@ local RelevantToAll = {
 
 TMW.Types = setmetatable({}, {
 	__index = function(t, k)
-		if type(k) == "table" and k.base == TMW.IconBase then -- if the key is an icon, then return the icon's Type table
+		if type(k) == "table" and k.class == TMW.Classes.Icon then -- if the key is an icon, then return the icon's Type table
 			return t[k.Type]
 		else -- if no type exists, then use the fallback (default) type
 			return rawget(t, "")
@@ -786,8 +884,8 @@ TMW.BE = {
 		ReducedPhysicalDone = "1160;99;26017;81130;702;24423",
 	},
 	buffs = {
-		ImmuneToStun		= "642;45438;34471;19574;48792;1022;33786;710;46924;19263;47585",
-		ImmuneToMagicCC		= "642;45438;34471;19574;33786;710;46924;19263;47585;31224;8178;23920;49039",
+		ImmuneToStun		= "642;45438;19574;48792;1022;33786;710;46924;19263;6615",
+		ImmuneToMagicCC		= "642;45438;48707;19574;33786;710;46924;19263;31224;8178;23920;49039",
 		IncreasedStats		= "79061;79063;90363",
 		IncreasedDamage		= "75447;82930",
 		IncreasedCrit		= "24932;29801;51701;51470;24604;90309",
@@ -805,9 +903,9 @@ TMW.BE = {
 		BurstManaRegen		= "29166;16191;64901",
 		PushbackResistance  = "19746;87717",
 		Resistances			= "19891;8185",
-		DefensiveBuffs		= "48707;30823;33206;47585;871;48792;498;22812;61336;5277;74001;47788;19263;6940;_12976;31850",
+		DefensiveBuffs		= "48707;30823;33206;47585;871;48792;498;22812;61336;5277;74001;47788;19263;6940;_12976;31850;31224;42650;86657",
 		MiscHelpfulBuffs	= "89488;10060;23920;68992;31642;54428;2983;1850;29166;16689;53271;1044;31821;45182",
-		DamageBuffs			= "1719;12292;85730;50334;5217;3045;77801;34692;31884;51713;49016;12472",
+		DamageBuffs			= "1719;12292;85730;50334;5217;3045;77801;34692;31884;51713;49016;12472;57933;64701;86700",
 	},
 	casts = {
 		--prefixing with _ doesnt really matter here since casts only match by ID, but it may prevent confusion if people try and use these as buff/debuff equivs
@@ -818,10 +916,11 @@ TMW.BE = {
 	},
 	dr = {
 	},
-	unlisted = {
+--[[	unlisted = {
 		-- enrages were extracted using the script in the /Scripts folder (source is db.mmo-champion.com)
+		-- NO LONGER NEEDED BECAUSE I DISCOVERED THE BUG!
 		Enraged				= "24689;102989;18499;2687;29131;59465;39575;77238;52262;12292;54508;23257;66092;57733;58942;40076;8599;15061;15716;18501;19451;19812;22428;23128;23342;25503;26041;26051;28371;30485;31540;31915;32714;33958;34670;37605;37648;37975;38046;38166;38664;39031;41254;41447;42705;42745;43139;47399;48138;48142;48193;50420;51513;52470;54427;55285;56646;59697;59707;59828;60075;61369;63227;68541;70371;72143;72146;72147;72148;75998;76100;76862;78722;78943;80084;80467;86736;95436;95459;102134;108169;109889;5229;12880;57514;57518;14201;57516;57519;14202;57520;14203;57521;14204;57522;51170;4146;76816;90872;82033;48702;52537;49029;67233;54781;56729;53361;79420;66759;67657;67658;67659;40601;51662;60177;63848;43292;90045;92946;52071;82759;60430;81772;48391;80158;101109;101110;54475;56769;63147;62071;52610;41364;81021;81022;81016;81017;34392;55462;108566;50636;72203;49016;69052;43664;59694;91668;52461;54356;76691;81706;52309;29340;76487",
-	},
+	},]]
 }
 
 TMW.EventList = {
@@ -919,286 +1018,16 @@ TMW.EventList = {
 	},
 }
 
-TMW.ChannelList = {
-	{
-		text = NONE,
-		channel = "",
-	},
-	{
-		text = CHAT_MSG_SAY,
-		channel = "SAY",
-		isBlizz = 1,
-	},
-	{
-		text = CHAT_MSG_YELL,
-		channel = "YELL",
-		isBlizz = 1,
-	},
-	{
-		text = WHISPER,
-		channel = "WHISPER",
-		isBlizz = 1,
-		editbox = 1,
-	},
-	{
-		text = CHAT_MSG_PARTY,
-		channel = "PARTY",
-		isBlizz = 1,
-	},
-	{
-		text = CHAT_MSG_RAID,
-		channel = "RAID",
-		isBlizz = 1,
-	},
-	{
-		text = CHAT_MSG_RAID_WARNING,
-		channel = "RAID_WARNING",
-		isBlizz = 1,
-	},
-	{
-		text = CHAT_MSG_BATTLEGROUND,
-		channel = "BATTLEGROUND",
-		isBlizz = 1,
-	},
-	{
-		text = L["CHAT_MSG_SMART"],
-		desc = L["CHAT_MSG_SMART_DESC"],
-		channel = "SMART",
-		isBlizz = 1, -- flagged to not use override %t and %f substitutions
-	},
-	{
-		text = L["CHAT_MSG_CHANNEL"],
-		desc = L["CHAT_MSG_CHANNEL_DESC"],
-		channel = "CHANNEL",
-		isBlizz = 1, -- flagged to not use override %t and %f substitutions
-		defaultlocation = function() return select(2, GetChannelList()) end,
-		dropdown = function()
-			for i = 1, math.huge, 2 do
-				local num, name = select(i, GetChannelList())
-				if not num then break end
-				
-				local info = UIDropDownMenu_CreateInfo()
-				info.func = TMW.ANN.LocDropdownFunc
-				info.text = name
-				info.arg1 = name
-				info.value = name
-				info.checked = name == TMW.ANN:GetEventSettings().Location
-				UIDropDownMenu_AddButton(info, UIDROPDOWNMENU_MENU_LEVEL) 
-			end
-		end,
-		ddtext = function(value)
-			-- also a verification function
-			for i = 1, math.huge, 2 do
-				local num, name = select(i, GetChannelList())
-				if not num then return end
-				
-				if name == value then
-					return value
-				end
-			end
-		end,
-	},
-	{
-		text = CHAT_MSG_GUILD,
-		channel = "GUILD",
-		isBlizz = 1,
-	},
-	{
-		text = CHAT_MSG_OFFICER,
-		channel = "OFFICER",
-		isBlizz = 1,
-	},
-	{
-		text = CHAT_MSG_EMOTE,
-		channel = "EMOTE",
-		isBlizz = 1,
-	},
-	{
-		text = L["CHAT_FRAME"],
-		channel = "FRAME",
-		icon = 1,
-		color = 1,
-		defaultlocation = function() return DEFAULT_CHAT_FRAME.name end,
-		dropdown = function()
-		
-			local name = "RaidWarningFrame"
-			local info = UIDropDownMenu_CreateInfo()
-			info.func = TMW.ANN.LocDropdownFunc
-			info.text = L[name]
-			info.arg1 = L[name]
-			info.value = name
-			info.checked = name == TMW.ANN:GetEventSettings().Location
-			UIDropDownMenu_AddButton(info, UIDROPDOWNMENU_MENU_LEVEL) 
-					
-			local i = 1
-			while _G["ChatFrame"..i] do 
-				local _, _, _, _, _, _, shown, _, docked = FCF_GetChatWindowInfo(i);
-				if shown or docked then
-					local name = _G["ChatFrame"..i].name
-					local info = UIDropDownMenu_CreateInfo()
-					info.func = TMW.ANN.LocDropdownFunc
-					info.text = name
-					info.arg1 = name
-					info.value = name
-					info.checked = name == TMW.ANN:GetEventSettings().Location
-					UIDropDownMenu_AddButton(info, UIDROPDOWNMENU_MENU_LEVEL) 
-				end
-				i = i + 1
-			end
-		end,
-		ddtext = function(value)
-			-- also a verification function
-			if value == "RaidWarningFrame" then
-				return L[value]
-			end
-			
-			local i = 1
-			while _G["ChatFrame"..i] do 
-				if _G["ChatFrame"..i].name == value then
-					return value
-				end
-				i = i + 1
-			end
-		end,
-	},
-	{
-		text = "Scrolling Combat Text",
-		channel = "SCT",
-		hidden = not (SCT and SCT:IsEnabled()),
-		sticky = 1,
-		icon = 1,
-		color = 1,
-		defaultlocation = SCT and SCT.FRAME1,
-		frames = SCT and {
-			[SCT.FRAME1] = "Frame 1",
-			[SCT.FRAME2] = "Frame 2",
-			[SCT.FRAME3 or SCT.MSG] = "SCTD", -- cheesy, i know
-			[SCT.MSG] = "Messages",
-		},
-		dropdown = function()
-			if not SCT then return end
-			for id, name in pairs(TMW.ChannelList.SCT.frames) do
-				local info = UIDropDownMenu_CreateInfo()
-				info.func = TMW.ANN.LocDropdownFunc
-				info.text = name
-				info.arg1 = info.text
-				info.value = id
-				info.checked = id == TMW.ANN:GetEventSettings().Location
-				UIDropDownMenu_AddButton(info, UIDROPDOWNMENU_MENU_LEVEL)
-			end
-		end,
-		ddtext = function(value)
-			if not SCT then return end
-			return TMW.ChannelList.SCT.frames[value]
-		end,
-	},
-	{
-		text = "MikSBT",
-		channel = "MSBT",
-		hidden = not MikSBT,
-		sticky = 1,
-		icon = 1,
-		color = 1,
-		size = 1,
-		defaultlocation = "Notification",
-		dropdown = function()
-			for scrollAreaKey, scrollAreaName in MikSBT:IterateScrollAreas() do
-				local info = UIDropDownMenu_CreateInfo()
-				info.text = scrollAreaName
-				info.value = scrollAreaKey
-				info.checked = scrollAreaKey == TMW.ANN:GetEventSettings().Location
-				info.func = TMW.ANN.LocDropdownFunc
-				info.arg1 = scrollAreaName
-				UIDropDownMenu_AddButton(info, UIDROPDOWNMENU_MENU_LEVEL)
-			end
-		end,
-		ddtext = function(value)
-			if value then
-				return MikSBT and select(2, MikSBT:IterateScrollAreas())[value]
-			end
-		end,
-	},
-	{
-		text = "Parrot",
-		channel = "PARROT",
-		hidden = not (Parrot and ((Parrot.IsEnabled and Parrot:IsEnabled()) or Parrot:IsActive())),
-		sticky = 1,
-		icon = 1,
-		color = 1,
-		size = 1,
-		defaultlocation = "Notification",
-		dropdown = function()
-			local areas = Parrot.GetScrollAreasChoices and Parrot:GetScrollAreasChoices() or Parrot:GetScrollAreasValidate()
-			for k, n in pairs(areas) do
-				local info = UIDropDownMenu_CreateInfo()
-				info.text = n
-				info.value = k
-				info.func = TMW.ANN.LocDropdownFunc
-				info.arg1 = n
-				info.checked = k == TMW.ANN:GetEventSettings().Location
-				UIDropDownMenu_AddButton(info, UIDROPDOWNMENU_MENU_LEVEL)
-			end
-		end,
-		ddtext = function(value)
-			if value then
-				return (Parrot.GetScrollAreasChoices and Parrot:GetScrollAreasChoices() or Parrot:GetScrollAreasValidate())[value]
-			end
-		end,
-	},
+local CompareFuncs = {
+	-- harkens back to the days of the conditions of old, but it is more efficient than a big elseif chain.
+	["=="] = function(a, b) return a == b  end,
+	["~="] = function(a, b)  return a ~= b end,
+	[">="] = function(a, b)  return a >= b end,
+	["<="] = function(a, b) return a <= b  end,
+	["<"] = function(a, b) return a < b  end,
+	[">"] = function(a, b) return a > b end,
 }
-for k, v in pairs(TMW.ChannelList) do
-	TMW.ChannelList[v.channel] = v
-end local ChannelList = TMW.ChannelList
 
-do -- STANCES
-	TMW.Stances = {
-		{class = "WARRIOR", 	id = 2457}, 	-- Battle Stance
-		{class = "WARRIOR", 	id = 71}, 		-- Defensive Stance
-		{class = "WARRIOR", 	id = 2458}, 	-- Berserker Stance
-
-		{class = "DRUID", 		id = 5487}, 	-- Bear Form
-		{class = "DRUID", 		id = 768}, 		-- Cat Form
-		{class = "DRUID", 		id = 1066}, 	-- Aquatic Form
-		{class = "DRUID", 		id = 783}, 		-- Travel Form
-		{class = "DRUID", 		id = 24858}, 	-- Moonkin Form
-		{class = "DRUID", 		id = 33891}, 	-- Tree of Life
-		{class = "DRUID", 		id = 33943}, 	-- Flight Form
-		{class = "DRUID", 		id = 40120}, 	-- Swift Flight Form
-
-		{class = "PRIEST", 		id = 15473}, 	-- Shadowform
-
-		{class = "ROGUE", 		id = 1784}, 	-- Stealth
-
-		{class = "HUNTER", 		id = 82661}, 	-- Aspect of the Fox
-		{class = "HUNTER", 		id = 13165}, 	-- Aspect of the Hawk
-		{class = "HUNTER", 		id = 5118}, 	-- Aspect of the Cheetah
-		{class = "HUNTER", 		id = 13159}, 	-- Aspect of the Pack
-		{class = "HUNTER", 		id = 20043}, 	-- Aspect of the Wild
-
-		{class = "DEATHKNIGHT", id = 48263}, 	-- Blood Presence
-		{class = "DEATHKNIGHT", id = 48266}, 	-- Frost Presence
-		{class = "DEATHKNIGHT", id = 48265}, 	-- Unholy Presence
-
-		{class = "PALADIN", 	id = 19746}, 	-- Concentration Aura
-		{class = "PALADIN", 	id = 32223}, 	-- Crusader Aura
-		{class = "PALADIN", 	id = 465}, 		-- Devotion Aura
-		{class = "PALADIN", 	id = 19891}, 	-- Resistance Aura
-		{class = "PALADIN", 	id = 7294}, 	-- Retribution Aura
-
-		{class = "WARLOCK", 	id = 47241}, 	-- Metamorphosis
-	}
-
-	TMW.CSN = {
-		[0]	= NONE,
-	}
-
-	for k, v in ipairs(TMW.Stances) do
-		if v.class == pclass then
-			local z = GetSpellInfo(v.id)
-			tinsert(TMW.CSN, z)
-		end
-	end
-end local CSN = TMW.CSN
 
 do -- hook LMB
 	local meta = LMB and getmetatable(LMB:Group("TellMeWhen")).__index
@@ -1219,6 +1048,66 @@ do -- hook LMB
 end
 
 
+
+TMW.__callbackregistry = {}
+
+function TMW:RegisterCallback(event, func, arg1)
+	local reg = self.__callbackregistry
+	local funcs
+	if reg[event] then
+		funcs = reg[event]
+	else
+		funcs = {}
+		reg[event] = funcs
+	end
+
+	if type(func) == "table" then
+		arg1 = func
+		func = func[event]
+	end
+	arg1 = arg1 or true
+	
+	local args
+	if funcs[func] then
+		args = funcs[func]
+	else
+		args = {}
+		funcs[func] = args
+	end
+	
+	args[arg1] = func
+end
+
+function TMW:UnregisterCallback(event, func, arg1)
+	local reg = self.__callbackregistry
+
+	if type(func) == "table" then
+		arg1 = func
+		func = func[event]
+	end
+	arg1 = arg1 or true
+	
+	local funcs = reg[event] and reg[event][func]
+	if funcs then
+		funcs[arg1] = nil
+	end
+end
+	
+function TMW:Fire(event, ...)
+	local funcs = TMW.__callbackregistry[event]
+	
+	if funcs then
+		for method, args in next, funcs do
+			for arg1 in next, args do
+				if arg1 ~= true then
+					method(arg1, event, ...)
+				else
+					method(event, ...)
+				end
+			end
+		end
+	end
+end
 
 
 -- --------------------------
@@ -1350,6 +1239,7 @@ function TMW:OnInitialize()
 	TMW:RegisterEvent("PLAYER_ENTERING_WORLD")
 	TMW:RegisterEvent("PLAYER_TALENT_UPDATE")
 	TMW:RegisterEvent("ACTIVE_TALENT_GROUP_CHANGED")
+	TMW:RegisterEvent("UNIT_POWER_FREQUENT")
 
 	
 	--------------- Comm ---------------
@@ -1458,15 +1348,28 @@ function TMW:OnUpdate(elapsed)					-- THE MAGICAL ENGINE OF DOING EVERYTHING
 		end
 		if Locked then
 		
-			for i = 1, #GroupUpdateFuncs do
-				local CndtCheck = GroupUpdateFuncs[i].CndtCheck
-				if CndtCheck then
+			for i = 1, #GroupsToUpdate do
+				local group = GroupsToUpdate[i]
+				local CndtCheck = group.CndtCheck
+				if CndtCheck and (group.conditionUpdateMethod == "OnUpdate" or group.conditionsNeedUpdate or group.nextConditionUpdate < time) then
 					CndtCheck()
+					if group.CndtFailed then
+						if group.__shown then
+							group:Hide()
+						end
+					else
+						if not group.__shown then
+							group:Show()
+						end
+					end
 				end
 			end
 
 			for i = 1, #IconUpdateFuncs do
-				IconUpdateFuncs[i]:Update(time)
+				local icon = IconUpdateFuncs[i]
+			--	if icon.updateQueued then
+					icon:Update(time)
+			--	end
 			end
 
 			if TMW.DoWipeAC then
@@ -1487,57 +1390,48 @@ function TMW:OnUpdate(elapsed)					-- THE MAGICAL ENGINE OF DOING EVERYTHING
 			BindUpdateFuncs[i]:UpdateBindText()
 		end
 	end
-	
-	for bar in next, PBarsToUpdate do
-		local power = UnitPower("player", bar.powerType) + bar.offset
-		if not bar.InvertBars then
-			bar:SetValue(bar.Max - power)
-		else
-			bar:SetValue(power)
-		end
-	end
-	
-	for bar in next, CDBarsToUpdate do
+		
+	for cbar in next, CDBarsToUpdate do
 		local value, doTerminate
 		
-		local start, duration, InvertBars = bar.start, bar.duration, bar.InvertBars
+		local start, duration, InvertBars = cbar.start, cbar.duration, cbar.InvertBars
 		
 		if InvertBars then
 			if duration == 0 then
-				value = bar.Max
+				value = cbar.Max
 			else
-				value = time - start + bar.offset
+				value = time - start + cbar.offset
 			end
-			doTerminate = value >= bar.Max
+			doTerminate = value >= cbar.Max
 		else
 			if duration == 0 then
 				value = 0
 			else
-				value = duration - (time - start) + bar.offset
+				value = duration - (time - start) + cbar.offset
 			end
 			doTerminate = value <= 0
 		end
 		
 		if doTerminate then
-			CDBarsToUpdate[bar] = nil
+			CDBarsToUpdate[cbar] = nil
 			if InvertBars then
-				value = bar.Max
+				value = cbar.Max
 			else
 				value = 0
 			end
 		end
 		
-		if value ~= bar.__value then
-			bar:SetValue(value)
+		if value ~= cbar.__value then
+			cbar:SetValue(value)
 			
-			local co = bar.completeColor
-			local st = bar.startColor
+			local co = cbar.completeColor
+			local st = cbar.startColor
 			
 			if not InvertBars then
 				if duration ~= 0 then
 					local pct = (time - start) / duration
 					local inv = 1-pct
-					bar:SetStatusBarColor(
+					cbar:SetStatusBarColor(
 						(co.r * pct) + (st.r * inv),
 						(co.g * pct) + (st.g * inv),
 						(co.b * pct) + (st.b * inv),
@@ -1547,11 +1441,11 @@ function TMW:OnUpdate(elapsed)					-- THE MAGICAL ENGINE OF DOING EVERYTHING
 			else
 				--inverted
 				if duration == 0 then
-					bar:SetStatusBarColor(co.r, co.g, co.b, co.a)
+					cbar:SetStatusBarColor(co.r, co.g, co.b, co.a)
 				else
 					local pct = (time - start) / duration
 					local inv = 1-pct
-					bar:SetStatusBarColor(
+					cbar:SetStatusBarColor(
 						(co.r * pct) + (st.r * inv),
 						(co.g * pct) + (st.g * inv),
 						(co.b * pct) + (st.b * inv),
@@ -1559,7 +1453,7 @@ function TMW:OnUpdate(elapsed)					-- THE MAGICAL ENGINE OF DOING EVERYTHING
 					)
 				end
 			end
-			bar.__value = value
+			cbar.__value = value
 		end
 	end
 	
@@ -1577,8 +1471,10 @@ function TMW:OnUpdate(elapsed)					-- THE MAGICAL ENGINE OF DOING EVERYTHING
 end
 
 
+
+
 function TMW:Update()
-	if not (TMW.EnteredWorld and TMW.VarsLoaded) then return end
+	if not TMW.EnteredWorld then return end
 
 	if not TMW.Warned then
 		for k, v in ipairs(TMW.Warn) do
@@ -1593,27 +1489,15 @@ function TMW:Update()
 	updatePBar = 1
 
 	Locked = db.profile.Locked
-	CNDTEnv.Locked = Locked
-	TMW.DoWipeAC = false
+	
 	if not Locked then
 		TMW:LoadOptions()
-		if db.global.ConfigWarning then -- oh no! configuration code in the main addon!
-			TellMeWhen_ConfigWarning:Show()
-		else
-			TellMeWhen_ConfigWarning:Hide()
-		end
-	elseif TellMeWhen_ConfigWarning then
-		TellMeWhen_ConfigWarning:Hide()
 	end
+	
+	TMW:Fire("TMW_GLOBAL_UPDATE") -- the placement of this matters. Must be after options load, but before icons are updated
 
-	if TMW.IE then
-		TMW.IE:SaveSettings()
-	end
-
-	UPD_INTV = db.profile.Interval + 0.001 -- add a very small amount so that we don't call the name icon multiple times (through metas/conditionicons) in the same frame if the interval has been set 0
+	UPD_INTV = db.profile.Interval + 0.001 -- add a very small amount so that we don't call the same icon multiple times (through metas/conditionicons) in the same frame if the interval has been set 0
 	TELLMEWHEN_MAXGROUPS = db.profile.NumGroups
-	CNDTEnv.CurrentSpec = GetActiveTalentGroup()
-	CNDTEnv.CurrentTree = GetPrimaryTalentTree()
 	NumShapeshiftForms = GetNumShapeshiftForms()
 
 	BarGCD = db.profile.BarGCD
@@ -1632,19 +1516,22 @@ function TMW:Update()
 	end
 	
 	for key, Type in pairs(TMW.Types) do
+		Type:Update()
 		Type:UpdateColors(true)
 	end
 
-	for groupID = 1, TELLMEWHEN_MAXGROUPS do -- dont use TMW.InGroups() because that will setup every group that exists, even if it shouldn't be setup (i.e. it has been deleted or the user changed profiles)
-		TMW:Group_Update(groupID)
+	for groupID = 1, TELLMEWHEN_MAXGROUPS do
+		-- dont use TMW.InGroups() because that will setup every group that exists,
+		-- even if it shouldn't be setup (i.e. it has been deleted or the user changed profiles)
+		local group = TMW[groupID] or TMW.Classes.Group:New("Frame", "TellMeWhen_Group" .. groupID, TMW, "TellMeWhen_GroupTemplate", groupID)
+		group:Setup()
 	end
 
 	if not Locked then
 		TMW:DoValidityCheck()
 	end
-
-	time = GetTime() TMW.time = time
-	TMW.Initd = true
+	
+	TMW:ScheduleTimer("ForceUpdatePBars", 0.55)
 end
 
 function TMW:GetUpgradeTable()			-- upgrade functions
@@ -2218,11 +2105,11 @@ function TMW:GetUpgradeTable()			-- upgrade functions
 				gs.LBFGroup = nil
 				if gs.Stance then
 					for k, v in pairs(gs.Stance) do
-						if CSN[k] then
+						if TMW.CSN[k] then
 							if v then -- everything switched in this version
-								gs.Stance[CSN[k]] = false
+								gs.Stance[TMW.CSN[k]] = false
 							else
-								gs.Stance[CSN[k]] = true
+								gs.Stance[TMW.CSN[k]] = true
 							end
 							gs.Stance[k] = nil
 						end
@@ -2386,7 +2273,9 @@ end
 function TMW:GlobalUpgrade()
 	TellMeWhenDB.Version = TellMeWhenDB.Version or 0
 	if TellMeWhenDB.Version == 414069 then TellMeWhenDB.Version = 41409 end --well, that was a mighty fine fail
-	-- Begin DB upgrades that need to be done before defaults are added. Upgrades here should always do everything needed to every single profile, and remember to make sure that a table exists before going into it.
+	-- Begin DB upgrades that need to be done before defaults are added. 
+	-- Upgrades here should always do everything needed to every single profile,
+	-- and remember to make sure that a table exists before going into it.
 
 	if TellMeWhenDB.profiles then
 		if TellMeWhenDB.Version < 41402 then
@@ -2594,7 +2483,7 @@ end
 function TMW:DoValidityCheck()
 	for str in ipairs(TMW.ValidityCheckQueue) do
 		local icon, groupID, iconID, g, i = strsplit("^", str)
-		if not TMW:Icon_IsValid(icon) then
+		if not (icon and icon:IsValid()) then
 			if iconID ~= "nil" then
 				TMW.Warn(format(L["CONDITIONORMETA_CHECKINGINVALID"], groupID, iconID, g, i))
 			else
@@ -2609,12 +2498,10 @@ function TMW:RestoreEvents()
 	runEvents = 1
 end
 
-function TMW:GetFlasher(parent)
-	Flasher = parent:CreateTexture(nil, "BACKGROUND", nil, 5)
-	Flasher:SetAllPoints(parent.base == TMW.IconBase and parent.texture)
-	Flasher:Hide()
-	
-	return Flasher
+function TMW.OnGCD(d)
+	if d == 1 then return true end -- a cd of 1 is always a GCD (or at least isn't worth showing)
+	if GCD > 1.7 then return false end -- weed out a cooldown on the GCD spell that might be an interupt (counterspell, mind freeze, etc)
+	return GCD == d and d > 0 -- if the duration passed in is the same as the GCD spell, and the duration isnt zero, then it is a GCD
 end
 
 function TMW:PLAYER_ENTERING_WORLD()
@@ -2741,6 +2628,100 @@ function TMW:ACTIVE_TALENT_GROUP_CHANGED()
 	TMW:ScheduleUpdate(1)
 end
 
+function TMW:UNIT_POWER_FREQUENT(event, unit, powerType)
+	if unit == "player" then
+		local powerTypeNum = powerType and _G["SPELL_POWER_" .. powerType]
+		local power = powerTypeNum and UnitPower("player", powerTypeNum)
+		for pbar in next, PBarsToUpdate do
+			if not powerTypeNum then
+				powerTypeNum = pbar.powerType
+				power = UnitPower("player", powerTypeNum)
+			end
+			if powerTypeNum == pbar.powerType then
+				local Max = pbar.Max
+				local value
+				
+				if not pbar.InvertBars then
+					value = Max - power + pbar.offset
+				else
+					value = power + pbar.offset
+				end
+				
+				if value > Max then
+					value = Max
+				elseif value < 0 then
+					value = 0
+				end
+				
+				if pbar.__value ~= value then
+					pbar:SetValue(value)
+					pbar.__value = value
+				end
+			end
+		end
+	end
+end
+
+function TMW:ForceUpdatePBars()
+	TMW:UNIT_POWER_FREQUENT("UNIT_POWER_FREQUENT", "player", nil)
+end
+
+function TMW:IterateAllModules(callback, arg1, ...)
+    -- callback can be a funcref or a method of Module
+    -- arg1 to callback will be Module if set to "%MODULE" or if nil, otherwise it will be literal. You should probably set it to %MODULE% if callback is a method name
+    -- arg2, argN are everything in the vararg.
+    assert(callback, "NO CALLBACK TO CALL!")
+	
+	if self == TMW then
+		-- iterate icon types (but only once, since this func is recursive
+		for name, Type in pairs(TMW.Types) do
+			local firstArg = arg1
+			if arg1 == "%MODULE%" or not arg1 then
+				firstArg = Type
+			end
+			
+			local callbackfunc = callback
+			
+			if type(callbackfunc) == "string" then
+				callbackfunc = Type[callbackfunc]
+			end
+			
+			local arg2 = ...
+			if type(arg2) == "table" and arg2.class == TMW.Classes.Icon and arg2:GetSettings().Type ~= name then
+				callbackfunc = nil
+			end
+			
+			if callbackfunc then
+				local success, err = pcall(callbackfunc, firstArg, ...)
+				if not success then
+					TMW:Error(err)
+				end
+			end
+		end
+	end
+	
+    for _, Module in self:IterateModules() do
+        local firstArg = arg1
+        if arg1 == "%MODULE%" or not arg1 then
+            firstArg = Module
+        end
+		
+		local callbackfunc = callback
+		
+        if type(callbackfunc) == "string" then
+            callbackfunc = Module[callbackfunc]
+        end
+		
+		if callbackfunc then
+			local success, err = pcall(callbackfunc, firstArg, ...)
+			if not success then
+				TMW:Error(err)
+			end
+		end
+        
+        TMW.IterateAllModules(Module, callback, arg1, ...) -- iterate the sub-modules
+    end
+end
 
 function TMW:ProcessEquivalencies()
 	for dispeltype, icon in pairs(TMW.DS) do
@@ -2776,6 +2757,7 @@ function TMW:ProcessEquivalencies()
 			dr[k] = (dr[k] and (dr[k] .. ";" .. spellID)) or tostring(spellID)
 		end
 	end
+	
 	TMW.OldBE = CopyTable(TMW.BE)
 	TMW.BEBackup = TMW.BE -- never ever ever change this value
 	for category, b in pairs(TMW.OldBE) do
@@ -2880,17 +2862,6 @@ end
 
 
 local EVENTS = TMW:NewModule("Events", "AceEvent-3.0") TMW.EVENTS = EVENTS
-function EVENTS:OnInitialize()
-	function EVENTS:ADDON_LOADED(_, addon)
-		if addon == "TellMeWhen_Options" then
-			for _, Module in self:IterateModules() do
-				Module:OnOptionsLoaded()
-			end
-		end
-	end
-	
-	self:RegisterEvent("ADDON_LOADED")
-end
 
 local SND = EVENTS:NewModule("Sound", EVENTS) TMW.SND = SND
 function SND:ProcessIconEventSettings(eventSettings)
@@ -2920,37 +2891,170 @@ end
 
 
 local ANN = EVENTS:NewModule("Announcements", EVENTS) TMW.ANN = ANN
-function ANN:ProcessIconEventSettings(eventSettings)
-	if eventSettings.Channel ~= "" then
-		return true
-	end
-end
-function ANN:HandleEvent(icon, data)
-	local Channel = data.Channel
-	if Channel ~= "" then
-		local Text = data.Text
-		local chandata = ChannelList[Channel]
+
+TMW.ChannelList = {
+	{
+		text = NONE,
+		channel = "",
+	},
+	{
+		text = CHAT_MSG_SAY,
+		channel = "SAY",
+		isBlizz = 1,
+	},
+	{
+		text = CHAT_MSG_YELL,
+		channel = "YELL",
+		isBlizz = 1,
+	},
+	{
+		text = WHISPER,
+		channel = "WHISPER",
+		isBlizz = 1,
+		editbox = 1,
+	},
+	{
+		text = CHAT_MSG_PARTY,
+		channel = "PARTY",
+		isBlizz = 1,
+	},
+	{
+		text = CHAT_MSG_RAID,
+		channel = "RAID",
+		isBlizz = 1,
+	},
+	{
+		text = CHAT_MSG_RAID_WARNING,
+		channel = "RAID_WARNING",
+		isBlizz = 1,
+	},
+	{
+		text = CHAT_MSG_BATTLEGROUND,
+		channel = "BATTLEGROUND",
+		isBlizz = 1,
+	},
+	{
+		text = L["CHAT_MSG_SMART"],
+		desc = L["CHAT_MSG_SMART_DESC"],
+		channel = "SMART",
+		isBlizz = 1, -- flagged to not use override %t and %f substitutions
+		handler = function(icon, data, Text)
+			local channel = "SAY"
+			if UnitInBattleground("player") then
+				channel = "BATTLEGROUND"
+			elseif UnitInRaid("player") then
+				channel = "RAID"
+			elseif GetNumPartyMembers() > 1 then
+				channel = "PARTY"
+			end
+			SendChatMessage(Text, channel)
+		end,
+	},
+	{
+		text = L["CHAT_MSG_CHANNEL"],
+		desc = L["CHAT_MSG_CHANNEL_DESC"],
+		channel = "CHANNEL",
+		isBlizz = 1, -- flagged to not use override %t and %f substitutions
+		defaultlocation = function() return select(2, GetChannelList()) end,
+		dropdown = function()
+			for i = 1, math.huge, 2 do
+				local num, name = select(i, GetChannelList())
+				if not num then break end
+				
+				local info = UIDropDownMenu_CreateInfo()
+				info.func = TMW.ANN.LocDropdownFunc
+				info.text = name
+				info.arg1 = name
+				info.value = name
+				info.checked = name == TMW.ANN:GetEventSettings().Location
+				UIDropDownMenu_AddButton(info, UIDROPDOWNMENU_MENU_LEVEL) 
+			end
+		end,
+		ddtext = function(value)
+			-- also a verification function
+			for i = 1, math.huge, 2 do
+				local num, name = select(i, GetChannelList())
+				if not num then return end
+				
+				if name == value then
+					return value
+				end
+			end
+		end,
+		handler = function(icon, data, Text)
+			for i = 1, math.huge, 2 do
+				local num, name = select(i, GetChannelList())
+				if not num then break end
+				if strlowerCache[name] == strlowerCache[data.Location] then
+					SendChatMessage(Text, Channel, nil, num)
+					break
+				end
+			end
+		end,
+	},
+	{
+		text = CHAT_MSG_GUILD,
+		channel = "GUILD",
+		isBlizz = 1,
+	},
+	{
+		text = CHAT_MSG_OFFICER,
+		channel = "OFFICER",
+		isBlizz = 1,
+	},
+	{
+		text = CHAT_MSG_EMOTE,
+		channel = "EMOTE",
+		isBlizz = 1,
+	},
+	{
+		text = L["CHAT_FRAME"],
+		channel = "FRAME",
+		icon = 1,
+		color = 1,
+		defaultlocation = function() return DEFAULT_CHAT_FRAME.name end,
+		dropdown = function()
 		
-		Text = TMW:InjectDataIntoString(Text, icon, not (chandata and chandata.isBlizz))
-		
-		if Channel == "MSBT" then
-			if MikSBT then
-				local Size = data.Size
-				if Size == 0 then Size = nil end
-				MikSBT.DisplayMessage(Text, data.Location, data.Sticky, data.r*255, data.g*255, data.b*255, Size, nil, data.Icon and icon.__tex)
+			local name = "RaidWarningFrame"
+			local info = UIDropDownMenu_CreateInfo()
+			info.func = TMW.ANN.LocDropdownFunc
+			info.text = L[name]
+			info.arg1 = L[name]
+			info.value = name
+			info.checked = name == TMW.ANN:GetEventSettings().Location
+			UIDropDownMenu_AddButton(info, UIDROPDOWNMENU_MENU_LEVEL) 
+					
+			local i = 1
+			while _G["ChatFrame"..i] do 
+				local _, _, _, _, _, _, shown, _, docked = FCF_GetChatWindowInfo(i);
+				if shown or docked then
+					local name = _G["ChatFrame"..i].name
+					local info = UIDropDownMenu_CreateInfo()
+					info.func = TMW.ANN.LocDropdownFunc
+					info.text = name
+					info.arg1 = name
+					info.value = name
+					info.checked = name == TMW.ANN:GetEventSettings().Location
+					UIDropDownMenu_AddButton(info, UIDROPDOWNMENU_MENU_LEVEL) 
+				end
+				i = i + 1
 			end
-		elseif Channel == "SCT" then
-			if SCT then
-				sctcolor.r, sctcolor.g, sctcolor.b = data.r, data.g, data.b
-				SCT:DisplayCustomEvent(Text, sctcolor, data.Sticky, data.Location, nil, data.Icon and icon.__tex)
+		end,
+		ddtext = function(value)
+			-- also a verification function
+			if value == "RaidWarningFrame" then
+				return L[value]
 			end
-		elseif Channel == "PARROT" then
-			if Parrot then
-				local Size = data.Size
-				if Size == 0 then Size = nil end
-				Parrot:ShowMessage(Text, data.Location, data.Sticky, data.r, data.g, data.b, nil, Size, nil, data.Icon and icon.__tex)
+			
+			local i = 1
+			while _G["ChatFrame"..i] do 
+				if _G["ChatFrame"..i].name == value then
+					return value
+				end
+				i = i + 1
 			end
-		elseif Channel == "FRAME" then
+		end,
+		handler = function(icon, data, Text)
 			local Location = data.Location
 			
 			if data.Icon then
@@ -2970,36 +3074,139 @@ function ANN:HandleEvent(icon, data)
 					i = i+1
 				end
 			end
-			
-		elseif Channel == "SMART" then
-			local channel = "SAY"
-			if UnitInBattleground("player") then
-				channel = "BATTLEGROUND"
-			elseif UnitInRaid("player") then
-				channel = "RAID"
-			elseif GetNumPartyMembers() > 1 then
-				channel = "PARTY"
+		end,
+	},
+	{
+		text = "Scrolling Combat Text",
+		channel = "SCT",
+		hidden = not (SCT and SCT:IsEnabled()),
+		sticky = 1,
+		icon = 1,
+		color = 1,
+		defaultlocation = SCT and SCT.FRAME1,
+		frames = SCT and {
+			[SCT.FRAME1] = "Frame 1",
+			[SCT.FRAME2] = "Frame 2",
+			[SCT.FRAME3 or SCT.MSG] = "SCTD", -- cheesy, i know
+			[SCT.MSG] = "Messages",
+		},
+		dropdown = function()
+			if not SCT then return end
+			for id, name in pairs(TMW.ChannelList.SCT.frames) do
+				local info = UIDropDownMenu_CreateInfo()
+				info.func = TMW.ANN.LocDropdownFunc
+				info.text = name
+				info.arg1 = info.text
+				info.value = id
+				info.checked = id == TMW.ANN:GetEventSettings().Location
+				UIDropDownMenu_AddButton(info, UIDROPDOWNMENU_MENU_LEVEL)
 			end
-			SendChatMessage(Text, channel)
-			
-		elseif Channel == "CHANNEL" then
-			for i = 1, math.huge, 2 do
-				local num, name = select(i, GetChannelList())
-				if not num then break end
-				if strlowerCache[name] == strlowerCache[data.Location] then
-					SendChatMessage(Text, Channel, nil, num)
-					break
-				end
+		end,
+		ddtext = function(value)
+			if not SCT then return end
+			return TMW.ChannelList.SCT.frames[value]
+		end,
+		handler = function(icon, data, Text)
+			if SCT then
+				sctcolor.r, sctcolor.g, sctcolor.b = data.r, data.g, data.b
+				SCT:DisplayCustomEvent(Text, sctcolor, data.Sticky, data.Location, nil, data.Icon and icon.__tex)
 			end
-			
-		else
-			if Text and chandata and chandata.isBlizz then
-				local Location = data.Location
-				if Channel == "WHISPER" then
-					Location = TMW:InjectDataIntoString(Location, icon, true)
-				end
-				SendChatMessage(Text, Channel, nil, Location)
+		end,
+	},
+	{
+		text = "MikSBT",
+		channel = "MSBT",
+		hidden = not MikSBT,
+		sticky = 1,
+		icon = 1,
+		color = 1,
+		size = 1,
+		defaultlocation = "Notification",
+		dropdown = function()
+			for scrollAreaKey, scrollAreaName in MikSBT:IterateScrollAreas() do
+				local info = UIDropDownMenu_CreateInfo()
+				info.text = scrollAreaName
+				info.value = scrollAreaKey
+				info.checked = scrollAreaKey == TMW.ANN:GetEventSettings().Location
+				info.func = TMW.ANN.LocDropdownFunc
+				info.arg1 = scrollAreaName
+				UIDropDownMenu_AddButton(info, UIDROPDOWNMENU_MENU_LEVEL)
 			end
+		end,
+		ddtext = function(value)
+			if value then
+				return MikSBT and select(2, MikSBT:IterateScrollAreas())[value]
+			end
+		end,
+		handler = function(icon, data, Text)
+			if MikSBT then
+				local Size = data.Size
+				if Size == 0 then Size = nil end
+				MikSBT.DisplayMessage(Text, data.Location, data.Sticky, data.r*255, data.g*255, data.b*255, Size, nil, data.Icon and icon.__tex)
+			end
+		end,
+	},
+	{
+		text = "Parrot",
+		channel = "PARROT",
+		hidden = not (Parrot and ((Parrot.IsEnabled and Parrot:IsEnabled()) or Parrot:IsActive())),
+		sticky = 1,
+		icon = 1,
+		color = 1,
+		size = 1,
+		defaultlocation = "Notification",
+		dropdown = function()
+			local areas = Parrot.GetScrollAreasChoices and Parrot:GetScrollAreasChoices() or Parrot:GetScrollAreasValidate()
+			for k, n in pairs(areas) do
+				local info = UIDropDownMenu_CreateInfo()
+				info.text = n
+				info.value = k
+				info.func = TMW.ANN.LocDropdownFunc
+				info.arg1 = n
+				info.checked = k == TMW.ANN:GetEventSettings().Location
+				UIDropDownMenu_AddButton(info, UIDROPDOWNMENU_MENU_LEVEL)
+			end
+		end,
+		ddtext = function(value)
+			if value then
+				return (Parrot.GetScrollAreasChoices and Parrot:GetScrollAreasChoices() or Parrot:GetScrollAreasValidate())[value]
+			end
+		end,
+		handler = function(icon, data, Text)
+			if Parrot then
+				local Size = data.Size
+				if Size == 0 then Size = nil end
+				Parrot:ShowMessage(Text, data.Location, data.Sticky, data.r, data.g, data.b, nil, Size, nil, data.Icon and icon.__tex)
+			end
+		end,
+	},
+}
+for k, v in pairs(TMW.ChannelList) do
+	TMW.ChannelList[v.channel] = v
+end local ChannelList = TMW.ChannelList
+function ANN:ProcessIconEventSettings(eventSettings)
+	if eventSettings.Channel ~= "" then
+		return true
+	end
+end
+function ANN:HandleEvent(icon, data)
+	local Channel = data.Channel
+	if Channel ~= "" then
+		local Text = data.Text
+		local chandata = ChannelList[Channel]
+		
+		Text = TMW:InjectDataIntoString(Text, icon, not (chandata and chandata.isBlizz))
+		
+		if not chandata then
+			return
+		elseif chandata.handler then
+			chandata.handler(icon, data, Text)
+		elseif Text and chandata.isBlizz then
+			local Location = data.Location
+			if Channel == "WHISPER" then
+				Location = TMW:InjectDataIntoString(Location, icon, true)
+			end
+			SendChatMessage(Text, Channel, nil, Location)
 		end
 		
 		return true
@@ -3247,7 +3454,7 @@ ANIM.AnimationList = {
 			if icon.flasher then
 				flasher = icon.flasher
 			else
-				flasher = TMW:GetFlasher(icon)
+				flasher = ANIM:GetFlasher(icon)
 				icon.flasher = flasher
 			end
 			
@@ -3427,48 +3634,103 @@ function ANIM:HandleEvent(icon, data)
 	end
 	
 end
-
+function ANIM:GetFlasher(parent)
+	Flasher = parent:CreateTexture(nil, "BACKGROUND", nil, 5)
+	Flasher:SetAllPoints(parent.class == Icon and parent.texture)
+	Flasher:Hide()
+	
+	return Flasher
+end
 
 
 -- -----------
 -- GROUPS
 -- -----------
 
-TMW.GroupBase = {}
+Group = {}
+local Group = TMW:NewClass("Group", "Frame")
 
-local function GroupScriptSort(groupA, groupB)
+function Group.OnNewInstance(group, ...)
+	local _, name, _, _, groupID = ... -- the CreateFrame args
+	TMW[groupID] = group
+	CNDTEnv[name] = group
+end
+
+function Group.ScriptSort(groupA, groupB)
 	local gOrder = -db.profile.CheckOrder
 	return groupA:GetID()*gOrder < groupB:GetID()*gOrder
 end
 
-function TMW.GroupBase.SetScript(group, handler, func)
+Group.setscript = Group.SetScript
+function Group.SetScript(group, handler, func)
 	group[handler] = func
 	if handler ~= "OnUpdate" then
 		group:setscript(handler, func)
 	else
-		tDeleteItem(GroupUpdateFuncs, group)
+		tDeleteItem(GroupsToUpdate, group)
 		if func then
-			GroupUpdateFuncs[#GroupUpdateFuncs+1] = group
-			sort(GroupUpdateFuncs, GroupScriptSort)
+			GroupsToUpdate[#GroupsToUpdate+1] = group
+			sort(GroupsToUpdate, Group.ScriptSort)
 		end
 	end
 end
 
-function TMW.GroupBase.Show(group)
+Group.show = Group.Show
+function Group.Show(group)
 	if not group.__shown then
 		group:show()
 		group.__shown = 1
 	end
 end
 
-function TMW.GroupBase.Hide(group)
+Group.hide = Group.Hide
+function Group.Hide(group)
 	if group.__shown then
 		group:hide()
 		group.__shown = nil
 	end
 end
 
-function TMW.GroupBase.SetPos(group)
+
+function Group.GetSettings(group)
+	return db.profile.Groups[group:GetID()]
+end
+
+function Group.FinishCompilingConditions(group, funcstr)
+	if group.OnlyInCombat then
+		if funcstr == "" then
+			funcstr = [[UnitAffectingCombat("player")]]
+		else
+			funcstr = [[(]] .. funcstr .. [[) and UnitAffectingCombat("player")]]
+		end
+		TMW.CNDT:CompileUpdateFunction(group, {PLAYER_REGEN_ENABLED = true, PLAYER_REGEN_DISABLED = true})
+	else
+		TMW.CNDT:CompileUpdateFunction(group)
+	end
+	
+	return funcstr, group:GetName(), "CndtFailed"
+end
+
+function Group.ProcessConditionFunction(group, func, doCheckAfter)
+	-- groups dont use doCheckAfter
+	group.CndtCheck = func
+end
+	
+function Group.ShouldUpdateIcons(group)
+	local gs = group:GetSettings()
+	
+	if	(not gs.Enabled) or
+		(GetActiveTalentGroup() == 1 and not gs.PrimarySpec) or
+		(GetActiveTalentGroup() == 2 and not gs.SecondarySpec) or
+		(GetPrimaryTalentTree() and not gs["Tree" .. GetPrimaryTalentTree()])
+	then
+		return false
+	end
+	
+	return true
+end
+
+function Group.SetPos(group)
 	local groupID = group:GetID()
 	local s = db.profile.Groups[groupID]
 	local p = s.Point
@@ -3504,64 +3766,13 @@ function TMW.GroupBase.SetPos(group)
 	group:SetFrameLevel(s.Level)
 end
 
-function TMW.GroupBase.ShouldUpdateIcons(group)
-	return TMW:Group_ShouldUpdateIcons(group:GetID())
-end
-
-function TMW.GroupBase.GetSettings(group)
-	return db.profile.Groups[group:GetID()]
-end
-
-function TMW:GetShapeshiftForm()
-	-- very hackey function because of inconsistencies in blizzard's GetShapeshiftForm
-	local i = GetShapeshiftForm()
-	if pclass == "WARLOCK" and i == 2 then  --metamorphosis is index 2 for some reason
-		i = 1
-	elseif pclass == "ROGUE" and i >= 2 then	--vanish and shadow dance return 3 when active, vanish returns 2 when shadow dance isnt learned. Just treat everything as stealth
-		i = 1
-	end
-	if i > NumShapeshiftForms then 	--many classes return an invalid number on login, but not anymore!
-		i = 0
-	end
-	return i or 0
-end local GetShapeshiftForm = TMW.GetShapeshiftForm
-
-local function CreateGroup(groupID)
-	local group = CreateFrame("Frame", "TellMeWhen_Group" .. groupID, TMW, "TellMeWhen_GroupTemplate", groupID)
-	TMW[groupID] = group
-	CNDTEnv[group:GetName()] = group
-	group.base = TMW.GroupBase
-
-	for k, v in pairs(TMW.GroupBase) do
-		if type(group[k]) == "function" then -- if the method already exists on the icon
-			group[strlower(k)] = group[k] -- store the old method as the lowercase same name
-		end
-		group[k] = v
-	end
-	return group
-end
-
-function TMW:Group_ShouldUpdateIcons(groupID)
-	local gs = db.profile.Groups[groupID]
+function Group.Setup(group)
+	local groupID = group:GetID()
 	
-	if	(not gs.Enabled) or
-		(GetActiveTalentGroup() == 1 and not gs.PrimarySpec) or
-		(GetActiveTalentGroup() == 2 and not gs.SecondarySpec) or
-		(GetPrimaryTalentTree() and not gs["Tree" .. GetPrimaryTalentTree()])
-	then
-		return false
-	end
-	
-	return true
-end
-
-function TMW:Group_Update(groupID)
-	assert(groupID) -- possible bad things happening here?
 	if groupID > TELLMEWHEN_MAXGROUPS then
 		return
 	end
 	
-	local group = TMW[groupID] or CreateGroup(groupID)
 	group.CorrectStance = true
 	group.__shown = group:IsShown()
 
@@ -3581,7 +3792,7 @@ function TMW:Group_Update(groupID)
 		for row = 1, group.Rows do
 			for column = 1, group.Columns do
 				local iconID = (row-1)*group.Columns + column
-				local icon = group[iconID] or TMW:Icon_Create(group, groupID, iconID)
+				local icon = group[iconID] or TMW.Classes.Icon:New("Button", "TellMeWhen_Group" .. groupID .. "_Icon" .. iconID, group, "TellMeWhen_IconTemplate", iconID)
 
 				icon:Show()
 				icon:SetFrameLevel(group:GetFrameLevel() + 1)
@@ -3590,7 +3801,7 @@ function TMW:Group_Update(groupID)
 				icon.x, icon.y = x, y -- used for shakers
 				icon:SetPoint("TOPLEFT", x, y)
 				
-				local success, err = pcall(TMW.Icon_Update, TMW, icon)
+				local success, err = pcall(icon.Setup, icon)
 				if not success then
 					TMW:Error(L["GROUPICON"]:format(groupID, iconID) .. ": " .. err)
 				end
@@ -3638,24 +3849,34 @@ end
 -- ICONS
 -- ------------------
 
-TMW.IconBase = {}
+local Icon = TMW:NewClass("Icon", "Button")
 
-local CompareFuncs = {
-	-- harkens back to the days of the conditions of old, but it is more efficient than a big elseif chain.
-	["=="] = function(a, b) return a == b  end,
-	["~="] = function(a, b)  return a ~= b end,
-	[">="] = function(a, b)  return a >= b end,
-	["<="] = function(a, b) return a <= b  end,
-	["<"] = function(a, b) return a < b  end,
-	[">"] = function(a, b) return a > b end,
-}
-local function OnGCD(d)
-	if d == 1 then return true end -- a cd of 1 is always a GCD (or at least isn't worth showing)
-	if GCD > 1.7 then return false end -- weed out a cooldown on the GCD spell that might be an interupt (counterspell, mind freeze, etc)
-	return GCD == d and d > 0 -- if the duration passed in is the same as the GCD spell, and the duration isnt zero, then it is a GCD
-end	TMW.OnGCD = OnGCD
+function Icon.OnNewInstance(icon, ...)
+	local _, name, group, _, iconID = ... -- the CreateFrame args
 
-local function IconScriptSort(iconA, iconB)
+	icon.group = group
+	group[iconID] = icon
+	CNDTEnv[name] = icon
+	
+	icon.__alpha = icon:GetAlpha()
+	icon.__tex = icon.texture:GetTexture()
+end
+
+function Icon.__lt(icon1, icon2)
+	local g1 = icon1.group:GetID()
+	local g2 = icon2.group:GetID()
+	if g1 ~= g2 then
+		return g1 < g2
+	else
+		return icon1:GetID() < icon2:GetID()
+	end
+end
+
+function Icon.__tostring(icon)
+	return icon:GetName()
+end
+
+function Icon.ScriptSort(iconA, iconB)
 	local gOrder = -db.profile.CheckOrder
 	local gA = iconA.group:GetID()
 	local gB = iconB.group:GetID()
@@ -3666,36 +3887,8 @@ local function IconScriptSort(iconA, iconB)
 	return gA*gOrder < gB*gOrder
 end
 
-function TMW.IconBase.GetTooltipTitle(icon)
-	local groupID = icon:GetParent():GetID()
-	local line1 = L["ICON_TOOLTIP1"] .. " " .. format(L["GROUPICON"], TMW:GetGroupName(groupID, groupID, 1), icon:GetID())
-	if icon:GetParent().Locked then
-		line1 = line1 .. " (" .. L["LOCKED"] .. ")"
-	end
-	return line1
-end
-
-function TMW.IconBase.Update(icon, time, force, ...)
-	time = time or TMW.time
-	
-	if icon.__shown and (force or icon.LastUpdate <= time - UPD_INTV) then
-		icon.LastUpdate = time
-		
-		local CndtCheck = icon.CndtCheck
-		if CndtCheck and CndtCheck() then
-			return
-		end
-	
-		icon:OnUpdate(time, ...)
-		
-		local CndtCheckAfter = icon.CndtCheckAfter
-		if CndtCheckAfter then
-			CndtCheckAfter()
-		end
-	end
-end
-
-function TMW.IconBase.SetScript(icon, handler, func, dontnil)
+Icon.setscript = Icon.SetScript
+function Icon.SetScript(icon, handler, func, dontnil)
 	if func ~= nil or not dontnil then
 		icon[handler] = func
 	end
@@ -3706,42 +3899,37 @@ function TMW.IconBase.SetScript(icon, handler, func, dontnil)
 		if func then
 			IconUpdateFuncs[#IconUpdateFuncs+1] = icon
 		end
-		sort(IconUpdateFuncs, IconScriptSort)
+		sort(IconUpdateFuncs, Icon.ScriptSort)
 	end
 end
 
-function TMW.IconBase.SetTexture(icon, tex)
-	--if icon.__tex ~= tex then ------dont check for this, checking is done before this method is even called
-	tex = icon.OverrideTex or tex
-	icon.__tex = tex
-	icon.texture:SetTexture(tex)
+Icon.registerevent = Icon.RegisterEvent
+function Icon.RegisterEvent(icon, event)
+	icon:registerevent(event)
+	icon.hasEvents = 1
+end
+	
+function Icon.GetTooltipTitle(icon)
+	local groupID = icon:GetParent():GetID()
+	local line1 = L["ICON_TOOLTIP1"] .. " " .. format(L["GROUPICON"], TMW:GetGroupName(groupID, groupID, 1), icon:GetID())
+	if icon:GetParent().Locked then
+		line1 = line1 .. " (" .. L["LOCKED"] .. ")"
+	end
+	return line1
 end
 
-function TMW.IconBase.SetReverse(icon, reverse)
-	icon.__reverse = reverse
-	icon.cooldown:SetReverse(reverse)
+function Icon.GetSettings(icon)
+	return db.profile.Groups[icon.group:GetID()].Icons[icon:GetID()]
 end
 
-function TMW.IconBase.UpdateBindText(icon)
-	icon.bindText:SetText(TMW:InjectDataIntoString(icon.BindText, icon, true))
-end
-
-function TMW.IconBase.IsBeingEdited(icon)
+function Icon.IsBeingEdited(icon)
 	if TMW.IE and TMW.CI.ic == icon and TMW.IE.CurrentTab and TMW.IE:IsVisible() then
 		return TMW.IE.CurrentTab:GetID()
 	end
 end
 
-function TMW.IconBase.GetSettings(icon)
-	return db.profile.Groups[icon.group:GetID()].Icons[icon:GetID()]
-end
 
-function TMW.IconBase.RegisterEvent(icon, event)
-	icon:registerevent(event)
-	icon.hasEvents = 1
-end
-
-function TMW.IconBase.GetAnimations(icon)
+function Icon.GetAnimations(icon)
 	if not icon.animations then
 		local t = {}
 		Animations[icon] = t
@@ -3750,7 +3938,7 @@ function TMW.IconBase.GetAnimations(icon)
 	return icon.animations
 end
 
-function TMW.IconBase.StartAnimation(icon, table)
+function Icon.StartAnimation(icon, table)
 	local Animation = table.data.Animation
 	local AnimationData = Animation and AnimationList[Animation]
 	
@@ -3772,7 +3960,7 @@ function TMW.IconBase.StartAnimation(icon, table)
 	end
 end
 
-function TMW.IconBase.StopAnimation(icon, arg1)
+function Icon.StopAnimation(icon, arg1)
 	local animations = icon:GetAnimations()
 	
 	local Animation, table
@@ -3795,7 +3983,101 @@ function TMW.IconBase.StopAnimation(icon, arg1)
 	end
 end
 
-function TMW.IconBase.CrunchColor(icon, duration, inrange, nomana)
+
+function Icon.Validate(icon)
+	-- adds the icon to the list of icons that can be checked in metas/conditions
+	if type(icon) == "string" then
+		icon = _G[icon]
+	end
+	
+	if not TMW.IconsLookup[icon] then
+		tinsert(TMW.Icons, icon:GetName())
+		TMW.IconsLookup[icon] = 1
+	end
+end
+
+function Icon.Invalidate(icon)
+	-- removes the icon from the list of icons that can be checked in metas/conditions
+	if type(icon) == "string" then
+		icon = _G[icon]
+	end
+	
+	if TMW.IconsLookup[icon] then
+		local k = tContains(TMW.Icons, icon:GetName())
+		if k then tremove(TMW.Icons, k) end
+		TMW.IconsLookup[icon] = nil
+	end
+end
+
+function Icon.IsValid(icon)
+	-- checks if the icon is in the list of icons that can be checked in metas/conditions
+	if type(icon) == "string" then
+		icon = _G[icon]
+	end
+	return TMW.IconsLookup[icon]
+end
+
+	
+function Icon.Update(icon, time, force, ...)
+	time = time or TMW.time
+	
+	if icon.__shown and (force or icon.LastUpdate <= time - UPD_INTV) then
+		icon.LastUpdate = time
+		
+		local CndtCheck = icon.CndtCheck
+		if CndtCheck and (icon.conditionUpdateMethod == "OnUpdate" or icon.conditionsNeedUpdate or icon.nextConditionUpdate < time) then
+			CndtCheck()
+		end
+		
+		if icon.CndtFailed and (icon.ConditionAlpha or 0) == 0 then
+			if icon.__alpha ~= 0 then
+				icon:SetInfo(0)
+			end
+			return
+		end
+	
+		icon:OnUpdate(time, ...)
+		
+		local CndtCheckAfter = icon.CndtCheckAfter
+		if CndtCheckAfter and (icon.conditionUpdateMethod == "OnUpdate" or icon.conditionsNeedUpdate or icon.nextConditionUpdate < time) then
+			CndtCheckAfter()
+			if icon.CndtFailed and (icon.ConditionAlpha or 0) == 0 then
+				if icon.__alpha ~= 0 then
+					icon:SetInfo(0)
+				end
+			end
+		end
+	end
+end
+
+function Icon.SetTexture(icon, tex)
+	--if icon.__tex ~= tex then ------dont check for this, checking is done before this method is even called
+	tex = icon.OverrideTex or tex
+	icon.__tex = tex
+	icon.texture:SetTexture(tex)
+end
+
+function Icon.SetReverse(icon, reverse)
+	icon.__reverse = reverse
+	icon.cooldown:SetReverse(reverse)
+end
+
+function Icon.ForceSetAlpha(icon, alpha)
+	icon.__alpha = alpha
+	local oldalpha = icon:GetAlpha()-- For ICONFADE. much nicer than using __alpha because it will transition from what is curently visible, not what should be visible after any current fades end
+	icon.__oldAlpha = oldalpha 
+	
+	icon:SetAlpha(alpha)
+	if (alpha == 0 and oldalpha > 0) or (alpha > 0 and oldalpha == 0) then
+		TMW:Fire("TMW_ICON_SHOWN_CHANGED", icon)
+	end
+end
+
+function Icon.UpdateBindText(icon)
+	icon.bindText:SetText(TMW:InjectDataIntoString(icon.BindText, icon, true))
+end
+
+function Icon.CrunchColor(icon, duration, inrange, nomana)
 --[[
 	CBC = 	{r=0,	g=1,	b=0		},	-- cooldown bar complete
 	CBS = 	{r=1,	g=0,	b=0		},	-- cooldown bar start
@@ -3848,7 +4130,7 @@ function TMW.IconBase.CrunchColor(icon, duration, inrange, nomana)
 	return icon.typeData[s]
 end
 
-function TMW.IconBase.SetInfo(icon, alpha, color, texture, start, duration, spellChecked, reverse, count, countText, forceupdate, unit)
+function Icon.SetInfo(icon, alpha, color, texture, start, duration, spellChecked, reverse, count, countText, forceupdate, unit)
 	--[[
 	 icon			- the icon object to set the attributes on (frame) (but call as icon:SetInfo(alpha, ...))
 	[alpha]			- the alpha to set the icon to (number); (nil) defaults to 0
@@ -3875,6 +4157,7 @@ function TMW.IconBase.SetInfo(icon, alpha, color, texture, start, duration, spel
 		6) Handle arg in here
 	]]
 	
+	--local somethingChanged
 	
 	alpha = alpha or 0
 	duration = duration or 0
@@ -3888,6 +4171,7 @@ function TMW.IconBase.SetInfo(icon, alpha, color, texture, start, duration, spel
 			queueOnUnit = true
 			icon.__lastUnitChecked = icon.__unitChecked
 			icon.__unitChecked = unit
+		--	somethingChanged = 1
 		end
 		
 		local unitName = UnitName(unit)
@@ -3895,6 +4179,7 @@ function TMW.IconBase.SetInfo(icon, alpha, color, texture, start, duration, spel
 			queueOnUnit = true
 			icon.__lastUnitName = icon.__unitName
 			icon.__unitName = unitName
+			--somethingChanged = 1 -- nothing officially changed. this is only used for bind text display. notify a change if something changes there.
 		end
 		
 		if queueOnUnit and icon.OnUnit then
@@ -3908,6 +4193,7 @@ function TMW.IconBase.SetInfo(icon, alpha, color, texture, start, duration, spel
 			icon.EventsToFire.OnSpell = true
 		end
 		icon.__spellChecked = spellChecked
+	--	somethingChanged = 1
 	end
 	
 	if duration == 0.001 then duration = 0 end -- hardcode fix for tricks of the trade. nice hardcoding on your part too, blizzard
@@ -3918,6 +4204,7 @@ function TMW.IconBase.SetInfo(icon, alpha, color, texture, start, duration, spel
 		if d ~= icon.__lastDur then
 			icon.EventsToFire.OnDuration = d 
 			icon.__lastDur = d
+		--	somethingChanged = 1 noting actually changed since __lastDur is only used right here.
 		end
 	end
 	
@@ -3945,10 +4232,12 @@ function TMW.IconBase.SetInfo(icon, alpha, color, texture, start, duration, spel
 			if icon.OnHide then
 				icon.EventsToFire.OnHide = true
 			end
+			TMW:Fire("TMW_ICON_SHOWN_CHANGED", icon)
 		elseif oldalpha == 0 then
 			if icon.OnShow then
 				icon.EventsToFire.OnShow = true
 			end
+			TMW:Fire("TMW_ICON_SHOWN_CHANGED", icon)
 		elseif alpha > oldalpha then
 			if icon.OnAlphaInc then
 				icon.EventsToFire.OnAlphaInc = alpha*100
@@ -3958,6 +4247,8 @@ function TMW.IconBase.SetInfo(icon, alpha, color, texture, start, duration, spel
 				icon.EventsToFire.OnAlphaDec = alpha*100
 			end
 		end
+		
+	--	somethingChanged = 1
 	end
 
 	if icon.__start ~= start or icon.__duration ~= duration or forceupdate then
@@ -3994,7 +4285,8 @@ function TMW.IconBase.SetInfo(icon, alpha, color, texture, start, duration, spel
 					s, d = 0, 0
 				end
 
-				-- cd.s is only used in this function and is used to prevent finish effect spam (and to increase efficiency) while GCDs are being triggered. icon.__start isnt used because that just records the start time passed in, which may be a GCD, so it will change frequently
+				-- cd.s is only used in this function and is used to prevent finish effect spam (and to increase efficiency) while GCDs are being triggered.
+				-- icon.__start isnt used because that just records the start time passed in, which may be a GCD, so it will change frequently
 				if cd.s ~= s or cd.d ~= d or forceupdate then
 					cd:SetCooldown(s, d)
 					cd:Show()
@@ -4018,24 +4310,26 @@ function TMW.IconBase.SetInfo(icon, alpha, color, texture, start, duration, spel
 		end
 
 		if icon.ShowCBar then
-			local bar = icon.cbar
-			bar.duration = duration
-			bar.start = start
-			bar.InvertBars = icon.InvertBars
+			local cbar = icon.cbar
+			cbar.duration = duration
+			cbar.start = start
+			cbar.InvertBars = icon.InvertBars
 			if duration > 0 then
 				if isGCD and BarGCD then
-					bar.duration = 0
+					cbar.duration = 0
 				end
 
-				bar.Max = duration
-				bar:SetMinMaxValues(0,  duration)
+				cbar.Max = duration
+				cbar:SetMinMaxValues(0,  duration)
 				
-				CDBarsToUpdate[bar] = true
+				CDBarsToUpdate[cbar] = true
 			end
 		end
 
 		icon.__start = start
 		icon.__duration = duration
+		
+	--	somethingChanged = 1
 	end
 
 	if icon.__count ~= count or icon.__countText ~= countText then
@@ -4051,18 +4345,20 @@ function TMW.IconBase.SetInfo(icon, alpha, color, texture, start, duration, spel
 		if icon.OnStack then
 			icon.EventsToFire.OnStack = count
 		end
+		
+	--	somethingChanged = 1
 	end
 	
 	texture = icon.OverrideTex or texture -- if a texture override is specefied, then use it instead
 	if texture ~= nil and icon.__tex ~= texture then -- do this before events are processed because some text outputs use icon.__tex
 		icon.__tex = texture
 		icon.texture:SetTexture(texture)
+		
+	--	somethingChanged = 1
 	end
 	
 	-- NO EVENT HANDLING PAST THIS POINT! -- well, actually it doesnt matter that much anymore, but they still won't be handled till the next update
-	if icon.EventsToFire and next(icon.EventsToFire) then
-		local doSecondIteration
-		
+	if icon.EventsToFire and next(icon.EventsToFire) then		
 		for _, Module in EVENTS:IterateModules() do
 			for i = 1, #TMW.EventList do
 				local event = TMW.EventList[i].name
@@ -4088,9 +4384,7 @@ function TMW.IconBase.SetInfo(icon, alpha, color, texture, start, duration, spel
 							end
 						end
 						
-						-- the same test is preformed for all modules,
-						-- so we can save the result of it within the module iteration without adverse effects
-						-- it actually results an a performance increase.
+						-- the same test is preformed for all modules...
 						icon.EventsToFire[event] =  doFireAndData
 					end
 					
@@ -4104,22 +4398,10 @@ function TMW.IconBase.SetInfo(icon, alpha, color, texture, start, duration, spel
 				end
 			end
 		end
-		
-		if doSecondIteration then
-			for event, doFireAndData in next, icon.EventsToFire do			
-				local data = icon[event]
-				
-				if data.PassingCndt and data.CndtJustPassed then
-					doFireAndData = CompareFuncs[data.Operator](doFireAndData, data.Value)
-					if doFireAndData ~= data.wasPassingCondition then
-						print(icon, event, "CNDTCHANGE", doFireAndData)
-						data.wasPassingCondition = doFireAndData
-					end
-				end
-			end
-		end
 			
 		wipe(icon.EventsToFire)
+		
+	--	somethingChanged = 1
 	end
 	
 	--[[if alpha == 0 and not force and not icon.IsFading then
@@ -4141,13 +4423,15 @@ function TMW.IconBase.SetInfo(icon, alpha, color, texture, start, duration, spel
 		icon.texture:SetDesaturated(d)
 			
 		if LMB and ColorMSQ then
-			local iconnt = icon.__normaltex
+			local iconnt = icon.normaltex
 			if iconnt then
 				iconnt:SetVertexColor(r, g, b, 1)
 			end
 		end
 			
 		icon.__vrtxcolor = color
+		
+	--	somethingChanged = 1
 	end
 
 	if icon.ShowPBar and (updatePBar or queueOnSpell or forceupdate) then
@@ -4169,189 +4453,43 @@ function TMW.IconBase.SetInfo(icon, alpha, color, texture, start, duration, spel
 			PBarsToUpdate[pbar] = true
 		elseif PBarsToUpdate[pbar] then
 			PBarsToUpdate[pbar] = nil
-			pbar:SetValue(icon.InvertBars and pbar.Max or 0)
+			local value = icon.InvertBars and pbar.Max or 0
+			pbar:SetValue(value)
+			pbar.__value = value
 		end
+		
+	--	somethingChanged = 1
 	end
 	
 	if queueOnSpell and icon.UpdateBindText_Spell then
 		icon:UpdateBindText()
+	--	somethingChanged = 1
 	elseif queueOnUnit and icon.UpdateBindText_Unit then
 		icon:UpdateBindText()
+	--	somethingChanged = 1
 	elseif queueOnStack and icon.UpdateBindText_Stack then
 		icon:UpdateBindText()
-	end
-end
-
-local iconMT = {
-	__lt = function(icon1, icon2)
-		local g1 = icon1.group:GetID()
-		local g2 = icon2.group:GetID()
-		if g1 ~= g2 then
-			return g1 < g2
-		else
-			return icon1:GetID() < icon2:GetID()
-		end
-	end,
-	__tostring = function(icon)
-		return icon:GetName()
-	end,
-	__index = getmetatable(CreateFrame("Button")).__index,
-}
-
-
-local TypeBase = {}
-local typeMT = {
-	__index = TypeBase,
-}
-
-TypeBase.SUGType = "spell"
-TypeBase.leftCheckYOffset = 0
-TypeBase.chooseNameTitle = L["ICONMENU_CHOOSENAME"]
-TypeBase.chooseNameText  = L["CHOOSENAME_DIALOG"]
-TypeBase.unitTitle = L["ICONMENU_UNITSTOWATCH"]
-TypeBase.EventDisabled_OnCLEUEvent = true	
-
-do	-- TypeBase:InIcons(groupID)
-	local cg, ci, mg, mi, Type
-		
-	local function iter()
-		ci = ci + 1
-		while true do
-			if ci <= mi and TMW[cg] and (not TMW[cg][ci] or TMW[cg][ci].Type ~= Type.type) then
-				ci = ci + 1
-			elseif cg < mg and (ci > mi or not TMW[cg]) then
-				cg = cg + 1
-				ci = 1
-			elseif cg > mg then
-				return
-			else
-				break
-			end
-		end
-		return TMW[cg] and TMW[cg][ci], cg, ci -- icon, groupID, iconID
-	end
-		
-	function TypeBase:InIcons(groupID)
-		cg = groupID or 1
-		ci = 0
-		mg = groupID or TELLMEWHEN_MAXGROUPS
-		mi = TELLMEWHEN_MAXROWS*TELLMEWHEN_MAXROWS
-		Type = self
-		return iter
-	end
-end
-
-function TypeBase:UpdateColors(dontUpdateIcons)
-	for k, v in pairs(db.profile.Colors[self.type]) do
-		if v.Override then
-			self[k] = v
-		else
-			self[k] = db.profile.Colors.GLOBAL[k]
-		end
-	end
-	if not dontUpdateIcons then
-		self:UpdateIcons()
-	end
-end
-
-function TypeBase:UpdateIcons()
-	for icon in TMW:InIcons() do
-		if icon.typeData == self then
-			TMW:Icon_Update(icon)
-		end
-	end
-end
-
-function TypeBase:GetNameForDisplay(icon, data)
-	local name = data and GetSpellLink(data) or data
-	return name, true
-end
-
-function TypeBase:DragReceived(icon, t, data, subType)
-	local ics = icon:GetSettings()
-	
-	if t ~= "spell" then
-		return
+	--	somethingChanged = 1
 	end
 	
-	local _, spellID = GetSpellBookItemInfo(data, subType)
-	if not spellID then
-		return
-	end
-	
-	ics.Name = TMW:CleanString(ics.Name .. ";" .. spellID)
-	return true -- signal success
-end
-
-function TypeBase:GetIconMenuText(data)
-	local text = data.Name or ""
-	local tooltip =	data.Name and data.Name ~= "" and data.Name .. "\r\n" or ""
-
-	return text, tooltip
-end
-
-function TMW:RegisterIconType(Type)
-	local typekey = Type.type
-	setmetatable(Type, typeMT)
-	setmetatable(Type.RelevantSettings, RelevantToAll)
-	
-	if TMW.debug and rawget(Types, typekey) then
-		-- for tweaking and recreating icon types inside of WowLua so that I don't have to change the typekey every time.
-		typekey = typekey .. " - " .. date("%X")
-		Type.name = typekey
-	end
-	
-	Types[typekey] = Type -- put it in the main Types table
-	tinsert(TMW.OrderedTypes, Type) -- put it in the ordered types table (used to order the type selection dropdown in the icon editor)
-	return Type -- why not?
+	--[[if somethingChanged then
+		TMW:Fire("TMW_ICON_UPDATED", icon)
+	end]]
 end
 
 
-function TMW:Icon_Create(group, groupID, iconID)
-	local icon = CreateFrame("Button", "TellMeWhen_Group" .. groupID .. "_Icon" .. iconID, group, "TellMeWhen_IconTemplate", iconID)
+function Icon.FinishCompilingConditions(icon, funcstr)
+	TMW.CNDT:CompileUpdateFunction(icon)
 	
-	icon.group = group
-	group[iconID] = icon
-	CNDTEnv[icon:GetName()] = icon
-	icon.base = TMW.IconBase
-		
-	icon.__alpha = icon:GetAlpha()
-	icon.__tex = icon.texture:GetTexture()
-	
-	
-	--explicitly define functions from metatables
-	icon.SetAlpha = icon.SetAlpha
-	
-	icon.cooldown.SetCooldown = icon.cooldown.SetCooldown
-	icon.cooldown.Show = icon.cooldown.Show
-	icon.cooldown.SetAlpha = icon.cooldown.SetAlpha
-	icon.cooldown.SetReverse = icon.cooldown.SetReverse
-	icon.cooldown.Hide = icon.cooldown.Hide
-	
-	icon.texture.SetVertexColor = icon.texture.SetVertexColor
-	icon.texture.SetDesaturated = icon.texture.SetDesaturated
-	icon.texture.SetTexture = icon.texture.SetTexture
-	
-	icon.cbar.SetValue = icon.cbar.SetValue
-	
-	icon.pbar.SetStatusBarColor = icon.pbar.SetStatusBarColor
-	icon.pbar.SetMinMaxValues = icon.pbar.SetMinMaxValues
-	icon.pbar.SetValue = icon.pbar.SetValue
-	
-	icon.countText.SetText = icon.countText.SetText
-	
-	
-	setmetatable(icon, iconMT)
-	for k, v in pairs(TMW.IconBase) do
-		if type(icon[k]) == "function" then -- if the method already exists on the icon
-			icon[strlower(k)] = icon[k] -- store the old method as the lowercase same name
-		end
-		icon[k] = v
-	end
-	return icon
+	return icon.typeData:FinishCompilingConditions(icon, funcstr)
 end
 
-function TMW:Icon_UpdateBars(icon)
+function Icon.ProcessConditionFunction(icon, func, doCheckAfter)
+	icon.typeData:ProcessConditionFunction(icon, func, doCheckAfter)
+end
+
+	
+function Icon.SetupBars(icon)
 	local blizzEdgeInsets = icon.group.barInsets or 0
 	
 	local pbar = icon.pbar
@@ -4398,8 +4536,8 @@ function TMW:Icon_UpdateBars(icon)
 		cbar:Hide()
 	end
 end
-	
-function TMW:Icon_UpdateText(icon, fontString, settings)
+
+function Icon.SetupText(icon, fontString, settings)
 	fontString:SetWidth(settings.ConstrainWidth and icon.texture:GetWidth() or 0)
 	fontString:SetFont(LSM:Fetch("font", settings.Name), settings.Size, settings.Outline)
 	
@@ -4416,9 +4554,9 @@ function TMW:Icon_UpdateText(icon, fontString, settings)
 		fontString:SetPoint(settings.point, icon, settings.relativePoint, settings.x, settings.y)
 	end
 end
-	
-function TMW:Icon_Update(icon)
-	if not icon then return end
+
+function Icon.Setup(icon)
+	if not icon or not icon[0] then return end
 	
 	local iconID = icon:GetID()
 	local groupID = icon.group:GetID()
@@ -4428,7 +4566,7 @@ function TMW:Icon_Update(icon)
 	icon.typeData = typeData
 
 	runEvents = nil
-	TMW:ScheduleTimer("RestoreEvents", UPD_INTV*2.1)
+	TMW:ScheduleTimer("RestoreEvents", max(UPD_INTV*2.1, 0.05))
 
 	icon.__spellChecked = nil
 	icon.__unitChecked = nil
@@ -4491,14 +4629,13 @@ function TMW:Icon_Update(icon)
 	if icon.Conditions.n > 0 and Locked then -- dont define conditions if we are unlocked so that i dont have to deal with meta icons checking icons during config. I think i solved this somewhere else too without thinking about it, but what the hell
 		TMW.CNDT:ProcessConditions(icon)
 	else
-		icon.CndtCheck = nil
-		icon.CndtCheckAfter = nil
+		icon:ProcessConditionFunction() -- sets the functions to nil
 	end
 
 	if icon.Enabled and group:ShouldUpdateIcons() then
-		TMW:Icon_Validate(icon)
+		icon:Validate()
 	else
-		TMW:Icon_Invalidate(icon)
+		icon:Invalidate()
 	end
 
 	local cd = icon.cooldown
@@ -4509,14 +4646,14 @@ function TMW:Icon_Update(icon)
 	
 	-- Masque skinning
 	local isDefault
-	icon.__normaltex = icon.__MSQ_NormalTexture or icon:GetNormalTexture()
+	icon.normaltex = icon.__MSQ_NormalTexture or icon:GetNormalTexture()
 	if LMB then
-		local g = LMB:Group("TellMeWhen", format(L["fGROUP"], groupID))
-		g:AddButton(icon)
-		group.SkinID = g.SkinID or (g.db and g.db.SkinID)
-		if g.Disabled or (g.db and g.db.Disabled) then
+		local lmbGroup = LMB:Group("TellMeWhen", format(L["fGROUP"], groupID))
+		lmbGroup:AddButton(icon)
+		group.SkinID = lmbGroup.SkinID or (lmbGroup.db and lmbGroup.db.SkinID)
+		if lmbGroup.Disabled or (lmbGroup.db and lmbGroup.db.Disabled) then
 			group.SkinID = "Blizzard"
-			if not icon.__normaltex:GetTexture() then
+			if not icon.normaltex:GetTexture() then
 				isDefault = 1
 			end
 		end
@@ -4541,8 +4678,8 @@ function TMW:Icon_Update(icon)
 	icon:SetInfo(0, nil, nil, nil, nil, nil, nil, nil, nil, 1, nil) -- forceupdate is set to 1 here so it doesnt return early
 	
 	-- update overlay texts
-	TMW:Icon_UpdateText(icon, icon.countText, group.Fonts.Count)
-	TMW:Icon_UpdateText(icon, icon.bindText, group.Fonts.Bind)
+	icon:SetupText(icon.countText, group.Fonts.Count)
+	icon:SetupText(icon.bindText, group.Fonts.Bind)
 	
 	icon.UpdateBindText_Any = nil -- this one is for metas
 	icon.UpdateBindText_Spell = nil
@@ -4576,10 +4713,9 @@ function TMW:Icon_Update(icon)
 	
 	-- force an update
 	icon.LastUpdate = 0
-	TMW.time = GetTime()
+	
 	-- actually run the icon's update function
 	if icon.Enabled or not Locked then
-		Types[icon.Type]:Update(UPD_INTV)
 		local success, err = pcall(Types[icon.Type].Setup, Types[icon.Type], icon, groupID, iconID)
 		if not success then
 			TMW:Error(L["GROUPICON"]:format(groupID, iconID) .. ": " .. err)
@@ -4617,11 +4753,12 @@ function TMW:Icon_Update(icon)
 		end
 	end
 
-	TMW:Icon_UpdateBars(icon, groupID, iconID)
+	icon:SetupBars()
 	icon:Show()
 	local pbar = icon.pbar
 	local cbar = icon.cbar
 	cbar.__value = nil
+	pbar.__value = nil
 	CDBarsToUpdate[cbar] = db.profile.Locked and icon.ShowCBar and true or nil
 	updatePBar = 1
 	
@@ -4644,31 +4781,13 @@ function TMW:Icon_Update(icon)
 
 		local testCount, testCountText
 		if group.FontTest then
-			if icon.Type == "buff" then
-				testCount = random(1, 20)
-			elseif icon.Type == "dr" then
-				local rand = random(1, 3)
-				testCount = rand == 1 and 0 or rand == 2 and 25 or rand == 3 and 50
-				testCountText = testCount.."%"
-			elseif icon.Type == "meta" then
-				-- its the best of both worlds!
-				local rand = random(1, 23)
-				testCount = rand == 1 and 0 or rand == 2 and 25 or rand == 3 and 50 or rand - 3
-				if rand < 4 then
-					testCountText = testCount.."%"
-				end
-			end
+			testCount, testCountText = typeData:GetFontTestValues()
 		end
 		
 		--icon:SetInfo(alpha, color, texture, start, duration, spellChecked, reverse, count, countText, forceupdate, unit)
-		icon:SetInfo(1, 1, nil, 0, 0, icon.__spellChecked, nil, testCount, testCountText, nil, nil, icon.__unitChecked) -- alpha is set to 1 here so it doesnt return early
-		if icon.Enabled then
-			icon:SetAlpha(1)
-			icon.__alpha = 1
-		else
-			icon:SetAlpha(0.5)
-			icon.__alpha = 0.5
-		end
+		icon:SetInfo(1, 1, nil, 0, 0, icon.__spellChecked, nil, testCount, testCountText, nil, nil, icon.__unitChecked)
+		icon:ForceSetAlpha(icon.Enabled and 1 or 0.5) -- force set the alpha (dont handle it with SetInfo because of all the bells and whistles
+		
 		if not icon.texture:GetTexture() then
 			icon:SetTexture("Interface\\AddOns\\TellMeWhen\\Textures\\Disabled")
 		end
@@ -4682,53 +4801,141 @@ function TMW:Icon_Update(icon)
 		pbar:SetMinMaxValues(0, 1)
 		pbar:SetValue(1)
 		pbar:SetAlpha(.7)
-
-		for k, v in pairs(icon:GetAnimations()) do
-			icon:StopAnimation(v)
-		end
 		
 		icon:EnableMouse(1)
-		if icon.Type == "meta" then
-			-- meta icons shouln't show bars in config, even though they are force enabled. I hate to do it like this
-			cbar:SetValue(0)
-			pbar:SetValue(0)
+	end
+	
+	--icon.updateQueued = true
+	
+	TMW:Fire("TMW_ICON_SETUP", icon)
+	--TMW:Fire("TMW_ICON_UPDATED", icon)
+end
+
+
+
+local IconType = TMW:NewClass("IconType")
+
+IconType.SUGType = "spell"
+IconType.leftCheckYOffset = 0
+IconType.chooseNameTitle = L["ICONMENU_CHOOSENAME"]
+IconType.chooseNameText  = L["CHOOSENAME_DIALOG"]
+IconType.unitTitle = L["ICONMENU_UNITSTOWATCH"]
+IconType.EventDisabled_OnCLEUEvent = true	
+
+do	-- IconType:InIcons(groupID)
+	local cg, ci, mg, mi, Type
+		
+	local function iter()
+		ci = ci + 1
+		while true do
+			if ci <= mi and TMW[cg] and (not TMW[cg][ci] or TMW[cg][ci].Type ~= Type.type) then
+				-- the current icon is within the bounds of max number of icons
+				-- the group exists
+				-- the icon doesnt exist or is not the right type
+				ci = ci + 1
+			elseif cg < mg and (ci > mi or not TMW[cg]) then
+				-- the current group is within the number of groups that exist
+				-- the current icon is greater than the max number of icons, or the current group does not exist
+				cg = cg + 1
+				ci = 1
+			elseif cg > mg then
+				-- the current group exceeds the number of groups that exist
+				return -- exit
+			else
+				break -- we found an icon. procede to return it.
+			end
+		end
+		return TMW[cg] and TMW[cg][ci], cg, ci -- icon, groupID, iconID
+	end
+		
+	function IconType:InIcons(groupID)
+		cg = groupID or 1
+		ci = 0
+		mg = groupID or TELLMEWHEN_MAXGROUPS
+		mi = TELLMEWHEN_MAXROWS*TELLMEWHEN_MAXROWS
+		Type = self
+		return iter
+	end
+end
+
+function IconType:UpdateColors(dontUpdateIcons)
+	for k, v in pairs(db.profile.Colors[self.type]) do
+		if v.Override then
+			self[k] = v
+		else
+			self[k] = db.profile.Colors.GLOBAL[k]
 		end
 	end
-	
-end
-
-function TMW:Icon_Validate(icon)
-	-- adds the icon to the list of icons that can be checked in metas/conditions
-	if type(icon) == "string" then
-		icon = _G[icon]
-	end
-	
-	if not TMW.IconsLookup[icon] then
-		tinsert(TMW.Icons, icon:GetName())
-		TMW.IconsLookup[icon] = 1
+	if not dontUpdateIcons then
+		self:UpdateIcons()
 	end
 end
 
-function TMW:Icon_Invalidate(icon)
-	-- removes the icon from the list of icons that can be checked in metas/conditions
-	if type(icon) == "string" then
-		icon = _G[icon]
-	end
-	
-	if TMW.IconsLookup[icon] then
-		local k = tContains(TMW.Icons, icon:GetName())
-		if k then tremove(TMW.Icons, k) end
-		TMW.IconsLookup[icon] = nil
+function IconType:UpdateIcons()
+	for icon in self:InIcons() do
+		icon:Setup()
 	end
 end
 
-function TMW:Icon_IsValid(icon)
-	-- checks if the icon is in the list of icons that can be checked in metas/conditions
-	if type(icon) == "string" then
-		icon = _G[icon]
-	end
-	return TMW.IconsLookup[icon]
+function IconType:GetNameForDisplay(icon, data)
+	local name = data and GetSpellLink(data) or data
+	return name, true
 end
+
+function IconType:DragReceived(icon, t, data, subType)
+	local ics = icon:GetSettings()
+	
+	if t ~= "spell" then
+		return
+	end
+	
+	local _, spellID = GetSpellBookItemInfo(data, subType)
+	if not spellID then
+		return
+	end
+	
+	ics.Name = TMW:CleanString(ics.Name .. ";" .. spellID)
+	return true -- signal success
+end
+
+function IconType:GetIconMenuText(data)
+	local text = data.Name or ""
+	local tooltip =	data.Name and data.Name ~= "" and data.Name .. "\r\n" or ""
+
+	return text, tooltip
+end
+
+function IconType:GetFontTestValues(icon)
+	return nil, nil -- pretty pointless
+end
+
+function IconType:FinishCompilingConditions(icon, funcstr)
+	return funcstr, icon:GetName(), "CndtFailed"
+end
+
+function IconType:ProcessConditionFunction(icon, func, doCheckAfter)
+	local key = doCheckAfter and "CndtCheckAfter" or "CndtCheck"
+	local antikey = doCheckAfter and "CndtCheck" or "CndtCheckAfter"
+	
+	icon[key] = func
+	icon[antikey] = nil
+end
+
+function IconType:Register()
+	local typekey = self.type
+	setmetatable(self.RelevantSettings, RelevantToAll)
+	
+	if TMW.debug and rawget(Types, typekey) then
+		-- for tweaking and recreating icon types inside of WowLua so that I don't have to change the typekey every time.
+		typekey = typekey .. " - " .. date("%X")
+		self.name = typekey
+	end
+	
+	Types[typekey] = self -- put it in the main Types table
+	tinsert(TMW.OrderedTypes, self) -- put it in the ordered types table (used to order the type selection dropdown in the icon editor)
+	return self -- why not?
+end
+
 
 
 
@@ -4834,7 +5041,7 @@ function TMW:EquivToTable(name)
 	local names -- scope the variable
 	for k, v in pairs(TMW.BE) do -- check in subtables ('buffs', 'debuffs', 'casts', etc)
 		for equiv, str in pairs(v) do
-			if strlower(equiv) == name and (not TMW.BEIsHacked or equiv ~= "Enraged") then -- dont expand the enrage equiv if we are hacking with OldBE
+			if strlower(equiv) == name then
 				names = str
 				break -- break subtable loop
 			end

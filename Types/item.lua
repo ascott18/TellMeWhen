@@ -28,7 +28,7 @@ local print = TMW.print
 local _, pclass = UnitClass("Player")
 local SpellTextures = TMW.SpellTextures
 
-local Type = {}
+local Type = TMW.Classes.IconType:New()
 LibStub("AceEvent-3.0"):Embed(Type)
 Type.type = "item"
 Type.name = L["ICONMENU_ITEMCOOLDOWN"]
@@ -215,4 +215,4 @@ function Type:DragReceived(icon, t, data, subType)
 end
 
 
-TMW:RegisterIconType(Type)
+Type:Register()
