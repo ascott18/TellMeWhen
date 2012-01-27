@@ -3,6 +3,9 @@
  * Conditions are now almost entirely event driven, resulting in a (tremendous) performance increase.
  * Enrage is now a proper dispel type, and no longer relies on a pre-defined list of enrages.
  * Implemented a proper class-based inheritance system for many objects (Icons, Icon Types, Groups, Condition Groups).
+ * You can now check units relative to the special condition unit '%u' (//for example, '%u-target' or '%upettarget'//).
+ * Bug Fixes:
+ ** (r427) (Condition):  attempt to call global 'GetPrimaryTalentTree' (a nil value)
 
 ===v4.8.3===
  * Bug Fixes:

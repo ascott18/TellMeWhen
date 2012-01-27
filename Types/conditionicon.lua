@@ -115,7 +115,7 @@ function Type:FinishCompilingConditions(icon, funcstr)
 	return funcstr, icon:GetName(), "ConditionsFailed"
 end
 
-function Type:ProcessConditionFunction(icon, func, doCheckAfter)
+function Type:ProcessConditionFunction(icon, func)
 	icon.CndtCheck = nil
 	icon.CndtCheckAfter = nil
 	icon.CndtCheck_CNDTIC = func

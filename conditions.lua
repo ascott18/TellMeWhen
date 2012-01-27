@@ -281,6 +281,7 @@ Env = {
 	SecureCmdOptionParse = SecureCmdOptionParse,
 	GetSpellAutocast = GetSpellAutocast,
 	GetTalentTabInfo = GetTalentTabInfo,
+	GetPrimaryTalentTree = GetPrimaryTalentTree,
 	GetActiveTalentGroup = GetActiveTalentGroup,
 	
 	UnitStat = UnitStat,
@@ -455,7 +456,6 @@ function Env.GetShapeshiftForm()
 	end
 end
 
-
 local UnitAttackPower = UnitAttackPower
 function Env.UnitAttackPower(unit)
 	local base, pos, neg = UnitAttackPower(unit)
@@ -524,6 +524,7 @@ Env.UnitNameConcatCache = setmetatable(
 
 
 
+
 local function formatSeconds(seconds, arg2)
 	if type(seconds) == "table" then -- if i set it directly as a metamethod
 		seconds = arg2
@@ -563,189 +564,6 @@ local presentabsent = {[0] = L["ICONMENU_PRESENT"],[1] = L["ICONMENU_ABSENT"],}
 local absentseconds = setmetatable({[0] = formatSeconds(0).." ("..L["ICONMENU_ABSENT"]..")"}, {__index = formatSeconds})
 local usableseconds = setmetatable({[0] = formatSeconds(0).." ("..L["ICONMENU_USABLE"]..")"}, {__index = formatSeconds})
 local standardtcoords = {0.07, 0.93, 0.07, 0.93}
-
-local activeEventsReusable = {}
-function CNDT:CompileUpdateFunction(icon, activeEvents)
-	icon.conditionAnticipateFunc = nil
-	
-	local Conditions = icon.Conditions
-	activeEvents = activeEvents or wipe(activeEventsReusable)
-	local numAnticipatorArgs = 0
-	local anticipatorstr = ""
-	
-	for i = 1, Conditions.n do
-		local c = Conditions[i]
-		local t = c.Type
-		local v = CNDT.ConditionsByType[t]
-		if v and v.events then
-			local voidNext
-			for n, value in TMW:Vararg(TMW.get(v.events, c)) do
-				if value == "OnUpdate" then
-					icon.conditionUpdateMethod = "OnUpdate"
-					return value
-				end
-				
-				if voidNext then
-					-- voidNext is an event. value should be a unitID that we are going to associate with the event
-					assert(not value:find("[A-Z]"))
-					activeEvents[voidNext .. "|'" .. value .. "'"] = true
-					voidNext = nil
-				else
-					-- value is an event
-					if value == "unit_changed_event" then
-						if c.Unit == "target" then
-							activeEvents.PLAYER_TARGET_CHANGED = true
-						elseif c.Unit == "pet" then
-							activeEvents["UNIT_PET|'player'"] = true
-						elseif c.Unit == "focus" then
-							activeEvents.PLAYER_FOCUS_CHANGED = true
-						elseif c.Unit:find("^raid%d+$") then
-							activeEvents.RAID_ROSTER_UPDATE = true
-						elseif c.Unit:find("^party%d+$") then
-							activeEvents.PARTY_MEMBERS_CHANGED = true
-						elseif c.Unit:find("^boss%d+$") then
-							activeEvents.INSTANCE_ENCOUNTER_ENGAGE_UNIT = true
-						elseif c.Unit:find("^arena%d+$") then
-							activeEvents.ARENA_OPPONENT_UPDATE = true
-						end
-					elseif value:find("^UNIT_") then
-						voidNext = value -- tell the iterator to listen to the next value as a unitID
-					else
-						activeEvents[value] = true
-					end
-				end
-			end
-		else
-			icon.conditionUpdateMethod = "OnUpdate"
-			return "OnUpdate"
-		end
-		
-		-- handle code that anticipates when a change in state will occur.
-		-- this is usually used to predict when a duration threshold will be used, but you could really use it for whatever you want.
-		if v.anticipate then
-			numAnticipatorArgs = numAnticipatorArgs + 1
-			
-			local thisstr = TMW.get(v.anticipate, c) -- get the anticipator string from the condition data
-			thisstr = CNDT:DoConditionSubstitutions(icon, v, c, thisstr) -- substitute in any user settings
-
-			-- append a check to make sure that the smallest value out of all anticipation checks isnt less than the current time.
-			thisstr = thisstr .. [[
-			if VALUE <= time then
-				VALUE = huge
-			end]]
-			
-			-- change VALUE to the appropriate ARGUMENT#
-			thisstr = thisstr:gsub("VALUE", "ARGUMENT" .. numAnticipatorArgs)
-			
-			anticipatorstr = anticipatorstr .. "\r\n" .. thisstr
-		end
-	end
-	
-	if not next(activeEvents) then
-		icon.conditionUpdateMethod = "OnUpdate"
-		return "OnUpdate"
-	end
-	
-	local doesAnticipate
-	if anticipatorstr ~= "" then
-		local allVars = ""
-		for i = 1, numAnticipatorArgs do
-			allVars = allVars .. "ARGUMENT" .. i .. ","
-		end
-		allVars = allVars:sub(1, -2)
-		
-		anticipatorstr = anticipatorstr .. ([[
-		local nextTime = %s
-		if nextTime == 0 then
-			nextTime = huge
-		end
-		%s.nextConditionUpdate = nextTime]]):format((numAnticipatorArgs == 1 and allVars or "min(" .. allVars .. ")"), icon:GetName())
-		
-		doesAnticipate = true
-	end
-	
-	icon.conditionUpdateMethod = "OnEvent" --DEBUG: COMMENTING THIS LINE FORCES ALL CONDITIONS TO BE ONUPDATE DRIVEN
-	icon.conditionsNeedUpdate = true
-	
-	local numberOfIfs = 0
-	local funcstr = [[
-	local event, arg1 = ...
-	if not event then
-		return
-	elseif (]]
-	for event in pairs(activeEvents) do
-		local thisstr
-		
-		if event:find("|") then
-			-- event contains both the event and a arg to check, separated by "|".
-			-- args should be string wrapped if they are supposed to be strings, because we want to allow variable substitution too
-			local realEvent, arg = strsplit("|", event)
-			activeEvents[event] = realEvent --associate the entry with the real event
-			
-			thisstr = ([[event == %q and arg1 == %s]]):format(realEvent, arg)
-		else
-			thisstr = ([[event == %q]]):format(event)
-		end
-		
-		funcstr = funcstr .. [[(]] .. thisstr .. [[) or ]]
-	end
-		
-	funcstr = funcstr:sub(1, -5) .. [[) then
-		]] .. icon:GetName() .. [[.conditionsNeedUpdate = true
-	end]]
-	
-	funcstr = anticipatorstr .. "\r\n" .. funcstr
-	
-	-- clear out all existing funcs for the icon
-	for event, funcs in pairs(CNDT.EventEngine.funcs) do
-		for func, ic in pairs(funcs) do
-			if icon == ic then
-				funcs[func] = nil
-			end
-		end
-	end
-	
-	local func
-	if functionCache[funcstr] then
-		func = functionCache[funcstr]
-	else
-		local err
-		func, err = loadstring(funcstr, icon:GetName() .. " Condition Events")
-		if func then
-			func = setfenv(func, Env)
-			functionCache[funcstr] = func
-		elseif (TMW.debug or luaUsed) and err then
-			TMW:Error(err)
-		end
-	end
-	icon.CndtEventString = funcstr
-	
-	icon.conditionAnticipatorFunc = doesAnticipate and func
-	
-	if func then
-		for event, realEvent in pairs(activeEvents) do
-			if realEvent ~= true then
-				event = realEvent
-			end
-			CNDT.EventEngine:Register(event, func, icon)
-		end
-	end
-end
-
-function CNDT:IsUnitEventUnit(unit)
-	if	unit == "player"
-	or	unit == "pet"
-	or	unit == "target"
-	or	unit == "focus"
-	or	unit:find("^raid%d+$")
-	or	unit:find("^party%d+$")
-	or	unit:find("^boss%d+$")
-	or	unit:find("^arena%d+$")
-	then
-		return "unit_changed_event"
-	end
-	return "OnUpdate"
-end
 
 
 CNDT.Types = {
@@ -2790,6 +2608,7 @@ function CNDT:TMW_GLOBAL_UPDATE()
 end
 TMW:RegisterCallback("TMW_GLOBAL_UPDATE", CNDT)
 
+
 function CNDT:DoConditionSubstitutions(icon, v, c, thisstr)
 	for _, append in TMW:Vararg("2", "") do -- Unit2 MUST be before Unit
 		if strfind(thisstr, "c.Unit" .. append) then 
@@ -2811,7 +2630,6 @@ function CNDT:DoConditionSubstitutions(icon, v, c, thisstr)
 					sub = "(" .. sub .. " .. \"-" .. after .. "\")"				
 				end
 				thisstr = gsub(thisstr, "c.Unit" .. append,		sub) -- sub it in as a variable
-				doCheckAfter = true
 			else
 				thisstr = gsub(thisstr, "c.Unit" .. append,	"\"" .. unit .. "\"") -- sub it in as a string
 			end
@@ -2872,15 +2690,197 @@ function CNDT:DoConditionSubstitutions(icon, v, c, thisstr)
 	return thisstr
 end
 
+local activeEventsReusable = {}
+function CNDT:CompileUpdateFunction(icon, activeEvents)
+	icon.conditionAnticipateFunc = nil
+	
+	local Conditions = icon.Conditions
+	activeEvents = activeEvents or wipe(activeEventsReusable)
+	local numAnticipatorArgs = 0
+	local anticipatorstr = ""
+	
+	for i = 1, Conditions.n do
+		local c = Conditions[i]
+		local t = c.Type
+		local v = CNDT.ConditionsByType[t]
+		if v and v.events then
+			local voidNext
+			for n, value in TMW:Vararg(TMW.get(v.events, c)) do
+				if value == "OnUpdate" then
+					icon.conditionUpdateMethod = "OnUpdate"
+					return value
+				end
+				
+				if voidNext then
+					-- voidNext is an event. value should be a unitID that we are going to associate with the event
+					assert(not value:find("[A-Z]"))
+					activeEvents[voidNext .. "|'" .. value .. "'"] = true
+					voidNext = nil
+				else
+					-- value is an event
+					if value == "unit_changed_event" then
+						if c.Unit == "target" then
+							activeEvents.PLAYER_TARGET_CHANGED = true
+						elseif c.Unit == "pet" then
+							activeEvents["UNIT_PET|'player'"] = true
+						elseif c.Unit == "focus" then
+							activeEvents.PLAYER_FOCUS_CHANGED = true
+						elseif c.Unit:find("^raid%d+$") then
+							activeEvents.RAID_ROSTER_UPDATE = true
+						elseif c.Unit:find("^party%d+$") then
+							activeEvents.PARTY_MEMBERS_CHANGED = true
+						elseif c.Unit:find("^boss%d+$") then
+							activeEvents.INSTANCE_ENCOUNTER_ENGAGE_UNIT = true
+						elseif c.Unit:find("^arena%d+$") then
+							activeEvents.ARENA_OPPONENT_UPDATE = true
+						end
+					elseif value:find("^UNIT_") then
+						voidNext = value -- tell the iterator to listen to the next value as a unitID
+					else
+						activeEvents[value] = true
+					end
+				end
+			end
+		else
+			icon.conditionUpdateMethod = "OnUpdate"
+			return "OnUpdate"
+		end
+		
+		-- handle code that anticipates when a change in state will occur.
+		-- this is usually used to predict when a duration threshold will be used, but you could really use it for whatever you want.
+		if v.anticipate then
+			numAnticipatorArgs = numAnticipatorArgs + 1
+			
+			local thisstr = TMW.get(v.anticipate, c) -- get the anticipator string from the condition data
+			thisstr = CNDT:DoConditionSubstitutions(icon, v, c, thisstr) -- substitute in any user settings
+
+			-- append a check to make sure that the smallest value out of all anticipation checks isnt less than the current time.
+			thisstr = thisstr .. [[
+			if VALUE <= time then
+				VALUE = huge
+			end]]
+			
+			-- change VALUE to the appropriate ARGUMENT#
+			thisstr = thisstr:gsub("VALUE", "ARGUMENT" .. numAnticipatorArgs)
+			
+			anticipatorstr = anticipatorstr .. "\r\n" .. thisstr
+		end
+	end
+	
+	if not next(activeEvents) then
+		icon.conditionUpdateMethod = "OnUpdate"
+		return "OnUpdate"
+	end
+	
+	local doesAnticipate
+	if anticipatorstr ~= "" then
+		local allVars = ""
+		for i = 1, numAnticipatorArgs do
+			allVars = allVars .. "ARGUMENT" .. i .. ","
+		end
+		allVars = allVars:sub(1, -2)
+		
+		anticipatorstr = anticipatorstr .. ([[
+		local nextTime = %s
+		if nextTime == 0 then
+			nextTime = huge
+		end
+		%s.nextConditionUpdate = nextTime]]):format((numAnticipatorArgs == 1 and allVars or "min(" .. allVars .. ")"), icon:GetName())
+		
+		doesAnticipate = true
+	end
+	
+	icon.conditionUpdateMethod = "OnEvent" --DEBUG: COMMENTING THIS LINE FORCES ALL CONDITIONS TO BE ONUPDATE DRIVEN
+	icon.conditionsNeedUpdate = true
+	
+	local numberOfIfs = 0
+	local funcstr = [[
+	local event, arg1 = ...
+	if not event then
+		return
+	elseif (]]
+	for event in pairs(activeEvents) do
+		local thisstr
+		
+		if event:find("|") then
+			-- event contains both the event and a arg to check, separated by "|".
+			-- args should be string wrapped if they are supposed to be strings, because we want to allow variable substitution too
+			local realEvent, arg = strsplit("|", event)
+			activeEvents[event] = realEvent --associate the entry with the real event
+			
+			thisstr = ([[event == %q and arg1 == %s]]):format(realEvent, arg)
+		else
+			thisstr = ([[event == %q]]):format(event)
+		end
+		
+		funcstr = funcstr .. [[(]] .. thisstr .. [[) or ]]
+	end
+		
+	funcstr = funcstr:sub(1, -5) .. [[) then
+		]] .. icon:GetName() .. [[.conditionsNeedUpdate = true
+	end]]
+	
+	funcstr = anticipatorstr .. "\r\n" .. funcstr
+	
+	-- clear out all existing funcs for the icon
+	for event, funcs in pairs(CNDT.EventEngine.funcs) do
+		for func, ic in pairs(funcs) do
+			if icon == ic then
+				funcs[func] = nil
+			end
+		end
+	end
+	
+	local func
+	if functionCache[funcstr] then
+		func = functionCache[funcstr]
+	else
+		local err
+		func, err = loadstring(funcstr, icon:GetName() .. " Condition Events")
+		if func then
+			func = setfenv(func, Env)
+			functionCache[funcstr] = func
+		elseif (TMW.debug or luaUsed) and err then
+			TMW:Error(err)
+		end
+	end
+	icon.CndtEventString = funcstr
+	
+	icon.conditionAnticipatorFunc = doesAnticipate and func
+	
+	if func then
+		for event, realEvent in pairs(activeEvents) do
+			if realEvent ~= true then
+				event = realEvent
+			end
+			CNDT.EventEngine:Register(event, func, icon)
+		end
+	end
+end
+
+function CNDT:IsUnitEventUnit(unit)
+	if	unit == "player"
+	or	unit == "pet"
+	or	unit == "target"
+	or	unit == "focus"
+	or	unit:find("^raid%d+$")
+	or	unit:find("^party%d+$")
+	or	unit:find("^boss%d+$")
+	or	unit:find("^arena%d+$")
+	then
+		return "unit_changed_event"
+	end
+	return "OnUpdate"
+end
+
 function CNDT:ProcessConditions(icon)
+	-- icon might also be a group. make sure anything performed on icon can also be performed on group
 	if TMW.debug and test then test() end
 	
 	local Conditions = icon.Conditions
-	icon.CndtFailed = nil
 	
 	local funcstr = ""
 	local luaUsed
-	local doCheckAfter
 	
 	for i = 1, Conditions.n do
 		local c = Conditions[i]
@@ -2925,6 +2925,12 @@ function CNDT:ProcessConditions(icon)
 
 	local funcstr, name, key = icon:FinishCompilingConditions(funcstr:sub(4))
 	
+	if funcstr == "" then	
+		icon:ProcessConditionFunction()	
+		CNDT.EventEngine:UnregisterIcon(icon)
+		return
+	end
+	
 	icon.nextConditionUpdate = icon.nextConditionUpdate or math.huge
 	funcstr = (
 	[[if %s.nextConditionUpdate < time then
@@ -2962,9 +2968,7 @@ function CNDT:ProcessConditions(icon)
 		end
 	end
 
-	icon:ProcessConditionFunction(func, doCheckAfter)	
-	
-	return func
+	icon:ProcessConditionFunction(func) -- tell the group/icon that the function is ready to be handled
 end
 
 
@@ -2975,6 +2979,16 @@ function CNDT.EventEngine:Register(event, func, icon)
 	self:RegisterEvent(event)
 	CNDT.EventEngine.funcs[event] = CNDT.EventEngine.funcs[event] or {}
 	CNDT.EventEngine.funcs[event][func] = icon
+end
+
+function CNDT.EventEngine:UnregisterIcon(icon)
+	for event, funcs in pairs(CNDT.EventEngine.funcs) do
+		for func, ic in pairs(funcs) do
+			if icon == ic then
+				funcs[func] = nil
+			end
+		end
+	end
 end
 
 function CNDT.EventEngine:OnEvent(event, arg1)

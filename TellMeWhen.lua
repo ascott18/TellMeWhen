@@ -32,7 +32,7 @@ local DRData = LibStub("DRData-1.0", true)
 TELLMEWHEN_VERSION = "4.8.3"
 TELLMEWHEN_VERSION_MINOR = strmatch(" @project-version@", " r%d+") or ""
 TELLMEWHEN_VERSION_FULL = TELLMEWHEN_VERSION .. TELLMEWHEN_VERSION_MINOR
-TELLMEWHEN_VERSIONNUMBER = 48302 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
+TELLMEWHEN_VERSIONNUMBER = 48303 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
 if TELLMEWHEN_VERSIONNUMBER > 49000 or TELLMEWHEN_VERSIONNUMBER < 48000 then return error("YOU SCREWED UP THE VERSION NUMBER OR DIDNT CHANGE THE SAFETY LIMITS") end -- safety check because i accidentally made the version number 414069 once
 
 TELLMEWHEN_MAXGROUPS = 1 	--this is a default, used by SetTheory (addon), so dont rename
@@ -3664,15 +3664,7 @@ end
 Group.setscript = Group.SetScript
 function Group.SetScript(group, handler, func)
 	group[handler] = func
-	if handler ~= "OnUpdate" then
-		group:setscript(handler, func)
-	else
-		tDeleteItem(GroupsToUpdate, group)
-		if func then
-			GroupsToUpdate[#GroupsToUpdate+1] = group
-			sort(GroupsToUpdate, Group.ScriptSort)
-		end
-	end
+	group:setscript(handler, func)
 end
 
 Group.show = Group.Show
@@ -3711,8 +3703,13 @@ function Group.FinishCompilingConditions(group, funcstr)
 	return funcstr, group:GetName(), "CndtFailed"
 end
 
-function Group.ProcessConditionFunction(group, func, doCheckAfter)
-	-- groups dont use doCheckAfter
+function Group.ProcessConditionFunction(group, func)	
+	tDeleteItem(GroupsToUpdate, group)
+	if func then
+		GroupsToUpdate[#GroupsToUpdate+1] = group
+		sort(GroupsToUpdate, Group.ScriptSort)
+	end
+	
 	group.CndtCheck = func
 end
 	
@@ -3766,12 +3763,22 @@ function Group.SetPos(group)
 	group:SetFrameLevel(s.Level)
 end
 
+function Group.GetIconPos(group, iconID)
+	local Columns, Spacing = group.Columns, group.Spacing
+	
+	--[[local row = ceil(iconID / Columns)
+    local column = (iconID - 1) % Columns + 1
+	return (30 + Spacing)*(column-1), -(30 + Spacing)*(row-1)]]
+	
+	return (30 + Spacing)*(((iconID - 1) % Columns)), -(30 + Spacing)*(ceil(iconID / Columns)-1)
+end
+
 function Group.Setup(group)
 	local groupID = group:GetID()
 	
-	if groupID > TELLMEWHEN_MAXGROUPS then
+	--[[if groupID > TELLMEWHEN_MAXGROUPS then
 		return
-	end
+	end]]
 	
 	group.CorrectStance = true
 	group.__shown = group:IsShown()
@@ -3780,46 +3787,37 @@ function Group.Setup(group)
 		group[k] = db.profile.Groups[groupID][k]
 	end
 
-	if LMB then
-		db.profile.Groups[groupID].LBF = nil -- if people get masque then they dont need these settings anymore. If they want to downgrade then they will just have to set things up again, sorry
-	end
-	group.FontTest = (not Locked) and group.FontTest
+	group.FontTest = not Locked and group.FontTest
 
 	group:SetFrameLevel(group.Level)
-	local Spacing = group.Spacing
 	
 	if group:ShouldUpdateIcons() then
-		for row = 1, group.Rows do
-			for column = 1, group.Columns do
-				local iconID = (row-1)*group.Columns + column
-				local icon = group[iconID] or TMW.Classes.Icon:New("Button", "TellMeWhen_Group" .. groupID .. "_Icon" .. iconID, group, "TellMeWhen_IconTemplate", iconID)
+		for iconID = 1, group.Rows * group.Columns do
+			local icon = group[iconID] or TMW.Classes.Icon:New("Button", "TellMeWhen_Group" .. groupID .. "_Icon" .. iconID, group, "TellMeWhen_IconTemplate", iconID)
 
-				icon:Show()
-				icon:SetFrameLevel(group:GetFrameLevel() + 1)
-				
-				local x, y = (30 + Spacing)*(column-1), -(30 + Spacing)*(row-1)
-				icon.x, icon.y = x, y -- used for shakers
-				icon:SetPoint("TOPLEFT", x, y)
-				
-				local success, err = pcall(icon.Setup, icon)
-				if not success then
-					TMW:Error(L["GROUPICON"]:format(groupID, iconID) .. ": " .. err)
-				end
+			icon:Show()
+			icon:SetFrameLevel(group:GetFrameLevel() + 1)
+			
+			local x, y = group:GetIconPos(iconID)
+			icon.x, icon.y = x, y -- used for shakers
+			icon:SetPoint("TOPLEFT", x, y)
+			
+			local success, err = pcall(icon.Setup, icon)
+			if not success then
+				TMW:Error(L["GROUPICON"]:format(groupID, iconID) .. ": " .. err)
 			end
 		end
 		for iconID = (group.Rows*group.Columns)+1, TELLMEWHEN_MAXROWS*TELLMEWHEN_MAXROWS do
-			local icon = TMW[groupID][iconID]
+			local icon = group[iconID]
 			if icon then
 				icon:Hide()
 				ClearScripts(icon)
 			end
 		end
 
-		group.resizeButton:SetPoint("BOTTOMRIGHT", 3, -3)
-
 		if Locked or group.Locked then
 			group.resizeButton:Hide()
-		elseif not (Locked or group.Locked) then
+		else--if not (Locked or group.Locked) then
 			group.resizeButton:Show()
 		end
 	end
@@ -3828,19 +3826,15 @@ function Group.Setup(group)
 
 	if group:ShouldUpdateIcons() and Locked then
 		group:Show()
-		if group.Conditions.n > 0 or group.OnlyInCombat then
-			group:SetScript("OnUpdate", TMW.CNDT:ProcessConditions(group)) -- dont be alarmed, this is handled by GroupSetScript
-		else
-			group:SetScript("OnUpdate", nil)
-		end
 	else
-		group:SetScript("OnUpdate", nil)
 		if group:ShouldUpdateIcons() then
 			group:Show()
 		else
 			group:Hide()
 		end
 	end
+	
+	TMW.CNDT:ProcessConditions(group)
 end
 
 
@@ -4025,15 +4019,16 @@ function Icon.Update(icon, time, force, ...)
 		icon.LastUpdate = time
 		
 		local CndtCheck = icon.CndtCheck
-		if CndtCheck and (icon.conditionUpdateMethod == "OnUpdate" or icon.conditionsNeedUpdate or icon.nextConditionUpdate < time) then
-			CndtCheck()
-		end
-		
-		if icon.CndtFailed and (icon.ConditionAlpha or 0) == 0 then
-			if icon.__alpha ~= 0 then
-				icon:SetInfo(0)
+		if CndtCheck then
+			if (icon.conditionUpdateMethod == "OnUpdate" or icon.conditionsNeedUpdate or icon.nextConditionUpdate < time) then
+				CndtCheck()
 			end
-			return
+			if icon.CndtFailed and (icon.ConditionAlpha or 0) == 0 then
+				if icon.__alpha ~= 0 then
+					icon:SetInfo(0)
+				end
+				return
+			end
 		end
 	
 		icon:OnUpdate(time, ...)
@@ -4484,7 +4479,12 @@ function Icon.FinishCompilingConditions(icon, funcstr)
 	return icon.typeData:FinishCompilingConditions(icon, funcstr)
 end
 
-function Icon.ProcessConditionFunction(icon, func, doCheckAfter)
+function Icon.ProcessConditionFunction(icon, func)
+	local doCheckAfter
+	if icon.CndtString and icon.CndtString:find("__unitChecked") then
+		doCheckAfter = true
+	end
+	
 	icon.typeData:ProcessConditionFunction(icon, func, doCheckAfter)
 end
 
@@ -4626,11 +4626,7 @@ function Icon.Setup(icon)
 	ClearScripts(icon)
 
 	-- Conditions
-	if icon.Conditions.n > 0 and Locked then -- dont define conditions if we are unlocked so that i dont have to deal with meta icons checking icons during config. I think i solved this somewhere else too without thinking about it, but what the hell
-		TMW.CNDT:ProcessConditions(icon)
-	else
-		icon:ProcessConditionFunction() -- sets the functions to nil
-	end
+	TMW.CNDT:ProcessConditions(icon)
 
 	if icon.Enabled and group:ShouldUpdateIcons() then
 		icon:Validate()
