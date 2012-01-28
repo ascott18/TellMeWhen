@@ -267,6 +267,7 @@ Env = {
 	min = min,
 	IsMounted = IsMounted,
 	IsSwimming = IsSwimming,
+	IsResting = IsResting,
 	GetUnitSpeed = GetUnitSpeed,
 	GetManaRegen = GetManaRegen,
 	IsUsableSpell = IsUsableSpell,
@@ -436,6 +437,7 @@ function Env.GetZoneType()
 	end
 end
 
+local NumShapeshiftForms
 function Env.GetShapeshiftForm()
 	-- very hackey function because of inconsistencies in blizzard's GetShapeshiftForm
 	local i = GetShapeshiftForm()
@@ -2605,6 +2607,7 @@ local EnvMeta = {
 
 function CNDT:TMW_GLOBAL_UPDATE()
 	Env.Locked = db.profile.Locked
+	NumShapeshiftForms = GetNumShapeshiftForms()
 end
 TMW:RegisterCallback("TMW_GLOBAL_UPDATE", CNDT)
 

@@ -6,6 +6,8 @@
  * You can now check units relative to the special condition unit '%u' (//for example, '%u-target' or '%upettarget'//).
  * Bug Fixes:
  ** (r427) (Condition):  attempt to call global 'GetPrimaryTalentTree' (a nil value)
+ ** (r428) (Condition):  attempt to call global 'IsResting' (a nil value)
+ ** (r428) conditions.lua line 447: attempt to compare nil with number
 
 ===v4.8.3===
  * Bug Fixes:

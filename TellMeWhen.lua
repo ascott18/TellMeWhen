@@ -32,7 +32,7 @@ local DRData = LibStub("DRData-1.0", true)
 TELLMEWHEN_VERSION = "4.8.3"
 TELLMEWHEN_VERSION_MINOR = strmatch(" @project-version@", " r%d+") or ""
 TELLMEWHEN_VERSION_FULL = TELLMEWHEN_VERSION .. TELLMEWHEN_VERSION_MINOR
-TELLMEWHEN_VERSIONNUMBER = 48303 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
+TELLMEWHEN_VERSIONNUMBER = 48304 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
 if TELLMEWHEN_VERSIONNUMBER > 49000 or TELLMEWHEN_VERSIONNUMBER < 48000 then return error("YOU SCREWED UP THE VERSION NUMBER OR DIDNT CHANGE THE SAFETY LIMITS") end -- safety check because i accidentally made the version number 414069 once
 
 TELLMEWHEN_MAXGROUPS = 1 	--this is a default, used by SetTheory (addon), so dont rename
@@ -66,7 +66,7 @@ local bitband = bit.band
 
 
 ---------- Locals ----------
-local db, updatehandler, BarGCD, ClockGCD, Locked, SndChan, FramesToFind, UnitsToUpdate, CNDTEnv, ColorMSQ, OnlyMSQ, AnimationList
+local db, updatehandler, BarGCD, ClockGCD, Locked, SndChan, FramesToFind, CNDTEnv, ColorMSQ, OnlyMSQ, AnimationList
 local UPD_INTV = 0.06	--this is a default, local because i use it in onupdate functions
 local runEvents, updatePBar = 1, 1
 local GCD, NumShapeshiftForms, LastUpdate = 0, 0, 0
@@ -1379,9 +1379,6 @@ function TMW:OnUpdate(elapsed)					-- THE MAGICAL ENGINE OF DOING EVERYTHING
 				wipe(TMW.ChangedMetas)
 			end
 			updatePBar = nil
-			if UnitsToUpdate then
-				wipe(UnitsToUpdate)
-			end
 		end
 	end
 	
@@ -1498,7 +1495,6 @@ function TMW:Update()
 
 	UPD_INTV = db.profile.Interval + 0.001 -- add a very small amount so that we don't call the same icon multiple times (through metas/conditionicons) in the same frame if the interval has been set 0
 	TELLMEWHEN_MAXGROUPS = db.profile.NumGroups
-	NumShapeshiftForms = GetNumShapeshiftForms()
 
 	BarGCD = db.profile.BarGCD
 	ClockGCD = db.profile.ClockGCD
@@ -5496,3 +5492,234 @@ TMW:RegisterChatCommand("tmw", "SlashCommand")
 TMW:RegisterChatCommand("tellmewhen", "SlashCommand")
 
 
+
+
+
+
+--[===[
+
+
+
+
+local UNITS = TMW:NewModule("Units", "AceEvent-3.0")
+local UnitSet
+
+UNITS.activeSets = {}
+function UNITS:OnInitialize()
+	--[[if c.Unit == "target" then
+		activeEvents.PLAYER_TARGET_CHANGED = true
+	elseif c.Unit == "pet" then
+		activeEvents["UNIT_PET|'player'"] = true
+	elseif c.Unit == "focus" then
+		activeEvents.PLAYER_FOCUS_CHANGED = true
+	elseif c.Unit:find("^raid%d+$") then
+		activeEvents.RAID_ROSTER_UPDATE = true
+	elseif c.Unit:find("^party%d+$") then
+		activeEvents.PARTY_MEMBERS_CHANGED = true
+	elseif c.Unit:find("^boss%d+$") then
+		activeEvents.INSTANCE_ENCOUNTER_ENGAGE_UNIT = true
+	elseif c.Unit:find("^arena%d+$") then
+		activeEvents.ARENA_OPPONENT_UPDATE = true
+	end
+	UNITS:RegisterEvent("]]
+end
+
+UNITS.mtTranslations, UNITS.maTranslations = {}, {}
+function UNITS:UpdateTankAndAssistTranslations()
+	local mtTranslations, maTranslations = UNITS.mtTranslations, UNITS.maTranslations
+	
+	wipe(mtTranslations)
+	wipe(maTranslations)
+	
+	-- setup a table with (key, value) pairs as (oldnumber, newnumber)
+	-- oldnumber is 7 for raid7
+	-- newnumber is 1 for raid7 when the current maintank/assist is the 1st one found, 2 for the 2nd one found, etc)
+	for i = 1, GetNumRaidMembers() do
+		local raidunit = "raid" .. i
+		if GetPartyAssignment("MAINTANK", raidunit) then
+			mtTranslations[#mtTranslations + 1] = i
+		elseif GetPartyAssignment("MAINASSIST", raidunit) then
+			maTranslations[#maTranslations + 1] = i
+		end
+	end
+end
+
+UNITS.sets = {}
+function UNITS:GetUnitSet(unitSettings)
+	if UNITS.sets[unitSettings] then
+		return UNITS.sets[unitSettings]
+	else
+		local set = UnitSet:New()
+		UNITS.sets[unitSettings] = set
+		return set
+	end
+end
+
+
+function UNITS:GetOriginalUnitTable(unitSettings)
+	--local cachestring = getCacheString(unitSettings)
+	--if unitcache[cachestring] then return unitcache[cachestring] end --why make a bunch of tables and do a bunch of stuff if we dont need to
+
+	unitSettings = TMW:CleanString(unitSettings):
+	lower(): -- all units should be lowercase
+	gsub("|cffff0000", ""): -- strip color codes (NOTE LOWERCASE)
+	gsub("|r", ""):
+	gsub("#", "") -- strip the # from the dropdown
+	
+	
+	--SUBSTITUTE "party" with "party1-4", etc
+	for _, wholething in TMW:Vararg(strsplit(";", unitSettings)) do
+		local unit = strtrim(wholething)
+		for k, v in pairs(TMW.Units) do
+			if v.value == unit and v.range then
+				unitSettings = gsub(unitSettings, wholething, unit .. "1-" .. v.range)
+				break
+			end
+		end
+	end
+	
+	--SUBSTITUTE RAID1-10 WITH RAID1;RAID2;RAID3;...RAID10
+	local startpos, endpos = 0, 0
+	for wholething, unit, firstnum, lastnum, append in gmatch(unitSettings, "((%a+) ?(%d+) ?%- ?(%d+) ?([%a]*)) ?;?") do
+		if unit and firstnum and lastnum then
+			local str = ""
+			local order = firstnum > lastnum and -1 or 1
+
+			if abs(lastnum - firstnum) > 100 then
+				TMW:Print("Why on Earth would you want to track more than 100", unit, "units? I'll just ignore it and save you from possibly crashing.")
+			else
+				for i = firstnum, lastnum, order do
+					str = str .. unit .. i .. append .. ";"
+				end
+				str = strtrim(str, " ;")
+				wholething = gsub(wholething, "%-", "%%-") -- need to escape the dash for it to work
+				unitSettings = gsub(unitSettings, wholething, str)
+			end
+		end
+	end
+
+	local Units = TMW:SplitNames(unitSettings) -- get a table of everything
+
+	-- REMOVE DUPLICATES
+	local k = #Units --start at the end of the table so that we dont remove duplicates at the beginning of the table
+	while k > 0 do
+		if select(2, tContains(Units, Units[k], true)) > 1 then
+			tremove(Units, k) --if the current value occurs more than once then remove this entry of it
+		else
+			k = k - 1 --there are no duplicates, so move backwards towards zero
+		end
+	end
+
+	unitcache[cachestring] = Units
+	return Units
+end
+
+--[[
+	function-----------------------------------------------
+
+	for original, Units in pairs(unitsToChange) do
+		wipe(Units) -- clear unit translations so that we arent referencing incorrect units
+		for k, oldunit in ipairs(original) do
+			if strfind(oldunit, "maintank") then -- the old unit (maintank1)
+				local newunit = gsub(oldunit, "maintank", "raid") -- the new unit (raid7)
+				local oldnumber = tonumber(strmatch(newunit, "(%d+)")) -- the old number (7)
+				local newnumber = oldnumber and mtTranslations[oldnumber] -- the new number(1)
+				if newnumber then
+					Units[#Units+1] = gsub(newunit, oldnumber, newnumber)
+			--	else -- dont put an invalid unit back into the table, that is just pointless
+				--	Units[#Units+1] = oldunit
+				end
+			elseif strfind(oldunit, "mainassist") then
+				local newunit = gsub(oldunit, "mainassist", "raid")
+				local oldnumber = tonumber(strmatch(newunit, "(%d+)"))
+				local newnumber = oldnumber and maTranslations[oldnumber]
+				if newnumber then
+					Units[#Units+1] = gsub(newunit, oldnumber, newnumber)
+				end
+			else -- it isnt a special unit, so put it back in as normal
+				Units[#Units+1] = oldunit
+			end
+		end
+	end]]
+	
+UnitSet = TMW:NewClass("UnitSet")
+UnitSet.updateEvents = {}
+
+function UnitSet:OnNewInstance(unitSettings)
+	self.unitSettings = unitSettings
+	self.originalUnits = UNITS:GetOriginalUnitTable(unitSettings)
+	self.exposedUnits = {}
+	-- determine the operations that the set needs to stay updated
+	
+	for k, unit in pairs(self.originalUnits) do
+		if unit == "target" then
+			self.updateEvents.PLAYER_TARGET_CHANGED = true
+		elseif unit == "pet" then
+			self.updateEvents.UNIT_PET = true
+		elseif unit == "focus" then
+			self.updateEvents.PLAYER_FOCUS_CHANGED = true
+		elseif unit:find("^raid%d+$") then
+			self.updateEvents.RAID_ROSTER_UPDATE = true
+		elseif unit:find("^party%d+$") then
+			self.updateEvents.PARTY_MEMBERS_CHANGED = true
+		elseif unit:find("^boss%d+$") then
+			self.updateEvents.INSTANCE_ENCOUNTER_ENGAGE_UNIT = true
+		elseif unit:find("^arena%d+$") then
+			self.updateEvents.ARENA_OPPONENT_UPDATE = true
+		elseif unit:find("^maintank") or unit:find("^mainassist") then
+			self.updateEvents.RAID_ROSTER_UPDATE = true
+			self.hasTankAndAssistRefs = true
+		end
+	end
+		
+end
+
+function UnitSet:Update()
+	local exposedUnits = self.exposedUnits
+	for k in next, self.originalUnits do
+		exposedUnits[k] = v
+	end
+	
+	if self.hasTankAndAssistRefs then
+		for _, oldunit in ipairs(self.originalUnits) do
+			if strfind(oldunit, "maintank") then -- the old unit (maintank1)
+				local newunit = gsub(oldunit, "maintank", "raid") -- the new unit (raid7)
+				local oldnumber = tonumber(strmatch(newunit, "(%d+)")) -- the old number (7)
+				local newnumber = oldnumber and mtTranslations[oldnumber] -- the new number(1)
+				if newnumber then
+					exposedUnits[#exposedUnits+1] = gsub(newunit, oldnumber, newnumber)
+			--	else -- dont put an invalid unit back into the table, that is just pointless
+				--	Units[#Units+1] = oldunit
+				end
+			elseif strfind(oldunit, "mainassist") then
+				local newunit = gsub(oldunit, "mainassist", "raid")
+				local oldnumber = tonumber(strmatch(newunit, "(%d+)"))
+				local newnumber = oldnumber and maTranslations[oldnumber]
+				if newnumber then
+					exposedUnits[#exposedUnits+1] = gsub(newunit, oldnumber, newnumber)
+				end
+			else -- it isnt a special unit, so put it back in as normal
+				exposedUnits[#exposedUnits+1] = oldunit
+			end
+		end
+	end
+end
+
+--[[
+
+
+
+	if not dontreplace then -- flag to set to not put it into the replacement engine. Used for shift-hover tooltips (maybe)
+		--DETECT maintank#, mainassist#, etc, and make them substitute in real unitIDs -- MUST BE LAST
+		for k, unit in pairs(Units) do
+			if strfind(unit, "^maintank") or strfind(unit, "^mainassist") then
+				local original = CopyTable(Units) 	-- copy the original unit table so we know what units to scan for when they may have changed
+				unitsToChange[original] = Units 	-- store the table that will be getting changed with the original
+				TMW:RegisterEvent("RAID_ROSTER_UPDATE")
+				TMW:RAID_ROSTER_UPDATE()
+				break
+			end
+		end
+	end
+	
+	]===]
