@@ -32,7 +32,7 @@ local DRData = LibStub("DRData-1.0", true)
 TELLMEWHEN_VERSION = "4.8.3"
 TELLMEWHEN_VERSION_MINOR = strmatch(" @project-version@", " r%d+") or ""
 TELLMEWHEN_VERSION_FULL = TELLMEWHEN_VERSION .. TELLMEWHEN_VERSION_MINOR
-TELLMEWHEN_VERSIONNUMBER = 48306 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
+TELLMEWHEN_VERSIONNUMBER = 48308 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
 if TELLMEWHEN_VERSIONNUMBER > 49000 or TELLMEWHEN_VERSIONNUMBER < 48000 then return error("YOU SCREWED UP THE VERSION NUMBER OR DIDNT CHANGE THE SAFETY LIMITS") end -- safety check because i accidentally made the version number 414069 once
 
 TELLMEWHEN_MAXGROUPS = 1 	--this is a default, used by SetTheory (addon), so dont rename
@@ -63,11 +63,11 @@ local TARGET_TOKEN_NOT_FOUND, FOCUS_TOKEN_NOT_FOUND =
 local CL_PLAYER = COMBATLOG_OBJECT_TYPE_PLAYER
 local CL_PET = COMBATLOG_OBJECT_CONTROL_PLAYER
 local bitband = bit.band
-local GetUnitIDFromGUID, GetUnitIDFromName
 
 
 ---------- Locals ----------
 local db, updatehandler, BarGCD, ClockGCD, Locked, SndChan, FramesToFind, CNDTEnv, ColorMSQ, OnlyMSQ, AnimationList
+local NAMES, EVENTS, ANIM, ANN, SND
 local UPD_INTV = 0.06	--this is a default, local because i use it in onupdate functions
 local runEvents, updatePBar = 1, 1
 local GCD, NumShapeshiftForms, LastUpdate = 0, 0, 0
@@ -238,91 +238,6 @@ TMW.isNumber = setmetatable(
 		t[i] = o
 		return o
 end}) local isNumber = TMW.isNumber
-
-do	-- GetUnitIDFromGUID, GetUnitIDFromName 
-	local unitlist = {"player"}
-
-	local function addids(uid,lower,upper, append)
-		if lower and upper then
-			for i=lower,upper do
-				unitlist[#unitlist+1] = uid..i..(append or "")
-			end
-		else
-			unitlist[#unitlist+1] = uid..(append or "")
-		end
-	end
-
-	addids("mouseover")
-	
-	addids("target")
-	addids("targettarget")
-	addids("targettargettarget")
-
-	addids("pet")
-	addids("pettarget")
-	addids("pettargettarget")
-
-	addids("focus")
-	addids("focustarget")
-	addids("focustargettarget")
-
-	addids("arena",1,5)
-	addids("boss",1,5)
-	addids("party",1,4)
-	addids("party",1,4,"pet")
-	addids("raid",1,40)
-
-	addids("arena",1,5,"target")
-	addids("boss",1,5,"target")
-	addids("party",1,4,"target")
-	addids("party",1,4,"pettarget")
-	addids("raid",1,40,"target")
-
-	addids("arena",1,5,"targettarget")
-	addids("boss",1,5,"targettarget")
-	addids("party",1,4,"targettarget")
-	addids("party",1,4,"pettargettarget")
-	addids("raid",1,40,"targettarget")
-
-	addids = nil -- into the garbage you go!
-	
-	local len = #unitlist
-	
-	GetUnitIDFromGUID = function(srcGUID)
-		for i = 1, len do
-			local id = unitlist[i]
-			if UnitGUID(id) == srcGUID then
-				return id
-			end
-		end
-	end
-	TMW.GetUnitIDFromGUID = GetUnitIDFromGUID
-	
-	
-	GetUnitIDFromName = function(name)
-		name = strlowerCache[name]
-		for k, id in ipairs(unitlist) do
-			local nameGuess, serverGuess = UnitName(id)
-			if (serverGuess and strlowerCache[nameGuess .. "-" .. serverGuess] == name) or strlowerCache[nameGuess] == name then
-				return id
-			end
-		end
-	end
-	TMW.GetUnitIDFromName = GetUnitIDFromName
-end
-
-do	-- ClassColors
-	local ClassColors = {}
-	TMW.ClassColors = ClassColors
-	local function Update()
-		for class, color in pairs(CUSTOM_CLASS_COLORS or RAID_CLASS_COLORS) do
-			ClassColors[class] = ("|cff%02x%02x%02x"):format(color.r * 255, color.g * 255, color.b * 255)
-		end
-	end
-	Update()
-	if CUSTOM_CLASS_COLORS then CUSTOM_CLASS_COLORS:RegisterCallback(Update) end
-end
-
 
 function TMW.tContains(table, item, returnNum)
 	local firstkey
@@ -2841,68 +2756,6 @@ function TMW:ProcessEquivalencies()
 	end
 end
 
-local ClassColors = {}
-do
-	local function UpdateClassColors()
-		for class,color in pairs(CUSTOM_CLASS_COLORS or RAID_CLASS_COLORS) do
-			ClassColors[class] = ("|cff%02x%02x%02x"):format(color.r * 255, color.g * 255, color.b * 255)
-		end
-	end
-	
-	UpdateClassColors()
-	
-	if CUSTOM_CLASS_COLORS then
-		CUSTOM_CLASS_COLORS:RegisterCallback(UpdateClassColors)
-	end
-end
-
-local classColoredNameCache = {}
-function TMW:TryToAcquireName(input, shouldColor)
-	if not input then return end
-	
-	shouldColor = shouldColor and db.profile.ColorNames
-	
-	local name, server = UnitName(input or "")
-	
-	if name then	-- input was a unitID if name is true.
-		if server then
-			name = name .. "-" .. server
-		end
-		if shouldColor then
-			local _, class = UnitClass(input)
-			local nameColored = ClassColors[class] .. name .. "|r"
-			
-			classColoredNameCache[name] = nameColored
-				
-			name = nameColored
-		end
-	else		-- input was a name.
-		name = input
-		
-		if shouldColor and classColoredNameCache[name] then
-			return classColoredNameCache[name]
-		end
-		
-		local unit = GetUnitIDFromName(input)
-		if unit then
-			if shouldColor then
-				local _, class = UnitClass(unit)
-				local nameColored = ClassColors[class] .. name .. "|r"
-				
-				classColoredNameCache[name] = nameColored
-					
-				name = nameColored
-			else
-				name, server = UnitName(unit)
-				if server then
-					name = name .. "-" .. server
-				end
-			end
-		end
-	end
-	
-	return name
-end
 
 function TMW:InjectDataIntoString(Text, icon, doBlizz, shouldColorNames)
 	--shouldColorNames = true -- DEBUG
@@ -2912,17 +2765,17 @@ function TMW:InjectDataIntoString(Text, icon, doBlizz, shouldColorNames)
 	
 	if doBlizz then
 		if strfind(Text, "%%[Tt]") then
-			Text = gsub(Text, "%%[Tt]", TMW:TryToAcquireName("target", shouldColorNames) or TARGET_TOKEN_NOT_FOUND)
+			Text = gsub(Text, "%%[Tt]", NAMES:TryToAcquireName("target", shouldColorNames) or TARGET_TOKEN_NOT_FOUND)
 			--Text = gsub(Text, "%%[Tt]", UnitName("target") or TARGET_TOKEN_NOT_FOUND)
 		end
 		if strfind(Text, "%%[Ff]") then
-			Text = gsub(Text, "%%[Ff]", TMW:TryToAcquireName("focus", shouldColorNames) or FOCUS_TOKEN_NOT_FOUND)
+			Text = gsub(Text, "%%[Ff]", NAMES:TryToAcquireName("focus", shouldColorNames) or FOCUS_TOKEN_NOT_FOUND)
 		--	Text = gsub(Text, "%%[Ff]", UnitName("focus") or FOCUS_TOKEN_NOT_FOUND)
 		end
 	end
 	
 	if strfind(Text, "%%[Mm]") then
-		Text = gsub(Text, "%%[Mm]", TMW:TryToAcquireName("mouseover", shouldColorNames) or L["MOUSEOVER_TOKEN_NOT_FOUND"])
+		Text = gsub(Text, "%%[Mm]", NAMES:TryToAcquireName("mouseover", shouldColorNames) or L["MOUSEOVER_TOKEN_NOT_FOUND"])
 	--	Text = gsub(Text, "%%[Mm]", UnitName("mouseover") or L["MOUSEOVER_TOKEN_NOT_FOUND"])
 	end
 	
@@ -2930,10 +2783,10 @@ function TMW:InjectDataIntoString(Text, icon, doBlizz, shouldColorNames)
 	
 		if icon.Type == "cleu" then
 			if strfind(Text, "%%[Oo]") then
-				Text = gsub(Text, "%%[Oo]", TMW:TryToAcquireName(icon.cleu_sourceUnit, shouldColorNames) or "?")
+				Text = gsub(Text, "%%[Oo]", NAMES:TryToAcquireName(icon.cleu_sourceUnit, shouldColorNames) or "?")
 			end
 			if strfind(Text, "%%[Ee]") then
-				Text = gsub(Text, "%%[Ee]", TMW:TryToAcquireName(icon.cleu_destUnit, shouldColorNames) or "?")
+				Text = gsub(Text, "%%[Ee]", NAMES:TryToAcquireName(icon.cleu_destUnit, shouldColorNames) or "?")
 			--	Text = gsub(Text, "%%[Ee]", UnitName(icon.cleu_destUnit or "") or icon.cleu_destUnit or "?")
 			end
 			if strfind(Text, "%%[Xx]") then
@@ -2947,11 +2800,11 @@ function TMW:InjectDataIntoString(Text, icon, doBlizz, shouldColorNames)
 		end
 		
 		if strfind(Text, "%%[Pp]") then
-			Text = gsub(Text, "%%[Pp]", TMW:TryToAcquireName(icon.__lastUnitName or icon.__lastUnitChecked, shouldColorNames) or "?")
+			Text = gsub(Text, "%%[Pp]", NAMES:TryToAcquireName(icon.__lastUnitName or icon.__lastUnitChecked, shouldColorNames) or "?")
 		--	Text = gsub(Text, "%%[Pp]", icon.__lastUnitName or UnitName(icon.__lastUnitChecked or "") or "?")
 		end
 		if strfind(Text, "%%[Uu]") then
-			Text = gsub(Text, "%%[Uu]", TMW:TryToAcquireName(icon.__unitName or icon.__unitChecked, shouldColorNames) or "?")
+			Text = gsub(Text, "%%[Uu]", NAMES:TryToAcquireName(icon.__unitName or icon.__unitChecked, shouldColorNames) or "?")
 		--	Text = gsub(Text, "%%[Uu]", icon.__unitName or UnitName(icon.__unitChecked or "") or icon.__unitChecked or "?")
 		end
 		
@@ -2986,9 +2839,168 @@ end
 
 
 
-local EVENTS = TMW:NewModule("Events", "AceEvent-3.0") TMW.EVENTS = EVENTS
+NAMES = TMW:NewModule("Names", "AceEvent-3.0") TMW.NAMES = NAMES
+NAMES.ClassColors = {}
+NAMES.ClassColoredNameCache = {}
 
-local SND = EVENTS:NewModule("Sound", EVENTS) TMW.SND = SND
+function NAMES:OnInitialize()
+	local unitList = {"player"}
+	NAMES.unitList = unitList
+
+	local function addids(uid,lower,upper, append)
+		if lower and upper then
+			for i=lower,upper do
+				unitList[#unitList+1] = uid..i..(append or "")
+			end
+		else
+			unitList[#unitList+1] = uid..(append or "")
+		end
+	end
+
+	addids("mouseover")
+	
+	addids("target")
+	addids("targettarget")
+	addids("targettargettarget")
+
+	addids("pet")
+	addids("pettarget")
+	addids("pettargettarget")
+
+	addids("focus")
+	addids("focustarget")
+	addids("focustargettarget")
+
+	addids("arena",1,5)
+	addids("boss",1,5)
+	addids("party",1,4)
+	addids("party",1,4,"pet")
+	addids("raid",1,40)
+
+	addids("arena",1,5,"target")
+	addids("boss",1,5,"target")
+	addids("party",1,4,"target")
+	addids("party",1,4,"pettarget")
+	addids("raid",1,40,"target")
+
+	addids("arena",1,5,"targettarget")
+	addids("boss",1,5,"targettarget")
+	addids("party",1,4,"targettarget")
+	addids("party",1,4,"pettargettarget")
+	addids("raid",1,40,"targettarget")
+
+	addids = nil -- into the garbage you go!
+	
+	NAMES:UpdateClassColors()
+	
+	if CUSTOM_CLASS_COLORS then
+		CUSTOM_CLASS_COLORS:RegisterCallback(NAMES, "UpdateClassColors")
+	end
+	NAMES:RegisterEvent("UPDATE_BATTLEFIELD_SCORE")
+	NAMES:RegisterEvent("UPDATE_WORLD_STATES", "UPDATE_BATTLEFIELD_SCORE")
+	NAMES:RegisterEvent("UPDATE_MOUSEOVER_UNIT")
+end
+
+function NAMES:UPDATE_BATTLEFIELD_SCORE()
+	for i = 1, GetNumBattlefieldScores() do
+		local name, _, _, _, _, _, _, _, class = GetBattlefieldScore(i)
+		
+		NAMES.ClassColoredNameCache[name] = NAMES.ClassColors[class] .. name .. "|r"
+	end
+end
+
+function NAMES:UPDATE_MOUSEOVER_UNIT()
+	local name, server = UnitName("mouseover")
+	if not name then return end
+	if server then
+		name = name .. "-" .. server
+	end
+	local _, class = UnitClass("mouseover")
+	
+	NAMES.ClassColoredNameCache[name] = NAMES.ClassColors[class] .. name .. "|r"
+end
+
+function NAMES:UpdateClassColors()
+	for class,color in pairs(CUSTOM_CLASS_COLORS or RAID_CLASS_COLORS) do
+		NAMES.ClassColors[class] = ("|cff%02x%02x%02x"):format(color.r * 255, color.g * 255, color.b * 255)
+	end
+end
+
+
+function NAMES:GetUnitIDFromGUID(srcGUID)
+	local unitList = NAMES.unitList
+	for i = 1, #unitList do
+		local id = unitList[i]
+		if UnitGUID(id) == srcGUID then
+			return id
+		end
+	end
+end
+
+function NAMES:GetUnitIDFromName(name)
+	local unitList = NAMES.unitList
+	name = strlowerCache[name]
+	for i = 1, #unitList do
+		local id = unitList[i]
+		local nameGuess, serverGuess = UnitName(id)
+		if (serverGuess and strlowerCache[nameGuess .. "-" .. serverGuess] == name) or strlowerCache[nameGuess] == name then
+			return id
+		end
+	end
+end
+
+function NAMES:TryToAcquireName(input, shouldColor)
+	if not input then return end
+	
+	shouldColor = shouldColor and db.profile.ColorNames
+	
+	local name, server = UnitName(input or "")
+	
+	if name then	-- input was a unitID if name is true.
+		if server then
+			name = name .. "-" .. server
+		end
+		if shouldColor then
+			local _, class = UnitClass(input)
+			local nameColored = NAMES.ClassColors[class] .. name .. "|r"
+			
+			NAMES.ClassColoredNameCache[name] = nameColored
+				
+			name = nameColored
+		end
+	else		-- input was a name.
+		name = input
+		
+		if shouldColor and NAMES.ClassColoredNameCache[name] then
+			return NAMES.ClassColoredNameCache[name]
+		end
+		
+		local unit = NAMES:GetUnitIDFromName(input)
+		if unit then
+			if shouldColor then
+				local _, class = UnitClass(unit)
+				local nameColored = NAMES.ClassColors[class] .. name .. "|r"
+				
+				NAMES.ClassColoredNameCache[name] = nameColored
+					
+				name = nameColored
+			else
+				name, server = UnitName(unit)
+				if server then
+					name = name .. "-" .. server
+				end
+			end
+		end
+	end
+	
+	return name
+end
+
+
+
+EVENTS = TMW:NewModule("Events", "AceEvent-3.0") TMW.EVENTS = EVENTS
+
+SND = EVENTS:NewModule("Sound", EVENTS) TMW.SND = SND
 function SND:ProcessIconEventSettings(eventSettings)
 	local data = eventSettings.Sound
 	if data == "" or data == "Interface\\Quiet.ogg" or data == "None" then
@@ -3015,7 +3027,7 @@ function SND:HandleEvent(icon, data)
 end
 
 
-local ANN = EVENTS:NewModule("Announcements", EVENTS) TMW.ANN = ANN
+ANN = EVENTS:NewModule("Announcements", EVENTS) TMW.ANN = ANN
 
 TMW.ChannelList = {
 	{
@@ -3363,7 +3375,7 @@ function ANN:HandleEvent(icon, data)
 end
 
 
-local ANIM = EVENTS:NewModule("Animations", EVENTS) TMW.ANIM = ANIM
+ANIM = EVENTS:NewModule("Animations", EVENTS) TMW.ANIM = ANIM
 ANIM.AnimationList = {
 	{
 		text = NONE,
@@ -3792,6 +3804,7 @@ function ANIM:GetFlasher(parent)
 end
 
 
+
 -- -----------
 -- GROUPS
 -- -----------
@@ -3964,12 +3977,12 @@ function Group.Setup(group)
 				ClearScripts(icon)
 			end
 		end
+	end
 
-		if Locked or group.Locked then
-			group.resizeButton:Hide()
-		else--if not (Locked or group.Locked) then
-			group.resizeButton:Show()
-		end
+	if Locked or group.Locked then
+		group.resizeButton:Hide()
+	else--if not (Locked or group.Locked) then
+		group.resizeButton:Show()
 	end
 
 	group:SetPos()
