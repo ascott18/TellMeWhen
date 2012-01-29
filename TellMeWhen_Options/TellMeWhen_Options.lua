@@ -35,7 +35,7 @@ local tonumber, tostring, type, pairs, ipairs, tinsert, tremove, sort, wipe, nex
 	  tonumber, tostring, type, pairs, ipairs, tinsert, tremove, sort, wipe, next
 local strfind, strmatch, format, gsub, strsub, strtrim, max, min, strlower, floor, log10 =
 	  strfind, strmatch, format, gsub, strsub, strtrim, max, min, strlower, floor, log10
-local _G, GetTime = _G, GetTime
+local _G = _G
 local strlowerCache = TMW.strlowerCache
 local SpellTextures = TMW.SpellTextures
 local print = TMW.print
@@ -1201,6 +1201,12 @@ function TMW:CompileOptions()
 									type = "toggle",
 									order = 41,
 								},
+								ColorNames = {
+									name = L["COLORNAMES"],
+									desc = L["COLORNAMES_DESC"],
+									type = "toggle",
+									order = 42,
+								},
 								SUG_atBeginning = {
 									name = L["SUG_ATBEGINING"],
 									desc = L["SUG_ATBEGINING_DESC"],
@@ -1430,8 +1436,10 @@ function TMW:Group_Delete(groupID)
 	db.profile.NumGroups = db.profile.NumGroups - 1
 	for k, v in pairs(TMW.Icons) do
 		if tonumber(strmatch(v, "TellMeWhen_Group(%d+)")) == groupID then
-			local icon = _G[k]
-			icon:Invalidate()
+			local icon = _G[v]
+			if icon then
+				icon:Invalidate()
+			end
 		end
 	end
 	
@@ -1497,11 +1505,27 @@ end
 
 
 ---------- Spell/Item Dragging ----------
-function ID:SpellItemToIcon(icon)
-	if icon.class ~= TMW.Classes.Icon then
+function ID:TextureDragReceived(icon, t, data, subType)
+	local ics = icon:GetSettings()
+	
+	local _, input
+	if t == "spell" then
+		_, input = GetSpellBookItemInfo(data, subType)
+	elseif t == "item" then
+		input = GetItemIcon(data)
+	end
+	if not input then
 		return
 	end
 	
+	ics.CustomTex = TMW:CleanString(input)
+	return true -- signal success
+end
+
+function ID:SpellItemToIcon(icon, func, arg1)
+	if icon.class ~= TMW.Classes.Icon then
+		return
+	end
 	
 	local t, data, subType
 	local input
@@ -1523,7 +1547,12 @@ function ID:SpellItemToIcon(icon)
 	IE:AttemptBackup(icon)
 	
 	-- handle the drag based on icon type
-	local success = icon.typeData:DragReceived(icon, t, data, subType)
+	local success
+	if func then
+		success = func(arg1, icon, t, data, subType)
+	else
+		success = icon.typeData:DragReceived(icon, t, data, subType)
+	end
 	if not success then
 		return
 	end
@@ -3275,15 +3304,13 @@ function IE:GetRealNames() -- TODO: MODULARIZE THIS
 	if cachednames[CI.t .. CI.SoI .. text] then return cachednames[CI.t .. CI.SoI .. text] end
 
 	local tbl
-	TMW:HackEquivs()
 	local GetSpellInfo = GetSpellInfo
 	if CI.SoI == "item" then
 		tbl = TMW:GetItemIDs(nil, text)
 	else
 		tbl = TMW:GetSpellNames(nil, text)
 	end
-	local durations = Types[CI.t].DurationSyntax and TMW:GetSpellDurations(nil, text) -- needs to happen before unhacking
-	TMW:UnhackEquivs()
+	local durations = Types[CI.t].DurationSyntax and TMW:GetSpellDurations(nil, text)
 	
 	local str = ""
 	local numadded = 0
@@ -3339,7 +3366,7 @@ function IE:GetRealUnits(editbox)
 	local text = TMW:CleanString(editbox)
 	if cachedunits[text] then return cachedunits[text] end
 
-	local tbl = TMW:GetUnits(nil, text, true)
+	local tbl = TMW.UNITS:GetOriginalUnitTable(text)
 	
 	local str = ""
 	local numadded = 0
@@ -4417,18 +4444,25 @@ function EVENTS:SetupEventSettings()
 	EventSettings.Value		 	 :SetText(Settings.Value)
 	
 	--show settings
-	if settingsUsedByEvent then
-		for setting, state in pairs(settingsUsedByEvent) do
+	for setting, frame in pairs(EventSettings) do
+		if type(frame) == "table" then
+			local state = settingsUsedByEvent and settingsUsedByEvent[setting]
+			
 			if state == "FORCE" then
-				EventSettings[setting]:Disable()
-				EventSettings[setting]:SetAlpha(1)
+				frame:Disable()
+				frame:SetAlpha(1)
 			elseif state == "FORCEDISABLED" then
-				EventSettings[setting]:Disable()
-				EventSettings[setting]:SetAlpha(0.4)
+				frame:Disable()
+				frame:SetAlpha(0.4)
 			else
-				EventSettings[setting]:Enable()
+				frame:SetAlpha(1)
+				if frame.Enable then
+					frame:Enable()
+				end
+				if state then
+					frame:Show()
+				end
 			end
-			EventSettings[setting]:Show()
 		end
 	end
 	
@@ -4861,7 +4895,7 @@ function ANN:OnOptionsLoaded()
 	local previousFrame
 	local offs = 0
 	for i, channelData in ipairs(TMW.ChannelList) do
-		if not channelData.hidden then
+		if not get(channelData.hidden) then
 			i = i + offs
 			local frame = CreateFrame("Button", Channels:GetName().."Channel"..i, Channels, "TellMeWhen_ChannelSelectButton", i)
 			Channels[i] = frame

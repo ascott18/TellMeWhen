@@ -59,6 +59,7 @@ local strlowerCache = TMW.strlowerCache
 local isNumber = TMW.isNumber
 
 local CNDT = TMW:NewModule("Conditions", "AceEvent-3.0") TMW.CNDT = CNDT
+CNDT.SpecialUnitsUsed = {}
 
 local functionCache = {} CNDT.functionCache = functionCache
 
@@ -75,6 +76,14 @@ function CNDT:MINIMAP_UPDATE_TRACKING()
 	end
 end
 
+function CNDT:RAID_ROSTER_UPDATE()
+	TMW.UNITS:UpdateTankAndAssistMap()
+	for oldunit in pairs(Env) do
+		if CNDT.SpecialUnitsUsed[oldunit] then
+			TMW.UNITS:SubstituteTankAndAssistUnit(oldunit, Env, oldunit, true)
+		end
+	end
+end
 
 local test
 --[[
@@ -305,7 +314,7 @@ Env = {
 	ActivePetMode = 0,
 	NumPartyMembers = 0,
 	print = TMW.print,
-	time = GetTime(),
+	time = TMW.time,
 	huge = math.huge,
 	epsilon = 1e-255,
 	
@@ -2617,15 +2626,16 @@ function CNDT:DoConditionSubstitutions(icon, v, c, thisstr)
 		if strfind(thisstr, "c.Unit" .. append) then 
 			local unit
 			if append == "2" then
-				unit = TMW:GetUnits(nil, c.Name, true)[1] or ""
+				unit = TMW.UNITS:GetOriginalUnitTable(c.Name)[1] or ""
 			elseif append == "" then
-				unit = TMW:GetUnits(nil, c.Unit, true)[1] or ""
+				unit = TMW.UNITS:GetOriginalUnitTable(c.Unit)[1] or ""
 			end
 			if (strfind(unit, "maintank") or strfind(unit, "mainassist")) then
 				thisstr = gsub(thisstr, "c.Unit" .. append,		unit) -- sub it in as a variable
 				Env[unit] = unit
-				TMW:RegisterEvent("RAID_ROSTER_UPDATE")
-				TMW:RAID_ROSTER_UPDATE()
+				CNDT.SpecialUnitsUsed[unit] = true
+				CNDT:RegisterEvent("RAID_ROSTER_UPDATE")
+				CNDT:RAID_ROSTER_UPDATE()
 			elseif strfind(unit, "^%%[Uu]") then
 				local after = strmatch(unit, "^%%[Uu]%-?(.*)")
 				local sub = "(" .. icon:GetName() .. ".__unitChecked or '')"

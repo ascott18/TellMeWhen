@@ -82,7 +82,7 @@ L["ICONMENU_SPELLCOOLDOWN"] = "Spell Cooldown"
 L["ICONMENU_SPELLCOOLDOWN_DESC"] = [[Tracks the cooldowns of spells from your spellbook.]]
 
 L["ICONMENU_ITEMCOOLDOWN"] = "Item Cooldown"
-L["ICONMENU_ITEMCOOLDOWN_DESC"] = [[Tracks the cooldowns of items.]]
+L["ICONMENU_ITEMCOOLDOWN_DESC"] = [[Tracks the cooldowns of items with Use effects.]]
 
 L["ICONMENU_BUFFDEBUFF"] = "Buff/Debuff"
 L["ICONMENU_BUFFDEBUFF_DESC"] = [[Tracks buffs and/or debuffs.]]
@@ -175,12 +175,7 @@ L["ICONMENU_DRS"] = "Diminishing Returns"
 L["ICONMENU_CUSTOMTEX"] = "Custom Texture"
 L["ICONMENU_CUSTOMTEX_DESC"] = "If you want to override the texture shown by this icon, enter the Name or ID of the spell that has the texture that you want to use. You may also enter a texture path, such as 'Interface/Icons/spell_nature_healingtouch', or just 'spell_nature_healingtouch' if the path is 'Interface/Icons'"
 
-L["ICONMENU_BINDTEXT_DESC"] = [[Any text in this editbox will be shown on the icon where the keybinding is normally displayed on an action bar. This does NOT set a keybinding to this TellMeWhen icon. It is simply a visual reminder that will be shown on the icon. The text can be configured in this group's settings.
-
-The following substitutions may be used to customize the text shown:
-
-"%u" - Name of current unit being checked
-"%s" - Current spell/item/etc being checked]]
+L["ICONMENU_BINDTEXT_DESC"] = [[Any text in this editbox will be shown on the icon where the keybinding is normally displayed on an action bar. This does NOT set a keybinding to this TellMeWhen icon. It is simply a visual reminder that will be shown on the icon. The text can be configured in this group's settings.]]
 
 
 L["SUG_SUBSTITUTION_t"] = "Target's Name"
@@ -439,6 +434,9 @@ L["UIPANEL_TOOLTIP_SECONDARYSPEC"] = "Check to show this group while your second
 L["UIPANEL_DRAWEDGE"] = "Highlight timer edge"
 L["UIPANEL_DRAWEDGE_DESC"] = "Highlights the edge of the cooldown timer (clock animation) to increase visibility"
 L["UIPANEL_WARNINVALIDS"] = "Warn about invalid icons"
+
+L["COLORNAMES"] = "Class Colored Names"
+L["COLORNAMES_DESC"] = "Check in order to attempt to color the names of units in text displays (Binding Text and Text Event Output)."
 
 
 L["COLOR_DEFAULT"] = "*Global Colors*"
@@ -981,10 +979,12 @@ L["ANN_SUB_CHANNEL"] = "Sub section"
 L["ANN_WHISPERTARGET"] = "Whisper target"
 L["ANN_WHISPERTARGET_DESC"] = [[Input the name of the player that you would like to whisper. Normal server/faction whisper requirements apply. The following substitutions may be used:]]
 L["ANN_EVENT_GLOBALDESC"] = "Events are checked from top to bottom in this list. If an event is triggered that has text to output, no events below that event will output any text."
+L["ANN_FCT_DESC"] = "Outputs to Blizzard's Floating Combat Text feature. It MUST be enabled in your interface options for the text to be outputted."
 L["CHAT_MSG_SMART"] = "Smart Channel"
 L["CHAT_MSG_SMART_DESC"] = "Will output to Battleground, Raid, Party, or Say - whichever is appropriate."
 L["CHAT_MSG_CHANNEL"] = "Chat Channel"
 L["CHAT_MSG_CHANNEL_DESC"] = "Will output to a chat channel, such as Trade, or a custom channel that you have joined."
+
 
 L["CHAT_FRAME"] = "Chat/Message Frame"
 
@@ -1131,7 +1131,7 @@ L["CLEU_CAT_MISC"] = "Miscellaneous"
 
 
 L["CLEU_COMBATLOG_OBJECT_NONE"] = "Miscellaneous: Unknown Unit"
-L["CLEU_COMBATLOG_OBJECT_NONE_DESC"] = "Check to exclude units that are completely unknown to the WoW client."
+L["CLEU_COMBATLOG_OBJECT_NONE_DESC"] = "Check to exclude units that are completely unknown to the WoW client. This very rarely occurs, and can generally be left unchecked."
 L["CLEU_COMBATLOG_OBJECT_MAINASSIST"] = "Miscellaneous: Main Assist"
 L["CLEU_COMBATLOG_OBJECT_MAINASSIST_DESC"] = "Check to exclude units marked as main assists in your raid."
 L["CLEU_COMBATLOG_OBJECT_MAINTANK"] = "Miscellaneous: Main Tank"

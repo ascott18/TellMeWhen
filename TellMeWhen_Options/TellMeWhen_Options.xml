@@ -2417,6 +2417,7 @@
 								GameTooltip:Hide()
 							</OnLeave>
 							<OnReceiveDrag>
+								TMW.print(TMW.CI.ic)
 								TMW.ID:SpellItemToIcon(TMW.CI.ic)
 							</OnReceiveDrag>
 							<OnMouseUp>
@@ -2666,6 +2667,14 @@
 								
 								self:GetScript("OnTextChanged")(self)
 							</OnEditFocusLost>
+							
+							<OnReceiveDrag>
+								TMW.ID:SpellItemToIcon(TMW.CI.ic, TMW.ID.TextureDragReceived, TMW.ID)
+							</OnReceiveDrag>
+							<OnMouseUp>
+								TMW.ID:SpellItemToIcon(TMW.CI.ic, TMW.ID.TextureDragReceived, TMW.ID)
+							</OnMouseUp>
+							
 						</Scripts>
 					</EditBox>
 					<EditBox name="$parentUnit" inherits="TellMeWhen_UnitEditbox" parentKey="Unit" autoFocus="false">

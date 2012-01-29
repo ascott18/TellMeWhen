@@ -32,7 +32,7 @@ local DRData = LibStub("DRData-1.0", true)
 TELLMEWHEN_VERSION = "4.8.3"
 TELLMEWHEN_VERSION_MINOR = strmatch(" @project-version@", " r%d+") or ""
 TELLMEWHEN_VERSION_FULL = TELLMEWHEN_VERSION .. TELLMEWHEN_VERSION_MINOR
-TELLMEWHEN_VERSIONNUMBER = 48304 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
+TELLMEWHEN_VERSIONNUMBER = 48305 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
 if TELLMEWHEN_VERSIONNUMBER > 49000 or TELLMEWHEN_VERSIONNUMBER < 48000 then return error("YOU SCREWED UP THE VERSION NUMBER OR DIDNT CHANGE THE SAFETY LIMITS") end -- safety check because i accidentally made the version number 414069 once
 
 TELLMEWHEN_MAXGROUPS = 1 	--this is a default, used by SetTheory (addon), so dont rename
@@ -48,8 +48,8 @@ local UnitPower, PowerBarColor =
 	  UnitPower, PowerBarColor
 local PlaySoundFile, SendChatMessage =
 	  PlaySoundFile, SendChatMessage
-local UnitName, UnitInBattleground, UnitInRaid, GetNumPartyMembers, GetChannelList =
-	  UnitName, UnitInBattleground, UnitInRaid, GetNumPartyMembers, GetChannelList
+local UnitName, UnitInBattleground, UnitInRaid, UnitExists, GetNumPartyMembers, GetChannelList =
+	  UnitName, UnitInBattleground, UnitInRaid, UnitExists, GetNumPartyMembers, GetChannelList
 local tonumber, tostring, type, pairs, ipairs, tinsert, tremove, sort, select, wipe, rawget, next, tDeleteItem = --tDeleteItem is a blizzard function defined in UIParent.lua
 	  tonumber, tostring, type, pairs, ipairs, tinsert, tremove, sort, select, wipe, rawget, next, tDeleteItem
 local strfind, strmatch, format, gsub, strsub, strtrim, strsplit, strlower, min, max, ceil, floor =
@@ -63,6 +63,7 @@ local TARGET_TOKEN_NOT_FOUND, FOCUS_TOKEN_NOT_FOUND =
 local CL_PLAYER = COMBATLOG_OBJECT_TYPE_PLAYER
 local CL_PET = COMBATLOG_OBJECT_CONTROL_PLAYER
 local bitband = bit.band
+local GetUnitIDFromGUID, GetUnitIDFromName
 
 
 ---------- Locals ----------
@@ -70,10 +71,11 @@ local db, updatehandler, BarGCD, ClockGCD, Locked, SndChan, FramesToFind, CNDTEn
 local UPD_INTV = 0.06	--this is a default, local because i use it in onupdate functions
 local runEvents, updatePBar = 1, 1
 local GCD, NumShapeshiftForms, LastUpdate = 0, 0, 0
-local IconUpdateFuncs, GroupsToUpdate, unitsToChange = {}, {}, {}
-local BindUpdateFuncs
+local IconsToUpdate, GroupsToUpdate, unitsToChange = {}, {}, {}
+local IconsToUpdateBindText
 local loweredbackup = {}
-local Animations = {[UIParent] = {}, [WorldFrame] = {}}
+local bullshitTable = {}
+local ActiveAnimations = {[UIParent] = {}, [WorldFrame] = {}}
 local CDBarsToUpdate, PBarsToUpdate = {}, {}
 local time = GetTime() TMW.time = time
 local sctcolor = {r=1, b=1, g=1}
@@ -121,7 +123,7 @@ do	-- Class Lib
 
 	local function New(self, ...)
 		local instance
-		if ... then
+		if ... and self.frameType then
 			instance = CreateFrame(...)
 		else
 			instance = {}
@@ -157,7 +159,7 @@ do	-- Class Lib
 		local metatable
 		
 		if frameType then
-			metatable = CopyTable(getmetatable(CreateFrame(frameType:upper())))
+			metatable = CopyTable(getmetatable(CreateFrame(frameType)))
 			
 		elseif inherit then
 			if type(inherit) == "string" then
@@ -177,6 +179,7 @@ do	-- Class Lib
 			instances = {},
 			New = New,
 			instancemeta = {__index = metatable.__index},
+			frameType = frameType,
 		}
 		
 		setmetatable(class, metatable)
@@ -186,6 +189,7 @@ do	-- Class Lib
 		return class
 	end
 end
+
 
 ---------- Caches ----------
 TMW.strlowerCache = setmetatable(
@@ -215,6 +219,7 @@ TMW.SpellTextures = setmetatable(
 {
 	__index = function(t, name)
 		if not name then return end
+		
 		-- rawget the strlower because hardcoded entries (talents, mainly) are put into the table as lowercase
 		local tex = rawget(t, strlowerCache[name]) or GetSpellTexture(name)
 		
@@ -233,6 +238,90 @@ TMW.isNumber = setmetatable(
 		t[i] = o
 		return o
 end}) local isNumber = TMW.isNumber
+
+do	-- GetUnitIDFromGUID, GetUnitIDFromName 
+	local unitlist = {"player"}
+
+	local function addids(uid,lower,upper)
+		if lower and upper then
+			for i=lower,upper do
+				unitlist[#unitlist+1] = uid..i
+			end
+		else
+			unitlist[#unitlist+1] = uid
+		end
+	end
+
+	addids("target")
+	addids("targettarget")
+	addids("targettargettarget")
+
+	addids("pet")
+	addids("pettarget")
+	addids("pettargettarget")
+
+	addids("focus")
+	addids("focustarget")
+	addids("focustargettarget")
+
+	addids("arena",1,5)
+	addids("boss",1,5)
+	addids("party",1,4)
+	addids("partypet",1,4)
+	addids("raid",1,40)
+	addids("raidpet",1,40)
+
+	addids("arenatarget",1,5)
+	addids("bosstarget",1,5)
+	addids("partytarget",1,4)
+	addids("partypettarget",1,4)
+	addids("raidtarget",1,40)
+	addids("raidpettarget",1,40)
+
+	addids("arenatargettarget",1,5)
+	addids("bosstargettarget",1,5)
+	addids("partytargettarget",1,4)
+	addids("partypettargettarget",1,4)
+	addids("raidtargettarget",1,40)
+	addids("raidpettargettarget",1,40)
+
+	addids = nil -- into the garbage you go!
+	
+	local len = #unitlist
+	
+	GetUnitIDFromGUID = function(srcGUID)
+		for i = 1, len do
+			local id = unitlist[i]
+			if UnitGUID(id) == srcGUID then
+				return id
+			end
+		end
+	end
+	TMW.GetUnitIDFromGUID = GetUnitIDFromGUID
+	
+	
+	GetUnitIDFromName = function(name)
+		for k, id in ipairs(unitlist) do
+			if strlowerCache[UnitName(id)] == strlowerCache[name] then
+				return id
+			end
+		end
+	end
+	TMW.GetUnitIDFromName = GetUnitIDFromName
+end
+
+do	-- ClassColors
+	local ClassColors = {}
+	TMW.ClassColors = ClassColors
+	local function Update()
+		for class, color in pairs(CUSTOM_CLASS_COLORS or RAID_CLASS_COLORS) do
+			ClassColors[class] = ("|cff%02x%02x%02x"):format(color.r * 255, color.g * 255, color.b * 255)
+		end
+	end
+	Update()
+	if CUSTOM_CLASS_COLORS then CUSTOM_CLASS_COLORS:RegisterCallback(Update) end
+end
+
 
 function TMW.tContains(table, item, returnNum)
 	local firstkey
@@ -600,20 +689,21 @@ TMW.Defaults = {
 		VersionWarning		= true,
 	},
 	profile = {
-	--	Version 	 	 = 	TELLMEWHEN_VERSIONNUMBER,  -- DO NOT DEFINE VERSION AS A DEFAULT, OTHERWISE WE CANT TRACK IF A USER HAS AN OLD VERSION BECAUSE IT WILL ALWAYS DEFAULT TO THE LATEST
-		Locked 		 	 = 	false,
-		NumGroups	 	 =	1,
-		Interval	 	 =	UPD_INTV,
-		EffThreshold 	 =	15,
-		TextureName  	 = 	"Blizzard",
-		DrawEdge	 	 =	false,
-		MasterSound	 	 =	false,
-		ReceiveComm	 	 =	true,
-		WarnInvalids 	 =	true,
-		BarGCD		 	 =	true,
-		ClockGCD	 	 =	true,
-		CheckOrder	 	 =	-1,
-		SUG_atBeginning  = true,
+	--	Version			= 	TELLMEWHEN_VERSIONNUMBER,  -- DO NOT DEFINE VERSION AS A DEFAULT, OTHERWISE WE CANT TRACK IF A USER HAS AN OLD VERSION BECAUSE IT WILL ALWAYS DEFAULT TO THE LATEST
+		Locked			= 	false,
+		NumGroups		=	1,
+		Interval		=	UPD_INTV,
+		EffThreshold	=	15,
+		TextureName		= 	"Blizzard",
+		DrawEdge		=	false,
+		MasterSound		=	false,
+		ReceiveComm		=	true,
+		WarnInvalids	=	true,
+		BarGCD			=	true,
+		ClockGCD		=	true,
+		CheckOrder		=	-1,
+		SUG_atBeginning	=	true,
+		ColorNames		=	true,
 	--[[	CodeSnippets = {
 		},]]
 		ColorMSQ	 	 = false,
@@ -1109,6 +1199,42 @@ function TMW:Fire(event, ...)
 	end
 end
 
+function TMW:MakeFunctionCached(obj, method)
+    local func
+    if type(obj) == "table" and type(method) == "string" then
+        func = obj[method]
+    elseif type(obj) == "function" then
+        func = obj
+    else
+        error("Usage: TMW:MakeFunctionCached(object/function [, method])")
+    end
+    
+    local cache = {}
+    local wrapper = function(...)
+        -- tostringall is a Blizzard function defined in UIParent.lua
+        local cachestring = strconcat(tostringall(...))
+        if cache[cachestring] then
+            return cache[cachestring]
+        end
+        
+        local arg1, arg2 = func(...)
+        if arg2 ~= nil then
+            error("Cannot cache functions with more than 1 return arg")
+        end
+        
+        cache[cachestring] = arg1
+        
+        return arg1    
+    end
+    
+    if type(obj) == "table" then
+        obj[method] = wrapper
+    end
+    
+    return wrapper
+end
+
+
 
 -- --------------------------
 -- EXECUTIVE FUNCTIONS, ETC
@@ -1323,6 +1449,7 @@ function TMW:OnCommReceived(prefix, text, channel, who)
 	end
 end
 
+
 function TMW:OnUpdate(elapsed)					-- THE MAGICAL ENGINE OF DOING EVERYTHING
 	time = GetTime()
 	CNDTEnv.time = time
@@ -1346,6 +1473,8 @@ function TMW:OnUpdate(elapsed)					-- THE MAGICAL ENGINE OF DOING EVERYTHING
 				end
 			end
 		end
+		
+		
 		if Locked then
 		
 			for i = 1, #GroupsToUpdate do
@@ -1365,26 +1494,20 @@ function TMW:OnUpdate(elapsed)					-- THE MAGICAL ENGINE OF DOING EVERYTHING
 				end
 			end
 
-			for i = 1, #IconUpdateFuncs do
-				local icon = IconUpdateFuncs[i]
+			for i = 1, #IconsToUpdate do
+				local icon = IconsToUpdate[i]
 			--	if icon.updateQueued then
 					icon:Update(time)
 			--	end
 			end
-
-			if TMW.DoWipeAC then
-				wipe(TMW.AlreadyChecked)
-			end
-			if TMW.DoWipeChangedMetas then
-				wipe(TMW.ChangedMetas)
-			end
+			
 			updatePBar = nil
 		end
 	end
 	
-	if BindUpdateFuncs then
-		for i = 1, #BindUpdateFuncs do
-			BindUpdateFuncs[i]:UpdateBindText()
+	if IconsToUpdateBindText then
+		for i = 1, #IconsToUpdateBindText do
+			IconsToUpdateBindText[i]:UpdateBindText()
 		end
 	end
 		
@@ -1454,7 +1577,7 @@ function TMW:OnUpdate(elapsed)					-- THE MAGICAL ENGINE OF DOING EVERYTHING
 		end
 	end
 	
-	for icon, animations in next, Animations do
+	for icon, animations in next, ActiveAnimations do
 		for key, animationTable in next, animations do
 			-- its the magical modular tour, and its coming to take you awayyy......
 			
@@ -1505,7 +1628,7 @@ function TMW:Update()
 
 	wipe(TMW.Icons)
 	wipe(TMW.IconsLookup)
-	BindUpdateFuncs = nil
+	IconsToUpdateBindText = nil
 	
 	for group in TMW.InGroups() do
 		group:Hide()
@@ -1587,7 +1710,7 @@ function TMW:GetUpgradeTable()			-- upgrade functions
 			end,
 		},
 		[47002] = {
-			translations = {
+			map = {
 				CBS = "CDSTColor",
 				CBC = "CDCOColor",
 				OOR = "OORColor",
@@ -1599,7 +1722,7 @@ function TMW:GetUpgradeTable()			-- upgrade functions
 				--ABSENTColor	 =	{r=1, g=0.35, b=0.35, a=1},
 			},
 			global = function(self)
-				for newKey, oldKey in pairs(self.translations) do
+				for newKey, oldKey in pairs(self.map) do
 					local old = db.profile[oldKey]
 					local new = db.profile.Colors.GLOBAL[newKey]
 					
@@ -2522,73 +2645,6 @@ function TMW:PLAYER_ENTERING_WORLD()
 	end
 end
 
-local mtTranslations, maTranslations = {}, {}
-function TMW:RAID_ROSTER_UPDATE()
-	wipe(mtTranslations)
-	wipe(maTranslations)
-	local mtN = 1
-	local maN = 1
-	-- setup a table with (key, value) pairs as (oldnumber, newnumber)
-	-- oldnumber is 7 for raid7
-	-- newnumber is 1 for raid7 when the current maintank/assist is the 1st one found, 2 for the 2nd one found, etc)
-	for i = 1, GetNumRaidMembers() do
-		local raidunit = "raid" .. i
-		if GetPartyAssignment("MAINTANK", raidunit) then
-			mtTranslations[mtN] = i
-			mtN = mtN + 1
-		elseif GetPartyAssignment("MAINASSIST", raidunit) then
-			maTranslations[maN] = i
-			maN = maN + 1
-		end
-	end
-
-	for original, Units in pairs(unitsToChange) do
-		wipe(Units) -- clear unit translations so that we arent referencing incorrect units
-		for k, oldunit in ipairs(original) do
-			if strfind(oldunit, "maintank") then -- the old unit (maintank1)
-				local newunit = gsub(oldunit, "maintank", "raid") -- the new unit (raid7)
-				local oldnumber = tonumber(strmatch(newunit, "(%d+)")) -- the old number (7)
-				local newnumber = oldnumber and mtTranslations[oldnumber] -- the new number(1)
-				if newnumber then
-					Units[#Units+1] = gsub(newunit, oldnumber, newnumber)
-			--	else -- dont put an invalid unit back into the table, that is just pointless
-				--	Units[#Units+1] = oldunit
-				end
-			elseif strfind(oldunit, "mainassist") then
-				local newunit = gsub(oldunit, "mainassist", "raid")
-				local oldnumber = tonumber(strmatch(newunit, "(%d+)"))
-				local newnumber = oldnumber and maTranslations[oldnumber]
-				if newnumber then
-					Units[#Units+1] = gsub(newunit, oldnumber, newnumber)
-				end
-			else -- it isnt a special unit, so put it back in as normal
-				Units[#Units+1] = oldunit
-			end
-		end
-	end
-	for oldunit in pairs(CNDTEnv) do
-		if strfind(oldunit, "maintank") then
-			local newunit = gsub(oldunit, "maintank", "raid")
-			local oldnumber = tonumber(strmatch(newunit, "(%d+)"))
-			local newnumber = oldnumber and mtTranslations[oldnumber]
-			if newnumber then
-				CNDTEnv[oldunit] = gsub(newunit, oldnumber, newnumber)
-			else
-				CNDTEnv[oldunit] = oldunit
-			end
-		elseif strfind(oldunit, "mainassist") then
-			local newunit = gsub(oldunit, "mainassist", "raid")
-			local oldnumber = tonumber(strmatch(newunit, "(%d+)"))
-			local newnumber = oldnumber and maTranslations[oldnumber]
-			if newnumber then
-				CNDTEnv[oldunit] = gsub(u, oldnumber, newnumber)
-			else
-				CNDTEnv[oldunit] = oldunit
-			end
-		end
-	end
-end
-
 function TMW:COMBAT_LOG_EVENT_UNFILTERED(_, _, p,_, g, _, f, _, _, _, _, _, i)
 	-- This is only used for the suggester, but i want to to be listening all the times for auras, not just when you load the options
 	if p == "SPELL_AURA_APPLIED" and not TMW.AuraCache[i] then
@@ -2755,7 +2811,6 @@ function TMW:ProcessEquivalencies()
 	end
 	
 	TMW.OldBE = CopyTable(TMW.BE)
-	TMW.BEBackup = TMW.BE -- never ever ever change this value
 	for category, b in pairs(TMW.OldBE) do
 		for equiv, str in pairs(b) do
 			b[equiv] = gsub(str, "_", "") -- REMOVE UNDERSCORES FROM OLDBE
@@ -2763,17 +2818,20 @@ function TMW:ProcessEquivalencies()
 			-- turn all IDs prefixed with "_" into their localized name. Dont do this on every single one, but do use it for spells that do not have any other spells with the same name but different effects.
 			while strfind(str, "_") do
 				local id = strmatch(str, "_%d+") -- id includes the underscore, trimmed off below
+				local realID = tonumber(strmatch(str, "_(%d+)"))
 				if id then
-					local name = GetSpellInfo(strtrim(id, " _"))
+					local name, _, tex = GetSpellInfo(strtrim(id, " _"))
 					if name then
 						TMW:lowerNames(name) -- this will insert the spell name into the table of spells for capitalization restoration.
 						str = gsub(str, id, name)
+						SpellTextures[realID] = tex
+						SpellTextures[strlowerCache[name]] = tex
+						
 					else  -- this should never ever ever happen except in new patches if spellIDs were wrong (experience talking)
-						local newID = strtrim(id, " _")
 						if clientVersion >= addonVersion then -- dont warn for old clients using newer versions
-							TMW:Error("Invalid spellID found: " .. newID .. "! Please report this on TMW's CurseForge page, especially if you are currently on the PTR!")
+							TMW:Error("Invalid spellID found: " .. realID .. "! Please report this on TMW's CurseForge page, especially if you are currently on the PTR!")
 						end
-						str = gsub(str, id, newID) -- still need to substitute it to prevent recusion
+						str = gsub(str, id, realID) -- still need to substitute it to prevent recusion
 					end
 				end
 			end
@@ -2782,32 +2840,79 @@ function TMW:ProcessEquivalencies()
 	end
 end
 
-function TMW:InjectDataIntoString(Text, icon, doBlizz)
+local ClassColors = {}
+do
+	local function UpdateClassColors()
+		for class,color in pairs(CUSTOM_CLASS_COLORS or RAID_CLASS_COLORS) do
+			ClassColors[class] = ("|cff%02x%02x%02x"):format(color.r * 255, color.g * 255, color.b * 255)
+		end
+	end
+	
+	UpdateClassColors()
+	
+	if CUSTOM_CLASS_COLORS then
+		CUSTOM_CLASS_COLORS:RegisterCallback(UpdateClassColors)
+	end
+end
+
+function TMW:TryToAcquireName(input, shouldColor)
+	if not input then return end
+	
+	shouldColor = shouldColor and db.profile.ColorNames
+	
+	local name = UnitName(input or "")
+	if name then
+		if shouldColor then
+			local _, class = UnitClass(input)
+			name = ClassColors[class] .. name .. "|r"
+		end
+	else
+		name = input
+		local unit = GetUnitIDFromName(input)
+		if unit then
+			if shouldColor then
+				local _, class = UnitClass(unit)
+				name = ClassColors[class] .. name .. "|r"
+			else
+				name = UnitName(unit)
+			end
+		end
+	end
+	
+	return name
+end
+
+function TMW:InjectDataIntoString(Text, icon, doBlizz, shouldColorNames)
+	--shouldColorNames = true -- DEBUG
 	if not Text then return Text end
 	
 	--CURRENTLY USED: t, f, m, p, u, s, d, k, e, o, x
 	
 	if doBlizz then
 		if strfind(Text, "%%[Tt]") then
-			Text = gsub(Text, "%%[Tt]", UnitName("target") or TARGET_TOKEN_NOT_FOUND)
+			Text = gsub(Text, "%%[Tt]", TMW:TryToAcquireName("target", shouldColorNames) or TARGET_TOKEN_NOT_FOUND)
+			--Text = gsub(Text, "%%[Tt]", UnitName("target") or TARGET_TOKEN_NOT_FOUND)
 		end
 		if strfind(Text, "%%[Ff]") then
-			Text = gsub(Text, "%%[Ff]", UnitName("focus") or FOCUS_TOKEN_NOT_FOUND)
+			Text = gsub(Text, "%%[Ff]", TMW:TryToAcquireName("focus", shouldColorNames) or FOCUS_TOKEN_NOT_FOUND)
+		--	Text = gsub(Text, "%%[Ff]", UnitName("focus") or FOCUS_TOKEN_NOT_FOUND)
 		end
 	end
 	
 	if strfind(Text, "%%[Mm]") then
-		Text = gsub(Text, "%%[Mm]", UnitName("mouseover") or L["MOUSEOVER_TOKEN_NOT_FOUND"])
+		Text = gsub(Text, "%%[Mm]", TMW:TryToAcquireName("mouseover", shouldColorNames) or L["MOUSEOVER_TOKEN_NOT_FOUND"])
+	--	Text = gsub(Text, "%%[Mm]", UnitName("mouseover") or L["MOUSEOVER_TOKEN_NOT_FOUND"])
 	end
 	
 	if icon then
 	
 		if icon.Type == "cleu" then
 			if strfind(Text, "%%[Oo]") then
-				Text = gsub(Text, "%%[Oo]", UnitName(icon.cleu_sourceUnit or "") or icon.cleu_sourceUnit or "?")
+				Text = gsub(Text, "%%[Oo]", TMW:TryToAcquireName(icon.cleu_sourceUnit, shouldColorNames) or "?")
 			end
 			if strfind(Text, "%%[Ee]") then
-				Text = gsub(Text, "%%[Ee]", UnitName(icon.cleu_destUnit or "") or icon.cleu_destUnit or "?")
+				Text = gsub(Text, "%%[Ee]", TMW:TryToAcquireName(icon.cleu_destUnit, shouldColorNames) or "?")
+			--	Text = gsub(Text, "%%[Ee]", UnitName(icon.cleu_destUnit or "") or icon.cleu_destUnit or "?")
 			end
 			if strfind(Text, "%%[Xx]") then
 				local name, checkcase = icon.typeData:GetNameForDisplay(icon, icon.cleu_extraSpell)
@@ -2820,10 +2925,12 @@ function TMW:InjectDataIntoString(Text, icon, doBlizz)
 		end
 		
 		if strfind(Text, "%%[Pp]") then
-			Text = gsub(Text, "%%[Pp]", icon.__lastUnitName or UnitName(icon.__lastUnitChecked or "") or "?")
+			Text = gsub(Text, "%%[Pp]", TMW:TryToAcquireName(icon.__lastUnitName or icon.__lastUnitChecked, shouldColorNames) or "?")
+		--	Text = gsub(Text, "%%[Pp]", icon.__lastUnitName or UnitName(icon.__lastUnitChecked or "") or "?")
 		end
 		if strfind(Text, "%%[Uu]") then
-			Text = gsub(Text, "%%[Uu]", icon.__unitName or UnitName(icon.__unitChecked or "") or icon.__unitChecked or "?")
+			Text = gsub(Text, "%%[Uu]", TMW:TryToAcquireName(icon.__unitName or icon.__unitChecked, shouldColorNames) or "?")
+		--	Text = gsub(Text, "%%[Uu]", icon.__unitName or UnitName(icon.__unitChecked or "") or icon.__unitChecked or "?")
 		end
 		
 		if strfind(Text, "%%[Ss]") then
@@ -2933,7 +3040,7 @@ TMW.ChannelList = {
 		text = L["CHAT_MSG_SMART"],
 		desc = L["CHAT_MSG_SMART_DESC"],
 		channel = "SMART",
-		isBlizz = 1, -- flagged to not use override %t and %f substitutions
+		isBlizz = 1, -- flagged to not use override %t and %f substitutions, and also not to try and color any names
 		handler = function(icon, data, Text)
 			local channel = "SAY"
 			if UnitInBattleground("player") then
@@ -2950,7 +3057,7 @@ TMW.ChannelList = {
 		text = L["CHAT_MSG_CHANNEL"],
 		desc = L["CHAT_MSG_CHANNEL_DESC"],
 		channel = "CHANNEL",
-		isBlizz = 1, -- flagged to not use override %t and %f substitutions
+		isBlizz = 1, -- flagged to not use override %t and %f substitutions, and also not to try and color any names
 		defaultlocation = function() return select(2, GetChannelList()) end,
 		dropdown = function()
 			for i = 1, math.huge, 2 do
@@ -3058,7 +3165,10 @@ TMW.ChannelList = {
 			end
 			
 			if _G[Location] == RaidWarningFrame then
-				RaidNotice_AddMessage(RaidWarningFrame, Text, data)
+				-- workaround: blizzard's code doesnt manage colors correctly when there are 2 messages being displayed with different colors.
+				Text = ("|cff%02x%02x%02x"):format(data.r * 255, data.g * 255, data.b * 255) .. Text .. "|r"
+				
+				RaidNotice_AddMessage(RaidWarningFrame, Text, bullshitTable) -- arg3 still demands a valid table for the color info, even if it is empty
 			else
 				local i = 1
 				while _G["ChatFrame"..i] do
@@ -3176,6 +3286,25 @@ TMW.ChannelList = {
 			end
 		end,
 	},
+	{
+		text = COMBAT_TEXT_LABEL,
+		desc = L["ANN_FCT_DESC"],
+		channel = "FCT",
+		sticky = 1,
+		icon = 1,
+		color = 1,		
+		handler = function(icon, data, Text)
+			if data.Icon then
+				Text = "|T" .. (icon.__tex or "") .. ":20:20:-5|t " .. Text
+			end
+			if SHOW_COMBAT_TEXT ~= "0" then
+				if not CombatText_AddMessage then
+					UIParentLoadAddOn("Blizzard_CombatText")
+				end
+				CombatText_AddMessage(Text, CombatText_StandardScroll, data.r, data.g, data.b, data.Sticky and "crit" or nil, false)
+			end
+		end,
+	},
 }
 for k, v in pairs(TMW.ChannelList) do
 	TMW.ChannelList[v.channel] = v
@@ -3191,16 +3320,18 @@ function ANN:HandleEvent(icon, data)
 		local Text = data.Text
 		local chandata = ChannelList[Channel]
 		
-		Text = TMW:InjectDataIntoString(Text, icon, not (chandata and chandata.isBlizz))
-		
 		if not chandata then
 			return
-		elseif chandata.handler then
+		end
+		
+		Text = TMW:InjectDataIntoString(Text, icon, not chandata.isBlizz, not chandata.isBlizz)
+		
+		if chandata.handler then
 			chandata.handler(icon, data, Text)
 		elseif Text and chandata.isBlizz then
 			local Location = data.Location
 			if Channel == "WHISPER" then
-				Location = TMW:InjectDataIntoString(Location, icon, true)
+				Location = TMW:InjectDataIntoString(Location, icon, true, false)
 			end
 			SendChatMessage(Text, Channel, nil, Location)
 		end
@@ -3237,7 +3368,7 @@ ANIM.AnimationList = {
 				}
 				
 				-- manual version of :StartAnimation
-				Animations[WorldFrame][Animation] = table
+				ActiveAnimations[WorldFrame][Animation] = table
 				AnimationList[Animation].OnStart(WorldFrame, table)
 			end
 		end,
@@ -3249,7 +3380,7 @@ ANIM.AnimationList = {
 				-- manual version of :StopAnimation	
 				local Animation = table.Animation
 				
-				Animations[WorldFrame][Animation] = nil
+				ActiveAnimations[WorldFrame][Animation] = nil
 				AnimationList[Animation].OnStop(WorldFrame, table)
 			else
 				local Amt = (table.Magnitude or 10) / (1 + 10*(300^(-(remaining))))
@@ -3319,7 +3450,7 @@ ANIM.AnimationList = {
 			end
 			
 			-- manual version of :StartAnimation
-			Animations[UIParent][Animation] = table
+			ActiveAnimations[UIParent][Animation] = table
 			AnimationList[Animation].OnStart(UIParent, table)
 		end,
 		
@@ -3345,7 +3476,7 @@ ANIM.AnimationList = {
 				-- manual version of :StopAnimation	
 				local Animation = table.Animation
 				
-				Animations[UIParent][Animation] = nil
+				ActiveAnimations[UIParent][Animation] = nil
 				AnimationList[Animation].OnStop(UIParent, table)
 			end
 		end,
@@ -3685,6 +3816,8 @@ function Group.GetSettings(group)
 end
 
 function Group.FinishCompilingConditions(group, funcstr)
+	group.CndtFailed = nil
+	
 	if group.OnlyInCombat then
 		if funcstr == "" then
 			funcstr = [[UnitAffectingCombat("player")]]
@@ -3885,11 +4018,11 @@ function Icon.SetScript(icon, handler, func, dontnil)
 	if handler ~= "OnUpdate" then
 		icon:setscript(handler, func)
 	else
-		tDeleteItem(IconUpdateFuncs, icon)
+		tDeleteItem(IconsToUpdate, icon)
 		if func then
-			IconUpdateFuncs[#IconUpdateFuncs+1] = icon
+			IconsToUpdate[#IconsToUpdate+1] = icon
 		end
-		sort(IconUpdateFuncs, Icon.ScriptSort)
+		sort(IconsToUpdate, Icon.ScriptSort)
 	end
 end
 
@@ -3922,7 +4055,7 @@ end
 function Icon.GetAnimations(icon)
 	if not icon.animations then
 		local t = {}
-		Animations[icon] = t
+		ActiveAnimations[icon] = t
 		icon.animations = t
 	end
 	return icon.animations
@@ -4065,7 +4198,7 @@ function Icon.ForceSetAlpha(icon, alpha)
 end
 
 function Icon.UpdateBindText(icon)
-	icon.bindText:SetText(TMW:InjectDataIntoString(icon.BindText, icon, true))
+	icon.bindText:SetText(TMW:InjectDataIntoString(icon.BindText, icon, true, true))
 end
 
 function Icon.CrunchColor(icon, duration, inrange, nomana)
@@ -4470,6 +4603,7 @@ end
 
 
 function Icon.FinishCompilingConditions(icon, funcstr)
+	icon.CndtFailed = nil
 	TMW.CNDT:CompileUpdateFunction(icon)
 	
 	return icon.typeData:FinishCompilingConditions(icon, funcstr)
@@ -4569,6 +4703,7 @@ function Icon.Setup(icon)
 	icon.__unitName = nil
 	icon.__vrtxcolor = nil
 	icon.Units = nil
+	icon.ForceDisabled = nil
 	
 	for k in pairs(TMW.Icon_Defaults) do
 		if typeData.RelevantSettings[k] then
@@ -4680,9 +4815,9 @@ function Icon.Setup(icon)
 	if icon.BindText then
 		if strfind(icon.BindText, "%%[Dd]") then
 			icon.UpdateBindText_Any = true
-			BindUpdateFuncs = BindUpdateFuncs or {}
-			tDeleteItem(BindUpdateFuncs, icon)
-			tinsert(BindUpdateFuncs,icon)
+			IconsToUpdateBindText = IconsToUpdateBindText or {}
+			tDeleteItem(IconsToUpdateBindText, icon)
+			tinsert(IconsToUpdateBindText,icon)
 		else
 			if strfind(icon.BindText, "%%[Ss]") then
 				icon.UpdateBindText_Any = true
@@ -4720,7 +4855,7 @@ function Icon.Setup(icon)
 	-- Conditions and meta icons will update it as needed.
 	if icon.FakeHidden and not hasEventHandlers then
 		icon:SetScript("OnUpdate", nil, true)
-		tDeleteItem(IconUpdateFuncs, icon)
+		tDeleteItem(IconsToUpdate, icon)
 		if Locked then
 			icon:SetInfo(0)
 		end
@@ -4761,7 +4896,7 @@ function Icon.Setup(icon)
 			icon:SetTexture(nil)
 		end
 		icon:EnableMouse(0)
-		if (not icon.Enabled) or (icon.Name == "" and not Types[icon.Type].AllowNoName) then
+		if (icon.ForceDisabled or not icon.Enabled) or (icon.Name == "" and not Types[icon.Type].AllowNoName) then
 			ClearScripts(icon)
 			icon:Hide()
 		end
@@ -5020,12 +5155,9 @@ local function getCacheString(...)
 	return strconcat(tostringall(...))
 end
 
-local eqttcache = {}
 function TMW:EquivToTable(name)
 	-- this function checks to see if a string is a valid equivalency. If it is, all the spells that it represents will be put into an array and returned. If it isn't, nil will be returned.
-	local cachestring = getCacheString(name, TMW.BE)
-	if eqttcache[cachestring] then return eqttcache[cachestring] end -- if we already made a table of this string, then reuse it to not create garbage
-	
+
 	name = strlower(name) -- everything in this function is handled as lowercase to prevent issues with user input capitalization. DONT use TMW:lowerNames() here, because the input is not the output
 	local eqname, duration = strmatch(name, "(.-):([%d:%s%.]*)$") -- see if the string being checked has a duration attached to it (it really shouldn't because there is currently no point in doing so, but a user did try this and made a bug report, so I fixed it anyway
 	name = eqname or name -- if there was a duration, then replace the old name with the actual name without the duration attached
@@ -5054,16 +5186,11 @@ function TMW:EquivToTable(name)
 		tbl[a] = new -- stick it in the table
 	end
 	
-	eqttcache[cachestring] = tbl -- cache the end result
-	
 	return tbl
 end
+TMW:MakeFunctionCached(TMW, "EquivToTable")
 
-local gsncache = {}
 function TMW:GetSpellNames(icon, setting, firstOnly, toname, hash, keepDurations)
-	local cachestring = getCacheString(icon, setting, firstOnly, toname, hash, keepDurations, TMW.BE) -- a unique key for the cache table, turn possible nils into strings
-	if gsncache[cachestring] then return gsncache[cachestring] end --why make a bunch of tables and do a bunch of stuff if we dont need to
-
 	local buffNames = TMW:SplitNames(setting) -- get a table of everything
 
 	--INSERT EQUIVALENCIES
@@ -5116,7 +5243,6 @@ function TMW:GetSpellNames(icon, setting, firstOnly, toname, hash, keepDurations
 			v = TMW:lowerNames(v)
 			hash[v] = k -- put the final value in the table as well (may or may not be the same as the original value. Value should be NameArrray's key, for use with the duration table.
 		end
-		gsncache[cachestring] = hash
 		return hash
 	end
 	if toname then
@@ -5124,25 +5250,22 @@ function TMW:GetSpellNames(icon, setting, firstOnly, toname, hash, keepDurations
 			local ret = buffNames[1] or ""
 			ret = GetSpellInfo(ret) or ret -- turn the first value into a name and return it
 			if icon then ret = TMW:lowerNames(ret) end
-			gsncache[cachestring] = ret
 			return ret
 		else
 			for k, v in ipairs(buffNames) do
 				buffNames[k] = GetSpellInfo(v or "") or v --convert everything to a name
 			end
 			if icon then TMW:lowerNames(buffNames) end
-			gsncache[cachestring] = buffNames
 			return buffNames
 		end
 	end
 	if firstOnly then
 		local ret = buffNames[1] or ""
-		gsncache[cachestring] = ret
 		return ret
 	end
-	gsncache[cachestring] = buffNames
 	return buffNames
 end
+TMW:MakeFunctionCached(TMW, "GetSpellNames")
 
 local gsdcache = {}
 function TMW:GetSpellDurations(icon, setting)
@@ -5237,74 +5360,8 @@ TMW.Units = {
 	{ value = "mainassist", 		text = L["MAINASSIST"],	range = MAX_RAID_MEMBERS  },
 }
 function TMW:GetUnits(icon, setting, dontreplace)
-	local cachestring = getCacheString(setting, dontreplace)
-	if unitcache[cachestring] then return unitcache[cachestring] end --why make a bunch of tables and do a bunch of stuff if we dont need to
-
-	setting = TMW:CleanString(setting):
-	lower(): -- all units should be lowercase
-	gsub("|cffff0000", ""): -- strip color codes (NOTE LOWERCASE)
-	gsub("|r", ""):
-	gsub("#", "") -- strip the # from the dropdown
-	
-	
-	--SUBSTITUTE "party" with "party1-4", etc
-	for _, wholething in TMW:Vararg(strsplit(";", setting)) do
-		local unit = strtrim(wholething)
-		for k, v in pairs(TMW.Units) do
-			if v.value == unit and v.range then
-				setting = gsub(setting, wholething, unit .. "1-" .. v.range)
-				break
-			end
-		end
-	end
-	
-	--SUBSTITUTE RAID1-10 WITH RAID1;RAID2;RAID3;...RAID10
-	local startpos, endpos = 0, 0
-	for wholething, unit, firstnum, lastnum, append in gmatch(setting, "((%a+) ?(%d+) ?%- ?(%d+) ?([%a]*)) ?;?") do
-		if unit and firstnum and lastnum then
-			local str = ""
-			local order = firstnum > lastnum and -1 or 1
-
-			if abs(lastnum - firstnum) > 100 then
-				TMW:Print("Why on Earth would you want to track more than 100", unit, "units? I'll just ignore it and save you from possibly crashing.")
-			else
-				for i = firstnum, lastnum, order do
-					str = str .. unit .. i .. append .. ";"
-				end
-				str = strtrim(str, " ;")
-				wholething = gsub(wholething, "%-", "%%-") -- need to escape the dash for it to work
-				setting = gsub(setting, wholething, str)
-			end
-		end
-	end
-
-	local Units = TMW:SplitNames(setting) -- get a table of everything
-
-	-- REMOVE DUPLICATES
-	local k = #Units --start at the end of the table so that we dont remove duplicates at the beginning of the table
-	while k > 0 do
-		if select(2, tContains(Units, Units[k], true)) > 1 then
-			tremove(Units, k) --if the current value occurs more than once then remove this entry of it
-		else
-			k = k - 1 --there are no duplicates, so move backwards towards zero
-		end
-	end
-
-	if not dontreplace then -- flag to set to not put it into the replacement engine. Used for shift-hover tooltips (maybe)
-		--DETECT maintank#, mainassist#, etc, and make them substitute in real unitIDs -- MUST BE LAST
-		for k, unit in pairs(Units) do
-			if strfind(unit, "^maintank") or strfind(unit, "^mainassist") then
-				local original = CopyTable(Units) 	-- copy the original unit table so we know what units to scan for when they may have changed
-				unitsToChange[original] = Units 	-- store the table that will be getting changed with the original
-				TMW:RegisterEvent("RAID_ROSTER_UPDATE")
-				TMW:RAID_ROSTER_UPDATE()
-				break
-			end
-		end
-	end
-
-	unitcache[cachestring] = Units
-	return Units
+	local set = TMW.UNITS:GetUnitSet(setting)
+	return set.exposedUnits
 end
 
 local function replace(text, find, rep)
@@ -5360,25 +5417,13 @@ function TMW:StringIsInSemicolonList(list, strtofind)
 	end
 end
 
-function TMW:HackEquivs()
-	-- the level of hackyness here is sickening. Note that OldBE does not contain the enrage equiv
-	TMW.BE = TMW.OldBE
-	TMW.BEIsHacked = 1
-end
-
-function TMW:UnhackEquivs()
-	TMW.BE = TMW.BEBackup
-	TMW.BEIsHacked = nil
-end
 
 function TMW:GetConfigIconTexture(icon, isItem)
 	if icon.Name == "" then
 		return "Interface\\Icons\\INV_Misc_QuestionMark", nil
 	else
 	
-		TMW:HackEquivs()
 		local tbl = isItem and TMW:GetItemIDs(nil, icon.Name) or TMW:GetSpellNames(nil, icon.Name)
-		TMW:UnhackEquivs()
 	
 		for _, name in ipairs(tbl) do
 			local t = isItem and GetItemIcon(name) or SpellTextures[name]
@@ -5406,6 +5451,8 @@ function TMW:GetCustomTexture(icon)
 	else
 		CustomTex = icon
 	end
+	
+	CustomTex = tonumber(CustomTex) or CustomTex
 	
 	if CustomTex then
 		TMW.TestTex:SetTexture(SpellTextures[CustomTex])
@@ -5493,73 +5540,18 @@ TMW:RegisterChatCommand("tellmewhen", "SlashCommand")
 
 
 
-
-
-
---[===[
-
-
-
-
-local UNITS = TMW:NewModule("Units", "AceEvent-3.0")
+local UNITS = TMW:NewModule("Units", "AceEvent-3.0") TMW.UNITS = UNITS
+UNITS.mtMap, UNITS.maMap = {}, {}
+UNITS.unitsWithExistsEvent = {}
+UNITS.sets = {}
 local UnitSet
 
-UNITS.activeSets = {}
-function UNITS:OnInitialize()
-	--[[if c.Unit == "target" then
-		activeEvents.PLAYER_TARGET_CHANGED = true
-	elseif c.Unit == "pet" then
-		activeEvents["UNIT_PET|'player'"] = true
-	elseif c.Unit == "focus" then
-		activeEvents.PLAYER_FOCUS_CHANGED = true
-	elseif c.Unit:find("^raid%d+$") then
-		activeEvents.RAID_ROSTER_UPDATE = true
-	elseif c.Unit:find("^party%d+$") then
-		activeEvents.PARTY_MEMBERS_CHANGED = true
-	elseif c.Unit:find("^boss%d+$") then
-		activeEvents.INSTANCE_ENCOUNTER_ENGAGE_UNIT = true
-	elseif c.Unit:find("^arena%d+$") then
-		activeEvents.ARENA_OPPONENT_UPDATE = true
-	end
-	UNITS:RegisterEvent("]]
-end
-
-UNITS.mtTranslations, UNITS.maTranslations = {}, {}
-function UNITS:UpdateTankAndAssistTranslations()
-	local mtTranslations, maTranslations = UNITS.mtTranslations, UNITS.maTranslations
-	
-	wipe(mtTranslations)
-	wipe(maTranslations)
-	
-	-- setup a table with (key, value) pairs as (oldnumber, newnumber)
-	-- oldnumber is 7 for raid7
-	-- newnumber is 1 for raid7 when the current maintank/assist is the 1st one found, 2 for the 2nd one found, etc)
-	for i = 1, GetNumRaidMembers() do
-		local raidunit = "raid" .. i
-		if GetPartyAssignment("MAINTANK", raidunit) then
-			mtTranslations[#mtTranslations + 1] = i
-		elseif GetPartyAssignment("MAINASSIST", raidunit) then
-			maTranslations[#maTranslations + 1] = i
-		end
-	end
-end
-
-UNITS.sets = {}
 function UNITS:GetUnitSet(unitSettings)
-	if UNITS.sets[unitSettings] then
-		return UNITS.sets[unitSettings]
-	else
-		local set = UnitSet:New()
-		UNITS.sets[unitSettings] = set
-		return set
-	end
+	return UnitSet:New(unitSettings)
 end
-
+TMW:MakeFunctionCached(UNITS, "GetUnitSet")
 
 function UNITS:GetOriginalUnitTable(unitSettings)
-	--local cachestring = getCacheString(unitSettings)
-	--if unitcache[cachestring] then return unitcache[cachestring] end --why make a bunch of tables and do a bunch of stuff if we dont need to
-
 	unitSettings = TMW:CleanString(unitSettings):
 	lower(): -- all units should be lowercase
 	gsub("|cffff0000", ""): -- strip color codes (NOTE LOWERCASE)
@@ -5610,116 +5602,132 @@ function UNITS:GetOriginalUnitTable(unitSettings)
 		end
 	end
 
-	unitcache[cachestring] = Units
+	--unitcache[cachestring] = Units
 	return Units
 end
+TMW:MakeFunctionCached(UNITS, "GetOriginalUnitTable")
 
---[[
-	function-----------------------------------------------
-
-	for original, Units in pairs(unitsToChange) do
-		wipe(Units) -- clear unit translations so that we arent referencing incorrect units
-		for k, oldunit in ipairs(original) do
-			if strfind(oldunit, "maintank") then -- the old unit (maintank1)
-				local newunit = gsub(oldunit, "maintank", "raid") -- the new unit (raid7)
-				local oldnumber = tonumber(strmatch(newunit, "(%d+)")) -- the old number (7)
-				local newnumber = oldnumber and mtTranslations[oldnumber] -- the new number(1)
-				if newnumber then
-					Units[#Units+1] = gsub(newunit, oldnumber, newnumber)
-			--	else -- dont put an invalid unit back into the table, that is just pointless
-				--	Units[#Units+1] = oldunit
-				end
-			elseif strfind(oldunit, "mainassist") then
-				local newunit = gsub(oldunit, "mainassist", "raid")
-				local oldnumber = tonumber(strmatch(newunit, "(%d+)"))
-				local newnumber = oldnumber and maTranslations[oldnumber]
-				if newnumber then
-					Units[#Units+1] = gsub(newunit, oldnumber, newnumber)
-				end
-			else -- it isnt a special unit, so put it back in as normal
-				Units[#Units+1] = oldunit
-			end
-		end
-	end]]
+function UNITS:UpdateTankAndAssistMap()
+	local mtMap, maMap = UNITS.mtMap, UNITS.maMap
 	
+	wipe(mtMap)
+	wipe(maMap)
+	
+	-- setup a table with (key, value) pairs as (oldnumber, newnumber)
+	-- oldnumber is 7 for raid7
+	-- newnumber is 1 for raid7 when the current maintank/assist is the 1st one found, 2 for the 2nd one found, etc)
+	for i = 1, GetNumRaidMembers() do
+		local raidunit = "raid" .. i
+		if GetPartyAssignment("MAINTANK", raidunit) then
+			mtMap[#mtMap + 1] = i
+		elseif GetPartyAssignment("MAINASSIST", raidunit) then
+			maMap[#maMap + 1] = i
+		end
+	end
+end
+
+function UNITS:OnEvent(event, ...)
+
+	if event == "RAID_ROSTER_UPDATE" and UNITS.doTankAndAssistMap then
+		UNITS:UpdateTankAndAssistMap()
+	end
+	for unitSet in next, UnitSet.instances do
+		if unitSet.updateEvents[event] then
+			unitSet:Update()
+		end
+	end
+end
+
+function UNITS:SubstituteTankAndAssistUnit(oldunit, table, key, putInvalidUnitsBack)
+	if strfind(oldunit, "^maintank") then -- the old unit (maintank1)
+		local newunit = gsub(oldunit, "maintank", "raid") -- the new unit (raid1) (number not changed yet)
+		local oldnumber = tonumber(strmatch(newunit, "(%d+)")) -- the old number (1)
+		local newnumber = oldnumber and UNITS.mtMap[oldnumber] -- the new number(7)
+		if newnumber then
+			table[key] = gsub(newunit, oldnumber, newnumber)
+			return true
+		elseif putInvalidUnitsBack then
+			table[key] = oldunit
+		end
+		return false -- placement of this inside the if block is crucial
+	elseif strfind(oldunit, "^mainassist") then
+		local newunit = gsub(oldunit, "mainassist", "raid")
+		local oldnumber = tonumber(strmatch(newunit, "(%d+)"))
+		local newnumber = oldnumber and UNITS.maMap[oldnumber]
+		if newnumber then
+			table[key] = gsub(newunit, oldnumber, newnumber)
+			return true
+		elseif putInvalidUnitsBack then
+			table[key] = oldunit
+		end
+		return false -- placement of this inside the if block is crucial
+	end
+end
+
 UnitSet = TMW:NewClass("UnitSet")
-UnitSet.updateEvents = {}
 
 function UnitSet:OnNewInstance(unitSettings)
 	self.unitSettings = unitSettings
 	self.originalUnits = UNITS:GetOriginalUnitTable(unitSettings)
+	self.updateEvents = {}
 	self.exposedUnits = {}
 	-- determine the operations that the set needs to stay updated
 	
 	for k, unit in pairs(self.originalUnits) do
-		if unit == "target" then
+		if unit == "player" then
+		--	UNITS.unitsWithExistsEvent[unit] = true -- doesnt really have an event, but do this for external checks of unitsWithExistsEvent to increase efficiency.
+		elseif unit == "target" then
 			self.updateEvents.PLAYER_TARGET_CHANGED = true
+			UNITS.unitsWithExistsEvent[unit] = true
 		elseif unit == "pet" then
 			self.updateEvents.UNIT_PET = true
+			UNITS.unitsWithExistsEvent[unit] = true
 		elseif unit == "focus" then
 			self.updateEvents.PLAYER_FOCUS_CHANGED = true
+			UNITS.unitsWithExistsEvent[unit] = true
 		elseif unit:find("^raid%d+$") then
 			self.updateEvents.RAID_ROSTER_UPDATE = true
+			UNITS.unitsWithExistsEvent[unit] = true
 		elseif unit:find("^party%d+$") then
 			self.updateEvents.PARTY_MEMBERS_CHANGED = true
+			UNITS.unitsWithExistsEvent[unit] = true
 		elseif unit:find("^boss%d+$") then
 			self.updateEvents.INSTANCE_ENCOUNTER_ENGAGE_UNIT = true
+			UNITS.unitsWithExistsEvent[unit] = true
 		elseif unit:find("^arena%d+$") then
 			self.updateEvents.ARENA_OPPONENT_UPDATE = true
+			UNITS.unitsWithExistsEvent[unit] = true
 		elseif unit:find("^maintank") or unit:find("^mainassist") then
+			UNITS:UpdateTankAndAssistMap()
 			self.updateEvents.RAID_ROSTER_UPDATE = true
+			UNITS.unitsWithExistsEvent[unit] = true
 			self.hasTankAndAssistRefs = true
+			UNITS.doTankAndAssistMap = true
 		end
 	end
-		
+	
+	for event in pairs(self.updateEvents) do
+		UNITS:RegisterEvent(event, "OnEvent")
+	end
+	
+	self:Update()
 end
 
 function UnitSet:Update()
-	local exposedUnits = self.exposedUnits
-	for k in next, self.originalUnits do
-		exposedUnits[k] = v
+	local originalUnits, exposedUnits = self.originalUnits, self.exposedUnits
+	local hasTankAndAssistRefs = self.hasTankAndAssistRefs
+	for k in next, exposedUnits do
+		exposedUnits[k] = nil
 	end
 	
-	if self.hasTankAndAssistRefs then
-		for _, oldunit in ipairs(self.originalUnits) do
-			if strfind(oldunit, "maintank") then -- the old unit (maintank1)
-				local newunit = gsub(oldunit, "maintank", "raid") -- the new unit (raid7)
-				local oldnumber = tonumber(strmatch(newunit, "(%d+)")) -- the old number (7)
-				local newnumber = oldnumber and mtTranslations[oldnumber] -- the new number(1)
-				if newnumber then
-					exposedUnits[#exposedUnits+1] = gsub(newunit, oldnumber, newnumber)
-			--	else -- dont put an invalid unit back into the table, that is just pointless
-				--	Units[#Units+1] = oldunit
-				end
-			elseif strfind(oldunit, "mainassist") then
-				local newunit = gsub(oldunit, "mainassist", "raid")
-				local oldnumber = tonumber(strmatch(newunit, "(%d+)"))
-				local newnumber = oldnumber and maTranslations[oldnumber]
-				if newnumber then
-					exposedUnits[#exposedUnits+1] = gsub(newunit, oldnumber, newnumber)
-				end
-			else -- it isnt a special unit, so put it back in as normal
-				exposedUnits[#exposedUnits+1] = oldunit
-			end
+	for k = 1, #originalUnits do
+		local oldunit = originalUnits[k]
+		local success
+		if hasTankAndAssistRefs then
+			success = UNITS:SubstituteTankAndAssistUnit(oldunit, exposedUnits, #exposedUnits+1)
+		end
+		if success == nil and (not UNITS.unitsWithExistsEvent[oldunit] or UnitExists(oldunit)) then
+			exposedUnits[#exposedUnits+1] = oldunit
 		end
 	end
 end
-
---[[
-
-
-
-	if not dontreplace then -- flag to set to not put it into the replacement engine. Used for shift-hover tooltips (maybe)
-		--DETECT maintank#, mainassist#, etc, and make them substitute in real unitIDs -- MUST BE LAST
-		for k, unit in pairs(Units) do
-			if strfind(unit, "^maintank") or strfind(unit, "^mainassist") then
-				local original = CopyTable(Units) 	-- copy the original unit table so we know what units to scan for when they may have changed
-				unitsToChange[original] = Units 	-- store the table that will be getting changed with the original
-				TMW:RegisterEvent("RAID_ROSTER_UPDATE")
-				TMW:RAID_ROSTER_UPDATE()
-				break
-			end
-		end
-	end
-	
-	]===]

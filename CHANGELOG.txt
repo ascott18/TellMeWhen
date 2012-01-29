@@ -4,10 +4,18 @@
  * Enrage is now a proper dispel type, and no longer relies on a pre-defined list of enrages.
  * Implemented a proper class-based inheritance system for many objects (Icons, Icon Types, Groups, Condition Groups).
  * You can now check units relative to the special condition unit '%u' (//for example, '%u-target' or '%upettarget'//).
+ * You can now drag spells and items to the Custom Texture editbox to easily insert the texture of that spell or item.
+ * Icons that check units now have their units managed behind the scenes whenever possible so that icons aren't trying to check units that don't exist.
+ * There is now an option (enabled by default) to color the names of units in text displays and outputs.
+ * Added Floating Combat Text as a text output.
  * Bug Fixes:
  ** (r427) (Condition):  attempt to call global 'GetPrimaryTalentTree' (a nil value)
  ** (r428) (Condition):  attempt to call global 'IsResting' (a nil value)
  ** (r428) conditions.lua line 447: attempt to compare nil with number
+ ** (r429) Implemented a workaround for Blizzard's mismanagement of color in the Raid Warning Frame text output
+ ** (r429) TellMeWhen_Options.lua:1434: attempt to index local "icon" (a nil value)
+ ** (r429) An icon/group should no longer be treated as if it has failing conditions after it had conditions that were failing, but those conditions were removed.
+ 
 
 ===v4.8.3===
  * Bug Fixes:

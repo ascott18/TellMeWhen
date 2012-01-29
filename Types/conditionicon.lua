@@ -112,6 +112,7 @@ function Type:GetNameForDisplay(icon, data)
 end
 
 function Type:FinishCompilingConditions(icon, funcstr)
+	icon.ConditionsFailed = nil
 	return funcstr, icon:GetName(), "ConditionsFailed"
 end
 
@@ -131,20 +132,7 @@ function Type:Setup(icon, groupID, iconID)
 end
 
 function Type:DragReceived(icon, t, data, subType)
-	local ics = icon:GetSettings()
-	
-	local _, input
-	if t == "spell" then
-		_, input = GetSpellBookItemInfo(data, subType)
-	elseif t == "item" then
-		input = GetItemIcon(data)
-	end
-	if not input then
-		return
-	end
-	
-	ics.CustomTex = TMW:CleanString(input)
-	return true -- signal success
+	return TMW.ID:TextureDragReceived(icon, t, data, subType)
 end
 
 function Type:GetIconMenuText(data)

@@ -23,8 +23,6 @@ local db
 local _G, strmatch, tonumber, ipairs =
 	  _G, strmatch, tonumber, ipairs
 local print = TMW.print
-local AlreadyChecked = {} TMW.AlreadyChecked = AlreadyChecked
-local ChangedMetas = {} TMW.ChangedMetas = ChangedMetas
 local Locked
 
 
@@ -68,7 +66,7 @@ local function Meta_OnUpdate(icon, time)
 	
 	for n = 1, #CompiledIcons do
 		local ic = _G[CompiledIcons[n]]
-		if ic and ic.OnUpdate and ic.__shown and not (CheckNext and AlreadyChecked[ic]) then
+		if ic and ic.OnUpdate and ic.__shown and not (CheckNext and ic.__lastMetaCheck == time) then
 			ic:Update(time)
 			local alpha = ic.__alpha
 			if alpha > 0 and ic.__shown then
@@ -86,7 +84,7 @@ local function Meta_OnUpdate(icon, time)
 					break
 				end
 			else
-				AlreadyChecked[ic] = true
+				ic.__lastMetaCheck = time
 			end
 		end
 	end
@@ -98,8 +96,8 @@ local function Meta_OnUpdate(icon, time)
 			icon.bindText:SetText(ic.bindText:GetText())
 		end
 		
-		if ic ~= icon.__currentIcon or ChangedMetas[ic] then 
-			ChangedMetas[icon] = true
+		if ic ~= icon.__currentIcon or ic.__metaChangedTime == time then 
+			icon.__metaChangedTime = time
 			
 			if not ic.UpdateBindText then
 				icon.bindText:SetText(ic.bindText:GetText())
@@ -153,7 +151,7 @@ local function Meta_OnUpdate(icon, time)
 		--	TMW:Fire("TMW_ICON_UPDATED", icon)
 		end
 		
-		AlreadyChecked[ic] = true
+		ic.__lastMetaCheck = time
 		--icon:SetInfo(alpha, color, texture, start, duration, spellChecked, reverse, count, countText, forceupdate, unit)
 		icon:SetInfo(ic.__alpha, ic.__vrtxcolor, ic.__tex, ic.__start, ic.__duration, ic.__spellChecked, ic.__reverse, ic.__count, ic.__countText, force, ic.__unitChecked)
 	else
@@ -197,7 +195,7 @@ function GetFullIconTable(icon, icons) -- check what all the possible icons it c
 					for ics, _, icID in TMW:InIconSettings(groupID) do
 						if ics.Enabled and icID <= gs.Rows*gs.Columns then
 							-- ic here is a group name
-							InsertIcon(icon, ics, ic .. "_Icon" .. iconID)
+							InsertIcon(icon, ics, ic .. "_Icon" .. icID)
 						end
 					end
 				end
@@ -225,7 +223,6 @@ function Type:Setup(icon, groupID, iconID)
 	if icon.CheckNext then
 		TMW.DoWipeAC = true
 	end
-	TMW.DoWipeChangedMetas = true
 	
 	wipe(alreadyinserted)
 	icon.CompiledIcons = wipe(icon.CompiledIcons or {})
@@ -237,6 +234,18 @@ function Type:Setup(icon, groupID, iconID)
 	for _, ic in pairs(icon.Icons) do -- make sure to get meta icons in the table even if they get expanded
 		icon.IconsLookup[ic] = true
 	end]]
+	
+	icon.ForceDisabled = true
+	for _, ic in pairs(icon.CompiledIcons) do
+		-- ic might not exist, so we have to directly look up the settings
+		local g, i = strmatch(ic, "TellMeWhen_Group(%d+)_Icon(%d+)")
+		g, i = tonumber(g), tonumber(i)
+		assert(g and i)
+		if db.profile.Groups[g].Icons[i].Enabled then
+			icon.ForceDisabled = nil
+			break
+		end
+	end
 
 	icon.ShowPBar = true
 	icon.ShowCBar = true

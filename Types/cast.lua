@@ -25,6 +25,7 @@ local UnitCastingInfo, UnitChannelInfo, UnitExists, UnitGUID =
 	  UnitCastingInfo, UnitChannelInfo, UnitExists, UnitGUID
 local print = TMW.print
 local strlowerCache = TMW.strlowerCache
+local unitsWithExistsEvent
 
 local Type = TMW.Classes.IconType:New()
 LibStub("AceEvent-3.0"):Embed(Type)
@@ -57,6 +58,7 @@ Type.EventDisabled_OnStack = true
 
 function Type:Update()
 	db = TMW.db
+	unitsWithExistsEvent = TMW.UNITS.unitsWithExistsEvent
 end
 
 local function Cast_OnUpdate(icon, time)
@@ -65,7 +67,7 @@ local function Cast_OnUpdate(icon, time)
 
 	for u = 1, #Units do
 		local unit = Units[u]
-		if UnitExists(unit) then
+		if unitsWithExistsEvent[unit] or UnitExists(unit) then -- if unitsWithExistsEvent[unit] is true then the unit is managed by TMW's unit framework, so we dont need to check that it exists.
 			local name, _, _, iconTexture, start, endTime, _, _, notInterruptible = UnitCastingInfo(unit)
 			local reverse = false -- must be false
 			if not name then

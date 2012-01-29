@@ -28,6 +28,7 @@ local SpellTextures = TMW.SpellTextures
 local strlowerCache = TMW.strlowerCache
 local _, pclass = UnitClass("Player")
 local isNumber = TMW.isNumber
+local unitsWithExistsEvent
 
 
 local Type = TMW.Classes.IconType:New()
@@ -79,13 +80,14 @@ function Type:Update()
 	ClockGCD = db.profile.ClockGCD
 	EFF_THR = db.profile.EffThreshold
 	DS = TMW.DS
+	unitsWithExistsEvent = TMW.UNITS.unitsWithExistsEvent
 end
 
 local huge = math.huge
 local function Buff_OnUpdate(icon, time)
 
-	local Units, NameArray, NameNameArray, NameHash, Filter, Filterh, Sort, ShowTTText
-	= icon.Units, icon.NameArray, icon.NameNameArray, icon.NameHash, icon.Filter, icon.Filterh, icon.Sort, icon.ShowTTText
+	local Units, NameArray, NameNameArray, NameHash, Filter, Filterh, Sort
+	= icon.Units, icon.NameArray, icon.NameNameArray, icon.NameHash, icon.Filter, icon.Filterh, icon.Sort
 	local NotStealable = not icon.Stealable
 	local NAL = icon.NAL
 
@@ -94,7 +96,7 @@ local function Buff_OnUpdate(icon, time)
 	local d = Sort == -1 and huge or 0
 	for u = 1, #Units do
 		local unit = Units[u]
-		if UnitExists(unit) then
+		if unitsWithExistsEvent[unit] or UnitExists(unit) then -- if unitsWithExistsEvent[unit] is true then the unit is managed by TMW's unit framework, so we dont need to check that it exists.
 			if NAL > EFF_THR then
 				for z=1, 60 do --60 because i can and it breaks when there are no more buffs anyway
 					local _buffName, _, _iconTexture, _count, _dispelType, _duration, _expirationTime, _, canSteal, _, _id, _, _, _v1, _v2, _v3 = UnitAura(unit, z, Filter)
