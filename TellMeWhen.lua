@@ -252,6 +252,8 @@ do	-- GetUnitIDFromGUID, GetUnitIDFromName
 		end
 	end
 
+	addids("mouseover")
+	
 	addids("target")
 	addids("targettarget")
 	addids("targettargettarget")
@@ -298,8 +300,10 @@ do	-- GetUnitIDFromGUID, GetUnitIDFromName
 	
 	
 	GetUnitIDFromName = function(name)
+		name = strlowerCache[name]
 		for k, id in ipairs(unitlist) do
-			if strlowerCache[UnitName(id)] == strlowerCache[name] then
+			local nameGuess, serverGuess = UnitName(id)
+			if (serverGuess and strlowerCache[nameGuess .. "-" .. serverGuess] == name) or strlowerCache[nameGuess] == name then
 				return id
 			end
 		end
@@ -2852,26 +2856,47 @@ do
 	end
 end
 
+local classColoredNameCache = {}
 function TMW:TryToAcquireName(input, shouldColor)
 	if not input then return end
 	
 	shouldColor = shouldColor and db.profile.ColorNames
 	
-	local name = UnitName(input or "")
-	if name then
+	local name, server = UnitName(input or "")
+	
+	if name then	-- input was a unitID if name is true.
+		if server then
+			name = name .. "-" .. server
+		end
 		if shouldColor then
 			local _, class = UnitClass(input)
-			name = ClassColors[class] .. name .. "|r"
+			local nameColored = ClassColors[class] .. name .. "|r"
+			
+			classColoredNameCache[name] = nameColored
+				
+			name = nameColored
 		end
-	else
+	else		-- input was a name.
 		name = input
+		
+		if shouldColor and classColoredNameCache[name] then
+			return classColoredNameCache[name]
+		end
+		
 		local unit = GetUnitIDFromName(input)
 		if unit then
 			if shouldColor then
 				local _, class = UnitClass(unit)
-				name = ClassColors[class] .. name .. "|r"
+				local nameColored = ClassColors[class] .. name .. "|r"
+				
+				classColoredNameCache[name] = nameColored
+					
+				name = nameColored
 			else
-				name = UnitName(unit)
+				name, server = UnitName(unit)
+				if server then
+					name = name .. "-" .. server
+				end
 			end
 		end
 	end
@@ -3759,7 +3784,7 @@ function ANIM:HandleEvent(icon, data)
 	
 end
 function ANIM:GetFlasher(parent)
-	Flasher = parent:CreateTexture(nil, "BACKGROUND", nil, 5)
+	local Flasher = parent:CreateTexture(nil, "BACKGROUND", nil, 5)
 	Flasher:SetAllPoints(parent.class == Icon and parent.texture)
 	Flasher:Hide()
 	
@@ -3771,7 +3796,6 @@ end
 -- GROUPS
 -- -----------
 
-Group = {}
 local Group = TMW:NewClass("Group", "Frame")
 
 function Group.OnNewInstance(group, ...)

@@ -14,8 +14,9 @@
  ** (r428) conditions.lua line 447: attempt to compare nil with number
  ** (r429) Implemented a workaround for Blizzard's mismanagement of color in the Raid Warning Frame text output
  ** (r429) TellMeWhen_Options.lua:1434: attempt to index local "icon" (a nil value)
- ** (r429) An icon/group should no longer be treated as if it has failing conditions after it had conditions that were failing, but those conditions were removed.
- ** (r430) Fixed the list of unitIDs used to guess a unit's class.
+ ** (r429) An icon/group should no longer be treated as if it has failing conditions after it had conditions that were failing, but those conditions were removed
+ ** (r430) Fixed the list of unitIDs used to guess a unit's class
+ ** (r431) A unit's class should now be properly detected when the unit is from another server
  
 
 ===v4.8.3===
