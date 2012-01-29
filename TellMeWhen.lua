@@ -32,7 +32,7 @@ local DRData = LibStub("DRData-1.0", true)
 TELLMEWHEN_VERSION = "4.8.3"
 TELLMEWHEN_VERSION_MINOR = strmatch(" @project-version@", " r%d+") or ""
 TELLMEWHEN_VERSION_FULL = TELLMEWHEN_VERSION .. TELLMEWHEN_VERSION_MINOR
-TELLMEWHEN_VERSIONNUMBER = 48305 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
+TELLMEWHEN_VERSIONNUMBER = 48306 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
 if TELLMEWHEN_VERSIONNUMBER > 49000 or TELLMEWHEN_VERSIONNUMBER < 48000 then return error("YOU SCREWED UP THE VERSION NUMBER OR DIDNT CHANGE THE SAFETY LIMITS") end -- safety check because i accidentally made the version number 414069 once
 
 TELLMEWHEN_MAXGROUPS = 1 	--this is a default, used by SetTheory (addon), so dont rename
@@ -242,13 +242,13 @@ end}) local isNumber = TMW.isNumber
 do	-- GetUnitIDFromGUID, GetUnitIDFromName 
 	local unitlist = {"player"}
 
-	local function addids(uid,lower,upper)
+	local function addids(uid,lower,upper, append)
 		if lower and upper then
 			for i=lower,upper do
-				unitlist[#unitlist+1] = uid..i
+				unitlist[#unitlist+1] = uid..i..(append or "")
 			end
 		else
-			unitlist[#unitlist+1] = uid
+			unitlist[#unitlist+1] = uid..(append or "")
 		end
 	end
 
@@ -267,23 +267,20 @@ do	-- GetUnitIDFromGUID, GetUnitIDFromName
 	addids("arena",1,5)
 	addids("boss",1,5)
 	addids("party",1,4)
-	addids("partypet",1,4)
+	addids("party",1,4,"pet")
 	addids("raid",1,40)
-	addids("raidpet",1,40)
 
-	addids("arenatarget",1,5)
-	addids("bosstarget",1,5)
-	addids("partytarget",1,4)
-	addids("partypettarget",1,4)
-	addids("raidtarget",1,40)
-	addids("raidpettarget",1,40)
+	addids("arena",1,5,"target")
+	addids("boss",1,5,"target")
+	addids("party",1,4,"target")
+	addids("party",1,4,"pettarget")
+	addids("raid",1,40,"target")
 
-	addids("arenatargettarget",1,5)
-	addids("bosstargettarget",1,5)
-	addids("partytargettarget",1,4)
-	addids("partypettargettarget",1,4)
-	addids("raidtargettarget",1,40)
-	addids("raidpettargettarget",1,40)
+	addids("arena",1,5,"targettarget")
+	addids("boss",1,5,"targettarget")
+	addids("party",1,4,"targettarget")
+	addids("party",1,4,"pettargettarget")
+	addids("raid",1,40,"targettarget")
 
 	addids = nil -- into the garbage you go!
 	
