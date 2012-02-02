@@ -213,9 +213,9 @@ local function Buff_OnUpdate(icon, time)
 				count = 0
 			end
 		end
-		
+
 		local color = icon:CrunchColor(duration)
-		
+
 		--icon:SetInfo(alpha, color, texture, start, duration, spellChecked, reverse, count, countText, forceupdate, unit)
 		if not id then
 			TMW:Error("NO ID RETURNED FOR " .. tostring(icon) .. " " .. buffName)
@@ -223,7 +223,7 @@ local function Buff_OnUpdate(icon, time)
 		icon:SetInfo(icon.Alpha, color, iconTexture, expirationTime - duration, duration, id, nil, count, count > 1 and count or "", nil, useUnit)
 	else
 		local color = icon:CrunchColor()
-	
+
 		icon:SetInfo(icon.UnAlpha, color, icon.FirstTexture, 0, 0, icon.NameFirst, nil, nil, nil, nil, Units[1])
 	end
 end
@@ -244,12 +244,12 @@ function Type:Setup(icon, groupID, iconID)
 		icon.Filter = icon.Filter .. "|PLAYER"
 		if icon.Filterh then icon.Filterh = icon.Filterh .. "|PLAYER" end
 	end
-	
+
 	icon:SetReverse(true)
 	icon.NAL = icon.NameNameHash[strlower(GetSpellInfo(8921))] and EFF_THR + 1 or #icon.NameArray
 	-- need to force any icon looking for moonfire to check all auras on the target because of a blizzard bug in WoW 4.1.
 	-- TODO: verify that the issue persists
-	
+
 	icon.NAL = icon.Sort and (#icon.NameArray > 1 or TMW.DS[icon.NameFirst]) and EFF_THR + 1 or icon.NAL
 	-- Force icons that sort to check all because it must find check all auras
 	-- in order to make a final decision on whether or not something has the highest/lowest duration.
@@ -257,7 +257,7 @@ function Type:Setup(icon, groupID, iconID)
 	-- Normal aura checking will stop when it finds the first one and go to check the next item in NameArray.
 
 	icon.FirstTexture = SpellTextures[icon.NameFirst]
-	
+
 	icon:SetTexture(TMW:GetConfigIconTexture(icon))
 
 	icon:SetScript("OnUpdate", Buff_OnUpdate)

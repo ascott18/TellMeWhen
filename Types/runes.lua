@@ -81,19 +81,19 @@ end
 
 local huge = math.huge
 local function Runes_OnUpdate(icon, time)
-	
+
 	local Slots, Sort = icon.Slots, icon.Sort
 	local readyslot
 	local unstart, unduration, unslot
 	local d = Sort == -1 and huge or 0
-	
+
 	for iSlot = 1, #Slots do -- be careful here. slots that are explicitly disabled by the user are set false. slots that are disabled internally are set nil.
 		if Slots[iSlot] then
 			local start, duration, runeReady = GetRuneCooldown(iSlot)
-			
+
 			if start == 0 then duration = 0 end
 			if start > time then runeReady = false end
-			
+
 			if runeReady then
 				if not readyslot then
 					readyslot = iSlot
@@ -118,19 +118,19 @@ local function Runes_OnUpdate(icon, time)
 			end
 		end
 	end
-	
+
 	--icon:SetInfo(alpha, color, texture, start, duration, spellChecked, reverse, count, countText, forceupdate, unit)
 	if readyslot then
 		local type = GetRuneType(readyslot)
-		
+
 		local color = icon:CrunchColor()
-		
+
 		icon:SetInfo(icon.Alpha, color, textures[type], 0, 0, type, nil, nil, nil, nil, nil)
 	elseif unslot then
 		local type = GetRuneType(unslot)
-		
+
 		local color = icon:CrunchColor(unduration)
-		
+
 		icon:SetInfo(icon.UnAlpha, color, textures[type], unstart, unduration, type, nil, nil, nil, nil, nil)
 	end
 end
@@ -146,16 +146,16 @@ function Type:Setup(icon, groupID, iconID)
 		local settingBit = i > 1 and bit.lshift(1, i - 1) or 1
 		icon.Slots[i] = bit.band(icon.TotemSlots, settingBit) == settingBit
 	end
-	
+
 	for k, v in ipairs(icon.Slots) do
 		if v then
 			icon.FirstTexture = textures[ceil(k/2)]
 			break
 		end
 	end
-	
+
 	icon:SetTexture(icon.FirstTexture or "Interface\\Icons\\INV_Misc_QuestionMark")
-	
+
 	icon:SetScript("OnUpdate", Runes_OnUpdate)
 	--icon:Update()
 end

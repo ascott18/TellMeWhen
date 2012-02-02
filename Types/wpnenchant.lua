@@ -76,7 +76,7 @@ local function GetWeaponEnchantName(slot)
 		local t = _G["TellMeWhen_ParserTextLeft" .. i]:GetText()
 		if t and t ~= "" then --（） multibyte parenthesis are used in zhCN locale.
 			local r = strmatch(t, "(.+)[%(%（]%d+[^%.]*[^%d]+[%)%）]") -- should work with all locales and only get the weapon enchant name, not other things (like the weapon DPS)
-			
+
 			if r then
 				r = strtrim(r)
 				if r ~= "" then
@@ -91,14 +91,14 @@ _G.GetWeaponEnchantName = GetWeaponEnchantName
 
 local function UpdateWeaponEnchantInfo(slot, selectIndex)
 	local has, expiration = select(selectIndex, GetWeaponEnchantInfo())
-	
+
 	if has then
 		local EnchantName = GetWeaponEnchantName(slot)
-		
+
 		if EnchantName then
 			expiration = expiration/1000
 			local d = WpnEnchDurs[EnchantName]
-			
+
 			if d < expiration then
 				WpnEnchDurs[EnchantName] = ceil(expiration)
 			end
@@ -137,15 +137,15 @@ local function WpnEnchant_OnUpdate(icon, time)
 			duration = expiration
 		end
 		local start = floor(time - duration + expiration)
-		
+
 		local color = icon:CrunchColor(duration)
-		
+
 		--icon:SetInfo(alpha, color, texture, start, duration, spellChecked, reverse, count, countText, forceupdate, unit)
 		icon:SetInfo(icon.Alpha, color, nil, start, duration, EnchantName, nil, nil, nil, nil, nil)
 	else
 		local color = icon:CrunchColor()
-		
-		icon:SetInfo(icon.UnAlpha, color, nil, 0, 0, nil, nil, nil, nil, nil, nil) 
+
+		icon:SetInfo(icon.UnAlpha, color, nil, 0, 0, nil, nil, nil, nil, nil, nil)
 	end
 end
 
@@ -153,11 +153,11 @@ local function WpnEnchant_OnEvent(icon, event, unit)
 	-- this function must be declared after _OnUpdate because it references _OnUpdate from inside it.
 	if not unit or unit == "player" then -- (not unit) covers calls from the timers set below
 		local Slot = icon.Slot
-		
+
 		local EnchantName = GetWeaponEnchantName(Slot)
 		icon.LastEnchantName = icon.EnchantName or icon.LastEnchantName
 		icon.EnchantName = EnchantName
-		
+
 		if icon.Name == "" then
 			icon.CorrectEnchant = true
 		elseif EnchantName then
@@ -171,18 +171,18 @@ local function WpnEnchant_OnEvent(icon, event, unit)
 			Type:ScheduleTimer(WpnEnchant_OnEvent, 0.1, icon)
 			Type:ScheduleTimer(WpnEnchant_OnEvent, 1, icon)
 		end
-		
+
 		local wpnTexture = GetInventoryItemTexture("player", Slot)
 
 		icon:SetTexture(wpnTexture or "Interface\\Icons\\INV_Misc_QuestionMark")
-	
+
 		if icon.HideUnequipped then
 			if not wpnTexture then
 				icon:SetInfo(0)
 				icon:SetScript("OnUpdate", nil)
 				return
 			end
-			
+
 			local itemID = GetInventoryItemID("player", Slot)
 			if itemID then
 				local _, _, _, _, _, _, _, _, invType = GetItemInfo(itemID)
@@ -211,10 +211,10 @@ function Type:Setup(icon, groupID, iconID)
 	icon:SetTexture(GetInventoryItemTexture("player", icon.Slot) or "Interface\\Icons\\INV_Misc_QuestionMark")
 
 	icon:SetReverse(true)
-	
+
 	icon.EnchantName = nil
 	icon.LastEnchantName = nil
-	icon.CorrectEnchant = nil		
+	icon.CorrectEnchant = nil
 
 	icon:SetScript("OnUpdate", WpnEnchant_OnUpdate)
 	icon:Update()
@@ -238,7 +238,7 @@ function Type:GetIconMenuText(data)
 		text = INVTYPE_THROWN
 	end
 	text = text .. " ((" .. L["ICONMENU_WPNENCHANT"] .. "))"
-	
+
 	local tooltip =	(data.Name and data.Name ~= "" and data.Name .. "\r\n" or "")
 
 	return text, tooltip

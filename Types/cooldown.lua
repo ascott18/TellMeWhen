@@ -80,22 +80,22 @@ local function AutoShot_OnEvent(icon, event, unit, _, _, _, spellID)
 end
 
 local function AutoShot_OnUpdate(icon, time)
-	
+
 	local NameName = icon.NameName
 	local asDuration = icon.asDuration
-	
+
 	local ready = time - icon.asStart > asDuration
 	local inrange = icon.RangeCheck and IsSpellInRange(NameName, "target") or 1
-	
+
 	if ready and inrange == 1 then
 		local color = icon:CrunchColor()
-		
+
 		--icon:SetInfo(alpha, color, texture, start, duration, spellChecked, reverse, count, countText, forceupdate, unit)
 		icon:SetInfo(icon.Alpha, icon.UnAlpha ~= 0 and pr or 1, nil, 0, 0, NameName, nil, nil, nil, nil, nil)
 	else
-		
+
 		local color = icon:CrunchColor(asDuration > 0 and asDuration, inrange)
-		
+
 		--icon:SetInfo(alpha, color, texture, start, duration, spellChecked, reverse, count, countText, forceupdate, unit)
 		icon:SetInfo(icon.UnAlpha, color, nil, icon.asStart, asDuration, NameName, nil, nil, nil, nil, nil)
 	end
@@ -124,7 +124,7 @@ local function SpellCooldown_OnUpdate(icon, time)
 			end
 			isGCD = (ClockGCD or duration ~= 0) and OnGCD(duration)
 			if inrange == 1 and not nomana and (duration == 0 or isGCD) then --usable
-			
+
 				local color = icon:CrunchColor()
 				--icon:SetInfo(alpha, color, texture, start, duration, spellChecked, reverse, count, countText, forceupdate, unit)
 				icon:SetInfo(icon.Alpha, color, SpellTextures[iName], start, duration, iName, nil, nil, nil, nil, nil)
@@ -151,7 +151,7 @@ local function SpellCooldown_OnUpdate(icon, time)
 	if duration then
 
 		local color = icon:CrunchColor(duration, inrange, nomana)
-		
+
 		--icon:SetInfo(alpha, color, texture, start, duration, spellChecked, reverse, count, countText, forceupdate, unit)
 		icon:SetInfo(icon.UnAlpha, color, icon.FirstTexture, start, duration, NameFirst, nil, nil, nil, nil, nil)
 	else
@@ -165,15 +165,15 @@ function Type:Setup(icon, groupID, iconID)
 	icon.NameName = TMW:GetSpellNames(icon, icon.Name, 1, 1)
 	icon.NameArray = TMW:GetSpellNames(icon, icon.Name)
 	icon.NameNameArray = TMW:GetSpellNames(icon, icon.Name, nil, 1)
-	
+
 	if icon.NameName == strlower(GetSpellInfo(75)) and not icon.NameArray[2] then
 		icon:SetTexture(GetSpellTexture(75))
 		icon.asStart = icon.asStart or 0
 		icon.asDuration = icon.asDuration or 0
-		
+
 		icon:RegisterEvent("UNIT_SPELLCAST_SUCCEEDED")
 		icon:SetScript("OnEvent", AutoShot_OnEvent)
-		
+
 		icon:SetScript("OnUpdate", AutoShot_OnUpdate)
 	else
 		icon.FirstTexture = SpellTextures[icon.NameFirst]
@@ -181,7 +181,7 @@ function Type:Setup(icon, groupID, iconID)
 		icon:SetTexture(TMW:GetConfigIconTexture(icon))
 		icon:SetScript("OnUpdate", SpellCooldown_OnUpdate)
 	end
-	
+
 	icon:Update()
 end
 

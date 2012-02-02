@@ -33,7 +33,7 @@ local CL_PET = COMBATLOG_OBJECT_CONTROL_PLAYER
 local clientVersion = select(4, GetBuildInfo())
 
 local DRData = LibStub("DRData-1.0", true)
-if not DRData then 
+if not DRData then
 	error("TMW: The Diminishing Returns icon type requires DRData-1.0. It is embedded within TellMeWhen - you probably just need to restart the game.")
 end
 local DRSpells = DRData.spells
@@ -124,21 +124,21 @@ local function DR_OnUpdate(icon, time)
 	for u = 1, #Units do
 		local unit = Units[u]
 		local dr = icon[UnitGUID(unit)]
-		
+
 		--icon:SetInfo(alpha, color, texture, start, duration, spellChecked, reverse, count, countText, forceupdate, unit)
 		if dr then
 			if dr.start + dr.duration <= time then
 				local color = icon:CrunchColor()
-				
+
 				icon:SetInfo(Alpha, color, dr.tex, 0, 0, icon.firstCategory, nil, nil, nil, nil, unit)
 				if Alpha > 0 then
 					return
 				end
 			else
 				local duration = dr.duration
-				
+
 				local color = icon:CrunchColor(duration)
-				
+
 				local amt = dr.amt
 				icon:SetInfo(UnAlpha, (not icon.ShowTimer and Alpha ~= 0) and .5 or 1, dr.tex, dr.start, duration, icon.firstCategory, nil, amt, amt .. "%", nil, unit)
 				if UnAlpha > 0 then
@@ -147,7 +147,7 @@ local function DR_OnUpdate(icon, time)
 			end
 		else
 			local color = icon:CrunchColor()
-			
+
 			icon:SetInfo(Alpha, color, icon.FirstTexture, 0, 0, icon.firstCategory, nil, nil, nil, nil, unit)
 			if Alpha > 0 then
 				return
@@ -178,7 +178,7 @@ local function CheckCategories(icon)
 	wipe(categoryTEMP)
 	local firstCategory, doWarn
 	local append = ""
-	
+
 	for i, IDorName in ipairs(icon.NameArray) do
 		for category, str in pairs(TMW.BE.dr) do
 			if TMW:StringIsInSemicolonList(str, IDorName) or TMW:GetSpellNames(icon, str, nil, 1, 1)[IDorName] then
@@ -193,14 +193,14 @@ local function CheckCategories(icon)
 			end
 		end
 	end
-	
+
 	if next(categoryTEMP) then
 		for category, string in TMW:OrderedPairs(categoryTEMP, "values") do
 			string = strmatch(string, ".*\001(.*)")
 			append = append .. format("\r\n\r\n%s:\r\n%s", L[category], TMW:CleanString(string))
 		end
 	end
-	
+
 	if icon:IsBeingEdited() == 1 then
 		if doWarn then
 			TMW.HELP:Show("ICON_DR_MISMATCH", icon, TMW.IE.Main.Name, 0, 0, L["WARN_DRMISMATCH"]..append)
@@ -221,7 +221,7 @@ function Type:Setup(icon, groupID, iconID)
 
 	-- Do the Right Thing and tell people if their DRs mismatch
 	CheckCategories(icon)
-	
+
 	icon:SetTexture(TMW:GetConfigIconTexture(icon))
 
 	icon:SetScript("OnEvent", DR_OnEvent)
@@ -235,7 +235,7 @@ function Type:GetFontTestValues(icon)
 	local rand = random(1, 3)
 	local testCount = rand == 1 and 0 or rand == 2 and 25 or rand == 3 and 50
 	local testCountText = testCount.."%"
-	
+
 	return testCount, testCountText
 end
 

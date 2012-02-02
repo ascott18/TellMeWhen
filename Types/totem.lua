@@ -92,18 +92,18 @@ local function Totem_OnUpdate(icon, time)
 		if Slots[iSlot] then
 			local _, totemName, start, duration, totemIcon = GetTotemInfo(iSlot)
 			if start ~= 0 and totemName and ((NameFirst == "") or NameNameHash[strlowerCache[totemName]]) then
-			
+
 				local color = icon:CrunchColor(duration)
-				
+
 				--icon:SetInfo(alpha, color, texture, start, duration, spellChecked, reverse, count, countText, forceupdate, unit)
 				icon:SetInfo(icon.Alpha, color, totemIcon, start, duration, totemName, nil, nil, nil, nil, nil)
 				return
 			end
 		end
 	end
-	
+
 	local color = icon:CrunchColor()
-	
+
 	--icon:SetInfo(alpha, color, texture, start, duration, spellChecked, reverse, count, countText, forceupdate, unit)
 	icon:SetInfo(icon.UnAlpha, color, icon.FirstTexture, 0, 0, nil, nil, nil, nil, nil, nil)
 end
@@ -158,7 +158,7 @@ function TypeIconMenuText(data)
 	if text == "" then
 		text = "((" .. Type.name .. "))"
 	end
-	
+
 	return text, data.Name and data.Name ~= ""  and data.Name .. "\r\n" or ""
 end
 

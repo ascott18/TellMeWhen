@@ -51,9 +51,9 @@ local approachTable
 local get = TMW.get
 
 ---------- Globals ----------
-BINDING_HEADER_TELLMEWHEN = L["ICON_TOOLTIP1"] 
-BINDING_NAME_TELLMEWHEN_ICONEDITOR_UNDO = L["UNDO_ICON"] 
-BINDING_NAME_TELLMEWHEN_ICONEDITOR_REDO = L["REDO_ICON"] 
+BINDING_HEADER_TELLMEWHEN = L["ICON_TOOLTIP1"]
+BINDING_NAME_TELLMEWHEN_ICONEDITOR_UNDO = L["UNDO_ICON"]
+BINDING_NAME_TELLMEWHEN_ICONEDITOR_REDO = L["REDO_ICON"]
 
 
 ---------- Data ----------
@@ -165,11 +165,11 @@ function ChatEdit_InsertLink(...)
 	local text = ...
 	local Type, id = strmatch(text, "|H(.-):(%d+)")
 	if not id then return false end
-	
+
 	if ANN.EditBox:HasFocus() then
 		-- just flat out put the link into the ANN editbox if it is focued. The ability to yell out clickable links is cool.
 		ANN.EditBox:Insert(text)
-	
+
 		-- notify success
 		return true
 	elseif IE.Main.Name:HasFocus() then
@@ -181,10 +181,10 @@ function ChatEdit_InsertLink(...)
 			-- DONT just check (CI.t ~= "item" and Type == "item") because there are link types we want to exclude, like achievements.
 			return false
 		end
-		
+
 		-- fun text insertion code
 		local Name = IE.Main.Name
-		
+
 		-- find the next semicolon in the string
 		local NameText = Name:GetText()
 		local start = #NameText
@@ -194,7 +194,7 @@ function ChatEdit_InsertLink(...)
 				break
 			end
 		end
-		
+
 		-- put the cursor right after the semicolon
 		Name:SetCursorPosition(start)
 		-- insert the text
@@ -203,7 +203,7 @@ function ChatEdit_InsertLink(...)
 		TMW:CleanString(IE.Main.Name)
 		-- put the cursor after the newly inserted text
 		Name:SetCursorPosition(start + #id + 2)
-		
+
 		-- notify success
 		return true
 	elseif IE.Main.CustomTex:HasFocus() then
@@ -225,10 +225,10 @@ function ChatEdit_InsertLink(...)
 			-- it will be appended when the texture is used.
 			tex = gsub(tex, "INTERFACE\\ICONS\\", "")
 			tex = gsub(tex, "Interface\\Icons\\", "")
-			
+
 			-- set the text
 			IE.Main.CustomTex:SetText(tex)
-			
+
 			-- notify success
 			return true
 		end
@@ -277,13 +277,13 @@ function TMW:TT(f, title, text, actualtitle, actualtext)
 	else
 		f.__title = title
 	end
-	
+
 	if text then
 		f.__text = (actualtext and text) or _G[text] or L[text]
 	else
 		f.__text = text
 	end
-	
+
 	if not f.__ttHooked then
 		f.__ttHooked = 1
 		f:HookScript("OnEnter", TTOnEnter)
@@ -342,9 +342,9 @@ function TMW:GetIconMenuText(g, i, data)
 
 	local Type = data.Type or ""
 	local typeData = Types[Type]
-	
+
 	local text, tooltip = typeData:GetIconMenuText(data)
-	
+
 	text = text == "" and L["UNNAMED"] or text
 	local textshort = strsub(text, 1, 35)
 	if strlen(text) > 35 then textshort = textshort .. "..." end
@@ -358,12 +358,12 @@ end
 
 function TMW:GuessIconTexture(data)
 	local tex
-	
+
 	if data.CustomTex then
 		tex = TMW:GetCustomTexture(data.CustomTex)
 	end
-	
-	
+
+
 	if (data.Name and data.Name ~= "" and data.Type ~= "meta" and data.Type ~= "wpnenchant" and data.Type ~= "runes") and not tex then
 		local name = TMW:GetSpellNames(nil, data.Name, 1)
 		if name then
@@ -398,7 +398,7 @@ end
 ---------- Dropdown Utilities ----------
 function TMW:SetUIDropdownText(frame, value, tbl, text)
 	frame.selectedValue = value
-	
+
 	if tbl then
 		if tbl == CNDT.Types then
 			frame:GetParent():TypeCheck(CNDT.ConditionsByType[value])
@@ -417,9 +417,11 @@ function TMW:SetUIDropdownText(frame, value, tbl, text)
 				local gID = tonumber(strmatch(value, "TellMeWhen_Group(%d+)$"))
 				if gID then
 					UIDropDownMenu_SetText(frame, TMW:GetGroupName(gID, gID))
+					return
 				end
-				return
 			end
+			UIDropDownMenu_SetText(frame, text)
+			return
 		end
 		for k, v in pairs(tbl) do
 			if v.value == value then
@@ -448,7 +450,7 @@ function TMW:SetIconPreviewIcon(icon)
 		self:Hide()
 		return
 	end
-	
+
 	local groupID = icon.group:GetID()
 	TMW:TT(self, format(L["GROUPICON"], TMW:GetGroupName(groupID, groupID, 1), icon:GetID()), "ICON_TOOLTIP2NEWSHORT", 1, nil)
 	self.icon = icon
@@ -462,7 +464,7 @@ do -- TMW:FindModule()
 	local function testFrame(frame)
 		if frame then
 			local Module = TMW:FindModule(frame)
-			if Module then 
+			if Module then
 				return Module
 			end
 		end
@@ -475,7 +477,7 @@ do -- TMW:FindModule()
 			return self
 		end
 		local Module = testFrame(self.GetParent and self:GetParent()) or testFrame(self.frame) or testFrame(self.Module) or testFrame(self.module)
-		if Module then 
+		if Module then
 			return Module
 		end
 	end
@@ -484,7 +486,7 @@ end
 do -- TMW:ReconcileData()
 	local function replace(table, key, source, destination, matchSource, matchDestination, swap)
 		local string = table[key]
-		
+
 		if matchSource and string:find(matchSource) then
 			table[key] = string:gsub(source, destination)
 		elseif not matchSource and source == string then
@@ -495,22 +497,30 @@ do -- TMW:ReconcileData()
 			table[key] = source
 		end
 	end
-	
+
 	function TMW:ReconcileData(source, destination, matchSource, matchDestination, swap, limitSourceGroup)
 		assert(source)
 		assert(destination)
-		
-		-- update any changed icons that meta icons are checking
+
 		for ics, groupID in TMW:InIconSettings() do
 			if not limitSourceGroup or groupID == limitSourceGroup then
+			
+				-- update any changed icons that meta icons are checking
 				for k, ic in pairs(ics.Icons) do
 					if type(ic) == "string" then
 						replace(ics.Icons, k, source, destination, matchSource, matchDestination, swap)
 					end
 				end
+				
+				-- update any changed icons that icon show/hide events are checking
+				for _, eventSettings in pairs(ics.Events) do
+					if type(eventSettings.Icon) == "string" then
+						replace(eventSettings, "Icon", source, destination, matchSource, matchDestination, swap)
+					end
+				end
 			end
 		end
-		
+
 		-- update any changed icons in conditions
 		for Condition, _, groupID in TMW:InConditionSettings() do
 			if not limitSourceGroup or groupID == limitSourceGroup then
@@ -519,7 +529,7 @@ do -- TMW:ReconcileData()
 				end
 			end
 		end
-		
+
 		-- update any anchors
 		for gs, groupID in TMW:InGroupSettings() do
 			if not limitSourceGroup or groupID == limitSourceGroup then
@@ -528,7 +538,7 @@ do -- TMW:ReconcileData()
 				end
 			end
 		end
-		
+
 		--TMW:Update()
 	end
 end
@@ -904,19 +914,19 @@ local groupConfigTemplate = {
 
 local colorOrder = {
 	"CBS",
-	"CBC", 
-	
-	"OOR",	
-	"OOM",	
+	"CBC",
+
+	"OOR",
+	"OOM",
 	"OORM",
-	
-	"CTA",	
-	"COA",	
-	"CTS",	
-	"COS",	
-	
-	"NA",	
-	"NS",	
+
+	"CTA",
+	"COA",
+	"CTS",
+	"COS",
+
+	"NA",
+	"NS",
 }
 local colorTemplate = {
 	type = "group",
@@ -932,7 +942,7 @@ local colorTemplate = {
 			end
 		end
 	end,
-	
+
 	args = {
 		header = {
 			order = 0,
@@ -946,7 +956,7 @@ local colorTemplate = {
 			desc = function(info)
 				local WhenChecks = TMW.Types[info[#info-2]].WhenChecks
 				local fmt = WhenChecks and WhenChecks.text or L["ICONMENU_SHOWWHEN"]
-				
+
 				return L["COLOR_" .. info[#info-1] .. "_DESC"]:format(fmt)
 			end,
 			type = "color",
@@ -957,7 +967,7 @@ local colorTemplate = {
 			end,
 			set = function(info, r, g, b, a)
 				local c = db.profile.Colors[info[#info-2]][info[#info-1]]
-				
+
 				c.r = r c.g = g c.b = b c.a = a
 				c.Override = true
 				TMW.Types[info[#info-2]]:UpdateColors()
@@ -968,7 +978,7 @@ local colorTemplate = {
 				if not base.Override then
 				--	c = db.profile.Colors["GLOBAL"][info[#info-1]] -- i don't like this. too confusing to see the color change when checking and unchecking the setting
 				end
-				
+
 				return c.r, c.g, c.b, c.a
 			end,
 			disabled = function(info)
@@ -1034,18 +1044,18 @@ local colorIconTypeTemplate = {
 	end,
 	order = function(info)
 		local this = info[#info]
-		
+
 		if this == "GLOBAL" then
 			return 0
 		end
-		
+
 		for order, type in pairs(TMW.OrderedTypes) do
 			if type.type == this then
 				return order
 			end
 		end
 	end,
-	
+
 	--only inherited by ColorMSQ and OnlyMSQ:
 	set = function(info, val)
 		db.profile[info[#info]] = val
@@ -1054,7 +1064,7 @@ local colorIconTypeTemplate = {
 	get = function(info)
 		return db.profile[info[#info]]
 	end,
-	
+
 	args = {
 		desc = {
 			order = 0,
@@ -1062,16 +1072,16 @@ local colorIconTypeTemplate = {
 			name = function(info)
 				local this = info[#info-1]
 				local t
-		
+
 				if this == "GLOBAL" then
 					t = L["COLOR_HEADER_DEFAULT"]
-				else 
+				else
 					t = L["COLOR_HEADER"]:format(TMW.Types[this].name)
 				end
 				return t .. "\r\n"
 			end,
-		}, 
-		
+		},
+
 		ColorMSQ = {
 			name = L["COLOR_MSQ_COLOR"],
 			desc = L["COLOR_MSQ_COLOR_DESC"],
@@ -1314,7 +1324,7 @@ function TMW:CompileOptions()
 		TMW.OptionsTable.args.groups.args["Group " .. g] = groupConfigTemplate
 	end
 	TMW.OptionsTable.args.groups.args.addgroupgroup.order = TELLMEWHEN_MAXGROUPS + 1
-	
+
 	TMW.OptionsTable.args.main.args.Colors.args.GLOBAL = colorIconTypeTemplate
 	for k, Type in pairs(TMW.Types) do
 		if not Type.NoColorSettings then
@@ -1343,7 +1353,7 @@ local function GetAnchoredPoints(group)
 
 	local relframe = _G[p.relativeTo] or UIParent
 	local point, relativePoint = p.point, p.relativePoint
-	
+
 	if relframe == UIParent then
 		-- use the smart anchor points provided by UIParent anchoring if it is being used
 		local _
@@ -1420,18 +1430,18 @@ function TMW:Group_Delete(groupID)
 	if db.profile.NumGroups == 1 then
 		return
 	end
-	
+
 	for id = groupID + 1, db.profile.NumGroups do
 		local source = "TellMeWhen_Group" .. id
 		local destination = "TellMeWhen_Group" .. id - 1
-		
+
 		-- check for groups exactly
 		TMW:ReconcileData(source, destination)
-		
+
 		-- check for any icons of a group.
 		TMW:ReconcileData(source, destination, source .. "_Icon", destination .. "_Icon")
 	end
-	
+
 	tremove(db.profile.Groups, groupID)
 	db.profile.NumGroups = db.profile.NumGroups - 1
 	for k, v in pairs(TMW.Icons) do
@@ -1442,7 +1452,7 @@ function TMW:Group_Delete(groupID)
 			end
 		end
 	end
-	
+
 	TMW:Update()
 	IE:Load()
 	TMW:CompileOptions()
@@ -1455,7 +1465,7 @@ function TMW:Group_Add()
 	db.profile.NumGroups = groupID
 	db.profile.Groups[db.profile.NumGroups].Enabled = true
 	TMW:Update()
-	
+
 	TMW:CompileOptions()
 	IE:NotifyChanges("groups", "Group " .. groupID)
 	return groupID, TMW[groupID]
@@ -1471,7 +1481,7 @@ function TMW:Group_HasIconData(groupID)
 			break
 		end
 	end
-	
+
 	return has
 end
 
@@ -1494,20 +1504,20 @@ function ID:OnInitialize()
 	hooksecurefunc("ClearCursor", ID.BAR_HIDEGRID)
 	ID:RegisterEvent("PET_BAR_HIDEGRID", "BAR_HIDEGRID")
 	ID:RegisterEvent("ACTIONBAR_HIDEGRID", "BAR_HIDEGRID")
-	
-	
+
+
 	ID.DD.wrapTooltips = 1
 end
 
 function ID:BAR_HIDEGRID()
-	ID.DraggingInfo = nil 
+	ID.DraggingInfo = nil
 end
 
 
 ---------- Spell/Item Dragging ----------
 function ID:TextureDragReceived(icon, t, data, subType)
 	local ics = icon:GetSettings()
-	
+
 	local _, input
 	if t == "spell" then
 		_, input = GetSpellBookItemInfo(data, subType)
@@ -1517,7 +1527,7 @@ function ID:TextureDragReceived(icon, t, data, subType)
 	if not input then
 		return
 	end
-	
+
 	ics.CustomTex = TMW:CleanString(input)
 	return true -- signal success
 end
@@ -1526,7 +1536,7 @@ function ID:SpellItemToIcon(icon, func, arg1)
 	if icon.class ~= TMW.Classes.Icon then
 		return
 	end
-	
+
 	local t, data, subType
 	local input
 	if not (CursorHasSpell() or CursorHasItem()) and ID.DraggingInfo then
@@ -1536,16 +1546,16 @@ function ID:SpellItemToIcon(icon, func, arg1)
 		t, data, subType = GetCursorInfo()
 	end
 	ID.DraggingInfo = nil
-	
+
 	if not t then
 		return
 	end
-	
+
 	IE:SaveSettings()
-	
+
 	-- create a backup before doing things
 	IE:AttemptBackup(icon)
-	
+
 	-- handle the drag based on icon type
 	local success
 	if func then
@@ -1556,7 +1566,7 @@ function ID:SpellItemToIcon(icon, func, arg1)
 	if not success then
 		return
 	end
-	
+
 	ClearCursor()
 	icon:Setup()
 	IE:Load(1)
@@ -1569,7 +1579,7 @@ function ID:DropDown()
 	info.func = ID.Handler
 	info.notCheckable = true
 	info.tooltipOnButton = true
-	
+
 	if ID.desticon then
 		-- Move
 		info.text = L["ICONMENU_MOVEHERE"]
@@ -1610,30 +1620,30 @@ function ID:DropDown()
 			end
 		end
 	end
-	
+
 	-- Anchor
 	do
 		local name, desc
-		
+
 		local srcname = L["fGROUP"]:format(TMW:GetGroupName(ID.srcicon.group:GetID(), ID.srcicon.group:GetID(), 1))
-			
+
 		if ID.desticon and ID.srcicon.group:GetID() ~= ID.desticon.group:GetID() then
 			local destname = L["fGROUP"]:format(TMW:GetGroupName(ID.desticon.group:GetID(), ID.desticon.group:GetID(), 1))
 			name = L["ICONMENU_ANCHORTO"]:format(destname)
 			desc = L["ICONMENU_ANCHORTO_DESC"]:format(srcname, destname, destname, srcname)
-			
+
 		elseif ID.destFrame and ID.destFrame:GetName() then
 			if ID.destFrame == WorldFrame and ID.srcicon.group.Point.relativeTo ~= "UIParent" then
 				name = L["ICONMENU_ANCHORTO_UIPARENT"]
 				desc = L["ICONMENU_ANCHORTO_UIPARENT_DESC"]
-				
+
 			elseif ID.destFrame ~= WorldFrame then
 				local destname = ID.destFrame:GetName()
 				name = L["ICONMENU_ANCHORTO"]:format(destname)
 				desc = L["ICONMENU_ANCHORTO_DESC"]:format(srcname, destname, destname, srcname)
 			end
 		end
-	
+
 		if name then
 			info.text = name
 			info.tooltipTitle = name
@@ -1642,7 +1652,7 @@ function ID:DropDown()
 			UIDropDownMenu_AddButton(info, UIDROPDOWNMENU_MENU_LEVEL)
 		end
 	end
-	
+
 	-- Split
 	if ID.destFrame then
 		info.text = L["ICONMENU_SPLIT"]
@@ -1664,7 +1674,7 @@ end
 
 function ID:Start(icon)
 	ID.srcicon = icon
-	
+
 	local scale = icon.group:GetScale()*0.85
 	ID.F:SetScript("OnUpdate", function()
 		local x, y = GetCursorPosition()
@@ -1688,31 +1698,31 @@ function ID:SetIsDraggingFalse()
 end
 
 function ID:CompleteDrag(script, icon)
-	
+
 	ID.F:SetScript("OnUpdate", nil)
 	ID.F:Hide()
 	ID:ScheduleTimer("SetIsDraggingFalse", 0.1)
-	
+
 	icon = icon or GetMouseFocus()
-	
+
 	-- icon here is the destination
 	if ID.IsDragging then
-		
+
 		if type(icon) == "table" and icon.class == TMW.Classes.Icon then -- if the frame that got the drag is an icon, set the destination stuff.
-		
+
 			ID.desticon = icon
 			ID.destFrame = nil
-			
+
 			if script == "OnDragStop" then -- wait for OnDragReceived
 				return
 			end
-			
+
 			if ID.desticon.group:GetID() == ID.srcicon.group:GetID() and ID.desticon:GetID() == ID.srcicon:GetID() then
 				return
 			end
-			
+
 			UIDropDownMenu_SetAnchor(ID.DD, 0, 0, "TOPLEFT", icon, "BOTTOMLEFT")
-		
+
 		else
 			ID.desticon = nil
 			ID.destFrame = icon -- not actually an icon. just some frame.
@@ -1720,7 +1730,7 @@ function ID:CompleteDrag(script, icon)
 			local UIScale = UIParent:GetScale()
 			UIDropDownMenu_SetAnchor(ID.DD, cursorX/UIScale, cursorY/UIScale, nil, UIParent, "BOTTOMLEFT")
 		end
-		
+
 		if not DropDownList1:IsShown() or UIDROPDOWNMENU_OPEN_MENU ~= ID.DD then
 			if not ID.DD.Initialized then
 				UIDropDownMenu_Initialize(ID.DD, ID.DropDown, "DROPDOWN")
@@ -1736,17 +1746,17 @@ end
 function ID:Handler(method)
 	-- close the menu
 	CloseDropDownMenus()
-	
+
 	-- save misc. settings
 	IE:SaveSettings()
-	
+
 	-- attempt to create a backup before doing anything
 	IE:AttemptBackup(ID.srcicon)
 	IE:AttemptBackup(ID.desticon)
-	
+
 	-- finally, invoke the method to handle the operation.
 	ID[method](ID)
-	
+
 	-- then, update things
 	TMW:Update()
 	IE:Load(1)
@@ -1758,21 +1768,21 @@ function ID:Move()
 	-- move the actual settings
 	db.profile.Groups[ID.desticon.group:GetID()].Icons[ID.desticon:GetID()] = db.profile.Groups[ID.srcicon.group:GetID()].Icons[ID.srcicon:GetID()]
 	db.profile.Groups[ID.srcicon.group:GetID()].Icons[ID.srcicon:GetID()] = nil
-	
+
 	-- preserve buff/debuff/other types textures
 	ID.desticon.texture:SetTexture(ID.srcicon.texture:GetTexture())
 
 	local srcicon, desticon = tostring(ID.srcicon), tostring(ID.desticon)
-	
+
 	TMW:ReconcileData(srcicon, desticon)
 end
 
 function ID:Copy()
 	-- copy the settings
 	db.profile.Groups[ID.desticon.group:GetID()].Icons[ID.desticon:GetID()] = TMW:CopyWithMetatable(db.profile.Groups[ID.srcicon.group:GetID()].Icons[ID.srcicon:GetID()])
-	
+
 	-- preserve buff/debuff/other types textures
-	ID.desticon.texture:SetTexture(ID.srcicon.texture:GetTexture()) 
+	ID.desticon.texture:SetTexture(ID.srcicon.texture:GetTexture())
 end
 
 function ID:Swap()
@@ -1780,14 +1790,14 @@ function ID:Swap()
 	local dest = db.profile.Groups[ID.desticon.group:GetID()].Icons[ID.desticon:GetID()]
 	db.profile.Groups[ID.desticon.group:GetID()].Icons[ID.desticon:GetID()] = db.profile.Groups[ID.srcicon.group:GetID()].Icons[ID.srcicon:GetID()]
 	db.profile.Groups[ID.srcicon.group:GetID()].Icons[ID.srcicon:GetID()] = dest
-	
+
 	-- preserve buff/debuff/other types textures
-	local desttex = ID.desticon.texture:GetTexture() 
+	local desttex = ID.desticon.texture:GetTexture()
 	ID.desticon.texture:SetTexture(ID.srcicon.texture:GetTexture())
 	ID.srcicon.texture:SetTexture(desttex)
 
 	local srcicon, desticon = tostring(ID.srcicon), tostring(ID.desticon)
-	
+
 	TMW:ReconcileData(srcicon, desticon, srcicon .. "$", desticon .. "$", true)
 end
 
@@ -1798,7 +1808,7 @@ end
 function ID:Condition()
 	-- add a condition to the destination icon
 	local Condition = CNDT:AddCondition(db.profile.Groups[ID.desticon.group:GetID()].Icons[ID.desticon:GetID()].Conditions)
-	
+
 	-- set the settings
 	Condition.Type = "ICON"
 	Condition.Icon = ID.srcicon:GetName()
@@ -1810,7 +1820,7 @@ function ID:Anchor()
 		if ID.desticon.group == ID.srcicon.group then
 			return
 		end
-		
+
 		-- set the setting
 		ID.srcicon.group.Point.relativeTo = ID.desticon.group:GetName()
 	else
@@ -1826,65 +1836,65 @@ function ID:Anchor()
 			-- make sure it actually has a name
 			return
 		end
-		
+
 		-- set the setting
 		ID.srcicon.group.Point.relativeTo = name
 	end
-	
+
 	-- do adjustments and positioning
 	-- i cheat. we didnt really stop moving anything, but i'm going to hijack this function anyway.
 	TMW:Group_StopMoving(ID.srcicon.group)
 end
 
-function ID:Split()	
+function ID:Split()
 	local groupID, group = TMW:Group_Add()
-	
-	
+
+
 	-- back up the icon data of the source group
 	local SOURCE_ICONS = db.profile.Groups[ID.srcicon.group:GetID()].Icons
 	-- nullify it (we don't want to copy it)
 	db.profile.Groups[ID.srcicon.group:GetID()].Icons = nil
-	
+
 	-- copy the source group.
 	-- pcall so that, in the rare event of some unforseen error, we don't lose the user's settings (they haven't yet been restored)
 	local success, err = pcall(TMW.CopyTableInPlaceWithMeta, TMW, db.profile.Groups[ID.srcicon.group:GetID()], db.profile.Groups[groupID])
-	
+
 	-- restore the icon data of the source group
 	db.profile.Groups[ID.srcicon.group:GetID()].Icons = SOURCE_ICONS
 	-- now it is safe to error since we restored the old settings
 	assert(success, err)
-	
-	
+
+
 	local gs = db.profile.Groups[groupID]
 	--gs.Icons = blankIcons
-	
+
 	-- group tweaks
 	gs.Rows = 1
 	gs.Columns = 1
 	gs.Name = ""
-	
+
 	-- adjustments and positioning
 	local p = gs.Point
 	p.point, p.relativeTo, p.relativePoint, p.x, p.y = ID.texture:GetPoint(2)
 	p.x, p.y = p.x/UIParent:GetScale()*.85, p.y/UIParent:GetScale()*.85
 	p.relativeTo = "UIParent"
 	TMW:Group_StopMoving(ID.srcicon.group)
-	
-	
+
+
 	TMW[groupID]:Setup()
-	
+
 	-- move the actual icon
 	-- move the actual settings
 	gs.Icons[1] = ID.srcicon.group.Icons[ID.srcicon:GetID()]
 	ID.srcicon.group.Icons[ID.srcicon:GetID()] = nil
-	
+
 	-- preserve buff/debuff/other types textures
 	group[1].texture:SetTexture(ID.srcicon.texture:GetTexture())
 
 	local srcicon, desticon = tostring(ID.srcicon), tostring(group[1])
-	
+
 	TMW:ReconcileData(srcicon, desticon)
-	
+
 	TMW[groupID]:Setup()
 end
 
@@ -1899,8 +1909,7 @@ ME = TMW:NewModule("MetaEditor") TMW.ME = ME
 function ME:LoadConfig()
 	local groupID, iconID = CI.g, CI.i
 	local settings = CI.ics.Icons
-	TMW:SetUIDropdownText(ME[1].icon, nil)
-
+	
 	for k, v in pairs(settings) do
 		local mg = ME[k] or CreateFrame("Frame", "TellMeWhen_IconEditorMainIcons" .. k, IE.Main.Icons.ScrollFrame.Icons, "TellMeWhen_MetaGroup", k)
 		ME[k] = mg
@@ -1911,10 +1920,9 @@ function ME:LoadConfig()
 			mg:SetPoint("TOP", ME[k-1], "BOTTOM", 0, 0)
 		end
 		mg:SetFrameLevel(IE.Main.Icons:GetFrameLevel()+2)
-		
-		TMW:SetUIDropdownText(mg.icon, v, TMW.Icons)
-		
-		mg.IconPreview:SetIcon(_G[v])
+
+		TMW:SetUIDropdownText(mg.icon, v, TMW.Icons, L["CHOOSEICON"])
+		mg.icon.IconPreview:SetIcon(_G[v])
 	end
 
 	for f=#settings+1, #ME do
@@ -1956,8 +1964,7 @@ function ME:UpOrDown(self, delta)
 end
 
 function ME:Insert(where)
-	CI.ics.Icons[1] = CI.ics.Icons[1] or TMW.Icons[1]
-	tinsert(CI.ics.Icons, where, TMW.Icons[1])
+	tinsert(CI.ics.Icons, where, "")
 	ME:LoadConfig()
 end
 
@@ -1977,14 +1984,14 @@ function ME:IconMenu()
 			local g = tonumber(strmatch(v, "TellMeWhen_Group(%d+)"))
 			if not addedGroups[g] and v ~= CI.ic:GetName() then
 				local info = UIDropDownMenu_CreateInfo()
-				
+
 				info.text = TMW:GetGroupName(g, g, 1)
-				
+
 				info.value = "TellMeWhen_Group" .. g
-				
+
 				info.func = ME.IconMenuOnClick
 				info.arg1 = self
-				
+
 				info.hasArrow = true
 				UIDropDownMenu_AddButton(info, UIDROPDOWNMENU_MENU_LEVEL)
 				addedGroups[g] = true
@@ -1996,24 +2003,24 @@ function ME:IconMenu()
 			g, i = tonumber(g), tonumber(i)
 			if tonumber(strmatch(UIDROPDOWNMENU_MENU_VALUE, "TellMeWhen_Group(%d+)")) == g and CI.ic and v ~= CI.ic:GetName() then
 				local info = UIDropDownMenu_CreateInfo()
-				
+
 				local text, textshort = TMW:GetIconMenuText(g, i)
 				info.text = textshort
 				info.tooltipTitle = text
 				info.tooltipText = format(L["GROUPICON"], TMW:GetGroupName(g, g, 1), i)
 				info.tooltipOnButton = true
-				
+
 				info.value = v
-				
+
 				info.func = ME.IconMenuOnClick
 				info.arg1 = self
-				
+
 				info.icon = TMW[g][i].texture:GetTexture()
 				UIDropDownMenu_AddButton(info, UIDROPDOWNMENU_MENU_LEVEL)
 			end
 		end
 	end
-	
+
 	--UIDropDownMenu_JustifyText(self, "LEFT")
 end
 
@@ -2041,8 +2048,8 @@ CLEU.Events = {
 "SPACE",
 	"RANGE_DAMAGE", -- normal
 	"RANGE_MISSED", -- normal
-	
-	
+
+
 "CAT_SPELL",
 	"SPELL_DAMAGE", -- normal
 	"SPELL_MISSED", -- normal
@@ -2060,8 +2067,8 @@ CLEU.Events = {
 "SPACE",
 	"DAMAGE_SHIELD", -- normal
 	"DAMAGE_SHIELD_MISSED", -- normal
-	
-	
+
+
 "CAT_AURA",
 	"SPELL_DISPEL",-- extraSpellID/name
 	"SPELL_DISPEL_FAILED",-- extraSpellID/name
@@ -2071,9 +2078,9 @@ CLEU.Events = {
 	"SPELL_AURA_APPLIED_DOSE",
 	"SPELL_AURA_REFRESH", -- normal
 	"SPELL_AURA_REMOVED", -- normal
-	"SPELL_AURA_REMOVED_DOSE",	
+	"SPELL_AURA_REMOVED_DOSE",
 	"SPELL_AURA_BROKEN",
-	
+
 	"SPELL_AURA_BROKEN_SPELL",-- extraSpellID/name
 "SPACE",
 	"SPELL_PERIODIC_DAMAGE",
@@ -2082,8 +2089,8 @@ CLEU.Events = {
 	"SPELL_PERIODIC_LEECH",
 	"SPELL_PERIODIC_HEAL",
 	"SPELL_PERIODIC_MISSED",
-	
-	
+
+
 "CAT_CAST",
 	"SPELL_CAST_FAILED",
 	"SPELL_CAST_START",
@@ -2091,9 +2098,9 @@ CLEU.Events = {
 "SPACE",
 	"SPELL_INTERRUPT",-- extraSpellID/name
 	"SPELL_INTERRUPT_SPELL",-- extraSpellID/name
-	
-	
-"CAT_MISC",	
+
+
+"CAT_MISC",
 	"DAMAGE_SPLIT",
 "SPACE",
 	"ENCHANT_APPLIED",
@@ -2110,24 +2117,24 @@ CLEU.Flags = {
     "COMBATLOG_OBJECT_REACTION_FRIENDLY",
     "COMBATLOG_OBJECT_REACTION_NEUTRAL",
     "COMBATLOG_OBJECT_REACTION_HOSTILE",
-	
+
     "SPACE",		-- "COMBATLOG_OBJECT_TYPE_MASK",
     "COMBATLOG_OBJECT_TYPE_PLAYER",
     "COMBATLOG_OBJECT_TYPE_NPC",
     "COMBATLOG_OBJECT_TYPE_PET",
     "COMBATLOG_OBJECT_TYPE_GUARDIAN",
     "COMBATLOG_OBJECT_TYPE_OBJECT",
-	
+
 	"SPACE",		-- "COMBATLOG_OBJECT_CONTROL_MASK",
     "COMBATLOG_OBJECT_CONTROL_PLAYER",
     "COMBATLOG_OBJECT_CONTROL_NPC",
-	
-	"SPACE",		-- "COMBATLOG_OBJECT_AFFILIATION_MASK", 
+
+	"SPACE",		-- "COMBATLOG_OBJECT_AFFILIATION_MASK",
     "COMBATLOG_OBJECT_AFFILIATION_MINE",
     "COMBATLOG_OBJECT_AFFILIATION_PARTY",
     "COMBATLOG_OBJECT_AFFILIATION_RAID",
     "COMBATLOG_OBJECT_AFFILIATION_OUTSIDER",
-	
+
 	"SPACE",		--"COMBATLOG_OBJECT_SPECIAL_MASK",
 	"COMBATLOG_OBJECT_TARGET",
 	"COMBATLOG_OBJECT_FOCUS",
@@ -2153,7 +2160,7 @@ CLEU.BetterMasks = {
 		COMBATLOG_OBJECT_CONTROL_PLAYER,
 		COMBATLOG_OBJECT_CONTROL_NPC
 	),
-	COMBATLOG_OBJECT_AFFILIATION_MASK = bit.bor( 
+	COMBATLOG_OBJECT_AFFILIATION_MASK = bit.bor(
 		COMBATLOG_OBJECT_AFFILIATION_MINE,
 		COMBATLOG_OBJECT_AFFILIATION_PARTY,
 		COMBATLOG_OBJECT_AFFILIATION_RAID,
@@ -2162,11 +2169,11 @@ CLEU.BetterMasks = {
 }
 
 function CLEU:OnInitialize()
-	
+
 	hooksecurefunc("UIDropDownMenu_StartCounting", function(frame)
-		if	UIDROPDOWNMENU_OPEN_MENU == IE.Main.CLEUEvents 
-		or	UIDROPDOWNMENU_OPEN_MENU == IE.Main.SourceFlags 
-		or	UIDROPDOWNMENU_OPEN_MENU == IE.Main.DestFlags 
+		if	UIDROPDOWNMENU_OPEN_MENU == IE.Main.CLEUEvents
+		or	UIDROPDOWNMENU_OPEN_MENU == IE.Main.SourceFlags
+		or	UIDROPDOWNMENU_OPEN_MENU == IE.Main.DestFlags
 		then
 			frame.showTimer = 0.5 -- i want the dropdown to hide much quicker (default is 2) after the cursor leaves it
 		end
@@ -2175,13 +2182,13 @@ end
 
 function CLEU:LoadConfig()
 	CLEU:Menus_SetTexts()
-	
+
 	CLEU:CheckMasks()
 end
 
 function CLEU:CheckMasks()
 	HELP:Hide("CLEU_WHOLECATEGORYEXCLUDED")
-	
+
 	for _, key in TMW:Vararg("SourceFlags", "DestFlags") do
 		if key then
 			for maskName, mask in pairs(CLEU.BetterMasks) do
@@ -2204,7 +2211,7 @@ function CLEU:CountDisabledBits(bitfield)
 			n = n + 1
 		end
 	end
-	return n 
+	return n
 end
 
 
@@ -2226,7 +2233,7 @@ function CLEU:Menus_SetTexts()
 		n = " (" .. n .. ")"
 	end
 	UIDropDownMenu_SetText(IE.Main.CLEUEvents, L["CLEU_EVENTS"] .. n)
-	
+
 	local n = CLEU:CountDisabledBits(CI.ics.SourceFlags)
 	if n ~= 0 then
 		n = " |cFFFF5959(" .. n .. ")|r"
@@ -2234,7 +2241,7 @@ function CLEU:Menus_SetTexts()
 		n = " (" .. n .. ")"
 	end
 	UIDropDownMenu_SetText(IE.Main.SourceFlags, L["CLEU_FLAGS"] .. n)
-	
+
 	local n = CLEU:CountDisabledBits(CI.ics.DestFlags)
 	if n ~= 0 then
 		n = " |cFFFF5959(" .. n .. ")|r"
@@ -2257,40 +2264,40 @@ function CLEU:EventMenu()
 				UIDropDownMenu_AddButton(info, UIDROPDOWNMENU_MENU_LEVEL)
 			end
 			currentCategory = event
-			
+
 		elseif (UIDROPDOWNMENU_MENU_LEVEL == 1 and not currentCategory) or (UIDROPDOWNMENU_MENU_LEVEL == 2 and UIDROPDOWNMENU_MENU_VALUE == currentCategory) then
 			if event == "SPACE" then
-				
+
 				AddDropdownSpacer()
 			else
 				local info = UIDropDownMenu_CreateInfo()
-				
+
 				info.text = L["CLEU_" .. event]
-				
+
 				local tooltipText = rawget(L, "CLEU_" .. event .. "_DESC")
 				if tooltipText then
 					info.tooltipTitle = info.text
 					info.tooltipText = tooltipText
 					info.tooltipOnButton = true
 				end
-				
+
 				info.value = event
 				info.checked = CI.ics.CLEUEvents[event]
 				info.keepShownOnClick = true
 				info.isNotRadio = true
 				info.func = CLEU.EventMenu_OnClick
 				info.arg1 = self
-				
+
 				UIDropDownMenu_AddButton(info, UIDROPDOWNMENU_MENU_LEVEL)
 			end
 		end
 		--[[if UIDROPDOWNMENU_MENU_LEVEL == 1 and v.category and not addedThings[v.category] then
 			-- addedThings IN THIS CASE is a list of categories that have been added. Add ones here that have not been added yet.
-			
+
 			if v.categorySpacebefore then
 				AddDropdownSpacer()
 			end
-			
+
 			local info = UIDropDownMenu_CreateInfo()
 			info.text = v.category
 			info.value = v.category
@@ -2303,16 +2310,16 @@ function CLEU:EventMenu()
 	--[[
 	for _, event in ipairs(CLEU.Events) do
 		local info = UIDropDownMenu_CreateInfo()
-		
+
 		info.text = L["CLEU_" .. event]
-		
+
 		info.value = event
 		info.checked = CI.ics.CLEUEvents[event]
 		info.keepShownOnClick = true
 		info.isNotRadio = true
 		info.func = CLEU.EventMenu_OnClick
 		info.arg1 = self
-		
+
 		UIDropDownMenu_AddButton(info, UIDROPDOWNMENU_MENU_LEVEL)
 	end]]
 end
@@ -2325,35 +2332,35 @@ function CLEU:EventMenu_OnClick(frame)
 		CI.ics.CLEUEvents[""] = false
 		CloseDropDownMenus()
 	end
-	
+
 	CI.ics.CLEUEvents[self.value] = not CI.ics.CLEUEvents[self.value]
-	
+
 	CLEU:Menus_SetTexts()
 	IE:ScheduleIconSetup()
 end
 
 function CLEU:FlagsMenu()
 	CLEU:CheckMasks()
-	
+
 	for _, flag in ipairs(CLEU.Flags) do
 		if flag == "SPACE" then
 			AddDropdownSpacer()
 		else
 			local info = UIDropDownMenu_CreateInfo()
-			
+
 			info.text = L["CLEU_" .. flag]
-			
+
 			info.tooltipTitle = L["CLEU_" .. flag]
 			info.tooltipText = L["CLEU_" .. flag .. "_DESC"]
 			info.tooltipOnButton = true
-			
+
 			info.value = flag
 			info.checked = bit.band(CI.ics[self.flagSet], _G[flag]) ~= _G[flag]
 			info.keepShownOnClick = true
 			info.isNotRadio = true
 			info.func = CLEU.FlagsMenu_OnClick
 			info.arg1 = self
-			
+
 			UIDropDownMenu_AddButton(info, UIDROPDOWNMENU_MENU_LEVEL)
 		end
 	end
@@ -2361,9 +2368,9 @@ end
 
 function CLEU:FlagsMenu_OnClick(frame)
 	CI.ics[frame.flagSet] = bit.bxor(CI.ics[frame.flagSet], _G[self.value])
-	
+
 	CLEU:CheckMasks()
-	
+
 	CLEU:Menus_SetTexts()
 	IE:ScheduleIconSetup()
 end
@@ -2558,20 +2565,20 @@ IE.Tabs = {
 
 
 function IE:OnInitialize()
-	
+
 	-- they see me clonin'... they hatin'...
 	-- (make TMW.IE be the same as IE)
 	-- IE[0] = TellMeWhen_IconEditor[0] (already done in .xml)
 	local meta = CopyTable(getmetatable(IE))
 	meta.__index = getmetatable(TellMeWhen_IconEditor).__index
 	setmetatable(IE, meta)
-	
+
 	IE:SetScript("OnUpdate", IE.OnUpdate)
 	IE.iconsToUpdate = {}
-	
+
 	IE.history = {}
 	IE.historyState = 0
-	
+
 	TMW:IterateAllModules("OnOptionsLoaded")
 	TMW:Fire("TMW_OPTIONS_LOADED")
 end
@@ -2579,11 +2586,11 @@ end
 function IE:OnUpdate()
 	local groupID, iconID = TMW.CI.g, TMW.CI.i
 	local icon = TMW.CI.ic
-	
+
 	if not groupID then
 		return
 	end
-	
+
 	-- update the top of the icon editor with the information of the current icon.
 	-- this is done in an OnUpdate because it is just too hard to track when the texture changes sometimes.
 	-- I don't want to fill up the main addon with configuration code to notify the IE of texture changes
@@ -2601,13 +2608,13 @@ function IE:OnUpdate()
 		self.BackButton:Show()
 		self.ForwardsButton:Show()
 	end
-	
+
 	-- run updates for any icons that are queued
 	for i, icon in ipairs(IE.iconsToUpdate) do
 		icon:Setup()
 		IE.iconsToUpdate[i] = nil
 	end
-	
+
 	-- check and see if the settings of the current icon have changed.
 	-- if they have, create a history point (or at least try to)
 	-- IMPORTANT: do this after running icon updates because SoundData is stored in the event table, which makes 2 changes over 2 frames in 1 user action, which SEVERELY screws things up
@@ -2624,7 +2631,7 @@ function IE:TMW_GLOBAL_UPDATE()
 	else
 		TellMeWhen_ConfigWarning:Hide()
 	end
-	
+
 	IE:SaveSettings()
 end
 TMW:RegisterCallback("TMW_GLOBAL_UPDATE", IE)
@@ -2640,16 +2647,16 @@ function IE:Load(isRefresh, icon, isHistoryChange)
 		CI.g = icon:GetParent():GetID()
 		CI.ic = icon
 		CI.t = icon.Type
-	
+
 		if IE.history[#IE.history] ~= icon and not isHistoryChange then
-			-- if we are using an old history point (i.e. we hit back a few times and then loaded a new icon), 
+			-- if we are using an old history point (i.e. we hit back a few times and then loaded a new icon),
 			-- delete all history points from the current one forward so that we dont jump around wildly when backing and forwarding
 			for i = IE.historyState + 1, #IE.history do
 				IE.history[i] = nil
 			end
-			
+
 			IE.history[#IE.history + 1] = icon
-			
+
 			-- set the history state to the latest point
 			IE.historyState = #IE.history
 			-- notify the back and forwards buttons that there was a change so they can :Enable() or :Disable()
@@ -2672,12 +2679,12 @@ function IE:Load(isRefresh, icon, isHistoryChange)
 
 	IE.Main.Name:SetLabels(TMW.Types[CI.t].chooseNameTitle, TMW.Types[CI.t].chooseNameText)
 	IE.Main.Name:GetScript("OnTextChanged")(IE.Main.Name)
-	
+
 	IE.Main.Unit:SetLabels(TMW.Types[CI.t].unitTitle)
 	IE.Main.Unit:GetScript("OnTextChanged")(IE.Main.Unit)
-	
+
 	TMW:SetUIDropdownText(IE.Main.Type, CI.t)
-	
+
 	CI.t = db.profile.Groups[groupID].Icons[iconID].Type
 	if CI.t == "" then
 		UIDropDownMenu_SetText(IE.Main.Type, L["ICONMENU_TYPE"])
@@ -2697,11 +2704,11 @@ function IE:Load(isRefresh, icon, isHistoryChange)
 	IE:SetupRadios()
 	IE:LoadSettings()
 	IE:ShowHide()
-	
+
 	IE:ScheduleIconSetup()
-	
+
 	HELP:ShowNext()
-	
+
 	-- It is intended that this happens at the end instead of the beginning.
 	-- Table accesses that trigger metamethods flesh out an icon's settings with new things that aren't there pre-load (usually)
 	if icon then
@@ -2714,43 +2721,43 @@ function IE:TabClick(self)
 	-- invoke blizzard's tab click function to set the apperance of all the tabs
 	PanelTemplates_Tab_OnClick(self, self:GetParent())
 	PlaySound("igCharacterInfoTab")
-	
+
 	-- hide all tabs' frames, including the current tab so that the OnHide and OnShow scripts fire
 	for id, frame in pairs(IE.Tabs) do
 		if IE[frame] then
 			IE[frame]:Hide()
 		end
 	end
-	
+
 	-- state the current tab.
 	-- this is used in many other places, including inside some OnShow scripts, so it MUST go before the :Show()s below
 	IE.CurrentTab = self
-	
+
 	-- show the selected tab's frame
 	IE[IE.Tabs[self:GetID()]]:Show()
 	-- show the icon editor
 	IE:Show()
-	
+
 	-- special handling for certain tabs.
 	if self.OnClick then
 		self:OnClick()
 	end
-	
+
 	HELP:ShowNext() -- should happen after conditions are loaded
 end
 
 function IE:NotifyChanges(...)
 	-- this is used to select the same group in all open TMW configuration windows
 	-- the path (...) is a list of keys in TMW.OptionsTable that leads to the desired group
-	
+
 	local hasPath = ...
-	
+
 	-- Notify standalone options panels of a change (Blizzard, slash command, LDB)
 	LibStub("AceConfigRegistry-3.0"):NotifyChange("TMW Options")
 	if hasPath then
 		LibStub("AceConfigDialog-3.0"):SelectGroup("TMW Options", ...)
 	end
-	
+
 	-- Notify the group settings tab in the icon editor of any changes
 	-- the order here is very specific and breaks if you change it. (:Open(), :SelectGroup(), :NotifyChange())
 	if IE.MainOptionsWidget and IE.MainOptions:IsShown() then
@@ -2849,7 +2856,7 @@ end
 function IE:LoadSettings()
 	local groupID, iconID = CI.g, CI.i
 	local ics = CI.ics
-	
+
 	for setting, settingtype in pairs(IE.Checks) do
 		local f = IE.Main[setting]
 		if settingtype == 1 then
@@ -2885,28 +2892,28 @@ function IE:LoadSettings()
 			IE.Main.LeftChecks[k] = nil
 		end
 	end
-	
+
 	local leftCheckNum = 1 -- ID of the current check being setup. will be incremented as checks are setup
-	
+
 	-- begin setting up the checks that are shown on the left side of the icon editor
 	for k, data in pairs(IE.LeftChecks) do
 		local setting = data.setting -- the setting that the check will handle
-		
+
 		if Types[CI.t].RelevantSettings[setting] and not get(data.hidden) then
 			-- the setting is used by the current icon type, and doesnt have an override that is "hiding" the check, so procede to set it up
-			
+
 			local f = IE.Main.LeftChecks[leftCheckNum] -- the check that will handle the setting
-			
+
 			if not f then
 				-- the check doesn't exist, so make it
 				f = CreateFrame("CheckButton", "TellMeWhen_IconEditorMainLeftChecks" .. leftCheckNum, TMW.IE.Main.LeftChecks, "TellMeWhen_CheckTemplate", leftCheckNum)
 				IE.Main.LeftChecks[leftCheckNum] = f -- store with the ID as the key for future reusual.
-				
+
 				if leftCheckNum ~= 1 then
 					-- anchor it to the previous check if it isn't the first one. the first one gets handled after these are all setup
 					f:SetPoint("TOP", IE.Main.LeftChecks[leftCheckNum-1], "BOTTOM", 0, 6)
 				end
-				
+
 				-- setup other fun stuff
 				f.text:SetWidth(TMW.WidthCol1)
 				f:SetScript("OnEnable", IE.LeftCheck_OnEnable)
@@ -2914,10 +2921,10 @@ function IE:LoadSettings()
 				f:SetScript("OnClick", IE.LeftCheck_OnClick)
 				f:SetMotionScriptsWhileDisabled(true)
 			end
-			
+
 			-- store the check with the setting as the key for easy external reference
 			IE.Main.LeftChecks[setting] = f
-			
+
 			-- set appearance and settings
 			f.data = data
 			f.setting = setting
@@ -2925,7 +2932,7 @@ function IE:LoadSettings()
 			TMW:TT(f, data.title, data.tooltip, 1, 1)
 			f:SetChecked(ics[setting])
 			f:Show()
-			
+
 			-- check if it should be disabled
 			if get(data.disabled) then
 				f:Enable() -- enable before disabling to force the OnDisable script to fire
@@ -2933,30 +2940,30 @@ function IE:LoadSettings()
 			else
 				f:Enable()
 			end
-			
+
 			-- Done. Increment the current check being setup
 			leftCheckNum = leftCheckNum + 1
 		end
 	end
-	
+
 	if IE.Main.LeftChecks[1] then
 		-- anchor the first check to the top left of the container
 		-- some icon types might offset the start of the left checks to fit in some other setting, which is what Type.leftCheckYOffset is
-		IE.Main.LeftChecks[1]:SetPoint("TOPLEFT", 0,  Types[CI.t].leftCheckYOffset) 
+		IE.Main.LeftChecks[1]:SetPoint("TOPLEFT", 0,  Types[CI.t].leftCheckYOffset)
 	end
-	
+
 	-- hide any extra checks that didn't get used
 	for i = leftCheckNum, #IE.Main.LeftChecks do
 		IE.Main.LeftChecks[i]:Hide()
 	end
-	
+
 	-- force the OnClick scripts to handle any hooks
 	for k, f in pairs(IE.Main.LeftChecks) do
 		if not tonumber(k) then
 			f:GetScript("OnClick")(f)
 		end
 	end
-	
+
 	-- Phew! Left checks are done. Lets move onto the "Radio" checks, shall we? (settings that have several checks but only one can be checked)
 	for _, parent in TMW:Vararg(CI.t ~= "runes" and IE.Main.TypeChecks, IE.Main.WhenChecks, IE.Main.Sort) do
 		if parent then
@@ -3202,7 +3209,7 @@ function IE:Equiv_DropDown_OnClick(value)
 	e:SetText(new)
 	local _, position = strfind(new, gsub(value, "([%-])", "%%%1"))
 	position = tonumber(position) + 2
-	
+
 	-- WARNING: lame coding from here to the end of this function.
 	e:SetFocus()
 	e:ClearFocus()
@@ -3217,13 +3224,13 @@ end
 function IE:Type_DropDown()
 	if not db then return end
 	local groupID, iconID = CI.g, CI.i
-	
+
 	for _, Type in ipairs(TMW.OrderedTypes) do -- order in the order in which they are loaded in the .toc file
 		if not Type.hidden then
 			if Type.spacebefore then
 				AddDropdownSpacer()
 			end
-			
+
 			local info = UIDropDownMenu_CreateInfo()
 			info.text = Type.name
 			info.value = Type.type
@@ -3236,7 +3243,7 @@ function IE:Type_DropDown()
 			info.func = IE.Type_Dropdown_OnClick
 			info.arg1 = Type
 			UIDropDownMenu_AddButton(info, UIDROPDOWNMENU_MENU_LEVEL)
-			
+
 			if Type.spaceafter then
 				AddDropdownSpacer()
 			end
@@ -3291,7 +3298,7 @@ function IE:Unit_DropDown_OnClick(v, e)
 	CI.ics.Unit = e:GetText()
 	IE:ScheduleIconSetup()
 	CloseDropDownMenus()
-	
+
 	db.global.HelpSettings.HasChangedUnit = db.global.HelpSettings.HasChangedUnit + 1
 end
 
@@ -3311,12 +3318,12 @@ function IE:GetRealNames() -- TODO: MODULARIZE THIS
 		tbl = TMW:GetSpellNames(nil, text)
 	end
 	local durations = Types[CI.t].DurationSyntax and TMW:GetSpellDurations(nil, text)
-	
+
 	local str = ""
 	local numadded = 0
 	local numlines = 50
 	local numperline = ceil(#tbl/numlines)
-	
+
 	for k, v in pairs(tbl) do
 		local name, texture
 		if CI.SoI == "item" then
@@ -3341,7 +3348,7 @@ function IE:GetRealNames() -- TODO: MODULARIZE THIS
 			name = name or v or ""
 			texture = texture or SpellTextures[name]
 		end
-		
+
 		if not tiptemp[name] then --prevents display of the same name twice when there are multiple spellIDs.
 			numadded = numadded + 1
 			local dur = Types[CI.t].DurationSyntax and " ("..TMW:FormatSeconds(durations[k])..")" or ""
@@ -3367,14 +3374,14 @@ function IE:GetRealUnits(editbox)
 	if cachedunits[text] then return cachedunits[text] end
 
 	local tbl = TMW.UNITS:GetOriginalUnitTable(text)
-	
+
 	local str = ""
 	local numadded = 0
 	local numlines = 50
 	local numperline = ceil(#tbl/numlines)
-	
+
 	for k, v in pairs(tbl) do
-		
+
 		if not tiptemp[v] then --prevents display of the same name twice when there are multiple units... or something. I copy-pasted this.
 			numadded = numadded + 1
 			str = str ..
@@ -3420,7 +3427,7 @@ TMW.ImportFunctions = {
 		local groupID, iconID = CI.g, CI.i
 		db.profile.Groups[groupID].Icons[iconID] = nil -- restore defaults, table recreated when passed in to CTIPWM
 		TMW:CopyTableInPlaceWithMeta(data, db.profile.Groups[groupID].Icons[iconID])
-		
+
 		if version then
 			if version > TELLMEWHEN_VERSIONNUMBER then
 				TMW:Print(L["FROMNEWERVERSION"])
@@ -3436,14 +3443,14 @@ TMW.ImportFunctions = {
 		db.profile.Groups[destgroupID] = nil -- restore defaults, table recreated when passed in to CTIPWM
 		local gs = db.profile.Groups[destgroupID]
 		TMW:CopyTableInPlaceWithMeta(data, gs)
-		
+
 		-- change any meta icon components to the new group if the meta and components are/were in the same group (icon conditions, too)
 		if oldgroupID then
 			local srcgr, destgr = "TellMeWhen_Group"..oldgroupID, TMW[destgroupID]:GetName()
-			
+
 			TMW:ReconcileData(srcgr, destgr, srcgr, destgr, nil, destgroupID)
 		end
-	
+
 		if version then
 			if version > TELLMEWHEN_VERSIONNUMBER then
 				TMW:Print(L["FROMNEWERVERSION"])
@@ -3454,24 +3461,24 @@ TMW.ImportFunctions = {
 	end,
 	global = function(data, version, noOverwrite)
 		if noOverwrite then -- noOverwrite is a name in this case.
-		
+
 			local base = gsub(noOverwrite, " %(%d+%)$", "")
 			local newnum = 2
-			
+
 			-- generate a new name if the profile already exists
 			local newname = base .. " (" .. newnum .. ")"
 			while db.profiles[newname] do
 				newnum = newnum + 1
 				newname = base .. " (" .. newnum .. ")"
 			end
-			
+
 			-- this will create a new profile if one by this name does not exist
 			db:SetProfile(newname)
 		else
 			db:ResetProfile()
 		end
 		TMW:CopyTableInPlaceWithMeta(data, db.profile)
-		
+
 		if version then
 			if version > TELLMEWHEN_VERSIONNUMBER then
 				TMW:Print(L["FROMNEWERVERSION"])
@@ -3489,7 +3496,7 @@ function TMW:Import(data, version, type, ...)
 	assert(version, "Missing version of data")
 	assert(type, "No data type specified!")
 	CloseDropDownMenus()
-	
+
 	local importfunc = TMW.ImportFunctions[type]
 	if importfunc then
 		importfunc(data, version, ...)
@@ -3517,7 +3524,7 @@ function TMW:ExportToComm(editbox, ...)
 	local player = strtrim(editbox:GetText())
 	if player and #player > 1 then -- and #player < 13 you can send to cross server people in a battleground ("Cybeloras-Mal'Ganis"), so it can be more than 13
 		local s = TMW:GetSettingsString(...)
-		
+
 		if player == "RAID" or player == "GUILD" then -- note the upper case
 			TMW:SendCommMessage("TMW", s, player, nil, "BULK", editbox.callback, editbox)
 		else
@@ -3541,45 +3548,45 @@ function TMW:MakeSerializedDataPretty(string)
 	gsub("%^ ^", "^^") -- remove double space at the end
 end
 
-function TMW:DeserializeData(string)	
+function TMW:DeserializeData(string)
 	local success, data, version, spaceControl, type, arg1, arg2, arg3, arg4, arg5 = TMW:Deserialize(string)
 	if not success then
 		-- corrupt/incomplete string
 		return nil
 	end
-	
+
 	if not version then
 		-- if the version is not included in the data,
 		-- then it must have been before the first version that included versions in export strings/comm,
 		-- so just take a guess that it was the first version that had version checks with it.
 		version = 41403
 	end
-	
+
 	if version <= 45809 and not type and data.Type then
 		-- 45809 was the last version to contain untyped data messages.
 		-- It only supported icon imports/exports, so the type has to be an icon.
 		type = "icon"
 	end
-	
+
 	if not TMW.ImportFunctions[type] then
 		-- unknown data type
 		return nil
 	end
-	
+
 	if spaceControl then
 		if spaceControl:find("`|") then
 			-- EVERYTHING is fucked up. try really hard to salvage it. It probably won't be completely successful
-			return TMW:DeserializeData(string:gsub("`", "~`"):gsub("~`|", "~`~|"))	
+			return TMW:DeserializeData(string:gsub("`", "~`"):gsub("~`|", "~`~|"))
 		elseif spaceControl:find("`") then
 			-- if spaces have become corrupt, then reformat them and... re-deserialize (lol)
-			return TMW:DeserializeData(string:gsub("`", "~`"))	
+			return TMW:DeserializeData(string:gsub("`", "~`"))
 		elseif spaceControl:find("~|") then
 			-- if pipe characters have been screwed up by blizzard's cute little method of escaping things combined with AS-3.0's cute way of escaping things, try to fix them.
-			return TMW:DeserializeData(string:gsub("~||", "~|"))	
+			return TMW:DeserializeData(string:gsub("~||", "~|"))
 		end
 	end
-	
-	
+
+
 	-- finally, we have everything we need. create a result object and return it.
 	local result = {
 		data = data,
@@ -3591,7 +3598,7 @@ function TMW:DeserializeData(string)
 		arg4 = arg4,
 		arg5 = arg5,
 	}
-	
+
 	return result
 end
 
@@ -3601,7 +3608,7 @@ function TMW:GetSettingsString(type, settings, defaults, ...)
 	assert(settings, "No data to serialize!")
 	assert(type, "No data type specified!")
 	assert(defaults, "No defaults specified!")
-	
+
 	-- ... contains additional data that may or may not be used/needed
 	IE:SaveSettings()
 	settings = CopyTable(settings)
@@ -3675,14 +3682,14 @@ function IE:Copy_DropDown_Icon_OnClick(ics, version)
 		TMW.HELP:Show("ICON_IMPORT_CURRENTPROFILE", nil, IE.ExportBox, 0, 0, L["HELP_IMPORT_CURRENTPROFILE"])
 	end
 	TMW[CI.g][CI.i]:SetTexture(nil)
-	
+
 	TMW:Import(ics, version, "icon")
 end
 
 function IE:AddIconToCopyDropdown(ics, groupID, iconID, profilename, group_src, version_src, force, disabled)
 	if force or (tonumber(iconID) and not IE:DeepCompare(DEFAULT_ICON_SETTINGS, ics)) then
 		info = UIDropDownMenu_CreateInfo()
-		
+
 		local tex
 		local ic = groupID and iconID and TMW[groupID] and TMW[groupID][iconID]
 		if db:GetCurrentProfile() == profilename and ic and ic.texture:GetTexture() then
@@ -3692,27 +3699,27 @@ function IE:AddIconToCopyDropdown(ics, groupID, iconID, profilename, group_src, 
 			tex = TMW:GuessIconTexture(ics)
 			info.value = false
 		end
-		
+
 		local text, textshort, tooltipText = TMW:GetIconMenuText(nil, nil, ics)
 		info.text = textshort
 		info.tooltipTitle = groupID and format(L["GROUPICON"], TMW:GetGroupName(group_src and group_src.Name, groupID, 1), iconID) or L["ICON"]
 		info.tooltipText = tooltipText
 		info.tooltipOnButton = true
-		
+
 		info.notCheckable = true
-		
+
 		info.icon = tex
 		info.tCoordLeft = 0.07
 		info.tCoordRight = 0.93
 		info.tCoordTop = 0.07
 		info.tCoordBottom = 0.93
-		
+
 		info.func = IE.Copy_DropDown_Icon_OnClick
 		info.arg1 = ics
 		info.arg2 = version_src
-		
+
 		info.disabled = disabled
-		
+
 		UIDropDownMenu_AddButton(info, UIDROPDOWNMENU_MENU_LEVEL)
 	end
 end
@@ -3721,21 +3728,21 @@ local DeserializedData = {}
 function IE:Copy_DropDown(...)
 	local DROPDOWN = self
 	local EDITBOX = DROPDOWN:GetParent()
-	
+
 	local iconIDCurrent = TMW.CI.i
 	local groupIDCurrent = TMW.CI.g
 	if EDITBOX.obj then -- ace3 gui widget
-		groupIDCurrent = findid(EDITBOX.obj.userdata) -- might be nil if the editbox isnt in a group's config 
+		groupIDCurrent = findid(EDITBOX.obj.userdata) -- might be nil if the editbox isnt in a group's config
 		iconIDCurrent = nil
 	elseif IE.CurrentTab:GetID() > #IE.Tabs - 2 then
 		iconIDCurrent = nil
 	end
-	
+
 	if not CI.ic then
 		TMW.IE:Load(1, TMW:InIcons()()) -- hack to get the first icon that exists
 	end
 	local info
-	
+
 	if TMW.Received then
 		 -- deserialize received comm
 		for k, who in pairs(TMW.Received) do
@@ -3753,32 +3760,32 @@ function IE:Copy_DropDown(...)
 			TMW.Received = nil
 		end
 	end
-	
+
 	local t = strtrim(EDITBOX:GetText())
 	local editboxResult = t ~= "" and TMW:DeserializeData(t)
 	t = nil -- we dont want any accidents...
 
-	
+
 	if type(UIDROPDOWNMENU_MENU_VALUE) == "string" and (strfind(UIDROPDOWNMENU_MENU_VALUE, "^IMPORT_BACKUP") or strfind(UIDROPDOWNMENU_MENU_VALUE, "^IMPORT_FROMBACKUP")) then
 		info = UIDropDownMenu_CreateInfo()
 		info.text = "|cffff0000" .. L["IMPORT_FROMBACKUP_WARNING"]:format(TMW.BackupDate)
 		info.isTitle = true
 		info.notCheckable = true
 		UIDropDownMenu_AddButton(info, UIDROPDOWNMENU_MENU_LEVEL)
-		
+
 		AddDropdownSpacer()
 	end
-	
+
 	if UIDROPDOWNMENU_MENU_LEVEL == 1 then -- main menu
 		----------IMPORT----------
-		
+
 		--heading
 		info = UIDropDownMenu_CreateInfo()
 		info.text = L["IMPORT_HEADING"]
 		info.isTitle = true
 		info.notCheckable = true
 		UIDropDownMenu_AddButton(info, UIDROPDOWNMENU_MENU_LEVEL)
-		
+
 		--import from local
 		info = UIDropDownMenu_CreateInfo()
 		info.text = L["IMPORT_FROMLOCAL"]
@@ -3786,7 +3793,7 @@ function IE:Copy_DropDown(...)
 		info.hasArrow = true
 		info.notCheckable = true
 		UIDropDownMenu_AddButton(info, UIDROPDOWNMENU_MENU_LEVEL)
-		
+
 		--import from backup
 		info = UIDropDownMenu_CreateInfo()
 		info.text = L["IMPORT_FROMBACKUP"]
@@ -3798,7 +3805,7 @@ function IE:Copy_DropDown(...)
 		info.hasArrow = true
 		info.notCheckable = true
 		UIDropDownMenu_AddButton(info, UIDROPDOWNMENU_MENU_LEVEL)
-		
+
 		--import from string
 		info = UIDropDownMenu_CreateInfo()
 		info.text = (EDITBOX.DoPulseValidString and "|cff00ff00" or "") .. L["IMPORT_FROMSTRING"]
@@ -3820,7 +3827,7 @@ function IE:Copy_DropDown(...)
 		info.disabled = not editboxResult
 		info.hasArrow = not info.disabled
 		UIDropDownMenu_AddButton(info, UIDROPDOWNMENU_MENU_LEVEL)
-		
+
 		--import from comm
 		info = UIDropDownMenu_CreateInfo()
 		info.text = (TMW.DoPulseReceivedComm and "|cff33ff33" or "") ..  L["IMPORT_FROMCOMM"]
@@ -3833,18 +3840,18 @@ function IE:Copy_DropDown(...)
 		info.disabled = not next(DeserializedData)
 		info.hasArrow = not info.disabled
 		UIDropDownMenu_AddButton(info, UIDROPDOWNMENU_MENU_LEVEL)
-		
-		
+
+
 		AddDropdownSpacer()
 		----------EXPORT----------
-		
+
 		--heading
 		info = UIDropDownMenu_CreateInfo()
 		info.text = L["EXPORT_HEADING"]
 		info.isTitle = true
 		info.notCheckable = true
 		UIDropDownMenu_AddButton(info, UIDROPDOWNMENU_MENU_LEVEL)
-		
+
 		--export to string
 		info = UIDropDownMenu_CreateInfo()
 		info.text = L["EXPORT_TOSTRING"]
@@ -3855,16 +3862,16 @@ function IE:Copy_DropDown(...)
 		info.hasArrow = true
 		info.notCheckable = true
 		UIDropDownMenu_AddButton(info, UIDROPDOWNMENU_MENU_LEVEL)
-		
+
 		--export to comm
 		info = UIDropDownMenu_CreateInfo()
 		local player = strtrim(EDITBOX:GetText())
 		info.disabled = (strfind(player, "[`~^%d]") or #player <= 1) and true
-		local text 
+		local text
 		if player == "RAID" or player == "GUILD" then
 			text = L["EXPORT_TO" .. player]
 		else
-			text = L["EXPORT_TOCOMM"] 
+			text = L["EXPORT_TOCOMM"]
 			if not info.disabled then
 				text = text .. ": " .. player
 			end
@@ -3877,12 +3884,12 @@ function IE:Copy_DropDown(...)
 		info.value = "EXPORT_TOCOMM"
 		info.hasArrow = not info.disabled
 		info.notCheckable = true
-		
+
 		UIDropDownMenu_AddButton(info, UIDROPDOWNMENU_MENU_LEVEL)
 	end
-	
+
 	if UIDROPDOWNMENU_MENU_LEVEL == 2 then
-	
+
 		if UIDROPDOWNMENU_MENU_VALUE == "IMPORT_FROMLOCAL" or UIDROPDOWNMENU_MENU_VALUE == "IMPORT_FROMBACKUP" then
 			local prefix
 			if UIDROPDOWNMENU_MENU_VALUE == "IMPORT_FROMLOCAL" then
@@ -3902,7 +3909,7 @@ function IE:Copy_DropDown(...)
 			end
 
 			AddDropdownSpacer()
-			
+
 			--other profiles
 			for profilename, profiletable in TMW:OrderedPairs(db.profiles) do
 				local profiletable = profile_src
@@ -3915,7 +3922,7 @@ function IE:Copy_DropDown(...)
 					UIDropDownMenu_AddButton(info, UIDROPDOWNMENU_MENU_LEVEL)
 				end
 			end
-			
+
 			--default profile
 			if db.profiles["Default"] and currentProfile ~= "Default" then
 				info = UIDropDownMenu_CreateInfo()
@@ -3926,16 +3933,16 @@ function IE:Copy_DropDown(...)
 				UIDropDownMenu_AddButton(info, UIDROPDOWNMENU_MENU_LEVEL)
 			end
 		end
-		
+
 		if UIDROPDOWNMENU_MENU_VALUE == "IMPORT_FROMSTRING_ICON" and editboxResult then
 			IE:AddIconToCopyDropdown(editboxResult.data, nil, nil, nil, nil, editboxResult.version, true, not iconIDCurrent)
-			
+
 		end
-		
+
 		if UIDROPDOWNMENU_MENU_VALUE == "IMPORT_FROMCOMM" then
 			TMW.DoPulseReceivedComm = nil
 			DROPDOWN.Dummy.Glow.Anim:Finish()
-			
+
 			for i, result in ipairs(DeserializedData) do
 				if result.type == "icon" then
 					IE:AddIconToCopyDropdown(result.data, nil, nil, nil, nil, result.version, true, not iconIDCurrent)
@@ -3957,9 +3964,9 @@ function IE:Copy_DropDown(...)
 				end
 			end
 		end
-		
+
 		if UIDROPDOWNMENU_MENU_VALUE == "EXPORT_TOCOMM" then
-		
+
 			-- icon to comm
 			if iconIDCurrent then
 				info = UIDropDownMenu_CreateInfo()
@@ -3974,7 +3981,7 @@ function IE:Copy_DropDown(...)
 				end
 				UIDropDownMenu_AddButton(info, UIDROPDOWNMENU_MENU_LEVEL)
 			end
-			
+
 			-- group to comm
 			if groupIDCurrent then
 				info = UIDropDownMenu_CreateInfo()
@@ -3989,7 +3996,7 @@ function IE:Copy_DropDown(...)
 				end
 				UIDropDownMenu_AddButton(info, UIDROPDOWNMENU_MENU_LEVEL)
 			end
-			
+
 			-- global to comm
 			info = UIDropDownMenu_CreateInfo()
 			info.text = L["fPROFILE"]:format(db:GetCurrentProfile())
@@ -4002,9 +4009,9 @@ function IE:Copy_DropDown(...)
 			end
 			UIDropDownMenu_AddButton(info, UIDROPDOWNMENU_MENU_LEVEL)
 		end
-		
+
 		if UIDROPDOWNMENU_MENU_VALUE == "EXPORT_TOSTRING" then
-		
+
 			-- icon to string
 			if iconIDCurrent then
 				info = UIDropDownMenu_CreateInfo()
@@ -4019,7 +4026,7 @@ function IE:Copy_DropDown(...)
 				end
 				UIDropDownMenu_AddButton(info, UIDROPDOWNMENU_MENU_LEVEL)
 			end
-			
+
 			-- group to string
 			if groupIDCurrent then
 				info = UIDropDownMenu_CreateInfo()
@@ -4034,7 +4041,7 @@ function IE:Copy_DropDown(...)
 				end
 				UIDropDownMenu_AddButton(info, UIDROPDOWNMENU_MENU_LEVEL)
 			end
-			
+
 			-- global to string
 			info = UIDropDownMenu_CreateInfo()
 			info.text = L["fPROFILE"]:format(db:GetCurrentProfile())
@@ -4051,7 +4058,7 @@ function IE:Copy_DropDown(...)
 
 	if not UIDROPDOWNMENU_MENU_VALUE then return end
 	if type(UIDROPDOWNMENU_MENU_VALUE) ~= "string" then return end
-		
+
 	local IMPORT, PROFILE, profilename, groupID = strsplit("_", UIDROPDOWNMENU_MENU_VALUE)
 	if IMPORT ~= "IMPORT" then return end
 	groupID = tonumber(groupID)
@@ -4086,7 +4093,7 @@ function IE:Copy_DropDown(...)
 		local VersionSetting = profile_src.Version
 		version_src = #gsub(VersionSetting, "[^%d]", "") >= 5 and tonumber(VersionSetting) or TELLMEWHEN_VERSIONNUMBER
 	end
-	
+
 	if groupID then
 		-- header
 		info = UIDropDownMenu_CreateInfo()
@@ -4100,7 +4107,7 @@ function IE:Copy_DropDown(...)
 		info.text = L["COPYGROUP"] .. " - " .. L["COPYPOSSCALE"]
 		info.func = function()
 			CloseDropDownMenus()
-			
+
 			local dest = db.profile.Groups[CI.g]
 			dest.Point = CopyTable(TMW.Group_Defaults.Point) -- not a special table (["**"]), so just normally copy it. Setting it nil won't recreate it like other settings tables, so re-copy from defaults
 			TMW:CopyTableInPlaceWithMeta(group_src.Point, dest.Point)
@@ -4112,7 +4119,7 @@ function IE:Copy_DropDown(...)
 		info.notCheckable = true
 		info.disabled = not groupIDCurrent
 		UIDropDownMenu_AddButton(info, UIDROPDOWNMENU_MENU_LEVEL)
-		
+
 		-- copy entire group - overwrite current
 		info = UIDropDownMenu_CreateInfo()
 		info.text = L["COPYGROUP"] .. " - " .. L["OVERWRITEGROUP"]:format(groupIDCurrent and TMW:GetGroupName(groupIDCurrent, groupIDCurrent, 1) or "?")
@@ -4122,7 +4129,7 @@ function IE:Copy_DropDown(...)
 		info.notCheckable = true
 		info.disabled = not groupIDCurrent
 		UIDropDownMenu_AddButton(info, UIDROPDOWNMENU_MENU_LEVEL)
-		
+
 		-- copy entire group - create new group
 		info = UIDropDownMenu_CreateInfo()
 		info.text = L["COPYGROUP"] .. " - " .. L["MAKENEWGROUP"]
@@ -4134,7 +4141,7 @@ function IE:Copy_DropDown(...)
 
 		if group_src.Icons and next(group_src.Icons) then
 			AddDropdownSpacer()
-			
+
 			-- icon header
 			info = UIDropDownMenu_CreateInfo()
 			info.text = L["UIPANEL_ICONS"]
@@ -4142,7 +4149,7 @@ function IE:Copy_DropDown(...)
 			info.notCheckable = true
 			UIDropDownMenu_AddButton(info, UIDROPDOWNMENU_MENU_LEVEL)
 
-			
+
 			-- add individual icons
 			for iconID, ics in TMW:OrderedPairs(group_src.Icons) do
 				IE:AddIconToCopyDropdown(ics, groupID, iconID, profilename, group_src, version_src, nil, not iconIDCurrent)
@@ -4155,7 +4162,7 @@ function IE:Copy_DropDown(...)
 		info.isTitle = true
 		info.notCheckable = true
 		UIDropDownMenu_AddButton(info, UIDROPDOWNMENU_MENU_LEVEL)
-	
+
 		-- copy entire profile - overwrite current
 		info = UIDropDownMenu_CreateInfo()
 		info.text = L["IMPORT_PROFILE"] .. " - " .. L["IMPORT_PROFILE_OVERWRITE"]:format(db:GetCurrentProfile())
@@ -4164,7 +4171,7 @@ function IE:Copy_DropDown(...)
 		end
 		info.notCheckable = true
 		UIDropDownMenu_AddButton(info, UIDROPDOWNMENU_MENU_LEVEL)
-		
+
 		-- copy entire profile - create new profile
 		info = UIDropDownMenu_CreateInfo()
 		info.text = L["IMPORT_PROFILE"] .. " - " .. L["IMPORT_PROFILE_NEW"]
@@ -4173,16 +4180,16 @@ function IE:Copy_DropDown(...)
 		end
 		info.notCheckable = true
 		UIDropDownMenu_AddButton(info, UIDROPDOWNMENU_MENU_LEVEL)
-		
+
 		AddDropdownSpacer()
-		
+
 		-- group header
 		info = UIDropDownMenu_CreateInfo()
 		info.text = L["UIPANEL_GROUPS"]
 		info.isTitle = true
 		info.notCheckable = true
 		UIDropDownMenu_AddButton(info, UIDROPDOWNMENU_MENU_LEVEL)
-	
+
 		-- add groups to be copied
 		for groupID, v in TMW:OrderedPairs(profile_src.Groups) do
 			if type(groupID) == "number" and groupID >= 1 and groupID <= (tonumber(profile_src.NumGroups) or 10) then -- group was a string once, so lets just be safe
@@ -4202,7 +4209,7 @@ function IE:Copy_DropDown(...)
 			end
 		end
 	end
-	
+
 end
 
 
@@ -4235,46 +4242,46 @@ IE.RapidSettings = {
 ---------- Comparison ----------
 function IE:DeepCompare(t1, t2, ...)
 	-- heavily modified version of http://snippets.luacode.org/snippets/Deep_Comparison_of_Two_Values_3
-	
+
 	-- attempt direct comparison
 	if t1 == t2 then
 		return true, ...
 	end
-	
+
 	-- if the values are not the same (they made it through the check above) AND they are not both tables, then they cannot be the same, so exit.
 	local ty1 = type(t1)
 	if ty1 ~= "table" or ty1 ~= type(t2) then
 		return false, ...
 	end
-	
+
 	-- compare table values
-	
+
 	-- compare table 1 with table 2
 	for k1, v1 in pairs(t1) do
 		local v2 = t2[k1]
-		
+
 		-- don't bother calling DeepCompare on the values if they are the same - it will just return true.
 		-- Only call it if the values are different (they are either 2 tables, or they actually are different non-table values)
 		-- by adding the (v1 ~= v2) check, efficiency is increased by about 300%.
 		if v1 ~= v2 and not IE:DeepCompare(v1, v2, k1, ...) then
-		
+
 			-- it only reaches this point if there is a difference between the 2 tables somewhere
 			-- so i dont feel bad about calling DeepCompare with the same args again
 			-- i need to because the key of the setting that changed is in there, and AttemptBackup needs that key
 			return IE:DeepCompare(v1, v2, k1, ...)
 		end
 	end
-	
+
 	-- compare table 2 with table 1
 	for k2, v2 in pairs(t2) do
 		local v1 = t1[k2]
-		
+
 		-- see comments for t1
 		if v1 ~= v2 and not IE:DeepCompare(v1, v2, k2, ...) then
 			return IE:DeepCompare(v1, v2, k2, ...)
 		end
 	end
-	
+
 	return true, ...
 end
 
@@ -4297,30 +4304,30 @@ end
 ---------- DoStuff ----------
 function IE:AttemptBackup(icon)
 	if not icon then return end
-	
+
 	if not icon.history then
 		-- create the needed infrastructure for storing icon history if it does not exist.
 		-- this includes creating the first history point
 		icon.history = {TMW:CopyWithMetatable(icon:GetSettings())}
 		icon.historyState = #icon.history
-	
+
 		-- notify the undo and redo buttons that there was a change so they can :Enable() or :Disable()
 		IE:UndoRedoChanged()
 	else
 		-- the needed stuff for undo and redu already exists, so lets delve into the meat of the process.
-		
+
 		-- compare the current icon settings with what we have in the currently used history point
 		-- the currently used history point may or may not be the most recent settings of the icon, but we want to check ics against what is being used.
 		-- result is either (true) if there were no changes in the settings, or a string representing the key path to the first setting change that was detected.
 		--(it was likely only one setting that changed, but not always)
 		local result, changedSetting = IE:GetCompareResultsPath(IE:DeepCompare(icon.history[icon.historyState], icon:GetSettings()))
 		if type(result) == "string" then
-			-- if we are using an old history point (i.e. we hit undo a few times and then made a change), 
+			-- if we are using an old history point (i.e. we hit undo a few times and then made a change),
 			-- delete all history points from the current one forward so that we dont jump around wildly when undoing and redoing
 			for i = icon.historyState + 1, #icon.history do
 				icon.history[i] = nil
 			end
-			
+
 			-- if the last setting that was changed is the same as the most recent setting that was changed,
 			-- and if the setting is one that can be changed very rapidly,
 			-- delete the previous history point so that we dont murder our memory usage and piss off the user as they undo a number from 1 to 10, 0.1 per click.
@@ -4329,12 +4336,12 @@ function IE:AttemptBackup(icon)
 				icon.historyState = #icon.history
 			end
 			icon.lastChangePath = result
-			
+
 			-- finally, create the newest history point.
 			-- we copy with with the metatable so that when doing comparisons against the current icon settings, we can invoke metamethods.
 			-- this is needed because otherwise an empty event table (icon:GetSettings().Events) will not match a fleshed out one that has no non-default data in it.
 			icon.history[#icon.history + 1] = TMW:CopyWithMetatable(icon:GetSettings())
-			
+
 			-- set the history state to the latest point
 			icon.historyState = #icon.history
 			-- notify the undo and redo buttons that there was a change so they can :Enable() or :Disable()
@@ -4345,16 +4352,16 @@ end
 
 function IE:DoUndoRedo(direction)
 	local icon = CI.ic
-	
+
 	if not icon.history[icon.historyState + direction] then return end -- not valid, so don't try
-		
+
 	icon.historyState = icon.historyState + direction
-	
-	db.profile.Groups[CI.g].Icons[CI.i] = nil -- recreated when passed into CTIPWM	
+
+	db.profile.Groups[CI.g].Icons[CI.i] = nil -- recreated when passed into CTIPWM
 	TMW:CopyTableInPlaceWithMeta(icon.history[icon.historyState], db.profile.Groups[CI.g].Icons[CI.i])
-	
+
 	CI.ic:Setup() -- do an immediate setup for good measure
-	
+
 	CloseDropDownMenus()
 	IE:Load(1)
 end
@@ -4364,7 +4371,7 @@ end
 function IE:UndoRedoChanged()
 	local icon = TMW.CI.ic
 	if not icon then return end
-	
+
 	if icon.historyState - 1 < 1 then
 		IE.UndoButton:Disable()
 		IE.CanUndo = false
@@ -4372,7 +4379,7 @@ function IE:UndoRedoChanged()
 		IE.UndoButton:Enable()
 		IE.CanUndo = true
 	end
-	
+
 	if icon.historyState + 1 > #icon.history then
 		IE.RedoButton:Disable()
 		IE.CanRedo = false
@@ -4384,14 +4391,14 @@ end
 
 
 ---------- Back/Fowards ----------
-function IE:DoBackForwards(direction)	
+function IE:DoBackForwards(direction)
 	if not IE.history[IE.historyState + direction] then return end -- not valid, so don't try
-	
+
 	IE.historyState = IE.historyState + direction
-	
+
 	CloseDropDownMenus()
 	IE:Load(nil, IE.history[IE.historyState], true)
-	
+
 	IE:BackFowardsChanged()
 end
 
@@ -4403,7 +4410,7 @@ function IE:BackFowardsChanged()
 		IE.BackButton:Enable()
 		IE.CanBack = true
 	end
-	
+
 	if IE.historyState + 1 > #IE.history then
 		IE.ForwardsButton:Disable()
 		IE.CanFowards = false
@@ -4424,30 +4431,34 @@ EVENTS = TMW.EVENTS
 function EVENTS:SetupEventSettings()
 	local EventSettings = self.EventSettings
 	local eventData = self.Events[self.currentEventID].eventData
-	
+
 	EventSettings.EventName:SetText(eventData.text) --L["EVENTS_SETTINGS_HEADER_SUB"]:format(eventData.text))
-	
+
 	local Settings = self:GetEventSettings()
 	local settingsUsedByEvent = eventData.settings
-	
+
 	--hide settings
 	EventSettings.Operator	 	 :Hide()
 	EventSettings.Value		 	 :Hide()
 	EventSettings.CndtJustPassed :Hide()
 	EventSettings.PassingCndt	 :Hide()
-	
+	EventSettings.Icon			 :Hide()
+
 	--set settings
 	EventSettings.PassThrough	 :SetChecked(Settings.PassThrough)
 	EventSettings.OnlyShown	 	 :SetChecked(Settings.OnlyShown)
 	EventSettings.CndtJustPassed :SetChecked(Settings.CndtJustPassed)
 	EventSettings.PassingCndt	 :SetChecked(Settings.PassingCndt)
 	EventSettings.Value		 	 :SetText(Settings.Value)
-	
+
+	TMW:SetUIDropdownText(EventSettings.Icon, Settings.Icon, TMW.Icons, L["CHOOSEICON"])
+	EventSettings.Icon.IconPreview:SetIcon(_G[Settings.Icon])
+
 	--show settings
 	for setting, frame in pairs(EventSettings) do
 		if type(frame) == "table" then
 			local state = settingsUsedByEvent and settingsUsedByEvent[setting]
-			
+
 			if state == "FORCE" then
 				frame:Disable()
 				frame:SetAlpha(1)
@@ -4459,13 +4470,13 @@ function EVENTS:SetupEventSettings()
 				if frame.Enable then
 					frame:Enable()
 				end
-				if state then
-					frame:Show()
-				end
+			end
+			if state then
+				frame:Show()
 			end
 		end
 	end
-	
+
 	if EventSettings.PassingCndt				:GetChecked() then
 		EventSettings.Operator.ValueLabel		:SetFontObject(GameFontHighlight)
 		EventSettings.Operator					:Enable()
@@ -4479,21 +4490,21 @@ function EVENTS:SetupEventSettings()
 		EventSettings.Value						:Disable()
 		EventSettings.CndtJustPassed			:Disable()
 	end
-	
+
 	EventSettings.Operator.ValueLabel:SetText(eventData.valueName)
 	EventSettings.Value.ValueLabel:SetText(eventData.valueSuffix)
-	
+
 	local v = TMW:SetUIDropdownText(EventSettings.Operator, Settings.Operator, operators)
 	if v then
 		TMW:TT(EventSettings.Operator, v.tooltipText, nil, 1)
-	end	
+	end
 end
 
 function EVENTS:OperatorMenu_DropDown()
 	-- self is not Module
 	local Module = self:GetParent():GetParent().module
 	local eventData = Module.Events[Module.currentEventID].eventData
-	
+
 	for k, v in pairs(operators) do
 		if not eventData.blacklistedOperators or not eventData.blacklistedOperators[v.value] then
 			local info = UIDropDownMenu_CreateInfo()
@@ -4511,34 +4522,87 @@ end
 function EVENTS:OperatorMenu_DropDown_OnClick(frame)
 	local dropdown = self
 	local self = TMW:FindModule(frame)
-	
+
 	TMW:SetUIDropdownText(frame, dropdown.value)
-	
+
 	self:GetEventSettings().Operator = dropdown.value
 	TMW:TT(frame, dropdown.tooltipTitle, nil, 1)
 end
 
-function EVENTS:SetupEventButtons(globalDescKey)
+function EVENTS:IconMenu_DropDown()
+	sort(TMW.Icons, TMW.IconsSort)
+	if UIDROPDOWNMENU_MENU_LEVEL == 2 then
+		for k, v in ipairs(TMW.Icons) do
+			local g, i = strmatch(v, "TellMeWhen_Group(%d+)_Icon(%d+)")
+			g, i = tonumber(g), tonumber(i)
+			if UIDROPDOWNMENU_MENU_VALUE == g and CI.ic ~= TMW[g][i] then
+				local info = UIDropDownMenu_CreateInfo()
+				info.func = EVENTS.IconMenu_DropDown_OnClick
+				local text, textshort = TMW:GetIconMenuText(g, i)
+				info.text = textshort
+				info.value = v
+				info.tooltipTitle = text
+				info.tooltipText = format(L["GROUPICON"], TMW:GetGroupName(g, g, 1), i)
+				info.tooltipOnButton = true
+				info.arg1 = self
+				info.tCoordLeft = 0.07
+				info.tCoordRight = 0.93
+				info.tCoordTop = 0.07
+				info.tCoordBottom = 0.93
+				info.icon = TMW[g][i].texture:GetTexture()
+				UIDropDownMenu_AddButton(info, UIDROPDOWNMENU_MENU_LEVEL)
+			end
+		end
+	elseif UIDROPDOWNMENU_MENU_LEVEL == 1 then
+		wipe(addedGroups)
+		for k, v in ipairs(TMW.Icons) do
+			local g = tonumber(strmatch(v, "TellMeWhen_Group(%d+)"))
+			if not addedGroups[g] then
+				local info = UIDropDownMenu_CreateInfo()
+				info.text = TMW:GetGroupName(g, g, 1)
+				info.hasArrow = true
+				info.notCheckable = true
+				info.value = g
+				UIDropDownMenu_AddButton(info, UIDROPDOWNMENU_MENU_LEVEL)
+				addedGroups[g] = true
+			end
+		end
+	end
+end
+
+function EVENTS:IconMenu_DropDown_OnClick(frame)
+	local dropdown = self
+	local self = TMW:FindModule(frame)
+
+	TMW:SetUIDropdownText(frame, dropdown.value, TMW.Icons)
+	CloseDropDownMenus()
+
+	frame.IconPreview:SetIcon(_G[dropdown.value])
+
+	self:GetEventSettings().Icon = dropdown.value
+end
+
+function EVENTS:CreateEventButtons(globalDescKey)
 	local Events = self.Events
 	local previousFrame
-	
+
 	--[[local yAdjustTitle, yAdjustText = 0, 0 -- not needed for now
 	local locale = GetLocale()
 	if locale == "zhCN" or locale == "zhTW" then
 		yAdjustTitle, yAdjustText = 3, -3
 	end]]
-	
+
 	for i, eventData in ipairs(TMW.EventList) do
 		local frame = CreateFrame("Button", Events:GetName().."Event"..i, Events, "TellMeWhen_Event", i)
 		Events[i] = frame
 		frame:SetPoint("TOPLEFT", previousFrame, "BOTTOMLEFT")
 		frame:SetPoint("TOPRIGHT", previousFrame, "BOTTOMRIGHT")
-		
+
 		local p, t, r, x, y = frame.EventName:GetPoint()
 		frame.EventName:SetPoint(p, t, r, x, y --[[+ yAdjustTitle]])
 		local p, t, r, x, y = frame.DataText:GetPoint()
 		frame.DataText:SetPoint(p, t, r, x, y --[[+ yAdjustText]])
-		
+
 		for k, v in pairs(frame) do
 			if type(v) == "table" and v.ExclusiveTo then
 				if v.ExclusiveTo == self:GetName() then
@@ -4548,18 +4612,18 @@ function EVENTS:SetupEventButtons(globalDescKey)
 				end
 			end
 		end
-		
+
 		frame.event = eventData.name
 		frame.eventData = eventData
-		
+
 		frame.EventName:SetText(eventData.text .. ":")
-		
+
 		frame.normalDesc = eventData.desc --.. "\r\n\r\n" .. L[globalDescKey]
 		TMW:TT(frame, eventData.text, frame.normalDesc, 1, 1)
-		
+
 		previousFrame = frame
 	end
-	
+
 	Events[1]:SetPoint("TOPLEFT", Events, "TOPLEFT", 0, 0)
 	Events[1]:SetPoint("TOPRIGHT", Events, "TOPRIGHT", 0, 0)
 	Events:SetHeight(#Events*Events[1]:GetHeight())
@@ -4567,13 +4631,13 @@ end
 
 function EVENTS:EnableAndDisableEvents()
 	local oldID = self.currentEventID
-	
+
 	for i, frame in ipairs(self.Events) do
 		if Types[CI.ic]["EventDisabled_" .. frame.event] then
 			frame:Disable()
 			frame.DataText:SetText(L["SOUND_EVENT_DISABLEDFORTYPE"])
 			TMW:TT(frame, frame.eventData.text, L["SOUND_EVENT_DISABLEDFORTYPE_DESC"]:format(Types[CI.t].name), 1, 1)
-			
+
 			if oldID == i then
 				oldID = oldID + 1
 			end
@@ -4583,7 +4647,7 @@ function EVENTS:EnableAndDisableEvents()
 			self:SetupEventDisplay(i)
 		end
 	end
-	
+
 	return oldID
 end
 
@@ -4600,14 +4664,14 @@ function EVENTS:ChooseEvent(id)
 	eventFrame.selected = 1
 	eventFrame:LockHighlight()
 	eventFrame:GetHighlightTexture():SetVertexColor(NORMAL_FONT_COLOR.r, NORMAL_FONT_COLOR.g, NORMAL_FONT_COLOR.b, 1)
-	
+
 	return eventFrame
 end
 
 function EVENTS:GetDisplayInfo(event)
 
 	-- event is either a string ("OnShow") or a frame id (1)
-	
+
 	-- determine eventID or eventString, whichever is unknown.
 	local eventID
 	local eventString
@@ -4623,7 +4687,7 @@ function EVENTS:GetDisplayInfo(event)
 		eventID = event
 		eventString = self.Events[eventID].event
 	end
-	
+
 	return eventID, eventString
 end
 
@@ -4632,9 +4696,9 @@ function EVENTS:LoadConfig()
 	if self == EVENTS then
 		return
 	end
-	
+
 	local oldID = self:EnableAndDisableEvents()
-	
+
 	if oldID and oldID > 0 then
 		oldID = oldID % #self.Events
 		if oldID == 0 then
@@ -4643,7 +4707,7 @@ function EVENTS:LoadConfig()
 		self:SelectEvent(oldID)
 	end
 	self:SetTabText()
-	
+
 	if CI.ics then
 		self:SetupEventSettings()
 	end
@@ -4651,7 +4715,7 @@ end
 
 function EVENTS:SetTabText()
 	local n = self:GetNumUsedEvents()
-	
+
 	if n > 0 then
 		self.tab:SetText(self.tabText .. " |cFFFF5959(" .. n .. ")")
 	else
@@ -4666,7 +4730,7 @@ end
 
 function EVENTS:TestEvent(event)
 	local settings = self:GetEventSettings(event)
-	
+
 	self:HandleEvent(CI.ic, settings)
 end
 
@@ -4681,7 +4745,7 @@ SND.LSM = LSM
 
 function SND:OnOptionsLoaded()
 	SND.tab = IE.SoundTab
-	SND:SetupEventButtons("SOUND_EVENT_GLOBALDESC")
+	SND:CreateEventButtons("SOUND_EVENT_GLOBALDESC")
 
 	local Sounds = SND.Sounds
 	Sounds.Header:SetText(L["SOUND_SOUNDTOPLAY"])
@@ -4701,11 +4765,11 @@ function SND:OnOptionsLoaded()
 		previous = f
 	end
 	SND:SetSoundsOffset(0)
-	
-	
+
+
 	SND.Events.Header:SetText(L["SOUND_EVENTS"])
-	SND:SelectEvent(1)	
-	
+	SND:SelectEvent(1)
+
 	SND.Sounds.ScrollBar:SetValue(0)
 end
 
@@ -4713,7 +4777,7 @@ end
 ---------- Events ----------
 function SND:SelectEvent(id)
 	local eventFrame = SND:ChooseEvent(id)
-	
+
 	if CI.ics then
 		SND:SelectSound(self:GetEventSettings().Sound)
 		SND:SetupEventSettings()
@@ -4722,13 +4786,13 @@ end
 
 function SND:SetupEventDisplay(event)
 	local eventID, eventString = SND:GetDisplayInfo(event)
-	
+
 	local name = self:GetEventSettings(eventString).Sound
-	
+
 	if name == "None" then
 		name = "|cff808080" .. NONE
 	end
-	
+
 	SND.Events[eventID].DataText:SetText(name)
 end
 
@@ -4738,7 +4802,7 @@ end
 function SND:SetSoundsOffset(offs)
 	if not SND.List or #LSM:List("sound")-1 ~= #SND.List then
 		SND.List = CopyTable(LSM:List("sound"))
-		
+
 		for k, v in pairs(SND.List) do
 			if v == "None" then
 				tremove(SND.List, k)
@@ -4841,7 +4905,7 @@ function SND:SelectSound(name)
 		SND.Custom.Background:SetVertexColor(NORMAL_FONT_COLOR.r, NORMAL_FONT_COLOR.g, NORMAL_FONT_COLOR.b, 1)
 		SND.Custom:SetText(name)
 	end
-	
+
 	SND:SetTabText()
 end
 
@@ -4850,7 +4914,7 @@ end
 function SND:GetNumUsedEvents()
 	local n = 0
 	for i, f in ipairs(SND.Events) do
-		
+
 		local v = self:GetEventSettings(f.event).Sound
 		if v == "" or v == "Interface\\Quiet.ogg" or v == "None" then
 			-- none
@@ -4865,7 +4929,7 @@ function SND:GetNumUsedEvents()
 			end
 		end
 	end
-	
+
 	return n
 end
 
@@ -4881,16 +4945,16 @@ local ChannelList = TMW.ChannelList
 
 function ANN:OnOptionsLoaded()
 	ANN.tab = IE.AnnounceTab
-	ANN:SetupEventButtons("ANN_EVENT_GLOBALDESC")
-	
+	ANN:CreateEventButtons("ANN_EVENT_GLOBALDESC")
+
 	local Events = ANN.Events
 	local Channels = ANN.Channels
-	
+
 	Events.Header:SetText(L["SOUND_EVENTS"])
 	Channels.Header:SetText(L["ANN_CHANTOUSE"])
-	
+
 	-- create event frames
-	
+
 	-- create channel frames
 	local previousFrame
 	local offs = 0
@@ -4902,33 +4966,33 @@ function ANN:OnOptionsLoaded()
 			frame:SetPoint("TOPLEFT", previousFrame, "BOTTOMLEFT", 0, 0)
 			frame:SetPoint("TOPRIGHT", previousFrame, "BOTTOMRIGHT", 0, 0)
 			frame:Show()
-			
+
 			frame.channel = channelData.channel
-			
+
 			frame.Name:SetText(channelData.text)
 			TMW:TT(frame, channelData.text, channelData.desc, 1, 1)
-			
+
 			previousFrame = frame
 		else
 			offs = offs - 1
 		end
 	end
-	
+
 	Channels[1]:SetPoint("TOPLEFT", Channels, "TOPLEFT", 0, 0)
 	Channels[1]:SetPoint("TOPRIGHT", Channels, "TOPRIGHT", 0, 0)
-	
+
 	Channels:SetHeight(#Channels*Channels[1]:GetHeight())
-	
-	ANN:SelectEvent(1)	
+
+	ANN:SelectEvent(1)
 end
 
 
 ---------- Events ----------
 function ANN:SelectEvent(id)
 	ANN.EditBox:ClearFocus()
-	
+
 	local eventFrame = ANN:ChooseEvent(id)
-	
+
 	if CI.ics then
 		local EventSettings = self:GetEventSettings()
 		ANN:SelectChannel(EventSettings.Channel)
@@ -4939,10 +5003,10 @@ end
 
 function ANN:SetupEventDisplay(event)
 	local eventID, eventString = self:GetDisplayInfo(event)
-	
+
 	local channel = self:GetEventSettings(eventString).Channel
 	local channelsettings = ChannelList[channel]
-	
+
 	if channelsettings then
 		local text = channelsettings.text
 		if text == NONE then
@@ -5023,7 +5087,7 @@ function ANN:SelectChannel(channel)
 		channelFrame:LockHighlight()
 		channelFrame:GetHighlightTexture():SetVertexColor(NORMAL_FONT_COLOR.r, NORMAL_FONT_COLOR.g, NORMAL_FONT_COLOR.b, 1)
 	end
-	
+
 	self:SetupEventDisplay(self.currentEventID)
 	self:SetTabText()
 end
@@ -5039,7 +5103,7 @@ function ANN:GetNumUsedEvents()
 			n = n + 1
 		end
 	end
-	
+
 	return n
 end
 
@@ -5068,15 +5132,15 @@ ANIM.tabText = L["ANIM_TAB"]
 
 function ANIM:OnOptionsLoaded()
 	self.tab = IE.AnimationsTab
-	self:SetupEventButtons("ANIM_EVENT_GLOBALDESC")
-	
+	self:CreateEventButtons("ANIM_EVENT_GLOBALDESC")
+
 	local Events = self.Events
 	local Animations = self.Animations
-	
+
 	Events.Header:SetText(L["SOUND_EVENTS"])
 	Animations.Header:SetText(L["ANIM_ANIMTOUSE"])
 	self.SettingsHeader:SetText(L["ANIM_ANIMSETTINGS"])
-		
+
 	-- create channel frames
 	local previousFrame
 	local offs = 0
@@ -5087,27 +5151,27 @@ function ANIM:OnOptionsLoaded()
 		frame:SetPoint("TOPLEFT", previousFrame, "BOTTOMLEFT", 0, 0)
 		frame:SetPoint("TOPRIGHT", previousFrame, "BOTTOMRIGHT", 0, 0)
 		frame:Show()
-		
+
 		frame.animationData = animationData
 		frame.animation = animationData.animation
-		
+
 		if animationData.noclick then
 			frame:SetScript("OnClick", nil)
 			frame:GetHighlightTexture():SetTexture(nil)
 		end
-		
+
 		frame.Name:SetText(animationData.text)
 		TMW:TT(frame, animationData.text, animationData.desc, 1, 1)
-		
+
 		previousFrame = frame
 	end
-	
+
 	Animations[1]:SetPoint("TOPLEFT", Animations, "TOPLEFT", 0, 0)
 	Animations[1]:SetPoint("TOPRIGHT", Animations, "TOPRIGHT", 0, 0)
-	
+
 	Animations:SetHeight(#Animations*Animations[1]:GetHeight())
-	
-	self:SelectEvent(1)	
+
+	self:SelectEvent(1)
 end
 
 function ANIM:TMW_ICON_SETUP(event, icon)
@@ -5118,11 +5182,11 @@ function ANIM:TMW_ICON_SETUP(event, icon)
 	end
 end
 TMW:RegisterCallback("TMW_ICON_SETUP", ANIM)
-	
+
 ---------- Events ----------
 function ANIM:SelectEvent(id)
 	local eventFrame = self:ChooseEvent(id)
-	
+
 	if CI.ics then
 		local EventSettings = self:GetEventSettings()
 		self:SelectAnimation(EventSettings.Animation)
@@ -5133,16 +5197,16 @@ end
 
 function ANIM:SetupEventDisplay(event)
 	local eventID, eventString = self:GetDisplayInfo(event)
-	
+
 	local animation = self:GetEventSettings(eventString).Animation
 	local animationSettings = self.AnimationList[animation]
-	
+
 	if animationSettings then
 		local text = animationSettings.text
 		if text == NONE then
 			text = "|cff808080" .. text
 		end
-		
+
 		self.Events[eventID].DataText:SetText(text)
 	end
 end
@@ -5178,7 +5242,7 @@ function ANIM:SelectAnimation(animation)
 				self[arg]:Hide()
 			end
 		end
-		
+
 		for i, arg in TMW:Vararg("Fade", "Infinite") do
 			if animationSettings[arg] then
 				self[arg]:SetChecked(EventSettings[arg])
@@ -5187,7 +5251,7 @@ function ANIM:SelectAnimation(animation)
 				self[arg]:Hide()
 			end
 		end
-		
+
 		if animationSettings.Color then
 			local r, g, b, a = EventSettings.r_anim, EventSettings.g_anim, EventSettings.b_anim, EventSettings.a_anim
 			self.Color:GetNormalTexture():SetVertexColor(r, g, b, 1)
@@ -5202,7 +5266,7 @@ function ANIM:SelectAnimation(animation)
 		animationFrame:LockHighlight()
 		animationFrame:GetHighlightTexture():SetVertexColor(NORMAL_FONT_COLOR.r, NORMAL_FONT_COLOR.g, NORMAL_FONT_COLOR.b, 1)
 	end
-	
+
 	self:SetupEventDisplay(self.currentEventID)
 	self:SetTabText()
 end
@@ -5218,7 +5282,7 @@ function ANIM:GetNumUsedEvents()
 			n = n + 1
 		end
 	end
-	
+
 	return n
 end
 
@@ -5230,7 +5294,7 @@ function ANIM:SetSliderMinMax(Slider, level)
 
 		local newmin = max(0, val-deviation)
 		local newmax = max(deviation, val + deviation)
-		
+
 		Slider:SetMinMaxValues(newmin, newmax)
 		Slider.Low:SetText(newmin)
 		Slider.High:SetText(newmax)
@@ -5259,7 +5323,7 @@ local TrackingCache = {}
 
 
 ---------- Initialization/Database/Spell Caching ----------
-function SUG:OnInitialize()	
+function SUG:OnInitialize()
 	TMWOptDB = TMWOptDB or {}
 
 	CNDT:CURRENCY_DISPLAY_UPDATE() -- im in ur SUG, hijackin' ur OnInitialize
@@ -5269,7 +5333,7 @@ function SUG:OnInitialize()
 	TMWOptDB.ItemCache = TMWOptDB.ItemCache or {}
 	TMWOptDB.AuraCache = TMWOptDB.AuraCache or {}
 	TMWOptDB.ClassSpellCache = nil -- this is old, get rid of it
-	
+
 	CurrentItems = {}
 
 	for k, v in pairs(TMWOptDB) do
@@ -5289,11 +5353,11 @@ function SUG:OnInitialize()
 	SUG.RequestedFrom = {}
 	SUG.commThrowaway = {}
 	SUG.Box = IE.Main.Name
-	
+
 	SUG:PLAYER_TALENT_UPDATE()
 	SUG:BuildClassSpellLookup() -- must go before the local versions (ClassSpellLookup) are defined
 	SUG.doUpdateItemCache = true
-	
+
 	for i = 1, GetNumTrackingTypes() do
 		local name, _, active = GetTrackingInfo(i)
 		TrackingCache[i] = strlower(name)
@@ -5321,9 +5385,9 @@ function SUG:OnInitialize()
 		local didrunhook
 		IE:HookScript("OnShow", function()
 			if didrunhook then return end
-			
+
 			do	--validate all old items in the item cache
-			
+
 				-- function to call once data about items has been collected from the server
 				function SUG:ValidateItemIDs()
 					--all data should be in by now, see what actually exists.
@@ -5334,16 +5398,16 @@ function SUG:OnInitialize()
 					end
 					SUG.ValidateItemIDs = nil
 				end
-					
+
 				--start the requests
 				for id in pairs(ItemCache) do
 					GetItemInfo(id)
 				end
-				
+
 				SUG:ScheduleTimer("ValidateItemIDs", 60)
 			end
-					
-					
+
+
 			TMWOptDB.IncompleteCache = true
 			SUG.NumCachePerFrame = 10
 
@@ -5361,17 +5425,17 @@ function SUG:OnInitialize()
 				["Interface\\Icons\\INV_Inscription_Tradeskill01"] = true,
 				["Interface\\Icons\\Temp"] = true,
 			}
-			
+
 			local index, spellsFailed = 0, 0
-			
+
 			TMWOptDB.CacheLength = TMWOptDB.CacheLength or 11000
-			
+
 			SUG.Suggest.Status:Show()
 			SUG.Suggest.Status.texture:SetTexture(LSM:Fetch("statusbar", db.profile.TextureName))
 			SUG.Suggest.Status:SetMinMaxValues(1, TMWOptDB.CacheLength)
 			SUG.Suggest.Speed:Show()
 			SUG.Suggest.Finish:Show()
-			
+
 			if TMWOptDB.WoWVersion and TMWOptDB.WoWVersion < clientVersion then
 				wipe(SUG.SpellCache)
 			elseif TMWOptDB.IncompleteCache then
@@ -5382,19 +5446,19 @@ function SUG:OnInitialize()
 			TMWOptDB.WoWVersion = clientVersion
 
 			local Parser, LT1 = SUG:GetParser()
-			
+
 			local SPELL_CAST_CHANNELED = SPELL_CAST_CHANNELED
 			local yield, resume = coroutine.yield, coroutine.resume
 
 			local function SpellCacher()
-				
+
 				while spellsFailed < 1000 do
-					
+
 					local name, rank, icon = GetSpellInfo(index)
 					if name then
 						name = strlower(name)
-						
-						local fail = 
+
+						local fail =
 						Blacklist[icon] or
 						strfind(name, "dnd") or
 						strfind(name, "test") or
@@ -5409,7 +5473,7 @@ function SUG:OnInitialize()
 						strfind(name, ":%s?%d") or -- interferes with colon duration syntax
 						strfind(name, "camera") or
 						strfind(name, "dmg")
-						
+
 						if not fail then
 							Parser:SetOwner(UIParent, "ANCHOR_NONE") -- must set the owner before text can be obtained.
 							Parser:SetSpellByID(index)
@@ -5423,7 +5487,7 @@ function SUG:OnInitialize()
 						spellsFailed = spellsFailed + 1
 					end
 					index = index + 1
-					
+
 					if index % SUG.NumCachePerFrame == 0 then
 						SUG.Suggest.Status:SetValue(index)
 						yield()
@@ -5431,20 +5495,20 @@ function SUG:OnInitialize()
 				end
 			end
 			local co = coroutine.create(SpellCacher)
-			
+
 			local f = CreateFrame("Frame")
 			f:SetScript("OnUpdate", function()
 				if not resume(co) then
 					TMWOptDB.IncompleteCache = false
 					TMWOptDB.CacheLength = index
-					
+
 					f:SetScript("OnUpdate", nil)
-					
+
 					SUG.Suggest.Speed:Hide()
 					SUG.Suggest.Status:Hide()
 					SUG.Suggest.Finish:Hide()
-					
-					
+
+
 					SpellCache[1852] = nil -- GM spell named silenced, interferes with equiv
 					SpellCache[47923] = nil -- spell named stunned, interferes
 					SpellCache[65918] = nil -- spell named stunned, interferes
@@ -5452,7 +5516,7 @@ function SUG:OnInitialize()
 					SpellCache[71216] = nil -- enraged, interferes
 					SpellCache[59208] = nil -- enraged, interferes
 					SpellCache[100000] = GetSpellInfo(100000) and strlower(GetSpellInfo(100000)) -- filted out by default but this spell really needs to be in the list because of how cool it is
-					
+
 					SUG.IsCaching = nil
 					if SUG.onCompleteCache then
 						SUG.onCompleteCache = nil
@@ -5476,15 +5540,15 @@ do
 	function SUG:GetParser()
 		if not Parser then
 			Parser = CreateFrame("GameTooltip")
-			
+
 			LT1 = Parser:CreateFontString()
 			RT1 = Parser:CreateFontString()
 			Parser:AddFontStrings(LT1, RT1)
-			
+
 			LT2 = Parser:CreateFontString()
 			RT2 = Parser:CreateFontString()
 			Parser:AddFontStrings(LT2, RT2)
-			
+
 			LT3 = Parser:CreateFontString()
 			RT3 = Parser:CreateFontString()
 			Parser:AddFontStrings(LT3, RT3)
@@ -5607,21 +5671,21 @@ end
 ---------- Suggesting ----------
 function SUG:DoSuggest()
 	wipe(SUGpreTable)
-	
+
 	local tbl = SUG.CurrentModule:Table_Get()
-	
-	
+
+
 	SUG.CurrentModule:Table_GetNormalSuggestions(SUGpreTable, SUG.CurrentModule:Table_Get())
 	SUG.CurrentModule:Table_GetEquivSuggestions(SUGpreTable, SUG.CurrentModule:Table_Get())
 	SUG.CurrentModule:Table_GetSpecialSuggestions(SUGpreTable, SUG.CurrentModule:Table_Get())
-	
+
 	SUG:SuggestingComplete(1)
 end
 
 function SUG:SuggestingComplete(doSort)
 	SUG.offset = min(SUG.offset, max(0, #SUGpreTable-#SUG+1))
 	local offset = SUG.offset
-	
+
 	if doSort and not SUG.CurrentModule.dontSort then
 		sort(SUGpreTable, SUG.CurrentModule:Table_GetSorter())
 	end
@@ -5632,7 +5696,7 @@ function SUG:SuggestingComplete(doSort)
 		SUG.CurrentModule.InvalidEntries = {}
 		InvalidEntries = SUG.CurrentModule.InvalidEntries
 	end
-	
+
 	while SUG[i] do
 		local key = i + SUG.offset
 		local id = SUGpreTable[key]
@@ -5648,9 +5712,9 @@ function SUG:SuggestingComplete(doSort)
 				break
 			end
 		end
-		
+
 		local f = SUG[i]
-		
+
 		f.insert = nil
 		f.insert2 = nil
 		f.tooltipmethod = nil
@@ -5661,13 +5725,13 @@ function SUG:SuggestingComplete(doSort)
 		f.overrideInsertID = nil
 		f.overrideInsertName = nil
 		f.Background:SetVertexColor(0, 0, 0, 0)
-		
+
 		if SUG.CurrentModule.noTexture then
 			f.Icon:SetWidth(0.00001)
 		else
 			f.Icon:SetWidth(f.Icon:GetHeight())
 		end
-		
+
 		if id then
 			local addFunc = 1
 			while true do
@@ -5675,35 +5739,35 @@ function SUG:SuggestingComplete(doSort)
 				if not Entry_AddToList then
 					break
 				end
-				
+
 				Entry_AddToList(SUG.CurrentModule, f, id)
-				
+
 				if f.insert then
 					break
 				end
-				
+
 				addFunc = addFunc + 1
 			end
-			
+
 			local colorizeFunc = 1
 			while true do
 				local Entry_Colorize = SUG.CurrentModule["Entry_Colorize_" .. colorizeFunc]
 				if not Entry_Colorize then
 					break
 				end
-				
+
 				Entry_Colorize(SUG.CurrentModule, f, id)
-				
+
 				colorizeFunc = colorizeFunc + 1
 			end
-			
+
 			f:Show()
 		else
 			f:Hide()
 		end
 		i=i+1
 	end
-	
+
 	if SUG.mousedOver then
 		SUG.mousedOver:GetScript("OnEnter")(SUG.mousedOver)
 	end
@@ -5725,7 +5789,7 @@ function SUG:NameOnCursor(isClick)
 			break
 		end
 	end
-	
+
 	if isClick then
 		SUG.endpos = #text
 		for i = SUG.startpos, #text do
@@ -5737,10 +5801,10 @@ function SUG:NameOnCursor(isClick)
 	else
 		SUG.endpos = SUG.Box:GetCursorPosition()
 	end
-	
+
 
 	SUG.lastName = strlower(TMW:CleanString(strsub(text, SUG.startpos, SUG.endpos)))
-	
+
 	if strfind(SUG.lastName, ":[%d:%s%.]*$") then
 		SUG.lastName, SUG.duration = strmatch(SUG.lastName, "(.-):([%d:%s%.]*)$")
 		SUG.duration = strtrim(SUG.duration, " :;.")
@@ -5764,14 +5828,14 @@ function SUG:NameOnCursor(isClick)
 		SUG.atBeginning = SUG.lastName
 	end
 
-	
+
 	if not SUG.CurrentModule.noMin and (SUG.lastName == "" or not strfind(SUG.lastName, "[^%.]")) then
 		SUG.Suggest:Hide()
 		return
 	else
 		SUG.Suggest:Show()
 	end
-	
+
 	if SUG.updatePlayerSpells then
 		wipe(SUGPlayerSpells)
 		for k, v in pairs(pclassSpellCache) do
@@ -5807,37 +5871,37 @@ end
 ---------- Item/Action Caching ----------
 function SUG:CacheItems()
 	if not SUG.doUpdateItemCache then return end
-	
+
 	wipe(CurrentItems)
-	
+
 	for container = -2, NUM_BAG_SLOTS do
 		for slot = 1, GetContainerNumSlots(container) do
 			local id = GetContainerItemID(container, slot)
 			if id then
 				local name = GetItemInfo(id)
 				name = name and strlower(name)
-				
+
 				CurrentItems[id] = name
 				ItemCache[id] = name
 			end
 		end
 	end
-	
+
 	for slot = 1, 19 do
 		local id = GetInventoryItemID("player", slot)
 		if id then
 			local name = GetItemInfo(id)
 			name = name and strlower(name)
-			
+
 			CurrentItems[id] = name
 			ItemCache[id] = name
 		end
 	end
-	
+
 	for id, name in pairs(CurrentItems) do
 		CurrentItems[name] = id
 	end
-	
+
 	SUG.doUpdateItemCache = nil
 end
 
@@ -5885,7 +5949,7 @@ local EditboxHooks = {
 }
 function SUG:EnableEditBox(editbox, inputType, onlyOneEntry)
 	editbox.SUG_Enabled = 1
-	
+
 	inputType = get(inputType)
 	inputType = (inputType == true and "spell") or inputType
 	if not inputType then
@@ -5893,7 +5957,7 @@ function SUG:EnableEditBox(editbox, inputType, onlyOneEntry)
 	end
 	editbox.SUG_type = inputType
 	editbox.SUG_onlyOneEntry = onlyOneEntry
-	
+
 	if not editbox.SUG_hooked then
 		for k, v in pairs(EditboxHooks) do
 			editbox:HookScript(k, v)
@@ -5962,7 +6026,7 @@ function Module:Table_GetNormalSuggestions(suggestions, tbl, ...)
 	local lastName = SUG.lastName
 	local semiLN = ";" .. lastName
 	local long = #lastName > 2
-	
+
 	if SUG.inputType == "number" then
 		local len = #SUG.lastName - 1
 		local match = tonumber(SUG.lastName)
@@ -5985,7 +6049,7 @@ function Module:Table_GetEquivSuggestions(suggestions, tbl, ...)
 	local lastName = SUG.lastName
 	local semiLN = ";" .. lastName
 	local long = #lastName > 2
-	
+
 	for _, tbl in TMW:Vararg(...) do
 		for equiv in pairs(tbl) do
 			if 	(long and (
@@ -6021,42 +6085,42 @@ function Module:Entry_Insert(insert)
 		if SUG.Box.SUG_onlyOneEntry then
 			SUG.Box:SetText(TMW:CleanString(insert))
 			SUG.Box:ClearFocus()
-			return 
+			return
 		end
-		
+
 		-- determine the text before an after where we will be inserting to
 		local currenttext = SUG.Box:GetText()
 		local start = SUG.startpos-1
 		local firsthalf = start > 0 and strsub(currenttext, 0, start) or ""
 		local lasthalf = strsub(currenttext, SUG.endpos+1)
-		
-		
+
+
 		-- DURATION STUFF:
 		-- determine if we should add a colon to the inserted text. a colon should be added if:
 			-- one existed before (the user clicked on a spell with a duration defined or already typed it in)
 			-- the module requests (requires) one
 		local doAddColon = SUG.duration or SUG.CurrentModule.doAddColon
-		
+
 		-- determine if there is an actual duration to be added to the inserted spell
 		local hasDurationData = SUG.duration
-		
+
 		if doAddColon then
 		-- the entire text to be inserted in
 			insert = insert .. ": " .. (hasDurationData or "")
-		end		
-		
-		
+		end
+
+
 		-- the entire text with the insertion added in
 		local newtext = firsthalf .. "; " .. insert .. "; " .. lasthalf
 		-- clean it up
 		SUG.Box:SetText(TMW:CleanString(newtext))
-		
+
 		-- put the cursor after the newly inserted text
 		local _, newPos = SUG.Box:GetText():find(insert:gsub("([%(%)%%%[%]%-%+%.%*])", "%%%1"), max(0, SUG.startpos-1))
 		if newPos then
 			SUG.Box:SetCursorPosition(newPos + 2)
 		end
-		
+
 		-- if we are at the end of the exitbox then put a semicolon in anyway for convenience
 		if SUG.Box:GetCursorPosition() == #SUG.Box:GetText() then
 			local append = "; "
@@ -6070,7 +6134,7 @@ function Module:Entry_Insert(insert)
 		if doAddColon and not hasDurationData then
 			SUG.Box:SetCursorPosition(SUG.Box:GetCursorPosition() - 2)
 		end
-		
+
 		-- attempt another suggestion (it will either be hidden or it will do another)
 		SUG:NameOnCursor(1)
 	end
@@ -6089,7 +6153,7 @@ Module.noMin = true
 Module.noTexture = true
 function Module:Table_GetNormalSuggestions(suggestions, tbl, ...)
 	suggestions[#suggestions + 1] = "d" -- Duration
-	
+
 	local typeData = Types[CI.t]
 
 	if not typeData.EventDisabled_OnUnit then
@@ -6102,7 +6166,7 @@ function Module:Table_GetNormalSuggestions(suggestions, tbl, ...)
 	if not typeData.EventDisabled_OnStack then
 		suggestions[#suggestions + 1] = "k" -- stacK
 	end
-	
+
 	if CI.t == "cleu" then
 		for _, letter in TMW:Vararg("o", "e", "x") do -- sOurceunit, dEstunit, eXtraspell
 			suggestions[#suggestions + 1] = letter
@@ -6113,7 +6177,7 @@ function Module:Entry_Insert(insert)
 	if insert then
 		insert = tostring(insert)
 		SUG.Box:Insert(insert)
-		
+
 		-- attempt another suggestion (it will either be hidden or it will do another)
 		SUG:NameOnCursor(1)
 	end
@@ -6143,12 +6207,12 @@ end
 local Module = SUG:NewModule("textsubsANNWhisper", SUG:GetModule("textsubsANN"))
 function Module:Table_GetNormalSuggestions(suggestions, tbl, ...)
 	local typeData = Types[CI.t]
-	
+
 	if not typeData.EventDisabled_OnUnit then
 		suggestions[#suggestions + 1] = "u" -- current Unit
 		suggestions[#suggestions + 1] = "p" -- Previous unit
 	end
-	
+
 	if CI.t == "cleu" then
 		suggestions[#suggestions + 1] = "o" -- sOurceunit
 		suggestions[#suggestions + 1] = "e" -- dEstunit
@@ -6159,13 +6223,13 @@ end
 local Module = SUG:NewModule("item", SUG:GetModule("default"))
 function Module:Table_Get()
 	SUG:CacheItems()
-	
+
 	return ItemCache
 end
 function Module:Entry_AddToList_1(f, id)
 	if id > INVSLOT_LAST_EQUIPPED then
 		local name, link = GetItemInfo(id)
-		
+
 		f.Name:SetText(link and link:gsub("[%[%]]", ""))
 		f.ID:SetText(id)
 
@@ -6186,11 +6250,11 @@ function Module:Entry_AddToList_2(f, id)
 	if id <= INVSLOT_LAST_EQUIPPED then
 		local itemID = GetInventoryItemID("player", id) -- get the itemID of the slot
 		local link = GetInventoryItemLink("player", id)
-		
+
 		f.overrideInsertID = L["SUG_INSERTITEMSLOT"]
-		
+
 		local name = GetItemInfo(itemID)
-	
+
 		f.Name:SetText(link and link:gsub("[%[%]]", ""))
 		f.ID:SetText("(" .. id .. ")")
 
@@ -6205,12 +6269,12 @@ function Module:Entry_AddToList_2(f, id)
 end
 function Module:Table_GetSpecialSuggestions(suggestions, tbl, ...)
 	local atBeginning = SUG.atBeginning
-	
+
 	for i = INVSLOT_FIRST_EQUIPPED, INVSLOT_LAST_EQUIPPED do
 		local itemID = GetInventoryItemID("player", i) -- get the itemID of the slot
 		self.Slots[i] = itemID and GetItemInfo(itemID)
 	end
-	
+
 	if SUG.inputType == "number" then
 		local len = #SUG.lastName - 1
 		local match = tonumber(SUG.lastName)
@@ -6242,7 +6306,7 @@ function Module.Sorter_ByName(a, b)
 			return haveA
 		end
 	end
-	
+
 	local nameA, nameB = ItemCache[a], ItemCache[b]
 	if nameA == nameB then
 		--sort identical names by ID
@@ -6262,7 +6326,7 @@ function Module.Sorter_Spells(a, b)
 	if a == "GCD" or b == "GCD" then
 		return a == "GCD"
 	end
-	
+
 	local haveA, haveB = EquivFirstIDLookup[a], EquivFirstIDLookup[b]
 	if haveA or haveB then
 		if haveA and haveB then
@@ -6292,14 +6356,14 @@ function Module.Sorter_Spells(a, b)
 		end
 		--if they both were auras, and they were auras of the same type (player, NPC) then procede on to the rest of the code to sort them by name/id
 	end
-	
+
 	if SUGIsNumberInput then
 		--sort by id
 		return a < b
 	else
 		--sort by name
 		local nameA, nameB = SpellCache[a], SpellCache[b]
-			
+
 		if nameA == nameB then
 			--sort identical names by ID
 			return a < b
@@ -6340,7 +6404,7 @@ function Module:Entry_Colorize_1(f, id)
 			end
 		end
 	end
-	
+
 	local whoCasted = SUG.AuraCache[id]
 	if whoCasted == 1 then
 		f.Background:SetVertexColor(.78, .61, .43, 1) -- color known NPC auras warrior brown
@@ -6373,7 +6437,7 @@ end
 function Module:Entry_AddToList_1(f, name)
 	local data = self.table[name]
 	name = GetTalentInfo(data[1], data[2]) -- restore case
-	
+
 	f.Name:SetText(name)
 
 	f.tooltipmethod = "SetHyperlink"
@@ -6385,7 +6449,7 @@ function Module:Entry_AddToList_1(f, name)
 end
 function Module:Table_GetNormalSuggestions(suggestions, tbl, ...)
 	local atBeginning = SUG.atBeginning
-	
+
 	for name in pairs(tbl) do
 		if strfind(name, atBeginning) then
 			suggestions[#suggestions + 1] = name
@@ -6402,7 +6466,7 @@ function Module:Entry_AddToList_2(f, id)
 	if id == "GCD" then
 		local equiv = id
 		id = TMW.GCDSpell --EquivFirstIDLookup[id]
-		
+
 		local name = GetSpellInfo(id)
 
 		f.Name:SetText(L["GCD"])
@@ -6433,7 +6497,7 @@ function Module:Entry_AddToList_1(f, id)
 
 		f.tooltipmethod = "SetSpellByID"
 		f.tooltiparg = id
- 
+
 		if pclassSpellCache[id] --[[name and GetSpellTexture(name)]] then
 			f.insert = SUG.inputType == "number" and id or name
 			f.insert2 = SUG.inputType ~= "number" and id or name
@@ -6455,17 +6519,17 @@ function Module:OnInitialize()
 end
 function Module:Entry_OnClick(f, button)
 	local insert
-	
+
 	local spellID = f.tooltiparg
 	local Parser, LT1, LT2, LT3, RT1, RT2, RT3 = SUG:GetParser()
 	Parser:SetOwner(UIParent, "ANCHOR_NONE")
 	Parser:SetSpellByID(spellID)
-	
+
 	local dur
-	
+
 	for _, text in TMW:Vararg(RT2:GetText(), RT3:GetText()) do
 		if text then
-			
+
 			local mins = text:match(MATCH_RECAST_TIME_MIN)
 			local secs = text:match(MATCH_RECAST_TIME_SEC)
 			if mins then
@@ -6473,7 +6537,7 @@ function Module:Entry_OnClick(f, button)
 			elseif secs then
 				dur = secs
 			end
-			
+
 			if dur then
 				break
 			end
@@ -6482,13 +6546,13 @@ function Module:Entry_OnClick(f, button)
 	if spellID == 42292 then -- pvp trinket override
 		dur = "2:00"
 	end
-	
+
 	if button == "RightButton" and f.insert2 then
 		insert = f.insert2
 	else
 		insert = f.insert
 	end
-	
+
 	self:Entry_Insert(insert, dur)
 end
 function Module:Entry_Insert(insert, duration)
@@ -6497,47 +6561,47 @@ function Module:Entry_Insert(insert, duration)
 		if SUG.Box.SUG_onlyOneEntry then
 			SUG.Box:SetText(TMW:CleanString(insert))
 			SUG.Box:ClearFocus()
-			return 
+			return
 		end
-		
+
 		-- determine the text before an after where we will be inserting to
 		local currenttext = SUG.Box:GetText()
 		local start = SUG.startpos-1
 		local firsthalf = start > 0 and strsub(currenttext, 0, start) or ""
 		local lasthalf = strsub(currenttext, SUG.endpos+1)
-		
+
 		-- determine if we should add a colon to the inserted text. a colon should be added if:
 			-- one existed before (the user clicked on a spell with a duration defined or already typed it in)
 			-- the module requests (requires) one
 		local doAddColon = SUG.duration or SUG.CurrentModule.doAddColon
-		
+
 		-- determine if there is an actual duration to be added to the inserted spell
 		local hasDurationData = duration or SUG.duration
-		
+
 		-- the entire text to be inserted in
 		local insert = (doAddColon and insert .. ": " .. (hasDurationData or "")) or insert
-		
+
 		-- the entire text with the insertion added in
 		local newtext = firsthalf .. "; " .. insert .. "; " .. lasthalf
-		
-		
+
+
 		SUG.Box:SetText(TMW:CleanString(newtext))
-		
+
 		-- put the cursor after the newly inserted text
 		local _, newPos = SUG.Box:GetText():find(insert:gsub("([%(%)%%%[%]%-%+%.%*])", "%%%1"), max(0, SUG.startpos-1))
 		newPos = newPos or #SUG.Box:GetText()
 		SUG.Box:SetCursorPosition(newPos + 2)
-		
+
 		-- if we are at the end of the exitbox then put a semicolon in anyway for convenience
-		if SUG.Box:GetCursorPosition() == #SUG.Box:GetText() then 
+		if SUG.Box:GetCursorPosition() == #SUG.Box:GetText() then
 			SUG.Box:SetText(SUG.Box:GetText() .. (doAddColon and not hasDurationData and " " or "") .. "; ")
 		end
-		
+
 		-- if we added a colon but there was no duration information inserted, move the cursor back 2 characters so the user can type it in quickly
 		if doAddColon and not hasDurationData then
 			SUG.Box:SetCursorPosition(SUG.Box:GetCursorPosition() - 2)
 		end
-		
+
 		-- attempt another suggestion (it will either be hidden or it will do another)
 		SUG:NameOnCursor(1)
 	end
@@ -6564,7 +6628,7 @@ function Module:Entry_AddToList_2(f, id)
 		f.tooltipmethod = "TMW_SetEquiv"
 		f.tooltiparg = equiv
 
-		f.Icon:SetTexture(SpellTextures[d])
+		f.Icon:SetTexture(SpellTextures[id])
 	end
 end
 function Module:Entry_Colorize_2(f, id)
@@ -6576,19 +6640,19 @@ function Module:Entry_IsValid(id)
 	if TMW.BE.casts[id] then
 		return true
 	end
-	
+
 	local _, _, _, _, _, _, castTime = GetSpellInfo(id)
 	if not castTime then
 		return false
 	elseif castTime > 0 then
 		return true
 	end
-	
+
 	local Parser, LT1, LT2, LT3 = SUG:GetParser()
-	
+
 	Parser:SetOwner(UIParent, "ANCHOR_NONE") -- must set the owner before text can be obtained.
 	Parser:SetSpellByID(id)
-	
+
 	if LT2:GetText() == SPELL_CAST_CHANNELED or LT3:GetText() == SPELL_CAST_CHANNELED then
 		return true
 	end
@@ -6605,7 +6669,7 @@ function Module:Table_Get()
 			self.ActionCache[spellID] = i
 		end
 	end
-	
+
 	return SpellCache
 end
 function Module:Entry_Colorize_2(f, id)
@@ -6619,7 +6683,7 @@ function Module.Sorter_Spells(a, b)
 	if (haveA and not haveB) or (haveB and not haveA) then
 		return haveA
 	end
-	
+
 	--player's spells (pclass)
 	local haveA, haveB = SUGPlayerSpells[a], SUGPlayerSpells[b]
 	if (haveA and not haveB) or (haveB and not haveA) then
@@ -6640,14 +6704,14 @@ function Module.Sorter_Spells(a, b)
 		end
 		--if they both were auras, and they were auras of the same type (player, NPC) then procede on to the rest of the code to sort them by name/id
 	end
-	
+
 	if SUGIsNumberInput then
 		--sort by id
 		return a < b
 	else
 		--sort by name
 		local nameA, nameB = SpellCache[a], SpellCache[b]
-			
+
 		if nameA == nameB then
 			--sort identical names by ID
 			return a < b
@@ -6716,6 +6780,20 @@ function Module:Table_GetSpecialSuggestions(suggestions, tbl, ...)
 	end
 end
 
+local Module = SUG:NewModule("cleu", SUG:GetModule("buff"))
+function Module:Table_Get()
+	return SpellCache, TMW.BE.buffs, TMW.BE.debuffs, TMW.BE.casts
+end
+function Module:Entry_Colorize_3(f, id)
+	if TMW.BE.casts[id] then
+		f.Background:SetVertexColor(1, .96, .41, 1) -- rogue yellow
+	end
+end
+function Module:Table_GetSpecialSuggestions(suggestions, tbl, ...)
+end
+
+
+
 
 local Module = SUG:NewModule("dr", SUG:GetModule("spell"))
 function Module:Table_Get()
@@ -6755,38 +6833,38 @@ Module.ItemIDs = {
 	5237,	--Mind-Numbing Poison
 	43235,	--Wound Poison
 	43231,	--Instant Poison
-	
+
 	31535,	--Bloodboil Poison
-	
+
 	3829,	--Frost Oil
 	3824,	--Shadow Oil -- good
-	
+
 	36899,	--Exceptional Mana Oil
 	22521,	--Superior Mana Oil -- good
 	20748,	--Brilliant Mana Oil -- good
 	20747,	--Lesser Mana Oil -- good
 	20745,	--Minor Mana Oil -- good
-	
+
 	22522,	--Superior Wizard Oil -- good
 	20749,	--Brilliant Wizard Oil -- good
 	20750,	--Wizard Oil -- good
 	20746,	--Lesser Wizard Oil -- good
 	20744,	--Minor Wizard Oil -- good
-	
-	
+
+
 	34539,	--Righteous Weapon Coating
 	34538,	--Blessed Weapon Coating
-	
+
 	--23123,	--Blessed Wizard Oil
-	
+
 	--23576,	--Greater Ward of Shielding
 	--23575,	--Lesser Ward of Shielding
-	
+
 	--25521,	--Greater Rune of Warding
 	--23559,	--Lesser Rune of Warding
-	
+
 	--7307,	--Flesh Eating Worm
-	
+
 	--46006,	--Glow Worm
 	--6529,	--Shiny Bauble
 	--6532,	--Bright Baubles
@@ -6798,7 +6876,7 @@ Module.ItemIDs = {
 	--6530,	--Nightcrawlers
 	--68049,	--Heat-Treated Spinning Lure
 	--6811,	--Aquadynamic Fish Lens
-	
+
 	--12643,	--Dense Weightstone
 	--3241,	--Heavy Weightstone
 	--7965,	--Solid Weightstone
@@ -6806,7 +6884,7 @@ Module.ItemIDs = {
 	--28420,	--Fel Weightstone
 	--28421,	--Adamantite Weightstone
 	--3239,	--Rough Weightstone
-	
+
 	--23529,	--Adamantite Sharpening Stone
 	--7964,	--Solid Sharpening Stone
 	--23122,	--Consecrated Sharpening Stone
@@ -6816,7 +6894,7 @@ Module.ItemIDs = {
 	--2863,	--Coarse Sharpening Stone
 	--12404,	--Dense Sharpening Stone
 	--18262,	--Elemental Sharpening Stone
-	
+
 	-- ZHTW:
 	-- weightstone: 平衡石
 	-- sharpening stone: 磨刀石
@@ -6835,10 +6913,10 @@ function Module:OnInitialize()
 	self.Spells = {}
 	self.Table = {}
 	self.SpellLookup = {}
-	
-	
-	self:Etc_DoItemLookups()		
-	
+
+
+	self:Etc_DoItemLookups()
+
 	for k, id in pairs(self.SpellIDs) do
 		local name = GetSpellInfo(id)
 		for _, enchant in TMW:Vararg(strsplit("|", L["SUG_MATCH_WPNENCH_ENCH"])) do
@@ -6863,7 +6941,7 @@ function Module:OnInitialize()
 			end
 		end
 	end
-	
+
 	for k, v in pairs(self.Spells) do
 		if self.Table[k] then
 			TMW:Error("Attempted to add spellID %d, but an item already has that id.", nil, k)
@@ -6871,20 +6949,20 @@ function Module:OnInitialize()
 			self.Table[k] = v
 		end
 	end
-	
+
 	for k, v in pairs(TMW.db.global.WpnEnchDurs) do
 		if not self.Table[k] then
 			self.Table[k] = k
 		end
 	end
-	
+
 	for name in pairs(self.Table) do
 		self:Etc_GetTexture(name) -- cache textures for the spell breakdown tooltip
 	end
 end
 function Module:Etc_DoItemLookups()
 	self:UnregisterEvent("GET_ITEM_INFO_RECEIVED")
-	
+
 	for k, id in pairs(self.ItemIDs) do
 		local name = GetItemInfo(id)
 		if name then
@@ -6893,20 +6971,20 @@ function Module:Etc_DoItemLookups()
 			self:RegisterEvent("GET_ITEM_INFO_RECEIVED", "Etc_DoItemLookups")
 		end
 	end
-	
+
 	for k, v in pairs(self.Items) do
 		self.Table[k] = v
 	end
 end
 function Module:Table_Get()
 	SUG:CacheItems()
-	
+
 	for k, v in pairs(TMW.db.global.WpnEnchDurs) do
 		if not self.Table[k] then
 			self.Table[k] = k
 		end
 	end
-	
+
 	return self.Table
 end
 function Module:Entry_AddToList_1(f, name)
@@ -6938,7 +7016,7 @@ function Module:Entry_AddToList_1(f, name)
 
 		f.insert = name
 	end
-	
+
 	f.Icon:SetTexture(self:Etc_GetTexture(name))
 end
 function Module:Etc_GetTexture(name)
@@ -6956,16 +7034,16 @@ function Module:Etc_GetTexture(name)
 			tex = "Interface\\Icons\\inv_stone_sharpeningstone_01"
 		end
 	end
-	
+
 	name = strlower(name)
 	SpellTextures[name] = SpellTextures[name] or tex
-	
+
 	return tex or "Interface\\Icons\\INV_Misc_QuestionMark"
 end
 function Module.Sorter(a, b)
 	local haveA = Module.Spells[a] and SUGPlayerSpells[Module.Spells[a]]
 	local haveB = Module.Spells[b] and SUGPlayerSpells[Module.Spells[b]]
-	
+
 	if haveA or haveB then
 		if haveA and haveB then
 			return a < b
@@ -6973,10 +7051,10 @@ function Module.Sorter(a, b)
 			return haveA
 		end
 	end
-	
+
 	local haveA = Module.Items[a] and (CurrentItems[ strlowerCache[ a ]] )
 	local haveB = Module.Items[b] and (CurrentItems[ strlowerCache[ b ]] )
-	
+
 	if haveA or haveB then
 		if haveA and haveB then
 			return a < b
@@ -6984,7 +7062,7 @@ function Module.Sorter(a, b)
 			return haveA
 		end
 	end
-	
+
 	-- its a very small table to sort, so i can get away with this
 	local haveA = rawget(TMW.db.global.WpnEnchDurs, a)
 	local haveB = rawget(TMW.db.global.WpnEnchDurs, b)
@@ -6995,10 +7073,10 @@ function Module.Sorter(a, b)
 			return haveA
 		end
 	end
-	
-	
+
+
 	local nameA, nameB = Module.Table[a], Module.Table[b]
-		
+
 	if a == b then
 		--sort identical names by ID
 		return Module.Table[a] < Module.Table[b]
@@ -7006,7 +7084,7 @@ function Module.Sorter(a, b)
 		--sort by name
 		return a < b
 	end
-	
+
 end
 function Module:Table_GetSorter()
 	SUG.doUpdateItemCache = true
@@ -7015,7 +7093,7 @@ function Module:Table_GetSorter()
 end
 function Module:Table_GetNormalSuggestions(suggestions, tbl, ...)
 	local atBeginning = SUG.atBeginning
-	
+
 	for name, id in pairs(tbl) do
 		if SUG.inputType == "number" or strfind(strlower(name), atBeginning) then
 			suggestions[#suggestions + 1] = name
@@ -7062,10 +7140,10 @@ end
 function CNDT:LoadConfig(type)
 	type = type or CNDT.type or "icon"
 	CNDT.type, CNDT.settings = CNDT:GetTypeData(type)
-	
+
 	local Conditions = CNDT.settings
 	if not Conditions then return end
-	
+
 	HELP:Hide("CNDT_UNIT_MISSING")
 	if Conditions.n > 0 then
 		for i = Conditions.n + 1, #CNDT do
@@ -7080,7 +7158,7 @@ function CNDT:LoadConfig(type)
 		CNDT:Clear()
 	end
 	CNDT:AddRemoveHandler()
-	
+
 	if IE.Conditions.ScrollFrame:GetVerticalScrollRange() == 0 then
 		TMW.IE.Conditions.ScrollFrame.ScrollBar:Hide()
 	end
@@ -7091,7 +7169,7 @@ function CNDT:Save()
 	if not groupID then return end
 
 	local Conditions = CNDT.settings
-	
+
 	for i, group in ipairs(CNDT) do
 		if group:IsShown() then
 			group:Save()
@@ -7117,18 +7195,18 @@ end
 
 function CNDT:SetTabText(type)
 	local type, Conditions = CNDT:GetTypeData(type)
-	
+
 	CNDT:CheckParentheses(type)
-	
+
 	local tab = (type == "icon" and IE.IconConditionTab) or IE.GroupConditionTab
 	local n = Conditions.n
-	
+
 	if n > 0 then
 		tab:SetText((CNDT[type.."invalid"] and "|TInterface\\AddOns\\TellMeWhen_Options\\Textures\\Alert:0:2|t|cFFFF0000" or "") .. L[type == "icon" and "CONDITIONS" or "GROUPCONDITIONS"] .. " |cFFFF5959(" .. n .. ")")
 	else
 		tab:SetText(L[type == "icon" and "CONDITIONS" or "GROUPCONDITIONS"] .. " (" .. n .. ")")
 	end
-	
+
 	PanelTemplates_TabResize(tab, -6)
 end
 
@@ -7177,16 +7255,16 @@ local function AddConditionToDropDown(v)
 end
 
 function CNDT:TypeMenu_DropDown()
-	
+
 	-- populate the "frequently used" submenu
 	if UIDROPDOWNMENU_MENU_LEVEL == 2 and UIDROPDOWNMENU_MENU_VALUE == "FREQ" then
-		
+
 		-- num is a count of how many we have added. We dont want to add more than maxNum things to the menu
 		local num, maxNum = 0, 20
-		
+
 		-- addedThings IN THIS CASE is a list of conditions that have been added to avoid duplicates between the two sources for the list (see below)
 		wipe(addedThings)
-		
+
 		-- add the conditions that should always be at the top of the list
 		for _, k in ipairs(commonConditions) do
 			AddConditionToDropDown(CNDT.ConditionsByType[k])
@@ -7194,14 +7272,14 @@ function CNDT:TypeMenu_DropDown()
 			num = num + 1
 			if num > maxNum then break end
 		end
-		
+
 		-- usedCount is a list of how many times a condition has been used.
 		-- We want to add the ones that get used the most to the rest of the menu
 		wipe(usedCount)
 		for Condition in TMW:InConditionSettings() do
 			usedCount[Condition.Type] = (usedCount[Condition.Type] or 0) + 1
 		end
-		
+
 		-- add the most used conditions to the list
 		for k, n in TMW:OrderedPairs(usedCount, "values", true) do
 			if not addedThings[k] and n > 1 then
@@ -7212,15 +7290,15 @@ function CNDT:TypeMenu_DropDown()
 			end
 		end
 	end
-	
+
 	wipe(addedThings)
 	local addedFreq = true -- FREQUENCY SUBMENU DISABLED BY SETTING THIS TRUE
 	for k, v in ipairs(CNDT.Types) do
-		
+
 		-- add the frequently used submenu before the first condition that does not have a category
 		if not v.category and not addedFreq and UIDROPDOWNMENU_MENU_LEVEL == 1 then
 			AddDropdownSpacer()
-				
+
 			local info = UIDropDownMenu_CreateInfo()
 			info.text = L["CNDTCAT_FREQUENTLYUSED"]
 			info.value = "FREQ"
@@ -7229,26 +7307,26 @@ function CNDT:TypeMenu_DropDown()
 			UIDropDownMenu_AddButton(info, UIDROPDOWNMENU_MENU_LEVEL)
 			addedFreq = true
 		end
-		
+
 		if ((UIDROPDOWNMENU_MENU_LEVEL == 2 and v.category == UIDROPDOWNMENU_MENU_VALUE) or (UIDROPDOWNMENU_MENU_LEVEL == 1 and not v.category)) and not v.hidden then
 			if v.spacebefore then
 				AddDropdownSpacer()
 			end
-			
+
 			-- most conditions are added to the dropdown right here
 			AddConditionToDropDown(v)
-			
+
 			if v.spaceafter then
 				AddDropdownSpacer()
 			end
-			
+
 		elseif UIDROPDOWNMENU_MENU_LEVEL == 1 and v.category and not addedThings[v.category] then
 			-- addedThings IN THIS CASE is a list of categories that have been added. Add ones here that have not been added yet.
-			
+
 			if v.categorySpacebefore then
 				AddDropdownSpacer()
 			end
-			
+
 			local info = UIDropDownMenu_CreateInfo()
 			info.text = v.category
 			info.value = v.category
@@ -7354,7 +7432,7 @@ end
 
 function CNDT:IconMenu_DropDown_OnClick(frame)
 	TMW:SetUIDropdownText(frame, self.value, TMW.Icons)
-	frame:GetParent().IconPreview:SetIcon(_G[self.value])
+	frame.IconPreview:SetIcon(_G[self.value])
 	CloseDropDownMenus()
 	CNDT:Save()
 end
@@ -7430,13 +7508,13 @@ CNDT.colors = setmetatable(
 		end
 		return rawget(t, k) or ""
 end})
-	
+
 function CNDT:CheckParentheses(type)
 	local type, settings = CNDT:GetTypeData(type)
-	
+
 	local numclose, numopen, runningcount = 0, 0, 0
 	local unopened = 0
-	
+
 	for Condition in TMW:InConditions(settings) do
 		for i = 1, Condition.PrtsBefore do
 			numopen = numopen + 1
@@ -7449,7 +7527,7 @@ function CNDT:CheckParentheses(type)
 			if runningcount < 0 then unopened = unopened + 1 end
 		end
 	end
-	
+
 	if numopen ~= numclose then
 		local typeNeeded, num
 		if numopen > numclose then
@@ -7458,24 +7536,24 @@ function CNDT:CheckParentheses(type)
 			typeNeeded, num = "(", numclose-numopen
 		end
 		HELP:Show("CNDT_PARENTHESES_ERROR", nil, TMW.IE.Conditions, 0, 0, L["PARENTHESIS_WARNING1"], num, L["PARENTHESIS_TYPE_" .. typeNeeded])
-		
+
 		CNDT[type.."invalid"] = 1
 	elseif unopened > 0 then
-	
+
 		HELP:Show("CNDT_PARENTHESES_ERROR", nil, TMW.IE.Conditions, 0, 0, L["PARENTHESIS_WARNING2"], unopened)
-		
+
 		CNDT[type.."invalid"] = 1
 	else
 		HELP:Hide("CNDT_PARENTHESES_ERROR")
 		CNDT[type.."invalid"] = nil
 	end
-end	
+end
 
 function CNDT:ColorizeParentheses()
 	if not IE.Conditions:IsShown() then return end
-	
+
 	CNDT.Parens = wipe(CNDT.Parens or {})
-	
+
 	for k, v in ipairs(CNDT) do
 		if v:IsShown() then
 			if v.OpenParenthesis:IsShown() then
@@ -7486,7 +7564,7 @@ function CNDT:ColorizeParentheses()
 					end
 				end
 			end
-			
+
 			if v.CloseParenthesis:IsShown() then
 				for k = #v.CloseParenthesis, 1, -1 do
 					local v = v.CloseParenthesis[k]
@@ -7498,7 +7576,7 @@ function CNDT:ColorizeParentheses()
 			end
 		end
 	end
-	
+
 	while true do
 		local numopen, nestinglevel, open, currentcolor = 0, 0
 		for i, v in ipairs(CNDT.Parens) do
@@ -7522,7 +7600,7 @@ function CNDT:ColorizeParentheses()
 					CNDT.Parens[i] = false
 					break
 				end
-			end		
+			end
 		end
 		if open then
 			CNDT.Parens[open] = true
@@ -7535,9 +7613,9 @@ function CNDT:ColorizeParentheses()
 			v.text:SetText(v.type)
 		end
 	end
-	
+
 	CNDT:SetTabText()
-end	
+end
 
 
 ---------- Condition Groups ----------
@@ -7583,13 +7661,13 @@ function CNDT:AddRemoveHandler()
 			CNDT[i].OpenParenthesis:Hide()
 		end
 	end
-	
+
 	CNDT:ColorizeParentheses()
 end
 
 function CNDT:CreateGroups(num)
 	local start = #CNDT + 1
-	
+
 	for i=start, num do
 		TMW.Classes.CndtGroup:New("Frame", "TellMeWhen_IconEditorConditionsGroupsGroup" .. i, TellMeWhen_IconEditor.Conditions.Groups, "TellMeWhen_ConditionGroup", i)
 	end
@@ -7611,15 +7689,15 @@ CndtGroup = TMW:NewClass("CndtGroup", "Frame")
 
 function CndtGroup.OnNewInstance(group)
 	local ID = group:GetID()
-	
+
 	CNDT[ID] = group
-	
+
 	group:SetPoint("TOPLEFT", CNDT[ID-1], "BOTTOMLEFT", 0, -14.5)
-	
+
 	local p, _, rp, x, y = TMW.CNDT[1].AddDelete:GetPoint()
 	group.AddDelete:ClearAllPoints()
 	group.AddDelete:SetPoint(p, CNDT[ID], rp, x, y)
-	
+
 	group:Clear()
 	group:SetTitles()
 end
@@ -7657,7 +7735,7 @@ function CndtGroup.TypeCheck(group, data)
 				group.Check:Hide()
 			end
 			SUG:EnableEditBox(group.EditBox, data.useSUG, true)
-			
+
 			group.Slider:SetWidth(217)
 			if data.noslide then
 				group.EditBox:SetWidth(520)
@@ -7692,14 +7770,14 @@ function CndtGroup.TypeCheck(group, data)
 			group.EditBox2:Hide()
 			SUG:DisableEditBox(group.EditBox2)
 		end
-		
+
 		if data.nooperator then
 			group.TextOperator:SetText("")
 			group.Operator:Hide()
 		else
 			group.Operator:Show()
 		end
-		
+
 		if data.noslide then
 			showval = false
 			group.Slider:Hide()
@@ -7709,7 +7787,7 @@ function CndtGroup.TypeCheck(group, data)
 			group.ValText:Show()
 			group.Slider:Show()
 		end
-		
+
 		if data.showhide then
 			data.showhide(group, data)
 		end
@@ -7722,18 +7800,18 @@ function CndtGroup.TypeCheck(group, data)
 		group.Operator:Hide()
 		group.ValText:Hide()
 		group.Slider:Hide()
-		
+
 		group.TextUnitOrIcon:SetText(nil)
 		group.TextUnitDef:SetText(nil)
 		group.TextOperator:SetText(nil)
 		group.TextValue:SetText(nil)
-	
+
 	end
 end
 
 function CndtGroup.Save(group)
 	local condition = CNDT.settings[group:GetID()]
-	
+
 	condition.Type = UIDropDownMenu_GetSelectedValue(group.Type) or ""
 	condition.Unit = strtrim(group.Unit:GetText()) or "player"
 	condition.Operator = UIDropDownMenu_GetSelectedValue(group.Operator) or "=="
@@ -7744,8 +7822,8 @@ function CndtGroup.Save(group)
 	condition.Name2 = strtrim(group.EditBox2:GetText()) or ""
 	condition.Checked = not not group.Check:GetChecked()
 	condition.Checked2 = not not group.Check2:GetChecked()
-	
-	
+
+
 	for k, rune in pairs(group.Runes) do
 		if type(rune) == "table" then
 			condition.Runes[rune:GetID()] = rune:GetChecked()
@@ -7776,29 +7854,29 @@ end
 function CndtGroup.Load(group)
 	local condition = CNDT.settings[group:GetID()]
 	local data = CNDT.ConditionsByType[condition.Type]
-	
+
 	TMW:SetUIDropdownText(group.Type, condition.Type)
 	UIDropDownMenu_SetText(group.Type, data and data.text or (condition.Type .. ": UNKNOWN TYPE"))
-	
+
 	group:TypeCheck(data)
-	
+
 	group.Unit:SetText(condition.Unit)
 	group.EditBox:SetText(condition.Name)
 	group.EditBox2:SetText(condition.Name2)
 	group.Check:SetChecked(condition.Checked)
 	group.Check2:SetChecked(condition.Checked2)
-	
+
 	TMW:SetUIDropdownText(group.Icon, condition.Icon, TMW.Icons)
-	group.IconPreview:SetIcon(_G[condition.Icon])
-	
+	group.Icon.IconPreview:SetIcon(_G[condition.Icon])
+
 	local v = TMW:SetUIDropdownText(group.Operator, condition.Operator, operators)
 	if v then
 		TMW:TT(group.Operator, v.tooltipText, nil, 1)
 	end
-	
+
 	group:SetSliderMinMax(condition.Level or 0)
 	group:SetValText()
-	
+
 	for k, rune in pairs(group.Runes) do
 		if type(rune) == "table" then
 			rune:SetChecked(condition.Runes[rune:GetID()])
@@ -7814,7 +7892,7 @@ function CndtGroup.Load(group)
 			group.CloseParenthesis[k]:SetChecked(condition.PrtsAfter >= k)
 		end
 	end
-	
+
 	group.AndOr:SetValue(condition.AndOr)
 	group:Show()
 end
@@ -7909,7 +7987,7 @@ function CndtGroup.SetSliderMinMax(group, level)
 		Slider.Low:SetText(get(v.texttable, vmin) or v.mint or vmin or 0)
 		Slider.High:SetText(get(v.texttable, vmax) or v.maxt or vmax or 1)
 	end
-		
+
 	local Min, Max = Slider:GetMinMaxValues()
 	local Mid
 	if v.Mid == true then
@@ -7918,7 +7996,7 @@ function CndtGroup.SetSliderMinMax(group, level)
 		Mid = get(v.midt, ((Max-Min)/2)+Min)
 	end
 	Slider.Mid:SetText(Mid)
-	
+
 	Slider.step = v.step or 1
 	Slider:SetValueStep(Slider.step)
 	if level then
@@ -7938,24 +8016,24 @@ HELP = TMW:NewModule("Help", "AceTimer-3.0") TMW.HELP = HELP
 
 HELP.Codes = {
 	"ICON_POCKETWATCH_FIRSTSEE",
-	
+
 	"CLEU_WHOLECATEGORYEXCLUDED",
-	
+
 	"ICON_DURS_FIRSTSEE",
 	"ICON_DURS_MISSING",
-	
+
 	"ICON_IMPORT_CURRENTPROFILE",
 	"ICON_EXPORT_DOCOPY",
-	
+
 	"ICON_DR_MISMATCH",
 	"ICON_MS_NOTFOUND",
 	"ICON_ICD_NATURESGRACE",
-	
+
 	"ICON_UNIT_MISSING",
-	
+
 	"CNDT_UNIT_MISSING",
 	"CNDT_PARENTHESES_ERROR",
-	
+
 	"SND_INVALID_CUSTOM",
 }
 
@@ -7985,10 +8063,10 @@ function HELP:Show(code, icon, frame, x, y, text, ...)
 	end
 	assert(codeID, format("Code %q is not defined", code))
 	-- we can now safely proceded to process and queue the help
-	
+
 	-- retrieve or create the data table
 	local help = wipe(HELP.Queued[code] or {})
-	
+
 	-- add the text format args to the data
 	for i = 1, select('#', ...) do
 		help[i] = select(i, ...)
@@ -8004,25 +8082,25 @@ function HELP:Show(code, icon, frame, x, y, text, ...)
 	-- if the frame has the CreateTexture method, then it can be made the parent.
 	-- Otherwise, the frame is actually a texture/font/etc object, so set its parent as the parent.
 	help.parent = help.frame.CreateTexture and help.frame or help.frame:GetParent()
-	
+
 	-- determine if the code has a setting associated to only show it once.
 	help.setting = HELP.OnlyOnce[code] and code
-	
+
 	-- if it does and it has already been set true, then we dont need to show anything, so quit.
 	if help.setting and db.global.HelpSettings[help.setting] then
 		HELP.Queued[code] = nil
 		help = nil
 		return
 	end
-	
+
 	-- if the code is the same as what is currently shown, then replace what is currently being shown.
 	if HELP.showingHelp and HELP.showingHelp.code == code then
 		HELP.showingHelp = nil
 	end
-	
+
 	-- everything should be in order, so add the help to the queue.
 	HELP:Queue(help)
-	
+
 	-- notify that this help will eventually be shown
 	return 1
 end
@@ -8044,7 +8122,7 @@ end
 function HELP:Queue(help)
 	-- add the help to the queue
 	HELP.Queued[help.code] = help
-	
+
 	-- notify the engine to start
 	HELP:ShowNext()
 end
@@ -8068,7 +8146,7 @@ function HELP:ShowNext()
 	if not HELP.showingHelp then
 		HELP.Frame:Hide()
 	end
-	
+
 	-- if we are already showing something, then don't overwrite it.
 	if HELP.showingHelp then
 		-- but if the current help should not be shown, then stop showing it, but stick it back in the queue to try again later
@@ -8079,12 +8157,12 @@ function HELP:ShowNext()
 		end
 		return
 	end
-	
+
 	-- if there isn't a next help to show, then dont try.
 	if not next(HELP.Queued) then
 		return
 	end
-	
+
 	-- calculate the next help in line based on the order of HELP.Codes
 	local help
 	for order, code in ipairs(HELP.Codes) do
@@ -8093,30 +8171,30 @@ function HELP:ShowNext()
 			break
 		end
 	end
-	
+
 	if not help then
 		return
 	end
-	
+
 	-- show the frame with the data
 	local text = format(help.text, unpack(help))
-	
+
 	HELP.Frame:ClearAllPoints()
 	HELP.Frame:SetPoint("TOPRIGHT", help.frame, "LEFT", (help.x or 0) - 30, (help.y or 0) + 28)
 	HELP.Frame.text:SetText(text)
 	HELP.Frame:SetHeight(HELP.Frame.text:GetHeight() + 38)
 	HELP.Frame:SetWidth(min(250, HELP.Frame.text:GetStringWidth() + 30))
-	
-	local parent = help.frame.CreateTexture and help.frame or help.frame:GetParent() -- if the frame has the CreateTexture method, then it can be made the parent. Otherwise, the frame is actually a texture/font/etc object, so set 
+
+	local parent = help.frame.CreateTexture and help.frame or help.frame:GetParent() -- if the frame has the CreateTexture method, then it can be made the parent. Otherwise, the frame is actually a texture/font/etc object, so set
 	HELP.Frame:SetParent(parent)
 	HELP.Frame:Show()
-	
-	
+
+
 	-- if the help had a setting associated, set it now
 	if help.setting then
 		db.global.HelpSettings[help.setting] = true
 	end
-	
+
 	-- remove the help from the queue and set it as the current help
 	HELP.Queued[help.code] = nil
 	HELP.showingHelp = help

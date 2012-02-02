@@ -80,7 +80,7 @@ local function Cast_OnUpdate(icon, time)
 				local duration = endTime - start
 
 				local color = icon:CrunchColor(duration)
-				
+
 				--icon:SetInfo(alpha, color, texture, start, duration, spellChecked, reverse, count, countText, forceupdate, unit)
 				icon:SetInfo(icon.Alpha, color, iconTexture, start, duration, name, reverse, nil, nil, nil, unit)
 
@@ -89,7 +89,7 @@ local function Cast_OnUpdate(icon, time)
 		end
 	end
 	local color = icon:CrunchColor()
-	
+
 	--icon:SetInfo(alpha, color, texture, start, duration, spellChecked, reverse, count, countText, forceupdate, unit)
 	icon:SetInfo(icon.UnAlpha, color, nil, 0, 0, NameFirst, nil, nil, nil, nil, Units[1])
 end

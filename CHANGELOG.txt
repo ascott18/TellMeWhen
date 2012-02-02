@@ -1,5 +1,4 @@
-===v?.?.?===
- * (Im not sure if this will be 4.9.0 or 5.0.0 - For now, its still 4.8.3 till I decide how far I want to go)
+===v4.9.0===
  * Conditions are now almost entirely event driven, resulting in a (tremendous) performance increase.
  * Enrage is now a proper dispel type, and no longer relies on a pre-defined list of enrages.
  * Implemented a proper class-based inheritance system for many objects (Icons, Icon Types, Groups, Condition Groups).
@@ -17,16 +16,16 @@
  ** (r429) An icon/group should no longer be treated as if it has failing conditions after it had conditions that were failing, but those conditions were removed
  ** (r430) Fixed the list of unitIDs used to guess a unit's class
  ** (r431) A unit's class should now be properly detected when the unit is from another server
- 
+ ** (r432) conditions.lua:1502 Usage: RegisterEvent("eventname", "methodname"): "methodname" - method "PLAYER_TALENT_UPDATE" not found on self.
 
 ===v4.8.3===
  * Bug Fixes:
  ** (r423) Events with conditions (Duration, Stacks changed) should now handle animations and sound properly.
- 
+
  ===v4.8.2===
  * Bug Fixes:
  ** (r421) You should no longer lock up when using the GCD condition
- 
+
  ===v4.8.1===
  * Bug Fixes:
  ** (r412) icd.lua:134 attempt to index field 'HELP' (a nil value)
@@ -81,7 +80,7 @@
  ** (r379) Fixed a bug that was preventing importing from a group in which the first icon is blank.
  ** (r379) Fixed (kinda) the status bar when exporting large pieces of data from TMW's Ace options dialogs.
  ** (r380) TellMeWhen-r379.lua:1803 bad argument #2 to "format" (number expected, got nil)
- 
+
 ===v4.7.2===
  * New Icon Type: Lightwell
  * Condition icons now use the Custom Texture editbox to select their texture instead of the Choose Name editbox (for consistency)
@@ -97,7 +96,7 @@
 ===v4.7.1===
  * Bug Fixes:
  ** (r342) Condition icons will no longer spam their event outputs when "Only show if timer is active" is enabled.
- 
+
 ===v4.7.0===
  * Completely redid the color system. Colors are now defined (in the main optons) globally, with the option to configure them per icon type and override the global settings.
  * Addded "%p" as a substitution for the name of the previously checked unit.
@@ -125,14 +124,14 @@
  ** (r335) TellMeWhen-4.6.7.lua:1771: attempt to index local "condition" (a number value)
  ** (r335) TellMeWhen_Options.lua:3883: Usage: TellMeWhen_IconEditorSoundEventSettingsValue:SetText("text")
  ** (r336) Fixed a bug with condition icon timers resetting themselves when conditions begin failing.
- 
+
 ===v4.6.7===
  * Bug Fixes:
  ** (r310) Fixed sound event text overflow bug
  ** (r311) Possibly fixed a bug that was causing the event settings of deleted groups to stick around
  ** (r312) Added Sudden Death/Colossus Smash to the cooldown reset tracker for Unit Cooldown icons
  ** (r313) TellMeWhen will no longer completely break when loading with ButtonFacade but not Masque installed
- 
+
 ===v4.6.6===
  * The suggestion list has been completely rewritten, and many features have been added.
  * Seeing as Masque has been out for a month now, I think it is safe to say that ButtonFacade is now obsolete. Removed all support for ButtonFacade
@@ -148,13 +147,13 @@
  ** (r307) Imported strings created in r307+ into r307+ will now try extra hard to fix any errors casued by Blizzard's buggy editboxes.
  ** (r308) Event settings in the icon editor should now always updated to reflect their current setting.
  ** (r308) Fixed buggy event button texts for zhCN and zhTW clients.
- 
+
 ===v4.6.5===
  * Bug Fixes:
  ** (r294) Fixed a bug where conditions were being erroneously attached to an icon/group after adding a condition and then removing all conditions.
  ** (r294) TellMeWhen.lua line 1452: attempt to index local 'condition' (a number value)
  ** (r296) TellMeWhen_Options.lua:2703: Missing version of data
- 
+
 ===v4.6.4===
  * New Condition: Pet talent tree.
  * You can now undo and redo changes made to icon settings.
@@ -171,11 +170,11 @@
  ** (r281) TellMeWhen\Types\dr.lua:182 table index is nil
  ** (r282) Pet talent tree localization was incorrect for some languages due to my crafty attempts to be crafty
  ** (r290) Blank icons will no longer be erroneously added to the copy dropdown.
- 
+
 ===v4.6.3===
  * Bug Fixes:
  ** (r268) The button to reset icons should now work properly
- 
+
 ===v4.6.2===
  * Item cooldowns now have their own icon type.
  * Added text substitutions for unit and spell names.
@@ -197,7 +196,7 @@
  ** (r253) TellMeWhen_Options\TellMeWhen_Options.lua:2246: attempt to index global "current" (a nil value)
  ** (r254) Changes in haste percentage without changes in haste rating will now be properly reflected in conditions (Tickets 303, 304)
  ** (r255) Warnings should no longer incorrectly show for missing durations for icon types that do not require them
- 
+
 ===v4.6.0===
  * You can now import and export entire groups or entire profiles.
  * You can now import settings from a backup created when TellMeWhen_Options loads.
@@ -231,7 +230,7 @@
  ** (r231) Fixed missing settings caused by the left-column overhaul
  ** (r232) Meta icons now inherit timer settings properly
  ** (r233) Fixed some deadly recursion
- 
+
 ===v4.5.5===
  * Added Brazilian Portuguese localization file. Translators wanted!
  * Implemented a method of determining of an import string has become corrupt by using WikiCreole formatting on Curse (and then fix it if it has been).
@@ -243,7 +242,7 @@
  * Re-implemented the "Only in Combat" option for groups (since it is such a common option, having it only as a condition is a bit tricky for new users to figure out).
  * Bug Fixes:
  ** (r210) Fixed frame levels that I broke in the last revision of 4.5.3.
- 
+
 ===v4.5.3===
  * Improved configurations for units. Leaving the red '#' in will now default the unit to its full range, and there is now a tooltip showing all units being checked when holding down a modifier key, similar to the name editbox.
  * Added a new option to condition icons: "Only show if timer is active". If enabled, forces the icon to be hidden if there is not an active timer on the icon.
@@ -261,7 +260,7 @@
  ** (r206) The group settings interface will now longer incorrectly show in the icon editor after moving a group if the group settings tab is not selected
  ** (r208) Loading an icon into the icon editor from a different group than the previously loaded icon while the Group Settings tab is selected will now cause the new icon's group to be loaded in the Group Settings tab
 
- 
+
 ===v4.5.2===
  * Added "%m" as a text substitution for the name of the unit that you are currently mousing over.
  * Existing substitutions "%t" and "%f" now work in all output locations.
@@ -310,11 +309,11 @@
  ** (r164) Tooltip scan conditions should now properly function with spellID input
  ** (r170) TellMeWhen_Options-r169.lua:215: attempt to index field "?" (a nil value)
  ** (r170) TellMeWhen_Options-r169.lua:1674: attempt to index field "?" (a nil value)
- 
+
 ===v4.4.6===
  * Bug Fixes:
  ** (r151) conditions.lua line 319: attempt to perform arithmetic on local 'start' (a nil value)
- 
+
 ===v4.4.4===
  * Bug Fixes:
  ** (r145) Totem icons now work for mushrooms/DK ghouls
@@ -342,7 +341,7 @@
  ** (r140) Icon's OnHide events should now properly fire when Always Hide is checked.
  ** (r142) Using equivalencies with the new duration syntax should now cause the duration to be applied to all spells in the equivalency.
  ** (r142) Fixed item textures in config mode.
- 
+
 ===v4.4.2===
  * Misc. updates.
 
@@ -375,7 +374,7 @@
  ** (r118) (Conditions) attempt to call global "GetRaidTargetIndex" (a nil value)
  ** (r119) unitcooldown.lua:328: attempt to index upvalue "db" (a nil value)
  ** (r119) Fixed a bug that was causing unitcooldowns/icd icons that use spellIDs to not work.
- 
+
 ===v4.3.0===
  * New icon type: Diminishing Returns. Guess what this one tracks?
  * New icon type: Cooldown - Auto Shot.

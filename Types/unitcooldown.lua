@@ -165,7 +165,7 @@ local resetsOnAura = {
 function Type:COMBAT_LOG_EVENT_UNFILTERED(e, _, p, _, g, a, _, _, _, _, _, _, i, n)-- tyPe, sourceGuid, sourcenAme, spellId, spellName -- 2 NEW ARGS IN 4.2
 	if p == "SPELL_CAST_SUCCESS" or p == "SPELL_AURA_APPLIED" or p == "SPELL_AURA_REFRESH" or p == "SPELL_DAMAGE" or p == "SPELL_HEAL" or p == "SPELL_MISSED" then
 	--	GUIDsToNames[g] = a
-		
+
 		local c = Cooldowns[g]
 		if p == "SPELL_AURA_APPLIED" then
 			if resetsOnAura[i] then
@@ -274,7 +274,7 @@ local function UnitCooldown_OnUpdate(icon, time)
 		local unit = TableToIterate[u]
 		local guid = UnitGUID(unit)
 		local cooldowns = guid and Cooldowns[guid]
-		
+
 		if cooldowns then
 			for i = 1, NAL do
 				local iName = NameArray[i]
@@ -287,7 +287,7 @@ local function UnitCooldown_OnUpdate(icon, time)
 				else
 					_start = cooldowns[iName] or 0
 				end
-				
+
 				if _start then
 					local _duration = Durations[i]
 					local tms = time - _start -- Time Minus Start - time since the unit's last cast of the spell (not neccesarily the time it has been on cooldown)
@@ -334,15 +334,15 @@ local function UnitCooldown_OnUpdate(icon, time)
 			end
 		end
 	end
-	
+
 	--icon:SetInfo(alpha, color, texture, start, duration, spellChecked, reverse, count, countText, forceupdate, unit)
 	if usename and Alpha > 0 then
 		local color = icon:CrunchColor()
-		
+
 		icon:SetInfo(Alpha, color, SpellTextures[usename] or "Interface\\Icons\\INV_Misc_PocketWatch_01", 0, 0, usename, nil, nil, nil, nil, useUnit)
 	elseif unname then
 		local color = icon:CrunchColor(unduration)
-		
+
 		icon:SetInfo(UnAlpha, color, SpellTextures[unname], unstart, unduration, unname, nil, nil, nil, nil, unUnit)
 	else
 		icon:SetInfo(0)
@@ -355,7 +355,7 @@ function Type:Setup(icon, groupID, iconID)
 	icon.NameFirst = TMW:GetSpellNames(icon, icon.Name, 1)
 	icon.NameArray = TMW:GetSpellNames(icon, icon.Name)
 	icon.Durations = TMW:GetSpellDurations(icon, icon.Name)
-	
+
 	--if icon.Unit == "" then
 	--	icon.Units = nil
 	--	icon.TableToIterate = Cooldowns
@@ -375,16 +375,16 @@ end
 
 function Type:DragReceived(icon, t, data, subType)
 	local ics = icon:GetSettings()
-	
+
 	if t ~= "spell" then
 		return
 	end
-	
+
 	local _, spellID = GetSpellBookItemInfo(data, subType)
 	if not spellID then
 		return
 	end
-	
+
 	ics.Name = TMW:CleanString(ics.Name .. ";" .. spellID)
 	if TMW.CI.ic ~= icon then
 		TMW.IE:Load(nil, icon)

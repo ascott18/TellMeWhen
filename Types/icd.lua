@@ -76,14 +76,14 @@ local function ICD_OnEvent(icon, event, ...)
 	if event == "COMBAT_LOG_EVENT_UNFILTERED" then
 		local p, g -- make these local separate from i and n
 		_, p, _, g, _, _, _, _, _, _, _, i, n = ...
-		
+
 		valid = g == pGUID and (p == "SPELL_AURA_APPLIED" or p == "SPELL_AURA_REFRESH" or p == "SPELL_ENERGIZE" or p == "SPELL_AURA_APPLIED_DOSE" or p == "SPELL_SUMMON" or p == "SPELL_DAMAGE" or p == "SPELL_MISSED")
 	elseif event == "UNIT_SPELLCAST_SUCCEEDED" or event == "UNIT_SPELLCAST_CHANNEL_START" or event == "UNIT_SPELLCAST_START" then
 		valid, n, _, _, i = ... -- I cheat. valid is actually a unitID here.
-		
+
 		valid = valid == "player"
 	end
-	
+
 	if valid then
 		local NameHash = icon.NameHash
 		local Key = NameHash[i] or NameHash[strlowerCache[n]]
@@ -106,11 +106,11 @@ local function ICD_OnUpdate(icon, time)
 	--icon:SetInfo(alpha, color, texture, start, duration, spellChecked, reverse, count, countText, forceupdate, unit)
 	if time - ICDStartTime > ICDDuration then
 		local color = icon:CrunchColor()
-		
+
 		icon:SetInfo(icon.Alpha, color, nil, 0, 0, icon.ICDID, nil, nil, nil, nil, nil)
 	else
 		local color = icon:CrunchColor(ICDDuration)
-		
+
 		icon:SetInfo(icon.UnAlpha, color, nil, ICDStartTime, ICDDuration, icon.ICDID, nil, nil, nil, nil, nil)
 	end
 end
@@ -125,7 +125,7 @@ function Type:Setup(icon, groupID, iconID)
 
 	icon.ICDStartTime = icon.ICDStartTime or 0
 	icon.ICDDuration = icon.ICDDuration or 0
-	
+
 	for _, name in pairs(icon.NameNameArray) do
 		if name == naturesGrace then
 			if icon:IsBeingEdited() == 1 then
@@ -136,7 +136,7 @@ function Type:Setup(icon, groupID, iconID)
 			break
 		end
 	end
-		
+
 	--[[ keep these events per icon isntead of global like unitcooldowns are so that ...
 	well i had a reason here but it didnt make sense when i came back and read it a while later. Just do it. I guess.]]
 	if icon.ICDType == "spellcast" then
@@ -157,16 +157,16 @@ end
 
 function Type:DragReceived(icon, t, data, subType)
 	local ics = icon:GetSettings()
-	
+
 	if t ~= "spell" then
 		return
 	end
-	
+
 	local _, spellID = GetSpellBookItemInfo(data, subType)
 	if not spellID then
 		return
 	end
-	
+
 	ics.Name = TMW:CleanString(ics.Name .. ";" .. spellID)
 	if TMW.CI.ic ~= icon then
 		TMW.IE:Load(nil, icon)

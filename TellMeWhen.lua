@@ -28,12 +28,12 @@ local LMB = LibStub("Masque", true) or (LibMasque and LibMasque("Button"))
 local AceDB = LibStub("AceDB-3.0")
 local LSM = LibStub("LibSharedMedia-3.0")
 local DRData = LibStub("DRData-1.0", true)
- 
-TELLMEWHEN_VERSION = "4.8.3"
+
+TELLMEWHEN_VERSION = "4.9.0"
 TELLMEWHEN_VERSION_MINOR = strmatch(" @project-version@", " r%d+") or ""
 TELLMEWHEN_VERSION_FULL = TELLMEWHEN_VERSION .. TELLMEWHEN_VERSION_MINOR
-TELLMEWHEN_VERSIONNUMBER = 48308 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
-if TELLMEWHEN_VERSIONNUMBER > 49000 or TELLMEWHEN_VERSIONNUMBER < 48000 then return error("YOU SCREWED UP THE VERSION NUMBER OR DIDNT CHANGE THE SAFETY LIMITS") end -- safety check because i accidentally made the version number 414069 once
+TELLMEWHEN_VERSIONNUMBER = 49002 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
+if TELLMEWHEN_VERSIONNUMBER > 50000 or TELLMEWHEN_VERSIONNUMBER < 49000 then return error("YOU SCREWED UP THE VERSION NUMBER OR DIDNT CHANGE THE SAFETY LIMITS") end -- safety check because i accidentally made the version number 414069 once
 
 TELLMEWHEN_MAXGROUPS = 1 	--this is a default, used by SetTheory (addon), so dont rename
 TELLMEWHEN_MAXROWS = 20
@@ -71,7 +71,7 @@ local NAMES, EVENTS, ANIM, ANN, SND
 local UPD_INTV = 0.06	--this is a default, local because i use it in onupdate functions
 local runEvents, updatePBar = 1, 1
 local GCD, NumShapeshiftForms, LastUpdate = 0, 0, 0
-local IconsToUpdate, GroupsToUpdate, unitsToChange = {}, {}, {}
+ IconsToUpdate, GroupsToUpdate, unitsToChange = {}, {}, {} --DEBUG
 local IconsToUpdateBindText
 local loweredbackup = {}
 local bullshitTable = {}
@@ -128,39 +128,39 @@ do	-- Class Lib
 		else
 			instance = {}
 		end
-		
+
 		-- if this is the first instance of the class, do some magic to it:
-		if not next(self.instances) then 
+		if not next(self.instances) then
 			-- set any defined metamethods
 			for k, v in pairs(self.instancemeta.__index) do
 				if TMW.Metamethods[k] then
 					self.instancemeta[k] = v
 				end
 			end
-			
+
 			getmetatable(self).__newindex = writeerror
 		end
-		
+
 		instance.class = self
 		instance.className = self.name
-		
+
 		setmetatable(instance, self.instancemeta)
-		
+
 		self.instances[instance] = true
-		
+
 		if self.OnNewInstance then
 			self.OnNewInstance(instance, ...)
 		end
-		
+
 		return instance
 	end
 
-	function TMW:NewClass(className, frameType, inherit)		
+	function TMW:NewClass(className, frameType, inherit)
 		local metatable
-		
+
 		if frameType then
 			metatable = CopyTable(getmetatable(CreateFrame(frameType)))
-			
+
 		elseif inherit then
 			if type(inherit) == "string" then
 				assert(TMW.Classes[inherit], ("Inheritance class %s does not exist."):format(inherit))
@@ -171,9 +171,9 @@ do	-- Class Lib
 		else
 			metatable = {__index = {}}
 		end
-		
+
 		metatable.__newindex = metatable.__index
-		
+
 		local class = {
 			name = className,
 			instances = {},
@@ -181,11 +181,11 @@ do	-- Class Lib
 			instancemeta = {__index = metatable.__index},
 			frameType = frameType,
 		}
-		
+
 		setmetatable(class, metatable)
-		
+
 		TMW.Classes[className] = class
-		
+
 		return class
 	end
 end
@@ -219,10 +219,10 @@ TMW.SpellTextures = setmetatable(
 {
 	__index = function(t, name)
 		if not name then return end
-		
+
 		-- rawget the strlower because hardcoded entries (talents, mainly) are put into the table as lowercase
 		local tex = rawget(t, strlowerCache[name]) or GetSpellTexture(name)
-		
+
 		t[name] = tex
 		return tex
 	end,
@@ -297,14 +297,14 @@ do -- Iterators
 	local mg = TELLMEWHEN_MAXGROUPS
 	local mi = TELLMEWHEN_MAXROWS*TELLMEWHEN_MAXROWS
 
-	
+
 	do -- InConditionSettings
-		
+
 		local stage, currentConditions, currentCondition, ci, cg, extIter
 		local function iter()
-			
+
 			currentCondition = currentCondition + 1
-			
+
 			if not currentConditions or currentCondition > (currentConditions.n or #currentConditions) then
 				local settings
 				settings, cg, ci = extIter()
@@ -325,7 +325,7 @@ do -- Iterators
 			if not condition then return iter() end
 			return condition, currentCondition, cg, ci -- condition data, conditionID, groupID, iconID
 		end
-		
+
 		function TMW:InConditionSettings()
 			stage = "icon"
 			extIter = TMW:InIconSettings()
@@ -333,27 +333,27 @@ do -- Iterators
 			return iter
 		end
 	end
-	
+
 	do -- InConditions
-		
+
 		local Conditions, ConditionID
 		local function iter()
 			ConditionID = ConditionID + 1
-			
+
 			if ConditionID > (Conditions.n  or #Conditions) then -- #Conditions enables iteration over tables that have not yet been upgraded with an n key (i.e. imported data from old versions)
 				return
 			end
 			local Condition = Conditions[ConditionID]
 			return Condition, ConditionID
 		end
-		
+
 		function TMW:InConditions(arg)
 			ConditionID = 0
 			Conditions = arg
 			return iter
 		end
 	end
-	
+
 	do -- InIconSettings
 		local cg = 1
 		local ci = 0
@@ -448,17 +448,17 @@ do -- Iterators
 		local handlers = {}
 		local function gethandler(...)
 			local handler = wipe(tremove(handlers) or {})
-			
+
 			handler.i = 0
 			handler.l = select("#", ...)
-			
+
 			for n = 1, handler.l do
 				handler[n] = select(n, ...)
 			end
-			
+
 			return handler
 		end
-		
+
 		local function iter(handler)
 			local i = handler.i
 			i = i + 1
@@ -467,7 +467,7 @@ do -- Iterators
 				return
 			end
 			handler.i = i
-			
+
 			return i, handler[i], handler.l
 		end
 
@@ -480,7 +480,7 @@ do -- Iterators
 
 		local tables = {}
 		local unused = {}
-		
+
 		local sortByValues, reverse
 		local function sorter(a, b)
 			if sortByValues then
@@ -512,11 +512,11 @@ do -- Iterators
 
 		local function next(t, state)
 			if state == nil then
-			
+
 				local key = tables[t][1]
 				return key, t[key]
 			end
-			
+
 			local key
 			for i = 1, #tables[t] do
 				if tables[t][i] == state then
@@ -548,7 +548,7 @@ do -- Iterators
 			end
 			sort(orderedIndex, func or sorter)
 			tables[t] = orderedIndex
-			
+
 			return next, t
 		end
 	end
@@ -624,21 +624,21 @@ TMW.Defaults = {
 		},]]
 		ColorMSQ	 	 = false,
 		OnlyMSQ		 	 = false,
-		
+
 		Colors = {
 			["**"] = {
 				CBC = 	{r=0,	g=1,	b=0,	Override = false,	a=1,	},	-- cooldown bar complete
 				CBS = 	{r=1,	g=0,	b=0,	Override = false,	a=1,	},	-- cooldown bar start
-				
+
 				OOR	=	{r=0.5,	g=0.5,	b=0.5,	Override = false,			},	-- out of range
 				OOM	=	{r=0.5,	g=0.5,	b=0.5,	Override = false,			},	-- out of mana
 				OORM=	{r=0.5,	g=0.5,	b=0.5,	Override = false,			},	-- out of range and mana
-						
+
 				CTA	=	{r=1,	g=1,	b=1,	Override = false,			},	-- counting with timer always
 				COA	=	{r=0.5,	g=0.5,	b=0.5,	Override = false,			},	-- counting withOUT timer always
 				CTS	=	{r=1,	g=1,	b=1,	Override = false,			},	-- counting with timer somtimes
 				COS	=	{r=1,	g=1,	b=1,	Override = false,			},	-- counting withOUT timer somtimes
-						
+
 				NA	=	{r=1,	g=1,	b=1,	Override = false,			},	-- not counting always
 				NS	=	{r=1,	g=1,	b=1,	Override = false,			},	-- not counting somtimes
 			},
@@ -712,7 +712,6 @@ TMW.Defaults = {
 						Type					= "",
 						Unit					= "player",
 						WpnEnchantType			= "MainHandSlot",
-						Icons					= {},
 						Alpha					= 1,
 						UnAlpha					= 1,
 						ConditionAlpha			= 0,
@@ -757,12 +756,15 @@ TMW.Defaults = {
 						DestFlags				= 2^32-1,
 						CLEUDur					= 5,
 						CLEUEvents 				= {
-							["*"] 				= false						
+							["*"] 				= false
+						},
+						Icons					= {
+							[1]					= "",
 						},
 						Events 					= {
 							["**"] 				= {
 								Sound 	  		= "None",
-								
+
 								Text 	  		= "",
 								Channel			= "",
 								Location  		= "",
@@ -772,7 +774,7 @@ TMW.Defaults = {
 								g 		  		= 1,
 								b 		  		= 1,
 								Size 	  		= 0,
-								
+
 								Animation	  	= "",
 								Duration		= 0.8,
 								Magnitude	  	= 10,
@@ -784,13 +786,14 @@ TMW.Defaults = {
 								g_anim	  		= 0,
 								b_anim	  		= 0,
 								a_anim	  		= 0.5,
-								
+
 								OnlyShown 		= false,
 								Operator 		= "<",
 								Value 			= 0,
 								CndtJustPassed 	= false,
 								PassingCndt		= false,
 								PassThrough		= false,
+								Icon			= "",
 							},
 							OnDuration = {
 								CndtJustPassed 	= true,
@@ -863,7 +866,7 @@ TMW.DS = {
 TMW.BE = {
 	--Most of these are thanks to Malazee @ US-Dalaran's chart: http://forums.wow-petopia.com/download/file.php?mode=view&id=4979 and spreadsheet https://spreadsheets.google.com/ccc?key=0Aox2ZHZE6e_SdHhTc0tZam05QVJDU0lONnp0ZVgzdkE&hl=en#gid=18
 	--Many more new spells/corrections were provided by Catok of Curse
-	
+
 	--NOTE: any id prefixed with "_" will have its localized name substituted in instead of being forced to match as an ID
 	debuffs = {
 		CrowdControl		= "_118;2637;33786;_1499;_19503;_19386;20066;10326;_9484;_6770;_2094;_51514;76780;_710;_5782;_6358;_49203;_605;82691", -- originally by calico0 of Curse
@@ -1022,6 +1025,22 @@ TMW.EventList = {
 		text = L["SOUND_EVENT_ONCLEU"],
 		desc = L["SOUND_EVENT_ONCLEU_DESC"],
 	},
+	{
+		name = "OnIconShow",
+		text = L["SOUND_EVENT_ONICONSHOW"],
+		desc = L["SOUND_EVENT_ONICONSHOW_DESC"],
+		settings = {
+			Icon = true,
+		},
+	},
+	{
+		name = "OnIconHide",
+		text = L["SOUND_EVENT_ONICONHIDE"],
+		desc = L["SOUND_EVENT_ONICONHIDE_DESC"],
+		settings = {
+			Icon = true,
+		},
+	},
 }
 
 local CompareFuncs = {
@@ -1037,7 +1056,7 @@ local CompareFuncs = {
 
 do -- hook LMB
 	local meta = LMB and getmetatable(LMB:Group("TellMeWhen")).__index
-	
+
 	if meta and meta.Skin and meta.Disable and meta.Enable then
 		local function hook(self)
 			if self and self.Addon == "TellMeWhen" then
@@ -1072,7 +1091,7 @@ function TMW:RegisterCallback(event, func, arg1)
 		func = func[event]
 	end
 	arg1 = arg1 or true
-	
+
 	local args
 	if funcs[func] then
 		args = funcs[func]
@@ -1080,7 +1099,7 @@ function TMW:RegisterCallback(event, func, arg1)
 		args = {}
 		funcs[func] = args
 	end
-	
+
 	args[arg1] = func
 end
 
@@ -1092,16 +1111,16 @@ function TMW:UnregisterCallback(event, func, arg1)
 		func = func[event]
 	end
 	arg1 = arg1 or true
-	
+
 	local funcs = reg[event] and reg[event][func]
 	if funcs then
 		funcs[arg1] = nil
 	end
 end
-	
+
 function TMW:Fire(event, ...)
 	local funcs = TMW.__callbackregistry[event]
-	
+
 	if funcs then
 		for method, args in next, funcs do
 			for arg1 in next, args do
@@ -1124,7 +1143,7 @@ function TMW:MakeFunctionCached(obj, method)
     else
         error("Usage: TMW:MakeFunctionCached(object/function [, method])")
     end
-    
+
     local cache = {}
     local wrapper = function(...)
         -- tostringall is a Blizzard function defined in UIParent.lua
@@ -1132,21 +1151,21 @@ function TMW:MakeFunctionCached(obj, method)
         if cache[cachestring] then
             return cache[cachestring]
         end
-        
+
         local arg1, arg2 = func(...)
         if arg2 ~= nil then
             error("Cannot cache functions with more than 1 return arg")
         end
-        
+
         cache[cachestring] = arg1
-        
-        return arg1    
+
+        return arg1
     end
-    
+
     if type(obj) == "table" then
         obj[method] = wrapper
     end
-    
+
     return wrapper
 end
 
@@ -1175,7 +1194,7 @@ function TMW:OnInitialize()
 	if LibStub("LibButtonFacade", true) and select(6, GetAddOnInfo("Masque")) == "MISSING" then
 		TMW.Warn("TellMeWhen no longer supports ButtonFacade. If you wish to continue to skin your icons, please upgrade to ButtonFacade's successor, Masque.")
 	end
-	
+
 	TMW:ProcessEquivalencies()
 
 	--------------- LSM ---------------
@@ -1195,7 +1214,7 @@ function TMW:OnInitialize()
 
 	LSM:Register("sound", "Die!", 		   [[Sound\Creature\GruulTheDragonkiller\GRULLAIR_Gruul_Slay03.wav]])
 	LSM:Register("sound", "You Fail!", 	   [[Sound\Creature\Kologarn\UR_Kologarn_slay02.wav]])
-	
+
 	LSM:Register("sound", "TMW - Pling 1", [[Interface\Addons\TellMeWhen\Sounds\Pling1.ogg]])
 	LSM:Register("sound", "TMW - Pling 2", [[Interface\Addons\TellMeWhen\Sounds\Pling2.ogg]])
 	LSM:Register("sound", "TMW - Pling 3", [[Interface\Addons\TellMeWhen\Sounds\Pling3.ogg]])
@@ -1212,9 +1231,9 @@ function TMW:OnInitialize()
 	LSM:Register("sound", "TMW - Ding 8",  [[Interface\Addons\TellMeWhen\Sounds\Ding8.ogg]])
 	LSM:Register("sound", "TMW - Ding 9",  [[Interface\Addons\TellMeWhen\Sounds\Ding9.ogg]])
 
-	
 
-	
+
+
 	--------------- Database ---------------
 	if type(TellMeWhenDB) ~= "table" then
 		TellMeWhenDB = {Version = TELLMEWHEN_VERSIONNUMBER}
@@ -1228,7 +1247,7 @@ function TMW:OnInitialize()
 	if db.global.XPac ~= XPac then
 		wipe(db.global.ClassSpellCache)
 	end
-	
+
 	TELLMEWHEN_MAXGROUPS = db.profile.NumGroups -- need to define before upgrading
 	db.profile.Version = db.profile.Version or TELLMEWHEN_VERSIONNUMBER -- this only does anything for new profiles
 	if TellMeWhen_Settings or (type(db.profile.Version) == "string") or (db.profile.Version < TELLMEWHEN_VERSIONNUMBER) then
@@ -1240,10 +1259,10 @@ function TMW:OnInitialize()
 	db.RegisterCallback(TMW, "OnNewProfile",		"OnProfile")
 	db.RegisterCallback(TMW, "OnProfileShutdown",	"ShutdownProfile")
 	db.RegisterCallback(TMW, "OnDatabaseShutdown",	"ShutdownProfile")
-	
-	
-	
-	
+
+
+
+
 	--------------- Spell Caches ---------------
 	TMW.ClassSpellCache = db.global.ClassSpellCache
 	local function AddID(id)
@@ -1267,23 +1286,23 @@ function TMW:OnInitialize()
 	for id in pairs(TMW.ClassSpellCache.PET) do
 		-- do pets last so pet spells dont take the place of class spells
 		AddID(id)
-	end	
+	end
 
 	TellMeWhenDB.AuraCache = TellMeWhenDB.AuraCache or {}
 	TMW.AuraCache = TellMeWhenDB.AuraCache
-	
-	
+
+
 	--------------- Events/OnUpdate ---------------
 	CNDTEnv = TMW.CNDT.Env
 	TMW:SetScript("OnUpdate", TMW.OnUpdate)
-	
+
 	TMW:RegisterEvent("COMBAT_LOG_EVENT_UNFILTERED")
 	TMW:RegisterEvent("PLAYER_ENTERING_WORLD")
 	TMW:RegisterEvent("PLAYER_TALENT_UPDATE")
 	TMW:RegisterEvent("ACTIVE_TALENT_GROUP_CHANGED")
 	TMW:RegisterEvent("UNIT_POWER_FREQUENT")
 
-	
+
 	--------------- Comm ---------------
 	if db.profile.ReceiveComm then
 		TMW:RegisterComm("TMW")
@@ -1295,8 +1314,8 @@ function TMW:OnInitialize()
 	end
 	TMW:PLAYER_ENTERING_WORLD()
 
-	
-	
+
+
 	TMW.VarsLoaded = true
 end
 
@@ -1309,10 +1328,10 @@ function TMW:OnProfile()
 	for icon in TMW:InIcons() do
 		icon:SetTexture(nil)
 	end
-	
+
 	TMW:Update()
 	TMW.IE:Load(1, TMW:InIcons()()) -- hack to get the first icon that exists
-	
+
 	if TMW.CompileOptions then TMW:CompileOptions() end -- redo groups in the options
 end
 
@@ -1353,7 +1372,7 @@ function TMW:OnCommReceived(prefix, text, channel, who)
 	elseif prefix == "TMW" and db.profile.ReceiveComm then
 		TMW.Received = TMW.Received or {}
 		TMW.Received[text] = who or true
-		
+
 		if who then
 			TMW.DoPulseReceivedComm = true
 			if db.global.HasImported then
@@ -1370,12 +1389,12 @@ function TMW:OnUpdate(elapsed)					-- THE MAGICAL ENGINE OF DOING EVERYTHING
 	time = GetTime()
 	CNDTEnv.time = time
 	TMW.time = time
-	
+
 	if LastUpdate <= time - UPD_INTV then
 		LastUpdate = time
 		_, GCD=GetSpellCooldown(GCDSpell)
 		CNDTEnv.GCD = GCD
-		
+
 		if FramesToFind then
 			-- I hate to do this, but this is the only way to detect frames that are created by an upvalued CreateFrame (*cough* VuhDo) (Unless i raw hook it, but CreateFrame should probably be secure)
 			for group, frameName in pairs(FramesToFind) do
@@ -1389,15 +1408,14 @@ function TMW:OnUpdate(elapsed)					-- THE MAGICAL ENGINE OF DOING EVERYTHING
 				end
 			end
 		end
-		
-		
+
+
 		if Locked then
-		
+
 			for i = 1, #GroupsToUpdate do
 				local group = GroupsToUpdate[i]
-				local CndtCheck = group.CndtCheck
-				if CndtCheck and (group.conditionUpdateMethod == "OnUpdate" or group.conditionsNeedUpdate or group.nextConditionUpdate < time) then
-					CndtCheck()
+				if group.CndtCheck and (group.conditionUpdateMethod == "OnUpdate" or group.conditionsNeedUpdate or group.nextConditionUpdate < time) then
+					group:CndtCheck()
 					if group.CndtFailed then
 						if group.__shown then
 							group:Hide()
@@ -1416,22 +1434,22 @@ function TMW:OnUpdate(elapsed)					-- THE MAGICAL ENGINE OF DOING EVERYTHING
 					icon:Update(time)
 			--	end
 			end
-			
+
 			updatePBar = nil
 		end
 	end
-	
+
 	if IconsToUpdateBindText then
 		for i = 1, #IconsToUpdateBindText do
 			IconsToUpdateBindText[i]:UpdateBindText()
 		end
 	end
-		
+
 	for cbar in next, CDBarsToUpdate do
 		local value, doTerminate
-		
+
 		local start, duration, InvertBars = cbar.start, cbar.duration, cbar.InvertBars
-		
+
 		if InvertBars then
 			if duration == 0 then
 				value = cbar.Max
@@ -1447,7 +1465,7 @@ function TMW:OnUpdate(elapsed)					-- THE MAGICAL ENGINE OF DOING EVERYTHING
 			end
 			doTerminate = value <= 0
 		end
-		
+
 		if doTerminate then
 			CDBarsToUpdate[cbar] = nil
 			if InvertBars then
@@ -1456,13 +1474,13 @@ function TMW:OnUpdate(elapsed)					-- THE MAGICAL ENGINE OF DOING EVERYTHING
 				value = 0
 			end
 		end
-		
+
 		if value ~= cbar.__value then
 			cbar:SetValue(value)
-			
+
 			local co = cbar.completeColor
 			local st = cbar.startColor
-			
+
 			if not InvertBars then
 				if duration ~= 0 then
 					local pct = (time - start) / duration
@@ -1492,11 +1510,11 @@ function TMW:OnUpdate(elapsed)					-- THE MAGICAL ENGINE OF DOING EVERYTHING
 			cbar.__value = value
 		end
 	end
-	
+
 	for icon, animations in next, ActiveAnimations do
 		for key, animationTable in next, animations do
 			-- its the magical modular tour, and its coming to take you awayyy......
-			
+
 			if animationTable.HALTED then
 				icon:StopAnimation(animationTable)
 			else
@@ -1525,11 +1543,11 @@ function TMW:Update()
 	updatePBar = 1
 
 	Locked = db.profile.Locked
-	
+
 	if not Locked then
 		TMW:LoadOptions()
 	end
-	
+
 	TMW:Fire("TMW_GLOBAL_UPDATE") -- the placement of this matters. Must be after options load, but before icons are updated
 
 	UPD_INTV = db.profile.Interval + 0.001 -- add a very small amount so that we don't call the same icon multiple times (through metas/conditionicons) in the same frame if the interval has been set 0
@@ -1540,16 +1558,16 @@ function TMW:Update()
 	ColorMSQ = db.profile.ColorMSQ
 	OnlyMSQ = db.profile.OnlyMSQ
 	SndChan = db.profile.MasterSound and "Master" or nil
-	
+
 
 	wipe(TMW.Icons)
 	wipe(TMW.IconsLookup)
 	IconsToUpdateBindText = nil
-	
+
 	for group in TMW.InGroups() do
 		group:Hide()
 	end
-	
+
 	for key, Type in pairs(TMW.Types) do
 		Type:Update()
 		Type:UpdateColors(true)
@@ -1565,14 +1583,14 @@ function TMW:Update()
 	if not Locked then
 		TMW:DoValidityCheck()
 	end
-	
+
 	TMW:ScheduleTimer("ForceUpdatePBars", 0.55)
 end
 
 function TMW:GetUpgradeTable()			-- upgrade functions
 	if TMW.UpgradeTable then return TMW.UpgradeTable end
 	local t = {
-		
+
 		[48025] = {
 			icon = function(ics)
 				ics.Name = gsub(ics.Name, "(CrowdControl)", "%1; " .. GetSpellInfo(339))
@@ -1632,7 +1650,7 @@ function TMW:GetUpgradeTable()			-- upgrade functions
 				OOR = "OORColor",
 				OOM = "OOMColor",
 				OORM = "OORColor",
-				
+
 				-- i didn't upgrade these 2 because they suck
 				--PRESENTColor =	{r=1, g=1, b=1, a=1},
 				--ABSENTColor	 =	{r=1, g=0.35, b=0.35, a=1},
@@ -1641,16 +1659,16 @@ function TMW:GetUpgradeTable()			-- upgrade functions
 				for newKey, oldKey in pairs(self.map) do
 					local old = db.profile[oldKey]
 					local new = db.profile.Colors.GLOBAL[newKey]
-					
+
 					if old then
 						for k, v in pairs(old) do
 							new[k] = v
 						end
-						
+
 						db.profile[oldKey] = nil
 					end
 				end
-				
+
 			end,
 		},
 		[46604] = {
@@ -1876,16 +1894,16 @@ function TMW:GetUpgradeTable()			-- upgrade functions
 				local Events = ics.Events
 				Events.OnShow.Sound = ics.SoundOnShow or "None"
 				Events.OnShow.Announce = ics.ANNOnShow or "\001"
-				
+
 				Events.OnHide.Sound = ics.SoundOnHide or "None"
 				Events.OnHide.Announce = ics.ANNOnHide or "\001"
-				
+
 				Events.OnStart.Sound = ics.SoundOnStart or "None"
 				Events.OnStart.Announce = ics.ANNOnStart or "\001"
-				
+
 				Events.OnFinish.Sound = ics.SoundOnFinish or "None"
 				Events.OnFinish.Announce = ics.ANNOnFinish or "\001"
-				
+
 				ics.SoundOnShow		= nil
 				ics.SoundOnHide		= nil
 				ics.SoundOnStart	= nil
@@ -2308,7 +2326,7 @@ end
 function TMW:GlobalUpgrade()
 	TellMeWhenDB.Version = TellMeWhenDB.Version or 0
 	if TellMeWhenDB.Version == 414069 then TellMeWhenDB.Version = 41409 end --well, that was a mighty fine fail
-	-- Begin DB upgrades that need to be done before defaults are added. 
+	-- Begin DB upgrades that need to be done before defaults are added.
 	-- Upgrades here should always do everything needed to every single profile,
 	-- and remember to make sure that a table exists before going into it.
 
@@ -2340,7 +2358,7 @@ function TMW:GlobalUpgrade()
 				end
 			end
 		end
-		
+
 		if TellMeWhenDB.Version < 45607 then
 			for _, p in pairs(TellMeWhenDB.profiles) do
 				if p.Groups then
@@ -2384,11 +2402,11 @@ function TMW:GlobalUpgrade()
 		end
 		if TellMeWhenDB.Version < 46407 then
 			local HelpSettings = TellMeWhenDB.global and TellMeWhenDB.global.HelpSettings
-			
+
 			if HelpSettings then
 				HelpSettings.ICON_DURS_FIRSTSEE = HelpSettings.NewDurSyntax
 				HelpSettings.NewDurSyntax = nil
-				
+
 				HelpSettings.ICON_POCKETWATCH_FIRSTSEE = HelpSettings.PocketWatch
 				HelpSettings.PocketWatch = nil
 			end
@@ -2418,7 +2436,7 @@ function TMW:Upgrade()
 		v = v..strrep("0", 5-#v)	-- append zeroes to create a 5 digit number
 		db.profile.Version = tonumber(v)
 	end
-	
+
 	TMW:DoUpgrade(db.profile.Version, true)
 
 	--All Upgrades Complete
@@ -2431,22 +2449,22 @@ function TMW:DoUpgrade(version, global, groupID, iconID)
 			if global and v.global then
 				-- upgrade global settings
 				v.global(v)
-				
+
 			elseif groupID and not iconID and v.group then
 				-- upgrade group settings
 				v.group(db.profile.Groups[groupID], v, groupID)
-				
+
 				-- upgrade group conditions
 				if v.condition then
 					for condition, conditionID in TMW:InConditions(db.profile.Groups[groupID].Conditions) do
 						v.condition(condition, v, conditionID, groupID)
 					end
 				end
-				
+
 			elseif iconID and groupID and v.icon then
 				-- upgrade icon settings
 				v.icon(db.profile.Groups[groupID].Icons[iconID], v, groupID, iconID)
-				
+
 				-- upgrade icon conditions
 				if v.condition then
 					for condition, conditionID in TMW:InConditions(db.profile.Groups[groupID].Icons[iconID].Conditions) do
@@ -2454,21 +2472,21 @@ function TMW:DoUpgrade(version, global, groupID, iconID)
 					end
 				end
 			end
-			
+
 			if global and v.postglobal then
 				-- upgrade global things that should come after everything else
 				v.postglobal(v)
-				
+
 			end
 		end
 	end
-	
+
 	if global then
 		-- delegate upgrades to all groups
 		for gs, groupID in TMW:InGroupSettings() do
 			TMW:DoUpgrade(version, nil, groupID, nil)
 		end
-		
+
 	elseif groupID and not iconID then
 		-- delegate upgrades to all icons
 		for ics, groupID, iconID in TMW:InIconSettings(groupID) do
@@ -2509,9 +2527,9 @@ end
 TMW.ValidityCheckQueue = {}
 function TMW:QueueValidityCheck(icon, groupID, iconID, g, i)
 	if not db.profile.WarnInvalids then return end
-	
+
 	local str = icon .. "^" .. groupID .. "^" .. (iconID or "nil") .. "^" .. g .. "^" .. i
-	
+
 	TMW.ValidityCheckQueue[str] = 1
 end
 
@@ -2608,19 +2626,19 @@ function TMW:UNIT_POWER_FREQUENT(event, unit, powerType)
 			if powerTypeNum == pbar.powerType then
 				local Max = pbar.Max
 				local value
-				
+
 				if not pbar.InvertBars then
 					value = Max - power + pbar.offset
 				else
 					value = power + pbar.offset
 				end
-				
+
 				if value > Max then
 					value = Max
 				elseif value < 0 then
 					value = 0
 				end
-				
+
 				if pbar.__value ~= value then
 					pbar:SetValue(value)
 					pbar.__value = value
@@ -2639,7 +2657,7 @@ function TMW:IterateAllModules(callback, arg1, ...)
     -- arg1 to callback will be Module if set to "%MODULE" or if nil, otherwise it will be literal. You should probably set it to %MODULE% if callback is a method name
     -- arg2, argN are everything in the vararg.
     assert(callback, "NO CALLBACK TO CALL!")
-	
+
 	if self == TMW then
 		-- iterate icon types (but only once, since this func is recursive
 		for name, Type in pairs(TMW.Types) do
@@ -2647,18 +2665,18 @@ function TMW:IterateAllModules(callback, arg1, ...)
 			if arg1 == "%MODULE%" or not arg1 then
 				firstArg = Type
 			end
-			
+
 			local callbackfunc = callback
-			
+
 			if type(callbackfunc) == "string" then
 				callbackfunc = Type[callbackfunc]
 			end
-			
+
 			local arg2 = ...
 			if type(arg2) == "table" and arg2.class == TMW.Classes.Icon and arg2:GetSettings().Type ~= name then
 				callbackfunc = nil
 			end
-			
+
 			if callbackfunc then
 				local success, err = pcall(callbackfunc, firstArg, ...)
 				if not success then
@@ -2667,26 +2685,26 @@ function TMW:IterateAllModules(callback, arg1, ...)
 			end
 		end
 	end
-	
+
     for _, Module in self:IterateModules() do
         local firstArg = arg1
         if arg1 == "%MODULE%" or not arg1 then
             firstArg = Module
         end
-		
+
 		local callbackfunc = callback
-		
+
         if type(callbackfunc) == "string" then
             callbackfunc = Module[callbackfunc]
         end
-		
+
 		if callbackfunc then
 			local success, err = pcall(callbackfunc, firstArg, ...)
 			if not success then
 				TMW:Error(err)
 			end
 		end
-        
+
         TMW.IterateAllModules(Module, callback, arg1, ...) -- iterate the sub-modules
     end
 end
@@ -2696,7 +2714,7 @@ function TMW:ProcessEquivalencies()
 	--	SpellTextures[dispeltype] = icon
 		SpellTextures[strlower(dispeltype)] = icon
 	end
-	
+
 	if DRData then
 		local myCategories = {
 			ctrlstun   = "DR-ControlledStun",
@@ -2725,12 +2743,12 @@ function TMW:ProcessEquivalencies()
 			dr[k] = (dr[k] and (dr[k] .. ";" .. spellID)) or tostring(spellID)
 		end
 	end
-	
+
 	TMW.OldBE = CopyTable(TMW.BE)
 	for category, b in pairs(TMW.OldBE) do
 		for equiv, str in pairs(b) do
 			b[equiv] = gsub(str, "_", "") -- REMOVE UNDERSCORES FROM OLDBE
-			
+
 			-- turn all IDs prefixed with "_" into their localized name. Dont do this on every single one, but do use it for spells that do not have any other spells with the same name but different effects.
 			while strfind(str, "_") do
 				local id = strmatch(str, "_%d+") -- id includes the underscore, trimmed off below
@@ -2742,7 +2760,7 @@ function TMW:ProcessEquivalencies()
 						str = gsub(str, id, name)
 						SpellTextures[realID] = tex
 						SpellTextures[strlowerCache[name]] = tex
-						
+
 					else  -- this should never ever ever happen except in new patches if spellIDs were wrong (experience talking)
 						if clientVersion >= addonVersion then -- dont warn for old clients using newer versions
 							TMW:Error("Invalid spellID found: " .. realID .. "! Please report this on TMW's CurseForge page, especially if you are currently on the PTR!")
@@ -2760,9 +2778,9 @@ end
 function TMW:InjectDataIntoString(Text, icon, doBlizz, shouldColorNames)
 	--shouldColorNames = true -- DEBUG
 	if not Text then return Text end
-	
+
 	--CURRENTLY USED: t, f, m, p, u, s, d, k, e, o, x
-	
+
 	if doBlizz then
 		if strfind(Text, "%%[Tt]") then
 			Text = gsub(Text, "%%[Tt]", NAMES:TryToAcquireName("target", shouldColorNames) or TARGET_TOKEN_NOT_FOUND)
@@ -2773,14 +2791,14 @@ function TMW:InjectDataIntoString(Text, icon, doBlizz, shouldColorNames)
 		--	Text = gsub(Text, "%%[Ff]", UnitName("focus") or FOCUS_TOKEN_NOT_FOUND)
 		end
 	end
-	
+
 	if strfind(Text, "%%[Mm]") then
 		Text = gsub(Text, "%%[Mm]", NAMES:TryToAcquireName("mouseover", shouldColorNames) or L["MOUSEOVER_TOKEN_NOT_FOUND"])
 	--	Text = gsub(Text, "%%[Mm]", UnitName("mouseover") or L["MOUSEOVER_TOKEN_NOT_FOUND"])
 	end
-	
+
 	if icon then
-	
+
 		if icon.Type == "cleu" then
 			if strfind(Text, "%%[Oo]") then
 				Text = gsub(Text, "%%[Oo]", NAMES:TryToAcquireName(icon.cleu_sourceUnit, shouldColorNames) or "?")
@@ -2798,7 +2816,7 @@ function TMW:InjectDataIntoString(Text, icon, doBlizz, shouldColorNames)
 				Text = gsub(Text, "%%[Xx]", name)
 			end
 		end
-		
+
 		if strfind(Text, "%%[Pp]") then
 			Text = gsub(Text, "%%[Pp]", NAMES:TryToAcquireName(icon.__lastUnitName or icon.__lastUnitChecked, shouldColorNames) or "?")
 		--	Text = gsub(Text, "%%[Pp]", icon.__lastUnitName or UnitName(icon.__lastUnitChecked or "") or "?")
@@ -2807,7 +2825,7 @@ function TMW:InjectDataIntoString(Text, icon, doBlizz, shouldColorNames)
 			Text = gsub(Text, "%%[Uu]", NAMES:TryToAcquireName(icon.__unitName or icon.__unitChecked, shouldColorNames) or "?")
 		--	Text = gsub(Text, "%%[Uu]", icon.__unitName or UnitName(icon.__unitChecked or "") or icon.__unitChecked or "?")
 		end
-		
+
 		if strfind(Text, "%%[Ss]") then
 			local name, checkcase = icon.typeData:GetNameForDisplay(icon, icon.__spellChecked)
 			name = name or "?"
@@ -2833,7 +2851,7 @@ function TMW:InjectDataIntoString(Text, icon, doBlizz, shouldColorNames)
 			Text = gsub(Text, "%%[Kk]", count)
 		end
 	end
-	
+
 	return Text
 end
 
@@ -2858,7 +2876,7 @@ function NAMES:OnInitialize()
 	end
 
 	addids("mouseover")
-	
+
 	addids("target")
 	addids("targettarget")
 	addids("targettargettarget")
@@ -2890,9 +2908,9 @@ function NAMES:OnInitialize()
 	addids("raid",1,40,"targettarget")
 
 	addids = nil -- into the garbage you go!
-	
+
 	NAMES:UpdateClassColors()
-	
+
 	if CUSTOM_CLASS_COLORS then
 		CUSTOM_CLASS_COLORS:RegisterCallback(NAMES, "UpdateClassColors")
 	end
@@ -2904,7 +2922,7 @@ end
 function NAMES:UPDATE_BATTLEFIELD_SCORE()
 	for i = 1, GetNumBattlefieldScores() do
 		local name, _, _, _, _, _, _, _, class = GetBattlefieldScore(i)
-		
+
 		NAMES.ClassColoredNameCache[name] = NAMES.ClassColors[class] .. name .. "|r"
 	end
 end
@@ -2916,7 +2934,7 @@ function NAMES:UPDATE_MOUSEOVER_UNIT()
 		name = name .. "-" .. server
 	end
 	local _, class = UnitClass("mouseover")
-	
+
 	NAMES.ClassColoredNameCache[name] = NAMES.ClassColors[class] .. name .. "|r"
 end
 
@@ -2951,57 +2969,80 @@ end
 
 function NAMES:TryToAcquireName(input, shouldColor)
 	if not input then return end
-	
+
 	shouldColor = shouldColor and db.profile.ColorNames
-	
+
 	local name, server = UnitName(input or "")
-	
-	if name then	-- input was a unitID if name is true.
-		if server then
+
+	if name then	-- input was a unitID if name was obtained.
+		if server and server ~= "" then
 			name = name .. "-" .. server
 		end
 		if shouldColor then
 			local _, class = UnitClass(input)
 			local nameColored = NAMES.ClassColors[class] .. name .. "|r"
-			
+
 			NAMES.ClassColoredNameCache[name] = nameColored
-				
+
 			name = nameColored
 		end
-	else		-- input was a name.
+	else			-- input was a name.
 		name = input
-		
+
 		if shouldColor and NAMES.ClassColoredNameCache[name] then
 			return NAMES.ClassColoredNameCache[name]
 		end
-		
+
 		local unit = NAMES:GetUnitIDFromName(input)
 		if unit then
 			if shouldColor then
 				local _, class = UnitClass(unit)
 				local nameColored = NAMES.ClassColors[class] .. name .. "|r"
-				
+
 				NAMES.ClassColoredNameCache[name] = nameColored
-					
+
 				name = nameColored
 			else
 				name, server = UnitName(unit)
-				if server then
+				if server and server ~= "" then
 					name = name .. "-" .. server
 				end
 			end
 		end
 	end
-	
+
 	return name
 end
 
 
 
 EVENTS = TMW:NewModule("Events", "AceEvent-3.0") TMW.EVENTS = EVENTS
+function EVENTS:ProcessAndDelegateIconEventSettings(icon, event, eventSettings)
+
+	local success = self:ProcessIconEventSettings(icon, event, eventSettings)
+
+	if success and (event == "OnIconShow" or event == "OnIconHide") then
+		EVENTS.iconsToHandleOnIconShowHide = EVENTS.iconsToHandleOnIconShowHide or {}
+		EVENTS.iconsToHandleOnIconShowHide[icon] = true
+		TMW:RegisterCallback("TMW_ICON_SHOWN_CHANGED", EVENTS) -- register to EVENTS, not self.
+	end
+
+	return success
+end
+function EVENTS:TMW_ICON_SHOWN_CHANGED(event, ic)
+	-- ic is the icon that changed, icon is the icon that might be handling it
+	local event = (ic.__alpha or ic:GetAlpha()) > 0 and "OnIconShow" or "OnIconHide"
+	local icName = ic:GetName()
+
+	for icon in next, self.iconsToHandleOnIconShowHide do
+		if icon[event] and icon[event].Icon == icName then
+			icon.EventsToFire[event] = true
+		end
+	end
+end
 
 SND = EVENTS:NewModule("Sound", EVENTS) TMW.SND = SND
-function SND:ProcessIconEventSettings(eventSettings)
+function SND:ProcessIconEventSettings(icon, event, eventSettings)
 	local data = eventSettings.Sound
 	if data == "" or data == "Interface\\Quiet.ogg" or data == "None" then
 		eventSettings.SoundData = nil
@@ -3097,14 +3138,14 @@ TMW.ChannelList = {
 			for i = 1, math.huge, 2 do
 				local num, name = select(i, GetChannelList())
 				if not num then break end
-				
+
 				local info = UIDropDownMenu_CreateInfo()
 				info.func = TMW.ANN.LocDropdownFunc
 				info.text = name
 				info.arg1 = name
 				info.value = name
 				info.checked = name == TMW.ANN:GetEventSettings().Location
-				UIDropDownMenu_AddButton(info, UIDROPDOWNMENU_MENU_LEVEL) 
+				UIDropDownMenu_AddButton(info, UIDROPDOWNMENU_MENU_LEVEL)
 			end
 		end,
 		ddtext = function(value)
@@ -3112,7 +3153,7 @@ TMW.ChannelList = {
 			for i = 1, math.huge, 2 do
 				local num, name = select(i, GetChannelList())
 				if not num then return end
-				
+
 				if name == value then
 					return value
 				end
@@ -3151,7 +3192,7 @@ TMW.ChannelList = {
 		color = 1,
 		defaultlocation = function() return DEFAULT_CHAT_FRAME.name end,
 		dropdown = function()
-		
+
 			local name = "RaidWarningFrame"
 			local info = UIDropDownMenu_CreateInfo()
 			info.func = TMW.ANN.LocDropdownFunc
@@ -3159,10 +3200,10 @@ TMW.ChannelList = {
 			info.arg1 = L[name]
 			info.value = name
 			info.checked = name == TMW.ANN:GetEventSettings().Location
-			UIDropDownMenu_AddButton(info, UIDROPDOWNMENU_MENU_LEVEL) 
-					
+			UIDropDownMenu_AddButton(info, UIDROPDOWNMENU_MENU_LEVEL)
+
 			local i = 1
-			while _G["ChatFrame"..i] do 
+			while _G["ChatFrame"..i] do
 				local _, _, _, _, _, _, shown, _, docked = FCF_GetChatWindowInfo(i);
 				if shown or docked then
 					local name = _G["ChatFrame"..i].name
@@ -3172,7 +3213,7 @@ TMW.ChannelList = {
 					info.arg1 = name
 					info.value = name
 					info.checked = name == TMW.ANN:GetEventSettings().Location
-					UIDropDownMenu_AddButton(info, UIDROPDOWNMENU_MENU_LEVEL) 
+					UIDropDownMenu_AddButton(info, UIDROPDOWNMENU_MENU_LEVEL)
 				end
 				i = i + 1
 			end
@@ -3182,9 +3223,9 @@ TMW.ChannelList = {
 			if value == "RaidWarningFrame" then
 				return L[value]
 			end
-			
+
 			local i = 1
-			while _G["ChatFrame"..i] do 
+			while _G["ChatFrame"..i] do
 				if _G["ChatFrame"..i].name == value then
 					return value
 				end
@@ -3193,15 +3234,15 @@ TMW.ChannelList = {
 		end,
 		handler = function(icon, data, Text)
 			local Location = data.Location
-			
+
 			if data.Icon then
 				Text = "|T" .. (icon.__tex or "") .. ":0|t " .. Text
 			end
-			
+
 			if _G[Location] == RaidWarningFrame then
 				-- workaround: blizzard's code doesnt manage colors correctly when there are 2 messages being displayed with different colors.
 				Text = ("|cff%02x%02x%02x"):format(data.r * 255, data.g * 255, data.b * 255) .. Text .. "|r"
-				
+
 				RaidNotice_AddMessage(RaidWarningFrame, Text, bullshitTable) -- arg3 still demands a valid table for the color info, even if it is empty
 			else
 				local i = 1
@@ -3326,7 +3367,7 @@ TMW.ChannelList = {
 		channel = "FCT",
 		sticky = 1,
 		icon = 1,
-		color = 1,		
+		color = 1,
 		handler = function(icon, data, Text)
 			if data.Icon then
 				Text = "|T" .. (icon.__tex or "") .. ":20:20:-5|t " .. Text
@@ -3343,7 +3384,7 @@ TMW.ChannelList = {
 for k, v in pairs(TMW.ChannelList) do
 	TMW.ChannelList[v.channel] = v
 end local ChannelList = TMW.ChannelList
-function ANN:ProcessIconEventSettings(eventSettings)
+function ANN:ProcessIconEventSettings(icon, event, eventSettings)
 	if eventSettings.Channel ~= "" then
 		return true
 	end
@@ -3353,13 +3394,13 @@ function ANN:HandleEvent(icon, data)
 	if Channel ~= "" then
 		local Text = data.Text
 		local chandata = ChannelList[Channel]
-		
+
 		if not chandata then
 			return
 		end
-		
+
 		Text = TMW:InjectDataIntoString(Text, icon, not chandata.isBlizz, not chandata.isBlizz)
-		
+
 		if chandata.handler then
 			chandata.handler(icon, data, Text)
 		elseif Text and chandata.isBlizz then
@@ -3369,7 +3410,7 @@ function ANN:HandleEvent(icon, data)
 			end
 			SendChatMessage(Text, Channel, nil, Location)
 		end
-		
+
 		return true
 	end
 end
@@ -3387,40 +3428,40 @@ ANIM.AnimationList = {
 		animation = "SCREENSHAKE",
 		Duration = true,
 		Magnitude = true,
-		
+
 		Play = function(icon, data)
 			if not WorldFrame:IsProtected() or not InCombatLockdown() then
 				local Animation = data.Animation
-				
+
 				local table = {
 					data = data,
 					Start = TMW.time,
 					Duration = data.Duration,
-					
+
 					Animation = Animation,
 					Magnitude = data.Magnitude,
 				}
-				
+
 				-- manual version of :StartAnimation
 				ActiveAnimations[WorldFrame][Animation] = table
 				AnimationList[Animation].OnStart(WorldFrame, table)
 			end
 		end,
-		
+
 		OnUpdate = function(WorldFrame, table)
 			local remaining = table.Duration - (TMW.time - table.Start)
-			
+
 			if remaining < 0 then
-				-- manual version of :StopAnimation	
+				-- manual version of :StopAnimation
 				local Animation = table.Animation
-				
+
 				ActiveAnimations[WorldFrame][Animation] = nil
 				AnimationList[Animation].OnStop(WorldFrame, table)
 			else
 				local Amt = (table.Magnitude or 10) / (1 + 10*(300^(-(remaining))))
-				local moveX = random(-Amt, Amt) 
-				local moveY = random(-Amt, Amt) 
-				
+				local moveX = random(-Amt, Amt)
+				local moveY = random(-Amt, Amt)
+
 				WorldFrame:ClearAllPoints()
 				for _, v in pairs(TMW.WorldFramePoints) do
 					WorldFrame:SetPoint(v[1], v[2], v[3], v[4] + moveX, v[5] + moveY)
@@ -3450,48 +3491,48 @@ ANIM.AnimationList = {
 		Period = true,
 		Color = true,
 		Fade = true,
-		
+
 		Play = function(icon, data)
 			local Animation = data.Animation
 			local AnimationData = AnimationList[Animation]
-			
+
 			local Duration = 0
 			local Period = data.Period
 			while Duration < data.Duration do
 				Duration = Duration + (Period * 2)
 			end
-			
+
 			local table = {
 				data = data,
 				Start = TMW.time,
 				Duration = Duration,
-				
+
 				Period = Period,
 				Fade = data.Fade,
 				Alpha = data.a_anim,
 				r = data.r_anim,
 				g = data.g_anim,
 				b = data.b_anim,
-				
+
 				Animation = Animation
-			}			
-		
+			}
+
 			-- inherit from ICONFLASH
 			if not AnimationData.OnStart then
 				local ICONFLASH = AnimationList.ICONFLASH
 				AnimationData.OnStart = ICONFLASH.OnStart
 				AnimationData.OnStop = ICONFLASH.OnStop
 			end
-			
+
 			-- manual version of :StartAnimation
 			ActiveAnimations[UIParent][Animation] = table
 			AnimationList[Animation].OnStart(UIParent, table)
 		end,
-		
+
 		OnUpdate = function(UIParent, table)
 			local FlashPeriod = table.Period
 			local flasher = UIParent.flasher
-			
+
 			local timePassed = TMW.time - table.Start
 			local fadingIn = floor(timePassed/FlashPeriod) % 2 == 1
 
@@ -3505,11 +3546,11 @@ ANIM.AnimationList = {
 			else
 				flasher:SetAlpha(fadingIn and table.Alpha or 0)
 			end
-			
+
 			if timePassed > table.Duration then
-				-- manual version of :StopAnimation	
+				-- manual version of :StopAnimation
 				local Animation = table.Animation
-				
+
 				ActiveAnimations[UIParent][Animation] = nil
 				AnimationList[Animation].OnStop(UIParent, table)
 			end
@@ -3522,27 +3563,27 @@ ANIM.AnimationList = {
 		Duration = true,
 		Magnitude = true,
 		Infinite = true,
-		
+
 		Play = function(icon, data)
 			icon:StartAnimation{
 				data = data,
 				Start = TMW.time,
 				Duration = data.Infinite and math.huge or data.Duration,
-				
+
 				Animation = Animation,
 				Magnitude = data.Magnitude,
 			}
 		end,
-		
+
 		OnUpdate = function(icon, table)
 			local remaining = table.Duration - (TMW.time - table.Start)
-			
+
 			local Amt = (table.Magnitude or 10) / (1 + 10*(300^(-(remaining))))
-			local moveX = random(-Amt, Amt) 
-			local moveY = random(-Amt, Amt) 
-			
+			local moveX = random(-Amt, Amt)
+			local moveY = random(-Amt, Amt)
+
 			icon:SetPoint("TOPLEFT", icon.x + moveX, icon.y + moveY)
-			
+
 			-- generic expiration
 			if remaining < 0 then
 				icon:StopAnimation(table)
@@ -3561,7 +3602,7 @@ ANIM.AnimationList = {
 		Color = true,
 		Fade = true,
 		Infinite = true,
-		
+
 		Play = function(icon, data)
 			local Duration = 0
 			local Period = data.Period
@@ -3572,12 +3613,12 @@ ANIM.AnimationList = {
 					Duration = Duration + (Period * 2)
 				end
 			end
-			
+
 			icon:StartAnimation{
 				data = data,
 				Start = TMW.time,
 				Duration = Duration,
-				
+
 				Period = Period,
 				Fade = data.Fade,
 				Alpha = data.a_anim,
@@ -3586,11 +3627,11 @@ ANIM.AnimationList = {
 				b = data.b_anim,
 			}
 		end,
-		
+
 		OnUpdate = function(icon, table)
 			local FlashPeriod = table.Period
-			local flasher = icon.flasher 
-			
+			local flasher = icon.flasher
+
 			local timePassed = TMW.time - table.Start
 			local fadingIn = floor(timePassed/FlashPeriod) % 2 == 1
 
@@ -3604,21 +3645,21 @@ ANIM.AnimationList = {
 			else
 				flasher:SetAlpha(fadingIn and table.Alpha or 0)
 			end
-			
+
 			-- (mostly) generic expiration -- we just finished the last flash, so dont do any more
 			if timePassed > table.Duration then
 				icon:StopAnimation(table)
 			end
 		end,
 		OnStart = function(icon, table)
-			local flasher 
+			local flasher
 			if icon.flasher then
 				flasher = icon.flasher
 			else
 				flasher = ANIM:GetFlasher(icon)
 				icon.flasher = flasher
 			end
-			
+
 			flasher:Show()
 			flasher:SetTexture(table.r, table.g, table.b, 1)
 		end,
@@ -3634,8 +3675,8 @@ ANIM.AnimationList = {
 		Period = true,
 		Fade = true,
 		Infinite = true,
-		
-		Play = function(icon, data)	
+
+		Play = function(icon, data)
 			local Duration = 0
 			local Period = data.Period
 			if data.Infinite then
@@ -3645,23 +3686,23 @@ ANIM.AnimationList = {
 					Duration = Duration + (Period * 2)
 				end
 			end
-			
+
 			icon:StartAnimation{
 				data = data,
 				Start = TMW.time,
 				Duration = Duration,
-				
+
 				Period = Period,
 				Fade = data.Fade,
 			}
 		end,
-		
+
 		OnUpdate = function(icon, table)
 			local FlashPeriod = table.Period
-			
+
 			local timePassed = TMW.time - table.Start
 			local fadingIn = floor(timePassed/FlashPeriod) % 2 == 0
-			
+
 			if table.Fade then
 				local remainingFlash = timePassed % FlashPeriod
 				if fadingIn then
@@ -3672,7 +3713,7 @@ ANIM.AnimationList = {
 			else
 				icon:SetAlpha(fadingIn and icon.__alpha or 0)
 			end
-			
+
 			-- (mostly) generic expiration -- we just finished the last flash, so dont do any more
 			if timePassed > table.Duration then
 				icon:StopAnimation(table)
@@ -3692,28 +3733,28 @@ ANIM.AnimationList = {
 		desc = L["ANIM_ICONFADE_DESC"],
 		animation = "ICONFADE",
 		Duration = true,
-		
+
 		Play = function(icon, data)
 			icon:StartAnimation{
 				data = data,
 				Start = TMW.time,
 				Duration = data.Duration,
-				
+
 				FadeDuration = data.Duration,
 			}
 		end,
-		
+
 		OnUpdate = function(icon, table)
 			if not icon.FakeHidden then
 				local remaining = table.Duration - (TMW.time - table.Start)
-				
+
 				-- generic expiration
 				if remaining < 0 then
 					icon:StopAnimation(table)
-				else				
+				else
 					local pct = remaining / table.FadeDuration
 					local inv = 1-pct
-			
+
 					icon:SetAlpha((icon.__oldAlpha * pct) + (icon.__alpha * inv))
 				end
 			end
@@ -3726,8 +3767,8 @@ ANIM.AnimationList = {
 			local IsFading = (icon.IsFading or 1) - 1
 			icon.IsFading = IsFading > 0 and IsFading or nil
 		end,
-		
-		
+
+
 	},
 	{
 		text = L["ANIM_ACTVTNGLOW"],
@@ -3735,7 +3776,7 @@ ANIM.AnimationList = {
 		animation = "ACTVTNGLOW",
 		Duration = true,
 		Infinite = true,
-		
+
 		Play = function(icon, data)
 			icon:StartAnimation{
 				data = data,
@@ -3743,7 +3784,7 @@ ANIM.AnimationList = {
 				Duration = data.Infinite and math.huge or data.Duration,
 			}
 		end,
-		
+
 		OnUpdate = function(icon, table)
 			if table.Duration - (TMW.time - table.Start) < 0 then
 				icon:StopAnimation(table)
@@ -3763,7 +3804,7 @@ ANIM.AnimationList = {
 		text = L["ANIM_ICONCLEAR"],
 		desc = L["ANIM_ICONCLEAR_DESC"],
 		animation = "ICONCLEAR",
-		
+
 		Play = function(icon, data)
 			for k, v in pairs(icon:GetAnimations()) do
 				-- instead of just calling :StopAnimation() right here, set this attribute so that meta icons inheriting the animation will also stop it.
@@ -3777,7 +3818,7 @@ for k, v in pairs(AnimationList) do
 		AnimationList[v.animation] = v
 	end
 end
-function ANIM:ProcessIconEventSettings(eventSettings)
+function ANIM:ProcessIconEventSettings(icon, event, eventSettings)
 	if eventSettings.Animation ~= "" then
 		return true
 	end
@@ -3785,7 +3826,7 @@ end
 function ANIM:HandleEvent(icon, data)
 	local Animation = data.Animation
 	if Animation ~= "" then
-		
+
 		-- what a cute little handler. TODO: make text like this.
 		local AnimationData = AnimationList[Animation]
 		if AnimationData then
@@ -3793,13 +3834,13 @@ function ANIM:HandleEvent(icon, data)
 			return true
 		end
 	end
-	
+
 end
 function ANIM:GetFlasher(parent)
 	local Flasher = parent:CreateTexture(nil, "BACKGROUND", nil, 5)
 	Flasher:SetAllPoints(parent.class == Icon and parent.texture)
 	Flasher:Hide()
-	
+
 	return Flasher
 end
 
@@ -3851,7 +3892,7 @@ end
 
 function Group.FinishCompilingConditions(group, funcstr)
 	group.CndtFailed = nil
-	
+
 	if group.OnlyInCombat then
 		if funcstr == "" then
 			funcstr = [[UnitAffectingCombat("player")]]
@@ -3862,23 +3903,25 @@ function Group.FinishCompilingConditions(group, funcstr)
 	else
 		TMW.CNDT:CompileUpdateFunction(group)
 	end
-	
-	return funcstr, group:GetName(), "CndtFailed"
+
+	return funcstr, "CndtFailed"
 end
 
-function Group.ProcessConditionFunction(group, func)	
+function Group.ProcessConditionFunction(group, func)
 	tDeleteItem(GroupsToUpdate, group)
-	if func then
+	if func and group:ShouldUpdateIcons() then
 		GroupsToUpdate[#GroupsToUpdate+1] = group
 		sort(GroupsToUpdate, Group.ScriptSort)
+	else
+		func = nil
 	end
-	
+
 	group.CndtCheck = func
 end
-	
+
 function Group.ShouldUpdateIcons(group)
 	local gs = group:GetSettings()
-	
+
 	if	(not gs.Enabled) or
 		(GetActiveTalentGroup() == 1 and not gs.PrimarySpec) or
 		(GetActiveTalentGroup() == 2 and not gs.SecondarySpec) or
@@ -3886,7 +3929,7 @@ function Group.ShouldUpdateIcons(group)
 	then
 		return false
 	end
-	
+
 	return true
 end
 
@@ -3909,13 +3952,13 @@ function Group.SetPos(group)
 		if not success and err:find("trying to anchor to itself") then
 			TMW:Error(err)
 			TMW:Print(L["ERROR_ANCHORSELF"]:format(L["fGROUP"]):format(TMW:GetGroupName(groupID, groupID, 1)))
-			
+
 			p.relativeTo = "UIParent"
 			p.point = "CENTER"
 			p.relativePoint = "CENTER"
 			p.x = 0
 			p.y = 0
-			
+
 			return group:SetPos()
 		end
 	end
@@ -3928,21 +3971,21 @@ end
 
 function Group.GetIconPos(group, iconID)
 	local Columns, Spacing = group.Columns, group.Spacing
-	
+
 	--[[local row = ceil(iconID / Columns)
     local column = (iconID - 1) % Columns + 1
 	return (30 + Spacing)*(column-1), -(30 + Spacing)*(row-1)]]
-	
+
 	return (30 + Spacing)*(((iconID - 1) % Columns)), -(30 + Spacing)*(ceil(iconID / Columns)-1)
 end
 
 function Group.Setup(group)
 	local groupID = group:GetID()
-	
+
 	--[[if groupID > TELLMEWHEN_MAXGROUPS then
 		return
 	end]]
-	
+
 	group.CorrectStance = true
 	group.__shown = group:IsShown()
 
@@ -3953,18 +3996,18 @@ function Group.Setup(group)
 	group.FontTest = not Locked and group.FontTest
 
 	group:SetFrameLevel(group.Level)
-	
+
 	if group:ShouldUpdateIcons() then
 		for iconID = 1, group.Rows * group.Columns do
 			local icon = group[iconID] or TMW.Classes.Icon:New("Button", "TellMeWhen_Group" .. groupID .. "_Icon" .. iconID, group, "TellMeWhen_IconTemplate", iconID)
 
 			icon:Show()
 			icon:SetFrameLevel(group:GetFrameLevel() + 1)
-			
+
 			local x, y = group:GetIconPos(iconID)
 			icon.x, icon.y = x, y -- used for shakers
 			icon:SetPoint("TOPLEFT", x, y)
-			
+
 			local success, err = pcall(icon.Setup, icon)
 			if not success then
 				TMW:Error(L["GROUPICON"]:format(groupID, iconID) .. ": " .. err)
@@ -3996,7 +4039,7 @@ function Group.Setup(group)
 			group:Hide()
 		end
 	end
-	
+
 	TMW.CNDT:ProcessConditions(group)
 end
 
@@ -4014,7 +4057,7 @@ function Icon.OnNewInstance(icon, ...)
 	icon.group = group
 	group[iconID] = icon
 	CNDTEnv[name] = icon
-	
+
 	icon.__alpha = icon:GetAlpha()
 	icon.__tex = icon.texture:GetTexture()
 end
@@ -4065,7 +4108,7 @@ function Icon.RegisterEvent(icon, event)
 	icon:registerevent(event)
 	icon.hasEvents = 1
 end
-	
+
 function Icon.GetTooltipTitle(icon)
 	local groupID = icon:GetParent():GetID()
 	local line1 = L["ICON_TOOLTIP1"] .. " " .. format(L["GROUPICON"], TMW:GetGroupName(groupID, groupID, 1), icon:GetID())
@@ -4086,6 +4129,58 @@ function Icon.IsBeingEdited(icon)
 end
 
 
+function Icon.QueueEvent(icon, event, data)
+	icon.EventsToFire[event] = data or true
+	icon.eventIsQueued = true
+end
+
+function Icon.ProcessQueuedEvents(icon)
+	if icon.EventsToFire and icon.eventIsQueued then
+		for _, Module in EVENTS:IterateModules() do
+			for i = 1, #TMW.EventList do
+				local event = TMW.EventList[i].name
+				local data = icon[event]
+				local doFireAndData = icon.EventsToFire[event]
+				if data and doFireAndData then
+
+					if data.OnlyShown and icon.__alpha <= 0 then
+						doFireAndData = false
+
+						-- the same test is preformed for all modules,
+						-- so we can save the result of it within the module iteration without adverse effects
+						-- it actually results an a performance increase.
+						icon.EventsToFire[event] = doFireAndData
+
+					elseif data.PassingCndt and isNumber[doFireAndData] then
+						doFireAndData = CompareFuncs[data.Operator](doFireAndData, data.Value)
+						if data.CndtJustPassed then
+							if doFireAndData ~= data.wasPassingCondition then
+								data.wasPassingCondition = doFireAndData
+							else
+								doFireAndData = false
+							end
+						end
+
+						-- the same test is preformed for all modules...
+						icon.EventsToFire[event] =  doFireAndData
+					end
+
+
+					if doFireAndData and runEvents then
+						local handled = Module:HandleEvent(icon, data)
+						if handled and not data.PassThrough then
+							break
+						end
+					end
+				end
+			end
+		end
+
+		wipe(icon.EventsToFire)
+		icon.eventIsQueued = nil
+	end
+end
+
 function Icon.GetAnimations(icon)
 	if not icon.animations then
 		local t = {}
@@ -4098,16 +4193,16 @@ end
 function Icon.StartAnimation(icon, table)
 	local Animation = table.data.Animation
 	local AnimationData = Animation and AnimationList[Animation]
-	
+
 	if AnimationData then
 		icon:GetAnimations()[Animation] = table
-		
+
 		table.Animation = Animation
-	
+
 		if AnimationData.OnStart then
 			AnimationData.OnStart(icon, table)
 		end
-		
+
 		-- meta inheritance
 		for ic in Types.meta:InIcons() do
 			if ic.__currentIcon == icon then
@@ -4119,7 +4214,7 @@ end
 
 function Icon.StopAnimation(icon, arg1)
 	local animations = icon:GetAnimations()
-	
+
 	local Animation, table
 	if type(arg1) == "table" then
 		table = arg1
@@ -4128,12 +4223,12 @@ function Icon.StopAnimation(icon, arg1)
 		table = animations[arg1]
 		Animation = arg1
 	end
-	
+
 	local AnimationData = AnimationList[Animation]
-	
+
 	if AnimationData then
 		icon:GetAnimations()[Animation] = nil
-	
+
 		if AnimationData.OnStop then
 			AnimationData.OnStop(icon, table)
 		end
@@ -4146,7 +4241,7 @@ function Icon.Validate(icon)
 	if type(icon) == "string" then
 		icon = _G[icon]
 	end
-	
+
 	if not TMW.IconsLookup[icon] then
 		tinsert(TMW.Icons, icon:GetName())
 		TMW.IconsLookup[icon] = 1
@@ -4158,7 +4253,7 @@ function Icon.Invalidate(icon)
 	if type(icon) == "string" then
 		icon = _G[icon]
 	end
-	
+
 	if TMW.IconsLookup[icon] then
 		local k = tContains(TMW.Icons, icon:GetName())
 		if k then tremove(TMW.Icons, k) end
@@ -4174,17 +4269,16 @@ function Icon.IsValid(icon)
 	return TMW.IconsLookup[icon]
 end
 
-	
+
 function Icon.Update(icon, time, force, ...)
 	time = time or TMW.time
-	
+
 	if icon.__shown and (force or icon.LastUpdate <= time - UPD_INTV) then
 		icon.LastUpdate = time
-		
-		local CndtCheck = icon.CndtCheck
-		if CndtCheck then
+
+		if icon.CndtCheck then
 			if (icon.conditionUpdateMethod == "OnUpdate" or icon.conditionsNeedUpdate or icon.nextConditionUpdate < time) then
-				CndtCheck()
+				icon:CndtCheck()
 			end
 			if icon.CndtFailed and (icon.ConditionAlpha or 0) == 0 then
 				if icon.__alpha ~= 0 then
@@ -4193,12 +4287,11 @@ function Icon.Update(icon, time, force, ...)
 				return
 			end
 		end
-	
+
 		icon:OnUpdate(time, ...)
-		
-		local CndtCheckAfter = icon.CndtCheckAfter
-		if CndtCheckAfter and (icon.conditionUpdateMethod == "OnUpdate" or icon.conditionsNeedUpdate or icon.nextConditionUpdate < time) then
-			CndtCheckAfter()
+
+		if icon.CndtCheckAfter and (icon.conditionUpdateMethod == "OnUpdate" or icon.conditionsNeedUpdate or icon.nextConditionUpdate < time) then
+			icon:CndtCheckAfter()
 			if icon.CndtFailed and (icon.ConditionAlpha or 0) == 0 then
 				if icon.__alpha ~= 0 then
 					icon:SetInfo(0)
@@ -4223,8 +4316,8 @@ end
 function Icon.ForceSetAlpha(icon, alpha)
 	icon.__alpha = alpha
 	local oldalpha = icon:GetAlpha()-- For ICONFADE. much nicer than using __alpha because it will transition from what is curently visible, not what should be visible after any current fades end
-	icon.__oldAlpha = oldalpha 
-	
+	icon.__oldAlpha = oldalpha
+
 	icon:SetAlpha(alpha)
 	if (alpha == 0 and oldalpha > 0) or (alpha > 0 and oldalpha == 0) then
 		TMW:Fire("TMW_ICON_SHOWN_CHANGED", icon)
@@ -4239,7 +4332,7 @@ function Icon.CrunchColor(icon, duration, inrange, nomana)
 --[[
 	CBC = 	{r=0,	g=1,	b=0		},	-- cooldown bar complete
 	CBS = 	{r=1,	g=0,	b=0		},	-- cooldown bar start
-	
+
 	OOR	=	{r=0.5,	g=0.5,	b=0.5	},	-- out of range
 	OOM	=	{r=0.5,	g=0.5,	b=0.5	},	-- out of mana
 	OORM=	{r=0.5,	g=0.5,	b=0.5	},	-- out of range and mana
@@ -4251,24 +4344,24 @@ function Icon.CrunchColor(icon, duration, inrange, nomana)
 
 	NA	=	{r=1,	g=1,	b=1		},	-- not counting always
 	NS	=	{r=1,	g=1,	b=1		},	-- not counting somtimes]]
-	
+
 	if inrange == 0 and nomana then
 		return icon.typeData.OORM
 	elseif inrange == 0 then
 		return icon.typeData.OOR
 	elseif nomana then
 		return icon.typeData.OOM
-	end			
-	
-	
+	end
+
+
 	local s
-	
+
 	if not duration or duration == 0 then
 		s = "N" -- Not counting
 	else
 		s = "C" -- Counting
 	end
-	
+
 	if s == "C" then
 		if icon.ShowTimer then
 			s = s .. "T" -- Timer
@@ -4276,15 +4369,15 @@ function Icon.CrunchColor(icon, duration, inrange, nomana)
 			s = s .. "O" -- nOtimer
 		end
 	end
-	
+
 	if (icon.ShowWhen or "always") == "always" then
 		s = s .. "A" -- Always
 	else
 		s = s .. "S" -- Sometimes
 	end
-	
-	assert(icon.typeData[s])
-	
+
+	--assert(icon.typeData[s])
+
 	return icon.typeData[s]
 end
 
@@ -4302,8 +4395,8 @@ function Icon.SetInfo(icon, alpha, color, texture, start, duration, spellChecked
 	[countText]		- the actual stack TEXT to be set on the icon, will use count if nil (number/string/nil/false)
 	[forceupdate]	- for meta icons, will force an update on things even if args didnt change.
 	[unit]			- the unit that the icon stopped checking on
-	
-	
+
+
 		TO ADD AN ARG: (Notepad++)
 		1) Ctrl+F
 		2) Find regex		([^\-]+icon:SetInfo\(.*)\)
@@ -4314,15 +4407,15 @@ function Icon.SetInfo(icon, alpha, color, texture, start, duration, spellChecked
 		6) IMPORTANT: Update the meta icon with the new arg
 		6) Handle arg in here
 	]]
-	
+
 	--local somethingChanged
-	
+
 	alpha = alpha or 0
 	duration = duration or 0
 	start = start or 0
-	
+
 	local queueOnUnit, queueOnSpell, queueOnStack
-	
+
 	unit = unit or icon.Units and icon.Units[1]
 	if unit then
 		if icon.__unitChecked ~= unit then
@@ -4331,7 +4424,7 @@ function Icon.SetInfo(icon, alpha, color, texture, start, duration, spellChecked
 			icon.__unitChecked = unit
 		--	somethingChanged = 1
 		end
-		
+
 		local unitName = UnitName(unit)
 		if icon.__unitName ~= unitName then
 			queueOnUnit = true
@@ -4339,34 +4432,34 @@ function Icon.SetInfo(icon, alpha, color, texture, start, duration, spellChecked
 			icon.__unitName = unitName
 			--somethingChanged = 1 -- nothing officially changed. this is only used for bind text display. notify a change if something changes there.
 		end
-		
+
 		if queueOnUnit and icon.OnUnit then
-			icon.EventsToFire.OnUnit = true
+			icon:QueueEvent("OnUnit")
 		end
 	end
-	
+
 	if icon.__spellChecked ~= spellChecked then
 		queueOnSpell = true
 		if icon.OnSpell then
-			icon.EventsToFire.OnSpell = true
+			icon:QueueEvent("OnSpell")
 		end
 		icon.__spellChecked = spellChecked
 	--	somethingChanged = 1
 	end
-	
+
 	if duration == 0.001 then duration = 0 end -- hardcode fix for tricks of the trade. nice hardcoding on your part too, blizzard
 	local d = duration - (time - start)
 
 	if icon.OnDuration then
 		local d = d > 0 and d or 0
 		if d ~= icon.__lastDur then
-			icon.EventsToFire.OnDuration = d 
+			icon:QueueEvent("OnDuration", d)
 			icon.__lastDur = d
 		--	somethingChanged = 1 noting actually changed since __lastDur is only used right here.
 		end
 	end
-	
-	
+
+
 	if
 		(icon.CndtFailed) or -- conditions failed
 		(d > 0 and ((icon.DurationMinEnabled and icon.DurationMin > d) or (icon.DurationMaxEnabled and d > icon.DurationMax))) or -- duration requirements failed
@@ -4377,35 +4470,35 @@ function Icon.SetInfo(icon, alpha, color, texture, start, duration, spellChecked
 
 	if alpha ~= icon.__alpha then
 		local oldalpha = icon.__alpha
-		
+
 		icon.__alpha = alpha
 		icon.__oldAlpha = icon:GetAlpha() -- For ICONFADE. much nicer than using __alpha because it will transition from what is curently visible, not what should be visible after any current fades end
-		
+
 		if not icon.IsFading then
 			icon:SetAlpha(icon.FakeHidden or alpha)
 		end
-		
+
 		-- detect events that occured, and handle them if they did
 		if alpha == 0 then
 			if icon.OnHide then
-				icon.EventsToFire.OnHide = true
+				icon:QueueEvent("OnHide")
 			end
 			TMW:Fire("TMW_ICON_SHOWN_CHANGED", icon)
 		elseif oldalpha == 0 then
 			if icon.OnShow then
-				icon.EventsToFire.OnShow = true
+				icon:QueueEvent("OnShow")
 			end
 			TMW:Fire("TMW_ICON_SHOWN_CHANGED", icon)
 		elseif alpha > oldalpha then
 			if icon.OnAlphaInc then
-				icon.EventsToFire.OnAlphaInc = alpha*100
+				icon:QueueEvent("OnAlphaInc", alpha*100)
 			end
 		else -- it must be less than, because it isnt greater than and it isnt the same
 			if icon.OnAlphaDec then
-				icon.EventsToFire.OnAlphaDec = alpha*100
+				icon:QueueEvent("OnAlphaDec", alpha*100)
 			end
 		end
-		
+
 	--	somethingChanged = 1
 	end
 
@@ -4424,11 +4517,11 @@ function Icon.SetInfo(icon, alpha, color, texture, start, duration, spellChecked
 			-- detect events that occured, and handle them if they did
 			if realDuration == 0 then
 				if icon.OnFinish then
-					icon.EventsToFire.OnFinish = true
+					icon:QueueEvent("OnFinish")
 				end
 			else
 				if icon.OnStart then
-					icon.EventsToFire.OnStart = true
+					icon:QueueEvent("OnStart")
 				end
 			end
 			icon.__realDuration = realDuration
@@ -4479,14 +4572,14 @@ function Icon.SetInfo(icon, alpha, color, texture, start, duration, spellChecked
 
 				cbar.Max = duration
 				cbar:SetMinMaxValues(0,  duration)
-				
+
 				CDBarsToUpdate[cbar] = true
 			end
 		end
 
 		icon.__start = start
 		icon.__duration = duration
-		
+
 	--	somethingChanged = 1
 	end
 
@@ -4499,69 +4592,25 @@ function Icon.SetInfo(icon, alpha, color, texture, start, duration, spellChecked
 		end
 		icon.__count = count
 		icon.__countText = countText
-		
+
 		if icon.OnStack then
-			icon.EventsToFire.OnStack = count
+			icon:QueueEvent("OnStack", count)
 		end
-		
+
 	--	somethingChanged = 1
 	end
-	
+
 	texture = icon.OverrideTex or texture -- if a texture override is specefied, then use it instead
 	if texture ~= nil and icon.__tex ~= texture then -- do this before events are processed because some text outputs use icon.__tex
 		icon.__tex = texture
 		icon.texture:SetTexture(texture)
-		
+
 	--	somethingChanged = 1
 	end
-	
+
 	-- NO EVENT HANDLING PAST THIS POINT! -- well, actually it doesnt matter that much anymore, but they still won't be handled till the next update
-	if icon.EventsToFire and next(icon.EventsToFire) then		
-		for _, Module in EVENTS:IterateModules() do
-			for i = 1, #TMW.EventList do
-				local event = TMW.EventList[i].name
-				local doFireAndData = icon.EventsToFire[event]
-				if doFireAndData then					
-					local data = icon[event]
-					
-					if data.OnlyShown and icon.__alpha <= 0 then
-						doFireAndData = false
-						
-						-- the same test is preformed for all modules,
-						-- so we can save the result of it within the module iteration without adverse effects
-						-- it actually results an a performance increase.
-						icon.EventsToFire[event] = doFireAndData
-						
-					elseif data.PassingCndt and isNumber[doFireAndData] then
-						doFireAndData = CompareFuncs[data.Operator](doFireAndData, data.Value)
-						if data.CndtJustPassed then
-							if doFireAndData ~= data.wasPassingCondition then
-								data.wasPassingCondition = doFireAndData
-							else
-								doFireAndData = false
-							end
-						end
-						
-						-- the same test is preformed for all modules...
-						icon.EventsToFire[event] =  doFireAndData
-					end
-					
-					
-					if doFireAndData and runEvents then
-						local handled = Module:HandleEvent(icon, data)
-						if handled and not data.PassThrough then
-							break
-						end
-					end
-				end
-			end
-		end
-			
-		wipe(icon.EventsToFire)
-		
-	--	somethingChanged = 1
-	end
-	
+	icon:ProcessQueuedEvents()
+
 	--[[if alpha == 0 and not force and not icon.IsFading then
 		-- im not a huge fan of this anymore. the performance increase is very small considering the small amount of code below
 		return
@@ -4574,21 +4623,21 @@ function Icon.SetInfo(icon, alpha, color, texture, start, duration, spellChecked
 		else
 			r, g, b, d = color, color, color, false
 		end
-		
+
 		if not (LMB and OnlyMSQ) then
 			icon.texture:SetVertexColor(r, g, b, 1)
 		end
 		icon.texture:SetDesaturated(d)
-			
+
 		if LMB and ColorMSQ then
 			local iconnt = icon.normaltex
 			if iconnt then
 				iconnt:SetVertexColor(r, g, b, 1)
 			end
 		end
-			
+
 		icon.__vrtxcolor = color
-		
+
 	--	somethingChanged = 1
 	end
 
@@ -4607,7 +4656,7 @@ function Icon.SetInfo(icon, alpha, color, texture, start, duration, spellChecked
 			end
 
 			pbar:SetMinMaxValues(0, cost)
-			
+
 			PBarsToUpdate[pbar] = true
 		elseif PBarsToUpdate[pbar] then
 			PBarsToUpdate[pbar] = nil
@@ -4615,10 +4664,10 @@ function Icon.SetInfo(icon, alpha, color, texture, start, duration, spellChecked
 			pbar:SetValue(value)
 			pbar.__value = value
 		end
-		
+
 	--	somethingChanged = 1
 	end
-	
+
 	if queueOnSpell and icon.UpdateBindText_Spell then
 		icon:UpdateBindText()
 	--	somethingChanged = 1
@@ -4629,7 +4678,7 @@ function Icon.SetInfo(icon, alpha, color, texture, start, duration, spellChecked
 		icon:UpdateBindText()
 	--	somethingChanged = 1
 	end
-	
+
 	--[[if somethingChanged then
 		TMW:Fire("TMW_ICON_UPDATED", icon)
 	end]]
@@ -4639,7 +4688,7 @@ end
 function Icon.FinishCompilingConditions(icon, funcstr)
 	icon.CndtFailed = nil
 	TMW.CNDT:CompileUpdateFunction(icon)
-	
+
 	return icon.typeData:FinishCompilingConditions(icon, funcstr)
 end
 
@@ -4648,20 +4697,20 @@ function Icon.ProcessConditionFunction(icon, func)
 	if icon.CndtString and icon.CndtString:find("__unitChecked") then
 		doCheckAfter = true
 	end
-	
+
 	icon.typeData:ProcessConditionFunction(icon, func, doCheckAfter)
 end
 
-	
+
 function Icon.SetupBars(icon)
 	local blizzEdgeInsets = icon.group.barInsets or 0
-	
+
 	local pbar = icon.pbar
 	pbar.texture:SetTexture(LSM:Fetch("statusbar", db.profile.TextureName))
 	pbar:SetPoint("BOTTOM", icon.texture, "CENTER", 0, 0.5)
 	pbar:SetPoint("TOPLEFT", icon.texture, "TOPLEFT", blizzEdgeInsets, -blizzEdgeInsets)
 	pbar:SetPoint("TOPRIGHT", icon.texture, "TOPRIGHT", -blizzEdgeInsets, -blizzEdgeInsets)
-	
+
 	pbar:SetMinMaxValues(0, 1)
 	pbar.offset = icon.PBarOffs or 0
 	pbar.InvertBars = icon.InvertBars
@@ -4671,30 +4720,30 @@ function Icon.SetupBars(icon)
 		pbar:SetStatusBarColor(colorinfo.r, colorinfo.g, colorinfo.b, 0.9)
 		pbar.powerType = powerType
 	end
-	
+
 	if icon.ShowPBar and icon.NameFirst then
 		TMW:RegisterEvent("SPELL_UPDATE_USABLE")
 		pbar:Show()
 	else
 		pbar:Hide()
 	end
-	
+
 	local cbar = icon.cbar
 	cbar.texture:SetTexture(LSM:Fetch("statusbar", db.profile.TextureName))
 	cbar:SetPoint("TOP", icon.texture, "CENTER", 0, -0.5)
 	cbar:SetPoint("BOTTOMLEFT", icon.texture, "BOTTOMLEFT", blizzEdgeInsets, blizzEdgeInsets)
 	cbar:SetPoint("BOTTOMRIGHT", icon.texture, "BOTTOMRIGHT", -blizzEdgeInsets, blizzEdgeInsets)
-	
+
 	cbar.Max = cbar.Max or 1
 	cbar.start = cbar.start or 0
 	cbar.duration = cbar.duration or 0
 	cbar:SetMinMaxValues(0, cbar.Max)
 	cbar.startColor = icon.typeData.CBS
 	cbar.completeColor = icon.typeData.CBC
-	
+
 	cbar.offset = icon.CBarOffs or 0
-	cbar.InvertBars = icon.InvertBars	
-	if icon.ShowCBar then	
+	cbar.InvertBars = icon.InvertBars
+	if icon.ShowCBar then
 		cbar:Show()
 	else
 		cbar:Hide()
@@ -4704,13 +4753,13 @@ end
 function Icon.SetupText(icon, fontString, settings)
 	fontString:SetWidth(settings.ConstrainWidth and icon.texture:GetWidth() or 0)
 	fontString:SetFont(LSM:Fetch("font", settings.Name), settings.Size, settings.Outline)
-	
+
 	if LMB then
 		if settings.OverrideLBFPos then
 			fontString:ClearAllPoints()
 			local func = fontString.__MSQ_SetPoint or fontString.SetPoint
 			func(fontString, settings.point, icon, settings.relativePoint, settings.x, settings.y)
-			
+
 			fontString:SetJustifyH(settings.point:match("LEFT") or settings.point:match("RIGHT") or "CENTER")
 		end
 	else
@@ -4721,7 +4770,7 @@ end
 
 function Icon.Setup(icon)
 	if not icon or not icon[0] then return end
-	
+
 	local iconID = icon:GetID()
 	local groupID = icon.group:GetID()
 	local group = icon.group
@@ -4738,7 +4787,7 @@ function Icon.Setup(icon)
 	icon.__vrtxcolor = nil
 	icon.Units = nil
 	icon.ForceDisabled = nil
-	
+
 	for k in pairs(TMW.Icon_Defaults) do
 		if typeData.RelevantSettings[k] then
 			icon[k] = ics[k]
@@ -4751,14 +4800,14 @@ function Icon.Setup(icon)
 	for _, eventData in ipairs(TMW.EventList) do
 		local event = eventData.name
 		local eventSettings = icon.Events[event]
-		
+
 		local thisHasEventHandlers
 		for _, Module in EVENTS:IterateModules() do
-			thisHasEventHandlers = Module:ProcessIconEventSettings(eventSettings) or thisHasEventHandlers
+			thisHasEventHandlers = Module:ProcessAndDelegateIconEventSettings(icon, event, eventSettings) or thisHasEventHandlers
 		end
-		
+
 		hasEventHandlers = hasEventHandlers or thisHasEventHandlers
-		
+
 		if thisHasEventHandlers and not typeData["EventDisabled_" .. event] then
 			icon[event] = eventSettings
 			icon.EventsToFire = icon.EventsToFire or {}
@@ -4767,17 +4816,17 @@ function Icon.Setup(icon)
 		end
 	end
 
-	
+
 	-- process alpha settings
 	if icon.ShowWhen == "alpha" then
 		icon.UnAlpha = 0
 	elseif icon.ShowWhen == "unalpha" then
 		icon.Alpha = 0
 	end
-	
+
 	-- make fake hidden easier to process in SetInfo
 	icon.FakeHidden = icon.FakeHidden and 0
-	
+
 	if pclass ~= "DEATHKNIGHT" then
 		icon.IgnoreRunes = nil
 	end
@@ -4802,9 +4851,9 @@ function Icon.Setup(icon)
 	local cd = icon.cooldown
 	cd.noCooldownCount = not icon.ShowTimerText
 	cd:SetDrawEdge(db.profile.DrawEdge)
-	icon:SetReverse(false)	
-	
-	
+	icon:SetReverse(false)
+
+
 	-- Masque skinning
 	local isDefault
 	icon.normaltex = icon.__MSQ_NormalTexture or icon:GetNormalTexture()
@@ -4821,7 +4870,7 @@ function Icon.Setup(icon)
 	else
 		isDefault = 1
 	end
-	
+
 	if isDefault then
 		group.barInsets = 1.5
 		cd:SetFrameLevel(icon:GetFrameLevel() + 1)
@@ -4833,15 +4882,15 @@ function Icon.Setup(icon)
 		icon.cbar:SetFrameLevel(icon:GetFrameLevel() + -1)
 		icon.pbar:SetFrameLevel(icon:GetFrameLevel() + -1)
 	end
-	
+
 	--reset things
 	--icon:SetInfo(alpha, color, texture, start, duration, spellChecked, reverse, count, countText, forceupdate, unit)
 	icon:SetInfo(0, nil, nil, nil, nil, nil, nil, nil, nil, 1, nil) -- forceupdate is set to 1 here so it doesnt return early
-	
+
 	-- update overlay texts
 	icon:SetupText(icon.countText, group.Fonts.Count)
 	icon:SetupText(icon.bindText, group.Fonts.Bind)
-	
+
 	icon.UpdateBindText_Any = nil -- this one is for metas
 	icon.UpdateBindText_Spell = nil
 	icon.UpdateBindText_Unit = nil
@@ -4870,11 +4919,11 @@ function Icon.Setup(icon)
 	else
 		icon.bindText:SetText(nil)
 	end
-	
-	
+
+
 	-- force an update
 	icon.LastUpdate = 0
-	
+
 	-- actually run the icon's update function
 	if icon.Enabled or not Locked then
 		local success, err = pcall(Types[icon.Type].Setup, Types[icon.Type], icon, groupID, iconID)
@@ -4884,7 +4933,7 @@ function Icon.Setup(icon)
 	else
 		icon:SetInfo(0)
 	end
-	
+
 	-- if the icon is set to always hide and it isnt handling any events, then don't automatically update it.
 	-- Conditions and meta icons will update it as needed.
 	if icon.FakeHidden and not hasEventHandlers then
@@ -4894,11 +4943,11 @@ function Icon.Setup(icon)
 			icon:SetInfo(0)
 		end
 	end
-	
+
 	-- Warnings for missing durations and first-time instructions for duration syntax
 	if typeData.DurationSyntax and icon:IsBeingEdited() == 1 then
 		TMW.HELP:Show("ICON_DURS_FIRSTSEE", nil, TMW.IE.Main.Type, 20, 0, L["HELP_FIRSTUCD"])
-		
+
 		local Name = TMW.IE.Main.Name
 		local s = ""
 		local array = TMW:GetSpellNames(nil, Name:GetText())
@@ -4922,9 +4971,9 @@ function Icon.Setup(icon)
 	pbar.__value = nil
 	CDBarsToUpdate[cbar] = db.profile.Locked and icon.ShowCBar and true or nil
 	updatePBar = 1
-	
-	if icon.OverrideTex then icon:SetTexture(icon.OverrideTex) end 
-	
+
+	if icon.OverrideTex then icon:SetTexture(icon.OverrideTex) end
+
 	if Locked then
 		if icon.texture:GetTexture() == "Interface\\AddOns\\TellMeWhen\\Textures\\Disabled" then
 			icon:SetTexture(nil)
@@ -4934,7 +4983,7 @@ function Icon.Setup(icon)
 			ClearScripts(icon)
 			icon:Hide()
 		end
-		
+
 		pbar:SetAlpha(.9)
 		cbar:SetAlpha(.9)
 	else
@@ -4944,11 +4993,11 @@ function Icon.Setup(icon)
 		if group.FontTest then
 			testCount, testCountText = typeData:GetFontTestValues()
 		end
-		
+
 		--icon:SetInfo(alpha, color, texture, start, duration, spellChecked, reverse, count, countText, forceupdate, unit)
 		icon:SetInfo(1, 1, nil, 0, 0, icon.__spellChecked, nil, testCount, testCountText, nil, nil, icon.__unitChecked)
 		icon:ForceSetAlpha(icon.Enabled and 1 or 0.5) -- force set the alpha (dont handle it with SetInfo because of all the bells and whistles
-		
+
 		if not icon.texture:GetTexture() then
 			icon:SetTexture("Interface\\AddOns\\TellMeWhen\\Textures\\Disabled")
 		end
@@ -4962,12 +5011,12 @@ function Icon.Setup(icon)
 		pbar:SetMinMaxValues(0, 1)
 		pbar:SetValue(1)
 		pbar:SetAlpha(.7)
-		
+
 		icon:EnableMouse(1)
 	end
-	
+
 	--icon.updateQueued = true
-	
+
 	TMW:Fire("TMW_ICON_SETUP", icon)
 	--TMW:Fire("TMW_ICON_UPDATED", icon)
 end
@@ -4981,11 +5030,11 @@ IconType.leftCheckYOffset = 0
 IconType.chooseNameTitle = L["ICONMENU_CHOOSENAME"]
 IconType.chooseNameText  = L["CHOOSENAME_DIALOG"]
 IconType.unitTitle = L["ICONMENU_UNITSTOWATCH"]
-IconType.EventDisabled_OnCLEUEvent = true	
+IconType.EventDisabled_OnCLEUEvent = true
 
 do	-- IconType:InIcons(groupID)
 	local cg, ci, mg, mi, Type
-		
+
 	local function iter()
 		ci = ci + 1
 		while true do
@@ -5008,7 +5057,7 @@ do	-- IconType:InIcons(groupID)
 		end
 		return TMW[cg] and TMW[cg][ci], cg, ci -- icon, groupID, iconID
 	end
-		
+
 	function IconType:InIcons(groupID)
 		cg = groupID or 1
 		ci = 0
@@ -5045,16 +5094,16 @@ end
 
 function IconType:DragReceived(icon, t, data, subType)
 	local ics = icon:GetSettings()
-	
+
 	if t ~= "spell" then
 		return
 	end
-	
+
 	local _, spellID = GetSpellBookItemInfo(data, subType)
 	if not spellID then
 		return
 	end
-	
+
 	ics.Name = TMW:CleanString(ics.Name .. ";" .. spellID)
 	return true -- signal success
 end
@@ -5071,13 +5120,13 @@ function IconType:GetFontTestValues(icon)
 end
 
 function IconType:FinishCompilingConditions(icon, funcstr)
-	return funcstr, icon:GetName(), "CndtFailed"
+	return funcstr, "CndtFailed"
 end
 
 function IconType:ProcessConditionFunction(icon, func, doCheckAfter)
 	local key = doCheckAfter and "CndtCheckAfter" or "CndtCheck"
 	local antikey = doCheckAfter and "CndtCheck" or "CndtCheckAfter"
-	
+
 	icon[key] = func
 	icon[antikey] = nil
 end
@@ -5085,13 +5134,13 @@ end
 function IconType:Register()
 	local typekey = self.type
 	setmetatable(self.RelevantSettings, RelevantToAll)
-	
+
 	if TMW.debug and rawget(Types, typekey) then
 		-- for tweaking and recreating icon types inside of WowLua so that I don't have to change the typekey every time.
 		typekey = typekey .. " - " .. date("%X")
 		self.name = typekey
 	end
-	
+
 	Types[typekey] = self -- put it in the main Types table
 	tinsert(TMW.OrderedTypes, self) -- put it in the ordered types table (used to order the type selection dropdown in the icon editor)
 	return self -- why not?
@@ -5115,14 +5164,14 @@ function string:toseconds()
 	-- converts a string (e.g. "1:45:37") into the number of seconds that it represents (eg. 6337)
 	self = ":" .. self:trim(": ") -- a colon is needed at the beginning so that gmatch will catch the first unit of time in the string (minutes, hours, etc)
 	local _, numcolon = self:gsub(":", ":") -- HACK: count the number of colons in the string so that we can keep track of what multiplier we are on (since we start with the highest unit of time)
-	local seconds = 0 
+	local seconds = 0
 	for num in self:gmatch(":([0-9%.]*)") do -- iterate over all units of time and their value
 		if tonumber(num) and mult[numcolon] then -- make sure that it is valid (there is a number and it isnt a unit of time higher than a year)
 			seconds = seconds + mult[numcolon]*num -- multiply the number of units by the number of seconds in that unit and add the appropriate amount of time to the running count
 		end
 		numcolon = numcolon - 1 -- decrease the current unit of time that is being worked with (even if it was an invalid unit and failed the above check)
 	end
-	return seconds 
+	return seconds
 end
 
 function TMW:lowerNames(str)
@@ -5133,14 +5182,14 @@ function TMW:lowerNames(str)
 		end
 		return str
 	end
-	
+
 	-- Dispel types retain their capitalization. Restore it here.
 	for ds in pairs(TMW.DS) do
 		if strlower(ds) == strlower(str) then
 			return ds
 		end
 	end
-	
+
 	local ret = tonumber(str) or strlower(str)
 	if type(ret) == "string" then
 		if loweredbackup[ret] then
@@ -5148,7 +5197,7 @@ function TMW:lowerNames(str)
 			-- Generally, assume that strings with more capitals after non-letters are more proper than ones with less
 			local _, oldcount = gsub(loweredbackup[ret], "[^%a]%u", "%1")
 			local _, newcount = gsub(str, "[^%a]%u", "%1")
-			
+
 			-- check the first letter of each string for a capital
 			if strfind(loweredbackup[ret], "^%u") then
 				oldcount = oldcount + 1
@@ -5156,7 +5205,7 @@ function TMW:lowerNames(str)
 			if strfind(str, "^%u") then
 				newcount = newcount + 1
 			end
-			
+
 			-- the new string has more than the old, so use it instead
 			if newcount > oldcount then
 				loweredbackup[ret] = str
@@ -5166,7 +5215,7 @@ function TMW:lowerNames(str)
 			loweredbackup[ret] = str
 		end
 	end
-	
+
 	return ret
 end
 
@@ -5195,7 +5244,7 @@ function TMW:EquivToTable(name)
 	name = strlower(name) -- everything in this function is handled as lowercase to prevent issues with user input capitalization. DONT use TMW:lowerNames() here, because the input is not the output
 	local eqname, duration = strmatch(name, "(.-):([%d:%s%.]*)$") -- see if the string being checked has a duration attached to it (it really shouldn't because there is currently no point in doing so, but a user did try this and made a bug report, so I fixed it anyway
 	name = eqname or name -- if there was a duration, then replace the old name with the actual name without the duration attached
-	
+
 	local names -- scope the variable
 	for k, v in pairs(TMW.BE) do -- check in subtables ('buffs', 'debuffs', 'casts', etc)
 		for equiv, str in pairs(v) do
@@ -5206,9 +5255,9 @@ function TMW:EquivToTable(name)
 		end
 		if names then break end -- break main loop
 	end
-	
+
 	if not names then return end -- if we didnt find an equivalency string then get out
-	
+
 
 	local tbl = { strsplit(";", names) } -- split the string into a table
 	for a, b in pairs(tbl) do
@@ -5219,7 +5268,7 @@ function TMW:EquivToTable(name)
 		end
 		tbl[a] = new -- stick it in the table
 	end
-	
+
 	return tbl
 end
 TMW:MakeFunctionCached(TMW, "EquivToTable")
@@ -5253,7 +5302,7 @@ function TMW:GetSpellNames(icon, setting, firstOnly, toname, hash, keepDurations
 			k = k - 1 --there are no duplicates, so move backwards towards zero
 		end
 	end
-	
+
 	-- REMOVE SPELL DURATIONS (FOR UNIT COOLDOWNS/ICDs)
 	if not keepDurations then
 		for k, buffName in pairs(buffNames) do
@@ -5273,7 +5322,7 @@ function TMW:GetSpellNames(icon, setting, firstOnly, toname, hash, keepDurations
 			if toname then
 				v = GetSpellInfo(v or "") or v -- turn the value into a name if needed
 			end
-			
+
 			v = TMW:lowerNames(v)
 			hash[v] = k -- put the final value in the table as well (may or may not be the same as the original value. Value should be NameArrray's key, for use with the duration table.
 		end
@@ -5304,10 +5353,10 @@ TMW:MakeFunctionCached(TMW, "GetSpellNames")
 local gsdcache = {}
 function TMW:GetSpellDurations(icon, setting)
 	if gsdcache[setting] then return gsdcache[setting] end --why make a bunch of tables and do a bunch of stuff if we dont need to
-	
+
 	local NameArray = TMW:GetSpellNames(icon, setting, nil, nil, nil, 1)
 	local DurationArray = CopyTable(NameArray)
-	
+
 	-- EXTRACT SPELL DURATIONS
 	for k, buffName in pairs(NameArray) do
 		DurationArray[k] = strmatch(buffName, ".-:([%d:%s%.]*)$")
@@ -5317,7 +5366,7 @@ function TMW:GetSpellDurations(icon, setting)
 			DurationArray[k] = tonumber(DurationArray[k]:trim(" :;."):toseconds())
 		end
 	end
-	
+
 	gsdcache[setting] = DurationArray
 	return DurationArray
 end
@@ -5325,7 +5374,7 @@ end
 function TMW:GetItemIDs(icon, setting, firstOnly, toname)
 	-- note: these cannot be cached because of slotIDs
 
-	
+
 	local names = TMW:SplitNames(setting)
 	-- REMOVE SPELL DURATIONS (FOR WHATEVER REASON THE USER MIGHT HAVE PUT THEM IN FOR ITEMS)
 	for k, item in pairs(names) do
@@ -5337,7 +5386,7 @@ function TMW:GetItemIDs(icon, setting, firstOnly, toname)
 	if icon then
 		names = TMW:lowerNames(names)
 	end
-	
+
 	for k, item in ipairs(names) do
 		item = strtrim(item) -- trim trailing spaces
 		local itemID = tonumber(item) --if it is a number then it might be the itemID if them item
@@ -5443,7 +5492,7 @@ end
 function TMW:StringIsInSemicolonList(list, strtofind)
 	-- wheee, long function names
 	strtofind = tostring(strtofind)
-	
+
 	for i, str in TMW:Vararg(strsplit(";", list)) do
 		if strtofind == str then
 			return true
@@ -5456,9 +5505,9 @@ function TMW:GetConfigIconTexture(icon, isItem)
 	if icon.Name == "" then
 		return "Interface\\Icons\\INV_Misc_QuestionMark", nil
 	else
-	
+
 		local tbl = isItem and TMW:GetItemIDs(nil, icon.Name) or TMW:GetSpellNames(nil, icon.Name)
-	
+
 		for _, name in ipairs(tbl) do
 			local t = isItem and GetItemIcon(name) or SpellTextures[name]
 			if t then
@@ -5485,9 +5534,9 @@ function TMW:GetCustomTexture(icon)
 	else
 		CustomTex = icon
 	end
-	
+
 	CustomTex = tonumber(CustomTex) or CustomTex
-	
+
 	if CustomTex then
 		TMW.TestTex:SetTexture(SpellTextures[CustomTex])
 		if not TMW.TestTex:GetTexture() then
@@ -5519,7 +5568,7 @@ function TMW:FormatSeconds(seconds, skipSmall, keepTrailing)
 	local h = (seconds % 31556925.9936  % 86400) / 3600
 	local m = (seconds % 31556925.9936  % 86400  % 3600) / 60
 	local s = (seconds % 31556925.9936  % 86400  % 3600  % 60)
-	
+
 	local ns = s
 	if skipSmall then
 		ns = format("%d", s)
@@ -5532,12 +5581,12 @@ function TMW:FormatSeconds(seconds, skipSmall, keepTrailing)
 	if s < 10 and seconds >= 60 then
 		ns = "0" .. ns
 	end
-	
+
 	if y >= 1 then return format("%d:%d:%02d:%02d:%s", y, d, h, m, ns) end
 	if d >= 1 then return format("%d:%02d:%02d:%s", d, h, m, ns) end
 	if h >= 1 then return format("%d:%02d:%s", h, m, ns) end
 	if m >= 1 then return format("%d:%s", m, ns) end
-	
+
 	return ns
 end
 
@@ -5549,12 +5598,12 @@ function TMW:LockToggle()
 		end
 	end
 	db.profile.Locked = not db.profile.Locked
-	
+
 	if not db.profile.Locked then
 		wipe(CDBarsToUpdate)
 		wipe(PBarsToUpdate)
 	end
-	
+
 	PlaySound("igCharacterInfoTab")
 	TMW:Update()
 end
@@ -5591,8 +5640,8 @@ function UNITS:GetOriginalUnitTable(unitSettings)
 	gsub("|cffff0000", ""): -- strip color codes (NOTE LOWERCASE)
 	gsub("|r", ""):
 	gsub("#", "") -- strip the # from the dropdown
-	
-	
+
+
 	--SUBSTITUTE "party" with "party1-4", etc
 	for _, wholething in TMW:Vararg(strsplit(";", unitSettings)) do
 		local unit = strtrim(wholething)
@@ -5603,7 +5652,7 @@ function UNITS:GetOriginalUnitTable(unitSettings)
 			end
 		end
 	end
-	
+
 	--SUBSTITUTE RAID1-10 WITH RAID1;RAID2;RAID3;...RAID10
 	local startpos, endpos = 0, 0
 	for wholething, unit, firstnum, lastnum, append in gmatch(unitSettings, "((%a+) ?(%d+) ?%- ?(%d+) ?([%a]*)) ?;?") do
@@ -5643,10 +5692,10 @@ TMW:MakeFunctionCached(UNITS, "GetOriginalUnitTable")
 
 function UNITS:UpdateTankAndAssistMap()
 	local mtMap, maMap = UNITS.mtMap, UNITS.maMap
-	
+
 	wipe(mtMap)
 	wipe(maMap)
-	
+
 	-- setup a table with (key, value) pairs as (oldnumber, newnumber)
 	-- oldnumber is 7 for raid7
 	-- newnumber is 1 for raid7 when the current maintank/assist is the 1st one found, 2 for the 2nd one found, etc)
@@ -5706,7 +5755,7 @@ function UnitSet:OnNewInstance(unitSettings)
 	self.updateEvents = {}
 	self.exposedUnits = {}
 	-- determine the operations that the set needs to stay updated
-	
+
 	for k, unit in pairs(self.originalUnits) do
 		if unit == "player" then
 		--	UNITS.unitsWithExistsEvent[unit] = true -- doesnt really have an event, but do this for external checks of unitsWithExistsEvent to increase efficiency.
@@ -5739,11 +5788,11 @@ function UnitSet:OnNewInstance(unitSettings)
 			UNITS.doTankAndAssistMap = true
 		end
 	end
-	
+
 	for event in pairs(self.updateEvents) do
 		UNITS:RegisterEvent(event, "OnEvent")
 	end
-	
+
 	self:Update()
 end
 
@@ -5753,7 +5802,7 @@ function UnitSet:Update()
 	for k in next, exposedUnits do
 		exposedUnits[k] = nil
 	end
-	
+
 	for k = 1, #originalUnits do
 		local oldunit = originalUnits[k]
 		local success

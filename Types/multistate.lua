@@ -98,11 +98,11 @@ local function MultiStateCD_OnUpdate(icon, time)
 		if icon.ManaCheck then
 			_, nomana = IsUsableAction(Slot)
 		end
-		
+
 		local actionType, spellID = GetActionInfo(Slot)
 		spellID = actionType == "spell" and spellID or icon.NameFirst
-		
-		
+
+
 		local alpha, color
 		if (duration == 0 or OnGCD(duration)) and inrange == 1 and not nomana then
 			alpha = icon.Alpha
@@ -111,7 +111,7 @@ local function MultiStateCD_OnUpdate(icon, time)
 			alpha = icon.UnAlpha
 			color = icon:CrunchColor(duration, inrange, nomana)
 		end
-		
+
 		--icon:SetInfo(alpha, color, texture, start, duration, spellChecked, reverse, count, countText, forceupdate, unit)
 		icon:SetInfo(alpha, color, GetActionTexture(Slot) or "Interface\\Icons\\INV_Misc_QuestionMark", start, duration, spellID, nil, nil, nil, nil, nil)
 	end
@@ -121,14 +121,14 @@ end
 function Type:Setup(icon, groupID, iconID)
 	icon.NameFirst = TMW:GetSpellNames(icon, icon.Name, 1)
 	local originalNameFirst = icon.NameFirst
-	
+
 	if icon.NameFirst and icon.NameFirst ~= "" and GetSpellLink(icon.NameFirst) and not tonumber(icon.NameFirst) then
 		icon.NameFirst = tonumber(strmatch(GetSpellLink(icon.NameFirst), ":(%d+)")) -- extract the spellID from the link
 	end
-	
+
 	icon.Slot = 0
 	MultiStateCD_OnEvent(icon)
-	
+
 	if icon:IsBeingEdited() == 1 then
 		if icon.Slot == 0 and originalNameFirst and originalNameFirst ~= "" then
 			TMW.HELP:Show("ICON_MS_NOTFOUND", icon, TMW.IE.Main.Name, 0, 0, L["HELP_MS_NOFOUND"], originalNameFirst)

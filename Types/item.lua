@@ -50,7 +50,7 @@ Type.RelevantSettings = {
 	OnlyEquipped = true,
 	OnlyInBags = true,
 	EnableStacks = true,
-	
+
 	DurationMin = true,
 	DurationMax = true,
 	DurationMinEnabled = true,
@@ -115,9 +115,9 @@ local function ItemCooldown_OnUpdate(icon, time)
 			end
 			isGCD = OnGCD(duration)
 			if equipped and inrange == 1 and (duration == 0 or isGCD) then --usable
-			
+
 				local color = icon:CrunchColor()
-				
+
 				--icon:SetInfo(alpha, color, texture, start, duration, spellChecked, reverse, count, countText, forceupdate, unit)
 				icon:SetInfo(icon.Alpha, color, GetItemIcon(iName) or "Interface\\Icons\\INV_Misc_QuestionMark", start, duration, iName, nil, count, EnableStacks and count > 1 and count or "", nil, nil)
 
@@ -151,9 +151,9 @@ local function ItemCooldown_OnUpdate(icon, time)
 		isGCD = OnGCD(duration)
 	end
 	if duration then
-		
+
 		local color = icon:CrunchColor(duration, inrange)
-		
+
 		--icon:SetInfo(alpha, color, texture, start, duration, spellChecked, reverse, count, countText, forceupdate, unit)
 		icon:SetInfo(icon.UnAlpha, color, GetItemIcon(NameFirst2), start, duration, NameFirst2, nil, count, EnableStacks and count > 1 and count or "", nil, nil)
 	else
@@ -188,9 +188,9 @@ function Type:Setup(icon, groupID, iconID)
 	end
 
 	icon:SetTexture(TMW:GetConfigIconTexture(icon, 1))
-	
+
 	Type:RegisterEvent("BAG_UPDATE")
-	
+
 	icon:SetScript("OnUpdate", ItemCooldown_OnUpdate)
 	icon:Update()
 end
@@ -205,11 +205,11 @@ end
 
 function Type:DragReceived(icon, t, data, subType)
 	local ics = icon:GetSettings()
-	
+
 	if t ~= "item" or not data then
 		return
 	end
-	
+
 	ics.Name = TMW:CleanString(ics.Name .. ";" .. data)
 	return true -- signal success
 end

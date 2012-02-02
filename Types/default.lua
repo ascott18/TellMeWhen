@@ -54,7 +54,7 @@ end
 
 function Type:DragReceived(icon, t, data, subType)
 	local ics = icon:GetSettings()
-	
+
 	local newType, input
 	if t == "spell" then
 		_, input = GetSpellBookItemInfo(data, subType)
@@ -64,11 +64,11 @@ function Type:DragReceived(icon, t, data, subType)
 		newType = "item"
 	end
 	if not (input and newType) then return end
-	
+
 	ics.Type = newType
 	ics.Enabled = true
 	ics.Name = TMW:CleanString(ics.Name .. ";" .. input)
 	return true -- signal success
 end
-	
+
 Type:Register()

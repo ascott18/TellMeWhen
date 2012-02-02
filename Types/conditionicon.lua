@@ -32,7 +32,7 @@ Type.SUGType = "texture"
 Type.DontSetInfoInCondition = true
 Type.chooseNameTitle = L["ICONMENU_CHOOSENAME_CNDTIC"]
 Type.chooseNameText = L["CHOOSENAME_DIALOG_CNDTIC"]
-	
+
 Type.WhenChecks = {
 	text = L["ICONMENU_CNDTSHOWWHEN"],
 	{ value = "alpha",			text = L["ICONMENU_SUCCEED"],			colorCode = "|cFF00FF00" },
@@ -64,26 +64,25 @@ function Type:Update()
 end
 
 local function ConditionIcon_OnUpdate(icon, time)
-	local CndtCheck = icon.CndtCheck_CNDTIC
-	if CndtCheck then
+	if icon.CndtCheck_CNDTIC then
 		if icon.conditionUpdateMethod == "OnUpdate" or icon.conditionsNeedUpdate or icon.nextConditionUpdate < time then
-			CndtCheck()
+			icon:CndtCheck_CNDTIC()
 		end
 		local succeeded = not icon.ConditionsFailed
-		
+
 		local alpha = succeeded and icon.Alpha or icon.UnAlpha
-		
+
 		local d, start, duration
-		
+
 		--icon:SetInfo(alpha, color, texture, start, duration, spellChecked, reverse, count, countText, forceupdate, unit)
 		if succeeded and not icon.__succeeded and icon.ConditionDurEnabled then
 			d = icon.ConditionDur
 			start, duration = time, d
-			
+
 		elseif not succeeded and icon.__succeeded and icon.UnConditionDurEnabled then
 			d = icon.UnConditionDur
 			start, duration = time, d
-			
+
 		else
 			d = icon.__duration - (time - icon.__start)
 			d = d > 0 and d or 0
@@ -93,14 +92,14 @@ local function ConditionIcon_OnUpdate(icon, time)
 				start, duration = 0, 0
 			end
 		end
-		
+
 		if icon.OnlyIfCounting and d <= 0 then
 			alpha = 0
 		end
 		local color = icon:CrunchColor(d)
-		
+
 		icon:SetInfo(alpha, color, nil, start, duration, nil, nil, nil, nil, nil, nil)
-			
+
 		icon.__succeeded = succeeded
 	else
 		icon:SetInfo(1)
@@ -113,7 +112,7 @@ end
 
 function Type:FinishCompilingConditions(icon, funcstr)
 	icon.ConditionsFailed = nil
-	return funcstr, icon:GetName(), "ConditionsFailed"
+	return funcstr, "ConditionsFailed"
 end
 
 function Type:ProcessConditionFunction(icon, func)
@@ -126,7 +125,7 @@ function Type:Setup(icon, groupID, iconID)
 	icon.__start = icon.__start or 0 --TellMeWhen-4.2.1.2.lua:2115 attempt to perform arithmetic on local "start" (a nil value) -- caused because condition icons do necessarily define start/durations, even if shown.
 	icon.__duration = icon.__duration or 0
 	icon.__vrtxcolor = 1
-	
+
 	icon:SetScript("OnUpdate", ConditionIcon_OnUpdate)
 	--icon:Update() -- dont do this!
 end

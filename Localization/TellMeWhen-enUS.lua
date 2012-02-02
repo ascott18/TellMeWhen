@@ -68,6 +68,8 @@ L["CHOOSENAME_DIALOG_PETABILITIES"] = "|cFFFF5959PET ABILITIES|r must use SpellI
 L["CHOOSENAME_DIALOG_MSCD"] = [=[Enter the Name or ID of what the cooldown that you want this icon to monitor. Only the first spell/item will be checked - semicolon-delimited lists are not valid for this icon type.]=]
 L["CHOOSENAME_DIALOG_CNDTIC"] = "Enter the Name or ID of the spell that has the texture that you want to use. You may also enter a texture path, such as 'Interface/Icons/spell_nature_healingtouch', or just 'spell_nature_healingtouch' if the path is 'Interface/Icons'"
 
+L["CHOOSEICON"] = "Choose an icon to check"
+
 L["ICONMENU_ALPHA"] = "Opacity"
 L["CONDITIONALPHA"] = "Failed Conditions/Reqs."
 L["CONDITIONALPHA_DESC"] = "This will be used when conditions fail, or if the duration or stack requirements are not met. This setting will be ignored if the icon is already hidden by the other two opacity settings."
@@ -207,7 +209,7 @@ L["ICONMENU_COMPONENTICONS"] = "Component Icons & Groups"
 L["ICONMENU_UNITSTOWATCH"] = "Unit(s) to watch"
 L["ICONMENU_UNITSTOWATCH_ALL"] = "OR leave blank to track all"
 L["ICONMENU_UNITS"] = "Units"
-L["ICONMENU_UNIT_DESC"] = [[Enter the units to watch in this box. Units can be inserted from the dropdown at the right, or advanced users can type in their own units. Standard units (e.g. player) and/or friendly player names (e.g. %s) may be used as units. Separate multiple units with semicolons (;). 
+L["ICONMENU_UNIT_DESC"] = [[Enter the units to watch in this box. Units can be inserted from the dropdown at the right, or advanced users can type in their own units. Standard units (e.g. player) and/or friendly player names (e.g. %s) may be used as units. Separate multiple units with semicolons (;).
 
 For more information about units, go to http://www.wowpedia.org/UnitId.]]
 L["DROPDOWN_UNIT_DESC"] = [[You can select units from this menu to insert into the editbox. Units that end with '|cFFFF0000#|r' require that the '|cFFFF0000#|r' be replaced with a number corresponding to the appropriate unit, or a range of numbers. E.g. change 'raid|cFFFF0000#|r' to 'raid25' to track the 25th raid member, or change it to 'raid1-25' to track the first 25 raid members.
@@ -670,7 +672,7 @@ Examples:
 	"[nomodifier:alt]" - not holding down the alt key.
 	"[@target, help][mod:ctrl]" - target is friendly OR holding down ctrl
 	"[@focus, harm, nomod:shift]" - focus is hostile AND not holding down shift
-	
+
 For more help, go to http://www.wowpedia.org/Making_a_macro]]
 L["MACROCONDITION_EB_DESC"] = "If using a single condition, opening and closing brackets are optional. Brackets are required if using multiple conditionals."
 L["NOTINRANGE"] = "Not in range"
@@ -921,6 +923,16 @@ Because this event occurs every time the icon is updated while a timer is runnin
 L["SOUND_EVENT_ONCLEU"] = "Combat Event"
 L["SOUND_EVENT_ONCLEU_DESC"] = [[This event triggers when a combat event that should be processed by the icon occurs.]]
 
+L["SOUND_EVENT_ONICONSHOW"] = "Icon Show"
+L["SOUND_EVENT_ONICONSHOW_DESC"] = [[This event triggers when another icon (not this icon) is shown.
+
+Configure the icon that should be watched using the event settings below.]]
+
+L["SOUND_EVENT_ONICONHIDE"] = "Icon Hide"
+L["SOUND_EVENT_ONICONHIDE_DESC"] = [[This event triggers when another icon (not this icon) is hidden.
+
+Configure the icon that should be watched using the event settings below.]]
+
 L["SOUND_EVENT_GLOBALDESC"] = "Events are checked from top to bottom in this list. If an event is triggered that has a sound to play, no events below that event will play a sound."
 L["SOUND_EVENT_DISABLEDFORTYPE"] = "Not available"
 L["SOUND_EVENT_DISABLEDFORTYPE_DESC"] = "This event is not available for %s type icons."
@@ -942,7 +954,7 @@ L["SOUND_TAB"] = "Sound"
 
 L["EVENTS_SETTINGS_HEADER"] = "Event Settings"
 --L["EVENTS_SETTINGS_HEADER_SUB"] = "Only handle %s:"
-L["EVENTS_SETTINGS_GLOBAL_DESC"] = "Note that event settings affect the event across all outputs, including sound and text."
+L["EVENTS_SETTINGS_GLOBAL_DESC"] = "Note that event settings affect the event across all outputs, including sound, text, and animations."
 
 L["EVENTS_SETTINGS_ONLYSHOWN"] = "Only handle if icon is shown"
 L["EVENTS_SETTINGS_ONLYSHOWN_DESC"] = "Prevents the event from being handled if the icon is not shown."
@@ -1183,8 +1195,8 @@ L["CLEU_WHOLECATEGORYEXCLUDED"] = [[You have excluded every part of the %q categ
 Uncheck at least one for proper functionality.]]
 
 L["CLEU_NOFILTERS"] = [[The %s icon in %s does not have any filters defined. It will not function until you define at least one filter.]]
-	
-	
+
+
 L["CLEU_DIED"] = "Death"
 
 L["CLEU_HEADER"] = "Combat Event Filters"

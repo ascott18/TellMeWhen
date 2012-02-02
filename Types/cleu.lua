@@ -25,7 +25,7 @@ local bit_band = bit.band
 local print = TMW.print
 local SpellTextures = TMW.SpellTextures
 
-local pGUID = UnitGUID("player") -- this isnt actually defined right here (it returns nil), so I will do it later too
+local pGUID = UnitGUID("player") -- this isnt actually defined right here (it returns nil at this stage of loading), so I will do it later too
 local clientVersion = select(4, GetBuildInfo())
 local strlowerCache = TMW.strlowerCache
 
@@ -37,7 +37,7 @@ Type.desc = L["ICONMENU_CLEU_DESC"]
 Type.usePocketWatch = 1
 Type.AllowNoName = true
 Type.chooseNameTitle = L["ICONMENU_CHOOSENAME"] .. " " .. L["ICONMENU_CHOOSENAME_ORBLANK"]
-Type.SUGType = "spell"
+Type.SUGType = "cleu"
 Type.spacebefore = true
 -- Type.leftCheckYOffset = -130 -- nevermind
 
@@ -73,6 +73,7 @@ function Type:Update()
 	db = TMW.db
 	pGUID = UnitGUID("player")
 end
+
 local EnvironmentalTextures = {
 	DROWNING = "Interface\\Icons\\Spell_Shadow_DemonBreath",
 	FALLING = GetSpellTexture(130),
@@ -99,7 +100,7 @@ local function CLEU_OnEvent(icon, _, t, event, h, sourceGUID, sourceName, source
 	if event == "SPELL_MISSED" and arg4 == "REFLECT" then
 		-- make a fake event for spell reflects
 		event = "SPELL_REFLECT"
-		
+
 		-- swap the source and the destination
 		local a, b, c, d = sourceGUID, sourceName, sourceFlags, sourceRaidFlags
 		sourceGUID, sourceName, sourceFlags, sourceRaidFlags = destGUID, destName, destFlags, destRaidFlags
@@ -109,21 +110,21 @@ local function CLEU_OnEvent(icon, _, t, event, h, sourceGUID, sourceName, source
 		-- fire it in addition to, not in place of, SPELL_INTERRUPT
 		CLEU_OnEvent(icon, _, t, "SPELL_INTERRUPT_SPELL", h, sourceGUID, sourceName, sourceFlags, sourceRaidFlags, destGUID, destName, destFlags, destRaidFlags, arg1, arg2, arg3, arg4, arg5, ...)
 	end
-	
+
 	if icon.AllowAnyEvents or icon.CLEUEvents[event] then
-	
+
 		if sourceName and sourceFlags and icon.SourceFlags then
 			if bit_band(icon.SourceFlags, sourceFlags) ~= sourceFlags then
 				return
 			end
 		end
-		
+
 		if destName and destFlags and icon.DestFlags then
 			if bit_band(icon.DestFlags, destFlags) ~= destFlags then
 				return
 			end
 		end
-		
+
 		local SourceUnits = icon.SourceUnits
 		local sourceUnit = sourceName
 		if SourceUnits and sourceName then
@@ -144,7 +145,7 @@ local function CLEU_OnEvent(icon, _, t, event, h, sourceGUID, sourceName, source
 				return
 			end
 		end
-		
+
 		local DestUnits = icon.DestUnits
 		local destUnit = destName
 		if DestUnits and destName then
@@ -165,9 +166,9 @@ local function CLEU_OnEvent(icon, _, t, event, h, sourceGUID, sourceName, source
 				return
 			end
 		end
-		
+
 		--local spellID, spellName = arg1, arg2 -- this may or may not be true, depends on the event
-			
+
 		local tex, spellID, spellName, extraID, extraName
 		if event == "SWING_DAMAGE" or event == "SWING_MISSED" then
 			spellName = ACTION_SWING
@@ -214,7 +215,7 @@ local function CLEU_OnEvent(icon, _, t, event, h, sourceGUID, sourceName, source
 			--"SPELL_AURA_APPLIED", -- normal
 			--"SPELL_AURA_REFRESH", -- normal
 			--"SPELL_AURA_REMOVED", -- normal
-	
+
 			--"SPELL_PERIODIC_DAMAGE", -- normal
 			--"SPELL_PERIODIC_DRAIN", -- normal
 			--"SPELL_PERIODIC_ENERGIZE", -- normal
@@ -224,7 +225,7 @@ local function CLEU_OnEvent(icon, _, t, event, h, sourceGUID, sourceName, source
 			--"DAMAGE_SHIELD", -- normal
 			--"DAMAGE_SHIELD_MISSED", -- normal
 			--"DAMAGE_SPLIT", -- normal
-			--"SPELL_INSTAKILL", -- normal 
+			--"SPELL_INSTAKILL", -- normal
 			--"SPELL_SUMMON" -- normal
 			--"SPELL_RESURRECT" -- normal
 			--"SPELL_CREATE" -- normal
@@ -239,7 +240,7 @@ local function CLEU_OnEvent(icon, _, t, event, h, sourceGUID, sourceName, source
 			]]
 		end
 		tex = tex or SpellTextures[spellID] or SpellTextures[spellName] -- [spellName] should never be used, but whatever
-	
+
 		local NameHash = icon.NameHash
 		local duration
 		if NameHash and not EventsWithoutSpells[event] then
@@ -253,7 +254,7 @@ local function CLEU_OnEvent(icon, _, t, event, h, sourceGUID, sourceName, source
 				end
 			end
 		end
-		
+
 		-- bind text updating
 		if icon.cleu_sourceUnit ~= sourceUnit and icon.UpdateBindText_SourceUnit then
 			icon:UpdateBindText()
@@ -262,58 +263,58 @@ local function CLEU_OnEvent(icon, _, t, event, h, sourceGUID, sourceName, source
 		elseif icon.cleu_extraSpell ~= extraID and icon.UpdateBindText_ExtraSpell then
 			icon:UpdateBindText()
 		end
-		
+
 		icon.cleu_start = TMW.time
 		icon.cleu_duration = duration or icon.CLEUDur
 		icon.cleu_spell = spellID or spellName -- perfer ID over name, but events without real names (DIED, ENVIRONMENTAL_DAMAGE, SWING) dont have spellIDs, so pass the spellName the be displayed on the icon
-		
-		icon.cleu_sourceUnit = sourceUnit 
-		icon.cleu_destUnit = destUnit 
-		icon.cleu_extraSpell = extraID 
-		
+
+		icon.cleu_sourceUnit = sourceUnit
+		icon.cleu_destUnit = destUnit
+		icon.cleu_extraSpell = extraID
+
 		if icon.OnCLEUEvent then
-			icon.EventsToFire.OnCLEUEvent = true
+			icon:QueueEvent("OnCLEUEvent")
+			icon:ProcessQueuedEvents()
 		end
-		
+
 		icon:Update(TMW.time, true, tex)
 	end
 end
 
 local function CLEU_OnUpdate(icon, time, tex)
 	-- tex is passed in when calling from OnEvent, otherwise its nil (causing there to be no update)
-	
 	local start = icon.cleu_start
 	local duration = icon.cleu_duration
 
 	--icon:SetInfo(alpha, color, texture, start, duration, spellChecked, reverse, count, countText, forceupdate, unit)
 	if time - start > duration then
 		local color = icon:CrunchColor()
-		
+
 		icon:SetInfo(icon.UnAlpha, color, tex, 0, 0, icon.cleu_spell, nil, nil, nil, nil, icon.cleu_destUnit or icon.cleu_sourceUnit)
 	else
 		local color = icon:CrunchColor(duration)
-		
+
 		icon:SetInfo(icon.Alpha, color, tex, start, duration, icon.cleu_spell, nil, nil, nil, nil, icon.cleu_destUnit or icon.cleu_sourceUnit)
 	end
-	
+
 	icon.LastUpdate = time -- sometimes we call this function whenever the hell we want ("OnEvent"), so at least have the decency to delay the next update
 end
 
 function Type:Setup(icon, groupID, iconID)
-	icon.NameHash = icon.Name ~= "" and TMW:GetSpellNames(icon, icon.Name, nil, nil, 1)	
+	icon.NameHash = icon.Name ~= "" and TMW:GetSpellNames(icon, icon.Name, nil, nil, 1)
 	icon.Durations = TMW:GetSpellDurations(icon, icon.Name)
-	
+
 	-- only define units if there are any units. we dont want to waste time iterating an empty table.
 	icon.SourceUnits = icon.SourceUnit ~= "" and TMW:GetUnits(icon, icon.SourceUnit)
 	icon.DestUnits = icon.DestUnit ~= "" and TMW:GetUnits(icon, icon.DestUnit)
-	
+
 	-- nil out flags if they are set to default (2^32-1)
 	icon.SourceFlags = icon.SourceFlags ~= 2^32-1 and icon.SourceFlags
 	icon.DestFlags = icon.DestFlags ~= 2^32-1 and icon.DestFlags
-	
+
 	-- more efficient than checking icon.CLEUEvents[""] every OnEvent
 	icon.AllowAnyEvents = icon.CLEUEvents[""]
-	
+
 	-- check for when bind texts should be updated (these are unique to cleu, so they are handled here, not in icon:Setup()
 	icon.UpdateBindText_SourceUnit = nil
 	icon.UpdateBindText_DestUnit = nil
@@ -332,23 +333,23 @@ function Type:Setup(icon, groupID, iconID)
 			icon.UpdateBindText_ExtraSpell = nil
 		end
 	end
-	
+
 	local tex, otherArgWhichLacksADecentName = TMW:GetConfigIconTexture(icon)
 	if otherArgWhichLacksADecentName == nil then
 		tex = "Interface\\Icons\\INV_Misc_PocketWatch_01"
 	end
 	icon:SetTexture(tex)
-	
+
 	-- type-specific data that events and OnUpdate use
 	icon.cleu_start = icon.cleu_start or 0
 	icon.cleu_duration = icon.cleu_duration or 0
 	icon.cleu_spell = nil
-	
+
 	-- type-specific data that events use
 	icon.cleu_sourceUnit = nil
 	icon.cleu_destUnit = nil
 	icon.cleu_extraSpell = nil
-	
+
 	-- safety mechanism
 	if icon.AllowAnyEvents and not icon.SourceUnits and not icon.DestUnits and not icon.NameHash and not icon.SourceFlags and not icon.DestFlags then
 		if db.profile.Locked and icon.Enabled then
@@ -356,10 +357,10 @@ function Type:Setup(icon, groupID, iconID)
 		end
 		return
 	end
-	
+
 	icon:RegisterEvent("COMBAT_LOG_EVENT_UNFILTERED")
 	icon:SetScript("OnEvent", CLEU_OnEvent)
-	
+
 	icon:SetScript("OnUpdate", CLEU_OnUpdate)
 	icon:Update()
 end

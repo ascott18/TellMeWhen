@@ -85,6 +85,18 @@ function CNDT:RAID_ROSTER_UPDATE()
 	end
 end
 
+function CNDT:PLAYER_TALENT_UPDATE()
+	for tab = 1, GetNumTalentTabs() do
+		for talent = 1, GetNumTalents(tab) do
+			local name, _, _, _, rank = GetTalentInfo(tab, talent)
+			local lower = name and strlowerCache[name]
+			if lower then
+				Env.TalentMap[lower] = rank or 0
+			end
+		end
+	end
+end
+
 local test
 --[[
 test = function()
@@ -230,7 +242,7 @@ do -- STANCES
 			tinsert(TMW.CSN, z)
 		end
 	end
-	
+
 	for k, v in pairs(TMW.CSN) do
 		TMW.CSN[v] = k
 	end
@@ -293,7 +305,7 @@ Env = {
 	GetTalentTabInfo = GetTalentTabInfo,
 	GetPrimaryTalentTree = GetPrimaryTalentTree,
 	GetActiveTalentGroup = GetActiveTalentGroup,
-	
+
 	UnitStat = UnitStat,
 	UnitAttackPower = UnitAttackPower,
 	UnitRangedAttackPower = UnitRangedAttackPower,
@@ -310,14 +322,14 @@ Env = {
 
 	classifications = classifications,
 	roles = roles,
-	
+
 	ActivePetMode = 0,
 	NumPartyMembers = 0,
 	print = TMW.print,
 	time = TMW.time,
 	huge = math.huge,
 	epsilon = 1e-255,
-	
+
 	Tracking = {},
 	TalentMap = {},
 	TMW = TMW,
@@ -332,7 +344,7 @@ function Env.CooldownDuration(spell, time)
 		local start, duration = GetSpellCooldown(TMW.GCDSpell)
 		return duration == 0 and 0 or (duration - (time - start))
 	end
-	
+
 	local start, duration = GetSpellCooldown(spell)
 	if duration then
 		return ((duration == 0 or OnGCD(duration)) and 0) or (duration - (time - start))
@@ -458,7 +470,7 @@ function Env.GetShapeshiftForm()
 	if i > NumShapeshiftForms then 	--many Classes return an invalid number on login, but not anymore!
 		i = 0
 	end
-	
+
 	if i == 0 then
 		return 0
 	else
@@ -482,7 +494,7 @@ end
 local GetSpellCritChance = GetSpellCritChance
 function Env.GetSpellCritChance()
 	return min(
-		GetSpellCritChance(2), 
+		GetSpellCritChance(2),
 		GetSpellCritChance(3),
 		GetSpellCritChance(4),
 		GetSpellCritChance(5),
@@ -494,7 +506,7 @@ end
 local GetSpellBonusDamage = GetSpellBonusDamage
 function Env.GetSpellBonusDamage()
 	return min(
-		GetSpellBonusDamage(2), 
+		GetSpellBonusDamage(2),
 		GetSpellBonusDamage(3),
 		GetSpellBonusDamage(4),
 		GetSpellBonusDamage(5),
@@ -526,7 +538,7 @@ Env.UnitNameConcatCache = setmetatable(
 {}, {
 	__index = function(t, i)
 		if not i then return end
-		
+
 		local o = ";" .. strlowerCache[i] .. ";"
 		t[i] = o
 		return o
@@ -564,7 +576,7 @@ local commanumber = function(k)
 	repeat
 		k, found = gsub(k, "(%d)(%d%d%d),", "%1,%2,", 1)
 	until found == 0
-	
+
 	return k
 end
 local percent = function(k) return k.."%" end
@@ -702,7 +714,7 @@ CNDT.Types = {
 		end,
 		spaceafter = true,
 	},
-	
+
 	{ -- soul shards
 		text = SOUL_SHARDS,
 		value = "SOUL_SHARDS",
@@ -947,7 +959,7 @@ CNDT.Types = {
 			return CNDT:IsUnitEventUnit(c.Unit), "UNIT_POWER_FREQUENT", c.Unit, "UNIT_POWER_BAR_SHOW", c.Unit, "UNIT_POWER_BAR_HIDE", c.Unit
 		end,
 	},
-	
+
 	{ -- max health
 		text = L["CONDITIONPANEL_MAX"] .. " " .. HEALTH,
 		value = "HEALTH_MAX",
@@ -1063,8 +1075,8 @@ CNDT.Types = {
 			return CNDT:IsUnitEventUnit(c.Unit), "UNIT_MAXPOWER", c.Unit, "UNIT_POWER_BAR_SHOW", c.Unit, "UNIT_POWER_BAR_HIDE", c.Unit
 		end,
 	},
-	
-	
+
+
 -------------------------------------unit status/attributes
 	{ -- exists
 		text = L["CONDITIONPANEL_EXISTS"],
@@ -1159,7 +1171,7 @@ CNDT.Types = {
 		funcstr = [[c.1nil == UnitIsPVP(c.Unit)]],
 		events = function(c)
 			return CNDT:IsUnitEventUnit(c.Unit), "UNIT_FACTION", c.Unit
-		end,		
+		end,
 	},
 	{ -- react
 		text = L["ICONMENU_REACT"],
@@ -1174,7 +1186,7 @@ CNDT.Types = {
 		funcstr = [[(((UnitIsEnemy("player", c.Unit) or ((UnitReaction("player", c.Unit) or 5) <= 4)) and 1) or 2) == c.Level]],
 		events = function(c)
 			return CNDT:IsUnitEventUnit(c.Unit), "UNIT_FLAGS", c.Unit, "UNIT_DYNAMIC_FLAGS", c.Unit
-		end,	
+		end,
 	},
 	{ -- speed
 		text = L["SPEED"],
@@ -1217,7 +1229,7 @@ CNDT.Types = {
 		funcstr = [[c.1nil == (strfind(c.Name, UnitNameConcatCache[UnitName(c.Unit) or ""]) and 1)]],
 		events = function(c)
 			return CNDT:IsUnitEventUnit(c.Unit), "UNIT_NAME_UPDATE", c.Unit
-		end,	
+		end,
 	},
 	{ -- level
 		text = L["CONDITIONPANEL_LEVEL"],
@@ -1231,7 +1243,7 @@ CNDT.Types = {
 		funcstr = [[UnitLevel(c.Unit) c.Operator c.Level]],
 		events = function(c)
 			return CNDT:IsUnitEventUnit(c.Unit), "UNIT_LEVEL", c.Unit
-		end,	
+		end,
 	},
 	{ -- class
 		text = L["CONDITIONPANEL_CLASS"],
@@ -1253,7 +1265,7 @@ CNDT.Types = {
 		end,
 		events = function(c)
 			return CNDT:IsUnitEventUnit(c.Unit) -- classes cant change, so this is all we should need
-		end,	
+		end,
 	},
 	{ -- classification
 		text = L["CONDITIONPANEL_CLASSIFICATION"],
@@ -1267,7 +1279,7 @@ CNDT.Types = {
 		funcstr = [[(classifications[UnitClassification(c.Unit)] or 1) c.Operator c.Level]],
 		events = function(c)
 			return CNDT:IsUnitEventUnit(c.Unit), "UNIT_CLASSIFICATION_CHANGED", c.Unit
-		end,	
+		end,
 	},
 	{ -- role
 		text = L["CONDITIONPANEL_ROLE"],
@@ -1283,8 +1295,8 @@ CNDT.Types = {
 			-- the unit change events should actually cover many of the changes (at least for party and raid units, but roles only exist in party and raid anyway.)
 			return CNDT:IsUnitEventUnit(c.Unit), "PLAYER_ROLES_ASSIGNED", "ROLE_CHANGED_INFORM"
 		end,
-		
-		
+
+
 	},
 	{ -- raid icon
 		text = L["CONDITIONPANEL_RAIDICON"],
@@ -1341,7 +1353,7 @@ CNDT.Types = {
 		-- events = absolutely no events
 	},
 
-	
+
 -------------------------------------player status/attributes
 	{ -- instance type
 		text = L["CONDITIONPANEL_INSTANCETYPE"],
@@ -1483,7 +1495,7 @@ CNDT.Types = {
 		events = function(c)
 			return "PLAYER_TALENT_UPDATE", "ACTIVE_TALENT_GROUP_CHANGED"
 		end,
-	}, 
+	},
 	{ -- points in talent
 		text = L["UIPANEL_PTSINTAL"],
 		category = L["CNDTCAT_ATTRIBUTES_PLAYER"],
@@ -1648,7 +1660,7 @@ CNDT.Types = {
 		texttable = usableunusable,
 		icon = "Interface\\Icons\\ability_warrior_revenge",
 		tcoords = standardtcoords,
-		funcstr = [[c.1nil == ReactiveHelper(c.NameFirst, c.Checked)]], 
+		funcstr = [[c.1nil == ReactiveHelper(c.NameFirst, c.Checked)]],
 		events = "SPELL_UPDATE_USABLE",
 	},
 		{ -- spell has mana
@@ -1702,7 +1714,7 @@ CNDT.Types = {
 			local VALUE = start + duration -- the time at which we need to update again. (when the GCD ends)
 		]],
 	},
-	
+
 	{ -- item cooldown
 		text = L["ITEMCOOLDOWN"],
 		value = "ITEMCD",
@@ -1892,7 +1904,7 @@ CNDT.Types = {
 		funcstr = [[UnitCast(c.Unit, c.Level, LOWER(c.NameName))]], -- LOWER is some gsub magic
 		events = function(c)
 			-- holy shit
-			return CNDT:IsUnitEventUnit(c.Unit), 
+			return CNDT:IsUnitEventUnit(c.Unit),
 			"UNIT_SPELLCAST_START", c.Unit,
 			"UNIT_SPELLCAST_STOP", c.Unit,
 			"UNIT_SPELLCAST_FAILED", c.Unit,
@@ -2009,7 +2021,7 @@ CNDT.Types = {
 			return CNDT:IsUnitEventUnit(c.Unit), "UNIT_AURA", c.Unit
 		end,
 	},
-	
+
 	{ -- unit debuff duration
 		text = L["ICONMENU_DEBUFF"] .. " - " .. L["DURATION"],
 		value = "DEBUFFDUR",
@@ -2162,8 +2174,8 @@ CNDT.Types = {
 			local VALUE = time + (dur/1000) - c.Level]],
 		hidden = pclass ~= "ROGUE",
 	},
-	
-	
+
+
 -------------------------------------stats
 	{ -- strength
 		text = _G["SPELL_STAT1_NAME"],
@@ -2441,7 +2453,7 @@ CNDT.Types = {
 			if c.Icon == "" or c.Icon == icon:GetName() then
 				return [[true]]
 			end
-			
+
 			local g, i = strmatch(c.Icon, "TellMeWhen_Group(%d+)_Icon(%d+)")
 			g, i = tonumber(g) or 0, tonumber(i) or 0
 			if icon.class == TMW.Classes.Icon then
@@ -2449,7 +2461,7 @@ CNDT.Types = {
 			else
 				TMW:QueueValidityCheck(c.Icon, icon:GetID(), nil, g, i)
 			end
-	
+
 			local str = [[(c.Icon and c.Icon.__shown and c.Icon.OnUpdate and not c.Icon:Update(time))]]
 			if c.Level == 0 then
 				str = str .. [[and c.Icon.__alpha > 0]]
@@ -2458,10 +2470,6 @@ CNDT.Types = {
 			end
 			return gsub(str, "c.Icon", c.Icon)
 		end,
-		events = function(c)
-			TMW:RegisterCallback("TMW_ICON_SHOWN_CHANGED", CNDT.EventEngine.OnEvent, CNDT.EventEngine) 
-			return "TMW_ICON_SHOWN_CHANGED|" .. c.Icon
-		end
 	},
 	{ -- macro conditional
 		text = L["MACROCONDITION"],
@@ -2498,8 +2506,8 @@ CNDT.Types = {
 		funcstr = function(c) return c.Name ~= "" and c.Name or "true" end,
 		-- events = absolutely no events
 	},
-	
-	
+
+
 	{ -- default
 		text = L["CONDITIONPANEL_DEFAULT"],
 		value = "",
@@ -2511,7 +2519,7 @@ CNDT.Types = {
 		max = 100,
 		funcstr = [[true]],
 	},
-	
+
 }
 
 local currencies = {
@@ -2549,7 +2557,7 @@ for k, v in ipairs(CNDT.Types) do
 	if v == "CURRENCYPLACEHOLDER" then
 		CNDT.Types[k] = nil
 		local spacenext
-		
+
 		for _, id in ipairs(currencies) do
 			if id == "SPACE" then
 				spacenext = true
@@ -2623,7 +2631,7 @@ TMW:RegisterCallback("TMW_GLOBAL_UPDATE", CNDT)
 
 function CNDT:DoConditionSubstitutions(icon, v, c, thisstr)
 	for _, append in TMW:Vararg("2", "") do -- Unit2 MUST be before Unit
-		if strfind(thisstr, "c.Unit" .. append) then 
+		if strfind(thisstr, "c.Unit" .. append) then
 			local unit
 			if append == "2" then
 				unit = TMW.UNITS:GetOriginalUnitTable(c.Name)[1] or ""
@@ -2638,9 +2646,9 @@ function CNDT:DoConditionSubstitutions(icon, v, c, thisstr)
 				CNDT:RAID_ROSTER_UPDATE()
 			elseif strfind(unit, "^%%[Uu]") then
 				local after = strmatch(unit, "^%%[Uu]%-?(.*)")
-				local sub = "(" .. icon:GetName() .. ".__unitChecked or '')"
+				local sub = "(icon.__unitChecked or '')"
 				if after and after ~= "" then
-					sub = "(" .. sub .. " .. \"-" .. after .. "\")"				
+					sub = "(" .. sub .. " .. \"-" .. after .. "\")"
 				end
 				thisstr = gsub(thisstr, "c.Unit" .. append,		sub) -- sub it in as a variable
 			else
@@ -2648,14 +2656,14 @@ function CNDT:DoConditionSubstitutions(icon, v, c, thisstr)
 			end
 		end
 	end
-	
+
 	local name = gsub((c.Name or ""), "; ", ";")
 	name = gsub(name, " ;", ";")
 	name = ";" .. name .. ";"
 	name = gsub(name, ";;", ";")
 	name = strtrim(name)
 	name = strlower(name)
-	
+
 	local name2 = gsub((c.Name2 or ""), "; ", ";")
 	name2 = gsub(name2, " ;", ";")
 	name2 = ";" .. name2 .. ";"
@@ -2671,7 +2679,7 @@ function CNDT:DoConditionSubstitutions(icon, v, c, thisstr)
 	gsub("c.NameName2", 	"\"" .. TMW:GetSpellNames(nil, name2, 1, 1) .. "\""):
 	gsub("c.ItemID2", 		TMW:GetItemIDs(nil, name2, 1)):
 	gsub("c.Name2", 		"\"" .. name2 .. "\""):
-	
+
 	gsub("c.NameFirst", 	"\"" .. TMW:GetSpellNames(nil, name, 1) .. "\""):
 	gsub("c.NameName", 		"\"" .. TMW:GetSpellNames(nil, name, 1, 1) .. "\""):
 	gsub("c.ItemID", 		TMW:GetItemIDs(nil, name, 1)):
@@ -2681,9 +2689,9 @@ function CNDT:DoConditionSubstitutions(icon, v, c, thisstr)
 	gsub("c.False", 		tostring(c.Level == 1)):
 	gsub("c.1nil", 			c.Level == 0 and 1 or "nil"):
 	gsub("c.nil1", 			c.Level == 1 and 1 or "nil"): -- reverse 1nil
-	
+
 	gsub("LOWER%((.-)%)",	strlower) -- fun gsub magic stuff
-	
+
 	-- extra fun stuff
 	if thisstr:find("c.GCDReplacedNameFirst2") then
 		local name = TMW:GetSpellNames(nil, name2, 1)
@@ -2699,19 +2707,19 @@ function CNDT:DoConditionSubstitutions(icon, v, c, thisstr)
 		end
 		thisstr = thisstr:gsub("c.GCDReplacedNameFirst", "\"" .. name .. "\"")
 	end
-	
+
 	return thisstr
 end
 
 local activeEventsReusable = {}
 function CNDT:CompileUpdateFunction(icon, activeEvents)
-	icon.conditionAnticipateFunc = nil
-	
+	icon.ConditionAnticipatorFunc = nil
+
 	local Conditions = icon.Conditions
 	activeEvents = activeEvents or wipe(activeEventsReusable)
 	local numAnticipatorArgs = 0
 	local anticipatorstr = ""
-	
+
 	for i = 1, Conditions.n do
 		local c = Conditions[i]
 		local t = c.Type
@@ -2723,7 +2731,7 @@ function CNDT:CompileUpdateFunction(icon, activeEvents)
 					icon.conditionUpdateMethod = "OnUpdate"
 					return value
 				end
-				
+
 				if voidNext then
 					-- voidNext is an event. value should be a unitID that we are going to associate with the event
 					assert(not value:find("[A-Z]"))
@@ -2758,12 +2766,12 @@ function CNDT:CompileUpdateFunction(icon, activeEvents)
 			icon.conditionUpdateMethod = "OnUpdate"
 			return "OnUpdate"
 		end
-		
+
 		-- handle code that anticipates when a change in state will occur.
 		-- this is usually used to predict when a duration threshold will be used, but you could really use it for whatever you want.
 		if v.anticipate then
 			numAnticipatorArgs = numAnticipatorArgs + 1
-			
+
 			local thisstr = TMW.get(v.anticipate, c) -- get the anticipator string from the condition data
 			thisstr = CNDT:DoConditionSubstitutions(icon, v, c, thisstr) -- substitute in any user settings
 
@@ -2772,19 +2780,19 @@ function CNDT:CompileUpdateFunction(icon, activeEvents)
 			if VALUE <= time then
 				VALUE = huge
 			end]]
-			
+
 			-- change VALUE to the appropriate ARGUMENT#
 			thisstr = thisstr:gsub("VALUE", "ARGUMENT" .. numAnticipatorArgs)
-			
+
 			anticipatorstr = anticipatorstr .. "\r\n" .. thisstr
 		end
 	end
-	
+
 	if not next(activeEvents) then
 		icon.conditionUpdateMethod = "OnUpdate"
 		return "OnUpdate"
 	end
-	
+
 	local doesAnticipate
 	if anticipatorstr ~= "" then
 		local allVars = ""
@@ -2792,49 +2800,52 @@ function CNDT:CompileUpdateFunction(icon, activeEvents)
 			allVars = allVars .. "ARGUMENT" .. i .. ","
 		end
 		allVars = allVars:sub(1, -2)
-		
+
 		anticipatorstr = anticipatorstr .. ([[
 		local nextTime = %s
 		if nextTime == 0 then
 			nextTime = huge
 		end
-		%s.nextConditionUpdate = nextTime]]):format((numAnticipatorArgs == 1 and allVars or "min(" .. allVars .. ")"), icon:GetName())
-		
+		icon.nextConditionUpdate = nextTime]]):format((numAnticipatorArgs == 1 and allVars or "min(" .. allVars .. ")"))
+
 		doesAnticipate = true
 	end
-	
+
 	icon.conditionUpdateMethod = "OnEvent" --DEBUG: COMMENTING THIS LINE FORCES ALL CONDITIONS TO BE ONUPDATE DRIVEN
 	icon.conditionsNeedUpdate = true
-	
+
 	local numberOfIfs = 0
 	local funcstr = [[
-	local event, arg1 = ...
 	if not event then
 		return
 	elseif (]]
 	for event in pairs(activeEvents) do
 		local thisstr
-		
+
 		if event:find("|") then
 			-- event contains both the event and a arg to check, separated by "|".
 			-- args should be string wrapped if they are supposed to be strings, because we want to allow variable substitution too
 			local realEvent, arg = strsplit("|", event)
 			activeEvents[event] = realEvent --associate the entry with the real event
-			
+
 			thisstr = ([[event == %q and arg1 == %s]]):format(realEvent, arg)
 		else
 			thisstr = ([[event == %q]]):format(event)
 		end
-		
+
 		funcstr = funcstr .. [[(]] .. thisstr .. [[) or ]]
 	end
-		
+
 	funcstr = funcstr:sub(1, -5) .. [[) then
-		]] .. icon:GetName() .. [[.conditionsNeedUpdate = true
+		icon.conditionsNeedUpdate = true
 	end]]
-	
+
 	funcstr = anticipatorstr .. "\r\n" .. funcstr
 	
+	funcstr = [[local icon = ]] .. icon:GetName() .. [[
+	local event, arg1 = ...
+	]] .. funcstr
+
 	-- clear out all existing funcs for the icon
 	for event, funcs in pairs(CNDT.EventEngine.funcs) do
 		for func, ic in pairs(funcs) do
@@ -2843,7 +2854,7 @@ function CNDT:CompileUpdateFunction(icon, activeEvents)
 			end
 		end
 	end
-	
+
 	local func
 	if functionCache[funcstr] then
 		func = functionCache[funcstr]
@@ -2853,14 +2864,14 @@ function CNDT:CompileUpdateFunction(icon, activeEvents)
 		if func then
 			func = setfenv(func, Env)
 			functionCache[funcstr] = func
-		elseif (TMW.debug or luaUsed) and err then
+		elseif err then
 			TMW:Error(err)
 		end
 	end
 	icon.CndtEventString = funcstr
-	
-	icon.conditionAnticipatorFunc = doesAnticipate and func
-	
+
+	icon.ConditionAnticipatorFunc = doesAnticipate and func
+
 	if func then
 		for event, realEvent in pairs(activeEvents) do
 			if realEvent ~= true then
@@ -2889,28 +2900,28 @@ end
 function CNDT:ProcessConditions(icon)
 	-- icon might also be a group. make sure anything performed on icon can also be performed on group
 	if TMW.debug and test then test() end
-	
+
 	local Conditions = icon.Conditions
-	
+
 	local funcstr = ""
 	local luaUsed
-	
+
 	for i = 1, Conditions.n do
 		local c = Conditions[i]
 		local t = c.Type
 		local v = ConditionsByType[t]
-		
+
 		local andor
 		if c.AndOr == "OR" then
 			andor = "or " --have a space so they are both 3 chars long
 		else
 			andor = "and"
 		end
-		
+
 		if c.Operator == "~|=" then
 			c.Operator = "~=" -- fix potential corruption from importing a string (a single | becaomes || when pasted, "~=" in encoded as "~|=")
 		end
-		
+
 		if v then
 			if t == "LUA" then
 				luaUsed = 1
@@ -2924,9 +2935,9 @@ function CNDT:ProcessConditions(icon)
 
 			if thiscondtstr then
 				local thisstr = andor .. "(" .. strrep("(", c.PrtsBefore) .. thiscondtstr .. strrep(")", c.PrtsAfter)  .. ")"
-				
+
 				thisstr = CNDT:DoConditionSubstitutions(icon, v, c, thisstr)
-				
+
 				funcstr = funcstr .. thisstr
 			else
 				funcstr = funcstr .. (andor .. "(" .. strrep("(", c.PrtsBefore) .. "true" .. strrep(")", c.PrtsAfter)  .. ")")
@@ -2936,43 +2947,47 @@ function CNDT:ProcessConditions(icon)
 		end
 	end
 
-	local funcstr, name, key = icon:FinishCompilingConditions(funcstr:sub(4))
-	
-	if funcstr == "" then	
-		icon:ProcessConditionFunction()	
+	local funcstr, key = icon:FinishCompilingConditions(funcstr:sub(4))
+
+	if funcstr == "" then
+		icon:ProcessConditionFunction()
 		CNDT.EventEngine:UnregisterIcon(icon)
 		return
 	end
-	
+
 	icon.nextConditionUpdate = icon.nextConditionUpdate or math.huge
 	funcstr = (
-	[[if %s.nextConditionUpdate < time then
-		%s.nextConditionUpdate = huge
+	[[if icon.nextConditionUpdate < time then
+		icon.nextConditionUpdate = huge
 	end
 	if not (%s) then
-		%s.%s = 1
+		icon.%s = 1
 	else
-		%s.%s = nil
-	end]]):format(name, name, funcstr, name, key, name, key)
-	
+		icon.%s = nil
+	end]]):format(funcstr, key, key)
+
 	if icon.conditionUpdateMethod == "OnEvent" then
-		local prepend = name .. [[.conditionsNeedUpdate = nil
+		local prepend = [[icon.conditionsNeedUpdate = nil
 		]]
-		if icon.conditionAnticipatorFunc then
-			prepend = prepend .. icon:GetName() .. [[.conditionAnticipatorFunc()
+		if icon.ConditionAnticipatorFunc then
+			prepend = prepend .. [[icon.ConditionAnticipatorFunc()
 			]]
 		end
 		funcstr = prepend .. funcstr
 	end
 
-	local func
+	funcstr = [[local icon = ]] .. icon:GetName() .. "\r\n" .. funcstr
 	
+	
+	
+	local func
+
 	icon.CndtString = funcstr
 	if functionCache[funcstr] then
 		func = functionCache[funcstr]
 	else
 		local err
-		func, err = loadstring(funcstr, name .. " Condition")
+		func, err = loadstring(funcstr, icon:GetName() .. " Condition")
 		if func then
 			func = setfenv(func, Env)
 			functionCache[funcstr] = func

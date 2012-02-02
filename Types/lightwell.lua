@@ -66,7 +66,7 @@ Type.EventDisabled_OnSpell = true
 function Type:Update()
 	db = TMW.db
 	pGUID = UnitGUID("player")
-	
+
 	self:GLYPH()
 end
 
@@ -76,7 +76,7 @@ local SummonTime
 function Type:GLYPH()
 	for i = 7, NUM_GLYPH_SLOTS do
 		local _, _, _, spellID = GetGlyphSocketInfo(i);
-		if spellID == 55673 then 
+		if spellID == 55673 then
 			MaxCharges = 15
 			return
 		end
@@ -91,7 +91,7 @@ Type:RegisterEvent("GLYPH_UPDATED",  "GLYPH")
 
 
 function Type:COMBAT_LOG_EVENT_UNFILTERED(_, _, event, _, sourceGUID, _, _, _, _, _, _, _, spellID)
-	if sourceGUID == pGUID then		
+	if sourceGUID == pGUID then
 		if event == "SPELL_SUMMON" and spellID == 724 then
 			CurrentCharges = MaxCharges
 			SummonTime = TMW.time
@@ -114,9 +114,9 @@ local function LW_OnUpdate(icon, time)
 	if SummonTime and SummonTime + 180 < time then
 		CurrentCharges = 0
 	end
-	
+
 	local color = icon:CrunchColor(CurrentCharges) -- eww, passing # of charges as the duration. Hackerish....
-	
+
 	if CurrentCharges > 0 then
 		icon:SetInfo(icon.Alpha, color, nil, SummonTime, 180, 724, nil, CurrentCharges, CurrentCharges, nil, nil)
 	else
@@ -127,7 +127,7 @@ end
 
 function Type:Setup(icon, groupID, iconID)
 	icon.NameFirst = 724
-	
+
 	icon:SetTexture(SpellTextures[724])
 
 	icon:SetScript("OnUpdate", LW_OnUpdate)

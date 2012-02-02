@@ -48,7 +48,7 @@
 			</Button>
 		</Frames>
 	</Frame>
-	
+
 	<Button name="TellMeWhen_IconTemplate" virtual="true" enableMouse="true">
 		<Size x="30" y="30"/>
 		<Layers>
@@ -181,7 +181,7 @@
 				if TMW.ID.isMoving then
 					TMW:Group_StopMoving(TMW.ID.isMoving)
 				end
-				
+
 				if TMW.ID and TMW.ID.IsDragging then
 					TMW.ID:CompleteDrag("OnDragStop")
 				end
@@ -202,7 +202,7 @@
 	</Button>
 
 	<!-- END TEMPLATES -->
-	
+
 	<Cooldown hidden="true">
 		<!-- cooldown bug fixer.
 		Seems to fix the long-standing bug once and for all where cooldown models would
@@ -213,7 +213,7 @@
 			</OnLoad>
 		</Scripts>
 	</Cooldown>
-	
+
 	<Frame name="TellMeWhen_BlizzOptionsStub" hidden="true">
 		<Scripts>
 			<OnLoad>

@@ -8,14 +8,14 @@
 # X-Compatible-With: 40300
 ## Title: TellMeWhen
 
-## Version: 4.8.3
+## Version: 4.9.0
 ## Author: Cybeloras of Mal'Ganis
 
 ## Notes: Provides visual, auditory, and textual notifications about cooldowns, buffs, and pretty much every other element of combat.
 ## Notes-zhCN: 为冷却、增益/减益及其他各个方面提供视觉、听觉以及文字上的通知。
 ## Notes-zhTW: 為冷卻、增益/減益及其他各個方面提供視覺、聽覺以及文字上的通知。
 ## Notes-deDE: Bietet visuelle, akustische und schriftliche Benachrichtigungen über Cooldowns, Buffs and so ziemlich alles andere.
-## Notes-koKR: 재사용 대기, 강화 효과와 그밖의 꽤 많은 것에 관해 시청각적이고도 문자적인 알림을 제공합니다. 
+## Notes-koKR: 재사용 대기, 강화 효과와 그밖의 꽤 많은 것에 관해 시청각적이고도 문자적인 알림을 제공합니다.
 ## Notes-ruRU: Визуальные, звуковые и текстовые оповещения о готовности заклинаний, способностей, наличии баффов/дебаффов и многого другого.
 
 ## OptionalDeps: Masque, Ace3, OmniCC, tullaCC, sct, sctd, MikScrollingBattleText, Parrot, DRData-1.0
