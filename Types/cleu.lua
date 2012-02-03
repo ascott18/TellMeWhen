@@ -272,12 +272,12 @@ local function CLEU_OnEvent(icon, _, t, event, h, sourceGUID, sourceName, source
 		icon.cleu_destUnit = destUnit
 		icon.cleu_extraSpell = extraID
 
+		icon:Update(TMW.time, true, tex)
+
 		if icon.OnCLEUEvent then
 			icon:QueueEvent("OnCLEUEvent")
 			icon:ProcessQueuedEvents()
 		end
-
-		icon:Update(TMW.time, true, tex)
 	end
 end
 
