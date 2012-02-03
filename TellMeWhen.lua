@@ -32,7 +32,7 @@ local DRData = LibStub("DRData-1.0", true)
 TELLMEWHEN_VERSION = "4.9.0"
 TELLMEWHEN_VERSION_MINOR = strmatch(" @project-version@", " r%d+") or ""
 TELLMEWHEN_VERSION_FULL = TELLMEWHEN_VERSION .. TELLMEWHEN_VERSION_MINOR
-TELLMEWHEN_VERSIONNUMBER = 49003 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
+TELLMEWHEN_VERSIONNUMBER = 49004 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
 if TELLMEWHEN_VERSIONNUMBER > 50000 or TELLMEWHEN_VERSIONNUMBER < 49000 then return error("YOU SCREWED UP THE VERSION NUMBER OR DIDNT CHANGE THE SAFETY LIMITS") end -- safety check because i accidentally made the version number 414069 once
 
 TELLMEWHEN_MAXGROUPS = 1 	--this is a default, used by SetTheory (addon), so dont rename
@@ -3849,7 +3849,6 @@ function ANIM:HandleEvent(icon, data)
 	local Animation = data.Animation
 	if Animation ~= "" then
 
-		-- what a cute little handler. TODO: make text like this.
 		local AnimationData = AnimationList[Animation]
 		if AnimationData then
 			AnimationData.Play(icon, data)
@@ -4240,6 +4239,10 @@ function Icon.StartAnimation(icon, table)
 		icon:GetAnimations()[Animation] = table
 
 		table.Animation = Animation
+		
+		-- Make sure not to overwrite this value.
+		-- This is used to distingusih inherited meta animations from original animations on a metaicon.
+		table.originIcon = table.originIcon or icon 
 
 		if AnimationData.OnStart then
 			AnimationData.OnStart(icon, table)
@@ -4450,26 +4453,26 @@ function Icon.SetInfo(icon, alpha, color, texture, start, duration, spellChecked
 
 	local queueOnUnit, queueOnSpell, queueOnStack
 
-	unit = unit or icon.Units and icon.Units[1]
+	--unit = unit or icon.Units and icon.Units[1]
+	--if unit and (icon.UpdateBindText_Unit or icon.OnUnit) then
+	
+	if icon.__unitChecked ~= unit then
+		queueOnUnit = true
+		icon.__lastUnitChecked = icon.__unitChecked
+		icon.__unitChecked = unit
+	end
+		
 	if unit then
-		if icon.__unitChecked ~= unit then
-			queueOnUnit = true
-			icon.__lastUnitChecked = icon.__unitChecked
-			icon.__unitChecked = unit
-		--	somethingChanged = 1
-		end
-
 		local unitName = UnitName(unit)
 		if icon.__unitName ~= unitName then
 			queueOnUnit = true
 			icon.__lastUnitName = icon.__unitName
 			icon.__unitName = unitName
-			--somethingChanged = 1 -- nothing officially changed. this is only used for bind text display. notify a change if something changes there.
 		end
-
-		if queueOnUnit and icon.OnUnit then
-			icon:QueueEvent("OnUnit")
-		end
+	end
+	
+	if queueOnUnit and icon.OnUnit then
+		icon:QueueEvent("OnUnit")
 	end
 
 	if icon.__spellChecked ~= spellChecked then
@@ -4478,28 +4481,25 @@ function Icon.SetInfo(icon, alpha, color, texture, start, duration, spellChecked
 			icon:QueueEvent("OnSpell")
 		end
 		icon.__spellChecked = spellChecked
-	--	somethingChanged = 1
 	end
 
 	if duration == 0.001 then duration = 0 end -- hardcode fix for tricks of the trade. nice hardcoding on your part too, blizzard
 	local d = duration - (time - start)
+	d = d > 0 and d or 0
 
 	if icon.OnDuration then
-		local d = d > 0 and d or 0
 		if d ~= icon.__lastDur then
 			icon:QueueEvent("OnDuration", d)
 			icon.__lastDur = d
-		--	somethingChanged = 1 noting actually changed since __lastDur is only used right here.
 		end
 	end
 
-
 	if
-		(icon.ConditionObj and not icon.dontHandleConditionsExternally and icon.ConditionObj.Failed) or -- conditions failed
+		(icon.ConditionObj and not icon.dontHandleConditionsExternally and icon.ConditionObj.Failed) or 						  -- conditions failed
 		(d > 0 and ((icon.DurationMinEnabled and icon.DurationMin > d) or (icon.DurationMaxEnabled and d > icon.DurationMax))) or -- duration requirements failed
-		(count and ((icon.StackMinEnabled and icon.StackMin > count) or (icon.StackMaxEnabled and count > icon.StackMax))) -- stack requirements failed
+		(count and ((icon.StackMinEnabled and icon.StackMin > count) or (icon.StackMaxEnabled and count > icon.StackMax))) 		  -- stack requirements failed
 	then
-		alpha = alpha ~= 0 and icon.ConditionAlpha or 0 -- use the alpha setting for failed stacks/duration/conditions, but only if the alpha isnt being hidden for another reason
+		alpha = alpha ~= 0 and icon.ConditionAlpha or 0 -- use the alpha setting for failed stacks/duration/conditions, but only if the icon isnt being hidden for another reason
 	end
 
 	if alpha ~= icon.__alpha then
@@ -4532,8 +4532,6 @@ function Icon.SetInfo(icon, alpha, color, texture, start, duration, spellChecked
 				icon:QueueEvent("OnAlphaDec", alpha*100)
 			end
 		end
-
-	--	somethingChanged = 1
 	end
 
 	if icon.__start ~= start or icon.__duration ~= duration or forceupdate then
@@ -4613,8 +4611,6 @@ function Icon.SetInfo(icon, alpha, color, texture, start, duration, spellChecked
 
 		icon.__start = start
 		icon.__duration = duration
-
-	--	somethingChanged = 1
 	end
 
 	if icon.__count ~= count or icon.__countText ~= countText then
@@ -4630,16 +4626,12 @@ function Icon.SetInfo(icon, alpha, color, texture, start, duration, spellChecked
 		if icon.OnStack then
 			icon:QueueEvent("OnStack", count)
 		end
-
-	--	somethingChanged = 1
 	end
 
 	texture = icon.OverrideTex or texture -- if a texture override is specefied, then use it instead
 	if texture ~= nil and icon.__tex ~= texture then -- do this before events are processed because some text outputs use icon.__tex
 		icon.__tex = texture
 		icon.texture:SetTexture(texture)
-
-	--	somethingChanged = 1
 	end
 
 	-- NO EVENT HANDLING PAST THIS POINT! -- well, actually it doesnt matter that much anymore, but they still won't be handled till the next update
@@ -4673,8 +4665,6 @@ function Icon.SetInfo(icon, alpha, color, texture, start, duration, spellChecked
 		end
 
 		icon.__vrtxcolor = color
-
-	--	somethingChanged = 1
 	end
 
 	if icon.ShowPBar and (updatePBar or queueOnSpell or forceupdate) then
@@ -4700,24 +4690,15 @@ function Icon.SetInfo(icon, alpha, color, texture, start, duration, spellChecked
 			pbar:SetValue(value)
 			pbar.__value = value
 		end
-
-	--	somethingChanged = 1
 	end
 
 	if queueOnSpell and icon.UpdateBindText_Spell then
 		icon:UpdateBindText()
-	--	somethingChanged = 1
 	elseif queueOnUnit and icon.UpdateBindText_Unit then
 		icon:UpdateBindText()
-	--	somethingChanged = 1
 	elseif queueOnStack and icon.UpdateBindText_Stack then
 		icon:UpdateBindText()
-	--	somethingChanged = 1
 	end
-
-	--[[if somethingChanged then
-		TMW:Fire("TMW_ICON_UPDATED", icon)
-	end]]
 end
 
 
@@ -4928,20 +4909,21 @@ function Icon.Setup(icon)
 			IconsToUpdateBindText = IconsToUpdateBindText or {}
 			tDeleteItem(IconsToUpdateBindText, icon)
 			tinsert(IconsToUpdateBindText,icon)
-		else
-			if strfind(icon.BindText, "%%[Ss]") then
-				icon.UpdateBindText_Any = true
-				icon.UpdateBindText_Spell = true
-			end
-			if strfind(icon.BindText, "%%[UuPp]") then
-				icon.UpdateBindText_Any = true
-				icon.UpdateBindText_Unit = true
-			end
-			if strfind(icon.BindText, "%%[Kk]") then
-				icon.UpdateBindText_Any = true
-				icon.UpdateBindText_Stack = true
-			end
+		--else
 		end
+		if strfind(icon.BindText, "%%[Ss]") then
+			icon.UpdateBindText_Any = true
+			icon.UpdateBindText_Spell = true
+		end
+		if strfind(icon.BindText, "%%[UuPp]") then
+			icon.UpdateBindText_Any = true
+			icon.UpdateBindText_Unit = true
+		end
+		if strfind(icon.BindText, "%%[Kk]") then
+			icon.UpdateBindText_Any = true
+			icon.UpdateBindText_Stack = true
+		end
+	--	end
 		icon:UpdateBindText()
 	else
 		icon.bindText:SetText(nil)
@@ -5631,8 +5613,90 @@ TMW:RegisterChatCommand("tellmewhen", "SlashCommand")
 local UNITS = TMW:NewModule("Units", "AceEvent-3.0") TMW.UNITS = UNITS
 UNITS.mtMap, UNITS.maMap = {}, {}
 UNITS.unitsWithExistsEvent = {}
+UNITS.unitsWithBaseExistsEvent = {}
 UNITS.sets = {}
-local UnitSet
+local UnitSet = TMW:NewClass("UnitSet")
+
+function UnitSet:OnNewInstance(unitSettings)
+	self.unitSettings = unitSettings
+	self.originalUnits = UNITS:GetOriginalUnitTable(unitSettings)
+	self.updateEvents = {}
+	self.exposedUnits = {}
+	-- determine the operations that the set needs to stay updated
+
+	for k, unit in pairs(self.originalUnits) do
+		if unit == "player" then
+		--	UNITS.unitsWithExistsEvent[unit] = true -- doesnt really have an event, but do this for external checks of unitsWithExistsEvent to increase efficiency.
+		elseif unit == "target" then
+			self.updateEvents.PLAYER_TARGET_CHANGED = true
+			UNITS.unitsWithExistsEvent[unit] = true
+		elseif unit == "pet" then
+			self.updateEvents.UNIT_PET = true
+			UNITS.unitsWithExistsEvent[unit] = true
+		elseif unit == "focus" then
+			self.updateEvents.PLAYER_FOCUS_CHANGED = true
+			UNITS.unitsWithExistsEvent[unit] = true
+			
+		elseif unit:find("^raid%d+$") then
+			self.updateEvents.RAID_ROSTER_UPDATE = true
+			UNITS.unitsWithExistsEvent[unit] = true
+		elseif unit:find("^raid%d+") then -- TODO: EXTRAPOLATE THESE 3 LINES TO OTHER UNITS AND VERIFY THAT HIS CODE ACTUALLY WORKS (raid1target should only be in the table if raid1 exists, otherwise it shouldn't)
+			self.updateEvents.RAID_ROSTER_UPDATE = true
+			UNITS.unitsWithBaseExistsEvent[unit] = unit:match("^(raid%d+)")
+			
+		elseif unit:find("^party%d+$") then
+			self.updateEvents.PARTY_MEMBERS_CHANGED = true
+			UNITS.unitsWithExistsEvent[unit] = true
+			
+		elseif unit:find("^boss%d+$") then
+			self.updateEvents.INSTANCE_ENCOUNTER_ENGAGE_UNIT = true
+			UNITS.unitsWithExistsEvent[unit] = true
+			
+		elseif unit:find("^arena%d+$") then
+			self.updateEvents.ARENA_OPPONENT_UPDATE = true
+			UNITS.unitsWithExistsEvent[unit] = true
+			
+		elseif unit:find("^maintank") or unit:find("^mainassist") then
+			UNITS:UpdateTankAndAssistMap()
+			self.updateEvents.RAID_ROSTER_UPDATE = true
+			UNITS.unitsWithExistsEvent[unit] = true
+			self.hasTankAndAssistRefs = true
+			UNITS.doTankAndAssistMap = true
+		end
+	end
+
+	for event in pairs(self.updateEvents) do
+		UNITS:RegisterEvent(event, "OnEvent")
+	end
+
+	self:Update()
+end
+
+function UnitSet:Update()
+	local originalUnits, exposedUnits = self.originalUnits, self.exposedUnits
+	local hasTankAndAssistRefs = self.hasTankAndAssistRefs
+	for k in next, exposedUnits do
+		exposedUnits[k] = nil
+	end
+
+	for k = 1, #originalUnits do
+		local oldunit = originalUnits[k]
+		local success
+		if hasTankAndAssistRefs then
+			success = UNITS:SubstituteTankAndAssistUnit(oldunit, exposedUnits, #exposedUnits+1)
+		end
+		local hasExistsEvent = UNITS.unitsWithExistsEvent[oldunit]
+		local baseUnit = UNITS.unitsWithBaseExistsEvent[oldunit]
+		
+		if success == nil and (
+			(baseUnit and UnitExists(baseUnit)) or (not baseUnit and (not hasExistsEvent or UnitExists(oldunit)))
+		) then
+			exposedUnits[#exposedUnits+1] = oldunit
+		end
+	end
+end
+
+
 
 function UNITS:GetUnitSet(unitSettings)
 	return UnitSet:New(unitSettings)
@@ -5749,74 +5813,6 @@ function UNITS:SubstituteTankAndAssistUnit(oldunit, table, key, putInvalidUnitsB
 			table[key] = oldunit
 		end
 		return false -- placement of this inside the if block is crucial
-	end
-end
-
-UnitSet = TMW:NewClass("UnitSet")
-
-function UnitSet:OnNewInstance(unitSettings)
-	self.unitSettings = unitSettings
-	self.originalUnits = UNITS:GetOriginalUnitTable(unitSettings)
-	self.updateEvents = {}
-	self.exposedUnits = {}
-	-- determine the operations that the set needs to stay updated
-
-	for k, unit in pairs(self.originalUnits) do
-		if unit == "player" then
-		--	UNITS.unitsWithExistsEvent[unit] = true -- doesnt really have an event, but do this for external checks of unitsWithExistsEvent to increase efficiency.
-		elseif unit == "target" then
-			self.updateEvents.PLAYER_TARGET_CHANGED = true
-			UNITS.unitsWithExistsEvent[unit] = true
-		elseif unit == "pet" then
-			self.updateEvents.UNIT_PET = true
-			UNITS.unitsWithExistsEvent[unit] = true
-		elseif unit == "focus" then
-			self.updateEvents.PLAYER_FOCUS_CHANGED = true
-			UNITS.unitsWithExistsEvent[unit] = true
-		elseif unit:find("^raid%d+$") then
-			self.updateEvents.RAID_ROSTER_UPDATE = true
-			UNITS.unitsWithExistsEvent[unit] = true
-		elseif unit:find("^party%d+$") then
-			self.updateEvents.PARTY_MEMBERS_CHANGED = true
-			UNITS.unitsWithExistsEvent[unit] = true
-		elseif unit:find("^boss%d+$") then
-			self.updateEvents.INSTANCE_ENCOUNTER_ENGAGE_UNIT = true
-			UNITS.unitsWithExistsEvent[unit] = true
-		elseif unit:find("^arena%d+$") then
-			self.updateEvents.ARENA_OPPONENT_UPDATE = true
-			UNITS.unitsWithExistsEvent[unit] = true
-		elseif unit:find("^maintank") or unit:find("^mainassist") then
-			UNITS:UpdateTankAndAssistMap()
-			self.updateEvents.RAID_ROSTER_UPDATE = true
-			UNITS.unitsWithExistsEvent[unit] = true
-			self.hasTankAndAssistRefs = true
-			UNITS.doTankAndAssistMap = true
-		end
-	end
-
-	for event in pairs(self.updateEvents) do
-		UNITS:RegisterEvent(event, "OnEvent")
-	end
-
-	self:Update()
-end
-
-function UnitSet:Update()
-	local originalUnits, exposedUnits = self.originalUnits, self.exposedUnits
-	local hasTankAndAssistRefs = self.hasTankAndAssistRefs
-	for k in next, exposedUnits do
-		exposedUnits[k] = nil
-	end
-
-	for k = 1, #originalUnits do
-		local oldunit = originalUnits[k]
-		local success
-		if hasTankAndAssistRefs then
-			success = UNITS:SubstituteTankAndAssistUnit(oldunit, exposedUnits, #exposedUnits+1)
-		end
-		if success == nil and (not UNITS.unitsWithExistsEvent[oldunit] or UnitExists(oldunit)) then
-			exposedUnits[#exposedUnits+1] = oldunit
-		end
 	end
 end
 

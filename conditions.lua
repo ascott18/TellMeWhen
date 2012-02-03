@@ -2846,18 +2846,18 @@ function CNDT:CompileUpdateFunction(obj, activeEvents)
 	CNDT.EventEngine:UnregisterObject(obj)
 
 	local func
-	if functionCache[funcstr] then
-		func = functionCache[funcstr]
-	else
+	--if functionCache[funcstr] then
+	--	func = functionCache[funcstr]
+	--else
 		local err
 		func, err = loadstring(funcstr, tostring(obj) .. " Condition Events")
 		if func then
 			func = setfenv(func, Env)
-			functionCache[funcstr] = func
+		--	functionCache[funcstr] = func
 		elseif err then
 			TMW:Error(err)
 		end
-	end
+	--end
 	obj.updateString = funcstr
 
 	obj.AnticipateFunction = doesAnticipate and func
@@ -2952,11 +2952,7 @@ function CNDT.Conditions_LoadData(self, Conditions)
 end
 
 function CNDT:GetConditionCheckFunctionString(parent, Conditions)
-	--if TMW.debug and test then test() end
-	
-	--self.Failed = nil
-
-	--Conditions = Conditions or self.Conditions
+	if TMW.debug and test then test() end
 
 	local funcstr = ""
 
@@ -2993,41 +2989,14 @@ function CNDT:GetConditionCheckFunctionString(parent, Conditions)
 		funcstr = funcstr .. thisstr
 	end
 	
-	local funcstr, arg1 = parent:FinishCompilingConditions(funcstr:sub(4))	
-	--TMW.CNDT:CompileUpdateFunction(self, arg1)
+	local funcstr, arg1 = parent:FinishCompilingConditions(funcstr:sub(4))
 	
-	if funcstr ~= "" then		
-		--[==[funcstr = [[local self = ]] .. self:GetName() .. [[
-		return (]] .. funcstr .. [[)]]
-		]==]
+	if funcstr ~= "" then
 		funcstr = [[local obj, icon = ...
 		return (]] .. funcstr .. [[)]]
 	end
 	
 	return funcstr, arg1
-	--[[
-	local func
-	if funcstr ~= "" then
-
-		if TMW.CNDT.functionCache[funcstr] then
-			func = TMW.CNDT.functionCache[funcstr]
-		else
-			local err
-			func, err = loadstring(funcstr, self:GetName() .. " Condition")
-			if func then
-				func = setfenv(func, TMW.CNDT.Env)
-				TMW.CNDT.functionCache[funcstr] = func
-			elseif err then
-				TMW:Error(err)
-			end
-		end
-	end]]
-	
---[[	self.Condition_String = funcstr
-	self.Condition_CheckFunc = func
-	self.UpdateNeeded = true
-	
-	self:ProcessConditionFunction(func) -- tell the group/icon that the function is ready to be handled]]
 end
 
 

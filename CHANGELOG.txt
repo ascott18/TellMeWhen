@@ -16,7 +16,8 @@
  ** (r429) An icon/group should no longer be treated as if it has failing conditions after it had conditions that were failing, but those conditions were removed
  ** (r430) Fixed the list of unitIDs used to guess a unit's class
  ** (r431) A unit's class should now be properly detected when the unit is from another server
- ** (r434) Icon Show/Hide events should work once again now
+ ** (r434) Icon Show/Hide events should work once again
+ ** (r435) Unit substitutions should work once again
 
 ===v4.8.3===
  * Bug Fixes:

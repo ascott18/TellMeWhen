@@ -105,7 +105,9 @@ local function Meta_OnUpdate(icon, time)
 
 			if icon.animations then
 				for k, v in pairs(icon:GetAnimations()) do
-					icon:StopAnimation(v)
+					if v.originIcon ~= icon then
+						icon:StopAnimation(v)
+					end
 				end
 			end
 			if ic.animations then
