@@ -35,6 +35,7 @@ Lib\AceTimer-3.0\AceTimer-3.0.xml
 Lib\AceLocale-3.0\AceLocale-3.0.xml
 Lib\AceDB-3.0\AceDB-3.0.xml
 Lib\AceComm-3.0\AceComm-3.0.xml
+Lib\AceSerializer-3.0\AceSerializer-3.0.xml
 Lib\LibSharedMedia-3.0\lib.xml
 Lib\libdatabroker-1-1\LibDataBroker-1.1.lua
 Lib\DRData-1.0\DRData-1.0.xml

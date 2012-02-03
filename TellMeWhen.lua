@@ -18,7 +18,7 @@
 -- ADDON GLOBALS AND LOCALS
 -- ---------------------------------
 
-local TMW = LibStub("AceAddon-3.0"):NewAddon(CreateFrame("Frame", "TMW", UIParent), "TellMeWhen", "AceEvent-3.0", "AceTimer-3.0", "AceConsole-3.0", "AceComm-3.0")
+local TMW = LibStub("AceAddon-3.0"):NewAddon(CreateFrame("Frame", "TMW", UIParent), "TellMeWhen", "AceEvent-3.0", "AceTimer-3.0", "AceConsole-3.0", "AceComm-3.0", "AceSerializer-3.0")
 TellMeWhen = TMW
 
 local L = LibStub("AceLocale-3.0"):GetLocale("TellMeWhen", true)
@@ -32,7 +32,7 @@ local DRData = LibStub("DRData-1.0", true)
 TELLMEWHEN_VERSION = "4.9.0"
 TELLMEWHEN_VERSION_MINOR = strmatch(" @project-version@", " r%d+") or ""
 TELLMEWHEN_VERSION_FULL = TELLMEWHEN_VERSION .. TELLMEWHEN_VERSION_MINOR
-TELLMEWHEN_VERSIONNUMBER = 49002 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
+TELLMEWHEN_VERSIONNUMBER = 49003 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
 if TELLMEWHEN_VERSIONNUMBER > 50000 or TELLMEWHEN_VERSIONNUMBER < 49000 then return error("YOU SCREWED UP THE VERSION NUMBER OR DIDNT CHANGE THE SAFETY LIMITS") end -- safety check because i accidentally made the version number 414069 once
 
 TELLMEWHEN_MAXGROUPS = 1 	--this is a default, used by SetTheory (addon), so dont rename
@@ -63,6 +63,7 @@ local TARGET_TOKEN_NOT_FOUND, FOCUS_TOKEN_NOT_FOUND =
 local CL_PLAYER = COMBATLOG_OBJECT_TYPE_PLAYER
 local CL_PET = COMBATLOG_OBJECT_CONTROL_PLAYER
 local bitband = bit.band
+local huge = math.huge
 
 
 ---------- Locals ----------
@@ -71,9 +72,10 @@ local NAMES, EVENTS, ANIM, ANN, SND
 local UPD_INTV = 0.06	--this is a default, local because i use it in onupdate functions
 local runEvents, updatePBar = 1, 1
 local GCD, NumShapeshiftForms, LastUpdate = 0, 0, 0
- IconsToUpdate, GroupsToUpdate, unitsToChange = {}, {}, {} --DEBUG
+local IconsToUpdate, GroupsToUpdate = {}, {}
 local IconsToUpdateBindText
 local loweredbackup = {}
+local callbackregistry = {}
 local bullshitTable = {}
 local ActiveAnimations = {[UIParent] = {}, [WorldFrame] = {}}
 local CDBarsToUpdate, PBarsToUpdate = {}, {}
@@ -155,10 +157,26 @@ do	-- Class Lib
 		return instance
 	end
 
-	function TMW:NewClass(className, frameType, inherit)
-		local metatable
+	function TMW:NewClass(className, ...)
+		local metatable = {__index = {}}
 
-		if frameType then
+		local frameType
+		for n, v in TMW:Vararg(...) do
+			local meta
+			if n == 1 and not TMW.Classes[v] then
+				frameType = v
+				meta = getmetatable(CreateFrame(frameType))
+			elseif TMW.Classes[v] then
+				meta = getmetatable(TMW.Classes[v])			
+			end			
+			
+			if meta and meta.__index then
+				for k, v in pairs(meta.__index) do
+					metatable.__index[k] = metatable.__index[k] or v
+				end
+			end
+		end
+	--[[	if frameType then
 			metatable = CopyTable(getmetatable(CreateFrame(frameType)))
 
 		elseif inherit then
@@ -168,9 +186,7 @@ do	-- Class Lib
 			elseif type(inherit) == "table" then
 				metatable = CopyTable(getmetatable(inherit))
 			end
-		else
-			metatable = {__index = {}}
-		end
+		end]]
 
 		metatable.__newindex = metatable.__index
 
@@ -1074,10 +1090,10 @@ end
 
 
 
-TMW.__callbackregistry = {}
+callbackregistry = {}
 
 function TMW:RegisterCallback(event, func, arg1)
-	local reg = self.__callbackregistry
+	local reg = callbackregistry
 	local funcs
 	if reg[event] then
 		funcs = reg[event]
@@ -1104,7 +1120,7 @@ function TMW:RegisterCallback(event, func, arg1)
 end
 
 function TMW:UnregisterCallback(event, func, arg1)
-	local reg = self.__callbackregistry
+	local reg = callbackregistry
 
 	if type(func) == "table" then
 		arg1 = func
@@ -1119,7 +1135,7 @@ function TMW:UnregisterCallback(event, func, arg1)
 end
 
 function TMW:Fire(event, ...)
-	local funcs = TMW.__callbackregistry[event]
+	local funcs = callbackregistry[event]
 
 	if funcs then
 		for method, args in next, funcs do
@@ -1147,7 +1163,7 @@ function TMW:MakeFunctionCached(obj, method)
     local cache = {}
     local wrapper = function(...)
         -- tostringall is a Blizzard function defined in UIParent.lua
-        local cachestring = strconcat(tostringall(...))
+		local cachestring = strconcat(tostringall(...))
         if cache[cachestring] then
             return cache[cachestring]
         end
@@ -1300,7 +1316,6 @@ function TMW:OnInitialize()
 	TMW:RegisterEvent("PLAYER_ENTERING_WORLD")
 	TMW:RegisterEvent("PLAYER_TALENT_UPDATE")
 	TMW:RegisterEvent("ACTIVE_TALENT_GROUP_CHANGED")
-	TMW:RegisterEvent("UNIT_POWER_FREQUENT")
 
 
 	--------------- Comm ---------------
@@ -1414,9 +1429,12 @@ function TMW:OnUpdate(elapsed)					-- THE MAGICAL ENGINE OF DOING EVERYTHING
 
 			for i = 1, #GroupsToUpdate do
 				local group = GroupsToUpdate[i]
-				if group.CndtCheck and (group.conditionUpdateMethod == "OnUpdate" or group.conditionsNeedUpdate or group.nextConditionUpdate < time) then
-					group:CndtCheck()
-					if group.CndtFailed then
+				local ConditionObj = group.ConditionObj
+				if ConditionObj then
+					if ConditionObj.UpdateNeeded or ConditionObj.NextUpdateTime < time then
+						ConditionObj:Check(group)
+					end
+					if ConditionObj.Failed then
 						if group.__shown then
 							group:Hide()
 						end
@@ -1585,6 +1603,8 @@ function TMW:Update()
 	end
 
 	TMW:ScheduleTimer("ForceUpdatePBars", 0.55)
+	TMW:ScheduleTimer("ForceUpdatePBars", 1)
+	TMW:ScheduleTimer("ForceUpdatePBars", 2)
 end
 
 function TMW:GetUpgradeTable()			-- upgrade functions
@@ -2776,7 +2796,6 @@ end
 
 
 function TMW:InjectDataIntoString(Text, icon, doBlizz, shouldColorNames)
-	--shouldColorNames = true -- DEBUG
 	if not Text then return Text end
 
 	--CURRENTLY USED: t, f, m, p, u, s, d, k, e, o, x
@@ -3023,20 +3042,23 @@ function EVENTS:ProcessAndDelegateIconEventSettings(icon, event, eventSettings)
 
 	if success and (event == "OnIconShow" or event == "OnIconHide") then
 		EVENTS.iconsToHandleOnIconShowHide = EVENTS.iconsToHandleOnIconShowHide or {}
-		EVENTS.iconsToHandleOnIconShowHide[icon] = true
+		EVENTS.iconsToHandleOnIconShowHide[icon] = icon.Enabled and true or nil
 		TMW:RegisterCallback("TMW_ICON_SHOWN_CHANGED", EVENTS) -- register to EVENTS, not self.
 	end
 
 	return success
 end
-function EVENTS:TMW_ICON_SHOWN_CHANGED(event, ic)
-	-- ic is the icon that changed, icon is the icon that might be handling it
-	local event = (ic.__alpha or ic:GetAlpha()) > 0 and "OnIconShow" or "OnIconHide"
-	local icName = ic:GetName()
+function EVENTS:TMW_ICON_SHOWN_CHANGED(_, ic, event)
+	if Locked then
+		-- ic is the icon that changed, icon is the icon that might be handling it
+		--local event = (ic.__alpha or ic:GetAlpha()) > 0 and "OnIconShow" or "OnIconHide"
+		local icName = ic:GetName()
 
-	for icon in next, self.iconsToHandleOnIconShowHide do
-		if icon[event] and icon[event].Icon == icName then
-			icon.EventsToFire[event] = true
+		for icon in next, self.iconsToHandleOnIconShowHide do
+			if icon[event] and icon[event].Icon == icName then
+				icon:QueueEvent(event)
+				icon:ProcessQueuedEvents()
+			end
 		end
 	end
 end
@@ -3135,7 +3157,7 @@ TMW.ChannelList = {
 		isBlizz = 1, -- flagged to not use override %t and %f substitutions, and also not to try and color any names
 		defaultlocation = function() return select(2, GetChannelList()) end,
 		dropdown = function()
-			for i = 1, math.huge, 2 do
+			for i = 1, huge, 2 do
 				local num, name = select(i, GetChannelList())
 				if not num then break end
 
@@ -3150,7 +3172,7 @@ TMW.ChannelList = {
 		end,
 		ddtext = function(value)
 			-- also a verification function
-			for i = 1, math.huge, 2 do
+			for i = 1, huge, 2 do
 				local num, name = select(i, GetChannelList())
 				if not num then return end
 
@@ -3160,7 +3182,7 @@ TMW.ChannelList = {
 			end
 		end,
 		handler = function(icon, data, Text)
-			for i = 1, math.huge, 2 do
+			for i = 1, huge, 2 do
 				local num, name = select(i, GetChannelList())
 				if not num then break end
 				if strlowerCache[name] == strlowerCache[data.Location] then
@@ -3568,7 +3590,7 @@ ANIM.AnimationList = {
 			icon:StartAnimation{
 				data = data,
 				Start = TMW.time,
-				Duration = data.Infinite and math.huge or data.Duration,
+				Duration = data.Infinite and huge or data.Duration,
 
 				Animation = Animation,
 				Magnitude = data.Magnitude,
@@ -3607,7 +3629,7 @@ ANIM.AnimationList = {
 			local Duration = 0
 			local Period = data.Period
 			if data.Infinite then
-				Duration = math.huge
+				Duration = huge
 			else
 				while Duration < data.Duration do
 					Duration = Duration + (Period * 2)
@@ -3680,7 +3702,7 @@ ANIM.AnimationList = {
 			local Duration = 0
 			local Period = data.Period
 			if data.Infinite then
-				Duration = math.huge
+				Duration = huge
 			else
 				while Duration < data.Duration do
 					Duration = Duration + (Period * 2)
@@ -3781,7 +3803,7 @@ ANIM.AnimationList = {
 			icon:StartAnimation{
 				data = data,
 				Start = TMW.time,
-				Duration = data.Infinite and math.huge or data.Duration,
+				Duration = data.Infinite and huge or data.Duration,
 			}
 		end,
 
@@ -3845,12 +3867,42 @@ function ANIM:GetFlasher(parent)
 end
 
 
+local UpdateObject = TMW:NewClass("UpdateObject")
+TMW.UpdateObjects = {}
+function UpdateObject:Update_SetMethod(method)
+	self.Update_Method = method
+	if method == "OnUpdate" then
+		-- do nothing for now.
+		self.Update_Needed = true
+	elseif method == "OnEvent" then
+		icon:ScheduleNextUpdate()
+	else
+		-- clearing the update
+	end
+	TMW.UpdateObjects[self] = method
+end
+
+--function UpdateObject:Update_
+
+
+
+local ConditionControlledObject = TMW:NewClass("ConditionControlledObject")
+
+function ConditionControlledObject:Conditions_LoadData(Conditions)
+	self.ConditionObj = TMW.CNDT:GetConditionObject(self, Conditions)
+end
+
+
+
+
+
+
 
 -- -----------
 -- GROUPS
 -- -----------
 
-local Group = TMW:NewClass("Group", "Frame")
+local Group = TMW:NewClass("Group", "Frame", "ConditionControlledObject")
 
 function Group.OnNewInstance(group, ...)
 	local _, name, _, _, groupID = ... -- the CreateFrame args
@@ -3891,32 +3943,16 @@ function Group.GetSettings(group)
 end
 
 function Group.FinishCompilingConditions(group, funcstr)
-	group.CndtFailed = nil
-
 	if group.OnlyInCombat then
 		if funcstr == "" then
 			funcstr = [[UnitAffectingCombat("player")]]
 		else
 			funcstr = [[(]] .. funcstr .. [[) and UnitAffectingCombat("player")]]
 		end
-		TMW.CNDT:CompileUpdateFunction(group, {PLAYER_REGEN_ENABLED = true, PLAYER_REGEN_DISABLED = true})
+		return funcstr, {PLAYER_REGEN_ENABLED = true, PLAYER_REGEN_DISABLED = true}
 	else
-		TMW.CNDT:CompileUpdateFunction(group)
+		return funcstr
 	end
-
-	return funcstr, "CndtFailed"
-end
-
-function Group.ProcessConditionFunction(group, func)
-	tDeleteItem(GroupsToUpdate, group)
-	if func and group:ShouldUpdateIcons() then
-		GroupsToUpdate[#GroupsToUpdate+1] = group
-		sort(GroupsToUpdate, Group.ScriptSort)
-	else
-		func = nil
-	end
-
-	group.CndtCheck = func
 end
 
 function Group.ShouldUpdateIcons(group)
@@ -4030,8 +4066,16 @@ function Group.Setup(group)
 
 	group:SetPos()
 
+	tDeleteItem(GroupsToUpdate, group)
+		
 	if group:ShouldUpdateIcons() and Locked then
 		group:Show()
+
+		group:Conditions_LoadData(group.Conditions)
+		if group.ConditionObj then
+			GroupsToUpdate[#GroupsToUpdate+1] = group
+			sort(GroupsToUpdate, Group.ScriptSort)
+		end
 	else
 		if group:ShouldUpdateIcons() then
 			group:Show()
@@ -4039,8 +4083,6 @@ function Group.Setup(group)
 			group:Hide()
 		end
 	end
-
-	TMW.CNDT:ProcessConditions(group)
 end
 
 
@@ -4049,7 +4091,7 @@ end
 -- ICONS
 -- ------------------
 
-local Icon = TMW:NewClass("Icon", "Button")
+local Icon = TMW:NewClass("Icon", "Button", "ConditionControlledObject")
 
 function Icon.OnNewInstance(icon, ...)
 	local _, name, group, _, iconID = ... -- the CreateFrame args
@@ -4276,11 +4318,13 @@ function Icon.Update(icon, time, force, ...)
 	if icon.__shown and (force or icon.LastUpdate <= time - UPD_INTV) then
 		icon.LastUpdate = time
 
-		if icon.CndtCheck then
-			if (icon.conditionUpdateMethod == "OnUpdate" or icon.conditionsNeedUpdate or icon.nextConditionUpdate < time) then
-				icon:CndtCheck()
+		local ConditionObj = icon.ConditionObj
+		if ConditionObj then
+			if ConditionObj.UpdateNeeded or ConditionObj.NextUpdateTime < time then
+				ConditionObj:Check(icon)
 			end
-			if icon.CndtFailed and (icon.ConditionAlpha or 0) == 0 then
+			
+			if not icon.dontHandleConditionsExternally and ConditionObj.Failed and (icon.ConditionAlpha or 0) == 0 then
 				if icon.__alpha ~= 0 then
 					icon:SetInfo(0)
 				end
@@ -4290,14 +4334,7 @@ function Icon.Update(icon, time, force, ...)
 
 		icon:OnUpdate(time, ...)
 
-		if icon.CndtCheckAfter and (icon.conditionUpdateMethod == "OnUpdate" or icon.conditionsNeedUpdate or icon.nextConditionUpdate < time) then
-			icon:CndtCheckAfter()
-			if icon.CndtFailed and (icon.ConditionAlpha or 0) == 0 then
-				if icon.__alpha ~= 0 then
-					icon:SetInfo(0)
-				end
-			end
-		end
+	--[[	-- RE-CREATE CHECK AFTER IF YOU WANT IT BACK, BECAUSE FOR NOW, ITS DEAD]]
 	end
 end
 
@@ -4319,9 +4356,6 @@ function Icon.ForceSetAlpha(icon, alpha)
 	icon.__oldAlpha = oldalpha
 
 	icon:SetAlpha(alpha)
-	if (alpha == 0 and oldalpha > 0) or (alpha > 0 and oldalpha == 0) then
-		TMW:Fire("TMW_ICON_SHOWN_CHANGED", icon)
-	end
 end
 
 function Icon.UpdateBindText(icon)
@@ -4461,7 +4495,7 @@ function Icon.SetInfo(icon, alpha, color, texture, start, duration, spellChecked
 
 
 	if
-		(icon.CndtFailed) or -- conditions failed
+		(icon.ConditionObj and not icon.dontHandleConditionsExternally and icon.ConditionObj.Failed) or -- conditions failed
 		(d > 0 and ((icon.DurationMinEnabled and icon.DurationMin > d) or (icon.DurationMaxEnabled and d > icon.DurationMax))) or -- duration requirements failed
 		(count and ((icon.StackMinEnabled and icon.StackMin > count) or (icon.StackMaxEnabled and count > icon.StackMax))) -- stack requirements failed
 	then
@@ -4483,12 +4517,12 @@ function Icon.SetInfo(icon, alpha, color, texture, start, duration, spellChecked
 			if icon.OnHide then
 				icon:QueueEvent("OnHide")
 			end
-			TMW:Fire("TMW_ICON_SHOWN_CHANGED", icon)
+			TMW:Fire("TMW_ICON_SHOWN_CHANGED", icon, "OnIconHide")
 		elseif oldalpha == 0 then
 			if icon.OnShow then
 				icon:QueueEvent("OnShow")
 			end
-			TMW:Fire("TMW_ICON_SHOWN_CHANGED", icon)
+			TMW:Fire("TMW_ICON_SHOWN_CHANGED", icon, "OnIconShow")
 		elseif alpha > oldalpha then
 			if icon.OnAlphaInc then
 				icon:QueueEvent("OnAlphaInc", alpha*100)
@@ -4609,7 +4643,9 @@ function Icon.SetInfo(icon, alpha, color, texture, start, duration, spellChecked
 	end
 
 	-- NO EVENT HANDLING PAST THIS POINT! -- well, actually it doesnt matter that much anymore, but they still won't be handled till the next update
-	icon:ProcessQueuedEvents()
+	if icon.eventIsQueued then
+		icon:ProcessQueuedEvents()
+	end
 
 	--[[if alpha == 0 and not force and not icon.IsFading then
 		-- im not a huge fan of this anymore. the performance increase is very small considering the small amount of code below
@@ -4686,20 +4722,9 @@ end
 
 
 function Icon.FinishCompilingConditions(icon, funcstr)
-	icon.CndtFailed = nil
-	TMW.CNDT:CompileUpdateFunction(icon)
-
-	return icon.typeData:FinishCompilingConditions(icon, funcstr)
+	return funcstr
 end
 
-function Icon.ProcessConditionFunction(icon, func)
-	local doCheckAfter
-	if icon.CndtString and icon.CndtString:find("__unitChecked") then
-		doCheckAfter = true
-	end
-
-	icon.typeData:ProcessConditionFunction(icon, func, doCheckAfter)
-end
 
 
 function Icon.SetupBars(icon)
@@ -4722,7 +4747,8 @@ function Icon.SetupBars(icon)
 	end
 
 	if icon.ShowPBar and icon.NameFirst then
-		TMW:RegisterEvent("SPELL_UPDATE_USABLE")
+		TMW:RegisterEvent("SPELL_UPDATE_USABLE")		
+		TMW:RegisterEvent("UNIT_POWER_FREQUENT")
 		pbar:Show()
 	else
 		pbar:Hide()
@@ -4779,7 +4805,7 @@ function Icon.Setup(icon)
 	icon.typeData = typeData
 
 	runEvents = nil
-	TMW:ScheduleTimer("RestoreEvents", max(UPD_INTV*2.1, 0.05))
+	TMW:ScheduleTimer("RestoreEvents", max(UPD_INTV*2.1, 0.2))
 
 	icon.__spellChecked = nil
 	icon.__unitChecked = nil
@@ -4787,6 +4813,7 @@ function Icon.Setup(icon)
 	icon.__vrtxcolor = nil
 	icon.Units = nil
 	icon.ForceDisabled = nil
+	icon.dontHandleConditionsExternally = nil
 
 	for k in pairs(TMW.Icon_Defaults) do
 		if typeData.RelevantSettings[k] then
@@ -4840,7 +4867,7 @@ function Icon.Setup(icon)
 	ClearScripts(icon)
 
 	-- Conditions
-	TMW.CNDT:ProcessConditions(icon)
+	icon:Conditions_LoadData(icon.Conditions)
 
 	if icon.Enabled and group:ShouldUpdateIcons() then
 		icon:Validate()
@@ -5008,8 +5035,7 @@ function Icon.Setup(icon)
 		cbar:SetStatusBarColor(0, 1, 0, 0.5)
 
 		PBarsToUpdate[pbar] = nil
-		pbar:SetMinMaxValues(0, 1)
-		pbar:SetValue(1)
+		pbar:SetValue(pbar.Max)
 		pbar:SetAlpha(.7)
 
 		icon:EnableMouse(1)
@@ -5119,18 +5145,6 @@ function IconType:GetFontTestValues(icon)
 	return nil, nil -- pretty pointless
 end
 
-function IconType:FinishCompilingConditions(icon, funcstr)
-	return funcstr, "CndtFailed"
-end
-
-function IconType:ProcessConditionFunction(icon, func, doCheckAfter)
-	local key = doCheckAfter and "CndtCheckAfter" or "CndtCheck"
-	local antikey = doCheckAfter and "CndtCheck" or "CndtCheckAfter"
-
-	icon[key] = func
-	icon[antikey] = nil
-end
-
 function IconType:Register()
 	local typekey = self.type
 	setmetatable(self.RelevantSettings, RelevantToAll)
@@ -5230,12 +5244,6 @@ function TMW:RestoreCase(str)
 		end
 		return str
 	end
-end
-
-local function getCacheString(...)
-	-- returns a string containing all args
-	-- tostringall is a Blizzard function defined in UIParent.lua
-	return strconcat(tostringall(...))
 end
 
 function TMW:EquivToTable(name)
@@ -5350,10 +5358,7 @@ function TMW:GetSpellNames(icon, setting, firstOnly, toname, hash, keepDurations
 end
 TMW:MakeFunctionCached(TMW, "GetSpellNames")
 
-local gsdcache = {}
 function TMW:GetSpellDurations(icon, setting)
-	if gsdcache[setting] then return gsdcache[setting] end --why make a bunch of tables and do a bunch of stuff if we dont need to
-
 	local NameArray = TMW:GetSpellNames(icon, setting, nil, nil, nil, 1)
 	local DurationArray = CopyTable(NameArray)
 
@@ -5367,9 +5372,9 @@ function TMW:GetSpellDurations(icon, setting)
 		end
 	end
 
-	gsdcache[setting] = DurationArray
 	return DurationArray
 end
+TMW:MakeFunctionCached(TMW, "GetSpellDurations")
 
 function TMW:GetItemIDs(icon, setting, firstOnly, toname)
 	-- note: these cannot be cached because of slotIDs
@@ -5814,3 +5819,6 @@ function UnitSet:Update()
 		end
 	end
 end
+
+
+

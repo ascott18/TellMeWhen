@@ -2433,7 +2433,6 @@
 								GameTooltip:Hide()
 							</OnLeave>
 							<OnReceiveDrag>
-								TMW.print(TMW.CI.ic)
 								TMW.ID:SpellItemToIcon(TMW.CI.ic)
 							</OnReceiveDrag>
 							<OnMouseUp>

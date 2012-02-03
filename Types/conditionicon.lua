@@ -64,11 +64,9 @@ function Type:Update()
 end
 
 local function ConditionIcon_OnUpdate(icon, time)
-	if icon.CndtCheck_CNDTIC then
-		if icon.conditionUpdateMethod == "OnUpdate" or icon.conditionsNeedUpdate or icon.nextConditionUpdate < time then
-			icon:CndtCheck_CNDTIC()
-		end
-		local succeeded = not icon.ConditionsFailed
+	local ConditionObj = icon.ConditionObj
+	if ConditionObj then
+		local succeeded = not ConditionObj.Failed
 
 		local alpha = succeeded and icon.Alpha or icon.UnAlpha
 
@@ -110,22 +108,18 @@ function Type:GetNameForDisplay(icon, data)
 	return ""
 end
 
-function Type:FinishCompilingConditions(icon, funcstr)
-	icon.ConditionsFailed = nil
-	return funcstr, "ConditionsFailed"
-end
-
-function Type:ProcessConditionFunction(icon, func)
-	icon.CndtCheck = nil
-	icon.CndtCheckAfter = nil
-	icon.CndtCheck_CNDTIC = func
-end
 
 function Type:Setup(icon, groupID, iconID)
 	icon.__start = icon.__start or 0 --TellMeWhen-4.2.1.2.lua:2115 attempt to perform arithmetic on local "start" (a nil value) -- caused because condition icons do necessarily define start/durations, even if shown.
 	icon.__duration = icon.__duration or 0
 	icon.__vrtxcolor = 1
 
+	icon.dontHandleConditionsExternally = true
+	
+	if not icon.OverrideTex or icon.OverrideTex == "" then
+		icon.OverrideTex = "Interface\\Icons\\INV_Misc_QuestionMark"
+	end
+	
 	icon:SetScript("OnUpdate", ConditionIcon_OnUpdate)
 	--icon:Update() -- dont do this!
 end

@@ -22,7 +22,6 @@ TMW.WidthCol1 = 170
 ---------- Libraries ----------
 local LSM = LibStub("LibSharedMedia-3.0")
 local LMB = LibStub("Masque", true) or (LibMasque and LibMasque("Button"))
-LibStub("AceSerializer-3.0"):Embed(TMW)
 
 
 ---------- Upvalues ----------

@@ -57,8 +57,9 @@ local print = TMW.print
 local clientVersion = select(4, GetBuildInfo())
 local strlowerCache = TMW.strlowerCache
 local isNumber = TMW.isNumber
+local huge = math.huge
 
-local CNDT = TMW:NewModule("Conditions", "AceEvent-3.0") TMW.CNDT = CNDT
+local CNDT = TMW:NewModule("Conditions", "AceEvent-3.0", "AceSerializer-3.0") TMW.CNDT = CNDT
 CNDT.SpecialUnitsUsed = {}
 
 local functionCache = {} CNDT.functionCache = functionCache
@@ -414,7 +415,6 @@ function Env.AuraCount(unit, name, filter)
 	return n
 end
 
-local huge = math.huge
 function Env.AuraDur(unit, name, filter, time)
 	local buffName, _, _, _, _, duration, expirationTime = UnitAura(unit, name, nil, filter)
 	if not buffName then
@@ -2503,7 +2503,10 @@ CNDT.Types = {
 		unit = false,
 		icon = "Interface\\Icons\\INV_Misc_Gear_01",
 		tcoords = standardtcoords,
-		funcstr = function(c) return c.Name ~= "" and c.Name or "true" end,
+		funcstr = function(c)
+			setmetatable(TMW.CNDT.Env, TMW.CNDT.EnvMeta)
+			return c.Name ~= "" and c.Name or "true"
+		end,
 		-- events = absolutely no events
 	},
 
@@ -2620,7 +2623,7 @@ CNDT:CURRENCY_DISPLAY_UPDATE()
 local EnvMeta = {
 	__index = _G,
 	--__newindex = _G,
-}
+} TMW.CNDT.EnvMeta = EnvMeta
 
 function CNDT:TMW_GLOBAL_UPDATE()
 	Env.Locked = db.profile.Locked
@@ -2629,7 +2632,7 @@ end
 TMW:RegisterCallback("TMW_GLOBAL_UPDATE", CNDT)
 
 
-function CNDT:DoConditionSubstitutions(icon, v, c, thisstr)
+function CNDT:DoConditionSubstitutions(v, c, thisstr)
 	for _, append in TMW:Vararg("2", "") do -- Unit2 MUST be before Unit
 		if strfind(thisstr, "c.Unit" .. append) then
 			local unit
@@ -2712,10 +2715,8 @@ function CNDT:DoConditionSubstitutions(icon, v, c, thisstr)
 end
 
 local activeEventsReusable = {}
-function CNDT:CompileUpdateFunction(icon, activeEvents)
-	icon.ConditionAnticipatorFunc = nil
-
-	local Conditions = icon.Conditions
+function CNDT:CompileUpdateFunction(obj, activeEvents)
+	local Conditions = obj.settings
 	activeEvents = activeEvents or wipe(activeEventsReusable)
 	local numAnticipatorArgs = 0
 	local anticipatorstr = ""
@@ -2728,8 +2729,7 @@ function CNDT:CompileUpdateFunction(icon, activeEvents)
 			local voidNext
 			for n, value in TMW:Vararg(TMW.get(v.events, c)) do
 				if value == "OnUpdate" then
-					icon.conditionUpdateMethod = "OnUpdate"
-					return value
+					return
 				end
 
 				if voidNext then
@@ -2763,8 +2763,7 @@ function CNDT:CompileUpdateFunction(icon, activeEvents)
 				end
 			end
 		else
-			icon.conditionUpdateMethod = "OnUpdate"
-			return "OnUpdate"
+			return
 		end
 
 		-- handle code that anticipates when a change in state will occur.
@@ -2773,7 +2772,7 @@ function CNDT:CompileUpdateFunction(icon, activeEvents)
 			numAnticipatorArgs = numAnticipatorArgs + 1
 
 			local thisstr = TMW.get(v.anticipate, c) -- get the anticipator string from the condition data
-			thisstr = CNDT:DoConditionSubstitutions(icon, v, c, thisstr) -- substitute in any user settings
+			thisstr = CNDT:DoConditionSubstitutions(v, c, thisstr) -- substitute in any user settings
 
 			-- append a check to make sure that the smallest value out of all anticipation checks isnt less than the current time.
 			thisstr = thisstr .. [[
@@ -2789,8 +2788,7 @@ function CNDT:CompileUpdateFunction(icon, activeEvents)
 	end
 
 	if not next(activeEvents) then
-		icon.conditionUpdateMethod = "OnUpdate"
-		return "OnUpdate"
+		return
 	end
 
 	local doesAnticipate
@@ -2806,13 +2804,12 @@ function CNDT:CompileUpdateFunction(icon, activeEvents)
 		if nextTime == 0 then
 			nextTime = huge
 		end
-		icon.nextConditionUpdate = nextTime]]):format((numAnticipatorArgs == 1 and allVars or "min(" .. allVars .. ")"))
+		obj.NextUpdateTime = nextTime]]):format((numAnticipatorArgs == 1 and allVars or "min(" .. allVars .. ")"))
 
 		doesAnticipate = true
 	end
 
-	icon.conditionUpdateMethod = "OnEvent" --DEBUG: COMMENTING THIS LINE FORCES ALL CONDITIONS TO BE ONUPDATE DRIVEN
-	icon.conditionsNeedUpdate = true
+	obj.UpdateMethod = "OnEvent" --DEBUG: COMMENTING THIS LINE FORCES ALL CONDITIONS TO BE ONUPDATE DRIVEN
 
 	local numberOfIfs = 0
 	local funcstr = [[
@@ -2837,30 +2834,23 @@ function CNDT:CompileUpdateFunction(icon, activeEvents)
 	end
 
 	funcstr = funcstr:sub(1, -5) .. [[) then
-		icon.conditionsNeedUpdate = true
+		obj.UpdateNeeded = true
 	end]]
 
 	funcstr = anticipatorstr .. "\r\n" .. funcstr
 	
-	funcstr = [[local icon = ]] .. icon:GetName() .. [[
-	local event, arg1 = ...
+	funcstr = [[local obj, event, arg1 = ...
 	]] .. funcstr
 
 	-- clear out all existing funcs for the icon
-	for event, funcs in pairs(CNDT.EventEngine.funcs) do
-		for func, ic in pairs(funcs) do
-			if icon == ic then
-				funcs[func] = nil
-			end
-		end
-	end
+	CNDT.EventEngine:UnregisterObject(obj)
 
 	local func
 	if functionCache[funcstr] then
 		func = functionCache[funcstr]
 	else
 		local err
-		func, err = loadstring(funcstr, icon:GetName() .. " Condition Events")
+		func, err = loadstring(funcstr, tostring(obj) .. " Condition Events")
 		if func then
 			func = setfenv(func, Env)
 			functionCache[funcstr] = func
@@ -2868,16 +2858,17 @@ function CNDT:CompileUpdateFunction(icon, activeEvents)
 			TMW:Error(err)
 		end
 	end
-	icon.CndtEventString = funcstr
+	obj.updateString = funcstr
 
-	icon.ConditionAnticipatorFunc = doesAnticipate and func
+	obj.AnticipateFunction = doesAnticipate and func
+	obj.UpdateFunction = func
 
 	if func then
 		for event, realEvent in pairs(activeEvents) do
 			if realEvent ~= true then
 				event = realEvent
 			end
-			CNDT.EventEngine:Register(event, func, icon)
+			CNDT.EventEngine:Register(event, func, obj)
 		end
 	end
 end
@@ -2897,19 +2888,82 @@ function CNDT:IsUnitEventUnit(unit)
 	return "OnUpdate"
 end
 
-function CNDT:ProcessConditions(icon)
-	-- icon might also be a group. make sure anything performed on icon can also be performed on group
-	if TMW.debug and test then test() end
 
-	local Conditions = icon.Conditions
+
+
+local ConditionObject = TMW:NewClass("ConditionObject")
+
+
+function ConditionObject:OnNewInstance(parent, Conditions, conditionString, updateFuncArg1)
+	self.settings = Conditions
+	self.conditionString = conditionString
+	
+	self.UpdateNeeded = true
+	self.NextUpdateTime = huge
+	self.UpdateMethod = "OnUpdate"
+	
+	local func, err = loadstring(conditionString, tostring(self) .. " Condition")
+	if func then
+		func = setfenv(func, TMW.CNDT.Env)
+		self.CheckFunction = setfenv(func, TMW.CNDT.Env)
+	elseif err then
+		TMW:Error(err)
+	end
+	
+	CNDT:CompileUpdateFunction(self, updateFuncArg1) -- DEBUG: VARIABLE NAMES ARE WRONG (UpdateNeeded, etc)
+end
+
+function ConditionObject:Check(parent)
+	if self.CheckFunction then
+	
+		if self.UpdateMethod == "OnEvent" then
+			self.UpdateNeeded = nil
+			
+			if self.AnticipateFunction then
+				self:AnticipateFunction()
+			end
+		end
+		
+		if self.NextUpdateTime < TMW.time then
+			self.NextUpdateTime = huge
+		end
+		
+		local passed = self:CheckFunction(parent)
+		
+		self.Failed = not passed
+	end
+end
+
+function CNDT:GetConditionObject(parent, Conditions)
+	local conditionString, updateFuncArg1 = CNDT:GetConditionCheckFunctionString(parent, Conditions)
+	
+	if conditionString ~= "" then
+		for instance in pairs(ConditionObject.instances) do
+			if instance.conditionString == conditionString then
+				return instance
+			end
+		end
+		return ConditionObject:New(parent, Conditions, conditionString, updateFuncArg1)
+	end
+end
+
+
+function CNDT.Conditions_LoadData(self, Conditions)
+end
+
+function CNDT:GetConditionCheckFunctionString(parent, Conditions)
+	--if TMW.debug and test then test() end
+	
+	--self.Failed = nil
+
+	--Conditions = Conditions or self.Conditions
 
 	local funcstr = ""
-	local luaUsed
 
 	for i = 1, Conditions.n do
 		local c = Conditions[i]
 		local t = c.Type
-		local v = ConditionsByType[t]
+		local v = TMW.CNDT.ConditionsByType[t]
 
 		local andor
 		if c.AndOr == "OR" then
@@ -2922,98 +2976,74 @@ function CNDT:ProcessConditions(icon)
 			c.Operator = "~=" -- fix potential corruption from importing a string (a single | becaomes || when pasted, "~=" in encoded as "~|=")
 		end
 
+		local thiscondtstr
 		if v then
-			if t == "LUA" then
-				luaUsed = 1
-				setmetatable(Env, EnvMeta)
-			end
-
-			local thiscondtstr = v.funcstr
+			thiscondtstr = v.funcstr
 			if type(thiscondtstr) == "function" then
-				thiscondtstr = thiscondtstr(c, icon)
+				thiscondtstr = thiscondtstr(c, parent)
 			end
-
-			if thiscondtstr then
-				local thisstr = andor .. "(" .. strrep("(", c.PrtsBefore) .. thiscondtstr .. strrep(")", c.PrtsAfter)  .. ")"
-
-				thisstr = CNDT:DoConditionSubstitutions(icon, v, c, thisstr)
-
-				funcstr = funcstr .. thisstr
-			else
-				funcstr = funcstr .. (andor .. "(" .. strrep("(", c.PrtsBefore) .. "true" .. strrep(")", c.PrtsAfter)  .. ")")
-			end
-		else
-			funcstr = funcstr .. (andor .. "(" .. strrep("(", c.PrtsBefore) .. "true" .. strrep(")", c.PrtsAfter)  .. ")")
 		end
+		
+		thiscondtstr = thiscondtstr or "true"
+		
+		local thisstr = andor .. "(" .. strrep("(", c.PrtsBefore) .. thiscondtstr .. strrep(")", c.PrtsAfter)  .. ")"
+
+		thisstr = TMW.CNDT:DoConditionSubstitutions(v, c, thisstr)
+
+		funcstr = funcstr .. thisstr
 	end
-
-	local funcstr, key = icon:FinishCompilingConditions(funcstr:sub(4))
-
-	if funcstr == "" then
-		icon:ProcessConditionFunction()
-		CNDT.EventEngine:UnregisterIcon(icon)
-		return
-	end
-
-	icon.nextConditionUpdate = icon.nextConditionUpdate or math.huge
-	funcstr = (
-	[[if icon.nextConditionUpdate < time then
-		icon.nextConditionUpdate = huge
-	end
-	if not (%s) then
-		icon.%s = 1
-	else
-		icon.%s = nil
-	end]]):format(funcstr, key, key)
-
-	if icon.conditionUpdateMethod == "OnEvent" then
-		local prepend = [[icon.conditionsNeedUpdate = nil
-		]]
-		if icon.ConditionAnticipatorFunc then
-			prepend = prepend .. [[icon.ConditionAnticipatorFunc()
-			]]
-		end
-		funcstr = prepend .. funcstr
-	end
-
-	funcstr = [[local icon = ]] .. icon:GetName() .. "\r\n" .. funcstr
 	
+	local funcstr, arg1 = parent:FinishCompilingConditions(funcstr:sub(4))	
+	--TMW.CNDT:CompileUpdateFunction(self, arg1)
 	
+	if funcstr ~= "" then		
+		--[==[funcstr = [[local self = ]] .. self:GetName() .. [[
+		return (]] .. funcstr .. [[)]]
+		]==]
+		funcstr = [[local obj, icon = ...
+		return (]] .. funcstr .. [[)]]
+	end
 	
+	return funcstr, arg1
+	--[[
 	local func
+	if funcstr ~= "" then
 
-	icon.CndtString = funcstr
-	if functionCache[funcstr] then
-		func = functionCache[funcstr]
-	else
-		local err
-		func, err = loadstring(funcstr, icon:GetName() .. " Condition")
-		if func then
-			func = setfenv(func, Env)
-			functionCache[funcstr] = func
-		elseif (TMW.debug or luaUsed) and err then
-			TMW:Error(err)
+		if TMW.CNDT.functionCache[funcstr] then
+			func = TMW.CNDT.functionCache[funcstr]
+		else
+			local err
+			func, err = loadstring(funcstr, self:GetName() .. " Condition")
+			if func then
+				func = setfenv(func, TMW.CNDT.Env)
+				TMW.CNDT.functionCache[funcstr] = func
+			elseif err then
+				TMW:Error(err)
+			end
 		end
-	end
-
-	icon:ProcessConditionFunction(func) -- tell the group/icon that the function is ready to be handled
+	end]]
+	
+--[[	self.Condition_String = funcstr
+	self.Condition_CheckFunc = func
+	self.UpdateNeeded = true
+	
+	self:ProcessConditionFunction(func) -- tell the group/icon that the function is ready to be handled]]
 end
-
 
 
 CNDT.EventEngine = CreateFrame("Frame")
 CNDT.EventEngine.funcs = {}
-function CNDT.EventEngine:Register(event, func, icon)
+function CNDT.EventEngine:Register(event, func, obj)
 	self:RegisterEvent(event)
 	CNDT.EventEngine.funcs[event] = CNDT.EventEngine.funcs[event] or {}
-	CNDT.EventEngine.funcs[event][func] = icon
+	CNDT.EventEngine.funcs[event][obj] = func
 end
 
-function CNDT.EventEngine:UnregisterIcon(icon)
+function CNDT.EventEngine:UnregisterObject(obj)
 	for event, funcs in pairs(CNDT.EventEngine.funcs) do
-		for func, ic in pairs(funcs) do
-			if icon == ic then
-				funcs[func] = nil
+		for objKey in pairs(funcs) do
+			if obj == objKey then
+				funcs[objKey] = nil
 			end
 		end
 	end
@@ -3022,8 +3052,8 @@ end
 function CNDT.EventEngine:OnEvent(event, arg1)
 	local funcs = self.funcs[event]
 	if funcs then
-		for func in next, funcs do
-			func(event, arg1)
+		for obj, func in next, funcs do
+			func(obj, event, arg1)
 		end
 	end
 end

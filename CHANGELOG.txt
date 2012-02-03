@@ -1,5 +1,5 @@
 ===v4.9.0===
- * Conditions are now almost entirely event driven, resulting in a (tremendous) performance increase.
+ * The Condition engine has been completely rewritten and is now almost entirely event driven, resulting in a (tremendous) performance increase.
  * Enrage is now a proper dispel type, and no longer relies on a pre-defined list of enrages.
  * Implemented a proper class-based inheritance system for many objects (Icons, Icon Types, Groups, Condition Groups).
  * You can now check units relative to the special condition unit '%u' (//for example, '%u-target' or '%upettarget'//).
@@ -16,7 +16,7 @@
  ** (r429) An icon/group should no longer be treated as if it has failing conditions after it had conditions that were failing, but those conditions were removed
  ** (r430) Fixed the list of unitIDs used to guess a unit's class
  ** (r431) A unit's class should now be properly detected when the unit is from another server
- ** (r432) conditions.lua:1502 Usage: RegisterEvent("eventname", "methodname"): "methodname" - method "PLAYER_TALENT_UPDATE" not found on self.
+ ** (r434) Icon Show/Hide events should work once again now
 
 ===v4.8.3===
  * Bug Fixes:
