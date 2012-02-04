@@ -1,5 +1,4 @@
-﻿-- NEEDS manual REVIEW
--- --------------------
+﻿-- --------------------
 -- TellMeWhen
 -- Originally by Nephthys of Hyjal <lieandswell@yahoo.com>
 
@@ -86,6 +85,10 @@ function Type:Update()
 	ClockGCD = db.profile.ClockGCD
 end
 
+local function Totem_OnEvent(icon)
+	icon.NextUpdateTime = 0
+end
+
 local function Totem_OnUpdate(icon, time)
 
 	local Slots, NameNameHash, NameFirst = icon.Slots, icon.NameNameHash, icon.NameFirst
@@ -150,6 +153,11 @@ function Type:Setup(icon, groupID, iconID)
 		icon:SetTexture(TMW:GetConfigIconTexture(icon))
 	end
 
+	icon:SetUpdateMethod("manual")
+	
+	icon:RegisterEvent("PLAYER_TOTEM_UPDATE")
+	icon:SetScript("OnEvent", Totem_OnEvent)
+	
 	icon:SetScript("OnUpdate", Totem_OnUpdate)
 	icon:Update()
 end

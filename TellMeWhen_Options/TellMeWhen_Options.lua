@@ -5908,6 +5908,11 @@ local EditboxHooks = {
 			SUG:NameOnCursor(1)
 		end
 	end,
+	OnTabPressed = function(self)
+		if self.SUG_Enabled and SUG[1] and SUG[1].insert and SUG[1]:IsVisible() then
+			SUG[1]:Click("LeftButton")
+		end
+	end,
 }
 function SUG:EnableEditBox(editbox, inputType, onlyOneEntry)
 	editbox.SUG_Enabled = 1

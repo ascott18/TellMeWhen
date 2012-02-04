@@ -4223,7 +4223,9 @@ function Icon.StartAnimation(icon, table)
 		end
 
 		-- meta inheritance
-		for ic in next, Types.meta.Icons do
+		local Icons = Types.meta.Icons
+		for i = 1, #Icons do
+			local ic = Icons[i]
 			if ic.__currentIcon == icon then
 				ic:StartAnimation(table)
 			end

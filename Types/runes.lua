@@ -80,6 +80,14 @@ function Type:Update()
 	ClockGCD = db.profile.ClockGCD
 end
 
+
+function Type:RUNE_UPDATE()
+	for i = 1, #Type.Icons do
+		Type.Icons[i].NextUpdateTime = 0
+	end
+end
+	
+	
 local huge = math.huge
 local function Runes_OnUpdate(icon, time)
 
@@ -156,6 +164,11 @@ function Type:Setup(icon, groupID, iconID)
 	end
 
 	icon:SetTexture(icon.FirstTexture or "Interface\\Icons\\INV_Misc_QuestionMark")
+
+	Type:RegisterEvent("RUNE_TYPE_UPDATE", "RUNE_UPDATE")
+	Type:RegisterEvent("RUNE_POWER_UPDATE", "RUNE_UPDATE")
+	
+	icon:SetUpdateMethod("manual")
 
 	icon:SetScript("OnUpdate", Runes_OnUpdate)
 	--icon:Update()

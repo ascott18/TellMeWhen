@@ -8,6 +8,7 @@
  * Icons that check units now have their units managed behind the scenes whenever possible so that icons aren't trying to check units that don't exist.
  * There is now an option (enabled by default) to color the names of units in text displays and outputs.
  * Added Floating Combat Text as a text output.
+ * You can now press tab to insert the first entry that is displayed in the suggestion list.
  * Bug Fixes:
  ** (r427) (Condition):  attempt to call global 'GetPrimaryTalentTree' (a nil value)
  ** (r428) (Condition):  attempt to call global 'IsResting' (a nil value)
@@ -21,6 +22,7 @@
  ** (r435) Unit substitutions should work once again
  ** (r436) Fixed a bug causing the wrong data to be reported for Combat Log Event events
  ** (r437) When a meta icon changes the icon it is checking, it should no longer stop any animations that the meta icon itself initiated (non-inherited animations)
+ ** (r439) TellMeWhen-5.0.0.lua:4227: attempt to index local "ic" (a number value)
 
 ===v4.8.3===
  * Bug Fixes:

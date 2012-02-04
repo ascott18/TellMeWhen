@@ -183,10 +183,10 @@
 
 				GameTooltip:AddLine(" ")
 				if self.insert2 then
-					GameTooltip:AddLine(first:format(TMW.L["SUG_INSERT_LEFT"]), 0, .5, 1, nil)
+					GameTooltip:AddLine(first:format(TMW.L["SUG_INSERT_LEFT"] .. (self:GetID() == 1 and TMW.L["SUG_INSERT_TAB"] or "")), 0, .5, 1, nil)
 					GameTooltip:AddLine(second:format(TMW.L["SUG_INSERT_RIGHT"]), 0, .5, 1, nil)
 				else
-					GameTooltip:AddLine(first:format(TMW.L["SUG_INSERT_ANY"]), 0, .5, 1, nil)
+					GameTooltip:AddLine(first:format(TMW.L["SUG_INSERT_ANY"] .. (self:GetID() == 1 and TMW.L["SUG_INSERT_TAB"] or "")), 0, .5, 1, nil)
 				end
 
 				GameTooltip:Show()

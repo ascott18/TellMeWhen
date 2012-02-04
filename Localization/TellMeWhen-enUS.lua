@@ -865,6 +865,7 @@ L["SUG_FINISHHIM_DESC"] = "Click to immediately finish the caching/filtering pro
 L["SUG_INSERT_ANY"] = "|cff7fffffClick|r"
 L["SUG_INSERT_LEFT"] = "|cff7fffffLeft-click|r"
 L["SUG_INSERT_RIGHT"] = "|cff7fffffRight-click|r"
+L["SUG_INSERT_TAB"] = " or |cff7fffffTab|r"
 
 L["SUG_INSERTNAME"] = "%s to insert as a name"
 L["SUG_INSERTID"] = "%s to insert as an ID"
