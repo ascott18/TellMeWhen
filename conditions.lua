@@ -2462,7 +2462,7 @@ CNDT.Types = {
 				TMW:QueueValidityCheck(c.Icon, icon:GetID(), nil, g, i)
 			end
 
-			local str = [[(c.Icon and c.Icon.__shown and c.Icon.OnUpdate and not c.Icon:Update(time))]]
+			local str = [[(c.Icon and c.Icon.__shown and c.Icon.OnUpdate and not c.Icon:Update())]]
 			if c.Level == 0 then
 				str = str .. [[and c.Icon.__alpha > 0]]
 			else

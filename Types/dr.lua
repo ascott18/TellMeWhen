@@ -27,8 +27,8 @@ local print = TMW.print
 local huge = math.huge
 local strlowerCache = TMW.strlowerCache
 local SpellTextures = TMW.SpellTextures
-local CL_PLAYER = COMBATLOG_OBJECT_TYPE_PLAYER
-local CL_PET = COMBATLOG_OBJECT_CONTROL_PLAYER
+--local CL_PLAYER = COMBATLOG_OBJECT_TYPE_PLAYER
+local CL_CONTROL_PLAYER = COMBATLOG_OBJECT_CONTROL_PLAYER
 
 local clientVersion = select(4, GetBuildInfo())
 
@@ -82,39 +82,48 @@ function Type:Update()
 	ClockGCD = db.profile.ClockGCD
 end
 
-local function DR_OnEvent(icon, _, _, event, _, _, _, _, _, destGUID, _, destFlags, _, spellID, spellName, _, auraType)
-	if auraType == "DEBUFF" and (event == "SPELL_AURA_REMOVED" or event == "SPELL_AURA_APPLIED" or (icon.CheckRefresh and event == "SPELL_AURA_REFRESH")) then
-		local ND = icon.NameHash
-		if ND[spellID] or ND[strlowerCache[spellName]] then
-			if PvEDRs[spellID] or bitband(destFlags, CL_PLAYER) == CL_PLAYER or bitband(destFlags, CL_PET) == CL_PET then
-				local dr = icon[destGUID]
-				if event == "SPELL_AURA_APPLIED" then
-					if dr and dr.start + dr.duration <= TMW.time then
-						dr.start = 0
-						dr.duration = 0
-						dr.amt = 100
-					end
-				else
-					if not dr then
-						dr = {
-							amt = 50,
-							start = TMW.time,
-							duration = DRReset,
-							tex = SpellTextures[spellID]
-						}
-						icon[destGUID] = dr
-					else
-						local amt = dr.amt
-						if amt and amt ~= 0 then
-							dr.amt = amt > 25 and amt/2 or 0
-							dr.duration = DRReset
-							dr.start = TMW.time
-							dr.tex = SpellTextures[spellID]
+local function DR_OnEvent(icon, event, _, cevent, _, _, _, _, _, destGUID, _, destFlags, _, spellID, spellName, _, auraType)
+	if event == "COMBAT_LOG_EVENT_UNFILTERED" then
+		if auraType == "DEBUFF" and (cevent == "SPELL_AURA_REMOVED" or cevent == "SPELL_AURA_APPLIED" or (icon.CheckRefresh and cevent == "SPELL_AURA_REFRESH")) then
+			local ND = icon.NameHash
+			if ND[spellID] or ND[strlowerCache[spellName]] then
+				if PvEDRs[spellID] --[[or bitband(destFlags, CL_PLAYER) == CL_PLAYER]] or bitband(destFlags, CL_CONTROL_PLAYER) == CL_CONTROL_PLAYER then
+					local dr = icon[destGUID]
+					local time = TMW.time
+					if cevent == "SPELL_AURA_APPLIED" then
+						if dr and dr.start + dr.duration <= time then
+							dr.start = 0
+							dr.duration = 0
+							dr.amt = 100
 						end
+					else
+						if not dr then
+							dr = {
+								amt = 50,
+								start = time,
+								duration = DRReset,
+								tex = SpellTextures[spellID]
+							}
+							icon[destGUID] = dr
+						else
+							local amt = dr.amt
+							if amt and amt ~= 0 then
+								dr.amt = amt > 25 and amt/2 or 0
+								dr.duration = DRReset
+								dr.start = time
+								dr.tex = SpellTextures[spellID]
+							end
+						end
+					end
+					-- DO AN UPDATE RIGHT HERE
+					if icon.Update_Method == "manual" then
+						icon.NextUpdateTime = 0
 					end
 				end
 			end
 		end
+	else -- it must be a unit update event
+		icon.NextUpdateTime = 0
 	end
 end
 
@@ -140,7 +149,7 @@ local function DR_OnUpdate(icon, time)
 				local color = icon:CrunchColor(duration)
 
 				local amt = dr.amt
-				icon:SetInfo(UnAlpha, (not icon.ShowTimer and Alpha ~= 0) and .5 or 1, dr.tex, dr.start, duration, icon.firstCategory, nil, amt, amt .. "%", nil, unit)
+				icon:SetInfo(UnAlpha, color, dr.tex, dr.start, duration, icon.firstCategory, nil, amt, amt .. "%", nil, unit)
 				if UnAlpha > 0 then
 					return
 				end
@@ -216,7 +225,8 @@ function Type:Setup(icon, groupID, iconID)
 	icon.NameFirst = TMW:GetSpellNames(icon, icon.Name, 1)
 	icon.NameArray = TMW:GetSpellNames(icon, icon.Name)
 	icon.NameHash = TMW:GetSpellNames(icon, icon.Name, nil, nil, 1)
-	icon.Units = TMW:GetUnits(icon, icon.Unit)
+	local UnitSet
+	icon.Units, UnitSet = TMW:GetUnits(icon, icon.Unit)
 	icon.FirstTexture = SpellTextures[icon.NameFirst]
 
 	-- Do the Right Thing and tell people if their DRs mismatch
@@ -224,6 +234,15 @@ function Type:Setup(icon, groupID, iconID)
 
 	icon:SetTexture(TMW:GetConfigIconTexture(icon))
 
+	if UnitSet.allUnitsChangeOnEvent then
+		icon:SetUpdateMethod("manual")
+		for event in pairs(UnitSet.updateEvents) do
+			icon:RegisterEvent(event)
+		end
+	else
+		icon:SetUpdateMethod("auto")
+	end
+	
 	icon:SetScript("OnEvent", DR_OnEvent)
 	icon:RegisterEvent("COMBAT_LOG_EVENT_UNFILTERED")
 

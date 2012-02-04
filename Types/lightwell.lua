@@ -82,12 +82,10 @@ function Type:GLYPH()
 		end
 	end
 	MaxCharges = 10
+	for i = 1, #Type.Icons do
+		Type.Icons[i].NextUpdateTime = 0
+	end
 end
-Type:RegisterEvent("GLYPH_ADDED", 	 "GLYPH")
-Type:RegisterEvent("GLYPH_DISABLED", "GLYPH")
-Type:RegisterEvent("GLYPH_ENABLED",  "GLYPH")
-Type:RegisterEvent("GLYPH_REMOVED",  "GLYPH")
-Type:RegisterEvent("GLYPH_UPDATED",  "GLYPH")
 
 
 function Type:COMBAT_LOG_EVENT_UNFILTERED(_, _, event, _, sourceGUID, _, _, _, _, _, _, _, spellID)
@@ -95,20 +93,30 @@ function Type:COMBAT_LOG_EVENT_UNFILTERED(_, _, event, _, sourceGUID, _, _, _, _
 		if event == "SPELL_SUMMON" and spellID == 724 then
 			CurrentCharges = MaxCharges
 			SummonTime = TMW.time
+			
+			for i = 1, #Type.Icons do
+				Type.Icons[i].NextUpdateTime = 0
+			end
 		elseif (event == "SPELL_AURA_REFRESH" or event == "SPELL_AURA_APPLIED") and spellID == 7001 and CurrentCharges > 0 then
 			CurrentCharges = CurrentCharges - 1
+			
+			for i = 1, #Type.Icons do
+				Type.Icons[i].NextUpdateTime = 0
+			end
 		end
 	end
 end
-Type:RegisterEvent("COMBAT_LOG_EVENT_UNFILTERED")
 
 function Type:PLAYER_TOTEM_UPDATE(_, slot)
 	if slot == 1 and not GetTotemInfo(1) then
 		-- catch despawns/expirations
 		CurrentCharges = 0
+		
+		for i = 1, #Type.Icons do
+			Type.Icons[i].NextUpdateTime = 0
+		end
 	end
 end
-Type:RegisterEvent("PLAYER_TOTEM_UPDATE")
 
 local function LW_OnUpdate(icon, time)
 	if SummonTime and SummonTime + 180 < time then
@@ -129,7 +137,17 @@ function Type:Setup(icon, groupID, iconID)
 	icon.NameFirst = 724
 
 	icon:SetTexture(SpellTextures[724])
+	
+	Type:RegisterEvent("PLAYER_TOTEM_UPDATE")
+	Type:RegisterEvent("COMBAT_LOG_EVENT_UNFILTERED")
+	Type:RegisterEvent("GLYPH_ADDED", 	 "GLYPH")
+	Type:RegisterEvent("GLYPH_DISABLED", "GLYPH")
+	Type:RegisterEvent("GLYPH_ENABLED",  "GLYPH")
+	Type:RegisterEvent("GLYPH_REMOVED",  "GLYPH")
+	Type:RegisterEvent("GLYPH_UPDATED",  "GLYPH")
 
+	icon:SetUpdateMethod("manual")
+	
 	icon:SetScript("OnUpdate", LW_OnUpdate)
 	icon:Update()
 end

@@ -272,7 +272,7 @@ local function CLEU_OnEvent(icon, _, t, event, h, sourceGUID, sourceName, source
 		icon.cleu_destUnit = destUnit
 		icon.cleu_extraSpell = extraID
 
-		icon:Update(TMW.time, true, tex)
+		icon:Update(true, tex)
 
 		if icon.OnCLEUEvent then
 			-- make sure this comes after we update the icon.

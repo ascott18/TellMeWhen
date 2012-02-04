@@ -67,7 +67,7 @@ local function Meta_OnUpdate(icon, time)
 	for n = 1, #CompiledIcons do
 		local ic = _G[CompiledIcons[n]]
 		if ic and ic.OnUpdate and ic.__shown and not (CheckNext and ic.__lastMetaCheck == time) then
-			ic:Update(time)
+			ic:Update()
 			local alpha = ic.__alpha
 			if alpha > 0 and ic.__shown then
 				if Sort then

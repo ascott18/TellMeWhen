@@ -3804,8 +3804,8 @@
 								local wt
 
 								if not strfind(t, "%.[^\\]+$") then
+									wt = t ~= "" and TMW.L["SOUNDERROR1"]
 									t = "None"
-									wt = TMW.L["SOUNDERROR1"]
 								elseif strfind(strlower(t), "%.wav$") and select(4, GetBuildInfo()) > 40000 then
 									t = "None"
 									wt = TMW.L["SOUNDERROR2"]

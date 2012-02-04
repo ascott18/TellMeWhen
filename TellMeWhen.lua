@@ -32,7 +32,7 @@ local DRData = LibStub("DRData-1.0", true)
 TELLMEWHEN_VERSION = "5.0.0"
 TELLMEWHEN_VERSION_MINOR = strmatch(" @project-version@", " r%d+") or ""
 TELLMEWHEN_VERSION_FULL = TELLMEWHEN_VERSION .. TELLMEWHEN_VERSION_MINOR
-TELLMEWHEN_VERSIONNUMBER = 50001 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
+TELLMEWHEN_VERSIONNUMBER = 50002 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
 if TELLMEWHEN_VERSIONNUMBER > 51000 or TELLMEWHEN_VERSIONNUMBER < 50000 then return error("YOU SCREWED UP THE VERSION NUMBER OR DIDNT CHANGE THE SAFETY LIMITS") end -- safety check because i accidentally made the version number 414069 once
 
 TELLMEWHEN_MAXGROUPS = 1 	--this is a default, used by SetTheory (addon), so dont rename
@@ -61,7 +61,7 @@ local MikSBT, Parrot, SCT =
 local TARGET_TOKEN_NOT_FOUND, FOCUS_TOKEN_NOT_FOUND =
 	  TARGET_TOKEN_NOT_FOUND, FOCUS_TOKEN_NOT_FOUND
 local CL_PLAYER = COMBATLOG_OBJECT_TYPE_PLAYER
-local CL_PET = COMBATLOG_OBJECT_CONTROL_PLAYER
+local CL_CONTROL_PLAYER = COMBATLOG_OBJECT_CONTROL_PLAYER
 local bitband = bit.band
 local huge = math.huge
 
@@ -1449,7 +1449,7 @@ function TMW:OnUpdate(elapsed)					-- THE MAGICAL ENGINE OF DOING EVERYTHING
 			for i = 1, #IconsToUpdate do
 				local icon = IconsToUpdate[i]
 			--	if icon.updateQueued then
-					icon:Update(time)
+					icon:Update()
 			--	end
 			end
 
@@ -1458,8 +1458,8 @@ function TMW:OnUpdate(elapsed)					-- THE MAGICAL ENGINE OF DOING EVERYTHING
 	end
 
 	if IconsToUpdateBindText then
-		for i = 1, #IconsToUpdateBindText do
-			IconsToUpdateBindText[i]:UpdateBindText()
+		for icon in next, IconsToUpdateBindText do
+			icon:UpdateBindText()
 		end
 	end
 
@@ -1582,17 +1582,14 @@ function TMW:Update()
 	wipe(TMW.IconsLookup)
 	IconsToUpdateBindText = nil
 
-	for group in TMW.InGroups() do
-		group:Hide()
-	end
-
 	for key, Type in pairs(TMW.Types) do
+		wipe(Type.Icons)
 		Type:Update()
 		Type:UpdateColors(true)
 	end
 
-	for groupID = 1, TELLMEWHEN_MAXGROUPS do
-		-- dont use TMW.InGroups() because that will setup every group that exists,
+	for groupID = 1, max(TELLMEWHEN_MAXGROUPS, #TMW) do
+		-- cant use TMW.InGroups() because groups wont exist yet on the first call of this, so they would never be able to exists
 		-- even if it shouldn't be setup (i.e. it has been deleted or the user changed profiles)
 		local group = TMW[groupID] or TMW.Classes.Group:New("Frame", "TellMeWhen_Group" .. groupID, TMW, "TellMeWhen_GroupTemplate", groupID)
 		group:Setup()
@@ -2602,7 +2599,7 @@ end
 function TMW:COMBAT_LOG_EVENT_UNFILTERED(_, _, p,_, g, _, f, _, _, _, _, _, i)
 	-- This is only used for the suggester, but i want to to be listening all the times for auras, not just when you load the options
 	if p == "SPELL_AURA_APPLIED" and not TMW.AuraCache[i] then
-		if bitband(f, CL_PLAYER) == CL_PLAYER or bitband(f, CL_PET) == CL_PET then -- player or pet
+		if --[[bitband(f, CL_PLAYER) == CL_PLAYER or]] bitband(f, CL_CONTROL_PLAYER) == CL_CONTROL_PLAYER then -- player or player-controlled unit
 			TMW.AuraCache[i] = 2
 		else
 			TMW.AuraCache[i] = 1
@@ -3865,79 +3862,15 @@ function ANIM:GetFlasher(parent)
 	return Flasher
 end
 
---[=[
-local UpdateObject = TMW:NewClass("UpdateObject")
-UpdateObject.Update_Method = "auto"
-TMW.UpdateObjects = {}
-function UpdateObject:Update_SetMethod(method)
-	self.Update_Method = method
-	if method == "auto" then
-		-- do nothing for now.
-		self.Update_Needed = true
-	elseif method == "manual" then
-		self:ScheduleNextUpdate()
-	else
-		-- clearing the update
-	end
-	TMW.UpdateObjects[self] = method
-end
-
-
-
-function Icon.ScheduleNextUpdate(icon)
-	local d = icon.__duration - (time - icon.__start)
-	if d < 0 then d = 0 end
-	
-	local newdur = 0
-	
-	
-	-- Duration Min/Max
-	if icon.DurationMaxEnabled then
-		local DurationMax = icon.DurationMax
-		if DurationMax < d then
-			newdur = DurationMax
-		end
-	end
-	if icon.DurationMinEnabled then
-		local DurationMin = icon.DurationMin
-		if DurationMin < d and newdur < DurationMin then
-			newdur = DurationMin
-		end
-	end
-	
-	-- Duration Events
-	if icon.OnDuration then
-		local Duration = icon.OnDuration.Value
-		if Duration < d and newdur < Duration then
-			newdur = Duration
-		end
-	end
-	
-	local nextUpdateTime = time + (d - newdur)
-	if nextUpdateTime == time then
-		nextUpdateTime = nil
-	end
-	icon.nextUpdateTime = nextUpdateTime
-	
-	return nextUpdateTime
-end
-]=]
-
-
---function UpdateObject:Update_
-
 
 
 local ConditionControlledObject = TMW:NewClass("ConditionControlledObject")
 
 function ConditionControlledObject:Conditions_LoadData(Conditions)
-	self.ConditionObj = TMW.CNDT:GetConditionObject(self, Conditions)
+	local obj = TMW.CNDT:GetConditionObject(self, Conditions)
+	self.ConditionObj = obj
+	return obj
 end
-
-
-
-
-
 
 
 -- -----------
@@ -4000,7 +3933,8 @@ end
 function Group.ShouldUpdateIcons(group)
 	local gs = group:GetSettings()
 
-	if	(not gs.Enabled) or
+	if	(group:GetID() > TELLMEWHEN_MAXGROUPS) or
+		(not gs.Enabled) or
 		(GetActiveTalentGroup() == 1 and not gs.PrimarySpec) or
 		(GetActiveTalentGroup() == 2 and not gs.SecondarySpec) or
 		(GetPrimaryTalentTree() and not gs["Tree" .. GetPrimaryTalentTree()])
@@ -4060,10 +3994,6 @@ end
 function Group.Setup(group)
 	local groupID = group:GetID()
 
-	--[[if groupID > TELLMEWHEN_MAXGROUPS then
-		return
-	end]]
-
 	group.CorrectStance = true
 	group.__shown = group:IsShown()
 
@@ -4108,16 +4038,14 @@ function Group.Setup(group)
 
 	group:SetPos()
 
+	-- remove the group from the list of groups that should update conditions
 	tDeleteItem(GroupsToUpdate, group)
-		
+	
 	if group:ShouldUpdateIcons() and Locked then
 		group:Show()
 
-		group:Conditions_LoadData(group.Conditions)
-		if group.ConditionObj then
-			GroupsToUpdate[#GroupsToUpdate+1] = group
-			sort(GroupsToUpdate, Group.ScriptSort)
-		end
+		-- process any conditions the group might have
+		GroupsToUpdate[#GroupsToUpdate+1] = group:Conditions_LoadData(group.Conditions) and group
 	else
 		if group:ShouldUpdateIcons() then
 			group:Show()
@@ -4125,6 +4053,9 @@ function Group.Setup(group)
 			group:Hide()
 		end
 	end
+	
+	-- we probably added or removed an entry from this table, so re-sort it:
+	sort(GroupsToUpdate, Group.ScriptSort)
 end
 
 
@@ -4292,7 +4223,7 @@ function Icon.StartAnimation(icon, table)
 		end
 
 		-- meta inheritance
-		for ic in Types.meta:InIcons() do
+		for ic in next, Types.meta.Icons do
 			if ic.__currentIcon == icon then
 				ic:StartAnimation(table)
 			end
@@ -4411,8 +4342,7 @@ end
 
 
 
-function Icon.Update(icon, time, force, ...)
-	time = time or TMW.time
+function Icon.Update(icon, force, ...)
 	local Update_Method = icon.Update_Method
 	
 	if icon.__shown and (force or icon.LastUpdate <= time - UPD_INTV) then
@@ -4890,7 +4820,15 @@ function Icon.Setup(icon)
 	local group = icon.group
 	local ics = icon:GetSettings()
 	local typeData = Types[ics.Type]
+	
+	-- remove the icon from the previous type's icon list
+	if icon.typeData then
+		tDeleteItem(icon.typeData.Icons, icon)
+	end
+	
+	-- add the icon to this type's icon list
 	icon.typeData = typeData
+	typeData.Icons[#typeData.Icons + 1] = icon
 
 	runEvents = nil
 	TMW:ScheduleTimer("RestoreEvents", max(UPD_INTV*2.1, 0.2))
@@ -5015,8 +4953,7 @@ function Icon.Setup(icon)
 		if strfind(icon.BindText, "%%[Dd]") then
 			icon.UpdateBindText_Any = true
 			IconsToUpdateBindText = IconsToUpdateBindText or {}
-			tDeleteItem(IconsToUpdateBindText, icon)
-			tinsert(IconsToUpdateBindText,icon)
+			IconsToUpdateBindText[icon] = true
 		--else
 		end
 		if strfind(icon.BindText, "%%[Ss]") then
@@ -5043,7 +4980,7 @@ function Icon.Setup(icon)
 
 	-- actually run the icon's update function
 	if icon.Enabled or not Locked then
-		local success, err = pcall(Types[icon.Type].Setup, Types[icon.Type], icon, groupID, iconID)
+		local success, err = pcall(typeData.Setup, typeData, icon, groupID, iconID)
 		if not success then
 			TMW:Error(L["GROUPICON"]:format(groupID, iconID) .. ": " .. err)
 		end
@@ -5096,7 +5033,7 @@ function Icon.Setup(icon)
 			icon:SetTexture(nil)
 		end
 		icon:EnableMouse(0)
-		if (icon.ForceDisabled or not icon.Enabled) or (icon.Name == "" and not Types[icon.Type].AllowNoName) then
+		if (icon.ForceDisabled or not icon.Enabled) or (icon.Name == "" and not typeData.AllowNoName) then
 			ClearScripts(icon)
 			icon:Hide()
 		end
@@ -5184,7 +5121,11 @@ do	-- IconType:InIcons(groupID)
 	end
 end
 
-function IconType:UpdateColors(dontUpdateIcons)
+function IconType:OnNewInstance()
+	self.Icons = {}
+end
+
+function IconType:UpdateColors(dontSetupIcons)
 	for k, v in pairs(db.profile.Colors[self.type]) do
 		if v.Override then
 			self[k] = v
@@ -5192,14 +5133,14 @@ function IconType:UpdateColors(dontUpdateIcons)
 			self[k] = db.profile.Colors.GLOBAL[k]
 		end
 	end
-	if not dontUpdateIcons then
-		self:UpdateIcons()
+	if not dontSetupIcons then
+		self:SetupIcons()
 	end
 end
 
-function IconType:UpdateIcons()
-	for icon in self:InIcons() do
-		icon:Setup()
+function IconType:SetupIcons()
+	for i = 1, #self.Icons do
+		self.Icons[i]:Setup()
 	end
 end
 
@@ -5232,7 +5173,7 @@ function IconType:GetIconMenuText(data)
 end
 
 function IconType:GetFontTestValues(icon)
-	return nil, nil -- pretty pointless
+	return nil, nil -- pretty pointless to return these nils, but i do a lot of pointless things, don't i?
 end
 
 function IconType:Register()
@@ -5539,7 +5480,7 @@ TMW.Units = {
 }
 function TMW:GetUnits(icon, setting, dontreplace)
 	local set = TMW.UNITS:GetUnitSet(setting)
-	return set.exposedUnits
+	return set.exposedUnits, set
 end
 
 local function replace(text, find, rep)
@@ -5730,39 +5671,69 @@ function UnitSet:OnNewInstance(unitSettings)
 	self.originalUnits = UNITS:GetOriginalUnitTable(unitSettings)
 	self.updateEvents = {}
 	self.exposedUnits = {}
+	self.allUnitsChangeOnEvent = true
+	
 	-- determine the operations that the set needs to stay updated
-
 	for k, unit in pairs(self.originalUnits) do
 		if unit == "player" then
 		--	UNITS.unitsWithExistsEvent[unit] = true -- doesnt really have an event, but do this for external checks of unitsWithExistsEvent to increase efficiency.
-		elseif unit == "target" then
+		-- if someone legitimately entered "playertarget" then they probably dont deserve to have increased eficiency... dont bother handling player as a base unit
+		
+		elseif unit == "target" then -- the unit exactly
 			self.updateEvents.PLAYER_TARGET_CHANGED = true
 			UNITS.unitsWithExistsEvent[unit] = true
-		elseif unit == "pet" then
+		elseif unit:find("^target") then -- the unit as a base, with something else tacked onto it.
+			self.updateEvents.PLAYER_TARGET_CHANGED = true
+			UNITS.unitsWithBaseExistsEvent[unit] = "target"
+			self.allUnitsChangeOnEvent = false
+			
+		elseif unit == "pet" then -- the unit exactly
 			self.updateEvents.UNIT_PET = true
 			UNITS.unitsWithExistsEvent[unit] = true
-		elseif unit == "focus" then
+		elseif unit:find("^pet") then -- the unit as a base, with something else tacked onto it.
+			self.updateEvents.UNIT_PET = true
+			UNITS.unitsWithBaseExistsEvent[unit] = "pet"
+			self.allUnitsChangeOnEvent = false
+			
+		elseif unit == "focus" then -- the unit exactly
 			self.updateEvents.PLAYER_FOCUS_CHANGED = true
 			UNITS.unitsWithExistsEvent[unit] = true
-			
-		elseif unit:find("^raid%d+$") then
+		elseif unit:find("^focus") then -- the unit as a base, with something else tacked onto it.
+			self.updateEvents.PLAYER_FOCUS_CHANGED = true
+			UNITS.unitsWithBaseExistsEvent[unit] = "focus"
+			self.allUnitsChangeOnEvent = false
+		
+		elseif unit:find("^raid%d+$") then -- the unit exactly
 			self.updateEvents.RAID_ROSTER_UPDATE = true
 			UNITS.unitsWithExistsEvent[unit] = true
-		elseif unit:find("^raid%d+") then -- TODO: EXTRAPOLATE THESE 3 LINES TO OTHER UNITS AND VERIFY THAT HIS CODE ACTUALLY WORKS (raid1target should only be in the table if raid1 exists, otherwise it shouldn't)
+		elseif unit:find("^raid%d+") then -- the unit as a base, with something else tacked onto it.
 			self.updateEvents.RAID_ROSTER_UPDATE = true
 			UNITS.unitsWithBaseExistsEvent[unit] = unit:match("^(raid%d+)")
+			self.allUnitsChangeOnEvent = false
 			
-		elseif unit:find("^party%d+$") then
+		elseif unit:find("^party%d+$") then -- the unit exactly
 			self.updateEvents.PARTY_MEMBERS_CHANGED = true
 			UNITS.unitsWithExistsEvent[unit] = true
+		elseif unit:find("^party%d+") then -- the unit as a base, with something else tacked onto it.
+			self.updateEvents.PARTY_MEMBERS_CHANGED = true
+			UNITS.unitsWithBaseExistsEvent[unit] = unit:match("^(party%d+)")
+			self.allUnitsChangeOnEvent = false
 			
-		elseif unit:find("^boss%d+$") then
+		elseif unit:find("^boss%d+$") then -- the unit exactly
 			self.updateEvents.INSTANCE_ENCOUNTER_ENGAGE_UNIT = true
 			UNITS.unitsWithExistsEvent[unit] = true
+		elseif unit:find("^boss%d+") then -- the unit as a base, with something else tacked onto it.
+			self.updateEvents.INSTANCE_ENCOUNTER_ENGAGE_UNIT = true
+			UNITS.unitsWithBaseExistsEvent[unit] = unit:match("^(boss%d+)")
+			self.allUnitsChangeOnEvent = false
 			
-		elseif unit:find("^arena%d+$") then
+		elseif unit:find("^arena%d+$") then -- the unit exactly
 			self.updateEvents.ARENA_OPPONENT_UPDATE = true
 			UNITS.unitsWithExistsEvent[unit] = true
+		elseif unit:find("^arena%d+") then -- the unit as a base, with something else tacked onto it.
+			self.updateEvents.ARENA_OPPONENT_UPDATE = true
+			UNITS.unitsWithBaseExistsEvent[unit] = unit:match("^(arena%d+)")
+			self.allUnitsChangeOnEvent = false
 			
 		elseif unit:find("^maintank") or unit:find("^mainassist") then
 			UNITS:UpdateTankAndAssistMap()
@@ -5770,6 +5741,11 @@ function UnitSet:OnNewInstance(unitSettings)
 			UNITS.unitsWithExistsEvent[unit] = true
 			self.hasTankAndAssistRefs = true
 			UNITS.doTankAndAssistMap = true
+			if not (unit:find("^maintank%d+$") or unit:find("^mainassist%d+$")) then
+				self.allUnitsChangeOnEvent = false
+			end
+		else
+			self.allUnitsChangeOnEvent = false
 		end
 	end
 

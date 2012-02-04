@@ -64,6 +64,8 @@ Type.RelevantSettings = {
 
 Type.EventDisabled_OnStack = true
 
+local ManualIcons = {}
+
 
 function Type:Update()
 	db = TMW.db
@@ -165,18 +167,17 @@ local resetsOnAura = {
 function Type:COMBAT_LOG_EVENT_UNFILTERED(e, _, p, _, g, a, _, _, _, _, _, _, i, n)-- tyPe, sourceGuid, sourcenAme, spellId, spellName -- 2 NEW ARGS IN 4.2
 	if p == "SPELL_CAST_SUCCESS" or p == "SPELL_AURA_APPLIED" or p == "SPELL_AURA_REFRESH" or p == "SPELL_DAMAGE" or p == "SPELL_HEAL" or p == "SPELL_MISSED" then
 	--	GUIDsToNames[g] = a
-
+		--local doUpdate
 		local c = Cooldowns[g]
-		if p == "SPELL_AURA_APPLIED" then
-			if resetsOnAura[i] then
-				for id in pairs(resetsOnAura[i]) do
-					if c[id] then
-						-- dont set it to 0 if it doesnt exist so we dont make spells that havent been seen suddenly act like they have been seen
-						-- on the other hand, dont set things to nil or it will look like they haven't been seen.
-						c[id] = 0
-					end
+		if p == "SPELL_AURA_APPLIED" and resetsOnAura[i] then
+			for id in pairs(resetsOnAura[i]) do
+				if c[id] then
+					-- dont set it to 0 if it doesnt exist so we dont make spells that havent been seen suddenly act like they have been seen
+					-- on the other hand, dont set things to nil or it will look like they haven't been seen.
+					c[id] = 0
 				end
 			end
+		--	doUpdate = true
 		end
 		-- DONT ELSEIF HERE
 		if p == "SPELL_CAST_SUCCESS" then
@@ -191,6 +192,7 @@ function Type:COMBAT_LOG_EVENT_UNFILTERED(e, _, p, _, g, a, _, _, _, _, _, _, i,
 			end
 			c[strlowerCache[n]] = i
 			c[i] = TMW.time
+		--	doUpdate = true
 		else
 			local t = TMW.time
 			local ci = c[i]
@@ -198,14 +200,33 @@ function Type:COMBAT_LOG_EVENT_UNFILTERED(e, _, p, _, g, a, _, _, _, _, _, _, i,
 				c[strlowerCache[n]] = i
 				c[i] = t-1			-- hack it to make it a little bit more accurate. a max range dk deathcoil has a travel time of about 1.3 seconds, so 1 second should be a good average to be safe with travel times.
 			end						-- (and really, how often are people actually going to be tracking cooldowns with cast times? there arent that many, and the ones that do exist arent that important)
+		--	doUpdate = true
 		end
+		
+		--if doUpdate then
+			for k = 1, #ManualIcons do
+				local icon = ManualIcons[k]
+				local NameHash = icon.NameHash
+				if NameHash[i] or NameHash[n] then
+					icon.NextUpdateTime = 0
+				end
+			end
+		--end
 	end
 end
 
 function Type:UNIT_SPELLCAST_SUCCEEDED(e, u, n, _, _, i)--Unit, spellName, spellId
 	local c = Cooldowns[UnitGUID(u)]
-	c[strlowerCache[n]] = i
+	n = strlowerCache[n]
+	c[n] = i
 	c[i] = TMW.time
+	for k = 1, #ManualIcons do
+		local icon = ManualIcons[k]
+        local NameHash = icon.NameHash
+		if NameHash[i] or NameHash[n] then
+			icon.NextUpdateTime = 0
+		end
+	end
 end
 
 -- wiping cooldowns for arenas
@@ -251,6 +272,9 @@ function Type:ARENA_OPPONENT_UPDATE()
 	end
 end
 
+local function UnitCooldown_OnEvent(icon)
+	icon.NextUpdateTime = 0
+end
 
 local function UnitCooldown_OnUpdate(icon, time)
 	local unstart, unname, unduration, usename, dobreak, useUnit, unUnit
@@ -354,15 +378,36 @@ function Type:Setup(icon, groupID, iconID)
 	icon.ShowPBar = false
 	icon.NameFirst = TMW:GetSpellNames(icon, icon.Name, 1)
 	icon.NameArray = TMW:GetSpellNames(icon, icon.Name)
+	icon.NameHash = TMW:GetSpellNames(icon, icon.Name, nil, nil, 1)
 	icon.Durations = TMW:GetSpellDurations(icon, icon.Name)
 
 	--if icon.Unit == "" then
 	--	icon.Units = nil
 	--	icon.TableToIterate = Cooldowns
 	--else
-		icon.Units = TMW:GetUnits(icon, icon.Unit)
+		local UnitSet
+		icon.Units, UnitSet = TMW:GetUnits(icon, icon.Unit)
 		icon.TableToIterate = icon.Units
 	--end
+	
+	if UnitSet.allUnitsChangeOnEvent then
+		icon:SetUpdateMethod("manual")
+		for event in pairs(UnitSet.updateEvents) do
+			icon:RegisterEvent(event)
+		end
+		icon:SetScript("OnEvent", UnitCooldown_OnEvent)
+	else
+		icon:SetUpdateMethod("auto")
+	end
+	
+	-- THIS DOESNT REALLY BELONG HERE, BUT IT NEEDS TO BE HERE SO IT ALWAYS GETS UPDATED PROPERLY.
+	wipe(ManualIcons)
+	for i = 1, #Type.Icons do
+		local ic = Type.Icons[i]
+		if ic.Update_Method == "manual" then
+			ManualIcons[#ManualIcons + 1] = ic
+		end
+	end
 
 	Type:RegisterEvent("COMBAT_LOG_EVENT_UNFILTERED")
 	Type:RegisterEvent("UNIT_SPELLCAST_SUCCEEDED")

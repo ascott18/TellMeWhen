@@ -4690,6 +4690,19 @@ function EVENTS:GetDisplayInfo(event)
 	return eventID, eventString
 end
 
+function EVENTS:GetNumUsedEvents()
+	local n = 0
+	for i = 1, #self.Events do
+		local f = self.Events[i]
+		local has = self:ProcessIconEventSettings(CI.ic, f.event, self:GetEventSettings(f.event))
+		if has then
+			n = n + 1
+		end
+	end
+
+	return n
+end
+
 function EVENTS:LoadConfig()
 	-- EVENTS is a parent module. We don't want to load config if self == EVENTS since this function is meant to be inherited.
 	if self == EVENTS then
@@ -4724,7 +4737,7 @@ function EVENTS:SetTabText()
 end
 
 function EVENTS:GetEventSettings(event)
-	return TMW.CI.ics.Events[event or self.currentEvent]
+	return CI.ics.Events[event or self.currentEvent]
 end
 
 function EVENTS:TestEvent(event)
@@ -4909,30 +4922,6 @@ function SND:SelectSound(name)
 end
 
 
----------- Interface ----------
-function SND:GetNumUsedEvents()
-	local n = 0
-	for i, f in ipairs(SND.Events) do
-
-		local v = self:GetEventSettings(f.event).Sound
-		if v == "" or v == "Interface\\Quiet.ogg" or v == "None" then
-			-- none
-		elseif strfind(v, "%.[^\\]+$") then
-			n = n + 1
-		else
-			local s = LSM:Fetch("sound", v)
-			if s and s ~= "Interface\\Quiet.ogg" and s ~= "" then
-				n = n + 1
-			else
-				--fail
-			end
-		end
-	end
-
-	return n
-end
-
-
 
 -- ----------------------
 -- ANNOUNCEMENTS
@@ -5093,19 +5082,6 @@ end
 
 
 ---------- Interface ----------
-function ANN:GetNumUsedEvents()
-	local n = 0
-	for i = 1, #ANN.Events do
-		local f = ANN.Events[i]
-		local channel = self:GetEventSettings(f.event).Channel
-		if channel and #channel > 2 and channel ~= "None" then
-			n = n + 1
-		end
-	end
-
-	return n
-end
-
 function ANN:LocDropdownFunc(text)
 	local dropdown = self
 	local self = TMW:FindModule(UIDROPDOWNMENU_OPEN_MENU)
@@ -5272,19 +5248,6 @@ end
 
 
 ---------- Interface ----------
-function ANIM:GetNumUsedEvents()
-	local n = 0
-	for i = 1, #self.Events do
-		local f = self.Events[i]
-		local animation = self:GetEventSettings(f.event).Animation
-		if animation and animation ~= "" then
-			n = n + 1
-		end
-	end
-
-	return n
-end
-
 function ANIM:SetSliderMinMax(Slider, level)
 	-- level is passed in only when the setting is changing or being loaded
 	if Slider.range then
