@@ -119,6 +119,8 @@ function Type:Setup(icon, groupID, iconID)
 	if not icon.OverrideTex or icon.OverrideTex == "" then
 		icon.OverrideTex = "Interface\\Icons\\INV_Misc_QuestionMark"
 	end
+
+	icon:SetUpdateMethod("manual") -- 5.9% 0.0032
 	
 	icon:SetScript("OnUpdate", ConditionIcon_OnUpdate)
 	--icon:Update() -- dont do this!

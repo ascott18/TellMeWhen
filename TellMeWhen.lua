@@ -29,11 +29,11 @@ local AceDB = LibStub("AceDB-3.0")
 local LSM = LibStub("LibSharedMedia-3.0")
 local DRData = LibStub("DRData-1.0", true)
 
-TELLMEWHEN_VERSION = "4.9.0"
+TELLMEWHEN_VERSION = "5.0.0"
 TELLMEWHEN_VERSION_MINOR = strmatch(" @project-version@", " r%d+") or ""
 TELLMEWHEN_VERSION_FULL = TELLMEWHEN_VERSION .. TELLMEWHEN_VERSION_MINOR
-TELLMEWHEN_VERSIONNUMBER = 49005 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
-if TELLMEWHEN_VERSIONNUMBER > 50000 or TELLMEWHEN_VERSIONNUMBER < 49000 then return error("YOU SCREWED UP THE VERSION NUMBER OR DIDNT CHANGE THE SAFETY LIMITS") end -- safety check because i accidentally made the version number 414069 once
+TELLMEWHEN_VERSIONNUMBER = 50001 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
+if TELLMEWHEN_VERSIONNUMBER > 51000 or TELLMEWHEN_VERSIONNUMBER < 50000 then return error("YOU SCREWED UP THE VERSION NUMBER OR DIDNT CHANGE THE SAFETY LIMITS") end -- safety check because i accidentally made the version number 414069 once
 
 TELLMEWHEN_MAXGROUPS = 1 	--this is a default, used by SetTheory (addon), so dont rename
 TELLMEWHEN_MAXROWS = 20
@@ -3865,21 +3865,64 @@ function ANIM:GetFlasher(parent)
 	return Flasher
 end
 
-
+--[=[
 local UpdateObject = TMW:NewClass("UpdateObject")
+UpdateObject.Update_Method = "auto"
 TMW.UpdateObjects = {}
 function UpdateObject:Update_SetMethod(method)
 	self.Update_Method = method
-	if method == "OnUpdate" then
+	if method == "auto" then
 		-- do nothing for now.
 		self.Update_Needed = true
-	elseif method == "OnEvent" then
-		icon:ScheduleNextUpdate()
+	elseif method == "manual" then
+		self:ScheduleNextUpdate()
 	else
 		-- clearing the update
 	end
 	TMW.UpdateObjects[self] = method
 end
+
+
+
+function Icon.ScheduleNextUpdate(icon)
+	local d = icon.__duration - (time - icon.__start)
+	if d < 0 then d = 0 end
+	
+	local newdur = 0
+	
+	
+	-- Duration Min/Max
+	if icon.DurationMaxEnabled then
+		local DurationMax = icon.DurationMax
+		if DurationMax < d then
+			newdur = DurationMax
+		end
+	end
+	if icon.DurationMinEnabled then
+		local DurationMin = icon.DurationMin
+		if DurationMin < d and newdur < DurationMin then
+			newdur = DurationMin
+		end
+	end
+	
+	-- Duration Events
+	if icon.OnDuration then
+		local Duration = icon.OnDuration.Value
+		if Duration < d and newdur < Duration then
+			newdur = Duration
+		end
+	end
+	
+	local nextUpdateTime = time + (d - newdur)
+	if nextUpdateTime == time then
+		nextUpdateTime = nil
+	end
+	icon.nextUpdateTime = nextUpdateTime
+	
+	return nextUpdateTime
+end
+]=]
+
 
 --function UpdateObject:Update_
 
@@ -4315,19 +4358,78 @@ function Icon.IsValid(icon)
 end
 
 
+Icon.Update_Method = "auto"
+function Icon.SetUpdateMethod(icon, method)
+	icon.Update_Method = method
+	if method == "auto" then
+		-- do nothing for now.
+	elseif method == "manual" then
+		icon.NextUpdateTime = time
+	else
+	--	error("Unknown update method " .. method)
+	end
+end
+
+Icon.NextUpdateTime = huge
+function Icon.ScheduleNextUpdate(icon)
+	local d = icon.__duration - (time - icon.__start)
+	if d < 0 then d = 0 end
+	
+	local newdur = 0
+	
+	
+	-- Duration Min/Max
+	if icon.DurationMaxEnabled then
+		local DurationMax = icon.DurationMax
+		if DurationMax < d then
+			newdur = DurationMax
+		end
+	end
+	if icon.DurationMinEnabled then
+		local DurationMin = icon.DurationMin
+		if DurationMin < d and newdur < DurationMin then
+			newdur = DurationMin
+		end
+	end
+	
+	-- Duration Events
+	if icon.OnDuration then
+		local Duration = icon.OnDuration.Value
+		if Duration < d and newdur < Duration then
+			newdur = Duration
+		end
+	end
+	
+	local nextUpdateTime = time + (d - newdur)
+	if nextUpdateTime == time then
+		nextUpdateTime = nil
+	end
+	icon.NextUpdateTime = nextUpdateTime
+	
+	return nextUpdateTime
+end
+
+
+
 function Icon.Update(icon, time, force, ...)
 	time = time or TMW.time
-
+	local Update_Method = icon.Update_Method
+	
 	if icon.__shown and (force or icon.LastUpdate <= time - UPD_INTV) then
 		icon.LastUpdate = time
 
+		local iconUpdateNeeded = force or Update_Method == "auto" or icon.NextUpdateTime < time
+		
 		local ConditionObj = icon.ConditionObj
 		if ConditionObj then
 			if ConditionObj.UpdateNeeded or ConditionObj.NextUpdateTime < time then
 				ConditionObj:Check(icon)
+				iconUpdateNeeded = iconUpdateNeeded or ConditionObj.LastCheckFailed ~= ConditionObj.Failed
+			elseif ConditionObj.LastUpdateTime == time then
+				iconUpdateNeeded = true
 			end
 			
-			if not icon.dontHandleConditionsExternally and ConditionObj.Failed and (icon.ConditionAlpha or 0) == 0 then
+			if not icon.dontHandleConditionsExternally and not icon.hasEventHandlers and ConditionObj.Failed and (icon.ConditionAlpha or 0) == 0 then
 				if icon.__alpha ~= 0 then
 					icon:SetInfo(0)
 				end
@@ -4335,7 +4437,12 @@ function Icon.Update(icon, time, force, ...)
 			end
 		end
 
-		icon:OnUpdate(time, ...)
+		if iconUpdateNeeded then
+			icon:OnUpdate(time, ...)
+			if Update_Method == "manual" then
+				icon:ScheduleNextUpdate()
+			end
+		end
 
 	--[[	-- RE-CREATE CHECK AFTER IF YOU WANT IT BACK, BECAUSE FOR NOW, ITS DEAD]]
 	end
@@ -4823,6 +4930,7 @@ function Icon.Setup(icon)
 			icon[event] = nil
 		end
 	end
+	icon.hasEventHandlers = hasEventHandlers
 
 
 	-- process alpha settings

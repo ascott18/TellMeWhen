@@ -1,5 +1,6 @@
-===v4.9.0===
- * The Condition engine has been completely rewritten and is now almost entirely event driven, resulting in a (tremendous) performance increase.
+===v5.0.0===
+ * Several icon types have been changed to be entirely event based, meaning that they will no longer update themselves when they don't need to, resulting in a (tremendous) performance increase.
+ * The Condition engine has been completely rewritten and is now almost entirely event driven, resulting in another (tremendous) performance increase.
  * Enrage is now a proper dispel type, and no longer relies on a pre-defined list of enrages.
  * Implemented a proper class-based inheritance system for many objects (Icons, Icon Types, Groups, Condition Groups).
  * You can now check units relative to the special condition unit '%u' (//for example, '%u-target' or '%upettarget'//).
@@ -19,6 +20,7 @@
  ** (r434) Icon Show/Hide events should work once again
  ** (r435) Unit substitutions should work once again
  ** (r436) Fixed a bug causing the wrong data to be reported for Combat Log Event events
+ ** (r437) When a meta icon changes the icon it is checking, it should no longer stop any animations that the meta icon itself initiated (non-inherited animations)
 
 ===v4.8.3===
  * Bug Fixes:

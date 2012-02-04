@@ -275,6 +275,8 @@ local function CLEU_OnEvent(icon, _, t, event, h, sourceGUID, sourceName, source
 		icon:Update(TMW.time, true, tex)
 
 		if icon.OnCLEUEvent then
+			-- make sure this comes after we update the icon.
+			-- text substitutions depend on fields set when the icon is updated.
 			icon:QueueEvent("OnCLEUEvent")
 			icon:ProcessQueuedEvents()
 		end
@@ -358,6 +360,8 @@ function Type:Setup(icon, groupID, iconID)
 		return
 	end
 
+	icon:SetUpdateMethod("manual")
+	
 	icon:RegisterEvent("COMBAT_LOG_EVENT_UNFILTERED")
 	icon:SetScript("OnEvent", CLEU_OnEvent)
 

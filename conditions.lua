@@ -2632,7 +2632,7 @@ end
 TMW:RegisterCallback("TMW_GLOBAL_UPDATE", CNDT)
 
 
-function CNDT:DoConditionSubstitutions(v, c, thisstr)
+function CNDT:DoConditionSubstitutions(parent, v, c, thisstr)
 	for _, append in TMW:Vararg("2", "") do -- Unit2 MUST be before Unit
 		if strfind(thisstr, "c.Unit" .. append) then
 			local unit
@@ -2649,7 +2649,9 @@ function CNDT:DoConditionSubstitutions(v, c, thisstr)
 				CNDT:RAID_ROSTER_UPDATE()
 			elseif strfind(unit, "^%%[Uu]") then
 				local after = strmatch(unit, "^%%[Uu]%-?(.*)")
-				local sub = "(icon.__unitChecked or '')"
+				-- it is intended that we sub in parent:GetName() instead of "icon". 
+				-- We want to create unique ConditionObjects for each icon that uses %u
+				local sub = "(" .. parent:GetName() .. "icon.__unitChecked or '')"
 				if after and after ~= "" then
 					sub = "(" .. sub .. " .. \"-" .. after .. "\")"
 				end
@@ -2715,7 +2717,7 @@ function CNDT:DoConditionSubstitutions(v, c, thisstr)
 end
 
 local activeEventsReusable = {}
-function CNDT:CompileUpdateFunction(obj, activeEvents)
+function CNDT:CompileUpdateFunction(parent, obj, activeEvents)
 	local Conditions = obj.settings
 	activeEvents = activeEvents or wipe(activeEventsReusable)
 	local numAnticipatorArgs = 0
@@ -2772,7 +2774,7 @@ function CNDT:CompileUpdateFunction(obj, activeEvents)
 			numAnticipatorArgs = numAnticipatorArgs + 1
 
 			local thisstr = TMW.get(v.anticipate, c) -- get the anticipator string from the condition data
-			thisstr = CNDT:DoConditionSubstitutions(v, c, thisstr) -- substitute in any user settings
+			thisstr = CNDT:DoConditionSubstitutions(parent, v, c, thisstr) -- substitute in any user settings
 
 			-- append a check to make sure that the smallest value out of all anticipation checks isnt less than the current time.
 			thisstr = thisstr .. [[
@@ -2910,7 +2912,7 @@ function ConditionObject:OnNewInstance(parent, Conditions, conditionString, upda
 		TMW:Error(err)
 	end
 	
-	CNDT:CompileUpdateFunction(self, updateFuncArg1) -- DEBUG: VARIABLE NAMES ARE WRONG (UpdateNeeded, etc)
+	CNDT:CompileUpdateFunction(parent, self, updateFuncArg1) -- DEBUG: VARIABLE NAMES ARE WRONG (UpdateNeeded, etc)
 end
 
 function ConditionObject:Check(parent)
@@ -2923,14 +2925,17 @@ function ConditionObject:Check(parent)
 				self:AnticipateFunction()
 			end
 		end
-		
-		if self.NextUpdateTime < TMW.time then
+		local time = TMW.time
+		if self.NextUpdateTime < time then
 			self.NextUpdateTime = huge
 		end
 		
-		local passed = self:CheckFunction(parent)
+		if self.LastUpdateTime ~= time then
+			self.LastUpdateTime = time
+			self.LastCheckFailed = self.Failed
+		end
 		
-		self.Failed = not passed
+		self.Failed = not self:CheckFunction(parent)
 	end
 end
 
@@ -2984,7 +2989,7 @@ function CNDT:GetConditionCheckFunctionString(parent, Conditions)
 		
 		local thisstr = andor .. "(" .. strrep("(", c.PrtsBefore) .. thiscondtstr .. strrep(")", c.PrtsAfter)  .. ")"
 
-		thisstr = TMW.CNDT:DoConditionSubstitutions(v, c, thisstr)
+		thisstr = CNDT:DoConditionSubstitutions(parent, v, c, thisstr)
 
 		funcstr = funcstr .. thisstr
 	end
