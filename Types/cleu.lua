@@ -272,11 +272,13 @@ local function CLEU_OnEvent(icon, _, t, event, h, sourceGUID, sourceName, source
 		icon.cleu_destUnit = destUnit
 		icon.cleu_extraSpell = extraID
 
+		-- Unlike some icon types, an immedite update is needed here.
+		-- See below for reasoning.
 		icon:Update(true, tex)
 
 		if icon.OnCLEUEvent then
-			-- make sure this comes after we update the icon.
-			-- text substitutions depend on fields set when the icon is updated.
+			-- Make sure this comes after we update the icon.
+			-- Text substitutions depend on fields set when the icon is updated.
 			icon:QueueEvent("OnCLEUEvent")
 			icon:ProcessQueuedEvents()
 		end

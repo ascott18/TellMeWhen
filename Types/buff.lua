@@ -84,6 +84,20 @@ function Type:Update()
 	unitsWithExistsEvent = TMW.UNITS.unitsWithExistsEvent
 end
 
+local function Buff_OnEvent(icon, event, arg1)
+	if event == "UNIT_AURA" then
+		local Units = icon.Units
+		for u = 1, #Units do
+			if arg1 == Units[u] then
+				icon.NextUpdateTime = 0
+				return
+			end
+		end
+	else -- a unit changed event
+		icon.NextUpdateTime = 0
+	end
+end
+
 local huge = math.huge
 local function Buff_OnUpdate(icon, time)
 
@@ -237,7 +251,9 @@ function Type:Setup(icon, groupID, iconID)
 	icon.NameNameArray = TMW:GetSpellNames(icon, icon.Name, nil, 1)
 	icon.NameHash = TMW:GetSpellNames(icon, icon.Name, nil, nil, 1)
 	icon.NameNameHash = TMW:GetSpellNames(icon, icon.Name, nil, 1, 1)
-	icon.Units = TMW:GetUnits(icon, icon.Unit)
+	
+	local UnitSet
+	icon.Units, UnitSet = TMW:GetUnits(icon, icon.Unit)
 
 	icon.Filter = icon.BuffOrDebuff
 	icon.Filterh = icon.BuffOrDebuff == "EITHER" and "HARMFUL"
@@ -260,6 +276,17 @@ function Type:Setup(icon, groupID, iconID)
 	icon.FirstTexture = SpellTextures[icon.NameFirst]
 
 	icon:SetTexture(TMW:GetConfigIconTexture(icon))
+	
+	if UnitSet.allUnitsChangeOnEvent then
+		icon:SetUpdateMethod("manual")
+		for event in pairs(UnitSet.updateEvents) do
+			icon:RegisterEvent(event)
+		end
+	
+		icon:RegisterEvent("UNIT_AURA")
+	
+		icon:SetScript("OnEvent", Buff_OnEvent)
+	end
 
 	icon:SetScript("OnUpdate", Buff_OnUpdate)
 	icon:Update()

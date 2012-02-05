@@ -1801,7 +1801,11 @@ function ID:Swap()
 end
 
 function ID:Meta()
-	tinsert(db.profile.Groups[ID.desticon.group:GetID()].Icons[ID.desticon:GetID()].Icons, ID.srcicon:GetName())
+	local Icons = db.profile.Groups[ID.desticon.group:GetID()].Icons[ID.desticon:GetID()].Icons
+	if Icons[#Icons] == "" then
+		Icons[#Icons] = nil
+	end
+	tinsert(Icons, ID.srcicon:GetName())
 end
 
 function ID:Condition()
@@ -5150,7 +5154,7 @@ function ANIM:OnOptionsLoaded()
 end
 
 function ANIM:TMW_ICON_SETUP(event, icon)
-	if not db.profile.Locked then
+	if not db.profile.Locked and icon:HasAnimations() then
 		for k, v in pairs(icon:GetAnimations()) do
 			icon:StopAnimation(v)
 		end
@@ -5991,8 +5995,6 @@ end
 function Module:Table_GetNormalSuggestions(suggestions, tbl, ...)
 	local atBeginning = SUG.atBeginning
 	local lastName = SUG.lastName
-	local semiLN = ";" .. lastName
-	local long = #lastName > 2
 
 	if SUG.inputType == "number" then
 		local len = #SUG.lastName - 1
@@ -6427,7 +6429,13 @@ end
 
 local Module = SUG:NewModule("spellWithGCD", SUG:GetModule("spell"))
 function Module:Table_GetSpecialSuggestions(suggestions)
-	suggestions[#suggestions + 1] = "GCD"
+	local atBeginning = SUG.atBeginning
+	local lastName = SUG.lastName
+
+	
+	if strfind("gcd", atBeginning) or strfind(L["GCD"]:lower(), atBeginning) then
+		suggestions[#suggestions + 1] = "GCD"
+	end
 end
 function Module:Entry_AddToList_2(f, id)
 	if id == "GCD" then

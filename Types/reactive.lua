@@ -38,7 +38,7 @@ Type.chooseNameText  = L["CHOOSENAME_DIALOG"] .. "\r\n\r\n" .. L["CHOOSENAME_DIA
 
 Type.WhenChecks = {
 	text = L["ICONMENU_SHOWWHEN"],
-	{ value = "alpha", 		text = L["ICONMENU_USABLE"], 			colorCode = "|cFF00FF00" },
+	{ value = "alpha", 			text = L["ICONMENU_USABLE"], 			colorCode = "|cFF00FF00" },
 	{ value = "unalpha",		text = L["ICONMENU_UNUSABLE"], 			colorCode = "|cFFFF0000" },
 	{ value = "always", 		text = L["ICONMENU_ALWAYS"] },
 }
@@ -71,8 +71,13 @@ end
 
 
 local function Reactive_OnEvent(icon, event, spell)
-	if icon.NameFirst == spell or strlowerCache[GetSpellInfo(spell)] == icon.NameName then
-		icon.Usable = event == "SPELL_ACTIVATION_OVERLAY_GLOW_SHOW"
+	if event == "SPELL_ACTIVATION_OVERLAY_GLOW_SHOW" or event == "SPELL_ACTIVATION_OVERLAY_GLOW_SHOW" then
+		if icon.NameFirst == spell or strlowerCache[GetSpellInfo(spell)] == icon.NameName then
+			icon.Usable = event == "SPELL_ACTIVATION_OVERLAY_GLOW_SHOW"
+			icon.NextUpdateTime = 0
+		end
+	else
+		icon.NextUpdateTime = 0
 	end
 end
 
@@ -152,14 +157,27 @@ function Type:Setup(icon, groupID, iconID)
 
 	icon.FirstTexture = SpellTextures[icon.NameFirst]
 
+	icon:SetTexture(TMW:GetConfigIconTexture(icon))
+	
+	
 	if icon.UseActvtnOverlay then
 		icon:RegisterEvent("SPELL_ACTIVATION_OVERLAY_GLOW_SHOW")
 		icon:RegisterEvent("SPELL_ACTIVATION_OVERLAY_GLOW_HIDE")
 		icon:SetScript("OnEvent", Reactive_OnEvent)
 	end
-
-	icon:SetTexture(TMW:GetConfigIconTexture(icon))
-
+	
+	if not icon.RangeCheck and not icon.ManaCheck then -- dont try anything funny here with icon.IgnoreNomana. Even if that setting is true, it doesnt mean ManaCheck doesn't matter.
+		icon:RegisterEvent("SPELL_UPDATE_COOLDOWN")
+		icon:RegisterEvent("SPELL_UPDATE_USABLE")
+		if icon.IgnoreRunes then
+			icon:RegisterEvent("RUNE_POWER_UPDATE")
+			icon:RegisterEvent("RUNE_TYPE_UPDATE")
+		end	
+	
+		icon:SetScript("OnEvent", Reactive_OnEvent)
+		icon:SetUpdateMethod("manual")
+	end
+	
 	icon:SetScript("OnUpdate", Reactive_OnUpdate)
 	icon:Update()
 end

@@ -396,8 +396,6 @@ function Type:Setup(icon, groupID, iconID)
 			icon:RegisterEvent(event)
 		end
 		icon:SetScript("OnEvent", UnitCooldown_OnEvent)
-	else
-		icon:SetUpdateMethod("auto")
 	end
 	
 	-- THIS DOESNT REALLY BELONG HERE, BUT IT NEEDS TO BE HERE SO IT ALWAYS GETS UPDATED PROPERLY.

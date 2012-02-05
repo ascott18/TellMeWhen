@@ -32,7 +32,7 @@ local DRData = LibStub("DRData-1.0", true)
 TELLMEWHEN_VERSION = "5.0.0"
 TELLMEWHEN_VERSION_MINOR = strmatch(" @project-version@", " r%d+") or ""
 TELLMEWHEN_VERSION_FULL = TELLMEWHEN_VERSION .. TELLMEWHEN_VERSION_MINOR
-TELLMEWHEN_VERSIONNUMBER = 50002 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
+TELLMEWHEN_VERSIONNUMBER = 50003 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
 if TELLMEWHEN_VERSIONNUMBER > 51000 or TELLMEWHEN_VERSIONNUMBER < 50000 then return error("YOU SCREWED UP THE VERSION NUMBER OR DIDNT CHANGE THE SAFETY LIMITS") end -- safety check because i accidentally made the version number 414069 once
 
 TELLMEWHEN_MAXGROUPS = 1 	--this is a default, used by SetTheory (addon), so dont rename
@@ -77,7 +77,7 @@ local IconsToUpdateBindText
 local loweredbackup = {}
 local callbackregistry = {}
 local bullshitTable = {}
-local ActiveAnimations = {[UIParent] = {}, [WorldFrame] = {}}
+local ActiveAnimations = {}
 local CDBarsToUpdate, PBarsToUpdate = {}, {}
 local time = GetTime() TMW.time = time
 local sctcolor = {r=1, b=1, g=1}
@@ -122,16 +122,8 @@ do	-- Class Lib
 	local function writeerror(self, key, value)
 		TMW:Error(("Cannot write value %q to key %q on class %q because an instance has already been created"):format(value, key, self.name))
 	end
-
-	local function New(self, ...)
-		local instance
-		if ... and self.frameType then
-			instance = CreateFrame(...)
-		else
-			instance = {}
-		end
-
-		-- if this is the first instance of the class, do some magic to it:
+	
+	local function initializeClass(self)
 		if not next(self.instances) then
 			-- set any defined metamethods
 			for k, v in pairs(self.instancemeta.__index) do
@@ -142,6 +134,18 @@ do	-- Class Lib
 
 			getmetatable(self).__newindex = writeerror
 		end
+	end
+	
+	local function New(self, ...)
+		local instance
+		if ... and self.frameType then
+			instance = CreateFrame(...)
+		else
+			instance = {}
+		end
+
+		-- if this is the first instance of the class, do some magic to it:
+		initializeClass(self)
 
 		instance.class = self
 		instance.className = self.name
@@ -155,6 +159,27 @@ do	-- Class Lib
 		end
 
 		return instance
+	end
+	
+	local function Embed(self, target)
+		-- if this is the first instance (not really an instance here, but we need to anyway) of the class, do some magic to it:
+		initializeClass(self)
+
+		self.embeds[target] = true
+
+		for k, v in pairs(self.instancemeta.__index) do
+			if target[k] then
+				TMW:Error(("Error embedding class %s into target %s: Field %q already exists on the target."):format(self.name, tostring(target:GetName() or target), k))
+			else
+				target[k] = v
+			end
+		end
+		
+		if self.OnNewInstance then
+			self.OnNewInstance(target)
+		end
+
+		return target
 	end
 
 	function TMW:NewClass(className, ...)
@@ -176,24 +201,15 @@ do	-- Class Lib
 				end
 			end
 		end
-	--[[	if frameType then
-			metatable = CopyTable(getmetatable(CreateFrame(frameType)))
-
-		elseif inherit then
-			if type(inherit) == "string" then
-				assert(TMW.Classes[inherit], ("Inheritance class %s does not exist."):format(inherit))
-				metatable = CopyTable(getmetatable(TMW.Classes[inherit]))
-			elseif type(inherit) == "table" then
-				metatable = CopyTable(getmetatable(inherit))
-			end
-		end]]
 
 		metatable.__newindex = metatable.__index
 
 		local class = {
 			name = className,
 			instances = {},
+			embeds = {},
 			New = New,
+			Embed = Embed,
 			instancemeta = {__index = metatable.__index},
 			frameType = frameType,
 		}
@@ -1448,9 +1464,7 @@ function TMW:OnUpdate(elapsed)					-- THE MAGICAL ENGINE OF DOING EVERYTHING
 
 			for i = 1, #IconsToUpdate do
 				local icon = IconsToUpdate[i]
-			--	if icon.updateQueued then
-					icon:Update()
-			--	end
+				icon:Update()
 			end
 
 			updatePBar = nil
@@ -1458,12 +1472,14 @@ function TMW:OnUpdate(elapsed)					-- THE MAGICAL ENGINE OF DOING EVERYTHING
 	end
 
 	if IconsToUpdateBindText then
-		for icon in next, IconsToUpdateBindText do
-			icon:UpdateBindText()
+		for i = 1, #IconsToUpdateBindText do
+			IconsToUpdateBindText[i]:UpdateBindText()
 		end
 	end
 
-	for cbar in next, CDBarsToUpdate do
+	local cbaroffs = 0
+	for i = 1, #CDBarsToUpdate do
+		local cbar = CDBarsToUpdate[i + cbaroffs]
 		local value, doTerminate
 
 		local start, duration, InvertBars = cbar.start, cbar.duration, cbar.InvertBars
@@ -1485,7 +1501,8 @@ function TMW:OnUpdate(elapsed)					-- THE MAGICAL ENGINE OF DOING EVERYTHING
 		end
 
 		if doTerminate then
-			CDBarsToUpdate[cbar] = nil
+			tremove(CDBarsToUpdate, i + cbaroffs)
+			cbaroffs = cbaroffs - 1
 			if InvertBars then
 				value = cbar.Max
 			else
@@ -1529,14 +1546,16 @@ function TMW:OnUpdate(elapsed)					-- THE MAGICAL ENGINE OF DOING EVERYTHING
 		end
 	end
 
-	for icon, animations in next, ActiveAnimations do
-		for key, animationTable in next, animations do
-			-- its the magical modular tour, and its coming to take you awayyy......
+	if ActiveAnimations then
+		for animatedObject, animations in next, ActiveAnimations do
+			for _, animationTable in next, animations do
+				-- its the magical modular tour, and its coming to take you awayyy......
 
-			if animationTable.HALTED then
-				icon:StopAnimation(animationTable)
-			else
-				AnimationList[animationTable.Animation].OnUpdate(icon, animationTable)
+				if animationTable.HALTED then
+					animatedObject:StopAnimation(animationTable)
+				else
+					AnimationList[animationTable.Animation].OnUpdate(animatedObject, animationTable)
+				end
 			end
 		end
 	end
@@ -2792,7 +2811,7 @@ function TMW:ProcessEquivalencies()
 end
 
 
-function TMW:InjectDataIntoString(Text, icon, doBlizz, shouldColorNames)
+function TMW:InjectDataIntoString(Text, icon, doBlizz, shouldColorNames, dontSubDuration)
 	if not Text then return Text end
 
 	--CURRENTLY USED: t, f, m, p, u, s, d, k, e, o, x
@@ -2850,8 +2869,8 @@ function TMW:InjectDataIntoString(Text, icon, doBlizz, shouldColorNames)
 			end
 			Text = gsub(Text, "%%[Ss]", name)
 		end
-		if strfind(Text, "%%[Dd]") then
-			local duration = icon.__duration - (TMW.time - icon.__start)
+		if not dontSubDuration and strfind(Text, "%%[Dd]") then
+			local duration = icon.__duration - (time - icon.__start)
 			if duration < 0 then
 				duration = 0
 			end
@@ -3450,32 +3469,21 @@ ANIM.AnimationList = {
 
 		Play = function(icon, data)
 			if not WorldFrame:IsProtected() or not InCombatLockdown() then
-				local Animation = data.Animation
-
-				local table = {
+				WorldFrame:StartAnimation{
 					data = data,
-					Start = TMW.time,
+					Start = time,
 					Duration = data.Duration,
 
-					Animation = Animation,
 					Magnitude = data.Magnitude,
 				}
-
-				-- manual version of :StartAnimation
-				ActiveAnimations[WorldFrame][Animation] = table
-				AnimationList[Animation].OnStart(WorldFrame, table)
 			end
 		end,
 
 		OnUpdate = function(WorldFrame, table)
-			local remaining = table.Duration - (TMW.time - table.Start)
+			local remaining = table.Duration - (time - table.Start)
 
 			if remaining < 0 then
-				-- manual version of :StopAnimation
-				local Animation = table.Animation
-
-				ActiveAnimations[WorldFrame][Animation] = nil
-				AnimationList[Animation].OnStop(WorldFrame, table)
+				WorldFrame:StopAnimation(table)
 			else
 				local Amt = (table.Magnitude or 10) / (1 + 10*(300^(-(remaining))))
 				local moveX = random(-Amt, Amt)
@@ -3512,8 +3520,7 @@ ANIM.AnimationList = {
 		Fade = true,
 
 		Play = function(icon, data)
-			local Animation = data.Animation
-			local AnimationData = AnimationList[Animation]
+			local AnimationData = AnimationList[data.Animation]
 
 			local Duration = 0
 			local Period = data.Period
@@ -3521,9 +3528,17 @@ ANIM.AnimationList = {
 				Duration = Duration + (Period * 2)
 			end
 
-			local table = {
+			-- inherit from ICONFLASH (since all the functions except Play are the same)
+			if not AnimationData.OnStart then
+				local ICONFLASH = AnimationList.ICONFLASH
+				AnimationData.OnStart = ICONFLASH.OnStart
+				AnimationData.OnUpdate = ICONFLASH.OnUpdate
+				AnimationData.OnStop = ICONFLASH.OnStop
+			end
+
+			UIParent:StartAnimation{
 				data = data,
-				Start = TMW.time,
+				Start = time,
 				Duration = Duration,
 
 				Period = Period,
@@ -3532,47 +3547,7 @@ ANIM.AnimationList = {
 				r = data.r_anim,
 				g = data.g_anim,
 				b = data.b_anim,
-
-				Animation = Animation
 			}
-
-			-- inherit from ICONFLASH
-			if not AnimationData.OnStart then
-				local ICONFLASH = AnimationList.ICONFLASH
-				AnimationData.OnStart = ICONFLASH.OnStart
-				AnimationData.OnStop = ICONFLASH.OnStop
-			end
-
-			-- manual version of :StartAnimation
-			ActiveAnimations[UIParent][Animation] = table
-			AnimationList[Animation].OnStart(UIParent, table)
-		end,
-
-		OnUpdate = function(UIParent, table)
-			local FlashPeriod = table.Period
-			local flasher = UIParent.flasher
-
-			local timePassed = TMW.time - table.Start
-			local fadingIn = floor(timePassed/FlashPeriod) % 2 == 1
-
-			if table.Fade then
-				local remainingFlash = timePassed % FlashPeriod
-				if fadingIn then
-					flasher:SetAlpha(table.Alpha*((FlashPeriod-remainingFlash)/FlashPeriod))
-				else
-					flasher:SetAlpha(table.Alpha*(remainingFlash/FlashPeriod))
-				end
-			else
-				flasher:SetAlpha(fadingIn and table.Alpha or 0)
-			end
-
-			if timePassed > table.Duration then
-				-- manual version of :StopAnimation
-				local Animation = table.Animation
-
-				ActiveAnimations[UIParent][Animation] = nil
-				AnimationList[Animation].OnStop(UIParent, table)
-			end
 		end,
 	},
 	{
@@ -3586,26 +3561,25 @@ ANIM.AnimationList = {
 		Play = function(icon, data)
 			icon:StartAnimation{
 				data = data,
-				Start = TMW.time,
+				Start = time,
 				Duration = data.Infinite and huge or data.Duration,
 
-				Animation = Animation,
 				Magnitude = data.Magnitude,
 			}
 		end,
 
 		OnUpdate = function(icon, table)
-			local remaining = table.Duration - (TMW.time - table.Start)
-
-			local Amt = (table.Magnitude or 10) / (1 + 10*(300^(-(remaining))))
-			local moveX = random(-Amt, Amt)
-			local moveY = random(-Amt, Amt)
-
-			icon:SetPoint("TOPLEFT", icon.x + moveX, icon.y + moveY)
-
-			-- generic expiration
 			if remaining < 0 then
+				-- generic expiration
 				icon:StopAnimation(table)
+			else
+				local remaining = table.Duration - (time - table.Start)
+
+				local Amt = (table.Magnitude or 10) / (1 + 10*(300^(-(remaining))))
+				local moveX = random(-Amt, Amt)
+				local moveY = random(-Amt, Amt)
+
+				icon:SetPoint("TOPLEFT", icon.x + moveX, icon.y + moveY)
 			end
 		end,
 		OnStop = function(icon, table)
@@ -3635,7 +3609,7 @@ ANIM.AnimationList = {
 
 			icon:StartAnimation{
 				data = data,
-				Start = TMW.time,
+				Start = time,
 				Duration = Duration,
 
 				Period = Period,
@@ -3651,7 +3625,7 @@ ANIM.AnimationList = {
 			local FlashPeriod = table.Period
 			local flasher = icon.flasher
 
-			local timePassed = TMW.time - table.Start
+			local timePassed = time - table.Start
 			local fadingIn = floor(timePassed/FlashPeriod) % 2 == 1
 
 			if table.Fade then
@@ -3708,7 +3682,7 @@ ANIM.AnimationList = {
 
 			icon:StartAnimation{
 				data = data,
-				Start = TMW.time,
+				Start = time,
 				Duration = Duration,
 
 				Period = Period,
@@ -3719,7 +3693,7 @@ ANIM.AnimationList = {
 		OnUpdate = function(icon, table)
 			local FlashPeriod = table.Period
 
-			local timePassed = TMW.time - table.Start
+			local timePassed = time - table.Start
 			local fadingIn = floor(timePassed/FlashPeriod) % 2 == 0
 
 			if table.Fade then
@@ -3756,7 +3730,7 @@ ANIM.AnimationList = {
 		Play = function(icon, data)
 			icon:StartAnimation{
 				data = data,
-				Start = TMW.time,
+				Start = time,
 				Duration = data.Duration,
 
 				FadeDuration = data.Duration,
@@ -3765,7 +3739,7 @@ ANIM.AnimationList = {
 
 		OnUpdate = function(icon, table)
 			if not icon.FakeHidden then
-				local remaining = table.Duration - (TMW.time - table.Start)
+				local remaining = table.Duration - (time - table.Start)
 
 				-- generic expiration
 				if remaining < 0 then
@@ -3799,13 +3773,13 @@ ANIM.AnimationList = {
 		Play = function(icon, data)
 			icon:StartAnimation{
 				data = data,
-				Start = TMW.time,
+				Start = time,
 				Duration = data.Infinite and huge or data.Duration,
 			}
 		end,
 
 		OnUpdate = function(icon, table)
-			if table.Duration - (TMW.time - table.Start) < 0 then
+			if table.Duration - (time - table.Start) < 0 then
 				icon:StopAnimation(table)
 			end
 		end,
@@ -3825,9 +3799,11 @@ ANIM.AnimationList = {
 		animation = "ICONCLEAR",
 
 		Play = function(icon, data)
-			for k, v in pairs(icon:GetAnimations()) do
-				-- instead of just calling :StopAnimation() right here, set this attribute so that meta icons inheriting the animation will also stop it.
-				v.HALTED = true
+			if icon:HasAnimations() then
+				for k, v in pairs(icon:GetAnimations()) do
+					-- instead of just calling :StopAnimation() right here, set this attribute so that meta icons inheriting the animation will also stop it.
+					v.HALTED = true
+				end
 			end
 		end,
 	},
@@ -3862,6 +3838,91 @@ function ANIM:GetFlasher(parent)
 	return Flasher
 end
 
+local AnimatedObject = TMW:NewClass("AnimatedObject")
+
+function AnimatedObject:GetAnimations()
+	if not self.animations then
+		local t = {}
+		ActiveAnimations = ActiveAnimations or {}
+		ActiveAnimations[self] = t
+		self.animations = t
+		return t
+	end
+	return self.animations
+end
+function AnimatedObject:HasAnimations()
+	return self.animations 
+end
+function AnimatedObject:OnAnimationsUnused()
+	if self.animations then
+		self.animations = nil
+		ActiveAnimations[self] = nil
+		if not next(ActiveAnimations) then
+			ActiveAnimations = nil
+		end
+	end
+end
+function AnimatedObject:StartAnimation(table)
+	local Animation = table.data.Animation
+	local AnimationData = Animation and AnimationList[Animation]
+
+	if AnimationData then
+		self:GetAnimations()[Animation] = table
+
+		table.Animation = Animation
+		
+		-- Make sure not to overwrite this value.
+		-- This is used to distingusih inherited meta animations from original animations on a metaicon.
+		table.originIcon = table.originIcon or self
+		--table.lastInitialize = time 
+
+		if AnimationData.OnStart then
+			AnimationData.OnStart(self, table)
+		end
+
+		-- meta inheritance
+		if table.lastInherit ~= time then
+			table.lastInherit = time -- i do this because an infinite loop is possible with 2 meta icons checking eachother
+			local Icons = Types.meta.Icons
+			for i = 1, #Icons do
+				local ic = Icons[i]
+				if ic.__currentIcon == self then
+					ic:StartAnimation(table)
+				end
+			end
+		end
+	end
+end
+function AnimatedObject:StopAnimation(arg1)
+	local animations = self.animations
+	
+	if not animations then return end
+	
+	local Animation, table
+	if type(arg1) == "table" then
+		table = arg1
+		Animation = table.Animation
+	else
+		table = animations[arg1]
+		Animation = arg1
+	end
+
+	local AnimationData = AnimationList[Animation]
+
+	if AnimationData then
+		animations[Animation] = nil
+
+		if AnimationData.OnStop then
+			AnimationData.OnStop(self, table)
+		end
+		
+		if not next(animations) then
+			self:OnAnimationsUnused()
+		end
+	end
+end
+AnimatedObject:Embed(UIParent)
+AnimatedObject:Embed(WorldFrame)
 
 
 local ConditionControlledObject = TMW:NewClass("ConditionControlledObject")
@@ -4064,7 +4125,7 @@ end
 -- ICONS
 -- ------------------
 
-local Icon = TMW:NewClass("Icon", "Button", "ConditionControlledObject")
+local Icon = TMW:NewClass("Icon", "Button", "ConditionControlledObject", "AnimatedObject")
 
 function Icon.OnNewInstance(icon, ...)
 	local _, name, group, _, iconID = ... -- the CreateFrame args
@@ -4196,66 +4257,6 @@ function Icon.ProcessQueuedEvents(icon)
 	end
 end
 
-function Icon.GetAnimations(icon)
-	if not icon.animations then
-		local t = {}
-		ActiveAnimations[icon] = t
-		icon.animations = t
-	end
-	return icon.animations
-end
-
-function Icon.StartAnimation(icon, table)
-	local Animation = table.data.Animation
-	local AnimationData = Animation and AnimationList[Animation]
-
-	if AnimationData then
-		icon:GetAnimations()[Animation] = table
-
-		table.Animation = Animation
-		
-		-- Make sure not to overwrite this value.
-		-- This is used to distingusih inherited meta animations from original animations on a metaicon.
-		table.originIcon = table.originIcon or icon 
-
-		if AnimationData.OnStart then
-			AnimationData.OnStart(icon, table)
-		end
-
-		-- meta inheritance
-		local Icons = Types.meta.Icons
-		for i = 1, #Icons do
-			local ic = Icons[i]
-			if ic.__currentIcon == icon then
-				ic:StartAnimation(table)
-			end
-		end
-	end
-end
-
-function Icon.StopAnimation(icon, arg1)
-	local animations = icon:GetAnimations()
-
-	local Animation, table
-	if type(arg1) == "table" then
-		table = arg1
-		Animation = table.Animation
-	else
-		table = animations[arg1]
-		Animation = arg1
-	end
-
-	local AnimationData = AnimationList[Animation]
-
-	if AnimationData then
-		icon:GetAnimations()[Animation] = nil
-
-		if AnimationData.OnStop then
-			AnimationData.OnStop(icon, table)
-		end
-	end
-end
-
 
 function Icon.Validate(icon)
 	-- adds the icon to the list of icons that can be checked in metas/conditions
@@ -4297,7 +4298,7 @@ function Icon.SetUpdateMethod(icon, method)
 	if method == "auto" then
 		-- do nothing for now.
 	elseif method == "manual" then
-		icon.NextUpdateTime = time
+		icon.NextUpdateTime = 0
 	else
 	--	error("Unknown update method " .. method)
 	end
@@ -4339,15 +4340,15 @@ function Icon.ScheduleNextUpdate(icon)
 	end
 	icon.NextUpdateTime = nextUpdateTime
 	
-	return nextUpdateTime
+	--return nextUpdateTime
 end
 
 
 
 function Icon.Update(icon, force, ...)
-	local Update_Method = icon.Update_Method
 	
 	if icon.__shown and (force or icon.LastUpdate <= time - UPD_INTV) then
+		local Update_Method = icon.Update_Method
 		icon.LastUpdate = time
 
 		local iconUpdateNeeded = force or Update_Method == "auto" or icon.NextUpdateTime < time
@@ -4484,7 +4485,7 @@ function Icon.SetInfo(icon, alpha, color, texture, start, duration, spellChecked
 		6) Handle arg in here
 	]]
 
-	--local somethingChanged
+	local somethingChanged
 
 	alpha = alpha or 0
 	duration = duration or 0
@@ -4492,13 +4493,13 @@ function Icon.SetInfo(icon, alpha, color, texture, start, duration, spellChecked
 
 	local queueOnUnit, queueOnSpell, queueOnStack
 
-	--unit = unit or icon.Units and icon.Units[1]
-	--if unit and (icon.UpdateBindText_Unit or icon.OnUnit) then
-	
+	unit = unit or icon.Units and icon.Units[1]
 	if icon.__unitChecked ~= unit then
 		queueOnUnit = true
 		icon.__lastUnitChecked = icon.__unitChecked
 		icon.__unitChecked = unit
+		
+		somethingChanged = 1
 	end
 		
 	if unit then
@@ -4507,6 +4508,8 @@ function Icon.SetInfo(icon, alpha, color, texture, start, duration, spellChecked
 			queueOnUnit = true
 			icon.__lastUnitName = icon.__unitName
 			icon.__unitName = unitName
+		
+			somethingChanged = 1
 		end
 	end
 	
@@ -4520,6 +4523,8 @@ function Icon.SetInfo(icon, alpha, color, texture, start, duration, spellChecked
 		if icon.OnSpell then
 			icon:QueueEvent("OnSpell")
 		end
+		
+		somethingChanged = 1
 	end
 
 	if duration == 0.001 then duration = 0 end -- hardcode fix for tricks of the trade. nice hardcoding on your part too, blizzard
@@ -4530,6 +4535,8 @@ function Icon.SetInfo(icon, alpha, color, texture, start, duration, spellChecked
 		if d ~= icon.__lastDur then
 			icon:QueueEvent("OnDuration", d)
 			icon.__lastDur = d
+		
+			somethingChanged = 1
 		end
 	end
 
@@ -4571,6 +4578,8 @@ function Icon.SetInfo(icon, alpha, color, texture, start, duration, spellChecked
 				icon:QueueEvent("OnAlphaDec", alpha*100)
 			end
 		end
+		
+		somethingChanged = 1
 	end
 
 	if icon.__start ~= start or icon.__duration ~= duration or forceupdate then
@@ -4644,12 +4653,15 @@ function Icon.SetInfo(icon, alpha, color, texture, start, duration, spellChecked
 				cbar.Max = duration
 				cbar:SetMinMaxValues(0,  duration)
 
-				CDBarsToUpdate[cbar] = true
+				tDeleteItem(CDBarsToUpdate, cbar)
+				CDBarsToUpdate[#CDBarsToUpdate + 1] = cbar
 			end
 		end
 
 		icon.__start = start
 		icon.__duration = duration
+		
+		somethingChanged = 1
 	end
 
 	if icon.__count ~= count or icon.__countText ~= countText then
@@ -4665,17 +4677,23 @@ function Icon.SetInfo(icon, alpha, color, texture, start, duration, spellChecked
 		if icon.OnStack then
 			icon:QueueEvent("OnStack", count)
 		end
+		
+		somethingChanged = 1
 	end
 
 	texture = icon.OverrideTex or texture -- if a texture override is specefied, then use it instead
 	if texture ~= nil and icon.__tex ~= texture then -- do this before events are processed because some text outputs use icon.__tex
 		icon.__tex = texture
 		icon.texture:SetTexture(texture)
+		
+		somethingChanged = 1
 	end
 
 	-- NO EVENT HANDLING PAST THIS POINT! -- well, actually it doesnt matter that much anymore, but they still won't be handled till the next update
 	if icon.eventIsQueued then
 		icon:ProcessQueuedEvents()
+		
+		somethingChanged = 1
 	end
 
 	--[[if alpha == 0 and not force and not icon.IsFading then
@@ -4704,6 +4722,8 @@ function Icon.SetInfo(icon, alpha, color, texture, start, duration, spellChecked
 		end
 
 		icon.__vrtxcolor = color
+		
+		somethingChanged = 1
 	end
 
 	if icon.ShowPBar and (updatePBar or queueOnSpell or forceupdate) then
@@ -4729,14 +4749,23 @@ function Icon.SetInfo(icon, alpha, color, texture, start, duration, spellChecked
 			pbar:SetValue(value)
 			pbar.__value = value
 		end
+		
+		somethingChanged = 1
 	end
 
 	if queueOnSpell and icon.UpdateBindText_Spell then
 		icon:UpdateBindText()
+		somethingChanged = 1
 	elseif queueOnUnit and icon.UpdateBindText_Unit then
 		icon:UpdateBindText()
+		somethingChanged = 1
 	elseif queueOnStack and icon.UpdateBindText_Stack then
 		icon:UpdateBindText()
+		somethingChanged = 1
+	end
+	
+	if somethingChanged then
+		TMW:Fire("TMW_ICON_UPDATED", icon)
 	end
 end
 
@@ -4888,12 +4917,14 @@ function Icon.Setup(icon)
 	end
 	icon.OverrideTex = TMW:GetCustomTexture(icon)
 
+	
 	-- UnregisterAllEvents uses a metric fuckton of CPU, so only do it if needed
 	if icon.hasEvents then
 		icon:UnregisterAllEvents()
 		icon.hasEvents = nil
 	end
 	ClearScripts(icon)
+	icon:SetUpdateMethod("auto")
 
 	-- Conditions
 	icon:Conditions_LoadData(icon.Conditions)
@@ -4955,7 +4986,8 @@ function Icon.Setup(icon)
 		if strfind(icon.BindText, "%%[Dd]") then
 			icon.UpdateBindText_Any = true
 			IconsToUpdateBindText = IconsToUpdateBindText or {}
-			IconsToUpdateBindText[icon] = true
+			tDeleteItem(IconsToUpdateBindText, icon)
+			tinsert(IconsToUpdateBindText, icon)
 		--else
 		end
 		if strfind(icon.BindText, "%%[Ss]") then
@@ -5025,7 +5057,10 @@ function Icon.Setup(icon)
 	local cbar = icon.cbar
 	cbar.__value = nil
 	pbar.__value = nil
-	CDBarsToUpdate[cbar] = db.profile.Locked and icon.ShowCBar and true or nil
+	tDeleteItem(CDBarsToUpdate, cbar)
+	if db.profile.Locked and icon.ShowCBar then
+		tinsert(CDBarsToUpdate, cbar)
+	end
 	updatePBar = 1
 
 	if icon.OverrideTex then icon:SetTexture(icon.OverrideTex) end
@@ -5058,7 +5093,7 @@ function Icon.Setup(icon)
 			icon:SetTexture("Interface\\AddOns\\TellMeWhen\\Textures\\Disabled")
 		end
 
-		CDBarsToUpdate[cbar] = nil
+		tDeleteItem(CDBarsToUpdate, cbar)
 		cbar:SetValue(cbar.Max)
 		cbar:SetAlpha(.7)
 		cbar:SetStatusBarColor(0, 1, 0, 0.5)
@@ -5070,7 +5105,7 @@ function Icon.Setup(icon)
 		icon:EnableMouse(1)
 	end
 
-	--icon.updateQueued = true
+	icon.NextUpdateTime = 0
 
 	TMW:Fire("TMW_ICON_SETUP", icon)
 	--TMW:Fire("TMW_ICON_UPDATED", icon)

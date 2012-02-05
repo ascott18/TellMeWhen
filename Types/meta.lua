@@ -58,7 +58,6 @@ end
 
 local huge = math.huge
 local function Meta_OnUpdate(icon, time)
---	icon.updateQueued = nil
 	local Sort, CheckNext, CompiledIcons = icon.Sort, icon.CheckNext, icon.CompiledIcons
 
 	local icToUse
@@ -68,8 +67,7 @@ local function Meta_OnUpdate(icon, time)
 		local ic = _G[CompiledIcons[n]]
 		if ic and ic.OnUpdate and ic.__shown and not (CheckNext and ic.__lastMetaCheck == time) then
 			ic:Update()
-			local alpha = ic.__alpha
-			if alpha > 0 and ic.__shown then
+			if ic.__alpha > 0 and ic.__shown then
 				if Sort then
 					local _d = ic.__duration - (time - ic.__start)
 					if _d < 0 then
@@ -92,26 +90,26 @@ local function Meta_OnUpdate(icon, time)
 	if icToUse then
 		local ic = icToUse
 		local force
-		if ic.UpdateBindText then
+		if ic.UpdateBindText_Any then
 			icon.bindText:SetText(ic.bindText:GetText())
 		end
 
 		if ic ~= icon.__currentIcon or ic.__metaChangedTime == time then
 			icon.__metaChangedTime = time
 
-			if not ic.UpdateBindText then
+			if not ic.UpdateBindText_Any then
 				icon.bindText:SetText(ic.bindText:GetText())
 			end
 
-			if icon.animations then
+			if icon:HasAnimations() then
 				for k, v in pairs(icon:GetAnimations()) do
 					if v.originIcon ~= icon then
 						icon:StopAnimation(v)
 					end
 				end
 			end
-			if ic.animations then
-				for k, v in pairs(ic.animations) do
+			if ic:HasAnimations() then
+				for k, v in pairs(ic:GetAnimations()) do
 					icon:StartAnimation(v)
 				end
 			end
@@ -149,32 +147,36 @@ local function Meta_OnUpdate(icon, time)
 			force = 1
 
 			icon.__currentIcon = ic
-		--	TMW:Fire("TMW_ICON_UPDATED", ic)
-		--	TMW:Fire("TMW_ICON_UPDATED", icon)
+			TMW:Fire("TMW_ICON_UPDATED", ic)
+			--TMW:Fire("TMW_ICON_UPDATED", icon)
 		end
 
 		ic.__lastMetaCheck = time
 		--icon:SetInfo(alpha, color, texture, start, duration, spellChecked, reverse, count, countText, forceupdate, unit)
-		icon:SetInfo(ic.__alpha, ic.__vrtxcolor, ic.__tex, ic.__start, ic.__duration, ic.__spellChecked, ic.__reverse, ic.__count, ic.__countText, force, ic.__unitChecked)
-	else
+		if force or icon.metaUpdateQueued then
+			icon:SetInfo(ic.__alpha, ic.__vrtxcolor, ic.__tex, ic.__start, ic.__duration, ic.__spellChecked, ic.__reverse, ic.__count, ic.__countText, force, ic.__unitChecked)
+		end
+	elseif icon.__alpha ~= 0 then
 		icon:SetInfo(0)
 	end
 end
 
 
---[[local function TMW_ICON_UPDATED(icon, event, ic)
+local function TMW_ICON_UPDATED(icon, event, ic)
 	if Locked and icon.IconsLookup[ic:GetName()] then
-		icon.updateQueued = true
+		icon.metaUpdateQueued = true
 	end
-end]]
+end
 
 local InsertIcon, GetFullIconTable -- both need access to eachother, so scope them above their definitions
 
 local alreadyinserted = {}
 function InsertIcon(icon, ics, ic)
 	if ics.Type ~= "meta" or not icon.CheckNext then
-		alreadyinserted[ic] = true
-		tinsert(icon.CompiledIcons, ic)
+		alreadyinserted[ic] = true -- we might not insert if ic isnt enabled, but pretend that we did so we dont have to check again
+		if ics.Enabled then
+			tinsert(icon.CompiledIcons, ic)
+		end
 	elseif icon.CheckNext then
 		GetFullIconTable(icon, ics.Icons, icon.CompiledIcons)
 	end
@@ -215,7 +217,7 @@ function Type:Setup(icon, groupID, iconID)
 	icon.__currentIcon = nil -- reset this
 	icon.NameFirst = "" --need to set this to something for bars update
 
-	-- validity check)
+	-- validity check:
 	for k, v in pairs(icon.Icons) do
 		local g, i = strmatch(v, "TellMeWhen_Group(%d+)_Icon(%d+)")
 		g, i = tonumber(g) or 0, tonumber(i) or 0
@@ -229,14 +231,16 @@ function Type:Setup(icon, groupID, iconID)
 	wipe(alreadyinserted)
 	icon.CompiledIcons = wipe(icon.CompiledIcons or {})
 	icon.CompiledIcons = GetFullIconTable(icon, icon.Icons)
-	--[[icon.IconsLookup = wipe(icon.IconsLookup or {})
+	
+	icon.IconsLookup = wipe(icon.IconsLookup or {})
 	for _, ic in pairs(icon.CompiledIcons) do
 		icon.IconsLookup[ic] = true
 	end
 	for _, ic in pairs(icon.Icons) do -- make sure to get meta icons in the table even if they get expanded
 		icon.IconsLookup[ic] = true
-	end]]
+	end
 
+	
 	icon.ForceDisabled = true
 	for _, ic in pairs(icon.CompiledIcons) do
 		-- ic might not exist, so we have to directly look up the settings
@@ -253,14 +257,17 @@ function Type:Setup(icon, groupID, iconID)
 	icon.ShowCBar = true
 	icon.InvertBars = false
 
-	for k, v in pairs(icon:GetAnimations()) do
-		icon:StopAnimation(v)
+	if icon:HasAnimations() then
+		for k, v in pairs(icon:GetAnimations()) do
+			icon:StopAnimation(v)
+		end
 	end
 
 	icon:SetTexture("Interface\\Icons\\LevelUpIcon-LFD")
 
+--	icon:SetUpdateMethod("manual")
 	icon:SetScript("OnUpdate", Meta_OnUpdate)
-	--TMW:RegisterCallback("TMW_ICON_UPDATED", TMW_ICON_UPDATED, icon)
+	TMW:RegisterCallback("TMW_ICON_UPDATED", TMW_ICON_UPDATED, icon)
 end
 
 function Type:IE_TypeLoaded()
@@ -308,7 +315,7 @@ end
 
 function Type:TMW_ICON_SETUP(event, icon)
 	if icon.Type ~= self.type then
-	--	TMW:UnregisterCallback("TMW_ICON_UPDATED", TMW_ICON_UPDATED, icon)
+		TMW:UnregisterCallback("TMW_ICON_UPDATED", TMW_ICON_UPDATED, icon)
 	else
 		if not Locked then
 			-- meta icons shouln't show bars in config, even though they are force enabled.

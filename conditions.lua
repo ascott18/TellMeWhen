@@ -1903,7 +1903,7 @@ CNDT.Types = {
 		useSUG = true,
 		funcstr = [[UnitCast(c.Unit, c.Level, LOWER(c.NameName))]], -- LOWER is some gsub magic
 		events = function(c)
-			-- holy shit
+			-- holy shit... need i say more?
 			return CNDT:IsUnitEventUnit(c.Unit),
 			"UNIT_SPELLCAST_START", c.Unit,
 			"UNIT_SPELLCAST_STOP", c.Unit,
@@ -2651,7 +2651,7 @@ function CNDT:DoConditionSubstitutions(parent, v, c, thisstr)
 				local after = strmatch(unit, "^%%[Uu]%-?(.*)")
 				-- it is intended that we sub in parent:GetName() instead of "icon". 
 				-- We want to create unique ConditionObjects for each icon that uses %u
-				local sub = "(" .. parent:GetName() .. "icon.__unitChecked or '')"
+				local sub = "(" .. parent:GetName() .. ".__unitChecked or '')"
 				if after and after ~= "" then
 					sub = "(" .. sub .. " .. \"-" .. after .. "\")"
 				end

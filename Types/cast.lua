@@ -57,13 +57,40 @@ Type.RelevantSettings = {
 
 Type.EventDisabled_OnStack = true
 
+local events = {	
+	UNIT_SPELLCAST_START = true,
+	UNIT_SPELLCAST_STOP = true,
+	UNIT_SPELLCAST_FAILED = true,
+	UNIT_SPELLCAST_DELAYED = true,
+	UNIT_SPELLCAST_INTERRUPTED = true,
+	UNIT_SPELLCAST_CHANNEL_START = true,
+	UNIT_SPELLCAST_CHANNEL_UPDATE = true,
+	UNIT_SPELLCAST_CHANNEL_STOP = true,
+	UNIT_SPELLCAST_CHANNEL_INTERRUPTED = true,
+	UNIT_SPELLCAST_INTERRUPTIBLE = true,
+	UNIT_SPELLCAST_NOT_INTERRUPTIBLE = true,
+}
+
 function Type:Update()
 	db = TMW.db
 	unitsWithExistsEvent = TMW.UNITS.unitsWithExistsEvent
 end
 
-local function Cast_OnUpdate(icon, time)
+local function Cast_OnEvent(icon, event, arg1)
+	if events[event] then -- a unit cast event
+		local Units = icon.Units
+		for u = 1, #Units do
+			if arg1 == Units[u] then
+				icon.NextUpdateTime = 0
+				return
+			end
+		end
+	else -- a unit changed event
+		icon.NextUpdateTime = 0
+	end
+end
 
+local function Cast_OnUpdate(icon, time)
 	local NameFirst, NameNameHash, Units, Interruptible = icon.NameFirst, icon.NameNameHash, icon.Units, icon.Interruptible
 
 	for u = 1, #Units do
@@ -100,9 +127,25 @@ function Type:Setup(icon, groupID, iconID)
 	icon.NameFirst = TMW:GetSpellNames(icon, icon.Name, 1)
 --	icon.NameHash = TMW:GetSpellNames(icon, icon.Name, nil, nil, 1)
 	icon.NameNameHash = TMW:GetSpellNames(icon, icon.Name, nil, 1, 1)
-	icon.Units = TMW:GetUnits(icon, icon.Unit)
 
 	icon:SetTexture(TMW:GetConfigIconTexture(icon))
+	
+	local UnitSet
+	icon.Units, UnitSet = TMW:GetUnits(icon, icon.Unit)
+	icon.TableToIterate = icon.Units
+	
+	if UnitSet.allUnitsChangeOnEvent then
+		icon:SetUpdateMethod("manual")
+		for event in pairs(UnitSet.updateEvents) do
+			icon:RegisterEvent(event)
+		end
+	
+		for event in pairs(events) do
+			icon:RegisterEvent(event)
+		end
+	
+		icon:SetScript("OnEvent", Cast_OnEvent)
+	end
 
 	icon.ShowPBar = false
 	icon:SetScript("OnUpdate", Cast_OnUpdate)

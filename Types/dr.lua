@@ -239,8 +239,6 @@ function Type:Setup(icon, groupID, iconID)
 		for event in pairs(UnitSet.updateEvents) do
 			icon:RegisterEvent(event)
 		end
-	else
-		icon:SetUpdateMethod("auto")
 	end
 	
 	icon:SetScript("OnEvent", DR_OnEvent)

@@ -74,9 +74,10 @@ end
 
 
 local function AutoShot_OnEvent(icon, event, unit, _, _, _, spellID)
-	if unit == "player" and spellID == 75 then
+	if event == "UNIT_SPELLCAST_SUCCEEDED" and unit == "player" and spellID == 75 then
 		icon.asStart = TMW.time
 		icon.asDuration = UnitRangedDamage("player")
+		icon.NextUpdateTime = 0
 	end
 end
 
@@ -92,7 +93,7 @@ local function AutoShot_OnUpdate(icon, time)
 		local color = icon:CrunchColor()
 
 		--icon:SetInfo(alpha, color, texture, start, duration, spellChecked, reverse, count, countText, forceupdate, unit)
-		icon:SetInfo(icon.Alpha, icon.UnAlpha ~= 0 and pr or 1, nil, 0, 0, NameName, nil, nil, nil, nil, nil)
+		icon:SetInfo(icon.Alpha, color, nil, 0, 0, NameName, nil, nil, nil, nil, nil)
 	else
 
 		local color = icon:CrunchColor(asDuration > 0 and asDuration, inrange)
@@ -102,6 +103,10 @@ local function AutoShot_OnUpdate(icon, time)
 	end
 end
 
+
+local function SpellCooldown_OnEvent(icon, event)
+	icon.NextUpdateTime = 0
+end
 
 local function SpellCooldown_OnUpdate(icon, time)
 
@@ -172,6 +177,10 @@ function Type:Setup(icon, groupID, iconID)
 		icon.asStart = icon.asStart or 0
 		icon.asDuration = icon.asDuration or 0
 
+		if not icon.RangeCheck then
+			icon:SetUpdateMethod("manual")
+		end
+		
 		icon:RegisterEvent("UNIT_SPELLCAST_SUCCEEDED")
 		icon:SetScript("OnEvent", AutoShot_OnEvent)
 
@@ -180,6 +189,20 @@ function Type:Setup(icon, groupID, iconID)
 		icon.FirstTexture = SpellTextures[icon.NameFirst]
 
 		icon:SetTexture(TMW:GetConfigIconTexture(icon))
+		
+		
+		if not icon.RangeCheck and not icon.ManaCheck then -- dont try anything funny here with icon.IgnoreNomana. Even if that setting is true, it doesnt mean ManaCheck doesn't matter.
+			icon:RegisterEvent("SPELL_UPDATE_COOLDOWN")
+			icon:RegisterEvent("SPELL_UPDATE_USABLE")
+			if icon.IgnoreRunes then
+				icon:RegisterEvent("RUNE_POWER_UPDATE")
+				icon:RegisterEvent("RUNE_TYPE_UPDATE")
+			end	
+		
+			icon:SetScript("OnEvent", SpellCooldown_OnEvent)
+			icon:SetUpdateMethod("manual")
+		end
+	
 		icon:SetScript("OnUpdate", SpellCooldown_OnUpdate)
 	end
 
