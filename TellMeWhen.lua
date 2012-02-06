@@ -32,7 +32,7 @@ local DRData = LibStub("DRData-1.0", true)
 TELLMEWHEN_VERSION = "5.0.0"
 TELLMEWHEN_VERSION_MINOR = strmatch(" @project-version@", " r%d+") or ""
 TELLMEWHEN_VERSION_FULL = TELLMEWHEN_VERSION .. TELLMEWHEN_VERSION_MINOR
-TELLMEWHEN_VERSIONNUMBER = 50003 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
+TELLMEWHEN_VERSIONNUMBER = 50004 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
 if TELLMEWHEN_VERSIONNUMBER > 51000 or TELLMEWHEN_VERSIONNUMBER < 50000 then return error("YOU SCREWED UP THE VERSION NUMBER OR DIDNT CHANGE THE SAFETY LIMITS") end -- safety check because i accidentally made the version number 414069 once
 
 TELLMEWHEN_MAXGROUPS = 1 	--this is a default, used by SetTheory (addon), so dont rename
@@ -3524,9 +3524,13 @@ ANIM.AnimationList = {
 
 			local Duration = 0
 			local Period = data.Period
-			while Duration < data.Duration do
-				Duration = Duration + (Period * 2)
-			end
+		--	if Duration and data.Duration then
+				while Duration < data.Duration do
+					Duration = Duration + (Period * 2)
+				end
+		--	else
+		--		print(Duration, data.Duration)
+		--	end
 
 			-- inherit from ICONFLASH (since all the functions except Play are the same)
 			if not AnimationData.OnStart then
@@ -3569,12 +3573,12 @@ ANIM.AnimationList = {
 		end,
 
 		OnUpdate = function(icon, table)
+			local remaining = table.Duration - (time - table.Start)
+			
 			if remaining < 0 then
 				-- generic expiration
 				icon:StopAnimation(table)
 			else
-				local remaining = table.Duration - (time - table.Start)
-
 				local Amt = (table.Magnitude or 10) / (1 + 10*(300^(-(remaining))))
 				local moveX = random(-Amt, Amt)
 				local moveY = random(-Amt, Amt)
