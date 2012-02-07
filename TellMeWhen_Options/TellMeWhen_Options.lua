@@ -1186,6 +1186,12 @@ function TMW:CompileOptions()
 							guiInline = true,
 							dialogInline = true,
 							args = {
+								DEBUG_ForceAutoUpdate = {
+									name = "DEBUG: FORCE AUTO UPDATES",
+									desc = "TMW v5 introduced new code that manages updates muc more efficiently, only updating icons when they need to be updated. Check this to disable this feature in order to compare between the old method and the new method to see if there are any discrepancies that may be indicative of a bug.",
+									type = "toggle",
+									order = 1,
+								},
 								BarGCD = {
 									name = L["UIPANEL_BARIGNOREGCD"],
 									desc = L["UIPANEL_BARIGNOREGCD_DESC"],
@@ -7171,7 +7177,7 @@ end
 function CNDT:SetTabText(type)
 	local type, Conditions = CNDT:GetTypeData(type)
 
-	CNDT:CheckParentheses(type)
+	CNDT:CheckParentheses(CNDT:GetTypeData(type))
 
 	local tab = (type == "icon" and IE.IconConditionTab) or IE.GroupConditionTab
 	local n = Conditions.n
@@ -7483,46 +7489,6 @@ CNDT.colors = setmetatable(
 		end
 		return rawget(t, k) or ""
 end})
-
-function CNDT:CheckParentheses(type)
-	local type, settings = CNDT:GetTypeData(type)
-
-	local numclose, numopen, runningcount = 0, 0, 0
-	local unopened = 0
-
-	for Condition in TMW:InConditions(settings) do
-		for i = 1, Condition.PrtsBefore do
-			numopen = numopen + 1
-			runningcount = runningcount + 1
-			if runningcount < 0 then unopened = unopened + 1 end
-		end
-		for i = 1, Condition.PrtsAfter do
-			numclose = numclose + 1
-			runningcount = runningcount - 1
-			if runningcount < 0 then unopened = unopened + 1 end
-		end
-	end
-
-	if numopen ~= numclose then
-		local typeNeeded, num
-		if numopen > numclose then
-			typeNeeded, num = ")", numopen-numclose
-		else
-			typeNeeded, num = "(", numclose-numopen
-		end
-		HELP:Show("CNDT_PARENTHESES_ERROR", nil, TMW.IE.Conditions, 0, 0, L["PARENTHESIS_WARNING1"], num, L["PARENTHESIS_TYPE_" .. typeNeeded])
-
-		CNDT[type.."invalid"] = 1
-	elseif unopened > 0 then
-
-		HELP:Show("CNDT_PARENTHESES_ERROR", nil, TMW.IE.Conditions, 0, 0, L["PARENTHESIS_WARNING2"], unopened)
-
-		CNDT[type.."invalid"] = 1
-	else
-		HELP:Hide("CNDT_PARENTHESES_ERROR")
-		CNDT[type.."invalid"] = nil
-	end
-end
 
 function CNDT:ColorizeParentheses()
 	if not IE.Conditions:IsShown() then return end

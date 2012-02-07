@@ -2942,7 +2942,7 @@ end
 function CNDT:GetConditionObject(parent, Conditions)
 	local conditionString, updateFuncArg1 = CNDT:GetConditionCheckFunctionString(parent, Conditions)
 	
-	if conditionString ~= "" then
+	if conditionString and conditionString ~= "" then
 		for instance in pairs(ConditionObject.instances) do
 			if instance.conditionString == conditionString then
 				return instance
@@ -2960,6 +2960,10 @@ function CNDT:GetConditionCheckFunctionString(parent, Conditions)
 	if TMW.debug and test then test() end
 
 	local funcstr = ""
+	
+	if not CNDT:CheckParentheses(nil, Conditions) then
+		return ""
+	end
 
 	for i = 1, Conditions.n do
 		local c = Conditions[i]
@@ -3004,6 +3008,57 @@ function CNDT:GetConditionCheckFunctionString(parent, Conditions)
 	return funcstr, arg1
 end
 
+
+function CNDT:CheckParentheses(type, settings)
+
+	local numclose, numopen, runningcount = 0, 0, 0
+	local unopened = 0
+
+	for Condition in TMW:InConditions(settings) do
+		for i = 1, Condition.PrtsBefore do
+			numopen = numopen + 1
+			runningcount = runningcount + 1
+			if runningcount < 0 then unopened = unopened + 1 end
+		end
+		for i = 1, Condition.PrtsAfter do
+			numclose = numclose + 1
+			runningcount = runningcount - 1
+			if runningcount < 0 then unopened = unopened + 1 end
+		end
+	end
+
+	if numopen ~= numclose then
+		local typeNeeded, num
+		if numopen > numclose then
+			typeNeeded, num = ")", numopen-numclose
+		else
+			typeNeeded, num = "(", numclose-numopen
+		end
+		
+		if type then
+			TMW.HELP:Show("CNDT_PARENTHESES_ERROR", nil, TMW.IE.Conditions, 0, 0, L["PARENTHESIS_WARNING1"], num, L["PARENTHESIS_TYPE_" .. typeNeeded])
+
+			CNDT[type.."invalid"] = 1
+		end
+		
+		return false
+	elseif unopened > 0 then
+		if type then
+			TMW.HELP:Show("CNDT_PARENTHESES_ERROR", nil, TMW.IE.Conditions, 0, 0, L["PARENTHESIS_WARNING2"], unopened)
+
+			CNDT[type.."invalid"] = 1
+		end
+		
+		return false
+	else
+		if type then
+			TMW.HELP:Hide("CNDT_PARENTHESES_ERROR")
+			CNDT[type.."invalid"] = nil
+		end
+		
+		return true
+	end
+end
 
 CNDT.EventEngine = CreateFrame("Frame")
 CNDT.EventEngine.funcs = {}

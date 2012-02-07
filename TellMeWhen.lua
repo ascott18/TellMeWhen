@@ -32,7 +32,7 @@ local DRData = LibStub("DRData-1.0", true)
 TELLMEWHEN_VERSION = "5.0.0"
 TELLMEWHEN_VERSION_MINOR = strmatch(" @project-version@", " r%d+") or ""
 TELLMEWHEN_VERSION_FULL = TELLMEWHEN_VERSION .. TELLMEWHEN_VERSION_MINOR
-TELLMEWHEN_VERSIONNUMBER = 50004 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
+TELLMEWHEN_VERSIONNUMBER = 50005 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
 if TELLMEWHEN_VERSIONNUMBER > 51000 or TELLMEWHEN_VERSIONNUMBER < 50000 then return error("YOU SCREWED UP THE VERSION NUMBER OR DIDNT CHANGE THE SAFETY LIMITS") end -- safety check because i accidentally made the version number 414069 once
 
 TELLMEWHEN_MAXGROUPS = 1 	--this is a default, used by SetTheory (addon), so dont rename
@@ -3866,7 +3866,7 @@ function AnimatedObject:OnAnimationsUnused()
 		end
 	end
 end
-function AnimatedObject:StartAnimation(table)
+function AnimatedObject:StartAnimation(table, dontInherit)
 	local Animation = table.data.Animation
 	local AnimationData = Animation and AnimationList[Animation]
 
@@ -3885,13 +3885,12 @@ function AnimatedObject:StartAnimation(table)
 		end
 
 		-- meta inheritance
-		if table.lastInherit ~= time then
-			table.lastInherit = time -- i do this because an infinite loop is possible with 2 meta icons checking eachother
+		if not dontInherit then
 			local Icons = Types.meta.Icons
 			for i = 1, #Icons do
 				local ic = Icons[i]
 				if ic.__currentIcon == self then
-					ic:StartAnimation(table)
+					ic:StartAnimation(table, true)
 				end
 			end
 		end
@@ -4298,7 +4297,12 @@ end
 
 Icon.Update_Method = "auto"
 function Icon.SetUpdateMethod(icon, method)
+	if db.profile.DEBUG_ForceAutoUpdate then
+		method = "auto"
+	end
+	
 	icon.Update_Method = method
+	
 	if method == "auto" then
 		-- do nothing for now.
 	elseif method == "manual" then

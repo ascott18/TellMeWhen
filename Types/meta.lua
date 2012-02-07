@@ -148,7 +148,7 @@ local function Meta_OnUpdate(icon, time)
 
 			icon.__currentIcon = ic
 			TMW:Fire("TMW_ICON_UPDATED", ic)
-			--TMW:Fire("TMW_ICON_UPDATED", icon)
+			TMW:Fire("TMW_ICON_UPDATED", icon)
 		end
 
 		ic.__lastMetaCheck = time

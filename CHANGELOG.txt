@@ -24,6 +24,7 @@
  ** (r437) When a meta icon changes the icon it is checking, it should no longer stop any animations that the meta icon itself initiated (non-inherited animations)
  ** (r439) TellMeWhen-5.0.0.lua:4227: attempt to index local "ic" (a number value)
  ** (r441) TellMeWhen-5.0.0.lua:3572: attempt to compare nil with number
+ ** (r442) (Not really a bug fix): Added an option to TMW's main settings to temporarily disable the new update mechanism, reverting to the old method.
 
 ===v4.8.3===
  * Bug Fixes:
