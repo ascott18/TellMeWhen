@@ -1188,7 +1188,7 @@ function TMW:CompileOptions()
 							args = {
 								DEBUG_ForceAutoUpdate = {
 									name = "DEBUG: FORCE AUTO UPDATES",
-									desc = "TMW v5 introduced new code that manages updates muc more efficiently, only updating icons when they need to be updated. Check this to disable this feature in order to compare between the old method and the new method to see if there are any discrepancies that may be indicative of a bug.",
+									desc = "TMW v5 introduced new code that manages updates much more efficiently, only updating icons when they need to be updated. Check this to disable this feature in order to compare between the old method and the new method to see if there are any discrepancies that may be indicative of a bug.",
 									type = "toggle",
 									order = 1,
 								},
@@ -5160,9 +5160,9 @@ function ANIM:OnOptionsLoaded()
 end
 
 function ANIM:TMW_ICON_SETUP(event, icon)
-	if not db.profile.Locked and icon:HasAnimations() then
-		for k, v in pairs(icon:GetAnimations()) do
-			icon:StopAnimation(v)
+	if not db.profile.Locked and icon:Animations_Has() then
+		for k, v in pairs(icon:Animations_Get()) do
+			icon:Animations_Stop(v)
 		end
 	end
 end

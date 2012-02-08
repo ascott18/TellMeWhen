@@ -183,7 +183,6 @@ function Type:Setup(icon, groupID, iconID)
 		end
 	end
 
-	icon.ShowPBar = nil
 	if icon.OnlyEquipped then
 		icon.OnlyInBags = true
 	end

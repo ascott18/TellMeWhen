@@ -71,21 +71,24 @@ end
 
 
 local function Reactive_OnEvent(icon, event, spell)
-	if event == "SPELL_ACTIVATION_OVERLAY_GLOW_SHOW" or event == "SPELL_ACTIVATION_OVERLAY_GLOW_SHOW" then
+	if event == "SPELL_ACTIVATION_OVERLAY_GLOW_SHOW" or event == "SPELL_ACTIVATION_OVERLAY_GLOW_HIDE" then
 		if icon.NameFirst == spell or strlowerCache[GetSpellInfo(spell)] == icon.NameName then
-			icon.Usable = event == "SPELL_ACTIVATION_OVERLAY_GLOW_SHOW"
+			icon.forceUsable = event == "SPELL_ACTIVATION_OVERLAY_GLOW_SHOW"
 			icon.NextUpdateTime = 0
+			print(icon, event, TMW.time)
 		end
 	else
 		icon.NextUpdateTime = 0
+		print(icon, event, TMW.time)
 	end
 end
 
 local function Reactive_OnUpdate(icon, time)
+	print(icon, time)
 
 	local n, inrange, nomana, start, duration, CD, usable = 1
-	local NameArray, NameNameArray, RangeCheck, ManaCheck, CooldownCheck, IgnoreRunes, Usable, IgnoreNomana =
-	 icon.NameArray, icon.NameNameArray, icon.RangeCheck, icon.ManaCheck, icon.CooldownCheck, icon.IgnoreRunes, icon.Usable, icon.IgnoreNomana
+	local NameArray, NameNameArray, RangeCheck, ManaCheck, CooldownCheck, IgnoreRunes, forceUsable, IgnoreNomana =
+	 icon.NameArray, icon.NameNameArray, icon.RangeCheck, icon.ManaCheck, icon.CooldownCheck, icon.IgnoreRunes, icon.forceUsable, icon.IgnoreNomana
 
 	for i = 1, #NameArray do
 		local iName = NameArray[i]
@@ -109,7 +112,7 @@ local function Reactive_OnUpdate(icon, time)
 				end
 				CD = not (duration == 0 or OnGCD(duration))
 			end
-			usable = Usable or usable
+			usable = forceUsable or usable
 			if usable and not CD and not nomana and inrange == 1 then --usable
 
 				local color = icon:CrunchColor()
@@ -153,7 +156,7 @@ function Type:Setup(icon, groupID, iconID)
 	icon.NameName = TMW:GetSpellNames(icon, icon.Name, 1, true)
 	icon.NameArray = TMW:GetSpellNames(icon, icon.Name)
 	icon.NameNameArray = TMW:GetSpellNames(icon, icon.Name, nil, 1)
-	icon.Usable = false
+	icon.forceUsable = nil
 
 	icon.FirstTexture = SpellTextures[icon.NameFirst]
 

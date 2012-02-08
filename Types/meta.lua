@@ -90,27 +90,31 @@ local function Meta_OnUpdate(icon, time)
 	if icToUse then
 		local ic = icToUse
 		local force
-		if ic.UpdateBindText_Any then
+		local icBindTextObj = ic.BindTextObj
+		if icBindTextObj and icBindTextObj.hasAnySubstitutions then -- TODO: meta icons checking meta icons dont inherit properly here.
 			icon.bindText:SetText(ic.bindText:GetText())
 		end
 
 		if ic ~= icon.__currentIcon or ic.__metaChangedTime == time then
+			-- __metaChangedTime tracks changes to meta icons.
+			-- we want to be sure to update a meta icon whenever it changes. Or something like that. Just keep this here, otherwise bad things happen
 			icon.__metaChangedTime = time
-
-			if not ic.UpdateBindText_Any then
+			
+			-- we check if either are nil so that the bind text will be properly reset (to blank or to static) when an icon changes.
+			if not icBindTextObj or not icBindTextObj.hasAnySubstitutions then
 				icon.bindText:SetText(ic.bindText:GetText())
 			end
 
-			if icon:HasAnimations() then
-				for k, v in pairs(icon:GetAnimations()) do
+			if icon:Animations_Has() then
+				for k, v in pairs(icon:Animations_Get()) do
 					if v.originIcon ~= icon then
-						icon:StopAnimation(v)
+						icon:Animations_Stop(v)
 					end
 				end
 			end
-			if ic:HasAnimations() then
-				for k, v in pairs(ic:GetAnimations()) do
-					icon:StartAnimation(v)
+			if ic:Animations_Has() then
+				for k, v in pairs(ic:Animations_Get()) do
+					icon:Animations_Start(v)
 				end
 			end
 
@@ -143,6 +147,7 @@ local function Meta_OnUpdate(icon, time)
 			icon.ShowTimer = ic.ShowTimer
 			icon.ShowTimerText = ic.ShowTimerText
 			icon.cooldown.noCooldownCount = ic.cooldown.noCooldownCount
+			icon.BindTextObj = ic.BindTextObj -- BE VERY FUCKING CAREFUL WITH THIS. dont call any methods on it - only setting it to obtain attributes
 
 			force = 1
 
@@ -257,9 +262,9 @@ function Type:Setup(icon, groupID, iconID)
 	icon.ShowCBar = true
 	icon.InvertBars = false
 
-	if icon:HasAnimations() then
-		for k, v in pairs(icon:GetAnimations()) do
-			icon:StopAnimation(v)
+	if icon:Animations_Has() then
+		for k, v in pairs(icon:Animations_Get()) do
+			icon:Animations_Stop(v)
 		end
 	end
 

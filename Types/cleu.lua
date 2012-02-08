@@ -256,12 +256,16 @@ local function CLEU_OnEvent(icon, _, t, event, h, sourceGUID, sourceName, source
 		end
 
 		-- bind text updating
-		if icon.cleu_sourceUnit ~= sourceUnit and icon.UpdateBindText_SourceUnit then
-			icon:UpdateBindText()
-		elseif icon.cleu_destUnit ~= destUnit and icon.UpdateBindText_DestUnit then
-			icon:UpdateBindText()
-		elseif icon.cleu_extraSpell ~= extraID and icon.UpdateBindText_ExtraSpell then
-			icon:UpdateBindText()
+		local BindTextObj = icon.BindTextObj
+		if BindTextObj and BindTextObj.hasAnySubstitutions then
+			local usedSubstitutions = BindTextObj.usedSubstitutions
+			if
+				(icon.cleu_sourceUnit ~= sourceUnit	and usedSubstitutions.o)	or
+				(icon.cleu_destUnit ~= destUnit		and usedSubstitutions.e)	or
+				(icon.cleu_extraSpell ~= extraID	and usedSubstitutions.x)
+			then
+				BindTextObj:UpdateNonDurationSubstitutions()
+			end
 		end
 
 		icon.cleu_start = TMW.time
@@ -318,25 +322,6 @@ function Type:Setup(icon, groupID, iconID)
 
 	-- more efficient than checking icon.CLEUEvents[""] every OnEvent
 	icon.AllowAnyEvents = icon.CLEUEvents[""]
-
-	-- check for when bind texts should be updated (these are unique to cleu, so they are handled here, not in icon:Setup()
-	icon.UpdateBindText_SourceUnit = nil
-	icon.UpdateBindText_DestUnit = nil
-	icon.UpdateBindText_ExtraSpell = nil
-	if icon.BindText then
-		if strfind(icon.BindText, "%%[Oo]") then
-			icon.UpdateBindText_Any = true
-			icon.UpdateBindText_SourceUnit = nil
-		end
-		if strfind(icon.BindText, "%%[Ee]") then
-			icon.UpdateBindText_Any = true
-			icon.UpdateBindText_DestUnit = nil
-		end
-		if strfind(icon.BindText, "%%[Xx]") then
-			icon.UpdateBindText_Any = true
-			icon.UpdateBindText_ExtraSpell = nil
-		end
-	end
 
 	local tex, otherArgWhichLacksADecentName = TMW:GetConfigIconTexture(icon)
 	if otherArgWhichLacksADecentName == nil then

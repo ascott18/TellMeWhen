@@ -2912,7 +2912,7 @@ function ConditionObject:OnNewInstance(parent, Conditions, conditionString, upda
 		TMW:Error(err)
 	end
 	
-	CNDT:CompileUpdateFunction(parent, self, updateFuncArg1) -- DEBUG: VARIABLE NAMES ARE WRONG (UpdateNeeded, etc)
+	CNDT:CompileUpdateFunction(parent, self, updateFuncArg1)
 end
 
 function ConditionObject:Check(parent)
@@ -2943,7 +2943,9 @@ function CNDT:GetConditionObject(parent, Conditions)
 	local conditionString, updateFuncArg1 = CNDT:GetConditionCheckFunctionString(parent, Conditions)
 	
 	if conditionString and conditionString ~= "" then
-		for instance in pairs(ConditionObject.instances) do
+		local instances = ConditionObject.instances
+		for i = 1, #instances do
+			local instance = instances[i]
 			if instance.conditionString == conditionString then
 				return instance
 			end

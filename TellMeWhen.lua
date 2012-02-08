@@ -32,7 +32,7 @@ local DRData = LibStub("DRData-1.0", true)
 TELLMEWHEN_VERSION = "5.0.0"
 TELLMEWHEN_VERSION_MINOR = strmatch(" @project-version@", " r%d+") or ""
 TELLMEWHEN_VERSION_FULL = TELLMEWHEN_VERSION .. TELLMEWHEN_VERSION_MINOR
-TELLMEWHEN_VERSIONNUMBER = 50005 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
+TELLMEWHEN_VERSIONNUMBER = 50006 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
 if TELLMEWHEN_VERSIONNUMBER > 51000 or TELLMEWHEN_VERSIONNUMBER < 50000 then return error("YOU SCREWED UP THE VERSION NUMBER OR DIDNT CHANGE THE SAFETY LIMITS") end -- safety check because i accidentally made the version number 414069 once
 
 TELLMEWHEN_MAXGROUPS = 1 	--this is a default, used by SetTheory (addon), so dont rename
@@ -70,15 +70,15 @@ local huge = math.huge
 local db, updatehandler, BarGCD, ClockGCD, Locked, SndChan, FramesToFind, CNDTEnv, ColorMSQ, OnlyMSQ, AnimationList
 local NAMES, EVENTS, ANIM, ANN, SND
 local UPD_INTV = 0.06	--this is a default, local because i use it in onupdate functions
-local runEvents, updatePBar = 1, 1
-local GCD, NumShapeshiftForms, LastUpdate = 0, 0, 0
+local runEvents, updatePBars = 1, 1
+local GCD, NumShapeshiftForms, LastUpdate, LastBindTextUpdate = 0, 0, 0, 0
 local IconsToUpdate, GroupsToUpdate = {}, {}
-local IconsToUpdateBindText
+local BindTextObjsToUpdate
 local loweredbackup = {}
 local callbackregistry = {}
 local bullshitTable = {}
 local ActiveAnimations = {}
-local CDBarsToUpdate, PBarsToUpdate = {}, {}
+ CDBarsToUpdate, PBarsToUpdate = {}, {} --DEBUG
 local time = GetTime() TMW.time = time
 local sctcolor = {r=1, b=1, g=1}
 local clientVersion = select(4, GetBuildInfo())
@@ -124,7 +124,7 @@ do	-- Class Lib
 	end
 	
 	local function initializeClass(self)
-		if not next(self.instances) then
+		if not self.instances[1] then
 			-- set any defined metamethods
 			for k, v in pairs(self.instancemeta.__index) do
 				if TMW.Metamethods[k] then
@@ -152,7 +152,7 @@ do	-- Class Lib
 
 		setmetatable(instance, self.instancemeta)
 
-		self.instances[instance] = true
+		self.instances[#self.instances + 1] = instance
 
 		if self.OnNewInstance then
 			self.OnNewInstance(instance, ...)
@@ -875,16 +875,16 @@ TMW.GCDSpells = {
 } local GCDSpell = TMW.GCDSpells[pclass] TMW.GCDSpell = GCDSpell
 
 TMW.DefaultPowerTypes = {
-	ROGUE		= 3, -- sinister strike
-	PRIEST		= 0, -- renew
-	DRUID		= 0, -- rejuvenation
-	WARRIOR		= 1, -- rend
-	MAGE		= 0, -- fireball
-	WARLOCK		= 0, -- demon armor
-	PALADIN		= 0, -- seal of righteousness
-	SHAMAN		= 0, -- lightning shield
-	HUNTER		= 2, -- serpent sting
-	DEATHKNIGHT = 6, -- death coil
+	ROGUE		= 3,
+	PRIEST		= 0,
+	DRUID		= 0,
+	WARRIOR		= 1,
+	MAGE		= 0,
+	WARLOCK		= 0,
+	PALADIN		= 0,
+	SHAMAN		= 0,
+	HUNTER		= 2,
+	DEATHKNIGHT = 6,
 } local defaultPowerType = TMW.DefaultPowerTypes[pclass]
 
 TMW.DS = {
@@ -1467,13 +1467,19 @@ function TMW:OnUpdate(elapsed)					-- THE MAGICAL ENGINE OF DOING EVERYTHING
 				icon:Update()
 			end
 
-			updatePBar = nil
+			if updatePBars then
+				for pbar in next, PBarsToUpdate do
+					pbar:SetSpell(pbar.spell) -- force an update
+				end
+				updatePBars = nil
+			end
 		end
 	end
 
-	if IconsToUpdateBindText then
-		for i = 1, #IconsToUpdateBindText do
-			IconsToUpdateBindText[i]:UpdateBindText()
+	if BindTextObjsToUpdate and LastBindTextUpdate <= time - 0.1 then
+		LastBindTextUpdate = time
+		for i = 1, #BindTextObjsToUpdate do
+			BindTextObjsToUpdate[i]:Update()
 		end
 	end
 
@@ -1552,7 +1558,7 @@ function TMW:OnUpdate(elapsed)					-- THE MAGICAL ENGINE OF DOING EVERYTHING
 				-- its the magical modular tour, and its coming to take you awayyy......
 
 				if animationTable.HALTED then
-					animatedObject:StopAnimation(animationTable)
+					animatedObject:Animations_Stop(animationTable)
 				else
 					AnimationList[animationTable.Animation].OnUpdate(animatedObject, animationTable)
 				end
@@ -1577,7 +1583,7 @@ function TMW:Update()
 
 	time = GetTime() TMW.time = time
 	LastUpdate = time - 10
-	updatePBar = 1
+	updatePBars = 1
 
 	Locked = db.profile.Locked
 
@@ -1599,7 +1605,7 @@ function TMW:Update()
 
 	wipe(TMW.Icons)
 	wipe(TMW.IconsLookup)
-	IconsToUpdateBindText = nil
+	BindTextObjsToUpdate = nil
 
 	for key, Type in pairs(TMW.Types) do
 		wipe(Type.Icons)
@@ -2627,7 +2633,7 @@ function TMW:COMBAT_LOG_EVENT_UNFILTERED(_, _, p,_, g, _, f, _, _, _, _, _, i)
 end
 
 function TMW:SPELL_UPDATE_USABLE()
-	updatePBar = 1
+	updatePBars = 1
 end
 
 function TMW:PLAYER_TALENT_UPDATE()
@@ -2651,41 +2657,21 @@ function TMW:ACTIVE_TALENT_GROUP_CHANGED()
 end
 
 function TMW:UNIT_POWER_FREQUENT(event, unit, powerType)
+	-- powerType is an event arg
+	-- powerTypeNum is a manual update arg
 	if unit == "player" then
+		-- these may be nil if coming from a manual update. in that case, they will be determined by the bar's settings and attributes
 		local powerTypeNum = powerType and _G["SPELL_POWER_" .. powerType]
 		local power = powerTypeNum and UnitPower("player", powerTypeNum)
+		
 		for pbar in next, PBarsToUpdate do
-			if not powerTypeNum then
-				powerTypeNum = pbar.powerType
-				power = UnitPower("player", powerTypeNum)
-			end
-			if powerTypeNum == pbar.powerType then
-				local Max = pbar.Max
-				local value
-
-				if not pbar.InvertBars then
-					value = Max - power + pbar.offset
-				else
-					value = power + pbar.offset
-				end
-
-				if value > Max then
-					value = Max
-				elseif value < 0 then
-					value = 0
-				end
-
-				if pbar.__value ~= value then
-					pbar:SetValue(value)
-					pbar.__value = value
-				end
-			end
+			pbar:Update(power, powerTypeNum)
 		end
 	end
 end
 
 function TMW:ForceUpdatePBars()
-	TMW:UNIT_POWER_FREQUENT("UNIT_POWER_FREQUENT", "player", nil)
+	TMW:UNIT_POWER_FREQUENT("UNIT_POWER_FREQUENT", "player")
 end
 
 function TMW:IterateAllModules(callback, arg1, ...)
@@ -2810,6 +2796,66 @@ function TMW:ProcessEquivalencies()
 	end
 end
 
+BindTextObj = TMW:NewClass("BindTextObj")
+
+function BindTextObj:OnNewInstance(icon, FontObject)
+	self.icon = icon
+	self.FontObject = FontObject
+	self.usedSubstitutions = {}
+end
+
+function BindTextObj:SetBaseString(string)
+	self.baseString = string
+	self.hasDuration = strfind(string, "%%[Dd]")
+	self.hasAnySubstitutions = nil
+	wipe(self.usedSubstitutions)
+	
+	-- tfmpusdkeox is every letter currently used for substitutions
+	for letter in gmatch("tfmpusdkeox", "(.)") do
+		if strfind(string, "%%[" .. letter:upper() .. letter .. "]") then
+			self.usedSubstitutions[letter] = true
+			self.hasAnySubstitutions = true
+		end
+	end
+	
+	if BindTextObjsToUpdate then
+		tDeleteItem(BindTextObjsToUpdate, self)
+	end	
+	if self.hasDuration then
+		BindTextObjsToUpdate = BindTextObjsToUpdate or {}
+		tinsert(BindTextObjsToUpdate, self)
+	end
+	
+	self:UpdateNonDurationSubstitutions()
+end
+
+function BindTextObj:UpdateNonDurationSubstitutions()
+	self.stringWithoutDuration = TMW:InjectDataIntoString(self.baseString, self.icon, true, true, true)
+	self:Update(1)
+end
+
+function BindTextObj:Update(forceDurationUpdate)
+	local Text = self.stringWithoutDuration
+	
+	if self.hasDuration then
+		local icon = self.icon
+		local duration = icon.__duration - (time - icon.__start)
+		if duration < 0 then
+			duration = 0
+		end
+		if duration ~= self.lastDuration or forceDurationUpdate then
+			Text = gsub(Text, "%%[Dd]", TMW:FormatSeconds(duration, duration == 0 or duration > 10, true))
+			self.stringWithDuration = Text
+		else
+			Text = self.stringWithDuration
+		end
+	end
+	
+	if self.__currentText ~= Text then
+		self.FontObject:SetText(Text)
+		self.__currentText = Text
+	end
+end
 
 function TMW:InjectDataIntoString(Text, icon, doBlizz, shouldColorNames, dontSubDuration)
 	if not Text then return Text end
@@ -3015,7 +3061,7 @@ function NAMES:TryToAcquireName(input, shouldColor)
 		end
 		if shouldColor then
 			local _, class = UnitClass(input)
-			local nameColored = NAMES.ClassColors[class] .. name .. "|r"
+			local nameColored = (NAMES.ClassColors[class] or "") .. name .. "|r"
 
 			NAMES.ClassColoredNameCache[name] = nameColored
 
@@ -3469,7 +3515,7 @@ ANIM.AnimationList = {
 
 		Play = function(icon, data)
 			if not WorldFrame:IsProtected() or not InCombatLockdown() then
-				WorldFrame:StartAnimation{
+				WorldFrame:Animations_Start{
 					data = data,
 					Start = time,
 					Duration = data.Duration,
@@ -3483,7 +3529,7 @@ ANIM.AnimationList = {
 			local remaining = table.Duration - (time - table.Start)
 
 			if remaining < 0 then
-				WorldFrame:StopAnimation(table)
+				WorldFrame:Animations_Stop(table)
 			else
 				local Amt = (table.Magnitude or 10) / (1 + 10*(300^(-(remaining))))
 				local moveX = random(-Amt, Amt)
@@ -3524,13 +3570,9 @@ ANIM.AnimationList = {
 
 			local Duration = 0
 			local Period = data.Period
-		--	if Duration and data.Duration then
-				while Duration < data.Duration do
-					Duration = Duration + (Period * 2)
-				end
-		--	else
-		--		print(Duration, data.Duration)
-		--	end
+			while Duration < data.Duration do
+				Duration = Duration + (Period * 2)
+			end
 
 			-- inherit from ICONFLASH (since all the functions except Play are the same)
 			if not AnimationData.OnStart then
@@ -3540,7 +3582,7 @@ ANIM.AnimationList = {
 				AnimationData.OnStop = ICONFLASH.OnStop
 			end
 
-			UIParent:StartAnimation{
+			UIParent:Animations_Start{
 				data = data,
 				Start = time,
 				Duration = Duration,
@@ -3563,7 +3605,7 @@ ANIM.AnimationList = {
 		Infinite = true,
 
 		Play = function(icon, data)
-			icon:StartAnimation{
+			icon:Animations_Start{
 				data = data,
 				Start = time,
 				Duration = data.Infinite and huge or data.Duration,
@@ -3577,7 +3619,7 @@ ANIM.AnimationList = {
 			
 			if remaining < 0 then
 				-- generic expiration
-				icon:StopAnimation(table)
+				icon:Animations_Stop(table)
 			else
 				local Amt = (table.Magnitude or 10) / (1 + 10*(300^(-(remaining))))
 				local moveX = random(-Amt, Amt)
@@ -3611,7 +3653,7 @@ ANIM.AnimationList = {
 				end
 			end
 
-			icon:StartAnimation{
+			icon:Animations_Start{
 				data = data,
 				Start = time,
 				Duration = Duration,
@@ -3645,7 +3687,7 @@ ANIM.AnimationList = {
 
 			-- (mostly) generic expiration -- we just finished the last flash, so dont do any more
 			if timePassed > table.Duration then
-				icon:StopAnimation(table)
+				icon:Animations_Stop(table)
 			end
 		end,
 		OnStart = function(icon, table)
@@ -3684,7 +3726,7 @@ ANIM.AnimationList = {
 				end
 			end
 
-			icon:StartAnimation{
+			icon:Animations_Start{
 				data = data,
 				Start = time,
 				Duration = Duration,
@@ -3713,7 +3755,7 @@ ANIM.AnimationList = {
 
 			-- (mostly) generic expiration -- we just finished the last flash, so dont do any more
 			if timePassed > table.Duration then
-				icon:StopAnimation(table)
+				icon:Animations_Stop(table)
 			end
 		end,
 		OnStart = function(icon, table)
@@ -3732,7 +3774,7 @@ ANIM.AnimationList = {
 		Duration = true,
 
 		Play = function(icon, data)
-			icon:StartAnimation{
+			icon:Animations_Start{
 				data = data,
 				Start = time,
 				Duration = data.Duration,
@@ -3747,7 +3789,7 @@ ANIM.AnimationList = {
 
 				-- generic expiration
 				if remaining < 0 then
-					icon:StopAnimation(table)
+					icon:Animations_Stop(table)
 				else
 					local pct = remaining / table.FadeDuration
 					local inv = 1-pct
@@ -3775,7 +3817,7 @@ ANIM.AnimationList = {
 		Infinite = true,
 
 		Play = function(icon, data)
-			icon:StartAnimation{
+			icon:Animations_Start{
 				data = data,
 				Start = time,
 				Duration = data.Infinite and huge or data.Duration,
@@ -3784,7 +3826,7 @@ ANIM.AnimationList = {
 
 		OnUpdate = function(icon, table)
 			if table.Duration - (time - table.Start) < 0 then
-				icon:StopAnimation(table)
+				icon:Animations_Stop(table)
 			end
 		end,
 		OnStart = function(icon, table)
@@ -3803,9 +3845,9 @@ ANIM.AnimationList = {
 		animation = "ICONCLEAR",
 
 		Play = function(icon, data)
-			if icon:HasAnimations() then
-				for k, v in pairs(icon:GetAnimations()) do
-					-- instead of just calling :StopAnimation() right here, set this attribute so that meta icons inheriting the animation will also stop it.
+			if icon:Animations_Has() then
+				for k, v in pairs(icon:Animations_Get()) do
+					-- instead of just calling :Animations_Stop() right here, set this attribute so that meta icons inheriting the animation will also stop it.
 					v.HALTED = true
 				end
 			end
@@ -3844,7 +3886,7 @@ end
 
 local AnimatedObject = TMW:NewClass("AnimatedObject")
 
-function AnimatedObject:GetAnimations()
+function AnimatedObject:Animations_Get()
 	if not self.animations then
 		local t = {}
 		ActiveAnimations = ActiveAnimations or {}
@@ -3854,10 +3896,10 @@ function AnimatedObject:GetAnimations()
 	end
 	return self.animations
 end
-function AnimatedObject:HasAnimations()
+function AnimatedObject:Animations_Has()
 	return self.animations 
 end
-function AnimatedObject:OnAnimationsUnused()
+function AnimatedObject:Animations_OnUnused()
 	if self.animations then
 		self.animations = nil
 		ActiveAnimations[self] = nil
@@ -3866,12 +3908,12 @@ function AnimatedObject:OnAnimationsUnused()
 		end
 	end
 end
-function AnimatedObject:StartAnimation(table, dontInherit)
+function AnimatedObject:Animations_Start(table, dontInherit)
 	local Animation = table.data.Animation
 	local AnimationData = Animation and AnimationList[Animation]
 
 	if AnimationData then
-		self:GetAnimations()[Animation] = table
+		self:Animations_Get()[Animation] = table
 
 		table.Animation = Animation
 		
@@ -3890,13 +3932,13 @@ function AnimatedObject:StartAnimation(table, dontInherit)
 			for i = 1, #Icons do
 				local ic = Icons[i]
 				if ic.__currentIcon == self then
-					ic:StartAnimation(table, true)
+					ic:Animations_Start(table, true)
 				end
 			end
 		end
 	end
 end
-function AnimatedObject:StopAnimation(arg1)
+function AnimatedObject:Animations_Stop(arg1)
 	local animations = self.animations
 	
 	if not animations then return end
@@ -3920,7 +3962,7 @@ function AnimatedObject:StopAnimation(arg1)
 		end
 		
 		if not next(animations) then
-			self:OnAnimationsUnused()
+			self:Animations_OnUnused()
 		end
 	end
 end
@@ -4128,6 +4170,126 @@ end
 -- ICONS
 -- ------------------
 
+local PBar = TMW:NewClass("PBar", "StatusBar")
+
+function PBar:OnNewInstance(...)
+	local _, name, icon = ... -- the CreateFrame args
+	
+	self.Max = 1
+	self.offset = 0
+	self.icon = icon
+	self:SetFrameLevel(icon:GetFrameLevel() + 2)
+	
+	self:SetPoint("BOTTOM", icon, "CENTER", 0, 0.5)
+	self:SetPoint("TOPLEFT")
+	self:SetPoint("TOPRIGHT")
+	
+	self.texture = self:CreateTexture(nil, "OVERLAY")
+	self.texture:SetAllPoints()
+	self:SetStatusBarTexture(self.texture)
+end
+
+function PBar:SetAttributes(ics)
+	-- ics can probably be an icon too - not just icon settings
+	
+	self.InvertBars = ics.InvertBars
+	self.offset = ics.PBarOffs or 0
+	
+	if ics.ShowPBar then
+		self:Show()
+	else
+		self:Hide()
+	end
+end
+
+function PBar:Setup()
+	local icon = self.icon	
+
+	self.texture:SetTexture(LSM:Fetch("statusbar", db.profile.TextureName))
+	
+	local blizzEdgeInsets = icon.group.barInsets or 0
+	self:SetPoint("BOTTOM", icon.texture, "CENTER", 0, 0.5)
+	self:SetPoint("TOPLEFT", icon.texture, "TOPLEFT", blizzEdgeInsets, -blizzEdgeInsets)
+	self:SetPoint("TOPRIGHT", icon.texture, "TOPRIGHT", -blizzEdgeInsets, -blizzEdgeInsets)
+	
+
+	self:SetMinMaxValues(0, 1)
+	if not self.powerType then
+		local powerType = defaultPowerType
+		local colorinfo = PowerBarColor[powerType]
+		self:SetStatusBarColor(colorinfo.r, colorinfo.g, colorinfo.b, 0.9)
+		self.powerType = powerType
+	end
+
+	if icon.ShowPBar and icon.NameFirst then
+		TMW:RegisterEvent("SPELL_UPDATE_USABLE")		
+		TMW:RegisterEvent("UNIT_POWER_FREQUENT")
+	end
+	
+	self:SetAttributes(icon:GetSettings())
+end
+
+function PBar:SetSpell(spell)
+	self.spell = spell
+	
+	if spell then
+		local _, _, _, cost, _, powerType = GetSpellInfo(spell)
+		
+		cost = powerType == 9 and 3 or cost or 0 -- holy power hack: always use a max of 3
+		self.Max = cost
+		self:SetMinMaxValues(0, cost)
+		
+		powerType = powerType or defaultPowerType
+		if powerType ~= self.powerType then
+			local colorinfo = PowerBarColor[powerType]
+			self:SetStatusBarColor(colorinfo.r, colorinfo.g, colorinfo.b, 0.9)
+			self.powerType = powerType
+		end
+
+		PBarsToUpdate[self] = true
+		
+		self:Update()
+	else--if PBarsToUpdate[self] then
+		local value = self.InvertBars and self.Max or 0
+		self:SetValue(value)
+		self.__value = value
+		
+		PBarsToUpdate[self] = nil
+	end
+end
+
+function PBar:Update(power, powerTypeNum)
+	if not powerTypeNum then
+		powerTypeNum = self.powerType
+		power = UnitPower("player", powerTypeNum)
+	end
+	
+	if powerTypeNum == self.powerType then
+	
+		local Max = self.Max
+		local value
+
+		if not self.InvertBars then
+			value = Max - power + self.offset
+		else
+			value = power + self.offset
+		end
+
+		if value > Max then
+			value = Max
+		elseif value < 0 then
+			value = 0
+		end
+
+		if self.__value ~= value then
+			self:SetValue(value)
+			self.__value = value
+		end
+	end
+end
+
+
+
 local Icon = TMW:NewClass("Icon", "Button", "ConditionControlledObject", "AnimatedObject")
 
 function Icon.OnNewInstance(icon, ...)
@@ -4136,6 +4298,8 @@ function Icon.OnNewInstance(icon, ...)
 	icon.group = group
 	group[iconID] = icon
 	CNDTEnv[name] = icon
+	
+	icon.pbar = PBar:New("StatusBar", name .. "PBar", icon)
 
 	icon.__alpha = icon:GetAlpha()
 	icon.__tex = icon.texture:GetTexture()
@@ -4734,42 +4898,23 @@ function Icon.SetInfo(icon, alpha, color, texture, start, duration, spellChecked
 		somethingChanged = 1
 	end
 
-	if icon.ShowPBar and (updatePBar or queueOnSpell or forceupdate) then
-		local pbar = icon.pbar
-		if spellChecked then
-			local _, _, _, cost, _, powerType = GetSpellInfo(spellChecked)
-			cost = powerType == 9 and 3 or cost or 0
-			pbar.Max = cost
-			pbar.InvertBars = icon.InvertBars
-			powerType = powerType or defaultPowerType
-			if powerType ~= pbar.powerType then
-				local colorinfo = PowerBarColor[powerType]
-				pbar:SetStatusBarColor(colorinfo.r, colorinfo.g, colorinfo.b, 0.9)
-				pbar.powerType = powerType
-			end
-
-			pbar:SetMinMaxValues(0, cost)
-
-			PBarsToUpdate[pbar] = true
-		elseif PBarsToUpdate[pbar] then
-			PBarsToUpdate[pbar] = nil
-			local value = icon.InvertBars and pbar.Max or 0
-			pbar:SetValue(value)
-			pbar.__value = value
-		end
+	if icon.ShowPBar and (queueOnSpell or forceupdate) then
+		icon.pbar:SetSpell(spellChecked)
 		
-		somethingChanged = 1
+	--	somethingChanged = 1 -- redundant with queueOnSpell
 	end
 
-	if queueOnSpell and icon.UpdateBindText_Spell then
-		icon:UpdateBindText()
-		somethingChanged = 1
-	elseif queueOnUnit and icon.UpdateBindText_Unit then
-		icon:UpdateBindText()
-		somethingChanged = 1
-	elseif queueOnStack and icon.UpdateBindText_Stack then
-		icon:UpdateBindText()
-		somethingChanged = 1
+	local BindTextObj = icon.BindTextObj
+	if BindTextObj and BindTextObj.hasAnySubstitutions then
+		local usedSubstitutions = BindTextObj.usedSubstitutions
+		if
+			(queueOnSpell and usedSubstitutions.s)							or
+			(queueOnUnit  and (usedSubstitutions.u or usedSubstitutions.p))	or
+			(queueOnStack and usedSubstitutions.k)
+		then
+			BindTextObj:UpdateNonDurationSubstitutions()
+			somethingChanged = 1
+		end
 	end
 	
 	if somethingChanged then
@@ -4787,29 +4932,7 @@ end
 function Icon.SetupBars(icon)
 	local blizzEdgeInsets = icon.group.barInsets or 0
 
-	local pbar = icon.pbar
-	pbar.texture:SetTexture(LSM:Fetch("statusbar", db.profile.TextureName))
-	pbar:SetPoint("BOTTOM", icon.texture, "CENTER", 0, 0.5)
-	pbar:SetPoint("TOPLEFT", icon.texture, "TOPLEFT", blizzEdgeInsets, -blizzEdgeInsets)
-	pbar:SetPoint("TOPRIGHT", icon.texture, "TOPRIGHT", -blizzEdgeInsets, -blizzEdgeInsets)
-
-	pbar:SetMinMaxValues(0, 1)
-	pbar.offset = icon.PBarOffs or 0
-	pbar.InvertBars = icon.InvertBars
-	if not pbar.powerType then
-		local powerType = defaultPowerType
-		local colorinfo = PowerBarColor[powerType]
-		pbar:SetStatusBarColor(colorinfo.r, colorinfo.g, colorinfo.b, 0.9)
-		pbar.powerType = powerType
-	end
-
-	if icon.ShowPBar and icon.NameFirst then
-		TMW:RegisterEvent("SPELL_UPDATE_USABLE")		
-		TMW:RegisterEvent("UNIT_POWER_FREQUENT")
-		pbar:Show()
-	else
-		pbar:Hide()
-	end
+	icon.pbar:Setup()
 
 	local cbar = icon.cbar
 	cbar.texture:SetTexture(LSM:Fetch("statusbar", db.profile.TextureName))
@@ -4980,40 +5103,19 @@ function Icon.Setup(icon)
 
 	--reset things
 	--icon:SetInfo(alpha, color, texture, start, duration, spellChecked, reverse, count, countText, forceupdate, unit)
-	icon:SetInfo(0, nil, nil, nil, nil, nil, nil, nil, nil, 1, nil) -- forceupdate is set to 1 here so it doesnt return early
+	icon:SetInfo(0, nil, nil, nil, nil, nil, nil, nil, nil, 1, nil) -- forceupdate is set to 1 here so it doesnt return early (but this doesnt matter anymore)
 
 	-- update overlay texts
 	icon:SetupText(icon.countText, group.Fonts.Count)
 	icon:SetupText(icon.bindText, group.Fonts.Bind)
 
-	icon.UpdateBindText_Any = nil -- this one is for metas
-	icon.UpdateBindText_Spell = nil
-	icon.UpdateBindText_Unit = nil
-	icon.UpdateBindText_Stack = nil
-	if icon.BindText then
-		if strfind(icon.BindText, "%%[Dd]") then
-			icon.UpdateBindText_Any = true
-			IconsToUpdateBindText = IconsToUpdateBindText or {}
-			tDeleteItem(IconsToUpdateBindText, icon)
-			tinsert(IconsToUpdateBindText, icon)
-		--else
-		end
-		if strfind(icon.BindText, "%%[Ss]") then
-			icon.UpdateBindText_Any = true
-			icon.UpdateBindText_Spell = true
-		end
-		if strfind(icon.BindText, "%%[UuPp]") then
-			icon.UpdateBindText_Any = true
-			icon.UpdateBindText_Unit = true
-		end
-		if strfind(icon.BindText, "%%[Kk]") then
-			icon.UpdateBindText_Any = true
-			icon.UpdateBindText_Stack = true
-		end
-	--	end
-		icon:UpdateBindText()
-	else
-		icon.bindText:SetText(nil)
+	if icon.BindText and icon.BindText ~= "" then
+		icon.BindTextObj = icon.BindTextObj or BindTextObj:New(icon, icon.bindText)
+		
+		icon.BindTextObj:SetBaseString(icon.BindText)
+	elseif icon.BindTextObj then
+		icon.BindTextObj:SetBaseString("")
+		icon.BindTextObj = nil
 	end
 
 
@@ -5069,7 +5171,7 @@ function Icon.Setup(icon)
 	if db.profile.Locked and icon.ShowCBar then
 		tinsert(CDBarsToUpdate, cbar)
 	end
-	updatePBar = 1
+	updatePBars = 1
 
 	if icon.OverrideTex then icon:SetTexture(icon.OverrideTex) end
 
@@ -5912,7 +6014,9 @@ function UNITS:OnEvent(event, ...)
 	if event == "RAID_ROSTER_UPDATE" and UNITS.doTankAndAssistMap then
 		UNITS:UpdateTankAndAssistMap()
 	end
-	for unitSet in next, UnitSet.instances do
+	local instances = UnitSet.instances
+	for i = 1, #instances do
+		local unitSet = instances[i]
 		if unitSet.updateEvents[event] then
 			unitSet:Update()
 		end
