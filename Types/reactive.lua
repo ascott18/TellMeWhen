@@ -75,16 +75,13 @@ local function Reactive_OnEvent(icon, event, spell)
 		if icon.NameFirst == spell or strlowerCache[GetSpellInfo(spell)] == icon.NameName then
 			icon.forceUsable = event == "SPELL_ACTIVATION_OVERLAY_GLOW_SHOW"
 			icon.NextUpdateTime = 0
-			print(icon, event, TMW.time)
 		end
 	else
 		icon.NextUpdateTime = 0
-		print(icon, event, TMW.time)
 	end
 end
 
 local function Reactive_OnUpdate(icon, time)
-	print(icon, time)
 
 	local n, inrange, nomana, start, duration, CD, usable = 1
 	local NameArray, NameNameArray, RangeCheck, ManaCheck, CooldownCheck, IgnoreRunes, forceUsable, IgnoreNomana =

@@ -125,6 +125,7 @@ L["ICONMENU_CAST_DESC"] = [=[Tracks spell casts and channels.]=]
 
 L["ICONMENU_CNDTIC"] = "Condition Icon"
 L["ICONMENU_CNDTIC_DESC"] = [=[Tracks the state of conditions.]=]
+L["ICONMENU_CNDTIC_ICONMENUTOOLTIP"] = "(%d |4Condition:Conditions;)"
 
 L["ICONMENU_DR"] = "Diminishing Returns"
 L["ICONMENU_DR_DESC"] = [=[Tracks the length and extent of diminishing returns.]=]
@@ -144,6 +145,7 @@ L["ICONMENU_META"] = "Meta Icon"
 L["ICONMENU_META_DESC"] = [=[Combines multiple icons into one.
 
 Icons that have %q checked will still be shown in a meta icon if they would otherwise be shown.]=]
+L["ICONMENU_META_ICONMENUTOOLTIP"] = "(%d |4Icon:Icons;)"
 
 
 

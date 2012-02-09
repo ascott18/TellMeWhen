@@ -88,21 +88,22 @@ local function Meta_OnUpdate(icon, time)
 	end
 
 	if icToUse then
-		local ic = icToUse
 		local force
-		local icBindTextObj = ic.BindTextObj
+		
+		local icBindTextObj = icToUse.BindTextObj
 		if icBindTextObj and icBindTextObj.hasAnySubstitutions then -- TODO: meta icons checking meta icons dont inherit properly here.
-			icon.bindText:SetText(ic.bindText:GetText())
+			icon.bindText:SetText(icToUse.bindText:GetText())
 		end
 
-		if ic ~= icon.__currentIcon or ic.__metaChangedTime == time then
+		if icToUse ~= icon.__currentIcon or icToUse.__metaChangedTime == time then
 			-- __metaChangedTime tracks changes to meta icons.
-			-- we want to be sure to update a meta icon whenever it changes. Or something like that. Just keep this here, otherwise bad things happen
+			-- we want to be sure to update a meta icon whenever it changes.
+			-- Or something like that. Just keep this here, otherwise bad things happen
 			icon.__metaChangedTime = time
 			
 			-- we check if either are nil so that the bind text will be properly reset (to blank or to static) when an icon changes.
 			if not icBindTextObj or not icBindTextObj.hasAnySubstitutions then
-				icon.bindText:SetText(ic.bindText:GetText())
+				icon.bindText:SetText(icToUse.bindText:GetText())
 			end
 
 			if icon:Animations_Has() then
@@ -112,56 +113,43 @@ local function Meta_OnUpdate(icon, time)
 					end
 				end
 			end
-			if ic:Animations_Has() then
-				for k, v in pairs(ic:Animations_Get()) do
+			if icToUse:Animations_Has() then
+				for k, v in pairs(icToUse:Animations_Get()) do
 					icon:Animations_Start(v)
 				end
 			end
 
 			if LMB then -- i dont like the way that Masque handles this (inefficient), so i'll do it myself
-				local icnt = ic.normaltex -- icon.normaltex = icon.__LBF_Normal or icon:GetNormalTexture() -- set during icon:Setup()
+				local icnt = icToUse.normaltex -- icon.normaltex = icon.__LBF_Normal or icon:GetNormalTexture() -- set during icon:Setup()
 				local iconnt = icon.normaltex
 				if icnt and iconnt then
 					iconnt:SetVertexColor(icnt:GetVertexColor())
 				end
 			end
+			
+			icon.pbar:SetAttributes(icToUse.pbar)
+			icon.cbar:SetAttributes(icToUse.cbar)
 
-			local icSCB, icSPB = ic.ShowCBar, ic.ShowPBar
-			icon.ShowCBar, icon.ShowPBar = icSCB, icSPB
-			if icSPB then
-				icon.pbar.offset = ic.pbar.offset
-				icon.pbar:Show()
-			else
-				icon.pbar:Hide()
-			end
-			if icSCB then
-				icon.cbar.offset = ic.cbar.offset
-				icon.cbar.startColor = ic.cbar.startColor
-				icon.cbar.completeColor = ic.cbar.completeColor
-				icon.cbar:Show()
-			else
-				icon.cbar:Hide()
-			end
-
-			icon.InvertBars = ic.InvertBars
-			icon.ShowTimer = ic.ShowTimer
-			icon.ShowTimerText = ic.ShowTimerText
-			icon.cooldown.noCooldownCount = ic.cooldown.noCooldownCount
-			icon.BindTextObj = ic.BindTextObj -- BE VERY FUCKING CAREFUL WITH THIS. dont call any methods on it - only setting it to obtain attributes
+			icon.ShowTimer = icToUse.ShowTimer
+			icon.ShowTimerText = icToUse.ShowTimerText
+			icon.cooldown.noCooldownCount = icToUse.cooldown.noCooldownCount
+			--icon.BindTextObj = icToUse.BindTextObj -- BE VERY FUCKING CAREFUL WITH THIS. dont call any methods on it - only setting it to obtain attributes
 
 			force = 1
 
-			icon.__currentIcon = ic
-			TMW:Fire("TMW_ICON_UPDATED", ic)
+			icon.__currentIcon = icToUse
+			TMW:Fire("TMW_ICON_UPDATED", icToUse)
 			TMW:Fire("TMW_ICON_UPDATED", icon)
 		end
 
-		ic.__lastMetaCheck = time
+		icToUse.__lastMetaCheck = time
 		--icon:SetInfo(alpha, color, texture, start, duration, spellChecked, reverse, count, countText, forceupdate, unit)
 		if force or icon.metaUpdateQueued then
-			icon:SetInfo(ic.__alpha, ic.__vrtxcolor, ic.__tex, ic.__start, ic.__duration, ic.__spellChecked, ic.__reverse, ic.__count, ic.__countText, force, ic.__unitChecked)
+			icon.metaUpdateQueued = nil
+			icon:SetInfo(icToUse.__alpha, icToUse.__vrtxcolor, icToUse.__tex, icToUse.__start, icToUse.__duration, icToUse.__spellChecked, icToUse.__reverse, icToUse.__count, icToUse.__countText, force, icToUse.__unitChecked)
 		end
-	elseif icon.__alpha ~= 0 then
+	elseif icon.__alpha ~= 0 and icon.metaUpdateQueued then
+		icon.metaUpdateQueued = nil
 		icon:SetInfo(0)
 	end
 end
@@ -220,7 +208,7 @@ end
 
 function Type:Setup(icon, groupID, iconID)
 	icon.__currentIcon = nil -- reset this
-	icon.NameFirst = "" --need to set this to something for bars update
+	icon.metaUpdateQueued = true -- force this
 
 	-- validity check:
 	for k, v in pairs(icon.Icons) do
@@ -258,10 +246,6 @@ function Type:Setup(icon, groupID, iconID)
 		end
 	end
 
-	icon.ShowPBar = true
-	icon.ShowCBar = true
-	icon.InvertBars = false
-
 	if icon:Animations_Has() then
 		for k, v in pairs(icon:Animations_Get()) do
 			icon:Animations_Stop(v)
@@ -270,7 +254,7 @@ function Type:Setup(icon, groupID, iconID)
 
 	icon:SetTexture("Interface\\Icons\\LevelUpIcon-LFD")
 
---	icon:SetUpdateMethod("manual")
+	--icon:SetUpdateMethod("manual")
 	icon:SetScript("OnUpdate", Meta_OnUpdate)
 	TMW:RegisterCallback("TMW_ICON_UPDATED", TMW_ICON_UPDATED, icon)
 end
@@ -349,8 +333,16 @@ function Type:GetFontTestValues(icon)
 	return testCount, testCountText
 end
 
-function Type:GetIconMenuText(data)
-	return "((" .. Type.name .. "))", ""
+function Type:GetIconMenuText(data, groupID, iconID)
+	local text
+	if iconID then
+		text = L["fICON"]:format(iconID) .. " - " .. Type.name, ""
+	else
+		text = "((" .. Type.name .. "))", ""
+	end
+	text = text .. " " .. L["ICONMENU_META_ICONMENUTOOLTIP"]:format(data.Icons and #data.Icons or 0)
+	
+	return text, "", true
 end
 
 Type:Register()

@@ -32,7 +32,7 @@ local DRData = LibStub("DRData-1.0", true)
 TELLMEWHEN_VERSION = "5.0.0"
 TELLMEWHEN_VERSION_MINOR = strmatch(" @project-version@", " r%d+") or ""
 TELLMEWHEN_VERSION_FULL = TELLMEWHEN_VERSION .. TELLMEWHEN_VERSION_MINOR
-TELLMEWHEN_VERSIONNUMBER = 50006 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
+TELLMEWHEN_VERSIONNUMBER = 50007 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
 if TELLMEWHEN_VERSIONNUMBER > 51000 or TELLMEWHEN_VERSIONNUMBER < 50000 then return error("YOU SCREWED UP THE VERSION NUMBER OR DIDNT CHANGE THE SAFETY LIMITS") end -- safety check because i accidentally made the version number 414069 once
 
 TELLMEWHEN_MAXGROUPS = 1 	--this is a default, used by SetTheory (addon), so dont rename
@@ -78,7 +78,7 @@ local loweredbackup = {}
 local callbackregistry = {}
 local bullshitTable = {}
 local ActiveAnimations = {}
- CDBarsToUpdate, PBarsToUpdate = {}, {} --DEBUG
+local CBarsToUpdate, PBarsToUpdate = {}, {}
 local time = GetTime() TMW.time = time
 local sctcolor = {r=1, b=1, g=1}
 local clientVersion = select(4, GetBuildInfo())
@@ -286,6 +286,20 @@ function TMW.tContains(table, item, returnNum)
 	end
 	return firstkey, num
 end local tContains = TMW.tContains
+
+function TMW.tDeleteItem(table, item, onlyOne)
+	local i = 1
+	while table[i] do
+		if item == table[i] then
+			tremove(table, i)
+			if onlyOne then
+				return
+			end
+		else
+			i = i + 1
+		end
+	end
+end local tDeleteItem = TMW.tDeleteItem
 
 local function ClearScripts(f)
 	f:SetScript("OnEvent", nil)
@@ -1468,7 +1482,8 @@ function TMW:OnUpdate(elapsed)					-- THE MAGICAL ENGINE OF DOING EVERYTHING
 			end
 
 			if updatePBars then
-				for pbar in next, PBarsToUpdate do
+				for i = 1, #PBarsToUpdate do
+					local pbar = PBarsToUpdate[i]
 					pbar:SetSpell(pbar.spell) -- force an update
 				end
 				updatePBars = nil
@@ -1484,72 +1499,9 @@ function TMW:OnUpdate(elapsed)					-- THE MAGICAL ENGINE OF DOING EVERYTHING
 	end
 
 	local cbaroffs = 0
-	for i = 1, #CDBarsToUpdate do
-		local cbar = CDBarsToUpdate[i + cbaroffs]
-		local value, doTerminate
-
-		local start, duration, InvertBars = cbar.start, cbar.duration, cbar.InvertBars
-
-		if InvertBars then
-			if duration == 0 then
-				value = cbar.Max
-			else
-				value = time - start + cbar.offset
-			end
-			doTerminate = value >= cbar.Max
-		else
-			if duration == 0 then
-				value = 0
-			else
-				value = duration - (time - start) + cbar.offset
-			end
-			doTerminate = value <= 0
-		end
-
-		if doTerminate then
-			tremove(CDBarsToUpdate, i + cbaroffs)
-			cbaroffs = cbaroffs - 1
-			if InvertBars then
-				value = cbar.Max
-			else
-				value = 0
-			end
-		end
-
-		if value ~= cbar.__value then
-			cbar:SetValue(value)
-
-			local co = cbar.completeColor
-			local st = cbar.startColor
-
-			if not InvertBars then
-				if duration ~= 0 then
-					local pct = (time - start) / duration
-					local inv = 1-pct
-					cbar:SetStatusBarColor(
-						(co.r * pct) + (st.r * inv),
-						(co.g * pct) + (st.g * inv),
-						(co.b * pct) + (st.b * inv),
-						(co.a * pct) + (st.a * inv)
-					)
-				end
-			else
-				--inverted
-				if duration == 0 then
-					cbar:SetStatusBarColor(co.r, co.g, co.b, co.a)
-				else
-					local pct = (time - start) / duration
-					local inv = 1-pct
-					cbar:SetStatusBarColor(
-						(co.r * pct) + (st.r * inv),
-						(co.g * pct) + (st.g * inv),
-						(co.b * pct) + (st.b * inv),
-						(co.a * pct) + (st.a * inv)
-					)
-				end
-			end
-			cbar.__value = value
-		end
+	for i = 1, #CBarsToUpdate do
+		local cbar = CBarsToUpdate[i + cbaroffs]
+		cbaroffs = cbaroffs + cbar:Update()
 	end
 
 	if ActiveAnimations then
@@ -2664,7 +2616,8 @@ function TMW:UNIT_POWER_FREQUENT(event, unit, powerType)
 		local powerTypeNum = powerType and _G["SPELL_POWER_" .. powerType]
 		local power = powerTypeNum and UnitPower("player", powerTypeNum)
 		
-		for pbar in next, PBarsToUpdate do
+		for i = 1, #PBarsToUpdate do
+			local pbar = PBarsToUpdate[i]
 			pbar:Update(power, powerTypeNum)
 		end
 	end
@@ -2796,6 +2749,7 @@ function TMW:ProcessEquivalencies()
 	end
 end
 
+
 BindTextObj = TMW:NewClass("BindTextObj")
 
 function BindTextObj:OnNewInstance(icon, FontObject)
@@ -2819,7 +2773,7 @@ function BindTextObj:SetBaseString(string)
 	end
 	
 	if BindTextObjsToUpdate then
-		tDeleteItem(BindTextObjsToUpdate, self)
+		tDeleteItem(BindTextObjsToUpdate, self, true)
 	end	
 	if self.hasDuration then
 		BindTextObjsToUpdate = BindTextObjsToUpdate or {}
@@ -4170,13 +4124,32 @@ end
 -- ICONS
 -- ------------------
 
-local PBar = TMW:NewClass("PBar", "StatusBar")
+local OverlayBar = TMW:NewClass("OverlayBar")
+
+function OverlayBar:RegisterForUpdates()
+	if not self.isInUpdateTable then
+		tinsert(self.updateTable, self)
+		self.isInUpdateTable = true
+	end
+end
+
+function OverlayBar:UnregisterForUpdates()
+	if self.isInUpdateTable then
+		tDeleteItem(self.updateTable, self, true)
+		self.isInUpdateTable = nil
+	end
+end
+
+
+
+local PBar = TMW:NewClass("PBar", "StatusBar", "OverlayBar")
+PBar.updateTable = PBarsToUpdate
 
 function PBar:OnNewInstance(...)
 	local _, name, icon = ... -- the CreateFrame args
 	
 	self.Max = 1
-	self.offset = 0
+	self.PBarOffs = 0
 	self.icon = icon
 	self:SetFrameLevel(icon:GetFrameLevel() + 2)
 	
@@ -4189,13 +4162,15 @@ function PBar:OnNewInstance(...)
 	self:SetStatusBarTexture(self.texture)
 end
 
-function PBar:SetAttributes(ics)
-	-- ics can probably be an icon too - not just icon settings
+function PBar:SetAttributes(source)
+	-- source should either be a PBar or an Icon.
+	-- Code must maintain compatability so that both of these will work as input (keep inherited keys the same)
 	
-	self.InvertBars = ics.InvertBars
-	self.offset = ics.PBarOffs or 0
+	self.InvertBars = source.InvertBars
+	self.PBarOffs = source.PBarOffs or 0
+	self.ShowPBar = source.ShowPBar
 	
-	if ics.ShowPBar then
+	if self.ShowPBar then
 		self:Show()
 	else
 		self:Hide()
@@ -4212,21 +4187,19 @@ function PBar:Setup()
 	self:SetPoint("TOPLEFT", icon.texture, "TOPLEFT", blizzEdgeInsets, -blizzEdgeInsets)
 	self:SetPoint("TOPRIGHT", icon.texture, "TOPRIGHT", -blizzEdgeInsets, -blizzEdgeInsets)
 	
-
-	self:SetMinMaxValues(0, 1)
 	if not self.powerType then
 		local powerType = defaultPowerType
 		local colorinfo = PowerBarColor[powerType]
 		self:SetStatusBarColor(colorinfo.r, colorinfo.g, colorinfo.b, 0.9)
 		self.powerType = powerType
 	end
+	
+	self:SetAttributes(icon)
 
-	if icon.ShowPBar and icon.NameFirst then
+	if self.ShowPBar then
 		TMW:RegisterEvent("SPELL_UPDATE_USABLE")		
 		TMW:RegisterEvent("UNIT_POWER_FREQUENT")
 	end
-	
-	self:SetAttributes(icon:GetSettings())
 end
 
 function PBar:SetSpell(spell)
@@ -4238,6 +4211,7 @@ function PBar:SetSpell(spell)
 		cost = powerType == 9 and 3 or cost or 0 -- holy power hack: always use a max of 3
 		self.Max = cost
 		self:SetMinMaxValues(0, cost)
+		self.__value = nil -- the displayed value might change when we change the max, so force an update
 		
 		powerType = powerType or defaultPowerType
 		if powerType ~= self.powerType then
@@ -4246,15 +4220,18 @@ function PBar:SetSpell(spell)
 			self.powerType = powerType
 		end
 
-		PBarsToUpdate[self] = true
+		if not self.isInUpdateTable then
+			PBarsToUpdate[#PBarsToUpdate + 1] = self
+			self.isInUpdateTable = true
+		end
 		
 		self:Update()
-	else--if PBarsToUpdate[self] then
+	elseif self.isInUpdateTable then
 		local value = self.InvertBars and self.Max or 0
 		self:SetValue(value)
 		self.__value = value
 		
-		PBarsToUpdate[self] = nil
+		self:UnregisterForUpdates()
 	end
 end
 
@@ -4270,9 +4247,9 @@ function PBar:Update(power, powerTypeNum)
 		local value
 
 		if not self.InvertBars then
-			value = Max - power + self.offset
+			value = Max - power + self.PBarOffs
 		else
-			value = power + self.offset
+			value = power + self.PBarOffs
 		end
 
 		if value > Max then
@@ -4290,6 +4267,165 @@ end
 
 
 
+local CBar = TMW:NewClass("CBar", "StatusBar", "OverlayBar")
+CBar.updateTable = CBarsToUpdate
+
+function CBar:OnNewInstance(...)
+	local _, name, icon = ... -- the CreateFrame args
+	
+	self.Max = 1
+	self.CBarOffs = 0
+	self.icon = icon
+	self:SetFrameLevel(icon:GetFrameLevel() + 2)
+	self:SetMinMaxValues(0, self.Max)
+	
+	self.start = 0
+	self.duration = 0
+	
+	self:SetPoint("TOP", icon, "CENTER", 0, -0.5)
+	self:SetPoint("BOTTOMLEFT")
+	self:SetPoint("BOTTOMRIGHT")
+	
+	self.texture = self:CreateTexture(nil, "OVERLAY")
+	self.texture:SetAllPoints()
+	self:SetStatusBarTexture(self.texture)
+end
+
+function CBar:SetAttributes(source)
+	-- source should either be a CBar or an Icon.
+	-- Code must maintain compatability so that both of these will work as input (keep inherited keys the same)
+	
+	self.InvertBars = source.InvertBars
+	self.CBarOffs = source.CBarOffs or 0
+	self.ShowCBar = source.ShowCBar
+	
+	-- THIS WONT REALLY WORK CORRECTLY
+	self.startColor = source.startColor or (source.typeData and source.typeData.CBS)
+	self.completeColor = source.completeColor or (source.typeData and source.typeData.CBC)
+	
+	if self.ShowCBar then
+		self:Show()
+	else
+		self:Hide()
+	end
+	
+	self:Update(1)
+end
+
+function CBar:Setup()
+	local icon = self.icon
+	
+	self.texture:SetTexture(LSM:Fetch("statusbar", db.profile.TextureName))
+	
+	local blizzEdgeInsets = icon.group.barInsets or 0
+	self:SetPoint("TOP", icon.texture, "CENTER", 0, -0.5)
+	self:SetPoint("BOTTOMLEFT", icon.texture, "BOTTOMLEFT", blizzEdgeInsets, blizzEdgeInsets)
+	self:SetPoint("BOTTOMRIGHT", icon.texture, "BOTTOMRIGHT", -blizzEdgeInsets, blizzEdgeInsets)
+	
+	self:SetAttributes(icon)
+end
+
+function CBar:Update(force)
+	local ret = 0
+	
+	local value, doTerminate
+
+	local start, duration, InvertBars = self.start, self.duration, self.InvertBars
+
+	if InvertBars then
+		if duration == 0 then
+			value = self.Max
+		else
+			value = time - start + self.CBarOffs
+		end
+		doTerminate = value >= self.Max
+	else
+		if duration == 0 then
+			value = 0
+		else
+			value = duration - (time - start) + self.CBarOffs
+		end
+		doTerminate = value <= 0
+	end
+
+	if doTerminate then
+		self:UnregisterForUpdates()
+		ret = -1
+		if InvertBars then
+			value = self.Max
+		else
+			value = 0
+		end
+	end
+
+	if force or value ~= self.__value then
+		self:SetValue(value)
+
+		local co = self.completeColor
+		local st = self.startColor
+
+		if not InvertBars then
+			-- normal
+			if value ~= 0 then
+				--local pct = (time - start) / duration
+				local pct = value / self.Max
+				local inv = 1-pct
+				self:SetStatusBarColor(
+					(co.r * pct) + (st.r * inv),
+					(co.g * pct) + (st.g * inv),
+					(co.b * pct) + (st.b * inv),
+					(co.a * pct) + (st.a * inv)
+				)
+			--else
+				-- no reason to do thisif value is 0
+				-- self:SetStatusBarColor(st.r, st.g, st.b, st.a)
+			end
+		else
+			--inverted
+			if value ~= 0 then
+				--local pct = (time - start) / duration
+				local pct = value / self.Max
+				local inv = 1-pct
+				self:SetStatusBarColor(
+					(co.r * pct) + (st.r * inv),
+					(co.g * pct) + (st.g * inv),
+					(co.b * pct) + (st.b * inv),
+					(co.a * pct) + (st.a * inv)
+				)
+			--else
+				-- no reason to do thisif value is 0
+				--	self:SetStatusBarColor(co.r, co.g, co.b, co.a)
+			end
+		end
+		self.__value = value
+	end
+	
+	return ret
+end
+
+function CBar:SetCooldown(start, duration, isGCD)
+	self.duration = duration
+	self.start = start
+	
+	if duration > 0 then
+		if isGCD and BarGCD then
+			self.duration = 0
+		end
+
+		self.Max = duration
+		self:SetMinMaxValues(0, duration)
+		self.__value = nil -- the displayed value might change when we change the max, so force an update
+
+		if not self.isInUpdateTable then
+			CBarsToUpdate[#CBarsToUpdate + 1] = self
+			self.isInUpdateTable = true
+		end
+	end
+end
+
+
+
+
 local Icon = TMW:NewClass("Icon", "Button", "ConditionControlledObject", "AnimatedObject")
 
 function Icon.OnNewInstance(icon, ...)
@@ -4300,6 +4436,7 @@ function Icon.OnNewInstance(icon, ...)
 	CNDTEnv[name] = icon
 	
 	icon.pbar = PBar:New("StatusBar", name .. "PBar", icon)
+	icon.cbar = CBar:New("StatusBar", name .. "CBar", icon)
 
 	icon.__alpha = icon:GetAlpha()
 	icon.__tex = icon.texture:GetTexture()
@@ -4338,7 +4475,7 @@ function Icon.SetScript(icon, handler, func, dontnil)
 	if handler ~= "OnUpdate" then
 		icon:setscript(handler, func)
 	else
-		tDeleteItem(IconsToUpdate, icon)
+		tDeleteItem(IconsToUpdate, icon, true)
 		if func then
 			IconsToUpdate[#IconsToUpdate+1] = icon
 		end
@@ -4812,22 +4949,9 @@ function Icon.SetInfo(icon, alpha, color, texture, start, duration, spellChecked
 			icon.cooldown:Hide()
 		end
 
-		if icon.ShowCBar then
-			local cbar = icon.cbar
-			cbar.duration = duration
-			cbar.start = start
-			cbar.InvertBars = icon.InvertBars
-			if duration > 0 then
-				if isGCD and BarGCD then
-					cbar.duration = 0
-				end
-
-				cbar.Max = duration
-				cbar:SetMinMaxValues(0,  duration)
-
-				tDeleteItem(CDBarsToUpdate, cbar)
-				CDBarsToUpdate[#CDBarsToUpdate + 1] = cbar
-			end
+		local cbar = icon.cbar
+		if cbar.ShowCBar then
+			cbar:SetCooldown(start, duration, isGCD)
 		end
 
 		icon.__start = start
@@ -4898,7 +5022,7 @@ function Icon.SetInfo(icon, alpha, color, texture, start, duration, spellChecked
 		somethingChanged = 1
 	end
 
-	if icon.ShowPBar and (queueOnSpell or forceupdate) then
+	if icon.pbar.ShowPBar and (queueOnSpell or forceupdate) then
 		icon.pbar:SetSpell(spellChecked)
 		
 	--	somethingChanged = 1 -- redundant with queueOnSpell
@@ -4929,33 +5053,6 @@ end
 
 
 
-function Icon.SetupBars(icon)
-	local blizzEdgeInsets = icon.group.barInsets or 0
-
-	icon.pbar:Setup()
-
-	local cbar = icon.cbar
-	cbar.texture:SetTexture(LSM:Fetch("statusbar", db.profile.TextureName))
-	cbar:SetPoint("TOP", icon.texture, "CENTER", 0, -0.5)
-	cbar:SetPoint("BOTTOMLEFT", icon.texture, "BOTTOMLEFT", blizzEdgeInsets, blizzEdgeInsets)
-	cbar:SetPoint("BOTTOMRIGHT", icon.texture, "BOTTOMRIGHT", -blizzEdgeInsets, blizzEdgeInsets)
-
-	cbar.Max = cbar.Max or 1
-	cbar.start = cbar.start or 0
-	cbar.duration = cbar.duration or 0
-	cbar:SetMinMaxValues(0, cbar.Max)
-	cbar.startColor = icon.typeData.CBS
-	cbar.completeColor = icon.typeData.CBC
-
-	cbar.offset = icon.CBarOffs or 0
-	cbar.InvertBars = icon.InvertBars
-	if icon.ShowCBar then
-		cbar:Show()
-	else
-		cbar:Hide()
-	end
-end
-
 function Icon.SetupText(icon, fontString, settings)
 	fontString:SetWidth(settings.ConstrainWidth and icon.texture:GetWidth() or 0)
 	fontString:SetFont(LSM:Fetch("font", settings.Name), settings.Size, settings.Outline)
@@ -4985,7 +5082,7 @@ function Icon.Setup(icon)
 	
 	-- remove the icon from the previous type's icon list
 	if icon.typeData then
-		tDeleteItem(icon.typeData.Icons, icon)
+		tDeleteItem(icon.typeData.Icons, icon, true)
 	end
 	
 	-- add the icon to this type's icon list
@@ -5109,13 +5206,21 @@ function Icon.Setup(icon)
 	icon:SetupText(icon.countText, group.Fonts.Count)
 	icon:SetupText(icon.bindText, group.Fonts.Bind)
 
-	if icon.BindText and icon.BindText ~= "" then
-		icon.BindTextObj = icon.BindTextObj or BindTextObj:New(icon, icon.bindText)
-		
-		icon.BindTextObj:SetBaseString(icon.BindText)
-	elseif icon.BindTextObj then
-		icon.BindTextObj:SetBaseString("")
+	if not icon.BindTextObj or icon.BindTextObj.icon == icon then
+		-- need to check that the icon is the original icon because of the way that meta icons inherit bind text
+		if icon.BindText and icon.BindText ~= "" then
+			icon.BindTextObj = icon.BindTextObj or BindTextObj:New(icon, icon.bindText)
+			
+			icon.BindTextObj:SetBaseString(icon.BindText)
+		elseif icon.BindTextObj then
+			icon.BindTextObj:SetBaseString("")
+			icon.BindTextObj = nil
+		else
+			icon.bindText:SetText("")
+		end
+	else
 		icon.BindTextObj = nil
+		icon.bindText:SetText("")
 	end
 
 
@@ -5161,17 +5266,20 @@ function Icon.Setup(icon)
 		end
 	end
 
-	icon:SetupBars()
-	icon:Show()
 	local pbar = icon.pbar
 	local cbar = icon.cbar
+	pbar:Setup()
+	cbar:Setup()
 	cbar.__value = nil
 	pbar.__value = nil
-	tDeleteItem(CDBarsToUpdate, cbar)
+	
+	cbar:UnregisterForUpdates()
 	if db.profile.Locked and icon.ShowCBar then
-		tinsert(CDBarsToUpdate, cbar)
+		cbar:RegisterForUpdates()
 	end
 	updatePBars = 1
+	
+	icon:Show()
 
 	if icon.OverrideTex then icon:SetTexture(icon.OverrideTex) end
 
@@ -5203,12 +5311,12 @@ function Icon.Setup(icon)
 			icon:SetTexture("Interface\\AddOns\\TellMeWhen\\Textures\\Disabled")
 		end
 
-		tDeleteItem(CDBarsToUpdate, cbar)
+		cbar:UnregisterForUpdates()
 		cbar:SetValue(cbar.Max)
 		cbar:SetAlpha(.7)
 		cbar:SetStatusBarColor(0, 1, 0, 0.5)
 
-		PBarsToUpdate[pbar] = nil
+		pbar:UnregisterForUpdates()
 		pbar:SetValue(pbar.Max)
 		pbar:SetAlpha(.7)
 
@@ -5783,7 +5891,14 @@ function TMW:LockToggle()
 	db.profile.Locked = not db.profile.Locked
 
 	if not db.profile.Locked then
-		wipe(CDBarsToUpdate)
+		for _, cbar in pairs(CBarsToUpdate) do
+			cbar.isInUpdateTable = nil
+		end
+		wipe(CBarsToUpdate)
+		
+		for _, pbar in pairs(PBarsToUpdate) do
+			pbar.isInUpdateTable = nil
+		end
 		wipe(PBarsToUpdate)
 	end
 

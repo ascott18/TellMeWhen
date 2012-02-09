@@ -342,11 +342,14 @@ function TMW:GetIconMenuText(g, i, data)
 	local Type = data.Type or ""
 	local typeData = Types[Type]
 
-	local text, tooltip = typeData:GetIconMenuText(data)
+	local text, tooltip, dontShorten = typeData:GetIconMenuText(data, g, i)
 
 	text = text == "" and L["UNNAMED"] or text
-	local textshort = strsub(text, 1, 35)
-	if strlen(text) > 35 then textshort = textshort .. "..." end
+	local textshort = not dontShorten and strsub(text, 1, 40) or text
+	
+	if strlen(text) > 40 and not dontShorten then
+		textshort = textshort .. "..."
+	end
 
 	tooltip =	tooltip ..
 				((Types[Type].name) or "") ..
@@ -402,10 +405,11 @@ function TMW:SetUIDropdownText(frame, value, tbl, text)
 		if tbl == CNDT.Types then
 			frame:GetParent():TypeCheck(CNDT.ConditionsByType[value])
 		elseif tbl == TMW.Icons then
-			for k, v in pairs(tbl) do
-				if v == value then
-					UIDropDownMenu_SetText(frame, TMW:GetIconMenuText(nil, nil, _G[v]))
-					return _G[v]
+			for icon in TMW:InIcons() do
+				if icon:GetName() == value then
+					local g, i = strmatch(value, "TellMeWhen_Group(%d+)_Icon(%d+)")
+					UIDropDownMenu_SetText(frame, TMW:GetIconMenuText(tonumber(g), tonumber(i), icon))
+					return icon
 				end
 			end
 			local gID, iID = strmatch(value, "TellMeWhen_Group(%d+)_Icon(%d+)")
@@ -2013,11 +2017,15 @@ function ME:IconMenu()
 			if tonumber(strmatch(UIDROPDOWNMENU_MENU_VALUE, "TellMeWhen_Group(%d+)")) == g and CI.ic and v ~= CI.ic:GetName() then
 				local info = UIDropDownMenu_CreateInfo()
 
+				
 				local text, textshort = TMW:GetIconMenuText(g, i)
+				if text:sub(-2) == "))" then
+					textshort = textshort .. " " .. L["fICON"]:format(i)
+				end
 				info.text = textshort
 				info.tooltipTitle = text
-				info.tooltipText = format(L["GROUPICON"], TMW:GetGroupName(g, g, 1), i)
 				info.tooltipOnButton = true
+				info.tooltipText = format(L["GROUPICON"], TMW:GetGroupName(g, g, 1), i)
 
 				info.value = v
 
@@ -2692,8 +2700,6 @@ function IE:Load(isRefresh, icon, isHistoryChange)
 	IE.Main.Unit:SetLabels(TMW.Types[CI.t].unitTitle)
 	IE.Main.Unit:GetScript("OnTextChanged")(IE.Main.Unit)
 
-	TMW:SetUIDropdownText(IE.Main.Type, CI.t)
-
 	CI.t = db.profile.Groups[groupID].Icons[iconID].Type
 	if CI.t == "" then
 		UIDropDownMenu_SetText(IE.Main.Type, L["ICONMENU_TYPE"])
@@ -3000,6 +3006,7 @@ function IE:LoadSettings()
 			end
 		end
 	end
+	
 	IE.Main.TypeChecks.Runes:Hide()
 	if CI.t == "runes" then
 		for k, frame in pairs(IE.Main.TypeChecks.Runes) do
@@ -3263,9 +3270,10 @@ end
 function IE:Type_Dropdown_OnClick()
 	CI.ics.Type = self.value
 	CI.ic.texture:SetTexture(nil)
+	
 	IE:ScheduleIconSetup()
-	TMW:SetUIDropdownText(IE.Main.Type, self.value)
 	CI.t = self.value
+	
 	SUG.redoIfSame = 1
 	SUG.Suggest:Hide()
 	HELP:HideForIcon(CI.ic)
@@ -3709,8 +3717,11 @@ function IE:AddIconToCopyDropdown(ics, groupID, iconID, profilename, group_src, 
 			info.value = false
 		end
 
-		local text, textshort, tooltipText = TMW:GetIconMenuText(nil, nil, ics)
-		info.text = textshort
+		local text, textshort, tooltipText = TMW:GetIconMenuText(groupID, iconID, ics)
+		if text:sub(-2) == "))" and iconID then
+			textshort = textshort .. " " .. L["fICON"]:format(iconID)
+		end
+		info.text = groupAndIcon or textshort
 		info.tooltipTitle = groupID and format(L["GROUPICON"], TMW:GetGroupName(group_src and group_src.Name, groupID, 1), iconID) or L["ICON"]
 		info.tooltipText = tooltipText
 		info.tooltipOnButton = true
@@ -4546,19 +4557,26 @@ function EVENTS:IconMenu_DropDown()
 			g, i = tonumber(g), tonumber(i)
 			if UIDROPDOWNMENU_MENU_VALUE == g and CI.ic ~= TMW[g][i] then
 				local info = UIDropDownMenu_CreateInfo()
-				info.func = EVENTS.IconMenu_DropDown_OnClick
+				
 				local text, textshort = TMW:GetIconMenuText(g, i)
+				if text:sub(-2) == "))" then
+					textshort = textshort .. " " .. L["fICON"]:format(i)
+				end
 				info.text = textshort
-				info.value = v
 				info.tooltipTitle = text
 				info.tooltipText = format(L["GROUPICON"], TMW:GetGroupName(g, g, 1), i)
 				info.tooltipOnButton = true
+				
+				info.value = v
 				info.arg1 = self
+				info.func = EVENTS.IconMenu_DropDown_OnClick
+				
 				info.tCoordLeft = 0.07
 				info.tCoordRight = 0.93
 				info.tCoordTop = 0.07
 				info.tCoordBottom = 0.93
 				info.icon = TMW[g][i].texture:GetTexture()
+				
 				UIDropDownMenu_AddButton(info, UIDROPDOWNMENU_MENU_LEVEL)
 			end
 		end
@@ -7378,14 +7396,20 @@ function CNDT:IconMenu_DropDown()
 			g, i = tonumber(g), tonumber(i)
 			if UIDROPDOWNMENU_MENU_VALUE == g and CI.ic ~= TMW[g][i] then
 				local info = UIDropDownMenu_CreateInfo()
-				info.func = CNDT.IconMenu_DropDown_OnClick
+				
 				local text, textshort = TMW:GetIconMenuText(g, i)
+				if text:sub(-2) == "))" then
+					textshort = textshort .. " " .. L["fICON"]:format(i)
+				end
 				info.text = textshort
-				info.value = v
 				info.tooltipTitle = text
-				info.tooltipText = format(L["GROUPICON"], TMW:GetGroupName(g, g, 1), i)
+				info.tooltipText = L["GROUPICON"]:format(TMW:GetGroupName(g, g, 1), i)
 				info.tooltipOnButton = true
+				
 				info.arg1 = self
+				info.value = v
+				info.func = CNDT.IconMenu_DropDown_OnClick
+				
 				info.tCoordLeft = 0.07
 				info.tCoordRight = 0.93
 				info.tCoordTop = 0.07

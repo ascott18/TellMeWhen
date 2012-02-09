@@ -238,7 +238,8 @@ function Type:GetIconMenuText(data)
 	elseif data.WpnEnchantType == "RangedSlot" then
 		text = INVTYPE_THROWN
 	end
-	text = text .. " ((" .. L["ICONMENU_WPNENCHANT"] .. "))"
+	
+	text = text .. " - " .. L["ICONMENU_WPNENCHANT"]
 
 	local tooltip =	(data.Name and data.Name ~= "" and data.Name .. "\r\n" or "")
 

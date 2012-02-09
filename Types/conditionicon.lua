@@ -130,8 +130,15 @@ function Type:DragReceived(icon, t, data, subType)
 	return TMW.ID:TextureDragReceived(icon, t, data, subType)
 end
 
-function Type:GetIconMenuText(data)
-	return "((" .. Type.name .. "))", ""
+function Type:GetIconMenuText(data, groupID, iconID)
+	local text
+	if iconID then
+		text = L["fICON"]:format(iconID) .. " - " .. Type.name, ""
+	else
+		text = "((" .. Type.name .. "))", ""
+	end
+	text = text .. " " .. L["ICONMENU_CNDTIC_ICONMENUTOOLTIP"]:format((data.Conditions and (data.Conditions.n or #data.Conditions)) or 0)
+	return text, "", true
 end
 
 function Type:IE_TypeLoaded()

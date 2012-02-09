@@ -156,10 +156,10 @@ function Type:GetNameForDisplay(icon, data)
 	return data and GetSpellLink(data) or data, 1
 end
 
-function Type:GetIconMenuText(data)
+function Type:GetIconMenuText(data, groupID, iconID)
 	local text = data.Name or ""
 	if text == "" then
-		text = "((" .. L["ICONMENU_CAST"] .. "))"
+		text = L["fICON"]:format(iconID) .. " - " .. Type.name
 	end
 
 	return text, data.Name and data.Name ~= "" and data.Name .. "\r\n" or ""
