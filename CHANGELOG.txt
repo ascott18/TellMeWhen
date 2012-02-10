@@ -9,6 +9,8 @@
  * There is now an option (enabled by default) to color the names of units in text displays and outputs.
  * Added Floating Combat Text as a text output.
  * You can now press tab to insert the first entry that is displayed in the suggestion list.
+ * The icon listing in dropdowns for meta icons, condition icons, and others is now much prettier and more informative.
+ * Added slash commands to easily enable or disable icons and groups.
  * Bug Fixes:
  ** (r427) (Condition):  attempt to call global 'GetPrimaryTalentTree' (a nil value)
  ** (r428) (Condition):  attempt to call global 'IsResting' (a nil value)

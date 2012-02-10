@@ -152,8 +152,8 @@ function Type:Setup(icon, groupID, iconID)
 	icon:Update()
 end
 
-function Type:GetNameForDisplay(icon, data)
-	return data and GetSpellLink(data) or data, 1
+function Type:GetNameForDisplay(icon, data, doInsertLink)
+	return data and ((doInsertLink and GetSpellLink(data)) or GetSpellInfo(data)) or data, 1
 end
 
 function Type:GetIconMenuText(data, groupID, iconID)
@@ -162,7 +162,7 @@ function Type:GetIconMenuText(data, groupID, iconID)
 		text = L["fICON"]:format(iconID) .. " - " .. Type.name
 	end
 
-	return text, data.Name and data.Name ~= "" and data.Name .. "\r\n" or ""
+	return text, ""--data.Name and data.Name ~= "" and data.Name .. "\r\n" or ""
 end
 
 Type:Register()

@@ -104,7 +104,7 @@ local function ConditionIcon_OnUpdate(icon, time)
 	end
 end
 
-function Type:GetNameForDisplay(icon, data)
+function Type:GetNameForDisplay(icon, data, doInsertLink)
 	return ""
 end
 
@@ -133,9 +133,9 @@ end
 function Type:GetIconMenuText(data, groupID, iconID)
 	local text
 	if iconID then
-		text = L["fICON"]:format(iconID) .. " - " .. Type.name, ""
+		text = L["fICON"]:format(iconID) .. " - " .. Type.name
 	else
-		text = "((" .. Type.name .. "))", ""
+		text = Type.name
 	end
 	text = text .. " " .. L["ICONMENU_CNDTIC_ICONMENUTOOLTIP"]:format((data.Conditions and (data.Conditions.n or #data.Conditions)) or 0)
 	return text, "", true

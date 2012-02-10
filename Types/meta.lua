@@ -336,9 +336,9 @@ end
 function Type:GetIconMenuText(data, groupID, iconID)
 	local text
 	if iconID then
-		text = L["fICON"]:format(iconID) .. " - " .. Type.name, ""
+		text = L["fICON"]:format(iconID) .. " - " .. Type.name
 	else
-		text = "((" .. Type.name .. "))", ""
+		text = Type.name
 	end
 	text = text .. " " .. L["ICONMENU_META_ICONMENUTOOLTIP"]:format(data.Icons and #data.Icons or 0)
 	

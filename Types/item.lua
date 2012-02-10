@@ -195,10 +195,10 @@ function Type:Setup(icon, groupID, iconID)
 	icon:Update()
 end
 
-function Type:GetNameForDisplay(icon, data)
+function Type:GetNameForDisplay(icon, data, doInsertLink)
 	if data then
 		local name, link = GetItemInfo(data)
-		data = link or name or data
+		data = (doInsertLink and link) or name or data
 	end
 	return data
 end

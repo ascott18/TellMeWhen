@@ -144,7 +144,7 @@ local function Runes_OnUpdate(icon, time)
 	end
 end
 
-function Type:GetNameForDisplay(icon, data)
+function Type:GetNameForDisplay(icon, data, doInsertLink)
 	return runeNames[data]
 end
 

@@ -171,13 +171,11 @@ function TypeIconMenuText(data)
 	return text, data.Name and data.Name ~= ""  and data.Name .. "\r\n" or ""
 end
 
-function Type:GetNameForDisplay(icon, data)
-	if data then
-		return data and GetSpellLink(data) or data
-	else
-		data = icon.NameFirst
-		return data and GetSpellLink(data) or data, 1
-	end
+function Type:GetNameForDisplay(icon, data, doInsertLink)
+	local ret2
+	data = data or icon.NameFirst
+	
+	return data and ((doInsertLink and GetSpellLink(data)) or GetSpellInfo(data)) or data, ret2
 end
 
 Type:Register()

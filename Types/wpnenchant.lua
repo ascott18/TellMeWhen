@@ -225,7 +225,7 @@ function Type:Setup(icon, groupID, iconID)
 	icon:OnEvent(nil, "player")
 end
 
-function Type:GetNameForDisplay(icon, data)
+function Type:GetNameForDisplay(icon, data, doInsertLink)
 	return icon.LastEnchantName or data or icon.EnchantName
 end
 
@@ -241,7 +241,7 @@ function Type:GetIconMenuText(data)
 	
 	text = text .. " - " .. L["ICONMENU_WPNENCHANT"]
 
-	local tooltip =	(data.Name and data.Name ~= "" and data.Name .. "\r\n" or "")
+	local tooltip =	""--(data.Name and data.Name ~= "" and data.Name .. "\r\n" or "")
 
 	return text, tooltip
 end

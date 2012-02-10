@@ -166,7 +166,7 @@ local function DR_OnUpdate(icon, time)
 	icon:SetInfo(0)
 end
 
-function Type:GetNameForDisplay(icon, data)
+function Type:GetNameForDisplay(icon, data, doInsertLink)
 	return data and (L[data] or gsub(data, "DR%-", ""))
 end
 

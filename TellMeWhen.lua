@@ -32,7 +32,7 @@ local DRData = LibStub("DRData-1.0", true)
 TELLMEWHEN_VERSION = "5.0.0"
 TELLMEWHEN_VERSION_MINOR = strmatch(" @project-version@", " r%d+") or ""
 TELLMEWHEN_VERSION_FULL = TELLMEWHEN_VERSION .. TELLMEWHEN_VERSION_MINOR
-TELLMEWHEN_VERSIONNUMBER = 50007 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
+TELLMEWHEN_VERSIONNUMBER = 50008 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
 if TELLMEWHEN_VERSIONNUMBER > 51000 or TELLMEWHEN_VERSIONNUMBER < 50000 then return error("YOU SCREWED UP THE VERSION NUMBER OR DIDNT CHANGE THE SAFETY LIMITS") end -- safety check because i accidentally made the version number 414069 once
 
 TELLMEWHEN_MAXGROUPS = 1 	--this is a default, used by SetTheory (addon), so dont rename
@@ -85,9 +85,6 @@ local clientVersion = select(4, GetBuildInfo())
 local addonVersion = tonumber(GetAddOnMetadata("TellMeWhen", "X-Interface"))
 local _, pclass = UnitClass("Player")
 
-TMW.Icons = {}
-TMW.IconsLookup = {}
-TMW.OrderedTypes = {}
 
 TMW.Print = TMW.Print or _G.print
 TMW.Warn = setmetatable(
@@ -631,6 +628,7 @@ TMW.Types = setmetatable({}, {
 		end
 	end
 }) local Types = TMW.Types
+TMW.OrderedTypes = {}
 
 TMW.Defaults = {
 	global = {
@@ -666,6 +664,7 @@ TMW.Defaults = {
 		CheckOrder		=	-1,
 		SUG_atBeginning	=	true,
 		ColorNames		=	true,
+		AlwaysSubLinks	=	false,
 	--[[	CodeSnippets = {
 		},]]
 		ColorMSQ	 	 = false,
@@ -1555,8 +1554,6 @@ function TMW:Update()
 	SndChan = db.profile.MasterSound and "Master" or nil
 
 
-	wipe(TMW.Icons)
-	wipe(TMW.IconsLookup)
 	BindTextObjsToUpdate = nil
 
 	for key, Type in pairs(TMW.Types) do
@@ -2811,8 +2808,9 @@ function BindTextObj:Update(forceDurationUpdate)
 	end
 end
 
-function TMW:InjectDataIntoString(Text, icon, doBlizz, shouldColorNames, dontSubDuration)
+function TMW:InjectDataIntoString(Text, icon, doBlizz, shouldColorNames, dontSubDuration, doInsertLink)
 	if not Text then return Text end
+	doInsertLink = doInsertLink or db.profile.AlwaysSubLinks
 
 	--CURRENTLY USED: t, f, m, p, u, s, d, k, e, o, x
 
@@ -2843,7 +2841,7 @@ function TMW:InjectDataIntoString(Text, icon, doBlizz, shouldColorNames, dontSub
 			--	Text = gsub(Text, "%%[Ee]", UnitName(icon.cleu_destUnit or "") or icon.cleu_destUnit or "?")
 			end
 			if strfind(Text, "%%[Xx]") then
-				local name, checkcase = icon.typeData:GetNameForDisplay(icon, icon.cleu_extraSpell)
+				local name, checkcase = icon.typeData:GetNameForDisplay(icon, icon.cleu_extraSpell, doInsertLink)
 				name = name or "?"
 				if checkcase then
 					name = TMW:RestoreCase(name)
@@ -2862,7 +2860,7 @@ function TMW:InjectDataIntoString(Text, icon, doBlizz, shouldColorNames, dontSub
 		end
 
 		if strfind(Text, "%%[Ss]") then
-			local name, checkcase = icon.typeData:GetNameForDisplay(icon, icon.__spellChecked)
+			local name, checkcase = icon.typeData:GetNameForDisplay(icon, icon.__spellChecked, doInsertLink)
 			name = name or "?"
 			if checkcase then
 				name = TMW:RestoreCase(name)
@@ -3437,7 +3435,7 @@ function ANN:HandleEvent(icon, data)
 			return
 		end
 
-		Text = TMW:InjectDataIntoString(Text, icon, not chandata.isBlizz, not chandata.isBlizz)
+		Text = TMW:InjectDataIntoString(Text, icon, not chandata.isBlizz, not chandata.isBlizz, nil, true)
 
 		if chandata.handler then
 			chandata.handler(icon, data, Text)
@@ -4562,37 +4560,10 @@ function Icon.ProcessQueuedEvents(icon)
 end
 
 
-function Icon.Validate(icon)
-	-- adds the icon to the list of icons that can be checked in metas/conditions
-	if type(icon) == "string" then
-		icon = _G[icon]
-	end
-
-	if not TMW.IconsLookup[icon] then
-		tinsert(TMW.Icons, icon:GetName())
-		TMW.IconsLookup[icon] = 1
-	end
-end
-
-function Icon.Invalidate(icon)
-	-- removes the icon from the list of icons that can be checked in metas/conditions
-	if type(icon) == "string" then
-		icon = _G[icon]
-	end
-
-	if TMW.IconsLookup[icon] then
-		local k = tContains(TMW.Icons, icon:GetName())
-		if k then tremove(TMW.Icons, k) end
-		TMW.IconsLookup[icon] = nil
-	end
-end
-
 function Icon.IsValid(icon)
-	-- checks if the icon is in the list of icons that can be checked in metas/conditions
-	if type(icon) == "string" then
-		icon = _G[icon]
-	end
-	return TMW.IconsLookup[icon]
+	-- checks if the icon should be in the list of icons that can be checked in metas/conditions
+	
+	return icon.Enabled and icon.group:ShouldUpdateIcons()
 end
 
 
@@ -4710,9 +4681,6 @@ function Icon.ForceSetAlpha(icon, alpha)
 	icon:SetAlpha(alpha)
 end
 
-function Icon.UpdateBindText(icon)
-	icon.bindText:SetText(TMW:InjectDataIntoString(icon.BindText, icon, true, true))
-end
 
 function Icon.CrunchColor(icon, duration, inrange, nomana)
 --[[
@@ -5157,12 +5125,6 @@ function Icon.Setup(icon)
 	-- Conditions
 	icon:Conditions_LoadData(icon.Conditions)
 
-	if icon.Enabled and group:ShouldUpdateIcons() then
-		icon:Validate()
-	else
-		icon:Invalidate()
-	end
-
 	local cd = icon.cooldown
 	cd.noCooldownCount = not icon.ShowTimerText
 	cd:SetDrawEdge(db.profile.DrawEdge)
@@ -5399,8 +5361,8 @@ function IconType:SetupIcons()
 	end
 end
 
-function IconType:GetNameForDisplay(icon, data)
-	local name = data and GetSpellLink(data) or data
+function IconType:GetNameForDisplay(icon, data, doInsertLink)
+	local name = data and ((doInsertLink and GetSpellLink(data)) or GetSpellInfo(data)) or data
 	return name, true
 end
 
@@ -5422,7 +5384,7 @@ end
 
 function IconType:GetIconMenuText(data)
 	local text = data.Name or ""
-	local tooltip =	data.Name and data.Name ~= "" and data.Name .. "\r\n" or ""
+	local tooltip =	""--data.Name and data.Name ~= "" and data.Name .. "\r\n" or ""
 
 	return text, tooltip
 end
@@ -5442,7 +5404,7 @@ function IconType:Register()
 	end
 
 	Types[typekey] = self -- put it in the main Types table
-	tinsert(TMW.OrderedTypes, self) -- put it in the ordered types table (used to order the type selection dropdown in the icon editor)
+	tinsert(TMW.OrderedTypes, self) -- put it in the ordered table (used to order the type selection dropdown in the icon editor)
 	return self -- why not?
 end
 
@@ -5907,11 +5869,40 @@ function TMW:LockToggle()
 end
 
 function TMW:SlashCommand(str)
-	local cmd = TMW:GetArgs(str)
+	local cmd, arg2, arg3 = TMW:GetArgs(str, 3)
 	cmd = strlower(cmd or "")
-	if cmd == strlower(L["CMD_OPTIONS"]) or cmd == "options" then --allow unlocalized "options" too
+	
+	if cmd == L["CMD_ENABLE"]:lower() or cmd == "enable" then
+		cmd = "enable"
+	elseif cmd == L["CMD_DISABLE"]:lower() or cmd == "disable" then
+		cmd = "disable"
+	elseif cmd == L["CMD_TOGGLE"]:lower() or cmd == "toggle" then
+		cmd = "toggle"
+	elseif cmd == L["CMD_OPTIONS"]:lower() or cmd == "options" then
+		cmd = "options"
+	end
+	
+	if cmd == "options" then
 		TMW:LoadOptions()
 		LibStub("AceConfigDialog-3.0"):Open("TMW Options")
+		
+	elseif cmd == "enable" or cmd == "disable" or cmd == "toggle" then
+		local groupID, iconID = tonumber(arg2), tonumber(arg3)
+		
+		local group = groupID and groupID <= TELLMEWHEN_MAXGROUPS and TMW[groupID]
+		local icon = iconID and group and group[iconID]
+		local obj = icon or group
+		if obj then
+			if cmd == "enable" then
+				obj:GetSettings().Enabled = true
+			elseif cmd == "disable" then
+				obj:GetSettings().Enabled = false
+			elseif cmd == "toggle" then
+				obj:GetSettings().Enabled = not obj:GetSettings().Enabled
+			end
+			obj:Setup()
+		end
+		
 	else
 		TMW:LockToggle()
 	end

@@ -7,6 +7,9 @@ L["!!Main Addon Description"] = "Provides visual, auditory, and textual notifica
 
 
 L["CMD_OPTIONS"] = "options"
+L["CMD_ENABLE"] = "enable"
+L["CMD_DISABLE"] = "disable"
+L["CMD_TOGGLE"] = "toggle"
 
 L["ICON_TOOLTIP1"] = "TellMeWhen"
 L["ICON_TOOLTIP2NEW"] = [[|cff7fffffRight-click|r for icon options.
@@ -441,6 +444,8 @@ L["UIPANEL_WARNINVALIDS"] = "Warn about invalid icons"
 
 L["COLORNAMES"] = "Class Colored Names"
 L["COLORNAMES_DESC"] = "Check in order to attempt to color the names of units in text displays (Binding Text and Text Event Output)."
+L["ALWAYSSUBLINKS"] = "Always Substitute Links"
+L["ALWAYSSUBLINKS_DESC"] = "By default, spell/item links will only be substituted into text event outputs. Check this setting to cause links to be substituted everywhere, including icon bind/label text."
 
 
 L["COLOR_DEFAULT"] = "*Global Colors*"
@@ -926,12 +931,12 @@ Because this event occurs every time the icon is updated while a timer is runnin
 L["SOUND_EVENT_ONCLEU"] = "Combat Event"
 L["SOUND_EVENT_ONCLEU_DESC"] = [[This event triggers when a combat event that should be processed by the icon occurs.]]
 
-L["SOUND_EVENT_ONICONSHOW"] = "Icon Show"
+L["SOUND_EVENT_ONICONSHOW"] = "Other Icon Show"
 L["SOUND_EVENT_ONICONSHOW_DESC"] = [[This event triggers when another icon (not this icon) is shown.
 
 Configure the icon that should be watched using the event settings below.]]
 
-L["SOUND_EVENT_ONICONHIDE"] = "Icon Hide"
+L["SOUND_EVENT_ONICONHIDE"] = "Other Icon Hide"
 L["SOUND_EVENT_ONICONHIDE_DESC"] = [[This event triggers when another icon (not this icon) is hidden.
 
 Configure the icon that should be watched using the event settings below.]]

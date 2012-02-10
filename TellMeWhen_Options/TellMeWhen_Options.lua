@@ -352,7 +352,7 @@ function TMW:GetIconMenuText(g, i, data)
 	end
 
 	tooltip =	tooltip ..
-				((Types[Type].name) or "") ..
+				((typeData.name) or "") ..
 				((data.Enabled and "") or "\r\n(" .. L["DISABLED"] .. ")")
 
 	return text, textshort, tooltip
@@ -404,7 +404,7 @@ function TMW:SetUIDropdownText(frame, value, tbl, text)
 	if tbl then
 		if tbl == CNDT.Types then
 			frame:GetParent():TypeCheck(CNDT.ConditionsByType[value])
-		elseif tbl == TMW.Icons then
+		elseif tbl == TMW.InIcons then
 			for icon in TMW:InIcons() do
 				if icon:GetName() == value then
 					local g, i = strmatch(value, "TellMeWhen_Group(%d+)_Icon(%d+)")
@@ -1052,7 +1052,7 @@ local colorIconTypeTemplate = {
 			return 0
 		end
 
-		for order, type in pairs(TMW.OrderedTypes) do
+		for order, type in ipairs(TMW.OrderedTypes) do
 			if type.type == this then
 				return order
 			end
@@ -1226,12 +1226,18 @@ function TMW:CompileOptions()
 									type = "toggle",
 									order = 42,
 								},
+								AlwaysSubLinks = {
+									name = L["ALWAYSSUBLINKS"],
+									desc = L["ALWAYSSUBLINKS_DESC"],
+									type = "toggle",
+									order = 43,
+								},
 								SUG_atBeginning = {
 									name = L["SUG_ATBEGINING"],
 									desc = L["SUG_ATBEGINING_DESC"],
 									width = "double",
 									type = "toggle",
-									order = 42,
+									order = 44,
 								},
 								ReceiveComm = {
 									name = L["ALLOWCOMM"],
@@ -1453,14 +1459,6 @@ function TMW:Group_Delete(groupID)
 
 	tremove(db.profile.Groups, groupID)
 	db.profile.NumGroups = db.profile.NumGroups - 1
-	for k, v in pairs(TMW.Icons) do
-		if tonumber(strmatch(v, "TellMeWhen_Group(%d+)")) == groupID then
-			local icon = _G[v]
-			if icon then
-				icon:Invalidate()
-			end
-		end
-	end
 
 	TMW:Update()
 	IE:Load()
@@ -1934,7 +1932,7 @@ function ME:LoadConfig()
 		end
 		mg:SetFrameLevel(IE.Main.Icons:GetFrameLevel()+2)
 
-		TMW:SetUIDropdownText(mg.icon, v, TMW.Icons, L["CHOOSEICON"])
+		TMW:SetUIDropdownText(mg.icon, v, TMW.InIcons, L["CHOOSEICON"])
 		mg.icon.IconPreview:SetIcon(_G[v])
 	end
 
@@ -1990,55 +1988,49 @@ end
 ---------- Dropdown ----------
 local addedGroups = {}
 function ME:IconMenu()
-	sort(TMW.Icons, TMW.IconsSort)
 	if UIDROPDOWNMENU_MENU_LEVEL == 1 then
-		wipe(addedGroups)
-		for k, v in ipairs(TMW.Icons) do
-			local g = tonumber(strmatch(v, "TellMeWhen_Group(%d+)"))
-			if not addedGroups[g] and v ~= CI.ic:GetName() then
+		for group, groupID in TMW:InGroups() do
+			if group:ShouldUpdateIcons() then
 				local info = UIDropDownMenu_CreateInfo()
 
-				info.text = TMW:GetGroupName(g, g, 1)
+				info.text = TMW:GetGroupName(groupID, groupID, 1)
 
-				info.value = "TellMeWhen_Group" .. g
+				info.value = group:GetName()
 
 				info.func = ME.IconMenuOnClick
 				info.arg1 = self
 
 				info.hasArrow = true
 				UIDropDownMenu_AddButton(info, UIDROPDOWNMENU_MENU_LEVEL)
-				addedGroups[g] = true
 			end
 		end
 	elseif UIDROPDOWNMENU_MENU_LEVEL == 2 then
-		for k, v in ipairs(TMW.Icons) do
-			local g, i = strmatch(v, "TellMeWhen_Group(%d+)_Icon(%d+)")
-			g, i = tonumber(g), tonumber(i)
-			if tonumber(strmatch(UIDROPDOWNMENU_MENU_VALUE, "TellMeWhen_Group(%d+)")) == g and CI.ic and v ~= CI.ic:GetName() then
+		for icon, groupID, iconID in TMW:InIcons() do
+			if icon:IsValid() and icon.group:GetName() == UIDROPDOWNMENU_MENU_VALUE and CI.ic ~= icon then
 				local info = UIDropDownMenu_CreateInfo()
-
 				
-				local text, textshort = TMW:GetIconMenuText(g, i)
+				local text, textshort, tooltip = TMW:GetIconMenuText(groupID, iconID)
 				if text:sub(-2) == "))" then
-					textshort = textshort .. " " .. L["fICON"]:format(i)
+					textshort = textshort .. " " .. L["fICON"]:format(iconID)
 				end
 				info.text = textshort
 				info.tooltipTitle = text
 				info.tooltipOnButton = true
-				info.tooltipText = format(L["GROUPICON"], TMW:GetGroupName(g, g, 1), i)
+				info.tooltipText = L["GROUPICON"]:format(TMW:GetGroupName(groupID, groupID, 1), iconID) .. "\r\n" .. tooltip
 
-				info.value = v
-
+				info.value = icon:GetName()
 				info.func = ME.IconMenuOnClick
 				info.arg1 = self
 
-				info.icon = TMW[g][i].texture:GetTexture()
+				info.tCoordLeft = 0.07
+				info.tCoordRight = 0.93
+				info.tCoordTop = 0.07
+				info.tCoordBottom = 0.93
+				info.icon = icon.texture:GetTexture()
 				UIDropDownMenu_AddButton(info, UIDROPDOWNMENU_MENU_LEVEL)
 			end
 		end
 	end
-
-	--UIDropDownMenu_JustifyText(self, "LEFT")
 end
 
 function ME:IconMenuOnClick(frame)
@@ -4471,7 +4463,7 @@ function EVENTS:SetupEventSettings()
 	EventSettings.PassingCndt	 :SetChecked(Settings.PassingCndt)
 	EventSettings.Value		 	 :SetText(Settings.Value)
 
-	TMW:SetUIDropdownText(EventSettings.Icon, Settings.Icon, TMW.Icons, L["CHOOSEICON"])
+	TMW:SetUIDropdownText(EventSettings.Icon, Settings.Icon, TMW.InIcons, L["CHOOSEICON"])
 	EventSettings.Icon.IconPreview:SetIcon(_G[Settings.Icon])
 
 	--show settings
@@ -4550,24 +4542,21 @@ function EVENTS:OperatorMenu_DropDown_OnClick(frame)
 end
 
 function EVENTS:IconMenu_DropDown()
-	sort(TMW.Icons, TMW.IconsSort)
 	if UIDROPDOWNMENU_MENU_LEVEL == 2 then
-		for k, v in ipairs(TMW.Icons) do
-			local g, i = strmatch(v, "TellMeWhen_Group(%d+)_Icon(%d+)")
-			g, i = tonumber(g), tonumber(i)
-			if UIDROPDOWNMENU_MENU_VALUE == g and CI.ic ~= TMW[g][i] then
+		for icon, groupID, iconID in TMW:InIcons() do
+			if icon:IsValid() and UIDROPDOWNMENU_MENU_VALUE == groupID and CI.ic ~= icon then
 				local info = UIDropDownMenu_CreateInfo()
 				
-				local text, textshort = TMW:GetIconMenuText(g, i)
+				local text, textshort, tooltip = TMW:GetIconMenuText(groupID, iconID)
 				if text:sub(-2) == "))" then
-					textshort = textshort .. " " .. L["fICON"]:format(i)
+					textshort = textshort .. " " .. L["fICON"]:format(iconID)
 				end
 				info.text = textshort
 				info.tooltipTitle = text
-				info.tooltipText = format(L["GROUPICON"], TMW:GetGroupName(g, g, 1), i)
+				info.tooltipText = format(L["GROUPICON"], TMW:GetGroupName(groupID, groupID, 1), iconID) .. "\r\n" .. tooltip
 				info.tooltipOnButton = true
 				
-				info.value = v
+				info.value = icon:GetName()
 				info.arg1 = self
 				info.func = EVENTS.IconMenu_DropDown_OnClick
 				
@@ -4575,23 +4564,20 @@ function EVENTS:IconMenu_DropDown()
 				info.tCoordRight = 0.93
 				info.tCoordTop = 0.07
 				info.tCoordBottom = 0.93
-				info.icon = TMW[g][i].texture:GetTexture()
+				info.icon = icon.texture:GetTexture()
 				
 				UIDropDownMenu_AddButton(info, UIDROPDOWNMENU_MENU_LEVEL)
-			end
+			end		
 		end
 	elseif UIDROPDOWNMENU_MENU_LEVEL == 1 then
-		wipe(addedGroups)
-		for k, v in ipairs(TMW.Icons) do
-			local g = tonumber(strmatch(v, "TellMeWhen_Group(%d+)"))
-			if not addedGroups[g] then
+		for group, groupID in TMW:InGroups() do
+			if group:ShouldUpdateIcons() then
 				local info = UIDropDownMenu_CreateInfo()
-				info.text = TMW:GetGroupName(g, g, 1)
+				info.text = TMW:GetGroupName(groupID, groupID, 1)
 				info.hasArrow = true
 				info.notCheckable = true
-				info.value = g
+				info.value = groupID
 				UIDropDownMenu_AddButton(info, UIDROPDOWNMENU_MENU_LEVEL)
-				addedGroups[g] = true
 			end
 		end
 	end
@@ -4601,7 +4587,7 @@ function EVENTS:IconMenu_DropDown_OnClick(frame)
 	local dropdown = self
 	local self = TMW:FindModule(frame)
 
-	TMW:SetUIDropdownText(frame, dropdown.value, TMW.Icons)
+	TMW:SetUIDropdownText(frame, dropdown.value, TMW.InIcons)
 	CloseDropDownMenus()
 
 	frame.IconPreview:SetIcon(_G[dropdown.value])
@@ -7223,7 +7209,6 @@ end
 ---------- Dropdowns ----------
 local addedThings = {}
 local usedCount = {}
-local addedGroups = {}
 local commonConditions = {
 	"COMBAT",
 	"VEHICLE",
@@ -7389,54 +7374,48 @@ function CNDT:UnitMenu_DropDown_OnClick(frame, v)
 end
 
 function CNDT:IconMenu_DropDown()
-	sort(TMW.Icons, TMW.IconsSort)
 	if UIDROPDOWNMENU_MENU_LEVEL == 2 then
-		for k, v in ipairs(TMW.Icons) do
-			local g, i = strmatch(v, "TellMeWhen_Group(%d+)_Icon(%d+)")
-			g, i = tonumber(g), tonumber(i)
-			if UIDROPDOWNMENU_MENU_VALUE == g and CI.ic ~= TMW[g][i] then
+		for icon, groupID, iconID in TMW:InIcons() do
+			if icon:IsValid() and UIDROPDOWNMENU_MENU_VALUE == groupID and CI.ic ~= icon then
 				local info = UIDropDownMenu_CreateInfo()
 				
-				local text, textshort = TMW:GetIconMenuText(g, i)
+				local text, textshort, tooltip = TMW:GetIconMenuText(groupID, iconID)
 				if text:sub(-2) == "))" then
-					textshort = textshort .. " " .. L["fICON"]:format(i)
+					textshort = textshort .. " " .. L["fICON"]:format(iconID)
 				end
 				info.text = textshort
 				info.tooltipTitle = text
-				info.tooltipText = L["GROUPICON"]:format(TMW:GetGroupName(g, g, 1), i)
+				info.tooltipText = L["GROUPICON"]:format(TMW:GetGroupName(groupID, groupID, 1), iconID) .. "\r\n" .. tooltip
 				info.tooltipOnButton = true
 				
 				info.arg1 = self
-				info.value = v
+				info.value = icon:GetName()
 				info.func = CNDT.IconMenu_DropDown_OnClick
 				
 				info.tCoordLeft = 0.07
 				info.tCoordRight = 0.93
 				info.tCoordTop = 0.07
 				info.tCoordBottom = 0.93
-				info.icon = TMW[g][i].texture:GetTexture()
+				info.icon = icon.texture:GetTexture()
 				UIDropDownMenu_AddButton(info, UIDROPDOWNMENU_MENU_LEVEL)
 			end
 		end
 	elseif UIDROPDOWNMENU_MENU_LEVEL == 1 then
-		wipe(addedGroups)
-		for k, v in ipairs(TMW.Icons) do
-			local g = tonumber(strmatch(v, "TellMeWhen_Group(%d+)"))
-			if not addedGroups[g] then
+		for group, groupID in TMW:InGroups() do
+			if group:ShouldUpdateIcons() then
 				local info = UIDropDownMenu_CreateInfo()
-				info.text = TMW:GetGroupName(g, g, 1)
+				info.text = TMW:GetGroupName(groupID, groupID, 1)
 				info.hasArrow = true
 				info.notCheckable = true
-				info.value = g
+				info.value = groupID
 				UIDropDownMenu_AddButton(info, UIDROPDOWNMENU_MENU_LEVEL)
-				addedGroups[g] = true
 			end
 		end
 	end
 end
 
 function CNDT:IconMenu_DropDown_OnClick(frame)
-	TMW:SetUIDropdownText(frame, self.value, TMW.Icons)
+	TMW:SetUIDropdownText(frame, self.value, TMW.InIcons)
 	frame.IconPreview:SetIcon(_G[self.value])
 	CloseDropDownMenus()
 	CNDT:Save()
@@ -7831,7 +7810,7 @@ function CndtGroup.Load(group)
 	group.Check:SetChecked(condition.Checked)
 	group.Check2:SetChecked(condition.Checked2)
 
-	TMW:SetUIDropdownText(group.Icon, condition.Icon, TMW.Icons)
+	TMW:SetUIDropdownText(group.Icon, condition.Icon, TMW.InIcons)
 	group.Icon.IconPreview:SetIcon(_G[condition.Icon])
 
 	local v = TMW:SetUIDropdownText(group.Operator, condition.Operator, operators)
@@ -7869,7 +7848,7 @@ function CndtGroup.Clear(group)
 	group.Check:SetChecked(nil)
 	group.Check2:SetChecked(nil)
 
-	TMW:SetUIDropdownText(group.Icon, "", TMW.Icons)
+	TMW:SetUIDropdownText(group.Icon, "", TMW.InIcons)
 	TMW:SetUIDropdownText(group.Type, "", CNDT.Types)
 	TMW:SetUIDropdownText(group.Operator, "==", operators)
 	group.AndOr:SetValue("AND")
