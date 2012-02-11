@@ -1,5 +1,4 @@
-﻿-- NEEDS manual REVIEW
--- --------------------
+﻿-- --------------------
 -- TellMeWhen
 -- Originally by Nephthys of Hyjal <lieandswell@yahoo.com>
 
@@ -95,6 +94,7 @@ local function ICD_OnEvent(icon, event, ...)
 			icon.ICDStartTime = TMW.time
 			icon.ICDDuration = icon.Durations[Key]
 			icon.ICDID = i
+			icon.NextUpdateTime = 0
 		end
 	end
 end
@@ -138,6 +138,8 @@ function Type:Setup(icon, groupID, iconID)
 		end
 	end
 
+	icon:SetTexture(TMW:GetConfigIconTexture(icon))
+
 	--[[ keep these events per icon isntead of global like unitcooldowns are so that ...
 	well i had a reason here but it didnt make sense when i came back and read it a while later. Just do it. I guess.]]
 	if icon.ICDType == "spellcast" then
@@ -150,8 +152,8 @@ function Type:Setup(icon, groupID, iconID)
 	end
 	icon:SetScript("OnEvent", ICD_OnEvent)
 
-	icon:SetTexture(TMW:GetConfigIconTexture(icon))
-
+	icon:SetUpdateMethod("manual")
+	
 	icon:SetScript("OnUpdate", ICD_OnUpdate)
 	icon:Update()
 end

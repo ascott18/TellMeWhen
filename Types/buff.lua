@@ -1,5 +1,4 @@
-﻿-- NEEDS manual REVIEW
--- --------------------
+﻿-- --------------------
 -- TellMeWhen
 -- Originally by Nephthys of Hyjal <lieandswell@yahoo.com>
 
@@ -232,9 +231,6 @@ local function Buff_OnUpdate(icon, time)
 		local color = icon:CrunchColor(duration)
 
 		--icon:SetInfo(alpha, color, texture, start, duration, spellChecked, reverse, count, countText, forceupdate, unit)
-		if not id then
-			TMW:Error("NO ID RETURNED FOR " .. tostring(icon) .. " " .. buffName)
-		end
 		icon:SetInfo(icon.Alpha, color, iconTexture, expirationTime - duration, duration, id, nil, count, count > 1 and count or "", nil, useUnit)
 	else
 		local color = icon:CrunchColor()

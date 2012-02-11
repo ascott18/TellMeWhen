@@ -23,8 +23,8 @@ local _, pclass = UnitClass("Player")
 local db, ClockGCD
 local strlower =
 	  strlower
-local GetTotemInfo, GetSpellTexture =
-	  GetTotemInfo, GetSpellTexture
+local GetTotemInfo, GetSpellTexture, GetSpellLink, GetSpellInfo =
+	  GetTotemInfo, GetSpellTexture, GetSpellLink, GetSpellInfo
 local print = TMW.print
 local strlowerCache = TMW.strlowerCache
 
@@ -162,7 +162,7 @@ function Type:Setup(icon, groupID, iconID)
 	icon:Update()
 end
 
-function TypeIconMenuText(data)
+function Type:GetIconMenuText(data)
 	local text = data.Name or ""
 	if text == "" then
 		text = "((" .. Type.name .. "))"

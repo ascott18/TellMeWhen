@@ -1,5 +1,4 @@
-﻿-- NEEDS manual REVIEW
--- --------------------
+﻿-- --------------------
 -- TellMeWhen
 -- Originally by Nephthys of Hyjal <lieandswell@yahoo.com>
 
@@ -71,18 +70,22 @@ function Type:Update()
 end
 
 
-local function MultiStateCD_OnEvent(icon)
-	local actionType, spellID = GetActionInfo(icon.Slot) -- check the current slot first, because it probably didnt change
-	if actionType == "spell" and spellID == icon.NameFirst then
-		return
-	end
-	for i=1, 120 do
-		local actionType, spellID = GetActionInfo(i)
+local function MultiStateCD_OnEvent(icon, event)
+	if event == "ACTIONBAR_SLOT_CHANGED" then
+		local actionType, spellID = GetActionInfo(icon.Slot) -- check the current slot first, because it probably didnt change
 		if actionType == "spell" and spellID == icon.NameFirst then
-			icon.Slot = i
-			return
+			-- do nothing
+		else
+			for i=1, 120 do
+				local actionType, spellID = GetActionInfo(i)
+				if actionType == "spell" and spellID == icon.NameFirst then
+					icon.Slot = i
+					break
+				end
+			end
 		end
 	end
+	icon.NextUpdateTime = 0
 end
 
 local function MultiStateCD_OnUpdate(icon, time)
@@ -128,11 +131,11 @@ function Type:Setup(icon, groupID, iconID)
 	end
 
 	icon.Slot = 0
-	MultiStateCD_OnEvent(icon)
+	MultiStateCD_OnEvent(icon, "ACTIONBAR_SLOT_CHANGED") -- the placement of this matters. so does the event arg
 
 	if icon:IsBeingEdited() == 1 then
 		if icon.Slot == 0 and originalNameFirst and originalNameFirst ~= "" then
-			TMW.HELP:Show("ICON_MS_NOTFOUND", icon, TMW.IE.Main.Name, 0, 0, L["HELP_MS_NOFOUND"], originalNameFirst)
+			TMW.HELP:Show("ICON_MS_NOTFOUND", icon, TMW.IE.Main.Name, 0, 0, L["HELP_MS_NOFOUND"], TMW:RestoreCase(originalNameFirst))
 		else
 			TMW.HELP:Hide("ICON_MS_NOTFOUND")
 		end
@@ -141,8 +144,12 @@ function Type:Setup(icon, groupID, iconID)
 	icon:SetTexture(GetActionTexture(icon.Slot) or "Interface\\Icons\\INV_Misc_QuestionMark")
 
 	icon:RegisterEvent("ACTIONBAR_SLOT_CHANGED")
+	icon:RegisterEvent("ACTIONBAR_UPDATE_COOLDOWN")
+	icon:RegisterEvent("ACTIONBAR_UPDATE_USABLE")
 	icon:SetScript("OnEvent", MultiStateCD_OnEvent)
-
+	
+	icon:SetUpdateMethod("manual")
+	
 	icon:SetScript("OnUpdate", MultiStateCD_OnUpdate)
 	icon:Update()
 end

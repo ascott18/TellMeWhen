@@ -1,5 +1,4 @@
-﻿-- NEEDS manual REVIEW
--- --------------------
+﻿-- --------------------
 -- TellMeWhen
 -- Originally by Nephthys of Hyjal <lieandswell@yahoo.com>
 

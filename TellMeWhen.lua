@@ -32,7 +32,7 @@ local DRData = LibStub("DRData-1.0", true)
 TELLMEWHEN_VERSION = "5.0.0"
 TELLMEWHEN_VERSION_MINOR = strmatch(" @project-version@", " r%d+") or ""
 TELLMEWHEN_VERSION_FULL = TELLMEWHEN_VERSION .. TELLMEWHEN_VERSION_MINOR
-TELLMEWHEN_VERSIONNUMBER = 50009 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
+TELLMEWHEN_VERSIONNUMBER = 50010 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
 if TELLMEWHEN_VERSIONNUMBER > 51000 or TELLMEWHEN_VERSIONNUMBER < 50000 then return error("YOU SCREWED UP THE VERSION NUMBER OR DIDNT CHANGE THE SAFETY LIMITS") end -- safety check because i accidentally made the version number 414069 once
 
 TELLMEWHEN_MAXGROUPS = 1 	--this is a default, used by SetTheory (addon), so dont rename
@@ -40,20 +40,24 @@ TELLMEWHEN_MAXROWS = 20
 
 
 ---------- Upvalues ----------
-local GetSpellCooldown, GetSpellInfo, GetSpellTexture =
-	  GetSpellCooldown, GetSpellInfo, GetSpellTexture
-local GetNumRaidMembers, GetPartyAssignment =
-	  GetNumRaidMembers, GetPartyAssignment
-local UnitPower, PowerBarColor =
-	  UnitPower, PowerBarColor
-local PlaySoundFile, SendChatMessage =
-	  PlaySoundFile, SendChatMessage
-local UnitName, UnitInBattleground, UnitInRaid, UnitExists, GetNumPartyMembers, GetChannelList =
-	  UnitName, UnitInBattleground, UnitInRaid, UnitExists, GetNumPartyMembers, GetChannelList
-local tonumber, tostring, type, pairs, ipairs, tinsert, tremove, sort, select, wipe, rawget, next, tDeleteItem = --tDeleteItem is a blizzard function defined in UIParent.lua
-	  tonumber, tostring, type, pairs, ipairs, tinsert, tremove, sort, select, wipe, rawget, next, tDeleteItem
-local strfind, strmatch, format, gsub, strsub, strtrim, strsplit, strlower, min, max, ceil, floor =
-	  strfind, strmatch, format, gsub, strsub, strtrim, strsplit, strlower, min, max, ceil, floor
+local GetSpellCooldown, GetSpellInfo, GetSpellTexture, GetSpellLink, GetSpellBookItemInfo =
+	  GetSpellCooldown, GetSpellInfo, GetSpellTexture, GetSpellLink, GetSpellBookItemInfo
+local GetItemInfo, GetInventoryItemID, GetItemIcon =
+	  GetItemInfo, GetInventoryItemID, GetItemIcon
+local GetActiveTalentGroup, GetPrimaryTalentTree, GetNumTalentTabs, GetNumTalents, GetTalentInfo =
+	  GetActiveTalentGroup, GetPrimaryTalentTree, GetNumTalentTabs, GetNumTalents, GetTalentInfo
+local UnitPower, UnitClass, UnitGUID, UnitName, UnitInBattleground, UnitInRaid, UnitExists =
+	  UnitPower, UnitClass, UnitGUID, UnitName, UnitInBattleground, UnitInRaid, UnitExists
+local PlaySoundFile, PlaySound, SendChatMessage, GetChannelList =
+	  PlaySoundFile, PlaySound, SendChatMessage, GetChannelList
+local GetNumRaidMembers, GetNumPartyMembers, GetRealNumRaidMembers, GetRealNumPartyMembers, GetPartyAssignment, InCombatLockdown =
+	  GetNumRaidMembers, GetNumPartyMembers, GetRealNumRaidMembers, GetRealNumPartyMembers, GetPartyAssignment, InCombatLockdown
+local GetNumBattlefieldScores, GetBattlefieldScore = 
+	  GetNumBattlefieldScores, GetBattlefieldScore
+local tonumber, tostring, type, pairs, ipairs, tinsert, tremove, sort, select, wipe, rawget, next, assert, pcall, getmetatable, setmetatable, date, CopyTable =
+	  tonumber, tostring, type, pairs, ipairs, tinsert, tremove, sort, select, wipe, rawget, next, assert, pcall, getmetatable, setmetatable, date, CopyTable
+local strfind, strmatch, format, gsub, gmatch, strsub, strtrim, strsplit, strlower, strrep, min, max, ceil, floor, abs, random =
+	  strfind, strmatch, format, gsub, gmatch, strsub, strtrim, strsplit, strlower, strrep, min, max, ceil, floor, abs, random
 local _G, GetTime =
 	  _G, GetTime
 local MikSBT, Parrot, SCT =
@@ -2756,7 +2760,7 @@ function TMW:ProcessEquivalencies()
 end
 
 
-BindTextObj = TMW:NewClass("BindTextObj")
+local BindTextObj = TMW:NewClass("BindTextObj")
 
 function BindTextObj:OnNewInstance(icon, FontObject)
 	self.icon = icon
@@ -3209,7 +3213,7 @@ TMW.ChannelList = {
 				local num, name = select(i, GetChannelList())
 				if not num then break end
 				if strlowerCache[name] == strlowerCache[data.Location] then
-					SendChatMessage(Text, Channel, nil, num)
+					SendChatMessage(Text, data.Channel, nil, num)
 					break
 				end
 			end
@@ -3839,7 +3843,7 @@ function ANIM:HandleEvent(icon, data)
 end
 function ANIM:GetFlasher(parent)
 	local Flasher = parent:CreateTexture(nil, "BACKGROUND", nil, 5)
-	Flasher:SetAllPoints(parent.class == Icon and parent.texture)
+	Flasher:SetAllPoints(parent.class == TMW.Classes.Icon and parent.texture)
 	Flasher:Hide()
 
 	return Flasher
@@ -5589,7 +5593,7 @@ function TMW:RestoreCase(str)
 		return loweredbackup[str]
 	else
 		for original, lowered in pairs(strlowerCache) do
-			if lowerered == str then
+			if lowered == str then
 				return original
 			end
 		end

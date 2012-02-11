@@ -1,5 +1,4 @@
-﻿-- NEEDS manual REVIEW
--- --------------------
+﻿-- --------------------
 -- TellMeWhen
 -- Originally by Nephthys of Hyjal <lieandswell@yahoo.com>
 
@@ -22,8 +21,8 @@ local L = TMW.L
 local db
 local ipairs, strlower =
 	  ipairs, strlower
-local UnitCastingInfo, UnitChannelInfo, UnitExists, UnitGUID =
-	  UnitCastingInfo, UnitChannelInfo, UnitExists, UnitGUID
+local GetSpellLink, GetSpellInfo, UnitCastingInfo, UnitChannelInfo, UnitExists, UnitGUID =
+	  GetSpellLink, GetSpellInfo, UnitCastingInfo, UnitChannelInfo, UnitExists, UnitGUID
 local print = TMW.print
 local strlowerCache = TMW.strlowerCache
 local unitsWithExistsEvent

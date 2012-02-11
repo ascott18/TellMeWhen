@@ -20,8 +20,8 @@ local L = TMW.L
 local LMB = LibStub("Masque", true) or (LibMasque and LibMasque("Button"))
 
 local db
-local _G, strmatch, tonumber, ipairs =
-	  _G, strmatch, tonumber, ipairs
+local _G, strmatch, tonumber, ipairs, pairs, next =
+	  _G, strmatch, tonumber, ipairs, pairs, next
 local print = TMW.print
 local Locked
 
@@ -107,14 +107,14 @@ local function Meta_OnUpdate(icon, time)
 			end
 
 			if icon:Animations_Has() then
-				for k, v in pairs(icon:Animations_Get()) do
+				for k, v in next, icon:Animations_Get() do
 					if v.originIcon ~= icon then
 						icon:Animations_Stop(v)
 					end
 				end
 			end
 			if icToUse:Animations_Has() then
-				for k, v in pairs(icToUse:Animations_Get()) do
+				for k, v in next, icToUse:Animations_Get() do
 					icon:Animations_Start(v)
 				end
 			end
@@ -254,7 +254,7 @@ function Type:Setup(icon, groupID, iconID)
 
 	icon:SetTexture("Interface\\Icons\\LevelUpIcon-LFD")
 
-	--icon:SetUpdateMethod("manual")
+	--icon:SetUpdateMethod("manual") DONT DO THIS! 
 	icon:SetScript("OnUpdate", Meta_OnUpdate)
 	TMW:RegisterCallback("TMW_ICON_UPDATED", TMW_ICON_UPDATED, icon)
 end

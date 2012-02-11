@@ -19,8 +19,8 @@ if not TMW then return end
 local L = TMW.L
 
 local db, ClockGCD
-local strlower, bitband =
-	  strlower, bit.band
+local strlower, gsub, bitband =
+	  strlower, gsub, bit.band
 local UnitGUID =
 	  UnitGUID
 local print = TMW.print

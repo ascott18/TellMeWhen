@@ -21,8 +21,8 @@ local L = TMW.L
 local db, ClockGCD
 local strlower =
 	  strlower
-local UnitGUID, GetGlyphSocketInfo =
-	  UnitGUID, GetGlyphSocketInfo
+local UnitGUID, GetGlyphSocketInfo, GetTotemInfo =
+	  UnitGUID, GetGlyphSocketInfo, GetTotemInfo
 local print = TMW.print
 local SpellTextures = TMW.SpellTextures
 local _, pclass = UnitClass("Player")

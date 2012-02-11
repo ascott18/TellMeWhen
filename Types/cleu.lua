@@ -19,9 +19,11 @@ if not TMW then return end
 local L = TMW.L
 
 local db
-local strlower =
-	  strlower
-local bit_band = bit.band
+local _G = _G
+local strlower, bit_band =
+	  strlower, bit.band
+local UnitGUID, GetSpellTexture, GetItemIcon =
+	  UnitGUID, GetSpellTexture, GetItemIcon
 local print = TMW.print
 local SpellTextures = TMW.SpellTextures
 
@@ -136,7 +138,7 @@ local function CLEU_OnEvent(icon, _, t, event, h, sourceGUID, sourceName, source
 					matched = 1
 					break
 				elseif UnitGUID(unit) == sourceGUID then
-					destUnit = unit -- replace with the actual unitID
+					sourceUnit = unit -- replace with the actual unitID
 					matched = 1
 					break
 				end
@@ -173,7 +175,7 @@ local function CLEU_OnEvent(icon, _, t, event, h, sourceGUID, sourceName, source
 		if event == "SWING_DAMAGE" or event == "SWING_MISSED" then
 			spellName = ACTION_SWING
 			-- dont define spellID here so that ACTION_SWING will be used in %s substitutions
-			tex = GetSpellTexture(6603)
+			tex = SpellTextures[6603]
 		elseif event == "ENCHANT_APPLIED" or event == "ENCHANT_REMOVED" then
 			spellID = arg1
 			spellName = arg2

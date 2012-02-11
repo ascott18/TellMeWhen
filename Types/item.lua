@@ -1,5 +1,4 @@
-﻿-- NEEDS manual REVIEW
--- --------------------
+﻿-- --------------------
 -- TellMeWhen
 -- Originally by Nephthys of Hyjal <lieandswell@yahoo.com>
 
@@ -20,8 +19,8 @@ if not TMW then return end
 local L = TMW.L
 
 local db, ClockGCD
-local GetItemCooldown, IsItemInRange, IsEquippedItem, GetItemIcon, GetItemCount =
-	  GetItemCooldown, IsItemInRange, IsEquippedItem, GetItemIcon, GetItemCount
+local GetItemCooldown, IsItemInRange, IsEquippedItem, GetItemIcon, GetItemCount, GetItemInfo =
+	  GetItemCooldown, IsItemInRange, IsEquippedItem, GetItemIcon, GetItemCount, GetItemInfo
 local pairs =
 	  pairs
 local OnGCD = TMW.OnGCD

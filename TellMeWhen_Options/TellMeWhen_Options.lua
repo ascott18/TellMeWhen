@@ -3858,7 +3858,7 @@ function IE:AddIconToCopyDropdown(ics, groupID, iconID, profilename, group_src, 
 		if text:sub(-2) == "))" and iconID then
 			textshort = textshort .. " " .. L["fICON"]:format(iconID)
 		end
-		info.text = groupAndIcon or textshort
+		info.text = textshort
 		info.tooltipTitle = groupID and format(L["GROUPICON"], TMW:GetGroupName(group_src and group_src.Name, groupID, 1), iconID) or L["ICON"]
 		info.tooltipText = tooltipText
 		info.tooltipOnButton = true
@@ -4069,7 +4069,6 @@ function IE:Copy_DropDown(...)
 
 			--other profiles
 			for profilename, profiletable in TMW:OrderedPairs(db.profiles) do
-				local profiletable = profile_src
 				if profilename ~= currentProfile and profilename ~= "Default" then -- current profile and default are handled separately
 					info = UIDropDownMenu_CreateInfo()
 					info.text = profilename
@@ -7371,8 +7370,7 @@ local function AddConditionToDropDown(v)
 	info.tooltipText = v.tooltip
 	info.tooltipOnButton = true
 	info.value = v.value
-	info.arg1 = frame
-	info.arg2 = v
+	info.arg1 = v
 	info.icon = get(v.icon)
 	if v.tcoords then
 		info.tCoordLeft = v.tcoords[1]
@@ -7467,7 +7465,7 @@ function CNDT:TypeMenu_DropDown()
 	end
 end
 
-function CNDT:TypeMenu_DropDown_OnClick(frame, data)
+function CNDT:TypeMenu_DropDown_OnClick(data)
 	TMW:SetUIDropdownText(UIDROPDOWNMENU_OPEN_MENU, self.value)
 	UIDropDownMenu_SetText(UIDROPDOWNMENU_OPEN_MENU, data.text)
 	local group = UIDROPDOWNMENU_OPEN_MENU:GetParent()

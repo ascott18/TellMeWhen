@@ -27,28 +27,30 @@ local Env
 local L = TMW.L
 local _, pclass = UnitClass("Player")
 
-local strlower, min, gsub, tostring, strfind, strsub, type, pairs, strtrim, select, format, tonumber =
-	  strlower, min, gsub, tostring, strfind, strsub, type, pairs, strtrim, select, format, tonumber
+local tostring,type, pairs, select, tonumber, wipe, assert, next, loadstring, setfenv, setmetatable =
+	  tostring,type, pairs, select, tonumber, wipe, assert, next, loadstring, setfenv, setmetatable
+local strlower, min, gsub, strfind, strsub, strtrim, format, strmatch, strsplit, strrep =
+	  strlower, min, gsub, strfind, strsub, strtrim, format, strmatch, strsplit, strrep
 local NONE, MAX_SPELL_SCHOOLS =
 	  NONE, MAX_SPELL_SCHOOLS
-local GetEclipseDirection, IsResting, GetPetActionInfo, GetTotemInfo, GetTalentTabInfo =
-	  GetEclipseDirection, IsResting, GetPetActionInfo, GetTotemInfo, GetTalentTabInfo
+local GetPetActionInfo, GetTotemInfo =
+	  GetPetActionInfo, GetTotemInfo
 local IsInInstance, GetInstanceDifficulty =
 	  IsInInstance, GetInstanceDifficulty
-local GetShapeshiftFormInfo =
-	  GetShapeshiftFormInfo
+local GetTalentTabInfo, GetNumTalentTabs, GetNumTalents, GetTalentInfo =
+	  GetTalentTabInfo, GetNumTalentTabs, GetNumTalents, GetTalentInfo
+local GetShapeshiftFormInfo, GetShapeshiftForm, GetNumShapeshiftForms =
+	  GetShapeshiftFormInfo, GetShapeshiftForm, GetNumShapeshiftForms
 local UnitAttackPower, UnitRangedAttackPower =
 	  UnitAttackPower, UnitRangedAttackPower
-local GetMeleeHaste, GetRangedHaste, UnitSpellHaste =
-	  GetMeleeHaste, GetRangedHaste, UnitSpellHaste
-local GetCritChance, GetRangedCritChance, GetSpellCritChance =
-	  GetCritChance, GetRangedCritChance, GetSpellCritChance
+local GetSpellCritChance =
+	  GetSpellCritChance
 local GetSpellBonusDamage, GetSpellBonusHealing =
 	  GetSpellBonusDamage, GetSpellBonusHealing
-local GetExpertise, GetMastery, UnitStat =
-	  GetExpertise, GetMastery, UnitStat
-local UnitAura, UnitAffectingCombat, UnitHasVehicleUI =
-	  UnitAura, UnitAffectingCombat, UnitHasVehicleUI
+local GetSpellTexture, GetInventoryItemTexture, GetInventorySlotInfo, GetCurrencyInfo =
+	  GetSpellTexture, GetInventoryItemTexture, GetInventorySlotInfo, GetCurrencyInfo
+local UnitAura =
+	  UnitAura
 local GetNumTrackingTypes, GetTrackingInfo =
 	  GetNumTrackingTypes, GetTrackingInfo
 
