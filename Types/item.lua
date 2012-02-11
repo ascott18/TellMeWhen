@@ -84,10 +84,15 @@ function Type:BAG_UPDATE()
 	end
 end
 
-local function ItemCooldown_OnEvent(icon)
-	-- the reason for doing it like this is because this event will fire several times at once sometimes,
-	-- but there is no reason to recheck things until they are needed next.
-	icon.DoUpdateIDs = true
+local function ItemCooldown_OnEvent(icon, event, unit)
+	if event == "UNIT_INVENTORY_CHANGED" and unit == "player" then
+		-- the reason for handling DoUpdateIDs is because this event will fire several times at once sometimes,
+		-- but there is no reason to recheck things until they are needed next.
+		if icon.ShouldUpdateIDs then
+			icon.DoUpdateIDs = true
+		end
+	end
+	icon.NextUpdateTime = 0
 end
 
 local function ItemCooldown_OnUpdate(icon, time)
@@ -167,20 +172,33 @@ function Type:Setup(icon, groupID, iconID)
 	icon.NameFirst = TMW:GetItemIDs(icon, icon.Name, 1)
 	icon.NameArray = TMW:GetItemIDs(icon, icon.Name)
 	icon.NameNameArray = TMW:GetItemIDs(icon, icon.Name, nil, 1)
-	icon.NameNameArray = TMW:GetItemIDs(icon, icon.Name, nil, 1)
 
+	icon.ShouldUpdateIDs = nil
 	if not icon.NameFirst or icon.NameFirst == 0 then
 		icon:RegisterEvent("UNIT_INVENTORY_CHANGED")
 		icon:SetScript("OnEvent", ItemCooldown_OnEvent)
+		icon.ShouldUpdateIDs = true
 	else
 		for _, n in ipairs(TMW:SplitNames(icon.Name)) do
 			n = tonumber(strtrim(n))
 			if n and n <= INVSLOT_LAST_EQUIPPED then
 				icon:RegisterEvent("PLAYER_EQUIPMENT_CHANGED")
 				icon:SetScript("OnEvent", ItemCooldown_OnEvent)
+				icon.ShouldUpdateIDs = true
 				break
 			end
 		end
+	end
+	
+	Type:RegisterEvent("BAG_UPDATE") -- must come before the icon events are set.
+	
+	if not icon.RangeCheck then
+		icon:RegisterEvent("UNIT_INVENTORY_CHANGED")
+		icon:RegisterEvent("PLAYER_EQUIPMENT_CHANGED")
+		icon:RegisterEvent("BAG_UPDATE_COOLDOWN")
+		icon:RegisterEvent("BAG_UPDATE")
+		icon:SetUpdateMethod("manual")
+		icon:SetScript("OnEvent", ItemCooldown_OnEvent)
 	end
 
 	if icon.OnlyEquipped then
@@ -188,8 +206,6 @@ function Type:Setup(icon, groupID, iconID)
 	end
 
 	icon:SetTexture(TMW:GetConfigIconTexture(icon, 1))
-
-	Type:RegisterEvent("BAG_UPDATE")
 
 	icon:SetScript("OnUpdate", ItemCooldown_OnUpdate)
 	icon:Update()

@@ -1,6 +1,7 @@
 ===v5.0.0===
  * Several icon types have been changed to be entirely event based, meaning that they will no longer update themselves when they don't need to, resulting in a (tremendous) performance increase.
  * The Condition engine has been completely rewritten and is now almost entirely event driven, resulting in another (tremendous) performance increase.
+ * You can now sort all of the icons of a group based on attributes like duration, stacks, and opacity.
  * Enrage is now a proper dispel type, and no longer relies on a pre-defined list of enrages.
  * Implemented a proper class-based inheritance system for many objects (Icons, Icon Types, Groups, Condition Groups).
  * You can now check units relative to the special condition unit '%u' (//for example, '%u-target' or '%upettarget'//).

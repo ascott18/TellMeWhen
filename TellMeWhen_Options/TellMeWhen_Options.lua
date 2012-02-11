@@ -587,6 +587,7 @@ local importExportBoxTemplate = {
 local groupFontConfigTemplate = {
 	type = "group",
 	name = function(info) return L["UIPANEL_FONT_" .. info[#info]] end,
+	desc = function(info) return L["UIPANEL_FONT_" .. info[#info] .. "_DESC"] end,
 	order = function(info) return fontorder[info[#info]] end,
 	set = function(info, val)
 		local g = findid(info)
@@ -683,6 +684,130 @@ local groupFontConfigTemplate = {
 		},
 	},
 }
+
+local groupSortPriorities = {
+	"id",		
+	"duration",	
+	"stacks",	
+	"visiblealpha",
+	"visibleshown",
+	"alpha",	
+	"shown",
+}	
+local groupSortValues = {
+	L["UIPANEL_GROUPSORT_id"],		
+	L["UIPANEL_GROUPSORT_duration"],
+	L["UIPANEL_GROUPSORT_stacks"],	
+	L["UIPANEL_GROUPSORT_visiblealpha"],
+	L["UIPANEL_GROUPSORT_visibleshown"],	
+	L["UIPANEL_GROUPSORT_alpha"],	
+	L["UIPANEL_GROUPSORT_shown"],	
+}
+local groupSortMethodTemplate
+groupSortMethodTemplate = {
+	type = "group",
+	name = function(info)
+		return ""
+	end,
+	order = function(info)
+		return tonumber(info[#info])
+	end,
+	disabled = function(info, priorityID)
+		local g = findid(info)
+		local priorityID = priorityID or tonumber(info[#info-1])
+		for k, v in pairs(db.profile.Groups[g].SortPriorities) do
+			if k < priorityID and v.Method == "id" then
+				return true
+			end
+		end
+	end,
+	dialogInline = true,
+	guiInline = true,
+	args = {
+		method = {
+			name = function(info)
+				local priorityID = tonumber(info[#info-1])
+				return L["UIPANEL_GROUPSORT_METHODNAME"]:format(priorityID)
+			end,
+			desc = function(info)
+				local g = findid(info)
+				local priorityID = tonumber(info[#info-1])
+				local Method = db.profile.Groups[g].SortPriorities[priorityID].Method
+				
+				local desc = L["UIPANEL_GROUPSORT_METHODNAME_DESC"]:format(priorityID) .. "\r\n\r\n" .. L["UIPANEL_GROUPSORT_" .. Method .. "_DESC"]
+				if groupSortMethodTemplate.disabled(info, priorityID) then
+					desc = desc .. "\r\n\r\n" .. L["UIPANEL_GROUPSORT_METHODDISABLED_DESC"]
+				end
+				return desc
+			end,
+			type = "select",
+			width = "double",
+			values = groupSortValues,
+			style = "dropdown",
+			order = 1,		
+			get = function(info)
+				local g = findid(info)
+				local priorityID = tonumber(info[#info-1])
+				local Method = db.profile.Groups[g].SortPriorities[priorityID].Method
+				for k, v in pairs(groupSortPriorities) do
+					if Method == v then
+						return k
+					end
+				end
+			end,
+			set = function(info, val)
+				local g = findid(info)
+				local priorityID = tonumber(info[#info-1])
+				local oldPriority = db.profile.Groups[g].SortPriorities[priorityID]
+				local newPriority
+				for k, v in pairs(db.profile.Groups[g].SortPriorities) do
+					if v.Method == groupSortPriorities[val] then
+						db.profile.Groups[g].SortPriorities[k] = oldPriority
+						db.profile.Groups[g].SortPriorities[priorityID] = v
+						break
+					end
+				end
+				TMW[g]:SortIcons()
+			end,
+		},
+		OrderAscending = {
+			name = L["UIPANEL_GROUPSORT_SORTASCENDING"],
+			desc = L["UIPANEL_GROUPSORT_SORTASCENDING_DESC"],
+			type = "toggle",
+			width = "half",
+			order = 2,
+			get = function(info)
+				local g = findid(info)
+				local priorityID = tonumber(info[#info-1])
+				return db.profile.Groups[g].SortPriorities[priorityID].Order == 1
+			end,
+			set = function(info)
+				local g = findid(info)
+				local priorityID = tonumber(info[#info-1])
+				db.profile.Groups[g].SortPriorities[priorityID].Order = 1
+				TMW[g]:SortIcons()
+			end,
+		},
+		OrderDescending = {
+			name = L["UIPANEL_GROUPSORT_SORTDESCENDING"],
+			desc = L["UIPANEL_GROUPSORT_SORTDESCENDING_DESC"],
+			type = "toggle",
+			width = "half",
+			order = 3,
+			get = function(info)
+				local g = findid(info)
+				local priorityID = tonumber(info[#info-1])
+				return db.profile.Groups[g].SortPriorities[priorityID].Order == -1
+			end,
+			set = function(info)
+				local g = findid(info)
+				local priorityID = tonumber(info[#info-1])
+				db.profile.Groups[g].SortPriorities[priorityID].Order = -1
+				TMW[g]:SortIcons()
+			end,
+		},
+	}
+}
 local groupConfigTemplate = {
 	type = "group",
 	childGroups = "tab",
@@ -692,6 +817,7 @@ local groupConfigTemplate = {
 		main = {
 			type = "group",
 			name = L["MAIN"],
+			desc = L["UIPANEL_MAIN_DESC"],
 			order = 1,
 			args = {
 				Enabled = {
@@ -792,10 +918,27 @@ local groupConfigTemplate = {
 		},
 		Count = groupFontConfigTemplate,
 		Bind = groupFontConfigTemplate,
+		
+		Sorting = {
+			name = L["UIPANEL_GROUPSORT"],
+			desc = L["UIPANEL_GROUPSORT_DESC"],
+			type = "group",
+			order = 10,
+			args = {
+				["1"] = groupSortMethodTemplate,
+				["2"] = groupSortMethodTemplate,
+				["3"] = groupSortMethodTemplate,
+				["4"] = groupSortMethodTemplate,
+				["5"] = groupSortMethodTemplate,
+				["6"] = groupSortMethodTemplate,
+				["7"] = groupSortMethodTemplate,
+			},
+		},
 		position = {
 			type = "group",
-			order = 2,
+			order = 20,
 			name = L["UIPANEL_POSITION"],
+			desc = L["UIPANEL_POSITION_DESC"],
 			set = function(info, val)
 				local g = findid(info)
 				db.profile.Groups[g].Point[info[#info]] = val
@@ -1281,6 +1424,7 @@ function TMW:CompileOptions()
 						Colors = {
 							type = "group",
 							name = L["UIPANEL_COLORS"],
+							desc = L["UIPANEL_COLORS_DESC"],
 							order = 3,
 							childGroups = "tree",
 							args = {},
@@ -1290,6 +1434,7 @@ function TMW:CompileOptions()
 				groups = {
 					type = "group",
 					name = L["UIPANEL_GROUPS"],
+					desc = L["UIPANEL_GROUPS_DESC"],
 					order = 2,
 					set = function(info, val)
 						local g = findid(info)

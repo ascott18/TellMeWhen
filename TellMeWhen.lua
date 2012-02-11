@@ -32,7 +32,7 @@ local DRData = LibStub("DRData-1.0", true)
 TELLMEWHEN_VERSION = "5.0.0"
 TELLMEWHEN_VERSION_MINOR = strmatch(" @project-version@", " r%d+") or ""
 TELLMEWHEN_VERSION_FULL = TELLMEWHEN_VERSION .. TELLMEWHEN_VERSION_MINOR
-TELLMEWHEN_VERSIONNUMBER = 50008 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
+TELLMEWHEN_VERSIONNUMBER = 50009 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
 if TELLMEWHEN_VERSIONNUMBER > 51000 or TELLMEWHEN_VERSIONNUMBER < 50000 then return error("YOU SCREWED UP THE VERSION NUMBER OR DIDNT CHANGE THE SAFETY LIMITS") end -- safety check because i accidentally made the version number 414069 once
 
 TELLMEWHEN_MAXGROUPS = 1 	--this is a default, used by SetTheory (addon), so dont rename
@@ -709,6 +709,15 @@ TMW.Defaults = {
 				Tree1			= true,
 				Tree2			= true,
 				Tree3			= true,
+				SortPriorities = {
+					{Method = "id",				Order =	1,	},
+					{Method = "duration",		Order =	1,	},
+					{Method = "stacks",			Order =	-1,	},
+					{Method = "visiblealpha",	Order =	-1,	},
+					{Method = "visibleshown",	Order =	-1,	},
+					{Method = "alpha",			Order =	-1,	},
+					{Method = "shown",			Order =	-1,	},
+				},
 				Point = {
 					point 		  = "CENTER",
 					relativeTo 	  = "UIParent",
@@ -3941,11 +3950,102 @@ function Group.OnNewInstance(group, ...)
 	local _, name, _, _, groupID = ... -- the CreateFrame args
 	TMW[groupID] = group
 	CNDTEnv[name] = group
+	
+	group.SortedIcons = {}
 end
 
 function Group.ScriptSort(groupA, groupB)
 	local gOrder = -db.profile.CheckOrder
 	return groupA:GetID()*gOrder < groupB:GetID()*gOrder
+end
+
+function TMW:TMW_ICON_UPDATED(event, icon)
+	--TODO: THIS ISNT WHAT I WANT TO DO. DONT SPORT THE GROUP 10 TIMES IN ONE UPDATE
+	-- JUST SET AN ATTRIBUTE AND SORT IN THE NEXT ONUPDATE IF NEEDED
+	icon.group:SortIcons()
+end
+TMW:RegisterCallback("TMW_ICON_UPDATED", TMW)
+
+function Group.SortByLowDuration(iconA, iconB)
+	local iconA__duration, iconB__duration = iconA.__duration, iconB.__duration
+	local durationA = iconA__duration == 0 and 0 or iconA__duration - (time - iconA.__start)
+	local durationB = iconB__duration == 0 and 0 or iconB__duration - (time - iconB.__start)
+	
+	if durationA == durationB then
+		return iconA.ID < iconB.ID
+	else
+		return durationA < durationB
+	end
+end
+
+function Group.IconSorter(iconA, iconB)
+	local group = iconA.group
+	local SortPriorities = group.SortPriorities
+	for p = 1, #SortPriorities do
+		local settings = SortPriorities[p]
+		local method = settings.Method
+		local order = settings.Order
+		
+		if Locked or method == "id" then -- force sorting by ID when unlocked
+			if method == "id" then
+				return iconA.ID*order < iconB.ID*order
+				
+			elseif method == "alpha" then
+				local a, b = iconA.__alpha, iconB.__alpha
+				if a ~= b then
+					return a*order < b*order
+				end
+				
+			elseif method == "visiblealpha" then
+				local a, b = iconA:GetAlpha(), iconB:GetAlpha()
+				if a ~= b then
+					return a*order < b*order
+				end
+				
+			elseif method == "stacks" then
+				local a, b = iconA.__count or 0, iconB.__count or 0
+				if a ~= b then
+					return a*order < b*order
+				end
+				
+			elseif method == "shown" then
+				local a, b = (iconA.__shown and iconA.__alpha > 0) and 1 or 0, (iconB.__shown and iconB.__alpha > 0) and 1 or 0
+				if a ~= b then
+					return a*order < b*order
+				end
+				
+			elseif method == "visibleshown" then
+				local a, b = (iconA.__shown and iconA:GetAlpha() > 0) and 1 or 0, (iconB.__shown and iconB:GetAlpha() > 0) and 1 or 0
+				if a ~= b then
+					return a*order < b*order
+				end
+				
+			elseif method == "duration" then
+				local iconA__duration, iconB__duration = iconA.__duration, iconB.__duration
+				local durationA = iconA__duration - (time - iconA.__start)
+				local durationB = iconB__duration - (time - iconB.__start)
+				
+				if durationA ~= durationB then
+					return durationA*order < durationB*order
+				end
+			end
+		end
+	end
+end
+
+
+function Group.SortIcons(group)
+	local SortedIcons = group.SortedIcons
+	sort(SortedIcons, group.IconSorter)
+	
+	for positionedID = 1, #group do
+		local icon = SortedIcons[positionedID]
+		
+		local x, y = group:GetIconPos(positionedID)
+		icon.x, icon.y = x, y -- used for shakers
+		icon:SetPoint("TOPLEFT", x, y)
+		
+	end
 end
 
 Group.setscript = Group.SetScript
@@ -4095,6 +4195,7 @@ function Group.Setup(group)
 	end
 
 	group:SetPos()
+	group:SortIcons()
 
 	-- remove the group from the list of groups that should update conditions
 	tDeleteItem(GroupsToUpdate, group)
@@ -4430,8 +4531,10 @@ function Icon.OnNewInstance(icon, ...)
 	local _, name, group, _, iconID = ... -- the CreateFrame args
 
 	icon.group = group
+	icon.ID = iconID
 	group[iconID] = icon
 	CNDTEnv[name] = icon
+	tinsert(group.SortedIcons, icon)
 	
 	icon.pbar = PBar:New("StatusBar", name .. "PBar", icon)
 	icon.cbar = CBar:New("StatusBar", name .. "CBar", icon)
