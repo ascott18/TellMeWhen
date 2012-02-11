@@ -32,7 +32,7 @@ local DRData = LibStub("DRData-1.0", true)
 TELLMEWHEN_VERSION = "5.0.0"
 TELLMEWHEN_VERSION_MINOR = strmatch(" @project-version@", " r%d+") or ""
 TELLMEWHEN_VERSION_FULL = TELLMEWHEN_VERSION .. TELLMEWHEN_VERSION_MINOR
-TELLMEWHEN_VERSIONNUMBER = 50010 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
+TELLMEWHEN_VERSIONNUMBER = 50011 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
 if TELLMEWHEN_VERSIONNUMBER > 51000 or TELLMEWHEN_VERSIONNUMBER < 50000 then return error("YOU SCREWED UP THE VERSION NUMBER OR DIDNT CHANGE THE SAFETY LIMITS") end -- safety check because i accidentally made the version number 414069 once
 
 TELLMEWHEN_MAXGROUPS = 1 	--this is a default, used by SetTheory (addon), so dont rename
@@ -1470,6 +1470,7 @@ function TMW:OnUpdate(elapsed)					-- THE MAGICAL ENGINE OF DOING EVERYTHING
 		if Locked then
 
 			for i = 1, #GroupsToUpdate do
+				-- GroupsToUpdate only contains groups with conditions
 				local group = GroupsToUpdate[i]
 				local ConditionObj = group.ConditionObj
 				if ConditionObj then
@@ -1489,8 +1490,8 @@ function TMW:OnUpdate(elapsed)					-- THE MAGICAL ENGINE OF DOING EVERYTHING
 			end
 
 			for i = 1, #IconsToUpdate do
-				local icon = IconsToUpdate[i]
-				icon:Update()
+				--local icon = IconsToUpdate[i]
+				IconsToUpdate[i]:Update()
 			end
 
 			if updatePBars then
@@ -1499,6 +1500,14 @@ function TMW:OnUpdate(elapsed)					-- THE MAGICAL ENGINE OF DOING EVERYTHING
 					pbar:SetSpell(pbar.spell) -- force an update
 				end
 				updatePBars = nil
+			end
+			
+			for g = 1, #TMW do
+				local group = TMW[g]
+				if group.shouldSortIcons and group.iconSortNeeded then
+					group:SortIcons()
+					group.iconSortNeeded = nil
+				end
 			end
 		end
 	end
@@ -3958,29 +3967,21 @@ function Group.OnNewInstance(group, ...)
 	group.SortedIcons = {}
 end
 
+function Group.__tostring(group)
+	return group:GetName()
+end
+
 function Group.ScriptSort(groupA, groupB)
 	local gOrder = -db.profile.CheckOrder
 	return groupA:GetID()*gOrder < groupB:GetID()*gOrder
 end
 
-function TMW:TMW_ICON_UPDATED(event, icon)
-	--TODO: THIS ISNT WHAT I WANT TO DO. DONT SPORT THE GROUP 10 TIMES IN ONE UPDATE
-	-- JUST SET AN ATTRIBUTE AND SORT IN THE NEXT ONUPDATE IF NEEDED
-	icon.group:SortIcons()
-end
-TMW:RegisterCallback("TMW_ICON_UPDATED", TMW)
 
-function Group.SortByLowDuration(iconA, iconB)
-	local iconA__duration, iconB__duration = iconA.__duration, iconB.__duration
-	local durationA = iconA__duration == 0 and 0 or iconA__duration - (time - iconA.__start)
-	local durationB = iconB__duration == 0 and 0 or iconB__duration - (time - iconB.__start)
-	
-	if durationA == durationB then
-		return iconA.ID < iconB.ID
-	else
-		return durationA < durationB
-	end
+function Group:TMW_ICON_UPDATED(event, icon)
+	-- note that this callback is not inherited - it simply handles all groups
+	icon.group.iconSortNeeded = true
 end
+TMW:RegisterCallback("TMW_ICON_UPDATED", Group)
 
 function Group.IconSorter(iconA, iconB)
 	local group = iconA.group
@@ -4037,7 +4038,6 @@ function Group.IconSorter(iconA, iconB)
 	end
 end
 
-
 function Group.SortIcons(group)
 	local SortedIcons = group.SortedIcons
 	sort(SortedIcons, group.IconSorter)
@@ -4048,7 +4048,6 @@ function Group.SortIcons(group)
 		local x, y = group:GetIconPos(positionedID)
 		icon.x, icon.y = x, y -- used for shakers
 		icon:SetPoint("TOPLEFT", x, y)
-		
 	end
 end
 
@@ -4200,6 +4199,7 @@ function Group.Setup(group)
 
 	group:SetPos()
 	group:SortIcons()
+	group.shouldSortIcons = group.SortPriorities[1].Method ~= "id" and group:ShouldUpdateIcons() and group[2] and true
 
 	-- remove the group from the list of groups that should update conditions
 	tDeleteItem(GroupsToUpdate, group)

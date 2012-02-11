@@ -767,7 +767,7 @@ groupSortMethodTemplate = {
 						break
 					end
 				end
-				TMW[g]:SortIcons()
+				TMW[g]:Setup()
 			end,
 		},
 		OrderAscending = {
@@ -785,7 +785,7 @@ groupSortMethodTemplate = {
 				local g = findid(info)
 				local priorityID = tonumber(info[#info-1])
 				db.profile.Groups[g].SortPriorities[priorityID].Order = 1
-				TMW[g]:SortIcons()
+				TMW[g]:Setup()
 			end,
 		},
 		OrderDescending = {
@@ -803,7 +803,7 @@ groupSortMethodTemplate = {
 				local g = findid(info)
 				local priorityID = tonumber(info[#info-1])
 				db.profile.Groups[g].SortPriorities[priorityID].Order = -1
-				TMW[g]:SortIcons()
+				TMW[g]:Setup()
 			end,
 		},
 	}
