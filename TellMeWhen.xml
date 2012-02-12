@@ -71,52 +71,6 @@
 			</Layer>
 		</Layers>
 		<Frames>
-			<!--StatusBar name="$parentPowerBar" parentKey="pbar" hidden="true">
-				<Anchors>
-					<Anchor point="BOTTOM" relativeTo="$parentIcon" relativePoint="CENTER" y="0.5"/>
-					<Anchor point="TOPLEFT" relativeTo="$parentIcon"/>
-					<Anchor point="TOPRIGHT" relativeTo="$parentIcon"/>
-				</Anchors>
-				<Layers>
-					<Layer level="OVERLAY">
-						<Texture name="$parenttexture" parentKey="texture" file="Interface\TargetingFrame\UI-StatusBar">
-							<Size x="30" y="30"/>
-						</Texture>
-					</Layer>
-				</Layers>
-				<Scripts>
-					<OnLoad>
-						self.Max = 1
-						self:SetFrameLevel(self:GetParent():GetFrameLevel() + 2)
-						self.icon = self:GetParent()
-						self:SetStatusBarTexture(self.texture)
-						self.offset = 0
-					</OnLoad>
-				</Scripts>
-			</StatusBar-->
-			<StatusBar name="$parentCooldownBar" parentKey="cbar" minvalue="0" maxvalue="1" defaultvalue="0" hidden="true">
-				<Anchors>
-					<Anchor point="TOP" relativeTo="$parentIcon" relativePoint="CENTER" y="-0.5"/>
-					<Anchor point="BOTTOMLEFT" relativeTo="$parentIcon"/>
-					<Anchor point="BOTTOMRIGHT" relativeTo="$parentIcon"/>
-				</Anchors>
-				<Layers>
-					<Layer level="OVERLAY">
-						<Texture name="$parenttexture" parentKey="texture" file="Interface\TargetingFrame\UI-StatusBar">
-							<Size x="30" y="30"/>
-						</Texture>
-					</Layer>
-				</Layers>
-				<Scripts>
-					<OnLoad>
-						self.Max = 1
-						self:SetFrameLevel(self:GetParent():GetFrameLevel() + 2)
-						self.icon = self:GetParent()
-						self:SetStatusBarTexture(self.texture)
-						self.offset = 0
-					</OnLoad>
-				</Scripts>
-			</StatusBar>
 			<Cooldown name="$parentCooldown" parentKey="cooldown" inherits="CooldownFrameTemplate">
 				<Size x="30" y="30"/>
 				<Anchors>
@@ -197,6 +151,140 @@
 		<NormalTexture file=""/>
 		<HighlightTexture alphaMode="ADD" file="Interface\Buttons\ButtonHilight-Square"/>
 		<PushedTexture file="Interface\Buttons\UI-Quickslot-Depress"/>
+	</Button>
+
+	<Button name="TellMeWhen_BarTemplate" virtual="true" enableMouse="true">
+		<Size x="30" y="30"/>
+		<Layers>
+			<Layer level="ARTWORK">
+				<FontString name="$parentCount" parentKey="countText" inherits="NumberFontNormalSmall" justifyH="RIGHT">
+					<Anchors>
+						<Anchor point="BOTTOMRIGHT" x="-2" y="2"/>
+					</Anchors>
+				</FontString>
+				<FontString name="$parentHotKey" parentKey="bindText" inherits="NumberFontNormalSmallGray" justifyH="RIGHT">
+					<Anchors>
+						<Anchor point="TOPLEFT" x="-2" y="-2"/>
+					</Anchors>
+				</FontString>
+			</Layer>
+		</Layers>
+		<Frames>
+			<Button name="$parentIconDisplay" parentKey="iconDisplay">
+				<Size x="30" y="30"/>
+				<Anchors>
+					<Anchor point="TOPLEFT"/>
+				</Anchors>
+				<Layers>
+					<Layer level="BACKGROUND">
+						<Texture name="$parentIcon" parentKey="texture" file="Interface\Icons\INV_Misc_QuestionMark">
+							<Size x="30" y="30"/>
+							<Anchors>
+								<Anchor point="CENTER"/>
+							</Anchors>
+						</Texture>
+					</Layer>
+				</Layers>
+				<Frames>
+					<Cooldown name="$parentCooldown" parentKey="cooldown" inherits="CooldownFrameTemplate">
+						<Size x="30" y="30"/>
+						<Anchors>
+							<Anchor point="CENTER"/>
+						</Anchors>
+					</Cooldown>
+				</Frames>
+			</Button>
+		</Frames>
+		<Scripts>
+			<OnLoad>
+				self:RegisterForDrag("LeftButton", "RightButton")
+				self.cooldown = self.iconDisplay.cooldown
+				self.texture = self.iconDisplay.texture
+			</OnLoad>
+			<OnEnter>
+				self:SetScript("OnEnter", nil)
+				self.__noWrapTooltipText = true
+				TMW:TT(self, self.GetTooltipTitle, "ICON_TOOLTIP2NEW", 1, nil)
+				self:GetScript("OnEnter")(self)
+			</OnEnter>
+			<OnMouseUp>
+				if TMW.ID.isMoving then
+					TMW:Group_StopMoving(TMW.ID.isMoving)
+				end
+				if button == "RightButton" then
+					TMW.IE:Load(nil, self)
+				end
+				if TMW.IE then
+					TMW.IE:ScheduleIconSetup(self)
+				end
+			</OnMouseUp>
+			<OnMouseDown>
+				local ID = TMW.ID
+				if not ID then return end
+				ID.DraggingInfo = nil
+				ID.F:Hide()
+				ID.IsDragging = nil
+			</OnMouseDown>
+			<OnDragStart>
+				if button == "RightButton" and TMW.ID then
+					TMW.ID:Start(self)
+				elseif button == "LeftButton" then
+					local group = self:GetParent()
+					if not group.Locked then
+						group:StartMoving()
+						TMW.ID.isMoving = group
+					end
+				end
+				if TMW.IE then
+					TMW.IE:ScheduleIconSetup(self)
+				end
+			</OnDragStart>
+			<OnReceiveDrag>
+				if TMW.ID then
+					TMW.ID:CompleteDrag("OnReceiveDrag", self)
+					TMW.ID:SpellItemToIcon(self)
+				end
+			</OnReceiveDrag>
+			<OnClick>
+				if TMW.ID then
+					TMW.ID:SpellItemToIcon(self)
+				end
+			</OnClick>
+			<OnDragStop>
+				if TMW.ID.isMoving then
+					TMW:Group_StopMoving(TMW.ID.isMoving)
+				end
+
+				if TMW.ID and TMW.ID.IsDragging then
+					TMW.ID:CompleteDrag("OnDragStop")
+				end
+			</OnDragStop>
+			<OnShow>
+				self.__shown = 1
+			</OnShow>
+			<OnHide>
+				self.__shown = nil
+			</OnHide>
+		</Scripts>
+
+		<NormalTexture file="">
+			<Anchors>
+				<Anchor point="TOPLEFT" relativeTo="$parentIconDisplay" relativePoint="TOPLEFT"/>
+				<Anchor point="BOTTOMRIGHT" relativeTo="$parentIconDisplay" relativePoint="BOTTOMRIGHT"/>
+			</Anchors>
+		</NormalTexture>
+		<HighlightTexture alphaMode="ADD" file="Interface\Buttons\ButtonHilight-Square">
+			<Anchors>
+				<Anchor point="TOPLEFT" relativeTo="$parentIconDisplay" relativePoint="TOPLEFT"/>
+				<Anchor point="BOTTOMRIGHT" relativeTo="$parentIconDisplay" relativePoint="BOTTOMRIGHT"/>
+			</Anchors>
+		</HighlightTexture>
+		<PushedTexture file="Interface\Buttons\UI-Quickslot-Depress">
+			<Anchors>
+				<Anchor point="TOPLEFT" relativeTo="$parentIconDisplay" relativePoint="TOPLEFT"/>
+				<Anchor point="BOTTOMRIGHT" relativeTo="$parentIconDisplay" relativePoint="BOTTOMRIGHT"/>
+			</Anchors>
+		</PushedTexture>
 	</Button>
 
 	<!-- END TEMPLATES -->

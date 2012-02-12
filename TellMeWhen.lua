@@ -32,7 +32,7 @@ local DRData = LibStub("DRData-1.0", true)
 TELLMEWHEN_VERSION = "5.0.0"
 TELLMEWHEN_VERSION_MINOR = strmatch(" @project-version@", " r%d+") or ""
 TELLMEWHEN_VERSION_FULL = TELLMEWHEN_VERSION .. TELLMEWHEN_VERSION_MINOR
-TELLMEWHEN_VERSIONNUMBER = 50011 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
+TELLMEWHEN_VERSIONNUMBER = 50012 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
 if TELLMEWHEN_VERSIONNUMBER > 51000 or TELLMEWHEN_VERSIONNUMBER < 50000 then return error("YOU SCREWED UP THE VERSION NUMBER OR DIDNT CHANGE THE SAFETY LIMITS") end -- safety check because i accidentally made the version number 414069 once
 
 TELLMEWHEN_MAXGROUPS = 1 	--this is a default, used by SetTheory (addon), so dont rename
@@ -82,7 +82,7 @@ local loweredbackup = {}
 local callbackregistry = {}
 local bullshitTable = {}
 local ActiveAnimations = {}
-local CBarsToUpdate, PBarsToUpdate = {}, {}
+ CBarsToUpdate, PBarsToUpdate = {}, {}
 local time = GetTime() TMW.time = time
 local sctcolor = {r=1, b=1, g=1}
 local clientVersion = select(4, GetBuildInfo())
@@ -106,7 +106,7 @@ end})
 
 do	-- Class Lib
 	TMW.Classes = {}
-	TMW.Metamethods = {
+	local metamethods = {
 		__add = true,
 		__call = true,
 		__concat = true,
@@ -128,7 +128,7 @@ do	-- Class Lib
 		if not self.instances[1] then
 			-- set any defined metamethods
 			for k, v in pairs(self.instancemeta.__index) do
-				if TMW.Metamethods[k] then
+				if metamethods[k] then
 					self.instancemeta[k] = v
 				end
 			end
@@ -139,7 +139,7 @@ do	-- Class Lib
 	
 	local function New(self, ...)
 		local instance
-		if ... and self.frameType then
+		if ... and self.isFrameObject then
 			instance = CreateFrame(...)
 		else
 			instance = {}
@@ -155,29 +155,33 @@ do	-- Class Lib
 
 		self.instances[#self.instances + 1] = instance
 
-		if self.OnNewInstance then
-			self.OnNewInstance(instance, ...)
+		for k, v in pairs(self.instancemeta.__index) do
+			if type(k) == "string" and k:find("^OnNewInstance") then
+				v(instance, ...)
+			end
 		end
 
 		return instance
 	end
 	
-	local function Embed(self, target)
+	local function Embed(self, target, canOverwrite)
 		-- if this is the first instance (not really an instance here, but we need to anyway) of the class, do some magic to it:
 		initializeClass(self)
 
 		self.embeds[target] = true
 
 		for k, v in pairs(self.instancemeta.__index) do
-			if target[k] then
+			if target[k] and not canOverwrite then
 				TMW:Error(("Error embedding class %s into target %s: Field %q already exists on the target."):format(self.name, tostring(target:GetName() or target), k))
 			else
 				target[k] = v
 			end
 		end
 		
-		if self.OnNewInstance then
-			self.OnNewInstance(target)
+		for k, v in pairs(self.instancemeta) do
+			if type(k) == "string" and k:find("^OnNewInstance") then
+				v(instance)
+			end
 		end
 
 		return target
@@ -186,12 +190,12 @@ do	-- Class Lib
 	function TMW:NewClass(className, ...)
 		local metatable = {__index = {}}
 
-		local frameType
+		local isFrameObject
 		for n, v in TMW:Vararg(...) do
 			local meta
 			if n == 1 and not TMW.Classes[v] then
-				frameType = v
-				meta = getmetatable(CreateFrame(frameType))
+				isFrameObject = true
+				meta = getmetatable(CreateFrame(v))
 			elseif TMW.Classes[v] then
 				meta = getmetatable(TMW.Classes[v])			
 			end			
@@ -203,6 +207,7 @@ do	-- Class Lib
 			end
 		end
 
+		metatable.__index.isFrameObject = metatable.__index.isFrameObject or isFrameObject
 		metatable.__newindex = metatable.__index
 
 		local class = {
@@ -212,7 +217,7 @@ do	-- Class Lib
 			New = New,
 			Embed = Embed,
 			instancemeta = {__index = metatable.__index},
-			frameType = frameType,
+			isFrameObject = isFrameObject,
 		}
 
 		setmetatable(class, metatable)
@@ -625,7 +630,7 @@ local RelevantToAll = {
 
 TMW.Types = setmetatable({}, {
 	__index = function(t, k)
-		if type(k) == "table" and k.class == TMW.Classes.Icon then -- if the key is an icon, then return the icon's Type table
+		if type(k) == "table" and k.IsIcon then -- if the key is an icon, then return the icon's Type table
 			return t[k.Type]
 		else -- if no type exists, then use the fallback (default) type
 			return rawget(t, "")
@@ -698,11 +703,14 @@ TMW.Defaults = {
 			},
 			["**"] = {
 				Enabled			= false,
+				Type			= "icon",
 				OnlyInCombat	= false,
 				Locked			= false,
 				Name			= "",
 				Strata			= "MEDIUM",
 				Scale			= 2.0,
+				BarSizeX		= 100,
+				BarSizeY		= 20,
 				Level			= 10,
 				Rows			= 1,
 				Columns			= 4,
@@ -1585,9 +1593,16 @@ function TMW:Update()
 	end
 
 	for groupID = 1, max(TELLMEWHEN_MAXGROUPS, #TMW) do
-		-- cant use TMW.InGroups() because groups wont exist yet on the first call of this, so they would never be able to exists
-		-- even if it shouldn't be setup (i.e. it has been deleted or the user changed profiles)
-		local group = TMW[groupID] or TMW.Classes.Group:New("Frame", "TellMeWhen_Group" .. groupID, TMW, "TellMeWhen_GroupTemplate", groupID)
+		-- cant use TMW.InGroups() because groups wont exist yet on the first call of this,
+		-- so they would never be able to exist, even if it shouldn't be setup (i.e. it has been deleted or the user changed profiles)
+		local class
+		local gs = db.profile.Groups[groupID]
+		if gs.Type == "icon" then
+			class = TMW.Classes.Group
+		elseif gs.Type == "bar" then
+			class = TMW.Classes.BarGroup
+		end
+		local group = TMW[groupID] or class:New("Frame", "TellMeWhen_Group" .. groupID, TMW, "TellMeWhen_GroupTemplate", groupID)
 		group:Setup()
 	end
 
@@ -2667,7 +2682,7 @@ function TMW:IterateAllModules(callback, arg1, ...)
 			end
 
 			local arg2 = ...
-			if type(arg2) == "table" and arg2.class == TMW.Classes.Icon and arg2:GetSettings().Type ~= name then
+			if type(arg2) == "table" and arg2.IsIcon and arg2:GetSettings().Type ~= name then
 				callbackfunc = nil
 			end
 
@@ -3852,7 +3867,7 @@ function ANIM:HandleEvent(icon, data)
 end
 function ANIM:GetFlasher(parent)
 	local Flasher = parent:CreateTexture(nil, "BACKGROUND", nil, 5)
-	Flasher:SetAllPoints(parent.class == TMW.Classes.Icon and parent.texture)
+	Flasher:SetAllPoints(parent.IsIcon and parent.texture)
 	Flasher:Hide()
 
 	return Flasher
@@ -3957,9 +3972,9 @@ end
 -- GROUPS
 -- -----------
 
-local Group = TMW:NewClass("Group", "Frame", "ConditionControlledObject")
+local GroupParent = TMW:NewClass("GroupParent", "Frame", "ConditionControlledObject")
 
-function Group.OnNewInstance(group, ...)
+function GroupParent.OnNewInstance_GroupParent(group, ...)
 	local _, name, _, _, groupID = ... -- the CreateFrame args
 	TMW[groupID] = group
 	CNDTEnv[name] = group
@@ -3967,23 +3982,22 @@ function Group.OnNewInstance(group, ...)
 	group.SortedIcons = {}
 end
 
-function Group.__tostring(group)
+function GroupParent.__tostring(group)
 	return group:GetName()
 end
 
-function Group.ScriptSort(groupA, groupB)
+function GroupParent.ScriptSort(groupA, groupB)
 	local gOrder = -db.profile.CheckOrder
 	return groupA:GetID()*gOrder < groupB:GetID()*gOrder
 end
 
-
-function Group:TMW_ICON_UPDATED(event, icon)
+function GroupParent:TMW_ICON_UPDATED(event, icon)
 	-- note that this callback is not inherited - it simply handles all groups
 	icon.group.iconSortNeeded = true
 end
-TMW:RegisterCallback("TMW_ICON_UPDATED", Group)
+TMW:RegisterCallback("TMW_ICON_UPDATED", GroupParent)
 
-function Group.IconSorter(iconA, iconB)
+function GroupParent.IconSorter(iconA, iconB)
 	local group = iconA.group
 	local SortPriorities = group.SortPriorities
 	for p = 1, #SortPriorities do
@@ -4038,7 +4052,7 @@ function Group.IconSorter(iconA, iconB)
 	end
 end
 
-function Group.SortIcons(group)
+function GroupParent.SortIcons(group)
 	local SortedIcons = group.SortedIcons
 	sort(SortedIcons, group.IconSorter)
 	
@@ -4051,34 +4065,33 @@ function Group.SortIcons(group)
 	end
 end
 
-Group.setscript = Group.SetScript
-function Group.SetScript(group, handler, func)
+GroupParent.SetScript = GroupParent.SetScript
+function GroupParent.SetScript(group, handler, func)
 	group[handler] = func
 	group:setscript(handler, func)
 end
 
-Group.show = Group.Show
-function Group.Show(group)
+GroupParent.show = GroupParent.Show
+function GroupParent.Show(group)
 	if not group.__shown then
 		group:show()
 		group.__shown = 1
 	end
 end
 
-Group.hide = Group.Hide
-function Group.Hide(group)
+GroupParent.hide = GroupParent.Hide
+function GroupParent.Hide(group)
 	if group.__shown then
 		group:hide()
 		group.__shown = nil
 	end
 end
 
-
-function Group.GetSettings(group)
+function GroupParent.GetSettings(group)
 	return db.profile.Groups[group:GetID()]
 end
 
-function Group.FinishCompilingConditions(group, funcstr)
+function GroupParent.FinishCompilingConditions(group, funcstr)
 	if group.OnlyInCombat then
 		if funcstr == "" then
 			funcstr = [[UnitAffectingCombat("player")]]
@@ -4091,7 +4104,7 @@ function Group.FinishCompilingConditions(group, funcstr)
 	end
 end
 
-function Group.ShouldUpdateIcons(group)
+function GroupParent.ShouldUpdateIcons(group)
 	local gs = group:GetSettings()
 
 	if	(group:GetID() > TELLMEWHEN_MAXGROUPS) or
@@ -4105,6 +4118,83 @@ function Group.ShouldUpdateIcons(group)
 
 	return true
 end
+
+function GroupParent.SizeUpdate(resizeButton)
+	-- note that arg1 (self) is resizeButton
+	local group = resizeButton:GetParent()
+	local uiScale = UIParent:GetScale()
+	local cursorX, cursorY = GetCursorPosition()
+
+	-- calculate new scale
+	local newXScale = group.oldScale * (cursorX/uiScale - group.oldX*group.oldScale) / (resizeButton.oldCursorX/uiScale - group.oldX*group.oldScale)
+	local newYScale = group.oldScale * (cursorY/uiScale - group.oldY*group.oldScale) / (resizeButton.oldCursorY/uiScale - group.oldY*group.oldScale)
+	local newScale = max(0.6, newXScale, newYScale)
+	group:SetScale(newScale)
+
+	-- calculate new frame position
+	local newX = group.oldX * group.oldScale / newScale
+	local newY = group.oldY * group.oldScale / newScale
+	group:ClearAllPoints()
+	group:SetPoint("TOPLEFT", UIParent, "BOTTOMLEFT", newX, newY)
+end
+
+
+function GroupParent.Setup(group)
+	local groupID = group:GetID()
+
+	group.CorrectStance = true
+	group.__shown = group:IsShown()
+
+	for k, v in pairs(TMW.Group_Defaults) do
+		group[k] = db.profile.Groups[groupID][k]
+	end
+	
+	--[[if group.Type == "icon" then
+		TMW.Classes.Group:Embed(group, true)
+	elseif group.Type == "bar" then
+		TMW.Classes.BarGroup:Embed(group, true)
+	end]]
+
+	group.FontTest = not Locked and group.FontTest
+
+	group:SetFrameLevel(group.Level)
+
+	if group:ShouldUpdateIcons() then
+		group:SetupChildren()
+	end
+
+	if Locked or group.Locked then
+		group.resizeButton:Hide()
+	else--if not (Locked or group.Locked) then
+		group.resizeButton:Show()
+	end
+
+	group:SetPos()
+	group:SortIcons()
+	group.shouldSortIcons = group.SortPriorities[1].Method ~= "id" and group:ShouldUpdateIcons() and group[2] and true
+
+	-- remove the group from the list of groups that should update conditions
+	tDeleteItem(GroupsToUpdate, group)
+	
+	if group:ShouldUpdateIcons() and Locked then
+		group:Show()
+
+		-- process any conditions the group might have
+		GroupsToUpdate[#GroupsToUpdate+1] = group:Conditions_LoadData(group.Conditions) and group
+	else
+		if group:ShouldUpdateIcons() then
+			group:Show()
+		else
+			group:Hide()
+		end
+	end
+	
+	-- we probably added or removed an entry from this table, so re-sort it:
+	sort(GroupsToUpdate, group.ScriptSort)
+end
+
+local Group = TMW:NewClass("Group", "GroupParent")
+
 
 function Group.SetPos(group)
 	local groupID = group:GetID()
@@ -4152,75 +4242,145 @@ function Group.GetIconPos(group, iconID)
 	return (30 + Spacing)*(((iconID - 1) % Columns)), -(30 + Spacing)*(ceil(iconID / Columns)-1)
 end
 
-function Group.Setup(group)
+function Group.SetupChildren(group)
 	local groupID = group:GetID()
-
-	group.CorrectStance = true
-	group.__shown = group:IsShown()
-
-	for k, v in pairs(TMW.Group_Defaults) do
-		group[k] = db.profile.Groups[groupID][k]
-	end
-
-	group.FontTest = not Locked and group.FontTest
-
-	group:SetFrameLevel(group.Level)
-
-	if group:ShouldUpdateIcons() then
-		for iconID = 1, group.Rows * group.Columns do
-			local icon = group[iconID] or TMW.Classes.Icon:New("Button", "TellMeWhen_Group" .. groupID .. "_Icon" .. iconID, group, "TellMeWhen_IconTemplate", iconID)
-
-			icon:Show()
-			icon:SetFrameLevel(group:GetFrameLevel() + 1)
-
-			local x, y = group:GetIconPos(iconID)
-			icon.x, icon.y = x, y -- used for shakers
-			icon:SetPoint("TOPLEFT", x, y)
-
-			local success, err = pcall(icon.Setup, icon)
-			if not success then
-				TMW:Error(L["GROUPICON"]:format(groupID, iconID) .. ": " .. err)
-			end
-		end
-		for iconID = (group.Rows*group.Columns)+1, TELLMEWHEN_MAXROWS*TELLMEWHEN_MAXROWS do
-			local icon = group[iconID]
-			if icon then
-				icon:Hide()
-				ClearScripts(icon)
-			end
-		end
-	end
-
-	if Locked or group.Locked then
-		group.resizeButton:Hide()
-	else--if not (Locked or group.Locked) then
-		group.resizeButton:Show()
-	end
-
-	group:SetPos()
-	group:SortIcons()
-	group.shouldSortIcons = group.SortPriorities[1].Method ~= "id" and group:ShouldUpdateIcons() and group[2] and true
-
-	-- remove the group from the list of groups that should update conditions
-	tDeleteItem(GroupsToUpdate, group)
 	
-	if group:ShouldUpdateIcons() and Locked then
-		group:Show()
+	for iconID = 1, group.Rows * group.Columns do
+		local icon = group[iconID] or TMW.Classes.Icon:New("Button", "TellMeWhen_Group" .. groupID .. "_Icon" .. iconID, group, "TellMeWhen_IconTemplate", iconID)
 
-		-- process any conditions the group might have
-		GroupsToUpdate[#GroupsToUpdate+1] = group:Conditions_LoadData(group.Conditions) and group
-	else
-		if group:ShouldUpdateIcons() then
-			group:Show()
-		else
-			group:Hide()
+		icon:Show()
+		icon:SetFrameLevel(group:GetFrameLevel() + 1)
+
+		local x, y = group:GetIconPos(iconID)
+		icon.x, icon.y = x, y -- used for shakers
+		icon:SetPoint("TOPLEFT", x, y)
+
+		local success, err = pcall(icon.Setup, icon)
+		if not success then
+			TMW:Error(L["GROUPICON"]:format(groupID, iconID) .. ": " .. err)
 		end
 	end
-	
-	-- we probably added or removed an entry from this table, so re-sort it:
-	sort(GroupsToUpdate, Group.ScriptSort)
+	for iconID = (group.Rows*group.Columns)+1, TELLMEWHEN_MAXROWS*TELLMEWHEN_MAXROWS do
+		local icon = group[iconID]
+		if icon then
+			icon:Hide()
+			ClearScripts(icon)
+		end
+	end
 end
 
+
+local BarGroup = TMW:NewClass("BarGroup", "GroupParent")
+
+function BarGroup.SetPos(group)
+	local groupID = group:GetID()
+	local s = db.profile.Groups[groupID]
+	local p = s.Point
+	group:ClearAllPoints()
+	if p.relativeTo == "" then
+		p.relativeTo = "UIParent"
+	end
+	p.relativeTo = type(p.relativeTo) == "table" and p.relativeTo:GetName() or p.relativeTo
+	local relativeTo = _G[p.relativeTo]
+	if not relativeTo then
+		FramesToFind = FramesToFind or {}
+		FramesToFind[group] = p.relativeTo
+		group:SetPoint("CENTER", UIParent)
+	else
+		local success, err = pcall(group.SetPoint, group, p.point, relativeTo, p.relativePoint, p.x, p.y)
+		if not success and err:find("trying to anchor to itself") then
+			TMW:Error(err)
+			TMW:Print(L["ERROR_ANCHORSELF"]:format(L["fGROUP"]):format(TMW:GetGroupName(groupID, groupID, 1)))
+
+			p.relativeTo = "UIParent"
+			p.point = "CENTER"
+			p.relativePoint = "CENTER"
+			p.x = 0
+			p.y = 0
+
+			return group:SetPos()
+		end
+	end
+	group:SetScale(s.Scale)
+	local Spacing = s.Spacing
+	group:SetSize(s.Columns*(s.BarSizeX+Spacing)-Spacing, s.Rows*(s.BarSizeY+Spacing)-Spacing)
+	group:SetFrameStrata(s.Strata)
+	group:SetFrameLevel(s.Level)
+end
+
+function BarGroup.GetIconPos(group, iconID)
+	local Columns, Spacing = group.Columns, group.Spacing
+
+	--[[local row = ceil(iconID / Columns)
+    local column = 1
+	return (30 + Spacing)*(column-1), -(30 + Spacing)*(row-1)]]
+
+	return (group.BarSizeX + Spacing)*(((iconID - 1) % Columns)), -(group.BarSizeY + Spacing)*(ceil(iconID / Columns)-1)
+end
+
+function BarGroup.SetupChildren(group)
+	local groupID = group:GetID()
+	
+	for iconID = 1, group.Rows*group.Columns do
+		local icon = group[iconID] or TMW.Classes.Bar:New("Button", "TellMeWhen_Group" .. groupID .. "_Icon" .. iconID, group, "TellMeWhen_BarTemplate", iconID)
+
+		icon:Show()
+		icon:SetFrameLevel(group:GetFrameLevel() + 1)
+		
+		icon:SetSize(group.BarSizeX, group.BarSizeY)
+		
+		icon.iconDisplay:SetSize(group.BarSizeY, group.BarSizeY)
+
+		local x, y = group:GetIconPos(iconID)
+		icon.x, icon.y = x, y -- used for shakers
+		icon:SetPoint("TOPLEFT", x, y)
+
+		local success, err = pcall(icon.Setup, icon)
+		if not success then
+			TMW:Error(L["GROUPICON"]:format(groupID, iconID) .. ": " .. err)
+		end
+	end
+	for iconID = (group.Rows*group.Columns)+1, TELLMEWHEN_MAXROWS^2 do
+		local icon = group[iconID]
+		if icon then
+			icon:Hide()
+			ClearScripts(icon)
+		end
+	end
+end
+
+function BarGroup.SizeUpdate(resizeButton)
+	-- note that arg1 (self) is resizeButton
+	local group = resizeButton:GetParent()
+	local gs = group:GetSettings()
+	local uiScale = UIParent:GetScale()
+	local cursorX, cursorY = GetCursorPosition()
+
+    -- calculate & set new scale
+    local newYScale = group.oldScale * (cursorY/uiScale - group.oldY*group.oldScale) / (resizeButton.oldCursorY/uiScale - group.oldY*group.oldScale)
+    local newScale = max(0.25, newYScale)
+
+	group:SetScale(newScale)
+
+    -- calculate new bar width
+    local newWidth = max(25, ((((cursorX - resizeButton.oldCursorX - gs.Spacing)/uiScale + gs.Spacing)/gs.Columns + resizeButton.oldWidth * group.oldScale)/newScale))
+
+	-- calculate new frame position
+	local newX = group.oldX * group.oldScale / newScale
+	local newY = group.oldY * group.oldScale / newScale
+	group:ClearAllPoints()
+	group:SetPoint("TOPLEFT", UIParent, "BOTTOMLEFT", newX, newY)
+	
+	gs.BarSizeX = newWidth
+	
+	gs.Scale = group:GetScale()
+	local p = gs.Point
+	p.point, p.relativeTo, p.relativePoint, p.x, p.y = TMW:GetAnchoredPoints(group)
+	group:SetPos()
+	TMW.IE:NotifyChanges()
+	
+	group:Setup()
+end
 
 
 -- ------------------
@@ -4245,10 +4405,10 @@ end
 
 
 
-local PBar = TMW:NewClass("PBar", "StatusBar", "OverlayBar")
-PBar.updateTable = PBarsToUpdate
+local PBarParent = TMW:NewClass("PBarParent", "StatusBar", "OverlayBar")
+PBarParent.updateTable = PBarsToUpdate
 
-function PBar:OnNewInstance(...)
+function PBarParent:OnNewInstance(...)
 	local _, name, icon = ... -- the CreateFrame args
 	
 	self.Max = 1
@@ -4265,7 +4425,7 @@ function PBar:OnNewInstance(...)
 	self:SetStatusBarTexture(self.texture)
 end
 
-function PBar:SetAttributes(source)
+function PBarParent:SetAttributes(source)
 	-- source should either be a PBar or an Icon.
 	-- Code must maintain compatability so that both of these will work as input (keep inherited keys the same)
 	
@@ -4280,7 +4440,7 @@ function PBar:SetAttributes(source)
 	end
 end
 
-function PBar:Setup()
+function PBarParent:Setup()
 	local icon = self.icon	
 
 	self.texture:SetTexture(LSM:Fetch("statusbar", db.profile.TextureName))
@@ -4305,7 +4465,7 @@ function PBar:Setup()
 	end
 end
 
-function PBar:SetSpell(spell)
+function PBarParent:SetSpell(spell)
 	self.spell = spell
 	
 	if spell then
@@ -4338,7 +4498,7 @@ function PBar:SetSpell(spell)
 	end
 end
 
-function PBar:Update(power, powerTypeNum)
+function PBarParent:Update(power, powerTypeNum)
 	if not powerTypeNum then
 		powerTypeNum = self.powerType
 		power = UnitPower("player", powerTypeNum)
@@ -4370,10 +4530,10 @@ end
 
 
 
-local CBar = TMW:NewClass("CBar", "StatusBar", "OverlayBar")
-CBar.updateTable = CBarsToUpdate
+local CBarParent = TMW:NewClass("CBarParent", "StatusBar", "OverlayBar")
+CBarParent.updateTable = CBarsToUpdate
 
-function CBar:OnNewInstance(...)
+function CBarParent:OnNewInstance(...)
 	local _, name, icon = ... -- the CreateFrame args
 	
 	self.Max = 1
@@ -4385,16 +4545,14 @@ function CBar:OnNewInstance(...)
 	self.start = 0
 	self.duration = 0
 	
-	self:SetPoint("TOP", icon, "CENTER", 0, -0.5)
-	self:SetPoint("BOTTOMLEFT")
-	self:SetPoint("BOTTOMRIGHT")
+	self.anchorPoint = icon.texture
 	
 	self.texture = self:CreateTexture(nil, "OVERLAY")
 	self.texture:SetAllPoints()
 	self:SetStatusBarTexture(self.texture)
 end
 
-function CBar:SetAttributes(source)
+function CBarParent:SetAttributes(source)
 	-- source should either be a CBar or an Icon.
 	-- Code must maintain compatability so that both of these will work as input (keep inherited keys the same)
 	
@@ -4406,7 +4564,7 @@ function CBar:SetAttributes(source)
 	self.startColor = source.startColor or (source.typeData and source.typeData.CBS)
 	self.completeColor = source.completeColor or (source.typeData and source.typeData.CBC)
 	
-	if self.ShowCBar then
+	if self.ShowCBar or self.forceShown then
 		self:Show()
 	else
 		self:Hide()
@@ -4415,20 +4573,17 @@ function CBar:SetAttributes(source)
 	self:Update(1)
 end
 
-function CBar:Setup()
+function CBarParent:Setup()
 	local icon = self.icon
 	
 	self.texture:SetTexture(LSM:Fetch("statusbar", db.profile.TextureName))
 	
-	local blizzEdgeInsets = icon.group.barInsets or 0
-	self:SetPoint("TOP", icon.texture, "CENTER", 0, -0.5)
-	self:SetPoint("BOTTOMLEFT", icon.texture, "BOTTOMLEFT", blizzEdgeInsets, blizzEdgeInsets)
-	self:SetPoint("BOTTOMRIGHT", icon.texture, "BOTTOMRIGHT", -blizzEdgeInsets, blizzEdgeInsets)
+	self:Position()
 	
 	self:SetAttributes(icon)
 end
 
-function CBar:Update(force)
+function CBarParent:Update(force)
 	local ret = 0
 	
 	local value, doTerminate
@@ -4506,7 +4661,7 @@ function CBar:Update(force)
 	return ret
 end
 
-function CBar:SetCooldown(start, duration, isGCD)
+function CBarParent:SetCooldown(start, duration, isGCD)
 	self.duration = duration
 	self.start = start
 	
@@ -4527,11 +4682,22 @@ function CBar:SetCooldown(start, duration, isGCD)
 end
 
 
+local CBar = TMW:NewClass("CBar", "CBarParent")
+
+function CBar:Position()
+	local icon = self.icon
+	local blizzEdgeInsets = icon.group.barInsets or 0
+	self:SetPoint("TOP", icon.texture, "CENTER", 0, -0.5)
+	self:SetPoint("BOTTOMLEFT", icon.texture, "BOTTOMLEFT", blizzEdgeInsets, blizzEdgeInsets)
+	self:SetPoint("BOTTOMRIGHT", icon.texture, "BOTTOMRIGHT", -blizzEdgeInsets, blizzEdgeInsets)
+end
 
 
-local Icon = TMW:NewClass("Icon", "Button", "ConditionControlledObject", "AnimatedObject")
 
-function Icon.OnNewInstance(icon, ...)
+local IconParent = TMW:NewClass("IconParent", "Button", "ConditionControlledObject", "AnimatedObject")
+IconParent.IsIcon = true
+
+function IconParent.OnNewInstance_IconParent(icon, ...)
 	local _, name, group, _, iconID = ... -- the CreateFrame args
 
 	icon.group = group
@@ -4539,15 +4705,12 @@ function Icon.OnNewInstance(icon, ...)
 	group[iconID] = icon
 	CNDTEnv[name] = icon
 	tinsert(group.SortedIcons, icon)
-	
-	icon.pbar = PBar:New("StatusBar", name .. "PBar", icon)
-	icon.cbar = CBar:New("StatusBar", name .. "CBar", icon)
 
 	icon.__alpha = icon:GetAlpha()
 	icon.__tex = icon.texture:GetTexture()
 end
 
-function Icon.__lt(icon1, icon2)
+function IconParent.__lt(icon1, icon2)
 	local g1 = icon1.group:GetID()
 	local g2 = icon2.group:GetID()
 	if g1 ~= g2 then
@@ -4557,11 +4720,11 @@ function Icon.__lt(icon1, icon2)
 	end
 end
 
-function Icon.__tostring(icon)
+function IconParent.__tostring(icon)
 	return icon:GetName()
 end
 
-function Icon.ScriptSort(iconA, iconB)
+function IconParent.ScriptSort(iconA, iconB)
 	local gOrder = -db.profile.CheckOrder
 	local gA = iconA.group:GetID()
 	local gB = iconB.group:GetID()
@@ -4572,8 +4735,8 @@ function Icon.ScriptSort(iconA, iconB)
 	return gA*gOrder < gB*gOrder
 end
 
-Icon.setscript = Icon.SetScript
-function Icon.SetScript(icon, handler, func, dontnil)
+IconParent.setscript = IconParent.SetScript
+function IconParent.SetScript(icon, handler, func, dontnil)
 	if func ~= nil or not dontnil then
 		icon[handler] = func
 	end
@@ -4584,101 +4747,43 @@ function Icon.SetScript(icon, handler, func, dontnil)
 		if func then
 			IconsToUpdate[#IconsToUpdate+1] = icon
 		end
-		sort(IconsToUpdate, Icon.ScriptSort)
+		sort(IconsToUpdate, icon.ScriptSort)
 	end
 end
 
-Icon.registerevent = Icon.RegisterEvent
-function Icon.RegisterEvent(icon, event)
+IconParent.registerevent = IconParent.RegisterEvent
+function IconParent.RegisterEvent(icon, event)
 	icon:registerevent(event)
 	icon.hasEvents = 1
 end
 
-function Icon.GetTooltipTitle(icon)
-	local groupID = icon:GetParent():GetID()
-	local line1 = L["ICON_TOOLTIP1"] .. " " .. format(L["GROUPICON"], TMW:GetGroupName(groupID, groupID, 1), icon:GetID())
-	if icon:GetParent().Locked then
-		line1 = line1 .. " (" .. L["LOCKED"] .. ")"
-	end
-	return line1
-end
-
-function Icon.GetSettings(icon)
+function IconParent.GetSettings(icon)
 	return db.profile.Groups[icon.group:GetID()].Icons[icon:GetID()]
 end
 
-function Icon.IsBeingEdited(icon)
+function IconParent.IsBeingEdited(icon)
 	if TMW.IE and TMW.CI.ic == icon and TMW.IE.CurrentTab and TMW.IE:IsVisible() then
 		return TMW.IE.CurrentTab:GetID()
 	end
 end
 
-
-function Icon.QueueEvent(icon, event, data)
+function IconParent.QueueEvent(icon, event, data)
 	icon.EventsToFire[event] = data or true
 	icon.eventIsQueued = true
 end
 
-function Icon.ProcessQueuedEvents(icon)
-	if icon.EventsToFire and icon.eventIsQueued then
-		for _, Module in EVENTS:IterateModules() do
-			for i = 1, #TMW.EventList do
-				local event = TMW.EventList[i].name
-				local data = icon[event]
-				local doFireAndData = icon.EventsToFire[event]
-				if data and doFireAndData then
-
-					if data.OnlyShown and icon.__alpha <= 0 then
-						doFireAndData = false
-
-						-- the same test is preformed for all modules,
-						-- so we can save the result of it within the module iteration without adverse effects
-						-- it actually results an a performance increase.
-						icon.EventsToFire[event] = doFireAndData
-
-					elseif data.PassingCndt and isNumber[doFireAndData] then
-						doFireAndData = CompareFuncs[data.Operator](doFireAndData, data.Value)
-						if data.CndtJustPassed then
-							if doFireAndData ~= data.wasPassingCondition then
-								data.wasPassingCondition = doFireAndData
-							else
-								doFireAndData = false
-							end
-						end
-
-						-- the same test is preformed for all modules...
-						icon.EventsToFire[event] =  doFireAndData
-					end
-
-
-					if doFireAndData and runEvents then
-						local handled = Module:HandleEvent(icon, data)
-						if handled and not data.PassThrough then
-							break
-						end
-					end
-				end
-			end
-		end
-
-		wipe(icon.EventsToFire)
-		icon.eventIsQueued = nil
-	end
-end
-
-
-function Icon.IsValid(icon)
+function IconParent.IsValid(icon)
 	-- checks if the icon should be in the list of icons that can be checked in metas/conditions
 	
 	return icon.Enabled and icon.group:ShouldUpdateIcons()
 end
 
 
-Icon.Update_Method = "auto"
-function Icon.SetUpdateMethod(icon, method)
-	if db.profile.DEBUG_ForceAutoUpdate then
+IconParent.Update_Method = "auto"
+function IconParent.SetUpdateMethod(icon, method)
+	--[[if db.profile.DEBUG_ForceAutoUpdate then
 		method = "auto"
-	end
+	end]]
 	
 	icon.Update_Method = method
 	
@@ -4691,8 +4796,8 @@ function Icon.SetUpdateMethod(icon, method)
 	end
 end
 
-Icon.NextUpdateTime = huge
-function Icon.ScheduleNextUpdate(icon)
+IconParent.NextUpdateTime = huge
+function IconParent.ScheduleNextUpdate(icon)
 	local d = icon.__duration - (time - icon.__start)
 	if d < 0 then d = 0 end
 	
@@ -4730,57 +4835,19 @@ function Icon.ScheduleNextUpdate(icon)
 	--return nextUpdateTime
 end
 
-
-
-function Icon.Update(icon, force, ...)
-	
-	if icon.__shown and (force or icon.LastUpdate <= time - UPD_INTV) then
-		local Update_Method = icon.Update_Method
-		icon.LastUpdate = time
-
-		local iconUpdateNeeded = force or Update_Method == "auto" or icon.NextUpdateTime < time
-		
-		local ConditionObj = icon.ConditionObj
-		if ConditionObj then
-			if ConditionObj.UpdateNeeded or ConditionObj.NextUpdateTime < time then
-				ConditionObj:Check(icon)
-				iconUpdateNeeded = iconUpdateNeeded or ConditionObj.LastCheckFailed ~= ConditionObj.Failed
-			elseif ConditionObj.LastUpdateTime == time then
-				iconUpdateNeeded = true
-			end
-			
-			if not icon.dontHandleConditionsExternally and not icon.hasEventHandlers and ConditionObj.Failed and (icon.ConditionAlpha or 0) == 0 then
-				if icon.__alpha ~= 0 then
-					icon:SetInfo(0)
-				end
-				return
-			end
-		end
-
-		if iconUpdateNeeded then
-			icon:OnUpdate(time, ...)
-			if Update_Method == "manual" then
-				icon:ScheduleNextUpdate()
-			end
-		end
-
-	--[[	-- RE-CREATE CHECK AFTER IF YOU WANT IT BACK, BECAUSE FOR NOW, ITS DEAD]]
-	end
-end
-
-function Icon.SetTexture(icon, tex)
+function IconParent.SetTexture(icon, tex)
 	--if icon.__tex ~= tex then ------dont check for this, checking is done before this method is even called
 	tex = icon.OverrideTex or tex
 	icon.__tex = tex
 	icon.texture:SetTexture(tex)
 end
 
-function Icon.SetReverse(icon, reverse)
+function IconParent.SetReverse(icon, reverse)
 	icon.__reverse = reverse
 	icon.cooldown:SetReverse(reverse)
 end
 
-function Icon.ForceSetAlpha(icon, alpha)
+function IconParent.ForceSetAlpha(icon, alpha)
 	icon.__alpha = alpha
 	local oldalpha = icon:GetAlpha()-- For ICONFADE. much nicer than using __alpha because it will transition from what is curently visible, not what should be visible after any current fades end
 	icon.__oldAlpha = oldalpha
@@ -4788,8 +4855,7 @@ function Icon.ForceSetAlpha(icon, alpha)
 	icon:SetAlpha(alpha)
 end
 
-
-function Icon.CrunchColor(icon, duration, inrange, nomana)
+function IconParent.CrunchColor(icon, duration, inrange, nomana)
 --[[
 	CBC = 	{r=0,	g=1,	b=0		},	-- cooldown bar complete
 	CBS = 	{r=1,	g=0,	b=0		},	-- cooldown bar start
@@ -4842,7 +4908,49 @@ function Icon.CrunchColor(icon, duration, inrange, nomana)
 	return icon.typeData[s]
 end
 
-function Icon.SetInfo(icon, alpha, color, texture, start, duration, spellChecked, reverse, count, countText, forceupdate, unit)
+function IconParent.FinishCompilingConditions(icon, funcstr)
+	return funcstr
+end
+
+
+function IconParent.Update(icon, force, ...)
+	
+	if icon.__shown and (force or icon.LastUpdate <= time - UPD_INTV) then
+		local Update_Method = icon.Update_Method
+		icon.LastUpdate = time
+
+		local iconUpdateNeeded = force or Update_Method == "auto" or icon.NextUpdateTime < time
+		
+		local ConditionObj = icon.ConditionObj
+		if ConditionObj then
+			if ConditionObj.UpdateNeeded or ConditionObj.NextUpdateTime < time then
+				ConditionObj:Check(icon)
+				iconUpdateNeeded = iconUpdateNeeded or ConditionObj.LastCheckFailed ~= ConditionObj.Failed
+			elseif ConditionObj.LastUpdateTime == time then
+				iconUpdateNeeded = true
+			end
+			
+			if not icon.dontHandleConditionsExternally and not icon.hasEventHandlers and ConditionObj.Failed and (icon.ConditionAlpha or 0) == 0 then
+				if icon.__alpha ~= 0 then
+					icon:SetInfo(0)
+				end
+				return
+			end
+		end
+
+		if iconUpdateNeeded then
+			icon:OnUpdate(time, ...)
+			if Update_Method == "manual" then
+				icon:ScheduleNextUpdate()
+			end
+		end
+
+	--[[	-- RE-CREATE CHECK AFTER IF YOU WANT IT BACK, BECAUSE FOR NOW, ITS DEAD]]
+	end
+end
+
+-- i doubt that this one can stay here, but might as well try it for now.
+function IconParent.SetInfo(icon, alpha, color, texture, start, duration, spellChecked, reverse, count, countText, forceupdate, unit)
 	--[[
 	 icon			- the icon object to set the attributes on (frame) (but call as icon:SetInfo(alpha, ...))
 	[alpha]			- the alpha to set the icon to (number); (nil) defaults to 0
@@ -5025,7 +5133,7 @@ function Icon.SetInfo(icon, alpha, color, texture, start, duration, spellChecked
 		end
 
 		local cbar = icon.cbar
-		if cbar.ShowCBar then
+		if cbar.ShowCBar or cbar.forceShown then
 			cbar:SetCooldown(start, duration, isGCD)
 		end
 
@@ -5122,31 +5230,7 @@ function Icon.SetInfo(icon, alpha, color, texture, start, duration, spellChecked
 end
 
 
-function Icon.FinishCompilingConditions(icon, funcstr)
-	return funcstr
-end
-
-
-
-function Icon.SetupText(icon, fontString, settings)
-	fontString:SetWidth(settings.ConstrainWidth and icon.texture:GetWidth() or 0)
-	fontString:SetFont(LSM:Fetch("font", settings.Name), settings.Size, settings.Outline)
-
-	if LMB then
-		if settings.OverrideLBFPos then
-			fontString:ClearAllPoints()
-			local func = fontString.__MSQ_SetPoint or fontString.SetPoint
-			func(fontString, settings.point, icon, settings.relativePoint, settings.x, settings.y)
-
-			fontString:SetJustifyH(settings.point:match("LEFT") or settings.point:match("RIGHT") or "CENTER")
-		end
-	else
-		fontString:ClearAllPoints()
-		fontString:SetPoint(settings.point, icon, settings.relativePoint, settings.x, settings.y)
-	end
-end
-
-function Icon.Setup(icon)
+function IconParent.Setup(icon)
 	if not icon or not icon[0] then return end
 
 	local iconID = icon:GetID()
@@ -5236,36 +5320,14 @@ function Icon.Setup(icon)
 	cd.noCooldownCount = not icon.ShowTimerText
 	cd:SetDrawEdge(db.profile.DrawEdge)
 	icon:SetReverse(false)
+	
+	local pbar = icon.pbar
+	local cbar = icon.cbar
+	icon:Setup_Bars()
 
 
 	-- Masque skinning
-	local isDefault
-	icon.normaltex = icon.__MSQ_NormalTexture or icon:GetNormalTexture()
-	if LMB then
-		local lmbGroup = LMB:Group("TellMeWhen", format(L["fGROUP"], groupID))
-		lmbGroup:AddButton(icon)
-		group.SkinID = lmbGroup.SkinID or (lmbGroup.db and lmbGroup.db.SkinID)
-		if lmbGroup.Disabled or (lmbGroup.db and lmbGroup.db.Disabled) then
-			group.SkinID = "Blizzard"
-			if not icon.normaltex:GetTexture() then
-				isDefault = 1
-			end
-		end
-	else
-		isDefault = 1
-	end
-
-	if isDefault then
-		group.barInsets = 1.5
-		cd:SetFrameLevel(icon:GetFrameLevel() + 1)
-		icon.cbar:SetFrameLevel(icon:GetFrameLevel() + 2)
-		icon.pbar:SetFrameLevel(icon:GetFrameLevel() + 2)
-	else
-		group.barInsets = 0
-		cd:SetFrameLevel(icon:GetFrameLevel() + -2)
-		icon.cbar:SetFrameLevel(icon:GetFrameLevel() + -1)
-		icon.pbar:SetFrameLevel(icon:GetFrameLevel() + -1)
-	end
+	icon:Setup_LMB()
 
 	--reset things
 	--icon:SetInfo(alpha, color, texture, start, duration, spellChecked, reverse, count, countText, forceupdate, unit)
@@ -5334,19 +5396,6 @@ function Icon.Setup(icon)
 			TMW.HELP:Hide("ICON_DURS_MISSING")
 		end
 	end
-
-	local pbar = icon.pbar
-	local cbar = icon.cbar
-	pbar:Setup()
-	cbar:Setup()
-	cbar.__value = nil
-	pbar.__value = nil
-	
-	cbar:UnregisterForUpdates()
-	if db.profile.Locked and icon.ShowCBar then
-		cbar:RegisterForUpdates()
-	end
-	updatePBars = 1
 	
 	icon:Show()
 
@@ -5397,6 +5446,286 @@ function Icon.Setup(icon)
 	TMW:Fire("TMW_ICON_SETUP", icon)
 	--TMW:Fire("TMW_ICON_UPDATED", icon)
 end
+
+function IconParent.Setup_LMB(icon)
+
+	local isDefault
+	icon.normaltex = icon.__MSQ_NormalTexture or icon:GetNormalTexture()
+	if LMB then
+		local lmbGroup = LMB:Group("TellMeWhen", format(L["fGROUP"], icon.group:GetID()))
+		lmbGroup:AddButton(icon)
+		icon.group.SkinID = lmbGroup.SkinID or (lmbGroup.db and lmbGroup.db.SkinID)
+		if lmbGroup.Disabled or (lmbGroup.db and lmbGroup.db.Disabled) then
+			icon.group.SkinID = "Blizzard"
+			if not icon.normaltex:GetTexture() then
+				isDefault = 1
+			end
+		end
+	else
+		isDefault = 1
+	end
+
+	if isDefault then
+		icon.group.barInsets = 1.5
+		icon.cooldown:SetFrameLevel(icon:GetFrameLevel() + 1)
+		icon.cbar:SetFrameLevel(icon:GetFrameLevel() + 2)
+		icon.pbar:SetFrameLevel(icon:GetFrameLevel() + 2)
+	else
+		icon.group.barInsets = 0
+		icon.cooldown:SetFrameLevel(icon:GetFrameLevel() + -2)
+		icon.cbar:SetFrameLevel(icon:GetFrameLevel() + -1)
+		icon.pbar:SetFrameLevel(icon:GetFrameLevel() + -1)
+	end
+end
+
+function IconParent.Setup_Bars(icon)
+	local pbar = icon.pbar
+	local cbar = icon.cbar
+	pbar:Setup()
+	cbar:Setup()
+	cbar.__value = nil
+	pbar.__value = nil
+	
+	cbar:UnregisterForUpdates()
+	if db.profile.Locked and icon.ShowCBar then
+		cbar:RegisterForUpdates()
+	end
+	updatePBars = 1
+end
+
+
+local Icon = TMW:NewClass("Icon", "IconParent")
+
+function Icon.OnNewInstance(icon, ...)
+	local _, name, group, _, iconID = ... -- the CreateFrame args
+	
+	icon.pbar = PBarParent:New("StatusBar", name .. "PBar", icon)
+	icon.cbar = CBar:New("StatusBar", name .. "CBar", icon)
+end
+
+
+function Icon.GetTooltipTitle(icon)
+	local groupID = icon:GetParent():GetID()
+	local line1 = L["ICON_TOOLTIP1"] .. " " .. format(L["GROUPICON"], TMW:GetGroupName(groupID, groupID, 1), icon:GetID())
+	if icon:GetParent().Locked then
+		line1 = line1 .. " (" .. L["LOCKED"] .. ")"
+	end
+	return line1
+end
+
+function Icon.ProcessQueuedEvents(icon)
+	if icon.EventsToFire and icon.eventIsQueued then
+		for _, Module in EVENTS:IterateModules() do
+			for i = 1, #TMW.EventList do
+				local event = TMW.EventList[i].name
+				local data = icon[event]
+				local doFireAndData = icon.EventsToFire[event]
+				if data and doFireAndData then
+
+					if data.OnlyShown and icon.__alpha <= 0 then
+						doFireAndData = false
+
+						-- the same test is preformed for all modules,
+						-- so we can save the result of it within the module iteration without adverse effects
+						-- it actually results an a performance increase.
+						icon.EventsToFire[event] = doFireAndData
+
+					elseif data.PassingCndt and isNumber[doFireAndData] then
+						doFireAndData = CompareFuncs[data.Operator](doFireAndData, data.Value)
+						if data.CndtJustPassed then
+							if doFireAndData ~= data.wasPassingCondition then
+								data.wasPassingCondition = doFireAndData
+							else
+								doFireAndData = false
+							end
+						end
+
+						-- the same test is preformed for all modules...
+						icon.EventsToFire[event] =  doFireAndData
+					end
+
+
+					if doFireAndData and runEvents then
+						local handled = Module:HandleEvent(icon, data)
+						if handled and not data.PassThrough then
+							break
+						end
+					end
+				end
+			end
+		end
+
+		wipe(icon.EventsToFire)
+		icon.eventIsQueued = nil
+	end
+end
+
+
+function Icon.SetupText(icon, fontString, settings)
+	fontString:SetWidth(settings.ConstrainWidth and icon.texture:GetWidth() or 0)
+	fontString:SetFont(LSM:Fetch("font", settings.Name), settings.Size, settings.Outline)
+
+	if LMB then
+		if settings.OverrideLBFPos then
+			fontString:ClearAllPoints()
+			local func = fontString.__MSQ_SetPoint or fontString.SetPoint
+			func(fontString, settings.point, icon, settings.relativePoint, settings.x, settings.y)
+
+			fontString:SetJustifyH(settings.point:match("LEFT") or settings.point:match("RIGHT") or "CENTER")
+		end
+	else
+		fontString:ClearAllPoints()
+		fontString:SetPoint(settings.point, icon, settings.relativePoint, settings.x, settings.y)
+	end
+end
+
+
+local BarCBar = TMW:NewClass("BarCBar", "CBarParent")
+BarCBar.forceShown = true
+function BarCBar:Position()
+	local icon = self.icon
+	self:SetPoint("TOPLEFT", icon.texture, "TOPRIGHT")
+	self:SetPoint("BOTTOMRIGHT")
+end
+
+
+
+local Bar = TMW:NewClass("Bar", "IconParent")
+
+function Bar.OnNewInstance(icon, ...)
+	local _, name, group, _, iconID = ... -- the CreateFrame args
+	
+	icon.iconDisplay:EnableMouse(0)
+	
+	icon.pbar = PBarParent:New("StatusBar", name .. "PBar", icon)
+	
+	icon.cbar = BarCBar:New("StatusBar", name .. "CBar", icon)	
+end
+
+
+function Bar.GetTooltipTitle(icon)
+	local groupID = icon:GetParent():GetID()
+	local line1 = L["ICON_TOOLTIP1"] .. " " .. format(L["GROUPICON"], TMW:GetGroupName(groupID, groupID, 1), icon:GetID())
+	if icon:GetParent().Locked then
+		line1 = line1 .. " (" .. L["LOCKED"] .. ")"
+	end
+	return line1
+end
+
+function Bar.ProcessQueuedEvents(icon)
+	if icon.EventsToFire and icon.eventIsQueued then
+		for _, Module in EVENTS:IterateModules() do
+			for i = 1, #TMW.EventList do
+				local event = TMW.EventList[i].name
+				local data = icon[event]
+				local doFireAndData = icon.EventsToFire[event]
+				if data and doFireAndData then
+
+					if data.OnlyShown and icon.__alpha <= 0 then
+						doFireAndData = false
+
+						-- the same test is preformed for all modules,
+						-- so we can save the result of it within the module iteration without adverse effects
+						-- it actually results an a performance increase.
+						icon.EventsToFire[event] = doFireAndData
+
+					elseif data.PassingCndt and isNumber[doFireAndData] then
+						doFireAndData = CompareFuncs[data.Operator](doFireAndData, data.Value)
+						if data.CndtJustPassed then
+							if doFireAndData ~= data.wasPassingCondition then
+								data.wasPassingCondition = doFireAndData
+							else
+								doFireAndData = false
+							end
+						end
+
+						-- the same test is preformed for all modules...
+						icon.EventsToFire[event] =  doFireAndData
+					end
+
+
+					if doFireAndData and runEvents then
+						local handled = Module:HandleEvent(icon, data)
+						if handled and not data.PassThrough then
+							break
+						end
+					end
+				end
+			end
+		end
+
+		wipe(icon.EventsToFire)
+		icon.eventIsQueued = nil
+	end
+end
+
+
+function Bar.SetupText(icon, fontString, settings)
+	fontString:SetWidth(settings.ConstrainWidth and icon.texture:GetWidth() or 0)
+	fontString:SetFont(LSM:Fetch("font", settings.Name), settings.Size, settings.Outline)
+
+	if LMB then
+		if settings.OverrideLBFPos then
+			fontString:ClearAllPoints()
+			local func = fontString.__MSQ_SetPoint or fontString.SetPoint
+			func(fontString, settings.point, icon, settings.relativePoint, settings.x, settings.y)
+
+			fontString:SetJustifyH(settings.point:match("LEFT") or settings.point:match("RIGHT") or "CENTER")
+		end
+	else
+		fontString:ClearAllPoints()
+		fontString:SetPoint(settings.point, icon, settings.relativePoint, settings.x, settings.y)
+	end
+end
+
+function Bar.Setup_Bars(icon)
+	local pbar = icon.pbar
+	local cbar = icon.cbar
+	--icon.ShowCBar = true
+	--icon.ShowPBar = false
+	pbar:Setup()
+	cbar:Setup()
+	cbar.__value = nil
+	pbar.__value = nil
+	
+	cbar:UnregisterForUpdates()
+	if db.profile.Locked --[[and icon.ShowCBar]] then
+		cbar:RegisterForUpdates()
+	end
+	updatePBars = 1
+end
+
+function Bar.Setup_LMB(icon)
+
+	local isDefault
+	icon.normaltex = icon.__MSQ_NormalTexture or icon:GetNormalTexture()
+	if LMB then
+		local lmbGroup = LMB:Group("TellMeWhen", format(L["fGROUP"], icon.group:GetID()))
+		lmbGroup:AddButton(icon.iconDisplay)
+		icon.group.SkinID = lmbGroup.SkinID or (lmbGroup.db and lmbGroup.db.SkinID)
+		if lmbGroup.Disabled or (lmbGroup.db and lmbGroup.db.Disabled) then
+			icon.group.SkinID = "Blizzard"
+			if not icon.normaltex:GetTexture() then
+				isDefault = 1
+			end
+		end
+	else
+		isDefault = 1
+	end
+
+	if isDefault then
+		icon.group.barInsets = 1.5
+		icon.cooldown:SetFrameLevel(icon:GetFrameLevel() + 1)
+		icon.cbar:SetFrameLevel(icon:GetFrameLevel() + 2)
+		icon.pbar:SetFrameLevel(icon:GetFrameLevel() + 2)
+	else
+		icon.group.barInsets = 0
+		icon.cooldown:SetFrameLevel(icon:GetFrameLevel() + -2)
+		icon.cbar:SetFrameLevel(icon:GetFrameLevel() + -1)
+		icon.pbar:SetFrameLevel(icon:GetFrameLevel() + -1)
+	end
+end
+
 
 
 

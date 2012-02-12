@@ -2458,7 +2458,7 @@ CNDT.Types = {
 
 			local g, i = strmatch(c.Icon, "TellMeWhen_Group(%d+)_Icon(%d+)")
 			g, i = tonumber(g) or 0, tonumber(i) or 0
-			if icon.class == TMW.Classes.Icon then
+			if icon.IsIcon then
 				TMW:QueueValidityCheck(c.Icon, icon.group:GetID(), icon:GetID(), g, i)
 			else
 				TMW:QueueValidityCheck(c.Icon, icon:GetID(), nil, g, i)

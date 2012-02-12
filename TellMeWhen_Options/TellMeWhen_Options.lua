@@ -449,7 +449,7 @@ local function AddDropdownSpacer()
 end
 
 function TMW:SetIconPreviewIcon(icon)
-	if not icon or icon.class ~= TMW.Classes.Icon then
+	if not icon or not icon.IsIcon then
 		self:Hide()
 		return
 	end
@@ -841,7 +841,7 @@ local groupConfigTemplate = {
 					name = L["UIPANEL_ONLYINCOMBAT"],
 					desc = L["UIPANEL_TOOLTIP_ONLYINCOMBAT"],
 					type = "toggle",
-					order = 3,
+					order = 4,
 				},
 				PrimarySpec = {
 					name = L["UIPANEL_PRIMARYSPEC"],
@@ -884,6 +884,37 @@ local groupConfigTemplate = {
 					softMax = 20,
 					step = 0.1,
 					bigStep = 1,
+				},
+				Type = {
+					name = L["UIPANEL_GROUPTYPE"],
+					desc = L["UIPANEL_GROUPTYPE_DESC"],
+					type = "group",
+					dialogInline = true,
+					guiInline = true,
+					order = 23,
+					get = function(info)
+						local g = findid(info)
+						return db.profile.Groups[g][info[#info-1]] == info[#info]
+					end,
+					set = function(info)
+						local g = findid(info)
+						db.profile.Groups[g][info[#info-1]] = info[#info]
+						TMW[g]:Setup()
+					end,
+					args = {
+						icon = {
+							name = L["UIPANEL_GROUPTYPE_ICON"],
+							desc = L["UIPANEL_GROUPTYPE_ICON_DESC"],
+							type = "toggle",
+							order = 1,
+						},
+						bar = {
+							name = L["UIPANEL_GROUPTYPE_BAR"],
+							desc = L["UIPANEL_GROUPTYPE_BAR_DESC"],
+							type = "toggle",
+							order = 2,
+						},
+					}
 				},
 				CheckOrder = {
 					name = L["CHECKORDER"],
@@ -1338,6 +1369,7 @@ function TMW:CompileOptions()
 									desc = "TMW v5 introduced new code that manages updates much more efficiently, only updating icons when they need to be updated. Check this to disable this feature in order to compare between the old method and the new method to see if there are any discrepancies that may be indicative of a bug.",
 									type = "toggle",
 									order = 1,
+									hidden = true,
 								},
 								BarGCD = {
 									name = L["UIPANEL_BARIGNOREGCD"],
@@ -1508,7 +1540,7 @@ end
 
 ---------- Position ----------
 local Ruler = CreateFrame("Frame")
-local function GetAnchoredPoints(group)
+function TMW:GetAnchoredPoints(group)
 	local p = TMW.db.profile.Groups[group:GetID()].Point
 
 	local relframe = _G[p.relativeTo] or UIParent
@@ -1529,31 +1561,14 @@ local function GetAnchoredPoints(group)
 	return point, relframe:GetName(), relativePoint, -X, Y
 end
 
-local function Group_SizeUpdate(resizeButton)
-	local uiScale = UIParent:GetScale()
-	local group = resizeButton:GetParent()
-	local cursorX, cursorY = GetCursorPosition()
-
-	-- calculate new scale
-	local newXScale = group.oldScale * (cursorX/uiScale - group.oldX*group.oldScale) / (resizeButton.oldCursorX/uiScale - group.oldX*group.oldScale)
-	local newYScale = group.oldScale * (cursorY/uiScale - group.oldY*group.oldScale) / (resizeButton.oldCursorY/uiScale - group.oldY*group.oldScale)
-	local newScale = max(0.6, newXScale, newYScale)
-	group:SetScale(newScale)
-
-	-- calculate new frame position
-	local newX = group.oldX * group.oldScale / newScale
-	local newY = group.oldY * group.oldScale / newScale
-	group:ClearAllPoints()
-	group:SetPoint("TOPLEFT", UIParent, "BOTTOMLEFT", newX, newY)
-end
-
 function TMW:Group_StartSizing(resizeButton)
 	local group = resizeButton:GetParent()
 	group.oldScale = group:GetScale()
 	resizeButton.oldCursorX, resizeButton.oldCursorY = GetCursorPosition(UIParent)
 	group.oldX = group:GetLeft()
 	group.oldY = group:GetTop()
-	resizeButton:SetScript("OnUpdate", Group_SizeUpdate)
+    resizeButton.oldWidth = group:GetSettings().BarSizeX
+	resizeButton:SetScript("OnUpdate", group.SizeUpdate)
 end
 
 function TMW:Group_StopSizing(resizeButton)
@@ -1561,7 +1576,7 @@ function TMW:Group_StopSizing(resizeButton)
 	local group = resizeButton:GetParent()
 	db.profile.Groups[group:GetID()].Scale = group:GetScale()
 	local p = db.profile.Groups[group:GetID()].Point
-	p.point, p.relativeTo, p.relativePoint, p.x, p.y = GetAnchoredPoints(group)
+	p.point, p.relativeTo, p.relativePoint, p.x, p.y = TMW:GetAnchoredPoints(group)
 	group:SetPos()
 	IE:NotifyChanges()
 end
@@ -1570,7 +1585,7 @@ function TMW:Group_StopMoving(group)
 	group:StopMovingOrSizing()
 	ID.isMoving = nil
 	local p = db.profile.Groups[group:GetID()].Point
-	p.point, p.relativeTo, p.relativePoint, p.x, p.y = GetAnchoredPoints(group)
+	p.point, p.relativeTo, p.relativePoint, p.x, p.y = TMW:GetAnchoredPoints(group)
 	group:SetPos()
 	IE:NotifyChanges()
 end
@@ -1685,7 +1700,7 @@ function ID:TextureDragReceived(icon, t, data, subType)
 end
 
 function ID:SpellItemToIcon(icon, func, arg1)
-	if icon.class ~= TMW.Classes.Icon then
+	if not icon.IsIcon then
 		return
 	end
 
@@ -1860,7 +1875,7 @@ function ID:CompleteDrag(script, icon)
 	-- icon here is the destination
 	if ID.IsDragging then
 
-		if type(icon) == "table" and icon.class == TMW.Classes.Icon then -- if the frame that got the drag is an icon, set the destination stuff.
+		if type(icon) == "table" and icon.IsIcon then -- if the frame that got the drag is an icon, set the destination stuff.
 
 			ID.desticon = icon
 			ID.destFrame = nil
@@ -3832,7 +3847,7 @@ end
 ---------- Dropdown ----------
 function IE:Copy_DropDown_Icon_OnClick(ics, version)
 	-- self.value is the icon (maybe, if it's a string then we aren't importing from an icon in the current profile)
-	if type(self.value) == "table" and self.value.class == TMW.Classes.Icon and self.value:IsVisible() then
+	if type(self.value) == "table" and self.value.IsIcon and self.value:IsVisible() then
 		TMW.HELP:Show("ICON_IMPORT_CURRENTPROFILE", nil, IE.ExportBox, 0, 0, L["HELP_IMPORT_CURRENTPROFILE"])
 	end
 	TMW[CI.g][CI.i]:SetTexture(nil)
@@ -7771,7 +7786,7 @@ function CNDT:DeleteCondition(Conditions, n)
 end
 
 
----------- Group Class ----------
+---------- CndtGroup Class ----------
 CndtGroup = TMW:NewClass("CndtGroup", "Frame")
 
 function CndtGroup.OnNewInstance(group)

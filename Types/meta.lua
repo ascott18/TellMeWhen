@@ -308,7 +308,9 @@ function Type:TMW_ICON_SETUP(event, icon)
 	else
 		if not Locked then
 			-- meta icons shouln't show bars in config, even though they are force enabled.
-			icon.cbar:SetValue(0)
+			if icon.class ~= TMW.Classes.Bar then
+				icon.cbar:SetValue(0)
+			end
 			icon.pbar:SetValue(0)
 		end
 	end
