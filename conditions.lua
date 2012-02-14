@@ -1440,7 +1440,7 @@ CNDT.Types = {
 		icon = "Interface\\CHARACTERFRAME\\UI-StateIcon",
 		tcoords = {0.0625, 0.453125, 0.046875, 0.421875},
 		funcstr = [[c.1nil == IsResting()]],
-		events = "PLAYER_UPDATE_RESTING",
+		events = function() return "PLAYER_UPDATE_RESTING", "PLAYER_ENTERING_WORLD" end,
 	},
 	{ -- stance
 		text = 	pclass == "HUNTER" and L["ASPECT"] or
