@@ -398,7 +398,7 @@ L["UIPANEL_SUBTEXT2"] = "Icons work when locked. When unlocked, you can move/siz
 L["UIPANEL_MAINOPT"] = "Main Options"
 L["UIPANEL_GROUPS"] = "Groups"
 L["UIPANEL_GROUPS_DESC"] = "Settings for each group in this TellMeWhen profile."
-L["UIPANEL_GROUPTYPE"] = "Group Display Method"
+--[[L["UIPANEL_GROUPTYPE"] = "Group Display Method"
 L["UIPANEL_GROUPTYPE_DESC"] = "Choose how you would like icons within this group to be displayed."
 L["UIPANEL_GROUPTYPE_ICON"] = "Icon"
 L["UIPANEL_GROUPTYPE_ICON_DESC"] = [[Displays the icons in the group using TellMeWhen's traditional icon display.
@@ -407,7 +407,7 @@ IMPORTANT: Changing the type of a group requires a UI reload in order for the ch
 L["UIPANEL_GROUPTYPE_BAR"] = "Bar"
 L["UIPANEL_GROUPTYPE_BAR_DESC"] = [[Displays the icons in the group with progress bars attached to the icons.
 
-IMPORTANT: Changing the type of a group requires a UI reload in order for the changes to take effect.]]
+IMPORTANT: Changing the type of a group requires a UI reload in order for the changes to take effect.]]]]
 L["UIPANEL_ICONS"] = "Icons"
 L["UIPANEL_COLORS"] = "Colors"
 L["UIPANEL_COLORS_DESC"] = "Settings that control the coloring/tinting of icons based on their attributes."

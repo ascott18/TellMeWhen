@@ -885,7 +885,7 @@ local groupConfigTemplate = {
 					step = 0.1,
 					bigStep = 1,
 				},
-				Type = {
+				--[==[Type = {
 					name = L["UIPANEL_GROUPTYPE"],
 					desc = L["UIPANEL_GROUPTYPE_DESC"],
 					type = "group",
@@ -915,7 +915,7 @@ local groupConfigTemplate = {
 							order = 2,
 						},
 					}
-				},
+				},]==]
 				CheckOrder = {
 					name = L["CHECKORDER"],
 					desc = L["CHECKORDER_ICONDESC"],

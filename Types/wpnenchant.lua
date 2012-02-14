@@ -152,6 +152,8 @@ end
 local function WpnEnchant_OnEvent(icon, event, unit)
 	-- this function must be declared after _OnUpdate because it references _OnUpdate from inside it.
 	if not unit or unit == "player" then -- (not unit) covers calls from the timers set below
+		icon.NextUpdateTime = 0
+		
 		local Slot = icon.Slot
 
 		local EnchantName = GetWeaponEnchantName(Slot)
@@ -166,8 +168,8 @@ local function WpnEnchant_OnEvent(icon, event, unit)
 			-- we couldn't get an enchant name.
 			-- Either we checked too early, or there is no enchant.
 			-- Assume that we checked too early, and check again in a little bit.
-			-- We check that unit is defined because if we are calling from a timer, it will be false, and we dont want to endlessly chain timers.
-			-- A single func calling itself in 2 timers will create perpetual performance loss to the point of lockup.
+			-- We check that unit is defined here because if we are calling from a timer, it will be false, and we dont want to endlessly chain timers.
+			-- A single func calling itself in 2 timers will create perpetual performance loss to the point of lockup. (duh....)
 			Type:ScheduleTimer(WpnEnchant_OnEvent, 0.1, icon)
 			Type:ScheduleTimer(WpnEnchant_OnEvent, 1, icon)
 		end
@@ -221,6 +223,7 @@ function Type:Setup(icon, groupID, iconID)
 
 	icon:RegisterEvent("UNIT_INVENTORY_CHANGED")
 	icon:SetScript("OnEvent", WpnEnchant_OnEvent)
+	icon:SetUpdateMethod("manual")
 	icon:OnEvent(nil, "player")
 end
 
