@@ -31,6 +31,7 @@
  ** (r443) Fixed SPELL_ACTIVATION_OVERLAY_GLOW_HIDE typo.
  ** (r451) {{{TellMeWhen-enUS.lua:404: nesting of [[...]] is deprecated near "["}}}
  ** (r452) The Resting condition should now properly update when entering a battleground/dungeon/etc while resting, and vice-versa.
+ ** (r453) Combat log event icons should no longer process any sound/text/animation events when their parent group is hidden.
 
 ===v4.8.3===
  * Bug Fixes:

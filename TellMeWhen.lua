@@ -32,7 +32,7 @@ local DRData = LibStub("DRData-1.0", true)
 TELLMEWHEN_VERSION = "5.0.0"
 TELLMEWHEN_VERSION_MINOR = strmatch(" @project-version@", " r%d+") or ""
 TELLMEWHEN_VERSION_FULL = TELLMEWHEN_VERSION .. TELLMEWHEN_VERSION_MINOR
-TELLMEWHEN_VERSIONNUMBER = 50015 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
+TELLMEWHEN_VERSIONNUMBER = 50016 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
 if TELLMEWHEN_VERSIONNUMBER > 51000 or TELLMEWHEN_VERSIONNUMBER < 50000 then return error("YOU SCREWED UP THE VERSION NUMBER OR DIDNT CHANGE THE SAFETY LIMITS") end -- safety check because i accidentally made the version number 414069 once
 
 TELLMEWHEN_MAXGROUPS = 1 	--this is a default, used by SetTheory (addon), so dont rename
@@ -4535,6 +4535,7 @@ end
 
 
 local Icon = TMW:NewClass("Icon", "Button", "ConditionControlledObject", "AnimatedObject")
+Icon.IsIcon = true
 
 function Icon.OnNewInstance(icon, ...)
 	local _, name, group, _, iconID = ... -- the CreateFrame args
@@ -5595,11 +5596,11 @@ end
 
 function TMW:RestoreCase(str)
 	if loweredbackup[str] then
-		return loweredbackup[str]
+		return loweredbackup[str], str
 	else
 		for original, lowered in pairs(strlowerCache) do
 			if lowered == str then
-				return original
+				return original, str
 			end
 		end
 		return str
