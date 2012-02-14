@@ -29,6 +29,7 @@
  ** (r441) TellMeWhen-5.0.0.lua:3572: attempt to compare nil with number
  ** (r442) (Not really a bug fix): Added an option to TMW's main settings to temporarily disable the new update mechanism, reverting to the old method.
  ** (r443) Fixed SPELL_ACTIVATION_OVERLAY_GLOW_HIDE typo.
+ ** (r451) {{{TellMeWhen-enUS.lua:404: nesting of [[...]] is deprecated near "["}}}
 
 ===v4.8.3===
  * Bug Fixes:
