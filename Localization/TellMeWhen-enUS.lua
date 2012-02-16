@@ -180,7 +180,11 @@ L["ICONMENU_CASTS"] = "Spell Casts"
 L["ICONMENU_DRS"] = "Diminishing Returns"
 
 L["ICONMENU_CUSTOMTEX"] = "Custom Texture"
-L["ICONMENU_CUSTOMTEX_DESC"] = "If you want to override the texture shown by this icon, enter the Name or ID of the spell that has the texture that you want to use. You may also enter a texture path, such as 'Interface/Icons/spell_nature_healingtouch', or just 'spell_nature_healingtouch' if the path is 'Interface/Icons'"
+L["ICONMENU_CUSTOMTEX_DESC"] = [[If you want to override the texture shown by this icon, enter the Name or ID of the spell that has the texture that you want to use.
+
+You may also enter a texture path, such as 'Interface/Icons/spell_nature_healingtouch', or just 'spell_nature_healingtouch' if the path is 'Interface/Icons'
+
+You can use your own textures too as long as they are placed in WoW's directory (set this field to the path to the texture relative to WoW's root folder), are .tga or .blp format, and have dimensions that are powers of 2 (32, 64, 128, etc)]]
 
 L["ICONMENU_BINDTEXT_DESC"] = [[Any text in this editbox will be shown on the icon where the keybinding is normally displayed on an action bar. This does NOT set a keybinding to this TellMeWhen icon. It is simply a visual reminder that will be shown on the icon. The text can be configured in this group's settings.]]
 
@@ -1060,19 +1064,35 @@ L["ANIM_ANIMTOUSE"] = "Animation To Use"
 L["ANIM_ANIMSETTINGS"] = "Settings"
 
 L["ANIM_SECONDS"] = "%s Seconds"
+L["ANIM_PIXELS"] = "%s Pixels"
 L["ANIM_DURATION"] = "Animation Duration"
 L["ANIM_DURATION_DESC"] = "Set how long the animation should last after it is triggered."
 L["ANIM_PERIOD"] = "Flash Period"
-L["ANIM_PERIOD_DESC"] = "Set how long each flash should take - the time that the flash is shown or fading in."
+L["ANIM_PERIOD_DESC"] = [[Set how long each flash should take - the time that the flash is shown or fading in.
+
+Set to 0 if you don't want fading or flashing to occur.]]
 L["ANIM_MAGNITUDE"] = "Shake Magnitude"
 L["ANIM_MAGNITUDE_DESC"] = "Set how violent the shake should be."
+L["ANIM_THICKNESS"] = "Border Thickness"
+L["ANIM_THICKNESS_DESC"] = "Set how thick the border should be. (The default size of an icon is 30.)"
+L["ANIM_SIZE_ANIM"] = "Border Size"
+L["ANIM_SIZE_ANIM_DESC"] = "Set how big the entire border should be."
+L["ANIM_SIZEX"] = "Image Width"
+L["ANIM_SIZEX_DESC"] = "Set how wide the image should be."
+L["ANIM_SIZEY"] = "Image Height"
+L["ANIM_SIZEY_DESC"] = "Set how tall the image should be."
 L["ANIM_COLOR"] = "Color/Opacity"
 L["ANIM_COLOR_DESC"] = "Configure the color and the opacity of the flash."
 L["ANIM_FADE"] = "Fade Flashes"
 L["ANIM_FADE_DESC"] = "Check to have a smooth fade between each flash. Uncheck to instantly flash."
 L["ANIM_INFINITE"] = "Play Indefinitely"
 L["ANIM_INFINITE_DESC"] = "Check to cause the animation to play until it is overwritten by another animation on the icon of the same type, or until the %q animation is played."
+L["ANIM_TEX"] = "Texture"
+L["ANIM_TEX_DESC"] = [[Choose the texture that should be overlaid.
 
+You may enter the Name or ID of a spell that has the texture that you want to use, or you may enter a texture path, such as 'Interface/Icons/spell_nature_healingtouch', or just 'spell_nature_healingtouch' if the path is 'Interface/Icons'
+
+You can use your own textures too as long as they are placed in WoW's directory (set this field to the path to the texture relative to WoW's root folder), are .tga or .blp format, and have dimensions that are powers of 2 (32, 64, 128, etc)]]
 
 L["ANIM_SCREENSHAKE"] = "Screen: Shake"
 L["ANIM_SCREENSHAKE_DESC"] = [[Shakes your entire screen when it is triggered.
@@ -1091,6 +1111,10 @@ L["ANIM_SCREENFLASH"] = "Screen: Flash"
 L["ANIM_SCREENFLASH_DESC"] = "Flashes a colored overlay across the screen."
 L["ANIM_ICONFADE"] = "Icon: Fade In/Out"
 L["ANIM_ICONFADE_DESC"] = "Smoothly applies any opacity changes that occured with the selected event."
+L["ANIM_ICONBORDER"] = "Icon: Border"
+L["ANIM_ICONBORDER_DESC"] = "Overlays a colored border on the icon."
+L["ANIM_ICONOVERLAYIMG"] = "Icon: Image Overlay"
+L["ANIM_ICONOVERLAYIMG_DESC"] = "Overlays a custom image over the icon."
 L["ANIM_ICONCLEAR"] = "Icon: Stop Animations"
 L["ANIM_ICONCLEAR_DESC"] = "Stops all animations that are playing on the current icon."
 

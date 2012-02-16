@@ -5381,7 +5381,7 @@ function ANIM:SelectAnimation(animation)
 
 	local animationSettings = self.AnimationList[animation]
 	if animationSettings then
-		for i, arg in TMW:Vararg("Duration", "Magnitude", "Period") do
+		for i, arg in TMW:Vararg("Duration", "Magnitude", "Period", "Thickness", "Size_anim", "SizeX", "SizeY") do
 			if animationSettings[arg] then
 				self:SetSliderMinMax(self[arg], EventSettings[arg])
 				self[arg]:Show()
@@ -5407,6 +5407,13 @@ function ANIM:SelectAnimation(animation)
 			self.Color:Show()
 		else
 			self.Color:Hide()
+		end
+
+		if animationSettings.Image then
+			self.Image:SetText(EventSettings.Image)
+			self.Image:Show()
+		else
+			self.Image:Hide()
 		end
 	end
 

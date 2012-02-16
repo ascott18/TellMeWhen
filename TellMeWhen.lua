@@ -32,7 +32,7 @@ local DRData = LibStub("DRData-1.0", true)
 TELLMEWHEN_VERSION = "5.0.0"
 TELLMEWHEN_VERSION_MINOR = strmatch(" @project-version@", " r%d+") or ""
 TELLMEWHEN_VERSION_FULL = TELLMEWHEN_VERSION .. TELLMEWHEN_VERSION_MINOR
-TELLMEWHEN_VERSIONNUMBER = 50016 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
+TELLMEWHEN_VERSIONNUMBER = 50017 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
 if TELLMEWHEN_VERSIONNUMBER > 51000 or TELLMEWHEN_VERSIONNUMBER < 50000 then return error("YOU SCREWED UP THE VERSION NUMBER OR DIDNT CHANGE THE SAFETY LIMITS") end -- safety check because i accidentally made the version number 414069 once
 
 TELLMEWHEN_MAXGROUPS = 1 	--this is a default, used by SetTheory (addon), so dont rename
@@ -64,7 +64,7 @@ local MikSBT, Parrot, SCT =
 	  MikSBT, Parrot, SCT
 local TARGET_TOKEN_NOT_FOUND, FOCUS_TOKEN_NOT_FOUND =
 	  TARGET_TOKEN_NOT_FOUND, FOCUS_TOKEN_NOT_FOUND
-local CL_PLAYER = COMBATLOG_OBJECT_TYPE_PLAYER
+--local CL_PLAYER = COMBATLOG_OBJECT_TYPE_PLAYER
 local CL_CONTROL_PLAYER = COMBATLOG_OBJECT_CONTROL_PLAYER
 local bitband = bit.band
 local huge = math.huge
@@ -319,7 +319,8 @@ function TMW.print(...)
 	if TMW.debug or not TMW.VarsLoaded then
 		local prefix = "|cffff0000TMW"
 		if linenum then
-			prefix = prefix..format(" %4.0f", linenum(3))
+		--	prefix = prefix..format(" %4.0f", linenum(3))
+			prefix = format("|cffff0000 %s", linenum(3, 1))
 		end
 		prefix = prefix..":|r "
 		local func = TMW.debug and TMW.debug.print or _G.print
@@ -843,12 +844,17 @@ TMW.Defaults = {
 								Magnitude	  	= 10,
 								ScaleMagnitude 	= 2,
 								Period			= 0.4,
+								Size_anim	  	= 30,
+								SizeX	  		= 30,
+								SizeY	  		= 30,
+								Thickness	  	= 2,
 								Fade	  		= true,
 								Infinite  		= false,
 								r_anim	  		= 1,
 								g_anim	  		= 0,
 								b_anim	  		= 0,
 								a_anim	  		= 0.5,
+								Image			= "",
 
 								OnlyShown 		= false,
 								Operator 		= "<",
@@ -1137,16 +1143,14 @@ end
 
 
 
-callbackregistry = {}
-
 function TMW:RegisterCallback(event, func, arg1)
 	local reg = callbackregistry
-	local funcs
+	local funcsForEvent
 	if reg[event] then
-		funcs = reg[event]
+		funcsForEvent = reg[event]
 	else
-		funcs = {}
-		reg[event] = funcs
+		funcsForEvent = {}
+		reg[event] = funcsForEvent
 	end
 
 	if type(func) == "table" then
@@ -1155,15 +1159,22 @@ function TMW:RegisterCallback(event, func, arg1)
 	end
 	arg1 = arg1 or true
 
+	
 	local args
-	if funcs[func] then
-		args = funcs[func]
-	else
-		args = {}
-		funcs[func] = args
+	for i = 1, #funcsForEvent do
+		local tbl = funcsForEvent[i]
+		if tbl.func == func then
+			args = tbl
+			if not tContains(args, arg1) then
+				args[#args + 1] = arg1
+			end
+			break
+		end
 	end
-
-	args[arg1] = func
+	if not args then
+		args = {func = func, arg1}
+		funcsForEvent[#funcsForEvent + 1] = args
+	end
 end
 
 function TMW:UnregisterCallback(event, func, arg1)
@@ -1185,8 +1196,11 @@ function TMW:Fire(event, ...)
 	local funcs = callbackregistry[event]
 
 	if funcs then
-		for method, args in next, funcs do
-			for arg1 in next, args do
+		for t = 1, #funcs do
+			local tbl = funcs[t]
+			local method = tbl.func
+			for a = 1, #tbl do
+				local arg1 = tbl[a]
 				if arg1 ~= true then
 					method(arg1, event, ...)
 				else
@@ -2755,7 +2769,7 @@ function TMW:ProcessEquivalencies()
 				if id then
 					local name, _, tex = GetSpellInfo(strtrim(id, " _"))
 					if name then
-						TMW:lowerNames(name) -- this will insert the spell name into the table of spells for capitalization restoration.
+						TMW:LowerNames(name) -- this will insert the spell name into the table of spells for capitalization restoration.
 						str = gsub(str, id, name)
 						SpellTextures[realID] = tex
 						SpellTextures[strlowerCache[name]] = tex
@@ -2913,6 +2927,17 @@ function TMW:InjectDataIntoString(Text, icon, doBlizz, shouldColorNames, dontSub
 	end
 
 	return Text
+end
+
+
+
+local Display = TMW:NewClass("Display")
+
+function Display:OnNewInstance(name)
+	self.name = name
+	
+	self.Group = TMW:NewClass("Group_" .. name, "GroupParent")
+	self.Icon = TMW:NewClass("Icon_" .. name, "IconParent")
 end
 
 
@@ -3132,7 +3157,6 @@ end
 
 
 ANN = EVENTS:NewModule("Announcements", EVENTS) TMW.ANN = ANN
-
 TMW.ChannelList = {
 	{
 		text = NONE,
@@ -3494,6 +3518,11 @@ ANIM.AnimationList = {
 
 		Play = function(icon, data)
 			if not WorldFrame:IsProtected() or not InCombatLockdown() then
+			
+				if not WorldFrame.Animations_Start then
+					TMW.Classes.AnimatedObject:Embed(WorldFrame)
+				end
+				
 				WorldFrame:Animations_Start{
 					data = data,
 					Start = time,
@@ -3549,8 +3578,12 @@ ANIM.AnimationList = {
 
 			local Duration = 0
 			local Period = data.Period
-			while Duration < data.Duration do
-				Duration = Duration + (Period * 2)
+			if Period == 0 then
+				Duration = data.Duration
+			else
+				while Duration < data.Duration do
+					Duration = Duration + (Period * 2)
+				end
 			end
 
 			-- inherit from ICONFLASH (since all the functions except Play are the same)
@@ -3561,6 +3594,10 @@ ANIM.AnimationList = {
 				AnimationData.OnStop = ICONFLASH.OnStop
 			end
 
+			if not UIParent.Animations_Start then
+				TMW.Classes.AnimatedObject:Embed(UIParent)
+			end
+				
 			UIParent:Animations_Start{
 				data = data,
 				Start = time,
@@ -3627,8 +3664,12 @@ ANIM.AnimationList = {
 			if data.Infinite then
 				Duration = huge
 			else
-				while Duration < data.Duration do
-					Duration = Duration + (Period * 2)
+				if Period == 0 then
+					Duration = data.Duration
+				else
+					while Duration < data.Duration do
+						Duration = Duration + (Period * 2)
+					end
 				end
 			end
 
@@ -3648,20 +3689,20 @@ ANIM.AnimationList = {
 
 		OnUpdate = function(icon, table)
 			local FlashPeriod = table.Period
-			local flasher = icon.flasher
+			local animation_flasher = icon.animation_flasher
 
 			local timePassed = time - table.Start
-			local fadingIn = floor(timePassed/FlashPeriod) % 2 == 1
+			local fadingIn = FlashPeriod == 0 or floor(timePassed/FlashPeriod) % 2 == 1
 
-			if table.Fade then
+			if table.Fade and FlashPeriod ~= 0 then
 				local remainingFlash = timePassed % FlashPeriod
 				if fadingIn then
-					flasher:SetAlpha(table.Alpha*((FlashPeriod-remainingFlash)/FlashPeriod))
+					animation_flasher:SetAlpha(table.Alpha*((FlashPeriod-remainingFlash)/FlashPeriod))
 				else
-					flasher:SetAlpha(table.Alpha*(remainingFlash/FlashPeriod))
+					animation_flasher:SetAlpha(table.Alpha*(remainingFlash/FlashPeriod))
 				end
 			else
-				flasher:SetAlpha(fadingIn and table.Alpha or 0)
+				animation_flasher:SetAlpha(fadingIn and table.Alpha or 0)
 			end
 
 			-- (mostly) generic expiration -- we just finished the last flash, so dont do any more
@@ -3670,19 +3711,22 @@ ANIM.AnimationList = {
 			end
 		end,
 		OnStart = function(icon, table)
-			local flasher
-			if icon.flasher then
-				flasher = icon.flasher
+			local animation_flasher
+			if icon.animation_flasher then
+				animation_flasher = icon.animation_flasher
 			else
-				flasher = ANIM:GetFlasher(icon)
-				icon.flasher = flasher
+				animation_flasher = icon:CreateTexture(nil, "BACKGROUND", nil, 6)
+				animation_flasher:SetAllPoints(icon.class == TMW.Classes.Icon and icon.texture)
+				animation_flasher:Hide()
+	
+				icon.animation_flasher = animation_flasher
 			end
 
-			flasher:Show()
-			flasher:SetTexture(table.r, table.g, table.b, 1)
+			animation_flasher:Show()
+			animation_flasher:SetTexture(table.r, table.g, table.b, 1)
 		end,
 		OnStop = function(icon, table)
-			icon.flasher:Hide()
+			icon.animation_flasher:Hide()
 		end,
 	},
 	{
@@ -3700,8 +3744,12 @@ ANIM.AnimationList = {
 			if data.Infinite then
 				Duration = huge
 			else
-				while Duration < data.Duration do
-					Duration = Duration + (Period * 2)
+				if Period == 0 then
+					Duration = data.Duration
+				else
+					while Duration < data.Duration do
+						Duration = Duration + (Period * 2)
+					end
 				end
 			end
 
@@ -3719,11 +3767,11 @@ ANIM.AnimationList = {
 			local FlashPeriod = table.Period
 
 			local timePassed = time - table.Start
-			local fadingIn = floor(timePassed/FlashPeriod) % 2 == 0
+			local fadingIn = FlashPeriod == 0 or floor(timePassed/FlashPeriod) % 2 == 1
 
-			if table.Fade then
+			if table.Fade and FlashPeriod ~= 0 then
 				local remainingFlash = timePassed % FlashPeriod
-				if fadingIn then
+				if not fadingIn then
 					icon:SetAlpha(icon.__alpha*((FlashPeriod-remainingFlash)/FlashPeriod))
 				else
 					icon:SetAlpha(icon.__alpha*(remainingFlash/FlashPeriod))
@@ -3738,12 +3786,11 @@ ANIM.AnimationList = {
 			end
 		end,
 		OnStart = function(icon, table)
-			icon.IsFading = (icon.IsFading or 0) + 1
+			icon.FadeHandlers = icon.FadeHandlers or {}
+			icon.FadeHandlers[#icon.FadeHandlers + 1] = "ICONALPHAFLASH"
 		end,
 		OnStop = function(icon, table)
-			icon:SetAlpha(icon.__alpha)
-			local IsFading = (icon.IsFading or 1) - 1
-			icon.IsFading = IsFading > 0 and IsFading or nil
+			tDeleteItem(icon.FadeHandlers, "ICONALPHAFLASH")
 		end,
 	},
 	{
@@ -3778,12 +3825,11 @@ ANIM.AnimationList = {
 			end
 		end,
 		OnStart = function(icon, table)
-			icon.IsFading = (icon.IsFading or 0) + 1
+			icon.FadeHandlers = icon.FadeHandlers or {}
+			icon.FadeHandlers[#icon.FadeHandlers + 1] = "ICONFADE"
 		end,
 		OnStop = function(icon, table)
-			icon:SetAlpha(icon.__alpha)
-			local IsFading = (icon.IsFading or 1) - 1
-			icon.IsFading = IsFading > 0 and IsFading or nil
+			tDeleteItem(icon.FadeHandlers, "ICONFADE")
 		end,
 
 
@@ -3816,6 +3862,206 @@ ANIM.AnimationList = {
 		end,
 	},
 	{
+		text = L["ANIM_ICONBORDER"],
+		desc = L["ANIM_ICONBORDER_DESC"],
+		animation = "ICONBORDER",
+		Duration = true,
+		Period = true,
+		Color = true,
+		Fade = true,
+		Infinite = true,
+		Size_anim = true,
+		Thickness = true,
+
+		Play = function(icon, data)
+			local Duration = 0
+			local Period = data.Period
+			if data.Infinite then
+				Duration = huge
+			else
+				if Period == 0 then
+					Duration = data.Duration
+				else
+					while Duration < data.Duration do
+						Duration = Duration + (Period * 2)
+					end
+				end
+			end
+
+			icon:Animations_Start{
+				data = data,
+				Start = time,
+				Duration = Duration,
+
+				Period = Period,
+				Fade = data.Fade,
+				Alpha = data.a_anim,
+				r = data.r_anim,
+				g = data.g_anim,
+				b = data.b_anim,
+				Thickness = data.Thickness,
+				Size = data.Size_anim,
+			}
+		end,
+
+		OnUpdate = function(icon, table)
+			local FlashPeriod = table.Period
+			local animation_border = icon.animation_border
+
+			local timePassed = time - table.Start
+			local fadingIn = FlashPeriod == 0 or floor(timePassed/FlashPeriod) % 2 == 0
+
+			if table.Fade and FlashPeriod ~= 0 then
+				local remainingFlash = timePassed % FlashPeriod
+				if not fadingIn then
+					animation_border:SetAlpha(table.Alpha*((FlashPeriod-remainingFlash)/FlashPeriod))
+				else
+					animation_border:SetAlpha(table.Alpha*(remainingFlash/FlashPeriod))
+				end
+			else
+				animation_border:SetAlpha(fadingIn and table.Alpha or 0)
+			end
+
+			-- (mostly) generic expiration -- we just finished the last flash, so dont do any more
+			if timePassed > table.Duration then
+				icon:Animations_Stop(table)
+			end
+		end,
+		OnStart = function(icon, table)
+			local animation_border
+			if icon.animation_border then
+				animation_border = icon.animation_border
+			else
+				animation_border = CreateFrame("Frame", nil, icon)
+				animation_border:SetPoint("CENTER")
+				icon.animation_border = animation_border
+				
+				local tex = animation_border:CreateTexture(nil, "BACKGROUND", nil, 5)
+				animation_border.TOP = tex
+				tex:SetPoint("TOPLEFT")
+				tex:SetPoint("TOPRIGHT")
+				
+				local tex = animation_border:CreateTexture(nil, "BACKGROUND", nil, 5)
+				animation_border.BOTTOM = tex
+				tex:SetPoint("BOTTOMLEFT")
+				tex:SetPoint("BOTTOMRIGHT")
+				
+				local tex = animation_border:CreateTexture(nil, "BACKGROUND", nil, 5)
+				animation_border.LEFT = tex
+				tex:SetPoint("TOPLEFT", animation_border.TOP, "BOTTOMLEFT")
+				tex:SetPoint("BOTTOMLEFT", animation_border.BOTTOM, "TOPLEFT")
+				
+				local tex = animation_border:CreateTexture(nil, "BACKGROUND", nil, 5)
+				animation_border.RIGHT = tex
+				tex:SetPoint("TOPRIGHT", animation_border.TOP, "BOTTOMRIGHT")
+				tex:SetPoint("BOTTOMRIGHT", animation_border.BOTTOM, "TOPRIGHT")
+			end
+
+			animation_border:Show()
+			animation_border:SetSize(table.Size, table.Size)
+			
+			for _, pos in TMW:Vararg("TOP", "BOTTOM", "LEFT", "RIGHT") do
+				local tex = animation_border[pos]
+				
+				tex:SetTexture(table.r, table.g, table.b, 1)
+				tex:SetSize(table.Thickness, table.Thickness)
+			end
+		end,
+		OnStop = function(icon, table)
+			icon.animation_border:Hide()
+		end,
+	},
+	
+	
+	{
+		text = L["ANIM_ICONOVERLAYIMG"],
+		desc = L["ANIM_ICONOVERLAYIMG_DESC"],
+		animation = "ICONOVERLAYIMG",
+		Duration = true,
+		Period = true,
+		Fade = true,
+		Infinite = true,
+		SizeX = true,
+		SizeY = true,
+		Image = true,
+
+		Play = function(icon, data)
+			local Duration = 0
+			local Period = data.Period
+			if data.Infinite then
+				Duration = huge
+			else
+				if Period == 0 then
+					Duration = data.Duration
+				else
+					while Duration < data.Duration do
+						Duration = Duration + (Period * 2)
+					end
+				end
+			end
+
+			icon:Animations_Start{
+				data = data,
+				Start = time,
+				Duration = Duration,
+
+				Period = Period,
+				Fade = data.Fade,
+				Alpha = data.a_anim,
+				SizeX = data.SizeX,
+				SizeY = data.SizeY,
+				Image = TMW:GetCustomTexture(data.Image),
+			}
+		end,
+
+		OnUpdate = function(icon, table)
+			local FlashPeriod = table.Period
+			local animation_overlay = icon.animation_overlay
+
+			local timePassed = time - table.Start
+			local fadingIn = FlashPeriod == 0 or floor(timePassed/FlashPeriod) % 2 == 0
+
+			if table.Fade and FlashPeriod ~= 0 then
+				local remainingFlash = timePassed % FlashPeriod
+				if not fadingIn then
+					animation_overlay:SetAlpha(table.Alpha*((FlashPeriod-remainingFlash)/FlashPeriod))
+				else
+					animation_overlay:SetAlpha(table.Alpha*(remainingFlash/FlashPeriod))
+				end
+			else
+				animation_overlay:SetAlpha(fadingIn and table.Alpha or 0)
+			end
+
+			-- (mostly) generic expiration -- we just finished the last flash, so dont do any more
+			if timePassed > table.Duration then
+				icon:Animations_Stop(table)
+			end
+		end,
+		OnStart = function(icon, table)
+			local animation_overlay
+			if icon.animation_overlay then
+				animation_overlay = icon.animation_overlay
+			else
+				animation_overlay = icon:CreateTexture(nil, "BACKGROUND", nil, 4)
+				animation_overlay:SetPoint("CENTER")
+				icon.animation_overlay = animation_overlay
+			end
+
+			animation_overlay:Show()
+			animation_overlay:SetSize(table.SizeX, table.SizeY)
+			
+			animation_overlay:SetTexture(table.Image)
+		end,
+		OnStop = function(icon, table)
+			icon.animation_overlay:Hide()
+		end,
+	},
+	
+	
+	
+	
+	
+	{
 		noclick = true,
 	},
 	{
@@ -3838,6 +4084,9 @@ for k, v in pairs(AnimationList) do
 		AnimationList[v.animation] = v
 	end
 end
+function ANIM:OnInitialize()
+	TMW:RegisterCallback("TMW_ICON_META_INHERITED_ICON_CHANGED", self)
+end
 function ANIM:ProcessIconEventSettings(icon, event, eventSettings)
 	if eventSettings.Animation ~= "" then
 		return true
@@ -3855,16 +4104,22 @@ function ANIM:HandleEvent(icon, data)
 	end
 
 end
-function ANIM:GetFlasher(parent)
-	local Flasher = parent:CreateTexture(nil, "BACKGROUND", nil, 5)
-	Flasher:SetAllPoints(parent.class == TMW.Classes.Icon and parent.texture)
-	Flasher:Hide()
-
-	return Flasher
+function ANIM:TMW_ICON_META_INHERITED_ICON_CHANGED(event, icon, icToUse)
+	if icon:Animations_Has() then
+		for k, v in next, icon:Animations_Get() do
+			if v.originIcon ~= icon then
+				icon:Animations_Stop(v)
+			end
+		end
+	end
+	if icToUse:Animations_Has() then
+		for k, v in next, icToUse:Animations_Get() do
+			icon:Animations_Start(v)
+		end
+	end
 end
 
 local AnimatedObject = TMW:NewClass("AnimatedObject")
-
 function AnimatedObject:Animations_Get()
 	if not self.animations then
 		local t = {}
@@ -3945,8 +4200,7 @@ function AnimatedObject:Animations_Stop(arg1)
 		end
 	end
 end
-AnimatedObject:Embed(UIParent)
-AnimatedObject:Embed(WorldFrame)
+
 
 
 local ConditionControlledObject = TMW:NewClass("ConditionControlledObject")
@@ -3981,6 +4235,24 @@ function Group.ScriptSort(groupA, groupB)
 	return groupA:GetID()*gOrder < groupB:GetID()*gOrder
 end
 
+function Group.SizeUpdate(resizeButton)
+	-- note that arg1 (self) is resizeButton
+	local group = resizeButton:GetParent()
+	local uiScale = UIParent:GetScale()
+	local cursorX, cursorY = GetCursorPosition()
+
+	-- calculate new scale
+	local newXScale = group.oldScale * (cursorX/uiScale - group.oldX*group.oldScale) / (resizeButton.oldCursorX/uiScale - group.oldX*group.oldScale)
+	local newYScale = group.oldScale * (cursorY/uiScale - group.oldY*group.oldScale) / (resizeButton.oldCursorY/uiScale - group.oldY*group.oldScale)
+	local newScale = max(0.6, newXScale, newYScale)
+	group:SetScale(newScale)
+
+	-- calculate new frame position
+	local newX = group.oldX * group.oldScale / newScale
+	local newY = group.oldY * group.oldScale / newScale
+	group:ClearAllPoints()
+	group:SetPoint("TOPLEFT", UIParent, "BOTTOMLEFT", newX, newY)
+end
 
 function Group:TMW_ICON_UPDATED(event, icon)
 	-- note that this callback is not inherited - it simply handles all groups
@@ -4537,6 +4809,7 @@ end
 local Icon = TMW:NewClass("Icon", "Button", "ConditionControlledObject", "AnimatedObject")
 Icon.IsIcon = true
 
+-- NOT universal
 function Icon.OnNewInstance(icon, ...)
 	local _, name, group, _, iconID = ... -- the CreateFrame args
 
@@ -4553,6 +4826,7 @@ function Icon.OnNewInstance(icon, ...)
 	icon.__tex = icon.texture:GetTexture()
 end
 
+-- universal
 function Icon.__lt(icon1, icon2)
 	local g1 = icon1.group:GetID()
 	local g2 = icon2.group:GetID()
@@ -4563,10 +4837,12 @@ function Icon.__lt(icon1, icon2)
 	end
 end
 
+-- universal
 function Icon.__tostring(icon)
 	return icon:GetName()
 end
 
+-- universal
 function Icon.ScriptSort(iconA, iconB)
 	local gOrder = -db.profile.CheckOrder
 	local gA = iconA.group:GetID()
@@ -4578,6 +4854,7 @@ function Icon.ScriptSort(iconA, iconB)
 	return gA*gOrder < gB*gOrder
 end
 
+-- universal
 Icon.setscript = Icon.SetScript
 function Icon.SetScript(icon, handler, func, dontnil)
 	if func ~= nil or not dontnil then
@@ -4594,12 +4871,14 @@ function Icon.SetScript(icon, handler, func, dontnil)
 	end
 end
 
+-- universal
 Icon.registerevent = Icon.RegisterEvent
 function Icon.RegisterEvent(icon, event)
 	icon:registerevent(event)
 	icon.hasEvents = 1
 end
 
+-- universal (MAYBE)
 function Icon.GetTooltipTitle(icon)
 	local groupID = icon:GetParent():GetID()
 	local line1 = L["ICON_TOOLTIP1"] .. " " .. format(L["GROUPICON"], TMW:GetGroupName(groupID, groupID, 1), icon:GetID())
@@ -4609,22 +4888,25 @@ function Icon.GetTooltipTitle(icon)
 	return line1
 end
 
+-- universal
 function Icon.GetSettings(icon)
 	return db.profile.Groups[icon.group:GetID()].Icons[icon:GetID()]
 end
 
+-- universal
 function Icon.IsBeingEdited(icon)
 	if TMW.IE and TMW.CI.ic == icon and TMW.IE.CurrentTab and TMW.IE:IsVisible() then
 		return TMW.IE.CurrentTab:GetID()
 	end
 end
 
-
+-- universal
 function Icon.QueueEvent(icon, event, data)
 	icon.EventsToFire[event] = data or true
 	icon.eventIsQueued = true
 end
 
+-- universal (but actual event handlers (:HandleEvent()) arent)
 function Icon.ProcessQueuedEvents(icon)
 	if icon.EventsToFire and icon.eventIsQueued then
 		for _, Module in EVENTS:IterateModules() do
@@ -4672,14 +4954,14 @@ function Icon.ProcessQueuedEvents(icon)
 	end
 end
 
-
+-- universal
 function Icon.IsValid(icon)
 	-- checks if the icon should be in the list of icons that can be checked in metas/conditions
 	
 	return icon.Enabled and icon.group:ShouldUpdateIcons()
 end
 
-
+-- universal
 Icon.Update_Method = "auto"
 function Icon.SetUpdateMethod(icon, method)
 	if db.profile.DEBUG_ForceAutoUpdate then
@@ -4697,6 +4979,7 @@ function Icon.SetUpdateMethod(icon, method)
 	end
 end
 
+-- universal
 Icon.NextUpdateTime = huge
 function Icon.ScheduleNextUpdate(icon)
 	local d = icon.__duration - (time - icon.__start)
@@ -4737,7 +5020,7 @@ function Icon.ScheduleNextUpdate(icon)
 end
 
 
-
+-- universal (and needs to stay that way)
 function Icon.Update(icon, force, ...)
 	
 	if icon.__shown and (force or icon.LastUpdate <= time - UPD_INTV) then
@@ -4774,6 +5057,7 @@ function Icon.Update(icon, force, ...)
 	end
 end
 
+-- universal (probably)
 function Icon.SetTexture(icon, tex)
 	--if icon.__tex ~= tex then ------dont check for this, checking is done before this method is even called
 	tex = icon.OverrideTex or tex
@@ -4781,11 +5065,13 @@ function Icon.SetTexture(icon, tex)
 	icon.texture:SetTexture(tex)
 end
 
+-- universal (probably)
 function Icon.SetReverse(icon, reverse)
 	icon.__reverse = reverse
 	icon.cooldown:SetReverse(reverse)
 end
 
+-- universal
 function Icon.ForceSetAlpha(icon, alpha)
 	icon.__alpha = alpha
 	local oldalpha = icon:GetAlpha()-- For ICONFADE. much nicer than using __alpha because it will transition from what is curently visible, not what should be visible after any current fades end
@@ -4794,7 +5080,7 @@ function Icon.ForceSetAlpha(icon, alpha)
 	icon:SetAlpha(alpha)
 end
 
-
+-- universal (maybe, bars should handle color differently though e.g. color by school, by dispel type, etc)
 function Icon.CrunchColor(icon, duration, inrange, nomana)
 --[[
 	CBC = 	{r=0,	g=1,	b=0		},	-- cooldown bar complete
@@ -4848,6 +5134,7 @@ function Icon.CrunchColor(icon, duration, inrange, nomana)
 	return icon.typeData[s]
 end
 
+-- NOT universal ( try to create subroutines to handle discrepancies instead of duplicating the whole functions)
 function Icon.SetInfo(icon, alpha, color, texture, start, duration, spellChecked, reverse, count, countText, forceupdate, unit)
 	--[[
 	 icon			- the icon object to set the attributes on (frame) (but call as icon:SetInfo(alpha, ...))
@@ -4944,7 +5231,7 @@ function Icon.SetInfo(icon, alpha, color, texture, start, duration, spellChecked
 		icon.__alpha = alpha
 		icon.__oldAlpha = icon:GetAlpha() -- For ICONFADE. much nicer than using __alpha because it will transition from what is curently visible, not what should be visible after any current fades end
 
-		if not icon.IsFading then
+		if not icon.FadeHandlers or not icon.FadeHandlers[1] then
 			icon:SetAlpha(icon.FakeHidden or alpha)
 		end
 
@@ -5073,11 +5360,6 @@ function Icon.SetInfo(icon, alpha, color, texture, start, duration, spellChecked
 		somethingChanged = 1
 	end
 
-	--[[if alpha == 0 and not force and not icon.IsFading then
-		-- im not a huge fan of this anymore. the performance increase is very small considering the small amount of code below
-		return
-	end]]
-
 	if color and icon.__vrtxcolor ~= color then
 		local r, g, b, d
 		if type(color) == "table" then
@@ -5127,13 +5409,13 @@ function Icon.SetInfo(icon, alpha, color, texture, start, duration, spellChecked
 	end
 end
 
-
+-- universal
 function Icon.FinishCompilingConditions(icon, funcstr)
 	return funcstr
 end
 
 
-
+-- NOT universal ( and needs rewriting) -- TODO: rewrite texts to be dynamic instead of only having 2 static displays
 function Icon.SetupText(icon, fontString, settings)
 	fontString:SetWidth(settings.ConstrainWidth and icon.texture:GetWidth() or 0)
 	fontString:SetFont(LSM:Fetch("font", settings.Name), settings.Size, settings.Outline)
@@ -5152,6 +5434,12 @@ function Icon.SetupText(icon, fontString, settings)
 	end
 end
 
+
+
+
+
+
+-- NOT universal
 function Icon.Setup(icon)
 	if not icon or not icon[0] then return end
 
@@ -5161,18 +5449,21 @@ function Icon.Setup(icon)
 	local ics = icon:GetSettings()
 	local typeData = Types[ics.Type]
 	
+	
 	-- remove the icon from the previous type's icon list
 	if icon.typeData then
-		tDeleteItem(icon.typeData.Icons, icon, true)
+		icon.typeData:UnregisterIcon(icon)
 	end
-	
 	-- add the icon to this type's icon list
 	icon.typeData = typeData
-	typeData.Icons[#typeData.Icons + 1] = icon
-
+	typeData:RegisterIcon(icon)
+	
+	
+	-- make sure events dont fire while, or shortly after, we are setting up
 	runEvents = nil
 	TMW:ScheduleTimer("RestoreEvents", max(UPD_INTV*2.1, 0.2))
 
+	
 	icon.__spellChecked = nil
 	icon.__unitChecked = nil
 	icon.__unitName = nil
@@ -5189,7 +5480,7 @@ function Icon.Setup(icon)
 		end
 	end
 
-	local hasEventHandlers
+	icon.hasEventHandlers = nil
 	for _, eventData in ipairs(TMW.EventList) do
 		local event = eventData.name
 		local eventSettings = icon.Events[event]
@@ -5199,7 +5490,7 @@ function Icon.Setup(icon)
 			thisHasEventHandlers = Module:ProcessAndDelegateIconEventSettings(icon, event, eventSettings) or thisHasEventHandlers
 		end
 
-		hasEventHandlers = hasEventHandlers or thisHasEventHandlers
+		icon.hasEventHandlers = icon.hasEventHandlers or thisHasEventHandlers
 
 		if thisHasEventHandlers and not typeData["EventDisabled_" .. event] then
 			icon[event] = eventSettings
@@ -5208,7 +5499,6 @@ function Icon.Setup(icon)
 			icon[event] = nil
 		end
 	end
-	icon.hasEventHandlers = hasEventHandlers
 
 
 	-- process alpha settings
@@ -5277,26 +5567,28 @@ function Icon.Setup(icon)
 	--icon:SetInfo(alpha, color, texture, start, duration, spellChecked, reverse, count, countText, forceupdate, unit)
 	icon:SetInfo(0, nil, nil, nil, nil, nil, nil, nil, nil, 1, nil) -- forceupdate is set to 1 here so it doesnt return early (but this doesnt matter anymore)
 
-	-- update overlay texts
-	icon:SetupText(icon.countText, group.Fonts.Count)
-	icon:SetupText(icon.bindText, group.Fonts.Bind)
+	
+	-- this code here needs a complete rewrite:
+				-- update overlay texts
+				icon:SetupText(icon.countText, group.Fonts.Count)
+				icon:SetupText(icon.bindText, group.Fonts.Bind)
 
-	if not icon.BindTextObj or icon.BindTextObj.icon == icon then
-		-- need to check that the icon is the original icon because of the way that meta icons inherit bind text
-		if icon.BindText and icon.BindText ~= "" then
-			icon.BindTextObj = icon.BindTextObj or BindTextObj:New(icon, icon.bindText)
-			
-			icon.BindTextObj:SetBaseString(icon.BindText)
-		elseif icon.BindTextObj then
-			icon.BindTextObj:SetBaseString("")
-			icon.BindTextObj = nil
-		else
-			icon.bindText:SetText("")
-		end
-	else
-		icon.BindTextObj = nil
-		icon.bindText:SetText("")
-	end
+				if not icon.BindTextObj or icon.BindTextObj.icon == icon then
+					-- need to check that the icon is the original icon because of the way that meta icons inherit bind text
+					if icon.BindText and icon.BindText ~= "" then
+						icon.BindTextObj = icon.BindTextObj or BindTextObj:New(icon, icon.bindText)
+						
+						icon.BindTextObj:SetBaseString(icon.BindText)
+					elseif icon.BindTextObj then
+						icon.BindTextObj:SetBaseString("")
+						icon.BindTextObj = nil
+					else
+						icon.bindText:SetText("")
+					end
+				else
+					icon.BindTextObj = nil
+					icon.bindText:SetText("")
+				end
 
 
 	-- force an update
@@ -5314,7 +5606,7 @@ function Icon.Setup(icon)
 
 	-- if the icon is set to always hide and it isnt handling any events, then don't automatically update it.
 	-- Conditions and meta icons will update it as needed.
-	if icon.FakeHidden and not hasEventHandlers then
+	if icon.FakeHidden and not icon.hasEventHandlers then
 		icon:SetScript("OnUpdate", nil, true)
 		tDeleteItem(IconsToUpdate, icon)
 		if Locked then
@@ -5521,7 +5813,13 @@ function IconType:Register()
 	return self -- why not?
 end
 
+function IconType:RegisterIcon(icon)
+	self.Icons[#self.Icons + 1] = icon
+end
 
+function IconType:UnregisterIcon(icon)
+	tDeleteItem(self.Icons, icon)
+end
 
 
 -- ------------------
@@ -5549,11 +5847,11 @@ function string:toseconds()
 	return seconds
 end
 
-function TMW:lowerNames(str)
+function TMW:LowerNames(str)
 	-- converts a string, or all values of a table, to lowercase. Numbers are kept as numbers.
 	if type(str) == "table" then -- handle a table with recursion
 		for k, v in pairs(str) do
-			str[k] = TMW:lowerNames(v)
+			str[k] = TMW:LowerNames(v)
 		end
 		return str
 	end
@@ -5610,7 +5908,7 @@ end
 function TMW:EquivToTable(name)
 	-- this function checks to see if a string is a valid equivalency. If it is, all the spells that it represents will be put into an array and returned. If it isn't, nil will be returned.
 
-	name = strlower(name) -- everything in this function is handled as lowercase to prevent issues with user input capitalization. DONT use TMW:lowerNames() here, because the input is not the output
+	name = strlower(name) -- everything in this function is handled as lowercase to prevent issues with user input capitalization. DONT use TMW:LowerNames() here, because the input is not the output
 	local eqname, duration = strmatch(name, "(.-):([%d:%s%.]*)$") -- see if the string being checked has a duration attached to it (it really shouldn't because there is currently no point in doing so, but a user did try this and made a bug report, so I fixed it anyway
 	name = eqname or name -- if there was a duration, then replace the old name with the actual name without the duration attached
 
@@ -5682,7 +5980,7 @@ function TMW:GetSpellNames(icon, setting, firstOnly, toname, hash, keepDurations
 		end
 	end
 	if icon then
-		buffNames = TMW:lowerNames(buffNames)
+		buffNames = TMW:LowerNames(buffNames)
 	end
 
 	if hash then
@@ -5692,7 +5990,7 @@ function TMW:GetSpellNames(icon, setting, firstOnly, toname, hash, keepDurations
 				v = GetSpellInfo(v or "") or v -- turn the value into a name if needed
 			end
 
-			v = TMW:lowerNames(v)
+			v = TMW:LowerNames(v)
 			hash[v] = k -- put the final value in the table as well (may or may not be the same as the original value. Value should be NameArrray's key, for use with the duration table.
 		end
 		return hash
@@ -5701,13 +5999,13 @@ function TMW:GetSpellNames(icon, setting, firstOnly, toname, hash, keepDurations
 		if firstOnly then
 			local ret = buffNames[1] or ""
 			ret = GetSpellInfo(ret) or ret -- turn the first value into a name and return it
-			if icon then ret = TMW:lowerNames(ret) end
+			if icon then ret = TMW:LowerNames(ret) end
 			return ret
 		else
 			for k, v in ipairs(buffNames) do
 				buffNames[k] = GetSpellInfo(v or "") or v --convert everything to a name
 			end
-			if icon then TMW:lowerNames(buffNames) end
+			if icon then TMW:LowerNames(buffNames) end
 			return buffNames
 		end
 	end
@@ -5750,7 +6048,7 @@ function TMW:GetItemIDs(icon, setting, firstOnly, toname)
 		end
 	end
 	if icon then
-		names = TMW:lowerNames(names)
+		names = TMW:LowerNames(names)
 	end
 
 	for k, item in ipairs(names) do
@@ -5788,7 +6086,6 @@ function TMW:GetItemIDs(icon, setting, firstOnly, toname)
 	return names
 end
 
-local unitcache = {}
 TMW.Units = {
 	{ value = "%u", 				text = L["ICONMENU_ICONUNIT"], 	desc = L["ICONMENU_ICONUNIT_DESC"], onlyCondition = true },
 	{ value = "player", 			text = PLAYER .. " " .. L["PLAYER_DESC"]  		  },
@@ -5822,9 +6119,9 @@ local function replace(text, find, rep)
 	return text
 end
 function TMW:CleanString(text)
-	local isFrame
+	local frame
 	if type(text) == "table" and text.GetText then
-		isFrame = text
+		frame = text
 		text = text:GetText()
 	end
 	if not text then TMW:Error("No text to clean!") end
@@ -5835,8 +6132,8 @@ function TMW:CleanString(text)
 	text = replace(text, " :", ":") -- remove all single spaces before colons
 	text = replace(text, ":  ", ": ") -- remove all double spaces after colons (DONT REMOVE ALL DOUBLE SPACES EVERYWHERE, SOME SPELLS HAVE TYPO'd NAMES WITH 2 SPACES!)
 	text = gsub(text, ";", "; ") -- add spaces after all semicolons. Never used to do this, but it just looks so much better (DONT USE replace!).
-	if isFrame then
-		isFrame:SetText(text)
+	if frame then
+		frame:SetText(text)
 	end
 	return text
 end
@@ -5894,7 +6191,7 @@ end
 TMW.TestTex = TMW:CreateTexture()
 function TMW:GetCustomTexture(icon)
 	local CustomTex
-	if type(icon) == "table" then
+	if type(icon) == "table" and icon.IsIcon then
 		icon.CustomTex = icon.CustomTex ~= "" and icon.CustomTex
 		CustomTex = icon.CustomTex
 	else
@@ -6204,7 +6501,6 @@ function UNITS:GetOriginalUnitTable(unitSettings)
 		end
 	end
 
-	--unitcache[cachestring] = Units
 	return Units
 end
 TMW:MakeFunctionCached(UNITS, "GetOriginalUnitTable")

@@ -105,19 +105,8 @@ local function Meta_OnUpdate(icon, time)
 			if not icBindTextObj or not icBindTextObj.hasAnySubstitutions then
 				icon.bindText:SetText(icToUse.bindText:GetText())
 			end
-
-			if icon:Animations_Has() then
-				for k, v in next, icon:Animations_Get() do
-					if v.originIcon ~= icon then
-						icon:Animations_Stop(v)
-					end
-				end
-			end
-			if icToUse:Animations_Has() then
-				for k, v in next, icToUse:Animations_Get() do
-					icon:Animations_Start(v)
-				end
-			end
+			
+			TMW:Fire("TMW_ICON_META_INHERITED_ICON_CHANGED", icon, icToUse)
 
 			if LMB then -- i dont like the way that Masque handles this (inefficient), so i'll do it myself
 				local icnt = icToUse.normaltex -- icon.normaltex = icon.__LBF_Normal or icon:GetNormalTexture() -- set during icon:Setup()
@@ -133,7 +122,7 @@ local function Meta_OnUpdate(icon, time)
 			icon.ShowTimer = icToUse.ShowTimer
 			icon.ShowTimerText = icToUse.ShowTimerText
 			icon.cooldown.noCooldownCount = icToUse.cooldown.noCooldownCount
-			--icon.BindTextObj = icToUse.BindTextObj -- BE VERY FUCKING CAREFUL WITH THIS. dont call any methods on it - only setting it to obtain attributes
+			icon.BindTextObj = icToUse.BindTextObj -- BE VERY FUCKING CAREFUL WITH THIS. dont call any methods on it - only setting it to obtain attributes
 
 			force = 1
 
