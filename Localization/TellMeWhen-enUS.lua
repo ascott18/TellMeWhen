@@ -775,7 +775,7 @@ L["SPELLCOOLDOWN"] = "Spell cooldown"
 L["SPELLREACTIVITY"] = "Spell reactivity"
 L["MP5"] = "%d MP5"
 L["REACTIVECNDT_DESC"] = "This condition only checks the reactive state of the ability, not the cooldown of it."
-L["BUFFCNDT_DESC"] = "Only the first spell will be checked, all others will be ignored. Spells entered as IDs will not be forced to have their ID match an aura found; only the name will have to match."
+L["BUFFCNDT_DESC"] = "Only the first spell will be checked, all others will be ignored."
 L["CNDT_ONLYFIRST"] = "Only the first spell/item will be checked - semicolon-delimited lists are not valid for this condition type."
 L["GCD_ACTIVE"] = "GCD active"
 

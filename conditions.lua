@@ -394,7 +394,19 @@ function Env.UnitCast(unit, level, matchname)
 end
 
 function Env.AuraStacks(unit, name, filter)
-	local buffName, _, _, count = UnitAura(unit, name, nil, filter)
+	local buffName, count, id, _
+	local isID = isNumber[name]
+	if isID then
+		for z = 1, 60 do
+			buffName, _, _, count, _, _, _, _, _, _, id = UnitAura(unit, z, filter)
+			if not id or id == isID then
+				break
+			end
+		end
+	else
+		buffName, _, _, count, _, _, _, _, _, _, id = UnitAura(unit, name, nil, filter)
+	end
+	
 	if not buffName then
 		return 0
 	elseif buffName and count == 0 then
@@ -406,11 +418,12 @@ end
 
 function Env.AuraCount(unit, name, filter)
 	local n = 0
-	for i = 1, 60 do
-		local buffName = UnitAura(unit, i, filter)
+	local isID = isNumber[name]
+	for z = 1, 60 do
+		local buffName, _, _, _, _, _, _, _, _, _, id = UnitAura(unit, z, filter)
 		if not buffName then
 			return n
-		elseif strlower(buffName) == name then
+		elseif (isID and isID == id) or (not isID and strlowerCache[buffName] == name) then
 			n = n + 1
 		end
 	end
@@ -418,7 +431,20 @@ function Env.AuraCount(unit, name, filter)
 end
 
 function Env.AuraDur(unit, name, filter, time)
-	local buffName, _, _, _, _, duration, expirationTime = UnitAura(unit, name, nil, filter)
+	local buffName, duration, expirationTime, id, _
+	local isID = isNumber[name]
+	if isID then
+		for z = 1, 60 do
+			buffName, _, _, _, _, duration, expirationTime, _, _, _, id = UnitAura(unit, z, filter)
+			if not id or id == isID then
+				break
+			end
+		end
+	else
+		buffName, _, _, _, _, duration, expirationTime, _, _, _, id = UnitAura(unit, name, nil, filter)
+	end
+	
+	
 	if not buffName then
 		return 0
 	else
@@ -426,13 +452,20 @@ function Env.AuraDur(unit, name, filter, time)
 	end
 end
 
-function Env.TotemDuration(slot, time)
-	local have, name, start, duration = GetTotemInfo(slot)
-	return duration and duration ~= 0 and (duration - (time - start)) or 0
-end
-
-function Env.GetTooltipNumber(unit, name, filter)
-	local buffName, _, _, count, _, _, _, _, _, _, _, _, _, v1, v2, v3 = UnitAura(unit, name, nil, filter)
+function Env.AuraTooltipNumber(unit, name, filter)
+	local buffName, v1, v2, v3, id, _
+	local isID = isNumber[name]
+	if isID then
+		for z = 1, 60 do
+			buffName, _, _, _, _, duration, expirationTime, _, _, _, id = UnitAura(unit, z, filter)
+			if not id or id == isID then
+				break
+			end
+		end
+	else
+		buffName, _, _, _, _, duration, expirationTime, _, _, _, id = UnitAura(unit, name, nil, filter)
+	end
+	
 	if v1 then
 		if v1 > 0 then
 			return v1
@@ -443,6 +476,11 @@ function Env.GetTooltipNumber(unit, name, filter)
 		end
 	end
 	return 0
+end
+
+function Env.TotemDuration(slot, time)
+	local have, name, start, duration = GetTotemInfo(slot)
+	return duration and duration ~= 0 and (duration - (time - start)) or 0
 end
 
 function Env.GetZoneType()
@@ -1937,14 +1975,20 @@ CNDT.Types = {
 		icon = "Interface\\Icons\\spell_nature_rejuvenation",
 		tcoords = standardtcoords,
 		funcstr = function(c)
-			return [[AuraDur(c.Unit, c.NameName, "HELPFUL]] .. (c.Checked and "|PLAYER" or "") .. [[", time) c.Operator c.Level]]
+			return [[AuraDur(c.Unit, c.NameFirst, "HELPFUL]] .. (c.Checked and "|PLAYER" or "") .. [[", time) c.Operator c.Level]]
 		end,
 		events = function(c)
 			return CNDT:IsUnitEventUnit(c.Unit), "UNIT_AURA", c.Unit
 		end,
 		anticipate = function(c)
-			return [[local _, _, _, _, _, _, expirationTime = UnitAura(c.Unit, c.NameName, nil, "HELPFUL]] .. (c.Checked and "|PLAYER" or "") .. [[")
-			local VALUE = expirationTime and expirationTime - c.Level or 0]]
+			return [[local dur = AuraDur(c.Unit, c.NameFirst, "HELPFUL]] .. (c.Checked and "|PLAYER" or "") .. [[", time)
+			local VALUE
+			if dur and dur > 0 then
+				local expirationTime = dur + time
+				VALUE = expirationTime and expirationTime - c.Level or 0
+			else
+				VALUE = 0
+			end]]
 		end,
 	},
 	{ -- unit buff duration compare
@@ -1960,7 +2004,7 @@ CNDT.Types = {
 		icon = "Interface\\Icons\\spell_nature_rejuvenation",
 		tcoords = standardtcoords,
 		funcstr = function(c)
-			return [[AuraDur(c.Unit, c.NameName, "HELPFUL]] .. (c.Checked and "|PLAYER" or "") .. [[", time) c.Operator AuraDur(c.Unit, c.NameName2, "HELPFUL]] .. (c.Checked2 and "|PLAYER" or "") .. [[", time)]]
+			return [[AuraDur(c.Unit, c.NameFirst, "HELPFUL]] .. (c.Checked and "|PLAYER" or "") .. [[", time) c.Operator AuraDur(c.Unit, c.NameFirst2, "HELPFUL]] .. (c.Checked2 and "|PLAYER" or "") .. [[", time)]]
 		end,
 		events = function(c)
 			return CNDT:IsUnitEventUnit(c.Unit), "UNIT_AURA", c.Unit
@@ -1978,7 +2022,7 @@ CNDT.Types = {
 		icon = "Interface\\Icons\\inv_misc_herb_felblossom",
 		tcoords = standardtcoords,
 		funcstr = function(c)
-			return [[AuraStacks(c.Unit, c.NameName, "HELPFUL]] .. (c.Checked and "|PLAYER" or "") .. [[") c.Operator c.Level]]
+			return [[AuraStacks(c.Unit, c.NameFirst, "HELPFUL]] .. (c.Checked and "|PLAYER" or "") .. [[") c.Operator c.Level]]
 		end,
 		events = function(c)
 			return CNDT:IsUnitEventUnit(c.Unit), "UNIT_AURA", c.Unit
@@ -1997,7 +2041,7 @@ CNDT.Types = {
 		icon = "Interface\\Icons\\inv_elemental_primal_mana",
 		tcoords = standardtcoords,
 		funcstr = function(c)
-			return [[GetTooltipNumber(c.Unit, c.NameName, "HELPFUL]] .. (c.Checked and "|PLAYER" or "") .. [[") c.Operator c.Level]]
+			return [[AuraTooltipNumber(c.Unit, c.NameFirst, "HELPFUL]] .. (c.Checked and "|PLAYER" or "") .. [[") c.Operator c.Level]]
 		end,
 		events = function(c)
 			return CNDT:IsUnitEventUnit(c.Unit), "UNIT_AURA", c.Unit
@@ -2037,14 +2081,20 @@ CNDT.Types = {
 		icon = "Interface\\Icons\\spell_shadow_abominationexplosion",
 		tcoords = standardtcoords,
 		funcstr = function(c)
-			return [[AuraDur(c.Unit, c.NameName, "HARMFUL]] .. (c.Checked and "|PLAYER" or "") .. [[", time) c.Operator c.Level]]
+			return [[AuraDur(c.Unit, c.NameFirst, "HARMFUL]] .. (c.Checked and "|PLAYER" or "") .. [[", time) c.Operator c.Level]]
 		end,
 		events = function(c)
 			return CNDT:IsUnitEventUnit(c.Unit), "UNIT_AURA", c.Unit
 		end,
 		anticipate = function(c)
-			return [[local _, _, _, _, _, _, expirationTime = UnitAura(c.Unit, c.NameName, nil, "HARMFUL]] .. (c.Checked and "|PLAYER" or "") .. [[")
-			local VALUE = expirationTime and expirationTime - c.Level or 0]]
+			return [[local dur = AuraDur(c.Unit, c.NameFirst, "HARMFUL]] .. (c.Checked and "|PLAYER" or "") .. [[", time)
+			local VALUE
+			if dur and dur > 0 then
+				local expirationTime = dur + time
+				VALUE = expirationTime and expirationTime - c.Level or 0
+			else
+				VALUE = 0
+			end]]
 		end,
 		spacebefore = true,
 	},
@@ -2061,7 +2111,7 @@ CNDT.Types = {
 		icon = "Interface\\Icons\\spell_shadow_abominationexplosion",
 		tcoords = standardtcoords,
 		funcstr = function(c)
-			return [[AuraDur(c.Unit, c.NameName, "HARMFUL]] .. (c.Checked and "|PLAYER" or "") .. [[", time) c.Operator AuraDur(c.Unit, c.NameName2, "HARMFUL]] .. (c.Checked2 and "|PLAYER" or "") .. [[", time)]]
+			return [[AuraDur(c.Unit, c.NameFirst, "HARMFUL]] .. (c.Checked and "|PLAYER" or "") .. [[", time) c.Operator AuraDur(c.Unit, c.NameFirst2, "HARMFUL]] .. (c.Checked2 and "|PLAYER" or "") .. [[", time)]]
 		end,
 		events = function(c)
 			return CNDT:IsUnitEventUnit(c.Unit), "UNIT_AURA", c.Unit
@@ -2080,7 +2130,7 @@ CNDT.Types = {
 		icon = "Interface\\Icons\\ability_warrior_sunder",
 		tcoords = standardtcoords,
 		funcstr = function(c)
-			return [[AuraStacks(c.Unit, c.NameName, "HARMFUL]] .. (c.Checked and "|PLAYER" or "") .. [[") c.Operator c.Level]]
+			return [[AuraStacks(c.Unit, c.NameFirst, "HARMFUL]] .. (c.Checked and "|PLAYER" or "") .. [[") c.Operator c.Level]]
 		end,
 		events = function(c)
 			return CNDT:IsUnitEventUnit(c.Unit), "UNIT_AURA", c.Unit
@@ -2099,7 +2149,7 @@ CNDT.Types = {
 		icon = "Interface\\Icons\\spell_shadow_lifedrain",
 		tcoords = standardtcoords,
 		funcstr = function(c)
-			return [[GetTooltipNumber(c.Unit, c.NameName, "HARMFUL]] .. (c.Checked and "|PLAYER" or "") .. [[") c.Operator c.Level]]
+			return [[AuraTooltipNumber(c.Unit, c.NameFirst, "HARMFUL]] .. (c.Checked and "|PLAYER" or "") .. [[") c.Operator c.Level]]
 		end,
 		events = function(c)
 			return CNDT:IsUnitEventUnit(c.Unit), "UNIT_AURA", c.Unit
