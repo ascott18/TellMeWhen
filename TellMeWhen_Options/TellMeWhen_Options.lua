@@ -3269,7 +3269,7 @@ function IE:Equiv_GenerateTips(equiv)
 		local name, _, texture = GetSpellInfo(v)
 		if not name then
 			if TMW.debug then
-				TMW:Error("INVALID ID FOUND: "..equiv..":"..v)
+				TMW:Error("INVALID ID FOUND: %s:%s", equiv, v)
 			else
 				name = v
 				texture = "Interface\\Icons\\INV_Misc_QuestionMark"
@@ -7095,7 +7095,7 @@ function Module:OnInitialize()
 
 	for k, v in pairs(self.Spells) do
 		if self.Table[k] then
-			TMW:Error("Attempted to add spellID %d, but an item already has that id.", nil, k)
+			TMW:Error("Attempted to add spellID %d, but an item already has that id.", k)
 		else
 			self.Table[k] = v
 		end

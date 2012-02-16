@@ -32,7 +32,7 @@ local DRData = LibStub("DRData-1.0", true)
 TELLMEWHEN_VERSION = "5.0.0"
 TELLMEWHEN_VERSION_MINOR = strmatch(" @project-version@", " r%d+") or ""
 TELLMEWHEN_VERSION_FULL = TELLMEWHEN_VERSION .. TELLMEWHEN_VERSION_MINOR
-TELLMEWHEN_VERSIONNUMBER = 50017 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
+TELLMEWHEN_VERSIONNUMBER = 50018 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
 if TELLMEWHEN_VERSIONNUMBER > 51000 or TELLMEWHEN_VERSIONNUMBER < 50000 then return error("YOU SCREWED UP THE VERSION NUMBER OR DIDNT CHANGE THE SAFETY LIMITS") end -- safety check because i accidentally made the version number 414069 once
 
 TELLMEWHEN_MAXGROUPS = 1 	--this is a default, used by SetTheory (addon), so dont rename
@@ -121,7 +121,7 @@ do	-- Class Lib
 		__unm = true,
 	}
 	local function writeerror(self, key, value)
-		TMW:Error(("Cannot write value %q to key %q on class %q because an instance has already been created"):format(value, key, self.name))
+		TMW:Error("Cannot write value %q to key %q on class %q because an instance has already been created", value, key, self.name)
 	end
 	
 	local function initializeClass(self)
@@ -172,7 +172,7 @@ do	-- Class Lib
 
 		for k, v in pairs(self.instancemeta.__index) do
 			if target[k] and not canOverwrite then
-				TMW:Error(("Error embedding class %s into target %s: Field %q already exists on the target."):format(self.name, tostring(target:GetName() or target), k))
+				TMW:Error("Error embedding class %s into target %s: Field %q already exists on the target.", self.name, tostring(target:GetName() or target), k)
 			else
 				target[k] = v
 			end
@@ -1565,14 +1565,6 @@ end
 function TMW:Update()
 	if not TMW.EnteredWorld then return end
 
-	if not TMW.Warned then
-		for k, v in ipairs(TMW.Warn) do
-			TMW:Print(v)
-			TMW.Warn[k] = true
-		end
-		TMW.Warned = true
-	end
-
 	time = GetTime() TMW.time = time
 	LastUpdate = time - 10
 	updatePBars = 1
@@ -1610,6 +1602,10 @@ function TMW:Update()
 		group:Setup()
 	end
 
+	for key, Type in pairs(TMW.Types) do
+		Type:Update(true)
+	end
+
 	if not Locked then
 		TMW:DoValidityCheck()
 	end
@@ -1617,6 +1613,18 @@ function TMW:Update()
 	TMW:ScheduleTimer("ForceUpdatePBars", 0.55)
 	TMW:ScheduleTimer("ForceUpdatePBars", 1)
 	TMW:ScheduleTimer("ForceUpdatePBars", 2)
+	
+	TMW:ScheduleTimer("DoWarn", 3)
+end
+
+function TMW:DoWarn()
+	if not TMW.Warned then
+		for k, v in ipairs(TMW.Warn) do
+			TMW:Print(v)
+			TMW.Warn[k] = true
+		end
+		TMW.Warned = true
+	end
 end
 
 function TMW:GetUpgradeTable()			-- upgrade functions
@@ -2447,10 +2455,10 @@ function TMW:GlobalUpgrade()
 	TellMeWhenDB.Version = TELLMEWHEN_VERSIONNUMBER -- pre-default upgrades complete!
 end
 
-function TMW:Error(text, level, ...)
+function TMW:Error(text, ...)
 	text = text or ""
 	text = format(text, ...)
-	geterrorhandler()("TellMeWhen: " .. (text), level)
+	geterrorhandler()("TellMeWhen: " .. (text))
 end
 
 function TMW:Upgrade()
@@ -2541,7 +2549,7 @@ function TMW:LoadOptions(recursed)
 		else
 			local err = L["LOADERROR"] .. _G["ADDON_"..reason]
 			TMW:Print(err)
-			TMW:Error(err, 0) -- non breaking error
+			TMW:Error(err) -- non breaking error
 		end
 	else
 		for k, v in pairs(INTERFACEOPTIONS_ADDONCATEGORIES) do
@@ -2752,7 +2760,7 @@ function TMW:ProcessEquivalencies()
 		end
 		local dr = TMW.BE.dr
 		for spellID, category in pairs(DRData.spells) do
-			local k = myCategories[category] or TMW:Error("TMW: The DR category %q is undefined!", 0, category)
+			local k = myCategories[category] or TMW:Error("TMW: The DR category %q is undefined!", category)
 			dr[k] = (dr[k] and (dr[k] .. ";" .. spellID)) or tostring(spellID)
 		end
 	end
@@ -2776,7 +2784,7 @@ function TMW:ProcessEquivalencies()
 
 					else  -- this should never ever ever happen except in new patches if spellIDs were wrong (experience talking)
 						if clientVersion >= addonVersion then -- dont warn for old clients using newer versions
-							TMW:Error("Invalid spellID found: " .. realID .. "! Please report this on TMW's CurseForge page, especially if you are currently on the PTR!")
+							TMW:Error("Invalid spellID found: %s! Please report this on TMW's CurseForge page, especially if you are currently on the PTR!", realID)
 						end
 						str = gsub(str, id, realID) -- still need to substitute it to prevent recusion
 					end
@@ -4142,7 +4150,7 @@ function AnimatedObject:Animations_OnUnused()
 		end
 	end
 end
-function AnimatedObject:Animations_Start(table, dontInherit)
+function AnimatedObject:Animations_Start(table)
 	local Animation = table.data.Animation
 	local AnimationData = Animation and AnimationList[Animation]
 
@@ -4161,13 +4169,11 @@ function AnimatedObject:Animations_Start(table, dontInherit)
 		end
 
 		-- meta inheritance
-		if not dontInherit then
-			local Icons = Types.meta.Icons
-			for i = 1, #Icons do
-				local ic = Icons[i]
-				if ic.__currentIcon == self then
-					ic:Animations_Start(table, true)
-				end
+		local Icons = Types.meta.Icons
+		for i = 1, #Icons do
+			local ic = Icons[i]
+			if ic.__currentIcon == self then
+				ic:Animations_Start(table, ic)
 			end
 		end
 	end

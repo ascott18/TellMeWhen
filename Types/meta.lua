@@ -48,9 +48,30 @@ Type.RelevantSettings = {
 	Sort = true,
 }
 
+local CCI_icon
+local function CheckCompiledIcons(icon)
+	CCI_icon = icon
+	for _, ic in pairs(icon.CompiledIcons) do
+		ic = _G[ic]
+		if ic and ic.CompiledIcons and ic.Type == "meta" and ic.Enabled then
+			CheckCompiledIcons(ic)
+		end
+	end
+end
 
-function Type:Update()
+function Type:Update(after)
 	db = TMW.db
+	
+	if after then
+		for _, icon in pairs(Type.Icons) do
+			local success, err = pcall(CheckCompiledIcons, icon)
+			if err and err:find("stack overflow") then
+				local err = format("Meta icon recursion was detected in %s - there is an endless loop between the icon and its sub icons.", CCI_icon:GetName())
+				TMW:Error(err)
+				TMW.Warn(err)
+			end
+		end
+	end	
 end
 
 
@@ -155,7 +176,7 @@ local InsertIcon, GetFullIconTable -- both need access to eachother, so scope th
 local alreadyinserted = {}
 function InsertIcon(icon, ics, ic)
 	if ics.Type ~= "meta" or not icon.CheckNext then
-		alreadyinserted[ic] = true -- we might not insert if ic isnt enabled, but pretend that we did so we dont have to check again
+		alreadyinserted[ic] = true -- we might not have inserted if ic isnt enabled, but pretend that we did so we dont have to check again
 		if ics.Enabled then
 			tinsert(icon.CompiledIcons, ic)
 		end
