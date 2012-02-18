@@ -1,18 +1,26 @@
 ===v5.0.0===
- * Several icon types have been changed to be entirely event based, meaning that they will no longer update themselves when they don't need to, resulting in a (tremendous) performance increase.
- * The Condition engine has been completely rewritten and is now almost entirely event driven, resulting in another (tremendous) performance increase.
- * You can now sort all of the icons of a group based on attributes like duration, stacks, and opacity.
- * Enrage is now a proper dispel type, and no longer relies on a pre-defined list of enrages.
- * Implemented a proper class-based inheritance system for many objects (Icons, Icon Types, Groups, Condition Groups).
- * You can now check units relative to the special condition unit '%u' (//for example, '%u-target' or '%upettarget'//).
- * You can now drag spells and items to the Custom Texture editbox to easily insert the texture of that spell or item.
- * Icons that check units now have their units managed behind the scenes whenever possible so that icons aren't trying to check units that don't exist.
- * There is now an option (enabled by default) to color the names of units in text displays and outputs.
- * Added Floating Combat Text as a text output.
- * You can now press tab to insert the first entry that is displayed in the suggestion list.
- * The icon listing in dropdowns for meta icons, condition icons, and others is now much prettier and more informative.
- * Added slash commands to easily enable or disable icons and groups.
- * Added two new animations: Icon Border and Icon Image Overlay.
+ * Super cool changes:
+ ** All icon types have been changed to be entirely event based, meaning that they will no longer update themselves when they don't need to, resulting in a (tremendous) performance increase.
+ ** The Condition engine has been completely rewritten and is now almost entirely event driven, resulting in another (tremendous) performance increase.
+ ** Events have been completely rewritten to allow an unlimited amount of handlers to be created for an icon (instead of one text, one sound, and one animation per event per icon as previously).
+ ** You can now sort all of the icons of a group based on attributes like duration, stacks, and opacity.
+
+ * Pretty cool changes:
+ ** You can now check units relative to the special condition unit '%u' (//for example, '%u-target' or '%upettarget'//).
+ ** There is now an option (enabled by default) to color the names of units in text displays and outputs.
+ ** Added slash commands to easily enable or disable icons and groups.
+ ** Added Floating Combat Text as a text output.
+ ** Added two new animations: Icon Border and Icon Image Overlay.
+ ** You can now press tab to insert the first entry that is displayed in the suggestion list.
+ 
+ * Really boring changes:
+ ** The icon listing in dropdowns for meta icons, condition icons, and others is now much prettier and more informative.
+ ** Enrage is now a proper dispel type, and no longer relies on a pre-defined list of enrages.
+ ** Implemented a proper class-based inheritance system for many objects (Icons, Icon Types, Groups, Condition Groups).
+ ** Icons that check units now have their units managed behind the scenes whenever possible so that icons aren't trying to check units that don't exist.
+ ** You can now drag spells and items to the Custom Texture editbox to easily insert the texture of that spell or item.
+ ** Power bars and Timer bars have been shipped out into their own files, so a completely restart will be needed if you want to use them.
+ 
  * Bug Fixes:
  ** (r427) (Condition):  attempt to call global 'GetPrimaryTalentTree' (a nil value)
  ** (r428) (Condition):  attempt to call global 'IsResting' (a nil value)

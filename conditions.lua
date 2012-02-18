@@ -393,18 +393,17 @@ function Env.UnitCast(unit, level, matchname)
 	end
 end
 
-function Env.AuraStacks(unit, name, filter)
-	local buffName, count, id, _
+function Env.AuraStacks(unit, name, namename, filter)
 	local isID = isNumber[name]
-	if isID then
+	
+	local buffName, _, _, count, _, _, _, _, _, _, id = UnitAura(unit, namename, nil, filter)
+	if isID and id and id ~= isID then
 		for z = 1, 60 do
 			buffName, _, _, count, _, _, _, _, _, _, id = UnitAura(unit, z, filter)
 			if not id or id == isID then
 				break
 			end
 		end
-	else
-		buffName, _, _, count, _, _, _, _, _, _, id = UnitAura(unit, name, nil, filter)
 	end
 	
 	if not buffName then
@@ -416,7 +415,7 @@ function Env.AuraStacks(unit, name, filter)
 	end
 end
 
-function Env.AuraCount(unit, name, filter)
+function Env.AuraCount(unit, name, namename, filter)
 	local n = 0
 	local isID = isNumber[name]
 	for z = 1, 60 do
@@ -430,18 +429,17 @@ function Env.AuraCount(unit, name, filter)
 	return n
 end
 
-function Env.AuraDur(unit, name, filter, time)
-	local buffName, duration, expirationTime, id, _
+function Env.AuraDur(unit, name, namename, filter, time)
 	local isID = isNumber[name]
-	if isID then
+	
+	local buffName, _, _, _, _, duration, expirationTime, _, _, _, id = UnitAura(unit, namename, nil, filter)
+	if isID and id and id ~= isID then
 		for z = 1, 60 do
 			buffName, _, _, _, _, duration, expirationTime, _, _, _, id = UnitAura(unit, z, filter)
 			if not id or id == isID then
 				break
 			end
 		end
-	else
-		buffName, _, _, _, _, duration, expirationTime, _, _, _, id = UnitAura(unit, name, nil, filter)
 	end
 	
 	
@@ -452,18 +450,17 @@ function Env.AuraDur(unit, name, filter, time)
 	end
 end
 
-function Env.AuraTooltipNumber(unit, name, filter)
-	local buffName, v1, v2, v3, id, _
+function Env.AuraTooltipNumber(unit, name, namename, filter)
 	local isID = isNumber[name]
-	if isID then
+	
+	local _, _, _, _, _, _, _, _, _, _, id, _, _, v1, v2, v3 = UnitAura(unit, namename, nil, filter)
+	if isID and id and id ~= isID then
 		for z = 1, 60 do
-			buffName, _, _, _, _, duration, expirationTime, _, _, _, id = UnitAura(unit, z, filter)
+			_, _, _, _, _, _, _, _, _, _, id, _, _, v1, v2, v3 = UnitAura(unit, z, filter)
 			if not id or id == isID then
 				break
 			end
 		end
-	else
-		buffName, _, _, _, _, duration, expirationTime, _, _, _, id = UnitAura(unit, name, nil, filter)
 	end
 	
 	if v1 then
@@ -1975,13 +1972,13 @@ CNDT.Types = {
 		icon = "Interface\\Icons\\spell_nature_rejuvenation",
 		tcoords = standardtcoords,
 		funcstr = function(c)
-			return [[AuraDur(c.Unit, c.NameFirst, "HELPFUL]] .. (c.Checked and "|PLAYER" or "") .. [[", time) c.Operator c.Level]]
+			return [[AuraDur(c.Unit, c.NameFirst, c.NameName, "HELPFUL]] .. (c.Checked and "|PLAYER" or "") .. [[", time) c.Operator c.Level]]
 		end,
 		events = function(c)
 			return CNDT:IsUnitEventUnit(c.Unit), "UNIT_AURA", c.Unit
 		end,
 		anticipate = function(c)
-			return [[local dur = AuraDur(c.Unit, c.NameFirst, "HELPFUL]] .. (c.Checked and "|PLAYER" or "") .. [[", time)
+			return [[local dur = AuraDur(c.Unit, c.NameFirst, c.NameName, "HELPFUL]] .. (c.Checked and "|PLAYER" or "") .. [[", time)
 			local VALUE
 			if dur and dur > 0 then
 				local expirationTime = dur + time
@@ -2004,7 +2001,7 @@ CNDT.Types = {
 		icon = "Interface\\Icons\\spell_nature_rejuvenation",
 		tcoords = standardtcoords,
 		funcstr = function(c)
-			return [[AuraDur(c.Unit, c.NameFirst, "HELPFUL]] .. (c.Checked and "|PLAYER" or "") .. [[", time) c.Operator AuraDur(c.Unit, c.NameFirst2, "HELPFUL]] .. (c.Checked2 and "|PLAYER" or "") .. [[", time)]]
+			return [[AuraDur(c.Unit, c.NameFirst, c.NameName, "HELPFUL]] .. (c.Checked and "|PLAYER" or "") .. [[", time) c.Operator AuraDur(c.Unit, c.NameFirst2, c.NameName2, "HELPFUL]] .. (c.Checked2 and "|PLAYER" or "") .. [[", time)]]
 		end,
 		events = function(c)
 			return CNDT:IsUnitEventUnit(c.Unit), "UNIT_AURA", c.Unit
@@ -2022,7 +2019,7 @@ CNDT.Types = {
 		icon = "Interface\\Icons\\inv_misc_herb_felblossom",
 		tcoords = standardtcoords,
 		funcstr = function(c)
-			return [[AuraStacks(c.Unit, c.NameFirst, "HELPFUL]] .. (c.Checked and "|PLAYER" or "") .. [[") c.Operator c.Level]]
+			return [[AuraStacks(c.Unit, c.NameFirst, c.NameName, "HELPFUL]] .. (c.Checked and "|PLAYER" or "") .. [[") c.Operator c.Level]]
 		end,
 		events = function(c)
 			return CNDT:IsUnitEventUnit(c.Unit), "UNIT_AURA", c.Unit
@@ -2034,14 +2031,14 @@ CNDT.Types = {
 		value = "BUFFTOOLTIP",
 		category = L["CNDTCAT_BUFFSDEBUFFS"],
 		range = 500,
-		texttable = {[0] = "0 ("..L["ICONMENU_ABSENT"]..")"},
+		--texttable = {[0] = "0 ("..L["ICONMENU_ABSENT"]..")"},
 		name = function(editbox) TMW:TT(editbox, L["ICONMENU_BUFF"] .. " - " .. L["TOOLTIPSCAN"], "TOOLTIPSCAN_DESC", 1) editbox.label = L["BUFFTOCHECK"] end,
 		useSUG = true,
 		check = function(check) TMW:TT(check, "ONLYCHECKMINE", "ONLYCHECKMINE_DESC") end,
 		icon = "Interface\\Icons\\inv_elemental_primal_mana",
 		tcoords = standardtcoords,
 		funcstr = function(c)
-			return [[AuraTooltipNumber(c.Unit, c.NameFirst, "HELPFUL]] .. (c.Checked and "|PLAYER" or "") .. [[") c.Operator c.Level]]
+			return [[AuraTooltipNumber(c.Unit, c.NameFirst, c.NameName, "HELPFUL]] .. (c.Checked and "|PLAYER" or "") .. [[") c.Operator c.Level]]
 		end,
 		events = function(c)
 			return CNDT:IsUnitEventUnit(c.Unit), "UNIT_AURA", c.Unit
@@ -2081,13 +2078,13 @@ CNDT.Types = {
 		icon = "Interface\\Icons\\spell_shadow_abominationexplosion",
 		tcoords = standardtcoords,
 		funcstr = function(c)
-			return [[AuraDur(c.Unit, c.NameFirst, "HARMFUL]] .. (c.Checked and "|PLAYER" or "") .. [[", time) c.Operator c.Level]]
+			return [[AuraDur(c.Unit, c.NameFirst, c.NameName, "HARMFUL]] .. (c.Checked and "|PLAYER" or "") .. [[", time) c.Operator c.Level]]
 		end,
 		events = function(c)
 			return CNDT:IsUnitEventUnit(c.Unit), "UNIT_AURA", c.Unit
 		end,
 		anticipate = function(c)
-			return [[local dur = AuraDur(c.Unit, c.NameFirst, "HARMFUL]] .. (c.Checked and "|PLAYER" or "") .. [[", time)
+			return [[local dur = AuraDur(c.Unit, c.NameFirst, c.NameName, "HARMFUL]] .. (c.Checked and "|PLAYER" or "") .. [[", time)
 			local VALUE
 			if dur and dur > 0 then
 				local expirationTime = dur + time
@@ -2111,7 +2108,7 @@ CNDT.Types = {
 		icon = "Interface\\Icons\\spell_shadow_abominationexplosion",
 		tcoords = standardtcoords,
 		funcstr = function(c)
-			return [[AuraDur(c.Unit, c.NameFirst, "HARMFUL]] .. (c.Checked and "|PLAYER" or "") .. [[", time) c.Operator AuraDur(c.Unit, c.NameFirst2, "HARMFUL]] .. (c.Checked2 and "|PLAYER" or "") .. [[", time)]]
+			return [[AuraDur(c.Unit, c.NameFirst, c.NameName, "HARMFUL]] .. (c.Checked and "|PLAYER" or "") .. [[", time) c.Operator AuraDur(c.Unit, c.NameFirst2, c.NameName2, "HARMFUL]] .. (c.Checked2 and "|PLAYER" or "") .. [[", time)]]
 		end,
 		events = function(c)
 			return CNDT:IsUnitEventUnit(c.Unit), "UNIT_AURA", c.Unit
@@ -2130,7 +2127,7 @@ CNDT.Types = {
 		icon = "Interface\\Icons\\ability_warrior_sunder",
 		tcoords = standardtcoords,
 		funcstr = function(c)
-			return [[AuraStacks(c.Unit, c.NameFirst, "HARMFUL]] .. (c.Checked and "|PLAYER" or "") .. [[") c.Operator c.Level]]
+			return [[AuraStacks(c.Unit, c.NameFirst, c.NameName, "HARMFUL]] .. (c.Checked and "|PLAYER" or "") .. [[") c.Operator c.Level]]
 		end,
 		events = function(c)
 			return CNDT:IsUnitEventUnit(c.Unit), "UNIT_AURA", c.Unit
@@ -2142,14 +2139,14 @@ CNDT.Types = {
 		value = "DEBUFFTOOLTIP",
 		category = L["CNDTCAT_BUFFSDEBUFFS"],
 		range = 500,
-		texttable = {[0] = "0 ("..L["ICONMENU_ABSENT"]..")"},
+		--texttable = {[0] = "0 ("..L["ICONMENU_ABSENT"]..")"},
 		name = function(editbox) TMW:TT(editbox, L["ICONMENU_DEBUFF"] .. " - " .. L["TOOLTIPSCAN"], "TOOLTIPSCAN_DESC", 1) editbox.label = L["BUFFTOCHECK"] end,
 		useSUG = true,
 		check = function(check) TMW:TT(check, "ONLYCHECKMINE", "ONLYCHECKMINE_DESC") end,
 		icon = "Interface\\Icons\\spell_shadow_lifedrain",
 		tcoords = standardtcoords,
 		funcstr = function(c)
-			return [[AuraTooltipNumber(c.Unit, c.NameFirst, "HARMFUL]] .. (c.Checked and "|PLAYER" or "") .. [[") c.Operator c.Level]]
+			return [[AuraTooltipNumber(c.Unit, c.NameFirst, c.NameName, "HARMFUL]] .. (c.Checked and "|PLAYER" or "") .. [[") c.Operator c.Level]]
 		end,
 		events = function(c)
 			return CNDT:IsUnitEventUnit(c.Unit), "UNIT_AURA", c.Unit
@@ -3068,7 +3065,7 @@ function CNDT:CheckParentheses(type, settings)
 	local numclose, numopen, runningcount = 0, 0, 0
 	local unopened = 0
 
-	for Condition in TMW:InConditions(settings) do
+	for Condition in TMW:InNLengthTable(settings) do
 		for i = 1, Condition.PrtsBefore do
 			numopen = numopen + 1
 			runningcount = runningcount + 1

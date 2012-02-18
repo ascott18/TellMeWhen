@@ -266,7 +266,7 @@ local function CLEU_OnEvent(icon, _, t, event, h, sourceGUID, sourceName, source
 				(icon.cleu_destUnit ~= destUnit		and usedSubstitutions.e)	or
 				(icon.cleu_extraSpell ~= extraID	and usedSubstitutions.x)
 			then
-				BindTextObj:UpdateNonDurationSubstitutions()
+				BindTextObj:UpdateNonOnUpdateSubstitutions()
 			end
 		end
 

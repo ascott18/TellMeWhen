@@ -1,0 +1,233 @@
+-- --------------------
+-- TellMeWhen
+-- Originally by Nephthys of Hyjal <lieandswell@yahoo.com>
+
+-- Other contributions by
+-- Sweetmms of Blackrock
+-- Oozebull of Twisting Nether
+-- Oodyboo of Mug'thol
+-- Banjankri of Blackrock
+-- Predeter of Proudmoore
+-- Xenyr of Aszune
+
+-- Currently maintained by
+-- Cybeloras of Mal'Ganis
+-- --------------------
+
+
+if not TMW then return end
+
+local TMW = TMW
+local LSM = LibStub("LibSharedMedia-3.0")
+local	pairs, wipe =
+		pairs, wipe
+local CBarsToUpdate = {}
+
+local CBar = TMW:NewClass("CBar", "StatusBar", "UpdateTableManager")
+CBar:UpdateTable_Set(CBarsToUpdate)
+
+function CBar:OnNewInstance(...)
+	local _, name, icon = ... -- the CreateFrame args
+	
+	self.Max = 1
+	self.CBarOffs = 0
+	self.icon = icon
+	self:SetFrameLevel(icon:GetFrameLevel() + 2)
+	self:SetMinMaxValues(0, self.Max)
+	
+	self.start = 0
+	self.duration = 0
+	
+	self:SetPoint("TOP", icon, "CENTER", 0, -0.5)
+	self:SetPoint("BOTTOMLEFT")
+	self:SetPoint("BOTTOMRIGHT")
+	
+	self.texture = self:CreateTexture(nil, "OVERLAY")
+	self.texture:SetAllPoints()
+	self:SetStatusBarTexture(self.texture)
+end
+
+function CBar:SetAttributes(source)
+	-- source should either be a CBar or an Icon.
+	-- Code must maintain compatability so that both of these will work as input (keep inherited keys the same)
+	
+	self.InvertBars = source.InvertBars
+	self.CBarOffs = source.CBarOffs or 0
+	self.ShowCBar = source.ShowCBar
+	
+	-- THIS WONT REALLY WORK CORRECTLY
+	self.startColor = source.startColor or (source.typeData and source.typeData.CBS)
+	self.completeColor = source.completeColor or (source.typeData and source.typeData.CBC)
+	
+	if self.ShowCBar then
+		self:Show()
+	else
+		self:Hide()
+	end
+	
+	self:Update(1)
+end
+
+function CBar:Setup()
+	local icon = self.icon
+	
+	self.texture:SetTexture(LSM:Fetch("statusbar", TMW.db.profile.TextureName))
+	
+	local blizzEdgeInsets = icon.group.barInsets or 0
+	self:SetPoint("TOP", icon.texture, "CENTER", 0, -0.5)
+	self:SetPoint("BOTTOMLEFT", icon.texture, "BOTTOMLEFT", blizzEdgeInsets, blizzEdgeInsets)
+	self:SetPoint("BOTTOMRIGHT", icon.texture, "BOTTOMRIGHT", -blizzEdgeInsets, blizzEdgeInsets)
+	
+	self:SetAttributes(icon)
+end
+
+function CBar:Update(force)
+	local time = TMW.time
+	local ret = 0
+	
+	local value, doTerminate
+
+	local start, duration, InvertBars = self.start, self.duration, self.InvertBars
+
+	if InvertBars then
+		if duration == 0 then
+			value = self.Max
+		else
+			value = time - start + self.CBarOffs
+		end
+		doTerminate = value >= self.Max
+	else
+		if duration == 0 then
+			value = 0
+		else
+			value = duration - (time - start) + self.CBarOffs
+		end
+		doTerminate = value <= 0
+	end
+
+	if doTerminate then
+		self:UpdateTable_Unregister()
+		ret = -1
+		if InvertBars then
+			value = self.Max
+		else
+			value = 0
+		end
+	end
+
+	if force or value ~= self.__value then
+		self:SetValue(value)
+
+		local co = self.completeColor
+		local st = self.startColor
+
+		if not InvertBars then
+			-- normal
+			if value ~= 0 then
+				--local pct = (time - start) / duration
+				local pct = value / self.Max
+				local inv = 1-pct
+				self:SetStatusBarColor(
+					(co.r * pct) + (st.r * inv),
+					(co.g * pct) + (st.g * inv),
+					(co.b * pct) + (st.b * inv),
+					(co.a * pct) + (st.a * inv)
+				)
+			--else
+				-- no reason to do thisif value is 0
+				-- self:SetStatusBarColor(st.r, st.g, st.b, st.a)
+			end
+		else
+			--inverted
+			if value ~= 0 then
+				--local pct = (time - start) / duration
+				local pct = value / self.Max
+				local inv = 1-pct
+				self:SetStatusBarColor(
+					(co.r * pct) + (st.r * inv),
+					(co.g * pct) + (st.g * inv),
+					(co.b * pct) + (st.b * inv),
+					(co.a * pct) + (st.a * inv)
+				)
+			--else
+				-- no reason to do thisif value is 0
+				--	self:SetStatusBarColor(co.r, co.g, co.b, co.a)
+			end
+		end
+		self.__value = value
+	end
+	
+	return ret
+end
+
+function CBar:SetCooldown(start, duration, isGCD)
+	self.duration = duration
+	self.start = start
+	
+	if duration > 0 then
+		if isGCD and TMW.db.profile.BarGCD then -- TODO: upvalue BarGCD
+			self.duration = 0
+		end
+
+		self.Max = duration
+		self:SetMinMaxValues(0, duration)
+		self.__value = nil -- the displayed value might change when we change the max, so force an update
+
+		if not self.UpdateTable_IsInUpdateTable then
+			CBarsToUpdate[#CBarsToUpdate + 1] = self
+			self.UpdateTable_IsInUpdateTable = true
+		end
+	end
+end
+
+
+
+
+TMW:RegisterCallback("TMW_ONUPDATE", function(event, time, Locked)
+	local cbaroffs = 0
+	for i = 1, #CBarsToUpdate do
+		local cbar = CBarsToUpdate[i + cbaroffs]
+		cbaroffs = cbaroffs + cbar:Update()
+	end
+end)
+
+TMW:RegisterCallback("TMW_ICON_SETUP_POST", function(event, icon)
+	local cbar = icon.cbar
+	if cbar then
+		cbar:Setup()
+		cbar.__value = nil
+
+		cbar:UpdateTable_Unregister()
+		if TMW.db.profile.Locked and icon.ShowCBar then
+			cbar:UpdateTable_Register()
+		end
+		
+		if TMW.db.profile.Locked then
+			cbar:SetAlpha(.9)
+		else
+			cbar:UpdateTable_Unregister()
+			cbar:SetValue(cbar.Max)
+			cbar:SetAlpha(.7)
+			cbar:SetStatusBarColor(0, 1, 0, 0.5)
+		end
+		
+		if icon.isDefaultSkin then
+			icon.cbar:SetFrameLevel(icon:GetFrameLevel() + 2)
+		else
+			icon.cbar:SetFrameLevel(icon:GetFrameLevel() + -1)
+		end
+	end
+end)
+
+TMW:RegisterCallback("TMW_ICON_META_INHERITED_ICON_CHANGED", function(event, icon, icToUse)
+	icon.cbar:SetAttributes(icToUse.cbar)
+end)
+
+TMW:RegisterCallback("TMW_LOCK_TOGGLED", function(event, Locked)
+	if not Locked then
+		for _, cbar in pairs(CBarsToUpdate) do
+			cbar.UpdateTable_IsInUpdateTable = nil
+		end
+		wipe(CBarsToUpdate)
+	end
+end)

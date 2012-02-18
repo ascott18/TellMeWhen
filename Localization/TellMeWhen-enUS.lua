@@ -31,7 +31,7 @@ L["ERROR_ANCHORSELF"] = "%s was trying to anchor to itself, so TellMeWhen reset 
 
 L["LOCKED"] = "Locked"
 L["RESIZE"] = "Resize"
-L["RESIZE_TOOLTIP"] = "Click and drag to change size"
+L["RESIZE_TOOLTIP"] = "|cff7fffffClick-and-drag|r to resize"
 
 L["CONDITIONORMETA_CHECKINGINVALID"] = "Warning! Group %d, Icon %d is checking an invalid icon (Group %d, Icon %d)"
 L["CONDITIONORMETA_CHECKINGINVALID_GROUP"] = "Warning! Group %d is checking an invalid icon (Group %d, Icon %d)"
@@ -57,7 +57,7 @@ L["ICONMENU_CHOOSENAME_ITEMSLOT_DESC"] = [=[Enter the Name, ID, or equipment slo
 
 Equipment slots are numbered indexes that correspond to an equipped item. If you change the item equipped in that slot, the icon will reflect that.
 
-You can shift-click items and chat links or drag items to insert them into this editbox.]=]
+You can |cff7fffffShift-click|r items and chat links or drag items to insert them into this editbox.]=]
 
 L["ICONMENU_CHOOSENAME_MULTISTATE"] = "Choose name/ID to check"
 L["ICONMENU_CHOOSENAME_ORBLANK"] = "OR leave blank to track everything"
@@ -66,7 +66,7 @@ L["CHOOSENAME_EQUIVS_TOOLTIP"] = [[You can select predefined sets of buffs, debu
 L["CHOOSENAME_DIALOG_DDDEFAULT"] = "Predefined Spell Sets/Dispel Types"
 L["CHOOSENAME_DIALOG"] = [=[Enter the Name or ID of what you want this icon to monitor. You can add multiple entries (any combination of names, IDs, and equivalencies) by separating them with semicolons (;).
 
-You can shift-click spells/items/chat links or drag spells/items to insert them into this editbox.]=]
+You can |cff7fffffShift-click|r spells/items/chat links or drag spells/items to insert them into this editbox.]=]
 L["CHOOSENAME_DIALOG_PETABILITIES"] = "|cFFFF5959PET ABILITIES|r must use SpellIDs."
 L["CHOOSENAME_DIALOG_MSCD"] = [=[Enter the Name or ID of what the cooldown that you want this icon to monitor. Only the first spell/item will be checked - semicolon-delimited lists are not valid for this icon type.]=]
 L["CHOOSENAME_DIALOG_CNDTIC"] = "Enter the Name or ID of the spell that has the texture that you want to use. You may also enter a texture path, such as 'Interface/Icons/spell_nature_healingtouch', or just 'spell_nature_healingtouch' if the path is 'Interface/Icons'"
@@ -646,7 +646,7 @@ L["CONDITIONPANEL_VALUEN"] = "Value"
 L["CONDITIONPANEL_AND"] = "And"
 L["CONDITIONPANEL_OR"] = "Or"
 L["CONDITIONPANEL_ANDOR"] = "And / Or"
-L["CONDITIONPANEL_ANDOR_DESC"] = "Click to toggle between logical operators AND and OR"
+L["CONDITIONPANEL_ANDOR_DESC"] = "|cff7fffffClick|r to toggle between logical operators AND and OR"
 L["CONDITIONPANEL_POWER"] = "Primary Resource"
 L["CONDITIONPANEL_ABSOLUTE"] = "Absolute"
 L["CONDITIONPANEL_MAX"] = "Max"
@@ -915,7 +915,7 @@ L["SUG_NPCAURAS"] = "Known NPC buffs/debuffs"
 L["SUG_PLAYERAURAS"] = "Known PC/pet buffs/debuffs"
 L["SUG_MISC"] = "Miscellaneous"
 L["SUG_FINISHHIM"] = "Finish Caching Now"
-L["SUG_FINISHHIM_DESC"] = "Click to immediately finish the caching/filtering process. Note that your computer may freeze for a few seconds."
+L["SUG_FINISHHIM_DESC"] = "|cff7fffffClick|r to immediately finish the caching/filtering process. Note that your computer may freeze for a few seconds."
 
 
 L["SUG_INSERT_ANY"] = "|cff7fffffClick|r"
@@ -939,53 +939,53 @@ L["SUG_ATBEGINING_DESC"] = "If checked, the suggestion list will only display sp
 
 
 
-L["SOUND_EVENT_ONSHOW"] = "Show"
+L["SOUND_EVENT_ONSHOW"] = "On Show"
 L["SOUND_EVENT_ONSHOW_DESC"] = "This event triggers when the icon becomes shown (even if %q is checked)."
 
-L["SOUND_EVENT_ONHIDE"] = "Hide"
+L["SOUND_EVENT_ONHIDE"] = "On Hide"
 L["SOUND_EVENT_ONHIDE_DESC"] = "This event triggers when the icon is hidden (even if %q is checked)."
 
-L["SOUND_EVENT_ONSTART"] = "Start"
+L["SOUND_EVENT_ONSTART"] = "On Start"
 L["SOUND_EVENT_ONSTART_DESC"] = [[This event triggers when the cooldown becomes unusable, the buff/debuff is applied, etc.]]
 
-L["SOUND_EVENT_ONFINISH"] = "Finish"
+L["SOUND_EVENT_ONFINISH"] = "On Finish"
 L["SOUND_EVENT_ONFINISH_DESC"] = [[This event triggers when the cooldown becomes usable, the buff/debuff falls off, etc.]]
 
-L["SOUND_EVENT_ONALPHAINC"] = "Alpha Increase"
+L["SOUND_EVENT_ONALPHAINC"] = "On Alpha Increase"
 L["SOUND_EVENT_ONALPHAINC_DESC"] = [[This event triggers when the opacity of an icon increases.
 
 NOTE: This event will not trigger when increasing from 0% opacity (On Show).]]
 
-L["SOUND_EVENT_ONALPHADEC"] = "Alpha Decrease"
+L["SOUND_EVENT_ONALPHADEC"] = "On Alpha Decrease"
 L["SOUND_EVENT_ONALPHADEC_DESC"] = [[This event triggers when the opacity of an icon decreases.
 
 NOTE: This event will not trigger when decreasing to 0% opacity (On Hide).]]
 
-L["SOUND_EVENT_ONUNIT"] = "Unit Changed"
+L["SOUND_EVENT_ONUNIT"] = "On Unit Changed"
 L["SOUND_EVENT_ONUNIT_DESC"] = [[This event triggers when the unit that that the icon is displaying information for has changed.]]
 
-L["SOUND_EVENT_ONSPELL"] = "Spell Changed"
+L["SOUND_EVENT_ONSPELL"] = "On Spell Changed"
 L["SOUND_EVENT_ONSPELL_DESC"] = [[This event triggers when the spell/item/etc. that that the icon is displaying information for has changed.]]
 
-L["SOUND_EVENT_ONSTACK"] = "Stacks Changed"
+L["SOUND_EVENT_ONSTACK"] = "On Stacks Changed"
 L["SOUND_EVENT_ONSTACK_DESC"] = [[This event triggers when the stacks of whatever the item is tracking has changed.
 
 This includes the amount of diminishment for %s icons.]]
 
-L["SOUND_EVENT_ONDURATION"] = "Duration Changed"
+L["SOUND_EVENT_ONDURATION"] = "On Duration Changed"
 L["SOUND_EVENT_ONDURATION_DESC"] = [[This event triggers when the duration of the icon's timer changes.
 
 Because this event occurs every time the icon is updated while a timer is running, you must set a condition, and the event will only occur when the state of that condition changes.]]
 
-L["SOUND_EVENT_ONCLEU"] = "Combat Event"
+L["SOUND_EVENT_ONCLEU"] = "On Combat Event"
 L["SOUND_EVENT_ONCLEU_DESC"] = [[This event triggers when a combat event that should be processed by the icon occurs.]]
 
-L["SOUND_EVENT_ONICONSHOW"] = "Other Icon Show"
+L["SOUND_EVENT_ONICONSHOW"] = "On Other Icon Show"
 L["SOUND_EVENT_ONICONSHOW_DESC"] = [[This event triggers when another icon (not this icon) is shown.
 
 Configure the icon that should be watched using the event settings below.]]
 
-L["SOUND_EVENT_ONICONHIDE"] = "Other Icon Hide"
+L["SOUND_EVENT_ONICONHIDE"] = "On Other Icon Hide"
 L["SOUND_EVENT_ONICONHIDE_DESC"] = [[This event triggers when another icon (not this icon) is hidden.
 
 Configure the icon that should be watched using the event settings below.]]
@@ -994,7 +994,6 @@ L["SOUND_EVENT_GLOBALDESC"] = "Events are checked from top to bottom in this lis
 L["SOUND_EVENT_DISABLEDFORTYPE"] = "Not available"
 L["SOUND_EVENT_DISABLEDFORTYPE_DESC"] = "This event is not available for %s type icons."
 
-L["SOUND_EVENTS"] = "Icon Events"
 L["SOUND_SOUNDTOPLAY"] = "Sound to Play"
 L["SOUND_CUSTOM"] = "Custom sound file"
 L["SOUND_CUSTOM_DESC"] = [[Insert the path to a custom sound to play. Here are some examples, where "file" is the name of your sound, and "ext" is the file's extension (ogg or mp3 only!):
@@ -1008,6 +1007,14 @@ L["SOUND_CUSTOM_DESC"] = [[Insert the path to a custom sound to play. Here are s
 NOTE: WoW must be restarted before it will recognize files that did not exist when it was started up.]]
 L["SOUND_TAB"] = "Sound"
 
+L["EVENTS_TAB"] = "Events"
+L["EVENTS_HANDLERS_HEADER"] = "Icon Event Handlers"
+L["EVENTS_HANDLERS_ADD"] = "Add Event Handler..."
+L["EVENTS_HANDLERS_ADD_DESC"] = "|cff7fffffClick|r to choose an event handler to add to this icon."
+L["EVENTS_HANDLERS_GLOBAL_DESC"] = [[|cff7fffffClick|r for event handler options.
+|cff7fffffClick-and-drag|r to move.]]
+L["EVENTS_HANDLERS_PLAY"] = "Test Event"
+L["EVENTS_HANDLERS_PLAY_DESC"] = "|cff7fffffClick|r to test the event handler"
 
 L["EVENTS_SETTINGS_HEADER"] = "Event Settings"
 --L["EVENTS_SETTINGS_HEADER_SUB"] = "Only handle %s:"
@@ -1023,7 +1030,8 @@ L["EVENTS_SETTINGS_CNDTJUSTPASSED"] = "And it just began passing"
 L["EVENTS_SETTINGS_CNDTJUSTPASSED_DESC"] = "Prevents the event from being handled unless the condition configured above has just begun succeeding."
 
 L["EVENTS_SETTINGS_PASSTHROUGH"] = "Continue to lower events"
-L["EVENTS_SETTINGS_PASSTHROUGH_DESC"] = [[Allows the handling of another event after this one if this one gets handled. If left unchecked, the icon will not process any %s after this event if this event does process and output some %s.
+L["EVENTS_SETTINGS_PASSTHROUGH_DESC"] = [[Check to allow another event to be handled after this one.
+If left unchecked, the icon will not process any more events after this event if it successfully processes and outputs/displays something.
 
 Exeptions may apply, see individual event descriptions for details.]]
 
@@ -1342,7 +1350,7 @@ It is recommended that you change the icon type to %q instead, which will track 
 
 L["HELP_IMPORT_CURRENTPROFILE"] = [[Trying to move or copy an icon from this profile to another icon slot?
 
-You can do so easily by right-clicking on the icon and dragging it (hold down the mouse button) to another slot. When you release the mouse button, a menu will appear with many options.
+You can do so easily by |cff7fffffRight-clicking and dragging|r the icon (hold down the mouse button) to another slot. When you release the mouse button, a menu will appear with many options.
 
 Try dragging an icon to a meta icon, another group, or another frame on your screen for other options.]]
 

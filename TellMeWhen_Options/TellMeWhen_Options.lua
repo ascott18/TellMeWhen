@@ -516,7 +516,7 @@ do -- TMW:ReconcileData()
 				end
 				
 				-- update any changed icons that icon show/hide events are checking
-				for _, eventSettings in pairs(ics.Events) do
+				for eventSettings in TMW:InNLengthTable(ics.Events) do
 					if type(eventSettings.Icon) == "string" then
 						replace(eventSettings, "Icon", source, destination, matchSource, matchDestination, swap)
 					end
@@ -2119,13 +2119,13 @@ function ME:LoadConfig()
 		IE.Main.Icons.ScrollFrame.ScrollBar:Hide()
 	end
 end
+TMW:RegisterCallback("TMW_CONFIG_LOAD", ME.LoadConfig, ME)
 
 
 ---------- Click Handlers ----------
 function ME:UpOrDown(self, delta)
-	local groupID, iconID = CI.g, CI.i
-	local settings = db.profile.Groups[groupID].Icons[iconID].Icons
 	local ID = self:GetParent():GetID()
+	local settings = CI.ics.Icons
 	local curdata, destinationdata
 	curdata = settings[ID]
 	destinationdata = settings[ID+delta]
@@ -2354,6 +2354,7 @@ function CLEU:LoadConfig()
 
 	CLEU:CheckMasks()
 end
+TMW:RegisterCallback("TMW_CONFIG_LOAD", CLEU.LoadConfig, CLEU)
 
 function CLEU:CheckMasks()
 	HELP:Hide("CLEU_WHOLECATEGORYEXCLUDED")
@@ -2725,11 +2726,9 @@ IE.LeftChecks = {
 IE.Tabs = {
 	"Main",				-- [1]
 	"Conditions",	   -- [2]
-	"Sound",			-- [3]
-	"Announcements",	-- [4]
-	"Animations",	   -- [5]
-	"Conditions",	   -- [6]
-	"MainOptions",	  -- [7]
+	"Events",			-- [3]
+	"Conditions",	   -- [4]
+	"MainOptions",	  -- [5]
 }
 
 
@@ -2748,7 +2747,6 @@ function IE:OnInitialize()
 	IE.history = {}
 	IE.historyState = 0
 
-	TMW:IterateAllModules("OnOptionsLoaded")
 	TMW:Fire("TMW_OPTIONS_LOADED")
 end
 
@@ -2866,7 +2864,7 @@ function IE:Load(isRefresh, icon, isHistoryChange)
 	CNDT:SetTabText("icon")
 	CNDT:SetTabText("group")
 
-	TMW:IterateAllModules("LoadConfig")
+	TMW:Fire("TMW_CONFIG_LOAD")
 
 	IE:SetupRadios()
 	IE:LoadSettings()
@@ -4541,7 +4539,7 @@ end
 ---------- Interface ----------
 function IE:UndoRedoChanged()
 	local icon = TMW.CI.ic
-	if not icon then return end
+	if not icon or not icon.historyState then return end
 
 	if icon.historyState - 1 < 1 then
 		IE.UndoButton:Disable()
@@ -4601,7 +4599,10 @@ EVENTS = TMW.EVENTS
 
 function EVENTS:SetupEventSettings()
 	local EventSettings = self.EventSettings
-	local eventData = self.Events[self.currentEventID].eventData
+	
+	if not EVENTS.currentEventID then return end
+	
+	local eventData = self.Events[EVENTS.currentEventID].eventData
 
 	EventSettings.EventName:SetText(eventData.text) --L["EVENTS_SETTINGS_HEADER_SUB"]:format(eventData.text))
 
@@ -4673,8 +4674,8 @@ end
 
 function EVENTS:OperatorMenu_DropDown()
 	-- self is not Module
-	local Module = self:GetParent():GetParent().module
-	local eventData = Module.Events[Module.currentEventID].eventData
+	local Module = TMW.EVENTS.currentModule
+	local eventData = Module.Events[EVENTS.currentEventID].eventData
 
 	for k, v in pairs(operators) do
 		if not eventData.blacklistedOperators or not eventData.blacklistedOperators[v.value] then
@@ -4692,7 +4693,7 @@ end
 
 function EVENTS:OperatorMenu_DropDown_OnClick(frame)
 	local dropdown = self
-	local self = TMW:FindModule(frame)
+	local self = TMW.EVENTS.currentModule
 
 	TMW:SetUIDropdownText(frame, dropdown.value)
 
@@ -4744,7 +4745,7 @@ end
 
 function EVENTS:IconMenu_DropDown_OnClick(frame)
 	local dropdown = self
-	local self = TMW:FindModule(frame)
+	local self = TMW.EVENTS.currentModule
 
 	TMW:SetUIDropdownText(frame, dropdown.value, TMW.InIcons)
 	CloseDropDownMenus()
@@ -4763,46 +4764,52 @@ function EVENTS:CreateEventButtons(globalDescKey)
 	if locale == "zhCN" or locale == "zhTW" then
 		yAdjustTitle, yAdjustText = 3, -3
 	end]]
-
-	for i, eventData in ipairs(TMW.EventList) do
-		local frame = CreateFrame("Button", Events:GetName().."Event"..i, Events, "TellMeWhen_Event", i)
+	local Settings = self:GetEventSettings()
+	
+	for eventSettings, i in TMW:InNLengthTable(CI.ics.Events) do
+		local eventData = TMW.EventList[eventSettings.Event]
+		local frame = Events[i] or CreateFrame("Button", Events:GetName().."Event"..i, Events, "TellMeWhen_Event", i)
 		Events[i] = frame
 		frame:SetPoint("TOPLEFT", previousFrame, "BOTTOMLEFT")
 		frame:SetPoint("TOPRIGHT", previousFrame, "BOTTOMRIGHT")
 
-		local p, t, r, x, y = frame.EventName:GetPoint()
-		frame.EventName:SetPoint(p, t, r, x, y --[[+ yAdjustTitle]])
+		--[[local p, t, r, x, y = frame.EventName:GetPoint()
+		frame.EventName:SetPoint(p, t, r, x, y + yAdjustTitle)
 		local p, t, r, x, y = frame.DataText:GetPoint()
-		frame.DataText:SetPoint(p, t, r, x, y --[[+ yAdjustText]])
+		frame.DataText:SetPoint(p, t, r, x, y + yAdjustText)]]
 
-		for k, v in pairs(frame) do
-			if type(v) == "table" and v.ExclusiveTo then
-				if v.ExclusiveTo == self:GetName() then
-					v:Show()
-				else
-					v:Hide()
-				end
-			end
+		if eventData then
+			frame:Show()
+			
+			frame.event = eventData.name
+			frame.eventData = eventData
+
+			frame.EventName:SetText(eventData.text)
+
+			frame.normalDesc = eventData.desc .. "\r\n\r\n" .. L["EVENTS_HANDLERS_GLOBAL_DESC"]
+			TMW:TT(frame, eventData.text, frame.normalDesc, 1, 1)
+		else
+			frame.EventName:SetText("UNKNOWN EVENT: " .. tostring(eventSettings.Event))
+			frame:Disable()
+			
 		end
-
-		frame.event = eventData.name
-		frame.eventData = eventData
-
-		frame.EventName:SetText(eventData.text .. ":")
-
-		frame.normalDesc = eventData.desc --.. "\r\n\r\n" .. L[globalDescKey]
-		TMW:TT(frame, eventData.text, frame.normalDesc, 1, 1)
-
 		previousFrame = frame
 	end
+	
+	for i = max(CI.ics.Events.n + 1, 1), #Events do
+		Events[i]:Hide()
+	end
 
-	Events[1]:SetPoint("TOPLEFT", Events, "TOPLEFT", 0, 0)
-	Events[1]:SetPoint("TOPRIGHT", Events, "TOPRIGHT", 0, 0)
-	Events:SetHeight(#Events*Events[1]:GetHeight())
+	if Events[1] then
+		Events[1]:SetPoint("TOPLEFT", Events, "TOPLEFT", 0, 0)
+		Events[1]:SetPoint("TOPRIGHT", Events, "TOPRIGHT", 0, 0)
+	end
+	
+	Events:SetHeight(max(CI.ics.Events.n*(Events[1] and Events[1]:GetHeight() or 0), 1))
 end
 
 function EVENTS:EnableAndDisableEvents()
-	local oldID = self.currentEventID
+	local oldID = EVENTS.currentEventID
 
 	for i, frame in ipairs(self.Events) do
 		if Types[CI.ic]["EventDisabled_" .. frame.event] then
@@ -4816,17 +4823,48 @@ function EVENTS:EnableAndDisableEvents()
 		else
 			TMW:TT(frame, frame.eventData.text, frame.normalDesc, 1, 1)
 			frame:Enable()
-			self:SetupEventDisplay(i)
+			local Module = self:GetModuleForEventSettings(i)
+			if Module then
+				Module:SetupEventDisplay(i)
+			else
+				frame.DataText:SetText("UNKNOWN TYPE: " .. tostring(self:GetEventSettings(i).Type))
+			end
 		end
 	end
 
 	return oldID
 end
 
+function EVENTS:GetModuleForEventSettings(arg1)
+	local eventSettings
+	if type(arg1) == "table" then
+		eventSettings = arg1
+	else
+		eventSettings = EVENTS:GetEventSettings(arg1)
+	end
+	
+	if eventSettings then
+		return EVENTS:GetModule(eventSettings.Type, true)
+	end
+end
+
 function EVENTS:ChooseEvent(id)
 	local eventFrame = self.Events[id]
-	self.currentEventID = id
-	self.currentEvent = eventFrame.event
+	
+	EVENTS.currentEventID = id ~= 0 and id or nil
+	
+	for _, Module in EVENTS:IterateModules() do
+		Module.frame:Hide()
+	end
+	local eventModule = self:GetModuleForEventSettings()
+	if eventModule then
+		eventModule.frame:Show()
+		EVENTS.currentModule = eventModule
+	end
+	
+	if not eventFrame or id == 0 or not eventFrame:IsShown() then
+		return
+	end
 
 	for i, f in ipairs(self.Events) do
 		f.selected = nil
@@ -4837,7 +4875,22 @@ function EVENTS:ChooseEvent(id)
 	eventFrame:LockHighlight()
 	eventFrame:GetHighlightTexture():SetVertexColor(NORMAL_FONT_COLOR.r, NORMAL_FONT_COLOR.g, NORMAL_FONT_COLOR.b, 1)
 
+	IE.Events.ScrollFrame.adjustmentQueued = true
+	
 	return eventFrame
+end
+
+function EVENTS:AdjustScrollFrame()
+	local ScrollFrame = IE.Events.ScrollFrame
+	local eventFrame = self.Events[self.currentEventID]
+	
+	if not eventFrame then return end
+	
+	if eventFrame:GetBottom() and eventFrame:GetBottom() < ScrollFrame:GetBottom() then
+		ScrollFrame.ScrollBar:SetValue(ScrollFrame.ScrollBar:GetValue() + (ScrollFrame:GetBottom() - eventFrame:GetBottom()))
+	elseif eventFrame:GetTop() and eventFrame:GetTop() > ScrollFrame:GetTop() then
+		ScrollFrame.ScrollBar:SetValue(ScrollFrame.ScrollBar:GetValue() - (eventFrame:GetTop() - ScrollFrame:GetTop()))
+	end    
 end
 
 function EVENTS:GetDisplayInfo(event)
@@ -4867,9 +4920,12 @@ function EVENTS:GetNumUsedEvents()
 	local n = 0
 	for i = 1, #self.Events do
 		local f = self.Events[i]
-		local has = self:ProcessIconEventSettings(CI.ic, f.event, self:GetEventSettings(f.event))
-		if has then
-			n = n + 1
+		local Module = EVENTS:GetModuleForEventSettings(i)
+		if Module then
+			local has = Module:ProcessIconEventSettings(f.event, self:GetEventSettings(i))
+			if has then
+				n = n + 1
+			end
 		end
 	end
 
@@ -4877,26 +4933,43 @@ function EVENTS:GetNumUsedEvents()
 end
 
 function EVENTS:LoadConfig()
-	-- EVENTS is a parent module. We don't want to load config if self == EVENTS since this function is meant to be inherited.
-	if self == EVENTS then
-		return
-	end
 
+	self:CreateEventButtons()
+	
 	local oldID = self:EnableAndDisableEvents()
 
 	if oldID and oldID > 0 then
-		oldID = oldID % #self.Events
+		oldID = oldID % CI.ics.Events.n
 		if oldID == 0 then
-			oldID = #self.Events
+			oldID = CI.ics.Events.n
 		end
-		self:SelectEvent(oldID)
+	else
+		oldID = 1
 	end
-	self:SetTabText()
+	
+	print(oldID)
+	
+	if CI.ics.Events.n <= 0 then
+		self.EventSettings:Hide()
+	else
+		self.EventSettings:Show()
+	end
+	
+	for _, Module in self:IterateModules() do
+		Module.frame:Hide()
+	end
+	local Module = self:GetModuleForEventSettings(oldID)
+	if Module then
+		Module:SelectEvent(oldID)
+	end
 
-	if CI.ics then
-		self:SetupEventSettings()
+	if IE.Events.ScrollFrame:GetVerticalScrollRange() == 0 then
+		IE.Events.ScrollFrame.ScrollBar:Hide()
 	end
+	
+	self:SetTabText()
 end
+TMW:RegisterCallback("TMW_CONFIG_LOAD", EVENTS.LoadConfig, EVENTS)
 
 function EVENTS:SetTabText()
 	local n = self:GetNumUsedEvents()
@@ -4909,14 +4982,101 @@ function EVENTS:SetTabText()
 	PanelTemplates_TabResize(self.tab, -6)
 end
 
-function EVENTS:GetEventSettings(event)
-	return CI.ics.Events[event or self.currentEvent]
+function EVENTS:GetEventSettings(eventID)
+	return CI.ics.Events[eventID or EVENTS.currentEventID]
 end
 
-function EVENTS:TestEvent(event)
-	local settings = self:GetEventSettings(event)
+function EVENTS:TestEvent(eventID)
+	local settings = self:GetEventSettings(eventID)
 
 	self:HandleEvent(CI.ic, settings)
+end
+
+
+function EVENTS:TMW_OPTIONS_LOADED()
+	self.tab = IE.EventsTab
+	self.tabText = L["EVENTS_TAB"]
+	self.Events = IE.Events.Events
+	self.EventSettings = IE.Events.EventSettings
+	
+	--self.currentModule = self.orderedModules[1]
+--	self.currentModule.frame:Show()
+end
+TMW:RegisterCallback("TMW_OPTIONS_LOADED", EVENTS)
+
+
+function EVENTS:AddEvent_Dropdown()
+	if UIDROPDOWNMENU_MENU_LEVEL == 1 then
+		for i, eventData in ipairs(TMW.EventList) do
+			local info = UIDropDownMenu_CreateInfo()
+			
+			info.disabled = Types[CI.ic]["EventDisabled_" .. eventData.name]
+			
+			info.text = get(eventData.text)
+			info.tooltipTitle = get(eventData.text)
+			if info.disabled then
+				info.tooltipText = L["SOUND_EVENT_DISABLEDFORTYPE_DESC"]:format(Types[CI.t].name)
+			else
+				info.tooltipText = get(eventData.desc)
+			end
+			info.tooltipWhileDisabled = true
+			info.tooltipOnButton = true
+			
+			info.value = eventData.name
+			info.hasArrow = true
+			info.notCheckable = true
+			info.keepShownOnClick = true
+			
+			UIDropDownMenu_AddButton(info, UIDROPDOWNMENU_MENU_LEVEL)
+		end
+	elseif UIDROPDOWNMENU_MENU_LEVEL == 2 then
+		for i, Module in ipairs(EVENTS.orderedModules) do
+			local info = UIDropDownMenu_CreateInfo()
+			
+			info.text = Module.tabText
+		--[[	info.tooltipTitle = get(eventData.text)
+			info.tooltipText = get(eventData.desc)
+			info.tooltipOnButton = true]]
+			
+			info.value = Module.moduleName
+			info.hasAlpha = true
+			info.func = EVENTS.AddEvent_Dropdown_OnClick
+			info.arg1 = UIDROPDOWNMENU_MENU_VALUE
+			info.arg2 = Module.moduleName
+			info.notCheckable = true
+			
+			UIDropDownMenu_AddButton(info, UIDROPDOWNMENU_MENU_LEVEL)
+		end	
+	end
+end
+
+function EVENTS:AddEvent_Dropdown_OnClick(event, type)
+	CI.ics.Events.n = CI.ics.Events.n + 1
+
+	CI.ics.Events[CI.ics.Events.n].Event = event
+	CI.ics.Events[CI.ics.Events.n].Type = type
+	
+	EVENTS:LoadConfig()
+
+	local Module = EVENTS:GetModuleForEventSettings(CI.ics.Events.n)
+	if Module then
+		Module:SelectEvent(CI.ics.Events.n)
+	end
+	
+	CloseDropDownMenus()
+end
+
+
+function EVENTS:UpOrDown(button, delta)
+	local ID = button:GetID()
+	local settings = CI.ics.Events
+	
+	local curdata = settings[ID]
+	local destinationdata = settings[ID+delta]
+	settings[ID] = destinationdata
+	settings[ID+delta] = curdata
+	
+	EVENTS:LoadConfig()
 end
 
 
@@ -4928,9 +5088,11 @@ SND = TMW.SND
 SND.tabText = L["SOUND_TAB"]
 SND.LSM = LSM
 
-function SND:OnOptionsLoaded()
-	SND.tab = IE.SoundTab
-	SND:CreateEventButtons("SOUND_EVENT_GLOBALDESC")
+function SND:TMW_OPTIONS_LOADED()
+	--TMW:RegisterCallback("TMW_CONFIG_LOAD", self.LoadConfig, self)
+
+	--SND.tab = IE.SoundTab
+	--SND:CreateEventButtons("SOUND_EVENT_GLOBALDESC")
 
 	local Sounds = SND.Sounds
 	Sounds.Header:SetText(L["SOUND_SOUNDTOPLAY"])
@@ -4952,33 +5114,34 @@ function SND:OnOptionsLoaded()
 	SND:SetSoundsOffset(0)
 
 
-	SND.Events.Header:SetText(L["SOUND_EVENTS"])
-	SND:SelectEvent(1)
-
 	SND.Sounds.ScrollBar:SetValue(0)
 end
+TMW:RegisterCallback("TMW_OPTIONS_LOADED", SND)
 
 
 ---------- Events ----------
 function SND:SelectEvent(id)
-	local eventFrame = SND:ChooseEvent(id)
+	local eventFrame = self:ChooseEvent(id)
 
-	if CI.ics then
+	if CI.ics and eventFrame then
 		SND:SelectSound(self:GetEventSettings().Sound)
 		SND:SetupEventSettings()
 	end
 end
 
 function SND:SetupEventDisplay(event)
-	local eventID, eventString = SND:GetDisplayInfo(event)
+	print(2, event)
+	if not event then return end
 
-	local name = self:GetEventSettings(eventString).Sound
+	local eventID, eventString = self:GetDisplayInfo(event)
+
+	local name = self:GetEventSettings(eventID).Sound
 
 	if name == "None" then
 		name = "|cff808080" .. NONE
 	end
-
-	SND.Events[eventID].DataText:SetText(name)
+	print(debugstack())
+	self.Events[eventID].DataText:SetText("|cffcccccc" .. self.tabText .. ":|r " .. name)
 end
 
 
@@ -5043,6 +5206,7 @@ function SND:SetSoundsOffset(offs)
 end
 
 function SND:SelectSound(name)
+	print(1, name)
 	if not name then return end
 	local soundFrame, listID
 
@@ -5056,7 +5220,7 @@ function SND:SelectSound(name)
 	if listID and (listID > SND.Sounds[#SND.Sounds].listID or listID < SND.Sounds[1].listID) then
 		SND.Sounds.ScrollBar:SetValue(listID-1)
 	else
-		 SND:SetSoundsOffset(SND.offs)
+		SND:SetSoundsOffset(SND.offs)
 	end
 
 	for i, frame in ipairs(SND.Sounds) do
@@ -5091,7 +5255,7 @@ function SND:SelectSound(name)
 		SND.Custom:SetText(name)
 	end
 
-	SND:SetTabText()
+	self:SetupEventDisplay(EVENTS.currentEventID)
 end
 
 
@@ -5104,14 +5268,15 @@ ANN = TMW.ANN
 ANN.tabText = L["ANN_TAB"]
 local ChannelList = TMW.ChannelList
 
-function ANN:OnOptionsLoaded()
-	ANN.tab = IE.AnnounceTab
-	ANN:CreateEventButtons("ANN_EVENT_GLOBALDESC")
+function ANN:TMW_OPTIONS_LOADED()
+	--TMW:RegisterCallback("TMW_CONFIG_LOAD", self.LoadConfig, self)
+	
+	--ANN.tab = IE.AnnounceTab
+	--ANN:CreateEventButtons("ANN_EVENT_GLOBALDESC")
 
 	local Events = ANN.Events
 	local Channels = ANN.Channels
 
-	Events.Header:SetText(L["SOUND_EVENTS"])
 	Channels.Header:SetText(L["ANN_CHANTOUSE"])
 
 	-- create event frames
@@ -5143,18 +5308,17 @@ function ANN:OnOptionsLoaded()
 	Channels[1]:SetPoint("TOPRIGHT", Channels, "TOPRIGHT", 0, 0)
 
 	Channels:SetHeight(#Channels*Channels[1]:GetHeight())
-
-	ANN:SelectEvent(1)
 end
+TMW:RegisterCallback("TMW_OPTIONS_LOADED", ANN)
 
 
 ---------- Events ----------
 function ANN:SelectEvent(id)
 	ANN.EditBox:ClearFocus()
 
-	local eventFrame = ANN:ChooseEvent(id)
+	local eventFrame = self:ChooseEvent(id)
 
-	if CI.ics then
+	if CI.ics and eventFrame then
 		local EventSettings = self:GetEventSettings()
 		ANN:SelectChannel(EventSettings.Channel)
 		ANN.EditBox:SetText(EventSettings.Text)
@@ -5163,17 +5327,20 @@ function ANN:SelectEvent(id)
 end
 
 function ANN:SetupEventDisplay(event)
+	if not event then return end
 	local eventID, eventString = self:GetDisplayInfo(event)
 
-	local channel = self:GetEventSettings(eventString).Channel
+	local EventSettings = self:GetEventSettings(eventID)
+	local channel = EventSettings.Channel
 	local channelsettings = ChannelList[channel]
 
 	if channelsettings then
-		local text = channelsettings.text
-		if text == NONE then
-			text = "|cff808080" .. text
+		local chan = channelsettings.text
+		local data = EventSettings.Text
+		if chan == NONE then
+			data = "|cff808080" .. chan .. "|r"
 		end
-		self.Events[eventID].DataText:SetText(text)
+		self.Events[eventID].DataText:SetText("|cffcccccc" .. self.tabText .. ":|r " .. data)
 	end
 end
 
@@ -5249,15 +5416,14 @@ function ANN:SelectChannel(channel)
 		channelFrame:GetHighlightTexture():SetVertexColor(NORMAL_FONT_COLOR.r, NORMAL_FONT_COLOR.g, NORMAL_FONT_COLOR.b, 1)
 	end
 
-	self:SetupEventDisplay(self.currentEventID)
-	self:SetTabText()
+	self:SetupEventDisplay(EVENTS.currentEventID)
 end
 
 
 ---------- Interface ----------
 function ANN:LocDropdownFunc(text)
 	local dropdown = self
-	local self = TMW:FindModule(UIDROPDOWNMENU_OPEN_MENU)
+	local self = TMW.EVENTS.currentModule
 	TMW:SetUIDropdownText(self.Location, dropdown.value)
 	UIDropDownMenu_SetText(self.Location, text)
 	self:GetEventSettings().Location = dropdown.value
@@ -5278,14 +5444,15 @@ end
 ANIM = TMW.ANIM
 ANIM.tabText = L["ANIM_TAB"]
 
-function ANIM:OnOptionsLoaded()
-	self.tab = IE.AnimationsTab
-	self:CreateEventButtons("ANIM_EVENT_GLOBALDESC")
+function ANIM:TMW_OPTIONS_LOADED()
+	--TMW:RegisterCallback("TMW_CONFIG_LOAD", self.LoadConfig, self)
+	
+	--self.tab = IE.AnimationsTab
+	--self:CreateEventButtons("ANIM_EVENT_GLOBALDESC")
 
 	local Events = self.Events
 	local Animations = self.Animations
 
-	Events.Header:SetText(L["SOUND_EVENTS"])
 	Animations.Header:SetText(L["ANIM_ANIMTOUSE"])
 	self.SettingsHeader:SetText(L["ANIM_ANIMSETTINGS"])
 
@@ -5318,35 +5485,34 @@ function ANIM:OnOptionsLoaded()
 	Animations[1]:SetPoint("TOPRIGHT", Animations, "TOPRIGHT", 0, 0)
 
 	Animations:SetHeight(#Animations*Animations[1]:GetHeight())
-
-	self:SelectEvent(1)
 end
+TMW:RegisterCallback("TMW_OPTIONS_LOADED", ANIM)
 
-function ANIM:TMW_ICON_SETUP(event, icon)
+function ANIM:TMW_ICON_SETUP_POST(event, icon)
 	if not db.profile.Locked and icon:Animations_Has() then
 		for k, v in pairs(icon:Animations_Get()) do
 			icon:Animations_Stop(v)
 		end
 	end
 end
-TMW:RegisterCallback("TMW_ICON_SETUP", ANIM)
+TMW:RegisterCallback("TMW_ICON_SETUP_POST", ANIM)
 
 ---------- Events ----------
 function ANIM:SelectEvent(id)
 	local eventFrame = self:ChooseEvent(id)
 
-	if CI.ics then
+	if CI.ics and eventFrame then
 		local EventSettings = self:GetEventSettings()
 		self:SelectAnimation(EventSettings.Animation)
-		self.Duration:SetValue(EventSettings.Duration)
 		self:SetupEventSettings()
 	end
 end
 
 function ANIM:SetupEventDisplay(event)
+	if not event then return end
 	local eventID, eventString = self:GetDisplayInfo(event)
 
-	local animation = self:GetEventSettings(eventString).Animation
+	local animation = self:GetEventSettings(eventID).Animation
 	local animationSettings = self.AnimationList[animation]
 
 	if animationSettings then
@@ -5355,7 +5521,7 @@ function ANIM:SetupEventDisplay(event)
 			text = "|cff808080" .. text
 		end
 
-		self.Events[eventID].DataText:SetText(text)
+		self.Events[eventID].DataText:SetText("|cffcccccc" .. self.tabText .. ":|r " .. text)
 	end
 end
 
@@ -5422,8 +5588,7 @@ function ANIM:SelectAnimation(animation)
 		animationFrame:GetHighlightTexture():SetVertexColor(NORMAL_FONT_COLOR.r, NORMAL_FONT_COLOR.g, NORMAL_FONT_COLOR.b, 1)
 	end
 
-	self:SetupEventDisplay(self.currentEventID)
-	self:SetTabText()
+	self:SetupEventDisplay(EVENTS.currentEventID)
 end
 
 
@@ -7314,6 +7479,7 @@ function CNDT:LoadConfig(type)
 		TMW.IE.Conditions.ScrollFrame.ScrollBar:Hide()
 	end
 end
+TMW:RegisterCallback("TMW_CONFIG_LOAD", CNDT.LoadConfig, CNDT)
 
 function CNDT:Save()
 	local groupID, iconID = CI.g, CI.i

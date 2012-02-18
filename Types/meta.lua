@@ -126,7 +126,8 @@ local function Meta_OnUpdate(icon, time)
 			if not icBindTextObj or not icBindTextObj.hasAnySubstitutions then
 				icon.bindText:SetText(icToUse.bindText:GetText())
 			end
-			
+			icon.BindTextObj = icToUse.BindTextObj -- BE VERY FUCKING CAREFUL WITH THIS. dont call any methods on it - only setting it to obtain attributes
+
 			TMW:Fire("TMW_ICON_META_INHERITED_ICON_CHANGED", icon, icToUse)
 
 			if LMB then -- i dont like the way that Masque handles this (inefficient), so i'll do it myself
@@ -136,15 +137,11 @@ local function Meta_OnUpdate(icon, time)
 					iconnt:SetVertexColor(icnt:GetVertexColor())
 				end
 			end
-			
-			icon.pbar:SetAttributes(icToUse.pbar)
-			icon.cbar:SetAttributes(icToUse.cbar)
 
 			icon.ShowTimer = icToUse.ShowTimer
 			icon.ShowTimerText = icToUse.ShowTimerText
 			icon.cooldown.noCooldownCount = icToUse.cooldown.noCooldownCount
-			icon.BindTextObj = icToUse.BindTextObj -- BE VERY FUCKING CAREFUL WITH THIS. dont call any methods on it - only setting it to obtain attributes
-
+			
 			force = 1
 
 			icon.__currentIcon = icToUse
@@ -312,20 +309,22 @@ function Type:IE_TypeUnloaded()
 	TMW:TT(TMW.IE.Main.ConditionAlpha, "CONDITIONALPHA", "CONDITIONALPHA_DESC")
 end
 
-function Type:TMW_ICON_SETUP(event, icon)
+function Type:TMW_ICON_SETUP_POST(event, icon)
 	if icon.Type ~= self.type then
 		TMW:UnregisterCallback("TMW_ICON_UPDATED", TMW_ICON_UPDATED, icon)
 	else
 		if not Locked then
 			-- meta icons shouln't show bars in config, even though they are force enabled.
-			if icon.class ~= TMW.Classes.Bar then
+			if icon.cbar and icon.class ~= TMW.Classes.Bar then
 				icon.cbar:SetValue(0)
 			end
-			icon.pbar:SetValue(0)
+			if icon.pbar then
+				icon.pbar:SetValue(0)
+			end
 		end
 	end
 end
-TMW:RegisterCallback("TMW_ICON_SETUP", Type)
+TMW:RegisterCallback("TMW_ICON_SETUP_POST", Type)
 
 function Type:TMW_GLOBAL_UPDATE()
 	TMW.DoWipeAC = false

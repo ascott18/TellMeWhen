@@ -28,7 +28,24 @@
 		<CheckedTexture urgency="5" file="Interface\Buttons\UI-CheckBox-Check"/>
 		<DisabledCheckedTexture urgency="5" file="Interface\Buttons\UI-CheckBox-Check-Disabled"/>
 	</CheckButton>
-
+	
+	<!-- Appearance Templates -->
+	<Frame name="TellMeWhen_BorderedFrame" virtual="true">
+		<Backdrop edgeFile="Interface\DialogFrame\UI-DialogBox-Background-Dark" tile="true">
+			<EdgeSize>
+				<AbsValue val="0.5"/>
+			</EdgeSize>
+		</Backdrop>
+		<Layers>
+			<Layer level="BACKGROUND">
+				<Texture name="$parentBackground" parentKey="Background" setAllPoints="true">
+					<Color r="1" g="1" b="1" a="0.05"/>
+				</Texture>
+			</Layer>
+		</Layers>
+	</Frame>
+	
+	
 	<CheckButton name="TellMeWhen_RadioCheckTemplate" virtual="true" inherits="TellMeWhen_CheckTemplate">
 		<Scripts>
 			<OnLoad>
@@ -216,7 +233,7 @@
 		<HighlightFont style="GameFontHighlight"/>
 		<HighlightTexture file="Interface\QuestFrame\UI-QuestLogTitleHighlight" alphaMode="ADD">
 			<Anchors>
-				<Anchor point="TOPLEFT" y="1"/>
+				<Anchor point="TOPLEFT" y="-1"/>
 				<Anchor point="BOTTOMRIGHT" y="1"/>
 			</Anchors>
 		</HighlightTexture>
@@ -224,7 +241,7 @@
 			<Layer level="BACKGROUND">
 				<Texture name="$parentBackground" parentKey="Background" file="Interface\QuestFrame\UI-QuestLogTitleHighlight">
 					<Anchors>
-						<Anchor point="TOPLEFT" y="1"/>
+						<Anchor point="TOPLEFT" y="-1"/>
 						<Anchor point="BOTTOMRIGHT" y="1"/>
 					</Anchors>
 				</Texture>
@@ -865,13 +882,8 @@
 		</Scripts>
 	<!-- 	<HighlightTexture urgency="5" file="Interface\Buttons\UI-CheckBox-Highlight" alphaMode="ADD"/> -->
 	</CheckButton>
-	<Frame name="TellMeWhen_ConditionGroup" virtual="true">
+	<Frame name="TellMeWhen_ConditionGroup" inherits="TellMeWhen_BorderedFrame" virtual="true">
 		<Size x="559" y="69"/>
-		<Backdrop edgeFile="Interface\DialogFrame\UI-DialogBox-Background-Dark" tile="true">
-			<EdgeSize>
-				<AbsValue val="1"/>
-			</EdgeSize>
-		</Backdrop>
 		<Anchors>
 			<Anchor point="TOPLEFT"/>
 		</Anchors>
@@ -1234,7 +1246,6 @@
 				</Scripts>
 				<NormalTexture urgency="5" file="Interface\ChatFrame\UI-ChatIcon-ScrollUp-Up" alphaMode="ADD">
 					<TexCoords left="0.21875" right="0.6875" top="0.34375" bottom="0.65625"/>
-					ULx, 	ULy, 	LLx, 	  LLy,	   URx,	   URy,		LRx,	 LRy
 					<Color r=".7" g=".7" b=".7" a="1"/>
 				</NormalTexture>
 				<HighlightTexture urgency="5" file="Interface\ChatFrame\UI-ChatIcon-ScrollUp-Up" alphaMode="ADD">
@@ -1284,12 +1295,6 @@
 			</Button>
 		</Frames>
 		<Layers>
-			<Layer level="BACKGROUND">
-				<Texture name="$parentBackground" parentKey="Background" setAllPoints="true">
-					<Color r="1" g="1" b="1" a="0.05"/>
-					<Size x="27" y="27"/>
-				</Texture>
-			</Layer>
 			<Layer level="OVERLAY">
 				<FontString name="$parentTextType" parentKey="TextType" inherits="GameFontNormalSmall" justifyH="CENTER">
 					<Anchors>
@@ -1471,11 +1476,112 @@
 	</Button>
 
 
-	<Button name="TellMeWhen_Event" motionScriptsWhileDisabled="true" virtual="true" >
-		<Size y="14"/>
+	<Button name="TellMeWhen_Event" motionScriptsWhileDisabled="true" inherits="TellMeWhen_BorderedFrame" virtual="true" >
+		<Size y="26"/>
+		<Layers>
+			<Layer level="OVERLAY">
+				<FontString name="$parentEventName" parentKey="EventName" inherits="GameFontNormalSmall" justifyH="LEFT">
+					<Anchors>
+						<Anchor point="TOPLEFT" x="15" y="-3"/>
+					</Anchors>
+				</FontString>
+				<FontString name="$parentDataText" parentKey="DataText" inherits="GameFontHighlightSmall" justifyH="LEFT" >
+					<Anchors>
+						<Anchor point="TOPLEFT" relativeTo="$parentEventName" relativePoint="BOTTOMLEFT" x="0" y="-1"/>
+						<Anchor point="RIGHT" x="-15"/>
+					</Anchors>
+				</FontString>
+			</Layer>
+		</Layers>
+		<Frames>
+			<Button name="$parentDelete" parentKey="Delete">
+				<Size x="20" y="20"/>
+				<Anchors>
+					<Anchor point="TOPLEFT" relativeto="$parent" x="-2" y="2"/>
+				</Anchors>
+				<Scripts>
+					<OnClick>
+						local Events = TMW.CI.ics.Events
+						tremove(Events, self:GetParent():GetID())
+						Events.n = Events.n - 1
+						
+						TMW.EVENTS:LoadConfig()
+					</OnClick>
+				</Scripts>
+				
+				<NormalTexture urgency="5" file="Interface\Buttons\UI-Panel-MinimizeButton-Up"/>
+				<PushedTexture file="Interface\Buttons\UI-Panel-MinimizeButton-Down"/>
+				<HighlightTexture urgency="5" file="Interface\Buttons\UI-Panel-MinimizeButton-Highlight" alphaMode="ADD"/>
+			</Button>
+			
+			
+			<Button name="$parentPlay" parentKey="Play">
+				<Size x="15" y="15"/>
+				<Anchors>
+					<!--Anchor point="TOPRIGHT" x="-2" y="-3"/-->
+					<Anchor point="RIGHT" x="-2" y="0"/>
+				</Anchors>
+				<Scripts>
+					<OnLoad>
+						self:SetScale(0.8)
+					</OnLoad>
+					<OnClick>
+						local ID = self:GetParent():GetID()
+						local Module = TMW.EVENTS:GetModuleForEventSettings(ID)
+						if Module then
+							Module:TestEvent(ID)
+						end
+					</OnClick>
+					<OnDisable>
+						self:GetNormalTexture():SetDesaturated(1)
+					</OnDisable>
+					<OnEnable>
+						self:GetNormalTexture():SetDesaturated(nil)
+					</OnEnable>
+					<OnEnter>
+						self:GetParent():LockHighlight()
+					</OnEnter>
+					<OnLeave>
+						if not self:GetParent().selected then
+							self:GetParent():UnlockHighlight()
+						end
+					</OnLeave>
+				</Scripts>
+				<NormalTexture urgency="5" file="Interface\Buttons\UI-SpellbookIcon-NextPage-Up" alphaMode="ADD">
+					<TexCoords left="0.3125" right="0.625" top="0.3" bottom="0.71857"/>
+				</NormalTexture>
+				<HighlightTexture urgency="5" file="Interface\Buttons\UI-SpellbookIcon-NextPage-Up" alphaMode="ADD">
+					<TexCoords left="0.3125" right="0.625" top="0.3" bottom="0.71857"/>
+				</HighlightTexture>
+			</Button>
+		</Frames>
 		<Scripts>
+			<OnLoad>
+				self:RegisterForClicks("LeftButtonUp", "RightButtonUp")
+				self:RegisterForDrag("LeftButton", "RightButton")
+			</OnLoad>
+			<OnDragStart>
+				TMW.EVENTS.draggingFrame = self
+			</OnDragStart>
+			<OnDragStop>
+				TMW.EVENTS.draggingFrame = nil
+			</OnDragStop>
+			<OnEnter>
+				if self and TMW.EVENTS.draggingFrame and self ~= TMW.EVENTS.draggingFrame then
+					local selfSettings = TMW.CI.ics.Events[self:GetID()]
+					local dragSettings = TMW.CI.ics.Events[TMW.EVENTS.draggingFrame:GetID()]
+					
+					TMW.CI.ics.Events[self:GetID()] = dragSettings
+					TMW.CI.ics.Events[TMW.EVENTS.draggingFrame:GetID()] = selfSettings
+					TMW.EVENTS.draggingFrame = self
+					TMW.EVENTS:LoadConfig()
+				end
+			</OnEnter>
 			<OnClick>
-				self:GetParent():GetParent().module:SelectEvent(self:GetID())
+				local Module = TMW.EVENTS:GetModuleForEventSettings(self:GetID())
+				if Module then
+					Module:SelectEvent(self:GetID())
+				end
 			</OnClick>
 			<OnDisable>
 				self.EventName:SetFontObject(GameFontDisableSmall)
@@ -1496,83 +1602,15 @@
 		<HighlightFont style="GameFontHighlight"/>
 		<HighlightTexture file="Interface\QuestFrame\UI-QuestLogTitleHighlight" alphaMode="ADD">
 			<Anchors>
-				<Anchor point="TOPLEFT" y="1"/>
+				<Anchor point="TOPLEFT" y="-1"/>
 				<Anchor point="BOTTOMRIGHT" y="1"/>
 			</Anchors>
 		</HighlightTexture>
-
-		<Frames>
-
-			<Button name="$parentPlay" parentKey="Play">
-				<Size x="15" y="15"/>
-				<Anchors>
-					<Anchor point="TOPRIGHT"/>
-				</Anchors>
-				<Scripts>
-					<OnLoad>
-						self:SetScale(0.8)
-					</OnLoad>
-					<OnClick>
-						TMW:FindModule(self):TestEvent(self:GetParent().event)
-					</OnClick>
-					<OnDisable>
-						self:GetNormalTexture():SetDesaturated(1)
-					</OnDisable>
-					<OnEnable>
-						self:GetNormalTexture():SetDesaturated(nil)
-					</OnEnable>
-					<OnEnter>
-						self:GetParent():LockHighlight()
-					</OnEnter>
-					<OnLeave>
-						if not self:GetParent().selected then
-							self:GetParent():UnlockHighlight()
-						end
-					</OnLeave>
-				</Scripts>
-				<NormalTexture urgency="5" file="Interface\Buttons\UI-SpellbookIcon-NextPage-Up" alphaMode="ADD">
-					<TexCoords left="0.3125" right="0.625" top="0.28125" bottom="0.71857"/>
-				</NormalTexture>
-				<HighlightTexture urgency="5" file="Interface\Buttons\UI-SpellbookIcon-NextPage-Up" alphaMode="ADD">
-					<TexCoords left="0.3125" right="0.625" top="0.28125" bottom="0.71857"/>
-				</HighlightTexture>
-			</Button>
-		</Frames>
-		<Layers>
-			<Layer level="OVERLAY">
-				<FontString name="$parentEventName" parentKey="EventName" inherits="GameFontNormalSmall" justifyH="LEFT">
-					<Anchors>
-						<Anchor point="LEFT" x="3" y="0"/>
-					</Anchors>
-				</FontString>
-				<FontString name="$parentDataText" parentKey="DataText" inherits="GameFontHighlightSmall" justifyH="LEFT" >
-					<Anchors>
-						<Anchor point="LEFT" relativeTo="$parentEventName" relativePoint="RIGHT" x="3" y="0"/>
-						<Anchor point="RIGHT" x="-15"/>
-					</Anchors>
-				</FontString>
-			</Layer>
-		</Layers>
+		
 	</Button>
 
-	<Button name="TellMeWhen_ChannelSelectButton" virtual="true" >
+	<Button name="TellMeWhen_ChannelSelectButton" inherits="TellMeWhen_BorderedFrame" virtual="true" >
 		<Size y="12"/>
-		<Scripts>
-			<OnClick>
-				if TMW.CI.ics then
-					TMW.ANN:GetEventSettings().Channel = self.channel
-					TMW.IE:ScheduleIconSetup()
-				end
-				TMW.ANN:SelectChannel(self.channel)
-				TMW.ANN:SetTabText()
-			</OnClick>
-		</Scripts>
-		<HighlightTexture file="Interface\QuestFrame\UI-QuestLogTitleHighlight" alphaMode="ADD">
-			<Anchors>
-				<Anchor point="TOPLEFT" y="1"/>
-				<Anchor point="BOTTOMRIGHT" y="1"/>
-			</Anchors>
-		</HighlightTexture>
 		<Layers>
 			<Layer level="OVERLAY">
 				<FontString name="$parentName" parentKey="Name" inherits="GameFontHighlightSmall" justifyH="LEFT">
@@ -1583,37 +1621,42 @@
 				</FontString>
 			</Layer>
 		</Layers>
-	</Button>
-	<Button name="TellMeWhen_SoundSelectButton" virtual="true" >
-		<Size y="12"/>
 		<Scripts>
-			<OnLoad>
-			--	self.Background:SetVertexColor(0, 1, 0)
-			</OnLoad>
 			<OnClick>
-				local name = self.soundname
-				TMW.SND:SelectSound(name)
 				if TMW.CI.ics then
-					TMW.SND:GetEventSettings().Sound = name
+					TMW.ANN:GetEventSettings().Channel = self.channel
 					TMW.IE:ScheduleIconSetup()
 				end
-				TMW.SND:SetupEventDisplay(TMW.SND.currentEvent)
-				TMW.SND:SetTabText()
+				
+				TMW.EVENTS:LoadConfig()
+				TMW.ANN:SelectChannel(self.channel)
 			</OnClick>
-			<OnMouseWheel>
-				self:GetParent().ScrollBar:SetValue(self:GetParent().ScrollBar:GetValue() - delta)
-			</OnMouseWheel>
 		</Scripts>
 		<HighlightTexture file="Interface\QuestFrame\UI-QuestLogTitleHighlight" alphaMode="ADD">
 			<Anchors>
-				<Anchor point="TOPLEFT" y="1"/>
+				<Anchor point="TOPLEFT" y="-1"/>
 				<Anchor point="BOTTOMRIGHT" y="1"/>
 			</Anchors>
 		</HighlightTexture>
+	</Button>
+	<Button name="TellMeWhen_SoundSelectButton" inherits="TellMeWhen_BorderedFrame" virtual="true" >
+		<Size y="12"/>
+		<Layers>
+			<Layer level="OVERLAY">
+				<FontString name="$parentName" parentKey="Name" inherits="GameFontHighlightSmall" justifyH="LEFT">
+					<Anchors>
+						<Anchor point="LEFT" x="3"/>
+						<Anchor point="RIGHT" relativeTo="$parentPlay" relativePoint="LEFT" x="-1"/>
+					</Anchors>
+				</FontString>
+			</Layer>
+		</Layers>
 		<Frames>
 			<Button name="$parentPlay" parentKey="Play" virtual="true">
-				<NormalTexture file="Interface\Common\VoiceChat-Speaker"/>
-				<HighlightTexture file="Interface\Common\VoiceChat-On"/>
+				<Size x="14" y="14"/>
+				<Anchors>
+					<Anchor point="RIGHT" x="-2" y="0"/>
+				</Anchors>
 				<Scripts>
 					<OnClick>
 						PlaySoundFile(self:GetParent().soundfile, "Master")
@@ -1627,33 +1670,45 @@
 						end
 					</OnLeave>
 				</Scripts>
-				<Size x="15" y="15"/>
-				<Anchors>
-					<Anchor point="RIGHT" x="-2" y="1"/>
-				</Anchors>
+				<NormalTexture file="Interface\Common\VoiceChat-Speaker"/>
+				<HighlightTexture file="Interface\Common\VoiceChat-On"/>
 			</Button>
 		</Frames>
-		<Layers>
-			<Layer level="OVERLAY">
-				<FontString name="$parentName" parentKey="Name" inherits="GameFontHighlightSmall" justifyH="LEFT">
-					<Anchors>
-						<Anchor point="LEFT" x="3"/>
-						<Anchor point="RIGHT" relativeTo="$parentPlay" relativePoint="LEFT" x="-1"/>
-					</Anchors>
-				</FontString>
-			</Layer>
-		</Layers>
+		<Scripts>
+			<OnLoad>
+			--	self.Background:SetVertexColor(0, 1, 0)
+			</OnLoad>
+			<OnClick>
+				local name = self.soundname
+				if TMW.CI.ics then
+					TMW.SND:GetEventSettings().Sound = name
+					TMW.IE:ScheduleIconSetup()
+				end
+				
+				TMW.EVENTS:LoadConfig()
+				TMW.SND:SelectSound(name)
+			</OnClick>
+			<OnMouseWheel>
+				self:GetParent().ScrollBar:SetValue(self:GetParent().ScrollBar:GetValue() - delta)
+			</OnMouseWheel>
+		</Scripts>
+		<HighlightTexture file="Interface\QuestFrame\UI-QuestLogTitleHighlight" alphaMode="ADD">
+			<Anchors>
+				<Anchor point="TOPLEFT" y="-1"/>
+				<Anchor point="BOTTOMRIGHT" y="1"/>
+			</Anchors>
+		</HighlightTexture>
 	</Button>
 	<Button name="TellMeWhen_AnimationSelectButton" inherits="TellMeWhen_ChannelSelectButton" virtual="true" >
-		<Size y="12"/>
 		<Scripts>
 			<OnClick>
 				if TMW.CI.ics then
 					TMW.ANIM:GetEventSettings().Animation = self.animation
 					TMW.IE:ScheduleIconSetup()
 				end
+				
+				TMW.EVENTS:LoadConfig()
 				TMW.ANIM:SelectAnimation(self.animation)
-				TMW.ANIM:SetTabText()
 			</OnClick>
 		</Scripts>
 	</Button>
@@ -1663,7 +1718,7 @@
 		<Size x="26" y="26"/>
 		<Scripts>
 			<OnClick>
-				local parentModule = TMW:FindModule(self)
+				local parentModule = TMW.EVENTS.currentModule
 				if TMW.CI.ics then
 					parentModule:GetEventSettings()[self.setting] = not not self:GetChecked()
 					TMW.IE:ScheduleIconSetup()
@@ -1674,196 +1729,10 @@
 	</CheckButton>
 
 	<Frame name="TellMeWhen_EventContainer" hidden="true" setAllPoints="true" virtual="true">
-		<Frames>
-			<Frame name="$parentEvents" parentKey="Events">
-				<Size x="230" y="280"/>
-				<Anchors>
-					<Anchor point="TOPLEFT" x="20" y="-50"/>
-				</Anchors>
-				<Backdrop bgFile="Interface\DialogFrame\UI-DialogBox-Background-Dark" tile="true"/>
-				<Layers>
-					<Layer level="OVERLAY">
-						<FontString name="$parentHeader" inherits="GameFontNormalLarge" parentKey="Header" justifyH="LEFT" text="">
-							<Anchors>
-								<Anchor point="BOTTOM" relativePoint="TOP" y="1"/>
-							</Anchors>
-						</FontString>
-					</Layer>
-				</Layers>
-			</Frame>
-			<Frame name="$parentEventSettings" parentKey="EventSettings">
-				<Size y="1"/>
-				<Anchors>
-					<Anchor point="TOPLEFT" relativeTo="$parentEvents" relativePoint="BOTTOMLEFT" x="0" y="-10"/>
-					<Anchor point="TOPRIGHT" relativeTo="$parentEvents" relativePoint="BOTTOMRIGHT" x="0" y="-10"/>
-				</Anchors>
-				<Layers>
-					<Layer level="OVERLAY">
-						<FontString name="$parentHeader" inherits="GameFontNormalLarge" parentKey="Header" justifyH="CENTER">
-							<Anchors>
-								<Anchor point="TOP" y="5"/>
-							</Anchors>
-						</FontString>
-						<FontString name="$parentEventName" inherits="GameFontDisableSmall" parentKey="EventName" hidden="true" justifyH="CENTER">
-							<!-- THIS IS CURRENTLY HIDDEN DUE TO SPACE ISSUES IN THE ICON EDITOR. -->
-							<Anchors>
-								<Anchor point="TOP" relativeTo="$parentHeader" relativePoint="BOTTOM" y="0"/>
-							</Anchors>
-						</FontString>
-					</Layer>
-				</Layers>
-				<Frames>
-					<CheckButton name="$parentPassThrough" inherits="TellMeWhen_EventSettings_CheckTemplate" parentKey="PassThrough" motionScriptsWhileDisabled="true">
-						<Anchors>
-							<Anchor point="TOPLEFT" y="-10"/>
-						</Anchors>
-						<Scripts>
-							<OnLoad>
-								self.text:SetText(TMW.L["EVENTS_SETTINGS_PASSTHROUGH"])
-								local parentModule = TMW.EVENTS:GetModule(self:GetParent():GetParent():GetName():gsub("TellMeWhen_IconEditor", ""))
-								local fmt = parentModule.tabText
-								TMW:TT(self, "EVENTS_SETTINGS_PASSTHROUGH", TMW.L["EVENTS_SETTINGS_PASSTHROUGH_DESC"]:format(fmt, fmt) .. "\r\n\r\n" .. TMW.L["EVENTS_SETTINGS_GLOBAL_DESC"], nil, 1)
-								self.setting = "PassThrough"
-							</OnLoad>
-						</Scripts>
-					</CheckButton>
-
-					<CheckButton name="$parentOnlyShown" inherits="TellMeWhen_EventSettings_CheckTemplate" parentKey="OnlyShown" motionScriptsWhileDisabled="true">
-						<Anchors>
-							<Anchor point="TOP" relativeTo="$parentPassThrough" relativePoint="BOTTOM" y="6"/>
-						</Anchors>
-						<Scripts>
-							<OnLoad>
-								self.text:SetText(TMW.L["EVENTS_SETTINGS_ONLYSHOWN"])
-								TMW:TT(self, "EVENTS_SETTINGS_ONLYSHOWN", TMW.L["EVENTS_SETTINGS_ONLYSHOWN_DESC"] .. "\r\n\r\n" .. TMW.L["EVENTS_SETTINGS_GLOBAL_DESC"], nil, 1)
-								self.setting = "OnlyShown"
-							</OnLoad>
-						</Scripts>
-					</CheckButton>
-
-					<CheckButton name="$parentPassingCndt" inherits="TellMeWhen_EventSettings_CheckTemplate" parentKey="PassingCndt" motionScriptsWhileDisabled="true">
-						<Anchors>
-							<Anchor point="TOP" relativeTo="$parentOnlyShown" relativePoint="BOTTOM" y="6"/>
-						</Anchors>
-						<Scripts>
-							<OnLoad>
-								self.text:SetText(TMW.L["EVENTS_SETTINGS_PASSINGCNDT"])
-								TMW:TT(self, "EVENTS_SETTINGS_PASSINGCNDT", TMW.L["EVENTS_SETTINGS_PASSINGCNDT_DESC"] .. "\r\n\r\n" .. TMW.L["EVENTS_SETTINGS_GLOBAL_DESC"], nil, 1)
-								self.setting = "PassingCndt"
-							</OnLoad>
-						</Scripts>
-					</CheckButton>
-					<Frame name="$parentOperator" parentKey="Operator" inherits="TMW_DropDownMenuTemplate">
-						<Anchors>
-							<Anchor point="TOP" relativeTo="$parentPassingCndt" relativePoint="BOTTOM" x="105" y="6"/>
-						</Anchors>
-						<Layers>
-							<Layer level="OVERLAY">
-								<FontString name="$parentValueLabel" inherits="GameFontHighlight" parentKey="ValueLabel" justifyH="RIGHT">
-									<Anchors>
-										<Anchor point="RIGHT" relativePoint="LEFT" x="12" y="3"/>
-									</Anchors>
-								</FontString>
-							</Layer>
-						</Layers>
-						<Scripts>
-							<OnLoad>
-								self.wrapTooltips = 1
-								self.Button:SetMotionScriptsWhileDisabled(false)
-								UIDropDownMenu_SetWidth(self, 47)
-								self.Text:SetFontObject(GameFontHighlightLarge)
-								self.InitFunc = TMW.EVENTS.OperatorMenu_DropDown
-
-								function self:Disable()
-									self.Button:Disable()
-									self:SetAlpha(0.4)
-								end
-								function self:Enable()
-									self.Button:Enable()
-									self:SetAlpha(1)
-								end
-							</OnLoad>
-						</Scripts>
-					</Frame>
-
-					<EditBox name="$parentValue" inherits="TellMeWhen_TimeEditBoxTemplate" parentKey="Value" autoFocus="false">
-						<Size x="45" y="18"/>
-						<Anchors>
-							<Anchor point="LEFT" relativeTo="$parentOperator" relativePoint="RIGHT" x="-5" y="4"/>
-						</Anchors>
-						<Layers>
-							<Layer level="OVERLAY">
-								<FontString name="$parentValueLabel" inherits="GameFontHighlightLarge" parentKey="ValueLabel" justifyH="RIGHT">
-									<Anchors>
-										<Anchor point="RIGHT" relativePoint="RIGHT" x="-3" y="0"/>
-									</Anchors>
-								</FontString>
-							</Layer>
-						</Layers>
-						<Scripts>
-							<OnEditFocusLost>
-								EditBox_ClearHighlight(self)
-
-								local t = TMW:CleanString(self)
-								if strfind(t, ":") then
-									t = t:toseconds()
-								end
-								t = tonumber(t) or 0
-								self:SetText(t)
-
-								if TMW.CI.ics then
-									local parentModule = TMW:FindModule(self)
-									parentModule:GetEventSettings().Value = t
-									TMW.IE:ScheduleIconSetup()
-								end
-
-								self:GetScript("OnTextChanged")(self)
-							</OnEditFocusLost>
-							<OnEnable>
-								self:SetAlpha(1)
-							</OnEnable>
-							<OnDisable>
-								self:SetAlpha(.4)
-							</OnDisable>
-						</Scripts>
-					</EditBox>
-
-					<CheckButton name="$parentCndtJustPassed" inherits="TellMeWhen_EventSettings_CheckTemplate" parentKey="CndtJustPassed" motionScriptsWhileDisabled="true">
-						<Anchors>
-							<Anchor point="TOP" relativeTo="$parentPassingCndt" relativePoint="BOTTOM" y="-15" x="10"/>
-						</Anchors>
-						<Scripts>
-							<OnLoad>
-								self.text:SetText(TMW.L["EVENTS_SETTINGS_CNDTJUSTPASSED"])
-								TMW:TT(self, "EVENTS_SETTINGS_CNDTJUSTPASSED", TMW.L["EVENTS_SETTINGS_CNDTJUSTPASSED_DESC"] .. "\r\n\r\n" .. TMW.L["EVENTS_SETTINGS_GLOBAL_DESC"], nil, 1)
-								self.setting = "CndtJustPassed"
-							</OnLoad>
-						</Scripts>
-					</CheckButton>
-
-					<Frame name="$parentIcon" parentKey="Icon" inherits="TMW_IconDropDownMenuTemplate">
-						<Anchors>
-							<Anchor point="TOPLEFT" relativeTo="$parentOnlyShown" relativePoint="BOTTOMLEFT" x="10"/>
-						</Anchors>
-						<Scripts>
-							<OnLoad>
-								self.wrapTooltips = 1
-								self:Hide()
-								UIDropDownMenu_SetWidth(self, 151)
-								self.InitFunc = TMW.EVENTS.IconMenu_DropDown
-							</OnLoad>
-						</Scripts>
-					</Frame>
-
-				</Frames>
-				<Scripts>
-					<OnLoad>
-						self.Header:SetText(TMW.L["EVENTS_SETTINGS_HEADER"])
-					</OnLoad>
-				</Scripts>
-			</Frame>
-
-		</Frames>
+		<Anchors>
+			<Anchor point="TOPLEFT" relativeTo="$parentAddEvent" relativePoint="TOPRIGHT" x="28" y="0"/>
+			<Anchor point="RIGHT"/>
+		</Anchors>
 		<Scripts>
 			<OnLoad>
 				for k, v in pairs(self:GetParent()) do
@@ -1884,7 +1753,7 @@
 				end
 			</OnLoad>
 			<OnShow>
-				self.module:LoadConfig()
+				--self.module:LoadConfig()
 			</OnShow>
 		</Scripts>
 	</Frame>
@@ -2057,39 +1926,22 @@
 					</OnLoad>
 				</Scripts>
 			</Button>
-			<Button name="$parentTab3" parentKey="SoundTab" inherits="TellMeWhen_TabTemplate" id="3">
+			<Button name="$parentTab3" parentKey="EventsTab" inherits="TellMeWhen_TabTemplate" id="3">
 				<Anchors>
 					<Anchor point="LEFT" relativeTo="$parentTab2" relativePoint="RIGHT" x="-18"/>
 				</Anchors>
 				<Scripts>
 					<OnLoad>
-						self:SetText(TMW.L["SOUND_TAB"])
+						self:SetText(TMW.L["EVENTS_TAB"])
+						function self:OnClick()
+						--	TMW.EVENTS --TODO: DO SOMETHING
+						end
 					</OnLoad>
 				</Scripts>
 			</Button>
-			<Button name="$parentTab4" parentKey="AnnounceTab" inherits="TellMeWhen_TabTemplate" id="4">
+			<Button name="$parentTab4" parentKey="GroupConditionTab" inherits="TellMeWhen_TabTemplate" id="4">
 				<Anchors>
 					<Anchor point="LEFT" relativeTo="$parentTab3" relativePoint="RIGHT" x="-18"/>
-				</Anchors>
-				<Scripts>
-					<OnLoad>
-						self:SetText(TMW.L["ANN_TAB"])
-					</OnLoad>
-				</Scripts>
-			</Button>
-			<Button name="$parentTab5" parentKey="AnimationsTab" inherits="TellMeWhen_TabTemplate" id="5">
-				<Anchors>
-					<Anchor point="LEFT" relativeTo="$parentTab4" relativePoint="RIGHT" x="-18"/>
-				</Anchors>
-				<Scripts>
-					<OnLoad>
-						self:SetText(TMW.L["ANIM_TAB"])
-					</OnLoad>
-				</Scripts>
-			</Button>
-			<Button name="$parentTab6" parentKey="GroupConditionTab" inherits="TellMeWhen_TabTemplate" id="6">
-				<Anchors>
-					<Anchor point="LEFT" relativeTo="$parentTab5" relativePoint="RIGHT" x="-18"/>
 				</Anchors>
 				<Scripts>
 					<OnLoad>
@@ -2100,9 +1952,9 @@
 					</OnLoad>
 				</Scripts>
 			</Button>
-			<Button name="$parentTab7" parentKey="MainOptionsTab" inherits="TellMeWhen_TabTemplate" id="7">
+			<Button name="$parentTab5" parentKey="MainOptionsTab" inherits="TellMeWhen_TabTemplate" id="5">
 				<Anchors>
-					<Anchor point="LEFT" relativeTo="$parentTab6" relativePoint="RIGHT" x="-18"/>
+					<Anchor point="LEFT" relativeTo="$parentTab4" relativePoint="RIGHT" x="-18"/>
 				</Anchors>
 				<Scripts>
 					<OnLoad>
@@ -2481,9 +2333,6 @@
 										</Frames>
 									</Frame>
 								</ScrollChild>
-								<Scripts>
-									<OnLoad> self.scrollBarHideable = true</OnLoad>
-								</Scripts>
 								<Frames>
 									<Slider name="$parentScrollBar" inherits="MinimalScrollBarTemplate" parentKey="ScrollBar">
 										<Size x="17"/>
@@ -2493,10 +2342,17 @@
 										</Anchors>
 									</Slider>
 								</Frames>
+								<Scripts>
+									<OnLoad>
+										self.scrollBarHideable = true
+									</OnLoad>
+								</Scripts>
 							</ScrollFrame>
 						</Frames>
 						<Scripts>
-							<OnLoad> self.text:SetText(TMW.L["ICONMENU_COMPONENTICONS"])</OnLoad>
+							<OnLoad>
+								self.text:SetText(TMW.L["ICONMENU_COMPONENTICONS"])
+							</OnLoad>
 						</Scripts>
 					</Frame>
 
@@ -3703,694 +3559,986 @@
 					</OnShow>
 				</Scripts>
 			</Frame>
-			<Frame name="$parentSound" inherits="TellMeWhen_EventContainer" parentKey="Sound">
+			
+			
+			<Frame name="$parentEvents" setAllPoints="true" parentKey="Events">
 				<Frames>
-					<Frame name="$parentSounds" parentKey="Sounds">
-						<Size x="290" y="266"/>
+				
+					<ScrollFrame name="$parentSF" parentKey="ScrollFrame" inherits="UIPanelScrollFrameCodeTemplate" >
+						<Size x="210" y="156"/>
 						<Anchors>
-							<Anchor point="TOPLEFT" relativeTo="$parentEvents" relativePoint="TOPRIGHT" x="15"/>
+							<Anchor point="TOPLEFT" x="20" y="-75"/>
 						</Anchors>
-						<Frames>
-							<Button name="$parentNone" inherits="TellMeWhen_SoundSelectButton" parentKey="None" id="0"/>
-
-
-							<Slider name="$parentScrollBar" inherits="MinimalScrollBarTemplate" parentKey="ScrollBar">
-								<Size x="17"/>
-								<Anchors>
-									<Anchor point="TOPLEFT" relativePoint="TOPRIGHT" x="1" y="-17"/>
-									<Anchor point="BOTTOMLEFT" relativePoint="BOTTOMRIGHT" x="1" y="17"/>
-								</Anchors>
+						<Layers>
+							<Layer level="OVERLAY">
+								<FontString name="$parentHeader" inherits="GameFontNormalLarge" parentKey="Header" justifyH="LEFT" text="">
+									<Anchors>
+										<Anchor point="BOTTOM" relativePoint="TOP" y="26"/>
+									</Anchors>
+								</FontString>
+							</Layer>
+						</Layers>
+						<ScrollChild>
+							<Frame name="$parentEvents" parentKey="Events">
+								<Size x="210"/>
 								<Scripts>
 									<OnLoad>
-										self:SetValue(0)
-										self.scrollStep = 1
-										self:SetValueStep(1)
+										self:GetParent():GetParent().Events = self
 									</OnLoad>
-									<OnValueChanged>
-										TMW.SND:SetSoundsOffset(value)
-									</OnValueChanged>
 								</Scripts>
-							</Slider>
-						</Frames>
-						<Backdrop bgFile="Interface\DialogFrame\UI-DialogBox-Background-Dark" tile="true"/>
-						<Layers>
-							<Layer level="OVERLAY">
-								<FontString name="$parentHeader" inherits="GameFontNormalLarge" parentKey="Header" justifyH="LEFT" text="">
-									<Anchors>
-										<Anchor point="BOTTOM" relativePoint="TOP" y="1"/>
-									</Anchors>
-								</FontString>
-							</Layer>
-						</Layers>
-					</Frame>
-					<EditBox name="$parentCustom" parentKey="Custom" inherits="TellMeWhen_InputBoxTemplate">
-						<Size y="15"/>
-						<Anchors>
-							<Anchor point="TOPLEFT" relativeTo="$parentSounds" relativePoint="BOTTOMLEFT" x="5" y="-5"/>
-							<Anchor point="TOPRIGHT" relativeTo="$parentSounds" relativePoint="BOTTOMRIGHT" y="-5"/>
-						</Anchors>
-						<Frames>
-							<Button name="$parentPlay" parentKey="Play" virtual="true">
-								<NormalTexture file="Interface\Common\VoiceChat-Speaker"/>
-								<HighlightTexture file="Interface\Common\VoiceChat-On"/>
-								<Scripts>
-									<OnClick>
-										PlaySoundFile(self:GetParent():GetText(), "Master")
-									</OnClick>
-									<OnEnter>
-										self:GetParent().Background:Show()
-									</OnEnter>
-									<OnLeave>
-										if not self:GetParent().selected then
-											self:GetParent().Background:Hide()
-										end
-									</OnLeave>
-								</Scripts>
-								<Size x="20" y="20"/>
-								<Anchors>
-									<Anchor point="LEFT" relativePoint="RIGHT"/>
-								</Anchors>
-							</Button>
-						</Frames>
-						<Layers>
-							<Layer level="BACKGROUND">
-								<Texture name="$parentBackground" parentKey="Background" file="Interface\QuestFrame\UI-QuestLogTitleHighlight" hidden="true">
-									<Anchor point="TOPLEFT" y="1"/>
-									<Anchor point="BOTTOMRIGHT" y="1"/>
-								</Texture>
-							</Layer>
-						</Layers>
+							</Frame>
+						</ScrollChild>
 						<Scripts>
 							<OnLoad>
-								TMW:TT(self, "SOUND_CUSTOM", "SOUND_CUSTOM_DESC")
-								self.label = TMW.L["SOUND_CUSTOM"]
-							</OnLoad>
-							<OnEnter>
-								self.Background:Show()
-							</OnEnter>
-							<OnLeave>
-								if not self.selected then
-									self.Background:Hide()
-								end
-							</OnLeave>
-							<OnEditFocusLost>
-								EditBox_ClearHighlight(self)
-
-								local t = TMW:CleanString(self)
-								t = gsub(t, "/", "\\")
-								while strfind(t, "\\\\") do
-									t = gsub(t, "\\\\", "\\")
-								end
-								local wt
-
-								if not strfind(t, "%.[^\\]+$") then
-									wt = t ~= "" and TMW.L["SOUNDERROR1"]
-									t = "None"
-								elseif strfind(strlower(t), "%.wav$") and select(4, GetBuildInfo()) > 40000 then
-									t = "None"
-									wt = TMW.L["SOUNDERROR2"]
-								elseif not (strfind(strlower(t), "%.ogg$") or strfind(strlower(t), "%.mp3$")) then
-									wt = TMW.L["SOUNDERROR3"]
-								end
-
-								self:SetText(t)
-								if wt then
-									TMW.HELP:Show("SND_INVALID_CUSTOM", nil, self, 0, 0, wt)
-								else
-									TMW.HELP:Hide("SND_INVALID_CUSTOM")
-								end
-
-								if TMW.CI.ics and TMW.SND.currentEvent then
-									TMW.SND:GetEventSettings().Sound = t
-								end
-								TMW.SND:SelectSound(t)
-								TMW.IE:ScheduleIconSetup()
-								self:GetScript("OnTextChanged")(self)
-								TMW.SND:SetTabText()
-								TMW.SND:SetupEventDisplay(TMW.SND.currentEvent)
-							</OnEditFocusLost>
-						</Scripts>
-					</EditBox>
-
-
-				</Frames>
-			</Frame>
-			<Frame name="$parentAnnouncements" inherits="TellMeWhen_EventContainer" parentKey="Announcements">
-				<Frames>
-					<EditBox name="$parentEditBox" inherits="TellMeWhen_InputBoxTemplate" parentKey="EditBox" autoFocus="false">
-						<Size y="15"/>
-						<Anchors>
-							<Anchor point="TOPLEFT" relativeTo="$parentEvents" relativePoint="TOPRIGHT" x="20"/>
-							<Anchor point="RIGHT" x="-20"/>
-						</Anchors>
-						<Layers>
-							<Layer level="OVERLAY">
-								<FontString name="$parentHeader" inherits="GameFontNormalLarge" parentKey="Header" justifyH="LEFT" text="">
-									<Anchors>
-										<Anchor point="BOTTOM" relativePoint="TOP" y="1"/>
-									</Anchors>
-								</FontString>
-							</Layer>
-						</Layers>
-						<Scripts>
-							<OnLoad>
-								TMW:TT(self, "ANN_EDITBOX", "ANN_EDITBOX_DESC")
-								self.__noWrapTooltipText = true
-								self.label = "|cFFFF5050" .. TMW.L["ANN_EDITBOX_WARN"]
-								self.BackgroundText:SetWidth(self:GetWidth())
-								self.Header:SetText(TMW.L["ANN_EDITBOX"])
-								TMW.SUG:EnableEditBox(self, "textsubsANN")
-							</OnLoad>
-							<OnEditFocusLost>
-								EditBox_ClearHighlight(self)
-								TMW:CleanString(self)
-								if TMW.CI.ics and TMW.ANN.currentEvent then
-									TMW.ANN:GetEventSettings().Text = self:GetText()
-								end
-								TMW.IE:ScheduleIconSetup()
-								self:GetScript("OnTextChanged")(self)
-							</OnEditFocusLost>
-						</Scripts>
-					</EditBox>
-
-					<Frame name="$parentChannels" parentKey="Channels">
-						<Size x="150" y="266"/>
-						<Anchors>
-							<Anchor point="TOPLEFT" relativeTo="$parentEditBox" relativePoint="BOTTOMLEFT" x="-5" y="-25"/>
-						</Anchors>
-						<Frames>
-							<Button name="$parentNone" inherits="TellMeWhen_ChannelSelectButton" parentKey="None" id="1"/>
-						</Frames>
-						<Backdrop bgFile="Interface\DialogFrame\UI-DialogBox-Background-Dark" tile="true"/>
-						<Layers>
-							<Layer level="OVERLAY">
-								<FontString name="$parentHeader" inherits="GameFontNormalLarge" parentKey="Header" justifyH="LEFT" text="">
-									<Anchors>
-										<Anchor point="BOTTOM" relativePoint="TOP" y="1"/>
-									</Anchors>
-								</FontString>
-							</Layer>
-						</Layers>
-					</Frame>
-
-					<Frame name="$parentLocation" inherits="TMW_DropDownMenuTemplate" parentKey="Location">
-						<Anchors>
-							<Anchor point="TOPLEFT" relativeTo="$parentChannels" relativePoint="TOPRIGHT" x="-10"/>
-						</Anchors>
-						<Layers>
-							<Layer level="OVERLAY">
-								<FontString name="$parentHeader" inherits="GameFontNormalLarge" parentKey="Header" justifyH="LEFT" text="">
-									<Anchors>
-										<Anchor point="BOTTOM" relativePoint="TOP" y="1"/>
-									</Anchors>
-								</FontString>
-							</Layer>
-						</Layers>
-						<Scripts>
-							<OnLoad>
-								self.Header:SetText(TMW.L["ANN_SUB_CHANNEL"])
-								UIDropDownMenu_SetWidth(self, 135)
-								self.InitFunc = TMW.ANN.DropDown
-							</OnLoad>
-						</Scripts>
-					</Frame>
-					<EditBox name="$parentWhisperTarget" inherits="TellMeWhen_InputBoxTemplate" parentKey="WhisperTarget" autoFocus="false">
-						<Size x="135" y="15"/>
-						<Anchors>
-							<Anchor point="TOPLEFT" relativeTo="$parentChannels" relativePoint="TOPRIGHT" x="20" y="-5"/>
-						</Anchors>
-						<Layers>
-							<Layer level="OVERLAY">
-								<FontString name="$parentHeader" inherits="GameFontNormalLarge" parentKey="Header" justifyH="LEFT" text="">
-									<Anchors>
-										<Anchor point="BOTTOM" relativePoint="TOP" y="1"/>
-									</Anchors>
-								</FontString>
-							</Layer>
-						</Layers>
-						<Scripts>
-							<OnLoad>
-								self.Header:SetText(TMW.L["ANN_WHISPERTARGET"])
-								TMW:TT(self, "ANN_WHISPERTARGET", "ANN_WHISPERTARGET_DESC")
-								self.label = TMW.L["ANN_WHISPERTARGET"]
-								self.BackgroundText:SetWidth(self:GetWidth())
-								TMW.SUG:EnableEditBox(self, "textsubsANNWhisper")
-							</OnLoad>
-							<OnEditFocusLost>
-								EditBox_ClearHighlight(self)
-								TMW:CleanString(self)
-								if TMW.CI.ics then
-									TMW.ANN:GetEventSettings().Location = self:GetText()
-								end
-								TMW.IE:ScheduleIconSetup()
-								self:GetScript("OnTextChanged")(self)
-							</OnEditFocusLost>
-						</Scripts>
-					</EditBox>
-
-					<CheckButton name="$parentSticky" inherits="TellMeWhen_CheckTemplate" parentKey="Sticky">
-						<Anchors>
-							<Anchor point="TOPLEFT" relativeTo="$parentLocation" relativePoint="BOTTOMLEFT" x="15" y="-5"/>
-						</Anchors>
-						<Scripts>
-							<OnLoad>
-								self.text:SetText(TMW.L["ANN_STICKY"])
-							</OnLoad>
-							<OnClick>
-								TMW.ANN:GetEventSettings().Sticky = not not self:GetChecked()
-							</OnClick>
-						</Scripts>
-					</CheckButton>
-					<CheckButton name="$parentIcon" inherits="TellMeWhen_CheckTemplate" parentKey="Icon">
-						<Anchors>
-							<Anchor point="TOP" relativeTo="$parentSticky" relativePoint="BOTTOM" y="4"/>
-						</Anchors>
-						<Scripts>
-							<OnLoad>
-								self.text:SetText(TMW.L["ANN_SHOWICON"])
-								TMW:TT(self, "ANN_SHOWICON", "ANN_SHOWICON_DESC")
-							</OnLoad>
-							<OnClick>
-								TMW.ANN:GetEventSettings().Icon = not not self:GetChecked()
-								TMW.IE:ScheduleIconSetup()
-							</OnClick>
-						</Scripts>
-					</CheckButton>
-					<Button name="$parentColor" parentKey="Color">
-						<Size x="20" y="20"/>
-						<Anchors>
-							<Anchor point="TOP" relativeTo="$parentIcon" relativePoint="BOTTOM"/>
-						</Anchors>
-						<Layers>
-							<Layer level="BACKGROUND">
-								<Texture>
-									<Size x="17.5" y="17.5"/>
-									<Anchors>
-										<Anchor point="CENTER"/>
-									</Anchors>
-									<Color r="1.0" g="1.0" b="1.0"/>
-								</Texture>
-								<FontString name="$parenttext" parentKey="text" justifyH="LEFT" inherits="GameFontHighlightSmall">
-									<Anchors>
-										<Anchor point="LEFT" relativePoint="RIGHT" x="2"/>
-									</Anchors>
-								</FontString>
-							</Layer>
-						</Layers>
-						<Scripts>
-							<OnLoad>
-								self.text:SetText(TMW.L["FONTCOLOR"])
-								self.func = function()
-									local settings = TMW.ANN:GetEventSettings()
-									local r, g, b = ColorPickerFrame:GetColorRGB()
-									settings.r = r
-									settings.g = g
-									settings.b = b
-									self:GetNormalTexture():SetVertexColor(r, g, b, 1)
-									TMW.IE:ScheduleIconSetup()
-								end
-								self.cancel = function()
-									local settings = TMW.ANN:GetEventSettings()
-									local r, g, b = self.br, self.bg, self.bb
-									settings.r = r
-									settings.g = g
-									settings.b = b
-									self:GetNormalTexture():SetVertexColor(r, g, b, 1)
-									TMW.IE:ScheduleIconSetup()
-								end
-							</OnLoad>
-							<OnClick>
-								local settings = TMW.ANN:GetEventSettings()
-								local r, g, b = settings.r, settings.g, settings.b
-								self.br, self.bg, self.bb = r, g, b
-
-								ColorPickerFrame.hasOpacity = nil
-								ColorPickerFrame.func, ColorPickerFrame.cancelFunc = self.func, self.cancel
-								ColorPickerFrame:SetColorRGB(r,g,b)
-								ColorPickerFrame:Show()
-							</OnClick>
-						</Scripts>
-						<NormalTexture name="$parentNormalTexture" file="Interface\ChatFrame\ChatFrameColorSwatch"/>
-					</Button>
-
-					<Slider name="$parentSize" inherits="TellMeWhen_SliderTemplate" parentKey="Size" minvalue="0" maxvalue="38" valuestep="1">
-						<Size x="150" y="17"/>
-						<Anchors>
-							<Anchor point="TOPLEFT" relativeTo="$parentColor" relativePoint="BOTTOMLEFT" y="-17"/>
-						</Anchors>
-						<Scripts>
-							<OnMinMaxChanged>
-								local minValue, maxValue = self:GetMinMaxValues()
-								self.Low:SetText(TMW.L["DEFAULT"])
-								self.High:SetText(maxValue)
-							</OnMinMaxChanged>
-							<OnValueChanged>
-								local val = self:GetValue()
-								self.Mid:SetText(val == 0 and TMW.L["DEFAULT"] or val)
-								if TMW.CI.ics then
-									TMW.ANN:GetEventSettings().Size = val
-									TMW.IE:ScheduleIconSetup()
-								end
-							</OnValueChanged>
-							<OnLoad>
-								self.text:SetText(TMW.L["FONTSIZE"])
-								self:EnableMouseWheel(true)
-							</OnLoad>
-							<OnMouseWheel>
-								self:SetValue(self:GetValue()+delta)
-							</OnMouseWheel>
-						</Scripts>
-					</Slider>
-
-
-				</Frames>
-			</Frame>
-
-			<Frame name="$parentAnimations" inherits="TellMeWhen_EventContainer" parentKey="Animations">
-				<Frames>
-					<Frame name="$parentAnimations" parentKey="Animations">
-						<Size x="150" y="266"/>
-						<Anchors>
-							<Anchor point="TOPLEFT" relativeTo="$parentEvents" relativePoint="TOPRIGHT" x="15"/>
-						</Anchors>
-						<Frames>
-							<Button name="$parentNone" inherits="TellMeWhen_ChannelSelectButton" parentKey="None" id="1"/>
-						</Frames>
-						<Backdrop bgFile="Interface\DialogFrame\UI-DialogBox-Background-Dark" tile="true"/>
-						<Layers>
-							<Layer level="OVERLAY">
-								<FontString name="$parentHeader" inherits="GameFontNormalLarge" parentKey="Header" justifyH="LEFT" text="">
-									<Anchors>
-										<Anchor point="BOTTOM" relativePoint="TOP" y="1"/>
-									</Anchors>
-								</FontString>
-							</Layer>
-						</Layers>
-					</Frame>
-
-					<Slider name="$parentDuration" parentKey="Duration" inherits="TellMeWhen_AnimationSliderTemplate" valuestep="0.1" >
-						<Anchors>
-							<Anchor point="TOPLEFT" relativeTo="$parentAnimations" relativePoint="TOPRIGHT" x="20" y="-20"/>
-						</Anchors>
-						<Scripts>
-							<OnValueChanged>
-								value = max(self:GetValue(), 0.1)
-
-								self.Mid:SetText(TMW.L["ANIM_SECONDS"]:format(TMW:FormatSeconds(value, nil, true)))
-
-								if TMW.CI.ics then
-									TMW.ANIM:GetEventSettings().Duration = value
-									TMW.IE:ScheduleIconSetup()
-								end
-							</OnValueChanged>
-						</Scripts>
-					</Slider>
-
-					<CheckButton name="$parentInfinite" inherits="TellMeWhen_CheckTemplate" parentKey="Infinite">
-						<Anchors>
-							<Anchor point="TOPLEFT" relativeTo="$parentDuration" relativePoint="BOTTOMLEFT" y="-10"/>
-						</Anchors>
-						<Scripts>
-							<OnLoad>
-								self.text:SetText(TMW.L["ANIM_INFINITE"])
-								TMW:TT(self, "ANIM_INFINITE", "ANIM_INFINITE_DESC")
-
-								hooksecurefunc(self, "SetChecked", function(self, value)
-									if value then
-										self:GetParent().Duration:Disable()
-									else
-										self:GetParent().Duration:Enable()
+								self.scrollBarHideable = true
+								self.Header:SetText(TMW.L["EVENTS_HANDLERS_HEADER"])
+								self:HookScript("OnScrollRangeChanged", function()
+									if self.adjustmentQueued then
+										TMW.EVENTS:AdjustScrollFrame()
+										self.adjustmentQueued = nil
 									end
 								end)
 							</OnLoad>
-							<OnClick>
-								self:SetChecked(self:GetChecked()) -- trigger the hook
-								TMW.ANIM:GetEventSettings().Infinite = not not self:GetChecked()
-							</OnClick>
 						</Scripts>
-					</CheckButton>
-
-					<Slider name="$parentMagnitude" parentKey="Magnitude" inherits="TellMeWhen_AnimationSliderTemplate" valuestep="1">
+						<Frames>
+							<Slider name="$parentScrollBar" inherits="MinimalScrollBarTemplate" parentKey="ScrollBar">
+								<Size x="17"/>
+								<Anchors>
+									<Anchor point="TOPLEFT" relativePoint="TOPRIGHT" y="-17"/>
+									<Anchor point="BOTTOMLEFT" relativePoint="BOTTOMRIGHT" y="17"/>
+								</Anchors>
+							</Slider>
+						</Frames>
+					</ScrollFrame>
+					
+					<Button name="$parentAddEvent" inherits="TellMeWhen_BorderedFrame" parentKey="AddEvent">
+						<Size y="25"/>
 						<Anchors>
-							<Anchor point="TOPLEFT" relativeTo="$parentDuration" relativePoint="BOTTOMLEFT" y="-60"/>
-						</Anchors>
-						<Scripts>
-							<OnValueChanged>
-								value = self:GetValue()
-
-								self.Mid:SetText(TMW.L["ANIM_PIXELS"]:format(value))
-
-								if TMW.CI.ics then
-									TMW.ANIM:GetEventSettings().Magnitude = value
-									TMW.IE:ScheduleIconSetup()
-								end
-							</OnValueChanged>
-						</Scripts>
-					</Slider>
-					<Slider name="$parentPeriod" parentKey="Period" inherits="TellMeWhen_AnimationSliderTemplate" valuestep="0.1" >
-						<Size y="17"/>
-						<Anchors>
-							<Anchor point="TOPLEFT" relativeTo="$parentMagnitude" />
-						</Anchors>
-						<Scripts>
-							<OnValueChanged>
-								value = max(self:GetValue(), 0) -- whatever... just do it 
-
-								self.Mid:SetText(TMW.L["ANIM_SECONDS"]:format(TMW:FormatSeconds(value, nil, true)))
-
-								if TMW.CI.ics then
-									TMW.ANIM:GetEventSettings().Period = value
-									TMW.IE:ScheduleIconSetup()
-								end
-							</OnValueChanged>
-						</Scripts>
-					</Slider>
-					<!--Slider name="$parentScaleMagnitude" parentKey="ScaleMagnitude" inherits="TellMeWhen_AnimationSliderTemplate" minValue="0" maxValue="10" valuestep="0.1">
-						<Anchors>
-							<Anchor point="TOPLEFT" relativeTo="$parentPeriod" relativePoint="BOTTOMLEFT" y="-30"/>
-						</Anchors>
-						<Scripts>
-							<OnValueChanged>
-								value = tonumber(format("%." .. (self.step) .. "f", value))
-								value = max(value, 0.1)
-								self.Mid:SetText(value)
-								if TMW.CI.ics then
-									TMW.ANIM:GetEventSettings().ScaleMagnitude = value
-									TMW.IE:ScheduleIconSetup()
-								end
-							</OnValueChanged>
-							<OnLoad>
-								self.text:SetText(TMW.L["ANIM_SCALEMAGNITUDE"])
-								TMW:TT(self, "ANIM_SCALEMAGNITUDE", "ANIM_SCALEMAGNITUDE_DESC")
-								self:EnableMouseWheel(true)
-								self.step = 10
-							</OnLoad>
-						</Scripts>
-					</Slider-->
-
-
-					<Button name="$parentColor" parentKey="Color">
-						<Size x="20" y="20"/>
-						<Anchors>
-							<Anchor point="TOPLEFT" relativeTo="$parentPeriod" relativePoint="BOTTOMLEFT" x="0" y="-25"/>
+							<Anchor point="BOTTOMLEFT" relativeTo="$parentSF" relativePoint="TOPLEFT" y="-0"/>
+							<Anchor point="BOTTOMRIGHT" relativeTo="$parentSF" relativePoint="TOPRIGHT" y="-0"/>
 						</Anchors>
 						<Layers>
-							<Layer level="BACKGROUND">
-								<Texture parentKey="background">
-									<Size x="17.5" y="17.5"/>
+							<Layer level="OVERLAY">
+								<Texture name="$parentPlus" file="Interface\PaperDollInfoFrame\Character-Plus">
+									<Size x="20" y="20"/>
 									<Anchors>
-										<Anchor point="CENTER"/>
+										<Anchor point="LEFT" x="5"/>
 									</Anchors>
-									<Color r="1.0" g="1.0" b="1.0"/>
 								</Texture>
-								<FontString name="$parenttext" parentKey="text" justifyH="LEFT" inherits="GameFontHighlightSmall">
+								<FontString name="$parentEventName" parentKey="EventName" inherits="GameFontNormalSmall" justifyH="LEFT">
 									<Anchors>
-										<Anchor point="LEFT" relativePoint="RIGHT" x="2"/>
+										<Anchor point="LEFT" relativeTo="$parentPlus" relativePoint="RIGHT" x="5"/>
 									</Anchors>
 								</FontString>
 							</Layer>
 						</Layers>
+						<Frames>
+							<Frame name="$parentDD" parentKey="DD" inherits="TMW_DropDownMenuTemplate" hidden="true">
+								<Scripts>
+									<OnLoad>
+										self.wrapTooltips = 1
+										function self:Init()
+											UIDropDownMenu_Initialize(self, TMW.EVENTS.AddEvent_Dropdown, "DROPDOWN")
+											self.Init = function() end
+										end
+									</OnLoad>
+								</Scripts>
+							</Frame>
+						</Frames>
 						<Scripts>
 							<OnLoad>
-								self.text:SetText(TMW.L["ANIM_COLOR"])
-								TMW:TT(self, "ANIM_COLOR", "ANIM_COLOR_DESC")
-								self.func = function()
-									local settings = TMW.ANIM:GetEventSettings()
-									local r, g, b = ColorPickerFrame:GetColorRGB()
-									settings.r_anim = r
-									settings.g_anim = g
-									settings.b_anim = b
-									self:GetNormalTexture():SetVertexColor(r, g, b, 1)
-									TMW.IE:ScheduleIconSetup()
-								end
-								self.opacityFunc = function()
-									local settings = TMW.ANIM:GetEventSettings()
-									local a = 1 - OpacitySliderFrame:GetValue()
-									settings.a_anim = a
-									self.background:SetAlpha(a)
-									TMW.IE:ScheduleIconSetup()
-								end
-								self.cancel = function()
-									local settings = TMW.ANIM:GetEventSettings()
-									local r, g, b, a = self.br, self.bg, self.bb, self.ba
-									settings.r_anim = r
-									settings.g_anim = g
-									settings.b_anim = b
-									settings.a_anim = a
-									self:GetNormalTexture():SetVertexColor(r, g, b, 1)
-									self.background:SetAlpha(a)
-									TMW.IE:ScheduleIconSetup()
-								end
+								self.EventName:SetText(TMW.L["EVENTS_HANDLERS_ADD"])
+								TMW:TT(self, "EVENTS_HANDLERS_ADD", "EVENTS_HANDLERS_ADD_DESC")
 							</OnLoad>
 							<OnClick>
-								local settings = TMW.ANIM:GetEventSettings()
-								local r, g, b, a = settings.r_anim, settings.g_anim, settings.b_anim, settings.a_anim
-								self.br, self.bg, self.bb, self.ba = r, g, b, a
-
-								ColorPickerFrame.func, ColorPickerFrame.opacityFunc, ColorPickerFrame.cancelFunc = self.func, self.opacityFunc, self.cancel
-								ColorPickerFrame:SetColorRGB(r, g, b)
-								ColorPickerFrame.hasOpacity = true
-								ColorPickerFrame.opacity = 1 - a
-								ColorPickerFrame:Show()
+								self.DD:Init()
+								ToggleDropDownMenu(1, nil, self.DD, self, 0, 0)
 							</OnClick>
 						</Scripts>
-						<NormalTexture name="$parentNormalTexture" file="Interface\ChatFrame\ChatFrameColorSwatch"/>
+						<HighlightTexture file="Interface\QuestFrame\UI-QuestLogTitleHighlight" alphaMode="ADD">
+							<Anchors>
+								<Anchor point="TOPLEFT" y="-1"/>
+								<Anchor point="BOTTOMRIGHT" y="1"/>
+							</Anchors>
+						</HighlightTexture>
 					</Button>
-
 					
-
-					<EditBox name="$parentImage" inherits="TellMeWhen_InputBoxTemplate" parentKey="Image" autoFocus="false">
-						<Size x="140" y="15"/>
+					<Frame name="$parentEventSettings" parentKey="EventSettings">
+						<Size y="1"/>
 						<Anchors>
-							<Anchor point="TOPLEFT" relativeTo="$parentPeriod" relativePoint="BOTTOMLEFT" x="4" y="-25"/>
+							<Anchor point="TOPLEFT" relativeTo="$parentSF" relativePoint="BOTTOMLEFT" x="0" y="-9"/>
+							<Anchor point="TOPRIGHT" relativeTo="$parentSF" relativePoint="BOTTOMRIGHT" x="0" y="-9"/>
 						</Anchors>
+						<Layers>
+							<Layer level="OVERLAY">
+								<FontString name="$parentHeader" inherits="GameFontNormalLarge" parentKey="Header" justifyH="CENTER">
+									<Anchors>
+										<Anchor point="TOP" y="5"/>
+									</Anchors>
+								</FontString>
+								<FontString name="$parentEventName" inherits="GameFontDisableSmall" parentKey="EventName" justifyH="CENTER">
+									<Anchors>
+										<Anchor point="TOP" relativeTo="$parentHeader" relativePoint="BOTTOM" y="0"/>
+									</Anchors>
+								</FontString>
+							</Layer>
+						</Layers>
+						<Frames>
+							<CheckButton name="$parentPassThrough" inherits="TellMeWhen_EventSettings_CheckTemplate" parentKey="PassThrough" motionScriptsWhileDisabled="true">
+								<Anchors>
+									<Anchor point="TOPLEFT" y="-23"/>
+								</Anchors>
+								<Scripts>
+									<OnLoad>
+										self.text:SetText(TMW.L["EVENTS_SETTINGS_PASSTHROUGH"])
+										--[[local parentModule = TMW.EVENTS:GetModule(self:GetParent():GetParent():GetName():gsub("TellMeWhen_IconEditor", ""))
+										local fmt = parentModule.tabText]]
+										TMW:TT(self, "EVENTS_SETTINGS_PASSTHROUGH", "EVENTS_SETTINGS_PASSTHROUGH_DESC")
+										self.setting = "PassThrough"
+									</OnLoad>
+								</Scripts>
+							</CheckButton>
+
+							<CheckButton name="$parentOnlyShown" inherits="TellMeWhen_EventSettings_CheckTemplate" parentKey="OnlyShown" motionScriptsWhileDisabled="true">
+								<Anchors>
+									<Anchor point="TOP" relativeTo="$parentPassThrough" relativePoint="BOTTOM" y="6"/>
+								</Anchors>
+								<Scripts>
+									<OnLoad>
+										self.text:SetText(TMW.L["EVENTS_SETTINGS_ONLYSHOWN"])
+										TMW:TT(self, "EVENTS_SETTINGS_ONLYSHOWN", "EVENTS_SETTINGS_ONLYSHOWN_DESC")
+										self.setting = "OnlyShown"
+									</OnLoad>
+								</Scripts>
+							</CheckButton>
+
+							<CheckButton name="$parentPassingCndt" inherits="TellMeWhen_EventSettings_CheckTemplate" parentKey="PassingCndt" motionScriptsWhileDisabled="true">
+								<Anchors>
+									<Anchor point="TOP" relativeTo="$parentOnlyShown" relativePoint="BOTTOM" y="6"/>
+								</Anchors>
+								<Scripts>
+									<OnLoad>
+										self.text:SetText(TMW.L["EVENTS_SETTINGS_PASSINGCNDT"])
+										TMW:TT(self, "EVENTS_SETTINGS_PASSINGCNDT", "EVENTS_SETTINGS_PASSINGCNDT_DESC")
+										self.setting = "PassingCndt"
+									</OnLoad>
+								</Scripts>
+							</CheckButton>
+							<Frame name="$parentOperator" parentKey="Operator" inherits="TMW_DropDownMenuTemplate">
+								<Anchors>
+									<Anchor point="TOP" relativeTo="$parentPassingCndt" relativePoint="BOTTOM" x="105" y="6"/>
+								</Anchors>
+								<Layers>
+									<Layer level="OVERLAY">
+										<FontString name="$parentValueLabel" inherits="GameFontHighlight" parentKey="ValueLabel" justifyH="RIGHT">
+											<Anchors>
+												<Anchor point="RIGHT" relativePoint="LEFT" x="12" y="3"/>
+											</Anchors>
+										</FontString>
+									</Layer>
+								</Layers>
+								<Scripts>
+									<OnLoad>
+										self.wrapTooltips = 1
+										self.Button:SetMotionScriptsWhileDisabled(false)
+										UIDropDownMenu_SetWidth(self, 47)
+										self.Text:SetFontObject(GameFontHighlightLarge)
+										self.InitFunc = TMW.EVENTS.OperatorMenu_DropDown
+
+										function self:Disable()
+											self.Button:Disable()
+											self:SetAlpha(0.4)
+										end
+										function self:Enable()
+											self.Button:Enable()
+											self:SetAlpha(1)
+										end
+									</OnLoad>
+								</Scripts>
+							</Frame>
+
+							<EditBox name="$parentValue" inherits="TellMeWhen_TimeEditBoxTemplate" parentKey="Value" autoFocus="false">
+								<Size x="45" y="18"/>
+								<Anchors>
+									<Anchor point="LEFT" relativeTo="$parentOperator" relativePoint="RIGHT" x="-5" y="4"/>
+								</Anchors>
+								<Layers>
+									<Layer level="OVERLAY">
+										<FontString name="$parentValueLabel" inherits="GameFontHighlightLarge" parentKey="ValueLabel" justifyH="RIGHT">
+											<Anchors>
+												<Anchor point="RIGHT" relativePoint="RIGHT" x="-3" y="0"/>
+											</Anchors>
+										</FontString>
+									</Layer>
+								</Layers>
+								<Scripts>
+									<OnEditFocusLost>
+										EditBox_ClearHighlight(self)
+
+										local t = TMW:CleanString(self)
+										if strfind(t, ":") then
+											t = t:toseconds()
+										end
+										t = tonumber(t) or 0
+										self:SetText(t)
+
+										if TMW.CI.ics then
+											local parentModule = TMW.EVENTS.currentModule
+											parentModule:GetEventSettings().Value = t
+											TMW.IE:ScheduleIconSetup()
+										end
+
+										self:GetScript("OnTextChanged")(self)
+									</OnEditFocusLost>
+									<OnEnable>
+										self:SetAlpha(1)
+									</OnEnable>
+									<OnDisable>
+										self:SetAlpha(.4)
+									</OnDisable>
+								</Scripts>
+							</EditBox>
+
+							<CheckButton name="$parentCndtJustPassed" inherits="TellMeWhen_EventSettings_CheckTemplate" parentKey="CndtJustPassed" motionScriptsWhileDisabled="true">
+								<Anchors>
+									<Anchor point="TOP" relativeTo="$parentPassingCndt" relativePoint="BOTTOM" y="-15" x="10"/>
+								</Anchors>
+								<Scripts>
+									<OnLoad>
+										self.text:SetText(TMW.L["EVENTS_SETTINGS_CNDTJUSTPASSED"])
+										TMW:TT(self, "EVENTS_SETTINGS_CNDTJUSTPASSED", "EVENTS_SETTINGS_CNDTJUSTPASSED_DESC")
+										self.setting = "CndtJustPassed"
+									</OnLoad>
+								</Scripts>
+							</CheckButton>
+
+							<Frame name="$parentIcon" parentKey="Icon" inherits="TMW_IconDropDownMenuTemplate">
+								<Anchors>
+									<Anchor point="TOPLEFT" relativeTo="$parentOnlyShown" relativePoint="BOTTOMLEFT" x="10"/>
+								</Anchors>
+								<Scripts>
+									<OnLoad>
+										self.wrapTooltips = 1
+										self:Hide()
+										UIDropDownMenu_SetWidth(self, 151)
+										self.InitFunc = TMW.EVENTS.IconMenu_DropDown
+									</OnLoad>
+								</Scripts>
+							</Frame>
+
+						</Frames>
 						<Scripts>
 							<OnLoad>
-								TMW:TT(self, "ANIM_TEX", "ANIM_TEX_DESC")
-								self.label = TMW.L["ANIM_TEX"]
-								self.BackgroundText:SetWidth(self:GetWidth())
-								TMW.SUG:EnableEditBox(self, "texture", true)
+								self.Header:SetText(TMW.L["EVENTS_SETTINGS_HEADER"])
 							</OnLoad>
-							<OnEditFocusLost>
-								EditBox_ClearHighlight(self)
-
-								self:SetText(self:GetText():gsub([[\\]], [[\]]))
-
-								if TMW.CI.ics then
-									TMW.ANIM:GetEventSettings().Image = TMW:CleanString(self)
-									TMW.IE:ScheduleIconSetup()
-								end
-
-								self:GetScript("OnTextChanged")(self)
-							</OnEditFocusLost>
 						</Scripts>
-					</EditBox>
-					
-					<CheckButton name="$parentFade" inherits="TellMeWhen_CheckTemplate" parentKey="Fade">
-						<Anchors>
-							<Anchor point="TOP" relativeTo="$parentColor" relativePoint="BOTTOM" y="-5"/>
-						</Anchors>
-						<Scripts>
-							<OnLoad>
-								self.text:SetText(TMW.L["ANIM_FADE"])
-								TMW:TT(self, "ANIM_FADE", "ANIM_FADE_DESC")
-							</OnLoad>
-							<OnClick>
-								TMW.ANIM:GetEventSettings().Fade = not not self:GetChecked()
-							</OnClick>
-						</Scripts>
-					</CheckButton>
+					</Frame>
+		
+					<Frame name="$parentSound" inherits="TellMeWhen_EventContainer" parentKey="Sound">
+						<Frames>
+							<Frame name="$parentSounds" parentKey="Sounds">
+								<Size x="290" y="266"/>
+								<Anchors>
+									<Anchor point="TOPLEFT"/>
+								</Anchors>
+								<Frames>
+									<Button name="$parentNone" inherits="TellMeWhen_SoundSelectButton" parentKey="None" id="0"/>
 
-					
-					<Slider name="$parentThickness" parentKey="Thickness" inherits="TellMeWhen_AnimationSliderTemplate" valuestep="0.1" >
-						<Size y="17"/>
-						<Anchors>
-							<Anchor point="TOPLEFT" relativeTo="$parentFade" relativePoint="BOTTOMLEFT" y="-18" />
-						</Anchors>
-						<Scripts>
-							<OnValueChanged>
-								value = max(self:GetValue(), 0.1)
 
-								self.Mid:SetText(TMW.L["ANIM_PIXELS"]:format(value))
+									<Slider name="$parentScrollBar" inherits="MinimalScrollBarTemplate" parentKey="ScrollBar">
+										<Size x="17"/>
+										<Anchors>
+											<Anchor point="TOPLEFT" relativePoint="TOPRIGHT" x="1" y="-17"/>
+											<Anchor point="BOTTOMLEFT" relativePoint="BOTTOMRIGHT" x="1" y="17"/>
+										</Anchors>
+										<Scripts>
+											<OnLoad>
+												self:SetValue(0)
+												self.scrollStep = 1
+												self:SetValueStep(1)
+											</OnLoad>
+											<OnValueChanged>
+												TMW.SND:SetSoundsOffset(value)
+											</OnValueChanged>
+										</Scripts>
+									</Slider>
+								</Frames>
+								<Backdrop bgFile="Interface\DialogFrame\UI-DialogBox-Background-Dark" tile="true"/>
+								<Layers>
+									<Layer level="OVERLAY">
+										<FontString name="$parentHeader" inherits="GameFontNormalLarge" parentKey="Header" justifyH="LEFT" text="">
+											<Anchors>
+												<Anchor point="BOTTOM" relativePoint="TOP" y="1"/>
+											</Anchors>
+										</FontString>
+									</Layer>
+								</Layers>
+							</Frame>
+							<EditBox name="$parentCustom" parentKey="Custom" inherits="TellMeWhen_InputBoxTemplate">
+								<Size y="15"/>
+								<Anchors>
+									<Anchor point="TOPLEFT" relativeTo="$parentSounds" relativePoint="BOTTOMLEFT" x="5" y="-5"/>
+									<Anchor point="TOPRIGHT" relativeTo="$parentSounds" relativePoint="BOTTOMRIGHT" y="-5"/>
+								</Anchors>
+								<Frames>
+									<Button name="$parentPlay" parentKey="Play" virtual="true">
+										<NormalTexture file="Interface\Common\VoiceChat-Speaker"/>
+										<HighlightTexture file="Interface\Common\VoiceChat-On"/>
+										<Scripts>
+											<OnClick>
+												PlaySoundFile(self:GetParent():GetText(), "Master")
+											</OnClick>
+											<OnEnter>
+												self:GetParent().Background:Show()
+											</OnEnter>
+											<OnLeave>
+												if not self:GetParent().selected then
+													self:GetParent().Background:Hide()
+												end
+											</OnLeave>
+										</Scripts>
+										<Size x="20" y="20"/>
+										<Anchors>
+											<Anchor point="LEFT" relativePoint="RIGHT"/>
+										</Anchors>
+									</Button>
+								</Frames>
+								<Layers>
+									<Layer level="BACKGROUND">
+										<Texture name="$parentBackground" parentKey="Background" file="Interface\QuestFrame\UI-QuestLogTitleHighlight" hidden="true">
+											<Anchor point="TOPLEFT" y="-1"/>
+											<Anchor point="BOTTOMRIGHT" y="1"/>
+										</Texture>
+									</Layer>
+								</Layers>
+								<Scripts>
+									<OnLoad>
+										TMW:TT(self, "SOUND_CUSTOM", "SOUND_CUSTOM_DESC")
+										self.label = TMW.L["SOUND_CUSTOM"]
+									</OnLoad>
+									<OnEnter>
+										self.Background:Show()
+									</OnEnter>
+									<OnLeave>
+										if not self.selected then
+											self.Background:Hide()
+										end
+									</OnLeave>
+									<OnEditFocusLost>
+										EditBox_ClearHighlight(self)
 
-								if TMW.CI.ics then
-									TMW.ANIM:GetEventSettings().Thickness = value
-									TMW.IE:ScheduleIconSetup()
-								end
-							</OnValueChanged>
-						</Scripts>
-					</Slider>
-					<Slider name="$parentSize_anim" parentKey="Size_anim" inherits="TellMeWhen_AnimationSliderTemplate" valuestep="0.1" >
-						<Size y="17"/>
-						<Anchors>
-							<Anchor point="TOPLEFT" relativeTo="$parentThickness" relativePoint="BOTTOMLEFT" y="-28" />
-						</Anchors>
-						<Scripts>
-							<OnValueChanged>
-								value = max(self:GetValue(), 0.1)
+										local t = TMW:CleanString(self)
+										t = gsub(t, "/", "\\")
+										while strfind(t, "\\\\") do
+											t = gsub(t, "\\\\", "\\")
+										end
+										local wt
 
-								self.Mid:SetText(TMW.L["ANIM_PIXELS"]:format(value))
+										if not strfind(t, "%.[^\\]+$") then
+											wt = t ~= "" and TMW.L["SOUNDERROR1"]
+											t = "None"
+										elseif strfind(strlower(t), "%.wav$") and select(4, GetBuildInfo()) > 40000 then
+											t = "None"
+											wt = TMW.L["SOUNDERROR2"]
+										elseif not (strfind(strlower(t), "%.ogg$") or strfind(strlower(t), "%.mp3$")) then
+											wt = TMW.L["SOUNDERROR3"]
+										end
 
-								if TMW.CI.ics then
-									TMW.ANIM:GetEventSettings().Size_anim = value
-									TMW.IE:ScheduleIconSetup()
-								end
-							</OnValueChanged>
-						</Scripts>
-					</Slider>
-					<Slider name="$parentSizeX" parentKey="SizeX" inherits="TellMeWhen_AnimationSliderTemplate" valuestep="1" >
-						<Size y="17"/>
-						<Anchors>
-							<Anchor point="TOPLEFT" relativeTo="$parentFade" relativePoint="BOTTOMLEFT" y="-18" />
-						</Anchors>
-						<Scripts>
-							<OnValueChanged>
-								self.range = 100
-								value = max(self:GetValue(), 1)
+										self:SetText(t)
+										if wt then
+											TMW.HELP:Show("SND_INVALID_CUSTOM", nil, self, 0, 0, wt)
+										else
+											TMW.HELP:Hide("SND_INVALID_CUSTOM")
+										end
 
-								self.Mid:SetText(TMW.L["ANIM_PIXELS"]:format(value))
+										if TMW.CI.ics and TMW.EVENTS.currentEventID then
+											TMW.SND:GetEventSettings().Sound = t
+										end
+										TMW.SND:SelectSound(t)
+										TMW.IE:ScheduleIconSetup()
+										self:GetScript("OnTextChanged")(self)
+										
+										TMW.EVENTS:LoadConfig()
+									</OnEditFocusLost>
+								</Scripts>
+							</EditBox>
+						</Frames>
+					</Frame>
+					<Frame name="$parentAnnouncements" inherits="TellMeWhen_EventContainer" parentKey="Announcements">
+						<Frames>
+							<EditBox name="$parentEditBox" inherits="TellMeWhen_InputBoxTemplate" parentKey="EditBox" autoFocus="false">
+								<Size y="15"/>
+								<Anchors>
+									<Anchor point="TOPLEFT" x="5"/>
+									<Anchor point="RIGHT" x="-20"/>
+								</Anchors>
+								<Layers>
+									<Layer level="OVERLAY">
+										<FontString name="$parentHeader" inherits="GameFontNormalLarge" parentKey="Header" justifyH="LEFT" text="">
+											<Anchors>
+												<Anchor point="BOTTOM" relativePoint="TOP" y="1"/>
+											</Anchors>
+										</FontString>
+									</Layer>
+								</Layers>
+								<Scripts>
+									<OnLoad>
+										TMW:TT(self, "ANN_EDITBOX", "ANN_EDITBOX_DESC")
+										self.__noWrapTooltipText = true
+										self.label = "|cFFFF5050" .. TMW.L["ANN_EDITBOX_WARN"]
+										self.BackgroundText:SetWidth(self:GetWidth())
+										self.Header:SetText(TMW.L["ANN_EDITBOX"])
+										TMW.SUG:EnableEditBox(self, "textsubsANN")
+									</OnLoad>
+									<OnEditFocusLost>
+										EditBox_ClearHighlight(self)
+										TMW:CleanString(self)
+										if TMW.CI.ics and TMW.EVENTS.currentEventID then
+											TMW.ANN:GetEventSettings().Text = self:GetText()
+										end
+										TMW.IE:ScheduleIconSetup()
+										self:GetScript("OnTextChanged")(self)
+										
+										TMW.EVENTS:LoadConfig()
+									</OnEditFocusLost>
+								</Scripts>
+							</EditBox>
 
-								if TMW.CI.ics then
-									TMW.ANIM:GetEventSettings().SizeX = value
-									TMW.IE:ScheduleIconSetup()
-								end
-							</OnValueChanged>
-						</Scripts>
-					</Slider>
-					<Slider name="$parentSizeY" parentKey="SizeY" inherits="TellMeWhen_AnimationSliderTemplate" valuestep="1" >
-						<Size y="17"/>
-						<Anchors>
-							<Anchor point="TOPLEFT" relativeTo="$parentSizeX" relativePoint="BOTTOMLEFT" y="-28" />
-						</Anchors>
-						<Scripts>
-							<OnValueChanged>
-								self.range = 100
-								value = max(self:GetValue(), 1)
+							<Frame name="$parentChannels" parentKey="Channels">
+								<Size x="150" y="266"/>
+								<Anchors>
+									<Anchor point="TOPLEFT" relativeTo="$parentEditBox" relativePoint="BOTTOMLEFT" x="-5" y="-25"/>
+								</Anchors>
+								<Frames>
+									<Button name="$parentNone" inherits="TellMeWhen_ChannelSelectButton" parentKey="None" id="1"/>
+								</Frames>
+								<Backdrop bgFile="Interface\DialogFrame\UI-DialogBox-Background-Dark" tile="true"/>
+								<Layers>
+									<Layer level="OVERLAY">
+										<FontString name="$parentHeader" inherits="GameFontNormalLarge" parentKey="Header" justifyH="LEFT" text="">
+											<Anchors>
+												<Anchor point="BOTTOM" relativePoint="TOP" y="1"/>
+											</Anchors>
+										</FontString>
+									</Layer>
+								</Layers>
+							</Frame>
 
-								self.Mid:SetText(TMW.L["ANIM_PIXELS"]:format(value))
+							<Frame name="$parentLocation" inherits="TMW_DropDownMenuTemplate" parentKey="Location">
+								<Anchors>
+									<Anchor point="TOPLEFT" relativeTo="$parentChannels" relativePoint="TOPRIGHT" x="-10"/>
+								</Anchors>
+								<Layers>
+									<Layer level="OVERLAY">
+										<FontString name="$parentHeader" inherits="GameFontNormalLarge" parentKey="Header" justifyH="LEFT" text="">
+											<Anchors>
+												<Anchor point="BOTTOM" relativePoint="TOP" y="1"/>
+											</Anchors>
+										</FontString>
+									</Layer>
+								</Layers>
+								<Scripts>
+									<OnLoad>
+										self.Header:SetText(TMW.L["ANN_SUB_CHANNEL"])
+										UIDropDownMenu_SetWidth(self, 135)
+										self.InitFunc = TMW.ANN.DropDown
+									</OnLoad>
+								</Scripts>
+							</Frame>
+							<EditBox name="$parentWhisperTarget" inherits="TellMeWhen_InputBoxTemplate" parentKey="WhisperTarget" autoFocus="false">
+								<Size x="135" y="15"/>
+								<Anchors>
+									<Anchor point="TOPLEFT" relativeTo="$parentChannels" relativePoint="TOPRIGHT" x="20" y="-5"/>
+								</Anchors>
+								<Layers>
+									<Layer level="OVERLAY">
+										<FontString name="$parentHeader" inherits="GameFontNormalLarge" parentKey="Header" justifyH="LEFT" text="">
+											<Anchors>
+												<Anchor point="BOTTOM" relativePoint="TOP" y="1"/>
+											</Anchors>
+										</FontString>
+									</Layer>
+								</Layers>
+								<Scripts>
+									<OnLoad>
+										self.Header:SetText(TMW.L["ANN_WHISPERTARGET"])
+										TMW:TT(self, "ANN_WHISPERTARGET", "ANN_WHISPERTARGET_DESC")
+										self.label = TMW.L["ANN_WHISPERTARGET"]
+										self.BackgroundText:SetWidth(self:GetWidth())
+										TMW.SUG:EnableEditBox(self, "textsubsANNWhisper")
+									</OnLoad>
+									<OnEditFocusLost>
+										EditBox_ClearHighlight(self)
+										TMW:CleanString(self)
+										if TMW.CI.ics then
+											TMW.ANN:GetEventSettings().Location = self:GetText()
+										end
+										TMW.IE:ScheduleIconSetup()
+										self:GetScript("OnTextChanged")(self)
+									</OnEditFocusLost>
+								</Scripts>
+							</EditBox>
 
-								if TMW.CI.ics then
-									TMW.ANIM:GetEventSettings().SizeY = value
-									TMW.IE:ScheduleIconSetup()
-								end
-							</OnValueChanged>
-						</Scripts>
-					</Slider>
+							<CheckButton name="$parentSticky" inherits="TellMeWhen_CheckTemplate" parentKey="Sticky">
+								<Anchors>
+									<Anchor point="TOPLEFT" relativeTo="$parentLocation" relativePoint="BOTTOMLEFT" x="15" y="-5"/>
+								</Anchors>
+								<Scripts>
+									<OnLoad>
+										self.text:SetText(TMW.L["ANN_STICKY"])
+									</OnLoad>
+									<OnClick>
+										TMW.ANN:GetEventSettings().Sticky = not not self:GetChecked()
+									</OnClick>
+								</Scripts>
+							</CheckButton>
+							<CheckButton name="$parentIcon" inherits="TellMeWhen_CheckTemplate" parentKey="Icon">
+								<Anchors>
+									<Anchor point="TOP" relativeTo="$parentSticky" relativePoint="BOTTOM" y="4"/>
+								</Anchors>
+								<Scripts>
+									<OnLoad>
+										self.text:SetText(TMW.L["ANN_SHOWICON"])
+										TMW:TT(self, "ANN_SHOWICON", "ANN_SHOWICON_DESC")
+									</OnLoad>
+									<OnClick>
+										TMW.ANN:GetEventSettings().Icon = not not self:GetChecked()
+										TMW.IE:ScheduleIconSetup()
+									</OnClick>
+								</Scripts>
+							</CheckButton>
+							<Button name="$parentColor" parentKey="Color">
+								<Size x="20" y="20"/>
+								<Anchors>
+									<Anchor point="TOP" relativeTo="$parentIcon" relativePoint="BOTTOM"/>
+								</Anchors>
+								<Layers>
+									<Layer level="BACKGROUND">
+										<Texture>
+											<Size x="17.5" y="17.5"/>
+											<Anchors>
+												<Anchor point="CENTER"/>
+											</Anchors>
+											<Color r="1.0" g="1.0" b="1.0"/>
+										</Texture>
+										<FontString name="$parenttext" parentKey="text" justifyH="LEFT" inherits="GameFontHighlightSmall">
+											<Anchors>
+												<Anchor point="LEFT" relativePoint="RIGHT" x="2"/>
+											</Anchors>
+										</FontString>
+									</Layer>
+								</Layers>
+								<Scripts>
+									<OnLoad>
+										self.text:SetText(TMW.L["FONTCOLOR"])
+										self.func = function()
+											local settings = TMW.ANN:GetEventSettings()
+											local r, g, b = ColorPickerFrame:GetColorRGB()
+											settings.r = r
+											settings.g = g
+											settings.b = b
+											self:GetNormalTexture():SetVertexColor(r, g, b, 1)
+											TMW.IE:ScheduleIconSetup()
+										end
+										self.cancel = function()
+											local settings = TMW.ANN:GetEventSettings()
+											local r, g, b = self.br, self.bg, self.bb
+											settings.r = r
+											settings.g = g
+											settings.b = b
+											self:GetNormalTexture():SetVertexColor(r, g, b, 1)
+											TMW.IE:ScheduleIconSetup()
+										end
+									</OnLoad>
+									<OnClick>
+										local settings = TMW.ANN:GetEventSettings()
+										local r, g, b = settings.r, settings.g, settings.b
+										self.br, self.bg, self.bb = r, g, b
+
+										ColorPickerFrame.hasOpacity = nil
+										ColorPickerFrame.func, ColorPickerFrame.cancelFunc = self.func, self.cancel
+										ColorPickerFrame:SetColorRGB(r,g,b)
+										ColorPickerFrame:Show()
+									</OnClick>
+								</Scripts>
+								<NormalTexture name="$parentNormalTexture" file="Interface\ChatFrame\ChatFrameColorSwatch"/>
+							</Button>
+
+							<Slider name="$parentSize" inherits="TellMeWhen_SliderTemplate" parentKey="Size" minvalue="0" maxvalue="38" valuestep="1">
+								<Size x="150" y="17"/>
+								<Anchors>
+									<Anchor point="TOPLEFT" relativeTo="$parentColor" relativePoint="BOTTOMLEFT" y="-17"/>
+								</Anchors>
+								<Scripts>
+									<OnMinMaxChanged>
+										local minValue, maxValue = self:GetMinMaxValues()
+										self.Low:SetText(TMW.L["DEFAULT"])
+										self.High:SetText(maxValue)
+									</OnMinMaxChanged>
+									<OnValueChanged>
+										local val = self:GetValue()
+										self.Mid:SetText(val == 0 and TMW.L["DEFAULT"] or val)
+										if TMW.CI.ics then
+											TMW.ANN:GetEventSettings().Size = val
+											TMW.IE:ScheduleIconSetup()
+										end
+									</OnValueChanged>
+									<OnLoad>
+										self.text:SetText(TMW.L["FONTSIZE"])
+										self:EnableMouseWheel(true)
+									</OnLoad>
+									<OnMouseWheel>
+										self:SetValue(self:GetValue()+delta)
+									</OnMouseWheel>
+								</Scripts>
+							</Slider>
+
+
+						</Frames>
+					</Frame>
+
+					<Frame name="$parentAnimations" inherits="TellMeWhen_EventContainer" parentKey="Animations">
+						<Frames>
+							<Frame name="$parentAnimations" parentKey="Animations">
+								<Size x="150" y="266"/>
+								<Anchors>
+									<Anchor point="TOPLEFT" />
+								</Anchors>
+								<Frames>
+									<Button name="$parentNone" inherits="TellMeWhen_ChannelSelectButton" parentKey="None" id="1"/>
+								</Frames>
+								<Backdrop bgFile="Interface\DialogFrame\UI-DialogBox-Background-Dark" tile="true"/>
+								<Layers>
+									<Layer level="OVERLAY">
+										<FontString name="$parentHeader" inherits="GameFontNormalLarge" parentKey="Header" justifyH="LEFT" text="">
+											<Anchors>
+												<Anchor point="BOTTOM" relativePoint="TOP" y="1"/>
+											</Anchors>
+										</FontString>
+									</Layer>
+								</Layers>
+							</Frame>
+
+							<Slider name="$parentDuration" parentKey="Duration" inherits="TellMeWhen_AnimationSliderTemplate" valuestep="0.1" >
+								<Anchors>
+									<Anchor point="TOPLEFT" relativeTo="$parentAnimations" relativePoint="TOPRIGHT" x="20" y="-20"/>
+								</Anchors>
+								<Scripts>
+									<OnValueChanged>
+										value = max(self:GetValue(), 0.1)
+
+										self.Mid:SetText(TMW.L["ANIM_SECONDS"]:format(TMW:FormatSeconds(value, nil, true)))
+
+										if TMW.CI.ics then
+											TMW.ANIM:GetEventSettings().Duration = value
+											TMW.IE:ScheduleIconSetup()
+										end
+									</OnValueChanged>
+								</Scripts>
+							</Slider>
+
+							<CheckButton name="$parentInfinite" inherits="TellMeWhen_CheckTemplate" parentKey="Infinite">
+								<Anchors>
+									<Anchor point="TOPLEFT" relativeTo="$parentDuration" relativePoint="BOTTOMLEFT" y="-10"/>
+								</Anchors>
+								<Scripts>
+									<OnLoad>
+										self.text:SetText(TMW.L["ANIM_INFINITE"])
+										TMW:TT(self, "ANIM_INFINITE", "ANIM_INFINITE_DESC")
+
+										hooksecurefunc(self, "SetChecked", function(self, value)
+											if value then
+												self:GetParent().Duration:Disable()
+											else
+												self:GetParent().Duration:Enable()
+											end
+										end)
+									</OnLoad>
+									<OnClick>
+										self:SetChecked(self:GetChecked()) -- trigger the hook
+										TMW.ANIM:GetEventSettings().Infinite = not not self:GetChecked()
+									</OnClick>
+								</Scripts>
+							</CheckButton>
+
+							<Slider name="$parentMagnitude" parentKey="Magnitude" inherits="TellMeWhen_AnimationSliderTemplate" valuestep="1">
+								<Anchors>
+									<Anchor point="TOPLEFT" relativeTo="$parentDuration" relativePoint="BOTTOMLEFT" y="-60"/>
+								</Anchors>
+								<Scripts>
+									<OnValueChanged>
+										value = self:GetValue()
+
+										self.Mid:SetText(TMW.L["ANIM_PIXELS"]:format(value))
+
+										if TMW.CI.ics then
+											TMW.ANIM:GetEventSettings().Magnitude = value
+											TMW.IE:ScheduleIconSetup()
+										end
+									</OnValueChanged>
+								</Scripts>
+							</Slider>
+							<Slider name="$parentPeriod" parentKey="Period" inherits="TellMeWhen_AnimationSliderTemplate" valuestep="0.1" >
+								<Size y="17"/>
+								<Anchors>
+									<Anchor point="TOPLEFT" relativeTo="$parentMagnitude" />
+								</Anchors>
+								<Scripts>
+									<OnValueChanged>
+										value = max(self:GetValue(), 0) -- whatever... just do it 
+
+										self.Mid:SetText(TMW.L["ANIM_SECONDS"]:format(TMW:FormatSeconds(value, nil, true)))
+
+										if TMW.CI.ics then
+											TMW.ANIM:GetEventSettings().Period = value
+											TMW.IE:ScheduleIconSetup()
+										end
+									</OnValueChanged>
+								</Scripts>
+							</Slider>
+							<!--Slider name="$parentScaleMagnitude" parentKey="ScaleMagnitude" inherits="TellMeWhen_AnimationSliderTemplate" minValue="0" maxValue="10" valuestep="0.1">
+								<Anchors>
+									<Anchor point="TOPLEFT" relativeTo="$parentPeriod" relativePoint="BOTTOMLEFT" y="-30"/>
+								</Anchors>
+								<Scripts>
+									<OnValueChanged>
+										value = tonumber(format("%." .. (self.step) .. "f", value))
+										value = max(value, 0.1)
+										self.Mid:SetText(value)
+										if TMW.CI.ics then
+											TMW.ANIM:GetEventSettings().ScaleMagnitude = value
+											TMW.IE:ScheduleIconSetup()
+										end
+									</OnValueChanged>
+									<OnLoad>
+										self.text:SetText(TMW.L["ANIM_SCALEMAGNITUDE"])
+										TMW:TT(self, "ANIM_SCALEMAGNITUDE", "ANIM_SCALEMAGNITUDE_DESC")
+										self:EnableMouseWheel(true)
+										self.step = 10
+									</OnLoad>
+								</Scripts>
+							</Slider-->
+
+
+							<Button name="$parentColor" parentKey="Color">
+								<Size x="20" y="20"/>
+								<Anchors>
+									<Anchor point="TOPLEFT" relativeTo="$parentPeriod" relativePoint="BOTTOMLEFT" x="0" y="-25"/>
+								</Anchors>
+								<Layers>
+									<Layer level="BACKGROUND">
+										<Texture parentKey="background">
+											<Size x="17.5" y="17.5"/>
+											<Anchors>
+												<Anchor point="CENTER"/>
+											</Anchors>
+											<Color r="1.0" g="1.0" b="1.0"/>
+										</Texture>
+										<FontString name="$parenttext" parentKey="text" justifyH="LEFT" inherits="GameFontHighlightSmall">
+											<Anchors>
+												<Anchor point="LEFT" relativePoint="RIGHT" x="2"/>
+											</Anchors>
+										</FontString>
+									</Layer>
+								</Layers>
+								<Scripts>
+									<OnLoad>
+										self.text:SetText(TMW.L["ANIM_COLOR"])
+										TMW:TT(self, "ANIM_COLOR", "ANIM_COLOR_DESC")
+										self.func = function()
+											local settings = TMW.ANIM:GetEventSettings()
+											local r, g, b = ColorPickerFrame:GetColorRGB()
+											settings.r_anim = r
+											settings.g_anim = g
+											settings.b_anim = b
+											self:GetNormalTexture():SetVertexColor(r, g, b, 1)
+											TMW.IE:ScheduleIconSetup()
+										end
+										self.opacityFunc = function()
+											local settings = TMW.ANIM:GetEventSettings()
+											local a = 1 - OpacitySliderFrame:GetValue()
+											settings.a_anim = a
+											self.background:SetAlpha(a)
+											TMW.IE:ScheduleIconSetup()
+										end
+										self.cancel = function()
+											local settings = TMW.ANIM:GetEventSettings()
+											local r, g, b, a = self.br, self.bg, self.bb, self.ba
+											settings.r_anim = r
+											settings.g_anim = g
+											settings.b_anim = b
+											settings.a_anim = a
+											self:GetNormalTexture():SetVertexColor(r, g, b, 1)
+											self.background:SetAlpha(a)
+											TMW.IE:ScheduleIconSetup()
+										end
+									</OnLoad>
+									<OnClick>
+										local settings = TMW.ANIM:GetEventSettings()
+										local r, g, b, a = settings.r_anim, settings.g_anim, settings.b_anim, settings.a_anim
+										self.br, self.bg, self.bb, self.ba = r, g, b, a
+
+										ColorPickerFrame.func, ColorPickerFrame.opacityFunc, ColorPickerFrame.cancelFunc = self.func, self.opacityFunc, self.cancel
+										ColorPickerFrame:SetColorRGB(r, g, b)
+										ColorPickerFrame.hasOpacity = true
+										ColorPickerFrame.opacity = 1 - a
+										ColorPickerFrame:Show()
+									</OnClick>
+								</Scripts>
+								<NormalTexture name="$parentNormalTexture" file="Interface\ChatFrame\ChatFrameColorSwatch"/>
+							</Button>
+
+							
+
+							<EditBox name="$parentImage" inherits="TellMeWhen_InputBoxTemplate" parentKey="Image" autoFocus="false">
+								<Size x="140" y="15"/>
+								<Anchors>
+									<Anchor point="TOPLEFT" relativeTo="$parentPeriod" relativePoint="BOTTOMLEFT" x="4" y="-25"/>
+								</Anchors>
+								<Scripts>
+									<OnLoad>
+										TMW:TT(self, "ANIM_TEX", "ANIM_TEX_DESC")
+										self.label = TMW.L["ANIM_TEX"]
+										self.BackgroundText:SetWidth(self:GetWidth())
+										TMW.SUG:EnableEditBox(self, "texture", true)
+									</OnLoad>
+									<OnEditFocusLost>
+										EditBox_ClearHighlight(self)
+
+										self:SetText(self:GetText():gsub([[\\]], [[\]]))
+
+										if TMW.CI.ics then
+											TMW.ANIM:GetEventSettings().Image = TMW:CleanString(self)
+											TMW.IE:ScheduleIconSetup()
+										end
+
+										self:GetScript("OnTextChanged")(self)
+									</OnEditFocusLost>
+								</Scripts>
+							</EditBox>
+							
+							<CheckButton name="$parentFade" inherits="TellMeWhen_CheckTemplate" parentKey="Fade">
+								<Anchors>
+									<Anchor point="TOP" relativeTo="$parentColor" relativePoint="BOTTOM" y="-5"/>
+								</Anchors>
+								<Scripts>
+									<OnLoad>
+										self.text:SetText(TMW.L["ANIM_FADE"])
+										TMW:TT(self, "ANIM_FADE", "ANIM_FADE_DESC")
+									</OnLoad>
+									<OnClick>
+										TMW.ANIM:GetEventSettings().Fade = not not self:GetChecked()
+									</OnClick>
+								</Scripts>
+							</CheckButton>
+
+							
+							<Slider name="$parentThickness" parentKey="Thickness" inherits="TellMeWhen_AnimationSliderTemplate" valuestep="0.1" >
+								<Size y="17"/>
+								<Anchors>
+									<Anchor point="TOPLEFT" relativeTo="$parentFade" relativePoint="BOTTOMLEFT" y="-18" />
+								</Anchors>
+								<Scripts>
+									<OnValueChanged>
+										value = max(self:GetValue(), 0.1)
+
+										self.Mid:SetText(TMW.L["ANIM_PIXELS"]:format(value))
+
+										if TMW.CI.ics then
+											TMW.ANIM:GetEventSettings().Thickness = value
+											TMW.IE:ScheduleIconSetup()
+										end
+									</OnValueChanged>
+								</Scripts>
+							</Slider>
+							<Slider name="$parentSize_anim" parentKey="Size_anim" inherits="TellMeWhen_AnimationSliderTemplate" valuestep="0.1" >
+								<Size y="17"/>
+								<Anchors>
+									<Anchor point="TOPLEFT" relativeTo="$parentThickness" relativePoint="BOTTOMLEFT" y="-28" />
+								</Anchors>
+								<Scripts>
+									<OnValueChanged>
+										value = max(self:GetValue(), 0.1)
+
+										self.Mid:SetText(TMW.L["ANIM_PIXELS"]:format(value))
+
+										if TMW.CI.ics then
+											TMW.ANIM:GetEventSettings().Size_anim = value
+											TMW.IE:ScheduleIconSetup()
+										end
+									</OnValueChanged>
+								</Scripts>
+							</Slider>
+							<Slider name="$parentSizeX" parentKey="SizeX" inherits="TellMeWhen_AnimationSliderTemplate" valuestep="1" >
+								<Size y="17"/>
+								<Anchors>
+									<Anchor point="TOPLEFT" relativeTo="$parentFade" relativePoint="BOTTOMLEFT" y="-18" />
+								</Anchors>
+								<Scripts>
+									<OnValueChanged>
+										self.range = 100
+										value = max(self:GetValue(), 1)
+
+										self.Mid:SetText(TMW.L["ANIM_PIXELS"]:format(value))
+
+										if TMW.CI.ics then
+											TMW.ANIM:GetEventSettings().SizeX = value
+											TMW.IE:ScheduleIconSetup()
+										end
+									</OnValueChanged>
+								</Scripts>
+							</Slider>
+							<Slider name="$parentSizeY" parentKey="SizeY" inherits="TellMeWhen_AnimationSliderTemplate" valuestep="1" >
+								<Size y="17"/>
+								<Anchors>
+									<Anchor point="TOPLEFT" relativeTo="$parentSizeX" relativePoint="BOTTOMLEFT" y="-28" />
+								</Anchors>
+								<Scripts>
+									<OnValueChanged>
+										self.range = 100
+										value = max(self:GetValue(), 1)
+
+										self.Mid:SetText(TMW.L["ANIM_PIXELS"]:format(value))
+
+										if TMW.CI.ics then
+											TMW.ANIM:GetEventSettings().SizeY = value
+											TMW.IE:ScheduleIconSetup()
+										end
+									</OnValueChanged>
+								</Scripts>
+							</Slider>
+
+						</Frames>
+						<Layers>
+							<Layer level="OVERLAY">
+								<FontString name="$parentSettingsHeader" inherits="GameFontNormalLarge" parentKey="SettingsHeader" justifyH="CENTER" text="">
+									<Anchors>
+										<Anchor point="TOP" relativeTo="$parentAnimationsHeader"/>
+										<Anchor point="LEFT" relativeTo="$parentDuration"/>
+										<Anchor point="RIGHT" relativeTo="$parentDuration"/>
+									</Anchors>
+								</FontString>
+							</Layer>
+						</Layers>
+					</Frame>
 
 				</Frames>
-				<Layers>
-					<Layer level="OVERLAY">
-						<FontString name="$parentSettingsHeader" inherits="GameFontNormalLarge" parentKey="SettingsHeader" justifyH="CENTER" text="">
-							<Anchors>
-								<Anchor point="TOP" relativeTo="$parentAnimationsHeader"/>
-								<Anchor point="LEFT" relativeTo="$parentDuration"/>
-								<Anchor point="RIGHT" relativeTo="$parentDuration"/>
-							</Anchors>
-						</FontString>
-					</Layer>
-				</Layers>
-			</Frame>
+				<Scripts>
+					<OnLoad>
+						self.module = TMW.EVENTS
+						self.module.frame = self
+						self:RegisterForDrag("LeftButton")
+						self:Hide()
 
+						for k, v in pairs(self) do
+							if k ~= 0 then
+								self.module[k] = v
+							end
+						end
+					</OnLoad>
+				</Scripts>
+			</Frame>
+			
 
 			<Frame name="$parentMainOptions" enableMouse="true" hidden="true" setAllPoints="true" parentKey="MainOptions" >
 				<Frames>
