@@ -32,7 +32,7 @@ local DRData = LibStub("DRData-1.0", true)
 TELLMEWHEN_VERSION = "5.0.0"
 TELLMEWHEN_VERSION_MINOR = strmatch(" @project-version@", " r%d+") or ""
 TELLMEWHEN_VERSION_FULL = TELLMEWHEN_VERSION .. TELLMEWHEN_VERSION_MINOR
-TELLMEWHEN_VERSIONNUMBER = 50023 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
+TELLMEWHEN_VERSIONNUMBER = 50024 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
 if TELLMEWHEN_VERSIONNUMBER > 51000 or TELLMEWHEN_VERSIONNUMBER < 50000 then return error("YOU SCREWED UP THE VERSION NUMBER OR DIDNT CHANGE THE SAFETY LIMITS") end -- safety check because i accidentally made the version number 414069 once
 
 TELLMEWHEN_MAXGROUPS = 1 	--this is a default, used by SetTheory (addon), so dont rename
@@ -2724,24 +2724,27 @@ local UpdateTableManager = TMW:NewClass("UpdateTableManager")
 function UpdateTableManager:UpdateTable_Set(table)
 	self.UpdateTable_UpdateTable = table or {} -- create an anonymous table if one wasnt passed in
 end
-function UpdateTableManager:UpdateTable_Register()
-	assert(self.UpdateTable_UpdateTable, "No update table was found for " .. tostring(self.GetName and self:GetName() or self) .. ". Set one using self:UpdateTable_Set(table).")
+function UpdateTableManager:UpdateTable_Register(target)
+	assert(self.UpdateTable_UpdateTable, "No update table was found for " .. tostring(self.GetName and self[0] and self:GetName() or self) .. ". Set one using self:UpdateTable_Set(table).")
+	target = target or self
 	
-	if not self.UpdateTable_IsInUpdateTable then
-		tinsert(self.UpdateTable_UpdateTable, self)
-		self.UpdateTable_IsInUpdateTable = true
+	if not tContains(self.UpdateTable_UpdateTable, target) then
+		tinsert(self.UpdateTable_UpdateTable, target)
 	end
 end
-function UpdateTableManager:UpdateTable_Unregister()
-	assert(self.UpdateTable_UpdateTable, "No update table was found for " .. tostring(self.GetName and self:GetName() or self) .. ". Set one using self:UpdateTable_Set(table).")
+function UpdateTableManager:UpdateTable_Unregister(target)
+	assert(self.UpdateTable_UpdateTable, "No update table was found for " .. tostring(self.GetName and self[0] and self:GetName() or self) .. ". Set one using self:UpdateTable_Set(table).")
+	target = target or self
 	
-	if self.UpdateTable_IsInUpdateTable then
-		TMW.tDeleteItem(self.UpdateTable_UpdateTable, self, true)
-		self.UpdateTable_IsInUpdateTable = nil
-	end
+	TMW.tDeleteItem(self.UpdateTable_UpdateTable, target, true)
+end
+function UpdateTableManager:UpdateTable_UnregisterAll()
+	assert(self.UpdateTable_UpdateTable, "No update table was found for " .. tostring(self.GetName and self[0] and self:GetName() or self) .. ". Set one using self:UpdateTable_Set(table).")
+	
+	wipe(self.UpdateTable_UpdateTable)
 end
 function UpdateTableManager:UpdateTable_Sort(func)
-	assert(self.UpdateTable_UpdateTable, "No update table was found for " .. tostring(self.GetName and self:GetName() or self) .. ". Set one using self:UpdateTable_Set(table).")
+	assert(self.UpdateTable_UpdateTable, "No update table was found for " .. tostring(self.GetName and self[0] and self:GetName() or self) .. ". Set one using self:UpdateTable_Set(table).")
 	
 	sort(self.UpdateTable_UpdateTable, func)
 end
@@ -3083,13 +3086,21 @@ end
 
 
 EVENTS = TMW:NewModule("Events", "AceEvent-3.0") TMW.EVENTS = EVENTS
+do
+	EVENTS.OnIconShowHideHandlers = {}
+	EVENTS.OnIconShowHideManager = UpdateTableManager:New()
+	EVENTS.OnIconShowHideManager:UpdateTable_Set(EVENTS.OnIconShowHideHandlers)
+end
 function EVENTS:ProcessAndDelegateIconEventSettings(icon, event, eventSettings)
 	
 	local success = self:ProcessIconEventSettings(event, eventSettings)
 
+	
 	if success and (event == "OnIconShow" or event == "OnIconHide") then
-		EVENTS.iconsToHandleOnIconShowHide = EVENTS.iconsToHandleOnIconShowHide or {}
-		EVENTS.iconsToHandleOnIconShowHide[icon] = icon.Enabled and true or nil
+		if icon.Enabled then
+			print("REG", icon, event, success)
+			self.OnIconShowHideManager:UpdateTable_Register(icon)
+		end
 		TMW:RegisterCallback("TMW_ICON_SHOWN_CHANGED", EVENTS) -- register to EVENTS, not self.
 	end
 
@@ -3101,31 +3112,41 @@ function EVENTS:TMW_ICON_SHOWN_CHANGED(_, ic, event)
 		--local event = (ic.__alpha or ic:GetAlpha()) > 0 and "OnIconShow" or "OnIconHide"
 		local icName = ic:GetName()
 
-		for icon in next, self.iconsToHandleOnIconShowHide do
-			if icon[event] and icon[event].Icon == icName then
-				icon:QueueEvent(event)
-				icon:ProcessQueuedEvents()
+		local tbl = self.OnIconShowHideHandlers
+		for i = 1, #tbl do
+			local icon = tbl[i]
+			if icon.EventHandlersSet[event] then
+				for EventSettings in TMW:InNLengthTable(icon.Events) do
+					if EventSettings.Event == event and EventSettings.Icon == icName then
+						icon:QueueEvent(event)
+						icon:ProcessQueuedEvents()
+					end
+				end
 			end
 		end
 	end
 end
 function EVENTS:TMW_ICON_SETUP_PRE(_, icon)
+	self.OnIconShowHideManager:UpdateTable_Unregister(icon)
+	print("UNREG", icon)
+	
+	wipe(icon.EventHandlersSet)
+	
 	for eventSettings in TMW:InNLengthTable(icon.Events) do
 		local event = eventSettings.Event
 		if event then
-			local eventData = TMW.EventList[event]
+		--	local eventData = TMW.EventList[event]
 			
 			local thisHasEventHandlers
-			for _, Module in self:IterateModules() do
-				thisHasEventHandlers = Module:ProcessAndDelegateIconEventSettings(icon, event, eventSettings) or thisHasEventHandlers
+			local Module = self:GetModule(eventSettings.Type, true)
+			if Module then
+				thisHasEventHandlers = Module:ProcessAndDelegateIconEventSettings(icon, event, eventSettings)
 			end
 
 			icon.dontCheckForUpdates = icon.dontCheckForUpdates or thisHasEventHandlers
 			if thisHasEventHandlers and not icon.typeData["EventDisabled_" .. event] then
-				icon[event] = true
+				icon.EventHandlersSet[event] = true
 				icon.EventsToFire = icon.EventsToFire or {}
-			else
-				icon[event] = nil
 			end
 		end
 	end
@@ -4508,7 +4529,7 @@ function Group.Setup(group)
 		-- process any conditions the group might have
 		local ConditionObj = group:Conditions_LoadData(group.Conditions)
 		if ConditionObj then
-			group:UpdateTable_Register(group)
+			group:UpdateTable_Register()
 		end
 	else
 		if group:ShouldUpdateIcons() then
@@ -4548,6 +4569,7 @@ function Icon.OnNewInstance(icon, ...)
 	group[iconID] = icon
 	CNDTEnv[name] = icon
 	tinsert(group.SortedIcons, icon)
+	icon.EventHandlersSet = {}
 	
 	if TMW.Classes.PBar then
 		icon.pbar = TMW.Classes.PBar:New("StatusBar", name .. "PBar", icon)
@@ -4597,7 +4619,7 @@ function Icon.SetScript(icon, handler, func, dontnil)
 	else
 		icon:UpdateTable_Unregister(icon)
 		if func then
-			icon:UpdateTable_Register(icon)
+			icon:UpdateTable_Register()
 		end
 		icon:UpdateTable_Sort(icon.ScriptSort)
 	end
@@ -4736,7 +4758,7 @@ function Icon.ScheduleNextUpdate(icon)
 	end
 	
 	-- Duration Events
-	if icon.OnDuration then
+	if icon.EventHandlersSet.OnDuration then
 		for EventSettings in TMW:InNLengthTable(icon.Events) do
 			if EventSettings.Event == "OnDuration" then
 				local Duration = EventSettings.Value
@@ -4900,6 +4922,7 @@ function Icon.SetInfo(icon, alpha, color, texture, start, duration, spellChecked
 	]]
 
 	local somethingChanged
+	local EventHandlersSet = icon.EventHandlersSet
 
 	alpha = alpha or 0
 	duration = duration or 0
@@ -4927,14 +4950,14 @@ function Icon.SetInfo(icon, alpha, color, texture, start, duration, spellChecked
 		end
 	end
 	
-	if queueOnUnit and icon.OnUnit then
+	if queueOnUnit and EventHandlersSet.OnUnit then
 		icon:QueueEvent("OnUnit")
 	end
 
 	if icon.__spellChecked ~= spellChecked then
 		queueOnSpell = true
 		icon.__spellChecked = spellChecked
-		if icon.OnSpell then
+		if EventHandlersSet.OnSpell then
 			icon:QueueEvent("OnSpell")
 		end
 		
@@ -4945,7 +4968,7 @@ function Icon.SetInfo(icon, alpha, color, texture, start, duration, spellChecked
 	local d = duration - (time - start)
 	d = d > 0 and d or 0
 
-	if icon.OnDuration then
+	if EventHandlersSet.OnDuration then
 		if d ~= icon.__lastDur then
 			icon:QueueEvent("OnDuration", d)
 			icon.__lastDur = d
@@ -4974,21 +4997,23 @@ function Icon.SetInfo(icon, alpha, color, texture, start, duration, spellChecked
 
 		-- detect events that occured, and handle them if they did
 		if alpha == 0 then
-			if icon.OnHide then
+			if EventHandlersSet.OnHide then
 				icon:QueueEvent("OnHide")
 			end
 			TMW:Fire("TMW_ICON_SHOWN_CHANGED", icon, "OnIconHide")
 		elseif oldalpha == 0 then
-			if icon.OnShow then
+			
+			print(icon, EventHandlersSet.OnShow)
+			if EventHandlersSet.OnShow then
 				icon:QueueEvent("OnShow")
 			end
 			TMW:Fire("TMW_ICON_SHOWN_CHANGED", icon, "OnIconShow")
 		elseif alpha > oldalpha then
-			if icon.OnAlphaInc then
+			if EventHandlersSet.OnAlphaInc then
 				icon:QueueEvent("OnAlphaInc", alpha*100)
 			end
 		else -- it must be less than, because it isnt greater than and it isnt the same
-			if icon.OnAlphaDec then
+			if EventHandlersSet.OnAlphaDec then
 				icon:QueueEvent("OnAlphaDec", alpha*100)
 			end
 		end
@@ -5010,11 +5035,11 @@ function Icon.SetInfo(icon, alpha, color, texture, start, duration, spellChecked
 		if icon.__realDuration ~= realDuration then
 			-- detect events that occured, and handle them if they did
 			if realDuration == 0 then
-				if icon.OnFinish then
+				if EventHandlersSet.OnFinish then
 					icon:QueueEvent("OnFinish")
 				end
 			else
-				if icon.OnStart then
+				if EventHandlersSet.OnStart then
 					icon:QueueEvent("OnStart")
 				end
 			end
@@ -5075,7 +5100,7 @@ function Icon.SetInfo(icon, alpha, color, texture, start, duration, spellChecked
 		icon.__count = count
 		icon.__countText = countText
 
-		if icon.OnStack then
+		if EventHandlersSet.OnStack then
 			icon:QueueEvent("OnStack", count)
 		end
 		

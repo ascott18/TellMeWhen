@@ -279,7 +279,7 @@ local function CLEU_OnEvent(icon, _, t, event, h, sourceGUID, sourceName, source
 		icon.cleu_extraSpell = extraID
 
 		-- Unlike some icon types, an immedite update is needed here (because of the event)
-		if icon.OnCLEUEvent then
+		if icon.EventHandlersSet.OnCLEUEvent then
 			icon:QueueEvent("OnCLEUEvent")
 		end
 		icon:Update(true, tex)

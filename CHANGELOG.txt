@@ -42,6 +42,7 @@
  ** (r452) The Resting condition should now properly update when entering a battleground/dungeon/etc while resting, and vice-versa.
  ** (r453) Combat log event icons should no longer process any sound/text/animation events when their parent group is hidden.
  ** (r459) TellMeWhen-5.0.0.lua:4740: attempt to index field "OnDuration" (a boolean value)
+ ** (r461) TellMeWhen.lua line 3105: attempt to index field '?' (a boolean value)
 
 ===v4.8.3===
  * Bug Fixes:

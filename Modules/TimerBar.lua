@@ -173,10 +173,7 @@ function CBar:SetCooldown(start, duration, isGCD)
 		self:SetMinMaxValues(0, duration)
 		self.__value = nil -- the displayed value might change when we change the max, so force an update
 
-		if not self.UpdateTable_IsInUpdateTable then
-			CBarsToUpdate[#CBarsToUpdate + 1] = self
-			self.UpdateTable_IsInUpdateTable = true
-		end
+		self:UpdateTable_Register()
 	end
 end
 
@@ -225,9 +222,6 @@ end)
 
 TMW:RegisterCallback("TMW_LOCK_TOGGLED", function(event, Locked)
 	if not Locked then
-		for _, cbar in pairs(CBarsToUpdate) do
-			cbar.UpdateTable_IsInUpdateTable = nil
-		end
-		wipe(CBarsToUpdate)
+		CBar:UpdateTable_UnregisterAll()
 	end
 end)

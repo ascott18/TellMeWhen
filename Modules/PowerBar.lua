@@ -20,11 +20,12 @@ if not TMW then return end
 local TMW = TMW
 local LSM = LibStub("LibSharedMedia-3.0")
 local _, pclass = UnitClass("Player")
-local	GetSpellInfo, UnitPower =
-		GetSpellInfo, UnitPower
+local GetSpellInfo, UnitPower =
+	  GetSpellInfo, UnitPower
+local pairs, wipe, _G =
+	  pairs, wipe, _G
 local PowerBarColor = PowerBarColor
-local	pairs, wipe, _G =
-		pairs, wipe, _G
+local tContains = TMW.tContains
 
 local defaultPowerTypes = {
 	ROGUE		= 3,
@@ -121,13 +122,10 @@ function PBar:SetSpell(spell)
 			self.powerType = powerType
 		end
 
-		if not self.UpdateTable_IsInUpdateTable then
-			PBarsToUpdate[#PBarsToUpdate + 1] = self
-			self.UpdateTable_IsInUpdateTable = true
-		end
+		self:UpdateTable_Register()
 		
 		self:Update()
-	elseif self.UpdateTable_IsInUpdateTable then
+	elseif tContains(self.UpdateTable_UpdateTable, self) then
 		local value = self.InvertBars and self.Max or 0
 		self:SetValue(value)
 		self.__value = value
@@ -219,10 +217,7 @@ end)
 
 TMW:RegisterCallback("TMW_LOCK_TOGGLED", function(event, Locked)
 	if not Locked then
-		for _, pbar in pairs(PBarsToUpdate) do
-			pbar.UpdateTable_IsInUpdateTable = nil
-		end
-		wipe(PBarsToUpdate)
+		PBar:UpdateTable_UnregisterAll()
 	end
 end)
 

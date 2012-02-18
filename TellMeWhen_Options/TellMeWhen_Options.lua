@@ -4947,8 +4947,6 @@ function EVENTS:LoadConfig()
 		oldID = 1
 	end
 	
-	print(oldID)
-	
 	if CI.ics.Events.n <= 0 then
 		self.EventSettings:Hide()
 	else
@@ -5130,7 +5128,6 @@ function SND:SelectEvent(id)
 end
 
 function SND:SetupEventDisplay(event)
-	print(2, event)
 	if not event then return end
 
 	local eventID, eventString = self:GetDisplayInfo(event)
@@ -5140,7 +5137,7 @@ function SND:SetupEventDisplay(event)
 	if name == "None" then
 		name = "|cff808080" .. NONE
 	end
-	print(debugstack())
+	
 	self.Events[eventID].DataText:SetText("|cffcccccc" .. self.tabText .. ":|r " .. name)
 end
 
@@ -5206,7 +5203,6 @@ function SND:SetSoundsOffset(offs)
 end
 
 function SND:SelectSound(name)
-	print(1, name)
 	if not name then return end
 	local soundFrame, listID
 
