@@ -220,6 +220,13 @@ TMW:RegisterCallback("TMW_ICON_META_INHERITED_ICON_CHANGED", function(event, ico
 	icon.cbar:SetAttributes(icToUse.cbar)
 end)
 
+TMW:RegisterCallback("TMW_ICON_COOLDOWN_CHANGED", function(event, icon, start, duration, isGCD)
+	local cbar = icon.cbar
+	if cbar and cbar.ShowCBar then
+		cbar:SetCooldown(start, duration, isGCD)
+	end
+end)
+
 TMW:RegisterCallback("TMW_LOCK_TOGGLED", function(event, Locked)
 	if not Locked then
 		CBar:UpdateTable_UnregisterAll()

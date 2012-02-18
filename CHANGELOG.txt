@@ -44,6 +44,7 @@
  ** (r459) TellMeWhen-5.0.0.lua:4740: attempt to index field "OnDuration" (a boolean value)
  ** (r461) TellMeWhen.lua line 3105: attempt to index field '?' (a boolean value)
  ** (r462) AceDB-3.0-22.lua:104 in function <Ace3\AceDB-3.0\AceDB-3.0.lua:100 table index is NaN (MAYBE)
+ ** (r463) Fixed meta icons that check entire groups
 
 ===v4.8.3===
  * Bug Fixes:

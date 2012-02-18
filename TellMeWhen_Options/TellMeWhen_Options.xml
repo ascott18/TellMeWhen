@@ -1524,6 +1524,7 @@
 				<Scripts>
 					<OnLoad>
 						self:SetScale(0.8)
+						TMW:TT(self, "EVENTS_HANDLERS_PLAY", "EVENTS_HANDLERS_PLAY_DESC")
 					</OnLoad>
 					<OnClick>
 						local ID = self:GetParent():GetID()

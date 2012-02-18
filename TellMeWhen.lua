@@ -32,7 +32,7 @@ local DRData = LibStub("DRData-1.0", true)
 TELLMEWHEN_VERSION = "5.0.0"
 TELLMEWHEN_VERSION_MINOR = strmatch(" @project-version@", " r%d+") or ""
 TELLMEWHEN_VERSION_FULL = TELLMEWHEN_VERSION .. TELLMEWHEN_VERSION_MINOR
-TELLMEWHEN_VERSIONNUMBER = 50026 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
+TELLMEWHEN_VERSIONNUMBER = 50027 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
 if TELLMEWHEN_VERSIONNUMBER > 51000 or TELLMEWHEN_VERSIONNUMBER < 50000 then return error("YOU SCREWED UP THE VERSION NUMBER OR DIDNT CHANGE THE SAFETY LIMITS") end -- safety check because i accidentally made the version number 414069 once
 
 TELLMEWHEN_MAXGROUPS = 1 	--this is a default, used by SetTheory (addon), so dont rename
@@ -1139,13 +1139,12 @@ end
 
 
 function TMW:RegisterCallback(event, func, arg1)
-	local reg = callbackregistry
 	local funcsForEvent
-	if reg[event] then
-		funcsForEvent = reg[event]
+	if callbackregistry[event] then
+		funcsForEvent = callbackregistry[event]
 	else
 		funcsForEvent = {}
-		reg[event] = funcsForEvent
+		callbackregistry[event] = funcsForEvent
 	end
 
 	if type(func) == "table" then
@@ -3098,7 +3097,6 @@ function EVENTS:ProcessAndDelegateIconEventSettings(icon, event, eventSettings)
 	
 	if success and (event == "OnIconShow" or event == "OnIconHide") then
 		if icon.Enabled then
-			print("REG", icon, event, success)
 			self.OnIconShowHideManager:UpdateTable_Register(icon)
 		end
 		TMW:RegisterCallback("TMW_ICON_SHOWN_CHANGED", EVENTS) -- register to EVENTS, not self.
@@ -3128,7 +3126,6 @@ function EVENTS:TMW_ICON_SHOWN_CHANGED(_, ic, event)
 end
 function EVENTS:TMW_ICON_SETUP_PRE(_, icon)
 	self.OnIconShowHideManager:UpdateTable_Unregister(icon)
-	print("UNREG", icon)
 	
 	wipe(icon.EventHandlersSet)
 	
@@ -5002,8 +4999,6 @@ function Icon.SetInfo(icon, alpha, color, texture, start, duration, spellChecked
 			end
 			TMW:Fire("TMW_ICON_SHOWN_CHANGED", icon, "OnIconHide")
 		elseif oldalpha == 0 then
-			
-			print(icon, EventHandlersSet.OnShow)
 			if EventHandlersSet.OnShow then
 				icon:QueueEvent("OnShow")
 			end
@@ -5079,10 +5074,7 @@ function Icon.SetInfo(icon, alpha, color, texture, start, duration, spellChecked
 			icon.cooldown:Hide()
 		end
 
-		local cbar = icon.cbar
-		if cbar and cbar.ShowCBar then
-			cbar:SetCooldown(start, duration, isGCD)
-		end
+		TMW:Fire("TMW_ICON_COOLDOWN_CHANGED", icon, start, duration, isGCD)
 
 		icon.__start = start
 		icon.__duration = duration
@@ -5147,8 +5139,8 @@ function Icon.SetInfo(icon, alpha, color, texture, start, duration, spellChecked
 		somethingChanged = 1
 	end
 
-	if icon.pbar and icon.pbar.ShowPBar and (queueOnSpell or forceupdate) then
-		icon.pbar:SetSpell(spellChecked)
+	if queueOnSpell or forceupdate then
+		TMW:Fire("TMW_ICON_SPELL_CHANGED", icon, spellChecked)
 		
 	--	somethingChanged = 1 -- redundant with queueOnSpell
 	end

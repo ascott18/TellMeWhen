@@ -225,6 +225,14 @@ TMW:RegisterCallback("TMW_ICON_META_INHERITED_ICON_CHANGED", function(event, ico
 	icon.pbar:SetAttributes(icToUse.pbar)
 end)
 
+TMW:RegisterCallback("TMW_ICON_SPELL_CHANGED", function(event, icon, spellChecked)
+	local pbar = icon.pbar
+	if pbar and pbar.ShowPBar then
+		pbar:SetSpell(spellChecked)
+	end
+end)
+	
+	
 function PBar:SPELL_UPDATE_USABLE()
 	updatePBars = 1
 end
