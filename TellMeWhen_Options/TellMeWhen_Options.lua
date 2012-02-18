@@ -4939,7 +4939,17 @@ function EVENTS:LoadConfig()
 	local oldID = self:EnableAndDisableEvents()
 
 	if oldID and oldID > 0 then
-		oldID = oldID % CI.ics.Events.n
+		if CI.ics.Events.n ~= 0 then
+			-- make sure we dont get any NaN...
+			-- apparently blizzard decided to allow division by zero again,
+			-- but sometimes, you cant set an index of NaN (1%0) on a table in some clients.
+			-- I can in mine, so idk what the fuck is going on
+			-- t = ({[5%0] = 1})[400]	yields 1 (at any index, not just 400... what the hell?
+			-- See ticket 444 - lsjyzjl is getting "table index is NaN" from AceDB
+			oldID = oldID % CI.ics.Events.n
+		else
+			oldID = 0
+		end
 		if oldID == 0 then
 			oldID = CI.ics.Events.n
 		end
