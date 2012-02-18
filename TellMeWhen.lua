@@ -32,7 +32,7 @@ local DRData = LibStub("DRData-1.0", true)
 TELLMEWHEN_VERSION = "5.0.0"
 TELLMEWHEN_VERSION_MINOR = strmatch(" @project-version@", " r%d+") or ""
 TELLMEWHEN_VERSION_FULL = TELLMEWHEN_VERSION .. TELLMEWHEN_VERSION_MINOR
-TELLMEWHEN_VERSIONNUMBER = 50020 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
+TELLMEWHEN_VERSIONNUMBER = 50021 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
 if TELLMEWHEN_VERSIONNUMBER > 51000 or TELLMEWHEN_VERSIONNUMBER < 50000 then return error("YOU SCREWED UP THE VERSION NUMBER OR DIDNT CHANGE THE SAFETY LIMITS") end -- safety check because i accidentally made the version number 414069 once
 
 TELLMEWHEN_MAXGROUPS = 1 	--this is a default, used by SetTheory (addon), so dont rename
@@ -4550,8 +4550,8 @@ function Icon.OnNewInstance(icon, ...)
 	tinsert(group.SortedIcons, icon)
 	
 	if TMW.Classes.PBar then
-	--	icon.pbar = TMW.Classes.PBar:New("StatusBar", name .. "PBar", icon)
-	--	icon.cbar = TMW.Classes.CBar:New("StatusBar", name .. "CBar", icon)
+		icon.pbar = TMW.Classes.PBar:New("StatusBar", name .. "PBar", icon)
+		icon.cbar = TMW.Classes.CBar:New("StatusBar", name .. "CBar", icon)
 	end
 	
 	icon.__alpha = icon:GetAlpha()
