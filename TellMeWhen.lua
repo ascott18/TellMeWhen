@@ -32,7 +32,7 @@ local DRData = LibStub("DRData-1.0", true)
 TELLMEWHEN_VERSION = "5.0.0"
 TELLMEWHEN_VERSION_MINOR = strmatch(" @project-version@", " r%d+") or ""
 TELLMEWHEN_VERSION_FULL = TELLMEWHEN_VERSION .. TELLMEWHEN_VERSION_MINOR
-TELLMEWHEN_VERSIONNUMBER = 50021 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
+TELLMEWHEN_VERSIONNUMBER = 50022 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
 if TELLMEWHEN_VERSIONNUMBER > 51000 or TELLMEWHEN_VERSIONNUMBER < 50000 then return error("YOU SCREWED UP THE VERSION NUMBER OR DIDNT CHANGE THE SAFETY LIMITS") end -- safety check because i accidentally made the version number 414069 once
 
 TELLMEWHEN_MAXGROUPS = 1 	--this is a default, used by SetTheory (addon), so dont rename
@@ -4737,9 +4737,13 @@ function Icon.ScheduleNextUpdate(icon)
 	
 	-- Duration Events
 	if icon.OnDuration then
-		local Duration = icon.OnDuration.Value
-		if Duration < d and newdur < Duration then
-			newdur = Duration
+		for EventSettings in TMW:InNLengthTable(icon.Events) do
+			if EventSettings.Event == "OnDuration" then
+				local Duration = EventSettings.Value
+				if Duration < d and newdur < Duration then
+					newdur = Duration
+				end
+			end
 		end
 	end
 	
