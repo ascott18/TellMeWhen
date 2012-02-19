@@ -199,7 +199,7 @@ function GetFullIconTable(icon, icons) -- check what all the possible icons it c
 					for ics, _, icID in TMW:InIconSettings(groupID) do
 						if ics.Enabled and icID <= gs.Rows*gs.Columns then
 							-- ic here is a group name. turn it into an icon
-							local ic = ic .. "_Icon" .. icID
+							ic = ic .. "_Icon" .. icID
 							
 							-- if a meta icon is set to check its own group, dont put the meta icon in there.
 							if ic ~= icon:GetName() then

@@ -32,7 +32,7 @@ local DRData = LibStub("DRData-1.0", true)
 TELLMEWHEN_VERSION = "5.0.0"
 TELLMEWHEN_VERSION_MINOR = strmatch(" @project-version@", " r%d+") or ""
 TELLMEWHEN_VERSION_FULL = TELLMEWHEN_VERSION .. TELLMEWHEN_VERSION_MINOR
-TELLMEWHEN_VERSIONNUMBER = 50027 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
+TELLMEWHEN_VERSIONNUMBER = 50028 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
 if TELLMEWHEN_VERSIONNUMBER > 51000 or TELLMEWHEN_VERSIONNUMBER < 50000 then return error("YOU SCREWED UP THE VERSION NUMBER OR DIDNT CHANGE THE SAFETY LIMITS") end -- safety check because i accidentally made the version number 414069 once
 
 TELLMEWHEN_MAXGROUPS = 1 	--this is a default, used by SetTheory (addon), so dont rename
@@ -407,6 +407,7 @@ do -- Iterators
 		end
 
 		function TMW:InNLengthTable(arg)
+			print(1, arg)
 			k = 0
 			t = arg
 			return iter
@@ -871,10 +872,6 @@ TMW.Defaults = {
 								PassThrough		= false,
 								Icon			= "",
 							},
-							OnDuration = {
-								CndtJustPassed 	= true,
-								PassingCndt		= true,
-							},
 						},
 						Conditions = {
 							n 					= 0,
@@ -996,13 +993,22 @@ TMW.BE = {
 	},]]
 }
 
+local CompareFuncs = {
+	-- harkens back to the days of the conditions of old, but it is more efficient than a big elseif chain.
+	["=="] = function(a, b) return a == b  end,
+	["~="] = function(a, b)  return a ~= b end,
+	[">="] = function(a, b)  return a >= b end,
+	["<="] = function(a, b) return a <= b  end,
+	["<"] = function(a, b) return a < b  end,
+	[">"] = function(a, b) return a > b end,
+}
 TMW.EventList = {
-	{
+	{	-- OnShow
 		name = "OnShow",
 		text = L["SOUND_EVENT_ONSHOW"],
 		desc = L["SOUND_EVENT_ONSHOW_DESC"],
 	},
-	{
+	{	-- OnHide
 		name = "OnHide",
 		text = L["SOUND_EVENT_ONHIDE"],
 		desc = L["SOUND_EVENT_ONHIDE_DESC"],
@@ -1010,7 +1016,7 @@ TMW.EventList = {
 			OnlyShown = "FORCEDISABLED",
 		},
 	},
-	{
+	{	-- OnAlphaInc
 		name = "OnAlphaInc",
 		text = L["SOUND_EVENT_ONALPHAINC"],
 		desc = L["SOUND_EVENT_ONALPHAINC_DESC"],
@@ -1022,8 +1028,11 @@ TMW.EventList = {
 		},
 		valueName = L["ALPHA"],
 		valueSuffix = "%",
+		conditionChecker = function(icon, eventSettings)
+			return CompareFuncs[eventSettings.Operator](icon.__alpha * 100, eventSettings.Value)
+		end,
 	},
-	{
+	{	-- OnAlphaDec
 		name = "OnAlphaDec",
 		text = L["SOUND_EVENT_ONALPHADEC"],
 		desc = L["SOUND_EVENT_ONALPHADEC_DESC"],
@@ -1035,28 +1044,31 @@ TMW.EventList = {
 		},
 		valueName = L["ALPHA"],
 		valueSuffix = "%",
+		conditionChecker = function(icon, eventSettings)
+			return CompareFuncs[eventSettings.Operator](icon.__alpha * 100, eventSettings.Value)
+		end,
 	},
-	{
+	{	-- OnStart
 		name = "OnStart",
 		text = L["SOUND_EVENT_ONSTART"],
 		desc = L["SOUND_EVENT_ONSTART_DESC"],
 	},
-	{
+	{	-- OnFinish
 		name = "OnFinish",
 		text = L["SOUND_EVENT_ONFINISH"],
 		desc = L["SOUND_EVENT_ONFINISH_DESC"],
 	},
-	{
+	{	-- OnSpell
 		name = "OnSpell",
 		text = L["SOUND_EVENT_ONSPELL"],
 		desc = L["SOUND_EVENT_ONSPELL_DESC"],
 	},
-	{
+	{	-- OnUnit
 		name = "OnUnit",
 		text = L["SOUND_EVENT_ONUNIT"],
 		desc = L["SOUND_EVENT_ONUNIT_DESC"],
 	},
-	{
+	{	-- OnStack
 		name = "OnStack",
 		text = L["SOUND_EVENT_ONSTACK"],
 		desc = L["SOUND_EVENT_ONSTACK_DESC"],
@@ -1066,9 +1078,12 @@ TMW.EventList = {
 			CndtJustPassed = true,
 			PassingCndt = true,
 		},
-		valueName = L["STACKS"]
+		valueName = L["STACKS"],
+		conditionChecker = function(icon, eventSettings)
+			return CompareFuncs[eventSettings.Operator](icon.__count, eventSettings.Value)
+		end,
 	},
-	{
+	{	-- OnDuration
 		name = "OnDuration",
 		text = L["SOUND_EVENT_ONDURATION"],
 		desc = L["SOUND_EVENT_ONDURATION_DESC"],
@@ -1082,14 +1097,24 @@ TMW.EventList = {
 			["~="] = true,
 			["=="] = true,
 		},
-		valueName = L["DURATION"]
+		valueName = L["DURATION"],
+		conditionChecker = function(icon, eventSettings)
+			local d = icon.__duration - (time - icon.__start)
+			d = d > 0 and d or 0
+	
+			return CompareFuncs[eventSettings.Operator](d, eventSettings.Value)
+		end,
+		applyDefaultsToSetting = function(EventSettings)
+			EventSettings.CndtJustPassed = true
+			EventSettings.PassingCndt = true
+		end,
 	},
-	{
+	{	-- OnCLEUEvent
 		name = "OnCLEUEvent",
 		text = L["SOUND_EVENT_ONCLEU"],
 		desc = L["SOUND_EVENT_ONCLEU_DESC"],
 	},
-	{
+	{	-- OnIconShow
 		name = "OnIconShow",
 		text = L["SOUND_EVENT_ONICONSHOW"],
 		desc = L["SOUND_EVENT_ONICONSHOW_DESC"],
@@ -1097,7 +1122,7 @@ TMW.EventList = {
 			Icon = true,
 		},
 	},
-	{
+	{	-- OnIconHide
 		name = "OnIconHide",
 		text = L["SOUND_EVENT_ONICONHIDE"],
 		desc = L["SOUND_EVENT_ONICONHIDE_DESC"],
@@ -1106,16 +1131,6 @@ TMW.EventList = {
 		},
 	},
 } for k, v in pairs(TMW.EventList) do TMW.EventList[v.name] = v end
-
-local CompareFuncs = {
-	-- harkens back to the days of the conditions of old, but it is more efficient than a big elseif chain.
-	["=="] = function(a, b) return a == b  end,
-	["~="] = function(a, b)  return a ~= b end,
-	[">="] = function(a, b)  return a >= b end,
-	["<="] = function(a, b) return a <= b  end,
-	["<"] = function(a, b) return a < b  end,
-	[">"] = function(a, b) return a > b end,
-}
 
 
 do -- hook LMB
@@ -1601,6 +1616,18 @@ function TMW:GetUpgradeTable()			-- upgrade functions
 	if TMW.UpgradeTable then return TMW.UpgradeTable end
 	local t = {
 
+		[50028] = {
+			icon = function(ics, ...)
+				local Events = ics.Events
+				for _, eventSettings in ipairs(Events) do -- dont use InNLengthTable here
+					local eventData = TMW.EventList[eventSettings.Event]
+					if eventData and eventData.applyDefaultsToSetting then
+						eventData.applyDefaultsToSetting(eventSettings)
+					end
+				end
+			end,
+		},
+		
 		[50020] = {
 			icon = function(ics, ...)
 				local Events = ics.Events
@@ -1618,6 +1645,7 @@ function TMW:GetUpgradeTable()			-- upgrade functions
 								Events[Events.n].Type = moduleName
 								Events[Events.n].Event = event
 								Events[Events.n].PassThrough = true
+	
 								addedAnEvent = true
 							end
 						end
@@ -3116,10 +3144,10 @@ function EVENTS:TMW_ICON_SHOWN_CHANGED(_, ic, event)
 			if icon.EventHandlersSet[event] then
 				for EventSettings in TMW:InNLengthTable(icon.Events) do
 					if EventSettings.Event == event and EventSettings.Icon == icName then
-						icon:QueueEvent(event)
-						icon:ProcessQueuedEvents()
+						icon:QueueEvent(EventSettings)
 					end
 				end
+				icon:ProcessQueuedEvents()
 			end
 		end
 	end
@@ -4652,48 +4680,52 @@ function Icon.IsBeingEdited(icon)
 end
 
 -- universal
-function Icon.QueueEvent(icon, event, data)
-	icon.EventsToFire[event] = data or true
+function Icon.QueueEvent(icon, arg1)
+	icon.EventsToFire[arg1] = true
 	icon.eventIsQueued = true
 end
 
 -- universal (but actual event handlers (:HandleEvent()) arent)
 function Icon.ProcessQueuedEvents(icon)
-	if icon.EventsToFire and icon.eventIsQueued then
+	local EventsToFire = icon.EventsToFire
+	if EventsToFire and icon.eventIsQueued then
 		for i = 1, icon.Events.n do
-			local data = icon.Events[i]
-			local event = data.Event
-			local doFireAndData = icon.EventsToFire[event]
-			if data and doFireAndData then
+			-- settings to check for in EventsToFire
+			local EventSettingsFromIconSettings = icon.Events[i]
+			local event = EventSettingsFromIconSettings.Event
+			
+			local EventSettings
+			if EventsToFire[EventSettingsFromIconSettings] or EventsToFire[event] then
+				-- we should process EventSettingsFromIconSettings
+				EventSettings = EventSettingsFromIconSettings
+			end
+			local eventData = TMW.EventList[event]
+			if eventData and EventSettings then
+				local shouldProcess = true
+				if EventSettings.OnlyShown and icon.__alpha <= 0 then
+					shouldProcess = false
 
-				if data.OnlyShown and icon.__alpha <= 0 then
-					doFireAndData = false
-
-					-- the same test is preformed for all modules,
-					-- so we can save the result of it within the module iteration without adverse effects
-					-- it actually results an a performance increase.
-					icon.EventsToFire[event] = doFireAndData
-
-				elseif data.PassingCndt and isNumber[doFireAndData] then
-					doFireAndData = CompareFuncs[data.Operator](doFireAndData, data.Value)
-					if data.CndtJustPassed then
-						if doFireAndData ~= data.wasPassingCondition then
-							data.wasPassingCondition = doFireAndData
+				elseif EventSettings.PassingCndt then
+					local conditionChecker = eventData.conditionChecker
+					local conditionResult
+					if conditionChecker then
+						conditionResult = conditionChecker(icon, EventSettings)
+					end
+					if EventSettings.CndtJustPassed then
+						if conditionResult ~= EventSettings.wasPassingCondition then
+							EventSettings.wasPassingCondition = conditionResult
 						else
-							doFireAndData = false
+							conditionResult = false
 						end
 					end
-
-					-- the same test is preformed for all modules...
-					icon.EventsToFire[event] =  doFireAndData
+					shouldProcess = conditionResult
 				end
 
-
-				if doFireAndData and runEvents then
-					local Module = EVENTS:GetModule(data.Type, true)
+				if shouldProcess and runEvents then
+					local Module = EVENTS:GetModule(EventSettings.Type, true)
 					if Module then
-						local handled = Module:HandleEvent(icon, data)
-						if handled and not data.PassThrough then
+						local handled = Module:HandleEvent(icon, EventSettings)
+						if handled and not EventSettings.PassThrough then
 							break
 						end
 					end
@@ -4701,7 +4733,7 @@ function Icon.ProcessQueuedEvents(icon)
 			end
 		end
 
-		wipe(icon.EventsToFire)
+		wipe(EventsToFire)
 		icon.eventIsQueued = nil
 	end
 end
@@ -4967,7 +4999,7 @@ function Icon.SetInfo(icon, alpha, color, texture, start, duration, spellChecked
 
 	if EventHandlersSet.OnDuration then
 		if d ~= icon.__lastDur then
-			icon:QueueEvent("OnDuration", d)
+			icon:QueueEvent("OnDuration")
 			icon.__lastDur = d
 		
 			somethingChanged = 1
@@ -5005,11 +5037,11 @@ function Icon.SetInfo(icon, alpha, color, texture, start, duration, spellChecked
 			TMW:Fire("TMW_ICON_SHOWN_CHANGED", icon, "OnIconShow")
 		elseif alpha > oldalpha then
 			if EventHandlersSet.OnAlphaInc then
-				icon:QueueEvent("OnAlphaInc", alpha*100)
+				icon:QueueEvent("OnAlphaInc")
 			end
 		else -- it must be less than, because it isnt greater than and it isnt the same
 			if EventHandlersSet.OnAlphaDec then
-				icon:QueueEvent("OnAlphaDec", alpha*100)
+				icon:QueueEvent("OnAlphaDec")
 			end
 		end
 		
@@ -5093,7 +5125,7 @@ function Icon.SetInfo(icon, alpha, color, texture, start, duration, spellChecked
 		icon.__countText = countText
 
 		if EventHandlersSet.OnStack then
-			icon:QueueEvent("OnStack", count)
+			icon:QueueEvent("OnStack")
 		end
 		
 		somethingChanged = 1

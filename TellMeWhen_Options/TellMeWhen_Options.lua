@@ -4812,22 +4812,24 @@ function EVENTS:EnableAndDisableEvents()
 	local oldID = EVENTS.currentEventID
 
 	for i, frame in ipairs(self.Events) do
-		if Types[CI.ic]["EventDisabled_" .. frame.event] then
-			frame:Disable()
-			frame.DataText:SetText(L["SOUND_EVENT_DISABLEDFORTYPE"])
-			TMW:TT(frame, frame.eventData.text, L["SOUND_EVENT_DISABLEDFORTYPE_DESC"]:format(Types[CI.t].name), 1, 1)
+		if frame:IsShown() then
+			if Types[CI.ic]["EventDisabled_" .. frame.event] then
+				frame:Disable()
+				frame.DataText:SetText(L["SOUND_EVENT_DISABLEDFORTYPE"])
+				TMW:TT(frame, frame.eventData.text, L["SOUND_EVENT_DISABLEDFORTYPE_DESC"]:format(Types[CI.t].name), 1, 1)
 
-			if oldID == i then
-				oldID = oldID + 1
-			end
-		else
-			TMW:TT(frame, frame.eventData.text, frame.normalDesc, 1, 1)
-			frame:Enable()
-			local Module = self:GetModuleForEventSettings(i)
-			if Module then
-				Module:SetupEventDisplay(i)
+				if oldID == i then
+					oldID = oldID + 1
+				end
 			else
-				frame.DataText:SetText("UNKNOWN TYPE: " .. tostring(self:GetEventSettings(i).Type))
+				TMW:TT(frame, frame.eventData.text, frame.normalDesc, 1, 1)
+				frame:Enable()
+				local Module = self:GetModuleForEventSettings(i)
+				if Module then
+					Module:SetupEventDisplay(i)
+				else
+					frame.DataText:SetText("UNKNOWN TYPE: " .. tostring(self:GetEventSettings(i).Type))
+				end
 			end
 		end
 	end
@@ -4991,6 +4993,7 @@ function EVENTS:SetTabText()
 end
 
 function EVENTS:GetEventSettings(eventID)
+	
 	return CI.ics.Events[eventID or EVENTS.currentEventID]
 end
 
@@ -5060,15 +5063,23 @@ end
 
 function EVENTS:AddEvent_Dropdown_OnClick(event, type)
 	CI.ics.Events.n = CI.ics.Events.n + 1
-
-	CI.ics.Events[CI.ics.Events.n].Event = event
-	CI.ics.Events[CI.ics.Events.n].Type = type
+	
+	local n = CI.ics.Events.n
+	local EventSettings = CI.ics.Events[n]
+	
+	EventSettings.Event = event
+	EventSettings.Type = type
+	
+	local eventData = TMW.EventList[event]
+	if eventData and eventData.applyDefaultsToSetting then
+		eventData.applyDefaultsToSetting(EventSettings)
+	end
 	
 	EVENTS:LoadConfig()
 
-	local Module = EVENTS:GetModuleForEventSettings(CI.ics.Events.n)
+	local Module = EVENTS:GetModuleForEventSettings(n)
 	if Module then
-		Module:SelectEvent(CI.ics.Events.n)
+		Module:SelectEvent(n)
 	end
 	
 	CloseDropDownMenus()
@@ -5137,10 +5148,8 @@ function SND:SelectEvent(id)
 	end
 end
 
-function SND:SetupEventDisplay(event)
-	if not event then return end
-
-	local eventID, eventString = self:GetDisplayInfo(event)
+function SND:SetupEventDisplay(eventID)
+	if not eventID then return end
 
 	local name = self:GetEventSettings(eventID).Sound
 
@@ -5332,9 +5341,8 @@ function ANN:SelectEvent(id)
 	end
 end
 
-function ANN:SetupEventDisplay(event)
-	if not event then return end
-	local eventID, eventString = self:GetDisplayInfo(event)
+function ANN:SetupEventDisplay(eventID)
+	if not eventID then return end
 
 	local EventSettings = self:GetEventSettings(eventID)
 	local channel = EventSettings.Channel
@@ -5514,9 +5522,8 @@ function ANIM:SelectEvent(id)
 	end
 end
 
-function ANIM:SetupEventDisplay(event)
-	if not event then return end
-	local eventID, eventString = self:GetDisplayInfo(event)
+function ANIM:SetupEventDisplay(eventID)
+	if not eventID then return end
 
 	local animation = self:GetEventSettings(eventID).Animation
 	local animationSettings = self.AnimationList[animation]
