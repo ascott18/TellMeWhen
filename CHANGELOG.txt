@@ -45,6 +45,7 @@
  ** (r461) TellMeWhen.lua line 3105: attempt to index field '?' (a boolean value)
  ** (r462) AceDB-3.0-22.lua:104 in function <Ace3\AceDB-3.0\AceDB-3.0.lua:100 table index is NaN (MAYBE)
  ** (r464) Fixed meta icons that check entire groups
+ ** (r467) TellMeWhen-5.0.0.lua:3018: attempt to concatenate local "name" (a nil value)
 
 ===v4.8.3===
  * Bug Fixes:
