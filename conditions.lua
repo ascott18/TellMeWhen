@@ -1714,6 +1714,9 @@ CNDT.Types = {
 		icon = "Interface\\Icons\\inv_potion_137",
 		tcoords = standardtcoords,
 		funcstr = [[c.nil1 == select(2, IsUsableSpell(c.NameFirst))]],
+		events = function()
+			return "SPELL_UPDATE_USABLE", "UNIT_POWER_FREQUENT", "player"
+		end,
 	},
 		{ -- spell range
 		text = L["CONDITIONPANEL_SPELLRANGE"],

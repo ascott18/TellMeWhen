@@ -1477,17 +1477,18 @@
 
 
 	<Button name="TellMeWhen_Event" motionScriptsWhileDisabled="true" inherits="TellMeWhen_BorderedFrame" virtual="true" >
-		<Size y="26"/>
+		<Size y="31"/>
 		<Layers>
 			<Layer level="OVERLAY">
 				<FontString name="$parentEventName" parentKey="EventName" inherits="GameFontNormalSmall" justifyH="LEFT">
 					<Anchors>
-						<Anchor point="TOPLEFT" x="15" y="-3"/>
+						<Anchor point="TOPLEFT" x="15" y="-4"/>
+						<Anchor point="RIGHT" x="-15"/>
 					</Anchors>
 				</FontString>
 				<FontString name="$parentDataText" parentKey="DataText" inherits="GameFontHighlightSmall" justifyH="LEFT" >
 					<Anchors>
-						<Anchor point="BOTTOMLEFT" x="15" y="2"/>
+						<Anchor point="BOTTOMLEFT" x="15" y="4"/>
 						<Anchor point="RIGHT" x="-15"/>
 					</Anchors>
 				</FontString>
@@ -3566,7 +3567,7 @@
 				<Frames>
 				
 					<ScrollFrame name="$parentSF" parentKey="ScrollFrame" inherits="UIPanelScrollFrameCodeTemplate" >
-						<Size x="210" y="156"/>
+						<Size x="210" y="155"/>
 						<Anchors>
 							<Anchor point="TOPLEFT" x="20" y="-75"/>
 						</Anchors>
@@ -3574,7 +3575,7 @@
 							<Layer level="OVERLAY">
 								<FontString name="$parentHeader" inherits="GameFontNormalLarge" parentKey="Header" justifyH="LEFT" text="">
 									<Anchors>
-										<Anchor point="BOTTOM" relativePoint="TOP" y="26"/>
+										<Anchor point="BOTTOM" relativePoint="TOP" y="30"/>
 									</Anchors>
 								</FontString>
 							</Layer>
@@ -3613,7 +3614,7 @@
 					</ScrollFrame>
 					
 					<Button name="$parentAddEvent" inherits="TellMeWhen_BorderedFrame" parentKey="AddEvent">
-						<Size y="25"/>
+						<Size y="30"/>
 						<Anchors>
 							<Anchor point="BOTTOMLEFT" relativeTo="$parentSF" relativePoint="TOPLEFT" y="-0"/>
 							<Anchor point="BOTTOMRIGHT" relativeTo="$parentSF" relativePoint="TOPRIGHT" y="-0"/>

@@ -4759,7 +4759,7 @@ function EVENTS:CreateEventButtons(globalDescKey)
 	local Events = self.Events
 	local previousFrame
 
-	local yAdjustTitle, yAdjustText = 0, 0 -- not needed for now
+	local yAdjustTitle, yAdjustText = 0, 0
 	local locale = GetLocale()
 	if locale == "zhCN" or locale == "zhTW" then
 		yAdjustTitle, yAdjustText = 3, -3
@@ -4768,16 +4768,23 @@ function EVENTS:CreateEventButtons(globalDescKey)
 	
 	for eventSettings, i in TMW:InNLengthTable(CI.ics.Events) do
 		local eventData = TMW.EventList[eventSettings.Event]
-		local frame = Events[i] or CreateFrame("Button", Events:GetName().."Event"..i, Events, "TellMeWhen_Event", i)
-		Events[i] = frame
-		frame:SetPoint("TOPLEFT", previousFrame, "BOTTOMLEFT")
-		frame:SetPoint("TOPRIGHT", previousFrame, "BOTTOMRIGHT")
+		local frame = Events[i]
+		if not frame then
+			frame = CreateFrame("Button", Events:GetName().."Event"..i, Events, "TellMeWhen_Event", i)
+			Events[i] = frame
+			frame:SetPoint("TOPLEFT", previousFrame, "BOTTOMLEFT")
+			frame:SetPoint("TOPRIGHT", previousFrame, "BOTTOMRIGHT")
 
-		local p, t, r, x, y = frame.EventName:GetPoint()
-		frame.EventName:SetPoint(p, t, r, x, y + yAdjustTitle)
-		local p, t, r, x, y = frame.DataText:GetPoint()
-		frame.DataText:SetPoint(p, t, r, x, y + yAdjustText)
-
+			local p, t, r, x, y = frame.EventName:GetPoint(1)
+			frame.EventName:SetPoint(p, t, r, x, y + yAdjustTitle)
+			local p, t, r, x, y = frame.EventName:GetPoint(2)
+			frame.EventName:SetPoint(p, t, r, x, y + yAdjustTitle)
+			local p, t, r, x, y = frame.DataText:GetPoint(1)
+			frame.DataText:SetPoint(p, t, r, x, y + yAdjustText)
+			local p, t, r, x, y = frame.DataText:GetPoint(2)
+			frame.DataText:SetPoint(p, t, r, x, y + yAdjustText)
+		end
+		
 		if eventData then
 			frame:Show()
 			

@@ -19,8 +19,6 @@ if not TMW then return end
 local L = TMW.L
 
 local db, ClockGCD
-local GetSpellCooldown, IsSpellInRange, IsUsableSpell =
-	  GetSpellCooldown, IsSpellInRange, IsUsableSpell
 local GetActionCooldown, IsActionInRange, IsUsableAction, GetActionTexture, GetActionInfo =
 	  GetActionCooldown, IsActionInRange, IsUsableAction, GetActionTexture, GetActionInfo
 local UnitRangedDamage  =

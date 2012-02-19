@@ -69,13 +69,13 @@ function Type:Update()
 end
 
 
-local function Reactive_OnEvent(icon, event, spell)
+local function Reactive_OnEvent(icon, event, arg1)
 	if event == "SPELL_ACTIVATION_OVERLAY_GLOW_SHOW" or event == "SPELL_ACTIVATION_OVERLAY_GLOW_HIDE" then
-		if icon.NameFirst == spell or strlowerCache[GetSpellInfo(spell)] == icon.NameName then
+		if icon.NameFirst == arg1 or strlowerCache[GetSpellInfo(arg1)] == icon.NameName then
 			icon.forceUsable = event == "SPELL_ACTIVATION_OVERLAY_GLOW_SHOW"
 			icon.NextUpdateTime = 0
 		end
-	else
+	elseif event ~= "UNIT_POWER_FREQUENT" or arg1 == "player" then
 		icon.NextUpdateTime = 0
 	end
 end
@@ -165,13 +165,16 @@ function Type:Setup(icon, groupID, iconID)
 		icon:SetScript("OnEvent", Reactive_OnEvent)
 	end
 	
-	if not icon.RangeCheck and not icon.ManaCheck then -- dont try anything funny here with icon.IgnoreNomana. Even if that setting is true, it doesnt mean ManaCheck doesn't matter.
+	if not icon.RangeCheck then
 		icon:RegisterEvent("SPELL_UPDATE_COOLDOWN")
 		icon:RegisterEvent("SPELL_UPDATE_USABLE")
 		if icon.IgnoreRunes then
 			icon:RegisterEvent("RUNE_POWER_UPDATE")
 			icon:RegisterEvent("RUNE_TYPE_UPDATE")
 		end	
+		if icon.ManaCheck then
+			icon:RegisterEvent("UNIT_POWER_FREQUENT")
+		end
 	
 		icon:SetScript("OnEvent", Reactive_OnEvent)
 		icon:SetUpdateMethod("manual")

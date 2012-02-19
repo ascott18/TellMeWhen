@@ -103,8 +103,10 @@ local function AutoShot_OnUpdate(icon, time)
 end
 
 
-local function SpellCooldown_OnEvent(icon, event)
-	icon.NextUpdateTime = 0
+local function SpellCooldown_OnEvent(icon, event, unit)
+	if event ~= "UNIT_POWER_FREQUENT" or unit == "player" then
+		icon.NextUpdateTime = 0
+	end
 end
 
 local function SpellCooldown_OnUpdate(icon, time)
@@ -190,13 +192,16 @@ function Type:Setup(icon, groupID, iconID)
 		icon:SetTexture(TMW:GetConfigIconTexture(icon))
 		
 		
-		if not icon.RangeCheck and not icon.ManaCheck then -- dont try anything funny here with icon.IgnoreNomana. Even if that setting is true, it doesnt mean ManaCheck doesn't matter.
+		if not icon.RangeCheck then
 			icon:RegisterEvent("SPELL_UPDATE_COOLDOWN")
 			icon:RegisterEvent("SPELL_UPDATE_USABLE")
 			if icon.IgnoreRunes then
 				icon:RegisterEvent("RUNE_POWER_UPDATE")
 				icon:RegisterEvent("RUNE_TYPE_UPDATE")
 			end	
+			if icon.ManaCheck then
+				icon:RegisterEvent("UNIT_POWER_FREQUENT")
+			end
 		
 			icon:SetScript("OnEvent", SpellCooldown_OnEvent)
 			icon:SetUpdateMethod("manual")
