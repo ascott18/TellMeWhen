@@ -20,6 +20,7 @@
 
 local TMW = LibStub("AceAddon-3.0"):NewAddon(CreateFrame("Frame", "TMW", UIParent), "TellMeWhen", "AceEvent-3.0", "AceTimer-3.0", "AceConsole-3.0", "AceComm-3.0", "AceSerializer-3.0")
 TellMeWhen = TMW
+-- TMW is set globally through CreateFrame
 
 local L = LibStub("AceLocale-3.0"):GetLocale("TellMeWhen", true)
 --L = setmetatable({}, {__index = function() return "| ! | ! | ! | ! | ! | ! | ! | ! | ! | ! | ! | ! | ! | ! | ! | ! | ! " end}) -- stress testing for text widths
@@ -32,7 +33,7 @@ local DRData = LibStub("DRData-1.0", true)
 TELLMEWHEN_VERSION = "5.0.0"
 TELLMEWHEN_VERSION_MINOR = strmatch(" @project-version@", " r%d+") or ""
 TELLMEWHEN_VERSION_FULL = TELLMEWHEN_VERSION .. TELLMEWHEN_VERSION_MINOR
-TELLMEWHEN_VERSIONNUMBER = 50030 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
+TELLMEWHEN_VERSIONNUMBER = 50031 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
 if TELLMEWHEN_VERSIONNUMBER > 51000 or TELLMEWHEN_VERSIONNUMBER < 50000 then return error("YOU SCREWED UP THE VERSION NUMBER OR DIDNT CHANGE THE SAFETY LIMITS") end -- safety check because i accidentally made the version number 414069 once
 
 TELLMEWHEN_MAXGROUPS = 1 	--this is a default, used by SetTheory (addon), so dont rename
@@ -76,8 +77,7 @@ local NAMES, EVENTS, ANIM, ANN, SND
 local UPD_INTV = 0.06	--this is a default, local because i use it in onupdate functions
 local runEvents = 1
 local GCD, NumShapeshiftForms, LastUpdate, LastBindTextUpdate = 0, 0, 0, 0
-local IconsToUpdate, GroupsToUpdate = {}, {}
-local BindTextObjsToUpdate = {}
+local IconsToUpdate, GroupsToUpdate, BindTextObjsToUpdate = {}, {}, {}
 local loweredbackup = {}
 local callbackregistry = {}
 local bullshitTable = {}
@@ -5728,6 +5728,7 @@ end
 TMW:RegisterCallback("TMW_ICON_COOLDOWN_CHANGED", View)
 
 View:Register()
+
 
 -- ------------------
 -- NAME/ETC FUNCTIONS

@@ -2061,7 +2061,7 @@ CNDT.Types = {
 		icon = "Interface\\Icons\\ability_paladin_sacredcleansing",
 		tcoords = standardtcoords,
 		funcstr = function(c)
-			return [[AuraCount(c.Unit, "]]..strlower(TMW:GetSpellNames(nil, c.Name, 1, 1))..[[", "HELPFUL]] .. (c.Checked and "|PLAYER" or "") .. [[") c.Operator c.Level]]
+			return [[AuraCount(c.Unit, c.NameFirst, c.NameName, "HELPFUL]] .. (c.Checked and "|PLAYER" or "") .. [[") c.Operator c.Level]]
 		end,
 		events = function(c)
 			return CNDT:IsUnitEventUnit(c.Unit), "UNIT_AURA", c.Unit
@@ -2169,7 +2169,7 @@ CNDT.Types = {
 		icon = "Interface\\Icons\\spell_deathknight_frostfever",
 		tcoords = standardtcoords,
 		funcstr = function(c)
-			return [[AuraCount(c.Unit, "]]..strlower(TMW:GetSpellNames(nil, c.Name, 1, 1))..[[", "HARMFUL]] .. (c.Checked and "|PLAYER" or "") .. [[") c.Operator c.Level]]
+			return [[AuraCount(c.Unit, c.NameFirst, c.NameName, "HARMFUL]] .. (c.Checked and "|PLAYER" or "") .. [[") c.Operator c.Level]]
 		end,
 		events = function(c)
 			return CNDT:IsUnitEventUnit(c.Unit), "UNIT_AURA", c.Unit

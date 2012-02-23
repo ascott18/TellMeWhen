@@ -47,6 +47,8 @@
  ** (r464) Fixed meta icons that check entire groups
  ** (r467) TellMeWhen-5.0.0.lua:3018: attempt to concatenate local "name" (a nil value)
  ** (r468) Meta icons that are checking conditions show now properly update themselves when the state of their conditions change
+ ** (r469) Buff/Debuff "Number of" conditions should work properly now.
+ ** (r469) Sorting Buffs/Debuffs should now work if only one aura is being checked by the icon (the unit being checked may have more than one auras of the same name/ID, or the icon may be checking multiple units.)
 
 ===v4.8.3===
  * Bug Fixes:

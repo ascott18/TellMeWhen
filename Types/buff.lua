@@ -111,7 +111,7 @@ local function Buff_OnUpdate(icon, time)
 	for u = 1, #Units do
 		local unit = Units[u]
 		if unitsWithExistsEvent[unit] or UnitExists(unit) then -- if unitsWithExistsEvent[unit] is true then the unit is managed by TMW's unit framework, so we dont need to check that it exists.
-			if NAL > EFF_THR then
+			if Sort or NAL > EFF_THR then
 				for z=1, 60 do --60 because i can and it breaks when there are no more buffs anyway
 					local _buffName, _, _iconTexture, _count, _dispelType, _duration, _expirationTime, _, canSteal, _, _id, _, _, _v1, _v2, _v3 = UnitAura(unit, z, Filter)
 					_dispelType = _dispelType == "" and "Enraged" or _dispelType -- Bug: Enraged is an empty string
@@ -262,7 +262,8 @@ function Type:Setup(icon, groupID, iconID)
 	-- need to force any icon looking for moonfire to check all auras on the target because of a blizzard bug in WoW 4.1.
 	-- TODO: verify that the issue persists
 
-	icon.NAL = icon.Sort and (#icon.NameArray > 1 or TMW.DS[icon.NameFirst]) and EFF_THR + 1 or icon.NAL
+	-- icon.NAL = icon.Sort and EFF_THR + 1 or icon.NAL
+	-- NOTE: we dont do thisnaymore because this is checked directly in the function instead of doing stupid shit like this.
 	-- Force icons that sort to check all because it must find check all auras
 	-- in order to make a final decision on whether or not something has the highest/lowest duration.
 	-- Two buffs with the same name/ID can have different durations on a unit.
