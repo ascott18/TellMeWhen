@@ -100,7 +100,7 @@ local function Totem_OnUpdate(icon, time)
 				local color = icon:CrunchColor(duration)
 
 				--icon:SetInfo(alpha, color, texture, start, duration, spellChecked, reverse, count, countText, forceupdate, unit)
-				icon:SetInfo(icon.Alpha, color, totemIcon, start, duration, totemName, nil, nil, nil, nil, nil)
+				icon:SetInfo(icon.Alpha, color, totemIcon, start, duration, totemName, true, nil, nil, nil, nil)
 				return
 			end
 		end
@@ -109,7 +109,7 @@ local function Totem_OnUpdate(icon, time)
 	local color = icon:CrunchColor()
 
 	--icon:SetInfo(alpha, color, texture, start, duration, spellChecked, reverse, count, countText, forceupdate, unit)
-	icon:SetInfo(icon.UnAlpha, color, icon.FirstTexture, 0, 0, nil, nil, nil, nil, nil, nil)
+	icon:SetInfo(icon.UnAlpha, color, icon.FirstTexture, 0, 0, nil, true, nil, nil, nil, nil)
 end
 
 
@@ -141,7 +141,6 @@ function Type:Setup(icon, groupID, iconID)
 		icon.Slots[3] = true
 		icon.Slots[4] = true
 	end
-	icon:SetReverse(true)
 
 	icon.FirstTexture = icon.NameName and TMW.SpellTextures[icon.NameName]
 

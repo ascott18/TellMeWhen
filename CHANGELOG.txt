@@ -46,6 +46,7 @@
  ** (r462) AceDB-3.0-22.lua:104 in function <Ace3\AceDB-3.0\AceDB-3.0.lua:100 table index is NaN (MAYBE)
  ** (r464) Fixed meta icons that check entire groups
  ** (r467) TellMeWhen-5.0.0.lua:3018: attempt to concatenate local "name" (a nil value)
+ ** (r468) Meta icons that are checking conditions show now properly update themselves when the state of their conditions change
 
 ===v4.8.3===
  * Bug Fixes:

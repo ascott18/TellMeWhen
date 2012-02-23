@@ -185,6 +185,23 @@ do	-- Class Lib
 
 		return target
 	end
+	
+	local function Disembed(self, target, clearDifferentValues)
+		-- if this is the first instance (not really an instance here, but we need to anyway) of the class, do some magic to it:
+		initializeClass(self)
+
+		self.embeds[target] = false
+
+		for k, v in pairs(self.instancemeta.__index) do
+			if (target[k] == v) or (target[k] and clearDifferentValues) then
+				target[k] = nil
+			else
+				TMW:Error("Error disembedding class %s from target %s: Field %q should exist on the target, but it doesnt.", self.name, tostring(target:GetName() or target), k)
+			end
+		end
+
+		return target
+	end
 
 	function TMW:NewClass(className, ...)
 		local metatable = {__index = {}}
@@ -222,6 +239,7 @@ do	-- Class Lib
 			embeds = {},
 			New = New,
 			Embed = Embed,
+			Disembed = Disembed,
 			instancemeta = {__index = metatable.__index},
 			isFrameObject = isFrameObject,
 		}
@@ -638,6 +656,7 @@ local RelevantToAll = {
 TMW.Types = setmetatable({}, {
 	__index = function(t, k)
 		if type(k) == "table" and k.class == TMW.Classes.Icon then -- if the key is an icon, then return the icon's Type table
+			TMW:Error("Type lookup by icon is depreciated. Lookup by icon type instead.")
 			return t[k.Type]
 		else -- if no type exists, then use the fallback (default) type
 			return rawget(t, "")
@@ -645,6 +664,13 @@ TMW.Types = setmetatable({}, {
 	end
 }) local Types = TMW.Types
 TMW.OrderedTypes = {}
+
+TMW.Views = setmetatable({}, {
+	__index = function(t, k)
+		return rawget(t, "icon")
+	end
+}) local Views = TMW.Views
+TMW.OrderedViews = {}
 
 TMW.Defaults = {
 	global = {
@@ -712,6 +738,7 @@ TMW.Defaults = {
 				Enabled			= false,
 				OnlyInCombat	= false,
 				Locked			= false,
+				View			= "icon",
 				Name			= "",
 				Strata			= "MEDIUM",
 				Scale			= 2.0,
@@ -1266,11 +1293,11 @@ end
 -- --------------------------
 
 function TMW:OnInitialize()
-	if not rawget(Types, "multistate") then
+	if not rawget(TMW.Classes, "TimerBar") then
 		-- this also includes upgrading from older than 3.0 (pre-Ace3 DB settings)
 		StaticPopupDialogs["TMW_RESTARTNEEDED"] = {
-			--text = L["ERROR_MISSINGFILE"],
-			text = L["ERROR_MISSINGFILE_NOREQ"],
+			--text = L["ERROR_MISSINGFILE"], -- if the file is required for functionality
+			text = L["ERROR_MISSINGFILE_NOREQ"], -- if the file is NOT required for functionality
 			button1 = EXIT_GAME,
 			button2 = CANCEL,
 			OnAccept = ForceQuit,
@@ -1278,7 +1305,7 @@ function TMW:OnInitialize()
 			showAlert = true,
 			whileDead = true,
 		}
-		StaticPopup_Show("TMW_RESTARTNEEDED", TELLMEWHEN_VERSION_FULL, "multistate.lua")
+		StaticPopup_Show("TMW_RESTARTNEEDED", TELLMEWHEN_VERSION_FULL, "TimerBar.lua")
 	end
 
 	if LibStub("LibButtonFacade", true) and select(6, GetAddOnInfo("Masque")) == "MISSING" then
@@ -4395,10 +4422,10 @@ function Group.SortIcons(group)
 	end
 end
 
-Group.setscript = Group.SetScript
+Group.SetScript_Blizz = Group.SetScript
 function Group.SetScript(group, handler, func)
 	group[handler] = func
-	group:setscript(handler, func)
+	group:SetScript_Blizz(handler, func)
 end
 
 Group.show = Group.Show
@@ -4585,7 +4612,7 @@ local Icon = TMW:NewClass("Icon", "Button", "UpdateTableManager", "ConditionCont
 Icon:UpdateTable_Set(IconsToUpdate)
 Icon.IsIcon = true
 
--- NOT universal
+-- NOT universal (discrepancies need to be moved to icon:Setup() probably )
 function Icon.OnNewInstance(icon, ...)
 	local _, name, group, _, iconID = ... -- the CreateFrame args
 
@@ -4596,14 +4623,26 @@ function Icon.OnNewInstance(icon, ...)
 	tinsert(group.SortedIcons, icon)
 	icon.EventHandlersSet = {}
 	
-	if TMW.Classes.PBar then
-		icon.pbar = TMW.Classes.PBar:New("StatusBar", name .. "PBar", icon)
-		icon.cbar = TMW.Classes.CBar:New("StatusBar", name .. "CBar", icon)
+	icon.__alpha = icon:GetAlpha()
+	
+	if TMW.Classes.PowerBar then
+		icon.pbar_overlay = TMW.Classes.PowerBar:New("StatusBar", nil, icon)
+		icon.cbar_overlay = TMW.Classes.TimerBar:New("StatusBar", nil, icon)
 	end
 	
-	icon.__alpha = icon:GetAlpha()
-	icon.__tex = icon.texture:GetTexture()
 end
+
+-- universal (MAYBE)
+function Icon.GetTooltipTitle(icon)
+	local groupID = icon:GetParent():GetID()
+	local line1 = L["ICON_TOOLTIP1"] .. " " .. format(L["GROUPICON"], TMW:GetGroupName(groupID, groupID, 1), icon:GetID())
+	if icon:GetParent().Locked then
+		line1 = line1 .. " (" .. L["LOCKED"] .. ")"
+	end
+	return line1
+end
+
+do 																																	-- stick UNIVERSAL funcs here
 
 -- universal
 function Icon.__lt(icon1, icon2)
@@ -4634,13 +4673,13 @@ function Icon.ScriptSort(iconA, iconB)
 end
 
 -- universal
-Icon.setscript = Icon.SetScript
+Icon.SetScript_Blizz = Icon.SetScript
 function Icon.SetScript(icon, handler, func, dontnil)
 	if func ~= nil or not dontnil then
 		icon[handler] = func
 	end
 	if handler ~= "OnUpdate" then
-		icon:setscript(handler, func)
+		icon:SetScript_Blizz(handler, func)
 	else
 		icon:UpdateTable_Unregister(icon)
 		if func then
@@ -4651,20 +4690,19 @@ function Icon.SetScript(icon, handler, func, dontnil)
 end
 
 -- universal
-Icon.registerevent = Icon.RegisterEvent
+Icon.RegisterEvent_Blizz = Icon.RegisterEvent
 function Icon.RegisterEvent(icon, event)
-	icon:registerevent(event)
+	icon:RegisterEvent_Blizz(event)
 	icon.hasEvents = 1
 end
 
--- universal (MAYBE)
-function Icon.GetTooltipTitle(icon)
-	local groupID = icon:GetParent():GetID()
-	local line1 = L["ICON_TOOLTIP1"] .. " " .. format(L["GROUPICON"], TMW:GetGroupName(groupID, groupID, 1), icon:GetID())
-	if icon:GetParent().Locked then
-		line1 = line1 .. " (" .. L["LOCKED"] .. ")"
+Icon.UnregisterAllEvents_Blizz = Icon.UnregisterAllEvents
+function Icon.UnregisterAllEvents(icon, event)
+	-- UnregisterAllEvents uses a metric fuckton of CPU, so only do it if needed
+	if icon.hasEvents then
+		icon:UnregisterAllEvents_Blizz()
+		icon.hasEvents = nil
 	end
-	return line1
 end
 
 -- universal
@@ -4683,59 +4721,6 @@ end
 function Icon.QueueEvent(icon, arg1)
 	icon.EventsToFire[arg1] = true
 	icon.eventIsQueued = true
-end
-
--- universal (but actual event handlers (:HandleEvent()) arent)
-function Icon.ProcessQueuedEvents(icon)
-	local EventsToFire = icon.EventsToFire
-	if EventsToFire and icon.eventIsQueued then
-		for i = 1, icon.Events.n do
-			-- settings to check for in EventsToFire
-			local EventSettingsFromIconSettings = icon.Events[i]
-			local event = EventSettingsFromIconSettings.Event
-			
-			local EventSettings
-			if EventsToFire[EventSettingsFromIconSettings] or EventsToFire[event] then
-				-- we should process EventSettingsFromIconSettings
-				EventSettings = EventSettingsFromIconSettings
-			end
-			local eventData = TMW.EventList[event]
-			if eventData and EventSettings then
-				local shouldProcess = true
-				if EventSettings.OnlyShown and icon.__alpha <= 0 then
-					shouldProcess = false
-
-				elseif EventSettings.PassingCndt then
-					local conditionChecker = eventData.conditionChecker
-					local conditionResult
-					if conditionChecker then
-						conditionResult = conditionChecker(icon, EventSettings)
-					end
-					if EventSettings.CndtJustPassed then
-						if conditionResult ~= EventSettings.wasPassingCondition then
-							EventSettings.wasPassingCondition = conditionResult
-						else
-							conditionResult = false
-						end
-					end
-					shouldProcess = conditionResult
-				end
-
-				if shouldProcess and runEvents then
-					local Module = EVENTS:GetModule(EventSettings.Type, true)
-					if Module then
-						local handled = Module:HandleEvent(icon, EventSettings)
-						if handled and not EventSettings.PassThrough then
-							break
-						end
-					end
-				end
-			end
-		end
-
-		wipe(EventsToFire)
-		icon.eventIsQueued = nil
-	end
 end
 
 -- universal
@@ -4814,16 +4799,12 @@ function Icon.Update(icon, force, ...)
 	if icon.__shown and (force or icon.LastUpdate <= time - UPD_INTV) then
 		local Update_Method = icon.Update_Method
 		icon.LastUpdate = time
-
-		local iconUpdateNeeded = force or Update_Method == "auto" or icon.NextUpdateTime < time
 		
 		local ConditionObj = icon.ConditionObj
 		if ConditionObj then
+			-- the condition check needs to come before we determine iconUpdateNeeded because checking a condition may set NextUpdateTime to 0 if the condition changes
 			if ConditionObj.UpdateNeeded or ConditionObj.NextUpdateTime < time then
 				ConditionObj:Check(icon)
-				iconUpdateNeeded = iconUpdateNeeded or ConditionObj.LastCheckFailed ~= ConditionObj.Failed
-			elseif ConditionObj.LastUpdateTime == time then
-				iconUpdateNeeded = true
 			end
 			
 			if not icon.dontHandleConditionsExternally and not icon.dontCheckForUpdates and ConditionObj.Failed and (icon.ConditionAlpha or 0) == 0 then
@@ -4833,6 +4814,8 @@ function Icon.Update(icon, force, ...)
 				return
 			end
 		end
+
+		local iconUpdateNeeded = force or Update_Method == "auto" or icon.NextUpdateTime < time
 
 		if iconUpdateNeeded then
 			icon:OnUpdate(time, ...)
@@ -4845,6 +4828,33 @@ function Icon.Update(icon, force, ...)
 	end
 end
 
+-- universal
+function Icon.ForceSetAlpha(icon, alpha)
+	icon.__alpha = alpha
+	local oldalpha = icon:GetAlpha()-- For ICONFADE. much nicer than using __alpha because it will transition from what is curently visible, not what should be visible after any current fades end
+	icon.__oldAlpha = oldalpha
+
+	icon:SetAlpha(alpha)
+end
+
+-- universal
+function Icon.FinishCompilingConditions(icon, funcstr)
+	if funcstr ~= "" then
+		TMW:RegisterCallback("TMW_CNDT_OBJ_PASSING_CHANGED", icon)
+	else
+		TMW:UnregisterCallback("TMW_CNDT_OBJ_PASSING_CHANGED", icon)
+	end
+	return funcstr
+end
+
+function Icon.TMW_CNDT_OBJ_PASSING_CHANGED(icon, event, ConditionObj)
+	if icon.ConditionObj == ConditionObj then	
+		icon.NextUpdateTime = 0
+	end
+end
+
+end
+
 -- universal (probably)
 function Icon.SetTexture(icon, tex)
 	--if icon.__tex ~= tex then ------dont check for this, checking is done before this method is even called
@@ -4853,19 +4863,57 @@ function Icon.SetTexture(icon, tex)
 	icon.texture:SetTexture(tex)
 end
 
--- universal (probably)
-function Icon.SetReverse(icon, reverse)
-	icon.__reverse = reverse
-	icon.cooldown:SetReverse(reverse)
-end
+-- universal (but actual event handlers (:HandleEvent()) arent (probably))
+function Icon.ProcessQueuedEvents(icon)
+	local EventsToFire = icon.EventsToFire
+	if EventsToFire and icon.eventIsQueued then
+		for i = 1, icon.Events.n do
+			-- settings to check for in EventsToFire
+			local EventSettingsFromIconSettings = icon.Events[i]
+			local event = EventSettingsFromIconSettings.Event
+			
+			local EventSettings
+			if EventsToFire[EventSettingsFromIconSettings] or EventsToFire[event] then
+				-- we should process EventSettingsFromIconSettings
+				EventSettings = EventSettingsFromIconSettings
+			end
+			local eventData = TMW.EventList[event]
+			if eventData and EventSettings then
+				local shouldProcess = true
+				if EventSettings.OnlyShown and icon.__alpha <= 0 then
+					shouldProcess = false
 
--- universal
-function Icon.ForceSetAlpha(icon, alpha)
-	icon.__alpha = alpha
-	local oldalpha = icon:GetAlpha()-- For ICONFADE. much nicer than using __alpha because it will transition from what is curently visible, not what should be visible after any current fades end
-	icon.__oldAlpha = oldalpha
+				elseif EventSettings.PassingCndt then
+					local conditionChecker = eventData.conditionChecker
+					local conditionResult
+					if conditionChecker then
+						conditionResult = conditionChecker(icon, EventSettings)
+					end
+					if EventSettings.CndtJustPassed then
+						if conditionResult ~= EventSettings.wasPassingCondition then
+							EventSettings.wasPassingCondition = conditionResult
+						else
+							conditionResult = false
+						end
+					end
+					shouldProcess = conditionResult
+				end
 
-	icon:SetAlpha(alpha)
+				if shouldProcess and runEvents then
+					local Module = EVENTS:GetModule(EventSettings.Type, true)
+					if Module then
+						local handled = Module:HandleEvent(icon, EventSettings)
+						if handled and not EventSettings.PassThrough then
+							break
+						end
+					end
+				end
+			end
+		end
+
+		wipe(EventsToFire)
+		icon.eventIsQueued = nil
+	end
 end
 
 -- universal (maybe, bars should handle color differently though e.g. color by school, by dispel type, etc)
@@ -4932,7 +4980,7 @@ function Icon.SetInfo(icon, alpha, color, texture, start, duration, spellChecked
 	[start]			- the start time of the cooldow/duration, as passsed to icon.cooldown:SetCooldown(start, duration); (nil) defaults to 0
 	[duration]		- the duration of the cooldow/duration, as passsed to icon.cooldown:SetCooldown(start, duration); (nil) defaults to 0
 	[spellChecked]	- the name or ID of the spell to be used for the icons power bar overlay (string/number)
-	[reverse]		- true/false to set icon.cooldown:SetReverse(reverse), nil to not change (boolean/nil)
+	[reverse]		- true/false to set icon.cooldown:SetReverse(reverse), nil to not change (boolean/nil) (note that this is handled per View through TMW_ICON_COOLDOWN_CHANGED, not for every icon automatically)
 	[count]			- the number of stacks to be used for comparison, nil/false to hide (number/nil/false)
 	[countText]		- the actual stack TEXT to be set on the icon, will use count if nil (number/string/nil/false)
 	[forceupdate]	- for meta icons, will force an update on things even if args didnt change.
@@ -5073,40 +5121,7 @@ function Icon.SetInfo(icon, alpha, color, texture, start, duration, spellChecked
 			icon.__realDuration = realDuration
 		end
 
-		if icon.ShowTimer or icon.ShowTimerText then
-			local cd = icon.cooldown
-			if duration > 0 then
-				local s, d = start, duration
-
-				if isGCD and ClockGCD then
-					s, d = 0, 0
-				end
-
-				-- cd.s is only used in this function and is used to prevent finish effect spam (and to increase efficiency) while GCDs are being triggered.
-				-- icon.__start isnt used because that just records the start time passed in, which may be a GCD, so it will change frequently
-				if cd.s ~= s or cd.d ~= d or forceupdate then
-					cd:SetCooldown(s, d)
-					cd:Show()
-					if not icon.ShowTimer then
-						cd:SetAlpha(0)
-					end
-					if reverse ~= nil and icon.__reverse ~= reverse then -- must be ( ~= nil )
-						icon.__reverse = reverse
-						cd:SetReverse(reverse)
-					end
-					cd.s = s
-					cd.d = d
-				end
-			else
-				cd.s = 0
-				cd.d = 0
-				cd:Hide()
-			end
-		else
-			icon.cooldown:Hide()
-		end
-
-		TMW:Fire("TMW_ICON_COOLDOWN_CHANGED", icon, start, duration, isGCD)
+		TMW:Fire("TMW_ICON_COOLDOWN_CHANGED", icon, start, duration, isGCD, reverse, forceupdate)
 
 		icon.__start = start
 		icon.__duration = duration
@@ -5195,11 +5210,6 @@ function Icon.SetInfo(icon, alpha, color, texture, start, duration, spellChecked
 	end
 end
 
--- universal
-function Icon.FinishCompilingConditions(icon, funcstr)
-	return funcstr
-end
-
 
 -- NOT universal ( and needs rewriting) -- TODO: rewrite texts to be dynamic instead of only having 2 static displays
 function Icon.SetupText(icon, fontString, settings)
@@ -5220,11 +5230,6 @@ function Icon.SetupText(icon, fontString, settings)
 	end
 end
 
-
-
-
-
-
 -- NOT universal
 function Icon.Setup(icon)
 	if not icon or not icon[0] then return end
@@ -5234,6 +5239,7 @@ function Icon.Setup(icon)
 	local group = icon.group
 	local ics = icon:GetSettings()
 	local typeData = Types[ics.Type]
+	local viewData = Views[group:GetSettings().View]
 	
 	
 	-- remove the icon from the previous type's icon list
@@ -5258,6 +5264,9 @@ function Icon.Setup(icon)
 	icon.ForceDisabled = nil
 	icon.dontHandleConditionsExternally = nil
 	icon.dontCheckForUpdates = nil
+	if pclass ~= "DEATHKNIGHT" then
+		icon.IgnoreRunes = nil
+	end
 
 	for k in pairs(TMW.Icon_Defaults) do
 		if typeData.RelevantSettings[k] then
@@ -5266,9 +5275,6 @@ function Icon.Setup(icon)
 			icon[k] = nil
 		end
 	end
-
-	TMW:Fire("TMW_ICON_SETUP_PRE", icon)
-
 
 	-- process alpha settings
 	if icon.ShowWhen == "alpha" then
@@ -5279,83 +5285,69 @@ function Icon.Setup(icon)
 
 	-- make fake hidden easier to process in SetInfo
 	icon.FakeHidden = icon.FakeHidden and 0
-
-	if pclass ~= "DEATHKNIGHT" then
-		icon.IgnoreRunes = nil
-	end
 	icon.OverrideTex = TMW:GetCustomTexture(icon)
-
 	
-	-- UnregisterAllEvents uses a metric fuckton of CPU, so only do it if needed
-	if icon.hasEvents then
-		icon:UnregisterAllEvents()
-		icon.hasEvents = nil
-	end
+	icon:UnregisterAllEvents()
 	ClearScripts(icon)
 	icon:SetUpdateMethod("auto")
-
+	
 	-- Conditions
 	icon:Conditions_LoadData(icon.Conditions)
 
-	local cd = icon.cooldown
-	cd.noCooldownCount = not icon.ShowTimerText
-	cd:SetDrawEdge(db.profile.DrawEdge)
-	icon:SetReverse(false)
+	TMW:Fire("TMW_ICON_SETUP_PRE", icon)
 
-
-	-- Masque skinning
-	icon.isDefaultSkin = nil
-	icon.normaltex = icon.__MSQ_NormalTexture or icon:GetNormalTexture()
-	if LMB then
-		local lmbGroup = LMB:Group("TellMeWhen", L["fGROUP"]:format(groupID))
-		lmbGroup:AddButton(icon)
-		group.SkinID = lmbGroup.SkinID or (lmbGroup.db and lmbGroup.db.SkinID)
-		if lmbGroup.Disabled or (lmbGroup.db and lmbGroup.db.Disabled) then
-			group.SkinID = "Blizzard"
-			if not icon.normaltex:GetTexture() then
-				icon.isDefaultSkin = 1
-			end
-		end
-	else
-		icon.isDefaultSkin = 1
+	
+	
+	-- deintegrate the old view from the icon
+	if icon.viewData then
+		icon.viewData:Icon_Deintegrate(icon)
 	end
-
-	if icon.isDefaultSkin then
-		group.barInsets = 1.5
-		cd:SetFrameLevel(icon:GetFrameLevel() + 1)
-	else
-		group.barInsets = 0
-		cd:SetFrameLevel(icon:GetFrameLevel() + -2)
-	end
-
+	-- integrate the new view with the icon
+	icon.viewData = viewData
+	viewData:Icon_Integrate(icon)
+	
+	
+	viewData:Icon_Setup(icon)
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
 	--reset things
 	--icon:SetInfo(alpha, color, texture, start, duration, spellChecked, reverse, count, countText, forceupdate, unit)
 	icon:SetInfo(0, nil, nil, nil, nil, nil, nil, nil, nil, 1, nil) -- forceupdate is set to 1 here so it doesnt return early (but this doesnt matter anymore)
 
-	
+
+
 	-- this code here needs a complete rewrite:
-				-- update overlay texts
-				icon:SetupText(icon.countText, group.Fonts.Count)
-				icon:SetupText(icon.bindText, group.Fonts.Bind)
+	-- update overlay texts
+	icon:SetupText(icon.countText, group.Fonts.Count)
+	icon:SetupText(icon.bindText, group.Fonts.Bind)
 
-				if not icon.BindTextObj or icon.BindTextObj.icon == icon then
-					-- need to check that the icon is the original icon because of the way that meta icons inherit bind text
-					if icon.BindText and icon.BindText ~= "" then
-						icon.BindTextObj = icon.BindTextObj or BindTextObj:New(icon, icon.bindText)
-						
-						icon.BindTextObj:SetBaseString(icon.BindText)
-					elseif icon.BindTextObj then
-						icon.BindTextObj:SetBaseString("")
-						icon.BindTextObj = nil
-					else
-						icon.bindText:SetText("")
-					end
-				else
-					icon.BindTextObj = nil
-					icon.bindText:SetText("")
-				end
-
-
+	if not icon.BindTextObj or icon.BindTextObj.icon == icon then
+		-- need to check that the icon is the original icon because of the way that meta icons inherit bind text
+		if icon.BindText and icon.BindText ~= "" then
+			icon.BindTextObj = icon.BindTextObj or BindTextObj:New(icon, icon.bindText)
+			
+			icon.BindTextObj:SetBaseString(icon.BindText)
+		elseif icon.BindTextObj then
+			icon.BindTextObj:SetBaseString("")
+			icon.BindTextObj = nil
+		else
+			icon.bindText:SetText("")
+		end
+	else
+		icon.BindTextObj = nil
+		icon.bindText:SetText("")
+	end
+	
+	
 	-- force an update
 	icon.LastUpdate = 0
 
@@ -5379,28 +5371,9 @@ function Icon.Setup(icon)
 		end
 	end
 
-	-- Warnings for missing durations and first-time instructions for duration syntax
-	if typeData.DurationSyntax and icon:IsBeingEdited() == 1 then
-		TMW.HELP:Show("ICON_DURS_FIRSTSEE", nil, TMW.IE.Main.Type, 20, 0, L["HELP_FIRSTUCD"])
-
-		local Name = TMW.IE.Main.Name
-		local s = ""
-		local array = TMW:GetSpellNames(nil, Name:GetText())
-		for k, v in pairs(TMW:GetSpellDurations(nil, Name:GetText())) do
-			if v == 0 then
-				s = s .. (s ~= "" and "; " or "") .. array[k]
-			end
-		end
-		if s ~= "" then
-			TMW.HELP:Show("ICON_DURS_MISSING", icon, Name, 0, 0, L["HELP_MISSINGDURS"], s)
-		else
-			TMW.HELP:Hide("ICON_DURS_MISSING")
-		end
-	end
+	icon.NextUpdateTime = 0
 
 	icon:Show()
-
-	if icon.OverrideTex then icon:SetTexture(icon.OverrideTex) end
 
 	if Locked then
 		if icon.texture:GetTexture() == "Interface\\AddOns\\TellMeWhen\\Textures\\Disabled" then
@@ -5430,11 +5403,11 @@ function Icon.Setup(icon)
 		icon:EnableMouse(1)
 	end
 
-	icon.NextUpdateTime = 0
-
 	TMW:Fire("TMW_ICON_SETUP_POST", icon)
 	--TMW:Fire("TMW_ICON_UPDATED", icon)
 end
+
+
 
 
 
@@ -5561,6 +5534,200 @@ function IconType:UnregisterIcon(icon)
 	tDeleteItem(self.Icons, icon)
 end
 
+
+
+local IconView = TMW:NewClass("IconView")
+
+function IconView:Register()
+	local viewkey = self.view
+
+	if TMW.debug and rawget(Views, viewkey) then
+		-- for tweaking and recreating icon views inside of WowLua so that I don't have to change the viewkey every time.
+		viewkey = viewkey .. " - " .. date("%X")
+		self.name = viewkey
+	end
+
+	Views[viewkey] = self -- put it in the main Views table
+	tinsert(TMW.OrderedViews, self) -- put it in the ordered table (used to order the type selection dropdown in the icon editor)
+	
+	return self -- why not?
+end
+
+function IconView:Icon_Integrate(icon)
+	error("You are trying to integrate the default IconView. Figure out why this is happening, because it shouldn't")
+end
+function IconView:Icon_PreIntegrate(icon)
+	icon.viewElements = icon.viewElements or {}
+	
+	local viewElements = icon.viewElements[self.view]
+	if not viewElements then
+		icon.viewElements[self.view] = {}
+		viewElements = icon.viewElements[self.view]
+	end
+	
+	return viewElements
+end
+
+function IconView:Icon_Deintegrate(icon)
+	error("You are trying to deintegrate the default IconView. Figure out why this is happening, because it shouldn't")
+end
+
+
+-- TEMP DEBUG TODO: THIS SHOULDNT BE HERE. IT NEEDS TO BE IN ITS OWN FILE. I JUST DONT WANT TO MAKE ONE YET
+local View = TMW:NewClass("View", "IconView")
+View.view = "icon"
+
+function View:Icon_Integrate(icon)
+	local viewElements = self:Icon_PreIntegrate(icon)
+	
+	-- cooldown
+	if not viewElements.cooldown then
+		viewElements.cooldown = CreateFrame("Cooldown", nil, icon, "CooldownFrameTemplate")
+		viewElements.cooldown:SetSize(30, 30)
+		viewElements.cooldown:SetPoint("CENTER")
+	end
+	icon.cooldown = viewElements.cooldown
+	icon.cooldown:Show()
+	
+	-- texture
+	if not viewElements.texture then
+		viewElements.texture = icon:CreateTexture(nil, "BACKGROUND")
+		viewElements.texture:SetSize(30, 30)
+		viewElements.texture:SetPoint("CENTER")
+		viewElements.texture:SetTexture("Interface\\Icons\\INV_Misc_QuestionMark")
+	end
+	icon.texture = viewElements.texture
+	icon.texture:Show()
+	icon.__tex = icon.texture:GetTexture()
+	
+	-- countText
+	if not viewElements.countText then
+		viewElements.countText = icon:CreateFontString(nil, "ARTWORK", "NumberFontNormalSmall")
+		viewElements.countText:SetJustifyH("RIGHT")
+		viewElements.countText:SetPoint("BOTTOMRIGHT", -2, 2)
+	end
+	icon.countText = viewElements.countText
+	icon.countText:Show()
+	
+	-- bindText
+	if not viewElements.bindText then
+		viewElements.bindText = icon:CreateFontString(nil, "ARTWORK", "NumberFontNormalSmallGray")
+		viewElements.bindText:SetJustifyH("RIGHT")
+		viewElements.bindText:SetPoint("TOPLEFT", -2, -2)
+	end
+	icon.bindText = viewElements.bindText
+	icon.bindText:Show()
+	
+	if not viewElements.lmbButtonData then
+		viewElements.lmbButtonData = {
+			Icon = icon.texture,
+			Cooldown = icon.cooldown,
+			Count = icon.countText,
+			HotKey = icon.bindText,
+		}
+	end
+	icon.lmbButtonData = viewElements.lmbButtonData
+end
+
+function View:Icon_Deintegrate(icon)
+	local viewElements = icon.viewElements[self.view]
+	
+	icon.cooldown:Hide()
+	icon.cooldown = nil
+	
+	icon.texture:Hide()
+	icon.texture = nil
+	
+	icon.countText:Hide()
+	icon.countText = nil
+	
+	icon.bindText:Hide()
+	icon.bindText = nil
+	
+	icon.lmbButtonData = nil
+end
+
+function View:Icon_Setup(icon)	
+	local cd = icon.cooldown
+	local group = icon.group
+	
+	cd.noCooldownCount = not icon.ShowTimerText
+	cd:SetDrawEdge(db.profile.DrawEdge)
+
+
+	-- Masque skinning
+	icon.isDefaultSkin = nil
+	icon.normaltex = icon.__MSQ_NormalTexture or icon:GetNormalTexture()
+	if LMB then
+		local lmbGroup = LMB:Group("TellMeWhen", L["fGROUP"]:format(group:GetID()))
+		lmbGroup:AddButton(icon, icon.lmbButtonData)
+		group.SkinID = lmbGroup.SkinID or (lmbGroup.db and lmbGroup.db.SkinID)
+		if lmbGroup.Disabled or (lmbGroup.db and lmbGroup.db.Disabled) then
+			group.SkinID = "Blizzard"
+			if not icon.normaltex:GetTexture() then
+				icon.isDefaultSkin = 1
+			end
+		end
+	else
+		icon.isDefaultSkin = 1
+	end
+
+	if icon.isDefaultSkin then
+		group.barInsets = 1.5
+		cd:SetFrameLevel(icon:GetFrameLevel() + 1)
+	else
+		group.barInsets = 0
+		cd:SetFrameLevel(icon:GetFrameLevel() + -2)
+	end
+end
+
+function View:TMW_ICON_META_INHERITED_ICON_CHANGED(event, icon, icToUse)
+	if icon.viewData == self then
+		icon.cooldown.noCooldownCount = not icToUse.ShowTimerText
+	end	
+end
+TMW:RegisterCallback("TMW_ICON_META_INHERITED_ICON_CHANGED", View)
+
+function View:TMW_ICON_COOLDOWN_CHANGED(event, icon, start, duration, isGCD, reverse, forceupdate)
+	if icon.viewData == self and (icon.ShowTimer or icon.ShowTimerText) then
+		local cd = icon.cooldown
+		if duration > 0 then
+			local s, d = start, duration
+
+			if isGCD and ClockGCD then
+				s, d = 0, 0
+			end
+
+			-- cd.s is only used in this function and is used to prevent finish effect spam (and to increase efficiency) while GCDs are being triggered.
+			-- icon.__start isnt used because that just records the start time passed in, which may be a GCD, so it will change frequently
+			if cd.s ~= s or cd.d ~= d or forceupdate then
+				cd:SetCooldown(s, d)
+				cd:Show()
+				
+				if not icon.ShowTimer then
+					cd:SetAlpha(0)
+				end
+				
+				if reverse ~= nil and icon.__reverse ~= reverse then -- must be ( ~= nil )
+					icon.__reverse = reverse
+					cd:SetReverse(reverse)
+				end
+				
+				cd.s = s
+				cd.d = d
+			end
+		else
+			cd.s = 0
+			cd.d = 0
+			cd:Hide()
+		end
+	else
+		icon.cooldown:Hide()
+	end
+end
+TMW:RegisterCallback("TMW_ICON_COOLDOWN_CHANGED", View)
+
+View:Register()
 
 -- ------------------
 -- NAME/ETC FUNCTIONS
@@ -5972,7 +6139,7 @@ function TMW:FormatSeconds(seconds, skipSmall, keepTrailing)
 	local m = (seconds % 31556925.9936  % 86400  % 3600) / 60
 	local s = (seconds % 31556925.9936  % 86400  % 3600  % 60)
 
-	local ns = s
+	local ns
 	if skipSmall then
 		ns = format("%d", s)
 	else

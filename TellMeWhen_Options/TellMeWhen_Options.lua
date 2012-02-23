@@ -2803,6 +2803,29 @@ function IE:TMW_GLOBAL_UPDATE()
 end
 TMW:RegisterCallback("TMW_GLOBAL_UPDATE", IE)
 
+function IE:TMW_ICON_SETUP_POST(event, icon)
+	-- Warnings for missing durations and first-time instructions for duration syntax
+	if icon.typeData.DurationSyntax and icon:IsBeingEdited() == 1 then
+		HELP:Show("ICON_DURS_FIRSTSEE", nil, IE.Main.Type, 20, 0, L["HELP_FIRSTUCD"])
+
+		local Name = IE.Main.Name
+		local s = ""
+		local array = TMW:GetSpellNames(nil, Name:GetText())
+		for k, v in pairs(TMW:GetSpellDurations(nil, Name:GetText())) do
+			if v == 0 then
+				s = s .. (s ~= "" and "; " or "") .. array[k]
+			end
+		end
+		if s ~= "" then
+			HELP:Show("ICON_DURS_MISSING", icon, Name, 0, 0, L["HELP_MISSINGDURS"], s)
+		else
+			HELP:Hide("ICON_DURS_MISSING")
+		end
+	end
+end
+TMW:RegisterCallback("TMW_ICON_SETUP_POST", IE)
+
+
 ---------- Interface ----------
 function IE:Load(isRefresh, icon, isHistoryChange)
 	if type(icon) == "table" then
@@ -4820,7 +4843,7 @@ function EVENTS:EnableAndDisableEvents()
 
 	for i, frame in ipairs(self.Events) do
 		if frame:IsShown() then
-			if Types[CI.ic]["EventDisabled_" .. frame.event] then
+			if Types[CI.t]["EventDisabled_" .. frame.event] then
 				frame:Disable()
 				frame.DataText:SetText(L["SOUND_EVENT_DISABLEDFORTYPE"])
 				TMW:TT(frame, frame.eventData.text, L["SOUND_EVENT_DISABLEDFORTYPE_DESC"]:format(Types[CI.t].name), 1, 1)
@@ -5115,10 +5138,6 @@ SND.tabText = L["SOUND_TAB"]
 SND.LSM = LSM
 
 function SND:TMW_OPTIONS_LOADED()
-	--TMW:RegisterCallback("TMW_CONFIG_LOAD", self.LoadConfig, self)
-
-	--SND.tab = IE.SoundTab
-	--SND:CreateEventButtons("SOUND_EVENT_GLOBALDESC")
 
 	local Sounds = SND.Sounds
 	Sounds.Header:SetText(L["SOUND_SOUNDTOPLAY"])
@@ -5291,10 +5310,6 @@ ANN.tabText = L["ANN_TAB"]
 local ChannelList = TMW.ChannelList
 
 function ANN:TMW_OPTIONS_LOADED()
-	--TMW:RegisterCallback("TMW_CONFIG_LOAD", self.LoadConfig, self)
-	
-	--ANN.tab = IE.AnnounceTab
-	--ANN:CreateEventButtons("ANN_EVENT_GLOBALDESC")
 
 	local Events = ANN.Events
 	local Channels = ANN.Channels
@@ -5466,10 +5481,6 @@ ANIM = TMW.ANIM
 ANIM.tabText = L["ANIM_TAB"]
 
 function ANIM:TMW_OPTIONS_LOADED()
-	--TMW:RegisterCallback("TMW_CONFIG_LOAD", self.LoadConfig, self)
-	
-	--self.tab = IE.AnimationsTab
-	--self:CreateEventButtons("ANIM_EVENT_GLOBALDESC")
 
 	local Events = self.Events
 	local Animations = self.Animations
@@ -7473,7 +7484,7 @@ end
 
 
 ---------- Interface/Data ----------
-function CNDT:LoadConfig(type)
+function CNDT:LoadConfig(event, type)
 	type = type or CNDT.type or "icon"
 	CNDT.type, CNDT.settings = CNDT:GetTypeData(type)
 

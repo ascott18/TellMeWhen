@@ -241,7 +241,7 @@
 			<Layer level="BACKGROUND">
 				<Texture name="$parentBackground" parentKey="Background" file="Interface\QuestFrame\UI-QuestLogTitleHighlight">
 					<Anchors>
-						<Anchor point="TOPLEFT" y="-1"/>
+						<Anchor point="TOPLEFT" y="0"/>
 						<Anchor point="BOTTOMRIGHT" y="1"/>
 					</Anchors>
 				</Texture>
@@ -1923,7 +1923,7 @@
 					<OnLoad>
 						self:SetText(TMW.L["CONDITIONS"])
 						function self:OnClick()
-							TMW.CNDT:LoadConfig("icon")
+							TMW.CNDT:LoadConfig(nil, "icon")
 						end
 					</OnLoad>
 				</Scripts>
@@ -1935,9 +1935,6 @@
 				<Scripts>
 					<OnLoad>
 						self:SetText(TMW.L["EVENTS_TAB"])
-						function self:OnClick()
-						--	TMW.EVENTS --TODO: DO SOMETHING
-						end
 					</OnLoad>
 				</Scripts>
 			</Button>
@@ -1949,7 +1946,7 @@
 					<OnLoad>
 						self:SetText(TMW.L["GROUPCONDITIONS"])
 						function self:OnClick()
-							TMW.CNDT:LoadConfig("group")
+							TMW.CNDT:LoadConfig(nil, "group")
 						end
 					</OnLoad>
 				</Scripts>

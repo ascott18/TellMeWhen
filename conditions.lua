@@ -1222,7 +1222,7 @@ CNDT.Types = {
 		tcoords = standardtcoords,
 		funcstr = [[(((UnitIsEnemy("player", c.Unit) or ((UnitReaction("player", c.Unit) or 5) <= 4)) and 1) or 2) == c.Level]],
 		events = function(c)
-			return CNDT:IsUnitEventUnit(c.Unit), "UNIT_FLAGS", c.Unit, "UNIT_DYNAMIC_FLAGS", c.Unit
+			return CNDT:IsUnitEventUnit(c.Unit), "UNIT_FLAGS", c.Unit, "UNIT_DYNAMIC_FLAGS", c.Unit, "UNIT_FLAGS", "player", "UNIT_DYNAMIC_FLAGS", "player"
 		end,
 	},
 	{ -- speed
@@ -2982,12 +2982,11 @@ function ConditionObject:Check(parent)
 			self.NextUpdateTime = huge
 		end
 		
-		if self.LastUpdateTime ~= time then
-			self.LastUpdateTime = time
-			self.LastCheckFailed = self.Failed
+		local failed = not self:CheckFunction(parent)
+		if self.Failed ~= failed then
+			self.Failed = failed
+			TMW:Fire("TMW_CNDT_OBJ_PASSING_CHANGED", self)
 		end
-		
-		self.Failed = not self:CheckFunction(parent)
 	end
 end
 

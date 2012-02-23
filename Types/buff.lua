@@ -231,11 +231,11 @@ local function Buff_OnUpdate(icon, time)
 		local color = icon:CrunchColor(duration)
 
 		--icon:SetInfo(alpha, color, texture, start, duration, spellChecked, reverse, count, countText, forceupdate, unit)
-		icon:SetInfo(icon.Alpha, color, iconTexture, expirationTime - duration, duration, id, nil, count, count > 1 and count or "", nil, useUnit)
+		icon:SetInfo(icon.Alpha, color, iconTexture, expirationTime - duration, duration, id, true, count, count > 1 and count or "", nil, useUnit)
 	else
 		local color = icon:CrunchColor()
 
-		icon:SetInfo(icon.UnAlpha, color, icon.FirstTexture, 0, 0, icon.NameFirst, nil, nil, nil, nil, Units[1])
+		icon:SetInfo(icon.UnAlpha, color, icon.FirstTexture, 0, 0, icon.NameFirst, true, nil, nil, nil, Units[1])
 	end
 end
 
@@ -258,7 +258,6 @@ function Type:Setup(icon, groupID, iconID)
 		if icon.Filterh then icon.Filterh = icon.Filterh .. "|PLAYER" end
 	end
 
-	icon:SetReverse(true)
 	icon.NAL = icon.NameNameHash[strlower(GetSpellInfo(8921))] and EFF_THR + 1 or #icon.NameArray
 	-- need to force any icon looking for moonfire to check all auras on the target because of a blizzard bug in WoW 4.1.
 	-- TODO: verify that the issue persists

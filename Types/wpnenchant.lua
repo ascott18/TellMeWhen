@@ -141,11 +141,11 @@ local function WpnEnchant_OnUpdate(icon, time)
 		local color = icon:CrunchColor(duration)
 
 		--icon:SetInfo(alpha, color, texture, start, duration, spellChecked, reverse, count, countText, forceupdate, unit)
-		icon:SetInfo(icon.Alpha, color, nil, start, duration, EnchantName, nil, nil, nil, nil, nil)
+		icon:SetInfo(icon.Alpha, color, nil, start, duration, EnchantName, true, nil, nil, nil, nil)
 	else
 		local color = icon:CrunchColor()
 
-		icon:SetInfo(icon.UnAlpha, color, nil, 0, 0, nil, nil, nil, nil, nil, nil)
+		icon:SetInfo(icon.UnAlpha, color, nil, 0, 0, nil, true, nil, nil, nil, nil)
 	end
 end
 
@@ -211,8 +211,6 @@ function Type:Setup(icon, groupID, iconID)
 	icon.ShowPBar = false
 
 	icon:SetTexture(GetInventoryItemTexture("player", icon.Slot) or "Interface\\Icons\\INV_Misc_QuestionMark")
-
-	icon:SetReverse(true)
 
 	icon.EnchantName = nil
 	icon.LastEnchantName = nil

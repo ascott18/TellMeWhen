@@ -51,33 +51,6 @@
 
 	<Button name="TellMeWhen_IconTemplate" virtual="true" enableMouse="true">
 		<Size x="30" y="30"/>
-		<Layers>
-			<Layer level="BACKGROUND">
-				<Texture name="$parentIcon" parentKey="texture" file="Interface\Icons\INV_Misc_QuestionMark">
-					<Size x="30" y="30"/>
-				</Texture>
-			</Layer>
-			<Layer level="ARTWORK">
-				<FontString name="$parentCount" parentKey="countText" inherits="NumberFontNormalSmall" justifyH="RIGHT">
-					<Anchors>
-						<Anchor point="BOTTOMRIGHT" x="-2" y="2"/>
-					</Anchors>
-				</FontString>
-				<FontString name="$parentHotKey" parentKey="bindText" inherits="NumberFontNormalSmallGray" justifyH="RIGHT">
-					<Anchors>
-						<Anchor point="TOPLEFT" x="-2" y="-2"/>
-					</Anchors>
-				</FontString>
-			</Layer>
-		</Layers>
-		<Frames>
-			<Cooldown name="$parentCooldown" parentKey="cooldown" inherits="CooldownFrameTemplate">
-				<Size x="30" y="30"/>
-				<Anchors>
-					<Anchor point="CENTER"/>
-				</Anchors>
-			</Cooldown>
-		</Frames>
 		<Scripts>
 			<OnLoad>
 				self:RegisterForDrag("LeftButton", "RightButton")

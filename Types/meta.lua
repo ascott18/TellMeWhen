@@ -64,6 +64,9 @@ function Type:Update(after)
 	
 	if after then
 		for _, icon in pairs(Type.Icons) do
+			icon.metaUpdateQueued = true
+			
+			
 			local success, err = pcall(CheckCompiledIcons, icon)
 			if err and err:find("stack overflow") then
 				local err = format("Meta icon recursion was detected in %s - there is an endless loop between the icon and its sub icons.", CCI_icon:GetName())
@@ -140,7 +143,6 @@ local function Meta_OnUpdate(icon, time)
 
 			icon.ShowTimer = icToUse.ShowTimer
 			icon.ShowTimerText = icToUse.ShowTimerText
-			icon.cooldown.noCooldownCount = icToUse.cooldown.noCooldownCount
 			
 			force = 1
 
@@ -163,10 +165,17 @@ end
 
 
 local function TMW_ICON_UPDATED(icon, event, ic)
-	if Locked and icon.IconsLookup[ic:GetName()] then
+	if icon.IconsLookup[ic:GetName()] or ic == icon then
 		icon.metaUpdateQueued = true
 	end
 end
+
+local function TMW_CNDT_OBJ_PASSING_CHANGED(icon, event, ConditionObj)
+	if icon.ConditionObj == ConditionObj then	
+		icon.metaUpdateQueued = 0
+	end
+end
+
 
 local InsertIcon, GetFullIconTable -- both need access to eachother, so scope them above their definitions
 
@@ -269,6 +278,11 @@ function Type:Setup(icon, groupID, iconID)
 	--icon:SetUpdateMethod("manual") DONT DO THIS! 
 	icon:SetScript("OnUpdate", Meta_OnUpdate)
 	TMW:RegisterCallback("TMW_ICON_UPDATED", TMW_ICON_UPDATED, icon)
+	if icon.ConditionObj then
+		TMW:RegisterCallback("TMW_CNDT_OBJ_PASSING_CHANGED", TMW_CNDT_OBJ_PASSING_CHANGED, icon)
+	end
+	
+	icon.metaUpdateQueued = true
 end
 
 function Type:IE_TypeLoaded()
@@ -317,14 +331,15 @@ end
 function Type:TMW_ICON_SETUP_POST(event, icon)
 	if icon.Type ~= self.type then
 		TMW:UnregisterCallback("TMW_ICON_UPDATED", TMW_ICON_UPDATED, icon)
+		TMW:UnregisterCallback("TMW_CNDT_OBJ_PASSING_CHANGED", TMW_CNDT_OBJ_PASSING_CHANGED, icon)
 	else
 		if not Locked then
 			-- meta icons shouln't show bars in config, even though they are force enabled.
-			if icon.cbar and icon.class ~= TMW.Classes.Bar then
-				icon.cbar:SetValue(0)
+			if icon.cbar_overlay and icon.class ~= TMW.Classes.Bar then
+				icon.cbar_overlay:SetValue(0)
 			end
-			if icon.pbar then
-				icon.pbar:SetValue(0)
+			if icon.pbar_overlay then
+				icon.pbar_overlay:SetValue(0)
 			end
 		end
 	end

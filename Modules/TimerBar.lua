@@ -23,10 +23,12 @@ local	pairs, wipe =
 		pairs, wipe
 local CBarsToUpdate = {}
 
-local CBar = TMW:NewClass("CBar", "StatusBar", "UpdateTableManager")
-CBar:UpdateTable_Set(CBarsToUpdate)
+local BarGCD
 
-function CBar:OnNewInstance(...)
+local TimerBar = TMW:NewClass("TimerBar", "StatusBar", "UpdateTableManager")
+TimerBar:UpdateTable_Set(CBarsToUpdate)
+
+function TimerBar:OnNewInstance(...)
 	local _, name, icon = ... -- the CreateFrame args
 	
 	self.Max = 1
@@ -47,8 +49,8 @@ function CBar:OnNewInstance(...)
 	self:SetStatusBarTexture(self.texture)
 end
 
-function CBar:SetAttributes(source)
-	-- source should either be a CBar or an Icon.
+function TimerBar:SetAttributes(source)
+	-- source should either be a TimerBar or an Icon.
 	-- Code must maintain compatability so that both of these will work as input (keep inherited keys the same)
 	
 	self.InvertBars = source.InvertBars
@@ -68,7 +70,7 @@ function CBar:SetAttributes(source)
 	self:Update(1)
 end
 
-function CBar:Setup()
+function TimerBar:Setup()
 	local icon = self.icon
 	
 	self.texture:SetTexture(LSM:Fetch("statusbar", TMW.db.profile.TextureName))
@@ -81,7 +83,7 @@ function CBar:Setup()
 	self:SetAttributes(icon)
 end
 
-function CBar:Update(force)
+function TimerBar:Update(force)
 	local time = TMW.time
 	local ret = 0
 	
@@ -160,12 +162,12 @@ function CBar:Update(force)
 	return ret
 end
 
-function CBar:SetCooldown(start, duration, isGCD)
+function TimerBar:SetCooldown(start, duration, isGCD)
 	self.duration = duration
 	self.start = start
 	
 	if duration > 0 then
-		if isGCD and TMW.db.profile.BarGCD then -- TODO: upvalue BarGCD
+		if isGCD and BarGCD then -- TODO: upvalue BarGCD
 			self.duration = 0
 		end
 
@@ -180,55 +182,59 @@ end
 
 
 
+TMW:RegisterCallback("TMW_GLOBAL_UPDATE", function(event, time, Locked)
+	BarGCD = TMW.db.profile.BarGCD
+end)
+
 TMW:RegisterCallback("TMW_ONUPDATE", function(event, time, Locked)
-	local cbaroffs = 0
+	local offs = 0
 	for i = 1, #CBarsToUpdate do
-		local cbar = CBarsToUpdate[i + cbaroffs]
-		cbaroffs = cbaroffs + cbar:Update()
+		local cbar_overlay = CBarsToUpdate[i + offs]
+		offs = offs + cbar_overlay:Update() -- returns -1 if the cbar was unregistered, otherwise 0
 	end
 end)
 
 TMW:RegisterCallback("TMW_ICON_SETUP_POST", function(event, icon)
-	local cbar = icon.cbar
-	if cbar then
-		cbar:Setup()
-		cbar.__value = nil
+	local cbar_overlay = icon.cbar_overlay
+	if cbar_overlay then
+		cbar_overlay:Setup()
+		cbar_overlay.__value = nil
 
-		cbar:UpdateTable_Unregister()
+		cbar_overlay:UpdateTable_Unregister()
 		if TMW.db.profile.Locked and icon.ShowCBar then
-			cbar:UpdateTable_Register()
+			cbar_overlay:UpdateTable_Register()
 		end
 		
 		if TMW.db.profile.Locked then
-			cbar:SetAlpha(.9)
+			cbar_overlay:SetAlpha(.9)
 		else
-			cbar:UpdateTable_Unregister()
-			cbar:SetValue(cbar.Max)
-			cbar:SetAlpha(.7)
-			cbar:SetStatusBarColor(0, 1, 0, 0.5)
+			cbar_overlay:UpdateTable_Unregister()
+			cbar_overlay:SetValue(cbar_overlay.Max)
+			cbar_overlay:SetAlpha(.7)
+			cbar_overlay:SetStatusBarColor(0, 1, 0, 0.5)
 		end
 		
 		if icon.isDefaultSkin then
-			icon.cbar:SetFrameLevel(icon:GetFrameLevel() + 2)
+			icon.cbar_overlay:SetFrameLevel(icon:GetFrameLevel() + 2)
 		else
-			icon.cbar:SetFrameLevel(icon:GetFrameLevel() + -1)
+			icon.cbar_overlay:SetFrameLevel(icon:GetFrameLevel() + -1)
 		end
 	end
 end)
 
 TMW:RegisterCallback("TMW_ICON_META_INHERITED_ICON_CHANGED", function(event, icon, icToUse)
-	icon.cbar:SetAttributes(icToUse.cbar)
+	icon.cbar_overlay:SetAttributes(icToUse.cbar_overlay)
 end)
 
-TMW:RegisterCallback("TMW_ICON_COOLDOWN_CHANGED", function(event, icon, start, duration, isGCD)
-	local cbar = icon.cbar
-	if cbar and cbar.ShowCBar then
-		cbar:SetCooldown(start, duration, isGCD)
+TMW:RegisterCallback("TMW_ICON_COOLDOWN_CHANGED", function(event, icon, start, duration, isGCD, reverse)
+	local cbar_overlay = icon.cbar_overlay
+	if cbar_overlay and cbar_overlay.ShowCBar then
+		cbar_overlay:SetCooldown(start, duration, isGCD)
 	end
 end)
 
 TMW:RegisterCallback("TMW_LOCK_TOGGLED", function(event, Locked)
 	if not Locked then
-		CBar:UpdateTable_UnregisterAll()
+		TimerBar:UpdateTable_UnregisterAll()
 	end
 end)
