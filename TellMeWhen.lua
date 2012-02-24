@@ -33,7 +33,7 @@ local DRData = LibStub("DRData-1.0", true)
 TELLMEWHEN_VERSION = "5.0.0"
 TELLMEWHEN_VERSION_MINOR = strmatch(" @project-version@", " r%d+") or ""
 TELLMEWHEN_VERSION_FULL = TELLMEWHEN_VERSION .. TELLMEWHEN_VERSION_MINOR
-TELLMEWHEN_VERSIONNUMBER = 50033 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
+TELLMEWHEN_VERSIONNUMBER = 50034 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
 if TELLMEWHEN_VERSIONNUMBER > 51000 or TELLMEWHEN_VERSIONNUMBER < 50000 then return error("YOU SCREWED UP THE VERSION NUMBER OR DIDNT CHANGE THE SAFETY LIMITS") end -- safety check because i accidentally made the version number 414069 once
 
 TELLMEWHEN_MAXGROUPS = 1 	--this is a default, used by SetTheory (addon), so dont rename
@@ -72,7 +72,7 @@ local huge = math.huge
 
 
 ---------- Locals ----------
-local db, updatehandler, BarGCD, ClockGCD, Locked, SndChan, FramesToFind, CNDTEnv, ColorMSQ, OnlyMSQ, AnimationList
+local db, updatehandler, ClockGCD, Locked, SndChan, FramesToFind, CNDTEnv, ColorMSQ, OnlyMSQ, AnimationList
 local NAMES, EVENTS, ANIM, ANN, SND
 local UPD_INTV = 0.06	--this is a default, local because i use it in onupdate functions
 local runEvents = 1
@@ -454,15 +454,16 @@ do -- Iterators
 		end
 		
 		local function iter(h)
-			h.ci = h.ci + 1	-- at least increment the icon
+			local ci = h.ci
+			ci = ci + 1	-- at least increment the icon
 			while true do
-				if h.ci <= h.mi and h.cg <= h.mg and not rawget(db.profile.Groups[h.cg].Icons, h.ci) then
+				if ci <= h.mi and h.cg <= h.mg and not rawget(db.profile.Groups[h.cg].Icons, ci) then
 					--if there is another icon and the group is valid but the icon settings dont exist, move to the next icon
-					h.ci = h.ci + 1
-				elseif h.cg <= h.mg and h.ci > h.mi then
+					ci = ci + 1
+				elseif h.cg <= h.mg and ci > h.mi then
 					-- if there is another group and the icon exceeds the max, move to the first icon of the next group
 					h.cg = h.cg + 1
-					h.ci = 1
+					ci = 1
 				elseif h.cg > h.mg then
 					-- if there isnt another group, then stop
 					tinsert(handlers, h)
@@ -472,7 +473,8 @@ do -- Iterators
 					break
 				end
 			end
-			return db.profile.Groups[h.cg].Icons[h.ci], h.cg, h.ci -- ics, groupID, iconID
+			h.ci = ci
+			return db.profile.Groups[h.cg].Icons[ci], h.cg, ci -- ics, groupID, iconID
 		end
 
 		function TMW:InIconSettings(groupID)
@@ -1647,7 +1649,6 @@ function TMW:Update()
 	UPD_INTV = db.profile.Interval + 0.001 -- add a very small amount so that we don't call the same icon multiple times (through metas/conditionicons) in the same frame if the interval has been set 0
 	TELLMEWHEN_MAXGROUPS = db.profile.NumGroups
 
-	BarGCD = db.profile.BarGCD
 	ClockGCD = db.profile.ClockGCD
 	ColorMSQ = db.profile.ColorMSQ
 	OnlyMSQ = db.profile.OnlyMSQ
@@ -1678,6 +1679,8 @@ function TMW:Update()
 	end
 	
 	TMW:ScheduleTimer("DoWarn", 3)
+	
+	TMW:Fire("TMW_GLOBAL_UPDATE_POST")
 end
 
 function TMW:DoWarn()
@@ -3253,22 +3256,22 @@ function EVENTS:TMW_ICON_SETUP_PRE(_, icon)
 				icon.EventsToFire = icon.EventsToFire or {}
 			end
 		end
-	end
-	
-	if not icon.dontCheckForUpdates then
-		for ics in TMW:InIconSettings() do
-			for eventSettings in TMW:InNLengthTable(ics.Events) do
-				if eventSettings.Icon == icon:GetName() then
-					icon.dontCheckForUpdates = true
-					break
-				end
+	end	
+end
+TMW:RegisterCallback("TMW_ICON_SETUP_PRE", EVENTS)
+function EVENTS:TMW_GLOBAL_UPDATE_POST()
+	for icon in TMW:InIcons() do
+		local ics = icon:GetSettings()
+		for eventSettings in TMW:InNLengthTable(ics.Events) do
+			local ic = _G[eventSettings.Icon]
+			if ic then
+				ic.dontCheckForUpdates = true
+				ic:Setup()
 			end
 		end
 	end
-	
-	
 end
-TMW:RegisterCallback("TMW_ICON_SETUP_PRE", EVENTS)
+TMW:RegisterCallback("TMW_GLOBAL_UPDATE_POST", EVENTS)
 
 SND = EVENTS:NewModule("Sound", EVENTS) TMW.SND = SND
 function SND:ProcessIconEventSettings(event, eventSettings)
@@ -5328,7 +5331,10 @@ function Icon.Setup(icon)
 	icon.Units = nil
 	icon.ForceDisabled = nil
 	icon.dontHandleConditionsExternally = nil
-	icon.dontCheckForUpdates = nil
+	
+	--icon.dontCheckForUpdates = nil
+	--Dont set this to nil because we may change it externally and then call :Setup().
+	--Performance impact is negligible because once true, it can only go back nil through user config
 	
 	if pclass ~= "DEATHKNIGHT" then
 		icon.IgnoreRunes = nil

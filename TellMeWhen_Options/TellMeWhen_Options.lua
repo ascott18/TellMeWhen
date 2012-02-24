@@ -2779,9 +2779,9 @@ function IE:OnUpdate()
 	-- run updates for any icons that are queued
 	for i, icon in ipairs(IE.iconsToUpdate) do
 		icon:Setup()
-		IE.iconsToUpdate[i] = nil
 	end
-
+	wipe(IE.iconsToUpdate)
+	
 	-- check and see if the settings of the current icon have changed.
 	-- if they have, create a history point (or at least try to)
 	-- IMPORTANT: do this after running icon updates because SoundData is stored in the event table, which makes 2 changes over 2 frames in 1 user action, which SEVERELY screws things up

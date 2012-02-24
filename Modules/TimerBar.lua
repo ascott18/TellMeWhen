@@ -182,7 +182,7 @@ end
 
 
 
-TMW:RegisterCallback("TMW_GLOBAL_UPDATE", function(event, time, Locked)
+TMW:RegisterCallback("TMW_GLOBAL_UPDATE", function(event)
 	BarGCD = TMW.db.profile.BarGCD
 end)
 

@@ -183,7 +183,7 @@ TMW:RegisterCallback("TMW_ONUPDATE_TIMECONSTRAINED", function(event, time, Locke
 	end
 end)
 
-TMW:RegisterCallback("TMW_GLOBAL_UPDATE", function(event, Locked)
+TMW:RegisterCallback("TMW_GLOBAL_UPDATE", function(event)
 	updatePBars = 1
 
 	PowerBar:ScheduleTimer("ForceUpdatePBars", 0.55)
