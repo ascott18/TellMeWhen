@@ -33,7 +33,7 @@ local DRData = LibStub("DRData-1.0", true)
 TELLMEWHEN_VERSION = "5.0.0"
 TELLMEWHEN_VERSION_MINOR = strmatch(" @project-version@", " r%d+") or ""
 TELLMEWHEN_VERSION_FULL = TELLMEWHEN_VERSION .. TELLMEWHEN_VERSION_MINOR
-TELLMEWHEN_VERSIONNUMBER = 50031 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
+TELLMEWHEN_VERSIONNUMBER = 50032 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
 if TELLMEWHEN_VERSIONNUMBER > 51000 or TELLMEWHEN_VERSIONNUMBER < 50000 then return error("YOU SCREWED UP THE VERSION NUMBER OR DIDNT CHANGE THE SAFETY LIMITS") end -- safety check because i accidentally made the version number 414069 once
 
 TELLMEWHEN_MAXGROUPS = 1 	--this is a default, used by SetTheory (addon), so dont rename
@@ -371,153 +371,199 @@ function TMW.get(value, ...)
 end
 
 do -- Iterators
-	local mg = TELLMEWHEN_MAXGROUPS
-	local mi = TELLMEWHEN_MAXROWS*TELLMEWHEN_MAXROWS
-
 
 	do -- InConditionSettings
+		local handlers = {}
+		local function gethandler(stage, extIter, currentCondition)
+			local handler = wipe(tremove(handlers) or {})
 
-		local stage, currentConditions, currentCondition, ci, cg, extIter
-		local function iter()
+			handler.stage = stage
+			handler.extIter = extIter
+			handler.currentCondition = currentCondition
 
-			currentCondition = currentCondition + 1
+			return handler
+		end
 
-			if not currentConditions or currentCondition > (currentConditions.n or #currentConditions) then
+		local function iter(h)
+			h.currentCondition = h.currentCondition + 1
+
+			if not h.currentConditions or h.currentCondition > (h.currentConditions.n or #h.currentConditions) then
 				local settings
-				settings, cg, ci = extIter()
+				settings, h.cg, h.ci = h.extIter()
 				if not settings then
-					if stage == "icon" then
-						extIter = TMW:InGroupSettings()
-						stage = "group"
+					if h.stage == "icon" then
+						h.extIter = TMW:InGroupSettings()
+						h.stage = "group"
 						return iter()
 					else
+						tinsert(handlers, h)
 						return
 					end
 				end
-				currentConditions = settings.Conditions
-				currentCondition = 0
+				h.currentConditions = settings.Conditions
+				h.currentCondition = 0
 				return iter()
 			end
-			local condition = rawget(currentConditions, currentCondition)
+			local condition = rawget(h.currentConditions, h.currentCondition)
 			if not condition then return iter() end
-			return condition, currentCondition, cg, ci -- condition data, conditionID, groupID, iconID
+			return condition, h.currentCondition, h.cg, h.ci -- condition data, conditionID, groupID, iconID
 		end
 
 		function TMW:InConditionSettings()
-			stage = "icon"
-			extIter = TMW:InIconSettings()
-			currentCondition = 0
-			return iter
+			return iter, gethandler("icon", TMW:InIconSettings(), 0)
 		end
 	end
 
 	do -- InNLengthTable
+		local handlers = {}
+		local function gethandler(k, t)
+			local handler = wipe(tremove(handlers) or {})
 
-		local t, k
-		local function iter()
-			k = k + 1
+			handler.k = k
+			handler.t = t
 
-			if k > (t.n or #t) then -- #t enables iteration over tables that have not yet been upgraded with an n key (i.e. imported data from old versions)
+			return handler
+		end
+
+		local function iter(h)
+			h.k = h.k + 1
+
+			if h.k > (h.t.n or #h.t) then -- #t enables iteration over tables that have not yet been upgraded with an n key (i.e. imported data from old versions)
+				tinsert(handlers, h)
 				return
 			end
-			local v = t[k]
-			return v, k
+			return h.t[h.k], k
 		end
 
 		function TMW:InNLengthTable(arg)
-			k = 0
-			t = arg
-			return iter
+			return iter, gethandler(0, arg)
 		end
 	end
 
 	do -- InIconSettings
-		local cg = 1
-		local ci = 0
-		local function iter()
-			ci = ci + 1	-- at least increment the icon
+		local handlers = {}
+		local function gethandler(cg, ci, mg, mi)
+			local handler = wipe(tremove(handlers) or {})
+
+			handler.cg = cg
+			handler.ci = ci
+			handler.mg = mg
+			handler.mi = mi
+
+			return handler
+		end
+		
+		local function iter(h)
+			h.ci = h.ci + 1	-- at least increment the icon
 			while true do
-				if ci <= mi and rawget(db.profile.Groups, cg) and not rawget(db.profile.Groups[cg].Icons, ci) then
+				if h.ci <= h.mi and h.cg <= h.mg and not rawget(db.profile.Groups[h.cg].Icons, h.ci) then
 					--if there is another icon and the group is valid but the icon settings dont exist, move to the next icon
-					ci = ci + 1
-				elseif cg <= mg and (ci > mi or not rawget(db.profile.Groups, cg)) then
-					-- if there is another group and either the icon exceeds the max or the group has no settings, move to the first icon of the next group
-					cg = cg + 1
-					ci = 1
-				elseif cg > mg then
+					h.ci = h.ci + 1
+				elseif h.cg <= h.mg and h.ci > h.mi then
+					-- if there is another group and the icon exceeds the max, move to the first icon of the next group
+					h.cg = h.cg + 1
+					h.ci = 1
+				elseif h.cg > h.mg then
 					-- if there isnt another group, then stop
+					tinsert(handlers, h)
 					return
 				else
 					-- we finally found something valid, so use it
 					break
 				end
 			end
-			return rawget(db.profile.Groups, cg) and rawget(db.profile.Groups[cg].Icons,ci), cg, ci -- ics, groupID, iconID
+			return db.profile.Groups[h.cg].Icons[h.ci], h.cg, h.ci -- ics, groupID, iconID
 		end
 
 		function TMW:InIconSettings(groupID)
-			cg = groupID or 1
-			ci = 0
-			mg = groupID or TELLMEWHEN_MAXGROUPS
-			mi = TELLMEWHEN_MAXROWS*TELLMEWHEN_MAXROWS
-			return iter
+			return iter, gethandler(groupID or 1, 0, groupID or TELLMEWHEN_MAXGROUPS, TELLMEWHEN_MAXROWS*TELLMEWHEN_MAXROWS)			
 		end
 	end
 
 	do -- InGroupSettings
-		local cg = 0
-		local function iter()
-			cg = cg + 1
-			return rawget(db.profile.Groups, cg), cg -- setting table, groupID
+		local handlers = {}
+		local function gethandler(cg, mg)
+			local handler = wipe(tremove(handlers) or {})
+
+			handler.cg = cg
+			handler.mg = mg
+
+			return handler
+		end
+		
+		local function iter(h)
+			h.cg = h.cg + 1
+			if h.cg > h.mg then
+				tinsert(handlers, h)
+				return
+			end
+			return db.profile.Groups[cg], cg -- setting table, groupID
 		end
 
 		function TMW:InGroupSettings()
-			cg = 0
-			mg = TELLMEWHEN_MAXGROUPS
-			return iter
+			return iter, gethandler(0, TELLMEWHEN_MAXGROUPS)
 		end
 	end
 
 	do -- InIcons
-		local cg = 1
-		local ci = 0
-		local function iter()
-			ci = ci + 1
+		local handlers = {}
+		local function gethandler(cg, ci, mg, mi)
+			local handler = wipe(tremove(handlers) or {})
+
+			handler.cg = cg
+			handler.ci = ci
+			handler.mg = mg
+			handler.mi = mi
+
+			return handler
+		end
+		
+		local function iter(h)
+			h.ci = h.ci + 1
 			while true do
-				if ci <= mi and TMW[cg] and not TMW[cg][ci] then
-					ci = ci + 1
-				elseif cg < mg and (ci > mi or not TMW[cg]) then
-					cg = cg + 1
-					ci = 1
-				elseif cg > mg then
+				if h.ci <= h.mi and TMW[h.cg] and not TMW[h.cg][h.ci] then
+					h.ci = h.ci + 1
+				elseif h.cg < h.mg and (h.ci > h.mi or not TMW[h.cg]) then
+					h.cg = h.cg + 1
+					h.ci = 1
+				elseif h.cg > h.mg then
+					tinsert(handlers, h)
 					return
 				else
 					break
 				end
 			end
-			return TMW[cg] and TMW[cg][ci], cg, ci -- icon, groupID, iconID
+			return TMW[h.cg] and TMW[h.cg][h.ci], h.cg, h.ci -- icon, groupID, iconID
 		end
 
 		function TMW:InIcons(groupID)
-			cg = groupID or 1
-			ci = 0
-			mg = groupID or TELLMEWHEN_MAXGROUPS
-			mi = TELLMEWHEN_MAXROWS*TELLMEWHEN_MAXROWS
-			return iter
+			return iter, gethandler(groupID or 1, 0, groupID or TELLMEWHEN_MAXGROUPS, TELLMEWHEN_MAXROWS*TELLMEWHEN_MAXROWS)
 		end
 	end
 
 	do -- InGroups
-		local cg = 0
-		local function iter()
-			cg = cg + 1
+		local handlers = {}
+		local function gethandler(cg, mg)
+			local handler = wipe(tremove(handlers) or {})
+
+			handler.cg = cg
+			handler.mg = mg
+
+			return handler
+		end
+
+		local function iter(h)
+			local cg = h.cg + 1
+			h.cg = cg
+			if cg > h.mg then
+				tinsert(handlers, h)
+				return
+			end
 			return TMW[cg], cg -- group, groupID
 		end
 
 		function TMW:InGroups()
-			cg = 0
-			mg = TELLMEWHEN_MAXGROUPS
-			return iter
+			return iter, gethandler(0, TELLMEWHEN_MAXGROUPS)
 		end
 	end
 
@@ -3202,6 +3248,19 @@ function EVENTS:TMW_ICON_SETUP_PRE(_, icon)
 			end
 		end
 	end
+	
+	if not icon.dontCheckForUpdates then
+		for ics in TMW:InIconSettings() do
+			for eventSettings in TMW:InNLengthTable(ics.Events) do
+				if eventSettings.Icon == icon:GetName() then
+					icon.dontCheckForUpdates = true
+					break
+				end
+			end
+		end
+	end
+	
+	
 end
 TMW:RegisterCallback("TMW_ICON_SETUP_PRE", EVENTS)
 
@@ -4564,7 +4623,7 @@ function Group.Setup(group)
 
 	if Locked or group.Locked then
 		group.resizeButton:Hide()
-	else--if not (Locked or group.Locked) then
+	else
 		group.resizeButton:Show()
 	end
 
@@ -5264,6 +5323,7 @@ function Icon.Setup(icon)
 	icon.ForceDisabled = nil
 	icon.dontHandleConditionsExternally = nil
 	icon.dontCheckForUpdates = nil
+	
 	if pclass ~= "DEATHKNIGHT" then
 		icon.IgnoreRunes = nil
 	end

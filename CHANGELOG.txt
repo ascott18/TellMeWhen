@@ -49,6 +49,7 @@
  ** (r468) Meta icons that are checking conditions show now properly update themselves when the state of their conditions change
  ** (r469) Buff/Debuff "Number of" conditions should work properly now.
  ** (r469) Sorting Buffs/Debuffs should now work if only one aura is being checked by the icon (the unit being checked may have more than one auras of the same name/ID, or the icon may be checking multiple units.)
+ ** (r470) Icons that are being watched by On Icon Show/Hide events should now always be registered with the icon update engine to ensure that the icons that depend on these events function as expected
 
 ===v4.8.3===
  * Bug Fixes:

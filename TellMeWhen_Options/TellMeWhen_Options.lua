@@ -5051,7 +5051,7 @@ function EVENTS:AddEvent_Dropdown()
 		for i, eventData in ipairs(TMW.EventList) do
 			local info = UIDropDownMenu_CreateInfo()
 			
-			info.disabled = Types[CI.ic]["EventDisabled_" .. eventData.name]
+			info.disabled = Types[CI.t]["EventDisabled_" .. eventData.name]
 			
 			info.text = get(eventData.text)
 			info.tooltipTitle = get(eventData.text)

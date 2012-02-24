@@ -3030,7 +3030,7 @@ function CNDT:GetConditionCheckFunctionString(parent, Conditions)
 			andor = "and"
 		end
 
-		if c.Operator == "~|=" then
+		if c.Operator == "~|=" or c.Operator == "|="  or c.Operator == "||=" then
 			c.Operator = "~=" -- fix potential corruption from importing a string (a single | becaomes || when pasted, "~=" in encoded as "~|=")
 		end
 
