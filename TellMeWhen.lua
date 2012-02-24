@@ -33,7 +33,7 @@ local DRData = LibStub("DRData-1.0", true)
 TELLMEWHEN_VERSION = "5.0.0"
 TELLMEWHEN_VERSION_MINOR = strmatch(" @project-version@", " r%d+") or ""
 TELLMEWHEN_VERSION_FULL = TELLMEWHEN_VERSION .. TELLMEWHEN_VERSION_MINOR
-TELLMEWHEN_VERSIONNUMBER = 50035 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
+TELLMEWHEN_VERSIONNUMBER = 50036 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
 if TELLMEWHEN_VERSIONNUMBER > 51000 or TELLMEWHEN_VERSIONNUMBER < 50000 then return error("YOU SCREWED UP THE VERSION NUMBER OR DIDNT CHANGE THE SAFETY LIMITS") end -- safety check because i accidentally made the version number 414069 once
 
 TELLMEWHEN_MAXGROUPS = 1 	--this is a default, used by SetTheory (addon), so dont rename
@@ -4961,6 +4961,7 @@ end
 function Icon.ProcessQueuedEvents(icon)
 	local EventsToFire = icon.EventsToFire
 	if EventsToFire and icon.eventIsQueued then
+		local handledOne 
 		for i = 1, icon.Events.n do
 			-- settings to check for in EventsToFire
 			local EventSettingsFromIconSettings = icon.Events[i]
@@ -4997,8 +4998,11 @@ function Icon.ProcessQueuedEvents(icon)
 					local Module = EVENTS:GetModule(EventSettings.Type, true)
 					if Module then
 						local handled = Module:HandleEvent(icon, EventSettings)
-						if handled and not EventSettings.PassThrough then
-							break
+						if handled then
+							if not EventSettings.PassThrough then
+								break
+							end
+							handledOne = true
 						end
 					end
 				end
@@ -5007,6 +5011,9 @@ function Icon.ProcessQueuedEvents(icon)
 
 		wipe(EventsToFire)
 		icon.eventIsQueued = nil
+		if handledOne then
+			TMW:Fire("TMW_ICON_UPDATED", icon)
+		end
 	end
 end
 
@@ -5245,13 +5252,6 @@ function Icon.SetInfo(icon, alpha, color, texture, start, duration, spellChecked
 		icon.__tex = texture
 		icon.texture:SetTexture(texture)
 		
-		somethingChanged = 1
-	end
-
-	-- NO EVENT HANDLING PAST THIS POINT! -- well, actually it doesnt matter that much anymore, but they still won't be handled till the next update
-	if icon.eventIsQueued then
-		--icon:ProcessQueuedEvents()
-		-- TODO: DONT HANDLE somethingChanged here - fire the related callback when events are actually process in the new func
 		somethingChanged = 1
 	end
 
