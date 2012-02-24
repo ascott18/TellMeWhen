@@ -394,7 +394,7 @@ do -- Iterators
 					if h.stage == "icon" then
 						h.extIter = TMW:InGroupSettings()
 						h.stage = "group"
-						return iter()
+						return iter(h)
 					else
 						tinsert(handlers, h)
 						return
@@ -402,10 +402,10 @@ do -- Iterators
 				end
 				h.currentConditions = settings.Conditions
 				h.currentCondition = 0
-				return iter()
+				return iter(h)
 			end
 			local condition = rawget(h.currentConditions, h.currentCondition)
-			if not condition then return iter() end
+			if not condition then return iter(h) end
 			return condition, h.currentCondition, h.cg, h.ci -- condition data, conditionID, groupID, iconID
 		end
 
@@ -432,7 +432,7 @@ do -- Iterators
 				tinsert(handlers, h)
 				return
 			end
-			return h.t[h.k], k
+			return h.t[h.k], h.k
 		end
 
 		function TMW:InNLengthTable(arg)
@@ -1493,9 +1493,11 @@ function TMW:OnProfile()
 
 	TMW:Update()
 	for icon in TMW:InIcons() do
-		-- hack to get the first icon that exists
-		TMW.IE:Load(1, icon)
-		break
+		-- hack to get the first icon that exists and is shown
+		if icon:IsVisible() then
+			TMW.IE:Load(1, icon)
+			break
+		end
 	end
 
 	if TMW.CompileOptions then TMW:CompileOptions() end -- redo groups in the options

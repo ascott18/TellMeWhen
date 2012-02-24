@@ -51,6 +51,7 @@
  ** (r469) Sorting Buffs/Debuffs should now work if only one aura is being checked by the icon (the unit being checked may have more than one auras of the same name/ID, or the icon may be checking multiple units.)
  ** (r470) Icons that are being watched by On Icon Show/Hide events should now always be registered with the icon update engine to ensure that the icons that depend on these events function as expected
  ** (r471) TellMeWhen-5.0.0.lua:522: attempt to index local "h" (a nil value)
+ ** (r471) TellMeWhen_Options.lua:4797: attempt to concatenate local "i" (a nil value)
 
 ===v4.8.3===
  * Bug Fixes:
