@@ -33,7 +33,7 @@ local DRData = LibStub("DRData-1.0", true)
 TELLMEWHEN_VERSION = "5.0.0"
 TELLMEWHEN_VERSION_MINOR = strmatch(" @project-version@", " r%d+") or ""
 TELLMEWHEN_VERSION_FULL = TELLMEWHEN_VERSION .. TELLMEWHEN_VERSION_MINOR
-TELLMEWHEN_VERSIONNUMBER = 50034 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
+TELLMEWHEN_VERSIONNUMBER = 50035 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
 if TELLMEWHEN_VERSIONNUMBER > 51000 or TELLMEWHEN_VERSIONNUMBER < 50000 then return error("YOU SCREWED UP THE VERSION NUMBER OR DIDNT CHANGE THE SAFETY LIMITS") end -- safety check because i accidentally made the version number 414069 once
 
 TELLMEWHEN_MAXGROUPS = 1 	--this is a default, used by SetTheory (addon), so dont rename
@@ -943,7 +943,7 @@ TMW.Defaults = {
 								Value 			= 0,
 								CndtJustPassed 	= false,
 								PassingCndt		= false,
-								PassThrough		= false,
+								PassThrough		= true,
 								Icon			= "",
 							},
 						},
@@ -1628,8 +1628,6 @@ function TMW:OnUpdate(elapsed)					-- THE MAGICAL ENGINE OF DOING EVERYTHING
 
 	TMW:Fire("TMW_ONUPDATE", time, Locked)
 end
-
-
 
 
 function TMW:Update()
@@ -2562,6 +2560,25 @@ function TMW:GlobalUpgrade()
 				HelpSettings.PocketWatch = nil
 			end
 		end
+		if TellMeWhenDB.Version < 50035 then
+			for _, p in pairs(TellMeWhenDB.profiles) do
+				if p.Groups then
+					for _, gs in pairs(p.Groups) do
+						if gs.Icons then
+							for _, ics in pairs(gs.Icons) do
+								if ics.Events then
+									for k, eventSettings in pairs(ics.Events) do
+										if type(k) == "number" and eventSettings.PassThrough == nil then
+											eventSettings.PassThrough = false
+										end
+									end
+								end
+							end
+						end
+					end
+				end
+			end
+		end
 	end
 	TellMeWhenDB.Version = TELLMEWHEN_VERSIONNUMBER -- pre-default upgrades complete!
 end
@@ -3195,6 +3212,7 @@ end
 
 
 EVENTS = TMW:NewModule("Events", "AceEvent-3.0") TMW.EVENTS = EVENTS
+EVENTS.QueuedIcons = {}
 do
 	EVENTS.OnIconShowHideHandlers = {}
 	EVENTS.OnIconShowHideManager = UpdateTableManager:New()
@@ -3229,7 +3247,6 @@ function EVENTS:TMW_ICON_SHOWN_CHANGED(_, ic, event)
 						icon:QueueEvent(EventSettings)
 					end
 				end
-				icon:ProcessQueuedEvents()
 			end
 		end
 	end
@@ -3272,6 +3289,19 @@ function EVENTS:TMW_GLOBAL_UPDATE_POST()
 	end
 end
 TMW:RegisterCallback("TMW_GLOBAL_UPDATE_POST", EVENTS)
+function EVENTS:TMW_ONUPDATE_TIMECONSTRAINED(event, time, Locked)
+	local QueuedIcons = self.QueuedIcons
+	if Locked and QueuedIcons[1] then
+		sort(QueuedIcons, TMW.Classes.Icon.ScriptSort) --TODO: UPVALUE Icon
+		for i = 1, #QueuedIcons do
+			local icon = QueuedIcons[i]
+			icon:ProcessQueuedEvents()
+		end
+		wipe(QueuedIcons)
+	end
+end
+TMW:RegisterCallback("TMW_ONUPDATE_TIMECONSTRAINED", EVENTS)
+
 
 SND = EVENTS:NewModule("Sound", EVENTS) TMW.SND = SND
 function SND:ProcessIconEventSettings(event, eventSettings)
@@ -3652,11 +3682,11 @@ end
 
 ANIM = EVENTS:NewModule("Animations", EVENTS) TMW.ANIM = ANIM
 ANIM.AnimationList = {
-	{
+	{ -- NONE
 		text = NONE,
 		animation = "",
 	},
-	{
+	{ -- SCREENSHAKE
 		text = L["ANIM_SCREENSHAKE"],
 		desc = L["ANIM_SCREENSHAKE_DESC"],
 		animation = "SCREENSHAKE",
@@ -3711,7 +3741,7 @@ ANIM.AnimationList = {
 			end
 		end,
 	},
-	{
+	{ -- SCREENFLASH
 		text = L["ANIM_SCREENFLASH"],
 		desc = L["ANIM_SCREENFLASH_DESC"],
 		animation = "SCREENFLASH",
@@ -3759,7 +3789,7 @@ ANIM.AnimationList = {
 			}
 		end,
 	},
-	{
+	{ -- ICONSHAKE
 		text = L["ANIM_ICONSHAKE"],
 		desc = L["ANIM_ICONSHAKE_DESC"],
 		animation = "ICONSHAKE",
@@ -3795,7 +3825,7 @@ ANIM.AnimationList = {
 			icon:SetPoint("TOPLEFT", icon.x, icon.y)
 		end,
 	},
-	{
+	{ -- ICONFLASH
 		text = L["ANIM_ICONFLASH"],
 		desc = L["ANIM_ICONFLASH_DESC"],
 		animation = "ICONFLASH",
@@ -3876,7 +3906,7 @@ ANIM.AnimationList = {
 			icon.animation_flasher:Hide()
 		end,
 	},
-	{
+	{ -- ICONALPHAFLASH
 		text = L["ANIM_ICONALPHAFLASH"],
 		desc = L["ANIM_ICONALPHAFLASH_DESC"],
 		animation = "ICONALPHAFLASH",
@@ -3940,7 +3970,7 @@ ANIM.AnimationList = {
 			tDeleteItem(icon.FadeHandlers, "ICONALPHAFLASH")
 		end,
 	},
-	{
+	{ -- ICONFADE
 		text = L["ANIM_ICONFADE"],
 		desc = L["ANIM_ICONFADE_DESC"],
 		animation = "ICONFADE",
@@ -3981,7 +4011,7 @@ ANIM.AnimationList = {
 
 
 	},
-	{
+	{ -- ACTVTNGLOW
 		text = L["ANIM_ACTVTNGLOW"],
 		desc = L["ANIM_ACTVTNGLOW_DESC"],
 		animation = "ACTVTNGLOW",
@@ -4008,7 +4038,7 @@ ANIM.AnimationList = {
 			ActionButton_HideOverlayGlow(icon) -- dont upvalue, can be hooked (masque doesn't, but maybe others)
 		end,
 	},
-	{
+	{ -- ICONBORDER
 		text = L["ANIM_ICONBORDER"],
 		desc = L["ANIM_ICONBORDER_DESC"],
 		animation = "ICONBORDER",
@@ -4021,6 +4051,7 @@ ANIM.AnimationList = {
 		Thickness = true,
 
 		Play = function(icon, data)
+			print("ICONBORDER", icon, data.r_anim)
 			local Duration = 0
 			local Period = data.Period
 			if data.Infinite then
@@ -4118,9 +4149,7 @@ ANIM.AnimationList = {
 			icon.animation_border:Hide()
 		end,
 	},
-	
-	
-	{
+	{ -- ICONOVERLAYIMG
 		text = L["ANIM_ICONOVERLAYIMG"],
 		desc = L["ANIM_ICONOVERLAYIMG_DESC"],
 		animation = "ICONOVERLAYIMG",
@@ -4203,15 +4232,10 @@ ANIM.AnimationList = {
 			icon.animation_overlay:Hide()
 		end,
 	},
-	
-	
-	
-	
-	
-	{
+	{ -- (spacer)
 		noclick = true,
 	},
-	{
+	{ -- ICONCLEAR
 		text = L["ANIM_ICONCLEAR"],
 		desc = L["ANIM_ICONCLEAR_DESC"],
 		animation = "ICONCLEAR",
@@ -4219,6 +4243,7 @@ ANIM.AnimationList = {
 		Play = function(icon, data)
 			if icon:Animations_Has() then
 				for k, v in pairs(icon:Animations_Get()) do
+					print("ICONCLEAR", icon, k, v)
 					-- instead of just calling :Animations_Stop() right here, set this attribute so that meta icons inheriting the animation will also stop it.
 					v.HALTED = true
 				end
@@ -4789,6 +4814,7 @@ end
 function Icon.QueueEvent(icon, arg1)
 	icon.EventsToFire[arg1] = true
 	icon.eventIsQueued = true
+	EVENTS.QueuedIcons[#EVENTS.QueuedIcons + 1] = icon
 end
 
 -- universal
@@ -5224,8 +5250,8 @@ function Icon.SetInfo(icon, alpha, color, texture, start, duration, spellChecked
 
 	-- NO EVENT HANDLING PAST THIS POINT! -- well, actually it doesnt matter that much anymore, but they still won't be handled till the next update
 	if icon.eventIsQueued then
-		icon:ProcessQueuedEvents()
-		
+		--icon:ProcessQueuedEvents()
+		-- TODO: DONT HANDLE somethingChanged here - fire the related callback when events are actually process in the new func
 		somethingChanged = 1
 	end
 

@@ -1012,7 +1012,7 @@ L["EVENTS_HANDLERS_HEADER"] = "Icon Event Handlers"
 L["EVENTS_HANDLERS_ADD"] = "Add Event Handler..."
 L["EVENTS_HANDLERS_ADD_DESC"] = "|cff7fffffClick|r to choose an event handler to add to this icon."
 L["EVENTS_HANDLERS_GLOBAL_DESC"] = [[|cff7fffffClick|r for event handler options.
-|cff7fffffClick-and-drag|r to move.]]
+|cff7fffffClick-and-drag|r to reorder.]]
 L["EVENTS_HANDLERS_PLAY"] = "Test Event"
 L["EVENTS_HANDLERS_PLAY_DESC"] = "|cff7fffffClick|r to test the event handler"
 
