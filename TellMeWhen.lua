@@ -33,7 +33,7 @@ local DRData = LibStub("DRData-1.0", true)
 TELLMEWHEN_VERSION = "5.0.0"
 TELLMEWHEN_VERSION_MINOR = strmatch(" @project-version@", " r%d+") or ""
 TELLMEWHEN_VERSION_FULL = TELLMEWHEN_VERSION .. TELLMEWHEN_VERSION_MINOR
-TELLMEWHEN_VERSIONNUMBER = 50036 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
+TELLMEWHEN_VERSIONNUMBER = 50037 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
 if TELLMEWHEN_VERSIONNUMBER > 51000 or TELLMEWHEN_VERSIONNUMBER < 50000 then return error("YOU SCREWED UP THE VERSION NUMBER OR DIDNT CHANGE THE SAFETY LIMITS") end -- safety check because i accidentally made the version number 414069 once
 
 TELLMEWHEN_MAXGROUPS = 1 	--this is a default, used by SetTheory (addon), so dont rename
@@ -374,11 +374,12 @@ do -- Iterators
 
 	do -- InConditionSettings
 		local handlers = {}
-		local function gethandler(stage, extIter, currentCondition)
+		local function gethandler(stage, currentCondition, extIter, extIterHandler)
 			local handler = wipe(tremove(handlers) or {})
 
 			handler.stage = stage
 			handler.extIter = extIter
+			handler.extIterHandler = extIterHandler
 			handler.currentCondition = currentCondition
 
 			return handler
@@ -389,10 +390,10 @@ do -- Iterators
 
 			if not h.currentConditions or h.currentCondition > (h.currentConditions.n or #h.currentConditions) then
 				local settings
-				settings, h.cg, h.ci = h.extIter()
+				settings, h.cg, h.ci = h.extIter(h.extIterHandler)
 				if not settings then
 					if h.stage == "icon" then
-						h.extIter = TMW:InGroupSettings()
+						h.extIter, h.extIterHandler = TMW:InGroupSettings()
 						h.stage = "group"
 						return iter(h)
 					else
@@ -410,7 +411,7 @@ do -- Iterators
 		end
 
 		function TMW:InConditionSettings()
-			return iter, gethandler("icon", TMW:InIconSettings(), 0)
+			return iter, gethandler("icon", 0, TMW:InIconSettings())
 		end
 	end
 
