@@ -121,12 +121,12 @@ local function Buff_OnUpdate(icon, time)
 						if Sort then
 							local _d = (_expirationTime == 0 and huge) or _expirationTime - time
 							if d*Sort < _d*Sort then
-								buffName, iconTexture, count, duration, expirationTime, id, v1, v2, v3, d =
-								_buffName, _iconTexture, _count, _duration, _expirationTime, _id, _v1, _v2, _v3, _d
+								buffName, iconTexture, count, duration, expirationTime, id, v1, v2, v3, useUnit, d =
+								_buffName, _iconTexture, _count, _duration, _expirationTime, _id, _v1, _v2, _v3, unit, _d
 							end
 						else
-							buffName, iconTexture, count, duration, expirationTime, id, v1, v2, v3 =
-							_buffName, _iconTexture, _count, _duration, _expirationTime, _id, _v1, _v2, _v3
+							buffName, iconTexture, count, duration, expirationTime, id, v1, v2, v3, useUnit =
+							_buffName, _iconTexture, _count, _duration, _expirationTime, _id, _v1, _v2, _v3, unit
 							break
 						end
 					end
@@ -141,12 +141,12 @@ local function Buff_OnUpdate(icon, time)
 							if Sort then
 								local _d = (_expirationTime == 0 and huge) or _expirationTime - time
 								if d*Sort < _d*Sort then
-									buffName, iconTexture, count, duration, expirationTime, id, v1, v2, v3, d =
-									_buffName, _iconTexture, _count, _duration, _expirationTime, _id, _v1, _v2, _v3, _d
+									buffName, iconTexture, count, duration, expirationTime, id, v1, v2, v3, useUnit, d =
+									_buffName, _iconTexture, _count, _duration, _expirationTime, _id, _v1, _v2, _v3, unit, _d
 								end
 							else
-								buffName, iconTexture, count, duration, expirationTime, id, v1, v2, v3 =
-								 _buffName, _iconTexture, _count, _duration, _expirationTime, _id, _v1, _v2, _v3
+								buffName, iconTexture, count, duration, expirationTime, id, v1, v2, v3, useUnit =
+								 _buffName, _iconTexture, _count, _duration, _expirationTime, _id, _v1, _v2, _v3, unit
 								break
 							end
 						end

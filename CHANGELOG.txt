@@ -53,6 +53,7 @@
  ** (r471) TellMeWhen-5.0.0.lua:522: attempt to index local "h" (a nil value)
  ** (r472) TellMeWhen_Options.lua:4797: attempt to concatenate local "i" (a nil value)
  ** (r476) TellMeWhen-5.0.0.lua:457: attempt to index local "h" (a nil value)
+ ** (r477) Buff/debuff icons that sort or that exceed the efficiency threshold should now properly update and display the unit they check when requested
 
 ===v4.8.3===
  * Bug Fixes:
