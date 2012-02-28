@@ -4034,7 +4034,7 @@ ANIM.AnimationList = {
 		end,
 		OnStart = function(icon, table)
 			ActionButton_ShowOverlayGlow(icon) -- dont upvalue, can be hooked (masque does, maybe others)
-			self.overlay:SetFrameLevel(icon:GetFrameLevel() + 3)
+			icon.overlay:SetFrameLevel(icon:GetFrameLevel() + 3)
 		end,
 		OnStop = function(icon, table)
 			ActionButton_HideOverlayGlow(icon) -- dont upvalue, can be hooked (masque doesn't, but maybe others)
