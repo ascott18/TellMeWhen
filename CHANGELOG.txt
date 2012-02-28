@@ -55,6 +55,7 @@
  ** (r476) TellMeWhen-5.0.0.lua:457: attempt to index local "h" (a nil value)
  ** (r477) Buff/debuff icons that sort or that exceed the efficiency threshold should now properly update and display the unit they check when requested
  ** (r478) CLEU icons should once again not process their events when the icon or the icon's group is hidden
+ ** (r479) Attempted a fix at activation overlay borders appearing underneath the icon they are playing on
 
 ===v4.8.3===
  * Bug Fixes:

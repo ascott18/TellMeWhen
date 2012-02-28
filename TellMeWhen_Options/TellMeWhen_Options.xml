@@ -1935,6 +1935,9 @@
 				<Scripts>
 					<OnLoad>
 						self:SetText(TMW.L["EVENTS_TAB"])
+						function self:OnClick()
+							TMW.EVENTS:LoadConfig()
+						end						
 					</OnLoad>
 				</Scripts>
 			</Button>

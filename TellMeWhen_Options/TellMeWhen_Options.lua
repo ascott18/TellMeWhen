@@ -5377,6 +5377,8 @@ function ANN:SetupEventDisplay(eventID)
 			data = "|cff808080" .. chan .. "|r"
 		end
 		self.Events[eventID].DataText:SetText("|cffcccccc" .. self.tabText .. ":|r " .. data)
+	else
+		self.Events[eventID].DataText:SetText("|cffcccccc" .. self.tabText .. ":|r UNKNOWN: " .. (channel or "?"))
 	end
 end
 
@@ -5553,6 +5555,8 @@ function ANIM:SetupEventDisplay(eventID)
 		end
 
 		self.Events[eventID].DataText:SetText("|cffcccccc" .. self.tabText .. ":|r " .. text)
+	else
+		self.Events[eventID].DataText:SetText("|cffcccccc" .. self.tabText .. ":|r UNKNOWN: " .. (animation or "?"))
 	end
 end
 
@@ -5577,41 +5581,39 @@ function ANIM:SelectAnimation(animation)
 	self.currentAnimationSetting = animation
 
 	local animationSettings = self.AnimationList[animation]
-	if animationSettings then
-		for i, arg in TMW:Vararg("Duration", "Magnitude", "Period", "Thickness", "Size_anim", "SizeX", "SizeY") do
-			if animationSettings[arg] then
-				self:SetSliderMinMax(self[arg], EventSettings[arg])
-				self[arg]:Show()
-				self[arg]:Enable()
-			else
-				self[arg]:Hide()
-			end
-		end
-
-		for i, arg in TMW:Vararg("Fade", "Infinite") do
-			if animationSettings[arg] then
-				self[arg]:SetChecked(EventSettings[arg])
-				self[arg]:Show()
-			else
-				self[arg]:Hide()
-			end
-		end
-
-		if animationSettings.Color then
-			local r, g, b, a = EventSettings.r_anim, EventSettings.g_anim, EventSettings.b_anim, EventSettings.a_anim
-			self.Color:GetNormalTexture():SetVertexColor(r, g, b, 1)
-			self.Color.background:SetAlpha(a)
-			self.Color:Show()
+	for i, arg in TMW:Vararg("Duration", "Magnitude", "Period", "Thickness", "Size_anim", "SizeX", "SizeY") do
+		if animationSettings and animationSettings[arg] then
+			self:SetSliderMinMax(self[arg], EventSettings[arg])
+			self[arg]:Show()
+			self[arg]:Enable()
 		else
-			self.Color:Hide()
+			self[arg]:Hide()
 		end
+	end
 
-		if animationSettings.Image then
-			self.Image:SetText(EventSettings.Image)
-			self.Image:Show()
+	for i, arg in TMW:Vararg("Fade", "Infinite") do
+		if animationSettings and animationSettings[arg] then
+			self[arg]:SetChecked(EventSettings[arg])
+			self[arg]:Show()
 		else
-			self.Image:Hide()
+			self[arg]:Hide()
 		end
+	end
+
+	if animationSettings and animationSettings.Color then
+		local r, g, b, a = EventSettings.r_anim, EventSettings.g_anim, EventSettings.b_anim, EventSettings.a_anim
+		self.Color:GetNormalTexture():SetVertexColor(r, g, b, 1)
+		self.Color.background:SetAlpha(a)
+		self.Color:Show()
+	else
+		self.Color:Hide()
+	end
+
+	if animationSettings and animationSettings.Image then
+		self.Image:SetText(EventSettings.Image)
+		self.Image:Show()
+	else
+		self.Image:Hide()
 	end
 
 	if animationFrame then
