@@ -112,7 +112,7 @@ local function Buff_OnUpdate(icon, time)
 		local unit = Units[u]
 		if unitsWithExistsEvent[unit] or UnitExists(unit) then -- if unitsWithExistsEvent[unit] is true then the unit is managed by TMW's unit framework, so we dont need to check that it exists.
 			if Sort or NAL > EFF_THR then
-				for z=1, 60 do --60 because i can and it breaks when there are no more buffs anyway
+				for z=1, huge do --huge because i can and it breaks when there are no more buffs anyway
 					local _buffName, _, _iconTexture, _count, _dispelType, _duration, _expirationTime, _, canSteal, _, _id, _, _, _v1, _v2, _v3 = UnitAura(unit, z, Filter)
 					_dispelType = _dispelType == "" and "Enraged" or _dispelType -- Bug: Enraged is an empty string
 					if not _buffName then
@@ -132,7 +132,7 @@ local function Buff_OnUpdate(icon, time)
 					end
 				end
 				if Filterh and not buffName then
-					for z=1, 60 do
+					for z=1, huge do
 						local _buffName, _, _iconTexture, _count, _dispelType, _duration, _expirationTime, _, canSteal, _, _id, _, _, _v1, _v2, _v3 = UnitAura(unit, z, Filterh)
 						_dispelType = _dispelType == "" and "Enraged" or _dispelType -- Bug: Enraged is an empty string
 						if not _buffName then
@@ -160,7 +160,7 @@ local function Buff_OnUpdate(icon, time)
 					--local iName = strlowerCache[NameArray[i]] -- STRLOWERING IT BREAKS DISPEL TYPES! it should already be strlowered, except dispel types
 					local iName = NameArray[i]
 					if DS[iName] then --Handle dispel types.
-						for z=1, 60 do
+						for z=1, huge do
 							buffName, _, iconTexture, count, dispelType, duration, expirationTime, _, canSteal, _, id, _, _, v1, v2, v3 = UnitAura(unit, z, Filter)
 							dispelType = dispelType == "" and "Enraged" or dispelType -- Bug: Enraged is an empty string
 							if (not buffName) or (dispelType == iName and (NotStealable or canSteal)) then
@@ -168,7 +168,7 @@ local function Buff_OnUpdate(icon, time)
 							end
 						end
 						if Filterh and not buffName then
-							for z=1, 60 do
+							for z=1, huge do
 								buffName, _, iconTexture, count, dispelType, duration, expirationTime, _, canSteal, _, id, _, _, v1, v2, v3 = UnitAura(unit, z, Filterh)
 								dispelType = dispelType == "" and "Enraged" or dispelType -- Bug: Enraged is an empty string
 								if (not buffName) or (dispelType == iName and (NotStealable or canSteal)) then
@@ -184,7 +184,7 @@ local function Buff_OnUpdate(icon, time)
 						end
 					end
 					if buffName and id ~= iName and isNumber[iName] then
-						for z=1, 60 do
+						for z=1, huge do
 							buffName, _, iconTexture, count, _, duration, expirationTime, _, canSteal, _, id, _, _, v1, v2, v3 = UnitAura(unit, z, Filter)
 							if not id or id == iName then -- and (NotStealable or canSteal) then
 									-- No reason to check stealable here.
@@ -195,7 +195,7 @@ local function Buff_OnUpdate(icon, time)
 							end
 						end
 						if Filterh and not id then
-							for z=1, 60 do
+							for z=1, huge do
 								buffName, _, iconTexture, count, _, duration, expirationTime, _, canSteal, _, id, _, _, v1, v2, v3 = UnitAura(unit, z, Filterh)
 								if not id or id == iName then -- and (NotStealable or canSteal) then
 									-- No reason to check stealable here. See above.
