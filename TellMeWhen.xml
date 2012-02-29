@@ -113,12 +113,6 @@
 					TMW.ID:CompleteDrag("OnDragStop")
 				end
 			</OnDragStop>
-			<OnShow>
-				self.__shown = 1
-			</OnShow>
-			<OnHide>
-				self.__shown = nil
-			</OnHide>
 		</Scripts>
 
 		<NormalTexture file=""/>

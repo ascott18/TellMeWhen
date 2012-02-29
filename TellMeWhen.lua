@@ -33,7 +33,7 @@ local DRData = LibStub("DRData-1.0", true)
 TELLMEWHEN_VERSION = "5.0.0"
 TELLMEWHEN_VERSION_MINOR = strmatch(" @project-version@", " r%d+") or ""
 TELLMEWHEN_VERSION_FULL = TELLMEWHEN_VERSION .. TELLMEWHEN_VERSION_MINOR
-TELLMEWHEN_VERSIONNUMBER = 50040 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
+TELLMEWHEN_VERSIONNUMBER = 50042 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
 if TELLMEWHEN_VERSIONNUMBER > 51000 or TELLMEWHEN_VERSIONNUMBER < 50000 then return error("YOU SCREWED UP THE VERSION NUMBER OR DIDNT CHANGE THE SAFETY LIMITS") end -- safety check because i accidentally made the version number 414069 once
 
 TELLMEWHEN_MAXGROUPS = 1 	--this is a default, used by SetTheory (addon), so dont rename
@@ -157,6 +157,9 @@ do	-- Class Lib
 		for k, v in pairs(self.instancemeta.__index) do
 			if type(k) == "string" and k:find("^OnNewInstance") then
 				v(instance, ...)
+			end
+			if self.isFrameObject and instance.HasScript and instance:HasScript(k) then
+				instance:SetScript(k, v)
 			end
 		end
 
@@ -1587,19 +1590,8 @@ function TMW:OnUpdate(elapsed)					-- THE MAGICAL ENGINE OF DOING EVERYTHING
 				-- GroupsToUpdate only contains groups with conditions
 				local group = GroupsToUpdate[i]
 				local ConditionObj = group.ConditionObj
-				if ConditionObj then
-					if ConditionObj.UpdateNeeded or ConditionObj.NextUpdateTime < time then
-						ConditionObj:Check(group)
-					end
-					if ConditionObj.Failed then
-						if group.__shown then
-							group:Hide()
-						end
-					else
-						if not group.__shown then
-							group:Show()
-						end
-					end
+				if ConditionObj and ConditionObj.UpdateNeeded or ConditionObj.NextUpdateTime < time then
+					ConditionObj:Check(group)
 				end
 			end
 
@@ -4529,6 +4521,7 @@ function Group.Show(group)
 	end
 end
 
+
 Group.hide = Group.Hide
 function Group.Hide(group)
 	if group.__shown then
@@ -4537,22 +4530,45 @@ function Group.Hide(group)
 	end
 end
 
-
-function Group.GetSettings(group)
-	return db.profile.Groups[group:GetID()]
+function Group.Update(group)
+	local ConditionObj = group.ConditionObj
+	local ShouldUpdateIcons = group:ShouldUpdateIcons()
+	if (ConditionObj and ConditionObj.Failed) or (not ShouldUpdateIcons) then
+		group:Hide()
+	elseif ShouldUpdateIcons then
+		group:Show()
+	end
 end
 
 function Group.FinishCompilingConditions(group, funcstr)
+	local ret2
 	if group.OnlyInCombat then
 		if funcstr == "" then
 			funcstr = [[UnitAffectingCombat("player")]]
 		else
 			funcstr = [[(]] .. funcstr .. [[) and UnitAffectingCombat("player")]]
 		end
-		return funcstr, {PLAYER_REGEN_ENABLED = true, PLAYER_REGEN_DISABLED = true}
-	else
-		return funcstr
+		ret2 = {PLAYER_REGEN_ENABLED = true, PLAYER_REGEN_DISABLED = true}
 	end
+	
+	if funcstr ~= "" then
+		TMW:RegisterCallback("TMW_CNDT_OBJ_PASSING_CHANGED", group)
+	else
+		TMW:UnregisterCallback("TMW_CNDT_OBJ_PASSING_CHANGED", group)
+	end
+	
+	return funcstr, ret2
+end
+
+function Group.TMW_CNDT_OBJ_PASSING_CHANGED(group, event, ConditionObj, failed)
+	if group.ConditionObj == ConditionObj then	
+		group:Update()
+	end
+end
+
+
+function Group.GetSettings(group)
+	return db.profile.Groups[group:GetID()]
 end
 
 function Group.ShouldUpdateIcons(group)
@@ -4668,24 +4684,19 @@ function Group.Setup(group)
 	-- remove the group from the list of groups that should update conditions
 	group:UpdateTable_Unregister(group)
 	
+	group.ConditionObj = nil -- reset the condition object in case there were conditions previously that got removed, or if we are not locked
 	if group:ShouldUpdateIcons() and Locked then
-		group:Show()
-
 		-- process any conditions the group might have
 		local ConditionObj = group:Conditions_LoadData(group.Conditions)
 		if ConditionObj then
 			group:UpdateTable_Register()
 		end
-	else
-		if group:ShouldUpdateIcons() then
-			group:Show()
-		else
-			group:Hide()
-		end
 	end
 	
 	-- we probably added or removed an entry from this table, so re-sort it:
 	group:UpdateTable_Sort(Group.ScriptSort)
+	
+	group:Update()
 end
 
 
@@ -4717,6 +4728,7 @@ function Icon.OnNewInstance(icon, ...)
 	icon.EventHandlersSet = {}
 	
 	icon.__alpha = icon:GetAlpha()
+	icon.__shown = icon:IsShown()
 	
 	if TMW.Classes.PowerBar then
 		icon.pbar_overlay = TMW.Classes.PowerBar:New("StatusBar", nil, icon)
@@ -4734,8 +4746,6 @@ function Icon.GetTooltipTitle(icon)
 	end
 	return line1
 end
-
-do 																																	-- stick UNIVERSAL funcs here
 
 -- universal
 function Icon.__lt(icon1, icon2)
@@ -4796,6 +4806,15 @@ function Icon.UnregisterAllEvents(icon, event)
 		icon:UnregisterAllEvents_Blizz()
 		icon.hasEvents = nil
 	end
+end
+
+function Icon.OnShow(icon)
+	icon.__shown = 1
+	TMW:Fire("TMW_ICON_UPDATED", icon)
+end
+function Icon.OnHide(icon)
+	icon.__shown = nil
+	TMW:Fire("TMW_ICON_UPDATED", icon)
 end
 
 -- universal
@@ -4945,7 +4964,6 @@ function Icon.TMW_CNDT_OBJ_PASSING_CHANGED(icon, event, ConditionObj)
 	end
 end
 
-end
 
 -- universal (probably)
 function Icon.SetTexture(icon, tex)

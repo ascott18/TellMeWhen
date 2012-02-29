@@ -2985,7 +2985,7 @@ function ConditionObject:Check(parent)
 		local failed = not self:CheckFunction(parent)
 		if self.Failed ~= failed then
 			self.Failed = failed
-			TMW:Fire("TMW_CNDT_OBJ_PASSING_CHANGED", self)
+			TMW:Fire("TMW_CNDT_OBJ_PASSING_CHANGED", self, failed)
 		end
 	end
 end
