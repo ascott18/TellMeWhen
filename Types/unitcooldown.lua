@@ -64,7 +64,7 @@ Type.RelevantSettings = {
 
 Type.EventDisabled_OnStack = true
 
-local ManualIcons = {}
+ ManualIcons = {}
 
 
 function Type:Update()
@@ -168,6 +168,7 @@ function Type:COMBAT_LOG_EVENT_UNFILTERED(e, _, p, _, g, a, _, _, _, _, _, _, i,
 	if p == "SPELL_CAST_SUCCESS" or p == "SPELL_AURA_APPLIED" or p == "SPELL_AURA_REFRESH" or p == "SPELL_DAMAGE" or p == "SPELL_HEAL" or p == "SPELL_MISSED" then
 	--	GUIDsToNames[g] = a
 		--local doUpdate
+		n = n and strlowerCache[n]
 		local c = Cooldowns[g]
 		if p == "SPELL_AURA_APPLIED" and resetsOnAura[i] then
 			for id in pairs(resetsOnAura[i]) do
@@ -190,14 +191,14 @@ function Type:COMBAT_LOG_EVENT_UNFILTERED(e, _, p, _, g, a, _, _, _, _, _, _, i,
 					end
 				end
 			end
-			c[strlowerCache[n]] = i
+			c[n] = i
 			c[i] = TMW.time
 		--	doUpdate = true
 		else
 			local t = TMW.time
 			local ci = c[i]
 			if (ci and ci + 1.8 < t) or not ci then 	-- if this event was less than 1.8 seconds after a SPELL_CAST_SUCCESS or a UNIT_SPELLCAST_SUCCEEDED then ignore it (this is just a safety window for spell travel time so that if we found the real cast start, we dont overwrite it)
-				c[strlowerCache[n]] = i
+				c[n] = i
 				c[i] = t-1			-- hack it to make it a little bit more accurate. a max range dk deathcoil has a travel time of about 1.3 seconds, so 1 second should be a good average to be safe with travel times.
 			end						-- (and really, how often are people actually going to be tracking cooldowns with cast times? there arent that many, and the ones that do exist arent that important)
 		--	doUpdate = true

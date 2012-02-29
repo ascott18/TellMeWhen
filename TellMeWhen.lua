@@ -30,10 +30,10 @@ local AceDB = LibStub("AceDB-3.0")
 local LSM = LibStub("LibSharedMedia-3.0")
 local DRData = LibStub("DRData-1.0", true)
 
-TELLMEWHEN_VERSION = "5.0.0"
+TELLMEWHEN_VERSION = "5.0.1"
 TELLMEWHEN_VERSION_MINOR = strmatch(" @project-version@", " r%d+") or ""
 TELLMEWHEN_VERSION_FULL = TELLMEWHEN_VERSION .. TELLMEWHEN_VERSION_MINOR
-TELLMEWHEN_VERSIONNUMBER = 50042 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
+TELLMEWHEN_VERSIONNUMBER = 50101 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
 if TELLMEWHEN_VERSIONNUMBER > 51000 or TELLMEWHEN_VERSIONNUMBER < 50000 then return error("YOU SCREWED UP THE VERSION NUMBER OR DIDNT CHANGE THE SAFETY LIMITS") end -- safety check because i accidentally made the version number 414069 once
 
 TELLMEWHEN_MAXGROUPS = 1 	--this is a default, used by SetTheory (addon), so dont rename
@@ -2561,7 +2561,7 @@ function TMW:GlobalUpgrade()
 							for _, ics in pairs(gs.Icons) do
 								if ics.Events then
 									for k, eventSettings in pairs(ics.Events) do
-										if type(k) == "number" and eventSettings.PassThrough == nil then
+										if type(eventSettings) == "table" and eventSettings.PassThrough == nil then
 											eventSettings.PassThrough = false
 										end
 									end
@@ -5696,7 +5696,7 @@ function View:Icon_Integrate(icon)
 	
 	-- cooldown
 	if not viewElements.cooldown then
-		viewElements.cooldown = CreateFrame("Cooldown", nil, icon, "CooldownFrameTemplate")
+		viewElements.cooldown = CreateFrame("Cooldown", icon:GetName() .. "Cooldown_" .. self.view, icon, "CooldownFrameTemplate")
 		viewElements.cooldown:SetSize(30, 30)
 		viewElements.cooldown:SetPoint("CENTER")
 	end
@@ -5705,7 +5705,7 @@ function View:Icon_Integrate(icon)
 	
 	-- texture
 	if not viewElements.texture then
-		viewElements.texture = icon:CreateTexture(nil, "BACKGROUND")
+		viewElements.texture = icon:CreateTexture(icon:GetName() .. "Texture_" .. self.view, "BACKGROUND")
 		viewElements.texture:SetSize(30, 30)
 		viewElements.texture:SetPoint("CENTER")
 		viewElements.texture:SetTexture("Interface\\Icons\\INV_Misc_QuestionMark")
@@ -5716,7 +5716,7 @@ function View:Icon_Integrate(icon)
 	
 	-- countText
 	if not viewElements.countText then
-		viewElements.countText = icon:CreateFontString(nil, "ARTWORK", "NumberFontNormalSmall")
+		viewElements.countText = icon:CreateFontString(icon:GetName() .. "Count_" .. self.view, "ARTWORK", "NumberFontNormalSmall")
 		viewElements.countText:SetJustifyH("RIGHT")
 		viewElements.countText:SetPoint("BOTTOMRIGHT", -2, 2)
 	end
@@ -5725,7 +5725,7 @@ function View:Icon_Integrate(icon)
 	
 	-- bindText
 	if not viewElements.bindText then
-		viewElements.bindText = icon:CreateFontString(nil, "ARTWORK", "NumberFontNormalSmallGray")
+		viewElements.bindText = icon:CreateFontString(icon:GetName() .. "HotKey_" .. self.view, "ARTWORK", "NumberFontNormalSmallGray")
 		viewElements.bindText:SetJustifyH("RIGHT")
 		viewElements.bindText:SetPoint("TOPLEFT", -2, -2)
 	end

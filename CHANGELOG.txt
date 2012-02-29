@@ -1,3 +1,9 @@
+===v5.0.1===
+ * Bug Fixes:
+ ** (r483) Unit Cooldown icons checking spells by name should now function properly.
+ ** (r483) Cooldown sweeps and other icon components are no longer anonymous frames, returning to their previous nomenclature appended by an underscore and the icon's view type (Currently only "icon", more coming soon)
+ ** (r483) Fixed a faulty upgrade of the "PassThrough" setting when upgrading past 50035. Settings that already had this faulty upgrade occur may notice that the "Pass Through" setting on some of their events was toggled from checked to unchecked.
+ 
 ===v5.0.0===
  * Super cool changes:
  ** All icon types have been changed to be entirely event based, meaning that they will no longer update themselves when they don't need to, resulting in a (tremendous) performance increase.
