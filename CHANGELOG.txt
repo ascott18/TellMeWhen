@@ -1,6 +1,6 @@
 ===v5.0.2===
  * Bug Fixes:
- ** (r486) (Condition): attempt to call global "GetEclipseDirection" (a nil value)
+ ** (r485) (Condition): attempt to call global "GetEclipseDirection" (a nil value)
 
 ===v5.0.1===
  * Bug Fixes:
