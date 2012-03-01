@@ -261,6 +261,7 @@ Env = {
 	UnitPowerMax = UnitPowerMax,
 	UnitAura = UnitAura,
 	GetPetHappiness = GetPetHappiness,
+	GetEclipseDirection = GetEclipseDirection,
 	UnitName = UnitName,
 	GetComboPoints = GetComboPoints,
 	UnitExists = UnitExists,
