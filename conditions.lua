@@ -812,7 +812,7 @@ CNDT.Types = {
 		nooperator = true,
 		icon = "Interface\\PlayerFrame\\UI-DruidEclipse",
 		tcoords = {0.55859375, 0.64843750, 0.57031250, 0.75000000},
-		funcstr = [[c.Level == GetEclipseDirection() == "sun" and 1 or 0]],
+		funcstr = [[c.Level == (GetEclipseDirection() == "sun" and 1 or 0)]],
 		hidden = pclass ~= "DRUID",
 		events = "ECLIPSE_DIRECTION_CHANGE",
 	},
