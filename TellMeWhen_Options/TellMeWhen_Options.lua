@@ -2221,6 +2221,7 @@ CLEU.Events = {
 
 "CAT_SPELL",
 	"SPELL_DAMAGE", -- normal
+	"SPELL_DAMAGE_CRIT", -- normal
 	"SPELL_MISSED", -- normal
 	"SPELL_REFLECT", -- normal
 "SPACE",

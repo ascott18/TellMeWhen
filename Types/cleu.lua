@@ -110,7 +110,14 @@ local function CLEU_OnEvent(icon, _, t, event, h, sourceGUID, sourceName, source
 	elseif event == "SPELL_INTERRUPT" then
 		-- fake an event that allow filtering based on the spell that caused an interrupt rather than the spell that was interrupted.
 		-- fire it in addition to, not in place of, SPELL_INTERRUPT
-		CLEU_OnEvent(icon, _, t, "SPELL_INTERRUPT_SPELL", h, sourceGUID, sourceName, sourceFlags, sourceRaidFlags, destGUID, destName, destFlags, destRaidFlags, arg1, arg2, arg3, arg4, arg5, ...)
+		CLEU_OnEvent(icon, _, t, "SPELL_INTERRUPT_SPELL",	h, sourceGUID, sourceName, sourceFlags, sourceRaidFlags, destGUID, destName, destFlags, destRaidFlags, arg1, arg2, arg3, arg4, arg5, ...)
+	elseif event == "SPELL_DAMAGE" then
+		local _, _, _, _, arg10 = ...
+		if arg10 then
+			-- fake an event that fires if there was a crit
+			-- fire it in addition to, not in place of, SPELL_DAMAGE
+			CLEU_OnEvent(icon, _, t, "SPELL_DAMAGE_CRIT",		h, sourceGUID, sourceName, sourceFlags, sourceRaidFlags, destGUID, destName, destFlags, destRaidFlags, arg1, arg2, arg3, arg4, arg5, ...)
+		end
 	end
 
 	if icon.AllowAnyEvents or icon.CLEUEvents[event] then
@@ -207,8 +214,9 @@ local function CLEU_OnEvent(icon, _, t, event, h, sourceGUID, sourceName, source
 			--[[--"RANGE_DAMAGE", -- normal
 			--"RANGE_MISSED", -- normal
 			--"SPELL_DAMAGE", -- normal
+			--"SPELL_DAMAGE_CRIT", -- normal BUT NOT ACTUALLY AN EVENT
 			--"SPELL_MISSED", -- normal
-			--"SPELL_REFLECT", -- normal BUT  NOT ACTUALLY AN EVENT
+			--"SPELL_REFLECT", -- normal BUT NOT ACTUALLY AN EVENT
 			--"SPELL_EXTRA_ATTACKS", -- normal
 			--"SPELL_HEAL", -- normal
 			--"SPELL_ENERGIZE", -- normal
@@ -322,8 +330,8 @@ function Type:Setup(icon, groupID, iconID)
 	-- more efficient than checking icon.CLEUEvents[""] every OnEvent
 	icon.AllowAnyEvents = icon.CLEUEvents[""]
 
-	local tex, otherArgWhichLacksADecentName = TMW:GetConfigIconTexture(icon)
-	if otherArgWhichLacksADecentName == nil then
+	local tex, otherArgWhichLacksADecentNameAndIDontKnowWhatItIsToBeHonest = TMW:GetConfigIconTexture(icon)
+	if otherArgWhichLacksADecentNameAndIDontKnowWhatItIsToBeHonest == nil then
 		tex = "Interface\\Icons\\INV_Misc_PocketWatch_01"
 	end
 	icon:SetTexture(tex)

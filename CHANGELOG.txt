@@ -1,4 +1,5 @@
 ===v5.0.3===
+ * Spell Crit is now an event that can be tracked by Combat Event icons
  * Bug Fixes:
  ** (r489) TellMeWhen-5.0.2.lua:528 attempt to index local "h" (a nil value)
  
@@ -46,7 +47,7 @@
  ** (r431) A unit's class should now be properly detected when the unit is from another server
  ** (r434) Icon Show/Hide events should work once again
  ** (r435) Unit substitutions should work once again
- ** (r436) Fixed a bug causing the wrong data to be reported for Combat Log Event events
+ ** (r436) Fixed a bug causing the wrong data to be reported for Combat Event events
  ** (r437) When a meta icon changes the icon it is checking, it should no longer stop any animations that the meta icon itself initiated (non-inherited animations)
  ** (r439) TellMeWhen-5.0.0.lua:4227: attempt to index local "ic" (a number value)
  ** (r441) TellMeWhen-5.0.0.lua:3572: attempt to compare nil with number
@@ -54,7 +55,7 @@
  ** (r443) Fixed SPELL_ACTIVATION_OVERLAY_GLOW_HIDE typo.
  ** (r451) {{{TellMeWhen-enUS.lua:404: nesting of [[...]] is deprecated near "["}}}
  ** (r452) The Resting condition should now properly update when entering a battleground/dungeon/etc while resting, and vice-versa.
- ** (r453) Combat log event icons should no longer process any sound/text/animation events when their parent group is hidden.
+ ** (r453) Combat Event icons should no longer process any sound/text/animation events when their parent group is hidden.
  ** (r459) TellMeWhen-5.0.0.lua:4740: attempt to index field "OnDuration" (a boolean value)
  ** (r461) TellMeWhen.lua line 3105: attempt to index field '?' (a boolean value)
  ** (r462) AceDB-3.0-22.lua:104 in function <Ace3\AceDB-3.0\AceDB-3.0.lua:100 table index is NaN (MAYBE)
@@ -83,7 +84,7 @@
  * Bug Fixes:
  ** (r412) icd.lua:134 attempt to index field 'HELP' (a nil value)
  ** (r413) Meta icons that are sorted by high duration should now diplay the first icon shown if no icons have an active timer
- ** (r414) Combat log icons that have spell filters without defined durations should now properly fall back to the icon-wide duration
+ ** (r414) Combat Event icons that have spell filters without defined durations should now properly fall back to the icon-wide duration
  ** (r416) Meta icons that are set to sort should once again sort
  ** (r417) The icon unit setting should now always save when using the dropdown to change it
 
