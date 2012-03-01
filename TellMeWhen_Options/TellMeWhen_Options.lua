@@ -3922,6 +3922,16 @@ function IE:Copy_DropDown(...)
 	local DROPDOWN = self
 	local EDITBOX = DROPDOWN:GetParent()
 
+	if not CI.ic then
+		for icon in TMW:InIcons() do
+			-- hack to get the first icon that exists and is shown
+			if icon:IsVisible() then
+				TMW.IE:Load(1, icon)
+				break
+			end
+		end
+	end
+	
 	local iconIDCurrent = TMW.CI.i
 	local groupIDCurrent = TMW.CI.g
 	if EDITBOX.obj then -- ace3 gui widget
@@ -3929,10 +3939,6 @@ function IE:Copy_DropDown(...)
 		iconIDCurrent = nil
 	elseif IE.CurrentTab:GetID() > #IE.Tabs - 2 then
 		iconIDCurrent = nil
-	end
-
-	if not CI.ic then
-		TMW.IE:Load(1, TMW:InIcons()()) -- hack to get the first icon that exists
 	end
 	local info
 

@@ -1,3 +1,7 @@
+===v5.0.3===
+ * Bug Fixes:
+ ** (r489) TellMeWhen-5.0.2.lua:528 attempt to index local "h" (a nil value)
+ 
 ===v5.0.2===
  * Bug Fixes:
  ** (r485) (Condition): attempt to call global "GetEclipseDirection" (a nil value)
