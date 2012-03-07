@@ -36,6 +36,7 @@ Type.chooseNameTitle = L["ICONMENU_CHOOSENAME"] .. " " .. L["ICONMENU_CHOOSENAME
 Type.SUGType = "cast"
 Type.AllowNoName = true
 Type.usePocketWatch = 1
+Type.unitType = "unitid"
 Type.WhenChecks = {
 	text = L["ICONMENU_CASTSHOWWHEN"],
 	{ value = "alpha", 			text = L["ICONMENU_PRESENT"], 			colorCode = "|cFF00FF00" },
@@ -131,7 +132,6 @@ function Type:Setup(icon, groupID, iconID)
 	
 	local UnitSet
 	icon.Units, UnitSet = TMW:GetUnits(icon, icon.Unit)
-	icon.TableToIterate = icon.Units
 	
 	if UnitSet.allUnitsChangeOnEvent then
 		icon:SetUpdateMethod("manual")

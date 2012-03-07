@@ -41,6 +41,7 @@ Type.AllowNoName = true
 Type.chooseNameTitle = L["ICONMENU_CHOOSENAME"] .. " " .. L["ICONMENU_CHOOSENAME_ORBLANK"]
 Type.SUGType = "cleu"
 Type.spacebefore = true
+Type.unitType = "name"
 -- Type.leftCheckYOffset = -130 -- nevermind
 
 

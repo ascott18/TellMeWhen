@@ -1,8 +1,10 @@
 ===v5.0.3===
  * Spell Crit is now an event that can be tracked by Combat Event icons
+ * (Began work on implementing LibDogTag as the text manager for TMW instead of TMW's current system which is very limited.)
  * Bug Fixes:
  ** (r489) TellMeWhen-5.0.2.lua:528 attempt to index local "h" (a nil value)
- 
+ ** (r491) Re-re-re-re-re-re fixed meta icons that check entire groups
+
 ===v5.0.2===
  * Bug Fixes:
  ** (r485) (Condition): attempt to call global "GetEclipseDirection" (a nil value)
@@ -12,7 +14,7 @@
  ** (r483) Unit Cooldown icons checking spells by name should now function properly.
  ** (r483) Cooldown sweeps and other icon components are no longer anonymous frames, returning to their previous nomenclature appended by an underscore and the icon's view type (Currently only "icon", more coming soon)
  ** (r483) Fixed a faulty upgrade of the "PassThrough" setting when upgrading past 50035. Settings that already had this faulty upgrade occur may notice that the "Pass Through" setting on some of their events was toggled from checked to unchecked.
- 
+
 ===v5.0.0===
  * Super cool changes:
  ** All icon types have been changed to be entirely event based, meaning that they will no longer update themselves when they don't need to, resulting in a (tremendous) performance increase.
@@ -27,7 +29,7 @@
  ** Added Floating Combat Text as a text output.
  ** Added two new animations: Icon Border and Icon Image Overlay.
  ** You can now press tab to insert the first entry that is displayed in the suggestion list.
- 
+
  * Really boring changes:
  ** The icon listing in dropdowns for meta icons, condition icons, and others is now much prettier and more informative.
  ** Enrage is now a proper dispel type, and no longer relies on a pre-defined list of enrages.
@@ -35,7 +37,7 @@
  ** Icons that check units now have their units managed behind the scenes whenever possible so that icons aren't trying to check units that don't exist.
  ** You can now drag spells and items to the Custom Texture editbox to easily insert the texture of that spell or item.
  ** Power bars and Timer bars have been shipped out into their own files, so a completely restart will be needed if you want to use them.
- 
+
  * Bug Fixes:
  ** (r427) (Condition):  attempt to call global 'GetPrimaryTalentTree' (a nil value)
  ** (r428) (Condition):  attempt to call global 'IsResting' (a nil value)

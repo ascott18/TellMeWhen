@@ -38,6 +38,7 @@ Type.desc = L["ICONMENU_BUFFDEBUFF_DESC"]
 Type.usePocketWatch = 1
 Type.spacebefore = true
 Type.SUGType = "buff"
+Type.unitType = "unitid"
 Type.TypeChecks = {
 	text = L["ICONMENU_BUFFTYPE"],
 	setting = "BuffOrDebuff",

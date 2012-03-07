@@ -41,6 +41,7 @@ Type.desc = L["ICONMENU_UNITCOOLDOWN_DESC"]
 Type.usePocketWatch = 1
 Type.DurationSyntax = 1
 Type.SUGType = "spellwithduration"
+Type.unitType = "unitid"
 --Type.AllowNoUnit = true
 --Type.unitTitle = L["ICONMENU_UNITSTOWATCH"] .. " " .. L["ICONMENU_UNITSTOWATCH_ALL"]
 Type.WhenChecks = {
@@ -279,24 +280,14 @@ end
 
 local function UnitCooldown_OnUpdate(icon, time)
 	local unstart, unname, unduration, usename, dobreak, useUnit, unUnit
-	local Alpha, NameArray, OnlySeen, Sort, Durations, TableToIterate = icon.Alpha, icon.NameArray, icon.OnlySeen, icon.Sort, icon.Durations, icon.TableToIterate
+	local Alpha, NameArray, OnlySeen, Sort, Durations, Units = icon.Alpha, icon.NameArray, icon.OnlySeen, icon.Sort, icon.Durations, icon.Units
 	local NAL = #NameArray
 	local d = Sort == -1 and huge or 0
 	local UnAlpha = icon.UnAlpha
 
-	--[[for k, v in next, TableToIterate do
-		local unit, guid, cooldowns
-		if TableToIterate == Cooldowns then
-			guid = k
-			unit = GUIDsToNames[guid] -- unit is a name here, not a unitID
-			cooldowns = v
-		else--if TableToIterate == icon.Units then
-			unit = v
-			guid = UnitGUID(unit)
-			cooldowns = guid and Cooldowns[guid]
-		end]]
-	for u = 1, #TableToIterate do -- TableToIterate is icon.Units - i want to keep compatability with the other code that allows all units (for now)
-		local unit = TableToIterate[u]
+	
+	for u = 1, #Units do
+		local unit = Units[u]
 		local guid = UnitGUID(unit)
 		local cooldowns = guid and Cooldowns[guid]
 
@@ -382,14 +373,8 @@ function Type:Setup(icon, groupID, iconID)
 	icon.NameHash = TMW:GetSpellNames(icon, icon.Name, nil, nil, 1)
 	icon.Durations = TMW:GetSpellDurations(icon, icon.Name)
 
-	--if icon.Unit == "" then
-	--	icon.Units = nil
-	--	icon.TableToIterate = Cooldowns
-	--else
-		local UnitSet
-		icon.Units, UnitSet = TMW:GetUnits(icon, icon.Unit)
-		icon.TableToIterate = icon.Units
-	--end
+	local UnitSet
+	icon.Units, UnitSet = TMW:GetUnits(icon, icon.Unit)
 	
 	if UnitSet.allUnitsChangeOnEvent then
 		icon:SetUpdateMethod("manual")

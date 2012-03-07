@@ -346,7 +346,7 @@ function TMW:GetIconMenuText(g, i, data)
 
 	text = text == "" and L["UNNAMED"] or text
 	local textshort = not dontShorten and strsub(text, 1, 40) or text
-	
+
 	if strlen(text) > 40 and not dontShorten then
 		textshort = textshort .. "..."
 	end
@@ -507,14 +507,14 @@ do -- TMW:ReconcileData()
 
 		for ics, groupID in TMW:InIconSettings() do
 			if not limitSourceGroup or groupID == limitSourceGroup then
-			
+
 				-- update any changed icons that meta icons are checking
 				for k, ic in pairs(ics.Icons) do
 					if type(ic) == "string" then
 						replace(ics.Icons, k, source, destination, matchSource, matchDestination, swap)
 					end
 				end
-				
+
 				-- update any changed icons that icon show/hide events are checking
 				for eventSettings in TMW:InNLengthTable(ics.Events) do
 					if type(eventSettings.Icon) == "string" then
@@ -686,22 +686,22 @@ local groupFontConfigTemplate = {
 }
 
 local groupSortPriorities = {
-	"id",		
-	"duration",	
-	"stacks",	
+	"id",
+	"duration",
+	"stacks",
 	"visiblealpha",
 	"visibleshown",
-	"alpha",	
+	"alpha",
 	"shown",
-}	
+}
 local groupSortValues = {
-	L["UIPANEL_GROUPSORT_id"],		
+	L["UIPANEL_GROUPSORT_id"],
 	L["UIPANEL_GROUPSORT_duration"],
-	L["UIPANEL_GROUPSORT_stacks"],	
+	L["UIPANEL_GROUPSORT_stacks"],
 	L["UIPANEL_GROUPSORT_visiblealpha"],
-	L["UIPANEL_GROUPSORT_visibleshown"],	
-	L["UIPANEL_GROUPSORT_alpha"],	
-	L["UIPANEL_GROUPSORT_shown"],	
+	L["UIPANEL_GROUPSORT_visibleshown"],
+	L["UIPANEL_GROUPSORT_alpha"],
+	L["UIPANEL_GROUPSORT_shown"],
 }
 local groupSortMethodTemplate
 groupSortMethodTemplate = {
@@ -733,7 +733,7 @@ groupSortMethodTemplate = {
 				local g = findid(info)
 				local priorityID = tonumber(info[#info-1])
 				local Method = db.profile.Groups[g].SortPriorities[priorityID].Method
-				
+
 				local desc = L["UIPANEL_GROUPSORT_METHODNAME_DESC"]:format(priorityID) .. "\r\n\r\n" .. L["UIPANEL_GROUPSORT_" .. Method .. "_DESC"]
 				if groupSortMethodTemplate.disabled(info, priorityID) then
 					desc = desc .. "\r\n\r\n" .. L["UIPANEL_GROUPSORT_METHODDISABLED_DESC"]
@@ -744,7 +744,7 @@ groupSortMethodTemplate = {
 			width = "double",
 			values = groupSortValues,
 			style = "dropdown",
-			order = 1,		
+			order = 1,
 			get = function(info)
 				local g = findid(info)
 				local priorityID = tonumber(info[#info-1])
@@ -949,7 +949,7 @@ local groupConfigTemplate = {
 		},
 		Count = groupFontConfigTemplate,
 		Bind = groupFontConfigTemplate,
-		
+
 		Sorting = {
 			name = L["UIPANEL_GROUPSORT"],
 			desc = L["UIPANEL_GROUPSORT_DESC"],
@@ -2080,7 +2080,7 @@ ME = TMW:NewModule("MetaEditor") TMW.ME = ME
 function ME:LoadConfig()
 	local groupID, iconID = CI.g, CI.i
 	local settings = CI.ics.Icons
-	
+
 	for k, v in pairs(settings) do
 		local mg = ME[k] or CreateFrame("Frame", "TellMeWhen_IconEditorMainIcons" .. k, IE.Main.Icons.ScrollFrame.Icons, "TellMeWhen_MetaGroup", k)
 		ME[k] = mg
@@ -2168,7 +2168,7 @@ function ME:IconMenu()
 		for icon, groupID, iconID in TMW:InIcons() do
 			if icon:IsValid() and icon.group:GetName() == UIDROPDOWNMENU_MENU_VALUE and CI.ic ~= icon then
 				local info = UIDropDownMenu_CreateInfo()
-				
+
 				local text, textshort, tooltip = TMW:GetIconMenuText(groupID, iconID)
 				if text:sub(-2) == "))" then
 					textshort = textshort .. " " .. L["fICON"]:format(iconID)
@@ -2782,7 +2782,7 @@ function IE:OnUpdate()
 		icon:Setup()
 	end
 	wipe(IE.iconsToUpdate)
-	
+
 	-- check and see if the settings of the current icon have changed.
 	-- if they have, create a history point (or at least try to)
 	-- IMPORTANT: do this after running icon updates because SoundData is stored in the event table, which makes 2 changes over 2 frames in 1 user action, which SEVERELY screws things up
@@ -3180,7 +3180,7 @@ function IE:LoadSettings()
 			end
 		end
 	end
-	
+
 	IE.Main.TypeChecks.Runes:Hide()
 	if CI.t == "runes" then
 		for k, frame in pairs(IE.Main.TypeChecks.Runes) do
@@ -3444,10 +3444,10 @@ end
 function IE:Type_Dropdown_OnClick()
 	CI.ics.Type = self.value
 	CI.ic.texture:SetTexture(nil)
-	
+
 	IE:ScheduleIconSetup()
 	CI.t = self.value
-	
+
 	SUG.redoIfSame = 1
 	SUG.Suggest:Hide()
 	HELP:HideForIcon(CI.ic)
@@ -3932,7 +3932,7 @@ function IE:Copy_DropDown(...)
 			end
 		end
 	end
-	
+
 	local iconIDCurrent = TMW.CI.i
 	local groupIDCurrent = TMW.CI.g
 	if EDITBOX.obj then -- ace3 gui widget
@@ -4629,9 +4629,9 @@ EVENTS = TMW.EVENTS
 
 function EVENTS:SetupEventSettings()
 	local EventSettings = self.EventSettings
-	
+
 	if not EVENTS.currentEventID then return end
-	
+
 	local eventData = self.Events[EVENTS.currentEventID].eventData
 
 	EventSettings.EventName:SetText(eventData.text) --L["EVENTS_SETTINGS_HEADER_SUB"]:format(eventData.text))
@@ -4736,7 +4736,7 @@ function EVENTS:IconMenu_DropDown()
 		for icon, groupID, iconID in TMW:InIcons() do
 			if icon:IsValid() and UIDROPDOWNMENU_MENU_VALUE == groupID and CI.ic ~= icon then
 				local info = UIDropDownMenu_CreateInfo()
-				
+
 				local text, textshort, tooltip = TMW:GetIconMenuText(groupID, iconID)
 				if text:sub(-2) == "))" then
 					textshort = textshort .. " " .. L["fICON"]:format(iconID)
@@ -4745,19 +4745,19 @@ function EVENTS:IconMenu_DropDown()
 				info.tooltipTitle = text
 				info.tooltipText = format(L["GROUPICON"], TMW:GetGroupName(groupID, groupID, 1), iconID) .. "\r\n" .. tooltip
 				info.tooltipOnButton = true
-				
+
 				info.value = icon:GetName()
 				info.arg1 = self
 				info.func = EVENTS.IconMenu_DropDown_OnClick
-				
+
 				info.tCoordLeft = 0.07
 				info.tCoordRight = 0.93
 				info.tCoordTop = 0.07
 				info.tCoordBottom = 0.93
 				info.icon = icon.texture:GetTexture()
-				
+
 				UIDropDownMenu_AddButton(info, UIDROPDOWNMENU_MENU_LEVEL)
-			end		
+			end
 		end
 	elseif UIDROPDOWNMENU_MENU_LEVEL == 1 then
 		for group, groupID in TMW:InGroups() do
@@ -4795,7 +4795,7 @@ function EVENTS:CreateEventButtons(globalDescKey)
 		yAdjustTitle, yAdjustText = 3, -3
 	end
 	local Settings = self:GetEventSettings()
-	
+
 	for eventSettings, i in TMW:InNLengthTable(CI.ics.Events) do
 		local eventData = TMW.EventList[eventSettings.Event]
 		local frame = Events[i]
@@ -4814,10 +4814,10 @@ function EVENTS:CreateEventButtons(globalDescKey)
 			local p, t, r, x, y = frame.DataText:GetPoint(2)
 			frame.DataText:SetPoint(p, t, r, x, y + yAdjustText)
 		end
-		
+
 		if eventData then
 			frame:Show()
-			
+
 			frame.event = eventData.name
 			frame.eventData = eventData
 
@@ -4828,11 +4828,11 @@ function EVENTS:CreateEventButtons(globalDescKey)
 		else
 			frame.EventName:SetText("UNKNOWN EVENT: " .. tostring(eventSettings.Event))
 			frame:Disable()
-			
+
 		end
 		previousFrame = frame
 	end
-	
+
 	for i = max(CI.ics.Events.n + 1, 1), #Events do
 		Events[i]:Hide()
 	end
@@ -4841,7 +4841,7 @@ function EVENTS:CreateEventButtons(globalDescKey)
 		Events[1]:SetPoint("TOPLEFT", Events, "TOPLEFT", 0, 0)
 		Events[1]:SetPoint("TOPRIGHT", Events, "TOPRIGHT", 0, 0)
 	end
-	
+
 	Events:SetHeight(max(CI.ics.Events.n*(Events[1] and Events[1]:GetHeight() or 0), 1))
 end
 
@@ -4881,7 +4881,7 @@ function EVENTS:GetModuleForEventSettings(arg1)
 	else
 		eventSettings = EVENTS:GetEventSettings(arg1)
 	end
-	
+
 	if eventSettings then
 		return EVENTS:GetModule(eventSettings.Type, true)
 	end
@@ -4889,9 +4889,9 @@ end
 
 function EVENTS:ChooseEvent(id)
 	local eventFrame = self.Events[id]
-	
+
 	EVENTS.currentEventID = id ~= 0 and id or nil
-	
+
 	for _, Module in EVENTS:IterateModules() do
 		Module.frame:Hide()
 	end
@@ -4900,7 +4900,7 @@ function EVENTS:ChooseEvent(id)
 		eventModule.frame:Show()
 		EVENTS.currentModule = eventModule
 	end
-	
+
 	if not eventFrame or id == 0 or not eventFrame:IsShown() then
 		return
 	end
@@ -4915,21 +4915,21 @@ function EVENTS:ChooseEvent(id)
 	eventFrame:GetHighlightTexture():SetVertexColor(NORMAL_FONT_COLOR.r, NORMAL_FONT_COLOR.g, NORMAL_FONT_COLOR.b, 1)
 
 	IE.Events.ScrollFrame.adjustmentQueued = true
-	
+
 	return eventFrame
 end
 
 function EVENTS:AdjustScrollFrame()
 	local ScrollFrame = IE.Events.ScrollFrame
 	local eventFrame = self.Events[self.currentEventID]
-	
+
 	if not eventFrame then return end
-	
+
 	if eventFrame:GetBottom() and eventFrame:GetBottom() < ScrollFrame:GetBottom() then
 		ScrollFrame.ScrollBar:SetValue(ScrollFrame.ScrollBar:GetValue() + (ScrollFrame:GetBottom() - eventFrame:GetBottom()))
 	elseif eventFrame:GetTop() and eventFrame:GetTop() > ScrollFrame:GetTop() then
 		ScrollFrame.ScrollBar:SetValue(ScrollFrame.ScrollBar:GetValue() - (eventFrame:GetTop() - ScrollFrame:GetTop()))
-	end    
+	end
 end
 
 function EVENTS:GetDisplayInfo(event)
@@ -4974,7 +4974,7 @@ end
 function EVENTS:LoadConfig()
 
 	self:CreateEventButtons()
-	
+
 	local oldID = self:EnableAndDisableEvents()
 
 	if oldID and oldID > 0 then
@@ -4995,13 +4995,13 @@ function EVENTS:LoadConfig()
 	else
 		oldID = 1
 	end
-	
+
 	if CI.ics.Events.n <= 0 then
 		self.EventSettings:Hide()
 	else
 		self.EventSettings:Show()
 	end
-	
+
 	for _, Module in self:IterateModules() do
 		Module.frame:Hide()
 	end
@@ -5013,7 +5013,7 @@ function EVENTS:LoadConfig()
 	if IE.Events.ScrollFrame:GetVerticalScrollRange() == 0 then
 		IE.Events.ScrollFrame.ScrollBar:Hide()
 	end
-	
+
 	self:SetTabText()
 end
 TMW:RegisterCallback("TMW_CONFIG_LOAD", EVENTS.LoadConfig, EVENTS)
@@ -5030,7 +5030,7 @@ function EVENTS:SetTabText()
 end
 
 function EVENTS:GetEventSettings(eventID)
-	
+
 	return CI.ics.Events[eventID or EVENTS.currentEventID]
 end
 
@@ -5046,7 +5046,7 @@ function EVENTS:TMW_OPTIONS_LOADED()
 	self.tabText = L["EVENTS_TAB"]
 	self.Events = IE.Events.Events
 	self.EventSettings = IE.Events.EventSettings
-	
+
 	--self.currentModule = self.orderedModules[1]
 --	self.currentModule.frame:Show()
 end
@@ -5057,9 +5057,9 @@ function EVENTS:AddEvent_Dropdown()
 	if UIDROPDOWNMENU_MENU_LEVEL == 1 then
 		for i, eventData in ipairs(TMW.EventList) do
 			local info = UIDropDownMenu_CreateInfo()
-			
+
 			info.disabled = Types[CI.t]["EventDisabled_" .. eventData.name]
-			
+
 			info.text = get(eventData.text)
 			info.tooltipTitle = get(eventData.text)
 			if info.disabled then
@@ -5069,56 +5069,56 @@ function EVENTS:AddEvent_Dropdown()
 			end
 			info.tooltipWhileDisabled = true
 			info.tooltipOnButton = true
-			
+
 			info.value = eventData.name
 			info.hasArrow = true
 			info.notCheckable = true
 			info.keepShownOnClick = true
-			
+
 			UIDropDownMenu_AddButton(info, UIDROPDOWNMENU_MENU_LEVEL)
 		end
 	elseif UIDROPDOWNMENU_MENU_LEVEL == 2 then
 		for i, Module in ipairs(EVENTS.orderedModules) do
 			local info = UIDropDownMenu_CreateInfo()
-			
+
 			info.text = Module.tabText
 		--[[	info.tooltipTitle = get(eventData.text)
 			info.tooltipText = get(eventData.desc)
 			info.tooltipOnButton = true]]
-			
+
 			info.value = Module.moduleName
 			info.hasAlpha = true
 			info.func = EVENTS.AddEvent_Dropdown_OnClick
 			info.arg1 = UIDROPDOWNMENU_MENU_VALUE
 			info.arg2 = Module.moduleName
 			info.notCheckable = true
-			
+
 			UIDropDownMenu_AddButton(info, UIDROPDOWNMENU_MENU_LEVEL)
-		end	
+		end
 	end
 end
 
 function EVENTS:AddEvent_Dropdown_OnClick(event, type)
 	CI.ics.Events.n = CI.ics.Events.n + 1
-	
+
 	local n = CI.ics.Events.n
 	local EventSettings = CI.ics.Events[n]
-	
+
 	EventSettings.Event = event
 	EventSettings.Type = type
-	
+
 	local eventData = TMW.EventList[event]
 	if eventData and eventData.applyDefaultsToSetting then
 		eventData.applyDefaultsToSetting(EventSettings)
 	end
-	
+
 	EVENTS:LoadConfig()
 
 	local Module = EVENTS:GetModuleForEventSettings(n)
 	if Module then
 		Module:SelectEvent(n)
 	end
-	
+
 	CloseDropDownMenus()
 end
 
@@ -5126,12 +5126,12 @@ end
 function EVENTS:UpOrDown(button, delta)
 	local ID = button:GetID()
 	local settings = CI.ics.Events
-	
+
 	local curdata = settings[ID]
 	local destinationdata = settings[ID+delta]
 	settings[ID] = destinationdata
 	settings[ID+delta] = curdata
-	
+
 	EVENTS:LoadConfig()
 end
 
@@ -5189,7 +5189,7 @@ function SND:SetupEventDisplay(eventID)
 	if name == "None" then
 		name = "|cff808080" .. NONE
 	end
-	
+
 	self.Events[eventID].DataText:SetText("|cffcccccc" .. self.tabText .. ":|r " .. name)
 end
 
@@ -6813,7 +6813,7 @@ function Module:Table_GetSpecialSuggestions(suggestions)
 	local atBeginning = SUG.atBeginning
 	local lastName = SUG.lastName
 
-	
+
 	if strfind("gcd", atBeginning) or strfind(L["GCD"]:lower(), atBeginning) then
 		suggestions[#suggestions + 1] = "GCD"
 	end
@@ -7749,7 +7749,7 @@ function CNDT:IconMenu_DropDown()
 		for icon, groupID, iconID in TMW:InIcons() do
 			if icon:IsValid() and UIDROPDOWNMENU_MENU_VALUE == groupID and CI.ic ~= icon then
 				local info = UIDropDownMenu_CreateInfo()
-				
+
 				local text, textshort, tooltip = TMW:GetIconMenuText(groupID, iconID)
 				if text:sub(-2) == "))" then
 					textshort = textshort .. " " .. L["fICON"]:format(iconID)
@@ -7758,11 +7758,11 @@ function CNDT:IconMenu_DropDown()
 				info.tooltipTitle = text
 				info.tooltipText = L["GROUPICON"]:format(TMW:GetGroupName(groupID, groupID, 1), iconID) .. "\r\n" .. tooltip
 				info.tooltipOnButton = true
-				
+
 				info.arg1 = self
 				info.value = icon:GetName()
 				info.func = CNDT.IconMenu_DropDown_OnClick
-				
+
 				info.tCoordLeft = 0.07
 				info.tCoordRight = 0.93
 				info.tCoordTop = 0.07

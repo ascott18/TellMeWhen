@@ -28,7 +28,7 @@
 		<CheckedTexture urgency="5" file="Interface\Buttons\UI-CheckBox-Check"/>
 		<DisabledCheckedTexture urgency="5" file="Interface\Buttons\UI-CheckBox-Check-Disabled"/>
 	</CheckButton>
-	
+
 	<!-- Appearance Templates -->
 	<Frame name="TellMeWhen_BorderedFrame" virtual="true">
 		<Backdrop edgeFile="Interface\DialogFrame\UI-DialogBox-Background-Dark" tile="true">
@@ -44,8 +44,8 @@
 			</Layer>
 		</Layers>
 	</Frame>
-	
-	
+
+
 	<CheckButton name="TellMeWhen_RadioCheckTemplate" virtual="true" inherits="TellMeWhen_CheckTemplate">
 		<Scripts>
 			<OnLoad>
@@ -1505,17 +1505,17 @@
 						local Events = TMW.CI.ics.Events
 						tremove(Events, self:GetParent():GetID())
 						Events.n = Events.n - 1
-						
+
 						TMW.EVENTS:LoadConfig()
 					</OnClick>
 				</Scripts>
-				
+
 				<NormalTexture urgency="5" file="Interface\Buttons\UI-Panel-MinimizeButton-Up"/>
 				<PushedTexture file="Interface\Buttons\UI-Panel-MinimizeButton-Down"/>
 				<HighlightTexture urgency="5" file="Interface\Buttons\UI-Panel-MinimizeButton-Highlight" alphaMode="ADD"/>
 			</Button>
-			
-			
+
+
 			<Button name="$parentPlay" parentKey="Play">
 				<Size x="15" y="15"/>
 				<Anchors>
@@ -1572,7 +1572,7 @@
 				if self and TMW.EVENTS.draggingFrame and self ~= TMW.EVENTS.draggingFrame then
 					local selfSettings = TMW.CI.ics.Events[self:GetID()]
 					local dragSettings = TMW.CI.ics.Events[TMW.EVENTS.draggingFrame:GetID()]
-					
+
 					TMW.CI.ics.Events[self:GetID()] = dragSettings
 					TMW.CI.ics.Events[TMW.EVENTS.draggingFrame:GetID()] = selfSettings
 					TMW.EVENTS.draggingFrame = self
@@ -1608,7 +1608,7 @@
 				<Anchor point="BOTTOMRIGHT" y="1"/>
 			</Anchors>
 		</HighlightTexture>
-		
+
 	</Button>
 
 	<Button name="TellMeWhen_ChannelSelectButton" inherits="TellMeWhen_BorderedFrame" virtual="true" >
@@ -1629,7 +1629,7 @@
 					TMW.ANN:GetEventSettings().Channel = self.channel
 					TMW.IE:ScheduleIconSetup()
 				end
-				
+
 				TMW.EVENTS:LoadConfig()
 				TMW.ANN:SelectChannel(self.channel)
 			</OnClick>
@@ -1686,7 +1686,7 @@
 					TMW.SND:GetEventSettings().Sound = name
 					TMW.IE:ScheduleIconSetup()
 				end
-				
+
 				TMW.EVENTS:LoadConfig()
 				TMW.SND:SelectSound(name)
 			</OnClick>
@@ -1708,7 +1708,7 @@
 					TMW.ANIM:GetEventSettings().Animation = self.animation
 					TMW.IE:ScheduleIconSetup()
 				end
-				
+
 				TMW.EVENTS:LoadConfig()
 				TMW.ANIM:SelectAnimation(self.animation)
 			</OnClick>
@@ -1937,7 +1937,7 @@
 						self:SetText(TMW.L["EVENTS_TAB"])
 						function self:OnClick()
 							TMW.EVENTS:LoadConfig()
-						end						
+						end
 					</OnLoad>
 				</Scripts>
 			</Button>
@@ -3561,11 +3561,11 @@
 					</OnShow>
 				</Scripts>
 			</Frame>
-			
-			
+
+
 			<Frame name="$parentEvents" setAllPoints="true" parentKey="Events">
 				<Frames>
-				
+
 					<ScrollFrame name="$parentSF" parentKey="ScrollFrame" inherits="UIPanelScrollFrameCodeTemplate" >
 						<Size x="210" y="155"/>
 						<Anchors>
@@ -3612,7 +3612,7 @@
 							</Slider>
 						</Frames>
 					</ScrollFrame>
-					
+
 					<Button name="$parentAddEvent" inherits="TellMeWhen_BorderedFrame" parentKey="AddEvent">
 						<Size y="30"/>
 						<Anchors>
@@ -3664,7 +3664,7 @@
 							</Anchors>
 						</HighlightTexture>
 					</Button>
-					
+
 					<Frame name="$parentEventSettings" parentKey="EventSettings">
 						<Size y="1"/>
 						<Anchors>
@@ -3835,7 +3835,7 @@
 							</OnLoad>
 						</Scripts>
 					</Frame>
-		
+
 					<Frame name="$parentSound" inherits="TellMeWhen_EventContainer" parentKey="Sound">
 						<Frames>
 							<Frame name="$parentSounds" parentKey="Sounds">
@@ -3959,7 +3959,7 @@
 										TMW.SND:SelectSound(t)
 										TMW.IE:ScheduleIconSetup()
 										self:GetScript("OnTextChanged")(self)
-										
+
 										TMW.EVENTS:LoadConfig()
 									</OnEditFocusLost>
 								</Scripts>
@@ -4000,7 +4000,7 @@
 										end
 										TMW.IE:ScheduleIconSetup()
 										self:GetScript("OnTextChanged")(self)
-										
+
 										TMW.EVENTS:LoadConfig()
 									</OnEditFocusLost>
 								</Scripts>
@@ -4287,7 +4287,7 @@
 								</Anchors>
 								<Scripts>
 									<OnValueChanged>
-										value = max(self:GetValue(), 0) -- whatever... just do it 
+										value = max(self:GetValue(), 0) -- whatever... just do it
 
 										self.Mid:SetText(TMW.L["ANIM_SECONDS"]:format(TMW:FormatSeconds(value, nil, true)))
 
@@ -4390,7 +4390,7 @@
 								<NormalTexture name="$parentNormalTexture" file="Interface\ChatFrame\ChatFrameColorSwatch"/>
 							</Button>
 
-							
+
 
 							<EditBox name="$parentImage" inherits="TellMeWhen_InputBoxTemplate" parentKey="Image" autoFocus="false">
 								<Size x="140" y="15"/>
@@ -4418,7 +4418,7 @@
 									</OnEditFocusLost>
 								</Scripts>
 							</EditBox>
-							
+
 							<CheckButton name="$parentFade" inherits="TellMeWhen_CheckTemplate" parentKey="Fade">
 								<Anchors>
 									<Anchor point="TOP" relativeTo="$parentColor" relativePoint="BOTTOM" y="-5"/>
@@ -4434,7 +4434,7 @@
 								</Scripts>
 							</CheckButton>
 
-							
+
 							<Slider name="$parentThickness" parentKey="Thickness" inherits="TellMeWhen_AnimationSliderTemplate" valuestep="0.1" >
 								<Size y="17"/>
 								<Anchors>
@@ -4540,7 +4540,7 @@
 					</OnLoad>
 				</Scripts>
 			</Frame>
-			
+
 
 			<Frame name="$parentMainOptions" enableMouse="true" hidden="true" setAllPoints="true" parentKey="MainOptions" >
 				<Frames>
