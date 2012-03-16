@@ -4,6 +4,7 @@
  * Bug Fixes:
  ** (r489) TellMeWhen-5.0.2.lua:528 attempt to index local "h" (a nil value)
  ** (r491) Re-re-re-re-re-re fixed meta icons that check entire groups
+ ** (r492) TellMeWhen-5.0.2.lua:1080 attempt to compare nil with number (MAYBE)
 
 ===v5.0.2===
  * Bug Fixes:

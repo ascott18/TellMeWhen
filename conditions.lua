@@ -2681,8 +2681,19 @@ local EnvMeta = {
 function CNDT:TMW_GLOBAL_UPDATE()
 	Env.Locked = db.profile.Locked
 	NumShapeshiftForms = GetNumShapeshiftForms()
+	
+	for _, ConditionObj in pairs(TMW.Classes.ConditionObject.instances) do
+		ConditionObj.NextUpdateTime = TMW.time
+	end
 end
 TMW:RegisterCallback("TMW_GLOBAL_UPDATE", CNDT)
+
+function CNDT:TMW_GLOBAL_UPDATE_POST()
+	for _, ConditionObj in pairs(TMW.Classes.ConditionObject.instances) do
+		ConditionObj.NextUpdateTime = TMW.time
+	end
+end
+TMW:RegisterCallback("TMW_GLOBAL_UPDATE_POST", CNDT)
 
 
 function CNDT:DoConditionSubstitutions(parent, v, c, thisstr)

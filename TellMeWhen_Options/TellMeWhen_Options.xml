@@ -1580,6 +1580,8 @@
 				end
 			</OnEnter>
 			<OnClick>
+				TMW.IE:SaveSettings()
+				
 				local Module = TMW.EVENTS:GetModuleForEventSettings(self:GetID())
 				if Module then
 					Module:SelectEvent(self:GetID())
@@ -2540,7 +2542,6 @@
 
 								self:GetScript("OnTextChanged")(self)
 							</OnEditFocusLost>
-
 							<OnReceiveDrag>
 								TMW.ID:SpellItemToIcon(TMW.CI.ic, TMW.ID.TextureDragReceived, TMW.ID)
 							</OnReceiveDrag>
@@ -3774,6 +3775,9 @@
 									</Layer>
 								</Layers>
 								<Scripts>
+									<OnLoad>
+										TMW:RegisterCallback("TMW_CONFIG_SAVE_SETTINGS", self.ClearFocus, self)
+									</OnLoad>
 									<OnEditFocusLost>
 										EditBox_ClearHighlight(self)
 
@@ -3917,6 +3921,8 @@
 									<OnLoad>
 										TMW:TT(self, "SOUND_CUSTOM", "SOUND_CUSTOM_DESC")
 										self.label = TMW.L["SOUND_CUSTOM"]
+										
+										TMW:RegisterCallback("TMW_CONFIG_SAVE_SETTINGS", self.ClearFocus, self)
 									</OnLoad>
 									<OnEnter>
 										self.Background:Show()
@@ -3991,6 +3997,8 @@
 										self.BackgroundText:SetWidth(self:GetWidth())
 										self.Header:SetText(TMW.L["ANN_EDITBOX"])
 										TMW.SUG:EnableEditBox(self, "textsubsANN")
+										
+										TMW:RegisterCallback("TMW_CONFIG_SAVE_SETTINGS", self.ClearFocus, self)
 									</OnLoad>
 									<OnEditFocusLost>
 										EditBox_ClearHighlight(self)
@@ -4780,8 +4788,12 @@
 					<Anchor point="CENTER" relativePoint="TOPRIGHT" x="-22" y="-22"/>
 				</Anchors>
 				<Scripts>
-					<OnLoad>self:SetFrameLevel(self:GetFrameLevel() + 2)</OnLoad>
-					<OnClick>self:GetParent():Hide()</OnClick>
+					<OnLoad>
+						self:SetFrameLevel(self:GetFrameLevel() + 2)
+					</OnLoad>
+					<OnClick>
+						self:GetParent():Hide()
+					</OnClick>
 				</Scripts>
 			</Button>
 

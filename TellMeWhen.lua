@@ -34,7 +34,7 @@ local DogTag = LibStub("LibDogTag-3.0", true)
 TELLMEWHEN_VERSION = "5.0.3"
 TELLMEWHEN_VERSION_MINOR = strmatch(" @project-version@", " r%d+") or ""
 TELLMEWHEN_VERSION_FULL = TELLMEWHEN_VERSION .. TELLMEWHEN_VERSION_MINOR
-TELLMEWHEN_VERSIONNUMBER = 50303 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
+TELLMEWHEN_VERSIONNUMBER = 50304 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
 if TELLMEWHEN_VERSIONNUMBER > 51000 or TELLMEWHEN_VERSIONNUMBER < 50000 then return error("YOU SCREWED UP THE VERSION NUMBER OR DIDNT CHANGE THE SAFETY LIMITS") end -- safety check because i accidentally made the version number 414069 once
 
 TELLMEWHEN_MAXGROUPS = 1 	--this is a default, used by SetTheory (addon), so dont rename
@@ -795,6 +795,9 @@ TMW.Defaults = {
 				NS	=	{r=1,	g=1,	b=1,	Override = false,			},	-- not counting somtimes
 			},
 		},
+		TextLayouts = {
+			
+		},
 		Groups 		= 	{
 			[1] = {
 				Enabled			= true,
@@ -922,6 +925,13 @@ TMW.Defaults = {
 						},
 						Icons					= {
 							[1]					= "",
+						},
+						SettingsPerView			= {
+							["**"] = {
+								Texts = {
+									["*"] 				= "",
+								}
+							}
 						},
 						Events 					= {
 							n					= 0,
@@ -1075,13 +1085,7 @@ TMW.BE = {
 		Tier11Interrupts	= "_83703;_82752;_82636;_83070;_79710;_77896;_77569;_80734;_82411",
 		Tier12Interrupts	= "_97202;_100094",
 	},
-	dr = {
-	},
---[[	unlisted = {
-		-- enrages were extracted using the script in the /Scripts folder (source is db.mmo-champion.com)
-		-- NO LONGER NEEDED BECAUSE I DISCOVERED THE BUG!
-		Enraged				= "24689;102989;18499;2687;29131;59465;39575;77238;52262;12292;54508;23257;66092;57733;58942;40076;8599;15061;15716;18501;19451;19812;22428;23128;23342;25503;26041;26051;28371;30485;31540;31915;32714;33958;34670;37605;37648;37975;38046;38166;38664;39031;41254;41447;42705;42745;43139;47399;48138;48142;48193;50420;51513;52470;54427;55285;56646;59697;59707;59828;60075;61369;63227;68541;70371;72143;72146;72147;72148;75998;76100;76862;78722;78943;80084;80467;86736;95436;95459;102134;108169;109889;5229;12880;57514;57518;14201;57516;57519;14202;57520;14203;57521;14204;57522;51170;4146;76816;90872;82033;48702;52537;49029;67233;54781;56729;53361;79420;66759;67657;67658;67659;40601;51662;60177;63848;43292;90045;92946;52071;82759;60430;81772;48391;80158;101109;101110;54475;56769;63147;62071;52610;41364;81021;81022;81016;81017;34392;55462;108566;50636;72203;49016;69052;43664;59694;91668;52461;54356;76691;81706;52309;29340;76487",
-	},]]
+	dr = {},
 }
 
 local CompareFuncs = {
@@ -1171,7 +1175,8 @@ TMW.EventList = {
 		},
 		valueName = L["STACKS"],
 		conditionChecker = function(icon, eventSettings)
-			return CompareFuncs[eventSettings.Operator](icon.__count, eventSettings.Value)
+			local count = icon.__count
+			return count and CompareFuncs[eventSettings.Operator](count, eventSettings.Value)
 		end,
 	},
 	{	-- OnDuration
@@ -4886,7 +4891,7 @@ end
 function Icon.IsValid(icon)
 	-- checks if the icon should be in the list of icons that can be checked in metas/conditions
 
-	return icon.Enabled and icon.group:ShouldUpdateIcons()
+	return icon.Enabled and icon:GetID() <= icon.group.Rows*icon.group.Columns and icon.group:ShouldUpdateIcons()
 end
 
 -- universal
@@ -5398,6 +5403,8 @@ function Icon.SetupTexts(icon)
 	if DogTag then
 		DogTag:AddFontString(icon.bindText, icon, icon.BindText or "", "Unit;TMW", icon.DogTagkwargs)
 	end]]
+	
+	local textLayoutSettings = db.profile.TextLayouts[icon.viewData.view]
 end
 
 -- NOT universal
@@ -5591,7 +5598,6 @@ end
 
 
 
-
 local IconType = TMW:NewClass("IconType")
 
 IconType.SUGType = "spell"
@@ -5719,6 +5725,16 @@ end
 
 local IconView = TMW:NewClass("IconView")
 
+function IconView:OnNewInstance(view)
+	self.view = view
+	
+	TMW.Icon_Defaults.SettingsPerView[view] = {}
+	self.IconDefaultsPerView = TMW.Icon_Defaults.SettingsPerView[view]
+	
+	TMW.Defaults.profile.TextLayouts[view] = {}
+	self.TextLayouts = TMW.Defaults.profile.TextLayouts[view]
+end
+
 function IconView:Register()
 	local viewkey = self.view
 
@@ -5755,8 +5771,38 @@ end
 
 
 -- TEMP DEBUG TODO: THIS SHOULDNT BE HERE. IT NEEDS TO BE IN ITS OWN FILE. I JUST DONT WANT TO MAKE ONE YET
-local View = TMW:NewClass("View", "IconView")
-View.view = "icon"
+local View = IconView:New("icon")
+
+View.TextLayouts[1] = {
+	-- Default Layout 1
+	["**"] = {
+		Name 		  	= "Arial Narrow",
+		Size 		  	= 12,
+		x 	 		  	= -2,
+		y 	 		  	= 2,
+		point 		  	= "CENTER",
+		relativePoint 	= "CENTER",
+		Outline 	  	= "THICKOUTLINE",
+		OverrideLBFPos	= false,
+		ConstrainWidth	= true,
+	},
+	{	-- [1] Stacks
+		ConstrainWidth	= false,
+		point			= "BOTTOMRIGHT",
+		relativePoint	= "BOTTOMRIGHT",
+		
+		DefaultText		= "[Stacks]",
+		SkinAs			= "Count",
+	},
+	{	-- [2] Bind
+		y 			 	= -2,
+		point 		 	= "TOPLEFT",
+		relativePoint	= "TOPLEFT",
+		
+		DefaultText		= "",
+		SkinAs			= "HotKey",
+	},
+}
 
 function View:Icon_Integrate(icon)
 	local viewElements = self:Icon_PreIntegrate(icon)
@@ -6412,7 +6458,7 @@ local UnitSet = TMW:NewClass("UnitSet"){
 	OnNewInstance = function(self, unitSettings)
 		self.unitSettings = unitSettings
 		self.originalUnits = UNITS:GetOriginalUnitTable(unitSettings)
-		self.updateEvents = {}
+		self.updateEvents = {PLAYER_ENTERING_WORLD = true,}
 		self.exposedUnits = {}
 		self.allUnitsChangeOnEvent = true
 
@@ -6783,7 +6829,7 @@ if DogTag then
 			category = "Icon"
 	})
 
-	DogTag:AddTag("TMW", "Count", {
+	DogTag:AddTag("TMW", "Stacks", {
 			code = function (groupID, iconID)
 				local icon = TMW[groupID][iconID]
 				return icon.__count
@@ -6795,7 +6841,7 @@ if DogTag then
 			events = "TMW_ICON_UPDATED#$group#$icon",
 			ret = "number",
 			doc = "Returns the current stacks of the icon",
-			example = '[Count] => "9"; [Count(4, 5)] => "3"',
+			example = '[Stacks] => "9"; [Stacks(4, 5)] => "3"',
 			category = "Icon"
 	})
 

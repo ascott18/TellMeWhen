@@ -3269,15 +3269,8 @@ function IE:SaveSettings()
 			IE.Main[k]:ClearFocus()
 		end
 	end
-	ANN.EditBox:ClearFocus()
-	SND.Custom:ClearFocus()
-	if IE:IsShown() then
-		for i, frame in ipairs(CNDT) do
-			frame.Unit:ClearFocus()
-			frame.EditBox:ClearFocus()
-			frame.EditBox2:ClearFocus()
-		end
-	end
+	
+	TMW:Fire("TMW_CONFIG_SAVE_SETTINGS")
 end
 
 
@@ -8015,6 +8008,11 @@ function CndtGroup.OnNewInstance(group)
 
 	group:Clear()
 	group:SetTitles()
+	
+	
+	TMW:RegisterCallback("TMW_CONFIG_SAVE_SETTINGS", group.Unit.ClearFocus, group.Unit)
+	TMW:RegisterCallback("TMW_CONFIG_SAVE_SETTINGS", group.EditBox.ClearFocus, group.EditBox)
+	TMW:RegisterCallback("TMW_CONFIG_SAVE_SETTINGS", group.EditBox2.ClearFocus, group.EditBox2)
 end
 
 function CndtGroup.TypeCheck(group, data)
@@ -8318,7 +8316,6 @@ function CndtGroup.SetSliderMinMax(group, level)
 		Slider:SetValue(level)
 	end
 end
-
 
 
 
