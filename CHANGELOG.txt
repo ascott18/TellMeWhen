@@ -1,3 +1,7 @@
+===v5.1.0===
+ * Bug Fixes:
+ ** (r489) ClassColors.lua:50 Bad argument #1 to :RegisterCallback (string or function expected)
+ 
 ===v5.0.3===
  * Spell Crit is now an event that can be tracked by Combat Event icons
  * (Began work on implementing LibDogTag as the text manager for TMW instead of TMW's current system which is very limited.)
