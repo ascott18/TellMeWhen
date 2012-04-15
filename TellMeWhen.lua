@@ -2814,14 +2814,19 @@ function TMW:ProcessEquivalencies()
 			disorient  = "DR-Disorient",
 			ctrlroot   = "DR-ControlledRoot",
 			dragons	= "DR-DragonsBreath",
+			bindelemental	= "DR-BindElemental",
+			charge			= "DR-Charge",
+			intercept		= "DR-Intercept",
 		}
 		if not GetSpellInfo(74347) then -- invalid
 			DRData.spells[74347] = nil
 		end
 		local dr = TMW.BE.dr
 		for spellID, category in pairs(DRData.spells) do
-			local k = myCategories[category] or TMW:Error("TMW: The DR category %q is undefined!", category)
-			dr[k] = (dr[k] and (dr[k] .. ";" .. spellID)) or tostring(spellID)
+			local k = myCategories[category] or TMW:Error("The DR category %q is undefined!", category)
+			if k then
+				dr[k] = (dr[k] and (dr[k] .. ";" .. spellID)) or tostring(spellID)
+			end
 		end
 	end
 
