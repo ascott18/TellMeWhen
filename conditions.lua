@@ -1440,9 +1440,9 @@ CNDT.Types = {
 		icon = "Interface\\Icons\\Ability_Mount_Charger",
 		tcoords = standardtcoords,
 		funcstr = [[c.1nil == IsMounted()]],
-		events = function(c)
+		--[[events = function(c)
 			return "UNIT_AURA", "player" -- hopefully this is adequate
-		end,
+		end,]]
 	},
 	{ -- swimming
 		text = L["CONDITIONPANEL_SWIMMING"],

@@ -8,6 +8,7 @@
  ** (r492) TellMeWhen-5.0.2.lua:1080 attempt to compare nil with number //(MAYBE)//
  ** (r493) ClassColors.lua:50 Bad argument #1 to :RegisterCallback (string or function expected)
  ** (r496) TellMeWhen-5.1.0\Modules\Texts.lua:124: attempt to concatenate field "?" (a nil value)
+ ** (r498) Condition "Mounted" is no longer event based because it seems that it doesn't update on UNIT_AURA all the time
 
 ===v5.0.2===
  * Bug Fixes:
