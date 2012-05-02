@@ -20,6 +20,8 @@ local DogTag = LibStub("LibDogTag-3.0", true)
 local LMB = LibStub("Masque", true) or (LibMasque and LibMasque("Button"))
 local LSM = LibStub("LibSharedMedia-3.0")
 
+if not DogTag then return end
+
 local pairs, wipe = pairs, wipe
 
 local Texts = TMW:NewClass("IconModule_Texts", "IconModule", "EssentialIconModule", "MasqueSkinnableIconModule")
