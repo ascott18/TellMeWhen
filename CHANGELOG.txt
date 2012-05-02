@@ -12,6 +12,7 @@
  ** (r496) TellMeWhen-5.1.0\Modules\Texts.lua:124: attempt to concatenate field "?" (a nil value)
  ** (r498) Condition "Mounted" is no longer event based because it seems that it doesn't update on UNIT_AURA all the time
  ** (r499) TellMeWhen_Options.lua:1772: "}" expected (to close "{" at line 1762) near "order"
+ ** (r501) Cooldown sweeps without text shown should now always show properly after they have ran down to zero at least once
 
 ===v5.0.2===
  * Bug Fixes:

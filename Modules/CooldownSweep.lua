@@ -54,6 +54,7 @@ function CooldownSweep:SetCooldown(start, duration)
 	
 	if duration > 0 then
 		cd:Show() 
+		cd:SetAlpha(1)
 	else
 		cd:Hide()
 	end
