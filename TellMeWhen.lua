@@ -31,7 +31,7 @@ local DogTag = LibStub("LibDogTag-3.0", true)
 TELLMEWHEN_VERSION = "5.1.0"
 TELLMEWHEN_VERSION_MINOR = strmatch(" @project-version@", " r%d+") or ""
 TELLMEWHEN_VERSION_FULL = TELLMEWHEN_VERSION .. TELLMEWHEN_VERSION_MINOR
-TELLMEWHEN_VERSIONNUMBER = 51003 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
+TELLMEWHEN_VERSIONNUMBER = 51004 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
 if TELLMEWHEN_VERSIONNUMBER > 52000 or TELLMEWHEN_VERSIONNUMBER < 51000 then return error("YOU SCREWED UP THE VERSION NUMBER OR DIDNT CHANGE THE SAFETY LIMITS") end -- safety check because i accidentally made the version number 414069 once
 
 TELLMEWHEN_MAXROWS = 20
@@ -91,7 +91,7 @@ local addonVersion = tonumber(GetAddOnMetadata("TellMeWhen", "X-Interface"))
 local _, pclass = UnitClass("Player")
 local pname = UnitName("player")
 
-
+--TODO: (misplaced note) export any needed text layouts with icons that need them
 
 TMW.Print = TMW.Print or _G.print
 TMW.Warn = setmetatable(
