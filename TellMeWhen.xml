@@ -56,28 +56,34 @@
 				self:RegisterForDrag("LeftButton", "RightButton")
 			</OnLoad>
 			<OnEnter>
-				self:SetScript("OnEnter", nil)
-				self.__noWrapTooltipText = true
-				TMW:TT(self, self.GetTooltipTitle, "ICON_TOOLTIP2NEW", 1, nil)
-				self:GetScript("OnEnter")(self)
+				if not TMW.Locked then
+					self:SetScript("OnEnter", nil)
+					self.__noWrapTooltipText = true
+					TMW:TT(self, self.GetTooltipTitle, "ICON_TOOLTIP2NEW", 1, nil)
+					self:GetScript("OnEnter")(self)
+				end
 			</OnEnter>
 			<OnMouseUp>
-				if TMW.ID.isMoving then
-					TMW:Group_StopMoving(TMW.ID.isMoving)
-				end
-				if button == "RightButton" then
-					TMW.IE:Load(nil, self)
-				end
-				if TMW.IE then
-					TMW.IE:ScheduleIconSetup(self)
+				if not TMW.Locked then
+					if TMW.ID.isMoving then
+						TMW:Group_StopMoving(TMW.ID.isMoving)
+					end
+					if button == "RightButton" then
+						TMW.IE:Load(nil, self)
+					end
+					if TMW.IE then
+						TMW.IE:ScheduleIconSetup(self)
+					end
 				end
 			</OnMouseUp>
 			<OnMouseDown>
-				local ID = TMW.ID
-				if not ID then return end
-				ID.DraggingInfo = nil
-				ID.F:Hide()
-				ID.IsDragging = nil
+				if not TMW.Locked then
+					local ID = TMW.ID
+					if not ID then return end
+					ID.DraggingInfo = nil
+					ID.F:Hide()
+					ID.IsDragging = nil
+				end
 			</OnMouseDown>
 			<OnDragStart>
 				if button == "RightButton" and TMW.ID then
@@ -100,8 +106,19 @@
 				end
 			</OnReceiveDrag>
 			<OnClick>
-				if TMW.ID then
-					TMW.ID:SpellItemToIcon(self)
+				if TMW.Locked then
+					print(button, self.EventHandlersSet.OnLeftClick, self.EventHandlersSet.OnRightClick)
+					if button == "LeftButton" and self.EventHandlersSet.OnLeftClick then
+						self:QueueEvent("OnLeftClick")
+						self:ProcessQueuedEvents()
+					elseif button == "RightButton" and self.EventHandlersSet.OnRightClick then
+						self:QueueEvent("OnRightClick")
+						self:ProcessQueuedEvents()
+					end
+				else
+					if TMW.ID then
+						TMW.ID:SpellItemToIcon(self)
+					end
 				end
 			</OnClick>
 			<OnDragStop>

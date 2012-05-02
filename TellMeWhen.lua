@@ -31,7 +31,7 @@ local DogTag = LibStub("LibDogTag-3.0", true)
 TELLMEWHEN_VERSION = "5.1.0"
 TELLMEWHEN_VERSION_MINOR = strmatch(" @project-version@", " r%d+") or ""
 TELLMEWHEN_VERSION_FULL = TELLMEWHEN_VERSION .. TELLMEWHEN_VERSION_MINOR
-TELLMEWHEN_VERSIONNUMBER = 51009 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
+TELLMEWHEN_VERSIONNUMBER = 51010 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
 if TELLMEWHEN_VERSIONNUMBER > 52000 or TELLMEWHEN_VERSIONNUMBER < 51000 then return error("YOU SCREWED UP THE VERSION NUMBER OR DIDNT CHANGE THE SAFETY LIMITS") end -- safety check because i accidentally made the version number 414069 once
 
 TELLMEWHEN_MAXROWS = 20
@@ -1311,6 +1311,16 @@ TMW.EventList = {
 		settings = {
 			Icon = true,
 		},
+	},
+	{	-- OnLeftClick
+		name = "OnLeftClick",
+		text = L["SOUND_EVENT_ONLEFTCLICK"],
+		desc = L["SOUND_EVENT_ONLEFTCLICK_DESC"],
+	},
+	{	-- OnRightClick
+		name = "OnRightClick",
+		text = L["SOUND_EVENT_ONRIGHTCLICK"],
+		desc = L["SOUND_EVENT_ONRIGHTCLICK_DESC"],
 	},
 } for k, v in pairs(TMW.EventList) do TMW.EventList[v.name] = v end
 
@@ -3547,6 +3557,17 @@ function EVENTS:TMW_ICON_SETUP_PRE(_, icon)
 	end
 end
 TMW:RegisterCallback("TMW_ICON_SETUP_PRE", EVENTS)
+function EVENTS:TMW_ICON_SETUP_POST(_, icon)
+	for _, eventSettings in TMW:InNLengthTable(icon.Events) do
+		local event = eventSettings.Event
+		if event == "OnLeftClick" then
+			icon:EnableMouse(1)
+		elseif event == "OnRightClick" then
+			icon:EnableMouse(1)
+		end
+	end
+end
+TMW:RegisterCallback("TMW_ICON_SETUP_POST", EVENTS)
 function EVENTS:TMW_GLOBAL_UPDATE_POST()
 	for icon in TMW:InIcons() do
 		local ics = icon:GetSettings()

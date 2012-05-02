@@ -1093,6 +1093,12 @@ L["SOUND_EVENT_ONICONHIDE_DESC"] = [[This event triggers when another icon (not 
 
 Configure the icon that should be watched using the event settings below.]]
 
+L["SOUND_EVENT_ONLEFTCLICK"] = "On Left Click"
+L["SOUND_EVENT_ONLEFTCLICK_DESC"] = [[This event triggers when you |cff7fffffLight-click|r the icon while icons are locked.]]
+
+L["SOUND_EVENT_ONRIGHTCLICK"] = "On Right Click"
+L["SOUND_EVENT_ONRIGHTCLICK_DESC"] = [[This event triggers when you |cff7fffffRight-click|r the icon while icons are locked.]]
+
 L["SOUND_EVENT_GLOBALDESC"] = "Events are checked from top to bottom in this list. If an event is triggered that has a sound to play, no events below that event will play a sound."
 L["SOUND_EVENT_DISABLEDFORTYPE"] = "Not available"
 L["SOUND_EVENT_DISABLEDFORTYPE_DESC"] = "This event is not available for %s type icons."
