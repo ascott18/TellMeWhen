@@ -8207,7 +8207,7 @@ function CndtGroup.TypeCheck(group, data)
 			else
 				group.Check:Hide()
 			end
-			SUG:EnableEditBox(group.EditBox, data.useSUG, true)
+			SUG:EnableEditBox(group.EditBox, data.useSUG, not data.allowMultipleSUGEntires)
 
 			group.Slider:SetWidth(217)
 			if data.noslide then
@@ -8235,7 +8235,7 @@ function CndtGroup.TypeCheck(group, data)
 			else
 				group.Check2:Hide()
 			end
-			SUG:EnableEditBox(group.EditBox2, data.useSUG, true)
+			SUG:EnableEditBox(group.EditBox2, data.useSUG, not data.allowMultipleSUGEntires)
 			group.EditBox:SetWidth(250)
 			group.EditBox2:SetWidth(250)
 		else

@@ -3,6 +3,7 @@
  * Spell Crit is now an event that can be tracked by Combat Event icons.
  * Implementing LibDogTag as the text manager for TMW instead of TMW's current (and very limited) system. You can now create text layouts that can be applied to an icon to dictate how the texts for that icon will be displayed. Text layouts can be shared between users, and texts can be configured in a new tab on the icon editor.
  * You can now select any of the 4 sound channels to play sounds to (instead of just Master and SFX).
+ * You can now list specific totems to be checked by totem icons.
  * Bug Fixes:
  ** (r489) TellMeWhen-5.0.2.lua:528 attempt to index local "h" (a nil value)
  ** (r491) Re-re-re-re-re-re fixed meta icons that check entire groups

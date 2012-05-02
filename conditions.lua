@@ -334,6 +334,18 @@ Env = {
 	GCDSpell = TMW.GCDSpell,
 } CNDT.Env = Env
 
+Env.SemicolonConcatCache = setmetatable(
+{}, {
+	__index = function(t, i)
+		if not i then return end
+
+		local o = ";" .. strlowerCache[i] .. ";"
+		t[i] = o
+		return o
+	end,
+})
+local SemicolonConcatCache = Env.SemicolonConcatCache
+
 -- helper functions
 local OnGCD = TMW.OnGCD
 local GetSpellCooldown = GetSpellCooldown
@@ -470,8 +482,12 @@ function Env.AuraTooltipNumber(unit, name, namename, filter)
 	return 0
 end
 
-function Env.TotemDuration(slot, time)
+function Env.TotemHelper(slot, time, nameString)
 	local have, name, start, duration = GetTotemInfo(slot)
+	print(slot, nameString, name)
+	if nameString and nameString ~= "" and nameString ~= ";" and name and not strfind(nameString, SemicolonConcatCache[name or ""]) then
+		return 0
+	end
 	return duration and duration ~= 0 and (duration - (time - start)) or 0
 end
 
@@ -565,18 +581,6 @@ function Env.GetActivePetMode()
 		end
 	end
 end
-
-Env.UnitNameConcatCache = setmetatable(
-{}, {
-	__index = function(t, i)
-		if not i then return end
-
-		local o = ";" .. strlowerCache[i] .. ";"
-		t[i] = o
-		return o
-	end,
-})
-
 
 
 
@@ -1258,7 +1262,7 @@ CNDT.Types = {
 		texttable = bool,
 		icon = "Interface\\LFGFrame\\LFGFrame-SearchIcon-Background",
 		tcoords = standardtcoords,
-		funcstr = [[c.1nil == (strfind(c.Name, UnitNameConcatCache[UnitName(c.Unit) or ""]) and 1)]],
+		funcstr = [[c.1nil == (strfind(c.Name, SemicolonConcatCache[UnitName(c.Unit) or ""]) and 1)]],
 		events = function(c)
 			return CNDT:IsUnitEventUnit(c.Unit), "UNIT_NAME_UPDATE", c.Unit
 		end,
@@ -1441,6 +1445,7 @@ CNDT.Types = {
 		tcoords = standardtcoords,
 		funcstr = [[c.1nil == IsMounted()]],
 		--[[events = function(c)
+			-- commented out because it seems that this doesn't always update on UNIT_AURA (ticket 488)
 			return "UNIT_AURA", "player" -- hopefully this is adequate
 		end,]]
 	},
@@ -1859,13 +1864,16 @@ CNDT.Types = {
 		category = L["CNDTCAT_SPELLSABILITIES"],
 		range = 60,
 		unit = false,
+		name = function(editbox) TMW:TT(editbox, "CNDT_TOTEMNAME", "CNDT_TOTEMNAME_DESC") editbox.label = L["CNDT_TOTEMNAME"] .. " " .. L["ICONMENU_CHOOSENAME_ORBLANK"] end,
+		useSUG = true,
+		allowMultipleSUGEntires = true,
 		texttable = absentseconds,
 		icon = totemtex[1],
 		tcoords = standardtcoords,
-		funcstr = [[TotemDuration(1, time) c.Operator c.Level]],
+		funcstr = [[TotemHelper(1, time, c.Name) c.Operator c.Level]],
 		events = "PLAYER_TOTEM_UPDATE",
 		anticipate = function(c)
-			return [[local VALUE = time + TotemDuration(1, time) - c.Level]]
+			return [[local VALUE = time + TotemHelper(1, time) - c.Level]]
 		end,
 		hidden = not totems[1],
 		spacebefore = true,
@@ -1876,13 +1884,16 @@ CNDT.Types = {
 		category = L["CNDTCAT_SPELLSABILITIES"],
 		range = 60,
 		unit = false,
+		name = function(editbox) TMW:TT(editbox, "CNDT_TOTEMNAME", "CNDT_TOTEMNAME_DESC") editbox.label = L["CNDT_TOTEMNAME"] .. " " .. L["ICONMENU_CHOOSENAME_ORBLANK"] end,
+		useSUG = true,
+		allowMultipleSUGEntires = true,
 		texttable = absentseconds,
 		icon = totemtex[2],
 		tcoords = standardtcoords,
-		funcstr = [[TotemDuration(2, time) c.Operator c.Level]],
+		funcstr = [[TotemHelper(2, time, c.Name) c.Operator c.Level]],
 		events = "PLAYER_TOTEM_UPDATE",
 		anticipate = function(c)
-			return [[local VALUE = time + TotemDuration(2, time) - c.Level]]
+			return [[local VALUE = time + TotemHelper(2, time) - c.Level]]
 		end,
 		hidden = not totems[2],
 	},
@@ -1892,13 +1903,16 @@ CNDT.Types = {
 		category = L["CNDTCAT_SPELLSABILITIES"],
 		range = 60,
 		unit = false,
+		name = function(editbox) TMW:TT(editbox, "CNDT_TOTEMNAME", "CNDT_TOTEMNAME_DESC") editbox.label = L["CNDT_TOTEMNAME"] .. " " .. L["ICONMENU_CHOOSENAME_ORBLANK"] end,
+		useSUG = true,
+		allowMultipleSUGEntires = true,
 		texttable = absentseconds,
 		icon = totemtex[3],
 		tcoords = standardtcoords,
-		funcstr = [[TotemDuration(3, time) c.Operator c.Level]],
+		funcstr = [[TotemHelper(3, time, c.Name) c.Operator c.Level]],
 		events = "PLAYER_TOTEM_UPDATE",
 		anticipate = function(c)
-			return [[local VALUE = time + TotemDuration(3, time) - c.Level]]
+			return [[local VALUE = time + TotemHelper(3, time) - c.Level]]
 		end,
 		hidden = not totems[3],
 	},
@@ -1908,13 +1922,16 @@ CNDT.Types = {
 		category = L["CNDTCAT_SPELLSABILITIES"],
 		range = 60,
 		unit = false,
+		name = function(editbox) TMW:TT(editbox, "CNDT_TOTEMNAME", "CNDT_TOTEMNAME_DESC") editbox.label = L["CNDT_TOTEMNAME"] .. " " .. L["ICONMENU_CHOOSENAME_ORBLANK"] end,
+		useSUG = true,
+		allowMultipleSUGEntires = true,
 		texttable = absentseconds,
 		icon = totemtex[4],
 		tcoords = standardtcoords,
-		funcstr = [[TotemDuration(4, time) c.Operator c.Level]],
+		funcstr = [[TotemHelper(4, time, c.Name) c.Operator c.Level]],
 		events = "PLAYER_TOTEM_UPDATE",
 		anticipate = function(c)
-			return [[local VALUE = time + TotemDuration(4, time) - c.Level]]
+			return [[local VALUE = time + TotemHelper(4, time) - c.Level]]
 		end,
 		hidden = not totems[4],
 	},
