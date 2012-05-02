@@ -112,7 +112,7 @@ function Texts:GetFontStringID(fontStringID, fontStringSettings)
 	return fontStringID
 end
 function Texts:OnKwargsUpdated()
-	if self.layoutSettings then
+	if self.layoutSettings and self.Texts then
 		for fontStringID, fontStringSettings in TMW:InNLengthTable(self.layoutSettings) do
 			local fontString = self.fontStrings[self:GetFontStringID(fontStringID, fontStringSettings)]
 			if fontString then
@@ -121,7 +121,7 @@ function Texts:OnKwargsUpdated()
 					styleString = styleString .. ("[%s]"):format(fontStringSettings.Outline)
 				end	
 				
-				DogTag:AddFontString(fontString, self.icon, styleString .. self.Texts[fontStringID], "Unit;TMW", self.kwargs)
+				DogTag:AddFontString(fontString, self.icon, styleString .. (self.Texts[fontStringID] or ""), "Unit;TMW", self.kwargs)
 				DogTag:UpdateFontString(fontString)
 			end
 		end
