@@ -31,7 +31,7 @@ local DogTag = LibStub("LibDogTag-3.0", true)
 TELLMEWHEN_VERSION = "5.1.0"
 TELLMEWHEN_VERSION_MINOR = strmatch(" @project-version@", " r%d+") or ""
 TELLMEWHEN_VERSION_FULL = TELLMEWHEN_VERSION .. TELLMEWHEN_VERSION_MINOR
-TELLMEWHEN_VERSIONNUMBER = 51005 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
+TELLMEWHEN_VERSIONNUMBER = 51007 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
 if TELLMEWHEN_VERSIONNUMBER > 52000 or TELLMEWHEN_VERSIONNUMBER < 51000 then return error("YOU SCREWED UP THE VERSION NUMBER OR DIDNT CHANGE THE SAFETY LIMITS") end -- safety check because i accidentally made the version number 414069 once
 
 TELLMEWHEN_MAXROWS = 20
@@ -847,7 +847,7 @@ TMW.Defaults = {
 		EffThreshold	=	15,
 		TextureName		= 	"Blizzard",
 		DrawEdge		=	false,
-		MasterSound		=	false,
+		SoundChannel	=	"SFX",
 		ReceiveComm		=	true,
 		WarnInvalids	=	false,
 		BarGCD			=	true,
@@ -1773,7 +1773,7 @@ function TMW:Update()
 
 	UPD_INTV = TMW.db.profile.Interval + 0.001 -- add a very small amount so that we don't call the same icon multiple times (through metas/conditionicons) in the same frame if the interval has been set 0
 
-	SndChan = TMW.db.profile.MasterSound and "Master" or nil
+	SndChan = TMW.db.profile.SoundChannel
 
 	for key, Type in pairs(TMW.Types) do
 		wipe(Type.Icons)
@@ -1815,6 +1815,16 @@ function TMW:GetUpgradeTable()			-- upgrade functions
 	if TMW.UpgradeTable then return TMW.UpgradeTable end
 	local t = {
 
+		[51006] = {
+			global = function(self)
+				if TMW.db.profile.MasterSound then
+					TMW.db.profile.SoundChannel = "Master"
+				else
+					TMW.db.profile.SoundChannel = "SFX"
+				end
+				TMW.db.profile.MasterSound = nil
+			end,
+		},
 		[51003] = {
 			pairs = {
 				"Bind",

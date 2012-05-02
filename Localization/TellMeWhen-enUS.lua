@@ -1134,8 +1134,12 @@ Exeptions may apply, see individual event descriptions for details.]]
 
 
 
-L["SOUND_USEMASTER"] = "Always play sounds"
-L["SOUND_USEMASTER_DESC"] = "Check this to allow sounds to play even when the game sound has been muted. Uncheck to only play sounds while the game sound is enabled."
+L["SOUND_CHANNEL"] = "Sound Channel"
+L["SOUND_CHANNEL_DESC"] = [[Choose the sound channel and volume setting that you would like to use to play sounds.
+
+Selecting %q will let sounds be played even when sounds are turned off.]]
+L["SOUND_CHANNEL_MASTER"] = "Master"
+
 L["SOUNDERROR1"] = "File must have an extension!"
 L["SOUNDERROR2"] = "Custom WAV files are not supported by WoW 4.0+"
 L["SOUNDERROR3"] = "Only OGG and MP3 files are supported!"

@@ -1759,10 +1759,17 @@ function TMW:CompileOptions()
 									type = "toggle",
 									order = 40,
 								},
-								MasterSound = {
-									name = L["SOUND_USEMASTER"],
-									desc = L["SOUND_USEMASTER_DESC"],
-									type = "toggle",
+								SoundChannel = {
+									name = L["SOUND_CHANNEL"],
+									desc = L["SOUND_CHANNEL_DESC"],
+									type = "select",
+									values = {
+										-- GLOBALS: SOUND_VOLUME, MUSIC_VOLUME, AMBIENCE_VOLUME
+										SFX = SOUND_VOLUME,
+										Music = MUSIC_VOLUME,
+										Ambience = AMBIENCE_VOLUME,
+										Master = L["SOUND_CHANNEL_MASTER"],
+									},
 									order = 41,
 								},
 								ColorNames = {
