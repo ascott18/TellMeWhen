@@ -1,5 +1,5 @@
 local major = "DRData-1.0"
-local minor = 1007
+local minor = 1009
 assert(LibStub, string.format("%s requires LibStub.", major))
 
 local Data = LibStub:NewLibrary(major, minor)
@@ -22,6 +22,9 @@ local L = {
 	["Dragon's Breath"] = "Dragon's Breath",
 	["Silences"] = "Silences",
 	["Taunts"] = "Taunts",
+	["Bind Elemental"] = "Bind Elemental",
+	["Charge"] = "Charge",
+	["Intercept"] = "Intercept"
 }
 
 if GetLocale() == "frFR" then
@@ -101,7 +104,6 @@ Data.spells = {
 	[24259] = "silence", -- Spell Lock (Felhunter)
 	[47476] = "silence", -- Strangulate
 	[18498] = "silence", -- Gag Order (Warrior talent)
-	[74347] = "silence", -- Gag Order (Warrior talent) -- FIXME: duplicate ?
 	[81261] = "silence", -- Solar Beam
 	[31935] = "silence", -- Avenger's Shield
 
@@ -118,7 +120,6 @@ Data.spells = {
 	[ 6358] = "fear", -- Seduction (Succubus)
 	[ 5484] = "fear", -- Howl of Terror
 	[ 8122] = "fear", -- Psychic Scream
-	[65545] = "fear", -- Psychic Horror
 	[ 1513] = "fear", -- Scare Beast
 	[10326] = "fear", -- Turn Evil
 	[ 5246] = "fear", -- Intimidating Shout (main target)
@@ -131,7 +132,7 @@ Data.spells = {
 	[46968] = "ctrlstun", -- Shockwave
 	[  853] = "ctrlstun", -- Hammer of Justice
 	[ 5211] = "ctrlstun", -- Bash
-	[19577] = "ctrlstun", -- Intimidation
+	[24394] = "ctrlstun", -- Intimidation
 	[22570] = "ctrlstun", -- Maim
 	[  408] = "ctrlstun", -- Kidney Shot
 	[20549] = "ctrlstun", -- War Stomp
@@ -149,7 +150,6 @@ Data.spells = {
 	[ 1833] = "ctrlstun", -- Cheap Shot
 	[ 9005] = "ctrlstun", -- Pounce
 	[88625] = "ctrlstun", -- Holy Word: Chastise
-	[ 7922] = "ctrlstun", -- Charge
 
 	--[[ RANDOM STUNS ]]--
 	[64343] = "rndstun", -- Impact
@@ -157,18 +157,17 @@ Data.spells = {
 	[11210] = "rndstun", -- Improved Polymorph (rank 1)
 	[12592] = "rndstun", -- Improved Polymorph (rank 2)
 
-	--[[ CYCLONE ]]--
-	[33786] = "cyclone", -- Cyclone
-
 	--[[ ROOTS ]]--
 	[33395] = "ctrlroot", -- Freeze (Water Elemental)
+	[50041] = "ctrlroot", -- Chilblains
 	[50245] = "ctrlroot", -- Pin (Crab)
 	[  122] = "ctrlroot", -- Frost Nova
 	[  339] = "ctrlroot", -- Entangling Roots
 	[19975] = "ctrlroot", -- Nature's Grasp (Uses different spellIDs than Entangling Roots for the same spell)
-	[64695] = "ctrlroot", -- Earthgrab (Storm, Earth and Fire talent)
+	[51485] = "ctrlroot", -- Earth's Grasp
+	[63374] = "ctrlroot", -- Frozen Power
 	[ 4167] = "ctrlroot", -- Web (Spider)
-	[54706] = "ctrlroot",	-- Venom Web Spray (Silithid)
+	[54706] = "ctrlroot", -- Venom Web Spray (Silithid)
 	[19306] = "ctrlroot", -- Counterattack
 	[90327] = "ctrlroot", -- Lock Jaw (Dog)
 	[11190] = "ctrlroot", -- Improved Cone of Cold (rank 1)
@@ -182,15 +181,17 @@ Data.spells = {
 	--[[ HORROR ]]--
 	[ 6789] = "horror", -- Death Coil
 	[64044] = "horror", -- Psychic Horror
-	[87099] = "horror", -- Sin and Punishment (rank 1)
-	[87100] = "horror", -- Sin and Punishment (rank 2)
 
 	--[[ MISC ]]--
-	[19503] = "scatters",   -- Scatter Shot
-	[31661] = "dragons",    -- Dragon's Breath
-	[  605] = "mc",         -- Mind Control
-	[  710] = "banish",     -- Banish
-	[19185] = "entrapment", -- Entrapment
+	[19503] = "scatters",      -- Scatter Shot
+	[31661] = "dragons",       -- Dragon's Breath
+	[  605] = "mc",            -- Mind Control
+	[  710] = "banish",        -- Banish
+	[19185] = "entrapment",    -- Entrapment
+	[33786] = "cyclone",       -- Cyclone
+	[76780] = "bindelemental", -- Bind Elemental
+	[  100] = "charge",        -- Charge
+	[20252] = "intercept",     -- Intercept
 }
 
 -- DR Category names
@@ -211,6 +212,9 @@ Data.categoryNames = {
 	["dragons"] = L["Dragon's Breath"],
 	["silence"] = L["Silences"],
 	["taunt"] = L["Taunts"],
+	["bindelemental"] = L["Bind Elemental"],
+	["charge"] = L["Charge"],
+	["intercept"] = L["Intercept"],
 }
 
 -- Categories that have DR in PvE as well as PvP
