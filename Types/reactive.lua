@@ -2,13 +2,9 @@
 -- TellMeWhen
 -- Originally by Nephthys of Hyjal <lieandswell@yahoo.com>
 
--- Other contributions by
--- Sweetmms of Blackrock
--- Oozebull of Twisting Nether
--- Oodyboo of Mug'thol
--- Banjankri of Blackrock
--- Predeter of Proudmoore
--- Xenyr of Aszune
+-- Other contributions by:
+--		Sweetmms of Blackrock, Oozebull of Twisting Nether, Oodyboo of Mug'thol,
+--		Banjankri of Blackrock, Predeter of Proudmoore, Xenyr of Aszune
 
 -- Currently maintained by
 -- Cybeloras of Mal'Ganis
@@ -18,7 +14,6 @@ local TMW = TMW
 if not TMW then return end
 local L = TMW.L
 
-local db, ClockGCD
 local GetSpellCooldown, IsSpellInRange, IsUsableSpell, GetSpellInfo =
 	  GetSpellCooldown, IsSpellInRange, IsUsableSpell, GetSpellInfo
 local OnGCD = TMW.OnGCD
@@ -64,8 +59,6 @@ Type.EventDisabled_OnStack = true
 
 
 function Type:Update()
-	db = TMW.db
-	ClockGCD = db.profile.ClockGCD
 end
 
 
@@ -110,12 +103,13 @@ local function Reactive_OnUpdate(icon, time)
 			end
 			usable = forceUsable or usable
 			if usable and not CD and not nomana and inrange == 1 then --usable
-
-				local color = icon:CrunchColor()
-
-				--icon:SetInfo(alpha, color, texture, start, duration, spellChecked, reverse, count, countText, forceupdate, unit)
-				icon:SetInfo(icon.Alpha, color, SpellTextures[iName], start, duration, iName, nil, nil, nil, nil, nil, nil)
-
+				icon:SetInfo("alpha; color; texture; start, duration; spell",
+					icon.Alpha,
+					icon:CrunchColor(),
+					SpellTextures[iName],
+					start, duration,
+					iName
+				)
 				return
 			end
 		end
@@ -136,13 +130,15 @@ local function Reactive_OnUpdate(icon, time)
 		end
 	end
 	if duration then
-
-		local color = icon:CrunchColor(duration, inrange, nomana)
-
-		--icon:SetInfo(alpha, color, texture, start, duration, spellChecked, reverse, count, countText, forceupdate, unit)
-		icon:SetInfo(icon.UnAlpha, color, icon.FirstTexture, start, duration, NameFirst, nil, nil, nil, nil, nil, nil)
+		icon:SetInfo("alpha; color; texture; start, duration; spell",
+			icon.UnAlpha,
+			icon:CrunchColor(duration, inrange, nomana),
+			icon.FirstTexture,
+			start, duration,
+			NameFirst
+		)
 	else
-		icon:SetInfo(0)
+		icon:SetInfo("alpha", 0)
 	end
 end
 
@@ -156,7 +152,7 @@ function Type:Setup(icon, groupID, iconID)
 
 	icon.FirstTexture = SpellTextures[icon.NameFirst]
 
-	icon:SetTexture(TMW:GetConfigIconTexture(icon))
+	icon:SetInfo("texture", TMW:GetConfigIconTexture(icon))
 	
 	
 	if icon.UseActvtnOverlay then
@@ -174,6 +170,7 @@ function Type:Setup(icon, groupID, iconID)
 		end	
 		if icon.ManaCheck then
 			icon:RegisterEvent("UNIT_POWER_FREQUENT")
+			-- icon:RegisterEvent("SPELL_UPDATE_USABLE") -- already registered
 		end
 	
 		icon:SetScript("OnEvent", Reactive_OnEvent)

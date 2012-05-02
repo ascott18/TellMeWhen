@@ -2,13 +2,9 @@
 -- TellMeWhen
 -- Originally by Nephthys of Hyjal <lieandswell@yahoo.com>
 
--- Other contributions by
--- Sweetmms of Blackrock
--- Oozebull of Twisting Nether
--- Oodyboo of Mug'thol
--- Banjankri of Blackrock
--- Predeter of Proudmoore
--- Xenyr of Aszune
+-- Other contributions by:
+--		Sweetmms of Blackrock, Oozebull of Twisting Nether, Oodyboo of Mug'thol,
+--		Banjankri of Blackrock, Predeter of Proudmoore, Xenyr of Aszune
 
 -- Currently maintained by
 -- Cybeloras of Mal'Ganis
@@ -18,7 +14,6 @@ local TMW = TMW
 if not TMW then return end
 local L = TMW.L
 
-local db, ClockGCD
 local GetActionCooldown, IsActionInRange, IsUsableAction, GetActionTexture, GetActionInfo =
 	  GetActionCooldown, IsActionInRange, IsUsableAction, GetActionTexture, GetActionInfo
 local UnitRangedDamage  =
@@ -63,8 +58,6 @@ Type.EventDisabled_OnStack = true
 
 
 function Type:Update()
-	db = TMW.db
-	ClockGCD = db.profile.ClockGCD
 end
 
 
@@ -104,18 +97,23 @@ local function MultiStateCD_OnUpdate(icon, time)
 		local actionType, spellID = GetActionInfo(Slot)
 		spellID = actionType == "spell" and spellID or icon.NameFirst
 
-
-		local alpha, color
 		if (duration == 0 or OnGCD(duration)) and inrange == 1 and not nomana then
-			alpha = icon.Alpha
-			color = icon:CrunchColor()
+			icon:SetInfo("alpha; color; texture; start, duration; spell",
+				icon.Alpha,
+				icon:CrunchColor(),
+				GetActionTexture(Slot) or "Interface\\Icons\\INV_Misc_QuestionMark",
+				start, duration,
+				spellID
+			)
 		else
-			alpha = icon.UnAlpha
-			color = icon:CrunchColor(duration, inrange, nomana)
+			icon:SetInfo("alpha; color; texture; start, duration; spell",
+				icon.UnAlpha,
+				icon:CrunchColor(duration, inrange, nomana),
+				GetActionTexture(Slot) or "Interface\\Icons\\INV_Misc_QuestionMark",
+				start, duration,
+				spellID
+			)
 		end
-
-		--icon:SetInfo(alpha, color, texture, start, duration, spellChecked, reverse, count, countText, forceupdate, unit)
-		icon:SetInfo(alpha, color, GetActionTexture(Slot) or "Interface\\Icons\\INV_Misc_QuestionMark", start, duration, spellID, nil, nil, nil, nil, nil)
 	end
 end
 
@@ -139,7 +137,7 @@ function Type:Setup(icon, groupID, iconID)
 		end
 	end
 
-	icon:SetTexture(GetActionTexture(icon.Slot) or "Interface\\Icons\\INV_Misc_QuestionMark")
+	icon:SetInfo("texture", GetActionTexture(icon.Slot) or "Interface\\Icons\\INV_Misc_QuestionMark")
 
 	icon:RegisterEvent("ACTIONBAR_SLOT_CHANGED")
 	icon:RegisterEvent("ACTIONBAR_UPDATE_COOLDOWN")

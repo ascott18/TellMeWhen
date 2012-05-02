@@ -2,13 +2,9 @@
 -- TellMeWhen
 -- Originally by Nephthys of Hyjal <lieandswell@yahoo.com>
 
--- Other contributions by
--- Sweetmms of Blackrock
--- Oozebull of Twisting Nether
--- Oodyboo of Mug'thol
--- Banjankri of Blackrock
--- Predeter of Proudmoore
--- Xenyr of Aszune
+-- Other contributions by:
+--		Sweetmms of Blackrock, Oozebull of Twisting Nether, Oodyboo of Mug'thol,
+--		Banjankri of Blackrock, Predeter of Proudmoore, Xenyr of Aszune
 
 -- Currently maintained by
 -- Cybeloras of Mal'Ganis
@@ -18,7 +14,6 @@ local TMW = TMW
 if not TMW then return end
 local L = TMW.L
 
-local db
 local strlower =
 	  strlower
 local print = TMW.print
@@ -66,7 +61,6 @@ Type.EventDisabled_OnStack = true
 
 
 function Type:Update()
-	db = TMW.db
 	pGUID = UnitGUID("player")
 end
 
@@ -88,12 +82,13 @@ local function ICD_OnEvent(icon, event, ...)
 		local NameHash = icon.NameHash
 		local Key = NameHash[i] or NameHash[strlowerCache[n]]
 		if Key and not (icon.DontRefresh and (TMW.time - icon.ICDStartTime) < icon.Durations[Key]) then
-			local t = SpellTextures[i]
-			if t ~= icon.__tex then icon:SetTexture(t) end
 
 			icon.ICDStartTime = TMW.time
 			icon.ICDDuration = icon.Durations[Key]
-			icon.ICDID = i
+			icon:SetInfo("spell; texture", 
+				icon.ICDID,
+				SpellTextures[i]
+			)
 			icon.NextUpdateTime = 0
 		end
 	end
@@ -104,15 +99,18 @@ local function ICD_OnUpdate(icon, time)
 	local ICDStartTime = icon.ICDStartTime
 	local ICDDuration = icon.ICDDuration
 
-	--icon:SetInfo(alpha, color, texture, start, duration, spellChecked, reverse, count, countText, forceupdate, unit)
 	if time - ICDStartTime > ICDDuration then
-		local color = icon:CrunchColor()
-
-		icon:SetInfo(icon.Alpha, color, nil, 0, 0, icon.ICDID, nil, nil, nil, nil, nil)
+		icon:SetInfo("alpha; color; start, duration",
+			icon.Alpha,
+			icon:CrunchColor(),
+			0, 0
+		)
 	else
-		local color = icon:CrunchColor(ICDDuration)
-
-		icon:SetInfo(icon.UnAlpha, color, nil, ICDStartTime, ICDDuration, icon.ICDID, nil, nil, nil, nil, nil)
+		icon:SetInfo("alpha; color; start, duration",
+			icon.UnAlpha,
+			icon:CrunchColor(ICDDuration),
+			ICDStartTime, ICDDuration
+		)
 	end
 end
 local naturesGrace = strlower(GetSpellInfo(16886))
@@ -138,7 +136,7 @@ function Type:Setup(icon, groupID, iconID)
 		end
 	end
 
-	icon:SetTexture(TMW:GetConfigIconTexture(icon))
+	icon:SetInfo("texture", TMW:GetConfigIconTexture(icon))
 
 	--[[ keep these events per icon isntead of global like unitcooldowns are so that ...
 	well i had a reason here but it didnt make sense when i came back and read it a while later. Just do it. I guess.]]

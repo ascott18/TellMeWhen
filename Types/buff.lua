@@ -2,13 +2,9 @@
 -- TellMeWhen
 -- Originally by Nephthys of Hyjal <lieandswell@yahoo.com>
 
--- Other contributions by
--- Sweetmms of Blackrock
--- Oozebull of Twisting Nether
--- Oodyboo of Mug'thol
--- Banjankri of Blackrock
--- Predeter of Proudmoore
--- Xenyr of Aszune
+-- Other contributions by:
+--		Sweetmms of Blackrock, Oozebull of Twisting Nether, Oodyboo of Mug'thol,
+--		Banjankri of Blackrock, Predeter of Proudmoore, Xenyr of Aszune
 
 -- Currently maintained by
 -- Cybeloras of Mal'Ganis
@@ -18,7 +14,7 @@ local TMW = TMW
 if not TMW then return end
 local L = TMW.L
 
-local db, EFF_THR, ClockGCD, DS
+local EFF_THR, DS
 local tonumber, strlower =
 	  tonumber, strlower
 local UnitAura, UnitExists =
@@ -77,9 +73,7 @@ Type.RelevantSettings = {
 
 
 function Type:Update()
-	db = TMW.db
-	ClockGCD = db.profile.ClockGCD
-	EFF_THR = db.profile.EffThreshold
+	EFF_THR = TMW.db.profile.EffThreshold
 	DS = TMW.DS
 	unitsWithExistsEvent = TMW.UNITS.unitsWithExistsEvent
 end
@@ -229,14 +223,25 @@ local function Buff_OnUpdate(icon, time)
 			end
 		end
 
-		local color = icon:CrunchColor(duration)
-
-		--icon:SetInfo(alpha, color, texture, start, duration, spellChecked, reverse, count, countText, forceupdate, unit)
-		icon:SetInfo(icon.Alpha, color, iconTexture, expirationTime - duration, duration, id, true, count, count > 1 and count or "", nil, useUnit)
+		icon:SetInfo("alpha; color; texture; start, duration; stack, stackText; spell; unit, GUID",
+			icon.Alpha,
+			icon:CrunchColor(duration),
+			iconTexture,
+			expirationTime - duration, duration,
+			count, count,
+			id,
+			useUnit, nil
+		)
 	else
-		local color = icon:CrunchColor()
-
-		icon:SetInfo(icon.UnAlpha, color, icon.FirstTexture, 0, 0, icon.NameFirst, true, nil, nil, nil, Units[1])
+		icon:SetInfo("alpha; color; texture; start, duration; stack, stackText; spell; unit, GUID",
+			icon.UnAlpha,
+			icon:CrunchColor(),
+			icon.FirstTexture,
+			0, 0,
+			nil, nil,
+			icon.NameFirst,
+			Units[1], nil
+		)
 	end
 end
 
@@ -258,13 +263,13 @@ function Type:Setup(icon, groupID, iconID)
 		icon.Filter = icon.Filter .. "|PLAYER"
 		if icon.Filterh then icon.Filterh = icon.Filterh .. "|PLAYER" end
 	end
-
+	
 	icon.NAL = icon.NameNameHash[strlower(GetSpellInfo(8921))] and EFF_THR + 1 or #icon.NameArray
 	-- need to force any icon looking for moonfire to check all auras on the target because of a blizzard bug in WoW 4.1.
 	-- TODO: verify that the issue persists
 
 	-- icon.NAL = icon.Sort and EFF_THR + 1 or icon.NAL
-	-- NOTE: we dont do thisnaymore because this is checked directly in the function instead of doing stupid shit like this.
+	-- NOTE: we dont do this anymore because this is checked directly in the function instead of doing stupid shit like this.
 	-- Force icons that sort to check all because it must find check all auras
 	-- in order to make a final decision on whether or not something has the highest/lowest duration.
 	-- Two buffs with the same name/ID can have different durations on a unit.
@@ -272,7 +277,7 @@ function Type:Setup(icon, groupID, iconID)
 
 	icon.FirstTexture = SpellTextures[icon.NameFirst]
 
-	icon:SetTexture(TMW:GetConfigIconTexture(icon))
+	icon:SetInfo("texture; reverse", TMW:GetConfigIconTexture(icon), true)
 	
 	if UnitSet.allUnitsChangeOnEvent then
 		icon:SetUpdateMethod("manual")
@@ -287,10 +292,6 @@ function Type:Setup(icon, groupID, iconID)
 
 	icon:SetScript("OnUpdate", Buff_OnUpdate)
 	icon:Update()
-end
-
-function Type:GetFontTestValues(icon)
-	return random(1, 20), nil
 end
 
 Type:Register()

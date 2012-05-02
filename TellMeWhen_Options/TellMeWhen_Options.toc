@@ -10,6 +10,7 @@
 
 
 #@no-lib-strip@
+Lib\AceHook-3.0\AceHook-3.0.xml
 Lib\AceGUI-3.0\AceGUI-3.0.xml
 Lib\AceGUI-3.0-SharedMediaWidgets\widget.xml
 Lib\AceConfig-3.0\AceConfig-3.0.xml
@@ -19,6 +20,7 @@ Lib\AceDBOptions-3.0\AceDBOptions-3.0.xml
 widget-importexport.lua
 
 TellMeWhen_Options.lua
+ImportExport.lua
 
 TellMeWhen_Options.xml
 Bindings.xml

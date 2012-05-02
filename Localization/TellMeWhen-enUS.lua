@@ -25,8 +25,16 @@ L["CONFIGMODE"] = "TellMeWhen is in configuration mode. Icons will not be functi
 L["CONFIGMODE_EXIT"] = "Exit config mode"
 L["CONFIGMODE_NEVERSHOW"] = "Don't show again"
 L["IMPORTERROR_FAILEDPARSE"] = "There was an error processing the string. Ensure that you copied the entire string from the source."
-L["ERROR_MISSINGFILE"] = "A complete restart of WoW is required to use TellMeWhen %s (%s was not found). Would you like to restart WoW now?"
-L["ERROR_MISSINGFILE_NOREQ"] = "A complete restart of WoW may be required to fully use TellMeWhen %s (%s was not found). Would you like to restart WoW now?"
+L["ERROR_MISSINGFILE"] = [[A complete restart of WoW is required to use TellMeWhen %s:
+
+%s was not found.
+
+Would you like to restart WoW now?]]
+L["ERROR_MISSINGFILE_NOREQ"] = [[A complete restart of WoW may be required to fully use TellMeWhen %s:
+
+%s was not found.
+
+Would you like to restart WoW now?]]
 L["ERROR_ANCHORSELF"] = "%s was trying to anchor to itself, so TellMeWhen reset it's anchor to the center of the screen to prevent catastrophic failure."
 
 L["LOCKED"] = "Locked"
@@ -468,7 +476,7 @@ L["UIPANEL_GROUPSORT_SORTASCENDING_DESC"] = "Check to sort this attribute from l
 L["UIPANEL_GROUPSORT_SORTDESCENDING"] = "High"
 L["UIPANEL_GROUPSORT_SORTDESCENDING_DESC"] = "Check to sort this attribute from high to low values."
 
-L["UIPANEL_GROUPSORT_METHODDISABLED_DESC"] = "This sort method is diabled because a method above it is sorting by Icon ID, so this method will never be reached and used in sorting."
+L["UIPANEL_GROUPSORT_METHODDISABLED_DESC"] = "|TInterface\\AddOns\\TellMeWhen_Options\\Textures\\Alert:0:2|tThis sort method is diabled because a method above it is sorting by Icon ID, so this method will never be reached and used in sorting."
 
 L["UIPANEL_GROUPSORT_id"] = "Icon ID"
 L["UIPANEL_GROUPSORT_id_DESC"] = "Sorts the group by the ID numbers of its icons."
@@ -598,21 +606,22 @@ L["OUTLINE_NO"] = "No Outline"
 L["OUTLINE_THIN"] = "Thin Outline"
 L["OUTLINE_THICK"] = "Thick Outline"
 L["OUTLINE_MONOCHORME"] = "Monochrome"
-L["UIPANEL_FONT_OVERRIDELBF"] = "Override Masque position"
-L["UIPANEL_FONT_OVERRIDELBF_DESC"] = [[Check this to override the position of the stack text that is defined in your Masque skin.
-
-A UI Reload or a change of skin is required to restore the skin settings to the text should you choose to disable this option after enabling it.]]
 L["UIPANEL_FONT_CONSTRAINWIDTH"] = "Constrain Width"
 L["UIPANEL_FONT_CONSTRAINWIDTH_DESC"] = [[Check this to force the text to fit within the width of the icon if positioned appropriately.
+
 Uncheck to allow text to extend wider than the icon.]]
 L["UIPANEL_FONT_XOFFS"] = "X Offset"
+L["UIPANEL_FONT_XOFFS_DESC"] = "The x-axis offset of the anchor"
 L["UIPANEL_FONT_YOFFS"] = "Y Offset"
+L["UIPANEL_FONT_YOFFS_DESC"] = "The y-axis offset of the anchor"
 L["UIPANEL_POSITION"] = "Position"
 L["UIPANEL_POSITION_DESC"] = "Contains settings that control the position of the group on your screen."
 L["UIPANEL_POINT"] = "Point"
+L["UIPANEL_POINT_DESC"] = "The point on the group that will be anchored"
 L["UIPANEL_RELATIVETO"] = "Relative To"
 L["UIPANEL_RELATIVETO_DESC"] = "Type '/framestack' to toggle a tooltip that contains a list of all the frames that your mouse is over, and their names, to put into this dialog."
 L["UIPANEL_RELATIVEPOINT"] = "Relative Point"
+L["UIPANEL_RELATIVEPOINT_DESC"] = "The point that the group will be anchored to"
 L["CHECKORDER"] = "Update order"
 L["CHECKORDER_ICONDESC"] = "Sets the order in which icons within this group will be updated. This really only matters if you are using the feature of meta icons to check sub-metas."
 L["CHECKORDER_GROUPDESC"] = "Sets the order in which groups will be updated. This really only matters if you are using the feature of meta icons to check sub-metas."
@@ -624,6 +633,95 @@ L["UIPANEL_STRATA"] = "Frame Strata"
 L["UIPANEL_LOCK"] = "Lock Position"
 L["UIPANEL_LOCK_DESC"] = "Lock this group, preventing movement or sizing by dragging the group or the scale tab."
 
+
+L["TEXTLAYOUTS"] = "Text Layouts"
+L["TEXTLAYOUTS_TAB"] = "Text Displays"
+L["TEXTLAYOUTS_HEADER_LAYOUT"] = "Text Layout"
+L["TEXTLAYOUTS_HEADER_DISPLAY"] = "Text Display"
+L["TEXTLAYOUTS_fSTRING"] = "Display %s"
+L["TEXTLAYOUTS_fSTRING2"] = "Display %d: %s"
+L["TEXTLAYOUTS_fLAYOUT"] = "Text Layout: %s"
+L["TEXTLAYOUTS_UNNAMED"] = "<no name>"
+L["TEXTLAYOUTS_DEFAULTS_WRAPPER"] = "Default: %s"
+L["TEXTLAYOUTS_LAYOUTSETTINGS"] = "Layout Settings"
+L["TEXTLAYOUTS_LAYOUTSETTINGS_DESC"] = "Click to configure the text layout %q."
+
+L["TEXTLAYOUTS_DEFAULTS_ICON1"] = "Icon Layout 1"
+L["TEXTLAYOUTS_DEFAULTS_STACKS"] = "Stacks"
+L["TEXTLAYOUTS_DEFAULTS_BINDINGLABEL"] = "Binding/Label"
+L["TEXTLAYOUTS_RENAME"] = "Rename Layout"
+L["TEXTLAYOUTS_RENAMESTRING"] = "Rename Display"
+L["TEXTLAYOUTS_RENAMESTRING_DESC"] = "Rename this display to a name that fits its purpose so that you can easily identify it."
+L["TEXTLAYOUTS_CHOOSELAYOUT"] = "Choose Layout..."
+L["TEXTLAYOUTS_CHOOSELAYOUT_DESC"] = "Pick the text layout to use for this icon."
+L["TEXTLAYOUTS_ADDLAYOUT"] = "Add Layout"
+L["TEXTLAYOUTS_DELETELAYOUT"] = "Delete Layout"
+L["TEXTLAYOUTS_DELETELAYOUT_DESC"] = [[Click to delete this text layout.
+
+Hold |cff7fffffCtrl|r to bypass confirmation.]]
+L["TEXTLAYOUTS_DELETELAYOUT_CONFIRM_BASE"] = "Are you sure you want to delete the layout %q?"
+L["TEXTLAYOUTS_DELETELAYOUT_CONFIRM_NUM"] = "|cFFFF5959The %d |4group:groups; that |4depends:depend; on it will revert back to using the default text layout for |4its:their; display type.|r"
+L["TEXTLAYOUTS_CHOOSELAYOUT"] = [[Click to set this text layout as the text handler for this icon.
+
+Displays:
+%s]]
+L["TEXTLAYOUTS_ADDSTRING"] = "Add Text Display"
+L["TEXTLAYOUTS_ADDSTRING_DESC"] = "Adds a new text display to this text layout."
+L["TEXTLAYOUTS_DELETESTRING"] = "Delete Text Display"
+L["TEXTLAYOUTS_DELETESTRING_DESC"] = "Deletes this text display from this text layout."
+L["TEXTLAYOUTS_STRINGUSEDBY"] = "Used %d |4time:times;."
+L["TEXTLAYOUTS_NOEDIT_DESC"] = [[This text layout is a default layout that comes standard with TellMeWhen and cannot be modified.
+
+If you wish to modify it, please copy it using the %s interface below.]]
+L["TEXTLAYOUTS_DEFAULTTEXT"] = "Default Text"
+L["TEXTLAYOUTS_DEFAULTTEXT_DESC"] = "Edit the default text that will be used when this text layout is set on an icon."
+L["TEXTLAYOUTS_SETTEXT"] = "Set Text"
+L["TEXTLAYOUTS_SETTEXT_DESC"] = [[Set the text that will be used in this text display here.
+
+Text may be formatted with DogTag tags, allowing for dynamic displays of information. Type '/dogtag' or '/dt' for help on how to use tags.]]
+
+L["TEXTLAYOUTS_STRING_COPYMENU"] = "Copy"
+L["TEXTLAYOUTS_STRING_COPYMENU_DESC"] = "Click to open a list of all texts that are used in this profile that you can copy to this text display."
+L["TEXTLAYOUTS_STRING_SETDEFAULT"] = "Reset to Default"
+L["TEXTLAYOUTS_STRING_SETDEFAULT_DESC"] = [[Resets this display's text to the following default text, set in the current text layout's settings:
+
+%s]]
+L["TEXTLAYOUTS_BLANK"] = "(Blank)"
+L["TEXTLAYOUTS_LAYOUT_SETDEFAULTS"] = "Reset to Defaults"
+L["TEXTLAYOUTS_LAYOUT_SETDEFAULTS_DESC"] = [[Resets all displays' texts to their default texts, set in the current text layout's settings.]]
+
+L["TEXTLAYOUTS_IMPORT"] = "Import Text Layout"
+L["TEXTLAYOUTS_IMPORT_OVERWRITE"] = "|cFFFF5959Replace|r Existing"
+L["TEXTLAYOUTS_IMPORT_OVERWRITE_DESC"] = [[A text layout already exists with the same unique identifier as this one.
+
+Choose this option to overwrite the existing text layout with this layout. All icons that use the existing layout will be updated accordingly.]]
+L["TEXTLAYOUTS_IMPORT_OVERWRITE_DISABLED_DESC"] = [[You cannot overwrite a default text layout.]]
+L["TEXTLAYOUTS_IMPORT_CREATENEW"] = "|cff59ff59Create|r New"
+L["TEXTLAYOUTS_IMPORT_CREATENEW_DESC"] = [[A text layout already exists with the same unique identifier as this one.
+
+Choose this option to generate a new unique identifier and import the layout.]]
+L["TEXTLAYOUTS_IMPORT_NORMAL_DESC"] = [[Click to import the text layout.]]
+
+L["TEXTLAYOUTS_SKINAS"] = "Skin As"
+L["TEXTLAYOUTS_SKINAS_DESC"] = [[Choose the Masque element that you wish to skin this text as.]]
+L["TEXTLAYOUTS_SKINAS_NONE"] = "None"
+L["TEXTLAYOUTS_SKINAS_COUNT"] = "Stack Text"
+L["TEXTLAYOUTS_SKINAS_HOTKEY"] = "Binding Text"
+L["TEXTLAYOUTS_DISABLEDBYSKIN"] = "This setting cannot be changed if you have a Masque skin set for this text display."
+
+L["TEXTLAYOUTS_SETGROUPLAYOUT"] = "Text Layout"
+L["TEXTLAYOUTS_SETGROUPLAYOUT_DESC"] = [[Set the text layout that all icons of this group will use.
+
+The text layout can also be set individually per icon in each icon's settings.]]
+L["TEXTLAYOUTS_SETGROUPLAYOUT_DDVALUE"] = "Select layout..."
+
+L["TEXTLAYOUTS_FONTSETTINGS"] = "Font Settings"
+L["TEXTLAYOUTS_POSITIONSETTINGS"] = "Position Settings"
+L["TEXTLAYOUTS_RESETSKINAS"] = "The %q setting has been reset for font string %q in order to prevent conflicts with the new setting for font string %q."
+
+
+L["TEXTLAYOUTS_POINT_DESC"] = "The point on the text display that will be anchored to the icon"
+L["TEXTLAYOUTS_RELATIVEPOINT_DESC"] = "The point on the icon that will be anchored to"
 
 -- -------------
 -- CONDITION PANEL
@@ -846,10 +944,10 @@ L["PLAYER_DESC"] = "(You)"
 
 
 L["IMPORT_EXPORT"] = "Import/Export/Restore"
-L["IMPORT_EXPORT_DESC"] = [[Click the dropdown arrow to the right of this editbox to import and export icons, groups, and profiles.
+L["IMPORT_EXPORT_DESC"] = [[Click the button to the right to import and export icons, groups, and profiles.
 
 Importing to or from a string, or exporting to another player, will require the use of this editbox. See the tooltips within the dropdown menu for details.]]
-L["IMPORT_EXPORT_BUTTON_DESC"] = "Click this dropdown to import and export icons, groups, and profiles."
+L["IMPORT_EXPORT_BUTTON_DESC"] = "Click this button to import and export icons, groups, and profiles."
 L["IMPORT_EXPORT_DESC_INLINE"] = "Import and Export profiles, groups, icons to or from strings, other players, other profiles, or a backup of your settings."
 
 L["IMPORT_HEADING"] = "Import"
@@ -876,9 +974,10 @@ L["EXPORT_TOCOMM_DESC"] = [[Type a player's name into the editbox and choose thi
 
 You can also type "GUILD" or "RAID" (case-sensitive) to send to your entire guild or raid group.]]
 L["EXPORT_TOSTRING_DESC"] = "A string containing the necessary data will be pasted into the editbox.  Press Ctrl+C to copy it, and then paste it wherever you want to share it."
-L["EXPORT_SPECIALDESC"] = "Other TellMeWhen users can only import entire groups or entire profiles if they have version 4.6.0+"
+L["EXPORT_SPECIALDESC2"] = "Other TellMeWhen users can only import this data if they have version %s"
 L["EXPORT_f"] = "Export %s"
 L["fPROFILE"] = "Profile: %s"
+L["fTEXTLAYOUT"] = "Text Layout: %s"
 
 
 
@@ -1017,8 +1116,6 @@ L["EVENTS_HANDLERS_PLAY"] = "Test Event"
 L["EVENTS_HANDLERS_PLAY_DESC"] = "|cff7fffffClick|r to test the event handler"
 
 L["EVENTS_SETTINGS_HEADER"] = "Event Settings"
---L["EVENTS_SETTINGS_HEADER_SUB"] = "Only handle %s:"
-L["EVENTS_SETTINGS_GLOBAL_DESC"] = "Note that event settings affect the event across all outputs, including sound, text, and animations."
 
 L["EVENTS_SETTINGS_ONLYSHOWN"] = "Only handle if icon is shown"
 L["EVENTS_SETTINGS_ONLYSHOWN_DESC"] = "Prevents the event from being handled if the icon is not shown."
@@ -1222,6 +1319,8 @@ L["CLEU_SWING_MISSED"] = "Swing Miss"
 L["CLEU_UNIT_DESTROYED"] = "Unit Destroyed"
 L["CLEU_UNIT_DESTROYED_DESC"] = "Occurs when a unit such as a totem is destroyed."
 L["CLEU_UNIT_DIED"] = "Unit Died"
+L["CLEU_PARTY_KILL"] = "Party Kill"
+L["CLEU_PARTY_KILL_DESC"] = "Occurs when someone in your party kills something."
 
 L["CLEU_CAT_CAST"] = "Casts"
 L["CLEU_CAT_SWING"] = "Melee/Ranged"

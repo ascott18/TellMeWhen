@@ -2,13 +2,9 @@
 -- TellMeWhen
 -- Originally by Nephthys of Hyjal <lieandswell@yahoo.com>
 
--- Other contributions by
--- Sweetmms of Blackrock
--- Oozebull of Twisting Nether
--- Oodyboo of Mug'thol
--- Banjankri of Blackrock
--- Predeter of Proudmoore
--- Xenyr of Aszune
+-- Other contributions by:
+--		Sweetmms of Blackrock, Oozebull of Twisting Nether, Oodyboo of Mug'thol,
+--		Banjankri of Blackrock, Predeter of Proudmoore, Xenyr of Aszune
 
 -- Currently maintained by
 -- Cybeloras of Mal'Ganis
@@ -28,7 +24,6 @@ Type.spaceafter = true
 Type.HideBars = true
 Type.NoColorSettings = true
 Type.RelevantSettings = {
-	BindText = false,
 	CustomTex = false,
 	ShowTimer = false,
 	ShowTimerText = false,
@@ -45,11 +40,11 @@ end
 
 function Type:Setup(icon, groupID, iconID)
 	if icon.Name ~= "" then
-		icon:SetTexture("Interface\\Icons\\INV_Misc_QuestionMark")
+		icon:SetInfo("texture", "Interface\\Icons\\INV_Misc_QuestionMark")
 	else
-		icon:SetTexture(nil)
+		icon:SetInfo("texture", "")
 	end
-	icon:SetInfo(0)
+	icon:SetInfo("alpha", 0)
 end
 
 function Type:DragReceived(icon, t, data, subType)

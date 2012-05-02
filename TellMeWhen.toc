@@ -18,7 +18,7 @@
 ## Notes-koKR: 재사용 대기, 강화 효과와 그밖의 꽤 많은 것에 관해 시청각적이고도 문자적인 알림을 제공합니다.
 ## Notes-ruRU: Визуальные, звуковые и текстовые оповещения о готовности заклинаний, способностей, наличии баффов/дебаффов и многого другого.
 
-## OptionalDeps: Masque, Ace3, OmniCC, tullaCC, sct, sctd, MikScrollingBattleText, Parrot, DRData-1.0
+## OptionalDeps: Masque, Ace3, OmniCC, tullaCC, sct, sctd, MikScrollingBattleText, Parrot, DRData-1.0, LibDogTag-3.0, LibDogTag-Unit-3.0
 # The per character settings are the old settings, but we still need them to upgrade to the new ones
 ## SavedVariablesPerCharacter: TellMeWhen_Settings
 ## SavedVariables: TellMeWhenDB
@@ -39,6 +39,8 @@ Lib\AceSerializer-3.0\AceSerializer-3.0.xml
 Lib\LibSharedMedia-3.0\lib.xml
 Lib\libdatabroker-1-1\LibDataBroker-1.1.lua
 Lib\DRData-1.0\DRData-1.0.xml
+Lib\LibDogTag-3.0\lib.xml
+Lib\LibDogTag-Unit-3.0\lib.xml
 #@end-no-lib-strip@
 
 Localization\TellMeWhen-enUS.lua
@@ -55,9 +57,31 @@ Localization\StaticFormats.lua
 
 
 TellMeWhen.lua
-# Modules\UpdateTableManager.lua
+
+DataProcessors\duration.lua
+DataProcessors\spell.lua
+DataProcessors\unit.lua
+DataProcessors\dogtagunit.lua
+DataProcessors\color.lua
+DataProcessors\texture.lua
+DataProcessors\condition.lua
+DataProcessors\reverse.lua
+DataProcessors\stack.lua
+DataProcessors\shown.lua
+DataProcessors\alpha.lua
+DataProcessors\alphaoverride.lua
+
 Modules\TimerBar.lua
+Modules\TimerBar_Overlay.lua
 Modules\PowerBar.lua
+Modules\Alpha.lua
+Modules\CooldownSweep.lua
+Modules\Texture.lua
+Modules\Texture_Colored.lua
+Modules\Texts.lua
+
+Views\icon.lua
+# HANDLERS_TEMP.lua
 
 
 Types\default.lua

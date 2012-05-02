@@ -19,7 +19,6 @@ local TMW = TMW
 if not TMW then return end
 local L = TMW.L
 
-local db, ClockGCD
 local strlower, type, wipe, pairs =
 	  strlower, type, wipe, pairs
 local UnitGUID, IsInInstance =
@@ -65,12 +64,10 @@ Type.RelevantSettings = {
 
 Type.EventDisabled_OnStack = true
 
- ManualIcons = {}
+local ManualIcons = {}
 
 
 function Type:Update()
-	db = TMW.db
-	ClockGCD = db.profile.ClockGCD
 end
 
 local Cooldowns = setmetatable({}, {__index = function(t, k)
@@ -252,24 +249,24 @@ Type:RegisterEvent("ZONE_CHANGED_NEW_AREA", "PLAYER_ENTERING_WORLD")
 
 function Type:RAID_ROSTER_UPDATE()
 	for i = 1, 40 do
-		local guid = UnitGUID("raid" .. i)
-		if not guid then
+		local GUID = UnitGUID("raid" .. i)
+		if not GUID then
 			return
-		elseif not resetForArena[guid] then
-			wipe(Cooldowns[guid])
-			resetForArena[guid] = 1
+		elseif not resetForArena[GUID] then
+			wipe(Cooldowns[GUID])
+			resetForArena[GUID] = 1
 		end
 	end
 end
 
 function Type:ARENA_OPPONENT_UPDATE()
 	for i = 1, 5 do
-		local guid = UnitGUID("arena" .. i)
-		if not guid then
+		local GUID = UnitGUID("arena" .. i)
+		if not GUID then
 			return
-		elseif not resetForArena[guid] then
-			wipe(Cooldowns[guid])
-			resetForArena[guid] = 1
+		elseif not resetForArena[GUID] then
+			wipe(Cooldowns[GUID])
+			resetForArena[GUID] = 1
 		end
 	end
 end
@@ -288,8 +285,8 @@ local function UnitCooldown_OnUpdate(icon, time)
 	
 	for u = 1, #Units do
 		local unit = Units[u]
-		local guid = UnitGUID(unit)
-		local cooldowns = guid and Cooldowns[guid]
+		local GUID = UnitGUID(unit)
+		local cooldowns = GUID and Cooldowns[GUID]
 
 		if cooldowns then
 			for i = 1, NAL do
@@ -351,17 +348,26 @@ local function UnitCooldown_OnUpdate(icon, time)
 		end
 	end
 
-	--icon:SetInfo(alpha, color, texture, start, duration, spellChecked, reverse, count, countText, forceupdate, unit)
 	if usename and Alpha > 0 then
-		local color = icon:CrunchColor()
-
-		icon:SetInfo(Alpha, color, SpellTextures[usename] or "Interface\\Icons\\INV_Misc_PocketWatch_01", 0, 0, usename, nil, nil, nil, nil, useUnit)
+		icon:SetInfo("alpha; color; texture; start, duration; spell; unit, GUID",
+			Alpha,
+			icon:CrunchColor(),
+			SpellTextures[usename] or "Interface\\Icons\\INV_Misc_PocketWatch_01",
+			0, 0,
+			usename,
+			useUnit, nil
+		)
 	elseif unname then
-		local color = icon:CrunchColor(unduration)
-
-		icon:SetInfo(UnAlpha, color, SpellTextures[unname], unstart, unduration, unname, nil, nil, nil, nil, unUnit)
+		icon:SetInfo("alpha; color; texture; start, duration; spell; unit, GUID",
+			UnAlpha,
+			icon:CrunchColor(unduration),
+			SpellTextures[unname],
+			unstart, unduration,
+			unname,
+			unUnit, nil
+		)
 	else
-		icon:SetInfo(0)
+		icon:SetInfo("alpha", 0)
 	end
 end
 
@@ -396,7 +402,7 @@ function Type:Setup(icon, groupID, iconID)
 	Type:RegisterEvent("COMBAT_LOG_EVENT_UNFILTERED")
 	Type:RegisterEvent("UNIT_SPELLCAST_SUCCEEDED")
 
-	icon:SetTexture(TMW:GetConfigIconTexture(icon))
+	icon:SetInfo("texture", TMW:GetConfigIconTexture(icon))
 
 	icon:SetScript("OnUpdate", UnitCooldown_OnUpdate)
 	icon:Update()

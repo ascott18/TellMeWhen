@@ -2,13 +2,9 @@
 -- TellMeWhen
 -- Originally by Nephthys of Hyjal <lieandswell@yahoo.com>
 
--- Other contributions by
--- Sweetmms of Blackrock
--- Oozebull of Twisting Nether
--- Oodyboo of Mug'thol
--- Banjankri of Blackrock
--- Predeter of Proudmoore
--- Xenyr of Aszune
+-- Other contributions by:
+--		Sweetmms of Blackrock, Oozebull of Twisting Nether, Oodyboo of Mug'thol,
+--		Banjankri of Blackrock, Predeter of Proudmoore, Xenyr of Aszune
 
 -- Currently maintained by
 -- Cybeloras of Mal'Ganis
@@ -17,7 +13,6 @@
 if not TMW then return end
 
 local TMW = TMW
-local db = TMW.db
 local Env
 
 -- -----------------------
@@ -69,7 +64,6 @@ local functionCache = {} CNDT.functionCache = functionCache
 
 
 function CNDT:OnInitialize()
-	db = TMW.db
 end
 
 function CNDT:MINIMAP_UPDATE_TRACKING()
@@ -2515,11 +2509,11 @@ CNDT.Types = {
 				TMW:QueueValidityCheck(c.Icon, icon:GetID(), nil, g, i)
 			end
 
-			local str = [[(c.Icon and c.Icon.__shown and c.Icon.OnUpdate and not c.Icon:Update())]]
+			local str = [[(c.Icon and c.Icon.attributes.shown and c.Icon.OnUpdate and not c.Icon:Update())]]
 			if c.Level == 0 then
-				str = str .. [[and c.Icon.__alpha > 0]]
+				str = str .. [[and c.Icon.attributes.alpha > 0]]
 			else
-				str = str .. [[and c.Icon.__alpha == 0]]
+				str = str .. [[and c.Icon.attributes.alpha == 0]]
 			end
 			return gsub(str, "c.Icon", c.Icon)
 		end,
@@ -2560,7 +2554,30 @@ CNDT.Types = {
 			setmetatable(TMW.CNDT.Env, TMW.CNDT.EnvMeta)
 			return c.Name ~= "" and c.Name or "true"
 		end,
-		-- events = absolutely no events
+		events = function(c)
+			-- allows parsing of events from the code string. EG:
+			-- --EVENTS:'PLAYER_ENTERING_WORLD','PLAYER_LOGIN'
+			-- --[[EVENTS:'PLAYER_ENTERING_WORLD','PLAYER_DAMAGE_DONE_MODS',c.Unit]]
+			local eventString = strmatch(c.Name, "EVENTS:([^ \t]-)\]?")
+			if eventString then
+				CNDT.LuaTemporaryConditionTable = c
+				local func = [[
+					local c = TMW.CNDT.LuaTemporaryConditionTable
+				return ]] .. eventString
+				local func, err = loadstring(func)
+				if func then
+					-- we do this convoluted shit because the function is supposed to return a list of events,
+					-- but the first ret from pcall is success, which isn't expected as a ret value,
+					-- but we still need to return all other values (and an unknown number of them),
+					-- which makes unpack ideal for this.
+					local t = {pcall(func)}
+					local success = tremove(t, 1)
+					if success then
+						return unpack(t)
+					end
+				end
+			end
+		end,
 	},
 
 
@@ -2679,7 +2696,7 @@ local EnvMeta = {
 } TMW.CNDT.EnvMeta = EnvMeta
 
 function CNDT:TMW_GLOBAL_UPDATE()
-	Env.Locked = db.profile.Locked
+	Env.Locked = TMW.Locked
 	NumShapeshiftForms = GetNumShapeshiftForms()
 	
 	for _, ConditionObj in pairs(TMW.Classes.ConditionObject.instances) do
@@ -2714,8 +2731,8 @@ function CNDT:DoConditionSubstitutions(parent, v, c, thisstr)
 			elseif strfind(unit, "^%%[Uu]") then
 				local after = strmatch(unit, "^%%[Uu]%-?(.*)")
 				-- it is intended that we sub in parent:GetName() instead of "icon". 
-				-- We want to create unique ConditionObjects for each icon that uses %u
-				local sub = "(" .. parent:GetName() .. ".__unitChecked or '')"
+				-- We want to create unique ConditionObjects for each icon that uses %u (as opposed to using a cached one)
+				local sub = "(" .. parent:GetName() .. ".attributes.unit or '')"
 				if after and after ~= "" then
 					sub = "(" .. sub .. " .. \"-" .. after .. "\")"
 				end
@@ -2787,44 +2804,45 @@ function CNDT:CompileUpdateFunction(parent, obj, activeEvents)
 	local numAnticipatorArgs = 0
 	local anticipatorstr = ""
 
-	for i = 1, Conditions.n do
-		local c = Conditions[i]
+	for _, c in TMW:InNLengthTable(Conditions) do
 		local t = c.Type
 		local v = CNDT.ConditionsByType[t]
 		if v and v.events then
 			local voidNext
 			for n, value in TMW:Vararg(TMW.get(v.events, c)) do
-				if value == "OnUpdate" then
-					return
-				end
+				if type(value) == "string" then
+					if value == "OnUpdate" then
+						return
+					end
 
-				if voidNext then
-					-- voidNext is an event. value should be a unitID that we are going to associate with the event
-					assert(not value:find("[A-Z]"))
-					activeEvents[voidNext .. "|'" .. value .. "'"] = true
-					voidNext = nil
-				else
-					-- value is an event
-					if value == "unit_changed_event" then
-						if c.Unit == "target" then
-							activeEvents.PLAYER_TARGET_CHANGED = true
-						elseif c.Unit == "pet" then
-							activeEvents["UNIT_PET|'player'"] = true
-						elseif c.Unit == "focus" then
-							activeEvents.PLAYER_FOCUS_CHANGED = true
-						elseif c.Unit:find("^raid%d+$") then
-							activeEvents.RAID_ROSTER_UPDATE = true
-						elseif c.Unit:find("^party%d+$") then
-							activeEvents.PARTY_MEMBERS_CHANGED = true
-						elseif c.Unit:find("^boss%d+$") then
-							activeEvents.INSTANCE_ENCOUNTER_ENGAGE_UNIT = true
-						elseif c.Unit:find("^arena%d+$") then
-							activeEvents.ARENA_OPPONENT_UPDATE = true
-						end
-					elseif value:find("^UNIT_") then
-						voidNext = value -- tell the iterator to listen to the next value as a unitID
+					if voidNext then
+						-- voidNext is an event. value should be a unitID that we are going to associate with the event
+						assert(not value:find("[A-Z]"))
+						activeEvents[voidNext .. "|'" .. value .. "'"] = true
+						voidNext = nil
 					else
-						activeEvents[value] = true
+						-- value is an event
+						if value == "unit_changed_event" then
+							if c.Unit == "target" then
+								activeEvents.PLAYER_TARGET_CHANGED = true
+							elseif c.Unit == "pet" then
+								activeEvents["UNIT_PET|'player'"] = true
+							elseif c.Unit == "focus" then
+								activeEvents.PLAYER_FOCUS_CHANGED = true
+							elseif c.Unit:find("^raid%d+$") then
+								activeEvents.RAID_ROSTER_UPDATE = true
+							elseif c.Unit:find("^party%d+$") then
+								activeEvents.PARTY_MEMBERS_CHANGED = true
+							elseif c.Unit:find("^boss%d+$") then
+								activeEvents.INSTANCE_ENCOUNTER_ENGAGE_UNIT = true
+							elseif c.Unit:find("^arena%d+$") then
+								activeEvents.ARENA_OPPONENT_UPDATE = true
+							end
+						elseif value:find("^UNIT_") then
+							voidNext = value -- tell the iterator to listen to the next value as a unitID
+						else
+							activeEvents[value] = true
+						end
 					end
 				end
 			end
@@ -3030,8 +3048,7 @@ function CNDT:GetConditionCheckFunctionString(parent, Conditions)
 		return ""
 	end
 
-	for i = 1, Conditions.n do
-		local c = Conditions[i]
+	for _, c in TMW:InNLengthTable(Conditions) do
 		local t = c.Type
 		local v = TMW.CNDT.ConditionsByType[t]
 
@@ -3079,7 +3096,7 @@ function CNDT:CheckParentheses(type, settings)
 	local numclose, numopen, runningcount = 0, 0, 0
 	local unopened = 0
 
-	for Condition in TMW:InNLengthTable(settings) do
+	for _, Condition in TMW:InNLengthTable(settings) do
 		for i = 1, Condition.PrtsBefore do
 			numopen = numopen + 1
 			runningcount = runningcount + 1

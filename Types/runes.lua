@@ -2,13 +2,9 @@
 -- TellMeWhen
 -- Originally by Nephthys of Hyjal <lieandswell@yahoo.com>
 
--- Other contributions by
--- Sweetmms of Blackrock
--- Oozebull of Twisting Nether
--- Oodyboo of Mug'thol
--- Banjankri of Blackrock
--- Predeter of Proudmoore
--- Xenyr of Aszune
+-- Other contributions by:
+--		Sweetmms of Blackrock, Oozebull of Twisting Nether, Oodyboo of Mug'thol,
+--		Banjankri of Blackrock, Predeter of Proudmoore, Xenyr of Aszune
 
 -- Currently maintained by
 -- Cybeloras of Mal'Ganis
@@ -18,7 +14,6 @@ local TMW = TMW
 if not TMW then return end
 local L = TMW.L
 
-local db, ClockGCD
 local GetRuneType, GetRuneCooldown =
 	  GetRuneType, GetRuneCooldown
 local OnGCD = TMW.OnGCD
@@ -75,8 +70,6 @@ local runeNames = {
 }
 
 function Type:Update()
-	db = TMW.db
-	ClockGCD = db.profile.ClockGCD
 end
 
 
@@ -127,19 +120,26 @@ local function Runes_OnUpdate(icon, time)
 		end
 	end
 
-	--icon:SetInfo(alpha, color, texture, start, duration, spellChecked, reverse, count, countText, forceupdate, unit)
 	if readyslot then
 		local type = GetRuneType(readyslot)
 
-		local color = icon:CrunchColor()
-
-		icon:SetInfo(icon.Alpha, color, textures[type], 0, 0, type, nil, nil, nil, nil, nil)
+		icon:SetInfo("alpha; color; texture; start, duration; spell",
+			icon.Alpha,
+			icon:CrunchColor(),
+			textures[type],
+			0, 0,
+			type -- MAYBE: change this arg? (to a special arg instead of spell)
+		)
 	elseif unslot then
 		local type = GetRuneType(unslot)
-
-		local color = icon:CrunchColor(unduration)
-
-		icon:SetInfo(icon.UnAlpha, color, textures[type], unstart, unduration, type, nil, nil, nil, nil, nil)
+		
+		icon:SetInfo("alpha; color; texture; start, duration; spell",
+			icon.UnAlpha,
+			icon:CrunchColor(unduration),
+			textures[type],
+			unstart, unduration,
+			type -- MAYBE: change this arg? (to a special arg instead of spell)
+		)
 	end
 end
 
@@ -162,7 +162,7 @@ function Type:Setup(icon, groupID, iconID)
 		end
 	end
 
-	icon:SetTexture(icon.FirstTexture or "Interface\\Icons\\INV_Misc_QuestionMark")
+	icon:SetInfo("texture", icon.FirstTexture or "Interface\\Icons\\INV_Misc_QuestionMark")
 
 	Type:RegisterEvent("RUNE_TYPE_UPDATE", "RUNE_UPDATE")
 	Type:RegisterEvent("RUNE_POWER_UPDATE", "RUNE_UPDATE")

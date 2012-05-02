@@ -2,13 +2,9 @@
 -- TellMeWhen
 -- Originally by Nephthys of Hyjal <lieandswell@yahoo.com>
 
--- Other contributions by
--- Sweetmms of Blackrock
--- Oozebull of Twisting Nether
--- Oodyboo of Mug'thol
--- Banjankri of Blackrock
--- Predeter of Proudmoore
--- Xenyr of Aszune
+-- Other contributions by:
+--		Sweetmms of Blackrock, Oozebull of Twisting Nether, Oodyboo of Mug'thol,
+--		Banjankri of Blackrock, Predeter of Proudmoore, Xenyr of Aszune
 
 -- Currently maintained by
 -- Cybeloras of Mal'Ganis
@@ -18,7 +14,6 @@ local TMW = TMW
 if not TMW then return end
 local L = TMW.L
 
-local db, ClockGCD
 local GetItemCooldown, IsItemInRange, IsEquippedItem, GetItemIcon, GetItemCount, GetItemInfo =
 	  GetItemCooldown, IsItemInRange, IsEquippedItem, GetItemIcon, GetItemCount, GetItemInfo
 local pairs =
@@ -65,8 +60,6 @@ Type.EventDisabled_OnUnit = true
 
 
 function Type:Update()
-	db = TMW.db
-	ClockGCD = db.profile.ClockGCD
 end
 
 
@@ -104,7 +97,7 @@ local function ItemCooldown_OnUpdate(icon, time)
 	end
 
 	local n, inrange, equipped, start, duration, isGCD, count = 1
-	local RangeCheck, OnlyEquipped, OnlyInBags, NameArray, EnableStacks = icon.RangeCheck, icon.OnlyEquipped, icon.OnlyInBags, icon.NameArray, icon.EnableStacks
+	local RangeCheck, OnlyEquipped, OnlyInBags, NameArray = icon.RangeCheck, icon.OnlyEquipped, icon.OnlyInBags, icon.NameArray
 	for i = 1, #NameArray do
 		local iName = NameArray[i]
 		n = i
@@ -120,12 +113,14 @@ local function ItemCooldown_OnUpdate(icon, time)
 			end
 			isGCD = OnGCD(duration)
 			if equipped and inrange == 1 and (duration == 0 or isGCD) then --usable
-
-				local color = icon:CrunchColor()
-
-				--icon:SetInfo(alpha, color, texture, start, duration, spellChecked, reverse, count, countText, forceupdate, unit)
-				icon:SetInfo(icon.Alpha, color, GetItemIcon(iName) or "Interface\\Icons\\INV_Misc_QuestionMark", start, duration, iName, nil, count, EnableStacks and count > 1 and count or "", nil, nil)
-
+				icon:SetInfo("alpha; color; texture; start, duration; stack, stackText; spell",
+					icon.Alpha,
+					icon:CrunchColor(),
+					GetItemIcon(iName) or "Interface\\Icons\\INV_Misc_QuestionMark",
+					start, duration,
+					count, icon.EnableStacks and count,
+					iName
+				)
 				return
 			end
 		end
@@ -141,7 +136,7 @@ local function ItemCooldown_OnUpdate(icon, time)
 			end
 		end
 		if not NameFirst2 then
-			icon:SetInfo(0)
+			icon:SetInfo("alpha", 0)
 			return
 		end
 	else
@@ -156,13 +151,16 @@ local function ItemCooldown_OnUpdate(icon, time)
 		isGCD = OnGCD(duration)
 	end
 	if duration then
-
-		local color = icon:CrunchColor(duration, inrange)
-
-		--icon:SetInfo(alpha, color, texture, start, duration, spellChecked, reverse, count, countText, forceupdate, unit)
-		icon:SetInfo(icon.UnAlpha, color, GetItemIcon(NameFirst2), start, duration, NameFirst2, nil, count, EnableStacks and count > 1 and count or "", nil, nil)
+		icon:SetInfo("alpha; color; texture; start, duration; stack, stackText; spell",
+			icon.UnAlpha,
+			icon:CrunchColor(duration, inrange),
+			GetItemIcon(NameFirst2),
+			start, duration,
+			count, icon.EnableStacks and count,
+			NameFirst2
+		)
 	else
-		icon:SetInfo(0)
+		icon:SetInfo("alpha", 0)
 	end
 end
 
@@ -204,7 +202,7 @@ function Type:Setup(icon, groupID, iconID)
 		icon.OnlyInBags = true
 	end
 
-	icon:SetTexture(TMW:GetConfigIconTexture(icon, 1))
+	icon:SetInfo("texture", TMW:GetConfigIconTexture(icon, 1))
 
 	icon:SetScript("OnUpdate", ItemCooldown_OnUpdate)
 	icon:Update()
@@ -213,9 +211,18 @@ end
 function Type:GetNameForDisplay(icon, data, doInsertLink)
 	if data then
 		local name, link = GetItemInfo(data)
-		data = (doInsertLink and link) or name or data
+		local ret
+		if doInsertLink then
+			ret = name
+		else
+			ret = link
+		end
+		if ret then
+			return ret
+		end
 	end
-	return data
+	
+	return data, true
 end
 
 function Type:DragReceived(icon, t, data, subType)

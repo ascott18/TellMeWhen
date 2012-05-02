@@ -30,6 +30,7 @@ L["ICONMENU_DONTREFRESH_DESC"]			= L["ICONMENU_DONTREFRESH_DESC"]	 	 	:format(Sp
 
 L["ICONMENU_ICD_DESC"] 	  			  	= L["ICONMENU_ICD_DESC"]		 		 	:format(L["ICONMENU_ICDTYPE"])
 L["MESSAGERECIEVE"] 	  			  	= L["MESSAGERECIEVE"]		 		 	 	:format("%s", L["IMPORT_EXPORT"]) -- keep the first "%s" as "%s"
+L["TEXTLAYOUTS_NOEDIT_DESC"] 	  	  	= L["TEXTLAYOUTS_NOEDIT_DESC"] 		 	 	:format(L["IMPORT_EXPORT"])
 
 
 L["CONDITIONPANEL_UNIT_DESC"] 		  	= L["CONDITIONPANEL_UNIT_DESC"]		 		:format(pname)

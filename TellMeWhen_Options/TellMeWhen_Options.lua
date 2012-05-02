@@ -2,13 +2,9 @@
 -- TellMeWhen
 -- Originally by Nephthys of Hyjal <lieandswell@yahoo.com>
 
--- Other contributions by
--- Sweetmms of Blackrock
--- Oozebull of Twisting Nether
--- Oodyboo of Mug'thol
--- Banjankri of Blackrock
--- Predeter of Proudmoore
--- Xenyr of Aszune
+-- Other contributions by:
+--		Sweetmms of Blackrock, Oozebull of Twisting Nether, Oodyboo of Mug'thol,
+--		Banjankri of Blackrock, Predeter of Proudmoore, Xenyr of Aszune
 
 -- Currently maintained by
 -- Cybeloras of Mal'Ganis
@@ -22,34 +18,60 @@ TMW.WidthCol1 = 170
 ---------- Libraries ----------
 local LSM = LibStub("LibSharedMedia-3.0")
 local LMB = LibStub("Masque", true) or (LibMasque and LibMasque("Button"))
+local DogTag = LibStub("LibDogTag-3.0", true)
 
+-- GLOBALS: LibStub
+-- GLOBALS: TMWOptDB
+-- GLOBALS: TELLMEWHEN_VERSION, TELLMEWHEN_VERSION_MINOR, TELLMEWHEN_VERSION_FULL, TELLMEWHEN_VERSIONNUMBER, TELLMEWHEN_MAXROWS
+-- GLOBALS: UIDROPDOWNMENU_MENU_LEVEL, UIDROPDOWNMENU_MENU_VALUE, UIDROPDOWNMENU_OPEN_MENU
+-- GLOBALS: UIDropDownMenu_AddButton, UIDropDownMenu_CreateInfo, UIDropDownMenu_SetText, UIDropDownMenu_GetSelectedValue, UIDropDownMenu_Initialize, UIDropDownMenu_JustifyText, UIDropDownMenu_SetAnchor, UIDropDownMenu_StartCounting
+-- GLOBALS: CloseDropDownMenus, ToggleDropDownMenu, DropDownList1
+-- GLOBALS: NORMAL_FONT_COLOR, HIGHLIGHT_FONT_COLOR, INVSLOT_FIRST_EQUIPPED, INVSLOT_LAST_EQUIPPED, SPELL_RECAST_TIME_MIN, SPELL_RECAST_TIME_SEC, NONE, SPELL_CAST_CHANNELED, NUM_BAG_SLOTS, CANCEL
+-- GLOBALS: GameTooltip, GameTooltip_SetDefaultAnchor
+-- GLOBALS: UIParent, WorldFrame, TellMeWhen_IconEditor, GameFontDisable, GameFontHighlight, CreateFrame, collectgarbage 
+-- GLOBALS: PanelTemplates_TabResize, PanelTemplates_Tab_OnClick
 
 ---------- Upvalues ----------
 local TMW = TMW
-local db = TMW.db
 local L = TMW.L
 local GetSpellInfo, GetContainerItemID, GetContainerItemLink =
 	  GetSpellInfo, GetContainerItemID, GetContainerItemLink
-local tonumber, tostring, type, pairs, ipairs, tinsert, tremove, sort, wipe, next =
-	  tonumber, tostring, type, pairs, ipairs, tinsert, tremove, sort, wipe, next
-local strfind, strmatch, format, gsub, strsub, strtrim, max, min, strlower, floor, log10 =
-	  strfind, strmatch, format, gsub, strsub, strtrim, max, min, strlower, floor, log10
+local tonumber, tostring, type, pairs, ipairs, tinsert, tremove, sort, wipe, next, getmetatable, setmetatable, coroutine, pcall, assert, rawget, rawset, unpack, select =
+	  tonumber, tostring, type, pairs, ipairs, tinsert, tremove, sort, wipe, next, getmetatable, setmetatable, coroutine, pcall, assert, rawget, rawset, unpack, select
+local strfind, strmatch, format, gsub, strsub, strtrim, strlen, strsplit, strlower, max, min, floor, ceil, log10 =
+	  strfind, strmatch, format, gsub, strsub, strtrim, strlen, strsplit, strlower, max, min, floor, ceil, log10
+local GetItemInfo, GetItemIcon, GetInventoryItemID, GetInventoryItemLink, GetInventoryItemTexture, GetInventorySlotInfo, GetContainerNumSlots =
+	  GetItemInfo, GetItemIcon, GetInventoryItemID, GetInventoryItemLink, GetInventoryItemTexture, GetInventorySlotInfo, GetContainerNumSlots
+local GetNumTrackingTypes, GetTrackingInfo =
+	  GetNumTrackingTypes, GetTrackingInfo
+local GetBuildInfo, IsInGuild, GetRealNumPartyMembers, GetRealNumRaidMembers, GetNumRaidMembers, UnitInBattleground, UnitRace, UnitName =
+	  GetBuildInfo, IsInGuild, GetRealNumPartyMembers, GetRealNumRaidMembers, GetNumRaidMembers, UnitInBattleground, UnitRace, UnitName
+local GetSpellBookItemInfo, HasPetSpells, GetSpellTabInfo, GetActionInfo =
+	  GetSpellBookItemInfo, HasPetSpells, GetSpellTabInfo, GetActionInfo
+local GetNumTalentTabs, GetNumTalents, GetTalentInfo, GetTalentLink =
+	  GetNumTalentTabs, GetNumTalents, GetTalentInfo, GetTalentLink
+local GetCursorPosition, GetCursorInfo, GetMouseFocus, CursorHasSpell, CursorHasItem, ClearCursor =
+	  GetCursorPosition, GetCursorInfo, GetMouseFocus, CursorHasSpell, CursorHasItem, ClearCursor
+local _G, bit, CopyTable, hooksecurefunc, IsAddOnLoaded, IsMacClient, GetLocale, GetAchievementInfo, IsControlKeyDown, PlaySound =
+	  _G, bit, CopyTable, hooksecurefunc, IsAddOnLoaded, IsMacClient, GetLocale, GetAchievementInfo, IsControlKeyDown, PlaySound
 local _G = _G
+local bit = bit
+local CopyTable = CopyTable
 local strlowerCache = TMW.strlowerCache
 local SpellTextures = TMW.SpellTextures
 local print = TMW.print
 local Types = TMW.Types
-local ME, CNDT, IE, SUG, ID, SND, ANN, HELP, HIST, ANIM, EVENTS, CLEU
+local ME, CNDT, IE, SUG, ID, SND, ANN, HELP, HIST, ANIM, EVENTS, CLEU, TEXT
 local CNDT = TMW.CNDT -- created in TellMeWhen/conditions.lua
 
 
 ---------- Locals ----------
 local _, pclass = UnitClass("Player")
 local tiptemp = {}
-local approachTable
 local get = TMW.get
 
 ---------- Globals ----------
+--GLOBALS: BINDING_HEADER_TELLMEWHEN, BINDING_NAME_TELLMEWHEN_ICONEDITOR_UNDO, BINDING_NAME_TELLMEWHEN_ICONEDITOR_REDO
 BINDING_HEADER_TELLMEWHEN = L["ICON_TOOLTIP1"]
 BINDING_NAME_TELLMEWHEN_ICONEDITOR_UNDO = L["UNDO_ICON"]
 BINDING_NAME_TELLMEWHEN_ICONEDITOR_REDO = L["REDO_ICON"]
@@ -122,8 +144,8 @@ TMW.CI = setmetatable({}, {__index = function(tbl, k)
 		return tbl.ic and tbl.ic:GetSettings()
 	elseif k == "gs" then
 		-- take no chances with errors occuring here
-		return approachTable(TMW.db, "profile", "Groups", tbl.g)
-	elseif k == "SoI" then -- spell or item
+		return TMW.approachTable(TMW.db, "profile", "Groups", tbl.g)
+	elseif k == "SoI" then -- spell or item (antiquated, but not yet depreciated)
 		local ics = tbl.ics
 		if ics and ics.Type == "item" then
 			return "item"
@@ -131,10 +153,6 @@ TMW.CI = setmetatable({}, {__index = function(tbl, k)
 		return "spell"
 	end
 end}) local CI = TMW.CI		--current icon
-
-local DEFAULT_ICON_SETTINGS = db.profile.Groups[0].Icons[0]
-db.profile.Groups[0] = nil
-
 
 
 -- ----------------------
@@ -158,6 +176,7 @@ function GameTooltip:TMW_SetEquiv(equiv)
 	GameTooltip:AddLine(IE:Equiv_GenerateTips(equiv), NORMAL_FONT_COLOR.r, NORMAL_FONT_COLOR.g, NORMAL_FONT_COLOR.b, 1)
 end
 
+-- GLOBALS: ChatEdit_InsertLink
 local old_ChatEdit_InsertLink = ChatEdit_InsertLink
 function ChatEdit_InsertLink(...)
 	-- attempt to extract data from shift-clicking things (chat links, spells, items, etc) and insert it into the icon editor
@@ -241,7 +260,7 @@ end
 -- GENERAL CONFIG FUNCTIONS
 -- ----------------------
 
-function approachTable(t, ...)
+function TMW.approachTable(t, ...)
 	for i=1, select("#", ...) do
 		local k = select(i, ...)
 		if type(k) == "function" then
@@ -253,7 +272,6 @@ function approachTable(t, ...)
 	end
 	return t
 end
-
 
 ---------- Tooltips ----------
 local function TTOnEnter(self)
@@ -271,6 +289,9 @@ function TMW:TT(f, title, text, actualtitle, actualtext)
 	-- setting actualtitle or actualtext true cause it to use exactly what is passed in for title or text as the text in the tooltip
 	-- if these variables arent set, then it will attempt to see if the string is a global variable (e.g. "MAXIMUM")
 	-- if they arent set and it isnt a global, then it must be a TMW localized string, so use that
+	
+	TMW:Assert(f)
+	
 	if title then
 		f.__title = (actualtitle and title) or _G[title] or L[title]
 	else
@@ -319,14 +340,14 @@ function TMW:CopyWithMetatable(settings)
 	return setmetatable(copy, getmetatable(settings))
 end
 
-function TMW:CopyTableInPlaceWithMeta(src, dest)
+function TMW:CopyTableInPlaceWithMeta(src, dest, allowUnmatchedSourceTables)
 	--src and dest must have congruent data structure, otherwise shit will blow up. There are no safety checks to prevent this.
 	local metatemp = getmetatable(src) -- lets not go overwriting random metatables
 	setmetatable(src, getmetatable(dest))
 	for k in pairs(src) do
 		if dest[k] and type(dest[k]) == "table" and type(src[k]) == "table" then
-			TMW:CopyTableInPlaceWithMeta(src[k], dest[k])
-		elseif type(src[k]) ~= "table" then
+			TMW:CopyTableInPlaceWithMeta(src[k], dest[k], allowUnmatchedSourceTables)
+		elseif type(src[k]) ~= "table" or allowUnmatchedSourceTables then
 			dest[k] = src[k]
 		end
 	end
@@ -337,7 +358,7 @@ end
 
 ---------- Icon Utilities ----------
 function TMW:GetIconMenuText(g, i, data)
-	data = data or db.profile.Groups[tonumber(g)].Icons[tonumber(i)]
+	data = data or TMW.db.profile.Groups[tonumber(g)].Icons[tonumber(i)]
 
 	local Type = data.Type or ""
 	local typeData = Types[Type]
@@ -365,7 +386,6 @@ function TMW:GuessIconTexture(data)
 		tex = TMW:GetCustomTexture(data.CustomTex)
 	end
 
-
 	if (data.Name and data.Name ~= "" and data.Type ~= "meta" and data.Type ~= "wpnenchant" and data.Type ~= "runes") and not tex then
 		local name = TMW:GetSpellNames(nil, data.Name, 1)
 		if name then
@@ -383,6 +403,10 @@ function TMW:GuessIconTexture(data)
 	elseif data.Type == "wpnenchant" and not tex then tex = GetInventoryItemTexture("player", GetInventorySlotInfo(data.WpnEnchantType or "MainHandSlot")) or GetInventoryItemTexture("player", "MainHandSlot") end
 	if not tex then tex = "Interface\\Icons\\INV_Misc_QuestionMark" end
 	return tex
+end
+
+function TMW:PrepareIconSettingsForCopying(ics, gs)
+	TMW:Fire("TMW_ICON_MAKE_SETTINGS_STANDALONE", ics, gs)
 end
 
 function TMW.IconsSort(a, b)
@@ -447,6 +471,7 @@ local function AddDropdownSpacer()
 	info.notCheckable = true
 	UIDropDownMenu_AddButton(info, UIDROPDOWNMENU_MENU_LEVEL)
 end
+TMW.AddDropdownSpacer = AddDropdownSpacer
 
 function TMW:SetIconPreviewIcon(icon)
 	if not icon or not icon.IsIcon then
@@ -457,7 +482,7 @@ function TMW:SetIconPreviewIcon(icon)
 	local groupID = icon.group:GetID()
 	TMW:TT(self, format(L["GROUPICON"], TMW:GetGroupName(groupID, groupID, 1), icon:GetID()), "ICON_TOOLTIP2NEWSHORT", 1, nil)
 	self.icon = icon
-	self.texture:SetTexture(icon and icon.__tex)
+	self.texture:SetTexture(icon and icon.attributes.texture)
 	self:Show()
 end
 
@@ -516,7 +541,7 @@ do -- TMW:ReconcileData()
 				end
 
 				-- update any changed icons that icon show/hide events are checking
-				for eventSettings in TMW:InNLengthTable(ics.Events) do
+				for _, eventSettings in TMW:InNLengthTable(ics.Events) do
 					if type(eventSettings.Icon) == "string" then
 						replace(eventSettings, "Icon", source, destination, matchSource, matchDestination, swap)
 					end
@@ -555,7 +580,7 @@ end
 ---------- Data/Templates ----------
 local function findid(info)
 	for i = #info, 1, -1 do
-		local n = tonumber(strmatch(info[i], "Group (%d+)"))
+		local n = tonumber(strmatch(info[i], "#Group (%d+)"))
 		if n then return n end
 	end
 end
@@ -568,12 +593,6 @@ local fontorder = {
 	Count = 40,
 	Bind = 50,
 }
-local fontDisabled = function(info)
-	if not LMB then
-		return false
-	end
-	return not db.profile.Groups[findid(info)].Fonts[info[#info-1]].OverrideLBFPos
-end
 local importExportBoxTemplate = {
 	name = L["IMPORT_EXPORT"],
 	type = "input",
@@ -583,106 +602,6 @@ local importExportBoxTemplate = {
 	get = function() end,
 	set = function() end,
 	--hidden = function() return IE.ExportBox:IsVisible() end,
-}
-local groupFontConfigTemplate = {
-	type = "group",
-	name = function(info) return L["UIPANEL_FONT_" .. info[#info]] end,
-	desc = function(info) return L["UIPANEL_FONT_" .. info[#info] .. "_DESC"] end,
-	order = function(info) return fontorder[info[#info]] end,
-	set = function(info, val)
-		local g = findid(info)
-		db.profile.Groups[g].Fonts[info[#info-1]][info[#info]] = val
-		if info[#info-1] == "Count" then
-			TMW[g].FontTest = 1
-		end
-		TMW[g]:Setup()
-	end,
-	get = function(info)
-		return db.profile.Groups[findid(info)].Fonts[info[#info-1]][info[#info]]
-	end,
-	args = {
-		Name = {
-			name = L["UIPANEL_FONTFACE"],
-			desc = L["UIPANEL_FONT_DESC"],
-			type = "select",
-			order = 1,
-			dialogControl = 'LSM30_Font',
-			values = LSM:HashTable("font"),
-		},
-		Outline = {
-			name = L["UIPANEL_FONT_OUTLINE"],
-			desc = L["UIPANEL_FONT_OUTLINE_DESC"],
-			type = "select",
-			values = {
-				[""] = L["OUTLINE_NO"],
-				OUTLINE = L["OUTLINE_THIN"],
-				THICKOUTLINE = L["OUTLINE_THICK"],
-				MONOCHORME = L["OUTLINE_MONOCHORME"],
-			},
-			style = "dropdown",
-			order = 5,
-		},
-		Size = {
-			name = L["UIPANEL_FONT_SIZE"],
-			desc = L["UIPANEL_FONT_SIZE_DESC"],
-			type = "range",
-			order = 9,
-			min = 6,
-			softMax = 26,
-			step = 1,
-			bigStep = 1,
-		},
-		point = {
-			name = L["UIPANEL_POINT"],
-			type = "select",
-			values = points,
-			style = "dropdown",
-			order = 10,
-			disabled = fontDisabled,
-		},
-		relativePoint = {
-			name = L["UIPANEL_RELATIVEPOINT"],
-			type = "select",
-			values = points,
-			style = "dropdown",
-			order = 13,
-			disabled = fontDisabled,
-		},
-		ConstrainWidth = {
-			name = L["UIPANEL_FONT_CONSTRAINWIDTH"],
-			desc = L["UIPANEL_FONT_CONSTRAINWIDTH_DESC"],
-			type = "toggle",
-			order = 15,
-		},
-		x = {
-			name = L["UIPANEL_FONT_XOFFS"],
-			type = "range",
-			order = 20,
-			min = -30,
-			max = 30,
-			step = 1,
-			bigStep = 1,
-			disabled = fontDisabled,
-		},
-		y = {
-			name = L["UIPANEL_FONT_YOFFS"],
-			type = "range",
-			order = 21,
-			min = -30,
-			max = 30,
-			step = 1,
-			bigStep = 1,
-			disabled = fontDisabled,
-		},
-		OverrideLBFPos = {
-			name = L["UIPANEL_FONT_OVERRIDELBF"],
-			desc = L["UIPANEL_FONT_OVERRIDELBF_DESC"],
-			type = "toggle",
-			width = "double",
-			order = 50,
-			hidden = not (LMB),
-		},
-	},
 }
 
 local groupSortPriorities = {
@@ -703,7 +622,7 @@ local groupSortValues = {
 	L["UIPANEL_GROUPSORT_alpha"],
 	L["UIPANEL_GROUPSORT_shown"],
 }
-local groupSortMethodTemplate
+local groupSortMethodTemplate -- this is intentional
 groupSortMethodTemplate = {
 	type = "group",
 	name = function(info)
@@ -715,7 +634,7 @@ groupSortMethodTemplate = {
 	disabled = function(info, priorityID)
 		local g = findid(info)
 		local priorityID = priorityID or tonumber(info[#info-1])
-		for k, v in pairs(db.profile.Groups[g].SortPriorities) do
+		for k, v in pairs(TMW.db.profile.Groups[g].SortPriorities) do
 			if k < priorityID and v.Method == "id" then
 				return true
 			end
@@ -732,7 +651,7 @@ groupSortMethodTemplate = {
 			desc = function(info)
 				local g = findid(info)
 				local priorityID = tonumber(info[#info-1])
-				local Method = db.profile.Groups[g].SortPriorities[priorityID].Method
+				local Method = TMW.db.profile.Groups[g].SortPriorities[priorityID].Method
 
 				local desc = L["UIPANEL_GROUPSORT_METHODNAME_DESC"]:format(priorityID) .. "\r\n\r\n" .. L["UIPANEL_GROUPSORT_" .. Method .. "_DESC"]
 				if groupSortMethodTemplate.disabled(info, priorityID) then
@@ -748,7 +667,7 @@ groupSortMethodTemplate = {
 			get = function(info)
 				local g = findid(info)
 				local priorityID = tonumber(info[#info-1])
-				local Method = db.profile.Groups[g].SortPriorities[priorityID].Method
+				local Method = TMW.db.profile.Groups[g].SortPriorities[priorityID].Method
 				for k, v in pairs(groupSortPriorities) do
 					if Method == v then
 						return k
@@ -758,12 +677,12 @@ groupSortMethodTemplate = {
 			set = function(info, val)
 				local g = findid(info)
 				local priorityID = tonumber(info[#info-1])
-				local oldPriority = db.profile.Groups[g].SortPriorities[priorityID]
+				local oldPriority = TMW.db.profile.Groups[g].SortPriorities[priorityID]
 				local newPriority
-				for k, v in pairs(db.profile.Groups[g].SortPriorities) do
+				for k, v in pairs(TMW.db.profile.Groups[g].SortPriorities) do
 					if v.Method == groupSortPriorities[val] then
-						db.profile.Groups[g].SortPriorities[k] = oldPriority
-						db.profile.Groups[g].SortPriorities[priorityID] = v
+						TMW.db.profile.Groups[g].SortPriorities[k] = oldPriority
+						TMW.db.profile.Groups[g].SortPriorities[priorityID] = v
 						break
 					end
 				end
@@ -779,12 +698,12 @@ groupSortMethodTemplate = {
 			get = function(info)
 				local g = findid(info)
 				local priorityID = tonumber(info[#info-1])
-				return db.profile.Groups[g].SortPriorities[priorityID].Order == 1
+				return TMW.db.profile.Groups[g].SortPriorities[priorityID].Order == 1
 			end,
 			set = function(info)
 				local g = findid(info)
 				local priorityID = tonumber(info[#info-1])
-				db.profile.Groups[g].SortPriorities[priorityID].Order = 1
+				TMW.db.profile.Groups[g].SortPriorities[priorityID].Order = 1
 				TMW[g]:Setup()
 			end,
 		},
@@ -797,12 +716,12 @@ groupSortMethodTemplate = {
 			get = function(info)
 				local g = findid(info)
 				local priorityID = tonumber(info[#info-1])
-				return db.profile.Groups[g].SortPriorities[priorityID].Order == -1
+				return TMW.db.profile.Groups[g].SortPriorities[priorityID].Order == -1
 			end,
 			set = function(info)
 				local g = findid(info)
 				local priorityID = tonumber(info[#info-1])
-				db.profile.Groups[g].SortPriorities[priorityID].Order = -1
+				TMW.db.profile.Groups[g].SortPriorities[priorityID].Order = -1
 				TMW[g]:Setup()
 			end,
 		},
@@ -833,7 +752,7 @@ local groupConfigTemplate = {
 					width = "double",
 					set = function(info, val)
 						local g = findid(info)
-						db.profile.Groups[g].Name = strtrim(val)
+						TMW.db.profile.Groups[g].Name = strtrim(val)
 						TMW[g]:Setup()
 					end,
 				},
@@ -894,11 +813,11 @@ local groupConfigTemplate = {
 					order = 23,
 					get = function(info)
 						local g = findid(info)
-						return db.profile.Groups[g][info[#info-1]] == info[#info]
+						return TMW.db.profile.Groups[g][info[#info-1]] == info[#info]
 					end,
 					set = function(info)
 						local g = findid(info)
-						db.profile.Groups[g][info[#info-1]] = info[#info]
+						TMW.db.profile.Groups[g][info[#info-1]] = info[#info]
 						TMW[g]:Setup()
 					end,
 					args = {
@@ -916,13 +835,56 @@ local groupConfigTemplate = {
 						},
 					}
 				},]==]
+				TextLayout = {
+					name = L["TEXTLAYOUTS_SETGROUPLAYOUT"],
+					desc = L["TEXTLAYOUTS_SETGROUPLAYOUT_DESC"],
+					type = "select",
+					values = function(info)
+						local t = {}
+						for GUID, layoutSettings in pairs(TMW.db.profile.TextLayouts) do
+							t[GUID] = TEXT:GetLayoutName(layoutSettings, GUID)
+						end
+						setmetatable(t, {__index = function(t, k) 
+							if k == "%FAKEGET%" then
+								return L["TEXTLAYOUTS_SETGROUPLAYOUT_DDVALUE"]
+							end
+						end})
+						return t
+					end,
+					style = "dropdown",
+					order = 25,
+					get = function(info, val)
+						return "%FAKEGET%"
+					end,
+					set = function(info, val)
+						local groupID = findid(info)
+						local gs = TMW[groupID]:GetSettings()
+						gs.SettingsPerView[gs.View].TextLayout = val
+						
+						-- the group setting is a fallback for icons, so there is no reason to set the layout for individual icons
+						-- we do need to reset icons to "" so that they will fall back to the group setting, though.
+						for icon in TMW:InIcons(groupID) do
+							IE:AttemptBackup(icon)
+						end
+						
+						for ics in TMW:InIconSettings(groupID) do
+							ics.SettingsPerView[gs.View].TextLayout = ""
+						end
+						
+						for icon in TMW:InIcons(groupID) do
+							IE:AttemptBackup(icon)
+						end
+						
+						TMW[groupID]:Setup()
+					end,
+				},
 				CheckOrder = {
 					name = L["CHECKORDER"],
 					desc = L["CHECKORDER_ICONDESC"],
 					type = "select",
 					values = checkorder,
 					style = "dropdown",
-					order = 24,
+					order = 26,
 				},
 				delete = {
 					name = L["UIPANEL_DELGROUP"],
@@ -933,7 +895,7 @@ local groupConfigTemplate = {
 						TMW:Group_Delete(findid(info))
 					end,
 					disabled = function()
-						return db.profile.NumGroups == 1
+						return TMW.db.profile.NumGroups == 1
 					end,
 					confirm = function(info)
 						if IsControlKeyDown() then
@@ -947,23 +909,22 @@ local groupConfigTemplate = {
 				ImportExport = importExportBoxTemplate,
 			},
 		},
-		Count = groupFontConfigTemplate,
-		Bind = groupFontConfigTemplate,
+		--Count = groupFontConfigTemplate,
+		--Bind = groupFontConfigTemplate,
 
 		Sorting = {
 			name = L["UIPANEL_GROUPSORT"],
 			desc = L["UIPANEL_GROUPSORT_DESC"],
 			type = "group",
 			order = 10,
-			args = {
-				["1"] = groupSortMethodTemplate,
-				["2"] = groupSortMethodTemplate,
-				["3"] = groupSortMethodTemplate,
-				["4"] = groupSortMethodTemplate,
-				["5"] = groupSortMethodTemplate,
-				["6"] = groupSortMethodTemplate,
-				["7"] = groupSortMethodTemplate,
-			},
+			args = (function()
+				-- cheesy (or clever) inline dynamic table generation
+				local t = {}
+				for i = 1, #TMW.Group_Defaults.SortPriorities do
+					t[tostring(i)] = groupSortMethodTemplate
+				end
+				return t
+			end)()
 		},
 		position = {
 			type = "group",
@@ -972,15 +933,16 @@ local groupConfigTemplate = {
 			desc = L["UIPANEL_POSITION_DESC"],
 			set = function(info, val)
 				local g = findid(info)
-				db.profile.Groups[g].Point[info[#info]] = val
+				TMW.db.profile.Groups[g].Point[info[#info]] = val
 				TMW[g]:SetPos()
 			end,
 			get = function(info)
-				return db.profile.Groups[findid(info)].Point[info[#info]]
+				return TMW.db.profile.Groups[findid(info)].Point[info[#info]]
 			end,
 			args = {
 				point = {
 					name = L["UIPANEL_POINT"],
+					desc = L["UIPANEL_POINT_DESC"],
 					type = "select",
 					values = points,
 					style = "dropdown",
@@ -994,6 +956,7 @@ local groupConfigTemplate = {
 				},
 				relativePoint = {
 					name = L["UIPANEL_RELATIVEPOINT"],
+					desc = L["UIPANEL_RELATIVEPOINT_DESC"],
 					type = "select",
 					values = points,
 					style = "dropdown",
@@ -1001,6 +964,7 @@ local groupConfigTemplate = {
 				},
 				x = {
 					name = L["UIPANEL_FONT_XOFFS"],
+					desc = L["UIPANEL_FONT_XOFFS_DESC"],
 					type = "range",
 					order = 4,
 					softMin = -500,
@@ -1010,6 +974,7 @@ local groupConfigTemplate = {
 				},
 				y = {
 					name = L["UIPANEL_FONT_YOFFS"],
+					desc = L["UIPANEL_FONT_YOFFS_DESC"],
 					type = "range",
 					order = 5,
 					softMin = -500,
@@ -1026,10 +991,10 @@ local groupConfigTemplate = {
 					bigStep = 0.01,
 					set = function(info, val)
 						local g = findid(info)
-						db.profile.Groups[g].Scale = val
+						TMW.db.profile.Groups[g].Scale = val
 						TMW[g]:SetPos()
 					end,
-					get = function(info) return db.profile.Groups[findid(info)].Scale end,
+					get = function(info) return TMW.db.profile.Groups[findid(info)].Scale end,
 				},
 				Level = {
 					name = L["UIPANEL_LEVEL"],
@@ -1040,10 +1005,10 @@ local groupConfigTemplate = {
 					step = 1,
 					set = function(info, val)
 						local g = findid(info)
-						db.profile.Groups[g].Level = val
+						TMW.db.profile.Groups[g].Level = val
 						TMW[g]:SetPos()
 					end,
-					get = function(info) return db.profile.Groups[findid(info)].Level end,
+					get = function(info) return TMW.db.profile.Groups[findid(info)].Level end,
 				},
 				Strata = {
 					name = L["UIPANEL_STRATA"],
@@ -1052,11 +1017,11 @@ local groupConfigTemplate = {
 					order = 8,
 					set = function(info, val)
 						local g = findid(info)
-						db.profile.Groups[g].Strata = stratas[val]
+						TMW.db.profile.Groups[g].Strata = stratas[val]
 						TMW[g]:SetPos()
 					end,
 					get = function(info)
-						local val = db.profile.Groups[findid(info)].Strata
+						local val = TMW.db.profile.Groups[findid(info)].Strata
 						for k, v in pairs(stratas) do
 							if v == val then
 								return k
@@ -1072,10 +1037,10 @@ local groupConfigTemplate = {
 					order = 40,
 					set = function(info, val)
 						local g = findid(info)
-						db.profile.Groups[g].Locked = val
+						TMW.db.profile.Groups[g].Locked = val
 						TMW[g]:Setup()
 					end,
-					get = function(info) return db.profile.Groups[findid(info)].Locked end
+					get = function(info) return TMW.db.profile.Groups[findid(info)].Locked end
 				},
 				reset = {
 					name = L["UIPANEL_GROUPRESET"],
@@ -1088,6 +1053,412 @@ local groupConfigTemplate = {
 		},
 	}
 }
+
+local textLayoutInfo = {
+	layout = 2,
+	string = 3,
+	stringSetting = 4,
+}
+local function findlayout(info)
+	local layout = info[textLayoutInfo.layout]
+	return layout and strmatch(layout, "#TextLayout (.+)")
+end
+local function AddTextLayout()
+	local GUID = TMW.generateGUID(12)
+	local newLayout = TMW.db.profile.TextLayouts[GUID]
+	newLayout.GUID = GUID
+	
+	local Name = "New 1"
+	repeat
+		local found
+		for k, layoutSettings in pairs(TMW.db.profile.TextLayouts) do
+			if layoutSettings.Name == Name then
+				Name = TMW.oneUpString(Name)
+				found = true
+				break
+			end
+		end
+	until not found
+	
+	newLayout.Name = Name
+end
+local function UpdateIconsUsingTextLayout(layoutID)
+	for group, groupID in TMW:InGroups() do
+		for icon in TMW:InIcons(groupID) do
+			if icon:IsVisible() and icon:GetTextLayout() == layoutID then
+				-- setup entire groups because there is code that prevents excessive event firing
+				-- when updating a whole group vs a single icon
+				group:Setup()
+				break
+			end
+		end
+	end
+end
+local textLayoutTemplate = {
+	type = "group",
+	name = function(info)
+		local layout = findlayout(info)
+		
+		return TEXT:GetLayoutName(nil, layout)
+	end,
+	order = function(info)
+		local layout = findlayout(info)
+		local settings = TMW.db.profile.TextLayouts[layout]
+		
+		if settings.NoEdit then
+			return 1
+		else
+			return 2
+		end
+	end,
+	disabled = function(info)
+		local layout = findlayout(info)
+		local stringSetting = info[textLayoutInfo.stringSetting]
+		return stringSetting and TMW.db.profile.TextLayouts[layout].NoEdit
+	end,
+	args = {
+		Name = {
+			name = L["TEXTLAYOUTS_RENAME"],
+			type = "input",
+			width = "full",
+			order = 1,
+			set = function(info, val)
+				local layout = findlayout(info)
+				TMW.db.profile.TextLayouts[layout].Name = strtrim(val)
+				TMW:Update()
+				TEXT:LoadConfig()
+			end,
+			get = function(info)
+				local layout = findlayout(info)
+				return TMW.db.profile.TextLayouts[layout].Name
+			end,
+			disabled = function(info)
+				local layout = findlayout(info)
+				return TMW.db.profile.TextLayouts[layout].NoEdit
+			end,
+		},
+		addstring = {
+			name = L["TEXTLAYOUTS_ADDSTRING"],
+			type = "execute",
+			order = 2,
+			func = function(info)
+				local layout = findlayout(info)
+				TMW.db.profile.TextLayouts[layout].n = TMW.db.profile.TextLayouts[layout].n + 1
+				IE:NotifyChanges()
+				TMW:CompileOptions()
+				TMW:Update()
+				TEXT:LoadConfig()
+			end,
+			disabled = function(info)
+				local layout = findlayout(info)
+				return TMW.db.profile.TextLayouts[layout].NoEdit
+			end,
+		},
+		delete = {
+			name = L["TEXTLAYOUTS_DELETELAYOUT"],
+			desc = L["TEXTLAYOUTS_DELETELAYOUT_DESC"],
+			type = "execute",
+			order = 10,
+			func = function(info)
+				local layout = findlayout(info)
+				
+				IE:NotifyChanges("textlayouts") -- MUST HAPPEN BEFORE WE NIL THE LAYOUT
+				TMW.db.profile.TextLayouts[layout] = nil
+				TMW:CompileOptions()
+				TMW:Update()
+				TEXT:LoadConfig()
+			end,
+			disabled = function(info)
+				local layout = findlayout(info)
+				return TMW.db.profile.TextLayouts[layout].NoEdit
+			end,
+			confirm = function(info)
+				local layout = findlayout(info)
+				local n = TMW:TextLayout_GetNumTimesUsed(layout)
+			
+				local warning = L["TEXTLAYOUTS_DELETELAYOUT_CONFIRM_BASE"]:format(TEXT:GetLayoutName(nil, layout))
+				if n > 0 then
+					warning = warning .. "\r\n\r\n" .. L["TEXTLAYOUTS_DELETELAYOUT_CONFIRM_NUM"]:format(n)
+				elseif IsControlKeyDown() then
+					return false
+				end
+				return warning
+			end,
+		},
+		
+		NoEditDesc = {
+			name = "\r\n\r\n" .. L["TEXTLAYOUTS_NOEDIT_DESC"] .. "\r\n\r\n",
+			type = "description",
+			order = 100,
+			disabled = false,
+			hidden = function(info)
+				local layout = findlayout(info)
+				return not TMW.db.profile.TextLayouts[layout].NoEdit
+			end,
+		},
+		
+		importExportBox = importExportBoxTemplate,
+	},
+}
+
+local textFontStringTemplate = {
+	type = "group",
+	name = function(info)
+		local layout = findlayout(info)
+		local string = tonumber(info[textLayoutInfo.string])
+		
+		return TEXT:GetStringName(TMW.db.profile.TextLayouts[layout][string], string)
+	end,
+	order = function(info) return tonumber(info[#info]) end,
+	set = function(info, val)
+		local layout = findlayout(info)
+		local string = tonumber(info[textLayoutInfo.string])
+		local setting = info[textLayoutInfo.stringSetting]
+		TMW.db.profile.TextLayouts[layout][string][setting] = val
+		UpdateIconsUsingTextLayout(layout)
+		TEXT:LoadConfig()
+	end,
+	get = function(info)
+		local layout = findlayout(info)
+		local string = tonumber(info[textLayoutInfo.string])
+		local setting = info[textLayoutInfo.stringSetting]
+		return TMW.db.profile.TextLayouts[layout][string][setting]
+	end,
+	hidden = function(info)
+		local layout = findlayout(info)
+		local string = tonumber(info[textLayoutInfo.string])
+		return layout and string and TMW.db.profile.TextLayouts[layout].n < string
+	end,
+	args = {
+		StringName = {
+			name = L["TEXTLAYOUTS_RENAMESTRING"],
+			desc = L["TEXTLAYOUTS_RENAMESTRING_DESC"],
+			type = "input",
+			order = 1,
+		},
+		SkinAs = {
+			name = L["TEXTLAYOUTS_SKINAS"],
+			desc = L["TEXTLAYOUTS_SKINAS_DESC"],
+			type = "select",
+			style = "dropdown",
+			order = 2,
+			values = TMW.MasqueSkinnableTexts,
+			set = function(info, val)
+				local layout = findlayout(info)
+				local string = tonumber(info[textLayoutInfo.string])
+				local setting = info[textLayoutInfo.stringSetting]
+				assert(setting == "SkinAs")
+				for id, strSettings in TMW:InNLengthTable(TMW.db.profile.TextLayouts[layout]) do
+					if strSettings[setting] == val then
+						strSettings[setting] = ""
+						TMW:Printf(L["TEXTLAYOUTS_RESETSKINAS"],
+							L["TEXTLAYOUTS_SKINAS"],
+							TEXT:GetStringName(strSettings, id),
+							TEXT:GetStringName(TMW.db.profile.TextLayouts[layout][string], string)
+						)
+					end
+				end
+				TMW.db.profile.TextLayouts[layout][string][setting] = val
+				UpdateIconsUsingTextLayout(layout)
+				TEXT:LoadConfig()
+			end,
+			hidden = not (LMB),
+		},
+		DefaultText = {
+			name = L["TEXTLAYOUTS_DEFAULTTEXT"],
+			desc = L["TEXTLAYOUTS_DEFAULTTEXT_DESC"],
+			type = "input",
+			width = "full",
+			order = 0.5,
+		},
+		font = {
+			name = L["TEXTLAYOUTS_FONTSETTINGS"],
+			order = 20,
+			type = "group",
+			guiInline = true,
+			dialogInline = true,			
+			set = function(info, val)
+				local layout = findlayout(info)
+				local string = tonumber(info[textLayoutInfo.string])
+				local setting = info[textLayoutInfo.stringSetting + 1]
+				TMW.db.profile.TextLayouts[layout][string][setting] = val
+				UpdateIconsUsingTextLayout(layout)
+				TEXT:LoadConfig()
+			end,
+			get = function(info)
+				local layout = findlayout(info)
+				local string = tonumber(info[textLayoutInfo.string])
+				local setting = info[textLayoutInfo.stringSetting + 1]
+				return TMW.db.profile.TextLayouts[layout][string][setting]
+			end,
+			disabled = function(info)
+				local layout = findlayout(info)
+				local string = tonumber(info[textLayoutInfo.string])
+				return
+					TMW.db.profile.TextLayouts[layout].NoEdit or
+					(LMB and TMW.db.profile.TextLayouts[layout][string].SkinAs ~= "")
+			end,
+			args = {
+				Name = {
+					name = L["UIPANEL_FONTFACE"],
+					desc = L["UIPANEL_FONT_DESC"],
+					type = "select",
+					order = 4,
+					dialogControl = 'LSM30_Font',
+					values = LSM:HashTable("font"),
+				},
+				Outline = {
+					name = L["UIPANEL_FONT_OUTLINE"],
+					desc = L["UIPANEL_FONT_OUTLINE_DESC"],
+					type = "select",
+					values = {
+						[""] = L["OUTLINE_NO"],
+						OUTLINE = L["OUTLINE_THIN"],
+						THICKOUTLINE = L["OUTLINE_THICK"],
+						MONOCHROME = L["OUTLINE_MONOCHORME"],
+					},
+					style = "dropdown",
+					order = 1,
+					disabled = function(info)
+						local layout = findlayout(info)
+						local string = tonumber(info[textLayoutInfo.string])
+						return TMW.db.profile.TextLayouts[layout].NoEdit
+					end,
+				},
+				Size = {
+					name = L["UIPANEL_FONT_SIZE"],
+					desc = L["UIPANEL_FONT_SIZE_DESC"],
+					type = "range",
+					order = 9,
+					min = 6,
+					softMax = 26,
+					step = 1,
+					bigStep = 1,
+				},
+			},
+		},
+		position = {
+			name = L["TEXTLAYOUTS_POSITIONSETTINGS"],
+			order = 30,
+			type = "group",
+			guiInline = true,
+			dialogInline = true,			
+			set = function(info, val)
+				local layout = findlayout(info)
+				local string = tonumber(info[textLayoutInfo.string])
+				local setting = info[textLayoutInfo.stringSetting + 1]
+				TMW.db.profile.TextLayouts[layout][string][setting] = val
+				UpdateIconsUsingTextLayout(layout)
+				TEXT:LoadConfig()
+			end,
+			get = function(info)
+				local layout = findlayout(info)
+				local string = tonumber(info[textLayoutInfo.string])
+				local setting = info[textLayoutInfo.stringSetting + 1]
+				return TMW.db.profile.TextLayouts[layout][string][setting]
+			end,
+			disabled = function(info)
+				local layout = findlayout(info)
+				local string = tonumber(info[textLayoutInfo.string])
+				return
+					TMW.db.profile.TextLayouts[layout].NoEdit or
+					(LMB and TMW.db.profile.TextLayouts[layout][string].SkinAs ~= "")
+			end,
+			args = {
+				point = {
+					name = L["UIPANEL_POINT"],
+					desc = L["TEXTLAYOUTS_POINT_DESC"],
+					type = "select",
+					values = points,
+					style = "dropdown",
+					order = 10,
+				},
+				relativePoint = {
+					name = L["UIPANEL_RELATIVEPOINT"],
+					desc = L["TEXTLAYOUTS_RELATIVEPOINT_DESC"],
+					type = "select",
+					values = points,
+					style = "dropdown",
+					order = 13,
+				},
+				ConstrainWidth = {
+					name = L["UIPANEL_FONT_CONSTRAINWIDTH"],
+					desc = L["UIPANEL_FONT_CONSTRAINWIDTH_DESC"],
+					type = "toggle",
+					order = 1,
+					disabled = function(info)
+						local layout = findlayout(info)
+						local string = tonumber(info[textLayoutInfo.string])
+						return TMW.db.profile.TextLayouts[layout].NoEdit
+					end,
+				},
+				x = {
+					name = L["UIPANEL_FONT_XOFFS"],
+					desc = L["UIPANEL_FONT_XOFFS_DESC"],
+					type = "range",
+					order = 20,
+					min = -30,
+					max = 30,
+					step = 1,
+					bigStep = 1,
+				},
+				y = {
+					name = L["UIPANEL_FONT_YOFFS"],
+					desc = L["UIPANEL_FONT_YOFFS_DESC"],
+					type = "range",
+					order = 21,
+					min = -30,
+					max = 30,
+					step = 1,
+					bigStep = 1,
+				},
+			},
+		},
+	
+		delete = {
+			name = L["TEXTLAYOUTS_DELETESTRING"],
+			desc = L["TEXTLAYOUTS_DELETESTRING_DESC"],
+			type = "execute",
+			order = 3,
+			func = function(info)
+				local layout = findlayout(info)
+				local string = tonumber(info[textLayoutInfo.string])
+				
+				-- MUST HAPPEN BEFORE WE REMOVE THE STRING
+				if TMW.db.profile.TextLayouts[layout].n == string then
+					IE:NotifyChanges("textlayouts", layout, string - 1)
+				else
+					IE:NotifyChanges("textlayouts", layout, string)
+				end
+				
+				tremove(TMW.db.profile.TextLayouts[layout], string)
+				TMW.db.profile.TextLayouts[layout].n = TMW.db.profile.TextLayouts[layout].n - 1
+				
+				TMW:CompileOptions()
+				IE:NotifyChanges()
+				TMW:Update()
+				TEXT:LoadConfig()
+			end,
+			disabled = function(info)
+				local layout = findlayout(info)
+				return textLayoutTemplate.disabled(info) or TMW.db.profile.TextLayouts[layout].n == 1
+			end,
+			confirm = true,
+		},
+		
+		NoEditDesc = {
+			name = "\r\n\r\n" .. L["TEXTLAYOUTS_NOEDIT_DESC"],
+			type = "description",
+			order = 100,
+			disabled = false,
+			hidden = function(info)
+				local layout = findlayout(info)
+				return not TMW.db.profile.TextLayouts[layout].NoEdit
+			end,
+		},
+	},
+}
+
 
 local colorOrder = {
 	"CBS",
@@ -1143,23 +1514,23 @@ local colorTemplate = {
 				return strsub(info[#info-1], 1, 2) == "CB"
 			end,
 			set = function(info, r, g, b, a)
-				local c = db.profile.Colors[info[#info-2]][info[#info-1]]
+				local c = TMW.db.profile.Colors[info[#info-2]][info[#info-1]]
 
 				c.r = r c.g = g c.b = b c.a = a
 				c.Override = true
 				TMW.Types[info[#info-2]]:UpdateColors()
 			end,
 			get = function(info)
-				local base = db.profile.Colors[info[#info-2]][info[#info-1]]
+				local base = TMW.db.profile.Colors[info[#info-2]][info[#info-1]]
 				local c = base
 				if not base.Override then
-				--	c = db.profile.Colors["GLOBAL"][info[#info-1]] -- i don't like this. too confusing to see the color change when checking and unchecking the setting
+				--	c = TMW.db.profile.Colors["GLOBAL"][info[#info-1]] -- i don't like this. too confusing to see the color change when checking and unchecking the setting
 				end
 
 				return c.r, c.g, c.b, c.a
 			end,
 			disabled = function(info)
-				return not db.profile.Colors[info[#info-2]][info[#info-1]].Override and info[#info-2] ~= "GLOBAL"
+				return not TMW.db.profile.Colors[info[#info-2]][info[#info-1]].Override and info[#info-2] ~= "GLOBAL"
 			end
 		},
 		override = {
@@ -1169,11 +1540,11 @@ local colorTemplate = {
 			width = "half",
 			order = 1,
 			set = function(info, val)
-				db.profile.Colors[info[#info-2]][info[#info-1]].Override = val
+				TMW.db.profile.Colors[info[#info-2]][info[#info-1]].Override = val
 				TMW.Types[info[#info-2]]:UpdateColors()
 			end,
 			get = function(info)
-				return db.profile.Colors[info[#info-2]][info[#info-1]].Override
+				return TMW.db.profile.Colors[info[#info-2]][info[#info-1]].Override
 			end,
 			hidden = function(info)
 				return info[#info-2] == "GLOBAL"
@@ -1186,14 +1557,14 @@ local colorTemplate = {
 			width = "half",
 			order = 3,
 			set = function(info, val)
-				db.profile.Colors[info[#info-2]][info[#info-1]].Gray = val
+				TMW.db.profile.Colors[info[#info-2]][info[#info-1]].Gray = val
 				TMW.Types[info[#info-2]]:UpdateColors()
 			end,
 			get = function(info)
-				return db.profile.Colors[info[#info-2]][info[#info-1]].Gray
+				return TMW.db.profile.Colors[info[#info-2]][info[#info-1]].Gray
 			end,
 			disabled = function(info)
-				return strsub(info[#info-1], 1, 2) == "CB" or (not db.profile.Colors[info[#info-2]][info[#info-1]].Override and info[#info-2] ~= "GLOBAL")
+				return strsub(info[#info-1], 1, 2) == "CB" or (not TMW.db.profile.Colors[info[#info-2]][info[#info-1]].Override and info[#info-2] ~= "GLOBAL")
 			end
 		},
 		reset = {
@@ -1203,10 +1574,10 @@ local colorTemplate = {
 			width = "half",
 			order = 10,
 			func = function(info)
-				db.profile.Colors[info[#info-2]][info[#info-1]] = CopyTable(TellMeWhen.Defaults.profile.Colors["**"][info[#info-1]])
+				TMW.db.profile.Colors[info[#info-2]][info[#info-1]] = CopyTable(TMW.Defaults.profile.Colors["**"][info[#info-1]])
 			end,
 		--[=[	disabled = function(info)
-				return not db.profile.Colors[info[#info-2]][info[#info-1]].Override and info[#info-2] ~= "GLOBAL"
+				return not TMW.db.profile.Colors[info[#info-2]][info[#info-1]].Override and info[#info-2] ~= "GLOBAL"
 			end]=]
 		},
 	},
@@ -1235,11 +1606,11 @@ local colorIconTypeTemplate = {
 
 	--only inherited by ColorMSQ and OnlyMSQ:
 	set = function(info, val)
-		db.profile[info[#info]] = val
+		TMW.db.profile[info[#info]] = val
 		TMW:Update()
 	end,
 	get = function(info)
-		return db.profile[info[#info]]
+		return TMW.db.profile[info[#info]]
 	end,
 
 	args = {
@@ -1278,7 +1649,7 @@ local colorIconTypeTemplate = {
 				return not LMB or info[#info-1] ~= "GLOBAL"
 			end,
 			disabled = function(info)
-				return not db.profile.ColorMSQ
+				return not TMW.db.profile.ColorMSQ
 			end,
 		},
 	}
@@ -1287,7 +1658,6 @@ local colorIconTypeTemplate = {
 for k, v in pairs(colorOrder) do
 	colorIconTypeTemplate.args[v] = colorTemplate
 end
-
 for i = 1, GetNumTalentTabs() do
 	local _, name = GetTalentTabInfo(i)
 	groupConfigTemplate.args.main.args["Tree"..i] = {
@@ -1311,10 +1681,10 @@ function TMW:CompileOptions()
 					name = L["UIPANEL_MAINOPT"],
 					order = 1,
 					set = function(info, val)
-						db.profile[info[#info]] = val
+						TMW.db.profile[info[#info]] = val
 						TMW:Update()
 					end,
-					get = function(info) return db.profile[info[#info]] end,
+					get = function(info) return TMW.db.profile[info[#info]] end,
 					args = {
 						Locked = {
 							name = L["UIPANEL_LOCKUNLOCK"],
@@ -1430,9 +1800,9 @@ function TMW:CompileOptions()
 									type = "toggle",
 									order = 52,
 									set = function(info, val)
-										db.global[info[#info]] = val
+										TMW.db.global[info[#info]] = val
 									end,
-									get = function(info) return db.global[info[#info]] end,
+									get = function(info) return TMW.db.global[info[#info]] end,
 								},
 							},
 						},
@@ -1450,30 +1820,56 @@ function TMW:CompileOptions()
 							type = "execute",
 							order = 51,
 							confirm = true,
-							func = function() db:ResetProfile() end,
+							func = function() TMW.db:ResetProfile() end,
 						},
 						importexport = importExportBoxTemplate,
-						Colors = {
-							type = "group",
-							name = L["UIPANEL_COLORS"],
-							desc = L["UIPANEL_COLORS_DESC"],
-							order = 3,
-							childGroups = "tree",
-							args = {},
-						},
 					},
 				},
+				colors = {
+					type = "group",
+					name = L["UIPANEL_COLORS"],
+					desc = L["UIPANEL_COLORS_DESC"],
+					order = 10,
+					childGroups = "tree",
+					args = {},
+				},
+				textlayouts = {
+					type = "group",
+					name = L["TEXTLAYOUTS"],
+					order = 20,
+				--[=[	set = function(info, val)
+						TMW.db.profile[info[#info]] = val
+						TMW:Update()
+					end,
+					get = function(info) return TMW.db.profile[info[#info]] end,]=]
+					args = {
+						addlayout = {
+							name = L["TEXTLAYOUTS_ADDLAYOUT"],
+							type = "execute",
+							order = 1,
+							func = function()
+								AddTextLayout()
+								IE:NotifyChanges()
+								TMW:CompileOptions()
+								TMW:Update()
+								TEXT:LoadConfig()
+							end,
+						},
+						importExportBox = importExportBoxTemplate,
+					},
+				},
+				
 				groups = {
 					type = "group",
 					name = L["UIPANEL_GROUPS"],
 					desc = L["UIPANEL_GROUPS_DESC"],
-					order = 2,
+					order = 30,
 					set = function(info, val)
 						local g = findid(info)
-						db.profile.Groups[g][info[#info]] = val
+						TMW.db.profile.Groups[g][info[#info]] = val
 						TMW[g]:Setup()
 					end,
-					get = function(info) return db.profile.Groups[findid(info)][info[#info]] end,
+					get = function(info) return TMW.db.profile.Groups[findid(info)][info[#info]] end,
 					args = {
 						addgroupgroup = {
 							type = "group",
@@ -1494,8 +1890,8 @@ function TMW:CompileOptions()
 				},
 			},
 		}
-		TMW.OptionsTable.args.profiles = LibStub("AceDBOptions-3.0"):GetOptionsTable(db)
-		TMW.OptionsTable.args.profiles.args = CopyTable(TMW.OptionsTable.args.profiles.args) -- dont copy the entire table because it contains a reference to db ... and will copy the entire db.
+		TMW.OptionsTable.args.profiles = LibStub("AceDBOptions-3.0"):GetOptionsTable(TMW.db)
+		TMW.OptionsTable.args.profiles.args = CopyTable(TMW.OptionsTable.args.profiles.args) -- dont copy the entire table because it contains a reference to db ... and will copy the entire TMW.db.
 		TMW.OptionsTable.args.profiles.args.importexportdesc = {
 			order = 90,
 			type = "description",
@@ -1505,24 +1901,42 @@ function TMW:CompileOptions()
 		TMW.OptionsTable.args.profiles.args.importexport = importExportBoxTemplate
 	end
 
-
+	-- Dynamic Group Settings --
 	for k, v in pairs(TMW.OptionsTable.args.groups.args) do
-		if strfind(k, "Group %d+") then -- protect ["addgroup"] and any other future settings in the group header
+		if v == groupConfigTemplate then
 			TMW.OptionsTable.args.groups.args[k] = nil
 		end
 	end
-
-	for g = 1, TELLMEWHEN_MAXGROUPS do
-		TMW.OptionsTable.args.groups.args["Group " .. g] = groupConfigTemplate
+	for g = 1, TMW.db.profile.NumGroups do
+		TMW.OptionsTable.args.groups.args["#Group " .. g] = groupConfigTemplate
 	end
-	TMW.OptionsTable.args.groups.args.addgroupgroup.order = TELLMEWHEN_MAXGROUPS + 1
+	TMW.OptionsTable.args.groups.args.addgroupgroup.order = TMW.db.profile.NumGroups + 1
 
-	TMW.OptionsTable.args.main.args.Colors.args.GLOBAL = colorIconTypeTemplate
+	-- Dynamic Color Settings --
+	TMW.OptionsTable.args.colors.args.GLOBAL = colorIconTypeTemplate
 	for k, Type in pairs(TMW.Types) do
 		if not Type.NoColorSettings then
-			TMW.OptionsTable.args.main.args.Colors.args[k] = colorIconTypeTemplate
+			TMW.OptionsTable.args.colors.args[k] = colorIconTypeTemplate
 		end
 	end
+	
+	-- Dynamic Text Settings --
+	-- delete all current layouts
+	for k, v in pairs(TMW.OptionsTable.args.textlayouts.args) do
+		if v == textLayoutTemplate then
+			TMW.OptionsTable.args.textlayouts.args[k] = nil
+		end
+	end
+	for layoutID, layout in pairs(TMW.db.profile.TextLayouts) do
+		for fontStringID, fontString in TMW:InNLengthTable(layout) do
+			-- this will expand textLayoutTemplate's args tables to the needed number
+			-- unused textFontStringTemplate in it will not be removed
+			-- they are simply hidden by AceCD-3.0
+			textLayoutTemplate.args[tostring(fontStringID)] = textFontStringTemplate
+		end
+		TMW.OptionsTable.args.textlayouts.args["#TextLayout " .. layoutID] = textLayoutTemplate
+	end
+	
 
 	LibStub("AceConfig-3.0"):RegisterOptionsTable("TMW Options", TMW.OptionsTable)
 	LibStub("AceConfigDialog-3.0"):SetDefaultSize("TMW Options", 781, 512)
@@ -1574,8 +1988,8 @@ end
 function TMW:Group_StopSizing(resizeButton)
 	resizeButton:SetScript("OnUpdate", nil)
 	local group = resizeButton:GetParent()
-	db.profile.Groups[group:GetID()].Scale = group:GetScale()
-	local p = db.profile.Groups[group:GetID()].Point
+	TMW.db.profile.Groups[group:GetID()].Scale = group:GetScale()
+	local p = TMW.db.profile.Groups[group:GetID()].Point
 	p.point, p.relativeTo, p.relativePoint, p.x, p.y = TMW:GetAnchoredPoints(group)
 	group:SetPos()
 	IE:NotifyChanges()
@@ -1584,7 +1998,7 @@ end
 function TMW:Group_StopMoving(group)
 	group:StopMovingOrSizing()
 	ID.isMoving = nil
-	local p = db.profile.Groups[group:GetID()].Point
+	local p = TMW.db.profile.Groups[group:GetID()].Point
 	p.point, p.relativeTo, p.relativePoint, p.x, p.y = TMW:GetAnchoredPoints(group)
 	group:SetPos()
 	IE:NotifyChanges()
@@ -1592,9 +2006,9 @@ end
 
 function TMW:Group_ResetPosition(groupID)
 	for k, v in pairs(TMW.Group_Defaults.Point) do
-		db.profile.Groups[groupID].Point[k] = v
+		TMW.db.profile.Groups[groupID].Point[k] = v
 	end
-	db.profile.Groups[groupID].Scale = 1
+	TMW.db.profile.Groups[groupID].Scale = 1
 	IE:NotifyChanges()
 	TMW[groupID]:Setup()
 end
@@ -1602,11 +2016,11 @@ end
 
 ---------- Add/Delete ----------
 function TMW:Group_Delete(groupID)
-	if db.profile.NumGroups == 1 then
+	if TMW.db.profile.NumGroups == 1 then
 		return
 	end
 
-	for id = groupID + 1, db.profile.NumGroups do
+	for id = groupID + 1, TMW.db.profile.NumGroups do
 		local source = "TellMeWhen_Group" .. id
 		local destination = "TellMeWhen_Group" .. id - 1
 
@@ -1617,8 +2031,8 @@ function TMW:Group_Delete(groupID)
 		TMW:ReconcileData(source, destination, source .. "_Icon", destination .. "_Icon")
 	end
 
-	tremove(db.profile.Groups, groupID)
-	db.profile.NumGroups = db.profile.NumGroups - 1
+	tremove(TMW.db.profile.Groups, groupID)
+	TMW.db.profile.NumGroups = TMW.db.profile.NumGroups - 1
 
 	TMW:Update()
 	IE:Load()
@@ -1628,29 +2042,56 @@ function TMW:Group_Delete(groupID)
 end
 
 function TMW:Group_Add()
-	local groupID = db.profile.NumGroups + 1
-	db.profile.NumGroups = groupID
-	db.profile.Groups[db.profile.NumGroups].Enabled = true
+	local groupID = TMW.db.profile.NumGroups + 1
+	TMW.db.profile.NumGroups = groupID
+	TMW.db.profile.Groups[TMW.db.profile.NumGroups].Enabled = true
 	TMW:Update()
 
 	TMW:CompileOptions()
-	IE:NotifyChanges("groups", "Group " .. groupID)
+	IE:NotifyChanges("groups", "#Group " .. groupID)
 	return groupID, TMW[groupID]
 end
 
 
 ---------- Etc ----------
 function TMW:Group_HasIconData(groupID)
-	local has = false
 	for ics in TMW:InIconSettings(groupID) do
-		if not IE:DeepCompare(DEFAULT_ICON_SETTINGS, ics) then
-			has = true
-			break
+		if not IE:DeepCompare(TMW.DEFAULT_ICON_SETTINGS, ics) then
+			return true
 		end
 	end
 
-	return has
+	return false
 end
+
+function TMW:TextLayout_GetNumTimesUsed(layout)
+	local n = 0	
+	TMW.TextLayout_NumTimesUsedTemp = wipe(TMW.TextLayout_NumTimesUsedTemp or {})
+	
+	for gs, groupID in TMW:InGroupSettings() do
+		for view, settings in pairs(gs.SettingsPerView) do
+			if settings.TextLayout == layout then
+				n = n + (gs.Rows*gs.Columns)
+				TMW.TextLayout_NumTimesUsedTemp[groupID] = true
+				break
+			end
+		end
+	end
+	
+	for ics, groupID in TMW:InIconSettings() do
+		if not TMW.TextLayout_NumTimesUsedTemp[groupID] then
+			for view, settings in pairs(ics.SettingsPerView) do
+				if settings.TextLayout == layout then
+					n = n + 1
+					break
+				end
+			end
+		end
+	end
+
+	return n
+end
+
 
 -- ----------------------
 -- ICON DRAGGER
@@ -1849,9 +2290,9 @@ function ID:Start(icon)
 		ID.back:SetPoint("CENTER", UIParent, "BOTTOMLEFT", x/scale, y/scale )
 	end)
 	ID.F:SetScale(scale)
-	local t = TMW[ID.srcicon.group:GetID()][ID.srcicon:GetID()].texture:GetTexture()
+	local t = ID.srcicon.attributes.texture
 	ID.texture:SetTexture(t)
-	if t then
+	if t and t ~= "" then
 		ID.back:Hide()
 	else
 		ID.back:Show()
@@ -1933,11 +2374,17 @@ end
 ---------- Icon Methods ----------
 function ID:Move()
 	-- move the actual settings
-	db.profile.Groups[ID.desticon.group:GetID()].Icons[ID.desticon:GetID()] = db.profile.Groups[ID.srcicon.group:GetID()].Icons[ID.srcicon:GetID()]
-	db.profile.Groups[ID.srcicon.group:GetID()].Icons[ID.srcicon:GetID()] = nil
+	local srcgs = ID.srcicon.group:GetSettings()
+	local srcics = ID.srcicon:GetSettings()
+	
+	TMW:PrepareIconSettingsForCopying(srcics, srcgs)
+	
+	ID.desticon.group:GetSettings().Icons[ID.desticon:GetID()] = srcgs.Icons[ID.srcicon:GetID()]
+	srcgs.Icons[ID.srcicon:GetID()] = nil
+	
 
 	-- preserve buff/debuff/other types textures
-	ID.desticon.texture:SetTexture(ID.srcicon.texture:GetTexture())
+	ID.desticon:SetInfo("texture", ID.srcicon.attributes.texture)
 
 	local srcicon, desticon = tostring(ID.srcicon), tostring(ID.desticon)
 
@@ -1946,22 +2393,32 @@ end
 
 function ID:Copy()
 	-- copy the settings
-	db.profile.Groups[ID.desticon.group:GetID()].Icons[ID.desticon:GetID()] = TMW:CopyWithMetatable(db.profile.Groups[ID.srcicon.group:GetID()].Icons[ID.srcicon:GetID()])
+	local srcgs = ID.srcicon.group:GetSettings()
+	local srcics = ID.srcicon:GetSettings()
+	TMW:PrepareIconSettingsForCopying(srcics, srcgs)
+	
+	ID.desticon.group:GetSettings().Icons[ID.desticon:GetID()] = TMW:CopyWithMetatable(srcics)
 
 	-- preserve buff/debuff/other types textures
-	ID.desticon.texture:SetTexture(ID.srcicon.texture:GetTexture())
+	ID.desticon:SetInfo("texture", ID.srcicon.attributes.texture)
 end
 
 function ID:Swap()
 	-- swap the actual settings
-	local dest = db.profile.Groups[ID.desticon.group:GetID()].Icons[ID.desticon:GetID()]
-	db.profile.Groups[ID.desticon.group:GetID()].Icons[ID.desticon:GetID()] = db.profile.Groups[ID.srcicon.group:GetID()].Icons[ID.srcicon:GetID()]
-	db.profile.Groups[ID.srcicon.group:GetID()].Icons[ID.srcicon:GetID()] = dest
+	local destgs = ID.desticon.group:GetSettings()
+	local destics = ID.desticon:GetSettings()
+	local srcgs = ID.srcicon.group:GetSettings()
+	local srcics = ID.srcicon:GetSettings()
+	TMW:PrepareIconSettingsForCopying(destics, destgs)
+	TMW:PrepareIconSettingsForCopying(srcics, srcgs)
+	
+	destgs.Icons[ID.desticon:GetID()] = srcics
+	srcgs.Icons[ID.srcicon:GetID()] = destics
 
 	-- preserve buff/debuff/other types textures
-	local desttex = ID.desticon.texture:GetTexture()
-	ID.desticon.texture:SetTexture(ID.srcicon.texture:GetTexture())
-	ID.srcicon.texture:SetTexture(desttex)
+	local desttex = ID.desticon.attributes.texture
+	ID.desticon:SetInfo("texture", ID.srcicon.attributes.texture)
+	ID.srcicon:SetInfo("texture", desttex)
 
 	local srcicon, desticon = tostring(ID.srcicon), tostring(ID.desticon)
 
@@ -1969,7 +2426,7 @@ function ID:Swap()
 end
 
 function ID:Meta()
-	local Icons = db.profile.Groups[ID.desticon.group:GetID()].Icons[ID.desticon:GetID()].Icons
+	local Icons = TMW.db.profile.Groups[ID.desticon.group:GetID()].Icons[ID.desticon:GetID()].Icons
 	if Icons[#Icons] == "" then
 		Icons[#Icons] = nil
 	end
@@ -1978,7 +2435,7 @@ end
 
 function ID:Condition()
 	-- add a condition to the destination icon
-	local Condition = CNDT:AddCondition(db.profile.Groups[ID.desticon.group:GetID()].Icons[ID.desticon:GetID()].Conditions)
+	local Condition = CNDT:AddCondition(TMW.db.profile.Groups[ID.desticon.group:GetID()].Icons[ID.desticon:GetID()].Conditions)
 
 	-- set the settings
 	Condition.Type = "ICON"
@@ -2022,21 +2479,21 @@ function ID:Split()
 
 
 	-- back up the icon data of the source group
-	local SOURCE_ICONS = db.profile.Groups[ID.srcicon.group:GetID()].Icons
+	local SOURCE_ICONS = TMW.db.profile.Groups[ID.srcicon.group:GetID()].Icons
 	-- nullify it (we don't want to copy it)
-	db.profile.Groups[ID.srcicon.group:GetID()].Icons = nil
+	TMW.db.profile.Groups[ID.srcicon.group:GetID()].Icons = nil
 
 	-- copy the source group.
 	-- pcall so that, in the rare event of some unforseen error, we don't lose the user's settings (they haven't yet been restored)
-	local success, err = pcall(TMW.CopyTableInPlaceWithMeta, TMW, db.profile.Groups[ID.srcicon.group:GetID()], db.profile.Groups[groupID])
+	local success, err = pcall(TMW.CopyTableInPlaceWithMeta, TMW, TMW.db.profile.Groups[ID.srcicon.group:GetID()], TMW.db.profile.Groups[groupID])
 
 	-- restore the icon data of the source group
-	db.profile.Groups[ID.srcicon.group:GetID()].Icons = SOURCE_ICONS
+	TMW.db.profile.Groups[ID.srcicon.group:GetID()].Icons = SOURCE_ICONS
 	-- now it is safe to error since we restored the old settings
 	assert(success, err)
 
 
-	local gs = db.profile.Groups[groupID]
+	local gs = TMW.db.profile.Groups[groupID]
 	--gs.Icons = blankIcons
 
 	-- group tweaks
@@ -2060,7 +2517,7 @@ function ID:Split()
 	ID.srcicon.group.Icons[ID.srcicon:GetID()] = nil
 
 	-- preserve buff/debuff/other types textures
-	group[1].texture:SetTexture(ID.srcicon.texture:GetTexture())
+	group[1]:SetInfo("texture", ID.srcicon.attributes.texture)
 
 	local srcicon, desticon = tostring(ID.srcicon), tostring(group[1])
 
@@ -2140,7 +2597,7 @@ function ME:Insert(where)
 end
 
 function ME:Delete(self)
-	tremove(db.profile.Groups[CI.g].Icons[CI.i].Icons, self:GetParent():GetID())
+	tremove(TMW.db.profile.Groups[CI.g].Icons[CI.i].Icons, self:GetParent():GetID())
 	ME:LoadConfig()
 end
 
@@ -2186,7 +2643,7 @@ function ME:IconMenu()
 				info.tCoordRight = 0.93
 				info.tCoordTop = 0.07
 				info.tCoordBottom = 0.93
-				info.icon = icon.texture:GetTexture()
+				info.icon = icon.attributes.texture
 				UIDropDownMenu_AddButton(info, UIDROPDOWNMENU_MENU_LEVEL)
 			end
 		end
@@ -2194,7 +2651,7 @@ function ME:IconMenu()
 end
 
 function ME:IconMenuOnClick(frame)
-	db.profile.Groups[CI.g].Icons[CI.i].Icons[frame:GetParent():GetID()] = self.value
+	TMW.db.profile.Groups[CI.g].Icons[CI.i].Icons[frame:GetParent():GetID()] = self.value
 	ME:LoadConfig()
 	CloseDropDownMenus()
 end
@@ -2281,6 +2738,7 @@ CLEU.Events = {
 	"UNIT_DIED",
 	"UNIT_DESTROYED",
 	"SPELL_INSTAKILL",
+	"PARTY_KILL",
 }
 CLEU.Flags = {
 					-- "COMBATLOG_OBJECT_REACTION_MASK",
@@ -2560,7 +3018,6 @@ IE.Checks = {
 	--4=custom,
 	--table=subkeys are settings
 	Name = 2,
-	BindText = 2,
 	CustomTex = 2,
 	CLEUDur = 2,
 	Icons = 4,
@@ -2724,13 +3181,7 @@ IE.LeftChecks = {
 		disabledtooltip = L["ICONMENU_IGNORERUNES_DESC_DISABLED"],
 	},
 }
-IE.Tabs = {
-	"Main",				-- [1]
-	"Conditions",	   -- [2]
-	"Events",			-- [3]
-	"Conditions",	   -- [4]
-	"MainOptions",	  -- [5]
-}
+IE.Tabs = {}
 
 
 function IE:OnInitialize()
@@ -2771,7 +3222,7 @@ function IE:OnUpdate()
 	else
 		self.FS1:SetFormattedText(L["GROUPICON"], TMW:GetGroupName(groupID, groupID, 1), iconID)
 		if icon then
-			self.icontexture:SetTexture(icon.texture:GetTexture())
+			self.icontexture:SetTexture(icon.attributes.texture)
 		end
 		self.BackButton:Show()
 		self.ForwardsButton:Show()
@@ -2779,7 +3230,8 @@ function IE:OnUpdate()
 
 	-- run updates for any icons that are queued
 	for i, icon in ipairs(IE.iconsToUpdate) do
-		icon:Setup()
+	--	icon:Setup()
+		TMW.safecall(icon.Setup, icon)
 	end
 	wipe(IE.iconsToUpdate)
 
@@ -2790,8 +3242,9 @@ function IE:OnUpdate()
 end
 
 function IE:TMW_GLOBAL_UPDATE()
-	if not db.profile.Locked then
-		if db.global.ConfigWarning then -- oh no! configuration code in the main addon!
+	-- GLOBALS: TellMeWhen_ConfigWarning
+	if not TMW.Locked then
+		if TMW.db.global.ConfigWarning then
 			TellMeWhen_ConfigWarning:Show()
 		else
 			TellMeWhen_ConfigWarning:Hide()
@@ -2826,6 +3279,18 @@ function IE:TMW_ICON_SETUP_POST(event, icon)
 end
 TMW:RegisterCallback("TMW_ICON_SETUP_POST", IE)
 
+function IE:RegisterTab(tab, attachedFrame)
+	local id = #IE.Tabs + 1
+	
+	if id == 1 then
+		tab:SetPoint("BOTTOMLEFT", 0, -25)
+	else
+		tab:SetPoint("LEFT", IE.Tabs[id - 1], "RIGHT", -18, 0)
+	end
+	IE.Tabs[id] = tab
+	tab:SetID(id)
+	tab.attachedFrame = attachedFrame
+end
 
 ---------- Interface ----------
 function IE:Load(isRefresh, icon, isHistoryChange)
@@ -2866,7 +3331,7 @@ function IE:Load(isRefresh, icon, isHistoryChange)
 	if not groupID or not iconID then return end
 
 	IE.ExportBox:SetText("")
-	IE:SetScale(db.global.EditorScale)
+	IE:SetScale(TMW.db.global.EditorScale)
 
 	IE.Main.Name:SetLabels(TMW.Types[CI.t].chooseNameTitle, TMW.Types[CI.t].chooseNameText)
 	IE.Main.Name:GetScript("OnTextChanged")(IE.Main.Name)
@@ -2874,7 +3339,7 @@ function IE:Load(isRefresh, icon, isHistoryChange)
 	IE.Main.Unit:SetLabels(TMW.Types[CI.t].unitTitle)
 	IE.Main.Unit:GetScript("OnTextChanged")(IE.Main.Unit)
 
-	CI.t = db.profile.Groups[groupID].Icons[iconID].Type
+	CI.t = TMW.db.profile.Groups[groupID].Icons[iconID].Type
 	if CI.t == "" then
 		UIDropDownMenu_SetText(IE.Main.Type, L["ICONMENU_TYPE"])
 	else
@@ -2906,13 +3371,26 @@ function IE:Load(isRefresh, icon, isHistoryChange)
 	IE:UndoRedoChanged()
 end
 
+function IE:LoadFirstValidIcon()
+	for icon in TMW:InIcons() do
+		-- hack to get the first icon that exists and is shown
+		if icon:IsVisible() then
+			TMW.IE:Load(1, icon)
+			return
+		end
+	end
+	
+	TMW.IE:Hide()
+end
+	
 function IE:TabClick(self)
 	-- invoke blizzard's tab click function to set the apperance of all the tabs
 	PanelTemplates_Tab_OnClick(self, self:GetParent())
 	PlaySound("igCharacterInfoTab")
 
 	-- hide all tabs' frames, including the current tab so that the OnHide and OnShow scripts fire
-	for id, frame in pairs(IE.Tabs) do
+	for id, tab in ipairs(IE.Tabs) do
+		local frame = tab.attachedFrame
 		if IE[frame] then
 			IE[frame]:Hide()
 		end
@@ -2923,7 +3401,7 @@ function IE:TabClick(self)
 	IE.CurrentTab = self
 
 	-- show the selected tab's frame
-	IE[IE.Tabs[self:GetID()]]:Show()
+	IE[self.attachedFrame]:Show()
 	-- show the icon editor
 	IE:Show()
 
@@ -3012,7 +3490,7 @@ end
 function IE:Reset()
 	local groupID, iconID = CI.g, CI.i
 	IE:SaveSettings() -- this is here just to clear the focus of editboxes, not to actually save things
-	db.profile.Groups[groupID].Icons[iconID] = nil
+	TMW.db.profile.Groups[groupID].Icons[iconID] = nil
 	IE:ScheduleIconSetup()
 	IE:Load(1)
 	IE:TabClick(IE.MainTab)
@@ -3405,7 +3883,7 @@ end
 
 ---------- Dropdowns ----------
 function IE:Type_DropDown()
-	if not db then return end
+	if not TMW.db then return end
 	local groupID, iconID = CI.g, CI.i
 
 	for _, Type in ipairs(TMW.OrderedTypes) do -- order in the order in which they are loaded in the .toc file
@@ -3422,7 +3900,7 @@ function IE:Type_DropDown()
 				info.tooltipText = Type.desc
 				info.tooltipOnButton = true
 			end
-			info.checked = (info.value == db.profile.Groups[groupID].Icons[iconID].Type)
+			info.checked = (info.value == TMW.db.profile.Groups[groupID].Icons[iconID].Type)
 			info.func = IE.Type_Dropdown_OnClick
 			info.arg1 = Type
 			UIDropDownMenu_AddButton(info, UIDROPDOWNMENU_MENU_LEVEL)
@@ -3436,7 +3914,7 @@ end
 
 function IE:Type_Dropdown_OnClick()
 	CI.ics.Type = self.value
-	CI.ic.texture:SetTexture(nil)
+	CI.ic:SetInfo("texture", nil)
 
 	IE:ScheduleIconSetup()
 	CI.t = self.value
@@ -3448,7 +3926,7 @@ function IE:Type_Dropdown_OnClick()
 end
 
 function IE:Unit_DropDown()
-	if not db then return end
+	if not TMW.db then return end
 	local e = self:GetParent()
 	if not e:HasFocus() then
 		e:HighlightText()
@@ -3483,7 +3961,7 @@ function IE:Unit_DropDown_OnClick(v, e)
 	IE:ScheduleIconSetup()
 	CloseDropDownMenus()
 
-	db.global.HelpSettings.HasChangedUnit = db.global.HelpSettings.HasChangedUnit + 1
+	TMW.db.global.HelpSettings.HasChangedUnit = TMW.db.global.HelpSettings.HasChangedUnit + 1
 end
 
 
@@ -3605,96 +4083,30 @@ end
 -- IMPORT/EXPORT
 -- -----------------------
 
----------- Data Type Handlers ----------
-TMW.ImportFunctions = {
-	icon = function(data, version, noOverwrite)
-		local groupID, iconID = CI.g, CI.i
-		db.profile.Groups[groupID].Icons[iconID] = nil -- restore defaults, table recreated when passed in to CTIPWM
-		TMW:CopyTableInPlaceWithMeta(data, db.profile.Groups[groupID].Icons[iconID])
-
-		if version then
-			if version > TELLMEWHEN_VERSIONNUMBER then
-				TMW:Print(L["FROMNEWERVERSION"])
-			else
-				TMW:DoUpgrade(version, nil, groupID, iconID)
-			end
-		end
-	end,
-	group = function(data, version, noOverwrite, oldgroupID, destgroupID)
-		if noOverwrite then
-			destgroupID = TMW:Group_Add()
-		end
-		db.profile.Groups[destgroupID] = nil -- restore defaults, table recreated when passed in to CTIPWM
-		local gs = db.profile.Groups[destgroupID]
-		TMW:CopyTableInPlaceWithMeta(data, gs)
-
-		-- change any meta icon components to the new group if the meta and components are/were in the same group (icon conditions, too)
-		if oldgroupID then
-			local srcgr, destgr = "TellMeWhen_Group"..oldgroupID, TMW[destgroupID]:GetName()
-
-			TMW:ReconcileData(srcgr, destgr, srcgr, destgr, nil, destgroupID)
-		end
-
-		if version then
-			if version > TELLMEWHEN_VERSIONNUMBER then
-				TMW:Print(L["FROMNEWERVERSION"])
-			else
-				TMW:DoUpgrade(version, nil, destgroupID)
-			end
-		end
-	end,
-	global = function(data, version, noOverwrite)
-		if noOverwrite then -- noOverwrite is a name in this case.
-
-			local base = gsub(noOverwrite, " %(%d+%)$", "")
-			local newnum = 2
-
-			-- generate a new name if the profile already exists
-			local newname = base .. " (" .. newnum .. ")"
-			while db.profiles[newname] do
-				newnum = newnum + 1
-				newname = base .. " (" .. newnum .. ")"
-			end
-
-			-- this will create a new profile if one by this name does not exist
-			db:SetProfile(newname)
-		else
-			db:ResetProfile()
-		end
-		TMW:CopyTableInPlaceWithMeta(data, db.profile)
-
-		if version then
-			if version > TELLMEWHEN_VERSIONNUMBER then
-				TMW:Print(L["FROMNEWERVERSION"])
-			else
-				TMW:DoUpgrade(version, true)
-			end
-		end
-	end,
-}
-
-
----------- Main Functions ----------
-function TMW:Import(data, version, type, ...)
-	assert(data, "Missing data to import")
-	assert(version, "Missing version of data")
-	assert(type, "No data type specified!")
+---------- High-level Functions ----------
+function TMW:Import(editbox, settings, version, type, ...)
+	assert(settings, "Missing settings to import")
+	assert(version, "Missing version of settings")
+	assert(type, "No settings type specified!")
 	CloseDropDownMenus()
 
-	local importfunc = TMW.ImportFunctions[type]
-	if importfunc then
-		importfunc(data, version, ...)
+	local SharableDataType = TMW.approachTable(TMW, "Classes", "SharableDataType", "types", type)
+	if SharableDataType and SharableDataType.Import_ImportData then
+		SharableDataType:Import_ImportData(editbox, settings, version, ...)
 
 		TMW:Update()
 		IE:Load(1)
 	else
 		TMW:Print(L["IMPORTERROR_INVALIDTYPE"])
 	end
-	TMW:ScheduleTimer("CompileOptions", 0.1) -- i dont know why i have to delay it, but I do.
+	
+	--TMW:ScheduleTimer("CompileOptions", 0.2) -- i dont know why i have to delay it, but I do.
+	TMW:CompileOptions()
+	IE:NotifyChanges()
 end
 
-function TMW:ExportToString(editbox, ...)
-	local s = TMW:GetSettingsString(...)
+function TMW:ExportToString(editbox, type, settings, defaults, ...)
+	local s = TMW:GetSettingsString(type, settings, defaults, ...)
 	s = TMW:MakeSerializedDataPretty(s)
 	TMW.LastExportedString = s
 	editbox:SetText(s)
@@ -3704,10 +4116,10 @@ function TMW:ExportToString(editbox, ...)
 	HELP:Show("ICON_EXPORT_DOCOPY", nil, editbox, 0, 0, L["HELP_EXPORT_DOCOPY_" .. (IsMacClient() and "MAC" or "WIN")])
 end
 
-function TMW:ExportToComm(editbox, ...)
+function TMW:ExportToComm(editbox, type, settings, defaults, ...)
 	local player = strtrim(editbox:GetText())
 	if player and #player > 1 then -- and #player < 13 you can send to cross server people in a battleground ("Cybeloras-Mal'Ganis"), so it can be more than 13
-		local s = TMW:GetSettingsString(...)
+		local s = TMW:GetSettingsString(type, settings, defaults, ...)
 
 		if player == "RAID" or player == "GUILD" then -- note the upper case
 			TMW:SendCommMessage("TMW", s, player, nil, "BULK", editbox.callback, editbox)
@@ -3733,7 +4145,8 @@ function TMW:MakeSerializedDataPretty(string)
 end
 
 function TMW:DeserializeData(string)
-	local success, data, version, spaceControl, type, arg1, arg2, arg3, arg4, arg5 = TMW:Deserialize(string)
+	local success, data, version, spaceControl, type = TMW:Deserialize(string)
+	
 	if not success then
 		-- corrupt/incomplete string
 		return nil
@@ -3752,7 +4165,7 @@ function TMW:DeserializeData(string)
 		type = "icon"
 	end
 
-	if not TMW.ImportFunctions[type] then
+	if not TMW.Classes.SharableDataType.types[type] then
 		-- unknown data type
 		return nil
 	end
@@ -3776,11 +4189,7 @@ function TMW:DeserializeData(string)
 		data = data,
 		type = type,
 		version = version,
-		arg1 = arg1,
-		arg2 = arg2,
-		arg3 = arg3,
-		arg4 = arg4,
-		arg5 = arg5,
+		select(6, TMW:Deserialize(string)), -- capture all extra args
 	}
 
 	return result
@@ -3860,550 +4269,37 @@ end
 
 
 ---------- Dropdown ----------
-function IE:Copy_DropDown_Icon_OnClick(ics, version)
-	-- self.value is the icon (maybe, if it's a string then we aren't importing from an icon in the current profile)
-	if type(self.value) == "table" and self.value.IsIcon and self.value:IsVisible() then
-		TMW.HELP:Show("ICON_IMPORT_CURRENTPROFILE", nil, IE.ExportBox, 0, 0, L["HELP_IMPORT_CURRENTPROFILE"])
-	end
-	TMW[CI.g][CI.i]:SetTexture(nil)
 
-	TMW:Import(ics, version, "icon")
-end
 
-function IE:AddIconToCopyDropdown(ics, groupID, iconID, profilename, group_src, version_src, force, disabled)
-	if force or (tonumber(iconID) and not IE:DeepCompare(DEFAULT_ICON_SETTINGS, ics)) then
-		info = UIDropDownMenu_CreateInfo()
-
-		local tex
-		local ic = groupID and iconID and TMW[groupID] and TMW[groupID][iconID]
-		if db:GetCurrentProfile() == profilename and ic and ic.texture:GetTexture() then
-			tex = ic.texture:GetTexture()
-			info.value = ic -- holy shit, is this hacktastic or what?
-		else
-			tex = TMW:GuessIconTexture(ics)
-			info.value = false
-		end
-
-		local text, textshort, tooltipText = TMW:GetIconMenuText(groupID, iconID, ics)
-		if text:sub(-2) == "))" and iconID then
-			textshort = textshort .. " " .. L["fICON"]:format(iconID)
-		end
-		info.text = textshort
-		info.tooltipTitle = groupID and format(L["GROUPICON"], TMW:GetGroupName(group_src and group_src.Name, groupID, 1), iconID) or L["ICON"]
-		info.tooltipText = tooltipText
-		info.tooltipOnButton = true
-
-		info.notCheckable = true
-
-		info.icon = tex
-		info.tCoordLeft = 0.07
-		info.tCoordRight = 0.93
-		info.tCoordTop = 0.07
-		info.tCoordBottom = 0.93
-
-		info.func = IE.Copy_DropDown_Icon_OnClick
-		info.arg1 = ics
-		info.arg2 = version_src
-
-		info.disabled = disabled
-
-		UIDropDownMenu_AddButton(info, UIDROPDOWNMENU_MENU_LEVEL)
-	end
-end
-
-local DeserializedData = {}
-function IE:Copy_DropDown(...)
-	local DROPDOWN = self
-	local EDITBOX = DROPDOWN:GetParent()
-
-	if not CI.ic then
-		for icon in TMW:InIcons() do
-			-- hack to get the first icon that exists and is shown
-			if icon:IsVisible() then
-				TMW.IE:Load(1, icon)
-				break
-			end
+TMW:RegisterCallback("TMW_CONFIG_REQUEST_AVAILABLE_IMPORT_EXPORT_TYPES", function(event, editbox, import, export)
+	if editbox == TMW.IE.ExportBox then
+		-- tests that the editbox is the main one at the bottom of the IE
+		-- don't replace TellMeWhen_IconEditor with IE here...
+		import.group_overwrite = CI.g
+		export.group = CI.g
+			
+		local GUID = CI.ic:GetTextLayout()
+		import.textlayout_overwrite = GUID
+		export.textlayout = GUID
+		
+		if IE.CurrentTab:GetID() <= 4 then
+			import.icon = CI.i
+			export.icon = CI.i
 		end
 	end
+end)
 
-	local iconIDCurrent = TMW.CI.i
-	local groupIDCurrent = TMW.CI.g
-	if EDITBOX.obj then -- ace3 gui widget
-		groupIDCurrent = findid(EDITBOX.obj.userdata) -- might be nil if the editbox isnt in a group's config
-		iconIDCurrent = nil
-	elseif IE.CurrentTab:GetID() > #IE.Tabs - 2 then
-		iconIDCurrent = nil
+TMW:RegisterCallback("TMW_CONFIG_REQUEST_AVAILABLE_IMPORT_EXPORT_TYPES", function(event, editbox, import, export)
+	if editbox.IsImportExportWidget then
+		local info = editbox.obj.userdata
+		
+		import.group_overwrite = findid(info)
+		export.group = findid(info)
+		
+		import.textlayout_overwrite = findlayout(info)
+		export.textlayout = findlayout(info)
 	end
-	local info
-
-	if TMW.Received then
-		 -- deserialize received comm
-		for k, who in pairs(TMW.Received) do
-			-- deserialize received data because we dont do it as they are received; AceSerializer is only embedded in _Options
-			if type(k) == "string" and who then
-				local result = TMW:DeserializeData(k)
-				if result then
-					tinsert(DeserializedData, result)
-					result.who = who
-					TMW.Received[k] = nil
-				end
-			end
-		end
-		if not next(TMW.Received) then
-			TMW.Received = nil
-		end
-	end
-
-	local t = strtrim(EDITBOX:GetText())
-	local editboxResult = t ~= "" and TMW:DeserializeData(t)
-	t = nil -- we dont want any accidents...
-
-
-	if type(UIDROPDOWNMENU_MENU_VALUE) == "string" and (strfind(UIDROPDOWNMENU_MENU_VALUE, "^IMPORT_BACKUP") or strfind(UIDROPDOWNMENU_MENU_VALUE, "^IMPORT_FROMBACKUP")) then
-		info = UIDropDownMenu_CreateInfo()
-		info.text = "|cffff0000" .. L["IMPORT_FROMBACKUP_WARNING"]:format(TMW.BackupDate)
-		info.isTitle = true
-		info.notCheckable = true
-		UIDropDownMenu_AddButton(info, UIDROPDOWNMENU_MENU_LEVEL)
-
-		AddDropdownSpacer()
-	end
-
-	if UIDROPDOWNMENU_MENU_LEVEL == 1 then -- main menu
-		----------IMPORT----------
-
-		--heading
-		info = UIDropDownMenu_CreateInfo()
-		info.text = L["IMPORT_HEADING"]
-		info.isTitle = true
-		info.notCheckable = true
-		UIDropDownMenu_AddButton(info, UIDROPDOWNMENU_MENU_LEVEL)
-
-		--import from local
-		info = UIDropDownMenu_CreateInfo()
-		info.text = L["IMPORT_FROMLOCAL"]
-		info.value = "IMPORT_FROMLOCAL"
-		info.hasArrow = true
-		info.notCheckable = true
-		UIDropDownMenu_AddButton(info, UIDROPDOWNMENU_MENU_LEVEL)
-
-		--import from backup
-		info = UIDropDownMenu_CreateInfo()
-		info.text = L["IMPORT_FROMBACKUP"]
-		info.tooltipTitle = L["IMPORT_FROMBACKUP"]
-		info.tooltipText = L["IMPORT_FROMBACKUP_DESC"]:format(TMW.BackupDate)
-		info.tooltipOnButton = true
-		info.tooltipWhileDisabled = true
-		info.value = "IMPORT_FROMBACKUP"
-		info.hasArrow = true
-		info.notCheckable = true
-		UIDropDownMenu_AddButton(info, UIDROPDOWNMENU_MENU_LEVEL)
-
-		--import from string
-		info = UIDropDownMenu_CreateInfo()
-		info.text = (EDITBOX.DoPulseValidString and "|cff00ff00" or "") .. L["IMPORT_FROMSTRING"]
-		info.tooltipTitle = L["IMPORT_FROMSTRING"]
-		info.tooltipText = L["IMPORT_FROMSTRING_DESC"]
-		info.tooltipOnButton = true
-		info.tooltipWhileDisabled = true
-		local type = editboxResult and editboxResult.type
-		local value
-		if type == "global" then
-			value = "IMPORT_PROFILE_%EDITBOX"
-		elseif type == "group" and editboxResult.arg1 then
-			value = "IMPORT_PROFILE_%EDITBOX_" .. editboxResult.arg1
-		elseif type == "icon" then
-			value = "IMPORT_FROMSTRING_ICON"
-		end
-		info.value = value
-		info.notCheckable = true
-		info.disabled = not editboxResult
-		info.hasArrow = not info.disabled
-		UIDropDownMenu_AddButton(info, UIDROPDOWNMENU_MENU_LEVEL)
-
-		--import from comm
-		info = UIDropDownMenu_CreateInfo()
-		info.text = (TMW.DoPulseReceivedComm and "|cff33ff33" or "") ..  L["IMPORT_FROMCOMM"]
-		info.value = "IMPORT_FROMCOMM"
-		info.tooltipTitle = L["IMPORT_FROMCOMM"]
-		info.tooltipText = L["IMPORT_FROMCOMM_DESC"]
-		info.tooltipOnButton = true
-		info.tooltipWhileDisabled = true
-		info.notCheckable = true
-		info.disabled = not next(DeserializedData)
-		info.hasArrow = not info.disabled
-		UIDropDownMenu_AddButton(info, UIDROPDOWNMENU_MENU_LEVEL)
-
-
-		AddDropdownSpacer()
-		----------EXPORT----------
-
-		--heading
-		info = UIDropDownMenu_CreateInfo()
-		info.text = L["EXPORT_HEADING"]
-		info.isTitle = true
-		info.notCheckable = true
-		UIDropDownMenu_AddButton(info, UIDROPDOWNMENU_MENU_LEVEL)
-
-		--export to string
-		info = UIDropDownMenu_CreateInfo()
-		info.text = L["EXPORT_TOSTRING"]
-		info.tooltipTitle = L["EXPORT_TOSTRING"]
-		info.tooltipText = L["EXPORT_TOSTRING_DESC"]
-		info.tooltipOnButton = true
-		info.value = "EXPORT_TOSTRING"
-		info.hasArrow = true
-		info.notCheckable = true
-		UIDropDownMenu_AddButton(info, UIDROPDOWNMENU_MENU_LEVEL)
-
-		--export to comm
-		info = UIDropDownMenu_CreateInfo()
-		local player = strtrim(EDITBOX:GetText())
-		info.disabled = (strfind(player, "[`~^%d]") or #player <= 1) and true
-		local text
-		if player == "RAID" or player == "GUILD" then
-			text = L["EXPORT_TO" .. player]
-		else
-			text = L["EXPORT_TOCOMM"]
-			if not info.disabled then
-				text = text .. ": " .. player
-			end
-		end
-		info.text = text
-		info.tooltipTitle = text
-		info.tooltipText = L["EXPORT_TOCOMM_DESC"]
-		info.tooltipOnButton = true
-		info.tooltipWhileDisabled = true
-		info.value = "EXPORT_TOCOMM"
-		info.hasArrow = not info.disabled
-		info.notCheckable = true
-
-		UIDropDownMenu_AddButton(info, UIDROPDOWNMENU_MENU_LEVEL)
-	end
-
-	if UIDROPDOWNMENU_MENU_LEVEL == 2 then
-
-		if UIDROPDOWNMENU_MENU_VALUE == "IMPORT_FROMLOCAL" or UIDROPDOWNMENU_MENU_VALUE == "IMPORT_FROMBACKUP" then
-			local prefix
-			if UIDROPDOWNMENU_MENU_VALUE == "IMPORT_FROMLOCAL" then
-				prefix = "IMPORT_PROFILE_"
-			else
-				prefix = "IMPORT_BACKUP_"
-			end
-			-- current profile
-			local currentProfile = db:GetCurrentProfile()
-			if db.profiles[currentProfile] then
-				info = UIDropDownMenu_CreateInfo()
-				info.text = currentProfile
-				info.value = prefix .. currentProfile
-				info.hasArrow = true
-				info.notCheckable = true
-				UIDropDownMenu_AddButton(info, UIDROPDOWNMENU_MENU_LEVEL)
-			end
-
-			AddDropdownSpacer()
-
-			--other profiles
-			for profilename, profiletable in TMW:OrderedPairs(db.profiles) do
-				if profilename ~= currentProfile and profilename ~= "Default" then -- current profile and default are handled separately
-					info = UIDropDownMenu_CreateInfo()
-					info.text = profilename
-					info.value = prefix .. profilename
-					info.hasArrow = true
-					info.notCheckable = true
-					UIDropDownMenu_AddButton(info, UIDROPDOWNMENU_MENU_LEVEL)
-				end
-			end
-
-			--default profile
-			if db.profiles["Default"] and currentProfile ~= "Default" then
-				info = UIDropDownMenu_CreateInfo()
-				info.text = "Default"
-				info.value = prefix .. "Default"
-				info.hasArrow = true
-				info.notCheckable = true
-				UIDropDownMenu_AddButton(info, UIDROPDOWNMENU_MENU_LEVEL)
-			end
-		end
-
-		if UIDROPDOWNMENU_MENU_VALUE == "IMPORT_FROMSTRING_ICON" and editboxResult then
-			IE:AddIconToCopyDropdown(editboxResult.data, nil, nil, nil, nil, editboxResult.version, true, not iconIDCurrent)
-
-		end
-
-		if UIDROPDOWNMENU_MENU_VALUE == "IMPORT_FROMCOMM" then
-			TMW.DoPulseReceivedComm = nil
-			DROPDOWN.Dummy.Glow.Anim:Finish()
-
-			for i, result in ipairs(DeserializedData) do
-				if result.type == "icon" then
-					IE:AddIconToCopyDropdown(result.data, nil, nil, nil, nil, result.version, true, not iconIDCurrent)
-				else
-					info = UIDropDownMenu_CreateInfo()
-					info.text = result.arg1
-					local value = "IMPORT_FROMCOMM_ICON"
-					if result.type == "global" then
-						value = "IMPORT_PROFILE_%COMM" .. i
-					elseif result.type == "group" then
-						assert(result.arg1, "Missing groupID for group import")
-						value = "IMPORT_PROFILE_%COMM" .. i .. "_" .. result.arg1
-						info.text = TMW:GetGroupName(result.data.Name, result.arg1)
-					end
-					info.value = value
-					info.hasArrow = true
-					info.notCheckable = true
-					UIDropDownMenu_AddButton(info, UIDROPDOWNMENU_MENU_LEVEL)
-				end
-			end
-		end
-
-		if UIDROPDOWNMENU_MENU_VALUE == "EXPORT_TOCOMM" then
-
-			-- icon to comm
-			if iconIDCurrent then
-				info = UIDropDownMenu_CreateInfo()
-				local text = format(L["fICON"]:format(iconIDCurrent, TMW:GetGroupName(groupIDCurrent, groupIDCurrent, 1)))
-				info.text = text
-				info.tooltipTitle = text
-				info.tooltipText = L["EXPORT_TOCOMM_DESC"]
-				info.tooltipOnButton = true
-				info.notCheckable = true
-				info.func = function(...)
-					TMW:ExportToComm(EDITBOX, "icon", TMW.CI.ics, TMW.Icon_Defaults)
-				end
-				UIDropDownMenu_AddButton(info, UIDROPDOWNMENU_MENU_LEVEL)
-			end
-
-			-- group to comm
-			if groupIDCurrent then
-				info = UIDropDownMenu_CreateInfo()
-				local text = format(L["fGROUP"]:format(TMW:GetGroupName(groupIDCurrent, groupIDCurrent, 1)))
-				info.text = text
-				info.tooltipTitle = text
-				info.tooltipText = L["EXPORT_TOCOMM_DESC"] .. "\r\n\r\n" .. L["EXPORT_SPECIALDESC"]
-				info.tooltipOnButton = true
-				info.notCheckable = true
-				info.func = function()
-					TMW:ExportToComm(EDITBOX, "group", TMW[groupIDCurrent]:GetSettings(), TMW.Group_Defaults, groupIDCurrent)
-				end
-				UIDropDownMenu_AddButton(info, UIDROPDOWNMENU_MENU_LEVEL)
-			end
-
-			-- global to comm
-			info = UIDropDownMenu_CreateInfo()
-			info.text = L["fPROFILE"]:format(db:GetCurrentProfile())
-			info.tooltipTitle = L["fPROFILE"]:format(db:GetCurrentProfile())
-			info.tooltipText = L["EXPORT_TOCOMM_DESC"] .. "\r\n\r\n" .. L["EXPORT_SPECIALDESC"]
-			info.tooltipOnButton = true
-			info.notCheckable = true
-			info.func = function()
-				TMW:ExportToComm(EDITBOX, "global", TMW.db.profile, TMW.Defaults.profile, TMW.db:GetCurrentProfile())
-			end
-			UIDropDownMenu_AddButton(info, UIDROPDOWNMENU_MENU_LEVEL)
-		end
-
-		if UIDROPDOWNMENU_MENU_VALUE == "EXPORT_TOSTRING" then
-
-			-- icon to string
-			if iconIDCurrent then
-				info = UIDropDownMenu_CreateInfo()
-				local text = format(L["fICON"]:format(iconIDCurrent, TMW:GetGroupName(groupIDCurrent, groupIDCurrent, 1)))
-				info.text = text
-				info.tooltipTitle = text
-				info.tooltipText = L["EXPORT_TOSTRING_DESC"]
-				info.tooltipOnButton = true
-				info.notCheckable = true
-				info.func = function()
-					TMW:ExportToString(EDITBOX, "icon", TMW.CI.ics, TMW.Icon_Defaults)
-				end
-				UIDropDownMenu_AddButton(info, UIDROPDOWNMENU_MENU_LEVEL)
-			end
-
-			-- group to string
-			if groupIDCurrent then
-				info = UIDropDownMenu_CreateInfo()
-				local text = format(L["fGROUP"]:format(TMW:GetGroupName(groupIDCurrent, groupIDCurrent, 1)))
-				info.text = text
-				info.tooltipTitle = text
-				info.tooltipText = L["EXPORT_TOSTRING_DESC"] .. "\r\n\r\n" .. L["EXPORT_SPECIALDESC"]
-				info.tooltipOnButton = true
-				info.notCheckable = true
-				info.func = function()
-					TMW:ExportToString(EDITBOX, "group", TMW[groupIDCurrent]:GetSettings(), TMW.Group_Defaults, groupIDCurrent)
-				end
-				UIDropDownMenu_AddButton(info, UIDROPDOWNMENU_MENU_LEVEL)
-			end
-
-			-- global to string
-			info = UIDropDownMenu_CreateInfo()
-			info.text = L["fPROFILE"]:format(db:GetCurrentProfile())
-			info.tooltipTitle = L["fPROFILE"]:format(db:GetCurrentProfile())
-			info.tooltipText = L["EXPORT_TOSTRING_DESC"] .. "\r\n\r\n" .. L["EXPORT_SPECIALDESC"]
-			info.tooltipOnButton = true
-			info.notCheckable = true
-			info.func = function()
-				TMW:ExportToString(EDITBOX, "global", TMW.db.profile, TMW.Defaults.profile, db:GetCurrentProfile())
-			end
-			UIDropDownMenu_AddButton(info, UIDROPDOWNMENU_MENU_LEVEL)
-		end
-	end
-
-	if not UIDROPDOWNMENU_MENU_VALUE then return end
-	if type(UIDROPDOWNMENU_MENU_VALUE) ~= "string" then return end
-
-	local IMPORT, PROFILE, profilename, groupID = strsplit("_", UIDROPDOWNMENU_MENU_VALUE)
-	if IMPORT ~= "IMPORT" then return end
-	groupID = tonumber(groupID)
-	local profile_src, version_src, group_src, icon_src
-	local result
-	local commID = profilename and strmatch(profilename, "%COMM(%d+)")
-	if profilename == "%EDITBOX" then
-		result = editboxResult
-	elseif commID then
-		result = DeserializedData[tonumber(commID)]
-	end
-	if result then
-		if result.type == "global" then
-			profile_src = result.data
-			group_src = profile_src.Groups[groupID]
-			profilename = result.arg1
-		elseif result.type == "group" then
-			group_src = result.data
-			profilename = nil
-		elseif result.type == "icon" then
-			icon_src = result.data
-		end
-		version_src = result.version
-	else
-		if PROFILE == "PROFILE" then
-			profile_src = db.profiles[profilename]
-		elseif PROFILE == "BACKUP" then
-			profile_src = TMW.Backupdb.profiles[profilename]
-		end
-		if not profile_src then return end
-		group_src = profile_src and groupID and profile_src.Groups[groupID]
-		local VersionSetting = profile_src.Version
-		version_src = #gsub(VersionSetting, "[^%d]", "") >= 5 and tonumber(VersionSetting) or TELLMEWHEN_VERSIONNUMBER
-	end
-
-	if groupID then
-		-- header
-		info = UIDropDownMenu_CreateInfo()
-		info.text = (profilename and profilename .. ": " or "") .. TMW:GetGroupName(group_src.Name, groupID)
-		info.isTitle = true
-		info.notCheckable = true
-		UIDropDownMenu_AddButton(info, UIDROPDOWNMENU_MENU_LEVEL)
-
-		-- copy group position
-		info = UIDropDownMenu_CreateInfo()
-		info.text = L["COPYGROUP"] .. " - " .. L["COPYPOSSCALE"]
-		info.func = function()
-			CloseDropDownMenus()
-
-			local dest = db.profile.Groups[CI.g]
-			dest.Point = CopyTable(TMW.Group_Defaults.Point) -- not a special table (["**"]), so just normally copy it. Setting it nil won't recreate it like other settings tables, so re-copy from defaults
-			TMW:CopyTableInPlaceWithMeta(group_src.Point, dest.Point)
-
-			dest.Scale = group_src.Scale or TMW.Group_Defaults.Scale
-			dest.Level = group_src.Level or TMW.Group_Defaults.Level
-			TMW[CI.g]:Setup()
-		end
-		info.notCheckable = true
-		info.disabled = not groupIDCurrent
-		UIDropDownMenu_AddButton(info, UIDROPDOWNMENU_MENU_LEVEL)
-
-		-- copy entire group - overwrite current
-		info = UIDropDownMenu_CreateInfo()
-		info.text = L["COPYGROUP"] .. " - " .. L["OVERWRITEGROUP"]:format(groupIDCurrent and TMW:GetGroupName(groupIDCurrent, groupIDCurrent, 1) or "?")
-		info.func = function()
-			TMW:Import(group_src, version_src, "group", nil, groupID, groupIDCurrent)
-		end
-		info.notCheckable = true
-		info.disabled = not groupIDCurrent
-		UIDropDownMenu_AddButton(info, UIDROPDOWNMENU_MENU_LEVEL)
-
-		-- copy entire group - create new group
-		info = UIDropDownMenu_CreateInfo()
-		info.text = L["COPYGROUP"] .. " - " .. L["MAKENEWGROUP"]
-		info.func = function()
-			TMW:Import(group_src, version_src, "group", true, groupID, groupIDCurrent) -- true forces a new group to be created
-		end
-		info.notCheckable = true
-		UIDropDownMenu_AddButton(info, UIDROPDOWNMENU_MENU_LEVEL)
-
-		if group_src.Icons and next(group_src.Icons) then
-			AddDropdownSpacer()
-
-			-- icon header
-			info = UIDropDownMenu_CreateInfo()
-			info.text = L["UIPANEL_ICONS"]
-			info.isTitle = true
-			info.notCheckable = true
-			UIDropDownMenu_AddButton(info, UIDROPDOWNMENU_MENU_LEVEL)
-
-
-			-- add individual icons
-			for iconID, ics in TMW:OrderedPairs(group_src.Icons) do
-				IE:AddIconToCopyDropdown(ics, groupID, iconID, profilename, group_src, version_src, nil, not iconIDCurrent)
-			end
-		end
-	elseif profilename and profile_src then
-		-- header
-		info = UIDropDownMenu_CreateInfo()
-		info.text = profilename
-		info.isTitle = true
-		info.notCheckable = true
-		UIDropDownMenu_AddButton(info, UIDROPDOWNMENU_MENU_LEVEL)
-
-		-- copy entire profile - overwrite current
-		info = UIDropDownMenu_CreateInfo()
-		info.text = L["IMPORT_PROFILE"] .. " - " .. L["IMPORT_PROFILE_OVERWRITE"]:format(db:GetCurrentProfile())
-		info.func = function()
-			TMW:Import(profile_src, version_src, "global")
-		end
-		info.notCheckable = true
-		UIDropDownMenu_AddButton(info, UIDROPDOWNMENU_MENU_LEVEL)
-
-		-- copy entire profile - create new profile
-		info = UIDropDownMenu_CreateInfo()
-		info.text = L["IMPORT_PROFILE"] .. " - " .. L["IMPORT_PROFILE_NEW"]
-		info.func = function()
-			TMW:Import(profile_src, version_src, "global", profilename) -- newname forces a new profile to be created named newname
-		end
-		info.notCheckable = true
-		UIDropDownMenu_AddButton(info, UIDROPDOWNMENU_MENU_LEVEL)
-
-		AddDropdownSpacer()
-
-		-- group header
-		info = UIDropDownMenu_CreateInfo()
-		info.text = L["UIPANEL_GROUPS"]
-		info.isTitle = true
-		info.notCheckable = true
-		UIDropDownMenu_AddButton(info, UIDROPDOWNMENU_MENU_LEVEL)
-
-		-- add groups to be copied
-		for groupID, v in TMW:OrderedPairs(profile_src.Groups) do
-			if type(groupID) == "number" and groupID >= 1 and groupID <= (tonumber(profile_src.NumGroups) or 10) then -- group was a string once, so lets just be safe
-				info = UIDropDownMenu_CreateInfo()
-				info.text = TMW:GetGroupName(profile_src.Groups[groupID].Name, groupID)
-				info.value = UIDROPDOWNMENU_MENU_VALUE .. "_" .. groupID
-				info.hasArrow = true
-				info.notCheckable = true
-				info.tooltipTitle = format(L["fGROUP"], groupID)
-				info.tooltipText = 	(L["UIPANEL_ROWS"] .. ": " .. (v.Rows or 1) .. "\r\n") ..
-								L["UIPANEL_COLUMNS"] .. ": " .. (v.Columns or 4) ..
-								((v.PrimarySpec or v.PrimarySpec == nil) and "\r\n" .. L["UIPANEL_PRIMARYSPEC"] or "") ..
-								((v.SecondarySpec or v.SecondarySpec == nil) and "\r\n" .. L["UIPANEL_SECONDARYSPEC"] or "") ..
-								((v.Enabled and "") or "\r\n(" .. L["DISABLED"] .. ")")
-				info.tooltipOnButton = true
-				UIDropDownMenu_AddButton(info, UIDROPDOWNMENU_MENU_LEVEL)
-			end
-		end
-	end
-
-end
-
+end)
 
 
 -- ----------------------
@@ -4549,8 +4445,8 @@ function IE:DoUndoRedo(direction)
 
 	icon.historyState = icon.historyState + direction
 
-	db.profile.Groups[CI.g].Icons[CI.i] = nil -- recreated when passed into CTIPWM
-	TMW:CopyTableInPlaceWithMeta(icon.history[icon.historyState], db.profile.Groups[CI.g].Icons[CI.i])
+	TMW.db.profile.Groups[CI.g].Icons[CI.i] = nil -- recreated when passed into CTIPWM
+	TMW:CopyTableInPlaceWithMeta(icon.history[icon.historyState], TMW.db.profile.Groups[CI.g].Icons[CI.i])
 
 	CI.ic:Setup() -- do an immediate setup for good measure
 
@@ -4627,7 +4523,7 @@ function EVENTS:SetupEventSettings()
 
 	local eventData = self.Events[EVENTS.currentEventID].eventData
 
-	EventSettings.EventName:SetText(eventData.text) --L["EVENTS_SETTINGS_HEADER_SUB"]:format(eventData.text))
+	EventSettings.EventName:SetText(eventData.text)
 
 	local Settings = self:GetEventSettings()
 	local settingsUsedByEvent = eventData.settings
@@ -4747,7 +4643,7 @@ function EVENTS:IconMenu_DropDown()
 				info.tCoordRight = 0.93
 				info.tCoordTop = 0.07
 				info.tCoordBottom = 0.93
-				info.icon = icon.texture:GetTexture()
+				info.icon = icon.attributes.texture
 
 				UIDropDownMenu_AddButton(info, UIDROPDOWNMENU_MENU_LEVEL)
 			end
@@ -4789,7 +4685,7 @@ function EVENTS:CreateEventButtons(globalDescKey)
 	end
 	local Settings = self:GetEventSettings()
 
-	for eventSettings, i in TMW:InNLengthTable(CI.ics.Events) do
+	for i, eventSettings in TMW:InNLengthTable(CI.ics.Events) do
 		local eventData = TMW.EventList[eventSettings.Event]
 		local frame = Events[i]
 		if not frame then
@@ -5523,7 +5419,7 @@ end
 TMW:RegisterCallback("TMW_OPTIONS_LOADED", ANIM)
 
 function ANIM:TMW_ICON_SETUP_POST(event, icon)
-	if not db.profile.Locked and icon:Animations_Has() then
+	if not TMW.Locked and icon:Animations_Has() then
 		for k, v in pairs(icon:Animations_Get()) do
 			icon:Animations_Stop(v)
 		end
@@ -5646,6 +5542,261 @@ function ANIM:SetSliderMinMax(Slider, level)
 end
 
 
+
+-- ----------------------
+-- TEXT DISPLAY
+-- ----------------------
+
+TEXT = TMW:NewModule("TextDisplay", "AceHook-3.0") TMW.TEXT = TEXT
+TEXT.usedStrings = {}
+
+function TEXT:GetLayoutName(settings, GUID)
+	if GUID and not settings then
+		assert(type(GUID) == "string")
+		settings = rawget(TMW.db.profile.TextLayouts, GUID)
+	elseif settings and not GUID then
+		GUID = settings.GUID
+	end
+	
+	assert(type(GUID) == "string")
+	TMW:Assert(GUID == settings.GUID, "Something bad happened!  a: %s  b: %s", tostring(GUID), tostring(settings.GUID)) -- this should always succeed. If it didn't, something went wrong.
+	
+	local Name = strtrim(settings.Name or "")
+	
+	if Name == "" then
+		Name = L["TEXTLAYOUTS_UNNAMED"]
+	end
+	if settings.NoEdit then
+		Name = L["TEXTLAYOUTS_DEFAULTS_WRAPPER"]:format(Name)
+	end
+	
+	return Name
+end
+
+function TEXT:GetStringName(settings, num, unnamed)
+	local Name = strtrim(settings.StringName or "")
+	
+	if Name == "" then
+		if unnamed then
+			Name = L["TEXTLAYOUTS_UNNAMED"]
+		else
+			Name = L["TEXTLAYOUTS_fSTRING"]:format(num)
+		end
+	end
+	
+	return Name
+end
+
+
+function TEXT:CacheUsedStrings()
+	for text in pairs(TEXT.usedStrings) do
+		TEXT.usedStrings[text] = 0 -- set to 0, not nil, and dont wipe the table either
+	end
+	for ics, groupID, iconID in TMW:InIconSettings() do
+		for view, viewSettings in pairs(ics.SettingsPerView) do
+			for i, text in pairs(viewSettings.Texts) do
+				text = text:trim()
+				TEXT.usedStrings[text] = (TEXT.usedStrings[text] or 0) + 1
+			end
+		end
+	end
+	TEXT.usedStrings[""] = nil
+end
+
+
+function TEXT.Layout_DropDown_Sort(a, b)
+	local SettingsA, SettingsB = TMW.db.profile.TextLayouts[a], TMW.db.profile.TextLayouts[b]
+	local NoEditA, NoEditB = SettingsA.NoEdit, SettingsB.NoEdit
+	if NoEditA or NoEditB then
+		if NoEditA and NoEditB then
+			return TEXT:GetLayoutName(SettingsA, a) < TEXT:GetLayoutName(SettingsB, b)
+		else
+			return NoEditA
+		end
+	end
+end
+
+function TEXT:Layout_DropDown()
+	for GUID, settings in TMW:OrderedPairs(TMW.db.profile.TextLayouts, TEXT.Layout_DropDown_Sort) do
+		local info = UIDropDownMenu_CreateInfo()
+		
+		info.text = TEXT:GetLayoutName(settings, GUID)
+		info.value = GUID
+		info.checked = GUID == CI.ic:GetTextLayout()
+		
+		local strings = ""
+		for i, fontStringSettings in TMW:InNLengthTable(settings) do
+			strings = strings .. "\r\n" .. TEXT:GetStringName(fontStringSettings, 1)
+		end
+		info.tooltipTitle = TEXT:GetLayoutName(settings, GUID)
+		info.tooltipText = L["TEXTLAYOUTS_CHOOSELAYOUT"]:format(strings)
+		info.tooltipOnButton = true
+		
+		info.func = TEXT.Layout_DropDown_OnClick
+		
+		UIDropDownMenu_AddButton(info)
+	end
+end
+
+function TEXT:Layout_DropDown_OnClick()
+	CI.ic:GetSettingsPerView().TextLayout = self.value
+	TEXT:LoadConfig()
+	IE:ScheduleIconSetup()
+end
+
+
+function TEXT:CopyString_DropDown()
+	TEXT:CacheUsedStrings()
+	
+	for text, num in TMW:OrderedPairs(TEXT.usedStrings, "values", true) do
+		local info = UIDropDownMenu_CreateInfo()
+		
+		local displayText = text
+		if #displayText > 40 then
+			displayText = displayText:sub(1, 40) .. "..."
+		end
+		info.text = displayText
+		info.value = text
+		
+		info.tooltipTitle = L["TEXTLAYOUTS_STRINGUSEDBY"]:format(num)
+		info.tooltipText = DogTag:ColorizeCode(text)
+		info.tooltipOnButton = true
+		info.notCheckable = true
+		
+		info.arg1 = self
+		info.func = TEXT.CopyString_DropDown_OnClick
+		
+		UIDropDownMenu_AddButton(info)
+	end
+end
+
+function TEXT:CopyString_DropDown_OnClick(frame)
+	local id = frame:GetParent():GetParent():GetID()
+	
+	CI.ic:GetSettingsPerView().Texts[id] = self.value
+	TEXT:LoadConfig()
+	IE:ScheduleIconSetup()
+end
+
+function TEXT:TestDogTagFunc(success, ...)
+	if success then
+		local arg1, arg2 = ...
+		local numArgs = select("#", ...)
+		if numArgs == 2 and arg2 == nil and type(arg1) == "string" then
+			return arg1
+		end
+	end
+end
+
+do
+	hooksecurefunc(DogTag, "tagError", function(_, _, text)
+		TEXT.EvaluateError = text
+	end)
+end
+
+function TEXT:LoadConfig()
+
+	local Texts = CI.ic:GetSettingsPerView().Texts
+	local GUID, layoutSettings = CI.ic:GetTextLayout()
+	
+	TEXT:CacheUsedStrings()
+	
+	local layoutName
+	if layoutSettings then
+		local previousFrame
+		for i, stringSettings in TMW:InNLengthTable(layoutSettings) do
+			local frame = TEXT[i]
+			if not frame then
+				frame = CreateFrame("Frame", IE.TextDisplay.FontStrings:GetName().."String"..i, IE.TextDisplay.FontStrings, "TellMeWhen_TextDisplayGroup", i)
+				TEXT[i] = frame
+				frame:SetPoint("TOPLEFT", previousFrame, "BOTTOMLEFT")
+			end
+			
+			frame:Show()
+
+			frame.stringSettings = stringSettings
+
+			frame.StringName:SetFormattedText(L["TEXTLAYOUTS_fSTRING2"], i, TEXT:GetStringName(stringSettings, i, true))
+			frame.EditBox:SetText(Texts[i])
+
+			local DefaultText = stringSettings.DefaultText
+			if DefaultText == "" then
+				DefaultText = L["TEXTLAYOUTS_BLANK"]
+			else
+				DefaultText = ("%q"):format(DogTag:ColorizeCode(DefaultText))
+			end
+			TMW:TT(frame.Default, "TEXTLAYOUTS_STRING_SETDEFAULT", L["TEXTLAYOUTS_STRING_SETDEFAULT_DESC"]:format(DefaultText), nil, 1)
+			
+			CI.ic:Setup()
+			frame.Error:SetText()
+			local kwargs = {
+				icon = CI.ic.ID,
+				group = CI.ic.group.ID,
+				unit = CI.ic.attributes.dogTagUnit,
+			}
+			local tagError = TEXT:TestDogTagFunc(pcall(loadstring(DogTag:CreateFunctionFromCode(Texts[i], "TMW;Unit", kwargs))(), kwargs))
+			if tagError then
+				frame.Error:SetText("ERROR: " .. tagError)
+			else
+				TEXT.EvaluateError = nil
+				DogTag:Evaluate(Texts[i], "TMW;Unit", kwargs)
+				if TEXT.EvaluateError then
+					frame.Error:SetText("CRITICAL ERROR: " .. TEXT.EvaluateError)
+				end
+			end
+			
+			previousFrame = frame
+			
+			TEXT:SetTextDisplayContainerHeight(frame)
+		end
+		
+		for i = max(layoutSettings.n + 1, 1), #TEXT do
+			TEXT[i]:Hide()
+		end
+		
+		layoutName = TEXT:GetLayoutName(layoutSettings, GUID)
+	else
+		-- TODO: WHEN AN UNKNOWN LAYOUT OCCURS, SHOW A DESCRIPTION OF WHY IT HAPPENED (LAYOUT DELETED OR NOT IMPORTED) 
+		-- BELOW THE DROPDOWN WHERE THE TEXT DISPLAY CONFIGURATION NORMALLY WOULD BE
+		layoutName = "UNKNOWN LAYOUT: " .. (GUID or "<?>")
+	end
+
+	if TEXT[1] then
+		TEXT[1]:SetPoint("TOPLEFT", IE.TextDisplay.FontStrings)
+	end
+
+	if IE.TextDisplay.ScrollFrame:GetVerticalScrollRange() == 0 then
+		IE.TextDisplay.ScrollFrame.ScrollBar:Hide()
+	end
+	
+	UIDropDownMenu_SetText(IE.TextDisplay.Layout.PickLayout, layoutName)
+	--IE.TextDisplay.Layout.LayoutName:SetFormattedText(L["TEXTLAYOUTS_fLAYOUT"], layoutName)
+	
+	TMW:TT(IE.TextDisplay.Layout.LayoutSettings, "TEXTLAYOUTS_LAYOUTSETTINGS", L["TEXTLAYOUTS_LAYOUTSETTINGS_DESC"]:format(layoutName), nil, 1)
+end
+TMW:RegisterCallback("TMW_CONFIG_LOAD", TEXT.LoadConfig, TEXT)
+
+function TEXT:SetTextDisplayContainerHeight(frame)
+	local height = 26
+	
+	height = height + frame.EditBox:GetHeight()
+	
+	--frame.Error:SetHeight(frame.Error:GetStringHeight())
+	height = height + frame.Error:GetHeight()
+	
+	frame:SetHeight(height)
+end
+
+function TEXT:TMW_ICON_MAKE_SETTINGS_STANDALONE(event, ics, gs)
+	for view, settingsPerView in pairs(ics.SettingsPerView) do
+		local GUID = settingsPerView.TextLayout
+		if GUID == "" then
+			GUID = gs.SettingsPerView[view].TextLayout
+		end
+		settingsPerView.TextLayout = GUID
+	end
+end
+TMW:RegisterCallback("TMW_ICON_MAKE_SETTINGS_STANDALONE", TEXT)
 
 -- ----------------------
 -- SUGGESTER
@@ -5771,7 +5922,7 @@ function SUG:OnInitialize()
 			TMWOptDB.CacheLength = TMWOptDB.CacheLength or 11000
 
 			SUG.Suggest.Status:Show()
-			SUG.Suggest.Status.texture:SetTexture(LSM:Fetch("statusbar", db.profile.TextureName))
+			SUG.Suggest.Status.texture:SetTexture(LSM:Fetch("statusbar", TMW.db.profile.TextureName))
 			SUG.Suggest.Status:SetMinMaxValues(1, TMWOptDB.CacheLength)
 			SUG.Suggest.Speed:Show()
 			SUG.Suggest.Finish:Show()
@@ -5875,7 +6026,7 @@ function SUG:OnInitialize()
 	end
 end
 
-do
+do	-- SUG:GetParser()
 	local Parser, LT1, LT2, LT3, RT1, RT2, RT3
 	function SUG:GetParser()
 		if not Parser then
@@ -6162,7 +6313,7 @@ function SUG:NameOnCursor(isClick)
 	-- always escape parentheses, brackets, percent signs, minus signs, plus signs
 	SUG.lastName = gsub(SUG.lastName, "([%(%)%%%[%]%-%+])", "%%%1")
 
-	if db.profile.SUG_atBeginning then
+	if TMW.db.profile.SUG_atBeginning then
 		SUG.atBeginning = "^" .. SUG.lastName
 	else
 		SUG.atBeginning = SUG.lastName
@@ -6287,7 +6438,7 @@ local EditboxHooks = {
 		end
 	end,
 	OnTabPressed = function(self)
-		if self.SUG_Enabled and SUG[1] and SUG[1].insert and SUG[1]:IsVisible() then
+		if self.SUG_Enabled and SUG[1] and SUG[1].insert and SUG[1]:IsVisible() and not SUG.CurrentModule.noTab then
 			SUG[1]:Click("LeftButton")
 		end
 	end,
@@ -6464,7 +6615,7 @@ function Module:Entry_Insert(insert)
 			SUG.Box:SetCursorPosition(newPos + 2)
 		end
 
-		-- if we are at the end of the exitbox then put a semicolon in anyway for convenience
+		-- if we are at the end of the editbox then put a semicolon in anyway for convenience
 		if SUG.Box:GetCursorPosition() == #SUG.Box:GetText() then
 			local append = "; "
 			if doAddColon then
@@ -6494,6 +6645,7 @@ Module.showColorHelp = false
 Module.dontSort = true
 Module.noMin = true
 Module.noTexture = true
+Module.noTab = true
 function Module:Table_GetNormalSuggestions(suggestions, tbl, ...)
 	suggestions[#suggestions + 1] = "d" -- Duration
 
@@ -6526,14 +6678,15 @@ function Module:Entry_Insert(insert)
 	end
 end
 function Module:Entry_AddToList_1(f, letter)
-	f.Name:SetText(L["SUG_SUBSTITUTION_" .. letter])
-	f.ID:SetText("%" .. letter)
+	--f.Name:SetText(L["SUG_SUBSTITUTION_" .. letter])
+	f.Name:SetText("THE TEXTSUBS SUG MODULE IS DEPRECIATED. WHY IS IT STILL BEING USED?")
+	--f.ID:SetText("%" .. letter)
+--
+	f.insert = ""--"%" .. letter
+	--f.overrideInsertName = L["SUG_INSERTTEXTSUB"]
 
-	f.insert = "%" .. letter
-	f.overrideInsertName = L["SUG_INSERTTEXTSUB"]
-
-	f.tooltiptitle = L["SUG_SUBSTITUTION_" .. letter]
-	f.tooltiptext = L["SUG_SUBSTITUTION_" .. letter .. "_DESC"]
+--	f.tooltiptitle = L["SUG_SUBSTITUTION_" .. letter]
+--	f.tooltiptext = L["SUG_SUBSTITUTION_" .. letter .. "_DESC"]
 
 --	f.Icon:SetTexture(GetItemIcon(id))
 end
@@ -6941,7 +7094,7 @@ function Module:Entry_Insert(insert, duration)
 		newPos = newPos or #SUG.Box:GetText()
 		SUG.Box:SetCursorPosition(newPos + 2)
 
-		-- if we are at the end of the exitbox then put a semicolon in anyway for convenience
+		-- if we are at the end of the editbox then put a semicolon in anyway for convenience
 		if SUG.Box:GetCursorPosition() == #SUG.Box:GetText() then
 			SUG.Box:SetText(SUG.Box:GetText() .. (doAddColon and not hasDurationData and " " or "") .. "; ")
 		end
@@ -7500,7 +7653,7 @@ function CNDT:LoadConfig(event, type)
 		end
 		CNDT:CreateGroups(Conditions.n+1)
 
-		for i=1, Conditions.n do
+		for i in TMW:InNLengthTable(Conditions) do
 			CNDT[i]:Load()
 		end
 	else
@@ -7562,9 +7715,9 @@ end
 
 function CNDT:GetTypeData(type)
 	if type == "icon" then
-		return type, db.profile.Groups[CI.g].Icons[CI.i].Conditions
+		return type, TMW.db.profile.Groups[CI.g].Icons[CI.i].Conditions
 	elseif type == "group" then
-		return type, db.profile.Groups[CI.g].Conditions
+		return type, TMW.db.profile.Groups[CI.g].Conditions
 	else
 		return CNDT.type, CNDT.settings
 	end
@@ -7760,7 +7913,7 @@ function CNDT:IconMenu_DropDown()
 				info.tCoordRight = 0.93
 				info.tCoordTop = 0.07
 				info.tCoordBottom = 0.93
-				info.icon = icon.texture:GetTexture()
+				info.icon = icon.attributes.texture
 				UIDropDownMenu_AddButton(info, UIDROPDOWNMENU_MENU_LEVEL)
 			end
 		end
@@ -7993,7 +8146,7 @@ end
 
 
 ---------- CndtGroup Class ----------
-CndtGroup = TMW:NewClass("CndtGroup", "Frame")
+local CndtGroup = TMW:NewClass("CndtGroup", "Frame")
 
 function CndtGroup.OnNewInstance(group)
 	local ID = group:GetID()
@@ -8399,7 +8552,7 @@ function HELP:Show(code, icon, frame, x, y, text, ...)
 	help.setting = HELP.OnlyOnce[code] and code
 
 	-- if it does and it has already been set true, then we dont need to show anything, so quit.
-	if help.setting and db.global.HelpSettings[help.setting] then
+	if help.setting and TMW.db.global.HelpSettings[help.setting] then
 		HELP.Queued[code] = nil
 		help = nil
 		return
@@ -8504,7 +8657,7 @@ function HELP:ShowNext()
 
 	-- if the help had a setting associated, set it now
 	if help.setting then
-		db.global.HelpSettings[help.setting] = true
+		TMW.db.global.HelpSettings[help.setting] = true
 	end
 
 	-- remove the help from the queue and set it as the current help

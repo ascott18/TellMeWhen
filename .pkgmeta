@@ -13,9 +13,12 @@ externals:
     Lib/libdatabroker-1-1: git://git.wowace.com/wow/libdatabroker-1-1/mainline.git
     Lib/LibSharedMedia-3.0: svn://svn.wowace.com/wow/libsharedmedia-3-0/mainline/trunk
     Lib/DRData-1.0: git://git.wowace.com/wow/drdata-1-0/mainline.git
+    Libs/LibDogTag-3.0: svn://svn.wowace.com/wow/libdogtag-3-0/mainline/trunk
+    Libs/LibDogTag-Unit-3.0: svn://svn.wowace.com/wow/libdogtag-unit-3-0/mainline/trunk
     TellMeWhen_Options/Lib/AceDBOptions-3.0: svn://svn.wowace.com/wow/ace3/mainline/trunk/AceDBOptions-3.0
     TellMeWhen_Options/Lib/AceGUI-3.0: svn://svn.wowace.com/wow/ace3/mainline/trunk/AceGUI-3.0
     TellMeWhen_Options/Lib/AceConfig-3.0: svn://svn.wowace.com/wow/ace3/mainline/trunk/AceConfig-3.0
+    TellMeWhen_Options/Lib/AceHook-3.0: svn://svn.wowace.com/wow/ace3/mainline/trunk/AceHook-3.0
     TellMeWhen_Options/Lib/AceGUI-3.0-SharedMediaWidgets: svn://svn.wowace.com/wow/ace-gui-3-0-shared-media-widgets/mainline/trunk
     Lib/AceSerializer-3.0: svn://svn.wowace.com/wow/ace3/mainline/trunk/AceSerializer-3.0
 
@@ -43,3 +46,4 @@ ignore:
     - TellMeWhen_Options/scrapper.lua
     - TellMeWhen_Options/USEDLOCALE.lua
     - Scripts
+    - Tests

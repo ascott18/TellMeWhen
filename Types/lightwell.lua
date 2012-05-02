@@ -2,13 +2,9 @@
 -- TellMeWhen
 -- Originally by Nephthys of Hyjal <lieandswell@yahoo.com>
 
--- Other contributions by
--- Sweetmms of Blackrock
--- Oozebull of Twisting Nether
--- Oodyboo of Mug'thol
--- Banjankri of Blackrock
--- Predeter of Proudmoore
--- Xenyr of Aszune
+-- Other contributions by:
+--		Sweetmms of Blackrock, Oozebull of Twisting Nether, Oodyboo of Mug'thol,
+--		Banjankri of Blackrock, Predeter of Proudmoore, Xenyr of Aszune
 
 -- Currently maintained by
 -- Cybeloras of Mal'Ganis
@@ -18,7 +14,6 @@ local TMW = TMW
 if not TMW then return end
 local L = TMW.L
 
-local db, ClockGCD
 local strlower =
 	  strlower
 local UnitGUID, GetGlyphSocketInfo, GetTotemInfo =
@@ -64,7 +59,6 @@ Type.EventDisabled_OnUnit = true
 Type.EventDisabled_OnSpell = true
 
 function Type:Update()
-	db = TMW.db
 	pGUID = UnitGUID("player")
 
 	self:GLYPH()
@@ -126,9 +120,19 @@ local function LW_OnUpdate(icon, time)
 	local color = icon:CrunchColor(CurrentCharges) -- eww, passing # of charges as the duration. Hackerish....
 
 	if CurrentCharges > 0 then
-		icon:SetInfo(icon.Alpha, color, nil, SummonTime, 180, 724, nil, CurrentCharges, CurrentCharges, nil, nil)
+		icon:SetInfo("alpha; color; start, duration; stack, stackText",
+			icon.Alpha,
+			color,
+			SummonTime, 180,
+			CurrentCharges, CurrentCharges
+		)
 	else
-		icon:SetInfo(icon.UnAlpha, color, nil, 0, 0, 724, nil, nil, nil, nil, nil)
+		icon:SetInfo("alpha; color; start, duration; stack, stackText",
+			icon.UnAlpha,
+			color,
+			0, 0,
+			nil, nil
+		)
 	end
 end
 
@@ -136,7 +140,10 @@ end
 function Type:Setup(icon, groupID, iconID)
 	icon.NameFirst = 724
 
-	icon:SetTexture(SpellTextures[724])
+	icon:SetInfo("texture; spell",
+		SpellTextures[724],
+		724
+	)
 	
 	Type:RegisterEvent("PLAYER_TOTEM_UPDATE")
 	Type:RegisterEvent("COMBAT_LOG_EVENT_UNFILTERED")

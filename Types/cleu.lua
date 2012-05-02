@@ -2,13 +2,9 @@
 -- TellMeWhen
 -- Originally by Nephthys of Hyjal <lieandswell@yahoo.com>
 
--- Other contributions by
--- Sweetmms of Blackrock
--- Oozebull of Twisting Nether
--- Oodyboo of Mug'thol
--- Banjankri of Blackrock
--- Predeter of Proudmoore
--- Xenyr of Aszune
+-- Other contributions by:
+--		Sweetmms of Blackrock, Oozebull of Twisting Nether, Oodyboo of Mug'thol,
+--		Banjankri of Blackrock, Predeter of Proudmoore, Xenyr of Aszune
 
 -- Currently maintained by
 -- Cybeloras of Mal'Ganis
@@ -18,7 +14,6 @@ local TMW = TMW
 if not TMW then return end
 local L = TMW.L
 
-local db
 local _G = _G
 local strlower, bit_band =
 	  strlower, bit.band
@@ -73,7 +68,6 @@ Type.EventDisabled_OnCLEUEvent = false
 
 
 function Type:Update()
-	db = TMW.db
 	pGUID = UnitGUID("player")
 end
 
@@ -111,13 +105,13 @@ local function CLEU_OnEvent(icon, _, t, event, h, sourceGUID, sourceName, source
 	elseif event == "SPELL_INTERRUPT" then
 		-- fake an event that allow filtering based on the spell that caused an interrupt rather than the spell that was interrupted.
 		-- fire it in addition to, not in place of, SPELL_INTERRUPT
-		CLEU_OnEvent(icon, _, t, "SPELL_INTERRUPT_SPELL",	h, sourceGUID, sourceName, sourceFlags, sourceRaidFlags, destGUID, destName, destFlags, destRaidFlags, arg1, arg2, arg3, arg4, arg5, ...)
+		CLEU_OnEvent(icon, _, t, "SPELL_INTERRUPT_SPELL", h, sourceGUID, sourceName, sourceFlags, sourceRaidFlags, destGUID, destName, destFlags, destRaidFlags, arg1, arg2, arg3, arg4, arg5, ...)
 	elseif event == "SPELL_DAMAGE" then
 		local _, _, _, _, arg10 = ...
 		if arg10 then
 			-- fake an event that fires if there was a crit
 			-- fire it in addition to, not in place of, SPELL_DAMAGE
-			CLEU_OnEvent(icon, _, t, "SPELL_DAMAGE_CRIT",		h, sourceGUID, sourceName, sourceFlags, sourceRaidFlags, destGUID, destName, destFlags, destRaidFlags, arg1, arg2, arg3, arg4, arg5, ...)
+			CLEU_OnEvent(icon, _, t, "SPELL_DAMAGE_CRIT", h, sourceGUID, sourceName, sourceFlags, sourceRaidFlags, destGUID, destName, destFlags, destRaidFlags, arg1, arg2, arg3, arg4, arg5, ...)
 		end
 	end
 
@@ -207,12 +201,14 @@ local function CLEU_OnEvent(icon, _, t, event, h, sourceGUID, sourceName, source
 			spellName = L["CLEU_DIED"]
 			tex = "Interface\\Icons\\Ability_Rogue_FeignDeath"
 			if not sourceUnit then
-				sourceUnit = destUnit -- clone it
+			--	sourceUnit = destUnit -- clone it (wait, why? commenting this out because its stupid)
 			end
 		else
 			spellID = arg1
 			spellName = arg2
-			--[[--"RANGE_DAMAGE", -- normal
+			--[[	Handy list of all events that should be handled here. Try to keep it updated
+			
+			--"RANGE_DAMAGE", -- normal
 			--"RANGE_MISSED", -- normal
 			--"SPELL_DAMAGE", -- normal
 			--"SPELL_DAMAGE_CRIT", -- normal BUT NOT ACTUALLY AN EVENT
@@ -250,7 +246,6 @@ local function CLEU_OnEvent(icon, _, t, event, h, sourceGUID, sourceName, source
 			--"SPELL_CAST_SUCCESS" -- normal
 			]]
 		end
-		tex = tex or SpellTextures[spellID] or SpellTextures[spellName] -- [spellName] should never be used, but whatever
 
 		local NameHash = icon.NameHash
 		local duration
@@ -265,30 +260,30 @@ local function CLEU_OnEvent(icon, _, t, event, h, sourceGUID, sourceName, source
 				end
 			end
 		end
+		
+		TMW:Assert(tex or spellID)
 
-		-- bind text updating
-		local BindTextObj = icon.BindTextObj
-		if BindTextObj and BindTextObj.hasAnySubstitutions then
-			local usedSubstitutions = BindTextObj.usedSubstitutions
-			if
-				(icon.cleu_sourceUnit ~= sourceUnit	and usedSubstitutions.o)	or
-				(icon.cleu_destUnit ~= destUnit		and usedSubstitutions.e)	or
-				(icon.cleu_extraSpell ~= extraID	and usedSubstitutions.x)
-			then
-				BindTextObj:UpdateNonOnUpdateSubstitutions()
-			end
+		-- set the info that was obtained from the event.
+		local unit, GUID
+		if destUnit then
+			unit, GUID = destUnit, destGUID
+		else
+			unit, GUID = sourceUnit, sourceGUID
 		end
-
-		icon.cleu_start = TMW.time
-		icon.cleu_duration = duration or icon.CLEUDur
-		icon.cleu_spell = spellID or spellName -- perfer ID over name, but events without real names (DIED, ENVIRONMENTAL_DAMAGE, SWING) dont have spellIDs, so pass the spellName the be displayed on the icon
-
-		icon.cleu_sourceUnit = sourceUnit
-		icon.cleu_destUnit = destUnit
-		icon.cleu_extraSpell = extraID
-
-		-- Unlike some icon types, an immedite update is needed here (because of the event)
-		icon:Update(true, tex)
+		
+		icon:SetInfo(
+			"start, duration; texture; spell; extraSpell; unit, GUID; sourceUnit, sourceGUID; destUnit, destGUID",
+			TMW.time, duration or icon.CLEUDur,
+			tex or SpellTextures[spellID],
+			spellID or spellName,
+			extraID,
+			unit, GUID,
+			sourceUnit, sourceGUID,
+			destUnit, destGUID
+		)
+		
+		-- Unlike some event-driven icon types, an immedite update is needed here (because of the event)
+		--icon:Update(true)
 		
 		if icon.EventHandlersSet.OnCLEUEvent then
 			icon:QueueEvent("OnCLEUEvent")
@@ -297,20 +292,25 @@ local function CLEU_OnEvent(icon, _, t, event, h, sourceGUID, sourceName, source
 	end
 end
 
-local function CLEU_OnUpdate(icon, time, tex)
-	-- tex is passed in when calling from OnEvent, otherwise its nil (causing there to be no update)
-	local start = icon.cleu_start
-	local duration = icon.cleu_duration
+local function CLEU_OnUpdate(icon, time)
+	local attributes = icon.attributes
+	local start = attributes.start
+	local duration = attributes.duration
 
-	--icon:SetInfo(alpha, color, texture, start, duration, spellChecked, reverse, count, countText, forceupdate, unit)
 	if time - start > duration then
-		local color = icon:CrunchColor()
-
-		icon:SetInfo(icon.UnAlpha, color, tex, 0, 0, icon.cleu_spell, nil, nil, nil, nil, icon.cleu_destUnit or icon.cleu_sourceUnit)
+		icon:SetInfo(
+			"alpha; color; start, duration",
+			icon.UnAlpha,
+			icon:CrunchColor(),
+			0, 0
+		)
 	else
-		local color = icon:CrunchColor(duration)
-
-		icon:SetInfo(icon.Alpha, color, tex, start, duration, icon.cleu_spell, nil, nil, nil, nil, icon.cleu_destUnit or icon.cleu_sourceUnit)
+		icon:SetInfo(
+			"alpha; color; start, duration",
+			icon.Alpha,
+			icon:CrunchColor(duration),
+			start, duration
+		)
 	end
 
 	--icon.LastUpdate = time -- sometimes we call this function whenever the hell we want ("OnEvent"), so at least have the decency to delay the next update (nevermind, might cause weird event behav)
@@ -324,32 +324,18 @@ function Type:Setup(icon, groupID, iconID)
 	icon.SourceUnits = icon.SourceUnit ~= "" and TMW:GetUnits(icon, icon.SourceUnit)
 	icon.DestUnits = icon.DestUnit ~= "" and TMW:GetUnits(icon, icon.DestUnit)
 
-	-- nil out flags if they are set to default (2^32-1)
-	icon.SourceFlags = icon.SourceFlags ~= 2^32-1 and icon.SourceFlags
-	icon.DestFlags = icon.DestFlags ~= 2^32-1 and icon.DestFlags
+	-- nil out flags if they are set to default (0xFFFFFFFF)
+	icon.SourceFlags = icon.SourceFlags ~= 0xFFFFFFFF and icon.SourceFlags
+	icon.DestFlags = icon.DestFlags ~= 0xFFFFFFFF and icon.DestFlags
 
 	-- more efficient than checking icon.CLEUEvents[""] every OnEvent
 	icon.AllowAnyEvents = icon.CLEUEvents[""]
 
-	local tex, otherArgWhichLacksADecentNameAndIDontKnowWhatItIsToBeHonest = TMW:GetConfigIconTexture(icon)
-	if otherArgWhichLacksADecentNameAndIDontKnowWhatItIsToBeHonest == nil then
-		tex = "Interface\\Icons\\INV_Misc_PocketWatch_01"
-	end
-	icon:SetTexture(tex)
-
-	-- type-specific data that events and OnUpdate use
-	icon.cleu_start = icon.cleu_start or 0
-	icon.cleu_duration = icon.cleu_duration or 0
-	icon.cleu_spell = nil
-
-	-- type-specific data that events use
-	icon.cleu_sourceUnit = nil
-	icon.cleu_destUnit = nil
-	icon.cleu_extraSpell = nil
+	icon:SetInfo("texture", TMW:GetConfigIconTexture(icon))
 
 	-- safety mechanism
 	if icon.AllowAnyEvents and not icon.SourceUnits and not icon.DestUnits and not icon.NameHash and not icon.SourceFlags and not icon.DestFlags then
-		if db.profile.Locked and icon.Enabled then
+		if TMW.Locked and icon.Enabled then
 			TMW.Warn(L["CLEU_NOFILTERS"]:format(L["GROUPICON"]:format(TMW:GetGroupName(groupID, groupID, 1), iconID)))
 		end
 		return
@@ -366,3 +352,124 @@ end
 
 
 Type:Register()
+
+local Processor = TMW.Classes.IconDataProcessor:New("CLEU_SOURCEUNIT", "sourceUnit, sourceGUID")
+function Processor:CompileFunctionSegment(t)
+	-- GLOBALS: sourceUnit, sourceGUID
+	t[#t+1] = [[
+	
+	if attributes.sourceUnit ~= sourceUnit or attributes.sourceGUID ~= sourceGUID then
+		attributes.sourceUnit = sourceUnit
+		attributes.sourceGUID = sourceGUID
+		
+		TMW:Fire(CLEU_SOURCEUNIT.changedEvent, icon, sourceUnit, sourceGUID)
+		doFireIconUpdated = true
+	end
+	--]]
+end
+
+local Processor = TMW.Classes.IconDataProcessor:New("CLEU_DESTUNIT", "destUnit, destGUID")
+function Processor:CompileFunctionSegment(t)
+	-- GLOBALS: destUnit, destGUID
+	t[#t+1] = [[
+	
+	if attributes.destUnit ~= destUnit or attributes.destGUID ~= destGUID then
+		attributes.destUnit = destUnit
+		attributes.destGUID = destGUID
+		
+		TMW:Fire(CLEU_DESTUNIT.changedEvent, icon, destUnit, destGUID)
+		doFireIconUpdated = true
+	end
+	--]]
+end
+
+local Processor = TMW.Classes.IconDataProcessor:New("CLEU_EXTRASPELL", "extraSpell")
+function Processor:CompileFunctionSegment(t)
+	-- GLOBALS: extraSpell
+	t[#t+1] = [[
+	if attributes.extraSpell ~= extraSpell then
+		attributes.extraSpell = extraSpell
+
+		TMW:Fire(CLEU_EXTRASPELL.changedEvent, icon, spell)
+		doFireIconUpdated = true
+	end
+	--]]
+end
+
+
+local DogTag = LibStub("LibDogTag-3.0", true)
+DogTag:AddTag("TMW", "Source", {
+		code = function (groupID, iconID)
+			local icon = TMW[groupID][iconID]
+			if icon then
+				if icon.Type ~= "cleu" then
+					return ""
+				else
+					return icon.attributes.sourceUnit or ""
+				end
+			else
+				return ""
+			end
+		end,
+		arg = {
+			'group', 'number', '@req',
+			'icon', 'number', '@req',
+		},
+		events = TMW:CreateDogTagEventString("CLEU_SOURCEUNIT"),
+		ret = "string",
+		doc = "Returns the source unit of the last Combat Event that the icon processed. Best use in conjunction with the [Name] tag.",
+		example = ('[Source] => "target"; [Source(4, 5)] => "Cybeloras"; [Source:Name] => "Kobold"; [Source(4, 5):Name] => %q'):format(TMW.NAMES:TryToAcquireName("player", true)),
+		category = "Icon"
+})
+DogTag:AddTag("TMW", "Destination", {
+		code = function (groupID, iconID)
+			local icon = TMW[groupID][iconID]
+			if icon then
+				if icon.Type ~= "cleu" then
+					return ""
+				else
+					return icon.attributes.destUnit or ""
+				end
+			else
+				return ""
+			end
+		end,
+		arg = {
+			'group', 'number', '@req',
+			'icon', 'number', '@req',
+		},
+		events = TMW:CreateDogTagEventString("CLEU_DESTUNIT"),
+		ret = "string",
+		doc = "Returns the destination unit of the last Combat Event that the icon processed. Best use in conjunction with the [Name] tag.",
+		example = ('[Destination] => "target"; [Destination(4, 5)] => "Cybeloras"; [Destination:Name] => "Kobold"; [Destination(4, 5):Name] => %q'):format(TMW.NAMES:TryToAcquireName("player", true)),
+		category = "Icon"
+})
+DogTag:AddTag("TMW", "Extra", {
+		code = function (groupID, iconID, link)
+			local icon = TMW[groupID][iconID]
+			if icon then
+				if icon.Type ~= "cleu" then
+					return ""
+				else
+					local name, checkcase = icon.typeData:GetNameForDisplay(icon, icon.attributes.extraSpell, link)
+					name = name or ""
+					if checkcase and name ~= "" then
+						name = TMW:RestoreCase(name)
+					end
+					return name
+				end
+			else
+				return ""
+			end
+		end,
+		arg = {
+			'group', 'number', '@req',
+			'icon', 'number', '@req',
+			'link', 'boolean', false,
+		},
+		events = TMW:CreateDogTagEventString("CLEU_EXTRASPELL"),
+		ret = "string",
+		doc = "Returns the extra spell from the last Combat Event that the icon processed.",
+		example = ('[Extra] => %q; [Extra(link=true)] => %q; [Extra(4, 5)] => %q; [Extra(4, 5, true)] => %q'):format(GetSpellInfo(5782), GetSpellLink(5782), GetSpellInfo(5308), GetSpellLink(5308)),
+		category = "Icon"
+})

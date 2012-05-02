@@ -2,13 +2,9 @@
 -- TellMeWhen
 -- Originally by Nephthys of Hyjal <lieandswell@yahoo.com>
 
--- Other contributions by
--- Sweetmms of Blackrock
--- Oozebull of Twisting Nether
--- Oodyboo of Mug'thol
--- Banjankri of Blackrock
--- Predeter of Proudmoore
--- Xenyr of Aszune
+-- Other contributions by:
+--		Sweetmms of Blackrock, Oozebull of Twisting Nether, Oodyboo of Mug'thol,
+--		Banjankri of Blackrock, Predeter of Proudmoore, Xenyr of Aszune
 
 -- Currently maintained by
 -- Cybeloras of Mal'Ganis
@@ -28,113 +24,112 @@ local PowerBarColor = PowerBarColor
 local tContains = TMW.tContains
 
 local defaultPowerTypes = {
-	ROGUE		= 3,
-	PRIEST		= 0,
-	DRUID		= 0,
-	WARRIOR		= 1,
-	MAGE		= 0,
-	WARLOCK		= 0,
-	PALADIN		= 0,
-	SHAMAN		= 0,
-	HUNTER		= 2,
-	DEATHKNIGHT = 6,
+	ROGUE		= SPELL_POWER_ENERGY,
+	PRIEST		= SPELL_POWER_MANA,
+	DRUID		= SPELL_POWER_MANA,
+	WARRIOR		= SPELL_POWER_RAGE,
+	MAGE		= SPELL_POWER_MANA,
+	WARLOCK		= SPELL_POWER_MANA,
+	PALADIN		= SPELL_POWER_MANA,
+	SHAMAN		= SPELL_POWER_MANA,
+	HUNTER		= SPELL_POWER_FOCUS,
+	DEATHKNIGHT = SPELL_POWER_RUNIC_POWER,
 }
 local defaultPowerType = defaultPowerTypes[pclass]
 
 local PBarsToUpdate = {}
 
-local PowerBar = TMW:NewClass("PowerBar", "StatusBar", "UpdateTableManager", "AceEvent-3.0", "AceTimer-3.0")
+local PowerBar = TMW:NewClass("IconModule_PowerBar", "IconModule", "UpdateTableManager", "AceEvent-3.0", "AceTimer-3.0")
 PowerBar:UpdateTable_Set(PBarsToUpdate)
 
-function PowerBar:OnNewInstance(...)
-	local _, name, icon = ... -- the CreateFrame args
+function PowerBar:OnNewInstance(icon)
+	local bar = CreateFrame("StatusBar", nil, icon)
+	self.bar = bar
+	
+	self.texture = bar:CreateTexture(nil, "OVERLAY")
+	self.texture:SetAllPoints()
+	bar:SetStatusBarTexture(self.texture)
+	
+	local colorinfo = PowerBarColor[defaultPowerType]
+	bar:SetStatusBarColor(colorinfo.r, colorinfo.g, colorinfo.b, 0.9)
+	self.powerType = defaultPowerType
 	
 	self.Max = 1
+	bar:SetMinMaxValues(0, self.Max)
+	
 	self.PBarOffs = 0
-	self.icon = icon
-	self:SetFrameLevel(icon:GetFrameLevel() + 2)
-	
-	self:SetPoint("BOTTOM", icon, "CENTER", 0, 0.5)
-	self:SetPoint("TOPLEFT")
-	self:SetPoint("TOPRIGHT")
-	
-	self.texture = self:CreateTexture(nil, "OVERLAY")
-	self.texture:SetAllPoints()
-	self:SetStatusBarTexture(self.texture)
 end
 
-function PowerBar:SetAttributes(source)
-	-- source should either be a PowerBar or an Icon.
-	-- Code must maintain compatability so that both of these will work as input (keep inherited keys the same)
-	
-	self.InvertBars = source.InvertBars
-	self.PBarOffs = source.PBarOffs or 0
-	self.ShowPBar = source.ShowPBar
-	
-	if self.ShowPBar then
-		self:Show()
-	else
-		self:Hide()
-	end
-end
-
-function PowerBar:Setup()
-	local icon = self.icon	
-
+function PowerBar:OnEnable()
+	self.bar:Show()
 	self.texture:SetTexture(LSM:Fetch("statusbar", TMW.db.profile.TextureName))
 	
-	local blizzEdgeInsets = icon.group.barInsets or 0
-	self:SetPoint("BOTTOM", icon.texture, "CENTER", 0, 0.5)
-	self:SetPoint("TOPLEFT", icon.texture, "TOPLEFT", blizzEdgeInsets, -blizzEdgeInsets)
-	self:SetPoint("TOPRIGHT", icon.texture, "TOPRIGHT", -blizzEdgeInsets, -blizzEdgeInsets)
-	
-	if not self.powerType then
-		local powerType = defaultPowerType
-		local colorinfo = PowerBarColor[powerType]
-		self:SetStatusBarColor(colorinfo.r, colorinfo.g, colorinfo.b, 0.9)
-		self.powerType = powerType
-	end
-	
-	self:SetAttributes(icon)
+	local icon = self.icon
+	local attributes = icon.attributes
+	self:SPELL(icon, attributes.spell)
+end
+function PowerBar:OnDisable()
+	self.bar:Hide()
+	self:UpdateTable_Unregister()
+end
 
-	if self.ShowPBar then
-		-- register on PowerBar, not self
-		PowerBar:RegisterEvent("SPELL_UPDATE_USABLE")
-		PowerBar:RegisterEvent("UNIT_POWER_FREQUENT")
-	end
+function PowerBar:OnUsed()
+	PowerBar:RegisterEvent("SPELL_UPDATE_USABLE")
+	PowerBar:RegisterEvent("UNIT_POWER_FREQUENT")
+end
+function PowerBar:OnUnused()
+	PowerBar:UnregisterEvent("SPELL_UPDATE_USABLE")
+	PowerBar:UnregisterEvent("UNIT_POWER_FREQUENT")
+end
+
+
+function PowerBar:SetupForIcon(sourceIcon)
+	self.InvertBars = sourceIcon.InvertBars
+	self.Offset = sourceIcon.PBarOffs or 0
 end
 
 function PowerBar:SetSpell(spell)
+	local bar = self.bar
 	self.spell = spell
 	
 	if spell then
-		local _, _, _, cost, _, powerType = GetSpellInfo(spell)
-		
-		cost = powerType == 9 and 3 or cost or 0 -- holy power hack: always use a max of 3
-		self.Max = cost
-		self:SetMinMaxValues(0, cost)
-		self.__value = nil -- the displayed value might change when we change the max, so force an update
-		
-		powerType = powerType or defaultPowerType
-		if powerType ~= self.powerType then
-			local colorinfo = PowerBarColor[powerType]
-			self:SetStatusBarColor(colorinfo.r, colorinfo.g, colorinfo.b, 0.9)
-			self.powerType = powerType
-		end
+		self:UpdateCost()
 
 		self:UpdateTable_Register()
 		
 		self:Update()
 	elseif tContains(self.UpdateTable_UpdateTable, self) then
 		local value = self.InvertBars and self.Max or 0
-		self:SetValue(value)
+		bar:SetValue(value)
 		self.__value = value
 		
 		self:UpdateTable_Unregister()
 	end
 end
 
+function PowerBar:UpdateCost()
+	local bar = self.bar
+	local spell = self.spell
+	
+	if spell then
+		local _, _, _, cost, _, powerType = GetSpellInfo(spell)
+		
+		cost = powerType == 9 and 3 or cost or 0 -- holy power hack: always use a max of 3
+		self.Max = cost
+		bar:SetMinMaxValues(0, cost)
+		self.__value = nil -- the displayed value might change when we change the max, so force an update
+		
+		powerType = powerType or defaultPowerType
+		if powerType ~= self.powerType then
+			local colorinfo = PowerBarColor[powerType]
+			bar:SetStatusBarColor(colorinfo.r, colorinfo.g, colorinfo.b, 0.9)
+			self.powerType = powerType
+		end
+	end
+end
+
 function PowerBar:Update(power, powerTypeNum)
+	local bar = self.bar
 	if not powerTypeNum then
 		powerTypeNum = self.powerType
 		power = UnitPower("player", powerTypeNum)
@@ -158,62 +153,53 @@ function PowerBar:Update(power, powerTypeNum)
 		end
 
 		if self.__value ~= value then
-			self:SetValue(value)
+			bar:SetValue(value)
 			self.__value = value
 		end
 	end
 end
 
 
-
-local updatePBars
-
-
-function PowerBar:ForceUpdatePBars()
-	PowerBar:UNIT_POWER_FREQUENT("UNIT_POWER_FREQUENT", "player")
+function PowerBar:SPELL_UPDATE_USABLE()
+	if TMW.Locked then
+		for i = 1, #PBarsToUpdate do
+			local Module = PBarsToUpdate[i]
+			Module:UpdateCost()
+		end
+	end
 end
 
-TMW:RegisterCallback("TMW_ONUPDATE_TIMECONSTRAINED", function(event, time, Locked)
-	if Locked and updatePBars then
-		for i = 1, #PBarsToUpdate do
-			local pbar_overlay = PBarsToUpdate[i]
-			pbar_overlay:SetSpell(pbar_overlay.spell) -- force an update
-		end
-		updatePBars = nil
-	end
-end)
-
-TMW:RegisterCallback("TMW_GLOBAL_UPDATE", function(event)
-	updatePBars = 1
-
-	PowerBar:ScheduleTimer("ForceUpdatePBars", 0.55)
-	PowerBar:ScheduleTimer("ForceUpdatePBars", 1)
-	PowerBar:ScheduleTimer("ForceUpdatePBars", 2)	
-end)
-
-TMW:RegisterCallback("TMW_ICON_SETUP_POST", function(event, icon)
-	updatePBars = 1
-	
-	local pbar_overlay = icon.pbar_overlay
-	if pbar_overlay then
-		pbar_overlay:Setup()
-		pbar_overlay.__value = nil
-
-		if TMW.db.profile.Locked then
-			pbar_overlay:SetAlpha(.9)
-		else
-			pbar_overlay:UpdateTable_Unregister()
-			pbar_overlay:SetValue(pbar_overlay.Max)
-			pbar_overlay:SetAlpha(.7)
-		end
+function PowerBar:UNIT_POWER_FREQUENT(event, unit, powerType)
+	if unit == "player" then
+		local powerTypeNum = powerType and _G["SPELL_POWER_" .. powerType]
+		local power = powerTypeNum and UnitPower("player", powerTypeNum)
 		
-		if icon.isDefaultSkin then
-			icon.pbar_overlay:SetFrameLevel(icon:GetFrameLevel() + 2)
-		else
-			icon.pbar_overlay:SetFrameLevel(icon:GetFrameLevel() + -1)
+		for i = 1, #PBarsToUpdate do
+			local Module = PBarsToUpdate[i]
+			Module:Update(power, powerTypeNum)
 		end
 	end
+end
+
+
+function PowerBar:SPELL(icon, spellChecked)
+	self:SetSpell(spellChecked)
+end
+PowerBar:SetDataListner("SPELL")
+	
+PowerBar:SetIconEventListner("TMW_ICON_SETUP_POST", function(Module, icon)
+	if TMW.Locked then
+		Module:UpdateTable_Register()
+		
+		Module.bar:SetAlpha(.9)
+	else
+		Module:UpdateTable_Unregister()
+		
+		Module.bar:SetValue(Module.Max)
+		Module.bar:SetAlpha(.6)
+	end
 end)
+
 
 TMW:RegisterCallback("TMW_LOCK_TOGGLED", function(event, Locked)
 	if not Locked then
@@ -221,33 +207,3 @@ TMW:RegisterCallback("TMW_LOCK_TOGGLED", function(event, Locked)
 	end
 end)
 
-TMW:RegisterCallback("TMW_ICON_META_INHERITED_ICON_CHANGED", function(event, icon, icToUse)
-	icon.pbar_overlay:SetAttributes(icToUse.pbar_overlay)
-end)
-
-TMW:RegisterCallback("TMW_ICON_SPELL_CHANGED", function(event, icon, spellChecked)
-	local pbar_overlay = icon.pbar_overlay
-	if pbar_overlay and pbar_overlay.ShowPBar then
-		pbar_overlay:SetSpell(spellChecked)
-	end
-end)
-	
-	
-function PowerBar:SPELL_UPDATE_USABLE()
-	updatePBars = 1
-end
-
-
-function PowerBar:UNIT_POWER_FREQUENT(event, unit, powerType)
-	-- powerType is an event arg
-	if unit == "player" then
-		-- these may be nil if coming from a manual update. in that case, they will be determined by the bar's settings and attributes
-		local powerTypeNum = powerType and _G["SPELL_POWER_" .. powerType]
-		local power = powerTypeNum and UnitPower("player", powerTypeNum)
-		
-		for i = 1, #PBarsToUpdate do
-			local pbar_overlay = PBarsToUpdate[i]
-			pbar_overlay:Update(power, powerTypeNum)
-		end
-	end
-end

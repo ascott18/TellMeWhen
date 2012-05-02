@@ -1,5 +1,5 @@
 ﻿--[[-----------------------------------------------------------------------------
-EditBox Widget
+Import/Export Box Widget
 -------------------------------------------------------------------------------]]
 local Type, Version = "TMW-ImportExport", 1
 local AceGUI = LibStub and LibStub("AceGUI-3.0", true)
@@ -64,6 +64,7 @@ local function Constructor()
 	--editbox:SetPoint("BOTTOMLEFT", 6, 0)
 	editbox:SetPoint("TOPLEFT", 6, 0)
 	editbox:SetPoint("RIGHT", -18, 0)
+	editbox.IsImportExportWidget = true
 	
 	local label = frame:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
 	label:SetPoint("TOPLEFT", 0, -2)

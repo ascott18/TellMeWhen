@@ -2,13 +2,9 @@
 -- TellMeWhen
 -- Originally by Nephthys of Hyjal <lieandswell@yahoo.com>
 
--- Other contributions by
--- Sweetmms of Blackrock
--- Oozebull of Twisting Nether
--- Oodyboo of Mug'thol
--- Banjankri of Blackrock
--- Predeter of Proudmoore
--- Xenyr of Aszune
+-- Other contributions by:
+--		Sweetmms of Blackrock, Oozebull of Twisting Nether, Oodyboo of Mug'thol,
+--		Banjankri of Blackrock, Predeter of Proudmoore, Xenyr of Aszune
 
 -- Currently maintained by
 -- Cybeloras of Mal'Ganis
@@ -19,7 +15,6 @@ if not TMW then return end
 local L = TMW.L
 local LMB = LibStub("Masque", true) or (LibMasque and LibMasque("Button"))
 
-local db
 local _G, strmatch, tonumber, ipairs, pairs, next =
 	  _G, strmatch, tonumber, ipairs, pairs, next
 local print = TMW.print
@@ -38,7 +33,6 @@ Type.RelevantSettings = {
 	Icons = true,
 	CheckNext = true,
 	Name = false,
-	BindText = false,
 	CustomTex = false,
 	ShowTimer = false,
 	ShowTimerText = false,
@@ -60,7 +54,6 @@ local function CheckCompiledIcons(icon)
 end
 
 function Type:Update(after)
-	db = TMW.db
 	
 	if after then
 		for _, icon in pairs(Type.Icons) do
@@ -89,11 +82,12 @@ local function Meta_OnUpdate(icon, time)
 
 	for n = 1, #CompiledIcons do
 		local ic = _G[CompiledIcons[n]]
-		if ic and ic.OnUpdate and ic.__shown and not (CheckNext and ic.__lastMetaCheck == time) then
+		local attributes = ic and ic.attributes
+		if ic and ic.OnUpdate and attributes.shown and not (CheckNext and ic.__lastMetaCheck == time) then
 			ic:Update()
-			if ic.__alpha > 0 and ic.__shown then
+			if attributes.alpha > 0 and attributes.shown then -- make sure to re-check attributes.shown
 				if Sort then
-					local _d = ic.__duration - (time - ic.__start)
+					local _d = attributes.duration - (time - attributes.start)
 					if _d < 0 then
 						_d = 0
 					end
@@ -112,24 +106,15 @@ local function Meta_OnUpdate(icon, time)
 	end
 
 	if icToUse then
+	
+		--DEBUG TEST: make sure it doesnt recurse
+		while icToUse.Type == "meta" and icToUse.__currentIcon do
+			icToUse = icToUse.__currentIcon
+		end
+		
 		local force
 		
-		local icBindTextObj = icToUse.BindTextObj
-		if icBindTextObj and icBindTextObj.hasAnySubstitutions then -- TODO: meta icons checking meta icons dont inherit properly here.
-			icon.bindText:SetText(icToUse.bindText:GetText())
-		end
-
-		if icToUse ~= icon.__currentIcon or icToUse.__metaChangedTime == time then
-			-- __metaChangedTime tracks changes to meta icons.
-			-- we want to be sure to update a meta icon whenever it changes.
-			-- Or something like that. Just keep this here, otherwise bad things happen
-			icon.__metaChangedTime = time
-			
-			-- we check if either are nil so that the bind text will be properly reset (to blank or to static) when an icon changes.
-			if not icBindTextObj or not icBindTextObj.hasAnySubstitutions then
-				icon.bindText:SetText(icToUse.bindText:GetText())
-			end
-			icon.BindTextObj = icToUse.BindTextObj -- BE VERY FUCKING CAREFUL WITH THIS. dont call any methods on it - only setting it to obtain attributes
+		if icToUse ~= icon.__currentIcon then
 
 			TMW:Fire("TMW_ICON_META_INHERITED_ICON_CHANGED", icon, icToUse)
 
@@ -140,26 +125,25 @@ local function Meta_OnUpdate(icon, time)
 					iconnt:SetVertexColor(icnt:GetVertexColor())
 				end
 			end
-
-			icon.ShowTimer = icToUse.ShowTimer
-			icon.ShowTimerText = icToUse.ShowTimerText
+			
+			icon:SetupAllModulesForIcon(icToUse)
+			icon:SetModulesToActiveStateOfIcon(icToUse)
 			
 			force = 1
 
 			icon.__currentIcon = icToUse
-			TMW:Fire("TMW_ICON_UPDATED", icToUse)
-			TMW:Fire("TMW_ICON_UPDATED", icon)
+		--	TMW:Fire("TMW_ICON_UPDATED", icToUse)
+		--	TMW:Fire("TMW_ICON_UPDATED", icon)
 		end
 
 		icToUse.__lastMetaCheck = time
-		--icon:SetInfo(alpha, color, texture, start, duration, spellChecked, reverse, count, countText, forceupdate, unit)
 		if force or icon.metaUpdateQueued then
 			icon.metaUpdateQueued = nil
-			icon:SetInfo(icToUse.__alpha, icToUse.__vrtxcolor, icToUse.__tex, icToUse.__start, icToUse.__duration, icToUse.__spellChecked, icToUse.__reverse, icToUse.__count, icToUse.__countText, force, icToUse.__unitChecked)
+			icon:InheritDataFromIcon(icToUse)
 		end
-	elseif icon.__alpha ~= 0 and icon.metaUpdateQueued then
+	elseif icon.attributes.alpha ~= 0 and icon.metaUpdateQueued then
 		icon.metaUpdateQueued = nil
-		icon:SetInfo(0)
+		icon:SetInfo("alpha", 0)
 	end
 end
 
@@ -219,7 +203,7 @@ function GetFullIconTable(icon, icons) -- check what all the possible icons it c
 				end
 
 			elseif groupID and iconID then -- just an icon. put it in.
-				InsertIcon(icon, db.profile.Groups[groupID].Icons[iconID], ic)
+				InsertIcon(icon, TMW.db.profile.Groups[groupID].Icons[iconID], ic)
 			end
 		end
 	end
@@ -236,10 +220,6 @@ function Type:Setup(icon, groupID, iconID)
 		local g, i = strmatch(v, "TellMeWhen_Group(%d+)_Icon(%d+)")
 		g, i = tonumber(g) or 0, tonumber(i) or 0
 		TMW:QueueValidityCheck(v, groupID, iconID, g, i)
-	end
-
-	if icon.CheckNext then
-		TMW.DoWipeAC = true
 	end
 
 	wipe(alreadyinserted)
@@ -261,7 +241,7 @@ function Type:Setup(icon, groupID, iconID)
 		local g, i = strmatch(ic, "TellMeWhen_Group(%d+)_Icon(%d+)")
 		g, i = tonumber(g), tonumber(i)
 		assert(g and i)
-		if db.profile.Groups[g].Icons[i].Enabled then
+		if TMW.db.profile.Groups[g].Icons[i].Enabled then
 			icon.ForceDisabled = nil
 			break
 		end
@@ -273,9 +253,16 @@ function Type:Setup(icon, groupID, iconID)
 		end
 	end
 
-	icon:SetTexture("Interface\\Icons\\LevelUpIcon-LFD")
+	icon:SetInfo("texture", "Interface\\Icons\\LevelUpIcon-LFD")
 
-	--icon:SetUpdateMethod("manual") DONT DO THIS! 
+	
+	-- DONT DO THIS! ive tried for many hours to get it working,
+	-- but there is no possible way because meta icons update
+	-- the icons they are checking from within them to check for changes,
+	-- so everything will be delayed by at least one update cycle if we do manual updating.
+	--icon:SetUpdateMethod("manual") 
+	
+	
 	icon:SetScript("OnUpdate", Meta_OnUpdate)
 	TMW:RegisterCallback("TMW_ICON_UPDATED", TMW_ICON_UPDATED, icon)
 	if icon.ConditionObj then
@@ -328,41 +315,18 @@ function Type:IE_TypeUnloaded()
 	TMW:TT(TMW.IE.Main.ConditionAlpha, "CONDITIONALPHA", "CONDITIONALPHA_DESC")
 end
 
-function Type:TMW_ICON_SETUP_POST(event, icon)
+function Type:TMW_ICON_SETUP_PRE(event, icon)
 	if icon.Type ~= self.type then
 		TMW:UnregisterCallback("TMW_ICON_UPDATED", TMW_ICON_UPDATED, icon)
 		TMW:UnregisterCallback("TMW_CNDT_OBJ_PASSING_CHANGED", TMW_CNDT_OBJ_PASSING_CHANGED, icon)
-	else
-		if not Locked then
-			-- meta icons shouln't show bars in config, even though they are force enabled.
-			if icon.cbar_overlay and icon.class ~= TMW.Classes.Bar then
-				icon.cbar_overlay:SetValue(0)
-			end
-			if icon.pbar_overlay then
-				icon.pbar_overlay:SetValue(0)
-			end
-		end
 	end
 end
-TMW:RegisterCallback("TMW_ICON_SETUP_POST", Type)
+TMW:RegisterCallback("TMW_ICON_SETUP_PRE", Type)
 
 function Type:TMW_GLOBAL_UPDATE()
-	TMW.DoWipeAC = false
-	Locked = TMW.db.profile.Locked
+	Locked = TMW.Locked
 end
 TMW:RegisterCallback("TMW_GLOBAL_UPDATE", Type)
-
-function Type:GetFontTestValues(icon)
-	-- its the best of both worlds!
-	local rand = random(1, 23)
-	local testCount = rand == 1 and 0 or rand == 2 and 25 or rand == 3 and 50 or rand - 3
-	local testCountText
-	if rand < 4 then
-		testCountText = testCount.."%"
-	end
-
-	return testCount, testCountText
-end
 
 function Type:GetIconMenuText(data, groupID, iconID)
 	local text

@@ -2,13 +2,9 @@
 -- TellMeWhen
 -- Originally by Nephthys of Hyjal <lieandswell@yahoo.com>
 
--- Other contributions by
--- Sweetmms of Blackrock
--- Oozebull of Twisting Nether
--- Oodyboo of Mug'thol
--- Banjankri of Blackrock
--- Predeter of Proudmoore
--- Xenyr of Aszune
+-- Other contributions by:
+--		Sweetmms of Blackrock, Oozebull of Twisting Nether, Oodyboo of Mug'thol,
+--		Banjankri of Blackrock, Predeter of Proudmoore, Xenyr of Aszune
 
 -- Currently maintained by
 -- Cybeloras of Mal'Ganis
@@ -18,7 +14,6 @@ local TMW = TMW
 if not TMW then return end
 local L = TMW.L
 
-local db
 local ipairs, strlower =
 	  ipairs, strlower
 local GetSpellLink, GetSpellInfo, UnitCastingInfo, UnitChannelInfo, UnitExists, UnitGUID =
@@ -72,7 +67,6 @@ local events = {
 }
 
 function Type:Update()
-	db = TMW.db
 	unitsWithExistsEvent = TMW.UNITS.unitsWithExistsEvent
 end
 
@@ -109,8 +103,16 @@ local function Cast_OnUpdate(icon, time)
 
 				local color = icon:CrunchColor(duration)
 
-				--icon:SetInfo(alpha, color, texture, start, duration, spellChecked, reverse, count, countText, forceupdate, unit)
-				icon:SetInfo(icon.Alpha, color, iconTexture, start, duration, name, reverse, nil, nil, nil, unit)
+				icon:SetInfo(
+					"alpha; color; texture; start, duration; reverse; spell; unit, GUID",
+					icon.Alpha,
+					color,
+					iconTexture,
+					start, duration,
+					reverse,
+					name,
+					unit, nil
+				)
 
 				return
 			end
@@ -118,8 +120,14 @@ local function Cast_OnUpdate(icon, time)
 	end
 	local color = icon:CrunchColor()
 
-	--icon:SetInfo(alpha, color, texture, start, duration, spellChecked, reverse, count, countText, forceupdate, unit)
-	icon:SetInfo(icon.UnAlpha, color, nil, 0, 0, NameFirst, nil, nil, nil, nil, Units[1])
+	icon:SetInfo(
+		"alpha; color; start, duration; spell; unit, GUID",
+		icon.UnAlpha,
+		color,
+		0, 0,
+		NameFirst,
+		Units[1], nil
+	)
 end
 
 
@@ -128,7 +136,7 @@ function Type:Setup(icon, groupID, iconID)
 --	icon.NameHash = TMW:GetSpellNames(icon, icon.Name, nil, nil, 1)
 	icon.NameNameHash = TMW:GetSpellNames(icon, icon.Name, nil, 1, 1)
 
-	icon:SetTexture(TMW:GetConfigIconTexture(icon))
+	icon:SetInfo("texture", TMW:GetConfigIconTexture(icon))
 	
 	local UnitSet
 	icon.Units, UnitSet = TMW:GetUnits(icon, icon.Unit)

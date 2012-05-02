@@ -2,13 +2,9 @@
 -- TellMeWhen
 -- Originally by Nephthys of Hyjal <lieandswell@yahoo.com>
 
--- Other contributions by
--- Sweetmms of Blackrock
--- Oozebull of Twisting Nether
--- Oodyboo of Mug'thol
--- Banjankri of Blackrock
--- Predeter of Proudmoore
--- Xenyr of Aszune
+-- Other contributions by:
+--		Sweetmms of Blackrock, Oozebull of Twisting Nether, Oodyboo of Mug'thol,
+--		Banjankri of Blackrock, Predeter of Proudmoore, Xenyr of Aszune
 
 -- Currently maintained by
 -- Cybeloras of Mal'Ganis
@@ -18,7 +14,6 @@ local TMW = TMW
 if not TMW then return end
 local L = TMW.L
 
-local db
 local print = TMW.print
 
 
@@ -60,7 +55,6 @@ Type.EventDisabled_OnUnit = true
 Type.EventDisabled_OnStack = true
 
 function Type:Update()
-	db = TMW.db
 end
 
 local function ConditionIcon_OnUpdate(icon, time)
@@ -72,7 +66,6 @@ local function ConditionIcon_OnUpdate(icon, time)
 
 		local d, start, duration
 
-		--icon:SetInfo(alpha, color, texture, start, duration, spellChecked, reverse, count, countText, forceupdate, unit)
 		if succeeded and not icon.__succeeded and icon.ConditionDurEnabled then
 			d = icon.ConditionDur
 			start, duration = time, d
@@ -82,10 +75,11 @@ local function ConditionIcon_OnUpdate(icon, time)
 			start, duration = time, d
 
 		else
-			d = icon.__duration - (time - icon.__start)
+			local attributes = icon.attributes
+			d = attributes.duration - (time - attributes.start)
 			d = d > 0 and d or 0
 			if d > 0 then
-				start, duration = icon.__start, icon.__duration
+				start, duration = attributes.start, attributes.duration
 			else
 				start, duration = 0, 0
 			end
@@ -94,13 +88,17 @@ local function ConditionIcon_OnUpdate(icon, time)
 		if icon.OnlyIfCounting and d <= 0 then
 			alpha = 0
 		end
-		local color = icon:CrunchColor(d)
-
-		icon:SetInfo(alpha, color, nil, start, duration, nil, nil, nil, nil, nil, nil)
+		
+		icon:SetInfo(
+			"alpha; color; start, duration",
+			alpha,
+			icon:CrunchColor(d),
+			start, duration
+		)
 
 		icon.__succeeded = succeeded
 	else
-		icon:SetInfo(1)
+		icon:SetInfo("alpha", 1)
 	end
 end
 
@@ -110,15 +108,12 @@ end
 
 
 function Type:Setup(icon, groupID, iconID)
-	icon.__start = icon.__start or 0 --TellMeWhen-4.2.1.2.lua:2115 attempt to perform arithmetic on local "start" (a nil value) -- caused because condition icons do necessarily define start/durations, even if shown.
-	icon.__duration = icon.__duration or 0
-	icon.__vrtxcolor = 1
-
 	icon.dontHandleConditionsExternally = true
 	
 	if not icon.OverrideTex or icon.OverrideTex == "" then
 		icon.OverrideTex = "Interface\\Icons\\INV_Misc_QuestionMark"
 	end
+	icon:SetInfo("texture", icon.OverrideTex)
 
 	icon:SetUpdateMethod("manual")
 	

@@ -2,13 +2,9 @@
 -- TellMeWhen
 -- Originally by Nephthys of Hyjal <lieandswell@yahoo.com>
 
--- Other contributions by
--- Sweetmms of Blackrock
--- Oozebull of Twisting Nether
--- Oodyboo of Mug'thol
--- Banjankri of Blackrock
--- Predeter of Proudmoore
--- Xenyr of Aszune
+-- Other contributions by:
+--		Sweetmms of Blackrock, Oozebull of Twisting Nether, Oodyboo of Mug'thol,
+--		Banjankri of Blackrock, Predeter of Proudmoore, Xenyr of Aszune
 
 -- Currently maintained by
 -- Cybeloras of Mal'Ganis
@@ -18,7 +14,7 @@ local TMW = TMW
 if not TMW then return end
 local L = TMW.L
 
-local db, WpnEnchDurs, ClockGCD
+local WpnEnchDurs
 local _G, strlower, strmatch, strtrim, select, floor, ceil =
 	  _G, strlower, strmatch, strtrim, select, floor, ceil
 local GetInventoryItemTexture, GetInventorySlotInfo, GetWeaponEnchantInfo =
@@ -107,9 +103,7 @@ local function UpdateWeaponEnchantInfo(slot, selectIndex)
 end
 
 function Type:Update()
-	db = TMW.db
-	ClockGCD = db.profile.ClockGCD
-	WpnEnchDurs = db.global.WpnEnchDurs
+	WpnEnchDurs = TMW.db.global.WpnEnchDurs
 end
 
 local SlotsToNumbers = {
@@ -138,14 +132,19 @@ local function WpnEnchant_OnUpdate(icon, time)
 		end
 		local start = floor(time - duration + expiration)
 
-		local color = icon:CrunchColor(duration)
-
-		--icon:SetInfo(alpha, color, texture, start, duration, spellChecked, reverse, count, countText, forceupdate, unit)
-		icon:SetInfo(icon.Alpha, color, nil, start, duration, EnchantName, true, nil, nil, nil, nil)
+		icon:SetInfo("alpha; color; start, duration; spell",
+			icon.Alpha,
+			icon:CrunchColor(duration),
+			start, duration,
+			EnchantName
+		)
 	else
-		local color = icon:CrunchColor()
-
-		icon:SetInfo(icon.UnAlpha, color, nil, 0, 0, nil, true, nil, nil, nil, nil)
+		icon:SetInfo("alpha; color; start, duration; spell",
+			icon.UnAlpha,
+			icon:CrunchColor(),
+			0, 0,
+			nil
+		)
 	end
 end
 
@@ -176,11 +175,11 @@ local function WpnEnchant_OnEvent(icon, event, unit)
 
 		local wpnTexture = GetInventoryItemTexture("player", Slot)
 
-		icon:SetTexture(wpnTexture or "Interface\\Icons\\INV_Misc_QuestionMark")
+		icon:SetInfo("texture", wpnTexture or "Interface\\Icons\\INV_Misc_QuestionMark")
 
 		if icon.HideUnequipped then
 			if not wpnTexture then
-				icon:SetInfo(0)
+				icon:SetInfo("alpha", 0)
 				icon:SetScript("OnUpdate", nil)
 				return
 			end
@@ -189,7 +188,7 @@ local function WpnEnchant_OnEvent(icon, event, unit)
 			if itemID then
 				local _, _, _, _, _, _, _, _, invType = GetItemInfo(itemID)
 				if invType == "INVTYPE_HOLDABLE" or invType == "INVTYPE_RELIC" or invType == "INVTYPE_SHIELD" then
-					icon:SetInfo(0)
+					icon:SetInfo("alpha", 0)
 					icon:SetScript("OnUpdate", nil)
 					return
 				end
@@ -210,7 +209,10 @@ function Type:Setup(icon, groupID, iconID)
 
 	icon.ShowPBar = false
 
-	icon:SetTexture(GetInventoryItemTexture("player", icon.Slot) or "Interface\\Icons\\INV_Misc_QuestionMark")
+	icon:SetInfo("texture; reverse",
+		GetInventoryItemTexture("player", icon.Slot) or "Interface\\Icons\\INV_Misc_QuestionMark",
+		true
+	)
 
 	icon.EnchantName = nil
 	icon.LastEnchantName = nil

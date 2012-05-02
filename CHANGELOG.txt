@@ -1,14 +1,12 @@
 ===v5.1.0===
- * Bug Fixes:
- ** (r489) ClassColors.lua:50 Bad argument #1 to :RegisterCallback (string or function expected)
- 
-===v5.0.3===
+ * This is by and large the biggest update that TMW has ever seen. There were so many changes that I lost track of them. Many of the changes done weren't things that you should notice as a user - they are things that makes TMW much easier to expand in the future, including different icon view types aside from the standard square icon (e.g bars). These changes are not complete either - there is still work to be done before such features can be added.
  * Spell Crit is now an event that can be tracked by Combat Event icons
- * (Began work on implementing LibDogTag as the text manager for TMW instead of TMW's current system which is very limited.)
+ * (Began work on implementing LibDogTag as the text manager for TMW instead of TMW's current (and very limited) system.)
  * Bug Fixes:
  ** (r489) TellMeWhen-5.0.2.lua:528 attempt to index local "h" (a nil value)
  ** (r491) Re-re-re-re-re-re fixed meta icons that check entire groups
- ** (r492) TellMeWhen-5.0.2.lua:1080 attempt to compare nil with number (MAYBE)
+ ** (r492) TellMeWhen-5.0.2.lua:1080 attempt to compare nil with number //(MAYBE)//
+ ** (r493) ClassColors.lua:50 Bad argument #1 to :RegisterCallback (string or function expected)
 
 ===v5.0.2===
  * Bug Fixes:

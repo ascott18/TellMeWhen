@@ -2,13 +2,9 @@
 -- TellMeWhen
 -- Originally by Nephthys of Hyjal <lieandswell@yahoo.com>
 
--- Other contributions by
--- Sweetmms of Blackrock
--- Oozebull of Twisting Nether
--- Oodyboo of Mug'thol
--- Banjankri of Blackrock
--- Predeter of Proudmoore
--- Xenyr of Aszune
+-- Other contributions by:
+--		Sweetmms of Blackrock, Oozebull of Twisting Nether, Oodyboo of Mug'thol,
+--		Banjankri of Blackrock, Predeter of Proudmoore, Xenyr of Aszune
 
 -- Currently maintained by
 -- Cybeloras of Mal'Ganis
@@ -18,7 +14,7 @@ local TMW = TMW
 if not TMW then return end
 local L = TMW.L
 
-local db, ClockGCD
+local ClockGCD
 local GetSpellCooldown, IsSpellInRange, IsUsableSpell =
 	  GetSpellCooldown, IsSpellInRange, IsUsableSpell
 local GetActionCooldown, IsActionInRange, IsUsableAction, GetActionTexture, GetActionInfo =
@@ -66,8 +62,7 @@ Type.EventDisabled_OnStack = true
 
 
 function Type:Update()
-	db = TMW.db
-	ClockGCD = db.profile.ClockGCD
+	ClockGCD = TMW.db.profile.ClockGCD
 end
 
 
@@ -89,16 +84,21 @@ local function AutoShot_OnUpdate(icon, time)
 	local inrange = icon.RangeCheck and IsSpellInRange(NameName, "target") or 1
 
 	if ready and inrange == 1 then
-		local color = icon:CrunchColor()
-
-		--icon:SetInfo(alpha, color, texture, start, duration, spellChecked, reverse, count, countText, forceupdate, unit)
-		icon:SetInfo(icon.Alpha, color, nil, 0, 0, NameName, nil, nil, nil, nil, nil)
+		icon:SetInfo(
+			"alpha; color; start, duration; spell",
+			icon.Alpha,
+			icon:CrunchColor(),
+			0, 0,
+			NameName
+		)
 	else
-
-		local color = icon:CrunchColor(asDuration > 0 and asDuration, inrange)
-
-		--icon:SetInfo(alpha, color, texture, start, duration, spellChecked, reverse, count, countText, forceupdate, unit)
-		icon:SetInfo(icon.UnAlpha, color, nil, icon.asStart, asDuration, NameName, nil, nil, nil, nil, nil)
+		icon:SetInfo(
+			"alpha; color; start, duration; spell",
+			icon.UnAlpha,
+			icon:CrunchColor(asDuration > 0 and asDuration, inrange),
+			icon.asStart, asDuration,
+			NameName
+		)
 	end
 end
 
@@ -110,9 +110,9 @@ local function SpellCooldown_OnEvent(icon, event, unit)
 end
 
 local function SpellCooldown_OnUpdate(icon, time)
-
 	local n, inrange, nomana, start, duration, isGCD = 1
-	local IgnoreRunes, RangeCheck, ManaCheck, NameArray, NameNameArray = icon.IgnoreRunes, icon.RangeCheck, icon.ManaCheck, icon.NameArray, icon.NameNameArray
+	local IgnoreRunes, RangeCheck, ManaCheck, NameArray, NameNameArray =
+	icon.IgnoreRunes, icon.RangeCheck, icon.ManaCheck, icon.NameArray, icon.NameNameArray
 
 	for i = 1, #NameArray do
 		local iName = NameArray[i]
@@ -131,10 +131,14 @@ local function SpellCooldown_OnUpdate(icon, time)
 			end
 			isGCD = (ClockGCD or duration ~= 0) and OnGCD(duration)
 			if inrange == 1 and not nomana and (duration == 0 or isGCD) then --usable
-
-				local color = icon:CrunchColor()
-				--icon:SetInfo(alpha, color, texture, start, duration, spellChecked, reverse, count, countText, forceupdate, unit)
-				icon:SetInfo(icon.Alpha, color, SpellTextures[iName], start, duration, iName, nil, nil, nil, nil, nil)
+				icon:SetInfo(
+					"alpha; color; texture; start, duration; spell",
+					icon.Alpha,
+					icon:CrunchColor(),
+					SpellTextures[iName],
+					start, duration,
+					iName
+				)
 				return
 			end
 		end
@@ -156,13 +160,16 @@ local function SpellCooldown_OnUpdate(icon, time)
 		isGCD = OnGCD(duration)
 	end
 	if duration then
-
-		local color = icon:CrunchColor(duration, inrange, nomana)
-
-		--icon:SetInfo(alpha, color, texture, start, duration, spellChecked, reverse, count, countText, forceupdate, unit)
-		icon:SetInfo(icon.UnAlpha, color, icon.FirstTexture, start, duration, NameFirst, nil, nil, nil, nil, nil)
+		icon:SetInfo(
+			"alpha; color; texture; start, duration; spell",
+			icon.UnAlpha,
+			icon:CrunchColor(duration, inrange, nomana),
+			icon.FirstTexture,
+			start, duration,
+			NameFirst
+		)
 	else
-		icon:SetInfo(0)
+		icon:SetInfo("alpha", 0)
 	end
 end
 
@@ -174,7 +181,7 @@ function Type:Setup(icon, groupID, iconID)
 	icon.NameNameArray = TMW:GetSpellNames(icon, icon.Name, nil, 1)
 
 	if icon.NameName == strlower(GetSpellInfo(75)) and not icon.NameArray[2] then
-		icon:SetTexture(GetSpellTexture(75))
+		icon:SetInfo("texture", GetSpellTexture(75))
 		icon.asStart = icon.asStart or 0
 		icon.asDuration = icon.asDuration or 0
 
@@ -189,7 +196,7 @@ function Type:Setup(icon, groupID, iconID)
 	else
 		icon.FirstTexture = SpellTextures[icon.NameFirst]
 
-		icon:SetTexture(TMW:GetConfigIconTexture(icon))
+		icon:SetInfo("texture", TMW:GetConfigIconTexture(icon))
 		
 		
 		if not icon.RangeCheck then
@@ -201,6 +208,7 @@ function Type:Setup(icon, groupID, iconID)
 			end	
 			if icon.ManaCheck then
 				icon:RegisterEvent("UNIT_POWER_FREQUENT")
+				-- icon:RegisterEvent("SPELL_UPDATE_USABLE")-- already registered
 			end
 		
 			icon:SetScript("OnEvent", SpellCooldown_OnEvent)

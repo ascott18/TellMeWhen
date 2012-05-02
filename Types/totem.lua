@@ -2,13 +2,9 @@
 -- TellMeWhen
 -- Originally by Nephthys of Hyjal <lieandswell@yahoo.com>
 
--- Other contributions by
--- Sweetmms of Blackrock
--- Oozebull of Twisting Nether
--- Oodyboo of Mug'thol
--- Banjankri of Blackrock
--- Predeter of Proudmoore
--- Xenyr of Aszune
+-- Other contributions by:
+--		Sweetmms of Blackrock, Oozebull of Twisting Nether, Oodyboo of Mug'thol,
+--		Banjankri of Blackrock, Predeter of Proudmoore, Xenyr of Aszune
 
 -- Currently maintained by
 -- Cybeloras of Mal'Ganis
@@ -20,7 +16,6 @@ local L = TMW.L
 
 local _, pclass = UnitClass("Player")
 
-local db, ClockGCD
 local strlower =
 	  strlower
 local GetTotemInfo, GetSpellTexture, GetSpellLink, GetSpellInfo =
@@ -81,8 +76,6 @@ Type.EventDisabled_OnStack = true
 
 
 function Type:Update()
-	db = TMW.db
-	ClockGCD = db.profile.ClockGCD
 end
 
 local function Totem_OnEvent(icon)
@@ -96,20 +89,25 @@ local function Totem_OnUpdate(icon, time)
 		if Slots[iSlot] then
 			local _, totemName, start, duration, totemIcon = GetTotemInfo(iSlot)
 			if start ~= 0 and totemName and ((NameFirst == "") or NameNameHash[strlowerCache[totemName]]) then
-
-				local color = icon:CrunchColor(duration)
-
-				--icon:SetInfo(alpha, color, texture, start, duration, spellChecked, reverse, count, countText, forceupdate, unit)
-				icon:SetInfo(icon.Alpha, color, totemIcon, start, duration, totemName, true, nil, nil, nil, nil)
+				icon:SetInfo("alpha; color; texture; start, duration; spell",
+					icon.Alpha,
+					icon:CrunchColor(duration),
+					totemIcon,
+					start, duration,
+					totemName
+				)
 				return
 			end
 		end
 	end
-
-	local color = icon:CrunchColor()
-
-	--icon:SetInfo(alpha, color, texture, start, duration, spellChecked, reverse, count, countText, forceupdate, unit)
-	icon:SetInfo(icon.UnAlpha, color, icon.FirstTexture, 0, 0, nil, true, nil, nil, nil, nil)
+	
+	icon:SetInfo("alpha; color; texture; start, duration; spell",
+		icon.UnAlpha,
+		icon:CrunchColor(),
+		icon.FirstTexture,
+		0, 0,
+		NameFirst
+	)
 end
 
 
@@ -143,13 +141,15 @@ function Type:Setup(icon, groupID, iconID)
 	end
 
 	icon.FirstTexture = icon.NameName and TMW.SpellTextures[icon.NameName]
+	
+	icon:SetInfo("reverse", true)
 
 	if pclass == "DRUID" then
-		icon:SetTexture(GetSpellTexture(88747))
+		icon:SetInfo("texture", GetSpellTexture(88747))
 	elseif pclass == "DEATHKNIGHT" then
-		icon:SetTexture(GetSpellTexture(46584))
+		icon:SetInfo("texture", GetSpellTexture(46584))
 	else
-		icon:SetTexture(TMW:GetConfigIconTexture(icon))
+		icon:SetInfo("texture", TMW:GetConfigIconTexture(icon))
 	end
 
 	icon:SetUpdateMethod("manual")
@@ -171,10 +171,21 @@ function Type:GetIconMenuText(data)
 end
 
 function Type:GetNameForDisplay(icon, data, doInsertLink)
-	local ret2
 	data = data or icon.NameFirst
 	
-	return data and ((doInsertLink and GetSpellLink(data)) or GetSpellInfo(data)) or data, ret2
+	if data then
+		local name
+		if doInsertLink then
+			name = GetSpellLink(data)
+		else
+			name = GetSpellInfo(data)
+		end
+		if name then
+			return name
+		end
+	end
+	
+	return data, true
 end
 
 Type:Register()
