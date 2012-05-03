@@ -877,7 +877,9 @@ CNDT.Types = {
 		icon = "Interface\\Icons\\ability_rogue_eviscerate",
 		tcoords = standardtcoords,
 		funcstr = [[GetComboPoints("player", c.Unit) c.Operator c.Level]],
-		events = "UNIT_COMBO_POINTS",
+		events = function(c)
+			return CNDT:IsUnitEventUnit(c.Unit), "UNIT_COMBO_POINTS", "player"
+		end,
 	},
 
 	{ -- abs health
@@ -2555,6 +2557,22 @@ CNDT.Types = {
 		end,
 		-- events = absolutely no events
 	},
+	{ -- mouseover
+		text = L["MOUSEOVERCONDITION"],
+		tooltip = L["MOUSEOVERCONDITION_DESC"],
+		value = "MOUSEOVER",
+		min = 0,
+		max = 1,
+		texttable = bool,
+		nooperator = true,
+		unit = false,
+		icon = "Interface\\Icons\\Ability_Marksmanship",
+		tcoords = standardtcoords,
+		funcstr = function(c)
+			return [[c.True == icon:IsMouseOver()]]
+		end,
+		-- events = -- there is no good way to handle events for this condition
+	},
 	{ -- Lua
 		text = L["LUACONDITION"],
 		tooltip = L["LUACONDITION_DESC"],
@@ -2943,7 +2961,7 @@ function CNDT:CompileUpdateFunction(parent, obj, activeEvents)
 	funcstr = [[local obj, event, arg1 = ...
 	]] .. funcstr
 
-	-- clear out all existing funcs for the icon
+	-- clear out all existing funcs for the obj
 	CNDT.EventEngine:UnregisterObject(obj)
 
 	local func
@@ -3162,16 +3180,24 @@ end
 CNDT.EventEngine = CreateFrame("Frame")
 CNDT.EventEngine.funcs = {}
 function CNDT.EventEngine:Register(event, func, obj)
-	self:RegisterEvent(event)
+	
+	if event:find("^TMW_") then
+		TMW:RegisterCallback(event, func, obj)
+	else
+		self:RegisterEvent(event)
+	end
 	CNDT.EventEngine.funcs[event] = CNDT.EventEngine.funcs[event] or {}
 	CNDT.EventEngine.funcs[event][obj] = func
 end
 
 function CNDT.EventEngine:UnregisterObject(obj)
 	for event, funcs in pairs(CNDT.EventEngine.funcs) do
-		for objKey in pairs(funcs) do
+		for objKey, func in pairs(funcs) do
 			if obj == objKey then
 				funcs[objKey] = nil
+				if event:find("^TMW_") then
+					TMW:UnregisterCallback(event, func, obj)
+				end
 			end
 		end
 	end

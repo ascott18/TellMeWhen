@@ -829,6 +829,8 @@ Examples:
 
 For more help, go to http://www.wowpedia.org/Making_a_macro]]
 L["MACROCONDITION_EB_DESC"] = "If using a single condition, opening and closing brackets are optional. Brackets are required if using multiple conditionals."
+L["MOUSEOVERCONDITION"] = "Mouse is Over"
+L["MOUSEOVERCONDITION_DESC"] = "This condition checks if your mouse is over the icon or group that the condition is attached to."
 L["NOTINRANGE"] = "Not in range"
 L["INRANGE"] = "In range"
 L["STANCE"] = "Stance"

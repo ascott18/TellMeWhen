@@ -1,13 +1,13 @@
 --[[
 Name: LibDogTag-3.0
-Revision: $Rev: 239 $
+Revision: $Rev: 243 $
 Author: Cameron Kenneth Knight (ckknight@gmail.com)
 Website: http://www.wowace.com/
 Description: A library to provide a markup syntax
 ]]
 
 local MAJOR_VERSION = "LibDogTag-3.0"
-local MINOR_VERSION = 90000 + tonumber(("$Revision: 239 $"):match("%d+")) or 0
+local MINOR_VERSION = 90000 + tonumber(("$Revision: 243 $"):match("%d+")) or 0
 
 if MINOR_VERSION > _G.DogTag_MINOR_VERSION then
 	_G.DogTag_MINOR_VERSION = MINOR_VERSION
@@ -292,9 +292,8 @@ local function updateFontString(fs)
 		
 		local success, text, opacity, outline = pcall(func, kwargs)
 		if not success then
-			local err = text
-			local _, minor = LibStub(MAJOR_VERSION)
-			return geterrorhandler()(("%s.%d: Error with code %q (%s). %s"):format(MAJOR_VERSION, minor, code, nsList, err))
+			DogTag.tagError(code, nsList, text)
+			return
 		end
 	
 		if success then

@@ -48,6 +48,9 @@ function database:Import_BuildMenuData(result, editbox)
 	-- current profile
 	local currentProfile = TMW.db:GetCurrentProfile()
 	
+	assert(currentProfile)
+	assert(db.profiles[currentProfile])
+	
 	SharableDataType.types.global:Import_BuildContainingDropdownEntry
 	{
 		parentResult = result,

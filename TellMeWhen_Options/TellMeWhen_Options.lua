@@ -5695,7 +5695,7 @@ function TEXT:TestDogTagFunc(success, ...)
 	end
 end
 
-if DogTag then
+if DogTag and DogTag.tagError then
 	hooksecurefunc(DogTag, "tagError", function(_, _, text)
 		TEXT.EvaluateError = text
 	end)

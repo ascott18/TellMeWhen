@@ -8,7 +8,7 @@
 ## X-Category: Library
 ## X-Credit: Shefki
 ## OptionalDeps:
-## X-Curse-Packaged-Version: r242
+## X-Curse-Packaged-Version: r243
 ## X-Curse-Project-Name: LibDogTag-3.0
 ## X-Curse-Project-ID: libdogtag-3-0
 ## X-Curse-Repository-ID: wow/libdogtag-3-0/mainline

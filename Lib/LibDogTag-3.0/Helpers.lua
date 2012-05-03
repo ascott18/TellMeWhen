@@ -1,5 +1,5 @@
 local MAJOR_VERSION = "LibDogTag-3.0"
-local MINOR_VERSION = 90000 + tonumber(("$Revision: 241 $"):match("%d+")) or 0
+local MINOR_VERSION = 90000 + tonumber(("$Revision: 243 $"):match("%d+")) or 0
 
 if MINOR_VERSION > _G.DogTag_MINOR_VERSION then
 	_G.DogTag_MINOR_VERSION = MINOR_VERSION
@@ -478,4 +478,10 @@ local function clearCodes(namespace)
 end
 DogTag.clearCodes = clearCodes
 
+function DogTag.tagError(code, nsList, err)
+	local _, minor = LibStub(MAJOR_VERSION)
+	local message = ("%s.%d: Error with code %q (%s). %s"):format(MAJOR_VERSION, minor, code, nsList, err)
+	geterrorhandler()(message)
+	return message, code, nsList, err
+end
 end

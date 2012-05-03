@@ -1,5 +1,5 @@
 local MAJOR_VERSION = "LibDogTag-3.0"
-local MINOR_VERSION = 90000 + tonumber(("$Revision: 241 $"):match("%d+")) or 0
+local MINOR_VERSION = 90000 + tonumber(("$Revision: 243 $"):match("%d+")) or 0
 
 if MINOR_VERSION > _G.DogTag_MINOR_VERSION then
 	_G.DogTag_MINOR_VERSION = MINOR_VERSION
@@ -1995,9 +1995,7 @@ function DogTag:CreateFunctionFromCode(code, nsList, kwargs, notDebug)
 	
 	local good, ret, types, static = pcall(compile, ast, nsList, w, cachedTags, events, functions, extraKwargs, 'nil;number;string', 'result')
 	if not good then
-		local err = ret
-		local _, minor = LibStub(MAJOR_VERSION)
-		geterrorhandler()(("%s.%d: Error with code %q (%s). %s"):format(MAJOR_VERSION, minor, code, nsList, err))
+		DogTag.tagError(code, nsList, ret)
 	end	
 	
 	for i, v in ipairs(w) do
@@ -2166,9 +2164,8 @@ local function evaluate(code, nsList, kwargs)
 	
 	local success, text, opacity, outline = pcall(func, kwargs)
 	if not success then
-		local err = text
-		local _, minor = LibStub(MAJOR_VERSION)
-		return geterrorhandler()(("%s.%d: Error with code %q (%s). %s"):format(MAJOR_VERSION, minor, code, nsList, err))
+		DogTag.tagError(code, nsList, text)
+		return
 	end
 	
 	if madeKwargs then

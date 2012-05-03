@@ -5,6 +5,7 @@
  * You can now select any of the 4 sound channels to play sounds to (instead of just Master and SFX).
  * You can now list specific totems to be checked by totem icons.
  * Added On Left Click and On Right Click event handlers to icons.
+ * Added a condition to check if you have your mouse over a frame (group or icon).
  * Bug Fixes:
  ** (r489) TellMeWhen-5.0.2.lua:528 attempt to index local "h" (a nil value)
  ** (r491) Re-re-re-re-re-re fixed meta icons that check entire groups
@@ -14,6 +15,8 @@
  ** (r498) Condition "Mounted" is no longer event based because it seems that it doesn't update on UNIT_AURA all the time
  ** (r499) TellMeWhen_Options.lua:1772: "}" expected (to close "{" at line 1762) near "order"
  ** (r501) Cooldown sweeps without text shown should now always show properly after they have ran down to zero at least once
+ ** (r505) The Combo Point condition should now work properly
+ ** (r505) Cooldown icons should always sweep in the correct direction
 
 ===v5.0.2===
  * Bug Fixes:
