@@ -107,7 +107,6 @@
 			</OnReceiveDrag>
 			<OnClick>
 				if TMW.Locked then
-					print(button, self.EventHandlersSet.OnLeftClick, self.EventHandlersSet.OnRightClick)
 					if button == "LeftButton" and self.EventHandlersSet.OnLeftClick then
 						self:QueueEvent("OnLeftClick")
 						self:ProcessQueuedEvents()

@@ -17,6 +17,7 @@
  ** (r501) Cooldown sweeps without text shown should now always show properly after they have ran down to zero at least once
  ** (r505) The Combo Point condition should now work properly
  ** (r505) Cooldown icons should always sweep in the correct direction
+ ** (r506) Combat event icons that aren't set to always show should work now
 
 ===v5.0.2===
  * Bug Fixes:

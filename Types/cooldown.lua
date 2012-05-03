@@ -114,9 +114,6 @@ local function SpellCooldown_OnUpdate(icon, time)
 	local IgnoreRunes, RangeCheck, ManaCheck, NameArray, NameNameArray =
 	icon.IgnoreRunes, icon.RangeCheck, icon.ManaCheck, icon.NameArray, icon.NameNameArray
 
-	if icon.group.ID == 1 and (icon.ID == 5 or  icon.ID == 6 or  icon.ID == 7) then 
-	print(icon, time) 
-	end
 	for i = 1, #NameArray do
 		local iName = NameArray[i]
 		n = i

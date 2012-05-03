@@ -484,7 +484,6 @@ end
 
 function Env.TotemHelper(slot, time, nameString)
 	local have, name, start, duration = GetTotemInfo(slot)
-	print(slot, nameString, name)
 	if nameString and nameString ~= "" and nameString ~= ";" and name and not strfind(nameString, SemicolonConcatCache[name or ""]) then
 		return 0
 	end
