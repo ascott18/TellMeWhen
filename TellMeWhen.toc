@@ -53,6 +53,7 @@ Localization\TellMeWhen-ruRU.lua
 Localization\TellMeWhen-zhCN.lua
 Localization\TellMeWhen-zhTW.lua
 Localization\TellMeWhen-ptBR.lua
+Localization\TellMeWhen-itIT.lua
 Localization\StaticFormats.lua
 
 

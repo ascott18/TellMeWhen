@@ -282,9 +282,9 @@ local function CLEU_OnEvent(icon, _, t, event, h, sourceGUID, sourceName, source
 			destUnit, destGUID
 		)
 		
-		-- Unlike some event-driven icon types, an immedite update is needed here (because of the event)
-		--icon:Update(true)
-		icon.NextUpdateTime = 0
+		-- do an immediate update because it might look stupid if
+		-- half the icon changes on event and the other half changes on the next update cycle
+		icon:Update(true)
 		
 		if icon.EventHandlersSet.OnCLEUEvent then
 			icon:QueueEvent("OnCLEUEvent")
