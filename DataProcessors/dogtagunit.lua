@@ -28,7 +28,7 @@ function Processor:CompileFunctionSegment(t)
 	if attributes.dogTagUnit ~= dogTagUnit then
 		attributes.dogTagUnit = dogTagUnit
 
-		TMW:Fire(CONDITION.changedEvent, icon, dogTagUnit)
+		TMW:Fire(DOGTAGUNIT.changedEvent, icon, dogTagUnit)
 		doFireIconUpdated = true
 	end
 	--]]
