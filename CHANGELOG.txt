@@ -18,6 +18,7 @@
  ** (r505) The Combo Point condition should now work properly
  ** (r505) Cooldown icons should always sweep in the correct direction
  ** (r506) Combat event icons that aren't set to always show should work now
+ ** (r508) Processor DOGTAGUNIT should now fire its own event instead of firing CONDITION's event
 
 ===v5.0.2===
  * Bug Fixes:
