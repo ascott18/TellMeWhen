@@ -713,7 +713,7 @@ function Comm:HandleTopLevelMenu(editbox)
 	
 	for k, result in ipairs(DeserializedData) do
 		local type = SharableDataType.types[result.type]
-		type:Import_BuildContainingDropdownEntry(result)
+		type:Import_BuildContainingDropdownEntry(result, editbox)
 	end
 end
 

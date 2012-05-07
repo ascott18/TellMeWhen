@@ -19,6 +19,7 @@
  ** (r505) Cooldown icons should always sweep in the correct direction
  ** (r506) Combat event icons that aren't set to always show should work now
  ** (r508) Processor DOGTAGUNIT should now fire its own event instead of firing CONDITION's event
+ ** (r510) TellMeWhen_Options-r509\ImportExport.lua:384: attempt to index local "editbox" (a nil value)
 
 ===v5.0.2===
  * Bug Fixes:

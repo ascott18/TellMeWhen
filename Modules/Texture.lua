@@ -18,7 +18,7 @@ local L = TMW.L
 
 
 	
-local Texture = TMW:NewClass("IconModule_Texture", "IconModule", "EssentialIconModule", "MasqueSkinnableIconModule")
+local Texture = TMW:NewClass("IconModule_Texture", "IconModule")
 
 function Texture:OnNewInstance(icon)
 	self.texture = icon:CreateTexture(icon:GetName() .. "Texture", "BACKGROUND")

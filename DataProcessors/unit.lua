@@ -59,9 +59,9 @@ Processor:AddDogTag("TMW", "Unit", {
 	},
 	events = TMW:CreateDogTagEventString("UNIT"),
 	ret = "string",
-	doc = "Returns the unit or the name of the unit that the icon is checking. Best use in conjunction with the [Name] tag.",
+	doc = L["DT_DOC_Unit"],
 	example = '[Unit] => "target"; [Unit(4, 5)] => "focus"; [Unit:Name] => "Kobold"; [Unit(4, 5):Name] => "Gamon"',
-	category = "Icon"
+	category = L["ICON"],
 })
 Processor:AddDogTag("TMW", "PreviousUnit", {
 	code = function (groupID, iconID)
@@ -79,9 +79,9 @@ Processor:AddDogTag("TMW", "PreviousUnit", {
 	},
 	events = TMW:CreateDogTagEventString("UNIT"),
 	ret = "string",
-	doc = "Returns the unit or the name of the unit that the icon is checked prior to the current unit. Best use in conjunction with the [Name] tag.",
+	doc = L["DT_DOC_PreviousUnit"],
 	example = '[PreviousUnit] => "target"; [PreviousUnit(4, 5)] => "focus"; [PreviousUnit:Name] => "Kobold"; [PreviousUnit(4, 5):Name] => "Gamon"',
-	category = "Icon"
+	category = L["ICON"],
 })
 
 TMW:RegisterCallback("TMW_ICON_TYPE_CHANGED", function(event, icon, typeData, oldTypeData)

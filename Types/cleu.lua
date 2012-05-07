@@ -400,77 +400,77 @@ end
 
 local DogTag = LibStub("LibDogTag-3.0", true)
 DogTag:AddTag("TMW", "Source", {
-		code = function (groupID, iconID)
-			local icon = TMW[groupID][iconID]
-			if icon then
-				if icon.Type ~= "cleu" then
-					return ""
-				else
-					return icon.attributes.sourceUnit or ""
-				end
-			else
+	code = function (groupID, iconID)
+		local icon = TMW[groupID][iconID]
+		if icon then
+			if icon.Type ~= "cleu" then
 				return ""
+			else
+				return icon.attributes.sourceUnit or ""
 			end
-		end,
-		arg = {
-			'group', 'number', '@req',
-			'icon', 'number', '@req',
-		},
-		events = TMW:CreateDogTagEventString("CLEU_SOURCEUNIT"),
-		ret = "string",
-		doc = "Returns the source unit of the last Combat Event that the icon processed. Best use in conjunction with the [Name] tag.",
-		example = ('[Source] => "target"; [Source(4, 5)] => "Cybeloras"; [Source:Name] => "Kobold"; [Source(4, 5):Name] => %q'):format(TMW.NAMES:TryToAcquireName("player", true)),
-		category = "Icon"
+		else
+			return ""
+		end
+	end,
+	arg = {
+		'group', 'number', '@req',
+		'icon', 'number', '@req',
+	},
+	events = TMW:CreateDogTagEventString("CLEU_SOURCEUNIT"),
+	ret = "string",
+	doc = L["DT_DOC_Source"],
+	example = ('[Source] => "target"; [Source(4, 5)] => "Cybeloras"; [Source:Name] => "Kobold"; [Source(4, 5):Name] => %q'):format(TMW.NAMES:TryToAcquireName("player", true)),
+	category = L["ICON"],
 })
 DogTag:AddTag("TMW", "Destination", {
-		code = function (groupID, iconID)
-			local icon = TMW[groupID][iconID]
-			if icon then
-				if icon.Type ~= "cleu" then
-					return ""
-				else
-					return icon.attributes.destUnit or ""
-				end
-			else
+	code = function (groupID, iconID)
+		local icon = TMW[groupID][iconID]
+		if icon then
+			if icon.Type ~= "cleu" then
 				return ""
+			else
+				return icon.attributes.destUnit or ""
 			end
-		end,
-		arg = {
-			'group', 'number', '@req',
-			'icon', 'number', '@req',
-		},
-		events = TMW:CreateDogTagEventString("CLEU_DESTUNIT"),
-		ret = "string",
-		doc = "Returns the destination unit of the last Combat Event that the icon processed. Best use in conjunction with the [Name] tag.",
-		example = ('[Destination] => "target"; [Destination(4, 5)] => "Cybeloras"; [Destination:Name] => "Kobold"; [Destination(4, 5):Name] => %q'):format(TMW.NAMES:TryToAcquireName("player", true)),
-		category = "Icon"
+		else
+			return ""
+		end
+	end,
+	arg = {
+		'group', 'number', '@req',
+		'icon', 'number', '@req',
+	},
+	events = TMW:CreateDogTagEventString("CLEU_DESTUNIT"),
+	ret = "string",
+	doc = L["DT_DOC_Destination"],
+	example = ('[Destination] => "target"; [Destination(4, 5)] => "Cybeloras"; [Destination:Name] => "Kobold"; [Destination(4, 5):Name] => %q'):format(TMW.NAMES:TryToAcquireName("player", true)),
+	category = L["ICON"],
 })
 DogTag:AddTag("TMW", "Extra", {
-		code = function (groupID, iconID, link)
-			local icon = TMW[groupID][iconID]
-			if icon then
-				if icon.Type ~= "cleu" then
-					return ""
-				else
-					local name, checkcase = icon.typeData:GetNameForDisplay(icon, icon.attributes.extraSpell, link)
-					name = name or ""
-					if checkcase and name ~= "" then
-						name = TMW:RestoreCase(name)
-					end
-					return name
-				end
-			else
+	code = function (groupID, iconID, link)
+		local icon = TMW[groupID][iconID]
+		if icon then
+			if icon.Type ~= "cleu" then
 				return ""
+			else
+				local name, checkcase = icon.typeData:GetNameForDisplay(icon, icon.attributes.extraSpell, link)
+				name = name or ""
+				if checkcase and name ~= "" then
+					name = TMW:RestoreCase(name)
+				end
+				return name
 			end
-		end,
-		arg = {
-			'group', 'number', '@req',
-			'icon', 'number', '@req',
-			'link', 'boolean', false,
-		},
-		events = TMW:CreateDogTagEventString("CLEU_EXTRASPELL"),
-		ret = "string",
-		doc = "Returns the extra spell from the last Combat Event that the icon processed.",
-		example = ('[Extra] => %q; [Extra(link=true)] => %q; [Extra(4, 5)] => %q; [Extra(4, 5, true)] => %q'):format(GetSpellInfo(5782), GetSpellLink(5782), GetSpellInfo(5308), GetSpellLink(5308)),
-		category = "Icon"
+		else
+			return ""
+		end
+	end,
+	arg = {
+		'group', 'number', '@req',
+		'icon', 'number', '@req',
+		'link', 'boolean', false,
+	},
+	events = TMW:CreateDogTagEventString("CLEU_EXTRASPELL"),
+	ret = "string",
+	doc = L["DT_DOC_Extra"],
+	example = ('[Extra] => %q; [Extra(link=true)] => %q; [Extra(4, 5)] => %q; [Extra(4, 5, true)] => %q'):format(GetSpellInfo(5782), GetSpellLink(5782), GetSpellInfo(5308), GetSpellLink(5308)),
+	category = L["ICON"],
 })

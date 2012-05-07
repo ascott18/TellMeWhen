@@ -940,6 +940,25 @@ L["MAIN"] = "Main"
 L["UNNAMED"] = "((Unnamed))"
 
 
+L["MISCELLANEOUS"] = "Miscellaneous"
+L["TEXTMANIP"] = "Text manipulation"
+L["DT_DOC_TMWFormatDuration"] = "Returns a string formatted by TellMeWhen's time format. Alternative to [FormatDuration]."
+L["DT_DOC_Name"] = "Returns the name of the unit. This is an improved version of the default [Name] tag provided by DogTag. Color will default to the setting in TMW's main options."
+
+L["DT_DOC_Source"] = "Returns the source unit of the last Combat Event that the icon processed. Best use in conjunction with the [Name] tag. (This tag should only be used with %s type icons)"
+L["DT_DOC_Destination"] = "Returns the destination unit of the last Combat Event that the icon processed. Best use in conjunction with the [Name] tag. (This tag should only be used with %s type icons)"
+L["DT_DOC_Extra"] = "Returns the extra spell from the last Combat Event that the icon processed. (This tag should only be used with %s type icons)"
+
+L["DT_DOC_IsShown"] = "Returns whether or not an icon is shown."
+L["DT_DOC_Opacity"] = "Returns the opacity of an icon. Return value is between 0 and 1."
+L["DT_DOC_Duration"] = "Returns the current duration remaining on the icon. It is reccomended that you format this with [TMWFormatDuration]"
+L["DT_DOC_Spell"] = "Returns the spell or item that the icon is showing data for."
+L["DT_DOC_Stacks"] = "Returns the current stacks of the icon"
+L["DT_DOC_Unit"] = "Returns the unit or the name of the unit that the icon is checking. Best use in conjunction with the [Name] tag."
+L["DT_DOC_PreviousUnit"] = "Returns the unit or the name of the unit that the icon is checked prior to the current unit. Best use in conjunction with the [Name] tag."
+
+L["ERROR_MISSINGLAYOUT"] = "Couldn't find the text layout for %s. Falling back on the default for the icon's view type."
+ 
 L["SENDSUCCESSFUL"] = "Sent successfully"
 L["MESSAGERECIEVE"] = "%s has sent you some TellMeWhen data! You can import this data into TellMeWhen using the %q dropdown in the icon editor."
 L["MESSAGERECIEVE_SHORT"] = "%s has sent you some TellMeWhen data!"

@@ -31,7 +31,7 @@ local DogTag = LibStub("LibDogTag-3.0", true)
 TELLMEWHEN_VERSION = "5.1.0"
 TELLMEWHEN_VERSION_MINOR = strmatch(" @project-version@", " r%d+") or ""
 TELLMEWHEN_VERSION_FULL = TELLMEWHEN_VERSION .. TELLMEWHEN_VERSION_MINOR
-TELLMEWHEN_VERSIONNUMBER = 51015 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
+TELLMEWHEN_VERSIONNUMBER = 51016 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
 if TELLMEWHEN_VERSIONNUMBER > 52000 or TELLMEWHEN_VERSIONNUMBER < 51000 then return error("YOU SCREWED UP THE VERSION NUMBER OR DIDNT CHANGE THE SAFETY LIMITS") end -- safety check because i accidentally made the version number 414069 once
 
 TELLMEWHEN_MAXROWS = 20
@@ -4207,8 +4207,8 @@ ANIM.AnimationList = {
 			else
 				animation_flasher = icon:CreateTexture(nil, "BACKGROUND", nil, 6)
 				
-				 -- this will fallback on icon if there isnt a texture or icon isnt an icon
-				animation_flasher:SetAllPoints(icon.class == TMW.Classes.Icon and icon.EssentialModuleComponents.texture)
+				-- this will fallback on icon if there isnt a texture or icon isnt an icon
+				animation_flasher:SetAllPoints(icon.class == TMW.Classes.Icon and icon.EssentialModuleComponents.texture or icon)
 				animation_flasher:Hide()
 
 				icon.animation_flasher = animation_flasher
@@ -5054,7 +5054,7 @@ local Icon = TMW:NewClass("Icon", "Button", "UpdateTableManager", "ConditionCont
 Icon:UpdateTable_Set(IconsToUpdate)
 Icon.IsIcon = true
 
--- NOT universal (discrepancies need to be moved to icon:Setup() probably )
+-- universal
 function Icon.OnNewInstance(icon, ...)
 	local _, name, group, _, iconID = ... -- the CreateFrame args
 
@@ -5141,6 +5141,7 @@ function Icon.RegisterEvent(icon, event)
 	icon.hasEvents = 1
 end
 
+-- universal
 Icon.UnregisterAllEvents_Blizz = Icon.UnregisterAllEvents
 function Icon.UnregisterAllEvents(icon, event)
 	-- UnregisterAllEvents uses a metric fuckton of CPU, so only do it if needed
@@ -5150,6 +5151,7 @@ function Icon.UnregisterAllEvents(icon, event)
 	end
 end
 
+-- universal
 function Icon.OnShow(icon)
 	icon:SetInfo("shown", true)
 end
@@ -5309,7 +5311,7 @@ function Icon.SetTexture(icon, tex)
 	TMW:Error([[icon:SetTexture is depreciated. Use icon:SetInfo("texture", texture) instead]])
 end
 
--- universal (but actual event handlers (:HandleEvent()) arent (probably))
+-- universal (but actual event handlers (:HandleEvent()) arent (probably, mainly animations))
 function Icon.ProcessQueuedEvents(icon)
 	local EventsToFire = icon.EventsToFire
 	if EventsToFire and icon.eventIsQueued then
@@ -5423,6 +5425,7 @@ function Icon.CrunchColor(icon, duration, inrange, nomana)
 	return icon.typeData[s]
 end
 
+-- universal
 function Icon.GetTextLayout(icon, view)
 	-- view is optional, defaults to the current view
 	local GUID = icon:GetSettingsPerView(view).TextLayout
@@ -5444,15 +5447,13 @@ function Icon.GetTextLayout(icon, view)
 		
 		local groupID = icon.group.ID
 		local iconID = icon.ID
-		TMW.Warn(("Couldn't find the text layout for %s. Falling back on the default for the icon's view type.")
-			:format(L["GROUPICON"]:format(TMW:GetGroupName(groupID, groupID, 1), iconID))
-		) --TODO: localize
+		TMW.Warn(L["ERROR_MISSINGLAYOUT"]:format(L["GROUPICON"]):format(TMW:GetGroupName(groupID, groupID, 1), iconID))
 	end
 	
 	return GUID, layoutSettings	
 end
 
--- NOT universal
+-- universal
 function Icon.Setup(icon)
 	if not icon or not icon[0] then return end
 
@@ -5585,19 +5586,64 @@ end
 
 
 
+function Icon.ImplementModule(icon, moduleName)
+	local Module = icon.Modules[moduleName]
+	if not Module then
+		Module = TMW.Classes[moduleName]:New(icon)
+	end
+	return Module
+end
 
-do
+function Icon.DisableModule(icon, moduleName)
+	local Module = icon.Modules[moduleName]
+	if Module then
+		Module:Disable()
+		return Module
+	end
+end
 
-	TMW.ProcessorsByName = {}
-	local UsedTokens = {}
-	local IconDataProcessor = TMW:NewClass("IconDataProcessor")
-	IconDataProcessor.SIUVs = { --SetInfoUpValues
+function Icon.DisableAllModules(icon)
+	for moduleName, Module in pairs(icon.Modules) do
+		Module:Disable()
+	end
+end
+
+function Icon.SetupAllModulesForIcon(icon, sourceIcon)
+	for moduleName, Module in pairs(icon.Modules) do
+		if Module.SetupForIcon then
+			Module:SetupForIcon(sourceIcon)
+		end
+	end
+end
+
+function Icon.SetModulesToActiveStateOfIcon(icon, sourceIcon)
+	local sourceModules = sourceIcon.Modules
+	for moduleName, Module in pairs(icon.Modules) do
+		local sourceModule = sourceModules[moduleName]
+		if sourceModule then
+			if sourceModule.IsEnabled then
+				Module:Enable()
+			else
+				Module:Disable()
+			end
+		else
+			Module:Disable()
+		end
+	end
+end
+	
+
+
+TMW.ProcessorsByName = {}
+local IconDataProcessor = TMW:NewClass("IconDataProcessor"){
+	UsedTokens = {},
+	SIUVs = { --SetInfoUpValues
 		"local TMW = TMW",
 		"local print = TMW.print",
 		"local ProcessorsByName = TMW.ProcessorsByName",
 		"local type = type",
-	}
-	function IconDataProcessor:OnNewInstance(name, attributes)
+	},
+	OnNewInstance = function(self, name, attributes)
 		assert(name, "Name is required for an IconDataProcessor!")
 		assert(attributes, "Attributes are required for an IconDataProcessor!")
 		
@@ -5614,10 +5660,10 @@ do
 		self.attributesStringNoSpaces = attributes:gsub(" ", "")
 		
 		for _, attribute in TMW:Vararg(strsplit(",", self.attributesStringNoSpaces)) do
-			if UsedTokens[attribute] then
-				error(("Attribute token %q is already in use by %q!"):format(attribute, UsedTokens[attribute].name))
+			if self.UsedTokens[attribute] then
+				error(("Attribute token %q is already in use by %q!"):format(attribute, self.UsedTokens[attribute].name))
 			else
-				UsedTokens[attribute] = self
+				self.UsedTokens[attribute] = self
 			end
 		end
 		
@@ -5625,19 +5671,21 @@ do
 		self.SIUVs[#self.SIUVs+1] = ("local %s = ProcessorsByName['%s']"):format(name, name)
 		
 		self.changedEvent = "TMW_ICON_DATA_CHANGED_" .. name
-	end
-	function IconDataProcessor:AssertDependency(dependency)
+	end,
+	AssertDependency = function(self, dependency)
 		assert(TMW.ProcessorsByName[dependency], ("Dependency %q of processor %q was not found!"):format(dependency, self.name))
-	end
-	function IconDataProcessor:AddDogTag(...)
+	end,
+	AddDogTag = function(self, ...)
 		-- just a wrapper so that i don't have to LibStub DogTag everywhere
 		DogTag:AddTag(...)
-	end
-	
-	local InheritAllFunc
-	local function CreateInheritAllFunc()
+	end,
+}
+
+local InheritAllFunc
+function Icon.InheritDataFromIcon(iconDestination, iconSource)
+	if not InheritAllFunc then
 		local attributes = {}
-		
+	
 		for _, Processor in pairs(IconDataProcessor.instances) do
 			if not Processor.dontInherit then
 				for _, attribute in TMW:Vararg(strsplit(",", Processor.attributesStringNoSpaces)) do
@@ -5660,253 +5708,191 @@ do
 		
 		InheritAllFunc = assert(loadstring(table.concat(t)))
 	end
-	function Icon.InheritDataFromIcon(iconDestination, iconSource)
-		if not InheritAllFunc then
-			CreateInheritAllFunc()
-		end
-		InheritAllFunc(iconDestination, iconSource)
-	end
-
-
-	local SetInfo3Funcs = setmetatable({}, { __index = function(self, signature)
-		assert(type(signature) == "string",
-		("(Bad argument #3 to icon:SetInfo(signature, ...) - Expected string, got %s. (SetInfo changed in v5.1.0 - are you still using the old SetInfo format?)"):format(type(signature)))
-		
-		local originalSignature = signature
-		
-		signature = signature:gsub(" ", "")
-		if rawget(self, signature) then
-			return self[signature]    
-		end    
-		
-		local t = {} -- taking a page from DogTag's book on compiling functions
-		t[#t+1] = table.concat(IconDataProcessor.SIUVs, "\n")
-		t[#t+1] = "\n"
-		t[#t+1] = "return function(icon, "
-		t[#t+1] = originalSignature:trim(" ,;"):gsub("  ", " "):gsub(";", ",")
-		t[#t+1] = ")"
-		t[#t+1] = "\n\n"
-		t[#t+1] = [[
-			local attributes, EventHandlersSet = icon.attributes, icon.EventHandlersSet
-			local doFireIconUpdated
-		]]
-		
-		while #signature > 0 do
-			local found
-			for _, Processor in ipairs(IconDataProcessor.instances) do
-				found = signature:find(Processor.attributesStringNoSpaces .. "$") or signature:find(Processor.attributesStringNoSpaces .. "[;,]")
-				if found then
-					t[#t+1] = "local Processor = "
-					t[#t+1] = Processor.name
-					t[#t+1] = "\n"  
-					
-					Processor:CompileFunctionSegment(t)
-					
-					t[#t+1] = "\n\n"  
-					
-					signature = signature:gsub(Processor.attributesStringNoSpaces .. "[;,]?", "", 1)
-					
-					break
-				end
-			end
-			if not found then
-				error(("Couldn't find a signature match for the beginning of signature %q from %q"):format(signature, originalSignature))
-			end
-		end
-		
-		t[#t+1] =
-		[[	if doFireIconUpdated then
-				TMW:Fire('TMW_ICON_UPDATED', icon)
-			end
-		end -- "return function(icon, ...)"
-		]]
-		
-		local funcstr = table.concat(t)
-		local func = assert(loadstring(funcstr, "Data Processor " .. originalSignature))()
-		self[originalSignature] = func
-		self[originalSignature:gsub(" ", "")] = func
-		
-		return func
-	end})
-
-	function TMW.Classes.Icon.SetInfo(icon, signature, ...)
-		SetInfo3Funcs[signature](icon, ...)
-	end
 	
-	local DogTagEventHandler = function(event, icon)
-		DogTag:FireEvent(event, icon.group.ID, icon.ID)
-	end
-
-	function TMW:CreateDogTagEventString(...)
-		local eventString = ""
-		for i, dataProcessorName in TMW:Vararg(...) do
-			local Processor = TMW.ProcessorsByName[dataProcessorName]
-			TMW:RegisterCallback(Processor.changedEvent, DogTagEventHandler)
-			if i > 1 then
-				eventString = eventString .. ";"
-			end
-			eventString = eventString .. Processor.changedEvent .. "#$group#$icon"
-		end
-		return eventString
-	end
-
-	
-	function TMW.Classes.Icon.ImplementModule(icon, moduleName)
-		local Module = icon.Modules[moduleName]
-		if not Module then
-			Module = TMW.Classes[moduleName]:New(icon)
-		end
-		return Module
-	end
-	
-	function TMW.Classes.Icon.DisableModule(icon, moduleName)
-		local Module = icon.Modules[moduleName]
-		if Module then
-			Module:Disable()
-			return Module
-		end
-	end
-	
-	function TMW.Classes.Icon.DisableAllModules(icon)
-		for moduleName, Module in pairs(icon.Modules) do
-			Module:Disable()
-		end
-	end
-	
-	function TMW.Classes.Icon.SetupAllModulesForIcon(icon, sourceIcon)
-		for moduleName, Module in pairs(icon.Modules) do
-			if Module.SetupForIcon then
-				Module:SetupForIcon(sourceIcon)
-			end
-		end
-	end
-	
-	function TMW.Classes.Icon.SetModulesToActiveStateOfIcon(icon, sourceIcon)
-		local sourceModules = sourceIcon.Modules
-		for moduleName, Module in pairs(icon.Modules) do
-			local sourceModule = sourceModules[moduleName]
-			if sourceModule then
-				if sourceModule.IsEnabled then
-					Module:Enable()
-				else
-					Module:Disable()
-				end
-			else
-				Module:Disable()
-			end
-		end
-	end
-	
-	TMW.IconModulesByName = {}
-	TMW:NewClass("IconModule"){
-		EventListners = {},
-		OnNewInstance_1_IconModule = function(self, icon)
-			icon.Modules[self.className] = self
-			self.icon = icon
-		end,
-		OnFirstInstance_IconModule = function(self)
-			local className = self.className
-			for event, func in pairs(self.EventListners) do
-				TMW:RegisterCallback(event, function(event, icon, ...)
-					local Module = icon.Modules[className]
-					if Module and Module.IsEnabled then
-						func(Module, icon, ...)
-					end
-				end)
-			end
-		end,
-		OnClassInherit_IconModule = function(self, newClass)
-			newClass.EventListners = {}
-			for k, v in pairs(self.EventListners) do
-				newClass.EventListners[k] = v
-			end
-			newClass.NumberEnabled = 0
-		end,
-		SetDataListner = function(self, processorName, ...)
-			assert(self and not self.class, "SetDataListner should be called on a class, not an instance!")
-			
-			local Processor = TMW.ProcessorsByName[processorName]
-			assert(Processor, ("Couldn't find IconDataProcessor named %q"):format(tostring(processorName)))			
-			
-			 -- we need to make sure nil wasn't passed in.
-			 -- if nil was passed in, then we should nil the handler
-			 -- if nothing was passed in, then we should search for the func to use
-			local func = ...
-			if select("#", ...) == 0 and not func then
-				func = self[processorName]
-			end
-			
-			self:SetIconEventListner(Processor.changedEvent, func)
-		end,
-		GetDataListner = function(self, processorName)			
-			local Processor = TMW.ProcessorsByName[processorName]
-			assert(Processor, ("Couldn't find IconDataProcessor named %q"):format(tostring(processorName)))			
-			
-			return self:GetIconEventListner(Processor.changedEvent)
-		end,
-		SetIconEventListner = function(self, event, func)
-			assert(self and not self.class, "SetIconEventListner should be called on a class, not an instance!")
-			assert(event)
-			
-			self.EventListners[event] = func
-		end,
-		GetIconEventListner = function(self, event)
-			assert(event)
-			
-			return self.EventListners[event]
-		end,
-		Enable = function(self)
-			if not self.IsEnabled then
-				self.IsEnabled = true
-				self.class.NumberEnabled = self.class.NumberEnabled + 1
-				if self.class.NumberEnabled == 1 and self.class.OnUsed then
-					self.class:OnUsed()
-				end
-				
-				if self.OnEnable then
-					self:OnEnable()
-				end
-			end
-		end,
-		Disable = function(self)
-			if self.IsEnabled and not self.IsEssential then
-				self.IsEnabled = false
-				self.class.NumberEnabled = self.class.NumberEnabled - 1
-				if self.class.NumberEnabled == 0 and self.class.OnUnused then
-					self.class:OnUnused()
-				end
-				
-				if self.OnDisable then
-					self:OnDisable()
-				end
-			end
-		end,
-		SetEssential = function(self, essential)
-			self.IsEssential = true
-			self:Enable()		
-		end,
-	}
-	TMW:NewClass("EssentialIconModule"){
-		SetEssentialModuleComponent = function(self, identifier, component)
-			assert(identifier)
-			if component and self.icon.EssentialModuleComponents[identifier] then
-				TMW:Error("Icon %s already has an essential module component with identifier %q", tostring(self.icon), identifier)
-			end
-			self.icon.EssentialModuleComponents[identifier] = component
-		end,
-	}
-	TMW:NewClass("MasqueSkinnableIconModule"){
-		SetSkinnableComponent = function(self, component, frame)
-			assert(not self.icon.lmbButtonData[component])
-			self.icon.lmbButtonData[component] = frame
-		end,
-	}
-	TMW.MasqueSkinnableTexts = {
-		[""] = L["TEXTLAYOUTS_SKINAS_NONE"],
-		Count = L["TEXTLAYOUTS_SKINAS_COUNT"],
-		HotKey = L["TEXTLAYOUTS_SKINAS_HOTKEY"],
-	}	
+	InheritAllFunc(iconDestination, iconSource)
 end
+
+
+local SetInfoFuncs = setmetatable({}, { __index = function(self, signature)
+	assert(type(signature) == "string",
+	("(Bad argument #3 to icon:SetInfo(signature, ...) - Expected string, got %s. (SetInfo changed in v5.1.0 - are you still using the old SetInfo format?)"):format(type(signature)))
+	
+	local originalSignature = signature
+	
+	signature = signature:gsub(" ", "")
+	if rawget(self, signature) then
+		return self[signature]    
+	end    
+	
+	local t = {} -- taking a page from DogTag's book on compiling functions
+	t[#t+1] = table.concat(IconDataProcessor.SIUVs, "\n")
+	t[#t+1] = "\n"
+	t[#t+1] = "return function(icon, "
+	t[#t+1] = originalSignature:trim(" ,;"):gsub("  ", " "):gsub(";", ",")
+	t[#t+1] = ")"
+	t[#t+1] = "\n\n"
+	t[#t+1] = [[
+		local attributes, EventHandlersSet = icon.attributes, icon.EventHandlersSet
+		local doFireIconUpdated
+	]]
+	
+	while #signature > 0 do
+		local found
+		for _, Processor in ipairs(IconDataProcessor.instances) do
+			found = signature:find(Processor.attributesStringNoSpaces .. "$") or signature:find(Processor.attributesStringNoSpaces .. "[;,]")
+			if found then
+				t[#t+1] = "local Processor = "
+				t[#t+1] = Processor.name
+				t[#t+1] = "\n"  
+				
+				Processor:CompileFunctionSegment(t)
+				
+				t[#t+1] = "\n\n"  
+				
+				signature = signature:gsub(Processor.attributesStringNoSpaces .. "[;,]?", "", 1)
+				
+				break
+			end
+		end
+		if not found then
+			error(("Couldn't find a signature match for the beginning of signature %q from %q"):format(signature, originalSignature))
+		end
+	end
+	
+	t[#t+1] =
+	[[	if doFireIconUpdated then
+			TMW:Fire('TMW_ICON_UPDATED', icon)
+		end
+	end -- "return function(icon, ...)"
+	]]
+	
+	local funcstr = table.concat(t)
+	local func = assert(loadstring(funcstr, "Data Processor " .. originalSignature))()
+	self[originalSignature] = func
+	self[originalSignature:gsub(" ", "")] = func
+	
+	return func
+end})
+function Icon.SetInfo(icon, signature, ...)
+	SetInfoFuncs[signature](icon, ...)
+end
+
+local DogTagEventHandler = function(event, icon)
+	DogTag:FireEvent(event, icon.group.ID, icon.ID)
+end
+function TMW:CreateDogTagEventString(...)
+	local eventString = ""
+	for i, dataProcessorName in TMW:Vararg(...) do
+		local Processor = TMW.ProcessorsByName[dataProcessorName]
+		TMW:RegisterCallback(Processor.changedEvent, DogTagEventHandler)
+		if i > 1 then
+			eventString = eventString .. ";"
+		end
+		eventString = eventString .. Processor.changedEvent .. "#$group#$icon"
+	end
+	return eventString
+end
+
+
+TMW:NewClass("IconModule"){
+	EventListners = {},
+	OnNewInstance_1_IconModule = function(self, icon)
+		icon.Modules[self.className] = self
+		self.icon = icon
+	end,
+	OnFirstInstance_IconModule = function(self)
+		local className = self.className
+		for event, func in pairs(self.EventListners) do
+			TMW:RegisterCallback(event, function(event, icon, ...)
+				local Module = icon.Modules[className]
+				if Module and Module.IsEnabled then
+					func(Module, icon, ...)
+				end
+			end)
+		end
+	end,
+	OnClassInherit_IconModule = function(self, newClass)
+		newClass.EventListners = {}
+		for k, v in pairs(self.EventListners) do
+			newClass.EventListners[k] = v
+		end
+		newClass.NumberEnabled = 0
+	end,
+	SetDataListner = function(self, processorName, ...)
+		assert(self and not self.class, "SetDataListner should be called on a class, not an instance!")
+		
+		local Processor = TMW.ProcessorsByName[processorName]
+		assert(Processor, ("Couldn't find IconDataProcessor named %q"):format(tostring(processorName)))			
+		
+		 -- we need to make sure nil wasn't passed in.
+		 -- if nil was passed in, then we should nil the handler
+		 -- if nothing was passed in, then we should search for the func to use
+		local func = ...
+		if select("#", ...) == 0 and not func then
+			func = self[processorName]
+		end
+		
+		self:SetIconEventListner(Processor.changedEvent, func)
+	end,
+	GetDataListner = function(self, processorName)			
+		local Processor = TMW.ProcessorsByName[processorName]
+		assert(Processor, ("Couldn't find IconDataProcessor named %q"):format(tostring(processorName)))			
+		
+		return self:GetIconEventListner(Processor.changedEvent)
+	end,
+	SetIconEventListner = function(self, event, func)
+		assert(self and not self.class, "SetIconEventListner should be called on a class, not an instance!")
+		assert(event)
+		
+		self.EventListners[event] = func
+	end,
+	GetIconEventListner = function(self, event)
+		assert(event)
+		
+		return self.EventListners[event]
+	end,
+	Enable = function(self)
+		if not self.IsEnabled then
+			self.IsEnabled = true
+			self.class.NumberEnabled = self.class.NumberEnabled + 1
+			if self.class.NumberEnabled == 1 and self.class.OnUsed then
+				self.class:OnUsed()
+			end
+			
+			if self.OnEnable then
+				self:OnEnable()
+			end
+		end
+	end,
+	Disable = function(self)
+		if self.IsEnabled and not self.IsEssential then
+			self.IsEnabled = false
+			self.class.NumberEnabled = self.class.NumberEnabled - 1
+			if self.class.NumberEnabled == 0 and self.class.OnUnused then
+				self.class:OnUnused()
+			end
+			
+			if self.OnDisable then
+				self:OnDisable()
+			end
+		end
+	end,
+	SetEssential = function(self, essential)
+		self.IsEssential = true
+		self:Enable()		
+	end,
+	SetEssentialModuleComponent = function(self, identifier, component)
+		assert(identifier)
+		if component and self.icon.EssentialModuleComponents[identifier] then
+			TMW:Error("Icon %s already has an essential module component with identifier %q", tostring(self.icon), identifier)
+		end
+		self.icon.EssentialModuleComponents[identifier] = component
+	end,
+	SetSkinnableComponent = function(self, component, frame)
+		assert(not self.icon.lmbButtonData[component])
+		self.icon.lmbButtonData[component] = frame
+	end,
+}
 
 
 
@@ -5921,38 +5907,39 @@ IconType.unitTitle = L["ICONMENU_UNITSTOWATCH"]
 IconType.EventDisabled_OnCLEUEvent = true
 
 do	-- IconType:InIcons(groupID)
-	local cg, ci, mg, mi, Type
+	local states = {}
+	local function getstate(cg, ci, mg, mi, type)
+		local state = wipe(tremove(states) or {})
 
-	local function iter()
-		ci = ci + 1
+		state.cg = cg
+		state.ci = ci
+		state.mg = mg
+		state.mi = mi
+		state.type = type
+
+		return state
+	end
+
+	local function iter(s)
+		s.ci = s.ci + 1
 		while true do
-			if ci <= mi and TMW[cg] and (not TMW[cg][ci] or TMW[cg][ci].Type ~= Type.type) then
-				-- the current icon is within the bounds of max number of icons
-				-- the group exists
-				-- the icon doesnt exist or is not the right type
-				ci = ci + 1
-			elseif cg < mg and (ci > mi or not TMW[cg]) then
-				-- the current group is within the number of groups that exist
-				-- the current icon is greater than the max number of icons, or the current group does not exist
-				cg = cg + 1
-				ci = 1
-			elseif cg > mg then
-				-- the current group exceeds the number of groups that exist
-				return -- exit
+			if s.ci <= s.mi and TMW[s.cg] and (not TMW[s.cg][s.ci] or TMW[s.cg][s.ci].Type ~= s.type) then
+				s.ci = s.ci + 1
+			elseif s.cg < s.mg and (s.ci > s.mi or not TMW[s.cg]) then
+				s.cg = s.cg + 1
+				s.ci = 1
+			elseif s.cg > s.mg then
+				tinsert(states, s)
+				return
 			else
-				break -- we found an icon. procede to return it.
+				break
 			end
 		end
-		return TMW[cg] and TMW[cg][ci], cg, ci -- icon, groupID, iconID
+		return TMW[s.cg] and TMW[s.cg][s.ci], s.cg, s.ci -- icon, groupID, iconID
 	end
 
 	function IconType:InIcons(groupID)
-		cg = groupID or 1
-		ci = 0
-		mg = groupID or TMW.db.profile.NumGroups
-		mi = TELLMEWHEN_MAXROWS*TELLMEWHEN_MAXROWS
-		Type = self
-		return iter
+		return iter, getstate(groupID or 1, 0, groupID or TMW.db.profile.NumGroups, TELLMEWHEN_MAXROWS*TELLMEWHEN_MAXROWS, self)
 	end
 end
 
@@ -6078,6 +6065,7 @@ function IconView:Register()
 
 	return self -- why not?
 end
+
 
 
 -- ------------------
@@ -6909,7 +6897,6 @@ end
 
 
 -- TODO: IMPORTANT: ALLOW FOR SOME WAY TO EASILY SET LAYOUT DEFAULTS TO MANY DISPLAYS AT ONCE
--- TODO: LOCALIZE ALL THIS CRAP (tags)
 
 DogTag:AddTag("TMW", "TMWFormatDuration", {
 	code = TMW:MakeSingleArgFunctionCached(function(seconds)
@@ -6919,9 +6906,10 @@ DogTag:AddTag("TMW", "TMWFormatDuration", {
 		'seconds', 'number', '@req',
 	},
 	ret = "string",
-	doc = "Returns a string formatted by TellMeWhen's time format. Alternative to [FormatDuration].",
+	static = true,
+	doc = L["DT_DOC_TMWFormatDuration"],
 	example = '[0.54:TMWFormatDuration] => "0.5"; [20:TMWFormatDuration] => "20"; [80:TMWFormatDuration] => "1:20"; [10000:TMWFormatDuration] => "2:46:40"',
-	category = "TEXT MANIP"--TODO:  rename this (duh)
+	category = L["TEXTMANIP"]
 })
 
 NAMES:UpdateClassColors()
@@ -6934,12 +6922,12 @@ DogTag:AddTag("TMW", "Name", {
 		'color', 'boolean', true,
 	},
 	ret = "string",
-	doc = "Returns the name of the unit. This is an improved version of the default [Name] tag provided by DogTag. Color will default to the setting in TMW's main options.",
+	doc = L["DT_DOC_Name"],
 	events = "UNIT_NAME_UPDATE#$unit",
 	example = ('[Name] => %q; [Name(color=false)] => %q; [Name(unit="Randomdruid")] => %q'):
 		format(NAMES:TryToAcquireName("player", true), NAMES:TryToAcquireName("player", false), NAMES.ClassColors.DRUID .. "Randomdruid|r")
 	,
-	category = "ETC"--TODO:  rename this (duh)
+	category = L["MISCELLANEOUS"],
 })
 DogTag:AddTag("TMW", "NameForceUncolored", {
 	code = function(unit)
@@ -6950,5 +6938,8 @@ DogTag:AddTag("TMW", "NameForceUncolored", {
 	},
 	ret = "string",
 	events = "UNIT_NAME_UPDATE#$unit",
+	noDoc = true,
 })
+
+--TODO: add dogtag tags to SUG
 	

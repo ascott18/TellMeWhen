@@ -19,7 +19,7 @@ local L = TMW.L
 local OnGCD = TMW.OnGCD
 local ClockGCD
 
-local CooldownSweep = TMW:NewClass("IconModule_CooldownSweep", "IconModule", "EssentialIconModule", "MasqueSkinnableIconModule")
+local CooldownSweep = TMW:NewClass("IconModule_CooldownSweep", "IconModule")
 
 function CooldownSweep:OnNewInstance(icon)
 	self.cooldown = CreateFrame("Cooldown", icon:GetName() .. "Cooldown", icon, "CooldownFrameTemplate")

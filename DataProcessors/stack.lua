@@ -50,9 +50,9 @@ Processor:AddDogTag("TMW", "Stacks", {
 	},
 	events = TMW:CreateDogTagEventString("STACK"),
 	ret = "string",
-	doc = "Returns the current stacks of the icon",
+	doc = L["DT_DOC_Stacks"],
 	example = '[Stacks] => "9"; [Stacks(4, 5)] => "3"',
-	category = "Icon"
+	category = L["ICON"],
 })
 
 TMW:RegisterCallback("TMW_ICON_SETUP_PRE", function(event, icon)

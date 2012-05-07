@@ -24,7 +24,14 @@ if not DogTag then return end
 
 local pairs, wipe = pairs, wipe
 
-local Texts = TMW:NewClass("IconModule_Texts", "IconModule", "EssentialIconModule", "MasqueSkinnableIconModule")
+
+TMW.MasqueSkinnableTexts = {
+	[""] = L["TEXTLAYOUTS_SKINAS_NONE"],
+	Count = L["TEXTLAYOUTS_SKINAS_COUNT"],
+	HotKey = L["TEXTLAYOUTS_SKINAS_HOTKEY"],
+}	
+	
+local Texts = TMW:NewClass("IconModule_Texts", "IconModule")
 function Texts:OnNewInstance(icon)
 	self.kwargs = {}
 	self.fontStrings = {}
@@ -88,7 +95,7 @@ function Texts:SetupForIcon(sourceIcon)
 			fontString:Show()
 			fontString.settings = fontStringSettings
 			
-			fontString:SetWidth(fontStringSettings.ConstrainWidth and (icon.EssentialModuleComponents.texture or icon):GetWidth() or 0)
+			fontString:SetWidth(fontStringSettings.ConstrainWidth and icon:GetWidth() or 0)
 	
 			if not LMB or SkinAs == "" then
 				-- Position

@@ -57,9 +57,9 @@ Processor:AddDogTag("TMW", "Spell", {
 	},
 	events = TMW:CreateDogTagEventString("SPELL"),
 	ret = "string",
-	doc = "Returns the spell or item that the icon is showing data for.",
+	doc = L["DT_DOC_Spell"],
 	example = ('[Spell] => %q; [Spell(link=true)] => %q; [Spell(4, 5)] => %q; [Spell(4, 5, true)] => %q'):format(GetSpellInfo(2139), GetSpellLink(2139), GetSpellInfo(1766), GetSpellLink(1766)),
-	category = "Icon"
+	category = L["ICON"],
 })
 
 TMW:RegisterCallback("TMW_ICON_TYPE_CHANGED", function(event, icon, typeData, oldTypeData)

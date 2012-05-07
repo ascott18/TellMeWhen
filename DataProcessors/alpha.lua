@@ -97,9 +97,9 @@ Processor:AddDogTag("TMW", "IsShown", {
 	},
 	events = TMW:CreateDogTagEventString("SHOWN", "ALPHA"),
 	ret = "boolean",
-	doc = "Returns whether or not an icon is shown.",
+	doc = L["DT_DOC_IsShown"],
 	example = '[IsShown] => "true"; [IsShown(icon=3, group=2)] => "false"',
-	category = "Icon"
+	category = L["ICON"],
 })
 Processor:AddDogTag("TMW", "Opacity", {	
 	code = function (groupID, iconID, link)
@@ -117,7 +117,7 @@ Processor:AddDogTag("TMW", "Opacity", {
 	},
 	events = TMW:CreateDogTagEventString("ALPHA"),
 	ret = "boolean",
-	doc = "Returns the opacity of an icon. Return value is between 0 and 1.",
+	doc = L["DT_DOC_Opacity"],
 	example = '[IsShown] => "true"; [IsShown(icon=3, group=2)] => "false"',
-	category = "Icon"
+	category = L["ICON"],
 })

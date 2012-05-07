@@ -88,9 +88,9 @@ Processor:AddDogTag("TMW", "Duration", {
 	},
 	events = "FastUpdate",
 	ret = "number",
-	doc = "Returns the current duration remaining on the icon. It is reccomended that you format this with [TMWFormatDuration]",
+	doc = L["DT_DOC_Duration"],
 	example = '[Duration] => "5.462"; [Duration:TMWFormatDuration] => "5.4"; [Duration(4, 5)] => "97.32156"; [Duration(4, 5):TMWFormatDuration] => "1:37"',
-	category = "Icon"
+	category = L["ICON"],
 })
 
 TMW:RegisterCallback("TMW_ICON_SETUP_PRE", function(event, icon)
