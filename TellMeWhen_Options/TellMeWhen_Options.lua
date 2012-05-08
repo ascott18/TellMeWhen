@@ -6870,9 +6870,11 @@ function Module.Sorter_Spells(a, b)
 		if nameA == nameB then
 			--sort identical names by ID
 			return a < b
-		else
+		elseif nameA and nameB then
 			--sort by name
 			return nameA < nameB
+		else
+			return nameA
 		end
 	end
 end
@@ -6958,6 +6960,92 @@ function Module:Table_GetNormalSuggestions(suggestions, tbl, ...)
 			suggestions[#suggestions + 1] = name
 		end
 	end
+end
+
+
+local Module = SUG:NewModule("glyphs", SUG:GetModule("default"))
+Module.noMin = true
+Module.table = {}
+function Module:OnInitialize()
+	for i = 1, GetNumGlyphs() do
+		local type, _, _, _, glyphID, link = GetGlyphInfo(i)
+		if type ~= "header" then
+			local _, name = strmatch(link, "|Hglyph:(%d+)|h%[(.*)%]|h|r")
+		--	glyphID = tonumber(glyphID)
+			name = strlowerCache[name]
+			print(i, link, glyphID, name)
+			self.table[i] = name
+		end
+	end
+end
+function Module:Table_Get()
+	return self.table
+end
+function Module:Entry_AddToList_1(f, index)
+	local _, _, _, texture, glyphID, link = GetGlyphInfo(index)
+	local _, name = strmatch(link, "|Hglyph:(%d+)|h%[(.*)%]|h|r")
+
+	f.Name:SetText(name)
+	f.ID:SetText(glyphID)
+
+	f.tooltipmethod = "SetGlyphByID"
+	f.tooltiparg = glyphID
+
+	f.insert = SUG.inputType == "number" and glyphID or name
+	f.insert2 = SUG.inputType ~= "number" and glyphID or name
+
+	f.Icon:SetTexture(texture)
+end
+function Module:Table_GetNormalSuggestions(suggestions, tbl, ...)
+	local atBeginning = SUG.atBeginning
+	local lastName = SUG.lastName
+
+	if SUG.inputType == "number" then
+		local len = #SUG.lastName - 1
+		local match = tonumber(SUG.lastName)
+		for index, name in pairs(tbl) do
+			local _, _, _, _, id = GetGlyphInfo(index)
+			if min(id, floor(id / 10^(floor(log10(id)) - len))) == match then -- this looks like shit, but is is approx 300% more efficient than the below commented line
+		--	if strfind(id, atBeginning) then
+				suggestions[#suggestions + 1] = index
+			end
+		end
+	else
+		for index, name in pairs(tbl) do
+			-- name here is Glyph of Fancy Spell
+			if strfind(name, atBeginning) then
+				suggestions[#suggestions + 1] = index
+			else
+			
+				-- name here is Fancy Spell
+				name = GetGlyphInfo(index)
+				name = strlowerCache[name]
+				if strfind(name, atBeginning) then
+					suggestions[#suggestions + 1] = index
+				end
+			end
+		end
+	end
+end
+function Module.Sorter_Glyphs(a, b)
+	if SUGIsNumberInput then
+		--sort by id
+		return a < b
+	else
+		--sort by name
+		local nameA, nameB = Module.table[a], Module.table[b]
+
+		if nameA == nameB then
+			--sort identical names by ID
+			return a < b
+		else
+			--sort by name
+			return nameA < nameB
+		end
+	end
+end
+function Module:Table_GetSorter()
+	return self.Sorter_Glyphs
 end
 
 

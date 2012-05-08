@@ -94,6 +94,26 @@ function CNDT:PLAYER_TALENT_UPDATE()
 	end
 end
 
+local GetGlyphSocketInfo = GetGlyphSocketInfo
+function CNDT:GLYPH_UPDATED()
+	local GlyphLookup = Env.GlyphLookup
+	wipe(GlyphLookup)
+	for i = 1, NUM_GLYPH_SLOTS do
+		local _, _, _, spellID = GetGlyphSocketInfo(i)
+		local link = GetGlyphLink(i)
+		local glyphID = tonumber(strmatch(link, "|H.-:(%d+)"))
+		
+		if glyphID then
+			GlyphLookup[glyphID] = true
+			
+			local name = GetSpellInfo(spellID)
+			name = strlowerCache[name]
+			GlyphLookup[name] = true
+		end
+	end
+end
+
+
 local test
 --[[
 test = function()
@@ -324,12 +344,14 @@ Env = {
 	ActivePetMode = 0,
 	NumPartyMembers = 0,
 	print = TMW.print,
+	type = type,
 	time = TMW.time,
 	huge = math.huge,
 	epsilon = 1e-255,
 
 	Tracking = {},
 	TalentMap = {},
+	GlyphLookup = {},
 	TMW = TMW,
 	GCDSpell = TMW.GCDSpell,
 } CNDT.Env = Env
@@ -1555,6 +1577,36 @@ CNDT.Types = {
 			return "PLAYER_TALENT_UPDATE", "ACTIVE_TALENT_GROUP_CHANGED"
 		end,
 	},
+	{ -- glyph
+		text = L["UIPANEL_GLYPH"],
+		tooltip = L["UIPANEL_GLYPH_DESC"],
+		category = L["CNDTCAT_ATTRIBUTES_PLAYER"],
+		value = "GLYPH",
+		min = 0,
+		max = 1,
+		texttable = bool,
+		unit = PLAYER,
+		name = function(editbox) TMW:TT(editbox, "GLYPHTOCHECK", "CNDT_ONLYFIRST") editbox.label = L["GLYPHTOCHECK"] end,
+		nooperator = true,
+		useSUG = "glyphs",
+		icon = "inv_inscription_tradeskill01",
+		tcoords = standardtcoords,
+		funcstr = [[print(GlyphLookup[c.NameFirst], c.NameFirst, type(c.NameFirst)) == c.True]],
+		events = function(c)
+			-- this is handled externally because GlyphLookup is so extensive a process,
+			-- and if it does get stuck in an OnUpdate condition, it could be very bad.
+	
+			CNDT:RegisterEvent("GLYPH_ADDED", 	 "GLYPH_UPDATED")
+			CNDT:RegisterEvent("GLYPH_DISABLED", "GLYPH_UPDATED")
+			CNDT:RegisterEvent("GLYPH_ENABLED",  "GLYPH_UPDATED")
+			CNDT:RegisterEvent("GLYPH_REMOVED",  "GLYPH_UPDATED")
+			CNDT:RegisterEvent("GLYPH_UPDATED",  "GLYPH_UPDATED")
+			CNDT:GLYPH_UPDATED()
+			-- we still only need to update the condition when glyphs change, though.
+			
+			return "GLYPH_ADDED", "GLYPH_DISABLED", "GLYPH_ENABLED", "GLYPH_REMOVED", "GLYPH_UPDATED"
+		end,
+	},
 	{ -- pet autocast
 		text = L["CONDITIONPANEL_AUTOCAST"],
 		category = L["CNDTCAT_ATTRIBUTES_PLAYER"],
@@ -2746,6 +2798,14 @@ function CNDT:TMW_GLOBAL_UPDATE_POST()
 end
 TMW:RegisterCallback("TMW_GLOBAL_UPDATE_POST", CNDT)
 
+local function strWrap(string)
+	local num = isNumber[string]
+	if num then
+		return num
+	else
+		return format("%q", string)
+	end
+end
 
 function CNDT:DoConditionSubstitutions(parent, v, c, thisstr)
 	for _, append in TMW:Vararg("2", "") do -- Unit2 MUST be before Unit
@@ -2795,15 +2855,15 @@ function CNDT:DoConditionSubstitutions(parent, v, c, thisstr)
 	gsub("c.Level", 		v.percent and c.Level/100 or c.Level):
 	gsub("c.Checked", 		tostring(c.Checked)):
 	gsub("c.Operator", 		c.Operator):
-	gsub("c.NameFirst2", 	"\"" .. TMW:GetSpellNames(nil, name2, 1) .. "\""): --Name2 must be before Name
-	gsub("c.NameName2", 	"\"" .. TMW:GetSpellNames(nil, name2, 1, 1) .. "\""):
-	gsub("c.ItemID2", 		TMW:GetItemIDs(nil, name2, 1)):
-	gsub("c.Name2", 		"\"" .. name2 .. "\""):
+	gsub("c.NameFirst2", 	strWrap(TMW:GetSpellNames(nil, name2, 1))): --Name2 must be before Name
+	gsub("c.NameName2", 	strWrap(TMW:GetSpellNames(nil, name2, 1, 1))):
+	gsub("c.ItemID2", 		strWrap(TMW:GetItemIDs(nil, name2, 1))):
+	gsub("c.Name2", 		strWrap(name2)):
 
-	gsub("c.NameFirst", 	"\"" .. TMW:GetSpellNames(nil, name, 1) .. "\""):
-	gsub("c.NameName", 		"\"" .. TMW:GetSpellNames(nil, name, 1, 1) .. "\""):
-	gsub("c.ItemID", 		TMW:GetItemIDs(nil, name, 1)):
-	gsub("c.Name", 			"\"" .. name .. "\""):
+	gsub("c.NameFirst", 	strWrap(TMW:GetSpellNames(nil, name, 1))):
+	gsub("c.NameName", 		strWrap(TMW:GetSpellNames(nil, name, 1, 1))):
+	gsub("c.ItemID", 		strWrap(TMW:GetItemIDs(nil, name, 1))):
+	gsub("c.Name", 			strWrap(name)):
 
 	gsub("c.True", 			tostring(c.Level == 0)):
 	gsub("c.False", 		tostring(c.Level == 1)):

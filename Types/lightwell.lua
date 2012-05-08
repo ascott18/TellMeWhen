@@ -69,7 +69,7 @@ local CurrentCharges = 0
 local SummonTime
 function Type:GLYPH()
 	for i = 7, NUM_GLYPH_SLOTS do
-		local _, _, _, spellID = GetGlyphSocketInfo(i);
+		local _, _, _, spellID = GetGlyphSocketInfo(i)
 		if spellID == 55673 then
 			MaxCharges = 15
 			return
