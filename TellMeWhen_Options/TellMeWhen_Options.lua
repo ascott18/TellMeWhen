@@ -1103,7 +1103,7 @@ local textLayoutTemplate = {
 	end,
 	order = function(info)
 		local layout = findlayout(info)
-		local settings = TMW.db.profile.TextLayouts[layout]
+		local settings = TEXT:GetTextLayoutSettings(layout)
 		
 		if settings.NoEdit then
 			return 1
@@ -1114,7 +1114,7 @@ local textLayoutTemplate = {
 	disabled = function(info)
 		local layout = findlayout(info)
 		local stringSetting = info[textLayoutInfo.stringSetting]
-		return stringSetting and TMW.db.profile.TextLayouts[layout].NoEdit
+		return stringSetting and TEXT:GetTextLayoutSettings(layout).NoEdit
 	end,
 	args = {
 		Name = {
@@ -1124,17 +1124,17 @@ local textLayoutTemplate = {
 			order = 1,
 			set = function(info, val)
 				local layout = findlayout(info)
-				TMW.db.profile.TextLayouts[layout].Name = strtrim(val)
+				TEXT:GetTextLayoutSettings(layout).Name = strtrim(val)
 				TMW:Update()
 				TEXT:LoadConfig()
 			end,
 			get = function(info)
 				local layout = findlayout(info)
-				return TMW.db.profile.TextLayouts[layout].Name
+				return TEXT:GetTextLayoutSettings(layout).Name
 			end,
 			disabled = function(info)
 				local layout = findlayout(info)
-				return TMW.db.profile.TextLayouts[layout].NoEdit
+				return TEXT:GetTextLayoutSettings(layout).NoEdit
 			end,
 		},
 		addstring = {
@@ -1143,7 +1143,7 @@ local textLayoutTemplate = {
 			order = 2,
 			func = function(info)
 				local layout = findlayout(info)
-				TMW.db.profile.TextLayouts[layout].n = TMW.db.profile.TextLayouts[layout].n + 1
+				TEXT:GetTextLayoutSettings(layout).n = TEXT:GetTextLayoutSettings(layout).n + 1
 				IE:NotifyChanges()
 				TMW:CompileOptions()
 				TMW:Update()
@@ -1151,7 +1151,7 @@ local textLayoutTemplate = {
 			end,
 			disabled = function(info)
 				local layout = findlayout(info)
-				return TMW.db.profile.TextLayouts[layout].NoEdit
+				return TEXT:GetTextLayoutSettings(layout).NoEdit
 			end,
 		},
 		delete = {
@@ -1170,7 +1170,7 @@ local textLayoutTemplate = {
 			end,
 			disabled = function(info)
 				local layout = findlayout(info)
-				return TMW.db.profile.TextLayouts[layout].NoEdit
+				return TEXT:GetTextLayoutSettings(layout).NoEdit
 			end,
 			confirm = function(info)
 				local layout = findlayout(info)
@@ -1193,7 +1193,7 @@ local textLayoutTemplate = {
 			disabled = false,
 			hidden = function(info)
 				local layout = findlayout(info)
-				return not TMW.db.profile.TextLayouts[layout].NoEdit
+				return not TEXT:GetTextLayoutSettings(layout).NoEdit
 			end,
 		},
 		
@@ -1207,14 +1207,14 @@ local textFontStringTemplate = {
 		local layout = findlayout(info)
 		local string = tonumber(info[textLayoutInfo.string])
 		
-		return TEXT:GetStringName(TMW.db.profile.TextLayouts[layout][string], string)
+		return TEXT:GetStringName(TEXT:GetTextLayoutSettings(layout)[string], string)
 	end,
 	order = function(info) return tonumber(info[#info]) end,
 	set = function(info, val)
 		local layout = findlayout(info)
 		local string = tonumber(info[textLayoutInfo.string])
 		local setting = info[textLayoutInfo.stringSetting]
-		TMW.db.profile.TextLayouts[layout][string][setting] = val
+		TEXT:GetTextLayoutSettings(layout)[string][setting] = val
 		UpdateIconsUsingTextLayout(layout)
 		TEXT:LoadConfig()
 	end,
@@ -1222,12 +1222,12 @@ local textFontStringTemplate = {
 		local layout = findlayout(info)
 		local string = tonumber(info[textLayoutInfo.string])
 		local setting = info[textLayoutInfo.stringSetting]
-		return TMW.db.profile.TextLayouts[layout][string][setting]
+		return TEXT:GetTextLayoutSettings(layout)[string][setting]
 	end,
 	hidden = function(info)
 		local layout = findlayout(info)
 		local string = tonumber(info[textLayoutInfo.string])
-		return layout and string and TMW.db.profile.TextLayouts[layout].n < string
+		return layout and string and TEXT:GetTextLayoutSettings(layout).n < string
 	end,
 	args = {
 		StringName = {
@@ -1248,17 +1248,17 @@ local textFontStringTemplate = {
 				local string = tonumber(info[textLayoutInfo.string])
 				local setting = info[textLayoutInfo.stringSetting]
 				assert(setting == "SkinAs")
-				for id, strSettings in TMW:InNLengthTable(TMW.db.profile.TextLayouts[layout]) do
+				for id, strSettings in TMW:InNLengthTable(TEXT:GetTextLayoutSettings(layout)) do
 					if strSettings[setting] == val then
 						strSettings[setting] = ""
 						TMW:Printf(L["TEXTLAYOUTS_RESETSKINAS"],
 							L["TEXTLAYOUTS_SKINAS"],
 							TEXT:GetStringName(strSettings, id),
-							TEXT:GetStringName(TMW.db.profile.TextLayouts[layout][string], string)
+							TEXT:GetStringName(TEXT:GetTextLayoutSettings(layout)[string], string)
 						)
 					end
 				end
-				TMW.db.profile.TextLayouts[layout][string][setting] = val
+				TEXT:GetTextLayoutSettings(layout)[string][setting] = val
 				UpdateIconsUsingTextLayout(layout)
 				TEXT:LoadConfig()
 			end,
@@ -1281,7 +1281,7 @@ local textFontStringTemplate = {
 				local layout = findlayout(info)
 				local string = tonumber(info[textLayoutInfo.string])
 				local setting = info[textLayoutInfo.stringSetting + 1]
-				TMW.db.profile.TextLayouts[layout][string][setting] = val
+				TEXT:GetTextLayoutSettings(layout)[string][setting] = val
 				UpdateIconsUsingTextLayout(layout)
 				TEXT:LoadConfig()
 			end,
@@ -1289,14 +1289,14 @@ local textFontStringTemplate = {
 				local layout = findlayout(info)
 				local string = tonumber(info[textLayoutInfo.string])
 				local setting = info[textLayoutInfo.stringSetting + 1]
-				return TMW.db.profile.TextLayouts[layout][string][setting]
+				return TEXT:GetTextLayoutSettings(layout)[string][setting]
 			end,
 			disabled = function(info)
 				local layout = findlayout(info)
 				local string = tonumber(info[textLayoutInfo.string])
 				return
-					TMW.db.profile.TextLayouts[layout].NoEdit or
-					(LMB and TMW.db.profile.TextLayouts[layout][string].SkinAs ~= "")
+					TEXT:GetTextLayoutSettings(layout).NoEdit or
+					(LMB and TEXT:GetTextLayoutSettings(layout)[string].SkinAs ~= "")
 			end,
 			args = {
 				Name = {
@@ -1322,7 +1322,7 @@ local textFontStringTemplate = {
 					disabled = function(info)
 						local layout = findlayout(info)
 						local string = tonumber(info[textLayoutInfo.string])
-						return TMW.db.profile.TextLayouts[layout].NoEdit
+						return TEXT:GetTextLayoutSettings(layout).NoEdit
 					end,
 				},
 				Size = {
@@ -1347,7 +1347,7 @@ local textFontStringTemplate = {
 				local layout = findlayout(info)
 				local string = tonumber(info[textLayoutInfo.string])
 				local setting = info[textLayoutInfo.stringSetting + 1]
-				TMW.db.profile.TextLayouts[layout][string][setting] = val
+				TEXT:GetTextLayoutSettings(layout)[string][setting] = val
 				UpdateIconsUsingTextLayout(layout)
 				TEXT:LoadConfig()
 			end,
@@ -1355,14 +1355,14 @@ local textFontStringTemplate = {
 				local layout = findlayout(info)
 				local string = tonumber(info[textLayoutInfo.string])
 				local setting = info[textLayoutInfo.stringSetting + 1]
-				return TMW.db.profile.TextLayouts[layout][string][setting]
+				return TEXT:GetTextLayoutSettings(layout)[string][setting]
 			end,
 			disabled = function(info)
 				local layout = findlayout(info)
 				local string = tonumber(info[textLayoutInfo.string])
 				return
-					TMW.db.profile.TextLayouts[layout].NoEdit or
-					(LMB and TMW.db.profile.TextLayouts[layout][string].SkinAs ~= "")
+					TEXT:GetTextLayoutSettings(layout).NoEdit or
+					(LMB and TEXT:GetTextLayoutSettings(layout)[string].SkinAs ~= "")
 			end,
 			args = {
 				point = {
@@ -1389,7 +1389,7 @@ local textFontStringTemplate = {
 					disabled = function(info)
 						local layout = findlayout(info)
 						local string = tonumber(info[textLayoutInfo.string])
-						return TMW.db.profile.TextLayouts[layout].NoEdit
+						return TEXT:GetTextLayoutSettings(layout).NoEdit
 					end,
 				},
 				x = {
@@ -1425,14 +1425,14 @@ local textFontStringTemplate = {
 				local string = tonumber(info[textLayoutInfo.string])
 				
 				-- MUST HAPPEN BEFORE WE REMOVE THE STRING
-				if TMW.db.profile.TextLayouts[layout].n == string then
+				if TEXT:GetTextLayoutSettings(layout).n == string then
 					IE:NotifyChanges("textlayouts", layout, string - 1)
 				else
 					IE:NotifyChanges("textlayouts", layout, string)
 				end
 				
-				tremove(TMW.db.profile.TextLayouts[layout], string)
-				TMW.db.profile.TextLayouts[layout].n = TMW.db.profile.TextLayouts[layout].n - 1
+				tremove(TEXT:GetTextLayoutSettings(layout), string)
+				TEXT:GetTextLayoutSettings(layout).n = TEXT:GetTextLayoutSettings(layout).n - 1
 				
 				TMW:CompileOptions()
 				IE:NotifyChanges()
@@ -1441,7 +1441,7 @@ local textFontStringTemplate = {
 			end,
 			disabled = function(info)
 				local layout = findlayout(info)
-				return textLayoutTemplate.disabled(info) or TMW.db.profile.TextLayouts[layout].n == 1
+				return textLayoutTemplate.disabled(info) or TEXT:GetTextLayoutSettings(layout).n == 1
 			end,
 			confirm = true,
 		},
@@ -1453,7 +1453,7 @@ local textFontStringTemplate = {
 			disabled = false,
 			hidden = function(info)
 				local layout = findlayout(info)
-				return not TMW.db.profile.TextLayouts[layout].NoEdit
+				return not TEXT:GetTextLayoutSettings(layout).NoEdit
 			end,
 		},
 	},
@@ -5557,16 +5557,20 @@ end
 TEXT = TMW:NewModule("TextDisplay", "AceHook-3.0") TMW.TEXT = TEXT
 TEXT.usedStrings = {}
 
+function TEXT:GetTextLayoutSettings(GUID)
+	return GUID and rawget(TMW.db.profile.TextLayouts, GUID) or nil
+end
+
 function TEXT:GetLayoutName(settings, GUID)
 	if GUID and not settings then
 		assert(type(GUID) == "string")
-		settings = rawget(TMW.db.profile.TextLayouts, GUID)
+		settings = TEXT:GetTextLayoutSettings(GUID)
 	elseif settings and not GUID then
 		GUID = settings.GUID
 	end
 	
 	assert(type(GUID) == "string")
-	TMW:Assert(GUID == settings.GUID, "Something bad happened!  a: %s  b: %s", tostring(GUID), tostring(settings.GUID)) -- this should always succeed. If it didn't, something went wrong.
+	TMW:Assert(GUID == settings.GUID, "Something REALLY bad happened that should not have happened. This isn't a non-critical error anymore, so please report this to Cybeloras!  a: %s  b: %s", tostring(GUID), tostring(settings.GUID)) -- this should always succeed. If it didn't, something went wrong.
 	
 	local Name = strtrim(settings.Name or "")
 	
@@ -5612,7 +5616,7 @@ end
 
 
 function TEXT.Layout_DropDown_Sort(a, b)
-	local SettingsA, SettingsB = TMW.db.profile.TextLayouts[a], TMW.db.profile.TextLayouts[b]
+	local SettingsA, SettingsB = TEXT:GetTextLayoutSettings(a), TEXT:GetTextLayoutSettings(b)
 	local NoEditA, NoEditB = SettingsA.NoEdit, SettingsB.NoEdit
 	if NoEditA or NoEditB then
 		if NoEditA and NoEditB then
