@@ -5558,6 +5558,9 @@ TEXT = TMW:NewModule("TextDisplay", "AceHook-3.0") TMW.TEXT = TEXT
 TEXT.usedStrings = {}
 
 function TEXT:GetTextLayoutSettings(GUID)
+	if GUID == "icon" then
+		TMW:Error("Attempted to access layout keyed as 'icon', which is a bad bug, so please report this error")
+	end
 	return GUID and rawget(TMW.db.profile.TextLayouts, GUID) or nil
 end
 

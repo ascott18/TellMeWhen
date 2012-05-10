@@ -22,6 +22,9 @@
  ** (r508) Processor DOGTAGUNIT should now fire its own event instead of firing CONDITION's event
  ** (r510) TellMeWhen_Options-r509\ImportExport.lua:384: attempt to index local "editbox" (a nil value)
  ** (r512) Attempted to soothe Something bad happened! errors. If they continue to happen, please report them, as they actually indicate something is going wrong now.
+ ** (r514) TellMeWhen-5.1.0.lua:5331: "for" limit must be a number
+ ** (r514) TellMeWhen: Something REALLY bad happened that should not have happened. This isn't a non-critical error anymore, so please report this to Cybeloras!  a: icon  b: 
+ ** (r514) string "Data Processor alpha" line 35: attempt to compare number with table
 
 ===v5.0.2===
  * Bug Fixes:

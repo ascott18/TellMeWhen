@@ -31,7 +31,7 @@ local DogTag = LibStub("LibDogTag-3.0", true)
 TELLMEWHEN_VERSION = "5.1.0"
 TELLMEWHEN_VERSION_MINOR = strmatch(" @project-version@", " r%d+") or ""
 TELLMEWHEN_VERSION_FULL = TELLMEWHEN_VERSION .. TELLMEWHEN_VERSION_MINOR
-TELLMEWHEN_VERSIONNUMBER = 51018 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
+TELLMEWHEN_VERSIONNUMBER = 51019 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
 if TELLMEWHEN_VERSIONNUMBER > 52000 or TELLMEWHEN_VERSIONNUMBER < 51000 then return error("YOU SCREWED UP THE VERSION NUMBER OR DIDNT CHANGE THE SAFETY LIMITS") end -- safety check because i accidentally made the version number 414069 once
 
 TELLMEWHEN_MAXROWS = 20
@@ -1825,6 +1825,15 @@ function TMW:GetUpgradeTable()			-- upgrade functions
 	if TMW.UpgradeTable then return TMW.UpgradeTable end
 	local t = {
 
+		[51019] = {
+			textlayout = function(self, settings, GUID)
+				-- I don't know why this layout exists, but I know it was my fault, so I am going to delete it.
+				if GUID == "icon" and settings.GUID == "" then
+					TMW.db.profile.TextLayouts[GUID] = nil
+					TMW.Warn("TMW has deleted the invalid text layout keyed as 'icon' that was probably causing errors for you. If you were using it on any of your icons, then I apologize, but you probably weren't because it probably wasn't even named")
+				end
+			end,
+		},
 		[51008] = {
 			condition = function(self, condition)
 				if condition.Type == "TOTEM1"
@@ -1889,7 +1898,6 @@ function TMW:GetUpgradeTable()			-- upgrade functions
 				end
 				return true
 			end,
-			
 			SetLayoutToGroup = function(self, groupID, GUID)
 				TMW.db.profile.Groups[groupID].SettingsPerView.icon.TextLayout = GUID
 				-- the group setting is a fallback for icons, so there is no reason to set the layout for individual icons
@@ -1897,6 +1905,7 @@ function TMW:GetUpgradeTable()			-- upgrade functions
 					ics.SettingsPerView.icon.TextLayout = ""
 				end
 			end,
+			
 			group = function(self, gs, groupID)
 				local layout = TMW.db.profile.TextLayouts[0]
 				TMW.db.profile.TextLayouts[0] = nil
@@ -1999,6 +2008,7 @@ function TMW:GetUpgradeTable()			-- upgrade functions
 				end
 				return string
 			end,
+			
 			icon = function(self, ics)
 				local BindText = ics.BindText or ""
 				if ics.Type ~= "meta" and ics.Type ~= "" then
@@ -2027,7 +2037,6 @@ function TMW:GetUpgradeTable()			-- upgrade functions
 				end
 			end,
 		},
-
 		[50020] = {
 			icon = function(self, ics)
 				local Events = ics.Events
@@ -2125,6 +2134,7 @@ function TMW:GetUpgradeTable()			-- upgrade functions
 				--PRESENTColor =	{r=1, g=1, b=1, a=1},
 				--ABSENTColor	 =	{r=1, g=0.35, b=0.35, a=1},
 			},
+			
 			global = function(self)
 				for newKey, oldKey in pairs(self.map) do
 					local old = TMW.db.profile[oldKey]
@@ -2310,6 +2320,7 @@ function TMW:GetUpgradeTable()			-- upgrade functions
 				absent		= "unalpha",
 				always		= "always",
 			},
+			
 			icon = function(self, ics)
 				local setting = self.WhenChecks[ics.Type]
 				if setting then
@@ -5316,7 +5327,7 @@ function Icon.ProcessQueuedEvents(icon)
 	local EventsToFire = icon.EventsToFire
 	if EventsToFire and icon.eventIsQueued then
 		local handledOne
-		for i = 1, icon.Events.n do
+		for i = 1, (icon.Events.n or 0) do
 			-- settings to check for in EventsToFire
 			local EventSettingsFromIconSettings = icon.Events[i]
 			local event = EventSettingsFromIconSettings.Event
@@ -5441,7 +5452,6 @@ function Icon.GetTextLayout(icon, view)
 			GUID = DefaultsPerView["**"].TextLayout
 		end
 		assert(GUID)
-		print(GUID)
 		layoutSettings = rawget(TMW.db.profile.TextLayouts, GUID)
 		assert(layoutSettings)
 		
@@ -5669,6 +5679,7 @@ local IconDataProcessor = TMW:NewClass("IconDataProcessor"){
 		
 		TMW.ProcessorsByName[self.name] = self
 		self.SIUVs[#self.SIUVs+1] = ("local %s = ProcessorsByName['%s']"):format(name, name)
+		self.SIUVs[#self.SIUVs+1] = ("local %s"):format(attributes) -- do this to prevent leaked global accessing
 		
 		self.changedEvent = "TMW_ICON_DATA_CHANGED_" .. name
 	end,

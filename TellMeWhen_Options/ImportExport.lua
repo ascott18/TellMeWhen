@@ -544,10 +544,12 @@ function textlayout:Import_BuildMenuData(result, editbox)
 	
 	AddDropdownSpacer()
 	
-	if rawget(TMW.db.profile.TextLayouts, GUID) then
+	local layoutSettings = TMW.TEXT:GetTextLayoutSettings(GUID)
+	
+	if layoutSettings then
 		-- overwrite existing
 		local info = UIDropDownMenu_CreateInfo()
-		info.disabled = TMW.db.profile.TextLayouts[GUID].NoEdit
+		info.disabled = layoutSettings.NoEdit
 		info.text = L["TEXTLAYOUTS_IMPORT"] .. " - " .. L["TEXTLAYOUTS_IMPORT_OVERWRITE"]
 		info.tooltipTitle = info.text
 		info.tooltipText = info.disabled and L["TEXTLAYOUTS_IMPORT_OVERWRITE_DISABLED_DESC"] or L["TEXTLAYOUTS_IMPORT_OVERWRITE_DESC"]
@@ -604,7 +606,7 @@ function textlayout:Export_GetArgs(editbox, info)
 	local IMPORTS, EXPORTS = editbox:GetAvailableImportExportTypes()
 	local GUID = EXPORTS[self.type]
 	assert(type(GUID) == "string")
-	local settings = TMW.db.profile.TextLayouts[GUID]
+	local settings = TMW.TEXT:GetTextLayoutSettings(GUID)
 	
 	return editbox, self.type, settings, TMW.Defaults.profile.TextLayouts["**"], GUID
 end
