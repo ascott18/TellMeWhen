@@ -594,9 +594,8 @@ textlayout.Export_DataTypeDescriptionAppend = L["EXPORT_SPECIALDESC2"]:format("5
 function textlayout:Export_SetButtonAttributes(editbox, info)
 	local IMPORTS, EXPORTS = editbox:GetAvailableImportExportTypes()
 	local GUID = EXPORTS[self.type]
-	local settings = rawget(TMW.db.profile.TextLayouts, GUID)
 	
-	local text = L["fTEXTLAYOUT"]:format(TMW.TEXT:GetLayoutName(settings, GUID))
+	local text = L["fTEXTLAYOUT"]:format(TMW.TEXT:GetLayoutName(nil, GUID))
 	info.text = text
 	info.tooltipTitle = text
 end

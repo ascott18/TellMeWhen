@@ -428,7 +428,7 @@ function TMW:SetUIDropdownText(frame, value, tbl, text)
 	if tbl then
 		if tbl == CNDT.Types then
 			frame:GetParent():TypeCheck(CNDT.ConditionsByType[value])
-		elseif tbl == TMW.InIcons then
+		elseif tbl == TMW.InIcons and type(value) == "string" then
 			for icon in TMW:InIcons() do
 				if icon:GetName() == value then
 					local g, i = strmatch(value, "TellMeWhen_Group(%d+)_Icon(%d+)")
@@ -5567,9 +5567,12 @@ function TEXT:GetLayoutName(settings, GUID)
 		settings = TEXT:GetTextLayoutSettings(GUID)
 	elseif settings and not GUID then
 		GUID = settings.GUID
+	elseif not settings and not GUID then
+		error("You need to specify either settings or GUID for GetLayoutName")
 	end
 	
 	assert(type(GUID) == "string")
+	assert(type(settings) == "table")
 	TMW:Assert(GUID == settings.GUID, "Something REALLY bad happened that should not have happened. This isn't a non-critical error anymore, so please report this to Cybeloras!  a: %s  b: %s", tostring(GUID), tostring(settings.GUID)) -- this should always succeed. If it didn't, something went wrong.
 	
 	local Name = strtrim(settings.Name or "")
@@ -6975,9 +6978,7 @@ function Module:OnInitialize()
 		local type, _, _, _, glyphID, link = GetGlyphInfo(i)
 		if type ~= "header" then
 			local _, name = strmatch(link, "|Hglyph:(%d+)|h%[(.*)%]|h|r")
-		--	glyphID = tonumber(glyphID)
 			name = strlowerCache[name]
-			print(i, link, glyphID, name)
 			self.table[i] = name
 		end
 	end

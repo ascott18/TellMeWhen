@@ -1591,7 +1591,7 @@ CNDT.Types = {
 		useSUG = "glyphs",
 		icon = "inv_inscription_tradeskill01",
 		tcoords = standardtcoords,
-		funcstr = [[print(GlyphLookup[c.NameFirst], c.NameFirst, type(c.NameFirst)) == c.True]],
+		funcstr = [[GlyphLookup[c.NameFirst] == c.True]],
 		events = function(c)
 			-- this is handled externally because GlyphLookup is so extensive a process,
 			-- and if it does get stuck in an OnUpdate condition, it could be very bad.
