@@ -31,7 +31,7 @@ local DogTag = LibStub("LibDogTag-3.0", true)
 TELLMEWHEN_VERSION = "5.1.0"
 TELLMEWHEN_VERSION_MINOR = strmatch(" @project-version@", " r%d+") or ""
 TELLMEWHEN_VERSION_FULL = TELLMEWHEN_VERSION .. TELLMEWHEN_VERSION_MINOR
-TELLMEWHEN_VERSIONNUMBER = 51019 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
+TELLMEWHEN_VERSIONNUMBER = 51020 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
 if TELLMEWHEN_VERSIONNUMBER > 52000 or TELLMEWHEN_VERSIONNUMBER < 51000 then return error("YOU SCREWED UP THE VERSION NUMBER OR DIDNT CHANGE THE SAFETY LIMITS") end -- safety check because i accidentally made the version number 414069 once
 
 TELLMEWHEN_MAXROWS = 20
@@ -77,7 +77,6 @@ local huge = math.huge
 local --[[db,]] updatehandler, Locked, SndChan, FramesToFind, CNDTEnv, AnimationList
 local NAMES, EVENTS, ANIM, ANN, SND
 local UPD_INTV = 0.06	--this is a default, local because i use it in onupdate functions
-local runEvents = 1
 local GCD, NumShapeshiftForms, LastUpdate, LastBindTextUpdate = 0, 0, 0, 0
 local IconsToUpdate, GroupsToUpdate = {}, {}
 local loweredbackup = {}
@@ -1786,7 +1785,7 @@ function TMW:Update()
 	SndChan = TMW.db.profile.SoundChannel
 
 	for key, Type in pairs(TMW.Types) do
-		wipe(Type.Icons)
+		--wipe(Type.Icons)
 		Type:Update()
 		Type:UpdateColors(true)
 	end
@@ -3120,10 +3119,6 @@ function TMW:DoValidityCheck()
 	wipe(TMW.ValidityCheckQueue)
 end
 
-function TMW:RestoreEvents()
-	runEvents = 1
-end
-
 function TMW.OnGCD(d)
 	if d == 1 then return true end -- a cd of 1 is always a GCD (or at least isn't worth showing)
 	if GCD > 1.7 then return false end -- weed out a cooldown on the GCD spell that might be an interupt (counterspell, mind freeze, etc)
@@ -3497,7 +3492,7 @@ end
 
 
 
-EVENTS = TMW:NewModule("Events", "AceEvent-3.0") TMW.EVENTS = EVENTS
+EVENTS = TMW:NewModule("Events", "AceEvent-3.0", "AceTimer-3.0") TMW.EVENTS = EVENTS
 EVENTS.QueuedIcons = {}
 do
 	EVENTS.OnIconShowHideHandlers = {}
@@ -3604,6 +3599,16 @@ function EVENTS:TMW_ONUPDATE_TIMECONSTRAINED(event, time, Locked)
 	end
 end
 TMW:RegisterCallback("TMW_ONUPDATE_TIMECONSTRAINED", EVENTS)
+
+local runEvents = 1
+function EVENTS:RestoreEvents()
+	runEvents = 1
+end
+TMW:RegisterCallback("TMW_ICON_SETUP_PRE", function()
+	-- make sure events dont fire while, or shortly after, we are setting up
+	runEvents = nil
+	EVENTS:ScheduleTimer("RestoreEvents", max(UPD_INTV*2.1, 0.2))
+end)
 
 
 SND = EVENTS:NewModule("Sound", EVENTS) TMW.SND = SND
@@ -4604,16 +4609,19 @@ function ANIM:HandleEvent(icon, data)
 
 end
 function ANIM:TMW_ICON_META_INHERITED_ICON_CHANGED(event, icon, icToUse)
+	print(event, icon, icToUse)
 	if icon:Animations_Has() then
 		for k, v in next, icon:Animations_Get() do
 			if v.originIcon ~= icon then
 				icon:Animations_Stop(v)
+				print("Stopped", icon, k, v)
 			end
 		end
 	end
 	if icToUse:Animations_Has() then
 		for k, v in next, icToUse:Animations_Get() do
 			icon:Animations_Start(v)
+			print("Started", icon, k, v, icToUse)
 		end
 	end
 end
@@ -4676,8 +4684,10 @@ function AnimatedObject:Animations_Start(table)
 
 		-- meta inheritance
 		local Icons = Types.meta.Icons
+		print(table, Animation, self)
 		for i = 1, #Icons do
 			local ic = Icons[i]
+			print(ic, ic.__currentIcon, self)
 			if ic.__currentIcon == self then
 				ic:Animations_Start(table, ic)
 			end
@@ -5474,25 +5484,27 @@ function Icon.Setup(icon)
 	local typeData = Types[ics.Type]
 	local viewData = Views[group:GetSettings().View]
 	
-	local oldTypeData = icon.typeData
-	icon.typeData = typeData
 	icon.viewData = viewData
-
-	-- make sure events dont fire while, or shortly after, we are setting up
-	runEvents = nil
-	TMW:ScheduleTimer("RestoreEvents", max(UPD_INTV*2.1, 0.2))
 	
 	icon.ForceDisabled = nil
 	icon.dontHandleConditionsExternally = nil
 
 	--icon.doCheckForUpdatesIfFakeHidden = nil
-	--Dont set this to nil because we may change it externally and then call :Setup().
-	--Performance impact is negligible because once true, it can only go back nil through user config
 
-	if pclass ~= "DEATHKNIGHT" then
-		icon.IgnoreRunes = nil
+	-- Icon Type
+	local oldTypeData = icon.typeData
+	icon.typeData = typeData
+	
+	if oldTypeData then
+		oldTypeData:UnregisterIcon(icon)
 	end
-
+	typeData:RegisterIcon(icon)
+	
+	if icon.typeData ~= oldTypeData then		
+		TMW:Fire("TMW_ICON_TYPE_CHANGED", icon, typeData, oldTypeData)
+	end
+	
+	
 	for k in pairs(TMW.Icon_Defaults) do
 		if typeData.RelevantSettings[k] then
 			icon[k] = ics[k]
@@ -5500,6 +5512,8 @@ function Icon.Setup(icon)
 			icon[k] = nil
 		end
 	end
+
+	assert(not (pclass ~= "DEATHKNIGHT" and icon.IgnoreRunes)) --TODO: delete this after a while
 
 	-- process alpha settings
 	if icon.ShowWhen == "alpha" then
@@ -5520,19 +5534,6 @@ function Icon.Setup(icon)
 
 	-- Conditions
 	icon:Conditions_LoadData(icon.Conditions)
-
-	if icon.typeData ~= typeData then
-		
-		if oldTypeData then
-			-- remove the icon from the previous type's icon list
-			oldTypeData:UnregisterIcon(icon)
-		end
-		
-		-- add the icon to this type's icon list
-		typeData:RegisterIcon(icon)
-		
-		TMW:Fire("TMW_ICON_TYPE_CHANGED", icon, typeData, oldTypeData)
-	end
 
 	icon:DisableAllModules()
 	viewData:Icon_Setup(icon)

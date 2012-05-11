@@ -25,6 +25,7 @@
  ** (r514) TellMeWhen-5.1.0.lua:5331: "for" limit must be a number
  ** (r514) TellMeWhen: Something REALLY bad happened that should not have happened. This isn't a non-critical error anymore, so please report this to Cybeloras!  a: icon  b: 
  ** (r514) string "Data Processor alpha" line 35: attempt to compare number with table
+ ** (r515) Meta icons should once again always properly inherit animations
 
 ===v5.0.2===
  * Bug Fixes:
