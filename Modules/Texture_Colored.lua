@@ -15,6 +15,7 @@ if not TMW then return end
 
 local TMW = TMW
 local L = TMW.L
+local print = TMW.print
 
 local LMB = LibStub("Masque", true) or (LibMasque and LibMasque("Button"))
 local type = type

@@ -624,7 +624,7 @@ L["UIPANEL_RELATIVETO"] = "Relative To"
 L["UIPANEL_RELATIVETO_DESC"] = "Type '/framestack' to toggle a tooltip that contains a list of all the frames that your mouse is over, and their names, to put into this dialog."
 L["UIPANEL_RELATIVEPOINT"] = "Relative Point"
 L["UIPANEL_RELATIVEPOINT_DESC"] = "The point that the group will be anchored to"
-L["CHECKORDER"] = "Update order"
+L["CHECKORDER"] = "Update Order"
 L["CHECKORDER_ICONDESC"] = "Sets the order in which icons within this group will be updated. This really only matters if you are using the feature of meta icons to check sub-metas."
 L["CHECKORDER_GROUPDESC"] = "Sets the order in which groups will be updated. This really only matters if you are using the feature of meta icons to check sub-metas."
 L["ASCENDING"] = "Ascending"
@@ -634,6 +634,17 @@ L["UIPANEL_LEVEL"] = "Frame Level"
 L["UIPANEL_STRATA"] = "Frame Strata"
 L["UIPANEL_LOCK"] = "Lock Position"
 L["UIPANEL_LOCK_DESC"] = "Lock this group, preventing movement or sizing by dragging the group or the scale tab."
+
+L["LAYOUTDIRECTION"] = "Layout Direction"
+L["LAYOUTDIRECTION_DESC"] = "Sets the direction that icons will layout in the group."
+L["LAYOUTDIRECTION_1"] = "Right then Down"
+L["LAYOUTDIRECTION_2"] = "Left then Down"
+L["LAYOUTDIRECTION_3"] = "Left then Up"
+L["LAYOUTDIRECTION_4"] = "Right then Up"
+L["LAYOUTDIRECTION_5"] = "Down then Right"
+L["LAYOUTDIRECTION_6"] = "Down then Left"
+L["LAYOUTDIRECTION_7"] = "Up then Left"
+L["LAYOUTDIRECTION_8"] = "Up then Right"
 
 
 L["TEXTLAYOUTS"] = "Text Layouts"
@@ -961,7 +972,7 @@ L["DT_DOC_Unit"] = "Returns the unit or the name of the unit that the icon is ch
 L["DT_DOC_PreviousUnit"] = "Returns the unit or the name of the unit that the icon is checked prior to the current unit. Best use in conjunction with the [Name] tag."
 
 L["ERROR_MISSINGLAYOUT"] = "Couldn't find the text layout for %s. Falling back on the default for the icon's view type."
- 
+
 L["SENDSUCCESSFUL"] = "Sent successfully"
 L["MESSAGERECIEVE"] = "%s has sent you some TellMeWhen data! You can import this data into TellMeWhen using the %q dropdown in the icon editor."
 L["MESSAGERECIEVE_SHORT"] = "%s has sent you some TellMeWhen data!"

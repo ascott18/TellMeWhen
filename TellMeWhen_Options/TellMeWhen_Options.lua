@@ -886,6 +886,23 @@ local groupConfigTemplate = {
 					style = "dropdown",
 					order = 26,
 				},
+				LayoutDirection = {
+					name = L["LAYOUTDIRECTION"],
+					desc = L["LAYOUTDIRECTION_DESC"],
+					type = "select",
+					values = {
+						L["LAYOUTDIRECTION_1"],
+						L["LAYOUTDIRECTION_2"],
+						L["LAYOUTDIRECTION_3"],
+						L["LAYOUTDIRECTION_4"],
+						L["LAYOUTDIRECTION_5"],
+						L["LAYOUTDIRECTION_6"],
+						L["LAYOUTDIRECTION_7"],
+						L["LAYOUTDIRECTION_8"],
+					},  
+					style = "dropdown",
+					order = 27,
+				},
 				delete = {
 					name = L["UIPANEL_DELGROUP"],
 					desc = L["UIPANEL_DELGROUP_DESC"],
@@ -909,8 +926,6 @@ local groupConfigTemplate = {
 				ImportExport = importExportBoxTemplate,
 			},
 		},
-		--Count = groupFontConfigTemplate,
-		--Bind = groupFontConfigTemplate,
 
 		Sorting = {
 			name = L["UIPANEL_GROUPSORT"],

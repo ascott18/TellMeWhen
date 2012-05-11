@@ -15,6 +15,7 @@ if not TMW then return end
 
 local TMW = TMW
 local L = TMW.L
+local print = TMW.print
 
 local DogTag = LibStub("LibDogTag-3.0", true)
 

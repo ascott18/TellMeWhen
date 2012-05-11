@@ -31,7 +31,7 @@ local DogTag = LibStub("LibDogTag-3.0", true)
 TELLMEWHEN_VERSION = "5.1.0"
 TELLMEWHEN_VERSION_MINOR = strmatch(" @project-version@", " r%d+") or ""
 TELLMEWHEN_VERSION_FULL = TELLMEWHEN_VERSION .. TELLMEWHEN_VERSION_MINOR
-TELLMEWHEN_VERSIONNUMBER = 51020 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
+TELLMEWHEN_VERSIONNUMBER = 51021 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
 if TELLMEWHEN_VERSIONNUMBER > 52000 or TELLMEWHEN_VERSIONNUMBER < 51000 then return error("YOU SCREWED UP THE VERSION NUMBER OR DIDNT CHANGE THE SAFETY LIMITS") end -- safety check because i accidentally made the version number 414069 once
 
 TELLMEWHEN_MAXROWS = 20
@@ -922,6 +922,7 @@ TMW.Defaults = {
 				Tree1			= true,
 				Tree2			= true,
 				Tree3			= true,
+				LayoutDirection = 1,
 				SortPriorities = {
 					{Method = "id",				Order =	1,	},
 					{Method = "duration",		Order =	1,	},
@@ -4147,11 +4148,11 @@ ANIM.AnimationList = {
 				local moveX = random(-Amt, Amt)
 				local moveY = random(-Amt, Amt)
 
-				icon:SetPoint("TOPLEFT", icon.x + moveX, icon.y + moveY)
+				icon:SetPoint(icon.pos, icon.x + moveX, icon.y + moveY)
 			end
 		end,
 		OnStop = function(icon, table)
-			icon:SetPoint("TOPLEFT", icon.x, icon.y)
+			icon:SetPoint(icon.pos, icon.x, icon.y)
 		end,
 	},
 	{ -- ICONFLASH
@@ -4796,7 +4797,10 @@ function Group.IconSorter(iconA, iconB)
 		local method = settings.Method
 		local order = settings.Order
 
-		if Locked or method == "id" then -- force sorting by ID when unlocked
+		if Locked or method == "id" then
+			-- Force sorting by ID when unlocked.
+			-- Don't force the first one to be "id" because it also depends on the order that the user has set.
+			
 			if method == "id" then
 				return iconA.ID*order < iconB.ID*order
 
@@ -4848,10 +4852,7 @@ function Group.SortIcons(group)
 
 	for positionedID = 1, #group do
 		local icon = SortedIcons[positionedID]
-
-		local x, y = group:GetIconPos(positionedID)
-		icon.x, icon.y = x, y -- used for shakers
-		icon:SetPoint("TOPLEFT", x, y)
+		icon.viewData:Icon_SetPoint(icon, positionedID)
 	end
 end
 
@@ -4981,16 +4982,6 @@ function Group.SetPos(group)
 	group:SetFrameLevel(s.Level)
 end
 
-function Group.GetIconPos(group, iconID)
-	local Columns, Spacing = group.Columns, group.Spacing
-
-	--[[local row = ceil(iconID / Columns)
-    local column = (iconID - 1) % Columns + 1
-	return (30 + Spacing)*(column-1), -(30 + Spacing)*(row-1)]]
-
-	return (30 + Spacing)*(((iconID - 1) % Columns)), -(30 + Spacing)*(ceil(iconID / Columns)-1)
-end
-
 function Group.Setup(group)
 	local groupID = group:GetID()
 
@@ -5018,10 +5009,6 @@ function Group.Setup(group)
 
 			icon:Show()
 			icon:SetFrameLevel(group:GetFrameLevel() + 1)
-
-			local x, y = group:GetIconPos(iconID)
-			icon.x, icon.y = x, y -- used for shakers
-			icon:SetPoint("TOPLEFT", x, y)
 
 			TMW.safecall(icon.Setup, icon)
 		end
