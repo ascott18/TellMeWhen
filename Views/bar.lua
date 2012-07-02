@@ -21,13 +21,13 @@ local LMB = LibStub("Masque", true) or (LibMasque and LibMasque("Button"))
 
 local ceil = ceil
 
-local View = TMW.Classes.IconView:New("icon")
+local View = TMW.Classes.IconView:New("bar")
 
-TMW.Defaults.profile.TextLayouts.icon1 = {
-	Name = L["TEXTLAYOUTS_DEFAULTS_ICON1"],
-	GUID = "icon1",
+TMW.Defaults.profile.TextLayouts.bar1 = {
+	Name = L["TEXTLAYOUTS_DEFAULTS_BAR1"],
+	GUID = "bar1",
 	NoEdit = true,
-	n = 2,
+	n = 3,
 	-- Default Layout 1
 	{	-- [1] Bind
 		x 	 		  	= -2,
@@ -50,20 +50,29 @@ TMW.Defaults.profile.TextLayouts.icon1 = {
 		DefaultText		= "[Stacks:Hide('0', '1')]",
 		SkinAs			= "Count",
 	},
+	{	-- [3] Duration
+		x 	 		  	= -2,
+		y 	 		  	= 0,
+		ConstrainWidth	= true,
+		point			= "RIGHT",
+		relativePoint	= "RIGHT",
+		
+		StringName		= L["TEXTLAYOUTS_DEFAULTS_DURATION"],
+		DefaultText		= "[Duration:TMWFormatDuration:Hide('0.0')]",
+	},
 }
-View.defaultTextLayout = "icon1"
+View.defaultTextLayout = "bar1"
 
 View:ImplementsModule("IconModule_Alpha", true)
 View:ImplementsModule("IconModule_CooldownSweep", true)
 View:ImplementsModule("IconModule_Texture_Colored", true)
-View:ImplementsModule("IconModule_PowerBar_Overlay", true)
-View:ImplementsModule("IconModule_TimerBar_Overlay", true)
+View:ImplementsModule("IconModule_TimerBar_BarDisplay", true)
 View:ImplementsModule("IconModule_Texts", true)
 View:ImplementsModule("IconModule_Masque", true)
 	
 function View:Icon_Setup(icon)
+	icon:SetSize(100, 30)
 	local group = icon.group
-	icon:SetSize(30, 30)
 	
 	---------- Alpha ----------
 	local Alpha = icon.Modules.IconModule_Alpha
@@ -75,62 +84,53 @@ function View:Icon_Setup(icon)
 		CooldownSweep:Enable()
 	end
 	CooldownSweep.cooldown:ClearAllPoints()
+	CooldownSweep.cooldown:SetPoint("LEFT")
 	CooldownSweep.cooldown:SetSize(30, 30)
-	CooldownSweep.cooldown:SetPoint("CENTER")
 
 	---------- Texture ----------
 	local Texture = icon.Modules.IconModule_Texture_Colored
 	Texture:SetEssential(true)
 	Texture.texture:ClearAllPoints()
-	Texture.texture:SetPoint("CENTER")
+	Texture.texture:SetPoint("LEFT")
 	Texture.texture:SetSize(30, 30)
 	
-	---------- PowerBarOverlay ----------
-	local PowerBarOverlay = icon.Modules.IconModule_PowerBar_Overlay
-	if icon.ShowPBar then
-		PowerBarOverlay:Enable()
-	end
-	
 	---------- TimerBarOverlay ----------
-	local TimerBarOverlay = icon.Modules.IconModule_TimerBar_Overlay
-	if icon.ShowCBar then
-		TimerBarOverlay:Enable()
-	end
+	local TimerBar_BarDisplay = icon.Modules.IconModule_TimerBar_BarDisplay
+	TimerBar_BarDisplay:Enable()
+	TimerBar_BarDisplay.bar:SetPoint("TOPRIGHT")
+	TimerBar_BarDisplay.bar:SetPoint("BOTTOMRIGHT")
+	TimerBar_BarDisplay.bar:SetPoint("LEFT", Texture.texture, "RIGHT")
 	
 	---------- Texts ----------
 	local Texts = icon.Modules.IconModule_Texts
-	Texts:Enable()	
-
+	Texts:Enable()
+	
+	-- [=[
 	---------- Masque ----------
 	local Masque = icon.Modules.IconModule_Masque
 	Masque.container:ClearAllPoints()
-	Masque.container:SetAllPoints()
+	Masque.container:SetSize(30, 30)
+	Masque.container:SetPoint("LEFT")
 	Masque:Enable()
+	--]=]
 
 	---------- Skin-Dependent Module Layout ----------
 	if Masque.isDefaultSkin then
-		CooldownSweep.cooldown:SetFrameLevel(icon:GetFrameLevel() + 1)
-		PowerBarOverlay.bar:SetFrameLevel(icon:GetFrameLevel() + 2)
-		TimerBarOverlay.bar:SetFrameLevel(icon:GetFrameLevel() + 2)
+		CooldownSweep.cooldown:SetFrameLevel(icon:GetFrameLevel() + 3)
+		TimerBar_BarDisplay.bar:SetFrameLevel(icon:GetFrameLevel() + 2)
 	else
-		CooldownSweep.cooldown:SetFrameLevel(icon:GetFrameLevel() + -2)
-		PowerBarOverlay.bar:SetFrameLevel(icon:GetFrameLevel() + -1)
-		TimerBarOverlay.bar:SetFrameLevel(icon:GetFrameLevel() + -1)
+		CooldownSweep.cooldown:SetFrameLevel(icon:GetFrameLevel() + 2)
+		TimerBar_BarDisplay.bar:SetFrameLevel(icon:GetFrameLevel() + -1)
 	end
-	
-	local insets = Masque.isDefaultSkin and 1.5 or 0
-	TimerBarOverlay.bar:SetPoint("TOP", Texture.texture, "CENTER", 0, -0.5)
-	TimerBarOverlay.bar:SetPoint("BOTTOMLEFT", Texture.texture, "BOTTOMLEFT", insets, insets)
-	TimerBarOverlay.bar:SetPoint("BOTTOMRIGHT", Texture.texture, "BOTTOMRIGHT", -insets, insets)
-	
-	PowerBarOverlay.bar:SetPoint("BOTTOM", Texture.texture or icon, "CENTER", 0, 0.5)
-	PowerBarOverlay.bar:SetPoint("TOPLEFT", Texture.texture or icon, "TOPLEFT", insets, -insets)
-	PowerBarOverlay.bar:SetPoint("TOPRIGHT", Texture.texture or icon, "TOPRIGHT", -insets, -insets)
+	--local insets = Masque.isDefaultSkin and 1.5 or 0
+	TimerBar_BarDisplay.bar:SetPoint("TOPRIGHT")
+	TimerBar_BarDisplay.bar:SetPoint("BOTTOMRIGHT")
+	TimerBar_BarDisplay.bar:SetPoint("LEFT", Masque.container, "RIGHT")
 end
 function View:Icon_UnSetup(icon)
 	if LMB then
 		local lmbGroup = LMB:Group("TellMeWhen", L["fGROUP"]:format(icon.group:GetID()))
-		lmbGroup:RemoveButton(icon, true)
+		lmbGroup:RemoveButton(icon.stupidBullshit, true)
 	end
 end
 
@@ -165,7 +165,7 @@ function View:Icon_SetPoint(icon, positionID)
 		column = (positionID - 1) % Columns + 1
 	end
 	
-	local x, y = (30 + Spacing)*(column-1), (30 + Spacing)*(row-1)
+	local x, y = (100 + Spacing)*(column-1), (30 + Spacing)*(row-1)
 	
 	
 	local position = icon.position

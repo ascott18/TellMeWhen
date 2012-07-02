@@ -27,13 +27,9 @@ function Processor:CompileFunctionSegment(t)
 	-- GLOBALS: alpha
 	t[#t+1] = [[
 	alpha = alpha or 0
-	local d = (duration or attributes.duration or 0) - (TMW.time - (start or attributes.start or 0))
-	local stack = stack or attributes.stack
 	
 	if
-		(icon.ConditionObj and not icon.dontHandleConditionsExternally and icon.ConditionObj.Failed) or 						  -- conditions failed
-		(d > 0 and ((icon.DurationMinEnabled and icon.DurationMin > d) or (icon.DurationMaxEnabled and d > icon.DurationMax))) or -- duration requirements failed
-		(stack and ((icon.StackMinEnabled and icon.StackMin > stack) or (icon.StackMaxEnabled and stack > icon.StackMax))) 		  -- stack requirements failed
+		(icon.ConditionObj and not icon.dontHandleConditionsExternally and icon.ConditionObj.Failed) -- conditions failed
 	then
 		alpha = alpha ~= 0 and icon.ConditionAlpha or 0 -- use the alpha setting for failed stacks/duration/conditions, but only if the icon isnt being hidden for another reason
 	end
@@ -81,7 +77,7 @@ TMW:RegisterCallback("TMW_ICON_SETUP_PRE", function(event, icon)
 	end
 end)
 
-Processor:AddDogTag("TMW", "IsShown", {	
+Processor:RegisterDogTag("TMW", "IsShown", {	
 	code = function (groupID, iconID, link)
 		local group = TMW[groupID]
 		local icon = group and group[iconID]
@@ -102,7 +98,7 @@ Processor:AddDogTag("TMW", "IsShown", {
 	example = '[IsShown] => "true"; [IsShown(icon=3, group=2)] => "false"',
 	category = L["ICON"],
 })
-Processor:AddDogTag("TMW", "Opacity", {	
+Processor:RegisterDogTag("TMW", "Opacity", {	
 	code = function (groupID, iconID, link)
 		local group = TMW[groupID]
 		local icon = group and group[iconID]
@@ -122,3 +118,5 @@ Processor:AddDogTag("TMW", "Opacity", {
 	example = '[IsShown] => "true"; [IsShown(icon=3, group=2)] => "false"',
 	category = L["ICON"],
 })
+
+

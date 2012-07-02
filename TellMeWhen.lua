@@ -28,11 +28,11 @@ local DRData = LibStub("DRData-1.0", true)
 
 local DogTag = LibStub("LibDogTag-3.0", true)
 
-TELLMEWHEN_VERSION = "5.1.0"
+TELLMEWHEN_VERSION = "6.0.0"
 TELLMEWHEN_VERSION_MINOR = strmatch(" @project-version@", " r%d+") or ""
 TELLMEWHEN_VERSION_FULL = TELLMEWHEN_VERSION .. TELLMEWHEN_VERSION_MINOR
-TELLMEWHEN_VERSIONNUMBER = 51021 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
-if TELLMEWHEN_VERSIONNUMBER > 52000 or TELLMEWHEN_VERSIONNUMBER < 51000 then return error("YOU SCREWED UP THE VERSION NUMBER OR DIDNT CHANGE THE SAFETY LIMITS") end -- safety check because i accidentally made the version number 414069 once
+TELLMEWHEN_VERSIONNUMBER = 60001 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
+if TELLMEWHEN_VERSIONNUMBER > 61001 or TELLMEWHEN_VERSIONNUMBER < 60000 then return error("YOU SCREWED UP THE VERSION NUMBER OR DIDNT CHANGE THE SAFETY LIMITS") end -- safety check because i accidentally made the version number 414069 once
 
 TELLMEWHEN_MAXROWS = 20
 
@@ -53,8 +53,8 @@ local UnitPower, UnitClass, UnitGUID, UnitName, UnitInBattleground, UnitInRaid, 
 	  UnitPower, UnitClass, UnitGUID, UnitName, UnitInBattleground, UnitInRaid, UnitExists
 local PlaySoundFile, PlaySound, SendChatMessage, GetChannelList =
 	  PlaySoundFile, PlaySound, SendChatMessage, GetChannelList
-local GetNumRaidMembers, GetNumPartyMembers, GetRealNumRaidMembers, GetRealNumPartyMembers, GetPartyAssignment, InCombatLockdown, IsInGuild =
-	  GetNumRaidMembers, GetNumPartyMembers, GetRealNumRaidMembers, GetRealNumPartyMembers, GetPartyAssignment, InCombatLockdown, IsInGuild
+local GetPartyAssignment, InCombatLockdown, IsInGuild =
+	  GetPartyAssignment, InCombatLockdown, IsInGuild
 local GetNumBattlefieldScores, GetBattlefieldScore =
 	  GetNumBattlefieldScores, GetBattlefieldScore
 local GetCursorPosition, GetAddOnInfo, IsAddOnLoaded, LoadAddOn, EnableAddOn =
@@ -72,7 +72,6 @@ local tostringall = tostringall
 local bitband = bit.band
 local huge = math.huge
 
-
 ---------- Locals ----------
 local --[[db,]] updatehandler, Locked, SndChan, FramesToFind, CNDTEnv, AnimationList
 local NAMES, EVENTS, ANIM, ANN, SND
@@ -86,9 +85,18 @@ local ActiveAnimations = {}
 local time = GetTime() TMW.time = time
 local sctcolor = {r=1, b=1, g=1}
 local clientVersion = select(4, GetBuildInfo())
-local addonVersion = tonumber(GetAddOnMetadata("TellMeWhen", "X-Interface"))
+local addonVersion = tonumber(GetAddOnMetadata("TellMeWhen", "X-Interface")) --TODO: NONFUNCTIONAL IN MOP
+TMW.ISMOP = clientVersion >= 50000
 local _, pclass = UnitClass("Player")
 local pname = UnitName("player")
+
+
+if TMW.ISMOP then
+	GetActiveTalentGroup = GetActiveSpecGroup
+	GetPrimaryTalentTree = GetSpecialization
+	local IsInGroup, IsInRaid, GetNumGroupMembers = 
+		  IsInGroup, IsInRaid, GetNumGroupMembers
+end
 
 --TODO: (misplaced note) export any needed text layouts with icons that need them
 
@@ -105,197 +113,6 @@ TMW.Warn = setmetatable(
 			tinsert(tbl, text)
 		end
 end})
-
-do	-- Class Lib
-	TMW.Classes = {}
-	local metamethods = {
-		__add = true,
-		__call = true,
-		__concat = true,
-		__div = true,
-		__le = true,
-		__lt = true,
-		__mod = true,
-		__mul = true,
-		__pow = true,
-		__sub = true,
-		__tostring = true,
-		__unm = true,
-	}
-	
-	local function callFunc(class, instance, func, ...)
-	
-		-- check for all functions that dont match exactly, like OnNewInstance_1, _2, _3, ...
-		-- functions can be named whatever you want, but a numbering system helps make sure that
-		-- they are called in the order that you want them to be called in
-		for k, v in TMW:OrderedPairs(class.instancemeta.__index) do
-			if type(k) == "string" and k:find("^" .. func) and k ~= func then
-				v(instance, ...)
-			end
-		end
-		
-		-- now check for the function that exactly matches. this should be called last because
-		-- it should be the function that handles the real class being instantiated, not any inherited classes
-		local normalFunc = class.instancemeta.__index[func]
-		if normalFunc then
-			normalFunc(instance, ...)
-		end
-	end
-
-	local function initializeClass(self)
-		if not self.instances[1] then
-			-- set any defined metamethods
-			for k, v in pairs(self.instancemeta.__index) do
-				if metamethods[k] then
-					self.instancemeta[k] = v
-				end
-			end
-			
-			callFunc(self, self, "OnFirstInstance")
-		end
-	end
-
-	local function New(self, ...)
-		local instance
-		if ... and self.isFrameObject then
-			instance = CreateFrame(...)
-		else
-			instance = {}
-		end
-
-		-- if this is the first instance of the class, do some magic to it:
-		initializeClass(self)
-
-		instance.class = self
-		instance.className = self.className
-
-		setmetatable(instance, self.instancemeta)
-
-		self.instances[#self.instances + 1] = instance
-		
-		for k, v in pairs(self.instancemeta.__index) do
-			if self.isFrameObject and instance.HasScript and instance:HasScript(k) then
-				instance:SetScript(k, v)
-			end
-		end
-
-		callFunc(self, instance, "OnNewInstance", ...)
-		
-		return instance
-	end
-
-	local function Embed(self, target, canOverwrite)
-		-- if this is the first instance (not really an instance here, but we need to anyway) of the class, do some magic to it:
-		initializeClass(self)
-
-		self.embeds[target] = true
-
-		for k, v in pairs(self.instancemeta.__index) do
-			if target[k] and not canOverwrite then
-				TMW:Error("Error embedding class %s into target %s: Field %q already exists on the target.", self.className, tostring(target:GetName() or target), k)
-			else
-				target[k] = v
-			end
-		end
-
-		callFunc(self, target, "OnNewInstance")
-
-		return target
-	end
-
-	local function Disembed(self, target, clearDifferentValues)
-		self.embeds[target] = false
-
-		for k, v in pairs(self.instancemeta.__index) do
-			if (target[k] == v) or (target[k] and clearDifferentValues) then
-				target[k] = nil
-			else
-				TMW:Error("Error disembedding class %s from target %s: Field %q should exist on the target, but it doesnt.", self.className, tostring(target:GetName() or target), k)
-			end
-		end
-
-		return target
-	end
-
-	local function ExtendMethod(self, method, newFunction)
-		local existingFunction = self[method]
-		if existingFunction then
-			self[method] = function(...)
-				existingFunction(...)
-				newFunction(...)
-			end
-		else
-			self[method] = newFunction
-		end
-	end
-	
-	local __call = function(self, arg)
-		-- allow something like TMW:NewClass("Name"){Foo = function() end, Bar = 5}
-		if type(arg) == "table" then
-			for k, v in pairs(arg) do
-				self[k] = v
-			end
-		end
-		return self
-	end
-			
-	function TMW:NewClass(className, ...)
-		local metatable = {
-			__index = {},
-			__call = __call,
-		}
-		
-		local class = {
-			className = className,
-			instances = {},
-			embeds = {},
-			New = New,
-			Embed = Embed,
-			Disembed = Disembed,
-			ExtendMethod = ExtendMethod,
-		}
-
-		class.instancemeta = {__index = metatable.__index}
-		
-		setmetatable(class, metatable)
-		metatable.__newindex = metatable.__index
-
-		local isFrameObject
-		for n, v in TMW:Vararg(...) do
-			local index
-			if TMW.Classes[v] then
-				callFunc(TMW.Classes[v], TMW.Classes[v], "OnClassInherit", class)
-				index = getmetatable(TMW.Classes[v]).__index
-			elseif LibStub(v, true) then
-				local lib = LibStub(v, true)
-				if lib.Embed then
-					lib:Embed(metatable.__index)
-				else
-					TMW:Error("Library %q does not have an Embed method", v)
-				end
-			elseif type(v) == "table" then
-				index = v
-			elseif n == 1 then
-				isFrameObject = true
-				index = getmetatable(CreateFrame(v)).__index
-			end
-
-			if index then
-				for k, v in pairs(index) do
-					metatable.__index[k] = metatable.__index[k] or v
-				end
-			end
-		end
-		
-		class.isFrameObject = isFrameObject
-		
-		metatable.__index.isFrameObject = metatable.__index.isFrameObject or isFrameObject
-
-		TMW.Classes[className] = class
-
-		return class
-	end
-end
 
 
 ---------- Caches ----------
@@ -395,7 +212,7 @@ local function ClearScripts(f)
 end
 
 function TMW.print(...)
-	if TMW.debug or not TMW.VarsLoaded then
+	if TMW.debug or not TMW.Initialized then
 		local prefix = "|cffff0000TMW"
 		-- GLOBALS: linenum
 		if linenum then
@@ -428,7 +245,7 @@ function TMW.get(value, ...)
 	end
 end
 
-do	-- TMW.generateGUID(length)
+do -- TMW.generateGUID(length)
 	local chars = {}
 	for i = 33, 122 do
 		if i ~= 94 and charbyte ~= 96 then
@@ -780,6 +597,318 @@ do -- Iterators
 	end
 end
 
+do -- Callback Lib
+	function TMW:RegisterCallback(event, func, arg1)
+		local funcsForEvent
+		if callbackregistry[event] then
+			funcsForEvent = callbackregistry[event]
+		else
+			funcsForEvent = {}
+			callbackregistry[event] = funcsForEvent
+		end
+
+		if type(func) == "table" then
+			arg1 = func
+			func = assert(func[event], ("Couldn't find method %q on table %q!"):format(event, tostring(func.GetName and func[0] and func:GetName() or func.name or func)))
+		end
+		arg1 = arg1 or true
+
+
+		local args
+		for i = 1, #funcsForEvent do
+			local tbl = funcsForEvent[i]
+			if tbl.func == func then
+				args = tbl
+				if not tContains(args, arg1) then
+					args[#args + 1] = arg1
+				end
+				break
+			end
+		end
+		if not args then
+			args = {func = func, arg1}
+			funcsForEvent[#funcsForEvent + 1] = args
+		end
+	end
+
+	function TMW:UnregisterCallback(event, func, arg1)
+		if type(func) == "table" then
+			local object = func
+			arg1 = object
+			func = object[event]
+		end
+		arg1 = arg1 or true
+
+		local funcs = callbackregistry[event]
+		if funcs then
+			for t = 1, #funcs do
+				local tbl = funcs[t]
+				if tbl.func == func then
+					tDeleteItem(tbl, arg1)
+				end
+			end
+		end
+	end
+	
+	function TMW:Fire(event, ...)
+		local funcs = callbackregistry[event]
+
+		if funcs then
+			for t = 1, #funcs do
+				local tbl = funcs[t]
+				local method = tbl.func
+				if method then
+					for a = 1, #tbl do
+						local arg1 = tbl[a]
+						if arg1 ~= true then
+							method(arg1, event, ...)
+						else
+							method(event, ...)
+						end
+					end
+				end
+			end
+		end
+	end
+end
+
+do -- Class Lib
+	TMW.Classes = {}
+	local metamethods = {
+		__add = true,
+		__call = true,
+		__concat = true,
+		__div = true,
+		__le = true,
+		__lt = true,
+		__mod = true,
+		__mul = true,
+		__pow = true,
+		__sub = true,
+		__tostring = true,
+		__unm = true,
+	}
+	
+	local function callFunc(class, instance, func, ...)
+	
+		-- check for all functions that dont match exactly, like OnNewInstance_1, _2, _3, ...
+		-- functions can be named whatever you want, but a numbering system helps make sure that
+		-- they are called in the order that you want them to be called in
+		for k, v in TMW:OrderedPairs(class.instancemeta.__index) do
+			if type(k) == "string" and k:find("^" .. func) and k ~= func then
+				v(instance, ...)
+			end
+		end
+		
+		-- now check for the function that exactly matches. this should be called last because
+		-- it should be the function that handles the real class being instantiated, not any inherited classes
+		local normalFunc = class.instancemeta.__index[func]
+		if normalFunc then
+			normalFunc(instance, ...)
+		end
+	end
+
+	local function initializeClass(self)
+		if not self.instances[1] then
+			-- set any defined metamethods
+			for k, v in pairs(self.instancemeta.__index) do
+				if metamethods[k] then
+					self.instancemeta[k] = v
+				end
+			end
+			
+			callFunc(self, self, "OnFirstInstance")
+		end
+	end
+	
+	local __call = function(self, arg)
+		-- allow something like TMW:NewClass("Name"){Foo = function() end, Bar = 5}
+		if type(arg) == "table" then
+			for k, v in pairs(arg) do
+				self[k] = v
+			end
+		end
+		return self
+	end
+	
+	function TMW:NewClass(className, ...)
+		local metatable = {
+			__index = {},
+			__call = __call,
+		}
+		
+		local class = {
+			className = className,
+			instances = {},
+			embeds = {},
+			isTMWClass = true,
+		}
+
+		class.instancemeta = {__index = metatable.__index}
+		
+		setmetatable(class, metatable)
+		metatable.__newindex = metatable.__index
+
+		local isFrameObject
+		for n, v in TMW:Vararg("Class", ...) do
+			local index
+			if TMW.Classes[v] then
+				callFunc(TMW.Classes[v], TMW.Classes[v], "OnClassInherit", class)
+				index = getmetatable(TMW.Classes[v]).__index
+			elseif LibStub(v, true) then
+				local lib = LibStub(v, true)
+				if lib.Embed then
+					lib:Embed(metatable.__index)
+				else
+					TMW:Error("Library %q does not have an Embed method", v)
+				end
+			elseif type(v) == "table" then
+				index = v
+			elseif n == 2 then
+				local success, frame = pcall(CreateFrame, v)
+				if success and frame then
+					-- Need to do hide the frame or else if we made an editbox,
+					-- it will block all keyboard input for some reason
+					frame:Hide()
+					isFrameObject = v
+					
+					index = getmetatable(frame).__index
+				end
+			end
+
+			if index then
+				for k, v in pairs(index) do
+					metatable.__index[k] = metatable.__index[k] or v
+				end
+			end
+		end
+		
+		class.isFrameObject = isFrameObject
+		rawset(class, "isFrameObject", rawget(class, "isFrameObject") or isFrameObject)
+		
+		metatable.__index.isFrameObject = metatable.__index.isFrameObject or isFrameObject
+
+		TMW.Classes[className] = class
+		
+		TMW:Fire("TMW_CLASS_NEW", class)
+
+		return class
+	end
+	
+	-- Define the base class. All other classes implicitly inherit from this class.
+	TMW:NewClass("Class"){
+		New = function(self, ...)
+			local instance
+			if ... and self.isFrameObject then
+				instance = CreateFrame(...)
+			else
+				instance = {}
+			end
+
+			-- if this is the first instance of the class, do some magic to it:
+			initializeClass(self)
+
+			instance.class = self
+			instance.className = self.className
+			instance.isTMWClassInstance = true
+
+			setmetatable(instance, self.instancemeta)
+
+			self.instances[#self.instances + 1] = instance
+			
+			for k, v in pairs(self.instancemeta.__index) do
+				if self.isFrameObject and instance.HasScript and instance:HasScript(k) then
+					instance:HookScript(k, v)
+				end
+			end
+
+			callFunc(self, instance, "OnNewInstance", ...)
+			
+			TMW:Fire("TMW_CLASS_" .. self.className .. "_INSTANCE_NEW", self, instance)
+			
+			return instance
+		end,
+
+		Embed = function(self, target, canOverwrite)
+			-- if this is the first instance (not really an instance here, but we need to anyway) of the class, do some magic to it:
+			initializeClass(self)
+
+			self.embeds[target] = true
+
+			for k, v in pairs(self.instancemeta.__index) do
+				if target[k] and not canOverwrite then
+					TMW:Error("Error embedding class %s into target %s: Field %q already exists on the target.", self.className, tostring(target:GetName() or target), k)
+				else
+					target[k] = v
+				end
+			end
+			
+			for k, v in pairs(self.instancemeta.__index) do
+				if self.isFrameObject and target.HasScript and target:HasScript(k) then
+					target:HookScript(k, v)
+				end
+			end
+
+			callFunc(self, target, "OnNewInstance")
+
+			target.class = self
+			target.className = self.className
+			
+			return target
+		end,
+
+		Disembed = function(self, target, clearDifferentValues)
+			self.embeds[target] = false
+
+			for k, v in pairs(self.instancemeta.__index) do
+				if (target[k] == v) or (target[k] and clearDifferentValues) then
+					target[k] = nil
+				else
+					TMW:Error("Error disembedding class %s from target %s: Field %q should exist on the target, but it doesnt.", self.className, tostring(target:GetName() or target), k)
+				end
+			end
+
+			return target
+		end,
+
+		ExtendMethod = function(self, method, newFunction)
+			local existingFunction = self[method]
+			if existingFunction then
+				self[method] = function(...)
+					existingFunction(...)
+					newFunction(...)
+				end
+			else
+				self[method] = newFunction
+			end
+		end,
+		
+		AssertSelfIsClass = function(self)
+			assert(self.isTMWClass, ("Caller must be the class %q, not an instance of the class"):format(self.className))
+		end,
+		
+		AssertSelfIsInstance = function(self)
+			assert(self.isTMWClassInstance, ("Caller must be an instance of the class %q, not the class itself"):format(self.className))
+		end,
+		
+		InheritTable = function(self, sourceClass, tableKey)
+			sourceClass:AssertSelfIsClass()
+			
+			self[tableKey] = {}
+			for k, v in pairs(sourceClass[tableKey]) do
+				self[tableKey][k] = v
+			end
+		end,
+		
+		CallFunc = function(self, funcName, ...)
+			if self.isTMWClass then
+				callFunc(self, self, funcName)
+			else
+				callFunc(self.class, self, funcName, ...)
+			end
+		end,
+	}
+end
 
 
 local RelevantToAll = {
@@ -790,11 +919,7 @@ local RelevantToAll = {
 		Type = true,
 		Events = true,
 		Conditions = true,
-		CustomTex = true,
-		ShowTimer = true,
-		ShowTimerText = true,
 		ShowWhen = true,
-		FakeHidden = true,
 		Alpha = true,
 		UnAlpha = true,
 		ConditionAlpha = true
@@ -845,7 +970,7 @@ TMW.Defaults = {
 		Interval		=	UPD_INTV,
 		EffThreshold	=	15,
 		TextureName		= 	"Blizzard",
-		DrawEdge		=	false,
+		DrawEdge		=	not TMW.ISMOP and false,
 		SoundChannel	=	"SFX",
 		ReceiveComm		=	true,
 		WarnInvalids	=	false,
@@ -946,67 +1071,14 @@ TMW.Defaults = {
 				},
 				Icons = {
 					["**"] = {
-						BuffOrDebuff			= "HELPFUL",
 						ShowWhen				= "alpha",
 						Enabled					= false,
 						Name					= "",
-						CustomTex				= "",
-						OnlyMine				= false,
-						ShowTimer				= false,
-						ShowTimerText			= false,
-						ShowPBar				= false,
-						ShowCBar				= false,
-						PBarOffs				= 0,
-						CBarOffs				= 0,
-						InvertBars				= false,
 						Type					= "",
 						Unit					= "player",
-						WpnEnchantType			= "MainHandSlot",
 						Alpha					= 1,
 						UnAlpha					= 1,
 						ConditionAlpha			= 0,
-						RangeCheck				= false,
-						ManaCheck				= false,
-						CooldownCheck			= false,
-						IgnoreRunes				= false,
-						StackMin				= 0,
-						StackMax				= 0,
-						StackMinEnabled			= false,
-						StackMaxEnabled			= false,
-						DurationMin				= 0,
-						DurationMax				= 0,
-						DurationMinEnabled		= false,
-						DurationMaxEnabled		= false,
-						FakeHidden				= false,
-						HideUnequipped			= false,
-						Interruptible			= false,
-						ICDType					= "aura",
-						CheckNext				= false,
-						DontRefresh				= false,
-						UseActvtnOverlay		= false,
-						OnlyEquipped			= false,
-						EnableStacks			= false,
-						OnlyInBags				= false,
-						OnlySeen				= false,
-						Stealable				= false,
-						IgnoreNomana			= false,
-						ShowTTText				= false,
-						CheckRefresh			= true,
-						Sort					= false,
-						TotemSlots				= 0x3F,
-						ConditionDur			= 0,
-						UnConditionDur			= 0,
-						ConditionDurEnabled		= false,
-						UnConditionDurEnabled  	= false,
-						OnlyIfCounting			= false,
-						SourceUnit				= "",
-						DestUnit 				= "",
-						SourceFlags				= 0xFFFFFFFF,
-						DestFlags				= 0xFFFFFFFF,
-						CLEUDur					= 5,
-						CLEUEvents 				= {
-							["*"] 				= false
-						},
 						Icons					= {
 							[1]					= "",
 						},
@@ -1344,81 +1416,6 @@ do -- hook LMB
 end
 
 
-
-function TMW:RegisterCallback(event, func, arg1)
-	local funcsForEvent
-	if callbackregistry[event] then
-		funcsForEvent = callbackregistry[event]
-	else
-		funcsForEvent = {}
-		callbackregistry[event] = funcsForEvent
-	end
-
-	if type(func) == "table" then
-		arg1 = func
-		func = assert(func[event], ("Couldn't find method %q on table %q!"):format(event, tostring(func.GetName and func[0] and func:GetName() or func.name or func)))
-	end
-	arg1 = arg1 or true
-
-
-	local args
-	for i = 1, #funcsForEvent do
-		local tbl = funcsForEvent[i]
-		if tbl.func == func then
-			args = tbl
-			if not tContains(args, arg1) then
-				args[#args + 1] = arg1
-			end
-			break
-		end
-	end
-	if not args then
-		args = {func = func, arg1}
-		funcsForEvent[#funcsForEvent + 1] = args
-	end
-end
-
-function TMW:UnregisterCallback(event, func, arg1)
-	if type(func) == "table" then
-		local object = func
-		arg1 = object
-		func = object[event]
-	end
-	arg1 = arg1 or true
-
-	local funcs = callbackregistry[event]
-	if funcs then
-		for t = 1, #funcs do
-			local tbl = funcs[t]
-			if tbl.func == func then
-				tDeleteItem(tbl, arg1)
-			end
-		end
-	end
-end
-
-function TMW:Fire(event, ...)
-	local funcs = callbackregistry[event]
-
-	if funcs then
-		for t = 1, #funcs do
-			local tbl = funcs[t]
-			local method = tbl.func
-			if method then
-				for a = 1, #tbl do
-					local arg1 = tbl[a]
-					if arg1 ~= true then
-						method(arg1, event, ...)
-					else
-						method(event, ...)
-					end
-				end
-			end
-		end
-	end
-end
-
-
 function TMW:MakeFunctionCached(obj, method)
     local func
     if type(obj) == "table" and type(method) == "string" then
@@ -1494,6 +1491,34 @@ function TMW:MakeSingleArgFunctionCached(obj, method)
 end
 
 
+---------- Table Copying ----------
+function TMW:CopyWithMetatable(settings)
+	local copy = {}
+	for k, v in pairs(settings) do
+		if type(v) == "table" then
+			copy[k] = TMW:CopyWithMetatable(v)
+		else
+			copy[k] = v
+		end
+	end
+	return setmetatable(copy, getmetatable(settings))
+end
+
+function TMW:CopyTableInPlaceWithMeta(src, dest, allowUnmatchedSourceTables)
+	--src and dest must have congruent data structure, otherwise shit will blow up. There are no safety checks to prevent this.
+	local metatemp = getmetatable(src) -- lets not go overwriting random metatables
+	setmetatable(src, getmetatable(dest))
+	for k in pairs(src) do
+		if dest[k] and type(dest[k]) == "table" and type(src[k]) == "table" then
+			TMW:CopyTableInPlaceWithMeta(src[k], dest[k], allowUnmatchedSourceTables)
+		elseif type(src[k]) ~= "table" or allowUnmatchedSourceTables then
+			dest[k] = src[k]
+		end
+	end
+	setmetatable(src, metatemp) -- restore the old metatable
+	return dest -- not really needed, but what the hell why not
+end
+
 
 -- --------------------------
 -- EXECUTIVE FUNCTIONS, ETC
@@ -1516,6 +1541,7 @@ function TMW:OnInitialize()
 			preferredIndex = 3, -- http://forums.wowace.com/showthread.php?p=320956
 		}
 		StaticPopup_Show("TMW_RESTARTNEEDED", TELLMEWHEN_VERSION_FULL, "Views\\icon.lua")
+		return -- if required, return here
 	end
 
 	if LibStub("LibButtonFacade", true) and select(6, GetAddOnInfo("Masque")) == "MISSING" then
@@ -1558,39 +1584,69 @@ function TMW:OnInitialize()
 	LSM:Register("sound", "TMW - Ding 8",  [[Interface\Addons\TellMeWhen\Sounds\Ding8.ogg]])
 	LSM:Register("sound", "TMW - Ding 9",  [[Interface\Addons\TellMeWhen\Sounds\Ding9.ogg]])
 
+	--------------- Events/OnUpdate ---------------
+	CNDTEnv = TMW.CNDT.Env
+	TMW:SetScript("OnUpdate", TMW.OnUpdate)
 
+	TMW:RegisterEvent("PLAYER_ENTERING_WORLD")
+	TMW:RegisterEvent("PLAYER_TALENT_UPDATE")
+	TMW:RegisterEvent("ACTIVE_TALENT_GROUP_CHANGED")
+end
 
+function TMW:Initialize()
+	-- Everything in this function is either database initialization
+	-- or other initialization processes that depend on the database being initialized.
+	
+	-- This all used to be handled in the OnInitialize method, but with the advent of 
+	-- fully modular icon modules and types, we need to be able to handle default settings
+	-- and setting upgrades from 3rd-party addons that load after TMW, and this isn't possible
+	-- if upgrades and database initialization is done before those addons have a chance to load.
+	
+	if TMW.Initialized then 
+		return
+	end
+	TMW.Initialized = true
 
 	--------------- Database ---------------
 	if type(TellMeWhenDB) ~= "table" then
+		-- TellMeWhenDB might not exist if this is a fresh install
+		-- or if the user is upgrading from a really old version that uses TellMeWhen_Settings.
 		TellMeWhenDB = {Version = TELLMEWHEN_VERSIONNUMBER}
 	end
-	TMW:GlobalUpgrade() -- must happen before the db is created
+	
+	-- Handle upgrades that need to be done before defaults are added to the database.
+	-- Primary purpose of this is to properly upgrade settings if a default has changed.
+	TMW:GlobalUpgrade()
 
+	-- Initialize the database
 	TMW.db = AceDB:New("TellMeWhenDB", TMW.Defaults)
+	
+	-- Wipe the spell cache if user is running a new expansion (expansions have drastic spell changes)
 	local XPac = tonumber(strsub(clientVersion, 1, 1))
 	TMW.db.global.XPac = TMW.db.global.XPac or XPac
 	if TMW.db.global.XPac ~= XPac then
 		wipe(TMW.db.global.ClassSpellCache)
 	end
 
-	TMW.db.profile.Version = TMW.db.profile.Version or TELLMEWHEN_VERSIONNUMBER -- this only does anything for new profiles
-	if TellMeWhen_Settings or (type(TMW.db.profile.Version) == "string") or (TMW.db.profile.Version < TELLMEWHEN_VERSIONNUMBER) then
-		TMW:Upgrade()
-	end
-	TMW.db.RegisterCallback(TMW, "OnProfileChanged",	"OnProfile") -- must set callbacks after TMW:Upgrade() because the db is overwritten there when upgrading from 3.0.0
-	TMW.db.RegisterCallback(TMW, "OnProfileCopied",		"OnProfile")
-	TMW.db.RegisterCallback(TMW, "OnProfileReset",		"OnProfile")
-	TMW.db.RegisterCallback(TMW, "OnNewProfile",		"OnProfile")
-	TMW.db.RegisterCallback(TMW, "OnProfileShutdown",	"ShutdownProfile")
-	TMW.db.RegisterCallback(TMW, "OnDatabaseShutdown",	"ShutdownProfile")
+	-- Set the version for the current profile to the current version if it is a new profile.
+	TMW.db.profile.Version = TMW.db.profile.Version or TELLMEWHEN_VERSIONNUMBER
+	
+	-- Handle normal upgrades after the database has been initialized.
+	TMW:Upgrade()
 
+	-- DEFAULT_ICON_SETTINGS is used for comparisons against a blank icon setup,
+	-- most commonly used to see if the user has configured an icon at all.
 	TMW.DEFAULT_ICON_SETTINGS = TMW.db.profile.Groups[0].Icons[0]
 	TMW.db.profile.Groups[0] = nil
 
 
+	
 	--------------- Spell Caches ---------------
 	TMW.ClassSpellCache = TMW.db.global.ClassSpellCache
+	
+	-- Adds a spell's texture to the texture cache by name
+	-- so that we can get textures by spell name much more frequently,
+	-- reducing the usage of question mark and pocketwatch icons.
 	local function AddID(id)
 		local name, _, tex = GetSpellInfo(id)
 		name = strlowerCache[name]
@@ -1598,10 +1654,13 @@ function TMW:OnInitialize()
 			SpellTextures[name] = tex
 		end
 	end
+	
+	-- Spells of the user's class should be prioritized.
 	for id in pairs(TMW.ClassSpellCache[pclass]) do
-		-- do current class spells first to discourage overwrites
 		AddID(id)
 	end
+	
+	-- Next comes spells of all other classes.
 	for class, tbl in pairs(TMW.ClassSpellCache) do
 		if class ~= pclass and class ~= "PET" then
 			for id in pairs(tbl) do
@@ -1609,45 +1668,42 @@ function TMW:OnInitialize()
 			end
 		end
 	end
+	
+	-- Pets are last because there are some overlapping names with class spells
+	-- and we don't want to overwrite the textures for class spells with ones for pet spells.
 	for id in pairs(TMW.ClassSpellCache.PET) do
-		-- do pets last so pet spells dont take the place of class spells
 		AddID(id)
 	end
-	AddID = nil
 
+	-- Setup aura caching. It is currently only used for the spell suggestion list,
+	-- but the code for it is in the main addon so that we can catch auras all the time.
 	TellMeWhenDB.AuraCache = TellMeWhenDB.AuraCache or {}
 	TMW.AuraCache = TellMeWhenDB.AuraCache
-
-
-	--------------- Events/OnUpdate ---------------
-	CNDTEnv = TMW.CNDT.Env
-	TMW:SetScript("OnUpdate", TMW.OnUpdate)
-
 	TMW:RegisterEvent("COMBAT_LOG_EVENT_UNFILTERED")
-	TMW:RegisterEvent("PLAYER_ENTERING_WORLD")
-	TMW:RegisterEvent("PLAYER_TALENT_UPDATE")
-	TMW:RegisterEvent("ACTIVE_TALENT_GROUP_CHANGED")
 
-
-	--------------- Comm ---------------
+	
+	
+	
+	--------------- Communications ---------------
+	
+	-- Channel TMW is used for sharing data.
+	-- ReceiveComm is a setting that allows users to disable receiving shared data.
 	if TMW.db.profile.ReceiveComm then
 		TMW:RegisterComm("TMW")
 	end
+	
+	-- Channel TMWV is used for version notifications.
 	TMW:RegisterComm("TMWV")
 
+	-- Send a version notification to the user's guild.
 	if IsInGuild() then
 		TMW:SendCommMessage("TMWV", "M:" .. TELLMEWHEN_VERSION .. "^m:" .. TELLMEWHEN_VERSION_MINOR .. "^R:" .. TELLMEWHEN_VERSIONNUMBER .. "^", "GUILD")
 	end
-	TMW:PLAYER_ENTERING_WORLD()
-
-	TMW.VarsLoaded = true
 end
 
 function TMW:OnProfile()
 	TMW.db.profile.Version = TMW.db.profile.Version or TELLMEWHEN_VERSIONNUMBER -- this is for new profiles
-	if (type(TMW.db.profile.Version) == "string") or TMW.db.profile.Version < TELLMEWHEN_VERSIONNUMBER then
-		TMW:Upgrade()
-	end
+	
 	for icon in TMW:InIcons() do
 		icon:SetInfo("texture", "")
 	end
@@ -1719,23 +1775,7 @@ function TMW:OnUpdate(elapsed)					-- THE MAGICAL ENGINE OF DOING EVERYTHING
 		CNDTEnv.GCD = GCD
 		TMW.GCD = GCD
 
-		if FramesToFind then
-			-- I hate to do this, but this is the only way to detect frames that are created by an upvalued CreateFrame (*cough* VuhDo) (Unless i raw hook it, but CreateFrame should probably be secure)
-			for group, frameName in pairs(FramesToFind) do
-				if _G[frameName] then
-					group:SetPos()
-					FramesToFind[group] = nil
-					if not next(FramesToFind) then
-						FramesToFind = nil
-						break
-					end
-				end
-			end
-		end
-
-
 		if Locked then
-
 			for i = 1, #GroupsToUpdate do
 				-- GroupsToUpdate only contains groups with conditions
 				local group = GroupsToUpdate[i]
@@ -1766,9 +1806,9 @@ function TMW:OnUpdate(elapsed)					-- THE MAGICAL ENGINE OF DOING EVERYTHING
 end
 
 
-function TMW:Update()
-	if not TMW.EnteredWorld then return end
-
+function TMW:Update(...)
+	TMW:Initialize()
+	
 	time = GetTime() TMW.time = time
 	LastUpdate = 0
 
@@ -1821,10 +1861,16 @@ function TMW:DoWarn()
 	end
 end
 
-function TMW:GetUpgradeTable()			-- upgrade functions
-	if TMW.UpgradeTable then return TMW.UpgradeTable end
-	local t = {
 
+TMW.UpgradeTable = {}
+TMW.UpgradeTableByVersions = {}
+function TMW:GetBaseUpgrades()			-- upgrade functions
+	return {
+		[51023] = {
+			icon = function(self, ics)
+				ics.InvertBars = nil
+			end,
+		},
 		[51019] = {
 			textlayout = function(self, settings, GUID)
 				-- I don't know why this layout exists, but I know it was my fault, so I am going to delete it.
@@ -2075,14 +2121,6 @@ function TMW:GetUpgradeTable()			-- upgrade functions
 				ics.Name = gsub(ics.Name, "(CrowdControl)", "%1; " .. GetSpellInfo(339))
 			end,
 		},
-		[48017] = {
-			icon = function(self, ics)
-				-- convert from some stupid string thing i made up to a bitfield
-				if type(ics.TotemSlots) == "string" then
-					ics.TotemSlots = tonumber(ics.TotemSlots:reverse(), 2)
-				end
-			end,
-		},
 		[48010] = {
 			icon = function(self, ics)
 				-- OnlyShown was disabled for OnHide (not togglable anymore), so make sure that icons dont get stuck with it enabled
@@ -2115,13 +2153,15 @@ function TMW:GetUpgradeTable()			-- upgrade functions
 				end
 			end,
 		},
+		--[[
+		-- Commented out 6-22-12 - Meta icons can be FakeHidden as of a long time ago, so there is no reason to do this anymore
 		[47017] = {
 			icon = function(self, ics)
 				if ics.Type == "meta"  then
 					ics.FakeHidden = false
 				end
 			end,
-		},
+		},]]
 		[47002] = {
 			map = {
 				CBS = "CDSTColor",
@@ -2597,8 +2637,6 @@ function TMW:GetUpgradeTable()			-- upgrade functions
 				end
 			end,
 			icon = function(self, ics)
-				ics.StackMin = floor(ics.StackMin)
-				ics.StackMax = floor(ics.StackMax)
 				for k, v in pairs(ics.Conditions) do
 					if type(k) == "number" and v.Type == "ECLIPSE_DIRECTION" and v.Level == -1 then
 						v.Level = 0
@@ -2713,16 +2751,6 @@ function TMW:GetUpgradeTable()			-- upgrade functions
 				end
 			end,
 		},
-		[23000] = {
-			icon = function(self, ics)
-				if ics.StackMin ~= TMW.Icon_Defaults.StackMin then
-					ics.StackMinEnabled = true
-				end
-				if ics.StackMax ~= TMW.Icon_Defaults.StackMax then
-					ics.StackMaxEnabled = true
-				end
-			end,
-		},
 		[22100] = {
 			icon = function(self, ics)
 				if ics.UnitReact and ics.UnitReact ~= 0 then
@@ -2796,25 +2824,65 @@ function TMW:GetUpgradeTable()			-- upgrade functions
 		},
 
 	}
-
-	TMW.UpgradeTable = {}
-	for k, v in pairs(t) do
-		v.Version = k
-		tinsert(TMW.UpgradeTable, v)
-	end
-	sort(TMW.UpgradeTable, function(a, b)
-		if a.priority or b.priority then
-			if a.priority and b.priority then
-				return a.priority < b.priority
-			else
-				return a.priority
-			end
-		end
-		return a.Version < b.Version
-	end)
-	return TMW.UpgradeTable
 end
 
+function TMW:RegisterUpgrade(version, data)
+	assert(not data.Version, "Upgrade data cannot store a value with key 'Version' because it is a reserved key.")
+	
+	local upgradeSet = TMW.UpgradeTableByVersions[version]
+	if upgradeSet then
+		-- An upgrade set already exists for this version, so we need to merge the two.
+		for k, v in pairs(data) do
+			if upgradeSet[k] ~= nil then
+				if type(v) == "function" then
+					-- If we already have a function with the same key (E.g. 'icon' or 'group')
+					-- then hook the existing function so that both run
+					hooksecurefunc(upgradeSet, k, v)
+				else
+					-- If we already have data with the same key (some kind of helper data for the upgrade)
+					-- then raise an error because there will certainly be conflicts.
+					error(("A value with key %q already exists for upgrades for version %d. Please choose a different key to store it in to prevent conflicts.")
+					:format(k, version))
+				end
+			else
+				-- There was nothing already in place, so just stick it in the upgrade set as-is.
+				upgradeSet[k] = v
+			end
+		end
+	else
+		-- An upgrade set doesn't exist for this version,
+		-- so just use the table that was passed in and process it as a new upgrade set.
+		data.Version = version
+		TMW.UpgradeTableByVersions[version] = data
+		tinsert(TMW.UpgradeTable, data)
+	end
+end
+function TMW.UpgradeTableSorter(a, b)
+	if a.priority or b.priority then
+		if a.priority and b.priority then
+			return a.priority < b.priority
+		else
+			return a.priority
+		end
+	end
+	return a.Version < b.Version
+end
+function TMW:UpdateUpgradeTable()
+	sort(TMW.UpgradeTable, TMW.UpgradeTableSorter)
+end
+function TMW:GetUpgradeTable()	
+	if not TMW.ProcessedBaseUpgrades then		
+		for version, data in pairs(TMW:GetBaseUpgrades()) do
+			TMW:RegisterUpgrade(version, data)
+		end
+		
+		TMW.ProcessedBaseUpgrades = true
+	end
+	
+	TMW:UpdateUpgradeTable()
+	
+	return TMW.UpgradeTable
+end
 function TMW:GlobalUpgrade()
 	TellMeWhenDB.Version = TellMeWhenDB.Version or 0
 	if TellMeWhenDB.Version == 414069 then TellMeWhenDB.Version = 41409 end --well, that was a mighty fine fail
@@ -2926,7 +2994,7 @@ function TMW:GlobalUpgrade()
 	TellMeWhenDB.Version = TELLMEWHEN_VERSIONNUMBER -- pre-default upgrades complete!
 end
 
-do
+do	-- TMW.safecall
 	--[[
 		 xpcall safecall implementation
 	]]
@@ -2969,7 +3037,8 @@ do
 	end
 
 	function TMW.safecall(func, ...)
-		-- i don't check if func is a function here because it is always being called from my own code and i can keep track of that crap
+		-- I don't check if func is a function here because i hope that whoever calls it
+		-- is smart enough to check when they need it so we dont need to check when we probably dont need to.
 		--  if type(func) == "function" then
 			return Dispatchers[select('#', ...)](func, ...)
 		-- end
@@ -2997,26 +3066,38 @@ function TMW:Assert(statement, text, ...)
 end
 
 function TMW:Upgrade()
-	if TellMeWhen_Settings then -- needs to be first
-		for k, v in pairs(TellMeWhen_Settings) do
-			TMW.db.profile[k] = v
+	if TellMeWhen_Settings or (type(TMW.db.profile.Version) == "string") or (TMW.db.profile.Version < TELLMEWHEN_VERSIONNUMBER) then
+		if TellMeWhen_Settings then -- needs to be first
+			for k, v in pairs(TellMeWhen_Settings) do
+				TMW.db.profile[k] = v
+			end
+			TMW.db = AceDB:New("TellMeWhenDB", TMW.Defaults)
+			TMW.db.profile.Version = TellMeWhen_Settings.Version
+			TellMeWhen_Settings = nil
 		end
-		TMW.db = AceDB:New("TellMeWhenDB", TMW.Defaults)
-		TMW.db.profile.Version = TellMeWhen_Settings.Version
-		TellMeWhen_Settings = nil
-	end
-	if type(TMW.db.profile.Version) == "string" then
-		local v = gsub(TMW.db.profile.Version, "[^%d]", "") -- remove decimals
-		v = v..strrep("0", 5-#v)	-- append zeroes to create a 5 digit number
-		TMW.db.profile.Version = tonumber(v)
-	end
+		if type(TMW.db.profile.Version) == "string" then
+			local v = gsub(TMW.db.profile.Version, "[^%d]", "") -- remove decimals
+			v = v..strrep("0", 5-#v)	-- append zeroes to create a 5 digit number
+			TMW.db.profile.Version = tonumber(v)
+		end
 
-	TMW:DoUpgrade("global", TMW.db.profile.Version)
+		TMW:DoUpgrade("global", TMW.db.profile.Version)
+	end
+	
+	-- Must set callbacks after TMW:Upgrade() because the db is overwritten there when upgrading from 3.0.0
+	TMW.db.RegisterCallback(TMW, "OnProfileChanged",	"OnProfile")
+	TMW.db.RegisterCallback(TMW, "OnProfileCopied",		"OnProfile")
+	TMW.db.RegisterCallback(TMW, "OnProfileReset",		"OnProfile")
+	TMW.db.RegisterCallback(TMW, "OnNewProfile",		"OnProfile")
+	TMW.db.RegisterCallback(TMW, "OnProfileShutdown",	"ShutdownProfile")
+	TMW.db.RegisterCallback(TMW, "OnDatabaseShutdown",	"ShutdownProfile")
 end
 
 function TMW:DoUpgrade(type, version, ...)
 	assert(_G.type(type) == "string")
 	assert(_G.type(version) == "number")
+	
+	TMW.HaveUpgradedOnce = true
 	
 	-- upgrade the actual requested setting
 	for k, v in ipairs(TMW:GetUpgradeTable()) do
@@ -3127,25 +3208,11 @@ function TMW.OnGCD(d)
 end local OnGCD = TMW.OnGCD
 
 function TMW:PLAYER_ENTERING_WORLD()
-	if not TMW.VarsLoaded then return end
 	TMW.EnteredWorld = true
-
-	local NumRealRaidMembers = GetRealNumRaidMembers()
-	local NumRealPartyMembers = GetRealNumPartyMembers()
-	local NumRaidMembers = GetNumRaidMembers()
-
-	if (NumRealRaidMembers > 0) and (NumRealRaidMembers ~= (TMW.OldNumRealRaidMembers or 0)) then
-		TMW.OldNumRealRaidMembers = NumRealRaidMembers
-		TMW:SendCommMessage("TMWV", "M:" .. TELLMEWHEN_VERSION .. "^m:" .. TELLMEWHEN_VERSION_MINOR .. "^R:" .. TELLMEWHEN_VERSIONNUMBER .. "^", "RAID")
-
-	elseif (NumRealRaidMembers == 0) and (NumRealPartyMembers > 0) and (NumRealPartyMembers ~= (TMW.OldNumRealPartyMembers or 0)) then
-		TMW.OldNumRealPartyMembers = NumRealPartyMembers
-		TMW:SendCommMessage("TMWV", "M:" .. TELLMEWHEN_VERSION .. "^m:" .. TELLMEWHEN_VERSION_MINOR .. "^R:" .. TELLMEWHEN_VERSIONNUMBER .. "^", "PARTY")
-
-	elseif UnitInBattleground("player") and (NumRaidMembers ~= (TMW.OldNumRaidMembers or 0)) then
-		TMW.OldNumRaidMembers = NumRaidMembers
-		TMW:SendCommMessage("TMWV", "M:" .. TELLMEWHEN_VERSION .. "^m:" .. TELLMEWHEN_VERSION_MINOR .. "^R:" .. TELLMEWHEN_VERSIONNUMBER .. "^", "BATTLEGROUND")
-	end
+	
+	TMW:SendCommMessage("TMWV", "M:" .. TELLMEWHEN_VERSION .. "^m:" .. TELLMEWHEN_VERSION_MINOR .. "^R:" .. TELLMEWHEN_VERSIONNUMBER .. "^", "RAID")
+	TMW:SendCommMessage("TMWV", "M:" .. TELLMEWHEN_VERSION .. "^m:" .. TELLMEWHEN_VERSION_MINOR .. "^R:" .. TELLMEWHEN_VERSIONNUMBER .. "^", "PARTY")
+	TMW:SendCommMessage("TMWV", "M:" .. TELLMEWHEN_VERSION .. "^m:" .. TELLMEWHEN_VERSION_MINOR .. "^R:" .. TELLMEWHEN_VERSIONNUMBER .. "^", "BATTLEGROUND")
 end
 
 function TMW:COMBAT_LOG_EVENT_UNFILTERED(_, _, p,_, g, _, f, _, _, _, _, _, i)
@@ -3161,12 +3228,22 @@ end
 
 function TMW:PLAYER_TALENT_UPDATE()
 	if not TMW.AddedTalentsToTextures then
-		for tab = 1, GetNumTalentTabs() do
-			for talent = 1, GetNumTalents(tab) do
-				local name, tex = GetTalentInfo(tab, talent)
+		if TMW.ISMOP then
+			for talent = 1, MAX_NUM_TALENTS do
+				local name, tex = GetTalentInfo(talent)
 				local lower = name and strlowerCache[name]
 				if lower then
 					SpellTextures[lower] = tex
+				end
+			end
+		else
+			for tab = 1, GetNumTalentTabs() do
+				for talent = 1, GetNumTalents(tab) do
+					local name, tex = GetTalentInfo(tab, talent)
+					local lower = name and strlowerCache[name]
+					if lower then
+						SpellTextures[lower] = tex
+					end
 				end
 			end
 		end
@@ -3178,7 +3255,6 @@ end
 function TMW:ACTIVE_TALENT_GROUP_CHANGED()
 	TMW:ScheduleUpdate(1)
 end
-
 
 function TMW:ProcessEquivalencies()
 	for dispeltype, icon in pairs(TMW.DS) do
@@ -3239,7 +3315,9 @@ function TMW:ProcessEquivalencies()
 						SpellTextures[strlowerCache[name]] = tex
 
 					else  -- this should never ever ever happen except in new patches if spellIDs were wrong (experience talking)
-						if clientVersion >= addonVersion then -- dont warn for old clients using newer versions
+						if TMW.ISMOP then
+							-- DO NOTHING FOR NOW
+						elseif clientVersion >= addonVersion then -- dont warn for old clients using newer versions
 							TMW:Error("Invalid spellID found: %s! Please report this on TMW's CurseForge page, especially if you are currently on the PTR!", realID)
 						end
 						str = gsub(str, id, realID) -- still need to substitute it to prevent recusion
@@ -3280,17 +3358,6 @@ function UpdateTableManager:UpdateTable_Sort(func)
 
 	sort(self.UpdateTable_UpdateTable, func)
 end
-
-
-local Display = TMW:NewClass("Display")
-
-function Display:OnNewInstance(name)
-	self.name = name
-
-	self.Group = TMW:NewClass("Group_" .. name, "GroupParent")
-	self.Icon = TMW:NewClass("Icon_" .. name, "IconParent")
-end
-
 
 
 NAMES = TMW:NewModule("Names", "AceEvent-3.0") TMW.NAMES = NAMES
@@ -3690,9 +3757,9 @@ TMW.ChannelList = {
 			local channel = "SAY"
 			if UnitInBattleground("player") then
 				channel = "BATTLEGROUND"
-			elseif UnitInRaid("player") then
+			elseif IsInRaid() then
 				channel = "RAID"
-			elseif GetNumPartyMembers() > 1 then
+			elseif IsInGroup() then
 				channel = "PARTY"
 			end
 			SendChatMessage(Text, channel)
@@ -4148,11 +4215,13 @@ ANIM.AnimationList = {
 				local moveX = random(-Amt, Amt)
 				local moveY = random(-Amt, Amt)
 
-				icon:SetPoint(icon.pos, icon.x + moveX, icon.y + moveY)
+				local position = icon.position
+				icon:SetPoint(position.point, position.relativeTo, position.relativePoint, position.x + moveX, position.y + moveY)
 			end
 		end,
 		OnStop = function(icon, table)
-			icon:SetPoint(icon.pos, icon.x, icon.y)
+			local position = icon.position
+			icon:SetPoint(position.point, position.relativeTo, position.relativePoint, position.x, position.y)
 		end,
 	},
 	{ -- ICONFLASH
@@ -4519,7 +4588,7 @@ ANIM.AnimationList = {
 				Alpha = data.a_anim,
 				SizeX = data.SizeX,
 				SizeY = data.SizeY,
-				Image = TMW:GetCustomTexture(data.Image),
+				Image = TMW:GetTexturePathFromSetting(data.Image),
 			}
 		end,
 
@@ -4610,19 +4679,16 @@ function ANIM:HandleEvent(icon, data)
 
 end
 function ANIM:TMW_ICON_META_INHERITED_ICON_CHANGED(event, icon, icToUse)
-	print(event, icon, icToUse)
 	if icon:Animations_Has() then
 		for k, v in next, icon:Animations_Get() do
 			if v.originIcon ~= icon then
 				icon:Animations_Stop(v)
-				print("Stopped", icon, k, v)
 			end
 		end
 	end
 	if icToUse:Animations_Has() then
 		for k, v in next, icToUse:Animations_Get() do
 			icon:Animations_Start(v)
-			print("Started", icon, k, v, icToUse)
 		end
 	end
 end
@@ -4677,7 +4743,6 @@ function AnimatedObject:Animations_Start(table)
 		-- Make sure not to overwrite this value.
 		-- This is used to distingusih inherited meta animations from original animations on a metaicon.
 		table.originIcon = table.originIcon or self
-		--table.lastInitialize = time
 
 		if AnimationData.OnStart then
 			AnimationData.OnStart(self, table)
@@ -4685,10 +4750,8 @@ function AnimatedObject:Animations_Start(table)
 
 		-- meta inheritance
 		local Icons = Types.meta.Icons
-		print(table, Animation, self)
 		for i = 1, #Icons do
 			local ic = Icons[i]
-			print(ic, ic.__currentIcon, self)
 			if ic.__currentIcon == self then
 				ic:Animations_Start(table, ic)
 			end
@@ -4726,14 +4789,13 @@ end
 
 
 
-local ConditionControlledObject = TMW:NewClass("ConditionControlledObject")
-
-function ConditionControlledObject:Conditions_LoadData(Conditions)
-	local ConditionObj = TMW.CNDT:GetConditionObject(self, Conditions)
-	self.ConditionObj = ConditionObj
-	return ConditionObj
-end
-
+local ConditionControlledObject = TMW:NewClass("ConditionControlledObject"){
+	Conditions_LoadData = function(self, Conditions)
+		local ConditionObj = TMW.CNDT:GetConditionObject(self, Conditions)
+		self.ConditionObj = ConditionObj
+		return ConditionObj
+	end,
+}
 
 -- -----------
 -- GROUPS
@@ -4957,8 +5019,8 @@ function Group.SetPos(group)
 	p.relativeTo = type(p.relativeTo) == "table" and p.relativeTo:GetName() or p.relativeTo
 	local relativeTo = _G[p.relativeTo]
 	if not relativeTo then
-		FramesToFind = FramesToFind or {}
-		FramesToFind[group] = p.relativeTo
+		group.frameToFind = p.relativeTo
+		TMW:RegisterCallback("TMW_ONUPDATE_TIMECONSTRAINED", group.DetectFrame, group)
 		group:SetPoint("CENTER", UIParent)
 	else
 		local success, err = pcall(group.SetPoint, group, p.point, relativeTo, p.relativePoint, p.x, p.y)
@@ -4980,6 +5042,14 @@ function Group.SetPos(group)
 	group:SetSize(s.Columns*(30+Spacing)-Spacing, s.Rows*(30+Spacing)-Spacing)
 	group:SetFrameStrata(s.Strata)
 	group:SetFrameLevel(s.Level)
+end
+
+function Group.DetectFrame(group, event, time, Locked)
+	local frameToFind = group.frameToFind
+	if _G[frameToFind] then
+		group:SetPos()
+		TMW:UnregisterCallback("TMW_ONUPDATE_TIMECONSTRAINED", group.DetectFrame, group)
+	end
 end
 
 function Group.Setup(group)
@@ -5073,9 +5143,11 @@ function Icon.OnNewInstance(icon, ...)
 	tinsert(group.SortedIcons, icon)
 	
 	icon.EventHandlersSet = {}
+	icon.Components = {}
 	icon.Modules = {}
 	icon.EssentialModuleComponents = {}
 	icon.lmbButtonData = {}
+	icon.position = {}
 	
 	
 	icon.attributes = {
@@ -5240,7 +5312,7 @@ function Icon.ScheduleNextUpdate(icon)
 			newdur = DurationMin
 		end
 	end
-
+	--TMW:Fire("REQNEXTUPDATE", icon)--Todo: implement somehow
 	-- Duration Events
 	if icon.EventHandlersSet.OnDuration then
 		for _, EventSettings in TMW:InNLengthTable(icon.Events) do
@@ -5263,7 +5335,7 @@ function Icon.ScheduleNextUpdate(icon)
 end
 
 
--- universal (and needs to stay that way)
+-- universal
 function Icon.Update(icon, force, ...)
 	local attributes = icon.attributes
 	
@@ -5471,6 +5543,10 @@ function Icon.Setup(icon)
 	local typeData = Types[ics.Type]
 	local viewData = Views[group:GetSettings().View]
 	
+	-- Reset the lits of used components
+	wipe(icon.Components)
+	
+	local viewData_old = icon.viewData
 	icon.viewData = viewData
 	
 	icon.ForceDisabled = nil
@@ -5478,6 +5554,17 @@ function Icon.Setup(icon)
 
 	--icon.doCheckForUpdatesIfFakeHidden = nil
 
+	
+	if typeData.RelevantSettings then
+		for k in pairs(TMW.Icon_Defaults) do
+			if typeData.RelevantSettings[k] then
+				icon[k] = ics[k]
+			else
+				icon[k] = nil
+			end
+		end
+	end
+	
 	-- Icon Type
 	local oldTypeData = icon.typeData
 	icon.typeData = typeData
@@ -5486,18 +5573,10 @@ function Icon.Setup(icon)
 		oldTypeData:UnregisterIcon(icon)
 	end
 	typeData:RegisterIcon(icon)
+	typeData:ImplementIntoIcon(icon)
 	
 	if icon.typeData ~= oldTypeData then		
 		TMW:Fire("TMW_ICON_TYPE_CHANGED", icon, typeData, oldTypeData)
-	end
-	
-	
-	for k in pairs(TMW.Icon_Defaults) do
-		if typeData.RelevantSettings[k] then
-			icon[k] = ics[k]
-		else
-			icon[k] = nil
-		end
 	end
 
 	assert(not (pclass ~= "DEATHKNIGHT" and icon.IgnoreRunes)) --TODO: delete this after a while
@@ -5509,10 +5588,7 @@ function Icon.Setup(icon)
 		icon.Alpha = 0
 	end
 
-	-- make fake hidden easier to process in SetInfo
-	icon.FakeHidden = icon.FakeHidden and 0
-	icon.OverrideTex = TMW:GetCustomTexture(icon)
-
+	icon:DisableAllModules()
 	icon:UnregisterAllEvents()
 	ClearScripts(icon)
 	icon:SetUpdateMethod("auto")
@@ -5522,15 +5598,19 @@ function Icon.Setup(icon)
 	-- Conditions
 	icon:Conditions_LoadData(icon.Conditions)
 
-	icon:DisableAllModules()
-	viewData:Icon_Setup(icon)
-	icon:SetupAllModulesForIcon(icon)
-
 	-- force an update
 	icon.LastUpdate = 0
 
 	-- actually run the icon's update function
 	if icon.Enabled or not Locked then
+
+		if viewData_old and viewData_old.Icon_UnSetup then
+			viewData_old:Icon_UnSetup(icon)
+		end
+		viewData:ImplementIntoIcon(icon)
+		viewData:Icon_Setup(icon)
+		icon:SetupAllModulesForIcon(icon)
+		
 		TMW.safecall(typeData.Setup, typeData, icon, groupID, iconID)
 	else
 		icon:SetInfo("alpha", 0)
@@ -5538,10 +5618,10 @@ function Icon.Setup(icon)
 
 	-- if the icon is set to always hide and we haven't determined otherwise, then don't automatically update it.
 	-- Conditions and meta icons will update it as needed.
-	if icon.FakeHidden and not icon.doCheckForUpdatesIfFakeHidden then
+	--[[if icon.FakeHidden and not icon.doCheckForUpdatesIfFakeHidden then
 		icon:SetScript("OnUpdate", nil, true)
 		icon:UpdateTable_Unregister()
-	end
+	end]]
 
 	icon.NextUpdateTime = 0
 
@@ -5631,9 +5711,117 @@ function Icon.SetModulesToActiveStateOfIcon(icon, sourceIcon)
 end
 	
 
+TMW:NewClass("NamedInstances"){
+	OnClassInherit_NamedInstances = function(self, newClass)
+		newClass.instancesByName = {}
+	end,
+	OnNewInstance_NamedInstances = function(self, name)
+		self.instancesByName[name] = self
+	end,
+}
+
+TMW:NewClass("GenericComponent"){
+	IconSettingDefaults = {},
+	ConfigPanels = {},
+	OnClassInherit_GenericComponent = function(self, newClass)
+		newClass:InheritTable(self, "IconSettingDefaults")
+		newClass:InheritTable(self, "ConfigPanels")
+	end,
+	OnNewInstance_GenericComponent = function(self)
+		self:InheritTable(self.class, "IconSettingDefaults")
+		self:InheritTable(self.class, "ConfigPanels")
+	end,
+
+	ImplementIntoIcon = function(self, icon)
+		local ics = icon:GetSettings()
+		for setting in pairs(self.IconSettingDefaults) do
+			icon[setting] = ics[setting]
+		end
+		icon.Components[#icon.Components+1] = self
+	end,
+	
+	RegisterIconDefaults = function(self, defaults, forceRelevant)
+		assert(type(defaults) == "table", "arg1 to RegisterIconDefaults must be a table")
+		
+		if TMW.Initialized then
+			error(("Defaults for module %q are being registered too late. They need to be registered before the database is initialized."):format(self.name))
+		end
+		
+		-- Copy the defaults into the main defaults table.
+		TMW:CopyTableInPlaceWithMeta(defaults, TMW.Icon_Defaults, true)
+		-- Copy the defaults into defaults for this component. Used to implement relevant settings.
+		TMW:CopyTableInPlaceWithMeta(defaults, self.IconSettingDefaults, true)
+		
+		-- Add the settings to the RelevantToAll table so that they can be accessed directly from the icon.
+		if forceRelevant then
+			for settingKey in pairs(defaults) do
+				RelevantToAll.__index[settingKey] = true
+			end
+		end
+	end,
+	
+	ConfigPanelsSort = function(a, b)
+		local sizeAFull, sizeBFull = a.size == "full", b.size == "full"
+		if sizeAFull or sizeBFull then
+			if sizeAFull and sizeBFull then
+				return true
+			else
+				return sizeAFull
+			end
+		else
+			return false
+		end
+	end,
+	RegisterConfigPanel = function(self, size, preferredColumn, panelType)
+		-- This is supposed to be a private method, only called from the RegisterConfigPanel_<type> functions.
+		assert(size == "column" or size == "full", "GenericComponent:RegisterConfigPanel() - 'size' (arg2) - Expected 'column' or 'full'")
+		
+		local t = {
+			self = self,
+			panelType = panelType,
+			size = size,
+			preferredColumn = preferredColumn,
+		}
+		if size == "full" then
+			t.preferredColumn = 1
+		end
+		
+		self.ConfigPanels[#self.ConfigPanels + 1] = t
+		sort(self.ConfigPanels, self.ConfigPanelsSort)
+		return t
+	end,
+	RegisterConfigPanel_XMLTemplate = function(self, size, preferredColumn, xmlTemplateName)
+		local t = self:RegisterConfigPanel(size, preferredColumn, "XMLTemplate")
+		
+		assert(type(xmlTemplateName) == "string", "GenericComponent:RegisterConfigPanel_XMLTemplate() - 'xmlTemplateName' (arg3) - Expected string")
+		t.xmlTemplateName = xmlTemplateName
+	end,
+	RegisterConfigPanel_ConstructorFunc = function(self, size, preferredColumn, frameName, func)
+		local t = self:RegisterConfigPanel(size, preferredColumn, "ConstructorFunc")
+		
+		assert(type(frameName) == "string", "GenericComponent:RegisterConfigPanel_ConstructorFunc() - 'frameName' (arg3) - Expected string")
+		t.frameName = frameName
+		
+		assert(type(func) == "function", "GenericComponent:RegisterConfigPanel_ConstructorFunc() - 'func' (arg4) - Expected funcref")
+		t.func = func
+	end,
+	
+	RegisterUpgrade = function(self, version, data)
+		if TMW.HaveUpgradedOnce then
+			error(("Upgrades for module %q are being registered too late. They need to be registered before any upgrades occur."):format(self.name))
+		end
+		
+		TMW:RegisterUpgrade(version, data)
+	end,
+	
+	RegisterDogTag = function(self, ...)
+		-- just a wrapper so that i don't have to LibStub DogTag everywhere
+		DogTag:AddTag(...)
+	end,
+}
 
 TMW.ProcessorsByName = {}
-local IconDataProcessor = TMW:NewClass("IconDataProcessor"){
+local IconDataProcessor = TMW:NewClass("IconDataProcessor", "GenericComponent", "NamedInstances"){
 	UsedTokens = {},
 	SIUVs = { --SetInfoUpValues
 		"local TMW = TMW",
@@ -5644,6 +5832,8 @@ local IconDataProcessor = TMW:NewClass("IconDataProcessor"){
 	OnNewInstance = function(self, name, attributes)
 		assert(name, "Name is required for an IconDataProcessor!")
 		assert(attributes, "Attributes are required for an IconDataProcessor!")
+		
+		self.hooks = {}
 		
 		for i, instance in pairs(self.class.instances) do
 			if instance.name == name then
@@ -5667,16 +5857,61 @@ local IconDataProcessor = TMW:NewClass("IconDataProcessor"){
 		
 		TMW.ProcessorsByName[self.name] = self
 		self.SIUVs[#self.SIUVs+1] = ("local %s = ProcessorsByName['%s']"):format(name, name)
-		self.SIUVs[#self.SIUVs+1] = ("local %s"):format(attributes) -- do this to prevent leaked global accessing
+		self.SIUVs[#self.SIUVs+1] = ("local %s"):format(attributes) -- do this to prevent accidental leaked global accessing
 		
 		self.changedEvent = "TMW_ICON_DATA_CHANGED_" .. name
+		
+		TMW:ClearSetInfoFunctionCache()
 	end,
 	AssertDependency = function(self, dependency)
 		assert(TMW.ProcessorsByName[dependency], ("Dependency %q of processor %q was not found!"):format(dependency, self.name))
 	end,
-	AddDogTag = function(self, ...)
-		-- just a wrapper so that i don't have to LibStub DogTag everywhere
-		DogTag:AddTag(...)
+	CreateDogTagEventString = function(self)
+		return TMW:CreateDogTagEventString(self.name)
+	end,
+	CompileFunctionHooks = function(self, t, orderRequested)
+		for _, ProcessorHook in ipairs(self.hooks) do
+			for func, order in pairs(ProcessorHook.funcs) do
+				if order == orderRequested then
+					t[#t+1] = "\n"
+					func(self, t)
+					t[#t+1] = "\n"
+				end
+			end
+		end
+	end
+}
+
+TMW:NewClass("IconDataProcessorHook", "GenericComponent", "NamedInstances"){
+	OnNewInstance = function(self, name, processorToHook)
+		assert(type(name) == "string", "IconDataProcessorHook: arg1 to constructor function must be a string")
+		assert(type(processorToHook) == "string", "IconDataProcessorHook: arg2 to constructor function must be a string")
+		
+		local Processor = TMW.ProcessorsByName[processorToHook]
+		assert(Processor, "IconDataProcessorHook: unable to find IconDataProcessor named " .. processorToHook)
+		
+		self.name = name
+		self.processorToHook = processorToHook
+		self.Processor = Processor
+		self.Processor.hooks[#self.Processor.hooks+1] = self
+		self.funcs = {}
+		self.processorRequirements = {}
+		
+		self:RegisterProcessorRequirement(processorToHook)
+	end,
+	RegisterCompileFunctionSegmentHook = function(self, order, func)
+		-- These hooks are not much of hooks at all,
+		-- since they go directly in the body of the function
+		-- and can modify input variables before they are processed.
+		
+		assert(order == "pre" or order == "post", "RegisterCompileFunctionSegmentHook: arg1 must be either 'pre' or 'post'")
+		
+		self.funcs[func] = order
+		
+		TMW:ClearSetInfoFunctionCache()
+	end,
+	RegisterProcessorRequirement = function(self, processorName)
+		self.processorRequirements[processorName] = true
 	end,
 }
 
@@ -5684,11 +5919,13 @@ local InheritAllFunc
 function Icon.InheritDataFromIcon(iconDestination, iconSource)
 	if not InheritAllFunc then
 		local attributes = {}
+		local attributesSplit = {}
 	
 		for _, Processor in pairs(IconDataProcessor.instances) do
 			if not Processor.dontInherit then
+				attributes[#attributes+1] = Processor.attributesStringNoSpaces
 				for _, attribute in TMW:Vararg(strsplit(",", Processor.attributesStringNoSpaces)) do
-					attributes[#attributes+1] = attribute
+					attributesSplit[#attributesSplit+1] = attribute
 				end
 			end
 		end
@@ -5699,10 +5936,10 @@ function Icon.InheritDataFromIcon(iconDestination, iconSource)
 		t[#t+1] = "local attributes = iconSource.attributes"
 		t[#t+1] = "\n"
 		t[#t+1] = "iconDestination:SetInfo('"
-		t[#t+1] = table.concat(attributes, ", ")
+		t[#t+1] = table.concat(attributes, "; ")
 		t[#t+1] = "', "
 		t[#t+1] = "attributes."
-		t[#t+1] = table.concat(attributes, ", attributes.")
+		t[#t+1] = table.concat(attributesSplit, ", attributes.")
 		t[#t+1] = ")"
 		
 		InheritAllFunc = assert(loadstring(table.concat(t)))
@@ -5712,6 +5949,29 @@ function Icon.InheritDataFromIcon(iconDestination, iconSource)
 end
 
 
+local function enumLines(text)
+	text = text:gsub("\r\n", "\n"):gsub("\t", "    ")
+	local lines = {("\n"):split(text)}
+	local t = {}
+	local indent = 0
+	for i, v in ipairs(lines) do
+		if v:match("end;?$") or v:match("else$") or v:match("^ *elseif") then
+			indent = indent - 1
+		end
+		for j = 1, indent do
+			t[#t+1] = "    "
+		end
+		t[#t+1] = v:gsub(";\s*$", "")
+		t[#t+1] = " -- "
+		t[#t+1] = i
+		t[#t+1] = "\n"
+		if v:match("then$") or v:match("do$") or v:match("else$") or v:match("function%(.-%)") then
+			indent = indent + 1
+		end
+	end
+	local s = table.concat(t)
+	return s
+end
 local SetInfoFuncs = setmetatable({}, { __index = function(self, signature)
 	assert(type(signature) == "string",
 	("(Bad argument #3 to icon:SetInfo(signature, ...) - Expected string, got %s. (SetInfo changed in v5.1.0 - are you still using the old SetInfo format?)"):format(type(signature)))
@@ -5738,17 +5998,23 @@ local SetInfoFuncs = setmetatable({}, { __index = function(self, signature)
 	while #signature > 0 do
 		local found
 		for _, Processor in ipairs(IconDataProcessor.instances) do
-			found = signature:find(Processor.attributesStringNoSpaces .. "$") or signature:find(Processor.attributesStringNoSpaces .. "[;,]")
+			found = signature:find(Processor.attributesStringNoSpaces .. "$") or signature:find(Processor.attributesStringNoSpaces .. ";")
 			if found then
 				t[#t+1] = "local Processor = "
 				t[#t+1] = Processor.name
-				t[#t+1] = "\n"  
+				t[#t+1] = "\n"
+				
+				-- Process any hooks that should go before the main function segment
+				Processor:CompileFunctionHooks(t, "pre")
 				
 				Processor:CompileFunctionSegment(t)
 				
+				-- Process any hooks that should go after the main function segment
+				Processor:CompileFunctionHooks(t, "post")
+				
 				t[#t+1] = "\n\n"  
 				
-				signature = signature:gsub(Processor.attributesStringNoSpaces .. "[;,]?", "", 1)
+				signature = signature:gsub(Processor.attributesStringNoSpaces .. ";?", "", 1)
 				
 				break
 			end
@@ -5758,15 +6024,19 @@ local SetInfoFuncs = setmetatable({}, { __index = function(self, signature)
 		end
 	end
 	
-	t[#t+1] =
-	[[	if doFireIconUpdated then
+	t[#t+1] = [[
+	if doFireIconUpdated then
 			TMW:Fire('TMW_ICON_UPDATED', icon)
 		end
 	end -- "return function(icon, ...)"
 	]]
 	
 	local funcstr = table.concat(t)
-	local func = assert(loadstring(funcstr, "Data Processor " .. originalSignature))()
+	funcstr = enumLines(funcstr)
+	if TMW.SetInfoFuncsToFuncStrs then
+		TMW.SetInfoFuncsToFuncStrs[originalSignature] = funcstr
+	end
+	local func = assert(loadstring(funcstr, "SetInfo " .. originalSignature))()
 	self[originalSignature] = func
 	self[originalSignature:gsub(" ", "")] = func
 	
@@ -5775,6 +6045,11 @@ end})
 function Icon.SetInfo(icon, signature, ...)
 	SetInfoFuncs[signature](icon, ...)
 end
+function TMW:ClearSetInfoFunctionCache()
+	wipe(SetInfoFuncs)
+	InheritAllFunc = nil
+end
+TMW.SetInfoFuncsToFuncStrs = {} --DEBUG
 
 local DogTagEventHandler = function(event, icon)
 	DogTag:FireEvent(event, icon.group.ID, icon.ID)
@@ -5793,8 +6068,12 @@ function TMW:CreateDogTagEventString(...)
 end
 
 
-TMW:NewClass("IconModule"){
+TMW:NewClass("IconModule", "GenericComponent"){
 	EventListners = {},
+	ViewImplementors = {},
+	TypeAllowances = {},
+	ConfigPanels = {},
+	defaultAllowanceForTypes = true,
 	OnNewInstance_1_IconModule = function(self, icon)
 		icon.Modules[self.className] = self
 		self.icon = icon
@@ -5811,14 +6090,15 @@ TMW:NewClass("IconModule"){
 		end
 	end,
 	OnClassInherit_IconModule = function(self, newClass)
-		newClass.EventListners = {}
-		for k, v in pairs(self.EventListners) do
-			newClass.EventListners[k] = v
-		end
 		newClass.NumberEnabled = 0
+		
+		newClass:InheritTable(self, "EventListners")
+		newClass:InheritTable(self, "ViewImplementors")
+		newClass:InheritTable(self, "TypeAllowances")
+		newClass.defaultAllowanceForTypes = self.defaultAllowanceForTypes
 	end,
 	SetDataListner = function(self, processorName, ...)
-		assert(self and not self.class, "SetDataListner should be called on a class, not an instance!")
+		self:AssertSelfIsClass()
 		
 		local Processor = TMW.ProcessorsByName[processorName]
 		assert(Processor, ("Couldn't find IconDataProcessor named %q"):format(tostring(processorName)))			
@@ -5833,14 +6113,17 @@ TMW:NewClass("IconModule"){
 		
 		self:SetIconEventListner(Processor.changedEvent, func)
 	end,
-	GetDataListner = function(self, processorName)			
+	GetDataListner = function(self, processorName)
+		self:AssertSelfIsClass()
+		
 		local Processor = TMW.ProcessorsByName[processorName]
 		assert(Processor, ("Couldn't find IconDataProcessor named %q"):format(tostring(processorName)))			
 		
 		return self:GetIconEventListner(Processor.changedEvent)
 	end,
 	SetIconEventListner = function(self, event, func)
-		assert(self and not self.class, "SetIconEventListner should be called on a class, not an instance!")
+		self:AssertSelfIsClass()
+		
 		assert(event)
 		
 		self.EventListners[event] = func
@@ -5851,6 +6134,8 @@ TMW:NewClass("IconModule"){
 		return self.EventListners[event]
 	end,
 	Enable = function(self)
+		self:AssertSelfIsInstance()
+		
 		if not self.IsEnabled then
 			self.IsEnabled = true
 			self.class.NumberEnabled = self.class.NumberEnabled + 1
@@ -5864,6 +6149,8 @@ TMW:NewClass("IconModule"){
 		end
 	end,
 	Disable = function(self)
+		self:AssertSelfIsInstance()
+		
 		if self.IsEnabled and not self.IsEssential then
 			self.IsEnabled = false
 			self.class.NumberEnabled = self.class.NumberEnabled - 1
@@ -5877,10 +6164,14 @@ TMW:NewClass("IconModule"){
 		end
 	end,
 	SetEssential = function(self, essential)
+		self:AssertSelfIsInstance()
+		
 		self.IsEssential = true
 		self:Enable()		
 	end,
 	SetEssentialModuleComponent = function(self, identifier, component)
+		self:AssertSelfIsInstance()
+		
 		assert(identifier)
 		if component and self.icon.EssentialModuleComponents[identifier] then
 			TMW:Error("Icon %s already has an essential module component with identifier %q", tostring(self.icon), identifier)
@@ -5888,15 +6179,62 @@ TMW:NewClass("IconModule"){
 		self.icon.EssentialModuleComponents[identifier] = component
 	end,
 	SetSkinnableComponent = function(self, component, frame)
+		self:AssertSelfIsInstance()
+		
 		assert(not self.icon.lmbButtonData[component])
 		self.icon.lmbButtonData[component] = frame
 	end,
+
+	ImplementForAllViews = function(self, implementorFunc)
+		self:AssertSelfIsClass()
+		
+		self.ViewImplementors.ALL = implementorFunc
+	end,
+	
+	SetImplementorForViews = function(self, implementorFunc, ...)
+		-- intended to be a private method
+		for i, viewName in TMW:Vararg(...) do
+			self.ViewImplementors[viewName] = implementorFunc
+		end
+	end,
+	DisallowForViews = function(self, ...)
+		self:AssertSelfIsClass()
+		
+		self:SetImplementorForViews(false, ...)
+	end,
+	ImplementForViews = function(self, implementorFunc, ...)
+		self:AssertSelfIsClass()
+		
+		self:SetImplementorForViews(implementorFunc, ...)
+	end,
+	
+	SetAllowanceForTypes = function(self, allow, ...)
+		-- intended to be a private method
+		for i, typeName in TMW:Vararg(...) do
+			self.TypeAllowances[typeName] = allow
+		end
+	end,
+	DisallowForTypes = function(self, ...)
+		self:AssertSelfIsClass()
+		
+		self:SetAllowanceForTypes(false, ...)
+	end,
+	AllowForTypes = function(self, ...)
+		self:AssertSelfIsClass()
+		
+		self:SetAllowanceForTypes(true, ...)
+	end,
+	SetDefaultAllowanceForTypes = function(self, allow)
+		self:AssertSelfIsClass()
+		
+		self.defaultAllowanceForTypes = allow
+	end
 }
 
 
 
 
-local IconType = TMW:NewClass("IconType")
+local IconType = TMW:NewClass("IconType", "GenericComponent", "NamedInstances")
 
 IconType.SUGType = "spell"
 IconType.leftCheckYOffset = 0
@@ -5942,8 +6280,12 @@ do	-- IconType:InIcons(groupID)
 	end
 end
 
-function IconType:OnNewInstance()
+function IconType:OnNewInstance(type)
+	self.type = type
 	self.Icons = {}
+	self.ModuleAllowance = {}
+	self.UsedAttributes = {}
+	self.UsedProcessors = {}
 end
 
 function IconType:UpdateColors(dontSetupIcons)
@@ -6006,6 +6348,8 @@ end
 
 function IconType:Register()
 	local typekey = self.type
+	
+	self.RelevantSettings = self.RelevantSettings or {}
 	setmetatable(self.RelevantSettings, RelevantToAll)
 
 	if TMW.debug and rawget(Types, typekey) then
@@ -6016,6 +6360,14 @@ function IconType:Register()
 
 	Types[typekey] = self -- put it in the main Types table
 	tinsert(TMW.OrderedTypes, self) -- put it in the ordered table (used to order the type selection dropdown in the icon editor)
+	
+	-- Try to find processors for the attributes declared for the icon type.
+	-- It should find most since default processors are loaded before icon types.
+	self:UpdateUsedProcessors()
+	
+	-- Listen for any new processors, too, and update when they are created.
+	TMW:RegisterCallback("TMW_CLASS_IconDataProcessor_INSTANCE_NEW", self.UpdateUsedProcessors, self)
+	
 	return self -- why not?
 end
 
@@ -6028,14 +6380,120 @@ function IconType:UnregisterIcon(icon)
 end
 
 
+function IconType:SetModuleAllowances(allow, ...)
+	-- intended to be a private method
+	for i, moduleName in TMW:Vararg(...) do
+		self.ModuleAllowance[moduleName] = allow
+	end
+end
 
-local IconView = TMW:NewClass("IconView")
+function IconType:AllowModules(...)
+	IconType:SetModuleAllowances(true, ...)
+end
+
+function IconType:DisallowModules(...)
+	IconType:SetModuleAllowances(false, ...)
+end
+
+function IconType:UsesAttributes(attributesString)
+	self.UsedAttributes[attributesString] = true
+end
+
+function IconType:UpdateUsedProcessors()
+	for _, Processor in ipairs(IconDataProcessor.instances) do
+		if self.UsedAttributes[Processor.attributesString] then
+			self.UsedAttributes[Processor.attributesString] = nil
+			self.UsedProcessors[Processor] = true
+		end
+	end
+end
+
+IconType:ExtendMethod("ImplementIntoIcon", function(self, icon)
+	-- Implement all of the Processors that the Icon Type uses into the icon.
+	for Processor in pairs(self.UsedProcessors) do
+		Processor:ImplementIntoIcon(icon)
+	end
+	
+	
+	-- ProcessorHook:ImplementIntoIcon() needs to happen in a separate loop, 
+	-- and not as a method extension of Processor:ImplementIntoIcon(),
+	-- because ProcessorHooks need to check and see if the icon is implementing
+	-- all of the Processors that the hook has required for the hook to implement itself.
+	-- If this were to happen in the first loop here, then it would frequently fail because
+	-- dependencies might not be implemented before the hook would get implemented.
+	for Processor in pairs(self.UsedProcessors) do
+		for _, ProcessorHook in ipairs(Processor.hooks) do
+		
+			-- Assume that we have found all of the Processors that we need until we can't find one.
+			local foundAllProcessors = true
+			
+			-- Loop over all Processor requirements for this ProcessorHook
+			for processorRequirementName in pairs(ProcessorHook.processorRequirements) do
+				-- Get the actual Processor instance
+				local Processor = TMW.ProcessorsByName[processorRequirementName]
+				
+				-- If the Processor doesn't exist or the icon doesn't implement it,
+				-- fail the test and break the loop.
+				if not Processor or not tContains(icon.Components, Processor) then
+					foundAllProcessors = false
+					break
+				end
+			end
+			
+			-- Everything checked out, so implement it into the icon.
+			if foundAllProcessors then
+				ProcessorHook:ImplementIntoIcon(icon)
+			end
+		end
+	end
+end)
+
+--TODO: misplaced
+function Icon.ShouldImplementModule(icon, moduleName)
+	local typeData = icon.typeData
+	local viewData = icon.viewData
+	local moduleData = TMW.Classes[moduleName]
+	
+	if not moduleData then
+		return false
+	end
+	
+	-- Allowance based on icon type:
+	if typeData.ModuleAllowance[moduleName] == true then
+		-- If the type specifically requests to implement this module, then allow it.
+	elseif typeData.ModuleAllowance[moduleName] == nil and (moduleData.defaultAllowanceForTypes or moduleData.TypeAllowances[icon.Type]) then
+		-- If the type has not requested to either allow or disallow this module,
+		-- and the module allows implementation for this type, then allow it.
+	else
+		return
+	end
+	
+	-- Allowance based on icon view:
+	if moduleData.ViewImplementors[viewData.view] then
+		return moduleData.ViewImplementors[viewData.view]
+	elseif moduleData.ViewImplementors.ALL then
+		return moduleData.ViewImplementors.ALL
+	elseif viewData.ModuleImplementors[moduleName] then
+		return viewData.ModuleImplementors[moduleName]
+	end
+	
+	return false
+end
+
+function Icon.IsModuleImplemented(icon, moduleName)
+	return icon.Modules[moduleName]
+end
+
+
+local IconView = TMW:NewClass("IconView", "GenericComponent", "NamedInstances")
 
 function IconView:OnNewInstance(view)
 	self.view = view
+	self.name = view
 	
 	TMW.Icon_Defaults.SettingsPerView[view] = {}
 	self.IconDefaultsPerView = TMW.Icon_Defaults.SettingsPerView[view]
+	self.ModuleImplementors = {}
 end
 
 function IconView:Register()
@@ -6053,9 +6511,10 @@ function IconView:Register()
 	
 	TMW.Icon_Defaults.SettingsPerView[self.view] = {
 		Texts = {},
+		TextLayout = self.defaultTextLayout,
 	}
 	TMW.Group_Defaults.SettingsPerView[self.view] = {
-		TextLayout	= self.defaultTextLayout,
+		TextLayout = self.defaultTextLayout,
 	}
 	
 	for i, stringSettings in ipairs(TMW.Defaults.profile.TextLayouts[self.defaultTextLayout]) do
@@ -6065,6 +6524,44 @@ function IconView:Register()
 	return self -- why not?
 end
 
+function IconView:ImplementsModule(module, implementorFunc)
+	self.ModuleImplementors[module] = implementorFunc
+end
+
+function IconView:DisallowModules(...)
+	for i, moduleName in TMW:Vararg(...) do
+		self.ModuleImplementors[moduleName] = false
+	end
+	
+end
+
+IconView:ExtendMethod("ImplementIntoIcon", function(self, icon)
+	for moduleName, implementorFunc in pairs(self.ModuleImplementors) do
+		-- implementorFunc is either true if the module is setup within IconView:Icon_Setup(),
+		-- or it is a function if that function should be called in order to setup the module.
+		
+		-- Get the class of the module that we might be implementing.
+		local ModuleClass = TMW.Classes[moduleName]
+		
+		-- If the class exists and the module should be implemented, then do it.
+		if implementorFunc and ModuleClass then
+		
+			-- Check to see if an instance of the Module already exists for the icon before creating one.
+			local Module = icon.Modules[moduleName]
+			if not Module then
+				Module = ModuleClass:New(icon)
+			end
+			
+			-- Call the GenericComponent ImplementIntoIcon function to add settings and stuff.
+			Module:ImplementIntoIcon(icon)
+	
+			-- If implementorFunc was a function (see above) then call it in order to properly setup the module.
+			if type(implementorFunc) == "function" then
+				implementorFunc(self, icon)
+			end
+		end
+	end
+end)
 
 
 -- ------------------
@@ -6353,6 +6850,8 @@ TMW.Units = {
 	{ value = "mainassist", 		text = L["MAINASSIST"],	range = MAX_RAID_MEMBERS  },
 }
 function TMW:GetUnits(icon, setting)
+	assert(setting, "Setting was nil for TMW:GetUnits(" .. icon:GetName() .. ", setting)")
+	
 	local set = TMW.UNITS:GetUnitSet(setting)
 	return set.exposedUnits, set
 end
@@ -6371,7 +6870,7 @@ function TMW:CleanString(text)
 		frame = text
 		text = text:GetText()
 	end
-	if not text then TMW:Error("No text to clean!") end
+	if not text then error("No text to clean!") end
 	text = strtrim(text, "; \t\r\n")-- remove all leading and trailing semicolons, spaces, tabs, and newlines
 	text = replace(text, "[^:] ;", "; ") -- remove all spaces before semicolons
 	text = replace(text, "; ", ";") -- remove all spaces after semicolons
@@ -6439,26 +6938,32 @@ function TMW:GetConfigIconTexture(icon, isItem)
 end
 
 TMW.TestTex = TMW:CreateTexture()
-function TMW:GetCustomTexture(icon)
-	local CustomTex
-	if type(icon) == "table" and icon.IsIcon then
-		icon.CustomTex = icon.CustomTex ~= "" and icon.CustomTex
-		CustomTex = icon.CustomTex
-	else
-		CustomTex = icon
-	end
-
-	CustomTex = tonumber(CustomTex) or CustomTex
-
-	if CustomTex then
-		TMW.TestTex:SetTexture(SpellTextures[CustomTex])
-		if not TMW.TestTex:GetTexture() then
-			TMW.TestTex:SetTexture(CustomTex)
+function TMW:GetTexturePathFromSetting(setting)
+	setting = tonumber(setting) or setting
+		
+	if setting and setting ~= "" then
+		if TMW.ISMOP then
+			-- See http://us.battle.net/wow/en/forum/topic/5977979895#1 for the resoning behind this stupid shit right here.
+			if SpellTextures[setting] then
+				return SpellTextures[setting]
+			end
+			if strfind(setting, "[\\/]") then -- if there is a slash in it, then it is probably a full path
+				return setting
+			else
+				-- if there isn't a slash in it, then it is probably be a wow icon in interface\icons.
+				-- it still might be a file in wow's root directory, but fuck, there is no way to tell for sure
+				return "Interface\\Icons\\" .. setting
+			end
+		else
+			TMW.TestTex:SetTexture(SpellTextures[setting])
+			if not TMW.TestTex:GetTexture() then
+				TMW.TestTex:SetTexture(setting)
+			end
+			if not TMW.TestTex:GetTexture() then
+				TMW.TestTex:SetTexture("Interface\\Icons\\" .. setting)
+			end
+			return TMW.TestTex:GetTexture()
 		end
-		if not TMW.TestTex:GetTexture() then
-			TMW.TestTex:SetTexture("Interface\\Icons\\" .. CustomTex)
-		end
-		return TMW.TestTex:GetTexture()
 	end
 end
 
@@ -6771,12 +7276,15 @@ function UNITS:UpdateTankAndAssistMap()
 	-- setup a table with (key, value) pairs as (oldnumber, newnumber)
 	-- oldnumber is 7 for raid7
 	-- newnumber is 1 for raid7 when the current maintank/assist is the 1st one found, 2 for the 2nd one found, etc)
-	for i = 1, GetNumRaidMembers() do
-		local raidunit = "raid" .. i
-		if GetPartyAssignment("MAINTANK", raidunit) then
-			mtMap[#mtMap + 1] = i
-		elseif GetPartyAssignment("MAINASSIST", raidunit) then
-			maMap[#maMap + 1] = i
+	
+	if IsInRaid() then
+		for i = 1, GetNumGroupMembers() do
+			local raidunit = "raid" .. i
+			if GetPartyAssignment("MAINTANK", raidunit) then
+				mtMap[#mtMap + 1] = i
+			elseif GetPartyAssignment("MAINASSIST", raidunit) then
+				maMap[#maMap + 1] = i
+			end
 		end
 	end
 end
@@ -6794,27 +7302,36 @@ function UNITS:UpdateGroupedPlayersMap()
 	end
 
 	-- setup a table with (key, value) pairs as (name, unitID)
-	local numRaidMembers = GetNumRaidMembers()
-	for i = 1, numRaidMembers do
-		local raidunit = "raid" .. i
-		local name = UnitName(raidunit)
-		gpMap[strlowerCache[name]] = raidunit
-	end
-	for i = 1, numRaidMembers do
-		local petunit = "raidpet" .. i
-		local name = UnitName(petunit)
-		if name then
-			-- dont overwrite a player with a pet
-			gpMap[strlowerCache[name]] = gpMap[strlowerCache[name]] or petunit
+	
+	if IsInRaid() then
+		-- Raid Players
+		local numRaidMembers = GetNumGroupMembers()
+		for i = 1, numRaidMembers do
+			local raidunit = "raid" .. i
+			local name = UnitName(raidunit)
+			gpMap[strlowerCache[name]] = raidunit
+		end
+	
+		-- Raid Pets (Process after raid players so that players with names the same as pets dont get overwritten)
+		for i = 1, numRaidMembers do
+			local petunit = "raidpet" .. i
+			local name = UnitName(petunit)
+			if name then
+				-- dont overwrite a player with a pet
+				gpMap[strlowerCache[name]] = gpMap[strlowerCache[name]] or petunit
+			end
 		end
 	end
-
-	local numPartyMembers = GetNumPartyMembers()
+	
+	-- Party Players
+	local numPartyMembers = GetNumSubgroupMembers()
 	for i = 1, numPartyMembers do
 		local raidunit = "party" .. i
 		local name = UnitName(raidunit)
 		gpMap[strlowerCache[name]] = raidunit
 	end
+	
+	-- Party Pets (Process after party players so that players with names the same as pets dont get overwritten)
 	for i = 1, numPartyMembers do
 		local petunit = "party" .. i
 		local name = UnitName(petunit)

@@ -18,16 +18,18 @@ local L = TMW.L
 local print = TMW.print
 
 
-local Processor = TMW.Classes.IconDataProcessor:New("TEXTURE", "texture")
+local Processor = TMW.Classes.IconDataProcessor:New("PRESUSABLE", "presentOrUsable")
 
 function Processor:CompileFunctionSegment(t)
-	-- GLOBALS: texture
+	-- GLOBALS: presentOrUsable
 	t[#t+1] = [[
-	if texture ~= nil and attributes.texture ~= texture then
-		attributes.texture = texture
-
-		TMW:Fire(TEXTURE.changedEvent, icon, texture)
+	
+	if attributes.presentOrUsable ~= presentOrUsable then
+		attributes.presentOrUsable = presentOrUsable		
+		
+		TMW:Fire(PRESUSABLE.changedEvent, icon, presentOrUsable)
 		doFireIconUpdated = true
 	end
 	--]]
 end
+	

@@ -41,8 +41,7 @@ for spellID, category in pairs(DRSpells) do
 end
 
 
-local Type = TMW.Classes.IconType:New()
-Type.type = "dr"
+local Type = TMW.Classes.IconType:New("dr")
 LibStub("AceEvent-3.0"):Embed(Type)
 Type.name = L["ICONMENU_DR"]
 Type.desc = L["ICONMENU_DR_DESC"]
@@ -51,25 +50,43 @@ Type.SUGType = "dr"
 Type.unitType = "unitid"
 Type.WhenChecks = {
 	text = L["ICONMENU_SHOWWHEN"],
-	{ value = "alpha", 			text = L["ICONMENU_DRABSENT"], 		colorCode = "|cFF00FF00" },
-	{ value = "unalpha",		text = L["ICONMENU_DRPRESENT"], 	colorCode = "|cFFFF0000" },
+	{ value = "alpha", 			text = "|cFF00FF00" .. L["ICONMENU_DRABSENT"], 		 },
+	{ value = "unalpha",		text = "|cFFFF0000" .. L["ICONMENU_DRPRESENT"], 	 },
 	{ value = "always", 		text = L["ICONMENU_ALWAYS"] },
 }
 Type.RelevantSettings = {
 	Unit = true,
-	ShowCBar = true,
-	InvertBars = true,
-	CBarOffs = true,
-	StackMin = true,
-	StackMax = true,
-	StackMinEnabled = true,
-	StackMaxEnabled = true,
-	DurationMin = true,
-	DurationMax = true,
-	DurationMinEnabled = true,
-	DurationMaxEnabled = true,
-	CheckRefresh = true,
 }
+
+-- AUTOMATICALLY GENERATED: UsesAttributes
+Type:UsesAttributes("spell")
+Type:UsesAttributes("unit, GUID")
+Type:UsesAttributes("stack, stackText")
+Type:UsesAttributes("color")
+Type:UsesAttributes("start, duration")
+Type:UsesAttributes("alpha")
+Type:UsesAttributes("texture")
+-- END AUTOMATICALLY GENERATED: UsesAttributes
+
+Type:RegisterIconDefaults{
+	Unit					= "", 
+	CheckRefresh			= true,
+}
+
+Type:RegisterConfigPanel_XMLTemplate("full", 1, "TellMeWhen_ChooseName")
+
+Type:RegisterConfigPanel_XMLTemplate("column", 1, "TellMeWhen_Unit")
+
+Type:RegisterConfigPanel_ConstructorFunc("column", 1, "TellMeWhen_DRSettings", function(self)
+	self.Header:SetText(Type.name)
+	TMW.IE:BuildSimpleCheckSettingFrame(self, {
+		{
+			setting = "CheckRefresh",
+			title = L["ICONMENU_CHECKREFRESH"],
+			tooltip = L["ICONMENU_CHECKREFRESH_DESC"],
+		},
+	})
+end)
 
 
 
@@ -129,7 +146,7 @@ local function DR_OnUpdate(icon, time)
 		if dr then
 			if dr.start + dr.duration <= time then
 				icon:SetInfo("alpha; color; texture; start, duration; stack, stackText; unit, GUID",
-					Alpha,
+					icon.Alpha,
 					icon:CrunchColor(),
 					dr.tex,
 					0, 0,
@@ -145,7 +162,7 @@ local function DR_OnUpdate(icon, time)
 				local amt = dr.amt
 				
 				icon:SetInfo("alpha; color; texture; start, duration; stack, stackText; unit, GUID",
-					UnAlpha,
+					icon.UnAlpha,
 					icon:CrunchColor(duration),
 					dr.tex,
 					dr.start, duration,
@@ -158,7 +175,7 @@ local function DR_OnUpdate(icon, time)
 			end
 		else
 			icon:SetInfo("alpha; color; texture; start, duration; stack, stackText; unit, GUID",
-				Alpha,
+				icon.Alpha,
 				icon:CrunchColor(),
 				icon.FirstTexture,
 				0, 0,
@@ -240,7 +257,6 @@ end
 
 
 function Type:Setup(icon, groupID, iconID)
-	icon.ShowPBar = false
 	icon.NameFirst = TMW:GetSpellNames(icon, icon.Name, 1)
 	icon.NameArray = TMW:GetSpellNames(icon, icon.Name)
 	icon.NameHash = TMW:GetSpellNames(icon, icon.Name, nil, nil, 1)

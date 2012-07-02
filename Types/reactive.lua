@@ -24,35 +24,78 @@ local strlowerCache = TMW.strlowerCache
 local mindfreeze = strlower(GetSpellInfo(47528))
 
 
-local Type = TMW.Classes.IconType:New()
-Type.type = "reactive"
+local Type = TMW.Classes.IconType:New("reactive")
 Type.name = L["ICONMENU_REACTIVE"]
 Type.desc = L["ICONMENU_REACTIVE_DESC"]
 Type.chooseNameText  = L["CHOOSENAME_DIALOG"] .. "\r\n\r\n" .. L["CHOOSENAME_DIALOG_PETABILITIES"]
 
 Type.WhenChecks = {
 	text = L["ICONMENU_SHOWWHEN"],
-	{ value = "alpha", 			text = L["ICONMENU_USABLE"], 			colorCode = "|cFF00FF00" },
-	{ value = "unalpha",		text = L["ICONMENU_UNUSABLE"], 			colorCode = "|cFFFF0000" },
+	{ value = "alpha", 			text = "|cFF00FF00" .. L["ICONMENU_USABLE"], 			 },
+	{ value = "unalpha",		text = "|cFFFF0000" .. L["ICONMENU_UNUSABLE"], 			 },
 	{ value = "always", 		text = L["ICONMENU_ALWAYS"] },
 }
-Type.RelevantSettings = {
-	RangeCheck = true,
-	ManaCheck = true,
-	CooldownCheck = true,
-	ShowPBar = true,
-	PBarOffs = true,
-	ShowCBar = true,
-	CBarOffs = true,
-	InvertBars = true,
-	DurationMin = true,
-	DurationMax = true,
-	DurationMinEnabled = true,
-	DurationMaxEnabled = true,
-	UseActvtnOverlay = true,
-	IgnoreNomana = true,
-	IgnoreRunes = (pclass == "DEATHKNIGHT"),
+
+-- AUTOMATICALLY GENERATED: UsesAttributes
+Type:UsesAttributes("spell")
+Type:UsesAttributes("noMana")
+Type:UsesAttributes("inRange")
+Type:UsesAttributes("color")
+Type:UsesAttributes("start, duration")
+Type:UsesAttributes("alpha")
+Type:UsesAttributes("texture")
+-- END AUTOMATICALLY GENERATED: UsesAttributes
+
+Type:RegisterIconDefaults{
+	UseActvtnOverlay		= false,
+	CooldownCheck			= false,
+	IgnoreNomana			= false,
+	RangeCheck				= false,
+	ManaCheck				= false,
+	IgnoreRunes				= false,
 }
+
+Type:RegisterConfigPanel_XMLTemplate("full", 1, "TellMeWhen_ChooseName")
+
+Type:RegisterConfigPanel_ConstructorFunc("column", 1, "TellMeWhen_ReactiveSettings", function(self)
+	self.Header:SetText(Type.name)
+	TMW.IE:BuildSimpleCheckSettingFrame(self, {
+		{
+			setting = "UseActvtnOverlay",
+			title = L["ICONMENU_USEACTIVATIONOVERLAY"],
+			tooltip = L["ICONMENU_USEACTIVATIONOVERLAY_DESC"],
+		},
+		{
+			setting = "IgnoreNomana",
+			title = L["ICONMENU_IGNORENOMANA"],
+			tooltip = L["ICONMENU_IGNORENOMANA_DESC"],
+		},
+		{
+			setting = "CooldownCheck",
+			title = L["ICONMENU_COOLDOWNCHECK"],
+			tooltip = L["ICONMENU_COOLDOWNCHECK_DESC"],
+		},
+		{
+			setting = "RangeCheck",
+			title = L["ICONMENU_RANGECHECK"],
+			tooltip = L["ICONMENU_RANGECHECK_DESC"],
+		},
+		{
+			setting = "ManaCheck",
+			title = L["ICONMENU_MANACHECK"],
+			tooltip = L["ICONMENU_MANACHECK_DESC"],
+		},
+		{
+			setting = "IgnoreRunes",
+			title = L["ICONMENU_IGNORERUNES"],
+			tooltip = L["ICONMENU_IGNORERUNES_DESC"],
+			disabledtooltip = L["ICONMENU_IGNORERUNES_DESC_DISABLED"],
+			disabled = function(self)
+				return not TMW.CI.ics.CooldownCheck
+			end,
+		},
+	})
+end)
 
 Type.EventDisabled_OnUnit = true
 Type.EventDisabled_OnStack = true
@@ -103,12 +146,14 @@ local function Reactive_OnUpdate(icon, time)
 			end
 			usable = forceUsable or usable
 			if usable and not CD and not nomana and inrange == 1 then --usable
-				icon:SetInfo("alpha; color; texture; start, duration; spell",
+				icon:SetInfo("alpha; color; texture; start, duration; spell; inRange; noMana",
 					icon.Alpha,
 					icon:CrunchColor(),
 					SpellTextures[iName],
 					start, duration,
-					iName
+					iName,
+					inrange,
+					nomana
 				)
 				return
 			end
@@ -130,12 +175,14 @@ local function Reactive_OnUpdate(icon, time)
 		end
 	end
 	if duration then
-		icon:SetInfo("alpha; color; texture; start, duration; spell",
+		icon:SetInfo("alpha; color; texture; start, duration; spell; inRange; noMana",
 			icon.UnAlpha,
 			icon:CrunchColor(duration, inrange, nomana),
 			icon.FirstTexture,
 			start, duration,
-			NameFirst
+			NameFirst,
+			inrange,
+			nomana
 		)
 	else
 		icon:SetInfo("alpha", 0)

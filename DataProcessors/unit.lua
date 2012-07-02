@@ -44,7 +44,7 @@ function Processor:CompileFunctionSegment(t)
 	--]]
 end
 
-Processor:AddDogTag("TMW", "Unit", {
+Processor:RegisterDogTag("TMW", "Unit", {
 	code = function (groupID, iconID)
 		local group = TMW[groupID]
 		local icon = group and group[iconID]
@@ -64,7 +64,7 @@ Processor:AddDogTag("TMW", "Unit", {
 	example = '[Unit] => "target"; [Unit(4, 5)] => "focus"; [Unit:Name] => "Kobold"; [Unit(4, 5):Name] => "Gamon"',
 	category = L["ICON"],
 })
-Processor:AddDogTag("TMW", "PreviousUnit", {
+Processor:RegisterDogTag("TMW", "PreviousUnit", {
 	code = function (groupID, iconID)
 		local group = TMW[groupID]
 		local icon = group and group[iconID]

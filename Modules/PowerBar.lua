@@ -83,11 +83,6 @@ function PowerBar:OnUnused()
 end
 
 
-function PowerBar:SetupForIcon(sourceIcon)
-	self.InvertBars = sourceIcon.InvertBars
-	self.Offset = sourceIcon.PBarOffs or 0
-end
-
 function PowerBar:SetSpell(spell)
 	local bar = self.bar
 	self.spell = spell
@@ -99,7 +94,7 @@ function PowerBar:SetSpell(spell)
 		
 		self:Update()
 	elseif tContains(self.UpdateTable_UpdateTable, self) then
-		local value = self.InvertBars and self.Max or 0
+		local value = self.Invert and self.Max or 0
 		bar:SetValue(value)
 		self.__value = value
 		
@@ -140,7 +135,7 @@ function PowerBar:Update(power, powerTypeNum)
 		local Max = self.Max
 		local value
 
-		if not self.InvertBars then
+		if not self.Invert then
 			value = Max - power + self.PBarOffs
 		else
 			value = power + self.PBarOffs
@@ -186,19 +181,6 @@ function PowerBar:SPELL(icon, spellChecked)
 	self:SetSpell(spellChecked)
 end
 PowerBar:SetDataListner("SPELL")
-	
-PowerBar:SetIconEventListner("TMW_ICON_SETUP_POST", function(Module, icon)
-	if TMW.Locked then
-		Module:UpdateTable_Register()
-		
-		Module.bar:SetAlpha(.9)
-	else
-		Module:UpdateTable_Unregister()
-		
-		Module.bar:SetValue(Module.Max)
-		Module.bar:SetAlpha(.6)
-	end
-end)
 
 
 TMW:RegisterCallback("TMW_LOCK_TOGGLED", function(event, Locked)

@@ -32,8 +32,8 @@ local GetPetActionInfo, GetTotemInfo =
 	  GetPetActionInfo, GetTotemInfo
 local IsInInstance, GetInstanceDifficulty =
 	  IsInInstance, GetInstanceDifficulty
-local GetTalentTabInfo, GetNumTalentTabs, GetNumTalents, GetTalentInfo =
-	  GetTalentTabInfo, GetNumTalentTabs, GetNumTalents, GetTalentInfo
+local GetNumTalentTabs, GetNumTalents, GetTalentInfo =
+	  GetNumTalentTabs, GetNumTalents, GetTalentInfo
 local GetShapeshiftFormInfo, GetShapeshiftForm, GetNumShapeshiftForms =
 	  GetShapeshiftFormInfo, GetShapeshiftForm, GetNumShapeshiftForms
 local UnitAttackPower, UnitRangedAttackPower =
@@ -82,13 +82,25 @@ function CNDT:RAID_ROSTER_UPDATE()
 	end
 end
 
-function CNDT:PLAYER_TALENT_UPDATE()
-	for tab = 1, GetNumTalentTabs() do
-		for talent = 1, GetNumTalents(tab) do
-			local name, _, _, _, rank = GetTalentInfo(tab, talent)
+if TMW.ISMOP then
+	function CNDT:PLAYER_TALENT_UPDATE()
+		for talent = 1, MAX_NUM_TALENTS do
+			local name, _, _, _, selected = GetTalentInfo(talent)
 			local lower = name and strlowerCache[name]
 			if lower then
-				Env.TalentMap[lower] = rank or 0
+				Env.TalentMap[lower] = selected and 1 or nil
+			end
+		end
+	end
+else
+	function CNDT:PLAYER_TALENT_UPDATE()
+		for tab = 1, GetNumTalentTabs() do
+			for talent = 1, GetNumTalents(tab) do
+				local name, _, _, _, rank = GetTalentInfo(tab, talent)
+				local lower = name and strlowerCache[name]
+				if lower then
+					Env.TalentMap[lower] = rank or 0
+				end
 			end
 		end
 	end
@@ -288,8 +300,6 @@ Env = {
 	UnitGroupRolesAssigned = UnitGroupRolesAssigned,
 	UnitDetailedThreatSituation = UnitDetailedThreatSituation,
 	GetRaidTargetIndex = GetRaidTargetIndex,
-	GetNumPartyMembers = GetNumPartyMembers,
-	GetNumRaidMembers = GetNumRaidMembers,
 	UnitIsEnemy = UnitIsEnemy,
 	UnitIsUnit = UnitIsUnit,
 	UnitReaction = UnitReaction,
@@ -320,8 +330,6 @@ Env = {
 	GetCurrencyInfo = GetCurrencyInfo,
 	SecureCmdOptionParse = SecureCmdOptionParse,
 	GetSpellAutocast = GetSpellAutocast,
-	GetTalentTabInfo = GetTalentTabInfo,
-	GetPrimaryTalentTree = GetPrimaryTalentTree,
 	GetActiveTalentGroup = GetActiveTalentGroup,
 
 	UnitStat = UnitStat,
@@ -1450,7 +1458,14 @@ CNDT.Types = {
 		texttable = {[0] = SOLO, [1] = PARTY, [2] = RAID},
 		icon = "Interface\\Calendar\\MeetingIcon",
 		tcoords = standardtcoords,
-		funcstr = [[((GetNumRaidMembers() > 0 and 2) or (GetNumPartyMembers() > 0 and 1) or 0) c.Operator c.Level]], -- this one was harder than it should have been to figure out; keep it in mind for future condition creating
+		funcstr = TMW.ISMOP and [[((IsInRaid() and 2) or (IsInGroup() and 1) or 0) c.Operator c.Level]] or
+			[[((GetNumRaidMembers() > 0 and 2) or (GetNumPartyMembers() > 0 and 1) or 0) c.Operator c.Level]], -- this one was harder than it should have been to figure out; keep it in mind for future condition creating
+		Env = {
+			IsInRaid = IsInRaid,
+			IsInGroup = IsInGroup,
+			GetNumRaidMembers = GetNumRaidMembers,
+			GetNumPartyMembers = GetNumPartyMembers,
+		},
 		events = function(c)
 			return "PARTY_MEMBERS_CHANGED", "RAID_ROSTER_UPDATE"
 		end,
@@ -1540,19 +1555,65 @@ CNDT.Types = {
 			return "PLAYER_TALENT_UPDATE", "ACTIVE_TALENT_GROUP_CHANGED"
 		end,
 	},
-	{ -- talent tree
+	TMW.ISMOP and { -- active specialization
+		text = L["UIPANEL_SPECIALIZATION"],
+		category = L["CNDTCAT_ATTRIBUTES_PLAYER"],
+		value = "TREE",
+		min = 1,
+		max = 3,
+		midt = true,
+		texttable = function(i) return select(2, GetSpecializationInfo(i)) end,
+		unit = PLAYER,
+		icon = function() return select(4, GetSpecializationInfo(1)) end,
+		tcoords = standardtcoords,
+		funcstr = [[(GetSpecialization() or 0) c.Operator c.Level]],
+		Env = {
+			GetSpecialization = GetSpecialization
+		},
+	--	events = function(c)
+	--		return "PLAYER_TALENT_UPDATE", "ACTIVE_TALENT_GROUP_CHANGED" --TODO: probably wrong events
+	--	end,
+	} or { -- talent tree
 		text = L["UIPANEL_TREE"],
 		category = L["CNDTCAT_ATTRIBUTES_PLAYER"],
 		value = "TREE",
 		min = 1,
 		max = 3,
 		midt = true,
-		texttable = function(i) return select(2, GetTalentTabInfo(i)) end,
+		texttable = function(i) return select(2, GetTalentTabInfo(i)) end, --MOP DEPRECIATED, COMPAT CODE IN PLACE
 		unit = PLAYER,
-		icon = function() return select(4, GetTalentTabInfo(1)) end,
+		icon = function() return select(4, GetTalentTabInfo(1)) end, --MOP DEPRECIATED, COMPAT CODE IN PLACE 
 		tcoords = standardtcoords,
 		funcstr = [[GetPrimaryTalentTree() c.Operator c.Level]],
+		Env = {
+			GetPrimaryTalentTree = GetPrimaryTalentTree
+		},
 		events = function(c)
+			return "PLAYER_TALENT_UPDATE", "ACTIVE_TALENT_GROUP_CHANGED"
+		end,
+	},
+	{ -- talent learned
+		text = L["UIPANEL_TALENTLEARNED"],
+		category = L["CNDTCAT_ATTRIBUTES_PLAYER"],
+		value = "TALENTLEARNED",
+		min = 0,
+		max = 1,
+		texttable = bool,
+		nooperator = true,
+		unit = PLAYER,
+		name = function(editbox) TMW:TT(editbox, "SPELLTOCHECK", "CNDT_ONLYFIRST") editbox.label = L["SPELLTOCHECK"] end,
+		useSUG = "talents",
+		icon = function() return select(2, GetTalentInfo(1)) end,
+		tcoords = standardtcoords,
+		hidden = not TMW.ISMOP,
+		funcstr = [[TalentMap[LOWER(c.NameName)] == c.1nil]],
+		events = function(c)
+			-- this is handled externally because TalentMap is so extensive a process,
+			-- and if it does get stuck in an OnUpdate condition, it could be very bad.
+			CNDT:RegisterEvent("PLAYER_TALENT_UPDATE")
+			CNDT:PLAYER_TALENT_UPDATE()
+			
+			-- we still only need to update the condition when talents change, though.
 			return "PLAYER_TALENT_UPDATE", "ACTIVE_TALENT_GROUP_CHANGED"
 		end,
 	},
@@ -1567,7 +1628,21 @@ CNDT.Types = {
 		useSUG = "talents",
 		icon = function() return select(2, GetTalentInfo(1, 1)) end,
 		tcoords = standardtcoords,
-		funcstr = [[(TalentMap[c.NameName] or 0) c.Operator c.Level]],
+		hidden = TMW.ISMOP,
+		funcstr = function(c)
+			-- Brilliant hack that will automatically upgrade to the MOP version of the condition when it is processed.
+			-- This upgrade is kinda bad because we went from a number comparison to a boolean check, but we should at least put the level down to a valid value.
+			-- Users are going to need to redo their conditions anyway for gameplay reasons, so I'm not to worried about a poor upgrade here.
+			if TMW.ISMOP then
+				c.Type = "TALENTLEARNED"
+				if c.Level > 1 then
+					c.Level = 0
+				end
+				return CNDT.ConditionsByType.TALENTLEARNED.funcstr
+			else
+				return [[(TalentMap[LOWER(c.NameName)] or 0) c.Operator c.Level]]
+			end
+		end,
 		events = function(c)
 			-- this is handled externally because TalentMap is so extensive a process,
 			-- and if it does get stuck in an OnUpdate condition, it could be very bad.
@@ -1637,6 +1712,31 @@ CNDT.Types = {
 		funcstr = [[GetActivePetMode() c.Operator c.Level]],
 		events = "PET_BAR_UPDATE",
 	},
+	{ -- pet talent spec
+		text = L["CONDITIONPANEL_PETSPEC"],
+		category = L["CNDTCAT_ATTRIBUTES_PLAYER"],
+		value = "PETSPEC",
+		min = 0,
+		max = 3,
+		midt = true,
+		texttable = {
+			[0] = NONE,
+			L["PET_TYPE_FEROCITY"],
+			L["PET_TYPE_TENACITY"],
+			L["PET_TYPE_CUNNING"],
+		},
+		unit = PET,
+		icon = "Interface\\Icons\\Ability_Druid_DemoralizingRoar",
+		tcoords = standardtcoords,
+		funcstr = [[(GetSpecialization(nil, true) or 0) c.Operator c.Level]],
+		Env = {
+			GetSpecialization = GetSpecialization
+		},
+		hidden = not TMW.ISMOP,
+		--events = function()
+		--	return "UNIT_PET", "player" --MAYBE WRONG EVENTS, CHECK BEFORE UNCOMMENTING
+		--end,
+	},
 	{ -- pet talent tree
 		text = L["CONDITIONPANEL_PETTREE"],
 		category = L["CNDTCAT_ATTRIBUTES_PLAYER"],
@@ -1652,7 +1752,28 @@ CNDT.Types = {
 		unit = PET,
 		icon = "Interface\\Icons\\Ability_Druid_DemoralizingRoar",
 		tcoords = standardtcoords,
-		funcstr = [[(GetTalentTabInfo(1, nil, 1) or 0) c.Operator c.Level]],
+		funcstr = function(c)
+			-- Brilliant hack that will automatically upgrade to the MOP version of the condition when it is processed.
+			if TMW.ISMOP then
+				c.Type = "PETSPEC"
+				
+				if c.Level == 409 then -- old tenacity
+					c.Level = 2 -- new tenacity
+				elseif c.Level == 410 then -- old ferocity
+					c.Level = 1 -- new ferocity
+				elseif c.Level == 411 then -- old cunning
+					c.Level = 3 -- new cunning
+				end
+				
+				return CNDT.ConditionsByType.PETSPEC.funcstr
+			else
+				return [[(GetTalentTabInfo(1, nil, 1) or 0) c.Operator c.Level]] --MOP DEPRECIATED, COMPAT CODE IN PLACE 
+			end
+		end,
+		Env = {
+			GetTalentTabInfo = GetTalentTabInfo
+		},
+		hidden = TMW.ISMOP,
 		events = function()
 			return "UNIT_PET", "player"
 		end,
@@ -3145,7 +3266,7 @@ function CNDT:GetConditionCheckFunctionString(parent, Conditions)
 	for _, c in TMW:InNLengthTable(Conditions) do
 		local t = c.Type
 		local v = TMW.CNDT.ConditionsByType[t]
-
+		
 		local andor
 		if c.AndOr == "OR" then
 			andor = "or " --have a space so they are both 3 chars long
@@ -3159,6 +3280,18 @@ function CNDT:GetConditionCheckFunctionString(parent, Conditions)
 
 		local thiscondtstr
 		if v then
+		
+			-- Add in anything that the condition wants to include in Env
+			if v.Env then
+				for k, v in pairs(v.Env) do
+					if Env[k] ~= nil and Env[k] ~= v then
+						TMW:Error("Condition " .. t .. " tried to write values to Env different than those that were already in it. Pick different keys for its data or otherwise figure out why this happened.")
+					else
+						Env[k] = v
+					end
+				end
+			end
+		
 			thiscondtstr = v.funcstr
 			if type(thiscondtstr) == "function" then
 				thiscondtstr = thiscondtstr(c, parent)
@@ -3169,17 +3302,24 @@ function CNDT:GetConditionCheckFunctionString(parent, Conditions)
 		
 		local thisstr = andor .. "(" .. strrep("(", c.PrtsBefore) .. thiscondtstr .. strrep(")", c.PrtsAfter)  .. ")"
 
-		thisstr = CNDT:DoConditionSubstitutions(parent, v, c, thisstr)
-
+		if v then
+			thisstr = CNDT:DoConditionSubstitutions(parent, v, c, thisstr)
+		end
+		
 		funcstr = funcstr .. thisstr
 	end
 	
 	local funcstr, arg1 = parent:FinishCompilingConditions(funcstr:sub(4))
 	
+		print(funcstr, arg1)
 	if funcstr ~= "" then
-		funcstr = [[local obj, icon = ...
-		return (]] .. funcstr .. [[)]]
+		-- Well, what the fuck? Apparently this code here doesn't work in MoP. I have to do it on a single line for some strange reason.
+		--funcstr = [[local obj, icon = ...
+		--return ( ]] .. funcstr .. [[ )]]
+		
+		funcstr = "local obj, icon = ... \r\n return ( " .. funcstr .. " )"
 	end
+		print(funcstr, arg1)
 	
 	return funcstr, arg1
 end

@@ -5,10 +5,10 @@
 # Also dont forget to bump both of these - X-Interface is used to get the interface version in-game to check that the user is using a current client.
 ## Interface: 40300
 ## X-Interface: 40300
-# X-Compatible-With: 40300
+## X-Compatible-With: 50001
 ## Title: TellMeWhen
 
-## Version: 5.1.0
+## Version: 6.0.0
 ## Author: Cybeloras of Mal'Ganis
 
 ## Notes: Provides visual, auditory, and textual notifications about cooldowns, buffs, and pretty much every other element of combat.
@@ -22,7 +22,7 @@
 # The per character settings are the old settings, but we still need them to upgrade to the new ones
 ## SavedVariablesPerCharacter: TellMeWhen_Settings
 ## SavedVariables: TellMeWhenDB
-## X-Embeds: LibStub, Ace3, AceGUI-3.0-SharedMediaWidgets, LibSharedMedia-3.0, LibDataBroker-1.1, DRData-1.0
+## X-Embeds: LibStub, Ace3, AceGUI-3.0-SharedMediaWidgets, LibSharedMedia-3.0, LibDataBroker-1.1, DRData-1.0, LibDogTag-3.0, LibDogTag-Unit-3.0
 ## X-Category: Combat
 
 #@no-lib-strip@
@@ -71,17 +71,28 @@ DataProcessors\stack.lua
 DataProcessors\shown.lua
 DataProcessors\alpha.lua
 DataProcessors\alphaoverride.lua
+DataProcessors\presentOrUsable.lua
+DataProcessors\inRange.lua
+DataProcessors\noMana.lua
+
+DataProcessorHooks\ALPHA_DURATIONREQ.lua
+DataProcessorHooks\ALPHA_STACKREQ.lua
+DataProcessorHooks\TEXTURE_CUSTOMTEX.lua
 
 Modules\TimerBar.lua
 Modules\TimerBar_Overlay.lua
+Modules\TimerBar_BarDisplay.lua
 Modules\PowerBar.lua
+Modules\PowerBar_Overlay.lua
 Modules\Alpha.lua
 Modules\CooldownSweep.lua
 Modules\Texture.lua
 Modules\Texture_Colored.lua
 Modules\Texts.lua
+Modules\Masque.lua
 
 Views\icon.lua
+Views\bar.lua
 
 
 Types\default.lua

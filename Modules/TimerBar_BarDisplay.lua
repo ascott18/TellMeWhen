@@ -1,3 +1,5 @@
+
+
 -- --------------------
 -- TellMeWhen
 -- Originally by Nephthys of Hyjal <lieandswell@yahoo.com>
@@ -15,14 +17,15 @@ if not TMW then return end
 
 local TMW = TMW
 local L = TMW.L
+local print = TMW.print
 local error = error
 	
 
-local TimerBar_Overlay = TMW:NewClass("IconModule_TimerBar_Overlay", "IconModule_TimerBar")
+local TimerBar_BarDisplay = TMW:NewClass("IconModule_TimerBar_BarDisplay", "IconModule_TimerBar")
 
-function TimerBar_Overlay:SetupForIcon(sourceIcon)
-	self.Invert = sourceIcon.InvertCBar
-	self.Offset = sourceIcon.CBarOffs or 0
+function TimerBar_BarDisplay:SetupForIcon(sourceIcon)
+	self.Invert = false
+	self.Offset = 0
 	if not sourceIcon.typeData then
 		error("sourceIcon.typeData was nil. Why did this happen? (Please tell Cybeloras)")
 	end
@@ -31,21 +34,7 @@ function TimerBar_Overlay:SetupForIcon(sourceIcon)
 	self:UpdateValue(1)
 end
 
-TimerBar_Overlay:RegisterIconDefaults{
-	ShowCBar				= false,
-	CBarOffs				= 0,
-	InvertCBar				= false,
-}
-
-TimerBar_Overlay:RegisterConfigPanel_XMLTemplate("column", 3, "TellMeWhen_CBarOptions")
-
-TimerBar_Overlay:RegisterUpgrade(51022, {
-	icon = function(self, ics)
-		ics.InvertCBar = not not ics.InvertBars
-	end,
-})
-
-TimerBar_Overlay:SetIconEventListner("TMW_ICON_SETUP_POST", function(Module, icon)
+TimerBar_BarDisplay:SetIconEventListner("TMW_ICON_SETUP_POST", function(Module, icon)
 	if TMW.Locked then
 		Module:UpdateTable_Register()
 		
@@ -64,5 +53,3 @@ TimerBar_Overlay:SetIconEventListner("TMW_ICON_SETUP_POST", function(Module, ico
 		)
 	end
 end)
-
-

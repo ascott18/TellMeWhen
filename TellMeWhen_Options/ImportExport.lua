@@ -341,7 +341,7 @@ function group:Export_SetButtonAttributes(editbox, info)
 	local IMPORTS, EXPORTS = editbox:GetAvailableImportExportTypes()
 	local groupID = EXPORTS[self.type]
 	
-	local text = format(L["fGROUP"]:format(TMW:GetGroupName(groupID, groupID, 1)))
+	local text = L["fGROUP"]:format(TMW:GetGroupName(groupID, groupID, 1))
 	info.text = text
 	info.tooltipTitle = text
 end
@@ -443,7 +443,7 @@ function icon:Export_SetButtonAttributes(editbox, info)
 	local groupID = EXPORTS.group
 	local iconID = EXPORTS.icon
 	
-	local text = format(L["fICON"]:format(iconID, TMW:GetGroupName(groupID, groupID, 1)))
+	local text = L["fICON"]:format(iconID, TMW:GetGroupName(groupID, groupID, 1))
 	info.text = text
 	info.tooltipTitle = text
 end
@@ -466,6 +466,7 @@ local textlayout = SharableDataType:New("textlayout")
 
 function textlayout:Import_ImportData(editbox, data, version, GUID)
 	assert(type(GUID) == "string")
+	
 	TMW.db.profile.TextLayouts[GUID] = nil -- restore defaults
 	local textlayout = TMW.db.profile.TextLayouts[GUID]
 	TMW:CopyTableInPlaceWithMeta(data, textlayout, true)

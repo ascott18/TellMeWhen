@@ -5,6 +5,9 @@ local pname = UnitName("player")
 local spellFmt = "|T%s:0|t%s"
 local function Spell(id)
 	local name, _, tex = GetSpellInfo(id)
+	if not name or not tex then
+		error("TMW: UNKNOWN SPELLID: " .. id)
+	end
 	if id == 42292 then
 		tex = "Interface\\Icons\\inv_jewelry_trinketpvp_0" .. (UnitFactionGroup("player") == "Horde" and "2" or "1")
 	end
@@ -22,10 +25,9 @@ L["ICONMENU_MUSHROOMS_DESC"] 		  	= L["ICONMENU_MUSHROOMS_DESC"]	 		 	:format(Sp
 L["ICONMENU_UNITCOOLDOWN_DESC"] 	  	= L["ICONMENU_UNITCOOLDOWN_DESC"]		 	:format(Spell(42292), GetSpellInfo(42292))
 L["ICONMENU_MULTISTATECD_DESC"] 	  	= L["ICONMENU_MULTISTATECD_DESC"]		 	:format(Spell(88625), Spell(77606))
 L["HELP_ICD_NATURESGRACE"] 	  		  	= L["HELP_ICD_NATURESGRACE"]		 	 	:format(Spell(16886), L["ICONMENU_UNITCOOLDOWN"])
-L["CLEU_DAMAGE_SHIELD_DESC"] 	  	  	= L["CLEU_DAMAGE_SHIELD_DESC"]		 		:format(Spell(467), Spell(30482), Spell(324))
-L["CLEU_DAMAGE_SHIELD_MISSED_DESC"]   	= L["CLEU_DAMAGE_SHIELD_MISSED_DESC"]	 	:format(Spell(467), Spell(30482), Spell(324))
+L["CLEU_DAMAGE_SHIELD_DESC"] 	  	  	= L["CLEU_DAMAGE_SHIELD_DESC"]		 		:format(Spell(31271), Spell(30482), Spell(324))
+L["CLEU_DAMAGE_SHIELD_MISSED_DESC"]   	= L["CLEU_DAMAGE_SHIELD_MISSED_DESC"]	 	:format(Spell(31271), Spell(30482), Spell(324))
 L["CLEU_SPELL_STOLEN_DESC"]   		  	= L["CLEU_SPELL_STOLEN_DESC"]	 		 	:format(Spell(30449))
-L["ICONMENU_DONTREFRESH_DESC"]			= L["ICONMENU_DONTREFRESH_DESC"]	 	 	:format(Spell(83049))
 
 
 L["ICONMENU_ICD_DESC"] 	  			  	= L["ICONMENU_ICD_DESC"]		 		 	:format(L["ICONMENU_ICDTYPE"])
@@ -87,5 +89,6 @@ L["CONDITIONALPHA_METAICON"]		  	= format("|cff%02x%02x%02x", NORMAL_FONT_COLOR.
 L["CLEU_SOURCEUNITS_DESC"] 			  	= L["CLEU_SOURCEUNITS_DESC"] .. "\r\n\r\n" .. L["ICONMENU_UNIT_DESC"]
 L["CLEU_DESTUNITS_DESC"] 			  	= L["CLEU_DESTUNITS_DESC"]   .. "\r\n\r\n" .. L["ICONMENU_UNIT_DESC"]
 
-
-L["CLEU_DESTUNITS_DESC"] 			  	= L["CLEU_DESTUNITS_DESC"]   .. "\r\n\r\n" .. L["ICONMENU_UNIT_DESC"]
+if select(4, GetBuildInfo()) >= 50000 then -- ISMOP
+	L["ICONMENU_CUSTOMTEX_DESC"] = L["ICONMENU_CUSTOMTEX_DESC"] .. "\r\n\r\n" .. "|cffff0000MISTS OF PANDARIA BETA NOTE: Blizzard has what seems to be some temporary debugging code on their end that is interfering with TMW's ability to properly detect textures. If this icon is showing with a solid green texture, and your custom texture is in WoW's root folder, then please move it into a subdirectory of WoW's root and update the setting here accordingly to allow it to work correctly. If the custom texture is set to a spell, and it is either a spell name or a spell that no longer exists, then you should try and change it to a spellID of a spell that does exist. Sorry for the inconvenience!"
+end

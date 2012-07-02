@@ -22,25 +22,37 @@ local Locked
 
 
 
-local Type = TMW.Classes.IconType:New()
-Type.type = "meta"
+local Type = TMW.Classes.IconType:New("meta")
 Type.name = L["ICONMENU_META"]
 Type.desc = L["ICONMENU_META_DESC"]
 Type.AllowNoName = true
 Type.HideBars = true
 Type.NoColorSettings = true
 Type.RelevantSettings = {
-	Icons = true,
-	CheckNext = true,
-	Name = false,
 	CustomTex = false,
 	ShowTimer = false,
 	ShowTimerText = false,
 	ShowWhen = false,
 	Alpha = false,
 	UnAlpha = false,
-	Sort = true,
 }
+
+-- AUTOMATICALLY GENERATED: UsesAttributes
+Type:UsesAttributes("alpha")
+Type:UsesAttributes("texture")
+-- END AUTOMATICALLY GENERATED: UsesAttributes
+
+Type:RegisterIconDefaults{
+	Sort					= false,
+	CheckNext				= false,
+	Icons					= {
+		[1]					= "",
+	},   
+}
+
+Type:RegisterConfigPanel_XMLTemplate("full", 1, "TellMeWhen_MetaIconOptions")
+
+Type:RegisterConfigPanel_XMLTemplate("column", 1, "TellMeWhen_SortSettings")
 
 local CCI_icon
 local function CheckCompiledIcons(icon)
@@ -272,6 +284,8 @@ function Type:Setup(icon, groupID, iconID)
 	icon.metaUpdateQueued = true
 end
 
+--TODO: make this into an actual config panel
+--[[
 function Type:IE_TypeLoaded()
 	local spacing = 70
 	TMW.IE.Main.Sort:SetPoint("BOTTOMLEFT", 20, -22)
@@ -314,7 +328,7 @@ function Type:IE_TypeUnloaded()
 	TMW.IE.Main.ConditionAlpha.text:SetText(L["CONDITIONALPHA"])
 	TMW:TT(TMW.IE.Main.ConditionAlpha, "CONDITIONALPHA", "CONDITIONALPHA_DESC")
 end
-
+]]
 function Type:TMW_ICON_SETUP_PRE(event, icon)
 	if icon.Type ~= self.type then
 		TMW:UnregisterCallback("TMW_ICON_UPDATED", TMW_ICON_UPDATED, icon)

@@ -66,7 +66,7 @@ function Processor:CompileFunctionSegment(t)
 	--]]
 end
 
-Processor:AddDogTag("TMW", "Duration", {
+Processor:RegisterDogTag("TMW", "Duration", {
 	code = function (groupID, iconID)
 		local group = TMW[groupID]
 		local icon = group and group[iconID]

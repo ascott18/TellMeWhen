@@ -32,8 +32,7 @@ local SpellTextures = TMW.SpellTextures
 local clientVersion = select(4, GetBuildInfo())
 
 
-local Type = TMW.Classes.IconType:New()
-Type.type = "unitcooldown"
+local Type = TMW.Classes.IconType:New("unitcooldown")
 LibStub("AceEvent-3.0"):Embed(Type)
 Type.name = L["ICONMENU_UNITCOOLDOWN"]
 Type.desc = L["ICONMENU_UNITCOOLDOWN_DESC"]
@@ -45,22 +44,42 @@ Type.unitType = "unitid"
 --Type.unitTitle = L["ICONMENU_UNITSTOWATCH"] .. " " .. L["ICONMENU_UNITSTOWATCH_ALL"]
 Type.WhenChecks = {
 	text = L["ICONMENU_SHOWWHEN"],
-	{ value = "alpha", 			text = L["ICONMENU_USABLE"], 			colorCode = "|cFF00FF00" },
-	{ value = "unalpha",		text = L["ICONMENU_UNUSABLE"], 			colorCode = "|cFFFF0000" },
+	{ value = "alpha", 			text = "|cFF00FF00" .. L["ICONMENU_USABLE"], 			 },
+	{ value = "unalpha",		text = "|cFFFF0000" .. L["ICONMENU_UNUSABLE"], 			 },
 	{ value = "always", 		text = L["ICONMENU_ALWAYS"] },
 }
-Type.RelevantSettings = {
-	Unit = true,
-	OnlySeen = true,
-	ShowCBar = true,
-	InvertBars = true,
-	CBarOffs = true,
-	DurationMin = true,
-	DurationMax = true,
-	DurationMinEnabled = true,
-	DurationMaxEnabled = true,
-	Sort = true,
+
+-- AUTOMATICALLY GENERATED: UsesAttributes
+Type:UsesAttributes("spell")
+Type:UsesAttributes("unit, GUID")
+Type:UsesAttributes("color")
+Type:UsesAttributes("start, duration")
+Type:UsesAttributes("alpha")
+Type:UsesAttributes("texture")
+-- END AUTOMATICALLY GENERATED: UsesAttributes
+
+Type:RegisterIconDefaults{
+	Unit					= "", 
+	OnlySeen				= false,
+	Sort					= false,
 }
+
+Type:RegisterConfigPanel_XMLTemplate("full", 1, "TellMeWhen_ChooseName")
+
+Type:RegisterConfigPanel_XMLTemplate("column", 1, "TellMeWhen_Unit")
+
+Type:RegisterConfigPanel_XMLTemplate("column", 1, "TellMeWhen_SortSettings")
+
+Type:RegisterConfigPanel_ConstructorFunc("column", 1, "TellMeWhen_UnitCooldownSettings", function(self)
+	self.Header:SetText(Type.name)
+	TMW.IE:BuildSimpleCheckSettingFrame(self, {
+		{
+			setting = "OnlySeen",
+			title = L["ICONMENU_ONLYSEEN"],
+			tooltip = L["ICONMENU_ONLYSEEN_DESC"],
+		},
+	})
+end)
 
 Type.EventDisabled_OnStack = true
 
@@ -280,8 +299,6 @@ local function UnitCooldown_OnUpdate(icon, time)
 	local Alpha, NameArray, OnlySeen, Sort, Durations, Units = icon.Alpha, icon.NameArray, icon.OnlySeen, icon.Sort, icon.Durations, icon.Units
 	local NAL = #NameArray
 	local d = Sort == -1 and huge or 0
-	local UnAlpha = icon.UnAlpha
-
 	
 	for u = 1, #Units do
 		local unit = Units[u]
@@ -350,7 +367,7 @@ local function UnitCooldown_OnUpdate(icon, time)
 
 	if usename and Alpha > 0 then
 		icon:SetInfo("alpha; color; texture; start, duration; spell; unit, GUID",
-			Alpha,
+			icon.Alpha,
 			icon:CrunchColor(),
 			SpellTextures[usename] or "Interface\\Icons\\INV_Misc_PocketWatch_01",
 			0, 0,
@@ -359,7 +376,7 @@ local function UnitCooldown_OnUpdate(icon, time)
 		)
 	elseif unname then
 		icon:SetInfo("alpha; color; texture; start, duration; spell; unit, GUID",
-			UnAlpha,
+			icon.UnAlpha,
 			icon:CrunchColor(unduration),
 			SpellTextures[unname],
 			unstart, unduration,
@@ -373,7 +390,6 @@ end
 
 
 function Type:Setup(icon, groupID, iconID)
-	icon.ShowPBar = false
 	icon.NameFirst = TMW:GetSpellNames(icon, icon.Name, 1)
 	icon.NameArray = TMW:GetSpellNames(icon, icon.Name)
 	icon.NameHash = TMW:GetSpellNames(icon, icon.Name, nil, nil, 1)

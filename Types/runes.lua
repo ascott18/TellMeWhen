@@ -23,38 +23,45 @@ local SpellTextures = TMW.SpellTextures
 
 if not GetRuneType then return end
 
-local Type = TMW.Classes.IconType:New()
-Type.type = "runes"
+local Type = TMW.Classes.IconType:New("runes")
 LibStub("AceEvent-3.0"):Embed(Type)
 Type.name = L["ICONMENU_RUNES"]
 Type.desc = L["ICONMENU_RUNES_DESC"]
 Type.hidden = pclass ~= "DEATHKNIGHT"
 Type.AllowNoName = true
-Type.TypeChecks = {
-	setting = "TotemSlots",
-	text = L["RUNES"],
-}
 Type.WhenChecks = {
 	text = L["ICONMENU_SHOWWHEN"],
-	{ value = "alpha",			 	text = L["ICONMENU_USABLE"],			 	colorCode = "|cFF00FF00" },
-	{ value = "unalpha",		  	text = L["ICONMENU_UNUSABLE"],			 	colorCode = "|cFFFF0000" },
+	{ value = "alpha",			 	text = "|cFF00FF00" .. L["ICONMENU_USABLE"],			 	 },
+	{ value = "unalpha",		  	text = "|cFFFF0000" .. L["ICONMENU_UNUSABLE"],			 	 },
 	{ value = "always",		 	text = L["ICONMENU_ALWAYS"] },
 }
-Type.RelevantSettings = {
-	Name = false,
-	Sort = true,
-	TotemSlots = true,
-	ShowCBar = true,
-	CBarOffs = true,
-	InvertBars = true,
-	DurationMin = true,
-	DurationMax = true,
-	DurationMinEnabled = true,
-	DurationMaxEnabled = true,
+
+-- AUTOMATICALLY GENERATED: UsesAttributes
+Type:UsesAttributes("spell")
+Type:UsesAttributes("color")
+Type:UsesAttributes("start, duration")
+Type:UsesAttributes("alpha")
+Type:UsesAttributes("texture")
+-- END AUTOMATICALLY GENERATED: UsesAttributes
+
+Type:RegisterIconDefaults{
+	Sort					= false,
+	RuneSlots				= 0x3F, --(111111)
 }
+
+Type:RegisterConfigPanel_XMLTemplate("column", 1, "TellMeWhen_Runes")
+
+Type:RegisterConfigPanel_XMLTemplate("column", 1, "TellMeWhen_SortSettings")
 
 Type.EventDisabled_OnUnit = true
 Type.EventDisabled_OnStack = true
+
+Type:RegisterUpgrade(51024, {
+	icon = function(self, ics)
+		-- Import the setting from TotemSlots, which was what the setting used to be
+		ics.RuneSlots = ics.TotemSlots or 0x3F
+	end,
+})
 
 local textures = {
 	"Interface\\Icons\\Spell_Deathknight_BloodPresence",
@@ -151,8 +158,8 @@ end
 function Type:Setup(icon, groupID, iconID)
 	icon.Slots = wipe(icon.Slots or {})
 	for i=1, 6 do
-		local settingBit = i > 1 and bit.lshift(1, i - 1) or 1
-		icon.Slots[i] = bit.band(icon.TotemSlots, settingBit) == settingBit
+		local settingBit = bit.lshift(1, i - 1)
+		icon.Slots[i] = bit.band(icon.RuneSlots, settingBit) == settingBit
 	end
 
 	for k, v in ipairs(icon.Slots) do

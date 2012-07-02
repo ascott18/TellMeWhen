@@ -24,38 +24,68 @@ local UIParent = UIParent
 local strlowerCache = TMW.strlowerCache
 
 
-local Type = TMW.Classes.IconType:New()
+local Type = TMW.Classes.IconType:New("wpnenchant")
 LibStub("AceTimer-3.0"):Embed(Type)
-Type.type = "wpnenchant"
 Type.name = L["ICONMENU_WPNENCHANT"]
 Type.desc = L["ICONMENU_WPNENCHANT_DESC"]
 Type.chooseNameTitle = L["ICONMENU_CHOOSENAME_WPNENCH"] .. " " .. L["ICONMENU_CHOOSENAME_ORBLANK"]
 Type.chooseNameText = L["ICONMENU_CHOOSENAME_WPNENCH_DESC"]
 Type.AllowNoName = true
 Type.SUGType = "wpnenchant"
-Type.TypeChecks = {
-	text = L["ICONMENU_WPNENCHANTTYPE"],
-	setting = "WpnEnchantType",
-	{ value = "MainHandSlot",	text = INVTYPE_WEAPONMAINHAND },
-	{ value = "SecondaryHandSlot", text = INVTYPE_WEAPONOFFHAND },
-	{ value = "RangedSlot",		text = INVTYPE_THROWN },
-}
 Type.WhenChecks = {
 	text = L["ICONMENU_SHOWWHEN"],
-	{ value = "alpha", 			text = L["ICONMENU_PRESENT"], 			colorCode = "|cFF00FF00" },
-	{ value = "unalpha", 		text = L["ICONMENU_ABSENT"], 			colorCode = "|cFFFF0000" },
+	{ value = "alpha", 			text = "|cFF00FF00" .. L["ICONMENU_PRESENT"], 			 },
+	{ value = "unalpha", 		text = "|cFFFF0000" .. L["ICONMENU_ABSENT"], 			 },
 	{ value = "always", 		text = L["ICONMENU_ALWAYS"] },
 }
-Type.RelevantSettings = {
-	HideUnequipped = true,
-	WpnEnchantType = true,
-	ShowCBar = true,
-	CBarOffs = true,
-	DurationMin = true,
-	DurationMax = true,
-	DurationMinEnabled = true,
-	DurationMaxEnabled = true,
+
+-- AUTOMATICALLY GENERATED: UsesAttributes
+Type:UsesAttributes("spell")
+Type:UsesAttributes("reverse")
+Type:UsesAttributes("color")
+Type:UsesAttributes("start, duration")
+Type:UsesAttributes("alpha")
+Type:UsesAttributes("texture")
+-- END AUTOMATICALLY GENERATED: UsesAttributes
+
+Type:RegisterIconDefaults{
+	HideUnequipped			= false,
+	WpnEnchantType			= "MainHandSlot",
 }
+
+Type:RegisterConfigPanel_XMLTemplate("full", 1, "TellMeWhen_ChooseName")
+
+Type:RegisterConfigPanel_ConstructorFunc("column", 2, "TellMeWhen_WeaponSlot", function(self)
+	self.Header:SetText(TMW.L["ICONMENU_WPNENCHANTTYPE"])
+	TMW.IE:BuildSimpleCheckSettingFrame(self, {
+		{
+			setting = "WpnEnchantType",
+			value = "MainHandSlot",
+			title = INVTYPE_WEAPONMAINHAND,
+		},
+		{
+			setting = "WpnEnchantType",
+			value = "SecondaryHandSlot",
+			title = INVTYPE_WEAPONOFFHAND,
+		},
+		{
+			setting = "WpnEnchantType",
+			value = "RangedSlot",
+			title = INVTYPE_THROWN,
+		},
+	})
+end)
+
+Type:RegisterConfigPanel_ConstructorFunc("column", 1, "TellMeWhen_WpnEnchantSettings", function(self)
+	self.Header:SetText(Type.name)
+	TMW.IE:BuildSimpleCheckSettingFrame(self, {
+		{
+			setting = "HideUnequipped",
+			title = L["ICONMENU_HIDEUNEQUIPPED"],
+			tooltip = L["ICONMENU_HIDEUNEQUIPPED_DESC"],
+		},
+	})
+end)
 
 Type.EventDisabled_OnUnit = true
 Type.EventDisabled_OnStack = true
@@ -207,7 +237,6 @@ function Type:Setup(icon, groupID, iconID)
 
 	UpdateWeaponEnchantInfo(icon.Slot, icon.SelectIndex)
 
-	icon.ShowPBar = false
 
 	icon:SetInfo("texture; reverse",
 		GetInventoryItemTexture("player", icon.Slot) or "Interface\\Icons\\INV_Misc_QuestionMark",

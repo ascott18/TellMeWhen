@@ -17,8 +17,7 @@ local L = TMW.L
 local print = TMW.print
 
 
-local Type = TMW.Classes.IconType:New()
-Type.type = ""
+local Type = TMW.Classes.IconType:New("")
 Type.name = L["ICONMENU_TYPE"]
 Type.spaceafter = true
 Type.HideBars = true
@@ -33,6 +32,11 @@ Type.RelevantSettings = {
 	UnAlpha = false,
 	ConditionAlpha = false,
 }
+
+-- AUTOMATICALLY GENERATED: UsesAttributes
+Type:UsesAttributes("alpha")
+Type:UsesAttributes("texture")
+-- END AUTOMATICALLY GENERATED: UsesAttributes
 
 function Type:Update()
 

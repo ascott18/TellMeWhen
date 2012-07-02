@@ -18,16 +18,18 @@ local L = TMW.L
 local print = TMW.print
 
 
-local Processor = TMW.Classes.IconDataProcessor:New("TEXTURE", "texture")
+local Processor = TMW.Classes.IconDataProcessor:New("INRANGE", "inRange")
 
 function Processor:CompileFunctionSegment(t)
-	-- GLOBALS: texture
+	-- GLOBALS: inRange
 	t[#t+1] = [[
-	if texture ~= nil and attributes.texture ~= texture then
-		attributes.texture = texture
+	
+	if attributes.inRange ~= inRange then
+		attributes.inRange = inRange
 
-		TMW:Fire(TEXTURE.changedEvent, icon, texture)
+		TMW:Fire(INRANGE.changedEvent, icon, inRange)
 		doFireIconUpdated = true
 	end
 	--]]
 end
+	

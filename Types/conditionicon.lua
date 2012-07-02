@@ -17,8 +17,7 @@ local L = TMW.L
 local print = TMW.print
 
 
-local Type = TMW.Classes.IconType:New()
-Type.type = "conditionicon"
+local Type = TMW.Classes.IconType:New("conditionicon")
 Type.name = L["ICONMENU_CNDTIC"]
 Type.desc = L["ICONMENU_CNDTIC_DESC"]
 Type.spacebefore = true
@@ -30,25 +29,27 @@ Type.chooseNameText = L["CHOOSENAME_DIALOG_CNDTIC"]
 
 Type.WhenChecks = {
 	text = L["ICONMENU_CNDTSHOWWHEN"],
-	{ value = "alpha",			text = L["ICONMENU_SUCCEED"],			colorCode = "|cFF00FF00" },
-	{ value = "unalpha",		text = L["ICONMENU_FAIL"],				colorCode = "|cFFFF0000" },
+	{ value = "alpha",			text = "|cFF00FF00" .. L["ICONMENU_SUCCEED"],			 },
+	{ value = "unalpha",		text = "|cFFFF0000" .. L["ICONMENU_FAIL"],				 },
 	{ value = "always",			text = L["ICONMENU_ALWAYS"] },
 }
-Type.RelevantSettings = {
-	Name = false,
-	ConditionDur = true,
-	ConditionDurEnabled = true,
-	UnConditionDur = true,
-	UnConditionDurEnabled = true,
-	ShowCBar = true,
-	CBarOffs = true,
-	InvertBars = true,
-	DurationMin = true,
-	DurationMax = true,
-	DurationMinEnabled = true,
-	DurationMaxEnabled = true,
-	OnlyIfCounting = true,
+
+-- AUTOMATICALLY GENERATED: UsesAttributes
+Type:UsesAttributes("color")
+Type:UsesAttributes("start, duration")
+Type:UsesAttributes("alpha")
+Type:UsesAttributes("texture")
+-- END AUTOMATICALLY GENERATED: UsesAttributes
+
+Type:RegisterIconDefaults{
+	ConditionDur			= 0,
+	UnConditionDur			= 0,
+	ConditionDurEnabled		= false,
+	UnConditionDurEnabled  	= false,
+	OnlyIfCounting			= false,
 }
+
+Type:RegisterConfigPanel_XMLTemplate("column", 1, "TellMeWhen_ConditionIconSettings")
 
 Type.EventDisabled_OnSpell = true
 Type.EventDisabled_OnUnit = true
@@ -61,7 +62,7 @@ local function ConditionIcon_OnUpdate(icon, time)
 	local ConditionObj = icon.ConditionObj
 	if ConditionObj then
 		local succeeded = not ConditionObj.Failed
-
+		
 		local alpha = succeeded and icon.Alpha or icon.UnAlpha
 
 		local d, start, duration
@@ -110,10 +111,10 @@ end
 function Type:Setup(icon, groupID, iconID)
 	icon.dontHandleConditionsExternally = true
 	
-	if not icon.OverrideTex or icon.OverrideTex == "" then
+	--[[if not icon.OverrideTex or icon.OverrideTex == "" then
 		icon.OverrideTex = "Interface\\Icons\\INV_Misc_QuestionMark"
-	end
-	icon:SetInfo("texture", icon.OverrideTex)
+	end]]
+	icon:SetInfo("texture", "Interface\\Icons\\INV_Misc_QuestionMark")
 
 	icon:SetUpdateMethod("manual")
 	
@@ -122,7 +123,23 @@ function Type:Setup(icon, groupID, iconID)
 end
 
 function Type:DragReceived(icon, t, data, subType)
-	return TMW.ID:TextureDragReceived(icon, t, data, subType)
+	-- TODO: Switch conditionicons back to using ics.Name instead of ics.CustomTex for their texture.
+	-- I know its a little redundant to have both, but consistency and modularity is much more important than non-redundancy.
+	
+	local ics = icon:GetSettings()
+
+	local _, input
+	if t == "spell" then
+		_, input = GetSpellBookItemInfo(data, subType)
+	elseif t == "item" then
+		input = GetItemIcon(data)
+	end
+	if not input then
+		return
+	end
+
+	ics.CustomTex = TMW:CleanString(input)
+	return true -- signal success
 end
 
 function Type:GetIconMenuText(data, groupID, iconID)

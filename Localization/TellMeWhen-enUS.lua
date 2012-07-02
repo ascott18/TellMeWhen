@@ -68,7 +68,7 @@ Equipment slots are numbered indexes that correspond to an equipped item. If you
 You can |cff7fffffShift-click|r items and chat links or drag items to insert them into this editbox.]=]
 
 L["ICONMENU_CHOOSENAME_MULTISTATE"] = "Choose name/ID to check"
-L["ICONMENU_CHOOSENAME_ORBLANK"] = "OR leave blank to track everything"
+L["ICONMENU_CHOOSENAME_ORBLANK"] = "|cff7fffffOR|r leave blank to track everything"
 L["ICONMENU_ENABLE"] = "Enabled"
 L["CHOOSENAME_EQUIVS_TOOLTIP"] = [[You can select predefined sets of buffs, debuffs, spell casts, diminishing returns, or dispel types (Magic, Curse, etc.) from this menu to insert into the "%s" editbox.]]
 L["CHOOSENAME_DIALOG_DDDEFAULT"] = "Predefined Spell Sets/Dispel Types"
@@ -224,7 +224,7 @@ L["ICONMENU_COMPONENTICONS"] = "Component Icons & Groups"
 
 
 L["ICONMENU_UNITSTOWATCH"] = "Unit(s) to watch"
-L["ICONMENU_UNITSTOWATCH_ALL"] = "OR leave blank to track all"
+L["ICONMENU_UNITSTOWATCH_ALL"] = "|cff7fffffOR|r leave blank to track all"
 L["ICONMENU_UNITS"] = "Units"
 L["ICONMENU_UNIT_DESC"] = [[Enter the units to watch in this box. Units can be inserted from the dropdown at the right, or advanced users can type in their own units. Standard units (e.g. player) and/or friendly player names (e.g. %s) may be used as units. Separate multiple units with semicolons (;).
 
@@ -265,13 +265,11 @@ L["ICONMENU_SHOWTIMERTEXT_DESC"] = [[Check this option to display a textual disp
 
 This is only applicable if OmniCC (or similar) is installed.]]
 
-L["ICONMENU_OVERLAYBARHEADER"] = "Overlay Bars"
-L["ICONMENU_SHOWPBARN"] = "Power bar"
-L["ICONMENU_SHOWCBARN"] = "Timer bar"
 L["ICONMENU_SHOWPBAR_DESC"] = "Shows a bar that is overlaid across the top half of the icon that will indicate the power still needed to cast the spell (or the power that you have when 'Fill bars up' is checked)"
 L["ICONMENU_SHOWCBAR_DESC"] = "Shows a bar that is overlaid across the bottom half of the icon that will indicate the cooldown/duration remaining (or the time that has passed if 'Fill bars up' is checked)"
-L["ICONMENU_INVERTBARS"] = "Fill bars up"
-L["ICONMENU_INVERTBARS_DESC"] = "Check this option to cause the overlay bars to fill up to cover the whole width of the icon as power become sufficient and duration reaches zero."
+L["ICONMENU_INVERTBARS"] = "Fill bar up"
+L["ICONMENU_INVERTCBAR_DESC"] = "Check this option to cause the overlay bar to fill up to cover the whole width of the icon as duration reaches zero."
+L["ICONMENU_INVERTPBAR_DESC"] = "Check this option to cause the overlay bar to fill up to cover the whole width of the icon as power become sufficient."
 L["ICONMENU_OFFS"] = "Offset"
 L["ICONMENU_BAROFFS"] = [[This amount will be added to the bar in order to offset it.
 
@@ -321,7 +319,7 @@ L["ICONMENU_IGNORERUNES"] = "Ignore Runes"
 L["ICONMENU_IGNORERUNES_DESC"] = "Check this to treat the cooldown as usable if the only thing hindering it is a rune cooldown (or a global cooldown)."
 L["ICONMENU_IGNORERUNES_DESC_DISABLED"] = "You must enable the \"Cooldown check\" setting to enable the \"Ignore Runes\" setting."
 L["ICONMENU_DONTREFRESH"] = "Don't Refresh"
-L["ICONMENU_DONTREFRESH_DESC"] = "Check to force the cooldown to not reset if the trigger occurs while it is still counting down. Useful for talents such as %s."
+L["ICONMENU_DONTREFRESH_DESC"] = "Check to force the cooldown to not reset if the trigger occurs while it is still counting down."
 
 L["SORTBY"] = "Prioritize"
 L["SORTBYNONE"] = "Normally"
@@ -430,8 +428,10 @@ L["UIPANEL_COLUMNS"] = "Columns"
 L["UIPANEL_ONLYINCOMBAT"] = "Only show in combat"
 L["UIPANEL_SPEC"] = "Dual Spec"
 L["UIPANEL_TREE"] = "Talent Tree"
+L["UIPANEL_SPECIALIZATION"] = "Talent Specialization"
 L["UIPANEL_TREE_DESC"] = "Check to allow this group to show when this talent tree is active, or uncheck to cause it to hide when it is not active."
 L["UIPANEL_PTSINTAL"] = "Points in talent"
+L["UIPANEL_TALENTLEARNED"] = "Talent learned"
 L["UIPANEL_GLYPH"] = "Glyph"
 L["UIPANEL_GLYPH_DESC"] = "Checks if you have a particular glyph active."
 L["UIPANEL_PRIMARYSPEC"] = "Primary Spec"
@@ -823,6 +823,7 @@ L["CONDITIONPANEL_ITEMRANGE"] = "Item in range of unit"
 L["CONDITIONPANEL_AUTOCAST"] = "Spell autocasting"
 L["CONDITIONPANEL_PETMODE"] = "Pet attack mode"
 L["CONDITIONPANEL_PETTREE"] = "Pet talent tree"
+L["CONDITIONPANEL_PETSPEC"] = "Pet specialization"
 L["CONDITIONPANEL_TRACKING"] = "Tracking active"
 L["ONLYCHECKMINE"] = "Only Check Mine"
 L["ONLYCHECKMINE_DESC"] = "Check this to cause this condition to only check for buffs/debuffs that you casted"
@@ -883,7 +884,6 @@ L["SPELLHASTE"] = "Spell Haste"
 L["SPELLCRIT"] = "Spell Crit"
 L["ITEMINBAGS"] = "Item count (includes charges)"
 L["ITEMEQUIPPED"] = "Item is equipped"
-L["ITEMCOOLDOWN"] = "Item cooldown"
 L["ITEMCOOLDOWN"] = "Item cooldown"
 L["SPELLCOOLDOWN"] = "Spell cooldown"
 L["SPELLREACTIVITY"] = "Spell reactivity"
@@ -1295,7 +1295,7 @@ L["CLEU_SPELL_AURA_BROKEN"] = "Aura Broken"
 L["CLEU_SPELL_AURA_BROKEN_SPELL"] = "Aura Broken by Spell"
 L["CLEU_SPELL_AURA_BROKEN_SPELL_DESC"] = [[Occurs when an aura, usually some form of crowd control, is broken by damage from a spell.
 
-The aura that was broken is what the icon filters by; the spell that broke it can be accessed with the substitution '%x' in text displays.]]
+The aura that was broken is what the icon filters by; the spell that broke it can be accessed with the substitution [Extra] in text displays.]]
 L["CLEU_SPELL_AURA_REFRESH"] = "Aura Refreshed"
 L["CLEU_SPELL_AURA_REMOVED"] = "Aura Removed"
 L["CLEU_SPELL_AURA_REMOVED_DOSE"] = "Aura Stack Removed"
@@ -1319,11 +1319,11 @@ L["CLEU_SPELL_DAMAGE_CRIT_DESC"] = [[Occurs when any spell does critical damage.
 L["CLEU_SPELL_DISPEL"] = "Dispel"
 L["CLEU_SPELL_DISPEL_DESC"] = [[Occurs when an aura is dispelled.
 
-Icon can be filtered by the aura that was dispelled. The spell that dispelled it can be accessed with the substitution '%x' in text displays.]]
+Icon can be filtered by the aura that was dispelled. The spell that dispelled it can be accessed with the substitution [Extra] in text displays.]]
 L["CLEU_SPELL_DISPEL_FAILED"] = "Dispel Failed"
 L["CLEU_SPELL_DISPEL_FAILED_DESC"] = [[Occurs when an aura fails to be dispelled.
 
-Icon can be filtered by the aura that was attempted to be dispelled. The spell that attempted it can be accessed with the substitution '%x' in text displays.]]
+Icon can be filtered by the aura that was attempted to be dispelled. The spell that attempted it can be accessed with the substitution [Extra] in text displays.]]
 L["CLEU_SPELL_DRAIN"] = "Resource Drain"
 L["CLEU_SPELL_DRAIN_DESC"] = "Occurs when resources (health/mana/rage/energy/etc) are removed from a unit."
 L["CLEU_SPELL_ENERGIZE"] = "Resource Gain"
@@ -1335,13 +1335,13 @@ L["CLEU_SPELL_INSTAKILL"] = "Instant Kill"
 L["CLEU_SPELL_INTERRUPT"] = "Interrupt - Spell Interrupted"
 L["CLEU_SPELL_INTERRUPT_DESC"] = [[Occurs when a spell cast is interrupted.
 
-Icon can be filtered by the spell that was interrupted. The interrupt spell that interrupted it can be accessed with the substitution '%x' in text displays.
+Icon can be filtered by the spell that was interrupted. The interrupt spell that interrupted it can be accessed with the substitution [Extra] in text displays.
 
 Note the difference between the two interrupt events - both will always occur when a spell is interrupted, but each filters the spells involved differently.]]
 L["CLEU_SPELL_INTERRUPT_SPELL"] = "Interrupt - Interrupt Spell Used"
 L["CLEU_SPELL_INTERRUPT_SPELL_DESC"] = [[Occurs when a spell cast is interrupted.
 
-Icon can be filtered by the spell that caused the interrupt. The spell that was interrupted can be accessed with the substitution '%x' in text displays.
+Icon can be filtered by the spell that caused the interrupt. The spell that was interrupted can be accessed with the substitution [Extra] in text displays.
 
 Note the difference between the two interrupt events - both will always occur when a spell is interrupted, but each filters the spells involved differently.]]
 L["CLEU_SPELL_LEECH"] = "Resource Leech"
@@ -1440,11 +1440,14 @@ L["CLEU_EVENTS"] = "Events to check"
 L["CLEU_EVENTS_ALL"] = "All"
 L["CLEU_EVENTS_DESC"] = "Choose the combat events that you would like the icon to react to."
 L["CLEU_SOURCEUNITS"] = "Source unit(s) to check"
-L["CLEU_SOURCEUNITS_DESC"] = "Choose the source units that you would like the icon to react to, or leave this blank to let the icon react to any event source."
+L["CLEU_SOURCEUNITS_DESC"] = "Choose the source units that you would like the icon to react to, |cff7fffffOR|r leave this blank to let the icon react to any event source."
 L["CLEU_DESTUNITS"] = "Destination unit(s) to check"
-L["CLEU_DESTUNITS_DESC"] = "Choose the destination units that you would like the icon to react to, or leave this blank to let the icon react to any event destination."
+L["CLEU_DESTUNITS_DESC"] = "Choose the destination units that you would like the icon to react to, |cff7fffffOR|r leave this blank to let the icon react to any event destination."
 
-L["CLEU_FLAGS"] = "Exclusions"
+--L["CLEU_FLAGS_SOURCE"] = "Source Exclusions"
+--L["CLEU_FLAGS_DEST"] = "Destination Exclusions"
+L["CLEU_FLAGS_SOURCE"] = "Exclusions"
+L["CLEU_FLAGS_DEST"] = "Exclusions"
 L["CLEU_FLAGS_DESC"] = "Contains a list of attributes that can be used to exclude certain units from triggering the icon. If an exclusion is checked, and a unit has that attribute, the icon will not process the event that the unit was part of."
 
 L["CLEU_TIMER"] = "Timer to set on event"

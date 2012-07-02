@@ -18,16 +18,18 @@ local L = TMW.L
 local print = TMW.print
 
 
-local Processor = TMW.Classes.IconDataProcessor:New("TEXTURE", "texture")
+local Processor = TMW.Classes.IconDataProcessor:New("NOMANA", "noMana")
 
 function Processor:CompileFunctionSegment(t)
-	-- GLOBALS: texture
+	-- GLOBALS: noMana
 	t[#t+1] = [[
-	if texture ~= nil and attributes.texture ~= texture then
-		attributes.texture = texture
+	
+	if attributes.noMana ~= noMana then
+		attributes.noMana = noMana
 
-		TMW:Fire(TEXTURE.changedEvent, icon, texture)
+		TMW:Fire(NOMANA.changedEvent, icon, noMana)
 		doFireIconUpdated = true
 	end
 	--]]
 end
+	

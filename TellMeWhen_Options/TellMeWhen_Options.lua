@@ -13,7 +13,7 @@
 
 if not TMW then return end
 
-TMW.WidthCol1 = 170
+TMW.WidthCol1 = 150
 
 ---------- Libraries ----------
 local LSM = LibStub("LibSharedMedia-3.0")
@@ -44,8 +44,8 @@ local GetItemInfo, GetItemIcon, GetInventoryItemID, GetInventoryItemLink, GetInv
 	  GetItemInfo, GetItemIcon, GetInventoryItemID, GetInventoryItemLink, GetInventoryItemTexture, GetInventorySlotInfo, GetContainerNumSlots
 local GetNumTrackingTypes, GetTrackingInfo =
 	  GetNumTrackingTypes, GetTrackingInfo
-local GetBuildInfo, IsInGuild, GetRealNumPartyMembers, GetRealNumRaidMembers, GetNumRaidMembers, UnitInBattleground, UnitRace, UnitName =
-	  GetBuildInfo, IsInGuild, GetRealNumPartyMembers, GetRealNumRaidMembers, GetNumRaidMembers, UnitInBattleground, UnitRace, UnitName
+local GetBuildInfo, IsInGuild, UnitInBattleground, UnitRace, UnitName =
+	  GetBuildInfo, IsInGuild, UnitInBattleground, UnitRace, UnitName
 local GetSpellBookItemInfo, HasPetSpells, GetSpellTabInfo, GetActionInfo =
 	  GetSpellBookItemInfo, HasPetSpells, GetSpellTabInfo, GetActionInfo
 local GetNumTalentTabs, GetNumTalents, GetTalentInfo, GetTalentLink =
@@ -61,7 +61,7 @@ local strlowerCache = TMW.strlowerCache
 local SpellTextures = TMW.SpellTextures
 local print = TMW.print
 local Types = TMW.Types
-local ME, CNDT, IE, SUG, ID, SND, ANN, HELP, HIST, ANIM, EVENTS, CLEU, TEXT
+local ME, CNDT, IE, SUG, ID, SND, ANN, HELP, HIST, ANIM, EVENTS, TEXT
 local CNDT = TMW.CNDT -- created in TellMeWhen/conditions.lua
 
 
@@ -327,35 +327,6 @@ function TMW:TT_Update(f)
 end
 
 
----------- Table Copying ----------
-function TMW:CopyWithMetatable(settings)
-	local copy = {}
-	for k, v in pairs(settings) do
-		if type(v) == "table" then
-			copy[k] = TMW:CopyWithMetatable(v)
-		else
-			copy[k] = v
-		end
-	end
-	return setmetatable(copy, getmetatable(settings))
-end
-
-function TMW:CopyTableInPlaceWithMeta(src, dest, allowUnmatchedSourceTables)
-	--src and dest must have congruent data structure, otherwise shit will blow up. There are no safety checks to prevent this.
-	local metatemp = getmetatable(src) -- lets not go overwriting random metatables
-	setmetatable(src, getmetatable(dest))
-	for k in pairs(src) do
-		if dest[k] and type(dest[k]) == "table" and type(src[k]) == "table" then
-			TMW:CopyTableInPlaceWithMeta(src[k], dest[k], allowUnmatchedSourceTables)
-		elseif type(src[k]) ~= "table" or allowUnmatchedSourceTables then
-			dest[k] = src[k]
-		end
-	end
-	setmetatable(src, metatemp) -- restore the old metatable
-	return dest -- not really needed, but what the hell why not
-end
-
-
 ---------- Icon Utilities ----------
 function TMW:GetIconMenuText(g, i, data)
 	data = data or TMW.db.profile.Groups[tonumber(g)].Icons[tonumber(i)]
@@ -383,7 +354,7 @@ function TMW:GuessIconTexture(data)
 	local tex
 
 	if data.CustomTex then
-		tex = TMW:GetCustomTexture(data.CustomTex)
+		tex = TMW:GetTexturePathFromSetting(data.CustomTex)
 	end
 
 	if (data.Name and data.Name ~= "" and data.Type ~= "meta" and data.Type ~= "wpnenchant" and data.Type ~= "runes") and not tex then
@@ -1673,14 +1644,26 @@ local colorIconTypeTemplate = {
 for k, v in pairs(colorOrder) do
 	colorIconTypeTemplate.args[v] = colorTemplate
 end
-for i = 1, GetNumTalentTabs() do
-	local _, name = GetTalentTabInfo(i)
-	groupConfigTemplate.args.main.args["Tree"..i] = {
-		type = "toggle",
-		name = name,
-		desc = L["UIPANEL_TREE_DESC"],
-		order = 7+i,
-	}
+if TMW.ISMOP then
+	for i = 1, GetNumSpecializations() do
+		local _, name = GetSpecializationInfo(i)
+		groupConfigTemplate.args.main.args["Tree"..i] = {
+			type = "toggle",
+			name = name,
+			desc = L["UIPANEL_TREE_DESC"],
+			order = 7+i,
+		}
+	end
+else
+	for i = 1, GetNumTalentTabs() do
+		local _, name = GetTalentTabInfo(i) --MOP DEPRECIATED, COMPAT CODE IN PLACE
+		groupConfigTemplate.args.main.args["Tree"..i] = {
+			type = "toggle",
+			name = name,
+			desc = L["UIPANEL_TREE_DESC"],
+			order = 7+i,
+		}
+	end
 end
 
 
@@ -1768,7 +1751,7 @@ function TMW:CompileOptions()
 									type = "toggle",
 									order = 22,
 								},
-								DrawEdge = {
+								DrawEdge = not TMW.ISMOP and {
 									name = L["UIPANEL_DRAWEDGE"],
 									desc = L["UIPANEL_DRAWEDGE_DESC"],
 									type = "toggle",
@@ -2145,23 +2128,6 @@ end
 
 
 ---------- Spell/Item Dragging ----------
-function ID:TextureDragReceived(icon, t, data, subType)
-	local ics = icon:GetSettings()
-
-	local _, input
-	if t == "spell" then
-		_, input = GetSpellBookItemInfo(data, subType)
-	elseif t == "item" then
-		input = GetItemIcon(data)
-	end
-	if not input then
-		return
-	end
-
-	ics.CustomTex = TMW:CleanString(input)
-	return true -- signal success
-end
-
 function ID:SpellItemToIcon(icon, func, arg1)
 	if not icon.IsIcon then
 		return
@@ -2557,24 +2523,28 @@ end
 ME = TMW:NewModule("MetaEditor") TMW.ME = ME
 
 function ME:LoadConfig()
+	if not TellMeWhen_MetaIconOptions then return end
 	local groupID, iconID = CI.g, CI.i
 	local settings = CI.ics.Icons
 
 	for k, v in pairs(settings) do
-		local mg = ME[k] or CreateFrame("Frame", "TellMeWhen_IconEditorMainIcons" .. k, IE.Main.Icons.ScrollFrame.Icons, "TellMeWhen_MetaGroup", k)
+		local mg = ME[k] or CreateFrame("Frame", "TellMeWhen_IconEditorMainIcons" .. k, TellMeWhen_MetaIconOptions, "TellMeWhen_MetaGroup", k)
 		ME[k] = mg
 		mg:Show()
 		ME[k].up:Show()
 		ME[k].down:Show()
 		if k > 1 then
-			mg:SetPoint("TOP", ME[k-1], "BOTTOM", 0, 0)
+			mg:SetPoint("TOPLEFT", ME[k-1], "BOTTOMLEFT", 0, 0)
+			mg:SetPoint("TOPRIGHT", ME[k-1], "BOTTOMRIGHT", 0, 0)
 		end
-		mg:SetFrameLevel(IE.Main.Icons:GetFrameLevel()+2)
+		mg:SetFrameLevel(TellMeWhen_MetaIconOptions:GetFrameLevel()+2)
 
 		TMW:SetUIDropdownText(mg.icon, v, TMW.InIcons, L["CHOOSEICON"])
 		mg.icon.IconPreview:SetIcon(_G[v])
 	end
 
+	TellMeWhen_MetaIconOptions:SetHeight((#settings * ME[1]:GetHeight()) + 30)
+	
 	for f=#settings+1, #ME do
 		ME[f]:Hide()
 	end
@@ -2593,12 +2563,8 @@ function ME:LoadConfig()
 	else
 		ME[1].delete:Hide()
 	end
-
-	if IE.Main.Icons.ScrollFrame:GetVerticalScrollRange() == 0 then
-		IE.Main.Icons.ScrollFrame.ScrollBar:Hide()
-	end
 end
-TMW:RegisterCallback("TMW_CONFIG_LOAD", ME.LoadConfig, ME)
+TMW:RegisterCallback("TMW_CONFIG_ICON_LOADED", ME.LoadConfig, ME)
 
 
 ---------- Click Handlers ----------
@@ -2678,356 +2644,6 @@ function ME:IconMenuOnClick(frame)
 	CloseDropDownMenus()
 end
 
-
-
--- ----------------------
--- CLEU EDITOR
--- ----------------------
-
-CLEU = TMW:NewModule("CLEUEditor") TMW.CLEU = CLEU
-CLEU.Events = {
-	"",
-"SPACE",
-
-"CAT_SWING",
-	"SWING_DAMAGE", -- normal
-	"SWING_MISSED", -- normal
-	"SPELL_EXTRA_ATTACKS", -- normal
-"SPACE",
-	"RANGE_DAMAGE", -- normal
-	"RANGE_MISSED", -- normal
-
-
-"CAT_SPELL",
-	"SPELL_DAMAGE", -- normal
-	"SPELL_DAMAGE_CRIT", -- normal
-	"SPELL_MISSED", -- normal
-	"SPELL_REFLECT", -- normal
-"SPACE",
-	"SPELL_CREATE", -- normal
-	"SPELL_SUMMON", -- normal
-"SPACE",
-	"SPELL_HEAL", -- normal
-	"SPELL_RESURRECT", -- normal
-"SPACE",
-	"SPELL_ENERGIZE", -- normal
-	"SPELL_DRAIN", -- normal
-	"SPELL_LEECH", -- normal
-"SPACE",
-	"DAMAGE_SHIELD", -- normal
-	"DAMAGE_SHIELD_MISSED", -- normal
-
-
-"CAT_AURA",
-	"SPELL_DISPEL",-- extraSpellID/name
-	"SPELL_DISPEL_FAILED",-- extraSpellID/name
-	"SPELL_STOLEN",-- extraSpellID/name
-"SPACE",
-	"SPELL_AURA_APPLIED", -- normal
-	"SPELL_AURA_APPLIED_DOSE",
-	"SPELL_AURA_REFRESH", -- normal
-	"SPELL_AURA_REMOVED", -- normal
-	"SPELL_AURA_REMOVED_DOSE",
-	"SPELL_AURA_BROKEN",
-
-	"SPELL_AURA_BROKEN_SPELL",-- extraSpellID/name
-"SPACE",
-	"SPELL_PERIODIC_DAMAGE",
-	"SPELL_PERIODIC_DRAIN",
-	"SPELL_PERIODIC_ENERGIZE",
-	"SPELL_PERIODIC_LEECH",
-	"SPELL_PERIODIC_HEAL",
-	"SPELL_PERIODIC_MISSED",
-
-
-"CAT_CAST",
-	"SPELL_CAST_FAILED",
-	"SPELL_CAST_START",
-	"SPELL_CAST_SUCCESS",
-"SPACE",
-	"SPELL_INTERRUPT",-- extraSpellID/name
-	"SPELL_INTERRUPT_SPELL",-- extraSpellID/name
-
-
-"CAT_MISC",
-	"DAMAGE_SPLIT",
-"SPACE",
-	"ENCHANT_APPLIED",
-	"ENCHANT_REMOVED",
-"SPACE",
-	"ENVIRONMENTAL_DAMAGE",
-"SPACE",
-	"UNIT_DIED",
-	"UNIT_DESTROYED",
-	"SPELL_INSTAKILL",
-	"PARTY_KILL",
-}
-CLEU.Flags = {
-					-- "COMBATLOG_OBJECT_REACTION_MASK",
-    "COMBATLOG_OBJECT_REACTION_FRIENDLY",
-    "COMBATLOG_OBJECT_REACTION_NEUTRAL",
-    "COMBATLOG_OBJECT_REACTION_HOSTILE",
-
-    "SPACE",		-- "COMBATLOG_OBJECT_TYPE_MASK",
-    "COMBATLOG_OBJECT_TYPE_PLAYER",
-    "COMBATLOG_OBJECT_TYPE_NPC",
-    "COMBATLOG_OBJECT_TYPE_PET",
-    "COMBATLOG_OBJECT_TYPE_GUARDIAN",
-    "COMBATLOG_OBJECT_TYPE_OBJECT",
-
-	"SPACE",		-- "COMBATLOG_OBJECT_CONTROL_MASK",
-    "COMBATLOG_OBJECT_CONTROL_PLAYER",
-    "COMBATLOG_OBJECT_CONTROL_NPC",
-
-	"SPACE",		-- "COMBATLOG_OBJECT_AFFILIATION_MASK",
-    "COMBATLOG_OBJECT_AFFILIATION_MINE",
-    "COMBATLOG_OBJECT_AFFILIATION_PARTY",
-    "COMBATLOG_OBJECT_AFFILIATION_RAID",
-    "COMBATLOG_OBJECT_AFFILIATION_OUTSIDER",
-
-	"SPACE",		--"COMBATLOG_OBJECT_SPECIAL_MASK",
-	"COMBATLOG_OBJECT_TARGET",
-	"COMBATLOG_OBJECT_FOCUS",
-    "COMBATLOG_OBJECT_MAINTANK",
-    "COMBATLOG_OBJECT_MAINASSIST",
-    "COMBATLOG_OBJECT_NONE",
-}
-CLEU.BetterMasks = {
-	-- some of the default masks contain bits that arent used by any flags, so we will make our own
-	COMBATLOG_OBJECT_REACTION_MASK = bit.bor(
-		COMBATLOG_OBJECT_REACTION_FRIENDLY,
-		COMBATLOG_OBJECT_REACTION_NEUTRAL,
-		COMBATLOG_OBJECT_REACTION_HOSTILE
-	),
-    COMBATLOG_OBJECT_TYPE_MASK = bit.bor(
-		COMBATLOG_OBJECT_TYPE_PLAYER,
-		COMBATLOG_OBJECT_TYPE_NPC,
-		COMBATLOG_OBJECT_TYPE_PET,
-		COMBATLOG_OBJECT_TYPE_GUARDIAN,
-		COMBATLOG_OBJECT_TYPE_OBJECT
-	),
-	COMBATLOG_OBJECT_CONTROL_MASK = bit.bor(
-		COMBATLOG_OBJECT_CONTROL_PLAYER,
-		COMBATLOG_OBJECT_CONTROL_NPC
-	),
-	COMBATLOG_OBJECT_AFFILIATION_MASK = bit.bor(
-		COMBATLOG_OBJECT_AFFILIATION_MINE,
-		COMBATLOG_OBJECT_AFFILIATION_PARTY,
-		COMBATLOG_OBJECT_AFFILIATION_RAID,
-		COMBATLOG_OBJECT_AFFILIATION_OUTSIDER
-	),
-}
-
-function CLEU:OnInitialize()
-
-	hooksecurefunc("UIDropDownMenu_StartCounting", function(frame)
-		if	UIDROPDOWNMENU_OPEN_MENU == IE.Main.CLEUEvents
-		or	UIDROPDOWNMENU_OPEN_MENU == IE.Main.SourceFlags
-		or	UIDROPDOWNMENU_OPEN_MENU == IE.Main.DestFlags
-		then
-			frame.showTimer = 0.5 -- i want the dropdown to hide much quicker (default is 2) after the cursor leaves it
-		end
-	end)
-end
-
-function CLEU:LoadConfig()
-	CLEU:Menus_SetTexts()
-
-	CLEU:CheckMasks()
-end
-TMW:RegisterCallback("TMW_CONFIG_LOAD", CLEU.LoadConfig, CLEU)
-
-function CLEU:CheckMasks()
-	HELP:Hide("CLEU_WHOLECATEGORYEXCLUDED")
-
-	for _, key in TMW:Vararg("SourceFlags", "DestFlags") do
-		if key then
-			for maskName, mask in pairs(CLEU.BetterMasks) do
-				if bit.band(CI.ics[key], mask) == 0 then
-					local category = L["CLEU_" .. maskName]
-					HELP:Show("CLEU_WHOLECATEGORYEXCLUDED", CI.ic, IE.Main[key], 23, 3, L["CLEU_WHOLECATEGORYEXCLUDED"], category)
-					return
-				end
-			end
-		end
-	end
-end
-
-function CLEU:CountDisabledBits(bitfield)
-	local n = 0
-	for _ = 1, 32 do
-		local digit = bit.band(bitfield, 1)
-		bitfield = bit.rshift(bitfield, 1)
-		if digit == 0 then
-			n = n + 1
-		end
-	end
-	return n
-end
-
-
----------- Dropdowns ----------
-function CLEU:Menus_SetTexts()
-	local n = 0
-	if CI.ics.CLEUEvents[""] then
-		n = L["CLEU_EVENTS_ALL"]
-	else
-		for k, v in pairs(CI.ics.CLEUEvents) do
-			if v then
-				n = n + 1
-			end
-		end
-	end
-	if n == 0 then
-		n = " |cFFFF5959(0)|r |TInterface\\AddOns\\TellMeWhen_Options\\Textures\\Alert:0:2|t"
-	else
-		n = " (" .. n .. ")"
-	end
-	UIDropDownMenu_SetText(IE.Main.CLEUEvents, L["CLEU_EVENTS"] .. n)
-
-	local n = CLEU:CountDisabledBits(CI.ics.SourceFlags)
-	if n ~= 0 then
-		n = " |cFFFF5959(" .. n .. ")|r"
-	else
-		n = " (" .. n .. ")"
-	end
-	UIDropDownMenu_SetText(IE.Main.SourceFlags, L["CLEU_FLAGS"] .. n)
-
-	local n = CLEU:CountDisabledBits(CI.ics.DestFlags)
-	if n ~= 0 then
-		n = " |cFFFF5959(" .. n .. ")|r"
-	else
-		n = " (" .. n .. ")"
-	end
-	UIDropDownMenu_SetText(IE.Main.DestFlags, L["CLEU_FLAGS"] .. n)
-end
-
-function CLEU:EventMenu()
-	local currentCategory
-	for _, event in ipairs(CLEU.Events) do
-		if event:find("^CAT_") then --and event ~= currentCategory then
-			if UIDROPDOWNMENU_MENU_LEVEL == 1 then
-				local info = UIDropDownMenu_CreateInfo()
-				info.text = L["CLEU_" .. event]
-				info.value = event
-				info.notCheckable = true
-				info.hasArrow = true
-				UIDropDownMenu_AddButton(info, UIDROPDOWNMENU_MENU_LEVEL)
-			end
-			currentCategory = event
-
-		elseif (UIDROPDOWNMENU_MENU_LEVEL == 1 and not currentCategory) or (UIDROPDOWNMENU_MENU_LEVEL == 2 and UIDROPDOWNMENU_MENU_VALUE == currentCategory) then
-			if event == "SPACE" then
-
-				AddDropdownSpacer()
-			else
-				local info = UIDropDownMenu_CreateInfo()
-
-				info.text = L["CLEU_" .. event]
-
-				local tooltipText = rawget(L, "CLEU_" .. event .. "_DESC")
-				if tooltipText then
-					info.tooltipTitle = info.text
-					info.tooltipText = tooltipText
-					info.tooltipOnButton = true
-				end
-
-				info.value = event
-				info.checked = CI.ics.CLEUEvents[event]
-				info.keepShownOnClick = true
-				info.isNotRadio = true
-				info.func = CLEU.EventMenu_OnClick
-				info.arg1 = self
-
-				UIDropDownMenu_AddButton(info, UIDROPDOWNMENU_MENU_LEVEL)
-			end
-		end
-		--[[if UIDROPDOWNMENU_MENU_LEVEL == 1 and v.category and not addedThings[v.category] then
-			-- addedThings IN THIS CASE is a list of categories that have been added. Add ones here that have not been added yet.
-
-			if v.categorySpacebefore then
-				AddDropdownSpacer()
-			end
-
-			local info = UIDropDownMenu_CreateInfo()
-			info.text = v.category
-			info.value = v.category
-			info.notCheckable = true
-			info.hasArrow = true
-			addedThings[v.category] = true
-			UIDropDownMenu_AddButton(info, UIDROPDOWNMENU_MENU_LEVEL)
-		end]]
-	end
-	--[[
-	for _, event in ipairs(CLEU.Events) do
-		local info = UIDropDownMenu_CreateInfo()
-
-		info.text = L["CLEU_" .. event]
-
-		info.value = event
-		info.checked = CI.ics.CLEUEvents[event]
-		info.keepShownOnClick = true
-		info.isNotRadio = true
-		info.func = CLEU.EventMenu_OnClick
-		info.arg1 = self
-
-		UIDropDownMenu_AddButton(info, UIDROPDOWNMENU_MENU_LEVEL)
-	end]]
-end
-
-function CLEU:EventMenu_OnClick(frame)
-	if self.value == "" and not CI.ics.CLEUEvents[""] then -- if we are checking "Any Event" then uncheck all others
-		wipe(CI.ics.CLEUEvents)
-		CloseDropDownMenus()
-	elseif self.value ~= "" and CI.ics.CLEUEvents[""] then -- if we are checking a specific event then uncheck "Any Event"
-		CI.ics.CLEUEvents[""] = false
-		CloseDropDownMenus()
-	end
-
-	CI.ics.CLEUEvents[self.value] = not CI.ics.CLEUEvents[self.value]
-
-	CLEU:Menus_SetTexts()
-	IE:ScheduleIconSetup()
-end
-
-function CLEU:FlagsMenu()
-	CLEU:CheckMasks()
-
-	for _, flag in ipairs(CLEU.Flags) do
-		if flag == "SPACE" then
-			AddDropdownSpacer()
-		else
-			local info = UIDropDownMenu_CreateInfo()
-
-			info.text = L["CLEU_" .. flag]
-
-			info.tooltipTitle = L["CLEU_" .. flag]
-			info.tooltipText = L["CLEU_" .. flag .. "_DESC"]
-			info.tooltipOnButton = true
-
-			info.value = flag
-			info.checked = bit.band(CI.ics[self.flagSet], _G[flag]) ~= _G[flag]
-			info.keepShownOnClick = true
-			info.isNotRadio = true
-			info.func = CLEU.FlagsMenu_OnClick
-			info.arg1 = self
-
-			UIDropDownMenu_AddButton(info, UIDROPDOWNMENU_MENU_LEVEL)
-		end
-	end
-end
-
-function CLEU:FlagsMenu_OnClick(frame)
-	CI.ics[frame.flagSet] = bit.bxor(CI.ics[frame.flagSet], _G[self.value])
-
-	CLEU:CheckMasks()
-
-	CLEU:Menus_SetTexts()
-	IE:ScheduleIconSetup()
-end
-
-
-
 -- ----------------------
 -- ICON EDITOR
 -- ----------------------
@@ -3037,171 +2653,14 @@ IE.Checks = {
 	--1=check box,
 	--2=editbox,
 	--3=slider(x100),
-	--4=custom,
+	--4=custom, (only handle show/hide)
 	--table=subkeys are settings
-	Name = 2,
-	CustomTex = 2,
-	CLEUDur = 2,
-	Icons = 4,
-	Sort = 4,
-	CLEUEvents = 4,
-	DestUnit = 2,
-	SourceUnit = 2,
-	DestFlags = 4,
-	SourceFlags = 4,
-	Unit = 2,
-	ShowPBar = {
-		ShowPBar = 1,
-		PBarOffs = 2,
-	},
-	ShowCBar = {
-		ShowCBar = 1,
-		CBarOffs = 2,
-	},
-	InvertBars = 1,
-	Enabled = 1,
-	CheckNext = 1,
-	DurationMin = 2,
-	DurationMax = 2,
-	DurationMinEnabled = 1,
-	DurationMaxEnabled = 1,
-	ConditionDur = 2,
-	UnConditionDur = 2,
-	ConditionDurEnabled = 1,
-	UnConditionDurEnabled = 1,
-	StackMin = 2,
-	StackMax = 2,
-	StackMinEnabled = 1,
-	StackMaxEnabled = 1,
+	CheckNext = 4,
 	Alpha = 3,
 	UnAlpha = 3,
 	ConditionAlpha = 3,
-	FakeHidden = 1,
-	OnlyIfCounting = 1,
-}
-IE.LeftChecks = {
-	-- these are the settings that can be found on the left side of the icon editor.
-	-- because there are so many of them, frames are made dynamically and repurposed as needed
-	{
-		setting = "ShowTimer",
-		title = L["ICONMENU_SHOWTIMER"],
-		tooltip = L["ICONMENU_SHOWTIMER_DESC"],
-	},
-	{
-		setting = "ShowTimerText",
-		title = L["ICONMENU_SHOWTIMERTEXT"],
-		tooltip = L["ICONMENU_SHOWTIMERTEXT_DESC"],
-		disabled = function()
-			return not (IsAddOnLoaded("OmniCC") or IsAddOnLoaded("tullaCC") or LibStub("AceAddon-3.0"):GetAddon("LUI_Cooldown", true))
-		end,
-	},
-	{
-		setting = "OnlyMine",
-		title = L["ICONMENU_ONLYMINE"],
-		tooltip = L["ICONMENU_ONLYMINE_DESC"],
-	},
-	{
-		setting = "ShowTTText",
-		title = L["ICONMENU_SHOWTTTEXT"],
-		tooltip = L["ICONMENU_SHOWTTTEXT_DESC"],
-	},
-	{
-		setting = "Stealable",
-		title = L["ICONMENU_STEALABLE"],
-		tooltip = L["ICONMENU_STEALABLE_DESC"],
-	},
-	{
-		setting = "UseActvtnOverlay",
-		title = L["ICONMENU_USEACTIVATIONOVERLAY"],
-		tooltip = L["ICONMENU_USEACTIVATIONOVERLAY_DESC"],
-	},
-	{
-		setting = "IgnoreNomana",
-		title = L["ICONMENU_IGNORENOMANA"],
-		tooltip = L["ICONMENU_IGNORENOMANA_DESC"],
-	},
-	{
-		setting = "CheckRefresh",
-		title = L["ICONMENU_CHECKREFRESH"],
-		tooltip = L["ICONMENU_CHECKREFRESH_DESC"],
-	},
-	{
-		setting = "OnlySeen",
-		title = L["ICONMENU_ONLYSEEN"],
-		tooltip = L["ICONMENU_ONLYSEEN_DESC"],
-	},
-	{
-		setting = "DontRefresh",
-		title = L["ICONMENU_DONTREFRESH"],
-		tooltip = L["ICONMENU_DONTREFRESH_DESC"],
-	},
-	{
-		setting = "Interruptible",
-		title = L["ICONMENU_ONLYINTERRUPTIBLE"],
-		tooltip = L["ICONMENU_ONLYINTERRUPTIBLE_DESC"],
-	},
-	{
-		setting = "OnlyInBags",
-		title = L["ICONMENU_ONLYBAGS"],
-		tooltip = L["ICONMENU_ONLYBAGS_DESC"],
-	},
-	{
-		setting = "OnlyEquipped",
-		title = L["ICONMENU_ONLYEQPPD"],
-		tooltip = L["ICONMENU_ONLYEQPPD_DESC"],
-		clickhook = function(self, button)
-			if CI.ics and self:GetParent().OnlyInBags then
-				local checked = not not self:GetChecked()
-				if checked then
-					self:GetParent().OnlyInBags:SetChecked(true)
-					self:GetParent().OnlyInBags:Disable()
-					CI.ics.OnlyInBags = checked
-				else
-					self:GetParent().OnlyInBags:Enable()
-				end
-			end
-		end,
-	},
-	{
-		setting = "HideUnequipped",
-		title = L["ICONMENU_HIDEUNEQUIPPED"],
-		tooltip = L["ICONMENU_HIDEUNEQUIPPED_DESC"],
-	},
-	{
-		setting = "EnableStacks",
-		title = L["ICONMENU_SHOWSTACKS"],
-		tooltip = L["ICONMENU_SHOWSTACKS_DESC"],
-	},
-	{
-		setting = "RangeCheck",
-		title = L["ICONMENU_RANGECHECK"],
-		tooltip = L["ICONMENU_RANGECHECK_DESC"],
-	},
-	{
-		setting = "ManaCheck",
-		title = L["ICONMENU_MANACHECK"],
-		tooltip = L["ICONMENU_MANACHECK_DESC"],
-	},
-	{
-		setting = "CooldownCheck",
-		title = L["ICONMENU_COOLDOWNCHECK"],
-		tooltip = L["ICONMENU_COOLDOWNCHECK_DESC"],
-		clickhook = function(self, button)
-			local IgnoreRunes = self:GetParent().IgnoreRunes
-			if not IgnoreRunes then return end
-			if self:GetChecked() or TMW.CI.t ~= "reactive" then
-				IgnoreRunes:Enable()
-			else
-				IgnoreRunes:Disable()
-			end
-		end,
-	},
-	{
-		setting = "IgnoreRunes",
-		title = L["ICONMENU_IGNORERUNES"],
-		tooltip = L["ICONMENU_IGNORERUNES_DESC"],
-		disabledtooltip = L["ICONMENU_IGNORERUNES_DESC_DISABLED"],
-	},
+	FakeHidden = 4,
+	Enabled = 4,
 }
 IE.Tabs = {}
 
@@ -3279,27 +2738,6 @@ function IE:TMW_GLOBAL_UPDATE()
 end
 TMW:RegisterCallback("TMW_GLOBAL_UPDATE", IE)
 
-function IE:TMW_ICON_SETUP_POST(event, icon)
-	-- Warnings for missing durations and first-time instructions for duration syntax
-	if icon.typeData.DurationSyntax and icon:IsBeingEdited() == 1 then
-		HELP:Show("ICON_DURS_FIRSTSEE", nil, IE.Main.Type, 20, 0, L["HELP_FIRSTUCD"])
-
-		local Name = IE.Main.Name
-		local s = ""
-		local array = TMW:GetSpellNames(nil, Name:GetText())
-		for k, v in pairs(TMW:GetSpellDurations(nil, Name:GetText())) do
-			if v == 0 then
-				s = s .. (s ~= "" and "; " or "") .. array[k]
-			end
-		end
-		if s ~= "" then
-			HELP:Show("ICON_DURS_MISSING", icon, Name, 0, 0, L["HELP_MISSINGDURS"], s)
-		else
-			HELP:Hide("ICON_DURS_MISSING")
-		end
-	end
-end
-TMW:RegisterCallback("TMW_ICON_SETUP_POST", IE)
 
 function IE:RegisterTab(tab, attachedFrame)
 	local id = #IE.Tabs + 1
@@ -3315,6 +2753,95 @@ function IE:RegisterTab(tab, attachedFrame)
 end
 
 ---------- Interface ----------
+IE.ALLDISPLAYTABFRAMES = {}
+
+local BASE_Y_OFFSET = -75
+function IE:PositionPanels(size, lastFrameCol1, lastFrameCol2, lastFrameCol3, nextColumn)
+	for i, Component in pairs(CI.ic.Components) do
+		for i2, panelInfo in pairs(Component.ConfigPanels) do
+			if panelInfo.size == size then
+				local frame
+				if panelInfo.panelType == "XMLTemplate" then
+					frame = IE.ALLDISPLAYTABFRAMES[panelInfo.xmlTemplateName]
+					
+					if not frame then
+						frame = CreateFrame("Frame", panelInfo.xmlTemplateName, TellMeWhen_IconEditorMain, panelInfo.xmlTemplateName)
+						IE.ALLDISPLAYTABFRAMES[panelInfo.xmlTemplateName] = frame
+					end
+				elseif panelInfo.panelType == "ConstructorFunc" then
+					frame = IE.ALLDISPLAYTABFRAMES[panelInfo] 
+					
+					if not frame then
+						frame = CreateFrame("Frame", panelInfo.frameName, TellMeWhen_IconEditorMain, "TellMeWhen_OptionsModuleContainer")
+						IE.ALLDISPLAYTABFRAMES[panelInfo] = frame
+						TMW.safecall(panelInfo.func, frame)
+					end
+				end
+				if panelInfo.preferredColumn then
+					nextColumn = panelInfo.preferredColumn
+				end			
+				
+				frame:ClearAllPoints()
+				if panelInfo.size == "full" then
+					local lowestFrame = lastFrameCol1
+					if lowestFrame and lastFrameCol2 and lowestFrame:GetBottom() > lastFrameCol2:GetBottom() then
+						lowestFrame = lastFrameCol2
+					end
+					if lowestFrame and lastFrameCol3 and lowestFrame:GetBottom() > lastFrameCol3:GetBottom() then
+						lowestFrame = lastFrameCol3
+					end
+					
+					if lowestFrame then
+						frame:SetPoint("TOP", lowestFrame, "BOTTOM", 0, -10)
+						frame:SetPoint("LEFT", 20, 0)
+					else
+						frame:SetPoint("TOPLEFT", 20, BASE_Y_OFFSET)
+					end
+					
+					lastFrameCol1 = frame
+					lastFrameCol2 = frame
+					lastFrameCol3 = frame
+					
+					nextColumn = 1
+				elseif nextColumn == 1 then
+					if lastFrameCol1 then
+						frame:SetPoint("TOP", lastFrameCol1, "BOTTOM", 0, -10)
+						frame:SetPoint("LEFT", 20, 0)
+					else
+						frame:SetPoint("TOPLEFT", 20, BASE_Y_OFFSET)
+					end
+					
+					lastFrameCol1 = frame
+					nextColumn = 2
+				elseif nextColumn == 2 then
+					if lastFrameCol2 then
+						frame:SetPoint("TOP", lastFrameCol2, "BOTTOM", 0, -10)
+						frame:SetPoint("LEFT", 210, 0)
+					else
+						frame:SetPoint("TOPLEFT", 210, BASE_Y_OFFSET)
+					end
+					
+					lastFrameCol2 = frame
+					nextColumn = 3
+				elseif nextColumn == 3 then
+					if lastFrameCol3 then
+						frame:SetPoint("TOP", lastFrameCol3, "BOTTOM", 0, -10)
+						frame:SetPoint("LEFT", 400, 0)
+					else
+						frame:SetPoint("TOPLEFT", 400, BASE_Y_OFFSET)
+					end
+					
+					lastFrameCol3 = frame
+					nextColumn = 1
+				end
+				frame:Show()
+			end		
+		end		
+	end
+	
+	return lastFrameCol1, lastFrameCol2, lastFrameCol3, nextColumn
+end
+
 function IE:Load(isRefresh, icon, isHistoryChange)
 	if type(icon) == "table" then
 		HELP:HideForIcon(CI.ic)
@@ -3340,6 +2867,8 @@ function IE:Load(isRefresh, icon, isHistoryChange)
 			-- notify the back and forwards buttons that there was a change so they can :Enable() or :Disable()
 			IE:BackFowardsChanged()
 		end
+		
+		TMW:Fire("TMW_CONFIG_ICON_LOADED_CHANGED", icon)
 	end
 	if not IE:IsShown() then
 		if isRefresh then
@@ -3355,12 +2884,6 @@ function IE:Load(isRefresh, icon, isHistoryChange)
 	IE.ExportBox:SetText("")
 	IE:SetScale(TMW.db.global.EditorScale)
 
-	IE.Main.Name:SetLabels(TMW.Types[CI.t].chooseNameTitle, TMW.Types[CI.t].chooseNameText)
-	IE.Main.Name:GetScript("OnTextChanged")(IE.Main.Name)
-
-	IE.Main.Unit:SetLabels(TMW.Types[CI.t].unitTitle)
-	IE.Main.Unit:GetScript("OnTextChanged")(IE.Main.Unit)
-
 	CI.t = TMW.db.profile.Groups[groupID].Icons[iconID].Type
 	if CI.t == "" then
 		UIDropDownMenu_SetText(IE.Main.Type, L["ICONMENU_TYPE"])
@@ -3375,7 +2898,32 @@ function IE:Load(isRefresh, icon, isHistoryChange)
 	CNDT:SetTabText("icon")
 	CNDT:SetTabText("group")
 
-	TMW:Fire("TMW_CONFIG_LOAD")
+	
+	
+	
+	-- TODO: this code is very crude (if you didnt noticed when you saw ALLDISPLAYTABFRAMES. Please clean it up before releasing)
+	for _, frame in pairs(IE.ALLDISPLAYTABFRAMES) do
+		frame:Hide()
+	end
+	local lastFrameCol1, lastFrameCol2, lastFrameCol3
+	local nextColumn = 1
+	lastFrameCol1, lastFrameCol2, lastFrameCol3, nextColumn = IE:PositionPanels("full", lastFrameCol1, lastFrameCol2, lastFrameCol3, nextColumn)
+	lastFrameCol1, lastFrameCol2, lastFrameCol3, nextColumn = IE:PositionPanels("column", lastFrameCol1, lastFrameCol2, lastFrameCol3, nextColumn)
+	
+	-- THIS IS DEFINITELY TEMPORARY CODE SO THAT I CAN PUSH AN ALPHA RELEASE SOON:
+	IE.Main.WhenChecks:ClearAllPoints()
+	if lastFrameCol2 then
+		IE.Main.WhenChecks:SetPoint("TOP", lastFrameCol2, "BOTTOM", 0, -10)
+		IE.Main.WhenChecks:SetPoint("LEFT", 210, 0)
+	else
+		IE.Main.WhenChecks:SetPoint("TOPLEFT", 210, BASE_Y_OFFSET)
+	end
+	
+	
+	
+	
+	
+	TMW:Fire("TMW_CONFIG_ICON_LOADED", CI.ic)
 
 	IE:SetupRadios()
 	IE:LoadSettings()
@@ -3384,7 +2932,7 @@ function IE:Load(isRefresh, icon, isHistoryChange)
 	IE:ScheduleIconSetup()
 
 	HELP:ShowNext()
-
+	
 	-- It is intended that this happens at the end instead of the beginning.
 	-- Table accesses that trigger metamethods flesh out an icon's settings with new things that aren't there pre-load (usually)
 	if icon then
@@ -3423,7 +2971,11 @@ function IE:TabClick(self)
 	IE.CurrentTab = self
 
 	-- show the selected tab's frame
-	IE[self.attachedFrame]:Show()
+	if IE[self.attachedFrame] then
+		IE[self.attachedFrame]:Show()
+	else
+		TMW:Error(("Couldn't find child of TellMeWhen_IconEditor with key %q"):format(self.attachedFrame))
+	end
 	-- show the icon editor
 	IE:Show()
 
@@ -3458,53 +3010,41 @@ function IE:NotifyChanges(...)
 	end
 end
 
+function IE:IsSettingRelevantToIcon(icon, setting)
+	if icon.typeData.RelevantSettings[setting] ~= nil then
+		return icon.typeData.RelevantSettings[setting]
+	end
+	for i, Component in ipairs(icon.Components) do
+		if Component.IconSettingDefaults[setting] ~= nil then
+			return true
+		end
+	end
+end
+
 function IE:ShowHide()
 	local t = CI.t
 	if not t then return end
 
 	for k, v in pairs(IE.Checks) do
-		if Types[t].RelevantSettings[k] and IE.Main[k] then
-			IE.Main[k]:Show()
-			if IE.Main[k].SetEnabled then
-				IE.Main[k]:SetEnabled(1)
+		if IE.Main[k] then
+			if --[[Types[t].RelevantSettings[k] ]] IE:IsSettingRelevantToIcon(CI.ic, k) then
+				IE.Main[k]:Show()
+				if IE.Main[k].SetEnabled then
+					IE.Main[k]:SetEnabled(1)
+				end
+			else
+				IE.Main[k]:Hide()
 			end
-		else
-			IE.Main[k]:Hide()
 		end
 	end
 
 	for name, Type in pairs(Types) do
 		if name ~= t and Type.IE_TypeUnloaded then
-			Type:IE_TypeUnloaded()
+			TMW.safecall(Type.IE_TypeUnloaded, Type)
 		end
 	end
 	if Types[t].IE_TypeLoaded then
-		Types[t]:IE_TypeLoaded()
-	end
-
-	local spb = IE.Main.ShowPBar
-	local scb = IE.Main.ShowCBar
-	if Types[t].HideBars then -- override the previous shows and disables
-		spb:Hide()
-		scb:Hide()
-		IE.Main.InvertBars:Hide()
-	else
-		if not spb:IsShown() then
-			spb:Show()
-			spb:SetEnabled(nil)
-		end
-		if not scb:IsShown() then
-			scb:Show()
-			scb:SetEnabled(nil)
-		end
-		IE.Main.InvertBars:Enable()
-		if not (spb.enabled or scb.enabled) then
-			IE.Main.InvertBars:Show()
-			IE.Main.InvertBars:Disable()
-		end
-
-		spb.PBarOffs:SetEnabled(spb.ShowPBar:GetChecked())
-		scb.CBarOffs:SetEnabled(scb.ShowCBar:GetChecked())
+		TMW.safecall(Types[t].IE_TypeLoaded, Types[t])
 	end
 
 end
@@ -3521,25 +3061,286 @@ end
 
 
 ---------- Settings ----------
-function IE:LeftCheck_OnEnable()
-	-- self is the check box frame, not IE
-	self:SetAlpha(1)
-	if self.data.disabledtooltip then
-		TMW:TT(self, self.data.title, self.data.tooltip, 1, 1)
+
+TMW:NewClass("SettingFrameBase"){
+	CheckDisabled = function(self)
+		if get(self.data.disabled, self) then
+			self:Disable()
+		else
+			self:Enable()
+		end
+	end,
+	
+	CheckHidden = function(self)
+		if get(self.data.hidden, self) then
+			self:Hide()
+		else
+			self:Show()
+		end
+	end,
+	
+	CheckInteractionStates = function(self)
+		self:CheckDisabled()
+		self:CheckHidden()
+	end,
+	
+	OnEnable = function(self)
+		self:SetAlpha(1)
+		
+		if self.data.disabledtooltip then
+			TMW:TT(self, self.data.title, self.data.tooltip, 1, 1)
+		end
+	end,
+	
+	OnDisable = function(self)
+		self:SetAlpha(0.4)
+		
+		if self.data.disabledtooltip then
+			TMW:TT(self, self.data.title, self.data.disabledtooltip, 1, 1)
+		end
+	end,
+}
+TMW:NewClass("SettingCheckButton", "CheckButton", "SettingFrameBase"){
+	OnClick = function(self, button)
+		if CI.ics and self.setting then
+			local checked = not not self:GetChecked()
+			
+			if self.data.value == nil then
+				CI.ics[self.setting] = checked
+			elseif checked then
+				CI.ics[self.setting] = self.data.value
+			end
+			IE:ScheduleIconSetup()
+		end
+		
+		-- Cheater! (We arent getting anything)
+		-- (I'm using get as a wrapper so I don't have to check if the function exists before calling it)
+		get(self.data.OnClick, self, button) 
+	end,
+	OnCreate = function(self)
+		self.text:SetText(self.data.label or self.data.title)
+		self:SetMotionScriptsWhileDisabled(true)
+	end,
+	
+	ReloadSetting = function(self)
+		local icon = CI.ic
+		if self.data.value ~= nil then
+			self:SetChecked(icon:GetSettings()[self.setting] == self.data.value)
+		else
+			self:SetChecked(icon:GetSettings()[self.setting])
+		end
+		self:CheckInteractionStates()
+		self:OnClick("LeftButton")
+	end,
+}
+
+TMW:NewClass("BitflagSettingFrameBase"){
+	OnClick = function(self, button)		
+		if CI.ics and self.setting then
+			CI.ics[self.setting] = bit.bxor(CI.ics[self.setting], self.bit)
+			
+			IE:ScheduleIconSetup()
+		end
+		
+		-- Cheater! (We arent getting anything)
+		-- (I'm using get as a wrapper so I don't have to check if the function exists before calling it)
+		get(self.data.OnClick, self, button) 
+	end,
+	
+	OnCreate_BitflagSettingFrameBase = function(self)
+		local bitID = self.data.value or self:GetID()
+		assert(bitID, "Couldn't figure out what bit frame " .. self:GetName() .. " is supposed to operate on!")
+		
+		self.bit = bit.lshift(1, (self.data.value or self:GetID()) - 1)
+	end,
+	
+	ReloadSetting = function(self)
+		local icon = CI.ic
+		self:SetChecked(bit.band(icon:GetSettings()[self.setting], self.bit) == self.bit)
+		
+		self:CheckInteractionStates()
+	end,
+}
+
+TMW:NewClass("SettingTotemButton", "CheckButton", "SettingFrameBase", "BitflagSettingFrameBase"){
+	OnCreate = TMW.Classes.SettingCheckButton.OnCreate,
+}
+
+TMW:NewClass("SettingRuneButton", "Button", "SettingFrameBase", "BitflagSettingFrameBase"){
+	GetChecked = function(self)
+		return self.checked
+	end,
+	SetChecked = function(self, checked)
+		self.checked = checked
+		if checked then
+			self.Check:SetTexture("Interface\\RAIDFRAME\\ReadyCheck-Ready")
+		else
+			self.Check:SetTexture(nil)
+		end
+	end,
+	OnCreate = function(self)
+		-- detect what texture should be used
+		local runeType = gsub(self:GetName(), self:GetParent():GetName(), "")
+		runeType = gsub(runeType, "%d", "")
+		self.texture:SetTexture("Interface\\PlayerFrame\\UI-PlayerFrame-Deathknight-" .. runeType)
+	end,
+}
+
+TMW:NewClass("SettingEditBox", "EditBox", "SettingFrameBase"){
+	OnCreate = function(self)
+		TMW:RegisterCallback("TMW_CONFIG_SAVE_SETTINGS", self.ClearFocus, self)
+	end,
+	
+	IsEnabled = function(self)
+		return self.Enabled
+	end,
+	SetEnabled = function(self, enabled)
+		self:EnableKeyboard(enabled)
+		self:EnableMouse(enabled)
+		
+		if self.Enabled ~= enabled then
+			self.Enabled = enabled
+			if enabled then
+				self:OnEnable()
+			else
+				self:OnDisable()
+			end
+		end
+	end,
+	Enable = function(self)
+		self:SetEnabled(true)
+	end,
+	Disable = function(self)
+		self:SetEnabled(false)
+	end,
+	OnDisable = function(self)
+		self:SetAlpha(0.4)
+		self:ClearFocus()
+		
+		if self.data.disabledtooltip then
+			TMW:TT(self, self.data.title, self.data.disabledtooltip, 1, 1)
+		end
+	end,
+	OnEditFocusLost = function(self, button)
+		if CI.ics and self.setting then
+			local value
+			if self.data.doCleanString then
+				value = TMW:CleanString(self)
+			else
+				value = self:GetText()
+			end
+			
+			value = get(self.data.ModifySettingValue, self, value) or value
+			
+			CI.ics[self.setting] = value
+		
+			IE:ScheduleIconSetup()
+		end
+		
+		-- Cheater! (We arent getting anything)
+		-- (I'm using get as a wrapper so I don't have to check if the function exists before calling it)
+		get(self.data.OnEditFocusLost, self, button) 
+	end,
+	OnTextChanged = function(self, button)		
+		-- Cheater! (We arent getting anything)
+		-- (I'm using get as a wrapper so I don't have to check if the function exists before calling it)
+		get(self.data.OnTextChanged, self, button) 
+	end,
+	
+	ReloadSetting = function(self)
+		local icon = CI.ic
+		if self.setting then
+			self:SetText(icon:GetSettings()[self.setting])
+		end
+		self:CheckInteractionStates()
+		self:ClearFocus()
+	end,
+}
+
+function IE:CreateSettingFrameFromData(frame, arg2, arg3)
+	local objectType = frame:GetObjectType()
+	
+	local className, data
+	if arg3 ~= nil then
+		data = arg3
+		className = arg2
+	else
+		data = arg2
+		className = "Setting" .. objectType
 	end
+	
+	local class = TMW.Classes[className]
+	
+	assert(class, "Couldn't find class named " .. className .. " to use for " .. objectType .. (frame:GetName() or "<unnamed>") .. ".")
+	assert(type(className) == "string", "Usage: IE:CreateSettingFrameFromData(frame, [, className], data)")
+	assert(type(data) == "table", "Usage: IE:CreateSettingFrameFromData(frame, [, className], data)")
+	
+	-- Embed the class into the frame.
+	class:Embed(frame, true)
+	
+	-- Setup callbacks that will load the settings when needed.
+	TMW:RegisterCallback("TMW_CONFIG_ICON_LOADED", frame.ReloadSetting, frame)
+	TMW:RegisterCallback("TMW_CONFIG_ICON_HISTORY_STATE_CREATED", frame.ReloadSetting, frame)
+	TMW:RegisterCallback("TMW_CONFIG_ICON_HISTORY_STATE_CHANGED", frame.ReloadSetting, frame)
+
+	-- set appearance and settings
+	frame.data = data
+	frame.setting = data.setting
+	TMW:TT(frame, data.title, data.tooltip, 1, 1)
+	frame:Show()
+	
+	frame:CallFunc("OnCreate")
 end
-function IE:LeftCheck_OnDisable()
-	self:SetAlpha(0.4)
-	if self.data.disabledtooltip then
-		TMW:TT(self, self.data.title, self.data.disabledtooltip, 1, 1)
+
+function IE:BuildSimpleCheckSettingFrame(parent, arg2, arg3)
+	local className, allData, objectType
+	if arg3 ~= nil then
+		allData = arg3
+		className = arg2
+	else
+		allData = arg2
+		className = "SettingCheckButton"
 	end
-end
-function IE:LeftCheck_OnClick(button)
-	if CI.ics and self.setting then
-		CI.ics[self.setting] = not not self:GetChecked()
-		IE:ScheduleIconSetup()
+	local class = TMW.Classes[className]
+	local objectType = class.isFrameObject
+	
+	assert(class, "Couldn't find class named " .. className .. ".")
+	assert(type(objectType) == "string", "Couldn't find a WoW frame object type for class named " .. className .. ".")
+	assert(type(className) == "string", "Usage: IE:BuildSimpleCheckSettingFrame(parent, [, className], allData)")
+	assert(type(allData) == "table", "Usage: IE:BuildSimpleCheckSettingFrame(parent, [, className], allData)")
+	
+	
+	local lastCheckButton
+	for k, data in pairs(allData) do
+		assert(type(data) == "table", "All values in allData must be tables!")
+		local setting = data.setting -- the setting that the check will handle
+		-- the setting is used by the current icon type, and doesnt have an override that is "hiding" the check, so procede to set it up
+		
+		-- An human-friendly unique (hopefully) identifier for the frame
+		local identifier = setting .. (data.value ~= nil and tostring(data.value) or "")
+		
+		local f = parent[identifier]
+		if not f then
+			f = CreateFrame(objectType, parent:GetName() .. identifier, parent, "TellMeWhen_CheckTemplate")
+			parent[identifier] = f
+			IE:CreateSettingFrameFromData(f, className, data)
+		end
+		
+		if lastCheckButton then
+			-- Anchor it to the previous check if it isn't the first one.
+			f:SetPoint("TOP", lastCheckButton, "BOTTOM", 0, 4)
+		else
+			-- Anchor the first check to the parent
+			f:SetPoint("TOPLEFT", 5, -6)
+		end
+		lastCheckButton = f
+
+		f.text:SetWidth(TMW.WidthCol1)
 	end
-	get(self.data.clickhook, self, button) -- cheater! (we arent getting anything, im using this as a wrapper so i dont have to see if the function exists)
+	
+	parent:SetHeight(14 + #allData*26)
+	
+	return parent
 end
 
 function IE:LoadSettings()
@@ -3548,186 +3349,58 @@ function IE:LoadSettings()
 
 	for setting, settingtype in pairs(IE.Checks) do
 		local f = IE.Main[setting]
-		if settingtype == 1 then
-			-- handle standard check boxes
-			f:SetChecked(ics[setting])
-			f:GetScript("OnClick")(f)
-		elseif settingtype == 2 then
-			-- handle standard editboxes
-			f:SetText(ics[setting] or "")
-			f:SetCursorPosition(0)
-		elseif settingtype == 3 then
-			-- handle sliders. Note the *100 - done to prevent the shitty behavior with having a value step less than 1
-			f:SetValue(ics[setting]*100)
-		elseif type(settingtype) == "table" then
-			-- currently handles CBars and PBars - the actual frames are inside of a container, this handles them
-			for subset, subtype in pairs(settingtype) do
-				if subtype == 1 then
-					-- handle check boxes
-					f[subset]:SetChecked(ics[subset])
-				elseif subtype == 2 then
-					-- handle editboxes
-					f[subset]:SetText(ics[subset])
-					f[subset]:SetCursorPosition(0)
-				end
-			end
-		end
-	end
-
-	-- checks are stored in IE.Main.LeftChecks as numbers (which is fine), but also are keyed as the setting that they are handling.
-	-- clear out the setting keys because they are about to change.
-	for k, f in pairs(IE.Main.LeftChecks) do
-		if not tonumber(k) then
-			IE.Main.LeftChecks[k] = nil
-		end
-	end
-
-	local leftCheckNum = 1 -- ID of the current check being setup. will be incremented as checks are setup
-
-	-- begin setting up the checks that are shown on the left side of the icon editor
-	for k, data in pairs(IE.LeftChecks) do
-		local setting = data.setting -- the setting that the check will handle
-
-		if Types[CI.t].RelevantSettings[setting] and not get(data.hidden) then
-			-- the setting is used by the current icon type, and doesnt have an override that is "hiding" the check, so procede to set it up
-
-			local f = IE.Main.LeftChecks[leftCheckNum] -- the check that will handle the setting
-
-			if not f then
-				-- the check doesn't exist, so make it
-				f = CreateFrame("CheckButton", "TellMeWhen_IconEditorMainLeftChecks" .. leftCheckNum, TMW.IE.Main.LeftChecks, "TellMeWhen_CheckTemplate", leftCheckNum)
-				IE.Main.LeftChecks[leftCheckNum] = f -- store with the ID as the key for future reusual.
-
-				if leftCheckNum ~= 1 then
-					-- anchor it to the previous check if it isn't the first one. the first one gets handled after these are all setup
-					f:SetPoint("TOP", IE.Main.LeftChecks[leftCheckNum-1], "BOTTOM", 0, 6)
-				end
-
-				-- setup other fun stuff
-				f.text:SetWidth(TMW.WidthCol1)
-				f:SetScript("OnEnable", IE.LeftCheck_OnEnable)
-				f:SetScript("OnDisable", IE.LeftCheck_OnDisable)
-				f:SetScript("OnClick", IE.LeftCheck_OnClick)
-				f:SetMotionScriptsWhileDisabled(true)
-			end
-
-			-- store the check with the setting as the key for easy external reference
-			IE.Main.LeftChecks[setting] = f
-
-			-- set appearance and settings
-			f.data = data
-			f.setting = setting
-			f.text:SetText(data.title)
-			TMW:TT(f, data.title, data.tooltip, 1, 1)
-			f:SetChecked(ics[setting])
-			f:Show()
-
-			-- check if it should be disabled
-			if get(data.disabled) then
-				f:Enable() -- enable before disabling to force the OnDisable script to fire
-				f:Disable()
-			else
-				f:Enable()
-			end
-
-			-- Done. Increment the current check being setup
-			leftCheckNum = leftCheckNum + 1
-		end
-	end
-
-	if IE.Main.LeftChecks[1] then
-		-- anchor the first check to the top left of the container
-		-- some icon types might offset the start of the left checks to fit in some other setting, which is what Type.leftCheckYOffset is
-		IE.Main.LeftChecks[1]:SetPoint("TOPLEFT", 0,  Types[CI.t].leftCheckYOffset)
-	end
-
-	-- hide any extra checks that didn't get used
-	for i = leftCheckNum, #IE.Main.LeftChecks do
-		IE.Main.LeftChecks[i]:Hide()
-	end
-
-	-- force the OnClick scripts to handle any hooks
-	for k, f in pairs(IE.Main.LeftChecks) do
-		if not tonumber(k) then
-			f:GetScript("OnClick")(f)
-		end
-	end
-
-	-- Phew! Left checks are done. Lets move onto the "Radio" checks, shall we? (settings that have several checks but only one can be checked)
-	for _, parent in TMW:Vararg(CI.t ~= "runes" and IE.Main.TypeChecks, IE.Main.WhenChecks, IE.Main.Sort) do
-		if parent then
-			for k, frame in pairs(parent) do
-				if strfind(k, "Radio") then
-					if frame.setting == "TotemSlots" then
-						frame:SetChecked(bit.band(ics.TotemSlots, frame.bit) == frame.bit)
-					else
-						local checked = ics[frame.setting] == frame.value
-						frame:SetChecked(checked)
-						if checked and parent == IE.Main.WhenChecks then
-							if frame:GetID() == 1 then
-								IE.Main.Alpha:Enable()
-								IE.Main.UnAlpha:Disable()
-							elseif frame:GetID() == 2 then
-								IE.Main.Alpha:Disable()
-								IE.Main.UnAlpha:Enable()
-							elseif frame:GetID() == 3 then
-								IE.Main.Alpha:Enable()
-								IE.Main.UnAlpha:Enable()
-							end
-						end
+		if f then
+			if settingtype == 1 then
+				-- handle standard check boxes
+				f:SetChecked(ics[setting])
+				f:GetScript("OnClick")(f)
+			elseif settingtype == 2 then
+				-- handle standard editboxes
+				f:SetText(ics[setting] or "")
+				f:SetCursorPosition(0)
+			elseif settingtype == 3 then
+				-- handle sliders. Note the *100 - done to prevent the shitty behavior with having a value step less than 1
+				f:SetValue(ics[setting]*100)
+			elseif type(settingtype) == "table" then
+				-- currently handles CBars and PBars - the actual frames are inside of a container, this handles them
+				for subset, subtype in pairs(settingtype) do
+					if subtype == 1 then
+						-- handle check boxes
+						f[subset]:SetChecked(ics[subset])
+					elseif subtype == 2 then
+						-- handle editboxes
+						f[subset]:SetText(ics[subset])
+						f[subset]:SetCursorPosition(0)
 					end
 				end
 			end
 		end
 	end
-
-	IE.Main.TypeChecks.Runes:Hide()
-	if CI.t == "runes" then
-		for k, frame in pairs(IE.Main.TypeChecks.Runes) do
-			if k ~= 0 then
-				frame:SetChecked(bit.band(ics.TotemSlots, frame.bit) == frame.bit)
+	
+	-- Phew! Left checks are done. Lets move onto the "Radio" checks, shall we? (settings that have several checks but only one can be checked)
+	for k, frame in pairs(IE.Main.WhenChecks) do
+		if strfind(k, "Radio") then
+			local checked = ics[frame.setting] == frame.value
+			frame:SetChecked(checked)
+			if checked then
+				if frame:GetID() == 1 then
+					IE.Main.Alpha:Enable()
+					IE.Main.UnAlpha:Disable()
+				elseif frame:GetID() == 2 then
+					IE.Main.Alpha:Disable()
+					IE.Main.UnAlpha:Enable()
+				elseif frame:GetID() == 3 then
+					IE.Main.Alpha:Enable()
+					IE.Main.UnAlpha:Enable()
+				end
 			end
 		end
-		IE.Main.TypeChecks.Runes:Show()
 	end
 end
 
 function IE:SetupRadios()
 	local t = CI.t
 	local Type = Types[t]
-	if Type and Type.TypeChecks then
-		for k, frame in pairs(IE.Main.TypeChecks) do
-			if strfind(k, "Radio") then
-				local info = Type.TypeChecks[frame:GetID()]
-				if frame:GetID() > 1 then
-					if #Type.TypeChecks > 3 then
-						local p, rt, rp, x, y = frame:GetPoint(1)
-						frame:SetPoint(p, rt, rp, x, 11)
-					else
-						local p, rt, rp, x, y = frame:GetPoint(1)
-						frame:SetPoint(p, rt, rp, x, 5)
-					end
-				end
-				if info then
-					frame:Show()
-					frame.setting = Type.TypeChecks.setting
-					frame.value = info.value
-					frame.text:SetText((info.colorCode or "") .. info.text .. "|r")
-					if info.tooltipText then
-						TMW:TT(frame, info.text, info.tooltipText, 1, 1)
-					else
-						frame:SetScript("OnEnter", nil)
-					end
-				else
-					frame:Hide()
-				end
-			end
-		end
-		IE.Main.TypeChecks:Show()
-		IE.Main.TypeChecks.text:SetText(Type.TypeChecks.text)
-	else
-		IE.Main.TypeChecks:Hide()
-	end
 	if Type and Type.WhenChecks then
 		for k, frame in pairs(IE.Main.WhenChecks) do
 			if strfind(k, "Radio") then
@@ -3736,7 +3409,7 @@ function IE:SetupRadios()
 					frame:Show()
 					frame.setting = "ShowWhen"
 					frame.value = info.value
-					frame.text:SetText((info.colorCode or "") .. info.text .. "|r")
+					frame.text:SetText(info.text .. "|r")
 					if info.tooltipText then
 						TMW:TT(frame, info.text, info.tooltipText, 1, 1)
 					else
@@ -3747,7 +3420,7 @@ function IE:SetupRadios()
 				end
 			end
 		end
-		IE.Main.WhenChecks.text:SetText(Type.WhenChecks.text)
+		IE.Main.WhenChecks.Header:SetText(Type.WhenChecks.text)
 		IE.Main.WhenChecks:Show()
 	else
 		IE.Main.WhenChecks:Hide()
@@ -3755,8 +3428,8 @@ function IE:SetupRadios()
 
 	local alphainfo = Type and Type.WhenChecks
 	if alphainfo then
-		IE.Main.Alpha.text:SetText((alphainfo[1].colorCode or "") .. alphainfo[1].text .. "|r")
-		IE.Main.UnAlpha.text:SetText((alphainfo[2].colorCode or "") .. alphainfo[2].text .. "|r")
+		IE.Main.Alpha.text:SetText(alphainfo[1].text .. "|r")
+		IE.Main.UnAlpha.text:SetText(alphainfo[2].text .. "|r")
 	else
 		IE.Main.Alpha.text:SetText(L["ICONMENU_USABLE"])
 		IE.Main.UnAlpha.text:SetText(L["ICONMENU_UNUSABLE"])
@@ -3766,6 +3439,7 @@ end
 function IE:SaveSettings()
 	for k, t in pairs(IE.Checks) do
 		if t == 2 then
+			assert(IE.Main[k], ("Couldn't find frame for setting %q (from IE.Checks)"):format(k))
 			IE.Main[k]:ClearFocus()
 		end
 	end
@@ -3979,7 +3653,6 @@ function IE:Unit_DropDown_OnClick(v, e)
 	end
 	e:Insert(";" .. ins .. ";")
 	TMW:CleanString(e)
-	CI.ics.Unit = e:GetText()
 	IE:ScheduleIconSetup()
 	CloseDropDownMenus()
 
@@ -4101,6 +3774,7 @@ end
 
 
 
+
 -- -----------------------
 -- IMPORT/EXPORT
 -- -----------------------
@@ -4174,6 +3848,19 @@ function TMW:DeserializeData(string)
 		return nil
 	end
 
+	if spaceControl then
+		if spaceControl:find("`|") then
+			-- EVERYTHING is fucked up. try really hard to salvage it. It probably won't be completely successful
+			return TMW:DeserializeData(string:gsub("`", "~`"):gsub("~`|", "~`~|"))
+		elseif spaceControl:find("`") then
+			-- if spaces have become corrupt, then reformat them and... re-deserialize (lol)
+			return TMW:DeserializeData(string:gsub("`", "~`"))
+		elseif spaceControl:find("~|") then
+			-- if pipe characters have been screwed up by blizzard's cute little method of escaping things combined with AS-3.0's cute way of escaping things, try to fix them.
+			return TMW:DeserializeData(string:gsub("~||", "~|"))
+		end
+	end
+
 	if not version then
 		-- if the version is not included in the data,
 		-- then it must have been before the first version that included versions in export strings/comm,
@@ -4190,19 +3877,6 @@ function TMW:DeserializeData(string)
 	if not TMW.Classes.SharableDataType.types[type] then
 		-- unknown data type
 		return nil
-	end
-
-	if spaceControl then
-		if spaceControl:find("`|") then
-			-- EVERYTHING is fucked up. try really hard to salvage it. It probably won't be completely successful
-			return TMW:DeserializeData(string:gsub("`", "~`"):gsub("~`|", "~`~|"))
-		elseif spaceControl:find("`") then
-			-- if spaces have become corrupt, then reformat them and... re-deserialize (lol)
-			return TMW:DeserializeData(string:gsub("`", "~`"))
-		elseif spaceControl:find("~|") then
-			-- if pipe characters have been screwed up by blizzard's cute little method of escaping things combined with AS-3.0's cute way of escaping things, try to fix them.
-			return TMW:DeserializeData(string:gsub("~||", "~|"))
-		end
 	end
 
 
@@ -4456,12 +4130,16 @@ function IE:AttemptBackup(icon)
 			icon.historyState = #icon.history
 			-- notify the undo and redo buttons that there was a change so they can :Enable() or :Disable()
 			IE:UndoRedoChanged()
+			
+			TMW:Fire("TMW_CONFIG_ICON_HISTORY_STATE_CREATED", icon)
 		end
 	end
 end
 
 function IE:DoUndoRedo(direction)
 	local icon = CI.ic
+	
+	IE:UndoRedoChanged()
 
 	if not icon.history[icon.historyState + direction] then return end -- not valid, so don't try
 
@@ -4469,20 +4147,24 @@ function IE:DoUndoRedo(direction)
 
 	TMW.db.profile.Groups[CI.g].Icons[CI.i] = nil -- recreated when passed into CTIPWM
 	TMW:CopyTableInPlaceWithMeta(icon.history[icon.historyState], TMW.db.profile.Groups[CI.g].Icons[CI.i])
-
+	
 	CI.ic:Setup() -- do an immediate setup for good measure
+	
+	TMW:Fire("TMW_CONFIG_ICON_HISTORY_STATE_CHANGED", icon)
 
 	CloseDropDownMenus()
 	IE:Load(1)
+	
+	IE:UndoRedoChanged()
 end
 
 
 ---------- Interface ----------
 function IE:UndoRedoChanged()
-	local icon = TMW.CI.ic
-	if not icon or not icon.historyState then return end
+	local icon = CI.ic
+	assert(icon)
 
-	if icon.historyState - 1 < 1 then
+	if not icon.historyState or icon.historyState - 1 < 1 then
 		IE.UndoButton:Disable()
 		IE.CanUndo = false
 	else
@@ -4490,7 +4172,7 @@ function IE:UndoRedoChanged()
 		IE.CanUndo = true
 	end
 
-	if icon.historyState + 1 > #icon.history then
+	if not icon.historyState or icon.historyState + 1 > #icon.history then
 		IE.RedoButton:Disable()
 		IE.CanRedo = false
 	else
@@ -4927,7 +4609,7 @@ function EVENTS:LoadConfig()
 
 	self:SetTabText()
 end
-TMW:RegisterCallback("TMW_CONFIG_LOAD", EVENTS.LoadConfig, EVENTS)
+TMW:RegisterCallback("TMW_CONFIG_ICON_LOADED", EVENTS.LoadConfig, EVENTS)
 
 function EVENTS:SetTabText()
 	local n = self:GetNumUsedEvents()
@@ -5806,7 +5488,7 @@ function TEXT:LoadConfig()
 	
 	TMW:TT(IE.TextDisplay.Layout.LayoutSettings, "TEXTLAYOUTS_LAYOUTSETTINGS", L["TEXTLAYOUTS_LAYOUTSETTINGS_DESC"]:format(layoutName), nil, 1)
 end
-TMW:RegisterCallback("TMW_CONFIG_LOAD", TEXT.LoadConfig, TEXT)
+TMW:RegisterCallback("TMW_CONFIG_ICON_LOADED", TEXT.LoadConfig, TEXT)
 
 function TEXT:SetTextDisplayContainerHeight(frame)
 	local height = 26
@@ -5875,7 +5557,7 @@ function SUG:OnInitialize()
 
 	SUG.RequestedFrom = {}
 	SUG.commThrowaway = {}
-	SUG.Box = IE.Main.Name
+	--SUG.Box = IE.Main.Name
 
 	SUG:PLAYER_TALENT_UPDATE()
 	SUG:BuildClassSpellLookup() -- must go before the local versions (ClassSpellLookup) are defined
@@ -6099,23 +5781,9 @@ function SUG:UNIT_PET(event, unit)
 end
 
 function SUG:PLAYER_ENTERING_WORLD()
-	local NumRealRaidMembers = GetRealNumRaidMembers()
-	local NumRealPartyMembers = GetRealNumPartyMembers()
-	local NumRaidMembers = GetNumRaidMembers()
-
-	if (NumRealRaidMembers > 0) and (NumRealRaidMembers ~= (SUG.OldNumRealRaidMembers or 0)) then
-		SUG.OldNumRealRaidMembers = NumRealRaidMembers
-		SUG:SendCommMessage("TMWSUG", SUG:Serialize("RCSL"), "RAID")
-
-	elseif (NumRealRaidMembers == 0) and (NumRealPartyMembers > 0) and (NumRealPartyMembers ~= (SUG.OldNumRealPartyMembers or 0)) then
-		SUG.OldNumRealPartyMembers = NumRealPartyMembers
-		SUG:SendCommMessage("TMWSUG", SUG:Serialize("RCSL"), "PARTY")
-
-	elseif UnitInBattleground("player") and (NumRaidMembers ~= (SUG.OldNumRaidMembers or 0)) then
-		SUG.OldNumRaidMembers = NumRaidMembers
-		SUG:SendCommMessage("TMWSUG", SUG:Serialize("RCSL"), "BATTLEGROUND")
-	end
-
+	SUG:SendCommMessage("TMWSUG", SUG:Serialize("RCSL"), "RAID")
+	SUG:SendCommMessage("TMWSUG", SUG:Serialize("RCSL"), "PARTY")
+	SUG:SendCommMessage("TMWSUG", SUG:Serialize("RCSL"), "BATTLEGROUND")
 end
 
 function SUG:PLAYER_TALENT_UPDATE()
@@ -6948,12 +6616,22 @@ local Module = SUG:NewModule("talents", SUG:GetModule("spell"))
 Module.noMin = true
 Module.table = {}
 function Module:OnInitialize()
-	for tab = 1, GetNumTalentTabs() do
-		for talent = 1, GetNumTalents(tab) do
-			local name, tex, _, _, rank = GetTalentInfo(tab, talent)
+	if TMW.ISMOP then
+		for talent = 1, MAX_NUM_TALENTS do
+			local name = GetTalentInfo(talent)
 			local lower = name and strlowerCache[name]
 			if lower then
-				self.table[lower] = {tab, talent, tex}
+				self.table[lower] = talent
+			end
+		end
+	else
+		for tab = 1, GetNumTalentTabs() do
+			for talent = 1, GetNumTalents(tab) do
+				local name, tex = GetTalentInfo(tab, talent)
+				local lower = name and strlowerCache[name]
+				if lower then
+					self.table[lower] = {tab, talent, tex}
+				end
 			end
 		end
 	end
@@ -6965,17 +6643,31 @@ function Module:Table_GetSorter()
 	return nil
 end
 function Module:Entry_AddToList_1(f, name)
-	local data = self.table[name]
-	name = GetTalentInfo(data[1], data[2]) -- restore case
+	if TMW.ISMOP then
+		local talent = self.table[name]
+		local name, tex = GetTalentInfo(talent) -- restore case
 
-	f.Name:SetText(name)
+		f.Name:SetText(name)
 
-	f.tooltipmethod = "SetHyperlink"
-	f.tooltiparg = GetTalentLink(data[1], data[2])
+		f.tooltipmethod = "SetHyperlink"
+		f.tooltiparg = GetTalentLink(talent)
 
-	f.insert = name
+		f.insert = name
 
-	f.Icon:SetTexture(data[3])
+		f.Icon:SetTexture(tex)
+	else
+		local data = self.table[name]
+		name = GetTalentInfo(data[1], data[2]) -- restore case
+
+		f.Name:SetText(name)
+
+		f.tooltipmethod = "SetHyperlink"
+		f.tooltiparg = GetTalentLink(data[1], data[2])
+
+		f.insert = name
+
+		f.Icon:SetTexture(data[3])
+	end
 end
 function Module:Table_GetNormalSuggestions(suggestions, tbl, ...)
 	local atBeginning = SUG.atBeginning
@@ -7757,7 +7449,7 @@ end
 
 
 ---------- Interface/Data ----------
-function CNDT:LoadConfig(event, type)
+function CNDT:LoadConfig(type)
 	type = type or CNDT.type or "icon"
 	CNDT.type, CNDT.settings = CNDT:GetTypeData(type)
 
@@ -7783,7 +7475,7 @@ function CNDT:LoadConfig(event, type)
 		TMW.IE.Conditions.ScrollFrame.ScrollBar:Hide()
 	end
 end
-TMW:RegisterCallback("TMW_CONFIG_LOAD", CNDT.LoadConfig, CNDT)
+TMW:RegisterCallback("TMW_CONFIG_ICON_LOADED", function() CNDT:LoadConfig() end)
 
 function CNDT:Save()
 	local groupID, iconID = CI.g, CI.i
@@ -8600,8 +8292,6 @@ HELP = TMW:NewModule("Help", "AceTimer-3.0") TMW.HELP = HELP
 HELP.Codes = {
 	"ICON_POCKETWATCH_FIRSTSEE",
 
-	"CLEU_WHOLECATEGORYEXCLUDED",
-
 	"ICON_DURS_FIRSTSEE",
 	"ICON_DURS_MISSING",
 
@@ -8699,6 +8389,21 @@ end
 
 function HELP:GetShown()
 	return HELP.showingHelp and HELP.showingHelp.code
+end
+
+function HELP:NewCode(code, order, OnlyOnce)
+	assert(code, "HELP:NewCode() - arg1 must be a string, not nil.")
+	assert(not TMW.tContains(HELP.Codes, code), "HELP code " .. code .. " is already registered!")
+	
+	if order then
+		tinsert(HELP.Codes, order, code)
+	else
+		tinsert(HELP.Codes, code)
+	end
+	
+	if OnlyOnce then
+		HELP.OnlyOnce[code] = true
+	end
 end
 
 ---------- Queue Management ----------

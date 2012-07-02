@@ -22,14 +22,40 @@ local ClockGCD
 
 local CooldownSweep = TMW:NewClass("IconModule_CooldownSweep", "IconModule")
 
+CooldownSweep:RegisterIconDefaults{
+	ShowTimer = false,
+	ShowTimerText = false,
+}
+
+CooldownSweep:RegisterConfigPanel_ConstructorFunc("column", 3, "TellMeWhen_TimerOptions", function(self)
+	self.Header:SetText("TIMER SETTINGS") --TODO: localize
+	TMW.IE:BuildSimpleCheckSettingFrame(self, {
+		{
+			setting = "ShowTimer",
+			title = TMW.L["ICONMENU_SHOWTIMER"],
+			tooltip = TMW.L["ICONMENU_SHOWTIMER_DESC"],
+		},
+		{
+			setting = "ShowTimerText",
+			title = TMW.L["ICONMENU_SHOWTIMERTEXT"],
+			tooltip = TMW.L["ICONMENU_SHOWTIMERTEXT_DESC"],
+			disabled = function()
+				return not (IsAddOnLoaded("OmniCC") or IsAddOnLoaded("tullaCC") or LibStub("AceAddon-3.0"):GetAddon("LUI_Cooldown", true))
+			end,
+		},
+	})
+end)
+
 function CooldownSweep:OnNewInstance(icon)
 	self.cooldown = CreateFrame("Cooldown", icon:GetName() .. "Cooldown", icon, "CooldownFrameTemplate")
 	self:SetSkinnableComponent("Cooldown", self.cooldown)
 end
 
 function CooldownSweep:OnEnable()
-	self.cooldown:SetDrawEdge(TMW.db.profile.DrawEdge)
-	self:SetEssentialModuleComponent("cooldown", self.cooldown)
+	if not TMW.ISMOP then
+		-- SetDrawEdge has been removed in MOP
+		self.cooldown:SetDrawEdge(TMW.db.profile.DrawEdge)
+	end
 
 	local icon = self.icon
 	local attributes = icon.attributes
@@ -38,7 +64,6 @@ function CooldownSweep:OnEnable()
 end
 function CooldownSweep:OnDisable()
 	self:SetCooldown(0, 0)
-	self:SetEssentialModuleComponent("cooldown", nil)
 end
 
 function CooldownSweep:SetupForIcon(sourceIcon)

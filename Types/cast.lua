@@ -22,9 +22,8 @@ local print = TMW.print
 local strlowerCache = TMW.strlowerCache
 local unitsWithExistsEvent
 
-local Type = TMW.Classes.IconType:New()
+local Type = TMW.Classes.IconType:New("cast")
 LibStub("AceEvent-3.0"):Embed(Type)
-Type.type = "cast"
 Type.name = L["ICONMENU_CAST"]
 Type.desc = L["ICONMENU_CAST_DESC"]
 Type.chooseNameTitle = L["ICONMENU_CHOOSENAME"] .. " " .. L["ICONMENU_CHOOSENAME_ORBLANK"]
@@ -34,21 +33,40 @@ Type.usePocketWatch = 1
 Type.unitType = "unitid"
 Type.WhenChecks = {
 	text = L["ICONMENU_CASTSHOWWHEN"],
-	{ value = "alpha", 			text = L["ICONMENU_PRESENT"], 			colorCode = "|cFF00FF00" },
-	{ value = "unalpha", 		text = L["ICONMENU_ABSENT"], 			colorCode = "|cFFFF0000" },
+	{ value = "alpha", 			text = "|cFF00FF00" .. L["ICONMENU_PRESENT"], 			 },
+	{ value = "unalpha", 		text = "|cFFFF0000" .. L["ICONMENU_ABSENT"], 			 },
 	{ value = "always", 		text = L["ICONMENU_ALWAYS"] },
 }
-Type.RelevantSettings = {
-	Interruptible = true,
-	Unit = true,
-	ShowCBar = true,
-	CBarOffs = true,
-	InvertBars = true,
-	DurationMin = true,
-	DurationMax = true,
-	DurationMinEnabled = true,
-	DurationMaxEnabled = true,
+
+Type:RegisterIconDefaults{
+	Unit					= "", 
+	Interruptible			= false,
 }
+
+Type:RegisterConfigPanel_XMLTemplate("full", 1, "TellMeWhen_ChooseName")
+
+Type:RegisterConfigPanel_XMLTemplate("column", 1, "TellMeWhen_Unit")
+
+Type:RegisterConfigPanel_ConstructorFunc("column", 1, "TellMeWhen_CastSettings", function(self)
+	self.Header:SetText(Type.name)
+	TMW.IE:BuildSimpleCheckSettingFrame(self, {
+		{
+			setting = "Interruptible",
+			title = L["ICONMENU_ONLYINTERRUPTIBLE"],
+			tooltip = L["ICONMENU_ONLYINTERRUPTIBLE_DESC"],
+		},
+	})
+end)
+
+-- AUTOMATICALLY GENERATED: UsesAttributes
+Type:UsesAttributes("spell")
+Type:UsesAttributes("unit, GUID")
+Type:UsesAttributes("reverse")
+Type:UsesAttributes("color")
+Type:UsesAttributes("start, duration")
+Type:UsesAttributes("alpha")
+Type:UsesAttributes("texture")
+-- END AUTOMATICALLY GENERATED: UsesAttributes
 
 Type.EventDisabled_OnStack = true
 
@@ -154,7 +172,6 @@ function Type:Setup(icon, groupID, iconID)
 		icon:SetScript("OnEvent", Cast_OnEvent)
 	end
 
-	icon.ShowPBar = false
 	icon:SetScript("OnUpdate", Cast_OnUpdate)
 	icon:Update()
 end

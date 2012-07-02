@@ -39,7 +39,7 @@ function Processor:CompileFunctionSegment(t)
 	--]]
 end
 
-Processor:AddDogTag("TMW", "Stacks", {
+Processor:RegisterDogTag("TMW", "Stacks", {
 	code = function (groupID, iconID)
 		local group = TMW[groupID]
 		local icon = group and group[iconID]
@@ -60,4 +60,8 @@ TMW:RegisterCallback("TMW_ICON_SETUP_PRE", function(event, icon)
 	if not TMW.Locked then
 		icon:SetInfo("stack, stackText", nil, nil)
 	end
+end)
+
+TMW:RegisterCallback("TMW_ICON_TYPE_CHANGED", function(event, icon, typeData, oldTypeData)
+	icon:SetInfo("stack, stackText", nil, nil)
 end)

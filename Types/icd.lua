@@ -24,37 +24,68 @@ local clientVersion = select(4, GetBuildInfo())
 local strlowerCache = TMW.strlowerCache
 
 
-local Type = TMW.Classes.IconType:New()
-Type.type = "icd"
+local Type = TMW.Classes.IconType:New("icd")
 Type.name = L["ICONMENU_ICD"]
 Type.desc = L["ICONMENU_ICD_DESC"]
 Type.usePocketWatch = 1
 Type.DurationSyntax = 1
 Type.SUGType = "spellwithduration"
-Type.TypeChecks = {
-	setting = "ICDType",
-	text = L["ICONMENU_ICDTYPE"],
-	{ value = "aura", 			text = L["ICONMENU_ICDBDE"], 				tooltipText = L["ICONMENU_ICDAURA_DESC"]},
-	{ value = "spellcast", 		text = L["ICONMENU_SPELLCAST_COMPLETE"], 	tooltipText = L["ICONMENU_SPELLCAST_COMPLETE_DESC"]},
-	{ value = "caststart", 		text = L["ICONMENU_SPELLCAST_START"], 		tooltipText = L["ICONMENU_SPELLCAST_START_DESC"]},
-}
 Type.WhenChecks = {
 	text = L["ICONMENU_SHOWWHEN"],
-	{ value = "alpha", 			text = L["ICONMENU_USABLE"], 			colorCode = "|cFF00FF00" },
-	{ value = "unalpha",		text = L["ICONMENU_UNUSABLE"], 			colorCode = "|cFFFF0000" },
+	{ value = "alpha", 			text = "|cFF00FF00" .. L["ICONMENU_USABLE"], 			 },
+	{ value = "unalpha",		text = "|cFFFF0000" .. L["ICONMENU_UNUSABLE"], 			 },
 	{ value = "always", 		text = L["ICONMENU_ALWAYS"] },
 }
-Type.RelevantSettings = {
-	ICDType = true,
-	DontRefresh = true,
-	ShowCBar = true,
-	CBarOffs = true,
-	InvertBars = true,
-	DurationMin = true,
-	DurationMax = true,
-	DurationMinEnabled = true,
-	DurationMaxEnabled = true,
+
+-- AUTOMATICALLY GENERATED: UsesAttributes
+Type:UsesAttributes("spell")
+Type:UsesAttributes("color")
+Type:UsesAttributes("start, duration")
+Type:UsesAttributes("alpha")
+Type:UsesAttributes("texture")
+-- END AUTOMATICALLY GENERATED: UsesAttributes
+
+Type:RegisterIconDefaults{
+	ICDType					= "aura",
+	DontRefresh				= false,
 }
+
+Type:RegisterConfigPanel_XMLTemplate("full", 1, "TellMeWhen_ChooseName")
+
+Type:RegisterConfigPanel_ConstructorFunc("column", 2, "TellMeWhen_ICDType", function(self)
+	self.Header:SetText(TMW.L["ICONMENU_ICDTYPE"])
+	TMW.IE:BuildSimpleCheckSettingFrame(self, {
+		{
+			setting = "ICDType",
+			value = "aura",
+			title = TMW.L["ICONMENU_ICDBDE"],
+			tooltip = TMW.L["ICONMENU_ICDAURA_DESC"],
+		},
+		{
+			setting = "ICDType",
+			value = "spellcast",
+			title = TMW.L["ICONMENU_SPELLCAST_COMPLETE"],
+			tooltip = TMW.L["ICONMENU_SPELLCAST_COMPLETE_DESC"],
+		},
+		{
+			setting = "ICDType",
+			value = "caststart",
+			title = TMW.L["ICONMENU_SPELLCAST_START"],
+			tooltip = TMW.L["ICONMENU_SPELLCAST_START_DESC"],
+		},
+	})
+end)
+
+Type:RegisterConfigPanel_ConstructorFunc("column", 1, "TellMeWhen_ICDSettings", function(self)
+	self.Header:SetText(Type.name)
+	TMW.IE:BuildSimpleCheckSettingFrame(self, {
+		{
+			setting = "DontRefresh",
+			title = L["ICONMENU_DONTREFRESH"],
+			tooltip = L["ICONMENU_DONTREFRESH_DESC"],
+		},
+	})
+end)
 
 Type.EventDisabled_OnUnit = true
 Type.EventDisabled_OnStack = true
@@ -116,7 +147,6 @@ end
 local naturesGrace = strlower(GetSpellInfo(16886))
 
 function Type:Setup(icon, groupID, iconID)
-	icon.ShowPBar = false
 	icon.NameFirst = TMW:GetSpellNames(icon, icon.Name, 1)
 	icon.NameHash = TMW:GetSpellNames(icon, icon.Name, nil, nil, 1)
 	icon.NameNameArray = TMW:GetSpellNames(icon, icon.Name, nil, 1)

@@ -1,13 +1,1095 @@
 ﻿<Ui xmlns="http://www.blizzard.com/wow/ui/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.blizzard.com/wow/ui/
  ..\FrameXML\UI.xsd">
+ 
+	<Texture name="TellMeWhen_OptionsModuleContainerBorder" virtual="true">
+		<Size x="1.5" y="1.5"/>
+		<Color r="1.0" g="0.82" b="0" a="0.5"/>
+	</Texture>
+	<Frame name="TellMeWhen_OptionsModuleContainer" virtual="true">
+		<Size x="180"/>
+		<Layers>
+			<Layer level="OVERLAY">
+				<Texture name="$parentLeft" inherits="TellMeWhen_OptionsModuleContainerBorder">
+					<Anchors>
+						<Anchor point="TOPLEFT"/>
+						<Anchor point="BOTTOMLEFT"/>
+					</Anchors>
+				</Texture>
+				<Texture name="$parentRight" inherits="TellMeWhen_OptionsModuleContainerBorder">
+					<Anchors>
+						<Anchor point="TOPRIGHT"/>
+						<Anchor point="BOTTOMRIGHT"/>
+					</Anchors>
+				</Texture>
+				<Texture name="$parentBottom" inherits="TellMeWhen_OptionsModuleContainerBorder">
+					<Anchors>
+						<Anchor point="BOTTOMLEFT" relativeTo="$parentLeft" relativePoint="BOTTOMRIGHT"/>
+						<Anchor point="BOTTOMRIGHT" relativeTo="$parentRight" relativePoint="BOTTOMLEFT"/>
+					</Anchors>
+				</Texture>
+				<Texture name="$parentTopLeft" inherits="TellMeWhen_OptionsModuleContainerBorder">
+					<Size x="6" y="1.5"/>
+					<Anchors>
+						<Anchor point="TOPLEFT" relativeTo="$parentLeft" relativePoint="TOPRIGHT"/>
+					</Anchors>
+				</Texture>
+				<FontString name="$parentHeader" parentKey="Header" inherits="GameFontNormal" justifyH="LEFT">
+					<Anchors>
+						<Anchor point="LEFT" relativeTo="$parentTopLeft" relativePoint="RIGHT"/>
+					</Anchors>
+				</FontString>
+				<Texture name="$parentTopRight" inherits="TellMeWhen_OptionsModuleContainerBorder">
+					<Anchors>
+						<Anchor point="LEFT" relativeTo="$parentHeader" relativePoint="RIGHT"/>
+						<Anchor point="TOPRIGHT" relativeTo="$parentRight" relativePoint="TOPLEFT"/>
+					</Anchors>
+				</Texture>
+			</Layer>
+		</Layers>
+	</Frame>
+	
+	<Frame name="TellMeWhen_CBarOptions" inherits="TellMeWhen_OptionsModuleContainer" virtual="true">
+		<Size x="180" y="66"/>
+		<Frames>
+			<CheckButton name="$parentShowCBar" inherits="TellMeWhen_CheckTemplate" parentKey="ShowCBar">
+				<Anchors>
+					<Anchor point="TOPLEFT" x="5" y="-6"/>
+				</Anchors>
+				<Scripts>
+					<OnLoad>
+						TMW.IE:CreateSettingFrameFromData(self, {
+							setting = "ShowCBar",
+							title = TMW.L["ICONMENU_ENABLE"],
+							tooltip = TMW.L["ICONMENU_SHOWCBAR_DESC"],
+						})
+					</OnLoad>
+				</Scripts>
+			</CheckButton>
+			<CheckButton name="$parentInvertCBar" inherits="TellMeWhen_CheckTemplate" parentKey="InvertCBar">
+				<Anchors>
+					<Anchor point="TOPLEFT" relativeTo="$parentShowCBar" relativePoint="BOTTOMLEFT" y="4"/>
+				</Anchors>
+				<Scripts>
+					<OnLoad>
+						TMW.IE:CreateSettingFrameFromData(self, {
+							setting = "InvertCBar",
+							title = TMW.L["ICONMENU_INVERTBARS"],
+							tooltip = TMW.L["ICONMENU_INVERTCBAR_DESC"],
+							disabled = function(self)
+								return not TMW.CI.ics.ShowCBar
+							end,
+						})
+					</OnLoad>
+				</Scripts>
+			</CheckButton>
+			<EditBox name="$parentCBarOffs" inherits="TellMeWhen_TimeEditBoxTemplate" parentKey="CBarOffs" autoFocus="false">
+				<Size x="50" y="15"/>
+				<Anchors>
+					<Anchor point="LEFT" relativeTo="$parentInvertCBar" relativePoint="RIGHT" x="70" y="1"/>
+				</Anchors>
+				<Scripts>
+					<OnLoad>
+						self.text:SetText(TMW.L["ICONMENU_OFFS"])
+						self.text:SetWidth(50)
+						self.setting = "CBarOffs"
+						
+						TMW.IE:CreateSettingFrameFromData(self, {
+							setting = "CBarOffs",
+							title = TMW.L["ICONMENU_OFFS"],
+							tooltip = TMW.L["ICONMENU_BAROFFS"],
+							disabled = function(self)
+								return not TMW.CI.ics.ShowCBar
+							end,
+							ModifySettingValue = function(self, value)
+								return tonumber(value) or 0
+							end,
+						})
+					</OnLoad>
+				</Scripts>
+			</EditBox>
+		</Frames>
+		<Scripts>
+			<OnLoad>
+				self.Header:SetText("TIMER BAR")
+			</OnLoad>
+		</Scripts>
+	</Frame>
+ 
+	<Frame name="TellMeWhen_PBarOptions" inherits="TellMeWhen_OptionsModuleContainer" virtual="true">
+		<Size x="180" y="66"/>
+		<Frames>
+			<CheckButton name="$parentShowPBar" inherits="TellMeWhen_CheckTemplate" parentKey="ShowPBar">
+				<Anchors>
+					<Anchor point="TOPLEFT" x="5" y="-6"/>
+				</Anchors>
+				<Scripts>
+					<OnLoad>
+						TMW.IE:CreateSettingFrameFromData(self, {
+							setting = "ShowPBar",
+							title = TMW.L["ICONMENU_ENABLE"],
+							tooltip = TMW.L["ICONMENU_SHOWPBAR_DESC"],
+						})
+					</OnLoad>
+				</Scripts>
+			</CheckButton>
+			<CheckButton name="$parentInvertPBar" inherits="TellMeWhen_CheckTemplate" parentKey="InvertPBar">
+				<Anchors>
+					<Anchor point="TOPLEFT" relativeTo="$parentShowPBar" relativePoint="BOTTOMLEFT" y="4"/>
+				</Anchors>
+				<Scripts>
+					<OnLoad>
+						TMW.IE:CreateSettingFrameFromData(self, {
+							setting = "InvertPBar",
+							title = TMW.L["ICONMENU_INVERTBARS"],
+							tooltip = TMW.L["ICONMENU_INVERTPBAR_DESC"],
+							disabled = function(self)
+								return not TMW.CI.ics.ShowPBar
+							end,
+							ModifySettingValue = function(self, value)
+								return tonumber(value) or 0
+							end,
+						})
+					</OnLoad>
+				</Scripts>
+			</CheckButton>
+			<EditBox name="$parentPBarOffs" inherits="TellMeWhen_TimeEditBoxTemplate" parentKey="PBarOffs" autoFocus="false">
+				<Size x="50" y="15"/>
+				<Anchors>
+					<Anchor point="LEFT" relativeTo="$parentInvertPBar" relativePoint="RIGHT" x="70" y="1"/>
+				</Anchors>
+				<Scripts>
+					<OnLoad>
+						self.text:SetText(TMW.L["ICONMENU_OFFS"])
+						self.text:SetWidth(50)
+						self.setting = "PBarOffs"
+						
+						TMW.IE:CreateSettingFrameFromData(self, {
+							setting = "PBarOffs",
+							title = TMW.L["ICONMENU_OFFS"],
+							tooltip = TMW.L["ICONMENU_BAROFFS"],
+							disabled = function(self)
+								return not TMW.CI.ics.ShowPBar
+							end,
+						})
+					</OnLoad>
+				</Scripts>
+			</EditBox>
+		</Frames>
+		<Scripts>
+			<OnLoad>
+				self.Header:SetText("POWER BAR")
+			</OnLoad>
+		</Scripts>
+	</Frame>
+ 
+	<Frame name="TellMeWhen_DurationRequirements" inherits="TellMeWhen_OptionsModuleContainer" virtual="true">
+		<Size x="180" y="50"/>
+		<Frames>
+			<EditBox name="$parentDurationMin" parentKey="DurationMin" inherits="TellMeWhen_TimeEditBoxTemplate">
+				<Size x="50" y="15"/>
+				<Anchors>
+					<Anchor point="TOPLEFT" x="33" y="-23"/>
+				</Anchors>
+				<Scripts>
+					<OnLoad>
+						self.text:SetText(MINIMUM)
+						self.setting = "DurationMin"
+						
+						TMW.IE:CreateSettingFrameFromData(self, {
+							setting = "DurationMin",
+							title = MINIMUM,
+							tooltip = TMW.L["ICONMENU_DURATION_MIN_DESC"],
+							disabled = function(self)
+								return not TMW.CI.ics.DurationMinEnabled
+							end,
+							ModifySettingValue = function(self, value)
+								return tonumber(value) or 0
+							end,
+						})
+					</OnLoad>
+				</Scripts>
+			</EditBox>
+			<EditBox name="$parentDurationMax" parentKey="DurationMax" inherits="TellMeWhen_TimeEditBoxTemplate">
+				<Size x="50" y="15"/>
+				<Anchors>
+					<!-- <Anchor point="TOP" relativeTo="$parentDurationMin" relativePoint="BOTTOM" y="-25"/> -->
+					<Anchor point="LEFT" relativeTo="$parentDurationMin" relativePoint="RIGHT" x="35"/>
+				</Anchors>
+				<Scripts>
+					<OnLoad>
+						self.text:SetText(MAXIMUM)
+						self.setting = "DurationMax"
+						
+						TMW.IE:CreateSettingFrameFromData(self, {
+							setting = "DurationMax",
+							title = MAXIMUM,
+							tooltip = TMW.L["ICONMENU_DURATION_MIN_DESC"],
+							disabled = function(self)
+								return not TMW.CI.ics.DurationMaxEnabled
+							end,
+							ModifySettingValue = function(self, value)
+								return tonumber(value) or 0
+							end,
+						})
+					</OnLoad>
+				</Scripts>
 
+			</EditBox>
+			<CheckButton name="$parentDurationMinEnabled" parentKey="DurationMinEnabled" inherits="TellMeWhen_CheckTemplate">
+				<Size x="26" y="26"/>
+				<Anchors>
+					<Anchor point="RIGHT" relativeto="$parentDurationMin" relativePoint="LEFT" x="-1" y="-0.5"/>
+				</Anchors>
+				<Scripts>
+					<OnLoad>
+						TMW.IE:CreateSettingFrameFromData(self, {
+							setting = "DurationMinEnabled",
+							label = "",
+							title = ENABLE,
+							tooltip = TMW.L["GENERIC_NUMREQ_CHECK_DESC"]:format(TMW.L["ICONMENU_DURATION_MIN_DESC"]:gsub("^%u", strlower)),
+						})
+					</OnLoad>
+				</Scripts>
+			</CheckButton>
+			<CheckButton name="$parentDurationMaxEnabled" parentKey="DurationMaxEnabled" inherits="TellMeWhen_CheckTemplate">
+				<Size x="26" y="26"/>
+				<Anchors>
+					<Anchor point="RIGHT" relativeto="$parentDurationMax" relativePoint="LEFT" x="-1" y="-0.5"/>
+				</Anchors>
+				<Scripts>
+					<OnLoad>
+						
+						TMW.IE:CreateSettingFrameFromData(self, {
+							setting = "DurationMaxEnabled",
+							label = "",
+							title = ENABLE,
+							tooltip = TMW.L["GENERIC_NUMREQ_CHECK_DESC"]:format(TMW.L["ICONMENU_DURATION_MAX_DESC"]:gsub("^%u", strlower)),
+						})
+					</OnLoad>
+				</Scripts>
+			</CheckButton>
+		</Frames>
+		<Scripts>
+			<OnLoad>
+				self.Header:SetText("DURATION REQUIREMENTS")
+			</OnLoad>
+		</Scripts>
+	</Frame>
+ 
+	<Frame name="TellMeWhen_StackRequirements" inherits="TellMeWhen_OptionsModuleContainer" virtual="true">
+		<Size x="180" y="50"/>
+		<Frames>
+			<EditBox name="$parentStackMin" parentKey="StackMin" inherits="TellMeWhen_TimeEditBoxTemplate">
+				<Size x="50" y="15"/>
+				<Anchors>
+					<Anchor point="TOPLEFT" x="33" y="-23"/>
+				</Anchors>
+				<Scripts>
+					<OnLoad>
+						self.text:SetText(MINIMUM)
+						self.setting = "StackMin"
+						
+						TMW.IE:CreateSettingFrameFromData(self, {
+							setting = "StackMin",
+							title = MAXIMUM,
+							tooltip = TMW.L["ICONMENU_STACKS_MIN_DESC"],
+							disabled = function(self)
+								return not TMW.CI.ics.StackMinEnabled
+							end,
+							ModifySettingValue = function(self, value)
+								return tonumber(value) or 0
+							end,
+						})
+					</OnLoad>
+				</Scripts>
+			</EditBox>
+			<EditBox name="$parentStackMax" parentKey="StackMax" inherits="TellMeWhen_TimeEditBoxTemplate">
+				<Size x="50" y="15"/>
+				<Anchors>
+					<Anchor point="LEFT" relativeTo="$parentStackMin" relativePoint="RIGHT" x="35"/>
+				</Anchors>
+				<Scripts>
+					<OnLoad>
+						self.text:SetText(MAXIMUM)
+						self.setting = "StackMax"
+						
+						TMW.IE:CreateSettingFrameFromData(self, {
+							setting = "StackMax",
+							title = MAXIMUM,
+							tooltip = TMW.L["ICONMENU_STACKS_MAX_DESC"],
+							disabled = function(self)
+								return not TMW.CI.ics.StackMaxEnabled
+							end,
+							ModifySettingValue = function(self, value)
+								return tonumber(value) or 0
+							end,
+						})
+					</OnLoad>
+				</Scripts>
 
+			</EditBox>
+			<CheckButton name="$parentStackMinEnabled" parentKey="StackMinEnabled" inherits="TellMeWhen_CheckTemplate">
+				<Size x="26" y="26"/>
+				<Anchors>
+					<Anchor point="RIGHT" relativeto="$parentStackMin" relativePoint="LEFT" x="-1" y="-0.5"/>
+				</Anchors>
+				<Scripts>
+					<OnLoad>
+						TMW.IE:CreateSettingFrameFromData(self, {
+							setting = "StackMinEnabled",
+							label = "",
+							title = ENABLE,
+							tooltip = TMW.L["GENERIC_NUMREQ_CHECK_DESC"]:format(TMW.L["ICONMENU_STACKS_MIN_DESC"]:gsub("^%u", strlower)),
+						})
+					</OnLoad>
+				</Scripts>
+			</CheckButton>
+			<CheckButton name="$parentStackMaxEnabled" parentKey="StackMaxEnabled" inherits="TellMeWhen_CheckTemplate">
+				<Size x="26" y="26"/>
+				<Anchors>
+					<Anchor point="RIGHT" relativeto="$parentStackMax" relativePoint="LEFT" x="-1" y="-0.5"/>
+				</Anchors>
+				<Scripts>
+					<OnLoad>
+						TMW.IE:CreateSettingFrameFromData(self, {
+							setting = "StackMaxEnabled",
+							label = "",
+							title = ENABLE,
+							tooltip = TMW.L["GENERIC_NUMREQ_CHECK_DESC"]:format(TMW.L["ICONMENU_STACKS_MAX_DESC"]:gsub("^%u", strlower)),
+						})
+					</OnLoad>
+				</Scripts>
+			</CheckButton>
+		</Frames>
+		<Scripts>
+			<OnLoad>
+				self.Header:SetText("STACK REQUIREMENTS")
+			</OnLoad>
+		</Scripts>
+	</Frame>
+ 
+	<Frame name="TellMeWhen_ConditionIconSettings" inherits="TellMeWhen_OptionsModuleContainer" virtual="true">
+		<Size x="180" y="75"/>
+		<Frames>
+			<EditBox name="$parentConditionDur" parentKey="ConditionDur" inherits="TellMeWhen_TimeEditBoxTemplate">
+				<Size x="50" y="15"/>
+				<Anchors>
+					<Anchor point="TOPLEFT" x="33" y="-23"/>
+				</Anchors>
+				<Scripts>
+					<OnLoad>
+						self.text:SetText(TMW.L["ICONMENU_SUCCEED"])
+						self.setting = "ConditionDur"
+						
+						TMW.IE:CreateSettingFrameFromData(self, {
+							setting = "ConditionDur",
+							title = TMW.L["ICONMENU_SUCCEED"],
+							tooltip = TMW.L["CONDITION_TIMERS_SUCCEED_DESC"],
+							disabled = function(self)
+								return not TMW.CI.ics.ConditionDurEnabled
+							end,
+							ModifySettingValue = function(self, value)
+								return tonumber(value) or 0
+							end,
+						})
+					</OnLoad>
+				</Scripts>
+			</EditBox>
+			<EditBox name="$parentUnConditionDur" parentKey="UnConditionDur" inherits="TellMeWhen_TimeEditBoxTemplate">
+				<Size x="50" y="15"/>
+				<Anchors>
+					<Anchor point="LEFT" relativeTo="$parentConditionDur" relativePoint="RIGHT" x="35"/>
+				</Anchors>
+				<Scripts>
+					<OnLoad>
+						self.text:SetText(TMW.L["ICONMENU_FAIL"])
+						self.setting = "UnConditionDur"
+						
+						TMW.IE:CreateSettingFrameFromData(self, {
+							setting = "UnConditionDur",
+							title = MAXIMUM,
+							title = TMW.L["ICONMENU_FAIL"],
+							tooltip = TMW.L["CONDITION_TIMERS_FAIL_DESC"],
+							disabled = function(self)
+								return not TMW.CI.ics.UnConditionDurEnabled
+							end,
+							ModifySettingValue = function(self, value)
+								return tonumber(value) or 0
+							end,
+						})
+					</OnLoad>
+				</Scripts>
+
+			</EditBox>
+			<CheckButton name="$parentConditionDurEnabled" parentKey="ConditionDurEnabled" inherits="TellMeWhen_CheckTemplate">
+				<Size x="26" y="26"/>
+				<Anchors>
+					<Anchor point="RIGHT" relativeto="$parentConditionDur" relativePoint="LEFT" x="-1" y="-0.5"/>
+				</Anchors>
+				<Scripts>
+					<OnLoad>
+						TMW.IE:CreateSettingFrameFromData(self, {
+							setting = "ConditionDurEnabled",
+							label = "",
+							title = ENABLE,
+							tooltip = TMW.L["GENERIC_NUMREQ_CHECK_DESC"]:format(TMW.L["CONDITION_TIMERS_SUCCEED_DESC"]:gsub("^%u", strlower)),
+						})
+					</OnLoad>
+				</Scripts>
+			</CheckButton>
+			<CheckButton name="$parentUnConditionDurEnabled" parentKey="UnConditionDurEnabled" inherits="TellMeWhen_CheckTemplate">
+				<Size x="26" y="26"/>
+				<Anchors>
+					<Anchor point="RIGHT" relativeto="$parentUnConditionDur" relativePoint="LEFT" x="-1" y="-0.5"/>
+				</Anchors>
+				<Scripts>
+					<OnLoad>
+						TMW.IE:CreateSettingFrameFromData(self, {
+							setting = "UnConditionDurEnabled",
+							label = "",
+							title = ENABLE,
+							tooltip = TMW.L["GENERIC_NUMREQ_CHECK_DESC"]:format(TMW.L["CONDITION_TIMERS_FAIL_DESC"]:gsub("^%u", strlower)),
+						})
+					</OnLoad>
+				</Scripts>
+			</CheckButton>
+			<CheckButton name="$parentOnlyIfCounting" inherits="TellMeWhen_CheckTemplate" parentKey="OnlyIfCounting">
+				<Size x="28" y="28"/>
+				<Anchors>
+					<Anchor point="LEFT" x="5"/>
+					<Anchor point="TOP" relativeTo="$parentConditionDur" relativePoint="BOTTOM" y="-5"/>
+				</Anchors>
+				<Scripts>
+					<OnLoad>
+						self.text:SetWidth(TMW.WidthCol1)
+						
+						TMW.IE:CreateSettingFrameFromData(self, {
+							setting = "OnlyIfCounting",
+							title = TMW.L["ICONMENU_ONLYIFCOUNTING"],
+							tooltip = TMW.L["ICONMENU_ONLYIFCOUNTING_DESC"],
+						})
+					</OnLoad>
+				</Scripts>
+			</CheckButton>
+
+		</Frames>
+		<Scripts>
+			<OnLoad>
+				self.Header:SetText("CONDITION ICON SETTINGS")
+			</OnLoad>
+		</Scripts>
+	</Frame>
+	
+	<Frame name="BASE FRAME" inherits="TellMeWhen_OptionsModuleContainer" virtual="true">
+		<Size x="180" y="50"/>
+		<Frames>
+		
+		</Frames>
+		<Scripts>
+			<OnLoad>
+				self.Header:SetText("BASE FRAME")
+			</OnLoad>
+		</Scripts>
+	</Frame>
+	
+	<Frame name="TellMeWhen_ChooseName" inherits="TellMeWhen_OptionsModuleContainer" virtual="true">
+		<Size x="560" y="50"/>
+		<Frames>
+			<EditBox name="$parentName" inherits="TellMeWhen_InputBoxTemplate" multiline="true" parentKey="Name" autoFocus="false">
+				<Size x="545" y="15"/>
+				<Anchors>
+					<Anchor point="TOPLEFT" x="9" y="-10"/>
+					<Anchor point="TOPRIGHT" x="-25" y="-10"/>
+				</Anchors>
+				<Layers>
+					<Layer level="ARTWORK">
+						<FontString name="$parentFS1" inherits="GameFontHighlightSmall" parentKey="text" justifyH="LEFT">
+							<Anchors>
+								<Anchor point="LEFT" relativePoint="RIGHT" x="19" y="-1"/>
+							</Anchors>
+						</FontString>
+					</Layer>
+				</Layers>
+				<Frames>
+					<Frame name="$parentEquivs" inherits="TMW_DropDownMenuTemplate" parentKey="Equivs">
+						<Anchors>
+							<Anchor point="LEFT" relativePoint="RIGHT" x="-15" y="-4"/>
+						</Anchors>
+						<Scripts>
+							<OnLoad>
+								self.Left:Hide()
+								self.Middle:Hide()
+								self.Right:Hide()
+								self.Text:Hide()
+								UIDropDownMenu_SetWidth(self, 1)
+								TMW:TT(self, "CHOOSENAME_DIALOG_DDDEFAULT", "CHOOSENAME_EQUIVS_TOOLTIP")
+								self.InitFunc = TMW.IE.Equiv_DropDown
+							</OnLoad>
+						</Scripts>
+					</Frame>
+				</Frames>
+				<Scripts>
+					<OnLoad>
+						function self:SetLabels(title, text)
+							self.label = title
+							self.__title = title
+							self.__text = text
+							self:GetParent().Header:SetText(title)
+						end
+						self:RegisterEvent("MODIFIER_STATE_CHANGED")
+						self.BackgroundText:SetWidth(self:GetWidth())
+						self:SetTextInsets(1, 2, 1.5, 1.5)
+						--TellMeWhen_IconEditor.Main.Name = self	--TODO: TEMP DEBUG HACK REMOVE THIS ASAP BAD CODE RIGHT HERE AHHHH SAVEEE MEEEEEEEE IM TRAPPED INSIDE THE CODE!!!!!!!!!!!!!!!!
+						
+						TMW.IE:CreateSettingFrameFromData(self, {
+							setting = "Name",
+						})
+						
+						TMW:RegisterCallback("TMW_CONFIG_ICON_LOADED", function(event, icon)
+							self:SetLabels(icon.typeData.chooseNameTitle, icon.typeData.chooseNameText)
+							self:GetScript("OnTextChanged")(self)
+						end)
+					</OnLoad>
+					<OnEditFocusLost>
+						EditBox_ClearHighlight(self)
+						TMW:CleanString(self)
+
+						if TMW.CI.ics then
+							TMW.CI.ics.Name = TMW:CleanString(self:GetText())
+							TMW.IE:ScheduleIconSetup()
+						end
+
+						self:GetScript("OnTextChanged")(self)
+					</OnEditFocusLost>
+					<OnEditFocusGained>
+						TMW.SUG:EnableEditBox(self, TMW.CI.ic.typeData.SUGType)
+						self.BackgroundText:SetText(nil)
+					</OnEditFocusGained>
+					<OnEvent>
+						if not self.isOver then return end
+
+						GameTooltip:Hide()
+
+						GameTooltip_SetDefaultAnchor(GameTooltip, self)
+						GameTooltip:AddLine(self.__title, HIGHLIGHT_FONT_COLOR.r, HIGHLIGHT_FONT_COLOR.g, HIGHLIGHT_FONT_COLOR.b)
+						if IsModifierKeyDown() then
+							GameTooltip:AddLine(TMW.IE:GetRealNames(self), NORMAL_FONT_COLOR.r, NORMAL_FONT_COLOR.g, NORMAL_FONT_COLOR.b, nil)
+						else
+							GameTooltip:AddLine(self.__text, NORMAL_FONT_COLOR.r, NORMAL_FONT_COLOR.g, NORMAL_FONT_COLOR.b, 1)
+						end
+						GameTooltip:Show()
+					</OnEvent>
+					<OnEnter>
+						self.isOver = true
+						self:GetScript("OnEvent")(self)
+					</OnEnter>
+					<OnLeave>
+						self.isOver = false
+						GameTooltip:Hide()
+					</OnLeave>
+					<OnReceiveDrag>
+						TMW.ID:SpellItemToIcon(TMW.CI.ic)
+					</OnReceiveDrag>
+					<OnMouseUp>
+						TMW.ID:SpellItemToIcon(TMW.CI.ic)
+					</OnMouseUp>
+					<OnTextChanged>
+						local text = self:GetText()
+						if text == "" then
+							local label = self.label
+							local append = TMW.Types[TMW.CI.t].appendNameLabel
+							if append then
+								label = label .. " " .. append
+							end
+							self.BackgroundText:SetText(label)
+						else
+							self.BackgroundText:SetText(nil)
+						end
+						
+						self:GetParent():AdjustHeight()
+					</OnTextChanged>
+				</Scripts>
+			</EditBox>
+		</Frames>
+		<Scripts>
+			<OnLoad>
+				local Name = self.Name
+				
+				TMW:RegisterCallback("TMW_ICON_SETUP_POST", function(event, icon)
+					-- Warnings for missing durations and first-time instructions for duration syntax
+					if icon.typeData.DurationSyntax and icon:IsBeingEdited() == 1 then
+						TMW.HELP:Show("ICON_DURS_FIRSTSEE", nil, TMW.IE.Main.Type, 20, 0, TMW.L["HELP_FIRSTUCD"])
+
+						local s = ""
+						local array = TMW:GetSpellNames(nil, Name:GetText())
+						for k, v in pairs(TMW:GetSpellDurations(nil, Name:GetText())) do
+							if v == 0 then
+								s = s .. (s ~= "" and "; " or "") .. array[k]
+							end
+						end
+						if s ~= "" then
+							TMW.HELP:Show("ICON_DURS_MISSING", icon, Name, 0, 0, TMW.L["HELP_MISSINGDURS"], s)
+						else
+							TMW.HELP:Hide("ICON_DURS_MISSING")
+						end
+					end
+				end)				
+				
+				function self:AdjustHeight()
+					self:SetHeight(18 + self.Name:GetHeight())
+				end
+			</OnLoad>
+		</Scripts>
+	</Frame>
+	
+	<Frame name="TellMeWhen_CustomTex" inherits="TellMeWhen_OptionsModuleContainer" virtual="true">
+		<Size x="180" y="50"/>
+		<Frames>
+			<EditBox name="$parentCustomTex" inherits="TellMeWhen_InputBoxTemplate" multiline="true" parentKey="CustomTex" autoFocus="false">
+				<Size y="15"/>
+				<Anchors>
+					<Anchor point="TOPLEFT" x="9" y="-10"/>
+					<Anchor point="TOPRIGHT" x="-7" y="-10"/>
+				</Anchors>
+				<Scripts>
+					<OnLoad>
+						TMW.SUG:EnableEditBox(self, "texture", true)	
+						self.BackgroundText:SetWidth(self:GetWidth())
+						self.label = TMW.L["ICONMENU_CUSTOMTEX"]
+						
+						TMW.IE:CreateSettingFrameFromData(self, {
+							setting = "CustomTex",
+							title = TMW.L["ICONMENU_CUSTOMTEX"],
+							tooltip = TMW.L["ICONMENU_CUSTOMTEX_DESC"],
+							OnTextChanged = function(self)
+								self:GetParent():AdjustHeight()
+							end,
+							ModifySettingValue = function(self, value)
+								return value:gsub([[\\]], [[\]])
+							end,
+						})
+						self:SetTextInsets(2, 2, 2, 2)
+						
+						
+						function self:DragReceived(icon, t, data, subType)
+							local ics = icon:GetSettings()
+
+							local _, input
+							if t == "spell" then
+								_, input = GetSpellBookItemInfo(data, subType)
+							elseif t == "item" then
+								input = GetItemIcon(data)
+							end
+							if not input then
+								return
+							end
+
+							ics.CustomTex = TMW:CleanString(input)
+							return true -- signal success
+						end
+					</OnLoad>
+					<OnReceiveDrag>
+						TMW.ID:SpellItemToIcon(TMW.CI.ic, self.DragReceived, self)
+					</OnReceiveDrag>
+					<OnMouseUp>
+						TMW.ID:SpellItemToIcon(TMW.CI.ic, self.DragReceived, self)
+					</OnMouseUp>
+				</Scripts>
+			</EditBox>
+		</Frames>
+		<Scripts>
+			<OnLoad>
+				self.Header:SetText(TMW.L["ICONMENU_CUSTOMTEX"])
+				
+				function self:AdjustHeight()
+					self:SetHeight(18 + self.CustomTex:GetHeight())
+				end
+			</OnLoad>
+		</Scripts>
+	</Frame>
+	
+	<Frame name="TellMeWhen_Unit" inherits="TellMeWhen_OptionsModuleContainer" virtual="true">
+		<Size x="180" y="50"/>
+		<Frames>
+			<EditBox name="$parentUnit" inherits="TellMeWhen_UnitEditbox" multiline="true" parentKey="Unit" autoFocus="false">
+				<Anchors>
+					<Anchor point="TOPLEFT" x="9" y="-10"/>
+					<Anchor point="TOPRIGHT" x="-25" y="-10"/>
+				</Anchors>
+				<Scripts>
+					<OnLoad>
+						self:RegisterEvent("MODIFIER_STATE_CHANGED")
+						self.label = TMW.L["ICONMENU_UNITSTOWATCH"]
+						self.BackgroundText:SetWidth(self:GetWidth())
+						self:SetTextInsets(2, 2, 2, 2)
+
+						local text = function()
+							if IsModifierKeyDown() then
+								return TMW.IE:GetRealUnits(self)
+							else
+								return TMW.L["ICONMENU_UNIT_DESC"]
+							end
+						end
+
+						function self:SetLabels(title)
+							self.label = title
+							self.__title = title
+						end
+
+						TMW.IE:CreateSettingFrameFromData(self, {
+							setting = "Unit",
+							title = TMW.L["ICONMENU_UNITSTOWATCH"],
+							tooltip = text,
+							OnTextChanged = function(self)
+								self:GetParent():AdjustHeight()
+							end,
+						})
+						
+						TMW:RegisterCallback("TMW_CONFIG_ICON_LOADED", function(event, icon)
+							self:SetLabels(icon.typeData.unitTitle)
+							self:GetScript("OnTextChanged")(self)
+						end)
+						
+					</OnLoad>
+					<OnEditFocusLost>
+						EditBox_ClearHighlight(self)
+
+						if TMW.CI.ics then
+							TMW.CI.ics.Unit = TMW:CleanString(self)
+							TMW.IE:ScheduleIconSetup()
+							if TMW.CI.ics.Unit ~= "player" then
+								TMW.db.global.HelpSettings.HasChangedUnit = TMW.db.global.HelpSettings.HasChangedUnit + 1
+							end
+						end
+						self:GetScript("OnTextChanged")(self)
+					</OnEditFocusLost>
+					<OnTextChanged>
+						local text = self:GetText()
+
+						if text == "" then
+							if TMW.Types[TMW.CI.t].AllowNoUnit then
+								self.BackgroundText:SetText(self.label)
+								TMW.HELP:Hide("ICON_UNIT_MISSING")
+							else
+								self.BackgroundText:SetText("|cFFFF5050" .. self.label)
+								TMW.HELP:Show("ICON_UNIT_MISSING", TMW.CI.ic, self, 0, 0, TMW.L["HELP_NOUNITS"])
+							end
+						elseif text == "player" and (20 > TMW.db.global.HelpSettings.HasChangedUnit or TMW.Types[TMW.CI.t].AllowNoUnit) then
+							self.BackgroundText:SetText(self.label)
+						else
+							self.BackgroundText:SetText(nil)
+							TMW.HELP:Hide("ICON_UNIT_MISSING")
+						end
+					</OnTextChanged>
+				</Scripts>
+			</EditBox>
+		</Frames>
+		<Scripts>
+			<OnLoad>
+				self.Header:SetText(TMW.L["ICONMENU_UNITSTOWATCH"])
+				
+				function self:AdjustHeight()
+					self:SetHeight(18 + self.Unit:GetHeight())
+				end
+			</OnLoad>
+		</Scripts>
+	</Frame>
+	
+	<Frame name="TellMeWhen_CLEUOptions" inherits="TellMeWhen_OptionsModuleContainer" virtual="true">
+		<Size x="180" y="250"/>
+		<Frames>
+		
+			<EditBox name="$parentCLEUDur" parentKey="CLEUDur" inherits="TellMeWhen_TimeEditBoxTemplate">
+				<Anchors>
+					<Anchor point="TOPLEFT" x="12" y="-23"/>
+				</Anchors>
+				<Scripts>
+					<OnLoad>
+						self.text:SetPoint("LEFT", 0, 0)
+						self.text:SetText(TMW.L["CLEU_TIMER"])
+						self.setting = "CLEUDur"
+						
+						TMW.IE:CreateSettingFrameFromData(self, {
+							setting = "CLEUDur",
+							title = TMW.L["CLEU_TIMER"],
+							tooltip = TMW.L["CLEU_TIMER_DESC"],
+							ModifySettingValue = function(self, value)
+								return tonumber(value) or 0
+							end,
+						})
+					</OnLoad>
+				</Scripts>
+			</EditBox>
+
+			<Frame name="$parentCLEUEvents" inherits="TMW_DropDownMenuTemplate" parentKey="CLEUEvents">
+				<Anchors>
+					<Anchor point="TOPLEFT" x="-10" y="-60"/>
+				</Anchors>
+				<Layers>
+					<Layer level="ARTWORK">
+						<FontString name="$parentFS1" inherits="GameFontNormal" parentKey="text" justifyH="LEFT">
+							<Anchors>
+								<Anchor point="BOTTOMLEFT" relativePoint="TOPLEFT" x="15" y="3"/>
+							</Anchors>
+						</FontString>
+					</Layer>
+				</Layers>
+				<Scripts>
+					<OnLoad>
+						self.wrapTooltips = 1
+						UIDropDownMenu_SetWidth(self, 150)
+						self.InitFunc = TMW.Types.cleu.CONFIG.EventMenu
+						UIDropDownMenu_SetText(self, TMW.L["CLEU_EVENTS"])
+						self.Button:HookScript("OnClick", function(self)
+							TMW.IE:SaveSettings()
+						end)
+
+						TMW:TT(self, "CLEU_EVENTS", "CLEU_EVENTS_DESC")
+						self.text:SetText(TMW.L["CLEU_HEADER"])
+					</OnLoad>
+				</Scripts>
+			</Frame>
+			<EditBox name="$parentSourceUnit" inherits="TellMeWhen_UnitEditbox" multiline="true" parentKey="SourceUnit" autoFocus="false">
+				<Anchors>
+					<Anchor point="TOP" relativeTo="$parentCLEUEvents" relativePoint="BOTTOM" y="1"/>
+					<Anchor point="LEFT" x="9"/>
+					<Anchor point="RIGHT" x="-25"/>
+				</Anchors>
+				<Scripts>
+					<OnLoad>
+						self:RegisterEvent("MODIFIER_STATE_CHANGED")
+						self.label = TMW.L["CLEU_SOURCEUNITS"]
+						self.BackgroundText:SetWidth(self:GetWidth())
+						
+						TMW.IE:CreateSettingFrameFromData(self, {
+							setting = "SourceUnit",
+							title = TMW.L["CLEU_SOURCEUNITS"],
+							tooltip = function()
+								if IsModifierKeyDown() then
+									return TMW.IE:GetRealUnits(self)
+								else
+									return TMW.L["CLEU_SOURCEUNITS_DESC"]
+								end
+							end,
+							OnTextChanged = function(self)
+								self:GetParent():AdjustHeight()
+							end,
+							doCleanString = true,
+						})
+						
+						self:SetTextInsets(1, 2, 1.5, 1.5)
+					</OnLoad>
+				</Scripts>
+			</EditBox>
+			<Frame name="$parentSourceFlags" inherits="TMW_DropDownMenuTemplate" parentKey="SourceFlags">
+				<Anchors>
+					<Anchor point="TOPLEFT" relativeTo="$parentSourceUnit" relativePoint="BOTTOMLEFT" x="-15" y="-3"/>
+				</Anchors>
+				<Scripts>
+					<OnLoad>
+						self.wrapTooltips = 1
+						UIDropDownMenu_SetWidth(self, 145)
+						self.InitFunc = TMW.Types.cleu.CONFIG.FlagsMenu
+						self.flagSet = "SourceFlags" -- the setting name, basically
+						UIDropDownMenu_SetText(self, TMW.L["CLEU_FLAGS_SOURCE"])
+						self.Button:HookScript("OnClick", function(self)
+							TMW.IE:SaveSettings()
+						end)
+
+						TMW:TT(self, "CLEU_FLAGS_SOURCE", "CLEU_FLAGS_DESC")
+					</OnLoad>
+				</Scripts>
+			</Frame>
+
+			<EditBox name="$parentDestUnit" inherits="TellMeWhen_UnitEditbox" multiline="true" parentKey="DestUnit" autoFocus="false">
+				<Anchors>
+					<Anchor point="TOP" relativeTo="$parentSourceUnit" relativePoint="BOTTOM" y="-35"/>
+					<Anchor point="LEFT" x="9"/>
+					<Anchor point="RIGHT" x="-25"/>
+				</Anchors>
+				<Scripts>
+					<OnLoad>
+						self:RegisterEvent("MODIFIER_STATE_CHANGED")
+						self.label = TMW.L["CLEU_DESTUNITS"]
+						self.BackgroundText:SetWidth(self:GetWidth())
+						
+						TMW.IE:CreateSettingFrameFromData(self, {
+							setting = "DestUnit",
+							title = TMW.L["CLEU_DESTUNITS"],
+							tooltip = function()
+								if IsModifierKeyDown() then
+									return TMW.IE:GetRealUnits(self)
+								else
+									return TMW.L["CLEU_DESTUNITS_DESC"]
+								end
+							end,
+							OnTextChanged = function(self)
+								self:GetParent():AdjustHeight()
+							end,
+							doCleanString = true,
+						})
+						self:SetTextInsets(1, 2, 2, 2)
+					</OnLoad>
+				</Scripts>
+			</EditBox>
+			<Frame name="$parentDestFlags" inherits="TMW_DropDownMenuTemplate" parentKey="DestFlags">
+				<Anchors>
+					<Anchor point="TOPLEFT" relativeTo="$parentDestUnit" relativePoint="BOTTOMLEFT" x="-15" y="-3"/>
+				</Anchors>
+				<Scripts>
+					<OnLoad>
+						self.wrapTooltips = 1
+						UIDropDownMenu_SetWidth(self, 145)
+						self.InitFunc = TMW.Types.cleu.CONFIG.FlagsMenu
+						self.flagSet = "DestFlags" -- the setting name, basically
+						UIDropDownMenu_SetText(self, TMW.L["CLEU_FLAGS_DEST"])
+						self.Button:HookScript("OnClick", function(self)
+							TMW.IE:SaveSettings()
+						end)
+
+						TMW:TT(self, "CLEU_FLAGS_DEST", "CLEU_FLAGS_DESC")
+					</OnLoad>
+				</Scripts>
+			</Frame>
+
+		</Frames>
+		<Scripts>
+			<OnLoad>
+				self.Header:SetText("CLEU OPTIONS")
+				
+				function self:AdjustHeight()
+					self:SetHeight(163 + self.SourceUnit:GetHeight() + self.DestUnit:GetHeight())
+				end
+			</OnLoad>
+		</Scripts>
+	</Frame>
+	
+	<Frame name="TellMeWhen_SortSettings" inherits="TellMeWhen_OptionsModuleContainer" virtual="true">
+		<Size x="180" y="92"/>
+		<Scripts>
+			<OnLoad>
+				self.Header:SetText(TMW.L["SORTBY"])
+				TMW.IE:BuildSimpleCheckSettingFrame(self, {
+					{
+						setting = "Sort",
+						value = false,
+						title = TMW.L["SORTBYNONE"],
+						tooltip = TMW.L["SORTBYNONE_DESC"],
+					},
+					{
+						setting = "Sort",
+						value = -1,
+						title = TMW.L["ICONMENU_SORTASC"],
+						tooltip = TMW.L["ICONMENU_SORTASC_DESC"],
+					},
+					{
+						setting = "Sort",
+						value = 1,
+						title = TMW.L["ICONMENU_SORTDESC"],
+						tooltip = TMW.L["ICONMENU_SORTDESC_DESC"],
+					},
+				})
+			</OnLoad>
+		</Scripts>
+	</Frame>
+	
+	
+	<Frame name="TellMeWhen_MetaIconOptions" inherits="TellMeWhen_OptionsModuleContainer" virtual="true">
+		<Size x="560" y="20"/>
+		<Frames>
+			<Frame name="$parent1" inherits="TellMeWhen_MetaGroup" id="1">
+				<Anchors>
+					<Anchor point="TOPLEFT" y="-12"/>
+					<Anchor point="TOPRIGHT" y="-12"/>
+				</Anchors>
+			</Frame>
+		</Frames>
+		<Scripts>
+			<OnLoad>
+				self.Header:SetText(TMW.L["ICONMENU_COMPONENTICONS"])
+			</OnLoad>
+		</Scripts>
+	</Frame>
+	
+	
+	<Button name="TellMeWhen_TypeCheckRuneTemplate" virtual="true">
+		<Size x="27.5" y="27.5"/>
+		<Layers>
+			<Layer level="OVERLAY">
+				<Texture name="$parentCheck" parentKey="Check" file="">
+					<Size x="27" y="27"/>
+					<Anchors>
+						<Anchor point="CENTER"/>
+					</Anchors>
+				</Texture>
+			</Layer>
+			<Layer level="ARTWORK">
+				<Texture parentKey="texture" file="Interface\PlayerFrame\UI-PlayerFrame-Deathknight-Blood">
+					<Size x="27" y="27"/>
+					<Anchors>
+						<Anchor point="CENTER"/>
+					</Anchors>
+				</Texture>
+			</Layer>
+		</Layers>
+		<Scripts>
+			<OnClick>
+				self:SetChecked(not self:GetChecked())
+			</OnClick>
+			<OnLoad>
+				TMW.IE:CreateSettingFrameFromData(self, "SettingRuneButton", {
+					setting = "RuneSlots"
+				})
+			</OnLoad>
+		</Scripts>
+	</Button>
+	<Frame name="TellMeWhen_Runes" inherits="TellMeWhen_OptionsModuleContainer" virtual="true">
+		<Size x="180" y="44"/>
+		<Frames>
+			<Button name="$parentBlood1" parentKey="1" inherits="TellMeWhen_TypeCheckRuneTemplate" id="1">
+				<Anchors>
+					<Anchor point="TOPLEFT" x="7" y="-11"/>
+				</Anchors>
+			</Button>
+			<Button name="$parentBlood2" parentKey="2" inherits="TellMeWhen_TypeCheckRuneTemplate" id="2">
+				<Anchors>
+					<Anchor point="LEFT" relativeTo="$parentBlood1" relativePoint="RIGHT"/>
+				</Anchors>
+			</Button>
+			<Button name="$parentUnholy1" parentKey="3" inherits="TellMeWhen_TypeCheckRuneTemplate" id="3">
+				<Anchors>
+					<Anchor point="LEFT" relativeTo="$parentBlood2" relativePoint="RIGHT"/>
+				</Anchors>
+			</Button>
+			<Button name="$parentUnholy2" parentKey="4" inherits="TellMeWhen_TypeCheckRuneTemplate" id="4">
+				<Anchors>
+					<Anchor point="LEFT" relativeTo="$parentUnholy1" relativePoint="RIGHT"/>
+				</Anchors>
+			</Button>
+			<Button name="$parentFrost1" parentKey="5" inherits="TellMeWhen_TypeCheckRuneTemplate" id="5">
+				<Anchors>
+					<Anchor point="LEFT" relativeTo="$parentUnholy2" relativePoint="RIGHT"/>
+				</Anchors>
+			</Button>
+			<Button name="$parentFrost2" parentKey="6" inherits="TellMeWhen_TypeCheckRuneTemplate" id="6">
+				<Anchors>
+					<Anchor point="LEFT" relativeTo="$parentFrost1" relativePoint="RIGHT"/>
+				</Anchors>
+			</Button>
+		</Frames>
+		<Scripts>
+			<OnLoad>
+				self.Header:SetText(TMW.L["RUNES"])
+			</OnLoad>
+		</Scripts>
+	</Frame>
+ 
 	<!-- TEMPLATES -->
 	<CheckButton name="TellMeWhen_CheckTemplate" virtual="true">
 		<Size x="30" y="30"/>
 		<Layers>
 			<Layer level="ARTWORK">
-				<FontString name="$parentText" parentKey="text" justifyH="LEFT" inherits="GameFontHighlightSmall">
+				<FontString parentKey="text" justifyH="LEFT" inherits="GameFontHighlightSmall">
 					<Anchors>
 						<Anchor point="LEFT" relativePoint="RIGHT" x="-2"/>
 					</Anchors>
@@ -49,38 +1131,29 @@
 	<CheckButton name="TellMeWhen_RadioCheckTemplate" virtual="true" inherits="TellMeWhen_CheckTemplate">
 		<Scripts>
 			<OnLoad>
-				self.bit = self:GetID() > 1 and bit.lshift(1, self:GetID() - 1) or 1
-
 				self.text:SetWidth(self:GetParent():GetWidth()-7)
 			</OnLoad>
 			<OnClick>
-				if self.setting == "TotemSlots" then
-					TMW.CI.ics[self.setting] = bit.bxor(TMW.CI.ics.TotemSlots, self.bit)
-				else
-					for k, frame in pairs(self:GetParent()) do
-						if strfind(k, "Radio") then
-							frame:SetChecked(false)
-						end
-					end
-					self:SetChecked(true)
-					TMW.CI.ics[self.setting] = self.value
-					if strfind(self.setting, "ShowWhen") then
-						if self:GetID() == 1 then
-							TMW.IE.Main.Alpha:Enable()
-							TMW.IE.Main.UnAlpha:Disable()
-						elseif self:GetID() == 2 then
-							TMW.IE.Main.Alpha:Disable()
-							TMW.IE.Main.UnAlpha:Enable()
-						elseif self:GetID() == 3 then
-							TMW.IE.Main.Alpha:Enable()
-							TMW.IE.Main.UnAlpha:Enable()
-						end
+				for k, frame in pairs(self:GetParent()) do
+					if strfind(k, "Radio") then
+						frame:SetChecked(false)
 					end
 				end
-				if TMW.IE.Main.Name:HasFocus() then
-					TMW.SUG.redoIfSame = 1
-					TMW.SUG:NameOnCursor()
+				self:SetChecked(true)
+				TMW.CI.ics[self.setting] = self.value
+				if strfind(self.setting, "ShowWhen") then
+					if self:GetID() == 1 then
+						TMW.IE.Main.Alpha:Enable()
+						TMW.IE.Main.UnAlpha:Disable()
+					elseif self:GetID() == 2 then
+						TMW.IE.Main.Alpha:Disable()
+						TMW.IE.Main.UnAlpha:Enable()
+					elseif self:GetID() == 3 then
+						TMW.IE.Main.Alpha:Enable()
+						TMW.IE.Main.UnAlpha:Enable()
+					end
 				end
+				
 				TMW.IE:ShowHide()
 				TMW.IE:ScheduleIconSetup()
 			</OnClick>
@@ -92,44 +1165,6 @@
 	</Texture>
 	<EditBox name="TellMeWhen_InputBoxTemplate" enableMouse="true" virtual="true" autoFocus="false">
 		<Size y="15"/>
-		<!--Layers>
-			<Layer level="BACKGROUND">
-				<Texture name="$parentLeft" urgency="5" file="Interface\AddOns\TellMeWhen_Options\Textures\EditboxTexture">
-					<Size x="8"/>
-					<Anchors>
-						<Anchor point="TOPLEFT" x="-5" y="1.5"/>
-						<Anchor point="BOTTOMLEFT" x="-5" y="-1.5"/>
-					</Anchors>
-					<TexCoords left="0" right="0.0625" top="0" bottom="0.625"/>
-				</Texture>
-				<Texture name="$parentRight" urgency="5" file="Interface\AddOns\TellMeWhen_Options\Textures\EditboxTexture">
-					<Size x="8"/>
-					<Anchors>
-						<Anchor point="TOPRIGHT" y="1.5"/>
-						<Anchor point="BOTTOMRIGHT" y="-1.5"/>
-					</Anchors>
-					<TexCoords left="0.9375" right="1.0" top="0" bottom="0.625"/>
-				</Texture>
-				<Texture name="$parentMiddle" urgency="5" file="Interface\AddOns\TellMeWhen_Options\Textures\EditboxTexture">
-					<Size x="10" />
-					<Anchors>
-						<Anchor point="TOPLEFT" relativeTo="$parentLeft" relativePoint="TOPRIGHT"/>
-						<Anchor point="BOTTOMRIGHT" relativeTo="$parentRight" relativePoint="BOTTOMLEFT"/>
-					</Anchors>
-					<TexCoords left="0.0625" right="0.9375" top="0" bottom="0.625"/>
-				</Texture>
-			</Layer>
-			<Layer level="OVERLAY">
-				<FontString name="$parentBackgroundText" parentKey="BackgroundText" justifyH="CENTER" wordwrap="false" inherits="GameFontHighlightSmall">
-					<Color r="0.5" g="0.5" b="0.5"/>
-					<Anchors>
-						<Anchor point="LEFT"/>
-						<Anchor point="RIGHT"/>
-					</Anchors>
-				</FontString>
-			</Layer>
-		</Layers-->
-		
 		<TextInsets>
 			<AbsInset left="1" />
 		</TextInsets>
@@ -898,18 +1933,18 @@
 		<Layers>
 			<Layer level="OVERLAY">
 				<Texture name="$parentCheck" parentKey="Check" file="">
+					<Size x="27" y="27"/>
 					<Anchors>
 						<Anchor point="CENTER"/>
 					</Anchors>
-					<Size x="27" y="27"/>
 				</Texture>
 			</Layer>
 			<Layer level="ARTWORK">
 				<Texture parentKey="texture">
+					<Size x="28" y="28"/>
 					<Anchors>
 						<Anchor point="CENTER"/>
 					</Anchors>
-					<Size x="28" y="28"/>
 				</Texture>
 			</Layer>
 		</Layers>
@@ -1491,30 +2526,34 @@
 		</Scripts>
 	</Frame>
 	<Frame name="TellMeWhen_MetaGroup" virtual="true">
-		<Size x="440" y="29"/>
+		<Size y="29"/>
 		<Frames>
 			<Frame name="$parentIcon" parentKey="icon" inherits="TMW_IconDropDownMenuTemplate">
 				<Anchors>
-					<Anchor point="LEFT" x="-13" y="-2"/>
+					<Anchor point="LEFT" x="13"/>
 				</Anchors>
 				<Scripts>
 					<OnLoad>
 						self.wrapTooltips = 1
-						UIDropDownMenu_SetWidth(self, 360)
 						self.InitFunc = TMW.ME.IconMenu
 						self.Button:SetFrameLevel(self:GetFrameLevel()+1)
 						self.previewSize = 21
+						UIDropDownMenu_SetWidth(self, self:GetParent():GetParent():GetWidth() - 168, 0)
 					</OnLoad>
 				</Scripts>
 			</Frame>
 			<Button name="$parentUp" parentKey="up">
 				<Size x="30" y="30"/>
 				<Anchors>
-					<Anchor point="LEFT" relativeTo="$parentIcon" relativePoint="RIGHT" x="-15" y="2"/>
+					<Anchor point="LEFT" relativeTo="$parentIcon" relativePoint="RIGHT" x="38" y="2"/>
 				</Anchors>
 				<Scripts>
-					<OnLoad>TMW:TT(self, "METAPANEL_UP")</OnLoad>
-					 <OnClick>TMW.ME:UpOrDown(self, -1)</OnClick>
+					<OnLoad>
+						TMW:TT(self, "METAPANEL_UP")
+					</OnLoad>
+					<OnClick>
+						TMW.ME:UpOrDown(self, -1)
+					</OnClick>
 				</Scripts>
 				<NormalTexture urgency="5" file="Interface\ChatFrame\UI-ChatIcon-ScrollUp-Up"/>
 				<PushedTexture file="Interface\ChatFrame\UI-ChatIcon-ScrollUp-Down"/>
@@ -1569,52 +2608,6 @@
 			</OnLoad>
 		</Scripts>
 	</Frame>
-
-	<Button name="TellMeWhen_TypeCheckRuneTemplate" virtual="true" inherits="TellMeWhen_ConditionEditorRuneCheckTemplate">
-		<Size x="35" y="26"/>
-		<Layers>
-			<Layer level="ARTWORK">
-				<Texture parentKey="texture" file="Interface\PlayerFrame\UI-PlayerFrame-Deathknight-Blood">
-					<Size x="28" y="28"/>
-					<Anchors>
-						<Anchor point="CENTER"/>
-					</Anchors>
-				</Texture>
-			</Layer>
-		</Layers>
-		<Scripts>
-			<OnClick>
-				self:SetChecked(not self:GetChecked())
-
-				TMW.CI.ics.TotemSlots = bit.bxor(TMW.CI.ics.TotemSlots, self.bit)
-				TMW.IE:ScheduleIconSetup()
-			</OnClick>
-			<OnLoad>
-				self.bit = self:GetID() > 1 and bit.lshift(1, self:GetID() - 1) or 1
-
-				function self:GetChecked()
-					return self.checked
-				end
-				function self:SetChecked(checked)
-					self.checked = checked
-					if checked then
-						self.Check:SetTexture("Interface\\RAIDFRAME\\ReadyCheck-Ready")
-					else
-						self.Check:SetTexture(nil)
-					end
-				end
-
-				-- detect what texture should be used
-				for k, v in pairs(self:GetParent()) do
-					if v == self then
-						local runeType = gsub(self:GetName(), self:GetParent():GetName(), "")
-						runeType = gsub(runeType, "%d", "")
-						self.texture:SetTexture("Interface\\PlayerFrame\\UI-PlayerFrame-Deathknight-" .. runeType)
-					end
-				end
-			</OnLoad>
-		</Scripts>
-	</Button>
 
 
 	<Button name="TellMeWhen_Event" motionScriptsWhileDisabled="true" inherits="TellMeWhen_BorderedFrame" virtual="true" >
@@ -2087,10 +3080,11 @@
 	</Frame>
 
 	<EditBox name="TellMeWhen_UnitEditbox" inherits="TellMeWhen_InputBoxTemplate" virtual="true" autoFocus="false">
+		<Size y="15"/>
 		<Frames>
 			<Frame name="$parentIns" inherits="TMW_DropDownMenuTemplate" parentKey="Ins">
 				<Anchors>
-					<Anchor point="LEFT" relativePoint="RIGHT" x="-15" y="-4"/>
+					<Anchor point="BOTTOMLEFT" relativePoint="BOTTOMRIGHT" x="-14" y="-12"/>
 				</Anchors>
 				<Scripts>
 					<OnLoad>
@@ -2215,7 +3209,7 @@
 	</Frame>
 
 	<Frame name="TellMeWhen_IconEditor" hidden="true" movable="true" enableMouse="true" enableKeyboard="true" propagateKeyboardInput="true" frameStrata="DIALOG">
-		<Size x="600" y="400"/>
+		<Size x="600" y="700"/>
 		<Anchors>
 			<Anchor point="CENTER" relativeTo="UIParent"/>
 		</Anchors>
@@ -2246,7 +3240,7 @@
 						TMW.IE:RegisterTab(self, "Conditions")
 						self:SetText(TMW.L["CONDITIONS"])
 						function self:OnClick()
-							TMW.CNDT:LoadConfig(nil, "icon")
+							TMW.CNDT:LoadConfig("icon")
 						end
 					</OnLoad>
 				</Scripts>
@@ -2276,7 +3270,7 @@
 						TMW.IE:RegisterTab(self, "Conditions")
 						self:SetText(TMW.L["GROUPCONDITIONS"])
 						function self:OnClick()
-							TMW.CNDT:LoadConfig(nil, "group")
+							TMW.CNDT:LoadConfig("group")
 						end
 					</OnLoad>
 				</Scripts>
@@ -2294,7 +3288,7 @@
 					</OnLoad>
 				</Scripts>
 			</Button>
-
+			
 			<Frame name="$parentHelp" parentKey="Help" inherits="GlowBoxTemplate" enableMouse="true" hidden="true" >
 				<Size x="250"/>
 				<Layers>
@@ -2531,487 +3525,58 @@
 							</OnLoad>
 						</Scripts>
 					</Frame>
-					<EditBox name="$parentName" inherits="TellMeWhen_InputBoxTemplate" parentKey="Name" autoFocus="false">
-						<Size x="545" y="15"/>
+					
+					<CheckButton name="$parentEnabled" inherits="TellMeWhen_CheckTemplate" parentKey="Enabled">
 						<Anchors>
-							<Anchor point="TOPLEFT" relativeTo="$parentType" relativePoint="BOTTOMLEFT" x="23" y="1"/>
-						</Anchors>
-						<Layers>
-							<Layer level="ARTWORK">
-								<FontString name="$parentFS1" inherits="GameFontHighlightSmall" parentKey="text" justifyH="LEFT">
-									<Anchors>
-										<Anchor point="LEFT" relativePoint="RIGHT" x="19" y="-1"/>
-									</Anchors>
-								</FontString>
-							</Layer>
-						</Layers>
-						<Frames>
-							<Frame name="$parentEquivs" inherits="TMW_DropDownMenuTemplate" parentKey="Equivs">
-								<Anchors>
-									<Anchor point="LEFT" relativePoint="RIGHT" x="-15" y="-4"/>
-								</Anchors>
-								<Scripts>
-									<OnLoad>
-										self.Left:Hide()
-										self.Middle:Hide()
-										self.Right:Hide()
-										self.Text:Hide()
-										UIDropDownMenu_SetWidth(self, 1)
-										TMW:TT(self, "CHOOSENAME_DIALOG_DDDEFAULT", "CHOOSENAME_EQUIVS_TOOLTIP")
-										self.InitFunc = TMW.IE.Equiv_DropDown
-									</OnLoad>
-								</Scripts>
-							</Frame>
-						</Frames>
-						<Scripts>
-							<OnLoad>
-								function self:SetLabels(title, text)
-									self.label = title
-									self.__title = title
-									self.__text = text
-								end
-								self:SetLabels(label, title, text)
-								self:RegisterEvent("MODIFIER_STATE_CHANGED")
-								self.BackgroundText:SetWidth(self:GetWidth())
-							</OnLoad>
-							<OnEditFocusLost>
-								EditBox_ClearHighlight(self)
-								TMW:CleanString(self)
-
-								if TMW.CI.ics then
-									TMW.CI.ics.Name = TMW:CleanString(self:GetText())
-									TMW.IE:ScheduleIconSetup()
-								end
-
-								self:GetScript("OnTextChanged")(self)
-							</OnEditFocusLost>
-							<OnEditFocusGained>
-								TMW.SUG:EnableEditBox(self, TMW.CI.ic.typeData.SUGType)
-								self.BackgroundText:SetText(nil)
-							</OnEditFocusGained>
-							<OnEvent>
-								if not self.isOver then return end
-
-								GameTooltip:Hide()
-
-								GameTooltip_SetDefaultAnchor(GameTooltip, self)
-								GameTooltip:AddLine(self.__title, HIGHLIGHT_FONT_COLOR.r, HIGHLIGHT_FONT_COLOR.g, HIGHLIGHT_FONT_COLOR.b)
-								if IsModifierKeyDown() then
-									GameTooltip:AddLine(TMW.IE:GetRealNames(self), NORMAL_FONT_COLOR.r, NORMAL_FONT_COLOR.g, NORMAL_FONT_COLOR.b, nil)
-								else
-									GameTooltip:AddLine(self.__text, NORMAL_FONT_COLOR.r, NORMAL_FONT_COLOR.g, NORMAL_FONT_COLOR.b, 1)
-								end
-								GameTooltip:Show()
-							</OnEvent>
-							<OnEnter>
-								self.isOver = true
-								self:GetScript("OnEvent")(self)
-							</OnEnter>
-							<OnLeave>
-								self.isOver = false
-								GameTooltip:Hide()
-							</OnLeave>
-							<OnReceiveDrag>
-								TMW.ID:SpellItemToIcon(TMW.CI.ic)
-							</OnReceiveDrag>
-							<OnMouseUp>
-								TMW.ID:SpellItemToIcon(TMW.CI.ic)
-							</OnMouseUp>
-							<OnTextChanged>
-								local text = self:GetText()
-								if text == "" then
-									local label = self.label
-									local append = TMW.Types[TMW.CI.t].appendNameLabel
-									if append then
-										label = label .. " " .. append
-									end
-									self.BackgroundText:SetText(label)
-								else
-									self.BackgroundText:SetText(nil)
-								end
-							</OnTextChanged>
-						</Scripts>
-					</EditBox>
-					<Frame name="$parentIcons[DND]" hidden="true" parentKey="Icons">
-						<Anchors>
-							<Anchor point="TOPLEFT" relativeTo="$parentType" relativePoint="BOTTOMLEFT" x="-10" y="-17"/>
-							<Anchor point="BOTTOMRIGHT" y="77"/>
-						</Anchors>
-						<Layers>
-							<Layer level="ARTWORK">
-								<FontString name="$parentFS1" inherits="GameFontNormal" parentKey="text" justifyH="LEFT">
-									<Anchors>
-										<Anchor point="BOTTOMLEFT" relativePoint="TOPLEFT" x="77" y="5"/>
-									</Anchors>
-								</FontString>
-							</Layer>
-						</Layers>
-						<Frames>
-							<ScrollFrame name="$parentSF" parentKey="ScrollFrame" inherits="UIPanelScrollFrameCodeTemplate" setAllPoints="true" >
-								<ScrollChild>
-									<Frame name="TellMeWhen_IconEditorMainIcons" parentKey="Icons" >
-										<Size x="580" y="150"/>
-										<Frames>
-											<Frame name="$parent1" inherits="TellMeWhen_MetaGroup" id="1">
-												<Anchors>
-													<Anchor point="TOP" y="2"/>
-												</Anchors>
-											</Frame>
-										</Frames>
-									</Frame>
-								</ScrollChild>
-								<Frames>
-									<Slider name="$parentScrollBar" inherits="MinimalScrollBarTemplate" parentKey="ScrollBar">
-										<Size x="17"/>
-										<Anchors>
-											<Anchor point="TOPRIGHT" x="-10" y="-17"/>
-											<Anchor point="BOTTOMRIGHT" x="-10" y="17"/>
-										</Anchors>
-									</Slider>
-								</Frames>
-								<Scripts>
-									<OnLoad>
-										self.scrollBarHideable = true
-									</OnLoad>
-								</Scripts>
-							</ScrollFrame>
-						</Frames>
-						<Scripts>
-							<OnLoad>
-								self.text:SetText(TMW.L["ICONMENU_COMPONENTICONS"])
-							</OnLoad>
-						</Scripts>
-					</Frame>
-
-					<EditBox name="$parentCLEUDur" parentKey="CLEUDur" inherits="TellMeWhen_TimeEditBoxTemplate">
-						<Anchors>
-							<Anchor point="TOPLEFT" relativeTo="$parentType" relativePoint="BOTTOMLEFT" x="27" y="-107"/>
+							<Anchor point="LEFT" relativeTo="$parentType" relativePoint="RIGHT" x="-12" y="2"/>
 						</Anchors>
 						<Scripts>
 							<OnLoad>
-								TMW:TT(self, "CLEU_TIMER", "CLEU_TIMER_DESC")
-								self.text:SetText(TMW.L["CLEU_TIMER"])
-								self.setting = "CLEUDur"
-								self.text:SetPoint("LEFT", 0, 0)
+								self.text:SetWidth(85)
+								self:SetFrameLevel(self:GetFrameLevel() + 2) -- sometimes it ends up under the type dropdown which makes half of the checkbox unclickable
+							
+								TMW.IE:CreateSettingFrameFromData(self, {
+									setting = "Enabled",
+									title = TMW.L["ICONMENU_ENABLE"],
+								})
 							</OnLoad>
 						</Scripts>
-					</EditBox>
-
-					<Frame name="$parentCLEUEvents" inherits="TMW_DropDownMenuTemplate" parentKey="CLEUEvents">
+					</CheckButton>
+					<CheckButton name="$parentFakeHidden" parentKey="FakeHidden" inherits="TellMeWhen_CheckTemplate">
 						<Anchors>
-							<Anchor point="TOPLEFT" relativeTo="$parentType" relativePoint="BOTTOMLEFT" x="5" y="-155"/>
-						</Anchors>
-						<Layers>
-							<Layer level="ARTWORK">
-								<FontString name="$parentFS1" inherits="GameFontNormal" parentKey="text" justifyH="LEFT">
-									<Anchors>
-										<Anchor point="BOTTOMLEFT" relativePoint="TOPLEFT" x="15" y="3"/>
-									</Anchors>
-								</FontString>
-							</Layer>
-						</Layers>
-						<Scripts>
-							<OnLoad>
-								self.wrapTooltips = 1
-								UIDropDownMenu_SetWidth(self, 170)
-								self.InitFunc = TMW.CLEU.EventMenu
-								UIDropDownMenu_SetText(self, TMW.L["CLEU_EVENTS"])
-								self.Button:HookScript("OnClick", function(self)
-									TMW.IE:SaveSettings()
-								end)
-
-								TMW:TT(self, "CLEU_EVENTS", "CLEU_EVENTS_DESC")
-								self.text:SetText(TMW.L["CLEU_HEADER"])
-							</OnLoad>
-						</Scripts>
-					</Frame>
-					<EditBox name="$parentSourceUnit" inherits="TellMeWhen_UnitEditbox" parentKey="SourceUnit" autoFocus="false">
-						<Size x="162" y="15"/>
-						<Anchors>
-							<Anchor point="TOPLEFT" relativeTo="$parentCLEUEvents" relativePoint="BOTTOMLEFT" x="23" y="1"/>
+							<Anchor point="LEFT" relativeTo="$parentEnabled" relativePoint="RIGHT" x="80"/>
 						</Anchors>
 						<Scripts>
 							<OnLoad>
-								self:RegisterEvent("MODIFIER_STATE_CHANGED")
-								self.label = TMW.L["CLEU_SOURCEUNITS"]
-								self.BackgroundText:SetWidth(self:GetWidth())
-
-								local text = function()
-									if IsModifierKeyDown() then
-										return TMW.IE:GetRealUnits(self)
-									else
-										return TMW.L["CLEU_SOURCEUNITS_DESC"]
-									end
-								end
-								TMW:TT(self, "CLEU_SOURCEUNITS", text, nil, 1)
+								self.text:SetWidth(100)
+								
+								TMW.IE:CreateSettingFrameFromData(self, {
+									setting = "FakeHidden",
+									title = TMW.L["ICONALPHAPANEL_FAKEHIDDEN"],
+									tooltip = TMW.L["ICONALPHAPANEL_FAKEHIDDEN_DESC"],
+								})
 							</OnLoad>
-							<OnEditFocusLost>
-								EditBox_ClearHighlight(self)
-
-								if TMW.CI.ics then
-									TMW.CI.ics.SourceUnit = TMW:CleanString(self)
-									TMW.IE:ScheduleIconSetup()
-								end
-								self:GetScript("OnTextChanged")(self)
-							</OnEditFocusLost>
-							<OnTextChanged>
-								if self:GetText() == "" then
-									self.BackgroundText:SetText(self.label)
-								else
-									self.BackgroundText:SetText(nil)
-								end
-							</OnTextChanged>
 						</Scripts>
-					</EditBox>
-					<Frame name="$parentSourceFlags" inherits="TMW_DropDownMenuTemplate" parentKey="SourceFlags">
+					</CheckButton>
+					<CheckButton name="$parentCheckNext" inherits="TellMeWhen_CheckTemplate" parentKey="CheckNext">
 						<Anchors>
-							<Anchor point="LEFT" relativeTo="$parentSourceUnit" relativePoint="RIGHT" x="5" y="-4"/>
+							<Anchor point="LEFT" relativeTo="$parentFakeHidden" relativePoint="RIGHT" x="80"/>
 						</Anchors>
 						<Scripts>
 							<OnLoad>
-								self.wrapTooltips = 1
-								UIDropDownMenu_SetWidth(self, 115)
-								self.InitFunc = TMW.CLEU.FlagsMenu
-								self.flagSet = "SourceFlags" -- the setting name, basically
-								UIDropDownMenu_SetText(self, TMW.L["CLEU_FLAGS"])
-								self.Button:HookScript("OnClick", function(self)
-									TMW.IE:SaveSettings()
-								end)
-
-								TMW:TT(self, "CLEU_FLAGS", "CLEU_FLAGS_DESC")
+								self.text:SetWidth(self:GetParent().FakeHidden.text:GetWidth())
+								
+								TMW.IE:CreateSettingFrameFromData(self, {
+									setting = "CheckNext",
+									title = TMW.L["ICONMENU_CHECKNEXT"],
+									tooltip = TMW.L["ICONMENU_CHECKNEXT_DESC"],
+								})
 							</OnLoad>
 						</Scripts>
-					</Frame>
-
-					<EditBox name="$parentDestUnit" inherits="TellMeWhen_UnitEditbox" parentKey="DestUnit" autoFocus="false">
-						<Size x="162" y="15"/>
-						<Anchors>
-							<Anchor point="TOPLEFT" relativeTo="$parentSourceUnit" relativePoint="BOTTOMLEFT" x="0" y="-10"/>
-						</Anchors>
-						<Scripts>
-							<OnLoad>
-								self:RegisterEvent("MODIFIER_STATE_CHANGED")
-								self.label = TMW.L["CLEU_DESTUNITS"]
-								self.BackgroundText:SetWidth(self:GetWidth())
-
-								local text = function()
-									if IsModifierKeyDown() then
-										return TMW.IE:GetRealUnits(self)
-									else
-										return TMW.L["CLEU_DESTUNITS_DESC"]
-									end
-								end
-								TMW:TT(self, "CLEU_DESTUNITS", text, nil, 1)
-							</OnLoad>
-							<OnEditFocusLost>
-								EditBox_ClearHighlight(self)
-
-								if TMW.CI.ics then
-									TMW.CI.ics.DestUnit = TMW:CleanString(self)
-									TMW.IE:ScheduleIconSetup()
-								end
-								self:GetScript("OnTextChanged")(self)
-							</OnEditFocusLost>
-							<OnTextChanged>
-								if self:GetText() == "" then
-									self.BackgroundText:SetText(self.label)
-								else
-									self.BackgroundText:SetText(nil)
-								end
-							</OnTextChanged>
-						</Scripts>
-					</EditBox>
-					<Frame name="$parentDestFlags" inherits="TMW_DropDownMenuTemplate" parentKey="DestFlags">
-						<Anchors>
-							<Anchor point="LEFT" relativeTo="$parentDestUnit" relativePoint="RIGHT" x="5" y="-4"/>
-						</Anchors>
-						<Scripts>
-							<OnLoad>
-								self.wrapTooltips = 1
-								UIDropDownMenu_SetWidth(self, 115)
-								self.InitFunc = TMW.CLEU.FlagsMenu
-								self.flagSet = "DestFlags" -- the setting name, basically
-								UIDropDownMenu_SetText(self, TMW.L["CLEU_FLAGS"])
-								self.Button:HookScript("OnClick", function(self)
-									TMW.IE:SaveSettings()
-								end)
-
-								TMW:TT(self, "CLEU_FLAGS", "CLEU_FLAGS_DESC")
-							</OnLoad>
-						</Scripts>
-					</Frame>
-
-					<EditBox name="$parentCustomTex" inherits="TellMeWhen_InputBoxTemplate" parentKey="CustomTex" autoFocus="false">
-						<Size x="250" y="15"/>
-						<Anchors>
-							<Anchor point="TOPLEFT" relativeTo="$parentName" relativePoint="BOTTOMLEFT" y="-4"/>
-						</Anchors>
-						<Scripts>
-							<OnLoad>
-								TMW:TT(self, "ICONMENU_CUSTOMTEX", "ICONMENU_CUSTOMTEX_DESC")
-								self.label = TMW.L["ICONMENU_CUSTOMTEX"]
-								self.BackgroundText:SetWidth(self:GetWidth())
-								TMW.SUG:EnableEditBox(self, "texture", true)
-							</OnLoad>
-							<OnEditFocusLost>
-								EditBox_ClearHighlight(self)
-
-								self:SetText(self:GetText():gsub([[\\]], [[\]]))
-
-								if TMW.CI.ics then
-									TMW.CI.ics.CustomTex = TMW:CleanString(self)
-									TMW.IE:ScheduleIconSetup()
-								end
-
-								self:GetScript("OnTextChanged")(self)
-							</OnEditFocusLost>
-							<OnReceiveDrag>
-								TMW.ID:SpellItemToIcon(TMW.CI.ic, TMW.ID.TextureDragReceived, TMW.ID)
-							</OnReceiveDrag>
-							<OnMouseUp>
-								TMW.ID:SpellItemToIcon(TMW.CI.ic, TMW.ID.TextureDragReceived, TMW.ID)
-							</OnMouseUp>
-
-						</Scripts>
-					</EditBox>
-					<EditBox name="$parentUnit" inherits="TellMeWhen_UnitEditbox" parentKey="Unit" autoFocus="false">
-						<Size x="290" y="15"/>
-						<Anchors>
-							<Anchor point="LEFT" relativeTo="$parentCustomTex" relativePoint="RIGHT" x="5"/>
-						</Anchors>
-						<Scripts>
-							<OnLoad>
-								self:RegisterEvent("MODIFIER_STATE_CHANGED")
-								self.label = TMW.L["ICONMENU_UNITSTOWATCH"]
-								self.BackgroundText:SetWidth(self:GetWidth())
-
-								local text = function()
-									if IsModifierKeyDown() then
-										return TMW.IE:GetRealUnits(self)
-									else
-										return TMW.L["ICONMENU_UNIT_DESC"]
-									end
-								end
-
-								function self:SetLabels(title)
-									self.label = title
-									self.__title = title
-								end
-
-								TMW:TT(self, "ICONMENU_UNITSTOWATCH", text, nil, 1)
-							</OnLoad>
-							<OnEditFocusLost>
-								EditBox_ClearHighlight(self)
-
-								if TMW.CI.ics then
-									TMW.CI.ics.Unit = TMW:CleanString(self)
-									TMW.IE:ScheduleIconSetup()
-									if TMW.CI.ics.Unit ~= "player" then
-										TMW.db.global.HelpSettings.HasChangedUnit = TMW.db.global.HelpSettings.HasChangedUnit + 1
-									end
-								end
-								self:GetScript("OnTextChanged")(self)
-							</OnEditFocusLost>
-							<OnTextChanged>
-								local text = self:GetText()
-
-								if text == "" then
-									if TMW.Types[TMW.CI.t].AllowNoUnit then
-										self.BackgroundText:SetText(self.label)
-										TMW.HELP:Hide("ICON_UNIT_MISSING")
-									else
-										self.BackgroundText:SetText("|cFFFF5050" .. self.label)
-										TMW.HELP:Show("ICON_UNIT_MISSING", TMW.CI.ic, self, 0, 0, TMW.L["HELP_NOUNITS"])
-									end
-								elseif text == "player" and (20 > TMW.db.global.HelpSettings.HasChangedUnit or TMW.Types[TMW.CI.t].AllowNoUnit) then
-									self.BackgroundText:SetText(self.label)
-								else
-									self.BackgroundText:SetText(nil)
-									TMW.HELP:Hide("ICON_UNIT_MISSING")
-								end
-							</OnTextChanged>
-						</Scripts>
-					</EditBox>
-
-					<Frame name="$parentLeftChecks" parentKey="LeftChecks">
-						<Size x="1" y="1"/>
-						<Anchors>
-							<Anchor point="TOPLEFT" relativeTo="$parentCustomTex" relativePoint="BOTTOMLEFT" x="-5" y="-5"/>
-						</Anchors>
-					</Frame>
-
-					<Frame name="$parentSortChecks" parentKey="Sort">
-						<Size x="140" y="75"/>
-						<Anchors>
-							<Anchor point="BOTTOMLEFT" x="16" y="72"/>
-						</Anchors>
-						<Layers>
-							<Layer level="ARTWORK">
-								<FontString name="$parentFS1" inherits="GameFontNormal" parentKey="text" justifyH="LEFT">
-									<Anchors>
-										<Anchor point="TOPLEFT" y="10"/>
-									</Anchors>
-								</FontString>
-							</Layer>
-						</Layers>
-						<Frames>
-							<CheckButton name="$parent1" inherits="TellMeWhen_RadioCheckTemplate" parentKey="Radio1" id="1">
-								<Anchors>
-									<Anchor point="TOPLEFT" y="1"/>
-								</Anchors>
-								<Scripts>
-									<OnLoad>
-										self:Show()
-										self.setting = "Sort"
-										self.value = false
-										self.text:SetText(TMW.L["SORTBYNONE"])
-										TMW:TT(self, "SORTBYNONE", "SORTBYNONE_DESC")
-										self.text:SetWidth(TMW.WidthCol1)
-									</OnLoad>
-								</Scripts>
-							</CheckButton>
-							<CheckButton name="$parent2" inherits="TellMeWhen_RadioCheckTemplate" parentKey="Radio2" id="2">
-								<Anchors>
-									<Anchor point="TOPLEFT" relativeTo="$parent1" relativePoint="BOTTOMLEFT" y="8"/>
-								</Anchors>
-								<Scripts>
-									<OnLoad>
-										self:Show()
-										self.setting = "Sort"
-										self.value = -1
-										self.text:SetText(TMW.L["ICONMENU_SORTASC"])
-										TMW:TT(self, "ICONMENU_SORTASC", "ICONMENU_SORTASC_DESC")
-										self.text:SetWidth(TMW.WidthCol1)
-									</OnLoad>
-								</Scripts>
-							</CheckButton>
-							<CheckButton name="$parent3" inherits="TellMeWhen_RadioCheckTemplate" parentKey="Radio3" id="3">
-								<Anchors>
-									<Anchor point="TOPLEFT" relativeTo="$parent2" relativePoint="BOTTOMLEFT" y="8"/>
-								</Anchors>
-								<Scripts>
-									<OnLoad>
-										self:Show()
-										self.setting = "Sort"
-										self.value = 1
-										self.text:SetText(TMW.L["ICONMENU_SORTDESC"])
-										TMW:TT(self, "ICONMENU_SORTDESC", "ICONMENU_SORTDESC_DESC")
-										self.text:SetWidth(TMW.WidthCol1)
-									</OnLoad>
-								</Scripts>
-							</CheckButton>
-						</Frames>
-						<Scripts>
-							<OnLoad>
-								self.text:SetText(TMW.L["SORTBY"])
-							</OnLoad>
-						</Scripts>
-					</Frame>
-					<Frame name="$parentTypeChecks" parentKey="TypeChecks">
-						<Size x="150" y="100"/>
-						<Anchors>
-							<Anchor point="TOPLEFT" relativeTo="$parentCustomTex" relativePoint="BOTTOMLEFT" x="200" y="-19"/>
-						</Anchors>
+					</CheckButton>
+					
+					<Frame name="$parentWhenChecks" parentKey="WhenChecks" inherits="TellMeWhen_OptionsModuleContainer">
+						<Size x="180" y="90"/>
 						<Layers>
 							<Layer level="ARTWORK">
 								<FontString name="$parentFS1" inherits="GameFontNormal" parentKey="text" justifyH="LEFT">
@@ -3024,630 +3589,22 @@
 						<Frames>
 							<CheckButton name="$parent1" inherits="TellMeWhen_RadioCheckTemplate" parentKey="Radio1" id="1">
 								<Anchors>
-									<Anchor point="TOPLEFT"/>
+									<Anchor point="TOPLEFT" x="5" y="-6"/>
 								</Anchors>
 							</CheckButton>
 							<CheckButton name="$parent2" inherits="TellMeWhen_RadioCheckTemplate" parentKey="Radio2" id="2">
 								<Anchors>
-									<Anchor point="TOP" relativeTo="$parent1" relativePoint="BOTTOM" y="5"/>
+									<Anchor point="TOP" relativeTo="$parent1" relativePoint="BOTTOM" y="4"/>
 								</Anchors>
 							</CheckButton>
 							<CheckButton name="$parent3" inherits="TellMeWhen_RadioCheckTemplate" parentKey="Radio3" id="3">
 								<Anchors>
-									<Anchor point="TOP" relativeTo="$parent2" relativePoint="BOTTOM" y="5"/>
-								</Anchors>
-							</CheckButton>
-							<CheckButton name="$parent4" inherits="TellMeWhen_RadioCheckTemplate" parentKey="Radio4" id="4">
-								<Anchors>
-									<Anchor point="TOP" relativeTo="$parent3" relativePoint="BOTTOM" y="5"/>
-								</Anchors>
-							</CheckButton>
-							<Frame name="$parentRunes" parentKey="Runes" hidden="true">
-								<Size x="1" y="1"/>
-								<Anchors>
-									<Anchor point="TOPLEFT" y="-5"/>
-								</Anchors>
-								<Frames>
-									<Button name="$parentBlood1" parentKey="1" inherits="TellMeWhen_TypeCheckRuneTemplate" id="1">
-										<Anchors>
-											<Anchor point="TOPLEFT"/>
-										</Anchors>
-									</Button>
-									<Button name="$parentBlood2" parentKey="2" inherits="TellMeWhen_TypeCheckRuneTemplate" id="2">
-										<Anchors>
-											<Anchor point="LEFT" relativeTo="$parentBlood1" relativePoint="RIGHT"/>
-										</Anchors>
-									</Button>
-									<Button name="$parentUnholy1" parentKey="3" inherits="TellMeWhen_TypeCheckRuneTemplate" id="3">
-										<Anchors>
-											<Anchor point="TOPLEFT" relativeTo="$parentBlood1" relativePoint="BOTTOMLEFT"/>
-										</Anchors>
-									</Button>
-									<Button name="$parentUnholy2" parentKey="4" inherits="TellMeWhen_TypeCheckRuneTemplate" id="4">
-										<Anchors>
-											<Anchor point="LEFT" relativeTo="$parentUnholy1" relativePoint="RIGHT"/>
-										</Anchors>
-									</Button>
-									<Button name="$parentFrost1" parentKey="5" inherits="TellMeWhen_TypeCheckRuneTemplate" id="5">
-										<Anchors>
-											<Anchor point="TOPLEFT" relativeTo="$parentUnholy1" relativePoint="BOTTOMLEFT"/>
-										</Anchors>
-									</Button>
-									<Button name="$parentFrost2" parentKey="6" inherits="TellMeWhen_TypeCheckRuneTemplate" id="6">
-										<Anchors>
-											<Anchor point="LEFT" relativeTo="$parentFrost1" relativePoint="RIGHT"/>
-										</Anchors>
-									</Button>
-								</Frames>
-							</Frame>
-
-						</Frames>
-						<Scripts>
-							<OnLoad>
-								local _, pclass = UnitClass("Player")
-								if pclass == "SHAMAN" then
-									for k, frame in pairs(self) do
-										if type(frame) == "table" and frame.GetID and frame:GetID() > 1 then
-											local p, rt, rp, x, y = frame:GetPoint(1)
-											frame:SetPoint(p, rt, rp, x, 10)
-										end
-									end
-								end
-							</OnLoad>
-							<OnHide>
-								local f = self:GetParent().WhenChecks
-								f:ClearAllPoints()
-								f:SetPoint(self:GetPoint(1))
-							</OnHide>
-							<OnShow>
-								local f = self:GetParent().WhenChecks
-								f:ClearAllPoints()
-								f:SetPoint("TOPLEFT", self, "BOTTOMLEFT", 0, 7)
-							</OnShow>
-						</Scripts>
-					</Frame>
-					<Frame name="$parentWhenChecks" parentKey="WhenChecks">
-						<Size x="150" y="90"/>
-						<Anchors>
-							<Anchor point="TOPLEFT" relativeTo="$parentTypeChecks" relativePoint="BOTTOMLEFT" y="7"/>
-						</Anchors>
-						<Layers>
-							<Layer level="ARTWORK">
-								<FontString name="$parentFS1" inherits="GameFontNormal" parentKey="text" justifyH="LEFT">
-									<Anchors>
-										<Anchor point="TOPLEFT" x="-10" y="10"/>
-									</Anchors>
-								</FontString>
-							</Layer>
-						</Layers>
-						<Frames>
-							<CheckButton name="$parent1" inherits="TellMeWhen_RadioCheckTemplate" parentKey="Radio1" id="1">
-								<Anchors>
-									<Anchor point="TOPLEFT"/>
-								</Anchors>
-							</CheckButton>
-							<CheckButton name="$parent2" inherits="TellMeWhen_RadioCheckTemplate" parentKey="Radio2" id="2">
-								<Anchors>
-									<Anchor point="TOP" relativeTo="$parent1" relativePoint="BOTTOM" y="5"/>
-								</Anchors>
-							</CheckButton>
-							<CheckButton name="$parent3" inherits="TellMeWhen_RadioCheckTemplate" parentKey="Radio3" id="3">
-								<Anchors>
-									<Anchor point="TOP" relativeTo="$parent2" relativePoint="BOTTOM" y="5"/>
+									<Anchor point="TOP" relativeTo="$parent2" relativePoint="BOTTOM" y="4"/>
 								</Anchors>
 							</CheckButton>
 						</Frames>
 					</Frame>
-
-					<Frame name="$parentShowPBar" parentKey="ShowPBar">
-						<Size x="100" y="55"/>
-						<Anchors>
-							<Anchor point="TOPLEFT" relativeTo="$parentTypeChecks" relativePoint="TOPRIGHT" x="16" y="-1"/>
-						</Anchors>
-						<Frames>
-							<CheckButton name="$parentShowPBar" inherits="TellMeWhen_CheckTemplate" parentKey="ShowPBar" id="1">
-								<Anchors>
-									<Anchor point="TOPLEFT"/>
-								</Anchors>
-								<Scripts>
-									<OnLoad>
-										self.text:SetText(TMW.L["ICONMENU_SHOWPBARN"])
-										TMW:TT(self, "ICONMENU_SHOWPBARN", "ICONMENU_SHOWPBAR_DESC")
-										self.text:SetWidth(self:GetParent():GetWidth()-23)
-									</OnLoad>
-									<OnClick>
-										if TMW.CI.ics then
-											TMW.CI.ics.ShowPBar = not not self:GetChecked()
-											TMW.IE:ScheduleIconSetup()
-										end
-										self:GetParent().PBarOffs:SetEnabled(self:GetChecked())
-									</OnClick>
-								</Scripts>
-							</CheckButton>
-							<EditBox name="$parentPBarOffs" inherits="TellMeWhen_InputBoxTemplate" parentKey="PBarOffs" autoFocus="false">
-								<Size x="40" y="15"/>
-								<Anchors>
-									<Anchor point="TOPLEFT" relativeTo="$parentShowPBar" relativePoint="BOTTOMLEFT" x="14" y="2"/>
-								</Anchors>
-								<Layers>
-									<Layer level="ARTWORK">
-										<FontString name="$parentFS1" inherits="GameFontHighlightSmall" parentKey="text" justifyH="LEFT">
-											<Anchors>
-												<Anchor point="LEFT" relativePoint="RIGHT" x="5" y="-1"/>
-											</Anchors>
-										</FontString>
-									</Layer>
-								</Layers>
-								<Scripts>
-									<OnLoad>
-										self.text:SetText(TMW.L["ICONMENU_OFFS"])
-										self.text:SetWidth(50)
-										TMW:TT(self, "ICONMENU_OFFS", "ICONMENU_BAROFFS")
-										function self:SetEnabled(arg1)
-											arg1 = self:GetParent().enabled and arg1
-											if arg1 then
-												self:SetAlpha(1)
-											else
-												self:ClearFocus()
-												self:SetAlpha(0.3)
-											end
-											self:EnableKeyboard(arg1)
-											self:EnableMouse(arg1)
-											self.enabled = arg1
-										end
-									</OnLoad>
-									<OnEditFocusLost>
-										EditBox_ClearHighlight(self)
-										if TMW.CI.ics then
-											TMW.CI.ics.PBarOffs = tonumber(strtrim(self:GetText())) or 0
-											self:SetText(TMW.CI.ics.PBarOffs)
-											TMW.IE:ScheduleIconSetup()
-										end
-									</OnEditFocusLost>
-								</Scripts>
-							</EditBox>
-						</Frames>
-						<Scripts>
-							<OnLoad>
-								function self:SetEnabled(arg1)
-									if arg1 then
-										self.ShowPBar:Enable()
-										self.ShowPBar:SetAlpha(1)
-									else
-										self.ShowPBar:Disable()
-										self.ShowPBar:SetAlpha(0.3)
-									end
-									self.enabled = arg1
-									self.PBarOffs:SetEnabled(arg1)
-								end
-							</OnLoad>
-							<OnShow>
-								TMW.IE.Main.BarHeader:Show()
-							</OnShow>
-							<OnHide>
-								TMW.IE.Main.BarHeader:Hide()
-							</OnHide>
-						</Scripts>
-					</Frame>
-					<Frame name="$parentShowCBar" parentKey="ShowCBar">
-						<Size x="100" y="55"/>
-						<Anchors>
-							<Anchor point="TOPLEFT" relativeTo="$parentShowPBar" relativePoint="TOPRIGHT"/>
-						</Anchors>
-						<Frames>
-							<CheckButton name="$parentShowCBar" inherits="TellMeWhen_CheckTemplate" parentKey="ShowCBar">
-								<Anchors>
-									<Anchor point="TOPLEFT"/>
-								</Anchors>
-								<Scripts>
-									<OnLoad>
-										self.text:SetText(TMW.L["ICONMENU_SHOWCBARN"])
-										TMW:TT(self, "ICONMENU_SHOWCBARN", "ICONMENU_SHOWCBAR_DESC")
-										self.text:SetWidth(self:GetParent():GetWidth()-23)
-									</OnLoad>
-									<OnClick>
-										if TMW.CI.ics then
-											TMW.CI.ics.ShowCBar = not not self:GetChecked()
-											TMW.IE:ScheduleIconSetup()
-										end
-										self:GetParent().CBarOffs:SetEnabled(self:GetChecked())
-									</OnClick>
-								</Scripts>
-							</CheckButton>
-							<EditBox name="$parentCBarOffs" inherits="TellMeWhen_TimeEditBoxTemplate" parentKey="CBarOffs" autoFocus="false">
-								<Size x="40" y="15"/>
-								<Anchors>
-									<Anchor point="TOPLEFT" relativeTo="$parentShowCBar" relativePoint="BOTTOMLEFT" x="14" y="2"/>
-								</Anchors>
-								<Layers>
-									<Layer level="ARTWORK">
-										<FontString name="$parentFS1" inherits="GameFontHighlightSmall" parentKey="text" justifyH="LEFT">
-											<Anchors>
-												<Anchor point="LEFT" relativePoint="RIGHT" x="5" y="-1"/>
-											</Anchors>
-										</FontString>
-									</Layer>
-								</Layers>
-								<Scripts>
-									<OnLoad>
-										self.text:SetText(TMW.L["ICONMENU_OFFS"])
-										self.text:SetWidth(50)
-										TMW:TT(self, "ICONMENU_OFFS", "ICONMENU_BAROFFS")
-										self.setting = "CBarOffs"
-
-										function self:SetEnabled(arg1)
-											if arg1 then
-												self:SetAlpha(1)
-											else
-												self:ClearFocus()
-												self:SetAlpha(0.3)
-											end
-											self:EnableKeyboard(arg1)
-											self:EnableMouse(arg1)
-											self.enabled = arg1
-										end
-									</OnLoad>
-								</Scripts>
-							</EditBox>
-						</Frames>
-						<Scripts>
-							<OnLoad>
-								function self:SetEnabled(arg1)
-									if arg1 then
-										self.ShowCBar:Enable()
-										self.ShowCBar:SetAlpha(1)
-									else
-										self.ShowCBar:Disable()
-										self.ShowCBar:SetAlpha(0.3)
-									end
-									self.CBarOffs:SetEnabled(arg1)
-									self.enabled = arg1
-								end
-							</OnLoad>
-						</Scripts>
-					</Frame>
-					<CheckButton name="$parentInvertBars" inherits="TellMeWhen_CheckTemplate" parentKey="InvertBars" id="3">
-						<Anchors>
-							<Anchor point="TOPLEFT" relativeTo="$parentShowPBar" relativePoint="BOTTOMLEFT" y="7"/>
-						</Anchors>
-						<Scripts>
-							<OnLoad>
-								self.text:SetText(TMW.L["ICONMENU_INVERTBARS"])
-								TMW:TT(self, "ICONMENU_INVERTBARS", "ICONMENU_INVERTBARS_DESC")
-								self.text:SetWidth(self:GetParent():GetWidth()-20)
-							</OnLoad>
-							<OnClick>
-								if TMW.CI.ics then
-									TMW.CI.ics.InvertBars = not not self:GetChecked()
-									TMW.IE:ScheduleIconSetup()
-								end
-							</OnClick>
-						</Scripts>
-					</CheckButton>
-
-					<EditBox name="$parentDurationMin" parentKey="DurationMin" inherits="TellMeWhen_TimeEditBoxTemplate">
-						<Anchors>
-							<Anchor point="LEFT" relativeTo="$parentTypeChecks" relativePoint="RIGHT" x="45"/>
-							<Anchor point="TOP" relativeTo="$parentInvertBars" relativePoint="BOTTOM" y="-32"/>
-						</Anchors>
-						<Scripts>
-							<OnLoad>
-								TMW:TT(self, "MINIMUM", "ICONMENU_DURATION_MIN_DESC")
-								self.text:SetText(MINIMUM)
-								self.setting = "DurationMin"
-							</OnLoad>
-							<OnShow>
-								TMW.IE.Main.DurationHeader:Show()
-							</OnShow>
-							<OnHide>
-								TMW.IE.Main.DurationHeader:Hide()
-							</OnHide>
-						</Scripts>
-					</EditBox>
-					<EditBox name="$parentDurationMax" parentKey="DurationMax" inherits="TellMeWhen_TimeEditBoxTemplate">
-						<Anchors>
-							<Anchor point="LEFT" relativeTo="$parentDurationMin" relativePoint="RIGHT" x="40"/>
-						</Anchors>
-						<Scripts>
-							<OnLoad>
-								TMW:TT(self, "MAXIMUM", "ICONMENU_DURATION_MAX_DESC")
-								self.text:SetText(MAXIMUM)
-								self.setting = "DurationMax"
-							</OnLoad>
-						</Scripts>
-
-					</EditBox>
-					<CheckButton name="$parentDurationMinEnabled" parentKey="DurationMinEnabled" inherits="TellMeWhen_CheckTemplate">
-						<Size x="25" y="25"/>
-						<Anchors>
-							<Anchor point="RIGHT" relativeto="$parentDurationMin" relativePoint="LEFT" x="-3"/>
-						</Anchors>
-						<Scripts>
-							<OnLoad>
-								TMW:TT(self, "ENABLE", TMW.L["GENERIC_NUMREQ_CHECK_DESC"]:format(TMW.L["ICONMENU_DURATION_MIN_DESC"]:gsub("^%u", strlower)), nil, 1)
-							</OnLoad>
-							<OnClick>
-								local f = self:GetParent().DurationMin
-								local checked = not not self:GetChecked()
-								if checked then
-									f:SetAlpha(1)
-								else
-									f:SetAlpha(.4)
-								end
-								f:EnableKeyboard(checked)
-								f:EnableMouse(checked)
-
-								if TMW.CI.ics then
-									TMW.CI.ics.DurationMinEnabled = checked
-									TMW.IE:ScheduleIconSetup()
-								end
-							</OnClick>
-						</Scripts>
-					</CheckButton>
-					<CheckButton name="$parentDurationMaxEnabled" parentKey="DurationMaxEnabled" inherits="TellMeWhen_CheckTemplate">
-						<Size x="25" y="25"/>
-						<Anchors>
-							<Anchor point="RIGHT" relativeto="$parentDurationMax" relativePoint="LEFT" x="-3"/>
-						</Anchors>
-						<Scripts>
-							<OnLoad>
-								TMW:TT(self, "ENABLE", TMW.L["GENERIC_NUMREQ_CHECK_DESC"]:format(TMW.L["ICONMENU_DURATION_MAX_DESC"]:gsub("^%u", strlower)), nil, 1)
-							</OnLoad>
-							<OnClick>
-								local f = self:GetParent().DurationMax
-								local checked = not not self:GetChecked()
-								if checked then
-									f:SetAlpha(1)
-								else
-									f:SetAlpha(.4)
-								end
-								f:EnableKeyboard(checked)
-								f:EnableMouse(checked)
-
-								if TMW.CI.ics then
-									TMW.CI.ics.DurationMaxEnabled = checked
-									TMW.IE:ScheduleIconSetup()
-								end
-							</OnClick>
-						</Scripts>
-					</CheckButton>
-
-					<EditBox name="$parentConditionDur" parentKey="ConditionDur" inherits="TellMeWhen_TimeEditBoxTemplate">
-						<Anchors>
-							<Anchor point="TOPLEFT" relativeTo="$parentCustomTex" y="-100" x="20"/>
-						</Anchors>
-						<Scripts>
-							<OnLoad>
-								TMW:TT(self, "ICONMENU_SUCCEED", "CONDITION_TIMERS_SUCCEED_DESC")
-								self.text:SetText(TMW.L["ICONMENU_SUCCEED"])
-								self.setting = "ConditionDur"
-							</OnLoad>
-							<OnShow>
-								TMW.IE.Main.ConditionDurHeader:Show()
-							</OnShow>
-							<OnHide>
-								TMW.IE.Main.ConditionDurHeader:Hide()
-							</OnHide>
-						</Scripts>
-					</EditBox>
-					<EditBox name="$parentUnConditionDur" parentKey="UnConditionDur" inherits="TellMeWhen_TimeEditBoxTemplate">
-						<Anchors>
-							<Anchor point="LEFT" relativeTo="$parentConditionDur" relativePoint="RIGHT" x="40"/>
-						</Anchors>
-						<Scripts>
-							<OnLoad>
-								TMW:TT(self, "ICONMENU_FAIL", "CONDITION_TIMERS_FAIL_DESC")
-								self.text:SetText(TMW.L["ICONMENU_FAIL"])
-								self.setting = "UnConditionDur"
-							</OnLoad>
-						</Scripts>
-
-					</EditBox>
-					<CheckButton name="$parentConditionDurEnabled" parentKey="ConditionDurEnabled" inherits="TellMeWhen_CheckTemplate">
-						<Size x="25" y="25"/>
-						<Anchors>
-							<Anchor point="RIGHT" relativeto="$parentConditionDur" relativePoint="LEFT" x="-3"/>
-						</Anchors>
-						<Scripts>
-							<OnLoad>
-								TMW:TT(self, "ENABLE", TMW.L["GENERIC_NUMREQ_CHECK_DESC"]:format(TMW.L["CONDITION_TIMERS_SUCCEED_DESC"]:gsub("^%u", strlower)), nil, 1)
-							</OnLoad>
-							<OnClick>
-								local f = self:GetParent().ConditionDur
-								local checked = not not self:GetChecked()
-								if checked then
-									f:SetAlpha(1)
-								else
-									f:SetAlpha(.4)
-								end
-								f:EnableKeyboard(checked)
-								f:EnableMouse(checked)
-
-								if TMW.CI.ics then
-									TMW.CI.ics.ConditionDurEnabled = checked
-									TMW.IE:ScheduleIconSetup()
-								end
-							</OnClick>
-						</Scripts>
-					</CheckButton>
-					<CheckButton name="$parentUnConditionDurEnabled" parentKey="UnConditionDurEnabled" inherits="TellMeWhen_CheckTemplate">
-						<Size x="25" y="25"/>
-						<Anchors>
-							<Anchor point="RIGHT" relativeto="$parentUnConditionDur" relativePoint="LEFT" x="-3"/>
-						</Anchors>
-						<Scripts>
-							<OnLoad>
-								TMW:TT(self, "ENABLE", TMW.L["GENERIC_NUMREQ_CHECK_DESC"]:format(TMW.L["CONDITION_TIMERS_FAIL_DESC"]:gsub("^%u", strlower)), nil, 1)
-							</OnLoad>
-							<OnClick>
-								local f = self:GetParent().UnConditionDur
-								local checked = not not self:GetChecked()
-								if checked then
-									f:SetAlpha(1)
-								else
-									f:SetAlpha(.4)
-								end
-								f:EnableKeyboard(checked)
-								f:EnableMouse(checked)
-
-								local groupID, iconID = TMW.CI.g, TMW.CI.i
-								if TMW.CI.ics then
-									TMW.CI.ics.UnConditionDurEnabled = checked
-									TMW.IE:ScheduleIconSetup()
-								end
-							</OnClick>
-						</Scripts>
-					</CheckButton>
-					<CheckButton name="$parentOnlyIfCounting" inherits="TellMeWhen_CheckTemplate" parentKey="OnlyIfCounting">
-						<Anchors>
-							<Anchor point="TOPLEFT" relativeTo="$parentConditionDur" relativePoint="BOTTOMLEFT" x="-25" y="-10"/>
-						</Anchors>
-						<Scripts>
-							<OnLoad>
-								self.text:SetText(TMW.L["ICONMENU_ONLYIFCOUNTING"])
-								TMW:TT(self, "ICONMENU_ONLYIFCOUNTING", "ICONMENU_ONLYIFCOUNTING_DESC")
-								self:SetMotionScriptsWhileDisabled(true)
-								self.text:SetWidth(TMW.WidthCol1)
-							</OnLoad>
-							<OnClick>
-								if TMW.CI.ics then
-									TMW.CI.ics.OnlyIfCounting = not not self:GetChecked()
-									TMW.IE:ScheduleIconSetup()
-								end
-							</OnClick>
-						</Scripts>
-					</CheckButton>
-
-					<EditBox name="$parentStackMin" parentKey="StackMin" inherits="TellMeWhen_InputBoxTemplate">
-						<Size x="60" y="15"/>
-						<Anchors>
-							<Anchor point="TOPLEFT" relativeTo="$parentDurationMin" relativePoint="BOTTOMLEFT" y="-40"/>
-						</Anchors>
-						<Layers>
-							<Layer level="ARTWORK">
-								<FontString name="$parentText" parentKey="text" inherits="GameFontHighlightSmall">
-									<Anchors>
-										<Anchor point="BOTTOM" relativePoint="TOP" y="2"/>
-									</Anchors>
-								</FontString>
-							</Layer>
-						</Layers>
-						<Scripts>
-							<OnLoad>
-								TMW:TT(self, "MINIMUM", "ICONMENU_STACKS_MIN_DESC")
-								self.text:SetText(MINIMUM)
-							</OnLoad>
-							<OnEditFocusLost>
-								EditBox_ClearHighlight(self)
-
-								local t = TMW:CleanString(self)
-								t = floor(tonumber(t) or 0)
-								self:SetText(t)
-
-								if TMW.CI.ics then
-									TMW.CI.ics.StackMin = t
-									TMW.IE:ScheduleIconSetup()
-								end
-								self:GetScript("OnTextChanged")(self)
-							</OnEditFocusLost>
-							<OnShow>
-								TMW.IE.Main.StackHeader:Show()
-							</OnShow>
-							<OnHide>
-								TMW.IE.Main.StackHeader:Hide()
-							</OnHide>
-						</Scripts>
-					</EditBox>
-					<EditBox name="$parentStackMax" parentKey="StackMax" inherits="TellMeWhen_InputBoxTemplate">
-						<Size x="60" y="15"/>
-						<Anchors>
-							<Anchor point="LEFT" relativeTo="$parentStackMin" relativePoint="RIGHT" x="40"/>
-						</Anchors>
-						<Layers>
-							<Layer level="ARTWORK">
-								<FontString name="$parentText" parentKey="text" inherits="GameFontHighlightSmall">
-									<Anchors>
-										<Anchor point="BOTTOM" relativePoint="TOP" y="2"/>
-									</Anchors>
-								</FontString>
-							</Layer>
-						</Layers>
-						<Scripts>
-							<OnLoad>
-								TMW:TT(self, "MAXIMUM", "ICONMENU_STACKS_MAX_DESC")
-								self.text:SetText(MAXIMUM)
-							</OnLoad>
-							<OnEditFocusLost>
-								EditBox_ClearHighlight(self)
-
-								local t = TMW:CleanString(self)
-								t = floor(tonumber(t) or 0)
-								self:SetText(t)
-
-								if TMW.CI.ics then
-									TMW.CI.ics.StackMax = t
-									TMW.IE:ScheduleIconSetup()
-								end
-								self:GetScript("OnTextChanged")(self)
-							</OnEditFocusLost>
-						</Scripts>
-
-					</EditBox>
-					<CheckButton name="$parentStackMinEnabled" parentKey="StackMinEnabled" inherits="TellMeWhen_CheckTemplate">
-						<Size x="25" y="25"/>
-						<Anchors>
-							<Anchor point="RIGHT" relativeto="$parentStackMin" relativePoint="LEFT" x="-3"/>
-						</Anchors>
-						<Scripts>
-							<OnLoad>
-								TMW:TT(self, "ENABLE", TMW.L["GENERIC_NUMREQ_CHECK_DESC"]:format(TMW.L["ICONMENU_STACKS_MIN_DESC"]:gsub("^%u", strlower)), nil, 1)
-							</OnLoad>
-							<OnClick>
-								local f = self:GetParent().StackMin
-								local checked = not not self:GetChecked()
-								if checked then
-									f:SetAlpha(1)
-								else
-									f:SetAlpha(.4)
-								end
-								f:EnableKeyboard(checked)
-								f:EnableMouse(checked)
-
-								if TMW.CI.ics then
-									TMW.CI.ics.StackMinEnabled = checked
-									TMW.IE:ScheduleIconSetup()
-								end
-							</OnClick>
-						</Scripts>
-					</CheckButton>
-					<CheckButton name="$parentStackMaxEnabled" parentKey="StackMaxEnabled" inherits="TellMeWhen_CheckTemplate">
-						<Size x="25" y="25"/>
-						<Anchors>
-							<Anchor point="RIGHT" relativeto="$parentStackMax" relativePoint="LEFT" x="-3"/>
-						</Anchors>
-						<Scripts>
-							<OnLoad>
-								TMW:TT(self, "ENABLE", TMW.L["GENERIC_NUMREQ_CHECK_DESC"]:format(TMW.L["ICONMENU_STACKS_MAX_DESC"]:gsub("^%u", strlower)), nil, 1)
-							</OnLoad>
-							<OnClick>
-								local f = self:GetParent().StackMax
-								local checked = not not self:GetChecked()
-								if checked then
-									f:SetAlpha(1)
-								else
-									f:SetAlpha(.4)
-								end
-								f:EnableKeyboard(checked)
-								f:EnableMouse(checked)
-
-								if TMW.CI.ics then
-									TMW.CI.ics.StackMaxEnabled = checked
-									TMW.IE:ScheduleIconSetup()
-								end
-							</OnClick>
-						</Scripts>
-					</CheckButton>
-
+					
 					<Slider name="$parentAlpha" parentKey="Alpha" inherits="TellMeWhen_AlphaSliderTemplate" valuestep="1">
 						<Anchors>
 							<Anchor point="BOTTOMLEFT" x="18" y="47"/>
@@ -3690,93 +3647,9 @@
 						</Scripts>
 					</Slider>
 
-					<CheckButton name="$parentEnabled" inherits="TellMeWhen_CheckTemplate" parentKey="Enabled">
-						<Anchors>
-							<Anchor point="LEFT" relativeTo="$parentType" relativePoint="RIGHT" x="-12" y="2"/>
-						</Anchors>
-						<Scripts>
-							<OnLoad>
-								self.text:SetText(TMW.L["ICONMENU_ENABLE"])
-								self.text:SetWidth(85)
-								self:SetFrameLevel(self:GetFrameLevel() + 2) -- sometimes it ends up under the type dropdown which makes half of the checkbox unclickable
-							</OnLoad>
-							<OnClick>
-								if TMW.CI.ics then
-									TMW.CI.ics.Enabled = not not self:GetChecked()
-									TMW.IE:ScheduleIconSetup()
-								end
-							</OnClick>
-						</Scripts>
-					</CheckButton>
-					<CheckButton name="$parentFakeHidden" parentKey="FakeHidden" inherits="TellMeWhen_CheckTemplate">
-						<Anchors>
-							<Anchor point="LEFT" relativeTo="$parentEnabled" relativePoint="RIGHT" x="80"/>
-						</Anchors>
-						<Scripts>
-							<OnLoad>
-								TMW:TT(self, "ICONALPHAPANEL_FAKEHIDDEN", "ICONALPHAPANEL_FAKEHIDDEN_DESC")
-								self.text:SetText(TMW.L["ICONALPHAPANEL_FAKEHIDDEN"])
-								self.text:SetWidth(100)
-							</OnLoad>
-							<OnClick>
-								if TMW.CI.ics then
-									TMW.CI.ics.FakeHidden = not not self:GetChecked()
-									TMW.IE:ScheduleIconSetup()
-								end
-							</OnClick>
-						</Scripts>
-					</CheckButton>
-					<CheckButton name="$parentCheckNext" inherits="TellMeWhen_CheckTemplate" parentKey="CheckNext">
-						<Anchors>
-							<Anchor point="LEFT" relativeTo="$parentFakeHidden" relativePoint="RIGHT" x="80"/>
-							<!--Anchor point="CENTER" relativeTo="$parentFakeHidden"/-->
-						</Anchors>
-						<Scripts>
-							<OnLoad>
-								TMW:TT(self, "ICONMENU_CHECKNEXT", "ICONMENU_CHECKNEXT_DESC")
-								self.text:SetText(TMW.L["ICONMENU_CHECKNEXT"])
-								self.text:SetWidth(self:GetParent().FakeHidden.text:GetWidth())
-							</OnLoad>
-							<OnClick>
-								if TMW.CI.ics then
-									TMW.CI.ics.CheckNext = not not self:GetChecked()
-									TMW.IE:ScheduleIconSetup()
-								end
-							</OnClick>
-						</Scripts>
-					</CheckButton>
-					
 				</Frames>
 				<Layers>
 					<Layer level="OVERLAY">
-						<FontString name="$parentConditionDurHeader" parentKey="ConditionDurHeader" inherits="GameFontNormal" justifyH="CENTER">
-							<Anchors>
-								<Anchor point="LEFT" relativeTo="$parentConditionDur"/>
-								<Anchor point="RIGHT" relativeTo="$parentUnConditionDur"/>
-								<Anchor point="BOTTOM" relativeTo="$parentConditionDur" relativePoint="TOP" y="14"/>
-							</Anchors>
-						</FontString>
-						<FontString name="$parentDurationHeader" parentKey="DurationHeader" inherits="GameFontNormal" justifyH="CENTER">
-							<Anchors>
-								<Anchor point="LEFT" relativeTo="$parentDurationMin"/>
-								<Anchor point="RIGHT" relativeTo="$parentDurationMax"/>
-								<Anchor point="BOTTOM" relativeTo="$parentDurationMin" relativePoint="TOP" y="14"/>
-							</Anchors>
-						</FontString>
-						<FontString name="$parentStackHeader" parentKey="StackHeader" inherits="GameFontNormal" justifyH="CENTER">
-							<Anchors>
-								<Anchor point="LEFT" relativeTo="$parentStackMin"/>
-								<Anchor point="RIGHT" relativeTo="$parentStackMax"/>
-								<Anchor point="BOTTOM" relativeTo="$parentStackMin" relativePoint="TOP" y="14"/>
-							</Anchors>
-						</FontString>
-						<FontString name="$parentBarHeader" parentKey="BarHeader" inherits="GameFontNormal" justifyH="CENTER">
-							<Anchors>
-								<Anchor point="LEFT" relativeTo="$parentShowPBar"/>
-								<Anchor point="RIGHT" relativeTo="$parentShowCBar"/>
-								<Anchor point="BOTTOM" relativeTo="$parentShowPBar" relativePoint="TOP" y="0"/>
-							</Anchors>
-						</FontString>
 						<FontString name="$parentTransparencyHeader" parentKey="TransparencyHeader" inherits="GameFontNormal" justifyH="RIGHT">
 							<Anchors>
 								<Anchor point="BOTTOM" relativeTo="$parentUnAlpha" relativePoint="TOP" y="14"/>
@@ -3787,10 +3660,6 @@
 				<Scripts>
 					<OnLoad>
 						self:RegisterForDrag("LeftButton")
-						self.DurationHeader:SetText(TMW.L["DURATIONPANEL_TITLE"])
-						self.ConditionDurHeader:SetText(TMW.L["CONDITION_TIMERS_HEADER"])
-						self.StackHeader:SetText(TMW.L["STACKSPANEL_TITLE"])
-						self.BarHeader:SetText(TMW.L["ICONMENU_OVERLAYBARHEADER"])
 						self.TransparencyHeader:SetText(TMW.L["ICONMENU_ALPHA"] .. ":")
 					</OnLoad>
 					<OnDragStart> TMW.IE:StartMoving() </OnDragStart>

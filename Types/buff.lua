@@ -1,4 +1,4 @@
-﻿-- --------------------
+-- --------------------
 -- TellMeWhen
 -- Originally by Nephthys of Hyjal <lieandswell@yahoo.com>
 
@@ -27,50 +27,89 @@ local isNumber = TMW.isNumber
 local unitsWithExistsEvent
 
 
-local Type = TMW.Classes.IconType:New()
-Type.type = "buff"
+local Type = TMW.Classes.IconType:New("buff")
 Type.name = L["ICONMENU_BUFFDEBUFF"]
 Type.desc = L["ICONMENU_BUFFDEBUFF_DESC"]
 Type.usePocketWatch = 1
 Type.spacebefore = true
 Type.SUGType = "buff"
 Type.unitType = "unitid"
-Type.TypeChecks = {
-	text = L["ICONMENU_BUFFTYPE"],
-	setting = "BuffOrDebuff",
-	{ value = "HELPFUL", 		text = L["ICONMENU_BUFF"], 				colorCode = "|cFF00FF00" },
-	{ value = "HARMFUL", 		text = L["ICONMENU_DEBUFF"], 			colorCode = "|cFFFF0000" },
-	{ value = "EITHER", 		text = L["ICONMENU_BOTH"] },
-}
 Type.WhenChecks = {
 	text = L["ICONMENU_SHOWWHEN"],
-	{ value = "alpha", 			text = L["ICONMENU_PRESENT"], 			colorCode = "|cFF00FF00" },
-	{ value = "unalpha", 		text = L["ICONMENU_ABSENT"], 			colorCode = "|cFFFF0000" },
+	{ value = "alpha", 			text = "|cFF00FF00" .. L["ICONMENU_PRESENT"], 			 },
+	{ value = "unalpha", 		text = "|cFFFF0000" .. L["ICONMENU_ABSENT"], 			 },
 	{ value = "always", 		text = L["ICONMENU_ALWAYS"] },
 }
 Type.RelevantSettings = {
-	BuffOrDebuff = true,
-	OnlyMine = true,
-	Unit = true,
-	StackMin = true,
-	StackMax = true,
-	StackMinEnabled = true,
-	StackMaxEnabled = true,
-	ShowPBar = true,
-	PBarOffs = true,
-	ShowCBar = true,
-	CBarOffs = true,
-	InvertBars = true,
 	Sort = true,
-	DurationMin = true,
-	DurationMax = true,
-	DurationMinEnabled = true,
-	DurationMaxEnabled = true,
-	ShowTTText = true,
-	Stealable = pclass == "MAGE",
 }
 
+-- AUTOMATICALLY GENERATED: UsesAttributes
+Type:UsesAttributes("stack, stackText")
+Type:UsesAttributes("spell")
+Type:UsesAttributes("unit, GUID")
+Type:UsesAttributes("reverse")
+Type:UsesAttributes("color")
+Type:UsesAttributes("start, duration")
+Type:UsesAttributes("alpha")
+Type:UsesAttributes("texture")
+-- END AUTOMATICALLY GENERATED: UsesAttributes
 
+Type:RegisterIconDefaults{
+	Unit					= "", 
+	BuffOrDebuff			= "HELPFUL", 
+	Stealable				= false,     
+	ShowTTText				= false,     
+	OnlyMine				= false,
+}
+
+Type:RegisterConfigPanel_XMLTemplate("full", 1, "TellMeWhen_ChooseName")
+
+Type:RegisterConfigPanel_XMLTemplate("column", 1, "TellMeWhen_Unit")
+
+Type:RegisterConfigPanel_XMLTemplate("column", 1, "TellMeWhen_SortSettings")
+
+Type:RegisterConfigPanel_ConstructorFunc("column", 2, "TellMeWhen_BuffOrDebuff", function(self)
+	self.Header:SetText(TMW.L["ICONMENU_BUFFTYPE"])
+	TMW.IE:BuildSimpleCheckSettingFrame(self, {
+		{
+			setting = "BuffOrDebuff",
+			value = "HELPFUL",
+			title = "|cFF00FF00" .. TMW.L["ICONMENU_BUFF"],
+		},
+		{
+			setting = "BuffOrDebuff",
+			value = "HARMFUL",
+			title = "|cFFFF0000" .. TMW.L["ICONMENU_DEBUFF"],
+		},
+		{
+			setting = "BuffOrDebuff",
+			value = "EITHER",
+			title = TMW.L["ICONMENU_BOTH"],
+		},
+	})
+end)
+
+Type:RegisterConfigPanel_ConstructorFunc("column", 1, "TellMeWhen_BuffSettings", function(self)
+	self.Header:SetText(Type.name)
+	TMW.IE:BuildSimpleCheckSettingFrame(self, {
+		{
+			setting = "OnlyMine",
+			title = L["ICONMENU_ONLYMINE"],
+			tooltip = L["ICONMENU_ONLYMINE_DESC"],
+		},
+		{
+			setting = "ShowTTText",
+			title = L["ICONMENU_SHOWTTTEXT"],
+			tooltip = L["ICONMENU_SHOWTTTEXT_DESC"],
+		},
+		{
+			setting = "Stealable",
+			title = L["ICONMENU_STEALABLE"],
+			tooltip = L["ICONMENU_STEALABLE_DESC"],
+		},
+	})
+end)
 
 function Type:Update()
 	EFF_THR = TMW.db.profile.EffThreshold

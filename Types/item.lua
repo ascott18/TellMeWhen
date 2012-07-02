@@ -23,9 +23,8 @@ local print = TMW.print
 local _, pclass = UnitClass("Player")
 local SpellTextures = TMW.SpellTextures
 
-local Type = TMW.Classes.IconType:New()
+local Type = TMW.Classes.IconType:New("item")
 LibStub("AceEvent-3.0"):Embed(Type)
-Type.type = "item"
 Type.name = L["ICONMENU_ITEMCOOLDOWN"]
 Type.desc = L["ICONMENU_ITEMCOOLDOWN_DESC"]
 Type.chooseNameTitle = L["ICONMENU_CHOOSENAME_ITEMSLOT"]
@@ -33,31 +32,66 @@ Type.chooseNameText = L["ICONMENU_CHOOSENAME_ITEMSLOT_DESC"]
 Type.SUGType = "itemwithslots"
 Type.WhenChecks = {
 	text = L["ICONMENU_SHOWWHEN"],
-	{ value = "alpha", 			text = L["ICONMENU_USABLE"], 			colorCode = "|cFF00FF00" },
-	{ value = "unalpha",  		text = L["ICONMENU_UNUSABLE"], 			colorCode = "|cFFFF0000" },
+	{ value = "alpha", 			text = "|cFF00FF00" .. L["ICONMENU_USABLE"], 			 },
+	{ value = "unalpha",  		text = "|cFFFF0000" .. L["ICONMENU_UNUSABLE"], 			 },
 	{ value = "always", 		text = L["ICONMENU_ALWAYS"] },
 }
-Type.RelevantSettings = {
-	RangeCheck = true,
-	ShowCBar = true,
-	CBarOffs = true,
-	InvertBars = true,
-	OnlyEquipped = true,
-	OnlyInBags = true,
-	EnableStacks = true,
 
-	DurationMin = true,
-	DurationMax = true,
-	DurationMinEnabled = true,
-	DurationMaxEnabled = true,
-	StackMin = true,
-	StackMax = true,
-	StackMinEnabled = true,
-	StackMaxEnabled = true,
+-- AUTOMATICALLY GENERATED: UsesAttributes
+Type:UsesAttributes("spell")
+Type:UsesAttributes("stack, stackText")
+Type:UsesAttributes("inRange")
+Type:UsesAttributes("color")
+Type:UsesAttributes("start, duration")
+Type:UsesAttributes("alpha")
+Type:UsesAttributes("texture")
+-- END AUTOMATICALLY GENERATED: UsesAttributes
+
+Type:RegisterIconDefaults{
+	OnlyEquipped			= false,
+	EnableStacks			= false,
+	OnlyInBags				= false,
+	RangeCheck				= false,
 }
 
-Type.EventDisabled_OnUnit = true
+Type:RegisterConfigPanel_XMLTemplate("full", 1, "TellMeWhen_ChooseName")
 
+Type:RegisterConfigPanel_ConstructorFunc("column", 1, "TellMeWhen_ItemSettings", function(self)
+	self.Header:SetText(Type.name)
+	TMW.IE:BuildSimpleCheckSettingFrame(self, {
+		{
+			setting = "OnlyInBags",
+			title = L["ICONMENU_ONLYBAGS"],
+			tooltip = L["ICONMENU_ONLYBAGS_DESC"],
+			disabled = function(self)
+				return TMW.CI.ics.OnlyEquipped
+			end,
+		},
+		{
+			setting = "OnlyEquipped",
+			title = L["ICONMENU_ONLYEQPPD"],
+			tooltip = L["ICONMENU_ONLYEQPPD_DESC"],
+			OnClick = function(self, button)
+				if self:GetChecked() then
+					TMW.CI.ics.OnlyInBags = true
+					self:GetParent().OnlyInBags:ReloadSetting()
+				end
+			end,
+		},
+		{
+			setting = "EnableStacks",
+			title = L["ICONMENU_SHOWSTACKS"],
+			tooltip = L["ICONMENU_SHOWSTACKS_DESC"],
+		},
+		{
+			setting = "RangeCheck",
+			title = L["ICONMENU_RANGECHECK"],
+			tooltip = L["ICONMENU_RANGECHECK_DESC"],
+		},
+	})
+end)
+
+Type.EventDisabled_OnUnit = true
 
 function Type:Update()
 end
@@ -70,7 +104,7 @@ local ItemCount = setmetatable({}, {__index = function(tbl, k)
 	tbl[k] = count
 	return count
 end}) Type.ItemCount = ItemCount
-function Type:BAG_UPDATE()
+function Type:UPDATE_ITEM_COUNT()
 	for k in pairs(ItemCount) do
 		ItemCount[k] = GetItemCount(k, nil, 1)
 	end
@@ -113,13 +147,14 @@ local function ItemCooldown_OnUpdate(icon, time)
 			end
 			isGCD = OnGCD(duration)
 			if equipped and inrange == 1 and (duration == 0 or isGCD) then --usable
-				icon:SetInfo("alpha; color; texture; start, duration; stack, stackText; spell",
+				icon:SetInfo("alpha; color; texture; start, duration; stack, stackText; spell; inRange",
 					icon.Alpha,
 					icon:CrunchColor(),
 					GetItemIcon(iName) or "Interface\\Icons\\INV_Misc_QuestionMark",
 					start, duration,
 					count, icon.EnableStacks and count,
-					iName
+					iName,
+					inrange
 				)
 				return
 			end
@@ -151,13 +186,14 @@ local function ItemCooldown_OnUpdate(icon, time)
 		isGCD = OnGCD(duration)
 	end
 	if duration then
-		icon:SetInfo("alpha; color; texture; start, duration; stack, stackText; spell",
+		icon:SetInfo("alpha; color; texture; start, duration; stack, stackText; spell; inRange",
 			icon.UnAlpha,
 			icon:CrunchColor(duration, inrange),
 			GetItemIcon(NameFirst2),
 			start, duration,
 			count, icon.EnableStacks and count,
-			NameFirst2
+			NameFirst2,
+			inrange
 		)
 	else
 		icon:SetInfo("alpha", 0)
@@ -187,7 +223,10 @@ function Type:Setup(icon, groupID, iconID)
 		end
 	end
 	
-	Type:RegisterEvent("BAG_UPDATE") -- must come before the icon events are set.
+	-- Must come before the icon events are set. (Addendum 6-20-12: I have no idea why, but no reason to change it now)
+	Type:RegisterEvent("BAG_UPDATE", "UPDATE_ITEM_COUNT")
+	-- Added BAG_UPDATE_COOLDOWN 6-20-12 after discovering that BAG_UPDATE doesnt trigger for Mana Gems, possibly other items too
+	Type:RegisterEvent("BAG_UPDATE_COOLDOWN", "UPDATE_ITEM_COUNT")
 	
 	if not icon.RangeCheck then
 		icon:RegisterEvent("UNIT_INVENTORY_CHANGED")

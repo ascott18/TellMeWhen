@@ -24,8 +24,7 @@ local print = TMW.print
 local strlowerCache = TMW.strlowerCache
 
 
-local Type = TMW.Classes.IconType:New()
-Type.type = "totem"
+local Type = TMW.Classes.IconType:New("totem")
 Type.name = pclass == "DRUID" and L["ICONMENU_MUSHROOMS"]		or pclass == "DEATHKNIGHT" and L["ICONMENU_GHOUL"]		or L["ICONMENU_TOTEM"]
 Type.desc = pclass == "DRUID" and L["ICONMENU_MUSHROOMS_DESC"]	or pclass == "DEATHKNIGHT" and L["ICONMENU_GHOUL_DESC"]	or L["ICONMENU_TOTEM_DESC"]
 Type.chooseNameTitle = L["ICONMENU_CHOOSENAME"] .. " " .. L["ICONMENU_CHOOSENAME_ORBLANK"]
@@ -33,47 +32,90 @@ Type.AllowNoName = true
 Type.usePocketWatch = 1
 Type.hidden = pclass == "PRIEST" -- priest totems are lightwells, which is tracked with icon type "lightwell"
 
-if pclass == "SHAMAN" then
-	Type.TypeChecks = {
-		setting = "TotemSlots",
-		text = L["TOTEMS"],
-		{ text = L["FIRE"] 	},
-		{ text = L["EARTH"] },
-		{ text = L["WATER"] },
-		{ text = L["AIR"] 	},
-	}
-elseif pclass == "DRUID" then
-	Type.TypeChecks = {
-		setting = "TotemSlots",
-		text = L["MUSHROOMS"],
-		{ text = format(L["MUSHROOM"], 1) },
-		{ text = format(L["MUSHROOM"], 2) },
-		{ text = format(L["MUSHROOM"], 3) },
-	}
-end
 Type.WhenChecks = {
 	text = L["ICONMENU_SHOWWHEN"],
-	{ value = "alpha", 			text = L["ICONMENU_PRESENT"], 			colorCode = "|cFF00FF00" },
-	{ value = "unalpha", 		text = L["ICONMENU_ABSENT"], 			colorCode = "|cFFFF0000" },
+	{ value = "alpha", 			text = "|cFF00FF00" .. L["ICONMENU_PRESENT"], 			 },
+	{ value = "unalpha", 		text = "|cFFFF0000" .. L["ICONMENU_ABSENT"], 			 },
 	{ value = "always", 		text = L["ICONMENU_ALWAYS"] },
 }
-Type.RelevantSettings = {
-	Name = pclass ~= "DRUID" and pclass ~= "DEATHKNIGHT",
-	ShowPBar = true,
-	PBarOffs = true,
-	ShowCBar = true,
-	CBarOffs = true,
-	InvertBars = true,
-	DurationMin = true,
-	DurationMax = true,
-	DurationMinEnabled = true,
-	DurationMaxEnabled = true,
-	TotemSlots = true,
+
+-- AUTOMATICALLY GENERATED: UsesAttributes
+Type:UsesAttributes("spell")
+Type:UsesAttributes("reverse")
+Type:UsesAttributes("color")
+Type:UsesAttributes("start, duration")
+Type:UsesAttributes("alpha")
+Type:UsesAttributes("texture")
+-- END AUTOMATICALLY GENERATED: UsesAttributes
+
+Type:RegisterIconDefaults{
+	TotemSlots				= 0xF, --(1111)
 }
+
+if pclass ~= "DRUID" and pclass ~= "DEATHKNIGHT" then
+	Type:RegisterConfigPanel_XMLTemplate("full", 1, "TellMeWhen_ChooseName")
+end
+
+if pclass == "SHAMAN" then
+	Type:RegisterConfigPanel_ConstructorFunc("column", 2, "TellMeWhen_TotemSlots_Shaman", function(self)
+		self.Header:SetText(TMW.L["TOTEMS"])
+		TMW.IE:BuildSimpleCheckSettingFrame(self, "SettingTotemButton", {
+			{
+				setting = "TotemSlots",
+				value = 1,
+				title = TMW.L["FIRE"],
+			},
+			{
+				setting = "TotemSlots",
+				value = 2,
+				title = TMW.L["EARTH"],
+			},
+			{
+				setting = "TotemSlots",
+				value = 3,
+				title = TMW.L["WATER"],
+			},
+			{
+				setting = "TotemSlots",
+				value = 4,
+				title = TMW.L["AIR"],
+			},
+		})
+	end)
+elseif pclass == "DRUID" then
+	Type:RegisterConfigPanel_ConstructorFunc("column", 2, "TellMeWhen_TotemSlots_Druid", function(self)
+		self.Header:SetText(TMW.L["MUSHROOMS"])
+		TMW.IE:BuildSimpleCheckSettingFrame(self, "SettingTotemButton", {				
+			{
+				setting = "TotemSlots",
+				value = 1,
+				title = format(TMW.L["MUSHROOM"], 1),
+			},
+			{
+				setting = "TotemSlots",
+				value = 2,
+				title = format(TMW.L["MUSHROOM"], 2),
+			},
+			{
+				setting = "TotemSlots",
+				value = 3,
+				title = format(TMW.L["MUSHROOM"], 3),
+			},
+		})
+	end)
+end
 
 Type.EventDisabled_OnUnit = true
 Type.EventDisabled_OnStack = true
 
+Type:RegisterUpgrade(48017, {
+	icon = function(self, ics)
+		-- convert from some stupid string thing i made up to a bitfield
+		if type(ics.TotemSlots) == "string" then
+			ics.TotemSlots = tonumber(ics.TotemSlots:reverse(), 2)
+		end
+	end,
+})
 
 function Type:Update()
 end
@@ -119,7 +161,7 @@ function Type:Setup(icon, groupID, iconID)
 	end
 	icon.Slots = wipe(icon.Slots or {})
 	for i=1, 4 do
-		local settingBit = i > 1 and bit.lshift(1, i - 1) or 1
+		local settingBit = bit.lshift(1, i - 1)
 		icon.Slots[i] = bit.band(icon.TotemSlots, settingBit) == settingBit
 	end
 	if pclass == "DEATHKNIGHT" then

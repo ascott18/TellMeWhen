@@ -29,33 +29,59 @@ local _, pclass = UnitClass("Player")
 local SpellTextures = TMW.SpellTextures
 local mindfreeze = strlower(GetSpellInfo(47528))
 
-local Type = TMW.Classes.IconType:New()
+local Type = TMW.Classes.IconType:New("cooldown")
 LibStub("AceEvent-3.0"):Embed(Type)
-Type.type = "cooldown"
 Type.name = L["ICONMENU_SPELLCOOLDOWN"]
 Type.desc = L["ICONMENU_SPELLCOOLDOWN_DESC"]
 Type.chooseNameText  = L["CHOOSENAME_DIALOG"] .. "\r\n\r\n" .. L["CHOOSENAME_DIALOG_PETABILITIES"]
 
 Type.WhenChecks = {
 	text = L["ICONMENU_SHOWWHEN"],
-	{ value = "alpha", 			text = L["ICONMENU_USABLE"], 			colorCode = "|cFF00FF00" },
-	{ value = "unalpha",  		text = L["ICONMENU_UNUSABLE"], 			colorCode = "|cFFFF0000" },
+	{ value = "alpha", 			text = "|cFF00FF00" .. L["ICONMENU_USABLE"], 			 },
+	{ value = "unalpha",  		text = "|cFFFF0000" .. L["ICONMENU_UNUSABLE"], 			 },
 	{ value = "always", 		text = L["ICONMENU_ALWAYS"] },
 }
-Type.RelevantSettings = {
-	RangeCheck = true,
-	ManaCheck = true,
-	ShowPBar = true,
-	PBarOffs = true,
-	ShowCBar = true,
-	CBarOffs = true,
-	InvertBars = true,
-	DurationMin = true,
-	DurationMax = true,
-	DurationMinEnabled = true,
-	DurationMaxEnabled = true,
-	IgnoreRunes = (pclass == "DEATHKNIGHT"),
+
+-- AUTOMATICALLY GENERATED: UsesAttributes
+Type:UsesAttributes("reverse")
+Type:UsesAttributes("spell")
+Type:UsesAttributes("noMana")
+Type:UsesAttributes("inRange")
+Type:UsesAttributes("color")
+Type:UsesAttributes("start, duration")
+Type:UsesAttributes("alpha")
+Type:UsesAttributes("texture")
+-- END AUTOMATICALLY GENERATED: UsesAttributes
+
+Type:RegisterIconDefaults{
+	RangeCheck				= false,
+	ManaCheck				= false,
+	IgnoreRunes				= false,
 }
+
+Type:RegisterConfigPanel_XMLTemplate("full", 1, "TellMeWhen_ChooseName")
+
+Type:RegisterConfigPanel_ConstructorFunc("column", 1, "TellMeWhen_CooldownSettings", function(self)
+	self.Header:SetText(Type.name)
+	TMW.IE:BuildSimpleCheckSettingFrame(self, {
+		{
+			setting = "RangeCheck",
+			title = L["ICONMENU_RANGECHECK"],
+			tooltip = L["ICONMENU_RANGECHECK_DESC"],
+		},
+		{
+			setting = "ManaCheck",
+			title = L["ICONMENU_MANACHECK"],
+			tooltip = L["ICONMENU_MANACHECK_DESC"],
+		},
+		{
+			setting = "IgnoreRunes",
+			title = L["ICONMENU_IGNORERUNES"],
+			tooltip = L["ICONMENU_IGNORERUNES_DESC"],
+			disabledtooltip = L["ICONMENU_IGNORERUNES_DESC_DISABLED"],
+		},
+	})
+end)
 
 Type.EventDisabled_OnUnit = true
 Type.EventDisabled_OnStack = true
@@ -85,19 +111,21 @@ local function AutoShot_OnUpdate(icon, time)
 
 	if ready and inrange == 1 then
 		icon:SetInfo(
-			"alpha; color; start, duration; spell",
+			"alpha; color; start, duration; spell; inRange",
 			icon.Alpha,
 			icon:CrunchColor(),
 			0, 0,
-			NameName
+			NameName,
+			inrange
 		)
 	else
 		icon:SetInfo(
-			"alpha; color; start, duration; spell",
+			"alpha; color; start, duration; spell; inRange",
 			icon.UnAlpha,
 			icon:CrunchColor(asDuration > 0 and asDuration, inrange),
 			icon.asStart, asDuration,
-			NameName
+			NameName,
+			inrange
 		)
 	end
 end
@@ -132,12 +160,14 @@ local function SpellCooldown_OnUpdate(icon, time)
 			isGCD = (ClockGCD or duration ~= 0) and OnGCD(duration)
 			if inrange == 1 and not nomana and (duration == 0 or isGCD) then --usable
 				icon:SetInfo(
-					"alpha; color; texture; start, duration; spell",
+					"alpha; color; texture; start, duration; spell; inRange; noMana",
 					icon.Alpha,
 					icon:CrunchColor(),
 					SpellTextures[iName],
 					start, duration,
-					iName
+					iName,
+					inrange,
+					nomana
 				)
 				return
 			end
@@ -161,12 +191,14 @@ local function SpellCooldown_OnUpdate(icon, time)
 	end
 	if duration then
 		icon:SetInfo(
-			"alpha; color; texture; start, duration; spell",
+			"alpha; color; texture; start, duration; spell; inRange; noMana",
 			icon.UnAlpha,
 			icon:CrunchColor(duration, inrange, nomana),
 			icon.FirstTexture,
 			start, duration,
-			NameFirst
+			NameFirst,
+			inrange,
+			nomana
 		)
 	else
 		icon:SetInfo("alpha", 0)

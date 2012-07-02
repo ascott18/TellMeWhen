@@ -26,34 +26,26 @@ local pGUID = UnitGUID("player") -- this isnt actually defined right here (it re
 local clientVersion = select(4, GetBuildInfo())
 
 
-local Type = TMW.Classes.IconType:New()
-Type.type = "lightwell"
+local Type = TMW.Classes.IconType:New("lightwell")
 LibStub("AceEvent-3.0"):Embed(Type)
 Type.name = L["ICONMENU_LIGHTWELL"]
 Type.desc = L["ICONMENU_LIGHTWELL_DESC"]
 Type.hidden = pclass ~= "PRIEST"
 Type.WhenChecks = {
 	text = L["ICONMENU_SHOWWHEN"],
-	{ value = "alpha", 			text = L["ICONMENU_PRESENT"], 			colorCode = "|cFF00FF00" },
-	{ value = "unalpha", 		text = L["ICONMENU_ABSENT"], 			colorCode = "|cFFFF0000" },
+	{ value = "alpha", 			text = "|cFF00FF00" .. L["ICONMENU_PRESENT"], 			 },
+	{ value = "unalpha", 		text = "|cFFFF0000" .. L["ICONMENU_ABSENT"], 			 },
 	{ value = "always", 		text = L["ICONMENU_ALWAYS"] },
 }
-Type.RelevantSettings = {
-	Name = false,
-	ShowCBar = true,
-	CBarOffs = true,
-	ShowPBar = true,
-	PBarOffs = true,
-	InvertBars = true,
-	StackMin = true,
-	StackMax = true,
-	StackMinEnabled = true,
-	StackMaxEnabled = true,
-	DurationMin = true,
-	DurationMax = true,
-	DurationMinEnabled = true,
-	DurationMaxEnabled = true,
-}
+
+-- AUTOMATICALLY GENERATED: UsesAttributes
+Type:UsesAttributes("spell")
+Type:UsesAttributes("alpha")
+Type:UsesAttributes("color")
+Type:UsesAttributes("start, duration")
+Type:UsesAttributes("stack, stackText")
+Type:UsesAttributes("texture")
+-- END AUTOMATICALLY GENERATED: UsesAttributes
 
 Type.EventDisabled_OnUnit = true
 Type.EventDisabled_OnSpell = true

@@ -23,16 +23,21 @@ local Alpha = TMW:NewClass("IconModule_Alpha", "IconModule")
 function Alpha:OnEnable()
 	local icon = self.icon
 	local attributes = icon.attributes
+	
 	self:ALPHA(icon, attributes.alpha)
 	self:ALPHAOVERRIDE(icon, attributes.alphaOverride)
 end
 
 function Alpha:ALPHA(icon, alpha)
 	if (not icon.FadeHandlers or not icon.FadeHandlers[1]) and not icon.attributes.alphaOverride then
-		icon:SetAlpha(icon.FakeHidden or alpha)
+		icon:SetAlpha(icon.FakeHidden and 0 or alpha)
 	end
 end
 Alpha:SetDataListner("ALPHA")
+
+Alpha:RegisterIconDefaults{
+	FakeHidden				= false,
+}
 
 function Alpha:ALPHAOVERRIDE(icon, alphaOverride)
 	if alphaOverride then

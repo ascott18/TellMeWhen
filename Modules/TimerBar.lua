@@ -60,9 +60,9 @@ function TimerBar:UpdateValue(force)
 	
 	local value, doTerminate
 
-	local start, duration, InvertBars = self.start, self.duration, self.InvertBars
+	local start, duration, Invert = self.start, self.duration, self.Invert
 
-	if InvertBars then
+	if Invert then
 		if duration == 0 then
 			value = self.Max
 		else
@@ -81,7 +81,7 @@ function TimerBar:UpdateValue(force)
 	if doTerminate then
 		self:UpdateTable_Unregister()
 		ret = -1
-		if InvertBars then
+		if Invert then
 			value = self.Max
 		else
 			value = 0
