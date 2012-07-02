@@ -34,6 +34,7 @@ local defaultPowerTypes = {
 	SHAMAN		= SPELL_POWER_MANA,
 	HUNTER		= SPELL_POWER_FOCUS,
 	DEATHKNIGHT = SPELL_POWER_RUNIC_POWER,
+	MONK 		= SPELL_POWER_ENERGY,
 }
 local defaultPowerType = defaultPowerTypes[pclass]
 
@@ -51,6 +52,9 @@ function PowerBar:OnNewInstance(icon)
 	bar:SetStatusBarTexture(self.texture)
 	
 	local colorinfo = PowerBarColor[defaultPowerType]
+	if not colorinfo then
+		error("No PowerBarColor was found for class " .. pclass .. "! Is the defaultPowerType for the class not defined? (Please report this error over on TMW's CurseForge page)")
+	end
 	bar:SetStatusBarColor(colorinfo.r, colorinfo.g, colorinfo.b, 0.9)
 	self.powerType = defaultPowerType
 	

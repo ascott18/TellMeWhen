@@ -34,6 +34,7 @@
  ** (r518) Added two missing localization strings
  ** (r519) AceConfigDialog-3.0\AceConfigDialog-3.0-57.lua:473: 53AceConfigRegistry-3.0-14:ValidateOptionsTable(): TMW Options.args.main.args.checks.args.DrawEdge: expected a table, got a boolean
  ** (r520) TellMeWhen-6.0.0.lua:7306: attempt to call global "IsInRaid" (a nil value)
+ ** (r521) Added basic support for Monks
 
 ===v5.0.2===
  * Bug Fixes:

@@ -3311,7 +3311,6 @@ function CNDT:GetConditionCheckFunctionString(parent, Conditions)
 	
 	local funcstr, arg1 = parent:FinishCompilingConditions(funcstr:sub(4))
 	
-		print(funcstr, arg1)
 	if funcstr ~= "" then
 		-- Well, what the fuck? Apparently this code here doesn't work in MoP. I have to do it on a single line for some strange reason.
 		--funcstr = [[local obj, icon = ...
@@ -3319,7 +3318,6 @@ function CNDT:GetConditionCheckFunctionString(parent, Conditions)
 		
 		funcstr = "local obj, icon = ... \r\n return ( " .. funcstr .. " )"
 	end
-		print(funcstr, arg1)
 	
 	return funcstr, arg1
 end

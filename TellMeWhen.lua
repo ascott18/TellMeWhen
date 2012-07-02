@@ -1171,6 +1171,7 @@ TMW.GCDSpells = {
 	SHAMAN		= 324, -- lightning shield
 	HUNTER		= 1978, -- serpent sting
 	DEATHKNIGHT = 47541, -- death coil
+	MONK		= 100780, -- jab
 } local GCDSpell = TMW.GCDSpells[pclass] TMW.GCDSpell = GCDSpell
 
 
