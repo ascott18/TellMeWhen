@@ -32,6 +32,7 @@
  ** (r515) Meta icons should once again always properly inherit animations
  ** (r517) Item icons should now obtain and use the correct stacks of an item more frequently (hopefully 100% of the time, actually).
  ** (r518) Added two missing localization strings
+ ** (r519) AceConfigDialog-3.0\AceConfigDialog-3.0-57.lua:473: 53AceConfigRegistry-3.0-14:ValidateOptionsTable(): TMW Options.args.main.args.checks.args.DrawEdge: expected a table, got a boolean
 
 ===v5.0.2===
  * Bug Fixes:

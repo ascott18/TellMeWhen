@@ -1751,11 +1751,12 @@ function TMW:CompileOptions()
 									type = "toggle",
 									order = 22,
 								},
-								DrawEdge = not TMW.ISMOP and {
+								DrawEdge = { -- Cooldown:SetDrawEdge was removed in MoP
 									name = L["UIPANEL_DRAWEDGE"],
 									desc = L["UIPANEL_DRAWEDGE_DESC"],
 									type = "toggle",
 									order = 40,
+									hidden = TMW.ISMOP,
 								},
 								SoundChannel = {
 									name = L["SOUND_CHANNEL"],

@@ -31,7 +31,7 @@ local DogTag = LibStub("LibDogTag-3.0", true)
 TELLMEWHEN_VERSION = "6.0.0"
 TELLMEWHEN_VERSION_MINOR = strmatch(" @project-version@", " r%d+") or ""
 TELLMEWHEN_VERSION_FULL = TELLMEWHEN_VERSION .. TELLMEWHEN_VERSION_MINOR
-TELLMEWHEN_VERSIONNUMBER = 60002 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
+TELLMEWHEN_VERSIONNUMBER = 60003 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
 if TELLMEWHEN_VERSIONNUMBER > 61001 or TELLMEWHEN_VERSIONNUMBER < 60000 then return error("YOU SCREWED UP THE VERSION NUMBER OR DIDNT CHANGE THE SAFETY LIMITS") end -- safety check because i accidentally made the version number 414069 once
 
 TELLMEWHEN_MAXROWS = 20
@@ -2258,11 +2258,11 @@ function TMW:GetBaseUpgrades()			-- upgrade functions
 				end
 			end,
 		},
-		[45402] = {
+		--[[[45402] = {
 			group = function(self, gs)
 				gs.OnlyInCombat = false
 			end,
-		},
+		},]]
 		[45013] = {
 			icon = function(self, ics)
 				if ics.Type == "conditionicon" then
@@ -2452,12 +2452,12 @@ function TMW:GetBaseUpgrades()			-- upgrade functions
 			group = function(self, gs)
 				local Conditions = gs.Conditions
 
-				if gs.OnlyInCombat then
+				--[[if gs.OnlyInCombat then
 					local condition = Conditions[#Conditions + 1]
 					condition.Type = "COMBAT"
 					condition.Level = 0
 					gs.OnlyInCombat = nil
-				end
+				end]]
 				if gs.NotInVehicle then
 					local condition = Conditions[#Conditions + 1]
 					condition.Type = "VEHICLE"
