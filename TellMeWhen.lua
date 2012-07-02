@@ -31,7 +31,7 @@ local DogTag = LibStub("LibDogTag-3.0", true)
 TELLMEWHEN_VERSION = "6.0.0"
 TELLMEWHEN_VERSION_MINOR = strmatch(" @project-version@", " r%d+") or ""
 TELLMEWHEN_VERSION_FULL = TELLMEWHEN_VERSION .. TELLMEWHEN_VERSION_MINOR
-TELLMEWHEN_VERSIONNUMBER = 60003 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
+TELLMEWHEN_VERSIONNUMBER = 60004 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
 if TELLMEWHEN_VERSIONNUMBER > 61001 or TELLMEWHEN_VERSIONNUMBER < 60000 then return error("YOU SCREWED UP THE VERSION NUMBER OR DIDNT CHANGE THE SAFETY LIMITS") end -- safety check because i accidentally made the version number 414069 once
 
 TELLMEWHEN_MAXROWS = 20
@@ -7289,23 +7289,74 @@ function UNITS:UpdateTankAndAssistMap()
 	end
 end
 
+if TMW.ISMOP then
+	function UNITS:UpdateGroupedPlayersMap()
+		local gpMap = UNITS.gpMap
 
-function UNITS:UpdateGroupedPlayersMap()
-	local gpMap = UNITS.gpMap
+		wipe(gpMap)
 
-	wipe(gpMap)
+		gpMap[strlowerCache[pname]] = "player"
+		local petname = UnitName("pet")
+		if petname then
+			gpMap[strlowerCache[petname]] = "pet"
+		end
 
-	gpMap[strlowerCache[pname]] = "player"
-	local petname = UnitName("pet")
-	if petname then
-		gpMap[strlowerCache[petname]] = "pet"
+		-- setup a table with (key, value) pairs as (name, unitID)
+		
+		if IsInRaid() then
+			-- Raid Players
+			local numRaidMembers = GetNumGroupMembers()
+			for i = 1, numRaidMembers do
+				local raidunit = "raid" .. i
+				local name = UnitName(raidunit)
+				gpMap[strlowerCache[name]] = raidunit
+			end
+		
+			-- Raid Pets (Process after raid players so that players with names the same as pets dont get overwritten)
+			for i = 1, numRaidMembers do
+				local petunit = "raidpet" .. i
+				local name = UnitName(petunit)
+				if name then
+					-- dont overwrite a player with a pet
+					gpMap[strlowerCache[name]] = gpMap[strlowerCache[name]] or petunit
+				end
+			end
+		end
+		
+		-- Party Players
+		local numPartyMembers = GetNumSubgroupMembers()
+		for i = 1, numPartyMembers do
+			local raidunit = "party" .. i
+			local name = UnitName(raidunit)
+			gpMap[strlowerCache[name]] = raidunit
+		end
+		
+		-- Party Pets (Process after party players so that players with names the same as pets dont get overwritten)
+		for i = 1, numPartyMembers do
+			local petunit = "party" .. i
+			local name = UnitName(petunit)
+			if name then
+				-- dont overwrite a player with a pet
+				gpMap[strlowerCache[name]] = gpMap[strlowerCache[name]] or petunit
+			end
+		end
 	end
+else
+	function UNITS:UpdateGroupedPlayersMap()
+		local gpMap = UNITS.gpMap
 
-	-- setup a table with (key, value) pairs as (name, unitID)
-	
-	if IsInRaid() then
+		wipe(gpMap)
+
+		gpMap[strlowerCache[pname]] = "player"
+		local petname = UnitName("pet")
+		if petname then
+			gpMap[strlowerCache[petname]] = "pet"
+		end
+
+		-- setup a table with (key, value) pairs as (name, unitID)
+		
 		-- Raid Players
-		local numRaidMembers = GetNumGroupMembers()
+		local numRaidMembers = GetNumRaidMembers()
 		for i = 1, numRaidMembers do
 			local raidunit = "raid" .. i
 			local name = UnitName(raidunit)
@@ -7321,23 +7372,23 @@ function UNITS:UpdateGroupedPlayersMap()
 				gpMap[strlowerCache[name]] = gpMap[strlowerCache[name]] or petunit
 			end
 		end
-	end
-	
-	-- Party Players
-	local numPartyMembers = GetNumSubgroupMembers()
-	for i = 1, numPartyMembers do
-		local raidunit = "party" .. i
-		local name = UnitName(raidunit)
-		gpMap[strlowerCache[name]] = raidunit
-	end
-	
-	-- Party Pets (Process after party players so that players with names the same as pets dont get overwritten)
-	for i = 1, numPartyMembers do
-		local petunit = "party" .. i
-		local name = UnitName(petunit)
-		if name then
-			-- dont overwrite a player with a pet
-			gpMap[strlowerCache[name]] = gpMap[strlowerCache[name]] or petunit
+		
+		-- Party Players
+		local numPartyMembers = GetNumPartyMembers()
+		for i = 1, numPartyMembers do
+			local raidunit = "party" .. i
+			local name = UnitName(raidunit)
+			gpMap[strlowerCache[name]] = raidunit
+		end
+		
+		-- Party Pets (Process after party players so that players with names the same as pets dont get overwritten)
+		for i = 1, numPartyMembers do
+			local petunit = "party" .. i
+			local name = UnitName(petunit)
+			if name then
+				-- dont overwrite a player with a pet
+				gpMap[strlowerCache[name]] = gpMap[strlowerCache[name]] or petunit
+			end
 		end
 	end
 end
