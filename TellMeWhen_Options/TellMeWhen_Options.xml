@@ -1757,7 +1757,7 @@
 					<OnLoad>
 						TMW:TT(self, "IMPORT_EXPORT", "IMPORT_EXPORT_BUTTON_DESC")
 						self:SetText(TMW.L["IMPORT_EXPORT"])
-						self:SetWidth(self:GetTextWidth()+5)
+						self:SetWidth(self:GetTextWidth()+10)
 						self:SetFrameLevel(self:GetFrameLevel()+2)
 					</OnLoad>
 					<OnClick>

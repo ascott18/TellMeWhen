@@ -31,6 +31,7 @@
  ** (r514) string "Data Processor alpha" line 35: attempt to compare number with table
  ** (r515) Meta icons should once again always properly inherit animations
  ** (r517) Item icons should now obtain and use the correct stacks of an item more frequently (hopefully 100% of the time, actually).
+ ** (r518) Added two missing localization strings
 
 ===v5.0.2===
  * Bug Fixes:
