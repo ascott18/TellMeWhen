@@ -225,11 +225,11 @@ function View.Group_SizeUpdate(resizeButton)
     -- Calculate & set new scale:
 	local std_newWidth = std_cursorX - self.std_oldLeft
 	local ratio_SizeChangeX = std_newWidth/self.std_oldWidth
-	local newScaleX = ratio_SizeChangeX*group.oldScale
+	local newScaleX = ratio_SizeChangeX*self.oldScale
 	
 	local std_newHeight = self.std_oldTop - std_cursorY
 	local ratio_SizeChangeY = std_newHeight/self.std_oldHeight
-	local newScaleY = ratio_SizeChangeY*group.oldScale
+	local newScaleY = ratio_SizeChangeY*self.oldScale
 	
 	local newScale = max(0.6, newScaleX, newScaleY)
 	--[[
@@ -253,8 +253,8 @@ function View.Group_SizeUpdate(resizeButton)
 	-- instead of being relative to the group's top left corner, which is what it is supposed to be.
 	-- I don't remember why this calculation here works, so lets just leave it alone.
 	-- Note that it will be re-re-calculated once we are done resizing.
-	local newX = group.oldX * group.oldScale / newScale
-	local newY = group.oldY * group.oldScale / newScale
+	local newX = self.oldX * self.oldScale / newScale
+	local newY = self.oldY * self.oldScale / newScale
 	group:ClearAllPoints()
 	group:SetPoint("TOPLEFT", UIParent, "BOTTOMLEFT", newX, newY)
 end
