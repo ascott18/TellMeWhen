@@ -21,7 +21,7 @@ local format = format
 local isNumber = TMW.isNumber
 
 local Processor = TMW.Classes.IconDataProcessor:New("DURATION", "start, duration")
-Processor.SIUVs[#Processor.SIUVs+1] = "local OnGCD = TMW.OnGCD"
+Processor:DeclareUpValue("OnGCD", TMW.OnGCD)
 
 function Processor:CompileFunctionSegment(t)
 	-- GLOBALS: start, duration

@@ -39,13 +39,13 @@ Type.WhenChecks = {
 }
 
 Type:RegisterIconDefaults{
-	Unit					= "", 
+	Unit					= "player", 
 	Interruptible			= false,
 }
 
 Type:RegisterConfigPanel_XMLTemplate("full", 1, "TellMeWhen_ChooseName")
 
-Type:RegisterConfigPanel_XMLTemplate("column", 1, "TellMeWhen_Unit")
+Type:RegisterConfigPanel_XMLTemplate("full", 1, "TellMeWhen_Unit")
 
 Type:RegisterConfigPanel_ConstructorFunc("column", 1, "TellMeWhen_CastSettings", function(self)
 	self.Header:SetText(Type.name)

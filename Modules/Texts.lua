@@ -83,8 +83,7 @@ function Texts:SetupForIcon(sourceIcon)
 	self.kwargs.color = TMW.db.profile.ColorNames
 	
 	for _, fontString in pairs(self.fontStrings) do
-		DogTag:RemoveFontString(fontString)
-		fontString:Hide()
+		fontString.TMW_QueueForRemoval = true
 	end
 		
 	if layoutSettings then				
@@ -113,6 +112,14 @@ function Texts:SetupForIcon(sourceIcon)
 	end
 	
 	self:OnKwargsUpdated()
+	
+	for _, fontString in pairs(self.fontStrings) do
+		if fontString.TMW_QueueForRemoval then
+			fontString.TMW_QueueForRemoval = nil
+			DogTag:RemoveFontString(fontString)
+			fontString:Hide()
+		end
+	end
 end
 function Texts:GetFontStringID(fontStringID, fontStringSettings)
 	local SkinAs = fontStringSettings.SkinAs
@@ -125,14 +132,16 @@ function Texts:OnKwargsUpdated()
 	if self.layoutSettings and self.Texts then
 		for fontStringID, fontStringSettings in TMW:InNLengthTable(self.layoutSettings) do
 			local fontString = self.fontStrings[self:GetFontStringID(fontStringID, fontStringSettings)]
-			if fontString then
+			local text = self.Texts[fontStringID] or ""
+			
+			if fontString and text ~= "" then
 				local styleString = ""
 				if fontStringSettings.Outline == "OUTLINE" or fontStringSettings.Outline == "THICKOUTLINE" or fontStringSettings.Outline == "MONOCHROME" then
 					styleString = styleString .. ("[%s]"):format(fontStringSettings.Outline)
-				end	
+				end
 				
+				fontString.TMW_QueueForRemoval = nil
 				DogTag:AddFontString(fontString, self.icon, styleString .. (self.Texts[fontStringID] or ""), "Unit;TMW", self.kwargs)
-				DogTag:UpdateFontString(fontString)
 			end
 		end
 	end

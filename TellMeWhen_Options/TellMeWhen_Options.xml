@@ -2,8 +2,8 @@
  ..\FrameXML\UI.xsd">
  
 	<Texture name="TellMeWhen_OptionsModuleContainerBorder" virtual="true">
-		<Size x="1.5" y="1.5"/>
-		<Color r="1.0" g="0.82" b="0" a="0.5"/>
+		<Size x="1.0" y="1.0"/>
+		<Color r="1.0" g="0.82" b="0" a="0.4"/>
 	</Texture>
 	<Frame name="TellMeWhen_OptionsModuleContainer" virtual="true">
 		<Size x="180"/>
@@ -35,7 +35,7 @@
 				</Texture>
 				<FontString name="$parentHeader" parentKey="Header" inherits="GameFontNormal" justifyH="LEFT">
 					<Anchors>
-						<Anchor point="LEFT" relativeTo="$parentTopLeft" relativePoint="RIGHT"/>
+						<Anchor point="LEFT" relativeTo="$parentTopLeft" relativePoint="RIGHT" x="1"/>
 					</Anchors>
 				</FontString>
 				<Texture name="$parentTopRight" inherits="TellMeWhen_OptionsModuleContainerBorder">
@@ -549,6 +549,43 @@
 							self:SetLabels(icon.typeData.chooseNameTitle, icon.typeData.chooseNameText)
 							self:GetScript("OnTextChanged")(self)
 						end)
+						
+						TMW.Classes.ChatEdit_InsertLink_Hook:New(self, function(self, text, linkType, linkID)
+							if TMW.CI.t == "item" and linkType ~= "item" then
+								-- notify failure if the icon is an item cooldown icon and the link is not an item link
+								return false
+							elseif TMW.CI.t ~= "item" and linkType ~= "spell" and linkType ~= "enchant" then
+								-- notify failure if the icon is not an item cooldown and the link isn't a spell or enchant link
+								-- DONT just check (TMW.CI.t ~= "item" and linkType == "item") because there are link types we want to exclude, like achievements.
+								return false
+							end
+
+							local editbox = self.editbox
+
+							-- find the next semicolon in the string
+							local NameText = editbox:GetText()
+							
+							local start = #NameText
+							for i = editbox:GetCursorPosition()-1, #NameText, 1 do
+								if strsub(NameText, i, i) == ";" then
+									start = i+1
+									break
+								end
+							end
+
+							-- put the cursor right after the semicolon
+							editbox:SetCursorPosition(start)
+							-- insert the text
+							editbox:Insert("; " .. linkID .. "; ")
+							-- clean the text
+							TMW:CleanString(editbox)
+							-- put the cursor after the newly inserted text
+							editbox:SetCursorPosition(start + #linkID + 2)
+
+							-- notify success
+							return true
+						end)
+
 					</OnLoad>
 					<OnEditFocusLost>
 						EditBox_ClearHighlight(self)
@@ -687,6 +724,35 @@
 							ics.CustomTex = TMW:CleanString(input)
 							return true -- signal success
 						end
+						
+						TMW.Classes.ChatEdit_InsertLink_Hook:New(self, function(self, text, linkType, linkID)
+							-- if the custom texture box is active,
+							-- attempt to extract either a spellID or a texture path from the data to use.
+							local tex
+							if linkType == "spell" or linkType == "enchant" then
+								-- spells and enchants can just use their spellID
+								tex = linkID
+							elseif linkType == "item" then
+								-- items must get the texture path
+								tex = GetItemIcon(linkID)
+							elseif linkType == "achievement" then
+								-- achievements also must get their texture path
+								tex = select(10, GetAchievementInfo(linkID))
+							end
+							if tex then
+								-- clean off the first part of the path, it does not need to be saved
+								-- it will be appended when the texture is used.
+								tex = gsub(tex, "INTERFACE\\ICONS\\", "")
+								tex = gsub(tex, "Interface\\Icons\\", "")
+
+								-- set the text
+								self.editbox:SetText(tex)
+
+								-- notify success
+								return true
+							end
+						end)
+
 					</OnLoad>
 					<OnReceiveDrag>
 						TMW.ID:SpellItemToIcon(TMW.CI.ic, self.DragReceived, self)
@@ -709,7 +775,7 @@
 	</Frame>
 	
 	<Frame name="TellMeWhen_Unit" inherits="TellMeWhen_OptionsModuleContainer" virtual="true">
-		<Size x="180" y="50"/>
+		<Size x="560" y="50"/>
 		<Frames>
 			<EditBox name="$parentUnit" inherits="TellMeWhen_UnitEditbox" multiline="true" parentKey="Unit" autoFocus="false">
 				<Anchors>
@@ -4165,6 +4231,15 @@
 										TMW.SUG:EnableEditBox(self, "textsubsANN")
 										
 										TMW:RegisterCallback("TMW_CONFIG_SAVE_SETTINGS", self.ClearFocus, self)
+										
+										TMW.Classes.ChatEdit_InsertLink_Hook:New(self, function(self, text, linkType, linkID)
+											-- just flat out put the link into the ANN editbox if it is focued. The ability to yell out clickable links is cool.
+											self.editbox:Insert(text)
+
+											-- notify success
+											return true
+										end)
+
 									</OnLoad>
 									<OnEditFocusLost>
 										EditBox_ClearHighlight(self)

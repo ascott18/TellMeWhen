@@ -31,8 +31,8 @@ Type.hidden = pclass ~= "DEATHKNIGHT"
 Type.AllowNoName = true
 Type.WhenChecks = {
 	text = L["ICONMENU_SHOWWHEN"],
-	{ value = "alpha",			 	text = "|cFF00FF00" .. L["ICONMENU_USABLE"],			 	 },
-	{ value = "unalpha",		  	text = "|cFFFF0000" .. L["ICONMENU_UNUSABLE"],			 	 },
+	{ value = "alpha",			text = "|cFF00FF00" .. L["ICONMENU_USABLE"],	 },
+	{ value = "unalpha",	 	text = "|cFFFF0000" .. L["ICONMENU_UNUSABLE"],	 },
 	{ value = "always",		 	text = L["ICONMENU_ALWAYS"] },
 }
 
@@ -58,8 +58,10 @@ Type.EventDisabled_OnStack = true
 
 Type:RegisterUpgrade(51024, {
 	icon = function(self, ics)
-		-- Import the setting from TotemSlots, which was what the setting used to be
-		ics.RuneSlots = ics.TotemSlots or 0x3F
+		-- Import the setting from TotemSlots, which was what this setting used to be
+		if ics.Type == "runes" and ics.TotemSlots and ics.TotemSlots ~= 0xF then
+			ics.RuneSlots = ics.TotemSlots
+		end
 	end,
 })
 

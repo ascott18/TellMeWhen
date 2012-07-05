@@ -31,7 +31,7 @@ local DogTag = LibStub("LibDogTag-3.0", true)
 TELLMEWHEN_VERSION = "6.0.0"
 TELLMEWHEN_VERSION_MINOR = strmatch(" @project-version@", " r%d+") or ""
 TELLMEWHEN_VERSION_FULL = TELLMEWHEN_VERSION .. TELLMEWHEN_VERSION_MINOR
-TELLMEWHEN_VERSIONNUMBER = 60004 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
+TELLMEWHEN_VERSIONNUMBER = 60005 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
 if TELLMEWHEN_VERSIONNUMBER > 61001 or TELLMEWHEN_VERSIONNUMBER < 60000 then return error("YOU SCREWED UP THE VERSION NUMBER OR DIDNT CHANGE THE SAFETY LIMITS") end -- safety check because i accidentally made the version number 414069 once
 
 TELLMEWHEN_MAXROWS = 20
@@ -694,15 +694,29 @@ do -- Class Lib
 		-- check for all functions that dont match exactly, like OnNewInstance_1, _2, _3, ...
 		-- functions can be named whatever you want, but a numbering system helps make sure that
 		-- they are called in the order that you want them to be called in
-		for k, v in TMW:OrderedPairs(class.instancemeta.__index) do
+		for k, v in pairs(class.instancemeta.__index) do
 			if type(k) == "string" and k:find("^" .. func) and k ~= func then
 				v(instance, ...)
 			end
 		end
 		
+		if instance.isTMWClassInstance then
+			-- If this is being called on an instance of a class instead of a class,
+			-- search the instance itself for matching functions too.
+			-- This will never step on the toes of class.instancemeta.__index because
+			-- iterating over an instance will only yield things explicity set on an instance -
+			-- it will never directly contain anything inherited from a class.
+			for k, v in pairs(instance) do
+				if type(k) == "string" and k:find("^" .. func) and k ~= func then
+					v(instance, ...)
+				end
+			end
+		end
+		
+		
 		-- now check for the function that exactly matches. this should be called last because
 		-- it should be the function that handles the real class being instantiated, not any inherited classes
-		local normalFunc = class.instancemeta.__index[func]
+		local normalFunc = instance[func]
 		if normalFunc then
 			normalFunc(instance, ...)
 		end
@@ -1040,7 +1054,6 @@ TMW.Defaults = {
 				Level			= 10,
 				Rows			= 1,
 				Columns			= 4,
-				Spacing			= 0,
 				CheckOrder		= -1,
 				PrimarySpec		= true,
 				SecondarySpec	= true,
@@ -1067,6 +1080,8 @@ TMW.Defaults = {
 				SettingsPerView			= {
 					["**"] = {
 						TextLayout		= "icon1",
+						SpacingX		= 0,
+						SpacingY		= 0,
 					}
 				},
 				Icons = {
@@ -1075,7 +1090,6 @@ TMW.Defaults = {
 						Enabled					= false,
 						Name					= "",
 						Type					= "",
-						Unit					= "player",
 						Alpha					= 1,
 						UnAlpha					= 1,
 						ConditionAlpha			= 0,
@@ -1237,7 +1251,7 @@ TMW.BE = {
 		DamageBuffs			= "1719;12292;85730;50334;5217;3045;77801;34692;31884;51713;49016;12472;57933;64701;86700",
 	},
 	casts = {
-		--prefixing with _ doesnt really matter here since casts only match by ID, but it may prevent confusion if people try and use these as buff/debuff equivs
+		--prefixing with _ doesnt really matter here since casts only match by name, but it may prevent confusion if people try and use these as buff/debuff equivs
 		Heals				= "50464;5185;8936;740;2050;2060;2061;32546;596;64843;635;82326;19750;331;77472;8004;1064;73920",
 		PvPSpells			= "33786;339;20484;1513;982;64901;_605;453;5782;5484;79268;10326;51514;118;12051",
 		Tier11Interrupts	= "_83703;_82752;_82636;_83070;_79710;_77896;_77569;_80734;_82411",
@@ -1247,10 +1261,10 @@ TMW.BE = {
 }
 
 local CompareFuncs = {
-	-- harkens back to the days of the conditions of old, but it is more efficient than a big elseif chain.
+	-- harkens back to the days of the conditions of old, but it is actually more efficient than a big elseif chain.
 	["=="] = function(a, b) return a == b  end,
-	["~="] = function(a, b)  return a ~= b end,
-	[">="] = function(a, b)  return a >= b end,
+	["~="] = function(a, b) return a ~= b end,
+	[">="] = function(a, b) return a >= b end,
 	["<="] = function(a, b) return a <= b  end,
 	["<"] = function(a, b) return a < b  end,
 	[">"] = function(a, b) return a > b end,
@@ -1520,6 +1534,16 @@ function TMW:CopyTableInPlaceWithMeta(src, dest, allowUnmatchedSourceTables)
 	return dest -- not really needed, but what the hell why not
 end
 
+function TMW:WipeTableDataRetainStructure(tbl)
+	for k, v in pairs(tbl) do
+		if type(v) == "table" then
+			TMW:WipeTableDataRetainStructure(v)
+		else
+			tbl[k] = nil
+		end
+	end
+end
+
 
 -- --------------------------
 -- EXECUTIVE FUNCTIONS, ETC
@@ -1716,19 +1740,22 @@ function TMW:OnProfile()
 end
 
 TMW.DatabaseCleanups = {
-	icon = function(ics)
+	icon = function(ics, groupID, iconID)
 		if ics.Events then
 			for _, t in TMW:InNLengthTable(ics.Events) do
 				t.SoundData = nil
 				t.wasPassingCondition = nil
 			end
 		end
+		if groupID == 3 and iconID == 108 then
+			TellMeWhenDB.TEMP = CopyTable(ics)
+		end
 	end,
 }
 function TMW:ShutdownProfile()
 	-- get rid of settings that are stored in database tables for convenience, but dont need to be kept.
-	for ics in TMW:InIconSettings() do
-		TMW.DatabaseCleanups.icon(ics)
+	for ics, groupID, iconID in TMW:InIconSettings() do
+		TMW.DatabaseCleanups.icon(ics, groupID, iconID)
 	end
 end
 
@@ -1781,7 +1808,7 @@ function TMW:OnUpdate(elapsed)					-- THE MAGICAL ENGINE OF DOING EVERYTHING
 				-- GroupsToUpdate only contains groups with conditions
 				local group = GroupsToUpdate[i]
 				local ConditionObj = group.ConditionObj
-				if ConditionObj and ConditionObj.UpdateNeeded or ConditionObj.NextUpdateTime < time then
+				if ConditionObj and (ConditionObj.UpdateNeeded or ConditionObj.NextUpdateTime < time) then
 					ConditionObj:Check(group)
 				end
 			end
@@ -1867,6 +1894,13 @@ TMW.UpgradeTable = {}
 TMW.UpgradeTableByVersions = {}
 function TMW:GetBaseUpgrades()			-- upgrade functions
 	return {
+		[60005] = {
+			group = function(self, gs)
+				gs.SettingsPerView.icon.SpacingX = gs.Spacing or 0
+				gs.SettingsPerView.icon.SpacingY = gs.Spacing or 0
+				gs.Spacing = nil
+			end,
+		},
 		[51023] = {
 			icon = function(self, ics)
 				ics.InvertBars = nil
@@ -2658,9 +2692,13 @@ function TMW:GetBaseUpgrades()			-- upgrade functions
 				end
 			end,
 		},
-		[40000] = {
+		[40001] = {
 			global = function(self)
 				TMW.db.profile.Spacing = nil
+			end,
+		},
+		[40000] = {
+			global = function(self)
 				TMW.db.profile.Locked = false
 			end,
 			group = function(self, gs)
@@ -2996,8 +3034,9 @@ function TMW:GlobalUpgrade()
 end
 
 do	-- TMW.safecall
+	-- (Please please please don't ever use this anywhere that efficiency matters, because honestly, its atrocious.)
 	--[[
-		 xpcall safecall implementation
+		xpcall safecall implementation
 	]]
 	local xpcall = xpcall
 
@@ -4790,11 +4829,35 @@ end
 
 
 
-local ConditionControlledObject = TMW:NewClass("ConditionControlledObject"){
-	Conditions_LoadData = function(self, Conditions)
-		local ConditionObj = TMW.CNDT:GetConditionObject(self, Conditions)
-		self.ConditionObj = ConditionObj
-		return ConditionObj
+TMW:NewClass("ConditionImplementor"){
+	Conditions_GetConstructor = function(self, Conditions)
+		local ConditionObjectConstructor = TMW.CNDT:GetConditionObjectConstructor()
+		
+		ConditionObjectConstructor:LoadParentAndConditions(self, Conditions)
+		
+		return ConditionObjectConstructor
+	end,
+}
+
+TMW:NewClass("GenericModuleImplementor"){
+	PreDisableAllModules = function(self)
+		for moduleName, Module in pairs(self.Modules) do
+			Module:PreDisable()
+		end
+	end,
+
+	DisablePreDisabledModules = function(self)
+		for moduleName, Module in pairs(self.Modules) do
+			if Module.PreDisabled then
+				Module:Disable()
+			end
+		end
+	end,
+
+	DisableAllModules = function(self)
+		for moduleName, Module in pairs(self.Modules) do
+			Module:Disable()
+		end
 	end,
 }
 
@@ -4802,7 +4865,7 @@ local ConditionControlledObject = TMW:NewClass("ConditionControlledObject"){
 -- GROUPS
 -- -----------
 
-local Group = TMW:NewClass("Group", "Frame", "UpdateTableManager", "ConditionControlledObject")
+local Group = TMW:NewClass("Group", "Frame", "UpdateTableManager", "ConditionImplementor", "GenericModuleImplementor")
 Group:UpdateTable_Set(GroupsToUpdate)
 
 function Group.OnNewInstance(group, ...)
@@ -4812,6 +4875,8 @@ function Group.OnNewInstance(group, ...)
 
 	group.ID = groupID
 	group.SortedIcons = {}
+	group.Components = {}
+	group.Modules = {}
 end
 
 function Group.__tostring(group)
@@ -4821,25 +4886,6 @@ end
 function Group.ScriptSort(groupA, groupB)
 	local gOrder = -TMW.db.profile.CheckOrder
 	return groupA:GetID()*gOrder < groupB:GetID()*gOrder
-end
-
-function Group.SizeUpdate(resizeButton)
-	-- note that arg1 (self) is resizeButton
-	local group = resizeButton:GetParent()
-	local uiScale = UIParent:GetScale()
-	local cursorX, cursorY = GetCursorPosition()
-
-	-- calculate new scale
-	local newXScale = group.oldScale * (cursorX/uiScale - group.oldX*group.oldScale) / (resizeButton.oldCursorX/uiScale - group.oldX*group.oldScale)
-	local newYScale = group.oldScale * (cursorY/uiScale - group.oldY*group.oldScale) / (resizeButton.oldCursorY/uiScale - group.oldY*group.oldScale)
-	local newScale = max(0.6, newXScale, newYScale)
-	group:SetScale(newScale)
-
-	-- calculate new frame position
-	local newX = group.oldX * group.oldScale / newScale
-	local newY = group.oldY * group.oldScale / newScale
-	group:ClearAllPoints()
-	group:SetPoint("TOPLEFT", UIParent, "BOTTOMLEFT", newX, newY)
 end
 
 function Group:TMW_ICON_UPDATED(event, icon)
@@ -4951,31 +4997,13 @@ function Group.Update(group)
 	end
 end
 
-function Group.FinishCompilingConditions(group, funcstr)
-	local ret2
-	if group.OnlyInCombat then
-		if funcstr == "" then
-			funcstr = [[UnitAffectingCombat("player")]]
-		else
-			funcstr = [[(]] .. funcstr .. [[) and UnitAffectingCombat("player")]]
-		end
-		ret2 = {PLAYER_REGEN_ENABLED = true, PLAYER_REGEN_DISABLED = true}
-	end
-
-	if funcstr ~= "" then
-		TMW:RegisterCallback("TMW_CNDT_OBJ_PASSING_CHANGED", group)
-	else
-		TMW:UnregisterCallback("TMW_CNDT_OBJ_PASSING_CHANGED", group)
-	end
-
-	return funcstr, ret2
-end
-
 function Group.TMW_CNDT_OBJ_PASSING_CHANGED(group, event, ConditionObj, failed)
 	if group.ConditionObj == ConditionObj then
 		group:Update()
 	end
 end
+
+
 
 
 function Group.GetSettings(group)
@@ -4992,6 +5020,7 @@ function Group.ShouldUpdateIcons(group)
 	local gs = group:GetSettings()
 
 	if	(group:GetID() > TMW.db.profile.NumGroups) or
+		(not group.viewData) or
 		(not gs.Enabled) or
 		(GetActiveTalentGroup() == 1 and not gs.PrimarySpec) or
 		(GetActiveTalentGroup() == 2 and not gs.SecondarySpec) or
@@ -5007,6 +5036,24 @@ function Group.IsValid(group)
 	-- checks if the group can be checked in metas/conditions
 
 	return group:ShouldUpdateIcons()
+end
+
+
+function Group.CalibrateAnchors(group)
+	assert(TMW.GetAnchoredPoints, "Why is group:CalibrateAnchors() being called when TellMeWhen_Options isn't loaded?")
+	
+	local gs = group:GetSettings()
+	
+	local p = gs.Point
+	p.point, p.relativeTo, p.relativePoint, p.x, p.y = TMW:GetAnchoredPoints(group)
+end
+
+function Group.DetectFrame(group, event, time, Locked)
+	local frameToFind = group.frameToFind
+	if _G[frameToFind] then
+		group:SetPos()
+		TMW:UnregisterCallback("TMW_ONUPDATE_TIMECONSTRAINED", group.DetectFrame, group)
+	end
 end
 
 function Group.SetPos(group)
@@ -5038,23 +5085,51 @@ function Group.SetPos(group)
 			return group:SetPos()
 		end
 	end
-	group:SetScale(s.Scale)
-	local Spacing = s.Spacing
-	group:SetSize(s.Columns*(30+Spacing)-Spacing, s.Rows*(30+Spacing)-Spacing)
+	
 	group:SetFrameStrata(s.Strata)
 	group:SetFrameLevel(s.Level)
 end
 
-function Group.DetectFrame(group, event, time, Locked)
-	local frameToFind = group.frameToFind
-	if _G[frameToFind] then
-		group:SetPos()
-		TMW:UnregisterCallback("TMW_ONUPDATE_TIMECONSTRAINED", group.DetectFrame, group)
-	end
-end
 
+function Group.Setup_Conditions(group)
+	-- Clear out any old conditions and condition-related stuff
+	group.ConditionObj = nil
+	TMW:UnregisterCallback("TMW_CNDT_OBJ_PASSING_CHANGED", group)
+	group:UpdateTable_Unregister(group)
+	
+	-- Determine if we should process conditions
+	if group:ShouldUpdateIcons() and Locked then
+		-- Get a constructor to make the ConditionObj
+		local ConditionObjectConstructor = group:Conditions_GetConstructor(group.Conditions)
+		
+		-- If the group is set to only show in combat, add a condition to handle it.
+		if group.OnlyInCombat then
+			local combatCondition = ConditionObjectConstructor:Modify_WrapExistingAndAppendNew()
+			combatCondition.Type = "COMBAT"		
+		end
+		
+		-- Modifications are done. Construct the ConditionObj
+		group.ConditionObj = ConditionObjectConstructor:Construct()
+		
+		if group.ConditionObj then
+			-- Setup the event handler and the update table if a ConditionObj was returned
+			-- (meaning that there are conditions that need to be checked)
+			group:UpdateTable_Register()
+	
+			TMW:RegisterCallback("TMW_CNDT_OBJ_PASSING_CHANGED", group)
+		end
+	end
+
+	-- We probably added or removed an entry from the update table, so re-sort it
+	group:UpdateTable_Sort(Group.ScriptSort)
+end
+	
 function Group.Setup(group)
 	local groupID = group:GetID()
+	
+	local viewData_old = group.viewData
+	local viewData = Views[group.View]
+	group.viewData = viewData
 
 	group.CorrectStance = true
 	group.__shown = group:IsShown()
@@ -5063,18 +5138,27 @@ function Group.Setup(group)
 		group[k] = TMW.db.profile.Groups[groupID][k]
 	end
 
-	group.viewData = Views[group.View]
-	if not group.viewData then
-		group:Hide()
-		return
-	end
-	group.FontTest = not Locked and group.FontTest
-
-	group:SetFrameLevel(group.Level)
+	group:SetFrameLevel(group.Level) --TODO: is this redundant? I think it is
 
 	TMW:Fire("TMW_GROUP_SETUP_PRE", group)
 	
+	group:PreDisableAllModules()
+	
 	if group:ShouldUpdateIcons() then
+		-- Setup the groups's view:
+		
+		-- UnSetup the old view
+		if viewData_old and viewData_old ~= viewData and viewData_old.Group_UnSetup then
+			viewData_old:Group_UnSetup(group)
+		end
+		
+		-- Setup the current view
+		viewData:ImplementIntoGroup(group)
+		if viewData then
+			viewData:Group_Setup(group)
+		end
+		
+		-- Setup icons
 		for iconID = 1, group.Rows * group.Columns do
 			local icon = group[iconID] or TMW.Classes.Icon:New("Button", "TellMeWhen_Group" .. groupID .. "_Icon" .. iconID, group, "TellMeWhen_IconTemplate", iconID)
 
@@ -5091,31 +5175,14 @@ function Group.Setup(group)
 			end
 		end
 	end
-
-	if Locked or group.Locked then
-		group.resizeButton:Hide()
-	else
-		group.resizeButton:Show()
-	end
+	
+	group:DisablePreDisabledModules()
 
 	group:SetPos()
 	group:SortIcons()
 	group.shouldSortIcons = group.SortPriorities[1].Method ~= "id" and group:ShouldUpdateIcons() and group[2] and true
 
-	-- remove the group from the list of groups that should update conditions
-	group:UpdateTable_Unregister(group)
-
-	group.ConditionObj = nil -- reset the condition object in case there were conditions previously that got removed, or if we are not locked
-	if group:ShouldUpdateIcons() and Locked then
-		-- process any conditions the group might have
-		local ConditionObj = group:Conditions_LoadData(group.Conditions)
-		if ConditionObj then
-			group:UpdateTable_Register()
-		end
-	end
-
-	-- we probably added or removed an entry from this table, so re-sort it:
-	group:UpdateTable_Sort(Group.ScriptSort)
+	group:Setup_Conditions()
 
 	group:Update()
 	
@@ -5129,7 +5196,7 @@ end
 -- ------------------
 
 
-local Icon = TMW:NewClass("Icon", "Button", "UpdateTableManager", "ConditionControlledObject", "AnimatedObject")
+local Icon = TMW:NewClass("Icon", "Button", "UpdateTableManager", "ConditionImplementor", "AnimatedObject", "GenericModuleImplementor")
 Icon:UpdateTable_Set(IconsToUpdate)
 Icon.IsIcon = true
 
@@ -5370,16 +5437,6 @@ function Icon.Update(icon, force, ...)
 	end
 end
 
--- universal
-function Icon.FinishCompilingConditions(icon, funcstr)
-	if funcstr ~= "" then
-		TMW:RegisterCallback("TMW_CNDT_OBJ_PASSING_CHANGED", icon)
-	else
-		TMW:UnregisterCallback("TMW_CNDT_OBJ_PASSING_CHANGED", icon)
-	end
-	return funcstr
-end
-
 function Icon.TMW_CNDT_OBJ_PASSING_CHANGED(icon, event, ConditionObj, failed)
 	if icon.ConditionObj == ConditionObj then
 		icon.NextUpdateTime = 0
@@ -5589,7 +5646,6 @@ function Icon.Setup(icon)
 		icon.Alpha = 0
 	end
 
-	icon:DisableAllModules()
 	icon:UnregisterAllEvents()
 	ClearScripts(icon)
 	icon:SetUpdateMethod("auto")
@@ -5597,15 +5653,32 @@ function Icon.Setup(icon)
 	TMW:Fire("TMW_ICON_SETUP_PRE", icon)
 
 	-- Conditions
-	icon:Conditions_LoadData(icon.Conditions)
+	local ConditionObjectConstructor = icon:Conditions_GetConstructor(icon.Conditions)
+	icon.ConditionObj = ConditionObjectConstructor:Construct()
+	
+	if icon.ConditionObj then -- TODO: make sure ConditionObj gets cleared if there arent any conditions
+		TMW:RegisterCallback("TMW_CNDT_OBJ_PASSING_CHANGED", icon)
+	else
+		TMW:UnregisterCallback("TMW_CNDT_OBJ_PASSING_CHANGED", icon)
+	end
 
 	-- force an update
 	icon.LastUpdate = 0
 
 	-- actually run the icon's update function
 	if icon.Enabled or not Locked then
-
+		
+		if viewData ~= viewData_old then
+			-- If we changed views (or if the last view wasn't valid/didn't exist), disable all modules by default.
+			icon:DisableAllModules()
+		else
+			-- Otherwise, just prepare any modules that dont get :Enable()d to be disabled.
+			icon:PreDisableAllModules()
+		end
+		
 		if viewData_old and viewData_old.Icon_UnSetup then
+			-- Call the old view's Icon_UnSetup if it has one (in most cases, it shouldn't.
+			-- All unloading/UnSetup/Disabling should be handled by individual modules. 
 			viewData_old:Icon_UnSetup(icon)
 		end
 		viewData:ImplementIntoIcon(icon)
@@ -5613,8 +5686,13 @@ function Icon.Setup(icon)
 		icon:SetupAllModulesForIcon(icon)
 		
 		TMW.safecall(typeData.Setup, typeData, icon, groupID, iconID)
+	
+		--if TEST == 1 then
+			icon:DisablePreDisabledModules()
+		--end
 	else
 		icon:SetInfo("alpha", 0)
+		icon:DisableAllModules()
 	end
 
 	-- if the icon is set to always hide and we haven't determined otherwise, then don't automatically update it.
@@ -5663,30 +5741,6 @@ function Icon.Setup(icon)
 	TMW:Fire("TMW_ICON_SETUP_POST", icon)
 end
 
-
-
-function Icon.ImplementModule(icon, moduleName)
-	local Module = icon.Modules[moduleName]
-	if not Module then
-		Module = TMW.Classes[moduleName]:New(icon)
-	end
-	return Module
-end
-
-function Icon.DisableModule(icon, moduleName)
-	local Module = icon.Modules[moduleName]
-	if Module then
-		Module:Disable()
-		return Module
-	end
-end
-
-function Icon.DisableAllModules(icon)
-	for moduleName, Module in pairs(icon.Modules) do
-		Module:Disable()
-	end
-end
-
 function Icon.SetupAllModulesForIcon(icon, sourceIcon)
 	for moduleName, Module in pairs(icon.Modules) do
 		if Module.SetupForIcon then
@@ -5695,6 +5749,7 @@ function Icon.SetupAllModulesForIcon(icon, sourceIcon)
 	end
 end
 
+-- universal (this is for meta icons)
 function Icon.SetModulesToActiveStateOfIcon(icon, sourceIcon)
 	local sourceModules = sourceIcon.Modules
 	for moduleName, Module in pairs(icon.Modules) do
@@ -5713,6 +5768,7 @@ end
 	
 
 TMW:NewClass("NamedInstances"){
+	-- this isnt actually used (it is inherited from, but instancesByName isnt used anywhere. see if we could benefit by using it somewhere (i bet we can; i wrote it for a reason) (TODO)
 	OnClassInherit_NamedInstances = function(self, newClass)
 		newClass.instancesByName = {}
 	end,
@@ -5722,57 +5778,15 @@ TMW:NewClass("NamedInstances"){
 }
 
 TMW:NewClass("GenericComponent"){
-	IconSettingDefaults = {},
 	ConfigPanels = {},
 	OnClassInherit_GenericComponent = function(self, newClass)
-		newClass:InheritTable(self, "IconSettingDefaults")
 		newClass:InheritTable(self, "ConfigPanels")
 	end,
 	OnNewInstance_GenericComponent = function(self)
-		self:InheritTable(self.class, "IconSettingDefaults")
 		self:InheritTable(self.class, "ConfigPanels")
 	end,
-
-	ImplementIntoIcon = function(self, icon)
-		local ics = icon:GetSettings()
-		for setting in pairs(self.IconSettingDefaults) do
-			icon[setting] = ics[setting]
-		end
-		icon.Components[#icon.Components+1] = self
-	end,
 	
-	RegisterIconDefaults = function(self, defaults, forceRelevant)
-		assert(type(defaults) == "table", "arg1 to RegisterIconDefaults must be a table")
-		
-		if TMW.Initialized then
-			error(("Defaults for module %q are being registered too late. They need to be registered before the database is initialized."):format(self.name))
-		end
-		
-		-- Copy the defaults into the main defaults table.
-		TMW:CopyTableInPlaceWithMeta(defaults, TMW.Icon_Defaults, true)
-		-- Copy the defaults into defaults for this component. Used to implement relevant settings.
-		TMW:CopyTableInPlaceWithMeta(defaults, self.IconSettingDefaults, true)
-		
-		-- Add the settings to the RelevantToAll table so that they can be accessed directly from the icon.
-		if forceRelevant then
-			for settingKey in pairs(defaults) do
-				RelevantToAll.__index[settingKey] = true
-			end
-		end
-	end,
 	
-	ConfigPanelsSort = function(a, b)
-		local sizeAFull, sizeBFull = a.size == "full", b.size == "full"
-		if sizeAFull or sizeBFull then
-			if sizeAFull and sizeBFull then
-				return true
-			else
-				return sizeAFull
-			end
-		else
-			return false
-		end
-	end,
 	RegisterConfigPanel = function(self, size, preferredColumn, panelType)
 		-- This is supposed to be a private method, only called from the RegisterConfigPanel_<type> functions.
 		assert(size == "column" or size == "full", "GenericComponent:RegisterConfigPanel() - 'size' (arg2) - Expected 'column' or 'full'")
@@ -5788,7 +5802,6 @@ TMW:NewClass("GenericComponent"){
 		end
 		
 		self.ConfigPanels[#self.ConfigPanels + 1] = t
-		sort(self.ConfigPanels, self.ConfigPanelsSort)
 		return t
 	end,
 	RegisterConfigPanel_XMLTemplate = function(self, size, preferredColumn, xmlTemplateName)
@@ -5821,15 +5834,83 @@ TMW:NewClass("GenericComponent"){
 	end,
 }
 
+TMW:NewClass("IconComponent", "GenericComponent"){
+	IconSettingDefaults = {},
+	OnClassInherit_IconComponent = function(self, newClass)
+		newClass:InheritTable(self, "IconSettingDefaults")
+	end,
+	OnNewInstance_IconComponent = function(self)
+		self:InheritTable(self.class, "IconSettingDefaults")
+	end,
+	
+	RegisterIconDefaults = function(self, defaults, forceRelevant)
+		assert(type(defaults) == "table", "arg1 to RegisterIconDefaults must be a table")
+		
+		if TMW.Initialized then
+			error(("Defaults for module %q are being registered too late. They need to be registered before the database is initialized."):format(self.name))
+		end
+		
+		-- Copy the defaults into the main defaults table.
+		TMW:CopyTableInPlaceWithMeta(defaults, TMW.Icon_Defaults, true)
+		-- Copy the defaults into defaults for this component. Used to implement relevant settings.
+		TMW:CopyTableInPlaceWithMeta(defaults, self.IconSettingDefaults, true)
+		
+		-- Add the settings to the RelevantToAll table so that they can be accessed directly from the icon.
+		if forceRelevant then
+			for settingKey in pairs(defaults) do
+				RelevantToAll.__index[settingKey] = true
+			end
+		end
+	end,
+	
+	ImplementIntoIcon = function(self, icon)
+		local ics = icon:GetSettings()
+		for setting in pairs(self.IconSettingDefaults) do
+			icon[setting] = ics[setting]
+		end
+		icon.Components[#icon.Components+1] = self
+		
+		if self.OnImplementIntoIcon then
+		--	self:OnImplementIntoIcon(icon)
+		end
+		self:CallFunc("OnImplementIntoIcon", icon)
+	end,
+}
+
+TMW:NewClass("GroupComponent", "GenericComponent"){
+	RegisterGroupDefaults = function(self, defaults)
+		assert(type(defaults) == "table", "arg1 to RegisterGroupDefaults must be a table")
+		
+		if TMW.Initialized then
+			error(("Defaults for component %q are being registered too late. They need to be registered before the database is initialized."):format(self.name or "<??>"))
+		end
+		
+		-- Copy the defaults into the main defaults table.
+		TMW:CopyTableInPlaceWithMeta(defaults, TMW.Group_Defaults, true)
+	end,
+	
+	ImplementIntoGroup = function(self, group)
+		group.Components[#group.Components+1] = self
+		
+		if self.OnImplementIntoGroup then
+		--	self:OnImplementIntoGroup(icon)
+		end
+		self:CallFunc("OnImplementIntoGroup", group)
+	end,
+}
+
+
 TMW.ProcessorsByName = {}
-local IconDataProcessor = TMW:NewClass("IconDataProcessor", "GenericComponent", "NamedInstances"){
+local IconDataProcessor = TMW:NewClass("IconDataProcessor", "IconComponent", "NamedInstances"){
 	UsedTokens = {},
-	SIUVs = { --SetInfoUpValues
-		"local TMW = TMW",
-		"local print = TMW.print",
-		"local ProcessorsByName = TMW.ProcessorsByName",
-		"local type = type",
-	},
+	SIUVs2 = {},
+	DeclareUpValue = function(self, variables, ...)
+		assert(type(variables) == "string", "IconDataProcessor:DeclareUpValue(variables, ...) - variables must be a string")
+		self.SIUVs2[#self.SIUVs2+1] = {
+			variables = variables,
+			...,
+		}
+	end,
 	OnNewInstance = function(self, name, attributes)
 		assert(name, "Name is required for an IconDataProcessor!")
 		assert(attributes, "Attributes are required for an IconDataProcessor!")
@@ -5857,8 +5938,8 @@ local IconDataProcessor = TMW:NewClass("IconDataProcessor", "GenericComponent", 
 		end
 		
 		TMW.ProcessorsByName[self.name] = self
-		self.SIUVs[#self.SIUVs+1] = ("local %s = ProcessorsByName['%s']"):format(name, name)
-		self.SIUVs[#self.SIUVs+1] = ("local %s"):format(attributes) -- do this to prevent accidental leaked global accessing
+		self:DeclareUpValue(name, self)
+		self:DeclareUpValue(attributes) -- do this to prevent accidental leaked global accessing
 		
 		self.changedEvent = "TMW_ICON_DATA_CHANGED_" .. name
 		
@@ -5882,8 +5963,12 @@ local IconDataProcessor = TMW:NewClass("IconDataProcessor", "GenericComponent", 
 		end
 	end
 }
+IconDataProcessor:DeclareUpValue("TMW", TMW)
+IconDataProcessor:DeclareUpValue("print", print)
+IconDataProcessor:DeclareUpValue("ProcessorsByName", TMW.ProcessorsByName)
+IconDataProcessor:DeclareUpValue("type", type)
 
-TMW:NewClass("IconDataProcessorHook", "GenericComponent", "NamedInstances"){
+TMW:NewClass("IconDataProcessorHook", "IconComponent", "NamedInstances"){
 	OnNewInstance = function(self, name, processorToHook)
 		assert(type(name) == "string", "IconDataProcessorHook: arg1 to constructor function must be a string")
 		assert(type(processorToHook) == "string", "IconDataProcessorHook: arg2 to constructor function must be a string")
@@ -5985,7 +6070,29 @@ local SetInfoFuncs = setmetatable({}, { __index = function(self, signature)
 	end    
 	
 	local t = {} -- taking a page from DogTag's book on compiling functions
-	t[#t+1] = table.concat(IconDataProcessor.SIUVs, "\n")
+	
+	-- Declare all upvalues
+	for UVSetID, UVSet in ipairs(IconDataProcessor.SIUVs2) do
+		t[#t+1] = "local "
+		t[#t+1] = UVSet.variables
+		t[#t+1] = " = "
+		for referenceID, reference in ipairs(UVSet) do
+			t[#t+1] = "TMW.Classes.IconDataProcessor.SIUVs2["
+			t[#t+1] = UVSetID
+			t[#t+1] = "]["
+			t[#t+1] = referenceID
+			t[#t+1] = "]"
+			t[#t+1] = ", "
+		end
+		t[#t] = nil -- remove the final ", " (if there were any references) or the " = " (if there weren't)
+		t[#t+1] = "\n"
+	end
+	
+	t[#t+1] = "\n"
+	t[#t+1] = "--FINISHED V2UVS"
+	
+	t[#t+1] = "\n"
+	
 	t[#t+1] = "\n"
 	t[#t+1] = "return function(icon, "
 	t[#t+1] = originalSignature:trim(" ,;"):gsub("  ", " "):gsub(";", ",")
@@ -6026,7 +6133,7 @@ local SetInfoFuncs = setmetatable({}, { __index = function(self, signature)
 	end
 	
 	t[#t+1] = [[
-	if doFireIconUpdated then
+		if doFireIconUpdated then
 			TMW:Fire('TMW_ICON_UPDATED', icon)
 		end
 	end -- "return function(icon, ...)"
@@ -6069,11 +6176,61 @@ function TMW:CreateDogTagEventString(...)
 end
 
 
-TMW:NewClass("IconModule", "GenericComponent"){
+TMW:NewClass("ObjectModule"){
+	Enable = function(self)
+		self:AssertSelfIsInstance()
+		
+		self.PreDisabled = nil
+		
+		if not self.IsEnabled then
+			self.IsEnabled = true
+			self.class.NumberEnabled = self.class.NumberEnabled + 1
+			if self.class.NumberEnabled == 1 and self.class.OnUsed then
+				self.class:OnUsed()
+			end
+			
+			if self.OnEnable then
+				self:OnEnable()
+			end
+		end
+	end,
+	Disable = function(self)
+		self:AssertSelfIsInstance()
+		
+		self.PreDisabled = nil
+		
+		if self.IsEnabled and not self.IsEssential then
+			self.IsEnabled = false
+			self.class.NumberEnabled = self.class.NumberEnabled - 1
+			if self.class.NumberEnabled == 0 and self.class.OnUnused then
+				self.class:OnUnused()
+			end
+			
+			if self.OnDisable then
+				self:OnDisable()
+			end
+		end
+	end,
+	PreDisable = function(self)
+		self:AssertSelfIsInstance()
+		
+		if self.IsEnabled and not self.IsEssential then
+			self.PreDisabled = true
+		end
+	end,
+	
+	SetEssential = function(self, essential)
+		self:AssertSelfIsInstance()
+		
+		self.IsEssential = true
+		self:Enable()		
+	end,
+}
+
+TMW:NewClass("IconModule", "IconComponent", "ObjectModule"){
 	EventListners = {},
 	ViewImplementors = {},
 	TypeAllowances = {},
-	ConfigPanels = {},
 	defaultAllowanceForTypes = true,
 	OnNewInstance_1_IconModule = function(self, icon)
 		icon.Modules[self.className] = self
@@ -6133,42 +6290,6 @@ TMW:NewClass("IconModule", "GenericComponent"){
 		assert(event)
 		
 		return self.EventListners[event]
-	end,
-	Enable = function(self)
-		self:AssertSelfIsInstance()
-		
-		if not self.IsEnabled then
-			self.IsEnabled = true
-			self.class.NumberEnabled = self.class.NumberEnabled + 1
-			if self.class.NumberEnabled == 1 and self.class.OnUsed then
-				self.class:OnUsed()
-			end
-			
-			if self.OnEnable then
-				self:OnEnable()
-			end
-		end
-	end,
-	Disable = function(self)
-		self:AssertSelfIsInstance()
-		
-		if self.IsEnabled and not self.IsEssential then
-			self.IsEnabled = false
-			self.class.NumberEnabled = self.class.NumberEnabled - 1
-			if self.class.NumberEnabled == 0 and self.class.OnUnused then
-				self.class:OnUnused()
-			end
-			
-			if self.OnDisable then
-				self:OnDisable()
-			end
-		end
-	end,
-	SetEssential = function(self, essential)
-		self:AssertSelfIsInstance()
-		
-		self.IsEssential = true
-		self:Enable()		
 	end,
 	SetEssentialModuleComponent = function(self, identifier, component)
 		self:AssertSelfIsInstance()
@@ -6233,9 +6354,110 @@ TMW:NewClass("IconModule", "GenericComponent"){
 }
 
 
+TMW:NewClass("GroupModule", "GroupComponent", "ObjectModule"){
+	ViewImplementors = {},
+	OnNewInstance_1_GroupModule = function(self, group)
+		group.Modules[self.className] = self
+		self.group = group
+	end,
+	OnClassInherit_GroupModule = function(self, newClass)
+		newClass.NumberEnabled = 0
+		
+		newClass:InheritTable(self, "ViewImplementors")
+	end,
+	
+	ImplementForAllViews = function(self, implementorFunc)
+		self:AssertSelfIsClass()
+		
+		self.ViewImplementors.ALL = implementorFunc
+	end,
+	
+	SetImplementorForViews = function(self, implementorFunc, ...)
+		-- intended to be a private method
+		for i, viewName in TMW:Vararg(...) do
+			self.ViewImplementors[viewName] = implementorFunc
+		end
+	end,
+	DisallowForViews = function(self, ...)
+		self:AssertSelfIsClass()
+		
+		self:SetImplementorForViews(false, ...)
+	end,
+	ImplementForViews = function(self, implementorFunc, ...)
+		self:AssertSelfIsClass()
+		
+		self:SetImplementorForViews(implementorFunc, ...)
+	end,
+}
+
+TMW:NewClass("GroupModule_Resizer", "GroupModule"){
+	OnNewInstance = function(self, group)
+		self.resizeButton = CreateFrame("Button", nil, group, "TellMeWhen_GroupTemplate_ResizeButton")
+		self.resizeButton.module = self
+		
+		self.resizeButton:SetScript("OnMouseDown", self.StartSizing)
+		self.resizeButton:SetScript("OnMouseUp", self.StopSizing)
+	end,
+
+	OnDisable = function(self)
+		self.resizeButton:Hide()
+	end,
+	
+	GetStandardizedCoordinates = function(self)
+		local group = self.group
+		local scale = group:GetEffectiveScale()
+		
+		return
+			group:GetLeft()*scale,
+			group:GetRight()*scale,
+			group:GetTop()*scale,
+			group:GetBottom()*scale
+	end,
+	GetStandardizedCursorCoordinates = function(self)
+		-- This method is rather pointless (its just a wrapper),
+		-- but having consistency is nice so that I don't have to remember if the coords returned
+		-- are comparable to other Standardized coordinates/sizes
+		return GetCursorPosition()    
+	end,
+	GetStandardizedSize = function(self)
+		local group = self.group
+		local x, y = group:GetSize()
+		local scale = group:GetEffectiveScale()
+		
+		return x*scale, y*scale
+	end,
+
+	StartSizing = function(resizeButton)
+		local self = resizeButton.module
+		local group = self.group
+		
+		self.std_oldLeft, self.std_oldRight, self.std_oldTop, self.std_oldBottom = self:GetStandardizedCoordinates()
+		self.std_oldWidth, self.std_oldHeight = self:GetStandardizedSize()
+		
+		self.oldScale = group:GetScale()
+		self.oldUIScale = UIParent:GetScale()
+		self.oldEffectiveScale = group:GetEffectiveScale()
+		
+		self.oldX, self.oldY = group:GetLeft(), group:GetTop()
+		
+		resizeButton:SetScript("OnUpdate", group.viewData.Group_SizeUpdate)
+	end,
+	StopSizing = function(resizeButton)
+		local self = resizeButton.module
+		local group = self.group
+		
+		resizeButton:SetScript("OnUpdate", nil)
+		
+		group:CalibrateAnchors()
+		
+		group:SetPos()
+		
+		TMW.IE:NotifyChanges()
+	end,
+}
 
 
-local IconType = TMW:NewClass("IconType", "GenericComponent", "NamedInstances")
+local IconType = TMW:NewClass("IconType", "IconComponent", "NamedInstances")
 
 IconType.SUGType = "spell"
 IconType.leftCheckYOffset = 0
@@ -6409,7 +6631,7 @@ function IconType:UpdateUsedProcessors()
 	end
 end
 
-IconType:ExtendMethod("ImplementIntoIcon", function(self, icon)
+function IconType:OnImplementIntoIcon(icon)
 	-- Implement all of the Processors that the Icon Type uses into the icon.
 	for Processor in pairs(self.UsedProcessors) do
 		Processor:ImplementIntoIcon(icon)
@@ -6447,7 +6669,7 @@ IconType:ExtendMethod("ImplementIntoIcon", function(self, icon)
 			end
 		end
 	end
-end)
+end
 
 --TODO: misplaced
 function Icon.ShouldImplementModule(icon, moduleName)
@@ -6486,7 +6708,7 @@ function Icon.IsModuleImplemented(icon, moduleName)
 end
 
 
-local IconView = TMW:NewClass("IconView", "GenericComponent", "NamedInstances")
+local IconView = TMW:NewClass("IconView", "GroupComponent", "IconComponent", "NamedInstances")
 
 function IconView:OnNewInstance(view)
 	self.view = view
@@ -6509,19 +6731,6 @@ function IconView:Register()
 	Views[viewkey] = self -- put it in the main Views table
 	tinsert(TMW.OrderedViews, self) -- put it in the ordered table (used to order the type selection dropdown in the icon editor)
 
-	
-	TMW.Icon_Defaults.SettingsPerView[self.view] = {
-		Texts = {},
-		TextLayout = self.defaultTextLayout,
-	}
-	TMW.Group_Defaults.SettingsPerView[self.view] = {
-		TextLayout = self.defaultTextLayout,
-	}
-	
-	for i, stringSettings in ipairs(TMW.Defaults.profile.TextLayouts[self.defaultTextLayout]) do
-		TMW.Icon_Defaults.SettingsPerView[self.view].Texts[i] = stringSettings.DefaultText
-	end
-
 	return self -- why not?
 end
 
@@ -6536,13 +6745,42 @@ function IconView:DisallowModules(...)
 	
 end
 
-IconView:ExtendMethod("ImplementIntoIcon", function(self, icon)
+function IconView:OnImplementIntoGroup(group)
+--IconView:ExtendMethod("ImplementIntoGroup", function(self, group)
+	for moduleName, implementorFunc in pairs(self.ModuleImplementors) do
+		-- implementorFunc is either true if the module is setup within IconView:Group_Setup(),
+		-- or it is a function if that function should be called in order to setup the module.
+		
+		-- Get the class of the module that we might be implementing.
+		local ModuleClass = moduleName:find("GroupModule") and TMW.Classes[moduleName]
+		
+		-- If the class exists and the module should be implemented, then do it.
+		if implementorFunc and ModuleClass then
+		
+			-- Check to see if an instance of the Module already exists for the group before creating one.
+			local Module = group.Modules[moduleName]
+			if not Module then
+				Module = ModuleClass:New(group)
+			end
+			 
+			-- Call the IconComponent ImplementIntoIcon function to add settings and stuff.
+			Module:ImplementIntoGroup(group)
+	
+			-- If implementorFunc was a function (see above) then call it in order to properly setup the module.
+			if type(implementorFunc) == "function" then
+				implementorFunc(self, group)
+			end
+		end
+	end
+end--)
+
+function IconView:OnImplementIntoIcon(icon)
 	for moduleName, implementorFunc in pairs(self.ModuleImplementors) do
 		-- implementorFunc is either true if the module is setup within IconView:Icon_Setup(),
 		-- or it is a function if that function should be called in order to setup the module.
 		
 		-- Get the class of the module that we might be implementing.
-		local ModuleClass = TMW.Classes[moduleName]
+		local ModuleClass = moduleName:find("IconModule") and TMW.Classes[moduleName]
 		
 		-- If the class exists and the module should be implemented, then do it.
 		if implementorFunc and ModuleClass then
@@ -6553,7 +6791,7 @@ IconView:ExtendMethod("ImplementIntoIcon", function(self, icon)
 				Module = ModuleClass:New(icon)
 			end
 			
-			-- Call the GenericComponent ImplementIntoIcon function to add settings and stuff.
+			-- Call the IconComponent ImplementIntoIcon function to add settings and stuff.
 			Module:ImplementIntoIcon(icon)
 	
 			-- If implementorFunc was a function (see above) then call it in order to properly setup the module.
@@ -6562,7 +6800,7 @@ IconView:ExtendMethod("ImplementIntoIcon", function(self, icon)
 			end
 		end
 	end
-end)
+end
 
 
 -- ------------------

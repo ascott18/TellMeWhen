@@ -667,8 +667,11 @@ CNDT.Types = {
 		icon = "Interface\\Icons\\inv_alchemy_elixir_05",
 		tcoords = standardtcoords,
 		funcstr = [[UnitHealth(c.Unit)/(UnitHealthMax(c.Unit)+epsilon) c.Operator c.Level]],
-		events = function(c)
-			return CNDT:IsUnitEventUnit(c.Unit), "UNIT_HEALTH_FREQUENT", c.Unit, "UNIT_MAXHEALTH", c.Unit
+		events = function(ConditionObj, c)
+			return
+				ConditionObj:GetUnitChangedEventString(c.Unit),
+				ConditionObj:GenerateNormalEventString("UNIT_HEALTH_FREQUENT", c.Unit),
+				ConditionObj:GenerateNormalEventString("UNIT_MAXHEALTH", c.Unit)
 		end,
 	},
 	{ -- primary resource
@@ -683,8 +686,12 @@ CNDT.Types = {
 		icon = "Interface\\Icons\\inv_alchemy_elixir_02",
 		tcoords = standardtcoords,
 		funcstr = [[UnitPower(c.Unit)/(UnitPowerMax(c.Unit)+epsilon) c.Operator c.Level]],
-		events = function(c)
-			return CNDT:IsUnitEventUnit(c.Unit), "UNIT_POWER_FREQUENT", c.Unit, "UNIT_MAXPOWER", c.Unit, "UNIT_DISPLAYPOWER", c.Unit
+		events = function(ConditionObj, c)
+			return
+				ConditionObj:GetUnitChangedEventString(c.Unit),
+				ConditionObj:GenerateNormalEventString("UNIT_POWER_FREQUENT", c.Unit),
+				ConditionObj:GenerateNormalEventString("UNIT_MAXPOWER", c.Unit),
+				ConditionObj:GenerateNormalEventString("UNIT_DISPLAYPOWER", c.Unit)
 		end,
 	},
 	{ -- mana
@@ -698,8 +705,11 @@ CNDT.Types = {
 		icon = "Interface\\Icons\\inv_potion_126",
 		tcoords = standardtcoords,
 		funcstr = [[UnitPower(c.Unit, 0)/(UnitPowerMax(c.Unit, 0)+epsilon) c.Operator c.Level]],
-		events = function(c)
-			return CNDT:IsUnitEventUnit(c.Unit), "UNIT_POWER_FREQUENT", c.Unit, "UNIT_MAXPOWER", c.Unit
+		events = function(ConditionObj, c)
+			return
+				ConditionObj:GetUnitChangedEventString(c.Unit),
+				ConditionObj:GenerateNormalEventString("UNIT_POWER_FREQUENT", c.Unit),
+				ConditionObj:GenerateNormalEventString("UNIT_MAXPOWER", c.Unit)
 		end,
 	},
 	{ -- energy
@@ -713,8 +723,11 @@ CNDT.Types = {
 		icon = "Interface\\Icons\\inv_potion_125",
 		tcoords = standardtcoords,
 		funcstr = [[UnitPower(c.Unit, 3)/(UnitPowerMax(c.Unit, 3)+epsilon) c.Operator c.Level]],
-		events = function(c)
-			return CNDT:IsUnitEventUnit(c.Unit), "UNIT_POWER_FREQUENT", c.Unit, "UNIT_MAXPOWER", c.Unit
+		events = function(ConditionObj, c)
+			return
+				ConditionObj:GetUnitChangedEventString(c.Unit),
+				ConditionObj:GenerateNormalEventString("UNIT_POWER_FREQUENT", c.Unit),
+				ConditionObj:GenerateNormalEventString("UNIT_MAXPOWER", c.Unit)
 		end,
 	},
 	{ -- rage
@@ -728,8 +741,11 @@ CNDT.Types = {
 		icon = "Interface\\Icons\\inv_potion_120",
 		tcoords = standardtcoords,
 		funcstr = [[UnitPower(c.Unit, 1)/(UnitPowerMax(c.Unit, 1)+epsilon) c.Operator c.Level]],
-		events = function(c)
-			return CNDT:IsUnitEventUnit(c.Unit), "UNIT_POWER_FREQUENT", c.Unit, "UNIT_MAXPOWER", c.Unit
+		events = function(ConditionObj, c)
+			return
+				ConditionObj:GetUnitChangedEventString(c.Unit),
+				ConditionObj:GenerateNormalEventString("UNIT_POWER_FREQUENT", c.Unit),
+				ConditionObj:GenerateNormalEventString("UNIT_MAXPOWER", c.Unit)
 		end,
 	},
 	{ -- focus
@@ -743,8 +759,11 @@ CNDT.Types = {
 		icon = "Interface\\Icons\\inv_potion_124",
 		tcoords = standardtcoords,
 		funcstr = [[UnitPower(c.Unit, 2)/(UnitPowerMax(c.Unit, 2)+epsilon) c.Operator c.Level]],
-		events = function(c)
-			return CNDT:IsUnitEventUnit(c.Unit), "UNIT_POWER_FREQUENT", c.Unit, "UNIT_MAXPOWER", c.Unit
+		events = function(ConditionObj, c)
+			return
+				ConditionObj:GetUnitChangedEventString(c.Unit),
+				ConditionObj:GenerateNormalEventString("UNIT_POWER_FREQUENT", c.Unit),
+				ConditionObj:GenerateNormalEventString("UNIT_MAXPOWER", c.Unit)
 		end,
 	},
 	{ -- runic power
@@ -758,8 +777,11 @@ CNDT.Types = {
 		icon = "Interface\\Icons\\inv_potion_128",
 		tcoords = standardtcoords,
 		funcstr = [[UnitPower(c.Unit, 6)/(UnitPowerMax(c.Unit, 6)+epsilon) c.Operator c.Level]],
-		events = function(c)
-			return CNDT:IsUnitEventUnit(c.Unit), "UNIT_POWER_FREQUENT", c.Unit, "UNIT_MAXPOWER", c.Unit
+		events = function(ConditionObj, c)
+			return
+				ConditionObj:GetUnitChangedEventString(c.Unit),
+				ConditionObj:GenerateNormalEventString("UNIT_POWER_FREQUENT", c.Unit),
+				ConditionObj:GenerateNormalEventString("UNIT_MAXPOWER", c.Unit)
 		end,
 	},
 	{ -- alternate power (atramedes, chogall, etc)
@@ -774,8 +796,13 @@ CNDT.Types = {
 		icon = "Interface\\Icons\\spell_shadow_mindflay",
 		tcoords = standardtcoords,
 		funcstr = [[UnitPower(c.Unit, 10)/(UnitPowerMax(c.Unit, 10)+epsilon) c.Operator c.Level]],
-		events = function(c)
-			return CNDT:IsUnitEventUnit(c.Unit), "UNIT_POWER_FREQUENT", c.Unit, "UNIT_MAXPOWER", c.Unit, "UNIT_POWER_BAR_SHOW", c.Unit, "UNIT_POWER_BAR_HIDE", c.Unit
+		events = function(ConditionObj, c)
+			return
+				ConditionObj:GetUnitChangedEventString(c.Unit),
+				ConditionObj:GenerateNormalEventString("UNIT_POWER_FREQUENT", c.Unit),
+				ConditionObj:GenerateNormalEventString("UNIT_MAXPOWER", c.Unit),
+				ConditionObj:GenerateNormalEventString("UNIT_POWER_BAR_SHOW", c.Unit),
+				ConditionObj:GenerateNormalEventString("UNIT_POWER_BAR_HIDE", c.Unit)
 		end,
 		spaceafter = true,
 	},
@@ -790,8 +817,10 @@ CNDT.Types = {
 		icon = "Interface\\Icons\\inv_misc_gem_amethyst_02",
 		tcoords = standardtcoords,
 		funcstr = [[UnitPower(c.Unit, 7) c.Operator c.Level]],
-		events = function(c)
-			return CNDT:IsUnitEventUnit(c.Unit), "UNIT_POWER", c.Unit
+		events = function(ConditionObj, c)
+			return
+				ConditionObj:GetUnitChangedEventString(c.Unit),
+				ConditionObj:GenerateNormalEventString("UNIT_POWER", c.Unit)
 		end,
 		hidden = pclass ~= "WARLOCK",
 	},
@@ -805,8 +834,10 @@ CNDT.Types = {
 		icon = "Interface\\Icons\\Spell_Holy_Rune",
 		tcoords = standardtcoords,
 		funcstr = [[UnitPower(c.Unit, 9) c.Operator c.Level]],
-		events = function(c)
-			return CNDT:IsUnitEventUnit(c.Unit), "UNIT_POWER", c.Unit
+		events = function(ConditionObj, c)
+			return
+				ConditionObj:GetUnitChangedEventString(c.Unit),
+				ConditionObj:GenerateNormalEventString("UNIT_POWER", c.Unit)
 		end,
 		hidden = pclass ~= "PALADIN",
 	},
@@ -823,8 +854,10 @@ CNDT.Types = {
 		icon = "Interface\\PlayerFrame\\UI-DruidEclipse",
 		tcoords = {0.65625000, 0.74609375, 0.37500000, 0.55468750},
 		funcstr = [[UnitPower(c.Unit, 8) c.Operator c.Level]],
-		events = function(c)
-			return CNDT:IsUnitEventUnit(c.Unit), "UNIT_POWER", c.Unit
+		events = function(ConditionObj, c)
+			return
+				ConditionObj:GetUnitChangedEventString(c.Unit),
+				ConditionObj:GenerateNormalEventString("UNIT_POWER", c.Unit)
 		end,
 		hidden = pclass ~= "DRUID",
 	},
@@ -841,7 +874,10 @@ CNDT.Types = {
 		tcoords = {0.55859375, 0.64843750, 0.57031250, 0.75000000},
 		funcstr = [[c.Level == (GetEclipseDirection() == "sun" and 1 or 0)]],
 		hidden = pclass ~= "DRUID",
-		events = "ECLIPSE_DIRECTION_CHANGE",
+		events = function(ConditionObj, c)
+			return
+				ConditionObj:GenerateNormalEventString("ECLIPSE_DIRECTION_CHANGE")
+		end,
 	},
 	{ -- pet happiness
 		text = HAPPINESS,
@@ -856,8 +892,11 @@ CNDT.Types = {
 		tcoords = {0.390625, 0.5491, 0.03, 0.3305},
 		funcstr = GetPetHappiness and [[(GetPetHappiness() or 0) c.Operator c.Level]] or [[true]], -- dummy string to keep support for wowCN
 		hidden = not GetPetHappiness or pclass ~= "HUNTER", -- dont show if GetPetHappiness doesnt exist (if happiness is removed in the client version), not not because it must be false, not nil
-		events = function()
-			return "UNIT_HAPPINESS", "pet", "UNIT_POWER", "pet"
+		events = function(ConditionObj, c)
+			return
+				ConditionObj:GetUnitChangedEventString("pet"),
+				ConditionObj:GenerateNormalEventString("UNIT_HAPPINESS", "pet"),
+				ConditionObj:GenerateNormalEventString("UNIT_POWER", "pet")
 		end,
 	},
 	{ -- runes
@@ -891,8 +930,10 @@ CNDT.Types = {
 				return [[true]] -- just a cheesy error prevention if no runes are checked
 			end
 		end,
-		events = function(c)
-			return "RUNE_POWER_UPDATE", "RUNE_TYPE_UPDATE"
+		events = function(ConditionObj, c)
+			return
+				ConditionObj:GenerateNormalEventString("RUNE_POWER_UPDATE"),
+				ConditionObj:GenerateNormalEventString("RUNE_TYPE_UPDATE")
 		end,
 		hidden = pclass ~= "DEATHKNIGHT",
 	},
@@ -906,8 +947,10 @@ CNDT.Types = {
 		icon = "Interface\\Icons\\ability_rogue_eviscerate",
 		tcoords = standardtcoords,
 		funcstr = [[GetComboPoints("player", c.Unit) c.Operator c.Level]],
-		events = function(c)
-			return CNDT:IsUnitEventUnit(c.Unit), "UNIT_COMBO_POINTS", "player"
+		events = function(ConditionObj, c)
+			return
+				ConditionObj:GetUnitChangedEventString(c.Unit),
+				ConditionObj:GenerateNormalEventString("UNIT_COMBO_POINTS", "player")
 		end,
 	},
 
@@ -921,8 +964,10 @@ CNDT.Types = {
 		icon = "Interface\\Icons\\inv_alchemy_elixir_05",
 		tcoords = standardtcoords,
 		funcstr = [[UnitHealth(c.Unit) c.Operator c.Level]],
-		events = function(c)
-			return CNDT:IsUnitEventUnit(c.Unit), "UNIT_HEALTH_FREQUENT", c.Unit
+		events = function(ConditionObj, c)
+			return
+				ConditionObj:GetUnitChangedEventString(c.Unit),
+				ConditionObj:GenerateNormalEventString("UNIT_HEALTH_FREQUENT", c.Unit)
 		end,
 		spacebefore = true,
 	},
@@ -937,8 +982,11 @@ CNDT.Types = {
 		icon = "Interface\\Icons\\inv_alchemy_elixir_02",
 		tcoords = standardtcoords,
 		funcstr = [[UnitPower(c.Unit) c.Operator c.Level]],
-		events = function(c)
-			return CNDT:IsUnitEventUnit(c.Unit), "UNIT_POWER_FREQUENT", c.Unit, "UNIT_DISPLAYPOWER", c.Unit
+		events = function(ConditionObj, c)
+			return
+				ConditionObj:GetUnitChangedEventString(c.Unit),
+				ConditionObj:GenerateNormalEventString("UNIT_POWER_FREQUENT", c.Unit),
+				ConditionObj:GenerateNormalEventString("UNIT_DISPLAYPOWER", c.Unit)
 		end,
 	},
 	{ -- abs mana
@@ -951,8 +999,10 @@ CNDT.Types = {
 		icon = "Interface\\Icons\\inv_potion_126",
 		tcoords = standardtcoords,
 		funcstr = [[UnitPower(c.Unit, 0) c.Operator c.Level]],
-		events = function(c)
-			return CNDT:IsUnitEventUnit(c.Unit), "UNIT_POWER_FREQUENT", c.Unit
+		events = function(ConditionObj, c)
+			return
+				ConditionObj:GetUnitChangedEventString(c.Unit),
+				ConditionObj:GenerateNormalEventString("UNIT_POWER_FREQUENT", c.Unit)
 		end,
 	},
 	{ -- abs energy
@@ -965,8 +1015,10 @@ CNDT.Types = {
 		icon = "Interface\\Icons\\inv_potion_125",
 		tcoords = standardtcoords,
 		funcstr = [[UnitPower(c.Unit, 3) c.Operator c.Level]],
-		events = function(c)
-			return CNDT:IsUnitEventUnit(c.Unit), "UNIT_POWER_FREQUENT", c.Unit
+		events = function(ConditionObj, c)
+			return
+				ConditionObj:GetUnitChangedEventString(c.Unit),
+				ConditionObj:GenerateNormalEventString("UNIT_POWER_FREQUENT", c.Unit)
 		end,
 	},
 	{ -- abs rage
@@ -979,8 +1031,10 @@ CNDT.Types = {
 		icon = "Interface\\Icons\\inv_potion_120",
 		tcoords = standardtcoords,
 		funcstr = [[UnitPower(c.Unit, 1) c.Operator c.Level]],
-		events = function(c)
-			return CNDT:IsUnitEventUnit(c.Unit), "UNIT_POWER_FREQUENT", c.Unit
+		events = function(ConditionObj, c)
+			return
+				ConditionObj:GetUnitChangedEventString(c.Unit),
+				ConditionObj:GenerateNormalEventString("UNIT_POWER_FREQUENT", c.Unit)
 		end,
 	},
 	{ -- abs focus
@@ -993,8 +1047,10 @@ CNDT.Types = {
 		icon = "Interface\\Icons\\inv_potion_124",
 		tcoords = standardtcoords,
 		funcstr = [[UnitPower(c.Unit, 2) c.Operator c.Level]],
-		events = function(c)
-			return CNDT:IsUnitEventUnit(c.Unit), "UNIT_POWER_FREQUENT", c.Unit
+		events = function(ConditionObj, c)
+			return
+				ConditionObj:GetUnitChangedEventString(c.Unit),
+				ConditionObj:GenerateNormalEventString("UNIT_POWER_FREQUENT", c.Unit)
 		end,
 	},
 	{ -- abs runic power
@@ -1007,8 +1063,10 @@ CNDT.Types = {
 		icon = "Interface\\Icons\\inv_potion_128",
 		tcoords = standardtcoords,
 		funcstr = [[UnitPower(c.Unit, 6) c.Operator c.Level]],
-		events = function(c)
-			return CNDT:IsUnitEventUnit(c.Unit), "UNIT_POWER_FREQUENT", c.Unit
+		events = function(ConditionObj, c)
+			return
+				ConditionObj:GetUnitChangedEventString(c.Unit),
+				ConditionObj:GenerateNormalEventString("UNIT_POWER_FREQUENT", c.Unit)
 		end,
 	},
 	{ -- abs alternate power (atramedes, chogall, etc)
@@ -1022,8 +1080,12 @@ CNDT.Types = {
 		icon = "Interface\\Icons\\spell_shadow_mindflay",
 		tcoords = standardtcoords,
 		funcstr = [[UnitPower(c.Unit, 10) c.Operator c.Level]],
-		events = function(c)
-			return CNDT:IsUnitEventUnit(c.Unit), "UNIT_POWER_FREQUENT", c.Unit, "UNIT_POWER_BAR_SHOW", c.Unit, "UNIT_POWER_BAR_HIDE", c.Unit
+		events = function(ConditionObj, c)
+			return
+				ConditionObj:GetUnitChangedEventString(c.Unit),
+				ConditionObj:GenerateNormalEventString("UNIT_POWER_FREQUENT", c.Unit),
+				ConditionObj:GenerateNormalEventString("UNIT_POWER_BAR_SHOW", c.Unit),
+				ConditionObj:GenerateNormalEventString("UNIT_POWER_BAR_HIDE", c.Unit)
 		end,
 	},
 
@@ -1037,8 +1099,10 @@ CNDT.Types = {
 		icon = "Interface\\Icons\\inv_alchemy_elixir_05",
 		tcoords = standardtcoords,
 		funcstr = [[UnitHealthMax(c.Unit) c.Operator c.Level]],
-		events = function(c)
-			return CNDT:IsUnitEventUnit(c.Unit), "UNIT_MAXHEALTH", c.Unit
+		events = function(ConditionObj, c)
+			return
+				ConditionObj:GetUnitChangedEventString(c.Unit),
+				ConditionObj:GenerateNormalEventString("UNIT_MAXHEALTH", c.Unit)
 		end,
 		spacebefore = true,
 	},
@@ -1053,8 +1117,11 @@ CNDT.Types = {
 		icon = "Interface\\Icons\\inv_alchemy_elixir_02",
 		tcoords = standardtcoords,
 		funcstr = [[UnitPowerMax(c.Unit) c.Operator c.Level]],
-		events = function(c)
-			return CNDT:IsUnitEventUnit(c.Unit), "UNIT_MAXPOWER", c.Unit, "UNIT_DISPLAYPOWER", c.Unit
+		events = function(ConditionObj, c)
+			return
+				ConditionObj:GetUnitChangedEventString(c.Unit),
+				ConditionObj:GenerateNormalEventString("UNIT_MAXHEALTH", c.Unit),
+				ConditionObj:GenerateNormalEventString("UNIT_DISPLAYPOWER", c.Unit)
 		end,
 	},
 	{ -- max mana
@@ -1067,8 +1134,10 @@ CNDT.Types = {
 		icon = "Interface\\Icons\\inv_potion_126",
 		tcoords = standardtcoords,
 		funcstr = [[UnitPowerMax(c.Unit, 0) c.Operator c.Level]],
-		events = function(c)
-			return CNDT:IsUnitEventUnit(c.Unit), "UNIT_MAXPOWER", c.Unit
+		events = function(ConditionObj, c)
+			return
+				ConditionObj:GetUnitChangedEventString(c.Unit),
+				ConditionObj:GenerateNormalEventString("UNIT_MAXPOWER", c.Unit)
 		end,
 	},
 	{ -- max energy
@@ -1081,8 +1150,10 @@ CNDT.Types = {
 		icon = "Interface\\Icons\\inv_potion_125",
 		tcoords = standardtcoords,
 		funcstr = [[UnitPowerMax(c.Unit, 3) c.Operator c.Level]],
-		events = function(c)
-			return CNDT:IsUnitEventUnit(c.Unit), "UNIT_MAXPOWER", c.Unit
+		events = function(ConditionObj, c)
+			return
+				ConditionObj:GetUnitChangedEventString(c.Unit),
+				ConditionObj:GenerateNormalEventString("UNIT_MAXPOWER", c.Unit)
 		end,
 	},
 	{ -- max rage
@@ -1095,8 +1166,10 @@ CNDT.Types = {
 		icon = "Interface\\Icons\\inv_potion_120",
 		tcoords = standardtcoords,
 		funcstr = [[UnitPowerMax(c.Unit, 1) c.Operator c.Level]],
-		events = function(c)
-			return CNDT:IsUnitEventUnit(c.Unit), "UNIT_MAXPOWER", c.Unit
+		events = function(ConditionObj, c)
+			return
+				ConditionObj:GetUnitChangedEventString(c.Unit),
+				ConditionObj:GenerateNormalEventString("UNIT_MAXPOWER", c.Unit)
 		end,
 	},
 	{ -- max focus
@@ -1109,8 +1182,10 @@ CNDT.Types = {
 		icon = "Interface\\Icons\\inv_potion_124",
 		tcoords = standardtcoords,
 		funcstr = [[UnitPowerMax(c.Unit, 2) c.Operator c.Level]],
-		events = function(c)
-			return CNDT:IsUnitEventUnit(c.Unit), "UNIT_MAXPOWER", c.Unit
+		events = function(ConditionObj, c)
+			return
+				ConditionObj:GetUnitChangedEventString(c.Unit),
+				ConditionObj:GenerateNormalEventString("UNIT_MAXPOWER", c.Unit)
 		end,
 	},
 	{ -- max runic power
@@ -1123,8 +1198,10 @@ CNDT.Types = {
 		icon = "Interface\\Icons\\inv_potion_128",
 		tcoords = standardtcoords,
 		funcstr = [[UnitPowerMax(c.Unit, 6) c.Operator c.Level]],
-		events = function(c)
-			return CNDT:IsUnitEventUnit(c.Unit), "UNIT_MAXPOWER", c.Unit
+		events = function(ConditionObj, c)
+			return
+				ConditionObj:GetUnitChangedEventString(c.Unit),
+				ConditionObj:GenerateNormalEventString("UNIT_MAXPOWER", c.Unit)
 		end,
 	},
 	{ -- max alternate power (atramedes, chogall, etc)
@@ -1138,8 +1215,12 @@ CNDT.Types = {
 		icon = "Interface\\Icons\\spell_shadow_mindflay",
 		tcoords = standardtcoords,
 		funcstr = [[UnitPowerMax(c.Unit, 10) c.Operator c.Level]],
-		events = function(c)
-			return CNDT:IsUnitEventUnit(c.Unit), "UNIT_MAXPOWER", c.Unit, "UNIT_POWER_BAR_SHOW", c.Unit, "UNIT_POWER_BAR_HIDE", c.Unit
+		events = function(ConditionObj, c)
+			return
+				ConditionObj:GetUnitChangedEventString(c.Unit),
+				ConditionObj:GenerateNormalEventString("UNIT_MAXPOWER", c.Unit),
+				ConditionObj:GenerateNormalEventString("UNIT_POWER_BAR_SHOW", c.Unit),
+				ConditionObj:GenerateNormalEventString("UNIT_POWER_BAR_HIDE", c.Unit)
 		end,
 	},
 
@@ -1163,11 +1244,12 @@ CNDT.Types = {
 				return [[c.1nil == UnitExists(c.Unit)]]
 			end
 		end,
-		events = function(c)
+		events = function(ConditionObj, c)
 			--if c.Unit == "mouseover" then -- there is no event for when you are no longer mousing over a unit, so we cant use this
 			--	return "UPDATE_MOUSEOVER_UNIT"
 			--else
-				return CNDT:IsUnitEventUnit(c.Unit) -- this should work
+				return
+					ConditionObj:GetUnitChangedEventString(c.Unit) -- this should work
 			--end
 		end,
 	},
@@ -1183,8 +1265,10 @@ CNDT.Types = {
 		icon = "Interface\\Icons\\Ability_Vanish",
 		tcoords = standardtcoords,
 		funcstr = [[c.nil1 == UnitIsDeadOrGhost(c.Unit)]], -- note usage of nil1, not 1nil
-		events = function(c)
-			return CNDT:IsUnitEventUnit(c.Unit), "UNIT_HEALTH", c.Unit
+		events = function(ConditionObj, c)
+			return
+				ConditionObj:GetUnitChangedEventString(c.Unit),
+				ConditionObj:GenerateNormalEventString("UNIT_HEALTH", c.Unit)
 		end,
 	},
 	{ -- combat
@@ -1200,11 +1284,16 @@ CNDT.Types = {
 		funcstr = function(c)
 			return [[c.1nil == UnitAffectingCombat(c.Unit)]]
 		end,
-		events = function(c)
+		events = function(ConditionObj, c)
 			if c.Unit == "player" then
-				return "PLAYER_REGEN_ENABLED", "PLAYER_REGEN_DISABLED"
+				return
+					ConditionObj:GenerateNormalEventString("PLAYER_REGEN_ENABLED"),
+					ConditionObj:GenerateNormalEventString("PLAYER_REGEN_DISABLED")
 			else
-				return CNDT:IsUnitEventUnit(c.Unit), "UNIT_FLAGS", c.Unit, "UNIT_DYNAMIC_FLAGS", c.Unit -- idk if UNIT_DYNAMIC_FLAGS is needed. but lets do it anyway.
+				return
+					ConditionObj:GetUnitChangedEventString(c.Unit),
+					ConditionObj:GenerateNormalEventString("UNIT_FLAGS", c.Unit),
+					ConditionObj:GenerateNormalEventString("UNIT_DYNAMIC_FLAGS", c.Unit) -- idk if UNIT_DYNAMIC_FLAGS is needed. but lets do it anyway.
 			end
 		end,
 	},
@@ -1221,8 +1310,12 @@ CNDT.Types = {
 		funcstr = function(c)
 			return [[c.True == UnitHasVehicleUI(c.Unit)]]
 		end,
-		events = function(c)
-			return CNDT:IsUnitEventUnit(c.Unit), "UNIT_ENTERED_VEHICLE", c.Unit, "UNIT_EXITED_VEHICLE", c.Unit, "UNIT_VEHICLE", c.Unit
+		events = function(ConditionObj, c)
+			return
+				ConditionObj:GetUnitChangedEventString(c.Unit),
+				ConditionObj:GenerateNormalEventString("UNIT_ENTERED_VEHICLE", c.Unit),
+				ConditionObj:GenerateNormalEventString("UNIT_EXITED_VEHICLE", c.Unit),
+				ConditionObj:GenerateNormalEventString("UNIT_VEHICLE", c.Unit)
 		end,
 	},
 	{ -- pvp
@@ -1236,8 +1329,10 @@ CNDT.Types = {
 		icon = "Interface\\TargetingFrame\\UI-PVP-" .. UnitFactionGroup("player"),
 		tcoords = {0.046875, 0.609375, 0.015625, 0.59375},
 		funcstr = [[c.1nil == UnitIsPVP(c.Unit)]],
-		events = function(c)
-			return CNDT:IsUnitEventUnit(c.Unit), "UNIT_FACTION", c.Unit
+		events = function(ConditionObj, c)
+			return
+				ConditionObj:GetUnitChangedEventString(c.Unit),
+				ConditionObj:GenerateNormalEventString("UNIT_FACTION", c.Unit)
 		end,
 	},
 	{ -- react
@@ -1251,8 +1346,13 @@ CNDT.Types = {
 		icon = "Interface\\Icons\\Warrior_talent_icon_FuryInTheBlood",
 		tcoords = standardtcoords,
 		funcstr = [[(((UnitIsEnemy("player", c.Unit) or ((UnitReaction("player", c.Unit) or 5) <= 4)) and 1) or 2) == c.Level]],
-		events = function(c)
-			return CNDT:IsUnitEventUnit(c.Unit), "UNIT_FLAGS", c.Unit, "UNIT_DYNAMIC_FLAGS", c.Unit, "UNIT_FLAGS", "player", "UNIT_DYNAMIC_FLAGS", "player"
+		events = function(ConditionObj, c)
+			return
+				ConditionObj:GetUnitChangedEventString(c.Unit),
+				ConditionObj:GenerateNormalEventString("UNIT_FLAGS", c.Unit),
+				ConditionObj:GenerateNormalEventString("UNIT_DYNAMIC_FLAGS", c.Unit),
+				ConditionObj:GenerateNormalEventString("UNIT_FLAGS", "player"),
+				ConditionObj:GenerateNormalEventString("UNIT_DYNAMIC_FLAGS", "player")
 		end,
 	},
 	{ -- speed
@@ -1294,8 +1394,10 @@ CNDT.Types = {
 		icon = "Interface\\LFGFrame\\LFGFrame-SearchIcon-Background",
 		tcoords = standardtcoords,
 		funcstr = [[c.1nil == (strfind(c.Name, SemicolonConcatCache[UnitName(c.Unit) or ""]) and 1)]],
-		events = function(c)
-			return CNDT:IsUnitEventUnit(c.Unit), "UNIT_NAME_UPDATE", c.Unit
+		events = function(ConditionObj, c)
+			return
+				ConditionObj:GetUnitChangedEventString(c.Unit),
+				ConditionObj:GenerateNormalEventString("UNIT_NAME_UPDATE", c.Unit)
 		end,
 	},
 	{ -- level
@@ -1308,8 +1410,10 @@ CNDT.Types = {
 		icon = "Interface\\TargetingFrame\\UI-TargetingFrame-Skull",
 		tcoords = {0.05, 0.95, 0.03, 0.97},
 		funcstr = [[UnitLevel(c.Unit) c.Operator c.Level]],
-		events = function(c)
-			return CNDT:IsUnitEventUnit(c.Unit), "UNIT_LEVEL", c.Unit
+		events = function(ConditionObj, c)
+			return
+				ConditionObj:GetUnitChangedEventString(c.Unit),
+				ConditionObj:GenerateNormalEventString("UNIT_LEVEL", c.Unit)
 		end,
 	},
 	{ -- class
@@ -1330,8 +1434,9 @@ CNDT.Types = {
 		funcstr = function(c)
 			return [[select(2, UnitClass(c.Unit)) == "]] .. (Classes[c.Level] or "whoops") .. "\""
 		end,
-		events = function(c)
-			return CNDT:IsUnitEventUnit(c.Unit) -- classes cant change, so this is all we should need
+		events = function(ConditionObj, c)
+			return
+				ConditionObj:GetUnitChangedEventString(c.Unit) -- classes cant change, so this is all we should need
 		end,
 	},
 	{ -- classification
@@ -1344,8 +1449,10 @@ CNDT.Types = {
 		icon = "Interface\\Icons\\achievement_pvp_h_03",
 		tcoords = standardtcoords,
 		funcstr = [[(classifications[UnitClassification(c.Unit)] or 1) c.Operator c.Level]],
-		events = function(c)
-			return CNDT:IsUnitEventUnit(c.Unit), "UNIT_CLASSIFICATION_CHANGED", c.Unit
+		events = function(ConditionObj, c)
+			return
+				ConditionObj:GetUnitChangedEventString(c.Unit),
+				ConditionObj:GenerateNormalEventString("UNIT_CLASSIFICATION_CHANGED", c.Unit)
 		end,
 	},
 	{ -- role
@@ -1358,9 +1465,12 @@ CNDT.Types = {
 		icon = "Interface\\LFGFrame\\UI-LFG-ICON-ROLES",
 		tcoords = {GetTexCoordsForRole("DAMAGER")},
 		funcstr = [[(roles[UnitGroupRolesAssigned(c.Unit)] or 1) c.Operator c.Level]],
-		events = function(c)
+		events = function(ConditionObj, c)
 			-- the unit change events should actually cover many of the changes (at least for party and raid units, but roles only exist in party and raid anyway.)
-			return CNDT:IsUnitEventUnit(c.Unit), "PLAYER_ROLES_ASSIGNED", "ROLE_CHANGED_INFORM"
+			return
+				ConditionObj:GetUnitChangedEventString(c.Unit),
+				ConditionObj:GenerateNormalEventString("PLAYER_ROLES_ASSIGNED"),
+				ConditionObj:GenerateNormalEventString("ROLE_CHANGED_INFORM")
 		end,
 
 
@@ -1374,7 +1484,10 @@ CNDT.Types = {
 		texttable = setmetatable({[0]=NONE}, {__index = function(t, k) return "|TInterface\\TargetingFrame\\UI-RaidTargetingIcon_"..k..":0|t ".._G["RAID_TARGET_"..k] end}),
 		icon = "Interface\\TargetingFrame\\UI-RaidTargetingIcon_8",
 		funcstr = [[(GetRaidTargetIndex(c.Unit) or 0) c.Operator c.Level]],
-		events = "RAID_TARGET_UPDATE",
+		events = function(ConditionObj, c)
+			return
+				ConditionObj:GenerateNormalEventString("RAID_TARGET_UPDATE")
+		end,
 	},
 	{ -- unit is unit
 		text = L["CONDITIONPANEL_UNITISUNIT"],
@@ -1389,8 +1502,10 @@ CNDT.Types = {
 		icon = "Interface\\Icons\\spell_holy_prayerofhealing",
 		tcoords = standardtcoords,
 		funcstr = [[UnitIsUnit(c.Unit, c.Unit2) == c.1nil]],
-		events = function(c)
-			return CNDT:IsUnitEventUnit(c.Unit), CNDT:IsUnitEventUnit(c.Name)
+		events = function(ConditionObj, c)
+			return
+				ConditionObj:GetUnitChangedEventString(c.Unit),
+				ConditionObj:GetUnitChangedEventString(c.Name)
 		end,
 	},
 	{ -- unit threat scaled
@@ -1443,8 +1558,10 @@ CNDT.Types = {
 		icon = "Interface\\Icons\\Spell_Frost_Stun",
 		tcoords = standardtcoords,
 		funcstr = [[GetZoneType() c.Operator c.Level]],
-		events = function(c)
-			return "ZONE_CHANGED_NEW_AREA", "PLAYER_DIFFICULTY_CHANGED"
+		events = function(ConditionObj, c)
+			return
+				ConditionObj:GenerateNormalEventString("ZONE_CHANGED_NEW_AREA"),
+				ConditionObj:GenerateNormalEventString("PLAYER_DIFFICULTY_CHANGED")
 		end,
 	},
 	{ -- grouptype
@@ -1466,8 +1583,10 @@ CNDT.Types = {
 			GetNumRaidMembers = GetNumRaidMembers,
 			GetNumPartyMembers = GetNumPartyMembers,
 		},
-		events = function(c)
-			return "PARTY_MEMBERS_CHANGED", "RAID_ROSTER_UPDATE"
+		events = function(ConditionObj, c)
+			return
+				ConditionObj:GenerateNormalEventString("PARTY_MEMBERS_CHANGED"),
+				ConditionObj:GenerateNormalEventString("RAID_ROSTER_UPDATE")
 		end,
 	},
 	{ -- mounted
@@ -1482,10 +1601,6 @@ CNDT.Types = {
 		icon = "Interface\\Icons\\Ability_Mount_Charger",
 		tcoords = standardtcoords,
 		funcstr = [[c.1nil == IsMounted()]],
-		--[[events = function(c)
-			-- commented out because it seems that this doesn't always update on UNIT_AURA (ticket 488)
-			return "UNIT_AURA", "player" -- hopefully this is adequate
-		end,]]
 	},
 	{ -- swimming
 		text = L["CONDITIONPANEL_SWIMMING"],
@@ -1513,7 +1628,11 @@ CNDT.Types = {
 		icon = "Interface\\CHARACTERFRAME\\UI-StateIcon",
 		tcoords = {0.0625, 0.453125, 0.046875, 0.421875},
 		funcstr = [[c.1nil == IsResting()]],
-		events = function() return "PLAYER_UPDATE_RESTING", "PLAYER_ENTERING_WORLD" end,
+		events = function(ConditionObj, c)
+			return
+				ConditionObj:GenerateNormalEventString("PLAYER_UPDATE_RESTING"),
+				ConditionObj:GenerateNormalEventString("PLAYER_ENTERING_WORLD")
+		end,
 	},
 	{ -- stance
 		text = 	pclass == "HUNTER" and L["ASPECT"] or
@@ -1533,7 +1652,10 @@ CNDT.Types = {
 		end,
 		tcoords = standardtcoords,
 		funcstr = [[GetShapeshiftForm() c.Operator c.Level]],
-		events = "UPDATE_SHAPESHIFT_FORM",
+		events = function(ConditionObj, c)
+			return
+				ConditionObj:GenerateNormalEventString("UPDATE_SHAPESHIFT_FORM")
+		end,
 		hidden = #TMW.CSN == 0,
 	},
 	{ -- talent spec
@@ -1551,8 +1673,10 @@ CNDT.Types = {
 		icon = "Interface\\Icons\\achievement_general",
 		tcoords = standardtcoords,
 		funcstr = [[c.Level == GetActiveTalentGroup()]],
-		events = function(c)
-			return "PLAYER_TALENT_UPDATE", "ACTIVE_TALENT_GROUP_CHANGED"
+		events = function(ConditionObj, c)
+			return
+				ConditionObj:GenerateNormalEventString("PLAYER_TALENT_UPDATE"),
+				ConditionObj:GenerateNormalEventString("ACTIVE_TALENT_GROUP_CHANGED")
 		end,
 	},
 	TMW.ISMOP and { -- active specialization
@@ -1570,8 +1694,11 @@ CNDT.Types = {
 		Env = {
 			GetSpecialization = GetSpecialization
 		},
-	--	events = function(c)
-	--		return "PLAYER_TALENT_UPDATE", "ACTIVE_TALENT_GROUP_CHANGED" --TODO: probably wrong events
+	--	events = function(ConditionObj, c)
+	--		--TODO: probably wrong events
+	--		return
+	--			ConditionObj:GenerateNormalEventString("PLAYER_TALENT_UPDATE"),
+	--			ConditionObj:GenerateNormalEventString("ACTIVE_TALENT_GROUP_CHANGED")
 	--	end,
 	} or { -- talent tree
 		text = L["UIPANEL_TREE"],
@@ -1588,8 +1715,10 @@ CNDT.Types = {
 		Env = {
 			GetPrimaryTalentTree = GetPrimaryTalentTree
 		},
-		events = function(c)
-			return "PLAYER_TALENT_UPDATE", "ACTIVE_TALENT_GROUP_CHANGED"
+		events = function(ConditionObj, c)
+			return
+				ConditionObj:GenerateNormalEventString("PLAYER_TALENT_UPDATE"),
+				ConditionObj:GenerateNormalEventString("ACTIVE_TALENT_GROUP_CHANGED")
 		end,
 	},
 	{ -- talent learned
@@ -1607,14 +1736,16 @@ CNDT.Types = {
 		tcoords = standardtcoords,
 		hidden = not TMW.ISMOP,
 		funcstr = [[TalentMap[LOWER(c.NameName)] == c.1nil]],
-		events = function(c)
+		events = function(ConditionObj, c)
 			-- this is handled externally because TalentMap is so extensive a process,
 			-- and if it does get stuck in an OnUpdate condition, it could be very bad.
 			CNDT:RegisterEvent("PLAYER_TALENT_UPDATE")
 			CNDT:PLAYER_TALENT_UPDATE()
 			
 			-- we still only need to update the condition when talents change, though.
-			return "PLAYER_TALENT_UPDATE", "ACTIVE_TALENT_GROUP_CHANGED"
+			return
+				ConditionObj:GenerateNormalEventString("PLAYER_TALENT_UPDATE"),
+				ConditionObj:GenerateNormalEventString("ACTIVE_TALENT_GROUP_CHANGED")
 		end,
 	},
 	{ -- points in talent
@@ -1643,13 +1774,15 @@ CNDT.Types = {
 				return [[(TalentMap[LOWER(c.NameName)] or 0) c.Operator c.Level]]
 			end
 		end,
-		events = function(c)
+		events = function(ConditionObj, c)
 			-- this is handled externally because TalentMap is so extensive a process,
 			-- and if it does get stuck in an OnUpdate condition, it could be very bad.
 			CNDT:RegisterEvent("PLAYER_TALENT_UPDATE")
 			CNDT:PLAYER_TALENT_UPDATE()
 			-- we still only need to update the condition when talents change, though.
-			return "PLAYER_TALENT_UPDATE", "ACTIVE_TALENT_GROUP_CHANGED"
+			return
+				ConditionObj:GenerateNormalEventString("PLAYER_TALENT_UPDATE"),
+				ConditionObj:GenerateNormalEventString("ACTIVE_TALENT_GROUP_CHANGED")
 		end,
 	},
 	{ -- glyph
@@ -1667,7 +1800,7 @@ CNDT.Types = {
 		icon = "inv_inscription_tradeskill01",
 		tcoords = standardtcoords,
 		funcstr = [[GlyphLookup[c.NameFirst] == c.True]],
-		events = function(c)
+		events = function(ConditionObj, c)
 			-- this is handled externally because GlyphLookup is so extensive a process,
 			-- and if it does get stuck in an OnUpdate condition, it could be very bad.
 	
@@ -1679,7 +1812,12 @@ CNDT.Types = {
 			CNDT:GLYPH_UPDATED()
 			-- we still only need to update the condition when glyphs change, though.
 			
-			return "GLYPH_ADDED", "GLYPH_DISABLED", "GLYPH_ENABLED", "GLYPH_REMOVED", "GLYPH_UPDATED"
+			return
+				ConditionObj:GenerateNormalEventString("GLYPH_ADDED"),
+				ConditionObj:GenerateNormalEventString("GLYPH_DISABLED"),
+				ConditionObj:GenerateNormalEventString("GLYPH_ENABLED"),
+				ConditionObj:GenerateNormalEventString("GLYPH_REMOVED"),
+				ConditionObj:GenerateNormalEventString("GLYPH_UPDATED")
 		end,
 	},
 	{ -- pet autocast
@@ -1696,7 +1834,10 @@ CNDT.Types = {
 		icon = "Interface\\Icons\\ability_physical_taunt",
 		tcoords = standardtcoords,
 		funcstr = [[select(2, GetSpellAutocast(c.NameName)) == c.1nil]],
-		events = "PET_BAR_UPDATE",
+		events = function(ConditionObj, c)
+			return
+				ConditionObj:GenerateNormalEventString("PET_BAR_UPDATE")
+		end,
 	},
 	{ -- pet attack mode
 		text = L["CONDITIONPANEL_PETMODE"],
@@ -1710,7 +1851,10 @@ CNDT.Types = {
 		icon = PET_ASSIST_TEXTURE,
 		tcoords = standardtcoords,
 		funcstr = [[GetActivePetMode() c.Operator c.Level]],
-		events = "PET_BAR_UPDATE",
+		events = function(ConditionObj, c)
+			return
+				ConditionObj:GenerateNormalEventString("PET_BAR_UPDATE")
+		end,
 	},
 	{ -- pet talent spec
 		text = L["CONDITIONPANEL_PETSPEC"],
@@ -1733,8 +1877,10 @@ CNDT.Types = {
 			GetSpecialization = GetSpecialization
 		},
 		hidden = not TMW.ISMOP,
-		--events = function()
-		--	return "UNIT_PET", "player" --MAYBE WRONG EVENTS, CHECK BEFORE UNCOMMENTING
+		--events = function(ConditionObj, c)
+		--MAYBE WRONG EVENTS, CHECK BEFORE UNCOMMENTING
+		--	return
+		--		ConditionObj:GenerateNormalEventString("UNIT_PET", "player")
 		--end,
 	},
 	{ -- pet talent tree
@@ -1774,8 +1920,9 @@ CNDT.Types = {
 			GetTalentTabInfo = GetTalentTabInfo
 		},
 		hidden = TMW.ISMOP,
-		events = function()
-			return "UNIT_PET", "player"
+		events = function(ConditionObj, c)
+			return
+				ConditionObj:GenerateNormalEventString("UNIT_PET", "player")
 		end,
 	},
 	{ -- tracking
@@ -1792,11 +1939,13 @@ CNDT.Types = {
 		icon = "Interface\\MINIMAP\\TRACKING\\None",
 		tcoords = standardtcoords,
 		funcstr = [[Tracking[c.NameName] == c.1nil]],
-		events = function()
+		events = function(ConditionObj, c)
 			-- keep this event based because it is so extensive
 			CNDT:RegisterEvent("MINIMAP_UPDATE_TRACKING")
 			CNDT:MINIMAP_UPDATE_TRACKING()
-			return "MINIMAP_UPDATE_TRACKING"
+			
+			return
+				ConditionObj:GenerateNormalEventString("MINIMAP_UPDATE_TRACKING")
 		end,
 	},
 
@@ -1816,8 +1965,10 @@ CNDT.Types = {
 		icon = "Interface\\Icons\\spell_holy_divineintervention",
 		tcoords = standardtcoords,
 		funcstr = [[CooldownDuration(c.NameFirst, time) c.Operator c.Level]],
-		events = function(c)
-			return "SPELL_UPDATE_COOLDOWN", "SPELL_UPDATE_USABLE"
+		events = function(ConditionObj, c)
+			return
+				ConditionObj:GenerateNormalEventString("SPELL_UPDATE_COOLDOWN"),
+				ConditionObj:GenerateNormalEventString("SPELL_UPDATE_USABLE")
 		end,
 		anticipate = [[
 			local start, duration = GetSpellCooldown(c.GCDReplacedNameFirst)
@@ -1836,8 +1987,10 @@ CNDT.Types = {
 		icon = "Interface\\Icons\\spell_holy_divineintervention",
 		tcoords = standardtcoords,
 		funcstr = [[CooldownDuration(c.NameFirst, time) c.Operator CooldownDuration(c.NameFirst2, time)]],
-		events = function(c)
-			return "SPELL_UPDATE_COOLDOWN", "SPELL_UPDATE_USABLE"
+		events = function(ConditionObj, c)
+			return
+				ConditionObj:GenerateNormalEventString("SPELL_UPDATE_COOLDOWN"),
+				ConditionObj:GenerateNormalEventString("SPELL_UPDATE_USABLE")
 		end,
 		-- what a shitty anticipate func
 		anticipate = [[
@@ -1872,7 +2025,10 @@ CNDT.Types = {
 		icon = "Interface\\Icons\\ability_warrior_revenge",
 		tcoords = standardtcoords,
 		funcstr = [[c.1nil == ReactiveHelper(c.NameFirst, c.Checked)]],
-		events = "SPELL_UPDATE_USABLE",
+		events = function(ConditionObj, c)
+			return
+				ConditionObj:GenerateNormalEventString("SPELL_UPDATE_USABLE")
+		end,
 	},
 		{ -- spell has mana
 		text = L["CONDITIONPANEL_MANAUSABLE"],
@@ -1888,8 +2044,10 @@ CNDT.Types = {
 		icon = "Interface\\Icons\\inv_potion_137",
 		tcoords = standardtcoords,
 		funcstr = [[c.nil1 == select(2, IsUsableSpell(c.NameFirst))]],
-		events = function()
-			return "SPELL_UPDATE_USABLE", "UNIT_POWER_FREQUENT", "player"
+		events = function(ConditionObj, c)
+			return
+				ConditionObj:GenerateNormalEventString("SPELL_UPDATE_USABLE"),
+				ConditionObj:GenerateNormalEventString("UNIT_POWER_FREQUENT", "player")
 		end,
 	},
 		{ -- spell range
@@ -1920,8 +2078,10 @@ CNDT.Types = {
 		icon = "Interface\\Icons\\ability_hunter_steadyshot",
 		tcoords = standardtcoords,
 		funcstr = [[(GCD > 0 and GCD < 1.7) == c.True]],
-		events = function(c)
-			return "SPELL_UPDATE_COOLDOWN", "SPELL_UPDATE_USABLE"
+		events = function(ConditionObj, c)
+			return
+				ConditionObj:GenerateNormalEventString("SPELL_UPDATE_COOLDOWN"),
+				ConditionObj:GenerateNormalEventString("SPELL_UPDATE_USABLE")
 		end,
 		anticipate = [[
 			local start, duration = GetSpellCooldown(TMW.GCDSpell)
@@ -1943,7 +2103,10 @@ CNDT.Types = {
 		tcoords = standardtcoords,
 		funcstr = [[ItemCooldownDuration(c.ItemID, time) c.Operator c.Level]],
 		spacebefore = true,
-		events = "BAG_UPDATE_COOLDOWN",
+		events = function(ConditionObj, c)
+			return
+				ConditionObj:GenerateNormalEventString("BAG_UPDATE_COOLDOWN")
+		end,
 		anticipate = [[
 			local start, duration = GetItemCooldown(c.ItemID)
 			local VALUE = duration and start + (duration - c.Level) or huge
@@ -1961,7 +2124,10 @@ CNDT.Types = {
 		icon = "Interface\\Icons\\inv_jewelry_trinketpvp_01",
 		tcoords = standardtcoords,
 		funcstr = [[ItemCooldownDuration(c.ItemID, time) c.Operator ItemCooldownDuration(c.ItemID2, time)]],
-		events = "BAG_UPDATE_COOLDOWN",
+		events = function(ConditionObj, c)
+			return
+				ConditionObj:GenerateNormalEventString("BAG_UPDATE_COOLDOWN")
+		end,
 		-- what a shitty anticipate func
 		anticipate = [[
 			local start, duration = GetItemCooldown(c.ItemID)
@@ -2009,8 +2175,10 @@ CNDT.Types = {
 		icon = "Interface\\Icons\\inv_misc_bag_08",
 		tcoords = standardtcoords,
 		funcstr = [[GetItemCount(c.ItemID, nil, 1) c.Operator c.Level]],
-		events = function(c)
-			return "BAG_UPDATE", "UNIT_INVENTROY_CHANGED", "player"
+		events = function(ConditionObj, c)
+			return
+				ConditionObj:GenerateNormalEventString("BAG_UPDATE"),
+				ConditionObj:GenerateNormalEventString("UNIT_INVENTORY_CHANGED", "player")
 		end,
 	},
 	{ -- item equipped
@@ -2027,8 +2195,10 @@ CNDT.Types = {
 		icon = "Interface\\PaperDoll\\UI-PaperDoll-Slot-MainHand",
 		tcoords = standardtcoords,
 		funcstr = [[c.1nil == IsEquippedItem(c.ItemID)]],
-		events = function(c)
-			return "BAG_UPDATE", "UNIT_INVENTROY_CHANGED", "player"
+		events = function(ConditionObj, c)
+			return
+				ConditionObj:GenerateNormalEventString("BAG_UPDATE"),
+				ConditionObj:GenerateNormalEventString("UNIT_INVENTORY_CHANGED", "player")
 		end,
 	},
 
@@ -2045,7 +2215,10 @@ CNDT.Types = {
 		icon = totemtex[1],
 		tcoords = standardtcoords,
 		funcstr = [[TotemHelper(1, time, c.Name) c.Operator c.Level]],
-		events = "PLAYER_TOTEM_UPDATE",
+		events = function(ConditionObj, c)
+			return
+				ConditionObj:GenerateNormalEventString("PLAYER_TOTEM_UPDATE")
+		end,
 		anticipate = function(c)
 			return [[local VALUE = time + TotemHelper(1, time) - c.Level]]
 		end,
@@ -2065,7 +2238,10 @@ CNDT.Types = {
 		icon = totemtex[2],
 		tcoords = standardtcoords,
 		funcstr = [[TotemHelper(2, time, c.Name) c.Operator c.Level]],
-		events = "PLAYER_TOTEM_UPDATE",
+		events = function(ConditionObj, c)
+			return
+				ConditionObj:GenerateNormalEventString("PLAYER_TOTEM_UPDATE")
+		end,
 		anticipate = function(c)
 			return [[local VALUE = time + TotemHelper(2, time) - c.Level]]
 		end,
@@ -2084,7 +2260,10 @@ CNDT.Types = {
 		icon = totemtex[3],
 		tcoords = standardtcoords,
 		funcstr = [[TotemHelper(3, time, c.Name) c.Operator c.Level]],
-		events = "PLAYER_TOTEM_UPDATE",
+		events = function(ConditionObj, c)
+			return
+				ConditionObj:GenerateNormalEventString("PLAYER_TOTEM_UPDATE")
+		end,
 		anticipate = function(c)
 			return [[local VALUE = time + TotemHelper(3, time) - c.Level]]
 		end,
@@ -2103,7 +2282,10 @@ CNDT.Types = {
 		icon = totemtex[4],
 		tcoords = standardtcoords,
 		funcstr = [[TotemHelper(4, time, c.Name) c.Operator c.Level]],
-		events = "PLAYER_TOTEM_UPDATE",
+		events = function(ConditionObj, c)
+			return
+				ConditionObj:GenerateNormalEventString("PLAYER_TOTEM_UPDATE")
+		end,
 		anticipate = function(c)
 			return [[local VALUE = time + TotemHelper(4, time) - c.Level]]
 		end,
@@ -2128,20 +2310,21 @@ CNDT.Types = {
 		name = function(editbox) TMW:TT(editbox, "CONDITIONPANEL_CASTTOMATCH", "CONDITIONPANEL_CASTTOMATCH_DESC") editbox.label = L["CONDITIONPANEL_CASTTOMATCH"] .. " " .. L["ICONMENU_CHOOSENAME_ORBLANK"] end,
 		useSUG = true,
 		funcstr = [[UnitCast(c.Unit, c.Level, LOWER(c.NameName))]], -- LOWER is some gsub magic
-		events = function(c)
+		events = function(ConditionObj, c)
 			-- holy shit... need i say more?
-			return CNDT:IsUnitEventUnit(c.Unit),
-			"UNIT_SPELLCAST_START", c.Unit,
-			"UNIT_SPELLCAST_STOP", c.Unit,
-			"UNIT_SPELLCAST_FAILED", c.Unit,
-			"UNIT_SPELLCAST_DELAYED", c.Unit,
-			"UNIT_SPELLCAST_INTERRUPTED", c.Unit,
-			"UNIT_SPELLCAST_CHANNEL_START", c.Unit,
-			"UNIT_SPELLCAST_CHANNEL_UPDATE", c.Unit,
-			"UNIT_SPELLCAST_CHANNEL_STOP", c.Unit,
-			"UNIT_SPELLCAST_CHANNEL_INTERRUPTED", c.Unit,
-			"UNIT_SPELLCAST_INTERRUPTIBLE", c.Unit,
-			"UNIT_SPELLCAST_NOT_INTERRUPTIBLE", c.Unit
+			return
+				ConditionObj:GetUnitChangedEventString(c.Unit),
+				ConditionObj:GenerateNormalEventString("UNIT_SPELLCAST_START", c.Unit),
+				ConditionObj:GenerateNormalEventString("UNIT_SPELLCAST_STOP", c.Unit),
+				ConditionObj:GenerateNormalEventString("UNIT_SPELLCAST_FAILED", c.Unit),
+				ConditionObj:GenerateNormalEventString("UNIT_SPELLCAST_DELAYED", c.Unit),
+				ConditionObj:GenerateNormalEventString("UNIT_SPELLCAST_INTERRUPTED", c.Unit),
+				ConditionObj:GenerateNormalEventString("UNIT_SPELLCAST_CHANNEL_START", c.Unit),
+				ConditionObj:GenerateNormalEventString("UNIT_SPELLCAST_CHANNEL_UPDATE", c.Unit),
+				ConditionObj:GenerateNormalEventString("UNIT_SPELLCAST_CHANNEL_STOP", c.Unit),
+				ConditionObj:GenerateNormalEventString("UNIT_SPELLCAST_CHANNEL_INTERRUPTED", c.Unit),
+				ConditionObj:GenerateNormalEventString("UNIT_SPELLCAST_INTERRUPTIBLE", c.Unit),
+				ConditionObj:GenerateNormalEventString("UNIT_SPELLCAST_NOT_INTERRUPTIBLE", c.Unit)
 		end,
 		spacebefore = true,
 	},
@@ -2163,8 +2346,10 @@ CNDT.Types = {
 		funcstr = function(c)
 			return [[AuraDur(c.Unit, c.NameFirst, c.NameName, "HELPFUL]] .. (c.Checked and "|PLAYER" or "") .. [[", time) c.Operator c.Level]]
 		end,
-		events = function(c)
-			return CNDT:IsUnitEventUnit(c.Unit), "UNIT_AURA", c.Unit
+		events = function(ConditionObj, c)
+			return
+				ConditionObj:GetUnitChangedEventString(c.Unit),
+				ConditionObj:GenerateNormalEventString("UNIT_AURA", c.Unit)
 		end,
 		anticipate = function(c)
 			return [[local dur = AuraDur(c.Unit, c.NameFirst, c.NameName, "HELPFUL]] .. (c.Checked and "|PLAYER" or "") .. [[", time)
@@ -2192,8 +2377,10 @@ CNDT.Types = {
 		funcstr = function(c)
 			return [[AuraDur(c.Unit, c.NameFirst, c.NameName, "HELPFUL]] .. (c.Checked and "|PLAYER" or "") .. [[", time) c.Operator AuraDur(c.Unit, c.NameFirst2, c.NameName2, "HELPFUL]] .. (c.Checked2 and "|PLAYER" or "") .. [[", time)]]
 		end,
-		events = function(c)
-			return CNDT:IsUnitEventUnit(c.Unit), "UNIT_AURA", c.Unit
+		events = function(ConditionObj, c)
+			return
+				ConditionObj:GetUnitChangedEventString(c.Unit),
+				ConditionObj:GenerateNormalEventString("UNIT_AURA", c.Unit)
 		end,
 	},
 	{ -- unit buff stacks
@@ -2210,8 +2397,10 @@ CNDT.Types = {
 		funcstr = function(c)
 			return [[AuraStacks(c.Unit, c.NameFirst, c.NameName, "HELPFUL]] .. (c.Checked and "|PLAYER" or "") .. [[") c.Operator c.Level]]
 		end,
-		events = function(c)
-			return CNDT:IsUnitEventUnit(c.Unit), "UNIT_AURA", c.Unit
+		events = function(ConditionObj, c)
+			return
+				ConditionObj:GetUnitChangedEventString(c.Unit),
+				ConditionObj:GenerateNormalEventString("UNIT_AURA", c.Unit)
 		end,
 	},
 	{ -- unit buff tooltip
@@ -2229,8 +2418,10 @@ CNDT.Types = {
 		funcstr = function(c)
 			return [[AuraTooltipNumber(c.Unit, c.NameFirst, c.NameName, "HELPFUL]] .. (c.Checked and "|PLAYER" or "") .. [[") c.Operator c.Level]]
 		end,
-		events = function(c)
-			return CNDT:IsUnitEventUnit(c.Unit), "UNIT_AURA", c.Unit
+		events = function(ConditionObj, c)
+			return
+				ConditionObj:GetUnitChangedEventString(c.Unit),
+				ConditionObj:GenerateNormalEventString("UNIT_AURA", c.Unit)
 		end,
 	},
 	{ -- unit buff number
@@ -2249,8 +2440,10 @@ CNDT.Types = {
 		funcstr = function(c)
 			return [[AuraCount(c.Unit, c.NameFirst, c.NameName, "HELPFUL]] .. (c.Checked and "|PLAYER" or "") .. [[") c.Operator c.Level]]
 		end,
-		events = function(c)
-			return CNDT:IsUnitEventUnit(c.Unit), "UNIT_AURA", c.Unit
+		events = function(ConditionObj, c)
+			return
+				ConditionObj:GetUnitChangedEventString(c.Unit),
+				ConditionObj:GenerateNormalEventString("UNIT_AURA", c.Unit)
 		end,
 	},
 
@@ -2269,8 +2462,10 @@ CNDT.Types = {
 		funcstr = function(c)
 			return [[AuraDur(c.Unit, c.NameFirst, c.NameName, "HARMFUL]] .. (c.Checked and "|PLAYER" or "") .. [[", time) c.Operator c.Level]]
 		end,
-		events = function(c)
-			return CNDT:IsUnitEventUnit(c.Unit), "UNIT_AURA", c.Unit
+		events = function(ConditionObj, c)
+			return
+				ConditionObj:GetUnitChangedEventString(c.Unit),
+				ConditionObj:GenerateNormalEventString("UNIT_AURA", c.Unit)
 		end,
 		anticipate = function(c)
 			return [[local dur = AuraDur(c.Unit, c.NameFirst, c.NameName, "HARMFUL]] .. (c.Checked and "|PLAYER" or "") .. [[", time)
@@ -2299,8 +2494,10 @@ CNDT.Types = {
 		funcstr = function(c)
 			return [[AuraDur(c.Unit, c.NameFirst, c.NameName, "HARMFUL]] .. (c.Checked and "|PLAYER" or "") .. [[", time) c.Operator AuraDur(c.Unit, c.NameFirst2, c.NameName2, "HARMFUL]] .. (c.Checked2 and "|PLAYER" or "") .. [[", time)]]
 		end,
-		events = function(c)
-			return CNDT:IsUnitEventUnit(c.Unit), "UNIT_AURA", c.Unit
+		events = function(ConditionObj, c)
+			return
+				ConditionObj:GetUnitChangedEventString(c.Unit),
+				ConditionObj:GenerateNormalEventString("UNIT_AURA", c.Unit)
 		end,
 		-- anticipate: no anticipator is needed because the durations will always remain the same relative to eachother until at least a UNIT_AURA fires
 	},
@@ -2318,8 +2515,10 @@ CNDT.Types = {
 		funcstr = function(c)
 			return [[AuraStacks(c.Unit, c.NameFirst, c.NameName, "HARMFUL]] .. (c.Checked and "|PLAYER" or "") .. [[") c.Operator c.Level]]
 		end,
-		events = function(c)
-			return CNDT:IsUnitEventUnit(c.Unit), "UNIT_AURA", c.Unit
+		events = function(ConditionObj, c)
+			return
+				ConditionObj:GetUnitChangedEventString(c.Unit),
+				ConditionObj:GenerateNormalEventString("UNIT_AURA", c.Unit)
 		end,
 	},
 	{ -- unit debuff tooltip
@@ -2337,8 +2536,10 @@ CNDT.Types = {
 		funcstr = function(c)
 			return [[AuraTooltipNumber(c.Unit, c.NameFirst, c.NameName, "HARMFUL]] .. (c.Checked and "|PLAYER" or "") .. [[") c.Operator c.Level]]
 		end,
-		events = function(c)
-			return CNDT:IsUnitEventUnit(c.Unit), "UNIT_AURA", c.Unit
+		events = function(ConditionObj, c)
+			return
+				ConditionObj:GetUnitChangedEventString(c.Unit),
+				ConditionObj:GenerateNormalEventString("UNIT_AURA", c.Unit)
 		end,
 	},
 	{ -- unit debuff number
@@ -2357,8 +2558,10 @@ CNDT.Types = {
 		funcstr = function(c)
 			return [[AuraCount(c.Unit, c.NameFirst, c.NameName, "HARMFUL]] .. (c.Checked and "|PLAYER" or "") .. [[") c.Operator c.Level]]
 		end,
-		events = function(c)
-			return CNDT:IsUnitEventUnit(c.Unit), "UNIT_AURA", c.Unit
+		events = function(ConditionObj, c)
+			return
+				ConditionObj:GetUnitChangedEventString(c.Unit),
+				ConditionObj:GenerateNormalEventString("UNIT_AURA", c.Unit)
 		end,
 	},
 
@@ -2372,8 +2575,9 @@ CNDT.Types = {
 		icon = function() return GetInventoryItemTexture("player", GetInventorySlotInfo("MainHandSlot")) or "Interface\\Icons\\inv_weapon_shortblade_14" end,
 		tcoords = standardtcoords,
 		funcstr = [[(select(2, GetWeaponEnchantInfo()) or 0)/1000 c.Operator c.Level]],
-		events = function()
-			return "UNIT_INVENTORY_CHANGED", "player"
+		events = function(ConditionObj, c)
+			return
+				ConditionObj:GenerateNormalEventString("UNIT_INVENTORY_CHANGED", "player")
 		end,
 		anticipate = [[local _, dur = GetWeaponEnchantInfo()
 			local VALUE = time + (dur/1000) - c.Level]],
@@ -2389,8 +2593,9 @@ CNDT.Types = {
 		icon = function() return GetInventoryItemTexture("player", GetInventorySlotInfo("SecondaryHandSlot")) or "Interface\\Icons\\inv_weapon_shortblade_15" end,
 		tcoords = standardtcoords,
 		funcstr = [[(select(5, GetWeaponEnchantInfo()) or 0)/1000 c.Operator c.Level]],
-		events = function()
-			return "UNIT_INVENTORY_CHANGED", "player"
+		events = function(ConditionObj, c)
+			return
+				ConditionObj:GenerateNormalEventString("UNIT_INVENTORY_CHANGED", "player")
 		end,
 		anticipate = [[local _, _, _, _, dur = GetWeaponEnchantInfo()
 			local VALUE = time + (dur/1000) - c.Level]],
@@ -2405,8 +2610,9 @@ CNDT.Types = {
 		icon = function() return GetInventoryItemTexture("player", GetInventorySlotInfo("RangedSlot")) or "Interface\\Icons\\inv_throwingknife_06" end,
 		tcoords = standardtcoords,
 		funcstr = [[(select(8, GetWeaponEnchantInfo()) or 0)/1000 c.Operator c.Level]],
-		events = function()
-			return "UNIT_INVENTORY_CHANGED", "player"
+		events = function(ConditionObj, c)
+			return
+				ConditionObj:GenerateNormalEventString("UNIT_INVENTORY_CHANGED", "player")
 		end,
 		anticipate = [[local _, _, _, _, _, _, _, dur = GetWeaponEnchantInfo()
 			local VALUE = time + (dur/1000) - c.Level]],
@@ -2426,7 +2632,10 @@ CNDT.Types = {
 		icon = "Interface\\Icons\\spell_nature_strength",
 		tcoords = standardtcoords,
 		funcstr = [[UnitStat("player", 1) c.Operator c.Level]],
-		events = function() return "UNIT_STATS", "player" end,
+		events = function(ConditionObj, c)
+			return
+				ConditionObj:GenerateNormalEventString("UNIT_STATS", "player")
+		end,
 	},
 	{ -- agility
 		text = _G["SPELL_STAT2_NAME"],
@@ -2438,7 +2647,10 @@ CNDT.Types = {
 		icon = "Interface\\Icons\\spell_holy_blessingofagility",
 		tcoords = standardtcoords,
 		funcstr = [[UnitStat("player", 2) c.Operator c.Level]],
-		events = function() return "UNIT_STATS", "player" end,
+		events = function(ConditionObj, c)
+			return
+				ConditionObj:GenerateNormalEventString("UNIT_STATS", "player")
+		end,
 	},
 	{ -- stamina
 		text = _G["SPELL_STAT3_NAME"],
@@ -2450,7 +2662,10 @@ CNDT.Types = {
 		icon = "Interface\\Icons\\spell_holy_wordfortitude",
 		tcoords = standardtcoords,
 		funcstr = [[UnitStat("player", 3) c.Operator c.Level]],
-		events = function() return "UNIT_STATS", "player" end,
+		events = function(ConditionObj, c)
+			return
+				ConditionObj:GenerateNormalEventString("UNIT_STATS", "player")
+		end,
 	},
 	{ -- intellect
 		text = _G["SPELL_STAT4_NAME"],
@@ -2462,7 +2677,10 @@ CNDT.Types = {
 		icon = "Interface\\Icons\\spell_holy_magicalsentry",
 		tcoords = standardtcoords,
 		funcstr = [[UnitStat("player", 4) c.Operator c.Level]],
-		events = function() return "UNIT_STATS", "player" end,
+		events = function(ConditionObj, c)
+			return
+				ConditionObj:GenerateNormalEventString("UNIT_STATS", "player")
+		end,
 	},
 	{ -- spirit
 		text = _G["SPELL_STAT5_NAME"],
@@ -2474,7 +2692,10 @@ CNDT.Types = {
 		icon = "Interface\\Icons\\spell_shadow_burningspirit",
 		tcoords = standardtcoords,
 		funcstr = [[UnitStat("player", 1) c.Operator c.Level]],
-		events = function() return "UNIT_STATS", "player" end,
+		events = function(ConditionObj, c)
+			return
+				ConditionObj:GenerateNormalEventString("UNIT_STATS", "player")
+		end,
 	},
 	{ -- mastery
 		text = STAT_MASTERY,
@@ -2486,7 +2707,10 @@ CNDT.Types = {
 		icon = "Interface\\Icons\\spell_holy_championsbond",
 		tcoords = standardtcoords,
 		funcstr = [[GetMastery() c.Operator c.Level]],
-		events = "MASTERY_UPDATE",
+		events = function(ConditionObj, c)
+			return
+				ConditionObj:GenerateNormalEventString("MASTERY_UPDATE")
+		end,
 	},
 
 	{ -- melee AP
@@ -2499,7 +2723,10 @@ CNDT.Types = {
 		icon = "Interface\\Icons\\INV_Sword_04",
 		tcoords = standardtcoords,
 		funcstr = [[UnitAttackPower("player") c.Operator c.Level]],
-		events = function() return "UNIT_ATTACK_POWER", "player" end,
+		events = function(ConditionObj, c)
+			return
+				ConditionObj:GenerateNormalEventString("UNIT_ATTACK_POWER", "player")
+		end,
 		spacebefore = true,
 	},
 	{ -- melee crit
@@ -2514,7 +2741,10 @@ CNDT.Types = {
 		icon = "Interface\\Icons\\Ability_CriticalStrike",
 		tcoords = standardtcoords,
 		funcstr = [[GetCritChance()/100 c.Operator c.Level]],
-		events = "COMBAT_RATING_UPDATE",
+		events = function(ConditionObj, c)
+			return
+				ConditionObj:GenerateNormalEventString("COMBAT_RATING_UPDATE")
+		end,
 	},
 	{ -- melee haste
 		text = L["MELEEHASTE"],
@@ -2528,7 +2758,10 @@ CNDT.Types = {
 		icon = "Interface\\Icons\\spell_nature_bloodlust",
 		tcoords = standardtcoords,
 		funcstr = [[GetMeleeHaste()/100 c.Operator c.Level]],
-		events = function() return "UNIT_ATTACK_SPEED", "player" end,
+		events = function(ConditionObj, c)
+			return
+				ConditionObj:GenerateNormalEventString("UNIT_ATTACK_SPEED", "player")
+		end,
 	},
 	{ -- expertise
 		text = _G["COMBAT_RATING_NAME"..CR_EXPERTISE],
@@ -2540,7 +2773,10 @@ CNDT.Types = {
 		icon = "Interface\\Icons\\ability_rogue_shadowstrikes",
 		tcoords = standardtcoords,
 		funcstr = [[GetExpertise() c.Operator c.Level]],
-		events = "COMBAT_RATING_UPDATE",
+		events = function(ConditionObj, c)
+			return
+				ConditionObj:GenerateNormalEventString("COMBAT_RATING_UPDATE")
+		end,
 	},
 
 	{ -- ranged AP
@@ -2553,7 +2789,10 @@ CNDT.Types = {
 		icon = "Interface\\Icons\\INV_Weapon_Bow_07",
 		tcoords = standardtcoords,
 		funcstr = [[UnitRangedAttackPower("player") c.Operator c.Level]],
-		events = function() return "UNIT_RANGED_ATTACK_POWER", "player" end,
+		events = function(ConditionObj, c)
+			return
+				ConditionObj:GenerateNormalEventString("UNIT_RANGED_ATTACK_POWER", "player")
+		end,
 		spacebefore = true,
 	},
 	{ -- range crit
@@ -2568,7 +2807,10 @@ CNDT.Types = {
 		icon = "Interface\\Icons\\Ability_CriticalStrike",
 		tcoords = standardtcoords,
 		funcstr = [[GetRangedCritChance()/100 c.Operator c.Level]],
-		events = "COMBAT_RATING_UPDATE",
+		events = function(ConditionObj, c)
+			return
+				ConditionObj:GenerateNormalEventString("COMBAT_RATING_UPDATE")
+		end,
 	},
 	{ -- range haste
 		text = L["RANGEDHASTE"],
@@ -2582,7 +2824,10 @@ CNDT.Types = {
 		icon = "Interface\\Icons\\ability_hunter_runningshot",
 		tcoords = standardtcoords,
 		funcstr = [[GetRangedHaste()/100 c.Operator c.Level]],
-		events = function() return "UNIT_RANGEDDAMAGE", "player" end,
+		events = function(ConditionObj, c)
+			return
+				ConditionObj:GenerateNormalEventString("UNIT_RANGEDDAMAGE", "player")
+		end,
 	},
 
 
@@ -2596,7 +2841,10 @@ CNDT.Types = {
 		icon = "Interface\\Icons\\spell_fire_flamebolt",
 		tcoords = standardtcoords,
 		funcstr = [[GetSpellBonusDamage() c.Operator c.Level]],
-		events = "PLAYER_DAMAGE_DONE_MODS",
+		events = function(ConditionObj, c)
+			return
+				ConditionObj:GenerateNormalEventString("PLAYER_DAMAGE_DONE_MODS")
+		end,
 		spacebefore = true,
 	},
 	{ -- spell healing
@@ -2609,7 +2857,10 @@ CNDT.Types = {
 		icon = "Interface\\Icons\\spell_nature_healingtouch",
 		tcoords = standardtcoords,
 		funcstr = [[GetSpellBonusHealing() c.Operator c.Level]],
-		events = "PLAYER_DAMAGE_DONE_MODS",
+		events = function(ConditionObj, c)
+			return
+				ConditionObj:GenerateNormalEventString("PLAYER_DAMAGE_DONE_MODS")
+		end,
 	},
 	{ -- spell crit
 		text = L["SPELLCRIT"],
@@ -2623,7 +2874,10 @@ CNDT.Types = {
 		icon = "Interface\\Icons\\inv_gizmo_supersappercharge",
 		tcoords = standardtcoords,
 		funcstr = [[GetSpellCritChance() c.Operator c.Level]],
-		events = "COMBAT_RATING_UPDATE",
+		events = function(ConditionObj, c)
+			return
+				ConditionObj:GenerateNormalEventString("COMBAT_RATING_UPDATE")
+		end,
 	},
 	{ -- spell haste
 		text = L["SPELLHASTE"],
@@ -2637,7 +2891,11 @@ CNDT.Types = {
 		icon = "Interface\\Icons\\ability_mage_timewarp",
 		tcoords = standardtcoords,
 		funcstr = [[UnitSpellHaste("player")/100 c.Operator c.Level]],
-		events = function() return "COMBAT_RATING_UPDATE", "UNIT_SPELL_HASTE", "player" end,
+		events = function(ConditionObj, c)
+			return
+				ConditionObj:GenerateNormalEventString("COMBAT_RATING_UPDATE"),
+				ConditionObj:GenerateNormalEventString("UNIT_SPELL_HASTE", "player")
+		end,
 	},
 		{ -- mana regen
 		text = MANA_REGEN,
@@ -2761,10 +3019,19 @@ CNDT.Types = {
 			setmetatable(TMW.CNDT.Env, TMW.CNDT.EnvMeta)
 			return c.Name ~= "" and c.Name or "true"
 		end,
-		events = function(c)
+		events = function(ConditionObj, c) --TODO: update this for the new system
 			-- allows parsing of events from the code string. EG:
 			-- --EVENTS:'PLAYER_ENTERING_WORLD','PLAYER_LOGIN'
-			-- --[[EVENTS:'PLAYER_ENTERING_WORLD','PLAYER_DAMAGE_DONE_MODS',c.Unit]]
+			-- --[[EVENTS:'PLAYER_ENTERING_WORLD','UNIT_AURA','target']]
+			
+			
+			
+			if true then return end
+			
+			
+			
+			
+			
 			local eventString = strmatch(c.Name, "EVENTS:([^ \t]-)\]?")
 			if eventString then
 				CNDT.LuaTemporaryConditionTable = c
@@ -2851,7 +3118,10 @@ for k, v in ipairs(CNDT.Types) do
 					tcoords = standardtcoords,
 					spacebefore = spacenext,
 					hidden = true,
-					events = "CURRENCY_DISPLAY_UPDATE",
+					events = function(ConditionObj, c)
+						return
+							ConditionObj:GenerateNormalEventString("CURRENCY_DISPLAY_UPDATE")
+					end,
 				})
 				spacenext = nil
 				k = k + 1
@@ -3012,10 +3282,10 @@ function CNDT:DoConditionSubstitutions(parent, v, c, thisstr)
 	return thisstr
 end
 
-local activeEventsReusable = {}
-function CNDT:CompileUpdateFunction(parent, obj, activeEvents)
+local argCheckerStringsReusable = {}
+function CNDT:CompileUpdateFunction(parent, obj)
 	local Conditions = obj.settings
-	activeEvents = activeEvents or wipe(activeEventsReusable)
+	local argCheckerStrings = wipe(argCheckerStringsReusable)
 	local numAnticipatorArgs = 0
 	local anticipatorstr = ""
 
@@ -3024,40 +3294,12 @@ function CNDT:CompileUpdateFunction(parent, obj, activeEvents)
 		local v = CNDT.ConditionsByType[t]
 		if v and v.events then
 			local voidNext
-			for n, value in TMW:Vararg(TMW.get(v.events, c)) do
-				if type(value) == "string" then
-					if value == "OnUpdate" then
+			for n, argCheckerString in TMW:Vararg(TMW.get(v.events, obj, c)) do
+				if type(argCheckerString) == "string" then
+					if argCheckerString == "OnUpdate" then
 						return
-					end
-
-					if voidNext then
-						-- voidNext is an event. value should be a unitID that we are going to associate with the event
-						assert(not value:find("[A-Z]"))
-						activeEvents[voidNext .. "|'" .. value .. "'"] = true
-						voidNext = nil
 					else
-						-- value is an event
-						if value == "unit_changed_event" then
-							if c.Unit == "target" then
-								activeEvents.PLAYER_TARGET_CHANGED = true
-							elseif c.Unit == "pet" then
-								activeEvents["UNIT_PET|'player'"] = true
-							elseif c.Unit == "focus" then
-								activeEvents.PLAYER_FOCUS_CHANGED = true
-							elseif c.Unit:find("^raid%d+$") then
-								activeEvents.RAID_ROSTER_UPDATE = true
-							elseif c.Unit:find("^party%d+$") then
-								activeEvents.PARTY_MEMBERS_CHANGED = true
-							elseif c.Unit:find("^boss%d+$") then
-								activeEvents.INSTANCE_ENCOUNTER_ENGAGE_UNIT = true
-							elseif c.Unit:find("^arena%d+$") then
-								activeEvents.ARENA_OPPONENT_UPDATE = true
-							end
-						elseif value:find("^UNIT_") then
-							voidNext = value -- tell the iterator to listen to the next value as a unitID
-						else
-							activeEvents[value] = true
-						end
+						argCheckerStrings[argCheckerString] = true
 					end
 				end
 			end
@@ -3086,7 +3328,7 @@ function CNDT:CompileUpdateFunction(parent, obj, activeEvents)
 		end
 	end
 
-	if not next(activeEvents) then
+	if not next(argCheckerStrings) then
 		return
 	end
 
@@ -3115,21 +3357,11 @@ function CNDT:CompileUpdateFunction(parent, obj, activeEvents)
 	if not event then
 		return
 	elseif (]]
-	for event in pairs(activeEvents) do
-		local thisstr
-
-		if event:find("|") then
-			-- event contains both the event and a arg to check, separated by "|".
-			-- args should be string wrapped if they are supposed to be strings, because we want to allow variable substitution too
-			local realEvent, arg = strsplit("|", event)
-			activeEvents[event] = realEvent --associate the entry with the real event
-
-			thisstr = ([[event == %q and arg1 == %s]]):format(realEvent, arg)
-		else
-			thisstr = ([[event == %q]]):format(event)
+	
+	for argCheckerString in pairs(argCheckerStrings) do
+		if argCheckerString ~= "" then
+			funcstr = funcstr .. [[(]] .. argCheckerString .. [[) or ]]
 		end
-
-		funcstr = funcstr .. [[(]] .. thisstr .. [[) or ]]
 	end
 
 	funcstr = funcstr:sub(1, -5) .. [[) then
@@ -3138,7 +3370,12 @@ function CNDT:CompileUpdateFunction(parent, obj, activeEvents)
 
 	funcstr = anticipatorstr .. "\r\n" .. funcstr
 	
-	funcstr = [[local obj, event, arg1 = ...
+	local argHeader = [[local obj, event]]
+	for i = 1, obj.numArgsForEventString do 
+		argHeader = argHeader .. [[, arg]] .. i
+	end
+	
+	funcstr = argHeader .. [[ = ...
 	]] .. funcstr
 
 	-- clear out all existing funcs for the obj
@@ -3163,27 +3400,31 @@ function CNDT:CompileUpdateFunction(parent, obj, activeEvents)
 	obj.UpdateFunction = func
 
 	if func then
-		for event, realEvent in pairs(activeEvents) do
-			if realEvent ~= true then
-				event = realEvent
-			end
+		for event in pairs(obj.PreRegisteredEvents) do
 			CNDT.EventEngine:Register(event, func, obj)
 		end
 	end
 end
 
 function CNDT:IsUnitEventUnit(unit)
-	if	unit == "player"
-	or	unit == "pet"
-	or	unit == "target"
-	or	unit == "focus"
-	or	unit:find("^raid%d+$")
-	or	unit:find("^party%d+$")
-	or	unit:find("^boss%d+$")
-	or	unit:find("^arena%d+$")
-	then
-		return "unit_changed_event"
+	if	unit == "player" then
+		return ""
+	elseif unit == "target" then
+		return "PLAYER_TARGET_CHANGED"
+	elseif unit == "pet" then
+		return "UNIT_PET|'player'"
+	elseif unit == "focus" then
+		return "PLAYER_FOCUS_CHANGED"
+	elseif unit:find("^raid%d+$") then
+		return "RAID_ROSTER_UPDATE"
+	elseif unit:find("^party%d+$") then
+		return "PARTY_MEMBERS_CHANGED"
+	elseif unit:find("^boss%d+$") then
+		return "INSTANCE_ENCOUNTER_ENGAGE_UNIT"
+	elseif unit:find("^arena%d+$") then
+		return "ARENA_OPPONENT_UPDATE"
 	end
+	
 	return "OnUpdate"
 end
 
@@ -3191,11 +3432,12 @@ end
 
 
 local ConditionObject = TMW:NewClass("ConditionObject")
+ConditionObject.numArgsForEventString = 1
 
-
-function ConditionObject:OnNewInstance(parent, Conditions, conditionString, updateFuncArg1)
+function ConditionObject:OnNewInstance(parent, Conditions, conditionString)	
 	self.settings = Conditions
 	self.conditionString = conditionString
+	self.PreRegisteredEvents = {}
 	
 	self.UpdateNeeded = true
 	self.NextUpdateTime = huge
@@ -3209,7 +3451,7 @@ function ConditionObject:OnNewInstance(parent, Conditions, conditionString, upda
 		TMW:Error(err)
 	end
 	
-	CNDT:CompileUpdateFunction(parent, self, updateFuncArg1)
+	CNDT:CompileUpdateFunction(parent, self)
 end
 
 function ConditionObject:Check(parent)
@@ -3235,8 +3477,194 @@ function ConditionObject:Check(parent)
 	end
 end
 
+function ConditionObject:SetNumEventArgs(num)
+	self.numArgsForEventString = max(self.numArgsForEventString, num)
+end
+
+function ConditionObject:PreRegisterEvent(event)
+	-- Note that this function does not actually register the event with CNDT.EventEngine
+	-- It simply tells the object that it needs to register the event with CNDT.EventEngine
+	-- once processing is done and it has been determined that the entire condition set can be event driven
+	-- (if it has no OnUpdate conditions in it)
+	self.PreRegisteredEvents[event] = true
+end
+
+function ConditionObject:UnPreRegisterEvent(event)
+	self.PreRegisteredEvents[event] = nil
+end
+
+function ConditionObject:UnPreRegisterAllEvents()
+	wipe(self.PreRegisteredEvents)
+end
+
+function ConditionObject:GenerateNormalEventString(event, ...)
+	self:PreRegisterEvent(event)
+	self:SetNumEventArgs(select("#", ...))
+	
+	local str = "event == '"
+    str = str .. event
+    str = str .. "'"
+    
+	for n, arg in TMW:Vararg(...) do
+		
+		local arg_type = type(arg)
+		if 
+			arg_type ~= "number" and 
+			arg_type ~= "string" and 
+			arg_type ~= "boolean" and 
+			arg_type ~= "nil" 
+		then
+			TMW:Error("Unsupported event arg type: " .. arg_type)
+		elseif arg ~= nil then
+			str = str .. " and arg"
+			str = str .. n
+			str = str .. " == "
+			
+			if arg_type == "string" then
+				str = str .. "'"
+				str = str .. arg
+				str = str .. "'"
+			else -- number, boolean
+				str = str .. tostring(arg)
+			end
+		end
+	end
+	
+	return str
+end
+
+function ConditionObject:GetUnitChangedEventString(unit)
+	if unit == "player" then
+		return ""
+	elseif unit == "target" then
+		return self:GenerateNormalEventString("PLAYER_TARGET_CHANGED")
+	elseif unit == "pet" then
+		return self:GenerateNormalEventString("UNIT_PET", "player")
+	elseif unit == "focus" then
+		return self:GenerateNormalEventString("PLAYER_FOCUS_CHANGED")
+	elseif unit:find("^raid%d+$") then
+		return self:GenerateNormalEventString("RAID_ROSTER_UPDATE")
+	elseif unit:find("^party%d+$") then
+		return self:GenerateNormalEventString("PARTY_MEMBERS_CHANGED")
+	elseif unit:find("^boss%d+$") then
+		return self:GenerateNormalEventString("INSTANCE_ENCOUNTER_ENGAGE_UNIT")
+	elseif unit:find("^arena%d+$") then
+		return self:GenerateNormalEventString("ARENA_OPPONENT_UPDATE")
+	end
+	
+	return false
+end
+
+local ConditionObjectConstructor = TMW:NewClass("ConditionObjectConstructor"){
+	status = "ready",
+	
+	GetStatus = function(self)
+		return self.status
+	end,
+	LoadParentAndConditions = function(self, parent, Conditions)
+		-- Loads the parent and the Condition settings that will be used to
+		-- construct a ConditionObject.
+		
+		assert(self.status == "ready", "Cannot :LoadParentAndConditions() to a ConditionObjectConstructor whose status is not 'ready'!")
+		
+		self.parent = parent
+		self.Conditions = Conditions
+		self.ConditionsToConstructWith = Conditions
+		
+		self.status = "loaded"
+	end,
+	ResetModifiableConditionsBase = function(self)
+		self.ModifiableConditionsBase.n = 0
+		for k, v in ipairs(self.ModifiableConditionsBase) do
+			TMW:CopyTableInPlaceWithMeta(TMW.Icon_Defaults.Conditions, v)
+		end
+	end,
+	GetPostUserModifiableConditions = function(self)
+		-- Returns a copy of the settings table that was defined through :LoadConditions()
+		-- that can be modified without changing user settings. If this modified version of the conditions is created,
+		-- it will be used to :Construct() the ConditionObject instead of the original conditions.
+		
+		if self.ModifiableConditions then
+			return self.ModifiableConditions
+		end
+		if not self.ModifiableConditionsBase then
+			self.ModifiableConditionsBase = TMW:CopyWithMetatable(self.Conditions)
+		end
+		
+		self:ResetModifiableConditionsBase()
+		
+		self.ModifiableConditions = TMW:CopyTableInPlaceWithMeta(self.Conditions, self.ModifiableConditionsBase)
+		self.ConditionsToConstructWith = self.ModifiableConditions
+		
+		return self.ModifiableConditions
+	end,
+	
+	Modify_AppendNew = function(self)
+		-- Adds a single condition to the end.
+		-- Returns this condition so that it can be manually configured however necessary.
+		
+		local ModifiableConditions = self:GetPostUserModifiableConditions()
+		local mod = ModifiableConditions -- Alias for brevity
+		
+		mod.n = mod.n + 1
+		
+		return mod[mod.n]
+	end,
+	Modify_WrapExistingAndAppendNew = function(self)
+		-- Wraps all existing conditions in parenthesis (if needed) and adds a single condition to the end.
+		-- Returns this condition so that it can be manually configured however necessary.
+		
+		local ModifiableConditions = self:GetPostUserModifiableConditions()
+		local mod = ModifiableConditions -- Alias for brevity
+		
+		mod.n = mod.n + 1
+		if mod.n > 2 then
+			mod[1].PrtsBefore = mod[1].PrtsBefore + 1
+			mod[mod.n-1].PrtsAfter = mod[mod.n-1].PrtsAfter + 1
+		end
+		
+		return mod[mod.n]
+	end,
+		
+	Construct = function(self)
+		-- Constructs and returns a ConditionObject that will reflect any modifications
+		-- that were done through the ConditionObjectConstructor.
+		
+		local obj = CNDT:GetConditionObject(self.parent, self.ConditionsToConstructWith)
+		
+		self:Terminate()
+		
+		return obj
+	end,
+	Terminate = function(self)
+		-- Terminates the ConditionObjectConstructor and prepares it for reuse.
+		-- This is automatically called after performing :Construct().
+		
+		self.parent = nil
+		self.Conditions = nil
+		self.ConditionsToConstructWith = nil
+		self.ModifiableConditions = nil
+		
+		if self.ModifiableConditionsBase then
+			self:ResetModifiableConditionsBase()
+		end
+		
+		self.status = "ready"
+	end,
+}
+
+function CNDT:GetConditionObjectConstructor()
+	for _, instance in pairs(ConditionObjectConstructor.instances) do
+		if instance:GetStatus() == "ready" then
+			return instance
+		end
+	end
+	
+	return ConditionObjectConstructor:New()
+end
+
 function CNDT:GetConditionObject(parent, Conditions)
-	local conditionString, updateFuncArg1 = CNDT:GetConditionCheckFunctionString(parent, Conditions)
+	local conditionString = CNDT:GetConditionCheckFunctionString(parent, Conditions)
 	
 	if conditionString and conditionString ~= "" then
 		local instances = ConditionObject.instances
@@ -3246,12 +3674,8 @@ function CNDT:GetConditionObject(parent, Conditions)
 				return instance
 			end
 		end
-		return ConditionObject:New(parent, Conditions, conditionString, updateFuncArg1)
+		return ConditionObject:New(parent, Conditions, conditionString)
 	end
-end
-
-
-function CNDT.Conditions_LoadData(self, Conditions)
 end
 
 function CNDT:GetConditionCheckFunctionString(parent, Conditions)
@@ -3309,7 +3733,7 @@ function CNDT:GetConditionCheckFunctionString(parent, Conditions)
 		funcstr = funcstr .. thisstr
 	end
 	
-	local funcstr, arg1 = parent:FinishCompilingConditions(funcstr:sub(4))
+	funcstr = funcstr:sub(4)
 	
 	if funcstr ~= "" then
 		-- Well, what the fuck? Apparently this code here doesn't work in MoP. I have to do it on a single line for some strange reason.
@@ -3319,7 +3743,7 @@ function CNDT:GetConditionCheckFunctionString(parent, Conditions)
 		funcstr = "local obj, icon = ... \r\n return ( " .. funcstr .. " )"
 	end
 	
-	return funcstr, arg1
+	return funcstr
 end
 
 
@@ -3329,6 +3753,10 @@ function CNDT:CheckParentheses(type, settings)
 	local unopened = 0
 
 	for _, Condition in TMW:InNLengthTable(settings) do
+	
+		if _G.type(Condition.PrtsBefore) ~= "number" then
+			CONDITIONS = settings
+		end	
 		for i = 1, Condition.PrtsBefore do
 			numopen = numopen + 1
 			runningcount = runningcount + 1
@@ -3387,24 +3815,24 @@ function CNDT.EventEngine:Register(event, func, obj)
 	CNDT.EventEngine.funcs[event][obj] = func
 end
 
-function CNDT.EventEngine:UnregisterObject(obj)
+function CNDT.EventEngine:UnregisterObject(objToUnregister)
 	for event, funcs in pairs(CNDT.EventEngine.funcs) do
-		for objKey, func in pairs(funcs) do
-			if obj == objKey then
-				funcs[objKey] = nil
+		for obj, func in pairs(funcs) do
+			if objToUnregister == obj then
+				funcs[obj] = nil
 				if event:find("^TMW_") then
-					TMW:UnregisterCallback(event, func, obj)
+					TMW:UnregisterCallback(event, func, objToUnregister)
 				end
 			end
 		end
 	end
 end
 
-function CNDT.EventEngine:OnEvent(event, arg1)
+function CNDT.EventEngine:OnEvent(event, ...)
 	local funcs = self.funcs[event]
 	if funcs then
 		for obj, func in next, funcs do
-			func(obj, event, arg1)
+			func(obj, event, ...)
 		end
 	end
 end

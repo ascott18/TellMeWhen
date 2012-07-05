@@ -1,52 +1,40 @@
 ﻿<Ui xmlns="http://www.blizzard.com/wow/ui/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.blizzard.com/wow/ui/ .. \FrameXML\UI.xsd">
 
 	<!-- TEMPLATES -->
-	<Frame name="TellMeWhen_GroupTemplate" enableMouse="false" toplevel="true" movable="true" parent="TMW" virtual="true">
-		<Size x="1" y="1"/>
+	
+	
+	<Button name="TellMeWhen_GroupTemplate_ResizeButton" parentKey="resizeButton" virtual="true">
+		<Size x="10" y="10"/>
+		<Anchors>
+			<Anchor point="BOTTOMRIGHT" x="3" y="-3"/>
+		</Anchors>
+		<HitRectInsets left="3" right="0" top="3" bottom="0" />
 		<Layers>
 			<Layer level="BACKGROUND">
-				<Texture setAllPoints="true">
-					<Color r="0" g="0" b="0" a="0"/>
+				<Texture parentKey="texture" file="Interface\AddOns\TellMeWhen\Textures\Resize">
+					<Size x="10" y="10"/>
 				</Texture>
 			</Layer>
 		</Layers>
-		<Frames>
-			<Button name="$parent_ResizeButton" parentKey="resizeButton">
-				<Size x="10" y="10"/>
-				<Anchors>
-					<Anchor point="BOTTOMRIGHT" x="3" y="-3"/>
-				</Anchors>
-				<HitRectInsets left="3" right="0" top="3" bottom="0" />
-				<Layers>
-					<Layer level="BACKGROUND">
-						<Texture name="$parentTexture" parentKey="texture" file="Interface\AddOns\TellMeWhen\Textures\Resize">
-							<Size x="10" y="10"/>
-						</Texture>
-					</Layer>
-				</Layers>
-				<Scripts>
-					<OnLoad>
-						self.texture:SetVertexColor(0.6, 0.6, 0.6)
-					</OnLoad>
-					<OnMouseDown>
-						TMW:Group_StartSizing(self)
-					</OnMouseDown>
-					<OnMouseUp>
-						TMW:Group_StopSizing(self)
-					</OnMouseUp>
-					<OnEnter>
-						self.texture:SetVertexColor(1, 1, 1)
-						if TMW.TT and not self.__title then
-							TMW:TT(self, "RESIZE", "RESIZE_TOOLTIP")
-							self:GetScript("OnEnter")(self)
-						end
-					</OnEnter>
-					<OnLeave>
-						self.texture:SetVertexColor(0.6, 0.6, 0.6)
-					</OnLeave>
-				</Scripts>
-			</Button>
-		</Frames>
+		<Scripts>
+			<OnLoad>
+				self.texture:SetVertexColor(0.6, 0.6, 0.6)
+			</OnLoad>
+			<OnEnter>
+				self.texture:SetVertexColor(1, 1, 1)
+				if TMW.TT and not self.__title then
+					TMW:TT(self, "RESIZE", "RESIZE_TOOLTIP")
+					self:GetScript("OnEnter")(self)
+				end
+			</OnEnter>
+			<OnLeave>
+				self.texture:SetVertexColor(0.6, 0.6, 0.6)
+			</OnLeave>
+		</Scripts>
+	</Button>
+			
+	<Frame name="TellMeWhen_GroupTemplate" enableMouse="false" toplevel="true" movable="true" parent="TMW" virtual="true">
+		<Size x="1" y="1"/>
 	</Frame>
 
 	<Button name="TellMeWhen_IconTemplate" virtual="true" enableMouse="true">

@@ -176,84 +176,47 @@ function GameTooltip:TMW_SetEquiv(equiv)
 	GameTooltip:AddLine(IE:Equiv_GenerateTips(equiv), NORMAL_FONT_COLOR.r, NORMAL_FONT_COLOR.g, NORMAL_FONT_COLOR.b, 1)
 end
 
+
 -- GLOBALS: ChatEdit_InsertLink
+TMW:NewClass("ChatEdit_InsertLink_Hook"){
+	OnNewInstance = function(self, editbox, func)
+		assert(editbox)
+		assert(func)
+		self.func = func
+		self.editbox = editbox
+	end,
+	Call = function(self, text, linkType, linkID)
+		if self.editbox:HasFocus() then
+			return TMW.safecall(self.func, self, text, linkType, linkID)
+		end
+	end,
+}
+
 local old_ChatEdit_InsertLink = ChatEdit_InsertLink
-function ChatEdit_InsertLink(...)
+local function hook_ChatEdit_InsertLink(...)
 	-- attempt to extract data from shift-clicking things (chat links, spells, items, etc) and insert it into the icon editor
 	local text = ...
 	local Type, id = strmatch(text, "|H(.-):(%d+)")
 	if not id then return false end
 
-	if ANN.EditBox:HasFocus() then
-		-- just flat out put the link into the ANN editbox if it is focued. The ability to yell out clickable links is cool.
-		ANN.EditBox:Insert(text)
-
-		-- notify success
-		return true
-	elseif IE.Main.Name:HasFocus() then
-		if CI.t == "item" and Type ~= "item" then
-			-- notify failure if the icon is an item cooldown icon and the link is not an item link
-			return false
-		elseif CI.t ~= "item" and Type ~= "spell" and Type ~= "enchant" then
-			-- notify failure if the icon is not an item cooldown and the link isn't a spell or enchant link
-			-- DONT just check (CI.t ~= "item" and Type == "item") because there are link types we want to exclude, like achievements.
-			return false
-		end
-
-		-- fun text insertion code
-		local Name = IE.Main.Name
-
-		-- find the next semicolon in the string
-		local NameText = Name:GetText()
-		local start = #NameText
-		for i = Name:GetCursorPosition(), start, 1 do
-			if strsub(NameText, i, i) == ";" then
-				start = i+1
-				break
-			end
-		end
-
-		-- put the cursor right after the semicolon
-		Name:SetCursorPosition(start)
-		-- insert the text
-		IE.Main.Name:Insert("; " .. id .. "; ")
-		-- clean the text
-		TMW:CleanString(IE.Main.Name)
-		-- put the cursor after the newly inserted text
-		Name:SetCursorPosition(start + #id + 2)
-
-		-- notify success
-		return true
-	elseif IE.Main.CustomTex:HasFocus() then
-		-- if the custom texture box is active,
-		-- attempt to extract either a spellID or a texture path from the data to use.
-		local tex
-		if Type == "spell" or Type == "enchant" then
-			-- spells and enchants can just use their spellID
-			tex = id
-		elseif Type == "item" then
-			-- items must get the texture path
-			tex = GetItemIcon(id)
-		elseif Type == "achievement" then
-			-- achievements also must get their texture path
-			tex = select(10, GetAchievementInfo(id))
-		end
-		if tex then
-			-- clean off the first part of the path, it does not need to be saved
-			-- it will be appended when the texture is used.
-			tex = gsub(tex, "INTERFACE\\ICONS\\", "")
-			tex = gsub(tex, "Interface\\Icons\\", "")
-
-			-- set the text
-			IE.Main.CustomTex:SetText(tex)
-
-			-- notify success
-			return true
+	for _, instance in pairs(TMW.Classes.ChatEdit_InsertLink_Hook.instances) do
+		local executionSuccess, insertResult = instance:Call(text, Type, id)
+		if executionSuccess then
+			return insertResult
 		end
 	end
-	return old_ChatEdit_InsertLink(...)
+	
+	return false
 end
 
+function ChatEdit_InsertLink(...)
+	local executionSuccess, insertSuccess = TMW.safecall(hook_ChatEdit_InsertLink, ...)
+	if executionSuccess and insertSuccess ~= nil then
+		return insertSuccess
+	else
+		return old_ChatEdit_InsertLink(...)
+	end
+end
 
 
 -- ----------------------
@@ -459,29 +422,6 @@ end
 
 
 ---------- Misc Utilities ----------
-do -- TMW:FindModule()
-	local function testFrame(frame)
-		if frame then
-			local Module = TMW:FindModule(frame)
-			if Module then
-				return Module
-			end
-		end
-	end
-	function TMW:FindModule(self)
-		if type(self) ~= "table" then
-			return
-		end
-		if self.baseName == "TellMeWhen_Options" or self.baseName == "TellMeWhen" then
-			return self
-		end
-		local Module = testFrame(self.GetParent and self:GetParent()) or testFrame(self.frame) or testFrame(self.Module) or testFrame(self.module)
-		if Module then
-			return Module
-		end
-	end
-end
-
 do -- TMW:ReconcileData()
 	local function replace(table, key, source, destination, matchSource, matchDestination, swap)
 		local string = table[key]
@@ -765,8 +705,8 @@ local groupConfigTemplate = {
 					step = 1,
 					bigStep = 1,
 				},
-				Spacing = {
-					name = L["UIPANEL_ICONSPACING"],
+				SpacingX = {
+					name = L["UIPANEL_ICONSPACINGX"],
 					desc = L["UIPANEL_ICONSPACING_DESC"],
 					type = "range",
 					order = 22,
@@ -774,6 +714,38 @@ local groupConfigTemplate = {
 					softMax = 20,
 					step = 0.1,
 					bigStep = 1,
+					set = function(info, val)
+						local g = findid(info)
+						local gs = TMW.db.profile.Groups[g]
+						gs.SettingsPerView[gs.View][info[#info]] = val
+						TMW[g]:Setup()
+					end,
+					get = function(info)
+						local g = findid(info)
+						local gs = TMW.db.profile.Groups[g]
+						return gs.SettingsPerView[gs.View][info[#info]]
+					end,
+				},
+				SpacingY = {
+					name = L["UIPANEL_ICONSPACINGY"],
+					desc = L["UIPANEL_ICONSPACING_DESC"],
+					type = "range",
+					order = 23,
+					min = -5,
+					softMax = 20,
+					step = 0.1,
+					bigStep = 1,
+					set = function(info, val)
+						local g = findid(info)
+						local gs = TMW.db.profile.Groups[g]
+						gs.SettingsPerView[gs.View][info[#info]] = val
+						TMW[g]:Setup()
+					end,
+					get = function(info)
+						local g = findid(info)
+						local gs = TMW.db.profile.Groups[g]
+						return gs.SettingsPerView[gs.View][info[#info]]
+					end,
 				},
 				--[==[Type = {
 					name = L["UIPANEL_GROUPTYPE"],
@@ -1981,32 +1953,14 @@ function TMW:GetAnchoredPoints(group)
 	return point, relframe:GetName(), relativePoint, -X, Y
 end
 
-function TMW:Group_StartSizing(resizeButton)
-	local group = resizeButton:GetParent()
-	group.oldScale = group:GetScale()
-	resizeButton.oldCursorX, resizeButton.oldCursorY = GetCursorPosition(UIParent)
-	group.oldX = group:GetLeft()
-	group.oldY = group:GetTop()
-    resizeButton.oldWidth = group:GetSettings().BarSizeX
-	resizeButton:SetScript("OnUpdate", group.SizeUpdate)
-end
-
-function TMW:Group_StopSizing(resizeButton)
-	resizeButton:SetScript("OnUpdate", nil)
-	local group = resizeButton:GetParent()
-	TMW.db.profile.Groups[group:GetID()].Scale = group:GetScale()
-	local p = TMW.db.profile.Groups[group:GetID()].Point
-	p.point, p.relativeTo, p.relativePoint, p.x, p.y = TMW:GetAnchoredPoints(group)
-	group:SetPos()
-	IE:NotifyChanges()
-end
-
 function TMW:Group_StopMoving(group)
 	group:StopMovingOrSizing()
+	
 	ID.isMoving = nil
-	local p = TMW.db.profile.Groups[group:GetID()].Point
-	p.point, p.relativeTo, p.relativePoint, p.x, p.y = TMW:GetAnchoredPoints(group)
+	group:CalibrateAnchors()
+	
 	group:SetPos()
+	
 	IE:NotifyChanges()
 end
 
@@ -3312,34 +3266,41 @@ function IE:BuildSimpleCheckSettingFrame(parent, arg2, arg3)
 	
 	
 	local lastCheckButton
+	local numFrames = 0
 	for k, data in pairs(allData) do
-		assert(type(data) == "table", "All values in allData must be tables!")
-		local setting = data.setting -- the setting that the check will handle
-		-- the setting is used by the current icon type, and doesnt have an override that is "hiding" the check, so procede to set it up
+		if data ~= nil and data ~= false then -- skip over nils/false (dont freak out about them, they are probably intentional)
 		
-		-- An human-friendly unique (hopefully) identifier for the frame
-		local identifier = setting .. (data.value ~= nil and tostring(data.value) or "")
-		
-		local f = parent[identifier]
-		if not f then
-			f = CreateFrame(objectType, parent:GetName() .. identifier, parent, "TellMeWhen_CheckTemplate")
-			parent[identifier] = f
-			IE:CreateSettingFrameFromData(f, className, data)
-		end
-		
-		if lastCheckButton then
-			-- Anchor it to the previous check if it isn't the first one.
-			f:SetPoint("TOP", lastCheckButton, "BOTTOM", 0, 4)
-		else
-			-- Anchor the first check to the parent
-			f:SetPoint("TOPLEFT", 5, -6)
-		end
-		lastCheckButton = f
+			assert(type(data) == "table", "All values in allData must be tables!")
+			
+			local setting = data.setting -- the setting that the check will handle
+			-- the setting is used by the current icon type, and doesnt have an override that is "hiding" the check, so procede to set it up
+			
+			-- An human-friendly unique (hopefully) identifier for the frame
+			local identifier = setting .. (data.value ~= nil and tostring(data.value) or "")
+			
+			local f = parent[identifier]
+			if not f then
+				f = CreateFrame(objectType, parent:GetName() .. identifier, parent, "TellMeWhen_CheckTemplate")
+				parent[identifier] = f
+				IE:CreateSettingFrameFromData(f, className, data)
+			end
+			
+			if lastCheckButton then
+				-- Anchor it to the previous check if it isn't the first one.
+				f:SetPoint("TOP", lastCheckButton, "BOTTOM", 0, 4)
+			else
+				-- Anchor the first check to the parent
+				f:SetPoint("TOPLEFT", 5, -6)
+			end
+			lastCheckButton = f
 
-		f.text:SetWidth(TMW.WidthCol1)
+			f.text:SetWidth(TMW.WidthCol1)
+			
+			numFrames = numFrames + 1
+		end
 	end
 	
-	parent:SetHeight(14 + #allData*26)
+	parent:SetHeight(14 + numFrames*26)
 	
 	return parent
 end

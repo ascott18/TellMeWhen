@@ -74,11 +74,10 @@ Type:RegisterConfigPanel_ConstructorFunc("column", 1, "TellMeWhen_CooldownSettin
 			title = L["ICONMENU_MANACHECK"],
 			tooltip = L["ICONMENU_MANACHECK_DESC"],
 		},
-		{
+		pclass == "DEATHKNIGHT" and {
 			setting = "IgnoreRunes",
 			title = L["ICONMENU_IGNORERUNES"],
 			tooltip = L["ICONMENU_IGNORERUNES_DESC"],
-			disabledtooltip = L["ICONMENU_IGNORERUNES_DESC_DISABLED"],
 		},
 	})
 end)

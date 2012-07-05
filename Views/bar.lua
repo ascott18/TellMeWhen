@@ -27,19 +27,9 @@ TMW.Defaults.profile.TextLayouts.bar1 = {
 	Name = L["TEXTLAYOUTS_DEFAULTS_BAR1"],
 	GUID = "bar1",
 	NoEdit = true,
-	n = 3,
+	n = 2,
 	-- Default Layout 1
-	{	-- [1] Bind
-		x 	 		  	= -2,
-		y 			 	= -2,
-		point 		 	= "TOPLEFT",
-		relativePoint	= "TOPLEFT",
-		
-		StringName		= L["TEXTLAYOUTS_DEFAULTS_BINDINGLABEL"],
-		DefaultText		= "",
-		SkinAs			= "HotKey",
-	},
-	{	-- [2] Stacks
+	{	-- [1] Stacks
 		x 	 		  	= -2,
 		y 	 		  	= 2,
 		ConstrainWidth	= false,
@@ -50,7 +40,7 @@ TMW.Defaults.profile.TextLayouts.bar1 = {
 		DefaultText		= "[Stacks:Hide('0', '1')]",
 		SkinAs			= "Count",
 	},
-	{	-- [3] Duration
+	{	-- [2] Duration
 		x 	 		  	= -2,
 		y 	 		  	= 0,
 		ConstrainWidth	= true,
@@ -58,10 +48,31 @@ TMW.Defaults.profile.TextLayouts.bar1 = {
 		relativePoint	= "RIGHT",
 		
 		StringName		= L["TEXTLAYOUTS_DEFAULTS_DURATION"],
-		DefaultText		= "[Duration:TMWFormatDuration:Hide('0.0')]",
+		DefaultText		= "[Duration:TMWFormatDuration]",
 	},
 }
-View.defaultTextLayout = "bar1"
+
+View:RegisterIconDefaults{
+	SettingsPerView = {
+		bar = {
+			TextLayout = "bar1",
+			Texts = {
+				"[Stacks:Hide('0', '1')]",
+				"[Duration:TMWFormatDuration]",
+			}
+		}
+	}
+}
+View:RegisterGroupDefaults{
+	SettingsPerView = {
+		bar = {
+			TextLayout = "bar1",
+			SizeX = 140,
+			SizeY = 20,
+		}
+	}
+}
+
 
 View:ImplementsModule("IconModule_Alpha", true)
 View:ImplementsModule("IconModule_CooldownSweep", true)
@@ -69,10 +80,21 @@ View:ImplementsModule("IconModule_Texture_Colored", true)
 View:ImplementsModule("IconModule_TimerBar_BarDisplay", true)
 View:ImplementsModule("IconModule_Texts", true)
 View:ImplementsModule("IconModule_Masque", true)
+View:ImplementsModule("GroupModule_Resizer", true)
 	
-function View:Icon_Setup(icon)
-	icon:SetSize(100, 30)
+function View:Icon_SetSize(icon)
 	local group = icon.group
+	local gspv = group:GetSettingsPerView()
+	
+	icon:SetSize(gspv.SizeX, gspv.SizeY)
+end
+
+function View:Icon_Setup(icon)
+	local group = icon.group
+	local gs = group:GetSettings()
+	local gspv = group:GetSettingsPerView()
+	
+	self:Icon_SetSize(icon)
 	
 	---------- Alpha ----------
 	local Alpha = icon.Modules.IconModule_Alpha
@@ -84,15 +106,15 @@ function View:Icon_Setup(icon)
 		CooldownSweep:Enable()
 	end
 	CooldownSweep.cooldown:ClearAllPoints()
-	CooldownSweep.cooldown:SetPoint("LEFT")
-	CooldownSweep.cooldown:SetSize(30, 30)
+	CooldownSweep.cooldown:SetPoint("LEFT", icon)
+	CooldownSweep.cooldown:SetSize(gspv.SizeY, gspv.SizeY)
 
 	---------- Texture ----------
 	local Texture = icon.Modules.IconModule_Texture_Colored
 	Texture:SetEssential(true)
 	Texture.texture:ClearAllPoints()
-	Texture.texture:SetPoint("LEFT")
-	Texture.texture:SetSize(30, 30)
+	Texture.texture:SetPoint("LEFT", icon)
+	Texture.texture:SetSize(gspv.SizeY, gspv.SizeY)
 	
 	---------- TimerBarOverlay ----------
 	local TimerBar_BarDisplay = icon.Modules.IconModule_TimerBar_BarDisplay
@@ -109,7 +131,7 @@ function View:Icon_Setup(icon)
 	---------- Masque ----------
 	local Masque = icon.Modules.IconModule_Masque
 	Masque.container:ClearAllPoints()
-	Masque.container:SetSize(30, 30)
+	Masque.container:SetSize(gspv.SizeY, gspv.SizeY)
 	Masque.container:SetPoint("LEFT")
 	Masque:Enable()
 	--]=]
@@ -128,10 +150,26 @@ function View:Icon_Setup(icon)
 	TimerBar_BarDisplay.bar:SetPoint("LEFT", Masque.container, "RIGHT")
 end
 function View:Icon_UnSetup(icon)
-	if LMB then
-		local lmbGroup = LMB:Group("TellMeWhen", L["fGROUP"]:format(icon.group:GetID()))
-		lmbGroup:RemoveButton(icon.stupidBullshit, true)
+
+end
+
+function View:Group_Setup(group)
+	local gs = group:GetSettings()
+	local gspv = group:GetSettingsPerView()
+	
+	group:SetScale(gs.Scale)
+	group:SetSize(gs.Columns*(gspv.SizeX+gspv.SpacingX)-gspv.SpacingX, gs.Rows*(gspv.SizeY+gspv.SpacingY)-gspv.SpacingY)
+	
+	local Resizer = group.Modules.GroupModule_Resizer
+	Resizer:Enable()
+	if TMW.Locked or group.Locked then
+		Resizer.resizeButton:Hide()
+	else
+		Resizer.resizeButton:Show()
 	end
+end
+
+function View:Group_UnSetup(group)
 end
 
 function View:Icon_SetPoint(icon, positionID)
@@ -148,7 +186,8 @@ function View:Icon_SetPoint(icon, positionID)
 	]]
 	
 	local group = icon.group
-	local Spacing = group.Spacing
+	local gs = group:GetSettings()
+	local gspv = group:GetSettingsPerView()
 	local LayoutDirection = group.LayoutDirection
 	
 	local row, column
@@ -165,7 +204,7 @@ function View:Icon_SetPoint(icon, positionID)
 		column = (positionID - 1) % Columns + 1
 	end
 	
-	local x, y = (100 + Spacing)*(column-1), (30 + Spacing)*(row-1)
+	local x, y = (gspv.SizeX + gspv.SpacingX)*(column-1), (gspv.SizeY + gspv.SpacingY)*(row-1)
 	
 	
 	local position = icon.position
@@ -188,6 +227,108 @@ function View:Icon_SetPoint(icon, positionID)
 	icon:ClearAllPoints()
 	icon:SetPoint(position.point, position.relativeTo, position.relativePoint, position.x, position.y)
 end
+
+function View:Group_SetSizeAndScale(group)
+	local gs = group:GetSettings()
+	local gspv = group:GetSettingsPerView()
+	
+	group:SetScale(gs.Scale)
+	group:SetSize(gs.Columns*(gspv.SizeX+gspv.SpacingX)-gspv.SpacingX, gs.Rows*(gspv.SizeY+gspv.SpacingY)-gspv.SpacingY)
+end
+
+function View:Group_SetupMacroAppearance(group)
+	self:Group_SetSizeAndScale(group)
+	
+	for icon in TMW:InIcons(group.ID) do
+		self:Icon_SetSize(icon)
+	end
+	
+	group:SortIcons()
+end
+
+local UPD_INTV = 1
+function View.Group_SizeUpdate(resizeButton)
+	--[[ Notes:
+	--	arg1 (self) is resizeButton
+		
+	--	The 'std_' that prefixes a lot of variables means that it is comparable with all other 'std_' variables.
+		More specifically, it means that it does not depend on the scale of either the group nor UIParent.
+	]]
+	local self = resizeButton.module
+	
+	local group = self.group
+	local gs = group:GetSettings()
+	local gspv = group:GetSettingsPerView()
+	local uiScale = UIParent:GetScale()
+	
+	local std_cursorX, std_cursorY = self:GetStandardizedCursorCoordinates()
+
+	
+	
+    -- Calculate & set new scale:
+	local std_newHeight = self.std_oldTop - std_cursorY
+	local ratio_SizeChangeY = std_newHeight/self.std_oldHeight
+	local newScale = ratio_SizeChangeY*group.oldScale
+	newScale = max(0.25, newScale)
+	--[[
+		Holy shit. Look at this wicked sick dimensional analysis:
+		
+		std_newHeight	oldScale
+		------------- X	-------- = newScale
+		std_oldHeight	    1
+
+		'std_Height' cancels out 'std_Height', and 'old' cancels out 'old', leaving us with 'new' and 'Scale'!
+		I just wanted to make sure I explained why this shit works, because this code used to be confusing as hell
+		(which is why I am rewriting it right now)
+	]]
+
+	-- Set the scale that we just determined. This is critical because we have to group:GetEffectiveScale()
+	-- in order to determine the proper width, which depends on the current scale of the group.
+	gs.Scale = newScale
+	group:SetScale(newScale)
+	
+	
+	-- We have all the data needed to find the new position of the group.
+	-- It must be recalculated because otherwise it will scale relative to where it is anchored to,
+	-- instead of being relative to the group's top left corner, which is what it is supposed to be.
+	-- I don't remember why this calculation here works, so lets just leave it alone.
+	-- Note that it will be re-re-calculated once we are done resizing.
+	local newX = group.oldX * group.oldScale / newScale
+	local newY = group.oldY * group.oldScale / newScale
+	group:ClearAllPoints()
+	group:SetPoint("TOPLEFT", UIParent, "BOTTOMLEFT", newX, newY)
+	
+	
+    -- Calculate new bar width
+	local std_newFrameWidth = std_cursorX - self.std_oldLeft
+	local std_spacing = gspv.SpacingX*group:GetEffectiveScale()
+	local std_newWidth = (std_newFrameWidth + std_spacing)/gs.Columns - std_spacing
+	local newWidth = std_newWidth/group:GetEffectiveScale()
+	newWidth = max(gspv.SizeY, newWidth)
+	gspv.SizeX = newWidth
+	
+	if not self.LastUpdate or self.LastUpdate <= TMW.time - UPD_INTV then
+		-- Update the group completely very infrequently because of the high CPU usage.
+		
+		self.LastUpdate = TMW.time
+		
+		-- This needs to be done before we :Setup() or otherwise bad things happen.
+		group:CalibrateAnchors()
+	
+		group:Setup()
+	else
+		-- Only do the things that will determine most of the group's appearance on every frame.
+		
+		View:Group_SetSizeAndScale(group)
+		
+		for icon in TMW:InIcons(group.ID) do
+			View:Icon_SetSize(icon)
+		end
+		
+		group:SortIcons()
+	end
+end
+
 
 View:Register()
 

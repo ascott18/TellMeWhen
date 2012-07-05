@@ -54,9 +54,6 @@ Type.WhenChecks = {
 	{ value = "unalpha",		text = "|cFFFF0000" .. L["ICONMENU_DRPRESENT"], 	 },
 	{ value = "always", 		text = L["ICONMENU_ALWAYS"] },
 }
-Type.RelevantSettings = {
-	Unit = true,
-}
 
 -- AUTOMATICALLY GENERATED: UsesAttributes
 Type:UsesAttributes("spell")
@@ -69,13 +66,13 @@ Type:UsesAttributes("texture")
 -- END AUTOMATICALLY GENERATED: UsesAttributes
 
 Type:RegisterIconDefaults{
-	Unit					= "", 
+	Unit					= "player", 
 	CheckRefresh			= true,
 }
 
 Type:RegisterConfigPanel_XMLTemplate("full", 1, "TellMeWhen_ChooseName")
 
-Type:RegisterConfigPanel_XMLTemplate("column", 1, "TellMeWhen_Unit")
+Type:RegisterConfigPanel_XMLTemplate("full", 1, "TellMeWhen_Unit")
 
 Type:RegisterConfigPanel_ConstructorFunc("column", 1, "TellMeWhen_DRSettings", function(self)
 	self.Header:SetText(Type.name)

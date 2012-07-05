@@ -60,6 +60,7 @@ View:ImplementsModule("IconModule_PowerBar_Overlay", true)
 View:ImplementsModule("IconModule_TimerBar_Overlay", true)
 View:ImplementsModule("IconModule_Texts", true)
 View:ImplementsModule("IconModule_Masque", true)
+View:ImplementsModule("GroupModule_Resizer", true)
 	
 function View:Icon_Setup(icon)
 	local group = icon.group
@@ -76,13 +77,13 @@ function View:Icon_Setup(icon)
 	end
 	CooldownSweep.cooldown:ClearAllPoints()
 	CooldownSweep.cooldown:SetSize(30, 30)
-	CooldownSweep.cooldown:SetPoint("CENTER")
+	CooldownSweep.cooldown:SetPoint("CENTER", icon)
 
 	---------- Texture ----------
 	local Texture = icon.Modules.IconModule_Texture_Colored
 	Texture:SetEssential(true)
 	Texture.texture:ClearAllPoints()
-	Texture.texture:SetPoint("CENTER")
+	Texture.texture:SetPoint("CENTER", icon)
 	Texture.texture:SetSize(30, 30)
 	
 	---------- PowerBarOverlay ----------
@@ -99,13 +100,13 @@ function View:Icon_Setup(icon)
 	
 	---------- Texts ----------
 	local Texts = icon.Modules.IconModule_Texts
-	Texts:Enable()	
+	Texts:Enable()
 
 	---------- Masque ----------
 	local Masque = icon.Modules.IconModule_Masque
-	Masque.container:ClearAllPoints()
-	Masque.container:SetAllPoints()
 	Masque:Enable()
+	Masque.container:ClearAllPoints()
+	Masque.container:SetAllPoints()	
 
 	---------- Skin-Dependent Module Layout ----------
 	if Masque.isDefaultSkin then
@@ -128,10 +129,6 @@ function View:Icon_Setup(icon)
 	PowerBarOverlay.bar:SetPoint("TOPRIGHT", Texture.texture or icon, "TOPRIGHT", -insets, -insets)
 end
 function View:Icon_UnSetup(icon)
-	if LMB then
-		local lmbGroup = LMB:Group("TellMeWhen", L["fGROUP"]:format(icon.group:GetID()))
-		lmbGroup:RemoveButton(icon, true)
-	end
 end
 
 function View:Icon_SetPoint(icon, positionID)
@@ -148,7 +145,8 @@ function View:Icon_SetPoint(icon, positionID)
 	]]
 	
 	local group = icon.group
-	local Spacing = group.Spacing
+	local gs = group:GetSettings()
+	local gspv = group:GetSettingsPerView()
 	local LayoutDirection = group.LayoutDirection
 	
 	local row, column
@@ -165,7 +163,7 @@ function View:Icon_SetPoint(icon, positionID)
 		column = (positionID - 1) % Columns + 1
 	end
 	
-	local x, y = (30 + Spacing)*(column-1), (30 + Spacing)*(row-1)
+	local x, y = (30 + gspv.SpacingX)*(column-1), (30 + gspv.SpacingY)*(row-1)
 	
 	
 	local position = icon.position
@@ -189,5 +187,78 @@ function View:Icon_SetPoint(icon, positionID)
 	icon:SetPoint(position.point, position.relativeTo, position.relativePoint, position.x, position.y)
 end
 
+function View:Group_Setup(group)
+	
+	local gs = group:GetSettings()
+	local gspv = group:GetSettingsPerView()
+	
+	group:SetScale(gs.Scale)
+	group:SetSize(gs.Columns*(30+gspv.SpacingX)-gspv.SpacingX, gs.Rows*(30+gspv.SpacingY)-gspv.SpacingY)
+	
+	local Resizer = group.Modules.GroupModule_Resizer
+	Resizer:Enable()
+	if TMW.Locked or group.Locked then
+		Resizer.resizeButton:Hide()
+	else
+		Resizer.resizeButton:Show()
+	end
+end
+
+function View:Group_UnSetup(group)
+	
+end
+
+function View.Group_SizeUpdate(resizeButton)
+	--[[ Notes:
+	--	arg1 (self) is resizeButton
+		
+	--	The 'std_' that prefixes a lot of variables means that it is comparable with all other 'std_' variables.
+		More specifically, it means that it does not depend on the scale of either the group nor UIParent.
+	]]
+	local self = resizeButton.module
+	
+	local group = self.group
+	local gs = group:GetSettings()
+	
+	local std_cursorX, std_cursorY = self:GetStandardizedCursorCoordinates()
+	
+    -- Calculate & set new scale:
+	local std_newWidth = std_cursorX - self.std_oldLeft
+	local ratio_SizeChangeX = std_newWidth/self.std_oldWidth
+	local newScaleX = ratio_SizeChangeX*group.oldScale
+	
+	local std_newHeight = self.std_oldTop - std_cursorY
+	local ratio_SizeChangeY = std_newHeight/self.std_oldHeight
+	local newScaleY = ratio_SizeChangeY*group.oldScale
+	
+	local newScale = max(0.6, newScaleX, newScaleY)
+	--[[
+		Holy shit. Look at this wicked sick dimensional analysis:
+		
+		std_newHeight	oldScale
+		------------- X	-------- = newScale
+		std_oldHeight	    1
+
+		'std_Height' cancels out 'std_Height', and 'old' cancels out 'old', leaving us with 'new' and 'Scale'!
+		I just wanted to make sure I explained why this shit works, because this code used to be confusing as hell
+		(which is why I am rewriting it right now)
+	]]
+
+	-- Set the scale that we just determined.
+	gs.Scale = newScale
+	group:SetScale(newScale)
+
+	-- We have all the data needed to find the new position of the group.
+	-- It must be recalculated because otherwise it will scale relative to where it is anchored to,
+	-- instead of being relative to the group's top left corner, which is what it is supposed to be.
+	-- I don't remember why this calculation here works, so lets just leave it alone.
+	-- Note that it will be re-re-calculated once we are done resizing.
+	local newX = group.oldX * group.oldScale / newScale
+	local newY = group.oldY * group.oldScale / newScale
+	group:ClearAllPoints()
+	group:SetPoint("TOPLEFT", UIParent, "BOTTOMLEFT", newX, newY)
+end
+
+	
 View:Register()
 

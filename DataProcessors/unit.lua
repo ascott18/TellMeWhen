@@ -19,8 +19,8 @@ local print = TMW.print
 
 
 local Processor = TMW.Classes.IconDataProcessor:New("UNIT", "unit, GUID")
-Processor.SIUVs[#Processor.SIUVs+1] = "local UnitGUID = UnitGUID"
-Processor.SIUVs[#Processor.SIUVs+1] = "local playerGUID = UnitGUID('player')"
+Processor:DeclareUpValue("UnitGUID", UnitGUID)
+Processor:DeclareUpValue("playerGUID", UnitGUID('player'))
 
 function Processor:CompileFunctionSegment(t)
 	-- GLOBALS: unit, GUID

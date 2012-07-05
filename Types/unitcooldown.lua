@@ -59,14 +59,14 @@ Type:UsesAttributes("texture")
 -- END AUTOMATICALLY GENERATED: UsesAttributes
 
 Type:RegisterIconDefaults{
-	Unit					= "", 
+	Unit					= "player", 
 	OnlySeen				= false,
 	Sort					= false,
 }
 
 Type:RegisterConfigPanel_XMLTemplate("full", 1, "TellMeWhen_ChooseName")
 
-Type:RegisterConfigPanel_XMLTemplate("column", 1, "TellMeWhen_Unit")
+Type:RegisterConfigPanel_XMLTemplate("full", 1, "TellMeWhen_Unit")
 
 Type:RegisterConfigPanel_XMLTemplate("column", 1, "TellMeWhen_SortSettings")
 

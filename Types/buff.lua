@@ -56,7 +56,7 @@ Type:UsesAttributes("texture")
 -- END AUTOMATICALLY GENERATED: UsesAttributes
 
 Type:RegisterIconDefaults{
-	Unit					= "", 
+	Unit					= "player", 
 	BuffOrDebuff			= "HELPFUL", 
 	Stealable				= false,     
 	ShowTTText				= false,     
@@ -65,7 +65,28 @@ Type:RegisterIconDefaults{
 
 Type:RegisterConfigPanel_XMLTemplate("full", 1, "TellMeWhen_ChooseName")
 
-Type:RegisterConfigPanel_XMLTemplate("column", 1, "TellMeWhen_Unit")
+Type:RegisterConfigPanel_XMLTemplate("full", 1, "TellMeWhen_Unit")
+
+Type:RegisterConfigPanel_ConstructorFunc("column", 1, "TellMeWhen_BuffSettings", function(self)
+	self.Header:SetText(Type.name)
+	TMW.IE:BuildSimpleCheckSettingFrame(self, {
+		{
+			setting = "OnlyMine",
+			title = L["ICONMENU_ONLYMINE"],
+			tooltip = L["ICONMENU_ONLYMINE_DESC"],
+		},
+		{
+			setting = "ShowTTText",
+			title = L["ICONMENU_SHOWTTTEXT"],
+			tooltip = L["ICONMENU_SHOWTTTEXT_DESC"],
+		},
+		{
+			setting = "Stealable",
+			title = L["ICONMENU_STEALABLE"],
+			tooltip = L["ICONMENU_STEALABLE_DESC"],
+		},
+	})
+end)
 
 Type:RegisterConfigPanel_XMLTemplate("column", 1, "TellMeWhen_SortSettings")
 
@@ -90,26 +111,6 @@ Type:RegisterConfigPanel_ConstructorFunc("column", 2, "TellMeWhen_BuffOrDebuff",
 	})
 end)
 
-Type:RegisterConfigPanel_ConstructorFunc("column", 1, "TellMeWhen_BuffSettings", function(self)
-	self.Header:SetText(Type.name)
-	TMW.IE:BuildSimpleCheckSettingFrame(self, {
-		{
-			setting = "OnlyMine",
-			title = L["ICONMENU_ONLYMINE"],
-			tooltip = L["ICONMENU_ONLYMINE_DESC"],
-		},
-		{
-			setting = "ShowTTText",
-			title = L["ICONMENU_SHOWTTTEXT"],
-			tooltip = L["ICONMENU_SHOWTTTEXT_DESC"],
-		},
-		{
-			setting = "Stealable",
-			title = L["ICONMENU_STEALABLE"],
-			tooltip = L["ICONMENU_STEALABLE_DESC"],
-		},
-	})
-end)
 
 function Type:Update()
 	EFF_THR = TMW.db.profile.EffThreshold
