@@ -23,6 +23,8 @@ local ceil = ceil
 
 local View = TMW.Classes.IconView:New("icon")
 
+local ICON_SIZE = 30
+
 TMW.Defaults.profile.TextLayouts.icon1 = {
 	Name = L["TEXTLAYOUTS_DEFAULTS_ICON1"],
 	GUID = "icon1",
@@ -51,82 +53,110 @@ TMW.Defaults.profile.TextLayouts.icon1 = {
 		SkinAs			= "Count",
 	},
 }
-View.defaultTextLayout = "icon1"
 
-View:ImplementsModule("IconModule_Alpha", true)
-View:ImplementsModule("IconModule_CooldownSweep", true)
-View:ImplementsModule("IconModule_Texture_Colored", true)
-View:ImplementsModule("IconModule_PowerBar_Overlay", true)
-View:ImplementsModule("IconModule_TimerBar_Overlay", true)
-View:ImplementsModule("IconModule_Texts", true)
-View:ImplementsModule("IconModule_Masque", true)
-View:ImplementsModule("GroupModule_Resizer", true)
-	
-function View:Icon_Setup(icon)
-	local group = icon.group
-	icon:SetSize(30, 30)
-	
-	---------- Alpha ----------
-	local Alpha = icon.Modules.IconModule_Alpha
-	Alpha:SetEssential(true)
-	
-	---------- CooldownSweep ----------
-	local CooldownSweep = icon.Modules.IconModule_CooldownSweep
+View:RegisterIconDefaults{
+	SettingsPerView = {
+		icon = {
+			TextLayout = "icon1",
+			Texts = {
+				"",
+				"[Stacks:Hide('0', '1')]",
+			}
+		}
+	}
+}
+
+View:RegisterGroupDefaults{
+	SettingsPerView = {
+		icon = {
+			TextLayout = "icon1",
+			SizeX = ICON_SIZE,
+			SizeY = ICON_SIZE,
+		}
+	}
+}
+
+View:ImplementsModule("IconModule_Alpha", 10, function(Module, icon)
+	Module:SetEssential(true)
+end)
+View:ImplementsModule("IconModule_CooldownSweep", 20, function(Module, icon)
 	if icon.ShowTimer or icon.ShowTimerText then
-		CooldownSweep:Enable()
+		Module:Enable()
 	end
-	CooldownSweep.cooldown:ClearAllPoints()
-	CooldownSweep.cooldown:SetSize(30, 30)
-	CooldownSweep.cooldown:SetPoint("CENTER", icon)
-
-	---------- Texture ----------
-	local Texture = icon.Modules.IconModule_Texture_Colored
-	Texture:SetEssential(true)
-	Texture.texture:ClearAllPoints()
-	Texture.texture:SetPoint("CENTER", icon)
-	Texture.texture:SetSize(30, 30)
 	
-	---------- PowerBarOverlay ----------
-	local PowerBarOverlay = icon.Modules.IconModule_PowerBar_Overlay
+	Module.cooldown:ClearAllPoints()
+	Module.cooldown:SetSize(ICON_SIZE, ICON_SIZE)
+	Module.cooldown:SetPoint("CENTER", icon)
+end)
+View:ImplementsModule("IconModule_Texture_Colored", 30, function(Module, icon)
+	Module:SetEssential(true)
+	
+	Module.texture:ClearAllPoints()
+	Module.texture:SetSize(ICON_SIZE, ICON_SIZE)
+	Module.texture:SetPoint("CENTER", icon)
+end)
+View:ImplementsModule("IconModule_PowerBar_Overlay", 40, function(Module, icon)
 	if icon.ShowPBar then
-		PowerBarOverlay:Enable()
+		Module:Enable()
 	end
-	
-	---------- TimerBarOverlay ----------
-	local TimerBarOverlay = icon.Modules.IconModule_TimerBar_Overlay
+end)
+View:ImplementsModule("IconModule_TimerBar_Overlay", 50, function(Module, icon)
 	if icon.ShowCBar then
-		TimerBarOverlay:Enable()
+		Module:Enable()
 	end
+end)
+View:ImplementsModule("IconModule_Texts", 60, function(Module, icon)
+	Module:Enable()
+end)
+View:ImplementsModule("IconModule_Masque", 100, function(Module, icon)
+	local Modules = icon.Modules
+	local Masque = Module
 	
-	---------- Texts ----------
-	local Texts = icon.Modules.IconModule_Texts
-	Texts:Enable()
-
-	---------- Masque ----------
-	local Masque = icon.Modules.IconModule_Masque
 	Masque:Enable()
 	Masque.container:ClearAllPoints()
 	Masque.container:SetAllPoints()	
 
 	---------- Skin-Dependent Module Layout ----------
+	local CooldownSweep = Modules.IconModule_CooldownSweep
+	local PowerBar_Overlay = Modules.IconModule_PowerBar_Overlay
+	local TimerBar_Overlay = Modules.IconModule_TimerBar_Overlay
+	local IconModule_Texture_Colored = Modules.IconModule_Texture_Colored
+	
+	local frameLevelOffset
 	if Masque.isDefaultSkin then
-		CooldownSweep.cooldown:SetFrameLevel(icon:GetFrameLevel() + 1)
-		PowerBarOverlay.bar:SetFrameLevel(icon:GetFrameLevel() + 2)
-		TimerBarOverlay.bar:SetFrameLevel(icon:GetFrameLevel() + 2)
+		frameLevelOffset = Masque.isDefaultSkin and 1 or -2
 	else
-		CooldownSweep.cooldown:SetFrameLevel(icon:GetFrameLevel() + -2)
-		PowerBarOverlay.bar:SetFrameLevel(icon:GetFrameLevel() + -1)
-		TimerBarOverlay.bar:SetFrameLevel(icon:GetFrameLevel() + -1)
+		frameLevelOffset = -2
+	end
+	
+	if CooldownSweep then
+		CooldownSweep.cooldown:SetFrameLevel( icon:GetFrameLevel() + 0 + frameLevelOffset)
 	end
 	
 	local insets = Masque.isDefaultSkin and 1.5 or 0
-	TimerBarOverlay.bar:SetPoint("TOP", Texture.texture, "CENTER", 0, -0.5)
-	TimerBarOverlay.bar:SetPoint("BOTTOMLEFT", Texture.texture, "BOTTOMLEFT", insets, insets)
-	TimerBarOverlay.bar:SetPoint("BOTTOMRIGHT", Texture.texture, "BOTTOMRIGHT", -insets, insets)
+	local anchorTo = IconModule_Texture_Colored and IconModule_Texture_Colored.texture or icon
+	if TimerBar_Overlay then
+		TimerBar_Overlay.bar:SetFrameLevel(icon:GetFrameLevel() + 1 + frameLevelOffset)
+		TimerBar_Overlay.bar:ClearAllPoints()
+		TimerBar_Overlay.bar:SetPoint("TOP", anchorTo, "CENTER", 0, -0.5)
+		TimerBar_Overlay.bar:SetPoint("BOTTOMLEFT", anchorTo, "BOTTOMLEFT", insets, insets)
+		TimerBar_Overlay.bar:SetPoint("BOTTOMRIGHT", anchorTo, "BOTTOMRIGHT", -insets, insets)
+	end
 	
-	PowerBarOverlay.bar:SetPoint("BOTTOM", Texture.texture or icon, "CENTER", 0, 0.5)
-	PowerBarOverlay.bar:SetPoint("TOPLEFT", Texture.texture or icon, "TOPLEFT", insets, -insets)
-	PowerBarOverlay.bar:SetPoint("TOPRIGHT", Texture.texture or icon, "TOPRIGHT", -insets, -insets)
+	if PowerBar_Overlay then
+		PowerBar_Overlay.bar:SetFrameLevel(icon:GetFrameLevel() + 1 + frameLevelOffset)
+		PowerBar_Overlay.bar:ClearAllPoints()
+		PowerBar_Overlay.bar:SetPoint("BOTTOM", anchorTo, "CENTER", 0, 0.5)
+		PowerBar_Overlay.bar:SetPoint("TOPLEFT", anchorTo, "TOPLEFT", insets, -insets)
+		PowerBar_Overlay.bar:SetPoint("TOPRIGHT", anchorTo, "TOPRIGHT", -insets, -insets)
+	end
+end)
+
+
+View:ImplementsModule("GroupModule_Resizer", 10, true)
+	
+function View:Icon_Setup(icon)
+	icon:SetSize(ICON_SIZE, ICON_SIZE)
 end
 function View:Icon_UnSetup(icon)
 end
@@ -163,7 +193,7 @@ function View:Icon_SetPoint(icon, positionID)
 		column = (positionID - 1) % Columns + 1
 	end
 	
-	local x, y = (30 + gspv.SpacingX)*(column-1), (30 + gspv.SpacingY)*(row-1)
+	local x, y = (ICON_SIZE + gspv.SpacingX)*(column-1), (ICON_SIZE + gspv.SpacingY)*(row-1)
 	
 	
 	local position = icon.position
@@ -193,7 +223,7 @@ function View:Group_Setup(group)
 	local gspv = group:GetSettingsPerView()
 	
 	group:SetScale(gs.Scale)
-	group:SetSize(gs.Columns*(30+gspv.SpacingX)-gspv.SpacingX, gs.Rows*(30+gspv.SpacingY)-gspv.SpacingY)
+	group:SetSize(gs.Columns*(ICON_SIZE+gspv.SpacingX)-gspv.SpacingX, gs.Rows*(ICON_SIZE+gspv.SpacingY)-gspv.SpacingY)
 	
 	local Resizer = group.Modules.GroupModule_Resizer
 	Resizer:Enable()

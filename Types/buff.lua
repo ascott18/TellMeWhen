@@ -40,9 +40,6 @@ Type.WhenChecks = {
 	{ value = "unalpha", 		text = "|cFFFF0000" .. L["ICONMENU_ABSENT"], 			 },
 	{ value = "always", 		text = L["ICONMENU_ALWAYS"] },
 }
-Type.RelevantSettings = {
-	Sort = true,
-}
 
 -- AUTOMATICALLY GENERATED: UsesAttributes
 Type:UsesAttributes("stack, stackText")

@@ -3105,6 +3105,14 @@ function TMW:Assert(statement, text, ...)
 	end
 end
 
+function TMW:ValidateType(argN, methodName, var, reqType)
+	local varType = type(var)
+	if varType ~= reqType then
+		error(("Bad argument #%d to %q. %s expected, got %s"):format(argN, methodName, reqType, varType), 3)
+	end
+	
+end
+
 function TMW:Upgrade()
 	if TellMeWhen_Settings or (type(TMW.db.profile.Version) == "string") or (TMW.db.profile.Version < TELLMEWHEN_VERSIONNUMBER) then
 		if TellMeWhen_Settings then -- needs to be first
@@ -3662,7 +3670,7 @@ function EVENTS:TMW_ICON_SETUP_PRE(_, icon)
 				thisHasEventHandlers = Module:ProcessAndDelegateIconEventSettings(icon, event, eventSettings)
 			end
 
-			icon.doCheckForUpdatesIfFakeHidden = icon.doCheckForUpdatesIfFakeHidden or thisHasEventHandlers
+			--icon.doCheckForUpdatesIfFakeHidden = icon.doCheckForUpdatesIfFakeHidden or thisHasEventHandlers
 			if thisHasEventHandlers and not icon.typeData["EventDisabled_" .. event] then
 				icon.EventHandlersSet[event] = true
 				icon.EventsToFire = icon.EventsToFire or {}
@@ -3682,19 +3690,25 @@ function EVENTS:TMW_ICON_SETUP_POST(_, icon)
 	end
 end
 TMW:RegisterCallback("TMW_ICON_SETUP_POST", EVENTS)
+--[[
+-- The purpose of this was to set doCheckForUpdatesIfFakeHidden and then re-update the icon
+-- so that it would still update while FakeHidden (because an event depended upon it).
+-- Now, since icons are no longer disabled from automatic updates if they are FakeHidden,
+-- this code is purposeless.
+
 function EVENTS:TMW_GLOBAL_UPDATE_POST()
 	for icon in TMW:InIcons() do
 		local ics = icon:GetSettings()
 		for _, eventSettings in TMW:InNLengthTable(ics.Events) do
 			local ic = _G[eventSettings.Icon]
 			if ic then
-				ic.doCheckForUpdatesIfFakeHidden = true
+				--ic.doCheckForUpdatesIfFakeHidden = true
 				ic:Setup()
 			end
 		end
 	end
 end
-TMW:RegisterCallback("TMW_GLOBAL_UPDATE_POST", EVENTS)
+TMW:RegisterCallback("TMW_GLOBAL_UPDATE_POST", EVENTS)]]
 function EVENTS:TMW_ONUPDATE_TIMECONSTRAINED(event, time, Locked)
 	local QueuedIcons = self.QueuedIcons
 	if Locked and QueuedIcons[1] then
@@ -5138,8 +5152,6 @@ function Group.Setup(group)
 		group[k] = TMW.db.profile.Groups[groupID][k]
 	end
 
-	group:SetFrameLevel(group.Level) --TODO: is this redundant? I think it is
-
 	TMW:Fire("TMW_GROUP_SETUP_PRE", group)
 	
 	group:PreDisableAllModules()
@@ -5160,10 +5172,10 @@ function Group.Setup(group)
 		
 		-- Setup icons
 		for iconID = 1, group.Rows * group.Columns do
-			local icon = group[iconID] or TMW.Classes.Icon:New("Button", "TellMeWhen_Group" .. groupID .. "_Icon" .. iconID, group, "TellMeWhen_IconTemplate", iconID)
-
-			icon:Show()
-			icon:SetFrameLevel(group:GetFrameLevel() + 1)
+			local icon = group[iconID]
+			if not icon then
+				icon = TMW.Classes.Icon:New("Button", group:GetName() .. "_Icon" .. iconID, group, "TellMeWhen_IconTemplate", iconID)
+			end
 
 			TMW.safecall(icon.Setup, icon)
 		end
@@ -5418,7 +5430,7 @@ function Icon.Update(icon, force, ...)
 				ConditionObj:Check(icon)
 			end
 
-			if not icon.dontHandleConditionsExternally and not icon.doCheckForUpdatesIfFakeHidden and ConditionObj.Failed and (icon.ConditionAlpha or 0) == 0 then
+			if not icon.dontHandleConditionsExternally --[[and not icon.doCheckForUpdatesIfFakeHidden]] and ConditionObj.Failed and (icon.ConditionAlpha or 0) == 0 then
 				if attributes.alpha ~= 0 then
 					icon:SetInfo("alpha", 0)
 				end
@@ -5601,6 +5613,9 @@ function Icon.Setup(icon)
 	local typeData = Types[ics.Type]
 	local viewData = Views[group:GetSettings().View]
 	
+	icon:Show()
+	icon:SetFrameLevel(group:GetFrameLevel() + 1)
+	
 	-- Reset the lits of used components
 	wipe(icon.Components)
 	
@@ -5608,7 +5623,7 @@ function Icon.Setup(icon)
 	icon.viewData = viewData
 	
 	icon.ForceDisabled = nil
-	icon.dontHandleConditionsExternally = nil
+	icon.dontHandleConditionsExternally = nil --TODO: figure out a way to eliminate this.
 
 	--icon.doCheckForUpdatesIfFakeHidden = nil
 
@@ -5636,8 +5651,6 @@ function Icon.Setup(icon)
 	if icon.typeData ~= oldTypeData then		
 		TMW:Fire("TMW_ICON_TYPE_CHANGED", icon, typeData, oldTypeData)
 	end
-
-	assert(not (pclass ~= "DEATHKNIGHT" and icon.IgnoreRunes)) --TODO: delete this after a while
 
 	-- process alpha settings
 	if icon.ShowWhen == "alpha" then
@@ -5683,7 +5696,7 @@ function Icon.Setup(icon)
 		end
 		viewData:ImplementIntoIcon(icon)
 		viewData:Icon_Setup(icon)
-		icon:SetupAllModulesForIcon(icon)
+		--icon:SetupAllModulesForIcon(icon)
 		
 		TMW.safecall(typeData.Setup, typeData, icon, groupID, iconID)
 	
@@ -5807,16 +5820,19 @@ TMW:NewClass("GenericComponent"){
 	RegisterConfigPanel_XMLTemplate = function(self, size, preferredColumn, xmlTemplateName)
 		local t = self:RegisterConfigPanel(size, preferredColumn, "XMLTemplate")
 		
-		assert(type(xmlTemplateName) == "string", "GenericComponent:RegisterConfigPanel_XMLTemplate() - 'xmlTemplateName' (arg3) - Expected string")
+		TMW:ValidateType(2, "GenericComponent:RegisterConfigPanel_XMLTemplate()", size, "string")
+		TMW:ValidateType(4, "GenericComponent:RegisterConfigPanel_XMLTemplate()", xmlTemplateName, "string")
+		
 		t.xmlTemplateName = xmlTemplateName
 	end,
 	RegisterConfigPanel_ConstructorFunc = function(self, size, preferredColumn, frameName, func)
 		local t = self:RegisterConfigPanel(size, preferredColumn, "ConstructorFunc")
 		
-		assert(type(frameName) == "string", "GenericComponent:RegisterConfigPanel_ConstructorFunc() - 'frameName' (arg3) - Expected string")
-		t.frameName = frameName
+		TMW:ValidateType(2, "GenericComponent:RegisterConfigPanel_XMLTemplate()", size, "string")
+		TMW:ValidateType(4, "GenericComponent:RegisterConfigPanel_XMLTemplate()", frameName, "string")
+		TMW:ValidateType(5, "GenericComponent:RegisterConfigPanel_XMLTemplate()", func, "function")
 		
-		assert(type(func) == "function", "GenericComponent:RegisterConfigPanel_ConstructorFunc() - 'func' (arg4) - Expected funcref")
+		t.frameName = frameName
 		t.func = func
 	end,
 	
@@ -5870,9 +5886,6 @@ TMW:NewClass("IconComponent", "GenericComponent"){
 		end
 		icon.Components[#icon.Components+1] = self
 		
-		if self.OnImplementIntoIcon then
-		--	self:OnImplementIntoIcon(icon)
-		end
 		self:CallFunc("OnImplementIntoIcon", icon)
 	end,
 }
@@ -6059,7 +6072,7 @@ local function enumLines(text)
 	return s
 end
 local SetInfoFuncs = setmetatable({}, { __index = function(self, signature)
-	assert(type(signature) == "string",
+	assert(type(signature) == "string", --TODO: remove this check after 9/1/2012
 	("(Bad argument #3 to icon:SetInfo(signature, ...) - Expected string, got %s. (SetInfo changed in v5.1.0 - are you still using the old SetInfo format?)"):format(type(signature)))
 	
 	local originalSignature = signature
@@ -6255,6 +6268,22 @@ TMW:NewClass("IconModule", "IconComponent", "ObjectModule"){
 		newClass:InheritTable(self, "TypeAllowances")
 		newClass.defaultAllowanceForTypes = self.defaultAllowanceForTypes
 	end,
+	
+	OnImplementIntoIcon = function(self, icon)
+		local implementationData = self.implementationData
+		local implementorFunc = implementationData.implementorFunc
+		
+		-- implementorFunc is either true if the module is setup within IconView:Icon_Setup(),
+		-- or it is a function if that function should be called in order to setup the module.
+		if type(implementorFunc) == "function" then
+			implementorFunc(self, icon)
+		end
+		
+		if self.SetupForIcon then
+			self:SetupForIcon(icon)
+		end
+	end,
+	
 	SetDataListner = function(self, processorName, ...)
 		self:AssertSelfIsClass()
 		
@@ -6279,6 +6308,7 @@ TMW:NewClass("IconModule", "IconComponent", "ObjectModule"){
 		
 		return self:GetIconEventListner(Processor.changedEvent)
 	end,
+	
 	SetIconEventListner = function(self, event, func)
 		self:AssertSelfIsClass()
 		
@@ -6291,6 +6321,7 @@ TMW:NewClass("IconModule", "IconComponent", "ObjectModule"){
 		
 		return self.EventListners[event]
 	end,
+	
 	SetEssentialModuleComponent = function(self, identifier, component)
 		self:AssertSelfIsInstance()
 		
@@ -6506,7 +6537,6 @@ end
 function IconType:OnNewInstance(type)
 	self.type = type
 	self.Icons = {}
-	self.ModuleAllowance = {}
 	self.UsedAttributes = {}
 	self.UsedProcessors = {}
 end
@@ -6602,22 +6632,6 @@ function IconType:UnregisterIcon(icon)
 	tDeleteItem(self.Icons, icon)
 end
 
-
-function IconType:SetModuleAllowances(allow, ...)
-	-- intended to be a private method
-	for i, moduleName in TMW:Vararg(...) do
-		self.ModuleAllowance[moduleName] = allow
-	end
-end
-
-function IconType:AllowModules(...)
-	IconType:SetModuleAllowances(true, ...)
-end
-
-function IconType:DisallowModules(...)
-	IconType:SetModuleAllowances(false, ...)
-end
-
 function IconType:UsesAttributes(attributesString)
 	self.UsedAttributes[attributesString] = true
 end
@@ -6671,38 +6685,6 @@ function IconType:OnImplementIntoIcon(icon)
 	end
 end
 
---TODO: misplaced
-function Icon.ShouldImplementModule(icon, moduleName)
-	local typeData = icon.typeData
-	local viewData = icon.viewData
-	local moduleData = TMW.Classes[moduleName]
-	
-	if not moduleData then
-		return false
-	end
-	
-	-- Allowance based on icon type:
-	if typeData.ModuleAllowance[moduleName] == true then
-		-- If the type specifically requests to implement this module, then allow it.
-	elseif typeData.ModuleAllowance[moduleName] == nil and (moduleData.defaultAllowanceForTypes or moduleData.TypeAllowances[icon.Type]) then
-		-- If the type has not requested to either allow or disallow this module,
-		-- and the module allows implementation for this type, then allow it.
-	else
-		return
-	end
-	
-	-- Allowance based on icon view:
-	if moduleData.ViewImplementors[viewData.view] then
-		return moduleData.ViewImplementors[viewData.view]
-	elseif moduleData.ViewImplementors.ALL then
-		return moduleData.ViewImplementors.ALL
-	elseif viewData.ModuleImplementors[moduleName] then
-		return viewData.ModuleImplementors[moduleName]
-	end
-	
-	return false
-end
-
 function Icon.IsModuleImplemented(icon, moduleName)
 	return icon.Modules[moduleName]
 end
@@ -6734,20 +6716,26 @@ function IconView:Register()
 	return self -- why not?
 end
 
-function IconView:ImplementsModule(module, implementorFunc)
-	self.ModuleImplementors[module] = implementorFunc
+local function SortModuleImplementors(a, b)
+	return a.order < b.order
 end
-
-function IconView:DisallowModules(...)
-	for i, moduleName in TMW:Vararg(...) do
-		self.ModuleImplementors[moduleName] = false
-	end
+function IconView:ImplementsModule(module, order, implementorFunc)
+	TMW:ValidateType(2, "IconView:ImplementsModule()", module, "string")
+	TMW:ValidateType(3, "IconView:ImplementsModule()", order, "number")
 	
+	self.ModuleImplementors[#self.ModuleImplementors+1] = {
+		order = order,
+		moduleName = module,
+		implementorFunc = implementorFunc,
+	}
+	
+	sort(self.ModuleImplementors, SortModuleImplementors)
 end
 
 function IconView:OnImplementIntoGroup(group)
---IconView:ExtendMethod("ImplementIntoGroup", function(self, group)
-	for moduleName, implementorFunc in pairs(self.ModuleImplementors) do
+	for i, implementationData in ipairs(self.ModuleImplementors) do
+		local moduleName = implementationData.moduleName
+		local implementorFunc = implementationData.implementorFunc
 		-- implementorFunc is either true if the module is setup within IconView:Group_Setup(),
 		-- or it is a function if that function should be called in order to setup the module.
 		
@@ -6763,19 +6751,26 @@ function IconView:OnImplementIntoGroup(group)
 				Module = ModuleClass:New(group)
 			end
 			 
-			-- Call the IconComponent ImplementIntoIcon function to add settings and stuff.
+			-- Implement the Module into the group
 			Module:ImplementIntoGroup(group)
 	
 			-- If implementorFunc was a function (see above) then call it in order to properly setup the module.
 			if type(implementorFunc) == "function" then
 				implementorFunc(self, group)
 			end
+			
+			if Module.SetupForGroup then
+				Module:SetupForGroup(group)
+			end
 		end
 	end
-end--)
+end
 
 function IconView:OnImplementIntoIcon(icon)
-	for moduleName, implementorFunc in pairs(self.ModuleImplementors) do
+	for i, implementationData in ipairs(self.ModuleImplementors) do
+		local moduleName = implementationData.moduleName
+		local implementorFunc = implementationData.implementorFunc
+		
 		-- implementorFunc is either true if the module is setup within IconView:Icon_Setup(),
 		-- or it is a function if that function should be called in order to setup the module.
 		
@@ -6789,15 +6784,11 @@ function IconView:OnImplementIntoIcon(icon)
 			local Module = icon.Modules[moduleName]
 			if not Module then
 				Module = ModuleClass:New(icon)
+				Module.implementationData = implementationData
 			end
 			
-			-- Call the IconComponent ImplementIntoIcon function to add settings and stuff.
+			-- Implement the module into the icon.
 			Module:ImplementIntoIcon(icon)
-	
-			-- If implementorFunc was a function (see above) then call it in order to properly setup the module.
-			if type(implementorFunc) == "function" then
-				implementorFunc(self, icon)
-			end
 		end
 	end
 end

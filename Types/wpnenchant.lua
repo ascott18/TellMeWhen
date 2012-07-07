@@ -113,7 +113,6 @@ local function GetWeaponEnchantName(slot)
 		i=i+1
 	end
 end
-_G.GetWeaponEnchantName = GetWeaponEnchantName
 
 local function UpdateWeaponEnchantInfo(slot, selectIndex)
 	local has, expiration = select(selectIndex, GetWeaponEnchantInfo())

@@ -74,13 +74,65 @@ View:RegisterGroupDefaults{
 }
 
 
-View:ImplementsModule("IconModule_Alpha", true)
-View:ImplementsModule("IconModule_CooldownSweep", true)
-View:ImplementsModule("IconModule_Texture_Colored", true)
-View:ImplementsModule("IconModule_TimerBar_BarDisplay", true)
-View:ImplementsModule("IconModule_Texts", true)
-View:ImplementsModule("IconModule_Masque", true)
-View:ImplementsModule("GroupModule_Resizer", true)
+View:ImplementsModule("IconModule_Alpha", 10, function(Module, icon)
+	Module:SetEssential(true)
+end)
+View:ImplementsModule("IconModule_CooldownSweep", 20, function(Module, icon)
+	local group = icon.group
+	local gspv = group:GetSettingsPerView()
+	
+	if icon.ShowTimer or icon.ShowTimerText then
+		Module:Enable()
+	end
+	Module.cooldown:ClearAllPoints()
+	Module.cooldown:SetPoint("LEFT", icon)
+	Module.cooldown:SetSize(gspv.SizeY, gspv.SizeY)
+end)
+View:ImplementsModule("IconModule_Texture_Colored", 30, function(Module, icon)
+	local group = icon.group
+	local gspv = group:GetSettingsPerView()
+	
+	Module:SetEssential(true)
+	Module.texture:ClearAllPoints()
+	Module.texture:SetPoint("LEFT", icon)
+	Module.texture:SetSize(gspv.SizeY, gspv.SizeY)
+end)
+View:ImplementsModule("IconModule_TimerBar_BarDisplay", 50, function(Module, icon)
+	Module:Enable()
+end)
+View:ImplementsModule("IconModule_Texts", 70, function(Module, icon)
+	Module:Enable()
+end)
+View:ImplementsModule("IconModule_Masque", 100, function(Module, icon)
+	local Modules = icon.Modules
+	local Masque = Module
+	local group = icon.group
+	local gspv = group:GetSettingsPerView()
+	
+	Masque.container:ClearAllPoints()
+	Masque.container:SetSize(gspv.SizeY, gspv.SizeY)
+	Masque.container:SetPoint("LEFT")
+	Masque:Enable()
+
+	---------- Skin-Dependent Module Layout ----------
+	local CooldownSweep = Modules.IconModule_CooldownSweep
+	local TimerBar_BarDisplay = Modules.IconModule_TimerBar_BarDisplay
+	
+	if Masque.isDefaultSkin then
+		CooldownSweep.cooldown:SetFrameLevel(icon:GetFrameLevel() + 3)
+		TimerBar_BarDisplay.bar:SetFrameLevel(icon:GetFrameLevel() + 2)
+	else
+		CooldownSweep.cooldown:SetFrameLevel(icon:GetFrameLevel() + 2)
+		TimerBar_BarDisplay.bar:SetFrameLevel(icon:GetFrameLevel() + -1)
+	end
+	
+	TimerBar_BarDisplay.bar:ClearAllPoints()
+	TimerBar_BarDisplay.bar:SetPoint("TOPRIGHT")
+	TimerBar_BarDisplay.bar:SetPoint("BOTTOMRIGHT")
+	TimerBar_BarDisplay.bar:SetPoint("LEFT", Masque.container, "RIGHT")
+end)
+
+View:ImplementsModule("GroupModule_Resizer", 10, true)
 	
 function View:Icon_SetSize(icon)
 	local group = icon.group
@@ -90,64 +142,7 @@ function View:Icon_SetSize(icon)
 end
 
 function View:Icon_Setup(icon)
-	local group = icon.group
-	local gs = group:GetSettings()
-	local gspv = group:GetSettingsPerView()
-	
 	self:Icon_SetSize(icon)
-	
-	---------- Alpha ----------
-	local Alpha = icon.Modules.IconModule_Alpha
-	Alpha:SetEssential(true)
-	
-	---------- CooldownSweep ----------
-	local CooldownSweep = icon.Modules.IconModule_CooldownSweep
-	if icon.ShowTimer or icon.ShowTimerText then
-		CooldownSweep:Enable()
-	end
-	CooldownSweep.cooldown:ClearAllPoints()
-	CooldownSweep.cooldown:SetPoint("LEFT", icon)
-	CooldownSweep.cooldown:SetSize(gspv.SizeY, gspv.SizeY)
-
-	---------- Texture ----------
-	local Texture = icon.Modules.IconModule_Texture_Colored
-	Texture:SetEssential(true)
-	Texture.texture:ClearAllPoints()
-	Texture.texture:SetPoint("LEFT", icon)
-	Texture.texture:SetSize(gspv.SizeY, gspv.SizeY)
-	
-	---------- TimerBarOverlay ----------
-	local TimerBar_BarDisplay = icon.Modules.IconModule_TimerBar_BarDisplay
-	TimerBar_BarDisplay:Enable()
-	TimerBar_BarDisplay.bar:SetPoint("TOPRIGHT")
-	TimerBar_BarDisplay.bar:SetPoint("BOTTOMRIGHT")
-	TimerBar_BarDisplay.bar:SetPoint("LEFT", Texture.texture, "RIGHT")
-	
-	---------- Texts ----------
-	local Texts = icon.Modules.IconModule_Texts
-	Texts:Enable()
-	
-	-- [=[
-	---------- Masque ----------
-	local Masque = icon.Modules.IconModule_Masque
-	Masque.container:ClearAllPoints()
-	Masque.container:SetSize(gspv.SizeY, gspv.SizeY)
-	Masque.container:SetPoint("LEFT")
-	Masque:Enable()
-	--]=]
-
-	---------- Skin-Dependent Module Layout ----------
-	if Masque.isDefaultSkin then
-		CooldownSweep.cooldown:SetFrameLevel(icon:GetFrameLevel() + 3)
-		TimerBar_BarDisplay.bar:SetFrameLevel(icon:GetFrameLevel() + 2)
-	else
-		CooldownSweep.cooldown:SetFrameLevel(icon:GetFrameLevel() + 2)
-		TimerBar_BarDisplay.bar:SetFrameLevel(icon:GetFrameLevel() + -1)
-	end
-	--local insets = Masque.isDefaultSkin and 1.5 or 0
-	TimerBar_BarDisplay.bar:SetPoint("TOPRIGHT")
-	TimerBar_BarDisplay.bar:SetPoint("BOTTOMRIGHT")
-	TimerBar_BarDisplay.bar:SetPoint("LEFT", Masque.container, "RIGHT")
 end
 function View:Icon_UnSetup(icon)
 

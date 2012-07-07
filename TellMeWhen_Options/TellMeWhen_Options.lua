@@ -2610,12 +2610,9 @@ IE.Checks = {
 	--3=slider(x100),
 	--4=custom, (only handle show/hide)
 	--table=subkeys are settings
-	CheckNext = 4,
 	Alpha = 3,
 	UnAlpha = 3,
 	ConditionAlpha = 3,
-	FakeHidden = 4,
-	Enabled = 4,
 }
 IE.Tabs = {}
 
@@ -2982,7 +2979,7 @@ function IE:ShowHide()
 
 	for k, v in pairs(IE.Checks) do
 		if IE.Main[k] then
-			if --[[Types[t].RelevantSettings[k] ]] IE:IsSettingRelevantToIcon(CI.ic, k) then
+			if IE:IsSettingRelevantToIcon(CI.ic, k) then
 				IE.Main[k]:Show()
 				if IE.Main[k].SetEnabled then
 					IE.Main[k]:SetEnabled(1)
@@ -3079,13 +3076,16 @@ TMW:NewClass("SettingCheckButton", "CheckButton", "SettingFrameBase"){
 	
 	ReloadSetting = function(self)
 		local icon = CI.ic
-		if self.data.value ~= nil then
-			self:SetChecked(icon:GetSettings()[self.setting] == self.data.value)
-		else
-			self:SetChecked(icon:GetSettings()[self.setting])
+		
+		if icon then
+			if self.data.value ~= nil then
+				self:SetChecked(icon:GetSettings()[self.setting] == self.data.value)
+			else
+				self:SetChecked(icon:GetSettings()[self.setting])
+			end
+			self:CheckInteractionStates()
+			self:OnClick("LeftButton")
 		end
-		self:CheckInteractionStates()
-		self:OnClick("LeftButton")
 	end,
 }
 
@@ -3111,7 +3111,9 @@ TMW:NewClass("BitflagSettingFrameBase"){
 	
 	ReloadSetting = function(self)
 		local icon = CI.ic
-		self:SetChecked(bit.band(icon:GetSettings()[self.setting], self.bit) == self.bit)
+		if icon then
+			self:SetChecked(bit.band(icon:GetSettings()[self.setting], self.bit) == self.bit)
+		end
 		
 		self:CheckInteractionStates()
 	end,
@@ -3204,11 +3206,13 @@ TMW:NewClass("SettingEditBox", "EditBox", "SettingFrameBase"){
 	
 	ReloadSetting = function(self)
 		local icon = CI.ic
-		if self.setting then
-			self:SetText(icon:GetSettings()[self.setting])
+		if icon then
+			if self.setting then
+				self:SetText(icon:GetSettings()[self.setting])
+			end
+			self:CheckInteractionStates()
+			self:ClearFocus()
 		end
-		self:CheckInteractionStates()
-		self:ClearFocus()
 	end,
 }
 
@@ -4124,22 +4128,23 @@ end
 ---------- Interface ----------
 function IE:UndoRedoChanged()
 	local icon = CI.ic
-	assert(icon)
+	
+	if icon then
+		if not icon.historyState or icon.historyState - 1 < 1 then
+			IE.UndoButton:Disable()
+			IE.CanUndo = false
+		else
+			IE.UndoButton:Enable()
+			IE.CanUndo = true
+		end
 
-	if not icon.historyState or icon.historyState - 1 < 1 then
-		IE.UndoButton:Disable()
-		IE.CanUndo = false
-	else
-		IE.UndoButton:Enable()
-		IE.CanUndo = true
-	end
-
-	if not icon.historyState or icon.historyState + 1 > #icon.history then
-		IE.RedoButton:Disable()
-		IE.CanRedo = false
-	else
-		IE.RedoButton:Enable()
-		IE.CanRedo = true
+		if not icon.historyState or icon.historyState + 1 > #icon.history then
+			IE.RedoButton:Disable()
+			IE.CanRedo = false
+		else
+			IE.RedoButton:Enable()
+			IE.CanRedo = true
+		end
 	end
 end
 

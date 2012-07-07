@@ -1189,7 +1189,9 @@ Selecting %q will let sounds be played even when sounds are turned off.]]
 L["SOUND_CHANNEL_MASTER"] = "Master"
 
 L["SOUNDERROR1"] = "File must have an extension!"
-L["SOUNDERROR2"] = "Custom WAV files are not supported by WoW 4.0+"
+L["SOUNDERROR2"] = [[Custom WAV files are not supported by WoW 4.0+
+
+(Sounds build into WoW will still work, though)]]
 L["SOUNDERROR3"] = "Only OGG and MP3 files are supported!"
 
 L["ANN_TAB"] = "Text"

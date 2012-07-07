@@ -49,6 +49,7 @@ function Texts:OnNewInstance(icon)
 		end
 	end
 end
+
 function Texts:OnEnable()
 	local icon = self.icon
 	local attributes = icon.attributes
@@ -62,17 +63,28 @@ function Texts:OnDisable()
 		fontString:Hide()
 	end
 end
+
 function Texts:CreateFontString(id)
 	local icon = self.icon
 	local fontString = icon:CreateFontString(nil, "ARTWORK", "NumberFontNormalSmall")
 	self.fontStrings[id] = fontString
 	return fontString
 end
+
 function Texts:SetupForIcon(sourceIcon)
 	local icon = self.icon
 
+	--[[
+	TODO: the way that this works for meta icons is really weird if the meta is a different view than the source.
+	Consider forcing meta icons to only inherit from their own view (but that would suck),
+	or add a warning when they are of different views (which would be good),
+	or allow users to configure icons for multiple views without actually changing the view
+		(something like "Configure as..." in the icon editor)
+	]]
+	
+	
 	local Texts = sourceIcon:GetSettingsPerView().Texts
-	local _, layoutSettings = sourceIcon:GetTextLayout()
+	local _, layoutSettings = sourceIcon:GetTextLayout() 
 	self.layoutSettings = layoutSettings
 	self.Texts = Texts
 	
@@ -121,6 +133,7 @@ function Texts:SetupForIcon(sourceIcon)
 		end
 	end
 end
+
 function Texts:GetFontStringID(fontStringID, fontStringSettings)
 	local SkinAs = fontStringSettings.SkinAs
 	if SkinAs ~= "" then
@@ -128,6 +141,7 @@ function Texts:GetFontStringID(fontStringID, fontStringSettings)
 	end
 	return fontStringID
 end
+
 function Texts:OnKwargsUpdated()
 	if self.layoutSettings and self.Texts then
 		for fontStringID, fontStringSettings in TMW:InNLengthTable(self.layoutSettings) do

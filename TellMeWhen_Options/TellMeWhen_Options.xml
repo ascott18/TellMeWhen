@@ -4178,7 +4178,9 @@
 											wt = t ~= "" and TMW.L["SOUNDERROR1"]
 											t = "None"
 										elseif strfind(strlower(t), "%.wav$") and select(4, GetBuildInfo()) > 40000 then
-											t = "None"
+											 -- Don't force it to be nothing, because the user might be entering a built-in wav file,
+											 -- which is still valid.
+											--t = "None"
 											wt = TMW.L["SOUNDERROR2"]
 										elseif not (strfind(strlower(t), "%.ogg$") or strfind(strlower(t), "%.mp3$")) then
 											wt = TMW.L["SOUNDERROR3"]
