@@ -899,6 +899,10 @@ L["CNDT_TOTEMNAME_DESC"] = [[Set blank to track any totems of the selected type.
 
 Enter a totem name, or a list of names separated by semicolons, to only check certain totems.]]
 L["GCD_ACTIVE"] = "GCD active"
+L["BURNING_EMBERS_FRAGMENTS"] = "Burning Ember 'Fragments'"
+L["BURNING_EMBERS_FRAGMENTS_DESC"] = [[Each whole Burning Ember consists of 10 fragments.
+
+If you have 1 full ember and another half of an ember, for example, than you have 15 fragments.]]
 
 L["CNDTCAT_FREQUENTLYUSED"] = "Frequently Used"
 L["CNDTCAT_SPELLSABILITIES"] = "Spells/Items"

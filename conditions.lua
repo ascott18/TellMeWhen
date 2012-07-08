@@ -162,6 +162,7 @@ local Classes = {
 	"SHAMAN",
 	"WARLOCK",
 	"WARRIOR",
+	TMW.ISMOP and "MONK" or nil,
 }
 
 local classifications = {
@@ -258,6 +259,10 @@ do -- STANCES
 		{class = "PALADIN", 	id = 7294}, 	-- Retribution Aura
 
 		{class = "WARLOCK", 	id = 47241}, 	-- Metamorphosis
+		
+		--[[{class = "MONK", 		id = 115069}, 	-- Sturdy Ox
+		{class = "MONK", 		id = 115070}, 	-- Wise Serpent
+		{class = "MONK", 		id = 103985}, 	-- Fierce Tiger]]
 	}
 
 	TMW.CSN = {
@@ -543,6 +548,19 @@ function Env.GetShapeshiftForm()
 		i = 1
 	elseif pclass == "ROGUE" and i > 1 then	--vanish and shadow dance return 3 when active, vanish returns 2 when shadow dance isnt learned. Just treat everything as stealth
 		i = 1
+	--[[elseif pclass == "MONK" then
+		if NumShapeshiftForms == 2 then
+			-- Sturdy Ox (Brewmaster, 1st in TMW.CSN)
+			-- Wise Serpent (Mistweaver, 2nd in TMW.CSN)
+			if i == 2 then
+				i = 1
+			else
+				
+			end
+		elseif i == 1 then
+			-- Fierce Tiger, 3rd in TMW.CSN
+			i = 3
+		end]]
 	end
 	if i > NumShapeshiftForms then 	--many Classes return an invalid number on login, but not anymore!
 		i = 0
@@ -953,7 +971,88 @@ CNDT.Types = {
 				ConditionObj:GenerateNormalEventString("UNIT_COMBO_POINTS", "player")
 		end,
 	},
-
+	{ -- shadow orbs
+		text = SHADOW_ORBS,
+		value = "SHADOW_ORBS",
+		category = L["CNDTCAT_RESOURCES"],
+		min = 0,
+		max = 3,
+		unit = PLAYER,
+		icon = "Interface\\Icons\\Spell_Priest_Shadoworbs",
+		tcoords = standardtcoords,
+		funcstr = [[UnitPower("player", 13) c.Operator c.Level]],
+		events = function(ConditionObj, c)
+			return
+				ConditionObj:GenerateNormalEventString("UNIT_POWER", "player")
+		end,
+		hidden = pclass ~= "PRIEST" or not TMW.ISMOP,
+	},
+	{ -- chi
+		text = CHI_POWER,
+		value = "CHI",
+		category = L["CNDTCAT_RESOURCES"],
+		min = 0,
+		max = 5,
+		unit = PLAYER,
+		icon = "Interface\\Icons\\ability_monk_chiwave",
+		tcoords = standardtcoords,
+		funcstr = [[UnitPower("player", 12) c.Operator c.Level]],
+		events = function(ConditionObj, c)
+			return
+				ConditionObj:GenerateNormalEventString("UNIT_POWER", "player")
+		end,
+		hidden = pclass ~= "MONK",
+	},
+	{ -- burning embers (whole embers)
+		text = BURNING_EMBERS,
+		value = "BURNING_EMBERS",
+		category = L["CNDTCAT_RESOURCES"],
+		min = 0,
+		max = 4,
+		unit = PLAYER,
+		icon = "Interface\\Icons\\ability_warlock_burningembers",
+		tcoords = standardtcoords,
+		funcstr = [[UnitPower("player", 14, false) c.Operator c.Level]],
+		events = function(ConditionObj, c)
+			return
+				ConditionObj:GenerateNormalEventString("UNIT_POWER", "player")
+		end,
+		hidden = pclass ~= "WARLOCK" or not TMW.ISMOP,
+	},
+	{ -- burning embers (ember "fragments")
+		text = L["BURNING_EMBERS_FRAGMENTS"],
+		tooltip = L["BURNING_EMBERS_FRAGMENTS_DESC"],
+		value = "BURNING_EMBERS_FRAGMENTS",
+		category = L["CNDTCAT_RESOURCES"],
+		min = 0,
+		max = 40,
+		unit = PLAYER,
+		icon = "Interface\\Icons\\INV_Elemental_Mote_Fire01",
+		tcoords = standardtcoords,
+		funcstr = [[UnitPower("player", 14, true) c.Operator c.Level]],
+		events = function(ConditionObj, c)
+			return
+				ConditionObj:GenerateNormalEventString("UNIT_POWER", "player")
+		end,
+		hidden = pclass ~= "WARLOCK" or not TMW.ISMOP,
+	},
+	{ -- demonic fury
+		text = DEMONIC_FURY,
+		value = "DEMONIC_FURY",
+		category = L["CNDTCAT_RESOURCES"],
+		min = 0,
+		max = 1000,
+		unit = PLAYER,
+		icon = "Interface\\Icons\\Ability_Warlock_Eradication",
+		tcoords = standardtcoords,
+		funcstr = [[UnitPower("player", 15, true) c.Operator c.Level]],
+		events = function(ConditionObj, c)
+			return
+				ConditionObj:GenerateNormalEventString("UNIT_POWER", "player")
+		end,
+		hidden = pclass ~= "WARLOCK" or not TMW.ISMOP,
+	},
+	
 	{ -- abs health
 		text = L["CONDITIONPANEL_ABSOLUTE"] .. " " .. HEALTH,
 		value = "HEALTH_ABS",
@@ -1640,6 +1739,7 @@ CNDT.Types = {
 				pclass == "DEATHKNIGHT" and L["PRESENCE"] or
 				pclass == "DRUID" and L["SHAPESHIFT"] or
 				--pclass == "WARRIOR" and L["STANCE"] or
+				--pclass == "MONK" and L["STANCE"] or
 				L["STANCE"],
 		category = L["CNDTCAT_ATTRIBUTES_PLAYER"],
 		value = "STANCE",
