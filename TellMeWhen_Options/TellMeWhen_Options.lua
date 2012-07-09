@@ -236,60 +236,6 @@ function TMW.approachTable(t, ...)
 	return t
 end
 
----------- Tooltips ----------
-local function TTOnEnter(self)
-	if self.__title or self.__text then
-		GameTooltip_SetDefaultAnchor(GameTooltip, self)
-		GameTooltip:AddLine(get(self.__title, self), HIGHLIGHT_FONT_COLOR.r, HIGHLIGHT_FONT_COLOR.g, HIGHLIGHT_FONT_COLOR.b, false)
-		GameTooltip:AddLine(get(self.__text, self), NORMAL_FONT_COLOR.r, NORMAL_FONT_COLOR.g, NORMAL_FONT_COLOR.b, not self.__noWrapTooltipText)
-		GameTooltip:Show()
-	end
-end
-local function TTOnLeave(self)
-	GameTooltip:Hide()
-end
-function TMW:TT(f, title, text, actualtitle, actualtext)
-	-- setting actualtitle or actualtext true cause it to use exactly what is passed in for title or text as the text in the tooltip
-	-- if these variables arent set, then it will attempt to see if the string is a global variable (e.g. "MAXIMUM")
-	-- if they arent set and it isnt a global, then it must be a TMW localized string, so use that
-	
-	TMW:Assert(f)
-	
-	if title then
-		f.__title = (actualtitle and title) or _G[title] or L[title]
-	else
-		f.__title = title
-	end
-
-	if text then
-		f.__text = (actualtext and text) or _G[text] or L[text]
-	else
-		f.__text = text
-	end
-
-	if not f.__ttHooked then
-		f.__ttHooked = 1
-		f:HookScript("OnEnter", TTOnEnter)
-		f:HookScript("OnLeave", TTOnLeave)
-	else
-		if not f:GetScript("OnEnter") then
-			f:HookScript("OnEnter", TTOnEnter)
-		end
-		if not f:GetScript("OnLeave") then
-			f:HookScript("OnLeave", TTOnLeave)
-		end
-	end
-end
-function TMW:TT_Update(f)
-	if f:IsMouseOver() and f:IsVisible() then
-		f:GetScript("OnLeave")(f)
-		if not f.IsEnabled or f:IsEnabled() or f:GetMotionScriptsWhileDisabled() then
-			f:GetScript("OnEnter")(f)
-		end
-	end
-end
-
-
 ---------- Icon Utilities ----------
 function TMW:GetIconMenuText(g, i, data)
 	data = data or TMW.db.profile.Groups[tonumber(g)].Icons[tonumber(i)]
@@ -2498,7 +2444,7 @@ function ME:LoadConfig()
 		mg.icon.IconPreview:SetIcon(_G[v])
 	end
 
-	TellMeWhen_MetaIconOptions:SetHeight((#settings * ME[1]:GetHeight()) + 30)
+	TellMeWhen_MetaIconOptions:SetHeight((#settings * ME[1]:GetHeight()) + 50)
 	
 	for f=#settings+1, #ME do
 		ME[f]:Hide()

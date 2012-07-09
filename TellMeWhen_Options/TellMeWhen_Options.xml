@@ -2,14 +2,14 @@
  ..\FrameXML\UI.xsd">
  
 	<Texture name="TellMeWhen_OptionsModuleContainerBorder" virtual="true">
-		<Size x="1.0" y="1.0"/>
+		<Size x="2.0" y="2.0"/>
 		<Color r="1.0" g="0.82" b="0" a="0.4"/>
 	</Texture>
 	<Frame name="TellMeWhen_OptionsModuleContainer" virtual="true">
 		<Size x="180"/>
 		<Layers>
 			<Layer level="OVERLAY">
-				<Texture name="$parentLeft" inherits="TellMeWhen_OptionsModuleContainerBorder">
+			<!-- 	<Texture name="$parentLeft" inherits="TellMeWhen_OptionsModuleContainerBorder">
 					<Anchors>
 						<Anchor point="TOPLEFT"/>
 						<Anchor point="BOTTOMLEFT"/>
@@ -44,6 +44,61 @@
 						<Anchor point="TOPRIGHT" relativeTo="$parentRight" relativePoint="TOPLEFT"/>
 					</Anchors>
 				</Texture>
+			 -->
+				<!-- <Texture name="$parentLeftTop" inherits="TellMeWhen_OptionsModuleContainerBorder">
+					<Size x="2" y="10"/>
+					<Anchors>
+						<Anchor point="TOPLEFT"/>
+					</Anchors>
+				</Texture>
+				<Texture name="$parentRightTop" inherits="TellMeWhen_OptionsModuleContainerBorder">
+					<Size x="2" y="10"/>
+					<Anchors>
+						<Anchor point="TOPRIGHT"/>
+					</Anchors>
+				</Texture>
+				<Texture name="$parentLeftBottom" inherits="TellMeWhen_OptionsModuleContainerBorder">
+					<Size x="2" y="10"/>
+					<Anchors>
+						<Anchor point="BOTTOMLEFT"/>
+					</Anchors>
+				</Texture>
+				<Texture name="$parentRightBottom" inherits="TellMeWhen_OptionsModuleContainerBorder">
+					<Size x="2" y="10"/>
+					<Anchors>
+						<Anchor point="BOTTOMRIGHT"/>
+					</Anchors>
+				</Texture> -->
+				<Texture name="$parentTopLeft" inherits="TellMeWhen_OptionsModuleContainerBorder">
+					<Size x="6" y="2"/>
+					<Anchors>
+						<Anchor point="TOPLEFT" />
+					</Anchors>
+				</Texture>
+				<FontString name="$parentHeader" parentKey="Header" inherits="GameFontNormal" justifyH="LEFT">
+					<Anchors>
+						<Anchor point="LEFT" relativeTo="$parentTopLeft" relativePoint="RIGHT" x="1"/>
+					</Anchors>
+				</FontString>
+				<Texture name="$parentTopRight" inherits="TellMeWhen_OptionsModuleContainerBorder">
+					<Anchors>
+						<Anchor point="LEFT" relativeTo="$parentHeader" relativePoint="RIGHT"/>
+						<Anchor point="TOPRIGHT" />
+					</Anchors>
+				</Texture>
+				<!-- TODO: GET RID OF ALL THESE COMMENTS THAT I DONT END UP USING -->
+				<!-- <Texture name="$parentBottomLeft" inherits="TellMeWhen_OptionsModuleContainerBorder">
+					<Size x="10" y="2"/>
+					<Anchors>
+						<Anchor point="BOTTOMLEFT" relativeTo="$parentLeftBottom" relativePoint="BOTTOMRIGHT"/>
+					</Anchors>
+				</Texture>
+				<Texture name="$parentBottomRight" inherits="TellMeWhen_OptionsModuleContainerBorder">
+					<Size x="10" y="2"/>
+					<Anchors>
+						<Anchor point="BOTTOMRIGHT" relativeTo="$parentRightBottom" relativePoint="BOTTOMLEFT"/>
+					</Anchors>
+				</Texture> -->
 			</Layer>
 		</Layers>
 	</Frame>
@@ -680,7 +735,7 @@
 	</Frame>
 	
 	<Frame name="TellMeWhen_CustomTex" inherits="TellMeWhen_OptionsModuleContainer" virtual="true">
-		<Size x="180" y="50"/>
+		<Size x="560" y="50"/>
 		<Frames>
 			<EditBox name="$parentCustomTex" inherits="TellMeWhen_InputBoxTemplate" multiline="true" parentKey="CustomTex" autoFocus="false">
 				<Size y="15"/>
@@ -862,17 +917,46 @@
 	</Frame>
 	
 	<Frame name="TellMeWhen_CLEUOptions" inherits="TellMeWhen_OptionsModuleContainer" virtual="true">
-		<Size x="180" y="250"/>
+		<Size x="560" y="250"/>
 		<Frames>
 		
-			<EditBox name="$parentCLEUDur" parentKey="CLEUDur" inherits="TellMeWhen_TimeEditBoxTemplate">
+			<Frame name="$parentCLEUEvents" inherits="TMW_DropDownMenuTemplate" parentKey="CLEUEvents">
 				<Anchors>
-					<Anchor point="TOPLEFT" x="12" y="-23"/>
+					<Anchor point="TOPLEFT" x="-10" y="-8"/>
 				</Anchors>
 				<Scripts>
 					<OnLoad>
-						self.text:SetPoint("LEFT", 0, 0)
-						self.text:SetText(TMW.L["CLEU_TIMER"])
+						self.wrapTooltips = 1
+						UIDropDownMenu_SetWidth(self, 140)
+						self.InitFunc = TMW.Types.cleu.CONFIG.EventMenu
+						UIDropDownMenu_SetText(self, TMW.L["CLEU_EVENTS"])
+						self.Button:HookScript("OnClick", function(self)
+							TMW.IE:SaveSettings()
+						end)
+
+						TMW:TT(self, "CLEU_EVENTS", "CLEU_EVENTS_DESC")
+					</OnLoad>
+				</Scripts>
+			</Frame>
+			
+			<EditBox name="$parentCLEUDur" parentKey="CLEUDur" inherits="TellMeWhen_TimeEditBoxTemplate">
+				<Anchors>
+					<Anchor point="TOP" relativeTo="$parentCLEUEvents" relativePoint="BOTTOM" y="0"/>
+					<Anchor point="LEFT" x="12" />
+				</Anchors>
+				<Layers>
+					<Layer level="ARTWORK">
+						<FontString parentKey="text2" wordwrap="true" justifyH="LEFT" inherits="GameFontHighlightSmall">
+							<Anchors>
+								<Anchor point="LEFT" relativePoint="RIGHT" x="5"/>
+							</Anchors>
+						</FontString>
+					</Layer>
+				</Layers>
+				<Scripts>
+					<OnLoad>
+						self.text2:SetText(TMW.L["CLEU_TIMER"])
+						self.text2:SetWidth(self:GetParent().CLEUEvents:GetWidth() - self:GetWidth() - 35)
 						self.setting = "CLEUDur"
 						
 						TMW.IE:CreateSettingFrameFromData(self, {
@@ -887,39 +971,10 @@
 				</Scripts>
 			</EditBox>
 
-			<Frame name="$parentCLEUEvents" inherits="TMW_DropDownMenuTemplate" parentKey="CLEUEvents">
-				<Anchors>
-					<Anchor point="TOPLEFT" x="-10" y="-60"/>
-				</Anchors>
-				<Layers>
-					<Layer level="ARTWORK">
-						<FontString name="$parentFS1" inherits="GameFontNormal" parentKey="text" justifyH="LEFT">
-							<Anchors>
-								<Anchor point="BOTTOMLEFT" relativePoint="TOPLEFT" x="15" y="3"/>
-							</Anchors>
-						</FontString>
-					</Layer>
-				</Layers>
-				<Scripts>
-					<OnLoad>
-						self.wrapTooltips = 1
-						UIDropDownMenu_SetWidth(self, 150)
-						self.InitFunc = TMW.Types.cleu.CONFIG.EventMenu
-						UIDropDownMenu_SetText(self, TMW.L["CLEU_EVENTS"])
-						self.Button:HookScript("OnClick", function(self)
-							TMW.IE:SaveSettings()
-						end)
-
-						TMW:TT(self, "CLEU_EVENTS", "CLEU_EVENTS_DESC")
-						self.text:SetText(TMW.L["CLEU_HEADER"])
-					</OnLoad>
-				</Scripts>
-			</Frame>
 			<EditBox name="$parentSourceUnit" inherits="TellMeWhen_UnitEditbox" multiline="true" parentKey="SourceUnit" autoFocus="false">
 				<Anchors>
-					<Anchor point="TOP" relativeTo="$parentCLEUEvents" relativePoint="BOTTOM" y="1"/>
-					<Anchor point="LEFT" x="9"/>
-					<Anchor point="RIGHT" x="-25"/>
+					<Anchor point="TOPLEFT" relativeTo="$parentCLEUEvents" relativePoint="TOPRIGHT" x="-5" y="-5"/>
+					<Anchor point="RIGHT" x="-145"/>
 				</Anchors>
 				<Scripts>
 					<OnLoad>
@@ -949,12 +1004,12 @@
 			</EditBox>
 			<Frame name="$parentSourceFlags" inherits="TMW_DropDownMenuTemplate" parentKey="SourceFlags">
 				<Anchors>
-					<Anchor point="TOPLEFT" relativeTo="$parentSourceUnit" relativePoint="BOTTOMLEFT" x="-15" y="-3"/>
+					<Anchor point="BOTTOMLEFT" relativeTo="$parentSourceUnit" relativePoint="BOTTOMRIGHT" x="5" y="-11"/>
 				</Anchors>
 				<Scripts>
 					<OnLoad>
 						self.wrapTooltips = 1
-						UIDropDownMenu_SetWidth(self, 145)
+						UIDropDownMenu_SetWidth(self, 100)
 						self.InitFunc = TMW.Types.cleu.CONFIG.FlagsMenu
 						self.flagSet = "SourceFlags" -- the setting name, basically
 						UIDropDownMenu_SetText(self, TMW.L["CLEU_FLAGS_SOURCE"])
@@ -969,9 +1024,8 @@
 
 			<EditBox name="$parentDestUnit" inherits="TellMeWhen_UnitEditbox" multiline="true" parentKey="DestUnit" autoFocus="false">
 				<Anchors>
-					<Anchor point="TOP" relativeTo="$parentSourceUnit" relativePoint="BOTTOM" y="-35"/>
-					<Anchor point="LEFT" x="9"/>
-					<Anchor point="RIGHT" x="-25"/>
+					<Anchor point="TOPLEFT" relativeTo="$parentSourceUnit" relativePoint="BOTTOMLEFT" y="-10"/>
+					<Anchor point="RIGHT" x="-145"/>
 				</Anchors>
 				<Scripts>
 					<OnLoad>
@@ -1000,12 +1054,12 @@
 			</EditBox>
 			<Frame name="$parentDestFlags" inherits="TMW_DropDownMenuTemplate" parentKey="DestFlags">
 				<Anchors>
-					<Anchor point="TOPLEFT" relativeTo="$parentDestUnit" relativePoint="BOTTOMLEFT" x="-15" y="-3"/>
+					<Anchor point="BOTTOMLEFT" relativeTo="$parentDestUnit" relativePoint="BOTTOMRIGHT" x="5" y="-11"/>
 				</Anchors>
 				<Scripts>
 					<OnLoad>
 						self.wrapTooltips = 1
-						UIDropDownMenu_SetWidth(self, 145)
+						UIDropDownMenu_SetWidth(self, 100)
 						self.InitFunc = TMW.Types.cleu.CONFIG.FlagsMenu
 						self.flagSet = "DestFlags" -- the setting name, basically
 						UIDropDownMenu_SetText(self, TMW.L["CLEU_FLAGS_DEST"])
@@ -1063,9 +1117,26 @@
 	<Frame name="TellMeWhen_MetaIconOptions" inherits="TellMeWhen_OptionsModuleContainer" virtual="true">
 		<Size x="560" y="20"/>
 		<Frames>
+			<CheckButton name="$parentCheckNext" inherits="TellMeWhen_CheckTemplate" parentKey="CheckNext">
+				<Anchors>
+					<!-- <Anchor point="TOPLEFT" x="5" y="-6"/> -->
+					<Anchor point="TOP" x="-30" y="-6"/>
+				</Anchors>
+				<Scripts>
+					<OnLoad>						
+						TMW.IE:CreateSettingFrameFromData(self, {
+							setting = "CheckNext",
+							title = TMW.L["ICONMENU_CHECKNEXT"],
+							tooltip = TMW.L["ICONMENU_CHECKNEXT_DESC"],
+						})
+					</OnLoad>
+				</Scripts>
+			</CheckButton>
+			
 			<Frame name="$parent1" inherits="TellMeWhen_MetaGroup" id="1">
 				<Anchors>
-					<Anchor point="TOPLEFT" y="-12"/>
+					<Anchor point="TOP" relativeTo="$parentCheckNext" relativePoint="BOTTOM" y="-3"/>
+					<Anchor point="LEFT" x="-3"/>
 					<Anchor point="TOPRIGHT" y="-12"/>
 				</Anchors>
 			</Frame>
@@ -2604,7 +2675,7 @@
 						self.InitFunc = TMW.ME.IconMenu
 						self.Button:SetFrameLevel(self:GetFrameLevel()+1)
 						self.previewSize = 21
-						UIDropDownMenu_SetWidth(self, self:GetParent():GetParent():GetWidth() - 168, 0)
+						UIDropDownMenu_SetWidth(self, self:GetParent():GetParent():GetWidth() - 164, 0)
 					</OnLoad>
 				</Scripts>
 			</Frame>
@@ -3624,23 +3695,7 @@
 							</OnLoad>
 						</Scripts>
 					</CheckButton>
-					<CheckButton name="$parentCheckNext" inherits="TellMeWhen_CheckTemplate" parentKey="CheckNext">
-						<Anchors>
-							<Anchor point="LEFT" relativeTo="$parentFakeHidden" relativePoint="RIGHT" x="80"/>
-						</Anchors>
-						<Scripts>
-							<OnLoad>
-								self.text:SetWidth(self:GetParent().FakeHidden.text:GetWidth())
-								
-								TMW.IE:CreateSettingFrameFromData(self, {
-									setting = "CheckNext",
-									title = TMW.L["ICONMENU_CHECKNEXT"],
-									tooltip = TMW.L["ICONMENU_CHECKNEXT_DESC"],
-								})
-							</OnLoad>
-						</Scripts>
-					</CheckButton>
-					
+										
 					<Frame name="$parentWhenChecks" parentKey="WhenChecks" inherits="TellMeWhen_OptionsModuleContainer">
 						<Size x="180" y="90"/>
 						<Layers>

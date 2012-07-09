@@ -132,7 +132,14 @@ View:ImplementsModule("IconModule_Masque", 100, function(Module, icon)
 	TimerBar_BarDisplay.bar:SetPoint("LEFT", Masque.container, "RIGHT")
 end)
 
-View:ImplementsModule("GroupModule_Resizer", 10, true)
+View:ImplementsModule("GroupModule_Resizer_ScaleY_SizeX", 10, function(Module, group)
+	Module:Enable()
+	if TMW.Locked or group.Locked then
+		Module.resizeButton:Hide()
+	else
+		Module.resizeButton:Show()
+	end
+end)
 	
 function View:Icon_SetSize(icon)
 	local group = icon.group
@@ -154,14 +161,6 @@ function View:Group_Setup(group)
 	
 	group:SetScale(gs.Scale)
 	group:SetSize(gs.Columns*(gspv.SizeX+gspv.SpacingX)-gspv.SpacingX, gs.Rows*(gspv.SizeY+gspv.SpacingY)-gspv.SpacingY)
-	
-	local Resizer = group.Modules.GroupModule_Resizer
-	Resizer:Enable()
-	if TMW.Locked or group.Locked then
-		Resizer.resizeButton:Hide()
-	else
-		Resizer.resizeButton:Show()
-	end
 end
 
 function View:Group_UnSetup(group)
@@ -240,90 +239,6 @@ function View:Group_SetupMacroAppearance(group)
 	
 	group:SortIcons()
 end
-
-local UPD_INTV = 1
-function View.Group_SizeUpdate(resizeButton)
-	--[[ Notes:
-	--	arg1 (self) is resizeButton
-		
-	--	The 'std_' that prefixes a lot of variables means that it is comparable with all other 'std_' variables.
-		More specifically, it means that it does not depend on the scale of either the group nor UIParent.
-	]]
-	local self = resizeButton.module
-	
-	local group = self.group
-	local gs = group:GetSettings()
-	local gspv = group:GetSettingsPerView()
-	local uiScale = UIParent:GetScale()
-	
-	local std_cursorX, std_cursorY = self:GetStandardizedCursorCoordinates()
-
-	
-	
-    -- Calculate & set new scale:
-	local std_newHeight = self.std_oldTop - std_cursorY
-	local ratio_SizeChangeY = std_newHeight/self.std_oldHeight
-	local newScale = ratio_SizeChangeY*self.oldScale
-	newScale = max(0.25, newScale)
-	--[[
-		Holy shit. Look at this wicked sick dimensional analysis:
-		
-		std_newHeight	oldScale
-		------------- X	-------- = newScale
-		std_oldHeight	    1
-
-		'std_Height' cancels out 'std_Height', and 'old' cancels out 'old', leaving us with 'new' and 'Scale'!
-		I just wanted to make sure I explained why this shit works, because this code used to be confusing as hell
-		(which is why I am rewriting it right now)
-	]]
-
-	-- Set the scale that we just determined. This is critical because we have to group:GetEffectiveScale()
-	-- in order to determine the proper width, which depends on the current scale of the group.
-	gs.Scale = newScale
-	group:SetScale(newScale)
-	
-	
-	-- We have all the data needed to find the new position of the group.
-	-- It must be recalculated because otherwise it will scale relative to where it is anchored to,
-	-- instead of being relative to the group's top left corner, which is what it is supposed to be.
-	-- I don't remember why this calculation here works, so lets just leave it alone.
-	-- Note that it will be re-re-calculated once we are done resizing.
-	local newX = self.oldX * self.oldScale / newScale
-	local newY = self.oldY * self.oldScale / newScale
-	group:ClearAllPoints()
-	group:SetPoint("TOPLEFT", UIParent, "BOTTOMLEFT", newX, newY)
-	
-	
-    -- Calculate new bar width
-	local std_newFrameWidth = std_cursorX - self.std_oldLeft
-	local std_spacing = gspv.SpacingX*group:GetEffectiveScale()
-	local std_newWidth = (std_newFrameWidth + std_spacing)/gs.Columns - std_spacing
-	local newWidth = std_newWidth/group:GetEffectiveScale()
-	newWidth = max(gspv.SizeY, newWidth)
-	gspv.SizeX = newWidth
-	
-	if not self.LastUpdate or self.LastUpdate <= TMW.time - UPD_INTV then
-		-- Update the group completely very infrequently because of the high CPU usage.
-		
-		self.LastUpdate = TMW.time
-		
-		-- This needs to be done before we :Setup() or otherwise bad things happen.
-		group:CalibrateAnchors()
-	
-		group:Setup()
-	else
-		-- Only do the things that will determine most of the group's appearance on every frame.
-		
-		View:Group_SetSizeAndScale(group)
-		
-		for icon in TMW:InIcons(group.ID) do
-			View:Icon_SetSize(icon)
-		end
-		
-		group:SortIcons()
-	end
-end
-
 
 View:Register()
 

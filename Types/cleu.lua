@@ -71,7 +71,7 @@ Type:RegisterIconDefaults{
 
 Type:RegisterConfigPanel_XMLTemplate("full", 1, "TellMeWhen_ChooseName")
 
-Type:RegisterConfigPanel_XMLTemplate("column", 1, "TellMeWhen_CLEUOptions")
+Type:RegisterConfigPanel_XMLTemplate("full", 1, "TellMeWhen_CLEUOptions")
 
 Type.EventDisabled_OnStack = true
 Type.EventDisabled_OnCLEUEvent = false

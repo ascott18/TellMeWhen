@@ -8,19 +8,5 @@
 ## SavedVariables: TMWOptDB
 ## X-Category: Combat
 
-
-#@no-lib-strip@
-Lib\AceHook-3.0\AceHook-3.0.xml
-Lib\AceGUI-3.0\AceGUI-3.0.xml
-Lib\AceGUI-3.0-SharedMediaWidgets\widget.xml
-Lib\AceConfig-3.0\AceConfig-3.0.xml
-Lib\AceDBOptions-3.0\AceDBOptions-3.0.xml
-#@end-no-lib-strip@
-
-widget-importexport.lua
-
-TellMeWhen_Options.lua
-ImportExport.lua
-
-TellMeWhen_Options.xml
-Bindings.xml
+# MAKE SURE THAT ANY CHANGES HERE ALSO GET MADE TO \AddOns\TellMeWhen_Options\TellMeWhen_Options.toc
+includes.xml

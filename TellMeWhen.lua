@@ -1506,6 +1506,66 @@ function TMW:MakeSingleArgFunctionCached(obj, method)
 end
 
 
+
+--[[-------- Tooltips ----------
+	This used to be part of TellMeWhen_Options,
+	but it is so much easier to have it here in case an icon/group module wants to use it.
+]]
+local function TTOnEnter(self)
+	if self.__title or self.__text then
+		GameTooltip_SetDefaultAnchor(GameTooltip, self)
+		GameTooltip:AddLine(TMW.get(self.__title, self), HIGHLIGHT_FONT_COLOR.r, HIGHLIGHT_FONT_COLOR.g, HIGHLIGHT_FONT_COLOR.b, false)
+		GameTooltip:AddLine(TMW.get(self.__text, self), NORMAL_FONT_COLOR.r, NORMAL_FONT_COLOR.g, NORMAL_FONT_COLOR.b, not self.__noWrapTooltipText)
+		GameTooltip:Show()
+	end
+end
+local function TTOnLeave(self)
+	GameTooltip:Hide()
+end
+
+function TMW:TT(f, title, text, actualtitle, actualtext)
+	-- setting actualtitle or actualtext true cause it to use exactly what is passed in for title or text as the text in the tooltip
+	-- if these variables arent set, then it will attempt to see if the string is a global variable (e.g. "MAXIMUM")
+	-- if they arent set and it isnt a global, then it must be a TMW localized string, so use that
+	
+	TMW:ValidateType(2, "TMW:TT()", f, "frame")
+	
+	if title then
+		f.__title = (actualtitle and title) or _G[title] or L[title]
+	else
+		f.__title = title
+	end
+
+	if text then
+		f.__text = (actualtext and text) or _G[text] or L[text]
+	else
+		f.__text = text
+	end
+
+	if not f.__ttHooked then
+		f.__ttHooked = 1
+		f:HookScript("OnEnter", TTOnEnter)
+		f:HookScript("OnLeave", TTOnLeave)
+	else
+		if not f:GetScript("OnEnter") then
+			f:HookScript("OnEnter", TTOnEnter)
+		end
+		if not f:GetScript("OnLeave") then
+			f:HookScript("OnLeave", TTOnLeave)
+		end
+	end
+end
+
+function TMW:TT_Update(f)
+	if f:IsMouseOver() and f:IsVisible() then
+		f:GetScript("OnLeave")(f)
+		if not f.IsEnabled or f:IsEnabled() or f:GetMotionScriptsWhileDisabled() then
+			f:GetScript("OnEnter")(f)
+		end
+	end
+end
+
+
 ---------- Table Copying ----------
 function TMW:CopyWithMetatable(settings)
 	local copy = {}
@@ -3107,6 +3167,10 @@ end
 
 function TMW:ValidateType(argN, methodName, var, reqType)
 	local varType = type(var)
+	
+	if reqType == "frame" and varType == "table" and type(var[0]) == "userdata" then
+		varType = "frame"
+	end
 	if varType ~= reqType then
 		error(("Bad argument #%d to %q. %s expected, got %s"):format(argN, methodName, reqType, varType), 3)
 	end
@@ -3493,7 +3557,11 @@ end
 function NAMES:UpdateClassColors()
 	-- GLOBALS: CUSTOM_CLASS_COLORS, RAID_CLASS_COLORS
 	for class, color in pairs(CUSTOM_CLASS_COLORS or RAID_CLASS_COLORS) do
-		NAMES.ClassColors[class] = ("|cff%02x%02x%02x"):format(color.r * 255, color.g * 255, color.b * 255)
+		if color.colorStr then
+			NAMES.ClassColors[class] = color.colorStr
+		else
+			NAMES.ClassColors[class] = ("|cff%02x%02x%02x"):format(color.r * 255, color.g * 255, color.b * 255)
+		end
 	end
 end
 
@@ -6269,7 +6337,7 @@ TMW:NewClass("IconModule", "IconComponent", "ObjectModule"){
 		newClass.defaultAllowanceForTypes = self.defaultAllowanceForTypes
 	end,
 	
-	OnImplementIntoIcon = function(self, icon)
+	OnImplementIntoIcon_MODULEBASE = function(self, icon)
 		local implementationData = self.implementationData
 		local implementorFunc = implementationData.implementorFunc
 		
@@ -6419,17 +6487,39 @@ TMW:NewClass("GroupModule", "GroupComponent", "ObjectModule"){
 		
 		self:SetImplementorForViews(implementorFunc, ...)
 	end,
+	
+	OnImplementIntoGroup_MODULEBASE = function(self, group)
+		local implementationData = self.implementationData
+		local implementorFunc = implementationData.implementorFunc
+		
+		-- implementorFunc is either true if the module is setup within IconView:Group_Setup(),
+		-- or it is a function if that function should be called in order to setup the module.
+		if type(implementorFunc) == "function" then
+			implementorFunc(self, group)
+		end
+	end,
 }
 
 TMW:NewClass("GroupModule_Resizer", "GroupModule"){
-	OnNewInstance = function(self, group)
+	tooltipTitle = L["RESIZE"],
+	
+	OnNewInstance_Resizer = function(self, group)
+		assert(self.className ~= "GroupModule_Resizer", "GroupModule_Resizer cannot be instantiated. You must derive a class from it so that you can define a SizeUpdate method.")
+		
 		self.resizeButton = CreateFrame("Button", nil, group, "TellMeWhen_GroupTemplate_ResizeButton")
+		
 		self.resizeButton.module = self
 		
 		self.resizeButton:SetScript("OnMouseDown", self.StartSizing)
 		self.resizeButton:SetScript("OnMouseUp", self.StopSizing)
 	end,
 
+	OnImplementIntoGroup_Resizer = function(self)
+		self.resizeButton:SetFrameLevel(self.group:GetFrameLevel() + 2)
+		
+		TMW:TT(self.resizeButton, self.tooltipTitle, self.tooltipText, 1, 1)
+	end,
+	
 	OnDisable = function(self)
 		self.resizeButton:Hide()
 	end,
@@ -6471,7 +6561,7 @@ TMW:NewClass("GroupModule_Resizer", "GroupModule"){
 		
 		self.oldX, self.oldY = group:GetLeft(), group:GetTop()
 		
-		resizeButton:SetScript("OnUpdate", group.viewData.Group_SizeUpdate)
+		resizeButton:SetScript("OnUpdate", self.SizeUpdate)
 	end,
 	StopSizing = function(resizeButton)
 		local self = resizeButton.module
@@ -6485,6 +6575,158 @@ TMW:NewClass("GroupModule_Resizer", "GroupModule"){
 		
 		TMW.IE:NotifyChanges()
 	end,
+}
+TMW:NewClass("GroupModule_Resizer_ScaleXY", "GroupModule_Resizer"){
+	tooltipText = L["RESIZE_TOOLTIP"],
+	
+	SizeUpdate = function(resizeButton)
+		--[[ Notes:
+		--	arg1 (self) is resizeButton
+			
+		--	The 'std_' that prefixes a lot of variables means that it is comparable with all other 'std_' variables.
+			More specifically, it means that it does not depend on the scale of either the group nor UIParent.
+		]]
+		local self = resizeButton.module
+		
+		local group = self.group
+		local gs = group:GetSettings()
+		
+		local std_cursorX, std_cursorY = self:GetStandardizedCursorCoordinates()
+		
+		-- Calculate & set new scale:
+		local std_newWidth = std_cursorX - self.std_oldLeft
+		local ratio_SizeChangeX = std_newWidth/self.std_oldWidth
+		local newScaleX = ratio_SizeChangeX*self.oldScale
+		
+		local std_newHeight = self.std_oldTop - std_cursorY
+		local ratio_SizeChangeY = std_newHeight/self.std_oldHeight
+		local newScaleY = ratio_SizeChangeY*self.oldScale
+		
+		--[[
+			Holy shit. Look at this wicked sick dimensional analysis:
+			
+			std_newHeight	oldScale
+			------------- X	-------- = newScale
+			std_oldHeight	    1
+
+			'std_Height' cancels out 'std_Height', and 'old' cancels out 'old', leaving us with 'new' and 'Scale'!
+			I just wanted to make sure I explained why this shit works, because this code used to be confusing as hell
+			(which is why I am rewriting it right now)
+		]]
+		
+		local newScale
+		-- TODO: put a hint in the tooltip that this is possible.
+		if IsControlKeyDown() then
+			-- Uses the smaller of the two scales.
+			newScale = min(newScaleX, newScaleY)
+			newScale = max(0.6, newScale)
+		else
+			-- Uses the larger of the two scales.
+			newScale = max(0.6, newScaleX, newScaleY)
+		end
+
+		-- Set the scale that we just determined.
+		gs.Scale = newScale
+		group:SetScale(newScale)
+
+		
+		-- We have all the data needed to find the new position of the group.
+		-- It must be recalculated because otherwise it will scale relative to where it is anchored to,
+		-- instead of being relative to the group's top left corner, which is what it is supposed to be.
+		-- I don't remember why this calculation here works, so lets just leave it alone.
+		-- Note that it will be re-re-calculated once we are done resizing.
+		local newX = self.oldX * self.oldScale / newScale
+		local newY = self.oldY * self.oldScale / newScale
+		
+		group:ClearAllPoints()
+		group:SetPoint("TOPLEFT", UIParent, "BOTTOMLEFT", newX, newY)
+	end
+}
+TMW:NewClass("GroupModule_Resizer_ScaleY_SizeX", "GroupModule_Resizer"){
+	tooltipText = L["RESIZE_TOOLTIP"],
+	UPD_INTV = 1,
+	
+	SizeUpdate = function(resizeButton)
+		--[[ Notes:
+		--	arg1 (self) is resizeButton
+			
+		--	The 'std_' that prefixes a lot of variables means that it is comparable with all other 'std_' variables.
+			More specifically, it means that it does not depend on the scale of either the group nor UIParent.
+		]]
+		local self = resizeButton.module
+		
+		local group = self.group
+		local gs = group:GetSettings()
+		local gspv = group:GetSettingsPerView()
+		local uiScale = UIParent:GetScale()
+		
+		local std_cursorX, std_cursorY = self:GetStandardizedCursorCoordinates()
+
+		
+		
+		-- Calculate & set new scale:
+		local std_newHeight = self.std_oldTop - std_cursorY
+		local ratio_SizeChangeY = std_newHeight/self.std_oldHeight
+		local newScale = ratio_SizeChangeY*self.oldScale
+		newScale = max(0.25, newScale)
+		--[[
+			Holy shit. Look at this wicked sick dimensional analysis:
+			
+			std_newHeight	oldScale
+			------------- X	-------- = newScale
+			std_oldHeight	    1
+
+			'std_Height' cancels out 'std_Height', and 'old' cancels out 'old', leaving us with 'new' and 'Scale'!
+			I just wanted to make sure I explained why this shit works, because this code used to be confusing as hell
+			(which is why I am rewriting it right now)
+		]]
+
+		-- Set the scale that we just determined. This is critical because we have to group:GetEffectiveScale()
+		-- in order to determine the proper width, which depends on the current scale of the group.
+		gs.Scale = newScale
+		group:SetScale(newScale)
+		
+		
+		-- We have all the data needed to find the new position of the group.
+		-- It must be recalculated because otherwise it will scale relative to where it is anchored to,
+		-- instead of being relative to the group's top left corner, which is what it is supposed to be.
+		-- I don't remember why this calculation here works, so lets just leave it alone.
+		-- Note that it will be re-re-calculated once we are done resizing.
+		local newX = self.oldX * self.oldScale / newScale
+		local newY = self.oldY * self.oldScale / newScale
+		group:ClearAllPoints()
+		group:SetPoint("TOPLEFT", UIParent, "BOTTOMLEFT", newX, newY)
+		
+		
+		-- Calculate new width
+		local std_newFrameWidth = std_cursorX - self.std_oldLeft
+		local std_spacing = gspv.SpacingX*group:GetEffectiveScale()
+		local std_newWidth = (std_newFrameWidth + std_spacing)/gs.Columns - std_spacing
+		local newWidth = std_newWidth/group:GetEffectiveScale()
+		newWidth = max(gspv.SizeY, newWidth)
+		gspv.SizeX = newWidth
+		
+		if not self.LastUpdate or self.LastUpdate <= time - self.UPD_INTV then
+			-- Update the group completely very infrequently because of the high CPU usage.
+			
+			self.LastUpdate = time
+			
+			-- This needs to be done before we :Setup() or otherwise bad things happen.
+			group:CalibrateAnchors()
+		
+			group:Setup()
+		else
+			-- Only do the things that will determine most of the group's appearance on every frame.
+			
+			group.viewData:Group_SetSizeAndScale(group)
+			
+			for icon in TMW:InIcons(group.ID) do
+				group.viewData:Icon_SetSize(icon)
+			end
+			
+			group:SortIcons()
+		end
+	end
 }
 
 
@@ -6749,19 +6991,11 @@ function IconView:OnImplementIntoGroup(group)
 			local Module = group.Modules[moduleName]
 			if not Module then
 				Module = ModuleClass:New(group)
+				Module.implementationData = implementationData
 			end
 			 
 			-- Implement the Module into the group
 			Module:ImplementIntoGroup(group)
-	
-			-- If implementorFunc was a function (see above) then call it in order to properly setup the module.
-			if type(implementorFunc) == "function" then
-				implementorFunc(self, group)
-			end
-			
-			if Module.SetupForGroup then
-				Module:SetupForGroup(group)
-			end
 		end
 	end
 end

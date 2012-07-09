@@ -29,7 +29,7 @@ end)
 Hook:RegisterIconDefaults{
 	CustomTex				= "",
 }
-Hook:RegisterConfigPanel_XMLTemplate("column", 3, "TellMeWhen_CustomTex")
+Hook:RegisterConfigPanel_XMLTemplate("full", 3, "TellMeWhen_CustomTex")
 function Hook:OnImplementIntoIcon(icon)
 	icon.OverrideTex = TMW:GetTexturePathFromSetting(icon.CustomTex)
 end

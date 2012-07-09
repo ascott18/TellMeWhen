@@ -153,7 +153,14 @@ View:ImplementsModule("IconModule_Masque", 100, function(Module, icon)
 end)
 
 
-View:ImplementsModule("GroupModule_Resizer", 10, true)
+View:ImplementsModule("GroupModule_Resizer_ScaleXY", 10, function(Module, group)
+	Module:Enable()
+	if TMW.Locked or group.Locked then
+		Module.resizeButton:Hide()
+	else
+		Module.resizeButton:Show()
+	end
+end)
 	
 function View:Icon_Setup(icon)
 	icon:SetSize(ICON_SIZE, ICON_SIZE)
@@ -225,7 +232,7 @@ function View:Group_Setup(group)
 	group:SetScale(gs.Scale)
 	group:SetSize(gs.Columns*(ICON_SIZE+gspv.SpacingX)-gspv.SpacingX, gs.Rows*(ICON_SIZE+gspv.SpacingY)-gspv.SpacingY)
 	
-	local Resizer = group.Modules.GroupModule_Resizer
+	local Resizer = group.Modules.GroupModule_Resizer_ScaleXY
 	Resizer:Enable()
 	if TMW.Locked or group.Locked then
 		Resizer.resizeButton:Hide()
@@ -236,57 +243,6 @@ end
 
 function View:Group_UnSetup(group)
 	
-end
-
-function View.Group_SizeUpdate(resizeButton)
-	--[[ Notes:
-	--	arg1 (self) is resizeButton
-		
-	--	The 'std_' that prefixes a lot of variables means that it is comparable with all other 'std_' variables.
-		More specifically, it means that it does not depend on the scale of either the group nor UIParent.
-	]]
-	local self = resizeButton.module
-	
-	local group = self.group
-	local gs = group:GetSettings()
-	
-	local std_cursorX, std_cursorY = self:GetStandardizedCursorCoordinates()
-	
-    -- Calculate & set new scale:
-	local std_newWidth = std_cursorX - self.std_oldLeft
-	local ratio_SizeChangeX = std_newWidth/self.std_oldWidth
-	local newScaleX = ratio_SizeChangeX*self.oldScale
-	
-	local std_newHeight = self.std_oldTop - std_cursorY
-	local ratio_SizeChangeY = std_newHeight/self.std_oldHeight
-	local newScaleY = ratio_SizeChangeY*self.oldScale
-	
-	local newScale = max(0.6, newScaleX, newScaleY)
-	--[[
-		Holy shit. Look at this wicked sick dimensional analysis:
-		
-		std_newHeight	oldScale
-		------------- X	-------- = newScale
-		std_oldHeight	    1
-
-		'std_Height' cancels out 'std_Height', and 'old' cancels out 'old', leaving us with 'new' and 'Scale'!
-		I just wanted to make sure I explained why this shit works, because this code used to be confusing as hell
-		(which is why I am rewriting it right now)
-	]]
-
-	-- Set the scale that we just determined.
-	gs.Scale = newScale
-	group:SetScale(newScale)
-
-	-- We have all the data needed to find the new position of the group.
-	-- It must be recalculated because otherwise it will scale relative to where it is anchored to,
-	-- instead of being relative to the group's top left corner, which is what it is supposed to be.
-	-- I don't remember why this calculation here works, so lets just leave it alone.
-	-- Note that it will be re-re-calculated once we are done resizing.
-	local newX = self.oldX * self.oldScale / newScale
-	local newY = self.oldY * self.oldScale / newScale
-	group:ClearAllPoints()
-	group:SetPoint("TOPLEFT", UIParent, "BOTTOMLEFT", newX, newY)
 end
 
 	
