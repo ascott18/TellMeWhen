@@ -12,7 +12,7 @@
 -- Xenyr of Aszune
 
 -- Currently maintained by
--- Cybeloras of Mal'Ganis
+-- Cybeloras of Detheroc/Mal'Ganis
 -- --------------------
 
 local TMW = TMW
@@ -38,21 +38,11 @@ Type.name = L["ICONMENU_UNITCOOLDOWN"]
 Type.desc = L["ICONMENU_UNITCOOLDOWN_DESC"]
 Type.usePocketWatch = 1
 Type.DurationSyntax = 1
-Type.SUGType = "spellwithduration"
 Type.unitType = "unitid"
---Type.AllowNoUnit = true
---Type.unitTitle = L["ICONMENU_UNITSTOWATCH"] .. " " .. L["ICONMENU_UNITSTOWATCH_ALL"]
-Type.WhenChecks = {
-	text = L["ICONMENU_SHOWWHEN"],
-	{ value = "alpha", 			text = "|cFF00FF00" .. L["ICONMENU_USABLE"], 			 },
-	{ value = "unalpha",		text = "|cFFFF0000" .. L["ICONMENU_UNUSABLE"], 			 },
-	{ value = "always", 		text = L["ICONMENU_ALWAYS"] },
-}
 
 -- AUTOMATICALLY GENERATED: UsesAttributes
 Type:UsesAttributes("spell")
 Type:UsesAttributes("unit, GUID")
-Type:UsesAttributes("color")
 Type:UsesAttributes("start, duration")
 Type:UsesAttributes("alpha")
 Type:UsesAttributes("texture")
@@ -64,9 +54,20 @@ Type:RegisterIconDefaults{
 	Sort					= false,
 }
 
-Type:RegisterConfigPanel_XMLTemplate("full", 1, "TellMeWhen_ChooseName")
+Type:RegisterConfigPanel_XMLTemplate("full", 1, "TellMeWhen_ChooseName", {
+	SUGType = "spellwithduration",
+})
 
-Type:RegisterConfigPanel_XMLTemplate("full", 1, "TellMeWhen_Unit")
+Type:RegisterConfigPanel_XMLTemplate("full", 1, "TellMeWhen_Unit" --[[,{
+	allowNoUnit = true,
+	title = L["ICONMENU_UNITSTOWATCH"] .. " " .. L["ICONMENU_UNITSTOWATCH_ALL"],
+}]])
+
+Type:RegisterConfigPanel_XMLTemplate("column", 2, "TellMeWhen_WhenChecks", {
+	text = L["ICONMENU_SHOWWHEN"],
+	[0x2] = { text = "|cFF00FF00" .. L["ICONMENU_USABLE"], 			},
+	[0x1] = { text = "|cFFFF0000" .. L["ICONMENU_UNUSABLE"], 		},
+})
 
 Type:RegisterConfigPanel_XMLTemplate("column", 1, "TellMeWhen_SortSettings")
 
@@ -80,8 +81,6 @@ Type:RegisterConfigPanel_ConstructorFunc("column", 1, "TellMeWhen_UnitCooldownSe
 		},
 	})
 end)
-
-Type.EventDisabled_OnStack = true
 
 local ManualIcons = {}
 
@@ -366,18 +365,16 @@ local function UnitCooldown_OnUpdate(icon, time)
 	end
 
 	if usename and Alpha > 0 then
-		icon:SetInfo("alpha; color; texture; start, duration; spell; unit, GUID",
+		icon:SetInfo("alpha; texture; start, duration; spell; unit, GUID",
 			icon.Alpha,
-			icon:CrunchColor(),
 			SpellTextures[usename] or "Interface\\Icons\\INV_Misc_PocketWatch_01",
 			0, 0,
 			usename,
 			useUnit, nil
 		)
 	elseif unname then
-		icon:SetInfo("alpha; color; texture; start, duration; spell; unit, GUID",
+		icon:SetInfo("alpha; texture; start, duration; spell; unit, GUID",
 			icon.UnAlpha,
-			icon:CrunchColor(unduration),
 			SpellTextures[unname],
 			unstart, unduration,
 			unname,

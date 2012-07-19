@@ -7,7 +7,7 @@
 --		Banjankri of Blackrock, Predeter of Proudmoore, Xenyr of Aszune
 
 -- Currently maintained by
--- Cybeloras of Mal'Ganis
+-- Cybeloras of Detheroc/Mal'Ganis
 -- --------------------
 
 
@@ -77,7 +77,7 @@ View:RegisterGroupDefaults{
 }
 
 View:ImplementsModule("IconModule_Alpha", 10, function(Module, icon)
-	Module:SetEssential(true)
+	Module:Enable()
 end)
 View:ImplementsModule("IconModule_CooldownSweep", 20, function(Module, icon)
 	if icon.ShowTimer or icon.ShowTimerText then
@@ -89,7 +89,7 @@ View:ImplementsModule("IconModule_CooldownSweep", 20, function(Module, icon)
 	Module.cooldown:SetPoint("CENTER", icon)
 end)
 View:ImplementsModule("IconModule_Texture_Colored", 30, function(Module, icon)
-	Module:SetEssential(true)
+	Module:Enable()
 	
 	Module.texture:ClearAllPoints()
 	Module.texture:SetSize(ICON_SIZE, ICON_SIZE)
@@ -112,9 +112,9 @@ View:ImplementsModule("IconModule_Masque", 100, function(Module, icon)
 	local Modules = icon.Modules
 	local Masque = Module
 	
-	Masque:Enable()
 	Masque.container:ClearAllPoints()
 	Masque.container:SetAllPoints()	
+	Masque:Enable()
 
 	---------- Skin-Dependent Module Layout ----------
 	local CooldownSweep = Modules.IconModule_CooldownSweep
@@ -122,12 +122,7 @@ View:ImplementsModule("IconModule_Masque", 100, function(Module, icon)
 	local TimerBar_Overlay = Modules.IconModule_TimerBar_Overlay
 	local IconModule_Texture_Colored = Modules.IconModule_Texture_Colored
 	
-	local frameLevelOffset
-	if Masque.isDefaultSkin then
-		frameLevelOffset = Masque.isDefaultSkin and 1 or -2
-	else
-		frameLevelOffset = -2
-	end
+	local frameLevelOffset = Masque.isDefaultSkin and 1 or -2
 	
 	if CooldownSweep then
 		CooldownSweep.cooldown:SetFrameLevel( icon:GetFrameLevel() + 0 + frameLevelOffset)
@@ -152,20 +147,16 @@ View:ImplementsModule("IconModule_Masque", 100, function(Module, icon)
 	end
 end)
 
-
 View:ImplementsModule("GroupModule_Resizer_ScaleXY", 10, function(Module, group)
-	Module:Enable()
 	if TMW.Locked or group.Locked then
-		Module.resizeButton:Hide()
+		Module:Disable()
 	else
-		Module.resizeButton:Show()
+		Module:Enable()
 	end
 end)
 	
 function View:Icon_Setup(icon)
 	icon:SetSize(ICON_SIZE, ICON_SIZE)
-end
-function View:Icon_UnSetup(icon)
 end
 
 function View:Icon_SetPoint(icon, positionID)
@@ -231,18 +222,6 @@ function View:Group_Setup(group)
 	
 	group:SetScale(gs.Scale)
 	group:SetSize(gs.Columns*(ICON_SIZE+gspv.SpacingX)-gspv.SpacingX, gs.Rows*(ICON_SIZE+gspv.SpacingY)-gspv.SpacingY)
-	
-	local Resizer = group.Modules.GroupModule_Resizer_ScaleXY
-	Resizer:Enable()
-	if TMW.Locked or group.Locked then
-		Resizer.resizeButton:Hide()
-	else
-		Resizer.resizeButton:Show()
-	end
-end
-
-function View:Group_UnSetup(group)
-	
 end
 
 	

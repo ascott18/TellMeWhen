@@ -7,7 +7,7 @@
 --		Banjankri of Blackrock, Predeter of Proudmoore, Xenyr of Aszune
 
 -- Currently maintained by
--- Cybeloras of Mal'Ganis
+-- Cybeloras of Detheroc/Mal'Ganis
 -- --------------------
 
 local TMW = TMW
@@ -32,21 +32,13 @@ Type.name = L["ICONMENU_BUFFDEBUFF"]
 Type.desc = L["ICONMENU_BUFFDEBUFF_DESC"]
 Type.usePocketWatch = 1
 Type.spacebefore = true
-Type.SUGType = "buff"
 Type.unitType = "unitid"
-Type.WhenChecks = {
-	text = L["ICONMENU_SHOWWHEN"],
-	{ value = "alpha", 			text = "|cFF00FF00" .. L["ICONMENU_PRESENT"], 			 },
-	{ value = "unalpha", 		text = "|cFFFF0000" .. L["ICONMENU_ABSENT"], 			 },
-	{ value = "always", 		text = L["ICONMENU_ALWAYS"] },
-}
 
 -- AUTOMATICALLY GENERATED: UsesAttributes
-Type:UsesAttributes("stack, stackText")
 Type:UsesAttributes("spell")
 Type:UsesAttributes("unit, GUID")
 Type:UsesAttributes("reverse")
-Type:UsesAttributes("color")
+Type:UsesAttributes("stack, stackText")
 Type:UsesAttributes("start, duration")
 Type:UsesAttributes("alpha")
 Type:UsesAttributes("texture")
@@ -60,9 +52,17 @@ Type:RegisterIconDefaults{
 	OnlyMine				= false,
 }
 
-Type:RegisterConfigPanel_XMLTemplate("full", 1, "TellMeWhen_ChooseName")
+Type:RegisterConfigPanel_XMLTemplate("full", 1, "TellMeWhen_ChooseName", {
+	SUGType = "buff",
+})
 
 Type:RegisterConfigPanel_XMLTemplate("full", 1, "TellMeWhen_Unit")
+
+Type:RegisterConfigPanel_XMLTemplate("column", 2, "TellMeWhen_WhenChecks", {
+	text = L["ICONMENU_SHOWWHEN"],
+	[0x2] = { text = "|cFF00FF00" .. L["ICONMENU_PRESENT"], 	},
+	[0x1] = { text = "|cFFFF0000" .. L["ICONMENU_ABSENT"], 		},
+})
 
 Type:RegisterConfigPanel_ConstructorFunc("column", 1, "TellMeWhen_BuffSettings", function(self)
 	self.Header:SetText(Type.name)
@@ -260,9 +260,8 @@ local function Buff_OnUpdate(icon, time)
 			end
 		end
 
-		icon:SetInfo("alpha; color; texture; start, duration; stack, stackText; spell; unit, GUID",
+		icon:SetInfo("alpha; texture; start, duration; stack, stackText; spell; unit, GUID",
 			icon.Alpha,
-			icon:CrunchColor(duration),
 			iconTexture,
 			expirationTime - duration, duration,
 			count, count,
@@ -270,9 +269,8 @@ local function Buff_OnUpdate(icon, time)
 			useUnit, nil
 		)
 	else
-		icon:SetInfo("alpha; color; texture; start, duration; stack, stackText; spell; unit, GUID",
+		icon:SetInfo("alpha; texture; start, duration; stack, stackText; spell; unit, GUID",
 			icon.UnAlpha,
-			icon:CrunchColor(),
 			icon.FirstTexture,
 			0, 0,
 			nil, nil,

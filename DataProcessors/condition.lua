@@ -7,7 +7,7 @@
 --		Banjankri of Blackrock, Predeter of Proudmoore, Xenyr of Aszune
 
 -- Currently maintained by
--- Cybeloras of Mal'Ganis
+-- Cybeloras of Detheroc/Mal'Ganis
 -- --------------------
 
 
@@ -19,6 +19,8 @@ local print = TMW.print
 
 
 local Processor = TMW.Classes.IconDataProcessor:New("CONDITION", "conditionFailed")
+Processor.dontInherit = true
+
 function Processor:CompileFunctionSegment(t)
 	-- GLOBALS: conditionFailed
 	t[#t+1] = [[

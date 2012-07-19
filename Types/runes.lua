@@ -7,7 +7,7 @@
 --		Banjankri of Blackrock, Predeter of Proudmoore, Xenyr of Aszune
 
 -- Currently maintained by
--- Cybeloras of Mal'Ganis
+-- Cybeloras of Detheroc/Mal'Ganis
 -- --------------------
 
 local TMW = TMW
@@ -29,16 +29,9 @@ Type.name = L["ICONMENU_RUNES"]
 Type.desc = L["ICONMENU_RUNES_DESC"]
 Type.hidden = pclass ~= "DEATHKNIGHT"
 Type.AllowNoName = true
-Type.WhenChecks = {
-	text = L["ICONMENU_SHOWWHEN"],
-	{ value = "alpha",			text = "|cFF00FF00" .. L["ICONMENU_USABLE"],	 },
-	{ value = "unalpha",	 	text = "|cFFFF0000" .. L["ICONMENU_UNUSABLE"],	 },
-	{ value = "always",		 	text = L["ICONMENU_ALWAYS"] },
-}
 
 -- AUTOMATICALLY GENERATED: UsesAttributes
 Type:UsesAttributes("spell")
-Type:UsesAttributes("color")
 Type:UsesAttributes("start, duration")
 Type:UsesAttributes("alpha")
 Type:UsesAttributes("texture")
@@ -49,12 +42,15 @@ Type:RegisterIconDefaults{
 	RuneSlots				= 0x3F, --(111111)
 }
 
+Type:RegisterConfigPanel_XMLTemplate("column", 2, "TellMeWhen_WhenChecks", {
+	text = L["ICONMENU_SHOWWHEN"],
+	[0x2] = { text = "|cFF00FF00" .. L["ICONMENU_USABLE"],		},
+	[0x1] = { text = "|cFFFF0000" .. L["ICONMENU_UNUSABLE"],	},
+})
+
 Type:RegisterConfigPanel_XMLTemplate("column", 1, "TellMeWhen_Runes")
 
 Type:RegisterConfigPanel_XMLTemplate("column", 1, "TellMeWhen_SortSettings")
-
-Type.EventDisabled_OnUnit = true
-Type.EventDisabled_OnStack = true
 
 Type:RegisterUpgrade(51024, {
 	icon = function(self, ics)
@@ -132,9 +128,8 @@ local function Runes_OnUpdate(icon, time)
 	if readyslot then
 		local type = GetRuneType(readyslot)
 
-		icon:SetInfo("alpha; color; texture; start, duration; spell",
+		icon:SetInfo("alpha; texture; start, duration; spell",
 			icon.Alpha,
-			icon:CrunchColor(),
 			textures[type],
 			0, 0,
 			type -- MAYBE: change this arg? (to a special arg instead of spell)
@@ -142,9 +137,8 @@ local function Runes_OnUpdate(icon, time)
 	elseif unslot then
 		local type = GetRuneType(unslot)
 		
-		icon:SetInfo("alpha; color; texture; start, duration; spell",
+		icon:SetInfo("alpha; texture; start, duration; spell",
 			icon.UnAlpha,
-			icon:CrunchColor(unduration),
 			textures[type],
 			unstart, unduration,
 			type -- MAYBE: change this arg? (to a special arg instead of spell)

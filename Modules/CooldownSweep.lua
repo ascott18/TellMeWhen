@@ -7,7 +7,7 @@
 --		Banjankri of Blackrock, Predeter of Proudmoore, Xenyr of Aszune
 
 -- Currently maintained by
--- Cybeloras of Mal'Ganis
+-- Cybeloras of Detheroc/Mal'Ganis
 -- --------------------
 
 
@@ -28,7 +28,7 @@ CooldownSweep:RegisterIconDefaults{
 }
 
 CooldownSweep:RegisterConfigPanel_ConstructorFunc("column", 3, "TellMeWhen_TimerOptions", function(self)
-	self.Header:SetText("TIMER SETTINGS") --TODO: localize
+	self.Header:SetText(L["CONFIGPANEL_TIMER_HEADER"])
 	TMW.IE:BuildSimpleCheckSettingFrame(self, {
 		{
 			setting = "ShowTimer",

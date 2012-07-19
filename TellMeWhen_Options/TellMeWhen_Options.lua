@@ -7,7 +7,7 @@
 --		Banjankri of Blackrock, Predeter of Proudmoore, Xenyr of Aszune
 
 -- Currently maintained by
--- Cybeloras of Mal'Ganis
+-- Cybeloras of Detheroc/Mal'Ganis
 -- --------------------
 
 
@@ -145,7 +145,7 @@ TMW.CI = setmetatable({}, {__index = function(tbl, k)
 	elseif k == "gs" then
 		-- take no chances with errors occuring here
 		return TMW.approachTable(TMW.db, "profile", "Groups", tbl.g)
-	elseif k == "SoI" then -- spell or item (antiquated, but not yet depreciated)
+	elseif k == "SoI" then -- spell or item (antiquated, but not yet deprecated).. TODO: deprecate this
 		local ics = tbl.ics
 		if ics and ics.Type == "item" then
 			return "item"
@@ -179,12 +179,14 @@ end
 
 -- GLOBALS: ChatEdit_InsertLink
 TMW:NewClass("ChatEdit_InsertLink_Hook"){
-	OnNewInstance = function(self, editbox, func)
-		assert(editbox)
-		assert(func)
+	OnNewInstance = function(self, editbox, func)		
+		TMW:ValidateType(2, "ChatEdit_InsertLink_Hook:New()", editbox, "frame")
+		TMW:ValidateType(3, "ChatEdit_InsertLink_Hook:New()", func, "function")
+		
 		self.func = func
 		self.editbox = editbox
 	end,
+	
 	Call = function(self, text, linkType, linkID)
 		if self.editbox:HasFocus() then
 			return TMW.safecall(self.func, self, text, linkType, linkID)
@@ -193,10 +195,9 @@ TMW:NewClass("ChatEdit_InsertLink_Hook"){
 }
 
 local old_ChatEdit_InsertLink = ChatEdit_InsertLink
-local function hook_ChatEdit_InsertLink(...)
-	-- attempt to extract data from shift-clicking things (chat links, spells, items, etc) and insert it into the icon editor
-	local text = ...
+local function hook_ChatEdit_InsertLink(text)	
 	local Type, id = strmatch(text, "|H(.-):(%d+)")
+	
 	if not id then return false end
 
 	for _, instance in pairs(TMW.Classes.ChatEdit_InsertLink_Hook.instances) do
@@ -211,7 +212,7 @@ end
 
 function ChatEdit_InsertLink(...)
 	local executionSuccess, insertSuccess = TMW.safecall(hook_ChatEdit_InsertLink, ...)
-	if executionSuccess and insertSuccess ~= nil then
+	if executionSuccess and insertSuccess then
 		return insertSuccess
 	else
 		return old_ChatEdit_InsertLink(...)
@@ -237,13 +238,13 @@ function TMW.approachTable(t, ...)
 end
 
 ---------- Icon Utilities ----------
-function TMW:GetIconMenuText(g, i, data)
-	data = data or TMW.db.profile.Groups[tonumber(g)].Icons[tonumber(i)]
+function TMW:GetIconMenuText(g, i, ics)
+	ics = ics or TMW.db.profile.Groups[tonumber(g)].Icons[tonumber(i)]
 
-	local Type = data.Type or ""
+	local Type = ics.Type or ""
 	local typeData = Types[Type]
 
-	local text, tooltip, dontShorten = typeData:GetIconMenuText(data, g, i)
+	local text, tooltip, dontShorten = typeData:GetIconMenuText(ics, g, i)
 
 	text = text == "" and L["UNNAMED"] or text
 	local textshort = not dontShorten and strsub(text, 1, 40) or text
@@ -254,33 +255,34 @@ function TMW:GetIconMenuText(g, i, data)
 
 	tooltip =	tooltip ..
 				((typeData.name) or "") ..
-				((data.Enabled and "") or "\r\n(" .. L["DISABLED"] .. ")")
+				((ics.Enabled and "") or "\r\n(" .. L["DISABLED"] .. ")")
 
 	return text, textshort, tooltip
 end
 
-function TMW:GuessIconTexture(data)
+-- TODO: modularize this (to icon types)
+function TMW:GuessIconTexture(ics)
 	local tex
 
-	if data.CustomTex then
-		tex = TMW:GetTexturePathFromSetting(data.CustomTex)
+	if ics.CustomTex then
+		tex = TMW:GetTexturePathFromSetting(ics.CustomTex)
 	end
 
-	if (data.Name and data.Name ~= "" and data.Type ~= "meta" and data.Type ~= "wpnenchant" and data.Type ~= "runes") and not tex then
-		local name = TMW:GetSpellNames(nil, data.Name, 1)
+	if (ics.Name and ics.Name ~= "" and ics.Type ~= "meta" and ics.Type ~= "wpnenchant" and ics.Type ~= "runes") and not tex then
+		local name = TMW:GetSpellNames(nil, ics.Name, 1)
 		if name then
-			if data.Type == "item" then
+			if ics.Type == "item" then
 				tex = GetItemIcon(name) or tex
 			else
 				tex = SpellTextures[name]
 			end
 		end
 	end
-	if data.Type == "cast" and not tex then tex = "Interface\\Icons\\Temp"
-	elseif data.Type == "buff" and not tex then tex = "Interface\\Icons\\INV_Misc_PocketWatch_01"
-	elseif data.Type == "meta" and not tex then tex = "Interface\\Icons\\LevelUpIcon-LFD"
-	elseif data.Type == "runes" and not tex then tex = "Interface\\Icons\\Spell_Deathknight_BloodPresence"
-	elseif data.Type == "wpnenchant" and not tex then tex = GetInventoryItemTexture("player", GetInventorySlotInfo(data.WpnEnchantType or "MainHandSlot")) or GetInventoryItemTexture("player", "MainHandSlot") end
+	if ics.Type == "cast" and not tex then tex = "Interface\\Icons\\Temp"
+	elseif ics.Type == "buff" and not tex then tex = "Interface\\Icons\\INV_Misc_PocketWatch_01"
+	elseif ics.Type == "meta" and not tex then tex = "Interface\\Icons\\LevelUpIcon-LFD"
+	elseif ics.Type == "runes" and not tex then tex = "Interface\\Icons\\Spell_Deathknight_BloodPresence"
+	elseif ics.Type == "wpnenchant" and not tex then tex = GetInventoryItemTexture("player", GetInventorySlotInfo(ics.WpnEnchantType or "MainHandSlot")) or GetInventoryItemTexture("player", "MainHandSlot") end
 	if not tex then tex = "Interface\\Icons\\INV_Misc_QuestionMark" end
 	return tex
 end
@@ -1598,7 +1600,7 @@ function TMW:CompileOptions()
 					order = 1,
 					set = function(info, val)
 						TMW.db.profile[info[#info]] = val
-						TMW:Update()
+						TMW:ScheduleUpdate(0.4)
 					end,
 					get = function(info) return TMW.db.profile[info[#info]] end,
 					args = {
@@ -2550,16 +2552,6 @@ end
 -- ----------------------
 
 IE = TMW:NewModule("IconEditor", "AceEvent-3.0") TMW.IE = IE
-IE.Checks = {
-	--1=check box,
-	--2=editbox,
-	--3=slider(x100),
-	--4=custom, (only handle show/hide)
-	--table=subkeys are settings
-	Alpha = 3,
-	UnAlpha = 3,
-	ConditionAlpha = 3,
-}
 IE.Tabs = {}
 
 
@@ -2732,7 +2724,10 @@ function IE:PositionPanels(size, lastFrameCol1, lastFrameCol2, lastFrameCol3, ne
 					lastFrameCol3 = frame
 					nextColumn = 1
 				end
+				
 				frame:Show()
+				
+				TMW:Fire("TMW_CONFIG_PANEL_SETUP", frame, panelInfo)
 			end		
 		end		
 	end
@@ -2749,7 +2744,6 @@ function IE:Load(isRefresh, icon, isHistoryChange)
 		CI.i = icon:GetID()
 		CI.g = icon:GetParent():GetID()
 		CI.ic = icon
-		CI.t = icon.Type
 
 		if IE.history[#IE.history] ~= icon and not isHistoryChange then
 			-- if we are using an old history point (i.e. we hit back a few times and then loaded a new icon),
@@ -2779,23 +2773,30 @@ function IE:Load(isRefresh, icon, isHistoryChange)
 	local groupID, iconID = CI.g, CI.i
 	if not groupID or not iconID then return end
 
+	-- This is really really important. The icon must be setup so that it has the correct components implemented
+	-- so that the correct config panels will be loaded and shown for the icon.
+	CI.ic:Setup()
+	
 	IE.ExportBox:SetText("")
 	IE:SetScale(TMW.db.global.EditorScale)
 
-	CI.t = TMW.db.profile.Groups[groupID].Icons[iconID].Type
-	if CI.t == "" then
+	CI.ics.Type = CI.ics.Type
+	if CI.ics.Type == "" then
 		UIDropDownMenu_SetText(IE.Main.Type, L["ICONMENU_TYPE"])
 	else
-		local Type = rawget(TMW.Types, CI.t)
+		local Type = rawget(TMW.Types, CI.ics.Type)
 		if Type then
 			UIDropDownMenu_SetText(IE.Main.Type, Type.name)
 		else
-			UIDropDownMenu_SetText(IE.Main.Type, CI.t .. ": UNKNOWN TYPE")
+			UIDropDownMenu_SetText(IE.Main.Type, CI.ics.Type .. ": UNKNOWN TYPE")
 		end
 	end
 	CNDT:SetTabText("icon")
 	CNDT:SetTabText("group")
 
+	
+	
+	
 	
 	
 	
@@ -2808,14 +2809,9 @@ function IE:Load(isRefresh, icon, isHistoryChange)
 	lastFrameCol1, lastFrameCol2, lastFrameCol3, nextColumn = IE:PositionPanels("full", lastFrameCol1, lastFrameCol2, lastFrameCol3, nextColumn)
 	lastFrameCol1, lastFrameCol2, lastFrameCol3, nextColumn = IE:PositionPanels("column", lastFrameCol1, lastFrameCol2, lastFrameCol3, nextColumn)
 	
-	-- THIS IS DEFINITELY TEMPORARY CODE SO THAT I CAN PUSH AN ALPHA RELEASE SOON:
-	IE.Main.WhenChecks:ClearAllPoints()
-	if lastFrameCol2 then
-		IE.Main.WhenChecks:SetPoint("TOP", lastFrameCol2, "BOTTOM", 0, -10)
-		IE.Main.WhenChecks:SetPoint("LEFT", 210, 0)
-	else
-		IE.Main.WhenChecks:SetPoint("TOPLEFT", 210, BASE_Y_OFFSET)
-	end
+	print("loaded", debugstack())
+	
+	
 	
 	
 	
@@ -2823,8 +2819,6 @@ function IE:Load(isRefresh, icon, isHistoryChange)
 	
 	TMW:Fire("TMW_CONFIG_ICON_LOADED", CI.ic)
 
-	IE:SetupRadios()
-	IE:LoadSettings()
 	IE:ShowHide()
 
 	IE:ScheduleIconSetup()
@@ -2920,21 +2914,8 @@ function IE:IsSettingRelevantToIcon(icon, setting)
 end
 
 function IE:ShowHide()
-	local t = CI.t
+	local t = CI.ics.Type
 	if not t then return end
-
-	for k, v in pairs(IE.Checks) do
-		if IE.Main[k] then
-			if IE:IsSettingRelevantToIcon(CI.ic, k) then
-				IE.Main[k]:Show()
-				if IE.Main[k].SetEnabled then
-					IE.Main[k]:SetEnabled(1)
-				end
-			else
-				IE.Main[k]:Hide()
-			end
-		end
-	end
 
 	for name, Type in pairs(Types) do
 		if name ~= t and Type.IE_TypeUnloaded then
@@ -2986,7 +2967,7 @@ TMW:NewClass("SettingFrameBase"){
 		self:SetAlpha(1)
 		
 		if self.data.disabledtooltip then
-			TMW:TT(self, self.data.title, self.data.tooltip, 1, 1)
+			self:SetTooltip(self.data.title, self.data.tooltip)
 		end
 	end,
 	
@@ -2994,8 +2975,16 @@ TMW:NewClass("SettingFrameBase"){
 		self:SetAlpha(0.4)
 		
 		if self.data.disabledtooltip then
-			TMW:TT(self, self.data.title, self.data.disabledtooltip, 1, 1)
+			self:SetTooltip(self.data.title, self.data.disabledtooltip)
 		end
+	end,
+	
+	SetTooltip = function(self, title, text)
+		TMW:TT(self, title, text, 1, 1)
+	end,
+	
+	OnCreate_SettingFrameBase = function(self)
+		self:SetTooltip(self.data.title, self.data.tooltip)
 	end,
 }
 TMW:NewClass("SettingCheckButton", "CheckButton", "SettingFrameBase"){
@@ -3034,6 +3023,136 @@ TMW:NewClass("SettingCheckButton", "CheckButton", "SettingFrameBase"){
 		end
 	end,
 }
+TMW:NewClass("SettingSlider", "Slider", "SettingFrameBase"){
+	-- This class sucks. I didn't even finish writing it. If you need it for something, write it youself. Sorry.
+	-- TODO: maybe finish writing this?
+	
+	OnValueChanged = function(self, value)
+		if CI.ics and self.setting then
+		
+			value = get(self.data.ModifySettingValue, self, value) or value
+			
+			CI.ics[self.setting] = value
+			
+			IE:ScheduleIconSetup()
+		end
+		
+		-- Cheater! (We arent getting anything)
+		-- (I'm using get as a wrapper so I don't have to check if the function exists before calling it)
+		get(self.data.OnValueChanged, self, button) 
+	end,
+	OnCreate = function(self)
+		self:SetMinMaxValues(self.data.min, self.data.max)
+		self:SetValueStep(self.data.step or 1)
+		
+		self.text:SetText(self.data.label or self.data.title)
+		
+		self:EnableMouseWheel(true)
+	end,
+	
+	ReloadSetting = function(self)
+		local icon = CI.ic
+		
+		if icon then
+			self:SetValue(icon:GetSettings()[self.setting])
+			
+			self:CheckInteractionStates()
+		end
+	end,
+	
+	OnMouseWheel = function(self, delta)
+		self:SetValue(self:GetValue() + delta)
+	end,
+}
+
+TMW:NewClass("SettingSlider_Alpha", "SettingSlider"){
+	METHOD_EXTENSIONS = {
+		OnEnable = function(self)
+			local icon = CI.ic
+			
+			if icon then
+				self:SetValue(icon:GetSettings()[self.setting]*100)
+		
+				self:UpdateValueText()
+			end
+		end,
+		OnDisable = function(self)
+			self:FakeSetValue(0)
+		end,
+	},
+	
+	FakeSetValue = function(self, value)
+		self.fakeNextSetValue = 1
+		self:SetValue(value)
+		self.fakeNextSetValue = nil
+		
+		self:UpdateValueText()
+	end,
+	
+	OnCreate = function(self)
+		self:SetMinMaxValues(0, 100)
+		self:SetValueStep(1)
+		
+		self.text:SetText(self.data.label or self.data.title)
+		
+		self:EnableMouseWheel(true)
+	end,
+	
+	OnMinMaxChanged = function(self)
+		local minValue, maxValue = self:GetMinMaxValues()
+		
+		self.Low:SetText(minValue .. "%")
+		self.High:SetText(maxValue .. "%")
+		
+		local color = 34/255
+		self.Low:SetTextColor(color, color, color, 1)
+		self.High:SetTextColor(color, color, color, 1)
+		
+		self:UpdateValueText()
+	end,
+	
+	UpdateValueText = function(self)
+		local value = self:GetValue()
+		
+		if type(value) ~= "number" then
+			return
+		end
+		
+		if self:IsEnabled() then
+			if value/100 == self.data.setOrangeAtValue then
+				self.Mid:SetText("|cffff7400" .. value .. "%")
+			else
+				self.Mid:SetText(value .. "%")
+			end
+		else
+			self.Mid:SetText(value .. "%")
+		end
+	end,
+	
+	OnValueChanged = function(self, value)
+		local icon = CI.ic
+		
+		if icon and not self.fakeNextSetValue then
+			CI.ics[self.setting] = value / 100
+			IE:ScheduleIconSetup()
+		end
+		
+		self:UpdateValueText()
+	end,
+	
+	ReloadSetting = function(self)
+		local icon = CI.ic
+		
+		if icon then
+			self:SetValue(icon:GetSettings()[self.setting]*100)
+		
+			self:UpdateValueText()			
+			self:CheckInteractionStates()
+		end
+	end,
+}
+
+
 
 TMW:NewClass("BitflagSettingFrameBase"){
 	OnClick = function(self, button)		
@@ -3049,10 +3168,14 @@ TMW:NewClass("BitflagSettingFrameBase"){
 	end,
 	
 	OnCreate_BitflagSettingFrameBase = function(self)
-		local bitID = self.data.value or self:GetID()
-		assert(bitID, "Couldn't figure out what bit frame " .. self:GetName() .. " is supposed to operate on!")
-		
-		self.bit = bit.lshift(1, (self.data.value or self:GetID()) - 1)
+		if self.data.bit then
+			self.bit = self.data.bit
+		else
+			local bitID = self.data.value or self:GetID()
+			assert(bitID, "Couldn't figure out what bit frame " .. self:GetName() .. " is supposed to operate on!")
+			
+			self.bit = bit.lshift(1, (self.data.value or self:GetID()) - 1)
+		end
 	end,
 	
 	ReloadSetting = function(self)
@@ -3090,7 +3213,13 @@ TMW:NewClass("SettingRuneButton", "Button", "SettingFrameBase", "BitflagSettingF
 }
 
 TMW:NewClass("SettingEditBox", "EditBox", "SettingFrameBase"){
-	OnCreate = function(self)
+	METHOD_EXTENSIONS = {
+		OnDisable = function(self)
+			self:ClearFocus()
+		end,
+	},
+	
+	OnCreate_EditboxBase = function(self)
 		TMW:RegisterCallback("TMW_CONFIG_SAVE_SETTINGS", self.ClearFocus, self)
 	end,
 	
@@ -3116,14 +3245,7 @@ TMW:NewClass("SettingEditBox", "EditBox", "SettingFrameBase"){
 	Disable = function(self)
 		self:SetEnabled(false)
 	end,
-	OnDisable = function(self)
-		self:SetAlpha(0.4)
-		self:ClearFocus()
-		
-		if self.data.disabledtooltip then
-			TMW:TT(self, self.data.title, self.data.disabledtooltip, 1, 1)
-		end
-	end,
+	
 	OnEditFocusLost = function(self, button)
 		if CI.ics and self.setting then
 			local value
@@ -3191,7 +3313,6 @@ function IE:CreateSettingFrameFromData(frame, arg2, arg3)
 	-- set appearance and settings
 	frame.data = data
 	frame.setting = data.setting
-	TMW:TT(frame, data.title, data.tooltip, 1, 1)
 	frame:Show()
 	
 	frame:CallFunc("OnCreate")
@@ -3255,107 +3376,7 @@ function IE:BuildSimpleCheckSettingFrame(parent, arg2, arg3)
 	return parent
 end
 
-function IE:LoadSettings()
-	local groupID, iconID = CI.g, CI.i
-	local ics = CI.ics
-
-	for setting, settingtype in pairs(IE.Checks) do
-		local f = IE.Main[setting]
-		if f then
-			if settingtype == 1 then
-				-- handle standard check boxes
-				f:SetChecked(ics[setting])
-				f:GetScript("OnClick")(f)
-			elseif settingtype == 2 then
-				-- handle standard editboxes
-				f:SetText(ics[setting] or "")
-				f:SetCursorPosition(0)
-			elseif settingtype == 3 then
-				-- handle sliders. Note the *100 - done to prevent the shitty behavior with having a value step less than 1
-				f:SetValue(ics[setting]*100)
-			elseif type(settingtype) == "table" then
-				-- currently handles CBars and PBars - the actual frames are inside of a container, this handles them
-				for subset, subtype in pairs(settingtype) do
-					if subtype == 1 then
-						-- handle check boxes
-						f[subset]:SetChecked(ics[subset])
-					elseif subtype == 2 then
-						-- handle editboxes
-						f[subset]:SetText(ics[subset])
-						f[subset]:SetCursorPosition(0)
-					end
-				end
-			end
-		end
-	end
-	
-	-- Phew! Left checks are done. Lets move onto the "Radio" checks, shall we? (settings that have several checks but only one can be checked)
-	for k, frame in pairs(IE.Main.WhenChecks) do
-		if strfind(k, "Radio") then
-			local checked = ics[frame.setting] == frame.value
-			frame:SetChecked(checked)
-			if checked then
-				if frame:GetID() == 1 then
-					IE.Main.Alpha:Enable()
-					IE.Main.UnAlpha:Disable()
-				elseif frame:GetID() == 2 then
-					IE.Main.Alpha:Disable()
-					IE.Main.UnAlpha:Enable()
-				elseif frame:GetID() == 3 then
-					IE.Main.Alpha:Enable()
-					IE.Main.UnAlpha:Enable()
-				end
-			end
-		end
-	end
-end
-
-function IE:SetupRadios()
-	local t = CI.t
-	local Type = Types[t]
-	if Type and Type.WhenChecks then
-		for k, frame in pairs(IE.Main.WhenChecks) do
-			if strfind(k, "Radio") then
-				local info = Type.WhenChecks[frame:GetID()]
-				if info then
-					frame:Show()
-					frame.setting = "ShowWhen"
-					frame.value = info.value
-					frame.text:SetText(info.text .. "|r")
-					if info.tooltipText then
-						TMW:TT(frame, info.text, info.tooltipText, 1, 1)
-					else
-						frame:SetScript("OnEnter", nil)
-					end
-				else
-					frame:Hide()
-				end
-			end
-		end
-		IE.Main.WhenChecks.Header:SetText(Type.WhenChecks.text)
-		IE.Main.WhenChecks:Show()
-	else
-		IE.Main.WhenChecks:Hide()
-	end
-
-	local alphainfo = Type and Type.WhenChecks
-	if alphainfo then
-		IE.Main.Alpha.text:SetText(alphainfo[1].text .. "|r")
-		IE.Main.UnAlpha.text:SetText(alphainfo[2].text .. "|r")
-	else
-		IE.Main.Alpha.text:SetText(L["ICONMENU_USABLE"])
-		IE.Main.UnAlpha.text:SetText(L["ICONMENU_UNUSABLE"])
-	end
-end
-
-function IE:SaveSettings()
-	for k, t in pairs(IE.Checks) do
-		if t == 2 then
-			assert(IE.Main[k], ("Couldn't find frame for setting %q (from IE.Checks)"):format(k))
-			IE.Main[k]:ClearFocus()
-		end
-	end
-	
+function IE:SaveSettings()	
 	TMW:Fire("TMW_CONFIG_SAVE_SETTINGS")
 end
 
@@ -3524,8 +3545,7 @@ function IE:Type_Dropdown_OnClick()
 	CI.ics.Type = self.value
 	CI.ic:SetInfo("texture", nil)
 
-	IE:ScheduleIconSetup()
-	CI.t = self.value
+	CI.ics.Type = self.value
 
 	SUG.redoIfSame = 1
 	SUG.Suggest:Hide()
@@ -3574,10 +3594,10 @@ end
 
 ---------- Tooltips ----------
 local cachednames = {}
-function IE:GetRealNames() -- TODO: MODULARIZE THIS
+function IE:GetRealNames(Name) -- TODO: MODULARIZE THIS
 	-- gets a string to set as a tooltip of all of the spells names in the name box in the IE. Splits up equivalancies and turns IDs into names
-	local text = TMW:CleanString(IE.Main.Name)
-	if cachednames[CI.t .. CI.SoI .. text] then return cachednames[CI.t .. CI.SoI .. text] end
+	local text = TMW:CleanString(Name)
+	if cachednames[CI.ics.Type .. CI.SoI .. text] then return cachednames[CI.ics.Type .. CI.SoI .. text] end
 
 	local tbl
 	local GetSpellInfo = GetSpellInfo
@@ -3586,7 +3606,7 @@ function IE:GetRealNames() -- TODO: MODULARIZE THIS
 	else
 		tbl = TMW:GetSpellNames(nil, text)
 	end
-	local durations = Types[CI.t].DurationSyntax and TMW:GetSpellDurations(nil, text)
+	local durations = Types[CI.ics.Type].DurationSyntax and TMW:GetSpellDurations(nil, text)
 
 	local str = ""
 	local numadded = 0
@@ -3620,7 +3640,7 @@ function IE:GetRealNames() -- TODO: MODULARIZE THIS
 
 		if not tiptemp[name] then --prevents display of the same name twice when there are multiple spellIDs.
 			numadded = numadded + 1
-			local dur = Types[CI.t].DurationSyntax and " ("..TMW:FormatSeconds(durations[k])..")" or ""
+			local dur = Types[CI.ics.Type].DurationSyntax and " ("..TMW:FormatSeconds(durations[k])..")" or ""
 			str = str ..
 			(texture and ("|T" .. texture .. ":0|t") or "") ..
 			name ..
@@ -3632,7 +3652,7 @@ function IE:GetRealNames() -- TODO: MODULARIZE THIS
 	end
 	wipe(tiptemp)
 	str = strtrim(str, "\r\n ;")
-	cachednames[CI.t .. CI.SoI .. text] = str
+	cachednames[CI.ics.Type .. CI.SoI .. text] = str
 	return str
 end
 
@@ -3914,26 +3934,6 @@ end)
 -- UNDO/REDO
 -- ----------------------
 
-IE.RapidSettings = {
-	-- settings that can be changed very rapidly, i.e. via mouse wheel or in a color picker
-	r = true,
-	g = true,
-	b = true,
-	a = true,
-	r_anim = true,
-	g_anim = true,
-	b_anim = true,
-	a_anim = true,
-	Size = true,
-	Level = true,
-	Alpha = true,
-	UnAlpha = true,
-	ConditionAlpha = true,
-	Duration = true,
-	Magnitude = true,
-	Period = true,
-}
-
 
 ---------- Comparison ----------
 function IE:DeepCompare(t1, t2, ...)
@@ -4027,7 +4027,7 @@ function IE:AttemptBackup(icon)
 			-- if the last setting that was changed is the same as the most recent setting that was changed,
 			-- and if the setting is one that can be changed very rapidly,
 			-- delete the previous history point so that we dont murder our memory usage and piss off the user as they undo a number from 1 to 10, 0.1 per click.
-			if icon.lastChangePath == result and IE.RapidSettings[changedSetting] then
+			if icon.lastChangePath == result and TMW.RapidSettings[changedSetting] then
 				icon.history[#icon.history] = nil
 				icon.historyState = #icon.history
 			end
@@ -4354,17 +4354,11 @@ end
 function EVENTS:EnableAndDisableEvents()
 	local oldID = EVENTS.currentEventID
 
+	self:BuildListOfValidEvents()
+	
 	for i, frame in ipairs(self.Events) do
 		if frame:IsShown() then
-			if Types[CI.t]["EventDisabled_" .. frame.event] then
-				frame:Disable()
-				frame.DataText:SetText(L["SOUND_EVENT_DISABLEDFORTYPE"])
-				TMW:TT(frame, frame.eventData.text, L["SOUND_EVENT_DISABLEDFORTYPE_DESC"]:format(Types[CI.t].name), 1, 1)
-
-				if oldID == i then
-					oldID = oldID + 1
-				end
-			else
+			if self.ValidEvents[frame.event] then
 				TMW:TT(frame, frame.eventData.text, frame.normalDesc, 1, 1)
 				frame:Enable()
 				local Module = self:GetModuleForEventSettings(i)
@@ -4372,6 +4366,14 @@ function EVENTS:EnableAndDisableEvents()
 					Module:SetupEventDisplay(i)
 				else
 					frame.DataText:SetText("UNKNOWN TYPE: " .. tostring(self:GetEventSettings(i).Type))
+				end
+			else
+				frame:Disable()
+				frame.DataText:SetText(L["SOUND_EVENT_DISABLEDFORTYPE"])
+				TMW:TT(frame, frame.eventData.text, L["SOUND_EVENT_DISABLEDFORTYPE_DESC"]:format(Types[CI.ics.Type].name), 1, 1)
+
+				if oldID == i then
+					oldID = oldID + 1
 				end
 			end
 		end
@@ -4558,18 +4560,31 @@ function EVENTS:TMW_OPTIONS_LOADED()
 end
 TMW:RegisterCallback("TMW_OPTIONS_LOADED", EVENTS)
 
+function EVENTS:BuildListOfValidEvents()
+	self.ValidEvents = wipe(self.ValidEvents or {})
+	
+	for _, Component in ipairs(CI.ic.Components) do
+		for _, eventData in ipairs(Component.IconEvents) do
+			-- Put it in the table as an indexed field.
+			self.ValidEvents[#self.ValidEvents+1] = eventData
+			
+			-- Put it in the table keyed by the event, for lookups.
+			self.ValidEvents[eventData.name] = eventData
+		end
+	end
+end
 
 function EVENTS:AddEvent_Dropdown()
 	if UIDROPDOWNMENU_MENU_LEVEL == 1 then
-		for i, eventData in ipairs(TMW.EventList) do
+		EVENTS:BuildListOfValidEvents()
+		
+		for _, eventData in ipairs(EVENTS.ValidEvents) do
 			local info = UIDropDownMenu_CreateInfo()
-
-			info.disabled = Types[CI.t]["EventDisabled_" .. eventData.name]
 
 			info.text = get(eventData.text)
 			info.tooltipTitle = get(eventData.text)
 			if info.disabled then
-				info.tooltipText = L["SOUND_EVENT_DISABLEDFORTYPE_DESC"]:format(Types[CI.t].name)
+				info.tooltipText = L["SOUND_EVENT_DISABLEDFORTYPE_DESC"]:format(Types[CI.ics.Type].name)
 			else
 				info.tooltipText = get(eventData.desc)
 			end
@@ -5543,7 +5558,21 @@ function SUG:OnInitialize()
 				["Interface\\Icons\\INV_Inscription_Tradeskill01"] = true,
 				["Interface\\Icons\\Temp"] = true,
 			}
-
+			
+			local function findword(str, word)
+				if not strfind(str, word) then
+					return nil
+				else
+					if
+						strfind(str, "%A" .. word .. "%A") or	-- in the middle
+						strfind(str, "^" .. word .. "%A") or	-- at the beginning
+						strfind(str, "%A" .. word .. "$")		-- at the end
+					then
+						return true
+					end
+				end
+			end
+			
 			local index, spellsFailed = 0, 0
 
 			TMWOptDB.CacheLength = TMWOptDB.CacheLength or 11000
@@ -5570,27 +5599,27 @@ function SUG:OnInitialize()
 
 			local function SpellCacher()
 
-				while spellsFailed < 1000 do
-
+				while spellsFailed < 1500 do
+				
 					local name, rank, icon = GetSpellInfo(index)
 					if name then
 						name = strlower(name)
 
 						local fail =
 						Blacklist[icon] or
-						strfind(name, "dnd") or
-						strfind(name, "test") or
-						strfind(name, "debug") or
-						strfind(name, "bunny") or
-						strfind(name, "visual") or
-						strfind(name, "trigger") or
+						findword(name, "dnd") or
+						findword(name, "test") or
+						findword(name, "debug") or
+						findword(name, "bunny") or
+						findword(name, "visual") or
+						findword(name, "trigger") or
 						strfind(name, "[%[%%%+%?]") or -- no brackets, plus signs, percent signs, or question marks
-						strfind(name, "quest") or
-						strfind(name, "vehicle") or
-						strfind(name, "event") or
+						findword(name, "vehicle") or
+						findword(name, "event") or
+						findword(name, "quest") or
 						strfind(name, ":%s?%d") or -- interferes with colon duration syntax
-						strfind(name, "camera") or
-						strfind(name, "dmg")
+						findword(name, "camera") or
+						findword(name, "dmg")
 
 						if not fail then
 							Parser:SetOwner(UIParent, "ANCHOR_NONE") -- must set the owner before text can be obtained.
@@ -6250,7 +6279,7 @@ function Module:Entry_IsValid(id)
 	return true
 end
 
-
+--[==[
 local Module = SUG:NewModule("textsubs", SUG:GetModule("default"))
 Module.headerText = L["SUGGESTIONS_SUBSTITUTIONS"]
 Module.helpText = L["SUG_TOOLTIPTITLE_TEXTSUBS"]
@@ -6262,7 +6291,7 @@ Module.noTab = true
 function Module:Table_GetNormalSuggestions(suggestions, tbl, ...)
 	suggestions[#suggestions + 1] = "d" -- Duration
 
-	local typeData = Types[CI.t]
+	local typeData = Types[CI.ics.Type]
 
 	if not typeData.EventDisabled_OnUnit then
 		suggestions[#suggestions + 1] = "u" -- current Unit
@@ -6275,7 +6304,7 @@ function Module:Table_GetNormalSuggestions(suggestions, tbl, ...)
 		suggestions[#suggestions + 1] = "k" -- stacK
 	end
 
-	if CI.t == "cleu" then
+	if CI.ics.Type == "cleu" then
 		for _, letter in TMW:Vararg("o", "e", "x") do -- sOurceunit, dEstunit, eXtraspell
 			suggestions[#suggestions + 1] = letter
 		end
@@ -6315,19 +6344,19 @@ end
 
 local Module = SUG:NewModule("textsubsANNWhisper", SUG:GetModule("textsubsANN"))
 function Module:Table_GetNormalSuggestions(suggestions, tbl, ...)
-	local typeData = Types[CI.t]
+	local typeData = Types[CI.ics.Type]
 
 	if not typeData.EventDisabled_OnUnit then
 		suggestions[#suggestions + 1] = "u" -- current Unit
 		suggestions[#suggestions + 1] = "p" -- Previous unit
 	end
 
-	if CI.t == "cleu" then
+	if CI.ics.Type == "cleu" then
 		suggestions[#suggestions + 1] = "o" -- sOurceunit
 		suggestions[#suggestions + 1] = "e" -- dEstunit
 	end
 end
-
+]==]
 
 local Module = SUG:NewModule("item", SUG:GetModule("default"))
 function Module:Table_Get()

@@ -7,7 +7,7 @@
 --		Banjankri of Blackrock, Predeter of Proudmoore, Xenyr of Aszune
 
 -- Currently maintained by
--- Cybeloras of Mal'Ganis
+-- Cybeloras of Detheroc/Mal'Ganis
 -- --------------------
 
 if not TMW then return end
@@ -3007,7 +3007,7 @@ CNDT.Types = {
 		icon = "Interface\\Icons\\spell_magic_managain",
 		tcoords = standardtcoords,
 		funcstr = [[GetManaRegen() c.Operator c.Level]], -- anyone know of an event that can be reliably listened to to get this?
-		-- events = EVENTS NEEDED FOR THIS!!
+		-- events = EVENTS NEEDED FOR THIS!! TODO
 	},
 		{ -- mana in combat
 		text = MANA_REGEN_COMBAT,
@@ -3019,7 +3019,7 @@ CNDT.Types = {
 		icon = "Interface\\Icons\\spell_frost_summonwaterelemental",
 		tcoords = standardtcoords,
 		funcstr = [[select(2, GetManaRegen()) c.Operator c.Level]],
-		-- events = EVENTS NEEDED FOR THIS!!
+		-- events = EVENTS NEEDED FOR THIS!! TODO
 	},
 
 
@@ -3058,7 +3058,7 @@ CNDT.Types = {
 				TMW:QueueValidityCheck(c.Icon, icon:GetID(), nil, g, i)
 			end
 
-			local str = [[(c.Icon and c.Icon.attributes.shown and c.Icon.OnUpdate and not c.Icon:Update())]]
+			local str = [[( c.Icon and c.Icon.attributes.shown and c.Icon.OnUpdate and not c.Icon:Update())]]
 			if c.Level == 0 then
 				str = str .. [[and c.Icon.attributes.alpha > 0]]
 			else
@@ -3066,6 +3066,23 @@ CNDT.Types = {
 			end
 			return gsub(str, "c.Icon", c.Icon)
 		end,
+	--[[	events = function(ConditionObj, c)
+			ConditionObj:SetNumEventArgs(1)
+			
+			local t = {}
+			for _, IconDataProcessor_name in TMW:Vararg("ALPHA", "SHOWN") do
+				local IconDataProcessor = TMW.ProcessorsByName[IconDataProcessor_name]
+				local changedEvent = IconDataProcessor and IconDataProcessor.changedEvent
+				
+				if changedEvent then
+					ConditionObj:RequestEvent(changedEvent)
+					
+					t[#t+1] = "event == '" .. changedEvent .. "' and arg1 == " .. c.Icon
+				end
+			end
+			
+			return unpack(t)
+		end,]]
 	},
 	{ -- macro conditional
 		text = L["MACROCONDITION"],
@@ -3098,8 +3115,8 @@ CNDT.Types = {
 		unit = false,
 		icon = "Interface\\Icons\\Ability_Marksmanship",
 		tcoords = standardtcoords,
-		funcstr = function(c)
-			return [[c.True == icon:IsMouseOver()]]
+		funcstr = function(c, parent)
+			return [[c.True == ]] .. parent:GetName() .. [[:IsMouseOver()]]
 		end,
 		-- events = -- there is no good way to handle events for this condition
 	},
@@ -3165,6 +3182,12 @@ CNDT.Types = {
 		min = 0,
 		max = 100,
 		funcstr = [[true]],
+		events = function()
+			-- Returning false (as a string, not a boolean) won't cause responses to any events,
+			-- and it also won't make the ConditionObj default to being OnUpdate driven.
+			
+			return "false"
+		end,
 	},
 
 }
@@ -3275,16 +3298,12 @@ local EnvMeta = {
 function CNDT:TMW_GLOBAL_UPDATE()
 	Env.Locked = TMW.Locked
 	NumShapeshiftForms = GetNumShapeshiftForms()
-	
-	for _, ConditionObj in pairs(TMW.Classes.ConditionObject.instances) do
-		ConditionObj.NextUpdateTime = TMW.time
-	end
 end
 TMW:RegisterCallback("TMW_GLOBAL_UPDATE", CNDT)
 
 function CNDT:TMW_GLOBAL_UPDATE_POST()
 	for _, ConditionObj in pairs(TMW.Classes.ConditionObject.instances) do
-		ConditionObj.NextUpdateTime = TMW.time
+		ConditionObj:Check()
 	end
 end
 TMW:RegisterCallback("TMW_GLOBAL_UPDATE_POST", CNDT)
@@ -3386,7 +3405,7 @@ local argCheckerStringsReusable = {}
 function CNDT:CompileUpdateFunction(parent, obj)
 	local Conditions = obj.settings
 	local argCheckerStrings = wipe(argCheckerStringsReusable)
-	local numAnticipatorArgs = 0
+	local numAnticipatorResults = 0
 	local anticipatorstr = ""
 
 	for _, c in TMW:InNLengthTable(Conditions) do
@@ -3398,6 +3417,8 @@ function CNDT:CompileUpdateFunction(parent, obj)
 				if type(argCheckerString) == "string" then
 					if argCheckerString == "OnUpdate" then
 						return
+					elseif argCheckerString == "" then
+						TMW:Error("Condition.events shouldn't return blank strings! (From condition %q). Return false if you don't want the condition to update OnUpdate but it also has no events (basically, if it is static).", t)
 					else
 						argCheckerStrings[argCheckerString] = true
 					end
@@ -3410,7 +3431,7 @@ function CNDT:CompileUpdateFunction(parent, obj)
 		-- handle code that anticipates when a change in state will occur.
 		-- this is usually used to predict when a duration threshold will be used, but you could really use it for whatever you want.
 		if v.anticipate then
-			numAnticipatorArgs = numAnticipatorArgs + 1
+			numAnticipatorResults = numAnticipatorResults + 1
 
 			local thisstr = TMW.get(v.anticipate, c) -- get the anticipator string from the condition data
 			thisstr = CNDT:DoConditionSubstitutions(parent, v, c, thisstr) -- substitute in any user settings
@@ -3421,8 +3442,8 @@ function CNDT:CompileUpdateFunction(parent, obj)
 				VALUE = huge
 			end]]
 
-			-- change VALUE to the appropriate ARGUMENT#
-			thisstr = thisstr:gsub("VALUE", "ARGUMENT" .. numAnticipatorArgs)
+			-- change VALUE to the appropriate ANTICIPATOR_RESULT#
+			thisstr = thisstr:gsub("VALUE", "ANTICIPATOR_RESULT" .. numAnticipatorResults)
 
 			anticipatorstr = anticipatorstr .. "\r\n" .. thisstr
 		end
@@ -3435,8 +3456,8 @@ function CNDT:CompileUpdateFunction(parent, obj)
 	local doesAnticipate
 	if anticipatorstr ~= "" then
 		local allVars = ""
-		for i = 1, numAnticipatorArgs do
-			allVars = allVars .. "ARGUMENT" .. i .. ","
+		for i = 1, numAnticipatorResults do
+			allVars = allVars .. "ANTICIPATOR_RESULT" .. i .. ","
 		end
 		allVars = allVars:sub(1, -2)
 
@@ -3445,41 +3466,60 @@ function CNDT:CompileUpdateFunction(parent, obj)
 		if nextTime == 0 then
 			nextTime = huge
 		end
-		obj.NextUpdateTime = nextTime]]):format((numAnticipatorArgs == 1 and allVars or "min(" .. allVars .. ")"))
+		obj.NextUpdateTime = nextTime]]):format((numAnticipatorResults == 1 and allVars or "min(" .. allVars .. ")"))
 
 		doesAnticipate = true
 	end
 
 	obj.UpdateMethod = "OnEvent" --DEBUG: COMMENTING THIS LINE FORCES ALL CONDITIONS TO BE ONUPDATE DRIVEN
 
-	local numberOfIfs = 0
+	-- Begin creating the final string that will be used to make the function.
 	local funcstr = [[
 	if not event then
 		return
 	elseif (]]
 	
+	-- Compile all of the arg checker strings into one single composite that can be checked in an (if ... then) statement.
+	local argCheckerStringComposite = ""
 	for argCheckerString in pairs(argCheckerStrings) do
 		if argCheckerString ~= "" then
-			funcstr = funcstr .. [[(]] .. argCheckerString .. [[) or ]]
+			argCheckerStringComposite = argCheckerStringComposite .. [[(]] .. argCheckerString .. [[) or ]]
 		end
 	end
+	
+	if argCheckerStringComposite ~= "" then
+		-- If any arg checkers were added to the composite (it isnt a blank string),
+		-- trim off the final ") or " at the end of it.
+		argCheckerStringComposite = argCheckerStringComposite:sub(1, -5)
+	else
+		-- The arg checker string should never ever be blank. Raise an error if it was.
+		TMW:Error("The arg checker string for the ConditionObj being compiled for %q was blank. This should not have happened.", parent:GetName())
+	end
 
-	funcstr = funcstr:sub(1, -5) .. [[) then
-		obj.UpdateNeeded = true
+	-- Tack on the composite arg checker string to the function, and then close the elseif that it goes into.
+	funcstr = funcstr .. argCheckerStringComposite .. [[) then
+		if obj.doesAutoUpdate then
+			obj:Check()
+		else
+			obj.UpdateNeeded = true
+		end
 	end]]
 
+	-- Add the anticipator function string to the beginning of the function string, before event handling happens.
 	funcstr = anticipatorstr .. "\r\n" .. funcstr
 	
+	-- Finally, create the header of the function that will get all of the args passed into it.
 	local argHeader = [[local obj, event]]
 	for i = 1, obj.numArgsForEventString do 
 		argHeader = argHeader .. [[, arg]] .. i
 	end
 	
+	-- argHeader now looks like: local obj, event, arg1, arg2, arg3, ..., argN
+	
+	-- Set the variables that accept the args to the vararg with all of the function input,
+	-- and tack on the body of the function
 	funcstr = argHeader .. [[ = ...
 	]] .. funcstr
-
-	-- clear out all existing funcs for the obj
-	CNDT.EventEngine:UnregisterObject(obj)
 
 	local func
 	--if functionCache[funcstr] then
@@ -3499,11 +3539,8 @@ function CNDT:CompileUpdateFunction(parent, obj)
 	obj.AnticipateFunction = doesAnticipate and func
 	obj.UpdateFunction = func
 
-	if func then
-		for event in pairs(obj.PreRegisteredEvents) do
-			CNDT.EventEngine:Register(event, func, obj)
-		end
-	end
+	-- Register the events and the object with the UpdateEngine
+	obj:RegisterForUpdating()
 end
 
 function CNDT:IsUnitEventUnit(unit)
@@ -3537,7 +3574,9 @@ ConditionObject.numArgsForEventString = 1
 function ConditionObject:OnNewInstance(parent, Conditions, conditionString)	
 	self.settings = Conditions
 	self.conditionString = conditionString
-	self.PreRegisteredEvents = {}
+
+	self.AutoUpdateRequests = {}
+	self.RequestedEvents = {}
 	
 	self.UpdateNeeded = true
 	self.NextUpdateTime = huge
@@ -3552,9 +3591,11 @@ function ConditionObject:OnNewInstance(parent, Conditions, conditionString)
 	end
 	
 	CNDT:CompileUpdateFunction(parent, self)
+	
+	self:Check()
 end
 
-function ConditionObject:Check(parent)
+function ConditionObject:Check()
 	if self.CheckFunction then
 	
 		if self.UpdateMethod == "OnEvent" then
@@ -3569,7 +3610,7 @@ function ConditionObject:Check(parent)
 			self.NextUpdateTime = huge
 		end
 		
-		local failed = not self:CheckFunction(parent)
+		local failed = not self:CheckFunction() --TODO: make this not expect any input args (it used to be CheckFunction(parent)
 		if self.Failed ~= failed then
 			self.Failed = failed
 			TMW:Fire("TMW_CNDT_OBJ_PASSING_CHANGED", self, failed)
@@ -3577,28 +3618,46 @@ function ConditionObject:Check(parent)
 	end
 end
 
+function ConditionObject:RequestAutoUpdates(parent, isImplemented)
+	if isImplemented then
+		if not next(self.AutoUpdateRequests) then
+			self.doesAutoUpdate = true
+			self:RegisterForUpdating()
+		end
+		
+		self.AutoUpdateRequests[parent] = true
+	else
+		self.AutoUpdateRequests[parent] = nil
+		
+		if not next(self.AutoUpdateRequests) then
+			self.doesAutoUpdate = false
+			self:UnregisterForUpdating()
+		end
+	end
+end
+
+function ConditionObject:RegisterForUpdating()
+	CNDT.UpdateEngine:RegisterObject(self)
+end
+
+function ConditionObject:UnregisterForUpdating()
+	CNDT.UpdateEngine:UnregisterObject(self)
+end
+
 function ConditionObject:SetNumEventArgs(num)
 	self.numArgsForEventString = max(self.numArgsForEventString, num)
 end
 
-function ConditionObject:PreRegisterEvent(event)
-	-- Note that this function does not actually register the event with CNDT.EventEngine
-	-- It simply tells the object that it needs to register the event with CNDT.EventEngine
+function ConditionObject:RequestEvent(event)
+	-- Note that this function does not actually register the event with CNDT.UpdateEngine
+	-- It simply tells the object that it needs to register the event with CNDT.UpdateEngine
 	-- once processing is done and it has been determined that the entire condition set can be event driven
 	-- (if it has no OnUpdate conditions in it)
-	self.PreRegisteredEvents[event] = true
-end
-
-function ConditionObject:UnPreRegisterEvent(event)
-	self.PreRegisteredEvents[event] = nil
-end
-
-function ConditionObject:UnPreRegisterAllEvents()
-	wipe(self.PreRegisteredEvents)
+	self.RequestedEvents[event] = true
 end
 
 function ConditionObject:GenerateNormalEventString(event, ...)
-	self:PreRegisterEvent(event)
+	self:RequestEvent(event)
 	self:SetNumEventArgs(select("#", ...))
 	
 	local str = "event == '"
@@ -3635,7 +3694,10 @@ end
 
 function ConditionObject:GetUnitChangedEventString(unit)
 	if unit == "player" then
-		return ""
+		-- Returning false (as a string, not a boolean) won't cause responses to any events,
+		-- and it also won't make the ConditionObj default to being OnUpdate driven.
+		
+		return "false"
 	elseif unit == "target" then
 		return self:GenerateNormalEventString("PLAYER_TARGET_CHANGED")
 	elseif unit == "pet" then
@@ -3853,10 +3915,6 @@ function CNDT:CheckParentheses(type, settings)
 	local unopened = 0
 
 	for _, Condition in TMW:InNLengthTable(settings) do
-	
-		if _G.type(Condition.PrtsBefore) ~= "number" then
-			CONDITIONS = settings
-		end	
 		for i = 1, Condition.PrtsBefore do
 			numopen = numopen + 1
 			runningcount = runningcount + 1
@@ -3902,38 +3960,149 @@ function CNDT:CheckParentheses(type, settings)
 	end
 end
 
-CNDT.EventEngine = CreateFrame("Frame")
-CNDT.EventEngine.funcs = {}
-function CNDT.EventEngine:Register(event, func, obj)
+CNDT.UpdateEngine = CreateFrame("Frame")
+
+function CNDT.UpdateEngine:CreateUpdateTableManager()
+	local manager = TMW.Classes.UpdateTableManager:New()
 	
-	if event:find("^TMW_") then
-		TMW:RegisterCallback(event, func, obj)
-	else
-		self:RegisterEvent(event)
-	end
-	CNDT.EventEngine.funcs[event] = CNDT.EventEngine.funcs[event] or {}
-	CNDT.EventEngine.funcs[event][obj] = func
+	manager:UpdateTable_Set()
+	
+	return manager.UpdateTable_UpdateTable, manager
 end
 
-function CNDT.EventEngine:UnregisterObject(objToUnregister)
-	for event, funcs in pairs(CNDT.EventEngine.funcs) do
-		for obj, func in pairs(funcs) do
-			if objToUnregister == obj then
-				funcs[obj] = nil
-				if event:find("^TMW_") then
-					TMW:UnregisterCallback(event, func, objToUnregister)
-				end
+TMW:NewClass("EventUpdateTableManager", "UpdateTableManager"){
+	OnNewInstance_EventUpdateTableManager = function(self, event)
+		self.event = event
+		self:UpdateTable_Set()
+	end,
+	
+	UpdateTable_OnUsed = function(self)
+		CNDT.UpdateEngine:RegisterEvent(self.event)
+	end,
+	UpdateTable_OnUnused = function(self)
+		CNDT.UpdateEngine:UnregisterEvent(self.event)
+	end,
+
+}
+
+function CNDT.UpdateEngine:CreateEventUpdateTableManager(event)
+	local manager = TMW.Classes.EventUpdateTableManager:New(event)
+	
+	return manager.UpdateTable_UpdateTable, manager
+end
+
+local OnUpdate_UpdateTable, OnUpdate_UpdateTableManager = CNDT.UpdateEngine:CreateUpdateTableManager()
+local OnAnticipate_UpdateTable, OnAnticipate_UpdateTableManager = CNDT.UpdateEngine:CreateUpdateTableManager()
+
+CNDT.UpdateEngine.EventUpdateTables = {}
+CNDT.UpdateEngine.EventUpdateTableManagers = {}
+
+
+
+function CNDT.UpdateEngine:RegisterObject(ConditionObject)
+	if ConditionObject.UpdateMethod == "OnUpdate" then
+		self:RegisterObjForOnUpdate(ConditionObject)
+		
+	elseif ConditionObject.UpdateMethod == "OnEvent" then
+		self:RegisterObjForOnEvent(ConditionObject)
+	end
+end
+function CNDT.UpdateEngine:UnregisterObject(ConditionObject)
+	if ConditionObject.UpdateMethod == "OnUpdate" then
+		self:UnregisterObjForOnUpdate(ConditionObject)
+		
+	elseif ConditionObject.UpdateMethod == "OnEvent" then
+		self:UnregisterObjForOnEvent(ConditionObject)
+	end
+end
+
+
+function CNDT.UpdateEngine:RegisterObjForOnEvent(ConditionObject)
+	for event in pairs(ConditionObject.RequestedEvents) do
+		self:RegisterObjForEvent(ConditionObject, event)
+	end
+	
+	if ConditionObject.AnticipateFunction and ConditionObject.doesAutoUpdate then
+		OnAnticipate_UpdateTableManager:UpdateTable_Register(ConditionObject)
+	end
+end
+function CNDT.UpdateEngine:RegisterObjForEvent(ConditionObject, event)
+	
+	if event:find("^TMW_") then
+		TMW:RegisterCallback(event, ConditionObject.UpdateFunction, ConditionObject)
+	else		
+		local UpdateTableManager = CNDT.UpdateEngine.EventUpdateTableManagers[event]
+		if not UpdateTableManager then
+			local UpdateTable
+			UpdateTable, UpdateTableManager = self:CreateEventUpdateTableManager(event)
+			
+			CNDT.UpdateEngine.EventUpdateTableManagers[event] = UpdateTableManager
+			CNDT.UpdateEngine.EventUpdateTables[event] = UpdateTable
+		end
+		
+		UpdateTableManager:UpdateTable_Register(ConditionObject)		
+	end	
+end
+
+function CNDT.UpdateEngine:UnregisterObjForOnEvent(ConditionObject)
+	for event in pairs(ConditionObject.RequestedEvents) do
+		self:UnregisterObjForEvent(ConditionObject, event)
+	end
+	
+	if ConditionObject.AnticipateFunction then
+		OnAnticipate_UpdateTableManager:UpdateTable_Unregister(ConditionObject)
+	end
+end
+function CNDT.UpdateEngine:UnregisterObjForEvent(ConditionObject, event)
+	if event:find("^TMW_") then
+		TMW:UnregisterCallback(event, ConditionObject.UpdateFunction, ConditionObject)
+	else
+		local UpdateTableManager = CNDT.UpdateEngine.EventUpdateTableManagers[event]
+		if UpdateTableManager then
+			UpdateTableManager:UpdateTable_Unregister(ConditionObject)
+		end
+	end
+end
+
+function CNDT.UpdateEngine:OnEvent(event, ...)
+	local UpdateTable = self.EventUpdateTables[event]
+	
+	if UpdateTable then
+		for i = 1, #UpdateTable do
+			local ConditionObject = UpdateTable[i]
+			ConditionObject:UpdateFunction(event, ...)
+		end
+	end
+end
+CNDT.UpdateEngine:SetScript("OnEvent", CNDT.UpdateEngine.OnEvent)
+
+
+
+function CNDT.UpdateEngine:RegisterObjForOnUpdate(ConditionObject)
+	OnUpdate_UpdateTableManager:UpdateTable_Register(ConditionObject)
+end
+function CNDT.UpdateEngine:UnregisterObjForOnUpdate(ConditionObject)
+	OnUpdate_UpdateTableManager:UpdateTable_Unregister(ConditionObject)
+end
+
+function CNDT.UpdateEngine:OnUpdate(event, time, Locked)
+	if Locked then
+		for i = 1, #OnUpdate_UpdateTable do
+			local ConditionObject = OnUpdate_UpdateTable[i]
+			
+			ConditionObject:Check()
+			
+			--TODO: update Check() to not expect or pass through any args.
+			--TODO: remove support for %u substitution in conditions, move this functionality to unit sets
+		end
+		
+		for i = 1, #OnAnticipate_UpdateTable do
+			local ConditionObject = OnAnticipate_UpdateTable[i]
+			if ConditionObject.NextUpdateTime < time then
+				ConditionObject:Check()
 			end
 		end
 	end
-end
 
-function CNDT.EventEngine:OnEvent(event, ...)
-	local funcs = self.funcs[event]
-	if funcs then
-		for obj, func in next, funcs do
-			func(obj, event, ...)
-		end
-	end
 end
-CNDT.EventEngine:SetScript("OnEvent", CNDT.EventEngine.OnEvent)
+TMW:RegisterCallback("TMW_ONUPDATE_TIMECONSTRAINED_PRE", CNDT.UpdateEngine.OnUpdate, CNDT.UpdateEngine)

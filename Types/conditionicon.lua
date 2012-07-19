@@ -7,7 +7,7 @@
 --		Banjankri of Blackrock, Predeter of Proudmoore, Xenyr of Aszune
 
 -- Currently maintained by
--- Cybeloras of Mal'Ganis
+-- Cybeloras of Detheroc/Mal'Ganis
 -- --------------------
 
 local TMW = TMW
@@ -22,20 +22,8 @@ Type.name = L["ICONMENU_CNDTIC"]
 Type.desc = L["ICONMENU_CNDTIC_DESC"]
 Type.spacebefore = true
 Type.AllowNoName = true
-Type.SUGType = "texture"
-Type.DontSetInfoInCondition = true
-Type.chooseNameTitle = L["ICONMENU_CHOOSENAME_CNDTIC"]
-Type.chooseNameText = L["CHOOSENAME_DIALOG_CNDTIC"]
-
-Type.WhenChecks = {
-	text = L["ICONMENU_CNDTSHOWWHEN"],
-	{ value = "alpha",			text = "|cFF00FF00" .. L["ICONMENU_SUCCEED"],			 },
-	{ value = "unalpha",		text = "|cFFFF0000" .. L["ICONMENU_FAIL"],				 },
-	{ value = "always",			text = L["ICONMENU_ALWAYS"] },
-}
 
 -- AUTOMATICALLY GENERATED: UsesAttributes
-Type:UsesAttributes("color")
 Type:UsesAttributes("start, duration")
 Type:UsesAttributes("alpha")
 Type:UsesAttributes("texture")
@@ -51,9 +39,11 @@ Type:RegisterIconDefaults{
 
 Type:RegisterConfigPanel_XMLTemplate("column", 1, "TellMeWhen_ConditionIconSettings")
 
-Type.EventDisabled_OnSpell = true
-Type.EventDisabled_OnUnit = true
-Type.EventDisabled_OnStack = true
+Type:RegisterConfigPanel_XMLTemplate("column", 2, "TellMeWhen_WhenChecks", {
+	text = L["ICONMENU_CNDTSHOWWHEN"],
+	[0x2] = { text = "|cFF00FF00" .. L["ICONMENU_SUCCEED"],			},
+	[0x1] = { text = "|cFFFF0000" .. L["ICONMENU_FAIL"],			},
+})
 
 function Type:Update()
 end
@@ -91,9 +81,8 @@ local function ConditionIcon_OnUpdate(icon, time)
 		end
 		
 		icon:SetInfo(
-			"alpha; color; start, duration",
+			"alpha; start, duration",
 			alpha,
-			icon:CrunchColor(d),
 			start, duration
 		)
 
@@ -111,9 +100,6 @@ end
 function Type:Setup(icon, groupID, iconID)
 	icon.dontHandleConditionsExternally = true
 	
-	--[[if not icon.OverrideTex or icon.OverrideTex == "" then
-		icon.OverrideTex = "Interface\\Icons\\INV_Misc_QuestionMark"
-	end]]
 	icon:SetInfo("texture", "Interface\\Icons\\INV_Misc_QuestionMark")
 
 	icon:SetUpdateMethod("manual")

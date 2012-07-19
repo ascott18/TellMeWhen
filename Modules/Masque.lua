@@ -7,7 +7,7 @@
 --		Banjankri of Blackrock, Predeter of Proudmoore, Xenyr of Aszune
 
 -- Currently maintained by
--- Cybeloras of Mal'Ganis
+-- Cybeloras of Detheroc/Mal'Ganis
 -- --------------------
 
 
@@ -33,6 +33,9 @@ end
 function Masque:OnEnable()
 	local icon = self.icon
 	local container = self.container
+	
+	container:Show()
+	
 	container:SetFrameLevel(icon:GetFrameLevel())
 	
 	icon.normaltex = container.__MSQ_NormalTexture or container:GetNormalTexture()
@@ -52,6 +55,8 @@ function Masque:OnEnable()
 	end
 end
 function Masque:OnDisable()
+	self.container:Hide()
+	
 	if LMB then
 		self.lmbGroup:RemoveButton(self.container, true)
 	end

@@ -1,5 +1,5 @@
 ﻿# Originally by Nephthys of Hyjal
-# Major Updates by Oozebull of Twisting Nether, Xenyr of Aszune, and Cybeloras of Mal'Ganis
+# Major Updates by Oozebull of Twisting Nether, Xenyr of Aszune, and Cybeloras of Detheroc/Mal'Ganis
 
 # Dont forget to toc bump TellMeWhen_Options too
 # Also dont forget to bump both of these - X-Interface is used to get the interface version in-game to check that the user is using a current client.
@@ -9,7 +9,7 @@
 ## Title: TellMeWhen
 
 ## Version: 6.0.0
-## Author: Cybeloras of Mal'Ganis
+## Author: Cybeloras of Detheroc/Mal'Ganis
 
 ## Notes: Provides visual, auditory, and textual notifications about cooldowns, buffs, and pretty much every other element of combat.
 ## Notes-zhCN: 为冷却、增益/减益及其他各个方面提供视觉、听觉以及文字上的通知。
@@ -77,6 +77,7 @@ DataProcessors\noMana.lua
 
 DataProcessorHooks\ALPHA_DURATIONREQ.lua
 DataProcessorHooks\ALPHA_STACKREQ.lua
+DataProcessorHooks\ALPHA_CONDITIONREQ.lua
 DataProcessorHooks\TEXTURE_CUSTOMTEX.lua
 
 Modules\TimerBar.lua
@@ -90,6 +91,7 @@ Modules\Texture.lua
 Modules\Texture_Colored.lua
 Modules\Texts.lua
 Modules\Masque.lua
+Modules\IconEventClickHandler.lua
 
 Views\icon.lua
 Views\bar.lua

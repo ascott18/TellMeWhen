@@ -7,7 +7,7 @@
 --		Banjankri of Blackrock, Predeter of Proudmoore, Xenyr of Aszune
 
 -- Currently maintained by
--- Cybeloras of Mal'Ganis
+-- Cybeloras of Detheroc/Mal'Ganis
 -- --------------------
 
 
@@ -66,6 +66,60 @@ function Processor:CompileFunctionSegment(t)
 	--]]
 end
 
+Processor:RegisterIconEvent{
+	name = "OnStart",
+	text = L["SOUND_EVENT_ONSTART"],
+	desc = L["SOUND_EVENT_ONSTART_DESC"],
+}
+
+Processor:RegisterIconEvent{
+	name = "OnFinish",
+	text = L["SOUND_EVENT_ONFINISH"],
+	desc = L["SOUND_EVENT_ONFINISH_DESC"],
+}
+
+Processor:RegisterIconEvent{
+	name = "OnDuration",
+	text = L["SOUND_EVENT_ONDURATION"],
+	desc = L["SOUND_EVENT_ONDURATION_DESC"],
+	settings = {
+		Operator = true,
+		Value = true,
+		CndtJustPassed = "FORCE",
+		PassingCndt = "FORCE",
+	},
+	blacklistedOperators = {
+		["~="] = true,
+		["=="] = true,
+	},
+	valueName = L["DURATION"],
+	conditionChecker = function(icon, eventSettings)
+		local attributes = icon.attributes
+		local d = attributes.duration - (TMW.time - attributes.start)
+		d = d > 0 and d or 0
+
+		return TMW.CompareFuncs[eventSettings.Operator](d, eventSettings.Value)
+	end,
+	applyDefaultsToSetting = function(EventSettings)
+		EventSettings.CndtJustPassed = true
+		EventSettings.PassingCndt = true
+	end,
+}
+TMW:RegisterCallback("TMW_ICON_NEXTUPDATE_REQUESTDURATION", function(event, icon, currentIconDuration)
+	if icon.EventHandlersSet.OnDuration then
+		for _, EventSettings in TMW:InNLengthTable(icon.Events) do
+			if EventSettings.Event == "OnDuration" then
+				local Duration = EventSettings.Value
+				if Duration < currentIconDuration and icon.NextUpdate_Duration < Duration then
+					icon.NextUpdate_Duration = Duration
+				end
+			end
+		end
+	end
+end)
+
+
+
 Processor:RegisterDogTag("TMW", "Duration", {
 	code = function (groupID, iconID)
 		local group = TMW[groupID]
@@ -94,7 +148,7 @@ Processor:RegisterDogTag("TMW", "Duration", {
 	category = L["ICON"],
 })
 
-TMW:RegisterCallback("TMW_ICON_SETUP_PRE", function(event, icon)
+TMW:RegisterCallback("TMW_ICON_SETUP_POST", function(event, icon)
 	if not TMW.Locked then
 		icon:SetInfo("start, duration", 0, 0)
 	end

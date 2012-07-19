@@ -7,7 +7,7 @@
 --		Banjankri of Blackrock, Predeter of Proudmoore, Xenyr of Aszune
 
 -- Currently maintained by
--- Cybeloras of Mal'Ganis
+-- Cybeloras of Detheroc/Mal'Ganis
 -- --------------------
 
 
@@ -39,6 +39,23 @@ function Processor:CompileFunctionSegment(t)
 	--]]
 end
 
+Processor:RegisterIconEvent{	-- OnStack
+	name = "OnStack",
+	text = L["SOUND_EVENT_ONSTACK"],
+	desc = L["SOUND_EVENT_ONSTACK_DESC"],
+	settings = {
+		Operator = true,
+		Value = true,
+		CndtJustPassed = true,
+		PassingCndt = true,
+	},
+	valueName = L["STACKS"],
+	conditionChecker = function(icon, eventSettings)
+		local count = icon.attributes.stack
+		return count and TMW.CompareFuncs[eventSettings.Operator](count, eventSettings.Value)
+	end,
+}
+	
 Processor:RegisterDogTag("TMW", "Stacks", {
 	code = function (groupID, iconID)
 		local group = TMW[groupID]
@@ -56,7 +73,7 @@ Processor:RegisterDogTag("TMW", "Stacks", {
 	category = L["ICON"],
 })
 
-TMW:RegisterCallback("TMW_ICON_SETUP_PRE", function(event, icon)
+TMW:RegisterCallback("TMW_ICON_SETUP_POST", function(event, icon)
 	if not TMW.Locked then
 		icon:SetInfo("stack, stackText", nil, nil)
 	end

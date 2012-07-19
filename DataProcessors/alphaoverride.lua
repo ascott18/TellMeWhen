@@ -7,7 +7,7 @@
 --		Banjankri of Blackrock, Predeter of Proudmoore, Xenyr of Aszune
 
 -- Currently maintained by
--- Cybeloras of Mal'Ganis
+-- Cybeloras of Detheroc/Mal'Ganis
 -- --------------------
 
 
@@ -19,6 +19,7 @@ local print = TMW.print
 
 
 local Processor = TMW.Classes.IconDataProcessor:New("ALPHAOVERRIDE", "alphaOverride")
+Processor.dontInherit = true
 Processor:AssertDependency("ALPHA")
 
 function Processor:CompileFunctionSegment(t)

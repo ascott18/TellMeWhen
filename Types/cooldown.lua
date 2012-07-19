@@ -7,7 +7,7 @@
 --		Banjankri of Blackrock, Predeter of Proudmoore, Xenyr of Aszune
 
 -- Currently maintained by
--- Cybeloras of Mal'Ganis
+-- Cybeloras of Detheroc/Mal'Ganis
 -- --------------------
 
 local TMW = TMW
@@ -33,21 +33,13 @@ local Type = TMW.Classes.IconType:New("cooldown")
 LibStub("AceEvent-3.0"):Embed(Type)
 Type.name = L["ICONMENU_SPELLCOOLDOWN"]
 Type.desc = L["ICONMENU_SPELLCOOLDOWN_DESC"]
-Type.chooseNameText  = L["CHOOSENAME_DIALOG"] .. "\r\n\r\n" .. L["CHOOSENAME_DIALOG_PETABILITIES"]
 
-Type.WhenChecks = {
-	text = L["ICONMENU_SHOWWHEN"],
-	{ value = "alpha", 			text = "|cFF00FF00" .. L["ICONMENU_USABLE"], 			 },
-	{ value = "unalpha",  		text = "|cFFFF0000" .. L["ICONMENU_UNUSABLE"], 			 },
-	{ value = "always", 		text = L["ICONMENU_ALWAYS"] },
-}
 
 -- AUTOMATICALLY GENERATED: UsesAttributes
-Type:UsesAttributes("reverse")
 Type:UsesAttributes("spell")
 Type:UsesAttributes("noMana")
 Type:UsesAttributes("inRange")
-Type:UsesAttributes("color")
+Type:UsesAttributes("reverse")
 Type:UsesAttributes("start, duration")
 Type:UsesAttributes("alpha")
 Type:UsesAttributes("texture")
@@ -59,7 +51,15 @@ Type:RegisterIconDefaults{
 	IgnoreRunes				= false,
 }
 
-Type:RegisterConfigPanel_XMLTemplate("full", 1, "TellMeWhen_ChooseName")
+Type:RegisterConfigPanel_XMLTemplate("full", 1, "TellMeWhen_ChooseName", {
+	text = L["CHOOSENAME_DIALOG"] .. "\r\n\r\n" .. L["CHOOSENAME_DIALOG_PETABILITIES"],
+})
+
+Type:RegisterConfigPanel_XMLTemplate("column", 2, "TellMeWhen_WhenChecks", {
+	text = L["ICONMENU_SHOWWHEN"],
+	[0x2] = { text = "|cFF00FF00" .. L["ICONMENU_USABLE"], 			},
+	[0x1] = { text = "|cFFFF0000" .. L["ICONMENU_UNUSABLE"], 		},
+})
 
 Type:RegisterConfigPanel_ConstructorFunc("column", 1, "TellMeWhen_CooldownSettings", function(self)
 	self.Header:SetText(Type.name)
@@ -81,9 +81,6 @@ Type:RegisterConfigPanel_ConstructorFunc("column", 1, "TellMeWhen_CooldownSettin
 		},
 	})
 end)
-
-Type.EventDisabled_OnUnit = true
-Type.EventDisabled_OnStack = true
 
 
 function Type:Update()
@@ -110,18 +107,16 @@ local function AutoShot_OnUpdate(icon, time)
 
 	if ready and inrange == 1 then
 		icon:SetInfo(
-			"alpha; color; start, duration; spell; inRange",
+			"alpha; start, duration; spell; inRange",
 			icon.Alpha,
-			icon:CrunchColor(),
 			0, 0,
 			NameName,
 			inrange
 		)
 	else
 		icon:SetInfo(
-			"alpha; color; start, duration; spell; inRange",
+			"alpha; start, duration; spell; inRange",
 			icon.UnAlpha,
-			icon:CrunchColor(asDuration > 0 and asDuration, inrange),
 			icon.asStart, asDuration,
 			NameName,
 			inrange
@@ -159,9 +154,8 @@ local function SpellCooldown_OnUpdate(icon, time)
 			isGCD = (ClockGCD or duration ~= 0) and OnGCD(duration)
 			if inrange == 1 and not nomana and (duration == 0 or isGCD) then --usable
 				icon:SetInfo(
-					"alpha; color; texture; start, duration; spell; inRange; noMana",
+					"alpha; texture; start, duration; spell; inRange; noMana",
 					icon.Alpha,
-					icon:CrunchColor(),
 					SpellTextures[iName],
 					start, duration,
 					iName,
@@ -190,9 +184,8 @@ local function SpellCooldown_OnUpdate(icon, time)
 	end
 	if duration then
 		icon:SetInfo(
-			"alpha; color; texture; start, duration; spell; inRange; noMana",
+			"alpha; texture; start, duration; spell; inRange; noMana",
 			icon.UnAlpha,
-			icon:CrunchColor(duration, inrange, nomana),
 			icon.FirstTexture,
 			start, duration,
 			NameFirst,

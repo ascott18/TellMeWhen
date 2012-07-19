@@ -7,7 +7,7 @@
 --		Banjankri of Blackrock, Predeter of Proudmoore, Xenyr of Aszune
 
 -- Currently maintained by
--- Cybeloras of Mal'Ganis
+-- Cybeloras of Detheroc/Mal'Ganis
 -- --------------------
 
 local TMW = TMW
@@ -27,22 +27,14 @@ local strlowerCache = TMW.strlowerCache
 local Type = TMW.Classes.IconType:New("totem")
 Type.name = pclass == "DRUID" and L["ICONMENU_MUSHROOMS"]		or pclass == "DEATHKNIGHT" and L["ICONMENU_GHOUL"]		or L["ICONMENU_TOTEM"]
 Type.desc = pclass == "DRUID" and L["ICONMENU_MUSHROOMS_DESC"]	or pclass == "DEATHKNIGHT" and L["ICONMENU_GHOUL_DESC"]	or L["ICONMENU_TOTEM_DESC"]
-Type.chooseNameTitle = L["ICONMENU_CHOOSENAME"] .. " " .. L["ICONMENU_CHOOSENAME_ORBLANK"]
 Type.AllowNoName = true
 Type.usePocketWatch = 1
 Type.hidden = pclass == "PRIEST" -- priest totems are lightwells, which is tracked with icon type "lightwell"
 
-Type.WhenChecks = {
-	text = L["ICONMENU_SHOWWHEN"],
-	{ value = "alpha", 			text = "|cFF00FF00" .. L["ICONMENU_PRESENT"], 			 },
-	{ value = "unalpha", 		text = "|cFFFF0000" .. L["ICONMENU_ABSENT"], 			 },
-	{ value = "always", 		text = L["ICONMENU_ALWAYS"] },
-}
 
 -- AUTOMATICALLY GENERATED: UsesAttributes
 Type:UsesAttributes("spell")
 Type:UsesAttributes("reverse")
-Type:UsesAttributes("color")
 Type:UsesAttributes("start, duration")
 Type:UsesAttributes("alpha")
 Type:UsesAttributes("texture")
@@ -53,7 +45,9 @@ Type:RegisterIconDefaults{
 }
 
 if pclass ~= "DRUID" and pclass ~= "DEATHKNIGHT" then
-	Type:RegisterConfigPanel_XMLTemplate("full", 1, "TellMeWhen_ChooseName")
+	Type:RegisterConfigPanel_XMLTemplate("full", 1, "TellMeWhen_ChooseName", {
+		title = L["ICONMENU_CHOOSENAME"] .. " " .. L["ICONMENU_CHOOSENAME_ORBLANK"],
+	})
 end
 
 if pclass == "SHAMAN" then
@@ -105,8 +99,11 @@ elseif pclass == "DRUID" then
 	end)
 end
 
-Type.EventDisabled_OnUnit = true
-Type.EventDisabled_OnStack = true
+Type:RegisterConfigPanel_XMLTemplate("column", 2, "TellMeWhen_WhenChecks", {
+	text = L["ICONMENU_SHOWWHEN"],
+	[0x2] = { text = "|cFF00FF00" .. L["ICONMENU_PRESENT"],		},
+	[0x1] = { text = "|cFFFF0000" .. L["ICONMENU_ABSENT"],		},
+})
 
 Type:RegisterUpgrade(48017, {
 	icon = function(self, ics)
@@ -131,9 +128,8 @@ local function Totem_OnUpdate(icon, time)
 		if Slots[iSlot] then
 			local _, totemName, start, duration, totemIcon = GetTotemInfo(iSlot)
 			if start ~= 0 and totemName and ((NameFirst == "") or NameNameHash[strlowerCache[totemName]]) then
-				icon:SetInfo("alpha; color; texture; start, duration; spell",
+				icon:SetInfo("alpha; texture; start, duration; spell",
 					icon.Alpha,
-					icon:CrunchColor(duration),
 					totemIcon,
 					start, duration,
 					totemName
@@ -143,9 +139,8 @@ local function Totem_OnUpdate(icon, time)
 		end
 	end
 	
-	icon:SetInfo("alpha; color; texture; start, duration; spell",
+	icon:SetInfo("alpha; texture; start, duration; spell",
 		icon.UnAlpha,
-		icon:CrunchColor(),
 		icon.FirstTexture,
 		0, 0,
 		NameFirst

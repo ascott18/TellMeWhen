@@ -7,7 +7,7 @@
 --		Banjankri of Blackrock, Predeter of Proudmoore, Xenyr of Aszune
 
 -- Currently maintained by
--- Cybeloras of Mal'Ganis
+-- Cybeloras of Detheroc/Mal'Ganis
 -- --------------------
 
 local TMW = TMW
@@ -29,18 +29,10 @@ Type.name = L["ICONMENU_ICD"]
 Type.desc = L["ICONMENU_ICD_DESC"]
 Type.usePocketWatch = 1
 Type.DurationSyntax = 1
-Type.SUGType = "spellwithduration"
-Type.WhenChecks = {
-	text = L["ICONMENU_SHOWWHEN"],
-	{ value = "alpha", 			text = "|cFF00FF00" .. L["ICONMENU_USABLE"], 			 },
-	{ value = "unalpha",		text = "|cFFFF0000" .. L["ICONMENU_UNUSABLE"], 			 },
-	{ value = "always", 		text = L["ICONMENU_ALWAYS"] },
-}
 
 -- AUTOMATICALLY GENERATED: UsesAttributes
-Type:UsesAttributes("spell")
-Type:UsesAttributes("color")
 Type:UsesAttributes("start, duration")
+Type:UsesAttributes("spell")
 Type:UsesAttributes("alpha")
 Type:UsesAttributes("texture")
 -- END AUTOMATICALLY GENERATED: UsesAttributes
@@ -50,7 +42,15 @@ Type:RegisterIconDefaults{
 	DontRefresh				= false,
 }
 
-Type:RegisterConfigPanel_XMLTemplate("full", 1, "TellMeWhen_ChooseName")
+Type:RegisterConfigPanel_XMLTemplate("full", 1, "TellMeWhen_ChooseName", {
+	SUGType = "spellwithduration",
+})
+
+Type:RegisterConfigPanel_XMLTemplate("column", 2, "TellMeWhen_WhenChecks", {
+	text = L["ICONMENU_SHOWWHEN"],
+	[0x2] = { text = "|cFF00FF00" .. L["ICONMENU_USABLE"], 			},
+	[0x1] = { text = "|cFFFF0000" .. L["ICONMENU_UNUSABLE"], 		},
+})
 
 Type:RegisterConfigPanel_ConstructorFunc("column", 2, "TellMeWhen_ICDType", function(self)
 	self.Header:SetText(TMW.L["ICONMENU_ICDTYPE"])
@@ -86,10 +86,6 @@ Type:RegisterConfigPanel_ConstructorFunc("column", 1, "TellMeWhen_ICDSettings", 
 		},
 	})
 end)
-
-Type.EventDisabled_OnUnit = true
-Type.EventDisabled_OnStack = true
-
 
 function Type:Update()
 	pGUID = UnitGUID("player")
@@ -131,15 +127,13 @@ local function ICD_OnUpdate(icon, time)
 	local ICDDuration = icon.ICDDuration
 
 	if time - ICDStartTime > ICDDuration then
-		icon:SetInfo("alpha; color; start, duration",
+		icon:SetInfo("alpha; start, duration",
 			icon.Alpha,
-			icon:CrunchColor(),
 			0, 0
 		)
 	else
-		icon:SetInfo("alpha; color; start, duration",
+		icon:SetInfo("alpha; start, duration",
 			icon.UnAlpha,
-			icon:CrunchColor(ICDDuration),
 			ICDStartTime, ICDDuration
 		)
 	end

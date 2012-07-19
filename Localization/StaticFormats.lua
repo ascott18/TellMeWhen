@@ -78,6 +78,8 @@ L["COLOR_HEADER"] 					  	= L["COLOR_HEADER"]					 		:format("%s", L["COLOR_OVER
 L["CLEU_NOFILTERS"] 				  	= L["CLEU_NOFILTERS"]						:format(L["ICONMENU_CLEU"], "%s")
 L["CLEU_SPELL_DAMAGE_CRIT_DESC"]   	  	= L["CLEU_SPELL_DAMAGE_CRIT_DESC"]	 		:format(L["CLEU_SPELL_DAMAGE"])
 
+L["SOUND_CHANNEL_DESC"] 				= L["SOUND_CHANNEL_DESC"] 					:format(L["SOUND_CHANNEL_MASTER"])
+
 L["ANIM_INFINITE_DESC"] 				= L["ANIM_INFINITE_DESC"] 					:format(L["ANIM_ICONCLEAR"])
 
 L["DT_DOC_Source"] 					  	= L["DT_DOC_Source"] 						:format(L["ICONMENU_CLEU"])

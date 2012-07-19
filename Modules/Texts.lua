@@ -7,7 +7,7 @@
 --		Banjankri of Blackrock, Predeter of Proudmoore, Xenyr of Aszune
 
 -- Currently maintained by
--- Cybeloras of Mal'Ganis
+-- Cybeloras of Detheroc/Mal'Ganis
 -- --------------------
 
 
@@ -56,8 +56,7 @@ function Texts:OnEnable()
 	self:DOGTAGUNIT(icon, attributes.dogTagUnit)
 end
 function Texts:OnDisable()
-	for i = 1, #self do
-		local fontString = self[i]
+	for id, fontString in pairs(self.fontStrings) do
 		
 		DogTag:RemoveFontString(fontString)			
 		fontString:Hide()
@@ -123,6 +122,7 @@ function Texts:SetupForIcon(sourceIcon)
 		end
 	end
 	
+	-- TMW_QueueForRemoval gets set to nil for valid stings in OnKwargsUpdated, among other things
 	self:OnKwargsUpdated()
 	
 	for _, fontString in pairs(self.fontStrings) do
@@ -162,7 +162,9 @@ function Texts:OnKwargsUpdated()
 end
 
 function Texts:DOGTAGUNIT(icon, dogTagUnit)
-	self.kwargs.unit = dogTagUnit
-	self:OnKwargsUpdated()
+	if self.kwargs.unit ~= dogTagUnit then
+		self.kwargs.unit = dogTagUnit
+		self:OnKwargsUpdated()
+	end
 end
 Texts:SetDataListner("DOGTAGUNIT")

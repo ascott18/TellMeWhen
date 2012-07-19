@@ -7,7 +7,7 @@
 --		Banjankri of Blackrock, Predeter of Proudmoore, Xenyr of Aszune
 
 -- Currently maintained by
--- Cybeloras of Mal'Ganis
+-- Cybeloras of Detheroc/Mal'Ganis
 -- --------------------
 
 
@@ -23,16 +23,56 @@ Processor:AssertDependency("DURATION")
 Processor:AssertDependency("STACK")
 Processor:AssertDependency("SHOWN")
 
+Processor:RegisterIconEvent{	-- OnShow
+	name = "OnShow",
+	text = L["SOUND_EVENT_ONSHOW"],
+	desc = L["SOUND_EVENT_ONSHOW_DESC"],
+}
+Processor:RegisterIconEvent{	-- OnHide
+	name = "OnHide",
+	text = L["SOUND_EVENT_ONHIDE"],
+	desc = L["SOUND_EVENT_ONHIDE_DESC"],
+	settings = {
+		OnlyShown = "FORCEDISABLED",
+	},
+}
+Processor:RegisterIconEvent{	-- OnAlphaInc
+	name = "OnAlphaInc",
+	text = L["SOUND_EVENT_ONALPHAINC"],
+	desc = L["SOUND_EVENT_ONALPHAINC_DESC"],
+	settings = {
+		Operator = true,
+		Value = true,
+		CndtJustPassed = true,
+		PassingCndt = true,
+	},
+	valueName = L["ALPHA"],
+	valueSuffix = "%",
+	conditionChecker = function(icon, eventSettings)
+		return TMW.CompareFuncs[eventSettings.Operator](icon.attributes.alpha * 100, eventSettings.Value)
+	end,
+}
+Processor:RegisterIconEvent{	-- OnAlphaDec
+	name = "OnAlphaDec",
+	text = L["SOUND_EVENT_ONALPHADEC"],
+	desc = L["SOUND_EVENT_ONALPHADEC_DESC"],
+	settings = {
+		Operator = true,
+		Value = true,
+		CndtJustPassed = true,
+		PassingCndt = true,
+	},
+	valueName = L["ALPHA"],
+	valueSuffix = "%",
+	conditionChecker = function(icon, eventSettings)
+		return TMW.CompareFuncs[eventSettings.Operator](icon.attributes.alpha * 100, eventSettings.Value)
+	end,
+}
+	
 function Processor:CompileFunctionSegment(t)
 	-- GLOBALS: alpha
 	t[#t+1] = [[
 	alpha = alpha or 0
-	
-	if
-		(icon.ConditionObj and not icon.dontHandleConditionsExternally and icon.ConditionObj.Failed) -- conditions failed
-	then
-		alpha = alpha ~= 0 and icon.ConditionAlpha or 0 -- use the alpha setting for failed stacks/duration/conditions, but only if the icon isnt being hidden for another reason
-	end
 	
 	if alpha ~= attributes.alpha then
 		local oldalpha = attributes.alpha
@@ -71,7 +111,7 @@ function Processor:CompileFunctionSegment(t)
 	--]]
 end
 
-TMW:RegisterCallback("TMW_ICON_SETUP_PRE", function(event, icon)
+TMW:RegisterCallback("TMW_ICON_SETUP_POST", function(event, icon)
 	if not TMW.Locked then
 		icon:SetInfo("alpha", 0)
 	end

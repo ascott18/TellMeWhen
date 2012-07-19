@@ -7,7 +7,7 @@
 --		Banjankri of Blackrock, Predeter of Proudmoore, Xenyr of Aszune
 
 -- Currently maintained by
--- Cybeloras of Mal'Ganis
+-- Cybeloras of Detheroc/Mal'Ganis
 -- --------------------
 
 local TMW = TMW
@@ -46,20 +46,12 @@ LibStub("AceEvent-3.0"):Embed(Type)
 Type.name = L["ICONMENU_DR"]
 Type.desc = L["ICONMENU_DR_DESC"]
 Type.usePocketWatch = 1
-Type.SUGType = "dr"
 Type.unitType = "unitid"
-Type.WhenChecks = {
-	text = L["ICONMENU_SHOWWHEN"],
-	{ value = "alpha", 			text = "|cFF00FF00" .. L["ICONMENU_DRABSENT"], 		 },
-	{ value = "unalpha",		text = "|cFFFF0000" .. L["ICONMENU_DRPRESENT"], 	 },
-	{ value = "always", 		text = L["ICONMENU_ALWAYS"] },
-}
 
 -- AUTOMATICALLY GENERATED: UsesAttributes
 Type:UsesAttributes("spell")
 Type:UsesAttributes("unit, GUID")
 Type:UsesAttributes("stack, stackText")
-Type:UsesAttributes("color")
 Type:UsesAttributes("start, duration")
 Type:UsesAttributes("alpha")
 Type:UsesAttributes("texture")
@@ -70,9 +62,17 @@ Type:RegisterIconDefaults{
 	CheckRefresh			= true,
 }
 
-Type:RegisterConfigPanel_XMLTemplate("full", 1, "TellMeWhen_ChooseName")
+Type:RegisterConfigPanel_XMLTemplate("full", 1, "TellMeWhen_ChooseName", {
+	SUGType = "dr",
+})
 
 Type:RegisterConfigPanel_XMLTemplate("full", 1, "TellMeWhen_Unit")
+
+Type:RegisterConfigPanel_XMLTemplate("column", 2, "TellMeWhen_WhenChecks", {
+	text = L["ICONMENU_SHOWWHEN"],
+	[0x2] = { text = "|cFF00FF00" .. L["ICONMENU_DRABSENT"], 	},
+	[0x1] = { text = "|cFFFF0000" .. L["ICONMENU_DRPRESENT"], 	},
+})
 
 Type:RegisterConfigPanel_ConstructorFunc("column", 1, "TellMeWhen_DRSettings", function(self)
 	self.Header:SetText(Type.name)
@@ -142,9 +142,8 @@ local function DR_OnUpdate(icon, time)
 
 		if dr then
 			if dr.start + dr.duration <= time then
-				icon:SetInfo("alpha; color; texture; start, duration; stack, stackText; unit, GUID",
+				icon:SetInfo("alpha; texture; start, duration; stack, stackText; unit, GUID",
 					icon.Alpha,
-					icon:CrunchColor(),
 					dr.tex,
 					0, 0,
 					nil, nil,
@@ -158,9 +157,8 @@ local function DR_OnUpdate(icon, time)
 				local duration = dr.duration
 				local amt = dr.amt
 				
-				icon:SetInfo("alpha; color; texture; start, duration; stack, stackText; unit, GUID",
+				icon:SetInfo("alpha; texture; start, duration; stack, stackText; unit, GUID",
 					icon.UnAlpha,
-					icon:CrunchColor(duration),
 					dr.tex,
 					dr.start, duration,
 					amt, amt .. "%",
@@ -171,9 +169,8 @@ local function DR_OnUpdate(icon, time)
 				end
 			end
 		else
-			icon:SetInfo("alpha; color; texture; start, duration; stack, stackText; unit, GUID",
+			icon:SetInfo("alpha; texture; start, duration; stack, stackText; unit, GUID",
 				icon.Alpha,
-				icon:CrunchColor(),
 				icon.FirstTexture,
 				0, 0,
 				nil, nil,

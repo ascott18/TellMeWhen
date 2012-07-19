@@ -7,7 +7,7 @@
 --		Banjankri of Blackrock, Predeter of Proudmoore, Xenyr of Aszune
 
 -- Currently maintained by
--- Cybeloras of Mal'Ganis
+-- Cybeloras of Detheroc/Mal'Ganis
 -- --------------------
 
 
@@ -27,7 +27,7 @@ Hook:RegisterCompileFunctionSegmentHook("pre", function(Processor, t)
 	if
 		stack and ((icon.StackMinEnabled and icon.StackMin > stack) or (icon.StackMaxEnabled and stack > icon.StackMax))
 	then
-		alpha = alpha ~= 0 and icon.ConditionAlpha or 0 -- use the alpha setting for failed stacks/duration/conditions, but only if the icon isnt being hidden for another reason
+		alpha = alpha ~= 0 and icon.StackAlpha or 0 -- use the alpha setting for failed stacks/duration/conditions, but only if the icon isnt being hidden for another reason
 	end
 	--]]
 end)
@@ -36,6 +36,7 @@ Hook:RegisterIconDefaults{
 	StackMax				= 0,
 	StackMinEnabled			= false,
 	StackMaxEnabled			= false,
+	StackAlpha				= 0,
 }
 Hook:RegisterConfigPanel_XMLTemplate("column", 3, "TellMeWhen_StackRequirements")
 Hook:RegisterUpgrade(40080, {
@@ -52,5 +53,10 @@ Hook:RegisterUpgrade(23000, {
 		if ics.StackMax ~= TMW.Icon_Defaults.StackMax then
 			ics.StackMaxEnabled = true
 		end
+	end,
+})
+Hook:RegisterUpgrade(60010, {
+	icon = function(self, ics)
+		ics.StackAlpha = ics.ConditionAlpha
 	end,
 })

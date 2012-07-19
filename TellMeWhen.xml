@@ -55,9 +55,7 @@
 					if button == "RightButton" then
 						TMW.IE:Load(nil, self)
 					end
-					if TMW.IE then
-						TMW.IE:ScheduleIconSetup(self)
-					end
+					TMW.IE:ScheduleIconSetup(self)
 				end
 			</OnMouseUp>
 			<OnMouseDown>
@@ -90,18 +88,8 @@
 				end
 			</OnReceiveDrag>
 			<OnClick>
-				if TMW.Locked then
-					if button == "LeftButton" and self.EventHandlersSet.OnLeftClick then
-						self:QueueEvent("OnLeftClick")
-						self:ProcessQueuedEvents()
-					elseif button == "RightButton" and self.EventHandlersSet.OnRightClick then
-						self:QueueEvent("OnRightClick")
-						self:ProcessQueuedEvents()
-					end
-				else
-					if TMW.ID then
-						TMW.ID:SpellItemToIcon(self)
-					end
+				if not TMW.Locked and TMW.ID then
+					TMW.ID:SpellItemToIcon(self)
 				end
 			</OnClick>
 			<OnDragStop>

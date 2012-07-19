@@ -39,7 +39,10 @@ L["ERROR_ANCHORSELF"] = "%s was trying to anchor to itself, so TellMeWhen reset 
 
 L["LOCKED"] = "Locked"
 L["RESIZE"] = "Resize"
-L["RESIZE_TOOLTIP"] = "|cff7fffffClick-and-drag|r to resize"
+L["RESIZE_TOOLTIP"] = [[|cff7fffffClick-and-drag|r to resize]] -- keep this like this, used by the icon editor
+L["RESIZE_TOOLTIP_SCALEXY"] = [[|cff7fffffClick-and-drag|r to resize
+|cff7fffffHold Control|r to invert scale axis]]
+L["RESIZE_TOOLTIP_SCALEY_SIZEX"] = [[|cff7fffffClick-and-drag|r to resize]]
 
 L["CONDITIONORMETA_CHECKINGINVALID"] = "Warning! Group %d, Icon %d is checking an invalid icon (Group %d, Icon %d)"
 L["CONDITIONORMETA_CHECKINGINVALID_GROUP"] = "Warning! Group %d is checking an invalid icon (Group %d, Icon %d)"
@@ -88,6 +91,11 @@ L["CONDITIONALPHA_CONDITIONICON"] = "Failed Duration"
 L["CONDITIONALPHA_CONDITIONICON_DESC"] = "This will be used when the duration requirements are not met. This setting will be ignored if the icon is already hidden by the other two opacity settings."
 L["CONDITIONALPHA_METAICON"] = "Failed Conditions"
 L["CONDITIONALPHA_METAICON_DESC"] = "This opacity will be used when conditions fail."
+
+L["REQFAILED_ALPHA"] = "Opacity when failed"
+L["DURATIONALPHA_DESC"] = "Set the opacity level that the icon should display at when these duration requirements fail."
+L["STACKALPHA_DESC"] = "Set the opacity level that the icon should display at when these stack requirements fail."
+
 
 L["ICONMENU_TYPE"] = "Icon type"
 
@@ -1026,7 +1034,7 @@ L["fPROFILE"] = "Profile: %s"
 L["fTEXTLAYOUT"] = "Text Layout: %s"
 
 
-
+L["CONFIGPANEL_TIMER_HEADER"] = "Timer Settings"
 
 
 

@@ -7,7 +7,7 @@
 --		Banjankri of Blackrock, Predeter of Proudmoore, Xenyr of Aszune
 
 -- Currently maintained by
--- Cybeloras of Mal'Ganis
+-- Cybeloras of Detheroc/Mal'Ganis
 -- --------------------
 
 local TMW = TMW
@@ -29,35 +29,32 @@ local Type = TMW.Classes.IconType:New("multistate")
 LibStub("AceEvent-3.0"):Embed(Type)
 Type.name = L["ICONMENU_MULTISTATECD"]
 Type.desc = L["ICONMENU_MULTISTATECD_DESC"]
-Type.SUGType = "multistate"
-Type.chooseNameTitle = L["ICONMENU_CHOOSENAME_MULTISTATE"]
-Type.chooseNameText = L["CHOOSENAME_DIALOG_MSCD"]
-Type.WhenChecks = {
-	text = L["ICONMENU_SHOWWHEN"],
-	{ value = "alpha", 			text = "|cFF00FF00" .. L["ICONMENU_USABLE"], 			 },
-	{ value = "unalpha",  		text = "|cFFFF0000" .. L["ICONMENU_UNUSABLE"], 			 },
-	{ value = "always", 		text = L["ICONMENU_ALWAYS"] },
-}
 
 -- AUTOMATICALLY GENERATED: UsesAttributes
 Type:UsesAttributes("spell")
 Type:UsesAttributes("noMana")
 Type:UsesAttributes("inRange")
-Type:UsesAttributes("color")
 Type:UsesAttributes("start, duration")
 Type:UsesAttributes("alpha")
 Type:UsesAttributes("texture")
 -- END AUTOMATICALLY GENERATED: UsesAttributes
-
-Type.EventDisabled_OnUnit = true
-Type.EventDisabled_OnStack = true
 
 Type:RegisterIconDefaults{
 	RangeCheck				= false,
 	ManaCheck				= false,
 }
 
-Type:RegisterConfigPanel_XMLTemplate("full", 1, "TellMeWhen_ChooseName")
+Type:RegisterConfigPanel_XMLTemplate("full", 1, "TellMeWhen_ChooseName", {
+	title = L["ICONMENU_CHOOSENAME_MULTISTATE"],
+	text = L["CHOOSENAME_DIALOG_MSCD"],
+	SUGType = "multistate",
+})
+
+Type:RegisterConfigPanel_XMLTemplate("column", 2, "TellMeWhen_WhenChecks", {
+	text = L["ICONMENU_SHOWWHEN"],
+	[0x2] = { text = "|cFF00FF00" .. L["ICONMENU_USABLE"], 			},
+	[0x1] = { text = "|cFFFF0000" .. L["ICONMENU_UNUSABLE"], 		},
+})
 
 Type:RegisterConfigPanel_ConstructorFunc("column", 1, "TellMeWhen_MultistateSettings", function(self)
 	self.Header:SetText(Type.name)
@@ -117,9 +114,8 @@ local function MultiStateCD_OnUpdate(icon, time)
 		spellID = actionType == "spell" and spellID or icon.NameFirst
 
 		if (duration == 0 or OnGCD(duration)) and inrange == 1 and not nomana then
-			icon:SetInfo("alpha; color; texture; start, duration; spell; inRange; noMana",
+			icon:SetInfo("alpha; texture; start, duration; spell; inRange; noMana",
 				icon.Alpha,
-				icon:CrunchColor(),
 				GetActionTexture(Slot) or "Interface\\Icons\\INV_Misc_QuestionMark",
 				start, duration,
 				spellID,
@@ -127,9 +123,8 @@ local function MultiStateCD_OnUpdate(icon, time)
 				nomana
 			)
 		else
-			icon:SetInfo("alpha; color; texture; start, duration; spell; inRange; noMana",
+			icon:SetInfo("alpha; texture; start, duration; spell; inRange; noMana",
 				icon.UnAlpha,
-				icon:CrunchColor(duration, inrange, nomana),
 				GetActionTexture(Slot) or "Interface\\Icons\\INV_Misc_QuestionMark",
 				start, duration,
 				spellID,

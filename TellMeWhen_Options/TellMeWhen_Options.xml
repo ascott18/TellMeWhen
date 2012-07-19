@@ -238,7 +238,7 @@
 	</Frame>
  
 	<Frame name="TellMeWhen_DurationRequirements" inherits="TellMeWhen_OptionsModuleContainer" virtual="true">
-		<Size x="180" y="50"/>
+		<Size x="180" y="80"/>
 		<Frames>
 			<EditBox name="$parentDurationMin" parentKey="DurationMin" inherits="TellMeWhen_TimeEditBoxTemplate">
 				<Size x="50" y="15"/>
@@ -323,6 +323,33 @@
 					</OnLoad>
 				</Scripts>
 			</CheckButton>
+			
+			<Slider name="$parentDurationAlpha" parentKey="DurationAlpha" inherits="TellMeWhen_SliderTemplate" valuestep="1">
+				<Size x="134" y="17"/>
+				<Anchors>
+					<Anchor point="LEFT" x="10" />
+					<Anchor point="RIGHT" x="-10" />
+					<Anchor point="TOP" relativeTo="$parentDurationMinEnabled" relativePoint="BOTTOM" y="-9" />
+				</Anchors>
+				<Scripts>
+					<OnLoad>
+						self.text:SetWidth(self:GetWidth())
+						
+						TMW.IE:CreateSettingFrameFromData(self, "SettingSlider_Alpha", {
+							title = TMW.L["REQFAILED_ALPHA"],
+							tooltip = TMW.L["DURATIONALPHA_DESC"],
+							setting = "DurationAlpha",
+							setOrangeAtValue = 1,
+							disabled = function(self)
+								local ics = TMW.CI.ics
+								if ics then
+									return not ics.DurationMinEnabled and not ics.DurationMaxEnabled
+								end
+							end,
+						})
+					</OnLoad>
+				</Scripts>
+			</Slider>
 		</Frames>
 		<Scripts>
 			<OnLoad>
@@ -332,7 +359,7 @@
 	</Frame>
  
 	<Frame name="TellMeWhen_StackRequirements" inherits="TellMeWhen_OptionsModuleContainer" virtual="true">
-		<Size x="180" y="50"/>
+		<Size x="180" y="80"/>
 		<Frames>
 			<EditBox name="$parentStackMin" parentKey="StackMin" inherits="TellMeWhen_TimeEditBoxTemplate">
 				<Size x="50" y="15"/>
@@ -415,6 +442,33 @@
 					</OnLoad>
 				</Scripts>
 			</CheckButton>
+			
+			<Slider name="$parentStackAlpha" parentKey="StackAlpha" inherits="TellMeWhen_SliderTemplate" valuestep="1">
+				<Size x="134" y="17"/>
+				<Anchors>
+					<Anchor point="LEFT" x="10" />
+					<Anchor point="RIGHT" x="-10" />
+					<Anchor point="TOP" relativeTo="$parentStackMinEnabled" relativePoint="BOTTOM" y="-9" />
+				</Anchors>
+				<Scripts>
+					<OnLoad>
+						self.text:SetWidth(self:GetWidth())
+						
+						TMW.IE:CreateSettingFrameFromData(self, "SettingSlider_Alpha", {
+							title = TMW.L["REQFAILED_ALPHA"],
+							tooltip = TMW.L["STACKALPHA_DESC"],
+							setting = "StackAlpha",
+							setOrangeAtValue = 1,
+							disabled = function(self)
+								local ics = TMW.CI.ics
+								if ics then
+									return not ics.StackMinEnabled and not ics.StackMaxEnabled
+								end
+							end,
+						})
+					</OnLoad>
+				</Scripts>
+			</Slider>
 		</Frames>
 		<Scripts>
 			<OnLoad>
@@ -585,33 +639,56 @@
 				</Frames>
 				<Scripts>
 					<OnLoad>
+						local supplementalData
+						
 						function self:SetLabels(title, text)
 							self.label = title
 							self.__title = title
 							self.__text = text
 							self:GetParent().Header:SetText(title)
+							
+							self:GetScript("OnTextChanged")(self)
 						end
+						
 						self:RegisterEvent("MODIFIER_STATE_CHANGED")
 						self.BackgroundText:SetWidth(self:GetWidth())
 						self:SetTextInsets(1, 2, 1.5, 1.5)
-						--TellMeWhen_IconEditor.Main.Name = self	--TODO: TEMP DEBUG HACK REMOVE THIS ASAP BAD CODE RIGHT HERE AHHHH SAVEEE MEEEEEEEE IM TRAPPED INSIDE THE CODE!!!!!!!!!!!!!!!!
 						
+						-- Turn it into a setting frame (automatically handles loading settings)
 						TMW.IE:CreateSettingFrameFromData(self, {
 							setting = "Name",
+							doCleanString = true,
 						})
 						
-						TMW:RegisterCallback("TMW_CONFIG_ICON_LOADED", function(event, icon)
-							self:SetLabels(icon.typeData.chooseNameTitle, icon.typeData.chooseNameText)
-							self:GetScript("OnTextChanged")(self)
+						TMW:RegisterCallback("TMW_CONFIG_PANEL_SETUP", function(event, frame, panelInfo)
+							if frame == self:GetParent() then
+								supplementalData = panelInfo.supplementalData
+								
+								local title, text
+								
+								if supplementalData then
+									title = supplementalData.title or TMW.L["ICONMENU_CHOOSENAME"]
+									text = supplementalData.text or TMW.L["CHOOSENAME_DIALOG"]
+									
+									TMW.SUG:EnableEditBox(self, supplementalData.SUGType or "spell")
+								else
+									title = TMW.L["ICONMENU_CHOOSENAME"]
+									text  = TMW.L["CHOOSENAME_DIALOG"]
+									
+									TMW.SUG:EnableEditBox(self, "spell")
+								end
+
+								self:SetLabels(title, text)
+							end
 						end)
 						
 						TMW.Classes.ChatEdit_InsertLink_Hook:New(self, function(self, text, linkType, linkID)
-							if TMW.CI.t == "item" and linkType ~= "item" then
+							if TMW.CI.ics.Type == "item" and linkType ~= "item" then
 								-- notify failure if the icon is an item cooldown icon and the link is not an item link
 								return false
-							elseif TMW.CI.t ~= "item" and linkType ~= "spell" and linkType ~= "enchant" then
+							elseif TMW.CI.ics.Type ~= "item" and linkType ~= "spell" and linkType ~= "enchant" then
 								-- notify failure if the icon is not an item cooldown and the link isn't a spell or enchant link
-								-- DONT just check (TMW.CI.t ~= "item" and linkType == "item") because there are link types we want to exclude, like achievements.
+								-- DONT just check (TMW.CI.ics.Type ~= "item" and linkType == "item") because there are link types we want to exclude, like achievements.
 								return false
 							end
 
@@ -640,21 +717,30 @@
 							-- notify success
 							return true
 						end)
+						
+						
+						TMW:RegisterCallback("TMW_ICON_SETUP_POST", function(event, icon)
+							-- Warnings for missing durations and first-time instructions for duration syntax
+							if icon.typeData.DurationSyntax and icon:IsBeingEdited() == 1 then
+								TMW.HELP:Show("ICON_DURS_FIRSTSEE", nil, TMW.IE.Main.Type, 20, 0, TMW.L["HELP_FIRSTUCD"])
+
+								local s = ""
+								local array = TMW:GetSpellNames(nil, self:GetText())
+								for k, v in pairs(TMW:GetSpellDurations(nil, self:GetText())) do
+									if v == 0 then
+										s = s .. (s ~= "" and "; " or "") .. array[k]
+									end
+								end
+								if s ~= "" then
+									TMW.HELP:Show("ICON_DURS_MISSING", icon, self, 0, 0, TMW.L["HELP_MISSINGDURS"], s)
+								else
+									TMW.HELP:Hide("ICON_DURS_MISSING")
+								end
+							end
+						end)
 
 					</OnLoad>
-					<OnEditFocusLost>
-						EditBox_ClearHighlight(self)
-						TMW:CleanString(self)
-
-						if TMW.CI.ics then
-							TMW.CI.ics.Name = TMW:CleanString(self:GetText())
-							TMW.IE:ScheduleIconSetup()
-						end
-
-						self:GetScript("OnTextChanged")(self)
-					</OnEditFocusLost>
 					<OnEditFocusGained>
-						TMW.SUG:EnableEditBox(self, TMW.CI.ic.typeData.SUGType)
 						self.BackgroundText:SetText(nil)
 					</OnEditFocusGained>
 					<OnEvent>
@@ -689,7 +775,7 @@
 						local text = self:GetText()
 						if text == "" then
 							local label = self.label
-							local append = TMW.Types[TMW.CI.t].appendNameLabel
+							local append = TMW.Types[TMW.CI.ics.Type].appendNameLabel
 							if append then
 								label = label .. " " .. append
 							end
@@ -704,29 +790,7 @@
 			</EditBox>
 		</Frames>
 		<Scripts>
-			<OnLoad>
-				local Name = self.Name
-				
-				TMW:RegisterCallback("TMW_ICON_SETUP_POST", function(event, icon)
-					-- Warnings for missing durations and first-time instructions for duration syntax
-					if icon.typeData.DurationSyntax and icon:IsBeingEdited() == 1 then
-						TMW.HELP:Show("ICON_DURS_FIRSTSEE", nil, TMW.IE.Main.Type, 20, 0, TMW.L["HELP_FIRSTUCD"])
-
-						local s = ""
-						local array = TMW:GetSpellNames(nil, Name:GetText())
-						for k, v in pairs(TMW:GetSpellDurations(nil, Name:GetText())) do
-							if v == 0 then
-								s = s .. (s ~= "" and "; " or "") .. array[k]
-							end
-						end
-						if s ~= "" then
-							TMW.HELP:Show("ICON_DURS_MISSING", icon, Name, 0, 0, TMW.L["HELP_MISSINGDURS"], s)
-						else
-							TMW.HELP:Hide("ICON_DURS_MISSING")
-						end
-					end
-				end)				
-				
+			<OnLoad>				
 				function self:AdjustHeight()
 					self:SetHeight(18 + self.Name:GetHeight())
 				end
@@ -844,17 +908,23 @@
 						self.BackgroundText:SetWidth(self:GetWidth())
 						self:SetTextInsets(2, 2, 2, 2)
 
+						self.normalTooltip = TMW.L["ICONMENU_UNIT_DESC"]
+						
 						local text = function()
 							if IsModifierKeyDown() then
 								return TMW.IE:GetRealUnits(self)
 							else
-								return TMW.L["ICONMENU_UNIT_DESC"]
+								return self.normalTooltip
 							end
 						end
-
-						function self:SetLabels(title)
+						
+						function self:SetLabels(title, text)
 							self.label = title
 							self.__title = title
+							self.normalTooltip = text
+							self:GetParent().Header:SetText(title)
+							
+							self:GetScript("OnTextChanged")(self)
 						end
 
 						TMW.IE:CreateSettingFrameFromData(self, {
@@ -866,9 +936,27 @@
 							end,
 						})
 						
-						TMW:RegisterCallback("TMW_CONFIG_ICON_LOADED", function(event, icon)
-							self:SetLabels(icon.typeData.unitTitle)
-							self:GetScript("OnTextChanged")(self)
+						TMW:RegisterCallback("TMW_CONFIG_PANEL_SETUP", function(event, frame, panelInfo)
+							if frame == self:GetParent() then
+								local supplementalData = panelInfo.supplementalData
+								self.supplementalData = supplementalData
+								
+								local title, text
+								
+								if supplementalData then
+									title = supplementalData.title or TMW.L["ICONMENU_UNITSTOWATCH"]
+									text = supplementalData.text or TMW.L["ICONMENU_UNIT_DESC"]
+									
+								--	TMW.SUG:EnableEditBox(self, supplementalData.SUGType or "unit") --TODO: NYI (not urgent/important, though)
+								else
+									title = TMW.L["ICONMENU_UNITSTOWATCH"]
+									text  = TMW.L["ICONMENU_UNIT_DESC"]
+									
+									--TMW.SUG:EnableEditBox(self, "unit") --TODO: NYI (not urgent/important, though)
+								end
+
+								self:SetLabels(title, text)
+							end
 						end)
 						
 					</OnLoad>
@@ -887,15 +975,17 @@
 					<OnTextChanged>
 						local text = self:GetText()
 
+						local allowNoUnit = self.supplementalData and self.supplementalData.allowNoUnit
+						
 						if text == "" then
-							if TMW.Types[TMW.CI.t].AllowNoUnit then
+							if allowNoUnit then
 								self.BackgroundText:SetText(self.label)
 								TMW.HELP:Hide("ICON_UNIT_MISSING")
 							else
 								self.BackgroundText:SetText("|cFFFF5050" .. self.label)
 								TMW.HELP:Show("ICON_UNIT_MISSING", TMW.CI.ic, self, 0, 0, TMW.L["HELP_NOUNITS"])
 							end
-						elseif text == "player" and (20 > TMW.db.global.HelpSettings.HasChangedUnit or TMW.Types[TMW.CI.t].AllowNoUnit) then
+						elseif text == "player" and (20 > TMW.db.global.HelpSettings.HasChangedUnit or allowNoUnit) then
 							self.BackgroundText:SetText(self.label)
 						else
 							self.BackgroundText:SetText(nil)
@@ -1078,7 +1168,7 @@
 				self.Header:SetText("CLEU OPTIONS")
 				
 				function self:AdjustHeight()
-					self:SetHeight(163 + self.SourceUnit:GetHeight() + self.DestUnit:GetHeight())
+					self:SetHeight(30 + self.SourceUnit:GetHeight() + self.DestUnit:GetHeight())
 				end
 			</OnLoad>
 		</Scripts>
@@ -1113,7 +1203,179 @@
 		</Scripts>
 	</Frame>
 	
-	
+	<!-- <Frame name="TellMeWhen_WhenCheckSet" virtual="true">
+		<Frames>
+			<CheckButton name="$parentCheck" parentKey="Check" inherits="TellMeWhen_CheckTemplate">
+				<Anchors>
+					<Anchor point="TOPLEFT" x="5" y="-6"/>
+				</Anchors>
+				<Scripts>
+					<OnLoad>
+						self.text:SetWidth(self:GetParent():GetWidth()-7)
+				
+						TMW.IE:CreateSettingFrameFromData(self, "SettingTotemButton", {
+							setting = "ShowWhen",
+							bit = 0x2,
+						})
+					</OnLoad>
+				</Scripts>
+			</CheckButton>
+			<Slider name="$parentAlpha" parentKey="Alpha" inherits="TellMeWhen_SliderTemplate" valuestep="1">
+				<Size x="175" y="17"/>
+				<Anchors>
+					<Anchor point="BOTTOMLEFT" x="18" y="47"/>
+				</Anchors>
+				<Scripts>
+					<OnLoad>
+						self.text:SetWidth(self:GetWidth())
+					</OnLoad>
+				</Scripts>
+			</Slider>
+		</Frames>
+		
+		<Scripts>
+			<OnLoad>
+				local bit = bit.lshift(1, self:GetID()-1)
+				self.bit = bit
+				
+				TMW.IE:CreateSettingFrameFromData(self.Check, "SettingTotemButton", {
+					setting = "ShowWhen",
+					bit = bit,
+				})	
+				TMW.IE:CreateSettingFrameFromData(self.Alpha, "SettingSlider_Alpha", {
+					setting = "Alpha",
+					setOrangeAtValue = 0,
+					disabled = function(self)
+						local ics = TMW.CI.ics
+						if ics then
+							return bit.band(ics.ShowWhen, bit) == 0
+						end
+					end,
+				})
+			</OnLoad>
+		</Scripts>
+	</Frame> -->
+	<Frame name="TellMeWhen_WhenChecks" inherits="TellMeWhen_OptionsModuleContainer" virtual="true">
+		<Size x="180" y="90"/>
+		<Layers>
+			<Layer level="ARTWORK">
+				<FontString name="$parentFS1" inherits="GameFontNormal" parentKey="text" justifyH="LEFT">
+					<Anchors>
+						<Anchor point="TOPLEFT" x="-10" y="10"/>
+					</Anchors>
+				</FontString>
+			</Layer>
+		</Layers>
+		<Frames>
+			<CheckButton name="$parent1" inherits="TellMeWhen_CheckTemplate" id="1">
+				<Anchors>
+					<Anchor point="TOPLEFT" x="5" y="-15"/>
+				</Anchors>
+				<Scripts>
+					<OnLoad>
+						self.text.SetText = function() end --TODO: do this better
+				
+						TMW.IE:CreateSettingFrameFromData(self, "SettingTotemButton", {
+							setting = "ShowWhen",
+							bit = 0x2,
+						})
+					</OnLoad>
+				</Scripts>
+			</CheckButton>
+			<CheckButton name="$parent2" inherits="TellMeWhen_CheckTemplate" id="2">
+				<Anchors>
+					<Anchor point="TOP" relativeTo="$parent1" relativePoint="BOTTOM" y="-11"/>
+				</Anchors>
+				<Scripts>
+					<OnLoad>
+						self.text.SetText = function() end --TODO: do this better
+				
+						TMW.IE:CreateSettingFrameFromData(self, "SettingTotemButton", {
+							setting = "ShowWhen",
+							bit = 0x1,
+						})
+					</OnLoad>
+				</Scripts>
+			</CheckButton>
+			
+			
+			<Slider name="$parentAlpha" parentKey="Alpha" inherits="TellMeWhen_SliderTemplate" valuestep="1">
+				<Size x="134" y="17"/>
+				<Anchors>
+					<Anchor point="LEFT" relativeTo="$parent1" relativePoint="RIGHT" x="5" />
+				</Anchors>
+				<Scripts>
+					<OnLoad>
+						self.text:SetWidth(self:GetWidth())
+						self.bit = 0x2 --TODO: THIS IS TEMPORARY. FIGURE OUT A BETTER WAY TO HANDLE WHENCHECKS
+						
+						TMW.IE:CreateSettingFrameFromData(self, "SettingSlider_Alpha", {
+							setting = "Alpha",
+							setOrangeAtValue = 0,
+							disabled = function(self)
+								local ics = TMW.CI.ics
+								if ics then
+									return bit.band(ics.ShowWhen, 0x2) == 0
+								end
+							end,
+						})
+					</OnLoad>
+				</Scripts>
+			</Slider>
+			<Slider name="$parentUnAlpha" parentKey="UnAlpha" inherits="TellMeWhen_SliderTemplate" valuestep="1">
+				<Size x="134" y="17"/>
+				<Anchors>
+					<Anchor point="LEFT" relativeTo="$parent2" relativePoint="RIGHT" x="5" />
+				</Anchors>
+				<Scripts>
+					<OnLoad>
+						self.text:SetWidth(self:GetWidth())
+						self.bit = 0x1 --TODO: THIS IS TEMPORARY. FIGURE OUT A BETTER WAY TO HANDLE WHENCHECKS
+						
+						TMW.IE:CreateSettingFrameFromData(self, "SettingSlider_Alpha", {
+							setting = "UnAlpha",
+							setOrangeAtValue = 0,
+							disabled = function(self)
+								local ics = TMW.CI.ics
+								if ics then
+									return bit.band(ics.ShowWhen, 0x1) == 0
+								end
+							end,
+						})
+					</OnLoad>
+				</Scripts>
+			</Slider>
+					
+		</Frames>
+		<Scripts>
+			<OnLoad>
+				TMW:RegisterCallback("TMW_CONFIG_PANEL_SETUP", function(event, frame, panelInfo)
+					if frame == self then
+						local supplementalData = panelInfo.supplementalData
+						
+						assert(supplementalData, "Supplemental data (arg5 to RegisterConfigPanel_XMLTemplate) must be provided for TellMeWhen_WhenChecks!")
+						
+						-- Set the title for the frame
+						self.Header:SetText(supplementalData.text)
+						
+						-- Setup the titles and tooltips of all the children
+						for _, child in TMW:Vararg(self:GetChildren()) do
+							-- Numeric keys in supplementalData point to the tables that have the data for that specified bit toggle
+							local data = supplementalData[child.bit]
+							if data then
+								if child.text then
+									child.text:SetText(data.text)
+								end
+								child:SetTooltip(data.text, data.tooltipText)
+							end
+						end
+					end
+				end)
+			</OnLoad>
+		</Scripts>
+	</Frame>
+					
+					
 	<Frame name="TellMeWhen_MetaIconOptions" inherits="TellMeWhen_OptionsModuleContainer" virtual="true">
 		<Size x="560" y="20"/>
 		<Frames>
@@ -1264,38 +1526,6 @@
 		</Layers>
 	</Frame>
 
-
-	<CheckButton name="TellMeWhen_RadioCheckTemplate" virtual="true" inherits="TellMeWhen_CheckTemplate">
-		<Scripts>
-			<OnLoad>
-				self.text:SetWidth(self:GetParent():GetWidth()-7)
-			</OnLoad>
-			<OnClick>
-				for k, frame in pairs(self:GetParent()) do
-					if strfind(k, "Radio") then
-						frame:SetChecked(false)
-					end
-				end
-				self:SetChecked(true)
-				TMW.CI.ics[self.setting] = self.value
-				if strfind(self.setting, "ShowWhen") then
-					if self:GetID() == 1 then
-						TMW.IE.Main.Alpha:Enable()
-						TMW.IE.Main.UnAlpha:Disable()
-					elseif self:GetID() == 2 then
-						TMW.IE.Main.Alpha:Disable()
-						TMW.IE.Main.UnAlpha:Enable()
-					elseif self:GetID() == 3 then
-						TMW.IE.Main.Alpha:Enable()
-						TMW.IE.Main.UnAlpha:Enable()
-					end
-				end
-				
-				TMW.IE:ShowHide()
-				TMW.IE:ScheduleIconSetup()
-			</OnClick>
-		</Scripts>
-	</CheckButton>
 	<Texture name="TellMeWhen_InputBoxTemplateBorder" virtual="true">
 		<Size x="1" y="1"/>
 		<Color r="0.4" g="0.4" b="0.4" a="1"/>
@@ -1626,46 +1856,6 @@
 		</ThumbTexture>
 	</Slider>
 
-	<Slider name="TellMeWhen_AlphaSliderTemplate" inherits="TellMeWhen_SliderTemplate" minvalue="0" maxvalue="100" valuestep="1" virtual="true">
-		<Size x="175" y="17"/>
-		<Scripts>
-			<OnMinMaxChanged>
-				local minValue, maxValue = self:GetMinMaxValues()
-				self.Low:SetText(minValue .. "%")
-				self.High:SetText(maxValue .. "%")
-				local color = 34/255
-				self.Low:SetTextColor(color, color, color, 1)
-				self.High:SetTextColor(color, color, color, 1)
-			</OnMinMaxChanged>
-			<OnValueChanged>
-				self.Mid:SetText(value .. "%")
-				if TMW.CI.ics and not self.fakeNextSetValue then
-					TMW.CI.ics[self.setting] = value / 100
-					TMW.IE:ScheduleIconSetup()
-					if self:IsEnabled() and ((value == 0 and self.setting ~= "ConditionAlpha") or (value == 100 and self.setting == "ConditionAlpha")) then
-						self.Mid:SetText("|cffff7400" .. value .. "%")
-					end
-				end
-			</OnValueChanged>
-			<OnLoad>
-				self:EnableMouseWheel(true)
-			</OnLoad>
-			<OnEnable>
-				self:SetAlpha(1)
-				self:SetValue(TMW.CI.ics[self.setting]*100)
-			</OnEnable>
-			<OnDisable>
-				self:SetAlpha(0.4)
-				self.fakeNextSetValue = 1
-				self:SetValue(0)
-				self.Mid:SetText("0%")
-				self.fakeNextSetValue = nil
-			</OnDisable>
-			<OnMouseWheel>
-				self:SetValue(self:GetValue()+delta)
-			</OnMouseWheel>
-		</Scripts>
-	</Slider>
 	<Slider name="TellMeWhen_AnimationSliderTemplate" inherits="TellMeWhen_SliderTemplate" virtual="true">
 		<Size y="17"/>
 		<Anchors>
@@ -3071,7 +3261,7 @@
 						TMW:TT(self, "TEXTLAYOUTS_SETTEXT", "TEXTLAYOUTS_SETTEXT_DESC")
 						self.label = TMW.L["TEXTLAYOUTS_SETTEXT"]
 						self.BackgroundText:SetWidth(self:GetWidth())
-					--	TMW.SUG:EnableEditBox(self, "textsubs")
+					--	TMW.SUG:EnableEditBox(self, "textsubs") --TODO: UPDATE SUG MODULE TO DOGTAG
 					
 						TMW:RegisterCallback("TMW_CONFIG_SAVE_SETTINGS", self.ClearFocus, self)
 						
@@ -3652,10 +3842,10 @@
 								end)
 
 								local title = function()
-									return TMW.Types[TMW.CI.t].name
+									return TMW.Types[TMW.CI.ics.Type].name
 								end
 								local text = function()
-									return TMW.Types[TMW.CI.t].desc
+									return TMW.Types[TMW.CI.ics.Type].desc
 								end
 
 								TMW:TT(self, title, text, 1, 1)
@@ -3695,81 +3885,28 @@
 							</OnLoad>
 						</Scripts>
 					</CheckButton>
-										
-					<Frame name="$parentWhenChecks" parentKey="WhenChecks" inherits="TellMeWhen_OptionsModuleContainer">
-						<Size x="180" y="90"/>
-						<Layers>
-							<Layer level="ARTWORK">
-								<FontString name="$parentFS1" inherits="GameFontNormal" parentKey="text" justifyH="LEFT">
-									<Anchors>
-										<Anchor point="TOPLEFT" x="-10" y="10"/>
-									</Anchors>
-								</FontString>
-							</Layer>
-						</Layers>
-						<Frames>
-							<CheckButton name="$parent1" inherits="TellMeWhen_RadioCheckTemplate" parentKey="Radio1" id="1">
-								<Anchors>
-									<Anchor point="TOPLEFT" x="5" y="-6"/>
-								</Anchors>
-							</CheckButton>
-							<CheckButton name="$parent2" inherits="TellMeWhen_RadioCheckTemplate" parentKey="Radio2" id="2">
-								<Anchors>
-									<Anchor point="TOP" relativeTo="$parent1" relativePoint="BOTTOM" y="4"/>
-								</Anchors>
-							</CheckButton>
-							<CheckButton name="$parent3" inherits="TellMeWhen_RadioCheckTemplate" parentKey="Radio3" id="3">
-								<Anchors>
-									<Anchor point="TOP" relativeTo="$parent2" relativePoint="BOTTOM" y="4"/>
-								</Anchors>
-							</CheckButton>
-						</Frames>
-					</Frame>
 					
-					<Slider name="$parentAlpha" parentKey="Alpha" inherits="TellMeWhen_AlphaSliderTemplate" valuestep="1">
+					<Slider name="$parentConditionAlpha" parentKey="ConditionAlpha" inherits="TellMeWhen_SliderTemplate" valuestep="1">
+						<Size x="175" y="17"/>
 						<Anchors>
 							<Anchor point="BOTTOMLEFT" x="18" y="47"/>
 						</Anchors>
 						<Scripts>
 							<OnLoad>
 								self.text:SetWidth(self:GetWidth())
-								self.setting = "Alpha"
-							</OnLoad>
-							<OnShow>
-								TMW.IE.Main.TransparencyHeader:Show()
-							</OnShow>
-							<OnHide>
-								TMW.IE.Main.TransparencyHeader:Hide()
-							</OnHide>
-						</Scripts>
-					</Slider>
-					<Slider name="$parentUnAlpha" parentKey="UnAlpha" inherits="TellMeWhen_AlphaSliderTemplate" valuestep="1">
-						<Anchors>
-							<Anchor point="LEFT" relativeTo="$parentAlpha" relativePoint="RIGHT" x="17"/>
-						</Anchors>
-						<Scripts>
-							<OnLoad>
-								self.text:SetWidth(self:GetWidth())
-								self.setting = "UnAlpha"
-							</OnLoad>
-						</Scripts>
-					</Slider>
-					<Slider name="$parentConditionAlpha" parentKey="ConditionAlpha" inherits="TellMeWhen_AlphaSliderTemplate" valuestep="1">
-						<Anchors>
-							<Anchor point="LEFT" relativeTo="$parentUnAlpha" relativePoint="RIGHT" x="17"/>
-						</Anchors>
-						<Scripts>
-							<OnLoad>
-								self.text:SetWidth(self:GetWidth())
-								self.setting = "ConditionAlpha"
-								self.text:SetText(TMW.L["CONDITIONALPHA"])
-								TMW:TT(self, "CONDITIONALPHA", "CONDITIONALPHA_DESC")
+						
+								TMW.IE:CreateSettingFrameFromData(self, "SettingSlider_Alpha", {
+									title = TMW.L["CONDITIONALPHA"],
+									tooltip = TMW.L["CONDITIONALPHA_DESC"],
+									setting = "ConditionAlpha",
+									setOrangeAtValue = 1,
+								})
 							</OnLoad>
 						</Scripts>
 					</Slider>
 
 				</Frames>
-				<Layers>
+				<!-- <Layers>
 					<Layer level="OVERLAY">
 						<FontString name="$parentTransparencyHeader" parentKey="TransparencyHeader" inherits="GameFontNormal" justifyH="RIGHT">
 							<Anchors>
@@ -3777,11 +3914,11 @@
 							</Anchors>
 						</FontString>
 					</Layer>
-				</Layers>
+				</Layers> -->
 				<Scripts>
 					<OnLoad>
 						self:RegisterForDrag("LeftButton")
-						self.TransparencyHeader:SetText(TMW.L["ICONMENU_ALPHA"] .. ":")
+					--	self.TransparencyHeader:SetText(TMW.L["ICONMENU_ALPHA"] .. ":")
 					</OnLoad>
 					<OnDragStart> TMW.IE:StartMoving() </OnDragStart>
 					<OnDragStop> TMW.IE:StopMovingOrSizing() </OnDragStop>
@@ -4282,10 +4419,13 @@
 									<OnLoad>
 										TMW:TT(self, "ANN_EDITBOX", "ANN_EDITBOX_DESC")
 										self.__noWrapTooltipText = true
+										
 										self.label = "|cFFFF5050" .. TMW.L["ANN_EDITBOX_WARN"]
 										self.BackgroundText:SetWidth(self:GetWidth())
+										
 										self.Header:SetText(TMW.L["ANN_EDITBOX"])
-										TMW.SUG:EnableEditBox(self, "textsubsANN")
+										
+										--TMW.SUG:EnableEditBox(self, "textsubsANN") --TODO: UPDATE SUG MODULE TO DOGTAG 
 										
 										TMW:RegisterCallback("TMW_CONFIG_SAVE_SETTINGS", self.ClearFocus, self)
 										
@@ -4373,7 +4513,7 @@
 										TMW:TT(self, "ANN_WHISPERTARGET", "ANN_WHISPERTARGET_DESC")
 										self.label = TMW.L["ANN_WHISPERTARGET"]
 										self.BackgroundText:SetWidth(self:GetWidth())
-										TMW.SUG:EnableEditBox(self, "textsubsANNWhisper")
+										--TMW.SUG:EnableEditBox(self, "textsubsANNWhisper") --TODO: UPDATE SUG MODULE TO DOGTAG
 									</OnLoad>
 									<OnEditFocusLost>
 										EditBox_ClearHighlight(self)
@@ -5281,14 +5421,14 @@
 				</Anchors>
 				<Layers>
 					<Layer level="OVERLAY">
-						<Texture name="$parentTexture" file="Interface\AddOns\TellMeWhen\Textures\Resize">
+						<Texture name="$parentTexture" parentKey="texture" file="Interface\AddOns\TellMeWhen\Textures\Resize">
 							<Size x="10" y="10"/>
 						</Texture>
 					</Layer>
 				</Layers>
 				<Scripts>
 					<OnLoad>
-						_G[self:GetName() .. "Texture"]:SetVertexColor(0.6, 0.6, 0.6)
+						self.texture:SetVertexColor(0.6, 0.6, 0.6)
 						TMW:TT(self, "RESIZE", "RESIZE_TOOLTIP")
 						self:SetFrameLevel(self:GetParent():GetFrameLevel() + 2)
 					</OnLoad>
@@ -5320,10 +5460,10 @@
 						TMW.db.global.EditorScale = self:GetParent():GetScale()
 					</OnMouseUp>
 					<OnEnter>
-						_G[self:GetName() .. "Texture"]:SetVertexColor(1, 1, 1)
+						self.texture:SetVertexColor(1, 1, 1)
 					</OnEnter>
 					<OnLeave>
-						_G[self:GetName() .. "Texture"]:SetVertexColor(0.6, 0.6, 0.6)
+						self.texture:SetVertexColor(0.6, 0.6, 0.6)
 					</OnLeave>
 				</Scripts>
 			</Button>

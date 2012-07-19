@@ -7,7 +7,7 @@
 --		Banjankri of Blackrock, Predeter of Proudmoore, Xenyr of Aszune
 
 -- Currently maintained by
--- Cybeloras of Mal'Ganis
+-- Cybeloras of Detheroc/Mal'Ganis
 -- --------------------
 
 local TMW = TMW
@@ -28,21 +28,11 @@ local Type = TMW.Classes.IconType:New("wpnenchant")
 LibStub("AceTimer-3.0"):Embed(Type)
 Type.name = L["ICONMENU_WPNENCHANT"]
 Type.desc = L["ICONMENU_WPNENCHANT_DESC"]
-Type.chooseNameTitle = L["ICONMENU_CHOOSENAME_WPNENCH"] .. " " .. L["ICONMENU_CHOOSENAME_ORBLANK"]
-Type.chooseNameText = L["ICONMENU_CHOOSENAME_WPNENCH_DESC"]
 Type.AllowNoName = true
-Type.SUGType = "wpnenchant"
-Type.WhenChecks = {
-	text = L["ICONMENU_SHOWWHEN"],
-	{ value = "alpha", 			text = "|cFF00FF00" .. L["ICONMENU_PRESENT"], 			 },
-	{ value = "unalpha", 		text = "|cFFFF0000" .. L["ICONMENU_ABSENT"], 			 },
-	{ value = "always", 		text = L["ICONMENU_ALWAYS"] },
-}
 
 -- AUTOMATICALLY GENERATED: UsesAttributes
 Type:UsesAttributes("spell")
 Type:UsesAttributes("reverse")
-Type:UsesAttributes("color")
 Type:UsesAttributes("start, duration")
 Type:UsesAttributes("alpha")
 Type:UsesAttributes("texture")
@@ -53,7 +43,17 @@ Type:RegisterIconDefaults{
 	WpnEnchantType			= "MainHandSlot",
 }
 
-Type:RegisterConfigPanel_XMLTemplate("full", 1, "TellMeWhen_ChooseName")
+Type:RegisterConfigPanel_XMLTemplate("full", 1, "TellMeWhen_ChooseName", {
+	title = L["ICONMENU_CHOOSENAME_WPNENCH"] .. " " .. L["ICONMENU_CHOOSENAME_ORBLANK"],
+	text = L["ICONMENU_CHOOSENAME_WPNENCH_DESC"],
+	SUGType = "wpnenchant",
+})
+
+Type:RegisterConfigPanel_XMLTemplate("column", 2, "TellMeWhen_WhenChecks", {
+	text = L["ICONMENU_SHOWWHEN"],
+	[0x2] = { text = "|cFF00FF00" .. L["ICONMENU_PRESENT"], 		 },
+	[0x1] = { text = "|cFFFF0000" .. L["ICONMENU_ABSENT"], 			 },
+})
 
 Type:RegisterConfigPanel_ConstructorFunc("column", 2, "TellMeWhen_WeaponSlot", function(self)
 	self.Header:SetText(TMW.L["ICONMENU_WPNENCHANTTYPE"])
@@ -86,9 +86,6 @@ Type:RegisterConfigPanel_ConstructorFunc("column", 1, "TellMeWhen_WpnEnchantSett
 		},
 	})
 end)
-
-Type.EventDisabled_OnUnit = true
-Type.EventDisabled_OnStack = true
 
 local Parser = CreateFrame("GameTooltip", "TellMeWhen_Parser", TMW, "GameTooltipTemplate")
 local function GetWeaponEnchantName(slot)
@@ -161,16 +158,14 @@ local function WpnEnchant_OnUpdate(icon, time)
 		end
 		local start = floor(time - duration + expiration)
 
-		icon:SetInfo("alpha; color; start, duration; spell",
+		icon:SetInfo("alpha; start, duration; spell",
 			icon.Alpha,
-			icon:CrunchColor(duration),
 			start, duration,
 			EnchantName
 		)
 	else
-		icon:SetInfo("alpha; color; start, duration; spell",
+		icon:SetInfo("alpha; start, duration; spell",
 			icon.UnAlpha,
-			icon:CrunchColor(),
 			0, 0,
 			nil
 		)
@@ -233,7 +228,7 @@ function Type:Setup(icon, groupID, iconID)
 	icon.NameHash = TMW:GetSpellNames(icon, icon.Name, nil, nil, 1)
 	icon.SelectIndex = SlotsToNumbers[icon.WpnEnchantType] or 1
 	icon.Slot = GetInventorySlotInfo(icon.WpnEnchantType)
-
+	
 	UpdateWeaponEnchantInfo(icon.Slot, icon.SelectIndex)
 
 
@@ -259,13 +254,13 @@ function Type:GetNameForDisplay(icon, data, doInsertLink)
 	return icon.LastEnchantName or data or icon.EnchantName
 end
 
-function Type:GetIconMenuText(data)
+function Type:GetIconMenuText(ics)
 	local text = ""
-	if data.WpnEnchantType == "MainHandSlot" or not data.WpnEnchantType then
+	if ics.WpnEnchantType == "MainHandSlot" or not ics.WpnEnchantType then
 		text = INVTYPE_WEAPONMAINHAND
-	elseif data.WpnEnchantType == "SecondaryHandSlot" then
+	elseif ics.WpnEnchantType == "SecondaryHandSlot" then
 		text = INVTYPE_WEAPONOFFHAND
-	elseif data.WpnEnchantType == "RangedSlot" then
+	elseif ics.WpnEnchantType == "RangedSlot" then
 		text = INVTYPE_THROWN
 	end
 	

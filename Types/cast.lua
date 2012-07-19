@@ -7,7 +7,7 @@
 --		Banjankri of Blackrock, Predeter of Proudmoore, Xenyr of Aszune
 
 -- Currently maintained by
--- Cybeloras of Mal'Ganis
+-- Cybeloras of Detheroc/Mal'Ganis
 -- --------------------
 
 local TMW = TMW
@@ -26,26 +26,27 @@ local Type = TMW.Classes.IconType:New("cast")
 LibStub("AceEvent-3.0"):Embed(Type)
 Type.name = L["ICONMENU_CAST"]
 Type.desc = L["ICONMENU_CAST_DESC"]
-Type.chooseNameTitle = L["ICONMENU_CHOOSENAME"] .. " " .. L["ICONMENU_CHOOSENAME_ORBLANK"]
-Type.SUGType = "cast"
 Type.AllowNoName = true
 Type.usePocketWatch = 1
 Type.unitType = "unitid"
-Type.WhenChecks = {
-	text = L["ICONMENU_CASTSHOWWHEN"],
-	{ value = "alpha", 			text = "|cFF00FF00" .. L["ICONMENU_PRESENT"], 			 },
-	{ value = "unalpha", 		text = "|cFFFF0000" .. L["ICONMENU_ABSENT"], 			 },
-	{ value = "always", 		text = L["ICONMENU_ALWAYS"] },
-}
 
 Type:RegisterIconDefaults{
 	Unit					= "player", 
 	Interruptible			= false,
 }
 
-Type:RegisterConfigPanel_XMLTemplate("full", 1, "TellMeWhen_ChooseName")
+Type:RegisterConfigPanel_XMLTemplate("full", 1, "TellMeWhen_ChooseName", {
+	title = L["ICONMENU_CHOOSENAME"] .. " " .. L["ICONMENU_CHOOSENAME_ORBLANK"],
+	SUGType = "cast",
+})
 
 Type:RegisterConfigPanel_XMLTemplate("full", 1, "TellMeWhen_Unit")
+
+Type:RegisterConfigPanel_XMLTemplate("column", 2, "TellMeWhen_WhenChecks", {
+	text = L["ICONMENU_CASTSHOWWHEN"],
+	[0x2] = { text = "|cFF00FF00" .. L["ICONMENU_PRESENT"], 	},
+	[0x1] = { text = "|cFFFF0000" .. L["ICONMENU_ABSENT"], 		},
+})
 
 Type:RegisterConfigPanel_ConstructorFunc("column", 1, "TellMeWhen_CastSettings", function(self)
 	self.Header:SetText(Type.name)
@@ -60,15 +61,12 @@ end)
 
 -- AUTOMATICALLY GENERATED: UsesAttributes
 Type:UsesAttributes("spell")
-Type:UsesAttributes("unit, GUID")
 Type:UsesAttributes("reverse")
-Type:UsesAttributes("color")
+Type:UsesAttributes("unit, GUID")
 Type:UsesAttributes("start, duration")
 Type:UsesAttributes("alpha")
 Type:UsesAttributes("texture")
 -- END AUTOMATICALLY GENERATED: UsesAttributes
-
-Type.EventDisabled_OnStack = true
 
 local events = {	
 	UNIT_SPELLCAST_START = true,
@@ -119,12 +117,9 @@ local function Cast_OnUpdate(icon, time)
 				start, endTime = start/1000, endTime/1000
 				local duration = endTime - start
 
-				local color = icon:CrunchColor(duration)
-
 				icon:SetInfo(
-					"alpha; color; texture; start, duration; reverse; spell; unit, GUID",
+					"alpha; texture; start, duration; reverse; spell; unit, GUID",
 					icon.Alpha,
-					color,
 					iconTexture,
 					start, duration,
 					reverse,
@@ -136,12 +131,10 @@ local function Cast_OnUpdate(icon, time)
 			end
 		end
 	end
-	local color = icon:CrunchColor()
 
 	icon:SetInfo(
-		"alpha; color; start, duration; spell; unit, GUID",
+		"alpha; start, duration; spell; unit, GUID",
 		icon.UnAlpha,
-		color,
 		0, 0,
 		NameFirst,
 		Units[1], nil

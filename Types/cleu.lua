@@ -7,7 +7,7 @@
 --		Banjankri of Blackrock, Predeter of Proudmoore, Xenyr of Aszune
 
 -- Currently maintained by
--- Cybeloras of Mal'Ganis
+-- Cybeloras of Detheroc/Mal'Ganis
 -- --------------------
 
 local TMW = TMW
@@ -32,28 +32,17 @@ Type.name = L["ICONMENU_CLEU"]
 Type.desc = L["ICONMENU_CLEU_DESC"]
 Type.usePocketWatch = 1
 Type.AllowNoName = true
-Type.chooseNameTitle = L["ICONMENU_CHOOSENAME"] .. " " .. L["ICONMENU_CHOOSENAME_ORBLANK"]
-Type.SUGType = "cleu"
 Type.spacebefore = true
 Type.unitType = "name"
--- Type.leftCheckYOffset = -130 -- nevermind
 
-
-Type.WhenChecks = {
-	text = L["ICONMENU_SHOWWHEN"],
-	{ value = "alpha",			text = "|cFF00FF00" .. L["ICONMENU_COUNTING"], 		tooltipText = L["ICONMENU_COUNTING_DESC"],		 },
-	{ value = "unalpha", 		text = "|cFFFF0000" .. L["ICONMENU_NOTCOUNTING"], 	tooltipText = L["ICONMENU_NOTCOUNTING_DESC"],	 },
-	{ value = "always", 		text = L["ICONMENU_ALWAYS"] },
-}
 
 -- AUTOMATICALLY GENERATED: UsesAttributes
 Type:UsesAttributes("sourceUnit, sourceGUID")
 Type:UsesAttributes("spell")
-Type:UsesAttributes("color")
-Type:UsesAttributes("start, duration")
-Type:UsesAttributes("unit, GUID")
-Type:UsesAttributes("destUnit, destGUID")
 Type:UsesAttributes("alpha")
+Type:UsesAttributes("destUnit, destGUID")
+Type:UsesAttributes("unit, GUID")
+Type:UsesAttributes("start, duration")
 Type:UsesAttributes("extraSpell")
 Type:UsesAttributes("texture")
 -- END AUTOMATICALLY GENERATED: UsesAttributes
@@ -69,14 +58,24 @@ Type:RegisterIconDefaults{
 	},
 }
 
-Type:RegisterConfigPanel_XMLTemplate("full", 1, "TellMeWhen_ChooseName")
+Type:RegisterConfigPanel_XMLTemplate("full", 1, "TellMeWhen_ChooseName", {
+	title = L["ICONMENU_CHOOSENAME"] .. " " .. L["ICONMENU_CHOOSENAME_ORBLANK"],
+	SUGType = "cleu",
+})
+
+Type:RegisterConfigPanel_XMLTemplate("column", 2, "TellMeWhen_WhenChecks", {
+	text = L["ICONMENU_SHOWWHEN"],
+	[0x2] = { text = "|cFF00FF00" .. L["ICONMENU_COUNTING"], 		tooltipText = L["ICONMENU_COUNTING_DESC"],		 },
+	[0x1] = { text = "|cFFFF0000" .. L["ICONMENU_NOTCOUNTING"], 	tooltipText = L["ICONMENU_NOTCOUNTING_DESC"],	 },
+})
 
 Type:RegisterConfigPanel_XMLTemplate("full", 1, "TellMeWhen_CLEUOptions")
 
-Type.EventDisabled_OnStack = true
-Type.EventDisabled_OnCLEUEvent = false
-
-
+Type:RegisterIconEvent{
+	name = "OnCLEUEvent",
+	text = L["SOUND_EVENT_ONCLEU"],
+	desc = L["SOUND_EVENT_ONCLEU_DESC"],
+}
 
 function Type:Update()
 	pGUID = UnitGUID("player")
@@ -311,16 +310,14 @@ local function CLEU_OnUpdate(icon, time)
 
 	if time - start > duration then
 		icon:SetInfo(
-			"alpha; color; start, duration",
+			"alpha; start, duration",
 			icon.UnAlpha,
-			icon:CrunchColor(),
 			0, 0
 		)
 	else
 		icon:SetInfo(
-			"alpha; color; start, duration",
+			"alpha; start, duration",
 			icon.Alpha,
-			icon:CrunchColor(duration),
 			start, duration
 		)
 	end

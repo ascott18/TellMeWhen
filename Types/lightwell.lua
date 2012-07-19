@@ -7,7 +7,7 @@
 --		Banjankri of Blackrock, Predeter of Proudmoore, Xenyr of Aszune
 
 -- Currently maintained by
--- Cybeloras of Mal'Ganis
+-- Cybeloras of Detheroc/Mal'Ganis
 -- --------------------
 
 local TMW = TMW
@@ -31,24 +31,20 @@ LibStub("AceEvent-3.0"):Embed(Type)
 Type.name = L["ICONMENU_LIGHTWELL"]
 Type.desc = L["ICONMENU_LIGHTWELL_DESC"]
 Type.hidden = pclass ~= "PRIEST"
-Type.WhenChecks = {
-	text = L["ICONMENU_SHOWWHEN"],
-	{ value = "alpha", 			text = "|cFF00FF00" .. L["ICONMENU_PRESENT"], 			 },
-	{ value = "unalpha", 		text = "|cFFFF0000" .. L["ICONMENU_ABSENT"], 			 },
-	{ value = "always", 		text = L["ICONMENU_ALWAYS"] },
-}
 
 -- AUTOMATICALLY GENERATED: UsesAttributes
 Type:UsesAttributes("spell")
-Type:UsesAttributes("alpha")
-Type:UsesAttributes("color")
-Type:UsesAttributes("start, duration")
 Type:UsesAttributes("stack, stackText")
+Type:UsesAttributes("start, duration")
+Type:UsesAttributes("alpha")
 Type:UsesAttributes("texture")
 -- END AUTOMATICALLY GENERATED: UsesAttributes
 
-Type.EventDisabled_OnUnit = true
-Type.EventDisabled_OnSpell = true
+Type:RegisterConfigPanel_XMLTemplate("column", 2, "TellMeWhen_WhenChecks", {
+	text = L["ICONMENU_SHOWWHEN"],
+	[0x2] = { text = "|cFF00FF00" .. L["ICONMENU_PRESENT"], 		},
+	[0x1] = { text = "|cFFFF0000" .. L["ICONMENU_ABSENT"], 			},
+})
 
 function Type:Update()
 	pGUID = UnitGUID("player")
@@ -109,19 +105,15 @@ local function LW_OnUpdate(icon, time)
 		CurrentCharges = 0
 	end
 
-	local color = icon:CrunchColor(CurrentCharges) -- eww, passing # of charges as the duration. Hackerish....
-
 	if CurrentCharges > 0 then
-		icon:SetInfo("alpha; color; start, duration; stack, stackText",
+		icon:SetInfo("alpha; start, duration; stack, stackText",
 			icon.Alpha,
-			color,
 			SummonTime, 180,
 			CurrentCharges, CurrentCharges
 		)
 	else
-		icon:SetInfo("alpha; color; start, duration; stack, stackText",
+		icon:SetInfo("alpha; start, duration; stack, stackText",
 			icon.UnAlpha,
-			color,
 			0, 0,
 			nil, nil
 		)

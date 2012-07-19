@@ -7,7 +7,7 @@
 --		Banjankri of Blackrock, Predeter of Proudmoore, Xenyr of Aszune
 
 -- Currently maintained by
--- Cybeloras of Mal'Ganis
+-- Cybeloras of Detheroc/Mal'Ganis
 -- --------------------
 
 local TMW = TMW
@@ -95,7 +95,7 @@ local function Meta_OnUpdate(icon, time)
 	for n = 1, #CompiledIcons do
 		local ic = _G[CompiledIcons[n]]
 		local attributes = ic and ic.attributes
-		if ic and ic.OnUpdate and attributes.shown and not (CheckNext and ic.__lastMetaCheck == time) then
+		if ic and ic.OnUpdate and attributes.shown and not (CheckNext and ic.__lastMetaCheck == time) and ic.viewData == icon.viewData then
 			ic:Update()
 			if attributes.alpha > 0 and attributes.shown then -- make sure to re-check attributes.shown
 				if Sort then
@@ -144,8 +144,6 @@ local function Meta_OnUpdate(icon, time)
 			force = 1
 
 			icon.__currentIcon = icToUse
-		--	TMW:Fire("TMW_ICON_UPDATED", icToUse)
-		--	TMW:Fire("TMW_ICON_UPDATED", icon)
 		end
 
 		icToUse.__lastMetaCheck = time
@@ -163,12 +161,6 @@ end
 local function TMW_ICON_UPDATED(icon, event, ic)
 	if icon.IconsLookup[ic:GetName()] or ic == icon then
 		icon.metaUpdateQueued = true
-	end
-end
-
-local function TMW_CNDT_OBJ_PASSING_CHANGED(icon, event, ConditionObj)
-	if icon.ConditionObj == ConditionObj then	
-		icon.metaUpdateQueued = 0
 	end
 end
 
@@ -277,17 +269,14 @@ function Type:Setup(icon, groupID, iconID)
 	
 	icon:SetScript("OnUpdate", Meta_OnUpdate)
 	TMW:RegisterCallback("TMW_ICON_UPDATED", TMW_ICON_UPDATED, icon)
-	if icon.ConditionObj then
-		TMW:RegisterCallback("TMW_CNDT_OBJ_PASSING_CHANGED", TMW_CNDT_OBJ_PASSING_CHANGED, icon)
-	end
 	
 	icon.metaUpdateQueued = true
 end
 
---TODO: make this into an actual config panel
---[[
+--TODO: make this into an actual config panel (META SORT)
+
 function Type:IE_TypeLoaded()
-	local spacing = 70
+	--[[local spacing = 70
 	TMW.IE.Main.Sort:SetPoint("BOTTOMLEFT", 20, -22)
 	TMW.IE.Main.Sort.text:SetWidth(spacing)
 
@@ -303,12 +292,12 @@ function Type:IE_TypeLoaded()
 	TMW:TT(TMW.IE.Main.Sort.Radio1, "SORTBYNONE", "SORTBYNONE_META_DESC")
 	TMW:TT(TMW.IE.Main.Sort.Radio2, "ICONMENU_SORTASC", "ICONMENU_SORTASC_META_DESC")
 	TMW:TT(TMW.IE.Main.Sort.Radio3, "ICONMENU_SORTDESC", "ICONMENU_SORTDESC_META_DESC")
-
+]]
 	TMW.IE.Main.ConditionAlpha.text:SetText(L["CONDITIONALPHA_METAICON"])
 	TMW:TT(TMW.IE.Main.ConditionAlpha, "CONDITIONALPHA_METAICON", "CONDITIONALPHA_METAICON_DESC")
 end
 
-function Type:IE_TypeUnloaded()
+function Type:IE_TypeUnloaded()--[[
 	TMW.IE.Main.Sort:SetPoint("BOTTOMLEFT", 16, 72)
 	TMW.IE.Main.Sort.text:SetWidth(0)
 
@@ -324,18 +313,17 @@ function Type:IE_TypeUnloaded()
 	TMW:TT(TMW.IE.Main.Sort.Radio1, "SORTBYNONE", "SORTBYNONE_DESC")
 	TMW:TT(TMW.IE.Main.Sort.Radio2, "ICONMENU_SORTASC", "ICONMENU_SORTASC_DESC")
 	TMW:TT(TMW.IE.Main.Sort.Radio3, "ICONMENU_SORTDESC", "ICONMENU_SORTDESC_DESC")
-
+]]
 	TMW.IE.Main.ConditionAlpha.text:SetText(L["CONDITIONALPHA"])
 	TMW:TT(TMW.IE.Main.ConditionAlpha, "CONDITIONALPHA", "CONDITIONALPHA_DESC")
 end
-]]
-function Type:TMW_ICON_SETUP_PRE(event, icon)
-	if icon.Type ~= self.type then
+
+function Type:TMW_ICON_TYPE_CHANGED(event, icon, typeData, typeData_old)
+	if self == typeData_old then
 		TMW:UnregisterCallback("TMW_ICON_UPDATED", TMW_ICON_UPDATED, icon)
-		TMW:UnregisterCallback("TMW_CNDT_OBJ_PASSING_CHANGED", TMW_CNDT_OBJ_PASSING_CHANGED, icon)
 	end
 end
-TMW:RegisterCallback("TMW_ICON_SETUP_PRE", Type)
+TMW:RegisterCallback("TMW_ICON_TYPE_CHANGED", Type)
 
 function Type:TMW_GLOBAL_UPDATE()
 	Locked = TMW.Locked

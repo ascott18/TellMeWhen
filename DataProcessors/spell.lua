@@ -7,7 +7,7 @@
 --		Banjankri of Blackrock, Predeter of Proudmoore, Xenyr of Aszune
 
 -- Currently maintained by
--- Cybeloras of Mal'Ganis
+-- Cybeloras of Detheroc/Mal'Ganis
 -- --------------------
 
 
@@ -36,6 +36,12 @@ function Processor:CompileFunctionSegment(t)
 	--]]
 end
 
+Processor:RegisterIconEvent{	-- OnSpell
+	name = "OnSpell",
+	text = L["SOUND_EVENT_ONSPELL"],
+	desc = L["SOUND_EVENT_ONSPELL_DESC"],
+}
+	
 Processor:RegisterDogTag("TMW", "Spell", {
 	code = function (groupID, iconID, link)
 		local group = TMW[groupID]

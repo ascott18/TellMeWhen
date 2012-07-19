@@ -7,7 +7,7 @@
 --		Banjankri of Blackrock, Predeter of Proudmoore, Xenyr of Aszune
 
 -- Currently maintained by
--- Cybeloras of Mal'Ganis
+-- Cybeloras of Detheroc/Mal'Ganis
 -- --------------------
 
 
@@ -19,13 +19,45 @@ local print = TMW.print
 
 local DogTag = LibStub("LibDogTag-3.0", true)
 
+-- The way that this processor works is really sleezy.
+-- Basically, we create a processor just to reserve an attribute name and event and all that fun stuff,
+-- and so that we have an event that can be listened to by DogTag AutoUpdateRequests.
 	
 local Processor = TMW.Classes.IconDataProcessor:New("DOGTAGUNIT", "dogTagUnit")
 Processor:AssertDependency("UNIT")
 
+-- This is just empty because the actual processing is done in the hook.
 function Processor:CompileFunctionSegment(t)
-	-- GLOBALS: dogTagUnit
 	t[#t+1] = [[
+	--]]
+end
+
+
+
+--Here's the hook (the real crux of the whole thing)
+
+local Hook = TMW.Classes.IconDataProcessorHook:New("UNIT_DOGTAGUNIT", "UNIT")
+
+Hook:DeclareUpValue("DogTag", DogTag)
+Hook:DeclareUpValue("TMW_UNITS", TMW.UNITS)
+
+Hook:RegisterCompileFunctionSegmentHook("post", function(Processor, t)
+	-- GLOBALS: unit
+	t[#t+1] = [[
+	local dogTagUnit
+	
+	if icon.typeData.unitType == "unitid" then
+		dogTagUnit = unit
+		if not DogTag.IsLegitimateUnit[dogTagUnit] then
+			dogTagUnit = dogTagUnit and TMW_UNITS:TestUnit(dogTagUnit)
+			if not DogTag.IsLegitimateUnit[dogTagUnit] then
+				dogTagUnit = "player"
+			end
+		end
+	else
+		dogTagUnit = "player"
+	end
+	
 	if attributes.dogTagUnit ~= dogTagUnit then
 		attributes.dogTagUnit = dogTagUnit
 
@@ -33,19 +65,6 @@ function Processor:CompileFunctionSegment(t)
 		doFireIconUpdated = true
 	end
 	--]]
-end
-
-TMW:RegisterCallback("TMW_ICON_DATA_CHANGED_UNIT", function(event, icon, unit)
-	if icon.typeData.unitType == "unitid" then
-		if not DogTag.IsLegitimateUnit[unit] then
-			unit = unit and TMW.UNITS:TestUnit(unit)
-			if not DogTag.IsLegitimateUnit[unit] then
-				unit = "player"
-			end
-		end
-	else
-		unit = "player"
-	end
-	icon:SetInfo("dogTagUnit", unit)
 end)
+
 	

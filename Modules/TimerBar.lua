@@ -7,7 +7,7 @@
 --		Banjankri of Blackrock, Predeter of Proudmoore, Xenyr of Aszune
 
 -- Currently maintained by
--- Cybeloras of Mal'Ganis
+-- Cybeloras of Detheroc/Mal'Ganis
 -- --------------------
 
 
@@ -34,6 +34,8 @@ function TimerBar:OnNewInstance(icon)
 	
 	self.Max = 1
 	bar:SetMinMaxValues(0, self.Max)
+	
+	self:SetColors(TMW.Types[""].CBS, TMW.Types[""].CBC)
 	
 	self.start = 0
 	self.duration = 0

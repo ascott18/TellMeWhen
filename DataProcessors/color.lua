@@ -7,7 +7,7 @@
 --		Banjankri of Blackrock, Predeter of Proudmoore, Xenyr of Aszune
 
 -- Currently maintained by
--- Cybeloras of Mal'Ganis
+-- Cybeloras of Detheroc/Mal'Ganis
 -- --------------------
 
 
@@ -33,7 +33,7 @@ function Processor:CompileFunctionSegment(t)
 	--]]
 end
 
-TMW:RegisterCallback("TMW_ICON_SETUP_PRE", function(event, icon)
+TMW:RegisterCallback("TMW_ICON_SETUP_POST", function(event, icon)
 	if not TMW.Locked then
 		icon:SetInfo("color", 1)
 	end

@@ -7,7 +7,7 @@
 --		Banjankri of Blackrock, Predeter of Proudmoore, Xenyr of Aszune
 
 -- Currently maintained by
--- Cybeloras of Mal'Ganis
+-- Cybeloras of Detheroc/Mal'Ganis
 -- --------------------
 
 local TMW = TMW
@@ -27,21 +27,11 @@ local Type = TMW.Classes.IconType:New("item")
 LibStub("AceEvent-3.0"):Embed(Type)
 Type.name = L["ICONMENU_ITEMCOOLDOWN"]
 Type.desc = L["ICONMENU_ITEMCOOLDOWN_DESC"]
-Type.chooseNameTitle = L["ICONMENU_CHOOSENAME_ITEMSLOT"]
-Type.chooseNameText = L["ICONMENU_CHOOSENAME_ITEMSLOT_DESC"]
-Type.SUGType = "itemwithslots"
-Type.WhenChecks = {
-	text = L["ICONMENU_SHOWWHEN"],
-	{ value = "alpha", 			text = "|cFF00FF00" .. L["ICONMENU_USABLE"], 			 },
-	{ value = "unalpha",  		text = "|cFFFF0000" .. L["ICONMENU_UNUSABLE"], 			 },
-	{ value = "always", 		text = L["ICONMENU_ALWAYS"] },
-}
 
 -- AUTOMATICALLY GENERATED: UsesAttributes
 Type:UsesAttributes("spell")
-Type:UsesAttributes("stack, stackText")
 Type:UsesAttributes("inRange")
-Type:UsesAttributes("color")
+Type:UsesAttributes("stack, stackText")
 Type:UsesAttributes("start, duration")
 Type:UsesAttributes("alpha")
 Type:UsesAttributes("texture")
@@ -54,7 +44,17 @@ Type:RegisterIconDefaults{
 	RangeCheck				= false,
 }
 
-Type:RegisterConfigPanel_XMLTemplate("full", 1, "TellMeWhen_ChooseName")
+Type:RegisterConfigPanel_XMLTemplate("full", 1, "TellMeWhen_ChooseName", {
+	title = L["ICONMENU_CHOOSENAME_ITEMSLOT"],
+	text = L["ICONMENU_CHOOSENAME_ITEMSLOT_DESC"],
+	SUGType = "itemwithslots",
+})
+
+Type:RegisterConfigPanel_XMLTemplate("column", 2, "TellMeWhen_WhenChecks", {
+	text = L["ICONMENU_SHOWWHEN"],
+	[0x2] = { text = "|cFF00FF00" .. L["ICONMENU_USABLE"], 			},
+	[0x1] = { text = "|cFFFF0000" .. L["ICONMENU_UNUSABLE"], 		},
+})
 
 Type:RegisterConfigPanel_ConstructorFunc("column", 1, "TellMeWhen_ItemSettings", function(self)
 	self.Header:SetText(Type.name)
@@ -90,8 +90,6 @@ Type:RegisterConfigPanel_ConstructorFunc("column", 1, "TellMeWhen_ItemSettings",
 		},
 	})
 end)
-
-Type.EventDisabled_OnUnit = true
 
 function Type:Update()
 end
@@ -147,9 +145,8 @@ local function ItemCooldown_OnUpdate(icon, time)
 			end
 			isGCD = OnGCD(duration)
 			if equipped and inrange == 1 and (duration == 0 or isGCD) then --usable
-				icon:SetInfo("alpha; color; texture; start, duration; stack, stackText; spell; inRange",
+				icon:SetInfo("alpha; texture; start, duration; stack, stackText; spell; inRange",
 					icon.Alpha,
-					icon:CrunchColor(),
 					GetItemIcon(iName) or "Interface\\Icons\\INV_Misc_QuestionMark",
 					start, duration,
 					count, icon.EnableStacks and count,
@@ -186,9 +183,8 @@ local function ItemCooldown_OnUpdate(icon, time)
 		isGCD = OnGCD(duration)
 	end
 	if duration then
-		icon:SetInfo("alpha; color; texture; start, duration; stack, stackText; spell; inRange",
+		icon:SetInfo("alpha; texture; start, duration; stack, stackText; spell; inRange",
 			icon.UnAlpha,
-			icon:CrunchColor(duration, inrange),
 			GetItemIcon(NameFirst2),
 			start, duration,
 			count, icon.EnableStacks and count,

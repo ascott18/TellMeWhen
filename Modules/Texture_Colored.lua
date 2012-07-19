@@ -7,7 +7,7 @@
 --		Banjankri of Blackrock, Predeter of Proudmoore, Xenyr of Aszune
 
 -- Currently maintained by
--- Cybeloras of Mal'Ganis
+-- Cybeloras of Detheroc/Mal'Ganis
 -- --------------------
 
 
@@ -19,6 +19,7 @@ local print = TMW.print
 
 local LMB = LibStub("Masque", true) or (LibMasque and LibMasque("Button"))
 local type = type
+local bitband = bit.band
 
 local ColorMSQ, OnlyMSQ
 
@@ -74,7 +75,9 @@ function Texture_Colored:UPDATE(icon)
 			end
 		end
 
-		if (icon.ShowWhen or "always") == "always" then
+		
+		--if (icon.ShowWhen or "always") == "always" then
+		if (bitband(icon.ShowWhen or 0x3, 0x3)) == 0x3 then
 			s = s .. "A" -- Always
 		else
 			s = s .. "S" -- Sometimes

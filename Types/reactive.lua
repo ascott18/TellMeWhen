@@ -7,7 +7,7 @@
 --		Banjankri of Blackrock, Predeter of Proudmoore, Xenyr of Aszune
 
 -- Currently maintained by
--- Cybeloras of Mal'Ganis
+-- Cybeloras of Detheroc/Mal'Ganis
 -- --------------------
 
 local TMW = TMW
@@ -27,20 +27,11 @@ local mindfreeze = strlower(GetSpellInfo(47528))
 local Type = TMW.Classes.IconType:New("reactive")
 Type.name = L["ICONMENU_REACTIVE"]
 Type.desc = L["ICONMENU_REACTIVE_DESC"]
-Type.chooseNameText  = L["CHOOSENAME_DIALOG"] .. "\r\n\r\n" .. L["CHOOSENAME_DIALOG_PETABILITIES"]
-
-Type.WhenChecks = {
-	text = L["ICONMENU_SHOWWHEN"],
-	{ value = "alpha", 			text = "|cFF00FF00" .. L["ICONMENU_USABLE"], 			 },
-	{ value = "unalpha",		text = "|cFFFF0000" .. L["ICONMENU_UNUSABLE"], 			 },
-	{ value = "always", 		text = L["ICONMENU_ALWAYS"] },
-}
 
 -- AUTOMATICALLY GENERATED: UsesAttributes
 Type:UsesAttributes("spell")
 Type:UsesAttributes("noMana")
 Type:UsesAttributes("inRange")
-Type:UsesAttributes("color")
 Type:UsesAttributes("start, duration")
 Type:UsesAttributes("alpha")
 Type:UsesAttributes("texture")
@@ -55,7 +46,15 @@ Type:RegisterIconDefaults{
 	IgnoreRunes				= false,
 }
 
-Type:RegisterConfigPanel_XMLTemplate("full", 1, "TellMeWhen_ChooseName")
+Type:RegisterConfigPanel_XMLTemplate("full", 1, "TellMeWhen_ChooseName", {
+	text = L["CHOOSENAME_DIALOG"] .. "\r\n\r\n" .. L["CHOOSENAME_DIALOG_PETABILITIES"],
+})
+
+Type:RegisterConfigPanel_XMLTemplate("column", 2, "TellMeWhen_WhenChecks", {
+	text = L["ICONMENU_SHOWWHEN"],
+	[0x2] = { text = "|cFF00FF00" .. L["ICONMENU_USABLE"], 			},
+	[0x1] = { text = "|cFFFF0000" .. L["ICONMENU_UNUSABLE"], 		},
+})
 
 Type:RegisterConfigPanel_ConstructorFunc("column", 1, "TellMeWhen_ReactiveSettings", function(self)
 	self.Header:SetText(Type.name)
@@ -96,9 +95,6 @@ Type:RegisterConfigPanel_ConstructorFunc("column", 1, "TellMeWhen_ReactiveSettin
 		},
 	})
 end)
-
-Type.EventDisabled_OnUnit = true
-Type.EventDisabled_OnStack = true
 
 
 function Type:Update()
@@ -146,9 +142,8 @@ local function Reactive_OnUpdate(icon, time)
 			end
 			usable = forceUsable or usable
 			if usable and not CD and not nomana and inrange == 1 then --usable
-				icon:SetInfo("alpha; color; texture; start, duration; spell; inRange; noMana",
+				icon:SetInfo("alpha; texture; start, duration; spell; inRange; noMana",
 					icon.Alpha,
-					icon:CrunchColor(),
 					SpellTextures[iName],
 					start, duration,
 					iName,
@@ -175,9 +170,8 @@ local function Reactive_OnUpdate(icon, time)
 		end
 	end
 	if duration then
-		icon:SetInfo("alpha; color; texture; start, duration; spell; inRange; noMana",
+		icon:SetInfo("alpha; texture; start, duration; spell; inRange; noMana",
 			icon.UnAlpha,
-			icon:CrunchColor(duration, inrange, nomana),
 			icon.FirstTexture,
 			start, duration,
 			NameFirst,
