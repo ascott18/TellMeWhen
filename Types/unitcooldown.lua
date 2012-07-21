@@ -59,6 +59,8 @@ Type:RegisterConfigPanel_XMLTemplate("full", 1, "TellMeWhen_ChooseName", {
 })
 
 Type:RegisterConfigPanel_XMLTemplate("full", 1, "TellMeWhen_Unit" --[[,{
+	-- this commented shit here is the stuff for allowing unitcooldown icons to work for any known actors (instead of just ones with unitIDs).
+	-- It turned out to suck, but im leaving the code in. There is a lot of other code scattered in the file that is also part of this.
 	allowNoUnit = true,
 	title = L["ICONMENU_UNITSTOWATCH"] .. " " .. L["ICONMENU_UNITSTOWATCH_ALL"],
 }]])

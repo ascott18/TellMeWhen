@@ -42,6 +42,11 @@ Type:UsesAttributes("alpha")
 Type:UsesAttributes("texture")
 -- END AUTOMATICALLY GENERATED: UsesAttributes
 
+Type:SetModuleAllowance("IconModule_PowerBar_Overlay", false)
+Type:SetModuleAllowance("IconModule_TimerBar_Overlay", false)
+Type:SetModuleAllowance("IconModule_Texts", false)
+Type:SetModuleAllowance("IconModule_CooldownSweep", false)
+
 Type:RegisterIconDefaults{
 	Sort					= false,
 	CheckNext				= false,
@@ -239,14 +244,14 @@ function Type:Setup(icon, groupID, iconID)
 	end
 
 	
-	icon.ForceDisabled = true
+	local dontUpdate = true
 	for _, ic in pairs(icon.CompiledIcons) do
 		-- ic might not exist, so we have to directly look up the settings
 		local g, i = strmatch(ic, "TellMeWhen_Group(%d+)_Icon(%d+)")
 		g, i = tonumber(g), tonumber(i)
 		assert(g and i)
 		if TMW.db.profile.Groups[g].Icons[i].Enabled then
-			icon.ForceDisabled = nil
+			dontUpdate = nil
 			break
 		end
 	end
@@ -258,7 +263,6 @@ function Type:Setup(icon, groupID, iconID)
 	end
 
 	icon:SetInfo("texture", "Interface\\Icons\\LevelUpIcon-LFD")
-
 	
 	-- DONT DO THIS! ive tried for many hours to get it working,
 	-- but there is no possible way because meta icons update
@@ -266,10 +270,10 @@ function Type:Setup(icon, groupID, iconID)
 	-- so everything will be delayed by at least one update cycle if we do manual updating.
 	--icon:SetUpdateMethod("manual") 
 	
-	
-	icon:SetScript("OnUpdate", Meta_OnUpdate)
-	TMW:RegisterCallback("TMW_ICON_UPDATED", TMW_ICON_UPDATED, icon)
-	
+	if not dontUpdate then
+		icon:SetScript("OnUpdate", Meta_OnUpdate)
+		TMW:RegisterCallback("TMW_ICON_UPDATED", TMW_ICON_UPDATED, icon)
+	end
 	icon.metaUpdateQueued = true
 end
 

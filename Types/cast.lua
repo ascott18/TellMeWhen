@@ -68,6 +68,8 @@ Type:UsesAttributes("alpha")
 Type:UsesAttributes("texture")
 -- END AUTOMATICALLY GENERATED: UsesAttributes
 
+Type:SetModuleAllowance("IconModule_PowerBar_Overlay", true)
+
 local events = {	
 	UNIT_SPELLCAST_START = true,
 	UNIT_SPELLCAST_STOP = true,

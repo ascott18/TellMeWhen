@@ -31,7 +31,7 @@ local DogTag = LibStub("LibDogTag-3.0", true)
 TELLMEWHEN_VERSION = "6.0.0"
 TELLMEWHEN_VERSION_MINOR = strmatch(" @project-version@", " r%d+") or ""
 TELLMEWHEN_VERSION_FULL = TELLMEWHEN_VERSION .. TELLMEWHEN_VERSION_MINOR
-TELLMEWHEN_VERSIONNUMBER = 60010 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
+TELLMEWHEN_VERSIONNUMBER = 60011 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
 if TELLMEWHEN_VERSIONNUMBER > 61001 or TELLMEWHEN_VERSIONNUMBER < 60000 then return error("YOU SCREWED UP THE VERSION NUMBER OR DIDNT CHANGE THE SAFETY LIMITS") end -- safety check because i accidentally made the version number 414069 once
 
 TELLMEWHEN_MAXROWS = 20
@@ -1612,9 +1612,6 @@ function TMW:Initialize()
 	if TMW.db.global.XPac ~= XPac then
 		wipe(TMW.db.global.ClassSpellCache)
 	end
-
-	-- Set the version for the current profile to the current version if it is a new profile.
-	TMW.db.profile.Version = TMW.db.profile.Version or TELLMEWHEN_VERSIONNUMBER
 	
 	-- Handle normal upgrades after the database has been initialized.
 	TMW:Upgrade()
@@ -1687,16 +1684,21 @@ function TMW:Initialize()
 end
 
 function TMW:OnProfile()
-	TMW.db.profile.Version = TMW.db.profile.Version or TELLMEWHEN_VERSIONNUMBER -- this is for new profiles
-	
 	for icon in TMW:InIcons() do
 		icon:SetInfo("texture", "")
 	end
+	
+	TMW:Upgrade()
 
 	TMW:Update()
-	TMW.IE:LoadFirstValidIcon()
+	
+	-- LoadFirstValidIcon must happen through a timer to avoid interference with AceConfigDialog callbacks getting broken when
+	-- we reload the icon editor. (AceConfigDialog-3.0\AceConfigDialog-3.0-57.lua:804: attempt to index field "rootframe" (a nil value))
+	TMW.IE:ScheduleTimer("LoadFirstValidIcon", 0.1)
 
-	if TMW.CompileOptions then TMW:CompileOptions() end -- redo groups in the options
+	if TMW.CompileOptions then
+		TMW:CompileOptions() -- redo groups in the options
+	end
 end
 
 TMW.DatabaseCleanups = {
@@ -1805,7 +1807,7 @@ function TMW:Update()
 	if not Locked then
 		TMW:LoadOptions()
 	end
-
+	
 	TMW:Fire("TMW_GLOBAL_UPDATE") -- the placement of this matters. Must be after options load, but before icons are updated
 
 	UPD_INTV = TMW.db.profile.Interval + 0.001 -- add a very small amount so that we don't call the same icon multiple times (through metas/conditionicons) in the same frame if the interval has been set 0
@@ -1854,7 +1856,7 @@ TMW.UpgradeTableByVersions = {}
 function TMW:GetBaseUpgrades()			-- upgrade functions
 	return {
 		[60008] = {
-			icon = function(self, ics)
+			icon = function(self, ics, ...)
 				if ics.ShowWhen == "alpha" or ics.ShowWhen == nil then
 					ics.ShowWhen = 0x2
 				elseif ics.ShowWhen == "unalpha" then
@@ -3087,6 +3089,9 @@ end
 
 
 function TMW:Upgrade()
+	-- Set the version for the current profile to the current version if it is a new profile.
+	TMW.db.profile.Version = TMW.db.profile.Version or TELLMEWHEN_VERSIONNUMBER
+	
 	if TellMeWhen_Settings or (type(TMW.db.profile.Version) == "string") or (TMW.db.profile.Version < TELLMEWHEN_VERSIONNUMBER) then
 		if TellMeWhen_Settings then -- needs to be first
 			for k, v in pairs(TellMeWhen_Settings) do
@@ -3666,7 +3671,6 @@ function EVENTS:TMW_ICON_SETUP_PRE(_, icon)
 				thisHasEventHandlers = Module:ProcessAndDelegateIconEventSettings(icon, event, eventSettings)
 			end
 
-			--icon.doCheckForUpdatesIfFakeHidden = icon.doCheckForUpdatesIfFakeHidden or thisHasEventHandlers
 			if thisHasEventHandlers then
 				icon.EventHandlersSet[event] = true
 				icon.EventsToFire = icon.EventsToFire or {}
@@ -3686,25 +3690,7 @@ function EVENTS:TMW_ICON_SETUP_POST(_, icon)
 	end
 end
 TMW:RegisterCallback("TMW_ICON_SETUP_POST", EVENTS)
---[[
--- The purpose of this was to set doCheckForUpdatesIfFakeHidden and then re-update the icon
--- so that it would still update while FakeHidden (because an event depended upon it).
--- Now, since icons are no longer disabled from automatic updates if they are FakeHidden,
--- this code is purposeless.
 
-function EVENTS:TMW_GLOBAL_UPDATE_POST()
-	for icon in TMW:InIcons() do
-		local ics = icon:GetSettings()
-		for _, eventSettings in TMW:InNLengthTable(ics.Events) do
-			local ic = _G[eventSettings.Icon]
-			if ic then
-				--ic.doCheckForUpdatesIfFakeHidden = true
-				ic:Setup()
-			end
-		end
-	end
-end
-TMW:RegisterCallback("TMW_GLOBAL_UPDATE_POST", EVENTS)]]
 function EVENTS:TMW_ONUPDATE_TIMECONSTRAINED_POST(event, time, Locked)
 	local QueuedIcons = self.QueuedIcons
 	if Locked and QueuedIcons[1] then
@@ -4860,20 +4846,6 @@ TMW:NewClass("GenericModuleImplementor", "GenericComponentImplementor"){
 		self.Modules = {}
 	end,
 	
-	PreDisableAllModules = function(self)
-		for moduleName, Module in pairs(self.Modules) do
-			Module:PreDisable()
-		end
-	end,
-
-	DisablePreDisabledModules = function(self)
-		for moduleName, Module in pairs(self.Modules) do
-			if Module.PreDisabled then
-				Module:Disable()
-			end
-		end
-	end,
-
 	DisableAllModules = function(self)
 		for moduleName, Module in pairs(self.Modules) do
 			Module:Disable()
@@ -5160,7 +5132,7 @@ function Group.Setup(group)
 
 	TMW:Fire("TMW_GROUP_SETUP_PRE", group)
 	
-	group:PreDisableAllModules()
+	group:DisableAllModules()
 	
 	if group:ShouldUpdateIcons() then
 		-- Setup the groups's view:
@@ -5560,12 +5532,9 @@ function Icon.Setup(icon)
 	local typeData_old = icon.typeData
 	icon.typeData = typeData
 	
-	icon.ForceDisabled = nil
 	icon.dontHandleConditionsExternally = nil --TODO: figure out a way to eliminate this.
-
-	--icon.doCheckForUpdatesIfFakeHidden = nil
 	
-		
+
 	icon:UnregisterAllEvents()
 	ClearScripts(icon)	
 	icon:SetUpdateMethod("auto")
@@ -5608,19 +5577,23 @@ function Icon.Setup(icon)
 	-- force an update
 	icon.LastUpdate = 0
 	
+	icon:DisableAllModules()
+	
 	-- actually run the icon's update function
 	if icon.Enabled or not Locked then
 	
-	
-	
-		if viewData ~= viewData_old then
-			-- If we changed views (or if the last view wasn't valid/didn't exist), disable all modules by default.
-			icon:DisableAllModules()
-		else
-			-- Otherwise, just prepare any modules that dont get :Enable()d to be disabled.
-			icon:PreDisableAllModules()
+		------------ Icon Type ------------
+		if typeData_old then
+			typeData_old:UnimplementFromIcon(icon)
+		end
+		typeData:ImplementIntoIcon(icon)
+		
+		if icon.typeData ~= typeData_old then		
+			TMW:Fire("TMW_ICON_TYPE_CHANGED", icon, typeData, typeData_old)
 		end
 		
+		
+		------------ Icon View ------------		
 		if viewData_old then
 			viewData_old:UnimplementFromIcon(icon)
 			
@@ -5631,40 +5604,13 @@ function Icon.Setup(icon)
 			end
 		end
 		viewData:Icon_Setup(icon)
-		viewData:ImplementIntoIcon(icon)
-
-		if viewData == viewData_old then
-			-- Finish what was started by :PreDisableAllModules()
-			icon:DisablePreDisabledModules()
-		end
+		viewData:ImplementIntoIcon(icon)		
 		
-		
-		
-		-- Icon Type	
-		if typeData_old then
-			typeData_old:UnimplementFromIcon(icon)
-		end
-		typeData:ImplementIntoIcon(icon)
-		
-		if icon.typeData ~= typeData_old then		
-			TMW:Fire("TMW_ICON_TYPE_CHANGED", icon, typeData, typeData_old)
-		end
 		
 		TMW.safecall(typeData.Setup, typeData, icon, groupID, iconID)
-		
-		
-		
 	else
 		icon:SetInfo("alpha", 0)
-		icon:DisableAllModules()
 	end
-
-	-- if the icon is set to always hide and we haven't determined otherwise, then don't automatically update it.
-	-- Conditions and meta icons will update it as needed.
-	--[[if icon.FakeHidden and not icon.doCheckForUpdatesIfFakeHidden then
-		icon:SetScript("OnUpdate", nil, true)
-		icon:UpdateTable_Unregister()
-	end]]
 
 	icon.NextUpdateTime = 0
 
@@ -5674,7 +5620,7 @@ function Icon.Setup(icon)
 			icon:SetInfo("texture", "")
 		end
 		icon:EnableMouse(0)
-		if icon.ForceDisabled or not icon.Enabled or (icon.Name == "" and not typeData.AllowNoName) then
+		if not icon.Enabled or (icon.Name == "" and not typeData.AllowNoName) then
 			ClearScripts(icon)
 			icon:Hide()
 		else
@@ -5721,7 +5667,7 @@ function Icon.SetModulesToActiveStateOfIcon(icon, sourceIcon)
 			local sourceModule = sourceModules[moduleName]
 			if sourceModule then
 				if sourceModule.IsEnabled then
-					Module:Enable()
+					Module:Enable(true)
 				else
 					Module:Disable()
 				end
@@ -5812,6 +5758,10 @@ TMW:NewClass("GenericComponent"){
 		
 		t.frameName = frameName
 		t.func = func
+	end,
+	ShouldShowConfigPanels = function(self, icon)
+		-- Defaults to true. Subclasses of GenericComponent can overwrite this function for their own usage.
+		return true
 	end,
 	
 	RegisterRapidSetting = function(self, setting)
@@ -6014,11 +5964,11 @@ IconDataProcessor:DeclareUpValue("type", type)
 
 TMW:NewClass("IconDataProcessorHook", "IconDataProcessorComponent"){
 	OnNewInstance = function(self, name, processorToHook)
-		assert(type(name) == "string", "IconDataProcessorHook: arg1 to constructor function must be a string")
-		assert(type(processorToHook) == "string", "IconDataProcessorHook: arg2 to constructor function must be a string")
+		TMW:ValidateType(2, "IconDataProcessorHook:New()", name, "string")
+		TMW:ValidateType(3, "IconDataProcessorHook:New()", processorToHook, "string")
 		
 		local Processor = TMW.ProcessorsByName[processorToHook]
-		assert(Processor, "IconDataProcessorHook: unable to find IconDataProcessor named " .. processorToHook)
+		assert(Processor, "IconDataProcessorHook:New() unable to find IconDataProcessor named " .. processorToHook)
 		
 		self.name = name
 		self.processorToHook = processorToHook
@@ -6175,7 +6125,7 @@ local SetInfoFuncs = setmetatable({}, { __index = function(self, signature)
 	
 	t[#t+1] = [[
 		if doFireIconUpdated then
-			TMW:Fire('TMW_ICON_UPDATED', icon)
+			TMW:Fire("TMW_ICON_UPDATED", icon)
 		end
 	end -- "return function(icon, ...)"
 	]]
@@ -6242,8 +6192,6 @@ TMW:NewClass("ObjectModule"){
 	Enable = function(self)
 		self:AssertSelfIsInstance()
 		
-		self.PreDisabled = nil
-		
 		if not self.IsEnabled then
 			self.IsEnabled = true
 			self.class.NumberEnabled = self.class.NumberEnabled + 1
@@ -6259,8 +6207,6 @@ TMW:NewClass("ObjectModule"){
 	Disable = function(self)
 		self:AssertSelfIsInstance()
 		
-		self.PreDisabled = nil
-		
 		if self.IsEnabled then
 			self.IsEnabled = false
 			self.class.NumberEnabled = self.class.NumberEnabled - 1
@@ -6273,23 +6219,18 @@ TMW:NewClass("ObjectModule"){
 			end
 		end
 	end,
-	PreDisable = function(self)
-		self:AssertSelfIsInstance()
-		
-		if self.IsEnabled then
-			self.PreDisabled = true
-		end
-	end,
-
+	
 	SetScriptHandler = function(self, script, func)
 		self:AssertSelfIsClass()
 		
-		assert(script)
+		TMW:ValidateType(2, "Module:GetScriptHandler()", script, "string")
 		
 		self.ScriptHandlers[script] = func
 	end,
 	GetScriptHandler = function(self, script)
-		assert(script)
+	--	self:AssertSelfIsClass() -- doesnt need to be class. No harm in just looking this up for an instance.
+		
+		TMW:ValidateType(2, "Module:GetScriptHandler()", script, "string")
 		
 		return self.ScriptHandlers[script]
 	end,
@@ -6299,6 +6240,7 @@ TMW:NewClass("IconModule", "IconComponent", "ObjectModule"){
 	EventListners = {},
 	ViewImplementors = {},
 	TypeAllowances = {},
+	
 	defaultAllowanceForTypes = true,
 	OnNewInstance_1_IconModule = function(self, icon)
 		icon.Modules[self.className] = self
@@ -6382,7 +6324,7 @@ TMW:NewClass("IconModule", "IconComponent", "ObjectModule"){
 		return self.EventListners[event]
 	end,
 	
-	SetEssentialModuleComponent = function(self, identifier, component)
+	SetEssentialModuleComponent = function(self, identifier, component)	--TODO: deprecate this
 		self:AssertSelfIsInstance()
 		
 		assert(identifier)
@@ -6404,46 +6346,91 @@ TMW:NewClass("IconModule", "IconComponent", "ObjectModule"){
 		self.ViewImplementors.ALL = implementorFunc
 	end,
 	
-	SetImplementorForViews = function(self, implementorFunc, ...)
-		self:AssertIsProtectedCall()
+	SetImplementorForView = function(self, view, order, implementorFunc)
+		self:AssertSelfIsClass()
 		
-		for i, viewName in TMW:Vararg(...) do
-			self.ViewImplementors[viewName] = implementorFunc
+		local IconView = Views[viewName]
+		local moduleName = self.className
+		
+		if IconView then
+			IconView:ImplementsModule(moduleName, order, implementorFunc)
+		else
+			TMW:RegisterCallback("TMW_VIEW_REGISTERED", function(event, IconView)
+				if IconView.view == viewName then
+					IconView:ImplementsModule(moduleName, order, implementorFunc)
+				end
+			end)
 		end
-	end,
-	DisallowForViews = function(self, ...)
-		self:AssertSelfIsClass()
-		
-		self:SetImplementorForViews(false, ...)
-	end,
-	ImplementForViews = function(self, implementorFunc, ...)
-		self:AssertSelfIsClass()
-		
-		self:SetImplementorForViews(implementorFunc, ...)
 	end,
 	
-	SetAllowanceForTypes = function(self, allow, ...)
-		self:AssertIsProtectedCall()
+	SetAllowanceForType = function(self, typeName, allow)
+		self:AssertSelfIsClass()
 		
-		for i, typeName in TMW:Vararg(...) do
+		TMW:ValidateType(2, "IconModule:SetAllowanceForType()", typeName, "string")
+		
+		-- allow cannot be nil
+		TMW:ValidateType(3, "IconModule:SetAllowanceForType()", allow, "boolean")
+		
+		if self.TypeAllowances[typeName] == nil then
 			self.TypeAllowances[typeName] = allow
+		else
+			TMW:Error("You cannot set a module's type allowance once it has already been declared by either a module or an icon type.")
 		end
-	end,
-	DisallowForTypes = function(self, ...)
-		self:AssertSelfIsClass()
-		
-		self:SetAllowanceForTypes(false, ...)
-	end,
-	AllowForTypes = function(self, ...)
-		self:AssertSelfIsClass()
-		
-		self:SetAllowanceForTypes(true, ...)
 	end,
 	SetDefaultAllowanceForTypes = function(self, allow)
 		self:AssertSelfIsClass()
 		
 		self.defaultAllowanceForTypes = allow
-	end
+	end,
+	
+	IsAllowedByType = function(self, iconType)
+		local typeAllowance = self.TypeAllowances[iconType]
+		if typeAllowance ~= nil then
+			return typeAllowance
+		else
+			return self.defaultAllowanceForTypes
+		end
+	end,
+	
+	Enable = function(self, ignoreTypeAllowances)
+		self:AssertSelfIsInstance()
+		
+		if not self.IsEnabled then
+			if ignoreTypeAllowances or self:IsAllowedByType(self.icon.Type) then
+				self.IsEnabled = true
+				
+				self.class.NumberEnabled = self.class.NumberEnabled + 1
+				if self.class.NumberEnabled == 1 and self.class.OnUsed then
+					self.class:OnUsed()
+				end
+				
+				if self.OnEnable then
+					self:OnEnable()
+				end
+			end
+		end
+	end,
+	Disable = function(self)
+		self:AssertSelfIsInstance()
+		
+		if self.IsEnabled then
+			self.IsEnabled = false
+			self.class.NumberEnabled = self.class.NumberEnabled - 1
+			if self.class.NumberEnabled == 0 and self.class.OnUnused then
+				self.class:OnUnused()
+			end
+			
+			if self.OnDisable then
+				self:OnDisable()
+			end
+		end
+	end,
+
+	ShouldShowConfigPanels = function(self, icon)
+		assert(icon == self.icon)
+		
+		return self:IsAllowedByType(icon.Type)
+	end,
 }
 
 TMW:NewClass("GroupModule", "GroupComponent", "ObjectModule"){
@@ -6929,6 +6916,21 @@ function IconType:OnUnimplementFromIcon(icon)
 		Processor:UnimplementFromIcon(icon)
 	end
 end
+--TODO: (misplaced note): implement something like IconModule:RegisterAnchor(frame, identifier, localizedName) so that other modules can anchor to it (mainly texts)
+function IconType:SetModuleAllowance(moduleName, allow)
+	local IconModule = TMW.Classes[moduleName]
+	
+	if IconModule and IconModule.SetAllowanceForType then
+		IconModule:SetAllowanceForType(self.type, allow)
+	elseif not IconModule then
+		TMW:RegisterCallback("TMW_CLASS_NEW", function(event, class)
+			if class.className == moduleName and class.SetAllowanceForType then
+				local IconModule = class
+				IconModule:SetAllowanceForType(self.type, allow)
+			end
+		end)
+	end
+end
 
 function Icon.IsModuleImplemented(icon, moduleName)
 	return icon.Modules[moduleName]
@@ -6959,6 +6961,8 @@ function IconView:Register()
 	Views[viewkey] = self -- put it in the main Views table
 	tinsert(TMW.OrderedViews, self) -- put it in the ordered table (used to order the type selection dropdown in the icon editor)
 
+	TMW:Fire("TMW_VIEW_REGISTERED", self)
+	
 	return self -- why not?
 end
 
@@ -7015,8 +7019,8 @@ function IconView:OnImplementIntoIcon(icon)
 		
 		-- Get the class of the module that we might be implementing.
 		local ModuleClass = moduleName:find("IconModule") and TMW.Classes[moduleName]
-		
-		-- If the class exists and the module should be implemented, then do it.
+			
+		-- If the class exists and the module should be implemented, then proceed to check Processor requirements.
 		if implementorFunc and ModuleClass then
 		
 			-- Check to see if an instance of the Module already exists for the icon before creating one.

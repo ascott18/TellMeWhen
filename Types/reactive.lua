@@ -37,6 +37,8 @@ Type:UsesAttributes("alpha")
 Type:UsesAttributes("texture")
 -- END AUTOMATICALLY GENERATED: UsesAttributes
 
+Type:SetModuleAllowance("IconModule_PowerBar_Overlay", true)
+
 Type:RegisterIconDefaults{
 	UseActvtnOverlay		= false,
 	CooldownCheck			= false,

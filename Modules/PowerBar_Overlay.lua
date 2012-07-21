@@ -18,6 +18,7 @@ local L = L
 local print = TMW.print
 
 local PowerBar_Overlay = TMW:NewClass("IconModule_PowerBar_Overlay", "IconModule_PowerBar")
+PowerBar_Overlay:SetDefaultAllowanceForTypes(false)
 
 function PowerBar_Overlay:SetupForIcon(sourceIcon)
 	self.Invert = sourceIcon.InvertPBar

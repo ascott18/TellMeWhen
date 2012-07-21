@@ -425,8 +425,6 @@ do -- TMW:ReconcileData()
 				end
 			end
 		end
-
-		--TMW:Update()
 	end
 end
 
@@ -2551,7 +2549,7 @@ end
 -- ICON EDITOR
 -- ----------------------
 
-IE = TMW:NewModule("IconEditor", "AceEvent-3.0") TMW.IE = IE
+IE = TMW:NewModule("IconEditor", "AceEvent-3.0", "AceTimer-3.0") TMW.IE = IE
 IE.Tabs = {}
 
 
@@ -2648,88 +2646,90 @@ IE.ALLDISPLAYTABFRAMES = {}
 local BASE_Y_OFFSET = -75
 function IE:PositionPanels(size, lastFrameCol1, lastFrameCol2, lastFrameCol3, nextColumn)
 	for i, Component in pairs(CI.ic.Components) do
-		for i2, panelInfo in pairs(Component.ConfigPanels) do
-			if panelInfo.size == size then
-				local frame
-				if panelInfo.panelType == "XMLTemplate" then
-					frame = IE.ALLDISPLAYTABFRAMES[panelInfo.xmlTemplateName]
-					
-					if not frame then
-						frame = CreateFrame("Frame", panelInfo.xmlTemplateName, TellMeWhen_IconEditorMain, panelInfo.xmlTemplateName)
-						IE.ALLDISPLAYTABFRAMES[panelInfo.xmlTemplateName] = frame
+		if Component:ShouldShowConfigPanels(CI.ic) then
+			for i2, panelInfo in pairs(Component.ConfigPanels) do
+				if panelInfo.size == size then
+					local frame
+					if panelInfo.panelType == "XMLTemplate" then
+						frame = IE.ALLDISPLAYTABFRAMES[panelInfo.xmlTemplateName]
+						
+						if not frame then
+							frame = CreateFrame("Frame", panelInfo.xmlTemplateName, TellMeWhen_IconEditorMain, panelInfo.xmlTemplateName)
+							IE.ALLDISPLAYTABFRAMES[panelInfo.xmlTemplateName] = frame
+						end
+					elseif panelInfo.panelType == "ConstructorFunc" then
+						frame = IE.ALLDISPLAYTABFRAMES[panelInfo] 
+						
+						if not frame then
+							frame = CreateFrame("Frame", panelInfo.frameName, TellMeWhen_IconEditorMain, "TellMeWhen_OptionsModuleContainer")
+							IE.ALLDISPLAYTABFRAMES[panelInfo] = frame
+							TMW.safecall(panelInfo.func, frame)
+						end
 					end
-				elseif panelInfo.panelType == "ConstructorFunc" then
-					frame = IE.ALLDISPLAYTABFRAMES[panelInfo] 
+					if panelInfo.preferredColumn then
+						nextColumn = panelInfo.preferredColumn
+					end			
 					
-					if not frame then
-						frame = CreateFrame("Frame", panelInfo.frameName, TellMeWhen_IconEditorMain, "TellMeWhen_OptionsModuleContainer")
-						IE.ALLDISPLAYTABFRAMES[panelInfo] = frame
-						TMW.safecall(panelInfo.func, frame)
-					end
-				end
-				if panelInfo.preferredColumn then
-					nextColumn = panelInfo.preferredColumn
-				end			
-				
-				frame:ClearAllPoints()
-				if panelInfo.size == "full" then
-					local lowestFrame = lastFrameCol1
-					if lowestFrame and lastFrameCol2 and lowestFrame:GetBottom() > lastFrameCol2:GetBottom() then
-						lowestFrame = lastFrameCol2
-					end
-					if lowestFrame and lastFrameCol3 and lowestFrame:GetBottom() > lastFrameCol3:GetBottom() then
-						lowestFrame = lastFrameCol3
-					end
-					
-					if lowestFrame then
-						frame:SetPoint("TOP", lowestFrame, "BOTTOM", 0, -10)
-						frame:SetPoint("LEFT", 20, 0)
-					else
-						frame:SetPoint("TOPLEFT", 20, BASE_Y_OFFSET)
-					end
-					
-					lastFrameCol1 = frame
-					lastFrameCol2 = frame
-					lastFrameCol3 = frame
-					
-					nextColumn = 1
-				elseif nextColumn == 1 then
-					if lastFrameCol1 then
-						frame:SetPoint("TOP", lastFrameCol1, "BOTTOM", 0, -10)
-						frame:SetPoint("LEFT", 20, 0)
-					else
-						frame:SetPoint("TOPLEFT", 20, BASE_Y_OFFSET)
-					end
-					
-					lastFrameCol1 = frame
-					nextColumn = 2
-				elseif nextColumn == 2 then
-					if lastFrameCol2 then
-						frame:SetPoint("TOP", lastFrameCol2, "BOTTOM", 0, -10)
-						frame:SetPoint("LEFT", 210, 0)
-					else
-						frame:SetPoint("TOPLEFT", 210, BASE_Y_OFFSET)
-					end
-					
-					lastFrameCol2 = frame
-					nextColumn = 3
-				elseif nextColumn == 3 then
-					if lastFrameCol3 then
-						frame:SetPoint("TOP", lastFrameCol3, "BOTTOM", 0, -10)
-						frame:SetPoint("LEFT", 400, 0)
-					else
-						frame:SetPoint("TOPLEFT", 400, BASE_Y_OFFSET)
+					frame:ClearAllPoints()
+					if panelInfo.size == "full" then
+						local lowestFrame = lastFrameCol1
+						if lowestFrame and lastFrameCol2 and lowestFrame:GetBottom() > lastFrameCol2:GetBottom() then
+							lowestFrame = lastFrameCol2
+						end
+						if lowestFrame and lastFrameCol3 and lowestFrame:GetBottom() > lastFrameCol3:GetBottom() then
+							lowestFrame = lastFrameCol3
+						end
+						
+						if lowestFrame then
+							frame:SetPoint("TOP", lowestFrame, "BOTTOM", 0, -10)
+							frame:SetPoint("LEFT", 20, 0)
+						else
+							frame:SetPoint("TOPLEFT", 20, BASE_Y_OFFSET)
+						end
+						
+						lastFrameCol1 = frame
+						lastFrameCol2 = frame
+						lastFrameCol3 = frame
+						
+						nextColumn = 1
+					elseif nextColumn == 1 then
+						if lastFrameCol1 then
+							frame:SetPoint("TOP", lastFrameCol1, "BOTTOM", 0, -10)
+							frame:SetPoint("LEFT", 20, 0)
+						else
+							frame:SetPoint("TOPLEFT", 20, BASE_Y_OFFSET)
+						end
+						
+						lastFrameCol1 = frame
+						nextColumn = 2
+					elseif nextColumn == 2 then
+						if lastFrameCol2 then
+							frame:SetPoint("TOP", lastFrameCol2, "BOTTOM", 0, -10)
+							frame:SetPoint("LEFT", 210, 0)
+						else
+							frame:SetPoint("TOPLEFT", 210, BASE_Y_OFFSET)
+						end
+						
+						lastFrameCol2 = frame
+						nextColumn = 3
+					elseif nextColumn == 3 then
+						if lastFrameCol3 then
+							frame:SetPoint("TOP", lastFrameCol3, "BOTTOM", 0, -10)
+							frame:SetPoint("LEFT", 400, 0)
+						else
+							frame:SetPoint("TOPLEFT", 400, BASE_Y_OFFSET)
+						end
+						
+						lastFrameCol3 = frame
+						nextColumn = 1
 					end
 					
-					lastFrameCol3 = frame
-					nextColumn = 1
-				end
-				
-				frame:Show()
-				
-				TMW:Fire("TMW_CONFIG_PANEL_SETUP", frame, panelInfo)
+					frame:Show()
+					
+					TMW:Fire("TMW_CONFIG_PANEL_SETUP", frame, panelInfo)
+				end		
 			end		
-		end		
+		end
 	end
 	
 	return lastFrameCol1, lastFrameCol2, lastFrameCol3, nextColumn
@@ -3283,6 +3283,92 @@ TMW:NewClass("SettingEditBox", "EditBox", "SettingFrameBase"){
 		end
 	end,
 }
+
+TMW:NewClass("SettingWhenCheckSet", "Frame", "SettingFrameBase"){
+	OnCreate = function(self)
+		assert(self.Alpha and self.Check, "Couldn't find the children that are supposed to exist. Are you sure that the frame you are making into a SettingWhenCheckSet inherits from TellMeWhen_WhenCheckSet?")
+		
+		local data = self.data
+		
+		-- ShowWhen toggle
+		assert(data.bit, "SettingWhenCheckSet's data table must declare a bit flag to be toggled in ics.ShowWhen! (data.bit)")
+		
+		IE:CreateSettingFrameFromData(self.Check, "SettingTotemButton", {
+			setting = "ShowWhen",
+			bit = data.bit,
+		})
+		
+		
+		-- Alpha slider
+		assert(data.alphaSettingName, "SettingWhenCheckSet's data table must declare an alpha setting to be used! (data.alphaSettingName)")
+		
+		TMW.IE:CreateSettingFrameFromData(self.Alpha, "SettingSlider_Alpha", {
+			setting = data.alphaSettingName,
+			setOrangeAtValue = data.setOrangeAtValue or 0,
+			disabled = function(self)
+				local ics = TMW.CI.ics
+				if ics then
+					return bit.band(ics.ShowWhen, data.bit) == 0
+				end
+			end,
+		})
+		
+		local parent = self:GetParent()
+		TMW:RegisterCallback("TMW_CONFIG_PANEL_SETUP", function(event, frame, panelInfo)
+			if frame == parent then
+				local supplementalData = panelInfo.supplementalData
+				
+				assert(supplementalData, "Supplemental data (arg5 to RegisterConfigPanel_XMLTemplate) must be provided for TellMeWhen_WhenChecks!")
+				
+				-- Set the title for the frame
+				parent.Header:SetText(supplementalData.text)
+				
+				-- Numeric keys in supplementalData point to the tables that have the data for that specified bit toggle
+				local supplementalDataForBit = supplementalData[data.bit]
+				if supplementalDataForBit then
+					self.Alpha.text:SetText(supplementalDataForBit.text)
+					self.Alpha:SetTooltip(supplementalDataForBit.text, supplementalDataForBit.tooltipText)
+					
+					self.Check:SetTooltip(supplementalDataForBit.text, supplementalDataForBit.tooltipText)
+				end
+			end
+		end)
+	end,
+	
+	--TODO: put these four functions in their own class and have both this class and SettingEditBox inherit from it (they share the same functions with only a small extension needed for SettingEditBox
+	IsEnabled = function(self)
+		return self.Enabled
+	end,
+	SetEnabled = function(self, enabled)		
+		if self.Enabled ~= enabled then
+			self.Enabled = enabled
+			if enabled then
+				self:OnEnable()
+			else
+				self:OnDisable()
+			end
+		end
+	end,
+	Enable = function(self)
+		self:SetEnabled(true)
+	end,
+	Disable = function(self)
+		self:SetEnabled(false)
+	end,
+	
+	OnEnable = function(self)
+		self.Check:CheckInteractionStates()
+		self.Alpha:CheckInteractionStates()
+	end,
+	
+	OnDisable = function(self)
+		self.Check:Disable()
+		self.Alpha:Disable()
+	end,
+	
+	OnCreate_SettingFrameBase = function() end, -- this is the default function that sets the toltip on the frame. We don't want a tooltip on the whole thing.
+}
+
 
 function IE:CreateSettingFrameFromData(frame, arg2, arg3)
 	local objectType = frame:GetObjectType()
@@ -6752,11 +6838,9 @@ function Module:Entry_AddToList_1(f, id)
 		f.tooltipmethod = "SetSpellByID"
 		f.tooltiparg = id
 
-		if pclassSpellCache[id] --[[name and GetSpellTexture(name)]] then
-			f.insert = SUG.inputType == "number" and id or name
-			f.insert2 = SUG.inputType ~= "number" and id or name
-		else
-			f.insert = id
+		f.insert = id
+		if pclassSpellCache[id] and name and GetSpellTexture(name) then
+			f.insert2 = name
 		end
 
 		f.Icon:SetTexture(SpellTextures[id])

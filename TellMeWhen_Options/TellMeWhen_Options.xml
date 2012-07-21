@@ -589,6 +589,7 @@
 		</Scripts>
 	</Frame>
 	
+	<!-- TODO: THIS BASE FRAME THING IS TEMPORARY. GET RID OF IT SOON -->
 	<Frame name="BASE FRAME" inherits="TellMeWhen_OptionsModuleContainer" virtual="true">
 		<Size x="180" y="50"/>
 		<Frames>
@@ -1203,27 +1204,23 @@
 		</Scripts>
 	</Frame>
 	
-	<!-- <Frame name="TellMeWhen_WhenCheckSet" virtual="true">
+	<Frame name="TellMeWhen_WhenCheckSet" virtual="true">
+		<Size x="170" y="40"/>
 		<Frames>
 			<CheckButton name="$parentCheck" parentKey="Check" inherits="TellMeWhen_CheckTemplate">
 				<Anchors>
-					<Anchor point="TOPLEFT" x="5" y="-6"/>
+					<Anchor point="TOPLEFT"/>
 				</Anchors>
 				<Scripts>
 					<OnLoad>
 						self.text:SetWidth(self:GetParent():GetWidth()-7)
-				
-						TMW.IE:CreateSettingFrameFromData(self, "SettingTotemButton", {
-							setting = "ShowWhen",
-							bit = 0x2,
-						})
 					</OnLoad>
 				</Scripts>
 			</CheckButton>
 			<Slider name="$parentAlpha" parentKey="Alpha" inherits="TellMeWhen_SliderTemplate" valuestep="1">
-				<Size x="175" y="17"/>
+				<Size x="134" y="17"/>
 				<Anchors>
-					<Anchor point="BOTTOMLEFT" x="18" y="47"/>
+					<Anchor point="LEFT" relativeTo="$parentCheck" relativePoint="RIGHT" x="5" />
 				</Anchors>
 				<Scripts>
 					<OnLoad>
@@ -1232,29 +1229,9 @@
 				</Scripts>
 			</Slider>
 		</Frames>
-		
-		<Scripts>
-			<OnLoad>
-				local bit = bit.lshift(1, self:GetID()-1)
-				self.bit = bit
-				
-				TMW.IE:CreateSettingFrameFromData(self.Check, "SettingTotemButton", {
-					setting = "ShowWhen",
-					bit = bit,
-				})	
-				TMW.IE:CreateSettingFrameFromData(self.Alpha, "SettingSlider_Alpha", {
-					setting = "Alpha",
-					setOrangeAtValue = 0,
-					disabled = function(self)
-						local ics = TMW.CI.ics
-						if ics then
-							return bit.band(ics.ShowWhen, bit) == 0
-						end
-					end,
-				})
-			</OnLoad>
-		</Scripts>
-	</Frame> -->
+	</Frame>
+	
+	
 	<Frame name="TellMeWhen_WhenChecks" inherits="TellMeWhen_OptionsModuleContainer" virtual="true">
 		<Size x="180" y="90"/>
 		<Layers>
@@ -1267,85 +1244,32 @@
 			</Layer>
 		</Layers>
 		<Frames>
-			<CheckButton name="$parent1" inherits="TellMeWhen_CheckTemplate" id="1">
+			<Frame name="$parentAlpha" inherits="TellMeWhen_WhenCheckSet">
 				<Anchors>
 					<Anchor point="TOPLEFT" x="5" y="-15"/>
 				</Anchors>
 				<Scripts>
 					<OnLoad>
-						self.text.SetText = function() end --TODO: do this better
-				
-						TMW.IE:CreateSettingFrameFromData(self, "SettingTotemButton", {
-							setting = "ShowWhen",
+						TMW.IE:CreateSettingFrameFromData(self, "SettingWhenCheckSet", {
+							alphaSettingName = "Alpha",
 							bit = 0x2,
 						})
 					</OnLoad>
 				</Scripts>
-			</CheckButton>
-			<CheckButton name="$parent2" inherits="TellMeWhen_CheckTemplate" id="2">
+			</Frame>
+			<Frame name="$parentUnAlpha" inherits="TellMeWhen_WhenCheckSet">
 				<Anchors>
-					<Anchor point="TOP" relativeTo="$parent1" relativePoint="BOTTOM" y="-11"/>
+					<Anchor point="TOP" relativeTo="$parentAlpha" relativePoint="BOTTOM" y="-1"/>
 				</Anchors>
 				<Scripts>
 					<OnLoad>
-						self.text.SetText = function() end --TODO: do this better
-				
-						TMW.IE:CreateSettingFrameFromData(self, "SettingTotemButton", {
-							setting = "ShowWhen",
+						TMW.IE:CreateSettingFrameFromData(self, "SettingWhenCheckSet", {
+							alphaSettingName = "UnAlpha",
 							bit = 0x1,
 						})
 					</OnLoad>
 				</Scripts>
-			</CheckButton>
-			
-			
-			<Slider name="$parentAlpha" parentKey="Alpha" inherits="TellMeWhen_SliderTemplate" valuestep="1">
-				<Size x="134" y="17"/>
-				<Anchors>
-					<Anchor point="LEFT" relativeTo="$parent1" relativePoint="RIGHT" x="5" />
-				</Anchors>
-				<Scripts>
-					<OnLoad>
-						self.text:SetWidth(self:GetWidth())
-						self.bit = 0x2 --TODO: THIS IS TEMPORARY. FIGURE OUT A BETTER WAY TO HANDLE WHENCHECKS
-						
-						TMW.IE:CreateSettingFrameFromData(self, "SettingSlider_Alpha", {
-							setting = "Alpha",
-							setOrangeAtValue = 0,
-							disabled = function(self)
-								local ics = TMW.CI.ics
-								if ics then
-									return bit.band(ics.ShowWhen, 0x2) == 0
-								end
-							end,
-						})
-					</OnLoad>
-				</Scripts>
-			</Slider>
-			<Slider name="$parentUnAlpha" parentKey="UnAlpha" inherits="TellMeWhen_SliderTemplate" valuestep="1">
-				<Size x="134" y="17"/>
-				<Anchors>
-					<Anchor point="LEFT" relativeTo="$parent2" relativePoint="RIGHT" x="5" />
-				</Anchors>
-				<Scripts>
-					<OnLoad>
-						self.text:SetWidth(self:GetWidth())
-						self.bit = 0x1 --TODO: THIS IS TEMPORARY. FIGURE OUT A BETTER WAY TO HANDLE WHENCHECKS
-						
-						TMW.IE:CreateSettingFrameFromData(self, "SettingSlider_Alpha", {
-							setting = "UnAlpha",
-							setOrangeAtValue = 0,
-							disabled = function(self)
-								local ics = TMW.CI.ics
-								if ics then
-									return bit.band(ics.ShowWhen, 0x1) == 0
-								end
-							end,
-						})
-					</OnLoad>
-				</Scripts>
-			</Slider>
-					
+			</Frame>					
 		</Frames>
 		<Scripts>
 			<OnLoad>
@@ -1357,25 +1281,12 @@
 						
 						-- Set the title for the frame
 						self.Header:SetText(supplementalData.text)
-						
-						-- Setup the titles and tooltips of all the children
-						for _, child in TMW:Vararg(self:GetChildren()) do
-							-- Numeric keys in supplementalData point to the tables that have the data for that specified bit toggle
-							local data = supplementalData[child.bit]
-							if data then
-								if child.text then
-									child.text:SetText(data.text)
-								end
-								child:SetTooltip(data.text, data.tooltipText)
-							end
-						end
 					end
 				end)
 			</OnLoad>
 		</Scripts>
 	</Frame>
-					
-					
+	
 	<Frame name="TellMeWhen_MetaIconOptions" inherits="TellMeWhen_OptionsModuleContainer" virtual="true">
 		<Size x="560" y="20"/>
 		<Frames>
@@ -5207,8 +5118,16 @@
 								self.status = status
 							end,
 						}
+						
+						widget.content.obj = widget
+						self.obj = widget
 
+						local constructed
 						local function Constructor()
+							if constructed then
+								error("TellMeWhen: Second construction for options container widget occurred! Why did this happen, ahhhh!")
+							end
+							constructed = 1
 							return AceGUI:RegisterAsContainer(widget)
 						end
 						AceGUI:RegisterWidgetType(Type, Constructor, Version)
