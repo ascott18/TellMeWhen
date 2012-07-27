@@ -43,19 +43,19 @@ Type:RegisterIconDefaults{
 	WpnEnchantType			= "MainHandSlot",
 }
 
-Type:RegisterConfigPanel_XMLTemplate("full", 1, "TellMeWhen_ChooseName", {
+Type:RegisterConfigPanel_XMLTemplate(100, "TellMeWhen_ChooseName", {
 	title = L["ICONMENU_CHOOSENAME_WPNENCH"] .. " " .. L["ICONMENU_CHOOSENAME_ORBLANK"],
 	text = L["ICONMENU_CHOOSENAME_WPNENCH_DESC"],
 	SUGType = "wpnenchant",
 })
 
-Type:RegisterConfigPanel_XMLTemplate("column", 2, "TellMeWhen_WhenChecks", {
+Type:RegisterConfigPanel_XMLTemplate(130, "TellMeWhen_WhenChecks", {
 	text = L["ICONMENU_SHOWWHEN"],
 	[0x2] = { text = "|cFF00FF00" .. L["ICONMENU_PRESENT"], 		 },
 	[0x1] = { text = "|cFFFF0000" .. L["ICONMENU_ABSENT"], 			 },
 })
 
-Type:RegisterConfigPanel_ConstructorFunc("column", 2, "TellMeWhen_WeaponSlot", function(self)
+Type:RegisterConfigPanel_ConstructorFunc(120, "TellMeWhen_WeaponSlot", function(self)
 	self.Header:SetText(TMW.L["ICONMENU_WPNENCHANTTYPE"])
 	TMW.IE:BuildSimpleCheckSettingFrame(self, {
 		{
@@ -76,7 +76,7 @@ Type:RegisterConfigPanel_ConstructorFunc("column", 2, "TellMeWhen_WeaponSlot", f
 	})
 end)
 
-Type:RegisterConfigPanel_ConstructorFunc("column", 1, "TellMeWhen_WpnEnchantSettings", function(self)
+Type:RegisterConfigPanel_ConstructorFunc(150, "TellMeWhen_WpnEnchantSettings", function(self)
 	self.Header:SetText(Type.name)
 	TMW.IE:BuildSimpleCheckSettingFrame(self, {
 		{

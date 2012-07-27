@@ -19,19 +19,7 @@ local print = TMW.print
 
 
 local Processor = TMW.Classes.IconDataProcessor:New("REVERSE", "reverse")
-
-function Processor:CompileFunctionSegment(t)
-	-- GLOBALS: reverse
-	t[#t+1] = [[
-	if attributes.reverse ~= reverse then
-		
-		TMW:Fire(REVERSE.changedEvent, icon, reverse)
-		doFireIconUpdated = true
-
-		attributes.reverse = reverse
-	end
-	--]]
-end
+-- Processor:CompileFunctionSegment(t) is default.
 
 TMW:RegisterCallback("TMW_ICON_TYPE_CHANGED", function(event, icon, typeData, oldTypeData)
 	icon:SetInfo("reverse", nil)

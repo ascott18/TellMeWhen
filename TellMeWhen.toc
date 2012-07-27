@@ -63,7 +63,6 @@ DataProcessors\duration.lua
 DataProcessors\spell.lua
 DataProcessors\unit.lua
 DataProcessors\dogtagunit.lua
-DataProcessors\color.lua
 DataProcessors\texture.lua
 DataProcessors\condition.lua
 DataProcessors\reverse.lua
@@ -71,9 +70,9 @@ DataProcessors\stack.lua
 DataProcessors\shown.lua
 DataProcessors\alpha.lua
 DataProcessors\alphaoverride.lua
-DataProcessors\presentOrUsable.lua
 DataProcessors\inRange.lua
 DataProcessors\noMana.lua
+DataProcessors\realAlpha.lua
 
 DataProcessorHooks\ALPHA_DURATIONREQ.lua
 DataProcessorHooks\ALPHA_STACKREQ.lua
@@ -92,6 +91,7 @@ Modules\Texture_Colored.lua
 Modules\Texts.lua
 Modules\Masque.lua
 Modules\IconEventClickHandler.lua
+Modules\IconConditions.lua
 
 Views\icon.lua
 Views\bar.lua

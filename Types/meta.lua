@@ -28,14 +28,6 @@ Type.desc = L["ICONMENU_META_DESC"]
 Type.AllowNoName = true
 Type.HideBars = true
 Type.NoColorSettings = true
-Type.RelevantSettings = {
-	CustomTex = false,
-	ShowTimer = false,
-	ShowTimerText = false,
-	ShowWhen = false,
-	Alpha = false,
-	UnAlpha = false,
-}
 
 -- AUTOMATICALLY GENERATED: UsesAttributes
 Type:UsesAttributes("alpha")
@@ -55,9 +47,21 @@ Type:RegisterIconDefaults{
 	},   
 }
 
-Type:RegisterConfigPanel_XMLTemplate("full", 1, "TellMeWhen_MetaIconOptions")
+Type:RegisterConfigPanel_XMLTemplate(150, "TellMeWhen_MetaIconOptions")
 
-Type:RegisterConfigPanel_XMLTemplate("column", 1, "TellMeWhen_SortSettings")
+Type:RegisterConfigPanel_XMLTemplate(170, "TellMeWhen_SortSettings")
+
+Type:RegisterUpgrade(24100, {
+	icon = function(self, ics)
+		if ics.Type == "meta" and type(ics.Icons) == "table" then
+			--make values the data, not the keys, so that we can customize the order that they are checked in
+			for k, v in pairs(ics.Icons) do
+				tinsert(ics.Icons, k)
+				ics.Icons[k] = nil
+			end
+		end
+	end,
+})
 
 local CCI_icon
 local function CheckCompiledIcons(icon)
@@ -102,7 +106,7 @@ local function Meta_OnUpdate(icon, time)
 		local attributes = ic and ic.attributes
 		if ic and ic.OnUpdate and attributes.shown and not (CheckNext and ic.__lastMetaCheck == time) and ic.viewData == icon.viewData then
 			ic:Update()
-			if attributes.alpha > 0 and attributes.shown then -- make sure to re-check attributes.shown
+			if attributes.realAlpha > 0 and attributes.shown then -- make sure to re-check attributes.shown
 				if Sort then
 					local _d = attributes.duration - (time - attributes.start)
 					if _d < 0 then
@@ -144,7 +148,7 @@ local function Meta_OnUpdate(icon, time)
 			end
 			
 			icon:SetupAllModulesForIcon(icToUse)
-			icon:SetModulesToActiveStateOfIcon(icToUse)
+			icon:SetModulesToEnabledStateOfIcon(icToUse)
 			
 			force = 1
 
@@ -156,7 +160,7 @@ local function Meta_OnUpdate(icon, time)
 			icon.metaUpdateQueued = nil
 			icon:InheritDataFromIcon(icToUse)
 		end
-	elseif icon.attributes.alpha ~= 0 and icon.metaUpdateQueued then
+	elseif icon.attributes.realAlpha ~= 0 and icon.metaUpdateQueued then
 		icon.metaUpdateQueued = nil
 		icon:SetInfo("alpha", 0)
 	end
@@ -264,12 +268,14 @@ function Type:Setup(icon, groupID, iconID)
 
 	icon:SetInfo("texture", "Interface\\Icons\\LevelUpIcon-LFD")
 	
-	-- DONT DO THIS! ive tried for many hours to get it working,
+	-- DONT DO THIS! (manual updates) ive tried for many hours to get it working,
 	-- but there is no possible way because meta icons update
 	-- the icons they are checking from within them to check for changes,
 	-- so everything will be delayed by at least one update cycle if we do manual updating.
-	--icon:SetUpdateMethod("manual") 
+	-- icon:SetUpdateMethod("manual") 
 	
+	icon:SetInfo("alpha", 0)
+		
 	if not dontUpdate then
 		icon:SetScript("OnUpdate", Meta_OnUpdate)
 		TMW:RegisterCallback("TMW_ICON_UPDATED", TMW_ICON_UPDATED, icon)
@@ -281,45 +287,50 @@ end
 
 function Type:IE_TypeLoaded()
 	--[[local spacing = 70
-	TMW.IE.Main.Sort:SetPoint("BOTTOMLEFT", 20, -22)
-	TMW.IE.Main.Sort.text:SetWidth(spacing)
+	TMW.IE.MainScrollFrame.Sort:SetPoint("BOTTOMLEFT", 20, -22)
+	TMW.IE.MainScrollFrame.Sort.text:SetWidth(spacing)
 
-	TMW.IE.Main.Sort.Radio1:SetPoint("TOPLEFT", spacing, 19)
-	TMW.IE.Main.Sort.Radio1.text:SetWidth(spacing + 2)
+	TMW.IE.MainScrollFrame.Sort.Radio1:SetPoint("TOPLEFT", spacing, 19)
+	TMW.IE.MainScrollFrame.Sort.Radio1.text:SetWidth(spacing + 2)
 
-	TMW.IE.Main.Sort.Radio2:SetPoint("TOPLEFT", TMW.IE.Main.Sort.Radio1, "TOPRIGHT", spacing, 0)
-	TMW.IE.Main.Sort.Radio2.text:SetWidth(spacing + 2)
+	TMW.IE.MainScrollFrame.Sort.Radio2:SetPoint("TOPLEFT", TMW.IE.MainScrollFrame.Sort.Radio1, "TOPRIGHT", spacing, 0)
+	TMW.IE.MainScrollFrame.Sort.Radio2.text:SetWidth(spacing + 2)
 
-	TMW.IE.Main.Sort.Radio3:SetPoint("TOPLEFT", TMW.IE.Main.Sort.Radio2, "TOPRIGHT", spacing, 0)
-	TMW.IE.Main.Sort.Radio3.text:SetWidth(spacing + 2)
+	TMW.IE.MainScrollFrame.Sort.Radio3:SetPoint("TOPLEFT", TMW.IE.MainScrollFrame.Sort.Radio2, "TOPRIGHT", spacing, 0)
+	TMW.IE.MainScrollFrame.Sort.Radio3.text:SetWidth(spacing + 2)
 
-	TMW:TT(TMW.IE.Main.Sort.Radio1, "SORTBYNONE", "SORTBYNONE_META_DESC")
-	TMW:TT(TMW.IE.Main.Sort.Radio2, "ICONMENU_SORTASC", "ICONMENU_SORTASC_META_DESC")
-	TMW:TT(TMW.IE.Main.Sort.Radio3, "ICONMENU_SORTDESC", "ICONMENU_SORTDESC_META_DESC")
+	TMW:TT(TMW.IE.MainScrollFrame.Sort.Radio1, "SORTBYNONE", "SORTBYNONE_META_DESC")
+	TMW:TT(TMW.IE.MainScrollFrame.Sort.Radio2, "ICONMENU_SORTASC", "ICONMENU_SORTASC_META_DESC")
+	TMW:TT(TMW.IE.MainScrollFrame.Sort.Radio3, "ICONMENU_SORTDESC", "ICONMENU_SORTDESC_META_DESC")
 ]]
-	TMW.IE.Main.ConditionAlpha.text:SetText(L["CONDITIONALPHA_METAICON"])
-	TMW:TT(TMW.IE.Main.ConditionAlpha, "CONDITIONALPHA_METAICON", "CONDITIONALPHA_METAICON_DESC")
+
+--TODO: do something with this to make it behave the same way, or something
+	--TMW.IE.MainScrollFrame.ConditionAlpha.text:SetText(L["CONDITIONALPHA_METAICON"])
+	--TMW:TT(TMW.IE.MainScrollFrame.ConditionAlpha, "CONDITIONALPHA_METAICON", "CONDITIONALPHA_METAICON_DESC")
 end
 
 function Type:IE_TypeUnloaded()--[[
-	TMW.IE.Main.Sort:SetPoint("BOTTOMLEFT", 16, 72)
-	TMW.IE.Main.Sort.text:SetWidth(0)
+	TMW.IE.MainScrollFrame.Sort:SetPoint("BOTTOMLEFT", 16, 72)
+	TMW.IE.MainScrollFrame.Sort.text:SetWidth(0)
 
-	TMW.IE.Main.Sort.Radio1:SetPoint("TOPLEFT", 0, 1)
-	TMW.IE.Main.Sort.Radio1.text:SetWidth(TMW.WidthCol1)
+	TMW.IE.MainScrollFrame.Sort.Radio1:SetPoint("TOPLEFT", 0, 1)
+	TMW.IE.MainScrollFrame.Sort.Radio1.text:SetWidth(TMW.WidthCol1)
 
-	TMW.IE.Main.Sort.Radio2:SetPoint("TOPLEFT", TMW.IE.Main.Sort.Radio1, "BOTTOMLEFT", 0, 8)
-	TMW.IE.Main.Sort.Radio2.text:SetWidth(TMW.WidthCol1)
+	TMW.IE.MainScrollFrame.Sort.Radio2:SetPoint("TOPLEFT", TMW.IE.MainScrollFrame.Sort.Radio1, "BOTTOMLEFT", 0, 8)
+	TMW.IE.MainScrollFrame.Sort.Radio2.text:SetWidth(TMW.WidthCol1)
 
-	TMW.IE.Main.Sort.Radio3:SetPoint("TOPLEFT", TMW.IE.Main.Sort.Radio2, "BOTTOMLEFT", 0, 8)
-	TMW.IE.Main.Sort.Radio3.text:SetWidth(TMW.WidthCol1)
+	TMW.IE.MainScrollFrame.Sort.Radio3:SetPoint("TOPLEFT", TMW.IE.MainScrollFrame.Sort.Radio2, "BOTTOMLEFT", 0, 8)
+	TMW.IE.MainScrollFrame.Sort.Radio3.text:SetWidth(TMW.WidthCol1)
 
-	TMW:TT(TMW.IE.Main.Sort.Radio1, "SORTBYNONE", "SORTBYNONE_DESC")
-	TMW:TT(TMW.IE.Main.Sort.Radio2, "ICONMENU_SORTASC", "ICONMENU_SORTASC_DESC")
-	TMW:TT(TMW.IE.Main.Sort.Radio3, "ICONMENU_SORTDESC", "ICONMENU_SORTDESC_DESC")
+	TMW:TT(TMW.IE.MainScrollFrame.Sort.Radio1, "SORTBYNONE", "SORTBYNONE_DESC")
+	TMW:TT(TMW.IE.MainScrollFrame.Sort.Radio2, "ICONMENU_SORTASC", "ICONMENU_SORTASC_DESC")
+	TMW:TT(TMW.IE.MainScrollFrame.Sort.Radio3, "ICONMENU_SORTDESC", "ICONMENU_SORTDESC_DESC")
 ]]
-	TMW.IE.Main.ConditionAlpha.text:SetText(L["CONDITIONALPHA"])
-	TMW:TT(TMW.IE.Main.ConditionAlpha, "CONDITIONALPHA", "CONDITIONALPHA_DESC")
+
+
+--TODO: do something with this to make it behave the same way, or something
+--	TMW.IE.MainScrollFrame.ConditionAlpha.text:SetText(L["CONDITIONALPHA"])
+--	TMW:TT(TMW.IE.MainScrollFrame.ConditionAlpha, "CONDITIONALPHA", "CONDITIONALPHA_DESC")
 end
 
 function Type:TMW_ICON_TYPE_CHANGED(event, icon, typeData, typeData_old)
@@ -333,6 +344,18 @@ function Type:TMW_GLOBAL_UPDATE()
 	Locked = TMW.Locked
 end
 TMW:RegisterCallback("TMW_GLOBAL_UPDATE", Type)
+
+TMW:RegisterCallback("TMW_CONFIG_ICON_RECONCILIATION_REQUESTED", function(event, replace, limitSourceGroup)
+	for ics, groupID in TMW:InIconSettings() do
+		if not limitSourceGroup or groupID == limitSourceGroup then
+			for k, ic in pairs(ics.Icons) do
+				if type(ic) == "string" then
+					replace(ics.Icons, k)
+				end
+			end
+		end
+	end
+end)
 
 function Type:GetIconMenuText(data, groupID, iconID)
 	local text

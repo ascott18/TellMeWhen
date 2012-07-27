@@ -33,6 +33,10 @@ TMW.MasqueSkinnableTexts = {
 }	
 	
 local Texts = TMW:NewClass("IconModule_Texts", "IconModule")
+
+Texts:RegisterConfigPanel_XMLTemplate(400, "TellMeWhen_TextDisplayOptions")
+
+
 function Texts:OnNewInstance(icon)
 	self.kwargs = {}
 	self.fontStrings = {}

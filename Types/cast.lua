@@ -35,20 +35,20 @@ Type:RegisterIconDefaults{
 	Interruptible			= false,
 }
 
-Type:RegisterConfigPanel_XMLTemplate("full", 1, "TellMeWhen_ChooseName", {
+Type:RegisterConfigPanel_XMLTemplate(100, "TellMeWhen_ChooseName", {
 	title = L["ICONMENU_CHOOSENAME"] .. " " .. L["ICONMENU_CHOOSENAME_ORBLANK"],
 	SUGType = "cast",
 })
 
-Type:RegisterConfigPanel_XMLTemplate("full", 1, "TellMeWhen_Unit")
+Type:RegisterConfigPanel_XMLTemplate(105, "TellMeWhen_Unit")
 
-Type:RegisterConfigPanel_XMLTemplate("column", 2, "TellMeWhen_WhenChecks", {
+Type:RegisterConfigPanel_XMLTemplate(130, "TellMeWhen_WhenChecks", {
 	text = L["ICONMENU_CASTSHOWWHEN"],
 	[0x2] = { text = "|cFF00FF00" .. L["ICONMENU_PRESENT"], 	},
 	[0x1] = { text = "|cFFFF0000" .. L["ICONMENU_ABSENT"], 		},
 })
 
-Type:RegisterConfigPanel_ConstructorFunc("column", 1, "TellMeWhen_CastSettings", function(self)
+Type:RegisterConfigPanel_ConstructorFunc(150, "TellMeWhen_CastSettings", function(self)
 	self.Header:SetText(Type.name)
 	TMW.IE:BuildSimpleCheckSettingFrame(self, {
 		{

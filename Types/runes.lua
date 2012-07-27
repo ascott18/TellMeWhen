@@ -42,15 +42,15 @@ Type:RegisterIconDefaults{
 	RuneSlots				= 0x3F, --(111111)
 }
 
-Type:RegisterConfigPanel_XMLTemplate("column", 2, "TellMeWhen_WhenChecks", {
+Type:RegisterConfigPanel_XMLTemplate(130, "TellMeWhen_WhenChecks", {
 	text = L["ICONMENU_SHOWWHEN"],
 	[0x2] = { text = "|cFF00FF00" .. L["ICONMENU_USABLE"],		},
 	[0x1] = { text = "|cFFFF0000" .. L["ICONMENU_UNUSABLE"],	},
 })
 
-Type:RegisterConfigPanel_XMLTemplate("column", 1, "TellMeWhen_Runes")
+Type:RegisterConfigPanel_XMLTemplate(150, "TellMeWhen_Runes")
 
-Type:RegisterConfigPanel_XMLTemplate("column", 1, "TellMeWhen_SortSettings")
+Type:RegisterConfigPanel_XMLTemplate(170, "TellMeWhen_SortSettings")
 
 Type:RegisterUpgrade(51024, {
 	icon = function(self, ics)

@@ -35,73 +35,6 @@
 
 	<Button name="TellMeWhen_IconTemplate" virtual="true" enableMouse="true">
 		<Size x="30" y="30"/>
-		<Scripts>
-			<OnLoad>
-				self:RegisterForDrag("LeftButton", "RightButton")
-			</OnLoad>
-			<OnEnter>
-				if not TMW.Locked then
-					self:SetScript("OnEnter", nil)
-					self.__noWrapTooltipText = true
-					TMW:TT(self, self.GetTooltipTitle, "ICON_TOOLTIP2NEW", 1, nil)
-					self:GetScript("OnEnter")(self)
-				end
-			</OnEnter>
-			<OnMouseUp>
-				if not TMW.Locked then
-					if TMW.ID.isMoving then
-						TMW:Group_StopMoving(TMW.ID.isMoving)
-					end
-					if button == "RightButton" then
-						TMW.IE:Load(nil, self)
-					end
-					TMW.IE:ScheduleIconSetup(self)
-				end
-			</OnMouseUp>
-			<OnMouseDown>
-				if not TMW.Locked then
-					local ID = TMW.ID
-					if not ID then return end
-					ID.DraggingInfo = nil
-					ID.F:Hide()
-					ID.IsDragging = nil
-				end
-			</OnMouseDown>
-			<OnDragStart>
-				if button == "RightButton" and TMW.ID then
-					TMW.ID:Start(self)
-				elseif button == "LeftButton" then
-					local group = self:GetParent()
-					if not group.Locked then
-						group:StartMoving()
-						TMW.ID.isMoving = group
-					end
-				end
-				if TMW.IE then
-					TMW.IE:ScheduleIconSetup(self)
-				end
-			</OnDragStart>
-			<OnReceiveDrag>
-				if TMW.ID then
-					TMW.ID:CompleteDrag("OnReceiveDrag", self)
-					TMW.ID:SpellItemToIcon(self)
-				end
-			</OnReceiveDrag>
-			<OnClick>
-				if not TMW.Locked and TMW.ID then
-					TMW.ID:SpellItemToIcon(self)
-				end
-			</OnClick>
-			<OnDragStop>
-				if TMW.ID.isMoving then
-					TMW:Group_StopMoving(TMW.ID.isMoving)
-				end
-
-				if TMW.ID and TMW.ID.IsDragging then
-					TMW.ID:CompleteDrag("OnDragStop")
-				end
-			</OnDragStop>
-		</Scripts>
 
 		<NormalTexture file=""/>
 		<HighlightTexture alphaMode="ADD" file="Interface\Buttons\ButtonHilight-Square"/>
@@ -113,7 +46,8 @@
 	<Cooldown hidden="true">
 		<!-- cooldown bug fixer.
 		Seems to fix the long-standing bug once and for all where cooldown models would
-		not show up until one was initiated somewhere outside a TMW icon -->
+		not show up until one was initiated somewhere outside a TMW icon.
+		Don't ask why this works, because I don't have a clue. But, it does. So leave it alone.-->
 		<Scripts>
 			<OnLoad>
 				self:SetCooldown(GetTime(), 1)

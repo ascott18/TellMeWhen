@@ -25,7 +25,7 @@ Hook:RegisterIconDefaults{
 	CustomTex				= "",
 }
 
-Hook:RegisterConfigPanel_XMLTemplate("full", 3, "TellMeWhen_CustomTex")
+Hook:RegisterConfigPanel_XMLTemplate(310, "TellMeWhen_CustomTex")
 
 Hook:RegisterCompileFunctionSegmentHook("pre", function(Processor, t)
 	-- GLOBALS: texture

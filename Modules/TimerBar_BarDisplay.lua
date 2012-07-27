@@ -29,7 +29,7 @@ function TimerBar_BarDisplay:SetupForIcon(sourceIcon)
 	if not sourceIcon.typeData then
 		error("sourceIcon.typeData was nil. Why did this happen? (Please tell Cybeloras)")
 	end
-	self:SetColors(sourceIcon.typeData.CBS, sourceIcon.typeData.CBC)
+	self:SetColors(sourceIcon.typeData.Colors.CBS, sourceIcon.typeData.Colors.CBC)--TODO: this module needs the option to be able to color itself
 	
 	self:UpdateValue(1)
 end

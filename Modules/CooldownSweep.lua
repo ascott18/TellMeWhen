@@ -27,7 +27,7 @@ CooldownSweep:RegisterIconDefaults{
 	ShowTimerText = false,
 }
 
-CooldownSweep:RegisterConfigPanel_ConstructorFunc("column", 3, "TellMeWhen_TimerOptions", function(self)
+CooldownSweep:RegisterConfigPanel_ConstructorFunc(200, "TellMeWhen_TimerSettings", function(self)
 	self.Header:SetText(L["CONFIGPANEL_TIMER_HEADER"])
 	TMW.IE:BuildSimpleCheckSettingFrame(self, {
 		{
@@ -45,6 +45,14 @@ CooldownSweep:RegisterConfigPanel_ConstructorFunc("column", 3, "TellMeWhen_Timer
 		},
 	})
 end)
+
+CooldownSweep:RegisterUpgrade(45608, {
+	icon = function(self, ics)
+		if not ics.ShowTimer then
+			ics.ShowTimerText = false
+		end
+	end,
+})
 
 function CooldownSweep:OnNewInstance(icon)
 	self.cooldown = CreateFrame("Cooldown", icon:GetName() .. "Cooldown", icon, "CooldownFrameTemplate")

@@ -23,6 +23,9 @@ local isNumber = TMW.isNumber
 local Processor = TMW.Classes.IconDataProcessor:New("DURATION", "start, duration")
 Processor:DeclareUpValue("OnGCD", TMW.OnGCD)
 
+TMW.Classes.Icon.attributes.start = 0
+TMW.Classes.Icon.attributes.duration = 0
+
 function Processor:CompileFunctionSegment(t)
 	-- GLOBALS: start, duration
 	t[#t+1] = [[

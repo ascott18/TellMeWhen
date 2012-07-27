@@ -21,14 +21,4 @@ local print = TMW.print
 local Processor = TMW.Classes.IconDataProcessor:New("CONDITION", "conditionFailed")
 Processor.dontInherit = true
 
-function Processor:CompileFunctionSegment(t)
-	-- GLOBALS: conditionFailed
-	t[#t+1] = [[
-	if attributes.conditionFailed ~= conditionFailed then
-		attributes.conditionFailed = conditionFailed
-
-		TMW:Fire(CONDITION.changedEvent, icon, conditionFailed)
-		doFireIconUpdated = true
-	end
-	--]]
-end
+-- Processor:CompileFunctionSegment(t) is default.

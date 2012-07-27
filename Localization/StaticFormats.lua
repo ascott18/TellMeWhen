@@ -86,8 +86,6 @@ L["DT_DOC_Source"] 					  	= L["DT_DOC_Source"] 						:format(L["ICONMENU_CLEU"]
 L["DT_DOC_Destination"] 			  	= L["DT_DOC_Destination"] 					:format(L["ICONMENU_CLEU"])
 L["DT_DOC_Extra"] 					  	= L["DT_DOC_Extra"]	 						:format(L["ICONMENU_CLEU"])
 
-L["CONDITIONALPHA_METAICON"]		  	= format("|cff%02x%02x%02x", NORMAL_FONT_COLOR.r*255, NORMAL_FONT_COLOR.g*255, NORMAL_FONT_COLOR.b*255) .. L["ICONMENU_ALPHA"] .. ":|r " .. L["CONDITIONALPHA_METAICON"]
-
 L["CLEU_SOURCEUNITS_DESC"] 			  	= L["CLEU_SOURCEUNITS_DESC"] .. "\r\n\r\n" .. L["ICONMENU_UNIT_DESC"]
 L["CLEU_DESTUNITS_DESC"] 			  	= L["CLEU_DESTUNITS_DESC"]   .. "\r\n\r\n" .. L["ICONMENU_UNIT_DESC"]
 

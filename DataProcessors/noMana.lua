@@ -19,19 +19,7 @@ local print = TMW.print
 
 
 local Processor = TMW.Classes.IconDataProcessor:New("NOMANA", "noMana")
-
-function Processor:CompileFunctionSegment(t)
-	-- GLOBALS: noMana
-	t[#t+1] = [[
-	
-	if attributes.noMana ~= noMana then
-		attributes.noMana = noMana
-
-		TMW:Fire(NOMANA.changedEvent, icon, noMana)
-		doFireIconUpdated = true
-	end
-	--]]
-end
+-- Processor:CompileFunctionSegment(t) is default.
 
 TMW:RegisterCallback("TMW_ICON_SETUP_POST", function(event, icon)
 	if not TMW.Locked then

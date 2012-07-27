@@ -19,20 +19,6 @@ local print = TMW.print
 
 
 local Processor = TMW.Classes.IconDataProcessor:New("ALPHAOVERRIDE", "alphaOverride")
+TMW.IconAlphaManager:AddHandler(0, "ALPHAOVERRIDE", true)
 Processor.dontInherit = true
-Processor:AssertDependency("ALPHA")
-
-function Processor:CompileFunctionSegment(t)
-	-- GLOBALS: alphaOverride
-	t[#t+1] = [[
-	if alphaOverride ~= attributes.alphaOverride then
-	
-		attributes.alphaOverride = alphaOverride
-		attributes.actualAlphaAtLastChange = icon:GetAlpha()
-
-		TMW:Fire(ALPHAOVERRIDE.changedEvent, icon, alphaOverride)
-		doFireIconUpdated = true
-	end
-	--]]
-end
 	

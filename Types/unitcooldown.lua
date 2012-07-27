@@ -54,26 +54,24 @@ Type:RegisterIconDefaults{
 	Sort					= false,
 }
 
-Type:RegisterConfigPanel_XMLTemplate("full", 1, "TellMeWhen_ChooseName", {
+Type:RegisterConfigPanel_XMLTemplate(100, "TellMeWhen_ChooseName", {
 	SUGType = "spellwithduration",
 })
 
-Type:RegisterConfigPanel_XMLTemplate("full", 1, "TellMeWhen_Unit" --[[,{
+Type:RegisterConfigPanel_XMLTemplate(105, "TellMeWhen_Unit" --[[,{
 	-- this commented shit here is the stuff for allowing unitcooldown icons to work for any known actors (instead of just ones with unitIDs).
 	-- It turned out to suck, but im leaving the code in. There is a lot of other code scattered in the file that is also part of this.
 	allowNoUnit = true,
 	title = L["ICONMENU_UNITSTOWATCH"] .. " " .. L["ICONMENU_UNITSTOWATCH_ALL"],
 }]])
 
-Type:RegisterConfigPanel_XMLTemplate("column", 2, "TellMeWhen_WhenChecks", {
+Type:RegisterConfigPanel_XMLTemplate(130, "TellMeWhen_WhenChecks", {
 	text = L["ICONMENU_SHOWWHEN"],
 	[0x2] = { text = "|cFF00FF00" .. L["ICONMENU_USABLE"], 			},
 	[0x1] = { text = "|cFFFF0000" .. L["ICONMENU_UNUSABLE"], 		},
 })
 
-Type:RegisterConfigPanel_XMLTemplate("column", 1, "TellMeWhen_SortSettings")
-
-Type:RegisterConfigPanel_ConstructorFunc("column", 1, "TellMeWhen_UnitCooldownSettings", function(self)
+Type:RegisterConfigPanel_ConstructorFunc(150, "TellMeWhen_UnitCooldownSettings", function(self)
 	self.Header:SetText(Type.name)
 	TMW.IE:BuildSimpleCheckSettingFrame(self, {
 		{
@@ -83,6 +81,8 @@ Type:RegisterConfigPanel_ConstructorFunc("column", 1, "TellMeWhen_UnitCooldownSe
 		},
 	})
 end)
+
+Type:RegisterConfigPanel_XMLTemplate(170, "TellMeWhen_SortSettings")
 
 local ManualIcons = {}
 

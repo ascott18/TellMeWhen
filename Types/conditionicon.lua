@@ -24,10 +24,13 @@ Type.spacebefore = true
 Type.AllowNoName = true
 
 -- AUTOMATICALLY GENERATED: UsesAttributes
+Type:UsesAttributes("alpha_conditionFailed")
 Type:UsesAttributes("start, duration")
 Type:UsesAttributes("alpha")
 Type:UsesAttributes("texture")
 -- END AUTOMATICALLY GENERATED: UsesAttributes
+
+Type:UsesAttributes("conditionFailed", false)
 
 Type:RegisterIconDefaults{
 	ConditionDur			= 0,
@@ -37,13 +40,13 @@ Type:RegisterIconDefaults{
 	OnlyIfCounting			= false,
 }
 
-Type:RegisterConfigPanel_XMLTemplate("column", 1, "TellMeWhen_ConditionIconSettings")
-
-Type:RegisterConfigPanel_XMLTemplate("column", 2, "TellMeWhen_WhenChecks", {
+Type:RegisterConfigPanel_XMLTemplate(130, "TellMeWhen_WhenChecks", {
 	text = L["ICONMENU_CNDTSHOWWHEN"],
 	[0x2] = { text = "|cFF00FF00" .. L["ICONMENU_SUCCEED"],			},
 	[0x1] = { text = "|cFFFF0000" .. L["ICONMENU_FAIL"],			},
 })
+
+Type:RegisterConfigPanel_XMLTemplate(150, "TellMeWhen_ConditionIconSettings")
 
 function Type:Update()
 end
@@ -81,14 +84,15 @@ local function ConditionIcon_OnUpdate(icon, time)
 		end
 		
 		icon:SetInfo(
-			"alpha; start, duration",
+			"alpha_conditionFailed; alpha; start, duration",
+			nil,
 			alpha,
 			start, duration
 		)
 
 		icon.__succeeded = succeeded
 	else
-		icon:SetInfo("alpha", 1)
+		icon:SetInfo("alpha_conditionFailed; alpha", nil, 1)
 	end
 end
 
@@ -137,16 +141,6 @@ function Type:GetIconMenuText(data, groupID, iconID)
 	end
 	text = text .. " " .. L["ICONMENU_CNDTIC_ICONMENUTOOLTIP"]:format((data.Conditions and (data.Conditions.n or #data.Conditions)) or 0)
 	return text, "", true
-end
-
-function Type:IE_TypeLoaded()
-	TMW.IE.Main.ConditionAlpha.text:SetText(L["CONDITIONALPHA_CONDITIONICON"])
-	TMW:TT(TMW.IE.Main.ConditionAlpha, "CONDITIONALPHA_CONDITIONICON", "CONDITIONALPHA_CONDITIONICON_DESC")
-end
-
-function Type:IE_TypeUnloaded()
-	TMW.IE.Main.ConditionAlpha.text:SetText(L["CONDITIONALPHA"])
-	TMW:TT(TMW.IE.Main.ConditionAlpha, "CONDITIONALPHA", "CONDITIONALPHA_DESC")
 end
 
 Type:Register()

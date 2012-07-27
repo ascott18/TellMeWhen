@@ -17,34 +17,44 @@ local TMW = TMW
 local L = TMW.L
 local print = TMW.print
 
-local Hook = TMW.Classes.IconDataProcessorHook:New("ALPHA_CONDITIONREQ", "ALPHA")
-Hook:RegisterProcessorRequirement("CONDITION")
+
+
+
+local Hook = TMW.Classes.IconDataProcessorHook:New("ALPHA_CONDITIONREQ", "CONDITION")
 
 Hook:RegisterIconDefaults{
-	ConditionAlpha			= 0,
+	ConditionAlpha			= 0, --TODO: ConditionAlpha has no config panel. Make one and register it to this hook.
 }
 Hook:RegisterRapidSetting("ConditionAlpha")
 
-Hook:RegisterCompileFunctionSegmentHook("pre", function(Processor, t)
-	-- GLOBALS: alpha, conditionFailed
-	t[#t+1] = [[
-	
-	-- We need a new variable name to prevent conflicts (which is what cndts_failed is)
-	
-	-- First, try to get it from the function call (it may also be getting set right now)
-	local cndts_failed = conditionFailed
-	-- If we didn't get it just now, then get the stored value from attributes
-	if cndts_failed == nil then
-		cndts_failed = attributes.conditionFailed
+Hook:RegisterConfigPanel_XMLTemplate(229, "TellMeWhen_ConditionRequirements")
+
+
+local Processor = TMW.Classes.IconDataProcessor:New("ALPHA_CONDITIONFAILED", "alpha_conditionFailed")
+TMW.IconAlphaManager:AddHandler(10, "ALPHA_CONDITIONFAILED")
+
+-- This IconDataProcessorHook does not RegisterCompileFunctionSegmentHook(). 
+-- Since it only really matters when conditionFailed changes, we listen to CONDITION's changedEvent,
+-- and call SetInfo_INTERNAL to set alpha_conditionFailed as needed.
+TMW:RegisterCallback(TMW.ProcessorsByName.CONDITION.changedEvent, function(event, icon, conditionFailed)
+	if conditionFailed then
+		icon:SetInfo_INTERNAL("alpha_conditionFailed", icon.ConditionAlpha)
+	else
+		icon:SetInfo_INTERNAL("alpha_conditionFailed", nil)
 	end
-	
-	if
-		cndts_failed and not icon.dontHandleConditionsExternally
-	then
-		 -- use the alpha setting for failed conditions, but only if the icon isnt being hidden for another reason
-		alpha = alpha ~= 0 and icon.ConditionAlpha or 0
+end)
+
+
+Hook:ExtendMethod("OnImplementIntoIcon", function(self, icon)
+	if icon.attributes.conditionFailed then
+		icon:SetInfo("alpha_conditionFailed", icon.ConditionAlpha)
+	else
+		icon:SetInfo("alpha_conditionFailed", nil)
 	end
-	--]]
+end)
+
+Hook:ExtendMethod("OnUnimplementFromIcon", function(self, icon)
+	icon:SetInfo("alpha_conditionFailed", nil)
 end)
 
 Hook:RegisterUpgrade(41005, {

@@ -26,7 +26,7 @@ function TimerBar_Overlay:SetupForIcon(sourceIcon)
 	if not sourceIcon.typeData then
 		error("sourceIcon.typeData was nil. Why did this happen? (Please tell Cybeloras)")
 	end
-	self:SetColors(sourceIcon.typeData.CBS, sourceIcon.typeData.CBC)
+	self:SetColors(sourceIcon.typeData.Colors.CBS, sourceIcon.typeData.Colors.CBC)
 	
 	self:UpdateValue(1)
 end
@@ -37,7 +37,7 @@ TimerBar_Overlay:RegisterIconDefaults{
 	InvertCBar				= false,
 }
 
-TimerBar_Overlay:RegisterConfigPanel_XMLTemplate("column", 3, "TellMeWhen_CBarOptions")
+TimerBar_Overlay:RegisterConfigPanel_XMLTemplate(217, "TellMeWhen_CBarOptions")
 
 TimerBar_Overlay:RegisterUpgrade(51022, {
 	icon = function(self, ics)

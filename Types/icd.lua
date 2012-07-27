@@ -42,17 +42,17 @@ Type:RegisterIconDefaults{
 	DontRefresh				= false,
 }
 
-Type:RegisterConfigPanel_XMLTemplate("full", 1, "TellMeWhen_ChooseName", {
+Type:RegisterConfigPanel_XMLTemplate(100, "TellMeWhen_ChooseName", {
 	SUGType = "spellwithduration",
 })
 
-Type:RegisterConfigPanel_XMLTemplate("column", 2, "TellMeWhen_WhenChecks", {
+Type:RegisterConfigPanel_XMLTemplate(130, "TellMeWhen_WhenChecks", {
 	text = L["ICONMENU_SHOWWHEN"],
 	[0x2] = { text = "|cFF00FF00" .. L["ICONMENU_USABLE"], 			},
 	[0x1] = { text = "|cFFFF0000" .. L["ICONMENU_UNUSABLE"], 		},
 })
 
-Type:RegisterConfigPanel_ConstructorFunc("column", 2, "TellMeWhen_ICDType", function(self)
+Type:RegisterConfigPanel_ConstructorFunc(120, "TellMeWhen_ICDType", function(self)
 	self.Header:SetText(TMW.L["ICONMENU_ICDTYPE"])
 	TMW.IE:BuildSimpleCheckSettingFrame(self, {
 		{
@@ -76,7 +76,7 @@ Type:RegisterConfigPanel_ConstructorFunc("column", 2, "TellMeWhen_ICDType", func
 	})
 end)
 
-Type:RegisterConfigPanel_ConstructorFunc("column", 1, "TellMeWhen_ICDSettings", function(self)
+Type:RegisterConfigPanel_ConstructorFunc(150, "TellMeWhen_ICDSettings", function(self)
 	self.Header:SetText(Type.name)
 	TMW.IE:BuildSimpleCheckSettingFrame(self, {
 		{
@@ -152,7 +152,7 @@ function Type:Setup(icon, groupID, iconID)
 	for _, name in pairs(icon.NameNameArray) do
 		if name == naturesGrace then
 			if icon:IsBeingEdited() == 1 then
-				TMW.HELP:Show("ICON_ICD_NATURESGRACE", icon, TMW.IE.Main.Name, 0, 0, L["HELP_ICD_NATURESGRACE"])
+				TMW.HELP:Show("ICON_ICD_NATURESGRACE", icon, TMW.IE.MainScrollFrame.Name, 0, 0, L["HELP_ICD_NATURESGRACE"])
 			elseif TMW.HELP then
 				TMW.HELP:Hide("ICON_ICD_NATURESGRACE")
 			end

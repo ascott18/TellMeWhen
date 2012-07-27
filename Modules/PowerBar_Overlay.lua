@@ -31,7 +31,7 @@ PowerBar_Overlay:RegisterIconDefaults{
 	InvertPBar				= false,
 }
 
-PowerBar_Overlay:RegisterConfigPanel_XMLTemplate("column", 3, "TellMeWhen_PBarOptions")
+PowerBar_Overlay:RegisterConfigPanel_XMLTemplate(215, "TellMeWhen_PBarOptions")
 
 PowerBar_Overlay:RegisterUpgrade(51022, {
 	icon = function(self, ics)

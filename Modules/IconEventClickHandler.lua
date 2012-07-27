@@ -24,7 +24,7 @@ function Module:OnNewInstance_IconEventClickHandler(icon)
 	icon:RegisterForClicks("LeftButtonUp", "RightButtonUp")
 end
 
-Module:SetScriptHandler("OnClick", function(Module, icon, button)
+Module:SetIconScriptHandler("OnClick", function(Module, icon, button)
 	if TMW.Locked then
 		if button == "LeftButton" and icon.EventHandlersSet.OnLeftClick then
 			icon:QueueEvent("OnLeftClick")
@@ -46,5 +46,6 @@ Module:RegisterIconEvent{	-- OnRightClick
 	text = L["SOUND_EVENT_ONRIGHTCLICK"],
 	desc = L["SOUND_EVENT_ONRIGHTCLICK_DESC"],
 }
+
 
 

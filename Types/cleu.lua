@@ -60,18 +60,18 @@ Type:RegisterIconDefaults{
 	},
 }
 
-Type:RegisterConfigPanel_XMLTemplate("full", 1, "TellMeWhen_ChooseName", {
+Type:RegisterConfigPanel_XMLTemplate(100, "TellMeWhen_ChooseName", {
 	title = L["ICONMENU_CHOOSENAME"] .. " " .. L["ICONMENU_CHOOSENAME_ORBLANK"],
 	SUGType = "cleu",
 })
 
-Type:RegisterConfigPanel_XMLTemplate("column", 2, "TellMeWhen_WhenChecks", {
+Type:RegisterConfigPanel_XMLTemplate(130, "TellMeWhen_WhenChecks", {
 	text = L["ICONMENU_SHOWWHEN"],
 	[0x2] = { text = "|cFF00FF00" .. L["ICONMENU_COUNTING"], 		tooltipText = L["ICONMENU_COUNTING_DESC"],		 },
 	[0x1] = { text = "|cFFFF0000" .. L["ICONMENU_NOTCOUNTING"], 	tooltipText = L["ICONMENU_NOTCOUNTING_DESC"],	 },
 })
 
-Type:RegisterConfigPanel_XMLTemplate("full", 1, "TellMeWhen_CLEUOptions")
+Type:RegisterConfigPanel_XMLTemplate(150, "TellMeWhen_CLEUOptions")
 
 Type:RegisterIconEvent{
 	name = "OnCLEUEvent",
@@ -395,17 +395,7 @@ function Processor:CompileFunctionSegment(t)
 end
 
 local Processor = TMW.Classes.IconDataProcessor:New("CLEU_EXTRASPELL", "extraSpell")
-function Processor:CompileFunctionSegment(t)
-	-- GLOBALS: extraSpell
-	t[#t+1] = [[
-	if attributes.extraSpell ~= extraSpell then
-		attributes.extraSpell = extraSpell
-
-		TMW:Fire(CLEU_EXTRASPELL.changedEvent, icon, spell)
-		doFireIconUpdated = true
-	end
-	--]]
-end
+-- Processor:CompileFunctionSegment(t) is default.
 
 
 local DogTag = LibStub("LibDogTag-3.0", true)

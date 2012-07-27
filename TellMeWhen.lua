@@ -31,7 +31,7 @@ local DogTag = LibStub("LibDogTag-3.0", true)
 TELLMEWHEN_VERSION = "6.0.0"
 TELLMEWHEN_VERSION_MINOR = strmatch(" @project-version@", " r%d+") or ""
 TELLMEWHEN_VERSION_FULL = TELLMEWHEN_VERSION .. TELLMEWHEN_VERSION_MINOR
-TELLMEWHEN_VERSIONNUMBER = 60011 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
+TELLMEWHEN_VERSIONNUMBER = 60012 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
 if TELLMEWHEN_VERSIONNUMBER > 61001 or TELLMEWHEN_VERSIONNUMBER < 60000 then return error("YOU SCREWED UP THE VERSION NUMBER OR DIDNT CHANGE THE SAFETY LIMITS") end -- safety check because i accidentally made the version number 414069 once
 
 TELLMEWHEN_MAXROWS = 20
@@ -77,7 +77,6 @@ local UPD_INTV = 0.06	--this is a default, local because i use it in onupdate fu
 local GCD, NumShapeshiftForms, LastUpdate, LastBindTextUpdate = 0, 0, 0, 0
 local IconsToUpdate, GroupsToUpdate = {}, {}
 local loweredbackup = {}
-local callbackregistry = {}
 local bullshitTable = {}
 local ActiveAnimations = {}
 local time = GetTime() TMW.time = time
@@ -97,7 +96,6 @@ if TMW.ISMOP then
 end
 
 --TODO: (misplaced note) export any needed text layouts with icons that need them
---TODO: (misplaced note) change the way that icon events are fired. Consider using TMW's event framework to capture them instead of manual firings from within data processors.
 
 TMW.Print = TMW.Print or _G.print
 TMW.Warn = setmetatable(
@@ -243,6 +241,97 @@ function TMW.get(value, ...)
 		return value
 	end
 end
+
+
+
+
+
+do	-- TMW.safecall
+	-- (Please please please don't ever use this anywhere that efficiency matters, because honestly, its atrocious. One of the things that I really don't like about Ace3)
+	--[[
+		xpcall safecall implementation
+	]]
+	local xpcall = xpcall
+
+	local function errorhandler(err)
+		return geterrorhandler()(err)
+	end
+
+	local function CreateDispatcher(argCount)
+		local code = [[
+			local xpcall, eh = ...
+			local method, ARGS
+			local function call() return method(ARGS) end
+		
+			local function dispatch(func, ...)
+				method = func
+				if not method then return end
+				ARGS = ...
+				return xpcall(call, eh)
+			end
+		
+			return dispatch
+		]]
+		
+		local ARGS = {}
+		for i = 1, argCount do ARGS[i] = "arg"..i end
+		ARGS = table.concat(ARGS, ", ")
+		code = code:gsub("ARGS", ARGS)
+		return assert(loadstring(code, "safecall Dispatcher["..argCount.."]"))(xpcall, errorhandler)
+	end
+
+	local Dispatchers = setmetatable({}, {__index=function(self, argCount)
+		local dispatcher = CreateDispatcher(argCount)
+		rawset(self, argCount, dispatcher)
+		return dispatcher
+	end})
+	Dispatchers[0] = function(func)
+		return xpcall(func, errorhandler)
+	end
+
+	function TMW.safecall(func, ...)
+		-- I don't check if func is a function here because i hope that whoever calls it
+		-- is smart enough to check when they need it so we dont need to check when we probably dont need to.
+		--  if type(func) == "function" then
+			return Dispatchers[select('#', ...)](func, ...)
+		-- end
+	end
+end
+
+function TMW:Error(text, ...)
+	text = text or ""
+	local success, result = pcall(format, text, ...)
+	if success then
+		text = result
+	end
+	geterrorhandler()("TellMeWhen: " .. text)
+end
+
+function TMW:Assert(statement, text, ...)
+	if not statement then
+		text = text or "Assertion Failed!"
+		local success, result = pcall(format, text, ...)
+		if success then
+			text = result
+		end
+		geterrorhandler()("TellMeWhen: " .. text)
+	end
+end
+
+function TMW:ValidateType(argN, methodName, var, reqType)
+	local varType = type(var)
+	
+	if reqType == "frame" and varType == "table" and type(var[0]) == "userdata" then
+		varType = "frame"
+	end
+	if varType ~= reqType then
+		error(("Bad argument #%d to %q. %s expected, got %s"):format(argN, methodName, reqType, varType), 3)
+	end
+	
+end
+
+
+
 
 do -- TMW.generateGUID(length)
 	local chars = {}
@@ -597,6 +686,7 @@ do -- Iterators
 end
 
 do -- Callback Lib
+	local callbackregistry = {}
 	function TMW:RegisterCallback(event, func, arg1)
 		local funcsForEvent
 		if callbackregistry[event] then
@@ -649,6 +739,8 @@ do -- Callback Lib
 		end
 	end
 	
+	local safecall = TMW.safecall
+	
 	function TMW:Fire(event, ...)
 		local funcs = callbackregistry[event]
 
@@ -660,9 +752,9 @@ do -- Callback Lib
 					for a = 1, #tbl do
 						local arg1 = tbl[a]
 						if arg1 ~= true then
-							method(arg1, event, ...)
+							safecall(method, arg1, event, ...)
 						else
-							method(event, ...)
+							safecall(method, event, ...)
 						end
 					end
 				end
@@ -751,6 +843,12 @@ do -- Class Lib
 	end
 	
 	function TMW:NewClass(className, ...)
+		TMW:ValidateType(2, "TMW:NewClass()", className, "string")
+		
+		if TMW.Classes[className] then
+			error("TMW: A class with name " .. className .. " already exists. You can't overwrite existing classes, so pick a different name", 2)
+		end
+		
 		local metatable = {
 			__index = {},
 			__call = __call,
@@ -769,7 +867,7 @@ do -- Class Lib
 		metatable.__newindex = metatable.__index
 
 		local isFrameObject
-		for n, v in TMW:Vararg("Class", ...) do
+		for n, v in TMW:Vararg("Class", ...) do		
 			local index
 			if TMW.Classes[v] then
 				callFunc(TMW.Classes[v], TMW.Classes[v], "OnClassInherit", class)
@@ -930,12 +1028,22 @@ do -- Class Lib
 		end,
 		
 		InheritTable = function(self, sourceClass, tableKey)
+			TMW:ValidateType(2, "Class:InheritTable()", sourceClass, "table")
+			TMW:ValidateType(3, "Class:InheritTable()", tableKey, "string")
+			
 			sourceClass:AssertSelfIsClass()
 			
 			self[tableKey] = {}
 			for k, v in pairs(sourceClass[tableKey]) do
 				self[tableKey][k] = v
 			end
+			
+			-- not needed to return the table, but helpful because
+			-- sometimes i set a variable to the result by mistake,
+			-- and if i forget that this doesnt work then i spend a long time debugging
+			-- trying to figure out why a single attributes table
+			-- is shared by all icons... yeah, i did that once.
+			return self[tableKey]
 		end,
 		
 		CallFunc = function(self, funcName, ...)
@@ -960,7 +1068,6 @@ local RelevantToAll = {
 		ShowWhen = true,
 		Alpha = true,
 		UnAlpha = true,
-		ConditionAlpha = true
 	}
 }
 
@@ -991,9 +1098,6 @@ TMW.Defaults = {
 		},
 		ClassSpellCache	= {
 			["*"] = {},
-		},
-		HelpSettings = {
-			HasChangedUnit = 0,
 		},
 		--[[CodeSnippets = {
 		},]]
@@ -1855,6 +1959,11 @@ TMW.UpgradeTable = {}
 TMW.UpgradeTableByVersions = {}
 function TMW:GetBaseUpgrades()			-- upgrade functions
 	return {
+		[60012] = {
+			global = function(self)
+				TMW.db.global.HelpSettings.HasChangedUnit = nil
+			end,
+		},
 		[60008] = {
 			icon = function(self, ics, ...)
 				if ics.ShowWhen == "alpha" or ics.ShowWhen == nil then
@@ -2160,15 +2269,6 @@ function TMW:GetBaseUpgrades()			-- upgrade functions
 				end
 			end,
 		},
-		--[[
-		-- Commented out 6-22-12 - Meta icons can be FakeHidden as of a long time ago, so there is no reason to do this anymore
-		[47017] = {
-			icon = function(self, ics)
-				if ics.Type == "meta"  then
-					ics.FakeHidden = false
-				end
-			end,
-		},]]
 		[47002] = {
 			map = {
 				CBS = "CDSTColor",
@@ -2247,13 +2347,6 @@ function TMW:GetBaseUpgrades()			-- upgrade functions
 					if type(k) == "number" and condition.Type == "CASTING" then
 						condition.Name = ""
 					end
-				end
-			end,
-		},
-		[45608] = {
-			icon = function(self, ics)
-				if not ics.ShowTimer then
-					ics.ShowTimerText = false
 				end
 			end,
 		},
@@ -2736,17 +2829,6 @@ function TMW:GetBaseUpgrades()			-- upgrade functions
 				end
 			end,
 		},
-		[24100] = {
-			icon = function(self, ics)
-				if ics.Type == "meta" and type(ics.Icons) == "table" then
-					--make values the data, not the keys, so that we can customize the order that they are checked in
-					for k, v in pairs(ics.Icons) do
-						tinsert(ics.Icons, k)
-						ics.Icons[k] = nil
-					end
-				end
-			end,
-		},
 		[24000] = {
 			icon = function(self, ics)
 				ics.Name = gsub(ics.Name, "StunnedOrIncapacitated", "Stunned;Incapacitated")
@@ -2999,93 +3081,6 @@ function TMW:GlobalUpgrade()
 	end
 	TellMeWhenDB.Version = TELLMEWHEN_VERSIONNUMBER -- pre-default upgrades complete!
 end
-
-
-
-do	-- TMW.safecall
-	-- (Please please please don't ever use this anywhere that efficiency matters, because honestly, its atrocious. One of the things that I really don't like about Ace3)
-	--[[
-		xpcall safecall implementation
-	]]
-	local xpcall = xpcall
-
-	local function errorhandler(err)
-		return geterrorhandler()(err)
-	end
-
-	local function CreateDispatcher(argCount)
-		local code = [[
-			local xpcall, eh = ...
-			local method, ARGS
-			local function call() return method(ARGS) end
-		
-			local function dispatch(func, ...)
-				method = func
-				if not method then return end
-				ARGS = ...
-				return xpcall(call, eh)
-			end
-		
-			return dispatch
-		]]
-		
-		local ARGS = {}
-		for i = 1, argCount do ARGS[i] = "arg"..i end
-		ARGS = table.concat(ARGS, ", ")
-		code = code:gsub("ARGS", ARGS)
-		return assert(loadstring(code, "safecall Dispatcher["..argCount.."]"))(xpcall, errorhandler)
-	end
-
-	local Dispatchers = setmetatable({}, {__index=function(self, argCount)
-		local dispatcher = CreateDispatcher(argCount)
-		rawset(self, argCount, dispatcher)
-		return dispatcher
-	end})
-	Dispatchers[0] = function(func)
-		return xpcall(func, errorhandler)
-	end
-
-	function TMW.safecall(func, ...)
-		-- I don't check if func is a function here because i hope that whoever calls it
-		-- is smart enough to check when they need it so we dont need to check when we probably dont need to.
-		--  if type(func) == "function" then
-			return Dispatchers[select('#', ...)](func, ...)
-		-- end
-	end
-end
-
-function TMW:Error(text, ...)
-	text = text or ""
-	local success, result = pcall(format, text, ...)
-	if success then
-		text = result
-	end
-	geterrorhandler()("TellMeWhen: " .. text)
-end
-
-function TMW:Assert(statement, text, ...)
-	if not statement then
-		text = text or "Assertion Failed!"
-		local success, result = pcall(format, text, ...)
-		if success then
-			text = result
-		end
-		geterrorhandler()("TellMeWhen: " .. text)
-	end
-end
-
-function TMW:ValidateType(argN, methodName, var, reqType)
-	local varType = type(var)
-	
-	if reqType == "frame" and varType == "table" and type(var[0]) == "userdata" then
-		varType = "frame"
-	end
-	if varType ~= reqType then
-		error(("Bad argument #%d to %q. %s expected, got %s"):format(argN, methodName, reqType, varType), 3)
-	end
-	
-end
-
 
 
 function TMW:Upgrade()
@@ -3624,14 +3619,14 @@ function EVENTS:ProcessAndDelegateIconEventSettings(icon, event, eventSettings)
 	if success and (event == "OnIconShow" or event == "OnIconHide") then
 		if icon.Enabled then
 			self.OnIconShowHideManager:UpdateTable_Register(icon)
-			TMW:RegisterCallback("TMW_ICON_DATA_CHANGED_ALPHA", EVENTS) -- register to EVENTS, not self.
+			TMW:RegisterCallback("TMW_ICON_DATA_CHANGED_REALALPHA", EVENTS) -- register to EVENTS, not self.
 		end
 	end
 
 	return success
 end
 
-function EVENTS:TMW_ICON_DATA_CHANGED_ALPHA(_, ic, alpha, oldalpha)
+function EVENTS:TMW_ICON_DATA_CHANGED_REALALPHA(_, ic, alpha, oldalpha)
 	if Locked then
 		-- ic is the icon that changed, icon is the icon that might be handling it
 		
@@ -3703,6 +3698,18 @@ function EVENTS:TMW_ONUPDATE_TIMECONSTRAINED_POST(event, time, Locked)
 	end
 end
 TMW:RegisterCallback("TMW_ONUPDATE_TIMECONSTRAINED_POST", EVENTS)
+
+TMW:RegisterCallback("TMW_CONFIG_ICON_RECONCILIATION_REQUESTED", function(event, replace, limitSourceGroup)
+	for ics, groupID in TMW:InIconSettings() do
+		if not limitSourceGroup or groupID == limitSourceGroup then
+			for _, eventSettings in TMW:InNLengthTable(ics.Events) do
+				if type(eventSettings.Icon) == "string" then
+					replace(eventSettings, "Icon")
+				end
+			end
+		end
+	end
+end)
 
 local runEvents = 1
 function EVENTS:RestoreEvents()
@@ -4386,12 +4393,12 @@ ANIM.AnimationList = {
 			if table.Fade and FlashPeriod ~= 0 then
 				local remainingFlash = timePassed % FlashPeriod
 				if not fadingIn then
-					icon:SetAlpha(icon.attributes.alpha*((FlashPeriod-remainingFlash)/FlashPeriod))
+					icon:SetAlpha(icon.attributes.realAlpha*((FlashPeriod-remainingFlash)/FlashPeriod))
 				else
-					icon:SetAlpha(icon.attributes.alpha*(remainingFlash/FlashPeriod))
+					icon:SetAlpha(icon.attributes.realAlpha*(remainingFlash/FlashPeriod))
 				end
 			else
-				icon:SetAlpha(fadingIn and icon.attributes.alpha or 0)
+				icon:SetAlpha(fadingIn and icon.attributes.realAlpha or 0)
 			end
 
 			-- (mostly) generic expiration -- we just finished the last flash, so dont do any more
@@ -4434,7 +4441,7 @@ ANIM.AnimationList = {
 					local pct = remaining / table.FadeDuration
 					local inv = 1-pct
 
-					icon:SetAlpha((icon.attributes.actualAlphaAtLastChange * pct) + (icon.attributes.alpha * inv))
+					icon:SetAlpha((icon.attributes.actualAlphaAtLastChange * pct) + (icon.attributes.realAlpha * inv))
 				end
 			end
 		end,
@@ -4784,7 +4791,8 @@ function AnimatedObject:Animations_Start(table)
 			AnimationData.OnStart(self, table)
 		end
 
-		-- meta inheritance
+		
+		-- meta inheritance--TODO: get this out of here.
 		local Icons = Types.meta.Icons
 		for i = 1, #Icons do
 			local ic = Icons[i]
@@ -4904,7 +4912,7 @@ function Group.IconSorter(iconA, iconB)
 				return iconA.ID*order < iconB.ID*order
 
 			elseif method == "alpha" then
-				local a, b = attributesA.alpha, attributesB.alpha
+				local a, b = attributesA.realAlpha, attributesB.realAlpha
 				if a ~= b then
 					return a*order < b*order
 				end
@@ -4922,7 +4930,7 @@ function Group.IconSorter(iconA, iconB)
 				end
 
 			elseif method == "shown" then
-				local a, b = (attributesA.shown and attributesA.alpha > 0) and 1 or 0, (attributesB.shown and attributesB.alpha > 0) and 1 or 0
+				local a, b = (attributesA.shown and attributesA.realAlpha > 0) and 1 or 0, (attributesB.shown and attributesB.realAlpha > 0) and 1 or 0
 				if a ~= b then
 					return a*order < b*order
 				end
@@ -4944,7 +4952,8 @@ function Group.IconSorter(iconA, iconB)
 		end
 	end
 end
-
+--TODO: make group icon sorting into a group module. Icon placement in general should be handled by a module.
+-- Also make icon sorting itself much more modular (to allow extensions)
 function Group.SortIcons(group)
 	local SortedIcons = group.SortedIcons
 	sort(SortedIcons, group.IconSorter)
@@ -4993,8 +5002,16 @@ function Group.TMW_CNDT_OBJ_PASSING_CHANGED(group, event, ConditionObj, failed)
 	end
 end
 
-
-
+TMW:RegisterCallback("TMW_CONFIG_ICON_RECONCILIATION_REQUESTED",
+function(event, replace, limitSourceGroup)
+	for gs, groupID in TMW:InGroupSettings() do
+		if not limitSourceGroup or groupID == limitSourceGroup then
+			if type(gs.Point.relativeTo) == "string" then
+				replace(gs.Point, "relativeTo")
+			end
+		end
+	end
+end)
 
 function Group.GetSettings(group)
 	return TMW.db.profile.Groups[group:GetID()]
@@ -5194,7 +5211,8 @@ end
 local Icon = TMW:NewClass("Icon", "Button", "UpdateTableManager", "ConditionImplementor", "AnimatedObject", "GenericModuleImplementor")
 Icon:UpdateTable_Set(IconsToUpdate)
 Icon.IsIcon = true
-
+Icon.attributes = {}
+	
 -- universal
 function Icon.OnNewInstance(icon, ...)
 	local _, name, group, _, iconID = ... -- the CreateFrame args
@@ -5210,24 +5228,7 @@ function Icon.OnNewInstance(icon, ...)
 	icon.lmbButtonData = {}
 	icon.position = {}
 	
-	
-	icon.attributes = {
-		start = 0,
-		duration = 0,
-		alpha = icon:GetAlpha(),
-		shown = icon:IsShown(),
-		color = 1,
-	}
-end
-
--- universal (MAYBE)
-function Icon.GetTooltipTitle(icon)
-	local groupID = icon:GetParent():GetID()
-	local line1 = L["ICON_TOOLTIP1"] .. " " .. format(L["GROUPICON"], TMW:GetGroupName(groupID, groupID, 1), icon:GetID())
-	if icon:GetParent().Locked then
-		line1 = line1 .. " (" .. L["LOCKED"] .. ")"
-	end
-	return line1
+	icon.attributes = icon:InheritTable(Icon, "attributes")
 end
 
 -- universal
@@ -5408,13 +5409,8 @@ function Icon.TMW_CNDT_OBJ_PASSING_CHANGED(icon, event, ConditionObj, failed)
 	if icon.ConditionObj == ConditionObj then
 		icon.NextUpdateTime = 0
 		-- alpha is set here to force an update on it
-		icon:SetInfo("alpha; conditionFailed", icon.attributes.alpha, failed)
+		icon:SetInfo("conditionFailed", failed)
 	end
-end
-
--- universal (probably)
-function Icon.SetTexture(icon, tex)
-	TMW:Error([[icon:SetTexture is depreciated. Use icon:SetInfo("texture", texture) instead]])
 end
 
 -- universal (but actual event handlers (:HandleEvent()) arent (probably, mainly animations))
@@ -5435,7 +5431,7 @@ function Icon.ProcessQueuedEvents(icon)
 			local eventData = TMW.EventList[event]
 			if eventData and EventSettings then
 				local shouldProcess = true
-				if EventSettings.OnlyShown and icon.attributes.alpha <= 0 then
+				if EventSettings.OnlyShown and icon.attributes.realAlpha <= 0 then
 					shouldProcess = false
 
 				elseif EventSettings.PassingCndt then
@@ -5524,7 +5520,7 @@ function Icon.Setup(icon)
 	local groupID = group:GetID()
 	local ics = icon:GetSettings()
 	local typeData = Types[ics.Type]
-	local viewData = Views[group:GetSettings().View]
+	local viewData = group.viewData
 	
 	local viewData_old = icon.viewData
 	icon.viewData = viewData
@@ -5634,9 +5630,8 @@ function Icon.Setup(icon)
 		ClearScripts(icon)
 		
 		icon:SetInfo(
-			"alphaOverride; color; start, duration; stack, stackText",
+			"alphaOverride; start, duration; stack, stackText",
 			icon.Enabled and 1 or 0.5,
-			1,
 			0, 0,
 			nil, nil
 		)
@@ -5654,13 +5649,13 @@ end
 function Icon.SetupAllModulesForIcon(icon, sourceIcon)
 	for moduleName, Module in pairs(icon.Modules) do
 		if Module.SetupForIcon then
-			Module:SetupForIcon(sourceIcon)
+			TMW.safecall(Module.SetupForIcon, Module, sourceIcon)
 		end
 	end
 end
 
 -- universal (this is for meta icons)
-function Icon.SetModulesToActiveStateOfIcon(icon, sourceIcon)
+function Icon.SetModulesToEnabledStateOfIcon(icon, sourceIcon)
 	local sourceModules = sourceIcon.Modules
 	for moduleName, Module in pairs(icon.Modules) do
 		if Module.IsImplemented then
@@ -5677,17 +5672,92 @@ function Icon.SetModulesToActiveStateOfIcon(icon, sourceIcon)
 		end
 	end
 end
-	
 
-TMW:NewClass("NamedInstances"){
-	-- this isnt actually used (it is inherited from, but instancesByName isnt used anywhere. see if we could benefit by using it somewhere (i bet we can; i wrote it for a reason) (TODO)
-	OnClassInherit_NamedInstances = function(self, newClass)
-		newClass.instancesByName = {}
+TMW.IconAlphaManager = {
+	AlphaHandlers = {},
+	
+	HandlerSorter = function(a, b)
+		return a.order < b.order
 	end,
-	OnNewInstance_NamedInstances = function(self, name)
-		self.instancesByName[name] = self
+	
+	UPDATE = function(self, event, icon)
+		local attributes = icon.attributes
+		local AlphaHandlers = self.AlphaHandlers
+		
+		local handlerToUse, alphaToUse
+		
+		for i = 1, #AlphaHandlers do
+			local handler = AlphaHandlers[i]
+			
+			local alpha = attributes[handler.attribute]
+			
+			if alpha == 0 then
+				-- If an alpha is set to 0, then the icon should be hidden no matter what, 
+				-- so use it as the final alpha value and stop looking for more.
+				-- This functionality has existed in TMW since practically day one, by the way. So don't be clever and remove it.
+				handlerToUse = handler
+				break
+			elseif alpha ~= nil then
+				if handler.haltImmediatelyIfFound then
+					-- This is currently only used for ALPHAOVERRIDE
+					handlerToUse = handler
+					break
+				elseif not handlerToUse then
+					-- If we found an alpha value that isn't nil and we haven't figured out
+					-- an alpha value to use yet, use this one, but keep looking for 0 values.
+					handlerToUse = handler
+				end
+			end
+		end
+		
+		if handlerToUse then			
+			-- realAlpha stores the alpha that the icon should be showing, before FakeHidden.
+			icon:SetInfo_INTERNAL("realAlpha", attributes[handlerToUse.attribute])
+		end
 	end,
+	
+	SetupHandler = function(handler)
+		local self = handler.self
+		
+		local IconDataProcessor = TMW.ProcessorsByName[handler.processorName]
+		if IconDataProcessor then
+			if IconDataProcessor.NumAttributes ~= 1 then
+				error("IconModule_Alpha handlers cannot check IconDataProcessors that have more than one attribute!")
+			end
+			
+			handler.attribute = IconDataProcessor.attributesStringNoSpaces
+			
+			TMW:RegisterCallback(IconDataProcessor.changedEvent, self.UPDATE, self)
+			
+			TMW:UnregisterCallback("TMW_CLASS_IconDataProcessor_INSTANCE_NEW", self.SetupHandler, handler)
+		end
+	end,
+
+	-- PUBLIC METHOD (ish)
+	AddHandler = function(self, order, processorName, haltImmediatelyIfFound)
+		TMW:ValidateType(2, "IconModule_Alpha:AddHandler()", order, "number")
+		TMW:ValidateType(3, "IconModule_Alpha:AddHandler()", processorName, "string")
+		
+		local handler = {
+			self = self,
+			order = order,
+			processorName = processorName,
+			haltImmediatelyIfFound = haltImmediatelyIfFound,
+		}
+		
+		tinsert(self.AlphaHandlers, handler)
+		
+		sort(self.AlphaHandlers, self.HandlerSorter)
+		
+		if TMW.ProcessorsByName[processorName] then
+			self.SetupHandler(handler)
+		else
+			TMW:RegisterCallback("TMW_CLASS_IconDataProcessor_INSTANCE_NEW", self.SetupHandler, handler)
+		end
+		
+	end,	
 }
+
 
 TMW.RapidSettings = {
 	-- settings that can be changed very rapidly, i.e. via mouse wheel or in a color picker
@@ -5722,39 +5792,33 @@ TMW:NewClass("GenericComponent"){
 	end,
 	
 	
-	RegisterConfigPanel = function(self, size, preferredColumn, panelType, supplementalData)
+	RegisterConfigPanel = function(self, order, panelType, supplementalData)
 		self:AssertIsProtectedCall("Use the RegisterConfigPanel_<type> functions instead.")
 		
-		assert(size == "column" or size == "full", "GenericComponent:RegisterConfigPanel() - 'size' (arg2) - Expected 'column' or 'full'")
-		
 		local t = {
-			self = self,
+			component = self,
 			panelType = panelType,
-			size = size,
-			preferredColumn = preferredColumn,
+			order = order,
 			supplementalData = supplementalData,
 		}
-		if size == "full" then
-			t.preferredColumn = 1
-		end
 		
 		self.ConfigPanels[#self.ConfigPanels + 1] = t
 		return t
 	end,
-	RegisterConfigPanel_XMLTemplate = function(self, size, preferredColumn, xmlTemplateName, supplementalData)
-		TMW:ValidateType(2, "GenericComponent:RegisterConfigPanel_XMLTemplate()", size, "string")
-		TMW:ValidateType(4, "GenericComponent:RegisterConfigPanel_XMLTemplate()", xmlTemplateName, "string")
+	RegisterConfigPanel_XMLTemplate = function(self, order, xmlTemplateName, supplementalData)
+		TMW:ValidateType(2, "GenericComponent:RegisterConfigPanel_XMLTemplate()", order, "number")
+		TMW:ValidateType(3, "GenericComponent:RegisterConfigPanel_XMLTemplate()", xmlTemplateName, "string")
 		
-		local t = self:RegisterConfigPanel(size, preferredColumn, "XMLTemplate", supplementalData)
+		local t = self:RegisterConfigPanel(order, "XMLTemplate", supplementalData)
 		
 		t.xmlTemplateName = xmlTemplateName
 	end,
-	RegisterConfigPanel_ConstructorFunc = function(self, size, preferredColumn, frameName, func, supplementalData)
-		TMW:ValidateType(2, "GenericComponent:RegisterConfigPanel_XMLTemplate()", size, "string")
-		TMW:ValidateType(4, "GenericComponent:RegisterConfigPanel_XMLTemplate()", frameName, "string")
-		TMW:ValidateType(5, "GenericComponent:RegisterConfigPanel_XMLTemplate()", func, "function")
+	RegisterConfigPanel_ConstructorFunc = function(self, order, frameName, func, supplementalData)
+		TMW:ValidateType(2, "GenericComponent:RegisterConfigPanel_XMLTemplate()", order, "number")
+		TMW:ValidateType(3, "GenericComponent:RegisterConfigPanel_ConstructorFunc()", frameName, "string")
+		TMW:ValidateType(4, "GenericComponent:RegisterConfigPanel_ConstructorFunc()", func, "function")
 		
-		local t = self:RegisterConfigPanel(size, preferredColumn, "ConstructorFunc", supplementalData)
+		local t = self:RegisterConfigPanel(order, "ConstructorFunc", supplementalData)
 		
 		t.frameName = frameName
 		t.func = func
@@ -5835,7 +5899,7 @@ TMW:NewClass("IconComponent", "GenericComponent"){
 			icon.ComponentsLookup[self] = true
 			
 			if self.OnImplementIntoIcon then
-				self:OnImplementIntoIcon(icon)
+				TMW.safecall(self.OnImplementIntoIcon, self, icon)
 			end
 		end
 	end,
@@ -5891,7 +5955,7 @@ TMW:NewClass("GroupComponent", "GenericComponent"){
 
 
 TMW.ProcessorsByName = {}
-TMW:NewClass("IconDataProcessorComponent", "IconComponent", "NamedInstances"){
+TMW:NewClass("IconDataProcessorComponent", "IconComponent"){
 	SIUVs = {},
 	
 	DeclareUpValue = function(self, variables, ...)
@@ -5901,10 +5965,16 @@ TMW:NewClass("IconDataProcessorComponent", "IconComponent", "NamedInstances"){
 			...,
 		}
 	end,
+	
+	CreateDogTagEventString = function(self)
+		return TMW:CreateDogTagEventString(self.name)
+	end,
 }
 
 local IconDataProcessor = TMW:NewClass("IconDataProcessor", "IconDataProcessorComponent"){
 	UsedTokens = {},
+	NumAttributes = 0,
+	
 	OnNewInstance = function(self, name, attributes)
 		assert(name, "Name is required for an IconDataProcessor!")
 		assert(attributes, "Attributes are required for an IconDataProcessor!")
@@ -5928,6 +5998,7 @@ local IconDataProcessor = TMW:NewClass("IconDataProcessor", "IconDataProcessorCo
 				error(("Attribute token %q is already in use by %q!"):format(attribute, self.UsedTokens[attribute].name))
 			else
 				self.UsedTokens[attribute] = self
+				self.NumAttributes = self.NumAttributes + 1
 			end
 		end
 		
@@ -5942,20 +6013,45 @@ local IconDataProcessor = TMW:NewClass("IconDataProcessor", "IconDataProcessorCo
 	AssertDependency = function(self, dependency)
 		assert(TMW.ProcessorsByName[dependency], ("Dependency %q of processor %q was not found!"):format(dependency, self.name))
 	end,
-	CreateDogTagEventString = function(self)
-		return TMW:CreateDogTagEventString(self.name)
-	end,
 	CompileFunctionHooks = function(self, t, orderRequested)
 		for _, ProcessorHook in ipairs(self.hooks) do
 			for func, order in pairs(ProcessorHook.funcs) do
 				if order == orderRequested then
 					t[#t+1] = "\n"
-					func(self, t)
+					TMW.safecall(func, self, t)
 					t[#t+1] = "\n"
 				end
 			end
 		end
-	end
+	end,
+
+	CompileFunctionSegment = function(self, t)
+		if self.NumAttributes ~= 1 then
+			error(("IconDataProcessor %q must declare its own CompileFunctionSegment method if it doesn't have only one attribute"):format(self.name))
+		end
+		
+		local attribute = self.attributesStringNoSpaces
+		
+		t[#t+1] = [[if attributes.]]
+		t[#t+1] = attribute
+		t[#t+1] = [[ ~= ]]
+		t[#t+1] = attribute
+		t[#t+1] = [[ then
+			attributes.]]
+			t[#t+1] = attribute
+			t[#t+1] = [[ = ]]
+			t[#t+1] = attribute
+			t[#t+1] = [[
+
+			TMW:Fire("]]
+			t[#t+1] = self.changedEvent
+			t[#t+1] = [[", icon, ]]
+			t[#t+1] = attribute
+			t[#t+1] = [[)
+			doFireIconUpdated = true
+		end
+		--]]
+	end,
 }
 IconDataProcessor:DeclareUpValue("TMW", TMW)
 IconDataProcessor:DeclareUpValue("print", print)
@@ -5994,7 +6090,7 @@ TMW:NewClass("IconDataProcessorHook", "IconDataProcessorComponent"){
 		self.processorRequirements[processorName] = true
 	end,
 }
---TODO: make condition implementation into a module. part of this will be making sure that setinfo'alpha' is called when condition state changes.
+
 local InheritAllFunc
 function Icon.InheritDataFromIcon(iconDestination, iconSource)
 	if not InheritAllFunc then
@@ -6028,40 +6124,10 @@ function Icon.InheritDataFromIcon(iconDestination, iconSource)
 	InheritAllFunc(iconDestination, iconSource)
 end
 
-
-local function enumLines(text)
-	text = text:gsub("\r\n", "\n"):gsub("\t", "    ")
-	local lines = {("\n"):split(text)}
-	local t = {}
-	local indent = 0
-	for i, v in ipairs(lines) do
-		if v:match("end;?$") or v:match("else$") or v:match("^ *elseif") then
-			indent = indent - 1
-		end
-		for j = 1, indent do
-			t[#t+1] = "    "
-		end
-		t[#t+1] = v:gsub(";\s*$", "")
-		t[#t+1] = " -- "
-		t[#t+1] = i
-		t[#t+1] = "\n"
-		if v:match("then$") or v:match("do$") or v:match("else$") or v:match("function%(.-%)") then
-			indent = indent + 1
-		end
-	end
-	local s = table.concat(t)
-	return s
-end
-local SetInfoFuncs = setmetatable({}, { __index = function(self, signature)
-	assert(type(signature) == "string", --TODO: remove this check after 9/1/2012
-	("(Bad argument #3 to icon:SetInfo(signature, ...) - Expected string, got %s. (SetInfo changed in v5.1.0 - are you still using the old SetInfo format?)"):format(type(signature)))
-	
+local function SetInfo_GenerateFunction(signature, isInternal)
 	local originalSignature = signature
 	
 	signature = signature:gsub(" ", "")
-	if rawget(self, signature) then
-		return self[signature]    
-	end    
 	
 	local t = {} -- taking a page from DogTag's book on compiling functions
 	
@@ -6095,10 +6161,15 @@ local SetInfoFuncs = setmetatable({}, { __index = function(self, signature)
 	]]
 	
 	while #signature > 0 do
-		local found
+		local match
 		for _, Processor in ipairs(IconDataProcessor.instances) do
-			found = signature:find(Processor.attributesStringNoSpaces .. "$") or signature:find(Processor.attributesStringNoSpaces .. ";")
-			if found then
+		
+			match = signature:match("^(" .. Processor.attributesStringNoSpaces .. ")$") -- The attribute string is the only one in the signature
+				 or	signature:match("^(" .. Processor.attributesStringNoSpaces .. ";)") -- The attribute string is the first one in the signature
+				 or	signature:match("(;" .. Processor.attributesStringNoSpaces .. ")$") -- The attribute string is the last one in the signature
+				 or	signature:match(";(" .. Processor.attributesStringNoSpaces .. ";)") -- The attribute string is in the middle of the signature
+				 
+			if match then
 				t[#t+1] = "local Processor = "
 				t[#t+1] = Processor.name
 				t[#t+1] = "\n"
@@ -6113,42 +6184,95 @@ local SetInfoFuncs = setmetatable({}, { __index = function(self, signature)
 				
 				t[#t+1] = "\n\n"  
 				
-				signature = signature:gsub(Processor.attributesStringNoSpaces .. ";?", "", 1)
+				signature = signature:gsub(match, "", 1)
 				
 				break
 			end
 		end
-		if not found then
-			error(("Couldn't find a signature match for the beginning of signature %q from %q"):format(signature, originalSignature), 3)
+		if not match then
+			error(("Couldn't find a signature match for the beginning of signature %q from %q"):format(signature, originalSignature), 4)
 		end
 	end
 	
-	t[#t+1] = [[
-		if doFireIconUpdated then
-			TMW:Fire("TMW_ICON_UPDATED", icon)
-		end
-	end -- "return function(icon, ...)"
-	]]
+	if isInternal then
+		t[#t+1] = [[
+			return doFireIconUpdated
+		end -- "return function(icon, ...)"
+		]]
+	else
+		t[#t+1] = [[
+			if doFireIconUpdated then
+				TMW:Fire("TMW_ICON_UPDATED", icon)
+			end
+		end -- "return function(icon, ...)"
+		]]
+	end
 	
 	local funcstr = table.concat(t)
-	funcstr = enumLines(funcstr)
-	if TMW.SetInfoFuncsToFuncStrs then
-		TMW.SetInfoFuncsToFuncStrs[originalSignature] = funcstr
+	if TMW.debug then
+		funcstr = TMW.debug.enumLines(funcstr)
+		TMW.debug.SetInfoFuncsToFuncStrs[tostring(isInternal) .. originalSignature] = funcstr
 	end
 	local func = assert(loadstring(funcstr, "SetInfo " .. originalSignature))()
-	self[originalSignature] = func
-	self[originalSignature:gsub(" ", "")] = func
+	
+	return func
+end
+
+local SetInfoFuncs = setmetatable({}, { __index = function(self, signature)
+	assert(type(signature) == "string", --TODO: remove this check after 9/1/2012
+	("(Bad argument #3 to icon:SetInfo(signature, ...) - Expected string, got %s. (SetInfo changed in v5.1.0 - are you still using the old SetInfo format?)"):format(type(signature)))
+	
+	-- Check and see if we already made a function for this signature, just with different spacing.
+	local signature_no_spaces = signature:gsub(" ", "")
+	if rawget(self, signature_no_spaces) then
+		local func = self[signature_no_spaces]
+		
+		-- If there was a function, cache it for the original signature also so that we don't go through this lookup process every time.
+		self[signature] = func
+		return func
+	end
+	
+	local func = SetInfo_GenerateFunction(signature, nil)
+	
+	self[signature] = func
+	self[signature:gsub(" ", "")] = func
 	
 	return func
 end})
 function Icon.SetInfo(icon, signature, ...)
 	SetInfoFuncs[signature](icon, ...)
 end
+
+local SetInfoInternalFuncs = setmetatable({}, { __index = function(self, signature)
+	-- Check and see if we already made a function for this signature, just with different spacing.
+	local signature_no_spaces = signature:gsub(" ", "")
+	if rawget(self, signature_no_spaces) then
+		local func = self[signature_no_spaces]
+		
+		-- If there was a function, cache it for the original signature also so that we don't go through this lookup process every time.
+		self[signature] = func
+		return func
+	end
+	
+	local func = SetInfo_GenerateFunction(signature, true)
+	
+	self[signature] = func
+	self[signature:gsub(" ", "")] = func
+	
+	return func
+end})
+-- SetInfo_INTERNAL doesn't fire TMW_ICON_UPDATED because it is always called from within SetInfo (inside IconDataProcessorHooks).
+-- SetInfo will fire it at the end (and only once, isntead of multiple times), so SetInfo_INTERNAL shouldn't fire it.
+-- It returns doFireIconUpdated, which should be handled as needed if SetInfo_INTERNAL is being called inside a hook.
+-- It can (and should, obviously) be ignored if being called from the changedEvent of an IconDataProcessor.
+function Icon.SetInfo_INTERNAL(icon, signature, ...)
+	SetInfoInternalFuncs[signature](icon, ...)
+end
 function TMW:ClearSetInfoFunctionCache()
 	wipe(SetInfoFuncs)
+	wipe(SetInfoInternalFuncs)
 	InheritAllFunc = nil
 end
-TMW.SetInfoFuncsToFuncStrs = {} --DEBUG
 
 local DogTagEventHandler = function(event, icon)
 	DogTag:FireEvent(event, icon.group.ID, icon.ID)
@@ -6196,11 +6320,11 @@ TMW:NewClass("ObjectModule"){
 			self.IsEnabled = true
 			self.class.NumberEnabled = self.class.NumberEnabled + 1
 			if self.class.NumberEnabled == 1 and self.class.OnUsed then
-				self.class:OnUsed()
+				TMW.safecall(self.class.OnUsed, self.class)
 			end
 			
 			if self.OnEnable then
-				self:OnEnable()
+				TMW.safecall(self.OnEnable, self)
 			end
 		end
 	end,
@@ -6211,16 +6335,16 @@ TMW:NewClass("ObjectModule"){
 			self.IsEnabled = false
 			self.class.NumberEnabled = self.class.NumberEnabled - 1
 			if self.class.NumberEnabled == 0 and self.class.OnUnused then
-				self.class:OnUnused()
+				TMW.safecall(self.class.OnUnused, self.class)
 			end
 			
 			if self.OnDisable then
-				self:OnDisable()
+				TMW.safecall(self.OnDisable, self)
 			end
 		end
 	end,
 	
-	SetScriptHandler = function(self, script, func)
+	SetIconScriptHandler = function(self, script, func)
 		self:AssertSelfIsClass()
 		
 		TMW:ValidateType(2, "Module:GetScriptHandler()", script, "string")
@@ -6271,14 +6395,14 @@ TMW:NewClass("IconModule", "IconComponent", "ObjectModule"){
 		local implementationData = self.implementationData
 		local implementorFunc = implementationData.implementorFunc
 		
+		if self.SetupForIcon then
+			TMW.safecall(self.SetupForIcon, self, icon)
+		end
+		
 		-- implementorFunc is either true if the module is setup within IconView:Icon_Setup(),
 		-- or it is a function if that function should be called in order to setup the module.
 		if type(implementorFunc) == "function" then
 			implementorFunc(self, icon)
-		end
-		
-		if self.SetupForIcon then
-			self:SetupForIcon(icon)
 		end
 	end,
 	
@@ -6324,7 +6448,7 @@ TMW:NewClass("IconModule", "IconComponent", "ObjectModule"){
 		return self.EventListners[event]
 	end,
 	
-	SetEssentialModuleComponent = function(self, identifier, component)	--TODO: deprecate this
+	SetEssentialModuleComponent = function(self, identifier, component)	--TODO: deprecate this. replace it with the new list of anchored points things that i wanted to do.
 		self:AssertSelfIsInstance()
 		
 		assert(identifier)
@@ -6346,7 +6470,7 @@ TMW:NewClass("IconModule", "IconComponent", "ObjectModule"){
 		self.ViewImplementors.ALL = implementorFunc
 	end,
 	
-	SetImplementorForView = function(self, view, order, implementorFunc)
+	SetImplementorForView = function(self, viewName, order, implementorFunc)
 		self:AssertSelfIsClass()
 		
 		local IconView = Views[viewName]
@@ -6401,11 +6525,11 @@ TMW:NewClass("IconModule", "IconComponent", "ObjectModule"){
 				
 				self.class.NumberEnabled = self.class.NumberEnabled + 1
 				if self.class.NumberEnabled == 1 and self.class.OnUsed then
-					self.class:OnUsed()
+					TMW.safecall(self.class.OnUsed, self.class)
 				end
 				
 				if self.OnEnable then
-					self:OnEnable()
+					TMW.safecall(self.OnEnable, self)
 				end
 			end
 		end
@@ -6417,11 +6541,11 @@ TMW:NewClass("IconModule", "IconComponent", "ObjectModule"){
 			self.IsEnabled = false
 			self.class.NumberEnabled = self.class.NumberEnabled - 1
 			if self.class.NumberEnabled == 0 and self.class.OnUnused then
-				self.class:OnUnused()
+				TMW.safecall(self.class.OnUnused, self.class)
 			end
 			
 			if self.OnDisable then
-				self:OnDisable()
+				TMW.safecall(self.OnDisable, self)
 			end
 		end
 	end,
@@ -6486,6 +6610,7 @@ TMW:NewClass("GroupModule_Resizer", "GroupModule"){
 		OnImplementIntoGroup = function(self)
 			self.resizeButton:SetFrameLevel(self.group:GetFrameLevel() + 2)
 			
+			self.resizeButton.__noWrapTooltipText = true
 			TMW:TT(self.resizeButton, self.tooltipTitle, self.tooltipText, 1, 1)
 		end,
 	},
@@ -6717,7 +6842,8 @@ TMW:NewClass("GroupModule_Resizer_ScaleY_SizeX", "GroupModule_Resizer"){
 }
 
 
-local IconType = TMW:NewClass("IconType", "IconComponent", "NamedInstances")
+local IconType = TMW:NewClass("IconType", "IconComponent")
+IconType.UsedAttributes = {}
 
 do	-- IconType:InIcons(groupID)
 	local states = {}
@@ -6759,16 +6885,17 @@ end
 function IconType:OnNewInstance(type)
 	self.type = type
 	self.Icons = {}
-	self.UsedAttributes = {}
+	self:InheritTable(self.class, "UsedAttributes")
 	self.UsedProcessors = {}
+	self.Colors = {}
 end
 
 function IconType:UpdateColors(dontSetupIcons)
 	for k, v in pairs(TMW.db.profile.Colors[self.type]) do
 		if v.Override then
-			self[k] = v
+			self.Colors[k] = v
 		else
-			self[k] = TMW.db.profile.Colors.GLOBAL[k]
+			self.Colors[k] = TMW.db.profile.Colors.GLOBAL[k]
 		end
 	end
 	if not dontSetupIcons then
@@ -6846,8 +6973,12 @@ function IconType:Register()
 	return self -- why not?
 end
 
-function IconType:UsesAttributes(attributesString)
-	self.UsedAttributes[attributesString] = true
+function IconType:UsesAttributes(attributesString, uses)
+	if uses == false then
+		self.UsedAttributes[attributesString] = nil
+	else
+		self.UsedAttributes[attributesString] = true
+	end
 end
 
 function IconType:UpdateUsedProcessors()
@@ -6916,6 +7047,11 @@ function IconType:OnUnimplementFromIcon(icon)
 		Processor:UnimplementFromIcon(icon)
 	end
 end
+
+IconType:UsesAttributes("alpha")
+IconType:UsesAttributes("alphaOverride")
+IconType:UsesAttributes("conditionFailed")
+
 --TODO: (misplaced note): implement something like IconModule:RegisterAnchor(frame, identifier, localizedName) so that other modules can anchor to it (mainly texts)
 function IconType:SetModuleAllowance(moduleName, allow)
 	local IconModule = TMW.Classes[moduleName]
@@ -6937,7 +7073,7 @@ function Icon.IsModuleImplemented(icon, moduleName)
 end
 
 
-local IconView = TMW:NewClass("IconView", "GroupComponent", "IconComponent", "NamedInstances")
+local IconView = TMW:NewClass("IconView", "GroupComponent", "IconComponent")
 IconView.ModuleImplementors = {}
 --TODO: consider making all icon views classes instead of just instances of IconView. Create an instance of the class that can be used as a view when :Register() is called.
 function IconView:OnNewInstance(view)
@@ -6969,9 +7105,17 @@ end
 local function SortModuleImplementors(a, b)
 	return a.order < b.order
 end
+local function DefaultImplementorFunc(Module)
+	Module:Enable()
+end
+
 function IconView:ImplementsModule(module, order, implementorFunc)
 	TMW:ValidateType(2, "IconView:ImplementsModule()", module, "string")
 	TMW:ValidateType(3, "IconView:ImplementsModule()", order, "number")
+	
+	if implementorFunc == true then
+		implementorFunc = DefaultImplementorFunc
+	end
 	
 	self.ModuleImplementors[#self.ModuleImplementors+1] = {
 		order = order,
@@ -7065,7 +7209,12 @@ function IconView:OnUnimplementFromIcon(icon)
 	end
 end
 
-IconView:ImplementsModule("IconModule_IconEventClickHandler", 10, function(Module) Module:Enable() end)
+IconView:ImplementsModule("IconModule_IconEventClickHandler", 2, true)
+IconView:ImplementsModule("IconModule_RecieveSpellDrags", 3, true)
+IconView:ImplementsModule("IconModule_IconDragger", 4, true)
+IconView:ImplementsModule("IconModule_GroupDragger", 5, true)
+IconView:ImplementsModule("IconModule_Tooltip", 6, true)
+IconView:ImplementsModule("IconModule_IconEditorLoader", 7, true)
 
 -- ------------------
 -- NAME/ETC FUNCTIONS

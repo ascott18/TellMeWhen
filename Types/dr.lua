@@ -64,19 +64,19 @@ Type:RegisterIconDefaults{
 	CheckRefresh			= true,
 }
 
-Type:RegisterConfigPanel_XMLTemplate("full", 1, "TellMeWhen_ChooseName", {
+Type:RegisterConfigPanel_XMLTemplate(100, "TellMeWhen_ChooseName", {
 	SUGType = "dr",
 })
 
-Type:RegisterConfigPanel_XMLTemplate("full", 1, "TellMeWhen_Unit")
+Type:RegisterConfigPanel_XMLTemplate(105, "TellMeWhen_Unit")
 
-Type:RegisterConfigPanel_XMLTemplate("column", 2, "TellMeWhen_WhenChecks", {
+Type:RegisterConfigPanel_XMLTemplate(130, "TellMeWhen_WhenChecks", {
 	text = L["ICONMENU_SHOWWHEN"],
 	[0x2] = { text = "|cFF00FF00" .. L["ICONMENU_DRABSENT"], 	},
 	[0x1] = { text = "|cFFFF0000" .. L["ICONMENU_DRPRESENT"], 	},
 })
 
-Type:RegisterConfigPanel_ConstructorFunc("column", 1, "TellMeWhen_DRSettings", function(self)
+Type:RegisterConfigPanel_ConstructorFunc(150, "TellMeWhen_DRSettings", function(self)
 	self.Header:SetText(Type.name)
 	TMW.IE:BuildSimpleCheckSettingFrame(self, {
 		{
@@ -243,7 +243,7 @@ do	-- CheckCategories
 
 		if icon:IsBeingEdited() == 1 then
 			if result.doWarn then
-				TMW.HELP:Show("ICON_DR_MISMATCH", icon, TMW.IE.Main.Name, 0, 0, L["WARN_DRMISMATCH"] .. result.append)
+				TMW.HELP:Show("ICON_DR_MISMATCH", icon, TMW.IE.MainScrollFrame.Name, 0, 0, L["WARN_DRMISMATCH"] .. result.append)
 			else
 				TMW.HELP:Hide("ICON_DR_MISMATCH")
 			end

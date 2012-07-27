@@ -17,21 +17,12 @@ local TMW = TMW
 local L = TMW.L
 local print = TMW.print
 
-local Hook = TMW.Classes.IconDataProcessorHook:New("ALPHA_DURATIONREQ", "ALPHA")
-Hook:RegisterProcessorRequirement("DURATION")
-Hook:RegisterCompileFunctionSegmentHook("pre", function(Processor, t)
-	-- GLOBALS: alpha, start, duration
-	t[#t+1] = [[
+-- Create an IconDataProcessor that will store the result of the duration test
+TMW.Classes.IconDataProcessor:New("ALPHA_DURATIONFAILED", "alpha_durationFailed")
+TMW.IconAlphaManager:AddHandler(20, "ALPHA_DURATIONFAILED")
 
-	local d = (duration or attributes.duration or 0) - (TMW.time - (start or attributes.start or 0))
-	
-	if
-		d > 0 and ((icon.DurationMinEnabled and icon.DurationMin > d) or (icon.DurationMaxEnabled and d > icon.DurationMax))
-	then
-		alpha = alpha ~= 0 and icon.DurationAlpha or 0 -- use the alpha setting for failed duration, but only if the icon isnt being hidden for another reason
-	end
-	--]]
-end)
+local Hook = TMW.Classes.IconDataProcessorHook:New("ALPHA_DURATIONREQ", "DURATION")
+
 Hook:RegisterIconDefaults{
 	DurationMin				= 0,
 	DurationMax				= 0,
@@ -39,16 +30,41 @@ Hook:RegisterIconDefaults{
 	DurationMaxEnabled		= false,
 	DurationAlpha			= 0,
 }
-Hook:RegisterConfigPanel_XMLTemplate("column", 3, "TellMeWhen_DurationRequirements")
+Hook:RegisterConfigPanel_XMLTemplate(222, "TellMeWhen_DurationRequirements")
+
+
+Hook:RegisterCompileFunctionSegmentHook("post", function(Processor, t)
+	-- GLOBALS: start, duration
+	t[#t+1] = [[
+
+	local d = duration - (TMW.time - start)
+	
+	local alpha_durationFailed = nil
+	if
+		d > 0 and ((icon.DurationMinEnabled and icon.DurationMin > d) or (icon.DurationMaxEnabled and d > icon.DurationMax))
+	then
+		alpha_durationFailed = icon.DurationAlpha
+	end
+	
+	if attributes.alpha_durationFailed ~= alpha_durationFailed then
+		icon:SetInfo_INTERNAL("alpha_durationFailed", alpha_durationFailed)
+	end
+	--]]
+end)
+
+Hook:ExtendMethod("OnUnimplementFromIcon", function(self, icon)
+	icon:SetInfo("alpha_durationFailed", nil)
+end)
+
 
 TMW:RegisterCallback("TMW_ICON_NEXTUPDATE_REQUESTDURATION", function(event, icon, currentIconDuration)
-	local attributes = icon.attributes
 	if icon.DurationMaxEnabled then
 		local DurationMax = icon.DurationMax
-		if DurationMax < currentIconDuration then
+		if DurationMax < currentIconDuration and icon.NextUpdate_Duration < DurationMax  then
 			icon.NextUpdate_Duration = DurationMax
 		end
 	end
+	
 	if icon.DurationMinEnabled then
 		local DurationMin = icon.DurationMin
 		if DurationMin < currentIconDuration and icon.NextUpdate_Duration < DurationMin then

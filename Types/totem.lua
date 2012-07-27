@@ -47,15 +47,16 @@ Type:RegisterIconDefaults{
 }
 
 if pclass ~= "DRUID" and pclass ~= "DEATHKNIGHT" then
-	Type:RegisterConfigPanel_XMLTemplate("full", 1, "TellMeWhen_ChooseName", {
+	Type:RegisterConfigPanel_XMLTemplate(100, "TellMeWhen_ChooseName", {
 		title = L["ICONMENU_CHOOSENAME"] .. " " .. L["ICONMENU_CHOOSENAME_ORBLANK"],
 	})
 end
 
 if pclass == "SHAMAN" then
-	Type:RegisterConfigPanel_ConstructorFunc("column", 2, "TellMeWhen_TotemSlots_Shaman", function(self)
+	Type:RegisterConfigPanel_ConstructorFunc(120, "TellMeWhen_TotemSlots_Shaman", function(self)
 		self.Header:SetText(TMW.L["TOTEMS"])
 		TMW.IE:BuildSimpleCheckSettingFrame(self, "SettingTotemButton", {
+			numPerRow = 4,
 			{
 				setting = "TotemSlots",
 				value = 1,
@@ -79,7 +80,7 @@ if pclass == "SHAMAN" then
 		})
 	end)
 elseif pclass == "DRUID" then
-	Type:RegisterConfigPanel_ConstructorFunc("column", 2, "TellMeWhen_TotemSlots_Druid", function(self)
+	Type:RegisterConfigPanel_ConstructorFunc(120, "TellMeWhen_TotemSlots_Druid", function(self)
 		self.Header:SetText(TMW.L["MUSHROOMS"])
 		TMW.IE:BuildSimpleCheckSettingFrame(self, "SettingTotemButton", {				
 			{
@@ -101,7 +102,7 @@ elseif pclass == "DRUID" then
 	end)
 end
 
-Type:RegisterConfigPanel_XMLTemplate("column", 2, "TellMeWhen_WhenChecks", {
+Type:RegisterConfigPanel_XMLTemplate(130, "TellMeWhen_WhenChecks", {
 	text = L["ICONMENU_SHOWWHEN"],
 	[0x2] = { text = "|cFF00FF00" .. L["ICONMENU_PRESENT"],		},
 	[0x1] = { text = "|cFFFF0000" .. L["ICONMENU_ABSENT"],		},

@@ -20,31 +20,35 @@ local print = TMW.print
 
 local Alpha = TMW:NewClass("IconModule_Alpha", "IconModule")
 
-function Alpha:OnEnable()
-	local icon = self.icon
-	local attributes = icon.attributes
-	
-	self:ALPHA(icon, attributes.alpha)
-	self:ALPHAOVERRIDE(icon, attributes.alphaOverride)
-end
-
-function Alpha:ALPHA(icon, alpha)
-	if (not icon.FadeHandlers or not icon.FadeHandlers[1]) and not icon.attributes.alphaOverride then
-		icon:SetAlpha(icon.FakeHidden and 0 or alpha)
-	end
-end
-Alpha:SetDataListner("ALPHA")
-
 Alpha:RegisterIconDefaults{
 	FakeHidden				= false,
 }
 
-function Alpha:ALPHAOVERRIDE(icon, alphaOverride)
-	if alphaOverride then
-		icon:SetAlpha(alphaOverride)
+
+Alpha:RegisterConfigPanel_ConstructorFunc(220, "TellMeWhen_AlphaModuleSettings", function(self)
+	self.Header:SetText(L["ICONALPHAPANEL_FAKEHIDDEN"])
+	TMW.IE:BuildSimpleCheckSettingFrame(self, {
+		{
+			setting = "FakeHidden",
+			title = L["ICONALPHAPANEL_FAKEHIDDEN"],
+			tooltip = L["ICONALPHAPANEL_FAKEHIDDEN_DESC"],
+		}
+	})
+end)
+
+function Alpha:OnEnable()
+	local icon = self.icon
+	local attributes = icon.attributes
+	
+	self:REALALPHA(icon, icon.attributes.realAlpha)
+end
+
+function Alpha:REALALPHA(icon, realAlpha)
+	if TMW.Locked then
+		icon:SetAlpha(icon.FakeHidden and 0 or realAlpha)
 	else
-		self:ALPHA(icon, icon.attributes.alpha)
+		icon:SetAlpha(realAlpha)
 	end
 end
-Alpha:SetDataListner("ALPHAOVERRIDE")
-	
+
+Alpha:SetDataListner("REALALPHA")

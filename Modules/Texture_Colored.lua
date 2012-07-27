@@ -31,6 +31,19 @@ Texture_Colored:ExtendMethod("OnEnable", function(self)
 	self:UPDATE(icon)	
 end)
 
+function Texture_Colored:SetupForIcon(icon)
+	self.Colors = icon.typeData.Colors
+	self.ShowWhen = icon.ShowWhen
+	self.ShowTimer = icon.ShowTimer
+end
+
+local COLOR_UNLOCKED = {
+	r=1,
+	b=1,
+	g=1,
+	Gray=false,
+}
+--TODO: the whole colors thing needs to be completely redone. This is a really depressing todo, but you need to do it.
 function Texture_Colored:UPDATE(icon)
 	local attributes = icon.attributes
 	local duration, inrange, nomana = attributes.duration, attributes.inRange, attributes.noMana
@@ -51,12 +64,14 @@ function Texture_Colored:UPDATE(icon)
 	NS	=	{r=1,	g=1,	b=1		},	-- not counting somtimes]]
 
 	local color
-	if inrange == 0 and nomana then
-		color = icon.typeData.OORM
+	if not TMW.Locked then
+		color = COLOR_UNLOCKED
+	elseif inrange == 0 and nomana then
+		color = self.Colors.OORM
 	elseif inrange == 0 then
-		color = icon.typeData.OOR
+		color = self.Colors.OOR
 	elseif nomana then
-		color = icon.typeData.OOM
+		color = self.Colors.OOM
 	else
 
 		local s
@@ -68,7 +83,7 @@ function Texture_Colored:UPDATE(icon)
 		end
 
 		if s == "C" then
-			if icon.ShowTimer then
+			if self.ShowTimer then
 				s = s .. "T" -- Timer
 			else
 				s = s .. "O" -- nOtimer
@@ -76,16 +91,16 @@ function Texture_Colored:UPDATE(icon)
 		end
 
 		
-		--if (icon.ShowWhen or "always") == "always" then
-		if (bitband(icon.ShowWhen or 0x3, 0x3)) == 0x3 then
+		--if (self.ShowWhen or "always") == "always" then
+		if (bitband(self.ShowWhen or 0x3, 0x3)) == 0x3 then
 			s = s .. "A" -- Always
 		else
 			s = s .. "S" -- Sometimes
 		end
 		
-		--assert(icon.typeData[s])
+		--assert(self.Colors[s])
 
-		color = icon.typeData[s]
+		color = self.Colors[s]
 	end
 	
 	local texture = self.texture
@@ -104,7 +119,6 @@ function Texture_Colored:UPDATE(icon)
 	end
 end
 
-Texture_Colored:SetDataListner("PRESUSABLE", Texture_Colored.UPDATE)
 Texture_Colored:SetDataListner("INRANGE", Texture_Colored.UPDATE)
 Texture_Colored:SetDataListner("NOMANA", Texture_Colored.UPDATE)
 

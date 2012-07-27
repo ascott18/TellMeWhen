@@ -54,19 +54,40 @@ Type:RegisterIconDefaults{
 	OnlyMine				= false,
 }
 
-Type:RegisterConfigPanel_XMLTemplate("full", 1, "TellMeWhen_ChooseName", {
+Type:RegisterConfigPanel_XMLTemplate(100, "TellMeWhen_ChooseName", {
 	SUGType = "buff",
 })
 
-Type:RegisterConfigPanel_XMLTemplate("full", 1, "TellMeWhen_Unit")
+Type:RegisterConfigPanel_XMLTemplate(105, "TellMeWhen_Unit")
 
-Type:RegisterConfigPanel_XMLTemplate("column", 2, "TellMeWhen_WhenChecks", {
+Type:RegisterConfigPanel_ConstructorFunc(120, "TellMeWhen_BuffOrDebuff", function(self)
+	self.Header:SetText(TMW.L["ICONMENU_BUFFTYPE"])
+	TMW.IE:BuildSimpleCheckSettingFrame(self, {
+		{
+			setting = "BuffOrDebuff",
+			value = "HELPFUL",
+			title = "|cFF00FF00" .. L["ICONMENU_BUFF"],
+		},
+		{
+			setting = "BuffOrDebuff",
+			value = "HARMFUL",
+			title = "|cFFFF0000" .. L["ICONMENU_DEBUFF"],
+		},
+		{
+			setting = "BuffOrDebuff",
+			value = "EITHER",
+			title = L["ICONMENU_BOTH"],
+		},
+	})
+end)
+
+Type:RegisterConfigPanel_XMLTemplate(130, "TellMeWhen_WhenChecks", {
 	text = L["ICONMENU_SHOWWHEN"],
 	[0x2] = { text = "|cFF00FF00" .. L["ICONMENU_PRESENT"], 	},
 	[0x1] = { text = "|cFFFF0000" .. L["ICONMENU_ABSENT"], 		},
 })
 
-Type:RegisterConfigPanel_ConstructorFunc("column", 1, "TellMeWhen_BuffSettings", function(self)
+Type:RegisterConfigPanel_ConstructorFunc(150, "TellMeWhen_BuffSettings", function(self)
 	self.Header:SetText(Type.name)
 	TMW.IE:BuildSimpleCheckSettingFrame(self, {
 		{
@@ -87,28 +108,7 @@ Type:RegisterConfigPanel_ConstructorFunc("column", 1, "TellMeWhen_BuffSettings",
 	})
 end)
 
-Type:RegisterConfigPanel_XMLTemplate("column", 1, "TellMeWhen_SortSettings")
-
-Type:RegisterConfigPanel_ConstructorFunc("column", 2, "TellMeWhen_BuffOrDebuff", function(self)
-	self.Header:SetText(TMW.L["ICONMENU_BUFFTYPE"])
-	TMW.IE:BuildSimpleCheckSettingFrame(self, {
-		{
-			setting = "BuffOrDebuff",
-			value = "HELPFUL",
-			title = "|cFF00FF00" .. TMW.L["ICONMENU_BUFF"],
-		},
-		{
-			setting = "BuffOrDebuff",
-			value = "HARMFUL",
-			title = "|cFFFF0000" .. TMW.L["ICONMENU_DEBUFF"],
-		},
-		{
-			setting = "BuffOrDebuff",
-			value = "EITHER",
-			title = TMW.L["ICONMENU_BOTH"],
-		},
-	})
-end)
+Type:RegisterConfigPanel_XMLTemplate(170, "TellMeWhen_SortSettings")
 
 
 function Type:Update()

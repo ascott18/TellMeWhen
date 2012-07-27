@@ -371,60 +371,42 @@ end
 
 ---------- Misc Utilities ----------
 do -- TMW:ReconcileData()
-	local function replace(table, key, source, destination, matchSource, matchDestination, swap)
+	local isRunning
+	local source_use, destination_use, matchSource_use, matchDestination_use, swap_use
+	
+	
+	local function replace(table, key)
+		assert(isRunning, "TMW:ReconcileData() isn't running!")
+		
+		TMW:ValidateType(1, "replace()", table, "table")
+		assert(key ~= nil, "TMW: replace() - arg2 (key) cannot be nil")
+		
 		local string = table[key]
 
-		if matchSource and string:find(matchSource) then
-			table[key] = string:gsub(source, destination)
-		elseif not matchSource and source == string then
-			table[key] = destination
-		elseif swap and matchDestination and string:find(matchDestination) then
-			table[key] = string:gsub(destination, source)
-		elseif swap and not matchDestination and destination == string then
-			table[key] = source
+		if matchSource_use and string:find(matchSource_use) then
+			table[key] = string:gsub(source_use, destination_use)
+		elseif not matchSource_use and source_use == string then
+			table[key] = destination_use
+		elseif swap_use and matchDestination_use and string:find(matchDestination_use) then
+			table[key] = string:gsub(destination_use, source_use)
+		elseif swap_use and not matchDestination_use and destination_use == string then
+			table[key] = source_use
 		end
 	end
 
 	function TMW:ReconcileData(source, destination, matchSource, matchDestination, swap, limitSourceGroup)
+		assert(not isRunning)
+		isRunning = true
+		
 		assert(source)
 		assert(destination)
+		
+		source_use, destination_use, matchSource_use, matchDestination_use, swap_use =
+		source,		destination,	 matchSource,	  matchDestination,		swap
 
-		for ics, groupID in TMW:InIconSettings() do
-			if not limitSourceGroup or groupID == limitSourceGroup then
-
-				-- update any changed icons that meta icons are checking
-				for k, ic in pairs(ics.Icons) do
-					if type(ic) == "string" then
-						replace(ics.Icons, k, source, destination, matchSource, matchDestination, swap)
-					end
-				end
-
-				-- update any changed icons that icon show/hide events are checking
-				for _, eventSettings in TMW:InNLengthTable(ics.Events) do
-					if type(eventSettings.Icon) == "string" then
-						replace(eventSettings, "Icon", source, destination, matchSource, matchDestination, swap)
-					end
-				end
-			end
-		end
-
-		-- update any changed icons in conditions
-		for Condition, _, groupID in TMW:InConditionSettings() do
-			if not limitSourceGroup or groupID == limitSourceGroup then
-				if Condition.Icon ~= "" and type(Condition.Icon) == "string" then
-					replace(Condition, "Icon", source, destination, matchSource, matchDestination, swap)
-				end
-			end
-		end
-
-		-- update any anchors
-		for gs, groupID in TMW:InGroupSettings() do
-			if not limitSourceGroup or groupID == limitSourceGroup then
-				if type(gs.Point.relativeTo) == "string" then
-					replace(gs.Point, "relativeTo", source, destination, matchSource, matchDestination, swap)
-				end
-			end
-		end
+		TMW:Fire("TMW_CONFIG_ICON_RECONCILIATION_REQUESTED", replace, limitSourceGroup)
+		
+		isRunning = false
 	end
 end
 
@@ -2582,14 +2564,16 @@ function IE:OnUpdate()
 	-- update the top of the icon editor with the information of the current icon.
 	-- this is done in an OnUpdate because it is just too hard to track when the texture changes sometimes.
 	-- I don't want to fill up the main addon with configuration code to notify the IE of texture changes
+	local titlePrepend = L["ICON_TOOLTIP1"] .. " v" .. TELLMEWHEN_VERSION_FULL .. " - "
+	
 	if IE.CurrentTab:GetID() > #IE.Tabs - 2 then
 		-- the last 2 tabs are group config, so dont show icon info
-		self.FS1:SetFormattedText(L["fGROUP"], TMW:GetGroupName(groupID, groupID, 1))
+		self.FS1:SetFormattedText(titlePrepend .. L["fGROUP"], TMW:GetGroupName(groupID, groupID, 1))
 		self.icontexture:SetTexture(nil)
 		self.BackButton:Hide()
 		self.ForwardsButton:Hide()
 	else
-		self.FS1:SetFormattedText(L["GROUPICON"], TMW:GetGroupName(groupID, groupID, 1), iconID)
+		self.FS1:SetFormattedText(titlePrepend .. L["GROUPICON"], TMW:GetGroupName(groupID, groupID, 1), iconID)
 		if icon then
 			self.icontexture:SetTexture(icon.attributes.texture)
 		end
@@ -2631,7 +2615,7 @@ function IE:RegisterTab(tab, attachedFrame)
 	local id = #IE.Tabs + 1
 	
 	if id == 1 then
-		tab:SetPoint("BOTTOMLEFT", 0, -25)
+		tab:SetPoint("BOTTOMLEFT", 0, -30)
 	else
 		tab:SetPoint("LEFT", IE.Tabs[id - 1], "RIGHT", -18, 0)
 	end
@@ -2643,96 +2627,151 @@ end
 ---------- Interface ----------
 IE.ALLDISPLAYTABFRAMES = {}
 
-local BASE_Y_OFFSET = -75
-function IE:PositionPanels(size, lastFrameCol1, lastFrameCol2, lastFrameCol3, nextColumn)
-	for i, Component in pairs(CI.ic.Components) do
+local panelList = {}
+local function panelSort(a, b)
+	return a.order < b.order
+end
+
+local GetColorForFrameName
+do
+	local t = {}
+	GetColorForFrameName = function(key)
+		-- This function isn't supposed to make sense.
+		-- It just generates pseudorandom numbers that are always the same given an input.
+		key = key:lower()
+		wipe(t)
+		local len = #key
+		local seglen = floor(len/3)
+		local currentField = 1
+		for i = 1, len do
+			local byte = strbyte(key:sub(i, i)) - 90
+			
+			t[currentField] = (t[currentField] or 0) + byte + byte^(i-((currentField-1)*seglen))
+			if i%seglen == 0 then
+				currentField = currentField + 1 
+			end
+			if currentField == 4 then
+				break
+			end
+		end
+		
+		local maxVal = max(t[1], t[2], t[3])
+		for i, v in pairs(t) do
+			t[i] = v/maxVal
+		end
+		
+		return t[1], t[2], t[3], 0.06
+	end
+end
+
+function IE:PositionPanels()
+	wipe(panelList)
+	for _, Component in pairs(CI.ic.Components) do
 		if Component:ShouldShowConfigPanels(CI.ic) then
-			for i2, panelInfo in pairs(Component.ConfigPanels) do
-				if panelInfo.size == size then
-					local frame
-					if panelInfo.panelType == "XMLTemplate" then
-						frame = IE.ALLDISPLAYTABFRAMES[panelInfo.xmlTemplateName]
-						
-						if not frame then
-							frame = CreateFrame("Frame", panelInfo.xmlTemplateName, TellMeWhen_IconEditorMain, panelInfo.xmlTemplateName)
-							IE.ALLDISPLAYTABFRAMES[panelInfo.xmlTemplateName] = frame
-						end
-					elseif panelInfo.panelType == "ConstructorFunc" then
-						frame = IE.ALLDISPLAYTABFRAMES[panelInfo] 
-						
-						if not frame then
-							frame = CreateFrame("Frame", panelInfo.frameName, TellMeWhen_IconEditorMain, "TellMeWhen_OptionsModuleContainer")
-							IE.ALLDISPLAYTABFRAMES[panelInfo] = frame
-							TMW.safecall(panelInfo.func, frame)
-						end
-					end
-					if panelInfo.preferredColumn then
-						nextColumn = panelInfo.preferredColumn
-					end			
-					
-					frame:ClearAllPoints()
-					if panelInfo.size == "full" then
-						local lowestFrame = lastFrameCol1
-						if lowestFrame and lastFrameCol2 and lowestFrame:GetBottom() > lastFrameCol2:GetBottom() then
-							lowestFrame = lastFrameCol2
-						end
-						if lowestFrame and lastFrameCol3 and lowestFrame:GetBottom() > lastFrameCol3:GetBottom() then
-							lowestFrame = lastFrameCol3
-						end
-						
-						if lowestFrame then
-							frame:SetPoint("TOP", lowestFrame, "BOTTOM", 0, -10)
-							frame:SetPoint("LEFT", 20, 0)
-						else
-							frame:SetPoint("TOPLEFT", 20, BASE_Y_OFFSET)
-						end
-						
-						lastFrameCol1 = frame
-						lastFrameCol2 = frame
-						lastFrameCol3 = frame
-						
-						nextColumn = 1
-					elseif nextColumn == 1 then
-						if lastFrameCol1 then
-							frame:SetPoint("TOP", lastFrameCol1, "BOTTOM", 0, -10)
-							frame:SetPoint("LEFT", 20, 0)
-						else
-							frame:SetPoint("TOPLEFT", 20, BASE_Y_OFFSET)
-						end
-						
-						lastFrameCol1 = frame
-						nextColumn = 2
-					elseif nextColumn == 2 then
-						if lastFrameCol2 then
-							frame:SetPoint("TOP", lastFrameCol2, "BOTTOM", 0, -10)
-							frame:SetPoint("LEFT", 210, 0)
-						else
-							frame:SetPoint("TOPLEFT", 210, BASE_Y_OFFSET)
-						end
-						
-						lastFrameCol2 = frame
-						nextColumn = 3
-					elseif nextColumn == 3 then
-						if lastFrameCol3 then
-							frame:SetPoint("TOP", lastFrameCol3, "BOTTOM", 0, -10)
-							frame:SetPoint("LEFT", 400, 0)
-						else
-							frame:SetPoint("TOPLEFT", 400, BASE_Y_OFFSET)
-						end
-						
-						lastFrameCol3 = frame
-						nextColumn = 1
-					end
-					
-					frame:Show()
-					
-					TMW:Fire("TMW_CONFIG_PANEL_SETUP", frame, panelInfo)
-				end		
+			for _, panelInfo in pairs(Component.ConfigPanels) do
+				tinsert(panelList, panelInfo)
 			end		
 		end
 	end
 	
-	return lastFrameCol1, lastFrameCol2, lastFrameCol3, nextColumn
+	for i = 1, #IE.Main.PanelListing do
+		IE.Main.PanelListing[i]:Hide()
+	end
+	
+	sort(panelList, panelSort)
+	
+	local lastFrame
+	
+	for i, panelInfo in ipairs(panelList) do
+		local frame
+		-- Get the frame for the panel if it already exists, or create it if it doesn't.
+		if panelInfo.panelType == "XMLTemplate" then
+			frame = IE.ALLDISPLAYTABFRAMES[panelInfo.xmlTemplateName]
+			
+			if not frame then
+				frame = CreateFrame("Frame", panelInfo.xmlTemplateName, TellMeWhen_IconEditorMainScrollFrame, panelInfo.xmlTemplateName)
+				IE.ALLDISPLAYTABFRAMES[panelInfo.xmlTemplateName] = frame
+			end
+		elseif panelInfo.panelType == "ConstructorFunc" then
+			frame = IE.ALLDISPLAYTABFRAMES[panelInfo] 
+			
+			if not frame then
+				frame = CreateFrame("Frame", panelInfo.frameName, TellMeWhen_IconEditorMainScrollFrame, "TellMeWhen_OptionsModuleContainer")
+				IE.ALLDISPLAYTABFRAMES[panelInfo] = frame
+				TMW.safecall(panelInfo.func, frame)
+			end
+		end
+		
+		local GenericComponent = panelInfo.component
+		
+		local ALPHA, R, G, B = 0.06
+		if GenericComponent.className == "IconType" then
+			R, G, B = 0.3, 1, 0.5
+		elseif GenericComponent.className:find("IconModule") then
+			R, G, B = 0.3, 0.4, 1
+		elseif GenericComponent.className:find("GroupModule") then
+			R, G, B = 0.6, 0.4, 1
+		elseif GenericComponent.className:find("IconDataProcessor") then -- IconDataProcessor and IconDataProcessorHook
+			R, G, B = 1, 0.5, 0.5
+		else
+			print("TMW: UNHANDLED CONFIG PANEL CLASS: ", GenericComponent.className)
+			R, G, B = 1, 1, 1
+		end
+		frame.Background:SetTexture(R, G, B)
+		frame.ALPHA = ALPHA
+		frame.Background:SetAlpha(ALPHA)
+		
+		if lastFrame then
+			frame:SetPoint("TOP", lastFrame, "BOTTOM", 0, -7)
+		else
+			frame:SetPoint("TOP", 20, -7)
+		end
+		lastFrame = frame
+		
+		frame:Show()
+		
+		TMW:Fire("TMW_CONFIG_PANEL_SETUP", frame, panelInfo)
+		
+		local panelListingFrame = IE.Main.PanelListing:GetListing(i)
+		panelListingFrame:SetText(frame.Header:GetText())
+		panelListingFrame.Background:SetTexture(R, G, B)
+		panelListingFrame.Background:SetAlpha(ALPHA)
+		panelListingFrame:Show()
+		
+		panelListingFrame.frame = frame
+		frame.panelListingFrame = panelListingFrame
+	end	
+end
+
+function IE:DistributeFrameAnchorsLaterally(parent, numPerRow, ...)
+	local numChildFrames = select("#", ...)
+	
+	local parentWidth = parent:GetWidth()
+	local paddingPerSide = 5 -- constant
+	local parentWidth_padded = parentWidth - paddingPerSide*2
+	
+	local widthPerFrame = parentWidth_padded/numPerRow
+	
+	local lastChild
+	for i = 1, numChildFrames do
+		local child = select(i, ...)
+		
+		local yOffset = 0
+		for i = 1, child:GetNumPoints() do
+			local point, relativeTo, relativePoint, x, y = child:GetPoint(i)
+			if point == "LEFT" then
+				yOffset = y or 0
+				break
+			end
+		end
+		
+		if lastChild then
+			child:SetPoint("LEFT", lastChild, "RIGHT", widthPerFrame - lastChild:GetWidth(), yOffset)
+		else
+			child:SetPoint("LEFT", paddingPerSide, yOffset)
+		end
+		lastChild = child
+	end
 end
 
 function IE:Load(isRefresh, icon, isHistoryChange)
@@ -2741,8 +2780,11 @@ function IE:Load(isRefresh, icon, isHistoryChange)
 		PlaySound("igCharacterInfoTab")
 		IE:SaveSettings()
 		CNDT:Clear()
+		
+		local ic_old = CI.ic
+		
 		CI.i = icon:GetID()
-		CI.g = icon:GetParent():GetID()
+		CI.g = icon.group:GetID()
 		CI.ic = icon
 
 		if IE.history[#IE.history] ~= icon and not isHistoryChange then
@@ -2758,6 +2800,10 @@ function IE:Load(isRefresh, icon, isHistoryChange)
 			IE.historyState = #IE.history
 			-- notify the back and forwards buttons that there was a change so they can :Enable() or :Disable()
 			IE:BackFowardsChanged()
+		end
+		
+		if ic_old ~= CI.ic then
+			IE.Main.ScrollFrame:SetVerticalScroll(0)
 		end
 		
 		TMW:Fire("TMW_CONFIG_ICON_LOADED_CHANGED", icon)
@@ -2804,13 +2850,8 @@ function IE:Load(isRefresh, icon, isHistoryChange)
 	for _, frame in pairs(IE.ALLDISPLAYTABFRAMES) do
 		frame:Hide()
 	end
-	local lastFrameCol1, lastFrameCol2, lastFrameCol3
-	local nextColumn = 1
-	lastFrameCol1, lastFrameCol2, lastFrameCol3, nextColumn = IE:PositionPanels("full", lastFrameCol1, lastFrameCol2, lastFrameCol3, nextColumn)
-	lastFrameCol1, lastFrameCol2, lastFrameCol3, nextColumn = IE:PositionPanels("column", lastFrameCol1, lastFrameCol2, lastFrameCol3, nextColumn)
 	
-	print("loaded", debugstack())
-	
+	IE:PositionPanels()
 	
 	
 	
@@ -2819,8 +2860,18 @@ function IE:Load(isRefresh, icon, isHistoryChange)
 	
 	TMW:Fire("TMW_CONFIG_ICON_LOADED", CI.ic)
 
-	IE:ShowHide()
-
+	local t = CI.ics.Type
+	if t then
+		for name, Type in pairs(Types) do
+			if name ~= t and Type.IE_TypeUnloaded then
+				TMW.safecall(Type.IE_TypeUnloaded, Type)
+			end
+		end
+		if Types[t].IE_TypeLoaded then
+			TMW.safecall(Types[t].IE_TypeLoaded, Types[t])
+		end
+	end
+	
 	IE:ScheduleIconSetup()
 
 	HELP:ShowNext()
@@ -2831,6 +2882,10 @@ function IE:Load(isRefresh, icon, isHistoryChange)
 		IE:AttemptBackup(CI.ic)
 	end
 	IE:UndoRedoChanged()
+
+	if IE.Main.ScrollFrame:GetVerticalScrollRange() == 0 then
+		IE.Main.ScrollFrame.ScrollBar:Hide()
+	end
 end
 
 function IE:LoadFirstValidIcon()
@@ -2911,21 +2966,6 @@ function IE:IsSettingRelevantToIcon(icon, setting)
 			return true
 		end
 	end
-end
-
-function IE:ShowHide()
-	local t = CI.ics.Type
-	if not t then return end
-
-	for name, Type in pairs(Types) do
-		if name ~= t and Type.IE_TypeUnloaded then
-			TMW.safecall(Type.IE_TypeUnloaded, Type)
-		end
-	end
-	if Types[t].IE_TypeLoaded then
-		TMW.safecall(Types[t].IE_TypeLoaded, Types[t])
-	end
-
 end
 
 function IE:Reset()
@@ -3039,7 +3079,7 @@ TMW:NewClass("SettingSlider", "Slider", "SettingFrameBase"){
 		
 		-- Cheater! (We arent getting anything)
 		-- (I'm using get as a wrapper so I don't have to check if the function exists before calling it)
-		get(self.data.OnValueChanged, self, button) 
+		get(self.data.OnValueChanged, self) 
 	end,
 	OnCreate = function(self)
 		self:SetMinMaxValues(self.data.min, self.data.max)
@@ -3061,7 +3101,9 @@ TMW:NewClass("SettingSlider", "Slider", "SettingFrameBase"){
 	end,
 	
 	OnMouseWheel = function(self, delta)
-		self:SetValue(self:GetValue() + delta)
+		if self:IsEnabled() then
+			self:SetValue(self:GetValue() + delta)
+		end
 	end,
 }
 
@@ -3302,7 +3344,7 @@ TMW:NewClass("SettingWhenCheckSet", "Frame", "SettingFrameBase"){
 		-- Alpha slider
 		assert(data.alphaSettingName, "SettingWhenCheckSet's data table must declare an alpha setting to be used! (data.alphaSettingName)")
 		
-		TMW.IE:CreateSettingFrameFromData(self.Alpha, "SettingSlider_Alpha", {
+		IE:CreateSettingFrameFromData(self.Alpha, "SettingSlider_Alpha", {
 			setting = data.alphaSettingName,
 			setOrangeAtValue = data.setOrangeAtValue or 0,
 			disabled = function(self)
@@ -3424,7 +3466,8 @@ function IE:BuildSimpleCheckSettingFrame(parent, arg2, arg3)
 	
 	local lastCheckButton
 	local numFrames = 0
-	for k, data in pairs(allData) do
+	local numPerRow = allData.numPerRow or min(#allData, 3)
+	for i, data in ipairs(allData) do
 		if data ~= nil and data ~= false then -- skip over nils/false (dont freak out about them, they are probably intentional)
 		
 			assert(type(data) == "table", "All values in allData must be tables!")
@@ -3432,22 +3475,28 @@ function IE:BuildSimpleCheckSettingFrame(parent, arg2, arg3)
 			local setting = data.setting -- the setting that the check will handle
 			-- the setting is used by the current icon type, and doesnt have an override that is "hiding" the check, so procede to set it up
 			
-			-- An human-friendly unique (hopefully) identifier for the frame
+			-- An human-friendly-ish unique (hopefully) identifier for the frame
 			local identifier = setting .. (data.value ~= nil and tostring(data.value) or "")
 			
 			local f = parent[identifier]
 			if not f then
 				f = CreateFrame(objectType, parent:GetName() .. identifier, parent, "TellMeWhen_CheckTemplate")
 				parent[identifier] = f
+				parent[i] = f
 				IE:CreateSettingFrameFromData(f, className, data)
 			end
 			
 			if lastCheckButton then
 				-- Anchor it to the previous check if it isn't the first one.
-				f:SetPoint("TOP", lastCheckButton, "BOTTOM", 0, 4)
+				if numFrames%numPerRow == 0 then
+					f:SetPoint("TOP", parent[i-numPerRow], "BOTTOM", 0, 2)
+				else
+					-- This will get overwritten soon.
+					f:SetPoint("LEFT", lastCheckButton.text, "RIGHT", 5, 0)
+				end
 			else
-				-- Anchor the first check to the parent
-				f:SetPoint("TOPLEFT", 5, -6)
+				-- Anchor the first check to the parent. The left anchor will be handled by DistributeFrameAnchorsLaterally.
+				f:SetPoint("TOP", 0, -6)
 			end
 			lastCheckButton = f
 
@@ -3457,7 +3506,13 @@ function IE:BuildSimpleCheckSettingFrame(parent, arg2, arg3)
 		end
 	end
 	
-	parent:SetHeight(14 + numFrames*26)
+	TMW:RegisterCallback("TMW_CONFIG_ICON_LOADED", function()
+		for i = 1, #parent, numPerRow do
+			IE:DistributeFrameAnchorsLaterally(parent, numPerRow, unpack(parent, i))
+		end
+	end)
+	
+	parent:SetHeight(16 + ceil(numFrames/numPerRow)*24)
 	
 	return parent
 end
@@ -3579,7 +3634,8 @@ function IE:Equiv_DropDown()
 end
 
 function IE:Equiv_DropDown_OnClick(value)
-	local e = IE.Main.Name
+	-- TODO: tie this closer to the choosename panel
+	local e = IE.MainScrollFrame.Name
 	e:Insert("; " .. value .. "; ")
 	local new = TMW:CleanString(e)
 	e:SetText(new)
@@ -3673,8 +3729,6 @@ function IE:Unit_DropDown_OnClick(v, e)
 	TMW:CleanString(e)
 	IE:ScheduleIconSetup()
 	CloseDropDownMenus()
-
-	TMW.db.global.HelpSettings.HasChangedUnit = TMW.db.global.HelpSettings.HasChangedUnit + 1
 end
 
 
@@ -5357,7 +5411,7 @@ function TEXT:Layout_DropDown()
 			strings = strings .. "\r\n" .. TEXT:GetStringName(fontStringSettings, 1)
 		end
 		info.tooltipTitle = TEXT:GetLayoutName(settings, GUID)
-		info.tooltipText = L["TEXTLAYOUTS_CHOOSELAYOUT"]:format(strings)
+		info.tooltipText = L["TEXTLAYOUTS_LAYOUTDISPLAYS"]:format(strings)
 		info.tooltipOnButton = true
 		
 		info.func = TEXT.Layout_DropDown_OnClick
@@ -5423,7 +5477,8 @@ if DogTag and DogTag.tagError then
 end
 
 function TEXT:LoadConfig()
-
+	if not IE.TextDisplay then return end
+	
 	local Texts = CI.ic:GetSettingsPerView().Texts
 	local GUID, layoutSettings = CI.ic:GetTextLayout()
 	
@@ -5437,16 +5492,20 @@ function TEXT:LoadConfig()
 			if not frame then
 				frame = CreateFrame("Frame", IE.TextDisplay.FontStrings:GetName().."String"..i, IE.TextDisplay.FontStrings, "TellMeWhen_TextDisplayGroup", i)
 				TEXT[i] = frame
-				frame:SetPoint("TOPLEFT", previousFrame, "BOTTOMLEFT")
+				frame:SetPoint("TOP", previousFrame, "BOTTOM")
 			end
 			
 			frame:Show()
 
 			frame.stringSettings = stringSettings
 
-			frame.StringName:SetFormattedText(L["TEXTLAYOUTS_fSTRING2"], i, TEXT:GetStringName(stringSettings, i, true))
-			frame.EditBox:SetText(Texts[i])
+			local display_N_stringName = L["TEXTLAYOUTS_fSTRING2"]:format(i, TEXT:GetStringName(stringSettings, i, true))
+			TMW:TT(frame.EditBox, display_N_stringName, "TEXTLAYOUTS_SETTEXT_DESC", 1)
+			frame.EditBox.label = display_N_stringName
 
+			frame.EditBox:SetText(Texts[i])
+			frame.EditBox:GetScript("OnTextChanged")(frame.EditBox)
+			
 			local DefaultText = stringSettings.DefaultText
 			if DefaultText == "" then
 				DefaultText = L["TEXTLAYOUTS_BLANK"]
@@ -5462,7 +5521,10 @@ function TEXT:LoadConfig()
 				group = CI.ic.group.ID,
 				unit = CI.ic.attributes.dogTagUnit,
 			}
-			local tagError = TEXT:TestDogTagFunc(pcall(loadstring(DogTag:CreateFunctionFromCode(Texts[i], "TMW;Unit", kwargs))(), kwargs))
+			
+			local func = loadstring(DogTag:CreateFunctionFromCode(Texts[i], "TMW;Unit", kwargs))
+			func = func and func()
+			local tagError = func and TEXT:TestDogTagFunc(pcall(func, kwargs))
 			if tagError then
 				frame.Error:SetText("ERROR: " .. tagError)
 			else
@@ -5490,22 +5552,29 @@ function TEXT:LoadConfig()
 	end
 
 	if TEXT[1] then
-		TEXT[1]:SetPoint("TOPLEFT", IE.TextDisplay.FontStrings)
-	end
-
-	if IE.TextDisplay.ScrollFrame:GetVerticalScrollRange() == 0 then
-		IE.TextDisplay.ScrollFrame.ScrollBar:Hide()
+		TEXT[1]:SetPoint("TOP", IE.TextDisplay.FontStrings)
 	end
 	
-	UIDropDownMenu_SetText(IE.TextDisplay.Layout.PickLayout, layoutName)
-	--IE.TextDisplay.Layout.LayoutName:SetFormattedText(L["TEXTLAYOUTS_fLAYOUT"], layoutName)
+	UIDropDownMenu_SetText(IE.TextDisplay.Layout.PickLayout, "|cff666666" .. L["TEXTLAYOUTS_HEADER_LAYOUT"] .. ": |r" .. layoutName)
 	
 	TMW:TT(IE.TextDisplay.Layout.LayoutSettings, "TEXTLAYOUTS_LAYOUTSETTINGS", L["TEXTLAYOUTS_LAYOUTSETTINGS_DESC"]:format(layoutName), nil, 1)
 end
 TMW:RegisterCallback("TMW_CONFIG_ICON_LOADED", TEXT.LoadConfig, TEXT)
 
+function TEXT:ResizeParentFrame()
+	local height = 45
+	
+	for i = 1, #TEXT do
+		if TEXT[i]:IsShown() then
+			height = height + TEXT[i]:GetHeight()
+		end
+	end
+	
+	IE.TextDisplay:SetHeight(height)
+end
+
 function TEXT:SetTextDisplayContainerHeight(frame)
-	local height = 26
+	local height = 6
 	
 	height = height + frame.EditBox:GetHeight()
 	
@@ -5513,6 +5582,8 @@ function TEXT:SetTextDisplayContainerHeight(frame)
 	height = height + frame.Error:GetHeight()
 	
 	frame:SetHeight(height)
+	
+	TEXT:ResizeParentFrame()
 end
 
 function TEXT:TMW_ICON_MAKE_SETTINGS_STANDALONE(event, ics, gs)
@@ -5571,7 +5642,6 @@ function SUG:OnInitialize()
 
 	SUG.RequestedFrom = {}
 	SUG.commThrowaway = {}
-	--SUG.Box = IE.Main.Name
 
 	SUG:PLAYER_TALENT_UPDATE()
 	SUG:BuildClassSpellLookup() -- must go before the local versions (ClassSpellLookup) are defined
@@ -8528,6 +8598,343 @@ end
 
 
 
+
+
+
+
+
+
+
+--TODO: needs its own file
+
+
+
+-- --------------------
+-- TellMeWhen
+-- Originally by Nephthys of Hyjal <lieandswell@yahoo.com>
+
+-- Other contributions by:
+--		Sweetmms of Blackrock, Oozebull of Twisting Nether, Oodyboo of Mug'thol,
+--		Banjankri of Blackrock, Predeter of Proudmoore, Xenyr of Aszune
+
+-- Currently maintained by
+-- Cybeloras of Detheroc/Mal'Ganis
+-- --------------------
+
+
+if not TMW then return end
+
+local TMW = TMW
+local L = TMW.L
+local error = error
+	
+
+local Module = TMW:NewClass("IconModule_GroupDragger", "IconModule")
+
+function Module:OnNewInstance_GroupDragger(icon)
+	icon:RegisterForDrag("LeftButton", "RightButton")
+end
+
+Module:SetIconScriptHandler("OnDragStop", function(Module, icon)
+	if TMW.ID.isMoving then
+		TMW:Group_StopMoving(TMW.ID.isMoving)
+	end
+end)
+
+Module:SetIconScriptHandler("OnDragStart", function(Module, icon, button)
+	if button == "LeftButton" then
+		local group = icon:GetParent()
+		if not group.Locked then
+			group:StartMoving()
+			TMW.ID.isMoving = group
+		end
+	end
+	if TMW.IE then
+		TMW.IE:ScheduleIconSetup(icon)
+	end
+end)
+
+Module:SetIconScriptHandler("OnMouseUp", function(Module, icon, button)
+	if not TMW.Locked then
+		if TMW.ID.isMoving then
+			TMW:Group_StopMoving(TMW.ID.isMoving)
+		end
+	end
+end)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+--TODO: separate files for all of this crap
+
+
+
+
+
+
+
+
+-- --------------------
+-- TellMeWhen
+-- Originally by Nephthys of Hyjal <lieandswell@yahoo.com>
+
+-- Other contributions by:
+--		Sweetmms of Blackrock, Oozebull of Twisting Nether, Oodyboo of Mug'thol,
+--		Banjankri of Blackrock, Predeter of Proudmoore, Xenyr of Aszune
+
+-- Currently maintained by
+-- Cybeloras of Detheroc/Mal'Ganis
+-- --------------------
+
+
+if not TMW then return end
+
+local TMW = TMW
+local L = TMW.L
+local error = error
+	
+
+local Module = TMW:NewClass("IconModule_RecieveSpellDrags", "IconModule")
+
+Module:SetIconScriptHandler("OnClick", function(Module, icon, button)
+	if not TMW.Locked and TMW.ID and button == "LeftButton" then
+		TMW.ID:SpellItemToIcon(icon)
+	end
+end)
+Module:SetIconScriptHandler("OnReceiveDrag", function(Module, icon, button)
+	if not TMW.Locked and TMW.ID then
+		TMW.ID:SpellItemToIcon(icon)
+	end
+end)
+
+
+
+
+
+
+
+
+
+
+
+
+-- --------------------
+-- TellMeWhen
+-- Originally by Nephthys of Hyjal <lieandswell@yahoo.com>
+
+-- Other contributions by:
+--		Sweetmms of Blackrock, Oozebull of Twisting Nether, Oodyboo of Mug'thol,
+--		Banjankri of Blackrock, Predeter of Proudmoore, Xenyr of Aszune
+
+-- Currently maintained by
+-- Cybeloras of Detheroc/Mal'Ganis
+-- --------------------
+
+
+if not TMW then return end
+
+local TMW = TMW
+local L = TMW.L
+local error = error
+	
+
+local Module = TMW:NewClass("IconModule_IconEditorLoader", "IconModule")
+
+Module:SetIconScriptHandler("OnMouseUp", function(Module, icon, button)
+	if not TMW.Locked then
+		if button == "RightButton" then
+			TMW.IE:Load(nil, icon)
+		end
+		TMW.IE:ScheduleIconSetup(icon)
+	end
+end)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+-- --------------------
+-- TellMeWhen
+-- Originally by Nephthys of Hyjal <lieandswell@yahoo.com>
+
+-- Other contributions by:
+--		Sweetmms of Blackrock, Oozebull of Twisting Nether, Oodyboo of Mug'thol,
+--		Banjankri of Blackrock, Predeter of Proudmoore, Xenyr of Aszune
+
+-- Currently maintained by
+-- Cybeloras of Detheroc/Mal'Ganis
+-- --------------------
+
+
+if not TMW then return end
+
+local TMW = TMW
+local L = TMW.L
+local error = error
+	
+
+local Module = TMW:NewClass("IconModule_IconDragger", "IconModule")
+
+function Module:OnNewInstance_IconDragger(icon)
+	icon:RegisterForDrag("LeftButton", "RightButton")
+end
+
+Module:SetIconScriptHandler("OnMouseDown", function(Module, icon)
+	if not TMW.Locked then
+		local ID = TMW.ID
+		if not ID then return end
+		ID.DraggingInfo = nil
+		ID.F:Hide()
+		ID.IsDragging = nil
+	end
+end)
+
+Module:SetIconScriptHandler("OnDragStart", function(Module, icon, button)
+	if button == "RightButton" and TMW.ID then
+		TMW.ID:Start(icon)
+	end
+	if TMW.IE then
+		TMW.IE:ScheduleIconSetup(icon)
+	end
+end)
+
+Module:SetIconScriptHandler("OnReceiveDrag", function(Module, icon)
+	if TMW.ID then
+		TMW.ID:CompleteDrag("OnReceiveDrag", icon)
+	end
+end)
+
+Module:SetIconScriptHandler("OnDragStop", function(Module, icon)
+	if TMW.ID and TMW.ID.IsDragging then
+		TMW.ID:CompleteDrag("OnDragStop")
+	end
+end)
+
+
+
+
+
+
+
+
+
+
+
+
+-- --------------------
+-- TellMeWhen
+-- Originally by Nephthys of Hyjal <lieandswell@yahoo.com>
+
+-- Other contributions by:
+--		Sweetmms of Blackrock, Oozebull of Twisting Nether, Oodyboo of Mug'thol,
+--		Banjankri of Blackrock, Predeter of Proudmoore, Xenyr of Aszune
+
+-- Currently maintained by
+-- Cybeloras of Detheroc/Mal'Ganis
+-- --------------------
+
+
+if not TMW then return end
+
+local TMW = TMW
+local L = TMW.L
+local error = error
+	
+
+local Module = TMW:NewClass("IconModule_Tooltip", "IconModule")
+local title_default = function(icon)
+	local groupID = icon.group:GetID()
+	
+	local line1 =
+		L["ICON_TOOLTIP1"] ..
+		" " ..
+		format(L["GROUPICON"], TMW:GetGroupName(groupID, groupID, 1), icon:GetID())
+		
+	if icon.group.Locked then
+		line1 = line1 .. " (" .. L["LOCKED"] .. ")"
+	end
+	
+	return line1
+end
+Module.title = title_default
+
+local text_default = L["ICON_TOOLTIP2NEW"]
+Module.text = text_default
+
+Module:ExtendMethod("OnUnimplementFromIcon", function(self)
+	self:SetTooltipTitle(title_default, true)
+	self:SetTooltipText(text_default, true)
+end)
+
+function Module:OnDisable()
+	if self.icon:IsMouseOver() and self.icon:IsVisible() then
+		GameTooltip:Hide()
+	end
+end
+
+function Module:SetTooltipTitle(title, dontUpdate)
+	self.title = title
+	
+	-- this should work, even though this tooltip isn't manged by TMW's tooltip handler
+	-- (TT_Update is really generic)
+	if not dontUpdate then
+		TMW:TT_Update(self.icon)
+	end
+end
+function Module:SetTooltipText(text, dontUpdate)
+	self.text = text
+	
+	-- this should work, even though this tooltip isn't manged by TMW's tooltip handler
+	-- (TT_Update is really generic)
+	if not dontUpdate then
+		TMW:TT_Update(self.icon)
+	end
+end
+
+Module:SetIconScriptHandler("OnEnter", function(Module, icon)
+	GameTooltip_SetDefaultAnchor(GameTooltip, icon)
+	GameTooltip:AddLine(TMW.get(Module.title, icon), HIGHLIGHT_FONT_COLOR.r, HIGHLIGHT_FONT_COLOR.g, HIGHLIGHT_FONT_COLOR.b, false)
+	GameTooltip:AddLine(TMW.get(Module.text, icon), NORMAL_FONT_COLOR.r, NORMAL_FONT_COLOR.g, NORMAL_FONT_COLOR.b, false)
+	GameTooltip:Show()
+end)
+
+Module:SetIconScriptHandler("OnLeave", function(Module, icon)
+	GameTooltip:Hide()
+end)
 
 
 

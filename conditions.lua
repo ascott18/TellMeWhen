@@ -3060,9 +3060,9 @@ CNDT.Types = {
 
 			local str = [[( c.Icon and c.Icon.attributes.shown and c.Icon.OnUpdate and not c.Icon:Update())]]
 			if c.Level == 0 then
-				str = str .. [[and c.Icon.attributes.alpha > 0]]
+				str = str .. [[and c.Icon.attributes.realAlpha > 0]]
 			else
-				str = str .. [[and c.Icon.attributes.alpha == 0]]
+				str = str .. [[and c.Icon.attributes.realAlpha == 0]]
 			end
 			return gsub(str, "c.Icon", c.Icon)
 		end,
@@ -3070,7 +3070,7 @@ CNDT.Types = {
 			ConditionObj:SetNumEventArgs(1)
 			
 			local t = {}
-			for _, IconDataProcessor_name in TMW:Vararg("ALPHA", "SHOWN") do
+			for _, IconDataProcessor_name in TMW:Vararg("REALALPHA", "SHOWN") do
 				local IconDataProcessor = TMW.ProcessorsByName[IconDataProcessor_name]
 				local changedEvent = IconDataProcessor and IconDataProcessor.changedEvent
 				
@@ -3307,6 +3307,16 @@ function CNDT:TMW_GLOBAL_UPDATE_POST()
 	end
 end
 TMW:RegisterCallback("TMW_GLOBAL_UPDATE_POST", CNDT)
+
+TMW:RegisterCallback("TMW_CONFIG_ICON_RECONCILIATION_REQUESTED", function(event, replace, limitSourceGroup)
+	for Condition, _, groupID in TMW:InConditionSettings() do
+		if not limitSourceGroup or groupID == limitSourceGroup then
+			if Condition.Icon ~= "" and type(Condition.Icon) == "string" then
+				replace(Condition, "Icon")
+			end
+		end
+	end
+end)
 
 local function strWrap(string)
 	local num = isNumber[string]
@@ -3618,8 +3628,8 @@ function ConditionObject:Check()
 	end
 end
 
-function ConditionObject:RequestAutoUpdates(parent, isImplemented)
-	if isImplemented then
+function ConditionObject:RequestAutoUpdates(parent, doRequest)
+	if doRequest then
 		if not next(self.AutoUpdateRequests) then
 			self.doesAutoUpdate = true
 			self:RegisterForUpdating()

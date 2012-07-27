@@ -361,14 +361,14 @@ L["ICONMENU_SPLIT_DESC"] = "Create a new group and move this icon into it. Many 
 L["GENERIC_NUMREQ_CHECK_DESC"] = "Check to enable and configue the %s"
 
 L["STACKS"] = "Stacks"
-L["STACKSPANEL_TITLE"] = "Stacks"
+L["STACKSPANEL_TITLE2"] = "Stack Requirements"
 L["ICONMENU_STACKS_MIN_DESC"] = "Minimum number of stacks needed to show the icon"
 L["ICONMENU_STACKS_MAX_DESC"] = "Maximum number of stacks allowed to show the icon"
 
 L["DURATION"] = "Duration"
-L["DURATIONPANEL_TITLE"] = "Duration"
-L["ICONMENU_DURATION_MIN_DESC"] = "Minimum duration needed to show the icon"
-L["ICONMENU_DURATION_MAX_DESC"] = "Maximum duration allowed to show the icon"
+L["DURATIONPANEL_TITLE2"] = "Duration Requirements"
+L["ICONMENU_DURATION_MIN_DESC"] = "Minimum duration needed to show the icon, in seconds"
+L["ICONMENU_DURATION_MAX_DESC"] = "Maximum duration allowed to show the icon, in seconds"
 
 L["CONDITION_TIMERS_HEADER"] = "Timers"
 L["CONDITION_TIMERS_SUCCEED_DESC"] = "Duration of a timer to set on the icon when conditions begin succeeding"
@@ -380,7 +380,7 @@ L["METAPANEL_REMOVE"] = "Remove this icon"
 L["METAPANEL_INSERT"] = "Insert an icon"
 
 L["ICONALPHAPANEL_FAKEHIDDEN"] = "Always Hide"
-L["ICONALPHAPANEL_FAKEHIDDEN_DESC"] = "Causes the icon to be hidden all the time, but whilst still enabled in order to allow the conditions of other icons to check this icon, for meta icons to include this icon, and for this icon's sounds and text outputs to be processed."
+L["ICONALPHAPANEL_FAKEHIDDEN_DESC"] = "Forces the icon to be hidden all the time, but whilst still enabled in order to allow the conditions of other icons to check this icon, for meta icons to include this icon, and for this icon's events to be processed."
 L["ICONMENU_WPNENCHANTTYPE"] = "Weapon slot to monitor"
 L["ICONMENU_HIDEUNEQUIPPED"] = "Hide when slot lacks weapon"
 L["ICONMENU_HIDEUNEQUIPPED_DESC"] = "Check this to force the icon to be hidden if the weapon spot being checked does not have a weapon in it, or if that slot has a shield or an off-hand frill."
@@ -685,9 +685,7 @@ L["TEXTLAYOUTS_DELETELAYOUT_DESC"] = [[Click to delete this text layout.
 Hold |cff7fffffCtrl|r to bypass confirmation.]]
 L["TEXTLAYOUTS_DELETELAYOUT_CONFIRM_BASE"] = "Are you sure you want to delete the layout %q?"
 L["TEXTLAYOUTS_DELETELAYOUT_CONFIRM_NUM"] = "|cFFFF5959The %d |4group:groups; that |4depends:depend; on it will revert back to using the default text layout for |4its:their; display type.|r"
-L["TEXTLAYOUTS_CHOOSELAYOUT"] = [[Click to set this text layout as the text handler for this icon.
-
-Displays:
+L["TEXTLAYOUTS_LAYOUTDISPLAYS"] = [[Displays:
 %s]]
 L["TEXTLAYOUTS_ADDSTRING"] = "Add Text Display"
 L["TEXTLAYOUTS_ADDSTRING_DESC"] = "Adds a new text display to this text layout."
@@ -700,7 +698,7 @@ If you wish to modify it, please copy it using the %s interface below.]]
 L["TEXTLAYOUTS_DEFAULTTEXT"] = "Default Text"
 L["TEXTLAYOUTS_DEFAULTTEXT_DESC"] = "Edit the default text that will be used when this text layout is set on an icon."
 L["TEXTLAYOUTS_SETTEXT"] = "Set Text"
-L["TEXTLAYOUTS_SETTEXT_DESC"] = [[Set the text that will be used in this text display here.
+L["TEXTLAYOUTS_SETTEXT_DESC"] = [[Set the text that will be used in this text display.
 
 Text may be formatted with DogTag tags, allowing for dynamic displays of information. Type '/dogtag' or '/dt' for help on how to use tags.]]
 
@@ -1034,7 +1032,11 @@ L["fPROFILE"] = "Profile: %s"
 L["fTEXTLAYOUT"] = "Text Layout: %s"
 
 
-L["CONFIGPANEL_TIMER_HEADER"] = "Timer Settings"
+L["CONFIGPANEL_TIMER_HEADER"] = "Timer Sweep"
+L["CONFIGPANEL_CBAR_HEADER"] = "Timer Bar Overlay"
+L["CONFIGPANEL_PBAR_HEADER"] = "Power Bar Overlay"
+L["CONFIGPANEL_CLEU_HEADER"] = "Combat Events"
+L["CONFIGPANEL_CNDTTIMERS_HEADER"] = "Condition Timers"
 
 
 
@@ -1144,7 +1146,7 @@ L["SOUND_EVENT_ONICONHIDE_DESC"] = [[This event triggers when another icon (not 
 Configure the icon that should be watched using the event settings below.]]
 
 L["SOUND_EVENT_ONLEFTCLICK"] = "On Left Click"
-L["SOUND_EVENT_ONLEFTCLICK_DESC"] = [[This event triggers when you |cff7fffffLight-click|r the icon while icons are locked.]]
+L["SOUND_EVENT_ONLEFTCLICK_DESC"] = [[This event triggers when you |cff7fffffLeft-click|r the icon while icons are locked.]]
 
 L["SOUND_EVENT_ONRIGHTCLICK"] = "On Right Click"
 L["SOUND_EVENT_ONRIGHTCLICK_DESC"] = [[This event triggers when you |cff7fffffRight-click|r the icon while icons are locked.]]
@@ -1346,7 +1348,7 @@ L["CLEU_SPELL_DRAIN_DESC"] = "Occurs when resources (health/mana/rage/energy/etc
 L["CLEU_SPELL_ENERGIZE"] = "Resource Gain"
 L["CLEU_SPELL_ENERGIZE_DESC"] = "Occurs when resources (health/mana/rage/energy/etc) are gained by a unit."
 L["CLEU_SPELL_EXTRA_ATTACKS"] = "Extra Attacks Gained"
-L["CLEU_SPELL_EXTRA_ATTACKS_DESC"] = "Occurs when you are granted extra melee swings from procs."
+L["CLEU_SPELL_EXTRA_ATTACKS_DESC"] = "Occurs when extra melee swings are granted by procs."
 L["CLEU_SPELL_HEAL"] = "Heal"
 L["CLEU_SPELL_INSTAKILL"] = "Instant Kill"
 L["CLEU_SPELL_INTERRUPT"] = "Interrupt - Spell Interrupted"
@@ -1468,7 +1470,7 @@ L["CLEU_FLAGS_DEST"] = "Exclusions"
 L["CLEU_FLAGS_DESC"] = "Contains a list of attributes that can be used to exclude certain units from triggering the icon. If an exclusion is checked, and a unit has that attribute, the icon will not process the event that the unit was part of."
 
 L["CLEU_TIMER"] = "Timer to set on event"
-L["CLEU_TIMER_DESC"] = [[Duration of a timer to set on the icon when an event occurs.
+L["CLEU_TIMER_DESC"] = [[Duration of a timer, in seconds, to set on the icon when an event occurs.
 
 You may also set durations using the "Spell: Duration" syntax in the %q editbox to be used whenever an event is handled using a spell that you have set as a filter.
 

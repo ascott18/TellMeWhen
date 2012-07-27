@@ -21,17 +21,10 @@ local DogTag = LibStub("LibDogTag-3.0", true)
 
 -- The way that this processor works is really sleezy.
 -- Basically, we create a processor just to reserve an attribute name and event and all that fun stuff,
--- and so that we have an event that can be listened to by DogTag AutoUpdateRequests.
+-- and so that we have an event that can be listened to by an IconModule.
 	
 local Processor = TMW.Classes.IconDataProcessor:New("DOGTAGUNIT", "dogTagUnit")
 Processor:AssertDependency("UNIT")
-
--- This is just empty because the actual processing is done in the hook.
-function Processor:CompileFunctionSegment(t)
-	t[#t+1] = [[
-	--]]
-end
-
 
 
 --Here's the hook (the real crux of the whole thing)
@@ -59,10 +52,7 @@ Hook:RegisterCompileFunctionSegmentHook("post", function(Processor, t)
 	end
 	
 	if attributes.dogTagUnit ~= dogTagUnit then
-		attributes.dogTagUnit = dogTagUnit
-
-		TMW:Fire(DOGTAGUNIT.changedEvent, icon, dogTagUnit)
-		doFireIconUpdated = true
+		doFireIconUpdated = icon:SetInfo_INTERNAL("dogTagUnit", dogTagUnit) or doFireIconUpdate
 	end
 	--]]
 end)

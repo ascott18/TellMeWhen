@@ -42,7 +42,7 @@ Type:UsesAttributes("texture")
 
 Type:SetModuleAllowance("IconModule_PowerBar_Overlay", true)
 
-Type:RegisterConfigPanel_XMLTemplate("column", 2, "TellMeWhen_WhenChecks", {
+Type:RegisterConfigPanel_XMLTemplate(130, "TellMeWhen_WhenChecks", {
 	text = L["ICONMENU_SHOWWHEN"],
 	[0x2] = { text = "|cFF00FF00" .. L["ICONMENU_PRESENT"], 		},
 	[0x1] = { text = "|cFFFF0000" .. L["ICONMENU_ABSENT"], 			},

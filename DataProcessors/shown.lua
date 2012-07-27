@@ -20,16 +20,6 @@ local print = TMW.print
 
 local Processor = TMW.Classes.IconDataProcessor:New("SHOWN", "shown")
 Processor.dontInherit = true
+-- Processor:CompileFunctionSegment(t) is default.
 
-function Processor:CompileFunctionSegment(t)
-	-- GLOBALS: shown
-	t[#t+1] = [[
-	if attributes.shown ~= shown then
-		
-		TMW:Fire(SHOWN.changedEvent, icon, shown)
-		doFireIconUpdated = true
-
-		attributes.shown = shown
-	end
-	--]]
-end
+TMW.Classes.Icon.attributes.shown = 1
