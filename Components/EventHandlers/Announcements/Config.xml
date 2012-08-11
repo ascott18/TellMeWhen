@@ -1,0 +1,281 @@
+<Ui>
+	<Button name="TellMeWhen_ChannelSelectButton" inherits="TellMeWhen_BorderedFrame" virtual="true" >
+		<Size y="12"/>
+		<Layers>
+			<Layer level="OVERLAY">
+				<FontString name="$parentName" parentKey="Name" inherits="GameFontHighlightSmall" justifyH="LEFT">
+					<Anchors>
+						<Anchor point="LEFT" x="3"/>
+						<Anchor point="RIGHT" x="-1"/>
+					</Anchors>
+				</FontString>
+			</Layer>
+		</Layers>
+		<Scripts>
+			<OnClick>
+				if TMW.CI.ics then
+					TMW.ANN:GetEventSettings().Channel = self.channel
+					TMW.IE:ScheduleIconSetup()
+				end
+
+				TMW.EVENTS:LoadConfig()
+				TMW.ANN:SelectChannel(self.channel)
+			</OnClick>
+		</Scripts>
+		<HighlightTexture file="Interface\QuestFrame\UI-QuestLogTitleHighlight" alphaMode="ADD">
+			<Anchors>
+				<Anchor point="TOPLEFT" y="-1"/>
+				<Anchor point="BOTTOMRIGHT" y="1"/>
+			</Anchors>
+		</HighlightTexture>
+	</Button>
+ 
+ 
+	<Frame name="$parentAnnouncements" inherits="TellMeWhen_EventContainer" parentKey="Announcements">
+		<Frames>
+			<EditBox name="$parentEditBox" inherits="TellMeWhen_InputBoxTemplate" parentKey="EditBox" autoFocus="false">
+				<Size y="15"/>
+				<Anchors>
+					<Anchor point="TOPLEFT" x="5"/>
+					<Anchor point="RIGHT" x="-20"/>
+				</Anchors>
+				<Layers>
+					<Layer level="OVERLAY">
+						<FontString name="$parentHeader" inherits="GameFontNormalLarge" parentKey="Header" justifyH="LEFT" text="">
+							<Anchors>
+								<Anchor point="BOTTOM" relativePoint="TOP" y="1"/>
+							</Anchors>
+						</FontString>
+					</Layer>
+				</Layers>
+				<Scripts>
+					<OnLoad>
+						TMW:TT(self, "ANN_EDITBOX", "ANN_EDITBOX_DESC")
+						self.__noWrapTooltipText = true
+						
+						self.label = "|cFFFF5050" .. TMW.L["ANN_EDITBOX_WARN"]
+						self.BackgroundText:SetWidth(self:GetWidth())
+						
+						self.Header:SetText(TMW.L["ANN_EDITBOX"])
+						
+						--TMW.SUG:EnableEditBox(self, "textsubsANN") --TODO: UPDATE SUG MODULE TO DOGTAG 
+						
+						TMW:RegisterCallback("TMW_CONFIG_SAVE_SETTINGS", "ClearFocus", self)
+						
+						TMW.Classes.ChatEdit_InsertLink_Hook:New(self, function(self, text, linkType, linkID)
+							-- just flat out put the link into the ANN editbox if it is focued. The ability to yell out clickable links is cool.
+							self.editbox:Insert(text)
+
+							-- notify success
+							return true
+						end)
+
+					</OnLoad>
+					<OnEditFocusLost>
+						EditBox_ClearHighlight(self)
+						TMW:CleanString(self)
+						if TMW.CI.ics and TMW.EVENTS.currentEventID then
+							TMW.ANN:GetEventSettings().Text = self:GetText()
+						end
+						TMW.IE:ScheduleIconSetup()
+						self:GetScript("OnTextChanged")(self)
+
+						TMW.EVENTS:LoadConfig()
+					</OnEditFocusLost>
+				</Scripts>
+			</EditBox>
+
+			<Frame name="$parentChannelList" parentKey="ChannelList">
+				<Size x="150" y="266"/>
+				<Anchors>
+					<Anchor point="TOPLEFT" relativeTo="$parentEditBox" relativePoint="BOTTOMLEFT" x="-5" y="-25"/>
+				</Anchors>
+				<Frames>
+					<Button name="$parentNone" inherits="TellMeWhen_ChannelSelectButton" parentKey="None" id="1"/>
+				</Frames>
+				<Backdrop bgFile="Interface\DialogFrame\UI-DialogBox-Background-Dark" tile="true"/>
+				<Layers>
+					<Layer level="OVERLAY">
+						<FontString name="$parentHeader" inherits="GameFontNormalLarge" parentKey="Header" justifyH="LEFT" text="">
+							<Anchors>
+								<Anchor point="BOTTOM" relativePoint="TOP" y="1"/>
+							</Anchors>
+						</FontString>
+					</Layer>
+				</Layers>
+			</Frame>
+
+			<Frame name="$parentLocation" inherits="TMW_DropDownMenuTemplate" parentKey="Location">
+				<Anchors>
+					<Anchor point="TOPLEFT" relativeTo="$parentChannelList" relativePoint="TOPRIGHT" x="-10"/>
+				</Anchors>
+				<Layers>
+					<Layer level="OVERLAY">
+						<FontString name="$parentHeader" inherits="GameFontNormalLarge" parentKey="Header" justifyH="LEFT" text="">
+							<Anchors>
+								<Anchor point="BOTTOM" relativePoint="TOP" y="1"/>
+							</Anchors>
+						</FontString>
+					</Layer>
+				</Layers>
+				<Scripts>
+					<OnLoad>
+						self.Header:SetText(TMW.L["ANN_SUB_CHANNEL"])
+						UIDropDownMenu_SetWidth(self, 135)
+						self.initialize = TMW.ANN.Location_DropDown
+					</OnLoad>
+				</Scripts>
+			</Frame>
+			<EditBox name="$parentWhisperTarget" inherits="TellMeWhen_InputBoxTemplate" parentKey="WhisperTarget" autoFocus="false">
+				<Size x="135" y="15"/>
+				<Anchors>
+					<Anchor point="TOPLEFT" relativeTo="$parentChannelList" relativePoint="TOPRIGHT" x="20" y="-5"/>
+				</Anchors>
+				<Layers>
+					<Layer level="OVERLAY">
+						<FontString name="$parentHeader" inherits="GameFontNormalLarge" parentKey="Header" justifyH="LEFT" text="">
+							<Anchors>
+								<Anchor point="BOTTOM" relativePoint="TOP" y="1"/>
+							</Anchors>
+						</FontString>
+					</Layer>
+				</Layers>
+				<Scripts>
+					<OnLoad>
+						self.Header:SetText(TMW.L["ANN_WHISPERTARGET"])
+						TMW:TT(self, "ANN_WHISPERTARGET", "ANN_WHISPERTARGET_DESC")
+						self.label = TMW.L["ANN_WHISPERTARGET"]
+						self.BackgroundText:SetWidth(self:GetWidth())
+						--TMW.SUG:EnableEditBox(self, "textsubsANNWhisper") --TODO: UPDATE SUG MODULE TO DOGTAG
+					</OnLoad>
+					<OnEditFocusLost>
+						EditBox_ClearHighlight(self)
+						TMW:CleanString(self)
+						if TMW.CI.ics then
+							TMW.ANN:GetEventSettings().Location = self:GetText()
+						end
+						TMW.IE:ScheduleIconSetup()
+						self:GetScript("OnTextChanged")(self)
+					</OnEditFocusLost>
+				</Scripts>
+			</EditBox>
+
+			<CheckButton name="$parentSticky" inherits="TellMeWhen_CheckTemplate" parentKey="Sticky">
+				<Anchors>
+					<Anchor point="TOPLEFT" relativeTo="$parentLocation" relativePoint="BOTTOMLEFT" x="15" y="-5"/>
+				</Anchors>
+				<Scripts>
+					<OnLoad>
+						self.text:SetText(TMW.L["ANN_STICKY"])
+					</OnLoad>
+					<OnClick>
+						TMW.ANN:GetEventSettings().Sticky = not not self:GetChecked()
+					</OnClick>
+				</Scripts>
+			</CheckButton>
+			<CheckButton name="$parentShowIconTex" inherits="TellMeWhen_CheckTemplate" parentKey="ShowIconTex">
+				<Anchors>
+					<Anchor point="TOP" relativeTo="$parentSticky" relativePoint="BOTTOM" y="4"/>
+				</Anchors>
+				<Scripts>
+					<OnLoad>
+						self.text:SetText(TMW.L["ANN_SHOWICON"])
+						TMW:TT(self, "ANN_SHOWICON", "ANN_SHOWICON_DESC")
+					</OnLoad>
+					<OnClick>
+						TMW.ANN:GetEventSettings().ShowIconTex = not not self:GetChecked()
+						TMW.IE:ScheduleIconSetup()
+					</OnClick>
+				</Scripts>
+			</CheckButton>
+			<Button name="$parentColor" parentKey="Color">
+				<Size x="20" y="20"/>
+				<Anchors>
+					<Anchor point="TOP" relativeTo="$parentIcon" relativePoint="BOTTOM"/>
+				</Anchors>
+				<Layers>
+					<Layer level="BACKGROUND">
+						<Texture>
+							<Size x="17.5" y="17.5"/>
+							<Anchors>
+								<Anchor point="CENTER"/>
+							</Anchors>
+							<Color r="1.0" g="1.0" b="1.0"/>
+						</Texture>
+						<FontString name="$parenttext" parentKey="text" justifyH="LEFT" inherits="GameFontHighlightSmall">
+							<Anchors>
+								<Anchor point="LEFT" relativePoint="RIGHT" x="2"/>
+							</Anchors>
+						</FontString>
+					</Layer>
+				</Layers>
+				<Scripts>
+					<OnLoad>
+						self.text:SetText(TMW.L["FONTCOLOR"])
+						self.func = function()
+							local settings = TMW.ANN:GetEventSettings()
+							local r, g, b = ColorPickerFrame:GetColorRGB()
+							settings.r = r
+							settings.g = g
+							settings.b = b
+							self:GetNormalTexture():SetVertexColor(r, g, b, 1)
+							TMW.IE:ScheduleIconSetup()
+						end
+						self.cancel = function()
+							local settings = TMW.ANN:GetEventSettings()
+							local r, g, b = self.br, self.bg, self.bb
+							settings.r = r
+							settings.g = g
+							settings.b = b
+							self:GetNormalTexture():SetVertexColor(r, g, b, 1)
+							TMW.IE:ScheduleIconSetup()
+						end
+					</OnLoad>
+					<OnClick>
+						local settings = TMW.ANN:GetEventSettings()
+						local r, g, b = settings.r, settings.g, settings.b
+						self.br, self.bg, self.bb = r, g, b
+
+						ColorPickerFrame.hasOpacity = nil
+						ColorPickerFrame.func, ColorPickerFrame.cancelFunc = self.func, self.cancel
+						ColorPickerFrame:SetColorRGB(r,g,b)
+						ColorPickerFrame:Show()
+					</OnClick>
+				</Scripts>
+				<NormalTexture name="$parentNormalTexture" file="Interface\ChatFrame\ChatFrameColorSwatch"/>
+			</Button>
+
+			<Slider name="$parentSize" inherits="TellMeWhen_SliderTemplate" parentKey="Size" minvalue="0" maxvalue="38" valuestep="1">
+				<Size x="150" y="17"/>
+				<Anchors>
+					<Anchor point="TOPLEFT" relativeTo="$parentColor" relativePoint="BOTTOMLEFT" y="-17"/>
+				</Anchors>
+				<Scripts>
+					<OnMinMaxChanged>
+						local minValue, maxValue = self:GetMinMaxValues()
+						self.Low:SetText(TMW.L["DEFAULT"])
+						self.High:SetText(maxValue)
+					</OnMinMaxChanged>
+					<OnValueChanged>
+						local val = self:GetValue()
+						self.Mid:SetText(val == 0 and TMW.L["DEFAULT"] or val)
+						if TMW.CI.ics then
+							TMW.ANN:GetEventSettings().Size = val
+							TMW.IE:ScheduleIconSetup()
+						end
+					</OnValueChanged>
+					<OnLoad>
+						self.text:SetText(TMW.L["FONTSIZE"])
+						self:EnableMouseWheel(true)
+					</OnLoad>
+					<OnMouseWheel>
+						self:SetValue(self:GetValue()+delta)
+					</OnMouseWheel>
+				</Scripts>
+			</Slider>
+
+
+		</Frames>
+	</Frame>
+
+</Ui>

@@ -1,0 +1,219 @@
+<Ui>
+	<Button name="TellMeWhen_SoundSelectButton" inherits="TellMeWhen_BorderedFrame" virtual="true" >
+		<Size y="12"/>
+		<Anchors>
+			<Anchor point="LEFT"/>
+			<Anchor point="RIGHT"/>
+		</Anchors>
+		<Layers>
+			<Layer level="OVERLAY">
+				<FontString name="$parentName" parentKey="Name" inherits="GameFontHighlightSmall" justifyH="LEFT">
+					<Anchors>
+						<Anchor point="LEFT" x="3"/>
+						<Anchor point="RIGHT" relativeTo="$parentPlay" relativePoint="LEFT" x="-1"/>
+					</Anchors>
+				</FontString>
+			</Layer>
+		</Layers>
+		<Frames>
+			<Button name="$parentPlay" parentKey="Play" virtual="true">
+				<Size x="14" y="14"/>
+				<Anchors>
+					<Anchor point="RIGHT" x="-2" y="0"/>
+				</Anchors>
+				<Scripts>
+					<OnClick>
+						PlaySoundFile(self:GetParent().soundfile, "Master")
+					</OnClick>
+					<OnEnter>
+						self:GetParent():LockHighlight()
+					</OnEnter>
+					<OnLeave>
+						if TMW.SND.selectedListID ~= self:GetParent().listID then
+							self:GetParent():UnlockHighlight()
+						end
+					</OnLeave>
+				</Scripts>
+				<NormalTexture file="Interface\Common\VoiceChat-Speaker"/>
+				<HighlightTexture file="Interface\Common\VoiceChat-On"/>
+			</Button>
+		</Frames>
+		<Scripts>
+			<OnLoad>
+			--	self.Background:SetVertexColor(0, 1, 0)
+			</OnLoad>
+			<OnClick>
+				local name = self.soundname
+				if TMW.CI.ics then
+					TMW.SND:GetEventSettings().Sound = name
+					TMW.IE:ScheduleIconSetup()
+				end
+
+				TMW.EVENTS:LoadConfig()
+				TMW.SND:SelectSound(name)
+			</OnClick>
+			<OnMouseWheel>
+				self:GetParent().ScrollBar:SetValue(self:GetParent().ScrollBar:GetValue() - delta)
+			</OnMouseWheel>
+		</Scripts>
+		<HighlightTexture file="Interface\QuestFrame\UI-QuestLogTitleHighlight" alphaMode="ADD">
+			<Anchors>
+				<Anchor point="TOPLEFT" y="-1"/>
+				<Anchor point="BOTTOMRIGHT" y="1"/>
+			</Anchors>
+		</HighlightTexture>
+	</Button>
+	
+	<Frame name="$parentSound" inherits="TellMeWhen_EventContainer" parentKey="Sound">
+		<Frames>
+			<Frame name="$parentSoundList" parentKey="SoundList">
+				<!-- <Size x="290" y="266"/> -->
+				<Anchors>
+					<Anchor point="TOPLEFT"/>
+					<Anchor point="BOTTOMRIGHT" x="-30" y="15"/>
+				</Anchors>
+				<Frames>
+					<Button name="$parentNone" inherits="TellMeWhen_SoundSelectButton" parentKey="None" id="0"/>
+
+					<Slider name="$parentScrollBar" inherits="MinimalScrollBarTemplate" parentKey="ScrollBar">
+						<Size x="17"/>
+						<Anchors>
+							<Anchor point="TOPLEFT" relativePoint="TOPRIGHT" x="1" y="-17"/>
+							<Anchor point="BOTTOMLEFT" relativePoint="BOTTOMRIGHT" x="1" y="17"/>
+						</Anchors>
+						<Scripts>
+							<OnLoad>
+								self:SetValue(0)
+								self.scrollStep = 1
+								self:SetValueStep(1)
+							</OnLoad>
+							<OnValueChanged>
+								TMW.SND:SetSoundsOffset(value)
+							</OnValueChanged>
+						</Scripts>
+					</Slider>
+				</Frames>
+				<!-- <Backdrop bgFile="Interface\DialogFrame\UI-DialogBox-Background-Dark" tile="true"/> -->
+				<Layers>
+					<Layer level="OVERLAY">
+						<FontString name="$parentHeader" inherits="GameFontNormalLarge" parentKey="Header" justifyH="LEFT" text="">
+							<Anchors>
+								<Anchor point="BOTTOM" relativePoint="TOP" y="1"/>
+							</Anchors>
+						</FontString>
+					</Layer>
+					<Layer level="BACKGROUND">
+						<Texture name="$parentBackground" parentKey="Background">
+							<Anchors>
+								<Anchor point="TOPLEFT"/>
+							</Anchors>
+							<Color r="0" g="0" b="0"/>
+						</Texture>
+					</Layer>
+				</Layers>
+				<Scripts>
+					<OnSizeChanged>
+						if TMW.CI.ics then
+						--	TMW.SND:SelectSound(TMW.SND:GetEventSettings().Sound)
+						end
+						TMW.SND:SetSoundsOffset(TMW.SND.offs)
+					</OnSizeChanged>
+				</Scripts>
+			</Frame>
+			<EditBox name="$parentCustom" parentKey="Custom" inherits="TellMeWhen_InputBoxTemplate">
+				<Size y="15"/>
+				<Anchors>
+					<Anchor point="LEFT" relativeTo="$parentSoundList" x="5" />
+					<Anchor point="RIGHT" relativeTo="$parentSoundList" x="-5" />
+					<Anchor point="TOP" relativeTo="$parentSoundList" relativePoint="BOTTOM" y="-5"/>
+				</Anchors>
+				<Frames>
+					<Button name="$parentPlay" parentKey="Play" virtual="true">
+						<NormalTexture file="Interface\Common\VoiceChat-Speaker"/>
+						<HighlightTexture file="Interface\Common\VoiceChat-On"/>
+						<Scripts>
+							<OnClick>
+								PlaySoundFile(self:GetParent():GetText(), "Master")
+							</OnClick>
+							<OnEnter>
+								self:GetParent().Background:Show()
+							</OnEnter>
+							<OnLeave>
+								if not self:GetParent().selected then
+									self:GetParent().Background:Hide()
+								end
+							</OnLeave>
+						</Scripts>
+						<Size x="20" y="20"/>
+						<Anchors>
+							<Anchor point="LEFT" relativePoint="RIGHT"/>
+						</Anchors>
+					</Button>
+				</Frames>
+				<Layers>
+					<Layer level="BACKGROUND">
+						<Texture name="$parentBackground" parentKey="Background" file="Interface\QuestFrame\UI-QuestLogTitleHighlight" hidden="true">
+							<Anchor point="TOPLEFT" y="-1"/>
+							<Anchor point="BOTTOMRIGHT" y="1"/>
+						</Texture>
+					</Layer>
+				</Layers>
+				<Scripts>
+					<OnLoad>
+						TMW:TT(self, "SOUND_CUSTOM", "SOUND_CUSTOM_DESC")
+						self.label = TMW.L["SOUND_CUSTOM"]
+						
+						TMW:RegisterCallback("TMW_CONFIG_SAVE_SETTINGS", "ClearFocus", self)
+					</OnLoad>
+					<OnEnter>
+						self.Background:Show()
+					</OnEnter>
+					<OnLeave>
+						if not self.selected then
+							self.Background:Hide()
+						end
+					</OnLeave>
+					<OnEditFocusLost>
+						EditBox_ClearHighlight(self)
+
+						local t = TMW:CleanString(self)
+						t = gsub(t, "/", "\\")
+						while strfind(t, "\\\\") do
+							t = gsub(t, "\\\\", "\\")
+						end
+						local wt
+
+						if not strfind(t, "%.[^\\]+$") then
+							wt = t ~= "" and TMW.L["SOUNDERROR1"]
+							t = "None"
+						elseif strfind(strlower(t), "%.wav$") and select(4, GetBuildInfo()) > 40000 then
+							 -- Don't force it to be nothing, because the user might be entering a built-in wav file,
+							 -- which is still valid.
+							--t = "None"
+							wt = TMW.L["SOUNDERROR2"]
+						elseif not (strfind(strlower(t), "%.ogg$") or strfind(strlower(t), "%.mp3$")) then
+							wt = TMW.L["SOUNDERROR3"]
+						end
+
+						self:SetText(t)
+						if wt then
+							TMW.HELP:Show("SND_INVALID_CUSTOM", nil, self, 0, 0, wt)
+						else
+							TMW.HELP:Hide("SND_INVALID_CUSTOM")
+						end
+
+						if TMW.CI.ics and TMW.EVENTS.currentEventID then
+							TMW.SND:GetEventSettings().Sound = t
+						end
+						TMW.SND:SelectSound(t)
+						TMW.IE:ScheduleIconSetup()
+						self:GetScript("OnTextChanged")(self)
+
+						TMW.EVENTS:LoadConfig()
+					</OnEditFocusLost>
+				</Scripts>
+			</EditBox>
+		</Frames>
+	</Frame>
+	
+</Ui>

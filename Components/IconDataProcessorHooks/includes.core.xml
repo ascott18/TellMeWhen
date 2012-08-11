@@ -1,0 +1,8 @@
+<Ui>
+
+<Include file="IconDataProcessorHook_Alpha_ConditionReq\includes.core.xml"/>
+<Include file="IconDataProcessorHook_Alpha_DurationReq\includes.core.xml"/>
+<Include file="IconDataProcessorHook_Alpha_StackReq\includes.core.xml"/>
+<Include file="IconDataProcessorHook_Texture_CustomTex\includes.core.xml"/>
+
+</Ui>

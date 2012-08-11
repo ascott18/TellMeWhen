@@ -1,0 +1,126 @@
+<Ui>
+
+	<Frame name="TellMeWhen_DurationRequirements" inherits="TellMeWhen_OptionsModuleContainer" virtual="true">
+		<Size y="51"/>
+		<Frames>
+			<CheckButton name="$parentDurationMinEnabled" parentKey="DurationMinEnabled" inherits="TellMeWhen_CheckTemplate">
+				<Size x="26" y="26"/>
+				<Anchors>
+					<Anchor point="TOPLEFT" x="5" y="-20"/>
+				</Anchors>
+				<Scripts>
+					<OnLoad>
+						TMW.IE:CreateSettingFrameFromData(self, {
+							setting = "DurationMinEnabled",
+							label = "",
+							title = ENABLE,
+							tooltip = TMW.L["GENERIC_NUMREQ_CHECK_DESC"]:format(TMW.L["ICONMENU_DURATION_MIN_DESC"]:gsub("^%u", strlower)),
+						})
+					</OnLoad>
+				</Scripts>
+			</CheckButton>
+			<CheckButton name="$parentDurationMaxEnabled" parentKey="DurationMaxEnabled" inherits="TellMeWhen_CheckTemplate">
+				<Size x="26" y="26"/>
+				<Anchors>
+					<Anchor point="LEFT" relativeTo="$parentDurationMinEnabled" relativePoint="RIGHT" x="80"/>
+				</Anchors>
+				<Scripts>
+					<OnLoad>
+						
+						TMW.IE:CreateSettingFrameFromData(self, {
+							setting = "DurationMaxEnabled",
+							label = "",
+							title = ENABLE,
+							tooltip = TMW.L["GENERIC_NUMREQ_CHECK_DESC"]:format(TMW.L["ICONMENU_DURATION_MAX_DESC"]:gsub("^%u", strlower)),
+						})
+					</OnLoad>
+				</Scripts>
+			</CheckButton>
+			
+			<EditBox name="$parentDurationMin" parentKey="DurationMin" inherits="TellMeWhen_TimeEditBoxTemplate">
+				<Size x="60" y="15"/>
+				<Anchors>
+					<Anchor point="LEFT" relativeto="$parentDurationMinEnabled" relativePoint="RIGHT" x="1" y="0.5"/>
+				</Anchors>
+				<Scripts>
+					<OnLoad>
+						self.text:SetText(MINIMUM)
+						self.setting = "DurationMin"
+						
+						TMW.IE:CreateSettingFrameFromData(self, {
+							setting = "DurationMin",
+							title = MINIMUM,
+							tooltip = TMW.L["ICONMENU_DURATION_MIN_DESC"],
+							disabled = function(self)
+								return not TMW.CI.ics.DurationMinEnabled
+							end,
+							ModifySettingValue = function(self, value)
+								return tonumber(value) or 0
+							end,
+						})
+					</OnLoad>
+				</Scripts>
+			</EditBox>
+			<EditBox name="$parentDurationMax" parentKey="DurationMax" inherits="TellMeWhen_TimeEditBoxTemplate">
+				<Size x="60" y="15"/>
+				<Anchors>
+					<Anchor point="LEFT" relativeto="$parentDurationMaxEnabled" relativePoint="RIGHT" x="1" y="0.5"/>
+				</Anchors>
+				<Scripts>
+					<OnLoad>
+						self.text:SetText(MAXIMUM)
+						self.setting = "DurationMax"
+						
+						TMW.IE:CreateSettingFrameFromData(self, {
+							setting = "DurationMax",
+							title = MAXIMUM,
+							tooltip = TMW.L["ICONMENU_DURATION_MIN_DESC"],
+							disabled = function(self)
+								return not TMW.CI.ics.DurationMaxEnabled
+							end,
+							ModifySettingValue = function(self, value)
+								return tonumber(value) or 0
+							end,
+						})
+					</OnLoad>
+				</Scripts>
+
+			</EditBox>
+			
+			<Slider name="$parentDurationAlpha" parentKey="DurationAlpha" inherits="TellMeWhen_SliderTemplate" valuestep="1">
+				<Size y="17"/>
+				<Anchors>
+					<Anchor point="LEFT" relativeTo="$parentDurationMax" relativePoint="RIGHT" x="25" />
+					<Anchor point="RIGHT" x="-10" />
+					<Anchor point="TOP" y="-21" />
+				</Anchors>
+				<Scripts>
+					<OnLoad>
+						self.text:SetWidth(self:GetWidth())
+						
+						TMW.IE:CreateSettingFrameFromData(self, "SettingSlider_Alpha", {
+							title = TMW.L["REQFAILED_ALPHA"],
+							tooltip = TMW.L["DURATIONALPHA_DESC"],
+							setting = "DurationAlpha",
+							setOrangeAtValue = 1,
+							disabled = function(self)
+								local ics = TMW.CI.ics
+								if ics then
+									return not ics.DurationMinEnabled and not ics.DurationMaxEnabled
+								end
+							end,
+						})
+					</OnLoad>
+				</Scripts>
+			</Slider>
+		</Frames>
+		<Scripts>
+			<OnLoad>
+				self.Header:SetText(TMW.L["DURATIONPANEL_TITLE2"])
+				
+				--TMW.IE:DistributeFrameAnchorsLaterally(self, 3, self.DurationMinEnabled, self.DurationMaxEnabled, self.DurationAlpha)
+			</OnLoad>
+		</Scripts>
+	</Frame>
+ 
+</Ui>

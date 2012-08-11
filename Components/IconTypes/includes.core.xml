@@ -1,0 +1,21 @@
+<Ui>
+
+<Include file="IconView_buff\includes.core.xml"/>
+<Include file="IconView_cast\includes.core.xml"/>
+<Include file="IconView_cleu\includes.core.xml"/>
+<Include file="IconView_conditionicon\includes.core.xml"/>
+<Include file="IconView_cooldown\includes.core.xml"/>
+<Include file="IconView_default\includes.core.xml"/>
+<Include file="IconView_dr\includes.core.xml"/>
+<Include file="IconView_icd\includes.core.xml"/>
+<Include file="IconView_item\includes.core.xml"/>
+<Include file="IconView_lightwell\includes.core.xml"/>
+<Include file="IconView_meta\includes.core.xml"/>
+<Include file="IconView_multistate\includes.core.xml"/>
+<Include file="IconView_reactive\includes.core.xml"/>
+<Include file="IconView_runes\includes.core.xml"/>
+<Include file="IconView_totem\includes.core.xml"/>
+<Include file="IconView_unitcooldown\includes.core.xml"/>
+<Include file="IconView_wpnenchant\includes.core.xml"/>
+
+</Ui>

@@ -1,0 +1,75 @@
+<Ui>
+
+	<Button name="TellMeWhen_TypeCheckRuneTemplate" virtual="true">
+		<Size x="27.5" y="27.5"/>
+		<Layers>
+			<Layer level="OVERLAY">
+				<Texture name="$parentCheck" parentKey="Check" file="">
+					<Size x="27" y="27"/>
+					<Anchors>
+						<Anchor point="CENTER"/>
+					</Anchors>
+				</Texture>
+			</Layer>
+			<Layer level="ARTWORK">
+				<Texture parentKey="texture" file="Interface\PlayerFrame\UI-PlayerFrame-Deathknight-Blood">
+					<Size x="27" y="27"/>
+					<Anchors>
+						<Anchor point="CENTER"/>
+					</Anchors>
+				</Texture>
+			</Layer>
+		</Layers>
+		<Scripts>
+			<OnClick>
+				self:SetChecked(not self:GetChecked())
+			</OnClick>
+			<OnLoad>
+				TMW.IE:CreateSettingFrameFromData(self, "SettingRuneButton", {
+					setting = "RuneSlots"
+				})
+			</OnLoad>
+		</Scripts>
+	</Button>
+	<Frame name="TellMeWhen_Runes" inherits="TellMeWhen_OptionsModuleContainer" virtual="true">
+		<Size y="44"/>
+		<Frames>
+			<Button name="$parentBlood1" parentKey="1" inherits="TellMeWhen_TypeCheckRuneTemplate" id="1">
+				<Anchors>
+					<Anchor point="TOPLEFT" x="7" y="-11"/>
+				</Anchors>
+			</Button>
+			<Button name="$parentBlood2" parentKey="2" inherits="TellMeWhen_TypeCheckRuneTemplate" id="2">
+				<Anchors>
+					<Anchor point="LEFT" relativeTo="$parentBlood1" relativePoint="RIGHT"/>
+				</Anchors>
+			</Button>
+			<Button name="$parentUnholy1" parentKey="3" inherits="TellMeWhen_TypeCheckRuneTemplate" id="3">
+				<Anchors>
+					<Anchor point="LEFT" relativeTo="$parentBlood2" relativePoint="RIGHT"/>
+				</Anchors>
+			</Button>
+			<Button name="$parentUnholy2" parentKey="4" inherits="TellMeWhen_TypeCheckRuneTemplate" id="4">
+				<Anchors>
+					<Anchor point="LEFT" relativeTo="$parentUnholy1" relativePoint="RIGHT"/>
+				</Anchors>
+			</Button>
+			<Button name="$parentFrost1" parentKey="5" inherits="TellMeWhen_TypeCheckRuneTemplate" id="5">
+				<Anchors>
+					<Anchor point="LEFT" relativeTo="$parentUnholy2" relativePoint="RIGHT"/>
+				</Anchors>
+			</Button>
+			<Button name="$parentFrost2" parentKey="6" inherits="TellMeWhen_TypeCheckRuneTemplate" id="6">
+				<Anchors>
+					<Anchor point="LEFT" relativeTo="$parentFrost1" relativePoint="RIGHT"/>
+				</Anchors>
+			</Button>
+		</Frames>
+		<Scripts>
+			<OnLoad>
+				self.Header:SetText(TMW.L["RUNES"])
+			</OnLoad>
+		</Scripts>
+	</Frame>
+ 
+</Ui>

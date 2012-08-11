@@ -1,0 +1,7 @@
+<Ui>
+
+<Include file="Sound\includes.core.xml"/>
+<Include file="Announcements\includes.core.xml"/>
+<Include file="Animations\includes.core.xml"/>
+
+</Ui>

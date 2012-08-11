@@ -1,0 +1,10 @@
+<Ui>
+
+<!-- 
+<Include file="Config.xml"/>
+ -->
+ 
+
+<Script file="totem.lua"/>
+
+</Ui>

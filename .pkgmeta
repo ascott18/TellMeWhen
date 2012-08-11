@@ -3,6 +3,16 @@
 externals:
     Lib/CallbackHandler-1.0: svn://svn.wowace.com/wow/callbackhandler/mainline/tags/1.0.3/CallbackHandler-1.0
     Lib/LibStub: svn://svn.wowace.com/wow/libstub/mainline/tags/1.0
+	
+    Lib/libdatabroker-1-1: git://git.wowace.com/wow/libdatabroker-1-1/mainline.git
+	
+    Lib/LibSharedMedia-3.0: svn://svn.wowace.com/wow/libsharedmedia-3-0/mainline/trunk
+	
+    Lib/DRData-1.0: git://git.wowace.com/wow/drdata-1-0/mainline.git
+	
+    Lib/LibDogTag-3.0: svn://svn.wowace.com/wow/libdogtag-3-0/mainline/trunk
+    Lib/LibDogTag-Unit-3.0: svn://svn.wowace.com/wow/libdogtag-unit-3-0/mainline/trunk
+
     Lib/AceAddon-3.0: svn://svn.wowace.com/wow/ace3/mainline/trunk/AceAddon-3.0
     Lib/AceEvent-3.0: svn://svn.wowace.com/wow/ace3/mainline/trunk/AceEvent-3.0
     Lib/AceComm-3.0: svn://svn.wowace.com/wow/ace3/mainline/trunk/AceComm-3.0
@@ -10,16 +20,11 @@ externals:
     Lib/AceDB-3.0: svn://svn.wowace.com/wow/ace3/mainline/trunk/AceDB-3.0
     Lib/AceLocale-3.0: svn://svn.wowace.com/wow/ace3/mainline/trunk/AceLocale-3.0
     Lib/AceTimer-3.0: svn://svn.wowace.com/wow/ace3/mainline/trunk/AceTimer-3.0
-    Lib/libdatabroker-1-1: git://git.wowace.com/wow/libdatabroker-1-1/mainline.git
-    Lib/LibSharedMedia-3.0: svn://svn.wowace.com/wow/libsharedmedia-3-0/mainline/trunk
-    Lib/DRData-1.0: git://git.wowace.com/wow/drdata-1-0/mainline.git
-    Lib/LibDogTag-3.0: svn://svn.wowace.com/wow/libdogtag-3-0/mainline/trunk
-    Lib/LibDogTag-Unit-3.0: svn://svn.wowace.com/wow/libdogtag-unit-3-0/mainline/trunk
-    TellMeWhen_Options/Lib/AceDBOptions-3.0: svn://svn.wowace.com/wow/ace3/mainline/trunk/AceDBOptions-3.0
-    TellMeWhen_Options/Lib/AceGUI-3.0: svn://svn.wowace.com/wow/ace3/mainline/trunk/AceGUI-3.0
-    TellMeWhen_Options/Lib/AceConfig-3.0: svn://svn.wowace.com/wow/ace3/mainline/trunk/AceConfig-3.0
-    TellMeWhen_Options/Lib/AceHook-3.0: svn://svn.wowace.com/wow/ace3/mainline/trunk/AceHook-3.0
-    TellMeWhen_Options/Lib/AceGUI-3.0-SharedMediaWidgets: svn://svn.wowace.com/wow/ace-gui-3-0-shared-media-widgets/mainline/trunk
+    Lib/AceDBOptions-3.0: svn://svn.wowace.com/wow/ace3/mainline/trunk/AceDBOptions-3.0
+    Lib/AceConfig-3.0: svn://svn.wowace.com/wow/ace3/mainline/trunk/AceConfig-3.0
+    Lib/AceGUI-3.0: svn://svn.wowace.com/wow/ace3/mainline/trunk/AceGUI-3.0
+    Lib/AceGUI-3.0-SharedMediaWidgets: svn://svn.wowace.com/wow/ace-gui-3-0-shared-media-widgets/mainline/trunk
+    Lib/AceHook-3.0: svn://svn.wowace.com/wow/ace3/mainline/trunk/AceHook-3.0
     Lib/AceSerializer-3.0: svn://svn.wowace.com/wow/ace3/mainline/trunk/AceSerializer-3.0
 
 optional-dependencies:
@@ -42,9 +47,8 @@ ignore:
     - scrapper.lua
     - USEDLOCALE.lua
     - Lib
-    - TellMeWhen_Options/Lib
-    - TellMeWhen_Options/scrapper.lua
-    - TellMeWhen_Options/USEDLOCALE.lua
+    - Options/scrapper.lua
+    - Options/USEDLOCALE.lua
     - Scripts
     - Tests
     - Committ

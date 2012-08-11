@@ -1,0 +1,17 @@
+<Ui>
+
+<Include file="Core\includes.core.xml"/>
+
+<Include file="EventHandlers\includes.core.xml"/>
+
+<Include file="IconDataProcessors\includes.core.xml"/>
+<Include file="IconDataProcessorHooks\includes.core.xml"/>
+
+<Include file="GroupModules\includes.core.xml"/>
+<Include file="IconModules\includes.core.xml"/>
+
+<Include file="IconViews\includes.core.xml"/>
+
+<Include file="IconTypes\includes.core.xml"/>
+
+</Ui>

@@ -1,0 +1,69 @@
+<Ui>
+
+	<Frame name="TellMeWhen_CBarOptions" inherits="TellMeWhen_OptionsModuleContainer" virtual="true">
+		<Size y="40"/>
+		<Frames>
+			<CheckButton name="$parentShowCBar" inherits="TellMeWhen_CheckTemplate" parentKey="ShowCBar">
+				<Anchors>
+					<Anchor point="TOP" y="-10"/>
+				</Anchors>
+				<Scripts>
+					<OnLoad>
+						TMW.IE:CreateSettingFrameFromData(self, {
+							setting = "ShowCBar",
+							title = TMW.L["ICONMENU_ENABLE"],
+							tooltip = TMW.L["ICONMENU_SHOWCBAR_DESC"],
+						})
+					</OnLoad>
+				</Scripts>
+			</CheckButton>
+			<CheckButton name="$parentInvertCBar" inherits="TellMeWhen_CheckTemplate" parentKey="InvertCBar">
+				<Scripts>
+					<OnLoad>
+						TMW.IE:CreateSettingFrameFromData(self, {
+							setting = "InvertCBar",
+							title = TMW.L["ICONMENU_INVERTBARS"],
+							tooltip = TMW.L["ICONMENU_INVERTCBAR_DESC"],
+							disabled = function(self)
+								return not TMW.CI.ics.ShowCBar
+							end,
+						})
+					</OnLoad>
+				</Scripts>
+			</CheckButton>
+			<EditBox name="$parentCBarOffs" inherits="TellMeWhen_TimeEditBoxTemplate" parentKey="CBarOffs" autoFocus="false">
+				<Size x="60" y="15"/>
+				<Anchors>
+					<Anchor point="LEFT" relativeTo="$parentInvertCBar" relativePoint="RIGHT" y="1"/>
+				</Anchors>
+				<Scripts>
+					<OnLoad>
+						self.text:SetText(TMW.L["ICONMENU_OFFS"])
+						self.text:SetWidth(50)
+						self.setting = "CBarOffs"
+						
+						TMW.IE:CreateSettingFrameFromData(self, {
+							setting = "CBarOffs",
+							title = TMW.L["ICONMENU_OFFS"],
+							tooltip = TMW.L["ICONMENU_BAROFFS"],
+							disabled = function(self)
+								return not TMW.CI.ics.ShowCBar
+							end,
+							ModifySettingValue = function(self, value)
+								return tonumber(value) or 0
+							end,
+						})
+					</OnLoad>
+				</Scripts>
+			</EditBox>
+		</Frames>
+		<Scripts>
+			<OnLoad>
+				self.Header:SetText(TMW.L["CONFIGPANEL_CBAR_HEADER"])
+				
+				TMW.IE:DistributeFrameAnchorsLaterally(self, 3, self.ShowCBar, self.InvertCBar, self.CBarOffs)
+			</OnLoad>
+		</Scripts>
+	</Frame>
+ 
+</Ui>

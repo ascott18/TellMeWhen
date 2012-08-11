@@ -1,0 +1,136 @@
+<Ui>
+
+	<Frame name="TellMeWhen_MetaGroup" virtual="true">
+		<Size y="29"/>
+		<Frames>
+			<Frame name="$parentIcon" parentKey="icon" inherits="TMW_IconDropDownMenuTemplate">
+				<Anchors>
+					<Anchor point="LEFT" x="13"/>
+				</Anchors>
+				<Scripts>
+					<OnLoad>
+						self.wrapTooltips = 1
+						self.initialize = TMW.ME.IconMenu
+						self.Button:SetFrameLevel(self:GetFrameLevel()+1)
+						self.previewSize = 21
+						UIDropDownMenu_SetWidth(self, self:GetParent():GetParent():GetWidth() - 88, 0)
+					</OnLoad>
+				</Scripts>
+			</Frame>
+			
+			<Button name="$parentUp" parentKey="up">
+				<Size x="15" y="15"/>
+				<Anchors>
+					<Anchor point="LEFT" relativeTo="$parentIcon" relativePoint="RIGHT" x="-10" y="2"/>
+				</Anchors>
+				<Scripts>
+					<OnLoad>
+						self:SetFrameLevel(self:GetParent():GetFrameLevel() + 2)
+						TMW:TT(self, "METAPANEL_UP")
+					</OnLoad>
+					<OnClick>
+						TMW.ME:UpOrDown(self, -1)
+					</OnClick>
+				</Scripts>
+				<NormalTexture urgency="5" file="Interface\ChatFrame\UI-ChatIcon-ScrollUp-Up" alphaMode="ADD">
+					<TexCoords left="0.21875" right="0.6875" top="0.34375" bottom="0.65625"/>
+					<Color r=".7" g=".7" b=".7" a="1"/>
+				</NormalTexture>
+				<HighlightTexture urgency="5" file="Interface\ChatFrame\UI-ChatIcon-ScrollUp-Up" alphaMode="ADD">
+					<TexCoords left="0.21875" right="0.6875" top="0.34375" bottom="0.65625"/>
+				</HighlightTexture>
+			</Button>
+			<Button name="$parentDown" parentKey="down">
+				<Size x="15" y="15"/>
+				<Anchors>
+					<Anchor point="LEFT" relativeTo="$parentUp" relativePoint="RIGHT" x="3"/>
+				</Anchors>
+				<Scripts>
+					<OnLoad>
+						self:SetFrameLevel(self:GetParent():GetFrameLevel() + 2)
+						TMW:TT(self, "METAPANEL_DOWN")
+					</OnLoad>
+					 <OnClick>
+						TMW.ME:UpOrDown(self, 1)
+					 </OnClick>
+				</Scripts>
+				<NormalTexture urgency="5" file="Interface\ChatFrame\UI-ChatIcon-ScrollDown-Up" alphaMode="ADD">
+					<TexCoords left="0.21875" right="0.6875" top="0.34375" bottom="0.65625"/>
+					<Color r=".7" g=".7" b=".7" a="1"/>
+				</NormalTexture>
+				<HighlightTexture urgency="5" file="Interface\ChatFrame\UI-ChatIcon-ScrollDown-Up" alphaMode="ADD">
+					<TexCoords left="0.21875" right="0.6875" top="0.34375" bottom="0.65625"/>
+				</HighlightTexture>
+			</Button>
+			
+			
+			<Button name="$parentDelete" parentKey="delete" inherits="UIPanelCloseButton">
+				<Anchors>
+					<Anchor point="LEFT" relativeTo="$parentDown" relativePoint="RIGHT" x="0"/>
+				</Anchors>
+				<Scripts>
+					<OnLoad>TMW:TT(self, "METAPANEL_REMOVE")</OnLoad>
+					<OnClick>TMW.ME:Delete(self)</OnClick>
+				</Scripts>
+			</Button>
+			<Button name="$parentInsert" parentKey="insert">
+				<Size x="30" y="30"/>
+				<Anchors>
+					<Anchor point="LEFT" relativeTo="$parentDelete" relativePoint="BOTTOMRIGHT" x="-8"/>
+					<Anchor point="BOTTOM" y="-15"/>
+				</Anchors>
+				<NormalTexture urgency="5" file="Interface\AddOns\TellMeWhen\Textures\Plus-Up"/>
+				<PushedTexture file="Interface\AddOns\TellMeWhen\Textures\Plus-Down"/>
+				<HighlightTexture urgency="5" file="Interface\AddOns\TellMeWhen\Textures\Plus-Highlight" alphaMode="ADD"/>
+				<Scripts>
+					 <OnLoad>
+						TMW:TT(self, "METAPANEL_INSERT")
+					</OnLoad>
+					<OnClick>
+						TMW.ME:Insert(self:GetParent():GetID()+1)
+					</OnClick>
+				</Scripts>
+			</Button>
+		</Frames>
+		<Scripts>
+			<OnLoad>
+				TMW.ME[self:GetID()] = self
+			</OnLoad>
+		</Scripts>
+	</Frame>
+
+	<Frame name="TellMeWhen_MetaIconOptions" inherits="TellMeWhen_OptionsModuleContainer" virtual="true">
+		<Size y="20"/>
+		<Frames>
+			<CheckButton name="$parentCheckNext" inherits="TellMeWhen_CheckTemplate" parentKey="CheckNext">
+				<Anchors>
+					<!-- <Anchor point="TOPLEFT" x="5" y="-6"/> -->
+					<Anchor point="TOP" x="-30" y="-6"/>
+				</Anchors>
+				<Scripts>
+					<OnLoad>						
+						TMW.IE:CreateSettingFrameFromData(self, {
+							setting = "CheckNext",
+							title = TMW.L["ICONMENU_CHECKNEXT"],
+							tooltip = TMW.L["ICONMENU_CHECKNEXT_DESC"],
+						})
+					</OnLoad>
+				</Scripts>
+			</CheckButton>
+			
+			<Frame name="$parent1" inherits="TellMeWhen_MetaGroup" id="1">
+				<Anchors>
+					<Anchor point="TOP" relativeTo="$parentCheckNext" relativePoint="BOTTOM" y="-3"/>
+					<Anchor point="LEFT" x="-3"/>
+					<Anchor point="TOPRIGHT" y="-12"/>
+				</Anchors>
+			</Frame>
+		</Frames>
+		<Scripts>
+			<OnLoad>
+				self.Header:SetText(TMW.L["ICONMENU_COMPONENTICONS"])
+			</OnLoad>
+		</Scripts>
+	</Frame>
+	
+</Ui>

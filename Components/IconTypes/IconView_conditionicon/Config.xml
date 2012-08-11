@@ -1,0 +1,115 @@
+<Ui>
+
+	<Frame name="TellMeWhen_ConditionIconSettings" inherits="TellMeWhen_OptionsModuleContainer" virtual="true">
+		<Size y="47"/>
+		<Frames>
+			<EditBox name="$parentConditionDur" parentKey="ConditionDur" inherits="TellMeWhen_TimeEditBoxTemplate">
+				<Size x="60" y="15"/>
+				<Anchors>
+					<Anchor point="TOPLEFT" x="33" y="-23"/>
+				</Anchors>
+				<Scripts>
+					<OnLoad>
+						self.text:SetText(TMW.L["ICONMENU_SUCCEED"])
+						self.setting = "ConditionDur"
+						
+						TMW.IE:CreateSettingFrameFromData(self, {
+							setting = "ConditionDur",
+							title = TMW.L["ICONMENU_SUCCEED"],
+							tooltip = TMW.L["CONDITION_TIMERS_SUCCEED_DESC"],
+							disabled = function(self)
+								return not TMW.CI.ics.ConditionDurEnabled
+							end,
+							ModifySettingValue = function(self, value)
+								return tonumber(value) or 0
+							end,
+						})
+					</OnLoad>
+				</Scripts>
+			</EditBox>
+			<EditBox name="$parentUnConditionDur" parentKey="UnConditionDur" inherits="TellMeWhen_TimeEditBoxTemplate">
+				<Size x="60" y="15"/>
+				<Anchors>
+					<Anchor point="LEFT" relativeTo="$parentConditionDur" relativePoint="RIGHT" x="35"/>
+				</Anchors>
+				<Scripts>
+					<OnLoad>
+						self.text:SetText(TMW.L["ICONMENU_FAIL"])
+						self.setting = "UnConditionDur"
+						
+						TMW.IE:CreateSettingFrameFromData(self, {
+							setting = "UnConditionDur",
+							title = MAXIMUM,
+							title = TMW.L["ICONMENU_FAIL"],
+							tooltip = TMW.L["CONDITION_TIMERS_FAIL_DESC"],
+							disabled = function(self)
+								return not TMW.CI.ics.UnConditionDurEnabled
+							end,
+							ModifySettingValue = function(self, value)
+								return tonumber(value) or 0
+							end,
+						})
+					</OnLoad>
+				</Scripts>
+
+			</EditBox>
+			<CheckButton name="$parentConditionDurEnabled" parentKey="ConditionDurEnabled" inherits="TellMeWhen_CheckTemplate">
+				<Size x="26" y="26"/>
+				<Anchors>
+					<Anchor point="RIGHT" relativeto="$parentConditionDur" relativePoint="LEFT" x="-1" y="-0.5"/>
+				</Anchors>
+				<Scripts>
+					<OnLoad>
+						TMW.IE:CreateSettingFrameFromData(self, {
+							setting = "ConditionDurEnabled",
+							label = "",
+							title = ENABLE,
+							tooltip = TMW.L["GENERIC_NUMREQ_CHECK_DESC"]:format(TMW.L["CONDITION_TIMERS_SUCCEED_DESC"]:gsub("^%u", strlower)),
+						})
+					</OnLoad>
+				</Scripts>
+			</CheckButton>
+			<CheckButton name="$parentUnConditionDurEnabled" parentKey="UnConditionDurEnabled" inherits="TellMeWhen_CheckTemplate">
+				<Size x="26" y="26"/>
+				<Anchors>
+					<Anchor point="RIGHT" relativeto="$parentUnConditionDur" relativePoint="LEFT" x="-1" y="-0.5"/>
+				</Anchors>
+				<Scripts>
+					<OnLoad>
+						TMW.IE:CreateSettingFrameFromData(self, {
+							setting = "UnConditionDurEnabled",
+							label = "",
+							title = ENABLE,
+							tooltip = TMW.L["GENERIC_NUMREQ_CHECK_DESC"]:format(TMW.L["CONDITION_TIMERS_FAIL_DESC"]:gsub("^%u", strlower)),
+						})
+					</OnLoad>
+				</Scripts>
+			</CheckButton>
+			
+			<CheckButton name="$parentOnlyIfCounting" inherits="TellMeWhen_CheckTemplate" parentKey="OnlyIfCounting">
+				<Size x="28" y="28"/>
+				<Anchors>
+					<Anchor point="LEFT" relativeTo="$parentUnConditionDur" relativePoint="RIGHT" x="10" y="-0.5"/>
+				</Anchors>
+				<Scripts>
+					<OnLoad>
+						--self.text:SetWidth(TMW.WidthCol1)
+						
+						TMW.IE:CreateSettingFrameFromData(self, {
+							setting = "OnlyIfCounting",
+							title = TMW.L["ICONMENU_ONLYIFCOUNTING"],
+							tooltip = TMW.L["ICONMENU_ONLYIFCOUNTING_DESC"],
+						})
+					</OnLoad>
+				</Scripts>
+			</CheckButton>
+
+		</Frames>
+		<Scripts>
+			<OnLoad>
+				self.Header:SetText(TMW.L["CONFIGPANEL_CNDTTIMERS_HEADER"])
+			</OnLoad>
+		</Scripts>
+	</Frame>
+	
+</Ui>

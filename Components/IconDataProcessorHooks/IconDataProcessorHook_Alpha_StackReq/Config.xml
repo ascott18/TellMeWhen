@@ -1,0 +1,126 @@
+<Ui>
+
+	<Frame name="TellMeWhen_StackRequirements" inherits="TellMeWhen_OptionsModuleContainer" virtual="true">
+		<Size y="51"/>
+		<Frames>
+			<CheckButton name="$parentStackMinEnabled" parentKey="StackMinEnabled" inherits="TellMeWhen_CheckTemplate">
+				<Size x="26" y="26"/>
+				<Anchors>
+					<Anchor point="TOPLEFT" x="5" y="-20"/>
+				</Anchors>
+				<Scripts>
+					<OnLoad>
+						TMW.IE:CreateSettingFrameFromData(self, {
+							setting = "StackMinEnabled",
+							label = "",
+							title = ENABLE,
+							tooltip = TMW.L["GENERIC_NUMREQ_CHECK_DESC"]:format(TMW.L["ICONMENU_STACKS_MIN_DESC"]:gsub("^%u", strlower)),
+						})
+					</OnLoad>
+				</Scripts>
+			</CheckButton>
+			<CheckButton name="$parentStackMaxEnabled" parentKey="StackMaxEnabled" inherits="TellMeWhen_CheckTemplate">
+				<Size x="26" y="26"/>
+				<Anchors>
+					<Anchor point="LEFT" relativeTo="$parentStackMinEnabled" relativePoint="RIGHT" x="80"/>
+				</Anchors>
+				<Scripts>
+					<OnLoad>
+						TMW.IE:CreateSettingFrameFromData(self, {
+							setting = "StackMaxEnabled",
+							label = "",
+							title = ENABLE,
+							tooltip = TMW.L["GENERIC_NUMREQ_CHECK_DESC"]:format(TMW.L["ICONMENU_STACKS_MAX_DESC"]:gsub("^%u", strlower)),
+						})
+					</OnLoad>
+				</Scripts>
+			</CheckButton>
+			
+			
+			<EditBox name="$parentStackMin" parentKey="StackMin" inherits="TellMeWhen_TimeEditBoxTemplate">
+				<Size x="60" y="15"/>
+				<Anchors>
+					<Anchor point="LEFT" relativeto="$parentStackMinEnabled" relativePoint="RIGHT" x="1" y="0.5"/>
+				</Anchors>
+				<Scripts>
+					<OnLoad>
+						self.text:SetText(MINIMUM)
+						self.setting = "StackMin"
+						
+						TMW.IE:CreateSettingFrameFromData(self, {
+							setting = "StackMin",
+							title = MAXIMUM,
+							tooltip = TMW.L["ICONMENU_STACKS_MIN_DESC"],
+							disabled = function(self)
+								return not TMW.CI.ics.StackMinEnabled
+							end,
+							ModifySettingValue = function(self, value)
+								return tonumber(value) or 0
+							end,
+						})
+					</OnLoad>
+				</Scripts>
+			</EditBox>
+			<EditBox name="$parentStackMax" parentKey="StackMax" inherits="TellMeWhen_TimeEditBoxTemplate">
+				<Size x="60" y="15"/>
+				<Anchors>
+					<Anchor point="LEFT" relativeto="$parentStackMaxEnabled" relativePoint="RIGHT" x="1" y="0.5"/>
+				</Anchors>
+				<Scripts>
+					<OnLoad>
+						self.text:SetText(MAXIMUM)
+						self.setting = "StackMax"
+						
+						TMW.IE:CreateSettingFrameFromData(self, {
+							setting = "StackMax",
+							title = MAXIMUM,
+							tooltip = TMW.L["ICONMENU_STACKS_MAX_DESC"],
+							disabled = function(self)
+								return not TMW.CI.ics.StackMaxEnabled
+							end,
+							ModifySettingValue = function(self, value)
+								return tonumber(value) or 0
+							end,
+						})
+					</OnLoad>
+				</Scripts>
+
+			</EditBox>
+			
+			<Slider name="$parentStackAlpha" parentKey="StackAlpha" inherits="TellMeWhen_SliderTemplate" valuestep="1">
+				<Size y="17"/>
+				<Anchors>
+					<Anchor point="LEFT" relativeTo="$parentStackMax" relativePoint="RIGHT" x="25" />
+					<Anchor point="RIGHT" x="-10" />
+					<Anchor point="TOP" y="-21" />
+				</Anchors>
+				<Scripts>
+					<OnLoad>
+						self.text:SetWidth(self:GetWidth())
+						
+						TMW.IE:CreateSettingFrameFromData(self, "SettingSlider_Alpha", {
+							title = TMW.L["REQFAILED_ALPHA"],
+							tooltip = TMW.L["STACKALPHA_DESC"],
+							setting = "StackAlpha",
+							setOrangeAtValue = 1,
+							disabled = function(self)
+								local ics = TMW.CI.ics
+								if ics then
+									return not ics.StackMinEnabled and not ics.StackMaxEnabled
+								end
+							end,
+						})
+					</OnLoad>
+				</Scripts>
+			</Slider>
+		</Frames>
+		<Scripts>
+			<OnLoad>
+				self.Header:SetText(TMW.L["STACKSPANEL_TITLE2"])
+				
+				--TMW.IE:DistributeFrameAnchorsLaterally(self, 3, self.StackMinEnabled, self.StackMaxEnabled, self.StackAlpha)
+			</OnLoad>
+		</Scripts>
+	</Frame>
+ 
+</Ui>

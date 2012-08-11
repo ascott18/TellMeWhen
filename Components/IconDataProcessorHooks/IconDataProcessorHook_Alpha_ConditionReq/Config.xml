@@ -1,0 +1,34 @@
+<Ui>
+
+	<Frame name="TellMeWhen_ConditionRequirements" inherits="TellMeWhen_OptionsModuleContainer" virtual="true">
+		<Size y="46"/>
+		<Frames>
+			<Slider name="$parentConditionAlpha" parentKey="ConditionAlpha" inherits="TellMeWhen_SliderTemplate" valuestep="1">
+				<Size y="17"/>
+				<Anchors>
+					<Anchor point="LEFT" x="10" />
+					<Anchor point="RIGHT" x="-10" />
+					<Anchor point="TOP" y="-17" />
+				</Anchors>
+				<Scripts>
+					<OnLoad>
+						self.text:SetWidth(self:GetWidth())
+						
+						TMW.IE:CreateSettingFrameFromData(self, "SettingSlider_Alpha", {
+							title = TMW.L["REQFAILED_ALPHA"],
+							tooltip = TMW.L["CONDITIONALPHA_METAICON_DESC"],
+							setting = "ConditionAlpha",
+							setOrangeAtValue = 1,
+						})
+					</OnLoad>
+				</Scripts>
+			</Slider>
+		</Frames>
+		<Scripts>
+			<OnLoad>
+				self.Header:SetText(TMW.L["CONDITIONALPHA_METAICON"])
+			</OnLoad>
+		</Scripts>
+	</Frame>
+ 
+</Ui>

@@ -1,0 +1,20 @@
+<Ui>
+
+<Include file="IconDataProcessor_Duration\includes.core.xml"/>
+<Include file="IconDataProcessor_Spell\includes.core.xml"/>
+<Include file="IconDataProcessor_Texture\includes.core.xml"/>
+<Include file="IconDataProcessor_Condition\includes.core.xml"/>
+<Include file="IconDataProcessor_Reverse\includes.core.xml"/>
+<Include file="IconDataProcessor_Stack\includes.core.xml"/>
+<Include file="IconDataProcessor_Mana\includes.core.xml"/>
+<Include file="IconDataProcessor_Range\includes.core.xml"/>
+
+<Include file="IconDataProcessor_Unit\includes.core.xml"/>
+<Include file="IconDataProcessor_Unit_DogTag\includes.core.xml"/>
+
+<Include file="IconDataProcessor_Shown\includes.core.xml"/>
+<Include file="IconDataProcessor_Alpha\includes.core.xml"/>
+<Include file="IconDataProcessor_Alpha_Override\includes.core.xml"/>
+<Include file="IconDataProcessor_Alpha_Real\includes.core.xml"/>
+
+</Ui>

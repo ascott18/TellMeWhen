@@ -1,0 +1,662 @@
+<Ui>
+
+	<Button name="TellMeWhen_ConditionEditorRuneCheckTemplate" virtual="true">
+		<Size x="35" y="29"/>
+		<Layers>
+			<Layer level="OVERLAY">
+				<Texture name="$parentCheck" parentKey="Check" file="">
+					<Size x="27" y="27"/>
+					<Anchors>
+						<Anchor point="CENTER"/>
+					</Anchors>
+				</Texture>
+			</Layer>
+			<Layer level="ARTWORK">
+				<Texture parentKey="texture">
+					<Size x="28" y="28"/>
+					<Anchors>
+						<Anchor point="CENTER"/>
+					</Anchors>
+				</Texture>
+			</Layer>
+		</Layers>
+		<Scripts>
+			<OnClick>
+				if self.checked then
+					self.checked = false
+					self.Check:SetTexture("Interface\\RAIDFRAME\\ReadyCheck-NotReady")
+				elseif self.checked == false then
+					self.checked = nil
+					self.Check:SetTexture(nil)
+				elseif self.checked == nil then
+					self.checked = true
+					self.Check:SetTexture("Interface\\RAIDFRAME\\ReadyCheck-Ready")
+				end
+				TMW.CNDT:RuneHandler(self)
+				TMW.CNDT:Save()
+			</OnClick>
+			<OnLoad>
+				self.GetChecked = TMW.CNDT.Rune_GetChecked
+				self.SetChecked = TMW.CNDT.Rune_SetChecked
+
+
+				-- detect what texture should be used
+				for k, v in pairs(self:GetParent()) do
+					if v == self then
+						local runeName = gsub(self:GetName(), self:GetParent():GetName(), "")
+						local runeType, death = runeName:match("(.*)%d(.*)")
+
+						if death and death ~= "" then
+							self.texture:SetTexture("Interface\\AddOns\\TellMeWhen\\Textures\\" .. runeType)
+						else
+							self.texture:SetTexture("Interface\\PlayerFrame\\UI-PlayerFrame-Deathknight-" .. runeType)
+						end
+					end
+				end
+
+			</OnLoad>
+		</Scripts>
+	</Button>
+	<CheckButton name="TellMeWhen_ConditionEditorParenthesisTemplate" hidden="true" virtual="true">
+		<Size x="20" y="20"/>
+		<HitRectInsets>
+			<AbsInset left="4" right="4" top="0" bottom="0"/>
+		</HitRectInsets>
+		<Layers>
+			<Layer level="ARTWORK">
+				<FontString name="$parentText" parentKey="text" justifyH="LEFT" inherits="GameFontHighlight">
+					<Anchors>
+						<Anchor point="CENTER"/>
+					</Anchors>
+				</FontString>
+			</Layer>
+		</Layers>
+		<Scripts>
+			<OnLoad>
+				if strfind(self:GetParent():GetName(), "Close") then
+					self.type = ")"
+				else
+					self.type = "("
+				end
+				self.text:SetText(self.type)
+				function self:SetChecked(checked)
+					self:Show()
+					local oldstate = self.checked
+					self.checked = checked
+					if checked then
+						local next = self:GetParent()[self:GetID() + 1]
+						if next then
+							next:Show()
+						elseif self:GetID() &lt; 13 then
+							next = CreateFrame("CheckButton", self:GetParent():GetName() .. self:GetID() + 1, self:GetParent(), "TellMeWhen_ConditionEditorParenthesisTemplate", self:GetID() + 1)
+							self:GetParent()[self:GetID() + 1] = next
+							local a, _, c, d, e = self:GetPoint()
+							next:SetPoint(a, self, c, d, e)
+							next:Show()
+							next:SetChecked(nil)
+						end
+					else
+						local last = self:GetParent()[self:GetID() - 1]
+						if type(last) == "table" and not last.checked then
+							self:Hide()
+						end
+						for i = self:GetID() + 1, #self:GetParent() do
+							self:GetParent()[i]:SetChecked(nil)
+							self:GetParent()[i]:Hide()
+						end
+					end
+
+					if oldstate ~= checked then
+					--	TMW.CNDT:ColorizeParentheses()
+					end
+				end
+
+				function self:GetChecked()
+					return self.checked
+				end
+				self:GetParent()[self:GetID()] = self
+			</OnLoad>
+			<OnClick>
+				self:SetChecked(not self.checked)
+				TMW.CNDT:Save()
+				TMW.CNDT:ColorizeParentheses()
+			</OnClick>
+			<OnEnter>
+				self.text:SetText(gsub(self.text:GetText(), "|cff222222", "|cffffffff"))
+			</OnEnter>
+			<OnLeave>
+				TMW.CNDT:ColorizeParentheses()
+			</OnLeave>
+		</Scripts>
+	<!-- 	<HighlightTexture urgency="5" file="Interface\Buttons\UI-CheckBox-Highlight" alphaMode="ADD"/> -->
+	</CheckButton>
+	<Frame name="TellMeWhen_ConditionGroup" inherits="TellMeWhen_BorderedFrame" virtual="true">
+		<Size x="559" y="69"/>
+		<Anchors>
+			<Anchor point="TOPLEFT"/>
+		</Anchors>
+		<Frames>
+			<Frame name="$parentType" parentKey="Type" inherits="TMW_DropDownMenuTemplate">
+				<Anchors>
+					<Anchor point="TOPLEFT" x="9" y="-14.5"/>
+				</Anchors>
+				<Scripts>
+					<OnLoad>
+						self.wrapTooltips = 1
+						UIDropDownMenu_SetWidth(self, 160)
+						self.initialize = TMW.CNDT.TypeMenu_DropDown
+					</OnLoad>
+				</Scripts>
+			</Frame>
+			<Frame name="$parentIcon" parentKey="Icon" inherits="TMW_IconDropDownMenuTemplate">
+				<Anchors>
+					<Anchor point="LEFT" relativeTo="$parentType" relativePoint="RIGHT" x="-10"/>
+				</Anchors>
+				<Scripts>
+					<OnLoad>
+						self.wrapTooltips = 1
+						self:Hide()
+						UIDropDownMenu_SetWidth(self, 151)
+						self.initialize = TMW.CNDT.IconMenu_DropDown
+					</OnLoad>
+				</Scripts>
+			</Frame>
+			<EditBox name="$parentUnit" inherits="TellMeWhen_InputBoxTemplate" parentKey="Unit" autoFocus="false">
+				<Size x="95" y="15"/>
+				<Anchors>
+					<Anchor point="LEFT" relativeTo="$parentType" relativePoint="RIGHT" x="-5" y="3"/>
+				</Anchors>
+				<Frames>
+					<Button name="$parentButton" motionScriptsWhileDisabled="true" parentKey="Button">
+						<Size x="24" y="24"/>
+						<Anchors>
+							<Anchor point="LEFT" relativePoint="RIGHT" x="-5.5" y="-0.5"/>
+						</Anchors>
+						<Scripts>
+							<OnClick>
+								TellMeWhen_IconEditorConditionsUnitDD:SetParent(self:GetParent())
+								TellMeWhen_IconEditorConditionsUnitDD:Init()
+								ToggleDropDownMenu(1, nil, TellMeWhen_IconEditorConditionsUnitDD, self, 0, 0)
+								PlaySound("igCharacterInfoTab")
+							</OnClick>
+						</Scripts>
+						<NormalTexture file="Interface\ChatFrame\UI-ChatIcon-ScrollDown-Up"/>
+						<PushedTexture file="Interface\ChatFrame\UI-ChatIcon-ScrollDown-Down"/>
+						<DisabledTexture file="Interface\ChatFrame\UI-ChatIcon-ScrollDown-Disabled"/>
+						<HighlightTexture file="Interface\Buttons\UI-Common-MouseHilight" alphaMode="ADD"/>
+					</Button>
+				</Frames>
+				<Scripts>
+					<OnLoad>
+						self.Ins = TellMeWhen_IconEditorConditionsUnitDD
+						self.label = "|cFFFF5050" .. TMW.L["CONDITIONPANEL_UNIT"] .. "!|r"
+						TMW:TT(self, "CONDITIONPANEL_UNIT", "CONDITIONPANEL_UNIT_DESC")
+						TMW:TT(self.Button, "CONDITIONPANEL_UNIT", "CONDITIONPANEL_UNITDROPDOWN_DESC")
+					</OnLoad>
+					<OnEditFocusLost>
+						EditBox_ClearHighlight(self)
+						TMW:CleanString(self)
+						TMW.CNDT:Save()
+
+						if self:GetText() == "" then
+							TMW.HELP:Show("CNDT_UNIT_MISSING", TMW.CI.ic, self:GetParent():GetParent():GetParent(), 0, 0, TMW.L["HELP_NOUNIT"])
+						end
+					</OnEditFocusLost>
+				</Scripts>
+			</EditBox>
+			<Frame name="$parentOperator" parentKey="Operator" inherits="TMW_DropDownMenuTemplate">
+				<Anchors>
+					<Anchor point="LEFT" relativeTo="$parentUnit" relativePoint="RIGHT" x="5" y="-3"/>
+				</Anchors>
+				<Scripts>
+					<OnLoad>
+						self.wrapTooltips = 1
+						self.Text:SetFontObject(GameFontHighlightLarge)
+						UIDropDownMenu_SetWidth(self, 47)
+						self.initialize = TMW.CNDT.OperatorMenu_DropDown
+					</OnLoad>
+				</Scripts>
+			</Frame>
+			<Slider name="$parentSlider" parentKey="Slider" inherits="TellMeWhen_SliderTemplate" minvalue="0" maxvalue="100" valuestep="1" defaultvalue="100">
+				<Size x="522" y="17"/>
+				<Anchors>
+					<Anchor point="TOPRIGHT" x="-5" y="-39"/>
+				</Anchors>
+				<Scripts>
+					<OnValueChanged>
+						local group = self:GetParent()
+						if group.SetValText then group:SetValText() end
+					</OnValueChanged>
+					<OnMouseUp>
+						self:GetParent():SetSliderMinMax()
+						TMW.CNDT:Save()
+					</OnMouseUp>
+					<OnLoad>
+						self:EnableMouseWheel(true)
+						self.getvalue = self.GetValue
+						function self:GetValue()
+							local step = self.step or 1
+							local val = self:getvalue()
+							return floor(val * (1/step) + 0.5) / (1/step)
+						end
+					</OnLoad>
+					<OnMouseWheel>
+						if IsShiftKeyDown() then
+							delta = delta*10
+						end
+						if IsControlKeyDown() then
+							delta = delta*60 -- (60 seconds)
+						end
+						if delta == 1 or delta == -1 then
+							delta = delta*(self.step or 1)
+						end
+						self:GetParent():SetSliderMinMax(self:GetValue()+delta)
+						TMW.CNDT:Save()
+					</OnMouseWheel>
+				</Scripts>
+			</Slider>
+			<EditBox name="$parentEditBox" inherits="TellMeWhen_InputBoxTemplate" parentKey="EditBox" autoFocus="false">
+				<Size x="302" y="15"/>
+				<Anchors>
+					<Anchor point="TOPLEFT" relativeTo="$parentType" relativePoint="BOTTOMLEFT" x="23" y="2"/>
+				</Anchors>
+				<Scripts>
+					<OnEditFocusLost>
+						EditBox_ClearHighlight(self)
+						TMW:CleanString(self)
+						TMW.CNDT:Save()
+					</OnEditFocusLost>
+				</Scripts>
+			</EditBox>
+			<EditBox name="$parentEditBox2" inherits="TellMeWhen_InputBoxTemplate" parentKey="EditBox2" autoFocus="false">
+				<Size x="302" y="15"/>
+				<Anchors>
+					<Anchor point="LEFT" relativeTo="$parentEditBox" relativePoint="RIGHT" x="15"/>
+				</Anchors>
+				<Scripts>
+					<OnEditFocusLost>
+						EditBox_ClearHighlight(self)
+						TMW:CleanString(self)
+						TMW.CNDT:Save()
+					</OnEditFocusLost>
+				</Scripts>
+			</EditBox>
+			<Frame name="$parentRunes" parentKey="Runes" hidden="true">
+				<Size x="1" y="1"/>
+				<Anchors>
+					<Anchor point="TOPLEFT" relativeTo="$parentType" relativePoint="TOPRIGHT" x="10" y="8"/>
+				</Anchors>
+				<Frames>
+					<Button name="$parentBlood1" parentKey="blood1" inherits="TellMeWhen_ConditionEditorRuneCheckTemplate" id="1">
+						<Anchors>
+							<Anchor point="TOPLEFT"/>
+						</Anchors>
+					</Button>
+					<Button name="$parentBlood2" parentKey="blood2" inherits="TellMeWhen_ConditionEditorRuneCheckTemplate" id="2">
+						<Anchors>
+							<Anchor point="LEFT" relativeTo="$parentBlood1" relativePoint="RIGHT"/>
+						</Anchors>
+					</Button>
+		 			<Button name="$parentFrost1" parentKey="frost1" inherits="TellMeWhen_ConditionEditorRuneCheckTemplate" id="5">
+						<Anchors>
+							<Anchor point="LEFT" relativeTo="$parentBlood2" relativePoint="RIGHT"/>
+						</Anchors>
+					</Button>
+					<Button name="$parentFrost2" parentKey="frost2" inherits="TellMeWhen_ConditionEditorRuneCheckTemplate" id="6">
+						<Anchors>
+							<Anchor point="LEFT" relativeTo="$parentFrost1" relativePoint="RIGHT"/>
+						</Anchors>
+					</Button>
+					<Button name="$parentUnholy1" parentKey="unholy1" inherits="TellMeWhen_ConditionEditorRuneCheckTemplate" id="3">
+						<Anchors>
+							<Anchor point="LEFT" relativeTo="$parentFrost2" relativePoint="RIGHT"/>
+						</Anchors>
+					</Button>
+					<Button name="$parentUnholy2" parentKey="unholy2" inherits="TellMeWhen_ConditionEditorRuneCheckTemplate" id="4">
+						<Anchors>
+							<Anchor point="LEFT" relativeTo="$parentUnholy1" relativePoint="RIGHT"/>
+						</Anchors>
+					</Button>
+
+
+					<Button name="$parentBlood1Death" parentKey="blood1death" inherits="TellMeWhen_ConditionEditorRuneCheckTemplate" id="7">
+						<Anchors>
+							<Anchor point="TOP" relativeTo="$parentBlood1" relativePoint="BOTTOM"/>
+						</Anchors>
+					</Button>
+					<Button name="$parentBlood2Death" parentKey="blood2death" inherits="TellMeWhen_ConditionEditorRuneCheckTemplate" id="8">
+						<Anchors>
+							<Anchor point="LEFT" relativeTo="$parentBlood1Death" relativePoint="RIGHT"/>
+						</Anchors>
+					</Button>
+					<Button name="$parentFrost1Death" parentKey="frost1death" inherits="TellMeWhen_ConditionEditorRuneCheckTemplate" id="11">
+						<Anchors>
+							<Anchor point="LEFT" relativeTo="$parentBlood2Death" relativePoint="RIGHT"/>
+						</Anchors>
+					</Button>
+					<Button name="$parentFrost2Death" parentKey="frost2death" inherits="TellMeWhen_ConditionEditorRuneCheckTemplate" id="12">
+						<Anchors>
+							<Anchor point="LEFT" relativeTo="$parentFrost1Death" relativePoint="RIGHT"/>
+						</Anchors>
+					</Button>
+					<Button name="$parentUnholy1Death" parentKey="unholy1death" inherits="TellMeWhen_ConditionEditorRuneCheckTemplate" id="9">
+						<Anchors>
+							<Anchor point="LEFT" relativeTo="$parentFrost2Death" relativePoint="RIGHT"/>
+						</Anchors>
+					</Button>
+					<Button name="$parentUnholy2Death" parentKey="unholy2death" inherits="TellMeWhen_ConditionEditorRuneCheckTemplate" id="10">
+						<Anchors>
+							<Anchor point="LEFT" relativeTo="$parentUnholy1Death" relativePoint="RIGHT"/>
+						</Anchors>
+					</Button>
+
+
+				</Frames>
+			</Frame>
+			<CheckButton name="$parentCheck" inherits="TellMeWhen_CheckTemplate" parentKey="Check">
+				<Size x="26" y="26"/>
+				<Anchors>
+					<Anchor point="RIGHT" relativeTo="$parentEditBox" x="5" y="-1"/>
+				</Anchors>
+				<Scripts>
+					<OnLoad>
+						self:SetFrameLevel(self:GetParent().EditBox:GetFrameLevel() + 1)
+						self:GetNormalTexture():SetVertexColor(1, 0, 0, 1)
+					</OnLoad>
+					<OnClick>
+						TMW.CNDT:Save()
+					</OnClick>
+				</Scripts>
+			</CheckButton>
+			<CheckButton name="$parentCheck2" inherits="TellMeWhen_CheckTemplate" parentKey="Check2">
+				<Size x="26" y="26"/>
+				<Anchors>
+					<Anchor point="RIGHT" relativeTo="$parentEditBox2" x="5" y="-1"/>
+				</Anchors>
+				<Scripts>
+					<OnLoad>
+						self:SetFrameLevel(self:GetParent().EditBox:GetFrameLevel() + 1)
+						self:GetNormalTexture():SetVertexColor(1, 0, 0, 1)
+					</OnLoad>
+					<OnClick>
+						TMW.CNDT:Save()
+					</OnClick>
+				</Scripts>
+			</CheckButton>
+
+
+			<Button name="$parentAndOr" parentKey="AndOr">
+				<Size x="40" y="20"/>
+				<Anchors>
+					<Anchor point="BOTTOM" relativePoint="TOP" x="1" y="-3"/>
+				</Anchors>
+				<Layers>
+					<Layer level="ARTWORK">
+						<FontString name="$parentText" parentKey="text" justifyH="CENTER" inherits="GameFontHighlight">
+							<Anchors>
+								<Anchor point="CENTER"/>
+							</Anchors>
+						</FontString>
+					</Layer>
+				</Layers>
+				<Scripts>
+					<OnLoad>
+						local AND, OR = TMW.L["CONDITIONPANEL_AND"], TMW.L["CONDITIONPANEL_OR"]
+						local GRAY = "|cff222222"
+						local SLASH = "/"
+						local WHITE = "|r"
+						local AND_t = WHITE .. AND .. GRAY .. SLASH .. OR
+						local OR_t = GRAY .. AND .. SLASH .. WHITE .. OR
+
+						function self:SetValue(value)
+							local text
+
+							if value == "AND" then
+								text = AND_t
+							elseif value == "OR" then
+								text = OR_t
+							end
+
+							self.text:SetText(text)
+							self.value = value
+							self:SetWidth(self.text:GetWidth())
+						end
+						function self:GetValue()
+							return self.value
+						end
+
+						TMW:TT(self, "CONDITIONPANEL_ANDOR", "CONDITIONPANEL_ANDOR_DESC")
+						self:SetValue("AND")
+					</OnLoad>
+					<OnClick>
+						if self.value == "AND" then
+							self:SetValue("OR")
+						elseif self.value == "OR" then
+							self:SetValue("AND")
+						end
+						TMW.CNDT:Save()
+					</OnClick>
+				</Scripts>
+			</Button>
+
+			<Frame name="$parentOpenParenthesis" parentKey="OpenParenthesis">
+				<Size x="100" y="20"/>
+				<Anchors>
+					<Anchor point="LEFT" relativePoint="RIGHT" relativeTo="$parentAndOr" x="5" y="0"/>
+				</Anchors>
+				<Frames>
+					<CheckButton name="$parent1" inherits="TellMeWhen_ConditionEditorParenthesisTemplate" id="1">
+						<Anchors>
+							<Anchor point="LEFT"/>
+						</Anchors>
+					</CheckButton>
+					<CheckButton name="$parent2" inherits="TellMeWhen_ConditionEditorParenthesisTemplate" id="2">
+						<Anchors>
+							<Anchor point="LEFT" relativeTo="$parent1" relativePoint="RIGHT" x="-8"/>
+						</Anchors>
+					</CheckButton>
+				</Frames>
+			</Frame>
+
+			<Frame name="$parentCloseParenthesis" parentKey="CloseParenthesis">
+				<Size x="100" y="20"/>
+				<Anchors>
+					<Anchor point="RIGHT" relativeTo="$parentAndOr" relativePoint="LEFT" x="-5" y="0"/>
+					<Anchor point="TOP" relativeTo="$parent" relativePoint="BOTTOM" x="0" y="3"/>
+				</Anchors>
+				<Frames>
+					<CheckButton name="$parent1" inherits="TellMeWhen_ConditionEditorParenthesisTemplate" id="1">
+						<Anchors>
+							<Anchor point="RIGHT"/>
+						</Anchors>
+					</CheckButton>
+					<CheckButton name="$parent2" inherits="TellMeWhen_ConditionEditorParenthesisTemplate" id="2">
+						<Anchors>
+							<Anchor point="RIGHT" relativeTo="$parent1" relativePoint="LEFT" x="8"/>
+						</Anchors>
+					</CheckButton>
+				</Frames>
+			</Frame>
+
+			<Button name="$parentUp" parentKey="Up">
+				<Size x="15" y="15"/>
+				<Anchors>
+					<Anchor point="TOPLEFT" x="4" y="-32"/>
+				</Anchors>
+				<Scripts>
+					<OnLoad>
+						self:SetFrameLevel(self:GetParent():GetFrameLevel() + 2)
+						TMW:TT(self, "METAPANEL_UP")
+						self:SetScale(0.8)
+					</OnLoad>
+					<OnClick>
+						self:GetParent():UpOrDown(-1)
+					</OnClick>
+				</Scripts>
+				<NormalTexture urgency="5" file="Interface\ChatFrame\UI-ChatIcon-ScrollUp-Up" alphaMode="ADD">
+					<TexCoords left="0.21875" right="0.6875" top="0.34375" bottom="0.65625"/>
+					<Color r=".7" g=".7" b=".7" a="1"/>
+				</NormalTexture>
+				<HighlightTexture urgency="5" file="Interface\ChatFrame\UI-ChatIcon-ScrollUp-Up" alphaMode="ADD">
+					<TexCoords left="0.21875" right="0.6875" top="0.34375" bottom="0.65625"/>
+				</HighlightTexture>
+			</Button>
+			<Button name="$parentDown" parentKey="Down">
+				<Size x="15" y="15"/>
+				<Anchors>
+					<Anchor point="TOP" relativeTo="$parentUp" relativePoint="BOTTOM" y="-3"/>
+				</Anchors>
+				<Scripts>
+					<OnLoad>
+						self:SetFrameLevel(self:GetParent():GetFrameLevel() + 2)
+						TMW:TT(self, "METAPANEL_DOWN")
+						self:SetScale(0.8)
+					</OnLoad>
+					<OnClick>
+						self:GetParent():UpOrDown(1)
+					</OnClick>
+				</Scripts>
+				<NormalTexture urgency="5" file="Interface\ChatFrame\UI-ChatIcon-ScrollDown-Up" alphaMode="ADD">
+					<TexCoords left="0.21875" right="0.6875" top="0.34375" bottom="0.65625"/>
+					<Color r=".7" g=".7" b=".7" a="1"/>
+				</NormalTexture>
+				<HighlightTexture urgency="5" file="Interface\ChatFrame\UI-ChatIcon-ScrollDown-Up" alphaMode="ADD">
+					<TexCoords left="0.21875" right="0.6875" top="0.34375" bottom="0.65625"/>
+				</HighlightTexture>
+			</Button>
+			<Button name="$parentAddDelete" parentKey="AddDelete">
+				<Size x="30" y="30"/>
+				<Anchors>
+					<Anchor point="TOPLEFT" relativeto="$parent" x="-4" y="4"/>
+				</Anchors>
+				<Scripts>
+					<OnLoad>
+						self.RealParent = self:GetParent()
+						self:SetParent(self:GetParent():GetParent()) -- dont hide it when the group is hidden
+					</OnLoad>
+					<OnClick>
+						self.RealParent:AddDeleteHandler()
+						TMW.CNDT:Save()
+					</OnClick>
+				</Scripts>
+				<NormalTexture urgency="5" file="Interface\AddOns\TellMeWhen\Textures\Plus-Up"/>
+				<PushedTexture file="Interface\AddOns\TellMeWhen\Textures\Plus-Down"/>
+				<HighlightTexture urgency="5" file="Interface\AddOns\TellMeWhen\Textures\Plus-Highlight" alphaMode="ADD"/>
+			</Button>
+		</Frames>
+		<Layers>
+			<Layer level="OVERLAY">
+				<FontString name="$parentTextType" parentKey="TextType" inherits="GameFontNormalSmall" justifyH="CENTER">
+					<Anchors>
+						<Anchor point="BOTTOM" relativeto="$parentType" relativePoint="TOP" y="-0.5"/>
+					</Anchors>
+				</FontString>
+				<FontString name="$parentTextUnitOrIcon" parentKey="TextUnitOrIcon" inherits="GameFontNormalSmall" justifyH="CENTER">
+					<Anchors>
+						<Anchor point="BOTTOM" relativeto="$parentUnit" relativePoint="TOP" y="5"/>
+					</Anchors>
+				</FontString>
+				<FontString name="$parentTextOperator" parentKey="TextOperator" inherits="GameFontNormalSmall" justifyH="CENTER">
+					<Anchors>
+						<Anchor point="BOTTOM" relativeto="$parentOperator" relativePoint="TOP" y="-0.5"/>
+					</Anchors>
+				</FontString>
+				<FontString name="$parentTextValue" parentKey="TextValue" inherits="GameFontNormalSmall" justifyH="CENTER">
+					<Anchors>
+						<Anchor point="BOTTOMLEFT" relativeto="$parentOperator" relativePoint="TOPRIGHT" x="-8" y="-0.5"/>
+					</Anchors>
+				</FontString>
+				<FontString name="$parentValText" parentKey="ValText" inherits="GameFontNormalLarge" justifyH="LEFT">
+					<Anchors>
+						<Anchor point="LEFT" relativeto="$parentOperator" relativePoint="RIGHT" x="-10" y="3"/>
+					</Anchors>
+				</FontString>
+				<FontString name="$parentTextUnitDef" parentKey="TextUnitDef" inherits="GameFontNormalLarge" justifyH="CENTER">
+					<Anchors>
+						<Anchor point="CENTER" relativeto="$parentUnit" y="-0"/>
+					</Anchors>
+				</FontString>
+				<FontString name="$parentSliderMid" parentKey="SliderMid" inherits="GameFontHighlightSmall">
+					<Anchors>
+						<Anchor point="TOP" relativeto="$parentSlider" relativePoint="BOTTOM" y="3"/>
+					</Anchors>
+				</FontString>
+			</Layer>
+		</Layers>
+		<Scripts>
+			<OnShow>
+				self.AddDelete:SetNormalTexture("Interface\\Buttons\\UI-Panel-MinimizeButton-Up")
+				self.AddDelete:SetPushedTexture("Interface\\Buttons\\UI-Panel-MinimizeButton-Down")
+				self.AddDelete:SetHighlightTexture("Interface\\Buttons\\UI-Panel-MinimizeButton-Highlight", "ADD")
+				TMW:TT(self.AddDelete, "CONDITIONPANEL_REMOVE")
+			</OnShow>
+			<OnHide>
+				self.AddDelete:SetNormalTexture("Interface\\AddOns\\TellMeWhen\\Textures\\Plus-Up")
+				self.AddDelete:SetPushedTexture("Interface\\AddOns\\TellMeWhen\\Textures\\Plus-Down")
+				self.AddDelete:SetHighlightTexture("Interface\\AddOns\\TellMeWhen\\Textures\\Plus-Highlight", "ADD")
+				TMW:TT(self.AddDelete, "CONDITIONPANEL_ADD")
+			</OnHide>
+
+		</Scripts>
+	</Frame>
+	
+			
+	<Frame name="$parentConditions" parent="TellMeWhen_IconEditor" hidden="true" setAllPoints="true" parentKey="Conditions">
+		<Frames>
+			<Frame name="$parentUnitDD" parentKey="UnitDD" inherits="TMW_DropDownMenuTemplate" hidden="true">
+				<Scripts>
+					<OnLoad>
+						function self:Init()
+							UIDropDownMenu_Initialize(self, TMW.CNDT.UnitMenu_DropDown, "DROPDOWN")
+							self.Init = function() end
+						end
+					</OnLoad>
+				</Scripts>
+			</Frame>
+			<ScrollFrame name="$parentScrollFrame" parentKey="ScrollFrame" inherits="UIPanelScrollFrameCodeTemplate" >
+				<Anchors>
+					<Anchor point="TOPLEFT" y="-27" x="-5"/>
+					<Anchor point="BOTTOMRIGHT" y="26"/>
+				</Anchors>
+				<ScrollChild>
+					<Frame name="$parentGroups" parent="TellMeWhen_IconEditorConditions" parentKey="Groups" >
+						<Size x="580" y="150"/>
+						<Scripts>
+							<OnLoad>
+								TMW.CNDT:CreateGroups(1)
+								TMW.CNDT[1].AndOr:Hide()
+								TMW.CNDT[1].CloseParenthesis:Hide()
+								TMW.CNDT[1]:SetPoint("TOPLEFT", 12, -16)
+							</OnLoad>
+						</Scripts>
+					</Frame>
+				</ScrollChild>
+				<Scripts>
+					<OnLoad>self.scrollBarHideable = true</OnLoad>
+				</Scripts>
+				<Frames>
+					<Slider name="$parentScrollBar" inherits="MinimalScrollBarTemplate" parentKey="ScrollBar">
+						<Size x="17"/>
+						<Anchors>
+							<Anchor point="TOPRIGHT" x="0" y="-18"/>
+							<Anchor point="BOTTOMRIGHT" x="0" y="17"/>
+						</Anchors>
+					</Slider>
+				</Frames>
+			</ScrollFrame>
+		</Frames>
+		<Scripts>
+			<OnLoad>
+				self:RegisterForDrag("LeftButton")
+				self:Hide()
+			</OnLoad>
+			<OnDragStart>
+				TMW.IE:StartMoving()
+			</OnDragStart>
+			<OnDragStop>
+				TMW.IE:StopMovingOrSizing()
+			</OnDragStop>
+		</Scripts>
+	</Frame>
+
+</Ui>

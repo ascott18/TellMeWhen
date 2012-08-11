@@ -1,0 +1,341 @@
+<Ui>
+	
+	<!--
+		A single text display in the icon editor.
+		Contains the editbox, the copy menu, and the rest to default button.
+		
+		Height of this frame is adjusted based on the height of the editbox.
+		Height of TellMeWhen_TextDisplayOptions is adjusted based on heights of these frames.
+	-->
+	<Frame name="TellMeWhen_TextDisplayGroup" virtual="true">
+		<!-- TODO: add up/down arrows to TextDisplayGroups -->
+		<!-- TODO: show frames for strings that are unhandled by the current layout,
+		allowing their manipulation, but also indicate that they are unhandled (in big red letters) -->
+		<Size y="40"/>
+		<Anchors>
+			<Anchor point="LEFT" x="0"/>
+			<Anchor point="RIGHT" x="0"/>
+		</Anchors>
+		<Frames>
+			<!--
+				Resets this text display to the default, as provided by the current text layout.
+			-->
+			<Button name="$parentDefault" parentKey="Default">
+				<Size x="15" y="15"/>
+				<Anchors>
+					<Anchor point="TOPRIGHT" x="-8" y="-2"/>
+				</Anchors>
+				<Scripts>
+					<OnLoad>
+						self:SetFrameLevel(self:GetFrameLevel()+2)
+					</OnLoad>
+					<OnClick>
+						if TMW.CI.ics then
+							local id = self:GetParent():GetID()
+							local GUID, layoutSettings = TMW.TEXT:GetTextLayoutForIcon(TMW.CI.ic)
+							local DefaultText = layoutSettings[id].DefaultText
+							TMW.CI.ics.SettingsPerView[TMW.CI.gs.View].Texts[id] = DefaultText
+							TMW.IE:ScheduleIconSetup()
+						end
+						TMW.TEXT:LoadConfig()
+					</OnClick>
+				</Scripts>
+				<NormalTexture urgency="5" file="Interface\PaperDollInfoFrame\UI-GearManager-Undo" alphaMode="ADD">
+					<TexCoords left="0.125" right="0.859375" top="0.140625" bottom="0.875"/>
+					<Color r=".7" g=".7" b=".7" a="1"/>
+				</NormalTexture>
+				<HighlightTexture urgency="5" file="Interface\PaperDollInfoFrame\UI-GearManager-Undo" alphaMode="ADD">
+					<TexCoords left="0.125" right="0.859375" top="0.140625" bottom="0.875"/>
+					<Color r="1" g="1" b="1" a="0.3"/>
+				</HighlightTexture>
+			</Button>
+			
+			<!--
+				Show a list of other text displays to copy to this display.
+			-->
+			<Button name="$parentCopy" parentKey="Copy">
+				<Size x="16" y="16"/>
+				<Anchors>
+					<Anchor point="RIGHT" relativeTo="$parentDefault"  relativePoint="LEFT" x="-5" y="-0.5"/>
+				</Anchors>
+				<Frames>
+					<Frame name="$parentDD" parentKey="DD" inherits="TMW_DropDownMenuTemplate" hidden="true">
+						<Scripts>
+							<OnLoad>
+								self.wrapTooltips = 1
+								--function self:Init()
+									UIDropDownMenu_Initialize(self, TMW.TEXT.CopyString_DropDown, "DROPDOWN")
+								--	self.Init = function() end
+								--end
+							</OnLoad>
+						</Scripts>
+					</Frame>
+				</Frames>
+				<Scripts>
+					<OnLoad>
+						self:SetFrameLevel(self:GetFrameLevel()+2)
+						TMW:TT(self, "TEXTLAYOUTS_STRING_COPYMENU", "TEXTLAYOUTS_STRING_COPYMENU_DESC")
+					</OnLoad>
+					<OnClick>
+						ToggleDropDownMenu(1, nil, self.DD, self, 0, 0)
+					</OnClick>
+				</Scripts>
+				<NormalTexture urgency="5" file="Interface\AddOns\TellMeWhen\Textures\Copy">
+				</NormalTexture>
+				<HighlightTexture urgency="5" file="Interface\AddOns\TellMeWhen\Textures\Copy" alphaMode="ADD">
+					<Color r="1" g="1" b="1" a="0.3"/>
+				</HighlightTexture>
+			</Button>
+			
+			<!--
+				Set the text for this text display
+			-->
+			<EditBox name="$parentEditBox" inherits="TellMeWhen_InputBoxTemplate" multiline="true" parentKey="EditBox" autoFocus="false">
+				<Size y="15"/>
+				<Anchors>
+					<Anchor point="TOP" y="-2"/>
+					<Anchor point="LEFT" x="25" />
+					<Anchor point="RIGHT" relativeTo="$parentCopy" relativePoint="LEFT" x="-5" />
+				</Anchors>
+				<Scripts>
+					<OnLoad>
+						self.BackgroundText:SetWidth(self:GetWidth())
+					--	TMW.SUG:EnableEditBox(self, "textsubs") --TODO: UPDATE SUG MODULE TO DOGTAG
+					
+						TMW:RegisterCallback("TMW_CONFIG_SAVE_SETTINGS", "ClearFocus", self)
+						
+						self:SetTextInsets(1, 2, 2, 2)
+					</OnLoad>
+					<OnTextChanged>
+						local text = self:GetText()
+						if text == "" then
+							self.BackgroundText:SetText(self.label)
+						else
+							self.BackgroundText:SetText(nil)
+						end
+						
+						local DogTag = LibStub("LibDogTag-3.0", true)
+						local colorText = self:GetText()
+						if self.lastText ~= colorText then
+							local text = colorText:gsub("|c%x%x%x%x%x%x%x%x", ""):gsub("|r", "")
+							
+							self.lastText = DogTag:ColorizeCode(text):gsub("|r", "")
+							local position = self:GetCursorPosition()
+							local skip = 0
+							for i = 1, position do
+								if colorText:byte(i) == ("|"):byte() then
+									if colorText:byte(i+1) == ("c"):byte() then
+										skip = skip + 10
+									elseif colorText:byte(i+1) == ("r"):byte() then
+										skip = skip + 2
+									end
+								end
+							end
+							position = position - skip
+							self:SetText(self.lastText)
+							
+							local betterPosition = 0
+							for i = 1, position do
+								betterPosition = betterPosition + 1
+								while self.lastText:byte(betterPosition) == ("|"):byte() do
+									if self.lastText:byte(betterPosition+1) == ("c"):byte() then
+										betterPosition = betterPosition + 10
+									elseif self.lastText:byte(betterPosition+1) == ("r"):byte() then
+										betterPosition = betterPosition + 2
+									else
+										break
+									end
+								end
+							end
+							
+							self:SetCursorPosition(betterPosition)
+						end
+						
+						TMW.TEXT:SetTextDisplayContainerHeight(self:GetParent())
+					</OnTextChanged>
+					<OnEditFocusLost>
+						EditBox_ClearHighlight(self)
+						
+						local DogTag = LibStub("LibDogTag-3.0", true)
+						self:SetText(DogTag:CleanCode(self:GetText()))
+						self:SetText(DogTag:ColorizeCode(self:GetText()))
+						
+						local text = self:GetText():trim("; \t\r\n")
+						
+						if TMW.CI.ics then
+							text = text:gsub("|c%x%x%x%x%x%x%x%x", ""):gsub("|r", "")
+							TMW.CI.ics.SettingsPerView[TMW.CI.ic.viewData.view].Texts[self:GetParent():GetID()] = text
+						end
+						
+						TMW.IE:ScheduleIconSetup()
+						self:GetScript("OnTextChanged")(self)
+						TMW.TEXT:LoadConfig()
+					</OnEditFocusLost>
+					<OnTabPressed>
+						self:Insert(strrep(" ", 4))
+					</OnTabPressed>
+				</Scripts>
+			</EditBox>
+
+		</Frames>
+		<Layers>
+			<Layer level="OVERLAY">
+				<FontString name="$parentStringNum" parentKey="StringNum" inherits="GameFontHighlight" justifyH="RIGHT">
+					<!-- <Size x="25"/> -->
+					<Anchors>
+						<Anchor point="TOP" y="-5"/>
+						<Anchor point="LEFT" x="2" />
+						<Anchor point="RIGHT" x="-3" relativeTo="$parentEditBox" relativePoint="LEFT"/>
+					</Anchors>
+				</FontString>
+				<FontString name="$parentError" parentKey="Error" inherits="GameFontRed" justifyH="LEFT" wordwrap="true">
+					<Anchors>
+						<Anchor point="TOPLEFT" relativeTo="$parentEditBox" relativePoint="BOTTOMLEFT" x="3" y="-2"/>
+					</Anchors>
+				</FontString>
+			</Layer>
+		</Layers>
+		<Scripts>
+			<OnLoad>
+				self.Error:SetWidth(self:GetWidth() - 6)
+				self.StringNum:SetText(self:GetID() .. ".")
+			</OnLoad>
+		</Scripts>
+	</Frame>
+	
+	<!--
+		Frame that holds icon options.
+		Implemented by Texts:RegisterConfigPanel_XMLTemplate(400, "TellMeWhen_TextDisplayOptions")
+	-->
+	<Frame name="TellMeWhen_TextDisplayOptions" inherits="TellMeWhen_OptionsModuleContainer" virtual="true">
+		<Size y="200"/>
+		<Frames>
+			<!--
+				The container that holds:
+					The choose layout dropdown
+					The shortcut to layout settings
+					The reset all button
+			-->
+			<Frame name="$parentLayout" parentKey="Layout">
+				<Size y="46"/>
+				<Anchors>
+					<Anchor point="TOPLEFT" x="0" y="-13"/>
+					<Anchor point="RIGHT"/>
+				</Anchors>
+				<Frames>
+					<!--
+						Resets all text displays (the editboxes) to their defaults as defined by the current layout.
+					-->
+					<Button name="$parentDefault" parentKey="Default">
+						<Size x="18" y="18"/>
+						<Anchors>
+							<Anchor point="TOPRIGHT" x="-5" y="-2"/>
+						</Anchors>
+						<Scripts>
+							<OnLoad>
+								self:SetFrameLevel(self:GetFrameLevel()+2)
+								TMW:TT(self, "TEXTLAYOUTS_LAYOUT_SETDEFAULTS", "TEXTLAYOUTS_LAYOUT_SETDEFAULTS_DESC")
+							</OnLoad>
+							<OnClick>							
+								if TMW.CI.ics then
+									local GUID, layoutSettings = TMW.TEXT:GetTextLayoutForIcon(TMW.CI.ic)
+									
+									for id, stringSettings in TMW:InNLengthTable(layoutSettings) do
+										TMW.CI.ics.SettingsPerView[TMW.CI.gs.View].Texts[id] = stringSettings.DefaultText
+									end
+								end
+								TMW.TEXT:LoadConfig()
+							</OnClick>
+						</Scripts>
+						<NormalTexture urgency="5" file="Interface\PaperDollInfoFrame\UI-GearManager-Undo" alphaMode="ADD">
+							<TexCoords left="0.125" right="0.859375" top="0.140625" bottom="0.875"/>
+							<Color r=".7" g=".7" b=".7" a="1"/>
+						</NormalTexture>
+						<HighlightTexture urgency="5" file="Interface\PaperDollInfoFrame\UI-GearManager-Undo" alphaMode="ADD">
+							<TexCoords left="0.125" right="0.859375" top="0.140625" bottom="0.875"/>
+							<Color r="1" g="1" b="1" a="0.3"/>
+						</HighlightTexture>
+					</Button>
+					
+					<!--
+						Shortcut to the settings for the current layout (via the group settings tab, currently),
+					-->
+					<Button name="$parentLayoutSettings" parentKey="LayoutSettings">
+						<Size x="17" y="17"/>
+						<Anchors>
+							<Anchor point="RIGHT" relativeTo="$parentDefault" relativePoint="LEFT" x="-5" y="0"/>
+						</Anchors>
+						<Scripts>
+							<OnLoad>
+								self:SetFrameLevel(self:GetParent():GetFrameLevel()+4)
+								
+								-- The tooltip is handled in TEXT:LoadConfig()
+							</OnLoad>
+							<OnClick>
+								local GUID, layoutSettings = TMW.TEXT:GetTextLayoutForIcon(TMW.CI.ic)
+								
+								for id, tab in ipairs(TMW.IE.Tabs) do
+									-- Iterate over all tabs until we find the MainOptions tab (which is the group options tab)
+									if tab.attachedFrame == "MainOptions" then
+										tab:Click()
+										
+										TMW:CompileOptions()
+										TMW.IE:NotifyChanges("textlayouts", "#TextLayout " .. GUID)
+										LibStub("AceConfigDialog-3.0"):Open("TMW IEOptions", TMW.IE.MainOptionsWidget)
+										
+										break
+									end
+								end
+								
+							</OnClick>
+						</Scripts>
+						<NormalTexture urgency="5" file="Interface\AddOns\TellMeWhen\Textures\Config">
+						</NormalTexture>
+						<HighlightTexture urgency="5" file="Interface\AddOns\TellMeWhen\Textures\Config" alphaMode="ADD">
+							<Color r="1" g="1" b="1" a="0.3"/>
+						</HighlightTexture>
+					</Button>
+					
+					<!--
+						Dropdown to change the text layout of the icon for the current view.
+					-->
+					<Frame name="$parentPickLayout" inherits="TMW_DropDownMenuTemplate" parentKey="PickLayout">
+						<Anchors>
+							<Anchor point="TOPLEFT" x="1" y="1"/>
+							<Anchor point="RIGHT" relativeTo="$parentLayoutSettings"  relativePoint="LEFT" x="5" />
+						</Anchors>
+						<Scripts>
+							<OnLoad>
+								UIDropDownMenu_SetText(self, TMW.L["TEXTLAYOUTS_CHOOSELAYOUT"])
+								self.initialize = TMW.TEXT.Layout_DropDown
+								
+								-- Save settings before changing the layout (most notably, save the text for the text displays)
+								self.Button:HookScript("OnClick", function(self)
+									TMW.IE:SaveSettings()
+								end)
+
+								TMW:TT(self, "TEXTLAYOUTS_CHOOSELAYOUT", "TEXTLAYOUTS_CHOOSELAYOUT_DESC")
+							</OnLoad>
+						</Scripts>
+					</Frame>
+				</Frames>
+			</Frame>
+			
+			<!--
+				Container that holds instances of TellMeWhen_TextDisplayGroup, arranged vertically.
+			-->
+			<Frame name="$parentFontStrings" parentKey="FontStrings" >
+				<Anchors>
+					<Anchor point="TOPLEFT" relativeTo="$parentLayout" relativePoint="BOTTOMLEFT" x="0" y="16"/>
+					<Anchor point="BOTTOMRIGHT" y="36"/>
+				</Anchors>
+			</Frame>
+		</Frames>
+		<Scripts>
+			<OnLoad>
+				self.Header:SetText(TMW.L["TEXTLAYOUTS_TAB"])
+			</OnLoad>
+		</Scripts>
+	</Frame>	
+
+</Ui>

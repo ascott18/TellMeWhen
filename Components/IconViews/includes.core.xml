@@ -1,0 +1,6 @@
+<Ui>
+
+<Include file="Icon\includes.core.xml"/>
+<Include file="Bar\includes.core.xml"/>
+
+</Ui>

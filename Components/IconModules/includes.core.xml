@@ -1,0 +1,18 @@
+<Ui>
+
+<Include file="IconModule_Alpha\includes.core.xml"/>
+<Include file="IconModule_CooldownSweep\includes.core.xml"/>
+<Include file="IconModule_IconContainer\includes.core.xml"/>
+<Include file="IconModule_IconContainer_Masque\includes.core.xml"/>
+<Include file="IconModule_IconEventClickHandler\includes.core.xml"/>
+<Include file="IconModule_IconOtherShowHideHandler\includes.core.xml"/>
+<Include file="IconModule_PowerBar\includes.core.xml"/>
+<Include file="IconModule_PowerBar_Overlay\includes.core.xml"/>
+<Include file="IconModule_Texts\includes.core.xml"/>
+<Include file="IconModule_Texture\includes.core.xml"/>
+<Include file="IconModule_Texture_Colored\includes.core.xml"/>
+<Include file="IconModule_TimerBar\includes.core.xml"/>
+<Include file="IconModule_TimerBar_BarDisplay\includes.core.xml"/>
+<Include file="IconModule_TimerBar_Overlay\includes.core.xml"/>
+
+</Ui>

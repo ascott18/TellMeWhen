@@ -267,7 +267,7 @@ L["ICONMENU_ONLYINTERRUPTIBLE_DESC"] = "Check this box to only show spell casts 
 L["ICONMENU_ONLYMINE"] = "Only check mine"
 L["ICONMENU_ONLYMINE_DESC"] = "Check this option to cause this icon to only check for buffs/debuffs that you casted"
 L["ICONMENU_SHOWTIMER"] = "Show timer"
-L["ICONMENU_SHOWTIMER_DESC"] = "Check this option to display the standard cooldown sweep animation on the icon when applicable."
+L["ICONMENU_SHOWTIMER_DESC"] = "Check this option to display the standard cooldown sweep animation on the icon."
 L["ICONMENU_SHOWTIMERTEXT"] = "Show timer text"
 L["ICONMENU_SHOWTIMERTEXT_DESC"] = [[Check this option to display a textual display of the remaining cooldown/duration on the icon.
 
@@ -487,7 +487,7 @@ L["UIPANEL_GROUPSORT_SORTASCENDING_DESC"] = "Check to sort this attribute from l
 L["UIPANEL_GROUPSORT_SORTDESCENDING"] = "High"
 L["UIPANEL_GROUPSORT_SORTDESCENDING_DESC"] = "Check to sort this attribute from high to low values."
 
-L["UIPANEL_GROUPSORT_METHODDISABLED_DESC"] = "|TInterface\\AddOns\\TellMeWhen_Options\\Textures\\Alert:0:2|tThis sort method is diabled because a method above it is sorting by Icon ID, so this method will never be reached and used in sorting."
+L["UIPANEL_GROUPSORT_METHODDISABLED_DESC"] = "|TInterface\\AddOns\\TellMeWhen\\Textures\\Alert:0:2|tThis sort method is diabled because a method above it is sorting by Icon ID, so this method will never be reached and used in sorting."
 
 L["UIPANEL_GROUPSORT_id"] = "Icon ID"
 L["UIPANEL_GROUPSORT_id_DESC"] = "Sorts the group by the ID numbers of its icons."
@@ -668,6 +668,7 @@ L["TEXTLAYOUTS_DEFAULTS_WRAPPER"] = "Default: %s"
 L["TEXTLAYOUTS_LAYOUTSETTINGS"] = "Layout Settings"
 L["TEXTLAYOUTS_LAYOUTSETTINGS_DESC"] = "Click to configure the text layout %q."
 
+L["TEXTLAYOUTS_DEFAULTS_NOLAYOUT"] = "<No Layout>"
 L["TEXTLAYOUTS_DEFAULTS_ICON1"] = "Icon Layout 1"
 L["TEXTLAYOUTS_DEFAULTS_BAR1"] = "Bar Layout 1"
 L["TEXTLAYOUTS_DEFAULTS_DURATION"] = "Duration"
@@ -684,13 +685,15 @@ L["TEXTLAYOUTS_DELETELAYOUT_DESC"] = [[Click to delete this text layout.
 
 Hold |cff7fffffCtrl|r to bypass confirmation.]]
 L["TEXTLAYOUTS_DELETELAYOUT_CONFIRM_BASE"] = "Are you sure you want to delete the layout %q?"
-L["TEXTLAYOUTS_DELETELAYOUT_CONFIRM_NUM"] = "|cFFFF5959The %d |4group:groups; that |4depends:depend; on it will revert back to using the default text layout for |4its:their; display type.|r"
+L["TEXTLAYOUTS_DELETELAYOUT_CONFIRM_NUM"] = "|cFFFF5959The %d |4icon:icons; that |4depends:depend; on it will revert back to using default text layouts.|r"
 L["TEXTLAYOUTS_LAYOUTDISPLAYS"] = [[Displays:
 %s]]
 L["TEXTLAYOUTS_ADDSTRING"] = "Add Text Display"
 L["TEXTLAYOUTS_ADDSTRING_DESC"] = "Adds a new text display to this text layout."
 L["TEXTLAYOUTS_DELETESTRING"] = "Delete Text Display"
-L["TEXTLAYOUTS_DELETESTRING_DESC"] = "Deletes this text display from this text layout."
+L["TEXTLAYOUTS_DELETESTRING_DESC"] = [[Deletes this text display from this text layout.
+
+Hold |cff7fffffCtrl|r to bypass confirmation.]]
 L["TEXTLAYOUTS_STRINGUSEDBY"] = "Used %d |4time:times;."
 L["TEXTLAYOUTS_NOEDIT_DESC"] = [[This text layout is a default layout that comes standard with TellMeWhen and cannot be modified.
 
@@ -958,6 +961,9 @@ L["COPYPOSSCALE"] = "Copy position/scale"
 L["COPYGROUP"] = "Copy Group"
 L["OVERWRITEGROUP"] = "|cFFFF5959Overwrite|r Group: %s"
 L["MAKENEWGROUP"] = "|cff59ff59Create|r New Group"
+
+
+L["CONFIGPANEL_LISTING_TOOLTIP"] = "|cff7fffffClick|r to jump to panel."
 
 
 L["GROUPADDONSETTINGS"] = "Group Settings"

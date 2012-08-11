@@ -8,5 +8,4 @@
 ## SavedVariables: TMWOptDB
 ## X-Category: Combat
 
-# MAKE SURE THAT ANY CHANGES HERE ALSO GET MADE TO \AddOns\TellMeWhen_Options\TellMeWhen_Options.toc
-includes.xml
+..\TellMeWhen\Options\includes.xml

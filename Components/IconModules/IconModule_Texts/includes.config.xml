@@ -1,0 +1,7 @@
+<Ui>
+
+<Script file="Config.lua"/>
+
+<Include file="Config.xml"/>
+ 
+</Ui>

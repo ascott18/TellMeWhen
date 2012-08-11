@@ -1,0 +1,69 @@
+<Ui>
+
+	<Frame name="TellMeWhen_PBarOptions" inherits="TellMeWhen_OptionsModuleContainer" virtual="true">
+		<Size y="40"/>
+		<Frames>
+			<CheckButton name="$parentShowPBar" inherits="TellMeWhen_CheckTemplate" parentKey="ShowPBar">
+				<Anchors>
+					<Anchor point="TOP" y="-10"/>
+				</Anchors>
+				<Scripts>
+					<OnLoad>
+						TMW.IE:CreateSettingFrameFromData(self, {
+							setting = "ShowPBar",
+							title = TMW.L["ICONMENU_ENABLE"],
+							tooltip = TMW.L["ICONMENU_SHOWPBAR_DESC"],
+						})
+					</OnLoad>
+				</Scripts>
+			</CheckButton>
+			<CheckButton name="$parentInvertPBar" inherits="TellMeWhen_CheckTemplate" parentKey="InvertPBar">
+				<Scripts>
+					<OnLoad>
+						TMW.IE:CreateSettingFrameFromData(self, {
+							setting = "InvertPBar",
+							title = TMW.L["ICONMENU_INVERTBARS"],
+							tooltip = TMW.L["ICONMENU_INVERTPBAR_DESC"],
+							disabled = function(self)
+								return not TMW.CI.ics.ShowPBar
+							end,
+							ModifySettingValue = function(self, value)
+								return tonumber(value) or 0
+							end,
+						})
+					</OnLoad>
+				</Scripts>
+			</CheckButton>
+			<EditBox name="$parentPBarOffs" inherits="TellMeWhen_TimeEditBoxTemplate" parentKey="PBarOffs" autoFocus="false">
+				<Size x="60" y="15"/>
+				<Anchors>
+					<Anchor point="LEFT" relativeTo="$parentInvertPBar" relativePoint="RIGHT" y="1"/>
+				</Anchors>
+				<Scripts>
+					<OnLoad>
+						self.text:SetText(TMW.L["ICONMENU_OFFS"])
+						self.text:SetWidth(50)
+						self.setting = "PBarOffs"
+						
+						TMW.IE:CreateSettingFrameFromData(self, {
+							setting = "PBarOffs",
+							title = TMW.L["ICONMENU_OFFS"],
+							tooltip = TMW.L["ICONMENU_BAROFFS"],
+							disabled = function(self)
+								return not TMW.CI.ics.ShowPBar
+							end,
+						})
+					</OnLoad>
+				</Scripts>
+			</EditBox>
+		</Frames>
+		<Scripts>
+			<OnLoad>
+				self.Header:SetText(TMW.L["CONFIGPANEL_PBAR_HEADER"])
+				
+				TMW.IE:DistributeFrameAnchorsLaterally(self, 3, self.ShowPBar, self.InvertPBar, self.PBarOffs)
+			</OnLoad>
+		</Scripts>
+	</Frame>
+ 
+</Ui>
