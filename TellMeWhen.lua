@@ -1574,7 +1574,7 @@ end
 
 function TMW:OnInitialize()
 	LoadAddOn("LibDogTag-3.0")
-	if not rawget(TMW.Views, "icon") then
+	if not rawget(TMW.Types, "") then
 		-- this also includes upgrading from older than 3.0 (pre-Ace3 DB settings)
 		-- GLOBALS: StaticPopupDialogs, StaticPopup_Show, EXIT_GAME, CANCEL, ForceQuit
 		StaticPopupDialogs["TMW_RESTARTNEEDED"] = {
@@ -1588,7 +1588,7 @@ function TMW:OnInitialize()
 			whileDead = true,
 			preferredIndex = 3, -- http://forums.wowace.com/showthread.php?p=320956
 		}
-		StaticPopup_Show("TMW_RESTARTNEEDED", TELLMEWHEN_VERSION_FULL, "Views\\icon.lua")
+		StaticPopup_Show("TMW_RESTARTNEEDED", TELLMEWHEN_VERSION_FULL, "Components\\IconTypes\\IconType_default\\default.lua")
 		return -- if required, return here
 	end
 

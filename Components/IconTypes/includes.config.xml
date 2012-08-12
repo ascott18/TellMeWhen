@@ -1,21 +1,21 @@
 <Ui>
 
-<Include file="IconView_buff\includes.config.xml"/>
-<Include file="IconView_cast\includes.config.xml"/>
-<Include file="IconView_cleu\includes.config.xml"/>
-<Include file="IconView_conditionicon\includes.config.xml"/>
-<Include file="IconView_cooldown\includes.config.xml"/>
-<Include file="IconView_default\includes.config.xml"/>
-<Include file="IconView_dr\includes.config.xml"/>
-<Include file="IconView_icd\includes.config.xml"/>
-<Include file="IconView_item\includes.config.xml"/>
-<Include file="IconView_lightwell\includes.config.xml"/>
-<Include file="IconView_meta\includes.config.xml"/>
-<Include file="IconView_multistate\includes.config.xml"/>
-<Include file="IconView_reactive\includes.config.xml"/>
-<Include file="IconView_runes\includes.config.xml"/>
-<Include file="IconView_totem\includes.config.xml"/>
-<Include file="IconView_unitcooldown\includes.config.xml"/>
-<Include file="IconView_wpnenchant\includes.config.xml"/>
+<Include file="IconType_buff\includes.config.xml"/>
+<Include file="IconType_cast\includes.config.xml"/>
+<Include file="IconType_cleu\includes.config.xml"/>
+<Include file="IconType_conditionicon\includes.config.xml"/>
+<Include file="IconType_cooldown\includes.config.xml"/>
+<Include file="IconType_default\includes.config.xml"/>
+<Include file="IconType_dr\includes.config.xml"/>
+<Include file="IconType_icd\includes.config.xml"/>
+<Include file="IconType_item\includes.config.xml"/>
+<Include file="IconType_lightwell\includes.config.xml"/>
+<Include file="IconType_meta\includes.config.xml"/>
+<Include file="IconType_multistate\includes.config.xml"/>
+<Include file="IconType_reactive\includes.config.xml"/>
+<Include file="IconType_runes\includes.config.xml"/>
+<Include file="IconType_totem\includes.config.xml"/>
+<Include file="IconType_unitcooldown\includes.config.xml"/>
+<Include file="IconType_wpnenchant\includes.config.xml"/>
 
 </Ui>
