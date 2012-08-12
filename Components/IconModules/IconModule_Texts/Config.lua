@@ -65,7 +65,6 @@ function TEXT:GetLayoutName(settings, GUID)
 	
 	assert(type(GUID) == "string")
 	assert(type(settings) == "table")
-	TMW:Assert(GUID == settings.GUID, "Something REALLY bad happened that should not have happened. This isn't a non-critical error anymore, so please report this to Cybeloras!  a: %s  b: %s", tostring(GUID), tostring(settings.GUID)) -- this should always succeed. If it didn't, something went wrong.
 	
 	local Name = strtrim(settings.Name or "")
 	

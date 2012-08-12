@@ -106,9 +106,7 @@ local function Meta_OnUpdate(icon, time)
 		local attributes = ic and ic.attributes
 		if ic and ic.OnUpdate and attributes.shown and not (CheckNext and ic.__lastMetaCheck == time) and ic.viewData == icon.viewData then
 			ic:Update()
-			if not icToUse then
-				icToUse = ic
-			end
+			
 			if attributes.realAlpha > 0 and attributes.shown then -- make sure to re-check attributes.shown (it might have changed from 2 lines ago)
 				if Sort then
 					local _d = attributes.duration - (time - attributes.start)

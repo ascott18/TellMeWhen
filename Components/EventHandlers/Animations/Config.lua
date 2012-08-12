@@ -36,7 +36,7 @@ TMW:RegisterCallback("TMW_OPTIONS_LOADED", function(event)
 	-- create channel frames
 	local previousFrame
 	local offs = 0
-	for i, animationData in ipairs(EventHandler.AllAnimationsOrdered) do --TODO TEMP DEBUG: don't get from this table
+	for i, animationData in ipairs(EventHandler.AllAnimationsOrdered) do --TODO TEMP DEBUG: don't get from this table. only get animations that should be implemented in the current icon (so, extract from icon.Components and EventHandler.NonSpecificEventHandlerData
 		i = i + offs
 		local frame = CreateFrame("Button", AnimationList:GetName().."Animation"..i, AnimationList, "TellMeWhen_AnimationSelectButton", i)
 		AnimationList[i] = frame
