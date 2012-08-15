@@ -1003,7 +1003,7 @@ L["DT_DOC_Stacks"] = "Returns the current stacks of the icon"
 L["DT_DOC_Unit"] = "Returns the unit or the name of the unit that the icon is checking. Best use in conjunction with the [Name] tag."
 L["DT_DOC_PreviousUnit"] = "Returns the unit or the name of the unit that the icon is checked prior to the current unit. Best use in conjunction with the [Name] tag."
 
-L["ERROR_MISSINGLAYOUT"] = "Couldn't find the text layout for %s. Falling back on the default for the icon's view type."
+L["ERROR_MISSINGLAYOUT"] = "Couldn't find the text layout for %s. Falling back on the default layout."
 
 L["SENDSUCCESSFUL"] = "Sent successfully"
 L["MESSAGERECIEVE"] = "%s has sent you some TellMeWhen data! You can import this data into TellMeWhen using the %q dropdown in the icon editor."

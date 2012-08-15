@@ -30,7 +30,7 @@ local DogTag = LibStub("LibDogTag-3.0", true)
 TELLMEWHEN_VERSION = "6.0.0"
 TELLMEWHEN_VERSION_MINOR = strmatch(" @project-version@", " r%d+") or ""
 TELLMEWHEN_VERSION_FULL = TELLMEWHEN_VERSION .. TELLMEWHEN_VERSION_MINOR
-TELLMEWHEN_VERSIONNUMBER = 60018 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
+TELLMEWHEN_VERSIONNUMBER = 60019 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
 if TELLMEWHEN_VERSIONNUMBER > 61001 or TELLMEWHEN_VERSIONNUMBER < 60000 then return error("YOU SCREWED UP THE VERSION NUMBER OR DIDNT CHANGE THE SAFETY LIMITS") end -- safety check because i accidentally made the version number 414069 once
 
 TELLMEWHEN_MAXROWS = 20
@@ -85,20 +85,6 @@ TMW.ISMOP = clientVersion >= 50000
 local _, pclass = UnitClass("Player")
 local pname = UnitName("player")
 
-
-
-local STARTUPf = CreateFrame("frame")
-STARTUPf:RegisterAllEvents()
-STARTUP = {}
-function STARTUPf:CatEvent(event)
-	tinsert(STARTUP, {
-		time = debugprofilestop(),
-		event = event,
-		specs = (TMW.ISMOP and GetNumSpecializations or GetNumTalentTabs)(),
-		tree = GetPrimaryTalentTree(),
-	})
-end
-STARTUPf:SetScript("OnEvent", STARTUPf.CatEvent)
 
 if TMW.ISMOP then
 	GetActiveTalentGroup = GetActiveSpecGroup
@@ -759,9 +745,7 @@ do -- Callback Lib
 		end
 	end
 	
-	function TMW:Fire(event, ...)
-		STARTUPf:CatEvent(event)
-		
+	function TMW:Fire(event, ...)		
 		local funcs = callbackregistry[event]
 
 		if funcs then
@@ -3763,6 +3747,7 @@ end
 
 -- universal
 function Icon.QueueEvent(icon, arg1)
+	print(debugprofilestop(), icon, arg1)
 	icon.EventsToFire[arg1] = true
 	icon.eventIsQueued = true
 	
