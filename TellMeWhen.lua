@@ -30,7 +30,7 @@ local DogTag = LibStub("LibDogTag-3.0", true)
 TELLMEWHEN_VERSION = "6.0.0"
 TELLMEWHEN_VERSION_MINOR = strmatch(" @project-version@", " r%d+") or ""
 TELLMEWHEN_VERSION_FULL = TELLMEWHEN_VERSION .. TELLMEWHEN_VERSION_MINOR
-TELLMEWHEN_VERSIONNUMBER = 60019 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
+TELLMEWHEN_VERSIONNUMBER = 60020 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
 if TELLMEWHEN_VERSIONNUMBER > 61001 or TELLMEWHEN_VERSIONNUMBER < 60000 then return error("YOU SCREWED UP THE VERSION NUMBER OR DIDNT CHANGE THE SAFETY LIMITS") end -- safety check because i accidentally made the version number 414069 once
 
 TELLMEWHEN_MAXROWS = 20
@@ -3233,14 +3233,16 @@ TMW:RegisterCallback("TMW_ONUPDATE_TIMECONSTRAINED_POST", function(event, time, 
 end)
 
 local runEvents = 1
+local runEventsTimerHandler
 function TMW:RestoreEvents()
 	runEvents = 1
 end
-TMW:RegisterCallback("TMW_ICON_SETUP_PRE",
-function()
+TMW:RegisterCallback("TMW_ICON_SETUP_PRE", function()
 	-- make sure events dont fire while, or shortly after, we are setting up
 	runEvents = nil
-	TMW:ScheduleTimer("RestoreEvents", max(UPD_INTV*2.1, 0.2))
+	
+	TMW:CancelTimer(runEventsTimerHandler, 1)
+	runEventsTimerHandler = TMW:ScheduleTimer("RestoreEvents", UPD_INTV*2.1)
 end)
 
 
@@ -3747,7 +3749,7 @@ end
 
 -- universal
 function Icon.QueueEvent(icon, arg1)
-	print(debugprofilestop(), icon, arg1)
+	print(debugprofilestop(), icon, arg1, runEvents)
 	icon.EventsToFire[arg1] = true
 	icon.eventIsQueued = true
 	
@@ -3878,6 +3880,7 @@ function Icon.ProcessQueuedEvents(icon)
 					shouldProcess = conditionResult
 				end
 
+				print(debugprofilestop(), icon, event, runEvents)
 				if shouldProcess and runEvents and icon.attributes.shown then
 					local EventHandler = TMW:GetEventHandler(EventSettings.Type, true)
 					if EventHandler then
