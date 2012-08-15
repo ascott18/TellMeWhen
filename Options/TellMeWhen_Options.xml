@@ -243,6 +243,8 @@
 				</Anchors>
 				<Scripts>
 					<OnLoad>
+						TMW.SUG:EnableEditBox(self, "units")
+						
 						self:RegisterEvent("MODIFIER_STATE_CHANGED")
 						self.label = TMW.L["ICONMENU_UNITSTOWATCH"]
 						self.BackgroundText:SetWidth(self:GetWidth())
@@ -287,12 +289,12 @@
 									title = supplementalData.title or TMW.L["ICONMENU_UNITSTOWATCH"]
 									text = supplementalData.text or TMW.L["ICONMENU_UNIT_DESC"]
 									
-								--	TMW.SUG:EnableEditBox(self, supplementalData.SUGType or "unit") --TODO: NYI (not urgent/important, though)
+								--	TMW.SUG:EnableEditBox(self, supplementalData.SUGType or "units") --TODO: NYI (not urgent/important, though)
 								else
 									title = TMW.L["ICONMENU_UNITSTOWATCH"]
 									text  = TMW.L["ICONMENU_UNIT_DESC"]
 									
-									--TMW.SUG:EnableEditBox(self, "unit") --TODO: NYI (not urgent/important, though)
+									--TMW.SUG:EnableEditBox(self, "units") --TODO: NYI (not urgent/important, though)
 								end
 
 								self:SetLabels(title, text)

@@ -30,7 +30,7 @@ local DogTag = LibStub("LibDogTag-3.0", true)
 TELLMEWHEN_VERSION = "6.0.0"
 TELLMEWHEN_VERSION_MINOR = strmatch(" @project-version@", " r%d+") or ""
 TELLMEWHEN_VERSION_FULL = TELLMEWHEN_VERSION .. TELLMEWHEN_VERSION_MINOR
-TELLMEWHEN_VERSIONNUMBER = 60015 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
+TELLMEWHEN_VERSIONNUMBER = 60016 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
 if TELLMEWHEN_VERSIONNUMBER > 61001 or TELLMEWHEN_VERSIONNUMBER < 60000 then return error("YOU SCREWED UP THE VERSION NUMBER OR DIDNT CHANGE THE SAFETY LIMITS") end -- safety check because i accidentally made the version number 414069 once
 
 TELLMEWHEN_MAXROWS = 20
@@ -6035,7 +6035,6 @@ function TMW:GetItemIDs(icon, setting, firstOnly, toname)
 end
 
 TMW.Units = {
-	{ value = "%u", 				text = L["ICONMENU_ICONUNIT"], 	desc = L["ICONMENU_ICONUNIT_DESC"], onlyCondition = true },
 	{ value = "player", 			text = PLAYER .. " " .. L["PLAYER_DESC"]  		  },
 	{ value = "target", 			text = TARGET 									  },
 	{ value = "targettarget", 		text = L["ICONMENU_TARGETTARGET"] 				  },
@@ -6442,9 +6441,9 @@ function UNITS:GetOriginalUnitTable(unitSettings)
 	--SUBSTITUTE "party" with "party1-4", etc
 	for _, wholething in TMW:Vararg(strsplit(";", unitSettings)) do
 		local unit = strtrim(wholething)
-		for k, v in pairs(TMW.Units) do
-			if v.value == unit and v.range then
-				unitSettings = gsub(unitSettings, wholething, unit .. "1-" .. v.range)
+		for k, unitData in pairs(TMW.Units) do
+			if unitData.unitDataalue == unit and unitData.range then
+				unitSettings = gsub(unitSettings, wholething, unit .. "1-" .. unitData.range)
 				break
 			end
 		end

@@ -196,6 +196,10 @@ TMW:NewClass("ChatEdit_InsertLink_Hook"){
 
 local old_ChatEdit_InsertLink = ChatEdit_InsertLink
 local function hook_ChatEdit_InsertLink(text)	
+	if type(text) ~= "string" then
+		return false
+	end
+	
 	local Type, id = strmatch(text, "|H(.-):(%d+)")
 	
 	if not id then return false end
@@ -3200,38 +3204,43 @@ function IE:Type_Dropdown_OnClick()
 	IE:Load(1)
 end
 
-function IE:Unit_DropDown()
-	if not TMW.db then return end
-	local e = self:GetParent()
-	if not e:HasFocus() then
-		e:HighlightText()
+function IE:Unit_DropDown()	
+	local editBox = self:GetParent()
+	if not editBox:HasFocus() then
+		editBox:HighlightText()
 	end
-	for k, v in pairs(TMW.Units) do
-		if not v.onlyCondition then
-			local info = UIDropDownMenu_CreateInfo()
-			info.text = v.text
-			info.value = v.value
-			if v.range then
-				info.tooltipTitle = v.tooltipTitle or v.text
-				info.tooltipText = "|cFFFF0000#|r = 1-" .. v.range
-				info.tooltipOnButton = true
-			end
-			info.notCheckable = true
-			info.func = IE.Unit_DropDown_OnClick
-			info.arg1 = v
-			info.arg2 = e
-			UIDropDownMenu_AddButton(info, UIDROPDOWNMENU_MENU_LEVEL)
+	
+	for _, unitData in pairs(TMW.Units) do
+		local info = UIDropDownMenu_CreateInfo()
+		info.text = unitData.text
+		info.value = unitData.value
+		if unitData.range then
+			info.tooltipTitle = unitData.tooltipTitle or unitData.text
+			info.tooltipText = "|cFFFF0000#|r = 1-" .. unitData.range
+			info.tooltipOnButton = true
 		end
+		info.notCheckable = true
+		info.func = IE.Unit_DropDown_OnClick
+		info.arg1 = unitData
+		info.arg2 = editBox
+		UIDropDownMenu_AddButton(info, UIDROPDOWNMENU_MENU_LEVEL)
 	end
 end
 
-function IE:Unit_DropDown_OnClick(v, e)
-	local ins = v.value
-	if v.range then
-		ins = v.value .. "|cFFFF0000#|r"
+function IE:Unit_DropDown_OnClick(unitData, editBox)
+	local ins = unitData.value
+	if unitData.range then
+		ins = unitData.value .. "|cFFFF0000#|r"
 	end
-	e:Insert(";" .. ins .. ";")
-	TMW:CleanString(e)
+	editBox:Insert(";" .. ins .. ";")
+	
+	-- Cheesy hack to save the setting
+	--editBox:HighlightText()
+	--editBox:ClearFocus()
+	
+	--TMW:CleanString(editBox)
+	
+	
 	IE:ScheduleIconSetup()
 	CloseDropDownMenus()
 end
@@ -4665,7 +4674,6 @@ function SUG:SuggestingComplete(doSort)
 		f.tooltipmethod = nil
 		f.tooltiparg = nil
 		f.tooltiptitle = nil
-		f.tooltiptext = nil
 		f.tooltiptext = nil
 		f.overrideInsertID = nil
 		f.overrideInsertName = nil
@@ -6212,6 +6220,57 @@ function Module:Entry_AddToList_1(f, id)
 	f.Icon:SetTexture(texture)
 end
 
+
+local Module = SUG:NewModule("units", SUG:GetModule("default"))
+Module.noMin = true
+Module.noTexture = true
+Module.table = TMW.Units
+function Module:Table_Get()
+	return self.table
+end
+function Module:Entry_AddToList_1(f, index)
+	local unitData = self.table[index]
+	local unit = unitData.value
+
+	f.Name:SetText(unit)
+
+	if unitData.range then
+		f.tooltiptitle = unitData.tooltipTitle or unitData.text
+		f.tooltiptext = "|cFFFF0000#|r = 1-" .. unitData.range
+	elseif unitData.desc then
+		f.tooltiptitle = unitData.tooltipTitle or unitData.text
+		f.tooltiptext = unitData.desc
+	end
+	
+	f.insert = unit
+end
+function Module:Table_GetNormalSuggestions(suggestions, tbl, ...)
+	local atBeginning = SUG.atBeginning
+	
+	for index, unitData in pairs(tbl) do
+		if strfind(unitData.value, atBeginning) then
+			suggestions[#suggestions + 1] = index
+		end
+	end
+end
+function Module.Sorter_Units(a, b)
+	--sort by name
+	--[[local nameA, nameB = Module.table[a].value, Module.table[b].value
+
+	if nameA == nameB then
+		--sort identical names by ID
+		return a < b
+	else
+		--sort by name
+		return nameA < nameB
+	end]]
+	
+	--sort by index
+	return a < b
+end
+function Module:Table_GetSorter()
+	return self.Sorter_Units
+end
 
 
 

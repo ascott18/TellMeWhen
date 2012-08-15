@@ -300,24 +300,24 @@ function CNDT:TypeMenu_DropDown_OnClick(data)
 end
 
 function CNDT:UnitMenu_DropDown()
-	for k, v in pairs(TMW.Units) do
+	for k, unitData in pairs(TMW.Units) do
 		local info = UIDropDownMenu_CreateInfo()
 		info.func = CNDT.UnitMenu_DropDown_OnClick
-		if v.range then
-			info.tooltipTitle = v.tooltipTitle or v.text
-			info.tooltipText = "|cFFFF0000#|r = 1-" .. v.range
+		if unitData.range then
+			info.tooltipTitle = unitData.tooltipTitle or unitData.text
+			info.tooltipText = "|cFFFF0000#|r = 1-" .. unitData.range
 			info.tooltipOnButton = true
-		elseif v.desc then
-			info.tooltipTitle = v.tooltipTitle or v.text
-			info.tooltipText = v.desc
+		elseif unitData.desc then
+			info.tooltipTitle = unitData.tooltipTitle or unitData.text
+			info.tooltipText = unitData.desc
 			info.tooltipOnButton = true
 		end
-		info.text = v.text
-		info.value = v.value
-		info.hasArrow = v.hasArrow
+		info.text = unitData.text
+		info.unitDataalue = unitData.unitDataalue
+		info.hasArrow = unitData.hasArrow
 		info.notCheckable = true
 		info.arg1 = self
-		info.arg2 = v
+		info.arg2 = unitData
 		UIDropDownMenu_AddButton(info)
 	end
 end

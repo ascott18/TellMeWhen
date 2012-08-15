@@ -62,6 +62,8 @@
 				</Anchors>
 				<Scripts>
 					<OnLoad>
+						TMW.SUG:EnableEditBox(self, "units")
+						
 						self:RegisterEvent("MODIFIER_STATE_CHANGED")
 						self.label = TMW.L["CLEU_SOURCEUNITS"]
 						self.BackgroundText:SetWidth(self:GetWidth())
@@ -114,6 +116,8 @@
 				</Anchors>
 				<Scripts>
 					<OnLoad>
+						TMW.SUG:EnableEditBox(self, "units")
+						
 						self:RegisterEvent("MODIFIER_STATE_CHANGED")
 						self.label = TMW.L["CLEU_DESTUNITS"]
 						self.BackgroundText:SetWidth(self:GetWidth())

@@ -188,6 +188,8 @@
 				</Frames>
 				<Scripts>
 					<OnLoad>
+						TMW.SUG:EnableEditBox(self, "units")
+						
 						self.Ins = TellMeWhen_IconEditorConditionsUnitDD
 						self.label = "|cFFFF5050" .. TMW.L["CONDITIONPANEL_UNIT"] .. "!|r"
 						TMW:TT(self, "CONDITIONPANEL_UNIT", "CONDITIONPANEL_UNIT_DESC")
