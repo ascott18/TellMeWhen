@@ -459,9 +459,7 @@ local textLayoutTemplate = {
 	order = function(info)
 		local layout = findlayout(info)
 		local settings = TEXT:GetTextLayoutSettings(layout)
-		if not settings then
-			print(info, settings, layout, unpack(info))
-		end
+		
 		if settings.NoEdit then
 			return 1
 		else

@@ -19,7 +19,6 @@ local print = TMW.print
 
 local LMB = LibStub("Masque", true) or (LibMasque and LibMasque("Button"))
 
-print(TMW.Classes.IconModule_IconContainer)
 local IconContainer_Masque = TMW:NewClass("IconModule_IconContainer_Masque", "IconModule_IconContainer")
 
 function IconContainer_Masque:OnNewInstance_IconContainer_Masque(icon)

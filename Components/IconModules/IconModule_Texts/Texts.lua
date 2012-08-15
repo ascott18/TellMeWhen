@@ -243,9 +243,7 @@ TMW:RegisterUpgrade(51003, {
 					-- (So Ace3DB purged it completely because it wasn't needed)
 				-- (source[setting] == nil) :: If this specific setting is nil, then it was default, so inherit from defaults. 
 				if not source or source[setting] == nil then
-					-- self[settingsKey][setting] holds the old defaults for the text display we are creating a layout for.
-					print(i, _, settingsKey, setting, gs, groupID)
-					
+					-- self[settingsKey][setting] holds the old defaults for the text display we are creating a layout for.					
 					displaySettings[setting] = self[settingsKey][setting]
 				else
 					-- This setting was defined, so use the setting that was defined for it.

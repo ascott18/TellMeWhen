@@ -158,7 +158,6 @@ function EventHandler:SelectAnimation(animation)
 					TMW:Error("Couldn't find child of %s with key %q for animation %q", Frames:GetName(), configFrameData.frame, animation)
 				end
 			end
-			print(i, frame)
 			
 			local yOffset = (configFrameData.topPadding or 0) + (lastFrameBottomPadding or 0)
 			

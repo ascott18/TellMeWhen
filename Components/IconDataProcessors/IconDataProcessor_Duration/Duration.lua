@@ -50,7 +50,6 @@ function Processor:CompileFunctionSegment(t)
 			-- detect events that occured, and handle them if they did
 			if realDuration == 0 then
 				if EventHandlersSet.OnFinish then
-					print(icon, realDuration)
 					icon:QueueEvent("OnFinish")
 				end
 			else
