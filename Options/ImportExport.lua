@@ -314,14 +314,16 @@ group:RegisterMenuBuilder(10, function(self, result, editbox)
 		local destgroupID = IMPORTS.group_overwrite
 		local destgs = TMW.db.profile.Groups[destgroupID]
 		
-		-- not a special table (["**"]), so just normally copy it.
-		-- Setting it nil won't recreate it like other settings tables, so re-copy from defaults
+		-- Restore all default settings first.
+		-- Not a special table (["**"]), so just normally copy it.
+		-- Setting it nil won't recreate it like other settings tables, so re-copy from defaults.
 		destgs.Point = CopyTable(TMW.Group_Defaults.Point)
 		
-		TMW:CopyTableInPlaceWithMeta(destgs.Point, destgs.Point, true)
+		TMW:CopyTableInPlaceWithMeta(gs.Point, destgs.Point, true)
 
-		destgs.Scale = destgs.Scale or TMW.Group_Defaults.Scale
-		destgs.Level = destgs.Level or TMW.Group_Defaults.Level
+		destgs.Scale = gs.Scale or TMW.Group_Defaults.Scale
+		destgs.Level = gs.Level or TMW.Group_Defaults.Level
+		
 		TMW[destgroupID]:Setup()
 	end
 	info.notCheckable = true
