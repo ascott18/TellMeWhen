@@ -74,9 +74,6 @@ local runeNames = {
 	COMBAT_TEXT_RUNE_DEATH,
 }
 
-function Type:Update()
-end
-
 
 function Type:RUNE_UPDATE()
 	for i = 1, #Type.Icons do

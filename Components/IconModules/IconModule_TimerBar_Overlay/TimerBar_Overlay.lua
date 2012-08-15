@@ -15,6 +15,7 @@ if not TMW then return end
 
 local TMW = TMW
 local L = TMW.L
+local print = TMW.print
 	
 
 local TimerBar_Overlay = TMW:NewClass("IconModule_TimerBar_Overlay", "IconModule_TimerBar")

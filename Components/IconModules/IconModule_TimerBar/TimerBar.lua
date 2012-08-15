@@ -14,6 +14,7 @@
 if not TMW then return end
 
 local TMW = TMW
+local L = TMW.L
 local LSM = LibStub("LibSharedMedia-3.0")
 local	pairs, wipe =
 		pairs, wipe
@@ -24,8 +25,10 @@ local BarGCD, StatusBarTexture
 local TimerBar = TMW:NewClass("IconModule_TimerBar", "IconModule", "UpdateTableManager")
 TimerBar:UpdateTable_Set(BarsToUpdate)
 
+TimerBar:RegisterAnchorableFrame("TimerBar")
+
 function TimerBar:OnNewInstance(icon)	
-	local bar = CreateFrame("StatusBar", nil, icon)
+	local bar = CreateFrame("StatusBar", self:GetChildNameBase() .. "TimerBar", icon)
 	self.bar = bar
 	
 	self.texture = bar:CreateTexture(nil, "OVERLAY")
@@ -45,11 +48,12 @@ function TimerBar:OnNewInstance(icon)
 end
 
 function TimerBar:OnEnable()
+	local icon = self.icon
+	local attributes = icon.attributes
+	
 	self.bar:Show()
 	self.texture:SetTexture(StatusBarTexture)
 	
-	local icon = self.icon
-	local attributes = icon.attributes
 	self:DURATION(icon, attributes.start, attributes.duration)
 end
 function TimerBar:OnDisable()

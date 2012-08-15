@@ -79,20 +79,23 @@ TMW:RegisterCallback("TMW_DB_PRE_DEFAULT_UPGRADES", function()
 	end
 end)
 
+CooldownSweep:RegisterAnchorableFrame("Cooldown")
 
 function CooldownSweep:OnNewInstance(icon)
-	self.cooldown = CreateFrame("Cooldown", icon:GetName() .. "Cooldown", icon, "CooldownFrameTemplate")
+	self.cooldown = CreateFrame("Cooldown", self:GetChildNameBase() .. "Cooldown", icon, "CooldownFrameTemplate")
+	
 	self:SetSkinnableComponent("Cooldown", self.cooldown)
 end
 
 function CooldownSweep:OnEnable()
+	local icon = self.icon
+	local attributes = icon.attributes
+	
 	if not TMW.ISMOP then
 		-- SetDrawEdge has been removed in MOP
 		self.cooldown:SetDrawEdge(TMW.db.profile.DrawEdge)
-	end
-
-	local icon = self.icon
-	local attributes = icon.attributes
+	end	
+	
 	self:DURATION(icon, attributes.start, attributes.duration)
 	self:REVERSE(icon, attributes.reverse)
 end

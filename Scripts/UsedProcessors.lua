@@ -42,14 +42,17 @@ end
 end
 
 
-for line in io.open([[C:\Program Files\World Of Warcraft\Interface\AddOns\TellMeWhen\TellMeWhen.toc]], "r"):lines() do
-	local path = line:match("(Types\\.*)")
-	if path then
-		local success, err = pcall(processFile, [[C:\Program Files\World Of Warcraft\Interface\AddOns\TellMeWhen\]] .. path)
-		if not success then
-			print(path, err)
-		else
-			print(path .. ": Success")
+for line in io.open([[C:\Program Files\World Of Warcraft\Interface\AddOns\TellMeWhen\Components\IconTypes\includes.core.xml]], "r"):lines() do
+	local type = line:match([[<Include file="IconType_(.*)\includes.core.xml"/>]])
+	if type then
+		local path = "IconType_" .. type .. "\\" .. type .. ".lua"
+		if path then
+			local success, err = pcall(processFile, [[C:\Program Files\World Of Warcraft\Interface\AddOns\TellMeWhen\Components\IconTypes\]] .. path)
+			if not success then
+				print(path, err)
+			else
+				print(path .. ": Success")
+			end
 		end
 	end
 end

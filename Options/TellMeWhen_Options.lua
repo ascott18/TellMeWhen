@@ -404,6 +404,37 @@ do -- TMW:ReconcileData()
 	end
 end
 
+function TMW:ConvertContainerToScrollFrame(container, exteriorScrollBarPosition, scrollBarXOffs, scrollBarSizeX)
+    
+    
+    local scrollFrame = CreateFrame("ScrollFrame", container:GetName() .. "ScrollFrame", container:GetParent(), "TellMeWhen_ScrollFrameTemplate")
+    
+    local x, y = container:GetSize()
+    scrollFrame:SetSize(x, y)
+    for i = 1, container:GetNumPoints() do
+        scrollFrame:SetPoint(container:GetPoint(i))
+    end
+    
+    container:ClearAllPoints()
+    
+    scrollFrame:SetScrollChild(container)
+    container:SetSize(x, 1)
+	
+	if exteriorScrollBarPosition then
+		scrollFrame.ScrollBar:SetPoint("LEFT", scrollFrame, "RIGHT", scrollBarXOffs or 0, 0)
+	else
+		scrollFrame.ScrollBar:SetPoint("RIGHT", scrollFrame, "RIGHT", scrollBarXOffs or 0, 0)
+	end
+	
+	if scrollBarSizeX then
+		scrollFrame.ScrollBar:SetWidth(scrollBarSizeX)
+	end
+    
+    container.scrollFrame = scrollFrame
+    scrollFrame.container = container
+    
+end
+
 
 
 -- --------------
@@ -1958,6 +1989,12 @@ function IE:TMW_GLOBAL_UPDATE()
 end
 TMW:RegisterCallback("TMW_GLOBAL_UPDATE", IE)
 
+IE:RegisterEvent("PLAYER_REGEN_DISABLED", function()
+	if TMW.ISMOP then
+		IE:Hide()
+		LibStub("AceConfigDialog-3.0"):Close("TMW Options")
+	end
+end)
 
 function IE:RegisterTab(tab, attachedFrame)
 	local id = #IE.Tabs + 1
@@ -2034,14 +2071,14 @@ function IE:PositionPanels()
 			frame = IE.ALLDISPLAYTABFRAMES[panelInfo.xmlTemplateName]
 			
 			if not frame then
-				frame = CreateFrame("Frame", panelInfo.xmlTemplateName, TellMeWhen_IconEditorMainScrollFrame, panelInfo.xmlTemplateName)
+				frame = CreateFrame("Frame", panelInfo.xmlTemplateName, TellMeWhen_IconEditorMainPanels, panelInfo.xmlTemplateName)
 				IE.ALLDISPLAYTABFRAMES[panelInfo.xmlTemplateName] = frame
 			end
 		elseif panelInfo.panelType == "ConstructorFunc" then
 			frame = IE.ALLDISPLAYTABFRAMES[panelInfo] 
 			
 			if not frame then
-				frame = CreateFrame("Frame", panelInfo.frameName, TellMeWhen_IconEditorMainScrollFrame, "TellMeWhen_OptionsModuleContainer")
+				frame = CreateFrame("Frame", panelInfo.frameName, TellMeWhen_IconEditorMainPanels, "TellMeWhen_OptionsModuleContainer")
 				
 				IE.ALLDISPLAYTABFRAMES[panelInfo] = frame
 				TMW.safecall(panelInfo.func, frame)
@@ -2198,7 +2235,7 @@ function IE:Load(isRefresh, icon, isHistoryChange)
 		end
 		
 		if ic_old ~= CI.ic then
-			IE.Main.ScrollFrame:SetVerticalScroll(0)
+			IE.Main.Panels.scrollFrame:SetVerticalScroll(0)
 		end
 		
 		TMW:Fire("TMW_CONFIG_ICON_LOADED_CHANGED", icon)
@@ -2274,10 +2311,6 @@ function IE:Load(isRefresh, icon, isHistoryChange)
 		IE:AttemptBackup(CI.ic)
 	end
 	IE:UndoRedoChanged()
-
-	if IE.Main.ScrollFrame:GetVerticalScrollRange() == 0 then
-		IE.Main.ScrollFrame.ScrollBar:Hide()
-	end
 end
 
 function IE:LoadFirstValidIcon()
@@ -3107,7 +3140,7 @@ end
 
 function IE:Equiv_DropDown_OnClick(value)
 	-- TODO: tie this closer to the choosename panel
-	local e = IE.MainScrollFrame.Name
+	local e = IE.Panels.Name
 	e:Insert("; " .. value .. "; ")
 	local new = TMW:CleanString(e)
 	e:SetText(new)

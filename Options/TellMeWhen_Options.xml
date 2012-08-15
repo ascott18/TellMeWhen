@@ -457,6 +457,134 @@
 	
 	<!-- TEMPLATES -->
 	
+	<ScrollFrame name="TellMeWhen_ScrollFrameTemplate" parentKey="ScrollFrame" virtual="true">
+		<Scripts>
+			<OnLoad>
+ 
+			</OnLoad>
+			<OnScrollRangeChanged>
+				if ( not yrange ) then
+					yrange = self:GetVerticalScrollRange();
+				end
+
+				if ( floor(yrange) == 0 ) then
+					self.ScrollBar:Hide()
+				else
+					self.ScrollBar:Show()
+				end
+
+				if 0 >= self:GetVerticalScroll() then
+					self:SetVerticalScroll(0)
+				elseif self:GetVerticalScroll() > yrange then
+					self:SetVerticalScroll(yrange)
+				end
+
+
+
+				local height = self:GetHeight()
+				self.percentage = height/(yrange+height)
+
+				self.ScrollBar.Thumb:SetHeight(height*self.percentage)
+
+				self.ScrollBar.Thumb:SetPoint("TOP", self, "TOP", 0, -(self:GetVerticalScroll()*self.percentage))
+			</OnScrollRangeChanged>
+		  
+			<OnVerticalScroll>			
+				self.ScrollBar.Thumb:SetPoint("TOP", self, "TOP", 0, -(offset*self.percentage))
+			</OnVerticalScroll>
+			<OnMouseWheel>
+				local scrollStep = self.scrollStep or self:GetHeight() / 2
+				local newScroll
+				if ( delta > 0 ) then
+					newScroll = self:GetVerticalScroll() - scrollStep
+				else
+					newScroll = self:GetVerticalScroll() + scrollStep
+				end
+				if 0 > newScroll then
+					newScroll = 0
+				elseif newScroll > self:GetVerticalScrollRange() then
+					newScroll = self:GetVerticalScrollRange()
+				end
+				self:SetVerticalScroll(newScroll)
+			</OnMouseWheel>
+		</Scripts>
+		<Frames>
+			<Frame name="$parentScrollBar" parentKey="ScrollBar" hidden="true">
+				<Size x="10"/>
+				<Anchors>
+					<Anchor point="TOP"/>
+					<Anchor point="BOTTOM"/>
+				</Anchors>
+				<Layers>
+					<Layer level="BACKGROUND">
+						<Texture name="$parentBackdrop" setAllPoints="true" parentKey="Backdrop" >
+							<Color r="0.2" g="0.2" b="0.2"/>
+						</Texture>
+					</Layer>
+				</Layers>
+				
+				<Frames>
+					<Frame name="$parentThumb" parentKey="Thumb" >
+						<Anchors>
+							<Anchor point="LEFT"/>
+							<Anchor point="RIGHT"/>
+						</Anchors>
+						<Layers>
+							<Layer level="OVERLAY">
+								<Texture name="Texture" setAllPoints="true">
+									<Color r="0.35" g="0.35" b="0.35"/>
+								</Texture>
+							</Layer>
+						</Layers>
+						
+						<Scripts>
+							<OnLoad>
+								self:RegisterForDrag("LeftButton")
+							</OnLoad>
+							<OnDragStart>
+								self.IsScrolling = true
+								_, self.startY = GetCursorPosition()
+								self.startHeight = select(5, self:GetPoint(1))
+							</OnDragStart>
+							<OnDragStop>
+								self.IsScrolling = false
+							</OnDragStop>
+							<OnUpdate>
+								if self.IsScrolling then
+									local _, currentY = GetCursorPosition()
+									local delta = (currentY - self.startY)/self:GetEffectiveScale()
+									
+									local scrollFrame = self:GetParent():GetParent()
+									
+									
+									local maxTop = -(scrollFrame:GetHeight() - self:GetHeight())
+									local minTop = 0
+									
+									local newTop = (self.startHeight + delta)
+									if maxTop > newTop then
+										newTop = maxTop
+									elseif newTop > minTop then
+										newTop = minTop
+									end
+									
+									scrollFrame:SetVerticalScroll(-(newTop/scrollFrame.percentage))
+									self:SetPoint("TOP", scrollFrame, "TOP", 0, newTop)
+								end
+							</OnUpdate>
+						</Scripts>
+					
+					</Frame>
+				</Frames>
+				<Scripts>
+					<OnMouseWheel>
+						self:GetParent():GetScript("OnMouseWheel")(self:GetParent(), delta)
+					</OnMouseWheel>
+				</Scripts>
+			</Frame>
+		</Frames>
+	</ScrollFrame>
+			
+			
 	<Texture name="TellMeWhen_CheckTemplateBorder" virtual="true">
 		<Size x="1.3" y="1.3"/>
 		<Color r="0.4" g="0.4" b="0.4" a="1"/>
@@ -858,9 +986,6 @@
 				self.Background.START_ANIM = true
 				frame.Background.START_ANIM = true
 			</OnClick>
-			<OnMouseWheel>
-				ScrollFrameTemplate_OnMouseWheel(TMW.IE.Main.ScrollFrame, delta)
-			</OnMouseWheel>
 			<OnSizeChanged>
 				self:Resize()
 			</OnSizeChanged>
@@ -1433,6 +1558,7 @@
 		<Anchors>
 			<Anchor point="TOPLEFT" relativeTo="$parentAddEvent" relativePoint="TOPRIGHT" x="28" y="0"/>
 			<Anchor point="RIGHT"/>
+			<Anchor point="BOTTOM"/>
 		</Anchors>
 		<Scripts>
 			<OnLoad>
@@ -1596,26 +1722,7 @@
 		<Anchors>
 			<Anchor point="CENTER" relativeTo="UIParent"/>
 		</Anchors>
-		<!-- <Backdrop bgFile="Interface\FriendsFrame\UI-Toast-Background" edgeFile="Interface\DialogFrame\UI-DialogBox-Border" tile="true">
-			<BackgroundInsets>
-				<AbsInset left="8" right="8" top="8" bottom="8"/>
-			</BackgroundInsets>
-			<TileSize>
-				<AbsValue val="32"/>
-			</TileSize>
-			<EdgeSize>
-				<AbsValue val="32"/>
-			</EdgeSize>
-		</Backdrop> -->
 		
-		<!-- <Backdrop edgeFile="Interface\DialogFrame\UI-DialogBox-Background-Dark" tile="true">
-			<EdgeSize>
-				<AbsValue val="3"/>
-			</EdgeSize>
-			<EdgeInsets>
-				<AbsInset left="8" right="8" top="8" bottom="8"/>
-			</EdgeInsets>
-		</Backdrop> -->
 		<Layers>
 			<Layer level="BACKGROUND">
 				<Texture name="$parentBackground" parentKey="Background">
@@ -1860,7 +1967,16 @@
 							<OnLoad>
 								self:SetText(TMW.L["SUG_FINISHHIM"])
 								TMW:TT(self, "SUG_FINISHHIM", "SUG_FINISHHIM_DESC")
+								self:RegisterEvent("UNIT_FLAGS") -- accurately detects changes to InCombatLockdown
 							</OnLoad>
+							<OnEvent>
+								-- Don't allow this when in combat because of Blizzard's new throttling systen in Mists of Pandaria
+								if InCombatLockdown() then
+									self:Disable()
+								else
+									self:Enable()
+								end
+							</OnEvent>
 							<OnClick>
 								TMW.SUG.NumCachePerFrame = 2^1023 -- why the hell not?
 							</OnClick>
@@ -1909,6 +2025,8 @@
 						</Layers>
 						<Scripts>
 							<OnLoad>
+								TMW:ConvertContainerToScrollFrame(self, true, 1.5, 4.5)
+								
 							--	self.Header:SetText(TMW.L["SUGGESTIONS"])
 							--	self.InfoText:SetText(TMW.L["CACHING"])
 
@@ -1931,45 +2049,20 @@
 						</Scripts>
 					</Frame>
 			
-					<ScrollFrame name="$parentScrollFrame[DND]" parentKey="ScrollFrame" inherits="UIPanelScrollFrameCodeTemplate" >
+					
+					<Frame name="$parentPanels" parentKey="Panels">
 						<Anchors>
 							<Anchor point="LEFT" relativeTo="$parentPanelListing" relativePoint="RIGHT" x="7"/>
-							<Anchor point="TOP" relativeTo="$parentPanelListing"/>
-							<Anchor point="BOTTOM" relativeTo="$parentPanelListing" y="1"/>
-							<Anchor point="RIGHT" x="-24"/>
+							<Anchor point="TOP" y="-35"/>
+							<Anchor point="BOTTOM" y="3"/>
+							<Anchor point="RIGHT" x="-14"/>
 						</Anchors>
-						<Frames>
-						
-							<Slider name="$parentScrollBar" inherits="MinimalScrollBarTemplate" parentKey="ScrollBar">
-								<Size x="18"/>
-								<Anchors>
-									<Anchor point="TOP" y="-17"/>
-									<Anchor point="BOTTOM" y="17"/>
-									<Anchor point="LEFT" relativePoint="RIGHT" x="4" />
-								</Anchors>
-								<Scripts>
-									<OnLoad>
-										self:SetFrameLevel(self:GetParent():GetFrameLevel() + 2)
-									</OnLoad>
-								</Scripts>
-							</Slider>
-						</Frames>
-					
-						<ScrollChild>
-							<Frame name="$parentMainScrollFrame" parent="TellMeWhen_IconEditor" setAllPoints="true" parentKey="MainScrollFrame">
-								<Scripts>
-									<OnLoad>
-										self:SetSize(TellMeWhen_IconEditor.Main.ScrollFrame:GetWidth(), 10)
-									</OnLoad>
-								</Scripts>
-							</Frame>
-						</ScrollChild>
 						<Scripts>
 							<OnLoad>
-								self.scrollBarHideable = true
+								TMW:ConvertContainerToScrollFrame(self, true, 2)
 							</OnLoad>
 						</Scripts>
-					</ScrollFrame>
+					</Frame>
 				
 					<Frame name="$parentType" inherits="TMW_DropDownMenuTemplate" parentKey="Type">
 						<Anchors>
@@ -2035,12 +2128,16 @@
 				</Scripts>
 			</Frame>
 			<Frame name="$parentEvents" setAllPoints="true" parentKey="Events">
+				<Anchors>
+					<Anchor point="TOPLEFT" y="-23"/>
+					<Anchor point="BOTTOMRIGHT" y="26"/>
+				</Anchors>
 				<Frames>
 
 					<ScrollFrame name="$parentSF" parentKey="ScrollFrame" inherits="UIPanelScrollFrameCodeTemplate" >
 						<Size x="210" y="155"/>
 						<Anchors>
-							<Anchor point="TOPLEFT" x="12" y="-75"/>
+							<Anchor point="TOPLEFT" x="12" y="-50"/>
 						</Anchors>
 						<Layers>
 							<Layer level="OVERLAY">

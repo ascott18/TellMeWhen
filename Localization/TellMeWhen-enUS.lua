@@ -37,6 +37,9 @@ L["ERROR_MISSINGFILE_NOREQ"] = [[A complete restart of WoW may be required to fu
 Would you like to restart WoW now?]]
 L["ERROR_ANCHORSELF"] = "%s was trying to anchor to itself, so TellMeWhen reset it's anchor to the center of the screen to prevent catastrophic failure."
 
+L["ERROR_NO_LOCKTOGGLE_IN_LOCKDOWN"] = "Cannot unlock TellMeWhen while in combat."
+L["ERROR_NO_SLASH_IN_LOCKDOWN"] = "Cannot do that while in combat."
+
 L["LOCKED"] = "Locked"
 L["RESIZE"] = "Resize"
 L["RESIZE_TOOLTIP"] = [[|cff7fffffClick-and-drag|r to resize]] -- keep this like this, used by the icon editor
@@ -662,6 +665,7 @@ L["TEXTLAYOUTS_HEADER_LAYOUT"] = "Text Layout"
 L["TEXTLAYOUTS_HEADER_DISPLAY"] = "Text Display"
 L["TEXTLAYOUTS_fSTRING"] = "Display %s"
 L["TEXTLAYOUTS_fSTRING2"] = "Display %d: %s"
+L["TEXTLAYOUTS_fSTRING3"] = "Text Display: %s"
 L["TEXTLAYOUTS_fLAYOUT"] = "Text Layout: %s"
 L["TEXTLAYOUTS_UNNAMED"] = "<no name>"
 L["TEXTLAYOUTS_DEFAULTS_WRAPPER"] = "Default: %s"
@@ -964,6 +968,15 @@ L["MAKENEWGROUP"] = "|cff59ff59Create|r New Group"
 
 
 L["CONFIGPANEL_LISTING_TOOLTIP"] = "|cff7fffffClick|r to jump to panel."
+
+
+L["IconModule_IconContainer_MasqueIconContainer"] = "Icon Container"
+L["IconModule_IconContainer_MasqueIconContainer_DESC"] = "Holds the main parts of the icon, such as the texture"
+L["IconModule_TimerBar_OverlayTimerBar"] = "Timer Bar Overlay"
+L["IconModule_PowerBar_OverlayPowerBar"] = "Power Bar Overlay"
+L["IconModule_Texture_ColoredTexture"] = "Texture"
+L["IconModule_CooldownSweepCooldown"] = "Cooldown Sweep"
+L["IconModule_TimerBar_BarDisplayTimerBar"] = "Timer Bar"
 
 
 L["GROUPADDONSETTINGS"] = "Group Settings"

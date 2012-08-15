@@ -75,10 +75,6 @@ Type:RegisterConfigPanel_ConstructorFunc(150, "TellMeWhen_MultistateSettings", f
 end)
 
 
-function Type:Update()
-end
-
-
 local function MultiStateCD_OnEvent(icon, event)
 	if event == "ACTIONBAR_SLOT_CHANGED" then
 		local actionType, spellID = GetActionInfo(icon.Slot) -- check the current slot first, because it probably didnt change
@@ -151,7 +147,7 @@ function Type:Setup(icon, groupID, iconID)
 
 	if icon:IsBeingEdited() == 1 then
 		if icon.Slot == 0 and originalNameFirst and originalNameFirst ~= "" then
-			TMW.HELP:Show("ICON_MS_NOTFOUND", icon, TMW.IE.MainScrollFrame.Name, 0, 0, L["HELP_MS_NOFOUND"], TMW:RestoreCase(originalNameFirst))
+			TMW.HELP:Show("ICON_MS_NOTFOUND", icon, TellMeWhen_ChooseName, 0, 0, L["HELP_MS_NOFOUND"], TMW:RestoreCase(originalNameFirst))
 		else
 			TMW.HELP:Hide("ICON_MS_NOTFOUND")
 		end

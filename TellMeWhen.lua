@@ -326,11 +326,27 @@ end
 function TMW:ValidateType(argN, methodName, var, reqType)
 	local varType = type(var)
 	
-	if reqType == "frame" and varType == "table" and type(var[0]) == "userdata" then
-		varType = "frame"
+	local negatedSuccessfully = true
+	for _, reqType in TMW:Vararg(strsplit(";", reqType)) do
+		local negate = reqType:sub(1, 1) == "!"
+		local reqType = negate and reqType:sub(2) or reqType
+		
+		if reqType == "frame" and varType == "table" and type(var[0]) == "userdata" then
+			varType = "frame"
+		end
+		
+		if negate then
+			if varType == reqType then
+				negatedSuccessfully = false
+			end
+		else
+			if varType == reqType then
+				return
+			end
+		end
 	end
 	
-	if varType ~= reqType then
+	if not negatedSuccessfully then
 		error(("Bad argument #%s to %q. %s expected, got %s"):format(argN, methodName, reqType, varType), 3)
 	end
 end
@@ -1183,9 +1199,6 @@ TMW.Defaults = {
 				CheckOrder		= -1,
 				PrimarySpec		= true,
 				SecondarySpec	= true,
-				Tree1			= true,
-				Tree2			= true,
-				Tree3			= true,
 				LayoutDirection = 1,
 				SortPriorities = {
 					{Method = "id",				Order =	1,	},
@@ -1246,19 +1259,32 @@ TMW.Group_Defaults 			  = TMW.Defaults.profile.Groups["**"]	-- shortcut
 TMW.Icon_Defaults 			  = TMW.Group_Defaults.Icons["**"]		-- shortcut
 
 
-TMW.GCDSpells = {
-	ROGUE		= 1752, -- sinister strike
-	PRIEST		= 139, -- renew
-	DRUID		= 774, -- rejuvenation
-	WARRIOR		= 772, -- rend
-	MAGE		= 133, -- fireball
-	WARLOCK		= 687, -- demon armor
-	PALADIN		= 20154, -- seal of righteousness
-	SHAMAN		= 324, -- lightning shield
-	HUNTER		= 1978, -- serpent sting
-	DEATHKNIGHT = 47541, -- death coil
-	MONK		= 100780, -- jab
-} local GCDSpell = TMW.GCDSpells[pclass] TMW.GCDSpell = GCDSpell
+TMW.GCDSpells = TMW.ISMOP and {
+	ROGUE		= 1752,		-- sinister strike
+	PRIEST		= 585,		-- smite
+	DRUID		= 5176,		-- wrath
+	WARRIOR		= 103840,	-- victory rush
+	MAGE		= 44614,	-- frostfire bolt
+	WARLOCK		= 686,		-- shadow bolt
+	PALADIN		= 105361,	-- seal of command
+	SHAMAN		= 403,		-- lightning bolt
+	HUNTER		= 3044,		-- arcane shot
+	DEATHKNIGHT = 47541,	-- death coil
+	MONK		= 100780,	-- jab
+} or {
+	ROGUE		= 1752,		-- sinister strike
+	PRIEST		= 139, 		-- renew
+	DRUID		= 774, 		-- rejuvenation
+	WARRIOR		= 772, 		-- rend
+	MAGE		= 133, 		-- fireball
+	WARLOCK		= 687, 		-- demon armor
+	PALADIN		= 20154,	-- seal of righteousness
+	SHAMAN		= 324,		-- lightning shield
+	HUNTER		= 1978,		-- serpent sting
+	DEATHKNIGHT = 47541,	-- death coil
+}
+
+local GCDSpell = TMW.GCDSpells[pclass] TMW.GCDSpell = GCDSpell
 
 
 TMW.DS = {
@@ -1342,7 +1368,6 @@ TMW.CompareFuncs = {
 	[">"] = function(a, b) return a > b end,
 }
 TMW.EventList = {}
-
 
 do -- hook LMB
 	local meta = LMB and getmetatable(LMB:Group("TellMeWhen")).__index
@@ -1574,6 +1599,7 @@ end
 
 function TMW:OnInitialize()
 	LoadAddOn("LibDogTag-3.0")
+	
 	if not rawget(TMW.Types, "") then
 		-- this also includes upgrading from older than 3.0 (pre-Ace3 DB settings)
 		-- GLOBALS: StaticPopupDialogs, StaticPopup_Show, EXIT_GAME, CANCEL, ForceQuit
@@ -1602,8 +1628,7 @@ function TMW:OnInitialize()
 	TMW:SetScript("OnUpdate", TMW.OnUpdate)
 
 	TMW:RegisterEvent("PLAYER_ENTERING_WORLD")
-	TMW:RegisterEvent("PLAYER_TALENT_UPDATE")
-	TMW:RegisterEvent("ACTIVE_TALENT_GROUP_CHANGED")
+	TMW:RegisterEvent("PLAYER_LOGIN")
 end
 
 function TMW:Initialize()
@@ -1619,6 +1644,11 @@ function TMW:Initialize()
 		return
 	end
 	TMW.Initialized = true
+	
+	
+	for i = 1, (TMW.ISMOP and GetNumSpecializations or GetNumTalentTabs)() do
+		TMW.Group_Defaults["Tree"..i] = true
+	end
 
 	--------------- Database ---------------
 	if type(TellMeWhenDB) ~= "table" then
@@ -1826,19 +1856,21 @@ function TMW:Update()
 	Locked = TMW.db.profile.Locked
 	TMW.Locked = Locked
 
+	if not TMW:CheckCanDoLockedAction() then
+		return
+	end
+	
 	if not Locked then
 		TMW:LoadOptions()
 	end
 	
 	TMW:Fire("TMW_GLOBAL_UPDATE") -- the placement of this matters. Must be after options load, but before icons are updated
 
-	 -- Add a very small amount so that we don't call the same icon multiple times
-	 -- in the same frame if the interval has been set 0.
+	-- Add a very small amount so that we don't call the same icon multiple times
+	-- in the same frame if the interval has been set 0.
 	UPD_INTV = TMW.db.profile.Interval + 0.001
 
 	for key, Type in pairs(TMW.Types) do
-		--wipe(Type.Icons)
-		Type:Update()
 		Type:UpdateColors(true)
 	end
 
@@ -1849,10 +1881,6 @@ function TMW:Update()
 		TMW.safecall(group.Setup, group)
 	end
 
-	for key, Type in pairs(TMW.Types) do
-		Type:Update(true)
-	end
-
 	if not Locked then
 		TMW:DoValidityCheck()
 	end
@@ -1861,6 +1889,12 @@ function TMW:Update()
 
 	TMW:Fire("TMW_GLOBAL_UPDATE_POST")
 end
+
+TMW:RegisterEvent("PLAYER_REGEN_DISABLED", function()
+	if TMW.ISMOP and not TMW.Locked and TMW.Initialized then
+		TMW:LockToggle()
+	end
+end)
 
 function TMW:DoWarn()
 	if not TMW.Warned then
@@ -2664,7 +2698,6 @@ function TMW:QueueValidityCheck(icon, groupID, iconID, g, i)
 
 	TMW.ValidityCheckQueue[str] = 1
 end
-
 function TMW:DoValidityCheck()
 	for str in pairs(TMW.ValidityCheckQueue) do
 		local icon, groupID, iconID, g, i = strsplit("^", str)
@@ -2709,6 +2742,17 @@ function TMW:PLAYER_ENTERING_WORLD()
 	end
 end
 
+function TMW:PLAYER_LOGIN()
+	if TMW.ISMOP then
+		TMW:RegisterEvent("PLAYER_SPECIALIZATION_CHANGED")
+	else
+		TMW:RegisterEvent("PLAYER_TALENT_UPDATE", "PLAYER_SPECIALIZATION_CHANGED")
+		TMW:RegisterEvent("ACTIVE_TALENT_GROUP_CHANGED", "PLAYER_SPECIALIZATION_CHANGED")
+	end
+	
+	TMW:Update()
+end
+
 function TMW:COMBAT_LOG_EVENT_UNFILTERED(_, _, p,_, g, _, f, _, _, _, _, _, i)
 	-- This is only used for the suggester, but i want to to be listening all the times for auras, not just when you load the options
 	if p == "SPELL_AURA_APPLIED" and not TMW.AuraCache[i] then
@@ -2720,9 +2764,11 @@ function TMW:COMBAT_LOG_EVENT_UNFILTERED(_, _, p,_, g, _, f, _, _, _, _, _, i)
 	end
 end
 
-function TMW:PLAYER_TALENT_UPDATE()
-	if not TMW.AddedTalentsToTextures then
-		if TMW.ISMOP then
+if TMW.ISMOP then
+	function TMW:PLAYER_SPECIALIZATION_CHANGED()
+		TMW:ScheduleUpdate(.2)
+		
+		if not TMW.AddedTalentsToTextures then
 			for talent = 1, MAX_NUM_TALENTS do
 				local name, tex = GetTalentInfo(talent)
 				local lower = name and strlowerCache[name]
@@ -2730,7 +2776,14 @@ function TMW:PLAYER_TALENT_UPDATE()
 					SpellTextures[lower] = tex
 				end
 			end
-		else
+			TMW.AddedTalentsToTextures = 1
+		end
+	end
+else
+	function TMW:PLAYER_SPECIALIZATION_CHANGED()
+		TMW:ScheduleUpdate(.2)
+		
+		if not TMW.AddedTalentsToTextures then
 			for tab = 1, GetNumTalentTabs() do
 				for talent = 1, GetNumTalents(tab) do
 					local name, tex = GetTalentInfo(tab, talent)
@@ -2740,14 +2793,9 @@ function TMW:PLAYER_TALENT_UPDATE()
 					end
 				end
 			end
+			TMW.AddedTalentsToTextures = 1
 		end
-		TMW.AddedTalentsToTextures = 1
 	end
-	TMW:ScheduleUpdate(1)
-end
-
-function TMW:ACTIVE_TALENT_GROUP_CHANGED()
-	TMW:ScheduleUpdate(1)
 end
 
 function TMW:ProcessEquivalencies()
@@ -3585,6 +3633,7 @@ function Icon.OnNewInstance(icon, ...)
 	icon.EssentialModuleComponents = {}
 	icon.lmbButtonData = {}
 	icon.position = {}
+	icon.anchorableChildren = {}
 	
 	icon.attributes = icon:InheritTable(Icon, "attributes")
 end
@@ -3676,6 +3725,26 @@ function Icon.IsBeingEdited(icon)
 		return TMW.IE.CurrentTab:GetID()
 	end
 end
+
+local activeModuleChildren = {}
+function Icon.GetActiveModuleChildrenNames(icon)
+	wipe(activeModuleChildren)
+	
+	for moduleName, Module in pairs(icon.Modules) do
+		if Module.IsImplemented then
+			for name in pairs(Module.anchorableChildren) do
+				tinsert(activeModuleChildren, moduleName .. name)
+			end
+		end
+	end
+	
+	return unpack(activeModuleChildren)
+end
+
+function Icon.GetModuleChildFrame(icon, identifier)
+	return _G[icon:GetName() .. identifier]
+end
+
 
 -- universal
 function Icon.QueueEvent(icon, arg1)
@@ -4778,6 +4847,7 @@ TMW:NewClass("IconModule", "IconComponent", "ObjectModule"){
 	EventListners = {},
 	ViewImplementors = {},
 	TypeAllowances = {},
+	anchorableChildren = {},
 	
 	defaultAllowanceForTypes = true,
 	OnNewInstance_1_IconModule = function(self, icon)
@@ -4796,11 +4866,23 @@ TMW:NewClass("IconModule", "IconComponent", "ObjectModule"){
 				end
 			end)
 		end
+		
+		for name in pairs(self.anchorableChildren) do
+			local identifier = className .. name
+			
+			local localizedName = rawget(L, identifier)
+			if not localizedName then
+				TMW:Error("Localized name for %q is missing! (TMW.L[%q])", identifier, identifier)
+			end
+			
+			self.anchorableChildren[name] = localizedName
+		end
 	end,
 	OnClassInherit_IconModule = function(self, newClass)		
 		newClass:InheritTable(self, "EventListners")
 		newClass:InheritTable(self, "ViewImplementors")
 		newClass:InheritTable(self, "TypeAllowances")
+		newClass:InheritTable(self, "anchorableChildren")
 		
 		newClass.defaultAllowanceForTypes = self.defaultAllowanceForTypes
 	end,
@@ -4875,6 +4957,28 @@ TMW:NewClass("IconModule", "IconComponent", "ObjectModule"){
 		
 		assert(not self.icon.lmbButtonData[component])
 		self.icon.lmbButtonData[component] = frame
+	end,
+
+	GetChildNameBase = function(self)
+		self:AssertSelfIsInstance()
+		
+		return self.icon:GetName() .. self.className
+	end,
+	RegisterAnchorableFrame = function(self, name)
+		self:AssertSelfIsClass()
+		TMW:ValidateType("2 (name)", "IconModule:RegisterAnchorableFrame(name)", name, "string")
+		
+		self.anchorableChildren[name] = true
+		
+		--TMW:Fire("TMW_ICON_MODULE_ANCHORABLEFRAME_REGISTED", self.icon, self, name)
+	end,
+	UnregisterAnchorableFrame = function(self, name)
+		self:AssertSelfIsClass()
+		TMW:ValidateType("2 (name)", "IconModule:UnregisterAnchorableFrame(name)", name, "string")
+		
+		self.anchorableChildren[name] = nil
+		
+		--TMW:Fire("TMW_ICON_MODULE_ANCHORABLEFRAME_UNREGISTED", self.icon, self, name)
 	end,
 
 	ImplementForAllViews = function(self, implementorFunc)
@@ -5330,6 +5434,10 @@ function IconType:SetupIcons()
 	end
 end
 
+function IconType:Update()
+
+end
+
 function IconType:GetNameForDisplay(icon, data, doInsertLink)
 	if data then
 		local name
@@ -5780,7 +5888,7 @@ function TMW:EquivToTable(name)
 end
 TMW:MakeFunctionCached(TMW, "EquivToTable")
 
-function TMW:GetSpellNames(icon, setting, firstOnly, toname, GUID, keepDurations)
+function TMW:GetSpellNames(icon, setting, firstOnly, toname, hash, keepDurations)
 	local buffNames = TMW:SplitNames(setting) -- get a table of everything
 
 	--INSERT EQUIVALENCIES
@@ -5823,17 +5931,17 @@ function TMW:GetSpellNames(icon, setting, firstOnly, toname, GUID, keepDurations
 		buffNames = TMW:LowerNames(buffNames)
 	end
 
-	if GUID then
-		local GUID = {}
+	if hash then
+		local hash = {}
 		for k, v in ipairs(buffNames) do
 			if toname then
 				v = GetSpellInfo(v or "") or v -- turn the value into a name if needed
 			end
 
 			v = TMW:LowerNames(v)
-			GUID[v] = k -- put the final value in the table as well (may or may not be the same as the original value. Value should be NameArrray's key, for use with the duration table.
+			hash[v] = k -- put the final value in the table as well (may or may not be the same as the original value. Value should be NameArrray's key, for use with the duration table.
 		end
-		return GUID
+		return hash
 	end
 	if toname then
 		if firstOnly then
@@ -6104,6 +6212,11 @@ function TMW:FormatSeconds(seconds, skipSmall, keepTrailing)
 end
 
 function TMW:LockToggle()
+	if TMW.ISMOP and InCombatLockdown() and TMW.Locked then
+		TMW:Print(L["ERROR_NO_LOCKTOGGLE_IN_LOCKDOWN"])
+		return
+	end
+
 	for k, v in pairs(TMW.Warn) do
 		-- reset warnings so they can happen again
 		if type(k) == "string" then
@@ -6118,7 +6231,16 @@ function TMW:LockToggle()
 	TMW:Update()
 end
 
+function TMW:CheckCanDoLockedAction()
+	if TMW.ISMOP and InCombatLockdown() then
+		TMW:Print(L["ERROR_NO_SLASH_IN_LOCKDOWN"])
+		return false
+	end
+	return true
+end
+
 function TMW:SlashCommand(str)
+	
 	local cmd, arg2, arg3 = TMW:GetArgs(str, 3)
 	cmd = strlower(cmd or "")
 
@@ -6133,9 +6255,11 @@ function TMW:SlashCommand(str)
 	end
 
 	if cmd == "options" then
-		TMW:LoadOptions()
-		LibStub("AceConfigDialog-3.0"):Open("TMW Options")
-
+		
+		if TMW:CheckCanDoLockedAction() then
+			TMW:LoadOptions()
+			LibStub("AceConfigDialog-3.0"):Open("TMW Options")
+		end
 	elseif cmd == "enable" or cmd == "disable" or cmd == "toggle" then
 		local groupID, iconID = tonumber(arg2), tonumber(arg3)
 

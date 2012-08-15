@@ -117,8 +117,6 @@ TMW:RegisterUpgrade(48017, {
 	end,
 })
 
-function Type:Update()
-end
 
 local function Totem_OnEvent(icon)
 	icon.NextUpdateTime = 0

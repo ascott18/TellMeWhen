@@ -78,9 +78,9 @@ Type:RegisterIconEvent(61, "OnCLEUEvent", {
 	desc = L["SOUND_EVENT_ONCLEU_DESC"],
 })
 
-function Type:Update()
+TMW:RegisterCallback("TMW_GLOBAL_UPDATE", function()
 	pGUID = UnitGUID("player")
-end
+end)
 
 local EnvironmentalTextures = {
 	DROWNING = "Interface\\Icons\\Spell_Shadow_DemonBreath",

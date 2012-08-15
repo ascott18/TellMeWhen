@@ -28,6 +28,7 @@ local EventHandler = TMW.Classes.EventHandler.instancesByName.Animations
 EventHandler.tabText = L["ANIM_TAB"]
 
 TMW:RegisterCallback("TMW_OPTIONS_LOADED", function(event)
+	TMW:ConvertContainerToScrollFrame(EventHandler.ConfigContainer.ConfigFrames)
 	local AnimationList = EventHandler.ConfigContainer.AnimationList
 
 	AnimationList.Header:SetText(L["ANIM_ANIMTOUSE"])
@@ -126,43 +127,56 @@ function EventHandler:SelectAnimation(animation)
 		end
 	end
 	self.currentAnimationSetting = animation
-
+	
+	local Frames = EventHandler.ConfigContainer.ConfigFrames
+	
+	for configFrameIdentifier, configFrameData in pairs(EventHandler.ConfigFrameData) do
+		
+		local frame = configFrameData.frame
+		if type(frame) == "string" then
+			frame = Frames[frame]
+		end
+		if frame then
+			frame:Hide()
+		end
+	end
+	
 	local animationData = self.AllAnimationsByAnimation[animation]
-	for i, arg in TMW:Vararg("Duration", "Magnitude", "Period", "Thickness", "Size_anim", "SizeX", "SizeY") do
-		if animationData and animationData[arg] then
-			self:SetSliderMinMax(EventHandler.ConfigContainer[arg], EventSettings[arg])
-			EventHandler.ConfigContainer[arg]:Show()
-			EventHandler.ConfigContainer[arg]:Enable()
+	local ConfigFrames = animationData and animationData.ConfigFrames
+	
+	local lastFrame, lastFrameBottomPadding
+	for i, configFrameIdentifier in ipairs(ConfigFrames) do
+		local configFrameData = EventHandler.ConfigFrameData[configFrameIdentifier]
+		
+		if not configFrameData then
+			TMW:Error("Values in animationData.ConfigFrames for animation %q must resolve to a table registered via Animations:RegisterConfigFrame()", animation)
 		else
-			EventHandler.ConfigContainer[arg]:Hide()
+			local frame = configFrameData.frame
+			if type(frame) == "string" then
+				frame = Frames[frame]
+				if not frame then
+					TMW:Error("Couldn't find child of %s with key %q for animation %q", Frames:GetName(), configFrameData.frame, animation)
+				end
+			end
+			print(i, frame)
+			
+			local yOffset = (configFrameData.topPadding or 0) + (lastFrameBottomPadding or 0)
+			
+			if lastFrame then
+				frame:SetPoint("TOP", lastFrame, "BOTTOM", 0, -yOffset)
+			else
+				frame:SetPoint("TOP", Frames, "TOP", 0, -yOffset - 5)
+			end
+			frame:Show()
+			lastFrame = frame
+			print(i, configFrameData.Load, configFrameData, frame, EventSettings)
+			TMW.safecall(configFrameData.Load, configFrameData, frame, EventSettings)
+			
+			lastFrameBottomPadding = configFrameData.bottomPadding
 		end
 	end
-
-	for i, arg in TMW:Vararg("Fade", "Infinite") do
-		if animationData and animationData[arg] then
-			EventHandler.ConfigContainer[arg]:SetChecked(EventSettings[arg])
-			EventHandler.ConfigContainer[arg]:Show()
-		else
-			EventHandler.ConfigContainer[arg]:Hide()
-		end
-	end
-
-	if animationData and animationData.Color then
-		local r, g, b, a = EventSettings.r_anim, EventSettings.g_anim, EventSettings.b_anim, EventSettings.a_anim
-		EventHandler.ConfigContainer.Color:GetNormalTexture():SetVertexColor(r, g, b, 1)
-		EventHandler.ConfigContainer.Color.background:SetAlpha(a)
-		EventHandler.ConfigContainer.Color:Show()
-	else
-		EventHandler.ConfigContainer.Color:Hide()
-	end
-
-	if animationData and animationData.Image then
-		EventHandler.ConfigContainer.Image:SetText(EventSettings.Image)
-		EventHandler.ConfigContainer.Image:Show()
-	else
-		EventHandler.ConfigContainer.Image:Hide()
-	end
-
+	
+	
 	if animationFrame then
 		animationFrame:LockHighlight()
 		animationFrame:GetHighlightTexture():SetVertexColor(NORMAL_FONT_COLOR.r, NORMAL_FONT_COLOR.g, NORMAL_FONT_COLOR.b, 1)
@@ -193,3 +207,127 @@ function EventHandler:SetSliderMinMax(Slider, level)
 	end
 end
 
+EventHandler.ConfigFrameData = {}
+function EventHandler:RegisterConfigFrame(identifier, configFrameData)
+	TMW:ValidateType("identifier", "RegisterConfigFrame(identifier, configFrameData)", identifier, "string")
+	
+	TMW:ValidateType("configFrameData.frame", "RegisterConfigFrame(identifier, configFrameData)", configFrameData.frame, "string;frame")
+	TMW:ValidateType("configFrameData.Load", "RegisterConfigFrame(identifier, configFrameData)", configFrameData.Load, "function")
+	
+	TMW:ValidateType("configFrameData.topPadding", "RegisterConfigFrame(identifier, configFrameData)", configFrameData.topPadding, "number;nil")
+	TMW:ValidateType("configFrameData.bottomPadding", "RegisterConfigFrame(identifier, configFrameData)", configFrameData.bottomPadding, "number;nil")
+	
+	EventHandler.ConfigFrameData[identifier] = configFrameData
+end
+
+local function Load_Generic_Slider(self, frame, EventSettings)
+	EventHandler:SetSliderMinMax(frame, EventSettings[self.identifier])
+	frame:Enable()
+end
+
+local function Load_Generic_Check(self, frame, EventSettings)
+	frame:SetChecked(EventSettings[self.identifier])
+end
+EventHandler:RegisterConfigFrame("Duration", {
+	frame = "Duration",
+	topPadding = 13,
+	bottomPadding = 13,
+	
+	Load = Load_Generic_Slider,
+})
+EventHandler:RegisterConfigFrame("Magnitude", {
+	frame = "Magnitude",
+	topPadding = 13,
+	bottomPadding = 13,
+	
+	Load = Load_Generic_Slider,
+})
+EventHandler:RegisterConfigFrame("Period", {
+	frame = "Period",
+	topPadding = 13,
+	bottomPadding = 13,
+	
+	Load = Load_Generic_Slider,
+})
+EventHandler:RegisterConfigFrame("Thickness", {
+	frame = "Thickness",
+	topPadding = 13,
+	bottomPadding = 13,
+	
+	Load = Load_Generic_Slider,
+})
+
+EventHandler:RegisterConfigFrame("Size_anim", {
+	frame = "Size_anim",
+	topPadding = 13,
+	bottomPadding = 13,
+	
+	Load = Load_Generic_Slider,
+})
+
+EventHandler:RegisterConfigFrame("SizeX", {
+	frame = "SizeX",
+	topPadding = 13,
+	bottomPadding = 13,
+	
+	Load = Load_Generic_Slider,
+})
+
+EventHandler:RegisterConfigFrame("SizeY", {
+	frame = "SizeY",
+	topPadding = 13,
+	bottomPadding = 13,
+	
+	Load = Load_Generic_Slider,
+})
+
+EventHandler:RegisterConfigFrame("Fade", {
+	frame = "Fade",
+	--topPadding = 13,
+	--bottomPadding = 13,
+	Load = Load_Generic_Check,
+})
+
+EventHandler:RegisterConfigFrame("Infinite", {
+	frame = "Infinite",
+	--topPadding = 13,
+	--bottomPadding = 13,
+	Load = Load_Generic_Check,
+})
+
+
+EventHandler:RegisterConfigFrame("Image", {
+	frame = "Image",
+	topPadding = 4,
+	bottomPadding = 7,
+	
+	Load = function(self, frame, EventSettings)
+		frame:SetText(EventSettings.Image)
+	end,
+})
+
+EventHandler:RegisterConfigFrame("Color", {
+	frame = "Color",
+	topPadding = 4,
+	bottomPadding = 4,
+	
+	Load = function(self, frame, EventSettings)
+		local r, g, b, a = EventSettings.r_anim, EventSettings.g_anim, EventSettings.b_anim, EventSettings.a_anim
+		frame:GetNormalTexture():SetVertexColor(r, g, b, 1)
+		frame.background:SetAlpha(a)
+	end,
+})
+
+EventHandler:RegisterConfigFrame("Anchor", {
+	frame = "Anchor",
+	topPadding = 4,
+	bottomPadding = 4,
+	
+	Load = function(self, frame, EventSettings)
+		--[[local r, g, b, a = EventSettings.r_anim, EventSettings.g_anim, EventSettings.b_anim, EventSettings.a_anim
+		frame:GetNormalTexture():SetVertexColor(r, g, b, 1)
+		frame.background:SetAlpha(a)]]
+	end,
+})
+	
+	

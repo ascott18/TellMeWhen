@@ -90,10 +90,6 @@ function CNDT:LoadConfig(type)
 		CNDT:Clear()
 	end
 	CNDT:AddRemoveHandler()
-
-	if TellMeWhen_IconEditor.Conditions.ScrollFrame:GetVerticalScrollRange() == 0 then
-		TellMeWhen_IconEditor.Conditions.ScrollFrame.ScrollBar:Hide()
-	end
 end
 TMW:RegisterCallback("TMW_CONFIG_ICON_LOADED", function()
 	-- This is encapsulated in a function because LoadConfig excepts arg2 to be a condition type ("group" or "icon"),
@@ -136,7 +132,9 @@ function CNDT:SetTabText(type)
 
 	local parenthesesAreValid, errorMessage, fmt_1, fmt_2 = CNDT:CheckParentheses(Conditions)
 
-	if not parenthesesAreValid then
+	if parenthesesAreValid then
+		TMW.HELP:Hide("CNDT_PARENTHESES_ERROR")
+	else
 		TMW.HELP:Show("CNDT_PARENTHESES_ERROR", nil, TellMeWhen_IconEditor.Conditions, 0, 0, errorMessage, fmt_1, fmt_2)
 	end
 	

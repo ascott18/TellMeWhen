@@ -50,6 +50,7 @@ function Processor:CompileFunctionSegment(t)
 			-- detect events that occured, and handle them if they did
 			if realDuration == 0 then
 				if EventHandlersSet.OnFinish then
+					print(icon, realDuration)
 					icon:QueueEvent("OnFinish")
 				end
 			else
@@ -105,6 +106,8 @@ Processor:RegisterIconEvent(23, "OnDuration", {
 		EventSettings.PassingCndt = true
 	end,
 })
+
+
 TMW:RegisterCallback("TMW_ICON_NEXTUPDATE_REQUESTDURATION", function(event, icon, currentIconDuration)
 	if icon.EventHandlersSet.OnDuration then
 		for _, EventSettings in TMW:InNLengthTable(icon.Events) do
@@ -149,6 +152,7 @@ Processor:RegisterDogTag("TMW", "Duration", {
 })
 
 TMW:RegisterCallback("TMW_ICON_SETUP_POST", function(event, icon)
+	icon.__realDuration = icon.__realDuration or 0
 	if not TMW.Locked then
 		icon:SetInfo("start, duration", 0, 0)
 	end

@@ -33,6 +33,10 @@ Type.NoColorSettings = true
 Type:UsesAttributes("alpha")
 Type:UsesAttributes("texture")
 -- END AUTOMATICALLY GENERATED: UsesAttributes
+Type:UsesAttributes("start, duration")
+Type:UsesAttributes("spell")
+Type:UsesAttributes("unit, GUID")
+Type:UsesAttributes("stack, stackText")
 
 Type:SetModuleAllowance("IconModule_PowerBar_Overlay", false)
 Type:SetModuleAllowance("IconModule_TimerBar_Overlay", false)
@@ -74,22 +78,18 @@ local function CheckCompiledIcons(icon)
 	end
 end
 
-function Type:Update(after)
-	
-	if after then
-		for _, icon in pairs(Type.Icons) do
-			icon.metaUpdateQueued = true
-			
-			
-			local success, err = pcall(CheckCompiledIcons, icon)
-			if err and err:find("stack overflow") then
-				local err = format("Meta icon recursion was detected in %s - there is an endless loop between the icon and its sub icons.", CCI_icon:GetName())
-				TMW:Error(err)
-				TMW.Warn(err)
-			end
+TMW:RegisterCallback("TMW_GLOBAL_UPDATE_POST", function()
+	for _, icon in pairs(Type.Icons) do
+		icon.metaUpdateQueued = true
+		
+		local success, err = pcall(CheckCompiledIcons, icon)
+		if err and err:find("stack overflow") then
+			local err = format("Meta icon recursion was detected in %s - there is an endless loop between the icon and its sub icons.", CCI_icon:GetName())
+			TMW:Error(err)
+			TMW.Warn(err)
 		end
-	end	
-end
+	end
+end)
 
 
 
@@ -292,12 +292,6 @@ function Type:Setup(icon, groupID, iconID)
 		end
 	end
 
-	--[[if icon:Animations_Has() then
-		for k, v in pairs(icon:Animations_Get()) do
-			icon:Animations_Stop(v)
-		end
-	end]]
-
 	icon:SetInfo("texture", "Interface\\Icons\\LevelUpIcon-LFD")
 	
 	-- DONT DO THIS! (manual updates) ive tried for many hours to get it working,
@@ -319,50 +313,50 @@ end
 
 function Type:IE_TypeLoaded()
 	--[[local spacing = 70
-	TMW.IE.MainScrollFrame.Sort:SetPoint("BOTTOMLEFT", 20, -22)
-	TMW.IE.MainScrollFrame.Sort.text:SetWidth(spacing)
+	TMW.IE.Panels.Sort:SetPoint("BOTTOMLEFT", 20, -22)
+	TMW.IE.Panels.Sort.text:SetWidth(spacing)
 
-	TMW.IE.MainScrollFrame.Sort.Radio1:SetPoint("TOPLEFT", spacing, 19)
-	TMW.IE.MainScrollFrame.Sort.Radio1.text:SetWidth(spacing + 2)
+	TMW.IE.Panels.Sort.Radio1:SetPoint("TOPLEFT", spacing, 19)
+	TMW.IE.Panels.Sort.Radio1.text:SetWidth(spacing + 2)
 
-	TMW.IE.MainScrollFrame.Sort.Radio2:SetPoint("TOPLEFT", TMW.IE.MainScrollFrame.Sort.Radio1, "TOPRIGHT", spacing, 0)
-	TMW.IE.MainScrollFrame.Sort.Radio2.text:SetWidth(spacing + 2)
+	TMW.IE.Panels.Sort.Radio2:SetPoint("TOPLEFT", TMW.IE.Panels.Sort.Radio1, "TOPRIGHT", spacing, 0)
+	TMW.IE.Panels.Sort.Radio2.text:SetWidth(spacing + 2)
 
-	TMW.IE.MainScrollFrame.Sort.Radio3:SetPoint("TOPLEFT", TMW.IE.MainScrollFrame.Sort.Radio2, "TOPRIGHT", spacing, 0)
-	TMW.IE.MainScrollFrame.Sort.Radio3.text:SetWidth(spacing + 2)
+	TMW.IE.Panels.Sort.Radio3:SetPoint("TOPLEFT", TMW.IE.Panels.Sort.Radio2, "TOPRIGHT", spacing, 0)
+	TMW.IE.Panels.Sort.Radio3.text:SetWidth(spacing + 2)
 
-	TMW:TT(TMW.IE.MainScrollFrame.Sort.Radio1, "SORTBYNONE", "SORTBYNONE_META_DESC")
-	TMW:TT(TMW.IE.MainScrollFrame.Sort.Radio2, "ICONMENU_SORTASC", "ICONMENU_SORTASC_META_DESC")
-	TMW:TT(TMW.IE.MainScrollFrame.Sort.Radio3, "ICONMENU_SORTDESC", "ICONMENU_SORTDESC_META_DESC")
+	TMW:TT(TMW.IE.Panels.Sort.Radio1, "SORTBYNONE", "SORTBYNONE_META_DESC")
+	TMW:TT(TMW.IE.Panels.Sort.Radio2, "ICONMENU_SORTASC", "ICONMENU_SORTASC_META_DESC")
+	TMW:TT(TMW.IE.Panels.Sort.Radio3, "ICONMENU_SORTDESC", "ICONMENU_SORTDESC_META_DESC")
 ]]
 
 --TODO: do something with this to make it behave the same way, or something
-	--TMW.IE.MainScrollFrame.ConditionAlpha.text:SetText(L["CONDITIONALPHA_METAICON"])
-	--TMW:TT(TMW.IE.MainScrollFrame.ConditionAlpha, "CONDITIONALPHA_METAICON", "CONDITIONALPHA_METAICON_DESC")
+	--TMW.IE.Panels.ConditionAlpha.text:SetText(L["CONDITIONALPHA_METAICON"])
+	--TMW:TT(TMW.IE.Panels.ConditionAlpha, "CONDITIONALPHA_METAICON", "CONDITIONALPHA_METAICON_DESC")
 end
 
 function Type:IE_TypeUnloaded()--[[
-	TMW.IE.MainScrollFrame.Sort:SetPoint("BOTTOMLEFT", 16, 72)
-	TMW.IE.MainScrollFrame.Sort.text:SetWidth(0)
+	TMW.IE.Panels.Sort:SetPoint("BOTTOMLEFT", 16, 72)
+	TMW.IE.Panels.Sort.text:SetWidth(0)
 
-	TMW.IE.MainScrollFrame.Sort.Radio1:SetPoint("TOPLEFT", 0, 1)
-	TMW.IE.MainScrollFrame.Sort.Radio1.text:SetWidth(TMW.WidthCol1)
+	TMW.IE.Panels.Sort.Radio1:SetPoint("TOPLEFT", 0, 1)
+	TMW.IE.Panels.Sort.Radio1.text:SetWidth(TMW.WidthCol1)
 
-	TMW.IE.MainScrollFrame.Sort.Radio2:SetPoint("TOPLEFT", TMW.IE.MainScrollFrame.Sort.Radio1, "BOTTOMLEFT", 0, 8)
-	TMW.IE.MainScrollFrame.Sort.Radio2.text:SetWidth(TMW.WidthCol1)
+	TMW.IE.Panels.Sort.Radio2:SetPoint("TOPLEFT", TMW.IE.Panels.Sort.Radio1, "BOTTOMLEFT", 0, 8)
+	TMW.IE.Panels.Sort.Radio2.text:SetWidth(TMW.WidthCol1)
 
-	TMW.IE.MainScrollFrame.Sort.Radio3:SetPoint("TOPLEFT", TMW.IE.MainScrollFrame.Sort.Radio2, "BOTTOMLEFT", 0, 8)
-	TMW.IE.MainScrollFrame.Sort.Radio3.text:SetWidth(TMW.WidthCol1)
+	TMW.IE.Panels.Sort.Radio3:SetPoint("TOPLEFT", TMW.IE.Panels.Sort.Radio2, "BOTTOMLEFT", 0, 8)
+	TMW.IE.Panels.Sort.Radio3.text:SetWidth(TMW.WidthCol1)
 
-	TMW:TT(TMW.IE.MainScrollFrame.Sort.Radio1, "SORTBYNONE", "SORTBYNONE_DESC")
-	TMW:TT(TMW.IE.MainScrollFrame.Sort.Radio2, "ICONMENU_SORTASC", "ICONMENU_SORTASC_DESC")
-	TMW:TT(TMW.IE.MainScrollFrame.Sort.Radio3, "ICONMENU_SORTDESC", "ICONMENU_SORTDESC_DESC")
+	TMW:TT(TMW.IE.Panels.Sort.Radio1, "SORTBYNONE", "SORTBYNONE_DESC")
+	TMW:TT(TMW.IE.Panels.Sort.Radio2, "ICONMENU_SORTASC", "ICONMENU_SORTASC_DESC")
+	TMW:TT(TMW.IE.Panels.Sort.Radio3, "ICONMENU_SORTDESC", "ICONMENU_SORTDESC_DESC")
 ]]
 
 
 --TODO: do something with this to make it behave the same way, or something
---	TMW.IE.MainScrollFrame.ConditionAlpha.text:SetText(L["CONDITIONALPHA"])
---	TMW:TT(TMW.IE.MainScrollFrame.ConditionAlpha, "CONDITIONALPHA", "CONDITIONALPHA_DESC")
+--	TMW.IE.Panels.ConditionAlpha.text:SetText(L["CONDITIONALPHA"])
+--	TMW:TT(TMW.IE.Panels.ConditionAlpha, "CONDITIONALPHA", "CONDITIONALPHA_DESC")
 end
 
 function Type:TMW_ICON_TYPE_CHANGED(event, icon, typeData, typeData_old)

@@ -35,9 +35,6 @@ Type:SetModuleAllowance("IconModule_TimerBar_Overlay", false)
 Type:SetModuleAllowance("IconModule_Texts", false)
 Type:SetModuleAllowance("IconModule_CooldownSweep", false)
 
-function Type:Update()
-
-end
 
 function Type:Setup(icon, groupID, iconID)
 	if icon.Name ~= "" then

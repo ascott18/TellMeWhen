@@ -30,7 +30,7 @@ if not DogTag then
 end
 
 
-local TEXT = TMW:NewModule("TextDisplay", "AceHook-3.0")
+local TEXT = TMW:NewModule("TextDisplay")
 TMW.TEXT = TEXT
 
 
@@ -429,19 +429,22 @@ end
 function Texts:OnEnable()
 	local icon = self.icon
 	local attributes = icon.attributes
+	
 	self:DOGTAGUNIT(icon, attributes.dogTagUnit)
 end
+
 function Texts:OnDisable()
 	for id, fontString in pairs(self.fontStrings) do
 		
-		DogTag:RemoveFontString(fontString)			
+		DogTag:RemoveFontString(fontString)		
+		
 		fontString:Hide()
 	end
 end
 
 function Texts:CreateFontString(id)
 	local icon = self.icon
-	local fontString = icon:CreateFontString(nil, "ARTWORK", "NumberFontNormalSmall")
+	local fontString = icon:CreateFontString(self:GetChildNameBase() .. id, "ARTWORK", "NumberFontNormalSmall")
 	self.fontStrings[id] = fontString
 	return fontString
 end
@@ -475,7 +478,6 @@ function Texts:SetupForIcon(sourceIcon)
 		
 	if layoutSettings then				
 		for fontStringID, fontStringSettings in TMW:InNLengthTable(layoutSettings) do
-			local SkinAs = fontStringSettings.SkinAs
 			fontStringID = self:GetFontStringID(fontStringID, fontStringSettings)
 			
 			local fontString = self.fontStrings[fontStringID] or self:CreateFontString(fontStringID)
@@ -484,7 +486,7 @@ function Texts:SetupForIcon(sourceIcon)
 			
 			fontString:SetWidth(fontStringSettings.ConstrainWidth and icon:GetWidth() or 0)
 	
-			if not LMB or SkinAs == "" then
+			if not LMB or fontStringSettings.SkinAs == "" then
 				-- Position
 				fontString:ClearAllPoints()
 				local func = fontString.__MSQ_SetPoint or fontString.SetPoint
@@ -501,7 +503,7 @@ function Texts:SetupForIcon(sourceIcon)
 	-- TMW_QueueForRemoval gets set to nil for valid stings in OnKwargsUpdated, among other things
 	self:OnKwargsUpdated()
 	
-	for _, fontString in pairs(self.fontStrings) do
+	for fontStringID, fontString in pairs(self.fontStrings) do		
 		if fontString.TMW_QueueForRemoval then
 			fontString.TMW_QueueForRemoval = nil
 			DogTag:RemoveFontString(fontString)
@@ -518,20 +520,38 @@ function Texts:GetFontStringID(fontStringID, fontStringSettings)
 	return fontStringID
 end
 
+function TEXT:GetStringName(settings, num, unnamed)
+	local Name = strtrim(settings.StringName or "")
+	
+	if Name == "" then
+		if unnamed then
+			Name = L["TEXTLAYOUTS_UNNAMED"]
+		else
+			Name = L["TEXTLAYOUTS_fSTRING"]:format(num)
+		end
+	end
+	
+	return Name
+end
+
 function Texts:OnKwargsUpdated()
 	if self.layoutSettings and self.Texts then
 		for fontStringID, fontStringSettings in TMW:InNLengthTable(self.layoutSettings) do
 			local fontString = self.fontStrings[self:GetFontStringID(fontStringID, fontStringSettings)]
 			local text = self.Texts[fontStringID] or ""
 			
-			if fontString and text ~= "" then
-				local styleString = ""
-				if fontStringSettings.Outline == "OUTLINE" or fontStringSettings.Outline == "THICKOUTLINE" or fontStringSettings.Outline == "MONOCHROME" then
-					styleString = styleString .. ("[%s]"):format(fontStringSettings.Outline)
+			if fontString then
+					
+				if text ~= "" then
+					local styleString = ""
+					if fontStringSettings.Outline == "OUTLINE" or fontStringSettings.Outline == "THICKOUTLINE" or fontStringSettings.Outline == "MONOCHROME" then
+						styleString = styleString .. ("[%s]"):format(fontStringSettings.Outline)
+					end
+					
+					fontString.TMW_QueueForRemoval = nil
+					
+					DogTag:AddFontString(fontString, self.icon, styleString .. (self.Texts[fontStringID] or ""), "Unit;TMW", self.kwargs)
 				end
-				
-				fontString.TMW_QueueForRemoval = nil
-				DogTag:AddFontString(fontString, self.icon, styleString .. (self.Texts[fontStringID] or ""), "Unit;TMW", self.kwargs)
 			end
 		end
 	end

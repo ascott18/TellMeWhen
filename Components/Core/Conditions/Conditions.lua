@@ -3646,7 +3646,8 @@ function CNDT:DoConditionSubstitutions(parent, v, c, thisstr)
 				CNDT:RegisterEvent("RAID_ROSTER_UPDATE")
 				CNDT:RAID_ROSTER_UPDATE()
 			elseif strfind(unit, "^%%[Uu]") then
-				--TODO: depricate this
+			
+				--TODO: remove support for %u substitution in conditions, move this functionality to unit sets
 				local after = strmatch(unit, "^%%[Uu]%-?(.*)")
 				-- it is intended that we sub in parent:GetName() instead of "icon". 
 				-- We want to create unique ConditionObjects for each icon that uses %u (as opposed to using a cached one)
@@ -4248,7 +4249,7 @@ function CNDT:CheckParentheses(settings)
 		else
 			typeNeeded, num = "(", numclose-numopen
 		end
-				
+		
 		return false, L["PARENTHESIS_WARNING1"], num, L["PARENTHESIS_TYPE_" .. typeNeeded]
 	elseif unopened > 0 then
 		
@@ -4390,8 +4391,6 @@ function CNDT.UpdateEngine:OnUpdate(event, time, Locked)
 			local ConditionObject = OnUpdate_UpdateTable[i]
 			
 			ConditionObject:Check()
-			
-			--TODO: remove support for %u substitution in conditions, move this functionality to unit sets
 		end
 		
 		for i = 1, #OnAnticipate_UpdateTable do

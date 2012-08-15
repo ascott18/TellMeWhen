@@ -87,9 +87,6 @@ Type:RegisterConfigPanel_XMLTemplate(170, "TellMeWhen_SortSettings")
 local ManualIcons = {}
 
 
-function Type:Update()
-end
-
 local Cooldowns = setmetatable({}, {__index = function(t, k)
 	local n = {}
 	t[k] = n

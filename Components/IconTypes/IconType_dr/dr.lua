@@ -89,8 +89,6 @@ end)
 
 
 
-function Type:Update()
-end
 
 local function DR_OnEvent(icon, event, _, cevent, _, _, _, _, _, destGUID, _, destFlags, _, spellID, spellName, _, auraType)
 	if event == "COMBAT_LOG_EVENT_UNFILTERED" then
@@ -243,7 +241,7 @@ do	-- CheckCategories
 
 		if icon:IsBeingEdited() == 1 then
 			if result.doWarn then
-				TMW.HELP:Show("ICON_DR_MISMATCH", icon, TMW.IE.MainScrollFrame.Name, 0, 0, L["WARN_DRMISMATCH"] .. result.append)
+				TMW.HELP:Show("ICON_DR_MISMATCH", icon, TellMeWhen_ChooseName, 0, 0, L["WARN_DRMISMATCH"] .. result.append)
 			else
 				TMW.HELP:Hide("ICON_DR_MISMATCH")
 			end

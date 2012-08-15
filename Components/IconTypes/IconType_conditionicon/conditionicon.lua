@@ -67,9 +67,6 @@ Type:RegisterConfigPanel_XMLTemplate(130, "TellMeWhen_WhenChecks", {
 
 Type:RegisterConfigPanel_XMLTemplate(150, "TellMeWhen_ConditionIconSettings")
 
-function Type:Update()
-end
-
 local function ConditionIcon_OnUpdate(icon, time)
 	local ConditionObj = icon.ConditionObj
 	if ConditionObj then

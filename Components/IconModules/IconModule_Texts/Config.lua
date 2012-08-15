@@ -36,6 +36,7 @@ local CI = TMW.CI
 
 if not TEXT then return end
 
+LibStub("AceHook-3.0"):Embed(TEXT)
 
 local DEFAULT_LAYOUT_SETTINGS = TMW.db.profile.TextLayouts["\000"]
 TMW.db.profile.TextLayouts["\000"] = nil
@@ -73,20 +74,6 @@ function TEXT:GetLayoutName(settings, GUID)
 	end
 	if settings.NoEdit then
 		Name = L["TEXTLAYOUTS_DEFAULTS_WRAPPER"]:format(Name)
-	end
-	
-	return Name
-end
-
-function TEXT:GetStringName(settings, num, unnamed)
-	local Name = strtrim(settings.StringName or "")
-	
-	if Name == "" then
-		if unnamed then
-			Name = L["TEXTLAYOUTS_UNNAMED"]
-		else
-			Name = L["TEXTLAYOUTS_fSTRING"]:format(num)
-		end
 	end
 	
 	return Name

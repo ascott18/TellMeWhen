@@ -48,11 +48,11 @@ Type:RegisterConfigPanel_XMLTemplate(130, "TellMeWhen_WhenChecks", {
 	[0x1] = { text = "|cFFFF0000" .. L["ICONMENU_ABSENT"], 			},
 })
 
-function Type:Update()
+TMW:RegisterCallback("TMW_GLOBAL_UPDATE", function()
 	pGUID = UnitGUID("player")
 
-	self:GLYPH()
-end
+	Type:GLYPH()
+end)
 
 local MaxCharges = 10
 local CurrentCharges = 0

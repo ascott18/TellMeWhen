@@ -111,11 +111,11 @@ end)
 Type:RegisterConfigPanel_XMLTemplate(170, "TellMeWhen_SortSettings")
 
 
-function Type:Update()
+TMW:RegisterCallback("TMW_GLOBAL_UPDATE", function()
 	EFF_THR = TMW.db.profile.EffThreshold
 	DS = TMW.DS
 	unitsWithExistsEvent = TMW.UNITS.unitsWithExistsEvent
-end
+end)
 
 local function Buff_OnEvent(icon, event, arg1)
 	if event == "UNIT_AURA" then

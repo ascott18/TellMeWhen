@@ -92,9 +92,6 @@ Type:RegisterConfigPanel_ConstructorFunc(150, "TellMeWhen_ItemSettings", functio
 	})
 end)
 
-function Type:Update()
-end
-
 
 -- yay for caching!
 local ItemCount = setmetatable({}, {__index = function(tbl, k)

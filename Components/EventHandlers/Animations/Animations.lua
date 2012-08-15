@@ -123,6 +123,11 @@ function EventHandler:OnRegisterEventHandlerDataTable(eventHandlerData, order, a
 	-- Validate the animationData table
 	TMW:ValidateType("text", "animationData", animationData.text, "string")
 	TMW:ValidateType("Play", "animationData", animationData.Play, "function")
+	TMW:ValidateType("ConfigFrames", "animationData", animationData.ConfigFrames, "table")
+	
+	for i, configFrameIdentifier in ipairs(animationData.ConfigFrames) do
+		TMW:ValidateType(i, "animationDat.ConfigFrames", configFrameIdentifier, "string")
+	end
 	
 	animationData.order = order
 	animationData.animation = animation
@@ -138,6 +143,8 @@ end
 
 EventHandler:RegisterEventHandlerDataNonSpecific(1, "", {
 	text = NONE,
+	ConfigFrames = {},
+	
 	Play = function()
 		-- Do nothing. This will never get called anyway because EventHandler:ProcessIconEventSettings declares this event handler as invalid,
 		-- but it must be declared to pass validation.
@@ -148,8 +155,10 @@ EventHandler:RegisterEventHandlerDataNonSpecific(10, "SCREENSHAKE", {
 	-- GLOBALS: WorldFrame 
 	text = L["ANIM_SCREENSHAKE"],
 	desc = L["ANIM_SCREENSHAKE_DESC"],
-	Duration = true,
-	Magnitude = true,
+	ConfigFrames = {
+		"Duration",
+		"Magnitude",
+	},
 
 	Play = function(icon, eventSettings, IconComponent)
 		if not WorldFrame:IsProtected() or not InCombatLockdown() then
@@ -202,10 +211,12 @@ EventHandler:RegisterEventHandlerDataNonSpecific(10, "SCREENSHAKE", {
 EventHandler:RegisterEventHandlerDataNonSpecific(11, "SCREENFLASH", {
 	text = L["ANIM_SCREENFLASH"],
 	desc = L["ANIM_SCREENFLASH_DESC"],
-	Duration = true,
-	Period = true,
-	Color = true,
-	Fade = true,
+	ConfigFrames = {
+		"Duration",
+		"Period",
+		"Fade",
+		"Color",
+	},
 
 	Play = function(icon, eventSettings, IconComponent)
 		local AnimationData = EventHandler.AllAnimationsByAnimation[eventSettings.Animation]
@@ -286,9 +297,11 @@ EventHandler:RegisterEventHandlerDataNonSpecific(11, "SCREENFLASH", {
 EventHandler:RegisterEventHandlerDataNonSpecific(20, "ICONSHAKE", {
 	text = L["ANIM_ICONSHAKE"],
 	desc = L["ANIM_ICONSHAKE_DESC"],
-	Duration = true,
-	Magnitude = true,
-	Infinite = true,
+	ConfigFrames = {
+		"Duration",
+		"Infinite",
+		"Magnitude",
+	},
 
 	Play = function(icon, eventSettings, IconComponent)
 		icon:Animations_Start{
@@ -323,11 +336,13 @@ EventHandler:RegisterEventHandlerDataNonSpecific(20, "ICONSHAKE", {
 EventHandler:RegisterEventHandlerDataNonSpecific(30, "ICONFLASH", {
 	text = L["ANIM_ICONFLASH"],
 	desc = L["ANIM_ICONFLASH_DESC"],
-	Duration = true,
-	Period = true,
-	Color = true,
-	Fade = true,
-	Infinite = true,
+	ConfigFrames = {
+		"Duration",
+		"Infinite",
+		"Period",
+		"Fade",
+		"Color",
+	},
 
 	Play = function(icon, eventSettings, IconComponent)
 		local Duration = 0
@@ -388,9 +403,9 @@ EventHandler:RegisterEventHandlerDataNonSpecific(30, "ICONFLASH", {
 		else
 			animation_flasher = icon:CreateTexture(nil, "BACKGROUND", nil, 6)
 			
-			-- this will fallback on icon if there isnt a texture or icon isnt an icon
+			-- this will fallback on icon if there isnt a texture
 			-- TODO: add a setting that allows anchoring this to anything
-			animation_flasher:SetAllPoints(icon.class == TMW.Classes.Icon and icon.EssentialModuleComponents.texture or icon)
+			animation_flasher:SetAllPoints(icon.EssentialModuleComponents.texture or icon)
 			animation_flasher:Hide()
 
 			icon.animation_flasher = animation_flasher
@@ -407,13 +422,15 @@ EventHandler:RegisterEventHandlerDataNonSpecific(30, "ICONFLASH", {
 EventHandler:RegisterEventHandlerDataNonSpecific(70, "ICONBORDER", {
 	text = L["ANIM_ICONBORDER"],
 	desc = L["ANIM_ICONBORDER_DESC"],
-	Duration = true,
-	Period = true,
-	Color = true,
-	Fade = true,
-	Infinite = true,
-	Size_anim = true,
-	Thickness = true,
+	ConfigFrames = {
+		"Duration",
+		"Infinite",
+		"Period",
+		"Fade",
+		"Color",
+		"Size_anim",
+		"Thickness",
+	},
 
 	Play = function(icon, eventSettings, IconComponent)
 		local Duration = 0
@@ -518,13 +535,15 @@ EventHandler:RegisterEventHandlerDataNonSpecific(70, "ICONBORDER", {
 EventHandler:RegisterEventHandlerDataNonSpecific(80, "ICONOVERLAYIMG", {
 	text = L["ANIM_ICONOVERLAYIMG"],
 	desc = L["ANIM_ICONOVERLAYIMG_DESC"],
-	Duration = true,
-	Period = true,
-	Fade = true,
-	Infinite = true,
-	SizeX = true,
-	SizeY = true,
-	Image = true,
+	ConfigFrames = {
+		"Duration",
+		"Period",
+		"Fade",
+		"Infinite",
+		"Image",
+		"SizeX",
+		"SizeY",
+	},
 
 	Play = function(icon, eventSettings, IconComponent)
 		local Duration = 0
@@ -548,7 +567,7 @@ EventHandler:RegisterEventHandlerDataNonSpecific(80, "ICONOVERLAYIMG", {
 
 			Period = Period,
 			Fade = eventSettings.Fade,
-			Alpha = eventSettings.a_anim,
+			Alpha = eventSettings.a_anim, --TODO: THERE IS NO WAY TO SET THIS! WTF????
 			SizeX = eventSettings.SizeX,
 			SizeY = eventSettings.SizeY,
 			Image = TMW:GetTexturePathFromSetting(eventSettings.Image),
@@ -604,6 +623,7 @@ EventHandler:RegisterEventHandlerDataNonSpecific(80, "ICONOVERLAYIMG", {
 EventHandler:RegisterEventHandlerDataNonSpecific(200, "ICONCLEAR", {
 	text = L["ANIM_ICONCLEAR"],
 	desc = L["ANIM_ICONCLEAR_DESC"],
+	ConfigFrames = {},
 
 	Play = function(icon, eventSettings, IconComponent)
 		if icon:Animations_Has() then

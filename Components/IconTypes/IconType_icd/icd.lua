@@ -87,9 +87,9 @@ Type:RegisterConfigPanel_ConstructorFunc(150, "TellMeWhen_ICDSettings", function
 	})
 end)
 
-function Type:Update()
+TMW:RegisterCallback("TMW_GLOBAL_UPDATE", function()
 	pGUID = UnitGUID("player")
-end
+end)
 
 
 local function ICD_OnEvent(icon, event, ...)
@@ -138,6 +138,7 @@ local function ICD_OnUpdate(icon, time)
 		)
 	end
 end
+
 local naturesGrace = strlower(GetSpellInfo(16886))
 
 function Type:Setup(icon, groupID, iconID)
@@ -152,7 +153,7 @@ function Type:Setup(icon, groupID, iconID)
 	for _, name in pairs(icon.NameNameArray) do
 		if name == naturesGrace then
 			if icon:IsBeingEdited() == 1 then
-				TMW.HELP:Show("ICON_ICD_NATURESGRACE", icon, TMW.IE.MainScrollFrame.Name, 0, 0, L["HELP_ICD_NATURESGRACE"])
+				TMW.HELP:Show("ICON_ICD_NATURESGRACE", icon, TellMeWhen_ChooseName, 0, 0, L["HELP_ICD_NATURESGRACE"])
 			elseif TMW.HELP then
 				TMW.HELP:Hide("ICON_ICD_NATURESGRACE")
 			end

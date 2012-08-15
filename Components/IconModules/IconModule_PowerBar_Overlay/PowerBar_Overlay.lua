@@ -14,7 +14,7 @@
 if not TMW then return end
 
 local TMW = TMW
-local L = L
+local L = TMW.L
 local print = TMW.print
 
 local PowerBar_Overlay = TMW:NewClass("IconModule_PowerBar_Overlay", "IconModule_PowerBar")

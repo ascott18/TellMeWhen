@@ -100,10 +100,6 @@ Type:RegisterConfigPanel_ConstructorFunc(150, "TellMeWhen_ReactiveSettings", fun
 end)
 
 
-function Type:Update()
-end
-
-
 local function Reactive_OnEvent(icon, event, arg1)
 	if event == "SPELL_ACTIVATION_OVERLAY_GLOW_SHOW" or event == "SPELL_ACTIVATION_OVERLAY_GLOW_HIDE" then
 		if icon.NameFirst == arg1 or strlowerCache[GetSpellInfo(arg1)] == icon.NameName then

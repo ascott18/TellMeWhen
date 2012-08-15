@@ -21,17 +21,20 @@ local print = TMW.print
 	
 local Texture = TMW:NewClass("IconModule_Texture", "IconModule")
 
+Texture:RegisterAnchorableFrame("Texture")
+
 function Texture:OnNewInstance(icon)
-	self.texture = icon:CreateTexture(icon:GetName() .. "Texture", "BACKGROUND")
+	self.texture = icon:CreateTexture(self:GetChildNameBase() .. "Texture", "BACKGROUND")
 	self:SetSkinnableComponent("Icon", self.texture)
 end
 
 function Texture:OnEnable()
+	local icon = self.icon
+	local attributes = icon.attributes
+	
 	self.texture:Show()
 	self:SetEssentialModuleComponent("texture", self.texture)
 
-	local icon = self.icon
-	local attributes = icon.attributes
 	self:TEXTURE(icon, attributes.texture)
 end
 function Texture:OnDisable()

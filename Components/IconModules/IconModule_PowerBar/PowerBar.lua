@@ -14,6 +14,7 @@
 if not TMW then return end
 
 local TMW = TMW
+local L = TMW.L
 local LSM = LibStub("LibSharedMedia-3.0")
 local _, pclass = UnitClass("Player")
 local GetSpellInfo, UnitPower =
@@ -43,8 +44,10 @@ local PBarsToUpdate = {}
 local PowerBar = TMW:NewClass("IconModule_PowerBar", "IconModule", "UpdateTableManager", "AceEvent-3.0", "AceTimer-3.0")
 PowerBar:UpdateTable_Set(PBarsToUpdate)
 
+PowerBar:RegisterAnchorableFrame("PowerBar")
+
 function PowerBar:OnNewInstance(icon)
-	local bar = CreateFrame("StatusBar", nil, icon)
+	local bar = CreateFrame("StatusBar", self:GetChildNameBase() .. "PowerBar", icon)
 	self.bar = bar
 	
 	self.texture = bar:CreateTexture(nil, "OVERLAY")
@@ -53,7 +56,7 @@ function PowerBar:OnNewInstance(icon)
 	
 	local colorinfo = PowerBarColor[defaultPowerType]
 	if not colorinfo then
-		error("No PowerBarColor was found for class " .. pclass .. "! Is the defaultPowerType for the class not defined? (Please report this error over on TMW's CurseForge page)")
+		error("No PowerBarColor was found for class " .. pclass .. "! Is the defaultPowerType for the class not defined?")
 	end
 	bar:SetStatusBarColor(colorinfo.r, colorinfo.g, colorinfo.b, 0.9)
 	self.powerType = defaultPowerType
@@ -65,11 +68,12 @@ function PowerBar:OnNewInstance(icon)
 end
 
 function PowerBar:OnEnable()
+	local icon = self.icon
+	local attributes = icon.attributes
+	
 	self.bar:Show()
 	self.texture:SetTexture(LSM:Fetch("statusbar", TMW.db.profile.TextureName))
 	
-	local icon = self.icon
-	local attributes = icon.attributes
 	self:SPELL(icon, attributes.spell)
 end
 function PowerBar:OnDisable()

@@ -84,9 +84,9 @@ local events = {
 	UNIT_SPELLCAST_NOT_INTERRUPTIBLE = true,
 }
 
-function Type:Update()
+TMW:RegisterCallback("TMW_GLOBAL_UPDATE", function()
 	unitsWithExistsEvent = TMW.UNITS.unitsWithExistsEvent
-end
+end)
 
 local function Cast_OnEvent(icon, event, arg1)
 	if events[event] then -- a unit cast event

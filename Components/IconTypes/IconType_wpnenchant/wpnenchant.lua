@@ -128,9 +128,9 @@ local function UpdateWeaponEnchantInfo(slot, selectIndex)
 	end
 end
 
-function Type:Update()
+TMW:RegisterCallback("TMW_GLOBAL_UPDATE", function()
 	WpnEnchDurs = TMW.db.global.WpnEnchDurs
-end
+end)
 
 local SlotsToNumbers = {
 	MainHandSlot = 1,

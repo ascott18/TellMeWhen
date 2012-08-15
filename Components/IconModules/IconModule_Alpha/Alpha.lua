@@ -40,10 +40,12 @@ end)
 Alpha:RegisterEventHandlerData("Animations", 40, "ICONALPHAFLASH", {
 	text = L["ANIM_ICONALPHAFLASH"],
 	desc = L["ANIM_ICONALPHAFLASH_DESC"],
-	Duration = true,
-	Period = true,
-	Fade = true,
-	Infinite = true,
+	ConfigFrames = {
+		"Duration",
+		"Infinite",
+		"Period",
+		"Fade",
+	},
 
 	Play = function(icon, eventSettings)
 		local Duration = 0
@@ -110,7 +112,9 @@ Alpha:RegisterEventHandlerData("Animations", 40, "ICONALPHAFLASH", {
 Alpha:RegisterEventHandlerData("Animations", 50, "ICONFADE", {
 	text = L["ANIM_ICONFADE"],
 	desc = L["ANIM_ICONFADE_DESC"],
-	Duration = true,
+	ConfigFrames = {
+		"Duration",
+	},
 
 	Play = function(icon, eventSettings)
 		icon:Animations_Start{

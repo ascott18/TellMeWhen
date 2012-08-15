@@ -131,7 +131,7 @@
 	<!-- 	<HighlightTexture urgency="5" file="Interface\Buttons\UI-CheckBox-Highlight" alphaMode="ADD"/> -->
 	</CheckButton>
 	<Frame name="TellMeWhen_ConditionGroup" inherits="TellMeWhen_BorderedFrame" virtual="true">
-		<Size x="559" y="69"/>
+		<Size x="563" y="69"/>
 		<Anchors>
 			<Anchor point="TOPLEFT"/>
 		</Anchors>
@@ -156,7 +156,7 @@
 					<OnLoad>
 						self.wrapTooltips = 1
 						self:Hide()
-						UIDropDownMenu_SetWidth(self, 151)
+						UIDropDownMenu_SetWidth(self, 152)
 						self.initialize = TMW.CNDT.IconMenu_DropDown
 					</OnLoad>
 				</Scripts>
@@ -212,7 +212,7 @@
 					<OnLoad>
 						self.wrapTooltips = 1
 						self.Text:SetFontObject(GameFontHighlightLarge)
-						UIDropDownMenu_SetWidth(self, 47)
+						UIDropDownMenu_SetWidth(self, 50)
 						self.initialize = TMW.CNDT.OperatorMenu_DropDown
 					</OnLoad>
 				</Scripts>
@@ -600,7 +600,7 @@
 		</Scripts>
 	</Frame>
 	
-			
+	
 	<Frame name="$parentConditions" parent="TellMeWhen_IconEditor" hidden="true" setAllPoints="true" parentKey="Conditions">
 		<Frames>
 			<Frame name="$parentUnitDD" parentKey="UnitDD" inherits="TMW_DropDownMenuTemplate" hidden="true">
@@ -613,37 +613,23 @@
 					</OnLoad>
 				</Scripts>
 			</Frame>
-			<ScrollFrame name="$parentScrollFrame" parentKey="ScrollFrame" inherits="UIPanelScrollFrameCodeTemplate" >
+			
+			<Frame name="$parentGroups" parentKey="Groups" >
 				<Anchors>
 					<Anchor point="TOPLEFT" y="-27" x="-5"/>
 					<Anchor point="BOTTOMRIGHT" y="26"/>
 				</Anchors>
-				<ScrollChild>
-					<Frame name="$parentGroups" parent="TellMeWhen_IconEditorConditions" parentKey="Groups" >
-						<Size x="580" y="150"/>
-						<Scripts>
-							<OnLoad>
-								TMW.CNDT:CreateGroups(1)
-								TMW.CNDT[1].AndOr:Hide()
-								TMW.CNDT[1].CloseParenthesis:Hide()
-								TMW.CNDT[1]:SetPoint("TOPLEFT", 12, -16)
-							</OnLoad>
-						</Scripts>
-					</Frame>
-				</ScrollChild>
 				<Scripts>
-					<OnLoad>self.scrollBarHideable = true</OnLoad>
+					<OnLoad>
+						TMW:ConvertContainerToScrollFrame(self, false, -2)
+						
+						TMW.CNDT:CreateGroups(1)
+						TMW.CNDT[1].AndOr:Hide()
+						TMW.CNDT[1].CloseParenthesis:Hide()
+						TMW.CNDT[1]:SetPoint("TOPLEFT", 12, -16)
+					</OnLoad>
 				</Scripts>
-				<Frames>
-					<Slider name="$parentScrollBar" inherits="MinimalScrollBarTemplate" parentKey="ScrollBar">
-						<Size x="17"/>
-						<Anchors>
-							<Anchor point="TOPRIGHT" x="0" y="-18"/>
-							<Anchor point="BOTTOMRIGHT" x="0" y="17"/>
-						</Anchors>
-					</Slider>
-				</Frames>
-			</ScrollFrame>
+			</Frame>
 		</Frames>
 		<Scripts>
 			<OnLoad>

@@ -86,9 +86,9 @@ Type:RegisterConfigPanel_ConstructorFunc(150, "TellMeWhen_CooldownSettings", fun
 end)
 
 
-function Type:Update()
+TMW:RegisterCallback("TMW_GLOBAL_UPDATE", function()
 	ClockGCD = TMW.db.profile.ClockGCD
-end
+end)
 
 
 

@@ -19,8 +19,10 @@ local print = TMW.print
 
 local IconContainer = TMW:NewClass("IconModule_IconContainer", "IconModule")
 
+IconContainer:RegisterAnchorableFrame("IconContainer")
+
 function IconContainer:OnNewInstance_IconContainer(icon)	
-	local container = CreateFrame("Button", nil, icon)
+	local container = CreateFrame("Button", self:GetChildNameBase() .. "IconContainer", icon)
 	
 	self.container = container
 	
@@ -44,8 +46,10 @@ IconContainer:RegisterEventHandlerData("Animations", 60, "ACTVTNGLOW", {
 	-- GLOBALS: ActionButton_ShowOverlayGlow, ActionButton_HideOverlayGlow
 	text = L["ANIM_ACTVTNGLOW"],
 	desc = L["ANIM_ACTVTNGLOW_DESC"],
-	Duration = true,
-	Infinite = true,
+	ConfigFrames = {
+		"Duration",
+		"Infinite",
+	},
 
 	Play = function(icon, eventSettings)
 		icon:Animations_Start{
