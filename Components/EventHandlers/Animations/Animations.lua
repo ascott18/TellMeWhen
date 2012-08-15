@@ -537,9 +537,9 @@ EventHandler:RegisterEventHandlerDataNonSpecific(80, "ICONOVERLAYIMG", {
 	desc = L["ANIM_ICONOVERLAYIMG_DESC"],
 	ConfigFrames = {
 		"Duration",
+		"Infinite",
 		"Period",
 		"Fade",
-		"Infinite",
 		"Image",
 		"SizeX",
 		"SizeY",

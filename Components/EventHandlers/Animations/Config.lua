@@ -169,20 +169,18 @@ function EventHandler:SelectAnimation(animation)
 			end
 			frame:Show()
 			lastFrame = frame
-			print(i, configFrameData.Load, configFrameData, frame, EventSettings)
+			
 			TMW.safecall(configFrameData.Load, configFrameData, frame, EventSettings)
 			
 			lastFrameBottomPadding = configFrameData.bottomPadding
 		end
-	end
-	
+	end	
 	
 	if animationFrame then
 		animationFrame:LockHighlight()
 		animationFrame:GetHighlightTexture():SetVertexColor(NORMAL_FONT_COLOR.r, NORMAL_FONT_COLOR.g, NORMAL_FONT_COLOR.b, 1)
 	end
 
-	--self:SetupEventDisplay(EVENTS.currentEventID)
 	self:SetupEventDisplay(self.currentEventID)
 end
 
@@ -209,6 +207,7 @@ end
 
 EventHandler.ConfigFrameData = {}
 function EventHandler:RegisterConfigFrame(identifier, configFrameData)
+	configFrameData.identifier = identifier
 	TMW:ValidateType("identifier", "RegisterConfigFrame(identifier, configFrameData)", identifier, "string")
 	
 	TMW:ValidateType("configFrameData.frame", "RegisterConfigFrame(identifier, configFrameData)", configFrameData.frame, "string;frame")
