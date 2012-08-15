@@ -57,7 +57,7 @@ local isNumber = TMW.isNumber
 local huge = math.huge
 
 local time = GetTime()
-
+	
 local CNDT = TMW:NewModule("Conditions", "AceEvent-3.0", "AceSerializer-3.0") TMW.CNDT = CNDT
 CNDT.SpecialUnitsUsed = {}
 
@@ -3753,9 +3753,11 @@ function CNDT:CompileUpdateFunction(parent, obj)
 
 			-- append a check to make sure that the smallest value out of all anticipation checks isnt less than the current time.
 			thisstr = thisstr .. [[
+			
 			if VALUE <= time then
 				VALUE = huge
-			end]]
+			end
+			]]
 
 			-- change VALUE to the appropriate ANTICIPATOR_RESULT#
 			thisstr = thisstr:gsub("VALUE", "ANTICIPATOR_RESULT" .. numAnticipatorResults)
@@ -4214,10 +4216,10 @@ function CNDT:GetConditionCheckFunctionString(parent, Conditions)
 	
 	if funcstr ~= "" then
 		-- Well, what the fuck? Apparently this code here doesn't work in MoP. I have to do it on a single line for some strange reason.
-		--funcstr = [[local obj, icon = ...
-		--return ( ]] .. funcstr .. [[ )]]
+		funcstr = [[local obj, icon = ...
+		return ( ]] .. funcstr .. [[ )]]
 		
-		funcstr = "local obj, icon = ... \r\n return ( " .. funcstr .. " )"
+		--funcstr = "local obj, icon = ... \r\n return ( " .. funcstr .. " )"
 	end
 	
 	return funcstr
