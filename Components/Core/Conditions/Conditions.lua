@@ -625,6 +625,10 @@ Env.SemicolonConcatCache = setmetatable(
 		if not i then return end
 
 		local o = ";" .. strlowerCache[i] .. ";"
+		
+		-- escape ()[]-+*. since the purpose of this is to be the 2nd arg to strfind
+		o = o:gsub("([%(%)%%%[%]%-%+%*%.])", "%%%1")
+		
 		t[i] = o
 		return o
 	end,
@@ -1804,6 +1808,33 @@ CNDT.Types = {
 				ConditionObj:GenerateNormalEventString("UNIT_CLASSIFICATION_CHANGED", c.Unit)
 		end,
 	},
+	
+	{ -- creature type
+		text = L["CONDITIONPANEL_CREATURETYPE"],
+		category = L["CNDTCAT_ATTRIBUTES_UNIT"],
+		value = "CREATURETYPE",
+		min = 0,
+		max = 1,
+		name = function(editbox)
+			TMW:TT(editbox, "CONDITIONPANEL_CREATURETYPE_LABEL", "CONDITIONPANEL_CREATURETYPE_DESC")
+			editbox.label = L["CONDITIONPANEL_CREATURETYPE_LABEL"]
+		end,
+		useSUG = "creaturetype",
+		allowMultipleSUGEntires = true,
+		nooperator = true,
+		texttable = bool,
+		icon = "Interface\\Icons\\spell_shadow_summonfelhunter",
+		tcoords = standardtcoords,
+		Env = {
+			UnitCreatureType = UnitCreatureType,
+		},
+		funcstr = [[c.1nil == (strfind(c.Name, SemicolonConcatCache[UnitCreatureType(c.Unit) or ""]) and 1)]],
+		events = function(ConditionObj, c)
+			return
+				ConditionObj:GetUnitChangedEventString(c.Unit)
+		end,
+	},
+	
 	{ -- role
 		text = L["CONDITIONPANEL_ROLE"],
 		category = L["CNDTCAT_ATTRIBUTES_UNIT"],
@@ -2294,10 +2325,11 @@ CNDT.Types = {
 		tcoords = standardtcoords,
 		funcstr = [[Tracking[c.NameName] == c.1nil]],
 		events = function(ConditionObj, c)
-			-- keep this event based because it is so extensive
+			-- this event handling it is really extensive, so keep it in a separate process
 			CNDT:RegisterEvent("MINIMAP_UPDATE_TRACKING")
 			CNDT:MINIMAP_UPDATE_TRACKING()
 			
+			-- Tell the condition to also update when MINIMAP_UPDATE_TRACKING fires
 			return
 				ConditionObj:GenerateNormalEventString("MINIMAP_UPDATE_TRACKING")
 		end,
@@ -4216,6 +4248,8 @@ function CNDT:GetConditionCheckFunctionString(parent, Conditions)
 	
 	if funcstr ~= "" then
 		-- Well, what the fuck? Apparently this code here doesn't work in MoP. I have to do it on a single line for some strange reason.
+		-- Aannnnnnddd what the fuck now it works again. See r540 commit message for more info.
+		
 		funcstr = [[local obj, icon = ...
 		return ( ]] .. funcstr .. [[ )]]
 		

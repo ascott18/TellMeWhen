@@ -1661,3 +1661,26 @@ L["DR-RandomRoot"] = "Random roots"
 L["DR-ControlledRoot"] = "Controlled roots"
 L["DR-DragonsBreath"] = "Dragon's Breath"
 
+L["CONDITIONPANEL_CREATURETYPE"] = "Unit Creature Type"
+L["CONDITIONPANEL_CREATURETYPE_LABEL"] = "Creature Type(s)"
+L["CONDITIONPANEL_CREATURETYPE_DESC"] = [[You can enter multiple creature types to be matched by separating each one with a semicolon (;).
+
+Creature types must be typed exactly as they appear in the creature's tooltip.
+
+The condition will pass if any types are matched.]]
+
+
+L["CREATURETYPE_1"] = "Beast"
+L["CREATURETYPE_2"] = "Dragonkin"
+L["CREATURETYPE_3"] = "Demon"
+L["CREATURETYPE_4"] = "Elemental"
+L["CREATURETYPE_5"] = "Giant"
+L["CREATURETYPE_6"] = "Undead"
+L["CREATURETYPE_7"] = "Humanoid"
+L["CREATURETYPE_8"] = "Critter"
+L["CREATURETYPE_9"] = "Mechanical"
+L["CREATURETYPE_10"] = "Not specified"
+L["CREATURETYPE_11"] = "Totem"
+L["CREATURETYPE_12"] = "Non-combat Pet"
+L["CREATURETYPE_13"] = "Gas Cloud"
+L["CREATURETYPE_14"] = "Wild Pet"

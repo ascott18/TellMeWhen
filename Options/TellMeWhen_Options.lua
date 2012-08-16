@@ -5507,6 +5507,41 @@ function Module:Table_GetSorter()
 end
 
 
+
+ 
+
+local Module = SUG:NewModule("creaturetype", SUG:GetModule("default"))
+Module.noMin = true
+Module.noTexture = true
+Module.NUM_CREATURE_TYPES = 14
+function Module:Entry_AddToList_1(f, index)
+	local creaturetypeLocalized = L["CREATURETYPE_" .. index]
+	
+	f.tooltiptitle = creaturetypeLocalized
+	
+	f.Name:SetText(creaturetypeLocalized)
+	
+	f.insert = creaturetypeLocalized
+end
+function Module:Table_GetNormalSuggestions(suggestions, tbl, ...)
+	local lastName = SUG.lastName
+
+	for index = 1, self.NUM_CREATURE_TYPES do
+		local creaturetypeLocalized = L["CREATURETYPE_" .. index]
+	
+		if strfind(strlower(creaturetypeLocalized), lastName) then
+			suggestions[#suggestions + 1] = index
+		end
+	end
+end
+function Module:Table_GetSorter()
+	return nil
+end
+
+
+
+
+
 local Module = SUG:NewModule("spellWithGCD", SUG:GetModule("spell"))
 function Module:Table_GetSpecialSuggestions(suggestions)
 	local atBeginning = SUG.atBeginning
@@ -5832,6 +5867,7 @@ function Module:Table_GetSpecialSuggestions(suggestions, tbl, ...)
 		end
 	end
 end
+
 
 local Module = SUG:NewModule("cleu", SUG:GetModule("buff"))
 function Module:Table_Get()
@@ -6234,6 +6270,10 @@ function Module:Entry_AddToList_1(f, index)
 			f.Name:SetText(name)
 			f.insert = name
 		end
+	end
+	
+	if not f.tooltiptitle then
+		f.tooltiptitle = f.insert
 	end
 end
 function Module:Table_GetNormalSuggestions(suggestions, tbl, ...)
