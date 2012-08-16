@@ -1,12 +1,12 @@
 <Ui>
 
 	<Frame name="TellMeWhen_ConditionIconSettings" inherits="TellMeWhen_OptionsModuleContainer" virtual="true">
-		<Size y="47"/>
+		<Size y="40"/>
 		<Frames>
 			<EditBox name="$parentConditionDur" parentKey="ConditionDur" inherits="TellMeWhen_TimeEditBoxTemplate">
 				<Size x="60" y="15"/>
 				<Anchors>
-					<Anchor point="TOPLEFT" x="33" y="-23"/>
+					<Anchor point="TOPLEFT" x="33" y="-17"/>
 				</Anchors>
 				<Scripts>
 					<OnLoad>

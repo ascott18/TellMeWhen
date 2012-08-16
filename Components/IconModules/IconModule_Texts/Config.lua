@@ -288,7 +288,7 @@ function TEXT:ResizeParentFrame()
 end
 
 function TEXT:SetTextDisplayContainerHeight(frame)
-	local height = 6
+	local height = 1
 	
 	height = height + frame.EditBox:GetHeight()
 	

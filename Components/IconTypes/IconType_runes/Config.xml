@@ -32,11 +32,11 @@
 		</Scripts>
 	</Button>
 	<Frame name="TellMeWhen_Runes" inherits="TellMeWhen_OptionsModuleContainer" virtual="true">
-		<Size y="44"/>
+		<Size y="40"/>
 		<Frames>
 			<Button name="$parentBlood1" parentKey="1" inherits="TellMeWhen_TypeCheckRuneTemplate" id="1">
 				<Anchors>
-					<Anchor point="TOPLEFT" x="7" y="-11"/>
+					<Anchor point="TOPLEFT" x="7" y="-6"/>
 				</Anchors>
 			</Button>
 			<Button name="$parentBlood2" parentKey="2" inherits="TellMeWhen_TypeCheckRuneTemplate" id="2">

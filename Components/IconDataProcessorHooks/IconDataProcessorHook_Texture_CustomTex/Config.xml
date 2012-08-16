@@ -1,13 +1,12 @@
 <Ui>
 
 	<Frame name="TellMeWhen_CustomTex" inherits="TellMeWhen_OptionsModuleContainer" virtual="true">
-		<Size y="50"/>
 		<Frames>
 			<EditBox name="$parentCustomTex" inherits="TellMeWhen_InputBoxTemplate" multiline="true" parentKey="CustomTex" autoFocus="false">
 				<Size y="15"/>
 				<Anchors>
-					<Anchor point="TOPLEFT" x="9" y="-10"/>
-					<Anchor point="TOPRIGHT" x="-7" y="-10"/>
+					<Anchor point="TOPLEFT" x="9" y="-5"/>
+					<Anchor point="TOPRIGHT" x="-7" y="-5"/>
 				</Anchors>
 				<Scripts>
 					<OnLoad>
@@ -89,7 +88,7 @@
 				self.Header:SetText(TMW.L["ICONMENU_CUSTOMTEX"])
 				
 				function self:AdjustHeight()
-					self:SetHeight(18 + self.CustomTex:GetHeight())
+					self:SetHeight(11 + self.CustomTex:GetHeight())
 				end
 			</OnLoad>
 		</Scripts>

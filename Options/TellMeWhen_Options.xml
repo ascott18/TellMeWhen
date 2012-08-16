@@ -7,12 +7,12 @@
 	</Texture>
 	<Frame name="TellMeWhen_OptionsModuleContainer" virtual="true">
 		<Anchors>
-			<Anchor point="LEFT"/>
+			<Anchor point="LEFT" x="0"/>
 			<Anchor point="RIGHT"/>
 		</Anchors>
 		<Backdrop edgeFile="Interface\DialogFrame\UI-DialogBox-Background-Dark" tile="true">
 			<EdgeSize>
-				<AbsValue val="0.5"/>
+				<AbsValue val="1"/>
 			</EdgeSize>
 		</Backdrop>
 		<Layers>
@@ -23,7 +23,7 @@
 			<Layer level="OVERLAY">
 				<FontString name="$parentHeader" parentKey="Header" inherits="GameFontNormalSmall" justifyH="CENTER" alpha="1">
 					<Anchors>
-						<Anchor point="LEFT" relativePoint="TOPLEFT" x="3" y="-1.5"/>
+						<Anchor point="BOTTOMLEFT" relativePoint="TOPLEFT" x="3" y="1"/>
 						<!-- <Anchor point="RIGHT" relativePoint="TOPRIGHT" x="-3" y="-1.5"/> -->
 					</Anchors>
 				</FontString>
@@ -33,17 +33,122 @@
 			<OnUpdate>
 				TMW.IE:OptionsModuleContainer_OnUpdate(self)
 			</OnUpdate>
+			<!-- <OnShow>
+				if self.realHeight then
+					self:SetHeight(self.realHeight)
+				end
+			</OnShow>
+			<OnHide>
+				self.realHeight = self:GetHeight()
+				self:SetHeight(-13)
+			</OnHide>
+			<OnSizeChanged>
+				print(self, self:GetSize())
+			
+			</OnSizeChanged> -->
 		</Scripts>
 	</Frame>
 	
+	<Button name="TellMeWhen_PanelListingTemplate" virtual="true" inherits="TellMeWhen_BorderedFrame" hidden="true">
+		<Size y="18.95"/>
+		<Anchors>
+			<Anchor point="LEFT"/>
+			<Anchor point="RIGHT"/>
+		</Anchors>
+		<NormalFont style="GameFontNormal"/>
+		<HighlightFont style="GameFontHighlight"/>
+		<Layers>
+			<Layer level="OVERLAY">
+				<FontString name="$parentName" parentKey="Name" inherits="GameFontHighlight" wordwrap="true" justifyH="LEFT">
+					<Anchors>
+						<Anchor point="LEFT" x="2"/>
+					</Anchors>
+				</FontString>
+			</Layer>
+		</Layers>
+		<Scripts>
+			<OnLoad>
+				self:RegisterForClicks("LeftButtonUp", "RightButtonUp")
+			--	self:RegisterForDrag("LeftButton")
+			
+				TMW:TT(self, nil, "CONFIGPANEL_LISTING_TOOLTIP")
+				
+				function self:SetText(text)
+					self.Name:SetText(text)
+					self:Resize()
+				end
+				
+				function self:Resize()
+					self.Name:SetWidth(self:GetWidth() - 2)
+					self:SetHeight(self.Name:GetHeight() + 8)
+				end
+				
+				self.AceTimer = LibStub("AceTimer-3.0")
+			</OnLoad>
+			<OnClick>
+				local frame = self.frame
+				local ScrollFrame = TMW.IE.Main.ScrollFrame
+				
+				local frame_top, frame_bottom = frame:GetTop(), frame:GetBottom()
+				local ScrollFrame_top, ScrollFrame_bottom = ScrollFrame:GetTop(), ScrollFrame:GetBottom()
+				local ScrollFrame_pos = ScrollFrame:GetVerticalScroll()
+				
+				local offs = 0
+				if frame_top > ScrollFrame_top then
+					offs = ScrollFrame_top - frame_top - 8
+				elseif ScrollFrame_bottom > frame_bottom then
+					offs = ScrollFrame_bottom - frame_bottom
+				end
+				
+				ScrollFrame:SetVerticalScroll(ScrollFrame_pos + offs)
+				
+				self.Background.START_ANIM = true
+				frame.Background.START_ANIM = true
+				--[[
+				frame.shouldShow = not frame.shouldShow
+				if self.frame.shouldShow then
+					self.Name:SetAlpha(1)
+				else
+					self.Name:SetAlpha(0.5)
+				end
+				for _, frame in pairs(TMW.IE.ALLDISPLAYTABFRAMES) do
+					if frame.shouldShow then
+						frame:Show()
+					else
+						frame:Hide()
+					end
+				end]]
+			</OnClick>
+			<OnSizeChanged>
+				self:Resize()
+			</OnSizeChanged>
+			<OnShow>
+				self:Resize()
+			</OnShow>
+			
+			<OnUpdate>
+				--TMW.IE:OptionsModuleContainer_OnUpdate(self)
+				
+				if not self.Background.IS_PLAYING then
+					if self:IsMouseOver() then
+						self.Background:SetGradientAlpha("VERTICAL", 1, 1, 1, 0.125, 1, 1, 1, 0.25)
+					else
+						self.Background:SetGradientAlpha("VERTICAL", 1, 1, 1, 0.05, 1, 1, 1, 0.10)
+					end
+				end
+			</OnUpdate>
+		</Scripts>
+	</Button>
+	
 	<Frame name="TellMeWhen_ChooseName" inherits="TellMeWhen_OptionsModuleContainer" virtual="true">
-		<Size y="50"/>
+		<!-- <Size y="50"/> -->
 		<Frames>
 			<EditBox name="$parentName" inherits="TellMeWhen_InputBoxTemplate" multiline="true" parentKey="Name" autoFocus="false">
 				<Size x="545" y="15"/>
 				<Anchors>
-					<Anchor point="TOPLEFT" x="9" y="-10"/>
-					<Anchor point="TOPRIGHT" x="-25" y="-10"/>
+					<Anchor point="TOP" y="-5"/>
+					<Anchor point="LEFT" x="9" />
+					<Anchor point="RIGHT" x="-25" />
 				</Anchors>
 				<Layers>
 					<Layer level="ARTWORK">
@@ -227,19 +332,20 @@
 		<Scripts>
 			<OnLoad>				
 				function self:AdjustHeight()
-					self:SetHeight(18 + self.Name:GetHeight())
+					self:SetHeight(11 + self.Name:GetHeight())
 				end
 			</OnLoad>
 		</Scripts>
 	</Frame>
 	
 	<Frame name="TellMeWhen_Unit" inherits="TellMeWhen_OptionsModuleContainer" virtual="true">
-		<Size y="50"/>
+		<!-- <Size y="50"/> -->
 		<Frames>
 			<EditBox name="$parentUnit" inherits="TellMeWhen_UnitEditbox" multiline="true" parentKey="Unit" autoFocus="false">
 				<Anchors>
-					<Anchor point="TOPLEFT" x="9" y="-10"/>
-					<Anchor point="TOPRIGHT" x="-25" y="-10"/>
+					<Anchor point="TOP" y="-5"/>
+					<Anchor point="LEFT" x="9" />
+					<Anchor point="RIGHT" x="-25" />
 				</Anchors>
 				<Scripts>
 					<OnLoad>
@@ -337,7 +443,7 @@
 				self.Header:SetText(TMW.L["ICONMENU_UNITSTOWATCH"])
 				
 				function self:AdjustHeight()
-					self:SetHeight(18 + self.Unit:GetHeight())
+					self:SetHeight(11 + self.Unit:GetHeight())
 				end
 			</OnLoad>
 		</Scripts>
@@ -400,7 +506,7 @@
 		</Frames>
 	</Frame>
 	<Frame name="TellMeWhen_WhenChecks" inherits="TellMeWhen_OptionsModuleContainer" virtual="true">
-		<Size y="51"/>
+		<Size y="40"/>
 		<Layers>
 			<Layer level="ARTWORK">
 				<FontString name="$parentFS1" inherits="GameFontNormal" parentKey="text" justifyH="LEFT">
@@ -413,7 +519,7 @@
 		<Frames>
 			<Frame name="$parentAlpha" inherits="TellMeWhen_WhenCheckSet">
 				<Anchors>
-					<Anchor point="TOP" y="-15"/>
+					<Anchor point="TOP" y="-6"/>
 					<Anchor point="LEFT" />
 					<Anchor point="RIGHT" relativePoint="TOP"/>
 				</Anchors>
@@ -585,8 +691,8 @@
 			</Frame>
 		</Frames>
 	</ScrollFrame>
-			
-			
+	
+	
 	<Texture name="TellMeWhen_CheckTemplateBorder" virtual="true">
 		<Size x="1.3" y="1.3"/>
 		<Color r="0.4" g="0.4" b="0.4" a="1"/>
@@ -932,83 +1038,6 @@
 		</Scripts>
 	</EditBox>
 
-	<Button name="TellMeWhen_PanelListingTemplate" virtual="true" inherits="TellMeWhen_BorderedFrame" hidden="true">
-		<Size y="18.95"/>
-		<Anchors>
-			<Anchor point="LEFT"/>
-			<Anchor point="RIGHT"/>
-		</Anchors>
-		<NormalFont style="GameFontNormal"/>
-		<HighlightFont style="GameFontHighlight"/>
-		<Layers>
-			<Layer level="OVERLAY">
-				<FontString name="$parentName" parentKey="Name" inherits="GameFontHighlight" wordwrap="true" justifyH="LEFT">
-					<Anchors>
-						<Anchor point="LEFT"/>
-					</Anchors>
-				</FontString>
-			</Layer>
-		</Layers>
-		<Scripts>
-			<OnLoad>
-				self:RegisterForClicks("LeftButtonUp", "RightButtonUp")
-			--	self:RegisterForDrag("LeftButton")
-			
-				TMW:TT(self, nil, "CONFIGPANEL_LISTING_TOOLTIP")
-				
-				function self:SetText(text)
-					self.Name:SetText(text)
-					self:Resize()
-				end
-				
-				function self:Resize()
-					self.Name:SetWidth(self:GetWidth())
-					self:SetHeight(self.Name:GetHeight() + 8)
-				end
-				
-				self.AceTimer = LibStub("AceTimer-3.0")
-			</OnLoad>
-			<OnClick>
-				local ScrollFrame = TMW.IE.Main.ScrollFrame
-				local frame = self.frame
-				
-				local frame_top, frame_bottom = frame:GetTop(), frame:GetBottom()
-				local ScrollFrame_top, ScrollFrame_bottom = ScrollFrame:GetTop(), ScrollFrame:GetBottom()
-				local ScrollFrame_pos = ScrollFrame:GetVerticalScroll()
-				
-				local offs = 0
-				if frame_top > ScrollFrame_top then
-					offs = ScrollFrame_top - frame_top - 8
-				elseif ScrollFrame_bottom > frame_bottom then
-					offs = ScrollFrame_bottom - frame_bottom
-				end
-				
-				ScrollFrame:SetVerticalScroll(ScrollFrame_pos + offs)
-				
-				self.Background.START_ANIM = true
-				frame.Background.START_ANIM = true
-			</OnClick>
-			<OnSizeChanged>
-				self:Resize()
-			</OnSizeChanged>
-			<OnShow>
-				self:Resize()
-			</OnShow>
-			
-			<OnUpdate>
-				--TMW.IE:OptionsModuleContainer_OnUpdate(self)
-				
-				if not self.Background.IS_PLAYING then
-					if self:IsMouseOver() then
-						self.Background:SetGradientAlpha("VERTICAL", 1, 1, 1, 0.125, 1, 1, 1, 0.25)
-					else
-						self.Background:SetGradientAlpha("VERTICAL", 1, 1, 1, 0.05, 1, 1, 1, 0.10)
-					end
-				end
-			</OnUpdate>
-		</Scripts>
-	</Button>
-	
 	<Slider name="TellMeWhen_SliderTemplate" orientation="HORIZONTAL" virtual="true" enableMouse="true">
 		<Backdrop bgFile="Interface\Buttons\UI-SliderBar-Background" edgeFile="Interface\Buttons\UI-SliderBar-Border" tile="true">
 			<EdgeSize>
@@ -1728,7 +1757,7 @@
 		<Layers>
 			<Layer level="BACKGROUND">
 				<Texture name="$parentBackground" parentKey="Background">
-					<Color r="0.043137" g="0.043137" b="0.043137" a="0.995"/>
+					<Color r="0.05" g="0.05" b="0.05" a="0.97"/>
 				</Texture>
 			</Layer>
 		</Layers>

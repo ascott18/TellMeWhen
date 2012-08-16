@@ -2105,14 +2105,15 @@ function IE:PositionPanels()
 			print("TMW: UNHANDLED CONFIG PANEL CLASS: ", GenericComponent.className)
 			R, G, B = 1, 1, 1
 		end
+		R, G, B = R/2, G/2, B/2
 		
 		frame.Background:SetTexture(R, G, B)
 		frame.Background:SetGradientAlpha("VERTICAL", 1, 1, 1, 0.05, 1, 1, 1, 0.10)
 		
 		if lastFrame then
-			frame:SetPoint("TOP", lastFrame, "BOTTOM", 0, -10)
+			frame:SetPoint("TOP", lastFrame, "BOTTOM", 0, -13)
 		else
-			frame:SetPoint("TOP", 20, -7)
+			frame:SetPoint("TOP", 20, -12)
 		end
 		lastFrame = frame
 		
@@ -3005,7 +3006,7 @@ function IE:BuildSimpleCheckSettingFrame(parent, arg2, arg3)
 				end
 			else
 				-- Anchor the first check to the parent. The left anchor will be handled by DistributeFrameAnchorsLaterally.
-				f:SetPoint("TOP", 0, -6)
+				f:SetPoint("TOP", 0, -1)
 			end
 			lastCheckButton = f
 
@@ -3021,7 +3022,7 @@ function IE:BuildSimpleCheckSettingFrame(parent, arg2, arg3)
 		end
 	end)
 	
-	parent:SetHeight(16 + ceil(numFrames/numPerRow)*24)
+	parent:SetHeight(6 + ceil(numFrames/numPerRow)*24)
 	
 	return parent
 end

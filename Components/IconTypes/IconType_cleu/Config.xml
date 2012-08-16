@@ -6,7 +6,7 @@
 		
 			<Frame name="$parentCLEUEvents" inherits="TMW_DropDownMenuTemplate" parentKey="CLEUEvents">
 				<Anchors>
-					<Anchor point="TOPLEFT" x="-10" y="-8"/>
+					<Anchor point="TOPLEFT" x="-10" y="-3"/>
 				</Anchors>
 				<Scripts>
 					<OnLoad>
@@ -167,7 +167,7 @@
 				self.Header:SetText(TMW.L["CONFIGPANEL_CLEU_HEADER"])
 				
 				function self:AdjustHeight()
-					self:SetHeight(60 + self.SourceUnit:GetHeight() + self.DestUnit:GetHeight())
+					self:SetHeight(55 + self.SourceUnit:GetHeight() + self.DestUnit:GetHeight())
 				end
 			</OnLoad>
 		</Scripts>

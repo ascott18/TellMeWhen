@@ -1,11 +1,11 @@
 <Ui>
 
 	<Frame name="TellMeWhen_PBarOptions" inherits="TellMeWhen_OptionsModuleContainer" virtual="true">
-		<Size y="40"/>
+		<Size y="30"/>
 		<Frames>
 			<CheckButton name="$parentShowPBar" inherits="TellMeWhen_CheckTemplate" parentKey="ShowPBar">
 				<Anchors>
-					<Anchor point="TOP" y="-10"/>
+					<Anchor point="TOP" y="-1"/>
 				</Anchors>
 				<Scripts>
 					<OnLoad>
@@ -44,6 +44,9 @@
 						self.text:SetText(TMW.L["ICONMENU_OFFS"])
 						self.text:SetWidth(50)
 						self.setting = "PBarOffs"
+						
+						self.text:ClearAllPoints()
+						self.text:SetPoint("LEFT", self, "RIGHT", -5, 0)
 						
 						TMW.IE:CreateSettingFrameFromData(self, {
 							setting = "PBarOffs",

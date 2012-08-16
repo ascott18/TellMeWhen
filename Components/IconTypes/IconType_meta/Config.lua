@@ -77,7 +77,7 @@ function ME:LoadConfig()
 		mg.icon.IconPreview:SetIcon(_G[v])
 	end
 
-	TellMeWhen_MetaIconOptions:SetHeight((#settings * ME[1]:GetHeight()) + 50)
+	TellMeWhen_MetaIconOptions:SetHeight((#settings * ME[1]:GetHeight()) + 45)
 	
 	for f=#settings+1, #ME do
 		ME[f]:Hide()

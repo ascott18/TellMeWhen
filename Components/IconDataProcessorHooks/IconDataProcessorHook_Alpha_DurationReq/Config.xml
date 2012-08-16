@@ -1,12 +1,12 @@
 <Ui>
 
 	<Frame name="TellMeWhen_DurationRequirements" inherits="TellMeWhen_OptionsModuleContainer" virtual="true">
-		<Size y="51"/>
+		<Size y="40"/>
 		<Frames>
 			<CheckButton name="$parentDurationMinEnabled" parentKey="DurationMinEnabled" inherits="TellMeWhen_CheckTemplate">
 				<Size x="26" y="26"/>
 				<Anchors>
-					<Anchor point="TOPLEFT" x="5" y="-20"/>
+					<Anchor point="TOPLEFT" x="5" y="-11"/>
 				</Anchors>
 				<Scripts>
 					<OnLoad>
@@ -92,7 +92,7 @@
 				<Anchors>
 					<Anchor point="LEFT" relativeTo="$parentDurationMax" relativePoint="RIGHT" x="25" />
 					<Anchor point="RIGHT" x="-10" />
-					<Anchor point="TOP" y="-21" />
+					<Anchor point="TOP" y="-13" />
 				</Anchors>
 				<Scripts>
 					<OnLoad>

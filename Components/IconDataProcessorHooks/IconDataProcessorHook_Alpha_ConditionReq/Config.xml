@@ -1,14 +1,14 @@
 <Ui>
 
 	<Frame name="TellMeWhen_ConditionRequirements" inherits="TellMeWhen_OptionsModuleContainer" virtual="true">
-		<Size y="46"/>
+		<Size y="40"/>
 		<Frames>
 			<Slider name="$parentConditionAlpha" parentKey="ConditionAlpha" inherits="TellMeWhen_SliderTemplate" valuestep="1">
 				<Size y="17"/>
 				<Anchors>
 					<Anchor point="LEFT" x="10" />
 					<Anchor point="RIGHT" x="-10" />
-					<Anchor point="TOP" y="-17" />
+					<Anchor point="TOP" y="-13" />
 				</Anchors>
 				<Scripts>
 					<OnLoad>

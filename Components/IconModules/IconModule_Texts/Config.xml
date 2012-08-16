@@ -219,7 +219,7 @@
 			<Frame name="$parentLayout" parentKey="Layout">
 				<Size y="46"/>
 				<Anchors>
-					<Anchor point="TOPLEFT" x="0" y="-13"/>
+					<Anchor point="TOPLEFT" x="0" y="-7"/>
 					<Anchor point="RIGHT"/>
 				</Anchors>
 				<Frames>
