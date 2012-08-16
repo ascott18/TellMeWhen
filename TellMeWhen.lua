@@ -30,7 +30,7 @@ local DogTag = LibStub("LibDogTag-3.0", true)
 TELLMEWHEN_VERSION = "6.0.0"
 TELLMEWHEN_VERSION_MINOR = strmatch(" @project-version@", " r%d+") or ""
 TELLMEWHEN_VERSION_FULL = TELLMEWHEN_VERSION .. TELLMEWHEN_VERSION_MINOR
-TELLMEWHEN_VERSIONNUMBER = 60023 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
+TELLMEWHEN_VERSIONNUMBER = 60024 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
 if TELLMEWHEN_VERSIONNUMBER > 61001 or TELLMEWHEN_VERSIONNUMBER < 60000 then return error("YOU SCREWED UP THE VERSION NUMBER OR DIDNT CHANGE THE SAFETY LIMITS") end -- safety check because i accidentally made the version number 414069 once
 
 TELLMEWHEN_MAXROWS = 20
@@ -186,6 +186,22 @@ function TMW.tDeleteItem(table, item, onlyOne)
 	end
 end local tDeleteItem = TMW.tDeleteItem
 
+function TMW.removeTableDuplicates(table)
+	--start at the end of the table so that we dont remove duplicates at the beginning of the table
+	local k = #table
+	while k > 0 do
+		local first, num = tContains(table, table[k], true)
+		if num > 1 then
+			-- if the current value occurs more than once then remove this entry of it
+			tremove(table, k)
+		else
+			-- there are no duplicates, so move backwards towards zero
+			k = k - 1 
+		end
+	end
+
+end
+
 function TMW.OrderSort(a, b)
 	return a.order < b.order
 end
@@ -323,13 +339,14 @@ function TMW:Assert(statement, text, ...)
 	end
 end
 
-function TMW:ValidateType(argN, methodName, var, reqType)
+function TMW:ValidateType(argN, methodName, var, reqType, errLvl)
 	local varType = type(var)
 	
-	local negatedSuccessfully = true
+	local isGood, foundMatch = true, false
 	for _, reqType in TMW:Vararg(strsplit(";", reqType)) do
 		local negate = reqType:sub(1, 1) == "!"
 		local reqType = negate and reqType:sub(2) or reqType
+		reqType = reqType:trim(" ")
 		
 		if reqType == "frame" and varType == "table" and type(var[0]) == "userdata" then
 			varType = "frame"
@@ -337,17 +354,18 @@ function TMW:ValidateType(argN, methodName, var, reqType)
 		
 		if negate then
 			if varType == reqType then
-				negatedSuccessfully = false
+				isGood = false
+				break
 			end
 		else
 			if varType == reqType then
-				return
+				foundMatch = true
 			end
 		end
 	end
 	
-	if not negatedSuccessfully then
-		error(("Bad argument #%s to %q. %s expected, got %s"):format(argN, methodName, reqType, varType), 3)
+	if not isGood or not foundMatch then
+		error(("Bad argument #%s to %q. %s expected, got %s"):format(argN, methodName, reqType, varType), 3 + (errLvl or 0))
 	end
 end
 
@@ -5907,15 +5925,7 @@ function TMW:GetSpellNames(icon, setting, firstOnly, toname, hash, keepDurations
 	end
 
 	-- REMOVE DUPLICATES
-	local k = #buffNames --start at the end of the table so that we dont remove duplicates at the beginning of the table
-	while k > 0 do
-		local first, num = tContains(buffNames, buffNames[k], true)
-		if num > 1 then
-			tremove(buffNames, k) --if the current value occurs more than once then remove this entry of it
-		else
-			k = k - 1 --there are no duplicates, so move backwards towards zero
-		end
-	end
+	TMW.removeTableDuplicates(buffNames)
 
 	-- REMOVE SPELL DURATIONS (FOR UNIT COOLDOWNS/ICDs)
 	if not keepDurations then
@@ -6470,42 +6480,36 @@ function UNITS:GetOriginalUnitTable(unitSettings)
 	local Units = TMW:SplitNames(unitSettings) -- get a table of everything
 
 	-- REMOVE DUPLICATES
-	local k = #Units --start at the end of the table so that we dont remove duplicates at the beginning of the table
-	while k > 0 do
-		if select(2, tContains(Units, Units[k], true)) > 1 then
-			tremove(Units, k) --if the current value occurs more than once then remove this entry of it
-		else
-			k = k - 1 --there are no duplicates, so move backwards towards zero
-		end
-	end
+	TMW.removeTableDuplicates(Units)
 
 	return Units
 end
 TMW:MakeFunctionCached(UNITS, "GetOriginalUnitTable")
 
-function UNITS:UpdateTankAndAssistMap()
-	local mtMap, maMap = UNITS.mtMap, UNITS.maMap
 
-	wipe(mtMap)
-	wipe(maMap)
+if TMW.ISMOP then
+	function UNITS:UpdateTankAndAssistMap()
+		local mtMap, maMap = UNITS.mtMap, UNITS.maMap
 
-	-- setup a table with (key, value) pairs as (oldnumber, newnumber)
-	-- oldnumber is 7 for raid7
-	-- newnumber is 1 for raid7 when the current maintank/assist is the 1st one found, 2 for the 2nd one found, etc)
-	
-	if IsInRaid() then
-		for i = 1, GetNumGroupMembers() do
-			local raidunit = "raid" .. i
-			if GetPartyAssignment("MAINTANK", raidunit) then
-				mtMap[#mtMap + 1] = i
-			elseif GetPartyAssignment("MAINASSIST", raidunit) then
-				maMap[#maMap + 1] = i
+		wipe(mtMap)
+		wipe(maMap)
+
+		-- setup a table with (key, value) pairs as (oldnumber, newnumber)
+		-- oldnumber is 7 for raid7
+		-- newnumber is 1 for raid7 when the current maintank/assist is the 1st one found, 2 for the 2nd one found, etc)
+		
+		if IsInRaid() then
+			for i = 1, GetNumGroupMembers() do
+				local raidunit = "raid" .. i
+				if GetPartyAssignment("MAINTANK", raidunit) then
+					mtMap[#mtMap + 1] = i
+				elseif GetPartyAssignment("MAINASSIST", raidunit) then
+					maMap[#maMap + 1] = i
+				end
 			end
 		end
 	end
-end
 
-if TMW.ISMOP then
 	function UNITS:UpdateGroupedPlayersMap()
 		local gpMap = UNITS.gpMap
 
@@ -6558,6 +6562,28 @@ if TMW.ISMOP then
 		end
 	end
 else
+	function UNITS:UpdateTankAndAssistMap()
+		local mtMap, maMap = UNITS.mtMap, UNITS.maMap
+
+		wipe(mtMap)
+		wipe(maMap)
+
+		-- setup a table with (key, value) pairs as (oldnumber, newnumber)
+		-- oldnumber is 7 for raid7
+		-- newnumber is 1 for raid7 when the current maintank/assist is the 1st one found, 2 for the 2nd one found, etc)
+		
+	--	if IsInRaid() then
+			for i = 1, GetNumRaidMembers() do
+				local raidunit = "raid" .. i
+				if GetPartyAssignment("MAINTANK", raidunit) then
+					mtMap[#mtMap + 1] = i
+				elseif GetPartyAssignment("MAINASSIST", raidunit) then
+					maMap[#maMap + 1] = i
+				end
+			end
+		--end
+	end
+
 	function UNITS:UpdateGroupedPlayersMap()
 		local gpMap = UNITS.gpMap
 

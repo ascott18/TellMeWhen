@@ -3205,47 +3205,6 @@ function IE:Type_Dropdown_OnClick()
 	IE:Load(1)
 end
 
-function IE:Unit_DropDown()	
-	local editBox = self:GetParent()
-	if not editBox:HasFocus() then
-		editBox:HighlightText()
-	end
-	
-	for _, unitData in pairs(TMW.Units) do
-		local info = UIDropDownMenu_CreateInfo()
-		info.text = unitData.text
-		info.value = unitData.value
-		if unitData.range then
-			info.tooltipTitle = unitData.tooltipTitle or unitData.text
-			info.tooltipText = "|cFFFF0000#|r = 1-" .. unitData.range
-			info.tooltipOnButton = true
-		end
-		info.notCheckable = true
-		info.func = IE.Unit_DropDown_OnClick
-		info.arg1 = unitData
-		info.arg2 = editBox
-		UIDropDownMenu_AddButton(info, UIDROPDOWNMENU_MENU_LEVEL)
-	end
-end
-
-function IE:Unit_DropDown_OnClick(unitData, editBox)
-	local ins = unitData.value
-	if unitData.range then
-		ins = unitData.value .. "|cFFFF0000#|r"
-	end
-	editBox:Insert(";" .. ins .. ";")
-	
-	-- Cheesy hack to save the setting
-	--editBox:HighlightText()
-	--editBox:ClearFocus()
-	
-	--TMW:CleanString(editBox)
-	
-	
-	IE:ScheduleIconSetup()
-	CloseDropDownMenus()
-end
-
 
 ---------- Tooltips ----------
 local cachednames = {}
@@ -4758,6 +4717,7 @@ function SUG:NameOnCursor(isClick)
 
 
 	SUG.lastName = strlower(TMW:CleanString(strsub(text, SUG.startpos, SUG.endpos)))
+	SUG.lastName_unmodified = SUG.lastName
 
 	if strfind(SUG.lastName, ":[%d:%s%.]*$") then
 		SUG.lastName, SUG.duration = strmatch(SUG.lastName, "(.-):([%d:%s%.]*)$")
@@ -6230,20 +6190,51 @@ function Module:Table_Get()
 	return self.table
 end
 function Module:Entry_AddToList_1(f, index)
-	local unitData = self.table[index]
-	local unit = unitData.value
 
-	f.Name:SetText(unit)
-
-	if unitData.range then
-		f.tooltiptitle = unitData.tooltipTitle or unitData.text
-		f.tooltiptext = "|cFFFF0000#|r = 1-" .. unitData.range
-	elseif unitData.desc then
-		f.tooltiptitle = unitData.tooltipTitle or unitData.text
-		f.tooltiptext = unitData.desc
-	end
+	local isSpecial = strsub(index, 1, 1) == "%"
+	local prefix = isSpecial and strsub(index, 1, 2)
 	
-	f.insert = unit
+	if not isSpecial then
+		local unitData = self.table[index]
+		local unit = unitData.value
+		
+
+		if unitData.range then
+			f.tooltiptitle = unitData.tooltipTitle or unitData.text
+			f.tooltiptext = "|cFFFF0000#|r = 1-" .. unitData.range
+			
+			unit = unit .. " 1-" .. unitData.range
+		elseif unitData.desc then
+			f.tooltiptitle = unitData.tooltipTitle or unitData.text
+			f.tooltiptext = unitData.desc
+		end
+		
+		f.Name:SetText(unit)
+		f.insert = unit
+	else
+	
+		if prefix == "%P" then
+			local name = strsub(index, 3)
+			
+			local color = (CUSTOM_CLASS_COLORS or RAID_CLASS_COLORS)[select(2, UnitClass(name))]
+			
+			-- GLOBALS: CUSTOM_CLASS_COLORS, RAID_CLASS_COLORS
+			if color.colorStr then
+				color = color.colorStr
+			else
+				color = ("|cff%02x%02x%02x"):format(color.r * 255, color.g * 255, color.b * 255)
+			end
+	
+			f.Name:SetText(color .. name)
+			f.insert = name
+			
+		elseif prefix == "%A" then
+			local name = SUG.lastName_unmodified
+			--name = name:gsub("^(%a)", strupper)
+			f.Name:SetText(name)
+			f.insert = name
+		end
+	end
 end
 function Module:Table_GetNormalSuggestions(suggestions, tbl, ...)
 	local atBeginning = SUG.atBeginning
@@ -6256,22 +6247,82 @@ function Module:Table_GetNormalSuggestions(suggestions, tbl, ...)
 end
 function Module.Sorter_Units(a, b)
 	--sort by name
-	--[[local nameA, nameB = Module.table[a].value, Module.table[b].value
-
-	if nameA == nameB then
-		--sort identical names by ID
-		return a < b
-	else
-		--sort by name
-		return nameA < nameB
-	end]]
 	
-	--sort by index
+	local special_a, special_b = strsub(a, 1, 1), strsub(b, 1, 1)
+	local prefix_a, prefix_b = strsub(a, 1, 2), strsub(b, 1, 2)
+	
+	local haveA, haveB = special_a ~= "%", special_b ~= "%"
+	if (haveA and not haveB) or (haveB and not haveA) then
+		return haveA
+	end
+	
+	local haveA, haveB = prefix_a == "%P", prefix_b == "%P"
+	if (haveA and not haveB) or (haveB and not haveA) then
+		return haveA
+	end
+	
+	local haveA, haveB = prefix_a == "%A", prefix_b == "%A"
+	if (haveA and not haveB) or (haveB and not haveA) then
+		return haveA
+	end
+	
+	--sort by index/alphabetical/whatever
 	return a < b
 end
 function Module:Table_GetSorter()
 	return self.Sorter_Units
 end
+
+Module.groupedPlayers = {}
+function Module:UpdateGroupedPlayersMap()
+	local groupedPlayers = self.groupedPlayers
+
+	wipe(groupedPlayers)
+	
+	local numRaidMembers, numPartyMembers
+	if TMW.ISMOP then
+		numRaidMembers = IsInRaid() and GetNumGroupMembers() or 0
+		
+		numPartyMembers = GetNumSubgroupMembers()
+	else		
+		numRaidMembers = GetNumRaidMembers()
+		
+		numPartyMembers = GetNumPartyMembers()
+	end	
+	
+	groupedPlayers[UnitName("player")] = true
+	if UnitName("pet") then
+		groupedPlayers[UnitName("pet")] = true
+	end
+	
+	-- Raid Players
+	for i = 1, numRaidMembers do
+		local name = UnitName("raid" .. i)
+		groupedPlayers[name] = true
+	end
+	
+	-- Party Players
+	for i = 1, numPartyMembers do
+		local name = UnitName("party" .. i)
+		groupedPlayers[name] = true
+	end
+end
+
+function Module:Table_GetSpecialSuggestions(suggestions, tbl, ...)
+	local atBeginning = SUG.atBeginning
+	self:UpdateGroupedPlayersMap()
+	
+	for name in pairs(self.groupedPlayers) do
+		if SUG.inputType == "number" or strfind(strlower(name), atBeginning) then
+			suggestions[#suggestions + 1] = "%P" .. name
+		end
+	end
+	
+	suggestions[#suggestions + 1] = "%A"
+	
+	TMW.removeTableDuplicates(suggestions)
+end
+
 
 
 

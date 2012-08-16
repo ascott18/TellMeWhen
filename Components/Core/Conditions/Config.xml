@@ -162,38 +162,17 @@
 				</Scripts>
 			</Frame>
 			<EditBox name="$parentUnit" inherits="TellMeWhen_InputBoxTemplate" parentKey="Unit" autoFocus="false">
-				<Size x="95" y="15"/>
+				<Size x="120" y="15"/>
 				<Anchors>
 					<Anchor point="LEFT" relativeTo="$parentType" relativePoint="RIGHT" x="-5" y="3"/>
 				</Anchors>
-				<Frames>
-					<Button name="$parentButton" motionScriptsWhileDisabled="true" parentKey="Button">
-						<Size x="24" y="24"/>
-						<Anchors>
-							<Anchor point="LEFT" relativePoint="RIGHT" x="-5.5" y="-0.5"/>
-						</Anchors>
-						<Scripts>
-							<OnClick>
-								TellMeWhen_IconEditorConditionsUnitDD:SetParent(self:GetParent())
-								TellMeWhen_IconEditorConditionsUnitDD:Init()
-								ToggleDropDownMenu(1, nil, TellMeWhen_IconEditorConditionsUnitDD, self, 0, 0)
-								PlaySound("igCharacterInfoTab")
-							</OnClick>
-						</Scripts>
-						<NormalTexture file="Interface\ChatFrame\UI-ChatIcon-ScrollDown-Up"/>
-						<PushedTexture file="Interface\ChatFrame\UI-ChatIcon-ScrollDown-Down"/>
-						<DisabledTexture file="Interface\ChatFrame\UI-ChatIcon-ScrollDown-Disabled"/>
-						<HighlightTexture file="Interface\Buttons\UI-Common-MouseHilight" alphaMode="ADD"/>
-					</Button>
-				</Frames>
+				
 				<Scripts>
 					<OnLoad>
-						TMW.SUG:EnableEditBox(self, "units")
+						TMW.SUG:EnableEditBox(self, "units", true)
 						
-						self.Ins = TellMeWhen_IconEditorConditionsUnitDD
 						self.label = "|cFFFF5050" .. TMW.L["CONDITIONPANEL_UNIT"] .. "!|r"
 						TMW:TT(self, "CONDITIONPANEL_UNIT", "CONDITIONPANEL_UNIT_DESC")
-						TMW:TT(self.Button, "CONDITIONPANEL_UNIT", "CONDITIONPANEL_UNITDROPDOWN_DESC")
 					</OnLoad>
 					<OnEditFocusLost>
 						EditBox_ClearHighlight(self)
@@ -208,7 +187,7 @@
 			</EditBox>
 			<Frame name="$parentOperator" parentKey="Operator" inherits="TMW_DropDownMenuTemplate">
 				<Anchors>
-					<Anchor point="LEFT" relativeTo="$parentUnit" relativePoint="RIGHT" x="5" y="-3"/>
+					<Anchor point="LEFT" relativeTo="$parentUnit" relativePoint="RIGHT" x="-11" y="-3"/>
 				</Anchors>
 				<Scripts>
 					<OnLoad>
@@ -604,18 +583,7 @@
 	
 	
 	<Frame name="$parentConditions" parent="TellMeWhen_IconEditor" hidden="true" setAllPoints="true" parentKey="Conditions">
-		<Frames>
-			<Frame name="$parentUnitDD" parentKey="UnitDD" inherits="TMW_DropDownMenuTemplate" hidden="true">
-				<Scripts>
-					<OnLoad>
-						function self:Init()
-							UIDropDownMenu_Initialize(self, TMW.CNDT.UnitMenu_DropDown, "DROPDOWN")
-							self.Init = function() end
-						end
-					</OnLoad>
-				</Scripts>
-			</Frame>
-			
+		<Frames>			
 			<Frame name="$parentGroups" parentKey="Groups" >
 				<Anchors>
 					<Anchor point="TOPLEFT" y="-27" x="-5"/>

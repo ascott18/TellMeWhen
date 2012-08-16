@@ -25,7 +25,7 @@
 			
 			<EditBox name="$parentCLEUDur" parentKey="CLEUDur" inherits="TellMeWhen_TimeEditBoxTemplate">
 				<Anchors>
-					<Anchor point="LEFT" relativeTo="$parentCLEUEvents" relativePoint="RIGHT" x="0" y="7"/>
+					<Anchor point="LEFT" relativeTo="$parentCLEUEvents" relativePoint="RIGHT" x="0" y="4"/>
 				</Anchors>
 				<Layers>
 					<Layer level="ARTWORK">
@@ -58,7 +58,7 @@
 			<EditBox name="$parentSourceUnit" inherits="TellMeWhen_UnitEditbox" multiline="true" parentKey="SourceUnit" autoFocus="false">
 				<Anchors>
 					<Anchor point="TOPLEFT" relativeTo="$parentCLEUEvents" relativePoint="BOTTOMLEFT" x="22" y="1"/>
-					<Anchor point="RIGHT" x="-155"/>
+					<Anchor point="RIGHT" x="-135"/>
 				</Anchors>
 				<Scripts>
 					<OnLoad>
@@ -90,7 +90,7 @@
 			</EditBox>
 			<Frame name="$parentSourceFlags" inherits="TMW_DropDownMenuTemplate" parentKey="SourceFlags">
 				<Anchors>
-					<Anchor point="BOTTOMLEFT" relativeTo="$parentSourceUnit" relativePoint="BOTTOMRIGHT" x="5" y="-11"/>
+					<Anchor point="BOTTOMLEFT" relativeTo="$parentSourceUnit" relativePoint="BOTTOMRIGHT" x="-15" y="-11"/>
 				</Anchors>
 				<Scripts>
 					<OnLoad>
@@ -143,7 +143,7 @@
 			</EditBox>
 			<Frame name="$parentDestFlags" inherits="TMW_DropDownMenuTemplate" parentKey="DestFlags">
 				<Anchors>
-					<Anchor point="BOTTOMLEFT" relativeTo="$parentDestUnit" relativePoint="BOTTOMRIGHT" x="5" y="-11"/>
+					<Anchor point="BOTTOMLEFT" relativeTo="$parentDestUnit" relativePoint="BOTTOMRIGHT" x="-15" y="-11"/>
 				</Anchors>
 				<Scripts>
 					<OnLoad>

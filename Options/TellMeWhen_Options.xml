@@ -339,18 +339,15 @@
 	</Frame>
 	
 	<Frame name="TellMeWhen_Unit" inherits="TellMeWhen_OptionsModuleContainer" virtual="true">
-		<!-- <Size y="50"/> -->
 		<Frames>
 			<EditBox name="$parentUnit" inherits="TellMeWhen_UnitEditbox" multiline="true" parentKey="Unit" autoFocus="false">
 				<Anchors>
 					<Anchor point="TOP" y="-5"/>
 					<Anchor point="LEFT" x="9" />
-					<Anchor point="RIGHT" x="-25" />
+					<Anchor point="RIGHT" x="-9" />
 				</Anchors>
 				<Scripts>
-					<OnLoad>
-						TMW.SUG:EnableEditBox(self, "units")
-						
+					<OnLoad>						
 						self:RegisterEvent("MODIFIER_STATE_CHANGED")
 						self.label = TMW.L["ICONMENU_UNITSTOWATCH"]
 						self.BackgroundText:SetWidth(self:GetWidth())
@@ -395,12 +392,12 @@
 									title = supplementalData.title or TMW.L["ICONMENU_UNITSTOWATCH"]
 									text = supplementalData.text or TMW.L["ICONMENU_UNIT_DESC"]
 									
-								--	TMW.SUG:EnableEditBox(self, supplementalData.SUGType or "units") --TODO: NYI (not urgent/important, though)
+									TMW.SUG:EnableEditBox(self, supplementalData.SUGType or "units") --TODO: NYI (not urgent/important, though)
 								else
 									title = TMW.L["ICONMENU_UNITSTOWATCH"]
 									text  = TMW.L["ICONMENU_UNIT_DESC"]
 									
-									--TMW.SUG:EnableEditBox(self, "units") --TODO: NYI (not urgent/important, though)
+									TMW.SUG:EnableEditBox(self, "units") --TODO: NYI (not urgent/important, though)
 								end
 
 								self:SetLabels(title, text)
@@ -1621,30 +1618,14 @@
 
 	<EditBox name="TellMeWhen_UnitEditbox" inherits="TellMeWhen_InputBoxTemplate" virtual="true" autoFocus="false">
 		<Size y="15"/>
-		<Frames>
-			<Frame name="$parentIns" inherits="TMW_DropDownMenuTemplate" parentKey="Ins">
-				<Anchors>
-					<Anchor point="BOTTOMLEFT" relativePoint="BOTTOMRIGHT" x="-14" y="-12"/>
-				</Anchors>
-				<Scripts>
-					<OnLoad>
-						self.Left:Hide()
-						self.Middle:Hide()
-						self.Right:Hide()
-						self.Text:Hide()
-						TMW:TT(self, "ICONMENU_UNITS", "DROPDOWN_UNIT_DESC")
-						UIDropDownMenu_SetWidth(self, 1)
-						self.initialize = TMW.IE.Unit_DropDown
-					</OnLoad>
-				</Scripts>
-			</Frame>
-		</Frames>
 		<Scripts>
 			<OnEvent>
 				TMW:TT_Update(self)
 			</OnEvent>
 		</Scripts>
 	</EditBox>
+	
+	
 	<!-- END TEMPLATES -->
 
 
