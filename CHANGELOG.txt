@@ -2,15 +2,18 @@
  * This was version 5.1.0 for a while, but I upped it to 6.0.0 beacuse it was so massive.
  * This is by and large the biggest update that TMW has ever seen. There were so many changes that I lost track of them. Many of the changes done weren't things that you should notice as a user - they are things that makes TMW much easier to expand in the future, including different icon view types aside from the standard square icon (e.g bars). These changes are not complete either - there is still work to be done before such features can be added.
  * Almost everything in TMW is now modular. The most immediate effect of this is that the main tab in the icon editor is now divided into panels for each component that is contributing to an icon. THEIR LAYOUT IS STILL EXTREMELY CUDE AND PRELIMINARY, AND WILL ALMOST CERTAINLY CHANGE BEFORE RELEASE!
- * Preliminary updates for Mists of Pandaria. Currently, this is mostly just fixes for API that changed. Support for anything having to do with monks has not yet been implemented or even tested.
  * Spell Crit is now an event that can be tracked by Combat Event icons.
  * Implemented LibDogTag as the text manager for TMW instead of TMW's current (and very limited) system. You can now create text layouts that can be applied to an icon to dictate how the texts for that icon will be displayed. Text layouts can be shared between users, and texts can be configured in a new tab on the icon editor.
  * You can now select any of the 4 sound channels to play sounds to (instead of just Master and SFX).
  * You can now list specific totems to be checked by totem icons.
  * Added On Left Click and On Right Click event handlers to icons.
- * Added a condition to check if you have your mouse over a frame (group or icon).
- * Added conditions to check if you have a certain glyph active.
  * You can now change the direction that icons layout in within a group.
+ 
+ * New Conditions:
+ ** Added a condition to check if you have your mouse over a frame (group or icon).
+ ** Added conditions to check if you have a certain glyph active.
+ ** Added a condition to check the creature type (Undead, Humanoid, Demon, etc.) of a unit.
+ 
  * Bug Fixes:
  ** (r489) TellMeWhen-5.0.2.lua:528 attempt to index local "h" (a nil value)
  ** (r491) Re-re-re-re-re-re fixed meta icons that check entire groups

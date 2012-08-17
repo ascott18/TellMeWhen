@@ -107,6 +107,114 @@ TMW:RegisterCallback("TMW_UPGRADE_REQUESTED", function(event, type, version, ...
 	
 end)
 
+TMW:RegisterUpgrade(60026, {
+	stances = {
+		{class = "WARRIOR", 	id = 2457}, 	-- Battle Stance
+		{class = "WARRIOR", 	id = 71}, 		-- Defensive Stance
+		{class = "WARRIOR", 	id = 2458}, 	-- Berserker Stance
+
+		{class = "DRUID", 		id = 5487}, 	-- Bear Form
+		{class = "DRUID", 		id = 768}, 		-- Cat Form
+		{class = "DRUID", 		id = 1066}, 	-- Aquatic Form
+		{class = "DRUID", 		id = 783}, 		-- Travel Form
+		{class = "DRUID", 		id = 24858}, 	-- Moonkin Form
+		{class = "DRUID", 		id = 33891}, 	-- Tree of Life
+		{class = "DRUID", 		id = 33943}, 	-- Flight Form
+		{class = "DRUID", 		id = 40120}, 	-- Swift Flight Form
+
+		{class = "PRIEST", 		id = 15473}, 	-- Shadowform
+
+		{class = "ROGUE", 		id = 1784}, 	-- Stealth
+
+		{class = "HUNTER", 		id = 82661}, 	-- Aspect of the Fox
+		{class = "HUNTER", 		id = 13165}, 	-- Aspect of the Hawk
+		{class = "HUNTER", 		id = 5118}, 	-- Aspect of the Cheetah
+		{class = "HUNTER", 		id = 13159}, 	-- Aspect of the Pack
+		{class = "HUNTER", 		id = 20043}, 	-- Aspect of the Wild
+
+		{class = "DEATHKNIGHT", id = 48263}, 	-- Blood Presence
+		{class = "DEATHKNIGHT", id = 48266}, 	-- Frost Presence
+		{class = "DEATHKNIGHT", id = 48265}, 	-- Unholy Presence
+
+		{class = "PALADIN", 	id = 19746}, 	-- Concentration Aura
+		{class = "PALADIN", 	id = 32223}, 	-- Crusader Aura
+		{class = "PALADIN", 	id = 465}, 		-- Devotion Aura
+		{class = "PALADIN", 	id = 19891}, 	-- Resistance Aura
+		{class = "PALADIN", 	id = 7294}, 	-- Retribution Aura
+
+		{class = "WARLOCK", 	id = 47241}, 	-- Metamorphosis
+		
+		--[[{class = "MONK", 		id = 115069}, 	-- Sturdy Ox
+		{class = "MONK", 		id = 115070}, 	-- Wise Serpent
+		{class = "MONK", 		id = 103985}, 	-- Fierce Tiger]]
+	},
+	
+	setupcsn = function(self)
+		self.CSN = {
+			[0]	= NONE,
+		}
+
+		for _, stanceData in ipairs(self.stances) do
+			if stanceData.class == pclass then
+				firststanceid = firststanceid or stanceData.id
+				local stanceName = GetSpellInfo(stanceData.id)
+				tinsert(self.CSN, stanceName)
+			end
+		end
+
+		for i, stanceName in pairs(self.CSN) do
+			self.CSN[stanceName] = i
+		end
+
+	end,
+	condition = function(self, condition)
+		if condition.Type == "STANCE" then
+			if not self.CSN then
+				self:setupcsn()
+			end
+			
+			-- Make sure that there actually are stances for this class
+			if self.CSN[1] then
+				condition.Name = ""
+				
+				if condition.Operator == "==" then
+					condition.Name = self.CSN[condition.Level]
+					condition.Level = 0 -- true
+				elseif condition.Operator == "~=" then
+					condition.Name = self.CSN[condition.Level]
+					condition.Level = 1 -- false
+				elseif condition.Operator:find(">") then
+					condition.Name = ""
+					
+					-- If the operator is >= then include the condition at condition.Level
+					-- If the operator is > then start on the condition immediately after condition.Level
+					local startOffset = condition.Operator:find("=") and 0 or 1
+					
+					for i = condition.Level + startOffset, #self.CSN do
+						condition.Name = condition.Name .. self.CSN[i] .. "; "
+					end
+					condition.Name = condition.Name:sub(1, -3) -- trim off the ending semicolon and space
+					
+					condition.Level = 0 -- true
+				elseif condition.Operator:find("<") then
+					condition.Name = ""
+					
+					-- If the operator is >= then include the condition at condition.Level
+					-- If the operator is > then start on the condition immediately before condition.Level
+					local startOffset = condition.Operator:find("=") and 0 or 1
+					
+					-- Iterate backwards towards 1
+					for i = condition.Level - startOffset, 1, -1 do
+						condition.Name = condition.Name .. self.CSN[i] .. "; "
+					end
+					condition.Name = condition.Name:sub(1, -3) -- trim off the ending semicolon and space
+					
+					condition.Level = 0 -- true
+				end
+			end
+		end
+	end,
+})
 TMW:RegisterUpgrade(51008, {
 	condition = function(self, condition)
 		if condition.Type == "TOTEM1"
@@ -507,9 +615,9 @@ do -- STANCES
 
 		{class = "WARLOCK", 	id = 47241}, 	-- Metamorphosis
 		
-		--[[{class = "MONK", 		id = 115069}, 	-- Sturdy Ox
+		{class = "MONK", 		id = 115069}, 	-- Sturdy Ox
 		{class = "MONK", 		id = 115070}, 	-- Wise Serpent
-		{class = "MONK", 		id = 103985}, 	-- Fierce Tiger]]
+		{class = "MONK", 		id = 103985}, 	-- Fierce Tiger
 	}
 
 	TMW.CSN = {
@@ -802,29 +910,16 @@ function Env.GetShapeshiftForm()
 		i = 1
 	elseif pclass == "ROGUE" and i > 1 then	--vanish and shadow dance return 3 when active, vanish returns 2 when shadow dance isnt learned. Just treat everything as stealth
 		i = 1
-	--[[elseif pclass == "MONK" then
-		if NumShapeshiftForms == 2 then
-			-- Sturdy Ox (Brewmaster, 1st in TMW.CSN)
-			-- Wise Serpent (Mistweaver, 2nd in TMW.CSN)
-			if i == 2 then
-				i = 1
-			else
-				
-			end
-		elseif i == 1 then
-			-- Fierce Tiger, 3rd in TMW.CSN
-			i = 3
-		end]]
 	end
 	if i > NumShapeshiftForms then 	--many Classes return an invalid number on login, but not anymore!
 		i = 0
 	end
 
 	if i == 0 then
-		return 0
+		return NONE
 	else
-		local _, n = GetShapeshiftFormInfo(i)
-		return TMW.CSN[n] or 0
+		local _, name = GetShapeshiftFormInfo(i)
+		return name or ""
 	end
 end
 
@@ -2025,14 +2120,22 @@ CNDT.Types = {
 		category = L["CNDTCAT_ATTRIBUTES_PLAYER"],
 		value = "STANCE",
 		min = 0,
-		max = #TMW.CSN,
-		texttable = TMW.CSN, -- now isn't this convenient? too bad i have to track them by ID so they wont upgrade properly when stances are added/removed
+		max = 1,
+		texttable = bool,
+		nooperator = true,
+		name = function(editbox)
+			TMW:TT(editbox, "STANCE", "STANCE_DESC")
+			editbox.label = L["STANCE_LABEL"]
+		end,
+		useSUG = "stances",
+		allowMultipleSUGEntires = true,
 		unit = PLAYER,
 		icon = function()
 			return firststanceid and GetSpellTexture(firststanceid)
 		end,
 		tcoords = standardtcoords,
-		funcstr = [[GetShapeshiftForm() c.Operator c.Level]],
+		funcstr = [[c.1nil == (strfind(c.Name, SemicolonConcatCache[GetShapeshiftForm() or ""]) and 1)]],
+		--funcstr = [[GetShapeshiftForm() c.Operator c.Level]],
 		events = function(ConditionObj, c)
 			return
 				ConditionObj:GenerateNormalEventString("UPDATE_SHAPESHIFT_FORM")

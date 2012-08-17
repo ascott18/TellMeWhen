@@ -863,7 +863,13 @@ L["MOUSEOVERCONDITION"] = "Mouse is Over"
 L["MOUSEOVERCONDITION_DESC"] = "This condition checks if your mouse is over the icon or group that the condition is attached to."
 L["NOTINRANGE"] = "Not in range"
 L["INRANGE"] = "In range"
+
 L["STANCE"] = "Stance"
+L["STANCE_LABEL"] = "Stance(s)"
+L["STANCE_DESC"] = [[You can enter multiple stances to be matched by separating each one with a semicolon (;).
+
+The condition will pass if any stances are matched.]]
+
 L["AURA"] = "Aura"
 L["ASPECT"] = "Aspect"
 L["SHAPESHIFT"] = "Shapeshift"

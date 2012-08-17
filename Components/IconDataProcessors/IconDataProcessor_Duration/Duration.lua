@@ -33,7 +33,12 @@ function Processor:CompileFunctionSegment(t)
 	start = start or 0
 	
 	if duration == 0.001 then duration = 0 end -- hardcode fix for tricks of the trade. nice hardcoding on your part too, blizzard
-	local d = duration - (TMW.time - start)
+	local d
+	if start == TMW.time then
+		d = duration
+	else
+		d = duration - (TMW.time - start)
+	end
 	d = d > 0 and d or 0
 
 	if EventHandlersSet.OnDuration then

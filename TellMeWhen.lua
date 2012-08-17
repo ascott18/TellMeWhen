@@ -30,7 +30,7 @@ local DogTag = LibStub("LibDogTag-3.0", true)
 TELLMEWHEN_VERSION = "6.0.0"
 TELLMEWHEN_VERSION_MINOR = strmatch(" @project-version@", " r%d+") or ""
 TELLMEWHEN_VERSION_FULL = TELLMEWHEN_VERSION .. TELLMEWHEN_VERSION_MINOR
-TELLMEWHEN_VERSIONNUMBER = 60025 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
+TELLMEWHEN_VERSIONNUMBER = 60026 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
 if TELLMEWHEN_VERSIONNUMBER > 61001 or TELLMEWHEN_VERSIONNUMBER < 60000 then return error("YOU SCREWED UP THE VERSION NUMBER OR DIDNT CHANGE THE SAFETY LIMITS") end -- safety check because i accidentally made the version number 414069 once
 
 TELLMEWHEN_MAXROWS = 20
@@ -2731,7 +2731,7 @@ function TMW:DoValidityCheck()
 end
 
 function TMW.OnGCD(d)
-	if d == 1 then return true end -- a cd of 1 is always a GCD (or at least isn't worth showing)
+	if d <= 1 then return true end -- a cd of 1 (or less) is always a GCD (or at least isn't worth showing)
 	if GCD > 1.7 then return false end -- weed out a cooldown on the GCD spell that might be an interupt (counterspell, mind freeze, etc)
 	return GCD == d and d > 0 -- if the duration passed in is the same as the GCD spell, and the duration isnt zero, then it is a GCD
 end
@@ -6180,6 +6180,9 @@ function TMW:GetTexturePathFromSetting(setting)
 end
 
 function TMW:GetGroupName(n, g, short)
+	n = tonumber(n) or n
+	g = tonumber(g) or g
+	
 	if n and n == g then
 		n = TMW.db.profile.Groups[g].Name
 	end

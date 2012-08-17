@@ -1758,34 +1758,45 @@ ID:RegisterIconDragHandler(3,	-- Swap
 
 ID:RegisterIconDragHandler(30,	-- Anchor
 	function(ID, info)
-		do
-			local name, desc
+		local name, desc
 
-			local srcname = L["fGROUP"]:format(TMW:GetGroupName(ID.srcicon.group:GetID(), ID.srcicon.group:GetID(), 1))
+		local srcname = TMW:GetGroupName(ID.srcicon.group:GetID(), ID.srcicon.group:GetID())
 
-			if ID.desticon and ID.srcicon.group:GetID() ~= ID.desticon.group:GetID() then
-				local destname = L["fGROUP"]:format(TMW:GetGroupName(ID.desticon.group:GetID(), ID.desticon.group:GetID(), 1))
+		if ID.desticon and ID.srcicon.group:GetID() ~= ID.desticon.group:GetID() then
+			local destname = L["fGROUP"]:format(TMW:GetGroupName(ID.desticon.group:GetID(), ID.desticon.group:GetID(), 1))
+			name = L["ICONMENU_ANCHORTO"]:format(destname)
+			desc = L["ICONMENU_ANCHORTO_DESC"]:format(srcname, destname, destname, srcname)
+
+		elseif ID.destFrame and ID.destFrame:GetName() then
+			if ID.destFrame == WorldFrame and ID.srcicon.group.Point.relativeTo ~= "UIParent" then
+			
+				
+				local currentFrameName = ID.srcicon.group.Point.relativeTo
+				
+				local groupID = currentFrameName:match("^TellMeWhen_Group(%d+)")
+				local iconID = currentFrameName:match("^TellMeWhen_Group%d+_Icon(%d+)")
+				
+				if iconID and groupID then
+					currentFrameName = L["GROUPICON"]:format(TMW:GetGroupName(groupID, groupID, 1), iconID)
+				elseif groupID then
+					currentFrameName = TMW:GetGroupName(groupID, groupID)
+				end
+				
+				name = L["ICONMENU_ANCHORTO_UIPARENT"]
+				desc = L["ICONMENU_ANCHORTO_UIPARENT_DESC"]:format(srcname, currentFrameName)
+
+			elseif ID.destFrame ~= WorldFrame then
+				local destname = ID.destFrame:GetName()
 				name = L["ICONMENU_ANCHORTO"]:format(destname)
 				desc = L["ICONMENU_ANCHORTO_DESC"]:format(srcname, destname, destname, srcname)
-
-			elseif ID.destFrame and ID.destFrame:GetName() then
-				if ID.destFrame == WorldFrame and ID.srcicon.group.Point.relativeTo ~= "UIParent" then
-					name = L["ICONMENU_ANCHORTO_UIPARENT"]
-					desc = L["ICONMENU_ANCHORTO_UIPARENT_DESC"]
-
-				elseif ID.destFrame ~= WorldFrame then
-					local destname = ID.destFrame:GetName()
-					name = L["ICONMENU_ANCHORTO"]:format(destname)
-					desc = L["ICONMENU_ANCHORTO_DESC"]:format(srcname, destname, destname, srcname)
-				end
 			end
+		end
 
-			if name then
-				info.text = name
-				info.tooltipTitle = name
-				info.tooltipText = desc
-				return true
-			end
+		if name then
+			info.text = name
+			info.tooltipTitle = name
+			info.tooltipText = desc
+			return true
 		end
 	end,
 	function(ID)
@@ -5419,6 +5430,101 @@ function Module:Table_GetNormalSuggestions(suggestions, tbl, ...)
 		if strfind(name, atBeginning) then
 			suggestions[#suggestions + 1] = name
 		end
+	end
+end
+
+
+local Module = SUG:NewModule("stances", SUG:GetModule("spell"))
+Module.noMin = true
+Module.stances = {
+	WARRIOR = {
+		[2457] = 	GetSpellInfo(2457), 	-- Battle Stance
+		[71] = 		GetSpellInfo(71),		-- Defensive Stance
+		[2458] = 	GetSpellInfo(2458), 	-- Berserker Stance
+	},
+	DRUID = {
+		[5487] = 	GetSpellInfo(5487), 	-- Bear Form
+		[768] = 	GetSpellInfo(768),		-- Cat Form
+		[1066] = 	GetSpellInfo(1066), 	-- Aquatic Form
+		[783] = 	GetSpellInfo(783),		-- Travel Form
+		[24858] = 	GetSpellInfo(24858), 	-- Moonkin Form
+		[33891] = 	GetSpellInfo(33891), 	-- Tree of Life
+		[33943] = 	GetSpellInfo(33943), 	-- Flight Form
+		[40120] = 	GetSpellInfo(40120), 	-- Swift Flight Form	
+	},
+	PRIEST = {
+		[15473] = 	GetSpellInfo(15473), 	-- Shadowform	
+	},
+	ROGUE = {
+		[1784] = 	GetSpellInfo(1784), 	-- Stealth	
+	},
+	HUNTER = {
+		[82661] = 	GetSpellInfo(82661), 	-- Aspect of the Fox
+		[13165] = 	GetSpellInfo(13165), 	-- Aspect of the Hawk
+		[5118] = 	GetSpellInfo(5118), 	-- Aspect of the Cheetah
+		[13159] = 	GetSpellInfo(13159), 	-- Aspect of the Pack
+		[20043] = 	GetSpellInfo(20043), 	-- Aspect of the Wild	
+	},
+	DEATHKNIGHT = {
+		[48263] = 	GetSpellInfo(48263), 	-- Blood Presence
+		[48266] = 	GetSpellInfo(48266), 	-- Frost Presence
+		[48265] = 	GetSpellInfo(48265), 	-- Unholy Presence	
+	},
+	PALADIN = {
+		[19746] = 	GetSpellInfo(19746), 	-- Concentration Aura
+		[32223] = 	GetSpellInfo(32223), 	-- Crusader Aura
+		[465] = 	GetSpellInfo(465),		-- Devotion Aura
+		[19891] = 	GetSpellInfo(19891), 	-- Resistance Aura
+		[7294] = 	GetSpellInfo(7294),		-- Retribution Aura	
+	},
+	WARLOCK = {
+		[47241] = 	GetSpellInfo(47241),	-- Metamorphosis	
+	},
+	MONK = {
+		[115069] = 	GetSpellInfo(115069),	-- Sturdy Ox
+		[115070] = 	GetSpellInfo(115070),	-- Wise Serpent
+		[103985] = 	GetSpellInfo(103985),	-- Fierce Tiger
+	},
+}
+function Module:Table_Get()
+	return self.stances[pclass]
+end
+function Module:Entry_AddToList_1(f, spellID)
+	if spellID == 0 then
+		f.Name:SetText(NONE)
+
+		f.tooltiptitle = NONE
+
+		f.insert = NONE
+
+		f.Icon:SetTexture("Interface\\Icons\\INV_Misc_QuestionMark")
+	else
+		local name, _, tex = GetSpellInfo(spellID)
+
+		f.Name:SetText(name)
+
+		f.tooltipmethod = "SetSpellByID"
+		f.tooltiparg = spellID
+
+		f.insert = name
+
+		f.Icon:SetTexture(tex)
+	end
+end
+function Module:Table_GetNormalSuggestions(suggestions, tbl, ...)
+	local atBeginning = SUG.atBeginning
+	local lastName = SUG.lastName
+
+	for id, name in pairs(tbl) do
+		if strfind(strlower(name), atBeginning) then
+			suggestions[#suggestions + 1] = id
+		end
+	end
+end
+function Module:Table_GetSpecialSuggestions(suggestions, tbl, ...)
+	local atBeginning = SUG.atBeginning
+	if strfind(strlower(NONE), atBeginning) then
+		suggestions[#suggestions + 1] = 0
 	end
 end
 

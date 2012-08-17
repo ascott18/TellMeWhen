@@ -154,8 +154,8 @@ local function SpellCooldown_OnUpdate(icon, time)
 			if ManaCheck then
 				nomana = SpellHasNoMana(iName)
 			end
-			isGCD = (ClockGCD or duration ~= 0) and OnGCD(duration)
-			if inrange == 1 and not nomana and (duration == 0 or isGCD) then --usable
+			
+			if inrange == 1 and not nomana and (duration == 0 or OnGCD(duration)) then --usable
 				icon:SetInfo(
 					"alpha; texture; start, duration; spell; inRange; noMana",
 					icon.Alpha,
@@ -183,7 +183,6 @@ local function SpellCooldown_OnUpdate(icon, time)
 		if IgnoreRunes and duration == 10 and icon.NameName ~= mindfreeze then
 			start, duration = 0, 0
 		end
-		isGCD = OnGCD(duration)
 	end
 	if duration then
 		icon:SetInfo(
