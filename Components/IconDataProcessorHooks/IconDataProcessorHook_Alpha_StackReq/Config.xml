@@ -22,7 +22,7 @@
 			<CheckButton name="$parentStackMaxEnabled" parentKey="StackMaxEnabled" inherits="TellMeWhen_CheckTemplate">
 				<Size x="26" y="26"/>
 				<Anchors>
-					<Anchor point="LEFT" relativeTo="$parentStackMinEnabled" relativePoint="RIGHT" x="80"/>
+					<Anchor point="LEFT" relativeTo="$parentStackMinEnabled" relativePoint="RIGHT" x="45"/>
 				</Anchors>
 				<Scripts>
 					<OnLoad>
@@ -38,14 +38,16 @@
 			
 			
 			<EditBox name="$parentStackMin" parentKey="StackMin" inherits="TellMeWhen_TimeEditBoxTemplate">
-				<Size x="60" y="15"/>
+				<Size x="40" y="15"/>
 				<Anchors>
 					<Anchor point="LEFT" relativeto="$parentStackMinEnabled" relativePoint="RIGHT" x="1" y="0.5"/>
 				</Anchors>
 				<Scripts>
 					<OnLoad>
 						self.text:SetText(MINIMUM)
-						self.setting = "StackMin"
+						self.text:SetParent(self:GetParent().StackMinEnabled) -- This is evil and lazy. So, so lazy.
+						self.text:SetPoint("LEFT", 2, 0)
+						self.text:SetPoint("RIGHT", self)
 						
 						TMW.IE:CreateSettingFrameFromData(self, {
 							setting = "StackMin",
@@ -62,14 +64,16 @@
 				</Scripts>
 			</EditBox>
 			<EditBox name="$parentStackMax" parentKey="StackMax" inherits="TellMeWhen_TimeEditBoxTemplate">
-				<Size x="60" y="15"/>
+				<Size x="40" y="15"/>
 				<Anchors>
 					<Anchor point="LEFT" relativeto="$parentStackMaxEnabled" relativePoint="RIGHT" x="1" y="0.5"/>
 				</Anchors>
 				<Scripts>
 					<OnLoad>
 						self.text:SetText(MAXIMUM)
-						self.setting = "StackMax"
+						self.text:SetParent(self:GetParent().StackMaxEnabled) -- This is evil and lazy. So, so lazy.
+						self.text:SetPoint("LEFT", 2, 0)
+						self.text:SetPoint("RIGHT", self)
 						
 						TMW.IE:CreateSettingFrameFromData(self, {
 							setting = "StackMax",
@@ -90,14 +94,12 @@
 			<Slider name="$parentStackAlpha" parentKey="StackAlpha" inherits="TellMeWhen_SliderTemplate" valuestep="1">
 				<Size y="17"/>
 				<Anchors>
-					<Anchor point="LEFT" relativeTo="$parentStackMax" relativePoint="RIGHT" x="25" />
+					<Anchor point="LEFT" relativeTo="$parentStackMax" relativePoint="RIGHT" x="15" />
 					<Anchor point="RIGHT" x="-10" />
 					<Anchor point="TOP" y="-13" />
 				</Anchors>
 				<Scripts>
-					<OnLoad>
-						self.text:SetWidth(self:GetWidth())
-						
+					<OnLoad>						
 						TMW.IE:CreateSettingFrameFromData(self, "SettingSlider_Alpha", {
 							title = TMW.L["REQFAILED_ALPHA"],
 							tooltip = TMW.L["STACKALPHA_DESC"],

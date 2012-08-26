@@ -46,7 +46,7 @@ Processor:RegisterDogTag("TMW", "Spell", {
 		local group = TMW[groupID]
 		local icon = group and group[iconID]
 		if icon then
-			local name, checkcase = icon.typeData:GetNameForDisplay(icon, icon.attributes.spell, link)
+			local name, checkcase = icon.typeData:FormatSpellForOutput(icon, icon.attributes.spell, link)
 			name = name or ""
 			if checkcase and name ~= "" then
 				name = TMW:RestoreCase(name)

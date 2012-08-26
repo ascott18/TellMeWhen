@@ -36,14 +36,14 @@ Type:RegisterIconDefaults{
 }
 
 Type:RegisterConfigPanel_XMLTemplate(100, "TellMeWhen_ChooseName", {
-	title = L["ICONMENU_CHOOSENAME"] .. " " .. L["ICONMENU_CHOOSENAME_ORBLANK"],
+	title = L["ICONMENU_CHOOSENAME2"] .. " " .. L["ICONMENU_CHOOSENAME_ORBLANK"],
 	SUGType = "cast",
 })
 
 Type:RegisterConfigPanel_XMLTemplate(105, "TellMeWhen_Unit")
 
-Type:RegisterConfigPanel_XMLTemplate(130, "TellMeWhen_WhenChecks", {
-	text = L["ICONMENU_CASTSHOWWHEN"],
+Type:RegisterConfigPanel_XMLTemplate(165, "TellMeWhen_WhenChecks", {
+	--text = L["ICONMENU_CASTSHOWWHEN"],
 	[0x2] = { text = "|cFF00FF00" .. L["ICONMENU_PRESENT"], 	},
 	[0x1] = { text = "|cFFFF0000" .. L["ICONMENU_ABSENT"], 		},
 })
@@ -167,11 +167,11 @@ function Type:Setup(icon, groupID, iconID)
 		icon:SetScript("OnEvent", Cast_OnEvent)
 	end
 
-	icon:SetScript("OnUpdate", Cast_OnUpdate)
+	icon:SetUpdateFunction(Cast_OnUpdate)
 	icon:Update()
 end
 
-function Type:GetNameForDisplay(icon, data, doInsertLink)
+function Type:FormatSpellForOutput(icon, data, doInsertLink)
 	return data and ((doInsertLink and GetSpellLink(data)) or GetSpellInfo(data)) or data, 1
 end
 

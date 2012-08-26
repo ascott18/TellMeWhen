@@ -46,7 +46,7 @@ Type:RegisterConfigPanel_XMLTemplate(100, "TellMeWhen_ChooseName", {
 	SUGType = "spellwithduration",
 })
 
-Type:RegisterConfigPanel_XMLTemplate(130, "TellMeWhen_WhenChecks", {
+Type:RegisterConfigPanel_XMLTemplate(165, "TellMeWhen_WhenChecks", {
 	text = L["ICONMENU_SHOWWHEN"],
 	[0x2] = { text = "|cFF00FF00" .. L["ICONMENU_USABLE"], 			},
 	[0x1] = { text = "|cFFFF0000" .. L["ICONMENU_UNUSABLE"], 		},
@@ -55,6 +55,7 @@ Type:RegisterConfigPanel_XMLTemplate(130, "TellMeWhen_WhenChecks", {
 Type:RegisterConfigPanel_ConstructorFunc(120, "TellMeWhen_ICDType", function(self)
 	self.Header:SetText(TMW.L["ICONMENU_ICDTYPE"])
 	TMW.IE:BuildSimpleCheckSettingFrame(self, {
+		numPerRow = 1,
 		{
 			setting = "ICDType",
 			value = "aura",
@@ -152,7 +153,7 @@ function Type:Setup(icon, groupID, iconID)
 
 	for _, name in pairs(icon.NameNameArray) do
 		if name == naturesGrace then
-			if icon:IsBeingEdited() == 1 then
+			if icon:IsBeingEdited() == 1 and TellMeWhen_ChooseName then
 				TMW.HELP:Show("ICON_ICD_NATURESGRACE", icon, TellMeWhen_ChooseName, 0, 0, L["HELP_ICD_NATURESGRACE"])
 			elseif TMW.HELP then
 				TMW.HELP:Hide("ICON_ICD_NATURESGRACE")
@@ -177,7 +178,7 @@ function Type:Setup(icon, groupID, iconID)
 
 	icon:SetUpdateMethod("manual")
 	
-	icon:SetScript("OnUpdate", ICD_OnUpdate)
+	icon:SetUpdateFunction(ICD_OnUpdate)
 	icon:Update()
 end
 

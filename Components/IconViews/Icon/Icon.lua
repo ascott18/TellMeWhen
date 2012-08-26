@@ -52,30 +52,12 @@ TMW:RegisterDatabaseDefaults{
 					relativePoint	= "BOTTOMRIGHT",
 					
 					StringName		= L["TEXTLAYOUTS_DEFAULTS_STACKS"],
-					DefaultText		= "[Stacks:Hide('0', '1')]",
+					DefaultText		= "[Stacks:Hide('0')]",
 					SkinAs			= "Count",
 				},
 			},
 		},
 	},
-}
-
-View:RegisterIconDefaults{
-	SettingsPerView = {
-		icon = {
-		
-			-- don't do this. it will fallback to "",
-			-- which will then cause the icon to fallback on the group,
-			-- which will yield "icon1" (which is what we want.)
-			
-			--TextLayout = "icon1",
-			
-			Texts = {
-				"",
-				"[Stacks:Hide('0', '1')]",
-			}
-		}
-	}
 }
 
 View:RegisterGroupDefaults{
@@ -232,7 +214,6 @@ function View:Group_Setup(group)
 	local gs = group:GetSettings()
 	local gspv = group:GetSettingsPerView()
 	
-	group:SetScale(gs.Scale)
 	group:SetSize(gs.Columns*(ICON_SIZE+gspv.SpacingX)-gspv.SpacingX, gs.Rows*(ICON_SIZE+gspv.SpacingY)-gspv.SpacingY)
 end
 

@@ -58,11 +58,14 @@ Type:RegisterConfigPanel_XMLTemplate(100, "TellMeWhen_ChooseName", {
 	SUGType = "buff",
 })
 
-Type:RegisterConfigPanel_XMLTemplate(105, "TellMeWhen_Unit")
+Type:RegisterConfigPanel_XMLTemplate(105, "TellMeWhen_Unit", {
+	implementsConditions = true,
+})
 
 Type:RegisterConfigPanel_ConstructorFunc(120, "TellMeWhen_BuffOrDebuff", function(self)
 	self.Header:SetText(TMW.L["ICONMENU_BUFFTYPE"])
 	TMW.IE:BuildSimpleCheckSettingFrame(self, {
+		numPerRow = 3,
 		{
 			setting = "BuffOrDebuff",
 			value = "HELPFUL",
@@ -81,13 +84,7 @@ Type:RegisterConfigPanel_ConstructorFunc(120, "TellMeWhen_BuffOrDebuff", functio
 	})
 end)
 
-Type:RegisterConfigPanel_XMLTemplate(130, "TellMeWhen_WhenChecks", {
-	text = L["ICONMENU_SHOWWHEN"],
-	[0x2] = { text = "|cFF00FF00" .. L["ICONMENU_PRESENT"], 	},
-	[0x1] = { text = "|cFFFF0000" .. L["ICONMENU_ABSENT"], 		},
-})
-
-Type:RegisterConfigPanel_ConstructorFunc(150, "TellMeWhen_BuffSettings", function(self)
+Type:RegisterConfigPanel_ConstructorFunc(125, "TellMeWhen_BuffSettings", function(self)
 	self.Header:SetText(Type.name)
 	TMW.IE:BuildSimpleCheckSettingFrame(self, {
 		{
@@ -108,6 +105,12 @@ Type:RegisterConfigPanel_ConstructorFunc(150, "TellMeWhen_BuffSettings", functio
 	})
 end)
 
+Type:RegisterConfigPanel_XMLTemplate(165, "TellMeWhen_WhenChecks", {
+	text = L["ICONMENU_SHOWWHEN"],
+	[0x2] = { text = "|cFF00FF00" .. L["ICONMENU_PRESENT"], 	},
+	[0x1] = { text = "|cFFFF0000" .. L["ICONMENU_ABSENT"], 		},
+})
+
 Type:RegisterConfigPanel_XMLTemplate(170, "TellMeWhen_SortSettings")
 
 
@@ -126,6 +129,8 @@ local function Buff_OnEvent(icon, event, arg1)
 				return
 			end
 		end
+	elseif event == "TMW_UNITSET_UPDATED" and arg1 == icon.UnitSet then
+		icon.NextUpdateTime = 0
 	else -- a unit changed event
 		icon.NextUpdateTime = 0
 	end
@@ -291,8 +296,7 @@ function Type:Setup(icon, groupID, iconID)
 	icon.NameHash = TMW:GetSpellNames(icon, icon.Name, nil, nil, 1)
 	icon.NameNameHash = TMW:GetSpellNames(icon, icon.Name, nil, 1, 1)
 	
-	local UnitSet
-	icon.Units, UnitSet = TMW:GetUnits(icon, icon.Unit)
+	icon.Units, icon.UnitSet = TMW:GetUnits(icon, icon.Unit, icon:GetSettings().UnitConditions)
 
 	icon.Filter = icon.BuffOrDebuff
 	icon.Filterh = icon.BuffOrDebuff == "EITHER" and "HARMFUL"
@@ -316,18 +320,19 @@ function Type:Setup(icon, groupID, iconID)
 
 	icon:SetInfo("texture; reverse", TMW:GetConfigIconTexture(icon), true)
 	
-	if UnitSet.allUnitsChangeOnEvent then
+	if icon.UnitSet.allUnitsChangeOnEvent then
 		icon:SetUpdateMethod("manual")
-		for event in pairs(UnitSet.updateEvents) do
+		for event in pairs(icon.UnitSet.updateEvents) do
 			icon:RegisterEvent(event)
 		end
 	
 		icon:RegisterEvent("UNIT_AURA")
 	
 		icon:SetScript("OnEvent", Buff_OnEvent)
+		TMW:RegisterCallback("TMW_UNITSET_UPDATED", Buff_OnEvent, icon)
 	end
 
-	icon:SetScript("OnUpdate", Buff_OnUpdate)
+	icon:SetUpdateFunction(Buff_OnUpdate)
 	icon:Update()
 end
 

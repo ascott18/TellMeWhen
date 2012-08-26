@@ -8,9 +8,6 @@
 		Height of TellMeWhen_TextDisplayOptions is adjusted based on heights of these frames.
 	-->
 	<Frame name="TellMeWhen_TextDisplayGroup" virtual="true">
-		<!-- TODO: add up/down arrows to TextDisplayGroups -->
-		<!-- TODO: show frames for strings that are unhandled by the current layout,
-		allowing their manipulation, but also indicate that they are unhandled (in big red letters) -->
 		<Size y="40"/>
 		<Anchors>
 			<Anchor point="LEFT" x="0"/>
@@ -32,9 +29,9 @@
 					<OnClick>
 						if TMW.CI.ics then
 							local id = self:GetParent():GetID()
-							local GUID, layoutSettings = TMW.TEXT:GetTextLayoutForIcon(TMW.CI.ic)
-							local DefaultText = layoutSettings[id].DefaultText
-							TMW.CI.ics.SettingsPerView[TMW.CI.gs.View].Texts[id] = DefaultText
+							
+							TMW.CI.ics.SettingsPerView[TMW.CI.gs.View].Texts[id] = nil
+							
 							TMW.IE:ScheduleIconSetup()
 						end
 						TMW.TEXT:LoadConfig()
@@ -238,12 +235,11 @@
 							</OnLoad>
 							<OnClick>							
 								if TMW.CI.ics then
-									local GUID, layoutSettings = TMW.TEXT:GetTextLayoutForIcon(TMW.CI.ic)
-									
-									for id, stringSettings in TMW:InNLengthTable(layoutSettings) do
-										TMW.CI.ics.SettingsPerView[TMW.CI.gs.View].Texts[id] = stringSettings.DefaultText
-									end
+									wipe(TMW.CI.ics.SettingsPerView[TMW.CI.gs.View].Texts)
 								end
+							
+								TMW.IE:ScheduleIconSetup()
+								
 								TMW.TEXT:LoadConfig()
 							</OnClick>
 						</Scripts>

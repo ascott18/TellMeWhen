@@ -55,7 +55,7 @@
 				</Scripts>
 			</EditBox>
 
-			<EditBox name="$parentSourceUnit" inherits="TellMeWhen_UnitEditbox" multiline="true" parentKey="SourceUnit" autoFocus="false">
+			<EditBox name="$parentSourceUnit" inherits="TellMeWhen_UnitEditbox" parentKey="SourceUnit">
 				<Anchors>
 					<Anchor point="TOPLEFT" relativeTo="$parentCLEUEvents" relativePoint="BOTTOMLEFT" x="22" y="1"/>
 					<Anchor point="RIGHT" x="-135"/>
@@ -73,7 +73,7 @@
 							title = TMW.L["CLEU_SOURCEUNITS"],
 							tooltip = function()
 								if IsModifierKeyDown() then
-									return TMW.IE:GetRealUnits(self)
+									return TMW.UNITS:GetUnitInputDetailedTooltip(self)
 								else
 									return TMW.L["CLEU_SOURCEUNITS_DESC"]
 								end
@@ -108,7 +108,7 @@
 				</Scripts>
 			</Frame>
 
-			<EditBox name="$parentDestUnit" inherits="TellMeWhen_UnitEditbox" multiline="true" parentKey="DestUnit" autoFocus="false">
+			<EditBox name="$parentDestUnit" inherits="TellMeWhen_UnitEditbox" parentKey="DestUnit">
 				<Anchors>
 					<Anchor point="TOP" relativeTo="$parentSourceUnit" relativePoint="BOTTOM" y="-10"/>
 					<Anchor point="LEFT" relativeTo="$parentSourceUnit"/>
@@ -127,7 +127,7 @@
 							title = TMW.L["CLEU_DESTUNITS"],
 							tooltip = function()
 								if IsModifierKeyDown() then
-									return TMW.IE:GetRealUnits(self)
+									return TMW.UNITS:GetUnitInputDetailedTooltip(self)
 								else
 									return TMW.L["CLEU_DESTUNITS_DESC"]
 								end

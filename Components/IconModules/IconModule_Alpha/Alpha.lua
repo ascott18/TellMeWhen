@@ -26,7 +26,7 @@ Alpha:RegisterIconDefaults{
 }
 
 
-Alpha:RegisterConfigPanel_ConstructorFunc(220, "TellMeWhen_AlphaModuleSettings", function(self)
+Alpha:RegisterConfigPanel_ConstructorFunc(195, "TellMeWhen_AlphaModuleSettings", function(self)
 	self.Header:SetText(L["ICONALPHAPANEL_FAKEHIDDEN"])
 	TMW.IE:BuildSimpleCheckSettingFrame(self, {
 		{

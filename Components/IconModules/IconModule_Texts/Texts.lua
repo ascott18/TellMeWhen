@@ -92,11 +92,8 @@ TMW:RegisterDatabaseDefaults{
 					["**"] = {
 						SettingsPerView = {
 							["**"] = {
-								TextLayout = "", -- Fall back on the blank layout if an IconView does not explicitly define a layout.
-								Texts = {
-									 -- The table of texts that correspond to the displays defined by the text layout.
-									["*"] = "",
-								},
+								-- The table of texts that correspond to the displays defined by the text layout.
+								Texts = {},
 							},
 						},
 					},
@@ -129,8 +126,8 @@ TMW:RegisterUpgrade(51002, {
 		end
 		ics.BindText = nil
 		
-		-- The stack text display was static, so upgrade it statically (no conversion needed).
-		ics.SettingsPerView.icon.Texts[2] = "[Stacks:Hide('0', '1')]"
+		-- The stack text display was static, and it already corresponds to the default text for this text display, so do nothing.
+		-- ics.SettingsPerView.icon.Texts[2] = "[Stacks:Hide('0')]"
 	end,
 })
 
@@ -215,7 +212,7 @@ TMW:RegisterUpgrade(51003, {
 		
 		-- Display 2 is the stack text
 		layout[2].StringName = L["TEXTLAYOUTS_DEFAULTS_STACKS"]
-		layout[2].DefaultText = "[Stacks:Hide('0', '1')]"
+		layout[2].DefaultText = "[Stacks:Hide('0')]"
 		layout[2].SkinAs = "Count"
 		
 		for i = 1, layout.n do
@@ -338,10 +335,24 @@ TMW:RegisterUpgrade(51019, {
 	end,
 })
 
+TMW:RegisterUpgrade(60029, {
+	textlayout = function(self, settings, GUID)
+		-- For some reason a lot of text layouts are missing quotes.
+		-- (This may just be in my own settings as an artifact of early testing; but could also be in other people who alpha tested)
+		-- It also changed to not hide a stack of '1'.
+		for i, displaySettings in ipairs(settings) do
+			if displaySettings.DefaultText == "[Stacks:Hide(0, 1)]"
+			or displaySettings.DefaultText == "[Stacks:Hide('0', '1')]" then
+				displaySettings.DefaultText = "[Stacks:Hide('0')]"
+			end
+		end
+	end,
+})
+
 TMW:RegisterCallback("TMW_UPGRADE_REQUESTED", function(event, type, version, ...)
-	-- When a global settings upgrade is requested, update all text layouts.
+	-- When a profile settings upgrade is requested, update all text layouts.
 	
-	if type == "global" then
+	if type == "profile" then
 		for GUID, settings in pairs(TMW.db.profile.TextLayouts) do
 			TMW:DoUpgrade("textlayout", version, settings, GUID)
 		end
@@ -349,17 +360,20 @@ TMW:RegisterCallback("TMW_UPGRADE_REQUESTED", function(event, type, version, ...
 end)
 
 
-function TEXT:GetTextLayoutForIcon(icon, view)
+function TEXT:GetTextLayoutForIconID(groupID, iconID, view)
 	-- arg3, view, is optional. Defaults to the current view
-	view = view or icon.viewData.view
+	local gs = TMW.db.profile.Groups[groupID]
+	local ics = gs.Icons[iconID]
+	
+	view = view or gs.View
 	
 	-- Get the GUID defined by the icon for the current IconView
-	local GUID = icon:GetSettingsPerView(view).TextLayout
+	local GUID = ics.SettingsPerView[view].TextLayout
 	
 	-- If the icon defines the GUID as a blank string,
 	-- it should default to whatever the group defines. (Intended behavior, btw.)
-	if GUID == "" then
-		GUID = icon.group:GetSettingsPerView(view).TextLayout
+	if not GUID or GUID == "" then
+		GUID = gs.SettingsPerView[view].TextLayout
 	end
 	
 	-- Rawget from TextLayouts to see if the layout exists.
@@ -382,17 +396,32 @@ function TEXT:GetTextLayoutForIcon(icon, view)
 		-- Freak the fuck out if it wasn't found;
 		-- Only happens if a view defines a default layout but doesn't actually define layout itself.
 		assert(layoutSettings, ("Couldn't find default text layout with GUID %q for IconView %q"):format(GUID, view))
-		
-		-- Let the user know that the original layout was not found, and that we are falling back on a default.
-		local groupID = icon.group.ID
-		local iconID = icon.ID
-		TMW.Warn(L["ERROR_MISSINGLAYOUT"]:format(L["GROUPICON"]):format(TMW:GetGroupName(groupID, groupID, 1), iconID))
 	end
 	
 	return GUID, layoutSettings	
 end
 
+function TEXT:GetTextLayoutForIcon(icon, view)
+	return TEXT:GetTextLayoutForIconID(icon.group.ID, icon.ID, view)
+end
 
+function TEXT:GetTextFromSettingsAndLayout(Texts, layoutSettings, textID)
+	TMW:ValidateType(2, "TEXT:GetTextForIconAndLayout()", Texts, "table")
+	TMW:ValidateType(3, "TEXT:GetTextForIconAndLayout()", layoutSettings, "table")
+	TMW:ValidateType(4, "TEXT:GetTextForIconAndLayout()", textID, "number")
+	
+	local text = Texts[textID]
+	
+	if not text then		
+		if textID > layoutSettings.n then
+			error("textID is out of range for the given layout!", 2)
+		end
+	
+		text = layoutSettings[textID].DefaultText
+	end
+	
+	return text
+end
 
 
 
@@ -536,20 +565,18 @@ function Texts:OnKwargsUpdated()
 	if self.layoutSettings and self.Texts then
 		for fontStringID, fontStringSettings in TMW:InNLengthTable(self.layoutSettings) do
 			local fontString = self.fontStrings[self:GetFontStringID(fontStringID, fontStringSettings)]
-			local text = self.Texts[fontStringID] or ""
 			
-			if fontString then
-					
-				if text ~= "" then
-					local styleString = ""
-					if fontStringSettings.Outline == "OUTLINE" or fontStringSettings.Outline == "THICKOUTLINE" or fontStringSettings.Outline == "MONOCHROME" then
-						styleString = styleString .. ("[%s]"):format(fontStringSettings.Outline)
-					end
-					
-					fontString.TMW_QueueForRemoval = nil
-					
-					DogTag:AddFontString(fontString, self.icon, styleString .. (self.Texts[fontStringID] or ""), "Unit;TMW", self.kwargs)
+			local text = TEXT:GetTextFromSettingsAndLayout(self.Texts, self.layoutSettings, fontStringID)
+			
+			if fontString and text and text ~= "" then
+				local styleString = ""
+				if fontStringSettings.Outline == "OUTLINE" or fontStringSettings.Outline == "THICKOUTLINE" or fontStringSettings.Outline == "MONOCHROME" then
+					styleString = styleString .. ("[%s]"):format(fontStringSettings.Outline)
 				end
+				
+				fontString.TMW_QueueForRemoval = nil
+				
+				DogTag:AddFontString(fontString, self.icon, styleString .. text, "Unit;TMW", self.kwargs)
 			end
 		end
 	end

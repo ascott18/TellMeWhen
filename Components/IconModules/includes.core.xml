@@ -15,4 +15,10 @@
 <Include file="IconModule_TimerBar_BarDisplay\includes.core.xml"/>
 <Include file="IconModule_TimerBar_Overlay\includes.core.xml"/>
 
+<Include file="IconModule_GroupMover\includes.core.xml"/>
+<Include file="IconModule_IconDragger\includes.core.xml"/>
+<Include file="IconModule_IconEditorLoader\includes.core.xml"/>
+<Include file="IconModule_RecieveSpellDrags\includes.core.xml"/>
+<Include file="IconModule_Tooltip\includes.core.xml"/>
+
 </Ui>

@@ -58,34 +58,37 @@ L["FROMNEWERVERSION"] = "You are importing data that was created in a newer vers
 -- ICONMENU
 -- -------------
 
-L["ICONMENU_CHOOSENAME"] = "Choose name(s)/ID(s) to check"
-L["ICONMENU_CHOOSENAME_CNDTIC"] = "Choose name/ID/texture path"
+L["ICONMENU_CHOOSENAME2"] = "Choose spell(s) to check"
 
 L["ICONMENU_CHOOSENAME_WPNENCH"] = "Choose enchant(s) to check"
 L["ICONMENU_CHOOSENAME_WPNENCH_DESC"] = [=[Enter the name(s) the weapon enchants you want this icon to monitor. You can add multiple entries by separating them with semicolons (;).
 
 |cFFFF5959IMPORTANT|r: Enchant names must be entered exactly as they appear on the tooltip of your weapon while the enchant is active (e.g. "Flametongue", not "Flametongue Weapon").]=]
 
-L["ICONMENU_CHOOSENAME_ITEMSLOT"] = "Choose name(s)/ID(s)/equipment slot(s) (%d-%d) to check"
+L["ICONMENU_CHOOSENAME_ITEMSLOT2"] = "Choose item(s) to check"
 L["ICONMENU_CHOOSENAME_ITEMSLOT_DESC"] = [=[Enter the Name, ID, or equipment slot of what you want this icon to monitor. You can add multiple entries (any combination of names, IDs, and equipment slots) by separating them with semicolons (;).
 
 Equipment slots are numbered indexes that correspond to an equipped item. If you change the item equipped in that slot, the icon will reflect that.
 
-You can |cff7fffffShift-click|r items and chat links or drag items to insert them into this editbox.]=]
+|cff7fffffShift-click|r items and chat links or drag items to insert them into this editbox.]=]
 
-L["ICONMENU_CHOOSENAME_MULTISTATE"] = "Choose name/ID to check"
-L["ICONMENU_CHOOSENAME_ORBLANK"] = "|cff7fffffOR|r leave blank to track everything"
+L["ICONMENU_CHOOSENAME_MULTISTATE"] = "Choose spell to check"
+L["ICONMENU_CHOOSENAME_ORBLANK"] = "|cff7fffffOR|r leave blank to track all"
 L["ICONMENU_ENABLE"] = "Enabled"
+L["ICONMENU_ENABLE_DESC"] = "Icons will only function when they are enabled."
 L["CHOOSENAME_EQUIVS_TOOLTIP"] = [[You can select predefined sets of buffs, debuffs, spell casts, diminishing returns, or dispel types (Magic, Curse, etc.) from this menu to insert into the "%s" editbox.]]
 L["CHOOSENAME_DIALOG_DDDEFAULT"] = "Predefined Spell Sets/Dispel Types"
 L["CHOOSENAME_DIALOG"] = [=[Enter the Name or ID of what you want this icon to monitor. You can add multiple entries (any combination of names, IDs, and equivalencies) by separating them with semicolons (;).
 
-You can |cff7fffffShift-click|r spells/items/chat links or drag spells/items to insert them into this editbox.]=]
+|cff7fffffShift-click|r spells/items/chat links or drag spells/items to insert them into this editbox.]=]
 L["CHOOSENAME_DIALOG_PETABILITIES"] = "|cFFFF5959PET ABILITIES|r must use SpellIDs."
 L["CHOOSENAME_DIALOG_MSCD"] = [=[Enter the Name or ID of what the cooldown that you want this icon to monitor. Only the first spell/item will be checked - semicolon-delimited lists are not valid for this icon type.]=]
 L["CHOOSENAME_DIALOG_CNDTIC"] = "Enter the Name or ID of the spell that has the texture that you want to use. You may also enter a texture path, such as 'Interface/Icons/spell_nature_healingtouch', or just 'spell_nature_healingtouch' if the path is 'Interface/Icons'"
 
 L["CHOOSEICON"] = "Choose an icon to check"
+L["CHOOSEICON_DESC"] = [=[|cff7fffffClick|r to choose an icon/group.
+|cff7fffffLeft-Click and drag|r to rearrange.
+|cff7fffffRight-Click and drag|r to swap.]=]
 
 L["ICONMENU_ALPHA"] = "Opacity"
 L["CONDITIONALPHA"] = "Failed Conditions/Reqs."
@@ -129,7 +132,7 @@ L["ICONMENU_MUSHROOMS_DESC"] = [[Tracks a %s.]]
 L["ICONMENU_MULTISTATECD"] = "Multi-state Ability"
 L["ICONMENU_MULTISTATECD_DESC"] = [[Tracks an ability with multiple states.
 
-This should be used when you want to track the multiple states and textures of a cooldown such as %s or %s.]]
+This should be used when you want to track the multiple states and textures of a cooldown such as %s.]]
 
 
 L["ICONMENU_UNITCOOLDOWN"] = "Unit Cooldown"
@@ -170,17 +173,29 @@ Icons that have %q checked will still be shown in a meta icon if they would othe
 L["ICONMENU_META_ICONMENUTOOLTIP"] = "(%d |4Icon:Icons;)"
 
 
+L["ICONTYPE_DEFAULT_HEADER"] = "Instructions"
+L["ICONTYPE_DEFAULT_INSTRUCTIONS"] = [[To get started configuring this icon, select an icon type from the %q dropdown menu above.
+
+Be sure to also check the %q setting so that this icon will function.
+
+Remember that icons will only work when TellMeWhen is in its locked state, so type '/tmw' when you are finished with configuration.]]
 
 
 
-L["ICONMENU_SHOWWHEN"] = "Show icon when"
+
+
+L["ICONMENU_SHOWWHEN"] = "Show States & Opacity"
+L["ICONMENU_SHOWWHEN_SHOWWHEN_WRAP"] = "Show when %s|r"
+L["ICONMENU_SHOWWHEN_OPACITYWHEN_WRAP"] = "Opacity when %s|r"
+L["ICONMENU_SHOWWHEN_SHOW_GENERIC_DESC"] = "Set whether this icon should show for this icon state."
+L["ICONMENU_SHOWWHEN_OPACITY_GENERIC_DESC"] = "Set the opacity level that the icon should show at in this icon state."
 L["ICONMENU_USABLE"] = "Usable"
 L["ICONMENU_UNUSABLE"] = "Unusable"
 
 
-L["ICONMENU_COUNTING"] = "Counting"
+L["ICONMENU_COUNTING"] = "Timer running"
 L["ICONMENU_COUNTING_DESC"] = "Show the icon when the icon's timer is active."
-L["ICONMENU_NOTCOUNTING"] = "Not Counting"
+L["ICONMENU_NOTCOUNTING"] = "Timer not running"
 L["ICONMENU_NOTCOUNTING_DESC"] = "Show the icon when the icon's timer is not active."
 
 
@@ -235,7 +250,6 @@ L["ICONMENU_COMPONENTICONS"] = "Component Icons & Groups"
 
 
 L["ICONMENU_UNITSTOWATCH"] = "Unit(s) to watch"
-L["ICONMENU_UNITSTOWATCH_ALL"] = "|cff7fffffOR|r leave blank to track all"
 L["ICONMENU_UNITS"] = "Units"
 L["ICONMENU_UNIT_DESC"] = [[Enter the units to watch in this box. Units can be inserted from the dropdown at the right, or advanced users can type in their own units. Standard units (e.g. player) and/or friendly player names (e.g. %s) may be used as units. Separate multiple units with semicolons (;).
 
@@ -260,8 +274,10 @@ L["ICONMENU_ABSENT"] = "Absent"
 L["ICONMENU_ALWAYS"] = "Always"
 
 L["ICONMENU_CNDTSHOWWHEN"] = "Show when conditions"
-L["ICONMENU_FAIL"] = "Fail"
-L["ICONMENU_SUCCEED"] = "Succeed"
+L["ICONMENU_FAIL2"] = "Conditions Fail"
+L["ICONMENU_SUCCEED2"] = "Conditions Succeed"
+L["ICONMENU_ONFAIL"] = "On Fail"
+L["ICONMENU_ONSUCCEED"] = "On Succeed"
 
 L["ICONMENU_CASTSHOWWHEN"] = "Show when a cast is"
 L["ICONMENU_ONLYINTERRUPTIBLE"] = "Only Interruptible"
@@ -294,15 +310,30 @@ L["ICONMENU_ICDTYPE"] = "Triggered by"
 L["ICONMENU_SPELLCAST_COMPLETE"] = "Spell Cast Finish/Instant Cast"
 L["ICONMENU_SPELLCAST_START"] = "Spell Cast Start"
 L["ICONMENU_ICDBDE"] = "Buff/Debuff/Damage/Energize/Summon"
-L["ICONMENU_SPELLCAST_COMPLETE_DESC"] = [[Select this option if the internal cooldown begins when you finish casting a spell, or when you cast an instant cast spell.
+L["ICONMENU_SPELLCAST_COMPLETE_DESC"] = [[Select this option if the internal cooldown begins when:
+
+|cff7fffff1)|r You finish casting a spell, or
+|cff7fffff2)|r You cast an instant cast spell.
 
 You need to enter the name/ID of the spell cast that triggers the internal cooldown into the %q editbox.]]
-L["ICONMENU_SPELLCAST_START_DESC"] = [[Select this option if the internal cooldown begins when you start casting a spell.
+L["ICONMENU_SPELLCAST_START_DESC"] = [[Select this option if the internal cooldown begins when:
+
+|cff7fffff1)|r You start casting a spell.
 
 You need to enter the name/ID of the spell cast that triggers the internal cooldown into the %q editbox.]]
-L["ICONMENU_ICDAURA_DESC"] = [[Select this option if the internal cooldown begins when a buff or debuff is applied by yourself (includes procs), if the effect deals damage, or if the effect energizes you with mana/rage/etc.
+L["ICONMENU_ICDAURA_DESC"] = [[Select this option if the internal cooldown begins when:
 
-You need to enter the name/ID of the buff/debuff that you gain when the internal cooldown is triggered, or the name of the energize effect, or the name of the spell that does damage (check your combat log), into the %q editbox.]]
+|cff7fffff1)|r A buff or debuff is applied by yourself (includes procs), or
+|cff7fffff2)|r Damage is dealt, or
+|cff7fffff3)|r You are energized with mana/rage/etc.
+|cff7fffff4)|r You summon or create an object or NPC.
+
+You need to enter, into the %q editbox, the spell name/ID of:
+
+|cff7fffff1)|r The buff/debuff that you gain when the internal cooldown is triggered, or
+|cff7fffff2)|r The spell that does damage (check your combat log), or
+|cff7fffff3)|r The the energize effect (check your combat log), or
+|cff7fffff3)|r The spell that triggered the summon (check your combat log).]]
 
 L["ICONMENU_DRPRESENT"] = "Diminished"
 L["ICONMENU_DRABSENT"] = "Undiminished"
@@ -377,13 +408,17 @@ L["CONDITION_TIMERS_HEADER"] = "Timers"
 L["CONDITION_TIMERS_SUCCEED_DESC"] = "Duration of a timer to set on the icon when conditions begin succeeding"
 L["CONDITION_TIMERS_FAIL_DESC"] = "Duration of a timer to set on the icon when conditions begin failing"
 
-L["METAPANEL_UP"] = "Move up"
-L["METAPANEL_DOWN"] = "Move down"
+L["METAPANEL_UP"] = "Move up" -- unused by meta icons; still used by conditions
+L["METAPANEL_DOWN"] = "Move down" -- unused by meta icons; still used by conditions
 L["METAPANEL_REMOVE"] = "Remove this icon"
-L["METAPANEL_INSERT"] = "Insert an icon"
+L["META_ADDICON"] = "Add icon"
 
 L["ICONALPHAPANEL_FAKEHIDDEN"] = "Always Hide"
-L["ICONALPHAPANEL_FAKEHIDDEN_DESC"] = "Forces the icon to be hidden all the time, but whilst still enabled in order to allow the conditions of other icons to check this icon, for meta icons to include this icon, and for this icon's events to be processed."
+L["ICONALPHAPANEL_FAKEHIDDEN_DESC"] = [[Forces the icon to be hidden all the time while still allowing normal functionality:
+
+|cff7fffff-|r The icon can still be checked by conditions of other icons.
+|cff7fffff-|r Meta icons can display this icon.
+|cff7fffff-|r This icon's events will still be processed.]]
 L["ICONMENU_WPNENCHANTTYPE"] = "Weapon slot to monitor"
 L["ICONMENU_HIDEUNEQUIPPED"] = "Hide when slot lacks weapon"
 L["ICONMENU_HIDEUNEQUIPPED_DESC"] = "Check this to force the icon to be hidden if the weapon spot being checked does not have a weapon in it, or if that slot has a shield or an off-hand frill."
@@ -402,7 +437,7 @@ L["ICONMENU_ONLYSEEN_DESC"] = "Check this to make the icon only show a cooldown 
 L["ICONMENU_CHECKREFRESH"] = "Listen for refreshes"
 L["ICONMENU_CHECKREFRESH_DESC"] = [[Blizzard's combat log is very buggy when it comes to spell refreshes and fear (or other spells that break after a certain amount of damage). The combat log will say that the spell was refreshed when damage is dealt, even though it technically wasn't. Uncheck this box to disable listening to spell refreshes, but note that legitimate refreshes will be ignored as well.
 
-It is reccommended to leave this checked if the DRs you are checking for don't break after a certain amount of damage.]]
+It is recommended to leave this checked if the DRs you are checking for don't break after a certain amount of damage.]]
 L["ICONMENU_IGNORENOMANA"] = "Ignore lack of power"
 L["ICONMENU_IGNORENOMANA_DESC"] = [[Check this to cause the ability to not be treated as unusable if there is only a lack of power to use it.
 
@@ -931,6 +966,7 @@ L["CNDTCAT_ATTRIBUTES_PLAYER"] = "Player Attributes"
 L["CNDTCAT_STATS"] = "Combat Stats"
 L["CNDTCAT_RESOURCES"] = "Resources"
 L["CNDTCAT_CURRENCIES"] = "Currencies"
+L["CNDTCAT_MISC"] = "Miscellaneous"
 
 L["CONDITIONPANEL_MOUNTED"] = "Mounted"
 L["CONDITIONPANEL_EQUALS"] = "Equals"
@@ -988,6 +1024,8 @@ L["IconModule_TimerBar_BarDisplayTimerBar"] = "Timer Bar"
 L["GROUPADDONSETTINGS"] = "Group Settings"
 L["CONDITIONS"] = "Conditions"
 L["GROUPCONDITIONS"] = "Group Conditions"
+L["UNITCONDITIONS"] = "Unit Conditions"
+L["UNITCONDITIONS_DESC"] = "Click to configure a set of conditions that each unit will have to pass in order to be checked."
 L["MAIN"] = "Main"
 L["UNNAMED"] = "((Unnamed))"
 
@@ -1003,7 +1041,7 @@ L["DT_DOC_Extra"] = "Returns the extra spell from the last Combat Event that the
 
 L["DT_DOC_IsShown"] = "Returns whether or not an icon is shown."
 L["DT_DOC_Opacity"] = "Returns the opacity of an icon. Return value is between 0 and 1."
-L["DT_DOC_Duration"] = "Returns the current duration remaining on the icon. It is reccomended that you format this with [TMWFormatDuration]"
+L["DT_DOC_Duration"] = "Returns the current duration remaining on the icon. It is recommended that you format this with [TMWFormatDuration]"
 L["DT_DOC_Spell"] = "Returns the spell or item that the icon is showing data for."
 L["DT_DOC_Stacks"] = "Returns the current stacks of the icon"
 L["DT_DOC_Unit"] = "Returns the unit or the name of the unit that the icon is checking. Best use in conjunction with the [Name] tag."
@@ -1012,7 +1050,7 @@ L["DT_DOC_PreviousUnit"] = "Returns the unit or the name of the unit that the ic
 L["ERROR_MISSINGLAYOUT"] = "Couldn't find the text layout for %s. Falling back on the default layout."
 
 L["SENDSUCCESSFUL"] = "Sent successfully"
-L["MESSAGERECIEVE"] = "%s has sent you some TellMeWhen data! You can import this data into TellMeWhen using the %q dropdown in the icon editor."
+L["MESSAGERECIEVE"] = "%s has sent you some TellMeWhen data! You can import this data into TellMeWhen using the %q button, located at the bottom of the icon editor."
 L["MESSAGERECIEVE_SHORT"] = "%s has sent you some TellMeWhen data!"
 L["ALLOWCOMM"] = "Allow data importing"
 L["ALLOWVERSIONWARN"] = "Notify of new version"
@@ -1198,7 +1236,7 @@ L["EVENTS_HANDLERS_HEADER"] = "Icon Event Handlers"
 L["EVENTS_HANDLERS_ADD"] = "Add Event Handler..."
 L["EVENTS_HANDLERS_ADD_DESC"] = "|cff7fffffClick|r to choose an event handler to add to this icon."
 L["EVENTS_HANDLERS_GLOBAL_DESC"] = [[|cff7fffffClick|r for event handler options.
-|cff7fffffClick-and-drag|r to reorder.]]
+|cff7fffffClick-and-drag|r to rearrange.]]
 L["EVENTS_HANDLERS_PLAY"] = "Test Event"
 L["EVENTS_HANDLERS_PLAY_DESC"] = "|cff7fffffClick|r to test the event handler"
 
@@ -1585,37 +1623,27 @@ L["Feared"] = "Fear"
 L["Incapacitated"] = "Incapacitated"
 L["Stunned"] = "Stunned"
 L["Slowed"] = "Slowed"
---L["DontMelee"] = "Don't Melee"
 L["ImmuneToStun"] = "Immune To Stun"
 L["ImmuneToMagicCC"] = "Immune To Magic CC"
---L["MovementSlowed"] = "Movement Slowed"
 L["Disoriented"] = "Disoriented"
 L["Silenced"] = "Silenced"
 L["Disarmed"] = "Disarmed"
 L["Rooted"] = "Rooted"
 L["Shatterable"] = "Shatterable"
 L["IncreasedStats"] = "Increased Stats"
-L["IncreasedDamage"] = "Increased Damage Done"
 L["IncreasedCrit"] = "Increased Crit Chance"
+L["IncreasedMastery"] = "Increased Mastery"
 L["IncreasedAP"] = "Increased Attack Power"
+L["IncreasedSP"] = "Increased Spellpower"
 L["IncreasedSPsix"] = "Increased Spellpower (6%)"
 L["IncreasedSPten"] = "Increased Spellpower (10%)"
 L["IncreasedPhysHaste"] = "Increased Physical Haste"
 L["IncreasedSpellHaste"] = "Increased Spell Haste"
 L["BurstHaste"] = "Heroism/Bloodlust"
-L["BonusAgiStr"] = "Increased Agility/Strength"
 L["BonusStamina"] = "Increased Stamina"
-L["BonusArmor"] = "Increased Armor"
-L["BonusMana"] = "Increased Mana Pool"
-L["ManaRegen"] = "Increased Mana Regen"
 L["BurstManaRegen"] = "Burst Mana Regen"
-L["PushbackResistance"] = "Increased Pushback Resistance"
-L["Resistances"] = "Increased Spell Resistance"
 L["PhysicalDmgTaken"] = "Physical Damage Taken"
 L["SpellDamageTaken"] = "Increased Spell Damage Taken"
-L["SpellCritTaken"] = "Increased Spell Crit Taken"
-L["BleedDamageTaken"] = "Increased Bleed Damage Taken"
-L["ReducedAttackSpeed"] = "Reduced Attack Speed"
 L["ReducedCastingSpeed"] = "Reduced Casting Speed"
 L["ReducedArmor"] = "Reduced Armor"
 L["ReducedHealing"] = "Reduced Healing"
@@ -1623,6 +1651,20 @@ L["ReducedPhysicalDone"] = "Reduced Physical Damage Done"
 L["DefensiveBuffs"] = "Defensive Buffs"
 L["MiscHelpfulBuffs"] = "Misc. Helpful Buffs"
 L["DamageBuffs"] = "Damage Buffs"
+
+-- TMW.ISMOP: these don't exist in MoP
+L["DontMelee"] = "Don't Melee"
+L["MovementSlowed"] = "Movement Slowed"
+L["IncreasedDamage"] = "Increased Damage Done"
+L["BonusAgiStr"] = "Increased Agility/Strength"
+L["BonusArmor"] = "Increased Armor"
+L["BonusMana"] = "Increased Mana Pool"
+L["ManaRegen"] = "Increased Mana Regen"
+L["PushbackResistance"] = "Increased Pushback Resistance"
+L["Resistances"] = "Increased Spell Resistance"
+L["SpellCritTaken"] = "Increased Spell Crit Taken"
+L["BleedDamageTaken"] = "Increased Bleed Damage Taken"
+L["ReducedAttackSpeed"] = "Reduced Attack Speed"
 
 L["Heals"] = "Player Heals"
 L["PvPSpells"] = "PvP Crowd Control, etc."
@@ -1666,6 +1708,8 @@ L["DR-Disorient"] = "Disorients"
 L["DR-RandomRoot"] = "Random roots"
 L["DR-ControlledRoot"] = "Controlled roots"
 L["DR-DragonsBreath"] = "Dragon's Breath"
+L["DR-BindElemental"] = "Bind Elemental"
+L["DR-Charge"] = "Charge"
 
 L["CONDITIONPANEL_CREATURETYPE"] = "Unit Creature Type"
 L["CONDITIONPANEL_CREATURETYPE_LABEL"] = "Creature Type(s)"

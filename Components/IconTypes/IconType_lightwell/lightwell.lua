@@ -34,6 +34,7 @@ Type.hidden = pclass ~= "PRIEST"
 
 -- AUTOMATICALLY GENERATED: UsesAttributes
 Type:UsesAttributes("spell")
+Type:UsesAttributes("reverse")
 Type:UsesAttributes("stack, stackText")
 Type:UsesAttributes("start, duration")
 Type:UsesAttributes("alpha")
@@ -42,7 +43,7 @@ Type:UsesAttributes("texture")
 
 Type:SetModuleAllowance("IconModule_PowerBar_Overlay", true)
 
-Type:RegisterConfigPanel_XMLTemplate(130, "TellMeWhen_WhenChecks", {
+Type:RegisterConfigPanel_XMLTemplate(165, "TellMeWhen_WhenChecks", {
 	text = L["ICONMENU_SHOWWHEN"],
 	[0x2] = { text = "|cFF00FF00" .. L["ICONMENU_PRESENT"], 		},
 	[0x1] = { text = "|cFFFF0000" .. L["ICONMENU_ABSENT"], 			},
@@ -54,18 +55,29 @@ TMW:RegisterCallback("TMW_GLOBAL_UPDATE", function()
 	Type:GLYPH()
 end)
 
-local MaxCharges = 10
+local CONST_MAX_CHARGES = 10
+local CONST_MAX_CHARGES_GLYPHED = 15
+local CONST_SPELLID_GLYPH = 55673
+local CONST_SPELLID_SUMMONSPELL = 724
+local CONST_SPELLID_LIGHTWELLRENEW_HOT = 7001
+
+if TMW.ISMOP then
+	CONST_MAX_CHARGES = 15
+	CONST_MAX_CHARGES_GLYPHED = 17
+end
+
+local MaxCharges = CONST_MAX_CHARGES
 local CurrentCharges = 0
 local SummonTime
 function Type:GLYPH()
 	for i = 7, NUM_GLYPH_SLOTS do
 		local _, _, _, spellID = GetGlyphSocketInfo(i)
-		if spellID == 55673 then
-			MaxCharges = 15
+		if spellID == CONST_SPELLID_GLYPH then
+			MaxCharges = CONST_MAX_CHARGES_GLYPHED
 			return
 		end
 	end
-	MaxCharges = 10
+	MaxCharges = CONST_MAX_CHARGES
 	for i = 1, #Type.Icons do
 		Type.Icons[i].NextUpdateTime = 0
 	end
@@ -74,14 +86,14 @@ end
 
 function Type:COMBAT_LOG_EVENT_UNFILTERED(_, _, event, _, sourceGUID, _, _, _, _, _, _, _, spellID)
 	if sourceGUID == pGUID then
-		if event == "SPELL_SUMMON" and spellID == 724 then
+		if event == "SPELL_SUMMON" and spellID == CONST_SPELLID_SUMMONSPELL then
 			CurrentCharges = MaxCharges
 			SummonTime = TMW.time
 			
 			for i = 1, #Type.Icons do
 				Type.Icons[i].NextUpdateTime = 0
 			end
-		elseif (event == "SPELL_AURA_REFRESH" or event == "SPELL_AURA_APPLIED") and spellID == 7001 and CurrentCharges > 0 then
+		elseif (event == "SPELL_AURA_REFRESH" or event == "SPELL_AURA_APPLIED") and spellID == CONST_SPELLID_LIGHTWELLRENEW_HOT and CurrentCharges > 0 then
 			CurrentCharges = CurrentCharges - 1
 			
 			for i = 1, #Type.Icons do
@@ -103,14 +115,12 @@ function Type:PLAYER_TOTEM_UPDATE(_, slot)
 end
 
 local function LW_OnUpdate(icon, time)
-	if SummonTime and SummonTime + 180 < time then
-		CurrentCharges = 0
-	end
+	local have, _, start, duration = GetTotemInfo(1)
 
-	if CurrentCharges > 0 then
+	if have then
 		icon:SetInfo("alpha; start, duration; stack, stackText",
 			icon.Alpha,
-			SummonTime, 180,
+			start, duration,
 			CurrentCharges, CurrentCharges
 		)
 	else
@@ -124,11 +134,12 @@ end
 
 
 function Type:Setup(icon, groupID, iconID)
-	icon.NameFirst = 724
+	icon.NameFirst = CONST_SPELLID_SUMMONSPELL
 
-	icon:SetInfo("texture; spell",
-		SpellTextures[724],
-		724
+	icon:SetInfo("texture; spell; reverse",
+		SpellTextures[CONST_SPELLID_SUMMONSPELL],
+		CONST_SPELLID_SUMMONSPELL,
+		true
 	)
 	
 	Type:RegisterEvent("PLAYER_TOTEM_UPDATE")
@@ -141,7 +152,7 @@ function Type:Setup(icon, groupID, iconID)
 
 	icon:SetUpdateMethod("manual")
 	
-	icon:SetScript("OnUpdate", LW_OnUpdate)
+	icon:SetUpdateFunction(LW_OnUpdate)
 	icon:Update()
 end
 

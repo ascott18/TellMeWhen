@@ -41,13 +41,10 @@ local operators = {
 	{ tooltipText = L["CONDITIONPANEL_GREATEREQUAL"], 	value = ">=", 	text = ">=" },
 }
 
--- -----------------------
--- CONDITION EDITOR
--- -----------------------
-
 
 local CNDT = TMW.CNDT -- created in TellMeWhen/conditions.lua
-TMW.ID:RegisterIconDragHandler(10,	-- Condition
+
+TMW.ID:RegisterIconDragHandler(10,
 	function(ID, info)
 		if ID.desticon then
 			if ID.srcicon:IsValid() then
@@ -68,22 +65,47 @@ TMW.ID:RegisterIconDragHandler(10,	-- Condition
 	end
 )
 
----------- Interface/Data ----------
-function CNDT:LoadConfig(type)
-	type = type or CNDT.type or "icon"
-	CNDT.type, CNDT.settings = CNDT:GetTypeData(type)
+function CNDT:OnInitialize()
+	
+end
 
-	local Conditions = CNDT.settings
-	if not Conditions then return end
+---------- Interface/Data ----------
+function CNDT:LoadConfig(conditionSetName)
+	local ConditionSet
+	if conditionSetName then
+		ConditionSet = CNDT.ConditionSets[conditionSetName]
+	else
+		ConditionSet = CNDT.CurrentConditionSet
+	end
+	
+	CNDT.CurrentConditionSet = ConditionSet
+	if not ConditionSet then return end
+	
+	if ConditionSet.useDynamicTab then
+		if conditionSetName then
+			TMW.IE.DynamicConditionTab:Show()
+		
+			-- Only click the tab if we are manually loading the conditionSet (should only happen on user input)
+			TMW.IE:TabClick(TMW.IE.DynamicConditionTab)
+		end
+	else
+		TMW.IE.DynamicConditionTab:Hide()
+	end
+	
+	
+	CNDT.settings = ConditionSet:GetSettings()	
+	if not CNDT.settings then return end
+	
+	
 
 	TMW.HELP:Hide("CNDT_UNIT_MISSING")
-	if Conditions.n > 0 then
-		for i = Conditions.n + 1, #CNDT do
+	if CNDT.settings.n > 0 then
+		for i = CNDT.settings.n + 1, #CNDT do
 			CNDT[i]:Clear()
 		end
-		CNDT:CreateGroups(Conditions.n+1)
+		CNDT:CreateGroups(CNDT.settings.n+1)
 
-		for i in TMW:InNLengthTable(Conditions) do
+		for i in TMW:InNLengthTable(CNDT.settings) do
 			CNDT[i]:Load()
 		end
 	else
@@ -91,11 +113,42 @@ function CNDT:LoadConfig(type)
 	end
 	CNDT:AddRemoveHandler()
 end
+
 TMW:RegisterCallback("TMW_CONFIG_ICON_LOADED", function()
-	-- This is encapsulated in a function because LoadConfig excepts arg2 to be a condition type ("group" or "icon"),
+	-- This is encapsulated in a function because LoadConfig excepts arg2 to be a conditionSetName,
 	-- but it would end up being an event or an icon if CNDT.LoadConfig were registed as the callback.
 	CNDT:LoadConfig()
 end)
+
+
+TMW:RegisterCallback("TMW_CONFIG_ICON_LOADED_CHANGED", function(event, icon)
+	if TMW.IE.CurrentTab == TMW.IE.DynamicConditionTab then
+		TMW.IE:TabClick(TMW.IE.MainTab)
+	end
+end)
+TMW:RegisterCallback("TMW_CONFIG_TAB_CLICKED", function(event, currentTab, oldTab)
+	if oldTab == TMW.IE.DynamicConditionTab then
+		TMW.IE.DynamicConditionTab:Hide()
+	end
+end)
+
+local f = CreateFrame("Frame")
+f:SetScript("OnUpdate", function()	
+	local CurrentConditionSet = CNDT.CurrentConditionSet
+	
+	if CurrentConditionSet and CurrentConditionSet.useDynamicTab and CurrentConditionSet.ShouldShowTab then
+		if not CurrentConditionSet:ShouldShowTab() then
+			if TMW.IE.CurrentTab == TMW.IE.DynamicConditionTab then
+				TMW.IE:TabClick(TMW.IE.MainTab)
+			else
+				TMW.IE.DynamicConditionTab:Hide()
+			end
+		end
+	else
+		TMW.IE.DynamicConditionTab:Hide()
+	end
+end)
+
 
 function CNDT:Save()
 	local groupID, iconID = CI.g, CI.i
@@ -111,11 +164,7 @@ function CNDT:Save()
 		end
 	end
 
-	if CNDT.type == "icon" then
-		TMW.IE:ScheduleIconSetup()
-	elseif CNDT.type == "group" then
-		TMW[groupID]:Setup()
-	end
+	TMW:ScheduleUpdate(.2)
 end
 
 function CNDT:Clear()
@@ -127,8 +176,11 @@ function CNDT:Clear()
 end
 TMW:RegisterCallback("TMW_CONFIG_ICON_LOADED_CHANGED", "Clear", CNDT)
 
-function CNDT:SetTabText(type)
-	local type, Conditions = CNDT:GetTypeData(type)
+function CNDT:GetTabText(conditionSetName)
+	local ConditionSet = CNDT.ConditionSets[conditionSetName] or CNDT.CurrentConditionSet
+	
+	local Conditions = ConditionSet:GetSettings()
+	local tabText = ConditionSet.tabText
 
 	local parenthesesAreValid, errorMessage, fmt_1, fmt_2 = CNDT:CheckParentheses(Conditions)
 
@@ -138,32 +190,28 @@ function CNDT:SetTabText(type)
 		TMW.HELP:Show("CNDT_PARENTHESES_ERROR", nil, TellMeWhen_IconEditor.Conditions, 0, 0, errorMessage, fmt_1, fmt_2)
 	end
 	
-	local tab = (type == "icon" and TMW.IE.IconConditionTab) or TMW.IE.GroupConditionTab
 	local n = Conditions.n
 
 	if n > 0 then
-		tab:SetText((not parenthesesAreValid and "|TInterface\\AddOns\\TellMeWhen_Options\\Textures\\Alert:0:2|t|cFFFF0000" or "") .. L[type == "icon" and "CONDITIONS" or "GROUPCONDITIONS"] .. " |cFFFF5959(" .. n .. ")")
+		local prefix = (not parenthesesAreValid and "|TInterface\\AddOns\\TellMeWhen\\Textures\\Alert:0:2|t|cFFFF0000" or "")
+		return (prefix .. tabText .. " |cFFFF5959(" .. n .. ")")
 	else
-		tab:SetText(L[type == "icon" and "CONDITIONS" or "GROUPCONDITIONS"] .. " (" .. n .. ")")
+		return (tabText .. " (" .. n .. ")")
 	end
-
-	PanelTemplates_TabResize(tab, -6)
 end
 
-TMW:RegisterCallback("TMW_CONFIG_ICON_LOADED", function(event, icon)
-	CNDT:SetTabText("icon")
-	CNDT:SetTabText("group")
-end)
+function CNDT:SetTabText(conditionSetName)
+	local ConditionSet = CNDT.ConditionSets[conditionSetName] or CNDT.CurrentConditionSet
 	
-function CNDT:GetTypeData(type)
-	if type == "icon" then
-		return type, TMW.db.profile.Groups[CI.g].Icons[CI.i].Conditions
-	elseif type == "group" then
-		return type, TMW.db.profile.Groups[CI.g].Conditions
-	else
-		return CNDT.type, CNDT.settings
+	local tab = ConditionSet.useDynamicTab and TMW.IE.DynamicConditionTab or ConditionSet:GetTab()
+	
+	tab:SetText(CNDT:GetTabText(conditionSetName))
+
+	if tab:IsShown() then
+		PanelTemplates_TabResize(tab, -6)
 	end
 end
+
 
 
 ---------- Dropdowns ----------
@@ -177,106 +225,94 @@ local commonConditions = {
 	"STANCE",
 }
 
-local function AddConditionToDropDown(v)
-	if not v or v.hidden then return end
+local function AddConditionToDropDown(conditionData)	
 	local info = UIDropDownMenu_CreateInfo()
 	info.func = CNDT.TypeMenu_DropDown_OnClick
-	info.text = v.text
-	info.tooltipTitle = v.text
-	info.tooltipText = v.tooltip
+	info.text = conditionData.text
+	info.tooltipTitle = conditionData.text
+	info.tooltipText = conditionData.tooltip
 	info.tooltipOnButton = true
-	info.value = v.value
-	info.arg1 = v
-	info.icon = get(v.icon)
-	if v.tcoords then
-		info.tCoordLeft = v.tcoords[1]
-		info.tCoordRight = v.tcoords[2]
-		info.tCoordTop = v.tcoords[3]
-		info.tCoordBottom = v.tcoords[4]
+	info.value = conditionData.value
+	info.arg1 = conditionData
+	info.icon = get(conditionData.icon)
+	if conditionData.tcoords then
+		info.tCoordLeft = conditionData.tcoords[1]
+		info.tCoordRight = conditionData.tcoords[2]
+		info.tCoordTop = conditionData.tcoords[3]
+		info.tCoordBottom = conditionData.tcoords[4]
 	end
 	UIDropDownMenu_AddButton(info, UIDROPDOWNMENU_MENU_LEVEL)
+	
+	return true
 end
 
-function CNDT:TypeMenu_DropDown()
 
-	-- populate the "frequently used" submenu
-	if UIDROPDOWNMENU_MENU_LEVEL == 2 and UIDROPDOWNMENU_MENU_VALUE == "FREQ" then
-
-		-- num is a count of how many we have added. We dont want to add more than maxNum things to the menu
-		local num, maxNum = 0, 20
-
-		-- addedThings IN THIS CASE is a list of conditions that have been added to avoid duplicates between the two sources for the list (see below)
-		wipe(addedThings)
-
-		-- add the conditions that should always be at the top of the list
-		for _, k in ipairs(commonConditions) do
-			AddConditionToDropDown(CNDT.ConditionsByType[k])
-			addedThings[k] = 1
-			num = num + 1
-			if num > maxNum then break end
-		end
-
-		-- usedCount is a list of how many times a condition has been used.
-		-- We want to add the ones that get used the most to the rest of the menu
-		wipe(usedCount)
-		for Condition in TMW:InConditionSettings() do
-			usedCount[Condition.Type] = (usedCount[Condition.Type] or 0) + 1
-		end
-
-		-- add the most used conditions to the list
-		for k, n in TMW:OrderedPairs(usedCount, "values", true) do
-			if not addedThings[k] and n > 1 then
-				AddConditionToDropDown(CNDT.ConditionsByType[k])
-				addedThings[k] = 1
-				num = num + 1
-				if num > maxNum then break end
+function CNDT:TypeMenu_DropDown()	
+	if UIDROPDOWNMENU_MENU_LEVEL == 1 then
+		for k, categoryData in ipairs(CNDT.Categories) do
+			
+			if categoryData.categorySpacebefore then
+				TMW.AddDropdownSpacer()
 			end
-		end
-	end
 
-	wipe(addedThings)
-	local addedFreq = true -- FREQUENCY SUBMENU DISABLED BY SETTING THIS TRUE
-	for k, v in ipairs(CNDT.Types) do
-
-		-- add the frequently used submenu before the first condition that does not have a category
-		if not v.category and not addedFreq and UIDROPDOWNMENU_MENU_LEVEL == 1 then
-			TMW.AddDropdownSpacer()
-
+			local shouldAddCategory
+			local CurrentConditionSet = CNDT.CurrentConditionSet
+			
+			for k, conditionData in ipairs(categoryData.conditionData) do
+				local shouldAdd = not get(conditionData.hidden)
+				
+				if CurrentConditionSet.ConditionTypeFilter then
+					if not CurrentConditionSet:ConditionTypeFilter(conditionData) then
+						shouldAdd = false
+					end
+				end
+				
+				if not conditionData.IS_SPACER and shouldAdd then
+					shouldAddCategory = true
+					break
+				end
+			end
+			
 			local info = UIDropDownMenu_CreateInfo()
-			info.text = L["CNDTCAT_FREQUENTLYUSED"]
-			info.value = "FREQ"
+			info.text = categoryData.name
+			info.value = categoryData.identifier
 			info.notCheckable = true
-			info.hasArrow = true
+			info.hasArrow = shouldAddCategory
+			info.disabled = not shouldAddCategory
 			UIDropDownMenu_AddButton(info, UIDROPDOWNMENU_MENU_LEVEL)
-			addedFreq = true
 		end
-
-		if ((UIDROPDOWNMENU_MENU_LEVEL == 2 and v.category == UIDROPDOWNMENU_MENU_VALUE) or (UIDROPDOWNMENU_MENU_LEVEL == 1 and not v.category)) and not v.hidden then
-			if v.spacebefore then
-				TMW.AddDropdownSpacer()
+		
+	elseif UIDROPDOWNMENU_MENU_LEVEL == 2 then
+		local categoryData = CNDT.CategoriesByID[UIDROPDOWNMENU_MENU_VALUE]
+		
+		local queueSpacer
+		local hasAddedOneCondition
+		local lastButtonWasSpacer
+		
+		local CurrentConditionSet = CNDT.CurrentConditionSet
+		
+		for k, conditionData in ipairs(categoryData.conditionData) do
+			local shouldAdd = not get(conditionData.hidden)
+			
+			if not conditionData.IS_SPACER and CurrentConditionSet.ConditionTypeFilter then
+				if not CurrentConditionSet:ConditionTypeFilter(conditionData) then
+					shouldAdd = false
+				end
 			end
-
-			-- most conditions are added to the dropdown right here
-			AddConditionToDropDown(v)
-
-			if v.spaceafter then
-				TMW.AddDropdownSpacer()
+			
+			if shouldAdd then
+				if conditionData.IS_SPACER then
+					queueSpacer = true
+				else
+					if hasAddedOneCondition and queueSpacer then
+						TMW.AddDropdownSpacer()
+						queueSpacer = false
+					end
+					
+					AddConditionToDropDown(conditionData)
+					hasAddedOneCondition = true
+				end
 			end
-
-		elseif UIDROPDOWNMENU_MENU_LEVEL == 1 and v.category and not addedThings[v.category] then
-			-- addedThings IN THIS CASE is a list of categories that have been added. Add ones here that have not been added yet.
-
-			if v.categorySpacebefore then
-				TMW.AddDropdownSpacer()
-			end
-
-			local info = UIDropDownMenu_CreateInfo()
-			info.text = v.category
-			info.value = v.category
-			info.notCheckable = true
-			info.hasArrow = true
-			addedThings[v.category] = true
-			UIDropDownMenu_AddButton(info, UIDROPDOWNMENU_MENU_LEVEL)
 		end
 	end
 end
@@ -299,38 +335,6 @@ function CNDT:TypeMenu_DropDown_OnClick(data)
 	CloseDropDownMenus()
 end
 
-function CNDT:UnitMenu_DropDown()
-	for k, unitData in pairs(TMW.Units) do
-		local info = UIDropDownMenu_CreateInfo()
-		info.func = CNDT.UnitMenu_DropDown_OnClick
-		if unitData.range then
-			info.tooltipTitle = unitData.tooltipTitle or unitData.text
-			info.tooltipText = "|cFFFF0000#|r = 1-" .. unitData.range
-			info.tooltipOnButton = true
-		elseif unitData.desc then
-			info.tooltipTitle = unitData.tooltipTitle or unitData.text
-			info.tooltipText = unitData.desc
-			info.tooltipOnButton = true
-		end
-		info.text = unitData.text
-		info.unitDataalue = unitData.unitDataalue
-		info.hasArrow = unitData.hasArrow
-		info.notCheckable = true
-		info.arg1 = self
-		info.arg2 = unitData
-		UIDropDownMenu_AddButton(info)
-	end
-end
-
-function CNDT:UnitMenu_DropDown_OnClick(frame, v)
-	local ins = v.value
-	if v.range then
-		ins = v.value .. "|cFFFF0000#|r"
-	end
-	frame:GetParent():SetText(ins)
-	CNDT:Save()
-	CloseDropDownMenus()
-end
 
 function CNDT:IconMenu_DropDown()
 	if UIDROPDOWNMENU_MENU_LEVEL == 2 then
@@ -379,6 +383,7 @@ function CNDT:IconMenu_DropDown_OnClick(frame)
 	CloseDropDownMenus()
 	CNDT:Save()
 end
+
 
 function CNDT:OperatorMenu_DropDown()
 	for k, v in pairs(operators) do
@@ -610,9 +615,9 @@ function CndtGroup.OnNewInstance(group)
 	TMW:RegisterCallback("TMW_CONFIG_SAVE_SETTINGS", "ClearFocus", group.EditBox2)
 end
 
-function CndtGroup.TypeCheck(group, data)
-	if data then
-		local unit = data.unit
+function CndtGroup.TypeCheck(group, conditionData)
+	if conditionData then
+		local unit = conditionData.unit
 
 		group.Icon:Hide() --it bugs sometimes so just do it by default
 		group.Runes:Hide()
@@ -628,24 +633,24 @@ function CndtGroup.TypeCheck(group, data)
 			group.TextUnitDef:SetText(nil)
 		end
 
-		if data.name then
+		if conditionData.name then
 			group.EditBox:Show()
-			if type(data.name) == "function" then
-				data.name(group.EditBox)
+			if type(conditionData.name) == "function" then
+				conditionData.name(group.EditBox)
 				group.EditBox:GetScript("OnTextChanged")(group.EditBox)
 			else
 				TMW:TT(group.EditBox)
 			end
-			if data.check then
-				data.check(group.Check)
+			if conditionData.check then
+				conditionData.check(group.Check)
 				group.Check:Show()
 			else
 				group.Check:Hide()
 			end
-			TMW.SUG:EnableEditBox(group.EditBox, data.useSUG, not data.allowMultipleSUGEntires)
+			TMW.SUG:EnableEditBox(group.EditBox, conditionData.useSUG, not conditionData.allowMultipleSUGEntires)
 
 			group.Slider:SetWidth(217)
-			if data.noslide then
+			if conditionData.noslide then
 				group.EditBox:SetWidth(520)
 			else
 				group.EditBox:SetWidth(295)
@@ -656,21 +661,21 @@ function CndtGroup.TypeCheck(group, data)
 			group.Slider:SetWidth(522)
 			TMW.SUG:DisableEditBox(group.EditBox)
 		end
-		if data.name2 then
+		if conditionData.name2 then
 			group.EditBox2:Show()
-			if type(data.name2) == "function" then
-				data.name2(group.EditBox2)
+			if type(conditionData.name2) == "function" then
+				conditionData.name2(group.EditBox2)
 				group.EditBox2:GetScript("OnTextChanged")(group.EditBox2)
 			else
 				TMW:TT(group.EditBox2)
 			end
-			if data.check2 then
-				data.check2(group.Check2)
+			if conditionData.check2 then
+				conditionData.check2(group.Check2)
 				group.Check2:Show()
 			else
 				group.Check2:Hide()
 			end
-			TMW.SUG:EnableEditBox(group.EditBox2, data.useSUG, not data.allowMultipleSUGEntires)
+			TMW.SUG:EnableEditBox(group.EditBox2, conditionData.useSUG, not conditionData.allowMultipleSUGEntires)
 			group.EditBox:SetWidth(250)
 			group.EditBox2:SetWidth(250)
 		else
@@ -679,14 +684,14 @@ function CndtGroup.TypeCheck(group, data)
 			TMW.SUG:DisableEditBox(group.EditBox2)
 		end
 
-		if data.nooperator then
+		if conditionData.nooperator then
 			group.TextOperator:SetText("")
 			group.Operator:Hide()
 		else
 			group.Operator:Show()
 		end
 
-		if data.noslide then
+		if conditionData.noslide then
 			showval = false
 			group.Slider:Hide()
 			group.TextValue:SetText("")
@@ -696,9 +701,12 @@ function CndtGroup.TypeCheck(group, data)
 			group.Slider:Show()
 		end
 
-		if data.showhide then
-			data.showhide(group, data)
+		if conditionData.showhide then
+			conditionData.showhide(group, conditionData)
 		end
+		
+		TMW:Fire("TMW_CNDT_GROUP_TYPECHECK", group, conditionData)
+		
 		return showval
 	else
 		group.Unit:Hide()
@@ -721,7 +729,6 @@ function CndtGroup.Save(group)
 	local condition = CNDT.settings[group:GetID()]
 
 	condition.Type = UIDropDownMenu_GetSelectedValue(group.Type) or ""
-	condition.Unit = strtrim(group.Unit:GetText()) or "player"
 	condition.Operator = UIDropDownMenu_GetSelectedValue(group.Operator) or "=="
 	condition.Icon = UIDropDownMenu_GetSelectedValue(group.Icon) or ""
 	condition.Level = tonumber(group.Slider:GetValue()) or 0
@@ -730,6 +737,9 @@ function CndtGroup.Save(group)
 	condition.Name2 = strtrim(group.EditBox2:GetText()) or ""
 	condition.Checked = not not group.Check:GetChecked()
 	condition.Checked2 = not not group.Check2:GetChecked()
+	
+	
+	condition.Unit = strtrim(group.Unit:GetText()) or "player"
 
 
 	for k, rune in pairs(group.Runes) do

@@ -1,0 +1,17 @@
+<Ui>
+
+<Script file="Resources.lua"/>
+
+<Script file="Spells.lua"/>
+<Script file="BuffsDebuffs.lua"/>
+
+<Script file="PlayerAttributes.lua"/>
+<Script file="UnitAttributes.lua"/>
+
+<Script file="PlayerCombatStats.lua"/>
+
+<Script file="Currencies.lua"/>
+
+<Script file="Misc.lua"/>
+
+</Ui>

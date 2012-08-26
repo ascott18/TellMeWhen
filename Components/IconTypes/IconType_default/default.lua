@@ -35,6 +35,8 @@ Type:SetModuleAllowance("IconModule_TimerBar_Overlay", false)
 Type:SetModuleAllowance("IconModule_Texts", false)
 Type:SetModuleAllowance("IconModule_CooldownSweep", false)
 
+Type:RegisterConfigPanel_XMLTemplate(110, "TellMeWhen_DefaultInstructions")
+
 
 function Type:Setup(icon, groupID, iconID)
 	if icon.Name ~= "" then

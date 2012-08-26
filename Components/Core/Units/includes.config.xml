@@ -1,0 +1,8 @@
+<Ui>
+
+<Include file="unitInput.xml"/>
+ 
+<Script file="suggesterModule.lua"/>
+<Script file="unitInput.lua"/>
+
+</Ui>

@@ -15,4 +15,10 @@
 <Include file="IconModule_TimerBar_BarDisplay\includes.config.xml"/>
 <Include file="IconModule_TimerBar_Overlay\includes.config.xml"/>
 
+<Include file="IconModule_GroupMover\includes.config.xml"/>
+<Include file="IconModule_IconDragger\includes.config.xml"/>
+<Include file="IconModule_IconEditorLoader\includes.config.xml"/>
+<Include file="IconModule_RecieveSpellDrags\includes.config.xml"/>
+<Include file="IconModule_Tooltip\includes.config.xml"/>
+
 </Ui>

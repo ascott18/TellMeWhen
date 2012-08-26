@@ -34,6 +34,8 @@ local SND = TMW.SND
 SND.tabText = L["SOUND_TAB"]
 SND.LSM = LSM
 
+TMW.HELP:NewCode("SND_INVALID_CUSTOM")
+
 TMW:RegisterCallback("TMW_OPTIONS_LOADED", function()	
 	local Sounds = SND.ConfigContainer.SoundList
 	

@@ -3,5 +3,8 @@
 <Script file="Config.lua"/>
 
 <Include file="Config.xml"/>
+
+
+<Include file="Categories\includes.config.xml"/>
  
 </Ui>

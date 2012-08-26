@@ -52,7 +52,7 @@ Type:RegisterConfigPanel_XMLTemplate(100, "TellMeWhen_ChooseName", {
 	SUGType = "multistate",
 })
 
-Type:RegisterConfigPanel_XMLTemplate(130, "TellMeWhen_WhenChecks", {
+Type:RegisterConfigPanel_XMLTemplate(165, "TellMeWhen_WhenChecks", {
 	text = L["ICONMENU_SHOWWHEN"],
 	[0x2] = { text = "|cFF00FF00" .. L["ICONMENU_USABLE"], 			},
 	[0x1] = { text = "|cFFFF0000" .. L["ICONMENU_UNUSABLE"], 		},
@@ -162,7 +162,7 @@ function Type:Setup(icon, groupID, iconID)
 	
 	icon:SetUpdateMethod("manual")
 	
-	icon:SetScript("OnUpdate", MultiStateCD_OnUpdate)
+	icon:SetUpdateFunction(MultiStateCD_OnUpdate)
 	icon:Update()
 end
 

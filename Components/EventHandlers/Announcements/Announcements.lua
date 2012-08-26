@@ -37,7 +37,7 @@ local DogTag = LibStub("LibDogTag-3.0", true)
 
 
 local ANN = TMW.Classes.EventHandler:New("Announcements")
-TMW.ANN = ANN --TODO: refactor Announcements->Texts, ANN->??
+TMW.ANN = ANN
 
 ANN.kwargs = {}
 ANN.AllChannelsByChannel = {}
@@ -392,7 +392,7 @@ ANN:RegisterEventHandlerDataNonSpecific(70, "FRAME", {
 		-- GLOBALS: RaidWarningFrame, RaidNotice_AddMessage
 		if _G[Location] == RaidWarningFrame then
 			-- workaround: blizzard's code doesnt manage colors correctly when there are 2 messages being displayed with different colors.
-			Text = ("|cff%02x%02x%02x"):format(data.r * 255, data.g * 255, data.b * 255) .. Text .. "|r"
+			Text = ("|cff%02x%02x%02x"):format(data.r * 0xFF, data.g * 0xFF, data.b * 0xFF) .. Text .. "|r"
 
 			RaidNotice_AddMessage(RaidWarningFrame, Text, bullshitTable) -- arg3 still demands a valid table for the color info, even if it is empty
 		else
@@ -479,7 +479,7 @@ ANN:RegisterEventHandlerDataNonSpecific(83, "MSBT", {
 		if MikSBT then
 			local Size = data.Size
 			if Size == 0 then Size = nil end
-			MikSBT.DisplayMessage(Text, data.Location, data.Sticky, data.r*255, data.g*255, data.b*255, Size, nil, data.ShowIconTex and icon.attributes.texture)
+			MikSBT.DisplayMessage(Text, data.Location, data.Sticky, data.r*0xFF, data.g*0xFF, data.b*0xFF, Size, nil, data.ShowIconTex and icon.attributes.texture)
 		end
 	end,
 })

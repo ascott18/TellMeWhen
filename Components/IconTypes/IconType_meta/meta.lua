@@ -104,7 +104,7 @@ local function Meta_OnUpdate(icon, time)
 	for n = 1, #CompiledIcons do
 		local ic = _G[CompiledIcons[n]]
 		local attributes = ic and ic.attributes
-		if ic and ic.OnUpdate and attributes.shown and not (CheckNext and ic.__lastMetaCheck == time) and ic.viewData == icon.viewData then
+		if ic and ic.UpdateFunction and attributes.shown and not (CheckNext and ic.__lastMetaCheck == time) and ic.viewData == icon.viewData then
 			ic:Update()
 			
 			if attributes.realAlpha > 0 and attributes.shown then -- make sure to re-check attributes.shown (it might have changed from 2 lines ago)
@@ -128,8 +128,6 @@ local function Meta_OnUpdate(icon, time)
 	end
 
 	if icToUse then
-	
-		--TODO TEST: make sure it doesnt recurse
 		while icToUse.Type == "meta" and icToUse.__currentIcon do
 			icToUse = icToUse.__currentIcon
 		end
@@ -139,14 +137,6 @@ local function Meta_OnUpdate(icon, time)
 		if icToUse ~= icon.__currentIcon then
 
 			TMW:Fire("TMW_ICON_META_INHERITED_ICON_CHANGED", icon, icToUse)
-
-			if LMB then -- i dont like the way that Masque handles this (inefficient), so i'll do it myself
-				local icnt = icToUse.normaltex -- icon.normaltex = icon.__LBF_Normal or icon:GetNormalTexture() -- set during icon:Setup()
-				local iconnt = icon.normaltex
-				if icnt and iconnt then
-					iconnt:SetVertexColor(icnt:GetVertexColor())
-				end
-			end
 			
 			icon:SetupAllModulesForIcon(icToUse)
 			icon:SetModulesToEnabledStateOfIcon(icToUse)
@@ -303,7 +293,7 @@ function Type:Setup(icon, groupID, iconID)
 	icon:SetInfo("alpha", 0)
 		
 	if not dontUpdate then
-		icon:SetScript("OnUpdate", Meta_OnUpdate)
+		icon:SetUpdateFunction(Meta_OnUpdate)
 		TMW:RegisterCallback("TMW_ICON_UPDATED", TMW_ICON_UPDATED, icon)
 	end
 	icon.metaUpdateQueued = true
@@ -312,51 +302,20 @@ end
 --TODO: make this into an actual config panel (META SORT)
 
 function Type:IE_TypeLoaded()
-	--[[local spacing = 70
-	TMW.IE.Panels.Sort:SetPoint("BOTTOMLEFT", 20, -22)
-	TMW.IE.Panels.Sort.text:SetWidth(spacing)
-
-	TMW.IE.Panels.Sort.Radio1:SetPoint("TOPLEFT", spacing, 19)
-	TMW.IE.Panels.Sort.Radio1.text:SetWidth(spacing + 2)
-
-	TMW.IE.Panels.Sort.Radio2:SetPoint("TOPLEFT", TMW.IE.Panels.Sort.Radio1, "TOPRIGHT", spacing, 0)
-	TMW.IE.Panels.Sort.Radio2.text:SetWidth(spacing + 2)
-
-	TMW.IE.Panels.Sort.Radio3:SetPoint("TOPLEFT", TMW.IE.Panels.Sort.Radio2, "TOPRIGHT", spacing, 0)
-	TMW.IE.Panels.Sort.Radio3.text:SetWidth(spacing + 2)
-
+	--[[
 	TMW:TT(TMW.IE.Panels.Sort.Radio1, "SORTBYNONE", "SORTBYNONE_META_DESC")
 	TMW:TT(TMW.IE.Panels.Sort.Radio2, "ICONMENU_SORTASC", "ICONMENU_SORTASC_META_DESC")
 	TMW:TT(TMW.IE.Panels.Sort.Radio3, "ICONMENU_SORTDESC", "ICONMENU_SORTDESC_META_DESC")
 ]]
 
---TODO: do something with this to make it behave the same way, or something
-	--TMW.IE.Panels.ConditionAlpha.text:SetText(L["CONDITIONALPHA_METAICON"])
-	--TMW:TT(TMW.IE.Panels.ConditionAlpha, "CONDITIONALPHA_METAICON", "CONDITIONALPHA_METAICON_DESC")
 end
 
 function Type:IE_TypeUnloaded()--[[
-	TMW.IE.Panels.Sort:SetPoint("BOTTOMLEFT", 16, 72)
-	TMW.IE.Panels.Sort.text:SetWidth(0)
-
-	TMW.IE.Panels.Sort.Radio1:SetPoint("TOPLEFT", 0, 1)
-	TMW.IE.Panels.Sort.Radio1.text:SetWidth(TMW.WidthCol1)
-
-	TMW.IE.Panels.Sort.Radio2:SetPoint("TOPLEFT", TMW.IE.Panels.Sort.Radio1, "BOTTOMLEFT", 0, 8)
-	TMW.IE.Panels.Sort.Radio2.text:SetWidth(TMW.WidthCol1)
-
-	TMW.IE.Panels.Sort.Radio3:SetPoint("TOPLEFT", TMW.IE.Panels.Sort.Radio2, "BOTTOMLEFT", 0, 8)
-	TMW.IE.Panels.Sort.Radio3.text:SetWidth(TMW.WidthCol1)
-
 	TMW:TT(TMW.IE.Panels.Sort.Radio1, "SORTBYNONE", "SORTBYNONE_DESC")
 	TMW:TT(TMW.IE.Panels.Sort.Radio2, "ICONMENU_SORTASC", "ICONMENU_SORTASC_DESC")
 	TMW:TT(TMW.IE.Panels.Sort.Radio3, "ICONMENU_SORTDESC", "ICONMENU_SORTDESC_DESC")
 ]]
 
-
---TODO: do something with this to make it behave the same way, or something
---	TMW.IE.Panels.ConditionAlpha.text:SetText(L["CONDITIONALPHA"])
---	TMW:TT(TMW.IE.Panels.ConditionAlpha, "CONDITIONALPHA", "CONDITIONALPHA_DESC")
 end
 
 function Type:TMW_ICON_TYPE_CHANGED(event, icon, typeData, typeData_old)

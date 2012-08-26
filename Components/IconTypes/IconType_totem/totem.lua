@@ -48,7 +48,7 @@ Type:RegisterIconDefaults{
 
 if pclass ~= "DRUID" and pclass ~= "DEATHKNIGHT" then
 	Type:RegisterConfigPanel_XMLTemplate(100, "TellMeWhen_ChooseName", {
-		title = L["ICONMENU_CHOOSENAME"] .. " " .. L["ICONMENU_CHOOSENAME_ORBLANK"],
+		title = L["ICONMENU_CHOOSENAME2"] .. " " .. L["ICONMENU_CHOOSENAME_ORBLANK"],
 	})
 end
 
@@ -102,7 +102,7 @@ elseif pclass == "DRUID" then
 	end)
 end
 
-Type:RegisterConfigPanel_XMLTemplate(130, "TellMeWhen_WhenChecks", {
+Type:RegisterConfigPanel_XMLTemplate(165, "TellMeWhen_WhenChecks", {
 	text = L["ICONMENU_SHOWWHEN"],
 	[0x2] = { text = "|cFF00FF00" .. L["ICONMENU_PRESENT"],		},
 	[0x1] = { text = "|cFFFF0000" .. L["ICONMENU_ABSENT"],		},
@@ -195,7 +195,7 @@ function Type:Setup(icon, groupID, iconID)
 	icon:RegisterEvent("PLAYER_TOTEM_UPDATE")
 	icon:SetScript("OnEvent", Totem_OnEvent)
 	
-	icon:SetScript("OnUpdate", Totem_OnUpdate)
+	icon:SetUpdateFunction(Totem_OnUpdate)
 	icon:Update()
 end
 
@@ -208,7 +208,7 @@ function Type:GetIconMenuText(data)
 	return text, data.Name and data.Name ~= ""  and data.Name .. "\r\n" or ""
 end
 
-function Type:GetNameForDisplay(icon, data, doInsertLink)
+function Type:FormatSpellForOutput(icon, data, doInsertLink)
 	data = data or icon.NameFirst
 	
 	if data then

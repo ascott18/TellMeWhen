@@ -70,7 +70,7 @@ Type:RegisterConfigPanel_XMLTemplate(100, "TellMeWhen_ChooseName", {
 
 Type:RegisterConfigPanel_XMLTemplate(105, "TellMeWhen_Unit")
 
-Type:RegisterConfigPanel_XMLTemplate(130, "TellMeWhen_WhenChecks", {
+Type:RegisterConfigPanel_XMLTemplate(165, "TellMeWhen_WhenChecks", {
 	text = L["ICONMENU_SHOWWHEN"],
 	[0x2] = { text = "|cFF00FF00" .. L["ICONMENU_DRABSENT"], 	},
 	[0x1] = { text = "|cFFFF0000" .. L["ICONMENU_DRPRESENT"], 	},
@@ -184,7 +184,7 @@ local function DR_OnUpdate(icon, time)
 	icon:SetInfo("alpha", 0)
 end
 
-function Type:GetNameForDisplay(icon, data, doInsertLink)
+function Type:FormatSpellForOutput(icon, data, doInsertLink)
 	return data and (L[data] or gsub(data, "DR%-", ""))
 end
 
@@ -273,7 +273,7 @@ function Type:Setup(icon, groupID, iconID)
 	icon:SetScript("OnEvent", DR_OnEvent)
 	icon:RegisterEvent("COMBAT_LOG_EVENT_UNFILTERED")
 
-	icon:SetScript("OnUpdate", DR_OnUpdate)
+	icon:SetUpdateFunction(DR_OnUpdate)
 	icon:Update()
 end
 

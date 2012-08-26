@@ -4,18 +4,17 @@
 		<Size y="40"/>
 		<Frames>
 			<EditBox name="$parentConditionDur" parentKey="ConditionDur" inherits="TellMeWhen_TimeEditBoxTemplate">
-				<Size x="60" y="15"/>
+				<Size x="40" y="15"/>
 				<Anchors>
 					<Anchor point="TOPLEFT" x="33" y="-17"/>
 				</Anchors>
 				<Scripts>
 					<OnLoad>
-						self.text:SetText(TMW.L["ICONMENU_SUCCEED"])
-						self.setting = "ConditionDur"
+						self.text:SetText(TMW.L["ICONMENU_ONSUCCEED"])
 						
 						TMW.IE:CreateSettingFrameFromData(self, {
 							setting = "ConditionDur",
-							title = TMW.L["ICONMENU_SUCCEED"],
+							title = TMW.L["ICONMENU_ONSUCCEED"],
 							tooltip = TMW.L["CONDITION_TIMERS_SUCCEED_DESC"],
 							disabled = function(self)
 								return not TMW.CI.ics.ConditionDurEnabled
@@ -28,19 +27,18 @@
 				</Scripts>
 			</EditBox>
 			<EditBox name="$parentUnConditionDur" parentKey="UnConditionDur" inherits="TellMeWhen_TimeEditBoxTemplate">
-				<Size x="60" y="15"/>
+				<Size x="40" y="15"/>
 				<Anchors>
 					<Anchor point="LEFT" relativeTo="$parentConditionDur" relativePoint="RIGHT" x="35"/>
 				</Anchors>
 				<Scripts>
 					<OnLoad>
-						self.text:SetText(TMW.L["ICONMENU_FAIL"])
-						self.setting = "UnConditionDur"
+						self.text:SetText(TMW.L["ICONMENU_ONFAIL"])
 						
 						TMW.IE:CreateSettingFrameFromData(self, {
 							setting = "UnConditionDur",
 							title = MAXIMUM,
-							title = TMW.L["ICONMENU_FAIL"],
+							title = TMW.L["ICONMENU_ONFAIL"],
 							tooltip = TMW.L["CONDITION_TIMERS_FAIL_DESC"],
 							disabled = function(self)
 								return not TMW.CI.ics.UnConditionDurEnabled
@@ -60,6 +58,11 @@
 				</Anchors>
 				<Scripts>
 					<OnLoad>
+						local ConditionDur = self:GetParent().ConditionDur
+						ConditionDur.text:SetParent(self) -- This is evil and lazy. So, so lazy.
+						ConditionDur.text:SetPoint("LEFT", 2, 0)
+						ConditionDur.text:SetPoint("RIGHT", ConditionDur)
+						
 						TMW.IE:CreateSettingFrameFromData(self, {
 							setting = "ConditionDurEnabled",
 							label = "",
@@ -76,6 +79,11 @@
 				</Anchors>
 				<Scripts>
 					<OnLoad>
+						local UnConditionDur = self:GetParent().UnConditionDur
+						UnConditionDur.text:SetParent(self) -- This is evil and lazy. So, so lazy.
+						UnConditionDur.text:SetPoint("LEFT", 2, 0)
+						UnConditionDur.text:SetPoint("RIGHT", UnConditionDur)
+						
 						TMW.IE:CreateSettingFrameFromData(self, {
 							setting = "UnConditionDurEnabled",
 							label = "",
@@ -92,14 +100,14 @@
 					<Anchor point="LEFT" relativeTo="$parentUnConditionDur" relativePoint="RIGHT" x="10" y="-0.5"/>
 				</Anchors>
 				<Scripts>
-					<OnLoad>
-						--self.text:SetWidth(TMW.WidthCol1)
-						
+					<OnLoad>						
 						TMW.IE:CreateSettingFrameFromData(self, {
 							setting = "OnlyIfCounting",
 							title = TMW.L["ICONMENU_ONLYIFCOUNTING"],
 							tooltip = TMW.L["ICONMENU_ONLYIFCOUNTING_DESC"],
 						})
+						
+						self:ConstrainLabel(self:GetParent(), "RIGHT")
 					</OnLoad>
 				</Scripts>
 			</CheckButton>

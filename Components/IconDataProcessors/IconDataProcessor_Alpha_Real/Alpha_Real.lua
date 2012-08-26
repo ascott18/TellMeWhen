@@ -73,12 +73,6 @@ function Processor:CompileFunctionSegment(t)
 		local oldalpha = attributes.realAlpha or 0
 
 		attributes.realAlpha = realAlpha
-		
-		-- For ICONFADE. much nicer than using __alpha because it will transition from what is curently visible,
-		-- not what should be visible after any current fades end
-		-- TODO: maybe do this differently? 
-		-- TODO: (misplaced note) more closely assocate icon events with data processors
-		-- TODO: (misplaced note) more closely assocate icon animaions with data processors
 
 		-- detect events that occured, and handle them if they did
 		if realAlpha == 0 then

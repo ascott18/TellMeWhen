@@ -22,7 +22,7 @@
 			<CheckButton name="$parentDurationMaxEnabled" parentKey="DurationMaxEnabled" inherits="TellMeWhen_CheckTemplate">
 				<Size x="26" y="26"/>
 				<Anchors>
-					<Anchor point="LEFT" relativeTo="$parentDurationMinEnabled" relativePoint="RIGHT" x="80"/>
+					<Anchor point="LEFT" relativeTo="$parentDurationMinEnabled" relativePoint="RIGHT" x="45"/>
 				</Anchors>
 				<Scripts>
 					<OnLoad>
@@ -38,14 +38,16 @@
 			</CheckButton>
 			
 			<EditBox name="$parentDurationMin" parentKey="DurationMin" inherits="TellMeWhen_TimeEditBoxTemplate">
-				<Size x="60" y="15"/>
+				<Size x="40" y="15"/>
 				<Anchors>
 					<Anchor point="LEFT" relativeto="$parentDurationMinEnabled" relativePoint="RIGHT" x="1" y="0.5"/>
 				</Anchors>
 				<Scripts>
 					<OnLoad>
 						self.text:SetText(MINIMUM)
-						self.setting = "DurationMin"
+						self.text:SetParent(self:GetParent().DurationMinEnabled) -- This is evil and lazy. So, so lazy.
+						self.text:SetPoint("LEFT", 2, 0)
+						self.text:SetPoint("RIGHT", self)
 						
 						TMW.IE:CreateSettingFrameFromData(self, {
 							setting = "DurationMin",
@@ -62,14 +64,16 @@
 				</Scripts>
 			</EditBox>
 			<EditBox name="$parentDurationMax" parentKey="DurationMax" inherits="TellMeWhen_TimeEditBoxTemplate">
-				<Size x="60" y="15"/>
+				<Size x="40" y="15"/>
 				<Anchors>
 					<Anchor point="LEFT" relativeto="$parentDurationMaxEnabled" relativePoint="RIGHT" x="1" y="0.5"/>
 				</Anchors>
 				<Scripts>
 					<OnLoad>
 						self.text:SetText(MAXIMUM)
-						self.setting = "DurationMax"
+						self.text:SetParent(self:GetParent().DurationMaxEnabled) -- This is evil and lazy. So, so lazy.
+						self.text:SetPoint("LEFT", 2, 0)
+						self.text:SetPoint("RIGHT", self)
 						
 						TMW.IE:CreateSettingFrameFromData(self, {
 							setting = "DurationMax",
@@ -90,7 +94,7 @@
 			<Slider name="$parentDurationAlpha" parentKey="DurationAlpha" inherits="TellMeWhen_SliderTemplate" valuestep="1">
 				<Size y="17"/>
 				<Anchors>
-					<Anchor point="LEFT" relativeTo="$parentDurationMax" relativePoint="RIGHT" x="25" />
+					<Anchor point="LEFT" relativeTo="$parentDurationMax" relativePoint="RIGHT" x="15" />
 					<Anchor point="RIGHT" x="-10" />
 					<Anchor point="TOP" y="-13" />
 				</Anchors>

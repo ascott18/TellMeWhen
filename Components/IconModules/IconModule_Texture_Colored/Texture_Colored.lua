@@ -35,6 +35,7 @@ function Texture_Colored:SetupForIcon(icon)
 	self.Colors = icon.typeData.Colors
 	self.ShowWhen = icon.ShowWhen
 	self.ShowTimer = icon.ShowTimer
+	self:UPDATE(icon)
 end
 
 local COLOR_UNLOCKED = {

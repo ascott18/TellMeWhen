@@ -2,6 +2,7 @@
 
 <Include file="IconDataProcessor_Duration\includes.core.xml"/>
 <Include file="IconDataProcessor_Spell\includes.core.xml"/>
+<Include file="IconDataProcessor_SpellCharges\includes.core.xml"/>
 <Include file="IconDataProcessor_Texture\includes.core.xml"/>
 <Include file="IconDataProcessor_Condition\includes.core.xml"/>
 <Include file="IconDataProcessor_Reverse\includes.core.xml"/>

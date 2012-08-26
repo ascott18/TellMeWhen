@@ -32,7 +32,7 @@
 				</Scripts>
 			</CheckButton>
 			<EditBox name="$parentCBarOffs" inherits="TellMeWhen_TimeEditBoxTemplate" parentKey="CBarOffs" autoFocus="false">
-				<Size x="60" y="15"/>
+				<Size x="45" y="15"/>
 				<Anchors>
 					<Anchor point="LEFT" relativeTo="$parentInvertCBar" relativePoint="RIGHT" y="1"/>
 				</Anchors>
@@ -63,6 +63,9 @@
 		<Scripts>
 			<OnLoad>
 				self.Header:SetText(TMW.L["CONFIGPANEL_CBAR_HEADER"])
+				
+				self.ShowCBar:ConstrainLabel(self.InvertCBar)
+				self.InvertCBar:ConstrainLabel(self.CBarOffs)
 				
 				TMW.IE:DistributeFrameAnchorsLaterally(self, 3, self.ShowCBar, self.InvertCBar, self.CBarOffs)
 			</OnLoad>

@@ -58,14 +58,9 @@ Type:RegisterConfigPanel_XMLTemplate(100, "TellMeWhen_ChooseName", {
 	SUGType = "spellwithduration",
 })
 
-Type:RegisterConfigPanel_XMLTemplate(105, "TellMeWhen_Unit" --[[,{
-	-- this commented shit here is the stuff for allowing unitcooldown icons to work for any known actors (instead of just ones with unitIDs).
-	-- It turned out to suck, but im leaving the code in. There is a lot of other code scattered in the file that is also part of this.
-	allowNoUnit = true,
-	title = L["ICONMENU_UNITSTOWATCH"] .. " " .. L["ICONMENU_UNITSTOWATCH_ALL"],
-}]])
+Type:RegisterConfigPanel_XMLTemplate(105, "TellMeWhen_Unit")
 
-Type:RegisterConfigPanel_XMLTemplate(130, "TellMeWhen_WhenChecks", {
+Type:RegisterConfigPanel_XMLTemplate(165, "TellMeWhen_WhenChecks", {
 	text = L["ICONMENU_SHOWWHEN"],
 	[0x2] = { text = "|cFF00FF00" .. L["ICONMENU_USABLE"], 			},
 	[0x1] = { text = "|cFFFF0000" .. L["ICONMENU_UNUSABLE"], 		},
@@ -92,7 +87,6 @@ local Cooldowns = setmetatable({}, {__index = function(t, k)
 	t[k] = n
 	return n
 end}) TMW.Cooldowns = Cooldowns
---local GUIDsToNames = {}
 
 local resetsOnCast = {
 	[23989] = { -- readiness
@@ -179,67 +173,81 @@ local resetsOnAura = {
 }
 
 
-function Type:COMBAT_LOG_EVENT_UNFILTERED(e, _, p, _, g, a, _, _, _, _, _, _, i, n)-- tyPe, sourceGuid, sourcenAme, spellId, spellName -- 2 NEW ARGS IN 4.2
-	if p == "SPELL_CAST_SUCCESS" or p == "SPELL_AURA_APPLIED" or p == "SPELL_AURA_REFRESH" or p == "SPELL_DAMAGE" or p == "SPELL_HEAL" or p == "SPELL_MISSED" then
-	--	GUIDsToNames[g] = a
-		--local doUpdate
-		n = n and strlowerCache[n]
-		local c = Cooldowns[g]
-		if p == "SPELL_AURA_APPLIED" and resetsOnAura[i] then
-			for id in pairs(resetsOnAura[i]) do
-				if c[id] then
+function Type:COMBAT_LOG_EVENT_UNFILTERED(e, _, cleuEvent, _, sourceGUID, _, _, _, _, _, _, _, spellID, spellName)
+	if cleuEvent == "SPELL_CAST_SUCCESS"
+	or cleuEvent == "SPELL_AURA_APPLIED"
+	or cleuEvent == "SPELL_AURA_REFRESH"
+	or cleuEvent == "SPELL_DAMAGE"
+	or cleuEvent == "SPELL_HEAL"
+	or cleuEvent == "SPELL_MISSED"
+	then
+		spellName = spellName and strlowerCache[spellName]
+		local cooldownsForGUID = Cooldowns[sourceGUID]
+		
+		if cleuEvent == "SPELL_AURA_APPLIED" and resetsOnAura[spellID] then
+			for id in pairs(resetsOnAura[spellID]) do
+				if cooldownsForGUID[id] then
 					-- dont set it to 0 if it doesnt exist so we dont make spells that havent been seen suddenly act like they have been seen
 					-- on the other hand, dont set things to nil or it will look like they haven't been seen.
-					c[id] = 0
+					cooldownsForGUID[id] = 0
 				end
 			end
-		--	doUpdate = true
 		end
+		
 		-- DONT ELSEIF HERE
-		if p == "SPELL_CAST_SUCCESS" then
-			if resetsOnCast[i] then
-				for id in pairs(resetsOnCast[i]) do
-					if c[id] then
+		if cleuEvent == "SPELL_CAST_SUCCESS" then
+			if resetsOnCast[spellID] then
+				for id in pairs(resetsOnCast[spellID]) do
+					if cooldownsForGUID[id] then
 						-- dont set it to 0 if it doesnt exist so we dont make spells that havent been seen suddenly act like they have been seen
 						-- on the other hand, dont set things to nil or it will look like they haven't been seen.
-						c[id] = 0
+						cooldownsForGUID[id] = 0
 					end
 				end
 			end
-			c[n] = i
-			c[i] = TMW.time
-		--	doUpdate = true
+			cooldownsForGUID[spellName] = spellID
+			cooldownsForGUID[spellID] = TMW.time
 		else
-			local t = TMW.time
-			local ci = c[i]
-			if (ci and ci + 1.8 < t) or not ci then 	-- if this event was less than 1.8 seconds after a SPELL_CAST_SUCCESS or a UNIT_SPELLCAST_SUCCEEDED then ignore it (this is just a safety window for spell travel time so that if we found the real cast start, we dont overwrite it)
-				c[n] = i
-				c[i] = t-1			-- hack it to make it a little bit more accurate. a max range dk deathcoil has a travel time of about 1.3 seconds, so 1 second should be a good average to be safe with travel times.
-			end						-- (and really, how often are people actually going to be tracking cooldowns with cast times? there arent that many, and the ones that do exist arent that important)
-		--	doUpdate = true
+			local time = TMW.time
+			local storedTimeForSpell = cooldownsForGUID[spellID]
+			
+			-- If this event was less than 1.8 seconds after a SPELL_CAST_SUCCESS
+			-- or a UNIT_SPELLCAST_SUCCEEDED then ignore it.
+			-- (This is just a safety window for spell travel time so that
+			-- if we found the real cast start, we dont overwrite it)
+			-- (And really, how often are people actually going to be tracking cooldowns with cast times?
+			-- There arent that many, and the ones that do exist arent that important)
+			if not storedTimeForSpell or storedTimeForSpell + 1.8 < time then
+				cooldownsForGUID[spellName] = spellID
+				
+				-- Hack it to make it a little bit more accurate.
+				-- A max range dk deathcoil has a travel time of about 1.3 seconds,
+				-- so 1 second should be a good average to be safe with travel times.
+				cooldownsForGUID[spellID] = time-1			
+			end
 		end
 		
-		--if doUpdate then
-			for k = 1, #ManualIcons do
-				local icon = ManualIcons[k]
-				local NameHash = icon.NameHash
-				if NameHash[i] or NameHash[n] then
-					icon.NextUpdateTime = 0
-				end
+		for k = 1, #ManualIcons do
+			local icon = ManualIcons[k]
+			local NameHash = icon.NameHash
+			if NameHash[spellID] or NameHash[spellName] then
+				icon.NextUpdateTime = 0
 			end
-		--end
+		end
 	end
 end
 
-function Type:UNIT_SPELLCAST_SUCCEEDED(e, u, n, _, _, i)--Unit, spellName, spellId
-	local c = Cooldowns[UnitGUID(u)]
-	n = strlowerCache[n]
-	c[n] = i
-	c[i] = TMW.time
+function Type:UNIT_SPELLCAST_SUCCEEDED(event, unit, spellName, _, _, spellID)
+	local c = Cooldowns[UnitGUID(unit)]
+	spellName = strlowerCache[spellName]
+	
+	c[spellName] = spellID
+	c[spellID] = TMW.time
+	
 	for k = 1, #ManualIcons do
 		local icon = ManualIcons[k]
         local NameHash = icon.NameHash
-		if NameHash[i] or NameHash[n] then
+		if NameHash[spellID] or NameHash[spellName] then
 			icon.NextUpdateTime = 0
 		end
 	end
@@ -416,7 +424,7 @@ function Type:Setup(icon, groupID, iconID)
 
 	icon:SetInfo("texture", TMW:GetConfigIconTexture(icon))
 
-	icon:SetScript("OnUpdate", UnitCooldown_OnUpdate)
+	icon:SetUpdateFunction(UnitCooldown_OnUpdate)
 	icon:Update()
 end
 

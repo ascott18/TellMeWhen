@@ -17,8 +17,6 @@ local TMW = TMW
 local L = TMW.L
 local print = TMW.print
 
-local LMB = LibStub("Masque", true) or (LibMasque and LibMasque("Button"))
-
 local ceil = ceil
 
 local View = TMW.Classes.IconView:New("bar")
@@ -40,7 +38,7 @@ TMW:RegisterDatabaseDefaults{
 					relativePoint	= "BOTTOMRIGHT",
 					
 					StringName		= L["TEXTLAYOUTS_DEFAULTS_STACKS"],
-					DefaultText		= "[Stacks:Hide('0', '1')]",
+					DefaultText		= "[Stacks:Hide('0')]",
 					SkinAs			= "Count",
 				},
 				{	-- [2] Duration
@@ -58,23 +56,6 @@ TMW:RegisterDatabaseDefaults{
 	},
 }
 
-View:RegisterIconDefaults{
-	SettingsPerView = {
-		bar = {
-		
-			-- don't do this. it will fallback to "",
-			-- which will then cause the icon to fallback on the group,
-			-- which will yield "bar1" (which is what we want.)
-			
-			--TextLayout = "bar1",
-			
-			Texts = {
-				"[Stacks:Hide('0', '1')]",
-				"[Duration:TMWFormatDuration]",
-			}
-		}
-	}
-}
 View:RegisterGroupDefaults{
 	SettingsPerView = {
 		bar = {
@@ -167,7 +148,6 @@ function View:Group_Setup(group)
 	local gs = group:GetSettings()
 	local gspv = group:GetSettingsPerView()
 	
-	group:SetScale(gs.Scale)
 	group:SetSize(gs.Columns*(gspv.SizeX+gspv.SpacingX)-gspv.SpacingX, gs.Rows*(gspv.SizeY+gspv.SpacingY)-gspv.SpacingY)
 end
 
@@ -227,16 +207,15 @@ function View:Icon_SetPoint(icon, positionID)
 	icon:SetPoint(position.point, position.relativeTo, position.relativePoint, position.x, position.y)
 end
 
-function View:Group_SetSizeAndScale(group)
+function View:Group_SetSize(group)
 	local gs = group:GetSettings()
 	local gspv = group:GetSettingsPerView()
 	
-	group:SetScale(gs.Scale)
 	group:SetSize(gs.Columns*(gspv.SizeX+gspv.SpacingX)-gspv.SpacingX, gs.Rows*(gspv.SizeY+gspv.SpacingY)-gspv.SpacingY)
 end
 
 function View:Group_SetupMacroAppearance(group)
-	self:Group_SetSizeAndScale(group)
+	self:Group_SetSize(group)
 	
 	for icon in TMW:InIcons(group.ID) do
 		self:Icon_SetSize(icon)
@@ -270,8 +249,6 @@ if not TMW then return end
 local TMW = TMW
 local L = TMW.L
 local print = TMW.print
-
-local LMB = LibStub("Masque", true) or (LibMasque and LibMasque("Button"))
 
 local ceil = ceil
 
@@ -320,7 +297,6 @@ function View:Group_Setup(group)
 	local gs = group:GetSettings()
 	local gspv = group:GetSettingsPerView()
 	
-	group:SetScale(gs.Scale)
 	group:SetSize(gs.Columns*(gspv.SizeX+gspv.SpacingX)-gspv.SpacingX, gs.Rows*(gspv.SizeY+gspv.SpacingY)-gspv.SpacingY)
 end
 
@@ -380,16 +356,15 @@ function View:Icon_SetPoint(icon, positionID)
 	icon:SetPoint(position.point, position.relativeTo, position.relativePoint, position.x, position.y)
 end
 
-function View:Group_SetSizeAndScale(group)
+function View:Group_SetSize(group)
 	local gs = group:GetSettings()
 	local gspv = group:GetSettingsPerView()
 	
-	group:SetScale(gs.Scale)
 	group:SetSize(gs.Columns*(gspv.SizeX+gspv.SpacingX)-gspv.SpacingX, gs.Rows*(gspv.SizeY+gspv.SpacingY)-gspv.SpacingY)
 end
 
 function View:Group_SetupMacroAppearance(group)
-	self:Group_SetSizeAndScale(group)
+	self:Group_SetSize(group)
 	
 	for icon in TMW:InIcons(group.ID) do
 		self:Icon_SetSize(icon)

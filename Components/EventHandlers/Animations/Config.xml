@@ -31,7 +31,7 @@
 					return floor(val * (1/step) + 0.5) / (1/step)
 				end
 
-				local color = 34/255
+				local color = 34/0xFF
 				self.Low:SetTextColor(color, color, color, 1)
 				self.High:SetTextColor(color, color, color, 1)
 			</OnLoad>

@@ -9,86 +9,51 @@
 				</Anchors>
 				<Scripts>
 					<OnLoad>
+						self:RegisterForDrag("LeftButton", "RightButton")
+						
+						TMW:TT(self, "CHOOSEICON", "CHOOSEICON_DESC")
 						self.wrapTooltips = 1
 						self.initialize = TMW.ME.IconMenu
 						self.Button:SetFrameLevel(self:GetFrameLevel()+1)
 						self.previewSize = 21
-						UIDropDownMenu_SetWidth(self, self:GetParent():GetParent():GetWidth() - 88, 0)
+						UIDropDownMenu_SetWidth(self, self:GetParent():GetParent():GetWidth() - 25, 0)
 					</OnLoad>
+					<OnDragStart>
+						TMW.ME.draggingFrame = self
+						TMW.ME.draggingButton = button
+						TMW.ME.draggingOriginalFrame = self
+					</OnDragStart>
+					<OnDragStop>
+						TMW.ME.draggingFrame = nil
+						TMW.ME.draggingButton = nil
+						TMW.ME.draggingOriginalFrame = nil
+					</OnDragStop>
+					<OnUpdate>						
+						if self:IsMouseOver() and TMW.ME.draggingFrame and self ~= TMW.ME.draggingFrame then
+							if TMW.ME.draggingButton == "LeftButton" then
+								TMW.ME:SwapIcons(self:GetParent():GetID(), TMW.ME.draggingFrame:GetParent():GetID())
+								
+								TMW.ME.draggingFrame = self
+								
+							elseif TMW.ME.draggingButton == "RightButton" then
+							
+								TMW.ME:SwapIcons(TMW.ME.draggingFrame:GetParent():GetID(), TMW.ME.draggingOriginalFrame:GetParent():GetID())
+								TMW.ME:SwapIcons(self:GetParent():GetID(), TMW.ME.draggingOriginalFrame:GetParent():GetID())
+								
+								TMW.ME.draggingFrame = self
+							end
+						end
+					</OnUpdate>
 				</Scripts>
 			</Frame>
 			
-			<Button name="$parentUp" parentKey="up">
-				<Size x="15" y="15"/>
-				<Anchors>
-					<Anchor point="LEFT" relativeTo="$parentIcon" relativePoint="RIGHT" x="-10" y="2"/>
-				</Anchors>
-				<Scripts>
-					<OnLoad>
-						self:SetFrameLevel(self:GetParent():GetFrameLevel() + 2)
-						TMW:TT(self, "METAPANEL_UP")
-					</OnLoad>
-					<OnClick>
-						TMW.ME:UpOrDown(self, -1)
-					</OnClick>
-				</Scripts>
-				<NormalTexture urgency="5" file="Interface\ChatFrame\UI-ChatIcon-ScrollUp-Up" alphaMode="ADD">
-					<TexCoords left="0.21875" right="0.6875" top="0.34375" bottom="0.65625"/>
-					<Color r=".7" g=".7" b=".7" a="1"/>
-				</NormalTexture>
-				<HighlightTexture urgency="5" file="Interface\ChatFrame\UI-ChatIcon-ScrollUp-Up" alphaMode="ADD">
-					<TexCoords left="0.21875" right="0.6875" top="0.34375" bottom="0.65625"/>
-				</HighlightTexture>
-			</Button>
-			<Button name="$parentDown" parentKey="down">
-				<Size x="15" y="15"/>
-				<Anchors>
-					<Anchor point="LEFT" relativeTo="$parentUp" relativePoint="RIGHT" x="3"/>
-				</Anchors>
-				<Scripts>
-					<OnLoad>
-						self:SetFrameLevel(self:GetParent():GetFrameLevel() + 2)
-						TMW:TT(self, "METAPANEL_DOWN")
-					</OnLoad>
-					 <OnClick>
-						TMW.ME:UpOrDown(self, 1)
-					 </OnClick>
-				</Scripts>
-				<NormalTexture urgency="5" file="Interface\ChatFrame\UI-ChatIcon-ScrollDown-Up" alphaMode="ADD">
-					<TexCoords left="0.21875" right="0.6875" top="0.34375" bottom="0.65625"/>
-					<Color r=".7" g=".7" b=".7" a="1"/>
-				</NormalTexture>
-				<HighlightTexture urgency="5" file="Interface\ChatFrame\UI-ChatIcon-ScrollDown-Up" alphaMode="ADD">
-					<TexCoords left="0.21875" right="0.6875" top="0.34375" bottom="0.65625"/>
-				</HighlightTexture>
-			</Button>
-			
-			
 			<Button name="$parentDelete" parentKey="delete" inherits="UIPanelCloseButton">
 				<Anchors>
-					<Anchor point="LEFT" relativeTo="$parentDown" relativePoint="RIGHT" x="0"/>
+					<Anchor point="LEFT" relativeTo="$parentIcon" relativePoint="RIGHT" x="-16" y="2"/>
 				</Anchors>
 				<Scripts>
 					<OnLoad>TMW:TT(self, "METAPANEL_REMOVE")</OnLoad>
 					<OnClick>TMW.ME:Delete(self)</OnClick>
-				</Scripts>
-			</Button>
-			<Button name="$parentInsert" parentKey="insert">
-				<Size x="30" y="30"/>
-				<Anchors>
-					<Anchor point="LEFT" relativeTo="$parentDelete" relativePoint="BOTTOMRIGHT" x="-8"/>
-					<Anchor point="BOTTOM" y="-15"/>
-				</Anchors>
-				<NormalTexture urgency="5" file="Interface\AddOns\TellMeWhen\Textures\Plus-Up"/>
-				<PushedTexture file="Interface\AddOns\TellMeWhen\Textures\Plus-Down"/>
-				<HighlightTexture urgency="5" file="Interface\AddOns\TellMeWhen\Textures\Plus-Highlight" alphaMode="ADD"/>
-				<Scripts>
-					 <OnLoad>
-						TMW:TT(self, "METAPANEL_INSERT")
-					</OnLoad>
-					<OnClick>
-						TMW.ME:Insert(self:GetParent():GetID()+1)
-					</OnClick>
 				</Scripts>
 			</Button>
 		</Frames>
@@ -102,10 +67,30 @@
 	<Frame name="TellMeWhen_MetaIconOptions" inherits="TellMeWhen_OptionsModuleContainer" virtual="true">
 		<Size y="20"/>
 		<Frames>
+			<Button name="$parentAdd" parentKey="Add" inherits="TellMeWhen_ButtonTemplate">
+				<Size x="160" y="16"/>
+				<Anchors>
+					<Anchor point="TOPLEFT" x="7" y="-7"/>
+				</Anchors>
+				<Scripts>
+					<OnLoad>
+					
+						self:SetText([[|TInterface\PaperDollInfoFrame\Character-Plus:0|t ]] .. TMW.L["META_ADDICON"])
+						self:SetWidth(self:GetTextWidth()+15)
+						self:SetFrameLevel(self:GetParent():GetFrameLevel()+4)
+						self.Background:SetAlpha(0.7)
+					</OnLoad>
+					<OnClick>
+						tinsert(TMW.CI.ics.Icons, "")
+						TMW.ME:LoadConfig()
+					</OnClick>
+				</Scripts>
+			</Button>
+			
 			<CheckButton name="$parentCheckNext" inherits="TellMeWhen_CheckTemplate" parentKey="CheckNext">
 				<Anchors>
 					<!-- <Anchor point="TOPLEFT" x="5" y="-6"/> -->
-					<Anchor point="TOP" x="-30" y="-1"/>
+					<Anchor point="LEFT" relativeTo="$parentAdd" relativePoint="RIGHT" x="8" />
 				</Anchors>
 				<Scripts>
 					<OnLoad>						

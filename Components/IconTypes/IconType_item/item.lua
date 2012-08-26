@@ -45,12 +45,12 @@ Type:RegisterIconDefaults{
 }
 
 Type:RegisterConfigPanel_XMLTemplate(100, "TellMeWhen_ChooseName", {
-	title = L["ICONMENU_CHOOSENAME_ITEMSLOT"],
+	title = L["ICONMENU_CHOOSENAME_ITEMSLOT2"],
 	text = L["ICONMENU_CHOOSENAME_ITEMSLOT_DESC"],
 	SUGType = "itemwithslots",
 })
 
-Type:RegisterConfigPanel_XMLTemplate(130, "TellMeWhen_WhenChecks", {
+Type:RegisterConfigPanel_XMLTemplate(165, "TellMeWhen_WhenChecks", {
 	text = L["ICONMENU_SHOWWHEN"],
 	[0x2] = { text = "|cFF00FF00" .. L["ICONMENU_USABLE"], 			},
 	[0x1] = { text = "|cFFFF0000" .. L["ICONMENU_UNUSABLE"], 		},
@@ -237,11 +237,11 @@ function Type:Setup(icon, groupID, iconID)
 
 	icon:SetInfo("texture", TMW:GetConfigIconTexture(icon, 1))
 
-	icon:SetScript("OnUpdate", ItemCooldown_OnUpdate)
+	icon:SetUpdateFunction(ItemCooldown_OnUpdate)
 	icon:Update()
 end
 
-function Type:GetNameForDisplay(icon, data, doInsertLink)
+function Type:FormatSpellForOutput(icon, data, doInsertLink)
 	if data then
 		local name, link = GetItemInfo(data)
 		local ret

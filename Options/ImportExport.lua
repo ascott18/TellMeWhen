@@ -38,7 +38,7 @@ function SharableDataType:RegisterMenuBuilder(order, func)
 end
 function SharableDataType:RunMenuBuilders(result, editbox)
 	for i, data in ipairs(self.MenuBuilders) do
-		data.func(self, result, editbox)
+		TMW.safecall(data.func, self, result, editbox)
 	end
 end
 
@@ -76,10 +76,10 @@ end
 
 
 
----------- Global ----------
-local global = SharableDataType:New("global")
+---------- Profile ----------
+local profile = SharableDataType:New("profile")
 
-function global:Import_ImportData(editbox, data, version, noOverwrite)
+function profile:Import_ImportData(editbox, data, version, noOverwrite)
 	if noOverwrite then -- noOverwrite is a name in this case.
 
 		local base = gsub(noOverwrite, " %(%d+%)$", "")
@@ -108,7 +108,7 @@ function global:Import_ImportData(editbox, data, version, noOverwrite)
 		end
 	end
 end
-function global:Import_BuildContainingDropdownEntry(result)
+function profile:Import_BuildContainingDropdownEntry(result)
 	local info = UIDropDownMenu_CreateInfo()
 	info.text = result[1]
 	info.value = result
@@ -117,7 +117,7 @@ function global:Import_BuildContainingDropdownEntry(result)
 	UIDropDownMenu_AddButton(info, UIDROPDOWNMENU_MENU_LEVEL)
 end
 
-global.Import_BuildMenuData = global.RunMenuBuilders
+profile.Import_BuildMenuData = profile.RunMenuBuilders
 
 database:RegisterMenuBuilder(10, function(self, result, editbox)
 	
@@ -126,17 +126,19 @@ database:RegisterMenuBuilder(10, function(self, result, editbox)
 	local currentProfile = TMW.db:GetCurrentProfile()
 	
 	assert(currentProfile)
-	assert(db.profiles[currentProfile])
 	
-	SharableDataType.types.global:Import_BuildContainingDropdownEntry({
-		parentResult = result,
-		data = db.profiles[currentProfile],
-		type = "global",
-		version = db.profiles[currentProfile].Version,
-		[1] = currentProfile,
-	}, editbox)
+	-- This might not evaluate to true if the import type is the backup database and this profile didn't exist when backup was created
+	if db.profiles[currentProfile] then
+		SharableDataType.types.profile:Import_BuildContainingDropdownEntry({
+			parentResult = result,
+			data = db.profiles[currentProfile],
+			type = "profile",
+			version = db.profiles[currentProfile].Version,
+			[1] = currentProfile,
+		}, editbox)
 
-	TMW.AddDropdownSpacer()
+		TMW.AddDropdownSpacer()
+	end
 end)
 database:RegisterMenuBuilder(20, function(self, result, editbox)
 	local db = result.data
@@ -146,10 +148,10 @@ database:RegisterMenuBuilder(20, function(self, result, editbox)
 	for profilename, profiletable in TMW:OrderedPairs(db.profiles) do
 		-- current profile and default are handled separately
 		if profilename ~= currentProfile and profilename ~= "Default" then
-			SharableDataType.types.global:Import_BuildContainingDropdownEntry({
+			SharableDataType.types.profile:Import_BuildContainingDropdownEntry({
 				parentResult = result,
 				data = profiletable,
-				type = "global",
+				type = "profile",
 				version = profiletable.Version,
 				[1] = profilename,
 			}, editbox)
@@ -162,17 +164,17 @@ database:RegisterMenuBuilder(30, function(self, result, editbox)
 	
 	--default profile
 	if db.profiles["Default"] and currentProfile ~= "Default" then
-		SharableDataType.types.global:Import_BuildContainingDropdownEntry({
+		SharableDataType.types.profile:Import_BuildContainingDropdownEntry({
 			parentResult = result,
 			data = db.profiles.Default,
-			type = "global",
+			type = "profile",
 			version = db.profiles.Default.Version,
 			[1] = "Default",
 		}, editbox)
 	end
 end)
 
-global:RegisterMenuBuilder(1, function(self, result, editbox)
+profile:RegisterMenuBuilder(1, function(self, result, editbox)
 	-- header
 	local info = UIDropDownMenu_CreateInfo()
 	info.text = result[1]
@@ -181,12 +183,12 @@ global:RegisterMenuBuilder(1, function(self, result, editbox)
 	UIDropDownMenu_AddButton(info, UIDROPDOWNMENU_MENU_LEVEL)
 end)
 
-global:RegisterMenuBuilder(10, function(self, result, editbox)
+profile:RegisterMenuBuilder(10, function(self, result, editbox)
 	-- copy entire profile - overwrite current
 	local info = UIDropDownMenu_CreateInfo()
 	info.text = L["IMPORT_PROFILE"] .. " - " .. L["IMPORT_PROFILE_OVERWRITE"]:format(TMW.db:GetCurrentProfile())
 	info.func = function()
-		TMW:Import(editbox, result.data, result.version, "global")
+		TMW:Import(editbox, result.data, result.version, "profile")
 	end
 	info.notCheckable = true
 	UIDropDownMenu_AddButton(info, UIDROPDOWNMENU_MENU_LEVEL)
@@ -195,7 +197,7 @@ global:RegisterMenuBuilder(10, function(self, result, editbox)
 	local info = UIDropDownMenu_CreateInfo()
 	info.text = L["IMPORT_PROFILE"] .. " - " .. L["IMPORT_PROFILE_NEW"]
 	info.func = function()
-		TMW:Import(editbox, result.data, result.version, "global", result[1]) -- newname forces a new profile to be created named newname
+		TMW:Import(editbox, result.data, result.version, "profile", result[1]) -- newname forces a new profile to be created named newname
 	end
 	info.notCheckable = true
 	UIDropDownMenu_AddButton(info, UIDROPDOWNMENU_MENU_LEVEL)
@@ -203,13 +205,13 @@ global:RegisterMenuBuilder(10, function(self, result, editbox)
 	TMW.AddDropdownSpacer()
 end)
 
-global.Export_DescriptionAppend = L["EXPORT_SPECIALDESC2"]:format("4.6.0+")
-function global:Export_SetButtonAttributes(editbox, info)
+profile.Export_DescriptionAppend = L["EXPORT_SPECIALDESC2"]:format("4.6.0+")
+function profile:Export_SetButtonAttributes(editbox, info)
 	local text = L["fPROFILE"]:format(TMW.db:GetCurrentProfile())
 	info.text = text
 	info.tooltipTitle = text
 end
-function global:Export_GetArgs(editbox, info)
+function profile:Export_GetArgs(editbox, info)
 	--editbox, type, settings, defaults, ...
 	return editbox, self.type, TMW.db.profile, TMW.Defaults.profile, TMW.db:GetCurrentProfile()
 end
@@ -265,7 +267,7 @@ function group:Import_BuildContainingDropdownEntry(result)
 end
 group.Import_BuildMenuData = group.RunMenuBuilders
 
-global:RegisterMenuBuilder(40, function(self, result, editbox)
+profile:RegisterMenuBuilder(40, function(self, result, editbox)
 	-- group header
 	local info = UIDropDownMenu_CreateInfo()
 	info.text = L["UIPANEL_GROUPS"]
@@ -728,6 +730,10 @@ function ExportDestination:HandleTopLevelMenu(editbox)
 			info.notCheckable = true
 			
 			dataType:Export_SetButtonAttributes(editbox, info)
+			
+			-- Color everything before the first colon a light blue (highlights the type of data being exported, for clarity)
+			info.text = info.text:gsub("^(.-):", "|cff7fffff%1|r:")
+			
 			info.func = function()
 				self:Export(dataType:Export_GetArgs(editbox, info))--editbox, type, settings, defaults, ...
 			end
@@ -773,6 +779,8 @@ function Comm:Export(editbox, type, settings, defaults, ...)
 			TMW:SendCommMessage("TMW", s, "WHISPER", player, "BULK", editbox.callback, editbox)
 		end
 	end
+	
+	CloseDropDownMenus()
 end
 function Comm:SetButtonAttributes(editbox, info)
 	local player = strtrim(editbox:GetText())

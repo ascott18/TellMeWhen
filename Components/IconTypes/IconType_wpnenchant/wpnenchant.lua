@@ -49,7 +49,7 @@ Type:RegisterConfigPanel_XMLTemplate(100, "TellMeWhen_ChooseName", {
 	SUGType = "wpnenchant",
 })
 
-Type:RegisterConfigPanel_XMLTemplate(130, "TellMeWhen_WhenChecks", {
+Type:RegisterConfigPanel_XMLTemplate(165, "TellMeWhen_WhenChecks", {
 	text = L["ICONMENU_SHOWWHEN"],
 	[0x2] = { text = "|cFF00FF00" .. L["ICONMENU_PRESENT"], 		 },
 	[0x1] = { text = "|cFFFF0000" .. L["ICONMENU_ABSENT"], 			 },
@@ -68,11 +68,11 @@ Type:RegisterConfigPanel_ConstructorFunc(120, "TellMeWhen_WeaponSlot", function(
 			value = "SecondaryHandSlot",
 			title = INVTYPE_WEAPONOFFHAND,
 		},
-		{
+		not TMW.ISMOP and {
 			setting = "WpnEnchantType",
 			value = "RangedSlot",
 			title = INVTYPE_THROWN,
-		},
+		} or nil,
 	})
 end)
 
@@ -204,7 +204,7 @@ local function WpnEnchant_OnEvent(icon, event, unit)
 		if icon.HideUnequipped then
 			if not wpnTexture then
 				icon:SetInfo("alpha", 0)
-				icon:SetScript("OnUpdate", nil)
+				icon:SetUpdateFunction(nil)
 				return
 			end
 
@@ -213,13 +213,13 @@ local function WpnEnchant_OnEvent(icon, event, unit)
 				local _, _, _, _, _, _, _, _, invType = GetItemInfo(itemID)
 				if invType == "INVTYPE_HOLDABLE" or invType == "INVTYPE_RELIC" or invType == "INVTYPE_SHIELD" then
 					icon:SetInfo("alpha", 0)
-					icon:SetScript("OnUpdate", nil)
+					icon:SetUpdateFunction(nil)
 					return
 				end
 			end
 		end
-		if not icon.OnUpdate then
-			icon:SetScript("OnUpdate", WpnEnchant_OnUpdate)
+		if not icon.UpdateFunction then
+			icon:SetUpdateFunction(WpnEnchant_OnUpdate)
 		end
 	end
 end
@@ -241,7 +241,7 @@ function Type:Setup(icon, groupID, iconID)
 	icon.LastEnchantName = nil
 	icon.CorrectEnchant = nil
 
-	icon:SetScript("OnUpdate", WpnEnchant_OnUpdate)
+	icon:SetUpdateFunction(WpnEnchant_OnUpdate)
 	icon:Update()
 
 	icon:RegisterEvent("UNIT_INVENTORY_CHANGED")
@@ -250,7 +250,7 @@ function Type:Setup(icon, groupID, iconID)
 	icon:OnEvent(nil, "player")
 end
 
-function Type:GetNameForDisplay(icon, data, doInsertLink)
+function Type:FormatSpellForOutput(icon, data, doInsertLink)
 	return icon.LastEnchantName or data or icon.EnchantName
 end
 

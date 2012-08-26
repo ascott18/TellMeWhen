@@ -84,14 +84,30 @@ function TEXT:CacheUsedStrings()
 	for text in pairs(TEXT.usedStrings) do
 		TEXT.usedStrings[text] = 0 -- set to 0, not nil, and dont wipe the table either
 	end
+	
 	for ics, groupID, iconID in TMW:InIconSettings() do
 		for view, viewSettings in pairs(ics.SettingsPerView) do
-			for i, text in pairs(viewSettings.Texts) do
+		
+			local GUID, layoutSettings = TEXT:GetTextLayoutForIconID(groupID, iconID, view)
+			local Texts = viewSettings.Texts
+			
+			-- Get text displays that are used by the current layout.
+			for textID = 1, layoutSettings.n do
+				local text = TEXT:GetTextFromSettingsAndLayout(Texts, layoutSettings, textID)
 				text = text:trim()
 				TEXT.usedStrings[text] = (TEXT.usedStrings[text] or 0) + 1
 			end
+			
+			-- Get text displays that lie outside the bounds of the current layout.
+			for i, text in pairs(Texts) do
+				if i > layoutSettings.n then
+					text = text:trim()
+					TEXT.usedStrings[text] = (TEXT.usedStrings[text] or 0) + 1
+				end
+			end
 		end
 	end
+	
 	TEXT.usedStrings[""] = nil
 end
 
@@ -145,11 +161,12 @@ function TEXT:CopyString_DropDown()
 	for text, num in TMW:OrderedPairs(TEXT.usedStrings, "values", true) do
 		local info = UIDropDownMenu_CreateInfo()
 		
-		local displayText = text
-		if #displayText > 40 then
-			displayText = displayText:sub(1, 40) .. "..."
+		if #text > 50 then
+			info.text = DogTag:ColorizeCode(text:sub(1, 40)) .. "..."
+		else
+			info.text = DogTag:ColorizeCode(text)
 		end
-		info.text = displayText
+		
 		info.value = text
 		
 		info.tooltipTitle = L["TEXTLAYOUTS_STRINGUSEDBY"]:format(num)
@@ -201,6 +218,9 @@ function TEXT:LoadConfig()
 		local previousFrame
 		for i, stringSettings in TMW:InNLengthTable(layoutSettings) do
 			local frame = TEXT[i]
+			
+			local text = TEXT:GetTextFromSettingsAndLayout(Texts, layoutSettings, i)
+			
 			if not frame then
 				frame = CreateFrame("Frame", TellMeWhen_TextDisplayOptions.FontStrings:GetName().."String"..i, TellMeWhen_TextDisplayOptions.FontStrings, "TellMeWhen_TextDisplayGroup", i)
 				TEXT[i] = frame
@@ -215,7 +235,7 @@ function TEXT:LoadConfig()
 			TMW:TT(frame.EditBox, display_N_stringName, "TEXTLAYOUTS_SETTEXT_DESC", 1)
 			frame.EditBox.label = display_N_stringName
 
-			frame.EditBox:SetText(Texts[i])
+			frame.EditBox:SetText(text)
 			frame.EditBox:GetScript("OnTextChanged")(frame.EditBox)
 			
 			local DefaultText = stringSettings.DefaultText
@@ -234,14 +254,14 @@ function TEXT:LoadConfig()
 				unit = CI.ic.attributes.dogTagUnit,
 			}
 			
-			local func = loadstring(DogTag:CreateFunctionFromCode(Texts[i], "TMW;Unit", kwargs))
+			local func = loadstring(DogTag:CreateFunctionFromCode(text, "TMW;Unit", kwargs))
 			func = func and func()
 			local tagError = func and TEXT:TestDogTagFunc(pcall(func, kwargs))
 			if tagError then
 				frame.Error:SetText("ERROR: " .. tagError)
 			else
 				TEXT.EvaluateError = nil
-				DogTag:Evaluate(Texts[i], "TMW;Unit", kwargs)
+				DogTag:Evaluate(text, "TMW;Unit", kwargs)
 				if TEXT.EvaluateError then
 					frame.Error:SetText("CRITICAL ERROR: " .. TEXT.EvaluateError)
 				end
@@ -1034,9 +1054,9 @@ function textlayout:Export_GetArgs(editbox, info)
 	return editbox, self.type, settings, TMW.Defaults.profile.TextLayouts["**"], GUID
 end
 
-local SharableDataType_global = TMW.Classes.SharableDataType.types.global
-if SharableDataType_global then
-	SharableDataType_global:RegisterMenuBuilder(20, function(self, result, editbox)
+local SharableDataType_profile = TMW.Classes.SharableDataType.types.profile
+if SharableDataType_profile then
+	SharableDataType_profile:RegisterMenuBuilder(20, function(self, result, editbox)
 		local info = UIDropDownMenu_CreateInfo()
 		info.text = L["TEXTLAYOUTS"]
 		info.notCheckable = true

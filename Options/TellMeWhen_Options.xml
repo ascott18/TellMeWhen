@@ -8,7 +8,7 @@
 	<Frame name="TellMeWhen_OptionsModuleContainer" virtual="true">
 		<Anchors>
 			<Anchor point="LEFT" x="0"/>
-			<Anchor point="RIGHT"/>
+			<Anchor point="RIGHT" />
 		</Anchors>
 		<Backdrop edgeFile="Interface\DialogFrame\UI-DialogBox-Background-Dark" tile="true">
 			<EdgeSize>
@@ -23,122 +23,14 @@
 			<Layer level="OVERLAY">
 				<FontString name="$parentHeader" parentKey="Header" inherits="GameFontNormalSmall" justifyH="CENTER" alpha="1">
 					<Anchors>
-						<Anchor point="BOTTOMLEFT" relativePoint="TOPLEFT" x="3" y="1"/>
-						<!-- <Anchor point="RIGHT" relativePoint="TOPRIGHT" x="-3" y="-1.5"/> -->
+						<Anchor point="BOTTOM" relativePoint="TOP" y="0"/>
+						<Anchor point="LEFT" x="1" />
+						<Anchor point="RIGHT" x="-1" />
 					</Anchors>
 				</FontString>
 			</Layer>
 		</Layers>
-		<Scripts>
-			<OnUpdate>
-				TMW.IE:OptionsModuleContainer_OnUpdate(self)
-			</OnUpdate>
-			<!-- <OnShow>
-				if self.realHeight then
-					self:SetHeight(self.realHeight)
-				end
-			</OnShow>
-			<OnHide>
-				self.realHeight = self:GetHeight()
-				self:SetHeight(-13)
-			</OnHide>
-			<OnSizeChanged>
-				print(self, self:GetSize())
-			
-			</OnSizeChanged> -->
-		</Scripts>
 	</Frame>
-	
-	<Button name="TellMeWhen_PanelListingTemplate" virtual="true" inherits="TellMeWhen_BorderedFrame" hidden="true">
-		<Size y="18.95"/>
-		<Anchors>
-			<Anchor point="LEFT"/>
-			<Anchor point="RIGHT"/>
-		</Anchors>
-		<NormalFont style="GameFontNormal"/>
-		<HighlightFont style="GameFontHighlight"/>
-		<Layers>
-			<Layer level="OVERLAY">
-				<FontString name="$parentName" parentKey="Name" inherits="GameFontHighlight" wordwrap="true" justifyH="LEFT">
-					<Anchors>
-						<Anchor point="LEFT" x="2"/>
-					</Anchors>
-				</FontString>
-			</Layer>
-		</Layers>
-		<Scripts>
-			<OnLoad>
-				self:RegisterForClicks("LeftButtonUp", "RightButtonUp")
-			--	self:RegisterForDrag("LeftButton")
-			
-				TMW:TT(self, nil, "CONFIGPANEL_LISTING_TOOLTIP")
-				
-				function self:SetText(text)
-					self.Name:SetText(text)
-					self:Resize()
-				end
-				
-				function self:Resize()
-					self.Name:SetWidth(self:GetWidth() - 2)
-					self:SetHeight(self.Name:GetHeight() + 8)
-				end
-				
-				self.AceTimer = LibStub("AceTimer-3.0")
-			</OnLoad>
-			<OnClick>
-				local frame = self.frame
-				local ScrollFrame = TMW.IE.Main.ScrollFrame
-				
-				local frame_top, frame_bottom = frame:GetTop(), frame:GetBottom()
-				local ScrollFrame_top, ScrollFrame_bottom = ScrollFrame:GetTop(), ScrollFrame:GetBottom()
-				local ScrollFrame_pos = ScrollFrame:GetVerticalScroll()
-				
-				local offs = 0
-				if frame_top > ScrollFrame_top then
-					offs = ScrollFrame_top - frame_top - 8
-				elseif ScrollFrame_bottom > frame_bottom then
-					offs = ScrollFrame_bottom - frame_bottom
-				end
-				
-				ScrollFrame:SetVerticalScroll(ScrollFrame_pos + offs)
-				
-				self.Background.START_ANIM = true
-				frame.Background.START_ANIM = true
-				--[[
-				frame.shouldShow = not frame.shouldShow
-				if self.frame.shouldShow then
-					self.Name:SetAlpha(1)
-				else
-					self.Name:SetAlpha(0.5)
-				end
-				for _, frame in pairs(TMW.IE.ALLDISPLAYTABFRAMES) do
-					if frame.shouldShow then
-						frame:Show()
-					else
-						frame:Hide()
-					end
-				end]]
-			</OnClick>
-			<OnSizeChanged>
-				self:Resize()
-			</OnSizeChanged>
-			<OnShow>
-				self:Resize()
-			</OnShow>
-			
-			<OnUpdate>
-				--TMW.IE:OptionsModuleContainer_OnUpdate(self)
-				
-				if not self.Background.IS_PLAYING then
-					if self:IsMouseOver() then
-						self.Background:SetGradientAlpha("VERTICAL", 1, 1, 1, 0.125, 1, 1, 1, 0.25)
-					else
-						self.Background:SetGradientAlpha("VERTICAL", 1, 1, 1, 0.05, 1, 1, 1, 0.10)
-					end
-				end
-			</OnUpdate>
-		</Scripts>
-	</Button>
 	
 	<Frame name="TellMeWhen_ChooseName" inherits="TellMeWhen_OptionsModuleContainer" virtual="true">
 		<!-- <Size y="50"/> -->
@@ -207,12 +99,12 @@
 								local title, text
 								
 								if supplementalData then
-									title = supplementalData.title or TMW.L["ICONMENU_CHOOSENAME"]
+									title = supplementalData.title or TMW.L["ICONMENU_CHOOSENAME2"]
 									text = supplementalData.text or TMW.L["CHOOSENAME_DIALOG"]
 									
 									TMW.SUG:EnableEditBox(self, supplementalData.SUGType or "spell")
 								else
-									title = TMW.L["ICONMENU_CHOOSENAME"]
+									title = TMW.L["ICONMENU_CHOOSENAME2"]
 									text  = TMW.L["CHOOSENAME_DIALOG"]
 									
 									TMW.SUG:EnableEditBox(self, "spell")
@@ -340,7 +232,7 @@
 	
 	<Frame name="TellMeWhen_Unit" inherits="TellMeWhen_OptionsModuleContainer" virtual="true">
 		<Frames>
-			<EditBox name="$parentUnit" inherits="TellMeWhen_UnitEditbox" multiline="true" parentKey="Unit" autoFocus="false">
+			<EditBox name="$parentUnit" inherits="TellMeWhen_UnitEditbox" parentKey="Unit">
 				<Anchors>
 					<Anchor point="TOP" y="-5"/>
 					<Anchor point="LEFT" x="9" />
@@ -357,8 +249,10 @@
 						
 						local text = function()
 							if IsModifierKeyDown() then
-								return TMW.IE:GetRealUnits(self)
+								self.__noWrapTooltipText = true
+								return TMW.UNITS:GetUnitInputDetailedTooltip(self)
 							else
+								self.__noWrapTooltipText = false
 								return self.normalTooltip
 							end
 						end
@@ -405,15 +299,6 @@
 						end)
 						
 					</OnLoad>
-					<OnEditFocusLost>
-						EditBox_ClearHighlight(self)
-
-						if TMW.CI.ics then
-							TMW.CI.ics.Unit = TMW:CleanString(self)
-							TMW.IE:ScheduleIconSetup()
-						end
-						self:GetScript("OnTextChanged")(self)
-					</OnEditFocusLost>
 					<OnTextChanged>
 						local text = self:GetText()
 
@@ -434,13 +319,68 @@
 					</OnTextChanged>
 				</Scripts>
 			</EditBox>
+			
+			<Button name="$parentUnitConditions" parentKey="UnitConditions" inherits="TellMeWhen_ButtonTemplate">
+				<Size x="160" y="16"/>
+				<Anchors>
+					<Anchor point="TOP" relativeTo="$parentUnit" relativePoint="BOTTOM" y="-7"/>
+					<!-- <Anchor point="LEFT" relativeTo="$parentUnit" x="-1"/>
+					<Anchor point="RIGHT" relativeTo="$parentUnit" x="1"/> -->
+				</Anchors>
+				<Scripts>
+					<OnLoad>
+						self:SetFrameLevel(self:GetParent():GetFrameLevel()+2)
+						self.Background:SetAlpha(0.7)
+						
+						TMW:TT(self, "UNITCONDITIONS", "UNITCONDITIONS_DESC")
+						
+						TMW:RegisterCallback("TMW_CONFIG_PANEL_SETUP", function(event, frame, panelInfo)
+							if frame == self:GetParent() then
+								local supplementalData = panelInfo.supplementalData
+								self.supplementalData = supplementalData
+								
+								if supplementalData then
+									if supplementalData.implementsConditions then
+										self:Show()
+									else
+										self:Hide()
+									end
+								else
+									self:Hide()
+								end
+							end
+						end)
+					</OnLoad>
+					<OnUpdate>
+						local text = TMW.CNDT:GetTabText("Unit")
+						
+						self:SetText(text)
+						self:SetWidth(self:GetTextWidth()+20)
+					</OnUpdate>
+					<OnClick>
+						TMW.CNDT:LoadConfig("Unit")
+					</OnClick>
+					<OnShow>
+						self:SetHeight(16)
+						if self:GetParent().AdjustHeight then
+							self:GetParent():AdjustHeight()
+						end
+					</OnShow>
+					<OnHide>
+						self:SetHeight(-7)
+						if self:GetParent().AdjustHeight then
+							self:GetParent():AdjustHeight()
+						end
+					</OnHide>
+				</Scripts>
+			</Button>
 		</Frames>
 		<Scripts>
 			<OnLoad>
 				self.Header:SetText(TMW.L["ICONMENU_UNITSTOWATCH"])
 				
 				function self:AdjustHeight()
-					self:SetHeight(11 + self.Unit:GetHeight())
+					self:SetHeight(18 + self.UnitConditions:GetHeight()+self.Unit:GetHeight())
 				end
 			</OnLoad>
 		</Scripts>
@@ -452,6 +392,7 @@
 			<OnLoad>
 				self.Header:SetText(TMW.L["SORTBY"])
 				TMW.IE:BuildSimpleCheckSettingFrame(self, {
+					numPerRow = 3,
 					{
 						setting = "Sort",
 						value = false,
@@ -503,7 +444,7 @@
 		</Frames>
 	</Frame>
 	<Frame name="TellMeWhen_WhenChecks" inherits="TellMeWhen_OptionsModuleContainer" virtual="true">
-		<Size y="40"/>
+		<Size y="78"/>
 		<Layers>
 			<Layer level="ARTWORK">
 				<FontString name="$parentFS1" inherits="GameFontNormal" parentKey="text" justifyH="LEFT">
@@ -518,7 +459,7 @@
 				<Anchors>
 					<Anchor point="TOP" y="-6"/>
 					<Anchor point="LEFT" />
-					<Anchor point="RIGHT" relativePoint="TOP"/>
+					<Anchor point="RIGHT" />
 				</Anchors>
 				<Scripts>
 					<OnLoad>
@@ -531,7 +472,8 @@
 			</Frame>
 			<Frame name="$parentUnAlpha" inherits="TellMeWhen_WhenCheckSet">
 				<Anchors>
-					<Anchor point="LEFT" relativeTo="$parentAlpha" relativePoint="RIGHT" x="0"/>
+					<Anchor point="TOP" relativeTo="$parentAlpha" relativePoint="BOTTOM" y="2"/>
+					<Anchor point="LEFT" />
 					<Anchor point="RIGHT" />
 				</Anchors>
 				<Scripts>
@@ -553,7 +495,7 @@
 						assert(supplementalData, "Supplemental data (arg5 to RegisterConfigPanel_XMLTemplate) must be provided for TellMeWhen_WhenChecks!")
 						
 						-- Set the title for the frame
-						self.Header:SetText(supplementalData.text)
+						self.Header:SetText(supplementalData.text or TMW.L["ICONMENU_SHOWWHEN"])
 					end
 				end)
 			</OnLoad>
@@ -684,6 +626,16 @@
 					<OnMouseWheel>
 						self:GetParent():GetScript("OnMouseWheel")(self:GetParent(), delta)
 					</OnMouseWheel>
+					<OnMouseDown>
+						local _, y = GetCursorPosition()
+						if self.Thumb:GetBottom() > y then
+							delta = -1
+						elseif y > self.Thumb:GetTop() then
+							delta = 1
+						end						
+						
+						self:GetParent():GetScript("OnMouseWheel")(self:GetParent(), delta)
+					</OnMouseDown>
 				</Scripts>
 			</Frame>
 		</Frames>
@@ -835,12 +787,16 @@
 			<OnShow>
 				PanelTemplates_TabResize(self, -6)
 			</OnShow>
+			<OnHide>
+				self:SetWidth(TMW.IE.CONST.TAB_OFFS_X)
+			</OnHide>
+			<OnSizeChanged>
+				PanelTemplates_TabResize(self, -6)
+			</OnSizeChanged>
 		</Scripts>
 	</Button>
 	<Button name="TellMeWhen_ButtonTemplate" virtual="true">
-		<Size>
-			<AbsDimension x="144" y="15"/>
-		</Size>
+		<Size x="144" y="15"/>
 		<NormalFont style="GameFontNormal"/>
 		<HighlightFont style="GameFontHighlight"/>
 		<DisabledFont style="GameFontDisable"/>
@@ -871,7 +827,7 @@
 					</Anchors>
 				</Texture>
 				
-				<Texture name="$parentBackground">
+				<Texture name="$parentBackground" parentKey="Background">
 					<Color r="0.15" g="0.15" b="0.15" a="0.5"/>
 					<Anchors>
 						<Anchor point="TOPLEFT" relativeTo="$parentLeft" relativePoint="TOPRIGHT"/>
@@ -888,122 +844,6 @@
 				self:SetAlpha(0.7)
 			</OnDisable>
 		</Scripts>
-	</Button>
-	<Button name="TellMeWhen_SpellSuggestTemplate" virtual="true" hidden="true">
-		<Size y="18.95"/>
-		<Anchors>
-			<Anchor point="LEFT" x="10"/>
-			<Anchor point="RIGHT" x="-10"/>
-		</Anchors>
-		<Scripts>
-			<OnLoad>
-				self.Background:SetVertexColor(0, 1, 0)
-				self:RegisterForClicks("LeftButtonUp", "RightButtonUp")
-			</OnLoad>
-			<OnClick>
-				TMW.SUG.CurrentModule:Entry_OnClick(self, button)
-			</OnClick>
-			<OnEnter>
-				GameTooltip_SetDefaultAnchor(GameTooltip, self)
-				if self.tooltiptitle then
-					GameTooltip:AddLine(self.tooltiptitle, HIGHLIGHT_FONT_COLOR.r, HIGHLIGHT_FONT_COLOR.g, HIGHLIGHT_FONT_COLOR.b, 1)
-					GameTooltip:AddLine(self.tooltiptext, NORMAL_FONT_COLOR.r, NORMAL_FONT_COLOR.g, NORMAL_FONT_COLOR.b, 1)
-				end
-				if self.tooltipmethod and self.tooltiparg then
-					GameTooltip[self.tooltipmethod](GameTooltip, self.tooltiparg)
-				end
-
-				local first, second
-
-				if type(self.insert) == "number" then
-					first = self.overrideInsertID or TMW.L["SUG_INSERTID"]
-				else
-					first = self.overrideInsertName or TMW.L["SUG_INSERTNAME"]
-				end
-				if type(self.insert2) == "number" then
-					second = self.overrideInsertID or TMW.L["SUG_INSERTID"]
-				else
-					second = self.overrideInsertName or TMW.L["SUG_INSERTNAME"]
-				end
-
-				GameTooltip:AddLine(" ")
-				if self.insert2 then
-					local text = TMW.L["SUG_INSERT_LEFT"]
-					if not TMW.SUG.CurrentModule.noTab and self:GetID() == 1 then
-						text = text .. TMW.L["SUG_INSERT_TAB"]
-					end
-					GameTooltip:AddLine(first:format(text), 0, .5, 1, nil)
-					GameTooltip:AddLine(second:format(TMW.L["SUG_INSERT_RIGHT"]), 0, .5, 1, nil)
-				else
-					local text = TMW.L["SUG_INSERT_ANY"]
-					if not TMW.SUG.CurrentModule.noTab and self:GetID() == 1 then
-						text = text .. TMW.L["SUG_INSERT_TAB"]
-					end
-					GameTooltip:AddLine(first:format(text), 0, .5, 1, nil)
-				end
-
-				GameTooltip:Show()
-
-				TMW.SUG.mousedOver = self
-			</OnEnter>
-			<OnLeave>
-				GameTooltip:Hide()
-
-				if TMW.SUG.mousedOver == self then
-					TMW.SUG.mousedOver = nil
-				end
-			</OnLeave>
-			<OnMouseWheel>
-				if (not TMW.SUG[TMW.SUG:GetNumFramesNeeded()]:IsShown() and delta > 0) or TMW.SUG[TMW.SUG:GetNumFramesNeeded()]:IsShown() then
-					if IsShiftKeyDown() then
-						delta = delta*5
-					elseif IsControlKeyDown() then
-						delta = delta*(#TMW.SUG-1)
-					end
-					
-					TMW.SUG.offset = max(0, TMW.SUG.offset - delta)
-				end
-				TMW.SUG:SuggestingComplete()
-			</OnMouseWheel>
-		</Scripts>
-		<NormalFont style="GameFontNormal"/>
-		<HighlightFont style="GameFontHighlight"/>
-		<HighlightTexture file="Interface\QuestFrame\UI-QuestLogTitleHighlight" alphaMode="ADD">
-			<Anchors>
-				<Anchor point="TOPLEFT" y="-1"/>
-				<Anchor point="BOTTOMRIGHT" y="1"/>
-			</Anchors>
-		</HighlightTexture>
-		<Layers>
-			<Layer level="BACKGROUND">
-				<Texture name="$parentBackground" parentKey="Background" file="Interface\QuestFrame\UI-QuestLogTitleHighlight">
-					<Anchors>
-						<Anchor point="TOPLEFT" y="0"/>
-						<Anchor point="BOTTOMRIGHT" y="1"/>
-					</Anchors>
-				</Texture>
-			</Layer>
-			<Layer level="OVERLAY">
-				<Texture name="$parentIcon" parentKey="Icon" file="Interface\Icons\INV_Misc_QuestionMark">
-					<Size x="18" y="18"/>
-					<TexCoords left="0.07" right="0.93" top="0.07" bottom="0.93"/>
-					<Anchors>
-						<Anchor point="LEFT"/>
-					</Anchors>
-				</Texture>
-				<FontString name="$parentID" parentKey="ID" inherits="GameFontHighlight" justifyH="RIGHT">
-					<Anchors>
-						<Anchor point="RIGHT" x="-3" y="1"/>
-					</Anchors>
-				</FontString>
-				<FontString name="$parentName" parentKey="Name" inherits="GameFontHighlight" justifyH="LEFT">
-					<Anchors>
-						<Anchor point="LEFT" relativeTo="$parentIcon" relativePoint="RIGHT" x="3"/>
-						<Anchor point="RIGHT" relativeTo="$parentID" relativePoint="LEFT" x="-1"/>
-					</Anchors>
-				</FontString>
-			</Layer>
-		</Layers>
 	</Button>
 	<EditBox name="TellMeWhen_TimeEditBoxTemplate" inherits="TellMeWhen_InputBoxTemplate" virtual="true">
 		<Size x="60" y="15"/>
@@ -1026,10 +866,6 @@
 				end
 				t = tonumber(t) or 0
 				self:SetText(t)
-				if TMW.CI.ics then
-					TMW.CI.ics[self.setting] = t
-					TMW.IE:ScheduleIconSetup()
-				end
 				self:GetScript("OnTextChanged")(self)
 			</OnEditFocusLost>
 		</Scripts>
@@ -1052,6 +888,8 @@
 				<FontString name="$parentText" parentKey="text" inherits="GameFontHighlightSmall" justifyH="CENTER" justifyV="BOTTOM">
 					<Anchors>
 						<Anchor point="BOTTOM" relativePoint="TOP" y="-1"/>
+						<Anchor point="LEFT" x="-5"/>
+						<Anchor point="RIGHT" x="5"/>
 					</Anchors>
 				</FontString>
 				<FontString name="$parentLow" inherits="GameFontHighlightSmall" parentKey="Low" text="LOW">
@@ -1150,12 +988,6 @@
 					</Anchors>
 					<TexCoords left="0.1953125" right="0.8046875" top="0" bottom="1"/>
 				</Texture>
-				<FontString name="$parentText" parentKey="Text" inherits="GameFontHighlightSmall" wordwrap="false" justifyH="LEFT" justifyV="CENTER">
-					<Size y="10"/>
-					<Anchors>
-						<Anchor point="LEFT" relativeTo="$parentLeft" x="27" y="1"/>
-					</Anchors>
-				</FontString>
 			</Layer>
 			<Layer level="OVERLAY">
 				<Texture name="$parentIcon" hidden="true">
@@ -1173,6 +1005,18 @@
 				</Anchors>
 			</Button>
 		</Frames>
+		
+		<Layers>
+			<Layer level="ARTWORK">
+				<FontString name="$parentText" parentKey="Text" inherits="GameFontHighlightSmall" wordwrap="false" justifyH="LEFT" justifyV="CENTER">
+					<Size y="10"/>
+					<Anchors>
+						<Anchor point="LEFT" relativeTo="$parentLeft" x="27" y="1"/>
+						<Anchor point="RIGHT" relativeTo="$parentButton" relativePoint="LEFT" x="0" />
+					</Anchors>
+				</FontString>
+			</Layer>
+		</Layers>
 		<Scripts>
 			<OnEnter>
 				self.Button:LockHighlight()
@@ -1256,14 +1100,14 @@
 					<OnLoad>
 						TMW:TT(self, "IMPORT_EXPORT", "IMPORT_EXPORT_BUTTON_DESC")
 						self:SetText(TMW.L["IMPORT_EXPORT"])
-						self:SetWidth(self:GetTextWidth()+10)
-						self:SetFrameLevel(self:GetFrameLevel()+2)
+						self:SetWidth(self:GetTextWidth() + 10)
+						self:SetFrameLevel(self:GetFrameLevel() + 2)
 					</OnLoad>
 					<OnClick>
 						ToggleDropDownMenu(nil, nil, self:GetParent().DD, self, 0, 0)
 					</OnClick>
 					<PreClick>
-						UIDropDownMenu_Initialize(self:GetParent().DD, TMW.IE.Copy_DropDown, "MENU")
+					--	UIDropDownMenu_Initialize(self:GetParent().DD, TMW.IE.Copy_DropDown, "MENU")
 						self:SetScript("PreClick", nil)
 					</PreClick>
 				</Scripts>
@@ -1277,6 +1121,8 @@
 						self.wrapTooltips = 1
 						self:Hide()
 						UIDropDownMenu_SetWidth(self, 1)
+						self.initialize = TMW.IE.Copy_DropDown
+						self.displayMode = "MENU"
 					</OnLoad>
 					<OnKeyDown>
 						if key == "C" and (IsControlKeyDown()) then
@@ -1294,10 +1140,10 @@
 			<StatusBar name="$parentStatus" parentKey="Status" hidden="true">
 				<Anchors>
 					<Anchor point="TOPLEFT" x="-4"/>
-					<Anchor point="BOTTOMRIGHT" x="-2" y="-1"/>
+					<Anchor point="BOTTOMRIGHT" relativeTo="$parentButton" relativePoint="BOTTOMLEFT" x="-2" />
 				</Anchors>
 				<Layers>
-					<Layer level="BACKGROUND">
+					<Layer level="ARTWORK">
 						<Texture name="$parenttexture" parentKey="texture" file="Interface\TargetingFrame\UI-StatusBar"/>
 					</Layer>
 
@@ -1311,11 +1157,29 @@
 				</Layers>
 
 				<Animations>
-					<AnimationGroup name="$parentFadeOut" parentKey="FadeOut">
+					<AnimationGroup parentKey="FadeIn">
+						<Alpha change="1" duration="1" order="1"/>
+						<Scripts>
+							<OnPlay>
+								self:GetParent():SetAlpha(0)
+								self:GetParent().FadeOut:Stop()
+								self:GetParent():Show()
+							</OnPlay>
+							<OnFinished>
+								self:GetParent():SetAlpha(1)
+							</OnFinished>
+						</Scripts>
+					</AnimationGroup>
+					<AnimationGroup parentKey="FadeOut">
 						<Alpha change="-1" duration="1" order="1"/>
 						<Scripts>
+							<OnPlay>
+								self:GetParent().FadeIn:Stop()
+								self:GetParent():SetAlpha(1)
+							</OnPlay>
 							<OnFinished>
 								self:GetParent():Hide()
+								self:GetParent():SetAlpha(0)
 							</OnFinished>
 						</Scripts>
 					</AnimationGroup>
@@ -1325,14 +1189,16 @@
 						self:SetStatusBarTexture(self.texture)
 						self.texture:SetVertexColor(1, .5, .2, 1)
 						function self:Set(value, max)
-							self:Show()
+							if not self:IsShown() then
+								self.FadeIn:Play()
+							end
 							self:SetMinMaxValues(0, max)
 							self:SetValue(value)
 							if value >= max then
 								self.FadeOut:Play()
 							end
 						end
-						self:SetFrameLevel(self:GetParent():GetFrameLevel() - 1)
+						self:SetFrameLevel(self:GetParent():GetFrameLevel())
 						self.realParent = self:GetParent()
 						--self:SetParent(TellMeWhen_IconEditor)
 					</OnLoad>
@@ -1371,9 +1237,9 @@
 					wipe(export)
 					
 					-- default enabled types:
-					import.global_new = true
-					import.global_overwrite = true
-					export.global = true
+					import.profile_new = true
+					import.profile_overwrite = true
+					export.profile = true
 					
 					import.group_new = true
 					
@@ -1616,14 +1482,6 @@
 		</Scripts>
 	</Frame>
 
-	<EditBox name="TellMeWhen_UnitEditbox" inherits="TellMeWhen_InputBoxTemplate" virtual="true" autoFocus="false">
-		<Size y="15"/>
-		<Scripts>
-			<OnEvent>
-				TMW:TT_Update(self)
-			</OnEvent>
-		</Scripts>
-	</EditBox>
 	
 	
 	<!-- END TEMPLATES -->
@@ -1738,7 +1596,7 @@
 		<Layers>
 			<Layer level="BACKGROUND">
 				<Texture name="$parentBackground" parentKey="Background">
-					<Color r="0.05" g="0.05" b="0.05" a="0.97"/>
+					<Color r="0.05" g="0.05" b="0.05" a="0.995"/>
 				</Texture>
 			</Layer>
 		</Layers>
@@ -1759,7 +1617,7 @@
 						TMW.IE:RegisterTab(self, "Conditions")
 						self:SetText(TMW.L["CONDITIONS"])
 						function self:OnClick()
-							TMW.CNDT:LoadConfig("icon") --TODO: this (and group conditons tab) should be with CNDT's config. Rewrite IE.Tabs to make this possible.
+							TMW.CNDT:LoadConfig("Icon") --TODO: this (and group conditons tab) should be with CNDT's config. Rewrite IE.Tabs to make this possible.
 						end
 					</OnLoad>
 				</Scripts>
@@ -1781,7 +1639,7 @@
 						TMW.IE:RegisterTab(self, "Conditions")
 						self:SetText(TMW.L["GROUPCONDITIONS"])
 						function self:OnClick()
-							TMW.CNDT:LoadConfig("group")
+							TMW.CNDT:LoadConfig("Group")
 						end
 					</OnLoad>
 				</Scripts>
@@ -1796,6 +1654,14 @@
 							TMW.IE:NotifyChanges("groups", "#Group " .. TMW.CI.g)
 							LibStub("AceConfigDialog-3.0"):Open("TMW IEOptions", TMW.IE.MainOptionsWidget)
 						end
+					</OnLoad>
+				</Scripts>
+			</Button>
+			<Button name="$parentTab6" parentKey="DynamicConditionTab"	inherits="TellMeWhen_TabTemplate">
+				<Scripts>
+					<OnLoad>
+						self:Hide()
+						TMW.IE:RegisterTab(self, "Conditions")
 					</OnLoad>
 				</Scripts>
 			</Button>
@@ -1833,6 +1699,9 @@
 				<Scripts>
 					<OnLoad>
 						self.current = {}
+						
+						self:SetFrameLevel(200)
+						self:SetFrameStrata("DIALOG")
 
 						local arrow = self.arrow
 						arrow:SetSize(21, 53)
@@ -1855,162 +1724,7 @@
 					</OnHide>
 				</Scripts>
 			</Frame>
-
-			<Frame name="$parentSuggest" parentKey="Suggest" hidden="true" enableMouse="true">
-				<Size x="220"/>
-				<Anchors>
-					<Anchor point="TOPLEFT" relativePoint="TOPRIGHT" x="-4"/> 
-					<Anchor point="BOTTOMLEFT" relativePoint="BOTTOMRIGHT" x="-4"/>
-				</Anchors>
-				<Backdrop bgFile="Interface\DialogFrame\UI-DialogBox-Background-Dark" edgeFile="Interface\DialogFrame\UI-DialogBox-Border" tile="true">
-					<BackgroundInsets>
-						<AbsInset left="11" right="12" top="12" bottom="11"/>
-					</BackgroundInsets>
-					<TileSize>
-						<AbsValue val="32"/>
-					</TileSize>
-					<EdgeSize>
-						<AbsValue val="32"/>
-					</EdgeSize>
-				</Backdrop>
-				<Layers>
-					<Layer level="OVERLAY">
-						<FontString name="$parentHeader" inherits="GameFontNormalLarge" parentKey="Header" justifyH="LEFT">
-							<Anchors>
-								<Anchor point="TOP" y="-12"/>
-							</Anchors>
-						</FontString>
-					</Layer>
-					<Layer level="ARTWORK">
-						<FontString name="$parentInfoText" parentKey="InfoText" hidden="true" inherits="GameFontHighlight">
-							<Size x="180"/>
-							<Anchors>
-								<Anchor point="TOP" y="-45"/>
-							</Anchors>
-						</FontString>
-					</Layer>
-				</Layers>
-				<Frames>
-					<Slider name="$parentSpeed" inherits="TellMeWhen_SliderTemplate" parentKey="Speed" hidden="true">
-						<Size x="165" y="18"/>
-						<Anchors>
-							<Anchor point="TOP" relativeTo="$parentInfoText" relativePoint="BOTTOM" y="-25"/>
-						</Anchors>
-						<Scripts>
-							<OnLoad>
-								self.exponent = 4
-								self.max = 5000
-								self.text:SetText(TMW.L["CACHINGSPEED"])
-								self:SetMinMaxValues(1, (self.max^(1/self.exponent)))
-								self.Low:SetText(1)
-								self.High:SetText(self.max)
-								self.Mid:SetText(TMW.SUG.NumCachePerFrame)
-								self:SetValue(TMW.SUG.NumCachePerFrame or 10)
-							</OnLoad>
-							<OnValueChanged>
-								value = min(floor(value^self.exponent+0.5), self.max)
-								TMW.SUG.NumCachePerFrame = value
-								self.Mid:SetText(value)
-							</OnValueChanged>
-							<OnShow>
-								self:GetParent().InfoText:Show()
-							</OnShow>
-							<OnHide>
-								self:GetParent().InfoText:Hide()
-							</OnHide>
-						</Scripts>
-					</Slider>
-					<StatusBar name="$parentStatus" parentKey="Status" hidden="true">
-						<Size x="175" y="25"/>
-						<Anchors>
-							<Anchor point="TOP" relativeTo="$parentSpeed" relativePoint="BOTTOM" y="-15"/>
-						</Anchors>
-						<Layers>
-							<Layer level="ARTWORK">
-								<Texture name="$parenttexture" parentKey="texture" file="Interface\TargetingFrame\UI-StatusBar"/>
-							</Layer>
-
-							<Layer level="OVERLAY">
-								<FontString name="$parentText" parentKey="text" inherits="GameFontHighlight">
-									<Anchors>
-										<Anchor point="CENTER"/>
-									</Anchors>
-								</FontString>
-							</Layer>
-						</Layers>
-						<Scripts>
-							<OnLoad>
-								self:SetStatusBarTexture(self.texture)
-								self.texture:SetTexture(LibStub("LibSharedMedia-3.0"):Fetch("statusbar", TMW.db.profile.TextureName))
-							</OnLoad>
-							<OnValueChanged>
-								if self:IsShown() then
-									self.text:SetText(value.." / ~"..(TMWOptDB.CacheLength or 100000))
-								end
-							</OnValueChanged>
-						</Scripts>
-					</StatusBar>
-					<Button name="$parentHelp" inherits="MainMenuBarMicroButton" hidden="false">
-						<Anchors>
-							<Anchor point="TOPRIGHT" x="-15" y="9"/>
-						</Anchors>
-						<Scripts>
-							<OnLoad>
-								self:SetNormalTexture("Interface\\Buttons\\UI-MicroButton-Help-Up")
-								self:SetPushedTexture("Interface\\Buttons\\UI-MicroButton-Help-Up")
-								self:SetDisabledTexture("Interface\\Buttons\\UI-MicroButton-Help-Up")
-								self:SetHighlightTexture("Interface\\Buttons\\UI-MicroButton-Hilight")
-								self:SetScale(.58)
-							</OnLoad>
-							<OnEnter>
-								TMW.SUG:ColorHelp(self)
-							</OnEnter>
-							<OnLeave>
-								GameTooltip:Hide()
-							</OnLeave>
-						</Scripts>
-					</Button>
-					<Button name="$parentFinish" parentKey="Finish" inherits="TellMeWhen_ButtonTemplate" hidden="true">
-						<Size x="190" y="15"/>
-						<Anchors>
-							<Anchor point="BOTTOM" y="20"/>
-						</Anchors>
-						<Scripts>
-							<OnLoad>
-								self:SetText(TMW.L["SUG_FINISHHIM"])
-								TMW:TT(self, "SUG_FINISHHIM", "SUG_FINISHHIM_DESC")
-								self:RegisterEvent("UNIT_FLAGS") -- accurately detects changes to InCombatLockdown
-							</OnLoad>
-							<OnEvent>
-								-- Don't allow this when in combat because of Blizzard's new throttling systen in Mists of Pandaria
-								if InCombatLockdown() then
-									self:Disable()
-								else
-									self:Enable()
-								end
-							</OnEvent>
-							<OnClick>
-								TMW.SUG.NumCachePerFrame = 2^1023 -- why the hell not?
-							</OnClick>
-						</Scripts>
-					</Button>
-				</Frames>
-				<Scripts>
-					<OnLoad>
-						TMW.SUG.Suggest = self
-						self.Header:SetText(TMW.L["SUGGESTIONS"])
-						self.InfoText:SetText(TMW.L["CACHING"])
-						
-						TMW.SUG:GetFrame(1):SetPoint("TOP", 0, -12 - TMW.SUG[1]:GetHeight())
-					</OnLoad>
-					<OnSizeChanged>						
-						if TMW.SUG:GetNumFramesNeeded() ~= #TMW.SUG and self:IsShown() then
-							TMW.SUG:SuggestingComplete()
-						end
-					</OnSizeChanged>
-				</Scripts>
-			</Frame>
-
+			
 			<Frame name="$parentMain" parentKey="Main" hidden="true">
 				<Anchors>
 					<Anchor point="TOPLEFT" y="-23"/>
@@ -2018,60 +1732,31 @@
 				</Anchors>
 				
 				<Frames>
-					<Frame name="$parentPanelListing" parentKey="PanelListing" ><!-- inherits="TellMeWhen_BorderedFrame" -->
-						<Size x="137"/>
-						<!-- <Size x="-7"/> -->
+					
+					<Frame name="$parentPanelsLeft" parentKey="PanelsLeft">
 						<Anchors>
-							<Anchor point="LEFT" x="7" />
+							<Anchor point="LEFT" x="7"/>
 							<Anchor point="TOP" y="-35"/>
 							<Anchor point="BOTTOM" y="3"/>
+							<Anchor point="RIGHT" relativePoint="TOP" x="-6"/>
 						</Anchors>
-						<Layers>
-							<Layer level="OVERLAY">
-								<FontString name="$parentHeader" inherits="GameFontNormalLarge" parentKey="Header" justifyH="LEFT">
-									<Anchors>
-										<Anchor point="TOP" y="-12"/>
-									</Anchors>
-								</FontString>
-							</Layer>
-						</Layers>
 						<Scripts>
 							<OnLoad>
-								TMW:ConvertContainerToScrollFrame(self, true, 1.5, 4.5)
-								
-							--	self.Header:SetText(TMW.L["SUGGESTIONS"])
-							--	self.InfoText:SetText(TMW.L["CACHING"])
-
-								function self:GetListing(id)
-									if self[id] then
-										return self[id]
-									end
-									
-									local f = CreateFrame("Button", self:GetName().."Item"..id, self, "TellMeWhen_PanelListingTemplate", id)
-									self[id] = f
-									if self[id-1] then
-										f:SetPoint("TOP", self[id-1], "BOTTOM", 0, -3)
-									end
-									return f
-								end
-								
-								self:GetListing(1):SetPoint("TOP", 0, -0)
-								
+								TMW:ConvertContainerToScrollFrame(self, true, 1, 5)
 							</OnLoad>
 						</Scripts>
 					</Frame>
-			
 					
-					<Frame name="$parentPanels" parentKey="Panels">
+					<Frame name="$parentPanelsRight" parentKey="PanelsRight">
 						<Anchors>
-							<Anchor point="LEFT" relativeTo="$parentPanelListing" relativePoint="RIGHT" x="7"/>
+							<Anchor point="LEFT" relativePoint="TOP" x="6"/>
 							<Anchor point="TOP" y="-35"/>
 							<Anchor point="BOTTOM" y="3"/>
-							<Anchor point="RIGHT" x="-14"/>
+							<Anchor point="RIGHT" x="-7"/>
 						</Anchors>
 						<Scripts>
 							<OnLoad>
-								TMW:ConvertContainerToScrollFrame(self, true, 2)
+								TMW:ConvertContainerToScrollFrame(self, true, 1, 5)
 							</OnLoad>
 						</Scripts>
 					</Frame>
@@ -2079,7 +1764,8 @@
 					<Frame name="$parentType" inherits="TMW_DropDownMenuTemplate" parentKey="Type">
 						<Anchors>
 							<Anchor point="TOP" y="-4"/>
-							<Anchor point="LEFT" relativeTo="$parentScrollFrame[DND]" x="-10" />
+							<Anchor point="LEFT" relativeTo="$parentPanelsLeft" x="-10" />
+							<Anchor point="RIGHT" relativeTo="$parentPanelsLeft" x="10" />
 						</Anchors>
 						<Scripts>
 							<OnLoad>
@@ -2105,16 +1791,16 @@
 					
 					<CheckButton name="$parentEnabled" inherits="TellMeWhen_CheckTemplate" parentKey="Enabled">
 						<Anchors>
-							<Anchor point="LEFT" relativeTo="$parentType" relativePoint="RIGHT" x="-8" y="2"/>
+							<Anchor point="LEFT" relativeTo="$parentType" relativePoint="RIGHT" x="2" y="2"/>
 						</Anchors>
 						<Scripts>
 							<OnLoad>
-								self.text:SetWidth(85)
 								self:SetFrameLevel(self:GetFrameLevel() + 2) -- sometimes it ends up under the type dropdown which makes half of the checkbox unclickable
 							
 								TMW.IE:CreateSettingFrameFromData(self, {
 									setting = "Enabled",
 									title = TMW.L["ICONMENU_ENABLE"],
+									tooltip = TMW.L["ICONMENU_ENABLE_DESC"],
 								})
 							</OnLoad>
 						</Scripts>
@@ -2520,8 +2206,13 @@
 					<Anchor point="BOTTOMRIGHT" x="-7" y="6"/>
 				</Anchors>
 				<Scripts>
-					<OnLoad> self:SetFrameLevel(self:GetParent():GetFrameLevel()+4) </OnLoad>
-					<OnClick>self:GetParent():Hide() </OnClick>
+					<OnLoad>
+						self:SetFrameLevel(self:GetParent():GetFrameLevel()+4)
+						self:SetWidth(self:GetTextWidth()+15)
+					</OnLoad>
+					<OnClick>
+						self:GetParent():Hide()
+					</OnClick>
 				</Scripts>
 			</Button>
 
@@ -2704,6 +2395,8 @@
 				<FontString name="$parentFS1" parentKey="FS1" inherits="GameFontNormal" justifyH="CENTER">
 					<Anchors>
 						<Anchor point="TOP" y="-7"/>
+						<Anchor point="LEFT" relativeTo="$parentForwardsButton" relativePoint="RIGHT"/>
+						<Anchor point="RIGHT" relativeTo="$parentClose" relativePoint="LEFT"/>
 					</Anchors>
 				</FontString>
 				<Texture name="$parentIconTexture" parentKey="icontexture">

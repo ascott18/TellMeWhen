@@ -1,5 +1,13 @@
 <Ui>
 
+<Include file="Spells\includes.config.xml"/>
+
+<Include file="Suggester\includes.config.xml"/>
+
 <Include file="Conditions\includes.config.xml"/>
+
+<Include file="Units\includes.config.xml"/>
+
+<Include file="Resizer_Generic\includes.config.xml"/>
 
 </Ui>

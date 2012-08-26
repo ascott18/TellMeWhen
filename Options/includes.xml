@@ -16,10 +16,6 @@
 <Include file="TellMeWhen_Options.xml"/>
 <Include file="Bindings.xml"/>
 
-
-<Script file="Modules\Texts.lua"/>
-<Include file="Modules\Texts.xml"/>
-
 <Include file="..\Components\includes.config.xml"/>
 
 </Ui>

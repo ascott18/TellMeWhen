@@ -23,7 +23,7 @@ local print = TMW.print
 local Hook = TMW.Classes.IconDataProcessorHook:New("ALPHA_CONDITIONREQ", "CONDITION")
 
 Hook:RegisterIconDefaults{
-	ConditionAlpha			= 0, --TODO: ConditionAlpha has no config panel. Make one and register it to this hook.
+	ConditionAlpha			= 0,
 }
 Hook:RegisterRapidSetting("ConditionAlpha")
 

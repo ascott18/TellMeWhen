@@ -42,7 +42,7 @@ Type:RegisterIconDefaults{
 	RuneSlots				= 0x3F, --(111111)
 }
 
-Type:RegisterConfigPanel_XMLTemplate(130, "TellMeWhen_WhenChecks", {
+Type:RegisterConfigPanel_XMLTemplate(165, "TellMeWhen_WhenChecks", {
 	text = L["ICONMENU_SHOWWHEN"],
 	[0x2] = { text = "|cFF00FF00" .. L["ICONMENU_USABLE"],		},
 	[0x1] = { text = "|cFFFF0000" .. L["ICONMENU_UNUSABLE"],	},
@@ -143,7 +143,7 @@ local function Runes_OnUpdate(icon, time)
 	end
 end
 
-function Type:GetNameForDisplay(icon, data, doInsertLink)
+function Type:FormatSpellForOutput(icon, data, doInsertLink)
 	return runeNames[data]
 end
 
@@ -169,7 +169,7 @@ function Type:Setup(icon, groupID, iconID)
 	
 	icon:SetUpdateMethod("manual")
 
-	icon:SetScript("OnUpdate", Runes_OnUpdate)
+	icon:SetUpdateFunction(Runes_OnUpdate)
 	--icon:Update()
 end
 

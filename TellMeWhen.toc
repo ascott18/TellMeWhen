@@ -61,32 +61,6 @@ TellMeWhen.lua
 
 Components\includes.core.xml
 
-
-# Types\default.lua
-# 
-# Types\cooldown.lua
-# Types\item.lua
-# Types\runes.lua
-# Types\unitcooldown.lua
-# Types\icd.lua
-# Types\multistate.lua
-# Types\reactive.lua
-# 
-# Types\buff.lua
-# Types\wpnenchant.lua
-# Types\totem.lua
-# Types\lightwell.lua
-# Types\dr.lua
-# Types\cast.lua
-# 
-# Types\cleu.lua
-# 
-# Types\conditionicon.lua
-# Types\meta.lua
-# TODO: types need to be ordered when they are registered, not ordered in their load order
-
-
-conditions.lua
 LDB.lua
 
 TellMeWhen.xml

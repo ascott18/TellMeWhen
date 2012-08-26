@@ -59,18 +59,18 @@ TMW:RegisterUpgrade(45013, {
 	end,
 })
 
-Type:RegisterConfigPanel_XMLTemplate(130, "TellMeWhen_WhenChecks", {
-	text = L["ICONMENU_CNDTSHOWWHEN"],
-	[0x2] = { text = "|cFF00FF00" .. L["ICONMENU_SUCCEED"],			},
-	[0x1] = { text = "|cFFFF0000" .. L["ICONMENU_FAIL"],			},
+Type:RegisterConfigPanel_XMLTemplate(165, "TellMeWhen_WhenChecks", {
+	text = L["ICONMENU_SHOWWHEN"],
+	[0x2] = { text = "|cFF00FF00" .. L["ICONMENU_SUCCEED2"],			},
+	[0x1] = { text = "|cFFFF0000" .. L["ICONMENU_FAIL2"],			},
 })
 
 Type:RegisterConfigPanel_XMLTemplate(150, "TellMeWhen_ConditionIconSettings")
 
 local function ConditionIcon_OnUpdate(icon, time)
-	local ConditionObj = icon.ConditionObj
-	if ConditionObj then
-		local succeeded = not ConditionObj.Failed
+	local ConditionObject = icon.ConditionObject
+	if ConditionObject then
+		local succeeded = not ConditionObject.Failed
 		
 		local alpha = succeeded and icon.Alpha or icon.UnAlpha
 
@@ -112,26 +112,21 @@ local function ConditionIcon_OnUpdate(icon, time)
 	end
 end
 
-function Type:GetNameForDisplay(icon, data, doInsertLink)
+function Type:FormatSpellForOutput(icon, data, doInsertLink)
 	return ""
 end
 
 
-function Type:Setup(icon, groupID, iconID)
-	icon.dontHandleConditionsExternally = true
-	
+function Type:Setup(icon, groupID, iconID)	
 	icon:SetInfo("texture", "Interface\\Icons\\INV_Misc_QuestionMark")
 
 	icon:SetUpdateMethod("manual")
 	
-	icon:SetScript("OnUpdate", ConditionIcon_OnUpdate)
+	icon:SetUpdateFunction(ConditionIcon_OnUpdate)
 	--icon:Update() -- dont do this!
 end
 
-function Type:DragReceived(icon, t, data, subType)
-	-- TODO: Switch conditionicons back to using ics.Name instead of ics.CustomTex for their texture.
-	-- I know its a little redundant to have both, but consistency and modularity is much more important than non-redundancy.
-	
+function Type:DragReceived(icon, t, data, subType)	
 	local ics = icon:GetSettings()
 
 	local _, input

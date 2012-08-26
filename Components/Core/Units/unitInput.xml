@@ -1,0 +1,12 @@
+<Ui>
+
+	<EditBox name="TellMeWhen_UnitEditbox" inherits="TellMeWhen_InputBoxTemplate" virtual="true" multiline="true" autoFocus="false">
+		<Size y="15"/>
+		<Scripts>
+			<OnEvent>
+				TMW:TT_Update(self)
+			</OnEvent>
+		</Scripts>
+	</EditBox>
+
+</Ui>

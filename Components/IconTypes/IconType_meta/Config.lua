@@ -65,8 +65,6 @@ function ME:LoadConfig()
 		local mg = ME[k] or CreateFrame("Frame", "TellMeWhen_MetaIconOptions" .. k, TellMeWhen_MetaIconOptions, "TellMeWhen_MetaGroup", k)
 		ME[k] = mg
 		mg:Show()
-		ME[k].up:Show()
-		ME[k].down:Show()
 		if k > 1 then
 			mg:SetPoint("TOPLEFT", ME[k-1], "BOTTOMLEFT", 0, 0)
 			mg:SetPoint("TOPRIGHT", ME[k-1], "BOTTOMRIGHT", 0, 0)
@@ -77,20 +75,12 @@ function ME:LoadConfig()
 		mg.icon.IconPreview:SetIcon(_G[v])
 	end
 
-	TellMeWhen_MetaIconOptions:SetHeight((#settings * ME[1]:GetHeight()) + 45)
+	TellMeWhen_MetaIconOptions:SetHeight((#settings * ME[1]:GetHeight()) + 35)
 	
 	for f=#settings+1, #ME do
 		ME[f]:Hide()
 	end
-	ME[1].up:Hide()
 	ME[1]:Show()
-
-	if settings[1] then
-		ME[#settings].down:Hide()
-		ME[1].delete:Hide()
-	else
-		ME[1].down:Hide()
-	end
 
 	if settings[2] then
 		ME[1].delete:Show()
@@ -102,17 +92,6 @@ TMW:RegisterCallback("TMW_CONFIG_ICON_LOADED", ME.LoadConfig, ME)
 
 
 ---------- Click Handlers ----------
-function ME:UpOrDown(self, delta)
-	local ID = self:GetParent():GetID()
-	local settings = CI.ics.Icons
-	local curdata, destinationdata
-	curdata = settings[ID]
-	destinationdata = settings[ID+delta]
-	settings[ID] = destinationdata
-	settings[ID+delta] = curdata
-	ME:LoadConfig()
-end
-
 function ME:Insert(where)
 	tinsert(CI.ics.Icons, where, "")
 	ME:LoadConfig()
@@ -121,6 +100,14 @@ end
 function ME:Delete(self)
 	tremove(TMW.db.profile.Groups[CI.g].Icons[CI.i].Icons, self:GetParent():GetID())
 	ME:LoadConfig()
+end
+
+function ME:SwapIcons(id1, id2)
+	local Icons = TMW.CI.ics.Icons
+	
+	Icons[id1], Icons[id2] = Icons[id2], Icons[id1]
+	
+	TMW.ME:LoadConfig()
 end
 
 

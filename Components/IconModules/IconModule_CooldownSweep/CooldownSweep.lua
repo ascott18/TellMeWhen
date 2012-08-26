@@ -30,7 +30,7 @@ CooldownSweep:RegisterIconDefaults{
 CooldownSweep:RegisterConfigPanel_ConstructorFunc(200, "TellMeWhen_TimerSettings", function(self)
 	self.Header:SetText(L["CONFIGPANEL_TIMER_HEADER"])
 	TMW.IE:BuildSimpleCheckSettingFrame(self, {
-		numPerRow = 3,
+		numPerRow = 2,
 		{
 			setting = "ShowTimer",
 			title = TMW.L["ICONMENU_SHOWTIMER"],
@@ -40,9 +40,9 @@ CooldownSweep:RegisterConfigPanel_ConstructorFunc(200, "TellMeWhen_TimerSettings
 			setting = "ShowTimerText",
 			title = TMW.L["ICONMENU_SHOWTIMERTEXT"],
 			tooltip = TMW.L["ICONMENU_SHOWTIMERTEXT_DESC"],
-			disabled = function()
+			--[[disabled = function()
 				return not (IsAddOnLoaded("OmniCC") or IsAddOnLoaded("tullaCC") or LibStub("AceAddon-3.0"):GetAddon("LUI_Cooldown", true))
-			end,
+			end,]]
 		},
 	})
 end)
@@ -97,10 +97,16 @@ function CooldownSweep:OnEnable()
 	end	
 	
 	self:DURATION(icon, attributes.start, attributes.duration)
+	self:SPELLCHARGES(icon, attributes.charges, attributes.maxCharges)
 	self:REVERSE(icon, attributes.reverse)
 end
 function CooldownSweep:OnDisable()
-	self:SetCooldown(0, 0)
+	local cd = self.cooldown
+	
+	cd.start, cd.duration = 0, 0
+	cd.charges, cd.maxCharges = nil, nil
+	
+	self:UpdateCooldown()
 end
 
 function CooldownSweep:SetupForIcon(sourceIcon)
@@ -109,17 +115,21 @@ function CooldownSweep:SetupForIcon(sourceIcon)
 	self.cooldown.noCooldownCount = not sourceIcon.ShowTimerText
 end
 
-function CooldownSweep:SetCooldown(start, duration)
+function CooldownSweep:UpdateCooldown()
 	local cd = self.cooldown
-	cd:SetCooldown(start, duration)
-	cd.s = start
-	cd.d = duration
+	local duration = cd.duration
+	
+	cd:SetCooldown(cd.start, duration, cd.charges, cd.maxCharges)
 	
 	if duration > 0 then
-		cd:Show() 
-		cd:SetAlpha(1)
+		cd:Show()
+		cd:SetAlpha(self.ShowTimer and 1 or 0)
 	else
 		cd:Hide()
+	end
+
+	if not self.ShowTimer then
+		cd:SetAlpha(0)
 	end
 end
 
@@ -130,15 +140,26 @@ function CooldownSweep:DURATION(icon, start, duration)
 		start, duration = 0, 0
 	end
 	
-	if cd.s ~= start or cd.d ~= duration then
-		self:SetCooldown(start, duration)
-
-		if not self.ShowTimer then
-			cd:SetAlpha(0)
-		end
+	if cd.start ~= start or cd.duration ~= duration then
+		cd.start = start
+		cd.duration = duration
+		
+		self:UpdateCooldown()
 	end
 end
 CooldownSweep:SetDataListner("DURATION")
+
+function CooldownSweep:SPELLCHARGES(icon, charges, maxCharges)
+	local cd = self.cooldown
+	
+	if cd.charges ~= charges or cd.maxCharges ~= maxCharges then
+		cd.charges = charges
+		cd.maxCharges = maxCharges
+		
+		self:UpdateCooldown()
+	end
+end
+CooldownSweep:SetDataListner("SPELLCHARGES")
 
 function CooldownSweep:REVERSE(icon, reverse)
 	self.cooldown:SetReverse(reverse)
