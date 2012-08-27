@@ -1114,7 +1114,7 @@ L["CACHING"] = [[TellMeWhen is caching and filtering all spells in the game. Thi
 You do not have to wait for this process to complete in order to use TellMeWhen. Only the suggestion list is dependent on the completion of the spell cache.]]
 L["CACHINGSPEED"] = "Spells per frame:"
 L["SUGGESTIONS"] = "Suggestions:"
-L["SUGGESTIONS_SUBSTITUTIONS"] = "Substitutions:"
+L["SUGGESTIONS_DOGTAGS"] = "DogTags:"
 L["SUG_TOOLTIPTITLE"] = [[As you type, TellMeWhen will look through its cache and determine the spells that you were most likely looking for.
 
 Spells are categorized and colored as per the list below. Note that the categories that begin with the word "Known" will not have spells put into them until they have been seen as you play or log onto different Classes.
@@ -1122,7 +1122,9 @@ Spells are categorized and colored as per the list below. Note that the categori
 Clicking on an entry will insert it into the editbox.
 
 ]]--extra newlines intended
-L["SUG_TOOLTIPTITLE_TEXTSUBS"] = [[The following are substitutions that you may wish to use in this text display. Using a substitution will cause it to be replaced with the appropriate data wherever it is displayed.
+L["SUG_TOOLTIPTITLE_TEXTSUBS"] = [[The following are tags that you may wish to use in this text display. Using a substitution will cause it to be replaced with the appropriate data wherever it is displayed.
+
+For more information about these tags, and for more tags, click this button.
 
 Clicking on an entry will insert it into the editbox.]]
 L["SUG_DISPELTYPES"] = "Dispel Types"
@@ -1148,7 +1150,7 @@ L["SUG_INSERTNAME"] = "%s to insert as a name"
 L["SUG_INSERTID"] = "%s to insert as an ID"
 L["SUG_INSERTITEMSLOT"] = "%s to insert as an item slot ID"
 L["SUG_INSERTEQUIV"] = "%s to insert equivalency"
-L["SUG_INSERTTEXTSUB"] = "%s to insert substitution"
+L["SUG_INSERTTEXTSUB"] = "%s to insert tag"
 
 L["SUG_PATTERNMATCH_FISHINGLURE"] = "Fishing Lure %(%+%d+ Fishing Skill%)" -- enUS
 L["SUG_PATTERNMATCH_WEIGHTSTONE"] = "Weighted %(%+%d+ Damage%)"

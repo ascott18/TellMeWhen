@@ -97,7 +97,7 @@
 				<Scripts>
 					<OnLoad>
 						self.BackgroundText:SetWidth(self:GetWidth())
-					--	TMW.SUG:EnableEditBox(self, "textsubs") --TODO: UPDATE SUG MODULE TO DOGTAG
+						TMW.SUG:EnableEditBox(self, "dogtags")
 					
 						TMW:RegisterCallback("TMW_CONFIG_SAVE_SETTINGS", "ClearFocus", self)
 						

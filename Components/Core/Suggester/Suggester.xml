@@ -249,6 +249,11 @@
 					<OnLeave>
 						GameTooltip:Hide()
 					</OnLeave>
+					<OnClick>
+						if TMW.SUG.CurrentModule.helpOnClick then
+							TMW.SUG.CurrentModule.helpOnClick(self)
+						end
+					</OnClick>
 				</Scripts>
 			</Button>
 			<Button name="$parentFinish" parentKey="Finish" inherits="TellMeWhen_ButtonTemplate" hidden="true">

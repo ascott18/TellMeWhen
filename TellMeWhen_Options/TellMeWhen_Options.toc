@@ -1,7 +1,7 @@
 ﻿## Interface: 40300
 ## Title: TellMeWhen Options
 
-## Author: Cybeloras of Mal'Ganis
+## Author: Cybeloras of Detheroc/Mal'Ganis
 ## Notes: Options and configuration for TellMeWhen
 ## RequiredDeps: TellMeWhen
 ## LoadOnDemand: 1

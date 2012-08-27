@@ -58,7 +58,7 @@
 						
 						self.Header:SetText(TMW.L["ANN_EDITBOX"])
 						
-						--TMW.SUG:EnableEditBox(self, "textsubsANN") --TODO: UPDATE SUG MODULE TO DOGTAG 
+						TMW.SUG:EnableEditBox(self, "dogtags") --TODO: UPDATE SUG MODULE TO DOGTAG 
 						
 						TMW:RegisterCallback("TMW_CONFIG_SAVE_SETTINGS", "ClearFocus", self)
 						
@@ -146,7 +146,7 @@
 						TMW:TT(self, "ANN_WHISPERTARGET", "ANN_WHISPERTARGET_DESC")
 						self.label = TMW.L["ANN_WHISPERTARGET"]
 						self.BackgroundText:SetWidth(self:GetWidth())
-						--TMW.SUG:EnableEditBox(self, "textsubsANNWhisper") --TODO: UPDATE SUG MODULE TO DOGTAG
+						TMW.SUG:EnableEditBox(self, "dogtags") --TODO: UPDATE SUG MODULE TO DOGTAG
 					</OnLoad>
 					<OnEditFocusLost>
 						EditBox_ClearHighlight(self)

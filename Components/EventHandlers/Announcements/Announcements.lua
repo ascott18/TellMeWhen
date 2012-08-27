@@ -161,12 +161,12 @@ function ANN:HandleEvent(icon, eventSettings)
 		ANN.kwargs.color = not chandata.isBlizz and TMW.db.profile.ColorNames
 
 		if chandata.handler then
-			Text = DogTag:Evaluate(Text, "Unit;TMW", ANN.kwargs)
+			Text = DogTag:Evaluate(Text, "TMW;Unit", ANN.kwargs)
 			chandata.handler(icon, eventSettings, Text)
 		elseif Text and chandata.isBlizz then
 			local Location = eventSettings.Location
 			Text = Text:gsub("Name", "nameforceuncolored")
-			Text = DogTag:Evaluate(Text, "Unit;TMW", ANN.kwargs)
+			Text = DogTag:Evaluate(Text, "TMW;Unit", ANN.kwargs)
 			if Channel == "WHISPER" then
 				wipe(ANN.kwargs)
 				ANN.kwargs.icon = icon.ID
@@ -174,7 +174,7 @@ function ANN:HandleEvent(icon, eventSettings)
 				ANN.kwargs.unit = icon.attributes.dogTagUnit
 				ANN.kwargs.link = false
 				ANN.kwargs.color = false
-				Location = DogTag:Evaluate(Location, "Unit;TMW", ANN.kwargs)
+				Location = DogTag:Evaluate(Location, "TMW;Unit", ANN.kwargs)
 				Location = Location:gsub("|c%x%x%x%x%x%x%x%x", ""):gsub("|r", "") -- strip color codes
 			end
 			SendChatMessage(Text, Channel, nil, Location)
