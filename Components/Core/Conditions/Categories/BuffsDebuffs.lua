@@ -21,6 +21,9 @@ local CNDT = TMW.CNDT
 local Env = CNDT.Env
 local isNumber = TMW.isNumber
 
+local UnitAura = 
+	  UnitAura
+
 function Env.AuraStacks(unit, name, namename, filter)
 	local isID = isNumber[name]
 	
@@ -334,6 +337,7 @@ ConditionCategory:RegisterCondition(15,	 "DEBUFFNUMBER", {
 
 ConditionCategory:RegisterSpacer(20)
 
+Env.GetWeaponEnchantInfo = GetWeaponEnchantInfo
 ConditionCategory:RegisterCondition(21,	 "MAINHAND", {
 	text = L["ICONMENU_WPNENCHANT"] .. " - " .. INVTYPE_WEAPONMAINHAND,
 	category = L["CNDTCAT_BUFFSDEBUFFS"],

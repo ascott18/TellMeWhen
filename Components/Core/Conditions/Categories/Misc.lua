@@ -112,6 +112,9 @@ ConditionCategory:RegisterCondition(2,	 "MACRO", {
 	unit = false,
 	icon = "Interface\\Icons\\inv_misc_punchcards_yellow",
 	tcoords = CNDT.COMMON.standardtcoords,
+	Env = {
+		SecureCmdOptionParse = SecureCmdOptionParse,
+	},
 	funcstr = function(c)
 		local text = c.Name
 		text = (not strfind(text, "^%[") and ("[" .. text)) or text

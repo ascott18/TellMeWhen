@@ -42,12 +42,8 @@ local GetSpellCritChance =
 	  GetSpellCritChance
 local GetSpellBonusDamage, GetSpellBonusHealing =
 	  GetSpellBonusDamage, GetSpellBonusHealing
-local GetSpellTexture, GetInventoryItemTexture, GetInventorySlotInfo, GetCurrencyInfo =
-	  GetSpellTexture, GetInventoryItemTexture, GetInventorySlotInfo, GetCurrencyInfo
-local UnitAura =
-	  UnitAura
-local GetNumTrackingTypes, GetTrackingInfo =
-	  GetNumTrackingTypes, GetTrackingInfo
+local GetSpellTexture, GetInventoryItemTexture, GetInventorySlotInfo =
+	  GetSpellTexture, GetInventoryItemTexture, GetInventorySlotInfo
 
 local _G = _G
 local print = TMW.print
@@ -430,78 +426,49 @@ function CNDT:RAID_ROSTER_UPDATE()
 end
 
 Env = {
-	UnitHealth = UnitHealth,
-	UnitHealthMax = UnitHealthMax,
-	UnitPower = UnitPower,
-	UnitPowerMax = UnitPowerMax,
-	UnitAura = UnitAura,
-	GetPetHappiness = GetPetHappiness,
-	GetEclipseDirection = GetEclipseDirection,
-	UnitName = UnitName,
-	GetComboPoints = GetComboPoints,
-	UnitExists = UnitExists,
-	UnitIsDeadOrGhost = UnitIsDeadOrGhost,
-	UnitAffectingCombat = UnitAffectingCombat,
-	UnitHasVehicleUI = UnitHasVehicleUI,
-	UnitIsPVP = UnitIsPVP,
-	UnitClass = UnitClass,
-	UnitClassification = UnitClassification,
-	UnitGroupRolesAssigned = UnitGroupRolesAssigned,
-	UnitDetailedThreatSituation = UnitDetailedThreatSituation,
-	GetRaidTargetIndex = GetRaidTargetIndex,
-	UnitIsEnemy = UnitIsEnemy,
-	UnitIsUnit = UnitIsUnit,
-	UnitReaction = UnitReaction,
-	GetRuneType = GetRuneType,
-	GetRuneCount = GetRuneCount,
-	GetSpellCooldown = GetSpellCooldown,
-	GetItemCooldown = GetItemCooldown,
-	UnitLevel = UnitLevel,
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
 	strlower = strlower,
 	strlowerCache = TMW.strlowerCache,
 	strfind = strfind,
 	floor = floor,
 	select = select,
 	min = min,
-	IsMounted = IsMounted,
-	IsSwimming = IsSwimming,
-	IsResting = IsResting,
-	GetUnitSpeed = GetUnitSpeed,
-	GetManaRegen = GetManaRegen,
-	UnitBuff = UnitBuff,
-	UnitDebuff = UnitDebuff,
-	GetWeaponEnchantInfo = GetWeaponEnchantInfo,
-	GetItemCount = GetItemCount,
-	IsEquippedItem = IsEquippedItem,
-	IsSpellInRange = IsSpellInRange,
-	IsItemInRange = IsItemInRange,
-	GetCurrencyInfo = GetCurrencyInfo,
-	SecureCmdOptionParse = SecureCmdOptionParse,
-	GetSpellAutocast = GetSpellAutocast,
-
-	UnitStat = UnitStat,
-	UnitAttackPower = UnitAttackPower,
-	UnitRangedAttackPower = UnitRangedAttackPower,
-	UnitSpellHaste = UnitSpellHaste,
-	GetMeleeHaste = GetMeleeHaste,
-	GetRangedHaste = GetRangedHaste,
-	GetExpertise = GetExpertise,
-	GetCritChance = GetCritChance,
-	GetRangedCritChance = GetRangedCritChance,
-	GetSpellCritChance = GetSpellCritChance,
-	GetMastery = GetMastery,
-	GetSpellBonusDamage = GetSpellBonusDamage,
-	GetSpellBonusHealing = GetSpellBonusHealing,
 	
-	ActivePetMode = 0,
-	NumPartyMembers = 0,
 	print = TMW.print,
 	type = type,
 	time = TMW.time,
 	huge = math.huge,
 	epsilon = 1e-255,
 
-	Tracking = {},
 	TMW = TMW,
 	GCDSpell = TMW.GCDSpell,
 } CNDT.Env = Env

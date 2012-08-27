@@ -20,6 +20,13 @@ local print = TMW.print
 local CNDT = TMW.CNDT
 local Env = CNDT.Env
 
+local _, pclass = UnitClass("Player")
+
+Env.UnitHealth = UnitHealth
+Env.UnitHealthMax = UnitHealthMax
+Env.UnitPower = UnitPower
+Env.UnitPowerMax = UnitPowerMax
+
 
 local ConditionCategory = CNDT:GetCategory("RESOURCES", 1, L["CNDTCAT_RESOURCES"])
 
@@ -218,6 +225,9 @@ ConditionCategory:RegisterCondition(13.2, "ECLIPSE_DIRECTION", {
 	nooperator = true,
 	icon = "Interface\\PlayerFrame\\UI-DruidEclipse",
 	tcoords = {0.55859375, 0.64843750, 0.57031250, 0.75000000},
+	Env = {
+		GetEclipseDirection = GetEclipseDirection,
+	},
 	funcstr = [[c.Level == (GetEclipseDirection() == "sun" and 1 or 0)]],
 	hidden = pclass ~= "DRUID",
 	events = function(ConditionObject, c)
@@ -235,6 +245,9 @@ ConditionCategory:RegisterCondition(14,	 "HAPPINESS", {
 	unit = PET,
 	icon = "Interface\\PetPaperDollFrame\\UI-PetHappiness",
 	tcoords = {0.390625, 0.5491, 0.03, 0.3305},
+	Env = {
+		GetPetHappiness = GetPetHappiness,
+	},
 	funcstr = GetPetHappiness and [[(GetPetHappiness() or 0) c.Operator c.Level]] or [[true]], -- dummy string to keep support for wowCN
 	hidden = not GetPetHappiness or pclass ~= "HUNTER", -- dont show if GetPetHappiness doesnt exist (if happiness is removed in the client version), not not because it must be false, not nil
 	events = function(ConditionObject, c)
@@ -255,6 +268,10 @@ ConditionCategory:RegisterCondition(15,	 "RUNES", {
 	showhide = function(group)
 		group.Runes:Show()
 	end,
+	Env = {
+		GetRuneType = GetRuneType,
+		GetRuneCount = GetRuneCount,
+	},
 	funcstr = function(c) -- sub-constructor function
 		local str = ""
 		for k, v in pairs(c.Runes) do
@@ -289,6 +306,9 @@ ConditionCategory:RegisterCondition(16,	 "COMBO", {
 	max = 5,
 	icon = "Interface\\Icons\\ability_rogue_eviscerate",
 	tcoords = CNDT.COMMON.standardtcoords,
+	Env = {
+		GetComboPoints = GetComboPoints,
+	},
 	funcstr = [[GetComboPoints("player", c.Unit) c.Operator c.Level]],
 	events = function(ConditionObject, c)
 		return

@@ -70,6 +70,7 @@ local eventsFunc = function(ConditionObject, c)
 end
 
 local spacenext
+Env.GetCurrencyInfo = GetCurrencyInfo
 for i, id in ipairs(currencies) do
 	if id == "SPACE" then
 		ConditionCategory:RegisterSpacer(i + 0.5)

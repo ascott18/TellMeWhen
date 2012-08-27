@@ -34,6 +34,9 @@ ConditionCategory:RegisterCondition(1,	 "EXISTS", {
 	nooperator = true,
 	icon = "Interface\\Icons\\ABILITY_SEAL",
 	tcoords = CNDT.COMMON.standardtcoords,
+	Env = {
+		UnitExists = UnitExists,
+	},
 	funcstr = function(c)
 		if c.Unit == "player" then
 			return [[true]]
@@ -61,6 +64,9 @@ ConditionCategory:RegisterCondition(2,	 "ALIVE", {
 	nooperator = true,
 	icon = "Interface\\Icons\\Ability_Vanish",
 	tcoords = CNDT.COMMON.standardtcoords,
+	Env = {
+		UnitIsDeadOrGhost = UnitIsDeadOrGhost,
+	},
 	funcstr = [[c.nil1 == UnitIsDeadOrGhost(c.Unit)]], -- note usage of nil1, not 1nil
 	events = function(ConditionObject, c)
 		return
@@ -76,9 +82,10 @@ ConditionCategory:RegisterCondition(3,	 "COMBAT", {
 	nooperator = true,
 	icon = "Interface\\CharacterFrame\\UI-StateIcon",
 	tcoords = {0.53, 0.92, 0.05, 0.42},
-	funcstr = function(c)
-		return [[c.1nil == UnitAffectingCombat(c.Unit)]]
-	end,
+	Env = {
+		UnitAffectingCombat = UnitAffectingCombat,
+	},
+	funcstr = [[c.1nil == UnitAffectingCombat(c.Unit)]],
 	events = function(ConditionObject, c)
 		if c.Unit == "player" then
 			return
@@ -100,9 +107,10 @@ ConditionCategory:RegisterCondition(4,	 "VEHICLE", {
 	nooperator = true,
 	icon = "Interface\\Icons\\Ability_Vehicle_SiegeEngineCharge",
 	tcoords = CNDT.COMMON.standardtcoords,
-	funcstr = function(c)
-		return [[c.True == UnitHasVehicleUI(c.Unit)]]
-	end,
+	Env = {
+		UnitHasVehicleUI = UnitHasVehicleUI,
+	},
+	funcstr = [[c.True == UnitHasVehicleUI(c.Unit)]],
 	events = function(ConditionObject, c)
 		return
 			ConditionObject:GetUnitChangedEventString(CNDT:GetUnit(c.Unit)),
@@ -119,6 +127,9 @@ ConditionCategory:RegisterCondition(5,	 "PVPFLAG", {
 	nooperator = true,
 	icon = "Interface\\TargetingFrame\\UI-PVP-" .. UnitFactionGroup("player"),
 	tcoords = {0.046875, 0.609375, 0.015625, 0.59375},
+	Env = {
+		UnitIsPVP = UnitIsPVP,
+	},
 	funcstr = [[c.1nil == UnitIsPVP(c.Unit)]],
 	events = function(ConditionObject, c)
 		return
@@ -134,6 +145,10 @@ ConditionCategory:RegisterCondition(6,	 "REACT", {
 	nooperator = true,
 	icon = "Interface\\Icons\\Warrior_talent_icon_FuryInTheBlood",
 	tcoords = CNDT.COMMON.standardtcoords,
+	Env = {
+		UnitIsEnemy = UnitIsEnemy,
+		UnitReaction = UnitReaction,
+	},
 	funcstr = [[(((UnitIsEnemy("player", c.Unit) or ((UnitReaction("player", c.Unit) or 5) <= 4)) and 1) or 2) == c.Level]],
 	events = function(ConditionObject, c)
 		return
@@ -144,6 +159,8 @@ ConditionCategory:RegisterCondition(6,	 "REACT", {
 			ConditionObject:GenerateNormalEventString("UNIT_DYNAMIC_FLAGS", "player")
 	end,
 })
+
+Env.GetUnitSpeed = GetUnitSpeed
 ConditionCategory:RegisterCondition(7,	 "SPEED", {
 	text = L["SPEED"],
 	tooltip = L["SPEED_DESC"],
@@ -167,6 +184,7 @@ ConditionCategory:RegisterCondition(8,	 "RUNSPEED", {
 	funcstr = [[select(2, GetUnitSpeed(c.Unit))/]].. BASE_MOVEMENT_SPEED ..[[ c.Operator c.Level]],
 	-- events = absolutely no events
 })
+
 ConditionCategory:RegisterCondition(9,	 "NAME", {
 	text = L["CONDITIONPANEL_NAME"],
 	min = 0,
@@ -176,6 +194,9 @@ ConditionCategory:RegisterCondition(9,	 "NAME", {
 	texttable = CNDT.COMMON.bool,
 	icon = "Interface\\LFGFrame\\LFGFrame-SearchIcon-Background",
 	tcoords = CNDT.COMMON.standardtcoords,
+	Env = {
+		UnitName = UnitName,
+	},
 	funcstr = [[c.1nil == (strfind(c.Name, SemicolonConcatCache[UnitName(c.Unit) or ""]) and 1)]],
 	events = function(ConditionObject, c)
 		return
@@ -190,6 +211,9 @@ ConditionCategory:RegisterCondition(10,	 "LEVEL", {
 	texttable = {[-1] = BOSS},
 	icon = "Interface\\TargetingFrame\\UI-TargetingFrame-Skull",
 	tcoords = {0.05, 0.95, 0.03, 0.97},
+	Env = {
+		UnitLevel = UnitLevel,
+	},
 	funcstr = [[UnitLevel(c.Unit) c.Operator c.Level]],
 	events = function(ConditionObject, c)
 		return
@@ -224,6 +248,9 @@ ConditionCategory:RegisterCondition(11,	 "CLASS", {
 		CLASS_ICON_TCOORDS[pclass][3]+.02,
 		CLASS_ICON_TCOORDS[pclass][4]-.02,
 	},
+	Env = {
+		UnitClass = UnitClass,
+	},
 	funcstr = function(c)
 		return [[select(2, UnitClass(c.Unit)) == "]] .. (Classes[c.Level] or "whoops") .. "\""
 	end,
@@ -250,10 +277,11 @@ ConditionCategory:RegisterCondition(12,	 "CLASSIFICATION", {
 	texttable = function(k) return L[unitClassifications[k]] end,
 	icon = "Interface\\Icons\\achievement_pvp_h_03",
 	tcoords = CNDT.COMMON.standardtcoords,
-	funcstr = [[(unitClassifications[UnitClassification(c.Unit)] or 1) c.Operator c.Level]],
 	Env = {
 		unitClassifications = unitClassifications,
+		UnitClassification = UnitClassification,
 	},
+	funcstr = [[(unitClassifications[UnitClassification(c.Unit)] or 1) c.Operator c.Level]],
 	events = function(ConditionObject, c)
 		return
 			ConditionObject:GetUnitChangedEventString(CNDT:GetUnit(c.Unit)),
@@ -303,10 +331,11 @@ ConditionCategory:RegisterCondition(14,	 "ROLE", {
 	texttable = setmetatable({[1]=NONE}, {__index = function(t, k) return L[playerDungeonRoles[k]] end}),
 	icon = "Interface\\LFGFrame\\UI-LFG-ICON-ROLES",
 	tcoords = {GetTexCoordsForRole("DAMAGER")},
-	funcstr = [[(roles[UnitGroupRolesAssigned(c.Unit)] or 1) c.Operator c.Level]],
 	Env = {
-		playerDungeonRoles = playerDungeonRoles
+		playerDungeonRoles = playerDungeonRoles,
+		UnitGroupRolesAssigned = UnitGroupRolesAssigned,
 	},
+	funcstr = [[(roles[UnitGroupRolesAssigned(c.Unit)] or 1) c.Operator c.Level]],
 	events = function(ConditionObject, c)
 		-- the unit change events should actually cover many of the changes (at least for party and raid units, but roles only exist in party and raid anyway.)
 		return
@@ -322,6 +351,9 @@ ConditionCategory:RegisterCondition(15,	 "RAIDICON", {
 	max = 8,
 	texttable = setmetatable({[0]=NONE}, {__index = function(t, k) return "|TInterface\\TargetingFrame\\UI-RaidTargetingIcon_"..k..":0|t ".._G["RAID_TARGET_"..k] end}),
 	icon = "Interface\\TargetingFrame\\UI-RaidTargetingIcon_8",
+	Env = {
+		GetRaidTargetIndex = GetRaidTargetIndex,
+	},
 	funcstr = [[(GetRaidTargetIndex(c.Unit) or 0) c.Operator c.Level]],
 	events = function(ConditionObject, c)
 		return
@@ -340,6 +372,9 @@ ConditionCategory:RegisterCondition(16,	 "UNITISUNIT", {
 	texttable = CNDT.COMMON.bool,
 	icon = "Interface\\Icons\\spell_holy_prayerofhealing",
 	tcoords = CNDT.COMMON.standardtcoords,
+	Env = {
+		UnitIsUnit = UnitIsUnit,
+	},
 	funcstr = [[UnitIsUnit(c.Unit, c.Unit2) == c.1nil]],
 	events = function(ConditionObject, c)
 		return
@@ -355,6 +390,9 @@ ConditionCategory:RegisterCondition(17,	 "THREATSCALED", {
 	texttable = CNDT.COMMON.percent,
 	icon = "Interface\\Icons\\spell_misc_emotionangry",
 	tcoords = CNDT.COMMON.standardtcoords,
+	Env = {
+		UnitDetailedThreatSituation = UnitDetailedThreatSituation,
+	},
 	funcstr = [[(select(3, UnitDetailedThreatSituation("player", c.Unit)) or 0) c.Operator c.Level]],
 	-- events = absolutely no events
 })

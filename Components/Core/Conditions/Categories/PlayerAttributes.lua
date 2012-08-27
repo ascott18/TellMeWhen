@@ -23,7 +23,14 @@ local strlowerCache = TMW.strlowerCache
 
 local _, pclass = UnitClass("Player")
 
-
+local IsInInstance, GetInstanceDifficulty, GetNumShapeshiftForms, GetShapeshiftFormInfo = 
+	  IsInInstance, GetInstanceDifficulty, GetNumShapeshiftForms, GetShapeshiftFormInfo
+local GetTalentInfo, GetNumTalentTabs, GetNumTalents, GetGlyphLink, GetSpellInfo = 
+	  GetTalentInfo, GetNumTalentTabs, GetNumTalents, GetGlyphLink, GetSpellInfo
+local GetPetActionInfo, GetNumTrackingTypes, GetTrackingInfo = 
+	  GetPetActionInfo, GetNumTrackingTypes, GetTrackingInfo
+	  
+	  
 local ConditionCategory = CNDT:GetCategory("ATTRIBUTES_PLAYER", 3, L["CNDTCAT_ATTRIBUTES_PLAYER"])
 
 ConditionCategory:RegisterCondition(1,	 "INSTANCE", {
@@ -104,6 +111,9 @@ ConditionCategory:RegisterCondition(3,	 "MOUNTED", {
 	unit = PLAYER,
 	icon = "Interface\\Icons\\Ability_Mount_Charger",
 	tcoords = CNDT.COMMON.standardtcoords,
+	Env = {
+		IsMounted = IsMounted,
+	},
 	funcstr = [[c.1nil == IsMounted()]],
 })
 ConditionCategory:RegisterCondition(4,	 "SWIMMING", {
@@ -115,6 +125,9 @@ ConditionCategory:RegisterCondition(4,	 "SWIMMING", {
 	unit = PLAYER,
 	icon = "Interface\\Icons\\Spell_Shadow_DemonBreath",
 	tcoords = CNDT.COMMON.standardtcoords,
+	Env = {
+		IsSwimming = IsSwimming,
+	},
 	funcstr = [[c.1nil == IsSwimming()]],
 	--events = absolutely no events (SPELL_UPDATE_USABLE is close, but not close enough)
 })
@@ -127,6 +140,9 @@ ConditionCategory:RegisterCondition(5,	 "RESTING", {
 	unit = PLAYER,
 	icon = "Interface\\CHARACTERFRAME\\UI-StateIcon",
 	tcoords = {0.0625, 0.453125, 0.046875, 0.421875},
+	Env = {
+		IsResting = IsResting,
+	},
 	funcstr = [[c.1nil == IsResting()]],
 	events = function(ConditionObject, c)
 		return
@@ -429,6 +445,9 @@ ConditionCategory:RegisterCondition(12,	 "AUTOCAST", {
 	useSUG = true,
 	icon = "Interface\\Icons\\ability_physical_taunt",
 	tcoords = CNDT.COMMON.standardtcoords,
+	Env = {
+		GetSpellAutocast = GetSpellAutocast,
+	},
 	funcstr = [[select(2, GetSpellAutocast(c.NameName)) == c.1nil]],
 	events = function(ConditionObject, c)
 		return
@@ -536,6 +555,7 @@ ConditionCategory:RegisterCondition(15,	 "PETTREE", {
 	end,
 })
 
+Env.Tracking = {}
 function CNDT:MINIMAP_UPDATE_TRACKING()
 	for i = 1, GetNumTrackingTypes() do
 		local name, _, active = GetTrackingInfo(i)

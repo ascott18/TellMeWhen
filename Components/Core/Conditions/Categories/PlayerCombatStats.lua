@@ -20,7 +20,22 @@ local print = TMW.print
 local CNDT = TMW.CNDT
 local Env = CNDT.Env
 
+local min, format = min, format
 
+Env.UnitStat = UnitStat
+Env.UnitAttackPower = UnitAttackPower
+Env.UnitRangedAttackPower = UnitRangedAttackPower
+Env.UnitSpellHaste = UnitSpellHaste
+Env.GetMeleeHaste = GetMeleeHaste
+Env.GetRangedHaste = GetRangedHaste
+Env.GetExpertise = GetExpertise
+Env.GetCritChance = GetCritChance
+Env.GetRangedCritChance = GetRangedCritChance
+Env.GetSpellCritChance = GetSpellCritChance
+Env.GetMastery = GetMastery
+Env.GetSpellBonusDamage = GetSpellBonusDamage
+Env.GetSpellBonusHealing = GetSpellBonusHealing
+	
 local ConditionCategory = CNDT:GetCategory("STATS", 6, L["CNDTCAT_STATS"])
 
 ConditionCategory:RegisterCondition(1,	 "STRENGTH", {
@@ -326,6 +341,8 @@ ConditionCategory:RegisterCondition(34,	 "SPELLHASTE", {
 			ConditionObject:GenerateNormalEventString("UNIT_SPELL_HASTE", "player")
 	end,
 })
+
+Env.GetManaRegen = GetManaRegen
 ConditionCategory:RegisterCondition(35,	 "MANAREGEN", {
 	text = MANA_REGEN,
 	category = L["CNDTCAT_STATS"],
