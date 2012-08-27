@@ -465,8 +465,6 @@ function Texts:OnDisable()
 		
 		DogTag:RemoveFontString(fontString)		
 		
-		fontString:SetText("")
-		
 		fontString:Hide()
 	end
 end
@@ -578,7 +576,7 @@ function Texts:OnKwargsUpdated()
 				
 				fontString.TMW_QueueForRemoval = nil
 				
-				DogTag:AddFontString(fontString, self.icon, styleString .. text, "Unit;TMW", self.kwargs)
+				DogTag:AddFontString(fontString, self.icon, styleString .. text, "TMW;Unit", self.kwargs)
 			end
 		end
 	end

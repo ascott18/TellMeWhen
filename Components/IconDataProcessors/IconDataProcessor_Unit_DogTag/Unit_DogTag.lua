@@ -44,11 +44,11 @@ Hook:RegisterCompileFunctionSegmentHook("post", function(Processor, t)
 		if not DogTag.IsLegitimateUnit[dogTagUnit] then
 			dogTagUnit = dogTagUnit and TMW_UNITS:TestUnit(dogTagUnit)
 			if not DogTag.IsLegitimateUnit[dogTagUnit] then
-				dogTagUnit = ""
+				dogTagUnit = "player"
 			end
 		end
 	else
-		dogTagUnit = ""
+		dogTagUnit = "player"
 	end
 	
 	if attributes.dogTagUnit ~= dogTagUnit then
