@@ -87,8 +87,20 @@ function CooldownSweep:OnNewInstance(icon)
 	self:SetSkinnableComponent("Cooldown", self.cooldown)
 end
 
-function CooldownSweep:OnEnable()
-	local icon = self.icon
+function CooldownSweep:OnDisable()
+	local cd = self.cooldown
+	
+	cd.start, cd.duration = 0, 0
+	cd.charges, cd.maxCharges = nil, nil
+	
+	self:UpdateCooldown()
+end
+
+function CooldownSweep:SetupForIcon(icon)
+	self.ShowTimer = icon.ShowTimer
+	self.ShowTimerText = icon.ShowTimerText
+	self.cooldown.noCooldownCount = not icon.ShowTimerText
+	
 	local attributes = icon.attributes
 	
 	if not TMW.ISMOP then
@@ -99,20 +111,6 @@ function CooldownSweep:OnEnable()
 	self:DURATION(icon, attributes.start, attributes.duration)
 	self:SPELLCHARGES(icon, attributes.charges, attributes.maxCharges)
 	self:REVERSE(icon, attributes.reverse)
-end
-function CooldownSweep:OnDisable()
-	local cd = self.cooldown
-	
-	cd.start, cd.duration = 0, 0
-	cd.charges, cd.maxCharges = nil, nil
-	
-	self:UpdateCooldown()
-end
-
-function CooldownSweep:SetupForIcon(sourceIcon)
-	self.ShowTimer = sourceIcon.ShowTimer
-	self.ShowTimerText = sourceIcon.ShowTimerText
-	self.cooldown.noCooldownCount = not sourceIcon.ShowTimerText
 end
 
 function CooldownSweep:UpdateCooldown()

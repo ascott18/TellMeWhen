@@ -191,8 +191,7 @@ local UnitSet = TMW:NewClass("UnitSet"){
 
 		-- Setup conditions
 		if Conditions then
-			for k, unit in ipairs(self.originalUnits) do				
-				print(self, k, unit)
+			for k, unit in ipairs(self.originalUnits) do
 				-- Get a constructor to make the ConditionObject
 				local ConditionObjectConstructor = self:Conditions_GetConstructor(Conditions)
 				

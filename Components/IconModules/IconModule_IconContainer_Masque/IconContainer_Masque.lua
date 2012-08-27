@@ -36,7 +36,7 @@ do
 	-- icons will end up looking like total shit. I almost regret ever implementing Masque into TMW.
 	-- Having it implemented is almost worse than the bombardment of requests to have it implemented.
 	
-	local meta = LMB and getmetatable(LMB:Group("TellMeWhen")).__index
+	local meta = getmetatable(LMB:Group("TellMeWhen")).__index
 
 	if meta and meta.Skin and meta.Disable and meta.Enable then
 		local function hook(self)
@@ -54,9 +54,7 @@ do
 end
 
 function IconContainer_Masque:OnNewInstance_IconContainer_Masque(icon)
-	if LMB then
-		self.lmbGroup = LMB:Group("TellMeWhen", L["fGROUP"]:format(icon.group:GetID()))
-	end
+	self.lmbGroup = LMB:Group("TellMeWhen", L["fGROUP"]:format(icon.group:GetID()))
 end
 
 function IconContainer_Masque:SetupForIcon(icon)
@@ -76,25 +74,20 @@ IconContainer_Masque:ExtendMethod("OnEnable", function(self)
 	-- I really really hate the fact that this exists. But, oh well. At least it works more than 26.8% of the time.
 	icon.normaltex = container.__MSQ_NormalTexture or container:GetNormalTexture()
 	
-	if LMB then
-		self.isDefaultSkin = nil
-		
-		local lmbGroup = self.lmbGroup
-		lmbGroup:AddButton(container, icon.lmbButtonData)
-		
-		if lmbGroup.Disabled or (lmbGroup.db and lmbGroup.db.Disabled) then
-			if icon.normaltex and not icon.normaltex:GetTexture() then
-				self.isDefaultSkin = 1
-			end
+	self.isDefaultSkin = nil
+	
+	local lmbGroup = self.lmbGroup
+	lmbGroup:AddButton(container, icon.lmbButtonData)
+	
+	if lmbGroup.Disabled or (lmbGroup.db and lmbGroup.db.Disabled) then
+		if icon.normaltex and not icon.normaltex:GetTexture() then
+			self.isDefaultSkin = 1
 		end
-	else
-		self.isDefaultSkin = 1
 	end
 end)
 
 IconContainer_Masque:ExtendMethod("OnDisable", function(self)
-	if LMB then
-		self.lmbGroup:RemoveButton(self.container, true)
-	end
+	self.lmbGroup:RemoveButton(self.container, true)
+	
 	self.isDefaultSkin = 1
 end)

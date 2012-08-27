@@ -107,7 +107,7 @@ function Type:UPDATE_ITEM_COUNT()
 end
 
 local function ItemCooldown_OnEvent(icon, event, unit)
-	if event == "UNIT_INVENTORY_CHANGED" and unit == "player" then
+	if event == "PLAYER_EQUIPMENT_CHANGED" or (event == "UNIT_INVENTORY_CHANGED" and unit == "player") then
 		-- the reason for handling DoUpdateIDs is because this event will fire several times at once sometimes,
 		-- but there is no reason to recheck things until they are needed next.
 		if icon.ShouldUpdateIDs then
@@ -200,13 +200,14 @@ function Type:Setup(icon, groupID, iconID)
 	icon.NameArray = TMW:GetItemIDs(icon, icon.Name)
 	icon.NameNameArray = TMW:GetItemIDs(icon, icon.Name, nil, 1)
 
+	local splitNames = TMW:SplitNames(icon.Name)
 	icon.ShouldUpdateIDs = nil
-	if not icon.NameFirst or icon.NameFirst == 0 then
+	if #splitNames ~= #icon.NameArray or not icon.NameFirst or icon.NameFirst == 0 then
 		icon:RegisterEvent("UNIT_INVENTORY_CHANGED")
 		icon:SetScript("OnEvent", ItemCooldown_OnEvent)
 		icon.ShouldUpdateIDs = true
 	else
-		for _, n in ipairs(TMW:SplitNames(icon.Name)) do
+		for _, n in ipairs(splitNames) do
 			n = tonumber(strtrim(n))
 			if n and n <= INVSLOT_LAST_EQUIPPED then
 				icon:RegisterEvent("PLAYER_EQUIPMENT_CHANGED")

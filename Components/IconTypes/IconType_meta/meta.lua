@@ -138,8 +138,8 @@ local function Meta_OnUpdate(icon, time)
 
 			TMW:Fire("TMW_ICON_META_INHERITED_ICON_CHANGED", icon, icToUse)
 			
-			icon:SetupAllModulesForIcon(icToUse)
 			icon:SetModulesToEnabledStateOfIcon(icToUse)
+			icon:SetupAllModulesForIcon(icToUse)
 			
 			force = 1
 

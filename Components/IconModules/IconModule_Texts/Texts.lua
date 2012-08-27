@@ -465,6 +465,8 @@ function Texts:OnDisable()
 		
 		DogTag:RemoveFontString(fontString)		
 		
+		fontString:SetText("")
+		
 		fontString:Hide()
 	end
 end

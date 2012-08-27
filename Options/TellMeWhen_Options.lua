@@ -61,7 +61,7 @@ local strlowerCache = TMW.strlowerCache
 local SpellTextures = TMW.SpellTextures
 local print = TMW.print
 local Types = TMW.Types
-local IE, ID, HELP, EVENTS, TEXT
+local IE, ID, HELP, TEXT
 
 
 ---------- Locals ----------
@@ -3392,7 +3392,7 @@ end
 -- EVENTS
 -- ----------------------
 
-EVENTS = TMW.EVENTS
+local EVENTS = TMW.EVENTS
 
 function EVENTS:SetupEventSettings()
 	local EventSettings = self.EventSettings

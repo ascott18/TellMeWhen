@@ -25,7 +25,6 @@ local bitband = bit.band
 TMW:RegisterDatabaseDefaults{
 	global = {
 		AuraCache	= {
-			["*"] = {},
 		},
 	},
 }
@@ -85,12 +84,20 @@ TMW:RegisterCallback("TMW_OPTIONS_LOADED", function()
 	if Cache == TMW.db.global.AuraCache then
 		for k, v in pairs(Cache) do
 			-- import into the options DB and take it out of the main DB
-			TMWOptDB.AuraCache[k] = TMWOptDB.AuraCache[k] or v or TMWOptDB.AuraCache[k]
+			TMWOptDB.AuraCache[k] = TMWOptDB.AuraCache[k] or v
 			Cache[k] = nil
 		end
 		
 		-- Switch the pointer to the cache to the optionsDB
 		Cache = TMWOptDB.AuraCache
+	end
+	
+	-- "Programming Is Like Sex: One Mistake And You Have To Support For A Lifetime."
+	-- (For some reasons, empty tables were getting dumped in the aura cache. Kill it with fire if we find any.)
+	for k, v in pairs(Cache) do
+		if type(v) == "table" then
+			wipe(Cache)
+		end
 	end
 	
 	-- Wipe the aura cache if user is running a new expansion (expansions have drastic spell changes)

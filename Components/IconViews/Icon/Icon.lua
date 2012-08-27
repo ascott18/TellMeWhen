@@ -70,9 +70,7 @@ View:RegisterGroupDefaults{
 	}
 }
 
-View:ImplementsModule("IconModule_Alpha", 10, function(Module, icon)
-	Module:Enable()
-end)
+View:ImplementsModule("IconModule_Alpha", 10, true)
 View:ImplementsModule("IconModule_CooldownSweep", 20, function(Module, icon)
 	if icon.ShowTimer or icon.ShowTimerText then
 		Module:Enable()
@@ -99,9 +97,7 @@ View:ImplementsModule("IconModule_TimerBar_Overlay", 50, function(Module, icon)
 		Module:Enable()
 	end
 end)
-View:ImplementsModule("IconModule_Texts", 60, function(Module, icon)
-	Module:Enable()
-end)
+View:ImplementsModule("IconModule_Texts", 60, true)
 View:ImplementsModule("IconModule_IconContainer_Masque", 100, function(Module, icon)
 	local Modules = icon.Modules
 	local Masque = Module

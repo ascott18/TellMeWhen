@@ -25,12 +25,6 @@ local ColorMSQ, OnlyMSQ
 
 local Texture_Colored = TMW:NewClass("IconModule_Texture_Colored", "IconModule_Texture")
 
-Texture_Colored:ExtendMethod("OnEnable", function(self)
-	local icon = self.icon
-	local attributes = icon.attributes
-	self:UPDATE(icon)	
-end)
-
 function Texture_Colored:SetupForIcon(icon)
 	self.Colors = icon.typeData.Colors
 	self.ShowWhen = icon.ShowWhen

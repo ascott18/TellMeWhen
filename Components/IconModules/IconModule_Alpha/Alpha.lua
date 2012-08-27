@@ -158,15 +158,12 @@ function Alpha:OnNewInstance_Alpha()
 	self.FadeHandlers = {}
 end
 
-function Alpha:OnEnable()
-	local icon = self.icon
+function Alpha:SetupForIcon(icon)
+	self.FakeHidden = icon.FakeHidden
+	
 	local attributes = icon.attributes
 	
 	self:REALALPHA(icon, icon.attributes.realAlpha)
-end
-
-function Alpha:SetupForIcon(icon)
-	self.FakeHidden = icon.FakeHidden
 end
 
 function Alpha:REALALPHA(icon, realAlpha)
