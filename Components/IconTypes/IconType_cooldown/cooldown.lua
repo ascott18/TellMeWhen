@@ -266,19 +266,18 @@ function Type:Setup(icon, groupID, iconID)
 		
 		
 		if not icon.RangeCheck then
-			icon:RegisterEvent("SPELL_UPDATE_COOLDOWN")
-			icon:RegisterEvent("SPELL_UPDATE_USABLE")
-			icon:RegisterEvent("SPELL_UPDATE_CHARGES")
+			icon:RegisterSimpleUpdateEvent("SPELL_UPDATE_COOLDOWN")
+			icon:RegisterSimpleUpdateEvent("SPELL_UPDATE_USABLE")
+			icon:RegisterSimpleUpdateEvent("SPELL_UPDATE_CHARGES")
 			if icon.IgnoreRunes then
-				icon:RegisterEvent("RUNE_POWER_UPDATE")
-				icon:RegisterEvent("RUNE_TYPE_UPDATE")
+				icon:RegisterSimpleUpdateEvent("RUNE_POWER_UPDATE")
+				icon:RegisterSimpleUpdateEvent("RUNE_TYPE_UPDATE")
 			end	
 			if icon.ManaCheck then
-				icon:RegisterEvent("UNIT_POWER_FREQUENT")
-				-- icon:RegisterEvent("SPELL_UPDATE_USABLE")-- already registered
+				icon:RegisterSimpleUpdateEvent("UNIT_POWER_FREQUENT", "player")
+				-- icon:RegisterSimpleUpdateEvent("SPELL_UPDATE_USABLE")-- already registered
 			end
 		
-			icon:SetScript("OnEvent", SpellCooldown_OnEvent)
 			icon:SetUpdateMethod("manual")
 		end
 	

@@ -301,8 +301,6 @@ end
 local function UnitCooldown_OnEvent(icon, event, arg1)
 	if event == "TMW_UNITSET_UPDATED" and arg1 == icon.UnitSet then
 		icon.NextUpdateTime = 0
-	else -- it must be a unit update event
-		icon.NextUpdateTime = 0
 	end
 end
 
@@ -410,11 +408,10 @@ function Type:Setup(icon, groupID, iconID)
 	if icon.UnitSet.allUnitsChangeOnEvent then
 		icon:SetUpdateMethod("manual")
 		for event in pairs(icon.UnitSet.updateEvents) do
-			icon:RegisterEvent(event)
+			icon:RegisterSimpleUpdateEvent(event)
 		end
 		
 		TMW:RegisterCallback("TMW_UNITSET_UPDATED", UnitCooldown_OnEvent, icon)
-		icon:SetScript("OnEvent", UnitCooldown_OnEvent)
 	end
 	
 	-- THIS DOESNT REALLY BELONG HERE, BUT IT NEEDS TO BE HERE SO IT ALWAYS GETS UPDATED PROPERLY.

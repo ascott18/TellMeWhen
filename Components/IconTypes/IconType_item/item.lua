@@ -223,10 +223,10 @@ function Type:Setup(icon, groupID, iconID)
 	Type:RegisterEvent("BAG_UPDATE_COOLDOWN", "UPDATE_ITEM_COUNT")
 	
 	if not icon.RangeCheck then
-		icon:RegisterEvent("UNIT_INVENTORY_CHANGED")
-		icon:RegisterEvent("PLAYER_EQUIPMENT_CHANGED")
-		icon:RegisterEvent("BAG_UPDATE_COOLDOWN")
-		icon:RegisterEvent("BAG_UPDATE")
+		icon:RegisterSimpleUpdateEvent("UNIT_INVENTORY_CHANGED", "player")
+		icon:RegisterSimpleUpdateEvent("PLAYER_EQUIPMENT_CHANGED")
+		icon:RegisterSimpleUpdateEvent("BAG_UPDATE_COOLDOWN")
+		icon:RegisterSimpleUpdateEvent("BAG_UPDATE")
 		icon:SetUpdateMethod("manual")
 		icon:SetScript("OnEvent", ItemCooldown_OnEvent)
 	end

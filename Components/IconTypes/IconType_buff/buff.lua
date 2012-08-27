@@ -131,8 +131,6 @@ local function Buff_OnEvent(icon, event, arg1)
 		end
 	elseif event == "TMW_UNITSET_UPDATED" and arg1 == icon.UnitSet then
 		icon.NextUpdateTime = 0
-	else -- a unit changed event
-		icon.NextUpdateTime = 0
 	end
 end
 
@@ -323,7 +321,7 @@ function Type:Setup(icon, groupID, iconID)
 	if icon.UnitSet.allUnitsChangeOnEvent then
 		icon:SetUpdateMethod("manual")
 		for event in pairs(icon.UnitSet.updateEvents) do
-			icon:RegisterEvent(event)
+			icon:RegisterSimpleUpdateEvent(event)
 		end
 	
 		icon:RegisterEvent("UNIT_AURA")

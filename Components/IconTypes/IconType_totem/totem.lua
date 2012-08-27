@@ -144,10 +144,6 @@ TMW:RegisterUpgrade(48017, {
 })
 
 
-local function Totem_OnEvent(icon)
-	icon.NextUpdateTime = 0
-end
-
 local function Totem_OnUpdate(icon, time)
 
 	local Slots, NameNameHash, NameFirst = icon.Slots, icon.NameNameHash, icon.NameFirst
@@ -218,8 +214,7 @@ function Type:Setup(icon, groupID, iconID)
 
 	icon:SetUpdateMethod("manual")
 	
-	icon:RegisterEvent("PLAYER_TOTEM_UPDATE")
-	icon:SetScript("OnEvent", Totem_OnEvent)
+	icon:RegisterSimpleUpdateEvent("PLAYER_TOTEM_UPDATE")
 	
 	icon:SetUpdateFunction(Totem_OnUpdate)
 	icon:Update()

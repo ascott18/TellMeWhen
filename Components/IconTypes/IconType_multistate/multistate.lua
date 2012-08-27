@@ -159,11 +159,14 @@ function Type:Setup(icon, groupID, iconID)
 	icon:SetInfo("texture", GetActionTexture(icon.Slot) or "Interface\\Icons\\INV_Misc_QuestionMark")
 
 	icon:RegisterEvent("ACTIONBAR_SLOT_CHANGED")
-	icon:RegisterEvent("ACTIONBAR_UPDATE_COOLDOWN")
-	icon:RegisterEvent("ACTIONBAR_UPDATE_USABLE")
 	icon:SetScript("OnEvent", MultiStateCD_OnEvent)
 	
-	icon:SetUpdateMethod("manual")
+	if not icon.RangeCheck then
+		icon:RegisterSimpleUpdateEvent("ACTIONBAR_UPDATE_COOLDOWN")
+		icon:RegisterSimpleUpdateEvent("ACTIONBAR_UPDATE_USABLE")
+		
+		icon:SetUpdateMethod("manual")
+	end
 	
 	icon:SetUpdateFunction(MultiStateCD_OnUpdate)
 	icon:Update()

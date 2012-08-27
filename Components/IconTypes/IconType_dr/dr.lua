@@ -137,8 +137,6 @@ local function DR_OnEvent(icon, event, arg1, cevent, _, _, _, _, _, destGUID, _,
 		end
 	elseif event == "TMW_UNITSET_UPDATED" and arg1 == icon.UnitSet then
 		icon.NextUpdateTime = 0
-	else -- it must be a unit update event
-		icon.NextUpdateTime = 0
 	end
 end
 
@@ -288,14 +286,14 @@ function Type:Setup(icon, groupID, iconID)
 	if icon.UnitSet.allUnitsChangeOnEvent then
 		icon:SetUpdateMethod("manual")
 		for event in pairs(icon.UnitSet.updateEvents) do
-			icon:RegisterEvent(event)
+			icon:RegisterSimpleUpdateEvent(event)
 		end
 		
 		TMW:RegisterCallback("TMW_UNITSET_UPDATED", DR_OnEvent, icon)
 	end
 	
-	icon:SetScript("OnEvent", DR_OnEvent)
 	icon:RegisterEvent("COMBAT_LOG_EVENT_UNFILTERED")
+	icon:SetScript("OnEvent", DR_OnEvent)
 
 	icon:SetUpdateFunction(DR_OnUpdate)
 	icon:Update()

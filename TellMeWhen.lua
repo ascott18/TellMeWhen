@@ -30,7 +30,7 @@ local DogTag = LibStub("LibDogTag-3.0", true)
 TELLMEWHEN_VERSION = "6.0.0"
 TELLMEWHEN_VERSION_MINOR = strmatch(" @project-version@", " r%d+") or ""
 TELLMEWHEN_VERSION_FULL = TELLMEWHEN_VERSION .. TELLMEWHEN_VERSION_MINOR
-TELLMEWHEN_VERSIONNUMBER = 60034 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
+TELLMEWHEN_VERSIONNUMBER = 60035 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
 if TELLMEWHEN_VERSIONNUMBER > 61001 or TELLMEWHEN_VERSIONNUMBER < 60000 then return error("YOU SCREWED UP THE VERSION NUMBER OR DIDNT CHANGE THE SAFETY LIMITS") end -- safety check because i accidentally made the version number 414069 once
 
 TELLMEWHEN_MAXROWS = 20
@@ -3528,7 +3528,7 @@ end
 
 Icon.UnregisterAllEvents_Blizz = Icon.UnregisterAllEvents
 function Icon.UnregisterAllEvents(icon, event)
-	-- UnregisterAllEvents uses a metric fuckton of CPU, so only do it if needed
+	-- UnregisterAllEvents_Blizz uses a metric fuckton of CPU, so only do it if needed
 	if icon.hasEvents then
 		icon:UnregisterAllEvents_Blizz()
 		icon.hasEvents = nil
@@ -3631,6 +3631,50 @@ function Icon.ScheduleNextUpdate(icon)
 end
 
 
+local IconEventUpdateEngine = CreateFrame("Frame")
+TMW.IconEventUpdateEngine = IconEventUpdateEngine
+IconEventUpdateEngine.UpdateEvents = setmetatable({}, {__index = function(self, event)
+	self[event] = {}
+	return self[event]
+end})
+IconEventUpdateEngine:SetScript("OnEvent", function(self, event, arg1)
+	local iconsForEvent = self.UpdateEvents[event]
+	for icon, arg1ToMatch in pairs(iconsForEvent) do
+		if arg1ToMatch == true or arg1ToMatch == arg1 then
+			icon.NextUpdateTime = 0
+		end
+	end
+end)
+function Icon.RegisterSimpleUpdateEvent(icon, event, arg1)
+	arg1 = arg1 or true
+	
+	local iconsForEvent = IconEventUpdateEngine.UpdateEvents[event]
+	local existing = iconsForEvent[icon]
+	if existing and existing ~= arg1 then
+		error("Can't change the arg that you are checking for an event without unregistering first", 2)
+	end
+	iconsForEvent[icon] = arg1
+	IconEventUpdateEngine:RegisterEvent(event)
+end
+function Icon.UnregisterSimpleUpdateEvent(icon, event)
+	local iconsForEvent = rawget(IconEventUpdateEngine.UpdateEvents, event)
+	if iconsForEvent then
+		iconsForEvent[icon] = nil
+		if not next(iconsForEvent) then
+			IconEventUpdateEngine:UnregisterEvent(event)
+		end
+	end
+end
+function Icon.UnregisterAllSimpleUpdateEvents(icon)
+	for event, iconsForEvent in pairs(IconEventUpdateEngine.UpdateEvents) do
+		iconsForEvent[icon] = nil
+		if not next(iconsForEvent) then
+			IconEventUpdateEngine:UnregisterEvent(event)
+		end
+	end
+end
+
+
 function Icon.Update(icon, force, ...)
 	local attributes = icon.attributes
 	
@@ -3729,6 +3773,7 @@ end
 function Icon.DisableIcon(icon)
 	
 	icon:UnregisterAllEvents()
+	icon:UnregisterAllSimpleUpdateEvents()
 	ClearScripts(icon)
 	icon:SetUpdateFunction(nil)
 	icon:Hide()
