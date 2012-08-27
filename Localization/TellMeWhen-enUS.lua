@@ -345,6 +345,7 @@ L["WATER"] = "Water"
 L["AIR"] = "Air"
 L["MUSHROOMS"] = "Mushrooms to check"
 L["MUSHROOM"] = "Mushroom %d"
+L["GENERICTOTEM"] = "Totem %d"
 L["RUNES"] = "Rune(s) to check"
 
 L["ICONMENU_SHOWTTTEXT"] = "Show variable text"
@@ -434,6 +435,8 @@ L["ICONMENU_ONLYBAGS"] = "Only if in bags"
 L["ICONMENU_ONLYBAGS_DESC"] = "Check this to make the icon show only if the item is in your bags (or equipped). If 'Only if equipped' is enabled, this is also forcibly enabled."
 L["ICONMENU_ONLYSEEN"] = "Only if seen"
 L["ICONMENU_ONLYSEEN_DESC"] = "Check this to make the icon only show a cooldown if the unit has cast it at least once. You should check this if you are checking spells from different Classes in one icon."
+L["ICONMENU_SHOWWHENNONE"] = "Show if no result"
+L["ICONMENU_SHOWWHENNONE_DESC"] = "Check this to allow the icon to show as Undiminished when no diminishing returns could be detected on any unit."
 L["ICONMENU_CHECKREFRESH"] = "Listen for refreshes"
 L["ICONMENU_CHECKREFRESH_DESC"] = [[Blizzard's combat log is very buggy when it comes to spell refreshes and fear (or other spells that break after a certain amount of damage). The combat log will say that the spell was refreshed when damage is dealt, even though it technically wasn't. Uncheck this box to disable listening to spell refreshes, but note that legitimate refreshes will be ignored as well.
 

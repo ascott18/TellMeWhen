@@ -40,7 +40,9 @@ Type:RegisterConfigPanel_XMLTemplate(100, "TellMeWhen_ChooseName", {
 	SUGType = "cast",
 })
 
-Type:RegisterConfigPanel_XMLTemplate(105, "TellMeWhen_Unit")
+Type:RegisterConfigPanel_XMLTemplate(105, "TellMeWhen_Unit", {
+	implementsConditions = true,
+})
 
 Type:RegisterConfigPanel_XMLTemplate(165, "TellMeWhen_WhenChecks", {
 	--text = L["ICONMENU_CASTSHOWWHEN"],
@@ -97,6 +99,8 @@ local function Cast_OnEvent(icon, event, arg1)
 				return
 			end
 		end
+	elseif event == "TMW_UNITSET_UPDATED" and arg1 == icon.UnitSet then
+		icon.NextUpdateTime = 0
 	else -- a unit changed event
 		icon.NextUpdateTime = 0
 	end
@@ -151,12 +155,11 @@ function Type:Setup(icon, groupID, iconID)
 
 	icon:SetInfo("texture", TMW:GetConfigIconTexture(icon))
 	
-	local UnitSet
-	icon.Units, UnitSet = TMW:GetUnits(icon, icon.Unit)
+	icon.Units, icon.UnitSet = TMW:GetUnits(icon, icon.Unit)
 	
-	if UnitSet.allUnitsChangeOnEvent then
+	if icon.UnitSet.allUnitsChangeOnEvent then
 		icon:SetUpdateMethod("manual")
-		for event in pairs(UnitSet.updateEvents) do
+		for event in pairs(icon.UnitSet.updateEvents) do
 			icon:RegisterEvent(event)
 		end
 	
@@ -164,6 +167,7 @@ function Type:Setup(icon, groupID, iconID)
 			icon:RegisterEvent(event)
 		end
 	
+		TMW:RegisterCallback("TMW_UNITSET_UPDATED", Cast_OnEvent, icon)
 		icon:SetScript("OnEvent", Cast_OnEvent)
 	end
 

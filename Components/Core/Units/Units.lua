@@ -132,18 +132,18 @@ local UnitSet = TMW:NewClass("UnitSet"){
 				self.allUnitsChangeOnEvent = false
 
 			elseif unit:find("^raid%d+$") then -- the unit exactly
-				self.updateEvents.RAID_ROSTER_UPDATE = true
+				self.updateEvents[TMW.ISMOP and "GROUP_ROSTER_UPDATE" or "RAID_ROSTER_UPDATE"] = true
 				UNITS.unitsWithExistsEvent[unit] = true
 			elseif unit:find("^raid%d+") then -- the unit as a base, with something else tacked onto it.
-				self.updateEvents.RAID_ROSTER_UPDATE = true
+				self.updateEvents[TMW.ISMOP and "GROUP_ROSTER_UPDATE" or "RAID_ROSTER_UPDATE"] = true
 				UNITS.unitsWithBaseExistsEvent[unit] = unit:match("^(raid%d+)")
 				self.allUnitsChangeOnEvent = false
 
 			elseif unit:find("^party%d+$") then -- the unit exactly
-				self.updateEvents.PARTY_MEMBERS_CHANGED = true
+				self.updateEvents[TMW.ISMOP and "GROUP_ROSTER_UPDATE" or "PARTY_MEMBERS_CHANGED"] = true
 				UNITS.unitsWithExistsEvent[unit] = true
 			elseif unit:find("^party%d+") then -- the unit as a base, with something else tacked onto it.
-				self.updateEvents.PARTY_MEMBERS_CHANGED = true
+				self.updateEvents[TMW.ISMOP and "GROUP_ROSTER_UPDATE" or "PARTY_MEMBERS_CHANGED"] = true
 				UNITS.unitsWithBaseExistsEvent[unit] = unit:match("^(party%d+)")
 				self.allUnitsChangeOnEvent = false
 
@@ -165,7 +165,7 @@ local UnitSet = TMW:NewClass("UnitSet"){
 
 			elseif unit:find("^maintank") or unit:find("^mainassist") then
 				UNITS:UpdateTankAndAssistMap()
-				self.updateEvents.RAID_ROSTER_UPDATE = true
+				self.updateEvents[TMW.ISMOP and "GROUP_ROSTER_UPDATE" or "RAID_ROSTER_UPDATE"] = true
 				UNITS.unitsWithExistsEvent[unit] = true
 				self.hasTankAndAssistRefs = true
 				UNITS.doTankAndAssistMap = true
@@ -177,8 +177,8 @@ local UnitSet = TMW:NewClass("UnitSet"){
 				-- it MIGHT be a player name (or a derrivative thereof),
 				-- so register some events so that we can exchange it out with a real unitID when possible.
 
-				self.updateEvents.RAID_ROSTER_UPDATE = true
-				self.updateEvents.PARTY_MEMBERS_CHANGED = true
+				self.updateEvents[TMW.ISMOP and "GROUP_ROSTER_UPDATE" or "RAID_ROSTER_UPDATE"] = true
+				self.updateEvents[TMW.ISMOP and "GROUP_ROSTER_UPDATE" or "PARTY_MEMBERS_CHANGED"] = true
 				self.updateEvents.UNIT_PET = true
 				UNITS.doGroupedPlayersMap = true
 
@@ -485,10 +485,16 @@ end
 
 function UNITS:OnEvent(event, ...)
 
-	if event == "RAID_ROSTER_UPDATE" and UNITS.doTankAndAssistMap then
+	if (event == "GROUP_ROSTER_UPDATE" or event == "RAID_ROSTER_UPDATE") and UNITS.doTankAndAssistMap then
 		UNITS:UpdateTankAndAssistMap()
 	end
-	if UNITS.doGroupedPlayersMap and (event == "RAID_ROSTER_UPDATE" or event == "PARTY_MEMBERS_CHANGED" or event == "UNIT_PET") then
+	if UNITS.doGroupedPlayersMap
+	and (
+		event == "GROUP_ROSTER_UPDATE"
+		or event == "RAID_ROSTER_UPDATE"
+		or event == "PARTY_MEMBERS_CHANGED"
+		or event == "UNIT_PET"
+	) then
 		UNITS:UpdateGroupedPlayersMap()
 	end
 

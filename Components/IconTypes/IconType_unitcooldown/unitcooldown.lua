@@ -58,7 +58,9 @@ Type:RegisterConfigPanel_XMLTemplate(100, "TellMeWhen_ChooseName", {
 	SUGType = "spellwithduration",
 })
 
-Type:RegisterConfigPanel_XMLTemplate(105, "TellMeWhen_Unit")
+Type:RegisterConfigPanel_XMLTemplate(105, "TellMeWhen_Unit", {
+	implementsConditions = true,
+})
 
 Type:RegisterConfigPanel_XMLTemplate(165, "TellMeWhen_WhenChecks", {
 	text = L["ICONMENU_SHOWWHEN"],
@@ -262,10 +264,10 @@ function Type:PLAYER_ENTERING_WORLD()
 	isArena = z == "arena"
 	if isArena and not wasArena then
 		wipe(resetForArena)
-		Type:RegisterEvent("RAID_ROSTER_UPDATE")
+		Type:RegisterEvent(TMW.ISMOP and "GROUP_ROSTER_UPDATE" or "RAID_ROSTER_UPDATE", "RAID_ROSTER_UPDATE")
 		Type:RegisterEvent("ARENA_OPPONENT_UPDATE")
 	elseif not isArena then
-		Type:UnregisterEvent("RAID_ROSTER_UPDATE")
+		Type:UnregisterEvent(TMW.ISMOP and "GROUP_ROSTER_UPDATE" or "RAID_ROSTER_UPDATE", "RAID_ROSTER_UPDATE")
 		Type:UnregisterEvent("ARENA_OPPONENT_UPDATE")
 	end
 end
@@ -296,8 +298,12 @@ function Type:ARENA_OPPONENT_UPDATE()
 	end
 end
 
-local function UnitCooldown_OnEvent(icon)
-	icon.NextUpdateTime = 0
+local function UnitCooldown_OnEvent(icon, event, arg1)
+	if event == "TMW_UNITSET_UPDATED" and arg1 == icon.UnitSet then
+		icon.NextUpdateTime = 0
+	else -- it must be a unit update event
+		icon.NextUpdateTime = 0
+	end
 end
 
 local function UnitCooldown_OnUpdate(icon, time)
@@ -399,14 +405,15 @@ function Type:Setup(icon, groupID, iconID)
 	icon.NameHash = TMW:GetSpellNames(icon, icon.Name, nil, nil, 1)
 	icon.Durations = TMW:GetSpellDurations(icon, icon.Name)
 
-	local UnitSet
-	icon.Units, UnitSet = TMW:GetUnits(icon, icon.Unit)
+	icon.Units, icon.UnitSet = TMW:GetUnits(icon, icon.Unit)
 	
-	if UnitSet.allUnitsChangeOnEvent then
+	if icon.UnitSet.allUnitsChangeOnEvent then
 		icon:SetUpdateMethod("manual")
-		for event in pairs(UnitSet.updateEvents) do
+		for event in pairs(icon.UnitSet.updateEvents) do
 			icon:RegisterEvent(event)
 		end
+		
+		TMW:RegisterCallback("TMW_UNITSET_UPDATED", UnitCooldown_OnEvent, icon)
 		icon:SetScript("OnEvent", UnitCooldown_OnEvent)
 	end
 	

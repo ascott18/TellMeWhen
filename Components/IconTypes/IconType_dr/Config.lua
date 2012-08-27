@@ -44,6 +44,6 @@ function Module:Entry_AddToList_2(f, id)
 		f.tooltipmethod = "TMW_SetEquiv"
 		f.tooltiparg = equiv
 
-		f.Icon:SetTexture(SpellTextures[firstid])
+		f.Icon:SetTexture(TMW.SpellTextures[firstid])
 	end
 end

@@ -54,49 +54,75 @@ end
 
 if pclass == "SHAMAN" then
 	Type:RegisterConfigPanel_ConstructorFunc(120, "TellMeWhen_TotemSlots_Shaman", function(self)
-		self.Header:SetText(TMW.L["TOTEMS"])
+		self.Header:SetText(L["TOTEMS"])
 		TMW.IE:BuildSimpleCheckSettingFrame(self, "SettingTotemButton", {
 			numPerRow = 4,
 			{
 				setting = "TotemSlots",
 				value = 1,
-				title = TMW.L["FIRE"],
+				title = L["FIRE"],
 			},
 			{
 				setting = "TotemSlots",
 				value = 2,
-				title = TMW.L["EARTH"],
+				title = L["EARTH"],
 			},
 			{
 				setting = "TotemSlots",
 				value = 3,
-				title = TMW.L["WATER"],
+				title = L["WATER"],
 			},
 			{
 				setting = "TotemSlots",
 				value = 4,
-				title = TMW.L["AIR"],
+				title = L["AIR"],
 			},
 		})
 	end)
 elseif pclass == "DRUID" then
 	Type:RegisterConfigPanel_ConstructorFunc(120, "TellMeWhen_TotemSlots_Druid", function(self)
-		self.Header:SetText(TMW.L["MUSHROOMS"])
+		self.Header:SetText(L["MUSHROOMS"])
 		TMW.IE:BuildSimpleCheckSettingFrame(self, "SettingTotemButton", {				
 			{
 				setting = "TotemSlots",
 				value = 1,
-				title = format(TMW.L["MUSHROOM"], 1),
+				title = format(L["MUSHROOM"], 1),
 			},
 			{
 				setting = "TotemSlots",
 				value = 2,
-				title = format(TMW.L["MUSHROOM"], 2),
+				title = format(L["MUSHROOM"], 2),
 			},
 			{
 				setting = "TotemSlots",
 				value = 3,
-				title = format(TMW.L["MUSHROOM"], 3),
+				title = format(L["MUSHROOM"], 3),
+			},
+		})
+	end)
+elseif pclass ~= "DEATHKNIGHT" then
+	Type:RegisterConfigPanel_ConstructorFunc(120, "TellMeWhen_TotemSlots_Generic", function(self)
+		self.Header:SetText(L["TOTEMS"])
+		TMW.IE:BuildSimpleCheckSettingFrame(self, "SettingTotemButton", {				
+			{
+				setting = "TotemSlots",
+				value = 1,
+				title = format(L["GENERICTOTEM"], 1),
+			},
+			{
+				setting = "TotemSlots",
+				value = 2,
+				title = format(L["GENERICTOTEM"], 2),
+			},
+			{
+				setting = "TotemSlots",
+				value = 3,
+				title = format(L["GENERICTOTEM"], 3),
+			},
+			{
+				setting = "TotemSlots",
+				value = 4,
+				title = format(L["GENERICTOTEM"], 3),
 			},
 		})
 	end)

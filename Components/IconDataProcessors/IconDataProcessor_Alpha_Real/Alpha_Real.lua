@@ -100,7 +100,7 @@ function Processor:CompileFunctionSegment(t)
 end
 
 Processor:RegisterDogTag("TMW", "IsShown", {	
-	code = function (groupID, iconID, link)
+	code = function (groupID, iconID)
 		local group = TMW[groupID]
 		local icon = group and group[iconID]
 		if icon then

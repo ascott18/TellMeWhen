@@ -93,6 +93,8 @@ local function MultiStateCD_OnEvent(icon, event)
 	icon.NextUpdateTime = 0
 end
 
+
+--TODO: add support for spell charges (see cooldown/reactive for other implementation)
 local function MultiStateCD_OnUpdate(icon, time)
 
 	local Slot = icon.Slot
@@ -146,6 +148,7 @@ function Type:Setup(icon, groupID, iconID)
 	MultiStateCD_OnEvent(icon, "ACTIONBAR_SLOT_CHANGED") -- the placement of this matters. so does the event arg
 
 	if icon:IsBeingEdited() == 1 then
+		-- icon.Slot was just obtained by the OnEvent method call
 		if icon.Slot == 0 and originalNameFirst and originalNameFirst ~= "" then
 			TMW.HELP:Show("ICON_MS_NOTFOUND", icon, TellMeWhen_ChooseName, 0, 0, L["HELP_MS_NOFOUND"], TMW:RestoreCase(originalNameFirst))
 		else

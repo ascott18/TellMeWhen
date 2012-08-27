@@ -77,17 +77,22 @@ ConditionCategory:RegisterCondition(2,	 "GROUP", {
 	icon = "Interface\\Calendar\\MeetingIcon",
 	tcoords = CNDT.COMMON.standardtcoords,
 	Env = {
-		IsInRaid = IsInRaid,
-		IsInGroup = IsInGroup,
-		GetNumRaidMembers = GetNumRaidMembers,
-		GetNumPartyMembers = GetNumPartyMembers,
+		IsInRaid = IsInRaid, -- TMW.ISMOP
+		IsInGroup = IsInGroup, -- TMW.ISMOP
+		GetNumRaidMembers = GetNumRaidMembers, -- not TMW.ISMOP
+		GetNumPartyMembers = GetNumPartyMembers, -- not TMW.ISMOP
 	},
 	funcstr = TMW.ISMOP and [[((IsInRaid() and 2) or (IsInGroup() and 1) or 0) c.Operator c.Level]] or
 		[[((GetNumRaidMembers() > 0 and 2) or (GetNumPartyMembers() > 0 and 1) or 0) c.Operator c.Level]],
 	events = function(ConditionObject, c)
-		return
-			ConditionObject:GenerateNormalEventString("PARTY_MEMBERS_CHANGED"),
-			ConditionObject:GenerateNormalEventString("RAID_ROSTER_UPDATE")
+		if TMW.ISMOP then
+			return
+				ConditionObject:GenerateNormalEventString("GROUP_ROSTER_UPDATE")
+		else
+			return
+				ConditionObject:GenerateNormalEventString("PARTY_MEMBERS_CHANGED"),
+				ConditionObject:GenerateNormalEventString("RAID_ROSTER_UPDATE")
+		end
 	end,
 })
 ConditionCategory:RegisterCondition(3,	 "MOUNTED", {
@@ -226,46 +231,46 @@ ConditionCategory:RegisterCondition(7,	 "SPEC", {
 })
 
 if TMW.ISMOP then
-ConditionCategory:RegisterCondition(8,	 "TREE", {
-	text = L["UIPANEL_SPECIALIZATION"],
-	min = 1,
-	max = 3,
-	midt = true,
-	texttable = function(i) return select(2, GetSpecializationInfo(i)) end,
-	unit = PLAYER,
-	icon = function() return select(4, GetSpecializationInfo(1)) end,
-	tcoords = CNDT.COMMON.standardtcoords,
-	funcstr = [[(GetSpecialization() or 0) c.Operator c.Level]],
-	Env = {
-		GetSpecialization = GetSpecialization
-	},
---	events = function(ConditionObject, c)
---		--TODO: probably wrong events
---		return
---			ConditionObject:GenerateNormalEventString("PLAYER_TALENT_UPDATE"),
---			ConditionObject:GenerateNormalEventString("ACTIVE_TALENT_GROUP_CHANGED")
---	end,
-})
+	ConditionCategory:RegisterCondition(8,	 "TREE", {
+		text = L["UIPANEL_SPECIALIZATION"],
+		min = 1,
+		max = 3,
+		midt = true,
+		texttable = function(i) return select(2, GetSpecializationInfo(i)) end,
+		unit = PLAYER,
+		icon = function() return select(4, GetSpecializationInfo(1)) end,
+		tcoords = CNDT.COMMON.standardtcoords,
+		funcstr = [[(GetSpecialization() or 0) c.Operator c.Level]],
+		Env = {
+			GetSpecialization = GetSpecialization
+		},
+	--	events = function(ConditionObject, c)
+	--		--TODO: probably wrong events
+	--		return
+	--			ConditionObject:GenerateNormalEventString("PLAYER_TALENT_UPDATE"),
+	--			ConditionObject:GenerateNormalEventString("ACTIVE_TALENT_GROUP_CHANGED")
+	--	end,
+	})
 else
-ConditionCategory:RegisterCondition(8,	 "TREE", {
-	text = L["UIPANEL_TREE"],
-	min = 1,
-	max = 3,
-	midt = true,
-	texttable = function(i) return select(2, GetTalentTabInfo(i)) end, --MOP DEPRECIATED, COMPAT CODE IN PLACE
-	unit = PLAYER,
-	icon = function() return select(4, GetTalentTabInfo(1)) end, --MOP DEPRECIATED, COMPAT CODE IN PLACE 
-	tcoords = CNDT.COMMON.standardtcoords,
-	Env = {
-		GetPrimaryTalentTree = GetPrimaryTalentTree
-	},
-	funcstr = [[GetPrimaryTalentTree() c.Operator c.Level]],
-	events = function(ConditionObject, c)
-		return
-			ConditionObject:GenerateNormalEventString("PLAYER_TALENT_UPDATE"),
-			ConditionObject:GenerateNormalEventString("ACTIVE_TALENT_GROUP_CHANGED")
-	end,
-})
+	ConditionCategory:RegisterCondition(8,	 "TREE", {
+		text = L["UIPANEL_TREE"],
+		min = 1,
+		max = 3,
+		midt = true,
+		texttable = function(i) return select(2, GetTalentTabInfo(i)) end,
+		unit = PLAYER,
+		icon = function() return select(4, GetTalentTabInfo(1)) end,
+		tcoords = CNDT.COMMON.standardtcoords,
+		Env = {
+			GetPrimaryTalentTree = GetPrimaryTalentTree
+		},
+		funcstr = [[GetPrimaryTalentTree() c.Operator c.Level]],
+		events = function(ConditionObject, c)
+			return
+				ConditionObject:GenerateNormalEventString("PLAYER_TALENT_UPDATE"),
+				ConditionObject:GenerateNormalEventString("ACTIVE_TALENT_GROUP_CHANGED")
+		end,
+	})
 end
 
 
@@ -521,7 +526,7 @@ ConditionCategory:RegisterCondition(15,	 "PETTREE", {
 			
 			return CNDT.ConditionsByType.PETSPEC.funcstr
 		else
-			return [[(GetTalentTabInfo(1, nil, 1) or 0) c.Operator c.Level]] --MOP DEPRECIATED, COMPAT CODE IN PLACE 
+			return [[(GetTalentTabInfo(1, nil, 1) or 0) c.Operator c.Level]]
 		end
 	end,
 	hidden = TMW.ISMOP,

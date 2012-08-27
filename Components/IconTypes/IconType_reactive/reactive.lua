@@ -244,6 +244,7 @@ function Type:Setup(icon, groupID, iconID)
 	if not icon.RangeCheck then
 		icon:RegisterEvent("SPELL_UPDATE_COOLDOWN")
 		icon:RegisterEvent("SPELL_UPDATE_USABLE")
+		icon:RegisterEvent("SPELL_UPDATE_CHARGES")
 		if icon.IgnoreRunes then
 			icon:RegisterEvent("RUNE_POWER_UPDATE")
 			icon:RegisterEvent("RUNE_TYPE_UPDATE")

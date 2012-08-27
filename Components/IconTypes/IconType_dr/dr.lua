@@ -62,13 +62,16 @@ Type:SetModuleAllowance("IconModule_PowerBar_Overlay", true)
 Type:RegisterIconDefaults{
 	Unit					= "player", 
 	CheckRefresh			= true,
+	ShowWhenNone			= false,
 }
 
 Type:RegisterConfigPanel_XMLTemplate(100, "TellMeWhen_ChooseName", {
 	SUGType = "dr",
 })
 
-Type:RegisterConfigPanel_XMLTemplate(105, "TellMeWhen_Unit")
+Type:RegisterConfigPanel_XMLTemplate(105, "TellMeWhen_Unit", {
+	implementsConditions = true,
+})
 
 Type:RegisterConfigPanel_XMLTemplate(165, "TellMeWhen_WhenChecks", {
 	text = L["ICONMENU_SHOWWHEN"],
@@ -84,13 +87,18 @@ Type:RegisterConfigPanel_ConstructorFunc(150, "TellMeWhen_DRSettings", function(
 			title = L["ICONMENU_CHECKREFRESH"],
 			tooltip = L["ICONMENU_CHECKREFRESH_DESC"],
 		},
+		{
+			setting = "ShowWhenNone",
+			title = L["ICONMENU_SHOWWHENNONE"],
+			tooltip = L["ICONMENU_SHOWWHENNONE_DESC"],
+		},
 	})
 end)
 
 
 
 
-local function DR_OnEvent(icon, event, _, cevent, _, _, _, _, _, destGUID, _, destFlags, _, spellID, spellName, _, auraType)
+local function DR_OnEvent(icon, event, arg1, cevent, _, _, _, _, _, destGUID, _, destFlags, _, spellID, spellName, _, auraType)
 	if event == "COMBAT_LOG_EVENT_UNFILTERED" then
 		if auraType == "DEBUFF" and (cevent == "SPELL_AURA_REMOVED" or cevent == "SPELL_AURA_APPLIED" or (icon.CheckRefresh and cevent == "SPELL_AURA_REFRESH")) then
 			local ND = icon.NameHash
@@ -127,6 +135,8 @@ local function DR_OnEvent(icon, event, _, cevent, _, _, _, _, _, destGUID, _, de
 				end
 			end
 		end
+	elseif event == "TMW_UNITSET_UPDATED" and arg1 == icon.UnitSet then
+		icon.NextUpdateTime = 0
 	else -- it must be a unit update event
 		icon.NextUpdateTime = 0
 	end
@@ -181,7 +191,18 @@ local function DR_OnUpdate(icon, time)
 			end
 		end
 	end
-	icon:SetInfo("alpha", 0)
+	
+	if icon.ShowWhenNone then
+		icon:SetInfo("alpha; texture; start, duration; stack, stackText; unit, GUID",
+			icon.Alpha,
+			icon.FirstTexture,
+			0, 0,
+			nil, nil,
+			Units[1], nil
+		)
+	else
+		icon:SetInfo("alpha", 0)
+	end
 end
 
 function Type:FormatSpellForOutput(icon, data, doInsertLink)
@@ -239,7 +260,7 @@ do	-- CheckCategories
 		local result = func(icon, icon.NameArray)
 		icon:SetInfo("spell", result.firstCategory)
 
-		if icon:IsBeingEdited() == 1 then
+		if icon:IsBeingEdited() == 1 and TellMeWhen_ChooseName then
 			if result.doWarn then
 				TMW.HELP:Show("ICON_DR_MISMATCH", icon, TellMeWhen_ChooseName, 0, 0, L["WARN_DRMISMATCH"] .. result.append)
 			else
@@ -254,8 +275,9 @@ function Type:Setup(icon, groupID, iconID)
 	icon.NameFirst = TMW:GetSpellNames(icon, icon.Name, 1)
 	icon.NameArray = TMW:GetSpellNames(icon, icon.Name)
 	icon.NameHash = TMW:GetSpellNames(icon, icon.Name, nil, nil, 1)
-	local UnitSet
-	icon.Units, UnitSet = TMW:GetUnits(icon, icon.Unit)
+	
+	icon.Units, icon.UnitSet = TMW:GetUnits(icon, icon.Unit)
+	
 	icon.FirstTexture = SpellTextures[icon.NameFirst]
 
 	-- Do the Right Thing and tell people if their DRs mismatch
@@ -263,11 +285,13 @@ function Type:Setup(icon, groupID, iconID)
 
 	icon:SetInfo("texture", TMW:GetConfigIconTexture(icon))
 
-	if UnitSet.allUnitsChangeOnEvent then
+	if icon.UnitSet.allUnitsChangeOnEvent then
 		icon:SetUpdateMethod("manual")
-		for event in pairs(UnitSet.updateEvents) do
+		for event in pairs(icon.UnitSet.updateEvents) do
 			icon:RegisterEvent(event)
 		end
+		
+		TMW:RegisterCallback("TMW_UNITSET_UPDATED", DR_OnEvent, icon)
 	end
 	
 	icon:SetScript("OnEvent", DR_OnEvent)

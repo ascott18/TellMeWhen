@@ -115,6 +115,7 @@
 						end)
 						
 						TMW.Classes.ChatEdit_InsertLink_Hook:New(self, function(self, text, linkType, linkID)
+							--TODO: modularize to icon types
 							if TMW.CI.ics.Type == "item" and linkType ~= "item" then
 								-- notify failure if the icon is an item cooldown icon and the link is not an item link
 								return false
@@ -270,6 +271,7 @@
 							setting = "Unit",
 							title = TMW.L["ICONMENU_UNITSTOWATCH"],
 							tooltip = text,
+							doCleanString = true,
 							OnTextChanged = function(self)
 								self:GetParent():AdjustHeight()
 							end,

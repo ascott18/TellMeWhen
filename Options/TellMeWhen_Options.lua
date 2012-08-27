@@ -1228,7 +1228,7 @@ function TMW:CompileOptions()
 		end
 	else
 		for i = 1, GetNumTalentTabs() do
-			local _, name = GetTalentTabInfo(i) --MOP DEPRECIATED, COMPAT CODE IN PLACE
+			local _, name = GetTalentTabInfo(i)
 			parent["Tree"..i] = parent["Tree"..i] or {
 				type = "toggle",
 				name = name,
@@ -2444,7 +2444,7 @@ TMW:NewClass("BitflagSettingFrameBase"){
 	end,
 }
 
-TMW:NewClass("SettingTotemButton", "CheckButton", "SettingFrameBase", "BitflagSettingFrameBase"){
+TMW:NewClass("SettingTotemButton", "BitflagSettingFrameBase", "SettingCheckButton"){
 	OnCreate = TMW.Classes.SettingCheckButton.OnCreate,
 }
 

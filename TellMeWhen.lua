@@ -83,11 +83,6 @@ local _, pclass = UnitClass("Player")
 local pname = UnitName("player")
 
 
-if TMW.ISMOP then
-	GetActiveTalentGroup = GetActiveSpecGroup
-	GetPrimaryTalentTree = GetSpecialization
-end
-
 --TODO: (misplaced note) export any needed text layouts with icons that need them
 
 TMW.Print = TMW.Print or _G.print
@@ -3316,6 +3311,13 @@ end
 
 function Group.ShouldUpdateIcons(group)
 	local gs = group:GetSettings()
+
+	local GetActiveTalentGroup = GetActiveTalentGroup
+	local GetPrimaryTalentTree = GetPrimaryTalentTree
+	if TMW.ISMOP then
+		GetActiveTalentGroup = GetActiveSpecGroup
+		GetPrimaryTalentTree = GetSpecialization
+	end
 
 	if	(group:GetID() > TMW.db.profile.NumGroups) or
 		(not group.viewData) or

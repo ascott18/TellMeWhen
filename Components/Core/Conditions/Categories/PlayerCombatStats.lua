@@ -259,7 +259,8 @@ ConditionCategory:RegisterCondition(31,	 "SPELLDMG", {
 	funcstr = [[GetSpellBonusDamage() c.Operator c.Level]],
 	events = function(ConditionObject, c)
 		return
-			ConditionObject:GenerateNormalEventString("PLAYER_DAMAGE_DONE_MODS")
+			ConditionObject:GenerateNormalEventString("PLAYER_DAMAGE_DONE_MODS"),
+			ConditionObject:GenerateNormalEventString("SPELL_POWER_CHANGED") --TMW.ISMOP
 	end,
 })
 
