@@ -21,10 +21,10 @@ local LMB = LibStub("Masque", true) or (LibMasque and LibMasque("Button"))
 
 
 local IconContainer_Masque = TMW:NewClass("IconModule_IconContainer_Masque", "IconModule_IconContainer")
-IconContainer_Masque.isDefaultSkin = 1
 
 
 if not LMB then
+	IconContainer_Masque.isDefaultSkin = 1
 	-- IconModule_IconContainer_Masque will just be a clone of IconModule_IconContainer at this point.
 	-- No need to load any of the Masque-handling code it Masque isn't installed, so just leave it as a clone.
 	return

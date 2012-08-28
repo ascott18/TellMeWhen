@@ -1,3 +1,6 @@
+===v6.0.1===
+ * Bug fix: Fixed positioning issues when using Masque.
+ 
 ===v6.0.0===
  * This is by and large the biggest update that TMW has ever seen. There were so many changes that I lost track of them. Here are a few:
  * Full support for Mists of Pandaria. If anything is missing, please open a ticket.
