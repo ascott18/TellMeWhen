@@ -175,4 +175,8 @@ function Type:GetIconMenuText(data, groupID, iconID)
 	end
 end
 
+function Type:GuessIconTexture(ics)
+	return "Interface\\Icons\\Spell_Deathknight_BloodPresence"
+end
+
 Type:Register(30)

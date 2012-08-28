@@ -3,9 +3,9 @@
 
 # Dont forget to toc bump TellMeWhen_Options too
 # Also dont forget to bump both of these - X-Interface is used to get the interface version in-game to check that the user is using a current client.
-## Interface: 40300
-## X-Interface: 40300
-## X-Compatible-With: 50001
+## Interface: 50001
+## X-Interface: 50001
+## X-Compatible-With: 40300
 ## Title: TellMeWhen
 
 ## Version: 6.0.0

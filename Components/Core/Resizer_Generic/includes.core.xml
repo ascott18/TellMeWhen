@@ -1,8 +1,7 @@
 <Ui>
-<!-- TODO: delay the creation of the icon editor resize button so that this can be changed to load from includes.config -->
-
+<!-- 
 <Include file="ResizeButton.xml"/>
  
 <Script file="Resizer_Generic.lua"/>
- 
+  -->
 </Ui>

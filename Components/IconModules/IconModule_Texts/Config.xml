@@ -185,7 +185,7 @@
 						<Anchor point="RIGHT" x="-3" relativeTo="$parentEditBox" relativePoint="LEFT"/>
 					</Anchors>
 				</FontString>
-				<FontString name="$parentError" parentKey="Error" inherits="GameFontRed" justifyH="LEFT" wordwrap="true">
+				<FontString name="$parentError" parentKey="Error" inherits="GameFontRed" justifyH="LEFT" >
 					<Anchors>
 						<Anchor point="TOPLEFT" relativeTo="$parentEditBox" relativePoint="BOTTOMLEFT" x="3" y="-2"/>
 					</Anchors>
@@ -297,8 +297,8 @@
 					-->
 					<Frame name="$parentPickLayout" inherits="TMW_DropDownMenuTemplate" parentKey="PickLayout">
 						<Anchors>
-							<Anchor point="TOPLEFT" x="1" y="1"/>
-							<Anchor point="RIGHT" relativeTo="$parentLayoutSettings"  relativePoint="LEFT" x="5" />
+							<Anchor point="TOPLEFT" x="-8" y="1"/>
+							<Anchor point="RIGHT" relativeTo="$parentLayoutSettings"  relativePoint="LEFT" x="10" />
 						</Anchors>
 						<Scripts>
 							<OnLoad>
@@ -315,6 +315,23 @@
 						</Scripts>
 					</Frame>
 				</Frames>
+				<Layers>
+					<Layer level="OVERLAY">
+						<FontString name="$parentError" parentKey="Error" inherits="GameFontRed" wordwrap="true">
+							<Anchors>
+								<Anchor point="TOP" y="-28"/>
+							</Anchors>
+						</FontString>
+					</Layer>
+				</Layers>
+				<Scripts>
+					<OnLoad>
+						hooksecurefunc(self.Error, "SetText", function(self, text)
+							TMW.TEXT:ResizeParentFrame()
+						end)
+						self.Error:SetWidth(self:GetWidth() - 20)
+					</OnLoad>
+				</Scripts>
 			</Frame>
 			
 			<!--

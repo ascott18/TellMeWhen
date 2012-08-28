@@ -11,12 +11,12 @@
 					<OnLoad>
 						self:RegisterForDrag("LeftButton", "RightButton")
 						
-						TMW:TT(self, "CHOOSEICON", "CHOOSEICON_DESC")
 						self.wrapTooltips = 1
 						self.initialize = TMW.ME.IconMenu
 						self.Button:SetFrameLevel(self:GetFrameLevel()+1)
 						self.previewSize = 21
 						UIDropDownMenu_SetWidth(self, self:GetParent():GetParent():GetWidth() - 25, 0)
+						TMW:TT(self, "CHOOSEICON", "CHOOSEICON_DESC")
 					</OnLoad>
 					<OnDragStart>
 						TMW.ME.draggingFrame = self
@@ -52,8 +52,12 @@
 					<Anchor point="LEFT" relativeTo="$parentIcon" relativePoint="RIGHT" x="-16" y="2"/>
 				</Anchors>
 				<Scripts>
-					<OnLoad>TMW:TT(self, "METAPANEL_REMOVE")</OnLoad>
-					<OnClick>TMW.ME:Delete(self)</OnClick>
+					<OnLoad>
+						TMW:TT(self, "METAPANEL_REMOVE", "METAPANEL_REMOVE_DESC")
+					</OnLoad>
+					<OnClick>
+						TMW.ME:Delete(self)
+					</OnClick>
 				</Scripts>
 			</Button>
 		</Frames>
@@ -76,6 +80,9 @@
 					<OnLoad>
 					
 						self:SetText([[|TInterface\PaperDollInfoFrame\Character-Plus:0|t ]] .. TMW.L["META_ADDICON"])
+						
+						TMW:TT(self, "META_ADDICON", "META_ADDICON_DESC")
+						
 						self:SetWidth(self:GetTextWidth()+15)
 						self:SetFrameLevel(self:GetParent():GetFrameLevel()+4)
 						self.Background:SetAlpha(0.7)
@@ -118,4 +125,33 @@
 		</Scripts>
 	</Frame>
 	
+	<Frame name="TellMeWhen_MetaSortSettings" inherits="TellMeWhen_OptionsModuleContainer" virtual="true">
+		<Size y="92"/>
+		<Scripts>
+			<OnLoad>
+				self.Header:SetText(TMW.L["SORTBY"])
+				TMW.IE:BuildSimpleCheckSettingFrame(self, {
+					numPerRow = 3,
+					{
+						setting = "Sort",
+						value = false,
+						title = TMW.L["SORTBYNONE"],
+						tooltip = TMW.L["SORTBYNONE_META_DESC"],
+					},
+					{
+						setting = "Sort",
+						value = -1,
+						title = TMW.L["ICONMENU_SORTASC"],
+						tooltip = TMW.L["ICONMENU_SORTASC_META_DESC"],
+					},
+					{
+						setting = "Sort",
+						value = 1,
+						title = TMW.L["ICONMENU_SORTDESC"],
+						tooltip = TMW.L["ICONMENU_SORTDESC_META_DESC"],
+					},
+				})
+			</OnLoad>
+		</Scripts>
+	</Frame>
 </Ui>

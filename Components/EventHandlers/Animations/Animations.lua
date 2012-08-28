@@ -541,6 +541,7 @@ EventHandler:RegisterEventHandlerDataNonSpecific(80, "ICONOVERLAYIMG", {
 		"Period",
 		"Fade",
 		"Image",
+		"AlphaStandalone",
 		"SizeX",
 		"SizeY",
 	},
@@ -567,7 +568,7 @@ EventHandler:RegisterEventHandlerDataNonSpecific(80, "ICONOVERLAYIMG", {
 
 			Period = Period,
 			Fade = eventSettings.Fade,
-			Alpha = eventSettings.a_anim, --TODO: THERE IS NO WAY TO SET THIS! WTF????
+			Alpha = eventSettings.a_anim,
 			SizeX = eventSettings.SizeX,
 			SizeY = eventSettings.SizeY,
 			Image = TMW:GetTexturePathFromSetting(eventSettings.Image),

@@ -31,44 +31,9 @@ TMW:RegisterCallback("TMW_OPTIONS_LOADED", function(event)
 	TMW:ConvertContainerToScrollFrame(EventHandler.ConfigContainer.ConfigFrames)
 	local AnimationList = EventHandler.ConfigContainer.AnimationList
 
-	AnimationList.Header:SetText(L["ANIM_ANIMTOUSE"])
+	EventHandler.ConfigContainer.ListHeader:SetText(L["ANIM_ANIMTOUSE"])
 	EventHandler.ConfigContainer.SettingsHeader:SetText(L["ANIM_ANIMSETTINGS"])
 
-	-- create channel frames
-	local previousFrame
-	local offs = 0
-	for i, animationData in ipairs(EventHandler.AllAnimationsOrdered) do --TODO TEMP DEBUG: don't get from this table. only get animations that should be implemented in the current icon (so, extract from icon.Components and EventHandler.NonSpecificEventHandlerData
-		i = i + offs
-		local frame = CreateFrame("Button", AnimationList:GetName().."Animation"..i, AnimationList, "TellMeWhen_AnimationSelectButton", i)
-		AnimationList[i] = frame
-		frame:SetPoint("TOPLEFT", previousFrame, "BOTTOMLEFT", 0, 0)
-		frame:SetPoint("TOPRIGHT", previousFrame, "BOTTOMRIGHT", 0, 0)
-		frame:Show()
-
-		frame.animationData = animationData
-		frame.animation = animationData.animation
-
-		if animationData.noclick then
-			frame:SetScript("OnClick", nil)
-			frame:GetHighlightTexture():SetTexture(nil)
-		end
-
-		frame.Name:SetText(animationData.text)
-		TMW:TT(frame, animationData.text, animationData.desc, 1, 1)
-
-		previousFrame = frame
-	end
-
-	if AnimationList[1] then
-		AnimationList[1]:SetPoint("TOPLEFT", AnimationList, "TOPLEFT", 0, 0)
-		AnimationList[1]:SetPoint("TOPRIGHT", AnimationList, "TOPRIGHT", 0, 0)
-
-		AnimationList:SetHeight(#AnimationList*AnimationList[1]:GetHeight())
-		
-		AnimationList:Show()
-	else
-		AnimationList:Hide()
-	end
 end)
 
 TMW:RegisterCallback("TMW_ICON_SETUP_POST", function(event, icon)
@@ -80,9 +45,79 @@ TMW:RegisterCallback("TMW_ICON_SETUP_POST", function(event, icon)
 end)
 
 ---------- Events ----------
-function EventHandler:LoadSettingsForEventID(id)
-	local eventFrame = self:ChooseEvent(id)
+function EventHandler:GetAnimationFrame(frameID, previousFrame)
+	local AnimationList = self.ConfigContainer.AnimationList
+	
+	local frame = AnimationList[frameID]
+	if not frame then
+		frame = CreateFrame("Button", AnimationList:GetName().."Animation"..frameID, AnimationList, "TellMeWhen_AnimationSelectButton", frameID)
+		AnimationList[frameID] = frame
+		frame:SetPoint("TOPLEFT", previousFrame, "BOTTOMLEFT", 0, 0)
+		frame:SetPoint("TOPRIGHT", previousFrame, "BOTTOMRIGHT", 0, 0)
+	end
+	return frame
+end
 
+function EventHandler:LoadSettingsForEventID(id)
+	local AnimationList = EventHandler.ConfigContainer.AnimationList
+	
+	local previousFrame
+	local frameID = 0
+	
+	for i, eventHandlerData in ipairs(self.NonSpecificEventHandlerData) do
+		local animationData = eventHandlerData.animationData
+		frameID = frameID + 1
+		local frame = self:GetAnimationFrame(frameID, previousFrame)
+		frame:Show()
+
+		frame.animationData = animationData
+		frame.animation = animationData.animation
+
+		frame.Name:SetText(animationData.text)
+		TMW:TT(frame, animationData.text, animationData.desc, 1, 1)
+
+		previousFrame = frame
+	end
+	
+	for i, GenericComponent in ipairs(CI.ic.Components) do
+		if GenericComponent.EventHandlerData then
+			for i, eventHandlerData in ipairs(GenericComponent.EventHandlerData) do
+				if eventHandlerData.eventHandler == self then
+					local animationData = eventHandlerData.animationData
+					
+					frameID = frameID + 1
+					local frame = self:GetAnimationFrame(frameID, previousFrame)
+					frame:Show()
+
+					frame.animationData = animationData
+					frame.animation = animationData.animation
+
+					frame.Name:SetText(animationData.text)
+					TMW:TT(frame, animationData.text, animationData.desc, 1, 1)
+
+					previousFrame = frame
+				end
+			end
+		end
+	end
+	
+	for i = frameID + 1, #AnimationList do
+		AnimationList[i]:Hide()
+	end
+
+	if AnimationList[1] then
+		AnimationList[1]:SetPoint("TOPLEFT", AnimationList, "TOPLEFT", 0, 0)
+		AnimationList[1]:SetPoint("TOPRIGHT", AnimationList, "TOPRIGHT", 0, 0)
+		
+		AnimationList:Show()
+	else
+		AnimationList:Hide()
+	end
+	
+	
+	
+	local eventFrame = self:ChooseEvent(id)
+	
 	if CI.ics and eventFrame then
 		local EventSettings = self:GetEventSettings()
 		self:SelectAnimation(EventSettings.Animation)
@@ -102,9 +137,9 @@ function EventHandler:SetupEventDisplay(eventID)
 			text = "|cff808080" .. text
 		end
 
-		self.Events[eventID].DataText:SetText("|cffcccccc" .. self.tabText .. ":|r " .. text)
+		self.EventList[eventID].DataText:SetText("|cffcccccc" .. self.tabText .. ":|r " .. text)
 	else
-		self.Events[eventID].DataText:SetText("|cffcccccc" .. self.tabText .. ":|r UNKNOWN: " .. (animation or "?"))
+		self.EventList[eventID].DataText:SetText("|cffcccccc" .. self.tabText .. ":|r UNKNOWN: " .. (animation or "?"))
 	end
 end
 
@@ -114,10 +149,10 @@ end
 function EventHandler:SelectAnimation(animation)
 	local EventSettings = self:GetEventSettings()
 	local animationFrame
-
+	
 	for i=1, #EventHandler.ConfigContainer.AnimationList do
 		local f = EventHandler.ConfigContainer.AnimationList[i]
-		if f then
+		if f and f:IsShown() then
 			if f.animation == animation then
 				animationFrame = f
 			end
@@ -226,6 +261,8 @@ end
 local function Load_Generic_Check(self, frame, EventSettings)
 	frame:SetChecked(EventSettings[self.identifier])
 end
+
+TMW:RegisterRapidSetting("Duration")
 EventHandler:RegisterConfigFrame("Duration", {
 	frame = "Duration",
 	topPadding = 13,
@@ -233,6 +270,8 @@ EventHandler:RegisterConfigFrame("Duration", {
 	
 	Load = Load_Generic_Slider,
 })
+
+TMW:RegisterRapidSetting("Magnitude")
 EventHandler:RegisterConfigFrame("Magnitude", {
 	frame = "Magnitude",
 	topPadding = 13,
@@ -240,6 +279,8 @@ EventHandler:RegisterConfigFrame("Magnitude", {
 	
 	Load = Load_Generic_Slider,
 })
+
+TMW:RegisterRapidSetting("Period")
 EventHandler:RegisterConfigFrame("Period", {
 	frame = "Period",
 	topPadding = 13,
@@ -247,6 +288,8 @@ EventHandler:RegisterConfigFrame("Period", {
 	
 	Load = Load_Generic_Slider,
 })
+
+TMW:RegisterRapidSetting("Thickness")
 EventHandler:RegisterConfigFrame("Thickness", {
 	frame = "Thickness",
 	topPadding = 13,
@@ -255,6 +298,7 @@ EventHandler:RegisterConfigFrame("Thickness", {
 	Load = Load_Generic_Slider,
 })
 
+TMW:RegisterRapidSetting("Size_anim")
 EventHandler:RegisterConfigFrame("Size_anim", {
 	frame = "Size_anim",
 	topPadding = 13,
@@ -263,6 +307,18 @@ EventHandler:RegisterConfigFrame("Size_anim", {
 	Load = Load_Generic_Slider,
 })
 
+EventHandler:RegisterConfigFrame("AlphaStandalone", {
+	frame = "AlphaStandalone",
+	topPadding = 13,
+	bottomPadding = 13,
+	
+	Load = function(self, frame, EventSettings)
+		EventHandler:SetSliderMinMax(frame, EventSettings.a_anim*100)
+		frame:Enable()
+	end,
+})
+
+TMW:RegisterRapidSetting("SizeX")
 EventHandler:RegisterConfigFrame("SizeX", {
 	frame = "SizeX",
 	topPadding = 13,
@@ -271,6 +327,7 @@ EventHandler:RegisterConfigFrame("SizeX", {
 	Load = Load_Generic_Slider,
 })
 
+TMW:RegisterRapidSetting("SizeY")
 EventHandler:RegisterConfigFrame("SizeY", {
 	frame = "SizeY",
 	topPadding = 13,
@@ -304,6 +361,10 @@ EventHandler:RegisterConfigFrame("Image", {
 	end,
 })
 
+TMW:RegisterRapidSetting("r_anim")
+TMW:RegisterRapidSetting("g_anim")
+TMW:RegisterRapidSetting("b_anim")
+TMW:RegisterRapidSetting("a_anim")
 EventHandler:RegisterConfigFrame("Color", {
 	frame = "Color",
 	topPadding = 4,

@@ -53,7 +53,7 @@ Type:RegisterIconDefaults{
 
 Type:RegisterConfigPanel_XMLTemplate(150, "TellMeWhen_MetaIconOptions")
 
-Type:RegisterConfigPanel_XMLTemplate(170, "TellMeWhen_SortSettings")
+Type:RegisterConfigPanel_XMLTemplate(170, "TellMeWhen_MetaSortSettings")
 
 TMW:RegisterUpgrade(24100, {
 	icon = function(self, ics)
@@ -299,24 +299,6 @@ function Type:Setup(icon, groupID, iconID)
 	icon.metaUpdateQueued = true
 end
 
---TODO: make this into an actual config panel (META SORT)
-
-function Type:IE_TypeLoaded()
-	--[[
-	TMW:TT(TMW.IE.Panels.Sort.Radio1, "SORTBYNONE", "SORTBYNONE_META_DESC")
-	TMW:TT(TMW.IE.Panels.Sort.Radio2, "ICONMENU_SORTASC", "ICONMENU_SORTASC_META_DESC")
-	TMW:TT(TMW.IE.Panels.Sort.Radio3, "ICONMENU_SORTDESC", "ICONMENU_SORTDESC_META_DESC")
-]]
-
-end
-
-function Type:IE_TypeUnloaded()--[[
-	TMW:TT(TMW.IE.Panels.Sort.Radio1, "SORTBYNONE", "SORTBYNONE_DESC")
-	TMW:TT(TMW.IE.Panels.Sort.Radio2, "ICONMENU_SORTASC", "ICONMENU_SORTASC_DESC")
-	TMW:TT(TMW.IE.Panels.Sort.Radio3, "ICONMENU_SORTDESC", "ICONMENU_SORTDESC_DESC")
-]]
-
-end
 
 function Type:TMW_ICON_TYPE_CHANGED(event, icon, typeData, typeData_old)
 	if self == typeData_old then
@@ -346,6 +328,10 @@ function Type:GetIconMenuText(data, groupID, iconID)
 	local text = Type.name .. " " .. L["ICONMENU_META_ICONMENUTOOLTIP"]:format(data.Icons and #data.Icons or 0)
 	
 	return text, "", true
+end
+
+function Type:GuessIconTexture(ics)
+	return "Interface\\Icons\\LevelUpIcon-LFD"
 end
 
 Type:Register(310)

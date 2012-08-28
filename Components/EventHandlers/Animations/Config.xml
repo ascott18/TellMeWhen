@@ -56,7 +56,7 @@
 		</Scripts>
 	</Slider>
 
-	<Button name="TellMeWhen_AnimationSelectButton" inherits="TellMeWhen_ChannelSelectButton" virtual="true" >
+	<Button name="TellMeWhen_AnimationSelectButton" inherits="TellMeWhen_EventSubComponentSelectButton" virtual="true" >
 		<Scripts>
 			<OnClick>
 				if TMW.CI.ics then
@@ -73,28 +73,24 @@
 	<Frame name="$parentAnimations" inherits="TellMeWhen_EventContainer" parentKey="Animations">
 		<Frames>
 			<Frame name="$parentAnimationList" parentKey="AnimationList">
-				<Size x="150" y="266"/>
+				<Size x="150" y="10"/>
 				<Anchors>
 					<Anchor point="TOPLEFT" />
+					<Anchor point="BOTTOM" y="-0"/>
 				</Anchors>
 				<Frames>
-					<Button name="$parentNone" inherits="TellMeWhen_ChannelSelectButton" parentKey="None" id="1"/>
+					<Button name="$parentNone" inherits="TellMeWhen_AnimationSelectButton" parentKey="None" id="1"/>
 				</Frames>
-				<Backdrop bgFile="Interface\DialogFrame\UI-DialogBox-Background-Dark" tile="true"/>
-				<Layers>
-					<Layer level="OVERLAY">
-						<FontString name="$parentHeader" inherits="GameFontNormalLarge" parentKey="Header" justifyH="LEFT" text="">
-							<Anchors>
-								<Anchor point="BOTTOM" relativePoint="TOP" y="1"/>
-							</Anchors>
-						</FontString>
-					</Layer>
-				</Layers>
+				<Scripts>
+					<OnLoad>
+						TMW:ConvertContainerToScrollFrame(self, true, nil, 8)
+					</OnLoad>
+				</Scripts>
 			</Frame>
 			
 			<Frame name="$parentConfigFrames" parentKey="ConfigFrames">
 				<Anchors>
-					<Anchor point="TOPLEFT" relativeTo="$parentAnimationList" relativePoint="TOPRIGHT" x="5" y="0"/>
+					<Anchor point="TOPLEFT" relativeTo="$parentAnimationListScrollFrame" relativePoint="TOPRIGHT" x="5" y="0"/>
 					<Anchor point="BOTTOMRIGHT" x="-0" y="0"/>
 				</Anchors>
 				<Frames>
@@ -297,7 +293,44 @@
 						</Scripts>
 					</CheckButton>
 
+					<Slider name="$parentAlphaStandalone" parentKey="AlphaStandalone" inherits="TellMeWhen_AnimationSliderTemplate" valuestep="1" >
+						<Size y="17"/>
+						<Anchors>
+							<Anchor point="LEFT" x="10" />
+						</Anchors>
+						<Scripts>
+							<OnLoad>
+								local frameName = self:GetName():gsub(self:GetParent():GetName(), ""):upper()
 
+								self.text:SetText(TMW.L["ANIM_" .. frameName])
+								TMW:TT(self, "ANIM_" .. frameName, "ANIM_" .. frameName .. "_DESC")
+
+								self:SetMinMaxValues(0, 100)
+								self:SetValueStep(1)
+								self.step = 1
+								self.Low:SetText("0%")
+								self.High:SetText("100%")
+
+								TMW.Classes.EventHandler.instancesByName.Animations:SetSliderMinMax(self)
+
+								self:EnableMouseWheel(true)
+
+								local color = 34/0xFF
+								self.Low:SetTextColor(color, color, color, 1)
+								self.High:SetTextColor(color, color, color, 1)
+							</OnLoad>
+							<OnValueChanged>
+								self.Mid:SetText(value)
+
+								if TMW.CI.ics then
+									TMW.Classes.EventHandler.instancesByName.Animations:GetEventSettings().a_anim = value/100
+									TMW.IE:ScheduleIconSetup()
+								end
+							</OnValueChanged>
+						</Scripts>
+					</Slider>
+					
+					
 					<Slider name="$parentThickness" parentKey="Thickness" inherits="TellMeWhen_AnimationSliderTemplate" valuestep="0.1" >
 						<Size y="17"/>
 						<Anchors>
@@ -382,9 +415,15 @@
 		</Frames>
 		<Layers>
 			<Layer level="OVERLAY">
+				<FontString name="$parentListHeader" inherits="GameFontNormalLarge" parentKey="ListHeader" justifyH="LEFT" text="">
+					<Anchors>
+						<Anchor point="BOTTOM" relativeTo="$parentAnimationListScrollFrame" relativePoint="TOP" y="1"/>
+					</Anchors>
+				</FontString>
+				
 				<FontString name="$parentSettingsHeader" inherits="GameFontNormalLarge" parentKey="SettingsHeader" justifyH="CENTER" text="">
 					<Anchors>
-						<Anchor point="BOTTOM" relativeTo="$parentAnimationList" relativePoint="TOP" />
+						<Anchor point="BOTTOM" relativeTo="$parentAnimationListScrollFrame" relativePoint="TOP" />
 						<Anchor point="LEFT" relativeTo="$parentConfigFrames"/>
 						<Anchor point="RIGHT" relativeTo="$parentConfigFrames"/>
 					</Anchors>

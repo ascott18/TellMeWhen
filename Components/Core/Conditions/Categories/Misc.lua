@@ -21,7 +21,7 @@ local CNDT = TMW.CNDT
 local Env = CNDT.Env
 
 
-local ConditionCategory = CNDT:GetCategory("MISC", 8, L["CNDTCAT_MISC"])
+local ConditionCategory = CNDT:GetCategory("MISC", 8, L["CNDTCAT_MISC"], false, false)
 
 ConditionCategory:RegisterCondition(0,	 "", {
 	text = L["CONDITIONPANEL_DEFAULT"],
@@ -155,7 +155,12 @@ ConditionCategory:RegisterCondition(4,	 "LUA", {
 		setmetatable(TMW.CNDT.Env, TMW.CNDT.EnvMeta)
 		return c.Name ~= "" and c.Name or "true"
 	end,
-	events = function(ConditionObject, c) --TODO: update this for the new system
+	
+	--[=[
+	Just don't do this anymore. The only person who knows about it is me.
+	And i have only given it to one person in an export string.
+	
+	events = function(ConditionObject, c)
 		-- allows parsing of events from the code string. EG:
 		-- --EVENTS:'PLAYER_ENTERING_WORLD','PLAYER_LOGIN'
 		-- --[[EVENTS:'PLAYER_ENTERING_WORLD','UNIT_AURA','target']]
@@ -187,6 +192,6 @@ ConditionCategory:RegisterCondition(4,	 "LUA", {
 				end
 			end
 		end
-	end,
+	end,]=]
 })
 

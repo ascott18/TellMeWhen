@@ -209,7 +209,7 @@ function TEXT:LoadConfig()
 	if not TellMeWhen_TextDisplayOptions then return end
 	
 	local Texts = CI.ic:GetSettingsPerView().Texts
-	local GUID, layoutSettings = TEXT:GetTextLayoutForIcon(CI.ic)
+	local GUID, layoutSettings, isFallback = TEXT:GetTextLayoutForIcon(CI.ic)
 	
 	TEXT:CacheUsedStrings()
 	
@@ -280,8 +280,6 @@ function TEXT:LoadConfig()
 		
 		layoutName = TEXT:GetLayoutName(layoutSettings, GUID)
 	else
-		-- TODO: WHEN AN UNKNOWN LAYOUT OCCURS, SHOW A DESCRIPTION OF WHY IT HAPPENED (LAYOUT DELETED OR NOT IMPORTED) 
-		-- BELOW THE DROPDOWN WHERE THE TEXT DISPLAY CONFIGURATION NORMALLY WOULD BE
 		layoutName = "UNKNOWN LAYOUT: " .. (GUID or "<?>")
 	end
 
@@ -291,12 +289,18 @@ function TEXT:LoadConfig()
 	
 	UIDropDownMenu_SetText(TellMeWhen_TextDisplayOptions.Layout.PickLayout, "|cff666666" .. L["TEXTLAYOUTS_HEADER_LAYOUT"] .. ": |r" .. layoutName)
 	
+	TellMeWhen_TextDisplayOptions.Layout.Error:SetText(isFallback and L["TEXTLAYOUTS_ERROR_FALLBACK"] or nil)
+	
 	TMW:TT(TellMeWhen_TextDisplayOptions.Layout.LayoutSettings, "TEXTLAYOUTS_LAYOUTSETTINGS", L["TEXTLAYOUTS_LAYOUTSETTINGS_DESC"]:format(layoutName), nil, 1)
 end
 TMW:RegisterCallback("TMW_CONFIG_ICON_LOADED", TEXT.LoadConfig, TEXT)
 
 function TEXT:ResizeParentFrame()
-	local height = 45
+	local layoutHeight = 45 + TellMeWhen_TextDisplayOptions.Layout.Error:GetHeight()
+	
+	TellMeWhen_TextDisplayOptions.Layout:SetHeight(layoutHeight)
+	
+	local height = layoutHeight
 	
 	for i = 1, #TEXT do
 		if TEXT[i]:IsShown() then
@@ -304,7 +308,8 @@ function TEXT:ResizeParentFrame()
 		end
 	end
 	
-	TellMeWhen_TextDisplayOptions:SetHeight(height)
+	--TellMeWhen_TextDisplayOptions:SetHeight(height)
+	TMW:AnimateHeightChange(TellMeWhen_TextDisplayOptions, height, 0.1)
 end
 
 function TEXT:SetTextDisplayContainerHeight(frame)
@@ -398,7 +403,7 @@ TMW.GroupConfigTemplate.args.main.args.TextLayout = {
 
 		local viewData = TMW[groupID].viewData
 		
-		return viewData:DoesImplementModule("IconModule_Texts")
+		return not viewData:DoesImplementModule("IconModule_Texts")
 	end,
 	style = "dropdown",
 	order = 25,
@@ -426,6 +431,8 @@ TMW.GroupConfigTemplate.args.main.args.TextLayout = {
 		end
 		
 		TMW[groupID]:Setup()
+		
+		IE:Load(1)
 	end,
 }
 
@@ -498,6 +505,7 @@ local textLayoutTemplate = {
 	args = {
 		Name = {
 			name = L["TEXTLAYOUTS_RENAME"],
+			desc = L["TEXTLAYOUTS_RENAME_DESC"],
 			type = "input",
 			width = "full",
 			order = 1,
@@ -518,6 +526,7 @@ local textLayoutTemplate = {
 		},
 		addstring = {
 			name = L["TEXTLAYOUTS_ADDSTRING"],
+			desc = L["TEXTLAYOUTS_ADDSTRING_DESC"],
 			type = "execute",
 			order = 2,
 			func = function(info)
@@ -568,13 +577,29 @@ local textLayoutTemplate = {
 		},
 		
 		NoEditDesc = {
-			name = "\r\n\r\n" .. L["TEXTLAYOUTS_NOEDIT_DESC"] .. "\r\n\r\n",
+			name = "\r\n\r\n" .. L["TEXTLAYOUTS_NOEDIT_DESC"] .. "\r\n",
 			type = "description",
 			order = 100,
 			disabled = false,
 			hidden = function(info)
 				local layout = findlayout(info)
 				return not TEXT:GetTextLayoutSettings(layout).NoEdit
+			end,
+		},
+		
+		
+		Clone = {
+			name = L["TEXTLAYOUTS_CLONELAYOUT"],
+			desc = L["TEXTLAYOUTS_CLONELAYOUT_DESC"],
+			type = "execute",
+			width = "double",
+			order = 110,
+			func = function(info)
+				local layout = findlayout(info)
+				TMW:Import(nil, TMW.db.profile.TextLayouts[layout], TELLMEWHEN_VERSIONNUMBER, "textlayout", TMW.generateGUID(12))
+			end,
+			disabled = function(info)
+				return false
 			end,
 		},
 		
@@ -906,7 +931,7 @@ end)
 
 local textlayout = TMW.Classes.SharableDataType:New("textlayout")
 
-function textlayout:Import_ImportData(editbox, data, version, GUID)
+function textlayout:Import_ImportData(_, data, version, GUID)
 	assert(type(GUID) == "string")
 	
 	TMW.db.profile.TextLayouts[GUID] = nil -- restore defaults
@@ -1035,7 +1060,7 @@ function textlayout:Import_BuildMenuData(result, editbox)
 	
 end
 
-textlayout.Export_DescriptionAppend = L["EXPORT_SPECIALDESC2"]:format("5.1.0+")
+textlayout.Export_DescriptionAppend = L["EXPORT_SPECIALDESC2"]:format("6.0.0+")
 function textlayout:Export_SetButtonAttributes(editbox, info)
 	local IMPORTS, EXPORTS = editbox:GetAvailableImportExportTypes()
 	local GUID = EXPORTS[self.type]

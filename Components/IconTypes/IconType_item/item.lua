@@ -259,6 +259,15 @@ function Type:FormatSpellForOutput(icon, data, doInsertLink)
 	return data, true
 end
 
+function Type:GuessIconTexture(ics)
+	if ics.Name and ics.Name ~= "" then
+		local name = TMW:GetSpellNames(nil, ics.Name, 1)
+		if name then
+			return GetItemIcon(name)
+		end
+	end
+end
+
 function Type:DragReceived(icon, t, data, subType)
 	local ics = icon:GetSettings()
 

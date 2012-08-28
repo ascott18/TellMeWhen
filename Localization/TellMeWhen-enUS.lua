@@ -178,7 +178,10 @@ L["ICONTYPE_DEFAULT_INSTRUCTIONS"] = [[To get started configuring this icon, sel
 
 Be sure to also check the %q setting so that this icon will function.
 
-Remember that icons will only work when TellMeWhen is in its locked state, so type '/tmw' when you are finished with configuration.]]
+Remember that icons will only work when TellMeWhen is in its locked state, so type '/tmw' when you are finished with configuration.
+
+
+As you configure TellMeWhen, make sure to read the tooltips for each setting. These tooltips often contain important information about the how the setting works!]]
 
 
 
@@ -411,8 +414,10 @@ L["CONDITION_TIMERS_FAIL_DESC"] = "Duration of a timer to set on the icon when c
 
 L["METAPANEL_UP"] = "Move up" -- unused by meta icons; still used by conditions
 L["METAPANEL_DOWN"] = "Move down" -- unused by meta icons; still used by conditions
-L["METAPANEL_REMOVE"] = "Remove this icon"
-L["META_ADDICON"] = "Add icon"
+L["METAPANEL_REMOVE"] = "Remove icon"
+L["METAPANEL_REMOVE_DESC"] = "Click to remove this icon from the list that the meta icon will check."
+L["META_ADDICON"] = "Add Icon"
+L["META_ADDICON_DESC"] = "Click to add another icon to include in the meta icon."
 
 L["ICONALPHAPANEL_FAKEHIDDEN"] = "Always Hide"
 L["ICONALPHAPANEL_FAKEHIDDEN_DESC"] = [[Forces the icon to be hidden all the time while still allowing normal functionality:
@@ -589,40 +594,40 @@ L["COLOR_CTA_DESC"]	 = [[Color of the icon when:
 
 The timer is active (unusable/present),
 %q is enabled,
-%q is set to %q]]
+Both %q settings are checked]]
 
 L["COLOR_COA"]		 = "Counting, Timer Hidden, Always Shown"	-- counting withOUT timer always
 L["COLOR_COA_DESC"]	 = [[Color of the icon when:
 
 The timer is active (unusable/present),
 %q is disabled,
-%q is set to %q]]
+Both %q settings are checked]]
 
 L["COLOR_CTS"]		 = "Counting, Timer Shown, Sometimes Shown"	-- counting with timer somtimes
 L["COLOR_CTS_DESC"]	 = [[Color of the icon when:
 
 The timer is active (unusable/present),
 %q is enabled,
-%q is not set to %q]]
+Both %q settings are not checked]]
 
 L["COLOR_COS"]		 = "Counting, Timer Hidden, Sometimes Shown"	-- counting withOUT timer somtimes
 L["COLOR_COS_DESC"]	 = [[Color of the icon when:
 
 The timer is active (unusable/present),
 %q is disabled,
-%q is not set to %q]]
+Both %q settings are not checked]]
 
 L["COLOR_NA"]		 = "Finished, Always Shown"	-- not counting always
 L["COLOR_NA_DESC"]	 = [[Color of the icon when:
 
 The timer is finished (usable/absent),
-%q is set to %q]]
+Both %q settings are checked]]
 
 L["COLOR_NS"]		 = "Finished, Sometimes Shown"	-- not counting somtimes
 L["COLOR_NS_DESC"]	 = [[Color of the icon when:
 
 The timer is finished (usable/absent),
-%q is not set to %q]]
+Both %q settings are not checked]]
 
 
 L["FONTCOLOR"] = "Font Color"
@@ -710,6 +715,10 @@ L["TEXTLAYOUTS_DEFAULTS_WRAPPER"] = "Default: %s"
 L["TEXTLAYOUTS_LAYOUTSETTINGS"] = "Layout Settings"
 L["TEXTLAYOUTS_LAYOUTSETTINGS_DESC"] = "Click to configure the text layout %q."
 
+L["TEXTLAYOUTS_ERROR_FALLBACK"] = [[The text layout this icon is supposed to use could not be found. A default layout until the layout can be found, or until the layout is changed.
+
+(Did you delete the layout? Or did you import this icon without importing the layout it used?)]]
+
 L["TEXTLAYOUTS_DEFAULTS_NOLAYOUT"] = "<No Layout>"
 L["TEXTLAYOUTS_DEFAULTS_ICON1"] = "Icon Layout 1"
 L["TEXTLAYOUTS_DEFAULTS_BAR1"] = "Bar Layout 1"
@@ -717,6 +726,8 @@ L["TEXTLAYOUTS_DEFAULTS_DURATION"] = "Duration"
 L["TEXTLAYOUTS_DEFAULTS_STACKS"] = "Stacks"
 L["TEXTLAYOUTS_DEFAULTS_BINDINGLABEL"] = "Binding/Label"
 L["TEXTLAYOUTS_RENAME"] = "Rename Layout"
+L["TEXTLAYOUTS_RENAME_DESC"] = "Rename this layout to a name that fits its purpose so that you can easily identify it."
+
 L["TEXTLAYOUTS_RENAMESTRING"] = "Rename Display"
 L["TEXTLAYOUTS_RENAMESTRING_DESC"] = "Rename this display to a name that fits its purpose so that you can easily identify it."
 L["TEXTLAYOUTS_CHOOSELAYOUT"] = "Choose Layout..."
@@ -737,9 +748,11 @@ L["TEXTLAYOUTS_DELETESTRING_DESC"] = [[Deletes this text display from this text 
 
 Hold |cff7fffffCtrl|r to bypass confirmation.]]
 L["TEXTLAYOUTS_STRINGUSEDBY"] = "Used %d |4time:times;."
+L["TEXTLAYOUTS_CLONELAYOUT"] = "Clone layout"
+L["TEXTLAYOUTS_CLONELAYOUT_DESC"] = "Click to create a copy of this layout that you can edit separately."
 L["TEXTLAYOUTS_NOEDIT_DESC"] = [[This text layout is a default layout that comes standard with TellMeWhen and cannot be modified.
 
-If you wish to modify it, please copy it using the %s interface below.]]
+If you wish to modify it, please clone it.]]
 L["TEXTLAYOUTS_DEFAULTTEXT"] = "Default Text"
 L["TEXTLAYOUTS_DEFAULTTEXT_DESC"] = "Edit the default text that will be used when this text layout is set on an icon."
 L["TEXTLAYOUTS_SETTEXT"] = "Set Text"
@@ -813,6 +826,7 @@ L["CONDITIONPANEL_OR"] = "Or"
 L["CONDITIONPANEL_ANDOR"] = "And / Or"
 L["CONDITIONPANEL_ANDOR_DESC"] = "|cff7fffffClick|r to toggle between logical operators AND and OR"
 L["CONDITIONPANEL_POWER"] = "Primary Resource"
+L["CONDITIONPANEL_PERCENT"] = "Percent"
 L["CONDITIONPANEL_ABSOLUTE"] = "Absolute"
 L["CONDITIONPANEL_MAX"] = "Max"
 L["CONDITIONPANEL_COMBO"] = "Combo Points"
@@ -946,6 +960,8 @@ L["ITEMINBAGS"] = "Item count (includes charges)"
 L["ITEMEQUIPPED"] = "Item is equipped"
 L["ITEMCOOLDOWN"] = "Item cooldown"
 L["SPELLCOOLDOWN"] = "Spell cooldown"
+L["SPELLCHARGES"] = "Spell charges"
+L["SPELLCHARGES_DESC"] = "Tracks the charges of a spell like %q or %q."
 L["SPELLREACTIVITY"] = "Spell reactivity"
 L["MP5"] = "%d MP5"
 L["REACTIVECNDT_DESC"] = "This condition only checks the reactive state of the ability, not the cooldown of it."
@@ -1027,8 +1043,12 @@ L["IconModule_TimerBar_BarDisplayTimerBar"] = "Timer Bar"
 L["GROUPADDONSETTINGS"] = "Group Settings"
 L["CONDITIONS"] = "Conditions"
 L["GROUPCONDITIONS"] = "Group Conditions"
+
 L["UNITCONDITIONS"] = "Unit Conditions"
 L["UNITCONDITIONS_DESC"] = "Click to configure a set of conditions that each unit will have to pass in order to be checked."
+L["UNITCONDITIONS_STATICUNIT"] = "<Icon Unit>"
+
+
 L["MAIN"] = "Main"
 L["UNNAMED"] = "((Unnamed))"
 
@@ -1221,7 +1241,7 @@ L["SOUND_EVENT_ONRIGHTCLICK_DESC"] = [[This event triggers when you |cff7fffffRi
 
 L["SOUND_EVENT_GLOBALDESC"] = "Events are checked from top to bottom in this list. If an event is triggered that has a sound to play, no events below that event will play a sound."
 L["SOUND_EVENT_DISABLEDFORTYPE"] = "Not available"
-L["SOUND_EVENT_DISABLEDFORTYPE_DESC"] = "This event is not available for %s type icons."
+L["SOUND_EVENT_DISABLEDFORTYPE_DESC"] = "This event is not available for %q type icons."
 
 L["SOUND_SOUNDTOPLAY"] = "Sound to Play"
 L["SOUND_CUSTOM"] = "Custom sound file"
@@ -1277,6 +1297,7 @@ L["SOUNDERROR2"] = [[Custom WAV files are not supported by WoW 4.0+
 L["SOUNDERROR3"] = "Only OGG and MP3 files are supported!"
 
 L["ANN_TAB"] = "Text"
+L["ANN_NOTEXT"] = "<No Text>"
 L["ANN_CHANTOUSE"] = "Channel to Use"
 L["ANN_EDITBOX"] = "Text to be outputted"
 L["ANN_EDITBOX_WARN"] = "Type the text you wish to be outputted here"
@@ -1318,6 +1339,8 @@ L["ANIM_THICKNESS"] = "Border Thickness"
 L["ANIM_THICKNESS_DESC"] = "Set how thick the border should be."
 L["ANIM_SIZE_ANIM"] = "Border Size"
 L["ANIM_SIZE_ANIM_DESC"] = "Set how big the entire border should be. (The default size of an icon is 30.)"
+L["ANIM_ALPHASTANDALONE"] = "Alpha"
+L["ANIM_ALPHASTANDALONE_DESC"] = "Set the maximum opacity of the animation."
 L["ANIM_SIZEX"] = "Image Width"
 L["ANIM_SIZEX_DESC"] = "Set how wide the image should be."
 L["ANIM_SIZEY"] = "Image Height"

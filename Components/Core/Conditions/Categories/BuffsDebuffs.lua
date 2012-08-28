@@ -108,7 +108,7 @@ end
 
 
 
-local ConditionCategory = CNDT:GetCategory("BUFFSDEBUFFS", 5, L["CNDTCAT_BUFFSDEBUFFS"])
+local ConditionCategory = CNDT:GetCategory("BUFFSDEBUFFS", 5, L["CNDTCAT_BUFFSDEBUFFS"], false, false)
 
 ConditionCategory:RegisterCondition(1,	 "BUFFDUR", {
 	text = L["ICONMENU_BUFF"] .. " - " .. L["DURATION"],

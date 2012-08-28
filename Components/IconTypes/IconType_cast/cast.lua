@@ -179,6 +179,16 @@ function Type:FormatSpellForOutput(icon, data, doInsertLink)
 	return data and ((doInsertLink and GetSpellLink(data)) or GetSpellInfo(data)) or data, 1
 end
 
+function Type:GuessIconTexture(ics)
+	if ics.Name and ics.Name ~= "" then
+		local name = TMW:GetSpellNames(nil, ics.Name, 1)
+		if name then
+			return TMW.SpellTextures[name]
+		end
+	end
+	return "Interface\\Icons\\Temp"
+end
+
 function Type:GetIconMenuText(data, groupID, iconID)
 	local text = data.Name or ""
 	if text == "" then

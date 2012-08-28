@@ -240,17 +240,22 @@ function Type:COMBAT_LOG_EVENT_UNFILTERED(e, _, cleuEvent, _, sourceGUID, _, _, 
 end
 
 function Type:UNIT_SPELLCAST_SUCCEEDED(event, unit, spellName, _, _, spellID)
-	local c = Cooldowns[UnitGUID(unit)]
-	spellName = strlowerCache[spellName]
-	
-	c[spellName] = spellID
-	c[spellID] = TMW.time
-	
-	for k = 1, #ManualIcons do
-		local icon = ManualIcons[k]
-        local NameHash = icon.NameHash
-		if NameHash[spellID] or NameHash[spellName] then
-			icon.NextUpdateTime = 0
+	local sourceGUID = UnitGUID(unit)
+	if not sourceGUID then
+		TMW:Error("SourceGUID for %s (%s) was bad!", unit, tostring(sourceGUID))
+	else
+		local c = Cooldowns[sourceGUID]
+		spellName = strlowerCache[spellName]
+		
+		c[spellName] = spellID
+		c[spellID] = TMW.time
+		
+		for k = 1, #ManualIcons do
+			local icon = ManualIcons[k]
+			local NameHash = icon.NameHash
+			if NameHash[spellID] or NameHash[spellName] then
+				icon.NextUpdateTime = 0
+			end
 		end
 	end
 end
@@ -259,9 +264,9 @@ end
 local isArena
 local resetForArena = {}
 function Type:PLAYER_ENTERING_WORLD()
-	local _, z = IsInInstance()
+	local _, zoneType = IsInInstance()
 	local wasArena = isArena
-	isArena = z == "arena"
+	isArena = zoneType == "arena"
 	if isArena and not wasArena then
 		wipe(resetForArena)
 		Type:RegisterEvent(TMW.ISMOP and "GROUP_ROSTER_UPDATE" or "RAID_ROSTER_UPDATE", "RAID_ROSTER_UPDATE")

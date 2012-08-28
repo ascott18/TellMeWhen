@@ -166,7 +166,7 @@ TMW:RegisterCallback("TMW_OPTIONS_LOADED", function()
 					findword(name, "bunny") or
 					findword(name, "visual") or
 					findword(name, "trigger") or
-					strfind(name, "[%[%%%+%?]") or -- no brackets, plus signs, percent signs, or question marks
+					strfind(name, "[%]%[%%%+%?]") or -- no brackets, plus signs, percent signs, or question marks
 					findword(name, "vehicle") or
 					findword(name, "event") or
 					findword(name, "quest") or

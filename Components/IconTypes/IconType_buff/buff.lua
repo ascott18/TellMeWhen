@@ -334,5 +334,15 @@ function Type:Setup(icon, groupID, iconID)
 	icon:Update()
 end
 
+function Type:GuessIconTexture(ics)
+	if ics.Name and ics.Name ~= "" then
+		local name = TMW:GetSpellNames(nil, ics.Name, 1)
+		if name then
+			return SpellTextures[name]
+		end
+	end
+	return "Interface\\Icons\\INV_Misc_PocketWatch_01"
+end
+	
 Type:Register(100)
 

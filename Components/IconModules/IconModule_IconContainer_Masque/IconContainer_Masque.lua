@@ -21,6 +21,7 @@ local LMB = LibStub("Masque", true) or (LibMasque and LibMasque("Button"))
 
 
 local IconContainer_Masque = TMW:NewClass("IconModule_IconContainer_Masque", "IconModule_IconContainer")
+IconContainer_Masque.isDefaultSkin = 1
 
 
 if not LMB then

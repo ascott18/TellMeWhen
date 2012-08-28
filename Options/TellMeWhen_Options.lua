@@ -61,7 +61,7 @@ local strlowerCache = TMW.strlowerCache
 local SpellTextures = TMW.SpellTextures
 local print = TMW.print
 local Types = TMW.Types
-local IE, ID, HELP, TEXT
+local IE, ID, TEXT
 
 
 ---------- Locals ----------
@@ -131,12 +131,6 @@ TMW.CI = setmetatable({}, {__index = function(tbl, k)
 	elseif k == "gs" then
 		-- take no chances with errors occuring here
 		return TMW.approachTable(TMW.db, "profile", "Groups", tbl.g)
-	elseif k == "SoI" then -- spell or item (antiquated, but not yet deprecated).. TODO: deprecate this
-		local ics = tbl.ics
-		if ics and ics.Type == "item" then
-			return "item"
-		end
-		return "spell"
 	end
 end}) local CI = TMW.CI		--current icon
 
@@ -251,30 +245,21 @@ function TMW:GetIconMenuText(g, i, ics)
 	return text, textshort, tooltip
 end
 
--- TODO: modularize this (to icon types)
 function TMW:GuessIconTexture(ics)
 	local tex
 
 	if ics.CustomTex then
 		tex = TMW:GetTexturePathFromSetting(ics.CustomTex)
 	end
-
-	if (ics.Name and ics.Name ~= "" and ics.Type ~= "meta" and ics.Type ~= "wpnenchant" and ics.Type ~= "runes") and not tex then
-		local name = TMW:GetSpellNames(nil, ics.Name, 1)
-		if name then
-			if ics.Type == "item" then
-				tex = GetItemIcon(name) or tex
-			else
-				tex = SpellTextures[name]
-			end
-		end
+	
+	if not tex then
+		tex = TMW.Types[ics.Type]:GuessIconTexture(ics)
 	end
-	if ics.Type == "cast" and not tex then tex = "Interface\\Icons\\Temp"
-	elseif ics.Type == "buff" and not tex then tex = "Interface\\Icons\\INV_Misc_PocketWatch_01"
-	elseif ics.Type == "meta" and not tex then tex = "Interface\\Icons\\LevelUpIcon-LFD"
-	elseif ics.Type == "runes" and not tex then tex = "Interface\\Icons\\Spell_Deathknight_BloodPresence"
-	elseif ics.Type == "wpnenchant" and not tex then tex = GetInventoryItemTexture("player", GetInventorySlotInfo(ics.WpnEnchantType or "MainHandSlot")) or GetInventoryItemTexture("player", "MainHandSlot") end
-	if not tex then tex = "Interface\\Icons\\INV_Misc_QuestionMark" end
+	
+	if not tex then
+		tex = "Interface\\Icons\\INV_Misc_QuestionMark"
+	end
+	
 	return tex
 end
 
@@ -398,35 +383,64 @@ end
 function TMW:ConvertContainerToScrollFrame(container, exteriorScrollBarPosition, scrollBarXOffs, scrollBarSizeX)
     
     
-    local scrollFrame = CreateFrame("ScrollFrame", container:GetName() .. "ScrollFrame", container:GetParent(), "TellMeWhen_ScrollFrameTemplate")
+    local ScrollFrame = CreateFrame("ScrollFrame", container:GetName() .. "ScrollFrame", container:GetParent(), "TellMeWhen_ScrollFrameTemplate")
     
     local x, y = container:GetSize()
-    scrollFrame:SetSize(x, y)
+    ScrollFrame:SetSize(x, y)
     for i = 1, container:GetNumPoints() do
-        scrollFrame:SetPoint(container:GetPoint(i))
+        ScrollFrame:SetPoint(container:GetPoint(i))
     end
     
     container:ClearAllPoints()
     
-    scrollFrame:SetScrollChild(container)
+    ScrollFrame:SetScrollChild(container)
     container:SetSize(x, 1)
 	
 	if exteriorScrollBarPosition then
-		scrollFrame.ScrollBar:SetPoint("LEFT", scrollFrame, "RIGHT", scrollBarXOffs or 0, 0)
+		ScrollFrame.ScrollBar:SetPoint("LEFT", ScrollFrame, "RIGHT", scrollBarXOffs or 0, 0)
 	else
-		scrollFrame.ScrollBar:SetPoint("RIGHT", scrollFrame, "RIGHT", scrollBarXOffs or 0, 0)
+		ScrollFrame.ScrollBar:SetPoint("RIGHT", ScrollFrame, "RIGHT", scrollBarXOffs or 0, 0)
 	end
 	
 	if scrollBarSizeX then
-		scrollFrame.ScrollBar:SetWidth(scrollBarSizeX)
+		ScrollFrame.ScrollBar:SetWidth(scrollBarSizeX)
 	end
     
-    container.scrollFrame = scrollFrame
-    scrollFrame.container = container
+    container.ScrollFrame = ScrollFrame
+    ScrollFrame.container = container
     
 end
 
-
+function TMW:AnimateHeightChange(f, endHeight, duration)
+	
+	-- This function currently disabled because of frame level issues.
+	-- Top frames need to be above lower frames, but editboxes seem to go underneath everything for some reason.
+	-- It doesn't look awful, but I'm going to leave it disabled till I decide otherwise.
+	-- TODO
+	f:SetHeight(endHeight)
+	do return end
+	
+	if not f.__animateHeightHooked2 then
+		f.__animateHeightHooked2 = true
+		f:HookScript("OnUpdate", function(f)
+				if f.__animateHeight_duration then
+					if TMW.time - f.__animateHeight_startTime > f.__animateHeight_duration then
+						f.__animateHeight_duration = nil
+						f:SetHeight(f.__animateHeight_end)
+						return  
+					end
+					local pct = (TMW.time - f.__animateHeight_startTime)/f.__animateHeight_duration
+					f:SetHeight((pct*f.__animateHeight_delta)+f.__animateHeight_start)
+				end
+		end)    
+	end
+	
+	f.__animateHeight_start = f:GetHeight()
+	f.__animateHeight_end = endHeight
+	f.__animateHeight_delta = f.__animateHeight_end - f.__animateHeight_start
+	f.__animateHeight_startTime = TMW.time
+	f.__animateHeight_duration = duration
+end
 
 -- --------------
 -- MAIN OPTIONS
@@ -832,11 +846,7 @@ local colorTemplate = {
 		color = {
 			name = L["COLOR_COLOR"],
 			desc = function(info)
-				--TODO: this doesn't work anymore
-				local WhenChecks = TMW.Types[info[#info-2]].WhenChecks
-				local fmt = WhenChecks and WhenChecks.text or L["ICONMENU_SHOWWHEN"]
-
-				return L["COLOR_" .. info[#info-1] .. "_DESC"]:format(fmt)
+				return L["COLOR_" .. info[#info-1] .. "_DESC"]
 			end,
 			type = "color",
 			order = 2,
@@ -1771,43 +1781,14 @@ function IE:RegisterTab(tab, attachedFrame)
 end
 
 ---------- Interface ----------
-IE.ALLDISPLAYTABFRAMES = {}
-
+IE.AllDisplayPanels = {}
 local panelList = {}
 
-local GetColorForFrameName
-do
-	local t = {}
-	GetColorForFrameName = function(key)
-		-- This function isn't supposed to make sense.
-		-- It just generates pseudorandom numbers that are always the same given an input.
-		key = key:lower()
-		wipe(t)
-		local len = #key
-		local seglen = floor(len/3)
-		local currentField = 1
-		for i = 1, len do
-			local byte = strbyte(key:sub(i, i)) - 90
-			
-			t[currentField] = (t[currentField] or 0) + byte + byte^(i-((currentField-1)*seglen))
-			if i%seglen == 0 then
-				currentField = currentField + 1 
-			end
-			if currentField == 4 then
-				break
-			end
-		end
-		
-		local maxVal = max(t[1], t[2], t[3])
-		for i, v in pairs(t) do
-			t[i] = v/maxVal
-		end
-		
-		return t[1], t[2], t[3], 0.06
-	end
-end
-
 function IE:PositionPanels()
+	for _, frame in pairs(IE.AllDisplayPanels) do
+		frame:Hide()
+	end
+	
 	wipe(panelList)
 	for _, Component in pairs(CI.ic.Components) do
 		if Component:ShouldShowConfigPanels(CI.ic) then
@@ -1819,47 +1800,53 @@ function IE:PositionPanels()
 	
 	TMW:SortOrderedTables(panelList)
 	
-	TellMeWhen_IconEditorMainPanelsLeft.lastFrame, TellMeWhen_IconEditorMainPanelsRight.lastFrame = nil, nil
+	local ParentLeft, ParentRight = TellMeWhen_IconEditorMainPanelsLeft, TellMeWhen_IconEditorMainPanelsRight
+	for i = 1, #ParentLeft do
+		ParentLeft[i] = nil
+	end
+	for i = 1, #ParentRight do
+		ParentRight[i] = nil
+	end
 	
 	for i, panelInfo in ipairs(panelList) do
 		local GenericComponent = panelInfo.component
 		
 		local parent
 		if GenericComponent.className == "IconType" then 
-			parent = TellMeWhen_IconEditorMainPanelsLeft
+			parent = ParentLeft
 		else
-			parent = TellMeWhen_IconEditorMainPanelsRight
+			parent = ParentRight
 		end
 		
 		local frame
 		-- Get the frame for the panel if it already exists, or create it if it doesn't.
 		if panelInfo.panelType == "XMLTemplate" then
-			frame = IE.ALLDISPLAYTABFRAMES[panelInfo.xmlTemplateName]
+			frame = IE.AllDisplayPanels[panelInfo.xmlTemplateName]
 			
 			if not frame then
 				frame = CreateFrame("Frame", panelInfo.xmlTemplateName, parent, panelInfo.xmlTemplateName)
 				--frame:SetScale(0.9)
-				IE.ALLDISPLAYTABFRAMES[panelInfo.xmlTemplateName] = frame
+				IE.AllDisplayPanels[panelInfo.xmlTemplateName] = frame
 			end
 		elseif panelInfo.panelType == "ConstructorFunc" then
-			frame = IE.ALLDISPLAYTABFRAMES[panelInfo] 
+			frame = IE.AllDisplayPanels[panelInfo] 
 			
 			if not frame then
 				frame = CreateFrame("Frame", panelInfo.frameName, parent, "TellMeWhen_OptionsModuleContainer")
 				--frame:SetScale(0.9)
-				IE.ALLDISPLAYTABFRAMES[panelInfo] = frame
+				IE.AllDisplayPanels[panelInfo] = frame
 				TMW.safecall(panelInfo.func, frame)
 			end
 		end
 		
 		local R, G, B
 		
-		if parent.lastFrame then
-			frame:SetPoint("TOP", parent.lastFrame, "BOTTOM", 0, -11)
+		if type(parent[#parent]) == "table" then
+			frame:SetPoint("TOP", parent[#parent], "BOTTOM", 0, -11)
 		else
 			frame:SetPoint("TOP", 0, -10)
 		end
-		parent.lastFrame = frame
+		parent[#parent + 1] = frame
 		
 		local hue = 1/1.5
 		
@@ -1870,6 +1857,14 @@ function IE:PositionPanels()
 		
 		TMW:Fire("TMW_CONFIG_PANEL_SETUP", frame, panelInfo)
 	end	
+	
+	local IE_FL = IE:GetFrameLevel()
+	for i = 1, #ParentLeft do
+		ParentLeft[i]:SetFrameLevel(IE_FL + (#ParentLeft-i+1)*10)
+	end
+	for i = 1, #ParentRight do
+		ParentRight[i]:SetFrameLevel(IE_FL + (#ParentRight-i+1)*10)
+	end
 end
 
 function IE:DistributeFrameAnchorsLaterally(parent, numPerRow, ...)
@@ -1905,7 +1900,6 @@ end
 
 function IE:Load(isRefresh, icon, isHistoryChange)
 	if type(icon) == "table" then
-		HELP:HideForIcon(CI.ic)
 		PlaySound("igCharacterInfoTab")
 		IE:SaveSettings()
 		
@@ -1931,11 +1925,11 @@ function IE:Load(isRefresh, icon, isHistoryChange)
 		end
 		
 		if ic_old ~= CI.ic then
-			IE.Main.PanelsLeft.scrollFrame:SetVerticalScroll(0)
-			IE.Main.PanelsRight.scrollFrame:SetVerticalScroll(0)
+			IE.Main.PanelsLeft.ScrollFrame:SetVerticalScroll(0)
+			IE.Main.PanelsRight.ScrollFrame:SetVerticalScroll(0)
 		end
 		
-		TMW:Fire("TMW_CONFIG_ICON_LOADED_CHANGED", icon)
+		TMW:Fire("TMW_CONFIG_ICON_LOADED_CHANGED", icon, ic_old)
 	end
 	if not IE:IsShown() then
 		if isRefresh then
@@ -1967,38 +1961,12 @@ function IE:Load(isRefresh, icon, isHistoryChange)
 			UIDropDownMenu_SetText(IE.Main.Type, CI.ics.Type .. ": UNKNOWN TYPE")
 		end
 	end
-
-	
-	
-	
-	
-	
-	
-	-- TODO: this code is very crude (if you didnt noticed when you saw ALLDISPLAYTABFRAMES. Please clean it up before releasing)
-	for _, frame in pairs(IE.ALLDISPLAYTABFRAMES) do
-		frame:Hide()
-	end
 	
 	IE:PositionPanels()
 	
 	TMW:Fire("TMW_CONFIG_ICON_LOADED", CI.ic)
 	
-
-	local t = CI.ics.Type
-	if t then
-		for name, Type in pairs(Types) do
-			if name ~= t and Type.IE_TypeUnloaded then
-				TMW.safecall(Type.IE_TypeUnloaded, Type)
-			end
-		end
-		if Types[t].IE_TypeLoaded then
-			TMW.safecall(Types[t].IE_TypeLoaded, Types[t])
-		end
-	end
-	
 	IE:ScheduleIconSetup()
-
-	HELP:ShowNext()
 	
 	-- It is intended that this happens at the end instead of the beginning.
 	-- Table accesses that trigger metamethods flesh out an icon's settings with new things that aren't there pre-load (usually)
@@ -2052,8 +2020,6 @@ function IE:TabClick(self)
 	if self.OnClick then
 		self:OnClick()
 	end
-
-	HELP:ShowNext() -- should happen after conditions are loaded
 	
 	TMW:Fire("TMW_CONFIG_TAB_CLICKED", IE.CurrentTab, oldTab)
 end
@@ -2099,9 +2065,9 @@ function IE:Reset()
 	
 	TMW.db.profile.Groups[groupID].Icons[iconID] = nil
 	
-	CI.ic:Setup()
+	TMW:Fire("TMW_ICON_SETTINGS_RESET", CI.ic)
 	
-	HELP:HideForIcon(CI.ic)
+	CI.ic:Setup()
 	
 	IE:Load(1)
 	
@@ -2110,84 +2076,11 @@ end
 
 
 
-TMW:NewClass("IconEditor_Resizer_ScaleX_SizeY", "Resizer_Generic"){
-	tooltipText = L["RESIZE_TOOLTIP"],
-	UPD_INTV = 1,
-	tooltipTitle = L["RESIZE"],
-	
-	OnEnable = function(self)
-		self.resizeButton:Show()
-	end,
-	
-	OnDisable = function(self)
-		self.resizeButton:Hide()
-	end,	
-	
-	SizeUpdate = function(resizeButton)
-		--[[ Notes:
-		--	arg1 (self) is resizeButton
-			
-		--	The 'std_' that prefixes a lot of variables means that it is comparable with all other 'std_' variables.
-			More specifically, it means that it does not depend on the scale of either the parent nor UIParent.
-		]]
-		local self = resizeButton.module
-		
-		local parent = self.parent
-		local uiScale = UIParent:GetScale()
-		
-		local std_cursorX, std_cursorY = self:GetStandardizedCursorCoordinates()
-
-		
-		
-		-- Calculate & set new scale:
-		local std_newWidth = abs(self.std_oldLeft - std_cursorX)
-		local ratio_SizeChangeX = std_newWidth/self.std_oldWidth
-		local newScale = ratio_SizeChangeX*self.oldScale
-		newScale = max(0.4, newScale)
-		--[[
-			Holy shit. Look at this wicked sick dimensional analysis:
-			
-			std_newWidth	oldScale
-			------------- X	-------- = newScale
-			std_oldWidth	    1
-
-			'std_Width' cancels out 'std_Width', and 'old' cancels out 'old', leaving us with 'new' and 'Scale'!
-			I just wanted to make sure I explained why this shit works, because this code used to be confusing as hell
-			(which is why I am rewriting it right now)
-		]]
-
-		-- Set the scale that we just determined. This is critical because we have to parent:GetEffectiveScale()
-		-- in order to determine the proper width, which depends on the current scale of the parent.
-		parent:SetScale(newScale)
-		TMW.db.global.EditorScale = newScale
-		
-		
-		-- We have all the data needed to find the new position of the parent.
-		-- It must be recalculated because otherwise it will scale relative to where it is anchored to,
-		-- instead of being relative to the parent's top left corner, which is what it is supposed to be.
-		-- I don't remember why this calculation here works, so lets just leave it alone.
-		-- Note that it will be re-re-calculated once we are done resizing.
-		local newX = self.oldX * self.oldScale / newScale
-		local newY = self.oldY * self.oldScale / newScale
-		parent:ClearAllPoints()
-		parent:SetPoint("TOPLEFT", UIParent, "BOTTOMLEFT", newX, newY)
-		
-		
-		-- Calculate new width
-		local std_newFrameHeight = abs(std_cursorY - self.std_oldTop)
-		local newHeight = std_newFrameHeight/parent:GetEffectiveScale()
-		newHeight = max(400, newHeight)
-		newHeight = min(1200, newHeight)
-		
-		parent:SetHeight(newHeight)
-		TMW.db.global.EditorHeight = newHeight
-	end,
-}
-
-
 ---------- Settings ----------
 
 TMW:NewClass("SettingFrameBase"){
+	IsEnabled = true,
+	
 	CheckDisabled = function(self)
 		if get(self.data.disabled, self) then
 			self:Disable()
@@ -2226,7 +2119,7 @@ TMW:NewClass("SettingFrameBase"){
 	end,
 	
 	SetTooltip = function(self, title, text)
-		TMW:TT(self, title, text, 1, 1)
+		TMW:TT(self, title, text, 1, 1, "IsEnabled")
 	end,
 	
 	OnCreate_SettingFrameBase = function(self)
@@ -2768,6 +2661,7 @@ function IE:Equiv_GenerateTips(equiv)
 	return r
 end
 
+--[=[
 local function equivSorter(a, b)
 	if a == "IncreasedSPsix" and b == "IncreasedSPten" then
 		return true
@@ -2870,7 +2764,7 @@ function IE:Equiv_DropDown_OnClick(value)
 	e:SetCursorPosition(position)
 	CloseDropDownMenus()
 end
-
+]=]
 
 ---------- Dropdowns ----------
 function IE:Type_DropDown()
@@ -2909,7 +2803,8 @@ function IE:Type_Dropdown_OnClick()
 
 	CI.ics.Type = self.value
 	
-	HELP:HideForIcon(CI.ic)
+	CI.ic:Setup()
+	
 	IE:Load(1)
 end
 
@@ -2919,11 +2814,14 @@ local cachednames = {}
 function IE:GetRealNames(Name) -- TODO: MODULARIZE THIS
 	-- gets a string to set as a tooltip of all of the spells names in the name box in the IE. Splits up equivalancies and turns IDs into names
 	local text = TMW:CleanString(Name)
-	if cachednames[CI.ics.Type .. CI.SoI .. text] then return cachednames[CI.ics.Type .. CI.SoI .. text] end
+	
+	local SoI = CI.ics.Type == "item" and "item" or "spell"
+	
+	if cachednames[CI.ics.Type .. SoI .. text] then return cachednames[CI.ics.Type .. SoI .. text] end
 
 	local tbl
 	local GetSpellInfo = GetSpellInfo
-	if CI.SoI == "item" then
+	if SoI == "item" then
 		tbl = TMW:GetItemIDs(nil, text)
 	else
 		tbl = TMW:GetSpellNames(nil, text)
@@ -2939,7 +2837,7 @@ function IE:GetRealNames(Name) -- TODO: MODULARIZE THIS
 	
 	for k, v in pairs(tbl) do
 		local name, texture
-		if CI.SoI == "item" then
+		if SoI == "item" then
 			name = GetItemInfo(v) or v or ""
 			texture = GetItemIcon(v)
 		else
@@ -2976,7 +2874,7 @@ function IE:GetRealNames(Name) -- TODO: MODULARIZE THIS
 	end
 	wipe(tiptemp)
 	str = strtrim(str, "\r\n ;")
-	cachednames[CI.ics.Type .. CI.SoI .. text] = str
+	cachednames[CI.ics.Type .. SoI .. text] = str
 	return str
 end
 
@@ -3399,9 +3297,9 @@ function EVENTS:SetupEventSettings()
 
 	if not EVENTS.currentEventID then return end
 
-	local eventData = self.Events[EVENTS.currentEventID].eventData
+	local eventData = self.EventList[EVENTS.currentEventID].eventData
 
-	EventSettings.EventName:SetText(eventData.text)
+	self.EventSettingsEventName:SetText("(" .. EVENTS.currentEventID .. ") " .. eventData.text)
 
 	local Settings = self:GetEventSettings()
 	local settingsUsedByEvent = eventData.settings
@@ -3472,7 +3370,7 @@ end
 function EVENTS:OperatorMenu_DropDown()
 	-- self is not Module
 	local Module = TMW.EVENTS.currentEventHandler
-	local eventData = Module.Events[EVENTS.currentEventID].eventData
+	local eventData = Module.EventList[EVENTS.currentEventID].eventData
 
 	for k, v in pairs(operators) do
 		if not eventData.blacklistedOperators or not eventData.blacklistedOperators[v.value] then
@@ -3619,7 +3517,7 @@ function EVENTS:AddEvent_Dropdown_OnClick(event, type)
 end
 
 function EVENTS:CreateEventButtons(globalDescKey)
-	local Events = self.Events
+	local EventList = self.EventList
 	local previousFrame
 
 	local yAdjustTitle, yAdjustText = 0, 0
@@ -3631,10 +3529,10 @@ function EVENTS:CreateEventButtons(globalDescKey)
 
 	for i, eventSettings in TMW:InNLengthTable(CI.ics.Events) do
 		local eventData = TMW.EventList[eventSettings.Event]
-		local frame = Events[i]
+		local frame = EventList[i]
 		if not frame then
-			frame = CreateFrame("Button", Events:GetName().."Event"..i, Events, "TellMeWhen_Event", i)
-			Events[i] = frame
+			frame = CreateFrame("Button", EventList:GetName().."Event"..i, EventList, "TellMeWhen_Event", i)
+			EventList[i] = frame
 			frame:SetPoint("TOPLEFT", previousFrame, "BOTTOMLEFT")
 			frame:SetPoint("TOPRIGHT", previousFrame, "BOTTOMRIGHT")
 
@@ -3654,28 +3552,28 @@ function EVENTS:CreateEventButtons(globalDescKey)
 			frame.event = eventData.event
 			frame.eventData = eventData
 
-			frame.EventName:SetText(eventData.text)
+			frame.EventName:SetText(i .. ") " .. eventData.text)
 
 			frame.normalDesc = eventData.desc .. "\r\n\r\n" .. L["EVENTS_HANDLERS_GLOBAL_DESC"]
 			TMW:TT(frame, eventData.text, frame.normalDesc, 1, 1)
 		else
-			frame.EventName:SetText("UNKNOWN EVENT: " .. tostring(eventSettings.Event))
+			frame.EventName:SetText(i .. ") UNKNOWN EVENT: " .. tostring(eventSettings.Event))
 			frame:Disable()
 
 		end
 		previousFrame = frame
 	end
 
-	for i = max(CI.ics.Events.n + 1, 1), #Events do
-		Events[i]:Hide()
+	for i = max(CI.ics.Events.n + 1, 1), #EventList do
+		EventList[i]:Hide()
 	end
 
-	if Events[1] then
-		Events[1]:SetPoint("TOPLEFT", Events, "TOPLEFT", 0, 0)
-		Events[1]:SetPoint("TOPRIGHT", Events, "TOPRIGHT", 0, 0)
+	if EventList[1] then
+		EventList[1]:SetPoint("TOPLEFT", EventList, "TOPLEFT", 0, 0)
+		EventList[1]:SetPoint("TOPRIGHT", EventList, "TOPRIGHT", 0, 0)
 	end
 
-	Events:SetHeight(max(CI.ics.Events.n*(Events[1] and Events[1]:GetHeight() or 0), 1))
+	EventList:SetHeight(max(CI.ics.Events.n*(EventList[1] and EventList[1]:GetHeight() or 0), 1))
 end
 
 function EVENTS:EnableAndDisableEvents()
@@ -3683,7 +3581,7 @@ function EVENTS:EnableAndDisableEvents()
 
 	self:BuildListOfValidEvents()
 	
-	for i, frame in ipairs(self.Events) do
+	for i, frame in ipairs(self.EventList) do
 		if frame:IsShown() then
 			if self.ValidEvents[frame.event] then
 				TMW:TT(frame, frame.eventData.text, frame.normalDesc, 1, 1)
@@ -3723,7 +3621,7 @@ function EVENTS:GetEventHandlerForEventSettings(arg1)
 end
 
 function EVENTS:ChooseEvent(id)
-	local eventFrame = self.Events[id]
+	local eventFrame = self.EventList[id]
 
 	EVENTS.currentEventID = id ~= 0 and id or nil
 
@@ -3740,23 +3638,23 @@ function EVENTS:ChooseEvent(id)
 		return
 	end
 
-	for i, f in ipairs(self.Events) do
-		f.selected = nil
-		f:UnlockHighlight()
-		f:GetHighlightTexture():SetVertexColor(1, 1, 1, 1)
+	for i, frame in ipairs(self.EventList) do
+		frame.selected = nil
+		frame:UnlockHighlight()
+		frame:GetHighlightTexture():SetVertexColor(1, 1, 1, 1)
 	end
 	eventFrame.selected = 1
 	eventFrame:LockHighlight()
 	eventFrame:GetHighlightTexture():SetVertexColor(NORMAL_FONT_COLOR.r, NORMAL_FONT_COLOR.g, NORMAL_FONT_COLOR.b, 1)
 
 	IE.Events.ScrollFrame.adjustmentQueued = true
-
+	
 	return eventFrame
 end
 
 function EVENTS:AdjustScrollFrame()
 	local ScrollFrame = IE.Events.ScrollFrame
-	local eventFrame = self.Events[self.currentEventID]
+	local eventFrame = self.EventList[self.currentEventID]
 
 	if not eventFrame then return end
 
@@ -3769,8 +3667,8 @@ end
 
 function EVENTS:GetNumUsedEvents()
 	local n = 0
-	for i = 1, #self.Events do
-		local f = self.Events[i]
+	for i = 1, #self.EventList do
+		local f = self.EventList[i]
 		local Module = EVENTS:GetEventHandlerForEventSettings(i)
 		if Module then
 			local has = Module:ProcessIconEventSettings(f.event, self:GetEventSettings(i))
@@ -3821,9 +3719,9 @@ function EVENTS:LoadConfig()
 		EventHandler:LoadSettingsForEventID(oldID)
 	end
 
-	if IE.Events.ScrollFrame:GetVerticalScrollRange() == 0 then
+	--[[if IE.Events.ScrollFrame:GetVerticalScrollRange() == 0 then
 		IE.Events.ScrollFrame.ScrollBar:Hide()
-	end
+	end]]
 
 	self:SetTabText()
 end
@@ -3852,7 +3750,7 @@ function EVENTS:TestEvent(eventID)
 end
 
 TMW:RegisterCallback("TMW_OPTIONS_LOADED", function()
-	EVENTS.Events = IE.Events.Events
+	EVENTS.EventList = IE.Events.EventList
 	EVENTS.EventSettings = IE.Events.EventSettings
 end)
 
@@ -3883,229 +3781,6 @@ function EVENTS:UpOrDown(button, delta)
 
 	EVENTS:LoadConfig()
 end
-
-
-
--- -----------------------
--- HELP
--- -----------------------
-
-
-HELP = TMW:NewModule("Help", "AceTimer-3.0") TMW.HELP = HELP
-
-HELP.Codes = {
-	"ICON_POCKETWATCH_FIRSTSEE",
-
-	"ICON_DURS_FIRSTSEE",
-	"ICON_DURS_MISSING",
-
-	"ICON_IMPORT_CURRENTPROFILE",
-	"ICON_EXPORT_DOCOPY",
-
-	"ICON_DR_MISMATCH",
-	"ICON_MS_NOTFOUND",
-	"ICON_ICD_NATURESGRACE",
-
-	"ICON_UNIT_MISSING",
-
-	"CNDT_UNIT_MISSING",
-	"CNDT_PARENTHESES_ERROR",
-}
-
-HELP.OnlyOnce = {
-	ICON_DURS_FIRSTSEE = true,
-	ICON_POCKETWATCH_FIRSTSEE = true,
-	ICON_IMPORT_CURRENTPROFILE = true,
-	ICON_EXPORT_DOCOPY = true,
-}
-
-function HELP:OnInitialize()
-	HELP.Frame = IE.Help
-	HELP.Queued = {}
-end
-
-
----------- External Usage ----------
-function HELP:Show(code, icon, frame, x, y, text, ...)
-	-- handle the code, determine the ID of the code.
-	TMW:ValidateType(2, "TMW.HELP:Show()", code, "string")
-	TMW:ValidateType(3, "TMW.HELP:Show()", icon, "frame;nil")
-	TMW:ValidateType(4, "TMW.HELP:Show()", frame, "frame")
-	TMW:ValidateType(5, "TMW.HELP:Show()", x, "number;nil")
-	TMW:ValidateType(6, "TMW.HELP:Show()", y, "number;nil")
-	TMW:ValidateType(7, "TMW.HELP:Show()", text, "string")
-	
-	local codeID
-	for i, c in pairs(HELP.Codes) do
-		if c == code then
-			codeID = i
-			break
-		end
-	end
-	assert(codeID, format("Code %q is not defined", code))
-	-- we can now safely proceded to process and queue the help
-
-	-- retrieve or create the data table
-	local help = wipe(HELP.Queued[code] or {})
-
-	-- add the text format args to the data
-	for i = 1, select('#', ...) do
-		help[i] = select(i, ...)
-	end
-	-- add other data
-	help.code = code
-	help.codeID = codeID
-	help.icon = icon
-	help.frame = frame
-	help.x = x
-	help.y = y
-	help.text = text
-	-- if the frame has the CreateTexture method, then it can be made the parent.
-	-- Otherwise, the frame is actually a texture/font/etc object, so set its parent as the parent.
-	help.parent = help.frame.CreateTexture and help.frame or help.frame:GetParent()
-
-	-- determine if the code has a setting associated to only show it once.
-	help.setting = HELP.OnlyOnce[code] and code
-
-	-- if it does and it has already been set true, then we dont need to show anything, so quit.
-	if help.setting and TMW.db.global.HelpSettings[help.setting] then
-		HELP.Queued[code] = nil
-		help = nil
-		return
-	end
-
-	-- if the code is the same as what is currently shown, then replace what is currently being shown.
-	if HELP.showingHelp and HELP.showingHelp.code == code then
-		HELP.showingHelp = nil
-	end
-
-	-- everything should be in order, so add the help to the queue.
-	HELP:Queue(help)
-
-	-- notify that this help will eventually be shown
-	return 1
-end
-
-function HELP:Hide(code)
-	if HELP.Queued[code] then
-		HELP.Queued[code] = nil
-	elseif HELP.showingHelp and HELP.showingHelp.code == code then
-		HELP.showingHelp = nil
-		HELP:ShowNext()
-	end
-end
-
-function HELP:GetShown()
-	return HELP.showingHelp and HELP.showingHelp.code
-end
-
-function HELP:NewCode(code, order, OnlyOnce)
-	assert(code, "HELP:NewCode() - arg1 must be a string, not nil.")
-	assert(not TMW.tContains(HELP.Codes, code), "HELP code " .. code .. " is already registered!")
-	
-	if order then
-		tinsert(HELP.Codes, order, code)
-	else
-		tinsert(HELP.Codes, code)
-	end
-	
-	if OnlyOnce then
-		HELP.OnlyOnce[code] = true
-	end
-end
-
----------- Queue Management ----------
-function HELP:Queue(help)
-	-- add the help to the queue
-	HELP.Queued[help.code] = help
-
-	-- notify the engine to start
-	HELP:ShowNext()
-end
-
-function HELP:OnClose()
-	HELP.showingHelp = nil
-	HELP:ShowNext()
-end
-
-function HELP:ShouldShowHelp(help)
-	if help.icon and not help.icon:IsBeingEdited() then
-		return false
-	elseif not help.parent:IsVisible() then
-		return false
-	end
-	return true
-end
-
-function HELP:ShowNext()
-	-- if there nothing currently being displayed, hide the frame.
-	if not HELP.showingHelp then
-		HELP.Frame:Hide()
-	end
-
-	-- if we are already showing something, then don't overwrite it.
-	if HELP.showingHelp then
-		-- but if the current help should not be shown, then stop showing it, but stick it back in the queue to try again later
-		if not HELP:ShouldShowHelp(HELP.showingHelp) then
-			local current = HELP.showingHelp
-			HELP.showingHelp = nil
-			HELP:Queue(current)
-		end
-		return
-	end
-
-	-- if there isn't a next help to show, then dont try.
-	if not next(HELP.Queued) then
-		return
-	end
-
-	-- calculate the next help in line based on the order of HELP.Codes
-	local help
-	for order, code in ipairs(HELP.Codes) do
-		if HELP.Queued[code] and HELP:ShouldShowHelp(HELP.Queued[code]) then
-			help = HELP.Queued[code]
-			break
-		end
-	end
-
-	if not help then
-		return
-	end
-
-	-- show the frame with the data
-	local text = format(help.text, unpack(help))
-
-	HELP.Frame:ClearAllPoints()
-	HELP.Frame:SetPoint("TOPRIGHT", help.frame, "LEFT", (help.x or 0) - 30, (help.y or 0) + 28)
-	HELP.Frame.text:SetText(text)
-	HELP.Frame:SetHeight(HELP.Frame.text:GetHeight() + 38)
-	HELP.Frame:SetWidth(min(250, HELP.Frame.text:GetStringWidth() + 30))
-
-	HELP.Frame:Show()
-
-
-	-- if the help had a setting associated, set it now
-	if help.setting then
-		TMW.db.global.HelpSettings[help.setting] = true
-	end
-
-	-- remove the help from the queue and set it as the current help
-	HELP.Queued[help.code] = nil
-	HELP.showingHelp = help
-end
-
-function HELP:HideForIcon(icon)
-	for code, help in pairs(HELP.Queued) do
-		if help.icon == icon then
-			HELP.Queued[code] = nil
-		end
-	end
-	if HELP.showingHelp and HELP.showingHelp.icon == icon then
-		HELP.showingHelp = nil
-		HELP:ShowNext()
-	end
-end
-
 
 
 

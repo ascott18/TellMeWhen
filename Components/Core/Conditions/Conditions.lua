@@ -494,9 +494,6 @@ Env.SemicolonConcatCache = setmetatable(
 })
 
 
-
---TODO: add conditions for spell charges
-
 local function formatSeconds(seconds, arg2)
 	if type(seconds) == "table" then -- if i set it directly as a metamethod
 		seconds = arg2
@@ -543,10 +540,13 @@ CNDT.CategoriesByID = {}
 CNDT.ConditionsByType = {}
 
 TMW:NewClass("ConditionCategory"){
-	OnNewInstance = function(self, identifier, order, name)
+	OnNewInstance = function(self, identifier, order, name, spaceBefore, spaceAfter)
 		self.identifier = identifier
 		self.order = order
 		self.name = name
+		
+		self.spaceBefore = spaceBefore
+		self.spaceAfter = spaceAfter
 		
 		self.conditionData = {}
 	
@@ -590,7 +590,7 @@ TMW:NewClass("ConditionCategory"){
 	end,
 }
 
-function CNDT:GetCategory(identifier, order, categoryName)
+function CNDT:GetCategory(identifier, order, categoryName, spaceBefore, spaceAfter)
 	TMW:ValidateType("2 (identifier)", "CNDT:GetCategory()", identifier, "string")
 	
 	if CNDT.CategoriesByID[identifier] then
@@ -600,7 +600,7 @@ function CNDT:GetCategory(identifier, order, categoryName)
 	TMW:ValidateType("3 (order)", "CNDT:GetCategory()", order, "number")
 	TMW:ValidateType("4 (categoryName)", "CNDT:GetCategory()", categoryName, "string")
 	
-	return TMW.Classes.ConditionCategory:New(identifier, order, categoryName)
+	return TMW.Classes.ConditionCategory:New(identifier, order, categoryName, spaceBefore, spaceAfter)
 end
 
 
@@ -660,18 +660,6 @@ function CNDT:DoConditionSubstitutions(conditionData, condition, thisstr)
 				CNDT.SpecialUnitsUsed[unit] = true
 				CNDT:RegisterEvent(TMW.ISMOP and "GROUP_ROSTER_UPDATE" or "RAID_ROSTER_UPDATE", "RAID_ROSTER_UPDATE")
 				CNDT:RAID_ROSTER_UPDATE()
-			--[[elseif strfind(unit, "^%%[Uu]") then
-			
-				--TODO: remove support for %u substitution in conditions, move this functionality to unit sets
-				local after = strmatch(unit, "^%%[Uu]%-?(.*)")
-				-- it is intended that we sub in parent:GetName() instead of "icon". 
-				-- We want to create unique ConditionObjects for each icon that uses %u (as opposed to using a cached one)
-				local sub = "(" .. parent:GetName() .. ".attributes.unit or '')"
-				if after and after ~= "" then
-					sub = "(" .. sub .. " .. \"-" .. after .. "\")"
-				end
-				thisstr = gsub(thisstr, "c.Unit" .. append,		sub) -- sub it in as a variable
-				]]
 			else
 				thisstr = gsub(thisstr, "c.Unit" .. append,	"\"" .. unit .. "\"") -- sub it in as a string
 			end

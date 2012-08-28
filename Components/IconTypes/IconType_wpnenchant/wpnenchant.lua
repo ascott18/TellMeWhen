@@ -254,6 +254,11 @@ function Type:FormatSpellForOutput(icon, data, doInsertLink)
 	return icon.LastEnchantName or data or icon.EnchantName
 end
 
+function Type:GuessIconTexture(ics)
+	return GetInventoryItemTexture("player", GetInventorySlotInfo(ics.WpnEnchantType or "MainHandSlot"))
+	or GetInventoryItemTexture("player", "MainHandSlot")
+end
+
 function Type:GetIconMenuText(ics)
 	local text = ""
 	if ics.WpnEnchantType == "MainHandSlot" or not ics.WpnEnchantType then

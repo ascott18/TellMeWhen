@@ -10,11 +10,12 @@
 
 <Include file="Resizer_Generic\includes.core.xml"/>
 
+<Include file="Help\includes.core.xml"/>
+
 
 
 
 <Script file="PlayerNames.lua"/>
-
 
 
 

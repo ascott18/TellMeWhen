@@ -30,7 +30,7 @@ local DogTag = LibStub("LibDogTag-3.0", true)
 TELLMEWHEN_VERSION = "6.0.0"
 TELLMEWHEN_VERSION_MINOR = strmatch(" @project-version@", " r%d+") or ""
 TELLMEWHEN_VERSION_FULL = TELLMEWHEN_VERSION .. TELLMEWHEN_VERSION_MINOR
-TELLMEWHEN_VERSIONNUMBER = 60037 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
+TELLMEWHEN_VERSIONNUMBER = 60041 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
 if TELLMEWHEN_VERSIONNUMBER > 61001 or TELLMEWHEN_VERSIONNUMBER < 60000 then return error("YOU SCREWED UP THE VERSION NUMBER OR DIDNT CHANGE THE SAFETY LIMITS") end -- safety check because i accidentally made the version number 414069 once
 
 TELLMEWHEN_MAXROWS = 20
@@ -1534,7 +1534,7 @@ end
 	but it is so much easier to have it here in case an icon/group module wants to use it.
 ]]
 local function TTOnEnter(self)
-	if  (TMW.get(self.IsEnabled, self) or TMW.get(self.GetMotionScriptsWhileDisabled, self))
+	if  (not self.__ttshowchecker or TMW.get(self[self.__ttshowchecker], self))
 	and (self.__title or self.__text)
 	then
 		GameTooltip_SetDefaultAnchor(GameTooltip, self)
@@ -1547,7 +1547,7 @@ local function TTOnLeave(self)
 	GameTooltip:Hide()
 end
 
-function TMW:TT(f, title, text, actualtitle, actualtext)
+function TMW:TT(f, title, text, actualtitle, actualtext, showchecker)
 	-- setting actualtitle or actualtext true cause it to use exactly what is passed in for title or text as the text in the tooltip
 	-- if these variables arent set, then it will attempt to see if the string is a global variable (e.g. "MAXIMUM")
 	-- if they arent set and it isnt a global, then it must be a TMW localized string, so use that
@@ -1565,6 +1565,8 @@ function TMW:TT(f, title, text, actualtitle, actualtext)
 	else
 		f.__text = text
 	end
+	
+	f.__ttshowchecker = showchecker
 
 	if not f.__ttHooked then
 		f.__ttHooked = 1
@@ -2000,40 +2002,6 @@ function TMW:GetBaseUpgrades()			-- upgrade functions
 					local eventData = TMW.EventList[eventSettings.Event]
 					if eventData and eventData.applyDefaultsToSetting then
 						eventData.applyDefaultsToSetting(eventSettings)
-					end
-				end
-			end,
-		},
-		[50020] = {
-			-- Upgrade from the old event system that only allowed one event of each type per icon.
-			icon = function(self, ics)
-				local Events = ics.Events
-				for event, eventSettings in pairs(CopyTable(Events)) do -- dont use InNLengthTable here
-					if type(event) == "string" and event ~= "n" then
-						local addedAnEvent
-						for eventHandlerName, EventHandler in pairs(TMW.Classes.EventHandler.instancesByName) do
-							local hasHandlerOfType = EventHandler:ProcessIconEventSettings(event, eventSettings)
-							if type(rawget(Events, "n") or 0) == "table" then
-								Events.n = 0
-							end
-							if hasHandlerOfType then
-								Events.n = (rawget(Events, "n") or 0) + 1
-								Events[Events.n] = CopyTable(eventSettings)
-								Events[Events.n].Type = eventHandlerName
-								Events[Events.n].Event = event
-								Events[Events.n].PassThrough = true
-
-								addedAnEvent = true
-							end
-						end
-
-						-- the last new event added for each original event should retain
-						-- the original PassThrough setting instead of being forced to be true (Events[Events.n].PassThrough = true)
-						-- in order to retain previous functionality
-						if addedAnEvent then
-							Events[Events.n].PassThrough = eventSettings.PassThrough
-						end
-						Events[event] = nil
 					end
 				end
 			end,
@@ -2974,10 +2942,47 @@ function UpdateTableManager:UpdateTable_PerformAutoSort()
 end
 
 
+
+
 local EventHandler = TMW:NewClass("EventHandler", "AceEvent-3.0", "AceTimer-3.0")
 TMW.EVENTS = EventHandler
 local QueuedIcons = {}
 EventHandler.instancesByName = {}
+
+TMW:RegisterUpgrade(50020, {
+	-- Upgrade from the old event system that only allowed one event of each type per icon.
+	icon = function(self, ics)
+		local Events = ics.Events
+		for event, eventSettings in pairs(CopyTable(Events)) do -- dont use InNLengthTable here
+			if type(event) == "string" and event ~= "n" then
+				local addedAnEvent
+				for eventHandlerName, EventHandler in pairs(TMW.Classes.EventHandler.instancesByName) do
+					local hasHandlerOfType = EventHandler:ProcessIconEventSettings(event, eventSettings)
+					if type(rawget(Events, "n") or 0) == "table" then
+						Events.n = 0
+					end
+					if hasHandlerOfType then
+						Events.n = (rawget(Events, "n") or 0) + 1
+						Events[Events.n] = CopyTable(eventSettings)
+						Events[Events.n].Type = eventHandlerName
+						Events[Events.n].Event = event
+						Events[Events.n].PassThrough = true
+
+						addedAnEvent = true
+					end
+				end
+
+				-- the last new event added for each original event should retain
+				-- the original PassThrough setting instead of being forced to be true (Events[Events.n].PassThrough = true)
+				-- in order to retain previous functionality
+				if addedAnEvent then
+					Events[Events.n].PassThrough = eventSettings.PassThrough
+				end
+				Events[event] = nil
+			end
+		end
+	end,
+})
 
 function TMW:GetEventHandler(eventHandlerName)
 	return EventHandler.instancesByName[eventHandlerName]
@@ -3030,7 +3035,7 @@ function EventHandler:RegisterEventHandlerDataNonSpecific(...)
 	
 	local eventHandlerData = {
 		eventHandler = self,
-		eventHandlerName = self.className,
+		eventHandlerName = self.eventHandlerName,
 		...,
 	}
 	
@@ -3159,6 +3164,8 @@ function Group.OnNewInstance(group, ...)
 
 	group.ID = groupID
 	group.SortedIcons = {}
+	group.SortedIconsManager = UpdateTableManager:New()
+	group.SortedIconsManager:UpdateTable_Set(group.SortedIcons)
 end
 
 function Group.__tostring(group)
@@ -3238,13 +3245,14 @@ function Group.IconSorter(iconA, iconB)
 		end
 	end
 end
+
 --TODO: make group icon sorting into a group module. Icon placement in general should be handled by a module.
 -- Also make icon sorting itself much more modular (to allow extensions)
 function Group.SortIcons(group)
 	local SortedIcons = group.SortedIcons
 	sort(SortedIcons, group.IconSorter)
 
-	for positionedID = 1, #group do
+	for positionedID = 1, #SortedIcons do
 		local icon = SortedIcons[positionedID]
 		icon.viewData:Icon_SetPoint(icon, positionedID)
 	end
@@ -3384,6 +3392,8 @@ function Group.Setup(group)
 	
 	group.__shown = group:IsShown()
 	
+	group.numIcons = group.Rows * group.Columns
+	
 	local viewData_old = group.viewData
 	local viewData = TMW.Views[gs.View]
 	group.viewData = viewData
@@ -3411,28 +3421,33 @@ function Group.Setup(group)
 		end
 		
 		-- Setup icons
-		for iconID = 1, group.Rows * group.Columns do
+		for iconID = 1, group.numIcons do
 			local icon = group[iconID]
 			if not icon then
 				icon = TMW.Classes.Icon:New("Button", group:GetName() .. "_Icon" .. iconID, group, "TellMeWhen_IconTemplate", iconID)
 			end
 
 			TMW.safecall(icon.Setup, icon)
+		
+			group.SortedIconsManager:UpdateTable_Register(icon)
 		end
 
-		for iconID = (group.Rows*group.Columns)+1, #group do
+		for iconID = group.numIcons+1, #group do
 			local icon = group[iconID]
 			icon:DisableIcon()
+			group.SortedIconsManager:UpdateTable_Unregister(icon)
 		end
+		group.shouldSortIcons = group.SortPriorities[1].Method ~= "id" and group.numIcons > 1
 	else
 		for iconID = 1, #group do
 			local icon = group[iconID]
 			icon:DisableIcon()
+			group.SortedIconsManager:UpdateTable_Unregister(icon)
 		end
+		group.shouldSortIcons = false
 	end
 
 	group:SortIcons()
-	group.shouldSortIcons = group.SortPriorities[1].Method ~= "id" and group:ShouldUpdateIcons() and group[2] and true
 
 	group:Setup_Conditions()
 
@@ -3459,7 +3474,6 @@ function Icon.OnNewInstance(icon, ...)
 	icon.group = group
 	icon.ID = iconID
 	group[iconID] = icon
-	tinsert(group.SortedIcons, icon)
 	
 	icon.EventHandlersSet = {}
 	icon.EssentialModuleComponents = {}
@@ -3861,7 +3875,7 @@ function Icon.Setup(icon)
 		
 		------------ Icon View ------------
 		viewData:ImplementIntoIcon(icon)
-		viewData:Icon_Setup(icon)	
+		viewData:Icon_Setup(icon)
 		
 		
 		TMW.safecall(typeData.Setup, typeData, icon, groupID, iconID)
@@ -4032,18 +4046,14 @@ TMW.RapidSettings = {
 	g = true,
 	b = true,
 	a = true,
-	r_anim = true,
-	g_anim = true,
-	b_anim = true,
-	a_anim = true,
 	Size = true,
 	Level = true,
 	Alpha = true,
 	UnAlpha = true,
-	Duration = true,
-	Magnitude = true,
-	Period = true,
 }
+function TMW:RegisterRapidSetting(setting)
+	TMW.RapidSettings[setting] = true
+end
 
 TMW:NewClass("GenericComponent"){
 	ConfigPanels = {},
@@ -4093,33 +4103,36 @@ TMW:NewClass("GenericComponent"){
 		return true
 	end,
 	
-	RegisterRapidSetting = function(self, setting)
-		TMW.RapidSettings[setting] = true
-	end,
-	
 	RegisterDogTag = function(self, ...)
 		-- just a wrapper so that i don't have to LibStub DogTag everywhere
 		DogTag:AddTag(...)
 	end,
 	
-	RegisterIconEvent = function(self, order, event, data)
+	RegisterIconEvent = function(self, order, event, eventData)
 		TMW:ValidateType("2 (order)", "[GenericComponent]:RegisterIconEvent()", order, "number")
 		TMW:ValidateType("3 (event)", "[GenericComponent]:RegisterIconEvent()", event, "string")
-		TMW:ValidateType("4 (data)", "[GenericComponent]:RegisterIconEvent()", data, "table")
+		TMW:ValidateType("4 (eventData)", "[GenericComponent]:RegisterIconEvent()", eventData, "table")
 		
-		--TODO: add validation for required fields, etc, etc.
+		TMW:ValidateType("event", "eventData", eventData.event, "nil")
+		TMW:ValidateType("order", "eventData", eventData.order, "nil")
 		
-		data.event = event
-		data.order = order
+		TMW:ValidateType("text", "eventData", eventData.text, "string;nil")
+		TMW:ValidateType("desc", "eventData", eventData.desc, "string;nil")
+		TMW:ValidateType("settings", "eventData", eventData.settings, "table;nil")
+		TMW:ValidateType("valueName", "eventData", eventData.valueName, "string;nil")
+		TMW:ValidateType("conditionChecker", "eventData", eventData.conditionChecker, "function;nil")
+		
+		eventData.event = event
+		eventData.order = order
 		
 		if TMW.EventList[event] then
 			error(("An event with the event identifier %q already exists!"):format(event), 2)
 		end
 		
-		TMW.EventList[#TMW.EventList + 1] = data
-		TMW.EventList[event] = data
+		TMW.EventList[#TMW.EventList + 1] = eventData
+		TMW.EventList[event] = eventData
 		
-		self.IconEvents[#self.IconEvents + 1] = data
+		self.IconEvents[#self.IconEvents + 1] = eventData
 	end,
 	
 }
@@ -4791,22 +4804,12 @@ TMW:NewClass("IconModule", "IconComponent", "ObjectModule"){
 		TMW:ValidateType("2 (name)", "IconModule:RegisterAnchorableFrame(name)", name, "string")
 		
 		self.anchorableChildren[name] = true
-		
-		--TMW:Fire("TMW_ICON_MODULE_ANCHORABLEFRAME_REGISTED", self.icon, self, name)
 	end,
 	UnregisterAnchorableFrame = function(self, name)
 		self:AssertSelfIsClass()
 		TMW:ValidateType("2 (name)", "IconModule:UnregisterAnchorableFrame(name)", name, "string")
 		
 		self.anchorableChildren[name] = nil
-		
-		--TMW:Fire("TMW_ICON_MODULE_ANCHORABLEFRAME_UNREGISTED", self.icon, self, name)
-	end,
-
-	ImplementForAllViews = function(self, implementorFunc)
-		self:AssertSelfIsClass()
-		--TODO: not implemented
-		self.ViewImplementors.ALL = implementorFunc
 	end,
 	
 	SetAllowanceForType = function(self, typeName, allow)
@@ -4889,12 +4892,6 @@ TMW:NewClass("GroupModule", "GroupComponent", "ObjectModule"){
 		newClass:InheritTable(self, "ViewImplementors")
 	end,
 	
-	ImplementForAllViews = function(self, implementorFunc)
-		self:AssertSelfIsClass()
-		--TODO: not implemented
-		self.ViewImplementors.ALL = implementorFunc
-	end,
-	
 	SetImplementorForViews = function(self, implementorFunc, ...)
 		self:AssertIsProtectedCall()
 		
@@ -4971,6 +4968,15 @@ function IconType:FormatSpellForOutput(icon, data, doInsertLink)
 	end
 	
 	return data, true
+end
+
+function IconType:GuessIconTexture(ics)
+	if ics.Name and ics.Name ~= "" then
+		local name = TMW:GetSpellNames(nil, ics.Name, 1)
+		if name then
+			return SpellTextures[name]
+		end
+	end
 end
 
 function IconType:DragReceived(icon, t, data, subType)
@@ -5630,5 +5636,7 @@ DogTag:AddTag("TMW", "TMWFormatDuration", {
 	category = L["TEXTMANIP"]
 })
 
---TODO: add dogtag tags to SUG
+
+
+
 	

@@ -249,9 +249,10 @@ end
 
 function CNDT:TypeMenu_DropDown()	
 	if UIDROPDOWNMENU_MENU_LEVEL == 1 then
+		local canAddSpacer
 		for k, categoryData in ipairs(CNDT.Categories) do
 			
-			if categoryData.categorySpacebefore then
+			if categoryData.spaceBefore and canAddSpacer then
 				TMW.AddDropdownSpacer()
 			end
 
@@ -280,6 +281,12 @@ function CNDT:TypeMenu_DropDown()
 			info.hasArrow = shouldAddCategory
 			info.disabled = not shouldAddCategory
 			UIDropDownMenu_AddButton(info, UIDROPDOWNMENU_MENU_LEVEL)
+			canAddSpacer = true
+			
+			if categoryData.spaceAfter and canAddSpacer then
+				TMW.AddDropdownSpacer()
+				canAddSpacer = false
+			end
 		end
 		
 	elseif UIDROPDOWNMENU_MENU_LEVEL == 2 then

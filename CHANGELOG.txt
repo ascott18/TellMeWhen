@@ -1,43 +1,22 @@
 ===v6.0.0===
- * This was version 5.1.0 for a while, but I upped it to 6.0.0 beacuse it was so massive.
- * This is by and large the biggest update that TMW has ever seen. There were so many changes that I lost track of them. Many of the changes done weren't things that you should notice as a user - they are things that makes TMW much easier to expand in the future, including different icon view types aside from the standard square icon (e.g bars). These changes are not complete either - there is still work to be done before such features can be added.
- * Almost everything in TMW is now modular. The most immediate effect of this is that the main tab in the icon editor is now divided into panels for each component that is contributing to an icon. THEIR LAYOUT IS STILL EXTREMELY CUDE AND PRELIMINARY, AND WILL ALMOST CERTAINLY CHANGE BEFORE RELEASE!
- * Spell Crit is now an event that can be tracked by Combat Event icons.
- * Implemented LibDogTag as the text manager for TMW instead of TMW's current (and very limited) system. You can now create text layouts that can be applied to an icon to dictate how the texts for that icon will be displayed. Text layouts can be shared between users, and texts can be configured in a new tab on the icon editor.
+ * This is by and large the biggest update that TMW has ever seen. There were so many changes that I lost track of them. Here are a few:
+ * Full support for Mists of Pandaria. If anything is missing, please open a ticket.
+ 
+ * Almost everything in TMW is now modular. The most immediate effect of this is that the main tab in the icon editor is now divided into panels for each component that is contributing to an icon.
+ * Implemented LibDogTag as the text manager for TMW instead of TMW's old (and very limited) system. You can now create text layouts that can be applied to an icon to dictate how the texts for that icon will be displayed.
+ * You can now specify a new set of conditions that are attached to the units that an icon checks. This is the replacement for the now-removed ability to track "%u" as a unit in icon conditions.
  * You can now select any of the 4 sound channels to play sounds to (instead of just Master and SFX).
  * You can now list specific totems to be checked by totem icons.
  * Added On Left Click and On Right Click event handlers to icons.
  * You can now change the direction that icons layout in within a group.
+ * Spell Crit is now an event that can be tracked by Combat Event icons.
  
  * New Conditions:
  ** Added a condition to check if you have your mouse over a frame (group or icon).
  ** Added conditions to check if you have a certain glyph active.
  ** Added a condition to check the creature type (Undead, Humanoid, Demon, etc.) of a unit.
  
- * Bug Fixes:
- ** (r489) TellMeWhen-5.0.2.lua:528 attempt to index local "h" (a nil value)
- ** (r491) Re-re-re-re-re-re fixed meta icons that check entire groups
- ** (r492) TellMeWhen-5.0.2.lua:1080 attempt to compare nil with number //(MAYBE)//
- ** (r493) ClassColors.lua:50 Bad argument #1 to :RegisterCallback (string or function expected)
- ** (r496) TellMeWhen-5.1.0\Modules\Texts.lua:124: attempt to concatenate field "?" (a nil value)
- ** (r498) Condition "Mounted" is no longer event based because it seems that it doesn't update on UNIT_AURA all the time
- ** (r499) TellMeWhen_Options.lua:1772: "}" expected (to close "{" at line 1762) near "order"
- ** (r501) Cooldown sweeps without text shown should now always show properly after they have ran down to zero at least once
- ** (r505) The Combo Point condition should now work properly
- ** (r505) Cooldown icons should always sweep in the correct direction
- ** (r506) Combat event icons that aren't set to always show should work now
- ** (r508) Processor DOGTAGUNIT should now fire its own event instead of firing CONDITION's event
- ** (r510) TellMeWhen_Options-r509\ImportExport.lua:384: attempt to index local "editbox" (a nil value)
- ** (r512) Attempted to soothe Something bad happened! errors. If they continue to happen, please report them, as they actually indicate something is going wrong now.
- ** (r514) TellMeWhen-5.1.0.lua:5331: "for" limit must be a number
- ** (r514) TellMeWhen: Something REALLY bad happened that should not have happened. This isn't a non-critical error anymore, so please report this to Cybeloras!  a: icon  b: 
- ** (r514) string "Data Processor alpha" line 35: attempt to compare number with table
- ** (r515) Meta icons should once again always properly inherit animations
- ** (r517) Item icons should now obtain and use the correct stacks of an item more frequently (hopefully 100% of the time, actually).
- ** (r518) Added two missing localization strings
- ** (r519) AceConfigDialog-3.0\AceConfigDialog-3.0-57.lua:473: 53AceConfigRegistry-3.0-14:ValidateOptionsTable(): TMW Options.args.main.args.checks.args.DrawEdge: expected a table, got a boolean
- ** (r520) TellMeWhen-6.0.0.lua:7306: attempt to call global "IsInRaid" (a nil value)
- ** (r521) Added basic support for Monks
+ * There are many, many more changes not listed here. I recommend that you just start configuring TellMeWhen to see what all has changed.
 
 ===v5.0.2===
  * Bug Fixes:

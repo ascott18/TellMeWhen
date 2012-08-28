@@ -23,7 +23,7 @@ local CNDT = TMW.CNDT
 local Env = CNDT.Env
 
 
-local ConditionCategory = CNDT:GetCategory("ATTRIBUTES_UNIT", 2, L["CNDTCAT_ATTRIBUTES_UNIT"])
+local ConditionCategory = CNDT:GetCategory("ATTRIBUTES_UNIT", 2, L["CNDTCAT_ATTRIBUTES_UNIT"], true, false)
 
 ConditionCategory:RegisterCondition(1,	 "EXISTS", {
 	text = L["CONDITIONPANEL_EXISTS"],

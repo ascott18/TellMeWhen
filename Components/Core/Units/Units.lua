@@ -592,7 +592,7 @@ do
 			if CNDT.CurrentConditionSet == self then
 				conditionGroup.Unit:Hide()
 				if conditionGroup.TextUnitOrIcon:GetText() ~= nil then
-					conditionGroup.TextUnitDef:SetText("<ICON UNIT>")--TODO: localize
+					conditionGroup.TextUnitDef:SetText(L["UNITCONDITIONS_STATICUNIT"])
 				end
 			end
 		end,

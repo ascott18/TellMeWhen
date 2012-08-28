@@ -17,8 +17,7 @@
 		</Backdrop>
 		<Layers>
 			<Layer level="BACKGROUND">
-				<Texture name="$parentBackground" parentKey="Background" setAllPoints="true">
-				</Texture>
+				<Texture name="$parentBackground" parentKey="Background" setAllPoints="true"/>
 			</Layer>
 			<Layer level="OVERLAY">
 				<FontString name="$parentHeader" parentKey="Header" inherits="GameFontNormalSmall" justifyH="CENTER" alpha="1">
@@ -40,7 +39,8 @@
 				<Anchors>
 					<Anchor point="TOP" y="-5"/>
 					<Anchor point="LEFT" x="9" />
-					<Anchor point="RIGHT" x="-25" />
+					<!-- <Anchor point="RIGHT" x="-25" /> -->
+					<Anchor point="RIGHT" x="-9" />
 				</Anchors>
 				<Layers>
 					<Layer level="ARTWORK">
@@ -51,7 +51,7 @@
 						</FontString>
 					</Layer>
 				</Layers>
-				<Frames>
+				<!-- <Frames>
 					<Frame name="$parentEquivs" inherits="TMW_DropDownMenuTemplate" parentKey="Equivs">
 						<Anchors>
 							<Anchor point="LEFT" relativePoint="RIGHT" x="-15" y="-4"/>
@@ -68,7 +68,7 @@
 							</OnLoad>
 						</Scripts>
 					</Frame>
-				</Frames>
+				</Frames> -->
 				<Scripts>
 					<OnLoad>
 						local supplementalData
@@ -225,7 +225,8 @@
 		<Scripts>
 			<OnLoad>				
 				function self:AdjustHeight()
-					self:SetHeight(11 + self.Name:GetHeight())
+					--self:SetHeight(11 + self.Name:GetHeight())
+					TMW:AnimateHeightChange(self, 11 + self.Name:GetHeight(), 0.1)
 				end
 			</OnLoad>
 		</Scripts>
@@ -288,12 +289,12 @@
 									title = supplementalData.title or TMW.L["ICONMENU_UNITSTOWATCH"]
 									text = supplementalData.text or TMW.L["ICONMENU_UNIT_DESC"]
 									
-									TMW.SUG:EnableEditBox(self, supplementalData.SUGType or "units") --TODO: NYI (not urgent/important, though)
+									TMW.SUG:EnableEditBox(self, supplementalData.SUGType or "units")
 								else
 									title = TMW.L["ICONMENU_UNITSTOWATCH"]
 									text  = TMW.L["ICONMENU_UNIT_DESC"]
 									
-									TMW.SUG:EnableEditBox(self, "units") --TODO: NYI (not urgent/important, though)
+									TMW.SUG:EnableEditBox(self, "units")
 								end
 
 								self:SetLabels(title, text)
@@ -331,6 +332,7 @@
 				</Anchors>
 				<Scripts>
 					<OnLoad>
+						self:SetScale(0.9)
 						self:SetFrameLevel(self:GetParent():GetFrameLevel()+2)
 						self.Background:SetAlpha(0.7)
 						
@@ -382,7 +384,8 @@
 				self.Header:SetText(TMW.L["ICONMENU_UNITSTOWATCH"])
 				
 				function self:AdjustHeight()
-					self:SetHeight(18 + self.UnitConditions:GetHeight()+self.Unit:GetHeight())
+					--self:SetHeight(15 + self.UnitConditions:GetHeight()+self.Unit:GetHeight())
+					TMW:AnimateHeightChange(self, 15 + self.UnitConditions:GetHeight()+self.Unit:GetHeight(), 0.1)
 				end
 			</OnLoad>
 		</Scripts>
@@ -509,7 +512,8 @@
 	<ScrollFrame name="TellMeWhen_ScrollFrameTemplate" parentKey="ScrollFrame" virtual="true">
 		<Scripts>
 			<OnLoad>
- 
+				self.edgeScrollMouseCursorRange = 5
+				self.edgeScrollScrollDistancePerSecond = 150
 			</OnLoad>
 			<OnScrollRangeChanged>
 				if ( not yrange ) then
@@ -527,8 +531,6 @@
 				elseif self:GetVerticalScroll() > yrange then
 					self:SetVerticalScroll(yrange)
 				end
-
-
 
 				local height = self:GetHeight()
 				self.percentage = height/(yrange+height)
@@ -556,6 +558,42 @@
 				end
 				self:SetVerticalScroll(newScroll)
 			</OnMouseWheel>
+			
+			<OnUpdate>
+				if self.AllowEdgeScrolling then
+					local scale = self:GetEffectiveScale()
+					local self_top, self_bottom = self:GetTop()*scale, self:GetBottom()*scale
+					
+					local _, cursorY = GetCursorPosition()
+					
+					local absDistance_top = abs(self_top - cursorY)
+					local absDistance_bottom = abs(self_bottom - cursorY)
+					
+					local scrollStep
+					if absDistance_top > absDistance_bottom then
+						-- We are closer to the bottom of the frame
+						if self.edgeScrollMouseCursorRange > absDistance_bottom then
+							scrollStep = -self.edgeScrollScrollDistancePerSecond*elapsed
+						end
+					else
+						-- We are closer to the top of the frame
+						if self.edgeScrollMouseCursorRange > absDistance_top then
+							scrollStep = self.edgeScrollScrollDistancePerSecond*elapsed
+						end
+					end
+				
+					if scrollStep then
+						local newScroll = self:GetVerticalScroll() - scrollStep
+						
+						if 0 > newScroll then
+							newScroll = 0
+						elseif newScroll > self:GetVerticalScrollRange() then
+							newScroll = self:GetVerticalScrollRange()
+						end
+						self:SetVerticalScroll(newScroll)
+					end
+				end
+			</OnUpdate>
 		</Scripts>
 		<Frames>
 			<Frame name="$parentScrollBar" parentKey="ScrollBar" hidden="true">
@@ -603,10 +641,10 @@
 									local _, currentY = GetCursorPosition()
 									local delta = (currentY - self.startY)/self:GetEffectiveScale()
 									
-									local scrollFrame = self:GetParent():GetParent()
+									local ScrollFrame = self:GetParent():GetParent()
 									
 									
-									local maxTop = -(scrollFrame:GetHeight() - self:GetHeight())
+									local maxTop = -(ScrollFrame:GetHeight() - self:GetHeight())
 									local minTop = 0
 									
 									local newTop = (self.startHeight + delta)
@@ -616,8 +654,8 @@
 										newTop = minTop
 									end
 									
-									scrollFrame:SetVerticalScroll(-(newTop/scrollFrame.percentage))
-									self:SetPoint("TOP", scrollFrame, "TOP", 0, newTop)
+									ScrollFrame:SetVerticalScroll(-(newTop/ScrollFrame.percentage))
+									self:SetPoint("TOP", ScrollFrame, "TOP", 0, newTop)
 								end
 							</OnUpdate>
 						</Scripts>
@@ -630,11 +668,11 @@
 					</OnMouseWheel>
 					<OnMouseDown>
 						local _, y = GetCursorPosition()
-						if self.Thumb:GetBottom() > y then
+						if self.Thumb:GetBottom()*self:GetEffectiveScale() > y then
 							delta = -1
-						elseif y > self.Thumb:GetTop() then
+						elseif y > self.Thumb:GetTop()*self:GetEffectiveScale() then
 							delta = 1
-						end						
+						end
 						
 						self:GetParent():GetScript("OnMouseWheel")(self:GetParent(), delta)
 					</OnMouseDown>
@@ -1334,7 +1372,6 @@
 				<HighlightTexture urgency="5" file="Interface\Buttons\UI-Panel-MinimizeButton-Highlight" alphaMode="ADD"/>
 			</Button>
 
-
 			<Button name="$parentPlay" parentKey="Play">
 				<Size x="15" y="15"/>
 				<Anchors>
@@ -1382,15 +1419,21 @@
 				self:RegisterForDrag("LeftButton", "RightButton")
 			</OnLoad>
 			<OnDragStart>
-				self:GetParent().draggingFrame = self
-			</OnDragStart>
-			<OnDragStop>
-				self:GetParent().draggingFrame = nil
-			</OnDragStop>
-			<OnEnter>
 				local parent = self:GetParent()
 				
-				if self and parent.draggingFrame and self ~= parent.draggingFrame then
+				parent.draggingFrame = self
+				parent.ScrollFrame.AllowEdgeScrolling = true
+			</OnDragStart>
+			<OnDragStop>
+				local parent = self:GetParent()
+				
+				parent.draggingFrame = nil
+				parent.ScrollFrame.AllowEdgeScrolling = false
+			</OnDragStop>
+			<OnUpdate>
+				local parent = self:GetParent()
+				
+				if self:IsMouseOver() and parent.draggingFrame and self ~= parent.draggingFrame then
 					local selfSettings = TMW.CI.ics.Events[self:GetID()]
 					local dragSettings = TMW.CI.ics.Events[parent.draggingFrame:GetID()]
 
@@ -1399,7 +1442,8 @@
 					parent.draggingFrame = self
 					TMW.EVENTS:LoadConfig()
 				end
-			</OnEnter>
+			</OnUpdate>
+			
 			<OnClick>
 				TMW.IE:SaveSettings()
 				
@@ -1434,6 +1478,25 @@
 
 	</Button>
 
+	<Button name="TellMeWhen_EventSubComponentSelectButton" inherits="TellMeWhen_BorderedFrame" virtual="true" >
+		<Size y="12"/>
+		<Layers>
+			<Layer level="OVERLAY">
+				<FontString name="$parentName" parentKey="Name" inherits="GameFontHighlightSmall" justifyH="LEFT">
+					<Anchors>
+						<Anchor point="LEFT" x="3"/>
+						<Anchor point="RIGHT" x="-1"/>
+					</Anchors>
+				</FontString>
+			</Layer>
+		</Layers>
+		<HighlightTexture file="Interface\QuestFrame\UI-QuestLogTitleHighlight" alphaMode="ADD">
+			<Anchors>
+				<Anchor point="TOPLEFT" y="-1"/>
+				<Anchor point="BOTTOMRIGHT" y="1"/>
+			</Anchors>
+		</HighlightTexture>
+	</Button>
 
 	
 	<CheckButton name="TellMeWhen_EventSettings_CheckTemplate" inherits="TellMeWhen_CheckTemplate" virtual="true">
@@ -1452,7 +1515,7 @@
 
 	<Frame name="TellMeWhen_EventContainer" parent="TellMeWhen_IconEditorEvents" hidden="true" setAllPoints="true" virtual="true">
 		<Anchors>
-			<Anchor point="TOPLEFT" relativeTo="$parentAddEvent" relativePoint="TOPRIGHT" x="28" y="0"/>
+			<Anchor point="TOPLEFT" relativeTo="$parentAddEvent" relativePoint="TOPRIGHT" x="16" y="0"/>
 			<Anchor point="RIGHT"/>
 			<Anchor point="BOTTOM"/>
 		</Anchors>
@@ -1474,7 +1537,6 @@
 				self:RegisterForDrag("LeftButton")
 				self:Hide()
 
-				-- TODO: depricate this
 				for k, v in pairs(self) do
 					if k ~= 0 then
 						EventHandler[k] = v
@@ -1668,65 +1730,6 @@
 				</Scripts>
 			</Button>
 			
-			<Frame name="$parentHelp" parentKey="Help" inherits="GlowBoxTemplate" enableMouse="true" hidden="true" >
-				<Size x="250"/>
-				<Layers>
-					<Layer level="OVERLAY">
-						<FontString name="$parentText" parentKey="text" inherits="GameFontHighlightLeft" justifyV="TOP" >
-							<Size x="208"/>
-							<Anchors>
-								<Anchor point="TOPLEFT" x="10" y="-24"/>
-							</Anchors>
-						</FontString>
-					</Layer>
-				</Layers>
-				<Frames>
-					<Button name="$parentClose" inherits="UIPanelCloseButton">
-						<Anchors>
-							<Anchor point="TOPRIGHT" x="6" y="6"/>
-						</Anchors>
-						<Scripts>
-							<OnClick>
-								TMW.IE.Help:Hide()
-								TMW.HELP:OnClose()
-							</OnClick>
-						</Scripts>
-					</Button>
-					<Frame name="$parentArrow" parentKey="arrow" inherits="GlowBoxArrowTemplate">
-						<Anchors>
-							<Anchor point="TOPLEFT" relativePoint="TOPRIGHT"/>
-						</Anchors>
-					</Frame>
-				</Frames>
-				<Scripts>
-					<OnLoad>
-						self.current = {}
-						
-						self:SetFrameLevel(200)
-						self:SetFrameStrata("DIALOG")
-
-						local arrow = self.arrow
-						arrow:SetSize(21, 53)
-
-						arrow.arrow = _G[arrow:GetName() .. "Arrow"]
-						arrow.arrow:SetAllPoints(true)
-						arrow.arrow:SetTexCoord(0.78515625, 0.54687500, 0.99218750, 0.54687500, 0.78515625, 0.58789063, 0.99218750, 0.58789063)
-
-						arrow.glow = _G[arrow:GetName() .. "Glow"]
-						arrow.glow:SetAllPoints(true)
-						arrow.glow:SetTexCoord(0.40625000, 0.77343750, 0.66015625, 0.77343750, 0.40625000, 0.82812500, 0.66015625, 0.82812500)
-
-						self.text:SetSpacing(4)
-					</OnLoad>
-					<OnShow>
-						self:SetFrameLevel(self:GetParent():GetFrameLevel() + 10)
-					</OnShow>
-					<OnHide>
-						wipe(self.current)
-					</OnHide>
-				</Scripts>
-			</Frame>
-			
 			<Frame name="$parentMain" parentKey="Main" hidden="true">
 				<Anchors>
 					<Anchor point="TOPLEFT" y="-23"/>
@@ -1832,60 +1835,57 @@
 					<Anchor point="TOPLEFT" y="-23"/>
 					<Anchor point="BOTTOMRIGHT" y="26"/>
 				</Anchors>
-				<Frames>
-
-					<ScrollFrame name="$parentSF" parentKey="ScrollFrame" inherits="UIPanelScrollFrameCodeTemplate" >
-						<Size x="210" y="155"/>
+				<Frames>					
+					<Frame name="$parentEventList" parentKey="EventList">
+						<Size x="210" y="10"/>
 						<Anchors>
 							<Anchor point="TOPLEFT" x="12" y="-50"/>
+							<Anchor point="BOTTOM" relativePoint="LEFT" y="0"/>
 						</Anchors>
-						<Layers>
-							<Layer level="OVERLAY">
-								<FontString name="$parentHeader" inherits="GameFontNormalLarge" parentKey="Header" justifyH="LEFT" text="">
-									<Anchors>
-										<Anchor point="BOTTOM" relativePoint="TOP" y="30"/>
-									</Anchors>
-								</FontString>
-							</Layer>
-						</Layers>
-						<ScrollChild>
-							<Frame name="$parentEvents" parentKey="Events">
-								<Size x="210"/>
-								<Scripts>
-									<OnLoad>
-										self:GetParent():GetParent().Events = self
-									</OnLoad>
-								</Scripts>
-							</Frame>
-						</ScrollChild>
 						<Scripts>
 							<OnLoad>
-								self.scrollBarHideable = true
-								self.Header:SetText(TMW.L["EVENTS_HANDLERS_HEADER"])
-								self:HookScript("OnScrollRangeChanged", function()
+								self.originalParent = self:GetParent()
+								
+								TMW:ConvertContainerToScrollFrame(self, true, nil, 8)
+								
+								self.ScrollFrame.edgeScrollScrollDistancePerSecond = 100
+								
+								self.ScrollFrame:HookScript("OnScrollRangeChanged", function(self)
 									if self.adjustmentQueued then
 										TMW.EVENTS:AdjustScrollFrame()
 										self.adjustmentQueued = nil
 									end
 								end)
 							</OnLoad>
+							<OnUpdate>
+								local numChildren = #self
+								local lastShownChild
+								for i = 1, numChildren do
+									if self[i]:IsShown() then
+										lastShownChild = self[i]
+									else
+										break
+									end
+								end
+								
+								if lastShownChild then
+									if lastShownChild:GetBottom() > self.ScrollFrame:GetBottom() + 5 then
+										self.originalParent.EventSettings.ScrollFrame:SetPoint("TOP", lastShownChild, "BOTTOM", 0, -36)
+									else
+										self.originalParent.EventSettings.ScrollFrame:SetPoint("TOP", self.ScrollFrame, "BOTTOM", 0, -36)
+									end		
+								else
+									self.originalParent.EventSettings.ScrollFrame:SetPoint("TOP", self.ScrollFrame, "TOP", 0, -36)						
+								end
+							</OnUpdate>
 						</Scripts>
-						<Frames>
-							<Slider name="$parentScrollBar" inherits="MinimalScrollBarTemplate" parentKey="ScrollBar">
-								<Size x="17"/>
-								<Anchors>
-									<Anchor point="TOPLEFT" relativePoint="TOPRIGHT" y="-17"/>
-									<Anchor point="BOTTOMLEFT" relativePoint="BOTTOMRIGHT" y="17"/>
-								</Anchors>
-							</Slider>
-						</Frames>
-					</ScrollFrame>
+					</Frame>
 
 					<Button name="$parentAddEvent" inherits="TellMeWhen_BorderedFrame" parentKey="AddEvent">
 						<Size y="30"/>
 						<Anchors>
-							<Anchor point="BOTTOMLEFT" relativeTo="$parentSF" relativePoint="TOPLEFT" y="-0"/>
-							<Anchor point="BOTTOMRIGHT" relativeTo="$parentSF" relativePoint="TOPRIGHT" y="-0"/>
+							<Anchor point="BOTTOMLEFT" relativeTo="$parentEventListScrollFrame" relativePoint="TOPLEFT" y="2"/>
+							<Anchor point="BOTTOMRIGHT" relativeTo="$parentEventListScrollFrame" relativePoint="TOPRIGHT" y="2"/>
 						</Anchors>
 						<Layers>
 							<Layer level="OVERLAY">
@@ -1934,35 +1934,21 @@
 					</Button>
 
 					<Frame name="$parentEventSettings" parentKey="EventSettings">
-						<Size y="1"/>
+						<Size x="210" y="10"/>
 						<Anchors>
-							<Anchor point="TOPLEFT" relativeTo="$parentSF" relativePoint="BOTTOMLEFT" x="0" y="-9"/>
-							<Anchor point="TOPRIGHT" relativeTo="$parentSF" relativePoint="BOTTOMRIGHT" x="0" y="-9"/>
+							<Anchor point="TOP" relativeTo="$parentEventListScrollFrame" relativePoint="BOTTOM" y="-36"/>
+							<Anchor point="LEFT" relativeTo="$parentEventListScrollFrame" />
+							<Anchor point="RIGHT" relativeTo="$parentEventListScrollFrame" />
+							<Anchor point="BOTTOM" y="0"/>
 						</Anchors>
-						<Layers>
-							<Layer level="OVERLAY">
-								<FontString name="$parentHeader" inherits="GameFontNormalLarge" parentKey="Header" justifyH="CENTER">
-									<Anchors>
-										<Anchor point="TOP" y="5"/>
-									</Anchors>
-								</FontString>
-								<FontString name="$parentEventName" inherits="GameFontDisableSmall" parentKey="EventName" justifyH="CENTER">
-									<Anchors>
-										<Anchor point="TOP" relativeTo="$parentHeader" relativePoint="BOTTOM" y="0"/>
-									</Anchors>
-								</FontString>
-							</Layer>
-						</Layers>
 						<Frames>
 							<CheckButton name="$parentPassThrough" inherits="TellMeWhen_EventSettings_CheckTemplate" parentKey="PassThrough" motionScriptsWhileDisabled="true">
 								<Anchors>
-									<Anchor point="TOPLEFT" y="-23"/>
+									<Anchor point="TOPLEFT" y="-3"/>
 								</Anchors>
 								<Scripts>
 									<OnLoad>
 										self.text:SetText(TMW.L["EVENTS_SETTINGS_PASSTHROUGH"])
-										--[[local parentModule = TMW.EVENTS:GetModule(self:GetParent():GetParent():GetName():gsub("TellMeWhen_IconEditor", ""))
-										local fmt = parentModule.tabText]]
 										TMW:TT(self, "EVENTS_SETTINGS_PASSTHROUGH", "EVENTS_SETTINGS_PASSTHROUGH_DESC")
 										self.setting = "PassThrough"
 									</OnLoad>
@@ -1971,7 +1957,7 @@
 
 							<CheckButton name="$parentOnlyShown" inherits="TellMeWhen_EventSettings_CheckTemplate" parentKey="OnlyShown" motionScriptsWhileDisabled="true">
 								<Anchors>
-									<Anchor point="TOP" relativeTo="$parentPassThrough" relativePoint="BOTTOM" y="6"/>
+									<Anchor point="TOP" relativeTo="$parentPassThrough" relativePoint="BOTTOM" y="4"/>
 								</Anchors>
 								<Scripts>
 									<OnLoad>
@@ -1984,7 +1970,7 @@
 
 							<CheckButton name="$parentPassingCndt" inherits="TellMeWhen_EventSettings_CheckTemplate" parentKey="PassingCndt" motionScriptsWhileDisabled="true">
 								<Anchors>
-									<Anchor point="TOP" relativeTo="$parentOnlyShown" relativePoint="BOTTOM" y="6"/>
+									<Anchor point="TOP" relativeTo="$parentOnlyShown" relativePoint="BOTTOM" y="4"/>
 								</Anchors>
 								<Scripts>
 									<OnLoad>
@@ -1996,7 +1982,7 @@
 							</CheckButton>
 							<Frame name="$parentOperator" parentKey="Operator" inherits="TMW_DropDownMenuTemplate">
 								<Anchors>
-									<Anchor point="TOP" relativeTo="$parentPassingCndt" relativePoint="BOTTOM" x="105" y="6"/>
+									<Anchor point="TOP" relativeTo="$parentPassingCndt" relativePoint="BOTTOM" x="105" y="3"/>
 								</Anchors>
 								<Layers>
 									<Layer level="OVERLAY">
@@ -2074,7 +2060,7 @@
 
 							<CheckButton name="$parentCndtJustPassed" inherits="TellMeWhen_EventSettings_CheckTemplate" parentKey="CndtJustPassed" motionScriptsWhileDisabled="true">
 								<Anchors>
-									<Anchor point="TOP" relativeTo="$parentPassingCndt" relativePoint="BOTTOM" y="-15" x="10"/>
+									<Anchor point="TOP" relativeTo="$parentPassingCndt" relativePoint="BOTTOM" y="-15" x="8"/>
 								</Anchors>
 								<Scripts>
 									<OnLoad>
@@ -2087,7 +2073,7 @@
 
 							<Frame name="$parentIcon" parentKey="Icon" inherits="TMW_IconDropDownMenuTemplate">
 								<Anchors>
-									<Anchor point="TOPLEFT" relativeTo="$parentOnlyShown" relativePoint="BOTTOMLEFT" x="10"/>
+									<Anchor point="TOPLEFT" relativeTo="$parentOnlyShown" relativePoint="BOTTOMLEFT" x="7"/>
 								</Anchors>
 								<Scripts>
 									<OnLoad>
@@ -2102,15 +2088,46 @@
 						</Frames>
 						<Scripts>
 							<OnLoad>
-								self.Header:SetText(TMW.L["EVENTS_SETTINGS_HEADER"])
+								self.originalParent = self:GetParent()
+								TMW:ConvertContainerToScrollFrame(self, true, nil, 8)
 							</OnLoad>
+							<OnHide>
+								self.originalParent.EventSettingsHeader:Hide()
+								self.originalParent.EventSettingsEventName:Hide()
+							</OnHide>
+							<OnShow>
+								self.originalParent.EventSettingsHeader:Show()
+								self.originalParent.EventSettingsEventName:Show()
+							</OnShow>
 						</Scripts>
 					</Frame>
-
 				</Frames>
+				
+				
+				<Layers>
+					<Layer level="OVERLAY">
+						<FontString name="$parentEventListHeader" inherits="GameFontNormalLarge" parentKey="EventListHeader" justifyH="LEFT" text="">
+							<Anchors>
+								<Anchor point="BOTTOM" relativeTo="$parentEventListScrollFrame" relativePoint="TOP" y="30"/>
+							</Anchors>
+						</FontString>
+						<FontString name="$parentEventSettingsHeader" hidden="true" inherits="GameFontNormalLarge" parentKey="EventSettingsHeader" justifyH="CENTER">
+							<Anchors>
+								<Anchor point="TOP" relativeTo="$parentEventSettingsScrollFrame" y="30"/>
+							</Anchors>
+						</FontString>
+						<FontString inherits="GameFontDisableSmall" hidden="true" parentKey="EventSettingsEventName" justifyH="CENTER">
+							<Anchors>
+								<Anchor point="TOP" relativeTo="$parentEventSettingsHeader" relativePoint="BOTTOM" y="0"/>
+							</Anchors>
+						</FontString>
+					</Layer>
+				</Layers>
 				<Scripts>
 					<OnLoad>
-					--	TMW.EVENTS.frame = self
+						self.EventListHeader:SetText(TMW.L["EVENTS_HANDLERS_HEADER"])
+						self.EventSettingsHeader:SetText(TMW.L["EVENTS_SETTINGS_HEADER"])
+						
 						self:RegisterForDrag("LeftButton")
 						self:Hide()
 
@@ -2411,11 +2428,92 @@
 			</Layer>
 		</Layers>
 		<Scripts>
-			<OnLoad>
+			<OnShow>
+				self:SetScript("OnShow", nil)
+				
+				
+				
+				TMW:NewClass("IconEditor_Resizer_ScaleX_SizeY", "Resizer_Generic"){
+					tooltipText = TMW.L["RESIZE_TOOLTIP"],
+					UPD_INTV = 1,
+					tooltipTitle = TMW.L["RESIZE"],
+					
+					OnEnable = function(self)
+						self.resizeButton:Show()
+					end,
+					
+					OnDisable = function(self)
+						self.resizeButton:Hide()
+					end,	
+					
+					SizeUpdate = function(resizeButton)
+						--[[ Notes:
+						--	arg1 (self) is resizeButton
+							
+						--	The 'std_' that prefixes a lot of variables means that it is comparable with all other 'std_' variables.
+							More specifically, it means that it does not depend on the scale of either the parent nor UIParent.
+						]]
+						local self = resizeButton.module
+						
+						local parent = self.parent
+						local uiScale = UIParent:GetScale()
+						
+						local std_cursorX, std_cursorY = self:GetStandardizedCursorCoordinates()
+
+						
+						
+						-- Calculate and set new scale:
+						local std_newWidth = abs(self.std_oldLeft - std_cursorX)
+						local ratio_SizeChangeX = std_newWidth/self.std_oldWidth
+						local newScale = ratio_SizeChangeX*self.oldScale
+						newScale = max(0.4, newScale)
+						--[[
+							Holy shit. Look at this wicked sick dimensional analysis:
+							
+							std_newWidth	oldScale
+							------------- X	-------- = newScale
+							std_oldWidth	    1
+
+							'std_Width' cancels out 'std_Width', and 'old' cancels out 'old', leaving us with 'new' and 'Scale'!
+							I just wanted to make sure I explained why this shit works, because this code used to be confusing as hell
+							(which is why I am rewriting it right now)
+						]]
+
+						-- Set the scale that we just determined. This is critical because we have to parent:GetEffectiveScale()
+						-- in order to determine the proper width, which depends on the current scale of the parent.
+						parent:SetScale(newScale)
+						TMW.db.global.EditorScale = newScale
+						
+						
+						-- We have all the data needed to find the new position of the parent.
+						-- It must be recalculated because otherwise it will scale relative to where it is anchored to,
+						-- instead of being relative to the parent's top left corner, which is what it is supposed to be.
+						-- I don't remember why this calculation here works, so lets just leave it alone.
+						-- Note that it will be re-re-calculated once we are done resizing.
+						local newX = self.oldX * self.oldScale / newScale
+						local newY = self.oldY * self.oldScale / newScale
+						parent:ClearAllPoints()
+						parent:SetPoint("TOPLEFT", UIParent, "BOTTOMLEFT", newX, newY)
+						
+						
+						-- Calculate new width
+						local std_newFrameHeight = abs(std_cursorY - self.std_oldTop)
+						local newHeight = std_newFrameHeight/parent:GetEffectiveScale()
+						newHeight = max(400, newHeight)
+						newHeight = min(1200, newHeight)
+						
+						parent:SetHeight(newHeight)
+						TMW.db.global.EditorHeight = newHeight
+					end,
+				}
+
 				self.resizer = TMW.Classes.IconEditor_Resizer_ScaleX_SizeY:New(self)
 				self.resizer:Show()
 				self.resizer.resizeButton:SetScale(2)
 				
+			</OnShow>
+			<OnLoad>
+				self:SetFrameLevel(20)
 				self:RegisterForDrag("LeftButton")
 				for k, v in pairs(self) do
 					TMW.IE[k] = v

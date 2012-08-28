@@ -167,7 +167,8 @@
 				self.Header:SetText(TMW.L["CONFIGPANEL_CLEU_HEADER"])
 				
 				function self:AdjustHeight()
-					self:SetHeight(55 + self.SourceUnit:GetHeight() + self.DestUnit:GetHeight())
+					--self:SetHeight(55 + self.SourceUnit:GetHeight() + self.DestUnit:GetHeight())
+					TMW:AnimateHeightChange(self, 55 + self.SourceUnit:GetHeight() + self.DestUnit:GetHeight(), 0.1)
 				end
 			</OnLoad>
 		</Scripts>

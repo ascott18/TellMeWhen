@@ -6,7 +6,7 @@ local spellFmt = "|T%s:0|t%s"
 local function Spell(id)
 	local name, _, tex = GetSpellInfo(id)
 	if not name or not tex then
-		error("TMW: UNKNOWN SPELLID: " .. id)
+		return "?????"
 	end
 	if id == 42292 then
 		tex = "Interface\\Icons\\inv_jewelry_trinketpvp_0" .. (UnitFactionGroup("player") == "Horde" and "2" or "1")
@@ -28,6 +28,7 @@ L["HELP_ICD_NATURESGRACE"] 	  		  	= L["HELP_ICD_NATURESGRACE"]		 	 	:format(Spe
 L["CLEU_DAMAGE_SHIELD_DESC"] 	  	  	= L["CLEU_DAMAGE_SHIELD_DESC"]		 		:format(Spell(31271), Spell(30482), Spell(324))
 L["CLEU_DAMAGE_SHIELD_MISSED_DESC"]   	= L["CLEU_DAMAGE_SHIELD_MISSED_DESC"]	 	:format(Spell(31271), Spell(30482), Spell(324))
 L["CLEU_SPELL_STOLEN_DESC"]   		  	= L["CLEU_SPELL_STOLEN_DESC"]	 		 	:format(Spell(30449))
+L["SPELLCHARGES_DESC"]   			  	= L["SPELLCHARGES_DESC"]	 			 	:format(Spell(109132), Spell(115308))
 
 
 L["ICONMENU_ICD_DESC"] 	  			  	= L["ICONMENU_ICD_DESC"]		 		 	:format(L["ICONMENU_ICDTYPE"])
@@ -61,12 +62,12 @@ L["UIPANEL_GROUPSORT_visibleshown"]		= L["UIPANEL_GROUPSORT_visibleshown"]		:for
 L["UIPANEL_GROUPSORT_visibleshown_DESC"]= L["UIPANEL_GROUPSORT_visibleshown_DESC"]	:format(L["ICONALPHAPANEL_FAKEHIDDEN"])
 
 
-L["COLOR_CTA_DESC"]	 				  	= L["COLOR_CTA_DESC"]					 	:format(L["ICONMENU_SHOWTIMER"], "%s", L["ICONMENU_ALWAYS"])
-L["COLOR_COA_DESC"]	 				  	= L["COLOR_COA_DESC"]					 	:format(L["ICONMENU_SHOWTIMER"], "%s", L["ICONMENU_ALWAYS"])
-L["COLOR_CTS_DESC"]	 				  	= L["COLOR_CTS_DESC"]					 	:format(L["ICONMENU_SHOWTIMER"], "%s", L["ICONMENU_ALWAYS"])
-L["COLOR_COS_DESC"]	 				  	= L["COLOR_COS_DESC"]					 	:format(L["ICONMENU_SHOWTIMER"], "%s", L["ICONMENU_ALWAYS"])
-L["COLOR_NA_DESC"]	 				  	= L["COLOR_NA_DESC"]					 	:format("%s", L["ICONMENU_ALWAYS"])
-L["COLOR_NS_DESC"]	 				  	= L["COLOR_NS_DESC"]					 	:format("%s", L["ICONMENU_ALWAYS"])
+L["COLOR_CTA_DESC"]	 				  	= L["COLOR_CTA_DESC"]					 	:format(L["ICONMENU_SHOWTIMER"], L["ICONMENU_SHOWWHEN"])
+L["COLOR_COA_DESC"]	 				  	= L["COLOR_COA_DESC"]					 	:format(L["ICONMENU_SHOWTIMER"], L["ICONMENU_SHOWWHEN"])
+L["COLOR_CTS_DESC"]	 				  	= L["COLOR_CTS_DESC"]					 	:format(L["ICONMENU_SHOWTIMER"], L["ICONMENU_SHOWWHEN"])
+L["COLOR_COS_DESC"]	 				  	= L["COLOR_COS_DESC"]					 	:format(L["ICONMENU_SHOWTIMER"], L["ICONMENU_SHOWWHEN"])
+L["COLOR_NA_DESC"]	 				  	= L["COLOR_NA_DESC"]					 	:format(L["ICONMENU_SHOWWHEN"])
+L["COLOR_NS_DESC"]	 				  	= L["COLOR_NS_DESC"]					 	:format(L["ICONMENU_SHOWWHEN"])
 
 L["COLOR_HEADER"] 					  	= L["COLOR_HEADER"]					 		:format("%s", L["COLOR_OVERRIDEDEFAULT"])
 
@@ -87,5 +88,5 @@ L["CLEU_SOURCEUNITS_DESC"] 			  	= L["CLEU_SOURCEUNITS_DESC"] .. "\r\n\r\n" .. L
 L["CLEU_DESTUNITS_DESC"] 			  	= L["CLEU_DESTUNITS_DESC"]   .. "\r\n\r\n" .. L["ICONMENU_UNIT_DESC"]
 
 if select(4, GetBuildInfo()) >= 50000 then -- ISMOP
-	L["ICONMENU_CUSTOMTEX_DESC"] = L["ICONMENU_CUSTOMTEX_DESC"] .. "\r\n\r\n" .. "|cffff0000MISTS OF PANDARIA BETA NOTE: Blizzard has what seems to be some temporary debugging code on their end that is interfering with TMW's ability to properly detect textures. If this icon is showing with a solid green texture, and your custom texture is in WoW's root folder, then please move it into a subdirectory of WoW's root and update the setting here accordingly to allow it to work correctly. If the custom texture is set to a spell, and it is either a spell name or a spell that no longer exists, then you should try and change it to a spellID of a spell that does exist. Sorry for the inconvenience!"
+	L["ICONMENU_CUSTOMTEX_DESC"] = L["ICONMENU_CUSTOMTEX_DESC"] .. "\r\n\r\n" .. "|cffff0000MISTS OF PANDARIA NOTE: Due to changes made by Blizzard, TellMeWhen can no longer test to see if the texure you have specified is valid. If this icon is showing with a solid green texture, and your custom texture is in WoW's root folder, then please move it into a subdirectory of WoW's root and update the setting here accordingly to allow it to work correctly. If the custom texture is set to a spell, and it is either a spell name or a spell that no longer exists, then you should try and change it to a spellID of a spell that does exist. Sorry for the inconvenience!"
 end

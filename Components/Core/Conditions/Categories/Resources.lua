@@ -28,10 +28,10 @@ Env.UnitPower = UnitPower
 Env.UnitPowerMax = UnitPowerMax
 
 
-local ConditionCategory = CNDT:GetCategory("RESOURCES", 1, L["CNDTCAT_RESOURCES"])
+local ConditionCategory = CNDT:GetCategory("RESOURCES", 1, L["CNDTCAT_RESOURCES"], false, false)
 
 ConditionCategory:RegisterCondition(1,	 "HEALTH", {
-	text = HEALTH,
+	text = L["CONDITIONPANEL_PERCENT"] .. " " .. HEALTH,
 	percent = true,
 	texttable = CNDT.COMMON.percent,
 	min = 0,
@@ -47,7 +47,7 @@ ConditionCategory:RegisterCondition(1,	 "HEALTH", {
 	end,
 })
 ConditionCategory:RegisterCondition(2,	 "DEFAULT", {
-	text = L["CONDITIONPANEL_POWER"],
+	text = L["CONDITIONPANEL_PERCENT"] .. " " .. L["CONDITIONPANEL_POWER"],
 	tooltip = L["CONDITIONPANEL_POWER_DESC"],
 	percent = true,
 	texttable = CNDT.COMMON.percent,
@@ -65,7 +65,7 @@ ConditionCategory:RegisterCondition(2,	 "DEFAULT", {
 	end,
 })
 ConditionCategory:RegisterCondition(3,	 "MANA", {
-	text = MANA,
+	text = L["CONDITIONPANEL_PERCENT"] .. " " .. MANA,
 	percent = true,
 	texttable = CNDT.COMMON.percent,
 	min = 0,
@@ -81,7 +81,7 @@ ConditionCategory:RegisterCondition(3,	 "MANA", {
 	end,
 })
 ConditionCategory:RegisterCondition(4,	 "ENERGY", {
-	text = ENERGY,
+	text = L["CONDITIONPANEL_PERCENT"] .. " " .. ENERGY,
 	percent = true,
 	texttable = CNDT.COMMON.percent,
 	min = 0,
@@ -97,7 +97,7 @@ ConditionCategory:RegisterCondition(4,	 "ENERGY", {
 	end,
 })
 ConditionCategory:RegisterCondition(5,	 "RAGE", {
-	text = RAGE,
+	text = L["CONDITIONPANEL_PERCENT"] .. " " .. RAGE,
 	percent = true,
 	texttable = CNDT.COMMON.percent,
 	min = 0,
@@ -113,7 +113,7 @@ ConditionCategory:RegisterCondition(5,	 "RAGE", {
 	end,
 })
 ConditionCategory:RegisterCondition(6,	 "FOCUS", {
-	text = FOCUS,
+	text = L["CONDITIONPANEL_PERCENT"] .. " " .. FOCUS,
 	percent = true,
 	texttable = CNDT.COMMON.percent,
 	min = 0,
@@ -129,7 +129,7 @@ ConditionCategory:RegisterCondition(6,	 "FOCUS", {
 	end,
 })
 ConditionCategory:RegisterCondition(7,	 "RUNIC_POWER", {
-	text = RUNIC_POWER,
+	text = L["CONDITIONPANEL_PERCENT"] .. " " .. RUNIC_POWER,
 	percent = true,
 	texttable = CNDT.COMMON.percent,
 	min = 0,
@@ -145,7 +145,7 @@ ConditionCategory:RegisterCondition(7,	 "RUNIC_POWER", {
 	end,
 })
 ConditionCategory:RegisterCondition(8,	 "ALTPOWER", {
-	text = L["CONDITIONPANEL_ALTPOWER"],
+	text = L["CONDITIONPANEL_PERCENT"] .. " " .. L["CONDITIONPANEL_ALTPOWER"],
 	tooltip = L["CONDITIONPANEL_ALTPOWER_DESC"],
 	percent = true,
 	texttable = CNDT.COMMON.percent,
@@ -299,6 +299,21 @@ ConditionCategory:RegisterCondition(15,	 "RUNES", {
 	hidden = pclass ~= "DEATHKNIGHT",
 })
 
+ConditionCategory:RegisterCondition(15.5, "CHI", {
+	text = CHI_POWER,
+	min = 0,
+	max = 5,
+	unit = PLAYER,
+	icon = "Interface\\Icons\\ability_monk_chiwave",
+	tcoords = CNDT.COMMON.standardtcoords,
+	funcstr = [[UnitPower("player", 12) c.Operator c.Level]],
+	events = function(ConditionObject, c)
+		return
+			ConditionObject:GenerateNormalEventString("UNIT_POWER", "player")
+	end,
+	hidden = pclass ~= "MONK",
+})
+
 ConditionCategory:RegisterCondition(16,	 "COMBO", {
 	text = L["CONDITIONPANEL_COMBO"],
 	defaultUnit = "target",
@@ -330,21 +345,6 @@ ConditionCategory:RegisterCondition(17,	 "SHADOW_ORBS", {
 			ConditionObject:GenerateNormalEventString("UNIT_POWER", "player")
 	end,
 	hidden = pclass ~= "PRIEST" or not TMW.ISMOP,
-})
-
-ConditionCategory:RegisterCondition(18,	 "CHI", {
-	text = CHI_POWER,
-	min = 0,
-	max = 5,
-	unit = PLAYER,
-	icon = "Interface\\Icons\\ability_monk_chiwave",
-	tcoords = CNDT.COMMON.standardtcoords,
-	funcstr = [[UnitPower("player", 12) c.Operator c.Level]],
-	events = function(ConditionObject, c)
-		return
-			ConditionObject:GenerateNormalEventString("UNIT_POWER", "player")
-	end,
-	hidden = pclass ~= "MONK",
 })
 
 ConditionCategory:RegisterCondition(19.1, "BURNING_EMBERS", {

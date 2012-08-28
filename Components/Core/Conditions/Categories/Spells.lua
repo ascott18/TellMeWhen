@@ -66,7 +66,7 @@ function Env.ReactiveHelper(NameFirst, Checked)
 end
 
 
-local ConditionCategory = CNDT:GetCategory("SPELLSABILITIES", 4, L["CNDTCAT_SPELLSABILITIES"])
+local ConditionCategory = CNDT:GetCategory("SPELLSABILITIES", 4, L["CNDTCAT_SPELLSABILITIES"], true, false)
 
 ConditionCategory:RegisterCondition(1,	 "SPELLCD", {
 	text = L["SPELLCOOLDOWN"],
@@ -122,6 +122,29 @@ ConditionCategory:RegisterCondition(2,	 "SPELLCDCOMP", {
 		end
 	]],
 })
+ConditionCategory:RegisterCondition(2.5, "SPELLCHARGES", {
+	text = L["SPELLCHARGES"],
+	tooltip = L["SPELLCHARGES_DESC"],
+	range = 5,
+	name = function(editbox) TMW:TT(editbox, "SPELLTOCHECK", "CNDT_ONLYFIRST") editbox.label = L["SPELLTOCHECK"] end,
+	useSUG = "spell",
+	unit = PLAYER,
+	icon = "Interface\\Icons\\ability_monk_roll",
+	tcoords = CNDT.COMMON.standardtcoords,
+	Env = {
+		GetSpellCharges = GetSpellCharges,
+		GetSpellCount = GetSpellCount,
+	},
+	funcstr = [[(GetSpellCharges(c.NameFirst) or GetSpellCount(c.NameFirst)) c.Operator c.Level]],
+	events = function(ConditionObject, c)
+		return
+			ConditionObject:GenerateNormalEventString("SPELL_UPDATE_COOLDOWN"),
+			ConditionObject:GenerateNormalEventString("SPELL_UPDATE_USABLE"),
+			ConditionObject:GenerateNormalEventString("SPELL_UPDATE_CHARGES")
+	end,
+	hidden = not TMW.ISMOP,		
+})
+
 ConditionCategory:RegisterCondition(3,	 "REACTIVE", {
 	text = L["SPELLREACTIVITY"],
 	tooltip = L["REACTIVECNDT_DESC"],

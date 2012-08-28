@@ -92,7 +92,7 @@ function SND:SetupEventDisplay(eventID)
 		name = "|cff808080" .. NONE
 	end
 
-	self.Events[eventID].DataText:SetText("|cffcccccc" .. self.tabText .. ":|r " .. name)
+	self.EventList[eventID].DataText:SetText("|cffcccccc" .. self.tabText .. ":|r " .. name)
 end
 
 
@@ -229,7 +229,6 @@ function SND:SelectSound(name)
 		SND.ConfigContainer.Custom:SetText(name)
 	end
 
-	--self:SetupEventDisplay(EVENTS.currentEventID)
 	self:SetupEventDisplay(self.currentEventID)
 end
 

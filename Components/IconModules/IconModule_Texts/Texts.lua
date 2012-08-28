@@ -108,6 +108,12 @@ TMW:RegisterDatabaseDefaults{
 -- SETTINGS UPGRADES
 -- -------------------
 
+TMW:RegisterUpgrade(60038, {
+	group = function(self, gs, groupID)
+		gs.Fonts = nil
+	end
+})
+
 TMW:RegisterUpgrade(51002, {
 	-- This is the upgrade that handles the transition from TMW's ghetto text substitutions to DogTag.
 	
@@ -320,8 +326,6 @@ TMW:RegisterUpgrade(51003, {
 		
 		-- Set the new layout to the group we are upgrading.
 		self:SetLayoutToGroup(groupID, GUID)
-		
-	--	gs.Fonts = nil --TODO: don't nil this yet, i just might revert this whole system. once you get to release time, create a new upgrade to nil this
 	end,
 })
 
@@ -379,7 +383,10 @@ function TEXT:GetTextLayoutForIconID(groupID, iconID, view)
 	-- Rawget from TextLayouts to see if the layout exists.
 	local layoutSettings = GUID and rawget(TMW.db.profile.TextLayouts, GUID)
 	
+	local isFallback
 	if not layoutSettings then
+		isFallback = true
+		
 		-- If the layout doesn't exist, fall back on the default layout for the current IconView
 		local GroupDefaultsPerView = TMW.Group_Defaults.SettingsPerView
 		GUID = GroupDefaultsPerView[view] and GroupDefaultsPerView[view].TextLayout
@@ -398,7 +405,7 @@ function TEXT:GetTextLayoutForIconID(groupID, iconID, view)
 		assert(layoutSettings, ("Couldn't find default text layout with GUID %q for IconView %q"):format(GUID, view))
 	end
 	
-	return GUID, layoutSettings	
+	return GUID, layoutSettings, isFallback
 end
 
 function TEXT:GetTextLayoutForIcon(icon, view)

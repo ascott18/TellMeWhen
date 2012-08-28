@@ -21,7 +21,7 @@ local CNDT = TMW.CNDT
 local Env = CNDT.Env
 
 
-local ConditionCategory = CNDT:GetCategory("CURRENCIES", 7, L["CNDTCAT_CURRENCIES"])
+local ConditionCategory = CNDT:GetCategory("CURRENCIES", 7, L["CNDTCAT_CURRENCIES"], false, false)
 
 local currencies = {
 	-- currencies were extracted using the script in the /Scripts folder (source is wowhead)

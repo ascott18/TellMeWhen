@@ -1,0 +1,62 @@
+<Ui>
+
+	<Frame name="TellMeWhen_HelpFrame" parent="TellMeWhen_IconEditor" parentKey="Help" inherits="GlowBoxTemplate" enableMouse="true" hidden="true" >
+		<Size x="250"/>
+		<Layers>
+			<Layer level="OVERLAY">
+				<FontString name="$parentText" parentKey="text" inherits="GameFontHighlightLeft" justifyV="TOP" >
+					<Size x="208"/>
+					<Anchors>
+						<Anchor point="TOPLEFT" x="10" y="-24"/>
+					</Anchors>
+				</FontString>
+			</Layer>
+		</Layers>
+		<Frames>
+			<Button name="$parentClose" inherits="UIPanelCloseButton">
+				<Anchors>
+					<Anchor point="TOPRIGHT" x="6" y="6"/>
+				</Anchors>
+				<Scripts>
+					<OnClick>
+						self:GetParent():Hide()
+						TMW.HELP:OnClose()
+					</OnClick>
+				</Scripts>
+			</Button>
+			<Frame name="$parentArrow" parentKey="arrow" inherits="GlowBoxArrowTemplate">
+				<Anchors>
+					<Anchor point="TOPLEFT" relativePoint="TOPRIGHT"/>
+				</Anchors>
+			</Frame>
+		</Frames>
+		<Scripts>
+			<OnLoad>
+				self.current = {}
+				
+				self:SetFrameLevel(200)
+				self:SetFrameStrata("DIALOG")
+
+				local arrow = self.arrow
+				arrow:SetSize(21, 53)
+
+				arrow.arrow = _G[arrow:GetName() .. "Arrow"]
+				arrow.arrow:SetAllPoints(true)
+				arrow.arrow:SetTexCoord(0.78515625, 0.54687500, 0.99218750, 0.54687500, 0.78515625, 0.58789063, 0.99218750, 0.58789063)
+
+				arrow.glow = _G[arrow:GetName() .. "Glow"]
+				arrow.glow:SetAllPoints(true)
+				arrow.glow:SetTexCoord(0.40625000, 0.77343750, 0.66015625, 0.77343750, 0.40625000, 0.82812500, 0.66015625, 0.82812500)
+
+				self.text:SetSpacing(4)
+			</OnLoad>
+			<OnShow>
+				self:SetFrameLevel(self:GetParent():GetFrameLevel() + 10)
+			</OnShow>
+			<OnHide>
+				wipe(self.current)
+			</OnHide>
+		</Scripts>
+	</Frame>
+			
+</Ui>

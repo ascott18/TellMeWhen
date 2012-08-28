@@ -31,7 +31,7 @@ local GetPetActionInfo, GetNumTrackingTypes, GetTrackingInfo =
 	  GetPetActionInfo, GetNumTrackingTypes, GetTrackingInfo
 	  
 	  
-local ConditionCategory = CNDT:GetCategory("ATTRIBUTES_PLAYER", 3, L["CNDTCAT_ATTRIBUTES_PLAYER"])
+local ConditionCategory = CNDT:GetCategory("ATTRIBUTES_PLAYER", 3, L["CNDTCAT_ATTRIBUTES_PLAYER"], false, false)
 
 ConditionCategory:RegisterCondition(1,	 "INSTANCE", {
 	text = L["CONDITIONPANEL_INSTANCETYPE"],
@@ -260,12 +260,10 @@ if TMW.ISMOP then
 		Env = {
 			GetSpecialization = GetSpecialization
 		},
-	--	events = function(ConditionObject, c)
-	--		--TODO: probably wrong events
-	--		return
-	--			ConditionObject:GenerateNormalEventString("PLAYER_TALENT_UPDATE"),
-	--			ConditionObject:GenerateNormalEventString("ACTIVE_TALENT_GROUP_CHANGED")
-	--	end,
+		events = function(ConditionObject, c)
+			return
+				ConditionObject:GenerateNormalEventString("PLAYER_SPECIALIZATION_CHANGED")
+		end,
 	})
 else
 	ConditionCategory:RegisterCondition(8,	 "TREE", {

@@ -1,11 +1,7 @@
 <Ui>
 
-<!-- 
-<Include file="Config.xml"/>
- -->
+<Include file="ResizeButton.xml"/>
  
-<!-- 
-<Script file=""/>
- -->
-
+<Script file="Resizer_Generic.lua"/>
+ 
 </Ui>
