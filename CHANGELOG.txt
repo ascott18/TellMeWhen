@@ -1,3 +1,11 @@
+===v6.0.2===
+ * Bug fixes:
+ ** Bumped TellMeWhen_Options interface number
+ ** Fixed warlock stance suggestions
+ ** Removed paladin auras
+ ** Fixed name coloring issue
+ ** Fixed an error with range checking invalid spells
+ 
 ===v6.0.1===
  * Bug fix: Fixed positioning issues when using Masque.
  
