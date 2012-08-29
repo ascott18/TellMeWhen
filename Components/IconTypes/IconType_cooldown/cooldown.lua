@@ -26,6 +26,7 @@ local pairs =
 local OnGCD = TMW.OnGCD
 local SpellHasNoMana = TMW.SpellHasNoMana
 local print = TMW.print
+local isString = TMW.isString
 local _, pclass = UnitClass("Player")
 local SpellTextures = TMW.SpellTextures
 local mindfreeze = strlower(GetSpellInfo(47528))
@@ -167,7 +168,7 @@ local function SpellCooldown_OnUpdate(icon, time)
 				start, duration = 0, 0
 			end
 			inrange, nomana = 1
-			if RangeCheck then
+			if RangeCheck and isString[NameNameArray[i]] then
 				inrange = IsSpellInRange(NameNameArray[i], "target") or 1
 			end
 			if ManaCheck then
@@ -212,7 +213,7 @@ local function SpellCooldown_OnUpdate(icon, time)
 		end
 		
 		inrange, nomana = 1
-		if RangeCheck then
+		if RangeCheck and isString[icon.NameName] then
 			inrange = IsSpellInRange(icon.NameName, "target") or 1
 		end
 		if ManaCheck then

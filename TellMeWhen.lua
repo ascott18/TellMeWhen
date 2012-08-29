@@ -27,10 +27,10 @@ local DRData = LibStub("DRData-1.0", true)
 
 local DogTag = LibStub("LibDogTag-3.0", true)
 
-TELLMEWHEN_VERSION = "6.0.1"
+TELLMEWHEN_VERSION = "6.0.2"
 TELLMEWHEN_VERSION_MINOR = strmatch(" @project-version@", " r%d+") or ""
 TELLMEWHEN_VERSION_FULL = TELLMEWHEN_VERSION .. TELLMEWHEN_VERSION_MINOR
-TELLMEWHEN_VERSIONNUMBER = 60101 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
+TELLMEWHEN_VERSIONNUMBER = 60201 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
 if TELLMEWHEN_VERSIONNUMBER > 61001 or TELLMEWHEN_VERSIONNUMBER < 60000 then return error("YOU SCREWED UP THE VERSION NUMBER OR DIDNT CHANGE THE SAFETY LIMITS") end -- safety check because i accidentally made the version number 414069 once
 
 TELLMEWHEN_MAXROWS = 20
@@ -142,10 +142,24 @@ TMW.SpellTextures = setmetatable(
 
 TMW.isNumber = setmetatable(
 {}, {
+	__mode = "kv",
 	__index = function(t, i)
 		local o = tonumber(i) or false
 		t[i] = o
 		return o
+end})
+
+TMW.isString = setmetatable(
+{}, {
+	__mode = "kv",
+	__index = function(t, s)
+		if s == nil then
+			return false
+		else
+			local o = type(s) == "string"
+			t[s] = o
+			return o
+		end
 end})
 
 function TMW.tContains(table, item, returnNum)
@@ -240,7 +254,9 @@ function TMW.print(...)
 end
 local print = TMW.print
 function TMW:Debug(...)
-	TMW.print(format(...))
+	if TMW.debug or not TMW.Initialized then
+		TMW.print(format(...))
+	end
 end
 
 function TMW.get(value, ...)

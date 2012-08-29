@@ -118,7 +118,7 @@ function NAMES:UpdateClassColors()
 	-- GLOBALS: CUSTOM_CLASS_COLORS, RAID_CLASS_COLORS
 	for class, color in pairs(CUSTOM_CLASS_COLORS or RAID_CLASS_COLORS) do
 		if color.colorStr then
-			self.ClassColors[class] = color.colorStr
+			self.ClassColors[class] = "|c" .. color.colorStr
 		else
 			self.ClassColors[class] = ("|cff%02x%02x%02x"):format(color.r * 0xFF, color.g * 0xFF, color.b * 0xFF)
 		end

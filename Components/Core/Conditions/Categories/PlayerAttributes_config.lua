@@ -153,6 +153,8 @@ Module.stances = {
 	},
 	WARLOCK = {
 		[47241] = 	GetSpellInfo(47241),	-- Metamorphosis	
+		[103958] = 	GetSpellInfo(103958),	-- Metamorphosis (ISMOP)
+		[114168] = 	GetSpellInfo(114168),	-- Dark Apotheosis
 	},
 	MONK = {
 		[115069] = 	GetSpellInfo(115069),	-- Sturdy Ox

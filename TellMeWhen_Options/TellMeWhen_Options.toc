@@ -1,4 +1,4 @@
-﻿## Interface: 40300
+﻿## Interface: 50001
 ## Title: TellMeWhen Options
 
 ## Author: Cybeloras of Detheroc/Mal'Ganis

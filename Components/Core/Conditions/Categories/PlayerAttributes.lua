@@ -166,8 +166,8 @@ local FirstStances = {
 	ROGUE = 1784, 		-- Stealth
 	HUNTER = 82661, 	-- Aspect of the Fox
 	DEATHKNIGHT = 48263,-- Blood Presence
-	PALADIN = 19746, 	-- Concentration Aura
-	WARLOCK = 47241, 	-- Metamorphosis
+	PALADIN = TMW.ISMOP and 19746 or nil, 	-- Concentration Aura
+	WARLOCK = 103958, 	-- Metamorphosis
 	MONK = 103985, 		-- Fierce Tiger
 }
 ConditionCategory:RegisterCondition(6,	 "STANCE", {
@@ -197,9 +197,7 @@ ConditionCategory:RegisterCondition(6,	 "STANCE", {
 		GetShapeshiftForm = function()
 			-- very hackey function because of inconsistencies in blizzard's GetShapeshiftForm
 			local i = GetShapeshiftForm()
-			if pclass == "WARLOCK" and i == 2 then  --metamorphosis is index 2 for some reason
-				i = 1
-			elseif pclass == "ROGUE" and i > 1 then	--vanish and shadow dance return 3 when active, vanish returns 2 when shadow dance isnt learned. Just treat everything as stealth
+			if pclass == "ROGUE" and i > 1 then	--vanish and shadow dance return 3 when active, vanish returns 2 when shadow dance isnt learned. Just treat everything as stealth
 				i = 1
 			end
 			if i > NumShapeshiftForms then 	--many Classes return an invalid number on login, but not anymore!
@@ -256,10 +254,10 @@ if TMW.ISMOP then
 		unit = PLAYER,
 		icon = function() return select(4, GetSpecializationInfo(1)) end,
 		tcoords = CNDT.COMMON.standardtcoords,
-		funcstr = [[(GetSpecialization() or 0) c.Operator c.Level]],
 		Env = {
 			GetSpecialization = GetSpecialization
 		},
+		funcstr = [[(GetSpecialization() or 0) c.Operator c.Level]],
 		events = function(ConditionObject, c)
 			return
 				ConditionObject:GenerateNormalEventString("PLAYER_SPECIALIZATION_CHANGED")

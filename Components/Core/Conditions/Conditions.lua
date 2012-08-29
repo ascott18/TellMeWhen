@@ -34,8 +34,6 @@ local IsInInstance, GetInstanceDifficulty =
 	  IsInInstance, GetInstanceDifficulty
 local GetNumTalents, GetTalentInfo =
 	  GetNumTalents, GetTalentInfo
-local GetShapeshiftFormInfo, GetShapeshiftForm, GetNumShapeshiftForms =
-	  GetShapeshiftFormInfo, GetShapeshiftForm, GetNumShapeshiftForms
 local UnitAttackPower, UnitRangedAttackPower =
 	  UnitAttackPower, UnitRangedAttackPower
 local GetSpellCritChance =
@@ -774,7 +772,8 @@ function CNDT:GetConditionCheckFunctionString(parent, Conditions)
 			if conditionData.Env then
 				for k, v in pairs(conditionData.Env) do
 					if Env[k] ~= nil and Env[k] ~= v then
-						TMW:Error("Condition " .. t .. " tried to write values to Env different than those that were already in it. Pick different keys for its data or otherwise figure out why this happened.")
+						print(k, v, Env[k])
+						TMW:Error("Condition " .. t .. " tried to write values to Env different than those that were already in it.")
 					else
 						Env[k] = v
 					end

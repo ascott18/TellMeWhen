@@ -19,6 +19,7 @@ local GetSpellCooldown, IsSpellInRange, IsUsableSpell, GetSpellInfo, GetSpellCha
 local SpellHasNoMana = TMW.SpellHasNoMana
 local OnGCD = TMW.OnGCD
 local print = TMW.print
+local isString = TMW.isString
 local _, pclass = UnitClass("player")
 local SpellTextures = TMW.SpellTextures
 local strlowerCache = TMW.strlowerCache
@@ -142,7 +143,7 @@ local function Reactive_OnUpdate(icon, time)
 		
 		if duration then
 			inrange, CD = 1
-			if RangeCheck then
+			if RangeCheck and isString[NameNameArray[i]] then
 				inrange = IsSpellInRange(NameNameArray[i], "target") or 1
 			end
 			usable, nomana = IsUsableSpell(iName)
@@ -199,7 +200,7 @@ local function Reactive_OnUpdate(icon, time)
 			start, duration = 0, 0
 		end
 		inrange, nomana = 1
-		if RangeCheck then
+		if RangeCheck and isString[icon.NameName] then
 			inrange = IsSpellInRange(icon.NameName, "target") or 1
 		end
 		if ManaCheck then

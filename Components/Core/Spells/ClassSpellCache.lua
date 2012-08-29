@@ -171,7 +171,7 @@ local commThrowaway = {}
 
 function ClassSpellCache:OnCommReceived(prefix, text, channel, who)
 	if prefix ~= self.CONST.COMM_SLUG
-	--or who == UnitName("player")
+	or who == UnitName("player")
 	then
 		return
 	end
@@ -183,6 +183,8 @@ function ClassSpellCache:OnCommReceived(prefix, text, channel, who)
 			-- Request Class Spell Length
 			-- Only respond if the source player has not requested yet this session.
 			
+			TMW:Debug("RCSL from %s: %s", who, "")
+			
 			self:BuildClassSpellLookup()
 			self:SendCommMessage(self.CONST.COMM_SLUG, self:Serialize("CSL", ClassSpellLength), "WHISPER", who)
 			RequestedFrom[who] = true
@@ -190,6 +192,8 @@ function ClassSpellCache:OnCommReceived(prefix, text, channel, who)
 			-- Class Spell Length
 			wipe(commThrowaway)
 			local RecievedClassSpellLength = arg2
+			
+			TMW:Debug("CSL from %s: %s", who, text)
 			
 			self:BuildClassSpellLookup()
 			
@@ -204,7 +208,10 @@ function ClassSpellCache:OnCommReceived(prefix, text, channel, who)
 			
 		elseif arg1 == "RCSC" then
 			-- Request Class Spell Cache
-			-- arg2 is a list of requested classes/etc (RACIAL, PET, etc)
+			-- arg2 is a list of requested classes/etc (HUNTER, PALADIN, RACIAL, PET, etc)
+			
+			TMW:Debug("RCSC from %s: %s", who, text)
+			
 			wipe(commThrowaway)
 			for _, class in pairs(arg2) do
 				commThrowaway[class] = Cache[class]
