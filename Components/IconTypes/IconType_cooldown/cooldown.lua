@@ -63,8 +63,8 @@ Type:RegisterConfigPanel_XMLTemplate(100, "TellMeWhen_ChooseName", {
 
 Type:RegisterConfigPanel_XMLTemplate(165, "TellMeWhen_WhenChecks", {
 	text = L["ICONMENU_SHOWWHEN"],
-	[0x2] = { text = "|cFF00FF00" .. L["ICONMENU_USABLE"], 			},
-	[0x1] = { text = "|cFFFF0000" .. L["ICONMENU_UNUSABLE"], 		},
+	[0x2] = { text = "|cFF00FF00" .. L["ICONMENU_USABLE"],			},
+	[0x1] = { text = "|cFFFF0000" .. L["ICONMENU_UNUSABLE"],		},
 })
 
 Type:RegisterConfigPanel_ConstructorFunc(150, "TellMeWhen_CooldownSettings", function(self)
@@ -137,16 +137,20 @@ local function SpellCooldown_OnEvent(icon, event, unit)
 	end
 end
 
-local function SpellCooldown_OnUpdate(icon, time)
-	local n, inrange, nomana, start, duration, charges, maxCharges, stack, start_charge, duration_charge = 1
+local usableData = {}
+local unusableData = {}
+local function SpellCooldown_OnUpdate(icon, time)    
 	local IgnoreRunes, RangeCheck, ManaCheck, NameArray, NameNameArray =
 	icon.IgnoreRunes, icon.RangeCheck, icon.ManaCheck, icon.NameArray, icon.NameNameArray
 
+	local usableFound, unusableFound
+
 	for i = 1, #NameArray do
 		local iName = NameArray[i]
-		n = i
 		
+		local start, duration, charges, maxCharges, stack
 		if TMW.ISMOP then
+			local start_charge, duration_charge
 			charges, maxCharges, start_charge, duration_charge = GetSpellCharges(iName)
 			if charges then
 				if charges < maxCharges then
@@ -167,7 +171,7 @@ local function SpellCooldown_OnUpdate(icon, time)
 			if IgnoreRunes and duration == 10 and NameNameArray[i] ~= mindfreeze then
 				start, duration = 0, 0
 			end
-			inrange, nomana = 1
+			local inrange, nomana = 1
 			if RangeCheck and isString[NameNameArray[i]] then
 				inrange = IsSpellInRange(NameNameArray[i], "target") or 1
 			end
@@ -176,64 +180,65 @@ local function SpellCooldown_OnUpdate(icon, time)
 			end
 			
 			if inrange == 1 and not nomana and (duration == 0 or (charges and charges > 0) or OnGCD(duration)) then --usable
-				icon:SetInfo(
-					"alpha; texture; start, duration; charges, maxCharges; stack, stackText; spell; inRange; noMana",
-					icon.Alpha,
-					SpellTextures[iName],
-					start, duration,
-					charges, maxCharges,
-					stack, stack,
-					iName,
-					inrange,
-					nomana
-				)
-				return
-			end
-		end
-	end
-
-	local NameFirst = icon.NameFirst
-	if n > 1 then -- if there is more than 1 spell that was checked then we need to get these again for the first spell, otherwise reuse the values obtained above since they are just for the first one
-		
-		if TMW.ISMOP then
-			charges, maxCharges, start_charge, duration_charge = GetSpellCharges(NameFirst)
-			if charges then
-				if charges < maxCharges then
-					start, duration = start_charge, duration_charge
-				else
-					start, duration = GetSpellCooldown(NameFirst)
+				if not usableFound then
+					wipe(usableData)
+					usableData.alpha = icon.Alpha
+					usableData.tex = SpellTextures[iName]
+					usableData.inrange = inrange
+					usableData.nomana = nomana
+					usableData.iName = iName
+					usableData.stack = stack
+					usableData.charges = charges
+					usableData.maxCharges = maxCharges
+					usableData.start = start
+					usableData.duration = duration
+					
+					usableFound = true
+					
+					if icon.Alpha > 0 then
+						break
+					end
 				end
-				stack = charges
-			else
-				start, duration = GetSpellCooldown(NameFirst)
-				stack = GetSpellCount(NameFirst)
+			elseif not unusableFound then
+				wipe(unusableData)
+				unusableData.alpha = icon.UnAlpha
+				unusableData.tex = SpellTextures[iName]
+				unusableData.inrange = inrange
+				unusableData.nomana = nomana
+				unusableData.iName = iName
+				unusableData.stack = stack
+				unusableData.charges = charges
+				unusableData.maxCharges = maxCharges
+				unusableData.start = start
+				unusableData.duration = duration
+				
+				unusableFound = true
+				
+				if icon.Alpha == 0 then
+					break
+				end
 			end
-		else
-			start, duration = GetSpellCooldown(NameFirst)
-		end
-		
-		inrange, nomana = 1
-		if RangeCheck and isString[icon.NameName] then
-			inrange = IsSpellInRange(icon.NameName, "target") or 1
-		end
-		if ManaCheck then
-			nomana = SpellHasNoMana(NameFirst)
-		end
-		if IgnoreRunes and duration == 10 and icon.NameName ~= mindfreeze then
-			start, duration = 0, 0
 		end
 	end
-	if duration then
+	
+	local dataToUse
+	if usableFound and icon.Alpha > 0 then
+		dataToUse = usableData
+	elseif unusableFound then
+		dataToUse = unusableData
+	end
+	
+	if dataToUse then
 		icon:SetInfo(
 			"alpha; texture; start, duration; charges, maxCharges; stack, stackText; spell; inRange; noMana",
-			icon.UnAlpha,
-			icon.FirstTexture,
-			start, duration,
-			charges, maxCharges,
-			stack, stack,
-			NameFirst,
-			inrange,
-			nomana
+			dataToUse.alpha,
+			dataToUse.tex,
+			dataToUse.start, dataToUse.duration,
+			dataToUse.charges, dataToUse.maxCharges,
+			dataToUse.stack, dataToUse.stack,
+			dataToUse.iName,
+			dataToUse.inrange,
+			dataToUse.nomana
 		)
 	else
 		icon:SetInfo("alpha", 0)
@@ -246,23 +251,23 @@ function Type:Setup(icon, groupID, iconID)
 	icon.NameName = TMW:GetSpellNames(icon, icon.Name, 1, 1)
 	icon.NameArray = TMW:GetSpellNames(icon, icon.Name)
 	icon.NameNameArray = TMW:GetSpellNames(icon, icon.Name, nil, 1)
-
+	
 	if icon.NameName == strlower(GetSpellInfo(75)) and not icon.NameArray[2] then
 		icon:SetInfo("texture", GetSpellTexture(75))
 		icon.asStart = icon.asStart or 0
 		icon.asDuration = icon.asDuration or 0
-
+		
 		if not icon.RangeCheck then
 			icon:SetUpdateMethod("manual")
 		end
 		
 		icon:RegisterEvent("UNIT_SPELLCAST_SUCCEEDED")
 		icon:SetScript("OnEvent", AutoShot_OnEvent)
-
+		
 		icon:SetUpdateFunction(AutoShot_OnUpdate)
 	else
 		icon.FirstTexture = SpellTextures[icon.NameFirst]
-
+		
 		icon:SetInfo("texture; reverse", TMW:GetConfigIconTexture(icon), false)
 		
 		
@@ -273,20 +278,21 @@ function Type:Setup(icon, groupID, iconID)
 			if icon.IgnoreRunes then
 				icon:RegisterSimpleUpdateEvent("RUNE_POWER_UPDATE")
 				icon:RegisterSimpleUpdateEvent("RUNE_TYPE_UPDATE")
-			end	
+			end    
 			if icon.ManaCheck then
 				icon:RegisterSimpleUpdateEvent("UNIT_POWER_FREQUENT", "player")
 				-- icon:RegisterSimpleUpdateEvent("SPELL_UPDATE_USABLE")-- already registered
 			end
-		
+			
 			icon:SetUpdateMethod("manual")
 		end
-	
+		
 		icon:SetUpdateFunction(SpellCooldown_OnUpdate)
 	end
-
+	
 	icon:Update()
 end
 
 
 Type:Register(10)
+

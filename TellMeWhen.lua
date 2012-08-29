@@ -3633,7 +3633,7 @@ function Icon.SetUpdateMethod(icon, method)
 	elseif method == "manual" then
 		icon.NextUpdateTime = 0
 	else
-	--	error("Unknown update method " .. method)
+		error("Unknown update method " .. method)
 	end
 end
 
@@ -3805,6 +3805,7 @@ function Icon.DisableIcon(icon)
 	icon:UnregisterAllEvents()
 	icon:UnregisterAllSimpleUpdateEvents()
 	ClearScripts(icon)
+	icon:SetUpdateMethod("auto")
 	icon:SetUpdateFunction(nil)
 	icon:Hide()
 
@@ -4193,12 +4194,13 @@ TMW:NewClass("IconComponent", "GenericComponent"){
 	RegisterIconDefaults = function(self, defaults)
 		assert(type(defaults) == "table", "arg1 to RegisterIconDefaults must be a table")
 		
-		if TMW.Initialized then
-			error(("Defaults for module %q are being registered too late. They need to be registered before the database is initialized."):format(self.name))
+		if not TMW.Initialized then
+			-- Copy the defaults into the main defaults table.
+			TMW:MergeDefaultsTables(defaults, TMW.Icon_Defaults)
+		else
+			TMW:Error("Defaults for component %q (%q) are being registered too late. They need to be registered before the database is initialized.", self.name, self.className)
 		end
 		
-		-- Copy the defaults into the main defaults table.
-		TMW:MergeDefaultsTables(defaults, TMW.Icon_Defaults)
 		
 		-- Copy the defaults into defaults for this component. Used to implement relevant settings.
 		TMW:MergeDefaultsTables(defaults, self.IconSettingDefaults)
@@ -5032,6 +5034,7 @@ function IconType:Register(order)
 		-- for tweaking and recreating icon types inside of WowLua so that I don't have to change the typekey every time.
 		typekey = typekey .. " - " .. date("%X")
 		self.name = typekey
+		self.type = typekey
 	end
 
 	TMW.Types[typekey] = self -- put it in the main Types table
