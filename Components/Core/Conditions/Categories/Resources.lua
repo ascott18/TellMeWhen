@@ -185,7 +185,7 @@ ConditionCategory:RegisterCondition(11,	 "SOUL_SHARDS", {
 ConditionCategory:RegisterCondition(12,	 "HOLY_POWER", {
 	text = HOLY_POWER,
 	min = 0,
-	max = 3,
+	max = 5,
 	unit = PLAYER,
 	icon = "Interface\\Icons\\Spell_Holy_Rune",
 	tcoords = CNDT.COMMON.standardtcoords,

@@ -6,7 +6,6 @@
 -- Sweetmms of Blackrock
 -- Oozebull of Twisting Nether
 -- Oodyboo of Mug'thol
--- Oodyboo of Mug'thol
 -- Banjankri of Blackrock
 -- Predeter of Proudmoore
 -- Xenyr of Aszune
@@ -241,7 +240,7 @@ end
 
 function Type:UNIT_SPELLCAST_SUCCEEDED(event, unit, spellName, _, _, spellID)
 	local sourceGUID = UnitGUID(unit)
-	if not sourceGUID then
+	if not sourceGUID and unit ~= "npc" then
 		TMW:Error("SourceGUID for %s (%s) was bad!", unit, tostring(sourceGUID))
 	else
 		local c = Cooldowns[sourceGUID]
