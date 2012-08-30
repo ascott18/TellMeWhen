@@ -132,7 +132,7 @@ L["ICONMENU_MUSHROOMS_DESC"] = [[Tracks a %s.]]
 L["ICONMENU_MULTISTATECD"] = "Multi-state Ability"
 L["ICONMENU_MULTISTATECD_DESC"] = [[Tracks an ability with multiple states.
 
-This should be used when you want to track the multiple states and textures of a cooldown such as %s.]]
+This should be used when you want to track the multiple states and textures of a cooldown such as %s or %s.]]
 
 
 L["ICONMENU_UNITCOOLDOWN"] = "Unit Cooldown"
