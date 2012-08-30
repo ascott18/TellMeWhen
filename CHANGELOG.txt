@@ -11,6 +11,7 @@
  ** The "Show Variable text" setting should no longer cause errors
  ** Fixed the GCD spell for warriors (again)
  ** Fixed an issue with static formats and ptBR, zhCN, and zhTW.
+ ** \Core\Conditions\Categories\BuffsDebuffs.lua:56 attempt to index global 'strlowerCache' (a nil value)
  
 ===v6.0.1===
  * Bug fix: Fixed positioning issues when using Masque.
