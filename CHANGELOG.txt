@@ -1,5 +1,6 @@
 ===v6.0.2===
  * Cooldown icons should now provide much better functionality when checking multiple spells. Single-spell functionality should (hopefully) remain unchanged.
+ * Updated the name and description of the "Spell Cast Succeeded" Combat Event to reflect that it now only tracks instant cast spells.
  * Bug fixes:
  ** Bumped TellMeWhen_Options interface number
  ** Fixed warlock stance suggestions
@@ -9,6 +10,7 @@
  ** Holy power limit increased to 5
  ** The "Show Variable text" setting should no longer cause errors
  ** Fixed the GCD spell for warriors (again)
+ ** Fixed an issue with static formats and ptBR, zhCN, and zhTW.
  
 ===v6.0.1===
  * Bug fix: Fixed positioning issues when using Masque.

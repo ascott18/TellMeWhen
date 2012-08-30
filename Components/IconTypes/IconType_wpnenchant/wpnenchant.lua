@@ -97,8 +97,11 @@ local function GetWeaponEnchantName(slot)
 	local i = 1
 	while _G["TellMeWhen_ParserTextLeft" .. i] do
 		local t = _G["TellMeWhen_ParserTextLeft" .. i]:GetText()
-		if t and t ~= "" then --（） multibyte parenthesis are used in zhCN locale.
-			local r = strmatch(t, "(.+)[%(%（]%d+[^%.]*[^%d]+[%)%）]") -- should work with all locales and only get the weapon enchant name, not other things (like the weapon DPS)
+		if t and t ~= "" then
+		
+			-- （） multibyte parenthesis are used in zhCN locale.
+			-- should work with all locales and only get the weapon enchant name, not other things (like the weapon DPS)
+			local r = strmatch(t, "(.+)[%(%（]%d+[^%.]*[^%d]+[%)%）]")
 
 			if r then
 				r = strtrim(r)
