@@ -20,6 +20,7 @@ local print = TMW.print
 local CNDT = TMW.CNDT
 local Env = CNDT.Env
 local isNumber = TMW.isNumber
+local strlowerCache = TMW.strlowerCache
 
 local UnitAura = 
 	  UnitAura

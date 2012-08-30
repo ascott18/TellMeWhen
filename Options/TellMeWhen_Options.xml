@@ -1479,7 +1479,7 @@
 	</Button>
 
 	<Button name="TellMeWhen_EventSubComponentSelectButton" inherits="TellMeWhen_BorderedFrame" virtual="true" >
-		<Size y="12"/>
+		<Size y="14"/>
 		<Layers>
 			<Layer level="OVERLAY">
 				<FontString name="$parentName" parentKey="Name" inherits="GameFontHighlightSmall" justifyH="LEFT">
@@ -1651,7 +1651,7 @@
 		</Scripts>
 	</Frame>
 
-	<Frame name="TellMeWhen_IconEditor" hidden="true" movable="true" enableMouse="true" enableKeyboard="true" propagateKeyboardInput="true" frameStrata="DIALOG">
+	<Frame name="TellMeWhen_IconEditor" hidden="true" movable="true" clampedToScreen="true" enableMouse="true" enableKeyboard="true" propagateKeyboardInput="true" frameStrata="DIALOG">
 		<Size x="585" y="380"/>
 		<Anchors>
 			<Anchor point="CENTER" relativeTo="UIParent"/>
@@ -2262,11 +2262,12 @@
 						self:SetText(TMW.L["UNDO_ICON"])
 
 						local textfunc = function()
+							local ret = TMW.L["UNDO_ICON_DESC"]
 							local binding = GetBindingKey("TELLMEWHEN_ICONEDITOR_UNDO")
 							if binding then
-								binding = "(|cff7fffff" .. binding .. "|r)"
+								ret = ret .. "\r\n\r\n(|cff7fffff" .. binding .. "|r)"
 							end
-							return TMW.L["UNDO_ICON_DESC"] .. "\r\n\r\n" .. (binding or TMW.L["UNDOREDO_ICON_NOBIND"])
+							return ret
 						end
 						TMW:TT(self, "UNDO_ICON", textfunc, nil, 1)
 
@@ -2288,11 +2289,12 @@
 						self:SetText(TMW.L["REDO_ICON"])
 
 						local textfunc = function()
+							local ret = TMW.L["REDO_ICON_DESC"]
 							local binding = GetBindingKey("TELLMEWHEN_ICONEDITOR_REDO")
 							if binding then
-								binding = "(|cff7fffff" .. binding .. "|r)"
+								ret = ret .. "\r\n\r\n(|cff7fffff" .. binding .. "|r)"
 							end
-							return TMW.L["REDO_ICON_DESC"] .. "\r\n\r\n" .. (binding or TMW.L["UNDOREDO_ICON_NOBIND"])
+							return ret
 						end
 						TMW:TT(self, "REDO_ICON", textfunc, nil, 1)
 

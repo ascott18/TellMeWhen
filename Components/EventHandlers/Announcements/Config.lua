@@ -51,6 +51,7 @@ function ANN:GetChannelFrame(frameID, previousFrame)
 	return frame
 end
 
+local channelsToDisplay = {}
 function ANN:LoadSettingsForEventID(id)
 	ANN.ConfigContainer.EditBox:ClearFocus()
 
@@ -61,7 +62,7 @@ function ANN:LoadSettingsForEventID(id)
 		return
 	end
 	
-	
+	wipe(channelsToDisplay)
 	
 	
 	local ChannelList = self.ConfigContainer.ChannelList
@@ -71,8 +72,23 @@ function ANN:LoadSettingsForEventID(id)
 	local frameID = 0
 	for i, eventHandlerData in ipairs(self.NonSpecificEventHandlerData) do
 		local channelData = eventHandlerData.channelData
+		tinsert(channelsToDisplay, channelData)
+	end
+	
+	for i, GenericComponent in ipairs(CI.ic.Components) do
+		if GenericComponent.EventHandlerData then
+			for i, eventHandlerData in ipairs(GenericComponent.EventHandlerData) do
+				if eventHandlerData.eventHandler == self then
+					tinsert(channelsToDisplay, eventHandlerData.channelData)
+				end
+			end
+		end
+	end
+	
+	TMW:SortOrderedTables(channelsToDisplay)
+	
+	for frameID, channelData in ipairs(channelsToDisplay) do
 		if not get(channelData.hidden) then
-			frameID = frameID + 1
 			local frame = self:GetChannelFrame(frameID, previousFrame)
 			frame:Show()
 
@@ -85,28 +101,7 @@ function ANN:LoadSettingsForEventID(id)
 		end
 	end
 	
-	for i, GenericComponent in ipairs(CI.ic.Components) do
-		if GenericComponent.EventHandlerData then
-			for i, eventHandlerData in ipairs(GenericComponent.EventHandlerData) do
-				local channelData = eventHandlerData.channelData
-				if eventHandlerData.eventHandler == self and not get(channelData.hidden) then
-					
-					frameID = frameID + 1
-					local frame = self:GetChannelFrame(frameID, previousFrame)
-					frame:Show()
-
-					frame.channel = channelData.channel
-
-					frame.Name:SetText(channelData.text)
-					TMW:TT(frame, channelData.text, channelData.desc, 1, 1)
-
-					previousFrame = frame
-				end
-			end
-		end
-	end
-	
-	for i = frameID + 1, #ChannelList do
+	for i = #channelsToDisplay + 1, #ChannelList do
 		ChannelList[i]:Hide()
 	end
 

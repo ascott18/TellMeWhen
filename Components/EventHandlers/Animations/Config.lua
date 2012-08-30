@@ -58,15 +58,31 @@ function EventHandler:GetAnimationFrame(frameID, previousFrame)
 	return frame
 end
 
+local animationsToDisplay = {}
 function EventHandler:LoadSettingsForEventID(id)
 	local AnimationList = EventHandler.ConfigContainer.AnimationList
 	
 	local previousFrame
-	local frameID = 0
+	
+	wipe(animationsToDisplay)
 	
 	for i, eventHandlerData in ipairs(self.NonSpecificEventHandlerData) do
-		local animationData = eventHandlerData.animationData
-		frameID = frameID + 1
+		tinsert(animationsToDisplay, eventHandlerData.animationData)
+	end
+	
+	for i, GenericComponent in ipairs(CI.ic.Components) do
+		if GenericComponent.EventHandlerData then
+			for i, eventHandlerData in ipairs(GenericComponent.EventHandlerData) do
+				if eventHandlerData.eventHandler == self then
+					tinsert(animationsToDisplay, eventHandlerData.animationData)
+				end
+			end
+		end
+	end
+	
+	TMW:SortOrderedTables(animationsToDisplay)
+	
+	for frameID, animationData in ipairs(animationsToDisplay) do
 		local frame = self:GetAnimationFrame(frameID, previousFrame)
 		frame:Show()
 
@@ -79,29 +95,7 @@ function EventHandler:LoadSettingsForEventID(id)
 		previousFrame = frame
 	end
 	
-	for i, GenericComponent in ipairs(CI.ic.Components) do
-		if GenericComponent.EventHandlerData then
-			for i, eventHandlerData in ipairs(GenericComponent.EventHandlerData) do
-				if eventHandlerData.eventHandler == self then
-					local animationData = eventHandlerData.animationData
-					
-					frameID = frameID + 1
-					local frame = self:GetAnimationFrame(frameID, previousFrame)
-					frame:Show()
-
-					frame.animationData = animationData
-					frame.animation = animationData.animation
-
-					frame.Name:SetText(animationData.text)
-					TMW:TT(frame, animationData.text, animationData.desc, 1, 1)
-
-					previousFrame = frame
-				end
-			end
-		end
-	end
-	
-	for i = frameID + 1, #AnimationList do
+	for i = #animationsToDisplay + 1, #AnimationList do
 		AnimationList[i]:Hide()
 	end
 
