@@ -142,7 +142,7 @@ local function Buff_OnUpdate(icon, time)
 	local NotStealable = not icon.Stealable
 	local NAL = icon.NAL
 
-	local buffName, _, iconTexture, count, dispelType, duration, expirationTime, canSteal, id, v1, v2, v3
+	local buffName, _, iconTexture, count, dispelType, duration, expirationTime, canSteal, id, v1, v2, v3, v4
 	local useUnit
 	local d = Sort == -1 and huge or 0
 	for u = 1, #Units do
@@ -150,7 +150,7 @@ local function Buff_OnUpdate(icon, time)
 		if unitsWithExistsEvent[unit] or UnitExists(unit) then -- if unitsWithExistsEvent[unit] is true then the unit is managed by TMW's unit framework, so we dont need to check that it exists.
 			if Sort or NAL > EFF_THR then
 				for z=1, huge do --huge because i can and it breaks when there are no more buffs anyway
-					local _buffName, _, _iconTexture, _count, _dispelType, _duration, _expirationTime, _, canSteal, _, _id, _, _, _v1, _v2, _v3 = UnitAura(unit, z, Filter)
+					local _buffName, _, _iconTexture, _count, _dispelType, _duration, _expirationTime, _, canSteal, _, _id, _, _, _v1, _v2, _v3, _v4 = UnitAura(unit, z, Filter)
 					_dispelType = _dispelType == "" and "Enraged" or _dispelType -- Bug: Enraged is an empty string
 					if not _buffName then
 						break
@@ -158,19 +158,19 @@ local function Buff_OnUpdate(icon, time)
 						if Sort then
 							local _d = (_expirationTime == 0 and huge) or _expirationTime - time
 							if d*Sort < _d*Sort then
-								buffName, iconTexture, count, duration, expirationTime, id, v1, v2, v3, useUnit, d =
-								_buffName, _iconTexture, _count, _duration, _expirationTime, _id, _v1, _v2, _v3, unit, _d
+								buffName, iconTexture, count, duration, expirationTime, id, v1, v2, v3, v4, useUnit, d =
+								_buffName, _iconTexture, _count, _duration, _expirationTime, _id, _v1, _v2, _v3, _v4, unit, _d
 							end
 						else
-							buffName, iconTexture, count, duration, expirationTime, id, v1, v2, v3, useUnit =
-							_buffName, _iconTexture, _count, _duration, _expirationTime, _id, _v1, _v2, _v3, unit
+							buffName, iconTexture, count, duration, expirationTime, id, v1, v2, v3, v4, useUnit =
+							_buffName, _iconTexture, _count, _duration, _expirationTime, _id, _v1, _v2, _v3, _v4, unit
 							break
 						end
 					end
 				end
 				if Filterh and not buffName then
 					for z=1, huge do
-						local _buffName, _, _iconTexture, _count, _dispelType, _duration, _expirationTime, _, canSteal, _, _id, _, _, _v1, _v2, _v3 = UnitAura(unit, z, Filterh)
+						local _buffName, _, _iconTexture, _count, _dispelType, _duration, _expirationTime, _, canSteal, _, _id, _, _, _v1, _v2, _v3, _v4 = UnitAura(unit, z, Filterh)
 						_dispelType = _dispelType == "" and "Enraged" or _dispelType -- Bug: Enraged is an empty string
 						if not _buffName then
 							break
@@ -178,12 +178,12 @@ local function Buff_OnUpdate(icon, time)
 							if Sort then
 								local _d = (_expirationTime == 0 and huge) or _expirationTime - time
 								if d*Sort < _d*Sort then
-									buffName, iconTexture, count, duration, expirationTime, id, v1, v2, v3, useUnit, d =
-									_buffName, _iconTexture, _count, _duration, _expirationTime, _id, _v1, _v2, _v3, unit, _d
+									buffName, iconTexture, count, duration, expirationTime, id, v1, v2, v3, v4, useUnit, d =
+									_buffName, _iconTexture, _count, _duration, _expirationTime, _id, _v1, _v2, _v3, _v4, unit, _d
 								end
 							else
-								buffName, iconTexture, count, duration, expirationTime, id, v1, v2, v3, useUnit =
-								 _buffName, _iconTexture, _count, _duration, _expirationTime, _id, _v1, _v2, _v3, unit
+								buffName, iconTexture, count, duration, expirationTime, id, v1, v2, v3, v4, useUnit =
+								 _buffName, _iconTexture, _count, _duration, _expirationTime, _id, _v1, _v2, _v3, _v4, unit
 								break
 							end
 						end
@@ -198,7 +198,7 @@ local function Buff_OnUpdate(icon, time)
 					local iName = NameArray[i]
 					if DS[iName] then --Handle dispel types.
 						for z=1, huge do
-							buffName, _, iconTexture, count, dispelType, duration, expirationTime, _, canSteal, _, id, _, _, v1, v2, v3 = UnitAura(unit, z, Filter)
+							buffName, _, iconTexture, count, dispelType, duration, expirationTime, _, canSteal, _, id, _, _, v1, v2, v3, v4 = UnitAura(unit, z, Filter)
 							dispelType = dispelType == "" and "Enraged" or dispelType -- Bug: Enraged is an empty string
 							if (not buffName) or (dispelType == iName and (NotStealable or canSteal)) then
 								break
@@ -206,7 +206,7 @@ local function Buff_OnUpdate(icon, time)
 						end
 						if Filterh and not buffName then
 							for z=1, huge do
-								buffName, _, iconTexture, count, dispelType, duration, expirationTime, _, canSteal, _, id, _, _, v1, v2, v3 = UnitAura(unit, z, Filterh)
+								buffName, _, iconTexture, count, dispelType, duration, expirationTime, _, canSteal, _, id, _, _, v1, v2, v3, v4 = UnitAura(unit, z, Filterh)
 								dispelType = dispelType == "" and "Enraged" or dispelType -- Bug: Enraged is an empty string
 								if (not buffName) or (dispelType == iName and (NotStealable or canSteal)) then
 									break
@@ -215,14 +215,14 @@ local function Buff_OnUpdate(icon, time)
 						end
 					else
 						-- stealable checks here are done before breaking the loop
-						buffName, _, iconTexture, count, _, duration, expirationTime, _, canSteal, _, id, _, _, v1, v2, v3 = UnitAura(unit, NameNameArray[i], nil, Filter)
+						buffName, _, iconTexture, count, _, duration, expirationTime, _, canSteal, _, id, _, _, v1, v2, v3, v4 = UnitAura(unit, NameNameArray[i], nil, Filter)
 						if Filterh and not buffName then
-							buffName, _, iconTexture, count, _, duration, expirationTime, _, canSteal, _, id, _, _, v1, v2, v3 = UnitAura(unit, NameNameArray[i], nil, Filterh)
+							buffName, _, iconTexture, count, _, duration, expirationTime, _, canSteal, _, id, _, _, v1, v2, v3, v4 = UnitAura(unit, NameNameArray[i], nil, Filterh)
 						end
 					end
 					if buffName and id ~= iName and isNumber[iName] then
 						for z=1, huge do
-							buffName, _, iconTexture, count, _, duration, expirationTime, _, canSteal, _, id, _, _, v1, v2, v3 = UnitAura(unit, z, Filter)
+							buffName, _, iconTexture, count, _, duration, expirationTime, _, canSteal, _, id, _, _, v1, v2, v3, v4 = UnitAura(unit, z, Filter)
 							if not id or id == iName then -- and (NotStealable or canSteal) then
 									-- No reason to check stealable here.
 									-- It will be checked right before breaking the loop.
@@ -233,7 +233,7 @@ local function Buff_OnUpdate(icon, time)
 						end
 						if Filterh and not id then
 							for z=1, huge do
-								buffName, _, iconTexture, count, _, duration, expirationTime, _, canSteal, _, id, _, _, v1, v2, v3 = UnitAura(unit, z, Filterh)
+								buffName, _, iconTexture, count, _, duration, expirationTime, _, canSteal, _, id, _, _, v1, v2, v3, v4 = UnitAura(unit, z, Filterh)
 								if not id or id == iName then -- and (NotStealable or canSteal) then
 									-- No reason to check stealable here. See above.
 									break
@@ -253,15 +253,50 @@ local function Buff_OnUpdate(icon, time)
 		end
 	end
 	if buffName then
-		if icon.ShowTTText and v1 then
-			if v1 > 0 then
-				count = v1
-			elseif v2 > 0 then
-				count = v2
-			elseif v3 > 0 then
-				count = v3
+		if icon.ShowTTText then
+			if TMW.ISMOP then
+				-- This is really stupid, but there really isn't a more efficient way to do it.
+				-- As of WoW 5.0.4, there will be a boolean return at the end of UnitAura.
+				-- It could be v1, v2, v3, v4, or vN. There is no way to tell afaik, so we have to test the hard way.
+				if isNumber[v1] then
+					if v1 > 0 then
+						count = v1
+					elseif isNumber[v2] then
+						if v2 > 0 then
+							count = v2
+						elseif isNumber[v3] then
+							if v3 > 0 then
+								count = v3
+							elseif isNumber[v4] then
+								if v4 > 0 then
+									count = v4
+								else
+									count = 0
+								end
+							else
+								count = 0
+							end
+						else
+							count = 0
+						end
+					else
+						count = 0
+					end
+				else
+					count = 0
+				end
 			else
-				count = 0
+				if v1 > 0 then
+					count = v1
+				elseif v2 > 0 then
+					count = v2
+				elseif v3 > 0 then
+					count = v3
+				elseif v4 > 0 then
+					count = v4
+				else
+					count = 0
+				end
 			end
 		end
 

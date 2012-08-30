@@ -30,7 +30,7 @@ local DogTag = LibStub("LibDogTag-3.0", true)
 TELLMEWHEN_VERSION = "6.0.2"
 TELLMEWHEN_VERSION_MINOR = strmatch(" @project-version@", " r%d+") or ""
 TELLMEWHEN_VERSION_FULL = TELLMEWHEN_VERSION .. TELLMEWHEN_VERSION_MINOR
-TELLMEWHEN_VERSIONNUMBER = 60202 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
+TELLMEWHEN_VERSIONNUMBER = 60203 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
 if TELLMEWHEN_VERSIONNUMBER > 61001 or TELLMEWHEN_VERSIONNUMBER < 60000 then return error("YOU SCREWED UP THE VERSION NUMBER OR DIDNT CHANGE THE SAFETY LIMITS") end -- safety check because i accidentally made the version number 414069 once
 
 TELLMEWHEN_MAXROWS = 20
@@ -1294,7 +1294,7 @@ TMW.GCDSpells = TMW.ISMOP and {
 	ROGUE		= 1752,		-- sinister strike
 	PRIEST		= 585,		-- smite
 	DRUID		= 5176,		-- wrath
-	WARRIOR		= 103840,	-- victory rush
+	WARRIOR		= 5308,		-- execute
 	MAGE		= 44614,	-- frostfire bolt
 	WARLOCK		= 686,		-- shadow bolt
 	PALADIN		= 105361,	-- seal of command

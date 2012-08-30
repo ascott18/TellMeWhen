@@ -240,7 +240,9 @@ end
 
 function Type:UNIT_SPELLCAST_SUCCEEDED(event, unit, spellName, _, _, spellID)
 	local sourceGUID = UnitGUID(unit)
-	if not sourceGUID and unit ~= "npc" then
+	if not sourceGUID and unit ~= "npc," then
+		-- For some reason, this is firing for unit "npc," (yes, there is a comma there).
+		-- Obviously this is invalid, but if you find anything else invalid then scream about it too.
 		TMW:Error("SourceGUID for %s (%s) was bad!", unit, tostring(sourceGUID))
 	else
 		local c = Cooldowns[sourceGUID]

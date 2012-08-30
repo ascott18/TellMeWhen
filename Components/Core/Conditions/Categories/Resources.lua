@@ -383,7 +383,7 @@ ConditionCategory:RegisterCondition(19.3, "DEMONIC_FURY", {
 	unit = PLAYER,
 	icon = "Interface\\Icons\\Ability_Warlock_Eradication",
 	tcoords = CNDT.COMMON.standardtcoords,
-	funcstr = [[UnitPower("player", 15, true) c.Operator c.Level]],
+	funcstr = [[UnitPower("player", 15) c.Operator c.Level]],
 	events = function(ConditionObject, c)
 		return
 			ConditionObject:GenerateNormalEventString("UNIT_POWER", "player")
