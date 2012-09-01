@@ -23,7 +23,7 @@ local CNDT = TMW.CNDT
 local Env = CNDT.Env
 
 
-local ConditionCategory = CNDT:GetCategory("ATTRIBUTES_UNIT", 2, L["CNDTCAT_ATTRIBUTES_UNIT"], true, false)
+local ConditionCategory = CNDT:GetCategory("ATTRIBUTES_UNIT", 3, L["CNDTCAT_ATTRIBUTES_UNIT"], false, false)
 
 ConditionCategory:RegisterCondition(1,	 "EXISTS", {
 	text = L["CONDITIONPANEL_EXISTS"],
@@ -160,6 +160,10 @@ ConditionCategory:RegisterCondition(6,	 "REACT", {
 	end,
 })
 
+
+ConditionCategory:RegisterSpacer(6.5)
+
+
 Env.GetUnitSpeed = GetUnitSpeed
 ConditionCategory:RegisterCondition(7,	 "SPEED", {
 	text = L["SPEED"],
@@ -184,6 +188,10 @@ ConditionCategory:RegisterCondition(8,	 "RUNSPEED", {
 	funcstr = [[select(2, GetUnitSpeed(c.Unit))/]].. BASE_MOVEMENT_SPEED ..[[ c.Operator c.Level]],
 	-- events = absolutely no events
 })
+
+
+ConditionCategory:RegisterSpacer(8.5)
+
 
 ConditionCategory:RegisterCondition(9,	 "NAME", {
 	text = L["CONDITIONPANEL_NAME"],
@@ -313,6 +321,8 @@ ConditionCategory:RegisterCondition(13,	 "CREATURETYPE", {
 	end,
 })
 
+
+ConditionCategory:RegisterSpacer(13.5)
 
 
 local playerDungeonRoles = {

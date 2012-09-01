@@ -144,7 +144,13 @@ Module.stances = {
 		[48266] = 	GetSpellInfo(48266), 	-- Frost Presence
 		[48265] = 	GetSpellInfo(48265), 	-- Unholy Presence	
 	},
-	PALADIN = {
+	PALADIN = TMW.ISMOP and {
+		[105361] = 	GetSpellInfo(105361), 	-- Seal of Command
+		[20165] = 	GetSpellInfo(20165), 	-- Seal of Insight
+		[20164] = 	GetSpellInfo(20164),	-- Seal of Justice
+		[20154] = 	GetSpellInfo(20154), 	-- Seal of Righteousness
+		[31801] = 	GetSpellInfo(31801),	-- Seal of Truth
+	} or {
 		[19746] = 	GetSpellInfo(19746), 	-- Concentration Aura
 		[32223] = 	GetSpellInfo(32223), 	-- Crusader Aura
 		[465] = 	GetSpellInfo(465),		-- Devotion Aura

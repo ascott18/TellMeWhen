@@ -772,7 +772,6 @@ function CNDT:GetConditionCheckFunctionString(parent, Conditions)
 			if conditionData.Env then
 				for k, v in pairs(conditionData.Env) do
 					if Env[k] ~= nil and Env[k] ~= v then
-						print(k, v, Env[k])
 						TMW:Error("Condition " .. t .. " tried to write values to Env different than those that were already in it.")
 					else
 						Env[k] = v
@@ -1027,7 +1026,7 @@ function ConditionObject:RequestAutoUpdates(parent, doRequest)
 		
 		if not next(self.AutoUpdateRequests) then
 			self.doesAutoUpdate = false
-			self:UnregisterForUpdating()
+			--self:UnregisterForUpdating()
 		end
 	end
 end
@@ -1134,8 +1133,10 @@ local ConditionObjectConstructor = TMW:NewClass("ConditionObjectConstructor"){
 	end,
 	ResetModifiableConditionsBase = function(self)
 		self.ModifiableConditionsBase.n = 0
-		for k, v in ipairs(self.ModifiableConditionsBase) do
-			TMW:CopyTableInPlaceWithMeta(TMW.Icon_Defaults.Conditions, v)
+		for k, v in pairs(self.ModifiableConditionsBase) do
+			if type(k) == "number" then
+				TMW:CopyTableInPlaceWithMeta(TMW.Condition_Defaults["**"], v)
+			end
 		end
 	end,
 	GetPostUserModifiableConditions = function(self)

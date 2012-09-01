@@ -48,27 +48,27 @@ TEXT.MasqueSkinnableTexts = {
 TMW:RegisterDatabaseDefaults{
 	profile = {
 		TextLayouts = {
-			 -- Layout defaults
+			-- Layout defaults
 			["**"] = {
-				n					= 1,	-- The number of text displays that this layout handles.
-				Name				= "",	-- The name of this layout. Aesthetic only, doesn't need to be unique.
-				GUID				= "",	-- The GUID of this layout. Must be unique for all layouts. This is what the layout is keyed as in its parent table, and is how layouts are identified everywhere.
-				NoEdit				= false,-- True if the layout is a default layout and should not be modified.
+				n					= 1,		-- The number of text displays that this layout handles.
+				Name				= "",		-- The name of this layout. Aesthetic only, doesn't need to be unique.
+				GUID				= "",		-- The GUID of this layout. Must be unique for all layouts. This is what the layout is keyed as in its parent table, and is how layouts are identified everywhere.
+				NoEdit				= false,	-- True if the layout is a default layout and should not be modified.
 				
-				 -- Display defaults
+				-- Display defaults
 				["**"] = {
-					StringName		= "",
-					Name 		  	= "Arial Narrow",
-					Size 		  	= 12,
-					x 	 		  	= 0,
-					y 	 		  	= 0,
-					point 		  	= "CENTER",
-					relativePoint 	= "CENTER",
-					Outline 	  	= "THICKOUTLINE",
-					ConstrainWidth	= true,
+					StringName		= "",				-- Name of the string (user-readable)
+					Name 		  	= "Arial Narrow",	-- Name of the Font (Stupid key for this setting)
+					Size 		  	= 12,               -- Font size
+					x 	 		  	= 0,                -- Anchor setting
+					y 	 		  	= 0,                -- Anchor setting
+					point 		  	= "CENTER",         -- Anchor setting
+					relativePoint 	= "CENTER",         -- Anchor setting
+					Outline 	  	= "THICKOUTLINE",   -- Font outline
+					ConstrainWidth	= true,             -- fontString:SetWidth(icon:GetWidth())
 					
-					DefaultText		= "",
-					SkinAs			= "",
+					DefaultText		= "",               -- 
+					SkinAs			= "",               -- 
 				},
 			},
 			
@@ -107,6 +107,21 @@ TMW:RegisterDatabaseDefaults{
 -- -------------------
 -- SETTINGS UPGRADES
 -- -------------------
+
+TMW:RegisterUpgrade(60303, {
+	icon = function(self, ics)
+		-- The setting to trigger fallback on groups is nil now, not ""
+		-- (icon settings per view don't define a default TextLayout,
+		-- only groups do, so this will actually work and won't cause fallback
+		-- on defaults by setting it nil because the default is also nil)
+		
+		for viewName, settingsPerView in pairs(ics.SettingsPerView) do
+			if settingsPerView.TextLayout == "" then
+				settingsPerView.TextLayout = nil
+			end
+		end
+	end
+})
 
 TMW:RegisterUpgrade(60038, {
 	group = function(self, gs, groupID)
@@ -195,7 +210,7 @@ TMW:RegisterUpgrade(51003, {
 		
 		-- the group setting is a fallback for icons, so there is no reason to set the layout for individual icons
 		for ics in TMW:InIconSettings(groupID) do
-			ics.SettingsPerView.icon.TextLayout = ""
+			ics.SettingsPerView.icon.TextLayout = nil
 		end
 	end,
 	

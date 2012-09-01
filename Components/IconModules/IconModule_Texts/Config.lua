@@ -328,7 +328,7 @@ end
 function TEXT:TMW_ICON_PREPARE_SETTINGS_FOR_COPY(event, ics, gs)
 	for view, settingsPerView in pairs(ics.SettingsPerView) do
 		local GUID = settingsPerView.TextLayout
-		if GUID == "" then
+		if not GUID then
 			GUID = gs.SettingsPerView[view].TextLayout
 		end
 		settingsPerView.TextLayout = GUID
@@ -423,7 +423,7 @@ TMW.GroupConfigTemplate.args.main.args.TextLayout = {
 		end
 		
 		for ics in TMW:InIconSettings(groupID) do
-			ics.SettingsPerView[gs.View].TextLayout = ""
+			ics.SettingsPerView[gs.View].TextLayout = nil
 		end
 		
 		for icon in TMW:InIcons(groupID) do
@@ -550,7 +550,7 @@ local textLayoutTemplate = {
 			func = function(info)
 				local layout = findlayout(info)
 				
-				IE:NotifyChanges("textlayouts") -- MUST HAPPEN BEFORE WE NIL THE LAYOUT
+				IE:NotifyChanges("textlayouts") -- MUST HAPPEN BEFORE WE NIL THE LAYOUT (idk why)
 				TMW.db.profile.TextLayouts[layout] = nil
 				TMW:CompileOptions()
 				TMW:Update()
@@ -675,7 +675,7 @@ local textFontStringTemplate = {
 			desc = L["TEXTLAYOUTS_DEFAULTTEXT_DESC"],
 			type = "input",
 			width = "full",
-			order = 0.5,
+			order = 4,
 		},
 		font = {
 			name = L["TEXTLAYOUTS_FONTSETTINGS"],

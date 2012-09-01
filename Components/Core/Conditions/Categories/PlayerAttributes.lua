@@ -31,7 +31,7 @@ local GetPetActionInfo, GetNumTrackingTypes, GetTrackingInfo =
 	  GetPetActionInfo, GetNumTrackingTypes, GetTrackingInfo
 	  
 	  
-local ConditionCategory = CNDT:GetCategory("ATTRIBUTES_PLAYER", 3, L["CNDTCAT_ATTRIBUTES_PLAYER"], false, false)
+local ConditionCategory = CNDT:GetCategory("ATTRIBUTES_PLAYER", 2, L["CNDTCAT_ATTRIBUTES_PLAYER"], true, false)
 
 ConditionCategory:RegisterCondition(1,	 "INSTANCE", {
 	text = L["CONDITIONPANEL_INSTANCETYPE"],
@@ -102,6 +102,9 @@ ConditionCategory:RegisterCondition(2,	 "GROUP", {
 		end
 	end,
 })
+
+ConditionCategory:RegisterSpacer(2.5)
+
 ConditionCategory:RegisterCondition(3,	 "MOUNTED", {
 	text = L["CONDITIONPANEL_MOUNTED"],
 	min = 0,
@@ -158,6 +161,7 @@ TMW:RegisterCallback("TMW_GLOBAL_UPDATE", function()
 end)
 
 
+ConditionCategory:RegisterSpacer(5.5)
 
 local FirstStances = {
 	WARRIOR = 2457, 	-- Battle Stance
@@ -166,13 +170,13 @@ local FirstStances = {
 	ROGUE = 1784, 		-- Stealth
 	HUNTER = 82661, 	-- Aspect of the Fox
 	DEATHKNIGHT = 48263,-- Blood Presence
-	PALADIN = TMW.ISMOP and 19746 or nil, 	-- Concentration Aura
+	PALADIN = TMW.ISMOP and 105361 or 19746, 	-- Seal of Command/Concentration Aura
 	WARLOCK = 103958, 	-- Metamorphosis
 	MONK = 103985, 		-- Fierce Tiger
 }
 ConditionCategory:RegisterCondition(6,	 "STANCE", {
 	text = 	pclass == "HUNTER" and L["ASPECT"] or
-			pclass == "PALADIN" and L["AURA"] or
+			pclass == "PALADIN" and (TMW.ISMOP and L["SEAL"] or L["AURA"]) or
 			pclass == "DEATHKNIGHT" and L["PRESENCE"] or
 			pclass == "DRUID" and L["SHAPESHIFT"] or
 			--pclass == "WARRIOR" and L["STANCE"] or
@@ -402,7 +406,7 @@ ConditionCategory:RegisterCondition(11,	 "GLYPH", {
 	name = function(editbox) TMW:TT(editbox, "GLYPHTOCHECK", "CNDT_ONLYFIRST") editbox.label = L["GLYPHTOCHECK"] end,
 	nooperator = true,
 	useSUG = "glyphs",
-	icon = "inv_inscription_tradeskill01",
+	icon = "Interface\\Icons\\inv_inscription_tradeskill01",
 	tcoords = CNDT.COMMON.standardtcoords,
 	funcstr = [[GlyphLookup[c.NameFirst] == c.True]],
 	Env = {
@@ -429,6 +433,7 @@ ConditionCategory:RegisterCondition(11,	 "GLYPH", {
 	end,
 })
 
+ConditionCategory:RegisterSpacer(11.5)
 
 ConditionCategory:RegisterCondition(12,	 "AUTOCAST", {
 	text = L["CONDITIONPANEL_AUTOCAST"],
@@ -550,6 +555,10 @@ ConditionCategory:RegisterCondition(15,	 "PETTREE", {
 			ConditionObject:GenerateNormalEventString("UNIT_PET", "player")
 	end,
 })
+
+
+ConditionCategory:RegisterSpacer(15.5)
+
 
 Env.Tracking = {}
 function CNDT:MINIMAP_UPDATE_TRACKING()
