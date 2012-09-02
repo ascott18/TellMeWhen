@@ -2,12 +2,14 @@
  * Re-implemented the stance condition for paladin seals
  * Minor updates for some buff/debuff equivalancies. Still need help getting these completely up to date, though! If you notice something missing, please let me know!
  * You can now change the event of an event handler once it has been created.
+ * New setting for Combat Event icons - Don't Refresh.
  * Bug fixes:
  ** Fixed static formats again (ICONMENU_MULTISTATECD_DESC)
  ** (Condition ROLE): attempt to index global "roles" (a nil value)
  ** Buff/debuff duration sorting actually works now!
  ** TellMeWhen_Options.lua:3351: attempt to index local "settingsUsedByEvent" (a nil value)
  ** Announcements.lua:531: attempt to concatenate local "Text" (a nil value)
+ ** Leader of the Pack should now be properly checked by the IncreasedCrit equivalency
  
 ===v6.0.2===
  * Cooldown icons should now provide much better functionality when checking multiple spells. Single-spell functionality should (hopefully) remain unchanged.
