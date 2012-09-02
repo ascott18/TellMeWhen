@@ -162,7 +162,10 @@ function ANN:HandleEvent(icon, eventSettings)
 
 		if chandata.handler then
 			Text = DogTag:Evaluate(Text, "TMW;Unit", ANN.kwargs)
-			chandata.handler(icon, eventSettings, Text)
+			if Text then
+				-- DogTag returns nil if the result is an empty string.
+				chandata.handler(icon, eventSettings, Text)
+			end
 		elseif Text and chandata.isBlizz then
 			local Location = eventSettings.Location
 			Text = Text:gsub("Name", "nameforceuncolored")

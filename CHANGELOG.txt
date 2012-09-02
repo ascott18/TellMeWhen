@@ -7,6 +7,7 @@
  ** (Condition ROLE): attempt to index global "roles" (a nil value)
  ** Buff/debuff duration sorting actually works now!
  ** TellMeWhen_Options.lua:3351: attempt to index local "settingsUsedByEvent" (a nil value)
+ ** Announcements.lua:531: attempt to concatenate local "Text" (a nil value)
  
 ===v6.0.2===
  * Cooldown icons should now provide much better functionality when checking multiple spells. Single-spell functionality should (hopefully) remain unchanged.

@@ -54,6 +54,7 @@ Type:RegisterIconDefaults{
 	DestUnit 				= "",
 	SourceFlags				= 0xFFFFFFFF,
 	DestFlags				= 0xFFFFFFFF,
+	CLEUNoRefresh			= false,
 	CLEUDur					= 5,
 	CLEUEvents 				= {
 		["*"] 				= false
@@ -78,9 +79,11 @@ Type:RegisterIconEvent(61, "OnCLEUEvent", {
 	desc = L["SOUND_EVENT_ONCLEU_DESC"],
 })
 
+
 TMW:RegisterCallback("TMW_GLOBAL_UPDATE", function()
 	pGUID = UnitGUID("player")
 end)
+
 
 local EnvironmentalTextures = {
 	DROWNING = "Interface\\Icons\\Spell_Shadow_DemonBreath",
@@ -105,6 +108,10 @@ local EventsWithoutSpells = {
 
 local function CLEU_OnEvent(icon, _, t, event, h, sourceGUID, sourceName, sourceFlags, sourceRaidFlags, destGUID, destName, destFlags, destRaidFlags, arg1, arg2, arg3, arg4, arg5, ...)
 
+	if icon.CLEUNoRefresh and icon.attributes.duration > 0 then
+		return
+	end
+	
 	if event == "SPELL_MISSED" and arg4 == "REFLECT" then
 		-- make a fake event for spell reflects
 		event = "SPELL_REFLECT"
@@ -304,6 +311,7 @@ local function CLEU_OnEvent(icon, _, t, event, h, sourceGUID, sourceName, source
 	end
 end
 
+
 local function CLEU_OnUpdate(icon, time)
 	local attributes = icon.attributes
 	local start = attributes.start
@@ -325,6 +333,7 @@ local function CLEU_OnUpdate(icon, time)
 
 	--icon.LastUpdate = time -- sometimes we call this function whenever the hell we want ("OnEvent"), so at least have the decency to delay the next update (nevermind, might cause weird event behav)
 end
+
 
 function Type:Setup(icon, groupID, iconID)
 	icon.NameHash = icon.Name ~= "" and TMW:GetSpellNames(icon, icon.Name, nil, nil, 1)
@@ -364,6 +373,9 @@ end
 Type:Register(200)
 
 
+
+local DogTag = LibStub("LibDogTag-3.0", true)
+
 local Processor = TMW.Classes.IconDataProcessor:New("CLEU_SOURCEUNIT", "sourceUnit, sourceGUID")
 function Processor:CompileFunctionSegment(t)
 	-- GLOBALS: sourceUnit, sourceGUID
@@ -378,27 +390,6 @@ function Processor:CompileFunctionSegment(t)
 	end
 	--]]
 end
-
-local Processor = TMW.Classes.IconDataProcessor:New("CLEU_DESTUNIT", "destUnit, destGUID")
-function Processor:CompileFunctionSegment(t)
-	-- GLOBALS: destUnit, destGUID
-	t[#t+1] = [[
-
-	if attributes.destUnit ~= destUnit or attributes.destGUID ~= destGUID then
-		attributes.destUnit = destUnit
-		attributes.destGUID = destGUID
-
-		TMW:Fire(CLEU_DESTUNIT.changedEvent, icon, destUnit, destGUID)
-		doFireIconUpdated = true
-	end
-	--]]
-end
-
-local Processor = TMW.Classes.IconDataProcessor:New("CLEU_EXTRASPELL", "extraSpell")
--- Processor:CompileFunctionSegment(t) is default.
-
-
-local DogTag = LibStub("LibDogTag-3.0", true)
 DogTag:AddTag("TMW", "Source", {
 	code = function (groupID, iconID)
 		local icon = TMW[groupID][iconID]
@@ -422,6 +413,21 @@ DogTag:AddTag("TMW", "Source", {
 	example = ('[Source] => "target"; [Source(4, 5)] => "Cybeloras"; [Source:Name] => "Kobold"; [Source(4, 5):Name] => %q'):format(TMW.NAMES:TryToAcquireName("player", true)),
 	category = L["ICON"],
 })
+
+local Processor = TMW.Classes.IconDataProcessor:New("CLEU_DESTUNIT", "destUnit, destGUID")
+function Processor:CompileFunctionSegment(t)
+	-- GLOBALS: destUnit, destGUID
+	t[#t+1] = [[
+
+	if attributes.destUnit ~= destUnit or attributes.destGUID ~= destGUID then
+		attributes.destUnit = destUnit
+		attributes.destGUID = destGUID
+
+		TMW:Fire(CLEU_DESTUNIT.changedEvent, icon, destUnit, destGUID)
+		doFireIconUpdated = true
+	end
+	--]]
+end
 DogTag:AddTag("TMW", "Destination", {
 	code = function (groupID, iconID)
 		local icon = TMW[groupID][iconID]
@@ -445,6 +451,9 @@ DogTag:AddTag("TMW", "Destination", {
 	example = ('[Destination] => "target"; [Destination(4, 5)] => "Cybeloras"; [Destination:Name] => "Kobold"; [Destination(4, 5):Name] => %q'):format(TMW.NAMES:TryToAcquireName("player", true)),
 	category = L["ICON"],
 })
+
+local Processor = TMW.Classes.IconDataProcessor:New("CLEU_EXTRASPELL", "extraSpell")
+-- Processor:CompileFunctionSegment(t) is default.
 DogTag:AddTag("TMW", "Extra", {
 	code = function (groupID, iconID, link)
 		local icon = TMW[groupID][iconID]
