@@ -47,6 +47,7 @@ Type:UsesAttributes("texture")
 Type:SetModuleAllowance("IconModule_PowerBar_Overlay", true)
 
 Type:RegisterIconDefaults{
+	Sort					= false,
 	Unit					= "player", 
 	BuffOrDebuff			= "HELPFUL", 
 	Stealable				= false,     
