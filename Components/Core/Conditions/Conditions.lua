@@ -919,7 +919,10 @@ function ConditionObject:CompileUpdateFunction()
 	end
 
 	self.UpdateMethod = "OnEvent" --DEBUG: COMMENTING THIS LINE FORCES ALL CONDITIONS TO BE ONUPDATE DRIVEN
-
+	if TMW.db.profile.DEBUG_ForceAutoUpdate then
+		self.UpdateMethod = "OnUpdate"
+	end
+	
 	-- Begin creating the final string that will be used to make the function.
 	local funcstr = [[
 	if not event then

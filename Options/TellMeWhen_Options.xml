@@ -1412,6 +1412,15 @@
 					<TexCoords left="0.3125" right="0.625" top="0.3" bottom="0.71857"/>
 				</HighlightTexture>
 			</Button>
+		
+			<Frame name="$parentDD" parentKey="DD" inherits="TMW_DropDownMenuTemplate" hidden="true">
+				<Scripts>
+					<OnLoad>
+						self.wrapTooltips = 1
+						self.initialize = TMW.EVENTS.ChangeEvent_Dropdown
+					</OnLoad>
+				</Scripts>
+			</Frame>
 		</Frames>
 		<Scripts>
 			<OnLoad>
@@ -1444,12 +1453,20 @@
 				end
 			</OnUpdate>
 			
+			<OnMouseUp>
+				-- This is handled in OnMouseUp so that it will still fire when the button is disabled.
+				if button == "RightButton" then
+					ToggleDropDownMenu(1, nil, self.DD, self, 0, 0)
+				end
+			</OnMouseUp>
 			<OnClick>
-				TMW.IE:SaveSettings()
-				
-				local Module = TMW.EVENTS:GetEventHandlerForEventSettings(self:GetID())
-				if Module then
-					Module:LoadSettingsForEventID(self:GetID())
+				if button ~= "RightButton" then
+					TMW.IE:SaveSettings()
+					
+					local EventHandler = TMW.EVENTS:GetEventHandlerForEventSettings(self:GetID())
+					if EventHandler then
+						EventHandler:LoadSettingsForEventID(self:GetID())
+					end
 				end
 			</OnClick>
 			<OnDisable>
@@ -1907,10 +1924,7 @@
 								<Scripts>
 									<OnLoad>
 										self.wrapTooltips = 1
-										function self:Init()
-											UIDropDownMenu_Initialize(self, TMW.EVENTS.AddEvent_Dropdown, "DROPDOWN")
-											self.Init = function() end
-										end
+										self.initialize = TMW.EVENTS.AddEvent_Dropdown
 									</OnLoad>
 								</Scripts>
 							</Frame>
@@ -1921,7 +1935,6 @@
 								TMW:TT(self, "EVENTS_HANDLERS_ADD", "EVENTS_HANDLERS_ADD_DESC")
 							</OnLoad>
 							<OnClick>
-								self.DD:Init()
 								ToggleDropDownMenu(1, nil, self.DD, self, 0, 0)
 							</OnClick>
 						</Scripts>

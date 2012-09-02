@@ -1241,7 +1241,11 @@ L["SOUND_EVENT_ONRIGHTCLICK_DESC"] = [[This event triggers when you |cff7fffffRi
 
 L["SOUND_EVENT_GLOBALDESC"] = "Events are checked from top to bottom in this list. If an event is triggered that has a sound to play, no events below that event will play a sound."
 L["SOUND_EVENT_DISABLEDFORTYPE"] = "Not available"
-L["SOUND_EVENT_DISABLEDFORTYPE_DESC"] = "This event is not available for %q type icons."
+L["SOUND_EVENT_DISABLEDFORTYPE_DESC2"] = [[This event is not available for the current icon configuration.
+
+This is probably due to this event not being available for the current icon type (%s).
+
+|cff7fffffRight-click|r to change event.]]
 
 L["SOUND_SOUNDTOPLAY"] = "Sound to Play"
 L["SOUND_CUSTOM"] = "Custom sound file"
@@ -1260,8 +1264,9 @@ L["EVENTS_TAB"] = "Events"
 L["EVENTS_HANDLERS_HEADER"] = "Icon Event Handlers"
 L["EVENTS_HANDLERS_ADD"] = "Add Event Handler..."
 L["EVENTS_HANDLERS_ADD_DESC"] = "|cff7fffffClick|r to choose an event handler to add to this icon."
-L["EVENTS_HANDLERS_GLOBAL_DESC"] = [[|cff7fffffClick|r for event handler options.
-|cff7fffffClick-and-drag|r to rearrange.]]
+L["EVENTS_HANDLERS_GLOBAL_DESC"] = [[|cff7fffffClick|r for event handler options
+|cff7fffffRight-click|r to change event
+|cff7fffffClick-and-drag|r to rearrange]]
 L["EVENTS_HANDLERS_PLAY"] = "Test Event"
 L["EVENTS_HANDLERS_PLAY_DESC"] = "|cff7fffffClick|r to test the event handler"
 

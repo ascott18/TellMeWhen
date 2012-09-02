@@ -3348,7 +3348,7 @@ function EVENTS:SetupEventSettings()
 		EventSettings.Operator.ValueLabel		:SetFontObject(GameFontHighlight)
 		EventSettings.Operator					:Enable()
 		EventSettings.Value						:Enable()
-		if not settingsUsedByEvent.CndtJustPassed == "FORCE" then
+		if settingsUsedByEvent and not settingsUsedByEvent.CndtJustPassed == "FORCE" then
 			EventSettings.CndtJustPassed		:Enable()
 		end
 	else
@@ -3457,12 +3457,8 @@ function EVENTS:AddEvent_Dropdown()
 
 			info.text = get(eventData.text)
 			info.tooltipTitle = get(eventData.text)
-			if info.disabled then
-				info.tooltipText = L["SOUND_EVENT_DISABLEDFORTYPE_DESC"]:format(Types[CI.ics.Type].name)
-			else
-				info.tooltipText = get(eventData.desc)
-			end
-			info.tooltipWhileDisabled = true
+			info.tooltipText = get(eventData.desc)
+			
 			info.tooltipOnButton = true
 
 			info.value = eventData.event
@@ -3512,6 +3508,48 @@ function EVENTS:AddEvent_Dropdown_OnClick(event, type)
 	if Module then
 		Module:LoadSettingsForEventID(n)
 	end
+
+	CloseDropDownMenus()
+end
+
+function EVENTS:ChangeEvent_Dropdown()
+	if UIDROPDOWNMENU_MENU_LEVEL == 1 then
+		EVENTS:BuildListOfValidEvents()
+		
+		local eventButton = self:GetParent()
+		
+		for _, eventData in ipairs(EVENTS.ValidEvents) do
+			local info = UIDropDownMenu_CreateInfo()
+
+			info.text = get(eventData.text)
+			info.tooltipTitle = get(eventData.text)
+			info.tooltipText = get(eventData.desc)
+			
+			info.tooltipOnButton = true
+
+			info.value = eventData.event
+			info.checked = eventData.event == eventButton.event
+			info.func = EVENTS.ChangeEvent_Dropdown_OnClick
+			info.keepShownOnClick = false
+			info.arg1 = eventButton
+			info.arg2 = eventData.event
+
+			UIDropDownMenu_AddButton(info, UIDROPDOWNMENU_MENU_LEVEL)
+		end
+	end
+end
+function EVENTS:ChangeEvent_Dropdown_OnClick(eventButton, event)
+	local n = eventButton:GetID()
+	local EventSettings = CI.ics.Events[n]
+
+	EventSettings.Event = event
+
+	local eventData = TMW.EventList[event]
+	if eventData and eventData.applyDefaultsToSetting then
+		eventData.applyDefaultsToSetting(EventSettings)
+	end
+
+	EVENTS:LoadConfig()
 
 	CloseDropDownMenus()
 end
@@ -3595,7 +3633,7 @@ function EVENTS:EnableAndDisableEvents()
 			else
 				frame:Disable()
 				frame.DataText:SetText(L["SOUND_EVENT_DISABLEDFORTYPE"])
-				TMW:TT(frame, frame.eventData.text, L["SOUND_EVENT_DISABLEDFORTYPE_DESC"]:format(Types[CI.ics.Type].name), 1, 1)
+				TMW:TT(frame, frame.eventData.text, L["SOUND_EVENT_DISABLEDFORTYPE_DESC2"]:format(Types[CI.ics.Type].name), 1, 1)
 
 				if oldID == i then
 					oldID = oldID + 1
