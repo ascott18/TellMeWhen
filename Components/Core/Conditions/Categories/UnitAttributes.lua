@@ -345,7 +345,7 @@ ConditionCategory:RegisterCondition(14,	 "ROLE", {
 		playerDungeonRoles = playerDungeonRoles,
 		UnitGroupRolesAssigned = UnitGroupRolesAssigned,
 	},
-	funcstr = [[(roles[UnitGroupRolesAssigned(c.Unit)] or 1) c.Operator c.Level]],
+	funcstr = [[(playerDungeonRoles[UnitGroupRolesAssigned(c.Unit)] or 1) c.Operator c.Level]],
 	events = function(ConditionObject, c)
 		-- the unit change events should actually cover many of the changes (at least for party and raid units, but roles only exist in party and raid anyway.)
 		return

@@ -1,3 +1,10 @@
+===v6.0.3===
+ * Re-implemented the stance condition for paladin seals
+ * Minor updates for some buff/debuff equivalancies. Still need help getting these completely up to date, though! If you notice something missing, please let me know!
+ * Bug fixes:
+ ** Fixed static formats again (ICONMENU_MULTISTATECD_DESC)
+ ** (Condition ROLE): attempt to index global "roles" (a nil value)
+ 
 ===v6.0.2===
  * Cooldown icons should now provide much better functionality when checking multiple spells. Single-spell functionality should (hopefully) remain unchanged.
  * Updated the name and description of the "Spell Cast Succeeded" Combat Event to reflect that it now only tracks instant cast spells.
