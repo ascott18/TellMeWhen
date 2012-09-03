@@ -26,7 +26,7 @@
 			<EditBox name="$parentCLEUDur" parentKey="CLEUDur" inherits="TellMeWhen_TimeEditBoxTemplate">
 				<Anchors>
 					<Anchor point="TOP" relativeTo="$parentCLEUEvents" relativePoint="BOTTOM" y="3"/>
-					<Anchor point="LEFT" relativeTo="$parentCLEUEvents" relativePoint="LEFT" x="20" />
+					<Anchor point="LEFT" x="5" />
 				</Anchors>
 				<Layers>
 					<Layer level="ARTWORK">
@@ -185,6 +185,7 @@
 				self.Header:SetText(TMW.L["CONFIGPANEL_CLEU_HEADER"])
 				
 				TMW.IE:DistributeFrameAnchorsLaterally(self, 2, self.CLEUDur, self.CLEUNoRefresh)
+				self.CLEUDur:SetPoint("LEFT", 8, 0)
 				
 				self.CLEUNoRefresh:ConstrainLabel(self, "RIGHT")
 

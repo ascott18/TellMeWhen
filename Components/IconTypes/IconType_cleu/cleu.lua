@@ -107,10 +107,13 @@ local EventsWithoutSpells = {
 }
 
 local function CLEU_OnEvent(icon, _, t, event, h, sourceGUID, sourceName, sourceFlags, sourceRaidFlags, destGUID, destName, destFlags, destRaidFlags, arg1, arg2, arg3, arg4, arg5, ...)
+	
 
-	if icon.CLEUNoRefresh and icon.attributes.duration > 0 then
-		print(icon, "RETURNED")
-		return
+	if icon.CLEUNoRefresh then
+		local attributes = icon.attributes
+		if TMW.time - attributes.start < attributes.duration then
+			return
+		end
 	end
 	
 	if event == "SPELL_MISSED" and arg4 == "REFLECT" then
