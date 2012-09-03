@@ -231,19 +231,19 @@ function CONFIG:Menus_SetTexts()
 
 	local n = CONFIG:CountDisabledBits(TMW.CI.ics.SourceFlags)
 	if n ~= 0 then
-		n = " |cFFFF5959(" .. n .. ")|r"
+		n = "|cFFFF5959(" .. n .. ")|r "
 	else
-		n = " (" .. n .. ")"
+		n = "(" .. n .. ") "
 	end
-	UIDropDownMenu_SetText(TellMeWhen_CLEUOptions.SourceFlags, L["CLEU_FLAGS_SOURCE"] .. n)
+	UIDropDownMenu_SetText(TellMeWhen_CLEUOptions.SourceFlags, n .. L["CLEU_FLAGS_SOURCE"])
 
 	local n = CONFIG:CountDisabledBits(TMW.CI.ics.DestFlags)
 	if n ~= 0 then
-		n = " |cFFFF5959(" .. n .. ")|r"
+		n = "|cFFFF5959(" .. n .. ")|r "
 	else
-		n = " (" .. n .. ")"
+		n = "(" .. n .. ") "
 	end
-	UIDropDownMenu_SetText(TellMeWhen_CLEUOptions.DestFlags, L["CLEU_FLAGS_DEST"] .. n)
+	UIDropDownMenu_SetText(TellMeWhen_CLEUOptions.DestFlags, n .. L["CLEU_FLAGS_DEST"])
 end
 
 

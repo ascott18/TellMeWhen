@@ -2916,6 +2916,8 @@ function TMW:Import(editbox, settings, version, type, ...)
 
 		TMW:Update()
 		IE:Load(1)
+		
+		TMW:Print(L["IMPORT_SUCCESSFUL"])
 	else
 		TMW:Print(L["IMPORTERROR_INVALIDTYPE"])
 	end

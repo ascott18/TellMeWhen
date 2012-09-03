@@ -24,6 +24,8 @@ L["ENABLINGOPT"] = "TellMeWhen_Options is disabled. Enabling..."
 L["CONFIGMODE"] = "TellMeWhen is in configuration mode. Icons will not be functional until you leave configuration mode. Type '/tellmewhen' or '/tmw' to toggle configuration mode on and off."
 L["CONFIGMODE_EXIT"] = "Exit config mode"
 L["CONFIGMODE_NEVERSHOW"] = "Don't show again"
+L["IMPORT_SUCCESSFUL"] = "Import successful!"
+L["IMPORTERROR_INVALIDTYPE"] = "Attempted to import data of an unknown type. Check to see if you have the latest version of TellMeWhen installed."
 L["IMPORTERROR_FAILEDPARSE"] = "There was an error processing the string. Ensure that you copied the entire string from the source."
 L["ERROR_MISSINGFILE"] = [[A complete restart of WoW is required to use TellMeWhen %s:
 
@@ -366,6 +368,8 @@ L["ICONMENU_IGNORERUNES_DESC"] = "Check this to treat the cooldown as usable if 
 L["ICONMENU_IGNORERUNES_DESC_DISABLED"] = "You must enable the \"Cooldown check\" setting to enable the \"Ignore Runes\" setting."
 L["ICONMENU_DONTREFRESH"] = "Don't Refresh"
 L["ICONMENU_DONTREFRESH_DESC"] = "Check to force the cooldown to not reset if the trigger occurs while it is still counting down."
+L["ICONMENU_CLEU_NOREFRESH"] = "Don't Refresh"
+L["ICONMENU_CLEU_NOREFRESH_DESC"] = "Check to cause the icon to ignore events that happen while the icon's timer is active."
 
 L["SORTBY"] = "Prioritize"
 L["SORTBYNONE"] = "Normally"
@@ -1533,7 +1537,7 @@ L["CLEU_COMBATLOG_OBJECT_REACTION_FRIENDLY_DESC"] = "Check to exclude units that
 L["CLEU_COMBATLOG_OBJECT_REACTION_MASK"] = "Unit Reaction"
 
 L["CLEU_COMBATLOG_OBJECT_AFFILIATION_OUTSIDER"] = "Controller Relationship: Outsiders"
-L["CLEU_COMBATLOG_OBJECT_AFFILIATION_OUTSIDER_DESC"] = "Check to exclude units that are controlled by someone who is grouped with you."
+L["CLEU_COMBATLOG_OBJECT_AFFILIATION_OUTSIDER_DESC"] = "Check to exclude units that are controlled by someone who not is grouped with you."
 L["CLEU_COMBATLOG_OBJECT_AFFILIATION_RAID"] = "Controller Relationship: Raid Members"
 L["CLEU_COMBATLOG_OBJECT_AFFILIATION_RAID_DESC"] = "Check to exclude units that are controlled by someone who is in your raid group."
 L["CLEU_COMBATLOG_OBJECT_AFFILIATION_PARTY"] = "Controller Relationship: Party Members"

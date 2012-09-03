@@ -11,7 +11,7 @@
 				<Scripts>
 					<OnLoad>
 						self.wrapTooltips = 1
-						UIDropDownMenu_SetWidth(self, 150)
+						UIDropDownMenu_SetWidth(self, 249)
 						self.initialize = TMW.Types.cleu.CONFIG.EventMenu
 						UIDropDownMenu_SetText(self, TMW.L["CLEU_EVENTS"])
 						self.Button:HookScript("OnClick", function(self)
@@ -25,7 +25,8 @@
 			
 			<EditBox name="$parentCLEUDur" parentKey="CLEUDur" inherits="TellMeWhen_TimeEditBoxTemplate">
 				<Anchors>
-					<Anchor point="LEFT" relativeTo="$parentCLEUEvents" relativePoint="RIGHT" x="0" y="4"/>
+					<Anchor point="TOP" relativeTo="$parentCLEUEvents" relativePoint="BOTTOM" y="3"/>
+					<Anchor point="LEFT" relativeTo="$parentCLEUEvents" relativePoint="LEFT" x="20" />
 				</Anchors>
 				<Layers>
 					<Layer level="ARTWORK">
@@ -55,10 +56,27 @@
 				</Scripts>
 			</EditBox>
 
+			<CheckButton name="$parentCLEUNoRefresh" inherits="TellMeWhen_CheckTemplate" parentKey="CLEUNoRefresh">
+				<Anchors>
+					<Anchor point="LEFT" relativeTo="$parentCLEUDur" relativePoint="RIGHT" x="2" y="-1"/>
+				</Anchors>
+				<Scripts>
+					<OnLoad>
+						self:SetFrameLevel(self:GetFrameLevel() + 2) -- sometimes it ends up under the type dropdown which makes half of the checkbox unclickable
+					
+						TMW.IE:CreateSettingFrameFromData(self, {
+							setting = "CLEUNoRefresh",
+							title = TMW.L["ICONMENU_CLEU_NOREFRESH"],
+							tooltip = TMW.L["ICONMENU_CLEU_NOREFRESH_DESC"],
+						})
+					</OnLoad>
+				</Scripts>
+			</CheckButton>
+			
 			<EditBox name="$parentSourceUnit" inherits="TellMeWhen_UnitEditbox" parentKey="SourceUnit">
 				<Anchors>
-					<Anchor point="TOPLEFT" relativeTo="$parentCLEUEvents" relativePoint="BOTTOMLEFT" x="22" y="1"/>
-					<Anchor point="RIGHT" x="-135"/>
+					<Anchor point="TOPLEFT" relativeTo="$parentCLEUDur" relativePoint="BOTTOMLEFT" x="0" y="-10"/>
+					<Anchor point="RIGHT" x="-125"/>
 				</Anchors>
 				<Scripts>
 					<OnLoad>
@@ -95,7 +113,7 @@
 				<Scripts>
 					<OnLoad>
 						self.wrapTooltips = 1
-						UIDropDownMenu_SetWidth(self, 110)
+						UIDropDownMenu_SetWidth(self, 100)
 						self.initialize = TMW.Types.cleu.CONFIG.FlagsMenu
 						self.flagSet = "SourceFlags" -- the setting name, basically
 						UIDropDownMenu_SetText(self, TMW.L["CLEU_FLAGS_SOURCE"])
@@ -148,7 +166,7 @@
 				<Scripts>
 					<OnLoad>
 						self.wrapTooltips = 1
-						UIDropDownMenu_SetWidth(self, 110)
+						UIDropDownMenu_SetWidth(self, 100)
 						self.initialize = TMW.Types.cleu.CONFIG.FlagsMenu
 						self.flagSet = "DestFlags" -- the setting name, basically
 						UIDropDownMenu_SetText(self, TMW.L["CLEU_FLAGS_DEST"])
@@ -166,9 +184,16 @@
 			<OnLoad>
 				self.Header:SetText(TMW.L["CONFIGPANEL_CLEU_HEADER"])
 				
+				TMW.IE:DistributeFrameAnchorsLaterally(self, 2, self.CLEUDur, self.CLEUNoRefresh)
+				
+				self.CLEUNoRefresh:ConstrainLabel(self, "RIGHT")
+
+				self.CLEUDur.text2:SetPoint("RIGHT", self.CLEUNoRefresh, "LEFT")
+				self.CLEUDur.text2:SetHeight(30)
+				
 				function self:AdjustHeight()
-					--self:SetHeight(55 + self.SourceUnit:GetHeight() + self.DestUnit:GetHeight())
-					TMW:AnimateHeightChange(self, 55 + self.SourceUnit:GetHeight() + self.DestUnit:GetHeight(), 0.1)
+					--self:SetHeight(75 + self.SourceUnit:GetHeight() + self.DestUnit:GetHeight())
+					TMW:AnimateHeightChange(self, 75 + self.SourceUnit:GetHeight() + self.DestUnit:GetHeight(), 0.1)
 				end
 			</OnLoad>
 		</Scripts>

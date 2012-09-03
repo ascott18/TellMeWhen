@@ -109,6 +109,7 @@ local EventsWithoutSpells = {
 local function CLEU_OnEvent(icon, _, t, event, h, sourceGUID, sourceName, sourceFlags, sourceRaidFlags, destGUID, destName, destFlags, destRaidFlags, arg1, arg2, arg3, arg4, arg5, ...)
 
 	if icon.CLEUNoRefresh and icon.attributes.duration > 0 then
+		print(icon, "RETURNED")
 		return
 	end
 	
@@ -117,9 +118,8 @@ local function CLEU_OnEvent(icon, _, t, event, h, sourceGUID, sourceName, source
 		event = "SPELL_REFLECT"
 
 		-- swap the source and the destination
-		local a, b, c, d = sourceGUID, sourceName, sourceFlags, sourceRaidFlags
-		sourceGUID, sourceName, sourceFlags, sourceRaidFlags = destGUID, destName, destFlags, destRaidFlags
-		destGUID, destName, destFlags, destRaidFlags = a, b, c, d
+		sourceGUID, sourceName, sourceFlags, sourceRaidFlags,    destGUID, destName, destFlags, destRaidFlags =
+		destGUID, destName, destFlags, destRaidFlags,    sourceGUID, sourceName, sourceFlags, sourceRaidFlags
 	elseif event == "SPELL_INTERRUPT" then
 		-- fake an event that allow filtering based on the spell that caused an interrupt rather than the spell that was interrupted.
 		-- fire it in addition to, not in place of, SPELL_INTERRUPT
