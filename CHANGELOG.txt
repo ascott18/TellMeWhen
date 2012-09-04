@@ -10,6 +10,7 @@
  ** TellMeWhen_Options.lua:3351: attempt to index local "settingsUsedByEvent" (a nil value)
  ** Announcements.lua:531: attempt to concatenate local "Text" (a nil value)
  ** Leader of the Pack should now be properly checked by the IncreasedCrit equivalency
+ ** Fixed a major flaw with importing profiles from backup or from other profiles in the db
  
 ===v6.0.2===
  * Cooldown icons should now provide much better functionality when checking multiple spells. Single-spell functionality should (hopefully) remain unchanged.

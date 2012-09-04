@@ -93,7 +93,7 @@ function profile:Import_ImportData(editbox, data, version, noOverwrite)
 		end
 
 		-- put the data in the profile (no reason to CTIPWM when we can just do this) and set the profile
-		TMW.db.profiles[newname] = data
+		TMW.db.profiles[newname] = CopyTable(data)
 		TMW.db:SetProfile(newname)
 	else
 		TMW.db:ResetProfile()

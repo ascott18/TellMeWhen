@@ -329,7 +329,10 @@ function TEXT:TMW_ICON_PREPARE_SETTINGS_FOR_COPY(event, ics, gs)
 	for view, settingsPerView in pairs(ics.SettingsPerView) do
 		local GUID = settingsPerView.TextLayout
 		if not GUID then
-			GUID = gs.SettingsPerView[view].TextLayout
+			local GUID_group = gs.SettingsPerView[view].TextLayout
+			if GUID_group ~= TMW.approachTable(TMW.Group_Defaults, "SettingsPerView", view, "TextLayout") then
+				GUID = GUID_group
+			end
 		end
 		settingsPerView.TextLayout = GUID
 	end
