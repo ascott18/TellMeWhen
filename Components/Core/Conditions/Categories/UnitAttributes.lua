@@ -414,6 +414,9 @@ ConditionCategory:RegisterCondition(18,	 "THREATRAW", {
 	texttable = CNDT.COMMON.percent,
 	icon = "Interface\\Icons\\spell_misc_emotionhappy",
 	tcoords = CNDT.COMMON.standardtcoords,
+	Env = {
+		UnitDetailedThreatSituation = UnitDetailedThreatSituation,
+	},
 	funcstr = [[(select(4, UnitDetailedThreatSituation("player", c.Unit)) or 0) c.Operator c.Level]],
 	-- events = absolutely no events
 })

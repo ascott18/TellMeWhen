@@ -149,7 +149,7 @@ function Type:Setup(icon, groupID, iconID)
 
 	if icon:IsBeingEdited() == 1 then
 		-- icon.Slot was just obtained by the OnEvent method call
-		if icon.Slot == 0 and originalNameFirst and originalNameFirst ~= "" then
+		if icon.Slot == 0 and originalNameFirst and originalNameFirst ~= "" and TellMeWhen_ChooseName then
 			TMW.HELP:Show("ICON_MS_NOTFOUND", icon, TellMeWhen_ChooseName, 0, 0, L["HELP_MS_NOFOUND"], TMW:RestoreCase(originalNameFirst))
 		else
 			TMW.HELP:Hide("ICON_MS_NOTFOUND")
