@@ -1326,7 +1326,11 @@ L["CHAT_MSG_CHANNEL"] = "Chat Channel"
 L["CHAT_MSG_CHANNEL_DESC"] = "Will output to a chat channel, such as Trade, or a custom channel that you have joined."
 
 
-L["CHAT_FRAME"] = "Chat/Message Frame"
+L["CHAT_FRAME"] = "Chat Frame"
+L["RAID_WARNING_FAKE"] = "Raid Warning (Fake)"
+L["RAID_WARNING_FAKE_DESC"] = "Outputs a message as a raid warning, but nobody else will see it, and you do not have to be in a raid or have raid warning privelages"
+L["ERRORS_FRAME"] = "Errors Frame"
+L["ERRORS_FRAME_DESC"] = "Outputs the text to the standard errors frame that normally displays messages such as %q"
 
 
 

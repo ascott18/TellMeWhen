@@ -4,6 +4,7 @@
  * You can now change the event of an event handler once it has been created.
  * New setting for Combat Event icons - Don't Refresh.
  * Added Raid Finder to the Instance Type condition.
+ * You can now output text to the UI Errors Frame
  * Bug fixes:
  ** Fixed static formats again (ICONMENU_MULTISTATECD_DESC)
  ** (Condition ROLE): attempt to index global "roles" (a nil value)

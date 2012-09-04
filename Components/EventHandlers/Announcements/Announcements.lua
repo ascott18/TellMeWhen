@@ -55,6 +55,17 @@ ANN:RegisterEventDefaults{
 	Size 	  		= 0,
 }
 
+TMW:RegisterUpgrade(60312, {
+	icon = function(self, ics)
+		for _, eventSettings in TMW:InNLengthTable(ics.Events) do
+			if eventSettings.Channel == "FRAME" and eventSettings.Location == "RaidWarningFrame" then
+				eventSettings.Channel = "RAID_WARNING_FAKE"
+				eventSettings.Location = ""
+			end
+		end
+	end,
+})
+
 TMW:RegisterUpgrade(60014, {
 	-- I just discovered that announcements use a boolean "Icon" event setting for the "Show icon texture" setting
 	-- that conflicts with another event setting. Try to salvage what we can.
@@ -212,44 +223,36 @@ ANN:RegisterEventHandlerDataNonSpecific(0, "", {
 })
 ANN:RegisterEventHandlerDataNonSpecific(10, "SAY", {
 	text = CHAT_MSG_SAY,
-	channel = "SAY",
 	isBlizz = 1,
 })
 ANN:RegisterEventHandlerDataNonSpecific(12, "YELL", {
 	text = CHAT_MSG_YELL,
-	channel = "YELL",
 	isBlizz = 1,
 })
 ANN:RegisterEventHandlerDataNonSpecific(14, "WHISPER", {
 	text = WHISPER,
-	channel = "WHISPER",
 	isBlizz = 1,
 	editbox = 1,
 })
 ANN:RegisterEventHandlerDataNonSpecific(16, "PARTY", {
 	text = CHAT_MSG_PARTY,
-	channel = "PARTY",
 	isBlizz = 1,
 })
 ANN:RegisterEventHandlerDataNonSpecific(20, "RAID", {
 	text = CHAT_MSG_RAID,
-	channel = "RAID",
 	isBlizz = 1,
 })
 ANN:RegisterEventHandlerDataNonSpecific(22, "RAID_WARNING", {
 	text = CHAT_MSG_RAID_WARNING,
-	channel = "RAID_WARNING",
 	isBlizz = 1,
 })
 ANN:RegisterEventHandlerDataNonSpecific(24, "BATTLEGROUND", {
 	text = CHAT_MSG_BATTLEGROUND,
-	channel = "BATTLEGROUND",
 	isBlizz = 1,
 })
 ANN:RegisterEventHandlerDataNonSpecific(30, "SMART", {
 	text = L["CHAT_MSG_SMART"],
 	desc = L["CHAT_MSG_SMART_DESC"],
-	channel = "SMART",
 	isBlizz = 1, -- flagged to not use override %t and %f substitutions, and also not to try and color any names
 	handler =
 	TMW.ISMOP and
@@ -281,7 +284,6 @@ ANN:RegisterEventHandlerDataNonSpecific(30, "SMART", {
 ANN:RegisterEventHandlerDataNonSpecific(40, "CHANNEL", {
 	text = L["CHAT_MSG_CHANNEL"],
 	desc = L["CHAT_MSG_CHANNEL_DESC"],
-	channel = "CHANNEL",
 	isBlizz = 1, -- flagged to not use override %t and %f substitutions, and also not to try and color any names
 	defaultlocation = function() return select(2, GetChannelList()) end,
 	dropdown = function()
@@ -322,39 +324,24 @@ ANN:RegisterEventHandlerDataNonSpecific(40, "CHANNEL", {
 })
 ANN:RegisterEventHandlerDataNonSpecific(50, "GUILD", {
 	text = CHAT_MSG_GUILD,
-	channel = "GUILD",
 	isBlizz = 1,
 })
 ANN:RegisterEventHandlerDataNonSpecific(52, "OFFICER", {
 	text = CHAT_MSG_OFFICER,
-	channel = "OFFICER",
 	isBlizz = 1,
 })
 ANN:RegisterEventHandlerDataNonSpecific(60, "EMOTE", {
 	text = CHAT_MSG_EMOTE,
-	channel = "EMOTE",
 	isBlizz = 1,
 })
 
-local bullshitTable = {}
 ANN:RegisterEventHandlerDataNonSpecific(70, "FRAME", {
 	-- GLOBALS: DEFAULT_CHAT_FRAME, FCF_GetChatWindowInfo
 	text = L["CHAT_FRAME"],
-	channel = "FRAME",
 	icon = 1,
 	color = 1,
 	defaultlocation = function() return DEFAULT_CHAT_FRAME.name end,
 	dropdown = function()
-
-		local name = "RaidWarningFrame"
-		local info = UIDropDownMenu_CreateInfo()
-		info.func = TMW.ANN.Location_DropDown_OnClick
-		info.text = L[name]
-		info.arg1 = L[name]
-		info.value = name
-		info.checked = name == TMW.ANN:GetEventSettings().Location
-		UIDropDownMenu_AddButton(info, UIDROPDOWNMENU_MENU_LEVEL)
-
 		local i = 1
 		while _G["ChatFrame"..i] do
 			local _, _, _, _, _, _, shown, _, docked = FCF_GetChatWindowInfo(i);
@@ -372,11 +359,6 @@ ANN:RegisterEventHandlerDataNonSpecific(70, "FRAME", {
 		end
 	end,
 	ddtext = function(value)
-		-- also a verification function
-		if value == "RaidWarningFrame" then
-			return L[value]
-		end
-
 		local i = 1
 		while _G["ChatFrame"..i] do
 			if _G["ChatFrame"..i].name == value then
@@ -392,23 +374,54 @@ ANN:RegisterEventHandlerDataNonSpecific(70, "FRAME", {
 			Text = "|T" .. (icon.attributes.texture or "") .. ":0|t " .. Text
 		end
 
-		-- GLOBALS: RaidWarningFrame, RaidNotice_AddMessage
-		if _G[Location] == RaidWarningFrame then
-			-- workaround: blizzard's code doesnt manage colors correctly when there are 2 messages being displayed with different colors.
-			Text = ("|cff%02x%02x%02x"):format(data.r * 0xFF, data.g * 0xFF, data.b * 0xFF) .. Text .. "|r"
-
-			RaidNotice_AddMessage(RaidWarningFrame, Text, bullshitTable) -- arg3 still demands a valid table for the color info, even if it is empty
-		else
-			local i = 1
-			while _G["ChatFrame"..i] do
-				local frame = _G["ChatFrame"..i]
-				if Location == frame.name then
-					frame:AddMessage(Text, data.r, data.g, data.b, 1)
-					break
-				end
-				i = i+1
+		local i = 1
+		while _G["ChatFrame"..i] do
+			local frame = _G["ChatFrame"..i]
+			if Location == frame.name then
+				frame:AddMessage(Text, data.r, data.g, data.b, 1)
+				break
 			end
+			i = i+1
 		end
+	end,
+})
+
+local bullshitTable = {}
+ANN:RegisterEventHandlerDataNonSpecific(71, "RAID_WARNING_FAKE", {
+	text = L["RAID_WARNING_FAKE"],
+	desc = L["RAID_WARNING_FAKE_DESC"],
+	icon = 1,
+	color = 1,
+	handler = function(icon, data, Text)
+		local Location = data.Location
+
+		if data.ShowIconTex then
+			Text = "|T" .. (icon.attributes.texture or "") .. ":0|t " .. Text
+		end
+
+		-- GLOBALS: RaidWarningFrame, RaidNotice_AddMessage
+		
+		-- workaround: blizzard's code doesnt manage colors correctly when there are 2 messages being displayed with different colors.
+		Text = ("|cff%02x%02x%02x"):format(data.r * 0xFF, data.g * 0xFF, data.b * 0xFF) .. Text .. "|r"
+
+		RaidNotice_AddMessage(RaidWarningFrame, Text, bullshitTable) -- arg3 still demands a valid table for the color info, even if it is empty
+		
+	end,
+})
+
+local bullshitTable = {}
+ANN:RegisterEventHandlerDataNonSpecific(72, "ERRORS_FRAME", {
+	text = L["ERRORS_FRAME"],
+	desc = L["ERRORS_FRAME_DESC"],
+	icon = 1,
+	color = 1,
+	handler = function(icon, data, Text)
+		if data.ShowIconTex then
+			Text = "|T" .. (icon.attributes.texture or "") .. ":0|t " .. Text
+		end
+
+		-- GLOBALS: UIErrorsFrame
+		UIErrorsFrame:AddMessage(Text, data.r, data.g, data.b, 1)
 	end,
 })
 
@@ -416,7 +429,6 @@ local sctcolor = {r=1, b=1, g=1}
 ANN:RegisterEventHandlerDataNonSpecific(81, "SCT", {
 	-- GLOBALS: SCT
 	text = "Scrolling Combat Text",
-	channel = "SCT",
 	hidden = not (SCT and SCT:IsEnabled()),
 	sticky = 1,
 	icon = 1,
@@ -455,7 +467,6 @@ ANN:RegisterEventHandlerDataNonSpecific(81, "SCT", {
 ANN:RegisterEventHandlerDataNonSpecific(83, "MSBT", {
 	-- GLOBALS: MikSBT
 	text = "MikSBT",
-	channel = "MSBT",
 	hidden = not MikSBT,
 	sticky = 1,
 	icon = 1,
