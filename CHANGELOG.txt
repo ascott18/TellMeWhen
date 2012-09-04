@@ -3,6 +3,7 @@
  * Minor updates for some buff/debuff equivalancies. Still need help getting these completely up to date, though! If you notice something missing, please let me know!
  * You can now change the event of an event handler once it has been created.
  * New setting for Combat Event icons - Don't Refresh.
+ * Added Raid Finder to the Instance Type condition.
  * Bug fixes:
  ** Fixed static formats again (ICONMENU_MULTISTATECD_DESC)
  ** (Condition ROLE): attempt to index global "roles" (a nil value)

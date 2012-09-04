@@ -209,8 +209,8 @@ L["ICONMENU_BUFF"] = "Buff"
 L["ICONMENU_DEBUFF"] = "Debuff"
 L["ICONMENU_BOTH"] = "Either"
 
-L["ICONMENU_CHECKNEXT"] = "Check sub-metas"
-L["ICONMENU_CHECKNEXT_DESC"] = [[Checking this box will cause this icon to check all the icons of any meta icons that it might be checking at any level.
+L["ICONMENU_CHECKNEXT"] = "Expand sub-metas"
+L["ICONMENU_CHECKNEXT_DESC"] = [[Checking this box will cause this icon to expand all the icons of any meta icons that it might be checking at any level instead of just checking sub-meta icons as if they were just another normal icon.
 
 In addition, this icon will not show any icons that have already been shown by another meta icon that updates before this one. Update order can be changed in the main and group options.]]
 

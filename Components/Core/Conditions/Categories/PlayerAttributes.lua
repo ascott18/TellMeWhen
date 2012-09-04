@@ -36,7 +36,7 @@ local ConditionCategory = CNDT:GetCategory("ATTRIBUTES_PLAYER", 2, L["CNDTCAT_AT
 ConditionCategory:RegisterCondition(1,	 "INSTANCE", {
 	text = L["CONDITIONPANEL_INSTANCETYPE"],
 	min = 0,
-	max = 8,
+	max = 9,
 	unit = false,
 	texttable = {
 		[0] = NONE,
@@ -48,6 +48,7 @@ ConditionCategory:RegisterCondition(1,	 "INSTANCE", {
 		[6] = RAID_DIFFICULTY2,
 		[7] = RAID_DIFFICULTY3,
 		[8] = RAID_DIFFICULTY4,
+		[9] = RAID_FINDER,
 	},
 	icon = "Interface\\Icons\\Spell_Frost_Stun",
 	tcoords = CNDT.COMMON.standardtcoords,
@@ -61,7 +62,11 @@ ConditionCategory:RegisterCondition(1,	 "INSTANCE", {
 			elseif z == "party" then
 				return 2 + GetInstanceDifficulty() --3-4
 			elseif z == "raid" then
-				return 4 + GetInstanceDifficulty() --5-8
+				if IsPartyLFG() then
+					return 9
+				else
+					return 4 + GetInstanceDifficulty() --5-8
+				end
 			else
 				return 0
 			end
