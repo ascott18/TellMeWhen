@@ -120,7 +120,11 @@ local resetsOnCast = {
 		[53301] = 1,
 		[2643] = 1,
 	},
-	[11958] = { -- coldsnap
+	[11958] = TMW.ISMOP and { -- coldsnap
+		[45438] = 1,
+		[120] = 1,
+		[122] = 1,
+	} or { -- coldsnap
 		[44572] = 1,
 		[31687] = 1,
 		[11426] = 1,
@@ -138,11 +142,12 @@ local resetsOnCast = {
 		[51722] = 1,
 		[76577] = 1,
 	},
-	[60970] = { --some warrior thing that resets intercept
+	[60970] = TMW.ISMOP and { --some warrior thing that resets intercept
 		[20252] = 1,
 	},
 	[50334] = { --druid berserk or something
 		[33878] = 1,
+		[33917] = 1,
 	},
 }
 local resetsOnAura = {
@@ -191,6 +196,12 @@ function Type:COMBAT_LOG_EVENT_UNFILTERED(e, _, cleuEvent, _, sourceGUID, _, _, 
 					-- dont set it to 0 if it doesnt exist so we dont make spells that havent been seen suddenly act like they have been seen
 					-- on the other hand, dont set things to nil or it will look like they haven't been seen.
 					cooldownsForGUID[id] = 0
+					
+					-- Force update all icons. Too hard to check each icon to see if they were tracking the spellIDs that were reset,
+					-- or if they were tracking the names of the spells that were reset.
+					for k = 1, #ManualIcons do
+						ManualIcons[k].NextUpdateTime = 0
+					end
 				end
 			end
 		end
@@ -203,6 +214,12 @@ function Type:COMBAT_LOG_EVENT_UNFILTERED(e, _, cleuEvent, _, sourceGUID, _, _, 
 						-- dont set it to 0 if it doesnt exist so we dont make spells that havent been seen suddenly act like they have been seen
 						-- on the other hand, dont set things to nil or it will look like they haven't been seen.
 						cooldownsForGUID[id] = 0
+						
+						-- Force update all icons. Too hard to check each icon to see if they were tracking the spellIDs that were reset,
+						-- or if they were tracking the names of the spells that were reset.
+						for k = 1, #ManualIcons do
+							ManualIcons[k].NextUpdateTime = 0
+						end
 					end
 				end
 			end
@@ -240,10 +257,13 @@ end
 
 function Type:UNIT_SPELLCAST_SUCCEEDED(event, unit, spellName, _, _, spellID)
 	local sourceGUID = UnitGUID(unit)
-	if not sourceGUID and unit ~= "npc," then
-		-- For some reason, this is firing for unit "npc," (yes, there is a comma there).
-		-- Obviously this is invalid, but if you find anything else invalid then scream about it too.
-		TMW:Error("SourceGUID for %s (%s) was bad!", unit, tostring(sourceGUID))
+	if not sourceGUID then
+		if unit ~= "npc" and unit ~= "npc," then
+			-- For some reason, this is firing for unit "npc," (yes, there is a comma there).
+			-- It also seems to fire for "npc" without a comma, so ignore that too it it doesnt have a GUID.
+			-- Obviously this is invalid, but if you find anything else invalid then scream about it too.
+			TMW:Error("SourceGUID for %s (%s) was bad!", unit, tostring(sourceGUID))
+		end
 	else
 		local c = Cooldowns[sourceGUID]
 		spellName = strlowerCache[spellName]
@@ -381,6 +401,7 @@ local function UnitCooldown_OnUpdate(icon, time)
 		end
 	end
 
+	print(unstart, unduration)
 	if usename and Alpha > 0 then
 		icon:SetInfo("alpha; texture; start, duration; spell; unit, GUID",
 			icon.Alpha,

@@ -14,7 +14,6 @@ local TMW = TMW
 if not TMW then return end
 local L = TMW.L
 
-local ClockGCD
 local GetSpellCooldown, GetSpellCharges, GetSpellCount, IsSpellInRange, IsUsableSpell =
 	  GetSpellCooldown, GetSpellCharges, GetSpellCount, IsSpellInRange, IsUsableSpell
 local GetActionCooldown, IsActionInRange, IsUsableAction, GetActionTexture, GetActionInfo =
@@ -87,12 +86,6 @@ Type:RegisterConfigPanel_ConstructorFunc(150, "TellMeWhen_CooldownSettings", fun
 		},
 	})
 end)
-
-
-TMW:RegisterCallback("TMW_GLOBAL_UPDATE", function()
-	ClockGCD = TMW.db.profile.ClockGCD
-end)
-
 
 
 local function AutoShot_OnEvent(icon, event, unit, _, _, _, spellID)

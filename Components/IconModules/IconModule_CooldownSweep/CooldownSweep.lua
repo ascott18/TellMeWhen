@@ -18,13 +18,13 @@ local L = TMW.L
 local print = TMW.print
 
 local OnGCD = TMW.OnGCD
-local ClockGCD
 
 local CooldownSweep = TMW:NewClass("IconModule_CooldownSweep", "IconModule")
 
 CooldownSweep:RegisterIconDefaults{
 	ShowTimer = false,
 	ShowTimerText = false,
+	ClockGCD = false,
 }
 
 CooldownSweep:RegisterConfigPanel_ConstructorFunc(200, "TellMeWhen_TimerSettings", function(self)
@@ -44,9 +44,32 @@ CooldownSweep:RegisterConfigPanel_ConstructorFunc(200, "TellMeWhen_TimerSettings
 				return not (IsAddOnLoaded("OmniCC") or IsAddOnLoaded("tullaCC") or LibStub("AceAddon-3.0"):GetAddon("LUI_Cooldown", true))
 			end,]]
 		},
+		{
+			setting = "ClockGCD",
+			title = TMW.L["ICONMENU_CLOCKGCD"],
+			tooltip = TMW.L["ICONMENU_CLOCKGCD_DESC"],
+			disabled = function(self)
+				return not TMW.CI.ics.ShowTimer and not TMW.CI.ics.ShowTimerText
+			end,
+		},
 	})
 end)
 
+
+TMW:RegisterUpgrade(60315, {
+	icon = function(self, ics)
+		-- Pull the setting from the profile settings, since this setting is now per-icon
+		-- Also, the setting changed from "Ignore" to "Allow", so flip the boolean too.
+		
+		-- Old default value was true, so make sure we use true if the setting is nil from having been the same as default.
+		local old = TMW.db.global.ClockGCD
+		if old == nil then
+			old = true
+		end
+		
+		ics.ClockGCD = not old
+	end,
+})
 
 TMW:RegisterUpgrade(45608, {
 	icon = function(self, ics)
@@ -99,6 +122,7 @@ end
 function CooldownSweep:SetupForIcon(icon)
 	self.ShowTimer = icon.ShowTimer
 	self.ShowTimerText = icon.ShowTimerText
+	self.ClockGCD = icon.ClockGCD
 	self.cooldown.noCooldownCount = not icon.ShowTimerText
 	
 	local attributes = icon.attributes
@@ -134,7 +158,7 @@ end
 function CooldownSweep:DURATION(icon, start, duration)
 	local cd = self.cooldown
 	
-	if (OnGCD(duration) and ClockGCD) or (duration - (TMW.time - start)) <= 0 or duration <= 0 then
+	if (not self.ClockGCD and OnGCD(duration)) or (duration - (TMW.time - start)) <= 0 or duration <= 0 then
 		start, duration = 0, 0
 	end
 	
@@ -163,9 +187,5 @@ function CooldownSweep:REVERSE(icon, reverse)
 	self.cooldown:SetReverse(reverse)
 end
 CooldownSweep:SetDataListner("REVERSE")
-
-TMW:RegisterCallback("TMW_GLOBAL_UPDATE", function()
-	ClockGCD = TMW.db.profile.ClockGCD
-end)
 
 	

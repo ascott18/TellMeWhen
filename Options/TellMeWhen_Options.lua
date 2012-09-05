@@ -1078,12 +1078,6 @@ function TMW:CompileOptions()
 									type = "toggle",
 									order = 21,
 								},
-								ClockGCD = {
-									name = L["UIPANEL_CLOCKIGNOREGCD"],
-									desc = L["UIPANEL_CLOCKIGNOREGCD_DESC"],
-									type = "toggle",
-									order = 22,
-								},
 								DrawEdge = { -- Cooldown:SetDrawEdge was removed in MoP
 									name = L["UIPANEL_DRAWEDGE"],
 									desc = L["UIPANEL_DRAWEDGE_DESC"],

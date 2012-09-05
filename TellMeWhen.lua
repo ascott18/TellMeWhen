@@ -30,7 +30,7 @@ local DogTag = LibStub("LibDogTag-3.0", true)
 TELLMEWHEN_VERSION = "6.0.3"
 TELLMEWHEN_VERSION_MINOR = strmatch(" @project-version@", " r%d+") or ""
 TELLMEWHEN_VERSION_FULL = TELLMEWHEN_VERSION .. TELLMEWHEN_VERSION_MINOR
-TELLMEWHEN_VERSIONNUMBER = 60314 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
+TELLMEWHEN_VERSIONNUMBER = 60316 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
 if TELLMEWHEN_VERSIONNUMBER > 61001 or TELLMEWHEN_VERSIONNUMBER < 60000 then return error("YOU SCREWED UP THE VERSION NUMBER OR DIDNT CHANGE THE SAFETY LIMITS") end -- safety check because i accidentally made the version number 414069 once
 
 TELLMEWHEN_MAXROWS = 20
@@ -1181,7 +1181,6 @@ TMW.Defaults = {
 		ReceiveComm		=	true,
 		WarnInvalids	=	false,
 		BarGCD			=	true,
-		ClockGCD		=	true,
 		CheckOrder		=	-1,
 		SUG_atBeginning	=	true,
 		ColorNames		=	true,
@@ -2301,7 +2300,6 @@ function TMW:GetBaseUpgrades()			-- upgrade functions
 		[40100] = {
 			profile = function(self)
 				TMW.db.profile["BarGCD"] = true
-				TMW.db.profile["ClockGCD"] = true
 			end,
 		},
 		[40080] = {

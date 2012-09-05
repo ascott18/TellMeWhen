@@ -5,6 +5,7 @@
  * New setting for Combat Event icons - Don't Refresh.
  * Added Raid Finder to the Instance Type condition.
  * You can now output text to the UI Errors Frame
+ * Moved the Timers ignore GCD setting from per-profile to per-icon
  * Bug fixes:
  ** Fixed static formats again (ICONMENU_MULTISTATECD_DESC)
  ** (Condition ROLE): attempt to index global "roles" (a nil value)
@@ -13,6 +14,8 @@
  ** Announcements.lua:531: attempt to concatenate local "Text" (a nil value)
  ** Leader of the Pack should now be properly checked by the IncreasedCrit equivalency
  ** Fixed a major flaw with importing profiles from backup or from other profiles in the db
+ ** (Condition THREATRAW): attempt to call global 'UnitDetailedThreatSituation' (a nil value)
+ ** Fixed cooldown resetting with unitcooldown icons. Spells still not really updated for MoP
  
 ===v6.0.2===
  * Cooldown icons should now provide much better functionality when checking multiple spells. Single-spell functionality should (hopefully) remain unchanged.
