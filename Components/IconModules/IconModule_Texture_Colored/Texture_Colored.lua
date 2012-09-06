@@ -75,16 +75,15 @@ function Texture_Colored:UPDATE(icon)
 			s = "N" -- Not counting
 		else
 			s = "C" -- Counting
+			
+			--if s == "C" then
+				if self.ShowTimer then
+					s = s .. "T" -- Timer
+				else
+					s = s .. "O" -- nOtimer
+				end
+			--end
 		end
-
-		if s == "C" then
-			if self.ShowTimer then
-				s = s .. "T" -- Timer
-			else
-				s = s .. "O" -- nOtimer
-			end
-		end
-
 		
 		--if (self.ShowWhen or "always") == "always" then
 		if (bitband(self.ShowWhen or 0x3, 0x3)) == 0x3 then
@@ -94,7 +93,7 @@ function Texture_Colored:UPDATE(icon)
 		end
 		
 		--assert(self.Colors[s])
-
+		
 		color = self.Colors[s]
 	end
 	
@@ -116,6 +115,7 @@ end
 
 Texture_Colored:SetDataListner("INRANGE", Texture_Colored.UPDATE)
 Texture_Colored:SetDataListner("NOMANA", Texture_Colored.UPDATE)
+Texture_Colored:SetDataListner("DURATION", Texture_Colored.UPDATE)
 
 
 TMW:RegisterCallback("TMW_GLOBAL_UPDATE", function()

@@ -183,8 +183,6 @@ function ClassSpellCache:OnCommReceived(prefix, text, channel, who)
 			-- Request Class Spell Length
 			-- Only respond if the source player has not requested yet this session.
 			
-			TMW:Debug("RCSL from %s: %s", who, "")
-			
 			self:BuildClassSpellLookup()
 			self:SendCommMessage(self.CONST.COMM_SLUG, self:Serialize("CSL", ClassSpellLength), "WHISPER", who)
 			RequestedFrom[who] = true
@@ -192,8 +190,6 @@ function ClassSpellCache:OnCommReceived(prefix, text, channel, who)
 			-- Class Spell Length
 			wipe(commThrowaway)
 			local RecievedClassSpellLength = arg2
-			
-			TMW:Debug("CSL from %s: %s", who, text)
 			
 			self:BuildClassSpellLookup()
 			

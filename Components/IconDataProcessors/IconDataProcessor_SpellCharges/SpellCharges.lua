@@ -28,11 +28,11 @@ function Processor:CompileFunctionSegment(t)
 	
 	if attributes.charges ~= charges or attributes.maxCharges ~= maxCharges then
 
-		TMW:Fire(SPELLCHARGES.changedEvent, icon, charges, maxCharges)
-		doFireIconUpdated = true
-
 		attributes.charges = charges
 		attributes.maxCharges = maxCharges
+		
+		TMW:Fire(SPELLCHARGES.changedEvent, icon, charges, maxCharges)
+		doFireIconUpdated = true
 	end
 	--]]
 end

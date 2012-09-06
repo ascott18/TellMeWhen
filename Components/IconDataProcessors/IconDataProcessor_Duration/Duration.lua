@@ -65,11 +65,11 @@ function Processor:CompileFunctionSegment(t)
 			icon.__realDuration = realDuration
 		end
 
-		TMW:Fire(DURATION.changedEvent, icon, start, duration, d)
-		doFireIconUpdated = true
-
 		attributes.start = start
 		attributes.duration = duration
+
+		TMW:Fire(DURATION.changedEvent, icon, start, duration, d)
+		doFireIconUpdated = true
 	end
 	--]]
 end
