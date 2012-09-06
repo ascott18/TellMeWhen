@@ -120,29 +120,36 @@ local resetsOnCast = {
 		[53301] = 1,
 		[2643] = 1,
 	},
-	[11958] = TMW.ISMOP and { -- coldsnap
-		[45438] = 1,
-		[120] = 1,
-		[122] = 1,
-	} or { -- coldsnap
+	[108285] = { -- Call of the Elements
+		[108269] = 1, -- Capacitor Totem
+		[8177] = 1, -- Grounding Totem
+		[51485] = 1, -- Earthgrab Totem
+		[8143] = 1, -- Tremor Totem
+		[5394] = 1, -- Healing Stream Totem
+	},
+	[11129] = { -- Combustion
+		[108853] = 1, -- Inferno Blast
+	},
+	[11958] = { -- coldsnap
 		[44572] = 1,
-		[31687] = 1,
-		[11426] = 1,
-		[12472] = 1,
-		[45438] = 1,
+		[31687] = TMW.ISNOTMOP,
+		[11426] = TMW.ISNOTMOP,
+		[12472] = TMW.ISNOTMOP,
+		[45438] = TMW.ISNOTMOP,
 		[120] = 1,
 		[122] = 1,
 	},
 	[14185] = { --prep
-		[5277] = 1,
-		[2983] = 1,
-		[1856] = 1,
-		[36554] = 1,
-		[1766] = 1,
-		[51722] = 1,
-		[76577] = 1,
+		[5277] = 1, -- Evasion
+		[2983] = 1, -- Sprint
+		[1856] = 1, -- Vanish
+		[36554] = TMW.ISNOTMOP, -- Shadowstep
+		[1766] = TMW.ISNOTMOP, -- Kick
+		[51722] = 1, -- Dismantle
+		[76577] = TMW.ISNOTMOP, -- Smoke Bomb
+		[31224] = TMW.ISMOP, -- Cloak of Shadows
 	},
-	[60970] = TMW.ISMOP and { --some warrior thing that resets intercept
+	[60970] = TMW.ISNOTMOP and { --some warrior thing that resets intercept
 		[20252] = 1,
 	},
 	[50334] = { --druid berserk or something
@@ -151,6 +158,7 @@ local resetsOnCast = {
 	},
 }
 local resetsOnAura = {
+	-- PRE-MOP
 	[81162] = { -- will of the necropolis
 		[48982] = 1,
 	},
@@ -169,13 +177,20 @@ local resetsOnAura = {
 	[64343] = { -- impact
 		[2136] = 1,
 	},
-	[50227] = { -- sword and board
-		[23922] = 1,
-	},
 	[52437] = { -- sudden death
 		[86346] = 1,
 	},
 
+	-- MOP: 
+	[50227] = { -- Sword and Board
+		[23922] = 1, -- Shield Slam
+	},
+	[59578] = { -- The Art of War
+		[879] = 1, -- Exorcism
+	},
+	[52437] = { -- Sudden Death
+		[86346] = 1, -- Colossus Smash
+	},
 }
 
 
@@ -401,7 +416,6 @@ local function UnitCooldown_OnUpdate(icon, time)
 		end
 	end
 
-	print(unstart, unduration)
 	if usename and Alpha > 0 then
 		icon:SetInfo("alpha; texture; start, duration; spell; unit, GUID",
 			icon.Alpha,

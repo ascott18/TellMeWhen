@@ -108,6 +108,17 @@ TMW:RegisterDatabaseDefaults{
 -- SETTINGS UPGRADES
 -- -------------------
 
+TMW:RegisterUpgrade(60317, {
+	textlayout = function(self, layoutSettings)
+		-- A bug with importing text layouts led them to have their Name attribute set as a table
+		-- (Happened because Name was getting set to nil, and was getting recreated as a table through metamethods)
+		
+		if type(layoutSettings.Name) == "table" then
+			layoutSettings.Name = "Sorry, the name of this layout was lost."
+		end
+	end
+})
+
 TMW:RegisterUpgrade(60303, {
 	icon = function(self, ics)
 		-- The setting to trigger fallback on groups is nil now, not ""
@@ -567,20 +578,6 @@ function Texts:GetFontStringID(fontStringID, fontStringSettings)
 		fontStringID = SkinAs
 	end
 	return fontStringID
-end
-
-function TEXT:GetStringName(settings, num, unnamed)
-	local Name = strtrim(settings.StringName or "")
-	
-	if Name == "" then
-		if unnamed then
-			Name = L["TEXTLAYOUTS_UNNAMED"]
-		else
-			Name = L["TEXTLAYOUTS_fSTRING"]:format(num)
-		end
-	end
-	
-	return Name
 end
 
 function Texts:OnKwargsUpdated()

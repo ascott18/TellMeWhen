@@ -54,6 +54,20 @@ function TEXT:GetTextLayoutSettings(GUID)
 	return GUID and rawget(TMW.db.profile.TextLayouts, GUID) or nil
 end
 
+function TEXT:GetStringName(settings, num, unnamed)
+	local Name = strtrim(settings.StringName or "")
+	
+	if Name == "" then
+		if unnamed then
+			Name = L["TEXTLAYOUTS_UNNAMED"]
+		else
+			Name = L["TEXTLAYOUTS_fSTRING"]:format(num)
+		end
+	end
+	
+	return Name
+end
+
 function TEXT:GetLayoutName(settings, GUID)
 	if GUID and not settings then
 		assert(type(GUID) == "string")
@@ -590,7 +604,6 @@ local textLayoutTemplate = {
 			end,
 		},
 		
-		
 		Clone = {
 			name = L["TEXTLAYOUTS_CLONELAYOUT"],
 			desc = L["TEXTLAYOUTS_CLONELAYOUT_DESC"],
@@ -599,7 +612,7 @@ local textLayoutTemplate = {
 			order = 110,
 			func = function(info)
 				local layout = findlayout(info)
-				TMW:Import(nil, TMW.db.profile.TextLayouts[layout], TELLMEWHEN_VERSIONNUMBER, "textlayout", TMW.generateGUID(12))
+				TMW:Import(nil, TEXT:GetTextLayoutSettings(layout), TELLMEWHEN_VERSIONNUMBER, "textlayout", TMW.generateGUID(12))
 			end,
 			disabled = function(info)
 				return false

@@ -16,6 +16,8 @@
  ** Fixed a major flaw with importing profiles from backup or from other profiles in the db
  ** (Condition THREATRAW): attempt to call global 'UnitDetailedThreatSituation' (a nil value)
  ** Fixed cooldown resetting with unitcooldown icons. Spells still not really updated for MoP
+ ** Fixed a bug where colors weren't being updated when the duration of an icon changes. Colors still suck, but at least they should work (better) now.
+ ** Fixed a bag bug that will completely break most configuration after cloning a text layout
  
 ===v6.0.2===
  * Cooldown icons should now provide much better functionality when checking multiple spells. Single-spell functionality should (hopefully) remain unchanged.

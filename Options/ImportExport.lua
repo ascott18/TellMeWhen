@@ -82,14 +82,10 @@ local profile = SharableDataType:New("profile")
 function profile:Import_ImportData(editbox, data, version, noOverwrite)
 	if noOverwrite then -- noOverwrite is a name in this case.
 
-		local base = gsub(noOverwrite, " %(%d+%)$", "")
-		local newnum = 1
-
 		-- generate a new name if the profile already exists
-		local newname
-		while not newname or TMW.db.profiles[newname] do
-			newnum = newnum + 1
-			newname = base .. " (" .. newnum .. ")"
+		local newname = noOverwrite
+		while TMW.db.profiles[newname] do
+			newname = TMW.oneUpString(newname)
 		end
 
 		-- put the data in the profile (no reason to CTIPWM when we can just do this) and set the profile
