@@ -201,7 +201,7 @@ profile:RegisterMenuBuilder(10, function(self, result, editbox)
 	TMW.AddDropdownSpacer()
 end)
 
-profile.Export_DescriptionAppend = L["EXPORT_SPECIALDESC2"]:format("6.0.0+")
+profile.Export_DescriptionAppend = L["EXPORT_SPECIALDESC2"]:format("6.0.3+")
 function profile:Export_SetButtonAttributes(editbox, info)
 	local text = L["fPROFILE"]:format(TMW.db:GetCurrentProfile())
 	info.text = text
