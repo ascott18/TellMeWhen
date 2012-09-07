@@ -1639,6 +1639,9 @@ L["HELP_EXPORT_DOCOPY_WIN"] = [[Press |cff7fffffCTRL+C|r to copy]]
 L["HELP_EXPORT_DOCOPY_MAC"] = [[Press |cff7fffffCMD+C|r to copy]]
 
 
+L["IMPORT_ICON_DISABLED_DESC"] = "You must be editing an icon to be able to import an icon."
+
+
 L["TOPLEFT"] = "Top Left"
 L["TOP"] = "Top"
 L["TOPRIGHT"] = "Top Right"

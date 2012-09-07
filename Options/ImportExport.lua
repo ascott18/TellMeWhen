@@ -395,6 +395,7 @@ function icon:Import_ImportData(editbox, data, version)
 		end
 	end
 end
+
 function icon:Import_BuildContainingDropdownEntry(result, editbox)
 	local ics = result.data
 	local iconID = tonumber(result[1])
@@ -412,10 +413,8 @@ function icon:Import_BuildContainingDropdownEntry(result, editbox)
 		local ic = TMW.db:GetCurrentProfile() == profilename and groupID and iconID and TMW[groupID] and TMW[groupID][iconID]
 		if ic and ic.attributes.texture then
 			tex = ic.attributes.texture
-			info.value = ic -- holy shit, is this hacktastic or what?
 		else
 			tex = TMW:GuessIconTexture(ics)
-			info.value = false
 		end
 
 		local text, textshort, tooltipText = TMW:GetIconMenuText(groupID, iconID, ics)
@@ -424,8 +423,15 @@ function icon:Import_BuildContainingDropdownEntry(result, editbox)
 		end
 		info.text = textshort
 		info.tooltipTitle = (groupID and format(L["GROUPICON"], TMW:GetGroupName(gs and gs.Name, groupID, 1), iconID)) or (iconID and L["fICON"]:format(iconID)) or L["ICON"]
-		info.tooltipText = tooltipText
 		info.tooltipOnButton = true
+			
+		info.disabled = not IMPORTS.icon
+		if info.disabled then
+			info.tooltipText = L["IMPORT_ICON_DISABLED_DESC"]
+			info.tooltipWhileDisabled = true
+		else
+			info.tooltipText = tooltipText
+		end
 
 		info.notCheckable = true
 
@@ -436,7 +442,6 @@ function icon:Import_BuildContainingDropdownEntry(result, editbox)
 		info.tCoordBottom = 0.93
 
 		info.func = function()
-			-- self.value is the icon (maybe, if it's a string then we aren't importing from an icon in the current profile)
 			if ic and ic:IsVisible() then
 				TMW.HELP:Show("ICON_IMPORT_CURRENTPROFILE", nil, editbox, 0, 0, L["HELP_IMPORT_CURRENTPROFILE"])
 				TMW[IMPORTS.group_overwrite][IMPORTS.icon]:SetInfo("texture", tex)
@@ -452,8 +457,6 @@ function icon:Import_BuildContainingDropdownEntry(result, editbox)
 		end
 		info.arg1 = ics
 		info.arg2 = version
-
-		info.disabled = not IMPORTS.icon
 
 		UIDropDownMenu_AddButton(info, UIDROPDOWNMENU_MENU_LEVEL)
 	end
