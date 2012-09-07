@@ -18,6 +18,7 @@
  ** Fixed cooldown resetting with unitcooldown icons. Spells still not really updated for MoP
  ** Fixed a bug where colors weren't being updated when the duration of an icon changes. Colors still suck, but at least they should work (better) now.
  ** Fixed a bag bug that will completely break most configuration after cloning a text layout
+ ** Fixed a bug where profiles of version 60032 or earlier could not be imported by version 60033 or later.
  
 ===v6.0.2===
  * Cooldown icons should now provide much better functionality when checking multiple spells. Single-spell functionality should (hopefully) remain unchanged.

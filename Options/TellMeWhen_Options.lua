@@ -2904,6 +2904,8 @@ function TMW:Import(editbox, settings, version, type, ...)
 	assert(type, "No settings type specified!")
 	CloseDropDownMenus()
 
+	TMW:Fire("TMW_IMPORT_PRE", editbox, settings, version, type, ...)
+	
 	local SharableDataType = TMW.approachTable(TMW, "Classes", "SharableDataType", "types", type)
 	if SharableDataType and SharableDataType.Import_ImportData then
 		SharableDataType:Import_ImportData(editbox, settings, version, ...)
@@ -2915,6 +2917,8 @@ function TMW:Import(editbox, settings, version, type, ...)
 	else
 		TMW:Print(L["IMPORTERROR_INVALIDTYPE"])
 	end
+
+	TMW:Fire("TMW_IMPORT_POST", editbox, settings, version, type, ...)
 	
 	--TMW:ScheduleTimer("CompileOptions", 0.2) -- i dont know why i have to delay it, but I do.
 	TMW:CompileOptions()
@@ -2968,6 +2972,11 @@ function TMW:DeserializeData(string)
 		-- 45809 was the last version to contain untyped data messages.
 		-- It only supported icon imports/exports, so the type has to be an icon.
 		type = "icon"
+	end
+
+	if version <= 60032 and type == "global" then
+		-- 60032 was the last version that used "global" as the identifier for "profile"
+		type = "profile"
 	end
 
 	if not TMW.Classes.SharableDataType.types[type] then
