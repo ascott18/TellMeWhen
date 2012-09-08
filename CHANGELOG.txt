@@ -1,11 +1,12 @@
 ===v6.0.3===
- * Re-implemented the stance condition for paladin seals
+ * Re-implemented the stance condition for paladin seals.
  * Minor updates for some buff/debuff equivalancies. Still need help getting these completely up to date, though! If you notice something missing, please let me know!
  * You can now change the event of an event handler once it has been created.
  * New setting for Combat Event icons - Don't Refresh.
  * Added Raid Finder to the Instance Type condition.
- * You can now output text to the UI Errors Frame
- * Moved the Timers ignore GCD setting from per-profile to per-icon
+ * You can now output text to the UI Errors Frame.
+ * Moved the Timers ignore GCD setting from per-profile to per-icon.
+ * Updated unit cooldown icons for all cooldown resets in MoP.
  * Bug fixes:
  ** Fixed static formats again (ICONMENU_MULTISTATECD_DESC)
  ** (Condition ROLE): attempt to index global "roles" (a nil value)

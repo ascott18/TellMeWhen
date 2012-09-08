@@ -90,7 +90,41 @@ local Cooldowns = setmetatable({}, {__index = function(t, k)
 end}) TMW.Cooldowns = Cooldowns
 
 local resetsOnCast = {
-	[23989] = { -- readiness
+	[23989] = TMW.ISMOP and { -- Readiness
+		[120697] = 1, -- Lynx Rush
+		[19574] = 1, -- Bestial Wrath
+		[6991] = 1, -- Feed Pet
+		[53271] = 1, -- Master's Call
+		[82726] = 1, -- Fervor
+		[3674] = 1, -- Black Arrow
+		[13809] = 1, -- Ice Trap
+		[13813] = 1, -- Explosive Trap
+		[53351] = 1, -- Kill Shot
+		[19503] = 1, -- Scatter Shot
+		[19386] = 1, -- Wyvern Sting
+		[19263] = 1, -- Deterrence
+		[130392] = 1, -- Blink Strike
+		[3045] = 1, -- Rapid Fire
+		[1499] = 1, -- Freezing Trap
+		[131894] = 1, -- A Murder of Crows
+		[53301] = 1, -- Explosive Shot
+		[109304] = 1, -- Exhilaration
+		[34490] = 1, -- Silencing Shot
+		[109248] = 1, -- Binding Shot
+		[5116] = 1, -- Concussive Shot
+		[34600] = 1, -- Snake Trap
+		[34477] = 1, -- Misdirection
+		[51753] = 1, -- Camouflage
+		[20736] = 1, -- Distracting Shot
+		[120679] = 1, -- Dire Beast
+		[34026] = 1, -- Kill Command
+		-- [121818] = 1, -- Stampeded (5 min cd, doesn't get reset)
+		[5384] = 1, -- Feign Death
+		[19577] = 1, -- Intimidation
+		[1543] = 1, -- Flare
+		[781] = 1, -- Disengage
+		[53209] = 1, -- Chimera Shot
+	} or {
 		[19386] = 1,
 		[3674] = 1,
 		[19503] = 1,
@@ -120,6 +154,7 @@ local resetsOnCast = {
 		[53301] = 1,
 		[2643] = 1,
 	},
+	
 	[108285] = { -- Call of the Elements
 		[108269] = 1, -- Capacitor Totem
 		[8177] = 1, -- Grounding Totem
@@ -143,9 +178,9 @@ local resetsOnCast = {
 		[5277] = 1, -- Evasion
 		[2983] = 1, -- Sprint
 		[1856] = 1, -- Vanish
+		[51722] = 1, -- Dismantle
 		[36554] = TMW.ISNOTMOP, -- Shadowstep
 		[1766] = TMW.ISNOTMOP, -- Kick
-		[51722] = 1, -- Dismantle
 		[76577] = TMW.ISNOTMOP, -- Smoke Bomb
 		[31224] = TMW.ISMOP, -- Cloak of Shadows
 	},
@@ -158,30 +193,23 @@ local resetsOnCast = {
 	},
 }
 local resetsOnAura = {
-	-- PRE-MOP
-	[81162] = { -- will of the necropolis
-		[48982] = 1,
+	[81162] = { -- Will of the Necropolis
+		[48982] = 1, -- Rune Tap
 	},
-	[93400] = { -- shooting stars
-		[78674] = 1,
+	[93622] = { -- Mangle! (from lacerate and thrash)
+		[33878] = 1, -- Mangle
 	},
-	[93622] = { -- lacerate or something
-		[33878] = 1,
+	[48517] = TMW.ISNOTMOP and { -- solar eclipse
+		[16886] = 1, -- Nature's Grace
 	},
-	[48517] = { -- solar eclipse
-		[16886] = 1,
+	[48518] = TMW.ISMOP and { -- lunar eclipse
+		[48505] = 1, -- Starfall
+	} or {
+		[16886] = 1, -- Nature's Grace
 	},
-	[48518] = { -- lunar eclipse
-		[16886] = 1,
+	[64343] = TMW.ISNOTMOP and { -- impact
+		[2136] = 1, -- Fire Blast
 	},
-	[64343] = { -- impact
-		[2136] = 1,
-	},
-	[52437] = { -- sudden death
-		[86346] = 1,
-	},
-
-	-- MOP: 
 	[50227] = { -- Sword and Board
 		[23922] = 1, -- Shield Slam
 	},
@@ -191,6 +219,21 @@ local resetsOnAura = {
 	[52437] = { -- Sudden Death
 		[86346] = 1, -- Colossus Smash
 	},
+	[124430] = { -- Divine Insight (Shadow version)
+		[8092] = 1, -- Mind Blast
+	},
+	[77762] = { -- Lava Surge
+		[51505] = 1, -- Lava Burst
+	},
+	[93400] = { -- Shooting Stars
+		[78674] = 1, -- Starsurge
+	},
+	[32216] = { -- Victorious
+		[103840] = 1, -- Impending Victory
+	},
+}
+local spellBlacklist = {
+	[50288] = TMW.ISMOP, -- Starfall damage effect, causes the cooldown to be off by 10 seconds and prevents proper resets when tracking by name.
 }
 
 
@@ -202,6 +245,11 @@ function Type:COMBAT_LOG_EVENT_UNFILTERED(e, _, cleuEvent, _, sourceGUID, _, _, 
 	or cleuEvent == "SPELL_HEAL"
 	or cleuEvent == "SPELL_MISSED"
 	then
+	
+		if spellBlacklist[spellID] then
+			return
+		end
+		
 		spellName = spellName and strlowerCache[spellName]
 		local cooldownsForGUID = Cooldowns[sourceGUID]
 		
