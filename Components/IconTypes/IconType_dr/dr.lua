@@ -96,15 +96,13 @@ Type:RegisterConfigPanel_ConstructorFunc(150, "TellMeWhen_DRSettings", function(
 end)
 
 
-
-
 local function DR_OnEvent(icon, event, arg1, cevent, _, _, _, _, _, destGUID, _, destFlags, _, spellID, spellName, _, auraType)
 	if event == "COMBAT_LOG_EVENT_UNFILTERED" then
 		if auraType == "DEBUFF" and (cevent == "SPELL_AURA_REMOVED" or cevent == "SPELL_AURA_APPLIED" or (icon.CheckRefresh and cevent == "SPELL_AURA_REFRESH")) then
 			local ND = icon.NameHash
 			if ND[spellID] or ND[strlowerCache[spellName]] then
 				if PvEDRs[spellID] or bitband(destFlags, CL_CONTROL_PLAYER) == CL_CONTROL_PLAYER then
-					local dr = icon[destGUID]
+					local dr = icon.DRInfo[destGUID]
 					if cevent == "SPELL_AURA_APPLIED" then
 						if dr and dr.start + dr.duration <= TMW.time then
 							dr.start = 0
@@ -119,7 +117,7 @@ local function DR_OnEvent(icon, event, arg1, cevent, _, _, _, _, _, destGUID, _,
 								duration = DRReset,
 								tex = SpellTextures[spellID]
 							}
-							icon[destGUID] = dr
+							icon.DRInfo[destGUID] = dr
 						else
 							local amt = dr.amt
 							if amt and amt ~= 0 then
@@ -146,7 +144,7 @@ local function DR_OnUpdate(icon, time)
 	for u = 1, #Units do
 		local unit = Units[u]
 		local GUID = UnitGUID(unit)
-		local dr = icon[GUID]
+		local dr = icon.DRInfo[GUID]
 
 		if dr then
 			if dr.start + dr.duration <= time then
@@ -273,6 +271,16 @@ function Type:Setup(icon, groupID, iconID)
 	icon.NameFirst = TMW:GetSpellNames(icon, icon.Name, 1)
 	icon.NameArray = TMW:GetSpellNames(icon, icon.Name)
 	icon.NameHash = TMW:GetSpellNames(icon, icon.Name, nil, nil, 1)
+	
+	-- This looks really stupid, but it works exactly how it should.
+	local oldDRName = icon.Name
+	if not icon.oldDRName then
+		icon.DRInfo = icon.DRInfo or {}
+		icon.oldDRName = icon.Name
+	elseif icon.DRInfo and oldDRName ~= icon.Name then
+		wipe(icon.DRInfo)
+	end
+	
 	
 	icon.Units, icon.UnitSet = TMW:GetUnits(icon, icon.Unit)
 	

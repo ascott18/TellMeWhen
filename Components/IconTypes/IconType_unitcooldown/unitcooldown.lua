@@ -124,6 +124,9 @@ local resetsOnCast = {
 		[1543] = 1, -- Flare
 		[781] = 1, -- Disengage
 		[53209] = 1, -- Chimera Shot
+		[109259] = 1, -- Powershot
+		[117050] = 1, -- Glaive Toss
+		[120360] = 1, -- Barrrage
 	} or {
 		[19386] = 1,
 		[3674] = 1,

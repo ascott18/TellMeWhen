@@ -1758,6 +1758,7 @@ L["DR-ControlledRoot"] = "Controlled roots"
 L["DR-DragonsBreath"] = "Dragon's Breath"
 L["DR-BindElemental"] = "Bind Elemental"
 L["DR-Charge"] = "Charge"
+L["DR-IceWard"] = "Ice Ward"
 
 L["CONDITIONPANEL_CREATURETYPE"] = "Unit Creature Type"
 L["CONDITIONPANEL_CREATURETYPE_LABEL"] = "Creature Type(s)"

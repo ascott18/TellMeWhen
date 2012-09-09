@@ -5,7 +5,6 @@
 ## Interface: 50001
 # DONT FORGET TO TOC BUMP TELLMEWHEN_OPTIONS TOO!!
 ## X-Interface: 50001
-## X-Compatible-With: 40300
 ## Title: TellMeWhen
 
 ## Version: 6.0.3

@@ -30,7 +30,7 @@ local DogTag = LibStub("LibDogTag-3.0", true)
 TELLMEWHEN_VERSION = "6.0.3"
 TELLMEWHEN_VERSION_MINOR = strmatch(" @project-version@", " r%d+") or ""
 TELLMEWHEN_VERSION_FULL = TELLMEWHEN_VERSION .. TELLMEWHEN_VERSION_MINOR
-TELLMEWHEN_VERSIONNUMBER = 60321 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
+TELLMEWHEN_VERSIONNUMBER = 60322 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
 if TELLMEWHEN_VERSIONNUMBER > 61001 or TELLMEWHEN_VERSIONNUMBER < 60000 then return error("YOU SCREWED UP THE VERSION NUMBER OR DIDNT CHANGE THE SAFETY LIMITS") end -- safety check because i accidentally made the version number 414069 once
 
 TELLMEWHEN_MAXROWS = 20
@@ -1346,7 +1346,7 @@ TMW.BE = TMW.ISMOP and {
 		ReducedPhysicalDone = "115798;50256;24423",
 		ReducedCastingSpeed = "31589;73975;5761;109466;50274;90314;126402;58604",
 		ReducedHealing		= "115804",
-		Stunned				= "_1833;_408;_91800;_113801;5211;_56;9005;22570;19577;24394;56626;44572;_853;64044;_20549;46968;107102;132168;_30283;_7922;50519;91797;_89766;54786;105593;120086;117418;115001;_131402;108194;117526;105771;_122057;113953;118905",
+		Stunned				= "_1833;_408;_91800;_113801;5211;_56;9005;22570;19577;24394;56626;44572;_853;64044;_20549;46968;132168;_30283;_7922;50519;91797;_89766;54786;105593;120086;117418;115001;_131402;108194;117526;105771;_122242;113953;118905;119392;119381",
 		Incapacitated		= "20066;1776;_6770;115078",
 		Rooted				= "_339;_122;_64695;_19387;33395;_4167;54706;50245;90327;16979;45334;_87194;63685;102359;_128405;116706;123407;115197",
 		Disarmed			= "_51722;_676;64058;50541;91644;117368",
@@ -2225,12 +2225,6 @@ function TMW:GetBaseUpgrades()			-- upgrade functions
 			group = function(self, gs)
 				local Conditions = gs.Conditions
 
-				--[[if gs.OnlyInCombat then
-					local condition = Conditions[#Conditions + 1]
-					condition.Type = "COMBAT"
-					condition.Level = 0
-					gs.OnlyInCombat = nil
-				end]]
 				if gs.NotInVehicle then
 					local condition = Conditions[#Conditions + 1]
 					condition.Type = "VEHICLE"
@@ -2816,7 +2810,7 @@ function TMW:ProcessEquivalencies()
 			ctrlstun		= "DR-ControlledStun",
 			scatters		= "DR-Scatter",
 			fear 			= "DR-Fear",
-			rndstun			= "DR-RandomStun", -- TMW.ISMOP - DOESN'T EXIST IN MOP
+			rndstun			= "DR-RandomStun",
 			silence			= "DR-Silence",
 			banish 			= "DR-Banish",
 			mc 				= "DR-MindControl",
@@ -2825,17 +2819,13 @@ function TMW:ProcessEquivalencies()
 			disarm			= "DR-Disarm",
 			horror			= "DR-Horrify",
 			cyclone			= "DR-Cyclone",
-			rndroot			= "DR-RandomRoot", -- TMW.ISMOP - DOESN'T EXIST IN MOP
 			disorient		= "DR-Disorient",
 			ctrlroot		= "DR-ControlledRoot",
 			dragons			= "DR-DragonsBreath",
 			bindelemental	= "DR-BindElemental",
 			charge			= "DR-Charge",
-			intercept		= "DR-Intercept", -- TMW.ISMOP - DOESN'T EXIST IN MOP
+			iceward			= "DR-IceWard",
 		}
-		-- correction for ring of frost
-		DRData.spells[82691] = DRData.spells[82676]
-		--DRData.spells[82676] = nil -- dont feel like doing this. it technically isn't invalid, just incorrect, so I won't mess with it
 		
 		local dr = TMW.BE.dr
 		for spellID, category in pairs(DRData.spells) do

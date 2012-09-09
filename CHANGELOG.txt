@@ -6,7 +6,8 @@
  * Added Raid Finder to the Instance Type condition.
  * You can now output text to the UI Errors Frame.
  * Moved the Timers ignore GCD setting from per-profile to per-icon.
- * Updated unit cooldown icons for all cooldown resets in MoP.
+ * Updated Unit Cooldown icons for all cooldown resets in MoP.
+ * DR categories should now be complete for MoP. Please report any missing spells.
  * Bug fixes:
  ** Fixed static formats again (ICONMENU_MULTISTATECD_DESC)
  ** (Condition ROLE): attempt to index global "roles" (a nil value)
