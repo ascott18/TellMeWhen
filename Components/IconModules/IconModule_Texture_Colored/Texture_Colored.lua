@@ -21,7 +21,9 @@ local LMB = LibStub("Masque", true) or (LibMasque and LibMasque("Button"))
 local type = type
 local bitband = bit.band
 
-local ColorMSQ, OnlyMSQ
+local OnGCD = TMW.OnGCD
+
+local ColorGCD, ColorMSQ, OnlyMSQ
 
 local Texture_Colored = TMW:NewClass("IconModule_Texture_Colored", "IconModule_Texture")
 
@@ -71,7 +73,7 @@ function Texture_Colored:UPDATE(icon)
 
 		local s
 
-		if not duration or duration == 0 then
+		if not duration or duration == 0 or (ColorGCD and OnGCD(duration)) then
 			s = "N" -- Not counting
 		else
 			s = "C" -- Counting
@@ -121,4 +123,5 @@ Texture_Colored:SetDataListner("DURATION", Texture_Colored.UPDATE)
 TMW:RegisterCallback("TMW_GLOBAL_UPDATE", function()
 	ColorMSQ = TMW.db.profile.ColorMSQ
 	OnlyMSQ = TMW.db.profile.OnlyMSQ
+	ColorGCD = TMW.db.profile.ColorGCD
 end)

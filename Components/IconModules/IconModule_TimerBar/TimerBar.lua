@@ -20,6 +20,8 @@ local	pairs, wipe =
 		pairs, wipe
 local BarsToUpdate = {}
 
+local OnGCD = TMW.OnGCD
+
 local StatusBarTexture
 
 local TimerBar = TMW:NewClass("IconModule_TimerBar", "IconModule", "UpdateTableManager")
@@ -139,7 +141,7 @@ function TimerBar:SetColors(startColor, completeColor)
 end
 
 function TimerBar:DURATION(icon, start, duration)
-	self:SetCooldown(start, duration, TMW.OnGCD(duration))
+	self:SetCooldown(start, duration, OnGCD(duration))
 end
 TimerBar:SetDataListner("DURATION")
 

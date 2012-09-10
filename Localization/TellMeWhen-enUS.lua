@@ -465,7 +465,11 @@ L["ICONMENU_ONLYIFCOUNTING_DESC"] = "Check this to make the icon show only if th
 -- UI PANEL
 -- -------------
 
-L["UIPANEL_SUBTEXT2"] = "Icons work when locked. When unlocked, you can move/size icon groups and right click individual icons for more settings. You can also type /tellmewhen or /tmw to lock/unlock."
+L["UIPANEL_SUBTEXT2"] = [[Icons only work when locked.
+
+When unlocked, you can move/size icon groups and right click individual icons to configure them.
+
+You can also type /tellmewhen or /tmw to lock/unlock.]]
 L["UIPANEL_MAINOPT"] = "Main Options"
 L["UIPANEL_GROUPS"] = "Groups"
 L["UIPANEL_GROUPS_DESC"] = "Settings for each group in this TellMeWhen profile."
@@ -500,7 +504,7 @@ L["UIPANEL_SECONDARYSPEC"] = "Secondary Spec"
 L["UIPANEL_GROUPRESET"] = "Reset Position"
 L["UIPANEL_TOOLTIP_GROUPRESET"] = "Reset this group's position and scale"
 L["UIPANEL_ALLRESET"] = "Reset all"
-L["UIPANEL_TOOLTIP_ALLRESET"] = "Reset DATA and POSITION of all icons and groups, as well as any other settings."
+L["UIPANEL_TOOLTIP_ALLRESET"] = "Reset ALL SETTINGS of ALL ICONS AND GROUPS, as well as any other settings."
 L["UIPANEL_LOCKUNLOCK"] = "Lock/Unlock AddOn"
 L["UIPANEL_BARTEXTURE"] = "Bar Texture"
 L["UIPANEL_BARIGNOREGCD"] = "Bars Ignore GCD"
@@ -508,7 +512,9 @@ L["UIPANEL_BARIGNOREGCD_DESC"] = "If checked, cooldown bars will not change valu
 L["UIPANEL_CLOCKIGNOREGCD"] = "Timers Ignore GCD"
 L["UIPANEL_CLOCKIGNOREGCD_DESC"] = "If checked, timers and the cooldown clock will not trigger from a global cooldown"
 L["UIPANEL_UPDATEINTERVAL"] = "Update Interval"
-L["UIPANEL_TOOLTIP_UPDATEINTERVAL"] = "Sets how often (in seconds) icons are checked for show/hide, alpha, conditions, etc. Zero is as fast as possible. Lower values can have a significant impact on framerate for low-end computers"
+L["UIPANEL_TOOLTIP_UPDATEINTERVAL"] = [[Sets how often (in seconds) icons are checked for show/hide, alpha, conditions, etc.
+
+Zero is as fast as possible. Lower values can have a significant impact on framerate for low-end computers.]]
 L["UIPANEL_EFFTHRESHOLD"] = "Buff Efficiency Threshold"
 L["UIPANEL_EFFTHRESHOLD_DESC"] = "Sets the minimum number of buffs/debuffs to switch to a more efficient mode of checking them when there are a high number. Note that once the number of auras being checked exceeds this number, older auras will be prioritized instead of priority based on the order in which they were entered."
 L["UIPANEL_ICONSPACINGX"] = "Horizontal Icon Spacing"
@@ -564,7 +570,7 @@ L["UIPANEL_GROUPSORT_stacks_DESC"] = "Sorts the group by the stacks of each icon
 
 
 L["COLORNAMES"] = "Class Colored Names"
-L["COLORNAMES_DESC"] = "Check in order to attempt to color the names of units in text displays (Binding Text and Text Event Output)."
+L["COLORNAMES_DESC"] = "Check in order to attempt to color the names of units in text displays and text icon event handlers."
 L["ALWAYSSUBLINKS"] = "Always Substitute Links"
 L["ALWAYSSUBLINKS_DESC"] = "By default, spell/item links will only be substituted into text event outputs. Check this setting to cause links to be substituted everywhere, including icon bind/label text."
 
@@ -575,6 +581,8 @@ L["COLOR_MSQ_COLOR"] = "Color Masque border"
 L["COLOR_MSQ_COLOR_DESC"] = "Checking this will cause the border of a Masque skin (if the skin you are using has a border) to be colored."
 L["COLOR_MSQ_ONLY"] = "Only color Masque border"
 L["COLOR_MSQ_ONLY_DESC"] = "Checking this will cause ONLY the border of a Masque skin (if the skin you are using has a border) to colored. Icons will NOT be colored"
+L["COLOR_IGNORE_GCD"] = "Colors ignore GCD"
+L["COLOR_IGNORE_GCD_DESC"] = "Checking this will prevent icon colors from changing simply because of the global cooldown."
 L["COLOR_OVERRIDEDEFAULT"] = "Use"
 L["COLOR_OVERRIDEDEFAULT_DESC"] = "Check this to override the *Global Colors* setting and use this setting instead."
 L["COLOR_HEADER_DEFAULT"] = [[These colors will be used for any icon type that does not override them in the type's color settings.
@@ -1086,7 +1094,8 @@ L["ERROR_MISSINGLAYOUT"] = "Couldn't find the text layout for %s. Falling back o
 L["SENDSUCCESSFUL"] = "Sent successfully"
 L["MESSAGERECIEVE"] = "%s has sent you some TellMeWhen data! You can import this data into TellMeWhen using the %q button, located at the bottom of the icon editor."
 L["MESSAGERECIEVE_SHORT"] = "%s has sent you some TellMeWhen data!"
-L["ALLOWCOMM"] = "Allow data importing"
+L["ALLOWCOMM"] = "Allow in-game sharing"
+L["ALLOWCOMM_DESC"] = "Allow other TellMeWhen users to send you data."
 L["ALLOWVERSIONWARN"] = "Notify of new version"
 L["NEWVERSION"] = "A new version of TellMeWhen is available: %s"
 L["PLAYER_DESC"] = "(You)"

@@ -30,7 +30,7 @@ local DogTag = LibStub("LibDogTag-3.0", true)
 TELLMEWHEN_VERSION = "6.0.3"
 TELLMEWHEN_VERSION_MINOR = strmatch(" @project-version@", " r%d+") or ""
 TELLMEWHEN_VERSION_FULL = TELLMEWHEN_VERSION .. TELLMEWHEN_VERSION_MINOR
-TELLMEWHEN_VERSIONNUMBER = 60331 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
+TELLMEWHEN_VERSIONNUMBER = 60332 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
 if TELLMEWHEN_VERSIONNUMBER > 61001 or TELLMEWHEN_VERSIONNUMBER < 60000 then return error("YOU SCREWED UP THE VERSION NUMBER OR DIDNT CHANGE THE SAFETY LIMITS") end -- safety check because i accidentally made the version number 414069 once
 
 TELLMEWHEN_MAXROWS = 20
@@ -1177,20 +1177,21 @@ TMW.Defaults = {
 		Locked			= 	false,
 		NumGroups		=	1,
 		Interval		=	UPD_INTV,
-		EffThreshold	=	15,
+		--EffThreshold	=	15,
 		TextureName		= 	"Blizzard",
 		DrawEdge		=	not TMW.ISMOP and false,
 		SoundChannel	=	"SFX",
 		ReceiveComm		=	true,
 		WarnInvalids	=	false,
 		CheckOrder		=	-1,
-		SUG_atBeginning	=	true,
+		--SUG_atBeginning	=	true,
 		ColorNames		=	true,
 		AlwaysSubLinks	=	false,
 	--[[	CodeSnippets = {
 		},]]
 		ColorMSQ	 	 = false,
 		OnlyMSQ		 	 = false,
+		ColorGCD		 = true,
 
 		Colors = {
 			["**"] = {
@@ -1983,7 +1984,7 @@ local function OnUpdateDuringCoroutine(self)
 		else
 			local success, err = coroutine.resume(UpdateCoroutine)
 			if not success then
-				TMW:Printf(L["SAFESETUP_FAILED"], err)
+				--TMW:Printf(L["SAFESETUP_FAILED"], err)
 				TMW:Fire("TMW_SAFESETUP_COMPLETE")
 				TMW:Error(err)
 			end

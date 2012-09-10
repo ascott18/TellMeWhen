@@ -272,11 +272,11 @@ function SUG:NameOnCursor(isClick)
 	-- always escape parentheses, brackets, percent signs, minus signs, plus signs
 	SUG.lastName = gsub(SUG.lastName, "([%(%)%%%[%]%-%+])", "%%%1")
 
-	if TMW.db.profile.SUG_atBeginning then
+	--if TMW.db.profile.SUG_atBeginning then
 		SUG.atBeginning = "^" .. SUG.lastName
-	else
-		SUG.atBeginning = SUG.lastName
-	end
+	--else
+	--	SUG.atBeginning = SUG.lastName
+	--end
 
 
 	if SUG.CurrentModule.OnSuggest then

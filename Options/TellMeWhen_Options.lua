@@ -1019,6 +1019,15 @@ local colorIconTypeTemplate = {
 				return not TMW.db.profile.ColorMSQ
 			end,
 		},
+		ColorGCD = {
+			name = L["COLOR_IGNORE_GCD"],
+			desc = L["COLOR_IGNORE_GCD_DESC"],
+			type = "toggle",
+			order = 3,
+			hidden = function(info)
+				return not LMB or info[#info-1] ~= "GLOBAL"
+			end,
+		},
 	}
 }
 for k, v in pairs(colorOrder) do
@@ -1056,13 +1065,13 @@ function TMW:CompileOptions()
 							dialogControl = 'LSM30_Statusbar',
 							values = LSM:HashTable("statusbar"),
 						},
-						sliders = {
+						--[[sliders = {
 							type = "group",
 							order = 9,
 							name = "",
 							guiInline = true,
 							dialogInline = true,
-							args = {
+							args = {]]
 								Interval = {
 									name = L["UIPANEL_UPDATEINTERVAL"],
 									desc = L["UIPANEL_TOOLTIP_UPDATEINTERVAL"],
@@ -1073,7 +1082,7 @@ function TMW:CompileOptions()
 									step = 0.01,
 									bigStep = 0.01,
 								},
-								EffThreshold = {
+								--[[EffThreshold = {
 									name = L["UIPANEL_EFFTHRESHOLD"],
 									desc = L["UIPANEL_EFFTHRESHOLD_DESC"],
 									type = "range",
@@ -1081,9 +1090,13 @@ function TMW:CompileOptions()
 									min = 0,
 									max = 40,
 									step = 1,
+									
+									-- I really doubt that anyone uses this setting at all.
+									-- Going to hide it and see if anyone complains.
+									hidden = true,
 								},
 							},
-						},
+						},]]
 						checks = {
 							type = "group",
 							order = 21,
@@ -1130,15 +1143,19 @@ function TMW:CompileOptions()
 									type = "toggle",
 									order = 43,
 								},
-								SUG_atBeginning = {
+								--[[SUG_atBeginning = {
+									-- I really doubt that anyone uses this setting at all.
+									-- Going to hide it and see if anyone complains.
+									
 									name = L["SUG_ATBEGINING"],
 									desc = L["SUG_ATBEGINING_DESC"],
 									width = "double",
 									type = "toggle",
 									order = 44,
-								},
+								},]]
 								ReceiveComm = {
 									name = L["ALLOWCOMM"],
+									desc = L["ALLOWCOMM_DESC"],
 									type = "toggle",
 									order = 50,
 								},
@@ -1400,7 +1417,7 @@ function ID:SpellItemToIcon(icon, func, arg1)
 		return
 	end
 
-	local t, data, subType
+	local t, data, subType, param4
 	local input
 	if not (CursorHasSpell() or CursorHasItem()) and ID.DraggingInfo then
 		t = "spell"
@@ -1861,7 +1878,6 @@ function IE:OnUpdate()
 end
 
 function IE:TMW_ONUPDATE_POST(...)
-	print(self, ...)
 	-- run updates for any icons that are queued
 	for i, icon in ipairs(IE.iconsToUpdate) do
 		TMW.safecall(icon.Setup, icon)
