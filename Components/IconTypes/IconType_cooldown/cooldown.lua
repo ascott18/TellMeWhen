@@ -247,6 +247,10 @@ function Type:Setup(icon, groupID, iconID)
 	icon.NameArray = TMW:GetSpellNames(icon, icon.Name)
 	icon.NameNameArray = TMW:GetSpellNames(icon, icon.Name, nil, 1)
 	
+	if pclass ~= "DEATHKNIGHT" then
+		icon.IgnoreRunes =  nil
+	end
+	
 	if icon.NameName == strlower(GetSpellInfo(75)) and not icon.NameArray[2] then
 		icon:SetInfo("texture", GetSpellTexture(75))
 		icon.asStart = icon.asStart or 0

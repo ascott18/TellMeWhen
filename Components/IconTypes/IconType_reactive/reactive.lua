@@ -236,6 +236,9 @@ function Type:Setup(icon, groupID, iconID)
 
 	icon:SetInfo("texture", TMW:GetConfigIconTexture(icon))
 	
+	if pclass ~= "DEATHKNIGHT" then
+		icon.IgnoreRunes =  nil
+	end
 	
 	if icon.UseActvtnOverlay then
 		icon:RegisterEvent("SPELL_ACTIVATION_OVERLAY_GLOW_SHOW")
