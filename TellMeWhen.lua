@@ -30,7 +30,7 @@ local DogTag = LibStub("LibDogTag-3.0", true)
 TELLMEWHEN_VERSION = "6.0.3"
 TELLMEWHEN_VERSION_MINOR = strmatch(" @project-version@", " r%d+") or ""
 TELLMEWHEN_VERSION_FULL = TELLMEWHEN_VERSION .. TELLMEWHEN_VERSION_MINOR
-TELLMEWHEN_VERSIONNUMBER = 60327 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
+TELLMEWHEN_VERSIONNUMBER = 60328 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
 if TELLMEWHEN_VERSIONNUMBER > 61001 or TELLMEWHEN_VERSIONNUMBER < 60000 then return error("YOU SCREWED UP THE VERSION NUMBER OR DIDNT CHANGE THE SAFETY LIMITS") end -- safety check because i accidentally made the version number 414069 once
 
 TELLMEWHEN_MAXROWS = 20
@@ -1927,7 +1927,7 @@ end
 
 do -- TMW:UpdateViaCoroutine()
 -- Blizzard's execution cap in combat is 200ms. We will be extra safe and go for 100ms.
-local COROUTINE_MAX_TIME_PER_FRAME = 50
+local COROUTINE_MAX_TIME_PER_FRAME = 100
 
 local NumCoroutinesQueued = 0
 local CoroutineStartTime
@@ -1971,6 +1971,7 @@ local function OnUpdateDuringCoroutine(self)
 		
 		if not UpdateCoroutine then
 			UpdateCoroutine = coroutine.create(TMW.UpdateNormally)
+			CheckCoroutineTermination() -- Make sure we haven't already exceeded this frame's threshold (from loading options, creating the coroutine, etc.)
 		end
 		
 		TMW:RegisterCallback("TMW_ICON_SETUP_POST", CheckCoroutineTermination)

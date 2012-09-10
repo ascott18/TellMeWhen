@@ -520,6 +520,10 @@ L["UIPANEL_DELGROUP"] = "Delete this Group"
 L["UIPANEL_DELGROUP_DESC"] = [[Any groups after this group will have their ID shifted up one, and any icons that are checking icons in groups that will be shifted will have their settings automatically updated.
 
 Hold |cff7fffffCtrl|r to bypass confirmation.]]
+L["UIPANEL_GROUPMOVEUP"] = "Move up"
+L["UIPANEL_GROUPMOVEUP_DESC"] = "Shifts this group's groupID up by one"
+L["UIPANEL_GROUPMOVEDOWN"] = "Move Down"
+L["UIPANEL_GROUPMOVEDOWN_DESC"] = "Shifts this group's groupID down by one"
 L["UIPANEL_TOOLTIP_ENABLEGROUP"] = "Show and enable this group"
 L["UIPANEL_TOOLTIP_ROWS"] = "Set the number of rows in this group"
 L["UIPANEL_TOOLTIP_COLUMNS"] = "Set the number of columns in this group"

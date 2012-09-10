@@ -762,6 +762,32 @@ TMW.GroupConfigTemplate = {
 					style = "dropdown",
 					order = 27,
 				},
+				moveup = {
+					name = L["UIPANEL_GROUPMOVEUP"],
+					desc = L["UIPANEL_GROUPMOVEUP_DESC"],
+					type = "execute",
+					order = 48,
+					func = function(info)
+						TMW:Group_Swap(findid(info), findid(info) - 1)
+						IE:NotifyChanges("groups", "#Group " .. findid(info) - 1)
+					end,
+					disabled = function(info)
+						return findid(info) == 1
+					end,
+				},
+				movedown = {
+					name = L["UIPANEL_GROUPMOVEDOWN"],
+					desc = L["UIPANEL_GROUPMOVEDOWN_DESC"],
+					type = "execute",
+					order = 49,
+					func = function(info)
+						TMW:Group_Swap(findid(info), findid(info) + 1)
+						IE:NotifyChanges("groups", "#Group " .. findid(info) + 1)
+					end,
+					disabled = function(info)
+						return findid(info) == TMW.db.profile.NumGroups
+					end,
+				},
 				delete = {
 					name = L["UIPANEL_DELGROUP"],
 					desc = L["UIPANEL_DELGROUP_DESC"],
@@ -1305,6 +1331,34 @@ function TMW:Group_Add()
 	TMW:CompileOptions()
 	IE:NotifyChanges("groups", "#Group " .. groupID)
 	return groupID, TMW[groupID]
+end
+
+function TMW:Group_Swap(groupID1, groupID2)
+	local source = "TellMeWhen_Group" .. groupID1
+	local destination = "TellMeWhen_Group" .. "TEMP"
+
+	TMW:ReconcileData(source, destination)
+	TMW:ReconcileData(source, destination, source .. "_Icon", destination .. "_Icon")
+
+	local source = "TellMeWhen_Group" .. groupID2
+	local destination = "TellMeWhen_Group" .. groupID1
+
+	TMW:ReconcileData(source, destination)
+	TMW:ReconcileData(source, destination, source .. "_Icon", destination .. "_Icon")
+	
+	
+	local source = "TellMeWhen_Group" .. "TEMP"
+	local destination = "TellMeWhen_Group" .. groupID2
+	TMW:ReconcileData(source, destination)
+	TMW:ReconcileData(source, destination, source .. "_Icon", destination .. "_Icon")
+
+	local Groups = TMW.db.profile.Groups
+	Groups[groupID1], Groups[groupID2] = Groups[groupID2], Groups[groupID1]
+    
+    TMW:Update()
+	IE:Load()
+	TMW:CompileOptions()
+	IE:NotifyChanges()
 end
 
 

@@ -9,6 +9,7 @@
  * Updated Unit Cooldown icons for all cooldown resets in MoP.
  * DR categories should now be complete for MoP. Please report any missing spells.
  * You can once again toggle config mode in combat. You may still get script ran too long errors if TellMeWhen_Options has not been loaded yet and you unlock in combat,  but it won't break anything.
+ * You can now reorder groups.
  * Bug fixes:
  ** Fixed static formats again (ICONMENU_MULTISTATECD_DESC)
  ** (Condition ROLE): attempt to index global "roles" (a nil value)
