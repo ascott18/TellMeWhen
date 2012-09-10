@@ -239,7 +239,7 @@ local _, RACIAL = GetSpellInfo(20572) -- blood fury, we need the localized "Raci
 	
 function ClassSpellCache:PLAYER_TALENT_UPDATE()	
 	local  _, _, _, endgeneral = GetSpellTabInfo(1)
-	local _, _, offs, numspells = GetSpellTabInfo(4)
+	local _, _, offs, numspells = GetSpellTabInfo(GetNumSpellTabs())
 	local _, race = UnitRace("player")
 	
 	for i = 1, offs + numspells do

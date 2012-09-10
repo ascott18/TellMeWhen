@@ -360,11 +360,11 @@ L["ICONMENU_SHOWTTTEXT_DESC"] = [[Check this to display the first variable assoc
 
 Numbers are provided by Blizzard API and do not necessarily match numbers found on the tooltip of the aura. In most practical cases, though, the correct number will be shown.]]
 L["ICONMENU_RANGECHECK"] = "Range check"
-L["ICONMENU_RANGECHECK_DESC"] = "Check this to enable changing the color of the icon when you are out of range"
+L["ICONMENU_RANGECHECK_DESC"] = "Check this to enable changing the color of the icon when you are out of range."
 L["ICONMENU_MANACHECK"] = "Power check"
-L["ICONMENU_MANACHECK_DESC"] = "Check this to enable changing the color of the icon when you are out of mana/rage/runic power/etc"
+L["ICONMENU_MANACHECK_DESC"] = "Check this to enable changing the color of the icon when you are out of mana/rage/runic power/etc."
 L["ICONMENU_COOLDOWNCHECK"] = "Cooldown check"
-L["ICONMENU_COOLDOWNCHECK_DESC"] = "Check this to cause the icon to be considered unusable if it is on cooldown"
+L["ICONMENU_COOLDOWNCHECK_DESC"] = "Check this to cause the icon to be considered unusable if it is on cooldown."
 L["ICONMENU_IGNORERUNES"] = "Ignore Runes"
 L["ICONMENU_IGNORERUNES_DESC"] = "Check this to treat the cooldown as usable if the only thing hindering it is a rune cooldown (or a global cooldown)."
 L["ICONMENU_IGNORERUNES_DESC_DISABLED"] = "You must enable the \"Cooldown check\" setting to enable the \"Ignore Runes\" setting."

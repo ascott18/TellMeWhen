@@ -4989,16 +4989,21 @@ function IconType:GuessIconTexture(ics)
 	end
 end
 
-function IconType:DragReceived(icon, t, data, subType)
+function IconType:DragReceived(icon, t, data, subType, param4)
 	local ics = icon:GetSettings()
 
 	if t ~= "spell" then
 		return
 	end
 
-	local _, spellID = GetSpellBookItemInfo(data, subType)
-	if not spellID then
-		return
+	local _, spellID
+	if data == 0 and type(param4) == "number" then
+		spellID = param4
+	else
+		_, spellID = GetSpellBookItemInfo(data, subType)
+		if not spellID then
+			return
+		end
 	end
 
 	ics.Name = TMW:CleanString(ics.Name .. ";" .. spellID)

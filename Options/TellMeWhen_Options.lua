@@ -1358,7 +1358,7 @@ function ID:SpellItemToIcon(icon, func, arg1)
 		t = "spell"
 		data, subType = unpack(ID.DraggingInfo)
 	else
-		t, data, subType = GetCursorInfo()
+		t, data, subType, param4 = GetCursorInfo()
 	end
 	ID.DraggingInfo = nil
 
@@ -1374,9 +1374,9 @@ function ID:SpellItemToIcon(icon, func, arg1)
 	-- handle the drag based on icon type
 	local success
 	if func then
-		success = func(arg1, icon, t, data, subType)
+		success = func(arg1, icon, t, data, subType, param4)
 	else
-		success = icon.typeData:DragReceived(icon, t, data, subType)
+		success = icon.typeData:DragReceived(icon, t, data, subType, param4)
 	end
 	if not success then
 		return
