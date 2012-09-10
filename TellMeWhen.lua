@@ -30,7 +30,7 @@ local DogTag = LibStub("LibDogTag-3.0", true)
 TELLMEWHEN_VERSION = "6.0.3"
 TELLMEWHEN_VERSION_MINOR = strmatch(" @project-version@", " r%d+") or ""
 TELLMEWHEN_VERSION_FULL = TELLMEWHEN_VERSION .. TELLMEWHEN_VERSION_MINOR
-TELLMEWHEN_VERSIONNUMBER = 60328 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
+TELLMEWHEN_VERSIONNUMBER = 60331 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
 if TELLMEWHEN_VERSIONNUMBER > 61001 or TELLMEWHEN_VERSIONNUMBER < 60000 then return error("YOU SCREWED UP THE VERSION NUMBER OR DIDNT CHANGE THE SAFETY LIMITS") end -- safety check because i accidentally made the version number 414069 once
 
 TELLMEWHEN_MAXROWS = 20
@@ -1183,7 +1183,6 @@ TMW.Defaults = {
 		SoundChannel	=	"SFX",
 		ReceiveComm		=	true,
 		WarnInvalids	=	false,
-		BarGCD			=	true,
 		CheckOrder		=	-1,
 		SUG_atBeginning	=	true,
 		ColorNames		=	true,
@@ -1959,7 +1958,7 @@ local function OnUpdateDuringCoroutine(self)
 		TMW.safecall = safecall_safe
 		safecall = safecall_safe
 		
-		TMW:Print(L["SAFESETUP_COMPLETE"])
+		--TMW:Print(L["SAFESETUP_COMPLETE"])
 		TMW:Fire("TMW_SAFESETUP_COMPLETE")
 		
 		TMW:SetScript("OnUpdate", TMW.OnUpdate)
@@ -2375,11 +2374,6 @@ function TMW:GetBaseUpgrades()			-- upgrade functions
 				gsub("boss[^%d]", "boss1-4;"):
 				gsub("maintank[^%d]", "maintank1-5;"):
 				gsub("mainassist[^%d]", "mainassist1-5;"))
-			end,
-		},
-		[40100] = {
-			profile = function(self)
-				TMW.db.profile["BarGCD"] = true
 			end,
 		},
 		[40080] = {

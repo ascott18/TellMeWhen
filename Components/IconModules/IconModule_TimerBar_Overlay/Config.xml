@@ -1,7 +1,7 @@
 <Ui>
 
 	<Frame name="TellMeWhen_CBarOptions" inherits="TellMeWhen_OptionsModuleContainer" virtual="true">
-		<Size y="30"/>
+		<Size y="60"/>
 		<Frames>
 			<CheckButton name="$parentShowCBar" inherits="TellMeWhen_CheckTemplate" parentKey="ShowCBar">
 				<Anchors>
@@ -59,6 +59,24 @@
 					</OnLoad>
 				</Scripts>
 			</EditBox>
+			
+			<CheckButton name="$parentOverlay_BarGCD" inherits="TellMeWhen_CheckTemplate" parentKey="Overlay_BarGCD">
+				<Anchors>
+					<Anchor point="TOP" relativeTo="$parentShowCBar" relativePoint="BOTTOM" y="2"/>
+				</Anchors>
+				<Scripts>
+					<OnLoad>
+						TMW.IE:CreateSettingFrameFromData(self, {
+							setting = "Overlay_BarGCD",
+							title = TMW.L["ICONMENU_ALLOWGCD"],
+							tooltip = TMW.L["ICONMENU_ALLOWGCD_DESC"],
+							disabled = function(self)
+								return not TMW.CI.ics.ShowCBar
+							end,
+						})
+					</OnLoad>
+				</Scripts>
+			</CheckButton>
 		</Frames>
 		<Scripts>
 			<OnLoad>
@@ -68,6 +86,7 @@
 				self.InvertCBar:ConstrainLabel(self.CBarOffs)
 				
 				TMW.IE:DistributeFrameAnchorsLaterally(self, 3, self.ShowCBar, self.InvertCBar, self.CBarOffs)
+				TMW.IE:DistributeFrameAnchorsLaterally(self, 3, self.Overlay_BarGCD)
 			</OnLoad>
 		</Scripts>
 	</Frame>

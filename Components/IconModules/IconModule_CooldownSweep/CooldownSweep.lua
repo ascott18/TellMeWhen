@@ -46,8 +46,8 @@ CooldownSweep:RegisterConfigPanel_ConstructorFunc(200, "TellMeWhen_TimerSettings
 		},
 		{
 			setting = "ClockGCD",
-			title = TMW.L["ICONMENU_CLOCKGCD"],
-			tooltip = TMW.L["ICONMENU_CLOCKGCD_DESC"],
+			title = TMW.L["ICONMENU_ALLOWGCD"],
+			tooltip = TMW.L["ICONMENU_ALLOWGCD_DESC"],
 			disabled = function(self)
 				return not TMW.CI.ics.ShowTimer and not TMW.CI.ics.ShowTimerText
 			end,
@@ -62,7 +62,7 @@ TMW:RegisterUpgrade(60315, {
 		-- Also, the setting changed from "Ignore" to "Allow", so flip the boolean too.
 		
 		-- Old default value was true, so make sure we use true if the setting is nil from having been the same as default.
-		local old = TMW.db.global.ClockGCD
+		local old = TMW.db.profile.ClockGCD
 		if old == nil then
 			old = true
 		end

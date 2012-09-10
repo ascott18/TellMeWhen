@@ -5,7 +5,7 @@
  * New setting for Combat Event icons - Don't Refresh.
  * Added Raid Finder to the Instance Type condition.
  * You can now output text to the UI Errors Frame.
- * Moved the Timers ignore GCD setting from per-profile to per-icon.
+ * Moved the Timers ignore GCD & Bars ignore GCD settings from per-profile to per-icon.
  * Updated Unit Cooldown icons for all cooldown resets in MoP.
  * DR categories should now be complete for MoP. Please report any missing spells.
  * You can once again toggle config mode in combat. You may still get script ran too long errors if TellMeWhen_Options has not been loaded yet and you unlock in combat,  but it won't break anything.

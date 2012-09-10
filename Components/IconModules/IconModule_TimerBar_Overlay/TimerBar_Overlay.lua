@@ -20,9 +20,42 @@ local print = TMW.print
 
 local TimerBar_Overlay = TMW:NewClass("IconModule_TimerBar_Overlay", "IconModule_TimerBar")
 
+TimerBar_Overlay:RegisterIconDefaults{
+	ShowCBar				= false,
+	CBarOffs				= 0,
+	InvertCBar				= false,
+	Overlay_BarGCD			= false,
+}
+
+TimerBar_Overlay:RegisterConfigPanel_XMLTemplate(217, "TellMeWhen_CBarOptions")
+
+
+TMW:RegisterUpgrade(60331, {
+	icon = function(self, ics)
+		-- Pull the setting from the profile settings, since this setting is now per-icon
+		-- Also, the setting changed from "Ignore" to "Allow", so flip the boolean too.
+		
+		-- Old default value was true, so make sure we use true if the setting is nil from having been the same as default.
+		local old = TMW.db.profile.BarGCD
+		if old == nil then
+			old = true
+		end
+		
+		ics.Overlay_BarGCD = not old
+	end,
+})
+
+TMW:RegisterUpgrade(51022, {
+	icon = function(self, ics)
+		ics.InvertCBar = not not ics.InvertBars
+	end,
+})
+
+
 function TimerBar_Overlay:SetupForIcon(sourceIcon)
 	self.Invert = sourceIcon.InvertCBar
 	self.Offset = sourceIcon.CBarOffs or 0
+	self.BarGCD = sourceIcon.Overlay_BarGCD
 	if not sourceIcon.typeData then
 		error("sourceIcon.typeData was nil. Why did this happen? (Please tell Cybeloras)")
 	end
@@ -31,19 +64,6 @@ function TimerBar_Overlay:SetupForIcon(sourceIcon)
 	self:UpdateValue(1)
 end
 
-TimerBar_Overlay:RegisterIconDefaults{
-	ShowCBar				= false,
-	CBarOffs				= 0,
-	InvertCBar				= false,
-}
-
-TimerBar_Overlay:RegisterConfigPanel_XMLTemplate(217, "TellMeWhen_CBarOptions")
-
-TMW:RegisterUpgrade(51022, {
-	icon = function(self, ics)
-		ics.InvertCBar = not not ics.InvertBars
-	end,
-})
 
 TimerBar_Overlay:SetIconEventListner("TMW_ICON_SETUP_POST", function(Module, icon)
 	if TMW.Locked then

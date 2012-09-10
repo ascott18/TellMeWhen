@@ -20,7 +20,7 @@ local	pairs, wipe =
 		pairs, wipe
 local BarsToUpdate = {}
 
-local BarGCD, StatusBarTexture
+local StatusBarTexture
 
 local TimerBar = TMW:NewClass("IconModule_TimerBar", "IconModule", "UpdateTableManager")
 TimerBar:UpdateTable_Set(BarsToUpdate)
@@ -121,7 +121,7 @@ function TimerBar:SetCooldown(start, duration, isGCD)
 	self.start = start
 	
 	if duration > 0 then
-		if isGCD and BarGCD then
+		if isGCD and not self.BarGCD then
 			self.duration = 0
 		end
 
@@ -153,7 +153,6 @@ end)
 
 TMW:RegisterCallback("TMW_GLOBAL_UPDATE", function(event)
 	StatusBarTexture = LSM:Fetch("statusbar", TMW.db.profile.TextureName)
-	BarGCD = TMW.db.profile.BarGCD
 end)
 
 TMW:RegisterCallback("TMW_ONUPDATE_POST", function(event, time, Locked)
