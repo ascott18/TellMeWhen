@@ -14,8 +14,8 @@ local TMW = TMW
 if not TMW then return end
 local L = TMW.L
 
-local GetSpellCooldown, GetSpellCharges, GetSpellCount, IsSpellInRange, IsUsableSpell =
-	  GetSpellCooldown, GetSpellCharges, GetSpellCount, IsSpellInRange, IsUsableSpell
+local GetSpellCooldown, GetSpellCharges, GetSpellCount, IsUsableSpell =
+	  GetSpellCooldown, GetSpellCharges, GetSpellCount, IsUsableSpell
 local GetActionCooldown, IsActionInRange, IsUsableAction, GetActionTexture, GetActionInfo =
 	  GetActionCooldown, IsActionInRange, IsUsableAction, GetActionTexture, GetActionInfo
 local UnitRangedDamage =
@@ -29,6 +29,8 @@ local isString = TMW.isString
 local _, pclass = UnitClass("Player")
 local SpellTextures = TMW.SpellTextures
 local mindfreeze = strlower(GetSpellInfo(47528))
+
+local IsSpellInRange = LibStub("SpellRange-1.0").IsSpellInRange
 
 local Type = TMW.Classes.IconType:New("cooldown")
 LibStub("AceEvent-3.0"):Embed(Type)
@@ -165,8 +167,8 @@ local function SpellCooldown_OnUpdate(icon, time)
 				start, duration = 0, 0
 			end
 			local inrange, nomana = 1
-			if RangeCheck and isString[NameNameArray[i]] then
-				inrange = IsSpellInRange(NameNameArray[i], "target") or 1
+			if RangeCheck then
+				inrange = IsSpellInRange(iName, "target") or 1
 			end
 			if ManaCheck then
 				nomana = SpellHasNoMana(iName)

@@ -196,10 +196,10 @@ ConditionCategory:RegisterCondition(5,	 "SPELLRANGE", {
 	icon = "Interface\\Icons\\ability_hunter_snipershot",
 	tcoords = CNDT.COMMON.standardtcoords,
 	Env = {
-		IsSpellInRange = IsSpellInRange,
+		IsSpellInRange = LibStub("SpellRange-1.0").IsSpellInRange,
 	},
 	funcstr = function(c)
-		return 1-c.Level .. [[ == (IsSpellInRange(c.NameName, c.Unit) or 0)]]
+		return 1-c.Level .. [[ == (IsSpellInRange(c.NameFirst, c.Unit) or 0)]]
 	end,
 })
 ConditionCategory:RegisterCondition(6,	 "GCD", {

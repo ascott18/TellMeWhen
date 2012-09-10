@@ -14,8 +14,8 @@ local TMW = TMW
 if not TMW then return end
 local L = TMW.L
 
-local GetSpellCooldown, IsSpellInRange, IsUsableSpell, GetSpellInfo, GetSpellCharges, GetSpellCount =
-	  GetSpellCooldown, IsSpellInRange, IsUsableSpell, GetSpellInfo, GetSpellCharges, GetSpellCount
+local GetSpellCooldown, IsUsableSpell, GetSpellInfo, GetSpellCharges, GetSpellCount =
+	  GetSpellCooldown, IsUsableSpell, GetSpellInfo, GetSpellCharges, GetSpellCount
 local SpellHasNoMana = TMW.SpellHasNoMana
 local OnGCD = TMW.OnGCD
 local print = TMW.print
@@ -25,6 +25,7 @@ local SpellTextures = TMW.SpellTextures
 local strlowerCache = TMW.strlowerCache
 local mindfreeze = strlower(GetSpellInfo(47528))
 
+local IsSpellInRange = LibStub("SpellRange-1.0").IsSpellInRange
 
 local Type = TMW.Classes.IconType:New("reactive")
 Type.name = L["ICONMENU_REACTIVE"]
@@ -143,8 +144,8 @@ local function Reactive_OnUpdate(icon, time)
 		
 		if duration then
 			inrange, CD = 1
-			if RangeCheck and isString[NameNameArray[i]] then
-				inrange = IsSpellInRange(NameNameArray[i], "target") or 1
+			if RangeCheck then
+				inrange = IsSpellInRange(iName, "target") or 1
 			end
 			usable, nomana = IsUsableSpell(iName)
 			if IgnoreNomana then
@@ -200,8 +201,8 @@ local function Reactive_OnUpdate(icon, time)
 			start, duration = 0, 0
 		end
 		inrange, nomana = 1
-		if RangeCheck and isString[icon.NameName] then
-			inrange = IsSpellInRange(icon.NameName, "target") or 1
+		if RangeCheck then
+			inrange = IsSpellInRange(NameFirst, "target") or 1
 		end
 		if ManaCheck then
 			nomana = SpellHasNoMana(NameFirst)
