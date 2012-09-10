@@ -56,6 +56,17 @@ TMW:RegisterDatabaseDefaults{
 					SkinAs			= "Count",
 				},
 			},
+			icon2 = {
+				Name = L["TEXTLAYOUTS_DEFAULTS_CENTERNUMBER"],
+				GUID = "icon2",
+				NoEdit = true,
+				n = 1,
+				{
+					StringName = L["TEXTLAYOUTS_DEFAULTS_NUMBER"],
+					ConstrainWidth = false,
+					Size = 24,
+				}, 
+			},
 		},
 	},
 }

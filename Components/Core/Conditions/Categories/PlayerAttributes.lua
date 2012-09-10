@@ -257,7 +257,7 @@ if TMW.ISMOP then
 	ConditionCategory:RegisterCondition(8,	 "TREE", {
 		text = L["UIPANEL_SPECIALIZATION"],
 		min = 1,
-		max = 3,
+		max = GetNumSpecializations,
 		midt = true,
 		texttable = function(i) return select(2, GetSpecializationInfo(i)) end,
 		unit = PLAYER,
@@ -513,7 +513,7 @@ ConditionCategory:RegisterCondition(14,	 "PETSPEC", {
 		GetSpecialization = GetSpecialization
 	},
 	funcstr = [[(GetSpecialization(nil, true) or 0) c.Operator c.Level]],
-	hidden = not TMW.ISMOP,
+	hidden = pclass ~= "HUNTER" or not TMW.ISMOP,
 	--events = function(ConditionObject, c)
 	--MAYBE WRONG EVENTS, CHECK BEFORE UNCOMMENTING
 	--	return
@@ -554,7 +554,7 @@ ConditionCategory:RegisterCondition(15,	 "PETTREE", {
 			return [[(GetTalentTabInfo(1, nil, 1) or 0) c.Operator c.Level]]
 		end
 	end,
-	hidden = TMW.ISMOP,
+	hidden = pclass ~= "HUNTER" or TMW.ISMOP,
 	events = function(ConditionObject, c)
 		return
 			ConditionObject:GenerateNormalEventString("UNIT_PET", "player")

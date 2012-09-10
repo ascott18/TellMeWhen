@@ -743,6 +743,8 @@ L["TEXTLAYOUTS_DEFAULTS_BAR1"] = "Bar Layout 1"
 L["TEXTLAYOUTS_DEFAULTS_DURATION"] = "Duration"
 L["TEXTLAYOUTS_DEFAULTS_STACKS"] = "Stacks"
 L["TEXTLAYOUTS_DEFAULTS_BINDINGLABEL"] = "Binding/Label"
+L["TEXTLAYOUTS_DEFAULTS_CENTERNUMBER"] = "Center Number"
+L["TEXTLAYOUTS_DEFAULTS_NUMBER"] = "Number"
 L["TEXTLAYOUTS_RENAME"] = "Rename Layout"
 L["TEXTLAYOUTS_RENAME_DESC"] = "Rename this layout to a name that fits its purpose so that you can easily identify it."
 

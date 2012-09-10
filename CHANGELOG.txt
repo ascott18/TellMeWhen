@@ -11,6 +11,7 @@
  * You can once again toggle config mode in combat. You may still get script ran too long errors if TellMeWhen_Options has not been loaded yet and you unlock in combat,  but it won't break anything.
  * You can now reorder groups.
  * Added a setting to make colors ignore the GCD. It is enabled by default.
+ * Added center text as a default text layout.
  * Bug fixes:
  ** Fixed static formats again (ICONMENU_MULTISTATECD_DESC)
  ** (Condition ROLE): attempt to index global "roles" (a nil value)
@@ -27,6 +28,8 @@
  ** Fixed an error caused by dragging certain talents/specialization spells onto icons.
  ** Wrote a library (LibSpellRange-1.0) to solve the range checking problem in MoP.
  ** Texts.lua line 438: attempt to compare nil with number - Fixed for real this time!
+ ** The talent specialization condition will now properly allow all four choices for druids.
+ ** The pet talent tree conditions should no longer be listed for non-hunters.
  
 ===v6.0.2===
  * Cooldown icons should now provide much better functionality when checking multiple spells. Single-spell functionality should (hopefully) remain unchanged.
