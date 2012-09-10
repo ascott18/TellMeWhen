@@ -25,13 +25,11 @@ local dataobj = ldb:GetDataObjectByName("TellMeWhen") or
 	})
 
 dataobj.OnClick = function(self, button)
-	if TMW:CheckCanDoLockedAction() then
-		if button == "RightButton" then
-			TMW:LoadOptions()
-			LibStub("AceConfigDialog-3.0"):Open("TMW Options")
-		else
-			TMW:LockToggle()
-		end
+	if button == "RightButton" then
+		TMW:LoadOptions()
+		LibStub("AceConfigDialog-3.0"):Open("TMW Options")
+	else
+		TMW:LockToggle()
 	end
 end
 

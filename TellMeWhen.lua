@@ -30,7 +30,7 @@ local DogTag = LibStub("LibDogTag-3.0", true)
 TELLMEWHEN_VERSION = "6.0.3"
 TELLMEWHEN_VERSION_MINOR = strmatch(" @project-version@", " r%d+") or ""
 TELLMEWHEN_VERSION_FULL = TELLMEWHEN_VERSION .. TELLMEWHEN_VERSION_MINOR
-TELLMEWHEN_VERSIONNUMBER = 60326 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
+TELLMEWHEN_VERSIONNUMBER = 60327 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
 if TELLMEWHEN_VERSIONNUMBER > 61001 or TELLMEWHEN_VERSIONNUMBER < 60000 then return error("YOU SCREWED UP THE VERSION NUMBER OR DIDNT CHANGE THE SAFETY LIMITS") end -- safety check because i accidentally made the version number 414069 once
 
 TELLMEWHEN_MAXROWS = 20
@@ -1784,13 +1784,14 @@ function TMW:OnProfile()
 
 	TMW:Update()
 	
-	-- LoadFirstValidIcon must happen through a timer to avoid interference with AceConfigDialog callbacks getting broken when
-	-- we reload the icon editor. (AceConfigDialog-3.0\AceConfigDialog-3.0-57.lua:804: attempt to index field "rootframe" (a nil value))
-	TMW.IE:ScheduleTimer("LoadFirstValidIcon", 0.1)
-
 	if TMW.CompileOptions then
 		TMW:CompileOptions() -- redo groups in the options
 	end
+	
+	-- LoadFirstValidIcon must happen through a timer to avoid interference with AceConfigDialog callbacks getting broken when
+	-- we reload the icon editor. (AceConfigDialog-3.0\AceConfigDialog-3.0-57.lua:804: attempt to index field "rootframe" (a nil value))
+	--TMW.IE:ScheduleTimer("LoadFirstValidIcon", 0.1)
+	
 end
 
 TMW.DatabaseCleanups = {
@@ -1885,7 +1886,7 @@ function TMW:OnUpdate()					-- THE MAGICAL ENGINE OF DOING EVERYTHING
 	TMW:Fire("TMW_ONUPDATE_POST", time, Locked)
 end
 
-function TMW:Update()
+function TMW:UpdateNormally()
 	TMW:Initialize()
 	
 	time = GetTime() TMW.time = time
@@ -1893,10 +1894,6 @@ function TMW:Update()
 
 	Locked = TMW.db.profile.Locked
 	TMW.Locked = Locked
-
-	if not TMW:CheckCanDoLockedAction() then
-		return
-	end
 	
 	if not Locked then
 		TMW:LoadOptions()
@@ -1928,11 +1925,96 @@ function TMW:Update()
 	TMW:Fire("TMW_GLOBAL_UPDATE_POST")
 end
 
-TMW:RegisterEvent("PLAYER_REGEN_DISABLED", function()
-	if TMW.ISMOP and not TMW.Locked and TMW.Initialized then
-		TMW:LockToggle()
+do -- TMW:UpdateViaCoroutine()
+-- Blizzard's execution cap in combat is 200ms. We will be extra safe and go for 100ms.
+local COROUTINE_MAX_TIME_PER_FRAME = 50
+
+local NumCoroutinesQueued = 0
+local CoroutineStartTime
+local UpdateCoroutine
+
+local safecall_safe = TMW.safecall
+
+local function safecall_coroutine(func, ...)
+	return true, func(...)
+end
+
+local function CheckCoroutineTermination(...)
+	if UpdateCoroutine and debugprofilestop() - CoroutineStartTime > COROUTINE_MAX_TIME_PER_FRAME then
+		coroutine.yield(UpdateCoroutine)
+	end
+end
+
+local function OnUpdateDuringCoroutine(self)
+	time = GetTime()
+	TMW.time = time
+	
+	CoroutineStartTime = debugprofilestop()
+	
+	if not TMW.db.profile.Locked then
+		TMW:LoadOptions()
+	end
+	
+	if NumCoroutinesQueued == 0 then
+		TMW.safecall = safecall_safe
+		safecall = safecall_safe
+		
+		TMW:Print(L["SAFESETUP_COMPLETE"])
+		TMW:Fire("TMW_SAFESETUP_COMPLETE")
+		
+		TMW:SetScript("OnUpdate", TMW.OnUpdate)
+	else
+		-- Yielding a coroutine inside a pcall/xpcall isn't permitted,
+		-- so we will just have to YOLO (sorry) here and throw all error handling out the window.
+		TMW.safecall = safecall_coroutine
+		safecall = safecall_coroutine
+		
+		if not UpdateCoroutine then
+			UpdateCoroutine = coroutine.create(TMW.UpdateNormally)
+		end
+		
+		TMW:RegisterCallback("TMW_ICON_SETUP_POST", CheckCoroutineTermination)
+		TMW:RegisterCallback("TMW_GROUP_SETUP_POST", CheckCoroutineTermination)
+
+		
+		if coroutine.status(UpdateCoroutine) == "dead" then
+			UpdateCoroutine = nil
+			NumCoroutinesQueued = NumCoroutinesQueued - 1
+		else
+			local success, err = coroutine.resume(UpdateCoroutine)
+			if not success then
+				TMW:Printf(L["SAFESETUP_FAILED"], err)
+				TMW:Fire("TMW_SAFESETUP_COMPLETE")
+				TMW:Error(err)
+			end
+		end
+		
+		TMW:UnregisterCallback("TMW_ICON_SETUP_POST", CheckCoroutineTermination)
+		TMW:UnregisterCallback("TMW_GROUP_SETUP_POST", CheckCoroutineTermination)
+	end
+end
+
+function TMW:UpdateViaCoroutine()
+	if NumCoroutinesQueued == 0 then
+		--TMW:Print(L["SAFESETUP_TRIGGERED"])
+		TMW:Fire("TMW_SAFESETUP_TRIGGERED")
+		TMW:SetScript("OnUpdate", OnUpdateDuringCoroutine)
+	end
+	NumCoroutinesQueued = NumCoroutinesQueued + 1
+end
+
+TMW:RegisterEvent("PLAYER_REGEN_ENABLED", function()
+	if TMW.ISMOP and TMW.Initialized then
+		TMW.Update = TMW.UpdateNormally
 	end
 end)
+TMW:RegisterEvent("PLAYER_REGEN_DISABLED", function()
+	if TMW.ISMOP and TMW.Initialized then
+		TMW.Update = TMW.UpdateViaCoroutine
+	end
+end)
+end
+TMW.Update = TMW.UpdateNormally
 
 function TMW:DoWarn()
 	if not TMW.Warned then
@@ -5564,11 +5646,6 @@ function TMW:FormatSeconds(seconds, skipSmall, keepTrailing)
 end
 
 function TMW:LockToggle()
-	if TMW.ISMOP and InCombatLockdown() and TMW.Locked then
-		TMW:Print(L["ERROR_NO_LOCKTOGGLE_IN_LOCKDOWN"])
-		return
-	end
-
 	for k, v in pairs(TMW.Warn) do
 		-- reset warnings so they can happen again
 		if type(k) == "string" then
@@ -5581,14 +5658,6 @@ function TMW:LockToggle()
 
 	PlaySound("igCharacterInfoTab")
 	TMW:Update()
-end
-
-function TMW:CheckCanDoLockedAction()
-	if TMW.ISMOP and InCombatLockdown() then
-		TMW:Print(L["ERROR_NO_SLASH_IN_LOCKDOWN"])
-		return false
-	end
-	return true
 end
 
 function TMW:SlashCommand(str)
@@ -5608,10 +5677,8 @@ function TMW:SlashCommand(str)
 
 	if cmd == "options" then
 		
-		if TMW:CheckCanDoLockedAction() then
-			TMW:LoadOptions()
-			LibStub("AceConfigDialog-3.0"):Open("TMW Options")
-		end
+		TMW:LoadOptions()
+		LibStub("AceConfigDialog-3.0"):Open("TMW Options")
 	elseif cmd == "enable" or cmd == "disable" or cmd == "toggle" then
 		local groupID, iconID = tonumber(arg2), tonumber(arg3)
 

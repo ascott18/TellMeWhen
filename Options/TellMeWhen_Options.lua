@@ -36,8 +36,8 @@ local TMW = TMW
 local L = TMW.L
 local GetSpellInfo, GetContainerItemID, GetContainerItemLink =
 	  GetSpellInfo, GetContainerItemID, GetContainerItemLink
-local tonumber, tostring, type, pairs, ipairs, tinsert, tremove, sort, wipe, next, getmetatable, setmetatable, coroutine, pcall, assert, rawget, rawset, unpack, select =
-	  tonumber, tostring, type, pairs, ipairs, tinsert, tremove, sort, wipe, next, getmetatable, setmetatable, coroutine, pcall, assert, rawget, rawset, unpack, select
+local tonumber, tostring, type, pairs, ipairs, tinsert, tremove, sort, wipe, next, getmetatable, setmetatable, pcall, assert, rawget, rawset, unpack, select =
+	  tonumber, tostring, type, pairs, ipairs, tinsert, tremove, sort, wipe, next, getmetatable, setmetatable, pcall, assert, rawget, rawset, unpack, select
 local strfind, strmatch, format, gsub, strsub, strtrim, strlen, strsplit, strlower, max, min, floor, ceil, log10 =
 	  strfind, strmatch, format, gsub, strsub, strtrim, strlen, strsplit, strlower, max, min, floor, ceil, log10
 local GetItemInfo, GetItemIcon, GetInventoryItemID, GetInventoryItemLink, GetInventoryItemTexture, GetInventorySlotInfo, GetContainerNumSlots =
@@ -1689,6 +1689,12 @@ function IE:OnInitialize()
 	meta.__index = getmetatable(TellMeWhen_IconEditor).__index
 	setmetatable(IE, meta)
 
+	IE:HookScript("OnShow", function()
+		TMW:RegisterCallback("TMW_ONUPDATE_POST", IE)
+	end)
+	IE:HookScript("OnHide", function()
+		TMW:UnregisterCallback("TMW_ONUPDATE_POST", IE)
+	end)
 	IE:SetScript("OnUpdate", IE.OnUpdate)
 	IE.iconsToUpdate = {}
 
@@ -1725,7 +1731,9 @@ function IE:OnUpdate()
 		self.BackButton:Show()
 		self.ForwardsButton:Show()
 	end
+end
 
+function IE:TMW_ONUPDATE_POST()
 	-- run updates for any icons that are queued
 	for i, icon in ipairs(IE.iconsToUpdate) do
 		TMW.safecall(icon.Setup, icon)
@@ -1753,13 +1761,6 @@ function IE:TMW_GLOBAL_UPDATE()
 	IE:SaveSettings()
 end
 TMW:RegisterCallback("TMW_GLOBAL_UPDATE", IE)
-
-IE:RegisterEvent("PLAYER_REGEN_DISABLED", function()
-	if TMW.ISMOP then
-		IE:Hide()
-		LibStub("AceConfigDialog-3.0"):Close("TMW Options")
-	end
-end)
 
 function IE:RegisterTab(tab, attachedFrame)
 	local id = #IE.Tabs + 1

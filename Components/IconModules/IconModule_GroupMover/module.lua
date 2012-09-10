@@ -54,7 +54,7 @@ local Module = TMW:NewClass("IconModule_GroupMover", "IconModule"){
 			local GroupModule_GroupPosition = group:GetModuleOrModuleChild("GroupModule_GroupPosition")
 			
 			if not GroupModule_GroupPosition then
-				error("Implementing IconModule_GroupMover, or a derivative thereof, requies that GroupModule_GroupPosition, or a derivative thereof, be implemented. This may involve changing the implementation order of _GroupMover.")
+				error("Implementing IconModule_GroupMover (or a derivative) requies that GroupModule_GroupPosition (or a derivative) be already implemented.")
 			end
 		end,
 	},

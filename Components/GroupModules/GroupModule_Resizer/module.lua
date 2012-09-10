@@ -28,7 +28,7 @@ TMW:NewClass("GroupModule_Resizer", "GroupModule", "Resizer_Generic"){
 			local GroupModule_GroupPosition = group:GetModuleOrModuleChild("GroupModule_GroupPosition")
 			
 			if not GroupModule_GroupPosition then
-				error("Implementing GroupModule_Resizer, or a derivative thereof, requies that GroupModule_GroupPosition, or a derivative thereof, be implemented. This may involve changing the implementation order of _Resizer.")
+				error("Implementing GroupModule_Resizer (or a derivative) requies that GroupModule_GroupPosition (or a derivative) already be implemented.")
 			end
 		
 			self.resizeButton:SetFrameLevel(group:GetFrameLevel() + 3)

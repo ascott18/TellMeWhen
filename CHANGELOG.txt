@@ -8,6 +8,7 @@
  * Moved the Timers ignore GCD setting from per-profile to per-icon.
  * Updated Unit Cooldown icons for all cooldown resets in MoP.
  * DR categories should now be complete for MoP. Please report any missing spells.
+ * You can once again toggle config mode in combat. You may still get script ran too long errors if TellMeWhen_Options has not been loaded yet and you unlock in combat,  but it won't break anything.
  * Bug fixes:
  ** Fixed static formats again (ICONMENU_MULTISTATECD_DESC)
  ** (Condition ROLE): attempt to index global "roles" (a nil value)
@@ -23,6 +24,7 @@
  ** Fixed a bug where profiles of version 60032 or earlier could not be imported by version 60033 or later.
  ** Fixed an error caused by dragging certain talents/specialization spells onto icons.
  ** Wrote a library (LibSpellRange-1.0) to solve the range checking problem in MoP.
+ ** Texts.lua line 438: attempt to compare nil with number - Fixed for real this time!
  
 ===v6.0.2===
  * Cooldown icons should now provide much better functionality when checking multiple spells. Single-spell functionality should (hopefully) remain unchanged.

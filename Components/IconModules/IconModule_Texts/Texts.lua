@@ -445,7 +445,7 @@ function TEXT:GetTextFromSettingsAndLayout(Texts, layoutSettings, textID)
 	
 	local text = Texts[textID]
 	
-	if not text then		
+	if not text then
 		if textID > layoutSettings.n then
 			error("textID is out of range for the given layout!", 2)
 		end
@@ -484,13 +484,6 @@ function Texts:OnNewInstance(icon)
 			end
 		end
 	end
-end
-
-function Texts:OnEnable()
-	local icon = self.icon
-	local attributes = icon.attributes
-	
-	self:DOGTAGUNIT(icon, attributes.dogTagUnit)
 end
 
 function Texts:OnDisable()

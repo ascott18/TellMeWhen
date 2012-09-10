@@ -22,8 +22,8 @@ local Env
 local L = TMW.L
 local _, pclass = UnitClass("Player")
 
-local tostring, type, pairs, ipairs, tremove, pcall, unpack, select, tonumber, wipe, assert, next, loadstring, setfenv, setmetatable =
-	  tostring, type, pairs, ipairs, tremove, pcall, unpack, select, tonumber, wipe, assert, next, loadstring, setfenv, setmetatable
+local tostring, type, pairs, ipairs, tremove, unpack, select, tonumber, wipe, assert, next, loadstring, setfenv, setmetatable =
+	  tostring, type, pairs, ipairs, tremove, unpack, select, tonumber, wipe, assert, next, loadstring, setfenv, setmetatable
 local strlower, min, max, gsub, strfind, strsub, strtrim, format, strmatch, strsplit, strrep =
 	  strlower, min, max, gsub, strfind, strsub, strtrim, format, strmatch, strsplit, strrep
 local NONE, MAX_SPELL_SCHOOLS =
