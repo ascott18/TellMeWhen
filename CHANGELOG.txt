@@ -31,6 +31,7 @@
  ** Texts.lua line 438: attempt to compare nil with number - Fixed for real this time!
  ** The talent specialization condition will now properly allow all four choices for druids.
  ** The pet talent tree conditions should no longer be listed for non-hunters.
+ ** As a workaround to a strange bug in DogTag, the {{{[Stacks]}}} tag now returns a number value instead of a string. All default and otherwise reasonable variations of {{{[Stacks:Hide('0')}}} should automatically be upgraded.
  
 ===v6.0.2===
  * Cooldown icons should now provide much better functionality when checking multiple spells. Single-spell functionality should (hopefully) remain unchanged.

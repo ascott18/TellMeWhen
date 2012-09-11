@@ -1174,7 +1174,7 @@ function Module:Table_GetNormalSuggestions(suggestions, tbl, ...)
 	suggestions[#suggestions + 1] = "Destination:Name"
 	suggestions[#suggestions + 1] = "Unit:Name"
 	suggestions[#suggestions + 1] = "PreviousUnit:Name"
-	suggestions[#suggestions + 1] = "Stacks:Hide('0')"
+	suggestions[#suggestions + 1] = "Stacks:Hide(0)"
 end
 function Module:Entry_Insert(insert)
 	if insert then
@@ -1241,7 +1241,7 @@ function Module:Entry_AddToList_1(f, tagName)
 		local desc = ""
 		
 		for i, tag in TMW:Vararg(strsplit(":", tagName)) do
-			tag = tag:gsub("%(.*%)", "") -- "Hide('0')" to "Hide"
+			tag = tag:gsub("%(.*%)", "") -- "Hide(0)" to "Hide"
 		
 			local tagData = DogTag.Tags.TMW[tag]
 			local doc

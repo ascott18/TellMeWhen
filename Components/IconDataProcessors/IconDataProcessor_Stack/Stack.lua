@@ -17,6 +17,8 @@ local TMW = TMW
 local L = TMW.L
 local print = TMW.print
 
+local isNumber = TMW.isNumber
+
 local tostring = tostring
 
 
@@ -59,14 +61,16 @@ Processor:RegisterDogTag("TMW", "Stacks", {
 	code = function (groupID, iconID)
 		local group = TMW[groupID]
 		local icon = group and group[iconID]
-		return icon and tostring(icon.attributes.stackText or 0) or "0"
+		local stacks = icon and icon.attributes.stackText or 0
+		
+		return isNumber[stacks] or stacks
 	end,
 	arg = {
 		'group', 'number', '@req',
 		'icon', 'number', '@req',
 	},
 	events = TMW:CreateDogTagEventString("STACK"),
-	ret = "string",
+	ret = "number",
 	doc = L["DT_DOC_Stacks"],
 	example = '[Stacks] => "9"; [Stacks(4, 5)] => "3"',
 	category = L["ICON"],

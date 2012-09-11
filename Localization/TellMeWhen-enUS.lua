@@ -39,6 +39,9 @@ L["ERROR_MISSINGFILE_NOREQ"] = [[A complete restart of WoW may be required to fu
 Would you like to restart WoW now?]]
 L["ERROR_ANCHORSELF"] = "%s was trying to anchor to itself, so TellMeWhen reset it's anchor to the center of the screen to prevent catastrophic failure."
 
+L["ERROR_NO_LOCKTOGGLE_IN_LOCKDOWN"] = "Cannot unlock TellMeWhen while in combat."
+L["ERROR_ACTION_DENIED_IN_LOCKDOWN"] = "Cannot do that while in combat."
+
 L["SAFESETUP_TRIGGERED"] = "Running safe & slow setup..."
 L["SAFESETUP_COMPLETE"] = "Safe & slow setup complete."
 L["SAFESETUP_FAILED"] = "Safe & slow setup FAILED: %s"

@@ -1312,6 +1312,7 @@ function TMW:Group_Delete(groupID)
 		return
 	end
 
+	local needReloadIcon = groupID == TMW.CI.g
 	for id = groupID + 1, TMW.db.profile.NumGroups do
 		local source = "TellMeWhen_Group" .. id
 		local destination = "TellMeWhen_Group" .. id - 1
@@ -1321,6 +1322,8 @@ function TMW:Group_Delete(groupID)
 
 		-- check for any icons of a group.
 		TMW:ReconcileData(source, destination, source .. "_Icon", destination .. "_Icon")
+		
+		needReloadIcon = needReloadIcon or groupID == TMW.CI.g
 	end
 
 	tremove(TMW.db.profile.Groups, groupID)
@@ -1331,6 +1334,10 @@ function TMW:Group_Delete(groupID)
 	TMW:CompileOptions()
 	IE:NotifyChanges()
 	CloseDropDownMenus()
+	
+	if needReloadIcon then
+		TMW.IE:LoadFirstValidIcon()
+	end
 end
 
 function TMW:Group_Add()
@@ -1370,6 +1377,10 @@ function TMW:Group_Swap(groupID1, groupID2)
 	IE:Load()
 	TMW:CompileOptions()
 	IE:NotifyChanges()
+	
+	if TMW.CI.g == groupID1 or TMW.CI.g == groupID2 then
+		TMW.IE:LoadFirstValidIcon()
+	end
 end
 
 
@@ -1843,8 +1854,7 @@ function IE:OnInitialize()
 	self.resizer = TMW.Classes.IconEditor_Resizer_ScaleX_SizeY:New(self)
 	self.resizer:Show()
 	self.resizer.resizeButton:SetScale(2)
-				
-
+	
 	TMW:Fire("TMW_OPTIONS_LOADED")
 end
 
@@ -1905,6 +1915,13 @@ function IE:TMW_GLOBAL_UPDATE()
 	IE:SaveSettings()
 end
 TMW:RegisterCallback("TMW_GLOBAL_UPDATE", IE)
+
+IE:RegisterEvent("PLAYER_REGEN_DISABLED", function()
+	if not TMW.ALLOW_LOCKDOWN_CONFIG then
+		IE:Hide()
+		LibStub("AceConfigDialog-3.0"):Close("TMW Options")
+	end
+end)
 
 function IE:RegisterTab(tab, attachedFrame)
 	local id = #IE.Tabs + 1

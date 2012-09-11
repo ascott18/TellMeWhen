@@ -30,10 +30,12 @@ local DogTag = LibStub("LibDogTag-3.0", true)
 TELLMEWHEN_VERSION = "6.0.3"
 TELLMEWHEN_VERSION_MINOR = strmatch(" @project-version@", " r%d+") or ""
 TELLMEWHEN_VERSION_FULL = TELLMEWHEN_VERSION .. TELLMEWHEN_VERSION_MINOR
-TELLMEWHEN_VERSIONNUMBER = 60335 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
+TELLMEWHEN_VERSIONNUMBER = 60338 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
 if TELLMEWHEN_VERSIONNUMBER > 61001 or TELLMEWHEN_VERSIONNUMBER < 60000 then return error("YOU SCREWED UP THE VERSION NUMBER OR DIDNT CHANGE THE SAFETY LIMITS") end -- safety check because i accidentally made the version number 414069 once
 
 TELLMEWHEN_MAXROWS = 20
+
+TMW.ALLOW_LOCKDOWN_CONFIG = true
 
 -- GLOBALS: TellMeWhen, LibStub
 -- GLOBALS: TellMeWhenDB, TellMeWhen_Settings
@@ -1790,8 +1792,7 @@ function TMW:OnProfile()
 	
 	-- LoadFirstValidIcon must happen through a timer to avoid interference with AceConfigDialog callbacks getting broken when
 	-- we reload the icon editor. (AceConfigDialog-3.0\AceConfigDialog-3.0-57.lua:804: attempt to index field "rootframe" (a nil value))
-	--TMW.IE:ScheduleTimer("LoadFirstValidIcon", 0.1)
-	
+	TMW.IE:ScheduleTimer("LoadFirstValidIcon", 0.1)
 end
 
 TMW.DatabaseCleanups = {
@@ -1888,6 +1889,10 @@ end
 
 function TMW:UpdateNormally()
 	TMW:Initialize()
+	
+	if not TMW:CheckCanDoLockedAction() then
+		return
+	end
 	
 	time = GetTime() TMW.time = time
 	LastUpdate = 0
@@ -2011,7 +2016,11 @@ TMW:RegisterEvent("PLAYER_REGEN_ENABLED", function()
 end)
 TMW:RegisterEvent("PLAYER_REGEN_DISABLED", function()
 	if TMW.ISMOP and TMW.Initialized then
-		TMW.Update = TMW.UpdateViaCoroutine
+		if TMW.ALLOW_LOCKDOWN_CONFIG then
+			TMW.Update = TMW.UpdateViaCoroutine
+		elseif not TMW.Locked then
+			TMW:LockToggle()
+		end
 	end
 end)
 end
@@ -5639,7 +5648,21 @@ function TMW:FormatSeconds(seconds, skipSmall, keepTrailing)
 	return ns
 end
 
+function TMW:CheckCanDoLockedAction(message)
+	if TMW.ISMOP and InCombatLockdown() and not TMW.ALLOW_LOCKDOWN_CONFIG then
+		if message ~= false then
+			TMW:Print(message or L["ERROR_ACTION_DENIED_IN_LOCKDOWN"])
+		end
+		return false
+	end
+	return true
+end
+
 function TMW:LockToggle()
+	if not TMW:CheckCanDoLockedAction(L["ERROR_NO_LOCKTOGGLE_IN_LOCKDOWN"]) then
+		return
+	end
+	
 	for k, v in pairs(TMW.Warn) do
 		-- reset warnings so they can happen again
 		if type(k) == "string" then
@@ -5671,8 +5694,10 @@ function TMW:SlashCommand(str)
 
 	if cmd == "options" then
 		
-		TMW:LoadOptions()
-		LibStub("AceConfigDialog-3.0"):Open("TMW Options")
+		if TMW:CheckCanDoLockedAction() then
+			TMW:LoadOptions()
+			LibStub("AceConfigDialog-3.0"):Open("TMW Options")
+		end
 	elseif cmd == "enable" or cmd == "disable" or cmd == "toggle" then
 		local groupID, iconID = tonumber(arg2), tonumber(arg3)
 

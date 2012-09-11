@@ -108,6 +108,27 @@ TMW:RegisterDatabaseDefaults{
 -- SETTINGS UPGRADES
 -- -------------------
 
+TMW:RegisterUpgrade(60338, {
+	-- I decided to change [Stack] to return numbers instead of strings
+	icon = function(self, ics)
+		for viewName, settingsPerView in pairs(ics.SettingsPerView) do
+			for displayID, text in pairs(settingsPerView.Texts) do
+				settingsPerView.Texts[displayID] = text
+					:gsub("(Stacks[^:]-:Hide)%('0'%)", "%1(0)")
+					:gsub("(Stacks[^:]-:Hide)%('0', '1'%)", "%1(0, 1)")
+			end
+		end
+	end,
+	textlayout = function(self, settings, GUID)
+		-- I decided to change [Stack] to return numbers instead of strings
+		for i, displaySettings in ipairs(settings) do
+			displaySettings.DefaultText = displaySettings.DefaultText
+				:gsub("(Stacks[^:]-:Hide)%('0'%)", "%1(0)")
+				:gsub("(Stacks[^:]-:Hide)%('0', '1'%)", "%1(0, 1)")
+		end
+	end,
+})
+
 TMW:RegisterUpgrade(60317, {
 	textlayout = function(self, layoutSettings)
 		-- A bug with importing text layouts led them to have their Name attribute set as a table
@@ -140,26 +161,28 @@ TMW:RegisterUpgrade(60038, {
 	end
 })
 
-TMW:RegisterUpgrade(51002, {
-	-- This is the upgrade that handles the transition from TMW's ghetto text substitutions to DogTag.
-	
-	-- self.translateString is a function defined in the v51002 upgrade in TellMeWhen.lua.
-	-- It is the method that actually converts between the old and new text subs.
-	
-	-- This upgrade extends this upgrade to text displays
-	-- (The old static text displays, not the new ones that are the whole purpose of this file.)
-	
-	icon = function(self, ics)
-		local BindText = ics.BindText or ""
-		
-		-- Meta icons and default icons didn't implement BindText, so don't upgrade them.
-		if ics.Type ~= "meta" and ics.Type ~= "" then
-			ics.SettingsPerView.icon.Texts[1] = self:translateString(BindText)
+TMW:RegisterUpgrade(60029, {
+	textlayout = function(self, settings, GUID)
+		-- For some reason a lot of text layouts are missing quotes.
+		-- (This may just be in my own settings as an artifact of early testing; but could also be in other people who alpha tested)
+		-- It also changed to not hide a stack of '1'.
+		for i, displaySettings in ipairs(settings) do
+			if displaySettings.DefaultText == "[Stacks:Hide(0, 1)]"
+			or displaySettings.DefaultText == "[Stacks:Hide('0', '1')]"
+			or displaySettings.DefaultText == "[Stacks:Hide('0')]" then
+				displaySettings.DefaultText = "[Stacks:Hide(0)]"
+			end
 		end
-		ics.BindText = nil
-		
-		-- The stack text display was static, and it already corresponds to the default text for this text display, so do nothing.
-		-- ics.SettingsPerView.icon.Texts[2] = "[Stacks:Hide('0')]"
+	end,
+})
+
+TMW:RegisterUpgrade(51019, {
+	textlayout = function(self, settings, GUID)
+		-- I don't know why this layout exists, but I know it was my fault, so I am going to delete it.
+		if GUID == "icon" and settings.GUID == "" then
+			TMW.db.profile.TextLayouts[GUID] = nil
+			TMW.Warn("TMW has deleted the invalid text layout keyed as 'icon' that was probably causing errors for you. If you were using it on any of your icons, then I apologize, but you probably weren't because it probably wasn't even named")
+		end
 	end,
 })
 
@@ -244,7 +267,7 @@ TMW:RegisterUpgrade(51003, {
 		
 		-- Display 2 is the stack text
 		layout[2].StringName = L["TEXTLAYOUTS_DEFAULTS_STACKS"]
-		layout[2].DefaultText = "[Stacks:Hide('0')]"
+		layout[2].DefaultText = "[Stacks:Hide(0)]"
 		layout[2].SkinAs = "Count"
 		
 		for i = 1, layout.n do
@@ -355,27 +378,26 @@ TMW:RegisterUpgrade(51003, {
 	end,
 })
 
-TMW:RegisterUpgrade(51019, {
-	textlayout = function(self, settings, GUID)
-		-- I don't know why this layout exists, but I know it was my fault, so I am going to delete it.
-		if GUID == "icon" and settings.GUID == "" then
-			TMW.db.profile.TextLayouts[GUID] = nil
-			TMW.Warn("TMW has deleted the invalid text layout keyed as 'icon' that was probably causing errors for you. If you were using it on any of your icons, then I apologize, but you probably weren't because it probably wasn't even named")
+TMW:RegisterUpgrade(51002, {
+	-- This is the upgrade that handles the transition from TMW's ghetto text substitutions to DogTag.
+	
+	-- self.translateString is a function defined in the v51002 upgrade in TellMeWhen.lua.
+	-- It is the method that actually converts between the old and new text subs.
+	
+	-- This upgrade extends this upgrade to text displays
+	-- (The old static text displays, not the new ones that are the whole purpose of this file.)
+	
+	icon = function(self, ics)
+		local BindText = ics.BindText or ""
+		
+		-- Meta icons and default icons didn't implement BindText, so don't upgrade them.
+		if ics.Type ~= "meta" and ics.Type ~= "" then
+			ics.SettingsPerView.icon.Texts[1] = self:translateString(BindText)
 		end
-	end,
-})
-
-TMW:RegisterUpgrade(60029, {
-	textlayout = function(self, settings, GUID)
-		-- For some reason a lot of text layouts are missing quotes.
-		-- (This may just be in my own settings as an artifact of early testing; but could also be in other people who alpha tested)
-		-- It also changed to not hide a stack of '1'.
-		for i, displaySettings in ipairs(settings) do
-			if displaySettings.DefaultText == "[Stacks:Hide(0, 1)]"
-			or displaySettings.DefaultText == "[Stacks:Hide('0', '1')]" then
-				displaySettings.DefaultText = "[Stacks:Hide('0')]"
-			end
-		end
+		ics.BindText = nil
+		
+		-- The stack text display was static, and it already corresponds to the default text for this text display, so do nothing.
+		-- ics.SettingsPerView.icon.Texts[2] = "[Stacks:Hide(0)]"
 	end,
 })
 

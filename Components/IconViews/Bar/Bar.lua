@@ -38,7 +38,7 @@ TMW:RegisterDatabaseDefaults{
 					relativePoint	= "BOTTOMRIGHT",
 					
 					StringName		= L["TEXTLAYOUTS_DEFAULTS_STACKS"],
-					DefaultText		= "[Stacks:Hide('0')]",
+					DefaultText		= "[Stacks:Hide(0)]",
 					SkinAs			= "Count",
 				},
 				{	-- [2] Duration
