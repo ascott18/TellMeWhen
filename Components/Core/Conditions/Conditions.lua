@@ -26,22 +26,7 @@ local tostring, type, pairs, ipairs, tremove, unpack, select, tonumber, wipe, as
 	  tostring, type, pairs, ipairs, tremove, unpack, select, tonumber, wipe, assert, next, loadstring, setfenv, setmetatable
 local strlower, min, max, gsub, strfind, strsub, strtrim, format, strmatch, strsplit, strrep =
 	  strlower, min, max, gsub, strfind, strsub, strtrim, format, strmatch, strsplit, strrep
-local NONE, MAX_SPELL_SCHOOLS =
-	  NONE, MAX_SPELL_SCHOOLS
-local GetPetActionInfo, GetTotemInfo =
-	  GetPetActionInfo, GetTotemInfo
-local IsInInstance, GetInstanceDifficulty =
-	  IsInInstance, GetInstanceDifficulty
-local GetNumTalents, GetTalentInfo =
-	  GetNumTalents, GetTalentInfo
-local UnitAttackPower, UnitRangedAttackPower =
-	  UnitAttackPower, UnitRangedAttackPower
-local GetSpellCritChance =
-	  GetSpellCritChance
-local GetSpellBonusDamage, GetSpellBonusHealing =
-	  GetSpellBonusDamage, GetSpellBonusHealing
-local GetSpellTexture, GetInventoryItemTexture, GetInventorySlotInfo =
-	  GetSpellTexture, GetInventoryItemTexture, GetInventorySlotInfo
+local NONE = NONE
 
 local _G = _G
 local print = TMW.print
@@ -771,7 +756,8 @@ function CNDT:GetConditionCheckFunctionString(parent, Conditions)
 			-- Add in anything that the condition wants to include in Env
 			if conditionData.Env then
 				for k, v in pairs(conditionData.Env) do
-					if Env[k] ~= nil and Env[k] ~= v then
+					local existingValue = rawget(Env, k)
+					if existingValue ~= nil and existingValue ~= v then
 						TMW:Error("Condition " .. t .. " tried to write values to Env different than those that were already in it.")
 					else
 						Env[k] = v
