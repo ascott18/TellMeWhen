@@ -167,11 +167,17 @@
 						self.SpellCache = TMW:GetModule("SpellCache")
 						
 						function self:SetActualValue(val)
-							self:SetValue(val^(1/self.exponent))
+							if val ~= self:GetActualValue() then
+								self:SetValue(val^(1/self.exponent))
+							end
 						end
 						function self:GetActualValue()
 							return min(floor(self:GetValue()^self.exponent+0.5), self.max)
 						end
+						
+						TMW:RegisterCallback("TMW_SPELLCACHE_NUMCACHEPERFRAME_CHANGED", function(event, num)
+							self:SetActualValue(num)
+						end)
 						
 						self:SetMinMaxValues(1, self.max^(1/self.exponent))
 						

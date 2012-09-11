@@ -150,6 +150,7 @@ TMW:RegisterCallback("TMW_OPTIONS_LOADED", function()
 		local SPELL_CAST_CHANNELED = SPELL_CAST_CHANNELED
 		local yield, resume = coroutine.yield, coroutine.resume
 
+		local isInCombatLockdown = InCombatLockdown()
 		local function SpellCacher()
 
 			while spellsFailed < CONST.MAX_FAILED_SPELLS do
@@ -188,7 +189,7 @@ TMW:RegisterCallback("TMW_OPTIONS_LOADED", function()
 				end
 				index = index + 1
 
-				if index % NumCachePerFrame == 0 then
+				if index % (isInCombatLockdown and 1 or NumCachePerFrame) == 0 then
 					TMW:Fire("TMW_SPELLCACHE_NUMCACHED_CHANGED", index)
 					yield()
 				end
@@ -219,6 +220,10 @@ TMW:RegisterCallback("TMW_OPTIONS_LOADED", function()
 		
 				collectgarbage()
 			end
+		end)
+		f:RegisterEvent("UNIT_FLAGS") -- accurately detects changes to InCombatLockdown
+		f:SetScript("OnEvent", function(self, event)
+			isInCombatLockdown = InCombatLockdown()
 		end)
 			
 	end

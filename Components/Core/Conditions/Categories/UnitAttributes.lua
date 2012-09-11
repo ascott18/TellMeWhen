@@ -159,6 +159,23 @@ ConditionCategory:RegisterCondition(6,	 "REACT", {
 			ConditionObject:GenerateNormalEventString("UNIT_DYNAMIC_FLAGS", "player")
 	end,
 })
+ConditionCategory:RegisterCondition(6.2,	 "ISPLAYER", {
+	text = L["ICONMENU_ISPLAYER"],
+	min = 0,
+	max = 1,
+	texttable = CNDT.COMMON.bool,
+	nooperator = true,
+	icon = "Interface\\Icons\\INV_Misc_Head_Human_02",
+	tcoords = CNDT.COMMON.standardtcoords,
+	Env = {
+		UnitIsPlayer = UnitIsPlayer,
+	},
+	funcstr = [[UnitIsPlayer(c.Unit) == c.1nil]],
+	events = function(ConditionObject, c)
+		return
+			ConditionObject:GetUnitChangedEventString(CNDT:GetUnit(c.Unit))
+	end,
+})
 
 
 ConditionCategory:RegisterSpacer(6.5)

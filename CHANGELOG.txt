@@ -12,6 +12,7 @@
  * You can now reorder groups.
  * Added a setting to make colors ignore the GCD. It is enabled by default.
  * Added center text as a default text layout.
+ * New condition: Unit is Player.
  * Bug fixes:
  ** Fixed static formats again (ICONMENU_MULTISTATECD_DESC)
  ** (Condition ROLE): attempt to index global "roles" (a nil value)
