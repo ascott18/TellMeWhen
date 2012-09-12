@@ -806,8 +806,7 @@ end
 local ConditionObject = TMW:NewClass("ConditionObject")
 ConditionObject.numArgsForEventString = 1
 
-function ConditionObject:OnNewInstance(Conditions, conditionString)	
-	self.settings = Conditions
+function ConditionObject:OnNewInstance(Conditions, conditionString)
 	self.conditionString = conditionString
 
 	self.AutoUpdateRequests = {}
@@ -825,14 +824,13 @@ function ConditionObject:OnNewInstance(Conditions, conditionString)
 		TMW:Error(err)
 	end
 	
-	self:CompileUpdateFunction()
+	self:CompileUpdateFunction(Conditions)
 	
 	self:Check()
 end
 
 local argCheckerStringsReusable = {}
-function ConditionObject:CompileUpdateFunction()
-	local Conditions = self.settings
+function ConditionObject:CompileUpdateFunction(Conditions)
 	local argCheckerStrings = wipe(argCheckerStringsReusable)
 	local numAnticipatorResults = 0
 	local anticipatorstr = ""

@@ -1216,6 +1216,16 @@ function TMW:CompileOptions()
 					end,
 					get = function(info) return TMW.db.profile.Groups[findid(info)][info[#info]] end,
 					args = {
+						addgroup = {
+							name = L["UIPANEL_ADDGROUP"],
+							desc = L["UIPANEL_ADDGROUP_DESC"],
+							type = "execute",
+							width = "double",
+							order = 41,
+							handler = TMW,
+							func = "Group_Add",
+						},
+						importexport = importExportBoxTemplate,
 						addgroupgroup = {
 							type = "group",
 							name = L["UIPANEL_ADDGROUP"],
@@ -1224,6 +1234,7 @@ function TMW:CompileOptions()
 									name = L["UIPANEL_ADDGROUP"],
 									desc = L["UIPANEL_ADDGROUP_DESC"],
 									type = "execute",
+									width = "double",
 									order = 41,
 									handler = TMW,
 									func = "Group_Add",

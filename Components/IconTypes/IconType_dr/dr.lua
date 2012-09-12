@@ -282,7 +282,7 @@ function Type:Setup(icon, groupID, iconID)
 	end
 	
 	
-	icon.Units, icon.UnitSet = TMW:GetUnits(icon, icon.Unit)
+	icon.Units, icon.UnitSet = TMW:GetUnits(icon, icon.Unit, icon:GetSettings().UnitConditions)
 	
 	icon.FirstTexture = SpellTextures[icon.NameFirst]
 

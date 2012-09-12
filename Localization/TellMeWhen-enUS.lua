@@ -757,7 +757,8 @@ L["TEXTLAYOUTS_RENAMESTRING"] = "Rename Display"
 L["TEXTLAYOUTS_RENAMESTRING_DESC"] = "Rename this display to a name that fits its purpose so that you can easily identify it."
 L["TEXTLAYOUTS_CHOOSELAYOUT"] = "Choose Layout..."
 L["TEXTLAYOUTS_CHOOSELAYOUT_DESC"] = "Pick the text layout to use for this icon."
-L["TEXTLAYOUTS_ADDLAYOUT"] = "Add Layout"
+L["TEXTLAYOUTS_ADDLAYOUT"] = "Create New Layout"
+L["TEXTLAYOUTS_ADDLAYOUT_DESC"] = "Create a new text layout that you can configure and apply to your icons."
 L["TEXTLAYOUTS_DELETELAYOUT"] = "Delete Layout"
 L["TEXTLAYOUTS_DELETELAYOUT_DESC"] = [[Click to delete this text layout.
 

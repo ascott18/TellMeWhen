@@ -103,6 +103,7 @@ local UnitSet = TMW:NewClass("UnitSet"){
 
 		-- determine the operations that the set needs to stay updated
 		for k, unit in ipairs(self.originalUnits) do
+			unit = tostring(unit)
 			if unit == "player" then
 			--	UNITS.unitsWithExistsEvent[unit] = true -- doesnt really have an event, but do this for external checks of unitsWithExistsEvent to increase efficiency.
 			-- if someone legitimately entered "playertarget" then they probably dont deserve to have increased eficiency... dont bother handling player as a base unit
@@ -585,6 +586,8 @@ do
 		
 		ConditionTypeFilter = function(self, conditionData)
 			if conditionData.unit == nil then
+				return true
+			elseif conditionData.value == "LUA" then
 				return true
 			end
 		end,

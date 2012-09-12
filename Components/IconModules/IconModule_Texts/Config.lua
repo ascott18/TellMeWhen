@@ -903,7 +903,9 @@ local textlayouts_toplevel = {
 	args = {
 		addlayout = {
 			name = L["TEXTLAYOUTS_ADDLAYOUT"],
+			desc = L["TEXTLAYOUTS_ADDLAYOUT_DESC"],
 			type = "execute",
+			width = "double",
 			order = 1,
 			func = function()
 				AddTextLayout()

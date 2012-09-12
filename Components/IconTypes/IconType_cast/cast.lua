@@ -155,7 +155,7 @@ function Type:Setup(icon, groupID, iconID)
 
 	icon:SetInfo("texture", TMW:GetConfigIconTexture(icon))
 	
-	icon.Units, icon.UnitSet = TMW:GetUnits(icon, icon.Unit)
+	icon.Units, icon.UnitSet = TMW:GetUnits(icon, icon.Unit, icon:GetSettings().UnitConditions)
 	
 	if icon.UnitSet.allUnitsChangeOnEvent then
 		icon:SetUpdateMethod("manual")

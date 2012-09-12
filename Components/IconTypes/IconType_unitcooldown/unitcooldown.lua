@@ -495,7 +495,7 @@ function Type:Setup(icon, groupID, iconID)
 	icon.NameHash = TMW:GetSpellNames(icon, icon.Name, nil, nil, 1)
 	icon.Durations = TMW:GetSpellDurations(icon, icon.Name)
 
-	icon.Units, icon.UnitSet = TMW:GetUnits(icon, icon.Unit)
+	icon.Units, icon.UnitSet = TMW:GetUnits(icon, icon.Unit, icon:GetSettings().UnitConditions)
 	
 	if icon.UnitSet.allUnitsChangeOnEvent then
 		icon:SetUpdateMethod("manual")

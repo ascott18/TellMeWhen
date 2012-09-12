@@ -13,6 +13,7 @@
  * Added a setting to make colors ignore the GCD. It is enabled by default.
  * Added center text as a default text layout.
  * New condition: Unit is Player.
+ * Unit conditions now allow Lua conditions.
  * Bug fixes:
  ** Fixed static formats again (ICONMENU_MULTISTATECD_DESC)
  ** (Condition ROLE): attempt to index global "roles" (a nil value)
@@ -32,7 +33,7 @@
  ** The talent specialization condition will now properly allow all four choices for druids.
  ** The pet talent tree conditions should no longer be listed for non-hunters.
  ** As a workaround to a strange bug in DogTag, the {{{[Stacks]}}} tag now returns a number value instead of a string. All default and otherwise reasonable variations of {{{[Stacks:Hide('0')}}} should automatically be upgraded.
- 
+ ** Unit conditions now actually work with icon types other than Buff/Debuff
 ===v6.0.2===
  * Cooldown icons should now provide much better functionality when checking multiple spells. Single-spell functionality should (hopefully) remain unchanged.
  * Updated the name and description of the "Spell Cast Succeeded" Combat Event to reflect that it now only tracks instant cast spells.
