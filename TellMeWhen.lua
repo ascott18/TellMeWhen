@@ -30,7 +30,7 @@ local DogTag = LibStub("LibDogTag-3.0", true)
 TELLMEWHEN_VERSION = "6.0.3"
 TELLMEWHEN_VERSION_MINOR = strmatch(" @project-version@", " r%d+") or ""
 TELLMEWHEN_VERSION_FULL = TELLMEWHEN_VERSION .. TELLMEWHEN_VERSION_MINOR
-TELLMEWHEN_VERSIONNUMBER = 60339 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
+TELLMEWHEN_VERSIONNUMBER = 60340 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
 if TELLMEWHEN_VERSIONNUMBER > 61001 or TELLMEWHEN_VERSIONNUMBER < 60000 then return error("YOU SCREWED UP THE VERSION NUMBER OR DIDNT CHANGE THE SAFETY LIMITS") end -- safety check because i accidentally made the version number 414069 once
 
 TELLMEWHEN_MAXROWS = 20
@@ -1320,7 +1320,10 @@ TMW.GCDSpells = TMW.ISMOP and {
 	DEATHKNIGHT = 47541,	-- death coil
 }
 
-local GCDSpell = TMW.GCDSpells[pclass] TMW.GCDSpell = GCDSpell
+local GCDSpell = TMW.GCDSpells[pclass]
+TMW.GCDSpell = GCDSpell
+TMW.GCD = 0
+
 
 
 TMW.DS = {
@@ -4519,7 +4522,9 @@ function Icon.InheritDataFromIcon(iconDestination, iconSource)
 		t[#t+1] = table.concat(attributesSplit, ", attributes.")
 		t[#t+1] = ")"
 		
-		InheritAllFunc = assert(loadstring(table.concat(t)))
+		local funcstr = table.concat(t)
+		
+		InheritAllFunc = assert(loadstring(funcstr))
 	end
 	
 	InheritAllFunc(iconDestination, iconSource)

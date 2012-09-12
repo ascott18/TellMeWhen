@@ -733,16 +733,16 @@ function CNDT:GetConditionCheckFunctionString(parent, Conditions)
 		return ""
 	end
 
-	for _, condition in TMW:InNLengthTable(Conditions) do
+	for n, condition in TMW:InNLengthTable(Conditions) do
 		local t = condition.Type
 		local conditionData = CNDT.ConditionsByType[t]
 		
 		local andor
-		if condition.AndOr == "OR" then
-			-- Need a space after "or" so it 3 chars long (to match the length of "and");
-			-- the rest of the code expects this, so don't change this or things will break.
+		if n == 1 then
+			andor = ""
+		elseif condition.AndOr == "OR" then
 			andor = "or "
-		else
+		elseif condition.AndOr == "AND" then
 			andor = "and"
 		end
 
@@ -782,19 +782,22 @@ function CNDT:GetConditionCheckFunctionString(parent, Conditions)
 			thisstr = CNDT:DoConditionSubstitutions(conditionData, condition, thisstr)
 		end
 		
-		funcstr = funcstr .. thisstr
+		funcstr = funcstr .. "    " .. thisstr .. " -- " .. n .. "_" .. condition.Type .. "\r\n"
 	end
-	
-	funcstr = funcstr:sub(4)
 	
 	if funcstr ~= "" then
 		-- Well, what the fuck? Apparently this code here doesn't work in MoP. I have to do it on a single line for some strange reason.
 		-- Aannnnnnddd what the fuck now it works again. See r540 commit message for more info.
+		-- Aannnnnnddd im switching back to single line because multiline [[long strings]] aren't playing nice at all in debugging dumps/prints
 		
-		funcstr = [[local ConditionObject = ...
-		return ( ]] .. funcstr .. [[ )]]
+		-- funcstr = [[local ConditionObject = ...
+		-- return ( ]] .. funcstr .. [[ )]]
 		
-		--funcstr = "local ConditionObject = ... \r\n return ( " .. funcstr .. " )"
+		funcstr = "local ConditionObject = ... \r\n return (\r\n " .. funcstr .. " )"
+	end
+	
+	if TMW.debug then
+	--	funcstr = TMW.debug.enumLines(funcstr)
 	end
 	
 	return funcstr
@@ -816,7 +819,15 @@ function ConditionObject:OnNewInstance(Conditions, conditionString)
 	self.NextUpdateTime = huge
 	self.UpdateMethod = "OnUpdate"
 	
-	local func, err = loadstring(conditionString, tostring(self) .. " Condition")
+	local types = ""
+	if TMW.debug then
+		types = tostring(self):gsub("table: ", "_0x")
+	end
+	for n, condition in TMW:InNLengthTable(Conditions) do
+		types = types .. "_" .. condition.Type
+	end
+	
+	local func, err = loadstring(conditionString, "Condition" .. types)
 	if func then
 		func = setfenv(func, TMW.CNDT.Env)
 		self.CheckFunction = setfenv(func, TMW.CNDT.Env)
@@ -955,19 +966,14 @@ function ConditionObject:CompileUpdateFunction(Conditions)
 	funcstr = argHeader .. [[ = ...
 	]] .. funcstr
 
-	local func
-	--if functionCache[funcstr] then
-	--	func = functionCache[funcstr]
-	--else
-		local err
-		func, err = loadstring(funcstr, tostring(self) .. " Condition Events")
-		if func then
-			func = setfenv(func, Env)
-		--	functionCache[funcstr] = func
-		elseif err then
-			TMW:Error(err)
-		end
-	--end
+	
+	local func, err = loadstring(funcstr, tostring(self) .. " Condition Events")
+	if func then
+		func = setfenv(func, Env)
+	elseif err then
+		TMW:Error(err)
+	end
+	
 	self.updateString = funcstr
 
 	self.AnticipateFunction = doesAnticipate and func
