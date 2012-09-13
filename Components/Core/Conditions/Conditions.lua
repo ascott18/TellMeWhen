@@ -796,10 +796,6 @@ function CNDT:GetConditionCheckFunctionString(parent, Conditions)
 		funcstr = "local ConditionObject = ... \r\n return (\r\n " .. funcstr .. " )"
 	end
 	
-	if TMW.debug then
-	--	funcstr = TMW.debug.enumLines(funcstr)
-	end
-	
 	return funcstr
 end
 

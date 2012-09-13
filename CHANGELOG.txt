@@ -35,6 +35,7 @@
  ** As a workaround to a strange bug in DogTag, the {{{[Stacks]}}} tag now returns a number value instead of a string. All default and otherwise reasonable variations of {{{[Stacks:Hide('0')}}} should automatically be upgraded.
  ** Unit conditions now actually work with icon types other than Buff/Debuff
  ** Fixed an error with the GCD condition on login
+ ** The behavior of the link parameter for Item Cooldown icons' {{{[Spell]}}} DogTag should no longer be backwards
  
 ===v6.0.2===
  * Cooldown icons should now provide much better functionality when checking multiple spells. Single-spell functionality should (hopefully) remain unchanged.

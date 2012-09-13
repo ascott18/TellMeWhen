@@ -247,9 +247,9 @@ function Type:FormatSpellForOutput(icon, data, doInsertLink)
 		local name, link = GetItemInfo(data)
 		local ret
 		if doInsertLink then
-			ret = name
-		else
 			ret = link
+		else
+			ret = name
 		end
 		if ret then
 			return ret

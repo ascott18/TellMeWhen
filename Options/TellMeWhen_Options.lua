@@ -1137,12 +1137,13 @@ function TMW:CompileOptions()
 									type = "toggle",
 									order = 42,
 								},
-								AlwaysSubLinks = {
+								--[[AlwaysSubLinks = {
+									-- unused
 									name = L["ALWAYSSUBLINKS"],
 									desc = L["ALWAYSSUBLINKS_DESC"],
 									type = "toggle",
 									order = 43,
-								},
+								},]]
 								--[[SUG_atBeginning = {
 									-- I really doubt that anyone uses this setting at all.
 									-- Going to hide it and see if anyone complains.
