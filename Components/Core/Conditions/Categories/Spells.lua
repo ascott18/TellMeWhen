@@ -464,6 +464,41 @@ ConditionCategory:RegisterCondition(24,	 "TOTEM4", {
 ConditionCategory:RegisterSpacer(30)
 
 local UnitCastingInfo, UnitChannelInfo = UnitCastingInfo, UnitChannelInfo
+Env.UnitCast = function(unit, level, matchname)
+	local name, _, _, _, _, _, _, _, notInterruptible = UnitCastingInfo(unit)
+	if not name then
+		name, _, _, _, _, _, _, notInterruptible = UnitChannelInfo(unit)
+	end
+	name = strlowerCache[name]
+	if matchname == "" and name then
+		matchname = name
+	end
+	if level == 0 then -- only interruptible
+		return not notInterruptible and name == matchname
+	elseif level == 1 then -- present
+		return name == matchname
+	else -- absent
+		return name ~= matchname
+	end
+end
+Env.UnitCastTime = function(unit, level, matchname)
+	local name, _, _, _, _, endTime, _, _, notInterruptible = UnitCastingInfo(unit)
+	if not name then
+		name, _, _, _, _, endTime, _, notInterruptible = UnitChannelInfo(unit)
+	end
+	name = strlowerCache[name]
+	if matchname == "" and name then
+		matchname = name
+	end
+	local remaining = endTime and endTime/1000 - TMW.time or 0
+	if level == 0 then -- only interruptible
+		return not notInterruptible and name == matchname and remaining or 0
+	elseif level == 1 then -- present
+		return name == matchname and remaining or 0
+	else -- absent
+		return name ~= matchname and remaining or 0
+	end
+end
 ConditionCategory:RegisterCondition(31,	 "CASTING", {
 	text = L["ICONMENU_CAST"],
 	min = 0,
@@ -479,25 +514,6 @@ ConditionCategory:RegisterCondition(31,	 "CASTING", {
 	tcoords = CNDT.COMMON.standardtcoords,
 	name = function(editbox) TMW:TT(editbox, "CONDITIONPANEL_CASTTOMATCH", "CONDITIONPANEL_CASTTOMATCH_DESC") editbox.label = L["CONDITIONPANEL_CASTTOMATCH"] .. " " .. L["ICONMENU_CHOOSENAME_ORBLANK"] end,
 	useSUG = true,
-	Env = {
-		UnitCast = function(unit, level, matchname)
-			local name, _, _, _, _, _, _, _, notInterruptible = UnitCastingInfo(unit)
-			if not name then
-				name, _, _, _, _, _, _, notInterruptible = UnitChannelInfo(unit)
-			end
-			name = strlowerCache[name]
-			if matchname == "" and name then
-				matchname = name
-			end
-			if level == 0 then -- only interruptible
-				return not notInterruptible and (name == matchname)
-			elseif level == 1 then -- present
-				return (name == matchname)
-			else
-				return not (name == matchname) -- absent
-			end
-		end,
-	},
 	funcstr = [[UnitCast(c.Unit, c.Level, LOWER(c.NameName))]], -- LOWER is some gsub magic
 	events = function(ConditionObject, c)
 		-- holy shit... need i say more?
