@@ -36,6 +36,7 @@
  ** Unit conditions now actually work with icon types other than Buff/Debuff
  ** Fixed an error with the GCD condition on login
  ** The behavior of the link parameter for Item Cooldown icons' {{{[Spell]}}} DogTag should no longer be backwards
+ ** Shift-clicking links into the text announcement input box should now format them correctly for DogTag. Existing links cannot/will not be updated.
  
 ===v6.0.2===
  * Cooldown icons should now provide much better functionality when checking multiple spells. Single-spell functionality should (hopefully) remain unchanged.
