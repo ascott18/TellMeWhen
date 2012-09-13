@@ -23,7 +23,7 @@
 		</Layers>
 		<Frames>
 			<EditBox name="$parentEditBox" inherits="TellMeWhen_InputBoxTemplate" multiline="true" parentKey="EditBox" autoFocus="false">
-				<Size y="15"/>
+				<Size y="20"/>
 				<Anchors>
 					<Anchor point="TOPLEFT" x="5"/>
 					<Anchor point="RIGHT" x="-20"/>
@@ -51,15 +51,19 @@
 						
 						TMW:RegisterCallback("TMW_CONFIG_SAVE_SETTINGS", "ClearFocus", self)
 						
+						TMW.HELP:NewCode("ANN_LINK_INSERTED", nil, true)
+						
 						TMW.Classes.ChatEdit_InsertLink_Hook:New(self, function(self, text, linkType, linkID)
 							-- The ability to yell out clickable links is cool.
 							-- However, with DogTag, we need some slight modifications to get colors to work.
 							
 							local color, link = text:match("|cff(%x%x%x%x%x%x)(|H.*|h)")
 							
-							text = "['" .. link .. "':Color('" .. color .. "')]"
+							text = '["' .. link .. '":Color("' .. color .. '")]'
 							
 							self.editbox:Insert(text)
+							
+							TMW.HELP:Show("ANN_LINK_INSERTED", TMW.CI.ic, self.editbox, 0, 0, TMW.L["HELP_ANN_LINK_INSERTED"])
 
 							-- notify success
 							return true

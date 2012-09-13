@@ -82,7 +82,9 @@ function EventHandler:LoadSettingsForEventID(id)
 	
 	TMW:SortOrderedTables(animationsToDisplay)
 	
-	for frameID, animationData in ipairs(animationsToDisplay) do
+	local frameID = 0
+	for _, animationData in ipairs(animationsToDisplay) do
+		frameID = frameID + 1
 		local frame = self:GetAnimationFrame(frameID, previousFrame)
 		frame:Show()
 

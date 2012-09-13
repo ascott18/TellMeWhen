@@ -168,12 +168,6 @@
 				</Anchors>
 				
 				<Scripts>
-					<OnLoad>
-						TMW.SUG:EnableEditBox(self, "units", true)
-						
-						self.label = "|cFFFF5050" .. TMW.L["CONDITIONPANEL_UNIT"] .. "!|r"
-						TMW:TT(self, "CONDITIONPANEL_UNIT", "CONDITIONPANEL_UNIT_DESC")
-					</OnLoad>
 					<OnEditFocusLost>
 						EditBox_ClearHighlight(self)
 						TMW:CleanString(self)

@@ -14,6 +14,7 @@
  * Added center text as a default text layout.
  * New condition: Unit is Player.
  * Unit conditions now allow Lua conditions.
+ * Unit conditions now allow you to track the target of the icon's units.
  * Bug fixes:
  ** Fixed static formats again (ICONMENU_MULTISTATECD_DESC)
  ** (Condition ROLE): attempt to index global "roles" (a nil value)
@@ -33,10 +34,12 @@
  ** The talent specialization condition will now properly allow all four choices for druids.
  ** The pet talent tree conditions should no longer be listed for non-hunters.
  ** As a workaround to a strange bug in DogTag, the {{{[Stacks]}}} tag now returns a number value instead of a string. All default and otherwise reasonable variations of {{{[Stacks:Hide('0')}}} should automatically be upgraded.
- ** Unit conditions now actually work with icon types other than Buff/Debuff
- ** Fixed an error with the GCD condition on login
- ** The behavior of the link parameter for Item Cooldown icons' {{{[Spell]}}} DogTag should no longer be backwards
+ ** Unit conditions now actually work with icon types other than Buff/Debuff.
+ ** Fixed an error with the GCD condition on login.
+ ** The behavior of the link parameter for Item Cooldown icons' {{{[Spell]}}} DogTag should no longer be backwards.
  ** Shift-clicking links into the text announcement input box should now format them correctly for DogTag. Existing links cannot/will not be updated.
+ ** Fixed errors with mismatched frames and channels in the text output event configuration.
+ ** Attempted a fix for an error involving data from the last used suggestion module to leak into the DogTag suggestion module.
  
 ===v6.0.2===
  * Cooldown icons should now provide much better functionality when checking multiple spells. Single-spell functionality should (hopefully) remain unchanged.

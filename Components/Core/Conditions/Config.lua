@@ -630,7 +630,11 @@ function CndtGroup.TypeCheck(group, conditionData)
 		group.Runes:Hide()
 		local showval = true
 		group:SetTitles()
+		
 		group.Unit:Show()
+		TMW.SUG:EnableEditBox(group.Unit, "units", true)
+		group.Unit.label = "|cFFFF5050" .. TMW.L["CONDITIONPANEL_UNIT"] .. "!|r"
+		TMW:TT(group.Unit, "CONDITIONPANEL_UNIT", "ICONMENU_UNIT_DESC_CONDITIONUNIT")
 		if unit then
 			group.Unit:Hide()
 			group.TextUnitDef:SetText(unit)

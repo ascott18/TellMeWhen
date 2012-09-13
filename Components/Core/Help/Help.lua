@@ -128,7 +128,7 @@ function HELP:GetShown()
 end
 
 function HELP:NewCode(code, order, OnlyOnce)
-	assert(code, "HELP:NewCode() - arg1 must be a string, not nil.")
+	TMW:ValidateType(2, "HELP:NewCode(code, order, OnlyOnce)", code, "string")
 	assert(not TMW.tContains(HELP.Codes, code), "HELP code " .. code .. " is already registered!")
 	
 	if order then

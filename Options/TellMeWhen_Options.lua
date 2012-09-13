@@ -2322,6 +2322,7 @@ TMW:NewClass("SettingCheckButton", "CheckButton", "SettingFrameBase"){
 		-- Have to do this or else the text won't multiline/wordwrap when it should.
 		-- 30 is just an arbitrarily large number. 
 		self.text:SetHeight(30)
+		self.text:SetMaxLines(3)
 	end,
 	
 	ReloadSetting = function(self)

@@ -1264,17 +1264,17 @@ function Module:Entry_AddToList_1(f, tagName)
 			else
 				doc = tagData.doc
 			end
+			if not tagData then
+				TMW:Debug("NO TAG DATA FOR TAG %s", tag)
+			end
+			local tag_colorized = tagData and generateArgFormattedTagString(tag, tagData)
 			
-			local tag_colorized = generateArgFormattedTagString(tag, tagData) --DogTag:ColorizeCode("[" .. tag .. "]")
-			
-			--if numTags == 0 then
-			--	desc = desc .. "\r\n" .. (doc or "<???>")
-			--else
+			if tag_colorized then
 				desc = desc .. "\r\n" .. tag_colorized .. "\r\n" .. (doc or "<???>")
-				if i ~= numTags then
-					desc = desc .. "\r\n"
-				end
-			--end
+			end
+			if i ~= numTags then
+				desc = desc .. "\r\n"
+			end
 		end
 		
 		f.tooltiptext = desc

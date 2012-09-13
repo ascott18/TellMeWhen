@@ -1433,17 +1433,7 @@ TMW:NewClass("ConditionImplementor"){
 
 
 
-CNDT.ConditionSets = {
---[[	Unit = {
-		identifier = "Unit",
-		iterFunc = TMW.InIconSettings,
-		settingKey = "UnitConditions",
-		parentDefaults = TMW.Icon_Defaults,
-		iterArgs = {
-			[1] = TMW,
-		},
-	},]]
-}
+CNDT.ConditionSets = {}
 local ConditionSets = CNDT.ConditionSets
 
 function CNDT:RegisterConditionSet(identifier, conditionSetData)

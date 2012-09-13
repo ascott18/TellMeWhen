@@ -86,9 +86,11 @@ function ANN:LoadSettingsForEventID(id)
 	end
 	
 	TMW:SortOrderedTables(channelsToDisplay)
-	
-	for frameID, channelData in ipairs(channelsToDisplay) do
+	print(channelsToDisplay)
+	local frameID = 0
+	for _, channelData in ipairs(channelsToDisplay) do
 		if not get(channelData.hidden) then
+			frameID = frameID + 1
 			local frame = self:GetChannelFrame(frameID, previousFrame)
 			frame:Show()
 

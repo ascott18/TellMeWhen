@@ -34,7 +34,6 @@ local _, pclass = UnitClass("Player")
 local pname = UnitName("player")
 
 
-
 local UNITS = TMW:NewModule("Units", "AceEvent-3.0")
 
 TMW.UNITS = UNITS
@@ -66,6 +65,7 @@ UNITS.Units = {
 
 local TEMP_conditionsSettingSource
 
+
 -- Public Methods/Stuff:
 function TMW:GetUnits(icon, setting, Conditions)
 	assert(setting, "Setting was nil for TMW:GetUnits(" .. (icon and icon:GetName() or "<icon>") .. ", setting)")
@@ -88,8 +88,8 @@ function TMW:GetUnits(icon, setting, Conditions)
 	return UnitSet.exposedUnits, UnitSet
 end
 
--- Private Methods/Stuff:
 
+-- Private Methods/Stuff:
 local UnitSet = TMW:NewClass("UnitSet"){
 
 	OnNewInstance = function(self, unitSettings, Conditions)		
@@ -199,7 +199,9 @@ local UnitSet = TMW:NewClass("UnitSet"){
 				-- Get a modifiable version
 				local ModifiableConditions = ConditionObjectConstructor:GetPostUserModifiableConditions()
 				for _, condition in TMW:InNLengthTable(ModifiableConditions) do
-					condition.Unit = unit
+					condition.Unit = condition.Unit
+					:gsub("^unit", unit .. "-")
+					:gsub("%-%-", "-")
 				end
 				
 				-- Modifications are done. Construct the ConditionObject
@@ -564,6 +566,15 @@ end
 do
 	local CNDT = TMW.CNDT
 	CNDT:RegisterConditionImplementingClass("UnitSet")
+	
+	TMW:RegisterUpgrade(60344, {
+		icon = function(self, ics)
+			for n, condition in TMW:InNLengthTable(ics.UnitConditions) do
+				condition.Unit = "unit"
+			end
+		end,
+	})
+
 	local ConditionSet = {
 		parentSettingType = "icon",
 		parentDefaults = TMW.Icon_Defaults,
@@ -593,10 +604,8 @@ do
 		end,
 		TMW_CNDT_GROUP_TYPECHECK = function(self, event, conditionGroup, conditionData)
 			if CNDT.CurrentConditionSet == self then
-				conditionGroup.Unit:Hide()
-				if conditionGroup.TextUnitOrIcon:GetText() ~= nil then
-					conditionGroup.TextUnitDef:SetText(L["UNITCONDITIONS_STATICUNIT"])
-				end
+				TMW.SUG:EnableEditBox(conditionGroup.Unit, "unitconditionunits", true)
+				TMW:TT(conditionGroup.Unit, "CONDITIONPANEL_UNIT", "ICONMENU_UNIT_DESC_UNITCONDITIONUNIT")
 			end
 		end,
 	}

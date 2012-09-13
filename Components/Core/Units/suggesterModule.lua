@@ -44,14 +44,13 @@ function Module:Entry_AddToList_1(f, index)
 		local unitData = self.table[index]
 		local unit = unitData.value
 		
-
+		f.tooltiptitle = unitData.tooltipTitle or unitData.text
+		
 		if unitData.range then
-			f.tooltiptitle = unitData.tooltipTitle or unitData.text
 			f.tooltiptext = "|cFFFF0000#|r = 1-" .. unitData.range
 			
 			unit = unit .. " 1-" .. unitData.range
 		elseif unitData.desc then
-			f.tooltiptitle = unitData.tooltipTitle or unitData.text
 			f.tooltiptext = unitData.desc
 		end
 		
@@ -178,3 +177,15 @@ function Module:UpdateGroupedPlayersMap()
 	end
 end
 
+
+
+local Module = SUG:NewModule("unitconditionunits", SUG:GetModule("units"))
+Module.table = {
+	{ value = "unit",		text = L["UNITCONDITIONS_STATICUNIT"],			desc = L["UNITCONDITIONS_STATICUNIT_DESC"]			},
+	{ value = "unittarget",	text = L["UNITCONDITIONS_STATICUNIT_TARGET"],	desc = L["UNITCONDITIONS_STATICUNIT_TARGET_DESC"]	},
+}
+
+
+function Module:Table_GetSpecialSuggestions(suggestions, tbl, ...)
+	-- No specials
+end

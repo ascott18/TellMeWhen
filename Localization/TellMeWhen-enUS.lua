@@ -260,14 +260,21 @@ L["ICONMENU_COMPONENTICONS"] = "Component Icons & Groups"
 
 L["ICONMENU_UNITSTOWATCH"] = "Unit(s) to watch"
 L["ICONMENU_UNITS"] = "Units"
-L["ICONMENU_UNIT_DESC"] = [[Enter the units to watch in this box. Units can be inserted from the dropdown at the right, or advanced users can type in their own units. Standard units (e.g. player) and/or friendly player names (e.g. %s) may be used as units. Separate multiple units with semicolons (;).
+L["ICONMENU_UNIT_DESC"] = [[Enter the units to watch in this box. Units can be inserted from the suggestion list at the right, or advanced users can type in their own units.
 
-For more information about units, go to http://www.wowpedia.org/UnitId.]]
-L["DROPDOWN_UNIT_DESC"] = [[You can select units from this menu to insert into the editbox. Units that end with '|cFFFF0000#|r' require that the '|cFFFF0000#|r' be replaced with a number corresponding to the appropriate unit, or a range of numbers. E.g. change 'raid|cFFFF0000#|r' to 'raid25' to track the 25th raid member, or change it to 'raid1-25' to track the first 25 raid members.
+Standard units (e.g. player) and/or the names of players you are grouped with (e.g. %s) may be used as units.
 
-For more information about units, go to http://www.wowpedia.org/UnitId.]]
-L["ICONMENU_ICONUNIT"] = "<Icon's Unit>"
-L["ICONMENU_ICONUNIT_DESC"] = "Inserts the \"%u\" substitution, which will check whatever unit the icon is currently showing data for."
+Separate multiple units with semicolons (;).
+
+For more information about units, go to http://www.wowpedia.org/UnitId]]
+L["ICONMENU_UNIT_DESC_CONDITIONUNIT"] = [[Enter the unit to watch in this box. Unit can be inserted from the suggestion list at the right, or advanced users can type in their own unit.
+
+Standard units (e.g. player) and/or the names of players you are grouped with (e.g. %s) may be used.
+
+For more information about units, go to http://www.wowpedia.org/UnitId]]
+L["ICONMENU_UNIT_DESC_UNITCONDITIONUNIT"] = [[Enter the unit to watch in this box. Unit can be inserted from the suggestion list at the right.
+
+"unit" is an alias for each unit that the icon is checking.]]
 L["ICONMENU_FOCUS"] = "Focus"
 L["ICONMENU_TARGETTARGET"] = "Target's target"
 L["ICONMENU_FOCUSTARGET"] = "Focus' target"
@@ -841,10 +848,6 @@ L["FALSE"] = "False"
 L["CONDITIONPANEL_DEFAULT"] = "Choose a type..."
 L["CONDITIONPANEL_TYPE"] = "Type"
 L["CONDITIONPANEL_UNIT"] = "Unit"
-L["CONDITIONPANEL_UNIT_DESC"] = "Enter the unit to watch in this box. The unit can be inserted from the dropdown at the right, or advanced users can type in their own unit. Standard units (e.g. player) and/or friendly player names (e.g. %s) may be used as units."
-L["CONDITIONPANEL_UNITDROPDOWN_DESC"] = [[You can select a unit from this menu to insert into the editbox. Units that end with '|cFFFF0000#|r' require that the '|cFFFF0000#|r' be replaced with a number corresponding to the appropriate unit. E.g. change 'raid|cFFFF0000#|r' to 'raid25' to track the 25th raid member.
-
-NOTE: Conditions only accept one unit.]]
 L["CONDITIONPANEL_OPERATOR"] = "Operator"
 L["CONDITIONPANEL_VALUEN"] = "Value"
 L["CONDITIONPANEL_AND"] = "And"
@@ -1074,6 +1077,9 @@ L["GROUPCONDITIONS"] = "Group Conditions"
 L["UNITCONDITIONS"] = "Unit Conditions"
 L["UNITCONDITIONS_DESC"] = "Click to configure a set of conditions that each unit will have to pass in order to be checked."
 L["UNITCONDITIONS_STATICUNIT"] = "<Icon Unit>"
+L["UNITCONDITIONS_STATICUNIT_DESC"] = "Causes the condition to check each unit that the icon is checking."
+L["UNITCONDITIONS_STATICUNIT_TARGET"] = "<Icon Unit>'s target"
+L["UNITCONDITIONS_STATICUNIT_TARGET_DESC"] = "Causes the condition to check the target of each unit that the icon is checking."
 
 
 L["MAIN"] = "Main"
@@ -1330,6 +1336,9 @@ L["SOUNDERROR2"] = [[Custom WAV files are not supported by WoW 4.0+
 L["SOUNDERROR3"] = "Only OGG and MP3 files are supported!"
 
 L["ANN_TAB"] = "Text"
+L["HELP_ANN_LINK_INSERTED"] = [[The link you just inserted might look strange, but this is how it must be formatted with DogTag.
+
+Changing the color code if you are outputting to a Blizzard channel will break the link.]]
 L["ANN_NOTEXT"] = "<No Text>"
 L["ANN_CHANTOUSE"] = "Channel to Use"
 L["ANN_EDITBOX"] = "Text to be outputted"
@@ -1341,7 +1350,9 @@ L["ANN_SHOWICON"] = "Show icon texture"
 L["ANN_SHOWICON_DESC"] = "Some text destinations can show a texture along with the text. Check this to enable that feature."
 L["ANN_SUB_CHANNEL"] = "Sub section"
 L["ANN_WHISPERTARGET"] = "Whisper target"
-L["ANN_WHISPERTARGET_DESC"] = [[Input the name of the player that you would like to whisper. Normal server/faction whisper requirements apply.]]
+L["ANN_WHISPERTARGET_DESC"] = [[Input the name of the player that you would like to whisper.
+
+Normal server/faction whisper requirements apply.]]
 L["ANN_EVENT_GLOBALDESC"] = "Events are checked from top to bottom in this list. If an event is triggered that has text to output, no events below that event will output any text."
 L["ANN_FCT_DESC"] = "Outputs to Blizzard's Floating Combat Text feature. It MUST be enabled in your interface options for the text to be outputted."
 L["CHAT_MSG_SMART"] = "Smart Channel"
