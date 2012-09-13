@@ -18,7 +18,7 @@ end
 L["HELP_FIRSTUCD"] 					  	= L["HELP_FIRSTUCD"]			 		 	:format(L["ICONMENU_CHOOSENAME2"], GetSpellInfo(65547), GetSpellInfo(47528), GetSpellInfo(2139), GetSpellInfo(62618), GetSpellInfo(62618))
 L["HELP_MISSINGDURS"] 				  	= L["HELP_MISSINGDURS"]			 	 		:format("%s", GetSpellInfo(1766)) -- keep the first "%s" as "%s"
 L["ICONMENU_IGNORENOMANA_DESC"] 	  	= L["ICONMENU_IGNORENOMANA_DESC"]		 	:format(Spell(85288), Spell(5308))
-L["ICONMENU_REACTIVE_DESC"] 		  	= L["ICONMENU_REACTIVE_DESC"]	 		 	:format(Spell(53351), Spell(6572), Spell(17962))
+L["ICONMENU_REACTIVE_DESC"] 		  	= L["ICONMENU_REACTIVE_DESC"]	 		 	:format(Spell(53351), Spell(5308), Spell(17962))
 L["ICONMENU_GHOUL_DESC"] 			  	= L["ICONMENU_GHOUL_DESC"]		 	 		:format(Spell(52143))
 L["ICONMENU_MUSHROOMS"] 			  	= L["ICONMENU_MUSHROOMS"]		 			:format(GetSpellInfo(88747))
 L["ICONMENU_MUSHROOMS_DESC"] 		  	= L["ICONMENU_MUSHROOMS_DESC"]	 		 	:format(Spell(88747))

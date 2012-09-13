@@ -1065,13 +1065,13 @@ function TMW:CompileOptions()
 							dialogControl = 'LSM30_Statusbar',
 							values = LSM:HashTable("statusbar"),
 						},
-						--[[sliders = {
+						sliders = {
 							type = "group",
 							order = 9,
 							name = "",
 							guiInline = true,
 							dialogInline = true,
-							args = {]]
+							args = {
 								Interval = {
 									name = L["UIPANEL_UPDATEINTERVAL"],
 									desc = L["UIPANEL_TOOLTIP_UPDATEINTERVAL"],
@@ -1082,7 +1082,7 @@ function TMW:CompileOptions()
 									step = 0.01,
 									bigStep = 0.01,
 								},
-								--[[EffThreshold = {
+								EffThreshold = {
 									name = L["UIPANEL_EFFTHRESHOLD"],
 									desc = L["UIPANEL_EFFTHRESHOLD_DESC"],
 									type = "range",
@@ -1090,13 +1090,9 @@ function TMW:CompileOptions()
 									min = 0,
 									max = 40,
 									step = 1,
-									
-									-- I really doubt that anyone uses this setting at all.
-									-- Going to hide it and see if anyone complains.
-									hidden = true,
 								},
 							},
-						},]]
+						},
 						checks = {
 							type = "group",
 							order = 21,

@@ -116,7 +116,7 @@ Type:RegisterConfigPanel_XMLTemplate(170, "TellMeWhen_SortSettings")
 
 
 TMW:RegisterCallback("TMW_GLOBAL_UPDATE", function()
-	EFF_THR = 15 -- TMW.db.profile.EffThreshold
+	EFF_THR = TMW.db.profile.EffThreshold
 	DS = TMW.DS
 	unitsWithExistsEvent = TMW.UNITS.unitsWithExistsEvent
 end)

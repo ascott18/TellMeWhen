@@ -1,3 +1,6 @@
+===v6.0.4===
+ * The Buff Efficiency Threshold setting is back.
+ 
 ===v6.0.3===
  * Re-implemented the stance condition for paladin seals.
  * Minor updates for some buff/debuff equivalancies. Still need help getting these completely up to date, though! If you notice something missing, please let me know!

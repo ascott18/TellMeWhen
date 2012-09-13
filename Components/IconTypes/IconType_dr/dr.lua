@@ -95,6 +95,39 @@ Type:RegisterConfigPanel_ConstructorFunc(150, "TellMeWhen_DRSettings", function(
 	})
 end)
 
+TMW:RegisterCallback("TMW_EQUIVS_PROCESSING", function()
+	if DRData then
+		local myCategories = {
+			ctrlstun		= "DR-ControlledStun",
+			scatters		= "DR-Scatter",
+			fear 			= "DR-Fear",
+			rndstun			= "DR-RandomStun",
+			silence			= "DR-Silence",
+			banish 			= "DR-Banish",
+			mc 				= "DR-MindControl",
+			entrapment		= "DR-Entrapment",
+			taunt 			= "DR-Taunt",
+			disarm			= "DR-Disarm",
+			horror			= "DR-Horrify",
+			cyclone			= "DR-Cyclone",
+			disorient		= "DR-Disorient",
+			ctrlroot		= "DR-ControlledRoot",
+			dragons			= "DR-DragonsBreath",
+			bindelemental	= "DR-BindElemental",
+			charge			= "DR-Charge",
+			iceward			= "DR-IceWard",
+		}
+		
+		TMW.BE.dr = {}
+		local dr = TMW.BE.dr
+		for spellID, category in pairs(DRData.spells) do
+			local k = myCategories[category] or TMW:Error("The DR category %q is undefined!", category)
+			if k then
+				dr[k] = (dr[k] and (dr[k] .. ";" .. spellID)) or tostring(spellID)
+			end
+		end
+	end
+end)
 
 local function DR_OnEvent(icon, event, arg1, cevent, _, _, _, _, _, destGUID, _, destFlags, _, spellID, spellName, _, auraType)
 	if event == "COMBAT_LOG_EVENT_UNFILTERED" then

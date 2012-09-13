@@ -27,10 +27,10 @@ local DRData = LibStub("DRData-1.0", true)
 
 local DogTag = LibStub("LibDogTag-3.0", true)
 
-TELLMEWHEN_VERSION = "6.0.3"
+TELLMEWHEN_VERSION = "6.0.4"
 TELLMEWHEN_VERSION_MINOR = strmatch(" @project-version@", " r%d+") or ""
 TELLMEWHEN_VERSION_FULL = TELLMEWHEN_VERSION .. TELLMEWHEN_VERSION_MINOR
-TELLMEWHEN_VERSIONNUMBER = 60345 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
+TELLMEWHEN_VERSIONNUMBER = 60401 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
 if TELLMEWHEN_VERSIONNUMBER > 61001 or TELLMEWHEN_VERSIONNUMBER < 60000 then return error("YOU SCREWED UP THE VERSION NUMBER OR DIDNT CHANGE THE SAFETY LIMITS") end -- safety check because i accidentally made the version number 414069 once
 
 TELLMEWHEN_MAXROWS = 20
@@ -1179,7 +1179,7 @@ TMW.Defaults = {
 		Locked			= 	false,
 		NumGroups		=	1,
 		Interval		=	UPD_INTV,
-		--EffThreshold	=	15,
+		EffThreshold	=	15,
 		TextureName		= 	"Blizzard",
 		DrawEdge		=	not TMW.ISMOP and false,
 		SoundChannel	=	"SFX",
@@ -1398,7 +1398,6 @@ TMW.BE = TMW.ISMOP and {
 		Tier11Interrupts	= "_83703;_82752;_82636;_83070;_79710;_77896;_77569;_80734;_82411",
 		Tier12Interrupts	= "_97202;_100094",
 	},
-	dr = {},
 } or
 {
 	--Most of these are thanks to Malazee @ US-Dalaran's chart: http://forums.wow-petopia.com/download/file.php?mode=view&id=4979 and spreadsheet https://spreadsheets.google.com/ccc?key=0Aox2ZHZE6e_SdHhTc0tZam05QVJDU0lONnp0ZVgzdkE&hl=en#gid=18
@@ -1461,7 +1460,6 @@ TMW.BE = TMW.ISMOP and {
 		Tier11Interrupts	= "_83703;_82752;_82636;_83070;_79710;_77896;_77569;_80734;_82411",
 		Tier12Interrupts	= "_97202;_100094",
 	},
-	dr = {},
 }
 
 TMW.CompareFuncs = {
@@ -1712,17 +1710,17 @@ function TMW:OnInitialize()
 		return -- if required, return here
 	end
 
-	if LibStub("LibButtonFacade", true) and select(6, GetAddOnInfo("Masque")) == "MISSING" then
-		TMW.Warn("TellMeWhen no longer supports ButtonFacade. If you wish to continue to skin your icons, please upgrade to ButtonFacade's successor, Masque.")
-	end
-
-	TMW:ProcessEquivalencies()
-
 	--------------- Events/OnUpdate ---------------
 	TMW:SetScript("OnUpdate", TMW.OnUpdate)
 
 	TMW:RegisterEvent("PLAYER_ENTERING_WORLD")
 	TMW:RegisterEvent("PLAYER_LOGIN")
+
+	if LibStub("LibButtonFacade", true) and select(6, GetAddOnInfo("Masque")) == "MISSING" then
+		TMW.Warn("TellMeWhen no longer supports ButtonFacade. If you wish to continue to skin your icons, please upgrade to ButtonFacade's successor, Masque.")
+	end
+
+	TMW:ProcessEquivalencies()
 end
 
 function TMW:Initialize()
@@ -2893,37 +2891,8 @@ function TMW:ProcessEquivalencies()
 	--	SpellTextures[dispeltype] = icon
 		SpellTextures[strlower(dispeltype)] = icon
 	end
-
-	if DRData then
-		local myCategories = {
-			ctrlstun		= "DR-ControlledStun",
-			scatters		= "DR-Scatter",
-			fear 			= "DR-Fear",
-			rndstun			= "DR-RandomStun",
-			silence			= "DR-Silence",
-			banish 			= "DR-Banish",
-			mc 				= "DR-MindControl",
-			entrapment		= "DR-Entrapment",
-			taunt 			= "DR-Taunt",
-			disarm			= "DR-Disarm",
-			horror			= "DR-Horrify",
-			cyclone			= "DR-Cyclone",
-			disorient		= "DR-Disorient",
-			ctrlroot		= "DR-ControlledRoot",
-			dragons			= "DR-DragonsBreath",
-			bindelemental	= "DR-BindElemental",
-			charge			= "DR-Charge",
-			iceward			= "DR-IceWard",
-		}
-		
-		local dr = TMW.BE.dr
-		for spellID, category in pairs(DRData.spells) do
-			local k = myCategories[category] or TMW:Error("The DR category %q is undefined!", category)
-			if k then
-				dr[k] = (dr[k] and (dr[k] .. ";" .. spellID)) or tostring(spellID)
-			end
-		end
-	end
+	
+	TMW:Fire("TMW_EQUIVS_PROCESSING")
 
 	TMW.OldBE = CopyTable(TMW.BE)
 	for category, b in pairs(TMW.OldBE) do
