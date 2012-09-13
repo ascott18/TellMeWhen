@@ -590,11 +590,17 @@ end
 
 function CNDT:AddCondition(Conditions)
 	Conditions.n = Conditions.n + 1
+	
+	TMW:Fire("TMW_CNDT_CONDITION_ADDED", Conditions[Conditions.n])
+	
 	return Conditions[Conditions.n]
 end
 
 function CNDT:DeleteCondition(Conditions, n)
 	Conditions.n = Conditions.n - 1
+	
+	TMW:Fire("TMW_CNDT_CONDITION_DELETED", n)
+	
 	return tremove(Conditions, n)
 end
 

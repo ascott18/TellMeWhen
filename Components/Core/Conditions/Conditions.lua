@@ -60,6 +60,26 @@ TMW.Condition_Defaults = {
 		Runes 	   		= {},
 	},
 }
+setmetatable(TMW.Condition_Defaults["**"], {
+	__newindex = function(self, k, v)
+		if TMW.Initialized then
+			error("New condition defaults cannot be added after the database has already been initialized", 2)
+		end
+		TMW:Fire("TMW_CNDT_DEFAULTS_NEWVAL", k, v)
+		rawset(self, k, v)
+	end,
+})
+
+function CNDT:RegisterConditionDefaults(self, defaults)
+	assert(type(defaults) == "table", "arg1 to RegisterGroupDefaults must be a table")
+	
+	if TMW.Initialized then
+		error(("Defaults for conditions are being registered too late. They need to be registered before the database is initialized."):format(self.name or "<??>"))
+	end
+	
+	-- Copy the defaults into the main defaults table.
+	TMW:MergeDefaultsTables(defaults, TMW.Condition_Defaults["**"])
+end
 
 
 TMW:RegisterUpgrade(60026, {
@@ -1444,6 +1464,7 @@ function CNDT:RegisterConditionSet(identifier, conditionSetData)
 	
 	TMW:ValidateType("parentSettingType", "conditionSetData", data.parentSettingType, "string")
 	TMW:ValidateType("parentDefaults", "conditionSetData", data.parentDefaults, "table")
+	TMW:ValidateType("modifiedDefaults", "conditionSetData", data.modifiedDefaults, "table;nil")
 	
 	TMW:ValidateType("settingKey", "conditionSetData", data.settingKey, "number;string")
 	TMW:ValidateType("GetSettings", "conditionSetData", data.GetSettings, "function")
@@ -1466,7 +1487,15 @@ function CNDT:RegisterConditionSet(identifier, conditionSetData)
 	
 	data.identifier = identifier
 	
-	data.parentDefaults[data.settingKey] = TMW.Condition_Defaults
+	local defaults = TMW.Condition_Defaults
+	if data.modifiedDefaults then
+		defaults = CopyTable(defaults)
+		TMW:CopyTableInPlaceWithMeta(data.modifiedDefaults, defaults["**"], true)
+		TMW:RegisterCallback("TMW_CNDT_DEFAULTS_NEWVAL", function(event, k, v)
+			defaults["**"][k] = v
+		end)
+	end
+	data.parentDefaults[data.settingKey] = defaults
 	
 	ConditionSets[identifier] = data
 	

@@ -30,7 +30,7 @@ local DogTag = LibStub("LibDogTag-3.0", true)
 TELLMEWHEN_VERSION = "6.0.3"
 TELLMEWHEN_VERSION_MINOR = strmatch(" @project-version@", " r%d+") or ""
 TELLMEWHEN_VERSION_FULL = TELLMEWHEN_VERSION .. TELLMEWHEN_VERSION_MINOR
-TELLMEWHEN_VERSIONNUMBER = 60344 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
+TELLMEWHEN_VERSIONNUMBER = 60345 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
 if TELLMEWHEN_VERSIONNUMBER > 61001 or TELLMEWHEN_VERSIONNUMBER < 60000 then return error("YOU SCREWED UP THE VERSION NUMBER OR DIDNT CHANGE THE SAFETY LIMITS") end -- safety check because i accidentally made the version number 414069 once
 
 TELLMEWHEN_MAXROWS = 20
@@ -1674,8 +1674,9 @@ function TMW:MergeDefaultsTables(src, dest)
 		if dest[k] and dest_type == "table" and src_type == "table" then
 			TMW:MergeDefaultsTables(src[k], dest[k])
 			
-		elseif dest_type ~= "nil" and src_type ~= dest_type then
-			error(("Type mismatch in merging db default tables! Key: %q; Source type: %q; Destination type: %q"):format(k, src_type, dest_type), 3)
+		elseif dest_type ~= "nil" and src[k] ~= dest[k] then
+			error(("Mismatch in merging db default tables! Setting Key: %q; Source: %q (%s); Destination: %q (%s)")
+				:format(k, tostring(src[k]), src_type, tostring(dest[k]), dest_type), 3)
 			
 		else
 			dest[k] = src[k]

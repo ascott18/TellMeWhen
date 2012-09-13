@@ -202,6 +202,8 @@ local UnitSet = TMW:NewClass("UnitSet"){
 					condition.Unit = condition.Unit
 					:gsub("^unit", unit .. "-")
 					:gsub("%-%-", "-")
+					:gsub("%-%-", "-")
+					:trim("-")
 				end
 				
 				-- Modifications are done. Construct the ConditionObject
@@ -578,6 +580,9 @@ do
 	local ConditionSet = {
 		parentSettingType = "icon",
 		parentDefaults = TMW.Icon_Defaults,
+		modifiedDefaults = {
+			Unit = "unit",
+		},
 		
 		settingKey = "UnitConditions",
 		GetSettings = function(self)
@@ -608,7 +613,13 @@ do
 				TMW:TT(conditionGroup.Unit, "CONDITIONPANEL_UNIT", "ICONMENU_UNIT_DESC_UNITCONDITIONUNIT")
 			end
 		end,
+		--[[TMW_CNDT_CONDITION_ADDED = function(self, event, condition)
+			if CNDT.CurrentConditionSet == self then
+				-- DoStuff()
+			end
+		end,]]
 	}
 	TMW:RegisterCallback("TMW_CNDT_GROUP_TYPECHECK", ConditionSet)
+	--TMW:RegisterCallback("TMW_CNDT_CONDITION_ADDED", ConditionSet)
 	CNDT:RegisterConditionSet("Unit", ConditionSet)
 end
