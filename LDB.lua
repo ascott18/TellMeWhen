@@ -25,6 +25,10 @@ local dataobj = ldb:GetDataObjectByName("TellMeWhen") or
 	})
 
 dataobj.OnClick = function(self, button)
+	if not TMW.Initialized then
+		return
+	end
+	
 	if button == "RightButton" then
 		if TMW:CheckCanDoLockedAction() then
 			TMW:LoadOptions()

@@ -842,8 +842,9 @@ function ConditionObject:OnNewInstance(Conditions, conditionString)
 	for n, condition in TMW:InNLengthTable(Conditions) do
 		types = types .. "_" .. condition.Type
 	end
+	self.funcIdentifier = types
 	
-	local func, err = loadstring(conditionString, "Condition" .. types)
+	local func, err = loadstring(conditionString, "Condition" .. self.funcIdentifier)
 	if func then
 		func = setfenv(func, TMW.CNDT.Env)
 		self.CheckFunction = setfenv(func, TMW.CNDT.Env)
@@ -935,23 +936,20 @@ function ConditionObject:CompileUpdateFunction(Conditions)
 	end
 	
 	-- Begin creating the final string that will be used to make the function.
-	local funcstr = [[
-	if not event then
-		return
-	elseif (]]
+	local funcstr = "if not event then return \r\n elseif ( \r\n"
 	
 	-- Compile all of the arg checker strings into one single composite that can be checked in an (if ... then) statement.
 	local argCheckerStringComposite = ""
 	for argCheckerString in pairs(argCheckerStrings) do
 		if argCheckerString ~= "" then
-			argCheckerStringComposite = argCheckerStringComposite .. [[(]] .. argCheckerString .. [[) or ]]
+			argCheckerStringComposite = argCheckerStringComposite .. "    (" .. argCheckerString .. ") or \r\n"
 		end
 	end
 	
 	if argCheckerStringComposite ~= "" then
 		-- If any arg checkers were added to the composite (it isnt a blank string),
 		-- trim off the final ") or " at the end of it.
-		argCheckerStringComposite = argCheckerStringComposite:sub(1, -5)
+		argCheckerStringComposite = argCheckerStringComposite:sub(1, -6) .. "\r\n"
 	else
 		-- The arg checker string should never ever be blank. Raise an error if it was.
 		TMW:Error("The arg checker string compiled for ConditionObject %s was blank. This should not have happened.", tostring(self))
@@ -979,11 +977,11 @@ function ConditionObject:CompileUpdateFunction(Conditions)
 	
 	-- Set the variables that accept the args to the vararg with all of the function input,
 	-- and tack on the body of the function
-	funcstr = argHeader .. [[ = ...
-	]] .. funcstr
+	funcstr = argHeader .. " = ... \r\n" .. funcstr
 
+	funcstr = funcstr:gsub("	", "    ") -- tabs to spaces
 	
-	local func, err = loadstring(funcstr, tostring(self) .. " Condition Events")
+	local func, err = loadstring(funcstr, "ConditionEvents" .. self.funcIdentifier)
 	if func then
 		func = setfenv(func, Env)
 	elseif err then

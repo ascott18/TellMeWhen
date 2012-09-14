@@ -991,7 +991,7 @@ local colorIconTypeTemplate = {
 				if this == "GLOBAL" then
 					t = L["COLOR_HEADER_DEFAULT"]
 				else
-					t = L["COLOR_HEADER"]:format(TMW.Types[this].name)
+					t = L["COLOR_HEADER"]:format(TMW.Types[this].name, "?")-- 2nd param is to prevent errors incase StaticFormats errors
 				end
 				return t .. "\r\n"
 			end,

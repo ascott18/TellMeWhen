@@ -1,5 +1,7 @@
 ===v6.0.4===
  * The Buff Efficiency Threshold setting is back.
+ * Bug fixes:
+ ** Minimum group frame level is now 5 instead of 1 to prevent issues caused at low frame levels.
  
 ===v6.0.3===
  * Re-implemented the stance condition for paladin seals.
