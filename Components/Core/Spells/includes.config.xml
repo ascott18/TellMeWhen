@@ -1,4 +1,4 @@
-<Ui>
+﻿<Ui>
 
 <Script file="ItemCache.lua"/>
 <Script file="SpellCache.lua"/>

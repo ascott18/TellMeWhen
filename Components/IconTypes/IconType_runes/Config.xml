@@ -1,4 +1,4 @@
-<Ui>
+﻿<Ui>
 
 	<Button name="TellMeWhen_TypeCheckRuneTemplate" virtual="true">
 		<Size x="27.5" y="27.5"/>

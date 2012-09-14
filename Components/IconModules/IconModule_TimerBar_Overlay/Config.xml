@@ -1,4 +1,4 @@
-<Ui>
+﻿<Ui>
 
 	<Frame name="TellMeWhen_CBarOptions" inherits="TellMeWhen_OptionsModuleContainer" virtual="true">
 		<Size y="60"/>

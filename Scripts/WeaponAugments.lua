@@ -1,4 +1,4 @@
-{ -- item enhancements
+﻿{ -- item enhancements
 	12643,	--Dense Weightstone
 	23529,	--Adamantite Sharpening Stone
 	43233,	--Deadly Poison

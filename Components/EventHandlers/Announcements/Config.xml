@@ -1,4 +1,4 @@
-<Ui>
+﻿<Ui>
 	<Button name="TellMeWhen_ChannelSelectButton" inherits="TellMeWhen_EventSubComponentSelectButton" virtual="true" >
 		<Scripts>
 			<OnClick>

@@ -1,4 +1,4 @@
-<Ui>
+﻿<Ui>
 
 	<Button name="TellMeWhen_ResizeButton" parentKey="resizeButton" virtual="true">
 		<Size x="10" y="10"/>

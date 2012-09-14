@@ -1,4 +1,4 @@
-
+﻿
 function processFile(filePath)
 
 local file = io.open(filePath, "r")

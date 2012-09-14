@@ -1,4 +1,4 @@
--- Script to extract enrage spells from db.mmo-champion.com
+﻿-- Script to extract enrage spells from db.mmo-champion.com
 
 -- there are a few that arent spells anymore
 -- make sure and delete those (look at the tooltip on the name editbox in the icon editor when you hold down a mod key))

@@ -1,4 +1,4 @@
-<Ui>
+﻿<Ui>
 	<Button name="TellMeWhen_SpellSuggestTemplate" virtual="true" hidden="true">
 		<Size y="18.95"/>
 		<Anchors>

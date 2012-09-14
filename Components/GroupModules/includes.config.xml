@@ -1,4 +1,4 @@
-<Ui>
+﻿<Ui>
 
  <Include file="GroupModule_Resizer\includes.config.xml"/>
  <Include file="GroupModule_Resizer_ScaleXY\includes.config.xml"/>

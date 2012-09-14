@@ -1,4 +1,4 @@
-local root = [[B:\Games\World Of Warcraft\Interface\AddOns\TellMeWhen\]]
+﻿local root = [[B:\Games\World Of Warcraft\Interface\AddOns\TellMeWhen\]]
 local paths = {
 	[[TellMeWhen.xml]],
 	[[TellMeWhen_Options\TellMeWhen_Options.xml]],

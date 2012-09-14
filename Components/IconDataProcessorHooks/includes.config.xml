@@ -1,4 +1,4 @@
-<Ui>
+﻿<Ui>
 
 <Include file="IconDataProcessorHook_Alpha_ConditionReq\includes.config.xml"/>
 <Include file="IconDataProcessorHook_Alpha_DurationReq\includes.config.xml"/>

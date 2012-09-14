@@ -1,4 +1,4 @@
-<Ui>
+﻿<Ui>
 
 
 	<Slider name="TellMeWhen_AnimationSliderTemplate" inherits="TellMeWhen_SliderTemplate" virtual="true">

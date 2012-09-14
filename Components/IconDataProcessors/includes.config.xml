@@ -1,4 +1,4 @@
-<Ui>
+﻿<Ui>
 
 <Include file="IconDataProcessor_Duration\includes.config.xml"/>
 <Include file="IconDataProcessor_Spell\includes.config.xml"/>

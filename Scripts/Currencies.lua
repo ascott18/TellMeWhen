@@ -1,4 +1,4 @@
-{
+﻿{
 	61,	--Dalaran Jewelcrafter\'s Token
 	81,	--Epicurean\'s Award
 	241,	--Champion\'s Seal

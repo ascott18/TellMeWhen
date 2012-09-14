@@ -1,4 +1,4 @@
-<Ui>
+﻿<Ui>
 
 <Include file="Sound\includes.config.xml"/>
 <Include file="Announcements\includes.config.xml"/>

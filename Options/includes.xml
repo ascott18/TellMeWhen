@@ -1,4 +1,4 @@
-<Ui>
+﻿<Ui>
 
 <!--@no-lib-strip@--> 
 <Include file="..\Lib\AceHook-3.0\AceHook-3.0.xml"/>

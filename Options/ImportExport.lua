@@ -1,4 +1,4 @@
-local TMW = TMW
+﻿local TMW = TMW
 if not TMW then return end
 
 -- GLOBALS: TELLMEWHEN_VERSIONNUMBER

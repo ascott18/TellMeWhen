@@ -1,4 +1,4 @@
-
+﻿
 local AUTO_FIND_TOC = nil--"./"
 local FILE_BLACKLIST = {"^localization", "^lib"}
 

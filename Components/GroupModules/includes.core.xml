@@ -1,4 +1,4 @@
-<Ui>
+﻿<Ui>
 
  <Include file="GroupModule_Resizer\includes.core.xml"/>
  <Include file="GroupModule_Resizer_ScaleXY\includes.core.xml"/>

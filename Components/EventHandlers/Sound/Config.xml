@@ -1,4 +1,4 @@
-<Ui>
+﻿<Ui>
 	<Button name="TellMeWhen_SoundSelectButton" inherits="TellMeWhen_BorderedFrame" virtual="true" >
 		<Size y="12"/>
 		<Anchors>
