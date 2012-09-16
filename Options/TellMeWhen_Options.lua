@@ -289,7 +289,7 @@ function TMW:SetUIDropdownText(frame, value, tbl, text)
 			for icon in TMW:InIcons() do
 				if icon:GetName() == value then
 					local g, i = strmatch(value, "TellMeWhen_Group(%d+)_Icon(%d+)")
-					UIDropDownMenu_SetText(frame, TMW:GetIconMenuText(tonumber(g), tonumber(i), icon))
+					UIDropDownMenu_SetText(frame, TMW:GetIconMenuText(tonumber(g), tonumber(i), icon:GetSettings()))
 					return icon
 				end
 			end

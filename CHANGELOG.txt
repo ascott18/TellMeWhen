@@ -1,6 +1,7 @@
 ﻿===v6.0.4===
  * The Buff Efficiency Threshold setting is back.
  * Changed all file encodings to UTF-8 in hopes of fixing the problems that many users are having.
+ * Added a dropdown menu to select an icon when right clicking an an icon that has other icons underneath it.
  * Bug fixes:
  ** Minimum group frame level is now 5 instead of 1 to prevent issues caused at low frame levels.
  ** Increased the delay on LoadFirstValidIcon from 0.1 seconds to 0.5 seconds in hopes of preventing the AceCD:804 error more often.
