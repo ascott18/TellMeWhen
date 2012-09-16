@@ -4,6 +4,7 @@
  * Bug fixes:
  ** Minimum group frame level is now 5 instead of 1 to prevent issues caused at low frame levels.
  ** Increased the delay on LoadFirstValidIcon from 0.1 seconds to 0.5 seconds in hopes of preventing the AceCD:804 error more often.
+ ** Soul shard condition maximum has been increased to 4 (from 3).
  
 ===v6.0.3===
  * Re-implemented the stance condition for paladin seals.

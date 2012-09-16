@@ -169,7 +169,7 @@ ConditionCategory:RegisterSpacer(10)
 ConditionCategory:RegisterCondition(11,	 "SOUL_SHARDS", {
 	text = SOUL_SHARDS,
 	min = 0,
-	max = 3,
+	max = 4,
 	unit = PLAYER,
 	icon = "Interface\\Icons\\inv_misc_gem_amethyst_02",
 	tcoords = CNDT.COMMON.standardtcoords,
