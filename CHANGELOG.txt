@@ -7,6 +7,7 @@
  ** Increased the delay on LoadFirstValidIcon from 0.1 seconds to 0.5 seconds in hopes of preventing the AceCD:804 error more often.
  ** Soul shard condition maximum has been increased to 4 (from 3).
  ** The lightwell icon type should now work properly with the Lightspring glyph.
+ ** Tried again to fix the AceCD:804 error. Probably didn't succeed.
  
 ===v6.0.3===
  * Re-implemented the stance condition for paladin seals.

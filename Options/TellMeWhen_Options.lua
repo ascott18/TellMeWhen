@@ -1320,7 +1320,6 @@ function TMW:Group_Delete(groupID)
 		return
 	end
 
-	local needReloadIcon = groupID == TMW.CI.g
 	for id = groupID + 1, TMW.db.profile.NumGroups do
 		local source = "TellMeWhen_Group" .. id
 		local destination = "TellMeWhen_Group" .. id - 1
@@ -1330,22 +1329,16 @@ function TMW:Group_Delete(groupID)
 
 		-- check for any icons of a group.
 		TMW:ReconcileData(source, destination, source .. "_Icon", destination .. "_Icon")
-		
-		needReloadIcon = needReloadIcon or groupID == TMW.CI.g
 	end
 
 	tremove(TMW.db.profile.Groups, groupID)
 	TMW.db.profile.NumGroups = TMW.db.profile.NumGroups - 1
 
 	TMW:Update()
-	IE:Load()
+	IE:Load(1)
 	TMW:CompileOptions()
 	IE:NotifyChanges()
 	CloseDropDownMenus()
-	
-	if needReloadIcon then
-		TMW.IE:ScheduleTimer("LoadFirstValidIcon", 0.5)
-	end
 end
 
 function TMW:Group_Add()
@@ -1382,13 +1375,9 @@ function TMW:Group_Swap(groupID1, groupID2)
 	Groups[groupID1], Groups[groupID2] = Groups[groupID2], Groups[groupID1]
     
     TMW:Update()
-	IE:Load()
+	IE:Load(1)
 	TMW:CompileOptions()
 	IE:NotifyChanges()
-	
-	if TMW.CI.g == groupID1 or TMW.CI.g == groupID2 then
-		TMW.IE:ScheduleTimer("LoadFirstValidIcon", 0.5)
-	end
 end
 
 
@@ -2104,7 +2093,14 @@ function IE:Load(isRefresh, icon, isHistoryChange)
 	end
 
 	local groupID, iconID = CI.g, CI.i
-	if not groupID or not iconID then return end
+	if not groupID or not iconID then
+		return
+	elseif
+		not CI.ic.group:IsValid()
+		or not CI.ic:IsInRange()
+	then
+		return IE:LoadFirstValidIcon()
+	end
 
 	-- This is really really important. The icon must be setup so that it has the correct components implemented
 	-- so that the correct config panels will be loaded and shown for the icon.
@@ -2141,12 +2137,10 @@ function IE:Load(isRefresh, icon, isHistoryChange)
 end
 
 function IE:LoadFirstValidIcon()
-	if true then return end
 	for icon in TMW:InIcons() do
 		-- hack to get the first icon that exists and is shown
 		if icon:IsVisible() then
-			TMW.IE:Load(1, icon)
-			return
+			return IE:Load(1, icon)
 		end
 	end
 	
