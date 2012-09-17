@@ -24,6 +24,7 @@ local Module = TMW:NewClass("IconModule_IconEditorLoader", "IconModule")
 
 local icons = {}
 local DD = CreateFrame("Frame", nil, UIParent, "TMW_DropDownMenuTemplate")
+DD:Hide()
 DD.wrapTooltips = 1
 local function Dropdown_OnClick(button, icon)
 	icon.group:Raise()
