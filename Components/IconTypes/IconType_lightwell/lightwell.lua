@@ -58,8 +58,12 @@ end)
 local CONST_MAX_CHARGES = 10
 local CONST_MAX_CHARGES_GLYPHED = 15
 local CONST_SPELLID_GLYPH = 55673
-local CONST_SPELLID_SUMMONSPELL = 724
-local CONST_SPELLID_LIGHTWELLRENEW_HOT = 7001
+
+local CONST_SPELLID_LIGHTWELL_SUMMONSPELL = 724
+local CONST_SPELLID_LIGHTWELL_RENEW_HOT = 7001
+
+local CONST_SPELLID_LIGHTSPRING_SUMMONSPELL = 126135
+local CONST_SPELLID_LIGHTSPRING_RENEW_HOT = 126154
 
 if TMW.ISMOP then
 	CONST_MAX_CHARGES = 15
@@ -70,7 +74,7 @@ local MaxCharges = CONST_MAX_CHARGES
 local CurrentCharges = 0
 local SummonTime
 function Type:GLYPH()
-	for i = 7, NUM_GLYPH_SLOTS do
+	for i = 1, NUM_GLYPH_SLOTS do
 		local _, _, _, spellID = GetGlyphSocketInfo(i)
 		if spellID == CONST_SPELLID_GLYPH then
 			MaxCharges = CONST_MAX_CHARGES_GLYPHED
@@ -86,14 +90,20 @@ end
 
 function Type:COMBAT_LOG_EVENT_UNFILTERED(_, _, event, _, sourceGUID, _, _, _, _, _, _, _, spellID)
 	if sourceGUID == pGUID then
-		if event == "SPELL_SUMMON" and spellID == CONST_SPELLID_SUMMONSPELL then
+		if event == "SPELL_SUMMON"
+		and (spellID == CONST_SPELLID_LIGHTWELL_SUMMONSPELL or spellID == CONST_SPELLID_LIGHTSPRING_SUMMONSPELL)
+		then
 			CurrentCharges = MaxCharges
 			SummonTime = TMW.time
 			
 			for i = 1, #Type.Icons do
 				Type.Icons[i].NextUpdateTime = 0
 			end
-		elseif (event == "SPELL_AURA_REFRESH" or event == "SPELL_AURA_APPLIED") and spellID == CONST_SPELLID_LIGHTWELLRENEW_HOT and CurrentCharges > 0 then
+			
+		elseif (event == "SPELL_AURA_REFRESH" or event == "SPELL_AURA_APPLIED")
+		and (spellID == CONST_SPELLID_LIGHTWELL_RENEW_HOT or spellID == CONST_SPELLID_LIGHTSPRING_RENEW_HOT)
+		and CurrentCharges > 0
+		then
 			CurrentCharges = CurrentCharges - 1
 			
 			for i = 1, #Type.Icons do
@@ -134,11 +144,11 @@ end
 
 
 function Type:Setup(icon, groupID, iconID)
-	icon.NameFirst = CONST_SPELLID_SUMMONSPELL
+	icon.NameFirst = CONST_SPELLID_LIGHTWELL_SUMMONSPELL
 
 	icon:SetInfo("texture; spell; reverse",
-		SpellTextures[CONST_SPELLID_SUMMONSPELL],
-		CONST_SPELLID_SUMMONSPELL,
+		SpellTextures[CONST_SPELLID_LIGHTWELL_SUMMONSPELL],
+		CONST_SPELLID_LIGHTWELL_SUMMONSPELL,
 		true
 	)
 	

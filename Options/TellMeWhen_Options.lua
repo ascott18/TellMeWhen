@@ -1344,7 +1344,7 @@ function TMW:Group_Delete(groupID)
 	CloseDropDownMenus()
 	
 	if needReloadIcon then
-		TMW.IE:LoadFirstValidIcon()
+		TMW.IE:ScheduleTimer("LoadFirstValidIcon", 0.5)
 	end
 end
 
@@ -1387,7 +1387,7 @@ function TMW:Group_Swap(groupID1, groupID2)
 	IE:NotifyChanges()
 	
 	if TMW.CI.g == groupID1 or TMW.CI.g == groupID2 then
-		TMW.IE:LoadFirstValidIcon()
+		TMW.IE:ScheduleTimer("LoadFirstValidIcon", 0.5)
 	end
 end
 
@@ -2141,6 +2141,7 @@ function IE:Load(isRefresh, icon, isHistoryChange)
 end
 
 function IE:LoadFirstValidIcon()
+	if true then return end
 	for icon in TMW:InIcons() do
 		-- hack to get the first icon that exists and is shown
 		if icon:IsVisible() then
