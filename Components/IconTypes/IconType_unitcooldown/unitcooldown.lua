@@ -323,14 +323,13 @@ end
 
 function Type:UNIT_SPELLCAST_SUCCEEDED(event, unit, spellName, _, _, spellID)
 	local sourceGUID = UnitGUID(unit)
-	if not sourceGUID then
-		if unit ~= "npc" and unit ~= "npc," then
-			-- For some reason, this is firing for unit "npc," (yes, there is a comma there).
-			-- It also seems to fire for "npc" without a comma, so ignore that too it it doesnt have a GUID.
-			-- Obviously this is invalid, but if you find anything else invalid then scream about it too.
-			TMW:Error("SourceGUID for %s (%s) was bad!", unit, tostring(sourceGUID))
-		end
-	else
+	if sourceGUID then
+		-- For some reason, this is firing for unit "npc," (yes, there is a comma there).
+		-- It also seems to fire for "npc" without a comma, so ignore that too it it doesnt have a GUID.
+		-- Obviously this is invalid, but if you find anything else invalid then scream about it too.
+		-- Addendum 6-17-12: Fired for arena1 and GUID was nil. Seems this is a more common issue than I though,
+		-- so remove all errors and just ignore things without GUIDs.
+		
 		local c = Cooldowns[sourceGUID]
 		spellName = strlowerCache[spellName]
 		
