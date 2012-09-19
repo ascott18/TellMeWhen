@@ -41,7 +41,6 @@ local ConditionCategory = CNDT:GetCategory("STATS", 6, L["CNDTCAT_STATS"], true,
 ConditionCategory:RegisterCondition(1,	 "STRENGTH", {
 	text = _G["SPELL_STAT1_NAME"],
 	category = L["CNDTCAT_STATS"],
-	categorySpacebefore = true,
 	range = 5000,
 	unit = PLAYER,
 	texttable = CNDT.COMMON.commanumber,

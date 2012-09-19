@@ -27,7 +27,6 @@ local ConditionCategory = CNDT:GetCategory("ATTRIBUTES_UNIT", 3, L["CNDTCAT_ATTR
 
 ConditionCategory:RegisterCondition(1,	 "EXISTS", {
 	text = L["CONDITIONPANEL_EXISTS"],
---	categorySpacebefore = true,
 	min = 0,
 	max = 1,
 	texttable = CNDT.COMMON.bool,

@@ -497,7 +497,8 @@ Env.SemicolonConcatCache = setmetatable(
 })
 
 
-local function formatSeconds(seconds, arg2)
+CNDT.COMMON = {}
+function CNDT.COMMON.formatSeconds(seconds, arg2)
 	if type(seconds) == "table" then -- if i set it directly as a metamethod
 		seconds = arg2
 	end
@@ -517,9 +518,9 @@ local function formatSeconds(seconds, arg2)
 	if h >= 1 then return format("%d:%02d:%s", h, m, s) end
 	return format("%d:%s", m, s)
 end
+local formatSeconds = CNDT.COMMON.formatSeconds
 
 -- preset text tables that are frequently used
-CNDT.COMMON = {}
 CNDT.COMMON.commanumber = function(k)
 	k = gsub(k, "(%d)(%d%d%d)$", "%1,%2", 1)
 	local found

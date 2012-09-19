@@ -2,6 +2,7 @@
  * The Buff Efficiency Threshold setting is back.
  * Changed all file encodings to UTF-8 in hopes of fixing the problems that many users are having.
  * Added a dropdown menu to select an icon when right clicking an an icon that has other icons underneath it.
+ * New condition: Spell charge time.
  * Bug fixes:
  ** Minimum group frame level is now 5 instead of 1 to prevent issues caused at low frame levels.
  ** Increased the delay on LoadFirstValidIcon from 0.1 seconds to 0.5 seconds in hopes of preventing the AceCD:804 error more often.
@@ -9,6 +10,7 @@
  ** The lightwell icon type should now work properly with the Lightspring glyph.
  ** Tried again to fix the AceCD:804 error. Probably didn't succeed.
  ** Fixed an incorrect spellID for Spirit Beast Blessing in the IncreasedMastery equivalency.
+ ** Groups should now properly show/hide as needed when you change between primary/secondary talents specializations when both specializations are the same.
  
 ===v6.0.3===
  * Re-implemented the stance condition for paladin seals.

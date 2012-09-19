@@ -11,7 +11,8 @@ local function Spell(id)
 	if id == 42292 then
 		tex = "Interface\\Icons\\inv_jewelry_trinketpvp_0" .. (UnitFactionGroup("player") == "Horde" and "2" or "1")
 	end
-	return spellFmt:format(tex, name)
+	--tex = tex:gsub("\\\\", "\\")
+	return spellFmt:format(tex, name)--:gsub("\\\\", "\\"):gsub("\\\\", "\\")
 end
 
 
@@ -29,6 +30,7 @@ L["CLEU_DAMAGE_SHIELD_DESC"] 	  	  	= L["CLEU_DAMAGE_SHIELD_DESC"]		 		:format(S
 L["CLEU_DAMAGE_SHIELD_MISSED_DESC"]   	= L["CLEU_DAMAGE_SHIELD_MISSED_DESC"]	 	:format(Spell(31271), Spell(30482), Spell(324))
 L["CLEU_SPELL_STOLEN_DESC"]   		  	= L["CLEU_SPELL_STOLEN_DESC"]	 		 	:format(Spell(30449))
 L["SPELLCHARGES_DESC"]   			  	= L["SPELLCHARGES_DESC"]	 			 	:format(Spell(109132), Spell(115308))
+L["SPELLCHARGETIME_DESC"]   		  	= L["SPELLCHARGETIME_DESC"]	 			 	:format(Spell(109132), Spell(105174))
 
 
 L["ICONMENU_ICD_DESC"] 	  			  	= L["ICONMENU_ICD_DESC"]		 		 	:format(L["ICONMENU_ICDTYPE"])
