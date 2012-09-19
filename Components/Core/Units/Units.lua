@@ -191,7 +191,7 @@ local UnitSet = TMW:NewClass("UnitSet"){
 		end
 
 		-- Setup conditions
-		if Conditions then
+		if Conditions and Conditions.n > 0 then
 			for k, unit in ipairs(self.originalUnits) do
 				-- Get a constructor to make the ConditionObject
 				local ConditionObjectConstructor = self:Conditions_GetConstructor(Conditions)
@@ -312,7 +312,7 @@ function UNITS:GetOriginalUnitTable(unitSettings)
 	end
 
 	--SUBSTITUTE RAID1-10 WITH RAID1;RAID2;RAID3;...RAID10
-	for wholething, unit, firstnum, lastnum, append in gmatch(unitSettings, "((%a+) ?(%d+) ?%- ?(%d+) ?([%a]*)) ?;?") do
+	for wholething, unit, firstnum, lastnum, append in gmatch(unitSettings, "(([%a%d]+) ?(%d+) ?%- ?(%d+) ?([%a%d]*)) ?;?") do
 		if unit and firstnum and lastnum then
 
 			if abs(lastnum - firstnum) > 100 then

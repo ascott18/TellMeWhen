@@ -1653,9 +1653,12 @@ function TMW:CopyTableInPlaceWithMeta(src, dest, allowUnmatchedSourceTables)
 	local metatemp = getmetatable(src) -- lets not go overwriting random metatables
 	setmetatable(src, getmetatable(dest))
 	for k in pairs(src) do
-		if dest[k] and type(dest[k]) == "table" and type(src[k]) == "table" then
+		if type(dest[k]) == "table" and type(src[k]) == "table" then
 			TMW:CopyTableInPlaceWithMeta(src[k], dest[k], allowUnmatchedSourceTables)
-		elseif type(src[k]) ~= "table" or allowUnmatchedSourceTables then
+		elseif allowUnmatchedSourceTables and type(dest[k]) ~= "table" and type(src[k]) == "table" then
+			dest[k] = {}
+			TMW:CopyTableInPlaceWithMeta(src[k], dest[k], allowUnmatchedSourceTables)
+		elseif type(src[k]) ~= "table" then
 			dest[k] = src[k]
 		end
 	end
@@ -3426,9 +3429,8 @@ function Group.Setup_Conditions(group)
 		-- If the group is set to only show in combat, add a condition to handle it.
 		if group.OnlyInCombat then
 			local combatCondition = ConditionObjectConstructor:Modify_WrapExistingAndAppendNew()
-			combatCondition.Type = "COMBAT"		
+			combatCondition.Type = "COMBAT"
 		end
-		
 		-- Modifications are done. Construct the ConditionObject
 		group.ConditionObject = ConditionObjectConstructor:Construct()
 		

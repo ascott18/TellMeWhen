@@ -1121,6 +1121,7 @@ function ConditionObject:GetUnitChangedEventString(unit)
 end
 
 
+	
 local ConditionObjectConstructor = TMW:NewClass("ConditionObjectConstructor"){
 	status = "ready",
 	
@@ -1139,14 +1140,6 @@ local ConditionObjectConstructor = TMW:NewClass("ConditionObjectConstructor"){
 		
 		self.status = "loaded"
 	end,
-	ResetModifiableConditionsBase = function(self)
-		self.ModifiableConditionsBase.n = 0
-		for k, v in pairs(self.ModifiableConditionsBase) do
-			if type(k) == "number" then
-				TMW:CopyTableInPlaceWithMeta(TMW.Condition_Defaults["**"], v)
-			end
-		end
-	end,
 	GetPostUserModifiableConditions = function(self)
 		-- Returns a copy of the settings table that was defined through :LoadConditions()
 		-- that can be modified without changing user settings. If this modified version of the conditions is created,
@@ -1155,13 +1148,8 @@ local ConditionObjectConstructor = TMW:NewClass("ConditionObjectConstructor"){
 		if self.ModifiableConditions then
 			return self.ModifiableConditions
 		end
-		if not self.ModifiableConditionsBase then
-			self.ModifiableConditionsBase = TMW:CopyWithMetatable(self.Conditions)
-		end
-		
-		self:ResetModifiableConditionsBase()
-		
-		self.ModifiableConditions = TMW:CopyTableInPlaceWithMeta(self.Conditions, self.ModifiableConditionsBase)
+	
+		self.ModifiableConditions = TMW:CopyWithMetatable(self.Conditions)
 		self.ConditionsToConstructWith = self.ModifiableConditions
 		
 		return self.ModifiableConditions
@@ -1212,10 +1200,6 @@ local ConditionObjectConstructor = TMW:NewClass("ConditionObjectConstructor"){
 		self.Conditions = nil
 		self.ConditionsToConstructWith = nil
 		self.ModifiableConditions = nil
-		
-		if self.ModifiableConditionsBase then
-			self:ResetModifiableConditionsBase()
-		end
 		
 		self.status = "ready"
 	end,
