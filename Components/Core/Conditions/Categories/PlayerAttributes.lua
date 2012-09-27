@@ -158,6 +158,25 @@ ConditionCategory:RegisterCondition(5,	 "RESTING", {
 			ConditionObject:GenerateNormalEventString("PLAYER_ENTERING_WORLD")
 	end,
 })
+ConditionCategory:RegisterCondition(5.2, "INPETBATTLE", {
+	text = L["CONDITIONPANEL_INPETBATTLE"],
+	min = 0,
+	max = 1,
+	texttable = CNDT.COMMON.bool,
+	nooperator = true,
+	unit = PLAYER,
+	icon = "Interface\\CHARACTERFRAME\\UI-StateIcon", --TODO: change
+	tcoords = CNDT.COMMON.standardtcoords
+	Env = {
+		IsInBattle = C_PetBattles.IsInBattle,
+	},
+	funcstr = [[c.1nil == IsInBattle()]],
+	--[[events = function(ConditionObject, c) --TODO: find proper events for this
+		return
+			ConditionObject:GenerateNormalEventString("PLAYER_UPDATE_RESTING"),
+			ConditionObject:GenerateNormalEventString("PLAYER_ENTERING_WORLD")
+	end,]]
+})
 
 local NumShapeshiftForms
 local GetShapeshiftForm = GetShapeshiftForm
