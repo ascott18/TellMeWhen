@@ -165,12 +165,12 @@ ConditionCategory:RegisterCondition(5.2, "INPETBATTLE", {
 	texttable = CNDT.COMMON.bool,
 	nooperator = true,
 	unit = PLAYER,
-	icon = "Interface\\CHARACTERFRAME\\UI-StateIcon", --TODO: change
-	tcoords = CNDT.COMMON.standardtcoords
+	icon = "Interface\\Icons\\pet_type_critter", --TODO: change and/or check to see if this works.
+	tcoords = CNDT.COMMON.standardtcoords,
 	Env = {
 		IsInBattle = C_PetBattles.IsInBattle,
 	},
-	funcstr = [[c.1nil == IsInBattle()]],
+	funcstr = [[c.True == IsInBattle()]],
 	--[[events = function(ConditionObject, c) --TODO: find proper events for this
 		return
 			ConditionObject:GenerateNormalEventString("PLAYER_UPDATE_RESTING"),
