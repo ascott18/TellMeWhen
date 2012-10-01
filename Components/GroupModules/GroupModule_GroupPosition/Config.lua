@@ -44,7 +44,9 @@ TMW.GroupConfigTemplate.args.position = {
 		
 		local Module = TMW[g]:GetModuleOrModuleChild("GroupModule_GroupPosition")
 		
-		Module:SetPos()
+		if Module then
+			Module:SetPos()
+		end
 	end,
 	get = function(info)
 		return TMW.db.profile.Groups[findid(info)].Point[info[#info]]
@@ -110,7 +112,9 @@ TMW.GroupConfigTemplate.args.position = {
 		
 				local Module = TMW[g]:GetModuleOrModuleChild("GroupModule_GroupPosition")
 				
-				Module:SetPos()
+				if Module then
+					Module:SetPos()
+				end
 			end,
 			get = function(info) return TMW.db.profile.Groups[findid(info)].Scale end,
 		},
@@ -127,7 +131,9 @@ TMW.GroupConfigTemplate.args.position = {
 		
 				local Module = TMW[g]:GetModuleOrModuleChild("GroupModule_GroupPosition")
 				
-				Module:SetPos()
+				if Module then
+					Module:SetPos()
+				end
 			end,
 			get = function(info) return TMW.db.profile.Groups[findid(info)].Level end,
 		},
@@ -142,7 +148,9 @@ TMW.GroupConfigTemplate.args.position = {
 		
 				local Module = TMW[g]:GetModuleOrModuleChild("GroupModule_GroupPosition")
 				
-				Module:SetPos()
+				if Module then
+					Module:SetPos()
+				end
 			end,
 			get = function(info)
 				local val = TMW.db.profile.Groups[findid(info)].Strata

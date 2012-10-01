@@ -125,6 +125,10 @@ function PowerBar:UpdateCost()
 		powerType = powerType or defaultPowerType
 		if powerType ~= self.powerType then
 			local colorinfo = PowerBarColor[powerType]
+			if not colorinfo then
+				error("No colorinfo could be found for power type " .. tostring(powerType), ", " .. pclass)
+			end
+			
 			bar:SetStatusBarColor(colorinfo.r, colorinfo.g, colorinfo.b, 0.9)
 			self.powerType = powerType
 		end

@@ -40,7 +40,7 @@ manual-changelog:
     markup-type: creole
 
 license-output: LICENSE.txt
-enable-nolib-creation: no
+enable-nolib-creation: yes
 
 move-folders:
     TellMeWhen/TellMeWhen_Options: TellMeWhen_Options
