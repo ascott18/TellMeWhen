@@ -17,6 +17,7 @@ local TMW = TMW
 local L = TMW.L
 local print = TMW.print
 
+local huge = math.huge
 
 local Alpha = TMW:NewClass("IconModule_Alpha", "IconModule")
 Alpha.dontInherit = true
@@ -106,6 +107,10 @@ Alpha:RegisterEventHandlerData("Animations", 40, "ICONALPHAFLASH", {
 	OnStop = function(icon, table)
 		local IconModule_Alpha = icon:GetModuleOrModuleChild("IconModule_Alpha")
 		
+		if not IconModule_Alpha.FakeHidden then
+			icon:SetAlpha(icon.attributes.realAlpha)
+		end
+		
 		tDeleteItem(IconModule_Alpha.FadeHandlers, "ICONALPHAFLASH")
 	end,
 })
@@ -149,6 +154,10 @@ Alpha:RegisterEventHandlerData("Animations", 50, "ICONFADE", {
 	end,
 	OnStop = function(icon, table)
 		local IconModule_Alpha = icon:GetModuleOrModuleChild("IconModule_Alpha")
+		
+		if not IconModule_Alpha.FakeHidden then
+			icon:SetAlpha(icon.attributes.realAlpha)
+		end
 		
 		tDeleteItem(IconModule_Alpha.FadeHandlers, "ICONFADE")
 	end,

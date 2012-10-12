@@ -16,6 +16,9 @@
  ** Condition Object Constructors are now much more reliable (at the cost of some garbage churn when running TMW:Update())
  ** Fix attempted for GroupModule_GroupPosition\Config.lua line 47: attempt to index local 'Module' (a nil value)
  ** IncreasedStats should now properly include Legacy of the Emperor
+ ** Fixed Components\IconTypes\IconType_unitcooldown\unitcooldown.lua:317 attempt to index local 'NameHash' (a boolean value)
+ ** Fixed Components\IconModules\IconModule_PowerBar\PowerBar.lua:128 attempt to index local 'colorinfo' (a nil value)
+ ** Fixed Components\IconModules\IconModule_Alpha\Alpha.lua:96 attempt to compare nil with number
  
 ===v6.0.3===
  * Re-implemented the stance condition for paladin seals.
