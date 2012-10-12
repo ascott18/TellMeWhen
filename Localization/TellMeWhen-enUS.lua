@@ -69,7 +69,7 @@ L["ICONMENU_CHOOSENAME2"] = "Choose spell(s) to check"
 L["ICONMENU_CHOOSENAME_WPNENCH"] = "Choose enchant(s) to check"
 L["ICONMENU_CHOOSENAME_WPNENCH_DESC"] = [=[Enter the name(s) the weapon enchants you want this icon to monitor. You can add multiple entries by separating them with semicolons (;).
 
-|cFFFF5959IMPORTANT|r: Enchant names must be entered exactly as they appear on the tooltip of your weapon while the enchant is active (e.g. "Flametongue", not "Flametongue Weapon").]=]
+|cFFFF5959IMPORTANT|r: Enchant names must be entered exactly as they appear on the tooltip of your weapon while the enchant is active (e.g. "%s", not "%s").]=]
 
 L["ICONMENU_CHOOSENAME_ITEMSLOT2"] = "Choose item(s) to check"
 L["ICONMENU_CHOOSENAME_ITEMSLOT_DESC"] = [=[Enter the Name, ID, or equipment slot of what you want this icon to monitor. You can add multiple entries (any combination of names, IDs, and equipment slots) by separating them with semicolons (;).
@@ -88,7 +88,7 @@ L["CHOOSENAME_DIALOG"] = [=[Enter the Name or ID of what you want this icon to m
 
 |cff7fffffShift-click|r spells/items/chat links or drag spells/items to insert them into this editbox.]=]
 L["CHOOSENAME_DIALOG_PETABILITIES"] = "|cFFFF5959PET ABILITIES|r must use SpellIDs."
-L["CHOOSENAME_DIALOG_MSCD"] = [=[Enter the Name or ID of what the cooldown that you want this icon to monitor. Only the first spell/item will be checked - semicolon-delimited lists are not valid for this icon type.]=]
+L["CHOOSENAME_DIALOG_MSCD"] = [=[Enter the Name or ID of what you want this icon to monitor. Only the first spell/item will be checked - semicolon-delimited lists are not valid for this icon type.]=]
 L["CHOOSENAME_DIALOG_CNDTIC"] = "Enter the Name or ID of the spell that has the texture that you want to use. You may also enter a texture path, such as 'Interface/Icons/spell_nature_healingtouch', or just 'spell_nature_healingtouch' if the path is 'Interface/Icons'"
 
 L["CHOOSEICON"] = "Choose an icon to check"
@@ -130,7 +130,7 @@ L["ICONMENU_WPNENCHANT_DESC"] = [=[Tracks temporary weapon enchants.]=]
 
 L["ICONMENU_TOTEM"] = "Totem"
 L["ICONMENU_TOTEM_DESC"] = [[Tracks your totems.]]
-L["ICONMENU_GHOUL"] = "Non-MoG ghoul"
+L["ICONMENU_GHOUL"] = "Non-%s ghoul"
 L["ICONMENU_GHOUL_DESC"] = [[Tracks your ghoul if you don't have the %s talent.]]
 L["ICONMENU_MUSHROOMS"] = "%s"
 L["ICONMENU_MUSHROOMS_DESC"] = [[Tracks a %s.]]
@@ -161,8 +161,8 @@ L["ICONMENU_CNDTIC_ICONMENUTOOLTIP"] = "(%d |4Condition:Conditions;)"
 L["ICONMENU_DR"] = "Diminishing Returns"
 L["ICONMENU_DR_DESC"] = [=[Tracks the length and extent of diminishing returns.]=]
 
-L["ICONMENU_LIGHTWELL"] = "Lightwell"
-L["ICONMENU_LIGHTWELL_DESC"] = [=[Tracks the duration and charges of your lightwell.]=]
+--L["ICONMENU_LIGHTWELL"] = "Lightwell" -- defined in static formats
+L["ICONMENU_LIGHTWELL_DESC"] = [=[Tracks the duration and charges of your %s.]=]
 
 L["ICONMENU_RUNES"] = "Rune Cooldown"
 L["ICONMENU_RUNES_DESC"] = [[Tracks rune cooldowns]]
@@ -455,6 +455,8 @@ L["ICONMENU_SHOWSTACKS"] = "Show stacks"
 L["ICONMENU_SHOWSTACKS_DESC"] = "Check this to show the number of stacks of the item you have."
 L["ICONMENU_STEALABLE"] = "Only stealable"
 L["ICONMENU_STEALABLE_DESC"] = "Check this to only show buffs that can be spellstolen. Best used when checking for the 'Magic' dispel type"
+L["ICONMENU_HIDENOUNITS"] = "Hide if no units"
+L["ICONMENU_HIDENOUNITS_DESC"] = "Check this to cause the icon to hide if all the units that this icon is checking have been invalidated because of unit conditions and/or units not existing."
 L["ICONMENU_ONLYBAGS"] = "Only if in bags"
 L["ICONMENU_ONLYBAGS_DESC"] = "Check this to make the icon show only if the item is in your bags (or equipped). If 'Only if equipped' is enabled, this is also forcibly enabled."
 L["ICONMENU_ONLYSEEN"] = "Only if seen"
@@ -562,7 +564,7 @@ L["UIPANEL_GROUPSORT_SORTASCENDING_DESC"] = "Check to sort this attribute from l
 L["UIPANEL_GROUPSORT_SORTDESCENDING"] = "High"
 L["UIPANEL_GROUPSORT_SORTDESCENDING_DESC"] = "Check to sort this attribute from high to low values."
 
-L["UIPANEL_GROUPSORT_METHODDISABLED_DESC"] = "|TInterface\\AddOns\\TellMeWhen\\Textures\\Alert:0:2|tThis sort method is diabled because a method above it is sorting by Icon ID, so this method will never be reached and used in sorting."
+L["UIPANEL_GROUPSORT_METHODDISABLED_DESC"] = "|TInterface\\AddOns\\TellMeWhen\\Textures\\Alert:0:2|tThis sort method is disabled because a method above it is sorting by Icon ID, so this method will never be reached and used in sorting."
 
 L["UIPANEL_GROUPSORT_id"] = "Icon ID"
 L["UIPANEL_GROUPSORT_id_DESC"] = "Sorts the group by the ID numbers of its icons."
@@ -745,7 +747,7 @@ L["TEXTLAYOUTS_DEFAULTS_WRAPPER"] = "Default: %s"
 L["TEXTLAYOUTS_LAYOUTSETTINGS"] = "Layout Settings"
 L["TEXTLAYOUTS_LAYOUTSETTINGS_DESC"] = "Click to configure the text layout %q."
 
-L["TEXTLAYOUTS_ERROR_FALLBACK"] = [[The text layout this icon is supposed to use could not be found. A default layout until the layout can be found, or until the layout is changed.
+L["TEXTLAYOUTS_ERROR_FALLBACK"] = [[The text layout for this icon could not be found. A default layout will be used until the intended layout can be found, or until a different layout is selected.
 
 (Did you delete the layout? Or did you import this icon without importing the layout it used?)]]
 
@@ -1662,10 +1664,6 @@ L["HELP_MS_NOFOUND"] = [[The ability %q could not be found on your action bars.
 
 Ensure that the ability is on your action bars, in its default state, and that it is not only a macro that is putting the spell on your action bars. Otherwise, this icon will not function properly.]]
 
-L["HELP_ICD_NATURESGRACE"] = [[Trying to track the cooldown of %s?
-
-It is recommended that you change the icon type to %q instead, which will track resets in the cooldown triggered by eclipse state changes.]]
-
 L["HELP_IMPORT_CURRENTPROFILE"] = [[Trying to move or copy an icon from this profile to another icon slot?
 
 You can do so easily by |cff7fffffRight-clicking and dragging|r the icon (hold down the mouse button) to another slot. When you release the mouse button, a menu will appear with many options.
@@ -1724,7 +1722,7 @@ L["IncreasedSPsix"] = "Increased Spellpower (6%)"
 L["IncreasedSPten"] = "Increased Spellpower (10%)"
 L["IncreasedPhysHaste"] = "Increased Physical Haste"
 L["IncreasedSpellHaste"] = "Increased Spell Haste"
-L["BurstHaste"] = "Heroism/Bloodlust"
+--L["BurstHaste"] = "Heroism/Bloodlust" -- defined in static formats
 L["BonusStamina"] = "Increased Stamina"
 L["BurstManaRegen"] = "Burst Mana Regen"
 L["PhysicalDmgTaken"] = "Physical Damage Taken"

@@ -140,8 +140,6 @@ local function ICD_OnUpdate(icon, time)
 	end
 end
 
-local naturesGrace = strlower(GetSpellInfo(16886))
-
 function Type:Setup(icon, groupID, iconID)
 	icon.NameFirst = TMW:GetSpellNames(icon, icon.Name, 1)
 	icon.NameHash = TMW:GetSpellNames(icon, icon.Name, nil, nil, 1)
@@ -150,17 +148,6 @@ function Type:Setup(icon, groupID, iconID)
 
 	icon.ICDStartTime = icon.ICDStartTime or 0
 	icon.ICDDuration = icon.ICDDuration or 0
-
-	for _, name in pairs(icon.NameNameArray) do
-		if name == naturesGrace then
-			if icon:IsBeingEdited() == 1 and TellMeWhen_ChooseName then
-				TMW.HELP:Show("ICON_ICD_NATURESGRACE", icon, TellMeWhen_ChooseName, 0, 0, L["HELP_ICD_NATURESGRACE"])
-			elseif TMW.HELP then
-				TMW.HELP:Hide("ICON_ICD_NATURESGRACE")
-			end
-			break
-		end
-	end
 
 	icon:SetInfo("texture", TMW:GetConfigIconTexture(icon))
 

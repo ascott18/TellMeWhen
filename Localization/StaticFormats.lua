@@ -20,12 +20,12 @@ L["HELP_FIRSTUCD"] 					  	= L["HELP_FIRSTUCD"]			 		 	:format(L["ICONMENU_CHOOS
 L["HELP_MISSINGDURS"] 				  	= L["HELP_MISSINGDURS"]			 	 		:format("%s", GetSpellInfo(1766)) -- keep the first "%s" as "%s"
 L["ICONMENU_IGNORENOMANA_DESC"] 	  	= L["ICONMENU_IGNORENOMANA_DESC"]		 	:format(Spell(85288), Spell(5308))
 L["ICONMENU_REACTIVE_DESC"] 		  	= L["ICONMENU_REACTIVE_DESC"]	 		 	:format(Spell(53351), Spell(5308), Spell(17962))
+L["ICONMENU_GHOUL"] 			  		= L["ICONMENU_GHOUL"]		 	 			:format(GetSpellInfo(52143))
 L["ICONMENU_GHOUL_DESC"] 			  	= L["ICONMENU_GHOUL_DESC"]		 	 		:format(Spell(52143))
 L["ICONMENU_MUSHROOMS"] 			  	= L["ICONMENU_MUSHROOMS"]		 			:format(GetSpellInfo(88747))
 L["ICONMENU_MUSHROOMS_DESC"] 		  	= L["ICONMENU_MUSHROOMS_DESC"]	 		 	:format(Spell(88747))
 L["ICONMENU_UNITCOOLDOWN_DESC"] 	  	= L["ICONMENU_UNITCOOLDOWN_DESC"]		 	:format(Spell(42292), GetSpellInfo(42292))
 L["ICONMENU_MULTISTATECD_DESC"] 	  	= L["ICONMENU_MULTISTATECD_DESC"]		 	:format(Spell(77606), Spell(119898))
-L["HELP_ICD_NATURESGRACE"] 	  		  	= L["HELP_ICD_NATURESGRACE"]		 	 	:format(Spell(16886), L["ICONMENU_UNITCOOLDOWN"])
 L["CLEU_DAMAGE_SHIELD_DESC"] 	  	  	= L["CLEU_DAMAGE_SHIELD_DESC"]		 		:format(Spell(31271), Spell(30482), Spell(324))
 L["CLEU_DAMAGE_SHIELD_MISSED_DESC"]   	= L["CLEU_DAMAGE_SHIELD_MISSED_DESC"]	 	:format(Spell(31271), Spell(30482), Spell(324))
 L["CLEU_SPELL_STOLEN_DESC"]   		  	= L["CLEU_SPELL_STOLEN_DESC"]	 		 	:format(Spell(30449))
@@ -90,6 +90,32 @@ L["CLEU_SOURCEUNITS_DESC"] 			  	= L["CLEU_SOURCEUNITS_DESC"] .. "\r\n\r\n" .. L
 L["CLEU_DESTUNITS_DESC"] 			  	= L["CLEU_DESTUNITS_DESC"]   .. "\r\n\r\n" .. L["ICONMENU_UNIT_DESC"]
 
 L["ERRORS_FRAME_DESC"] 			 	 	= L["ERRORS_FRAME_DESC"]	 				:format(ERR_SPELL_COOLDOWN)
+
+L["BurstHaste"] = Spell(32182) .. "/" .. Spell(2825)
+
+L["ICONMENU_LIGHTWELL"] = GetSpellInfo(724)
+L["ICONMENU_LIGHTWELL_DESC"] 		 	= L["ICONMENU_LIGHTWELL_DESC"]	 			:format(Spell(724))
+
+L["ICONMENU_LIGHTWELL_DESC"] = [=[Tracks the duration and charges of your %s.]=]
+
+-- Wizard magic to make ICONMENU_CHOOSENAME_WPNENCH_DESC be locale-dynamic
+do
+	local FlametongueWeapon = GetSpellInfo(8024)
+	local FlametongueWeaponEnchant
+	for i = 1, select("#", strsplit("|", L["SUG_MATCH_WPNENCH_ENCH"])) do
+		local enchant = select(i, strsplit("|", L["SUG_MATCH_WPNENCH_ENCH"]))
+		enchant = FlametongueWeapon:match(enchant)
+		if enchant then
+			FlametongueWeaponEnchant = enchant
+			break
+		end
+	end
+	if FlametongueWeaponEnchant then
+		L["ICONMENU_CHOOSENAME_WPNENCH_DESC"] 	= L["ICONMENU_CHOOSENAME_WPNENCH_DESC"]	 	:format(FlametongueWeaponEnchant, FlametongueWeapon) 
+	else
+	
+	end
+end
 
 
 if select(4, GetBuildInfo()) >= 50000 then -- ISMOP

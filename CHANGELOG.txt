@@ -4,6 +4,7 @@
  * Added a dropdown menu to select an icon when right clicking an an icon that has other icons underneath it.
  * New condition: Spell charge time.
  * New condition: In pet battle.
+ * New setting for Buff/Debuff icons: Hide if no units.
  * Bug fixes:
  ** Minimum group frame level is now 5 instead of 1 to prevent issues caused at low frame levels.
  ** Increased the delay on LoadFirstValidIcon from 0.1 seconds to 0.5 seconds in hopes of preventing the AceCD:804 error more often.

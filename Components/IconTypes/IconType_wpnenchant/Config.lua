@@ -118,7 +118,7 @@ function Module:OnInitialize()
 
 	self:Etc_DoItemLookups()
 
-	for k, id in pairs(self.SpellIDs) do
+	for _, id in pairs(self.SpellIDs) do
 		local name = GetSpellInfo(id)
 		for _, enchant in TMW:Vararg(strsplit("|", L["SUG_MATCH_WPNENCH_ENCH"])) do
 			local dobreak

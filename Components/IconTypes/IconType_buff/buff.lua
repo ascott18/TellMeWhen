@@ -53,6 +53,7 @@ Type:RegisterIconDefaults{
 	Stealable				= false,     
 	ShowTTText				= false,     
 	OnlyMine				= false,
+	HideIfNoUnits			= false,
 }
 
 Type:RegisterConfigPanel_XMLTemplate(100, "TellMeWhen_ChooseName", {
@@ -102,6 +103,11 @@ Type:RegisterConfigPanel_ConstructorFunc(125, "TellMeWhen_BuffSettings", functio
 			setting = "Stealable",
 			title = L["ICONMENU_STEALABLE"],
 			tooltip = L["ICONMENU_STEALABLE_DESC"],
+		},
+		{
+			setting = "HideIfNoUnits",
+			title = L["ICONMENU_HIDENOUNITS"],
+			tooltip = L["ICONMENU_HIDENOUNITS_DESC"],
 		},
 	})
 end)
@@ -308,6 +314,15 @@ local function Buff_OnUpdate(icon, time)
 			count, count,
 			id,
 			useUnit, nil
+		)
+	elseif not Units[1] and icon.HideIfNoUnits then
+		icon:SetInfo("alpha; texture; start, duration; stack, stackText; spell; unit, GUID",
+			0,
+			icon.FirstTexture,
+			0, 0,
+			nil, nil,
+			icon.NameFirst,
+			nil, nil
 		)
 	else
 		icon:SetInfo("alpha; texture; start, duration; stack, stackText; spell; unit, GUID",
