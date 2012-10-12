@@ -96,7 +96,6 @@ L["BurstHaste"] = Spell(32182) .. "/" .. Spell(2825)
 L["ICONMENU_LIGHTWELL"] = GetSpellInfo(724)
 L["ICONMENU_LIGHTWELL_DESC"] 		 	= L["ICONMENU_LIGHTWELL_DESC"]	 			:format(Spell(724))
 
-L["ICONMENU_LIGHTWELL_DESC"] = [=[Tracks the duration and charges of your %s.]=]
 
 -- Wizard magic to make ICONMENU_CHOOSENAME_WPNENCH_DESC be locale-dynamic
 do
