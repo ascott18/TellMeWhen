@@ -19,6 +19,7 @@
  ** Fixed Components\IconTypes\IconType_unitcooldown\unitcooldown.lua:317 attempt to index local 'NameHash' (a boolean value)
  ** Fixed Components\IconModules\IconModule_PowerBar\PowerBar.lua:128 attempt to index local 'colorinfo' (a nil value)
  ** Fixed Components\IconModules\IconModule_Alpha\Alpha.lua:96 attempt to compare nil with number
+ ** The "Show Timer Text" option now works with ElvUI
  
 ===v6.0.3===
  * Re-implemented the stance condition for paladin seals.

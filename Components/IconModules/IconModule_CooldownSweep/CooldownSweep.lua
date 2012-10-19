@@ -40,9 +40,6 @@ CooldownSweep:RegisterConfigPanel_ConstructorFunc(200, "TellMeWhen_TimerSettings
 			setting = "ShowTimerText",
 			title = TMW.L["ICONMENU_SHOWTIMERTEXT"],
 			tooltip = TMW.L["ICONMENU_SHOWTIMERTEXT_DESC"],
-			--[[disabled = function()
-				return not (IsAddOnLoaded("OmniCC") or IsAddOnLoaded("tullaCC") or LibStub("AceAddon-3.0"):GetAddon("LUI_Cooldown", true))
-			end,]]
 		},
 		{
 			setting = "ClockGCD",
@@ -123,7 +120,9 @@ function CooldownSweep:SetupForIcon(icon)
 	self.ShowTimer = icon.ShowTimer
 	self.ShowTimerText = icon.ShowTimerText
 	self.ClockGCD = icon.ClockGCD
-	self.cooldown.noCooldownCount = not icon.ShowTimerText
+	
+	self.cooldown.noCooldownCount = not icon.ShowTimerText -- For OmniCC/tullaCC/most other cooldown count mods (I think LUI uses this too)
+	self.cooldown.noOCC = not icon.ShowTimerText -- For ElvUI (and maybe Tukui too?)
 	
 	local attributes = icon.attributes
 	
