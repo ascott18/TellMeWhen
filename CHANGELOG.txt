@@ -20,6 +20,7 @@
  ** Fixed Components\IconModules\IconModule_PowerBar\PowerBar.lua:128 attempt to index local 'colorinfo' (a nil value)
  ** Fixed Components\IconModules\IconModule_Alpha\Alpha.lua:96 attempt to compare nil with number
  ** The "Show Timer Text" option now works with ElvUI
+ ** Fixed TellMeWhen: Condition MELEEAP tried to write values to Env different than those that were already in it.
  
 ===v6.0.3===
  * Re-implemented the stance condition for paladin seals.

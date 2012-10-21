@@ -23,7 +23,6 @@ local Env = CNDT.Env
 local min, format = min, format
 
 Env.UnitStat = UnitStat
-Env.UnitAttackPower = UnitAttackPower
 Env.UnitRangedAttackPower = UnitRangedAttackPower
 Env.UnitSpellHaste = UnitSpellHaste
 Env.GetMeleeHaste = GetMeleeHaste
