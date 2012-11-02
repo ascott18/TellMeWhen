@@ -30,7 +30,7 @@ local DogTag = LibStub("LibDogTag-3.0", true)
 TELLMEWHEN_VERSION = "6.0.4"
 TELLMEWHEN_VERSION_MINOR = strmatch(" @project-version@", " r%d+") or ""
 TELLMEWHEN_VERSION_FULL = TELLMEWHEN_VERSION .. TELLMEWHEN_VERSION_MINOR
-TELLMEWHEN_VERSIONNUMBER = 60418 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
+TELLMEWHEN_VERSIONNUMBER = 60419 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
 if TELLMEWHEN_VERSIONNUMBER > 61001 or TELLMEWHEN_VERSIONNUMBER < 60000 then return error("YOU SCREWED UP THE VERSION NUMBER OR DIDNT CHANGE THE SAFETY LIMITS") end -- safety check because i accidentally made the version number 414069 once
 
 TELLMEWHEN_MAXROWS = 20
@@ -123,18 +123,22 @@ TMW.strlowerCache = setmetatable(
 	end,
 }) local strlowerCache = TMW.strlowerCache
 
-TMW.SpellTextures = setmetatable(
-{
+TMW.SpellTexturesMetaIndex = {}
+TMW.SpellTexturesBase = {
 	--hack for pvp tinkets
 	[42292] = "Interface\\Icons\\inv_jewelry_trinketpvp_0" .. (UnitFactionGroup("player") == "Horde" and "2" or "1"),
 	[strlowerCache[GetSpellInfo(42292)]] = "Interface\\Icons\\inv_jewelry_trinketpvp_0" .. (UnitFactionGroup("player") == "Horde" and "2" or "1"),
-},
+}
+local SpellTexturesMetaIndex = TMW.SpellTexturesMetaIndex
+local SpellTexturesBase = TMW.SpellTexturesBase
+TMW.SpellTextures = setmetatable(
+CopyTable(SpellTexturesBase),
 {
 	__index = function(t, name)
 		if not name then return end
 
 		-- rawget the strlower because hardcoded entries (talents, mainly) are put into the table as lowercase
-		local tex = rawget(t, strlowerCache[name]) or GetSpellTexture(name)
+		local tex = rawget(t, strlowerCache[name]) or GetSpellTexture(name) or SpellTexturesMetaIndex[name] or rawget(SpellTexturesMetaIndex, strlowerCache[name])
 
 		t[name] = tex
 		return tex
@@ -1351,15 +1355,15 @@ TMW.BE = TMW.ISMOP and {
 		ReducedPhysicalDone = "115798;50256;24423",
 		ReducedCastingSpeed = "31589;73975;5761;109466;50274;90314;126402;58604",
 		ReducedHealing		= "115804",
-		Stunned				= "_1833;_408;_91800;_113801;5211;_56;9005;22570;19577;24394;56626;44572;_853;64044;_20549;46968;132168;_30283;_7922;50519;91797;_89766;54786;105593;120086;117418;115001;_131402;108194;117526;105771;_122242;113953;118905;119392;119381",
+		Stunned				= "_1833;_408;_91800;_113801;5211;_56;9005;22570;19577;24394;56626;44572;_853;64044;_20549;46968;132168;_30283;_7922;50519;91797;_89766;54786;105593;120086;117418;115001;_131402;108194;117526;105771;_122242;113953;118905;119392;119381;118271",
 		Incapacitated		= "20066;1776;_6770;115078",
 		Rooted				= "_339;_122;_64695;_19387;33395;_4167;54706;50245;90327;16979;45334;_87194;63685;102359;_128405;116706;123407;115197",
 		Disarmed			= "_51722;_676;64058;50541;91644;117368",
 		Silenced			= "_47476;_78675;_34490;_55021;_15487;_1330;_24259;_18498;_25046;31935;31117;102051;116709",
 		Shatterable			= "122;33395;_44572;_82691", -- by algus2
-		Disoriented			= "_19503;31661;_2094;_51514;90337;88625",
+		Disoriented			= "_19503;31661;_2094;_51514;90337;88625;115750;99",
 		Slowed				= "_116;_120;_13810;_5116;_8056;_3600;_1715;_12323;116095;_110300;_20170;_115180;45524;_18223;_15407;_3409;26679;_58180;61391;44614;_7302;_8034;_63529;_15571;_7321;_7992;123586;47960", -- by algus2 
-		Feared				= "_5782;5246;_8122;10326;1513;111397;_5484;_6789;_87204;20511;112928;113004;113792",
+		Feared				= "_5782;5246;_8122;10326;1513;111397;_5484;_6789;_87204;20511;112928;113004;113792;113056",
 		Bleeding			= "_1822;_1079;9007;33745;1943;_703;_115767;89775;_11977;106830;77758",
 		
 		-- EXISTING WAS CHECKED, DIDN'T LOOK FOR NEW ONES YET:
@@ -1906,6 +1910,9 @@ function TMW:UpdateNormally()
 	if not Locked then
 		TMW:LoadOptions()
 	end
+	
+	wipe(SpellTextures)
+	SpellTextures = TMW:CopyTableInPlaceWithMeta(SpellTexturesBase, SpellTextures)
 	
 	TMW:Fire("TMW_GLOBAL_UPDATE") -- the placement of this matters. Must be after options load, but before icons are updated
 
@@ -2869,7 +2876,7 @@ function TMW:PLAYER_SPECIALIZATION_CHANGED()
 				local name, tex = GetTalentInfo(talent)
 				local lower = name and strlowerCache[name]
 				if lower then
-					SpellTextures[lower] = tex
+					SpellTexturesMetaIndex[lower] = tex
 				end
 			end
 		else
@@ -2878,7 +2885,7 @@ function TMW:PLAYER_SPECIALIZATION_CHANGED()
 					local name, tex = GetTalentInfo(tab, talent)
 					local lower = name and strlowerCache[name]
 					if lower then
-						SpellTextures[lower] = tex
+						SpellTexturesMetaIndex[lower] = tex
 					end
 				end
 			end
@@ -2889,8 +2896,8 @@ end
 
 function TMW:ProcessEquivalencies()
 	for dispeltype, icon in pairs(TMW.DS) do
-	--	SpellTextures[dispeltype] = icon
-		SpellTextures[strlower(dispeltype)] = icon
+	--	SpellTexturesMetaIndex[dispeltype] = icon
+		SpellTexturesMetaIndex[strlower(dispeltype)] = icon
 	end
 	
 	TMW:Fire("TMW_EQUIVS_PROCESSING")
@@ -2909,8 +2916,8 @@ function TMW:ProcessEquivalencies()
 					if name then
 						TMW:LowerNames(name) -- this will insert the spell name into the table of spells for capitalization restoration.
 						str = gsub(str, id, name)
-						SpellTextures[realID] = tex
-						SpellTextures[strlowerCache[name]] = tex
+						SpellTexturesMetaIndex[realID] = tex
+						SpellTexturesMetaIndex[strlowerCache[name]] = tex
 
 					else  -- this should never ever ever happen except in new patches if spellIDs were wrong (experience talking)
 						
@@ -5334,7 +5341,7 @@ function TMW:EquivToTable(name)
 end
 TMW:MakeFunctionCached(TMW, "EquivToTable")
 
-function TMW:GetSpellNames(icon, setting, firstOnly, toname, hash, keepDurations)
+function TMW:GetSpellNames(icon, setting, firstOnly, toname, hash, keepDurations, allowRenaming)
 	local buffNames = TMW:SplitNames(setting) -- get a table of everything
 
 	--INSERT EQUIVALENCIES
@@ -5372,7 +5379,7 @@ function TMW:GetSpellNames(icon, setting, firstOnly, toname, hash, keepDurations
 	if hash then
 		local hash = {}
 		for k, v in ipairs(buffNames) do
-			if toname then
+			if toname and (allowRenaming or tonumber(v)) then
 				v = GetSpellInfo(v or "") or v -- turn the value into a name if needed
 			end
 
@@ -5384,12 +5391,16 @@ function TMW:GetSpellNames(icon, setting, firstOnly, toname, hash, keepDurations
 	if toname then
 		if firstOnly then
 			local ret = buffNames[1] or ""
-			ret = GetSpellInfo(ret) or ret -- turn the first value into a name and return it
+			if (allowRenaming or tonumber(ret)) then
+				ret = GetSpellInfo(ret) or ret -- turn the first value into a name and return it
+			end
 			if icon then ret = TMW:LowerNames(ret) end
 			return ret
 		else
 			for k, v in ipairs(buffNames) do
-				buffNames[k] = GetSpellInfo(v or "") or v --convert everything to a name
+				if (allowRenaming or tonumber(v)) then
+					buffNames[k] = GetSpellInfo(v or "") or v --convert everything to a name
+				end
 			end
 			if icon then TMW:LowerNames(buffNames) end
 			return buffNames
@@ -5401,7 +5412,7 @@ function TMW:GetSpellNames(icon, setting, firstOnly, toname, hash, keepDurations
 	end
 	return buffNames
 end
-TMW:MakeFunctionCached(TMW, "GetSpellNames")
+--TMW:MakeFunctionCached(TMW, "GetSpellNames")
 
 function TMW:GetSpellDurations(icon, setting)
 	local NameArray = TMW:GetSpellNames(icon, setting, nil, nil, nil, 1)

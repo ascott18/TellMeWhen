@@ -109,7 +109,7 @@ TMW:RegisterDatabaseDefaults{
 -- -------------------
 
 TMW:RegisterUpgrade(60338, {
-	-- I decided to change [Stack] to return numbers instead of strings
+	-- I decided to change [Stacks] to return numbers instead of strings
 	icon = function(self, ics)
 		for viewName, settingsPerView in pairs(ics.SettingsPerView) do
 			for displayID, text in pairs(settingsPerView.Texts) do
@@ -120,7 +120,7 @@ TMW:RegisterUpgrade(60338, {
 		end
 	end,
 	textlayout = function(self, settings, GUID)
-		-- I decided to change [Stack] to return numbers instead of strings
+		-- I decided to change [Stacks] to return numbers instead of strings
 		for i, displaySettings in ipairs(settings) do
 			displaySettings.DefaultText = displaySettings.DefaultText
 				:gsub("(Stacks[^:]-:Hide)%('0'%)", "%1(0)")

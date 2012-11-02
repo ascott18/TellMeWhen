@@ -9,7 +9,6 @@
 	<Button name="TellMeWhen_IconTemplate" virtual="true" enableMouse="true">
 		<Size x="30" y="30"/>
 
-		<NormalTexture file=""/>
 		<HighlightTexture alphaMode="ADD" file="Interface\Buttons\ButtonHilight-Square"/>
 		<PushedTexture file="Interface\Buttons\UI-Quickslot-Depress"/>
 	</Button>

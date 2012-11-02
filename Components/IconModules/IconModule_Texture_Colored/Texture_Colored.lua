@@ -104,6 +104,8 @@ function Texture_Colored:UPDATE(icon)
 	
 	if not (LMB and OnlyMSQ) then
 		texture:SetVertexColor(r, g, b, 1)
+	else
+		texture:SetVertexColor(1, 1, 1, 1)
 	end
 	texture:SetDesaturated(d)
 	

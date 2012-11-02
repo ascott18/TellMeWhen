@@ -57,10 +57,6 @@ ConditionCategory:RegisterCondition(1,	 "ICON", {
 	unit = false,
 	icon = "Interface\\Icons\\INV_Misc_PocketWatch_01",
 	tcoords = CNDT.COMMON.standardtcoords,
-	showhide = function(group)
-		group.TextUnitOrIcon:SetText(L["ICONTOCHECK"])
-		group.Icon:Show()
-	end,
 	funcstr = function(c, icon)
 		if c.Icon == "" or c.Icon == icon:GetName() then
 			return [[true]]
@@ -100,6 +96,15 @@ ConditionCategory:RegisterCondition(1,	 "ICON", {
 		return unpack(t)
 	end,]]
 })
+TMW:RegisterCallback("TMW_CNDT_GROUP_DRAWGROUP", function(event, CndtGroup, conditionData, conditionSettings)
+	if conditionData and conditionData.value == "ICON" then
+		CndtGroup.TextIcon:SetText(L["ICONTOCHECK"])
+		CndtGroup.Icon:Show()
+	else
+		CndtGroup.TextIcon:SetText(nil)
+		CndtGroup.Icon:Hide()
+	end
+end)
 
 ConditionCategory:RegisterCondition(2,	 "MACRO", {
 	text = L["MACROCONDITION"],

@@ -607,19 +607,13 @@ do
 				return true
 			end
 		end,
-		TMW_CNDT_GROUP_TYPECHECK = function(self, event, conditionGroup, conditionData)
+		TMW_CNDT_GROUP_DRAWGROUP = function(self, event, conditionGroup, conditionData, conditionSettings)
 			if CNDT.CurrentConditionSet == self then
 				TMW.SUG:EnableEditBox(conditionGroup.Unit, "unitconditionunits", true)
 				TMW:TT(conditionGroup.Unit, "CONDITIONPANEL_UNIT", "ICONMENU_UNIT_DESC_UNITCONDITIONUNIT")
 			end
 		end,
-		--[[TMW_CNDT_CONDITION_ADDED = function(self, event, condition)
-			if CNDT.CurrentConditionSet == self then
-				-- DoStuff()
-			end
-		end,]]
 	}
-	TMW:RegisterCallback("TMW_CNDT_GROUP_TYPECHECK", ConditionSet)
-	--TMW:RegisterCallback("TMW_CNDT_CONDITION_ADDED", ConditionSet)
+	TMW:RegisterCallback("TMW_CNDT_GROUP_DRAWGROUP", ConditionSet)
 	CNDT:RegisterConditionSet("Unit", ConditionSet)
 end

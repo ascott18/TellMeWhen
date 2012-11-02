@@ -308,7 +308,7 @@ L["ICONMENU_SHOWTIMERTEXT_DESC"] = [[Check this option to display a textual disp
 
 This is only applicable if OmniCC (or similar) is installed.]]
 L["ICONMENU_ALLOWGCD"] = "Allow Global Cooldown"
-L["ICONMENU_ALLOWGCD_DESC"] = [[Check this option to allow the timer to react to and show the gloal cooldown instead of simply ignoring it.]]
+L["ICONMENU_ALLOWGCD_DESC"] = [[Check this option to allow the timer to react to and show the global cooldown instead of simply ignoring it.]]
 
 L["ICONMENU_SHOWPBAR_DESC"] = "Shows a bar that is overlaid across the top half of the icon that will indicate the power still needed to cast the spell (or the power that you have when 'Fill bars up' is checked)"
 L["ICONMENU_SHOWCBAR_DESC"] = "Shows a bar that is overlaid across the bottom half of the icon that will indicate the cooldown/duration remaining (or the time that has passed if 'Fill bars up' is checked)"
@@ -1064,7 +1064,13 @@ L["OVERWRITEGROUP"] = "|cFFFF5959Overwrite|r Group: %s"
 L["MAKENEWGROUP"] = "|cff59ff59Create|r New Group"
 
 
-L["CONFIGPANEL_LISTING_TOOLTIP"] = "|cff7fffffClick|r to jump to panel."
+--[=[L["CNDT_SLIDER_DESC_BASE"] = [[|cff7fffffMousewheel|r to adjust.
+|cff7fffffShift-Mousewheel|r to adjust x10.
+|cff7fffffControl-Mousewheel|r to adjust x60.
+|cff7fffffControl-Shift-Mousewheel|r to adjust x600.]]]=]
+L["CNDT_SLIDER_DESC_CLICKSWAP_TOMANUAL"] = [[|cff7fffffRight-Click|r to switch to manual input.]]
+L["CNDT_SLIDER_DESC_CLICKSWAP_TOSLIDER"] = [[|cff7fffffRight-Click|r to switch to slider input.]]
+L["CNDT_SLIDER_DESC_CLICKSWAP_TOSLIDER_DISALLOWED"] = [[Only manual input is allowed for values over %s (Blizzard's sliders can behave strangely with large values.)]]
 
 
 L["IconModule_IconContainer_MasqueIconContainer"] = "Icon Container"

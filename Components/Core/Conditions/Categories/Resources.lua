@@ -265,9 +265,6 @@ ConditionCategory:RegisterCondition(15,	 "RUNES", {
 	nooperator = true,
 	noslide = true,
 	icon = "Interface\\PlayerFrame\\UI-PlayerFrame-Deathknight-Blood",
-	showhide = function(group)
-		group.Runes:Show()
-	end,
 	Env = {
 		GetRuneType = GetRuneType,
 		GetRuneCount = GetRuneCount,
@@ -298,6 +295,13 @@ ConditionCategory:RegisterCondition(15,	 "RUNES", {
 	end,
 	hidden = pclass ~= "DEATHKNIGHT",
 })
+TMW:RegisterCallback("TMW_CNDT_GROUP_DRAWGROUP", function(event, CndtGroup, conditionData, conditionSettings)
+	if conditionData and conditionData.value == "RUNES" then
+		CndtGroup.Runes:Show()
+	else
+		CndtGroup.Runes:Hide()
+	end
+end)
 
 ConditionCategory:RegisterCondition(15.5, "CHI", {
 	text = CHI_POWER,

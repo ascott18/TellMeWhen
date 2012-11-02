@@ -121,8 +121,8 @@ function ClassSpellCache:TMW_DB_INITIALIZED()
 	local function AddID(id)
 		local name, _, tex = GetSpellInfo(id)
 		name = TMW.strlowerCache[name]
-		if name and not TMW.SpellTextures[name] then
-			TMW.SpellTextures[name] = tex
+		if name and not TMW.SpellTexturesMetaIndex[name] then
+			TMW.SpellTexturesMetaIndex[name] = tex
 		end
 	end
 	

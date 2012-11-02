@@ -739,6 +739,7 @@
 	</Texture>
 	<EditBox name="TellMeWhen_InputBoxTemplate" enableMouse="true" virtual="true" autoFocus="false">
 		<Size y="15"/>
+		<HitRectInsets left="-1" right="-1" top="-1" bottom="-1" />
 		<TextInsets>
 			<AbsInset left="1" />
 		</TextInsets>
@@ -923,6 +924,7 @@
 				<AbsInset left="3" right="3" top="6" bottom="6"/>
 			</BackgroundInsets>
 		</Backdrop>
+		<HitRectInsets left="0" right="0" top="-1" bottom="-4" />
 		<Layers>
 			<Layer level="ARTWORK">
 				<FontString name="$parentText" parentKey="text" inherits="GameFontHighlightSmall" justifyH="CENTER" justifyV="BOTTOM">

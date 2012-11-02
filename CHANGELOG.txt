@@ -2,6 +2,7 @@
  * The Buff Efficiency Threshold setting is back.
  * Changed all file encodings to UTF-8 in hopes of fixing the problems that many users are having.
  * Added a dropdown menu to select an icon when right clicking an an icon that has other icons underneath it.
+ * Conditions with no maximum value (e.g. Health/Mana; any condition that checks a time) now allows manual input of a value.
  * New condition: Spell charge time.
  * New condition: In pet battle.
  * New setting for Buff/Debuff icons: Hide if no units.
@@ -21,6 +22,8 @@
  ** Fixed Components\IconModules\IconModule_Alpha\Alpha.lua:96 attempt to compare nil with number
  ** The "Show Timer Text" option now works with ElvUI
  ** Fixed TellMeWhen: Condition MELEEAP tried to write values to Env different than those that were already in it.
+ ** Attempted some fixes at some obscure bugs that can happen with replacement spells (e.g. tracking Immolate in a debuff icon was getting force-changed to Corruption in Affliction spec.)
+ ** Removed the blank normaltexture that every icon had because of issues it causes in WoW 5.1
  
 ===v6.0.3===
  * Re-implemented the stance condition for paladin seals.

@@ -26,7 +26,9 @@ local pairs, ipairs, wipe, tinsert, tremove, rawget, tonumber, tostring, type =
 local strtrim, gsub, min, max = 
 	  strtrim, gsub, min, max
 
-
+local SLIDER_INPUTBOX_ENABLEALL = false -- toggle for allowing the right-click slider input box for all conditions, or just those with a range (and no max value)
+local AUTO_LOAD_SLIDERINPUTBOX_THRESHOLD = 10e5
+L["CNDT_SLIDER_DESC_CLICKSWAP_TOSLIDER_DISALLOWED"] = L["CNDT_SLIDER_DESC_CLICKSWAP_TOSLIDER_DISALLOWED"]:format(BreakUpLargeNumbers(AUTO_LOAD_SLIDERINPUTBOX_THRESHOLD))
 
 -- GLOBALS: UIDROPDOWNMENU_MENU_LEVEL, UIDROPDOWNMENU_MENU_VALUE, UIDROPDOWNMENU_OPEN_MENU
 -- GLOBALS: UIDropDownMenu_AddButton, UIDropDownMenu_CreateInfo, UIDropDownMenu_SetText, UIDropDownMenu_GetSelectedValue
@@ -97,20 +99,21 @@ function CNDT:LoadConfig(conditionSetName)
 	if not CNDT.settings then return end
 	
 	
-
 	TMW.HELP:Hide("CNDT_UNIT_MISSING")
+	
+	for i = CNDT.settings.n + 1, #CNDT do
+		CNDT[i]:Hide()
+	end
+		
 	if CNDT.settings.n > 0 then
-		for i = CNDT.settings.n + 1, #CNDT do
-			CNDT[i]:Clear()
-		end
 		CNDT:CreateGroups(CNDT.settings.n+1)
 
 		for i in TMW:InNLengthTable(CNDT.settings) do
-			CNDT[i]:Load()
+			CNDT[i]:Show()
+			CNDT[i]:LoadAndDraw()
 		end
-	else
-		CNDT:Clear()
 	end
+	
 	CNDT:AddRemoveHandler()
 end
 
@@ -150,27 +153,9 @@ f:SetScript("OnUpdate", function()
 end)
 
 
-function CNDT:Save()
-	local groupID, iconID = CI.g, CI.i
-	if not groupID then return end
-
-	local Conditions = CNDT.settings
-
-	for i, group in ipairs(CNDT) do
-		if group:IsShown() then
-			group:Save()
-		else
-			Conditions[i] = nil
-		end
-	end
-
-	TMW:ScheduleUpdate(.2)
-end
-
 function CNDT:Clear()
 	for i=1, #CNDT do
-		CNDT[i]:Clear()
-		CNDT[i]:SetTitles()
+		CNDT[i]:Hide()
 	end
 	CNDT:AddRemoveHandler()
 end
@@ -212,7 +197,32 @@ function CNDT:SetTabText(conditionSetName)
 	end
 end
 
-
+function CNDT:ValidateLevelForCondition(level, conditionType)
+	local conditionData = CNDT.ConditionsByType[conditionType]
+	
+	if not conditionData then
+		return level
+	end
+	
+	level = tonumber(level) or 0
+	
+	-- Round to the nearest step
+	local step = get(conditionData.step) or 1
+	level = floor(level * (1/step) + 0.5) / (1/step)
+	
+	-- Constrain to min/max
+	local vmin = conditionData.min
+	local vmax = conditionData.max
+	if vmin and level < vmin then
+		level = vmin
+	elseif vmax and level > vmax then
+		level = vmax
+	end
+	
+	level = max(level, 0)
+	
+	return level
+end
 
 ---------- Dropdowns ----------
 local addedThings = {}
@@ -328,17 +338,16 @@ function CNDT:TypeMenu_DropDown_OnClick(data)
 	TMW:SetUIDropdownText(UIDROPDOWNMENU_OPEN_MENU, self.value)
 	UIDropDownMenu_SetText(UIDROPDOWNMENU_OPEN_MENU, data.text)
 	local group = UIDROPDOWNMENU_OPEN_MENU:GetParent()
-	local showval = group:TypeCheck(data)
+	
+	local condition = group:GetConditionSettings()
 	if data.defaultUnit then
-		group.Unit:SetText(data.defaultUnit)
+		condition.Unit = data.defaultUnit
 	end
+	condition.Type = self.value
+	
+	group:LoadAndDraw()
 	group:SetSliderMinMax()
-	if showval then
-		group:SetValText()
-	else
-		group.ValText:SetText("")
-	end
-	CNDT:Save()
+	
 	CloseDropDownMenus()
 end
 
@@ -388,7 +397,10 @@ function CNDT:IconMenu_DropDown_OnClick(frame)
 	TMW:SetUIDropdownText(frame, self.value, TMW.InIcons)
 	frame.IconPreview:SetIcon(_G[self.value])
 	CloseDropDownMenus()
-	CNDT:Save()
+	
+	local group = UIDROPDOWNMENU_OPEN_MENU:GetParent()
+	local condition = group:GetConditionSettings()
+	condition.Icon = self.value
 end
 
 
@@ -408,7 +420,10 @@ end
 function CNDT:OperatorMenu_DropDown_OnClick(frame)
 	TMW:SetUIDropdownText(frame, self.value)
 	TMW:TT(frame, self.tooltipTitle, nil, 1)
-	CNDT:Save()
+	
+	local group = UIDROPDOWNMENU_OPEN_MENU:GetParent()
+	local condition = group:GetConditionSettings()
+	condition.Operator = self.value
 end
 
 
@@ -608,273 +623,261 @@ end
 ---------- CndtGroup Class ----------
 local CndtGroup = TMW:NewClass("CndtGroup", "Frame")
 
-function CndtGroup.OnNewInstance(group)
-	local ID = group:GetID()
+function CndtGroup:OnNewInstance()
+	local ID = self:GetID()
+	
+	CNDT[ID] = self
 
-	CNDT[ID] = group
-
-	group:SetPoint("TOPLEFT", CNDT[ID-1], "BOTTOMLEFT", 0, -14.5)
+	self:SetPoint("TOPLEFT", CNDT[ID-1], "BOTTOMLEFT", 0, -14.5)
 
 	local p, _, rp, x, y = TMW.CNDT[1].AddDelete:GetPoint()
-	group.AddDelete:ClearAllPoints()
-	group.AddDelete:SetPoint(p, CNDT[ID], rp, x, y)
-
-	group:Clear()
-	group:SetTitles()
+	self.AddDelete:ClearAllPoints()
+	self.AddDelete:SetPoint(p, CNDT[ID], rp, x, y)
 	
+	self:Hide()
 	
-	TMW:RegisterCallback("TMW_CONFIG_SAVE_SETTINGS", "ClearFocus", group.Unit)
-	TMW:RegisterCallback("TMW_CONFIG_SAVE_SETTINGS", "ClearFocus", group.EditBox)
-	TMW:RegisterCallback("TMW_CONFIG_SAVE_SETTINGS", "ClearFocus", group.EditBox2)
+	TMW:RegisterCallback("TMW_CONFIG_SAVE_SETTINGS", "ClearFocus", self.Unit)
+	TMW:RegisterCallback("TMW_CONFIG_SAVE_SETTINGS", "ClearFocus", self.EditBox)
+	TMW:RegisterCallback("TMW_CONFIG_SAVE_SETTINGS", "ClearFocus", self.EditBox2)
 end
 
-function CndtGroup.TypeCheck(group, conditionData)
+function CndtGroup:LoadAndDraw()
+	local conditionData = self:GetConditionData()
+	local conditionSettings = self:GetConditionSettings()
+	
+	TMW:Fire("TMW_CNDT_GROUP_DRAWGROUP", self, conditionData, conditionSettings)
+end
+
+-- LoadAndDraw handlers:
+-- Unit
+TMW:RegisterCallback("TMW_CNDT_GROUP_DRAWGROUP", function(event, CndtGroup, conditionData, conditionSettings)
 	if conditionData then
 		local unit = conditionData.unit
-
-		group.Icon:Hide() --it bugs sometimes so just do it by default
-		group.Runes:Hide()
-		local showval = true
-		group:SetTitles()
-		
-		group.Unit:Show()
-		TMW.SUG:EnableEditBox(group.Unit, "units", true)
-		group.Unit.label = "|cFFFF5050" .. TMW.L["CONDITIONPANEL_UNIT"] .. "!|r"
-		TMW:TT(group.Unit, "CONDITIONPANEL_UNIT", "ICONMENU_UNIT_DESC_CONDITIONUNIT")
-		if unit then
-			group.Unit:Hide()
-			group.TextUnitDef:SetText(unit)
-		elseif unit == false then -- must be == false
-			group.TextUnitOrIcon:SetText(nil)
-			group.Unit:Hide()
-			group.TextUnitDef:SetText(nil)
+	
+		if unit == nil then
+			-- Normal unit input and configuration
+			CndtGroup.Unit:Show()
+			CndtGroup.Unit:SetText(conditionSettings.Unit)
+			
+			CndtGroup.TextUnitDef:SetText(nil)
+			CndtGroup.TextUnit:SetText(L["CONDITIONPANEL_UNIT"])
+			
+			-- Set default behavior for the editbox. This all may be overridden by other callbacks if needed.
+			TMW.SUG:EnableEditBox(CndtGroup.Unit, "units", true)
+			CndtGroup.Unit.label = "|cFFFF5050" .. TMW.L["CONDITIONPANEL_UNIT"] .. "!|r"
+			TMW:TT(CndtGroup.Unit, "CONDITIONPANEL_UNIT", "ICONMENU_UNIT_DESC_CONDITIONUNIT")
+			
+		elseif unit == false then
+			-- No unit, hide editbox and static text
+			CndtGroup.Unit:Hide()
+			
+			CndtGroup.TextUnit:SetText(nil)
+			CndtGroup.TextUnitDef:SetText(nil)
+			
+		elseif type(unit) == "string" then
+			-- Static text in place of the editbox
+			CndtGroup.Unit:Hide()
+			
+			CndtGroup.TextUnit:SetText(L["CONDITIONPANEL_UNIT"])
+			CndtGroup.TextUnitDef:SetText(unit)
 		end
+	else
+		CndtGroup.Unit:Hide()
+		
+		CndtGroup.TextUnit:SetText(nil)
+		CndtGroup.TextUnitDef:SetText(nil)
+	end
+end)
 
+-- Type
+TMW:RegisterCallback("TMW_CNDT_GROUP_DRAWGROUP", function(event, CndtGroup, conditionData, conditionSettings)
+	CndtGroup.Type:Show()
+	CndtGroup.TextType:SetText(L["CONDITIONPANEL_TYPE"])
+
+	TMW:SetUIDropdownText(CndtGroup.Type, conditionSettings.Type)
+	UIDropDownMenu_SetText(CndtGroup.Type, conditionData and conditionData.text or (conditionSettings.Type .. ": UNKNOWN TYPE"))
+end)
+
+-- Operator
+TMW:RegisterCallback("TMW_CNDT_GROUP_DRAWGROUP", function(event, CndtGroup, conditionData, conditionSettings)
+	if not conditionData or conditionData.nooperator then
+		CndtGroup.TextOperator:SetText(nil)
+		CndtGroup.Operator:Hide()
+	else
+		CndtGroup.TextOperator:SetText(L["CONDITIONPANEL_OPERATOR"])
+		CndtGroup.Operator:Show()
+
+		local v = TMW:SetUIDropdownText(CndtGroup.Operator, conditionSettings.Operator, operators)
+		if v then
+			TMW:TT(CndtGroup.Operator, v.tooltipText, nil, 1)
+		end
+	end
+end)
+
+-- Icon
+TMW:RegisterCallback("TMW_CNDT_GROUP_DRAWGROUP", function(event, CndtGroup, conditionData, conditionSettings)
+
+
+	TMW:SetUIDropdownText(CndtGroup.Icon, conditionSettings.Icon, TMW.InIcons)
+	CndtGroup.Icon.IconPreview:SetIcon(_G[conditionSettings.Icon])
+end)
+
+-- Runes
+TMW:RegisterCallback("TMW_CNDT_GROUP_DRAWGROUP", function(event, CndtGroup, conditionData, conditionSettings)
+
+	for k, rune in pairs(CndtGroup.Runes) do
+		if type(rune) == "table" then
+			rune:SetChecked(conditionSettings.Runes[rune:GetID()])
+		end
+	end
+end)
+
+-- Parentheses
+TMW:RegisterCallback("TMW_CNDT_GROUP_DRAWGROUP", function(event, CndtGroup, conditionData, conditionSettings)
+
+	for k, frame in pairs(CndtGroup.OpenParenthesis) do
+		if type(frame) == "table" then
+			CndtGroup.OpenParenthesis[k]:SetChecked(conditionSettings.PrtsBefore >= k)
+		end
+	end
+	for k, frame in pairs(CndtGroup.CloseParenthesis) do
+		if type(frame) == "table" then
+			CndtGroup.CloseParenthesis[k]:SetChecked(conditionSettings.PrtsAfter >= k)
+		end
+	end
+end)
+
+-- And/Or
+TMW:RegisterCallback("TMW_CNDT_GROUP_DRAWGROUP", function(event, CndtGroup, conditionData, conditionSettings)
+
+	CndtGroup.AndOr:SetValue(conditionSettings.AndOr)
+end)
+
+-- Second Row
+TMW:RegisterCallback("TMW_CNDT_GROUP_DRAWGROUP", function(event, CndtGroup, conditionData, conditionSettings)
+	if conditionData then
 		if conditionData.name then
-			group.EditBox:Show()
+			CndtGroup.EditBox:Show()
+			CndtGroup.EditBox:SetText(conditionSettings.Name)
+		
 			if type(conditionData.name) == "function" then
-				conditionData.name(group.EditBox)
-				group.EditBox:GetScript("OnTextChanged")(group.EditBox)
+				conditionData.name(CndtGroup.EditBox)
+				CndtGroup.EditBox:GetScript("OnTextChanged")(CndtGroup.EditBox)
 			else
-				TMW:TT(group.EditBox)
+				TMW:TT(CndtGroup.EditBox, nil, nil)
 			end
 			if conditionData.check then
-				conditionData.check(group.Check)
-				group.Check:Show()
+				conditionData.check(CndtGroup.Check)
+				CndtGroup.Check:Show()
+				CndtGroup.Check:SetChecked(conditionSettings.Checked)
 			else
-				group.Check:Hide()
+				CndtGroup.Check:Hide()
 			end
-			TMW.SUG:EnableEditBox(group.EditBox, conditionData.useSUG, not conditionData.allowMultipleSUGEntires)
+			TMW.SUG:EnableEditBox(CndtGroup.EditBox, conditionData.useSUG, not conditionData.allowMultipleSUGEntires)
 
-			group.Slider:SetWidth(217)
+			CndtGroup.Slider:SetWidth(217)
 			if conditionData.noslide then
-				group.EditBox:SetWidth(520)
+				CndtGroup.EditBox:SetWidth(520)
 			else
-				group.EditBox:SetWidth(295)
+				CndtGroup.EditBox:SetWidth(295)
 			end
 		else
-			group.EditBox:Hide()
-			group.Check:Hide()
-			group.Slider:SetWidth(522)
-			TMW.SUG:DisableEditBox(group.EditBox)
+			CndtGroup.EditBox:Hide()
+			CndtGroup.Check:Hide()
+			CndtGroup.Slider:SetWidth(522)
+			TMW.SUG:DisableEditBox(CndtGroup.EditBox)
 		end
+		
 		if conditionData.name2 then
-			group.EditBox2:Show()
+			CndtGroup.EditBox2:Show()
+			CndtGroup.EditBox2:SetText(conditionSettings.Name2)
+		
 			if type(conditionData.name2) == "function" then
-				conditionData.name2(group.EditBox2)
-				group.EditBox2:GetScript("OnTextChanged")(group.EditBox2)
+				conditionData.name2(CndtGroup.EditBox2)
+				CndtGroup.EditBox2:GetScript("OnTextChanged")(CndtGroup.EditBox2)
 			else
-				TMW:TT(group.EditBox2)
+				TMW:TT(CndtGroup.EditBox2, nil, nil)
 			end
 			if conditionData.check2 then
-				conditionData.check2(group.Check2)
-				group.Check2:Show()
+				conditionData.check2(CndtGroup.Check2)
+				CndtGroup.Check2:Show()
+				CndtGroup.Check2:SetChecked(conditionSettings.Checked2)
 			else
-				group.Check2:Hide()
+				CndtGroup.Check2:Hide()
 			end
-			TMW.SUG:EnableEditBox(group.EditBox2, conditionData.useSUG, not conditionData.allowMultipleSUGEntires)
-			group.EditBox:SetWidth(250)
-			group.EditBox2:SetWidth(250)
+			TMW.SUG:EnableEditBox(CndtGroup.EditBox2, conditionData.useSUG, not conditionData.allowMultipleSUGEntires)
+			CndtGroup.EditBox:SetWidth(250)
+			CndtGroup.EditBox2:SetWidth(250)
 		else
-			group.Check2:Hide()
-			group.EditBox2:Hide()
-			TMW.SUG:DisableEditBox(group.EditBox2)
+			CndtGroup.Check2:Hide()
+			CndtGroup.EditBox2:Hide()
+			TMW.SUG:DisableEditBox(CndtGroup.EditBox2)
 		end
 
-		if conditionData.nooperator then
-			group.TextOperator:SetText("")
-			group.Operator:Hide()
-		else
-			group.Operator:Show()
-		end
+		
 
 		if conditionData.noslide then
-			showval = false
-			group.Slider:Hide()
-			group.TextValue:SetText("")
-			group.ValText:Hide()
+			CndtGroup.Slider:Hide()
+			CndtGroup.SliderInputBox:Hide()
+			
+			CndtGroup.TextValue:SetText(nil)
+			CndtGroup.ValText:Hide()
 		else
-			group.ValText:Show()
-			group.Slider:Show()
-		end
+			CndtGroup.TextValue:SetText(L["CONDITIONPANEL_VALUEN"])
+			
+			local val = conditionSettings.Level
+			CndtGroup.ValText:SetText(get(conditionData.texttable, val) or val)
+			CndtGroup.ValText:Show()
+			
+			CndtGroup:SetSliderMinMax(conditionSettings.Level or 0)
+			
+			-- If neither the slider or input box are already shown, show the slider
+			-- (don't show the slider unconditionally because otherwise every time :LoadAndDraw() is called the editbox will be hidden)
+			if not CndtGroup.Slider:IsShown() and not CndtGroup.SliderInputBox:IsShown() then
+				CndtGroup.Slider:Show()
+			end
+			
+			
+			TMW:TT(CndtGroup.SliderInputBox, nil, "CNDT_SLIDER_DESC_CLICKSWAP_TOSLIDER")
+			CndtGroup.SliderInputBox.__noWrapTooltipText = true
+			
+			if CndtGroup:GetSliderEditBoxAllowance() then
+				-- Show the tooltip hinting about toggling if toggling is possible.
+				TMW:TT(CndtGroup.Slider, nil, "CNDT_SLIDER_DESC_CLICKSWAP_TOMANUAL")
+				
+				if not CndtGroup:GetSliderAllowance() then
+					TMW:TT(CndtGroup.SliderInputBox, nil, "CNDT_SLIDER_DESC_CLICKSWAP_TOSLIDER_DISALLOWED")
+					CndtGroup.SliderInputBox.__noWrapTooltipText = nil
+					CndtGroup.SliderInputBox:Show()
+				end
+			else
+				-- Otherwise, don't include the part about toggling
+				TMW:TT(CndtGroup.Slider, nil, nil)
+				
+				-- Switch back to the slider.
+				CndtGroup.Slider:Show()
+			end
+			
+			TMW:TT_Update(CndtGroup.Slider)
+			TMW:TT_Update(CndtGroup.SliderInputBox)
 
-		if conditionData.showhide then
-			conditionData.showhide(group, conditionData)
 		end
-		
-		TMW:Fire("TMW_CNDT_GROUP_TYPECHECK", group, conditionData)
-		
-		return showval
 	else
-		group.Unit:Hide()
-		group.Check:Hide()
-		group.EditBox:Hide()
-		group.Check:Hide()
-		group.Operator:Hide()
-		group.ValText:Hide()
-		group.Slider:Hide()
-
-		group.TextUnitOrIcon:SetText(nil)
-		group.TextUnitDef:SetText(nil)
-		group.TextOperator:SetText(nil)
-		group.TextValue:SetText(nil)
-
-	end
-end
-
-function CndtGroup.Save(group)
-	local condition = CNDT.settings[group:GetID()]
-
-	condition.Type = UIDropDownMenu_GetSelectedValue(group.Type) or ""
-	condition.Operator = UIDropDownMenu_GetSelectedValue(group.Operator) or "=="
-	condition.Icon = UIDropDownMenu_GetSelectedValue(group.Icon) or ""
-	condition.Level = tonumber(group.Slider:GetValue()) or 0
-	condition.AndOr = group.AndOr:GetValue()
-	condition.Name = strtrim(group.EditBox:GetText()) or ""
-	condition.Name2 = strtrim(group.EditBox2:GetText()) or ""
-	condition.Checked = not not group.Check:GetChecked()
-	condition.Checked2 = not not group.Check2:GetChecked()
-	
-	
-	condition.Unit = strtrim(group.Unit:GetText()) or "player"
-
-
-	for k, rune in pairs(group.Runes) do
-		if type(rune) == "table" then
-			condition.Runes[rune:GetID()] = rune:GetChecked()
-		end
+		CndtGroup.TextValue:SetText(nil)
+		CndtGroup.Check:Hide()
+		CndtGroup.EditBox:Hide()
+		CndtGroup.Check2:Hide()
+		CndtGroup.EditBox2:Hide()
+		CndtGroup.Slider:Hide()
+		CndtGroup.SliderInputBox:Hide()
+		CndtGroup.ValText:Hide()
 	end
 
-	local n = 0
-	if group.OpenParenthesis:IsShown() then
-		for k, frame in pairs(group.OpenParenthesis) do
-			if type(frame) == "table" and frame:GetChecked() then
-				n = n + 1
-			end
-		end
-	end
-	condition.PrtsBefore = n
+end)
 
-	n = 0
-	if group.CloseParenthesis:IsShown() then
-		for k, frame in pairs(group.CloseParenthesis) do
-			if type(frame) == "table" and frame:GetChecked() then
-				n = n + 1
-			end
-		end
-	end
-	condition.PrtsAfter = n
-end
 
-function CndtGroup.Load(group)
-	local condition = CNDT.settings[group:GetID()]
-	local data = CNDT.ConditionsByType[condition.Type]
-
-	TMW:SetUIDropdownText(group.Type, condition.Type)
-	UIDropDownMenu_SetText(group.Type, data and data.text or (condition.Type .. ": UNKNOWN TYPE"))
-
-	group:TypeCheck(data)
-
-	group.Unit:SetText(condition.Unit)
-	group.EditBox:SetText(condition.Name)
-	group.EditBox2:SetText(condition.Name2)
-	group.Check:SetChecked(condition.Checked)
-	group.Check2:SetChecked(condition.Checked2)
-
-	TMW:SetUIDropdownText(group.Icon, condition.Icon, TMW.InIcons)
-	group.Icon.IconPreview:SetIcon(_G[condition.Icon])
-
-	local v = TMW:SetUIDropdownText(group.Operator, condition.Operator, operators)
-	if v then
-		TMW:TT(group.Operator, v.tooltipText, nil, 1)
-	end
-
-	group:SetSliderMinMax(condition.Level or 0)
-	group:SetValText()
-
-	for k, rune in pairs(group.Runes) do
-		if type(rune) == "table" then
-			rune:SetChecked(condition.Runes[rune:GetID()])
-		end
-	end
-	for k, frame in pairs(group.OpenParenthesis) do
-		if type(frame) == "table" then
-			group.OpenParenthesis[k]:SetChecked(condition.PrtsBefore >= k)
-		end
-	end
-	for k, frame in pairs(group.CloseParenthesis) do
-		if type(frame) == "table" then
-			group.CloseParenthesis[k]:SetChecked(condition.PrtsAfter >= k)
-		end
-	end
-
-	group.AndOr:SetValue(condition.AndOr)
-	group:Show()
-end
-
-function CndtGroup.Clear(group)
-	group.Unit:SetText("player")
-	group.EditBox:SetText("")
-	group.EditBox2:SetText("")
-	group.Check:SetChecked(nil)
-	group.Check2:SetChecked(nil)
-
-	TMW:SetUIDropdownText(group.Icon, "", TMW.InIcons)
-	
-	UIDropDownMenu_SetText(group.Type, CNDT.ConditionsByType[""].text)
-	group:TypeCheck(CNDT.ConditionsByType[""])
-	
-	TMW:SetUIDropdownText(group.Operator, "==", operators)
-	group.AndOr:SetValue("AND")
-	for k, rune in pairs(group.Runes) do
-		if type(rune) == "table" then
-			rune:SetChecked(nil)
-		end
-	end
-	group.Slider:SetValue(0)
-	group:Hide()
-	group.Unit:Show()
-	group.Operator:Show()
-	group.Icon:Hide()
-	group.Runes:Hide()
-	group.EditBox:Hide()
-	group.EditBox2:Hide()
-	group:SetSliderMinMax()
-	group:SetValText()
-end
-
-function CndtGroup.SetValText(group)
-	if group.ValText then
-		local val = group.Slider:GetValue()
-		local v = CNDT.ConditionsByType[UIDropDownMenu_GetSelectedValue(group.Type)]
-		if v then
-			group.ValText:SetText(get(v.texttable, val) or val)
-		end
-	end
-end
-
-function CndtGroup.UpOrDown(group, delta)
-	local ID = group:GetID()
+function CndtGroup:UpOrDown(delta)
+	local ID = self:GetID()
 	local settings = CNDT.settings
 	local curdata, destinationdata
 	curdata = settings[ID]
@@ -884,9 +887,9 @@ function CndtGroup.UpOrDown(group, delta)
 	CNDT:LoadConfig()
 end
 
-function CndtGroup.AddDeleteHandler(group)
-	if group:IsShown() then
-		CNDT:DeleteCondition(CNDT.settings, group:GetID())
+function CndtGroup:AddDeleteHandler()
+	if self:IsShown() then
+		CNDT:DeleteCondition(CNDT.settings, self:GetID())
 	else
 		CNDT:AddCondition(CNDT.settings)
 	end
@@ -894,51 +897,75 @@ function CndtGroup.AddDeleteHandler(group)
 	CNDT:LoadConfig()
 end
 
-function CndtGroup.SetTitles(group)
-	if not group.TextType then return end
-	group.TextType:SetText(L["CONDITIONPANEL_TYPE"])
-	group.TextUnitOrIcon:SetText(L["CONDITIONPANEL_UNIT"])
-	group.TextUnitDef:SetText("")
-	group.TextOperator:SetText(L["CONDITIONPANEL_OPERATOR"])
-	group.TextValue:SetText(L["CONDITIONPANEL_VALUEN"])
-end
-
-function CndtGroup.SetSliderMinMax(group, level)
+function CndtGroup:SetSliderMinMax(level)
 	-- level is passed in only when the setting is changing or being loaded
-	local v = CNDT.ConditionsByType[UIDropDownMenu_GetSelectedValue(group.Type)]
-	if not v then return end
-	local Slider = group.Slider
-	if v.range then
-		local deviation = v.range/2
+	
+	local data = self:GetConditionData()
+	if not data then return end
+	
+	level = level and CNDT:ValidateLevelForCondition(level, data.value)
+	
+	local Slider = self.Slider
+	local SliderInputBox = self.SliderInputBox
+	
+	
+	if data.range then
+		local deviation = data.range/2
 		local val = level or Slider:GetValue()
 
 		local newmin = max(0, val-deviation)
 		local newmax = max(deviation, val + deviation)
 
 		Slider:SetMinMaxValues(newmin, newmax)
-		Slider.Low:SetText(get(v.texttable, newmin) or newmin)
-		Slider.High:SetText(get(v.texttable, newmax) or newmax)
+		Slider.Low:SetText(get(data.texttable, newmin) or newmin)
+		Slider.High:SetText(get(data.texttable, newmax) or newmax)
 	else
-		local vmin = get(v.min)
-		local vmax = get(v.max)
+		local vmin = get(data.min)
+		local vmax = get(data.max)
 		Slider:SetMinMaxValues(vmin or 0, vmax or 1)
-		Slider.Low:SetText(get(v.texttable, vmin) or v.mint or vmin or 0)
-		Slider.High:SetText(get(v.texttable, vmax) or v.maxt or vmax or 1)
+		Slider.Low:SetText(get(data.texttable, vmin) or data.mint or vmin or 0)
+		Slider.High:SetText(get(data.texttable, vmax) or data.maxt or vmax or 1)
 	end
 
 	local Min, Max = Slider:GetMinMaxValues()
 	local Mid
-	if v.Mid == true then
-		Mid = get(v.texttable, ((Max-Min)/2)+Min) or ((Max-Min)/2)+Min
+	if data.Mid == true then
+		Mid = get(data.texttable, ((Max-Min)/2)+Min) or ((Max-Min)/2)+Min
 	else
-		Mid = get(v.midt, ((Max-Min)/2)+Min)
+		Mid = get(data.midt, ((Max-Min)/2)+Min)
 	end
 	Slider.Mid:SetText(Mid)
 
-	Slider.step = v.step or 1
-	Slider:SetValueStep(Slider.step)
+	Slider:SetValueStep(data.step or 1)
+	
 	if level then
 		Slider:SetValue(level)
+		SliderInputBox:SetText(level)
 	end
 end
+
+function CndtGroup:GetSliderEditBoxAllowance()
+	local conditionData = self:GetConditionData()
+	return conditionData.range or SLIDER_INPUTBOX_ENABLEALL
+end
+
+function CndtGroup:GetSliderAllowance()
+	local conditionSettings = self:GetConditionSettings()
+	return not self:GetSliderEditBoxAllowance() or conditionSettings.Level <= AUTO_LOAD_SLIDERINPUTBOX_THRESHOLD
+end
+
+
+function CndtGroup:GetConditionSettings()
+	if CNDT.settings then
+		return CNDT.settings[self:GetID()]
+	end
+end
+
+function CndtGroup:GetConditionData()
+	local condition = self:GetConditionSettings()
+	if condition then
+		return CNDT.ConditionsByType[condition.Type]
+	end
+end
+
 

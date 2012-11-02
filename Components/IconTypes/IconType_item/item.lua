@@ -261,9 +261,9 @@ end
 
 function Type:GuessIconTexture(ics)
 	if ics.Name and ics.Name ~= "" then
-		local name = TMW:GetSpellNames(nil, ics.Name, 1)
-		if name then
-			return GetItemIcon(name)
+		local id = TMW:GetItemIDs(nil, ics.Name, 1)
+		if id then
+			return GetItemIcon(id)
 		end
 	end
 end

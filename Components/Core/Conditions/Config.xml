@@ -33,7 +33,15 @@
 					self.Check:SetTexture("Interface\\RAIDFRAME\\ReadyCheck-Ready")
 				end
 				TMW.CNDT:RuneHandler(self)
-				TMW.CNDT:Save()
+
+				local CndtGroup = self:GetParent():GetParent()
+				local condition = CndtGroup:GetConditionSettings()
+				for k, rune in pairs(self:GetParent()) do
+					if type(rune) == "table" then
+						condition.Runes[rune:GetID()] = rune:GetChecked()
+					end
+				end
+				CndtGroup:LoadAndDraw()
 			</OnClick>
 			<OnLoad>
 				self.GetChecked = TMW.CNDT.Rune_GetChecked
@@ -118,7 +126,24 @@
 			</OnLoad>
 			<OnClick>
 				self:SetChecked(not self.checked)
-				TMW.CNDT:Save()
+				
+				local n = 0
+				if self:GetParent():IsShown() then
+					for k, frame in pairs(self:GetParent()) do
+						if type(frame) == "table" and frame:GetChecked() then
+							n = n + 1
+						end
+					end
+				end
+				
+				local CndtGroup = self:GetParent():GetParent()
+				if self.type == "(" then
+					CndtGroup:GetConditionSettings().PrtsBefore = n
+				else
+					CndtGroup:GetConditionSettings().PrtsAfter = n
+				end
+				CndtGroup:LoadAndDraw()
+	
 				TMW.CNDT:ColorizeParentheses()
 			</OnClick>
 			<OnEnter>
@@ -171,7 +196,10 @@
 					<OnEditFocusLost>
 						EditBox_ClearHighlight(self)
 						TMW:CleanString(self)
-						TMW.CNDT:Save()
+						
+						local CndtGroup = self:GetParent()
+						CndtGroup:GetConditionSettings().Unit = strtrim(self:GetText()) or "player"
+						CndtGroup:LoadAndDraw()
 
 						if self:GetText() == "" then
 							TMW.HELP:Show("CNDT_UNIT_MISSING", TMW.CI.ic, self:GetParent():GetParent():GetParent(), 0, 0, TMW.L["HELP_NOUNIT"])
@@ -192,28 +220,51 @@
 					</OnLoad>
 				</Scripts>
 			</Frame>
-			<Slider name="$parentSlider" parentKey="Slider" inherits="TellMeWhen_SliderTemplate" minvalue="0" maxvalue="100" valuestep="1" defaultvalue="100">
+			
+			<Slider name="$parentSlider" parentKey="Slider" inherits="TellMeWhen_SliderTemplate" hidden="true" minvalue="0" maxvalue="100" valuestep="1" defaultvalue="100">
 				<Size x="522" y="17"/>
 				<Anchors>
 					<Anchor point="TOPRIGHT" x="-5" y="-39"/>
 				</Anchors>
 				<Scripts>
-					<OnValueChanged>
-						local group = self:GetParent()
-						if group.SetValText then group:SetValText() end
-					</OnValueChanged>
+					<OnUpdate>
+						-- This code handles changing the value text when the slider is adjusted using click-and-drag.
+						-- CndtGroup:LoadAndDraw() can't be used because it forces an update using the current Level setting,
+						-- which either results in a completely locked slider if Level isn't set here before calling :LoadAndDraw,
+						-- or it results in a hypersensitive slider that updates its range every single frame.
+						-- Therefore, we just extract the text updating code and let it stand alone
+						-- without actually modifying any settings in this script handler.
+						
+						local CndtGroup = self:GetParent()
+						
+						if not CndtGroup.GetConditionData then
+							return
+						end
+						
+						local conditionData = CndtGroup:GetConditionData()
+						local value = self:GetValue()
+						CndtGroup.ValText:SetText(TMW.get(conditionData.texttable, value) or value)
+					</OnUpdate>
+					<OnMouseDown>
+						if button == "RightButton" and self:GetParent():GetSliderEditBoxAllowance() then
+							self:GetParent().SliderInputBox:Show()
+							self:GetParent():LoadAndDraw()
+						end
+					</OnMouseDown>
 					<OnMouseUp>
-						self:GetParent():SetSliderMinMax()
-						TMW.CNDT:Save()
+						local CndtGroup = self:GetParent()
+						local condition = CndtGroup:GetConditionSettings()
+						condition.Level = TMW.CNDT:ValidateLevelForCondition(self:GetValue(), condition.Type)
+						CndtGroup:LoadAndDraw()
 					</OnMouseUp>
+					<OnShow>
+						if self:GetParent().SliderInputBox then
+							self:GetParent().SliderInputBox:Hide()
+						end
+					</OnShow>
 					<OnLoad>
 						self:EnableMouseWheel(true)
-						self.getvalue = self.GetValue
-						function self:GetValue()
-							local step = self.step or 1
-							local val = self:getvalue()
-							return floor(val * (1/step) + 0.5) / (1/step)
-						end
+						self.__noWrapTooltipText = true
 					</OnLoad>
 					<OnMouseWheel>
 						if IsShiftKeyDown() then
@@ -222,14 +273,69 @@
 						if IsControlKeyDown() then
 							delta = delta*60 -- (60 seconds)
 						end
+						
+						local CndtGroup = self:GetParent()
+						
 						if delta == 1 or delta == -1 then
-							delta = delta*(self.step or 1)
+							delta = delta*(CndtGroup:GetConditionData().step or 1)
 						end
-						self:GetParent():SetSliderMinMax(self:GetValue()+delta)
-						TMW.CNDT:Save()
+						
+						local condition = CndtGroup:GetConditionSettings()
+						condition.Level = TMW.CNDT:ValidateLevelForCondition(self:GetValue()+delta, condition.Type)
+						CndtGroup:LoadAndDraw()
 					</OnMouseWheel>
 				</Scripts>
 			</Slider>
+			<EditBox name="$parentSliderInputBox" inherits="TellMeWhen_InputBoxTemplate" hidden="true" parentKey="SliderInputBox" autoFocus="false">
+				<Size x="302" y="15"/>
+				<Anchors>
+					<Anchor point="TOP" relativeTo="$parentType" relativePoint="BOTTOM" y="2"/>
+					<Anchor point="LEFT" relativeTo="$parentSlider" x="0"/>
+					<Anchor point="RIGHT" relativeTo="$parentSlider" x="0"/>
+				</Anchors>
+				<Scripts>
+					<OnEditFocusLost>
+						EditBox_ClearHighlight(self)
+						TMW:CleanString(self)
+						
+						local CndtGroup = self:GetParent()
+						local condition = CndtGroup:GetConditionSettings()
+						condition.Level = TMW.CNDT:ValidateLevelForCondition(self:GetText(), condition.Type)
+						CndtGroup:LoadAndDraw()
+					</OnEditFocusLost>
+					<OnShow>
+						self:GetParent().Slider:Hide()
+					</OnShow>
+					<OnMouseDown>
+						if button == "RightButton" and self:GetParent():GetSliderAllowance() then
+							self:GetParent().Slider:Show()
+						end
+					</OnMouseDown>
+					<OnMouseWheel>
+						if IsShiftKeyDown() then
+							delta = delta*10
+						end
+						if IsControlKeyDown() then
+							delta = delta*60 -- (60 seconds)
+						end
+						
+						local step = self:GetParent():GetConditionData().step
+						if delta == 1 or delta == -1 then
+							delta = delta*(step or 1)
+						end
+						self:GetParent():SetSliderMinMax(self:GetText()+delta)
+						
+						local CndtGroup = self:GetParent()
+						local condition = CndtGroup:GetConditionSettings()
+						condition.Level = TMW.CNDT:ValidateLevelForCondition(self:GetText(), condition.Type)
+						CndtGroup:LoadAndDraw()
+					</OnMouseWheel>
+				</Scripts>
+				
+			</EditBox>
+			
+			
+			
 			<EditBox name="$parentEditBox" inherits="TellMeWhen_InputBoxTemplate" parentKey="EditBox" autoFocus="false">
 				<Size x="302" y="15"/>
 				<Anchors>
@@ -239,7 +345,10 @@
 					<OnEditFocusLost>
 						EditBox_ClearHighlight(self)
 						TMW:CleanString(self)
-						TMW.CNDT:Save()
+						
+						local CndtGroup = self:GetParent()
+						CndtGroup:GetConditionSettings().Name = strtrim(self:GetText()) or ""
+						CndtGroup:LoadAndDraw()
 					</OnEditFocusLost>
 				</Scripts>
 			</EditBox>
@@ -252,7 +361,10 @@
 					<OnEditFocusLost>
 						EditBox_ClearHighlight(self)
 						TMW:CleanString(self)
-						TMW.CNDT:Save()
+						
+						local CndtGroup = self:GetParent()
+						CndtGroup:GetConditionSettings().Name2 = strtrim(self:GetText()) or ""
+						CndtGroup:LoadAndDraw()
 					</OnEditFocusLost>
 				</Scripts>
 			</EditBox>
@@ -339,7 +451,9 @@
 						self:GetNormalTexture():SetVertexColor(1, 0, 0, 1)
 					</OnLoad>
 					<OnClick>
-						TMW.CNDT:Save()
+						local CndtGroup = self:GetParent()
+						CndtGroup:GetConditionSettings().Checked = not not self:GetChecked()
+						CndtGroup:LoadAndDraw()
 					</OnClick>
 				</Scripts>
 			</CheckButton>
@@ -354,7 +468,9 @@
 						self:GetNormalTexture():SetVertexColor(1, 0, 0, 1)
 					</OnLoad>
 					<OnClick>
-						TMW.CNDT:Save()
+						local CndtGroup = self:GetParent()
+						CndtGroup:GetConditionSettings().Checked2 = not not self:GetChecked()
+						CndtGroup:LoadAndDraw()
 					</OnClick>
 				</Scripts>
 			</CheckButton>
@@ -409,7 +525,10 @@
 						elseif self.value == "OR" then
 							self:SetValue("AND")
 						end
-						TMW.CNDT:Save()
+						
+						local CndtGroup = self:GetParent()
+						CndtGroup:GetConditionSettings().AndOr = self:GetValue()
+						CndtGroup:LoadAndDraw()
 					</OnClick>
 				</Scripts>
 			</Button>
@@ -511,7 +630,6 @@
 					</OnLoad>
 					<OnClick>
 						self.RealParent:AddDeleteHandler()
-						TMW.CNDT:Save()
 					</OnClick>
 				</Scripts>
 				<NormalTexture urgency="5" file="Interface\AddOns\TellMeWhen\Textures\Plus-Up"/>
@@ -526,9 +644,14 @@
 						<Anchor point="BOTTOM" relativeto="$parentType" relativePoint="TOP" y="-0.5"/>
 					</Anchors>
 				</FontString>
-				<FontString name="$parentTextUnitOrIcon" parentKey="TextUnitOrIcon" inherits="GameFontNormalSmall" justifyH="CENTER">
+				<FontString name="$parentTextUnit" parentKey="TextUnit" inherits="GameFontNormalSmall" justifyH="CENTER">
 					<Anchors>
 						<Anchor point="BOTTOM" relativeto="$parentUnit" relativePoint="TOP" y="5"/>
+					</Anchors>
+				</FontString>
+				<FontString name="$parentTextIcon" parentKey="TextIcon" inherits="GameFontNormalSmall" justifyH="CENTER">
+					<Anchors>
+						<Anchor point="BOTTOM" relativeto="$parentIcon" relativePoint="TOP" y="-0.5"/>
 					</Anchors>
 				</FontString>
 				<FontString name="$parentTextOperator" parentKey="TextOperator" inherits="GameFontNormalSmall" justifyH="CENTER">

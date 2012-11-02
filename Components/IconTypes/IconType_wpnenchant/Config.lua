@@ -240,7 +240,7 @@ function Module:Etc_GetTexture(name)
 	end
 
 	name = strlower(name)
-	SpellTextures[name] = SpellTextures[name] or tex
+	TMW.SpellTexturesMetaIndex[name] = TMW.SpellTexturesMetaIndex[name] or tex
 
 	return tex or "Interface\\Icons\\INV_Misc_QuestionMark"
 end
