@@ -36,39 +36,48 @@ local ConditionCategory = CNDT:GetCategory("ATTRIBUTES_PLAYER", 2, L["CNDTCAT_AT
 ConditionCategory:RegisterCondition(1,	 "INSTANCE", {
 	text = L["CONDITIONPANEL_INSTANCETYPE"],
 	min = 0,
-	max = 9,
+	max = 11,
 	unit = false,
 	texttable = {
 		[0] = NONE,
 		[1] = BATTLEGROUND,
 		[2] = ARENA,
-		[3] = DUNGEON_DIFFICULTY1,
-		[4] = DUNGEON_DIFFICULTY2,
-		[5] = RAID_DIFFICULTY1,
-		[6] = RAID_DIFFICULTY2,
-		[7] = RAID_DIFFICULTY3,
-		[8] = RAID_DIFFICULTY4,
+		[3] = DUNGEON_DIFFICULTY_5PLAYER,
+		[4] = DUNGEON_DIFFICULTY_5PLAYER_HEROIC,
+		[5] = RAID_DIFFICULTY_10PLAYER,
+		[6] = RAID_DIFFICULTY_25PLAYER,
+		[7] = RAID_DIFFICULTY_10PLAYER_HEROIC,
+		[8] = RAID_DIFFICULTY_25PLAYER_HEROIC,
 		[9] = RAID_FINDER,
+		[10] = CHALLENGE_MODE,
+		[11] = RAID_DIFFICULTY_40PLAYER,
 	},
 	icon = "Interface\\Icons\\Spell_Frost_Stun",
 	tcoords = CNDT.COMMON.standardtcoords,
 	Env = {
 		GetZoneType = function()
 			local _, z = IsInInstance()
+			local instanceDifficulty = GetInstanceDifficulty()
 			if z == "pvp" then
+				-- Battleground (1)
 				return 1
 			elseif z == "arena" then
+				-- Arena (2)
 				return 2
-			elseif z == "party" then
-				return 2 + GetInstanceDifficulty() --3-4
-			elseif z == "raid" then
-				if IsPartyLFG() then
-					return 9
-				else
-					return 4 + GetInstanceDifficulty() --5-8
-				end
-			else
+			elseif instanceDifficulty == 1 then
+				-- None (0)
 				return 0
+			else
+				-- 5 man normal (3)
+				-- 5 man heroic (4)
+				-- 10 man normal (5)
+				-- 25 man normal (6)
+				-- 10 man heroic (7)
+				-- 25 man heroic (8)
+				-- LFR (9)
+				-- Challenge Mode (10)
+				-- 40 man (11)
+				return 1 + instanceDifficulty --3-11
 			end
 		end,
 	},
