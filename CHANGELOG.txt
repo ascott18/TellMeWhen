@@ -8,6 +8,7 @@
  * New condition: Equipment set equipped.
  * New setting for Buff/Debuff icons: Hide if no units.
  * Added Challenge Mode and 40 Player raid to the Instance Type condition.
+ * The Totem icon type has been re-focused towards the Rune of Power talent for mages.
  * Bug fixes:
  ** Minimum group frame level is now 5 instead of 1 to prevent issues caused at low frame levels.
  ** Increased the delay on LoadFirstValidIcon from 0.1 seconds to 0.5 seconds in hopes of preventing the AceCD:804 error more often.

@@ -132,6 +132,7 @@ L["ICONMENU_TOTEM"] = "Totem"
 L["ICONMENU_TOTEM_DESC"] = [[Tracks your totems.]]
 L["ICONMENU_GHOUL"] = "Non-%s ghoul"
 L["ICONMENU_GHOUL_DESC"] = [[Tracks your ghoul if you don't have the %s talent.]]
+L["ICONMENU_RUNEOFPOWER_DESC"] = [[Tracks the runes from the %s talent.]]
 L["ICONMENU_MUSHROOMS"] = "%s"
 L["ICONMENU_MUSHROOMS_DESC"] = [[Tracks a %s.]]
 
@@ -365,6 +366,8 @@ L["WATER"] = "Water"
 L["AIR"] = "Air"
 L["MUSHROOMS"] = "Mushrooms to check"
 L["MUSHROOM"] = "Mushroom %d"
+L["RUNESOFPOWER"] = "Runes to check"
+L["RUNEOFPOWER"] = "Rune %d"
 L["GENERICTOTEM"] = "Totem %d"
 L["RUNES"] = "Rune(s) to check"
 

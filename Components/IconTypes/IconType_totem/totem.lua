@@ -25,8 +25,8 @@ local strlowerCache = TMW.strlowerCache
 
 
 local Type = TMW.Classes.IconType:New("totem")
-Type.name = pclass == "DRUID" and L["ICONMENU_MUSHROOMS"]		or pclass == "DEATHKNIGHT" and L["ICONMENU_GHOUL"]		or L["ICONMENU_TOTEM"]
-Type.desc = pclass == "DRUID" and L["ICONMENU_MUSHROOMS_DESC"]	or pclass == "DEATHKNIGHT" and L["ICONMENU_GHOUL_DESC"]	or L["ICONMENU_TOTEM_DESC"]
+Type.name = pclass == "DRUID" and L["ICONMENU_MUSHROOMS"]		or pclass == "DEATHKNIGHT" and L["ICONMENU_GHOUL"]		or pclass == "MAGE" and GetSpellInfo(116011)			or L["ICONMENU_TOTEM"]
+Type.desc = pclass == "DRUID" and L["ICONMENU_MUSHROOMS_DESC"]	or pclass == "DEATHKNIGHT" and L["ICONMENU_GHOUL_DESC"]	or pclass == "MAGE" and L["ICONMENU_RUNEOFPOWER_DESC"]	or L["ICONMENU_TOTEM_DESC"]
 Type.AllowNoName = true
 Type.usePocketWatch = 1
 Type.hidden = pclass == "PRIEST" -- priest totems are lightwells, which is tracked with icon type "lightwell"
@@ -46,7 +46,7 @@ Type:RegisterIconDefaults{
 	TotemSlots				= 0xF, --(1111)
 }
 
-if pclass ~= "DRUID" and pclass ~= "DEATHKNIGHT" then
+if pclass ~= "DRUID" and pclass ~= "DEATHKNIGHT" and pclass ~= "MAGE" then
 	Type:RegisterConfigPanel_XMLTemplate(100, "TellMeWhen_ChooseName", {
 		title = L["ICONMENU_CHOOSENAME2"] .. " " .. L["ICONMENU_CHOOSENAME_ORBLANK"],
 	})
@@ -97,6 +97,22 @@ elseif pclass == "DRUID" then
 				setting = "TotemSlots",
 				value = 3,
 				title = format(L["MUSHROOM"], 3),
+			},
+		})
+	end)
+elseif pclass == "MAGE" then
+	Type:RegisterConfigPanel_ConstructorFunc(120, "TellMeWhen_TotemSlots_Mage", function(self)
+		self.Header:SetText(L["RUNESOFPOWER"])
+		TMW.IE:BuildSimpleCheckSettingFrame(self, "SettingTotemButton", {				
+			{
+				setting = "TotemSlots",
+				value = 1,
+				title = format(L["RUNEOFPOWER"], 1),
+			},
+			{
+				setting = "TotemSlots",
+				value = 2,
+				title = format(L["RUNEOFPOWER"], 2),
 			},
 		})
 	end)
@@ -189,6 +205,11 @@ function Type:Setup(icon, groupID, iconID)
 		icon.Slots[2] = nil
 		icon.Slots[3] = nil
 		icon.Slots[4] = nil
+	elseif pclass == "MAGE" then
+		icon.NameFirst = ""
+		icon.NameName = GetSpellInfo(116011)
+		icon.Slots[3] = nil -- there is no rune 3
+		icon.Slots[4] = nil -- there is no rune 4
 	elseif pclass == "DRUID" then
 		icon.NameFirst = ""
 		icon.NameName = GetSpellInfo(88747)
@@ -208,6 +229,8 @@ function Type:Setup(icon, groupID, iconID)
 		icon:SetInfo("texture", GetSpellTexture(88747))
 	elseif pclass == "DEATHKNIGHT" then
 		icon:SetInfo("texture", GetSpellTexture(46584))
+	elseif pclass == "MAGE" then
+		icon:SetInfo("texture", GetSpellTexture(116011))
 	else
 		icon:SetInfo("texture", TMW:GetConfigIconTexture(icon))
 	end
