@@ -1,14 +1,17 @@
 ﻿===v6.0.4===
- * The Buff Efficiency Threshold setting is back.
- * Changed all file encodings to UTF-8 in hopes of fixing the problems that many users are having.
- * Added a dropdown menu to select an icon when right clicking an an icon that has other icons underneath it.
- * Conditions with no maximum value (e.g. Health/Mana; any condition that checks a time) now allows manual input of a value.
- * New condition: Spell charge time.
- * New condition: In pet battle.
- * New condition: Equipment set equipped.
+ * Added a dropdown menu to select an icon when right clicking a spot on your screen that contains multiple icons.
+ * Conditions with no maximum value (e.g. Health/Mana; any condition that checks a time) now allow manual input of a value.
+ * New conditions:
+ ** Spell charge time
+ ** In pet battle
+ ** Equipment set equipped
+ ** Icon Shown Time
+ ** Icon Hidden Time
  * New setting for Buff/Debuff icons: Hide if no units.
  * Added Challenge Mode and 40 Player raid to the Instance Type condition.
  * The Totem icon type has been re-focused towards the Rune of Power talent for mages.
+ * The Buff Efficiency Threshold setting is back.
+ * Changed all file encodings to UTF-8 in hopes of fixing the loading problems that many users are having.
  * Bug fixes:
  ** Minimum group frame level is now 5 instead of 1 to prevent issues caused at low frame levels.
  ** Increased the delay on LoadFirstValidIcon from 0.1 seconds to 0.5 seconds in hopes of preventing the AceCD:804 error more often.

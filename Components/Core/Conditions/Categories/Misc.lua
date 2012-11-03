@@ -41,7 +41,6 @@ ConditionCategory:RegisterCondition(0,	 "", {
 	end,
 })
 
-ConditionCategory:RegisterSpacer(0.5)
 
 ConditionCategory:RegisterCondition(1,	 "ICON", {
 	text = L["CONDITIONPANEL_ICON"],
@@ -97,14 +96,97 @@ ConditionCategory:RegisterCondition(1,	 "ICON", {
 	end,]]
 })
 TMW:RegisterCallback("TMW_CNDT_GROUP_DRAWGROUP", function(event, CndtGroup, conditionData, conditionSettings)
-	if conditionData and conditionData.value == "ICON" then
+	if conditionData and conditionData.isicon then
 		CndtGroup.TextIcon:SetText(L["ICONTOCHECK"])
 		CndtGroup.Icon:Show()
+		if conditionData.nooperator then
+			UIDropDownMenu_SetWidth(CndtGroup.Icon, 152)
+		else
+			UIDropDownMenu_SetWidth(CndtGroup.Icon, 100)
+		end
 	else
 		CndtGroup.TextIcon:SetText(nil)
 		CndtGroup.Icon:Hide()
 	end
 end)
+
+ConditionCategory:RegisterSpacer(1.1)
+
+local hasRegisteredShownHiddenTimerCallback
+local function RegisterShownHiddenTimerCallback()
+	if hasRegisteredShownHiddenTimerCallback then return end
+	hasRegisteredShownHiddenTimerCallback = true
+	TMW:RegisterCallback(TMW.ProcessorsByName.REALALPHA.changedEvent, function(event, icon, realAlpha, oldalpha)
+		if realAlpha == 0 then
+			icon.__CNDT__ICONSHOWNTME = 0
+			icon.__CNDT__ICONHIDDENTME = TMW.time
+		elseif oldalpha == 0 then
+			icon.__CNDT__ICONSHOWNTME = TMW.time
+			icon.__CNDT__ICONHIDDENTME = 0
+		end
+	end)
+end
+
+ConditionCategory:RegisterCondition(1.2,	"ICONSHOWNTME", {
+	text = L["CONDITIONPANEL_ICONSHOWNTIME"],
+	tooltip = L["CONDITIONPANEL_ICONSHOWNTIME_DESC"],
+	range = 30,
+	step = 0.1,
+	texttable = CNDT.COMMON.formatSeconds,
+	isicon = true,
+	unit = false,
+	icon = "Interface\\Icons\\INV_Misc_PocketWatch_01",
+	tcoords = CNDT.COMMON.standardtcoords,
+	funcstr = function(c, icon)
+		if c.Icon == "" then
+			return [[true]]
+		end
+		
+		local g, i = strmatch(c.Icon, "TellMeWhen_Group(%d+)_Icon(%d+)")
+		g, i = tonumber(g) or 0, tonumber(i) or 0
+		if icon.IsIcon then
+			TMW:QueueValidityCheck(c.Icon, icon.group:GetID(), icon:GetID(), g, i)
+		elseif icon.class == TMW.Classes.Group then
+			TMW:QueueValidityCheck(c.Icon, icon:GetID(), nil, g, i)
+		end
+
+		RegisterShownHiddenTimerCallback()
+		
+		local str = [[c.Icon and c.Icon.attributes.shown and c.Icon.UpdateFunction and not c.Icon:Update() and c.Icon.attributes.realAlpha > 0 and time - (c.Icon.__CNDT__ICONSHOWNTME or 0) c.Operator c.Level]]
+		return gsub(str, "c.Icon", c.Icon)
+	end,
+})
+ConditionCategory:RegisterCondition(1.3,	"ICONHIDDENTME", {
+	text = L["CONDITIONPANEL_ICONHIDDENTIME"],
+	tooltip = L["CONDITIONPANEL_ICONHIDDENTIME_DESC"],
+	range = 30,
+	step = 0.1,
+	texttable = CNDT.COMMON.formatSeconds,
+	isicon = true,
+	unit = false,
+	icon = "Interface\\Icons\\INV_Misc_PocketWatch_01",
+	tcoords = CNDT.COMMON.standardtcoords,
+	funcstr = function(c, icon)
+		if c.Icon == "" then
+			return [[true]]
+		end
+		
+		local g, i = strmatch(c.Icon, "TellMeWhen_Group(%d+)_Icon(%d+)")
+		g, i = tonumber(g) or 0, tonumber(i) or 0
+		if icon.IsIcon then
+			TMW:QueueValidityCheck(c.Icon, icon.group:GetID(), icon:GetID(), g, i)
+		elseif icon.class == TMW.Classes.Group then
+			TMW:QueueValidityCheck(c.Icon, icon:GetID(), nil, g, i)
+		end
+
+		RegisterShownHiddenTimerCallback()
+		
+		local str = [[c.Icon and c.Icon.attributes.shown and c.Icon.UpdateFunction and not c.Icon:Update() and c.Icon.attributes.realAlpha == 0 and time - (c.Icon.__CNDT__ICONHIDDENTME or 0) c.Operator c.Level]]
+		return gsub(str, "c.Icon", c.Icon)
+	end,
+})
+
+ConditionCategory:RegisterSpacer(1.5)
 
 ConditionCategory:RegisterCondition(2,	 "MACRO", {
 	text = L["MACROCONDITION"],

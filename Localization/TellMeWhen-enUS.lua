@@ -879,9 +879,24 @@ L["CONDITIONPANEL_ICON_SHOWN"] = "Shown"
 L["CONDITIONPANEL_ICON_HIDDEN"] = "Hidden"
 L["CONDITIONPANEL_ICON_DESC"] = [=[The condition checks whether the icon specified is shown or hidden.
 
-If you don't want to display the icons that are being checked, check %q in the icon editor of the icon being checked.
+If you don't want to display the icon being checked, check %q in the icon editor of that icon.
 
 The group of the icon being checked must be shown in order to check the icon, even if the condition is set to false.]=]
+
+L["CONDITIONPANEL_ICONSHOWNTIME"] = "Icon Shown Time"
+L["CONDITIONPANEL_ICONSHOWNTIME_DESC"] = [=[The condition checks how long the icon specified has been shown.
+
+If you don't want to display the icon being checked, check %q in the icon editor of that icon.
+
+The group of the icon being checked must be shown in order to check the icon.]=]
+
+L["CONDITIONPANEL_ICONHIDDENTIME"] = "Icon Hidden Time"
+L["CONDITIONPANEL_ICONHIDDENTIME_DESC"] = [=[The condition checks how long the icon specified has been hidden.
+
+If you don't want to display the icon being checked, check %q in the icon editor of that icon.
+
+The group of the icon being checked must be shown in order to check the icon.]=]
+
 L["CONDITIONPANEL_RUNES_DESC"] = [=[Use this condition type to only show the icon when the selected runes are available.
 
 Each rune is a check button. A check mark will require that the rune be usable, an 'X' will require that the rune be unusable, no mark will ignore the rune.

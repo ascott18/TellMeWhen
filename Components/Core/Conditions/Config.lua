@@ -383,7 +383,7 @@ function CNDT:IconMenu_DropDown()
 		for group, groupID in TMW:InGroups() do
 			if group:ShouldUpdateIcons() then
 				local info = UIDropDownMenu_CreateInfo()
-				info.text = TMW:GetGroupName(groupID, groupID, 1)
+				info.text = TMW:GetGroupName(groupID, groupID)
 				info.hasArrow = true
 				info.notCheckable = true
 				info.value = groupID
