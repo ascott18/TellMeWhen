@@ -27,6 +27,7 @@
  ** Attempted some fixes at some obscure bugs that can happen with replacement spells (e.g. tracking Immolate in a debuff icon was getting force-changed to Corruption in Affliction spec.)
  ** Removed the blank normaltexture that every icon had because of issues it causes in WoW 5.1
  ** The Instance Type condition should now work properly.
+ ** Hacked in a fix for {{{<string>:"local _G = _G -- 1...":6: attempt to index field "__functions" (a nil value)}}}
  
 ===v6.0.3===
  * Re-implemented the stance condition for paladin seals.

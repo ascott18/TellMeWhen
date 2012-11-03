@@ -269,7 +269,8 @@ function TEXT:LoadConfig()
 			}
 			
 			local func = loadstring(DogTag:CreateFunctionFromCode(text, "TMW;Unit", kwargs))
-			func = func and func()
+			local success, newfunc = pcall(func)
+			func = func and success and newfunc
 			local tagError = func and TEXT:TestDogTagFunc(pcall(func, kwargs))
 			if tagError then
 				frame.Error:SetText("ERROR: " .. tagError)
