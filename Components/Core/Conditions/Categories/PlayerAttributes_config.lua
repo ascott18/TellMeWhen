@@ -301,9 +301,42 @@ function Module:Entry_AddToList_1(f, id)
 	f.Name:SetText(name)
 	f.ID:SetText(nil)
 
+	f.tooltiptitle = name
+	
 	f.insert = name
 
 	f.Icon:SetTexture(texture)
+end
+
+
+
+local Module = SUG:NewModule("blizzequipset", SUG:GetModule("default"))
+Module.noMin = true
+local EquipSetCache = {}
+function Module:Table_Get()
+	for i = 1, GetNumEquipmentSets() do
+		local name, icon = GetEquipmentSetInfo(i)
+
+		EquipSetCache[i] = strlower(name)
+	end
+	
+	return EquipSetCache
+end
+function Module:Table_GetSorter()
+	return nil
+end
+function Module:Entry_AddToList_1(f, id)
+	local name, icon = GetEquipmentSetInfo(id)
+
+	f.Name:SetText(name)
+	f.ID:SetText(nil)
+
+	f.tooltipmethod = "SetEquipmentSet"
+	f.tooltiparg = name
+
+	f.insert = name
+
+	f.Icon:SetTexture(icon)
 end
 
 

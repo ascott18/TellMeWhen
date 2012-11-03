@@ -272,7 +272,7 @@ ConditionCategory:RegisterCondition(7,	 "SPEC", {
 	end,
 })
 
-if TMW.ISMOP then
+if TMW.ISMOP then -- ConditionCategory:RegisterCondition(8,	 "TREE", {
 	ConditionCategory:RegisterCondition(8,	 "TREE", {
 		text = L["UIPANEL_SPECIALIZATION"],
 		min = 1,
@@ -398,8 +398,6 @@ ConditionCategory:RegisterCondition(10,	 "PTSINTAL", {
 			ConditionObject:GenerateNormalEventString("ACTIVE_TALENT_GROUP_CHANGED")
 	end,
 })
-
-
 
 
 local GetGlyphSocketInfo = GetGlyphSocketInfo
@@ -611,6 +609,34 @@ ConditionCategory:RegisterCondition(16,	 "TRACKING", {
 		-- Tell the condition to also update when MINIMAP_UPDATE_TRACKING fires
 		return
 			ConditionObject:GenerateNormalEventString("MINIMAP_UPDATE_TRACKING")
+	end,
+})
+
+
+
+ConditionCategory:RegisterSpacer(17)
+
+
+ConditionCategory:RegisterCondition(18,	 "BLIZZEQUIPSET", {
+	text = L["CONDITIONPANEL_BLIZZEQUIPSET"],
+	tooltip = L["CONDITIONPANEL_BLIZZEQUIPSET_DESC"],
+	min = 0,
+	max = 1,
+	texttable = CNDT.COMMON.bool,
+	nooperator = true,
+	unit = PLAYER,
+	name = function(editbox) TMW:TT(editbox, "CONDITIONPANEL_BLIZZEQUIPSET_INPUT", "CONDITIONPANEL_BLIZZEQUIPSET_INPUT_DESC") editbox.label = L["EQUIPSETTOCHECK"] end,
+	useSUG = "blizzequipset",
+	icon = "Interface\\Icons\\inv_box_04",
+	tcoords = CNDT.COMMON.standardtcoords,
+	Env = {
+		GetEquipmentSetInfoByName = GetEquipmentSetInfoByName,
+	},
+	funcstr = [[select(3, GetEquipmentSetInfoByName(c.NameRaw)) == c.True]],
+	events = function(ConditionObject, c)
+		return
+			--ConditionObject:GenerateNormalEventString("EQUIPMENT_SWAP_FINISHED") -- this doesn't fire late enough to get updated returns from GetEquipmentSetInfoByName
+			ConditionObject:GenerateNormalEventString("BAG_UPDATE") -- this is slightly overkill, but it is the first event that fires when the return value of GetEquipmentSetInfoByName has changed
 	end,
 })
 

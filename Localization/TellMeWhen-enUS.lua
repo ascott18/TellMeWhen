@@ -925,6 +925,13 @@ L["CONDITIONPANEL_PETMODE"] = "Pet attack mode"
 L["CONDITIONPANEL_PETTREE"] = "Pet talent tree"
 L["CONDITIONPANEL_PETSPEC"] = "Pet specialization"
 L["CONDITIONPANEL_TRACKING"] = "Tracking active"
+L["CONDITIONPANEL_BLIZZEQUIPSET"] = "Equipment set equipped"
+L["CONDITIONPANEL_BLIZZEQUIPSET_DESC"] = "Checks whether or not you have a specific Blizzard equipment manager set equipped."
+L["CONDITIONPANEL_BLIZZEQUIPSET_INPUT"] = "Equipment set name"
+L["CONDITIONPANEL_BLIZZEQUIPSET_INPUT_DESC"] = [[Enter the name of the Blizzard equipment set that you wish to check.
+
+Only one equipment set may be entered, and it is |cFFFF5959CASE SENSITIVE|r]]
+L["EQUIPSETTOCHECK"] = "Equipment set to check (|cFFFF5959CASE SENSITIVE|r)"
 L["ONLYCHECKMINE"] = "Only Check Mine"
 L["ONLYCHECKMINE_DESC"] = "Check this to cause this condition to only check for buffs/debuffs that you casted"
 L["LUACONDITION"] = "Lua (Advanced)"

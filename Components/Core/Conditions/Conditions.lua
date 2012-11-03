@@ -691,11 +691,13 @@ function CNDT:DoConditionSubstitutions(conditionData, condition, thisstr)
 	gsub("c.NameFirst2", 	strWrap(TMW:GetSpellNames(nil, name2, 1))): --Name2 must be before Name
 	gsub("c.NameName2", 	strWrap(TMW:GetSpellNames(nil, name2, 1, 1))):
 	gsub("c.ItemID2", 		strWrap(TMW:GetItemIDs(nil, name2, 1))):
+	gsub("c.Name2Raw", 		strWrap(condition.Name2)):
 	gsub("c.Name2", 		strWrap(name2)):
 
 	gsub("c.NameFirst", 	strWrap(TMW:GetSpellNames(nil, name, 1))):
 	gsub("c.NameName", 		strWrap(TMW:GetSpellNames(nil, name, 1, 1))):
 	gsub("c.ItemID", 		strWrap(TMW:GetItemIDs(nil, name, 1))):
+	gsub("c.NameRaw", 		strWrap(condition.Name)):
 	gsub("c.Name", 			strWrap(name)):
 
 	gsub("c.True", 			tostring(condition.Level == 0)):

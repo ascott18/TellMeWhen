@@ -5,6 +5,7 @@
  * Conditions with no maximum value (e.g. Health/Mana; any condition that checks a time) now allows manual input of a value.
  * New condition: Spell charge time.
  * New condition: In pet battle.
+ * New condition: Equipment set equipped.
  * New setting for Buff/Debuff icons: Hide if no units.
  * Bug fixes:
  ** Minimum group frame level is now 5 instead of 1 to prevent issues caused at low frame levels.

@@ -314,15 +314,19 @@ local EditboxHooks = {
 	OnEditFocusGained = function(self)
 		if self.SUG_Enabled then
 			local newModule = SUG:GetModule(self.SUG_type, true)
-			SUG.redoIfSame = SUG.CurrentModule ~= newModule
-			SUG.Box = self
-			SUG.CurrentModule = newModule
+			
+			
 			if not newModule then
+				SUG:DisableEditBox(self)
 				error(
 					("Editbox %q is supposed to implement SUG module %q, but the module doesn't seem to exist..."):
 					format(tostring(self:GetName() or self), tostring(self.SUG_type or "<??>"))
 				)
 			end
+			
+			SUG.redoIfSame = SUG.CurrentModule ~= newModule
+			SUG.Box = self
+			SUG.CurrentModule = newModule
 			SUG.Suggest.Header:SetText(SUG.CurrentModule.headerText)
 			SUG:NameOnCursor()
 		end
