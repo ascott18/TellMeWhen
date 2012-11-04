@@ -30,12 +30,11 @@ local DogTag = LibStub("LibDogTag-3.0", true)
 TELLMEWHEN_VERSION = "6.0.4"
 TELLMEWHEN_VERSION_MINOR = strmatch(" @project-version@", " r%d+") or ""
 TELLMEWHEN_VERSION_FULL = TELLMEWHEN_VERSION .. TELLMEWHEN_VERSION_MINOR
-TELLMEWHEN_VERSIONNUMBER = 60425 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
+TELLMEWHEN_VERSIONNUMBER = 60426 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
 if TELLMEWHEN_VERSIONNUMBER > 61001 or TELLMEWHEN_VERSIONNUMBER < 60000 then return error("YOU SCREWED UP THE VERSION NUMBER OR DIDNT CHANGE THE SAFETY LIMITS") end -- safety check because i accidentally made the version number 414069 once
 
 TELLMEWHEN_MAXROWS = 20
 
-TMW.ALLOW_LOCKDOWN_CONFIG = true
 
 -- GLOBALS: TellMeWhen, LibStub
 -- GLOBALS: TellMeWhenDB, TellMeWhen_Settings
@@ -1177,6 +1176,7 @@ TMW.Defaults = {
 		HasImported			= false,
 		ConfigWarning		= true,
 		VersionWarning		= true,
+		AllowCombatConfig	= false,
 	},
 	profile = {
 	--	Version			= 	TELLMEWHEN_VERSIONNUMBER,  -- DO NOT DEFINE VERSION AS A DEFAULT, OTHERWISE WE CANT TRACK IF A USER HAS AN OLD VERSION BECAUSE IT WILL ALWAYS DEFAULT TO THE LATEST
@@ -1771,7 +1771,6 @@ function TMW:Initialize()
 
 	
 	
-	
 	--------------- Communications ---------------
 	
 	-- Channel TMW is used for sharing data.
@@ -1966,8 +1965,8 @@ local function OnUpdateDuringCoroutine(self)
 	
 	CoroutineStartTime = debugprofilestop()
 	
-	if not TMW.db.profile.Locked then
-		TMW:LoadOptions()
+	if not IsAddOnLoaded("TellMeWhen_Options") then
+		error("TellMeWhen_Options was not loaded before a coroutine update happened. It is supposed to load before PLAYER_ENTERING_WORLD if the AllowCombatConfig setting is enabled!")
 	end
 	
 	if NumCoroutinesQueued == 0 then
@@ -2031,6 +2030,17 @@ TMW:RegisterEvent("PLAYER_REGEN_DISABLED", function()
 		elseif not TMW.Locked then
 			TMW:LockToggle()
 		end
+	end
+end)
+local hasRan
+TMW:RegisterCallback("TMW_GLOBAL_UPDATE", function()
+	if hasRan then
+		return
+	end
+	hasRan = true
+	if TMW.db.global.AllowCombatConfig then
+		TMW.ALLOW_LOCKDOWN_CONFIG = true
+		TMW:LoadOptions()
 	end
 end)
 end

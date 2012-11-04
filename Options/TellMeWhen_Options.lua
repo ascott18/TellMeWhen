@@ -1052,6 +1052,19 @@ function TMW:CompileOptions()
 					end,
 					get = function(info) return TMW.db.profile[info[#info]] end,
 					args = {
+						AllowCombatConfig = {
+							name = L["UIPANEL_COMBATCONFIG"],
+							desc = L["UIPANEL_COMBATCONFIG_DESC"],
+							type = "toggle",
+							order = 2.5,
+							confirm = function(info)
+								return not TMW.db.global[info[#info]]
+							end,
+							set = function(info, val)
+								TMW.db.global[info[#info]] = val
+							end,
+							get = function(info) return TMW.db.global[info[#info]] end,
+						},
 						Locked = {
 							name = L["UIPANEL_LOCKUNLOCK"],
 							desc = L["UIPANEL_SUBTEXT2"],
@@ -1107,12 +1120,12 @@ function TMW:CompileOptions()
 									order = 1,
 									hidden = true,
 								},
-								DrawEdge = { -- Cooldown:SetDrawEdge was removed in MoP
+								DrawEdge = {
 									name = L["UIPANEL_DRAWEDGE"],
 									desc = L["UIPANEL_DRAWEDGE_DESC"],
 									type = "toggle",
 									order = 40,
-									hidden = TMW.ISMOP,
+									hidden = TMW.ISMOP, -- Cooldown:SetDrawEdge was removed in MoP
 								},
 								SoundChannel = {
 									name = L["SOUND_CHANNEL"],
@@ -1181,14 +1194,14 @@ function TMW:CompileOptions()
 							style = "dropdown",
 							order = 30,
 						},
-						resetall = {
+						--[[resetall = {
 							name = L["UIPANEL_ALLRESET"],
 							desc = L["UIPANEL_TOOLTIP_ALLRESET"],
 							type = "execute",
 							order = 51,
 							confirm = true,
 							func = function() TMW.db:ResetProfile() end,
-						},
+						},]]
 						importexport = importExportBoxTemplate,
 					},
 				},

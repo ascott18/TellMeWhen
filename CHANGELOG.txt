@@ -1,6 +1,7 @@
 ﻿===v6.0.4===
  * Added a dropdown menu to select an icon when right clicking a spot on your screen that contains multiple icons.
  * Conditions with no maximum value (e.g. Health/Mana; any condition that checks a time) now allow manual input of a value.
+ * There is now an option to allow configuration while in combat (as opposed to allowing at all the time with potential bugs, the options module now loads at login when this option is enabled to prevent many errors and bugs).
  * New conditions:
  ** Spell charge time
  ** In pet battle

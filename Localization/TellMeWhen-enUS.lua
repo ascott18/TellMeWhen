@@ -39,8 +39,8 @@ L["ERROR_MISSINGFILE_NOREQ"] = [[A complete restart of WoW may be required to fu
 Would you like to restart WoW now?]]
 L["ERROR_ANCHORSELF"] = "%s was trying to anchor to itself, so TellMeWhen reset it's anchor to the center of the screen to prevent catastrophic failure."
 
-L["ERROR_NO_LOCKTOGGLE_IN_LOCKDOWN"] = "Cannot unlock TellMeWhen while in combat."
-L["ERROR_ACTION_DENIED_IN_LOCKDOWN"] = "Cannot do that while in combat."
+L["ERROR_NO_LOCKTOGGLE_IN_LOCKDOWN"] = "Cannot unlock TellMeWhen in combat if the %q option isn't enabled (type '/tmw options')."
+L["ERROR_ACTION_DENIED_IN_LOCKDOWN"] = "Cannot do that in combat if the %q option isn't enabled (type '/tmw options')."
 
 L["SAFESETUP_TRIGGERED"] = "Running safe & slow setup..."
 L["SAFESETUP_COMPLETE"] = "Safe & slow setup complete."
@@ -523,6 +523,14 @@ L["UIPANEL_TOOLTIP_GROUPRESET"] = "Reset this group's position and scale"
 L["UIPANEL_ALLRESET"] = "Reset all"
 L["UIPANEL_TOOLTIP_ALLRESET"] = "Reset ALL SETTINGS of ALL ICONS AND GROUPS, as well as any other settings."
 L["UIPANEL_LOCKUNLOCK"] = "Lock/Unlock AddOn"
+L["UIPANEL_COMBATCONFIG"] = "Allow config in combat"
+L["UIPANEL_COMBATCONFIG_DESC"] = [[Enable this to allow configuration of TellMeWhen while in combat.
+
+Note that this will force the options module to be loaded all the time, resulting in increased memory usage and slightly longer load times.
+
+This option is account-wide - all of your profiles will use this setting.
+
+Changes will only be reflected after you reload your UI.]]
 L["UIPANEL_BARTEXTURE"] = "Bar Texture"
 L["UIPANEL_BARIGNOREGCD"] = "Bars Ignore GCD"
 L["UIPANEL_BARIGNOREGCD_DESC"] = "If checked, cooldown bars will not change values if the cooldown triggered is a global cooldown"
