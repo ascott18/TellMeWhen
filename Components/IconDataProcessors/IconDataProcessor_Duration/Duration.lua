@@ -126,20 +126,22 @@ TMW:RegisterCallback("TMW_ICON_NEXTUPDATE_REQUESTDURATION", function(event, icon
 end)
 
 
-
+local OnGCD = TMW.OnGCD
 Processor:RegisterDogTag("TMW", "Duration", {
-	code = function (groupID, iconID)
+	code = function (groupID, iconID, gcd)
 		local group = TMW[groupID]
 		local icon = group and group[iconID]
 		if icon then
 			local attributes = icon.attributes
-			local duration = attributes.duration - (TMW.time - attributes.start)
-			if duration <= 0 then
+			local duration = attributes.duration
+			
+			local remaining = duration - (TMW.time - attributes.start)
+			if remaining <= 0 or (not gcd and OnGCD(duration)) then
 				return 0
 			end
 
 			-- cached version of tonumber()
-			return isNumber[format("%.1f", duration)] or 0
+			return isNumber[format("%.1f", remaining)] or 0
 		else
 			return 0
 		end
@@ -147,6 +149,7 @@ Processor:RegisterDogTag("TMW", "Duration", {
 	arg = {
 		'group', 'number', '@req',
 		'icon', 'number', '@req',
+		'gcd', 'boolean', true,
 	},
 	events = "FastUpdate",
 	ret = "number",

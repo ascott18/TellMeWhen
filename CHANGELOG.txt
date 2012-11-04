@@ -13,6 +13,7 @@
  * The Totem icon type has been re-focused towards the Rune of Power talent for mages.
  * The Buff Efficiency Threshold setting is back.
  * Changed all file encodings to UTF-8 in hopes of fixing the loading problems that many users are having.
+ * The {{{[Duration]}}} tag now has a parameter that allows for the GCD to be ignored ({{{[Duration(gcd=false)]}}})
  * Bug fixes:
  ** Minimum group frame level is now 5 instead of 1 to prevent issues caused at low frame levels.
  ** Increased the delay on LoadFirstValidIcon from 0.1 seconds to 0.5 seconds in hopes of preventing the AceCD:804 error more often.
