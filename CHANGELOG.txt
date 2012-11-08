@@ -43,6 +43,8 @@
  ** The glyph condition should now work correctly when its logic is set to false.
  ** You should no longer be spammed with messages telling you that you are not in a guild.
  
+ ** A Special note: r450 concludes a series of 9 bogus commits that were made in order to restore the revision number of the repo back to where it was before the data loss that struck CurseForge's SVN repos on 11/7 **
+ 
 ===v6.0.3===
  * Re-implemented the stance condition for paladin seals.
  * Minor updates for some buff/debuff equivalancies. Still need help getting these completely up to date, though! If you notice something missing, please let me know!
