@@ -308,6 +308,10 @@ L["ICONMENU_SHOWTIMERTEXT"] = "Show timer text"
 L["ICONMENU_SHOWTIMERTEXT_DESC"] = [[Check this option to display a textual display of the remaining cooldown/duration on the icon.
 
 This is only applicable if OmniCC (or similar) is installed.]]
+L["ICONMENU_SHOWTIMERTEXT_NOOCC"] = "Show ElvUI timer text"
+L["ICONMENU_SHOWTIMERTEXT_NOOCC_DESC"] = [[Check this option to display ElvUI's textual display of the remaining cooldown/duration on the icon.
+
+This setting only affects ElvUI's timer. If you have another addon that provides timers (like OmniCC), you can control those timers with the %q setting. It is not recommended to have both of these settings enabled.]]
 L["ICONMENU_ALLOWGCD"] = "Allow Global Cooldown"
 L["ICONMENU_ALLOWGCD_DESC"] = [[Check this option to allow the timer to react to and show the global cooldown instead of simply ignoring it.]]
 
@@ -1116,11 +1120,19 @@ L["IconModule_TimerBar_BarDisplayTimerBar"] = "Timer Bar"
 
 
 L["GROUPADDONSETTINGS"] = "Group Settings"
+L["GROUPADDONSETTINGS_DESC"] = [[Configure settings for this group, other groups, and all other general addon settings.]]
 L["CONDITIONS"] = "Conditions"
+L["ICONCONDITIONS_DESC"] = "Configure conditions that allow you to fine-tune when this icon is shown."
 L["GROUPCONDITIONS"] = "Group Conditions"
+L["GROUPCONDITIONS_DESC"] = "Configure conditions that allow you to fine-tune when this group is shown."
+
+L["EVENTCONDITIONS"] = "Event Conditions"
+L["EVENTCONDITIONS_DESC"] = "Click to configure a set of conditions that will trigger this event when they begin passing."
+L["EVENTCONDITIONS_TAB_DESC"] = "Configure a set of conditions that will trigger an event when they begin passing."
 
 L["UNITCONDITIONS"] = "Unit Conditions"
 L["UNITCONDITIONS_DESC"] = "Click to configure a set of conditions that each unit will have to pass in order to be checked."
+L["UNITCONDITIONS_TAB_DESC"] = "Configure conditions that each unit will have to pass in order to be checked."
 L["UNITCONDITIONS_STATICUNIT"] = "<Icon Unit>"
 L["UNITCONDITIONS_STATICUNIT_DESC"] = "Causes the condition to check each unit that the icon is checking."
 L["UNITCONDITIONS_STATICUNIT_TARGET"] = "<Icon Unit>'s target"
@@ -1128,6 +1140,7 @@ L["UNITCONDITIONS_STATICUNIT_TARGET_DESC"] = "Causes the condition to check the 
 
 
 L["MAIN"] = "Main"
+L["MAIN_DESC"] = "Contains the main options for this icon."
 L["UNNAMED"] = "((Unnamed))"
 
 
@@ -1318,6 +1331,18 @@ L["SOUND_EVENT_ONLEFTCLICK_DESC"] = [[This event triggers when you |cff7fffffLef
 L["SOUND_EVENT_ONRIGHTCLICK"] = "On Right Click"
 L["SOUND_EVENT_ONRIGHTCLICK_DESC"] = [[This event triggers when you |cff7fffffRight-click|r the icon while icons are locked.]]
 
+L["SOUND_EVENT_ONCONDITION"] = "On Condition Set Passing"
+L["SOUND_EVENT_ONCONDITION_DESC"] = "This event triggers when a set of conditions that you can configure for this event begin passing."
+
+L["SOUND_EVENT_ONEVENTSRESTORED"] = "On Icon Setup"
+L["SOUND_EVENT_ONEVENTSRESTORED_DESC"] = [[This event triggers immediately after this icon has been setup.
+
+This mainly happens when you leave configuration mode, but it also happens when entering/leaving a zone among several other things.
+
+This may also be thought of as a "soft reset" of the icon.
+
+This event may be useful in creating a default animation state for the icon.]]
+
 L["SOUND_EVENT_GLOBALDESC"] = "Events are checked from top to bottom in this list. If an event is triggered that has a sound to play, no events below that event will play a sound."
 L["SOUND_EVENT_DISABLEDFORTYPE"] = "Not available"
 L["SOUND_EVENT_DISABLEDFORTYPE_DESC2"] = [[This event is not available for the current icon configuration.
@@ -1340,6 +1365,7 @@ NOTE: WoW must be restarted before it will recognize files that did not exist wh
 L["SOUND_TAB"] = "Sound"
 
 L["EVENTS_TAB"] = "Events"
+L["EVENTS_TAB_DESC"] = "Configure triggers for sounds, text ouput, and animations."
 L["EVENTS_HANDLERS_HEADER"] = "Icon Event Handlers"
 L["EVENTS_HANDLERS_ADD"] = "Add Event Handler..."
 L["EVENTS_HANDLERS_ADD_DESC"] = "|cff7fffffClick|r to choose an event handler to add to this icon."

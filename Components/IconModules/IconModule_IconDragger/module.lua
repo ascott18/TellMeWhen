@@ -35,7 +35,7 @@ Module:SetScriptHandler("OnMouseDown", function(Module, icon)
 end)
 
 Module:SetScriptHandler("OnDragStart", function(Module, icon, button)
-	if button == "RightButton" and TMW.ID then
+	if not TMW.Locked and button == "RightButton" and TMW.ID then
 		TMW.ID:Start(icon)
 	end
 end)

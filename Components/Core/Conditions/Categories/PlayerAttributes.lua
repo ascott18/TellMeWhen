@@ -419,11 +419,11 @@ function CNDT:GLYPH_UPDATED()
 		local glyphID = tonumber(strmatch(link, "|H.-:(%d+)"))
 		
 		if glyphID then
-			GlyphLookup[glyphID] = true
+			GlyphLookup[glyphID] = 1
 			
 			local name = GetSpellInfo(spellID)
 			name = strlowerCache[name]
-			GlyphLookup[name] = true
+			GlyphLookup[name] = 1
 		end
 	end
 end
@@ -439,22 +439,21 @@ ConditionCategory:RegisterCondition(11,	 "GLYPH", {
 	useSUG = "glyphs",
 	icon = "Interface\\Icons\\inv_inscription_tradeskill01",
 	tcoords = CNDT.COMMON.standardtcoords,
-	funcstr = [[GlyphLookup[c.NameFirst] == c.True]],
+	funcstr = [[GlyphLookup[c.NameFirst] == c.1nil]],
 	Env = {
 		GlyphLookup = {},
 	},
 	events = function(ConditionObject, c)
 		-- this is handled externally because GlyphLookup is so extensive a process,
 		-- and if it does get stuck in an OnUpdate condition, it could be very bad.
-
 		CNDT:RegisterEvent("GLYPH_ADDED", 	 "GLYPH_UPDATED")
 		CNDT:RegisterEvent("GLYPH_DISABLED", "GLYPH_UPDATED")
 		CNDT:RegisterEvent("GLYPH_ENABLED",  "GLYPH_UPDATED")
 		CNDT:RegisterEvent("GLYPH_REMOVED",  "GLYPH_UPDATED")
 		CNDT:RegisterEvent("GLYPH_UPDATED",  "GLYPH_UPDATED")
 		CNDT:GLYPH_UPDATED()
-		-- we still only need to update the condition when glyphs change, though.
 		
+		-- we still only need to update the condition when glyphs change, though.
 		return
 			ConditionObject:GenerateNormalEventString("GLYPH_ADDED"),
 			ConditionObject:GenerateNormalEventString("GLYPH_DISABLED"),

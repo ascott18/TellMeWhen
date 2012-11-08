@@ -54,25 +54,16 @@ function Type:DragReceived(icon, t, data, subType)
 	if t == "spell" then
 		local _
 		if data == 0 and type(param4) == "number" then
-			input = param4
+			input = GetSpellInfo(param4)
 		else
 			local type
 			type, input = GetSpellBookItemInfo(data, subType)
 			if not input then
 				return
 			end
-		
-			-- This code attempts to fix weird shit that happens with replacement spells.
-			-- The weird shit doesn't happen with most replacement spells, though. I have only ever noticed it happen for the Frost Strike/Blood Strike pair.
-			-- The idea was stolen from the code that I came up with for LibSpellRange-1.0
+			
 			if type == "SPELL" then
-				local currentSpellName = GetSpellBookItemName(data, subType)
-				local link = GetSpellLink(currentSpellName)
-				local currentSpellID = tonumber(link and link:gsub("|", "||"):match("spell:(%d+)"))
-				
-				if currentSpellID then
-					input = currentSpellID
-				end
+				input = GetSpellBookItemName(data, subType)
 			end
 		end
 	

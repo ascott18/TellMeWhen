@@ -166,9 +166,9 @@ function CNDT:GetTabText(conditionSetName)
 	
 	local Conditions = ConditionSet:GetSettings()
 	local tabText = ConditionSet.tabText
-
+	
 	local parenthesesAreValid, errorMessage, fmt_1, fmt_2 = CNDT:CheckParentheses(Conditions)
-
+		
 	if parenthesesAreValid then
 		TMW.HELP:Hide("CNDT_PARENTHESES_ERROR")
 	else
@@ -191,6 +191,7 @@ function CNDT:SetTabText(conditionSetName)
 	local tab = ConditionSet.useDynamicTab and TMW.IE.DynamicConditionTab or ConditionSet:GetTab()
 	
 	tab:SetText(CNDT:GetTabText(conditionSetName))
+	TMW:TT(tab, ConditionSet.tabText, ConditionSet.tabTooltip, 1, 1)
 
 	if tab:IsShown() then
 		PanelTemplates_TabResize(tab, -6)

@@ -56,12 +56,10 @@ ANN:RegisterEventDefaults{
 }
 
 TMW:RegisterUpgrade(60312, {
-	icon = function(self, ics)
-		for _, eventSettings in TMW:InNLengthTable(ics.Events) do
-			if eventSettings.Channel == "FRAME" and eventSettings.Location == "RaidWarningFrame" then
-				eventSettings.Channel = "RAID_WARNING_FAKE"
-				eventSettings.Location = ""
-			end
+	iconEventHandler = function(self, eventSettings)
+		if eventSettings.Channel == "FRAME" and eventSettings.Location == "RaidWarningFrame" then
+			eventSettings.Channel = "RAID_WARNING_FAKE"
+			eventSettings.Location = ""
 		end
 	end,
 })
@@ -69,11 +67,9 @@ TMW:RegisterUpgrade(60312, {
 TMW:RegisterUpgrade(60014, {
 	-- I just discovered that announcements use a boolean "Icon" event setting for the "Show icon texture" setting
 	-- that conflicts with another event setting. Try to salvage what we can.
-	icon = function(self, ics)
-		for _, eventSettings in TMW:InNLengthTable(ics.Events) do
-			if type(eventSettings.Icon) == "boolean" then
-				eventSettings.ShowIconTex = eventSettings.Icon
-			end
+	iconEventHandler = function(self, eventSettings)
+		if type(eventSettings.Icon) == "boolean" then
+			eventSettings.ShowIconTex = eventSettings.Icon
 		end
 	end,
 })
@@ -86,26 +82,22 @@ TMW:RegisterUpgrade(51002, {
 	
 	-- This upgrade extends this upgrade to announcements and whisper locations
 	
-	icon = function(self, ics)				
-		for _, eventSettings in TMW:InNLengthTable(ics.Events) do
-			eventSettings.Text = self:translateString(eventSettings.Text)
-			if eventSettings.Channel == "WHISPER" then
-				eventSettings.Location = self:translateString(eventSettings.Location)
-			end
+	iconEventHandler = function(self, eventSettings)
+		eventSettings.Text = self:translateString(eventSettings.Text)
+		if eventSettings.Channel == "WHISPER" then
+			eventSettings.Location = self:translateString(eventSettings.Location)
 		end
 	end,
 })
 
 TMW:RegisterUpgrade(43009, {
-	icon = function(self, ics)
-		for _, v in TMW:InNLengthTable(ics.Events) do
-			if v.Location == "FRAME1" then
-				v.Location = 1
-			elseif v.Location == "FRAME2" then
-				v.Location = 2
-			elseif v.Location == "MSG" then
-				v.Location = 10
-			end
+	iconEventHandler = function(self, eventSettings)
+		if eventSettings.Location == "FRAME1" then
+			eventSettings.Location = 1
+		elseif eventSettings.Location == "FRAME2" then
+			eventSettings.Location = 2
+		elseif eventSettings.Location == "MSG" then
+			eventSettings.Location = 10
 		end
 	end,
 })
@@ -119,12 +111,10 @@ TMW:RegisterUpgrade(43005, {
 })
 
 TMW:RegisterUpgrade(42103, {
-	icon = function(self, ics)
-		for _, t in TMW:InNLengthTable(ics.Events) do
-			if t.Announce then
-				t.Text, t.Channel = strsplit("\001", t.Announce)
-				t.Announce = nil
-			end
+	iconEventHandler = function(self, eventSettings)
+		if eventSettings.Announce then
+			eventSettings.Text, eventSettings.Channel = strsplit("\001", eventSettings.Announce)
+			eventSettings.Announce = nil
 		end
 	end,
 })

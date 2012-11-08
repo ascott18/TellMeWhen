@@ -1,4 +1,6 @@
-﻿===v6.0.4===
+===v6.0.4===
+ * **New icon event: On Condition Set Passing. Allows you to create a set of conditions and then have an event react to them.**
+ * New icon event: On Icon Setup. Allows you to have a "default state" for icon animations.
  * Added a dropdown menu to select an icon when right clicking a spot on your screen that contains multiple icons.
  * Conditions with no maximum value (e.g. Health/Mana; any condition that checks a time) now allow manual input of a value.
  * There is now an option to allow configuration while in combat (as opposed to allowing at all the time with potential bugs, the options module now loads at login when this option is enabled to prevent many errors and bugs).
@@ -14,6 +16,7 @@
  * The Buff Efficiency Threshold setting is back.
  * Changed all file encodings to UTF-8 in hopes of fixing the loading problems that many users are having.
  * The {{{[Duration]}}} tag now has a parameter that allows for the GCD to be ignored ({{{[Duration(gcd=false)]}}})
+ * Added a separate toggle for the Show Timer Text option that only affects the timer text that ElvUI provides.
  * Bug fixes:
  ** Minimum group frame level is now 5 instead of 1 to prevent issues caused at low frame levels.
  ** Increased the delay on LoadFirstValidIcon from 0.1 seconds to 0.5 seconds in hopes of preventing the AceCD:804 error more often.
@@ -34,6 +37,11 @@
  ** Removed the blank normaltexture that every icon had because of issues it causes in WoW 5.1
  ** The Instance Type condition should now work properly.
  ** Hacked in a fix for {{{<string>:"local _G = _G -- 1...":6: attempt to index field "__functions" (a nil value)}}}
+ ** Item conditions show now correctly work if the item that they are tracking was entered by name and wasn't in your bags at login.
+ ** When a profile in the import menus has more than 10 groups, its groups will be split into submenus so that they don't run off the screen.
+ ** Attempted a fix at the issue with text corruption when typing Chinese characters into DogTag formatted editboxes.
+ ** The glyph condition should now work correctly when its logic is set to false.
+ ** You should no longer be spammed with messages telling you that you are not in a guild.
  
 ===v6.0.3===
  * Re-implemented the stance condition for paladin seals.

@@ -26,11 +26,9 @@ Module.dontInherit = true
 TMW:RegisterUpgrade(60014, {
 	-- I just discovered that this module use a string "Icon" event setting for the icon to watch
 	-- that conflicts with other event settings. Try to fix it.
-	icon = function(self, ics)
-		for _, eventSettings in TMW:InNLengthTable(ics.Events) do
-			if type(eventSettings.Icon) == "boolean" then
-				eventSettings.Icon = ""
-			end
+	iconEventHandler = function(self, eventSettings)
+		if type(eventSettings.Icon) == "boolean" then
+			eventSettings.Icon = ""
 		end
 	end,
 })

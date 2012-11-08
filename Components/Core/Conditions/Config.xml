@@ -687,12 +687,14 @@
 				self.AddDelete:SetPushedTexture("Interface\\Buttons\\UI-Panel-MinimizeButton-Down")
 				self.AddDelete:SetHighlightTexture("Interface\\Buttons\\UI-Panel-MinimizeButton-Highlight", "ADD")
 				TMW:TT(self.AddDelete, "CONDITIONPANEL_REMOVE")
+				TMW:TT_Update(self.AddDelete)
 			</OnShow>
 			<OnHide>
 				self.AddDelete:SetNormalTexture("Interface\\AddOns\\TellMeWhen\\Textures\\Plus-Up")
 				self.AddDelete:SetPushedTexture("Interface\\AddOns\\TellMeWhen\\Textures\\Plus-Down")
 				self.AddDelete:SetHighlightTexture("Interface\\AddOns\\TellMeWhen\\Textures\\Plus-Highlight", "ADD")
 				TMW:TT(self.AddDelete, "CONDITIONPANEL_ADD")
+				TMW:TT_Update(self.AddDelete)
 			</OnHide>
 
 		</Scripts>

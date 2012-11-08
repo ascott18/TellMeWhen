@@ -78,6 +78,12 @@
 							self.BackgroundText:SetText(nil)
 						end
 						
+						if userInput and (GetLocale() == "zhCN" or GetLocale() == "zhTW") then
+							-- It seems that bad things happen here while typing chinese characters
+							-- See http://wow.curseforge.com/addons/tellmewhen/tickets/641-typing-chinese-error/
+							return
+						end 
+						
 						local DogTag = LibStub("LibDogTag-3.0", true)
 						local colorText = self:GetText()
 						if self.lastText ~= colorText then

@@ -169,6 +169,7 @@ function Type:Setup(icon, groupID, iconID)
 	icon:Update()
 end
 
+--[[
 function Type:DragReceived(icon, t, data, subType)
 	local ics = icon:GetSettings()
 
@@ -187,7 +188,7 @@ function Type:DragReceived(icon, t, data, subType)
 		TMW.IE:TabClick(TMW.IE.MainTab)
 	end
 	return true -- signal success
-end
+end]]
 
 
 Type:Register(50)

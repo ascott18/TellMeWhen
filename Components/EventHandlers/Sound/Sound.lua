@@ -35,13 +35,11 @@ Sound:RegisterEventDefaults{
 
 TMW:RegisterUpgrade(42105, {
 	-- cleanup some old stuff that i noticed is sticking around in my settings, probably in other peoples' settings too
-	icon = function(self, ics)
-		for _, t in TMW:InNLengthTable(ics.Events) do
-			-- Major screw up: It should be "None", not "" for no sound.
-			-- I think this is an old artifact of the 42102 upgrade.
-			if t.Sound == "" then
-				t.Sound = "None"
-			end
+	iconEventHandler = function(self, eventSettings)
+		-- Major screw up: It should be "None", not "" for no sound.
+		-- I think this is an old artifact of the 42102 upgrade.
+		if eventSettings.Sound == "" then
+			eventSettings.Sound = "None"
 		end
 	end,
 })

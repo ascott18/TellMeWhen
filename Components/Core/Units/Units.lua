@@ -599,6 +599,7 @@ do
 			return TellMeWhen_Unit and TellMeWhen_Unit:IsShown()
 		end,
 		tabText = L["UNITCONDITIONS"],
+		tabTooltip = L["UNITCONDITIONS_TAB_DESC"],
 		
 		ConditionTypeFilter = function(self, conditionData)
 			if conditionData.unit == nil then

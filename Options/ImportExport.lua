@@ -220,6 +220,8 @@ end
 
 ---------- Group ----------
 local group = SharableDataType:New("group")
+local NUM_GROUPS_PER_SUBMENU = 10
+
 
 function group:Import_ImportData(editbox, data, version, noOverwrite, oldgroupID, destgroupID)
 	if noOverwrite then
@@ -271,9 +273,90 @@ profile:RegisterMenuBuilder(40, function(self, result, editbox)
 	info.notCheckable = true
 	UIDropDownMenu_AddButton(info, UIDROPDOWNMENU_MENU_LEVEL)
 
-	-- add groups to be copied
+	local hasMadeOneHolderMenu
+	
+	local startID, lastID = 1
+	
+	local numGroups = tonumber(result.data.NumGroups) or 10
+	
+	if numGroups > NUM_GROUPS_PER_SUBMENU then
+		for groupID = 1, numGroups do
+			if not startID then
+				startID = groupID
+			end
+				
+			-- Check to see if we have enough icons to build a holder menu.
+			if groupID % NUM_GROUPS_PER_SUBMENU == 0 then
+				
+				group:MakeHolderMenu(result, startID, groupID)
+				
+				-- nil out startID so that it will be set again for the next valid group found,
+				-- which will be the start of the next holder menu.
+				startID = nil
+			end
+			
+			-- lastID will hold the last groupID that is valid in the group once the loop ends.
+			-- It's recorded so that we don't need to loop back over the icons again to figure this out.
+			lastID = groupID
+		end
+		
+		-- Create a holder menu for any remaining icons that didn't get one inside the loop, if needed.
+		if startID then			
+			group:MakeHolderMenu(result, startID, lastID)
+		end
+	else
+		-- If there would only be one submenu, don't create submenus, and instead just put all groups directly in.
+		for groupID, gs in TMW:OrderedPairs(result.data.Groups) do
+			if type(groupID) == "number" and groupID >= 1 and groupID <= (tonumber(result.data.NumGroups) or 10) then
+				SharableDataType.types.group:Import_BuildContainingDropdownEntry({
+					parentResult = result,
+					data = gs,
+					type = "group",
+					version = result.version,
+					[1] = groupID,
+				}, editbox)
+				
+			end
+		end
+	end
+end)
+
+function group:MakeHolderMenu(result, startID, endID)	
+	local info = UIDropDownMenu_CreateInfo()
+	info.text = L["UIPANEL_GROUPS"] .. ": " .. startID .. " - " .. endID
+	info.notCheckable = true
+	info.hasArrow = true
+	
+	-- This table will be stored in UIDROPDOWNMENU_MENU_VALUE when this holder menu is expanded.
+	-- It is also passed as arg4 to Import_HolderMenuHandler(self, result, editbox, holderMenuData)
+	info.value = {
+		isHolderMenu = true,
+		result = result,
+		type = "group",
+		startID = startID,
+		endID = endID,
+	}
+	
+	UIDropDownMenu_AddButton(info, UIDROPDOWNMENU_MENU_LEVEL)	
+end
+
+function group:Import_HolderMenuHandler(result, editbox, holderMenuData)
+	-- Header
+	local info = UIDropDownMenu_CreateInfo()
+	info.text = L["UIPANEL_GROUPS"] .. ": " .. holderMenuData.startID .. " - " .. holderMenuData.endID
+	info.isTitle = true
+	info.notCheckable = true
+	UIDropDownMenu_AddButton(info, UIDROPDOWNMENU_MENU_LEVEL)
+	
+	TMW.AddDropdownSpacer()
+	
+	-- Add icons to the holder menu.
 	for groupID, gs in TMW:OrderedPairs(result.data.Groups) do
-		if type(groupID) == "number" and groupID >= 1 and groupID <= (tonumber(result.data.NumGroups) or 10) then
+	
+		-- Check to see if this group is within the range specified by the holder menu that is being built.
+		if type(groupID) == "number" and groupID >= 1 and groupID <= (tonumber(result.data.NumGroups) or 10) 
+			and groupID >= holderMenuData.startID and groupID <= holderMenuData.endID then
+		
 			SharableDataType.types.group:Import_BuildContainingDropdownEntry({
 				parentResult = result,
 				data = gs,
@@ -281,10 +364,9 @@ profile:RegisterMenuBuilder(40, function(self, result, editbox)
 				version = result.version,
 				[1] = groupID,
 			}, editbox)
-			
 		end
 	end
-end)
+end
 
 group:RegisterMenuBuilder(1, function(self, result, editbox)
 	local groupID = result[1]
@@ -293,7 +375,8 @@ group:RegisterMenuBuilder(1, function(self, result, editbox)
 	-- header
 	local info = UIDropDownMenu_CreateInfo()
 	local profilename = TMW.approachTable(result, "parentResult", 1)
-	info.text = (profilename and profilename .. ": " or "") .. TMW:GetGroupName(gs.Name, groupID)
+	--info.text = (profilename and profilename .. ": " or "") .. TMW:GetGroupName(gs.Name, groupID)
+	info.text = TMW:GetGroupName(gs.Name, groupID)
 	info.isTitle = true
 	info.notCheckable = true
 	UIDropDownMenu_AddButton(info, UIDROPDOWNMENU_MENU_LEVEL)
@@ -486,8 +569,6 @@ function icon:Export_GetArgs(editbox, info)
 end
 
 function icon:MakeHolderMenu(result, startID, endID)
-	local gs = result.data
-	
 	local info = UIDropDownMenu_CreateInfo()
 	info.text = L["UIPANEL_ICONS"] .. ": " .. startID .. " - " .. endID
 	info.notCheckable = true
@@ -518,49 +599,98 @@ group:RegisterMenuBuilder(30, function(self, result, editbox)
 	local startID, lastID
 	local count = 0
 	
+	local shouldBuildHolders = false
+	local precount = 0
 	for iconID, ics in TMW:OrderedPairs(gs.Icons) do
 	
 		-- Ignore icons that are just blank/default icons.
 		if not TMW.IE:DeepCompare(TMW.DEFAULT_ICON_SETTINGS, ics) then
-		
-			-- If we haven't found an icon to start the current holder menu with, use this one.
-			if not startID then
-				startID = iconID
-			end
-			
-			count = count + 1
-			
-			-- Check to see if we have enough icons to build a holder menu.
-			if count % NUM_ICONS_PER_SUBMENU == 0 then
-			
-				-- Add a spacer if we haven't added one yet.
-				if not hasMadeOneHolderMenu then
-					TMW.AddDropdownSpacer()
-					hasMadeOneHolderMenu = true
-				end
-				
-				icon:MakeHolderMenu(result, startID, iconID)
-				
-				-- nil out startID so that it will be set again for the next valid icon found,
-				-- which will be the start of the next holder menu.
-				startID = nil
-			end
-			
-			-- lastID will hold the last iconID that is valid in the group once the loop ends.
-			-- It's recorded so that we don't need to loop back over the icons again to figure this out.
-			lastID = iconID
+			precount = precount + 1
+		end
+		if precount > NUM_ICONS_PER_SUBMENU then
+			shouldBuildHolders = true
+			break
 		end
 	end
 	
-	-- Create a holder menu for any remaining icons that didn't get one inside the loop, if needed.
-	if startID then
-		-- Add a spacer if we haven't added one yet.
-		if not hasMadeOneHolderMenu then
-			TMW.AddDropdownSpacer()
-			--hasMadeOneHolderMenu = true -- doesn't matter at this point
+	if shouldBuildHolders then
+		for iconID, ics in TMW:OrderedPairs(gs.Icons) do
+		
+			-- Ignore icons that are just blank/default icons.
+			if not TMW.IE:DeepCompare(TMW.DEFAULT_ICON_SETTINGS, ics) then
+			
+				-- If we haven't found an icon to start the current holder menu with, use this one.
+				if not startID then
+					startID = iconID
+				end
+				
+				count = count + 1
+				
+				-- Check to see if we have enough icons to build a holder menu.
+				if count % NUM_ICONS_PER_SUBMENU == 0 then
+				
+					-- Add a spacer and header if we haven't added one yet.
+					if not hasMadeOneHolderMenu then
+						TMW.AddDropdownSpacer()
+						
+						local info = UIDropDownMenu_CreateInfo()
+						info.text = L["UIPANEL_ICONS"]
+						info.isTitle = true
+						info.notCheckable = true
+						UIDropDownMenu_AddButton(info, UIDROPDOWNMENU_MENU_LEVEL)
+						
+						hasMadeOneHolderMenu = true
+					end
+					
+					icon:MakeHolderMenu(result, startID, iconID)
+					
+					-- nil out startID so that it will be set again for the next valid icon found,
+					-- which will be the start of the next holder menu.
+					startID = nil
+				end
+				
+				-- lastID will hold the last iconID that is valid in the group once the loop ends.
+				-- It's recorded so that we don't need to loop back over the icons again to figure this out.
+				lastID = iconID
+			end
 		end
 		
-		icon:MakeHolderMenu(result, startID, lastID)
+		-- Create a holder menu for any remaining icons that didn't get one inside the loop, if needed.
+		if startID then
+			-- Add a spacer and header if we haven't added one yet.
+			if not hasMadeOneHolderMenu then
+				TMW.AddDropdownSpacer()
+				
+				local info = UIDropDownMenu_CreateInfo()
+				info.text = L["UIPANEL_ICONS"]
+				info.isTitle = true
+				info.notCheckable = true
+				UIDropDownMenu_AddButton(info, UIDROPDOWNMENU_MENU_LEVEL)
+						
+				--hasMadeOneHolderMenu = true -- doesn't matter at this point
+			end
+			
+			icon:MakeHolderMenu(result, startID, lastID)
+		end	
+	elseif precount > 0 then
+		TMW.AddDropdownSpacer()
+		
+		local info = UIDropDownMenu_CreateInfo()
+		info.text = L["UIPANEL_ICONS"]
+		info.isTitle = true
+		info.notCheckable = true
+		UIDropDownMenu_AddButton(info, UIDROPDOWNMENU_MENU_LEVEL)
+		
+		for iconID, ics in TMW:OrderedPairs(gs.Icons) do
+		
+			-- The icon was in range, so create a result object for the icon and build a dropdown entry for it.
+			SharableDataType.types.icon:Import_BuildContainingDropdownEntry({
+				data = ics,
+				version = result.version,
+				type = "icon",
+				[1] = iconID,
+			}, editbox)
+		end
 	end	
 end)
 
@@ -570,7 +700,7 @@ function icon:Import_HolderMenuHandler(result, editbox, holderMenuData)
 
 	-- Header
 	local info = UIDropDownMenu_CreateInfo()
-	info.text = L["UIPANEL_ICONS"]
+	info.text = L["UIPANEL_ICONS"] .. ": " .. holderMenuData.startID .. " - " .. holderMenuData.endID
 	info.isTitle = true
 	info.notCheckable = true
 	UIDropDownMenu_AddButton(info, UIDROPDOWNMENU_MENU_LEVEL)
@@ -833,15 +963,16 @@ function TMW.IE:Copy_DropDown(...)
 		UIDropDownMenu_AddButton(info, UIDROPDOWNMENU_MENU_LEVEL)
 
 		for k, importSource in pairs(ImportSource.instances) do
-			--import from local
 			local info = UIDropDownMenu_CreateInfo()
 			info.text = get(importSource.displayText, EDITBOX)
+			
 			if importSource.displayDescription then
 				info.tooltipTitle = importSource.displayText
 				info.tooltipText = importSource.displayDescription
 				info.tooltipOnButton = true
 				info.tooltipWhileDisabled = true
 			end
+			
 			info.value = importSource
 			info.notCheckable = true
 			info.disabled = get(importSource.displayDisabled, EDITBOX)
@@ -872,6 +1003,7 @@ function TMW.IE:Copy_DropDown(...)
 			
 			UIDropDownMenu_AddButton(info, UIDROPDOWNMENU_MENU_LEVEL)
 		end
+		
 	elseif type(UIDROPDOWNMENU_MENU_VALUE) == "table" then
 		if UIDROPDOWNMENU_MENU_VALUE.isHolderMenu then
 			SharableDataType.types[UIDROPDOWNMENU_MENU_VALUE.type]:Import_HolderMenuHandler(UIDROPDOWNMENU_MENU_VALUE.result, EDITBOX, UIDROPDOWNMENU_MENU_VALUE)

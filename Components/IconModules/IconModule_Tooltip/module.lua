@@ -69,10 +69,12 @@ function Module:SetTooltipText(text, dontUpdate)
 end
 
 Module:SetScriptHandler("OnEnter", function(Module, icon)
-	GameTooltip_SetDefaultAnchor(GameTooltip, icon)
-	GameTooltip:AddLine(TMW.get(Module.title, icon), HIGHLIGHT_FONT_COLOR.r, HIGHLIGHT_FONT_COLOR.g, HIGHLIGHT_FONT_COLOR.b, false)
-	GameTooltip:AddLine(TMW.get(Module.text, icon), NORMAL_FONT_COLOR.r, NORMAL_FONT_COLOR.g, NORMAL_FONT_COLOR.b, false)
-	GameTooltip:Show()
+	if not TMW.Locked then
+		GameTooltip_SetDefaultAnchor(GameTooltip, icon)
+		GameTooltip:AddLine(TMW.get(Module.title, icon), HIGHLIGHT_FONT_COLOR.r, HIGHLIGHT_FONT_COLOR.g, HIGHLIGHT_FONT_COLOR.b, false)
+		GameTooltip:AddLine(TMW.get(Module.text, icon), NORMAL_FONT_COLOR.r, NORMAL_FONT_COLOR.g, NORMAL_FONT_COLOR.b, false)
+		GameTooltip:Show()
+	end
 end)
 
 Module:SetScriptHandler("OnLeave", function(Module, icon)

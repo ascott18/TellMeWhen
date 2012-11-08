@@ -697,6 +697,26 @@
 				</FontString>
 			</Layer>
 		</Layers>
+		<Frames>
+			<Button name="$parentClickInterceptor" parentKey="clickinterceptor">
+				<Scripts>
+					<OnLoad>
+						self:SetAllPoints(self:GetParent().text)
+					</OnLoad>
+					<OnEnter>
+						self:GetParent():LockHighlight()
+						self:GetParent():GetScript("OnEnter")(self:GetParent())
+					</OnEnter>
+					<OnLeave>
+						self:GetParent():UnlockHighlight()
+						self:GetParent():GetScript("OnLeave")(self:GetParent())
+					</OnLeave>
+					<OnClick>
+						self:GetParent():Click(button)
+					</OnClick>
+				</Scripts>
+			</Button>
+		</Frames>
 		<Scripts>
 			<OnEnable>
 				self:SetAlpha(1)
@@ -1148,10 +1168,6 @@
 					<OnClick>
 						ToggleDropDownMenu(nil, nil, self:GetParent().DD, self, 0, 0)
 					</OnClick>
-					<PreClick>
-					--	UIDropDownMenu_Initialize(self:GetParent().DD, TMW.IE.Copy_DropDown, "MENU")
-						self:SetScript("PreClick", nil)
-					</PreClick>
 				</Scripts>
 			</Button>
 			<Frame name="$parentDD" inherits="TMW_DropDownMenuTemplate" propagateKeyboardInput="true" parentKey="DD">
@@ -1164,7 +1180,7 @@
 						self:Hide()
 						UIDropDownMenu_SetWidth(self, 1)
 						self.initialize = TMW.IE.Copy_DropDown
-						self.displayMode = "MENU"
+						--self.displayMode = "MENU"
 					</OnLoad>
 					<OnKeyDown>
 						if key == "C" and (IsControlKeyDown()) then
@@ -1691,6 +1707,7 @@
 					<OnLoad>
 						TMW.IE:RegisterTab(self, "Main")
 						self:SetText(TMW.L["MAIN"])
+						TMW:TT(self, "MAIN", "MAIN_DESC")
 					</OnLoad>
 				</Scripts>
 			</Button>
@@ -1698,7 +1715,6 @@
 				<Scripts>
 					<OnLoad>
 						TMW.IE:RegisterTab(self, "Conditions")
-						self:SetText(TMW.L["CONDITIONS"])
 						function self:OnClick()
 							TMW.CNDT:LoadConfig("Icon") --TODO: this (and group conditons tab) should be with CNDT's config. Rewrite IE.Tabs to make this possible.
 						end
@@ -1710,6 +1726,7 @@
 					<OnLoad>
 						TMW.IE:RegisterTab(self, "Events")
 						self:SetText(TMW.L["EVENTS_TAB"])
+						TMW:TT(self, "EVENTS_TAB", "EVENTS_TAB_DESC")
 						function self:OnClick()
 							TMW.EVENTS:LoadConfig()
 						end
@@ -1720,7 +1737,6 @@
 				<Scripts>
 					<OnLoad>
 						TMW.IE:RegisterTab(self, "Conditions")
-						self:SetText(TMW.L["GROUPCONDITIONS"])
 						function self:OnClick()
 							TMW.CNDT:LoadConfig("Group")
 						end
@@ -1732,6 +1748,7 @@
 					<OnLoad>
 						TMW.IE:RegisterTab(self, "MainOptions")
 						self:SetText(TMW.L["GROUPADDONSETTINGS"])
+						TMW:TT(self, "GROUPADDONSETTINGS", "GROUPADDONSETTINGS_DESC")
 						function self:OnClick()
 							TMW:CompileOptions()
 							TMW.IE:NotifyChanges("groups", "#Group " .. TMW.CI.g)
@@ -2100,6 +2117,7 @@
 								</Scripts>
 							</Frame>
 
+							
 						</Frames>
 						<Scripts>
 							<OnLoad>

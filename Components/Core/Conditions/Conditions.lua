@@ -474,6 +474,27 @@ Env = {
 
 	TMW = TMW,
 	GCDSpell = TMW.GCDSpell,
+	
+	-- These are here as a primitive security measure to prevent some of the most basic forms of malicious Lua conditions.
+	-- This list isn't even exhaustive, but its a start.
+    CancelLogout = error,
+    DownloadSettings = error,
+    ForceLogout = error,
+    ForceQuit = error,
+    Logout = error,
+    Quit = error,
+    ReloadUI = error,
+    Screenshot = error,
+    SetEuropeanNumbers = error,
+    SetUIVisibility = error,
+    UploadSettings = error,
+    DeleteCursorItem = error,
+    ClearCursor = error,
+    AcceptDuel = error,
+    CancelDuel = error,
+    StartDuel = error,
+    DeleteGMTicket = error,
+
 } CNDT.Env = Env
 
 TMW:RegisterCallback("TMW_ONUPDATE_PRE", function(event, time_arg)
@@ -645,6 +666,54 @@ local function strWrap(string)
 	end
 end
 
+local function SetupItemIDReplacer()
+	local hasZeroes = true
+	local function metamethod(self, name)
+		local id = TMW:GetItemIDs(nil, name, 1)
+		if not id then
+			id = 0
+		end
+		if id == 0 then
+			hasZeroes = true
+		end
+		self[name] = id
+		return id
+	end
+	Env.ItemLookup = setmetatable({}, {__index = metamethod})
+	local ItemLookup = Env.ItemLookup
+	
+	CNDT:RegisterEvent("BAG_UPDATE", function()
+		if hasZeroes then
+			hasZeroes = false
+			for k, v in pairs(ItemLookup) do
+				if v == 0 then
+					v = metamethod(ItemLookup, k)
+				end
+				if v == 0 then
+					hasZeroes = true
+				end
+			end
+		end
+	end)
+	
+	SetupItemIDReplacer = nil
+end
+
+function CNDT:GetItemIDRefForConditionChecker(name)
+	if name == ";" or name == 0 then
+		return 0
+	end
+	local id = TMW:GetItemIDs(nil, name, 1)
+	if id and id ~= 0 then
+		return id
+	end
+	if SetupItemIDReplacer then
+		SetupItemIDReplacer()
+	end
+	local _ = Env.ItemLookup[name]
+	return "ItemLookup[" .. strWrap(name) .. "]"
+end
+
 function CNDT:GetUnit(setting)
 	return TMW.UNITS:GetOriginalUnitTable(setting)[1] or ""
 end
@@ -688,15 +757,16 @@ function CNDT:DoConditionSubstitutions(conditionData, condition, thisstr)
 	gsub("c.Level", 		conditionData.percent and condition.Level/100 or condition.Level):
 	gsub("c.Checked", 		tostring(condition.Checked)):
 	gsub("c.Operator", 		condition.Operator):
+	
 	gsub("c.NameFirst2", 	strWrap(TMW:GetSpellNames(nil, name2, 1))): --Name2 must be before Name
 	gsub("c.NameName2", 	strWrap(TMW:GetSpellNames(nil, name2, 1, 1))):
-	gsub("c.ItemID2", 		strWrap(TMW:GetItemIDs(nil, name2, 1))):
+	gsub("c.ItemID2", 		CNDT:GetItemIDRefForConditionChecker(name2)):
 	gsub("c.Name2Raw", 		strWrap(condition.Name2)):
 	gsub("c.Name2", 		strWrap(name2)):
 
 	gsub("c.NameFirst", 	strWrap(TMW:GetSpellNames(nil, name, 1))):
 	gsub("c.NameName", 		strWrap(TMW:GetSpellNames(nil, name, 1, 1))):
-	gsub("c.ItemID", 		strWrap(TMW:GetItemIDs(nil, name, 1))):
+	gsub("c.ItemID", 		CNDT:GetItemIDRefForConditionChecker(name)):
 	gsub("c.NameRaw", 		strWrap(condition.Name)):
 	gsub("c.Name", 			strWrap(name)):
 
@@ -1455,7 +1525,7 @@ function CNDT:RegisterConditionSet(identifier, conditionSetData)
 	TMW:ValidateType("GetSettings", "conditionSetData", data.GetSettings, "function")
 	
 	TMW:ValidateType("iterFunc", "conditionSetData", data.iterFunc, "function")
-	TMW:ValidateType("iterArgs", "conditionSetData", data.iterArgs, "table;nil")
+	TMW:ValidateType("iterArgs", "conditionSetData", data.iterArgs, "table")
 	
 	TMW:ValidateType("useDynamicTab", "conditionSetData", data.useDynamicTab, "boolean;nil")
 	TMW:ValidateType("GetTab", "conditionSetData", data.GetTab, "function;nil")
@@ -1484,9 +1554,11 @@ function CNDT:RegisterConditionSet(identifier, conditionSetData)
 	
 	ConditionSets[identifier] = data
 	
-	TMW:RegisterCallback("TMW_CONFIG_ICON_LOADED", function(event, icon)
-		CNDT:SetTabText(identifier)
-	end)
+	if not data.useDynamicTab then
+		TMW:RegisterCallback("TMW_CONFIG_ICON_LOADED", function(event, icon)
+			CNDT:SetTabText(identifier)
+		end)
+	end
 end
 function CNDT:RegisterConditionImplementingClass(className)
 	TMW:ValidateType("2 (className)", "CNDT:RegisterConditionImplementingClass()", className, "string")
@@ -1520,6 +1592,7 @@ CNDT:RegisterConditionSet("Icon", {
 		return TMW.IE.IconConditionTab
 	end,
 	tabText = L["CONDITIONS"],
+	tabTooltip = L["ICONCONDITIONS_DESC"],
 })
 
 CNDT:RegisterConditionImplementingClass("Group")
@@ -1543,6 +1616,7 @@ CNDT:RegisterConditionSet("Group", {
 		return TMW.IE.GroupConditionTab
 	end,
 	tabText = L["GROUPCONDITIONS"],
+	tabTooltip = L["GROUPCONDITIONS_DESC"],
 })
 
 TMW:RegisterCallback("TMW_UPGRADE_REQUESTED", function(event, type, version, ...)

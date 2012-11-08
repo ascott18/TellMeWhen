@@ -30,7 +30,7 @@ local DogTag = LibStub("LibDogTag-3.0", true)
 TELLMEWHEN_VERSION = "6.0.4"
 TELLMEWHEN_VERSION_MINOR = strmatch(" @project-version@", " r%d+") or ""
 TELLMEWHEN_VERSION_FULL = TELLMEWHEN_VERSION .. TELLMEWHEN_VERSION_MINOR
-TELLMEWHEN_VERSIONNUMBER = 60428 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
+TELLMEWHEN_VERSIONNUMBER = 60436 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
 if TELLMEWHEN_VERSIONNUMBER > 61001 or TELLMEWHEN_VERSIONNUMBER < 60000 then return error("YOU SCREWED UP THE VERSION NUMBER OR DIDNT CHANGE THE SAFETY LIMITS") end -- safety check because i accidentally made the version number 414069 once
 
 TELLMEWHEN_MAXROWS = 20
@@ -2129,7 +2129,10 @@ function TMW:GetBaseUpgrades()			-- upgrade functions
 		[50028] = {
 			icon = function(self, ics)
 				local Events = ics.Events
-				for _, eventSettings in ipairs(Events) do -- dont use InNLengthTable here
+				
+				-- dont use InNLengthTable here
+				--(we need to make sure to do it to everything, not just events that are currently valid. Just in case...)
+				for _, eventSettings in ipairs(Events) do
 					local eventData = TMW.EventList[eventSettings.Event]
 					if eventData and eventData.applyDefaultsToSetting then
 						eventData.applyDefaultsToSetting(eventSettings)
@@ -2157,13 +2160,11 @@ function TMW:GetBaseUpgrades()			-- upgrade functions
 			end,
 		},
 		[47320] = {
-			icon = function(self, ics)
-				for _, Event in TMW:InNLengthTable(ics.Events) do
-					-- these numbers got really screwy (0.8000000119), put then back to what they should be (0.8)
-					Event.Duration 	= Event.Duration  and tonumber(format("%0.1f",	Event.Duration))
-					Event.Magnitude = Event.Magnitude and tonumber(format("%1f",	Event.Magnitude))
-					Event.Period  	= Event.Period    and tonumber(format("%0.1f",	Event.Period))
-				end
+			iconEventHandler = function(self, eventSettings)
+				-- these numbers got really screwy (0.8000000119), put then back to what they should be (0.8)
+				eventSettings.Duration 	= eventSettings.Duration  and tonumber(format("%0.1f",	eventSettings.Duration))
+				eventSettings.Magnitude = eventSettings.Magnitude and tonumber(format("%1f",	eventSettings.Magnitude))
+				eventSettings.Period  	= eventSettings.Period    and tonumber(format("%0.1f",	eventSettings.Period))
 			end,
 		},
 		[47002] = {
@@ -2855,7 +2856,9 @@ function TMW:PLAYER_ENTERING_WORLD()
 	if not TMW.debug then
 		-- Don't send version broadcast messages in developer mode.
 		
-		TMW:SendCommMessage("TMWV", "M:" .. TELLMEWHEN_VERSION .. "^m:" .. TELLMEWHEN_VERSION_MINOR .. "^R:" .. TELLMEWHEN_VERSIONNUMBER .. "^", "GUILD")
+		if IsInGuild() then
+			TMW:SendCommMessage("TMWV", "M:" .. TELLMEWHEN_VERSION .. "^m:" .. TELLMEWHEN_VERSION_MINOR .. "^R:" .. TELLMEWHEN_VERSIONNUMBER .. "^", "GUILD")
+		end
 		TMW:SendCommMessage("TMWV", "M:" .. TELLMEWHEN_VERSION .. "^m:" .. TELLMEWHEN_VERSION_MINOR .. "^R:" .. TELLMEWHEN_VERSIONNUMBER .. "^", "RAID")
 		TMW:SendCommMessage("TMWV", "M:" .. TELLMEWHEN_VERSION .. "^m:" .. TELLMEWHEN_VERSION_MINOR .. "^R:" .. TELLMEWHEN_VERSIONNUMBER .. "^", "PARTY")
 		TMW:SendCommMessage("TMWV", "M:" .. TELLMEWHEN_VERSION .. "^m:" .. TELLMEWHEN_VERSION_MINOR .. "^R:" .. TELLMEWHEN_VERSIONNUMBER .. "^", "BATTLEGROUND")
@@ -3068,6 +3071,17 @@ TMW:RegisterUpgrade(50020, {
 	end,
 })
 
+TMW:RegisterCallback("TMW_UPGRADE_REQUESTED", function(event, type, version, ...)
+	if type == "icon" then
+		local ics, groupID, iconID = ...
+		
+		-- delegate to events
+		for eventID, eventSettings in TMW:InNLengthTable(ics.Events) do
+			TMW:DoUpgrade("iconEventHandler", version, eventSettings, eventID, groupID, iconID)
+		end
+	end
+end)
+
 function TMW:GetEventHandler(eventHandlerName)
 	return EventHandler.instancesByName[eventHandlerName]
 end
@@ -3151,7 +3165,7 @@ TMW:RegisterCallback("TMW_ICON_SETUP_PRE", function(_, icon)
 
 			if thisHasEventHandlers then
 				TMW:Fire("TMW_ICON_EVENTS_PROCESSED_EVENT_FOR_USE", icon, event, eventSettings)
-					
+				
 				icon.EventHandlersSet[event] = true
 				icon.EventsToFire = icon.EventsToFire or {}
 			end
@@ -3174,17 +3188,13 @@ TMW:RegisterCallback("TMW_GLOBAL_UPDATE_POST", function(event, time, Locked)
 	wipe(QueuedIcons)
 end)
 
-local runEvents = 1
-local runEventsTimerHandler
-function TMW:RestoreEvents()
-	runEvents = 1
-end
-TMW:RegisterCallback("TMW_ICON_SETUP_PRE", function()
+
+TMW:RegisterCallback("TMW_ICON_SETUP_PRE", function(event, icon)
 	-- make sure events dont fire while, or shortly after, we are setting up
-	runEvents = nil
+	icon.runEvents = nil
 	
-	TMW:CancelTimer(runEventsTimerHandler, 1)
-	runEventsTimerHandler = TMW:ScheduleTimer("RestoreEvents", UPD_INTV*2.1)
+	TMW:CancelTimer(icon.runEventsTimerHandler, 1)
+	icon.runEventsTimerHandler = TMW.ScheduleTimer(icon, "RestoreEvents", UPD_INTV*2.1)
 end)
 
 
@@ -3550,6 +3560,7 @@ local Icon = TMW:NewClass("Icon", "Button", "UpdateTableManager", "GenericModule
 Icon:UpdateTable_Set(IconsToUpdate)
 Icon.IsIcon = true
 Icon.attributes = {}
+Icon.runEvents = 1
 	
 function Icon.OnNewInstance(icon, ...)
 	local _, name, group, _, iconID = ... -- the CreateFrame args
@@ -3679,6 +3690,15 @@ function Icon.QueueEvent(icon, arg1)
 	icon.eventIsQueued = true
 	
 	QueuedIcons[#QueuedIcons + 1] = icon
+end
+
+function Icon.RestoreEvents(icon)
+	icon.runEvents = 1
+	icon.runEventsTimerHandler = nil
+	if icon.EventHandlersSet.OnEventsRestored and Locked then
+		icon:QueueEvent("OnEventsRestored")
+		icon:ProcessQueuedEvents()
+	end
 end
 
 function Icon.IsInRange(icon)
@@ -3848,7 +3868,7 @@ function Icon.ProcessQueuedEvents(icon)
 					shouldProcess = conditionResult
 				end
 
-				if shouldProcess and runEvents and icon.attributes.shown then
+				if shouldProcess and icon.runEvents and icon.attributes.shown then
 					local EventHandler = TMW:GetEventHandler(EventSettings.Type, true)
 					if EventHandler then
 						local handled = EventHandler:HandleEvent(icon, EventSettings)
@@ -4222,7 +4242,6 @@ TMW:NewClass("GenericComponent"){
 		
 		self.IconEvents[#self.IconEvents + 1] = eventData
 	end,
-	
 }
 
 TMW:NewClass("IconComponent", "GenericComponent"){
@@ -5077,17 +5096,22 @@ function IconType:DragReceived(icon, t, data, subType, param4)
 		return
 	end
 
-	local _, spellID
+	local _, input
 	if data == 0 and type(param4) == "number" then
-		spellID = param4
+		input = GetSpellInfo(param4)
 	else
-		_, spellID = GetSpellBookItemInfo(data, subType)
-		if not spellID then
+		local type
+		type, input = GetSpellBookItemInfo(data, subType)
+		if not input then
 			return
+		end
+		
+		if type == "SPELL" then
+			input = GetSpellBookItemName(data, subType)
 		end
 	end
 
-	ics.Name = TMW:CleanString(ics.Name .. ";" .. spellID)
+	ics.Name = TMW:CleanString(ics.Name .. ";" .. input)
 	return true -- signal success
 end
 
@@ -5220,7 +5244,10 @@ function IconType:SetModuleAllowance(moduleName, allow)
 	end
 end
 
-
+IconType:RegisterIconEvent(111, "OnEventsRestored", {
+	text = L["SOUND_EVENT_ONEVENTSRESTORED"],
+	desc = L["SOUND_EVENT_ONEVENTSRESTORED_DESC"],
+})
 
 IconType:UsesAttributes("alpha")
 IconType:UsesAttributes("alphaOverride")

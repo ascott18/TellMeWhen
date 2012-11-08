@@ -5,6 +5,7 @@
 <Include file="IconModule_IconContainer\includes.config.xml"/>
 <Include file="IconModule_IconContainer_Masque\includes.config.xml"/>
 <Include file="IconModule_IconEventClickHandler\includes.config.xml"/>
+<Include file="IconModule_IconEventConditionHandler\includes.config.xml"/>
 <Include file="IconModule_IconOtherShowHideHandler\includes.config.xml"/>
 <Include file="IconModule_PowerBar\includes.config.xml"/>
 <Include file="IconModule_PowerBar_Overlay\includes.config.xml"/>

@@ -116,6 +116,7 @@ local hasRegisteredShownHiddenTimerCallback
 local function RegisterShownHiddenTimerCallback()
 	if hasRegisteredShownHiddenTimerCallback then return end
 	hasRegisteredShownHiddenTimerCallback = true
+	
 	TMW:RegisterCallback(TMW.ProcessorsByName.REALALPHA.changedEvent, function(event, icon, realAlpha, oldalpha)
 		if realAlpha == 0 then
 			icon.__CNDT__ICONSHOWNTME = 0

@@ -3487,13 +3487,15 @@ function EVENTS:SetupEventSettings()
 
 	local Settings = self:GetEventSettings()
 	local settingsUsedByEvent = eventData.settings
+	
+	TMW:Fire("TMW_CONFIG_EVENTS_SETTINGS_SETUP_PRE")
 
 	--hide settings
-	EventSettings.Operator	 	 :Hide()
-	EventSettings.Value		 	 :Hide()
-	EventSettings.CndtJustPassed :Hide()
-	EventSettings.PassingCndt	 :Hide()
-	EventSettings.Icon			 :Hide()
+	EventSettings.Operator	 	 		:Hide()
+	EventSettings.Value		 	 		:Hide()
+	EventSettings.CndtJustPassed 		:Hide()
+	EventSettings.PassingCndt	 		:Hide()
+	EventSettings.Icon			 		:Hide()
 
 	--set settings
 	EventSettings.PassThrough	 :SetChecked(Settings.PassThrough)
@@ -3549,6 +3551,8 @@ function EVENTS:SetupEventSettings()
 	if v then
 		TMW:TT(EventSettings.Operator, v.tooltipText, nil, 1)
 	end
+	
+	TMW:Fire("TMW_CONFIG_EVENTS_SETTINGS_SETUP_POST")
 end
 
 function EVENTS:OperatorMenu_DropDown()
