@@ -42,6 +42,7 @@
  ** Attempted a fix at the issue with text corruption when typing Chinese characters into DogTag formatted editboxes.
  ** The glyph condition should now work correctly when its logic is set to false.
  ** You should no longer be spammed with messages telling you that you are not in a guild.
+ ** The Show icon texture setting for MikSBT text output should now function as intended.
  
  ** A Special note: r450 concludes a series of 9 bogus commits that were made in order to restore the revision number of the repo back to where it was before the data loss that struck CurseForge's SVN repos on 11/7 **
  

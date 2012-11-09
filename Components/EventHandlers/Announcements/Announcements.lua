@@ -483,7 +483,7 @@ ANN:RegisterEventHandlerDataNonSpecific(83, "MSBT", {
 		if MikSBT then
 			local Size = data.Size
 			if Size == 0 then Size = nil end
-			MikSBT.DisplayMessage(Text, data.Location, data.Sticky, data.r*0xFF, data.g*0xFF, data.b*0xFF, Size, nil, data.ShowIconTex and icon.attributes.texture)
+			MikSBT.DisplayMessage(Text, data.Location, data.Sticky, data.r*0xFF, data.g*0xFF, data.b*0xFF, Size, nil, nil, data.ShowIconTex and icon.attributes.texture)
 		end
 	end,
 })
