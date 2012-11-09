@@ -30,7 +30,7 @@ local DogTag = LibStub("LibDogTag-3.0", true)
 TELLMEWHEN_VERSION = "6.0.4"
 TELLMEWHEN_VERSION_MINOR = strmatch(" @project-version@", " r%d+") or ""
 TELLMEWHEN_VERSION_FULL = TELLMEWHEN_VERSION .. TELLMEWHEN_VERSION_MINOR
-TELLMEWHEN_VERSIONNUMBER = 60445 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
+TELLMEWHEN_VERSIONNUMBER = 60446 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
 if TELLMEWHEN_VERSIONNUMBER > 61001 or TELLMEWHEN_VERSIONNUMBER < 60000 then return error("YOU SCREWED UP THE VERSION NUMBER OR DIDNT CHANGE THE SAFETY LIMITS") end -- safety check because i accidentally made the version number 414069 once
 
 TELLMEWHEN_MAXROWS = 20
@@ -2335,7 +2335,66 @@ function TMW:GetBaseUpgrades()			-- upgrade functions
 			end,
 		},
 		[41301] = {
+			stances = {
+				{class = "WARRIOR", 	id = 2457}, 	-- Battle Stance
+				{class = "WARRIOR", 	id = 71}, 		-- Defensive Stance
+				{class = "WARRIOR", 	id = 2458}, 	-- Berserker Stance
+
+				{class = "DRUID", 		id = 5487}, 	-- Bear Form
+				{class = "DRUID", 		id = 768}, 		-- Cat Form
+				{class = "DRUID", 		id = 1066}, 	-- Aquatic Form
+				{class = "DRUID", 		id = 783}, 		-- Travel Form
+				{class = "DRUID", 		id = 24858}, 	-- Moonkin Form
+				{class = "DRUID", 		id = 33891}, 	-- Tree of Life
+				{class = "DRUID", 		id = 33943}, 	-- Flight Form
+				{class = "DRUID", 		id = 40120}, 	-- Swift Flight Form
+
+				{class = "PRIEST", 		id = 15473}, 	-- Shadowform
+
+				{class = "ROGUE", 		id = 1784}, 	-- Stealth
+
+				{class = "HUNTER", 		id = 82661}, 	-- Aspect of the Fox
+				{class = "HUNTER", 		id = 13165}, 	-- Aspect of the Hawk
+				{class = "HUNTER", 		id = 5118}, 	-- Aspect of the Cheetah
+				{class = "HUNTER", 		id = 13159}, 	-- Aspect of the Pack
+				{class = "HUNTER", 		id = 20043}, 	-- Aspect of the Wild
+
+				{class = "DEATHKNIGHT", id = 48263}, 	-- Blood Presence
+				{class = "DEATHKNIGHT", id = 48266}, 	-- Frost Presence
+				{class = "DEATHKNIGHT", id = 48265}, 	-- Unholy Presence
+
+				{class = "PALADIN", 	id = 19746}, 	-- Concentration Aura
+				{class = "PALADIN", 	id = 32223}, 	-- Crusader Aura
+				{class = "PALADIN", 	id = 465}, 		-- Devotion Aura
+				{class = "PALADIN", 	id = 19891}, 	-- Resistance Aura
+				{class = "PALADIN", 	id = 7294}, 	-- Retribution Aura
+
+				{class = "WARLOCK", 	id = 47241}, 	-- Metamorphosis
+			}
+	
+			setupcsn = function(self)
+				self.CSN = {
+					[0]	= NONE,
+				}
+
+				for _, stanceData in ipairs(self.stances) do
+					if stanceData.class == pclass then
+						local stanceName = GetSpellInfo(stanceData.id)
+						tinsert(self.CSN, stanceName)
+					end
+				end
+
+				for i, stanceName in pairs(self.CSN) do
+					self.CSN[stanceName] = i
+				end
+
+			end,
+
 			group = function(self, gs)
+				if not self.CSN then
+					self:setupcsn()
+				end
+				
 				local Conditions = gs.Conditions
 
 				if gs.NotInVehicle then
@@ -2347,8 +2406,8 @@ function TMW:GetBaseUpgrades()			-- upgrade functions
 				if gs.Stance then
 					local nume = {}
 					local numd = {}
-					for id = 0, #TMW.CSN do
-						local sn = TMW.CSN[id]
+					for id = 0, #self.CSN do
+						local sn = self.CSN[id]
 						local en = gs.Stance[sn]
 						if en == false then
 							tinsert(numd, id)
@@ -2358,7 +2417,7 @@ function TMW:GetBaseUpgrades()			-- upgrade functions
 					end
 					if #nume ~= 0 then
 						local start = #Conditions + 1
-						if #nume <= ceil(#TMW.CSN/2) then
+						if #nume <= ceil(#self.CSN/2) then
 
 							for _, value in ipairs(nume) do
 								local condition = Conditions[#Conditions + 1]
@@ -2462,15 +2521,76 @@ function TMW:GetBaseUpgrades()			-- upgrade functions
 					TMW.db.profile.Font.Outline = "THICKOUTLINE"
 				end
 			end,
+			
+			stances = {
+				{class = "WARRIOR", 	id = 2457}, 	-- Battle Stance
+				{class = "WARRIOR", 	id = 71}, 		-- Defensive Stance
+				{class = "WARRIOR", 	id = 2458}, 	-- Berserker Stance
+
+				{class = "DRUID", 		id = 5487}, 	-- Bear Form
+				{class = "DRUID", 		id = 768}, 		-- Cat Form
+				{class = "DRUID", 		id = 1066}, 	-- Aquatic Form
+				{class = "DRUID", 		id = 783}, 		-- Travel Form
+				{class = "DRUID", 		id = 24858}, 	-- Moonkin Form
+				{class = "DRUID", 		id = 33891}, 	-- Tree of Life
+				{class = "DRUID", 		id = 33943}, 	-- Flight Form
+				{class = "DRUID", 		id = 40120}, 	-- Swift Flight Form
+
+				{class = "PRIEST", 		id = 15473}, 	-- Shadowform
+
+				{class = "ROGUE", 		id = 1784}, 	-- Stealth
+
+				{class = "HUNTER", 		id = 82661}, 	-- Aspect of the Fox
+				{class = "HUNTER", 		id = 13165}, 	-- Aspect of the Hawk
+				{class = "HUNTER", 		id = 5118}, 	-- Aspect of the Cheetah
+				{class = "HUNTER", 		id = 13159}, 	-- Aspect of the Pack
+				{class = "HUNTER", 		id = 20043}, 	-- Aspect of the Wild
+
+				{class = "DEATHKNIGHT", id = 48263}, 	-- Blood Presence
+				{class = "DEATHKNIGHT", id = 48266}, 	-- Frost Presence
+				{class = "DEATHKNIGHT", id = 48265}, 	-- Unholy Presence
+
+				{class = "PALADIN", 	id = 19746}, 	-- Concentration Aura
+				{class = "PALADIN", 	id = 32223}, 	-- Crusader Aura
+				{class = "PALADIN", 	id = 465}, 		-- Devotion Aura
+				{class = "PALADIN", 	id = 19891}, 	-- Resistance Aura
+				{class = "PALADIN", 	id = 7294}, 	-- Retribution Aura
+
+				{class = "WARLOCK", 	id = 47241}, 	-- Metamorphosis
+			}
+	
+			setupcsn = function(self)
+				self.CSN = {
+					[0]	= NONE,
+				}
+
+				for _, stanceData in ipairs(self.stances) do
+					if stanceData.class == pclass then
+						local stanceName = GetSpellInfo(stanceData.id)
+						tinsert(self.CSN, stanceName)
+					end
+				end
+
+				for i, stanceName in pairs(self.CSN) do
+					self.CSN[stanceName] = i
+				end
+
+			end,
+
 			group = function(self, gs)
 				gs.LBFGroup = nil
+				
+				if not self.CSN then
+					self:setupcsn()
+				end
+				
 				if gs.Stance then
 					for k, v in pairs(gs.Stance) do
-						if TMW.CSN[k] then
+						if self.CSN[k] then
 							if v then -- everything switched in this version
-								gs.Stance[TMW.CSN[k]] = false
+								gs.Stance[self.CSN[k]] = false
 							else
-								gs.Stance[TMW.CSN[k]] = true
+								gs.Stance[self.CSN[k]] = true
 							end
 							gs.Stance[k] = nil
 						end

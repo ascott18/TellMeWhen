@@ -43,7 +43,7 @@
  ** The glyph condition should now work correctly when its logic is set to false.
  ** You should no longer be spammed with messages telling you that you are not in a guild.
  ** The Show icon texture setting for MikSBT text output should now function as intended.
- 
+ ** Attempted a fix for TellMeWhen.lua line 2333: attempt to get length of field 'CSN' (a nil value)
  ** A Special note: r450 concludes a series of 9 bogus commits that were made in order to restore the revision number of the repo back to where it was before the data loss that struck CurseForge's SVN repos on 11/7 **
  
 ===v6.0.3===
