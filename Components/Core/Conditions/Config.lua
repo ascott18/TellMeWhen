@@ -220,7 +220,7 @@ function CNDT:ValidateLevelForCondition(level, conditionType)
 		level = vmax
 	end
 	
-	level = max(level, 0)
+	--level = max(level, 0)
 	
 	return level
 end

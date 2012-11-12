@@ -120,22 +120,23 @@ TMW:RegisterDatabaseDefaults{
 
 TMW:RegisterUpgrade(60448, {
 	textlayout = function(self, settings, GUID)
-		-- I decided to change [Stacks] to return numbers instead of strings
-		for i, displaySettings in ipairs(settings) do
-			displaySettings.Anchors.n = 1
-			
-			local point = displaySettings.point or "CENTER"
-			displaySettings.Justify = point:match("LEFT") or point:match("RIGHT") or "CENTER"
-			
-			displaySettings.Anchors[1].x 	 		  	= displaySettings.x or 0
-			displaySettings.Anchors[1].y 	 		  	= displaySettings.y or 0
-			displaySettings.Anchors[1].point 		  	= displaySettings.point or "CENTER"
-			displaySettings.Anchors[1].relativePoint 	= displaySettings.relativePoint or "CENTER"
-			
-			displaySettings.x 	 		  	= nil
-			displaySettings.y 	 		  	= nil
-			displaySettings.point 		  	= nil
-			displaySettings.relativePoint 	= nil
+		if not settings.NoEdit then
+			for i, displaySettings in ipairs(settings) do
+				displaySettings.Anchors.n = 1
+				
+				local point = displaySettings.point or "CENTER"
+				displaySettings.Justify = point:match("LEFT") or point:match("RIGHT") or "CENTER"
+				
+				displaySettings.Anchors[1].x 	 		  	= displaySettings.x or 0
+				displaySettings.Anchors[1].y 	 		  	= displaySettings.y or 0
+				displaySettings.Anchors[1].point 		  	= displaySettings.point or "CENTER"
+				displaySettings.Anchors[1].relativePoint 	= displaySettings.relativePoint or "CENTER"
+				
+				displaySettings.x 	 		  	= nil
+				displaySettings.y 	 		  	= nil
+				displaySettings.point 		  	= nil
+				displaySettings.relativePoint 	= nil
+			end
 		end
 	end,
 })
