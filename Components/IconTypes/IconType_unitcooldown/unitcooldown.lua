@@ -523,26 +523,5 @@ function Type:Setup(icon, groupID, iconID)
 	icon:Update()
 end
 
---[[
-function Type:DragReceived(icon, t, data, subType)
-	local ics = icon:GetSettings()
-
-	if t ~= "spell" then
-		return
-	end
-
-	local _, spellID = GetSpellBookItemInfo(data, subType)
-	if not spellID then
-		return
-	end
-
-	ics.Name = TMW:CleanString(ics.Name .. ";" .. spellID)
-	if TMW.CI.ic ~= icon then
-		TMW.IE:Load(nil, icon)
-		TMW.IE:TabClick(TMW.IE.MainTab)
-	end
-	return true -- signal success
-end]]
-
 
 Type:Register(40)

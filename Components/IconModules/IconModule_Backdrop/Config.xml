@@ -1,0 +1,19 @@
+﻿<Ui>
+
+	<Frame name="TellMeWhen_BackdropOptions" inherits="TellMeWhen_OptionsModuleContainer" virtual="true">
+		<Size y="30"/>
+		<Frames>
+						
+		</Frames>
+		<Scripts>
+			<OnLoad>
+				self.Header:SetText(TMW.L["CONFIGPANEL_BACKDROP_HEADER"])
+				
+				--self.ShowPBar:ConstrainLabel(self.InvertPBar)
+				
+				--TMW.IE:DistributeFrameAnchorsLaterally(self, 3, self.ShowPBar, self.InvertPBar, self.PBarOffs)
+			</OnLoad>
+		</Scripts>
+	</Frame>
+ 
+</Ui>

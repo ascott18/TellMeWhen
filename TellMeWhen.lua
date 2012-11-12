@@ -27,10 +27,10 @@ local DRData = LibStub("DRData-1.0", true)
 
 local DogTag = LibStub("LibDogTag-3.0", true)
 
-TELLMEWHEN_VERSION = "6.0.4"
+TELLMEWHEN_VERSION = "6.1.0"
 TELLMEWHEN_VERSION_MINOR = strmatch(" @project-version@", " r%d+") or ""
 TELLMEWHEN_VERSION_FULL = TELLMEWHEN_VERSION .. TELLMEWHEN_VERSION_MINOR
-TELLMEWHEN_VERSIONNUMBER = 60447 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
+TELLMEWHEN_VERSIONNUMBER = 61001 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
 if TELLMEWHEN_VERSIONNUMBER > 61001 or TELLMEWHEN_VERSIONNUMBER < 60000 then return error("YOU SCREWED UP THE VERSION NUMBER OR DIDNT CHANGE THE SAFETY LIMITS") end -- safety check because i accidentally made the version number 414069 once
 
 TELLMEWHEN_MAXROWS = 20
@@ -3792,7 +3792,9 @@ function Icon.GetActiveModuleChildrenNames(icon)
 	for moduleName, Module in pairs(icon.Modules) do
 		if Module.IsImplemented then
 			for name in pairs(Module.anchorableChildren) do
-				tinsert(activeModuleChildren, moduleName .. name)
+				local frameName = moduleName .. name
+				assert(_G[icon:GetName() .. frameName], ("Couldn't find frame named %q"):format(frameName))
+				tinsert(activeModuleChildren, frameName)
 			end
 		end
 	end
@@ -5216,19 +5218,23 @@ function IconType:DragReceived(icon, t, data, subType, param4)
 		return
 	end
 
-	local _, input
+	local input
 	if data == 0 and type(param4) == "number" then
+		-- I don't remember the purpose of this anymore.
+		-- It handles some special sort of spell, though, and is required.
 		input = GetSpellInfo(param4)
 	else
-		local type
-		type, input = GetSpellBookItemInfo(data, subType)
-		if not input then
+		local type, baseSpellID = GetSpellBookItemInfo(data, subType)
+		
+		if not baseSpellID or type ~= "SPELL" then
 			return
 		end
 		
-		if type == "SPELL" then
-			input = GetSpellBookItemName(data, subType)
-		end
+		
+		local currentSpellName = GetSpellBookItemName(data, subType)		
+		local baseSpellName = GetSpellInfo(baseSpellID)
+		
+		input = baseSpellName or currentSpellName
 	end
 
 	ics.Name = TMW:CleanString(ics.Name .. ";" .. input)
@@ -5243,7 +5249,7 @@ function IconType:GetIconMenuText(data)
 end
 
 function IconType:Register(order)
-	TMW:ValidateType("2 (order)", "IconView:Register(order)", order, "number")
+	TMW:ValidateType("2 (order)", "IconType:Register(order)", order, "number")
 	
 	local typekey = self.type
 	

@@ -701,18 +701,31 @@
 			<Button name="$parentClickInterceptor" parentKey="clickinterceptor">
 				<Scripts>
 					<OnLoad>
-						self:SetAllPoints(self:GetParent().text)
+						self.parent = self:GetParent()
+						self:SetAllPoints(self.parent.text)
 					</OnLoad>
 					<OnEnter>
-						self:GetParent():LockHighlight()
-						self:GetParent():GetScript("OnEnter")(self:GetParent())
+						--if self.parent.LockHighlight then
+							self.parent:LockHighlight()
+						--end
+						
+						local OnEnter = self.parent:GetScript("OnEnter")
+						if OnEnter then
+							OnEnter(self.parent)
+						end
 					</OnEnter>
 					<OnLeave>
-						self:GetParent():UnlockHighlight()
-						self:GetParent():GetScript("OnLeave")(self:GetParent())
+						--if self.parent.UnlockHighlight then
+							self.parent:UnlockHighlight()
+						--end
+						
+						local OnLeave = self.parent:GetScript("OnLeave")
+						if OnLeave then
+							OnLeave(self.parent)
+						end
 					</OnLeave>
 					<OnClick>
-						self:GetParent():Click(button)
+						self.parent:Click(button)
 					</OnClick>
 				</Scripts>
 			</Button>

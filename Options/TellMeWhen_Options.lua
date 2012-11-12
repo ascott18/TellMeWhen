@@ -89,6 +89,12 @@ local points = {
 	BOTTOMRIGHT = L["BOTTOMRIGHT"],
 } TMW.points = points
 
+TMW.justifyPoints = {
+	LEFT = L["LEFT"],
+	CENTER = L["CENTER"],
+	RIGHT = L["RIGHT"],
+}
+
 local operators = {
 	{ tooltipText = L["CONDITIONPANEL_EQUALS"], 		value = "==", 	text = "==" },
 	{ tooltipText = L["CONDITIONPANEL_NOTEQUAL"], 	 	value = "~=", 	text = "~=" },
@@ -705,37 +711,6 @@ TMW.GroupConfigTemplate = {
 						return gs.SettingsPerView[gs.View][info[#info]]
 					end,
 				},
-				--[==[Type = {
-					name = L["UIPANEL_GROUPTYPE"],
-					desc = L["UIPANEL_GROUPTYPE_DESC"],
-					type = "group",
-					dialogInline = true,
-					guiInline = true,
-					order = 23,
-					get = function(info)
-						local g = findid(info)
-						return TMW.db.profile.Groups[g][info[#info-1]] == info[#info]
-					end,
-					set = function(info)
-						local g = findid(info)
-						TMW.db.profile.Groups[g][info[#info-1]] = info[#info]
-						TMW[g]:Setup()
-					end,
-					args = {
-						icon = {
-							name = L["UIPANEL_GROUPTYPE_ICON"],
-							desc = L["UIPANEL_GROUPTYPE_ICON_DESC"],
-							type = "toggle",
-							order = 1,
-						},
-						bar = {
-							name = L["UIPANEL_GROUPTYPE_BAR"],
-							desc = L["UIPANEL_GROUPTYPE_BAR_DESC"],
-							type = "toggle",
-							order = 2,
-						},
-					}
-				},]==]
 				
 				CheckOrder = {
 					name = L["CHECKORDER"],
@@ -761,6 +736,27 @@ TMW.GroupConfigTemplate = {
 					},  
 					style = "dropdown",
 					order = 27,
+				},
+				View = {
+					name = L["UIPANEL_GROUPTYPE"],
+					desc = L["UIPANEL_GROUPTYPE_DESC"],
+					type = "group",
+					dialogInline = true,
+					guiInline = true,
+					order = 30,
+					get = function(info)
+						local g = findid(info)
+						return TMW.db.profile.Groups[g][info[#info-1]] == info[#info]
+					end,
+					set = function(info)
+						local g = findid(info)
+						TMW.db.profile.Groups[g][info[#info-1]] = info[#info]
+						TMW[g]:Setup()
+						TMW[g]:Setup()
+						IE:Load(1)
+						TMW:CompileOptions()
+					end,
+					args = {}
 				},
 				moveup = {
 					name = L["UIPANEL_GROUPMOVEUP"],
@@ -829,6 +825,44 @@ TMW.GroupConfigTemplate = {
 	}
 }
 
+local addGroupFunctionGroup = {
+	type = "group",
+	name = L["UIPANEL_ADDGROUP"],
+	dialogInline = true,
+	guiInline = true,
+	order = 40,
+	args = {},
+}
+local addGroupButton = {
+	name = function(info)
+		return TMW.Views[info[#info]].name
+	end,
+	desc = L["UIPANEL_ADDGROUP_DESC"],
+	type = "execute",
+	width = "double",
+	order = function(info)
+		return TMW.Views[info[#info]].order
+	end,
+	func = function(info)
+		local groupID, group = TMW:Group_Add()
+		
+		local gs = TMW.db.profile.Groups[groupID]
+		gs.View = info[#info]
+		TMW:Update()
+	end,
+}
+local viewSelectToggle = {
+	name = function(info)
+		return TMW.Views[info[#info]].name
+	end,
+	desc = function(info)
+		return TMW.Views[info[#info]].desc
+	end,
+	type = "toggle",
+	order = function(info)
+		return TMW.Views[info[#info]].order
+	end,
+}
 
 local colorOrder = {
 	"CBS",
@@ -1226,29 +1260,13 @@ function TMW:CompileOptions()
 					end,
 					get = function(info) return TMW.db.profile.Groups[findid(info)][info[#info]] end,
 					args = {
-						addgroup = {
-							name = L["UIPANEL_ADDGROUP"],
-							desc = L["UIPANEL_ADDGROUP_DESC"],
-							type = "execute",
-							width = "double",
-							order = 41,
-							handler = TMW,
-							func = "Group_Add",
-						},
+						addgroup = addGroupFunctionGroup,
 						importexport = importExportBoxTemplate,
 						addgroupgroup = {
 							type = "group",
 							name = L["UIPANEL_ADDGROUP"],
 							args = {
-								addgroup = {
-									name = L["UIPANEL_ADDGROUP"],
-									desc = L["UIPANEL_ADDGROUP_DESC"],
-									type = "execute",
-									width = "double",
-									order = 41,
-									handler = TMW,
-									func = "Group_Add",
-								},
+								addgroup = addGroupFunctionGroup,
 								importexport = importExportBoxTemplate,
 							},
 						},
@@ -1265,6 +1283,12 @@ function TMW:CompileOptions()
 			--hidden = function() return IE.ExportBox:IsVisible() end,
 		}
 		TMW.OptionsTable.args.profiles.args.importexport = importExportBoxTemplate
+	end
+
+	-- Dynamic Icon View Settings --
+	for view in pairs(TMW.Views) do
+		TMW.GroupConfigTemplate.args.main.args.View.args[view] = viewSelectToggle
+		addGroupFunctionGroup.args[view] = addGroupButton
 	end
 
 	-- Dynamic Group Settings --
@@ -1313,8 +1337,13 @@ function TMW:CompileOptions()
 	
 	TMW:Fire("TMW_CONFIG_MAIN_OPTIONS_COMPILE", TMW.OptionsTable)
 
+	
 	LibStub("AceConfig-3.0"):RegisterOptionsTable("TMW Options", TMW.OptionsTable)
-	LibStub("AceConfigDialog-3.0"):SetDefaultSize("TMW Options", 781, 512)
+	if not TMW.defaultSizeOfTMWOptionsSet then
+		TMW.defaultSizeOfTMWOptionsSet = 1
+		LibStub("AceConfigDialog-3.0"):SetDefaultSize("TMW Options", 781, 512)
+	end
+	
 	LibStub("AceConfig-3.0"):RegisterOptionsTable("TMW IEOptions", TMW.OptionsTable)
 	if not TMW.AddedToBlizz then
 		TMW.AddedToBlizz = LibStub("AceConfigDialog-3.0"):AddToBlizOptions("TMW Options", L["ICON_TOOLTIP1"])
@@ -1717,9 +1746,11 @@ ID:RegisterIconDragHandler(40,	-- Split
 		ID.srcicon.group.Icons[ID.srcicon:GetID()] = nil
 
 		-- preserve buff/debuff/other types textures
-		group[1]:SetInfo("texture", ID.srcicon.attributes.texture)
+		if group and group[1] then
+			group[1]:SetInfo("texture", ID.srcicon.attributes.texture)
+		end
 
-		local srcicon, desticon = tostring(ID.srcicon), tostring(group[1])
+		local srcicon, desticon = tostring(ID.srcicon), tostring("TellMeWhen_Group" .. groupID .. "_Icon1")
 
 		TMW:ReconcileData(srcicon, desticon)
 
@@ -1990,7 +2021,8 @@ function IE:PositionPanels()
 			frame = IE.AllDisplayPanels[panelInfo.xmlTemplateName]
 			
 			if not frame then
-				frame = CreateFrame("Frame", panelInfo.xmlTemplateName, parent, panelInfo.xmlTemplateName)
+				local _
+				_, frame = TMW.safecall(CreateFrame, "Frame", panelInfo.xmlTemplateName, parent, panelInfo.xmlTemplateName)
 				--frame:SetScale(0.9)
 				IE.AllDisplayPanels[panelInfo.xmlTemplateName] = frame
 			end
@@ -2005,23 +2037,23 @@ function IE:PositionPanels()
 			end
 		end
 		
-		local R, G, B
-		
-		if type(parent[#parent]) == "table" then
-			frame:SetPoint("TOP", parent[#parent], "BOTTOM", 0, -11)
-		else
-			frame:SetPoint("TOP", 0, -10)
-		end
-		parent[#parent + 1] = frame
-		
-		local hue = 1/1.5
-		
-		frame.Background:SetTexture(hue, hue, hue)
-		frame.Background:SetGradientAlpha("VERTICAL", 1, 1, 1, 0.05, 1, 1, 1, 0.10)
-		
-		frame:Show()
-		
-		TMW:Fire("TMW_CONFIG_PANEL_SETUP", frame, panelInfo)
+		if frame then
+			if type(parent[#parent]) == "table" then
+				frame:SetPoint("TOP", parent[#parent], "BOTTOM", 0, -11)
+			else
+				frame:SetPoint("TOP", 0, -10)
+			end
+			parent[#parent + 1] = frame
+			
+			local hue = 1/1.5
+			
+			frame.Background:SetTexture(hue, hue, hue)
+			frame.Background:SetGradientAlpha("VERTICAL", 1, 1, 1, 0.05, 1, 1, 1, 0.10)
+			
+			frame:Show()
+			
+			TMW:Fire("TMW_CONFIG_PANEL_SETUP", frame, panelInfo)
+		end	
 	end	
 	
 	local IE_FL = IE:GetFrameLevel()
@@ -2945,7 +2977,8 @@ function IE:Type_DropDown()
 	local groupID, iconID = CI.g, CI.i
 
 	for _, Type in ipairs(TMW.OrderedTypes) do -- order in the order in which they are loaded in the .toc file
-		if not Type.hidden then
+		local tempshow = CI.ics.Type == Type.type and Type.hidden
+		if tempshow or not Type.hidden then
 			if Type.spacebefore then
 				TMW.AddDropdownSpacer()
 			end
@@ -2961,6 +2994,8 @@ function IE:Type_DropDown()
 			info.checked = (info.value == TMW.db.profile.Groups[groupID].Icons[iconID].Type)
 			info.func = IE.Type_Dropdown_OnClick
 			info.arg1 = Type
+			info.disabled = tempshow
+			info.tooltipWhileDisabled = true
 			UIDropDownMenu_AddButton(info, UIDROPDOWNMENU_MENU_LEVEL)
 
 			if Type.spaceafter then

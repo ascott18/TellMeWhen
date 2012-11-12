@@ -494,16 +494,14 @@ You can also type /tellmewhen or /tmw to lock/unlock.]]
 L["UIPANEL_MAINOPT"] = "Main Options"
 L["UIPANEL_GROUPS"] = "Groups"
 L["UIPANEL_GROUPS_DESC"] = "Settings for each group in this TellMeWhen profile."
---[=[L["UIPANEL_GROUPTYPE"] = "Group Display Method"
+
+L["UIPANEL_GROUPTYPE"] = "Group Display Method"
 L["UIPANEL_GROUPTYPE_DESC"] = "Choose how you would like icons within this group to be displayed."
 L["UIPANEL_GROUPTYPE_ICON"] = "Icon"
-L["UIPANEL_GROUPTYPE_ICON_DESC"] = [[Displays the icons in the group using TellMeWhen's traditional icon display.
-
-IMPORTANT: Changing the type of a group requires a UI reload in order for the changes to take effect.]]
+L["UIPANEL_GROUPTYPE_ICON_DESC"] = [[Displays the icons in the group using TellMeWhen's traditional icon display.]]
 L["UIPANEL_GROUPTYPE_BAR"] = "Bar"
-L["UIPANEL_GROUPTYPE_BAR_DESC"] = [[Displays the icons in the group with progress bars attached to the icons.
+L["UIPANEL_GROUPTYPE_BAR_DESC"] = [[Displays the icons in the group with progress bars attached to the icons.]]
 
-IMPORTANT: Changing the type of a group requires a UI reload in order for the changes to take effect.]]]=]
 L["UIPANEL_ICONS"] = "Icons"
 L["UIPANEL_COLORS"] = "Colors"
 L["UIPANEL_COLORS_DESC"] = "Settings that control the coloring/tinting of icons based on their attributes."
@@ -718,6 +716,8 @@ L["UIPANEL_FONT_XOFFS"] = "X Offset"
 L["UIPANEL_FONT_XOFFS_DESC"] = "The x-axis offset of the anchor"
 L["UIPANEL_FONT_YOFFS"] = "Y Offset"
 L["UIPANEL_FONT_YOFFS_DESC"] = "The y-axis offset of the anchor"
+L["UIPANEL_FONT_JUSTIFY"] = "Justification"
+L["UIPANEL_FONT_JUSTIFY_DESC"] = "Set the justification (Left/Center/Right) for this text display."
 L["UIPANEL_POSITION"] = "Position"
 L["UIPANEL_POSITION_DESC"] = "Contains settings that control the position of the group on your screen."
 L["UIPANEL_POINT"] = "Point"
@@ -770,6 +770,7 @@ L["TEXTLAYOUTS_DEFAULTS_NOLAYOUT"] = "<No Layout>"
 L["TEXTLAYOUTS_DEFAULTS_ICON1"] = "Icon Layout 1"
 L["TEXTLAYOUTS_DEFAULTS_BAR1"] = "Bar Layout 1"
 L["TEXTLAYOUTS_DEFAULTS_DURATION"] = "Duration"
+L["TEXTLAYOUTS_DEFAULTS_SPELL"] = "Spell"
 L["TEXTLAYOUTS_DEFAULTS_STACKS"] = "Stacks"
 L["TEXTLAYOUTS_DEFAULTS_BINDINGLABEL"] = "Binding/Label"
 L["TEXTLAYOUTS_DEFAULTS_CENTERNUMBER"] = "Center Number"
@@ -787,6 +788,10 @@ L["TEXTLAYOUTS_DELETELAYOUT"] = "Delete Layout"
 L["TEXTLAYOUTS_DELETELAYOUT_DESC"] = [[Click to delete this text layout.
 
 Hold |cff7fffffCtrl|r to bypass confirmation.]]
+L["TEXTLAYOUTS_ADDANCHOR"] = "Add Anchor"
+L["TEXTLAYOUTS_ADDANCHOR_DESC"] = [[Click to add another text anchor.]]
+L["TEXTLAYOUTS_DELANCHOR"] = "Delete Anchor"
+L["TEXTLAYOUTS_DELANCHOR_DESC"] = [[Click to delete this text anchor.]]
 L["TEXTLAYOUTS_DELETELAYOUT_CONFIRM_BASE"] = "Are you sure you want to delete the layout %q?"
 L["TEXTLAYOUTS_DELETELAYOUT_CONFIRM_NUM"] = "|cFFFF5959The %d |4icon:icons; that |4depends:depend; on it will revert back to using default text layouts.|r"
 L["TEXTLAYOUTS_LAYOUTDISPLAYS"] = [[Displays:
@@ -850,8 +855,11 @@ L["TEXTLAYOUTS_POSITIONSETTINGS"] = "Position Settings"
 L["TEXTLAYOUTS_RESETSKINAS"] = "The %q setting has been reset for font string %q in order to prevent conflicts with the new setting for font string %q."
 
 
-L["TEXTLAYOUTS_POINT_DESC"] = "The point on the text display that will be anchored to the icon"
-L["TEXTLAYOUTS_RELATIVEPOINT_DESC"] = "The point on the icon that will be anchored to"
+L["TEXTLAYOUTS_POINT_DESC"] = "The point on the text display that will be anchored to the object"
+L["TEXTLAYOUTS_RELATIVEPOINT_DESC"] = "The point on the object that will be anchored to"
+L["TEXTLAYOUTS_RELATIVETO_DESC"] = "The object that the text will be anchored to"
+
+L["UIPANEL_ANCHORNUM"] = "Anchor %d"
 
 -- -------------
 -- CONDITION PANEL
@@ -1103,8 +1111,8 @@ L["MAKENEWGROUP"] = "|cff59ff59Create|r New Group"
 
 --[=[L["CNDT_SLIDER_DESC_BASE"] = [[|cff7fffffMousewheel|r to adjust.
 |cff7fffffShift-Mousewheel|r to adjust x10.
-|cff7fffffControl-Mousewheel|r to adjust x60.
-|cff7fffffControl-Shift-Mousewheel|r to adjust x600.]]]=]
+|cff7fffffCtrl-Mousewheel|r to adjust x60.
+|cff7fffffCtrl-Shift-Mousewheel|r to adjust x600.]]]=]
 L["CNDT_SLIDER_DESC_CLICKSWAP_TOMANUAL"] = [[|cff7fffffRight-Click|r to switch to manual input.]]
 L["CNDT_SLIDER_DESC_CLICKSWAP_TOSLIDER"] = [[|cff7fffffRight-Click|r to switch to slider input.]]
 L["CNDT_SLIDER_DESC_CLICKSWAP_TOSLIDER_DISALLOWED"] = [[Only manual input is allowed for values over %s (Blizzard's sliders can behave strangely with large values.)]]
@@ -1114,9 +1122,9 @@ L["IconModule_IconContainer_MasqueIconContainer"] = "Icon Container"
 L["IconModule_IconContainer_MasqueIconContainer_DESC"] = "Holds the main parts of the icon, such as the texture"
 L["IconModule_TimerBar_OverlayTimerBar"] = "Timer Bar Overlay"
 L["IconModule_PowerBar_OverlayPowerBar"] = "Power Bar Overlay"
-L["IconModule_Texture_ColoredTexture"] = "Texture"
+L["IconModule_Texture_ColoredTexture"] = "Icon Texture"
 L["IconModule_CooldownSweepCooldown"] = "Cooldown Sweep"
-L["IconModule_TimerBar_BarDisplayTimerBar"] = "Timer Bar"
+L["IconModule_TimerBar_BarDisplayTimerBar"] = "Timer Bar (Bar display)"
 
 
 L["GROUPADDONSETTINGS"] = "Group Settings"
@@ -1212,10 +1220,10 @@ L["fTEXTLAYOUT"] = "Text Layout: %s"
 
 L["CONFIGPANEL_TIMER_HEADER"] = "Timer Sweep"
 L["CONFIGPANEL_CBAR_HEADER"] = "Timer Bar Overlay"
+L["CONFIGPANEL_TIMERBAR_BARDISPLAY_HEADER"] = "Timer Bar"
 L["CONFIGPANEL_PBAR_HEADER"] = "Power Bar Overlay"
 L["CONFIGPANEL_CLEU_HEADER"] = "Combat Events"
 L["CONFIGPANEL_CNDTTIMERS_HEADER"] = "Condition Timers"
-
 
 
 

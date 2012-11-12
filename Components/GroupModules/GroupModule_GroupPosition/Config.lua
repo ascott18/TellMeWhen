@@ -54,7 +54,7 @@ TMW.GroupConfigTemplate.args.position = {
 	hidden = function(info)
 		local g = findid(info)
 		
-		return not TMW[g]:GetModuleOrModuleChild("GroupModule_GroupPosition", true)
+		return not TMW[g] or not TMW[g]:GetModuleOrModuleChild("GroupModule_GroupPosition", true)
 	end,
 	args = {
 		point = {

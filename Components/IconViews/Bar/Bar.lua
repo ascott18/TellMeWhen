@@ -21,6 +21,9 @@ local ceil = ceil
 
 local View = TMW.Classes.IconView:New("bar")
 
+View.name = L["UIPANEL_GROUPTYPE_BAR"]
+View.desc = L["UIPANEL_GROUPTYPE_BAR_DESC"]
+
 TMW:RegisterDatabaseDefaults{
 	profile = {
 		TextLayouts = {
@@ -29,38 +32,50 @@ TMW:RegisterDatabaseDefaults{
 				GUID = "bar1",
 				NoEdit = true,
 				n = 2,
+				
 				-- Default Layout 1
-				{	-- [1] Stacks
-					x 	 		  	= -2,
-					y 	 		  	= 2,
-					ConstrainWidth	= false,
-					point			= "BOTTOMRIGHT",
-					relativePoint	= "BOTTOMRIGHT",
-					
-					StringName		= L["TEXTLAYOUTS_DEFAULTS_STACKS"],
-					DefaultText		= "[Stacks:Hide(0)]",
-					SkinAs			= "Count",
+				{	-- [1] Duration		
+					StringName = L["TEXTLAYOUTS_DEFAULTS_DURATION"],
+					DefaultText = "[Duration:TMWFormatDuration]",	
+					Anchors = {
+						{
+							x = -2,
+							point = "RIGHT",
+							relativePoint = "RIGHT",
+						}, -- [1]
+					},
 				},
-				{	-- [2] Duration
-					x 	 		  	= -2,
-					y 	 		  	= 0,
-					ConstrainWidth	= true,
-					point			= "RIGHT",
-					relativePoint	= "RIGHT",
+				{	-- [2] Spell
+					StringName = L["TEXTLAYOUTS_DEFAULTS_SPELL"],		
+					DefaultText = "[Spell] [Stacks:Hide(0):Paren]",
 					
-					StringName		= L["TEXTLAYOUTS_DEFAULTS_DURATION"],
-					DefaultText		= "[Duration:TMWFormatDuration]",
+					Justify = "LEFT",
+					Anchors = {
+						n = 2,
+						{
+							x = 2,
+							point = "LEFT",
+							relativeTo = "IconModule_IconContainer_MasqueIconContainer",
+							relativePoint = "RIGHT",
+						}, -- [1]
+						{
+							point = "RIGHT",
+							relativeTo = "$$1",
+							relativePoint = "LEFT",
+						}, -- [2]
+					},
 				},
 			},
 		},
 	},
 }
 
+
 View:RegisterGroupDefaults{
 	SettingsPerView = {
 		bar = {
 			TextLayout = "bar1",
-			SizeX = 140,
+			SizeX = 100,
 			SizeY = 20,
 		}
 	}
@@ -80,6 +95,9 @@ View:ImplementsModule("IconModule_CooldownSweep", 20, function(Module, icon)
 	Module.cooldown:ClearAllPoints()
 	Module.cooldown:SetPoint("LEFT", icon)
 	Module.cooldown:SetSize(gspv.SizeY, gspv.SizeY)
+end)
+View:ImplementsModule("IconModule_Backdrop", 25, function(Module, icon)
+	Module:Enable()
 end)
 View:ImplementsModule("IconModule_Texture_Colored", 30, function(Module, icon)
 	local group = icon.group
@@ -113,16 +131,22 @@ View:ImplementsModule("IconModule_IconContainer_Masque", 100, function(Module, i
 	
 	if Masque.isDefaultSkin then
 		CooldownSweep.cooldown:SetFrameLevel(icon:GetFrameLevel() + 3)
-		TimerBar_BarDisplay.bar:SetFrameLevel(icon:GetFrameLevel() + 2)
+		--TimerBar_BarDisplay.bar:SetFrameLevel(icon:GetFrameLevel() + 1)
 	else
 		CooldownSweep.cooldown:SetFrameLevel(icon:GetFrameLevel() + 2)
-		TimerBar_BarDisplay.bar:SetFrameLevel(icon:GetFrameLevel() + -1)
+		--TimerBar_BarDisplay.bar:SetFrameLevel(icon:GetFrameLevel() + -1)
 	end
+	TimerBar_BarDisplay.bar:SetFrameLevel(icon:GetFrameLevel() + -0)
 	
 	TimerBar_BarDisplay.bar:ClearAllPoints()
 	TimerBar_BarDisplay.bar:SetPoint("TOPRIGHT")
 	TimerBar_BarDisplay.bar:SetPoint("BOTTOMRIGHT")
 	TimerBar_BarDisplay.bar:SetPoint("LEFT", Masque.container, "RIGHT")
+	
+	local Backdrop = Modules.IconModule_Backdrop
+	Backdrop.container:ClearAllPoints()
+	Backdrop.container:SetAllPoints(TimerBar_BarDisplay.bar)
+	Backdrop.container:SetFrameLevel(icon:GetFrameLevel() - 2)
 end)
 
 View:ImplementsModule("GroupModule_Resizer_ScaleY_SizeX", 10, function(Module, group)

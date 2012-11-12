@@ -60,13 +60,23 @@ TMW:RegisterDatabaseDefaults{
 					StringName		= "",				-- Name of the string (user-readable)
 					Name 		  	= "Arial Narrow",	-- Name of the Font (Stupid key for this setting)
 					Size 		  	= 12,               -- Font size
-					x 	 		  	= 0,                -- Anchor setting
-					y 	 		  	= 0,                -- Anchor setting
-					point 		  	= "CENTER",         -- Anchor setting
-					relativePoint 	= "CENTER",         -- Anchor setting
+					--x 	 		  	= 0,                -- Anchor setting
+					--y 	 		  	= 0,                -- Anchor setting
+					--point 		  	= "CENTER",         -- Anchor setting
+					--relativePoint 	= "CENTER",         -- Anchor setting
+					Justify	 		= "CENTER",         -- 
 					Outline 	  	= "THICKOUTLINE",   -- Font outline
-					ConstrainWidth	= true,             -- fontString:SetWidth(icon:GetWidth())
 					
+					Anchors = {
+						n = 1,
+						["**"] = {
+							x 	 		  	= 0,                -- Anchor setting
+							y 	 		  	= 0,                -- Anchor setting
+							point 		  	= "CENTER",         -- Anchor setting
+							relativeTo	 	= "",         		-- Anchor setting
+							relativePoint 	= "CENTER",         -- Anchor setting
+						},
+					},
 					DefaultText		= "",               -- 
 					SkinAs			= "",               -- 
 				},
@@ -108,6 +118,28 @@ TMW:RegisterDatabaseDefaults{
 -- SETTINGS UPGRADES
 -- -------------------
 
+TMW:RegisterUpgrade(60448, {
+	textlayout = function(self, settings, GUID)
+		-- I decided to change [Stacks] to return numbers instead of strings
+		for i, displaySettings in ipairs(settings) do
+			displaySettings.Anchors.n = 1
+			
+			local point = displaySettings.point or "CENTER"
+			displaySettings.Justify = point:match("LEFT") or point:match("RIGHT") or "CENTER"
+			
+			displaySettings.Anchors[1].x 	 		  	= displaySettings.x or 0
+			displaySettings.Anchors[1].y 	 		  	= displaySettings.y or 0
+			displaySettings.Anchors[1].point 		  	= displaySettings.point or "CENTER"
+			displaySettings.Anchors[1].relativePoint 	= displaySettings.relativePoint or "CENTER"
+			
+			displaySettings.x 	 		  	= nil
+			displaySettings.y 	 		  	= nil
+			displaySettings.point 		  	= nil
+			displaySettings.relativePoint 	= nil
+		end
+	end,
+})
+
 TMW:RegisterUpgrade(60338, {
 	-- I decided to change [Stacks] to return numbers instead of strings
 	icon = function(self, ics)
@@ -130,12 +162,12 @@ TMW:RegisterUpgrade(60338, {
 })
 
 TMW:RegisterUpgrade(60317, {
-	textlayout = function(self, layoutSettings)
+	textlayout = function(self, settings, GUID)
 		-- A bug with importing text layouts led them to have their Name attribute set as a table
 		-- (Happened because Name was getting set to nil, and was getting recreated as a table through metamethods)
 		
-		if type(layoutSettings.Name) == "table" then
-			layoutSettings.Name = "Sorry, the name of this layout was lost."
+		if type(settings.Name) == "table" then
+			settings.Name = "Sorry, the name of this layout was lost."
 		end
 	end
 })
@@ -551,7 +583,10 @@ function Texts:SetupForIcon(sourceIcon)
 		fontString.TMW_QueueForRemoval = true
 	end
 		
-	if layoutSettings then				
+	if layoutSettings then
+		local IconModule_IconContainer_Masque = icon:GetModuleOrModuleChild("IconModule_IconContainer_Masque")	
+		local isDefaultSkin = IconModule_IconContainer_Masque and IconModule_IconContainer_Masque.isDefaultSkin
+			
 		for fontStringID, fontStringSettings in TMW:InNLengthTable(layoutSettings) do
 			fontStringID = self:GetFontStringID(fontStringID, fontStringSettings)
 			
@@ -559,18 +594,53 @@ function Texts:SetupForIcon(sourceIcon)
 			fontString:Show()
 			fontString.settings = fontStringSettings
 			
-			fontString:SetWidth(fontStringSettings.ConstrainWidth and icon:GetWidth() or 0)
+			--fontString:SetWidth(fontStringSettings.ConstrainWidth and icon:GetWidth() or 0)
 	
-			if not LMB or fontStringSettings.SkinAs == "" then
+			if not LMB or isDefaultSkin or fontStringSettings.SkinAs == "" then				
+				-- Font
+				fontString:SetFont(LSM:Fetch("font", fontStringSettings.Name), fontStringSettings.Size, fontStringSettings.Outline)
+				
+				fontString:SetJustifyH(fontStringSettings.Justify)
+			end
+		end
+		
+		for fontStringID, fontStringSettings in TMW:InNLengthTable(layoutSettings) do
+			fontStringID = self:GetFontStringID(fontStringID, fontStringSettings)
+			
+			local fontString = self.fontStrings[fontStringID] or self:CreateFontString(fontStringID)
+	
+			if not LMB or isDefaultSkin or fontStringSettings.SkinAs == "" then		
 				-- Position
 				fontString:ClearAllPoints()
 				local func = fontString.__MSQ_SetPoint or fontString.SetPoint
-				func(fontString, fontStringSettings.point, icon, fontStringSettings.relativePoint, fontStringSettings.x, fontStringSettings.y)
-
-				fontString:SetJustifyH(fontStringSettings.point:match("LEFT") or fontStringSettings.point:match("RIGHT") or "CENTER")
 				
-				-- Font
-				fontString:SetFont(LSM:Fetch("font", fontStringSettings.Name), fontStringSettings.Size, fontStringSettings.Outline)
+				for n, anchorSettings in TMW:InNLengthTable(fontStringSettings.Anchors) do
+					local relativeTo = anchorSettings.relativeTo
+					if relativeTo:sub(1, 2) == "$$" then
+						relativeTo = tonumber(relativeTo:sub(3))
+						if relativeTo <= layoutSettings.n then
+							local fontStringSettingsOfAnchor = layoutSettings[relativeTo]
+							relativeTo = self:GetFontStringID(relativeTo, fontStringSettingsOfAnchor)
+							relativeTo = self.fontStrings[relativeTo]
+						else
+							relativeTo = nil
+						end
+						if not relativeTo then
+							TMW:Error("Couldn't find the anchor %q for icon %q, font string %s", anchorSettings.relativeTo, icon:GetName(), fontStringID)
+							relativeTo = icon
+						end
+					else
+						relativeTo = icon:GetName() .. relativeTo
+						if not _G[relativeTo] then
+							if self.hasSetupOnce then
+								TMW:Error("Couldn't find the anchor %q for icon %q, font string %s", anchorSettings.relativeTo, icon:GetName(), fontStringID)
+							end
+							relativeTo = icon
+						end
+					end
+					
+					func(fontString, anchorSettings.point, relativeTo, anchorSettings.relativePoint, anchorSettings.x, anchorSettings.y)
+				end
 			end
 		end
 	end
@@ -585,6 +655,7 @@ function Texts:SetupForIcon(sourceIcon)
 			fontString:Hide()
 		end
 	end
+	self.hasSetupOnce = true
 end
 
 function Texts:GetFontStringID(fontStringID, fontStringSettings)

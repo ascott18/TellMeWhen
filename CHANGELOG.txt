@@ -1,6 +1,10 @@
+===v6.1.0===
+ * New icon display method: Bars.
+ * You may notice some slight changes to the way your text layouts appear, especially if you used the Constrain Width setting. You will have to re-adjust your old layouts to achieve old functionality, which will probably require adding a second anchor to any affected text displays.
+ 
 ===v6.0.4===
- * **New icon event: On Condition Set Passing. Allows you to create a set of conditions and then have an event react to them.**
- * New icon event: On Icon Setup. Allows you to have a "default state" for icon animations.
+ * **New icon event: On Condition Set Passing. Allows you to create an event handler that reacts to the state of a condition set.**
+ * New icon event: On Icon Setup. Essentially allows you to have a "default state" for icon animations.
  * Added a dropdown menu to select an icon when right clicking a spot on your screen that contains multiple icons.
  * Conditions with no maximum value (e.g. Health/Mana; any condition that checks a time) now allow manual input of a value.
  * There is now an option to allow configuration while in combat (as opposed to allowing at all the time with potential bugs, the options module now loads at login when this option is enabled to prevent many errors and bugs).

@@ -23,6 +23,9 @@ local ceil = ceil
 
 local View = TMW.Classes.IconView:New("icon")
 
+View.name = L["UIPANEL_GROUPTYPE_ICON"]
+View.desc = L["UIPANEL_GROUPTYPE_ICON_DESC"]
+
 local ICON_SIZE = 30
 
 TMW:RegisterDatabaseDefaults{
@@ -35,21 +38,39 @@ TMW:RegisterDatabaseDefaults{
 				n = 2,
 				-- Default Layout 1
 				{	-- [1] Bind
-					x 	 		  	= -2,
-					y 			 	= -2,
-					point 		 	= "TOPLEFT",
-					relativePoint	= "TOPLEFT",
+					Anchors = {
+						n = 2,
+						{
+							x 	 		  	= -2,
+							y 	 		  	= -2,
+							point 		  	= "TOPLEFT",
+							relativeTo	 	= "",
+							relativePoint 	= "TOPLEFT",
+						},
+						{
+							x 	 		  	= -2,
+							y 	 		  	= -2,
+							point 		  	= "TOPRIGHT",
+							relativeTo	 	= "",
+							relativePoint 	= "TOPRIGHT",
+						},
+					},
 					
 					StringName		= L["TEXTLAYOUTS_DEFAULTS_BINDINGLABEL"],
 					DefaultText		= "",
 					SkinAs			= "HotKey",
 				},
 				{	-- [2] Stacks
-					x 	 		  	= -2,
-					y 	 		  	= 2,
-					ConstrainWidth	= false,
-					point			= "BOTTOMRIGHT",
-					relativePoint	= "BOTTOMRIGHT",
+					Anchors = {
+						n = 1,
+						{
+							x 	 		  	= -2,
+							y 	 		  	= 2,
+							point 		  	= "BOTTOMRIGHT",
+							relativeTo	 	= "",
+							relativePoint 	= "BOTTOMRIGHT",
+						},
+					},
 					
 					StringName		= L["TEXTLAYOUTS_DEFAULTS_STACKS"],
 					DefaultText		= "[Stacks:Hide(0)]",

@@ -26,8 +26,8 @@ TimerBar_BarDisplay:RegisterIconDefaults{
 	BarDisplay_BarGCD		= false,
 }
 
-TimerBar_BarDisplay:RegisterConfigPanel_ConstructorFunc(200, "TellMeWhen_TimerBar_BarDisplay_Settings", function(self)
-	self.Header:SetText(L["CONFIGPANEL_TIMER_HEADERTODOMAKETHISSOMETHINGCORRECTLYDESCRIPTIVE"])
+TimerBar_BarDisplay:RegisterConfigPanel_ConstructorFunc(210, "TellMeWhen_TimerBar_BarDisplay_Settings", function(self)
+	self.Header:SetText(L["CONFIGPANEL_TIMERBAR_BARDISPLAY_HEADER"])
 	TMW.IE:BuildSimpleCheckSettingFrame(self, {
 		numPerRow = 2,
 		{

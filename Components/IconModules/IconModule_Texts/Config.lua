@@ -419,12 +419,12 @@ TMW.GroupConfigTemplate.args.main.args.TextLayout = {
 	hidden = function(info)
 		local groupID = TMW.FindGroupIDFromInfo(info)
 
-		local viewData = TMW[groupID].viewData
+		local viewData = TMW[groupID] and TMW[groupID].viewData
 		
-		return not viewData:DoesImplementModule("IconModule_Texts")
+		return not viewData or not viewData:DoesImplementModule("IconModule_Texts")
 	end,
 	style = "dropdown",
-	order = 25,
+	order = 29,
 	get = function(info, val)
 		return "%FAKEGET%"
 	end,
@@ -624,6 +624,149 @@ local textLayoutTemplate = {
 	},
 }
 
+local anchorSet = {
+	name = function(info, val)
+		return L["UIPANEL_ANCHORNUM"]:format(info[textLayoutInfo.stringSetting + 1])
+	end,
+	order = 30,
+	type = "group",
+	guiInline = true,
+	dialogInline = true,			
+	set = function(info, val)
+		local layout = findlayout(info)
+		local display = tonumber(info[textLayoutInfo.display])
+		local anchorNum = tonumber(info[textLayoutInfo.stringSetting + 1])
+		local setting = info[textLayoutInfo.stringSetting + 2]
+		TEXT:GetTextLayoutSettings(layout)[display].Anchors[anchorNum][setting] = val
+		UpdateIconsUsingTextLayout(layout)
+		TEXT:LoadConfig()
+	end,
+	get = function(info)
+		local layout = findlayout(info)
+		local display = tonumber(info[textLayoutInfo.display])
+		local anchorNum = tonumber(info[textLayoutInfo.stringSetting + 1])
+		local setting = info[textLayoutInfo.stringSetting + 2]
+		
+		return TEXT:GetTextLayoutSettings(layout)[display].Anchors[anchorNum][setting]
+	end,
+	hidden = function(info)
+		local layout = findlayout(info)
+		local display = tonumber(info[textLayoutInfo.display])
+		local setting = tonumber(info[textLayoutInfo.stringSetting + 1])
+		return TEXT:GetTextLayoutSettings(layout)[display].Anchors.n < setting
+	end,
+	disabled = function(info)
+		local layout = findlayout(info)
+		local display = tonumber(info[textLayoutInfo.display])
+		return
+			TEXT:GetTextLayoutSettings(layout).NoEdit or
+			(LMB and TEXT:GetTextLayoutSettings(layout)[display].SkinAs ~= "")
+	end,
+	order = function(info)
+		return tonumber(info[textLayoutInfo.stringSetting + 1]) + 10
+	end,
+	args = {
+		point = {
+			name = L["UIPANEL_POINT"],
+			desc = L["TEXTLAYOUTS_POINT_DESC"],
+			type = "select",
+			values = TMW.points,
+			style = "dropdown",
+			order = 10,
+		},
+		relativeTo = {
+			name = L["UIPANEL_RELATIVETO"],
+			desc = L["TEXTLAYOUTS_RELATIVETO_DESC"],
+			type = "select",
+			width = "double",
+			values = function(info)
+				local t = {
+					[""] = L["ICON"],
+				}
+				local layout = findlayout(info)
+				local display = tonumber(info[textLayoutInfo.display])
+				
+				for i, fontStringSettings in TMW:InNLengthTable(TEXT:GetTextLayoutSettings(layout)) do
+					if i ~= display then
+						t["$$" .. i] = L["TEXTLAYOUTS_fSTRING3"]:format(TEXT:GetStringName(fontStringSettings, i))
+					end
+				end
+				
+				for IconModule in pairs(TMW.Classes.IconModule.inheritedBy) do
+					if #IconModule.instances > 0 then
+						for identifier, localizedName in pairs(IconModule.anchorableChildren) do
+							if type(localizedName) == "string" then
+								--print(IconModule, v, a, localizedName)
+								t[IconModule.className .. identifier] = localizedName
+							end
+						end
+					end
+					
+				end
+
+
+				return t
+			end,
+			style = "dropdown",
+			order = 12,
+		},
+		relativePoint = {
+			name = L["UIPANEL_RELATIVEPOINT"],
+			desc = L["TEXTLAYOUTS_RELATIVEPOINT_DESC"],
+			type = "select",
+			values = TMW.points,
+			style = "dropdown",
+			order = 13,
+		},
+		x = {
+			name = L["UIPANEL_FONT_XOFFS"],
+			desc = L["UIPANEL_FONT_XOFFS_DESC"],
+			type = "range",
+			order = 20,
+			min = -30,
+			max = 30,
+			step = 1,
+			bigStep = 1,
+		},
+		y = {
+			name = L["UIPANEL_FONT_YOFFS"],
+			desc = L["UIPANEL_FONT_YOFFS_DESC"],
+			type = "range",
+			order = 21,
+			min = -30,
+			max = 30,
+			step = 1,
+			bigStep = 1,
+		},
+		DeleteAnchor = {
+			name = L["TEXTLAYOUTS_DELANCHOR"],
+			desc = L["TEXTLAYOUTS_DELANCHOR_DESC"],
+			type = "execute",
+			order = 40,
+			func = function(info)
+				local layout = findlayout(info)
+				local display = tonumber(info[textLayoutInfo.display])
+				local Anchors = TEXT:GetTextLayoutSettings(layout)[display].Anchors
+				local anchorNum = tonumber(info[textLayoutInfo.stringSetting + 1])
+				
+				tremove(Anchors, anchorNum)
+				Anchors.n = Anchors.n - 1
+				
+				TMW:CompileOptions()
+				UpdateIconsUsingTextLayout(layout)
+				TEXT:LoadConfig()
+			end,
+			disabled = function(info)
+				local layout = findlayout(info)
+				local display = tonumber(info[textLayoutInfo.display])
+				local Anchors = TEXT:GetTextLayoutSettings(layout)[display].Anchors
+				
+				return Anchors.n <= 1 or TEXT:GetTextLayoutSettings(layout).NoEdit
+			end,
+		},
+	},
+}
+		
 local textFontStringTemplate = {
 	type = "group",
 	name = function(info)
@@ -672,7 +815,7 @@ local textFontStringTemplate = {
 				local setting = info[textLayoutInfo.stringSetting]
 				assert(setting == "SkinAs")
 				for id, strSettings in TMW:InNLengthTable(TEXT:GetTextLayoutSettings(layout)) do
-					if strSettings[setting] == val then
+					if strSettings[setting] == val and strSettings[setting] ~= "" then
 						strSettings[setting] = ""
 						TMW:Printf(L["TEXTLAYOUTS_RESETSKINAS"],
 							L["TEXTLAYOUTS_SKINAS"],
@@ -685,7 +828,7 @@ local textFontStringTemplate = {
 				UpdateIconsUsingTextLayout(layout)
 				TEXT:LoadConfig()
 			end,
-			hidden = not (LMB),
+			hidden = not LMB,
 		},
 		DefaultText = {
 			name = L["TEXTLAYOUTS_DEFAULTTEXT"],
@@ -759,6 +902,7 @@ local textFontStringTemplate = {
 				},
 			},
 		},
+		
 		position = {
 			name = L["TEXTLAYOUTS_POSITIONSETTINGS"],
 			order = 30,
@@ -787,51 +931,36 @@ local textFontStringTemplate = {
 					(LMB and TEXT:GetTextLayoutSettings(layout)[display].SkinAs ~= "")
 			end,
 			args = {
-				point = {
-					name = L["UIPANEL_POINT"],
-					desc = L["TEXTLAYOUTS_POINT_DESC"],
+				Justify = {
+					name = L["UIPANEL_FONT_JUSTIFY"],
+					desc = L["UIPANEL_FONT_JUSTIFY_DESC"],
 					type = "select",
-					values = TMW.points,
+					values = TMW.justifyPoints,
 					style = "dropdown",
-					order = 10,
-				},
-				relativePoint = {
-					name = L["UIPANEL_RELATIVEPOINT"],
-					desc = L["TEXTLAYOUTS_RELATIVEPOINT_DESC"],
-					type = "select",
-					values = TMW.points,
-					style = "dropdown",
-					order = 13,
-				},
-				ConstrainWidth = {
-					name = L["UIPANEL_FONT_CONSTRAINWIDTH"],
-					desc = L["UIPANEL_FONT_CONSTRAINWIDTH_DESC"],
-					type = "toggle",
 					order = 1,
 					disabled = function(info)
 						local layout = findlayout(info)
 						return TEXT:GetTextLayoutSettings(layout).NoEdit
 					end,
 				},
-				x = {
-					name = L["UIPANEL_FONT_XOFFS"],
-					desc = L["UIPANEL_FONT_XOFFS_DESC"],
-					type = "range",
-					order = 20,
-					min = -30,
-					max = 30,
-					step = 1,
-					bigStep = 1,
-				},
-				y = {
-					name = L["UIPANEL_FONT_YOFFS"],
-					desc = L["UIPANEL_FONT_YOFFS_DESC"],
-					type = "range",
-					order = 21,
-					min = -30,
-					max = 30,
-					step = 1,
-					bigStep = 1,
+				AddAnchor = {
+					name = L["TEXTLAYOUTS_ADDANCHOR"],
+					desc = L["TEXTLAYOUTS_ADDANCHOR_DESC"],
+					type = "execute",
+					order = 2,
+					func = function(info)
+						local layout = findlayout(info)
+						local display = tonumber(info[textLayoutInfo.display])
+						local Anchors = TEXT:GetTextLayoutSettings(layout)[display].Anchors
+						Anchors.n = Anchors.n + 1
+						TMW:CompileOptions()
+						UpdateIconsUsingTextLayout(layout)
+						TEXT:LoadConfig()
+					end,
+					disabled = function(info)
+						local layout = findlayout(info)
+						return TEXT:GetTextLayoutSettings(layout).NoEdit
+					end,
 				},
 			},
 		},
@@ -850,6 +979,20 @@ local textFontStringTemplate = {
 					IE:NotifyChanges("textlayouts", rawLayoutKey, display - 1)
 				else
 					IE:NotifyChanges("textlayouts", rawLayoutKey, display)
+				end
+				
+				for i, fontStringSettings in TMW:InNLengthTable(TEXT:GetTextLayoutSettings(layout)) do
+					for _, anchorSettings in TMW:InNLengthTable(fontStringSettings.Anchors) do
+						local relativeTo = anchorSettings.relativeTo
+						if relativeTo:sub(1, 2) == "$$" then
+							relativeTo = tonumber(relativeTo:sub(3))
+							if relativeTo > display then
+								anchorSettings.relativeTo = "$$" .. relativeTo - 1
+							elseif relativeTo == display then
+								anchorSettings.relativeTo = ""
+							end
+						end
+					end
 				end
 				
 				tremove(TEXT:GetTextLayoutSettings(layout), display)
@@ -880,9 +1023,9 @@ local textFontStringTemplate = {
 		},
 		
 		NoEditDesc = {
-			name = "\r\n\r\n" .. L["TEXTLAYOUTS_NOEDIT_DESC"],
+			name = "\r\n" .. L["TEXTLAYOUTS_NOEDIT_DESC"] .. "\r\n",
 			type = "description",
-			order = 100,
+			order = 5,
 			disabled = false,
 			hidden = function(info)
 				local layout = findlayout(info)
@@ -937,7 +1080,14 @@ TMW:RegisterCallback("TMW_CONFIG_MAIN_OPTIONS_COMPILE", function(event, OptionsT
 			-- this will expand textLayoutTemplate's args tables to the needed number
 			-- unused textFontStringTemplate in it will not be removed - they are simply hidden.
 			textLayoutTemplate.args[tostring(fontStringID)] = textFontStringTemplate
+			
+			for anchorID = 1, fontString.Anchors.n do
+				-- this will expand textFontStringTemplate.args.position's args tables to the needed number
+				-- unused anchorSet in it will not be removed - they are simply hidden.
+				textFontStringTemplate.args.position.args[tostring(anchorID)] = anchorSet
+			end
 		end
+		
 		OptionsTable.args.textlayouts.args["#TextLayout " .. layoutID] = textLayoutTemplate
 	end
 end)

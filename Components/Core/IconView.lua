@@ -23,7 +23,6 @@ IconView.ModuleImplementors = {}
 
 function IconView:OnNewInstance(view)
 	self.view = view
-	self.name = view
 	
 	TMW.Icon_Defaults.SettingsPerView[view] = {}
 	self.IconDefaultsPerView = TMW.Icon_Defaults.SettingsPerView[view]
@@ -40,7 +39,7 @@ function IconView:Register(order)
 	if TMW.debug and rawget(TMW.Views, viewkey) then
 		-- for tweaking and recreating icon views inside of WowLua so that I don't have to change the viewkey every time.
 		viewkey = viewkey .. " - " .. date("%X")
-		self.name = viewkey
+		self.view = viewkey
 	end
 
 	TMW.Views[viewkey] = self -- put it in the main Views table
@@ -83,7 +82,6 @@ function IconView:DoesImplementModule(moduleName)
 	
 	return false
 end
-
 
 function IconView:OnImplementIntoIcon(icon)
 	for i, implementationData in ipairs(self.ModuleImplementors) do

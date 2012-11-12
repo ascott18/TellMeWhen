@@ -40,6 +40,7 @@ Type:UsesAttributes("stack, stackText")
 
 Type:SetModuleAllowance("IconModule_PowerBar_Overlay", false)
 Type:SetModuleAllowance("IconModule_TimerBar_Overlay", false)
+Type:SetModuleAllowance("IconModule_TimerBar_BarDisplay", false)
 Type:SetModuleAllowance("IconModule_Texts", false)
 Type:SetModuleAllowance("IconModule_CooldownSweep", false)
 

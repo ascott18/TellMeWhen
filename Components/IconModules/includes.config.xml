@@ -10,6 +10,7 @@
 <Include file="IconModule_PowerBar\includes.config.xml"/>
 <Include file="IconModule_PowerBar_Overlay\includes.config.xml"/>
 <Include file="IconModule_Texts\includes.config.xml"/>
+<Include file="IconModule_Backdrop\includes.config.xml"/>
 <Include file="IconModule_Texture\includes.config.xml"/>
 <Include file="IconModule_Texture_Colored\includes.config.xml"/>
 <Include file="IconModule_TimerBar\includes.config.xml"/>
