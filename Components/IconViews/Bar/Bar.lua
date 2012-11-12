@@ -248,5 +248,9 @@ function View:Group_SetupMacroAppearance(group)
 	group:SortIcons()
 end
 
+function View:Group_OnCreate(gs)
+	gs.Rows, gs.Columns = gs.Columns, gs.Rows
+end
+
 View:Register(10)
 

@@ -844,11 +844,7 @@ local addGroupButton = {
 		return TMW.Views[info[#info]].order
 	end,
 	func = function(info)
-		local groupID, group = TMW:Group_Add()
-		
-		local gs = TMW.db.profile.Groups[groupID]
-		gs.View = info[#info]
-		TMW:Update()
+		TMW:Group_Add(info[#info])
 	end,
 }
 local viewSelectToggle = {
@@ -1383,10 +1379,18 @@ function TMW:Group_Delete(groupID)
 	CloseDropDownMenus()
 end
 
-function TMW:Group_Add()
+function TMW:Group_Add(view)
 	local groupID = TMW.db.profile.NumGroups + 1
 	TMW.db.profile.NumGroups = groupID
-	TMW.db.profile.Groups[TMW.db.profile.NumGroups].Enabled = true
+	TMW.db.profile.Groups[groupID].Enabled = true
+	if view then
+		TMW.db.profile.Groups[groupID].View = view
+		
+		local viewData = TMW.Views[view]
+		if viewData and viewData.Group_OnCreate then
+			viewData:Group_OnCreate(TMW.db.profile.Groups[groupID])
+		end
+	end
 	TMW:Update()
 
 	TMW:CompileOptions()
