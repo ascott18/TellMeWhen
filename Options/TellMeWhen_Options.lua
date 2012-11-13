@@ -2352,7 +2352,7 @@ TMW:NewClass("SettingCheckButton", "CheckButton", "SettingFrameBase"){
 		get(self.data.OnClick, self, button) 
 	end,
 	OnCreate = function(self)
-		self.text:SetText(self.data.label or self.data.title)
+		self.text:SetText(get(self.data.label or self.data.title))
 		self:SetMotionScriptsWhileDisabled(true)
 	end,
 	
@@ -3022,14 +3022,15 @@ end
 
 
 ---------- Tooltips ----------
-local cachednames = {}
+--local cachednames = {}
 function IE:GetRealNames(Name) -- TODO: MODULARIZE THIS
 	-- gets a string to set as a tooltip of all of the spells names in the name box in the IE. Splits up equivalancies and turns IDs into names
 	local text = TMW:CleanString(Name)
 	
 	local SoI = CI.ics.Type == "item" and "item" or "spell"
 	
-	if cachednames[CI.ics.Type .. SoI .. text] then return cachednames[CI.ics.Type .. SoI .. text] end
+	-- Note 11/12/12 (WoW 5.0.4) - caching causes incorrect results with "replacement spells" after switching specs like the corruption/immolate pair 
+	--if cachednames[CI.ics.Type .. SoI .. text] then return cachednames[CI.ics.Type .. SoI .. text] end
 
 	local tbl
 	local GetSpellInfo = GetSpellInfo
@@ -3086,7 +3087,7 @@ function IE:GetRealNames(Name) -- TODO: MODULARIZE THIS
 	end
 	wipe(tiptemp)
 	str = strtrim(str, "\r\n ;")
-	cachednames[CI.ics.Type .. SoI .. text] = str
+	--cachednames[CI.ics.Type .. SoI .. text] = str
 	return str
 end
 

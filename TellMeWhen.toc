@@ -17,7 +17,7 @@
 ## Notes-koKR: 재사용 대기, 강화 효과와 그밖의 꽤 많은 것에 관해 시청각적이고도 문자적인 알림을 제공합니다.
 ## Notes-ruRU: Визуальные, звуковые и текстовые оповещения о готовности заклинаний, способностей, наличии баффов/дебаффов и многого другого.
 
-## OptionalDeps: Masque, Ace3, OmniCC, tullaCC, sct, sctd, MikScrollingBattleText, Parrot, DRData-1.0, LibDogTag-3.0, LibDogTag-Unit-3.0, LibSpellRange-1.0
+## OptionalDeps: Masque, Ace3, OmniCC, tullaCC, sct, sctd, MikScrollingBattleText, Parrot, DRData-1.0, LibDogTag-3.0, LibDogTag-Unit-3.0, LibSpellRange-1.0, ElvUI, Tukui
 # The per character settings are the old settings, but we still need them to upgrade to the new ones. If they aren't defined, then they will be deleted immediately
 ## SavedVariablesPerCharacter: TellMeWhen_Settings
 ## SavedVariables: TellMeWhenDB

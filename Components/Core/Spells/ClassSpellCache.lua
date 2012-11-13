@@ -231,7 +231,10 @@ end
 function ClassSpellCache:PLAYER_ENTERING_WORLD()
 	self:SendCommMessage(self.CONST.COMM_SLUG, self:Serialize("RCSL"), "RAID")
 	self:SendCommMessage(self.CONST.COMM_SLUG, self:Serialize("RCSL"), "PARTY")
-	self:SendCommMessage(self.CONST.COMM_SLUG, self:Serialize("RCSL"), "BATTLEGROUND")
+	if clientVersion < 50100 then
+		-- Seems to be removed in WoW 5.1?
+		self:SendCommMessage(self.CONST.COMM_SLUG, self:Serialize("RCSL"), "BATTLEGROUND")
+	end
 end
 
 

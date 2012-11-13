@@ -34,26 +34,26 @@ CooldownSweep:RegisterConfigPanel_ConstructorFunc(200, "TellMeWhen_TimerSettings
 		numPerRow = 2,
 		{
 			setting = "ShowTimer",
-			title = TMW.L["ICONMENU_SHOWTIMER"],
-			tooltip = TMW.L["ICONMENU_SHOWTIMER_DESC"],
+			title = L["ICONMENU_SHOWTIMER"],
+			tooltip = L["ICONMENU_SHOWTIMER_DESC"],
 		},
 		{
 			setting = "ShowTimerText",
-			title = TMW.L["ICONMENU_SHOWTIMERTEXT"],
-			tooltip = TMW.L["ICONMENU_SHOWTIMERTEXT_DESC"],
+			title = L["ICONMENU_SHOWTIMERTEXT"],
+			tooltip = L["ICONMENU_SHOWTIMERTEXT_DESC"],
 		},
 		{
 			setting = "ClockGCD",
-			title = TMW.L["ICONMENU_ALLOWGCD"],
-			tooltip = TMW.L["ICONMENU_ALLOWGCD_DESC"],
+			title = L["ICONMENU_ALLOWGCD"],
+			tooltip = L["ICONMENU_ALLOWGCD_DESC"],
 			disabled = function(self)
 				return not TMW.CI.ics.ShowTimer and not TMW.CI.ics.ShowTimerText and not TMW.CI.ics.ShowTimerTextnoOCC
 			end,
 		},
 		{
 			setting = "ShowTimerTextnoOCC",
-			title = TMW.L["ICONMENU_SHOWTIMERTEXT_NOOCC"],
-			tooltip = TMW.L["ICONMENU_SHOWTIMERTEXT_NOOCC_DESC"],
+			title = L["ICONMENU_SHOWTIMERTEXT_NOOCC"],
+			tooltip = L["ICONMENU_SHOWTIMERTEXT_NOOCC_DESC"],
 			hidden = function()
 				return not IsAddOnLoaded("ElvUI")
 			end,
@@ -134,8 +134,23 @@ function CooldownSweep:SetupForIcon(icon)
 	self.ShowTimerTextnoOCC = icon.ShowTimerTextnoOCC
 	self.ClockGCD = icon.ClockGCD
 	
+	local tukui = IsAddOnLoaded("Tukui")
+	local elvui = IsAddOnLoaded("ElvUI")
+	
+	if tukui then
+		-- Tukui forcibly disables its own timers if OmniCC is installed.
+		self.cooldown.noCooldownCount = not icon.ShowTimerText
+		self.cooldown.noOCC = not icon.ShowTimerText
+	elseif elvui then
+		self.cooldown.noCooldownCount = not icon.ShowTimerText -- For OmniCC/tullaCC/most other cooldown count mods (I think LUI uses this too)
+		self.cooldown.noOCC = not icon.ShowTimerTextnoOCC -- For ElvUI
+	else
+		self.cooldown.noCooldownCount = not icon.ShowTimerText -- For OmniCC/tullaCC/most other cooldown count mods (I think LUI uses this too)
+	end
+	--[[
 	self.cooldown.noCooldownCount = not icon.ShowTimerText -- For OmniCC/tullaCC/most other cooldown count mods (I think LUI uses this too)
 	self.cooldown.noOCC = not icon.ShowTimerTextnoOCC -- For ElvUI
+	]]
 	
 	local attributes = icon.attributes
 	

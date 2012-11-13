@@ -30,8 +30,8 @@ local DogTag = LibStub("LibDogTag-3.0", true)
 TELLMEWHEN_VERSION = "6.1.0"
 TELLMEWHEN_VERSION_MINOR = strmatch(" @project-version@", " r%d+") or ""
 TELLMEWHEN_VERSION_FULL = TELLMEWHEN_VERSION .. TELLMEWHEN_VERSION_MINOR
-TELLMEWHEN_VERSIONNUMBER = 61002 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
-if TELLMEWHEN_VERSIONNUMBER > 62001 or TELLMEWHEN_VERSIONNUMBER < 61000 then return error("YOU SCREWED UP THE VERSION NUMBER OR DIDNT CHANGE THE SAFETY LIMITS") end -- safety check because i accidentally made the version number 414069 once
+TELLMEWHEN_VERSIONNUMBER = 61003 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
+if TELLMEWHEN_VERSIONNUMBER > 62000 or TELLMEWHEN_VERSIONNUMBER < 61000 then return error("YOU SCREWED UP THE VERSION NUMBER OR DIDNT CHANGE THE SAFETY LIMITS") end -- safety check because i accidentally made the version number 414069 once
 
 TELLMEWHEN_MAXROWS = 20
 
@@ -1512,7 +1512,7 @@ function TMW:MakeFunctionCached(obj, method)
         obj[method] = wrapper
     end
 
-    return wrapper
+    return wrapper, cache
 end
 
 function TMW:MakeSingleArgFunctionCached(obj, method)
@@ -2981,7 +2981,10 @@ function TMW:PLAYER_ENTERING_WORLD()
 		end
 		TMW:SendCommMessage("TMWV", "M:" .. TELLMEWHEN_VERSION .. "^m:" .. TELLMEWHEN_VERSION_MINOR .. "^R:" .. TELLMEWHEN_VERSIONNUMBER .. "^", "RAID")
 		TMW:SendCommMessage("TMWV", "M:" .. TELLMEWHEN_VERSION .. "^m:" .. TELLMEWHEN_VERSION_MINOR .. "^R:" .. TELLMEWHEN_VERSIONNUMBER .. "^", "PARTY")
-		TMW:SendCommMessage("TMWV", "M:" .. TELLMEWHEN_VERSION .. "^m:" .. TELLMEWHEN_VERSION_MINOR .. "^R:" .. TELLMEWHEN_VERSIONNUMBER .. "^", "BATTLEGROUND")
+		if clientVersion < 50100 then
+			-- Seems to be removed in WoW 5.1?
+			TMW:SendCommMessage("TMWV", "M:" .. TELLMEWHEN_VERSION .. "^m:" .. TELLMEWHEN_VERSION_MINOR .. "^R:" .. TELLMEWHEN_VERSIONNUMBER .. "^", "BATTLEGROUND")
+		end
 	end
 end
 
@@ -5575,7 +5578,17 @@ function TMW:GetSpellNames(icon, setting, firstOnly, toname, hash, keepDurations
 	end
 	return buffNames
 end
---TMW:MakeFunctionCached(TMW, "GetSpellNames")
+do
+	-- We need to wipe the cache on every TMW_GLOBAL_UPDATE because of issues with
+	-- spells that replace other spells in different specs, like Corruption/Immolate.
+	-- TMW_GLOBAL_UPDATE might fire a little too often for this, but it is a surefire way to prevent issues that should
+	-- hold up through out all future game updates because TMW_GLOBAL_UPDATE should always react to any changes in spec/talents/etc
+	
+	local _, cache = TMW:MakeFunctionCached(TMW, "GetSpellNames")
+	TMW:RegisterCallback("TMW_GLOBAL_UPDATE", function()
+		wipe(cache)
+	end)
+end
 
 function TMW:GetSpellDurations(icon, setting)
 	local NameArray = TMW:GetSpellNames(icon, setting, nil, nil, nil, 1)
