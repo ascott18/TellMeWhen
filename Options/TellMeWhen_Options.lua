@@ -3941,11 +3941,11 @@ function EVENTS:ChooseEvent(id)
 	for i, frame in ipairs(self.EventList) do
 		frame.selected = nil
 		frame:UnlockHighlight()
-		frame:GetHighlightTexture():SetVertexColor(1, 1, 1, 1)
+		frame:GetHighlightTexture():SetAlpha(0.1)
 	end
 	eventFrame.selected = 1
 	eventFrame:LockHighlight()
-	eventFrame:GetHighlightTexture():SetVertexColor(NORMAL_FONT_COLOR.r, NORMAL_FONT_COLOR.g, NORMAL_FONT_COLOR.b, 1)
+	eventFrame:GetHighlightTexture():SetAlpha(0.2)
 
 	IE.Events.ScrollFrame.adjustmentQueued = true
 	

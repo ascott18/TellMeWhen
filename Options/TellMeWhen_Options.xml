@@ -535,7 +535,7 @@
 				local height = self:GetHeight()
 				self.percentage = height/(yrange+height)
 
-				self.ScrollBar.Thumb:SetHeight(height*self.percentage)
+				self.ScrollBar.Thumb:SetHeight(max(height*self.percentage, 15))
 
 				self.ScrollBar.Thumb:SetPoint("TOP", self, "TOP", 0, -(self:GetVerticalScroll()*self.percentage))
 			</OnScrollRangeChanged>
@@ -630,6 +630,37 @@
 										<MinColor r="1" g="1" b="1" a="1"/>
 										<MaxColor r="0.6" g="0.6" b="0.6" a="1"/>
 									</Gradient>
+								</Texture>
+								
+								<Texture name="$parenttick1">
+									<Color r="0.2" g="0.2" b="0.2"/>
+									<Size y="1"/>
+					
+									<Anchors>
+										<Anchor point="LEFT" x="1"/>
+										<Anchor point="RIGHT" x="-1"/>
+									</Anchors>
+								</Texture>
+								
+								<Texture>
+									<Color r="0.2" g="0.2" b="0.2"/>
+									<Size y="1"/>
+									<Anchors>
+										<Anchor point="LEFT" x="1"/>
+										<Anchor point="RIGHT" x="-1"/>
+										<Anchor point="BOTTOM" relativeTo="$parenttick1" relativePoint="TOP" y="2"/>
+									</Anchors>
+								</Texture>
+								
+								<Texture>
+									<Color r="0.2" g="0.2" b="0.2"/>
+									<Size y="1"/>
+					
+									<Anchors>
+										<Anchor point="LEFT" x="1"/>
+										<Anchor point="RIGHT" x="-1"/>
+										<Anchor point="TOP" relativeTo="$parenttick1" relativePoint="BOTTOM" y="-2"/>
+									</Anchors>
 								</Texture>
 							</Layer>
 						</Layers>
@@ -1528,10 +1559,11 @@
 		</Scripts>
 		<NormalFont style="GameFontNormal"/>
 		<HighlightFont style="GameFontHighlight"/>
-		<HighlightTexture file="Interface\QuestFrame\UI-QuestLogTitleHighlight" alphaMode="ADD">
+		<HighlightTexture alphaMode="ADD" alpha="0.1">
+			<Color r="1" g="1" b="1"/>
 			<Anchors>
-				<Anchor point="TOPLEFT" y="-1"/>
-				<Anchor point="BOTTOMRIGHT" y="1"/>
+				<Anchor point="TOPLEFT" x="0.5" y="-0.5"/>
+				<Anchor point="BOTTOMRIGHT" x="-0.5" y="0.5"/>
 			</Anchors>
 		</HighlightTexture>
 
@@ -1980,10 +2012,11 @@
 								ToggleDropDownMenu(1, nil, self.DD, self, 0, 0)
 							</OnClick>
 						</Scripts>
-						<HighlightTexture file="Interface\QuestFrame\UI-QuestLogTitleHighlight" alphaMode="ADD">
+						<HighlightTexture alphaMode="ADD" alpha="0.1">
+							<Color r="1" g="1" b="1"/>
 							<Anchors>
-								<Anchor point="TOPLEFT" y="-1"/>
-								<Anchor point="BOTTOMRIGHT" y="1"/>
+								<Anchor point="TOPLEFT" x="0.5" y="-0.5"/>
+								<Anchor point="BOTTOMRIGHT" x="-0.5" y="0.5"/>
 							</Anchors>
 						</HighlightTexture>
 					</Button>

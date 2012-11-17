@@ -86,9 +86,7 @@
 		</HighlightTexture>
 		<Layers>
 			<Layer level="BACKGROUND">
-				<!-- <Texture name="$parentBackground" parentKey="Background" file="Interface\QuestFrame\UI-QuestLogTitleHighlight"> -->
-				<Texture name="$parentBackground" parentKey="Background" >
-					
+				<Texture name="$parentBackground" parentKey="Background">
 					<Color r="0.5" g="0.5" b="0.5" a="0.9"/>
 					<Anchors>
 						<Anchor point="TOPLEFT" y="-0.5"/>

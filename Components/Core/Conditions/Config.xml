@@ -621,20 +621,19 @@
 			<Button name="$parentAddDelete" parentKey="AddDelete">
 				<Size x="30" y="30"/>
 				<Anchors>
-					<Anchor point="TOPLEFT" relativeto="$parent" x="-4" y="4"/>
+					<Anchor point="TOPLEFT" x="-4" y="4"/>
 				</Anchors>
 				<Scripts>
 					<OnLoad>
-						self.RealParent = self:GetParent()
-						self:SetParent(self:GetParent():GetParent()) -- dont hide it when the group is hidden
+						TMW:TT(self, "CONDITIONPANEL_REMOVE")
 					</OnLoad>
 					<OnClick>
-						self.RealParent:AddDeleteHandler()
+						self:GetParent():AddDeleteHandler()
 					</OnClick>
 				</Scripts>
-				<NormalTexture urgency="5" file="Interface\AddOns\TellMeWhen\Textures\Plus-Up"/>
-				<PushedTexture file="Interface\AddOns\TellMeWhen\Textures\Plus-Down"/>
-				<HighlightTexture urgency="5" file="Interface\AddOns\TellMeWhen\Textures\Plus-Highlight" alphaMode="ADD"/>
+				<NormalTexture urgency="5" file="Interface\Buttons\UI-Panel-MinimizeButton-Up"/>
+				<PushedTexture file="Interface\Buttons\UI-Panel-MinimizeButton-Down"/>
+				<HighlightTexture urgency="5" file="Interface\Buttons\UI-Panel-MinimizeButton-Highlight" alphaMode="ADD"/>
 			</Button>
 		</Frames>
 		<Layers>
@@ -681,23 +680,6 @@
 				</FontString>
 			</Layer>
 		</Layers>
-		<Scripts>
-			<OnShow>
-				self.AddDelete:SetNormalTexture("Interface\\Buttons\\UI-Panel-MinimizeButton-Up")
-				self.AddDelete:SetPushedTexture("Interface\\Buttons\\UI-Panel-MinimizeButton-Down")
-				self.AddDelete:SetHighlightTexture("Interface\\Buttons\\UI-Panel-MinimizeButton-Highlight", "ADD")
-				TMW:TT(self.AddDelete, "CONDITIONPANEL_REMOVE")
-				TMW:TT_Update(self.AddDelete)
-			</OnShow>
-			<OnHide>
-				self.AddDelete:SetNormalTexture("Interface\\AddOns\\TellMeWhen\\Textures\\Plus-Up")
-				self.AddDelete:SetPushedTexture("Interface\\AddOns\\TellMeWhen\\Textures\\Plus-Down")
-				self.AddDelete:SetHighlightTexture("Interface\\AddOns\\TellMeWhen\\Textures\\Plus-Highlight", "ADD")
-				TMW:TT(self.AddDelete, "CONDITIONPANEL_ADD")
-				TMW:TT_Update(self.AddDelete)
-			</OnHide>
-
-		</Scripts>
 	</Frame>
 	
 	
@@ -718,7 +700,50 @@
 						TMW.CNDT[1]:SetPoint("TOPLEFT", 12, -16)
 					</OnLoad>
 				</Scripts>
+				<Frames>
+					<Button name="$parentAddCondition" inherits="TellMeWhen_BorderedFrame" parentKey="AddCondition">
+						<Size y="30"/>
+						<Layers>
+							<Layer level="OVERLAY">
+								<FontString name="$parentText" parentKey="text" inherits="GameFontNormalSmall" justifyH="LEFT">
+									<Anchors>
+										<Anchor point="CENTER"/>
+									</Anchors>
+								</FontString>
+								<Texture parentKey="Plus" file="Interface\PaperDollInfoFrame\Character-Plus">
+									<Size x="20" y="20"/>
+								</Texture>
+								<Texture parentKey="Plus2" file="Interface\PaperDollInfoFrame\Character-Plus">
+									<Size x="20" y="20"/>
+								</Texture>
+							</Layer>
+						</Layers>
+						<Scripts>
+							<OnLoad>
+								self.text:SetText(TMW.L["CONDITIONPANEL_ADD2"])
+								TMW:TT(self, "CONDITIONPANEL_ADD")
+								self.Plus:ClearAllPoints()
+								self.Plus:SetPoint("RIGHT", self.text, "LEFT", -10, 0)
+								self.Plus2:ClearAllPoints()
+								self.Plus2:SetPoint("LEFT", self.text, "RIGHT", 10, 0)
+							</OnLoad>
+							<OnClick>
+								TMW.CNDT:AddCondition(TMW.CNDT.settings)
+								TMW.CNDT:AddRemoveHandler()
+								TMW.CNDT:LoadConfig()
+							</OnClick>
+						</Scripts>
+						<HighlightTexture alphaMode="ADD" alpha="0.1">
+							<Color r="1" g="1" b="1"/>
+							<Anchors>
+								<Anchor point="TOPLEFT" x="0.5" y="-0.5"/>
+								<Anchor point="BOTTOMRIGHT" x="-0.5" y="0.5"/>
+							</Anchors>
+						</HighlightTexture>
+					</Button>
+				</Frames>
 			</Frame>
+
 		</Frames>
 		<Scripts>
 			<OnLoad>

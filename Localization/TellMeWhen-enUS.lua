@@ -534,9 +534,9 @@ L["UIPANEL_COMBATCONFIG_DESC"] = [[Enable this to allow configuration of TellMeW
 
 Note that this will force the options module to be loaded all the time, resulting in increased memory usage and slightly longer load times.
 
-This option is account-wide - all of your profiles will use this setting.
+This option is account-wide: all of your profiles will share this setting.
 
-Changes will only be reflected after you reload your UI.]]
+|cffff5959Changes will only be reflected after you |cff7fffffreload your UI|cffff5959.|r]]
 L["UIPANEL_BARTEXTURE"] = "Bar Texture"
 L["UIPANEL_BARIGNOREGCD"] = "Bars Ignore GCD"
 L["UIPANEL_BARIGNOREGCD_DESC"] = "If checked, cooldown bars will not change values if the cooldown triggered is a global cooldown"
@@ -1081,6 +1081,7 @@ L["CONDITIONPANEL_GREATER"] = "Greater Than"
 L["CONDITIONPANEL_GREATEREQUAL"] = "Greater Than/Equal to"
 L["CONDITIONPANEL_REMOVE"] = "Remove this condition"
 L["CONDITIONPANEL_ADD"] = "Add a condition"
+L["CONDITIONPANEL_ADD2"] = "Click to Add a Condition"
 L["PARENTHESIS_WARNING1"] = [[The number of opening and closing parentheses do not match!
 
 %d more %s |4parenthesis:parentheses; |4is:are; needed.]]

@@ -558,11 +558,7 @@ function CNDT:AddRemoveHandler()
 		CNDT[i].OpenParenthesis:Show()
 		CNDT[i].Down:Show()
 		if CNDT[i+1] then
-			if CNDT[i]:IsShown() then
-				CNDT[i+1].AddDelete:Show()
-			else
-				CNDT[i]:Hide()
-				CNDT[i+1].AddDelete:Hide()
+			if not CNDT[i]:IsShown() then
 				CNDT[i+1]:Hide()
 				if i > 1 then
 					CNDT[i-1].Down:Hide()
@@ -592,7 +588,16 @@ function CNDT:AddRemoveHandler()
 			CNDT[i].OpenParenthesis:Hide()
 		end
 	end
-
+	
+	local AddCondition = TellMeWhen_IconEditor.Conditions.Groups.AddCondition
+	--if n == 0 then 
+		AddCondition:SetPoint("TOPLEFT", CNDT[n+1])
+		AddCondition:SetPoint("TOPRIGHT", CNDT[n+1])
+	--else
+	--	AddCondition:SetPoint("TOPLEFT", CNDT[n], "BOTTOMLEFT", 0, -14.5)
+	--	AddCondition:SetPoint("TOPRIGHT", CNDT[n], "BOTTOMRIGHT", 0, -14.5)
+	--end
+	
 	CNDT:ColorizeParentheses()
 end
 
@@ -631,9 +636,9 @@ function CndtGroup:OnNewInstance()
 
 	self:SetPoint("TOPLEFT", CNDT[ID-1], "BOTTOMLEFT", 0, -14.5)
 
-	local p, _, rp, x, y = TMW.CNDT[1].AddDelete:GetPoint()
+	--[[local p, _, rp, x, y = TMW.CNDT[1].AddDelete:GetPoint()
 	self.AddDelete:ClearAllPoints()
-	self.AddDelete:SetPoint(p, CNDT[ID], rp, x, y)
+	self.AddDelete:SetPoint(p, CNDT[ID], rp, x, y)]]
 	
 	self:Hide()
 	
