@@ -73,17 +73,29 @@ IconContainer_Masque:ExtendMethod("OnEnable", function(self)
 	local container = self.container
 	
 	-- I really really hate the fact that this exists. But, oh well. At least it works more than 26.8% of the time.
-	icon.normaltex = container.__MSQ_NormalTexture or container:GetNormalTexture()
-	
 	self.isDefaultSkin = nil
 	
 	local lmbGroup = self.lmbGroup
-	lmbGroup:AddButton(container, icon.lmbButtonData)
 	
-	if lmbGroup.Disabled or (lmbGroup.db and lmbGroup.db.Disabled) then
-		if icon.normaltex and not icon.normaltex:GetTexture() then
-			self.isDefaultSkin = 1
+	local disabled = lmbGroup.Disabled or (lmbGroup.db and lmbGroup.db.Disabled)
+	
+	if self.hasSkinned then
+		lmbGroup:AddButton(container, icon.lmbButtonData)
+	end
+	if disabled then
+		if self.hasSkinned then
+			lmbGroup:RemoveButton(container)
 		end
+		--self.isDefaultSkin = 1
+	elseif not self.hasSkinned then
+		lmbGroup:AddButton(container, icon.lmbButtonData)
+		self.hasSkinned = true
+	end
+	
+	icon.normaltex = container.__MSQ_NormalTexture or container:GetNormalTexture()
+	
+	if disabled and not icon.normaltex then
+		self.isDefaultSkin = 1
 	end
 end)
 

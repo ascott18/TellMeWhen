@@ -1813,10 +1813,10 @@
 					
 					<Frame name="$parentPanelsRight" parentKey="PanelsRight">
 						<Anchors>
-							<Anchor point="LEFT" relativePoint="TOP" x="6"/>
+							<Anchor point="LEFT" relativePoint="TOP" x="5"/>
 							<Anchor point="TOP" y="-35"/>
 							<Anchor point="BOTTOM" y="3"/>
-							<Anchor point="RIGHT" x="-7"/>
+							<Anchor point="RIGHT" x="-9"/>
 						</Anchors>
 						<Scripts>
 							<OnLoad>

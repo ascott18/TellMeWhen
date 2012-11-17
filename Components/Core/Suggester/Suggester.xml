@@ -124,7 +124,7 @@
 		<Anchors>
 			<Anchor point="TOP" y="-0"/> 
 			<Anchor point="BOTTOM" y="0" />
-			<Anchor point="LEFT" relativePoint="RIGHT" x="2"/>
+			<Anchor point="LEFT" relativePoint="RIGHT" x="1"/>
 		</Anchors>
 		
 		<Layers>
@@ -292,12 +292,16 @@
 				self.Header:SetText(TMW.L["SUGGESTIONS"])
 				self.InfoText:SetText(TMW.L["CACHING"])
 				
-				TMW.SUG:GetFrame(1):SetPoint("TOP", 0, -6 - TMW.SUG[1]:GetHeight())
+				local firstItem = TMW.SUG:GetFrame(1)
+				firstItem:SetPoint("TOP", 0, -6 - TMW.SUG[1]:GetHeight())
+				firstItem.ClearAllPoints = TMW.NULLFUNC
+				firstItem.SetPoint = TMW.NULLFUNC
+				firstItem.SetSize = TMW.NULLFUNC
 				
 				-- Tukui_Skins tries to reposition this frame, but it totally ruins the resizability of it,
 				-- so just disallow repositioning.
-				self.SetPoint = TMW.NULLFUNC
-				self.ClearAllPoints = TMW.NULLFUNC
+			--	self.SetPoint = TMW.NULLFUNC
+				--self.ClearAllPoints = TMW.NULLFUNC
 			</OnLoad>
 			<OnSizeChanged>						
 				if TMW.SUG:GetNumFramesNeeded() ~= #TMW.SUG and self:IsShown() then

@@ -755,7 +755,7 @@ TMW.GroupConfigTemplate = {
 						-- This intentional. Double setup is needed for dealing with Masque bullshit,
 						-- Second setup is addon-wide so that all icons and groups can become aware of the new view if needed.
 						TMW[g]:Setup()
-						TMW:Setup()
+						TMW:Update()
 						
 						IE:Load(1)
 						TMW:CompileOptions()
@@ -1852,16 +1852,20 @@ function IE:OnInitialize()
 	IE.historyState = 0
 
 	TMW:NewClass("IconEditor_Resizer_ScaleX_SizeY", "Resizer_Generic"){
-		tooltipText = TMW.L["RESIZE_TOOLTIP"],
+		tooltipText = L["RESIZE_TOOLTIP"],
 		UPD_INTV = 1,
-		tooltipTitle = TMW.L["RESIZE"],
+		tooltipTitle = L["RESIZE"],
 		
 		OnEnable = function(self)
-			self.resizeButton:Show()
+			self:Show()
+			self.resizeButton:HookScript("OnShow", function(self)
+				self:SetFrameLevel(self:GetParent():GetFrameLevel() + 5)
+			end)
+			TMW:TT(self.resizeButton, self.tooltipTitle, self.tooltipText, 1, 1)
 		end,
 		
 		OnDisable = function(self)
-			self.resizeButton:Hide()
+			self:Hide()
 		end,	
 		
 		SizeUpdate = function(resizeButton)
@@ -1926,7 +1930,7 @@ function IE:OnInitialize()
 	}
 
 	self.resizer = TMW.Classes.IconEditor_Resizer_ScaleX_SizeY:New(self)
-	self.resizer:Show()
+	self.resizer:OnEnable()
 	self.resizer.resizeButton:SetScale(2)
 	
 	TMW:Fire("TMW_OPTIONS_LOADED")
