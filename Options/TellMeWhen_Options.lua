@@ -751,8 +751,12 @@ TMW.GroupConfigTemplate = {
 					set = function(info)
 						local g = findid(info)
 						TMW.db.profile.Groups[g][info[#info-1]] = info[#info]
+						
+						-- This intentional. Double setup is needed for dealing with Masque bullshit,
+						-- Second setup is addon-wide so that all icons and groups can become aware of the new view if needed.
 						TMW[g]:Setup()
-						TMW[g]:Setup()
+						TMW:Setup()
+						
 						IE:Load(1)
 						TMW:CompileOptions()
 					end,
@@ -1334,15 +1338,40 @@ function TMW:CompileOptions()
 	TMW:Fire("TMW_CONFIG_MAIN_OPTIONS_COMPILE", TMW.OptionsTable)
 
 	
+	LibStub("AceConfig-3.0"):RegisterOptionsTable("TMW IEOptions", TMW.OptionsTable)
+	
 	LibStub("AceConfig-3.0"):RegisterOptionsTable("TMW Options", TMW.OptionsTable)
 	if not TMW.defaultSizeOfTMWOptionsSet then
+		-- Make sure that this only happens once because otherwise the window
+		-- gets resized even if users have adjusted the size of the window.
 		TMW.defaultSizeOfTMWOptionsSet = 1
 		LibStub("AceConfigDialog-3.0"):SetDefaultSize("TMW Options", 781, 512)
 	end
 	
-	LibStub("AceConfig-3.0"):RegisterOptionsTable("TMW IEOptions", TMW.OptionsTable)
 	if not TMW.AddedToBlizz then
 		TMW.AddedToBlizz = LibStub("AceConfigDialog-3.0"):AddToBlizOptions("TMW Options", L["ICON_TOOLTIP1"])
+		
+		if TMW.AddedToBlizz and not TMW.ALLOW_LOCKDOWN_CONFIG then
+			local canShow = true
+			
+			IE:RegisterEvent("PLAYER_REGEN_DISABLED", function()
+				canShow = false
+				TMW.AddedToBlizz:Hide()
+			end)
+			
+			IE:RegisterEvent("PLAYER_REGEN_ENABLED", function()
+				canShow = true
+				if InterfaceOptionsFramePanelContainer.displayedPanel == TMW.AddedToBlizz then
+					TMW.AddedToBlizz:Show()
+				end
+			end)
+
+			TMW.AddedToBlizz:HookScript("OnShow", function(self)
+				if not canShow then
+					self:Hide()
+				end
+			end)
+		end
 	end
 end
 
@@ -1976,6 +2005,7 @@ function IE:RegisterTab(tab, attachedFrame)
 	else
 		tab:SetPoint("LEFT", IE.Tabs[id - 1], "RIGHT", IE.CONST.TAB_OFFS_X, 0)
 	end
+	
 	IE.Tabs[id] = tab
 	tab:SetID(id)
 	tab.attachedFrame = attachedFrame

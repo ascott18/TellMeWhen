@@ -24,6 +24,9 @@ IconContainer:RegisterAnchorableFrame("IconContainer")
 function IconContainer:OnNewInstance_IconContainer(icon)	
 	local container = CreateFrame("Button", self:GetChildNameBase() .. "IconContainer", icon)
 	
+	container:SetHighlightTexture("Interface\\Buttons\\ButtonHilight-Square")
+	container:SetPushedTexture("Interface\\Buttons\\UI-Quickslot-Depress")
+	
 	self.container = container
 	
 	container:EnableMouse(false)
@@ -79,5 +82,21 @@ IconContainer:RegisterEventHandlerData("Animations", 60, "ACTVTNGLOW", {
 		ActionButton_HideOverlayGlow(IconModule_IconContainer.container)
 	end,
 })
+
+
+IconContainer:SetScriptHandler("OnEnter", function(Module, icon)
+	Module.container:LockHighlight()
+end)
+IconContainer:SetScriptHandler("OnLeave", function(Module, icon)
+	Module.container:UnlockHighlight()
+	Module.container:SetButtonState("NORMAL")
+end)
+IconContainer:SetScriptHandler("OnMouseDown", function(Module, icon)
+	Module.container:SetButtonState("PUSHED")
+end)
+IconContainer:SetScriptHandler("OnMouseUp", function(Module, icon)
+	Module.container:SetButtonState("NORMAL")
+end)
+
 
 

@@ -358,7 +358,7 @@ You need to enter, into the %q editbox, the spell name/ID of:
 |cff7fffff1)|r The buff/debuff that you gain when the internal cooldown is triggered, or
 |cff7fffff2)|r The spell that does damage (check your combat log), or
 |cff7fffff3)|r The the energize effect (check your combat log), or
-|cff7fffff3)|r The spell that triggered the summon (check your combat log).]]
+|cff7fffff4)|r The spell that triggered the summon (check your combat log).]]
 
 L["ICONMENU_DRPRESENT"] = "Diminished"
 L["ICONMENU_DRABSENT"] = "Undiminished"
@@ -444,6 +444,10 @@ L["METAPANEL_REMOVE"] = "Remove icon"
 L["METAPANEL_REMOVE_DESC"] = "Click to remove this icon from the list that the meta icon will check."
 L["META_ADDICON"] = "Add Icon"
 L["META_ADDICON_DESC"] = "Click to add another icon to include in the meta icon."
+L["META_GROUP_INVALID_VIEW_DIFFERENT"] = [[Icons in this group may not be checked by this meta icon because they use different display methods.
+
+This group: %s
+Target group: %s]]
 
 L["ICONALPHAPANEL_FAKEHIDDEN"] = "Always Hide"
 L["ICONALPHAPANEL_FAKEHIDDEN_DESC"] = [[Forces the icon to be hidden all the time while still allowing normal functionality:

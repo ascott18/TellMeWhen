@@ -605,7 +605,12 @@
 				<Layers>
 					<Layer level="BACKGROUND">
 						<Texture name="$parentBackdrop" setAllPoints="true" parentKey="Backdrop" >
-							<Color r="0.2" g="0.2" b="0.2"/>
+							<Color r="0.15" g="0.15" b="0.15" a="1"/>
+					
+							<Gradient orientation="HORIZONTAL">
+								<MinColor r="1" g="1" b="1" a="1"/>
+								<MaxColor r="0.6" g="0.6" b="0.6" a="1"/>
+							</Gradient>
 						</Texture>
 					</Layer>
 				</Layers>
@@ -619,7 +624,12 @@
 						<Layers>
 							<Layer level="OVERLAY">
 								<Texture name="Texture" setAllPoints="true">
-									<Color r="0.35" g="0.35" b="0.35"/>
+									<Color r="0.5" g="0.5" b="0.5" a="1"/>
+					
+									<Gradient orientation="HORIZONTAL">
+										<MinColor r="1" g="1" b="1" a="1"/>
+										<MaxColor r="0.6" g="0.6" b="0.6" a="1"/>
+									</Gradient>
 								</Texture>
 							</Layer>
 						</Layers>
@@ -860,6 +870,7 @@
 			</OnClick>
 			<OnShow>
 				PanelTemplates_TabResize(self, -6)
+				self:SetFrameLevel(self:GetParent():GetFrameLevel() - 1)
 			</OnShow>
 			<OnHide>
 				self:SetWidth(TMW.IE.CONST.TAB_OFFS_X)
@@ -1139,7 +1150,7 @@
 					</OnMouseUp>
 				</Scripts>
 
-				<NormalTexture file=""/>
+				<NormalTexture />
 				<HighlightTexture alphaMode="ADD" file="Interface\Buttons\ButtonHilight-Square"/>
 				<PushedTexture file="Interface\Buttons\UI-Quickslot-Depress"/>
 			</Button>
@@ -1714,7 +1725,6 @@
 		</Layers>
 		
 		<Frames>
-			 
 			<Button name="$parentTab1" parentKey="MainTab"				inherits="TellMeWhen_TabTemplate">
 				<Scripts>
 					<OnLoad>

@@ -30,7 +30,7 @@ local DogTag = LibStub("LibDogTag-3.0", true)
 TELLMEWHEN_VERSION = "6.1.0"
 TELLMEWHEN_VERSION_MINOR = strmatch(" @project-version@", " r%d+") or ""
 TELLMEWHEN_VERSION_FULL = TELLMEWHEN_VERSION .. TELLMEWHEN_VERSION_MINOR
-TELLMEWHEN_VERSIONNUMBER = 61003 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
+TELLMEWHEN_VERSIONNUMBER = 61004 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
 if TELLMEWHEN_VERSIONNUMBER > 62000 or TELLMEWHEN_VERSIONNUMBER < 61000 then return error("YOU SCREWED UP THE VERSION NUMBER OR DIDNT CHANGE THE SAFETY LIMITS") end -- safety check because i accidentally made the version number 414069 once
 
 TELLMEWHEN_MAXROWS = 20
@@ -279,7 +279,9 @@ function TMW.get(value, ...)
 	end
 end
 
-
+function TMW.NULLFUNC()
+	-- Do nothing
+end
 
 
 
@@ -1817,9 +1819,16 @@ function TMW:ShutdownProfile()
 	end
 end
 
+function TMW:ScheduledUpdateHandler()
+	if TMW:CheckCanDoLockedAction(false) then
+		TMW:Update()
+	else
+		TMW:ScheduleUpdate(5)
+	end
+end
 function TMW:ScheduleUpdate(delay)
 	TMW:CancelTimer(updatehandler, 1)
-	updatehandler = TMW:ScheduleTimer("Update", delay or 1)
+	updatehandler = TMW:ScheduleTimer("ScheduledUpdateHandler", delay or 1)
 end
 
 function TMW:OnCommReceived(prefix, text, channel, who)
@@ -2032,17 +2041,20 @@ TMW:RegisterEvent("PLAYER_REGEN_DISABLED", function()
 		end
 	end
 end)
-local hasRan
-TMW:RegisterCallback("TMW_GLOBAL_UPDATE", function()
-	if hasRan then
-		return
-	end
-	hasRan = true
-	if TMW.db.global.AllowCombatConfig then
-		TMW.ALLOW_LOCKDOWN_CONFIG = true
-		TMW:LoadOptions()
-	end
-end)
+
+do
+	local hasRan
+	TMW:RegisterCallback("TMW_GLOBAL_UPDATE", function()
+		if hasRan then
+			return
+		end
+		hasRan = true
+		if TMW.db.global.AllowCombatConfig then
+			TMW.ALLOW_LOCKDOWN_CONFIG = true
+			TMW:LoadOptions()
+		end
+	end)
+end
 end
 TMW.Update = TMW.UpdateNormally
 

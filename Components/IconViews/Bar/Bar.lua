@@ -36,7 +36,7 @@ TMW:RegisterDatabaseDefaults{
 				-- Default Layout 1
 				{	-- [1] Duration		
 					StringName = L["TEXTLAYOUTS_DEFAULTS_DURATION"],
-					DefaultText = "[Duration:TMWFormatDuration]",	
+					DefaultText = "[Duration(gcd=true):TMWFormatDuration]",	
 					Anchors = {
 						{
 							x = -2,

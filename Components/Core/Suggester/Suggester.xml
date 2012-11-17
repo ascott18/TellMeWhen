@@ -1,9 +1,9 @@
 ﻿<Ui>
 	<Button name="TellMeWhen_SpellSuggestTemplate" virtual="true" hidden="true">
-		<Size y="18.95"/>
+		<Size y="19"/>
 		<Anchors>
-			<Anchor point="LEFT" x="10"/>
-			<Anchor point="RIGHT" x="-10"/>
+			<Anchor point="LEFT" x="5"/>
+			<Anchor point="RIGHT" x="-5"/>
 		</Anchors>
 		<Scripts>
 			<OnLoad>
@@ -78,18 +78,21 @@
 		</Scripts>
 		<NormalFont style="GameFontNormal"/>
 		<HighlightFont style="GameFontHighlight"/>
-		<HighlightTexture file="Interface\QuestFrame\UI-QuestLogTitleHighlight" alphaMode="ADD">
+		<HighlightTexture file="Interface\BUTTONS\UI-Listbox-Highlight2" alphaMode="ADD" alpha="0.5">
 			<Anchors>
-				<Anchor point="TOPLEFT" y="-1"/>
-				<Anchor point="BOTTOMRIGHT" y="1"/>
+				<Anchor point="TOPLEFT" y="-0.5"/>
+				<Anchor point="BOTTOMRIGHT" y="0.5"/>
 			</Anchors>
 		</HighlightTexture>
 		<Layers>
 			<Layer level="BACKGROUND">
-				<Texture name="$parentBackground" parentKey="Background" file="Interface\QuestFrame\UI-QuestLogTitleHighlight">
+				<!-- <Texture name="$parentBackground" parentKey="Background" file="Interface\QuestFrame\UI-QuestLogTitleHighlight"> -->
+				<Texture name="$parentBackground" parentKey="Background" >
+					
+					<Color r="0.5" g="0.5" b="0.5" a="0.9"/>
 					<Anchors>
-						<Anchor point="TOPLEFT" y="0"/>
-						<Anchor point="BOTTOMRIGHT" y="1"/>
+						<Anchor point="TOPLEFT" y="-0.5"/>
+						<Anchor point="BOTTOMRIGHT" y="0.5"/>
 					</Anchors>
 				</Texture>
 			</Layer>
@@ -103,12 +106,12 @@
 				</Texture>
 				<FontString name="$parentID" parentKey="ID" inherits="GameFontHighlight" justifyH="RIGHT">
 					<Anchors>
-						<Anchor point="RIGHT" x="-3" y="1"/>
+						<Anchor point="RIGHT" x="-1" y="0"/>
 					</Anchors>
 				</FontString>
 				<FontString name="$parentName" parentKey="Name" inherits="GameFontHighlight" justifyH="LEFT">
 					<Anchors>
-						<Anchor point="LEFT" relativeTo="$parentIcon" relativePoint="RIGHT" x="3"/>
+						<Anchor point="LEFT" relativeTo="$parentIcon" relativePoint="RIGHT" x="2"/>
 						<Anchor point="RIGHT" relativeTo="$parentID" relativePoint="LEFT" x="-1"/>
 					</Anchors>
 				</FontString>
@@ -117,27 +120,23 @@
 	</Button>
 	
 	<Frame name="$parentSuggest" parent="TellMeWhen_IconEditor" parentKey="Suggest" hidden="true" enableMouse="true">
-		<Size x="220"/>
+		<Size x="200"/>
 		<Anchors>
-			<Anchor point="TOPLEFT" relativePoint="TOPRIGHT" x="-4"/> 
-			<Anchor point="BOTTOMLEFT" relativePoint="BOTTOMRIGHT" x="-4"/>
+			<Anchor point="TOP" y="-0"/> 
+			<Anchor point="BOTTOM" y="0" />
+			<Anchor point="LEFT" relativePoint="RIGHT" x="2"/>
 		</Anchors>
-		<Backdrop bgFile="Interface\DialogFrame\UI-DialogBox-Background-Dark" edgeFile="Interface\DialogFrame\UI-DialogBox-Border" tile="true">
-			<BackgroundInsets>
-				<AbsInset left="11" right="12" top="12" bottom="11"/>
-			</BackgroundInsets>
-			<TileSize>
-				<AbsValue val="32"/>
-			</TileSize>
-			<EdgeSize>
-				<AbsValue val="32"/>
-			</EdgeSize>
-		</Backdrop>
+		
 		<Layers>
+			<Layer level="BACKGROUND">
+				<Texture name="$parentBackground" parentKey="Background">
+					<Color r="0.05" g="0.05" b="0.05" a="0.970"/>
+				</Texture>
+			</Layer>
 			<Layer level="OVERLAY">
 				<FontString name="$parentHeader" inherits="GameFontNormalLarge" parentKey="Header" justifyH="LEFT">
 					<Anchors>
-						<Anchor point="TOP" y="-12"/>
+						<Anchor point="TOP" y="-4"/>
 					</Anchors>
 				</FontString>
 			</Layer>
@@ -239,7 +238,7 @@
 			</StatusBar>
 			<Button name="$parentHelp" inherits="MainMenuBarMicroButton" hidden="false">
 				<Anchors>
-					<Anchor point="TOPRIGHT" x="-15" y="9"/>
+					<Anchor point="TOPRIGHT" x="-5" y="16"/>
 				</Anchors>
 				<Scripts>
 					<OnLoad>
@@ -293,7 +292,12 @@
 				self.Header:SetText(TMW.L["SUGGESTIONS"])
 				self.InfoText:SetText(TMW.L["CACHING"])
 				
-				TMW.SUG:GetFrame(1):SetPoint("TOP", 0, -12 - TMW.SUG[1]:GetHeight())
+				TMW.SUG:GetFrame(1):SetPoint("TOP", 0, -6 - TMW.SUG[1]:GetHeight())
+				
+				-- Tukui_Skins tries to reposition this frame, but it totally ruins the resizability of it,
+				-- so just disallow repositioning.
+				self.SetPoint = TMW.NULLFUNC
+				self.ClearAllPoints = TMW.NULLFUNC
 			</OnLoad>
 			<OnSizeChanged>						
 				if TMW.SUG:GetNumFramesNeeded() ~= #TMW.SUG and self:IsShown() then

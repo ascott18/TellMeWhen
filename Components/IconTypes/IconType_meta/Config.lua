@@ -31,15 +31,15 @@ local pairs, tinsert, tremove =
 
 TMW.ID:RegisterIconDragHandler(20,
 	function(ID, info)
-		if ID.desticon then
-			if ID.srcicon:IsValid() then
-				if ID.desticon.Type == "meta" then
-					info.text = L["ICONMENU_ADDMETA"]
-					info.tooltipTitle = nil
-					info.tooltipText = nil
-					return true
-				end
-			end
+		if ID.desticon
+		and ID.srcicon:IsValid()
+		and ID.desticon.Type == "meta"
+		and ID.srcicon.group.viewData == ID.desticon.group.viewData
+		then
+			info.text = L["ICONMENU_ADDMETA"]
+			info.tooltipTitle = nil
+			info.tooltipText = nil
+			return true
 		end
 	end,
 	function(ID)
@@ -115,18 +115,31 @@ end
 local addedGroups = {}
 function ME:IconMenu()
 	if UIDROPDOWNMENU_MENU_LEVEL == 1 then
+		local currentGroupView = TMW.CI.ic.group:GetSettings().View
 		for group, groupID in TMW:InGroups() do
 			if group:ShouldUpdateIcons() then
 				local info = UIDropDownMenu_CreateInfo()
 
-				info.text = TMW:GetGroupName(groupID, groupID, 1)
+				info.text = TMW:GetGroupName(groupID, groupID --[[, 1]])
 
 				info.value = group:GetName()
 
+				if currentGroupView ~= group:GetSettings().View then
+					info.disabled = true
+					info.tooltipWhileDisabled = true
+					
+					info.tooltipTitle = info.text
+					info.tooltipText = L["META_GROUP_INVALID_VIEW_DIFFERENT"]
+						:format(TMW.Views[currentGroupView].name, TMW.Views[group:GetSettings().View].name)
+					info.tooltipOnButton = true
+					info.hasArrow = false
+				else
+					info.hasArrow = true
+				end
+				
 				info.func = ME.IconMenuOnClick
 				info.arg1 = self
 
-				info.hasArrow = true
 				UIDropDownMenu_AddButton(info, UIDROPDOWNMENU_MENU_LEVEL)
 			end
 		end

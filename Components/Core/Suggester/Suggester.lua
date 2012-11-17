@@ -396,7 +396,7 @@ function SUG:ColorHelp(frame)
 end
 
 function SUG:GetNumFramesNeeded()
-	return floor(TMW.SUG.Suggest:GetHeight()/TMW.SUG[1]:GetHeight()) - 2
+	return floor((TMW.SUG.Suggest:GetHeight() + 5)/TMW.SUG[1]:GetHeight()) - 2
 end
 
 function SUG:GetFrame(id)
@@ -407,10 +407,10 @@ function SUG:GetFrame(id)
 	
 	local f = CreateFrame("Button", Suggest:GetName().."Item"..id, Suggest, "TellMeWhen_SpellSuggestTemplate", id)
 	TMW.SUG[id] = f
-	f:SetWidth(Suggest:GetWidth()-20)
 	
 	if TMW.SUG[id-1] then
-		f:SetPoint("TOP", TMW.SUG[id-1], "BOTTOM", 0, 0)
+		f:SetPoint("TOPRIGHT", TMW.SUG[id-1], "BOTTOMRIGHT", 0, 0)
+		f:SetPoint("TOPLEFT", TMW.SUG[id-1], "BOTTOMLEFT", 0, 0)
 	end
 	
 	return f

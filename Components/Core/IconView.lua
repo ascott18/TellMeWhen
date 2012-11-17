@@ -30,6 +30,8 @@ function IconView:OnNewInstance(view)
 end
 
 function IconView:Register(order)
+	TMW:ValidateType("IconView.name", "IconView:Register(order)", self.name, "string")
+	TMW:ValidateType("IconView.desc", "IconView:Register(order)", self.desc, "string")
 	TMW:ValidateType("2 (order)", "IconView:Register(order)", order, "number")
 
 	local viewkey = self.view
@@ -40,6 +42,7 @@ function IconView:Register(order)
 		-- for tweaking and recreating icon views inside of WowLua so that I don't have to change the viewkey every time.
 		viewkey = viewkey .. " - " .. date("%X")
 		self.view = viewkey
+		self.name = viewkey
 	end
 
 	TMW.Views[viewkey] = self -- put it in the main Views table

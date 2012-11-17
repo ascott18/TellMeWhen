@@ -212,6 +212,8 @@ function InsertIcon(icon, ics, ic)
 end
 
 function GetFullIconTable(icon, icons) -- check what all the possible icons it can show are, for use with setting CheckNext
+	local thisIconsView = icon.group.viewData.view
+	
 	for _, ic in ipairs(icons) do
 		if not alreadyinserted[ic] then
 			alreadyinserted[ic] = true
@@ -219,27 +221,29 @@ function GetFullIconTable(icon, icons) -- check what all the possible icons it c
 			local iconID = tonumber(strmatch(ic, "TellMeWhen_Group%d+_Icon(%d+)"))
 			local groupID = tonumber(strmatch(ic, "TellMeWhen_Group(%d+)"))
 
-			if groupID and not iconID then -- a group. Expand it into icons.
-				local group = TMW[groupID]
-				
-				if group and group:ShouldUpdateIcons() then
-					local gs = group:GetSettings()
+			if groupID and TMW.db.profile.Groups[groupID].View == thisIconsView then
+				if not iconID then -- a group. Expand it into icons.
+					local group = TMW[groupID]
+					
+					if group and group:ShouldUpdateIcons() then
+						local gs = group:GetSettings()
 
-					for ics, _, icID in TMW:InIconSettings(groupID) do
-						if ics.Enabled and icID <= gs.Rows*gs.Columns then
-							-- ic here is a group name. turn it into an icon
-							local ic = ic .. "_Icon" .. icID
-							
-							-- if a meta icon is set to check its own group, dont put the meta icon in there.
-							if ic ~= icon:GetName() then
-								InsertIcon(icon, ics, ic)
+						for ics, _, icID in TMW:InIconSettings(groupID) do
+							if ics.Enabled and icID <= gs.Rows*gs.Columns then
+								-- ic here is a group name. turn it into an icon
+								local ic = ic .. "_Icon" .. icID
+								
+								-- if a meta icon is set to check its own group, dont put the meta icon in there.
+								if ic ~= icon:GetName() then
+									InsertIcon(icon, ics, ic)
+								end
 							end
 						end
 					end
-				end
 
-			elseif groupID and iconID then -- just an icon. put it in.
-				InsertIcon(icon, TMW.db.profile.Groups[groupID].Icons[iconID], ic)
+				else -- just an icon. put it in.
+					InsertIcon(icon, TMW.db.profile.Groups[groupID].Icons[iconID], ic)
+				end
 			end
 		end
 	end
