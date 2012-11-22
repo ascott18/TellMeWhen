@@ -616,22 +616,34 @@
 				</Layers>
 				
 				<Frames>
-					<Frame name="$parentThumb" parentKey="Thumb" >
+					<Button name="$parentThumb" parentKey="Thumb" >
 						<Anchors>
 							<Anchor point="LEFT"/>
 							<Anchor point="RIGHT"/>
 						</Anchors>
+						
+						<NormalTexture setAllPoints="true">
+							<Color r="0.6" g="0.6" b="0.6" a="1"/>
+							
+							<Gradient orientation="HORIZONTAL">
+								<MinColor r="1" g="1" b="1" a="1"/>
+								<MaxColor r="0.6" g="0.6" b="0.6" a="1"/>
+							</Gradient>
+						</NormalTexture>
+						<HighlightTexture setAllPoints="true" alpha="0.25">
+							<Color r=".1" g="1" b="1"/>
+						</HighlightTexture>
+						<PushedTexture setAllPoints="true" >
+							<Color r="0.8" g="0.8" b="0.8" a="1"/>
+							
+							<Gradient orientation="HORIZONTAL">
+								<MinColor r="1" g="1" b="1" a="1"/>
+								<MaxColor r="0.6" g="0.6" b="0.6" a="1"/>
+							</Gradient>
+						</PushedTexture>
+						
 						<Layers>
-							<Layer level="OVERLAY">
-								<Texture name="Texture" setAllPoints="true">
-									<Color r="0.5" g="0.5" b="0.5" a="1"/>
-					
-									<Gradient orientation="HORIZONTAL">
-										<MinColor r="1" g="1" b="1" a="1"/>
-										<MaxColor r="0.6" g="0.6" b="0.6" a="1"/>
-									</Gradient>
-								</Texture>
-								
+							<Layer level="OVERLAY">							
 								<Texture name="$parenttick1">
 									<Color r="0.2" g="0.2" b="0.2"/>
 									<Size y="1"/>
@@ -641,7 +653,6 @@
 										<Anchor point="RIGHT" x="-1"/>
 									</Anchors>
 								</Texture>
-								
 								<Texture>
 									<Color r="0.2" g="0.2" b="0.2"/>
 									<Size y="1"/>
@@ -664,7 +675,6 @@
 								</Texture>
 							</Layer>
 						</Layers>
-						
 						<Scripts>
 							<OnLoad>
 								self:RegisterForDrag("LeftButton")
@@ -673,9 +683,13 @@
 								self.IsScrolling = true
 								_, self.startY = GetCursorPosition()
 								self.startHeight = select(5, self:GetPoint(1))
+								self:SetButtonState("PUSHED")
+								self:LockHighlight()
 							</OnDragStart>
 							<OnDragStop>
 								self.IsScrolling = false
+								self:SetButtonState("NORMAL")
+								self:UnlockHighlight()
 							</OnDragStop>
 							<OnUpdate>
 								if self.IsScrolling then
@@ -701,7 +715,7 @@
 							</OnUpdate>
 						</Scripts>
 					
-					</Frame>
+					</Button>
 				</Frames>
 				<Scripts>
 					<OnMouseWheel>
@@ -2242,7 +2256,7 @@
 				<Scripts>
 					<OnLoad>
 						self:RegisterForDrag("LeftButton")
-						self:SetScale(0.77)
+						self:SetScale(0.75)
 
 						local AceGUI = LibStub("AceGUI-3.0", true)
 						local Type, Version = "TMWGroupOptions", 1

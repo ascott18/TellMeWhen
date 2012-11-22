@@ -26,7 +26,6 @@ local Type = TMW.Classes.IconType:New("meta")
 Type.name = L["ICONMENU_META"]
 Type.desc = L["ICONMENU_META_DESC"]
 Type.AllowNoName = true
-Type.HideBars = true
 Type.NoColorSettings = true
 
 -- AUTOMATICALLY GENERATED: UsesAttributes
@@ -68,29 +67,31 @@ TMW:RegisterUpgrade(24100, {
 	end,
 })
 
-local CCI_icon
-local function CheckCompiledIcons(icon)
-	CCI_icon = icon
-	for _, ic in pairs(icon.CompiledIcons) do
-		ic = _G[ic]
-		if ic and ic.CompiledIcons and ic.Type == "meta" and ic.Enabled then
-			CheckCompiledIcons(ic)
+do
+	local CCI_icon
+	local function CheckCompiledIcons(icon)
+		CCI_icon = icon
+		for _, ic in pairs(icon.CompiledIcons) do
+			ic = _G[ic]
+			if ic and ic.CompiledIcons and ic.Type == "meta" and ic.Enabled then
+				CheckCompiledIcons(ic)
+			end
 		end
 	end
-end
 
-TMW:RegisterCallback("TMW_GLOBAL_UPDATE_POST", function()
-	for _, icon in pairs(Type.Icons) do
-		icon.metaUpdateQueued = true
-		
-		local success, err = pcall(CheckCompiledIcons, icon)
-		if err and err:find("stack overflow") then
-			local err = format("Meta icon recursion was detected in %s - there is an endless loop between the icon and its sub icons.", CCI_icon:GetName())
-			TMW:Error(err)
-			TMW.Warn(err)
+	TMW:RegisterCallback("TMW_GLOBAL_UPDATE_POST", function()
+		for _, icon in pairs(Type.Icons) do
+			icon.metaUpdateQueued = true
+			
+			local success, err = pcall(CheckCompiledIcons, icon)
+			if err and err:find("stack overflow") then
+				local err = format("Meta icon recursion was detected in %s - there is an endless loop between the icon and its sub icons.", CCI_icon:GetName())
+				TMW:Error(err)
+				TMW.Warn(err)
+			end
 		end
-	end
-end)
+	end)
+end
 
 
 

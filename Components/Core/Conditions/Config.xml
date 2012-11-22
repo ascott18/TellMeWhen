@@ -733,7 +733,7 @@
 								TMW.CNDT:LoadConfig()
 							</OnClick>
 						</Scripts>
-						<HighlightTexture alphaMode="ADD" alpha="0.1">
+						<HighlightTexture alphaMode="ADD" alpha="0.06">
 							<Color r="1" g="1" b="1"/>
 							<Anchors>
 								<Anchor point="TOPLEFT" x="0.5" y="-0.5"/>

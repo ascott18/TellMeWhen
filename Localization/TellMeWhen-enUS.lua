@@ -513,6 +513,13 @@ L["UIPANEL_ENABLEGROUP"] = "Enable Group"
 L["UIPANEL_GROUPNAME"] = "Rename Group"
 L["UIPANEL_ROWS"] = "Rows"
 L["UIPANEL_COLUMNS"] = "Columns"
+L["UIPANEL_GROUPALPHA"] = "Group Opacity"
+L["UIPANEL_GROUPALPHA_DESC"] = [[Set the opacity level of the entire group.
+
+This setting has no effect on the functionality of icons themselves. It only changes the appearance of the group and its icons.
+
+Set this setting to 0 if you want to hide the entire group will still allowing it to remain fully functional (similar to the %q setting for icons).]]
+
 L["UIPANEL_ONLYINCOMBAT"] = "Only show in combat"
 L["UIPANEL_SPEC"] = "Dual Spec"
 L["UIPANEL_TREE"] = "Talent Tree"

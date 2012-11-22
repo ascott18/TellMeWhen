@@ -20,7 +20,6 @@ local print = TMW.print
 local Type = TMW.Classes.IconType:New("")
 Type.name = L["ICONMENU_TYPE"]
 Type.spaceafter = true
-Type.HideBars = true
 Type.NoColorSettings = true
 
 -- AUTOMATICALLY GENERATED: UsesAttributes

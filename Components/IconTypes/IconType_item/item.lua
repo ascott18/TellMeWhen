@@ -126,8 +126,9 @@ local function ItemCooldown_OnUpdate(icon, time)
 		icon.DoUpdateIDs = nil
 	end
 
-	local n, inrange, equipped, start, duration, isGCD, count = 1
+	local n, inrange, equipped, start, duration, count = 1
 	local RangeCheck, OnlyEquipped, OnlyInBags, NameArray = icon.RangeCheck, icon.OnlyEquipped, icon.OnlyInBags, icon.NameArray
+	
 	for i = 1, #NameArray do
 		local iName = NameArray[i]
 		n = i
@@ -141,8 +142,8 @@ local function ItemCooldown_OnUpdate(icon, time)
 			if (OnlyEquipped and not IsEquippedItem(iName)) or (OnlyInBags and (count == 0)) then
 				equipped = false
 			end
-			isGCD = OnGCD(duration)
-			if equipped and inrange == 1 and (duration == 0 or isGCD) then --usable
+			
+			if equipped and inrange == 1 and (duration == 0 or OnGCD(duration)) then --usable
 				icon:SetInfo("alpha; texture; start, duration; stack, stackText; spell; inRange",
 					icon.Alpha,
 					GetItemIcon(iName) or "Interface\\Icons\\INV_Misc_QuestionMark",
@@ -181,6 +182,9 @@ local function ItemCooldown_OnUpdate(icon, time)
 		isGCD = OnGCD(duration)
 	end
 	if duration then
+		if duration == 0.001 then
+			duration = 0
+		end
 		icon:SetInfo("alpha; texture; start, duration; stack, stackText; spell; inRange",
 			icon.UnAlpha,
 			GetItemIcon(NameFirst2),

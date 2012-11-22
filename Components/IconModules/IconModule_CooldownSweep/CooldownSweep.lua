@@ -65,6 +65,12 @@ CooldownSweep:RegisterConfigPanel_ConstructorFunc(200, "TellMeWhen_TimerSettings
 end)
 
 
+TMW:RegisterUpgrade(60436, {
+	icon = function(self, ics)
+		ics.ShowTimerTextnoOCC = ics.ShowTimerText
+	end,
+})
+
 TMW:RegisterUpgrade(60315, {
 	icon = function(self, ics)
 		-- Pull the setting from the profile settings, since this setting is now per-icon

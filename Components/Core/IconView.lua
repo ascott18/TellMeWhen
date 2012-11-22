@@ -178,6 +178,7 @@ end
 
 -- Default modules
 IconView:ImplementsModule("GroupModule_GroupPosition", 1, true)
+IconView:ImplementsModule("GroupModule_Alpha", 1.5, true)
 
 IconView:ImplementsModule("IconModule_IconEventClickHandler", 2, true)
 IconView:ImplementsModule("IconModule_IconEventOtherShowHideHandler", 2.5, true)

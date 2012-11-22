@@ -68,6 +68,7 @@ Module:SetScriptHandler("OnMouseUp", function(Module, icon, button)
 		if #icons == 1 then
 			TMW.IE:Load(nil, icon)
 		elseif #icons > 1 then
+			CloseDropDownMenus()
 			ToggleDropDownMenu(1, nil, DD, icon, 0, 0)
 		end
 	end

@@ -5,5 +5,7 @@
  <Include file="GroupModule_Resizer_ScaleY_SizeX\includes.config.xml"/>
  
  <Include file="GroupModule_GroupPosition\includes.config.xml"/>
+ 
+ <Include file="GroupModule_Alpha\includes.config.xml"/>
 
 </Ui>
