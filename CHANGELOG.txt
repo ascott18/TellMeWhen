@@ -10,6 +10,7 @@
  ** Logging in while in combat with Masque installed without the Allow Config in Combat option enabled should no longer leave icons in a mangled state.
  ** Logging in while in combat with the Allow Config in Combat option enabled should now have a much lower chance of triggering a 'script ran too long' error.
  ** Items whose cooldown durations are reported as being 0.001 seconds should no longer be treated as being usable.
+ ** Added missing spells to the SpellDamageTaken equivalency
  
 ===v6.0.4===
  * **New icon event: On Condition Set Passing. Allows you to create an event handler that reacts to the state of a condition set.**
