@@ -1,6 +1,8 @@
 ===v6.1.0===
  * New icon display method: Bars.
+ * New icon type: Loss of Control (WoW 5.1+ only)
  * You may notice some slight changes to the way your text layouts appear, especially if you used the Constrain Width setting. You will have to re-adjust your old layouts to achieve old functionality, which will probably require adding a second anchor to any affected text displays.
+ * New group option: Group Opacity
  * Bug Fixes:
  ** Conditions with minimum values less than zero should now allow for these values to be selected.
  ** The Show Timer Text option should now work properly with Tukui.

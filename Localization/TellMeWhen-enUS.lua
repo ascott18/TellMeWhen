@@ -1294,6 +1294,17 @@ L["SUG_ATBEGINING_DESC"] = "If checked, the suggestion list will only display sp
 
 
 
+L["LOSECONTROL_ICONTYPE"] = "Loss of Control"
+L["LOSECONTROL_DROPDOWNLABEL"] = "Loss of Control Types"
+L["LOSECONTROL_DROPDOWNLABEL_DESC"] = "Choose the loss of control types that you would like the icon to react to."
+L["LOSECONTROL_ICONTYPE_DESC"] = "Tracks effects that cause the loss of control of your character."
+L["LOSECONTROL_INCONTROL"] = "In Control"
+L["LOSECONTROL_CONTROLLOST"] = "Control Lost"
+L["LOSECONTROL_TYPE_SCHOOLLOCK"] = "Spell School Locked"
+L["LOSECONTROL_TYPE_MAGICAL_IMMUNITY"] = "Magical Immunity"
+L["LOSECONTROL_TYPE_DESC_USEUNKNOWN"] = "NOTE: It is not known if this loss of control type is used or not."
+
+
 L["SOUND_EVENT_ONSHOW"] = "On Show"
 L["SOUND_EVENT_ONSHOW_DESC"] = "This event triggers when the icon becomes shown (even if %q is checked)."
 

@@ -1,0 +1,34 @@
+﻿<Ui>
+
+	<Frame name="TellMeWhen_LoseControlTypes" inherits="TellMeWhen_OptionsModuleContainer" virtual="true">
+		<Size y="33"/>
+		<Frames>
+		
+			<Frame name="$parentCLEUEvents" inherits="TMW_DropDownMenuTemplate" parentKey="CLEUEvents">
+				<Anchors>
+					<Anchor point="TOPLEFT" x="-10" y="-3"/>
+				</Anchors>
+				<Scripts>
+					<OnLoad>
+						self.wrapTooltips = 1
+						UIDropDownMenu_SetWidth(self, 249)
+						self.initialize = TMW.Types.losecontrol.CONFIG.DropdownMenu_SelectTypes
+						UIDropDownMenu_SetText(self, TMW.L["LOSECONTROL_DROPDOWNLABEL"])
+						self.Button:HookScript("OnClick", function(self)
+							TMW.IE:SaveSettings()
+						end)
+
+						TMW:TT(self, "LOSECONTROL_DROPDOWNLABEL", "LOSECONTROL_DROPDOWNLABEL_DESC")
+					</OnLoad>
+				</Scripts>
+			</Frame>
+			
+		</Frames>
+		<Scripts>
+			<OnLoad>
+				self.Header:SetText(TMW.L["LOSECONTROL_DROPDOWNLABEL"])
+			</OnLoad>
+		</Scripts>
+	</Frame>
+	
+</Ui>

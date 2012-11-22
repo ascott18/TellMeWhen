@@ -10,6 +10,7 @@
 <Include file="IconType_icd\includes.config.xml"/>
 <Include file="IconType_item\includes.config.xml"/>
 <Include file="IconType_lightwell\includes.config.xml"/>
+<Include file="IconType_losecontrol\includes.config.xml"/>
 <Include file="IconType_meta\includes.config.xml"/>
 <Include file="IconType_multistate\includes.config.xml"/>
 <Include file="IconType_reactive\includes.config.xml"/>

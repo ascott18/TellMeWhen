@@ -163,7 +163,10 @@ TMW:RegisterUpgrade(48017, {
 local function Totem_OnUpdate(icon, time)
 
 	local Slots, NameNameHash, NameFirst = icon.Slots, icon.NameNameHash, icon.NameFirst
-	for iSlot = 1, #Slots do -- be careful here. slots that are explicitly disabled by the user are set false. slots that are disabled internally are set nil.
+	
+	-- Be careful here. Slots that are explicitly disabled by the user are set false.
+	-- Slots that are disabled internally are set nil (which could change table length).
+	for iSlot = 1, #Slots do
 		if Slots[iSlot] then
 			local _, totemName, start, duration, totemIcon = GetTotemInfo(iSlot)
 			if start ~= 0 and totemName and ((NameFirst == "") or NameNameHash[strlowerCache[totemName]]) then
