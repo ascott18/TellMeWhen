@@ -258,7 +258,7 @@ ConditionCategory:RegisterCondition(31,	 "SPELLDMG", {
 	icon = "Interface\\Icons\\spell_fire_flamebolt",
 	tcoords = CNDT.COMMON.standardtcoords,
 	Env = {
-		GetSpellBonusDamage = function()
+		SPELLDMG_GetSpellBonusDamage = function()
 			return min(
 				GetSpellBonusDamage(2),
 				GetSpellBonusDamage(3),
@@ -269,7 +269,7 @@ ConditionCategory:RegisterCondition(31,	 "SPELLDMG", {
 			)
 		end,
 	},
-	funcstr = [[GetSpellBonusDamage() c.Operator c.Level]],
+	funcstr = [[SPELLDMG_GetSpellBonusDamage() c.Operator c.Level]],
 	events = function(ConditionObject, c)
 		return
 			ConditionObject:GenerateNormalEventString("PLAYER_DAMAGE_DONE_MODS"),
