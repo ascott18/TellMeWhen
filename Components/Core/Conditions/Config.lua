@@ -215,7 +215,7 @@ function CNDT:ValidateLevelForCondition(level, conditionType)
 	level = floor(level * (1/step) + 0.5) / (1/step)
 	
 	-- Constrain to min/max
-	local vmin = get(conditionData.min) or 0
+	local vmin = get(conditionData.min or 0)
 	local vmax = get(conditionData.max)
 	if vmin and level < vmin then
 		level = vmin
@@ -821,9 +821,10 @@ TMW:RegisterCallback("TMW_CNDT_GROUP_DRAWGROUP", function(event, CndtGroup, cond
 		else
 			CndtGroup.TextValue:SetText(L["CONDITIONPANEL_VALUEN"])
 			
-			local val = conditionSettings.Level
 			
 			CndtGroup:SetSliderMinMax(conditionSettings.Level or 0)
+			
+			local val = conditionSettings.Level
 			
 			CndtGroup.ValText:SetText(get(conditionData.texttable, val) or val)
 			CndtGroup.ValText:Show()
@@ -933,7 +934,11 @@ function CndtGroup:SetSliderMinMax(level)
 	if level then
 		Slider:SetValue(level)
 		SliderInputBox:SetText(level)
+		
+		self:GetConditionSettings().Level = level
 	end
+	
+	return level
 end
 
 function CndtGroup:GetSliderEditBoxAllowance()
