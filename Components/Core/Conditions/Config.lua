@@ -215,8 +215,8 @@ function CNDT:ValidateLevelForCondition(level, conditionType)
 	level = floor(level * (1/step) + 0.5) / (1/step)
 	
 	-- Constrain to min/max
-	local vmin = conditionData.min or 0
-	local vmax = conditionData.max
+	local vmin = get(conditionData.min) or 0
+	local vmax = get(conditionData.max)
 	if vmin and level < vmin then
 		level = vmin
 	elseif vmax and level > vmax then
@@ -822,10 +822,11 @@ TMW:RegisterCallback("TMW_CNDT_GROUP_DRAWGROUP", function(event, CndtGroup, cond
 			CndtGroup.TextValue:SetText(L["CONDITIONPANEL_VALUEN"])
 			
 			local val = conditionSettings.Level
-			CndtGroup.ValText:SetText(get(conditionData.texttable, val) or val)
-			CndtGroup.ValText:Show()
 			
 			CndtGroup:SetSliderMinMax(conditionSettings.Level or 0)
+			
+			CndtGroup.ValText:SetText(get(conditionData.texttable, val) or val)
+			CndtGroup.ValText:Show()
 			
 			-- If neither the slider or input box are already shown, show the slider
 			-- (don't show the slider unconditionally because otherwise every time :LoadAndDraw() is called the editbox will be hidden)
