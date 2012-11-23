@@ -28,7 +28,7 @@ local DogTag = LibStub("LibDogTag-3.0", true)
 TELLMEWHEN_VERSION = "6.1.0"
 TELLMEWHEN_VERSION_MINOR = strmatch(" @project-version@", " r%d+") or ""
 TELLMEWHEN_VERSION_FULL = TELLMEWHEN_VERSION .. TELLMEWHEN_VERSION_MINOR
-TELLMEWHEN_VERSIONNUMBER = 61013 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
+TELLMEWHEN_VERSIONNUMBER = 61015 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
 if TELLMEWHEN_VERSIONNUMBER > 62000 or TELLMEWHEN_VERSIONNUMBER < 61000 then return error("YOU SCREWED UP THE VERSION NUMBER OR DIDNT CHANGE THE SAFETY LIMITS") end -- safety check because i accidentally made the version number 414069 once
 
 TELLMEWHEN_MAXROWS = 20
@@ -5771,7 +5771,7 @@ function TMW:GetTexturePathFromSetting(setting)
 				return SpellTextures[setting]
 			end
 			if strfind(setting, "[\\/]") then -- if there is a slash in it, then it is probably a full path
-				return setting
+				return setting:gsub("/", "\\")
 			else
 				-- if there isn't a slash in it, then it is probably be a wow icon in interface\icons.
 				-- it still might be a file in wow's root directory, but fuck, there is no way to tell for sure

@@ -30,6 +30,8 @@ CooldownSweep:RegisterIconDefaults{
 
 CooldownSweep:RegisterConfigPanel_ConstructorFunc(200, "TellMeWhen_TimerSettings", function(self)
 	self.Header:SetText(L["CONFIGPANEL_TIMER_HEADER"])
+	TMW.HELP:NewCode("IE_TIMERTEXTHANDLER_MISSING", nil, true)
+	
 	TMW.IE:BuildSimpleCheckSettingFrame(self, {
 		numPerRow = 2,
 		{
@@ -41,6 +43,16 @@ CooldownSweep:RegisterConfigPanel_ConstructorFunc(200, "TellMeWhen_TimerSettings
 			setting = "ShowTimerText",
 			title = L["ICONMENU_SHOWTIMERTEXT"],
 			tooltip = L["ICONMENU_SHOWTIMERTEXT_DESC"],
+			OnClick = function(self)
+				if TMW.CI.ics.ShowTimerText then
+					if	not (OmniCC or IsAddOnLoaded("OmniCC")) -- Tukui is handled by OmniCC == true
+					and	not IsAddOnLoaded("tullaCC")
+					and	not LibStub("AceAddon-3.0"):GetAddon("LUI_Cooldown", true)
+					then
+					 TMW.HELP:Show("IE_TIMERTEXTHANDLER_MISSING", nil, self, 0, 0, L["HELP_IE_TIMERTEXTHANDLER_MISSING"])
+					end
+				end			
+			end,
 		},
 		{
 			setting = "ClockGCD",

@@ -89,7 +89,6 @@ L["CHOOSENAME_DIALOG"] = [=[Enter the Name or ID of what you want this icon to m
 |cff7fffffShift-click|r spells/items/chat links or drag spells/items to insert them into this editbox.]=]
 L["CHOOSENAME_DIALOG_PETABILITIES"] = "|cFFFF5959PET ABILITIES|r must use SpellIDs."
 L["CHOOSENAME_DIALOG_MSCD"] = [=[Enter the Name or ID of what you want this icon to monitor. Only the first spell/item will be checked - semicolon-delimited lists are not valid for this icon type.]=]
-L["CHOOSENAME_DIALOG_CNDTIC"] = "Enter the Name or ID of the spell that has the texture that you want to use. You may also enter a texture path, such as 'Interface/Icons/spell_nature_healingtouch', or just 'spell_nature_healingtouch' if the path is 'Interface/Icons'"
 
 L["CHOOSEICON"] = "Choose an icon to check"
 L["CHOOSEICON_DESC"] = [=[|cff7fffffClick|r to choose an icon/group.
@@ -229,6 +228,8 @@ L["ICONMENU_CUSTOMTEX_DESC"] = [[If you want to override the texture shown by th
 You may also enter a texture path, such as 'Interface/Icons/spell_nature_healingtouch', or just 'spell_nature_healingtouch' if the path is 'Interface/Icons'
 
 You can use your own textures too as long as they are placed in WoW's directory (set this field to the path to the texture relative to WoW's root folder), are .tga or .blp format, and have dimensions that are powers of 2 (32, 64, 128, etc)]]
+
+L["ICONMENU_CUSTOMTEX_MOPAPPEND_DESC"] = [[If this texture is showing as solid green, and your custom texture is in WoW's root folder, then please move it into a subdirectory of WoW's root and update the setting here accordingly to allow it to work correctly. If the custom texture is set to a spell, and it is either a spell name or a spell that no longer exists, then you should try and change it to a spellID of a spell that does exist.]]
 
 L["ICONMENU_BINDTEXT_DESC"] = [[Any text in this editbox will be shown on the icon where the keybinding is normally displayed on an action bar. This does NOT set a keybinding to this TellMeWhen icon. It is simply a visual reminder that will be shown on the icon. The text can be configured in this group's settings.]]
 
@@ -1776,6 +1777,9 @@ L["HELP_CNDT_PARENTHESES_FIRSTSEE"] = [[You can group sets of conditions togethe
 L["HELP_CNDT_ANDOR_FIRSTSEE"] = [[You can choose whether both conditions are required to succeed or if only one needs to succeed.
 
 |cff7fffffClick|r this setting between your conditions to change this behavior if you wish to do so.]]
+L["HELP_IE_TIMERTEXTHANDLER_MISSING"] = [[TellMeWhen cannot find any installed addon that it knows to be capable of handling this setting.
+
+If you enable this setting but do not see any timer texts, please install the addon "OmniCC" from Curse.com or WoWInterface.com.]]
 
 
 L["IMPORT_ICON_DISABLED_DESC"] = "You must be editing an icon to be able to import an icon."

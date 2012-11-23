@@ -134,5 +134,6 @@ end
 
 
 if select(4, GetBuildInfo()) >= 50000 then -- ISMOP
-	L["ICONMENU_CUSTOMTEX_DESC"] = L["ICONMENU_CUSTOMTEX_DESC"] .. "\r\n\r\n" .. "|cffff0000MISTS OF PANDARIA NOTE: Due to changes made by Blizzard, TellMeWhen can no longer test to see if the texure you have specified is valid. If this icon is showing with a solid green texture, and your custom texture is in WoW's root folder, then please move it into a subdirectory of WoW's root and update the setting here accordingly to allow it to work correctly. If the custom texture is set to a spell, and it is either a spell name or a spell that no longer exists, then you should try and change it to a spellID of a spell that does exist. Sorry for the inconvenience!"
+	L["ICONMENU_CUSTOMTEX_DESC"] = L["ICONMENU_CUSTOMTEX_DESC"] .. "\r\n\r\n" .. L["ICONMENU_CUSTOMTEX_MOPAPPEND_DESC"]
+	L["ANIM_TEX_DESC"] = L["ANIM_TEX_DESC"] .. "\r\n\r\n" .. L["ICONMENU_CUSTOMTEX_MOPAPPEND_DESC"]
 end
