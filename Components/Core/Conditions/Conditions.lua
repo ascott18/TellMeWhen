@@ -82,6 +82,17 @@ function CNDT:RegisterConditionDefaults(self, defaults)
 end
 
 
+TMW:RegisterUpgrade(61011, {
+	condition = function(self, condition)
+		-- Don't show these help messages for users who already use the settings.
+		if condition.PrtsBefore ~= 0 or condition.PrtsAfter ~= 0 then
+			TMW.db.global.HelpSettings.CNDT_PARENTHESES_FIRSTSEE = true
+		end
+		if condition.AndOr == "OR" then
+			TMW.db.global.HelpSettings.CNDT_ANDOR_FIRSTSEE = true
+		end
+	end,
+})
 TMW:RegisterUpgrade(60026, {
 	stances = {
 		{class = "WARRIOR", 	id = 2457}, 	-- Battle Stance
@@ -869,7 +880,12 @@ function CNDT:GetConditionCheckFunctionString(parent, Conditions)
 		
 		thiscondtstr = thiscondtstr or "true"
 		
-		local thisstr = andor .. "(" .. strrep("(", condition.PrtsBefore) .. thiscondtstr .. strrep(")", condition.PrtsAfter)  .. ")"
+		local thisstr
+		if Conditions.n >= 3 then
+			thisstr = andor .. "(" .. strrep("(", condition.PrtsBefore) .. thiscondtstr .. strrep(")", condition.PrtsAfter)  .. ")"
+		else
+			thisstr = andor .. "(" .. thiscondtstr .. ")"
+		end
 
 		if conditionData then
 			thisstr = CNDT:DoConditionSubstitutions(conditionData, condition, thisstr)
@@ -1307,6 +1323,10 @@ end
 
 function CNDT:CheckParentheses(settings)
 
+	if settings.n < 3 then
+		return true
+	end
+	
 	local numclose, numopen, runningcount = 0, 0, 0
 	local unopened = 0
 

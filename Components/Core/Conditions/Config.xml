@@ -125,6 +125,8 @@
 				self:GetParent()[self:GetID()] = self
 			</OnLoad>
 			<OnClick>
+				TMW.HELP:Hide("CNDT_PARENTHESES_FIRSTSEE")
+			
 				self:SetChecked(not self.checked)
 				
 				local n = 0
@@ -515,11 +517,13 @@
 						function self:GetValue()
 							return self.value
 						end
-
+						
 						TMW:TT(self, "CONDITIONPANEL_ANDOR", "CONDITIONPANEL_ANDOR_DESC")
 						self:SetValue("AND")
 					</OnLoad>
 					<OnClick>
+						TMW.HELP:Hide("CNDT_ANDOR_FIRSTSEE")
+						
 						if self.value == "AND" then
 							self:SetValue("OR")
 						elseif self.value == "OR" then
@@ -628,7 +632,7 @@
 						TMW:TT(self, "CONDITIONPANEL_REMOVE")
 					</OnLoad>
 					<OnClick>
-						self:GetParent():AddDeleteHandler()
+						self:GetParent():DeleteHandler()
 					</OnClick>
 				</Scripts>
 				<NormalTexture urgency="5" file="Interface\Buttons\UI-Panel-MinimizeButton-Up"/>
@@ -729,7 +733,6 @@
 							</OnLoad>
 							<OnClick>
 								TMW.CNDT:AddCondition(TMW.CNDT.settings)
-								TMW.CNDT:AddRemoveHandler()
 								TMW.CNDT:LoadConfig()
 							</OnClick>
 						</Scripts>

@@ -1770,6 +1770,14 @@ L["HELP_EXPORT_DOCOPY_WIN"] = [[Press |cff7fffffCTRL+C|r to copy]]
 L["HELP_EXPORT_DOCOPY_MAC"] = [[Press |cff7fffffCMD+C|r to copy]]
 
 
+L["HELP_CNDT_PARENTHESES_FIRSTSEE"] = [[You can group sets of conditions together for complex checking functionality, especially when coupled with the %q setting.
+
+|cff7fffffClick|r the parentheses between your conditions to group them together if you wish to do so.]]
+L["HELP_CNDT_ANDOR_FIRSTSEE"] = [[You can choose whether both conditions are required to succeed or if only one needs to succeed.
+
+|cff7fffffClick|r this setting between your conditions to change this behavior if you wish to do so.]]
+
+
 L["IMPORT_ICON_DISABLED_DESC"] = "You must be editing an icon to be able to import an icon."
 
 

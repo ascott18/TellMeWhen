@@ -1,5 +1,7 @@
 ﻿<Ui>
 
+<Include file="Help\includes.core.xml"/>
+
 <Include file="Spells\includes.core.xml"/>
 
 <Include file="Suggester\includes.core.xml"/>
@@ -9,8 +11,6 @@
 <Include file="Units\includes.core.xml"/>
 
 <Include file="Resizer_Generic\includes.core.xml"/>
-
-<Include file="Help\includes.core.xml"/>
 
 
 

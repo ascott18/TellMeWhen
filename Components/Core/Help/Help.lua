@@ -131,6 +131,7 @@ function HELP:NewCode(code, order, OnlyOnce)
 	assert(not TMW.tContains(HELP.Codes, code), "HELP code " .. code .. " is already registered!")
 	
 	if order then
+		order = min(order, #HELP.Codes + 1)
 		tinsert(HELP.Codes, order, code)
 	else
 		tinsert(HELP.Codes, code)
