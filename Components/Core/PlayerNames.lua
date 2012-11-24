@@ -244,7 +244,7 @@ DogTag:AddTag("TMW", "Name", {
 	alias = "TMWName(unit=unit, color=color)",
 	arg = {
 		'unit', 'string;undef', 'player',
-		'color', 'boolean', true
+		'color', 'string;undef', 'true'
 	},
 	ret = "string",
 	doc = L["DT_DOC_Name"],
