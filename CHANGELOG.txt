@@ -3,6 +3,7 @@
  * New icon type: Loss of Control (WoW 5.1+ only)
  * You may notice some slight changes to the way your text layouts appear, especially if you used the Constrain Width setting. You will have to re-adjust your old layouts to achieve old functionality, which will probably require adding a second anchor to any affected text displays.
  * New group option: Group Opacity
+ * The "Class Colored Names" setting was removed due to internal conflicts with DogTag and the implementation of this setting.
  * Bug Fixes:
  ** Conditions with minimum values less than zero should now allow for these values to be selected.
  ** The Show Timer Text option should now work properly with Tukui.
@@ -12,6 +13,8 @@
  ** Items whose cooldown durations are reported as being 0.001 seconds should no longer be treated as being usable.
  ** Added missing spells to the SpellDamageTaken equivalency
  ** Attempted a fix for error <string>:"Condition_SPELLDMG":3: Usage: GetSpellBonusDamage(school)
+ ** All slashes in custom texture paths will be converted to backslashes upon processing.
+ ** The [Name] DogTag should now always update properly.
  
 ===v6.0.4===
  * **New icon event: On Condition Set Passing. Allows you to create an event handler that reacts to the state of a condition set.**

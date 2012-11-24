@@ -1174,12 +1174,12 @@ function TMW:CompileOptions()
 									},
 									order = 41,
 								},
-								ColorNames = {
+								--[[ColorNames = {
 									name = L["COLORNAMES"],
 									desc = L["COLORNAMES_DESC"],
 									type = "toggle",
 									order = 42,
-								},
+								},]]
 								--[[AlwaysSubLinks = {
 									-- unused
 									name = L["ALWAYSSUBLINKS"],

@@ -1170,8 +1170,8 @@ L["TEXTMANIP"] = "Text manipulation"
 L["DT_DOC_TMWFormatDuration"] = "Returns a string formatted by TellMeWhen's time format. Alternative to [FormatDuration]."
 L["DT_DOC_Name"] = "Returns the name of the unit. This is an improved version of the default [Name] tag provided by DogTag. Color will default to the setting in TMW's main options."
 
-L["DT_DOC_Source"] = "Returns the source unit of the last Combat Event that the icon processed. Best use in conjunction with the [Name] tag. (This tag should only be used with %s type icons)"
-L["DT_DOC_Destination"] = "Returns the destination unit of the last Combat Event that the icon processed. Best use in conjunction with the [Name] tag. (This tag should only be used with %s type icons)"
+L["DT_DOC_Source"] = "Returns the source unit or name of the last Combat Event that the icon processed. Best use in conjunction with the [Name] tag. (This tag should only be used with %s type icons)"
+L["DT_DOC_Destination"] = "Returns the destination unit or name of the last Combat Event that the icon processed. Best use in conjunction with the [Name] tag. (This tag should only be used with %s type icons)"
 L["DT_DOC_Extra"] = "Returns the extra spell from the last Combat Event that the icon processed. (This tag should only be used with %s type icons)"
 
 L["DT_DOC_IsShown"] = "Returns whether or not an icon is shown."

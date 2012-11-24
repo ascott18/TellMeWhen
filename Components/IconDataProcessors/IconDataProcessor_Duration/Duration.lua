@@ -154,7 +154,7 @@ Processor:RegisterDogTag("TMW", "Duration", {
 	events = "FastUpdate",
 	ret = "number",
 	doc = L["DT_DOC_Duration"],
-	example = '[Duration] => "5.462"; [Duration:TMWFormatDuration] => "5.4"; [Duration(4, 5)] => "97.32156"; [Duration(4, 5):TMWFormatDuration] => "1:37"',
+	example = '[Duration] => "1.435"; [Duration(gcd=false)] => "0"; [Duration:TMWFormatDuration] => "1.4"; [Duration(4, 5)] => "97.32156"; [Duration(4, 5):TMWFormatDuration] => "1:37"',
 	category = L["ICON"],
 })
 

@@ -413,7 +413,7 @@ DogTag:AddTag("TMW", "Source", {
 	events = TMW:CreateDogTagEventString("CLEU_SOURCEUNIT"),
 	ret = "string",
 	doc = L["DT_DOC_Source"],
-	example = ('[Source] => "target"; [Source(4, 5)] => "Cybeloras"; [Source:Name] => "Kobold"; [Source(4, 5):Name] => %q'):format(TMW.NAMES:TryToAcquireName("player", true)),
+	example = ('[Source] => "target"; [Source(4, 5)] => %q; [Source:Name] => "Kobold"; [Source(4, 5):Name] => %q'):format(UnitName("player"), TMW.NAMES:TryToAcquireName(UnitName("player"), true)),
 	category = L["ICON"],
 })
 
@@ -451,7 +451,7 @@ DogTag:AddTag("TMW", "Destination", {
 	events = TMW:CreateDogTagEventString("CLEU_DESTUNIT"),
 	ret = "string",
 	doc = L["DT_DOC_Destination"],
-	example = ('[Destination] => "target"; [Destination(4, 5)] => "Cybeloras"; [Destination:Name] => "Kobold"; [Destination(4, 5):Name] => %q'):format(TMW.NAMES:TryToAcquireName("player", true)),
+	example = ('[Destination] => "target"; [Destination(4, 5)] => %q; [Destination:Name] => "Kobold"; [Destination(4, 5):Name] => %q'):format(UnitName("player"), TMW.NAMES:TryToAcquireName(UnitName("player"), true)),
 	category = L["ICON"],
 })
 

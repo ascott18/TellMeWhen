@@ -578,7 +578,7 @@ function Texts:SetupForIcon(sourceIcon)
 	self.kwargs.icon = sourceIcon.ID
 	self.kwargs.group = sourceIcon.group.ID
 	self.kwargs.unit = sourceIcon.attributes.dogTagUnit
-	self.kwargs.color = TMW.db.profile.ColorNames
+	--self.kwargs.shouldcolor = TMW.db.profile.ColorNames
 	
 	for _, fontString in pairs(self.fontStrings) do
 		fontString.TMW_QueueForRemoval = true
