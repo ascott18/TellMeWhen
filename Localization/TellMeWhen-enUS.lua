@@ -431,6 +431,7 @@ L["ICONMENU_STACKS_MIN_DESC"] = "Minimum number of stacks needed to show the ico
 L["ICONMENU_STACKS_MAX_DESC"] = "Maximum number of stacks allowed to show the icon"
 
 L["DURATION"] = "Duration"
+L["DURATIONPERC"] = "Duration Percentage"
 L["DURATIONPANEL_TITLE2"] = "Duration Requirements"
 L["ICONMENU_DURATION_MIN_DESC"] = "Minimum duration needed to show the icon, in seconds"
 L["ICONMENU_DURATION_MAX_DESC"] = "Maximum duration allowed to show the icon, in seconds"
@@ -1035,6 +1036,7 @@ L["DEBUFFTOCOMP2"] = "Second Debuff to Compare"
 L["CODETOEXE"] = "Code to Execute"
 L["MACROTOEVAL"] = "Macro Conditional(s) to Evaluate"
 L["COMPARISON"] = "Comparison"
+L["PERCENTAGE"] = "Percentage"
 
 L["PET_TYPE_CUNNING"] = "Cunning"
 L["PET_TYPE_TENACITY"] = "Tenacity"

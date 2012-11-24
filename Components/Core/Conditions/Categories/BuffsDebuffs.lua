@@ -76,9 +76,30 @@ function Env.AuraDur(unit, name, namename, filter)
 	
 	
 	if not buffName then
+		return 0, 0
+	else
+		return expirationTime == 0 and huge or expirationTime - TMW.time, duration, expirationTime
+	end
+end
+
+function Env.AuraPercent(unit, name, namename, filter)
+	local isID = isNumber[name]
+	
+	local buffName, _, _, _, _, duration, expirationTime, _, _, _, id = UnitAura(unit, namename, nil, filter)
+	if isID and id and id ~= isID then
+		for z = 1, 60 do
+			buffName, _, _, _, _, duration, expirationTime, _, _, _, id = UnitAura(unit, z, filter)
+			if not id or id == isID then
+				break
+			end
+		end
+	end
+	
+	
+	if not buffName then
 		return 0
 	else
-		return expirationTime == 0 and huge or expirationTime - TMW.time
+		return expirationTime == 0 and 1 or ((expirationTime - TMW.time) / duration)
 	end
 end
 
@@ -116,7 +137,7 @@ ConditionCategory:RegisterCondition(1,	 "BUFFDUR", {
 	category = L["CNDTCAT_BUFFSDEBUFFS"],
 	range = 30,
 	step = 0.1,
-	name = function(editbox) TMW:TT(editbox, L["ICONMENU_BUFF"] .. " - " .. L["DURATION"], "BUFFCNDT_DESC", 1) editbox.label = L["BUFFTOCHECK"] end,
+	name = function(editbox) TMW:TT(editbox, "BUFFTOCHECK", "BUFFCNDT_DESC") editbox.label = L["BUFFTOCHECK"] end,
 	useSUG = true,
 	check = function(check) TMW:TT(check, "ONLYCHECKMINE", "ONLYCHECKMINE_DESC") end,
 	texttable = CNDT.COMMON.absentseconds,
@@ -131,11 +152,40 @@ ConditionCategory:RegisterCondition(1,	 "BUFFDUR", {
 			ConditionObject:GenerateNormalEventString("UNIT_AURA", CNDT:GetUnit(c.Unit))
 	end,
 	anticipate = function(c)
-		return [[local dur = AuraDur(c.Unit, c.NameFirst, c.NameName, "HELPFUL]] .. (c.Checked and " PLAYER" or "") .. [[", time)
+		return [[local dur, duration, expirationTime = AuraDur(c.Unit, c.NameFirst, c.NameName, "HELPFUL]] .. (c.Checked and " PLAYER" or "") .. [[", time)
 		local VALUE
 		if dur and dur > 0 then
-			local expirationTime = dur + time
 			VALUE = expirationTime and expirationTime - c.Level or 0
+		else
+			VALUE = 0
+		end]]
+	end,
+})
+ConditionCategory:RegisterCondition(2.5, "BUFFPERC", {
+	text = L["ICONMENU_BUFF"] .. " - " .. L["DURATION"] .. " - " .. L["PERCENTAGE"],
+	category = L["CNDTCAT_BUFFSDEBUFFS"],
+	min = 0,
+	max = 100,
+	percent = true,
+	name = function(editbox) TMW:TT(editbox, "BUFFTOCHECK", "BUFFCNDT_DESC") editbox.label = L["BUFFTOCHECK"] end,
+	useSUG = true,
+	check = function(check) TMW:TT(check, "ONLYCHECKMINE", "ONLYCHECKMINE_DESC") end,
+	texttable = CNDT.COMMON.percent,
+	icon = "Interface\\Icons\\spell_holy_circleofrenewal",
+	tcoords = CNDT.COMMON.standardtcoords,
+	funcstr = function(c)
+		return [[AuraPercent(c.Unit, c.NameFirst, c.NameName, "HELPFUL]] .. (c.Checked and " PLAYER" or "") .. [[") c.Operator c.Level]]
+	end,
+	events = function(ConditionObject, c)
+		return
+			ConditionObject:GetUnitChangedEventString(CNDT:GetUnit(c.Unit)),
+			ConditionObject:GenerateNormalEventString("UNIT_AURA", CNDT:GetUnit(c.Unit))
+	end,
+	anticipate = function(c)
+		return [[local dur, duration, expirationTime = AuraDur(c.Unit, c.NameFirst, c.NameName, "HELPFUL]] .. (c.Checked and " PLAYER" or "") .. [[")
+		local VALUE
+		if dur and dur > 0 then
+			VALUE = expirationTime and (expirationTime - c.Level*duration) or 0
 		else
 			VALUE = 0
 		end]]
@@ -165,7 +215,7 @@ ConditionCategory:RegisterCondition(3,	 "BUFFSTACKS", {
 	text = L["ICONMENU_BUFF"] .. " - " .. L["STACKS"],
 	category = L["CNDTCAT_BUFFSDEBUFFS"],
 	range = 20,
-	name = function(editbox) TMW:TT(editbox, L["ICONMENU_BUFF"] .. " - " .. L["STACKS"], "BUFFCNDT_DESC", 1) editbox.label = L["BUFFTOCHECK"] end,
+	name = function(editbox) TMW:TT(editbox, "BUFFTOCHECK", "BUFFCNDT_DESC") editbox.label = L["BUFFTOCHECK"] end,
 	useSUG = true,
 	check = function(check) TMW:TT(check, "ONLYCHECKMINE", "ONLYCHECKMINE_DESC") end,
 	texttable = setmetatable({[0] = format(STACKS, 0).." ("..L["ICONMENU_ABSENT"]..")"}, {__index = function(tbl, k) return format(STACKS, k) end}),
@@ -186,7 +236,7 @@ ConditionCategory:RegisterCondition(4,	 "BUFFTOOLTIP", {
 	category = L["CNDTCAT_BUFFSDEBUFFS"],
 	range = 500,
 	--texttable = {[0] = "0 ("..L["ICONMENU_ABSENT"]..")"},
-	name = function(editbox) TMW:TT(editbox, L["ICONMENU_BUFF"] .. " - " .. L["TOOLTIPSCAN"], "TOOLTIPSCAN_DESC", 1) editbox.label = L["BUFFTOCHECK"] end,
+	name = function(editbox) TMW:TT(editbox, "BUFFTOCHECK", "TOOLTIPSCAN_DESC") editbox.label = L["BUFFTOCHECK"] end,
 	useSUG = true,
 	check = function(check) TMW:TT(check, "ONLYCHECKMINE", "ONLYCHECKMINE_DESC") end,
 	icon = "Interface\\Icons\\inv_elemental_primal_mana",
@@ -206,7 +256,7 @@ ConditionCategory:RegisterCondition(5,	 "BUFFNUMBER", {
 	category = L["CNDTCAT_BUFFSDEBUFFS"],
 	min = 0,
 	max = 20,
-	name = function(editbox) TMW:TT(editbox, L["ICONMENU_BUFF"] .. " - " .. L["NUMAURAS"], "BUFFCNDT_DESC", 1) editbox.label = L["BUFFTOCHECK"] end,
+	name = function(editbox) TMW:TT(editbox, "BUFFTOCHECK", "BUFFCNDT_DESC") editbox.label = L["BUFFTOCHECK"] end,
 	useSUG = true,
 	check = function(check) TMW:TT(check, "ONLYCHECKMINE", "ONLYCHECKMINE_DESC") end,
 	texttable = function(k) return format(L["ACTIVE"], k) end,
@@ -229,7 +279,7 @@ ConditionCategory:RegisterCondition(11,	 "DEBUFFDUR", {
 	category = L["CNDTCAT_BUFFSDEBUFFS"],
 	range = 30,
 	step = 0.1,
-	name = function(editbox) TMW:TT(editbox, L["ICONMENU_DEBUFF"] .. " - " .. L["DURATION"], "BUFFCNDT_DESC", 1) editbox.label = L["DEBUFFTOCHECK"] end,
+	name = function(editbox) TMW:TT(editbox, "DEBUFFTOCHECK", "BUFFCNDT_DESC") editbox.label = L["DEBUFFTOCHECK"] end,
 	useSUG = true,
 	check = function(check) TMW:TT(check, "ONLYCHECKMINE", "ONLYCHECKMINE_DESC") end,
 	texttable = CNDT.COMMON.absentseconds,
@@ -244,11 +294,40 @@ ConditionCategory:RegisterCondition(11,	 "DEBUFFDUR", {
 			ConditionObject:GenerateNormalEventString("UNIT_AURA", CNDT:GetUnit(c.Unit))
 	end,
 	anticipate = function(c)
-		return [[local dur = AuraDur(c.Unit, c.NameFirst, c.NameName, "HARMFUL]] .. (c.Checked and " PLAYER" or "") .. [[", time)
+		return [[local dur, duration, expirationTime = AuraDur(c.Unit, c.NameFirst, c.NameName, "HARMFUL]] .. (c.Checked and " PLAYER" or "") .. [[", time)
 		local VALUE
 		if dur and dur > 0 then
-			local expirationTime = dur + time
 			VALUE = expirationTime and expirationTime - c.Level or 0
+		else
+			VALUE = 0
+		end]]
+	end,
+})
+ConditionCategory:RegisterCondition(12.5,"DEBUFFPERC", {
+	text = L["ICONMENU_DEBUFF"] .. " - " .. L["DURATION"] .. " - " .. L["PERCENTAGE"],
+	category = L["CNDTCAT_BUFFSDEBUFFS"],
+	min = 0,
+	max = 100,
+	percent = true,
+	name = function(editbox) TMW:TT(editbox, "DEBUFFTOCHECK", "BUFFCNDT_DESC") editbox.label = L["DEBUFFTOCHECK"] end,
+	useSUG = true,
+	check = function(check) TMW:TT(check, "ONLYCHECKMINE", "ONLYCHECKMINE_DESC") end,
+	texttable = CNDT.COMMON.percent,
+	icon = "Interface\\Icons\\spell_priest_voidshift",
+	tcoords = CNDT.COMMON.standardtcoords,
+	funcstr = function(c)
+		return [[AuraPercent(c.Unit, c.NameFirst, c.NameName, "HARMFUL]] .. (c.Checked and " PLAYER" or "") .. [[") c.Operator c.Level]]
+	end,
+	events = function(ConditionObject, c)
+		return
+			ConditionObject:GetUnitChangedEventString(CNDT:GetUnit(c.Unit)),
+			ConditionObject:GenerateNormalEventString("UNIT_AURA", CNDT:GetUnit(c.Unit))
+	end,
+	anticipate = function(c)
+		return [[local dur, duration, expirationTime = AuraDur(c.Unit, c.NameFirst, c.NameName, "HARMFUL]] .. (c.Checked and " PLAYER" or "") .. [[")
+		local VALUE
+		if dur and dur > 0 then
+			VALUE = expirationTime and (expirationTime - c.Level*duration) or 0
 		else
 			VALUE = 0
 		end]]
@@ -279,7 +358,7 @@ ConditionCategory:RegisterCondition(13,	 "DEBUFFSTACKS", {
 	text = L["ICONMENU_DEBUFF"] .. " - " .. L["STACKS"],
 	category = L["CNDTCAT_BUFFSDEBUFFS"],
 	range = 20,
-	name = function(editbox) TMW:TT(editbox, L["ICONMENU_DEBUFF"] .. " - " .. L["STACKS"], "BUFFCNDT_DESC", 1) editbox.label = L["DEBUFFTOCHECK"]end,
+	name = function(editbox) TMW:TT(editbox, "DEBUFFTOCHECK", "BUFFCNDT_DESC") editbox.label = L["DEBUFFTOCHECK"] end,
 	useSUG = true,
 	check = function(check) TMW:TT(check, "ONLYCHECKMINE", "ONLYCHECKMINE_DESC") end,
 	texttable = setmetatable({[0] = format(STACKS, 0).." ("..L["ICONMENU_ABSENT"]..")"}, {__index = function(tbl, k) return format(STACKS, k) end}),
@@ -300,7 +379,7 @@ ConditionCategory:RegisterCondition(14,	 "DEBUFFTOOLTIP", {
 	category = L["CNDTCAT_BUFFSDEBUFFS"],
 	range = 500,
 	--texttable = {[0] = "0 ("..L["ICONMENU_ABSENT"]..")"},
-	name = function(editbox) TMW:TT(editbox, L["ICONMENU_DEBUFF"] .. " - " .. L["TOOLTIPSCAN"], "TOOLTIPSCAN_DESC", 1) editbox.label = L["BUFFTOCHECK"] end,
+	name = function(editbox) TMW:TT(editbox, "DEBUFFTOCHECK", "TOOLTIPSCAN_DESC") editbox.label = L["DEBUFFTOCHECK"] end,
 	useSUG = true,
 	check = function(check) TMW:TT(check, "ONLYCHECKMINE", "ONLYCHECKMINE_DESC") end,
 	icon = "Interface\\Icons\\spell_shadow_lifedrain",
@@ -320,7 +399,7 @@ ConditionCategory:RegisterCondition(15,	 "DEBUFFNUMBER", {
 	category = L["CNDTCAT_BUFFSDEBUFFS"],
 	min = 0,
 	max = 20,
-	name = function(editbox) TMW:TT(editbox, L["ICONMENU_DEBUFF"] .. " - " .. L["NUMAURAS"], "BUFFCNDT_DESC", 1) editbox.label = L["DEBUFFTOCHECK"]end,
+	name = function(editbox) TMW:TT(editbox, "DEBUFFTOCHECK", "BUFFCNDT_DESC") editbox.label = L["DEBUFFTOCHECK"] end,
 	useSUG = true,
 	check = function(check) TMW:TT(check, "ONLYCHECKMINE", "ONLYCHECKMINE_DESC") end,
 	texttable = function(k) return format(L["ACTIVE"], k) end,
