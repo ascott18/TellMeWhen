@@ -1,0 +1,75 @@
+﻿<Ui>
+
+	<Frame name="TellMeWhen_BarDisplayBarOptions" inherits="TellMeWhen_OptionsModuleContainer" virtual="true">
+		<Size y="58"/>
+		<Frames>
+			<CheckButton name="$parentInvert" inherits="TellMeWhen_CheckTemplate" parentKey="Invert">
+				<Anchors>
+					<Anchor point="TOP" y="-1"/>
+				</Anchors>
+				<Scripts>
+					<OnLoad>
+						TMW.IE:CreateSettingFrameFromData(self, {
+							setting = "BarDisplay_Invert",
+							title = TMW.L["ICONMENU_INVERTBARS"],
+							tooltip = TMW.L["ICONMENU_INVERTBARDISPLAYBAR_DESC"],
+						})
+					</OnLoad>
+				</Scripts>
+			</CheckButton>
+			
+			<CheckButton name="$parentBarGCD" inherits="TellMeWhen_CheckTemplate" parentKey="BarGCD">
+				<Scripts>
+					<OnLoad>
+						TMW.IE:CreateSettingFrameFromData(self, {
+							setting = "BarDisplay_BarGCD",
+							title = TMW.L["ICONMENU_ALLOWGCD"],
+							tooltip = TMW.L["ICONMENU_ALLOWGCD_DESC"],
+						})
+					</OnLoad>
+				</Scripts>
+			</CheckButton>
+			
+			<EditBox name="$parentFakeMax" inherits="TellMeWhen_TimeEditBoxTemplate" parentKey="FakeMax" autoFocus="false">
+				<Size x="45" y="15"/>
+				<Anchors>
+					<Anchor point="TOP" relativeTo="$parentInvert" relativePoint="BOTTOM" y="-2"/>
+				</Anchors>
+				<Scripts>
+					<OnLoad>
+						self.text:SetText(TMW.L["ICONMENU_FAKEMAX"])
+						--self.text:SetWidth(50)
+						self.text:ClearAllPoints()
+						self.text:SetPoint("LEFT", self, "RIGHT", 2, 0)
+						self.text:SetPoint("RIGHT", self:GetParent(), "RIGHT", -5, 0)
+						
+						self:SetPoint("LEFT", 11, 0)
+						
+						TMW.IE:CreateSettingFrameFromData(self, {
+							setting = "BarDisplay_FakeMax",
+							title = TMW.L["ICONMENU_FAKEMAX"],
+							tooltip = TMW.L["ICONMENU_FAKEMAX_DESC"],
+							disabled = function(self)
+								return TMW.CI.ics.BarDisplay_Invert
+							end,
+							ModifySettingValue = function(self, value)
+								return tonumber(value) or 0
+							end,
+						})
+					</OnLoad>
+				</Scripts>
+			</EditBox>
+		</Frames>
+		<Scripts>
+			<OnLoad>
+				self.Header:SetText(TMW.L["CONFIGPANEL_TIMERBAR_BARDISPLAY_HEADER"])
+				
+				self.Invert:ConstrainLabel(self.BarGCD)
+				self.BarGCD:ConstrainLabel(self, "RIGHT", -1, 0)
+				
+				TMW.IE:DistributeFrameAnchorsLaterally(self, 2, self.Invert, self.BarGCD)
+			</OnLoad>
+		</Scripts>
+	</Frame>
+ 
+</Ui>

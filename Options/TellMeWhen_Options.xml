@@ -979,7 +979,7 @@
 		<Size x="60" y="15"/>
 		<Layers>
 			<Layer level="ARTWORK">
-				<FontString name="$parentText" parentKey="text" inherits="GameFontHighlightSmall">
+				<FontString name="$parentText" parentKey="text" inherits="GameFontHighlightSmall" justifyH="LEFT">
 					<Anchors>
 						<Anchor point="BOTTOM" relativePoint="TOP" y="2"/>
 					</Anchors>

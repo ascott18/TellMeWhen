@@ -127,8 +127,8 @@ function TimerBar:SetCooldown(start, duration, isGCD)
 			self.duration = 0
 		end
 
-		self.Max = duration
-		self.bar:SetMinMaxValues(0, duration)
+		self.Max = self.FakeMax or duration
+		self.bar:SetMinMaxValues(0, self.Max)
 		self.__value = nil -- the displayed value might change when we change the max, so force an update
 
 		self:UpdateTable_Register()

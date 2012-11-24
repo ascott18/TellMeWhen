@@ -23,25 +23,22 @@ local print = TMW.print
 local TimerBar_BarDisplay = TMW:NewClass("IconModule_TimerBar_BarDisplay", "IconModule_TimerBar")
 
 TimerBar_BarDisplay:RegisterIconDefaults{
+	BarDisplay_Invert		= false,
 	BarDisplay_BarGCD		= false,
+	BarDisplay_FakeMax		= 0,
 }
 
-TimerBar_BarDisplay:RegisterConfigPanel_ConstructorFunc(210, "TellMeWhen_TimerBar_BarDisplay_Settings", function(self)
-	self.Header:SetText(L["CONFIGPANEL_TIMERBAR_BARDISPLAY_HEADER"])
-	TMW.IE:BuildSimpleCheckSettingFrame(self, {
-		numPerRow = 2,
-		{
-			setting = "BarDisplay_BarGCD",
-			title = TMW.L["ICONMENU_ALLOWGCD"],
-			tooltip = TMW.L["ICONMENU_ALLOWGCD_DESC"],
-		},
-	})
-end)
+TimerBar_BarDisplay:RegisterConfigPanel_XMLTemplate(210, "TellMeWhen_BarDisplayBarOptions")
 
 function TimerBar_BarDisplay:SetupForIcon(sourceIcon)
-	self.Invert = false
+	self.Invert = sourceIcon.BarDisplay_Invert
 	self.BarGCD = sourceIcon.BarDisplay_BarGCD
 	self.Offset = 0
+	if self.Invert or sourceIcon.BarDisplay_FakeMax == 0 then
+		self.FakeMax = nil
+	else
+		self.FakeMax = sourceIcon.BarDisplay_FakeMax
+	end
 	if not sourceIcon.typeData then
 		error("sourceIcon.typeData was nil. Why did this happen? (Please tell Cybeloras)")
 	end

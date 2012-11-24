@@ -46,7 +46,7 @@
 						self.setting = "PBarOffs"
 						
 						self.text:ClearAllPoints()
-						self.text:SetPoint("LEFT", self, "RIGHT", -5, 0)
+						self.text:SetPoint("LEFT", self, "RIGHT", 1, 0)
 						
 						TMW.IE:CreateSettingFrameFromData(self, {
 							setting = "PBarOffs",

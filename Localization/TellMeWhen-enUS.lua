@@ -321,7 +321,14 @@ L["ICONMENU_SHOWCBAR_DESC"] = "Shows a bar that is overlaid across the bottom ha
 L["ICONMENU_INVERTBARS"] = "Fill bar up"
 L["ICONMENU_INVERTCBAR_DESC"] = "Check this option to cause the overlay bar to fill up to cover the whole width of the icon as duration reaches zero."
 L["ICONMENU_INVERTPBAR_DESC"] = "Check this option to cause the overlay bar to fill up to cover the whole width of the icon as power become sufficient."
+L["ICONMENU_INVERTBARDISPLAYBAR_DESC"] = "Check this option to cause the bar to fill up to cover its whole width as duration reaches zero."
 L["ICONMENU_OFFS"] = "Offset"
+L["ICONMENU_FAKEMAX"] = "Artificial Maximum"
+L["ICONMENU_FAKEMAX_DESC"] = [[Set an artificial maximum value for the timer.
+
+You can use this setting to cause an entire group of icons to decay at the same rate, which can provide a visual indication of what timers will run out first.
+
+Set to 0 to disable this setting.]]
 L["ICONMENU_BAROFFS"] = [[This amount will be added to the bar in order to offset it.
 
 Useful for custom indicators of when you should begin casting a spell to prevent a buff from falling off, or to indicate the power required to cast a spell and still have some left over for an interrupt.]]
