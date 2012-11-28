@@ -130,7 +130,7 @@ function Type:GetIconMenuText(data)
 		text = "((" .. Type.name .. "))"
 	end]]
 
-	return text, "" --data.Name and data.Name ~= ""  and data.Name .. "\r\n" or ""
+	return "", "" --data.Name and data.Name ~= ""  and data.Name .. "\r\n" or ""
 end
 
 Type:Register(102)

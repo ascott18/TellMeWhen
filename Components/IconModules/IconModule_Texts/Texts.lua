@@ -559,14 +559,6 @@ end
 
 function Texts:SetupForIcon(sourceIcon)
 	local icon = self.icon
-
-	--[[
-	TODO: the way that this works for meta icons is really weird if the meta is a different view than the source.
-	Consider forcing meta icons to only inherit from their own view (but that would suck),
-	or add a warning when they are of different views (which would be good),
-	or allow users to configure icons for multiple views without actually changing the view
-		(something like "Configure as..." in the icon editor)
-	]]
 	
 	
 	local Texts = sourceIcon:GetSettingsPerView().Texts
