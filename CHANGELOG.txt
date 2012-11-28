@@ -1,3 +1,7 @@
+===v6.1.1===
+ * Bug Fixes:
+ ** Fixed error Interface\AddOns\TellMeWhen\TellMeWhen.lua:155: table index is nil
+ 
 ===v6.1.0===
  * New icon display method: Bars.
  * New icon type: Loss of Control (WoW 5.1+ only)

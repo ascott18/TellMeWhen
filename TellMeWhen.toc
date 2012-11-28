@@ -7,7 +7,7 @@
 ## X-Interface: 50100
 ## Title: TellMeWhen
 
-## Version: 6.1.0
+## Version: 6.1.1
 ## Author: Cybeloras of Detheroc/Mal'Ganis
 
 ## Notes: Provides visual, auditory, and textual notifications about cooldowns, buffs, and pretty much every other element of combat.

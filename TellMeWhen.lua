@@ -25,10 +25,10 @@ local AceDB = LibStub("AceDB-3.0")
 
 local DogTag = LibStub("LibDogTag-3.0", true)
 
-TELLMEWHEN_VERSION = "6.1.0"
+TELLMEWHEN_VERSION = "6.1.1"
 TELLMEWHEN_VERSION_MINOR = strmatch(" @project-version@", " r%d+") or ""
 TELLMEWHEN_VERSION_FULL = TELLMEWHEN_VERSION .. TELLMEWHEN_VERSION_MINOR
-TELLMEWHEN_VERSIONNUMBER = 61022 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
+TELLMEWHEN_VERSIONNUMBER = 61101 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
 if TELLMEWHEN_VERSIONNUMBER > 62000 or TELLMEWHEN_VERSIONNUMBER < 61000 then return error("YOU SCREWED UP THE VERSION NUMBER OR DIDNT CHANGE THE SAFETY LIMITS") end -- safety check because i accidentally made the version number 414069 once
 
 TELLMEWHEN_MAXROWS = 20
@@ -78,12 +78,18 @@ TMW.ISNOTMOP = not TMW.ISMOP and true or nil
 local _, pclass = UnitClass("Player")
 local pname = UnitName("player")
 
+
+TMW.CONST = {}
+TMW.CONST.CHAT_TYPE_INSTANCE_CHAT = "INSTANCE_CHAT"
+
+
 TMW.UnitAura = _G.UnitAura
 if clientVersion < 50100 then
 	function TMW.UnitAura(...)
 		local a, b, c, d, e, f, g, h, i, j, k, l, m = UnitAura(...)
 		return a, b, c, d, e, f, g, h, i, j, k, l, m, select(15, UnitAura(...))
 	end
+	TMW.CONST.CHAT_TYPE_INSTANCE_CHAT = "BATTLEGROUND"
 end
 
 --TODO: (misplaced note) export any needed text layouts with icons that need them
@@ -151,6 +157,7 @@ TMW.isNumber = setmetatable(
 {}, {
 	__mode = "kv",
 	__index = function(t, i)
+		if not i then return false end
 		local o = tonumber(i) or false
 		t[i] = o
 		return o
@@ -3007,10 +3014,7 @@ function TMW:PLAYER_ENTERING_WORLD()
 		end
 		TMW:SendCommMessage("TMWV", "M:" .. TELLMEWHEN_VERSION .. "^m:" .. TELLMEWHEN_VERSION_MINOR .. "^R:" .. TELLMEWHEN_VERSIONNUMBER .. "^", "RAID")
 		TMW:SendCommMessage("TMWV", "M:" .. TELLMEWHEN_VERSION .. "^m:" .. TELLMEWHEN_VERSION_MINOR .. "^R:" .. TELLMEWHEN_VERSIONNUMBER .. "^", "PARTY")
-		if clientVersion < 50100 then
-			-- Seems to be removed in WoW 5.1?
-			TMW:SendCommMessage("TMWV", "M:" .. TELLMEWHEN_VERSION .. "^m:" .. TELLMEWHEN_VERSION_MINOR .. "^R:" .. TELLMEWHEN_VERSIONNUMBER .. "^", "BATTLEGROUND")
-		end
+		TMW:SendCommMessage("TMWV", "M:" .. TELLMEWHEN_VERSION .. "^m:" .. TELLMEWHEN_VERSION_MINOR .. "^R:" .. TELLMEWHEN_VERSIONNUMBER .. "^", TMW.CONST.CHAT_TYPE_INSTANCE_CHAT)
 	end
 end
 
