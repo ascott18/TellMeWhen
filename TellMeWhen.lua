@@ -28,7 +28,7 @@ local DogTag = LibStub("LibDogTag-3.0", true)
 TELLMEWHEN_VERSION = "6.1.0"
 TELLMEWHEN_VERSION_MINOR = strmatch(" @project-version@", " r%d+") or ""
 TELLMEWHEN_VERSION_FULL = TELLMEWHEN_VERSION .. TELLMEWHEN_VERSION_MINOR
-TELLMEWHEN_VERSIONNUMBER = 61019 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
+TELLMEWHEN_VERSIONNUMBER = 61020 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
 if TELLMEWHEN_VERSIONNUMBER > 62000 or TELLMEWHEN_VERSIONNUMBER < 61000 then return error("YOU SCREWED UP THE VERSION NUMBER OR DIDNT CHANGE THE SAFETY LIMITS") end -- safety check because i accidentally made the version number 414069 once
 
 TELLMEWHEN_MAXROWS = 20
@@ -78,6 +78,13 @@ TMW.ISNOTMOP = not TMW.ISMOP and true or nil
 local _, pclass = UnitClass("Player")
 local pname = UnitName("player")
 
+TMW.UnitAura = _G.UnitAura
+if clientVersion < 50100 then
+	function TMW.UnitAura(...)
+		local a, b, c, d, e, f, g, h, i, j, k, l, m = UnitAura(...)
+		return a, b, c, d, e, f, g, h, i, j, k, l, m, select(15, UnitAura(...))
+	end
+end
 
 --TODO: (misplaced note) export any needed text layouts with icons that need them
 

@@ -18,7 +18,7 @@ local EFF_THR, DS
 local tonumber, strlower =
 	  tonumber, strlower
 local UnitAura, UnitExists =
-	  UnitAura, UnitExists
+	  TMW.UnitAura, UnitExists
 local print = TMW.print
 local SpellTextures = TMW.SpellTextures
 local strlowerCache = TMW.strlowerCache
@@ -157,7 +157,7 @@ local function Buff_OnUpdate(icon, time)
 		if unitsWithExistsEvent[unit] or UnitExists(unit) then -- if unitsWithExistsEvent[unit] is true then the unit is managed by TMW's unit framework, so we dont need to check that it exists.
 			if Sort or NAL > EFF_THR then
 				for z=1, huge do --huge because i can and it breaks when there are no more buffs anyway
-					local _buffName, _, _iconTexture, _count, _dispelType, _duration, _expirationTime, _, canSteal, _, _id, _, _, _v1, _v2, _v3, _v4 = UnitAura(unit, z, Filter)
+					local _buffName, _, _iconTexture, _count, _dispelType, _duration, _expirationTime, _, canSteal, _, _id, _, _, _, _v1, _v2, _v3, _v4 = UnitAura(unit, z, Filter)
 					_dispelType = _dispelType == "" and "Enraged" or _dispelType -- Bug: Enraged is an empty string
 					if not _buffName then
 						break
@@ -177,7 +177,7 @@ local function Buff_OnUpdate(icon, time)
 				end
 				if Filterh and not buffName then
 					for z=1, huge do
-						local _buffName, _, _iconTexture, _count, _dispelType, _duration, _expirationTime, _, canSteal, _, _id, _, _, _v1, _v2, _v3, _v4 = UnitAura(unit, z, Filterh)
+						local _buffName, _, _iconTexture, _count, _dispelType, _duration, _expirationTime, _, canSteal, _, _id, _, _, _, _v1, _v2, _v3, _v4 = UnitAura(unit, z, Filterh)
 						_dispelType = _dispelType == "" and "Enraged" or _dispelType -- Bug: Enraged is an empty string
 						if not _buffName then
 							break
@@ -205,7 +205,7 @@ local function Buff_OnUpdate(icon, time)
 					local iName = NameArray[i]
 					if DS[iName] then --Handle dispel types.
 						for z=1, huge do
-							buffName, _, iconTexture, count, dispelType, duration, expirationTime, _, canSteal, _, id, _, _, v1, v2, v3, v4 = UnitAura(unit, z, Filter)
+							buffName, _, iconTexture, count, dispelType, duration, expirationTime, _, canSteal, _, id, _, _, _, v1, v2, v3, v4 = UnitAura(unit, z, Filter)
 							dispelType = dispelType == "" and "Enraged" or dispelType -- Bug: Enraged is an empty string
 							if (not buffName) or (dispelType == iName and (NotStealable or canSteal)) then
 								break
@@ -213,7 +213,7 @@ local function Buff_OnUpdate(icon, time)
 						end
 						if Filterh and not buffName then
 							for z=1, huge do
-								buffName, _, iconTexture, count, dispelType, duration, expirationTime, _, canSteal, _, id, _, _, v1, v2, v3, v4 = UnitAura(unit, z, Filterh)
+								buffName, _, iconTexture, count, dispelType, duration, expirationTime, _, canSteal, _, id, _, _, _, v1, v2, v3, v4 = UnitAura(unit, z, Filterh)
 								dispelType = dispelType == "" and "Enraged" or dispelType -- Bug: Enraged is an empty string
 								if (not buffName) or (dispelType == iName and (NotStealable or canSteal)) then
 									break
@@ -222,14 +222,14 @@ local function Buff_OnUpdate(icon, time)
 						end
 					else
 						-- stealable checks here are done before breaking the loop
-						buffName, _, iconTexture, count, _, duration, expirationTime, _, canSteal, _, id, _, _, v1, v2, v3, v4 = UnitAura(unit, NameNameArray[i], nil, Filter)
+						buffName, _, iconTexture, count, _, duration, expirationTime, _, canSteal, _, id, _, _, _, v1, v2, v3, v4 = UnitAura(unit, NameNameArray[i], nil, Filter)
 						if Filterh and not buffName then
-							buffName, _, iconTexture, count, _, duration, expirationTime, _, canSteal, _, id, _, _, v1, v2, v3, v4 = UnitAura(unit, NameNameArray[i], nil, Filterh)
+							buffName, _, iconTexture, count, _, duration, expirationTime, _, canSteal, _, id, _, _, _, v1, v2, v3, v4 = UnitAura(unit, NameNameArray[i], nil, Filterh)
 						end
 					end
 					if buffName and id ~= iName and isNumber[iName] then
 						for z=1, huge do
-							buffName, _, iconTexture, count, _, duration, expirationTime, _, canSteal, _, id, _, _, v1, v2, v3, v4 = UnitAura(unit, z, Filter)
+							buffName, _, iconTexture, count, _, duration, expirationTime, _, canSteal, _, id, _, _, _, v1, v2, v3, v4 = UnitAura(unit, z, Filter)
 							if not id or id == iName then -- and (NotStealable or canSteal) then
 									-- No reason to check stealable here.
 									-- It will be checked right before breaking the loop.
@@ -240,7 +240,7 @@ local function Buff_OnUpdate(icon, time)
 						end
 						if Filterh and not id then
 							for z=1, huge do
-								buffName, _, iconTexture, count, _, duration, expirationTime, _, canSteal, _, id, _, _, v1, v2, v3, v4 = UnitAura(unit, z, Filterh)
+								buffName, _, iconTexture, count, _, duration, expirationTime, _, canSteal, _, id, _, _, _, v1, v2, v3, v4 = UnitAura(unit, z, Filterh)
 								if not id or id == iName then -- and (NotStealable or canSteal) then
 									-- No reason to check stealable here. See above.
 									break

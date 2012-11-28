@@ -22,8 +22,7 @@ local Env = CNDT.Env
 local isNumber = TMW.isNumber
 local strlowerCache = TMW.strlowerCache
 
-local UnitAura = 
-	  UnitAura
+local UnitAura = TMW.UnitAura
 
 function Env.AuraStacks(unit, name, namename, filter)
 	local isID = isNumber[name]
@@ -106,10 +105,10 @@ end
 function Env.AuraTooltipNumber(unit, name, namename, filter)
 	local isID = isNumber[name]
 	
-	local _, _, _, _, _, _, _, _, _, _, id, _, _, v1, v2, v3 = UnitAura(unit, namename, nil, filter)
+	local _, _, _, _, _, _, _, _, _, _, id, _, _, _, v1, v2, v3 = UnitAura(unit, namename, nil, filter)
 	if isID and id and id ~= isID then
 		for z = 1, 60 do
-			_, _, _, _, _, _, _, _, _, _, id, _, _, v1, v2, v3 = UnitAura(unit, z, filter)
+			_, _, _, _, _, _, _, _, _, _, id, _, _, _, v1, v2, v3 = UnitAura(unit, z, filter)
 			if not id or id == isID then
 				break
 			end
