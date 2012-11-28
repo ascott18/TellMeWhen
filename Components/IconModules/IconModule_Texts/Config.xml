@@ -192,14 +192,14 @@
 				</FontString>
 				<FontString name="$parentError" parentKey="Error" inherits="GameFontRed" justifyH="LEFT" >
 					<Anchors>
-						<Anchor point="TOPLEFT" relativeTo="$parentEditBox" relativePoint="BOTTOMLEFT" x="3" y="-2"/>
+						<Anchor point="TOPLEFT" relativeTo="$parentEditBox" relativePoint="BOTTOMLEFT" x="0" y="-2"/>
 					</Anchors>
 				</FontString>
 			</Layer>
 		</Layers>
 		<Scripts>
 			<OnLoad>
-				self.Error:SetWidth(self:GetWidth() - 6)
+				self.Error:SetWidth(self:GetWidth() - 27)
 				self.StringNum:SetText(self:GetID() .. ".")
 			</OnLoad>
 		</Scripts>

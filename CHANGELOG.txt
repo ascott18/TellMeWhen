@@ -16,6 +16,7 @@
  ** Attempted a fix for error <string>:"Condition_SPELLDMG":3: Usage: GetSpellBonusDamage(school)
  ** All slashes in custom texture paths will be converted to backslashes upon processing.
  ** The [Name] DogTag should now always update properly.
+ ** Fixed the error stemming from Components\Core\Spells\ClassSpellCache.lua:215 ()? running while in combat.
  
 ===v6.0.4===
  * **New icon event: On Condition Set Passing. Allows you to create an event handler that reacts to the state of a condition set.**
