@@ -105,10 +105,10 @@ end
 function Env.AuraTooltipNumber(unit, name, namename, filter)
 	local isID = isNumber[name]
 	
-	local _, _, _, _, _, _, _, _, _, _, id, _, _, _, v1, v2, v3 = UnitAura(unit, namename, nil, filter)
+	local _, _, _, _, _, _, _, _, _, _, id, _, _, _, v1, v2, v3, v4 = UnitAura(unit, namename, nil, filter)
 	if isID and id and id ~= isID then
 		for z = 1, 60 do
-			_, _, _, _, _, _, _, _, _, _, id, _, _, _, v1, v2, v3 = UnitAura(unit, z, filter)
+			_, _, _, _, _, _, _, _, _, _, id, _, _, _, v1, v2, v3, v4 = UnitAura(unit, z, filter)
 			if not id or id == isID then
 				break
 			end
@@ -116,12 +116,14 @@ function Env.AuraTooltipNumber(unit, name, namename, filter)
 	end
 	
 	if v1 then
-		if v1 > 0 then
+		if v1 and v1 > 0 then
 			return v1
-		elseif v2 > 0 then
+		elseif v2 and v2 > 0 then
 			return v2
-		elseif v3 > 0 then
+		elseif v3 and v3 > 0 then
 			return v3
+		elseif v4 and v4 > 0 then
+			return v4
 		end
 	end
 	return 0

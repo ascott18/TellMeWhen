@@ -31,6 +31,11 @@ local UnitInBattleground, IsInRaid, IsInGroup =
 local UnitInRaid, GetNumPartyMembers =
       UnitInRaid, GetNumPartyMembers
 	  
+
+local clientVersion = select(4, GetBuildInfo())
+local wow_501 = clientVersion >= 50100
+
+
 -- GLOBALS: UIDROPDOWNMENU_MENU_LEVEL, UIDropDownMenu_AddButton, UIDropDownMenu_CreateInfo
 
 local DogTag = LibStub("LibDogTag-3.0", true)
@@ -150,7 +155,7 @@ function ANN:HandleEvent(icon, eventSettings)
 		local Text = eventSettings.Text
 		local chandata = self.AllChannelsByChannel[Channel]
 
-		if not chandata then
+		if not chandata or not Text then
 			return
 		end
 
@@ -159,29 +164,25 @@ function ANN:HandleEvent(icon, eventSettings)
 		ANN.kwargs.group = icon.group.ID
 		ANN.kwargs.unit = icon.attributes.dogTagUnit
 		ANN.kwargs.link = true
-		--ANN.kwargs.shouldcolor = not chandata.isBlizz and TMW.db.profile.ColorNames
 
-		if chandata.handler then
-			Text = DogTag:Evaluate(Text, "TMW;Unit", ANN.kwargs)
-			if Text then
-				-- DogTag returns nil if the result is an empty string.
-				chandata.handler(icon, eventSettings, Text)
-			end
-		elseif Text and chandata.isBlizz then
-			local Location = eventSettings.Location
+		if chandata.isBlizz then
 			Text = Text:gsub("Name([^F])", "NameForceUncolored%1")
-			Text = DogTag:Evaluate(Text, "TMW;Unit", ANN.kwargs)
-			if Channel == "WHISPER" then
-				wipe(ANN.kwargs)
-				ANN.kwargs.icon = icon.ID
-				ANN.kwargs.group = icon.group.ID
-				ANN.kwargs.unit = icon.attributes.dogTagUnit
-				ANN.kwargs.link = false
-				--ANN.kwargs.shouldcolor = false
-				Location = DogTag:Evaluate(Location, "TMW;Unit", ANN.kwargs)
-				Location = Location:gsub("|c%x%x%x%x%x%x%x%x", ""):gsub("|r", "") -- strip color codes
+		end
+		Text = DogTag:Evaluate(Text, "TMW;Unit", ANN.kwargs)
+		
+		-- DogTag returns nil if the result is an empty string, so make sure Text is non-nil
+		if Text then
+			if chandata.handler then
+				chandata.handler(icon, eventSettings, Text)
+			elseif chandata.isBlizz then
+				local Location = eventSettings.Location
+				if Channel == "WHISPER" then
+					ANN.kwargs.link = false
+					Location = DogTag:Evaluate(Location, "TMW;Unit", ANN.kwargs)
+					Location = Location:gsub("|c%x%x%x%x%x%x%x%x", ""):gsub("|r", "") -- strip color codes
+				end
+				SendChatMessage(Text, Channel, nil, Location)
 			end
-			SendChatMessage(Text, Channel, nil, Location)
 		end
 
 		return true
@@ -239,13 +240,43 @@ ANN:RegisterEventHandlerDataNonSpecific(22, "RAID_WARNING", {
 ANN:RegisterEventHandlerDataNonSpecific(24, "BATTLEGROUND", {
 	text = CHAT_MSG_BATTLEGROUND,
 	isBlizz = 1,
+	handler =
+	wow_501 and 
+		function(icon, data, Text)
+			if UnitInBattleground("player") then
+				SendChatMessage(Text, TMW.CONST.CHAT_TYPE_INSTANCE_CHAT)
+			end
+		end
+	or nil,
+})
+ANN:RegisterEventHandlerDataNonSpecific(25, "INSTANCE_CHAT", {
+	text = INSTANCE_CHAT,
+	isBlizz = 1,
+	hidden = not wow_501,
+	handler = function(icon, data, Text)
+		if IsInGroup(LE_PARTY_CATEGORY_INSTANCE) then
+			SendChatMessage(Text, TMW.CONST.CHAT_TYPE_INSTANCE_CHAT)
+		end
+	end,
 })
 ANN:RegisterEventHandlerDataNonSpecific(30, "SMART", {
 	text = L["CHAT_MSG_SMART"],
 	desc = L["CHAT_MSG_SMART_DESC"],
 	isBlizz = 1, -- flagged to not use override %t and %f substitutions, and also not to try and color any names
 	handler =
-	TMW.ISMOP and
+	wow_501 and
+		function(icon, data, Text)
+			local channel = "SAY"
+			if IsInGroup(LE_PARTY_CATEGORY_INSTANCE) then
+				channel = TMW.CONST.CHAT_TYPE_INSTANCE_CHAT
+			elseif IsInRaid() then
+				channel = "RAID"
+			elseif IsInGroup() then
+				channel = "PARTY"
+			end
+			SendChatMessage(Text, channel)
+		end
+	or TMW.ISMOP and
 		function(icon, data, Text)
 			local channel = "SAY"
 			if UnitInBattleground("player") then
@@ -261,7 +292,7 @@ ANN:RegisterEventHandlerDataNonSpecific(30, "SMART", {
 		function(icon, data, Text)
 			local channel = "SAY"
 			if UnitInBattleground("player") then
-				channel = "BATTLEGROUND"
+				channel = TMW.CONST.CHAT_TYPE_INSTANCE_CHAT
 			elseif UnitInRaid("player") then
 				channel = "RAID"
 			elseif GetNumPartyMembers() > 1 then
@@ -419,7 +450,7 @@ local sctcolor = {r=1, b=1, g=1}
 ANN:RegisterEventHandlerDataNonSpecific(81, "SCT", {
 	-- GLOBALS: SCT
 	text = "Scrolling Combat Text",
-	hidden = not (SCT and SCT:IsEnabled()),
+	hidden = function() return not (SCT and SCT:IsEnabled()) end,
 	sticky = 1,
 	icon = 1,
 	color = 1,
@@ -457,7 +488,7 @@ ANN:RegisterEventHandlerDataNonSpecific(81, "SCT", {
 ANN:RegisterEventHandlerDataNonSpecific(83, "MSBT", {
 	-- GLOBALS: MikSBT
 	text = "MikSBT",
-	hidden = not MikSBT,
+	hidden = function() return not MikSBT end,
 	sticky = 1,
 	icon = 1,
 	color = 1,
@@ -490,7 +521,7 @@ ANN:RegisterEventHandlerDataNonSpecific(83, "MSBT", {
 ANN:RegisterEventHandlerDataNonSpecific(85, "PARROT", {
 	-- GLOBALS: Parrot
 	text = "Parrot",
-	hidden = not (Parrot and ((Parrot.IsEnabled and Parrot:IsEnabled()) or Parrot:IsActive())),
+	hidden = function() return not (Parrot and ((Parrot.IsEnabled and Parrot:IsEnabled()) or Parrot:IsActive())) end,
 	sticky = 1,
 	icon = 1,
 	color = 1,

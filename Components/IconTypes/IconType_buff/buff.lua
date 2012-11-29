@@ -26,6 +26,8 @@ local _, pclass = UnitClass("Player")
 local isNumber = TMW.isNumber
 local unitsWithExistsEvent
 
+local clientVersion = select(4, GetBuildInfo())
+local wow_501 = clientVersion >= 50100
 
 local Type = TMW.Classes.IconType:New("buff")
 Type.name = L["ICONMENU_BUFFDEBUFF"]
@@ -261,7 +263,22 @@ local function Buff_OnUpdate(icon, time)
 	end
 	if buffName then
 		if icon.ShowTTText then
-			if TMW.ISMOP then
+			if wow_501 then
+				-- WoW 5.1 moved the stupid boolean return value that used to be at the end
+				-- to before the variable returns where it belongs,
+				-- so we can simplify our checking a bit (no need to check variable types anymore; just check if they are non-nil).
+				if v1 and v1 > 0 then
+					count = v1
+				elseif v2 and v2 > 0 then
+					count = v2
+				elseif v3 and v3 > 0 then
+					count = v3
+				elseif v4 and v4 > 0 then
+					count = v4
+				else
+					count = 0
+				end
+			elseif TMW.ISMOP then
 				-- This is really stupid, but there really isn't a more efficient way to do it.
 				-- As of WoW 5.0.4, there will be a boolean return at the end of UnitAura.
 				-- It could be v1, v2, v3, v4, or vN. There is no way to tell afaik, so we have to test the hard way.

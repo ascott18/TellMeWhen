@@ -28,7 +28,7 @@ local DogTag = LibStub("LibDogTag-3.0", true)
 TELLMEWHEN_VERSION = "6.1.1"
 TELLMEWHEN_VERSION_MINOR = strmatch(" @project-version@", " r%d+") or ""
 TELLMEWHEN_VERSION_FULL = TELLMEWHEN_VERSION .. TELLMEWHEN_VERSION_MINOR
-TELLMEWHEN_VERSIONNUMBER = 61101 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
+TELLMEWHEN_VERSIONNUMBER = 61103 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
 if TELLMEWHEN_VERSIONNUMBER > 62000 or TELLMEWHEN_VERSIONNUMBER < 61000 then return error("YOU SCREWED UP THE VERSION NUMBER OR DIDNT CHANGE THE SAFETY LIMITS") end -- safety check because i accidentally made the version number 414069 once
 
 TELLMEWHEN_MAXROWS = 20
@@ -1865,11 +1865,22 @@ function TMW:OnCommReceived(prefix, text, channel, who)
 	end
 end
 
-
+local updateInProgress, shouldSafeUpdate
 function TMW:OnUpdate()					-- THE MAGICAL ENGINE OF DOING EVERYTHING
 	time = GetTime()
 	TMW.time = time
 
+	if updateInProgress then
+		-- If the previous update cycle didn't finish (updateInProgress is still true)
+		-- then we should enable safecalling icon updates in order to prevent catastrophic failure of the whole addonVersion
+		-- if only one icon or icon type is malfunctioning.
+		if not shouldSafeUpdate then
+			TMW:Debug("Update error detected. Switching to safe update mode!")
+		end
+		shouldSafeUpdate = true
+	end
+	updateInProgress = true
+	
 	TMW:Fire("TMW_ONUPDATE_PRE", time, Locked)
 	
 	if LastUpdate <= time - UPD_INTV then
@@ -1889,9 +1900,16 @@ function TMW:OnUpdate()					-- THE MAGICAL ENGINE OF DOING EVERYTHING
 				end
 			end
 	
-			for i = 1, #IconsToUpdate do
-				--local icon = IconsToUpdate[i]
-				IconsToUpdate[i]:Update()
+			if shouldSafeUpdate then
+				for i = 1, #IconsToUpdate do
+					local icon = IconsToUpdate[i]
+					safecall(icon.Update, icon)
+				end
+			else
+				for i = 1, #IconsToUpdate do
+					--local icon = IconsToUpdate[i]
+					IconsToUpdate[i]:Update()
+				end
 			end
 
 			for g = 1, #TMW do
@@ -1906,6 +1924,8 @@ function TMW:OnUpdate()					-- THE MAGICAL ENGINE OF DOING EVERYTHING
 		TMW:Fire("TMW_ONUPDATE_TIMECONSTRAINED_POST", time, Locked)
 	end
 
+	updateInProgress = nil
+	
 	TMW:Fire("TMW_ONUPDATE_POST", time, Locked)
 end
 
@@ -1978,6 +1998,8 @@ local function CheckCoroutineTermination(...)
 end
 
 local function OnUpdateDuringCoroutine(self)
+	-- This is an OnUpdate script, but don't be too concerned with performance because it is only using
+	-- when lock toggling in combat. Safety of the code (don't let it error!) is far more important than performance here.
 	time = GetTime()
 	TMW.time = time
 	

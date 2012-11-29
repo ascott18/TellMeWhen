@@ -1,4 +1,5 @@
 ===v6.1.1===
+ * Added a new text output handler for the Instance channel, and updated existing chat output methods for this channel.
  * Bug Fixes:
  ** Fixed error Interface\AddOns\TellMeWhen\TellMeWhen.lua:155: table index is nil
  
