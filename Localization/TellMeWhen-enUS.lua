@@ -32,6 +32,7 @@ L["ERROR_MISSINGFILE"] = [[A complete restart of WoW is required to use TellMeWh
 %s was not found.
 
 Would you like to restart WoW now?]]
+L["ERROR_MISSINGFILE_REQFILE"] = "A required file"
 L["ERROR_MISSINGFILE_NOREQ"] = [[A complete restart of WoW may be required to fully use TellMeWhen %s:
 
 %s was not found.
@@ -41,6 +42,16 @@ L["ERROR_ANCHORSELF"] = "%s was trying to anchor to itself, so TellMeWhen reset 
 
 L["ERROR_NO_LOCKTOGGLE_IN_LOCKDOWN"] = "Cannot unlock TellMeWhen in combat if the %q option isn't enabled (type '/tmw options')."
 L["ERROR_ACTION_DENIED_IN_LOCKDOWN"] = "Cannot do that in combat if the %q option isn't enabled (type '/tmw options')."
+
+L["ERROR_NOTINITIALIZED_NO_LOAD"] = "TellMeWhen_Options cannot be loaded if TellMeWhen failed to initialize!"
+L["ERROR_NOTINITIALIZED_NO_ACTION"] = "TellMeWhen cannot perform that action if the addon failed to initialize!"
+L["ERROR_NOTINITIALIZED_INTERFACEPANEL_EXPLANATION"] = [[It looks like TellMeWhen has failed to initialize.
+
+Because of this, TellMeWhen will not be able to function, and you will not be able to configure any of its settings.
+
+Please enable Lua errors (%s > %s > %s if you have not already), reload your UI, and post any errors that you get to a ticket at http://wow.curseforge.com/addons/tellmewhen/create-ticket/
+
+I apologize for the inconvenience, but this is a rare occurrence, and any information about it that you can provide will help to get it fixed right away!]]
 
 L["SAFESETUP_TRIGGERED"] = "Running safe & slow setup..."
 L["SAFESETUP_COMPLETE"] = "Safe & slow setup complete."
@@ -1312,6 +1323,8 @@ L["LOSECONTROL_DROPDOWNLABEL_DESC"] = "Choose the loss of control types that you
 L["LOSECONTROL_ICONTYPE_DESC"] = "Tracks effects that cause the loss of control of your character."
 L["LOSECONTROL_INCONTROL"] = "In Control"
 L["LOSECONTROL_CONTROLLOST"] = "Control Lost"
+L["LOSECONTROL_TYPE_ALL"] = "All Types"
+L["LOSECONTROL_TYPE_ALL_DESC"] = "Causes the icon to display information about all types of effects."
 L["LOSECONTROL_TYPE_SCHOOLLOCK"] = "Spell School Locked"
 L["LOSECONTROL_TYPE_MAGICAL_IMMUNITY"] = "Magical Immunity"
 L["LOSECONTROL_TYPE_DESC_USEUNKNOWN"] = "NOTE: It is not known if this loss of control type is used or not."

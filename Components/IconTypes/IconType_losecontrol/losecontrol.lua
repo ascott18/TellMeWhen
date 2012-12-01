@@ -45,10 +45,10 @@ Type:UsesAttributes("texture")
 -- END AUTOMATICALLY GENERATED: UsesAttributes
 
 Type:RegisterIconDefaults{
-	LoseContolTypes = {
+	LoseContolTypes = { -- PLEASE NOTE: THIS IS SPELLED WRONG (i noticed too late to change it)
 		["*"] = false,
+		[""] = false,
 		SCHOOL_INTERRUPT = 0,
-		ALL = false,
 	},
 }
 
@@ -103,7 +103,7 @@ local function LoseControl_OnUpdate(icon, time)
 		icon.FirstTexture,
 		0, 0,
 		nil,
-		nil;
+		nil
 	)
 end
 
@@ -142,7 +142,7 @@ Type:Register(102)
 
 local Processor = TMW.Classes.IconDataProcessor:New("LOC_CATEGORY", "locCategory")
 -- Processor:CompileFunctionSegment(t) is default.
-DogTag:AddTag("TMW", "LocType", {
+Processor:RegisterDogTag("TMW", "LocType", {
 	code = function (groupID, iconID)
 		local icon = TMW[groupID][iconID]
 		if icon then

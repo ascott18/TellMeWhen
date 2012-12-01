@@ -26,6 +26,7 @@ local dataobj = ldb:GetDataObjectByName("TellMeWhen") or
 
 dataobj.OnClick = function(self, button)
 	if not TMW.Initialized then
+		TMW:Print(L["ERROR_NOTINITIALIZED_NO_ACTION"])
 		return
 	end
 	

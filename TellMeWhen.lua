@@ -28,7 +28,7 @@ local DogTag = LibStub("LibDogTag-3.0", true)
 TELLMEWHEN_VERSION = "6.1.2"
 TELLMEWHEN_VERSION_MINOR = strmatch(" @project-version@", " r%d+") or ""
 TELLMEWHEN_VERSION_FULL = TELLMEWHEN_VERSION .. TELLMEWHEN_VERSION_MINOR
-TELLMEWHEN_VERSIONNUMBER = 61202 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
+TELLMEWHEN_VERSIONNUMBER = 61203 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
 if TELLMEWHEN_VERSIONNUMBER > 62000 or TELLMEWHEN_VERSIONNUMBER < 61000 then return error("YOU SCREWED UP THE VERSION NUMBER OR DIDNT CHANGE THE SAFETY LIMITS") end -- safety check because i accidentally made the version number 414069 once
 
 TELLMEWHEN_MAXROWS = 20
@@ -1722,10 +1722,10 @@ function TMW:OnInitialize()
 			whileDead = true,
 			preferredIndex = 3, -- http://forums.wowace.com/showthread.php?p=320956
 		}
-		StaticPopup_Show("TMW_RESTARTNEEDED", TELLMEWHEN_VERSION_FULL, "IconView.lua")
+		StaticPopup_Show("TMW_RESTARTNEEDED", TELLMEWHEN_VERSION_FULL, L["ERROR_MISSINGFILE_REQFILE"]) -- arg3 could also be the name of a file, like "IconView.lua"
 		return -- if required, return here
 	end
-
+	
 	--------------- Events/OnUpdate ---------------
 	TMW:SetScript("OnUpdate", TMW.OnUpdate)
 
@@ -2947,6 +2947,10 @@ end
 function TMW:LoadOptions(recursed)
 	if IsAddOnLoaded("TellMeWhen_Options") then
 		return true
+	end
+	if not TMW.Initialized then
+		TMW:Print(L["ERROR_NOTINITIALIZED_NO_LOAD"])
+		return 
 	end
 	TMW:Print(L["LOADINGOPT"])
 	local loaded, reason = LoadAddOn("TellMeWhen_Options")
@@ -5897,6 +5901,7 @@ end
 
 function TMW:SlashCommand(str)
 	if not TMW.Initialized then
+		TMW:Print(L["ERROR_NOTINITIALIZED_NO_ACTION"])
 		return
 	end
 	

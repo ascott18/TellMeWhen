@@ -4,7 +4,7 @@
 		<Size y="33"/>
 		<Frames>
 		
-			<Frame name="$parentCLEUEvents" inherits="TMW_DropDownMenuTemplate" parentKey="CLEUEvents">
+			<Frame name="$parentLocTypes" inherits="TMW_DropDownMenuTemplate" parentKey="LocTypes">
 				<Anchors>
 					<Anchor point="TOPLEFT" x="-10" y="-3"/>
 				</Anchors>

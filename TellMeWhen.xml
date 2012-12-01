@@ -25,14 +25,29 @@
 	</Cooldown>
 
 	<Frame name="TellMeWhen_BlizzOptionsStub" hidden="true">
+		<Layers>
+			<Layer level="OVERLAY">
+				<FontString inherits="GameFontHighlightLarge" parentKey="text" justifyH="CENTER">
+					<Anchors>
+						<Anchor point="CENTER"/>
+					</Anchors>
+				</FontString>
+			</Layer>
+		</Layers>
 		<Scripts>
 			<OnLoad>
 				self.name = TMW.L["ICON_TOOLTIP1"]
 				InterfaceOptions_AddCategory(self)
+				
+				self.text:SetText(TMW.L["ERROR_NOTINITIALIZED_INTERFACEPANEL_EXPLANATION"])
 			</OnLoad>
 			<OnShow>
 				TMW:LoadOptions()
-				InterfaceOptionsFrame_OpenToCategory(TMW.AddedToBlizz)
+				if TMW.AddedToBlizz then
+					InterfaceOptionsFrame_OpenToCategory(TMW.AddedToBlizz)
+				else
+					self.text:SetWidth(self:GetWidth() - 150)
+				end
 			</OnShow>
 		</Scripts>
 	</Frame>

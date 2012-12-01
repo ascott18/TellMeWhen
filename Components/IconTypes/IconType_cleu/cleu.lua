@@ -376,9 +376,6 @@ end
 Type:Register(200)
 
 
-
-local DogTag = LibStub("LibDogTag-3.0", true)
-
 local Processor = TMW.Classes.IconDataProcessor:New("CLEU_SOURCEUNIT", "sourceUnit, sourceGUID")
 function Processor:CompileFunctionSegment(t)
 	-- GLOBALS: sourceUnit, sourceGUID
@@ -393,7 +390,7 @@ function Processor:CompileFunctionSegment(t)
 	end
 	--]]
 end
-DogTag:AddTag("TMW", "Source", {
+Processor:RegisterDogTag("TMW", "Source", {
 	code = function (groupID, iconID)
 		local icon = TMW[groupID][iconID]
 		if icon then
@@ -431,7 +428,7 @@ function Processor:CompileFunctionSegment(t)
 	end
 	--]]
 end
-DogTag:AddTag("TMW", "Destination", {
+Processor:RegisterDogTag("TMW", "Destination", {
 	code = function (groupID, iconID)
 		local icon = TMW[groupID][iconID]
 		if icon then
@@ -457,7 +454,7 @@ DogTag:AddTag("TMW", "Destination", {
 
 local Processor = TMW.Classes.IconDataProcessor:New("CLEU_EXTRASPELL", "extraSpell")
 -- Processor:CompileFunctionSegment(t) is default.
-DogTag:AddTag("TMW", "Extra", {
+Processor:RegisterDogTag("TMW", "Extra", {
 	code = function (groupID, iconID, link)
 		local icon = TMW[groupID][iconID]
 		if icon then

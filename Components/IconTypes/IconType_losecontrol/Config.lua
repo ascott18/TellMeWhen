@@ -25,6 +25,11 @@ if not Type then return end
 Type.CONFIG = {}
 local CONFIG = Type.CONFIG
 
+
+-- IMPORTANT NOTE: the setting used by this icon type (LoseContolTypes) is spelled wrong.
+-- I noticed too late to change it, so just make sure and continue to spell it wrong.
+
+
 CONFIG.Types = {
 	-- Unconfirmed:
 	[LOSS_OF_CONTROL_DISPLAY_BANISH] = { -- "Banished"
@@ -137,18 +142,61 @@ CONFIG.schools = {
 	[0x40] = "|cffFF80FF" .. SPELL_SCHOOL6_CAP,
 }
 
+function CONFIG:LoadConfig()
+	if TellMeWhen_LoseControlTypes then
+		CONFIG:DropdownMenu_SetText()
+	end
+end
+TMW:RegisterCallback("TMW_CONFIG_ICON_LOADED", CONFIG.LoadConfig, CONFIG)
+
 function CONFIG.DropdownMenu_OnClick_Normal(dropDownButton, LoseContolTypes)
 	LoseContolTypes[dropDownButton.value] = not LoseContolTypes[dropDownButton.value]
+	
+	CONFIG:DropdownMenu_SetText()
+end
+
+function CONFIG.DropdownMenu_OnClick_All(dropDownButton, LoseContolTypes)
+	if not LoseContolTypes[dropDownButton.value] then
+		TMW.CI.ics.LoseContolTypes = TMW:CopyTableInPlaceWithMeta(TMW.Icon_Defaults.LoseContolTypes, {})
+		LoseContolTypes = TMW.CI.ics.LoseContolTypes
+	end
+	
+	LoseContolTypes[dropDownButton.value] = not LoseContolTypes[dropDownButton.value]
+	
+	CloseDropDownMenus()
+	
+	CONFIG:DropdownMenu_SetText()
 end
 
 function CONFIG.DropdownMenu_OnClick_SchoolInterrupt(dropDownButton, LoseContolTypes, schoolFlag)
 	LoseContolTypes[dropDownButton.value] = bit.bxor(LoseContolTypes[dropDownButton.value], schoolFlag)
+	
+	CONFIG:DropdownMenu_SetText()
 end
 
 function CONFIG.DropdownMenu_SelectTypes()
 	local LoseContolTypes = TMW.CI.ics.LoseContolTypes
 	
 	if UIDROPDOWNMENU_MENU_LEVEL == 1 then
+		local info = UIDropDownMenu_CreateInfo()
+
+		info.text = L["LOSECONTROL_TYPE_ALL"]
+		
+		info.tooltipTitle = L["LOSECONTROL_TYPE_ALL"]
+		info.tooltipText = L["LOSECONTROL_TYPE_ALL_DESC"]
+		info.tooltipOnButton = true
+			
+		info.value = ""
+		info.arg1 = LoseContolTypes
+		info.keepShownOnClick = true
+		
+		info.checked = LoseContolTypes[info.value]
+		info.func = CONFIG.DropdownMenu_OnClick_All
+		
+		UIDropDownMenu_AddButton(info, UIDROPDOWNMENU_MENU_LEVEL)
+		
+		TMW.AddDropdownSpacer()
+		
 		for text, data in TMW:OrderedPairs(CONFIG.Types) do
 			local info = UIDropDownMenu_CreateInfo()
 
@@ -157,7 +205,7 @@ function CONFIG.DropdownMenu_SelectTypes()
 			info.tooltipTitle = get(text)
 			info.tooltipText = (TMW.debug and data.value or "") .. (get(data.desc) or "")
 			info.tooltipOnButton = true
-				
+			
 			info.value = data.value
 			info.arg1 = LoseContolTypes
 			info.keepShownOnClick = true
@@ -166,7 +214,8 @@ function CONFIG.DropdownMenu_SelectTypes()
 				info.hasArrow = true
 				info.notCheckable = true
 			else
-				info.checked = LoseContolTypes[data.value]
+				info.checked = LoseContolTypes[""] or LoseContolTypes[data.value]
+				info.disabled = LoseContolTypes[""]
 				info.func = CONFIG.DropdownMenu_OnClick_Normal
 			end
 			
@@ -185,7 +234,8 @@ function CONFIG.DropdownMenu_SelectTypes()
 				
 				info.arg1 = LoseContolTypes
 				info.arg2 = bitFlag
-				info.checked = bit.band(LoseContolTypes[UIDROPDOWNMENU_MENU_VALUE], bitFlag) == bitFlag
+				info.checked = LoseContolTypes[""] or bit.band(LoseContolTypes[UIDROPDOWNMENU_MENU_VALUE], bitFlag) == bitFlag
+				info.disabled = LoseContolTypes[""]
 				info.func = CONFIG.DropdownMenu_OnClick_SchoolInterrupt
 			
 				UIDropDownMenu_AddButton(info, UIDROPDOWNMENU_MENU_LEVEL)
@@ -194,3 +244,28 @@ function CONFIG.DropdownMenu_SelectTypes()
 	end
 end
 
+function CONFIG:DropdownMenu_SetText()
+	local LoseContolTypes = TMW.CI.ics.LoseContolTypes
+	local n = 0
+	if LoseContolTypes[""] then
+		n = L["LOSECONTROL_TYPE_ALL"]
+	else
+		for k, v in pairs(LoseContolTypes) do
+			if k == "SCHOOL_INTERRUPT" then
+				for bitFlag in TMW:OrderedPairs(CONFIG.schools) do
+					if bit.band(LoseContolTypes[k], bitFlag) == bitFlag then
+						n = n + 1
+					end
+				end
+			elseif v then
+				n = n + 1
+			end
+		end
+	end
+	if n == 0 then
+		n = " |cFFFF5959(0)|r |TInterface\\AddOns\\TellMeWhen\\Textures\\Alert:0:2|t"
+	else
+		n = " (|cff59ff59" .. n .. "|r)"
+	end
+	UIDropDownMenu_SetText(TellMeWhen_LoseControlTypes.LocTypes, L["LOSECONTROL_DROPDOWNLABEL"] .. n)
+end
