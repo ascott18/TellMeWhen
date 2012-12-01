@@ -149,7 +149,7 @@ Processor:RegisterDogTag("TMW", "LocType", {
 			if icon.Type ~= "losecontrol" then
 				return ""
 			else
-				return icon.attributes.locCategory
+				return icon.attributes.locCategory or ""
 			end
 		else
 			return ""
