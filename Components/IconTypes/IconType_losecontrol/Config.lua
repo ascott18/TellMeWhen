@@ -34,14 +34,15 @@ CONFIG.Types = {
 		value = "CHARM",
 	},
 	[LOSS_OF_CONTROL_DISPLAY_CYCLONE] = { -- "Cycloned" 
+		-- I don't know if this is used at all
 		value = "CYCLONE",
 		desc = L["LOSECONTROL_TYPE_DESC_USEUNKNOWN"],
 	},
-	[LOSS_OF_CONTROL_DISPLAY_DAZE] = { -- "Dazed"
+	--[[[LOSS_OF_CONTROL_DISPLAY_DAZE] = { -- "Dazed"
 		-- I don't think this is used at all
 		value = "DAZE",
 		desc = L["LOSECONTROL_TYPE_DESC_USEUNKNOWN"],
-	},
+	},]]
 	[LOSS_OF_CONTROL_DISPLAY_DISARM] = { -- "Disarmed" 
 		value = "DISARM",
 	},

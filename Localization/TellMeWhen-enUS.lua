@@ -1183,6 +1183,8 @@ L["DT_DOC_Source"] = "Returns the source unit or name of the last Combat Event t
 L["DT_DOC_Destination"] = "Returns the destination unit or name of the last Combat Event that the icon processed. Best use in conjunction with the [Name] tag. (This tag should only be used with %s type icons)"
 L["DT_DOC_Extra"] = "Returns the extra spell from the last Combat Event that the icon processed. (This tag should only be used with %s type icons)"
 
+L["DT_DOC_LocType"] = "Returns the type of the control loss effect that the icon is displaying for. (This tag should only be used with %s type icons)"
+
 L["DT_DOC_IsShown"] = "Returns whether or not an icon is shown."
 L["DT_DOC_Opacity"] = "Returns the opacity of an icon. Return value is between 0 and 1."
 L["DT_DOC_Duration"] = "Returns the current duration remaining on the icon. It is recommended that you format this with [TMWFormatDuration]"

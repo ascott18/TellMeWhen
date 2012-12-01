@@ -48,6 +48,7 @@ Type:RegisterIconDefaults{
 	LoseContolTypes = {
 		["*"] = false,
 		SCHOOL_INTERRUPT = 0,
+		ALL = false,
 	},
 }
 
@@ -86,21 +87,23 @@ local function LoseControl_OnUpdate(icon, time)
 		end
 		
 		if isValidType then
-			icon:SetInfo("alpha; texture; start, duration; spell",
+			icon:SetInfo("alpha; texture; start, duration; spell; locCategory",
 				icon.Alpha,
 				texture,
 				start, duration,
-				spellID
+				spellID,
+				text
 			)
 			return
 		end
 	end
 	
-	icon:SetInfo("alpha; texture; start, duration; spell",
+	icon:SetInfo("alpha; texture; start, duration; spell; locCategory",
 		icon.UnAlpha,
 		icon.FirstTexture,
 		0, 0,
-		nil
+		nil,
+		nil;
 	)
 end
 
@@ -134,3 +137,31 @@ function Type:GetIconMenuText(data)
 end
 
 Type:Register(102)
+
+
+
+local Processor = TMW.Classes.IconDataProcessor:New("LOC_CATEGORY", "locCategory")
+-- Processor:CompileFunctionSegment(t) is default.
+DogTag:AddTag("TMW", "LocType", {
+	code = function (groupID, iconID)
+		local icon = TMW[groupID][iconID]
+		if icon then
+			if icon.Type ~= "losecontrol" then
+				return ""
+			else
+				return icon.attributes.locCategory
+			end
+		else
+			return ""
+		end
+	end,
+	arg = {
+		'group', 'number', '@req',
+		'icon', 'number', '@req',
+	},
+	events = TMW:CreateDogTagEventString("LOC_CATEGORY"),
+	ret = "string",
+	doc = L["DT_DOC_LocType"],
+	example = ('[LocType] => %q; [LocType(4, 5)] => %q'):format(LOSS_OF_CONTROL_DISPLAY_STUN, LOSS_OF_CONTROL_DISPLAY_FEAR),
+	category = L["ICON"],
+})
