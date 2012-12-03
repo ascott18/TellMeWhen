@@ -28,7 +28,7 @@ local DogTag = LibStub("LibDogTag-3.0", true)
 TELLMEWHEN_VERSION = "6.1.2"
 TELLMEWHEN_VERSION_MINOR = strmatch(" @project-version@", " r%d+") or ""
 TELLMEWHEN_VERSION_FULL = TELLMEWHEN_VERSION .. TELLMEWHEN_VERSION_MINOR
-TELLMEWHEN_VERSIONNUMBER = 61204 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
+TELLMEWHEN_VERSIONNUMBER = 61210 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
 if TELLMEWHEN_VERSIONNUMBER > 62000 or TELLMEWHEN_VERSIONNUMBER < 61000 then return error("YOU SCREWED UP THE VERSION NUMBER OR DIDNT CHANGE THE SAFETY LIMITS") end -- safety check because i accidentally made the version number 414069 once
 
 TELLMEWHEN_MAXROWS = 20
@@ -1752,33 +1752,16 @@ function TMW:Initialize()
 		return
 	end
 	
-	TMW:Fire("TMW_DB_INITIALIZING")
-
-	--------------- Database ---------------
-	if type(TellMeWhenDB) ~= "table" then
-		-- TellMeWhenDB might not exist if this is a fresh install
-		-- or if the user is upgrading from a really old version that uses TellMeWhen_Settings.
-		TellMeWhenDB = {Version = TELLMEWHEN_VERSIONNUMBER}
-	end
-	
-	-- Handle upgrades that need to be done before defaults are added to the database.
-	-- Primary purpose of this is to properly upgrade settings if a default has changed.
-	TMW:GlobalUpgrade()
-
 	TMW.Initialized = true
 	
-	-- Initialize the database
-	TMW.db = AceDB:New("TellMeWhenDB", TMW.Defaults)
+	TMW:InitializeDatabase()
 	
-	-- Handle normal upgrades after the database has been initialized.
-	TMW:Upgrade()
 
 	-- DEFAULT_ICON_SETTINGS is used for comparisons against a blank icon setup,
 	-- most commonly used to see if the user has configured an icon at all.
 	TMW.DEFAULT_ICON_SETTINGS = TMW.db.profile.Groups[0].Icons[0]
 	TMW.db.profile.Groups[0] = nil
 
-	
 	
 	--------------- Communications ---------------
 	
@@ -1790,6 +1773,61 @@ function TMW:Initialize()
 	
 	-- Channel TMWV is used for version notifications.
 	TMW:RegisterComm("TMWV")
+end
+
+function TMW:InitializeDatabase()
+	
+	if TMW.InitializedDatabase then 
+		return
+	end
+	
+	TMW.InitializedDatabase = true
+	
+	TMW:Fire("TMW_DB_INITIALIZING")
+	
+	--------------- Database ---------------
+	if type(TellMeWhenDB) ~= "table" then
+		-- TellMeWhenDB might not exist if this is a fresh install
+		-- or if the user is upgrading from a really old version that uses TellMeWhen_Settings.
+		TellMeWhenDB = {Version = TELLMEWHEN_VERSIONNUMBER}
+	end
+	
+
+	-- This will very rarely actually set anything.
+	-- TellMeWhenDB.Version is set when then DB is first created,
+	-- but, if this setting doesn't yet exist then the user has a really old version
+	-- from before TellMeWhenDB.Version existed, so set it to 0 so we make sure to do all of the upgrades here
+	TellMeWhenDB.Version = TellMeWhenDB.Version or 0
+	
+	-- Handle upgrades that need to be done before defaults are added to the database.
+	-- Primary purpose of this is to properly upgrade settings if a default has changed.
+	TMW:GlobalUpgrade()
+	
+	-- Initialize the database
+	if TellMeWhen_Settings then
+		for k, v in pairs(TellMeWhen_Settings) do
+			TMW.db.profile[k] = v
+		end
+		TMW.db = AceDB:New("TellMeWhenDB", TMW.Defaults)
+		TMW.db.profile.Version = TellMeWhen_Settings.Version
+		TellMeWhen_Settings = nil
+	else
+		TMW.db = AceDB:New("TellMeWhenDB", TMW.Defaults)
+	end
+	
+	TMW.db.RegisterCallback(TMW, "OnProfileChanged",	"OnProfile")
+	TMW.db.RegisterCallback(TMW, "OnProfileCopied",		"OnProfile")
+	TMW.db.RegisterCallback(TMW, "OnProfileReset",		"OnProfile")
+	TMW.db.RegisterCallback(TMW, "OnNewProfile",		"OnProfile")
+	TMW.db.RegisterCallback(TMW, "OnProfileShutdown",	"ShutdownProfile")
+	TMW.db.RegisterCallback(TMW, "OnDatabaseShutdown",	"ShutdownProfile")
+	
+	-- Handle normal upgrades after the database has been initialized.
+	TMW:Upgrade()
+	
+	-- All upgrades are complete. It is now safe to bump this to the latest version
+	-- (everything that needed it should be done executing by now)
+	TellMeWhenDB.Version = TELLMEWHEN_VERSIONNUMBER
 	
 	TMW:Fire("TMW_DB_INITIALIZED")
 end
@@ -1884,7 +1922,6 @@ function TMW:OnUpdate()					-- THE MAGICAL ENGINE OF DOING EVERYTHING
 	TMW:Fire("TMW_ONUPDATE_PRE", time, Locked)
 	
 	if LastUpdate <= time - UPD_INTV then
-		LastUpdate = time
 		_, GCD=GetSpellCooldown(GCDSpell)
 		TMW.GCD = GCD
 
@@ -1922,6 +1959,10 @@ function TMW:OnUpdate()					-- THE MAGICAL ENGINE OF DOING EVERYTHING
 		end
 
 		TMW:Fire("TMW_ONUPDATE_TIMECONSTRAINED_POST", time, Locked)
+		
+		-- It matters that this is at the end. If the update doesn't finish, we should not update this value,
+		-- because we want it to try again on the next update cycle
+		LastUpdate = time
 	end
 
 	updateInProgress = nil
@@ -2793,16 +2834,12 @@ function TMW:GetUpgradeTable()
 	
 	return TMW.UpgradeTable
 end
-function TMW:GlobalUpgrade()
 
-	-- This will very rarely actually set anything.
-	-- TellMeWhenDB.Version is set when then DB is first created,
-	-- but, if this setting doesn't yet exist then the user has a really old version
-	-- from before TellMeWhenDB.Version existed, so set it to 0 so we make sure to do all of the upgrades here
-	TellMeWhenDB.Version = TellMeWhenDB.Version or 0
-	
+function TMW:GlobalUpgrade()	
 	
 	if TellMeWhenDB.Version == 414069 then TellMeWhenDB.Version = 41409 end --well, that was a mighty fine fail
+
+
 	-- Begin DB upgrades that need to be done before defaults are added.
 	-- Upgrades here should always do everything needed to every single profile,
 	-- and remember to check if a table exists before iterating/indexing it.
@@ -2870,8 +2907,6 @@ function TMW:GlobalUpgrade()
 	end
 	
 	TMW:Fire("TMW_DB_PRE_DEFAULT_UPGRADES")
-	
-	TellMeWhenDB.Version = TELLMEWHEN_VERSIONNUMBER -- pre-default upgrades complete!
 end
 
 
@@ -2879,31 +2914,15 @@ function TMW:Upgrade()
 	-- Set the version for the current profile to the current version if it is a new profile.
 	TMW.db.profile.Version = TMW.db.profile.Version or TELLMEWHEN_VERSIONNUMBER
 	
-	if TellMeWhen_Settings or (type(TMW.db.profile.Version) == "string") or (TMW.db.profile.Version < TELLMEWHEN_VERSIONNUMBER) then
-		if TellMeWhen_Settings then -- needs to be first
-			for k, v in pairs(TellMeWhen_Settings) do
-				TMW.db.profile[k] = v
-			end
-			TMW.db = AceDB:New("TellMeWhenDB", TMW.Defaults)
-			TMW.db.profile.Version = TellMeWhen_Settings.Version
-			TellMeWhen_Settings = nil
-		end
-		if type(TMW.db.profile.Version) == "string" then
-			local v = gsub(TMW.db.profile.Version, "[^%d]", "") -- remove decimals
-			v = v..strrep("0", 5-#v)	-- append zeroes to create a 5 digit number
-			TMW.db.profile.Version = tonumber(v)
-		end
-
-		TMW:DoUpgrade("global", TellMeWhenDB.Version)
+	if type(TMW.db.profile.Version) == "string" then
+		local v = gsub(TMW.db.profile.Version, "[^%d]", "") -- remove decimals
+		v = v..strrep("0", 5-#v)	-- append zeroes to create a 5 digit number
+		TMW.db.profile.Version = tonumber(v)
 	end
 	
-	-- Must set callbacks after TMW:Upgrade() because the db is overwritten there when upgrading from 3.0.0
-	TMW.db.RegisterCallback(TMW, "OnProfileChanged",	"OnProfile")
-	TMW.db.RegisterCallback(TMW, "OnProfileCopied",		"OnProfile")
-	TMW.db.RegisterCallback(TMW, "OnProfileReset",		"OnProfile")
-	TMW.db.RegisterCallback(TMW, "OnNewProfile",		"OnProfile")
-	TMW.db.RegisterCallback(TMW, "OnProfileShutdown",	"ShutdownProfile")
-	TMW.db.RegisterCallback(TMW, "OnDatabaseShutdown",	"ShutdownProfile")
+	if TMW.db.profile.Version < TELLMEWHEN_VERSIONNUMBER then
+		TMW:DoUpgrade("global", TellMeWhenDB.Version)
+	end
 end
 
 function TMW:DoUpgrade(type, version, ...)
@@ -3982,7 +4001,6 @@ function Icon.Update(icon, force, ...)
 	
 	if attributes.shown and (force or icon.LastUpdate <= time - UPD_INTV) then
 		local Update_Method = icon.Update_Method
-		icon.LastUpdate = time
 
 		local ConditionObject = icon.ConditionObject
 		if ConditionObject then
@@ -4001,6 +4019,10 @@ function Icon.Update(icon, force, ...)
 				icon:ScheduleNextUpdate()
 			end
 		end
+		
+		-- It matters that this is at the end. If the update doesn't finish, we should not update this value,
+		-- because we want it to try again on the next update cycle
+		icon.LastUpdate = time
 	end
 end
 

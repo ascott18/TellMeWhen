@@ -24,7 +24,7 @@ local Texture = TMW:NewClass("IconModule_Texture", "IconModule")
 Texture:RegisterAnchorableFrame("Texture")
 
 function Texture:OnNewInstance(icon)
-	self.texture = icon:CreateTexture(self:GetChildNameBase() .. "Texture", "BACKGROUND", nil, 7)
+	self.texture = icon:CreateTexture(self:GetChildNameBase() .. "Texture", "BACKGROUND", nil, 5)
 	self:SetSkinnableComponent("Icon", self.texture)
 end
 

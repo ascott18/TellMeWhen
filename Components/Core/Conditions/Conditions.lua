@@ -1088,23 +1088,23 @@ end
 
 function ConditionObject:Check()
 	if self.CheckFunction then
-	
-		if self.UpdateMethod == "OnEvent" then
-			self.UpdateNeeded = nil
-			
-			if self.AnticipateFunction then
-				self:AnticipateFunction()
-			end
-		end
-		
-		if self.NextUpdateTime < time then
-			self.NextUpdateTime = huge
-		end
 		
 		local failed = not self:CheckFunction()
 		if self.Failed ~= failed then
 			self.Failed = failed
 			TMW:Fire("TMW_CNDT_OBJ_PASSING_CHANGED", self, failed)
+		end
+	
+		if self.UpdateMethod == "OnEvent" then
+			if self.AnticipateFunction then
+				self:AnticipateFunction()
+			end
+			
+			self.UpdateNeeded = nil
+		end
+		
+		if self.NextUpdateTime < time then
+			self.NextUpdateTime = huge
 		end
 	end
 end

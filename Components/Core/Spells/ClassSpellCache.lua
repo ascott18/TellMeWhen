@@ -29,13 +29,25 @@ TMW:RegisterDatabaseDefaults{
 	},
 }
 
+TMW:RegisterUpgrade(61210, {
+	global = function()
+		-- For some reason, the cache was getting filled with {[spellID] = class} pairs, which is totally wrong.
+		-- I changed the comm slug to prevent sharing the corrupt data,
+		-- but we still should wipe the existing DB if these bad values exist.
+		wipe(TMW.db.global.ClassSpellCache)
+	end,
+})
+
 local ClassSpellCache = TMW:NewModule("ClassSpellCache", "AceEvent-3.0", "AceComm-3.0", "AceSerializer-3.0", "AceTimer-3.0")
 
 ClassSpellCache.CONST = {
 	-- COMM_SLUG includes the current xpac number as a safety net to prevent corruption
 	-- this really shouldn't be possible, because two people on the same server can't possibly be playing different patches,
 	-- but if it ain't broke, don't fix it.
-	COMM_SLUG = "TMWClassSpells" .. XPac,
+	
+	-- The 2 is because I revised the protocol to include more information, such as version, for increased ability to be selective about received data.
+	COMM_SLUG = "TMW_CSC_2" .. XPac,
+	-- COMM_SLUG = "TMWClassSpells" .. XPac, --OLD, DO NOT REUSE!
 }
 
 
@@ -171,6 +183,14 @@ local commThrowaway = {}
 
 local commRecievedQueue = {}
 
+function ClassSpellCache:MakePacket(msgType, dataTable)
+	return self:Serialize(TELLMEWHEN_VERSIONNUMBER, msgType, dataTable, pclass)
+end
+
+function ClassSpellCache:SendData(who, msgType, dataTable)
+	self:SendCommMessage(self.CONST.COMM_SLUG, self:MakePacket(msgType, dataTable), "WHISPER", who)
+end
+
 function ClassSpellCache:OnCommReceived(prefix, text, channel, who)
 	if prefix ~= self.CONST.COMM_SLUG
 	or who == UnitName("player")
@@ -183,20 +203,22 @@ function ClassSpellCache:OnCommReceived(prefix, text, channel, who)
 		return
 	end
 	
-	local success, arg1, arg2 = self:Deserialize(text)
+	local success, sourceVersion, msgType, dataTable, sourcePclass = self:Deserialize(text)
 	
 	if success then
-		if arg1 == "RCSL" and not RequestedFrom[who] then
+		if msgType == "RCSL" and not RequestedFrom[who] then
 			-- Request Class Spell Length
 			-- Only respond if the source player has not requested yet this session.
 			
 			self:BuildClassSpellLookup()
-			self:SendCommMessage(self.CONST.COMM_SLUG, self:Serialize("CSL", ClassSpellLength), "WHISPER", who)
+			
+			self:SendData(who, "CSL", ClassSpellLength)
+			
 			RequestedFrom[who] = true
-		elseif arg1 == "CSL" then
+		elseif msgType == "CSL" then
 			-- Class Spell Length
 			wipe(commThrowaway)
-			local RecievedClassSpellLength = arg2
+			local RecievedClassSpellLength = dataTable
 			
 			self:BuildClassSpellLookup()
 			
@@ -206,23 +228,23 @@ function ClassSpellCache:OnCommReceived(prefix, text, channel, who)
 				end
 			end
 			if #commThrowaway > 0 then
-				self:SendCommMessage(self.CONST.COMM_SLUG, self:Serialize("RCSC", commThrowaway), "WHISPER", who)
+				self:SendData(who, "RCSC", commThrowaway)
 			end
 			
-		elseif arg1 == "RCSC" then
+		elseif msgType == "RCSC" then
 			-- Request Class Spell Cache
-			-- arg2 is a list of requested classes/etc (HUNTER, PALADIN, RACIAL, PET, etc)
+			-- dataTable is a list of requested classes/etc (HUNTER, PALADIN, RACIAL, PET, etc)
 			
 			TMW:Debug("RCSC from %s: %s", who, text)
 			
 			wipe(commThrowaway)
-			for _, class in pairs(arg2) do
+			for _, class in pairs(dataTable) do
 				commThrowaway[class] = Cache[class]
 			end
-			self:SendCommMessage(self.CONST.COMM_SLUG, self:Serialize("CSC", commThrowaway), "WHISPER", who)
-		elseif arg1 == "CSC" then
+			self:SendData(who, "CSC", commThrowaway)
+		elseif msgType == "CSC" then
 			-- Class Spell Cache
-			for class, tbl in pairs(arg2) do
+			for class, tbl in pairs(dataTable) do
 				for id, val in pairs(tbl) do
 					Cache[class][id] = val
 				end
@@ -231,7 +253,7 @@ function ClassSpellCache:OnCommReceived(prefix, text, channel, who)
 			self:BuildClassSpellLookup()
 		end
 	elseif TMW.debug then
-		TMW:Error(arg1)
+		TMW:Error(msgType)
 	end
 end
 
@@ -276,12 +298,11 @@ end
 
 function ClassSpellCache:UNIT_PET(event, unit)
 	if unit == "player" and HasPetSpells() then
-		local Cache = Cache.PET
 		local i = 1
 		while true do
 			local _, id = GetSpellBookItemInfo(i, "pet")
 			if id then
-				Cache[id] = pclass
+				Cache.PET[id] = pclass
 			else
 				break
 			end
