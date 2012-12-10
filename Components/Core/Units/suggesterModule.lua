@@ -42,20 +42,25 @@ function Module:Entry_AddToList_1(f, index)
 	
 	if not isSpecial then
 		local unitData = self.table[index]
-		local unit = unitData.value
-		
-		f.tooltiptitle = unitData.tooltipTitle or unitData.text
-		
-		if unitData.range then
-			f.tooltiptext = "|cFFFF0000#|r = 1-" .. unitData.range
+		if unitData then
+			local unit = unitData.value
 			
-			unit = unit .. " 1-" .. unitData.range
-		elseif unitData.desc then
-			f.tooltiptext = unitData.desc
+			f.tooltiptitle = unitData.tooltipTitle or unitData.text
+			
+			if unitData.range then
+				f.tooltiptext = "|cFFFF0000#|r = 1-" .. unitData.range
+				
+				unit = unit .. " 1-" .. unitData.range
+			elseif unitData.desc then
+				f.tooltiptext = unitData.desc
+			end
+			
+			f.Name:SetText(unit)
+			f.insert = unit
+		else			
+			f.Name:SetText("<ERROR>")
+			f.insert = ""
 		end
-		
-		f.Name:SetText(unit)
-		f.insert = unit
 	else
 	
 		if prefix == "%P" then

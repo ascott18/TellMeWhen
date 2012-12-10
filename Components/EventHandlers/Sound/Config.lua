@@ -30,6 +30,7 @@ local LSM = LibStub("LibSharedMedia-3.0")
 
 
 
+local EVENTS = TMW.EVENTS
 local SND = TMW.SND
 SND.tabText = L["SOUND_TAB"]
 SND.LSM = LSM
@@ -75,24 +76,19 @@ end
 
 ---------- Events ----------
 function SND:LoadSettingsForEventID(id)
-	local eventFrame = self:ChooseEvent(id)
-
-	if CI.ics and eventFrame then
-		SND:SelectSound(self:GetEventSettings().Sound)
-		SND:SetupEventSettings()
-	end
+	SND:SelectSound(EVENTS:GetEventSettings().Sound)
 end
 
 function SND:SetupEventDisplay(eventID)
 	if not eventID then return end
 
-	local name = self:GetEventSettings(eventID).Sound
+	local name = EVENTS:GetEventSettings(eventID).Sound
 
 	if name == "None" then
 		name = "|cff808080" .. NONE
 	end
 
-	self.EventList[eventID].DataText:SetText("|cffcccccc" .. self.tabText .. ":|r " .. name)
+	EVENTS.EventHandlerFrames[eventID].DataText:SetText("|cffcccccc" .. self.tabText .. ":|r " .. name)
 end
 
 

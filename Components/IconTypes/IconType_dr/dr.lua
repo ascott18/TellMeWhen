@@ -27,10 +27,8 @@ local CL_CONTROL_PLAYER = COMBATLOG_OBJECT_CONTROL_PLAYER
 
 local clientVersion = select(4, GetBuildInfo())
 
-local DRData = LibStub("DRData-1.0", true)
-if not DRData then
-	error("TMW: The Diminishing Returns icon type requires DRData-1.0. It is embedded within TellMeWhen - you probably just need to restart the game.")
-end
+local DRData = LibStub("DRData-1.0")
+
 local DRSpells = DRData.spells
 local DRReset = 18
 local PvEDRs = {}

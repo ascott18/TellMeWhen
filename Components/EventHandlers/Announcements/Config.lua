@@ -26,6 +26,7 @@ local CI = TMW.CI
 -- GLOBALS: CreateFrame, NONE, NORMAL_FONT_COLOR, UIDropDownMenu_SetText
 
 
+local EVENTS = TMW.EVENTS
 local ANN = TMW.ANN
 ANN.tabText = L["ANN_TAB"]
 
@@ -54,16 +55,8 @@ end
 local channelsToDisplay = {}
 function ANN:LoadSettingsForEventID(id)
 	ANN.ConfigContainer.EditBox:ClearFocus()
-
-	local eventFrame = self:ChooseEvent(id)
-	local ics = CI.ics
-	
-	if not ics then
-		return
-	end
 	
 	wipe(channelsToDisplay)
-	
 	
 	local ChannelList = self.ConfigContainer.ChannelList
 
@@ -110,8 +103,6 @@ function ANN:LoadSettingsForEventID(id)
 	if ChannelList[1] then
 		ChannelList[1]:SetPoint("TOPLEFT", ChannelList, "TOPLEFT", 0, 0)
 		ChannelList[1]:SetPoint("TOPRIGHT", ChannelList, "TOPRIGHT", 0, 0)
-	
-		--ChannelList:SetHeight(#ChannelList*ChannelList[1]:GetHeight())
 		
 		ChannelList:Show()
 	else
@@ -119,21 +110,15 @@ function ANN:LoadSettingsForEventID(id)
 	end
 	
 	
-	
-	
-
-	if ics and eventFrame then
-		local EventSettings = self:GetEventSettings()
-		ANN:SelectChannel(EventSettings.Channel)
-		ANN.ConfigContainer.EditBox:SetText(EventSettings.Text)
-		ANN:SetupEventSettings()
-	end
+	local EventSettings = EVENTS:GetEventSettings()
+	ANN:SelectChannel(EventSettings.Channel)
+	ANN.ConfigContainer.EditBox:SetText(EventSettings.Text)
 end
 
 function ANN:SetupEventDisplay(eventID)
 	if not eventID then return end
 
-	local EventSettings = self:GetEventSettings(eventID)
+	local EventSettings = EVENTS:GetEventSettings(eventID)
 	local channel = EventSettings.Channel
 	local channelsettings = ANN.AllChannelsByChannel[channel]
 
@@ -145,16 +130,16 @@ function ANN:SetupEventDisplay(eventID)
 		elseif chan == NONE then
 			data = "|cff808080" .. chan .. "|r"
 		end
-		self.EventList[eventID].DataText:SetText("|cffcccccc" .. self.tabText .. ":|r " .. data)
+		EVENTS.EventHandlerFrames[eventID].DataText:SetText("|cffcccccc" .. self.tabText .. ":|r " .. data)
 	else
-		self.EventList[eventID].DataText:SetText("|cffcccccc" .. self.tabText .. ":|r UNKNOWN: " .. (channel or "?"))
+		EVENTS.EventHandlerFrames[eventID].DataText:SetText("|cffcccccc" .. self.tabText .. ":|r UNKNOWN: " .. (channel or "?"))
 	end
 end
 
 
 ---------- ChannelList ----------
 function ANN:SelectChannel(channel)
-	local EventSettings = self:GetEventSettings()
+	local EventSettings = EVENTS:GetEventSettings()
 	local channelFrame
 
 	local ConfigFrames = ANN.ConfigContainer.ConfigFrames
@@ -243,6 +228,6 @@ function ANN:Location_DropDown_OnClick(text)
 	
 	TMW:SetUIDropdownText(ConfigFrames.Location, dropdown.value)
 	UIDropDownMenu_SetText(ConfigFrames.Location, text)
-	ANN:GetEventSettings().Location = dropdown.value
+	EVENTS:GetEventSettings().Location = dropdown.value
 end
 

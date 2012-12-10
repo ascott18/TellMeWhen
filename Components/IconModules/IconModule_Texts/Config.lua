@@ -26,7 +26,7 @@ local strmatch, strtrim, max =
 -- GLOBALS: TellMeWhen_TextDisplayOptions, TELLMEWHEN_VERSIONNUMBER
 -- GLOBALS: CreateFrame, IsControlKeyDown
 
-local DogTag = LibStub("LibDogTag-3.0", true)
+local DogTag = LibStub("LibDogTag-3.0")
 local LMB = LibStub("Masque", true) or (LibMasque and LibMasque("Button"))
 local LSM = LibStub("LibSharedMedia-3.0")
 

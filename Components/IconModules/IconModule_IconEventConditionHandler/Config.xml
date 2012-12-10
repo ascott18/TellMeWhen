@@ -1,5 +1,5 @@
 <Ui>
-	<Button name="$parentIconEventOnCondition" parentKey="IconEventOnCondition" parent="TellMeWhen_IconEditorEventsEventSettings" inherits="TellMeWhen_ButtonTemplate">
+	<Button name="$parentIconEventOnCondition" parentKey="IconEventOnCondition" parent="TellMeWhen_IconEditorEventsEventSettingsContainer" inherits="TellMeWhen_ButtonTemplate">
 		<Size x="200" y="16"/>
 		<Anchors>
 			<Anchor point="TOP" relativeTo="$parentOnlyShown" relativePoint="BOTTOM" y="-7"/>

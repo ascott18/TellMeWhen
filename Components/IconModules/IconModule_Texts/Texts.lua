@@ -21,13 +21,9 @@ local type, pairs, assert, rawget, wipe =
 	  type, pairs, assert, rawget, wipe
 
 
-local DogTag = LibStub("LibDogTag-3.0", true)
+local DogTag = LibStub("LibDogTag-3.0")
 local LMB = LibStub("Masque", true) or (LibMasque and LibMasque("Button"))
 local LSM = LibStub("LibSharedMedia-3.0")
-
-if not DogTag then 
-	error("TellMeWhen Texts: LibDogTag-3.0 was not found. Text overlay module will not load without it.")
-end
 
 
 local TEXT = TMW:NewModule("TextDisplay")

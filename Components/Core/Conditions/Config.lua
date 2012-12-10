@@ -163,10 +163,21 @@ end)
 
 
 function CNDT:GetTabText(conditionSetName)
-	local ConditionSet = CNDT.ConditionSets[conditionSetName] or CNDT.CurrentConditionSet
+	local ConditionSet = CNDT.CurrentConditionSet
+	if conditionSetName then
+		ConditionSet = CNDT.ConditionSets[conditionSetName]
+	end
+	
+	if not ConditionSet then
+		return "<ERROR: SET NOT FOUND!>"
+	end
 	
 	local Conditions = ConditionSet:GetSettings()
 	local tabText = ConditionSet.tabText
+	
+	if not Conditions then
+		return "<ERROR: SETTINGS NOT FOUND!>"
+	end
 	
 	local parenthesesAreValid, errorMessage, fmt_1, fmt_2 = CNDT:CheckParentheses(Conditions)
 		

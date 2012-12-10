@@ -135,7 +135,7 @@ Processor:RegisterDogTag("TMW", "Opacity", {
 		'icon', 'number', '@req',
 	},
 	events = TMW:CreateDogTagEventString("REALALPHA"),
-	ret = "boolean",
+	ret = "number",
 	doc = L["DT_DOC_Opacity"],
 	example = '[IsShown] => "true"; [IsShown(icon=3, group=2)] => "false"',
 	category = L["ICON"],

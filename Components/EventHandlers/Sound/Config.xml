@@ -45,7 +45,7 @@
 			<OnClick>
 				local name = self.soundname
 				if TMW.CI.ics then
-					TMW.SND:GetEventSettings().Sound = name
+					TMW.EVENTS:GetEventSettings().Sound = name
 					TMW.IE:ScheduleIconSetup()
 				end
 
@@ -114,7 +114,7 @@
 				<Scripts>
 					<OnSizeChanged>
 						if TMW.CI.ics then
-						--	TMW.SND:SelectSound(TMW.SND:GetEventSettings().Sound)
+						--	TMW.SND:SelectSound(TMW.EVENTS:GetEventSettings().Sound)
 						end
 						TMW.SND:SetSoundsOffset(TMW.SND.offs)
 					</OnSizeChanged>
@@ -203,7 +203,7 @@
 						end
 
 						if TMW.CI.ics and TMW.EVENTS.currentEventID then
-							TMW.SND:GetEventSettings().Sound = t
+							TMW.EVENTS:GetEventSettings().Sound = t
 						end
 						TMW.SND:SelectSound(t)
 						TMW.IE:ScheduleIconSetup()

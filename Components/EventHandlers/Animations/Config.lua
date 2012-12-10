@@ -24,6 +24,7 @@ local pairs, ipairs, max =
 
  -- GLOBALS: CreateFrame, NORMAL_FONT_COLOR, NONE
 
+local EVENTS = TMW.EVENTS
 local EventHandler = TMW.Classes.EventHandler.instancesByName.Animations
 EventHandler.tabText = L["ANIM_TAB"]
 
@@ -111,20 +112,14 @@ function EventHandler:LoadSettingsForEventID(id)
 	end
 	
 	
-	
-	local eventFrame = self:ChooseEvent(id)
-	
-	if CI.ics and eventFrame then
-		local EventSettings = self:GetEventSettings()
-		self:SelectAnimation(EventSettings.Animation)
-		self:SetupEventSettings()
-	end
+	local EventSettings = EVENTS:GetEventSettings()
+	self:SelectAnimation(EventSettings.Animation)
 end
 
 function EventHandler:SetupEventDisplay(eventID)
 	if not eventID then return end
 
-	local animation = self:GetEventSettings(eventID).Animation
+	local animation = EVENTS:GetEventSettings(eventID).Animation
 	local animationData = self.AllAnimationsByAnimation[animation]
 
 	if animationData then
@@ -133,9 +128,9 @@ function EventHandler:SetupEventDisplay(eventID)
 			text = "|cff808080" .. text
 		end
 
-		self.EventList[eventID].DataText:SetText("|cffcccccc" .. self.tabText .. ":|r " .. text)
+		EVENTS.EventHandlerFrames[eventID].DataText:SetText("|cffcccccc" .. self.tabText .. ":|r " .. text)
 	else
-		self.EventList[eventID].DataText:SetText("|cffcccccc" .. self.tabText .. ":|r UNKNOWN: " .. (animation or "?"))
+		EVENTS.EventHandlerFrames[eventID].DataText:SetText("|cffcccccc" .. self.tabText .. ":|r UNKNOWN: " .. (animation or "?"))
 	end
 end
 
@@ -143,7 +138,7 @@ end
 
 ---------- Animations ----------
 function EventHandler:SelectAnimation(animation)
-	local EventSettings = self:GetEventSettings()
+	local EventSettings = EVENTS:GetEventSettings()
 	local animationFrame
 	
 	for i=1, #EventHandler.ConfigContainer.AnimationList do

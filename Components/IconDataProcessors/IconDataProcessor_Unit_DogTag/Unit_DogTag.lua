@@ -17,7 +17,7 @@ local TMW = TMW
 local L = TMW.L
 local print = TMW.print
 
-local DogTag = LibStub("LibDogTag-3.0", true)
+local DogTag = LibStub("LibDogTag-3.0")
 
 -- The way that this processor works is really sleezy.
 -- Basically, we create a processor just to reserve an attribute name and event and all that fun stuff,

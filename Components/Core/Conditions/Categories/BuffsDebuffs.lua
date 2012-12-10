@@ -115,7 +115,7 @@ function Env.AuraTooltipNumber(unit, name, namename, filter)
 		end
 	end
 	
-	if v1 then
+	--if v1 then
 		if v1 and v1 > 0 then
 			return v1
 		elseif v2 and v2 > 0 then
@@ -125,7 +125,7 @@ function Env.AuraTooltipNumber(unit, name, namename, filter)
 		elseif v4 and v4 > 0 then
 			return v4
 		end
-	end
+	--end
 	return 0
 end
 

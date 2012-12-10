@@ -115,7 +115,7 @@
 							-- It seems that bad things happen here while typing chinese characters
 							-- See http://wow.curseforge.com/addons/tellmewhen/tickets/641-typing-chinese-error/
 						
-							local DogTag = LibStub("LibDogTag-3.0", true)
+							local DogTag = LibStub("LibDogTag-3.0")
 							local colorText = self:GetText()
 							if self.lastText ~= colorText then
 								local text = colorText:gsub("|c%x%x%x%x%x%x%x%x", ""):gsub("|r", "")
@@ -158,7 +158,7 @@
 					<OnEditFocusLost>
 						EditBox_ClearHighlight(self)
 						
-						local DogTag = LibStub("LibDogTag-3.0", true)
+						local DogTag = LibStub("LibDogTag-3.0")
 						self:SetText(DogTag:CleanCode(self:GetText()))
 						self:SetText(DogTag:ColorizeCode(self:GetText()))
 						

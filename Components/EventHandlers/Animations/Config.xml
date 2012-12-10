@@ -60,7 +60,7 @@
 		<Scripts>
 			<OnClick>
 				if TMW.CI.ics then
-					TMW.Classes.EventHandler.instancesByName.Animations:GetEventSettings().Animation = self.animation
+					TMW.EVENTS:GetEventSettings().Animation = self.animation
 					TMW.IE:ScheduleIconSetup()
 				end
 
@@ -106,7 +106,7 @@
 								self.Mid:SetFormattedText(TMW.L["ANIM_SECONDS"], TMW:FormatSeconds(value, nil, true))
 
 								if TMW.CI.ics then
-									TMW.Classes.EventHandler.instancesByName.Animations:GetEventSettings().Duration = value
+									TMW.EVENTS:GetEventSettings().Duration = value
 									TMW.IE:ScheduleIconSetup()
 								end
 							</OnValueChanged>
@@ -133,7 +133,7 @@
 							</OnLoad>
 							<OnClick>
 								self:SetChecked(self:GetChecked()) -- trigger the hook
-								TMW.Classes.EventHandler.instancesByName.Animations:GetEventSettings().Infinite = not not self:GetChecked()
+								TMW.EVENTS:GetEventSettings().Infinite = not not self:GetChecked()
 							</OnClick>
 						</Scripts>
 					</CheckButton>
@@ -150,7 +150,7 @@
 								self.Mid:SetFormattedText(TMW.L["ANIM_PIXELS"], value)
 
 								if TMW.CI.ics then
-									TMW.Classes.EventHandler.instancesByName.Animations:GetEventSettings().Magnitude = value
+									TMW.EVENTS:GetEventSettings().Magnitude = value
 									TMW.IE:ScheduleIconSetup()
 								end
 							</OnValueChanged>
@@ -169,7 +169,7 @@
 								self.Mid:SetFormattedText(TMW.L["ANIM_SECONDS"], TMW:FormatSeconds(value, nil, true))
 
 								if TMW.CI.ics then
-									TMW.Classes.EventHandler.instancesByName.Animations:GetEventSettings().Period = value
+									TMW.EVENTS:GetEventSettings().Period = value
 									TMW.IE:ScheduleIconSetup()
 								end
 							</OnValueChanged>
@@ -204,7 +204,7 @@
 								self.text:SetText(TMW.L["ANIM_COLOR"])
 								TMW:TT(self, "ANIM_COLOR", "ANIM_COLOR_DESC")
 								self.func = function()
-									local settings = TMW.Classes.EventHandler.instancesByName.Animations:GetEventSettings()
+									local settings = TMW.EVENTS:GetEventSettings()
 									local r, g, b = ColorPickerFrame:GetColorRGB()
 									settings.r_anim = r
 									settings.g_anim = g
@@ -213,14 +213,14 @@
 									TMW.IE:ScheduleIconSetup()
 								end
 								self.opacityFunc = function()
-									local settings = TMW.Classes.EventHandler.instancesByName.Animations:GetEventSettings()
+									local settings = TMW.EVENTS:GetEventSettings()
 									local a = 1 - OpacitySliderFrame:GetValue()
 									settings.a_anim = a
 									self.background:SetAlpha(a)
 									TMW.IE:ScheduleIconSetup()
 								end
 								self.cancel = function()
-									local settings = TMW.Classes.EventHandler.instancesByName.Animations:GetEventSettings()
+									local settings = TMW.EVENTS:GetEventSettings()
 									local r, g, b, a = self.br, self.bg, self.bb, self.ba
 									settings.r_anim = r
 									settings.g_anim = g
@@ -232,7 +232,7 @@
 								end
 							</OnLoad>
 							<OnClick>
-								local settings = TMW.Classes.EventHandler.instancesByName.Animations:GetEventSettings()
+								local settings = TMW.EVENTS:GetEventSettings()
 								local r, g, b, a = settings.r_anim, settings.g_anim, settings.b_anim, settings.a_anim
 								self.br, self.bg, self.bb, self.ba = r, g, b, a
 
@@ -268,7 +268,7 @@
 								self:SetText(self:GetText():gsub([[\\]], [[\]]))
 
 								if TMW.CI.ics then
-									TMW.Classes.EventHandler.instancesByName.Animations:GetEventSettings().Image = TMW:CleanString(self)
+									TMW.EVENTS:GetEventSettings().Image = TMW:CleanString(self)
 									TMW.IE:ScheduleIconSetup()
 								end
 
@@ -288,7 +288,7 @@
 								TMW:TT(self, "ANIM_FADE", "ANIM_FADE_DESC")
 							</OnLoad>
 							<OnClick>
-								TMW.Classes.EventHandler.instancesByName.Animations:GetEventSettings().Fade = not not self:GetChecked()
+								TMW.EVENTS:GetEventSettings().Fade = not not self:GetChecked()
 							</OnClick>
 						</Scripts>
 					</CheckButton>
@@ -323,7 +323,7 @@
 								self.Mid:SetText(value)
 
 								if TMW.CI.ics then
-									TMW.Classes.EventHandler.instancesByName.Animations:GetEventSettings().a_anim = value/100
+									TMW.EVENTS:GetEventSettings().a_anim = value/100
 									TMW.IE:ScheduleIconSetup()
 								end
 							</OnValueChanged>
@@ -344,7 +344,7 @@
 								self.Mid:SetFormattedText(TMW.L["ANIM_PIXELS"], value)
 
 								if TMW.CI.ics then
-									TMW.Classes.EventHandler.instancesByName.Animations:GetEventSettings().Thickness = value
+									TMW.EVENTS:GetEventSettings().Thickness = value
 									TMW.IE:ScheduleIconSetup()
 								end
 							</OnValueChanged>
@@ -363,7 +363,7 @@
 								self.Mid:SetFormattedText(TMW.L["ANIM_PIXELS"], value)
 
 								if TMW.CI.ics then
-									TMW.Classes.EventHandler.instancesByName.Animations:GetEventSettings().Size_anim = value
+									TMW.EVENTS:GetEventSettings().Size_anim = value
 									TMW.IE:ScheduleIconSetup()
 								end
 							</OnValueChanged>
@@ -383,7 +383,7 @@
 								self.Mid:SetFormattedText(TMW.L["ANIM_PIXELS"], value)
 
 								if TMW.CI.ics then
-									TMW.Classes.EventHandler.instancesByName.Animations:GetEventSettings().SizeX = value
+									TMW.EVENTS:GetEventSettings().SizeX = value
 									TMW.IE:ScheduleIconSetup()
 								end
 							</OnValueChanged>
@@ -403,7 +403,7 @@
 								self.Mid:SetFormattedText(TMW.L["ANIM_PIXELS"], value)
 
 								if TMW.CI.ics then
-									TMW.Classes.EventHandler.instancesByName.Animations:GetEventSettings().SizeY = value
+									TMW.EVENTS:GetEventSettings().SizeY = value
 									TMW.IE:ScheduleIconSetup()
 								end
 							</OnValueChanged>

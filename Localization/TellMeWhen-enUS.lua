@@ -11,7 +11,6 @@ L["CMD_ENABLE"] = "enable"
 L["CMD_DISABLE"] = "disable"
 L["CMD_TOGGLE"] = "toggle"
 
-L["ICON_TOOLTIP1"] = "TellMeWhen"
 L["ICON_TOOLTIP2NEW"] = [[|cff7fffffRight-click|r for icon options.
 |cff7fffffRight-click and drag|r to another icon to move/copy.
 |cff7fffffDrag|r spells or items onto the icon for quick setup.]]
@@ -43,6 +42,7 @@ L["ERROR_ANCHORSELF"] = "%s was trying to anchor to itself, so TellMeWhen reset 
 L["ERROR_NO_LOCKTOGGLE_IN_LOCKDOWN"] = "Cannot unlock TellMeWhen in combat if the %q option isn't enabled (type '/tmw options')."
 L["ERROR_ACTION_DENIED_IN_LOCKDOWN"] = "Cannot do that in combat if the %q option isn't enabled (type '/tmw options')."
 
+L["ERROR_NOTLOADED_ERROR"] = "TellMeWhen has failed to load! Are you missing a required library?"
 L["ERROR_NOTINITIALIZED_NO_LOAD"] = "TellMeWhen_Options cannot be loaded if TellMeWhen failed to initialize!"
 L["ERROR_NOTINITIALIZED_NO_ACTION"] = "TellMeWhen cannot perform that action if the addon failed to initialize!"
 L["ERROR_NOTINITIALIZED_INTERFACEPANEL_EXPLANATION"] = [[It looks like TellMeWhen has failed to initialize.
@@ -1432,6 +1432,14 @@ L["EVENTS_HANDLERS_PLAY"] = "Test Event"
 L["EVENTS_HANDLERS_PLAY_DESC"] = "|cff7fffffClick|r to test the event handler"
 
 L["EVENTS_SETTINGS_HEADER"] = "Event Settings"
+
+L["EVENTS_INSTRUCTIONS"] = [[In this tab, you can configure extra functionality for this icon with effects like sounds, animations, and text outputs.
+
+All these effects are triggered by an event of your choosing. Most events are triggered in response to a change in the icon's status, but there are other events too.
+
+To get started configuring these effects, click the button to the left and chose the combination of event and effect that you would like.
+
+The settings for the event and the effect will then appear, and you can configure them as desired.]]
 
 L["EVENTS_SETTINGS_ONLYSHOWN"] = "Only handle if icon is shown"
 L["EVENTS_SETTINGS_ONLYSHOWN_DESC"] = "Prevents the event from being handled if the icon is not shown."

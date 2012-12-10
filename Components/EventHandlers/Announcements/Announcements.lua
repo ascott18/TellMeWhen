@@ -38,7 +38,7 @@ local wow_501 = clientVersion >= 50100
 
 -- GLOBALS: UIDROPDOWNMENU_MENU_LEVEL, UIDropDownMenu_AddButton, UIDropDownMenu_CreateInfo
 
-local DogTag = LibStub("LibDogTag-3.0", true)
+local DogTag = LibStub("LibDogTag-3.0")
 
 
 local ANN = TMW.Classes.EventHandler:New("Announcements")
@@ -317,7 +317,7 @@ ANN:RegisterEventHandlerDataNonSpecific(40, "CHANNEL", {
 			info.text = name
 			info.arg1 = name
 			info.value = name
-			info.checked = name == TMW.ANN:GetEventSettings().Location
+			info.checked = name == TMW.EVENTS:GetEventSettings().Location
 			UIDropDownMenu_AddButton(info, UIDROPDOWNMENU_MENU_LEVEL)
 		end
 	end,
@@ -373,7 +373,7 @@ ANN:RegisterEventHandlerDataNonSpecific(70, "FRAME", {
 				info.text = name
 				info.arg1 = name
 				info.value = name
-				info.checked = name == TMW.ANN:GetEventSettings().Location
+				info.checked = name == TMW.EVENTS:GetEventSettings().Location
 				UIDropDownMenu_AddButton(info, UIDROPDOWNMENU_MENU_LEVEL)
 			end
 			i = i + 1
@@ -469,7 +469,7 @@ ANN:RegisterEventHandlerDataNonSpecific(81, "SCT", {
 			info.text = name
 			info.arg1 = info.text
 			info.value = id
-			info.checked = id == TMW.ANN:GetEventSettings().Location
+			info.checked = id == TMW.EVENTS:GetEventSettings().Location
 			UIDropDownMenu_AddButton(info, UIDROPDOWNMENU_MENU_LEVEL)
 		end
 	end,
@@ -499,7 +499,7 @@ ANN:RegisterEventHandlerDataNonSpecific(83, "MSBT", {
 			local info = UIDropDownMenu_CreateInfo()
 			info.text = scrollAreaName
 			info.value = scrollAreaKey
-			info.checked = scrollAreaKey == TMW.ANN:GetEventSettings().Location
+			info.checked = scrollAreaKey == TMW.EVENTS:GetEventSettings().Location
 			info.func = TMW.ANN.Location_DropDown_OnClick
 			info.arg1 = scrollAreaName
 			UIDropDownMenu_AddButton(info, UIDROPDOWNMENU_MENU_LEVEL)
@@ -535,7 +535,7 @@ ANN:RegisterEventHandlerDataNonSpecific(85, "PARROT", {
 			info.value = k
 			info.func = TMW.ANN.Location_DropDown_OnClick
 			info.arg1 = n
-			info.checked = k == TMW.ANN:GetEventSettings().Location
+			info.checked = k == TMW.EVENTS:GetEventSettings().Location
 			UIDropDownMenu_AddButton(info, UIDROPDOWNMENU_MENU_LEVEL)
 		end
 	end,

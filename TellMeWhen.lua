@@ -14,21 +14,21 @@
 -- ADDON GLOBALS AND LOCALS
 -- ---------------------------------
 
+-- Put requied libs here: (If they fail to load, they will make all of TMW will fail to load)
+local AceDB = LibStub("AceDB-3.0")
+local L = LibStub("AceLocale-3.0"):GetLocale("TellMeWhen", true)
+
 local TMW = LibStub("AceAddon-3.0"):NewAddon(CreateFrame("Frame", "TMW", UIParent), "TellMeWhen", "AceEvent-3.0", "AceTimer-3.0", "AceConsole-3.0", "AceComm-3.0", "AceSerializer-3.0")
 TellMeWhen = TMW
 -- TMW is set globally through CreateFrame
 
-local L = LibStub("AceLocale-3.0"):GetLocale("TellMeWhen", true)
 --L = setmetatable({}, {__index = function() return ("| ! "):rep(12) end}) -- stress testing for text widths
 TMW.L = L
-local AceDB = LibStub("AceDB-3.0")
-
-local DogTag = LibStub("LibDogTag-3.0", true)
 
 TELLMEWHEN_VERSION = "6.1.2"
 TELLMEWHEN_VERSION_MINOR = strmatch(" @project-version@", " r%d+") or ""
 TELLMEWHEN_VERSION_FULL = TELLMEWHEN_VERSION .. TELLMEWHEN_VERSION_MINOR
-TELLMEWHEN_VERSIONNUMBER = 61210 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
+TELLMEWHEN_VERSIONNUMBER = 61211 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
 if TELLMEWHEN_VERSIONNUMBER > 62000 or TELLMEWHEN_VERSIONNUMBER < 61000 then return error("YOU SCREWED UP THE VERSION NUMBER OR DIDNT CHANGE THE SAFETY LIMITS") end -- safety check because i accidentally made the version number 414069 once
 
 TELLMEWHEN_MAXROWS = 20
@@ -78,6 +78,7 @@ TMW.ISNOTMOP = not TMW.ISMOP and true or nil
 local _, pclass = UnitClass("Player")
 local pname = UnitName("player")
 
+local DogTag = LibStub("LibDogTag-3.0", true)
 
 TMW.CONST = {}
 TMW.CONST.CHAT_TYPE_INSTANCE_CHAT = "INSTANCE_CHAT"
@@ -1391,7 +1392,7 @@ TMW.BE = TMW.ISMOP and {
 		IncreasedPhysHaste  = "55610;113742;30809;128432;128433",
 		IncreasedStats		= "1126;117666;20217;90363",
 		BonusStamina		= "21562;103127;469;90364",
-		IncreasedSpellHaste = "24907;15473;51470",
+		IncreasedSpellHaste = "24907;15473;51470;49868",
 		IncreasedCrit		= "24932;1459;61316;97229;24604;90309;126373;126309;116781",
 		
 		-- EXISTING WAS CHECKED, DIDN'T LOOK FOR NEW ONES YET:
@@ -1706,8 +1707,6 @@ end
 -- --------------------------
 
 function TMW:OnInitialize()
-	LoadAddOn("LibDogTag-3.0")
-	
 	if not TMW.Classes.IconView then
 		-- this also includes upgrading from older than 3.0 (pre-Ace3 DB settings)
 		-- GLOBALS: StaticPopupDialogs, StaticPopup_Show, EXIT_GAME, CANCEL, ForceQuit
@@ -3230,7 +3229,6 @@ end
 
 
 local EventHandler = TMW:NewClass("EventHandler", "AceEvent-3.0", "AceTimer-3.0")
-TMW.EVENTS = EventHandler
 local QueuedIcons = {}
 EventHandler.instancesByName = {}
 
@@ -4415,6 +4413,9 @@ TMW:NewClass("GenericComponent"){
 	end,
 	
 	RegisterDogTag = function(self, ...)
+		if not DogTag then
+			return
+		end
 		-- just a wrapper so that i don't have to LibStub DogTag everywhere
 		DogTag:AddTag(...)
 	end,
@@ -4905,7 +4906,9 @@ function TMW:CreateDogTagEventString(...)
 	end
 	return eventString
 end
-
+if not DogTag then
+	TMW.CreateDogTagEventString = TMW.NULLFUNC
+end
 
 TMW:NewClass("ObjectModule"){
 	ScriptHandlers = {},
@@ -5971,19 +5974,19 @@ TMW:RegisterChatCommand("tmw", "SlashCommand")
 TMW:RegisterChatCommand("tellmewhen", "SlashCommand")
 
 
-
-DogTag:AddTag("TMW", "TMWFormatDuration", {
-	code = TMW:MakeSingleArgFunctionCached(function(seconds)
-		return TMW:FormatSeconds(seconds, seconds == 0 or seconds > 10, true)
-	end),
-	arg = {
-		'seconds', 'number', '@req',
-	},
-	ret = "string",
-	static = true,
-	doc = L["DT_DOC_TMWFormatDuration"],
-	example = '[0.54:TMWFormatDuration] => "0.5"; [20:TMWFormatDuration] => "20"; [80:TMWFormatDuration] => "1:20"; [10000:TMWFormatDuration] => "2:46:40"',
-	category = L["TEXTMANIP"]
-})
-
+if DogTag then
+	DogTag:AddTag("TMW", "TMWFormatDuration", {
+		code = TMW:MakeSingleArgFunctionCached(function(seconds)
+			return TMW:FormatSeconds(seconds, seconds == 0 or seconds > 10, true)
+		end),
+		arg = {
+			'seconds', 'number', '@req',
+		},
+		ret = "string",
+		static = true,
+		doc = L["DT_DOC_TMWFormatDuration"],
+		example = '[0.54:TMWFormatDuration] => "0.5"; [20:TMWFormatDuration] => "20"; [80:TMWFormatDuration] => "1:20"; [10000:TMWFormatDuration] => "2:46:40"',
+		category = L["TEXTMANIP"]
+	})
+end
 

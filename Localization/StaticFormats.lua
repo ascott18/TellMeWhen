@@ -89,6 +89,7 @@ L["ANIM_INFINITE_DESC"] 				= L["ANIM_INFINITE_DESC"] 					:format(L["ANIM_ICONC
 L["DT_DOC_Source"] 					  	= L["DT_DOC_Source"] 						:format(L["ICONMENU_CLEU"])
 L["DT_DOC_Destination"] 			  	= L["DT_DOC_Destination"] 					:format(L["ICONMENU_CLEU"])
 L["DT_DOC_Extra"] 					  	= L["DT_DOC_Extra"]	 						:format(L["ICONMENU_CLEU"])
+L["DT_DOC_LocType"] 				 	= L["DT_DOC_LocType"]	 					:format(L["LOSECONTROL_ICONTYPE"])
 
 L["ICONTYPE_DEFAULT_INSTRUCTIONS"] 	  	= L["ICONTYPE_DEFAULT_INSTRUCTIONS"]	 	:format(L["ICONMENU_TYPE"], L["ICONMENU_ENABLE"])
 

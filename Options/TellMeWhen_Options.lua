@@ -18,7 +18,6 @@ TMW.WidthCol1 = 150
 ---------- Libraries ----------
 local LSM = LibStub("LibSharedMedia-3.0")
 local LMB = LibStub("Masque", true) or (LibMasque and LibMasque("Button"))
-local DogTag = LibStub("LibDogTag-3.0", true)
 
 -- GLOBALS: LibStub
 -- GLOBALS: TMWOptDB
@@ -61,7 +60,7 @@ local strlowerCache = TMW.strlowerCache
 local SpellTextures = TMW.SpellTextures
 local print = TMW.print
 local Types = TMW.Types
-local IE, ID, TEXT
+local IE, ID
 
 
 ---------- Locals ----------
@@ -71,7 +70,7 @@ local get = TMW.get
 
 ---------- Globals ----------
 --GLOBALS: BINDING_HEADER_TELLMEWHEN, BINDING_NAME_TELLMEWHEN_ICONEDITOR_UNDO, BINDING_NAME_TELLMEWHEN_ICONEDITOR_REDO
-BINDING_HEADER_TELLMEWHEN = L["ICON_TOOLTIP1"]
+BINDING_HEADER_TELLMEWHEN = "TellMeWhen"
 BINDING_NAME_TELLMEWHEN_ICONEDITOR_UNDO = L["UNDO_ICON"]
 BINDING_NAME_TELLMEWHEN_ICONEDITOR_REDO = L["REDO_ICON"]
 
@@ -1073,7 +1072,7 @@ end
 function TMW:CompileOptions()
 	if not TMW.OptionsTable then
 		TMW.OptionsTable = {
-			name = L["ICON_TOOLTIP1"] .. " " .. TELLMEWHEN_VERSION_FULL,
+			name = "TellMeWhen v" .. TELLMEWHEN_VERSION_FULL,
 			type = "group",
 			args = {
 				main = {
@@ -1349,7 +1348,7 @@ function TMW:CompileOptions()
 	end
 	
 	if not TMW.AddedToBlizz then
-		TMW.AddedToBlizz = LibStub("AceConfigDialog-3.0"):AddToBlizOptions("TMW Options", L["ICON_TOOLTIP1"])
+		TMW.AddedToBlizz = LibStub("AceConfigDialog-3.0"):AddToBlizOptions("TMW Options", "TellMeWhen")
 		
 		if TMW.AddedToBlizz and not TMW.ALLOW_LOCKDOWN_CONFIG then
 			local canShow = true
@@ -1947,7 +1946,7 @@ function IE:OnUpdate()
 	-- update the top of the icon editor with the information of the current icon.
 	-- this is done in an OnUpdate because it is just too hard to track when the texture changes sometimes.
 	-- I don't want to fill up the main addon with configuration code to notify the IE of texture changes
-	local titlePrepend = L["ICON_TOOLTIP1"] .. " v" .. TELLMEWHEN_VERSION_FULL .. " - "
+	local titlePrepend = "TellMeWhen v" .. TELLMEWHEN_VERSION_FULL .. " - "
 	
 	if IE.CurrentTab:GetID() > #IE.Tabs - 2 then
 		-- the last 2 tabs are group config, so dont show icon info
@@ -3548,16 +3547,26 @@ end
 -- EVENTS
 -- ----------------------
 
+TMW.EVENTS = {}
 local EVENTS = TMW.EVENTS
 
+EVENTS.CONST = {
+	EVENT_INVALID_REASON_MISSINGHANDLER = 1,
+	EVENT_INVALID_REASON_MISSINGCOMPONENT = 2,
+}
+
 function EVENTS:SetupEventSettings()
-	local EventSettings = self.EventSettings
+	local EventSettingsContainer = self.EventSettingsContainer
 
-	if not EVENTS.currentEventID then return end
+	if not EVENTS.currentEventID then
+		EventSettingsContainer:Hide()
+		return
+	end
+	EventSettingsContainer:Show()
 
-	local eventData = self.EventList[EVENTS.currentEventID].eventData
+	local eventData = self.EventHandlerFrames[EVENTS.currentEventID].eventData
 
-	self.EventSettingsEventName:SetText("(" .. EVENTS.currentEventID .. ") " .. eventData.text)
+	self.EventSettingsContainerEventName:SetText("(" .. EVENTS.currentEventID .. ") " .. eventData.text)
 
 	local Settings = self:GetEventSettings()
 	local settingsUsedByEvent = eventData.settings
@@ -3565,24 +3574,24 @@ function EVENTS:SetupEventSettings()
 	TMW:Fire("TMW_CONFIG_EVENTS_SETTINGS_SETUP_PRE")
 
 	--hide settings
-	EventSettings.Operator	 	 		:Hide()
-	EventSettings.Value		 	 		:Hide()
-	EventSettings.CndtJustPassed 		:Hide()
-	EventSettings.PassingCndt	 		:Hide()
-	EventSettings.Icon			 		:Hide()
+	EventSettingsContainer.Operator	 	 		:Hide()
+	EventSettingsContainer.Value		 	 		:Hide()
+	EventSettingsContainer.CndtJustPassed 		:Hide()
+	EventSettingsContainer.PassingCndt	 		:Hide()
+	EventSettingsContainer.Icon			 		:Hide()
 
 	--set settings
-	EventSettings.PassThrough	 :SetChecked(Settings.PassThrough)
-	EventSettings.OnlyShown	 	 :SetChecked(Settings.OnlyShown)
-	EventSettings.CndtJustPassed :SetChecked(Settings.CndtJustPassed)
-	EventSettings.PassingCndt	 :SetChecked(Settings.PassingCndt)
-	EventSettings.Value		 	 :SetText(Settings.Value)
+	EventSettingsContainer.PassThrough	 :SetChecked(Settings.PassThrough)
+	EventSettingsContainer.OnlyShown	 	 :SetChecked(Settings.OnlyShown)
+	EventSettingsContainer.CndtJustPassed :SetChecked(Settings.CndtJustPassed)
+	EventSettingsContainer.PassingCndt	 :SetChecked(Settings.PassingCndt)
+	EventSettingsContainer.Value		 	 :SetText(Settings.Value)
 
-	TMW:SetUIDropdownText(EventSettings.Icon, Settings.Icon, TMW.InIcons, L["CHOOSEICON"])
-	EventSettings.Icon.IconPreview:SetIcon(_G[Settings.Icon])
+	TMW:SetUIDropdownText(EventSettingsContainer.Icon, Settings.Icon, TMW.InIcons, L["CHOOSEICON"])
+	EventSettingsContainer.Icon.IconPreview:SetIcon(_G[Settings.Icon])
 
 	--show settings
-	for setting, frame in pairs(EventSettings) do
+	for setting, frame in pairs(EventSettingsContainer) do
 		if type(frame) == "table" then
 			local state = settingsUsedByEvent and settingsUsedByEvent[setting]
 
@@ -3604,26 +3613,26 @@ function EVENTS:SetupEventSettings()
 		end
 	end
 
-	if EventSettings.PassingCndt				:GetChecked() then
-		EventSettings.Operator.ValueLabel		:SetFontObject(GameFontHighlight)
-		EventSettings.Operator					:Enable()
-		EventSettings.Value						:Enable()
+	if EventSettingsContainer.PassingCndt				:GetChecked() then
+		EventSettingsContainer.Operator.ValueLabel		:SetFontObject(GameFontHighlight)
+		EventSettingsContainer.Operator					:Enable()
+		EventSettingsContainer.Value						:Enable()
 		if settingsUsedByEvent and not settingsUsedByEvent.CndtJustPassed == "FORCE" then
-			EventSettings.CndtJustPassed		:Enable()
+			EventSettingsContainer.CndtJustPassed		:Enable()
 		end
 	else
-		EventSettings.Operator.ValueLabel		:SetFontObject(GameFontDisable)
-		EventSettings.Operator					:Disable()
-		EventSettings.Value						:Disable()
-		EventSettings.CndtJustPassed			:Disable()
+		EventSettingsContainer.Operator.ValueLabel		:SetFontObject(GameFontDisable)
+		EventSettingsContainer.Operator					:Disable()
+		EventSettingsContainer.Value						:Disable()
+		EventSettingsContainer.CndtJustPassed			:Disable()
 	end
 
-	EventSettings.Operator.ValueLabel:SetText(eventData.valueName)
-	EventSettings.Value.ValueLabel:SetText(eventData.valueSuffix)
+	EventSettingsContainer.Operator.ValueLabel:SetText(eventData.valueName)
+	EventSettingsContainer.Value.ValueLabel:SetText(eventData.valueSuffix)
 
-	local v = TMW:SetUIDropdownText(EventSettings.Operator, Settings.Operator, operators)
+	local v = TMW:SetUIDropdownText(EventSettingsContainer.Operator, Settings.Operator, operators)
 	if v then
-		TMW:TT(EventSettings.Operator, v.tooltipText, nil, 1)
+		TMW:TT(EventSettingsContainer.Operator, v.tooltipText, nil, 1)
 	end
 	
 	TMW:Fire("TMW_CONFIG_EVENTS_SETTINGS_SETUP_POST")
@@ -3632,7 +3641,7 @@ end
 function EVENTS:OperatorMenu_DropDown()
 	-- self is not Module
 	local Module = TMW.EVENTS.currentEventHandler
-	local eventData = Module.EventList[EVENTS.currentEventID].eventData
+	local eventData = Module.EventHandlerFrames[EVENTS.currentEventID].eventData
 
 	for k, v in pairs(operators) do
 		if not eventData.blacklistedOperators or not eventData.blacklistedOperators[v.value] then
@@ -3731,7 +3740,7 @@ function EVENTS:AddEvent_Dropdown()
 			UIDropDownMenu_AddButton(info, UIDROPDOWNMENU_MENU_LEVEL)
 		end
 	elseif UIDROPDOWNMENU_MENU_LEVEL == 2 then
-		for i, EventHandler in ipairs(EVENTS.instances) do
+		for i, EventHandler in ipairs(TMW.Classes.EventHandler.instances) do
 			local info = UIDropDownMenu_CreateInfo()
 
 			info.text = EventHandler.tabText
@@ -3766,10 +3775,7 @@ function EVENTS:AddEvent_Dropdown_OnClick(event, type)
 
 	EVENTS:LoadConfig()
 
-	local Module = EVENTS:GetEventHandlerForEventSettings(n)
-	if Module then
-		Module:LoadSettingsForEventID(n)
-	end
+	EVENTS:LoadEventID(n)
 
 	CloseDropDownMenus()
 end
@@ -3817,7 +3823,7 @@ function EVENTS:ChangeEvent_Dropdown_OnClick(eventButton, event)
 end
 
 function EVENTS:CreateEventButtons(globalDescKey)
-	local EventList = self.EventList
+	local EventHandlerFrames = self.EventHandlerFrames
 	local previousFrame
 
 	local yAdjustTitle, yAdjustText = 0, 0
@@ -3829,10 +3835,10 @@ function EVENTS:CreateEventButtons(globalDescKey)
 
 	for i, eventSettings in TMW:InNLengthTable(CI.ics.Events) do
 		local eventData = TMW.EventList[eventSettings.Event]
-		local frame = EventList[i]
+		local frame = EventHandlerFrames[i]
 		if not frame then
-			frame = CreateFrame("Button", EventList:GetName().."Event"..i, EventList, "TellMeWhen_Event", i)
-			EventList[i] = frame
+			frame = CreateFrame("Button", EventHandlerFrames:GetName().."Event"..i, EventHandlerFrames, "TellMeWhen_Event", i)
+			EventHandlerFrames[i] = frame
 			frame:SetPoint("TOPLEFT", previousFrame, "BOTTOMLEFT")
 			frame:SetPoint("TOPRIGHT", previousFrame, "BOTTOMRIGHT")
 
@@ -3864,16 +3870,16 @@ function EVENTS:CreateEventButtons(globalDescKey)
 		previousFrame = frame
 	end
 
-	for i = max(CI.ics.Events.n + 1, 1), #EventList do
-		EventList[i]:Hide()
+	for i = max(CI.ics.Events.n + 1, 1), #EventHandlerFrames do
+		EventHandlerFrames[i]:Hide()
 	end
 
-	if EventList[1] then
-		EventList[1]:SetPoint("TOPLEFT", EventList, "TOPLEFT", 0, 0)
-		EventList[1]:SetPoint("TOPRIGHT", EventList, "TOPRIGHT", 0, 0)
+	if EventHandlerFrames[1] then
+		EventHandlerFrames[1]:SetPoint("TOPLEFT", EventHandlerFrames, "TOPLEFT", 0, 0)
+		EventHandlerFrames[1]:SetPoint("TOPRIGHT", EventHandlerFrames, "TOPRIGHT", 0, 0)
 	end
 
-	EventList:SetHeight(max(CI.ics.Events.n*(EventList[1] and EventList[1]:GetHeight() or 0), 1))
+	EventHandlerFrames:SetHeight(max(CI.ics.Events.n*(EventHandlerFrames[1] and EventHandlerFrames[1]:GetHeight() or 0), 1))
 end
 
 function EVENTS:EnableAndDisableEvents()
@@ -3881,16 +3887,17 @@ function EVENTS:EnableAndDisableEvents()
 
 	self:BuildListOfValidEvents()
 	
-	for i, frame in ipairs(self.EventList) do
+	for i, frame in ipairs(self.EventHandlerFrames) do
 		if frame:IsShown() then
 			if self.ValidEvents[frame.event] then
 				TMW:TT(frame, frame.eventData.text, frame.normalDesc, 1, 1)
-				frame:Enable()
 				local Module = EVENTS:GetEventHandlerForEventSettings(i)
 				if Module then
+					frame:Enable()
 					Module:SetupEventDisplay(i)
 				else
-					frame.DataText:SetText("UNKNOWN TYPE: " .. tostring(EVENTS:GetEventSettings(i).Type))
+					frame:Disable()
+					frame.DataText:SetText("|cFFFF5050UNKNOWN TYPE:|r " .. tostring(EVENTS:GetEventSettings(i).Type))
 				end
 			else
 				frame:Disable()
@@ -3920,41 +3927,9 @@ function EVENTS:GetEventHandlerForEventSettings(arg1)
 	end
 end
 
-function EVENTS:ChooseEvent(id)
-	local eventFrame = self.EventList[id]
-
-	EVENTS.currentEventID = id ~= 0 and id or nil
-
-	for _, EventHandler in ipairs(EVENTS.instances) do
-		EventHandler.ConfigContainer:Hide()
-	end
-	local EventHandler = self:GetEventHandlerForEventSettings()
-	if EventHandler then
-		EventHandler.ConfigContainer:Show()
-		EVENTS.currentEventHandler = EventHandler
-	end
-
-	if not eventFrame or id == 0 or not eventFrame:IsShown() then
-		return
-	end
-
-	for i, frame in ipairs(self.EventList) do
-		frame.selected = nil
-		frame:UnlockHighlight()
-		frame:GetHighlightTexture():SetAlpha(0.1)
-	end
-	eventFrame.selected = 1
-	eventFrame:LockHighlight()
-	eventFrame:GetHighlightTexture():SetAlpha(0.2)
-
-	IE.Events.ScrollFrame.adjustmentQueued = true
-	
-	return eventFrame
-end
-
 function EVENTS:AdjustScrollFrame()
 	local ScrollFrame = IE.Events.ScrollFrame
-	local eventFrame = self.EventList[self.currentEventID]
+	local eventFrame = self.EventHandlerFrames[self.currentEventID]
 
 	if not eventFrame then return end
 
@@ -3967,8 +3942,8 @@ end
 
 function EVENTS:GetNumUsedEvents()
 	local n = 0
-	for i = 1, #self.EventList do
-		local f = self.EventList[i]
+	for i = 1, #self.EventHandlerFrames do
+		local f = self.EventHandlerFrames[i]
 		local Module = EVENTS:GetEventHandlerForEventSettings(i)
 		if Module then
 			local has = Module:ProcessIconEventSettings(f.event, self:GetEventSettings(i))
@@ -3983,49 +3958,115 @@ end
 
 function EVENTS:LoadConfig()
 	self:CreateEventButtons()
+	
+	local oldID = max(1, self.currentEventID or 1)
 
-	local oldID = self:EnableAndDisableEvents()
-
-	if oldID and oldID > 0 then
-		if CI.ics.Events.n ~= 0 then
-			-- make sure we dont get any NaN...
-			-- apparently blizzard decided to allow division by zero again,
-			-- but sometimes, you cant set an index of NaN (1%0) on a table in some clients.
-			-- I can in mine, so idk what the fuck is going on
-			-- t = ({[5%0] = 1})[400]	yields 1 (at any index, not just 400... what the hell?
-			-- See ticket 444 - lsjyzjl is getting "table index is NaN" from AceDB
-			oldID = oldID % CI.ics.Events.n
+	local didLoad
+	for i = 1, CI.ics.Events.n do
+		-- This wizard magic allows us to iterate over all eventIDs, 
+		-- starting with the currently selected one (oldID)
+		-- So, for example, if oldID == 3 and CI.ics.Events.n == 6,
+		-- eventID will be iterated as 3, 4, 5, 6, 1, 2
+		local eventID = ((i-2+oldID) % CI.ics.Events.n) + 1
+		local frame = self.EventHandlerFrames[eventID]
+		
+		-- Check if this eventID is valid, and load it if it is.
+		local isValid, reason = EVENTS:IsEventIDValid(eventID)
+		print(isValid, reason, eventID)
+		if isValid then
+			if not didLoad then
+				EVENTS:LoadEventID(eventID)
+				didLoad = true
+			end
+			
+			local EventHandler = EVENTS:GetEventHandlerForEventSettings(eventID)
+			EventHandler:SetupEventDisplay(i)
+			frame:Enable()
 		else
-			oldID = 0
+			frame:Disable()
+			
+			if reason == EVENTS.CONST.EVENT_INVALID_REASON_MISSINGHANDLER then
+				frame.DataText:SetText("|cFFFF5050UNKNOWN TYPE:|r " .. tostring(EVENTS:GetEventSettings(i).Type))
+			elseif reason == EVENTS.CONST.EVENT_INVALID_REASON_MISSINGCOMPONENT then
+				frame.DataText:SetText(L["SOUND_EVENT_DISABLEDFORTYPE"])
+				TMW:TT(frame, frame.eventData.text, L["SOUND_EVENT_DISABLEDFORTYPE_DESC2"]:format(Types[CI.ics.Type].name), 1, 1)
+			end
 		end
-		if oldID == 0 then
-			oldID = CI.ics.Events.n
+	end
+	
+	if not didLoad then
+		for _, EventHandler in ipairs(TMW.Classes.EventHandler.instances) do
+			EventHandler.ConfigContainer:Hide()
 		end
-	else
-		oldID = 1
+		self.EventSettingsContainer:Hide()
+		IE.Events.HelpText:Show()
 	end
 
-	if CI.ics.Events.n <= 0 then
-		self.EventSettings:Hide()
-	else
-		self.EventSettings:Show()
-	end
-
-	for _, EventHandler in ipairs(EVENTS.instances) do
-		EventHandler.ConfigContainer:Hide()
-	end
-	local EventHandler = self:GetEventHandlerForEventSettings(oldID)
-	if EventHandler then
-		EventHandler:LoadSettingsForEventID(oldID)
-	end
-
-	--[[if IE.Events.ScrollFrame:GetVerticalScrollRange() == 0 then
-		IE.Events.ScrollFrame.ScrollBar:Hide()
-	end]]
 
 	self:SetTabText()
 end
 TMW:RegisterCallback("TMW_CONFIG_ICON_LOADED", "LoadConfig", EVENTS)
+
+
+
+function EVENTS:IsEventIDValid(id)
+	self:BuildListOfValidEvents()
+	
+	local EventSettings = EVENTS:GetEventSettings(id)
+	
+	if self.ValidEvents[EventSettings.Event] then
+		local Module = EVENTS:GetEventHandlerForEventSettings(EventSettings)
+		if Module then
+			-- This event is valid and can be loaded
+			return true, 0
+		else
+			-- The event handler could not be found
+			return false, EVENTS.CONST.EVENT_INVALID_REASON_MISSINGHANDLER
+		end
+	else
+		-- The event is not valid for the current icon configuration
+		return false, EVENTS.CONST.EVENT_INVALID_REASON_MISSINGCOMPONENT
+	end
+
+end
+
+function EVENTS:LoadEventID(id)
+	local eventFrame = self.EventHandlerFrames[id]
+	
+	EVENTS.currentEventID = id ~= 0 and id or nil
+
+	for _, EventHandler in ipairs(TMW.Classes.EventHandler.instances) do
+		EventHandler.ConfigContainer:Hide()
+	end
+	IE.Events.HelpText:Show()
+	
+	local EventHandler = self:GetEventHandlerForEventSettings(id)
+	if EventHandler then
+		EventHandler.ConfigContainer:Show()
+		IE.Events.HelpText:Hide()
+		
+		EVENTS.currentEventHandler = EventHandler
+		
+		EventHandler:LoadSettingsForEventID(id)
+		EVENTS:SetupEventSettings()
+	end
+
+	IE.Events.ScrollFrame.adjustmentQueued = true
+
+	if not eventFrame or id == 0 or not eventFrame:IsShown() then
+		return
+	end
+
+	for i, frame in ipairs(self.EventHandlerFrames) do
+		frame.selected = nil
+		frame:UnlockHighlight()
+		frame:GetHighlightTexture():SetAlpha(0.1)
+	end
+	eventFrame.selected = 1
+	eventFrame:LockHighlight()
+	eventFrame:GetHighlightTexture():SetAlpha(0.2)
+	
+end
 
 function EVENTS:SetTabText()
 	local n = self:GetNumUsedEvents()
@@ -4050,8 +4091,8 @@ function EVENTS:TestEvent(eventID)
 end
 
 TMW:RegisterCallback("TMW_OPTIONS_LOADED", function()
-	EVENTS.EventList = IE.Events.EventList
-	EVENTS.EventSettings = IE.Events.EventSettings
+	EVENTS.EventHandlerFrames = IE.Events.EventHandlerFrames
+	EVENTS.EventSettingsContainer = IE.Events.EventSettingsContainer
 end)
 
 function EVENTS:BuildListOfValidEvents()

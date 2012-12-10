@@ -29,7 +29,7 @@ local UnitName, UnitClass =
 local _, pclass = UnitClass("Player")
 local pname = UnitName("player")
 
-local DogTag = LibStub("LibDogTag-3.0", true)
+local DogTag = LibStub("LibDogTag-3.0")
 
 
 local NAMES = TMW:NewModule("Names", "AceEvent-3.0")

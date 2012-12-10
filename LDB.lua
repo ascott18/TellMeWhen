@@ -41,7 +41,7 @@ dataobj.OnClick = function(self, button)
 end
 
 dataobj.OnTooltipShow = function(tt)
-	tt:AddLine(L["ICON_TOOLTIP1"])
+	tt:AddLine("TellMeWhen")
 	tt:AddLine(L["LDB_TOOLTIP1"])
 	tt:AddLine(L["LDB_TOOLTIP2"])
 end
