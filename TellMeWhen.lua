@@ -28,7 +28,7 @@ TMW.L = L
 TELLMEWHEN_VERSION = "6.1.2"
 TELLMEWHEN_VERSION_MINOR = strmatch(" @project-version@", " r%d+") or ""
 TELLMEWHEN_VERSION_FULL = TELLMEWHEN_VERSION .. TELLMEWHEN_VERSION_MINOR
-TELLMEWHEN_VERSIONNUMBER = 61213 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
+TELLMEWHEN_VERSIONNUMBER = 61214 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
 if TELLMEWHEN_VERSIONNUMBER > 62000 or TELLMEWHEN_VERSIONNUMBER < 61000 then return error("YOU SCREWED UP THE VERSION NUMBER OR DIDNT CHANGE THE SAFETY LIMITS") end -- safety check because i accidentally made the version number 414069 once
 
 TELLMEWHEN_MAXROWS = 20
@@ -3572,12 +3572,25 @@ end
 
 function Group.Update(group)
 	local ConditionObject = group.ConditionObject
-	local ShouldUpdateIcons = group:ShouldUpdateIcons()
-	if (ConditionObject and ConditionObject.Failed) or (not ShouldUpdateIcons) then
-		group:Hide()
-	elseif ShouldUpdateIcons then
-		group:Show()
+	
+	local allConditionsPassed = true
+	if ConditionObject and ConditionObject.Failed then
+		allConditionsPassed = false
+	elseif Locked and group.OnlyInCombat and not UnitAffectingCombat("player") then
+		allConditionsPassed = false
+	elseif not group:ShouldUpdateIcons() then
+		allConditionsPassed = false
 	end
+	
+	if allConditionsPassed then
+		group:Show()
+	else
+		group:Hide()
+	end
+end
+
+function Group.OnEvent(group, event)
+	group:Update()
 end
 
 function Group.TMW_CNDT_OBJ_PASSING_CHANGED(group, event, ConditionObject, failed)
@@ -3649,12 +3662,7 @@ function Group.Setup_Conditions(group)
 		-- Get a constructor to make the ConditionObject
 		local ConditionObjectConstructor = group:Conditions_GetConstructor(group.Conditions)
 		
-		-- If the group is set to only show in combat, add a condition to handle it.
-		if group.OnlyInCombat then
-			local combatCondition = ConditionObjectConstructor:Modify_WrapExistingAndAppendNew()
-			combatCondition.Type = "COMBAT"
-		end
-		-- Modifications are done. Construct the ConditionObject
+		-- Construct the ConditionObject
 		group.ConditionObject = ConditionObjectConstructor:Construct()
 		
 		if group.ConditionObject then
@@ -3739,6 +3747,14 @@ function Group.Setup(group)
 	group:SortIcons()
 
 	group:Setup_Conditions()
+	
+	if group.OnlyInCombat then
+		group:RegisterEvent("PLAYER_REGEN_ENABLED")
+		group:RegisterEvent("PLAYER_REGEN_DISABLED")
+		group:SetScript("OnEvent", group.OnEvent)
+	else
+		group:SetScript("OnEvent", nil)
+	end
 
 	group:Update()
 	

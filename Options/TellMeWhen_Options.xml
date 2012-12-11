@@ -760,9 +760,9 @@
 						self:SetAllPoints(self.parent.text)
 					</OnLoad>
 					<OnEnter>
-						--if self.parent.LockHighlight then
-							self.parent:LockHighlight()
-						--end
+						if not self.parent:IsEnabled() then return end
+						
+						self.parent:LockHighlight()
 						
 						local OnEnter = self.parent:GetScript("OnEnter")
 						if OnEnter then
@@ -770,9 +770,7 @@
 						end
 					</OnEnter>
 					<OnLeave>
-						--if self.parent.UnlockHighlight then
-							self.parent:UnlockHighlight()
-						--end
+						self.parent:UnlockHighlight()
 						
 						local OnLeave = self.parent:GetScript("OnLeave")
 						if OnLeave then
@@ -780,6 +778,8 @@
 						end
 					</OnLeave>
 					<OnClick>
+						if not self.parent:IsEnabled() then return end
+						
 						self.parent:Click(button)
 					</OnClick>
 				</Scripts>
@@ -2269,7 +2269,7 @@
 			</Frame>
 		
 			
-			<Frame name="$parentMainOptions" enableMouse="true" hidden="true" setAllPoints="true" parentKey="MainOptions" >
+			<Frame name="$parentMainOptions" hidden="true" setAllPoints="true" parentKey="MainOptions" >
 				<Frames>
 					<Frame parentKey="content">
 						<Anchors>
@@ -2280,7 +2280,6 @@
 				</Frames>
 				<Scripts>
 					<OnLoad>
-						self:RegisterForDrag("LeftButton")
 						self:SetScale(0.75)
 
 						local AceGUI = LibStub("AceGUI-3.0", true)
@@ -2342,8 +2341,6 @@
 
 						TMW.IE.MainOptionsWidget:ReleaseChildren() -- safer
 					</OnHide>
-					<OnDragStart> TMW.IE:StartMoving() </OnDragStart>
-					<OnDragStop> TMW.IE:StopMovingOrSizing() </OnDragStop>
 				</Scripts>
 			</Frame>
 
@@ -2573,10 +2570,10 @@
 				self.Help:SetHeight(self.Help.text:GetHeight() + 38)
 			</OnSizeChanged>
 			<OnDragStart>
-				self:StartMoving()
+				TMW.IE:StartMoving()
 			</OnDragStart>
 			<OnDragStop>
-				self:StopMovingOrSizing()
+				TMW.IE:StopMovingOrSizing()
 			</OnDragStop>
 		</Scripts>
 	</Frame>

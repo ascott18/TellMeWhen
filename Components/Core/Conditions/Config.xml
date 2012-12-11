@@ -748,18 +748,6 @@
 			</Frame>
 
 		</Frames>
-		<Scripts>
-			<OnLoad>
-				self:RegisterForDrag("LeftButton")
-				self:Hide()
-			</OnLoad>
-			<OnDragStart>
-				TMW.IE:StartMoving()
-			</OnDragStart>
-			<OnDragStop>
-				TMW.IE:StopMovingOrSizing()
-			</OnDragStop>
-		</Scripts>
 	</Frame>
 
 </Ui>

@@ -1962,6 +1962,19 @@ function IE:OnUpdate()
 		self.BackButton:Show()
 		self.ForwardsButton:Show()
 	end
+	
+	
+	if IE.isMoving then
+		local cursorCurrentX, cursorCurrentY = GetCursorPosition()
+		local deltaX, deltaY = IE.cursorStartX - cursorCurrentX, IE.cursorStartY - cursorCurrentY
+		
+		local scale = IE:GetEffectiveScale()
+		deltaX, deltaY = deltaX/scale, deltaY/scale
+		
+		local a, b, c = IE:GetPoint()
+		IE:ClearAllPoints()
+		IE:SetPoint(a, b, c, IE.startX - deltaX, IE.startY - deltaY)
+	end
 end
 
 function IE:TMW_ONUPDATE_POST(...)
@@ -2012,6 +2025,17 @@ function IE:RegisterTab(tab, attachedFrame)
 	IE.Tabs[id] = tab
 	tab:SetID(id)
 	tab.attachedFrame = attachedFrame
+end
+
+function IE:StartMoving()
+	print(debugstack())
+	IE.startX, IE.startY = select(4, IE:GetPoint())
+	IE.cursorStartX, IE.cursorStartY = GetCursorPosition()
+	IE.isMoving = true
+end
+
+function IE:StopMovingOrSizing()
+	IE.isMoving = false
 end
 
 ---------- Interface ----------
