@@ -36,7 +36,7 @@
 		</Layers>
 		<Scripts>
 			<OnLoad>
-				if not TMW then
+				if not _G.TellMeWhen then
 					local AceLocale = LibStub("AceLocale-3.0", true)
 					local msg
 					if AceLocale then

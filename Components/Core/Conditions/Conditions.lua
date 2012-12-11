@@ -942,7 +942,6 @@ function ConditionObject:OnNewInstance(Conditions, conditionString)
 	end
 	
 	self:CompileUpdateFunction(Conditions)
-	
 	self:Check()
 end
 

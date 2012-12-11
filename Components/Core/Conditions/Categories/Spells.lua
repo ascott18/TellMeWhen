@@ -46,6 +46,7 @@ function Env.CooldownDuration(spell)
 	return 0
 end
 
+local GetSpellCharges = GetSpellCharges
 function Env.RechargeDuration(spell)
 	local charges, maxCharges, start, duration = GetSpellCharges(spell)
 	if charges and charges ~= maxCharges then
@@ -146,6 +147,9 @@ ConditionCategory:RegisterCondition(2.6, "SPELLCHARGETIME", {
 	texttable = setmetatable({[0] = CNDT.COMMON.formatSeconds(0).." ("..L["SPELLCHARGES_FULLYCHARGED"]..")"}, {__index = CNDT.COMMON.formatSeconds}),
 	icon = "Interface\\Icons\\ability_warlock_handofguldan",
 	tcoords = CNDT.COMMON.standardtcoords,
+	Env = {
+		GetSpellCharges = GetSpellCharges,
+	},
 	funcstr = [[RechargeDuration(c.NameFirst) c.Operator c.Level]],
 	events = function(ConditionObject, c)
 		return

@@ -3550,6 +3550,12 @@ end
 TMW.EVENTS = {}
 local EVENTS = TMW.EVENTS
 
+function TMW.Classes.EventHandler:TestEvent(eventID)
+	local eventSettings = EVENTS:GetEventSettings(eventID)
+
+	self:HandleEvent(CI.ic, eventSettings)
+end
+
 EVENTS.CONST = {
 	EVENT_INVALID_REASON_MISSINGHANDLER = 1,
 	EVENT_INVALID_REASON_MISSINGCOMPONENT = 2,
@@ -3972,7 +3978,7 @@ function EVENTS:LoadConfig()
 		
 		-- Check if this eventID is valid, and load it if it is.
 		local isValid, reason = EVENTS:IsEventIDValid(eventID)
-		print(isValid, reason, eventID)
+		
 		if isValid then
 			if not didLoad then
 				EVENTS:LoadEventID(eventID)
@@ -4082,12 +4088,6 @@ end
 function EVENTS:GetEventSettings(eventID)
 
 	return CI.ics.Events[eventID or EVENTS.currentEventID]
-end
-
-function EVENTS:TestEvent(eventID)
-	local eventSettings = self:GetEventSettings(eventID)
-
-	self:HandleEvent(CI.ic, eventSettings)
 end
 
 TMW:RegisterCallback("TMW_OPTIONS_LOADED", function()
