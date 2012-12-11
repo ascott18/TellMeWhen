@@ -1,9 +1,10 @@
 ﻿<Ui>
 
 	<Frame name="TellMeWhen_MetaGroup" virtual="true">
-		<Size y="29"/>
+		<Size y="30"/>
 		<Frames>
 			<Frame name="$parentIcon" parentKey="icon" inherits="TMW_IconDropDownMenuTemplate">
+				<Size y="30"/>
 				<Anchors>
 					<Anchor point="LEFT" x="13"/>
 				</Anchors>
@@ -31,7 +32,21 @@
 					<OnUpdate>						
 						if self:IsMouseOver() and TMW.ME.draggingFrame and self ~= TMW.ME.draggingFrame then
 							if TMW.ME.draggingButton == "LeftButton" then
-								TMW.ME:SwapIcons(self:GetParent():GetID(), TMW.ME.draggingFrame:GetParent():GetID())
+								local sourceID = TMW.ME.draggingFrame:GetParent():GetID()
+								local destID = self:GetParent():GetID()
+								local delta = abs(sourceID - destID)
+								
+								if sourceID > destID then
+									print(destID, sourceID - 1)
+									for i = destID, sourceID - 1, 1 do
+										print("i", i)
+										TMW.ME:SwapIcons(i, i + 1)
+									end
+								else
+									for i = sourceID, destID - 1, 1 do
+										TMW.ME:SwapIcons(i, i + 1)
+									end
+								end
 								
 								TMW.ME.draggingFrame = self
 								
