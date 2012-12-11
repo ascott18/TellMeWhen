@@ -28,7 +28,7 @@ TMW.L = L
 TELLMEWHEN_VERSION = "6.1.2"
 TELLMEWHEN_VERSION_MINOR = strmatch(" @project-version@", " r%d+") or ""
 TELLMEWHEN_VERSION_FULL = TELLMEWHEN_VERSION .. TELLMEWHEN_VERSION_MINOR
-TELLMEWHEN_VERSIONNUMBER = 61214 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
+TELLMEWHEN_VERSIONNUMBER = 61215 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
 if TELLMEWHEN_VERSIONNUMBER > 62000 or TELLMEWHEN_VERSIONNUMBER < 61000 then return error("YOU SCREWED UP THE VERSION NUMBER OR DIDNT CHANGE THE SAFETY LIMITS") end -- safety check because i accidentally made the version number 414069 once
 
 TELLMEWHEN_MAXROWS = 20
@@ -3037,14 +3037,23 @@ function TMW.OnGCD(d)
 	end
 end
 
-function TMW.SpellHasNoMana(spell)
-    local _, _, _, cost, _, powerType = GetSpellInfo(spell)
-    if powerType then
-        local power = UnitPower("player", powerType)
-        if power < cost then
-			return 1
+do
+	local jab = GetSpellInfo(100780)
+	function TMW.SpellHasNoMana(spell)
+		local name, _, _, cost, _, powerType = GetSpellInfo(spell)
+		
+		if name == jab then
+			-- Jab is broken and doesnt report having a cost while in tiger stance 
+			-- (and maybe other stances) (see ticket #730)
+			local _, nomana = IsUsableSpell(spell)
+			return nomana
+		elseif powerType then
+			local power = UnitPower("player", powerType)
+			if power < cost then
+				return 1
+			end
 		end
-    end
+	end
 end
 
 function TMW:PLAYER_ENTERING_WORLD()
