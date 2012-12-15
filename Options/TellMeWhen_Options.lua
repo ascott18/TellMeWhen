@@ -3669,9 +3669,7 @@ function EVENTS:SetupEventSettings()
 end
 
 function EVENTS:OperatorMenu_DropDown()
-	-- self is not Module
-	local Module = TMW.EVENTS.currentEventHandler
-	local eventData = Module.EventHandlerFrames[EVENTS.currentEventID].eventData
+	local eventData = EVENTS.EventHandlerFrames[EVENTS.currentEventID].eventData
 
 	for k, v in pairs(operators) do
 		if not eventData.blacklistedOperators or not eventData.blacklistedOperators[v.value] then
@@ -3687,13 +3685,10 @@ function EVENTS:OperatorMenu_DropDown()
 	end
 end
 function EVENTS:OperatorMenu_DropDown_OnClick(frame)
-	local dropdown = self
-	local self = TMW.EVENTS.currentEventHandler
+	TMW:SetUIDropdownText(frame, self.value)
 
-	TMW:SetUIDropdownText(frame, dropdown.value)
-
-	self:GetEventSettings().Operator = dropdown.value
-	TMW:TT(frame, dropdown.tooltipTitle, nil, 1)
+	EVENTS.currentEventHandler:GetEventSettings().Operator = self.value
+	TMW:TT(frame, self.tooltipTitle, nil, 1)
 end
 
 function EVENTS:IconMenu_DropDown()
@@ -3738,15 +3733,12 @@ function EVENTS:IconMenu_DropDown()
 	end
 end
 function EVENTS:IconMenu_DropDown_OnClick(frame)
-	local dropdown = self
-	local self = TMW.EVENTS.currentEventHandler
-
-	TMW:SetUIDropdownText(frame, dropdown.value, TMW.InIcons)
+	TMW:SetUIDropdownText(frame, self.value, TMW.InIcons)
 	CloseDropDownMenus()
 
-	frame.IconPreview:SetIcon(_G[dropdown.value])
+	frame.IconPreview:SetIcon(_G[self.value])
 
-	self:GetEventSettings().Icon = dropdown.value
+	EVENTS.currentEventHandler:GetEventSettings().Icon = self.value
 end
 
 function EVENTS:AddEvent_Dropdown()

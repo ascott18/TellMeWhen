@@ -51,7 +51,7 @@ function AuraCache:GetCache()
 	if not Cache then
 		error("AuraCache is not yet initialized", 2)
 	elseif not OptionsAreLoaded then
-		error("AuraCache is only designed to work when TMW_Options is loaded.", 2)
+		error("AuraCache is only designed to work when TMW_Options is loaded (or AuraCache did not initialize properly).", 2)
 	end
 	
 	return Cache

@@ -1605,12 +1605,11 @@
 		<Size x="26" y="26"/>
 		<Scripts>
 			<OnClick>
-				local parentModule = TMW.EVENTS.currentEventHandler
 				if TMW.CI.ics then
-					parentModule:GetEventSettings()[self.setting] = not not self:GetChecked()
+					TMW.EVENTS:GetEventSettings()[self.setting] = not not self:GetChecked()
 					TMW.IE:ScheduleIconSetup()
 				end
-				parentModule:SetupEventSettings()
+				TMW.EVENTS:SetupEventSettings()
 			</OnClick>
 		</Scripts>
 	</CheckButton>
@@ -2169,8 +2168,7 @@
 										self:SetText(t)
 
 										if TMW.CI.ics then
-											local parentModule = TMW.EVENTS.currentEventHandler
-											parentModule:GetEventSettings().Value = t
+											TMW.EVENTS:GetEventSettings().Value = t
 											TMW.IE:ScheduleIconSetup()
 										end
 
