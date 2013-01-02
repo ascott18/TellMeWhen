@@ -397,6 +397,8 @@ L["RUNES"] = "Rune(s) to check"
 L["ICONMENU_SHOWTTTEXT"] = "Show variable text"
 L["ICONMENU_SHOWTTTEXT_DESC"] = [[Check this to display the first variable associated with the aura that is being displayed. Practical uses include monitoring damage shield amounts.
 
+This value will be reported and shown in place of the icon's stack count.
+
 Numbers are provided by Blizzard API and do not necessarily match numbers found on the tooltip of the aura. In most practical cases, though, the correct number will be shown.]]
 L["ICONMENU_RANGECHECK"] = "Range check"
 L["ICONMENU_RANGECHECK_DESC"] = "Check this to enable changing the color of the icon when you are out of range."
@@ -463,7 +465,7 @@ L["METAPANEL_DOWN"] = "Move down" -- unused by meta icons; still used by conditi
 L["METAPANEL_REMOVE"] = "Remove icon"
 L["METAPANEL_REMOVE_DESC"] = "Click to remove this icon from the list that the meta icon will check."
 L["META_ADDICON"] = "Add Icon"
-L["META_ADDICON_DESC"] = "Click to add another icon to include in the meta icon."
+L["META_ADDICON_DESC"] = "Click to add another icon to include in this meta icon."
 L["META_GROUP_INVALID_VIEW_DIFFERENT"] = [[Icons in this group may not be checked by this meta icon because they use different display methods.
 
 This group: %s
@@ -1183,6 +1185,7 @@ L["UNITCONDITIONS_STATICUNIT_TARGET_DESC"] = "Causes the condition to check the 
 L["MAIN"] = "Main"
 L["MAIN_DESC"] = "Contains the main options for this icon."
 L["UNNAMED"] = "((Unnamed))"
+L["NOTYPE"] = "<No Icon Type>"
 
 
 L["MISCELLANEOUS"] = "Miscellaneous"

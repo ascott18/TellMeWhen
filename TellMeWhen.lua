@@ -28,7 +28,7 @@ TMW.L = L
 TELLMEWHEN_VERSION = "6.1.2"
 TELLMEWHEN_VERSION_MINOR = strmatch(" @project-version@", " r%d+") or ""
 TELLMEWHEN_VERSION_FULL = TELLMEWHEN_VERSION .. TELLMEWHEN_VERSION_MINOR
-TELLMEWHEN_VERSIONNUMBER = 61216 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
+TELLMEWHEN_VERSIONNUMBER = 61217 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
 if TELLMEWHEN_VERSIONNUMBER > 62000 or TELLMEWHEN_VERSIONNUMBER < 61000 then return error("YOU SCREWED UP THE VERSION NUMBER OR DIDNT CHANGE THE SAFETY LIMITS") end -- safety check because i accidentally made the version number 414069 once
 
 TELLMEWHEN_MAXROWS = 20
@@ -1772,6 +1772,8 @@ function TMW:Initialize()
 	
 	-- Channel TMWV is used for version notifications.
 	TMW:RegisterComm("TMWV")
+	
+	TMW.InitializedFully = true
 end
 
 function TMW:InitializeDatabase()
@@ -1921,6 +1923,7 @@ function TMW:OnUpdate()					-- THE MAGICAL ENGINE OF DOING EVERYTHING
 	TMW:Fire("TMW_ONUPDATE_PRE", time, Locked)
 	
 	if LastUpdate <= time - UPD_INTV then
+		LastUpdate = time
 		_, GCD=GetSpellCooldown(GCDSpell)
 		TMW.GCD = GCD
 
@@ -1958,10 +1961,6 @@ function TMW:OnUpdate()					-- THE MAGICAL ENGINE OF DOING EVERYTHING
 		end
 
 		TMW:Fire("TMW_ONUPDATE_TIMECONSTRAINED_POST", time, Locked)
-		
-		-- It matters that this is at the end. If the update doesn't finish, we should not update this value,
-		-- because we want it to try again on the next update cycle
-		LastUpdate = time
 	end
 
 	updateInProgress = nil
@@ -1971,6 +1970,10 @@ end
 
 function TMW:UpdateNormally()
 	TMW:Initialize()
+	
+	if not TMW.InitializedFully then
+		return
+	end
 	
 	if not TMW:CheckCanDoLockedAction() then
 		return
@@ -2099,12 +2102,12 @@ function TMW:UpdateViaCoroutine()
 end
 
 TMW:RegisterEvent("PLAYER_REGEN_ENABLED", function()
-	if TMW.ISMOP and TMW.Initialized then
+	if TMW.ISMOP and TMW.InitializedFully then
 		TMW.Update = TMW.UpdateNormally
 	end
 end)
 TMW:RegisterEvent("PLAYER_REGEN_DISABLED", function()
-	if TMW.ISMOP and TMW.Initialized then
+	if TMW.ISMOP and TMW.InitializedFully then
 		if TMW.ALLOW_LOCKDOWN_CONFIG then
 			TMW.Update = TMW.UpdateViaCoroutine
 		elseif not TMW.Locked then
@@ -2966,7 +2969,7 @@ function TMW:LoadOptions(recursed)
 	if IsAddOnLoaded("TellMeWhen_Options") then
 		return true
 	end
-	if not TMW.Initialized then
+	if not TMW.InitializedFully then
 		TMW:Print(L["ERROR_NOTINITIALIZED_NO_LOAD"])
 		return 
 	end
@@ -3350,7 +3353,7 @@ end
 function EventHandler:RegisterEventDefaults(defaults)
 	assert(type(defaults) == "table", "arg1 to RegisterGroupDefaults must be a table")
 	
-	if TMW.Initialized then
+	if TMW.InitializedDatabase then
 		error(("Defaults for EventHandler %q are being registered too late. They need to be registered before the database is initialized."):format(self.name or "<??>"))
 	end
 	
@@ -4023,6 +4026,8 @@ function Icon.Update(icon, force, ...)
 	local attributes = icon.attributes
 	
 	if attributes.shown and (force or icon.LastUpdate <= time - UPD_INTV) then
+		icon.LastUpdate = time
+		
 		local Update_Method = icon.Update_Method
 
 		local ConditionObject = icon.ConditionObject
@@ -4042,10 +4047,6 @@ function Icon.Update(icon, force, ...)
 				icon:ScheduleNextUpdate()
 			end
 		end
-		
-		-- It matters that this is at the end. If the update doesn't finish, we should not update this value,
-		-- because we want it to try again on the next update cycle
-		icon.LastUpdate = time
 	end
 end
 
@@ -4365,7 +4366,7 @@ TMW.IconAlphaManager = {
 function TMW:RegisterDatabaseDefaults(defaults)
 	assert(type(defaults) == "table", "arg1 to RegisterProfileDefaults must be a table")
 	
-	if TMW.Initialized then
+	if TMW.InitializedDatabase then
 		error("Defaults are being registered too late. They need to be registered before the database is initialized.", 2)
 	end
 		
@@ -4513,7 +4514,7 @@ TMW:NewClass("IconComponent", "GenericComponent"){
 	RegisterIconDefaults = function(self, defaults)
 		assert(type(defaults) == "table", "arg1 to RegisterIconDefaults must be a table")
 		
-		if not TMW.Initialized then
+		if not TMW.InitializedDatabase then
 			-- Copy the defaults into the main defaults table.
 			TMW:MergeDefaultsTables(defaults, TMW.Icon_Defaults)
 		else
@@ -4562,7 +4563,7 @@ TMW:NewClass("GroupComponent", "GenericComponent"){
 	RegisterGroupDefaults = function(self, defaults)
 		assert(type(defaults) == "table", "arg1 to RegisterGroupDefaults must be a table")
 		
-		if TMW.Initialized then
+		if TMW.InitializedDatabase then
 			error(("Defaults for component %q are being registered too late. They need to be registered before the database is initialized."):format(self.name or "<??>"))
 		end
 		
@@ -5950,7 +5951,7 @@ function TMW:LockToggle()
 end
 
 function TMW:SlashCommand(str)
-	if not TMW.Initialized then
+	if not TMW.InitializedFully then
 		TMW:Print(L["ERROR_NOTINITIALIZED_NO_ACTION"])
 		return
 	end

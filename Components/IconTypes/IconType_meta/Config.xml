@@ -37,9 +37,7 @@
 								local delta = abs(sourceID - destID)
 								
 								if sourceID > destID then
-									print(destID, sourceID - 1)
 									for i = destID, sourceID - 1, 1 do
-										print("i", i)
 										TMW.ME:SwapIcons(i, i + 1)
 									end
 								else

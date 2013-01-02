@@ -11,6 +11,7 @@
  ** Fixed [string "ConditionEvents_SPELLCHARGETIME"] line 3: attempt to call global 'GetSpellCharges' (a nil value)
  ** The group Only show in combat setting is now handled by the group's event handlers to prevent Script ran too long errors (hopefully).
  ** Invented a new method for moving the Icon Editor so that it won't jump around all over the place anymore.
+ ** Fixed an issue with DetectFrame for GroupModule_GroupPosition(Thanks to ChairmanKaga, ticket #740).
  
 ===v6.1.1===
  * Added a new text output handler for the Instance channel, and updated existing chat output methods for this channel.

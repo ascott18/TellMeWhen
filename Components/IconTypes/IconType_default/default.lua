@@ -82,4 +82,8 @@ function Type:DragReceived(icon, t, data, subType)
 	return true -- signal success
 end
 
+function Type:GetIconMenuText(data)
+	return L["NOTYPE"], ""
+end
+
 Type:Register(1)

@@ -696,7 +696,6 @@ local anchorSet = {
 					if #IconModule.instances > 0 then
 						for identifier, localizedName in pairs(IconModule.anchorableChildren) do
 							if type(localizedName) == "string" then
-								--print(IconModule, v, a, localizedName)
 								t[IconModule.className .. identifier] = localizedName
 							end
 						end

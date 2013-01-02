@@ -57,10 +57,8 @@ TMW:NewClass("GroupModule_GroupPosition", "GroupModule"){
 		TMW:UnregisterCallback("TMW_ONUPDATE_TIMECONSTRAINED_PRE", "DetectFrame", self)
 	end,
 
-	DetectFrame = function(self, event, time, Locked)
-		local group = self.group
-		
-		local frameToFind = group.frameToFind
+	DetectFrame = function(self, event, time, Locked)		
+		local frameToFind = self.frameToFind
 		
 		if _G[frameToFind] then
 			self:SetPos()

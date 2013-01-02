@@ -62,7 +62,7 @@ TMW.Condition_Defaults = {
 }
 setmetatable(TMW.Condition_Defaults["**"], {
 	__newindex = function(self, k, v)
-		if TMW.Initialized then
+		if TMW.InitializedDatabase then
 			error("New condition defaults cannot be added after the database has already been initialized", 2)
 		end
 		TMW:Fire("TMW_CNDT_DEFAULTS_NEWVAL", k, v)
@@ -73,7 +73,7 @@ setmetatable(TMW.Condition_Defaults["**"], {
 function CNDT:RegisterConditionDefaults(self, defaults)
 	assert(type(defaults) == "table", "arg1 to RegisterGroupDefaults must be a table")
 	
-	if TMW.Initialized then
+	if TMW.InitializedDatabase then
 		error(("Defaults for conditions are being registered too late. They need to be registered before the database is initialized."):format(self.name or "<??>"))
 	end
 	
@@ -1555,7 +1555,7 @@ function CNDT:RegisterConditionSet(identifier, conditionSetData)
 		error(("A condition set is already registered with the identifier %q"):format(identifier), 2)
 	end
 	
-	if TMW.Initialized then
+	if TMW.InitializedDatabase then
 		error(("ConditionSet %q is being registered too late. It needs to be registered before the database is initialized."):format(self.name or "<??>"))
 	end
 	
