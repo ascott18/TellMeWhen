@@ -113,9 +113,6 @@
 				</Layers>
 				<Scripts>
 					<OnSizeChanged>
-						if TMW.CI.ics then
-						--	TMW.SND:SelectSound(TMW.EVENTS:GetEventSettings().Sound)
-						end
 						TMW.SND:SetSoundsOffset(TMW.SND.offs)
 					</OnSizeChanged>
 				</Scripts>

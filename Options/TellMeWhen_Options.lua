@@ -3689,7 +3689,7 @@ end
 function EVENTS:OperatorMenu_DropDown_OnClick(frame)
 	TMW:SetUIDropdownText(frame, self.value)
 
-	EVENTS.currentEventHandler:GetEventSettings().Operator = self.value
+	EVENTS:GetEventSettings().Operator = self.value
 	TMW:TT(frame, self.tooltipTitle, nil, 1)
 end
 
@@ -3740,7 +3740,7 @@ function EVENTS:IconMenu_DropDown_OnClick(frame)
 
 	frame.IconPreview:SetIcon(_G[self.value])
 
-	EVENTS.currentEventHandler:GetEventSettings().Icon = self.value
+	EVENTS:GetEventSettings().Icon = self.value
 end
 
 function EVENTS:AddEvent_Dropdown()

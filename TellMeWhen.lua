@@ -28,7 +28,7 @@ TMW.L = L
 TELLMEWHEN_VERSION = "6.1.2"
 TELLMEWHEN_VERSION_MINOR = strmatch(" @project-version@", " r%d+") or ""
 TELLMEWHEN_VERSION_FULL = TELLMEWHEN_VERSION .. TELLMEWHEN_VERSION_MINOR
-TELLMEWHEN_VERSIONNUMBER = 61217 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
+TELLMEWHEN_VERSIONNUMBER = 61218 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
 if TELLMEWHEN_VERSIONNUMBER > 62000 or TELLMEWHEN_VERSIONNUMBER < 61000 then return error("YOU SCREWED UP THE VERSION NUMBER OR DIDNT CHANGE THE SAFETY LIMITS") end -- safety check because i accidentally made the version number 414069 once
 
 TELLMEWHEN_MAXROWS = 20
@@ -4067,7 +4067,7 @@ function Icon.ProcessQueuedEvents(icon)
 			-- settings to check for in EventsToFire
 			local EventSettingsFromIconSettings = icon.Events[i]
 			local event = EventSettingsFromIconSettings.Event
-
+			
 			local EventSettings
 			if EventsToFire[EventSettingsFromIconSettings] or EventsToFire[event] then
 				-- we should process EventSettingsFromIconSettings
@@ -4081,15 +4081,17 @@ function Icon.ProcessQueuedEvents(icon)
 
 				elseif EventSettings.PassingCndt then
 					local conditionChecker = eventData.conditionChecker
-					local conditionResult
+					local conditionResult = true
+					
 					if conditionChecker then
 						conditionResult = conditionChecker(icon, EventSettings)
-					end
-					if EventSettings.CndtJustPassed then
-						if conditionResult ~= EventSettings.wasPassingCondition then
-							EventSettings.wasPassingCondition = conditionResult
-						else
-							conditionResult = false
+						
+						if EventSettings.CndtJustPassed then
+							if conditionResult ~= EventSettings.wasPassingCondition then
+								EventSettings.wasPassingCondition = conditionResult
+							else
+								conditionResult = false
+							end
 						end
 					end
 					shouldProcess = conditionResult
