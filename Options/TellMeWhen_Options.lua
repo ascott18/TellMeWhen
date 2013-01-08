@@ -1828,6 +1828,8 @@ IE.Tabs = {}
 
 IE.CONST = {
 	TAB_OFFS_X = -18,
+	IE_HEIGHT_MIN = 400,
+	IE_HEIGHT_MAX = 1200,
 }
 
 function IE:OnInitialize()
@@ -1922,8 +1924,8 @@ function IE:OnInitialize()
 			-- Calculate new width
 			local std_newFrameHeight = abs(std_cursorY - self.std_oldTop)
 			local newHeight = std_newFrameHeight/parent:GetEffectiveScale()
-			newHeight = max(400, newHeight)
-			newHeight = min(1200, newHeight)
+			newHeight = max(IE.CONST.IE_HEIGHT_MIN, newHeight)
+			newHeight = min(IE.CONST.IE_HEIGHT_MAX, newHeight)
 			
 			parent:SetHeight(newHeight)
 			TMW.db.global.EditorHeight = newHeight
@@ -2215,6 +2217,12 @@ function IE:Load(isRefresh, icon, isHistoryChange)
 	CI.ic:Setup()
 	
 	IE.ExportBox:SetText("")
+	
+	if 0 > IE:GetBottom() then
+		TMW.db.global.EditorScale = TMW.Defaults.global.EditorScale
+		TMW.db.global.EditorHeight = TMW.Defaults.global.EditorHeight
+	end
+	
 	IE:SetScale(TMW.db.global.EditorScale)
 	IE:SetHeight(TMW.db.global.EditorHeight)
 
