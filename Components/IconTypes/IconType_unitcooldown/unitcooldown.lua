@@ -11,7 +11,7 @@
 -- Xenyr of Aszune
 
 -- Currently maintained by
--- Cybeloras of Detheroc/Mal'Ganis
+-- Cybeloras of Aerie Peak/Detheroc/Mal'Ganis
 -- --------------------
 
 local TMW = TMW
