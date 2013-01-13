@@ -31,6 +31,12 @@ local function Dropdown_OnClick(button, icon)
 	TMW.IE:Load(nil, icon)
 end
 DD.initialize = function(dropdown)
+	local info = UIDropDownMenu_CreateInfo()
+	info.text = L["ICONMENU_CHOSEICONTOEDIT"]
+	info.isTitle = true
+	info.notCheckable = true
+	UIDropDownMenu_AddButton(info, UIDROPDOWNMENU_MENU_LEVEL)
+
 	for i, icon in pairs(icons) do
 		local groupID, iconID = icon.group.ID, icon.ID
 		

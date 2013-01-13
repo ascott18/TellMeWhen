@@ -298,6 +298,8 @@ L["ICONMENU_VEHICLE"] = "Vehicle"
 L["MAINTANK"] = "Main Tank"
 L["MAINASSIST"] = "Main Assist"
 
+L["ICONMENU_CHOSEICONTOEDIT"] = "Chose an icon to edit:"
+
 L["ICONMENU_PRESENT"] = "Present"
 L["ICONMENU_ABSENT"] = "Absent"
 L["ICONMENU_ALWAYS"] = "Always"
