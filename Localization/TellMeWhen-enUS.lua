@@ -352,7 +352,7 @@ L["ICONMENU_HOSTILE"] = "Hostile"
 
 L["ICONMENU_ISPLAYER"] = "Unit Is Player"
 
-L["ICONMENU_ICDTYPE"] = "Triggered by"
+L["ICONMENU_ICDTYPE"] = "Cooldown begins on..."
 L["ICONMENU_SPELLCAST_COMPLETE"] = "Spell Cast Finish/Instant Cast"
 L["ICONMENU_SPELLCAST_START"] = "Spell Cast Start"
 L["ICONMENU_ICDBDE"] = "Buff/Debuff/Damage/Energize/Summon"

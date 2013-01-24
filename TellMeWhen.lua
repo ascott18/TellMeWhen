@@ -28,7 +28,7 @@ TMW.L = L
 TELLMEWHEN_VERSION = "6.1.2"
 TELLMEWHEN_VERSION_MINOR = strmatch(" @project-version@", " r%d+") or ""
 TELLMEWHEN_VERSION_FULL = TELLMEWHEN_VERSION .. TELLMEWHEN_VERSION_MINOR
-TELLMEWHEN_VERSIONNUMBER = 61221 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
+TELLMEWHEN_VERSIONNUMBER = 61222 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
 if TELLMEWHEN_VERSIONNUMBER > 62000 or TELLMEWHEN_VERSIONNUMBER < 61000 then return error("YOU SCREWED UP THE VERSION NUMBER OR DIDNT CHANGE THE SAFETY LIMITS") end -- safety check because i accidentally made the version number 414069 once
 
 TELLMEWHEN_MAXROWS = 20
@@ -1826,10 +1826,6 @@ function TMW:InitializeDatabase()
 	-- Handle normal upgrades after the database has been initialized.
 	TMW:Upgrade()
 	
-	-- All upgrades are complete. It is now safe to bump this to the latest version
-	-- (everything that needed it should be done executing by now)
-	TellMeWhenDB.Version = TELLMEWHEN_VERSIONNUMBER
-	
 	TMW:Fire("TMW_DB_INITIALIZED")
 end
 
@@ -2922,8 +2918,12 @@ function TMW:Upgrade()
 		TMW.db.profile.Version = tonumber(v)
 	end
 	
-	if TMW.db.profile.Version < TELLMEWHEN_VERSIONNUMBER then
+	if TellMeWhenDB.Version < TELLMEWHEN_VERSIONNUMBER then
 		TMW:DoUpgrade("global", TellMeWhenDB.Version)
+	end
+	
+	if TMW.db.profile.Version < TELLMEWHEN_VERSIONNUMBER then
+		TMW:DoUpgrade("profile", TMW.db.profile.Version)
 	end
 end
 
@@ -2944,14 +2944,16 @@ function TMW:DoUpgrade(type, version, ...)
 
 	-- delegate out to sub-types
 	if type == "global" then
-		TMW:DoUpgrade("profile", TMW.db.profile.Version)
+	
+		--All Global Upgrades Complete
+		TellMeWhenDB.Version = TELLMEWHEN_VERSIONNUMBER
 	elseif type == "profile" then
 		-- delegate to groups
 		for gs, groupID in TMW:InGroupSettings() do
 			TMW:DoUpgrade("group", version, gs, groupID)
 		end
 		
-		--All Upgrades Complete
+		--All Profile Upgrades Complete
 		TMW.db.profile.Version = TELLMEWHEN_VERSIONNUMBER
 	elseif type == "group" then
 		local gs, groupID = ...

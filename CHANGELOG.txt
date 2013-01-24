@@ -4,7 +4,7 @@
  ** Designed a new protocol for sharing class spells to prevent the old version of it that was dramatically errored from leaking into a new version of it.
  ** LastUpdateTime-type values should now only be set after an update completes so that in the event of a "script ran too long" error, the update will be ran again in the next cycle.
  ** Icon Color Flash animations should now work correctly.
- ** Rewrote (but mostly just refactored) the database initialization process so that it runs more logically, and also so it allows for upgrades in the "global" DB namespace to run when they are supposed to.
+ ** Rewrote (but mostly just refactored) the database initialization process so that it runs in a much more logical fashion, and also so it allows for upgrades in the "global" DB namespace to run when they are supposed to.
  ** Rewrote (but mostly just refactored) event configuration code.
  ** The [Opacity] tag should now properly return a number instead of a boolean.
  ** Added Mind Quickening to the IncreasedSpellHaste equivalency

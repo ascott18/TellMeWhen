@@ -489,7 +489,8 @@ local function UpdateIconsUsingTextLayout(layoutID)
 				-- setup entire groups because there is code that prevents excessive event firing
 				-- when updating a whole group vs a single icon
 				group:Setup()
-				break
+				
+				break -- break icon loop
 			end
 		end
 	end
@@ -568,7 +569,8 @@ local textLayoutTemplate = {
 			func = function(info)
 				local layout = findlayout(info)
 				
-				IE:NotifyChanges("textlayouts") -- MUST HAPPEN BEFORE WE NIL THE LAYOUT (idk why)
+				IE:NotifyChanges("textlayouts") -- MUST HAPPEN BEFORE WE NIL THE LAYOUT (idk why. just do it, asshole)
+				
 				TMW.db.profile.TextLayouts[layout] = nil
 				TMW:CompileOptions()
 				TMW:Update()

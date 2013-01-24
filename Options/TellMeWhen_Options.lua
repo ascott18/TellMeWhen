@@ -3100,7 +3100,6 @@ function IE:GetRealNames(Name) -- TODO: MODULARIZE THIS
 	--if cachednames[CI.ics.Type .. SoI .. text] then return cachednames[CI.ics.Type .. SoI .. text] end
 
 	local tbl
-	local GetSpellInfo = GetSpellInfo
 	if SoI == "item" then
 		tbl = TMW:GetItemIDs(nil, text)
 	else
