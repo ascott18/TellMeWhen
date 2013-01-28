@@ -40,7 +40,7 @@ EventHandler:RegisterEventDefaults{
 	Magnitude	  	= 10,
 	ScaleMagnitude 	= 2,
 	Period			= 0.4,
-	Size_anim	  	= 30,
+	Size_anim	  	= 0,
 	SizeX	  		= 30,
 	SizeY	  		= 30,
 	Thickness	  	= 2,
@@ -51,6 +51,7 @@ EventHandler:RegisterEventDefaults{
 	b_anim	  		= 0,
 	a_anim	  		= 0.5,
 	Image			= "",
+	AnchorTo		= "IconModule_SelfIcon",
 }
 
 function EventHandler:ProcessIconEventSettings(event, eventSettings)
@@ -110,7 +111,25 @@ function EventHandler:TMW_ONUPDATE_POST()
 end
 TMW:RegisterCallback("TMW_ONUPDATE_POST", EventHandler)
 
+local function GetAnchorOrWarn(icon, anchorTo)
+	local name = icon:GetName() .. anchorTo
+	local frame = _G[name]
+	
+	if not frame then
+		TMW.Warn(L["ANIM_ANCHOR_NOT_FOUND"]:format(name))
+		return icon
+	end
+	
+	return frame
+end
 
+TMW:RegisterUpgrade(61224, {
+	iconEventHandler = function(self, eventSettings)
+		if eventSettings.Size_anim ~= 0 then
+			eventSettings.Size_anim = (eventSettings.Size_anim - 30)/2
+		end
+	end,
+})
 
 
 function EventHandler:OnRegisterEventHandlerDataTable(eventHandlerData, order, animation, animationData)
@@ -342,6 +361,7 @@ EventHandler:RegisterEventHandlerDataNonSpecific(30, "ICONFLASH", {
 		"Period",
 		"Fade",
 		"Color",
+		"AnchorTo",
 	},
 
 	Play = function(icon, eventSettings, IconComponent)
@@ -370,6 +390,8 @@ EventHandler:RegisterEventHandlerDataNonSpecific(30, "ICONFLASH", {
 			r = eventSettings.r_anim,
 			g = eventSettings.g_anim,
 			b = eventSettings.b_anim,
+			
+			AnchorTo = eventSettings.AnchorTo,
 		}
 	end,
 
@@ -403,13 +425,10 @@ EventHandler:RegisterEventHandlerDataNonSpecific(30, "ICONFLASH", {
 		else
 			animation_flasher = icon:CreateTexture(nil, "BACKGROUND", nil, 6)
 			
-			-- this will fallback on icon if there isnt a texture
-			-- TODO: add a setting that allows anchoring this to anything
-			animation_flasher:SetAllPoints(icon.EssentialModuleComponents.texture or icon)
-			animation_flasher:Hide()
-
 			icon.animation_flasher = animation_flasher
 		end
+		
+		animation_flasher:SetAllPoints(GetAnchorOrWarn(icon, table.AnchorTo))
 
 		animation_flasher:Show()
 		animation_flasher:SetTexture(table.r, table.g, table.b, 1)
@@ -430,6 +449,7 @@ EventHandler:RegisterEventHandlerDataNonSpecific(70, "ICONBORDER", {
 		"Color",
 		"Size_anim",
 		"Thickness",
+		"AnchorTo",
 	},
 
 	Play = function(icon, eventSettings, IconComponent)
@@ -460,6 +480,8 @@ EventHandler:RegisterEventHandlerDataNonSpecific(70, "ICONBORDER", {
 			b = eventSettings.b_anim,
 			Thickness = eventSettings.Thickness,
 			Size = eventSettings.Size_anim,
+			
+			AnchorTo = eventSettings.AnchorTo,
 		}
 	end,
 
@@ -492,7 +514,6 @@ EventHandler:RegisterEventHandlerDataNonSpecific(70, "ICONBORDER", {
 			animation_border = icon.animation_border
 		else
 			animation_border = CreateFrame("Frame", nil, icon)
-			animation_border:SetPoint("CENTER")
 			icon.animation_border = animation_border
 
 			local tex = animation_border:CreateTexture(nil, "BACKGROUND", nil, 5)
@@ -515,12 +536,14 @@ EventHandler:RegisterEventHandlerDataNonSpecific(70, "ICONBORDER", {
 			tex:SetPoint("TOPRIGHT", animation_border.TOP, "BOTTOMRIGHT")
 			tex:SetPoint("BOTTOMRIGHT", animation_border.BOTTOM, "TOPRIGHT")
 		end
+		
+		local offset = table.Size
+		
+		animation_border:SetPoint("TOPLEFT", GetAnchorOrWarn(icon, table.AnchorTo), "TOPLEFT", -offset, offset)
+		animation_border:SetPoint("BOTTOMRIGHT", GetAnchorOrWarn(icon, table.AnchorTo), "BOTTOMRIGHT", offset, -offset)
 
 		animation_border:Show()
-		animation_border:SetSize(table.Size, table.Size)
 
-			-- TODO: add a setting that allows anchoring this to anything.
-			-- TODO: Also, remove the ability to set a custom size - make it conform to what its anchored to, and change the size setting to inset amount.
 		for _, pos in TMW:Vararg("TOP", "BOTTOM", "LEFT", "RIGHT") do
 			local tex = animation_border[pos]
 
@@ -544,6 +567,7 @@ EventHandler:RegisterEventHandlerDataNonSpecific(80, "ICONOVERLAYIMG", {
 		"AlphaStandalone",
 		"SizeX",
 		"SizeY",
+		"AnchorTo",
 	},
 
 	Play = function(icon, eventSettings, IconComponent)
@@ -572,6 +596,8 @@ EventHandler:RegisterEventHandlerDataNonSpecific(80, "ICONOVERLAYIMG", {
 			SizeX = eventSettings.SizeX,
 			SizeY = eventSettings.SizeY,
 			Image = TMW:GetTexturePathFromSetting(eventSettings.Image),
+			
+			AnchorTo = eventSettings.AnchorTo,
 		}
 	end,
 
@@ -603,10 +629,11 @@ EventHandler:RegisterEventHandlerDataNonSpecific(80, "ICONOVERLAYIMG", {
 		if icon.animation_overlay then
 			animation_overlay = icon.animation_overlay
 		else
-			animation_overlay = icon:CreateTexture(nil, "BACKGROUND", nil, 4)
-			animation_overlay:SetPoint("CENTER")
+			animation_overlay = icon:CreateTexture(nil, "BACKGROUND", nil, 7)
 			icon.animation_overlay = animation_overlay
 		end
+		
+		animation_overlay:SetPoint("CENTER", GetAnchorOrWarn(icon, table.AnchorTo))
 
 		animation_overlay:Show()
 		animation_overlay:SetSize(table.SizeX, table.SizeY)

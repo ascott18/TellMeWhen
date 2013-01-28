@@ -3614,7 +3614,7 @@ function EVENTS:SetupEventSettings()
 
 	--hide settings
 	EventSettingsContainer.Operator	 	 		:Hide()
-	EventSettingsContainer.Value		 	 		:Hide()
+	EventSettingsContainer.Value		 	 	:Hide()
 	EventSettingsContainer.CndtJustPassed 		:Hide()
 	EventSettingsContainer.PassingCndt	 		:Hide()
 	EventSettingsContainer.Icon			 		:Hide()
@@ -3780,7 +3780,6 @@ function EVENTS:AddEvent_Dropdown()
 			info.tooltipOnButton = true]]
 
 			info.value = EventHandler.eventHandlerName
-			info.hasAlpha = true
 			info.func = EVENTS.AddEvent_Dropdown_OnClick
 			info.arg1 = UIDROPDOWNMENU_MENU_VALUE
 			info.arg2 = EventHandler.eventHandlerName
@@ -3853,6 +3852,7 @@ function EVENTS:ChangeEvent_Dropdown_OnClick(eventButton, event)
 	CloseDropDownMenus()
 end
 
+
 function EVENTS:CreateEventButtons(globalDescKey)
 	local EventHandlerFrames = self.EventHandlerFrames
 	local previousFrame
@@ -3867,6 +3867,7 @@ function EVENTS:CreateEventButtons(globalDescKey)
 	for i, eventSettings in TMW:InNLengthTable(CI.ics.Events) do
 		local eventData = TMW.EventList[eventSettings.Event]
 		local frame = EventHandlerFrames[i]
+		
 		if not frame then
 			frame = CreateFrame("Button", EventHandlerFrames:GetName().."Event"..i, EventHandlerFrames, "TellMeWhen_Event", i)
 			EventHandlerFrames[i] = frame
@@ -4011,7 +4012,7 @@ function EVENTS:LoadConfig()
 			end
 			
 			local EventHandler = EVENTS:GetEventHandlerForEventSettings(eventID)
-			EventHandler:SetupEventDisplay(i)
+			EventHandler:SetupEventDisplay(eventID)
 			frame:Enable()
 		else
 			frame:Disable()

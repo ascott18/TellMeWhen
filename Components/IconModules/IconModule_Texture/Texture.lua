@@ -33,13 +33,11 @@ function Texture:OnEnable()
 	local attributes = icon.attributes
 	
 	self.texture:Show()
-	self:SetEssentialModuleComponent("texture", self.texture)
 
 	self:TEXTURE(icon, attributes.texture)
 end
 function Texture:OnDisable()
 	self.texture:Hide()
-	self:SetEssentialModuleComponent("texture", nil)
 end
 
 function Texture:TEXTURE(icon, texture)

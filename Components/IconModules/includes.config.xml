@@ -1,5 +1,6 @@
 ﻿<Ui>
 
+<Include file="IconModule_Self\includes.config.xml"/>
 <Include file="IconModule_Alpha\includes.config.xml"/>
 <Include file="IconModule_CooldownSweep\includes.config.xml"/>
 <Include file="IconModule_IconContainer\includes.config.xml"/>

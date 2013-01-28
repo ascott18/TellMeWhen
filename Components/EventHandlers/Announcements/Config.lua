@@ -122,6 +122,7 @@ function ANN:SetupEventDisplay(eventID)
 	local channel = EventSettings.Channel
 	local channelsettings = ANN.AllChannelsByChannel[channel]
 
+
 	if channelsettings then
 		local chan = channelsettings.text
 		local data = EventSettings.Text

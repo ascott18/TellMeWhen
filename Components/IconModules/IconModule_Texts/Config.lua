@@ -702,9 +702,7 @@ local anchorSet = {
 							end
 						end
 					end
-					
 				end
-
 
 				return t
 			end,

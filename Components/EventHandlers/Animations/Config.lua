@@ -217,7 +217,7 @@ function EventHandler:SetSliderMinMax(Slider, level)
 		local deviation = Slider.range/2
 		local val = level or Slider:GetValue()
 
-		local newmin = max(0, val-deviation)
+		local newmin = max(Slider.min or 0, val-deviation)
 		local newmax = max(deviation, val + deviation)
 
 		Slider:SetMinMaxValues(newmin, newmax)
@@ -252,6 +252,7 @@ end
 local function Load_Generic_Check(self, frame, EventSettings)
 	frame:SetChecked(EventSettings[self.identifier])
 end
+
 
 TMW:RegisterRapidSetting("Duration")
 EventHandler:RegisterConfigFrame("Duration", {
@@ -295,7 +296,12 @@ EventHandler:RegisterConfigFrame("Size_anim", {
 	topPadding = 13,
 	bottomPadding = 13,
 	
-	Load = Load_Generic_Slider,
+	Load = function(self, frame, EventSettings)
+		frame.min = -math.huge
+		
+		EventHandler:SetSliderMinMax(frame, EventSettings[self.identifier])
+		frame:Enable()
+	end,
 })
 
 EventHandler:RegisterConfigFrame("AlphaStandalone", {
@@ -368,16 +374,62 @@ EventHandler:RegisterConfigFrame("Color", {
 	end,
 })
 
-EventHandler:RegisterConfigFrame("Anchor", {
-	frame = "Anchor",
-	topPadding = 4,
+
+EventHandler:RegisterConfigFrame("AnchorTo", {
+	frame = "AnchorTo",
+	topPadding = 14,
 	bottomPadding = 4,
 	
 	Load = function(self, frame, EventSettings)
-		--[[local r, g, b, a = EventSettings.r_anim, EventSettings.g_anim, EventSettings.b_anim, EventSettings.a_anim
-		frame:GetNormalTexture():SetVertexColor(r, g, b, 1)
-		frame.background:SetAlpha(a)]]
+		EventHandler:AnchorTo_Dropdown_SetText(EventHandler.ConfigFrames.AnchorTo, EventSettings.AnchorTo)
 	end,
 })
+
+function EventHandler:AnchorTo_Dropdown()
+	for _, IconModule in pairs(TMW.CI.ic.Modules) do
+		for identifier, localizedName in pairs(IconModule.anchorableChildren) do
+			if type(localizedName) == "string" then
+				local completeIdentifier = IconModule.className .. identifier
+				
+				local info = UIDropDownMenu_CreateInfo()
+
+				info.text = localizedName
+			--[[	info.tooltipTitle = get(eventData.text)
+				info.tooltipText = get(eventData.desc)
+				info.tooltipOnButton = true]]
+
+				info.value = completeIdentifier
+				info.func = EventHandler.AnchorTo_Dropdown_OnClick
+				
+				info.checked = EVENTS:GetEventSettings().AnchorTo == completeIdentifier
+
+				UIDropDownMenu_AddButton(info, UIDROPDOWNMENU_MENU_LEVEL)
+				
+			end
+		end
+	end
+end
+
+function EventHandler:AnchorTo_Dropdown_SetText(frame, setting)
+	local text = ""
 	
+	for _, IconModule in pairs(TMW.CI.ic.Modules) do
+		for identifier, localizedName in pairs(IconModule.anchorableChildren) do
+			local completeIdentifier = IconModule.className .. identifier
+			if completeIdentifier == setting and type(localizedName) == "string" then
+				
+				UIDropDownMenu_SetText(frame, localizedName)
+				return
+				
+			end
+		end
+	end
 	
+	UIDropDownMenu_SetText(frame, "????")
+end
+
+function EventHandler:AnchorTo_Dropdown_OnClick(event, value)
+	EVENTS:GetEventSettings().AnchorTo = self.value
+	
+	EventHandler:AnchorTo_Dropdown_SetText(EventHandler.ConfigFrames.AnchorTo, self.value)
+end

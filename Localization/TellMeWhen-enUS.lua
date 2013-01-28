@@ -450,7 +450,7 @@ Advanced anchor settings are available in the group options.]]
 L["ICONMENU_SPLIT"] = "Split into new group"
 L["ICONMENU_SPLIT_DESC"] = "Create a new group and move this icon into it. Many group settings will carry over to the new group."
 
-
+L["ANCHORTO"] = "Anchor To"
 
 L["GENERIC_NUMREQ_CHECK_DESC"] = "Check to enable and configue the %s"
 
@@ -1169,6 +1169,7 @@ L["IconModule_PowerBar_OverlayPowerBar"] = "Power Bar Overlay"
 L["IconModule_Texture_ColoredTexture"] = "Icon Texture"
 L["IconModule_CooldownSweepCooldown"] = "Cooldown Sweep"
 L["IconModule_TimerBar_BarDisplayTimerBar"] = "Timer Bar (Bar display)"
+L["IconModule_SelfIcon"] = "Icon"
 
 
 L["GROUPADDONSETTINGS"] = "Group Settings"
@@ -1532,8 +1533,8 @@ L["ANIM_MAGNITUDE"] = "Shake Magnitude"
 L["ANIM_MAGNITUDE_DESC"] = "Set how violent the shake should be."
 L["ANIM_THICKNESS"] = "Border Thickness"
 L["ANIM_THICKNESS_DESC"] = "Set how thick the border should be."
-L["ANIM_SIZE_ANIM"] = "Border Size"
-L["ANIM_SIZE_ANIM_DESC"] = "Set how big the entire border should be. (The default size of an icon is 30.)"
+L["ANIM_SIZE_ANIM"] = "Border Outset Amount"
+L["ANIM_SIZE_ANIM_DESC"] = "Set how big the entire border should be."
 L["ANIM_ALPHASTANDALONE"] = "Alpha"
 L["ANIM_ALPHASTANDALONE_DESC"] = "Set the maximum opacity of the animation."
 L["ANIM_SIZEX"] = "Image Width"
@@ -1577,6 +1578,7 @@ L["ANIM_ICONOVERLAYIMG_DESC"] = "Overlays a custom image over the icon."
 L["ANIM_ICONCLEAR"] = "Icon: Stop Animations"
 L["ANIM_ICONCLEAR_DESC"] = "Stops all animations that are playing on the current icon."
 
+L["ANIM_ANCHOR_NOT_FOUND"] = "Couldn't find frame named %q to anchor an animation to. Is this frame not used by the icon's current view?"
 
 
 L["CLEU_"] = "Any event" -- match any event

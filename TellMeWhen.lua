@@ -28,7 +28,7 @@ TMW.L = L
 TELLMEWHEN_VERSION = "6.1.2"
 TELLMEWHEN_VERSION_MINOR = strmatch(" @project-version@", " r%d+") or ""
 TELLMEWHEN_VERSION_FULL = TELLMEWHEN_VERSION .. TELLMEWHEN_VERSION_MINOR
-TELLMEWHEN_VERSIONNUMBER = 61223 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
+TELLMEWHEN_VERSIONNUMBER = 61225 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
 if TELLMEWHEN_VERSIONNUMBER > 62000 or TELLMEWHEN_VERSIONNUMBER < 61000 then return error("YOU SCREWED UP THE VERSION NUMBER OR DIDNT CHANGE THE SAFETY LIMITS") end -- safety check because i accidentally made the version number 414069 once
 
 TELLMEWHEN_MAXROWS = 20
@@ -3802,7 +3802,6 @@ function Icon.OnNewInstance(icon, ...)
 	group[iconID] = icon
 	
 	icon.EventHandlersSet = {}
-	icon.EssentialModuleComponents = {}
 	icon.lmbButtonData = {}
 	icon.position = {}
 	icon.anchorableChildren = {}
@@ -5130,15 +5129,6 @@ TMW:NewClass("IconModule", "IconComponent", "ObjectModule"){
 		return self:GetIconEventListner(Processor.changedEvent)
 	end,
 	
-	SetEssentialModuleComponent = function(self, identifier, component)	--TODO: deprecate this. replace it with the new list of anchored points things that i wanted to do.
-		self:AssertSelfIsInstance()
-		
-		assert(identifier)
-		if component and self.icon.EssentialModuleComponents[identifier] then
-			TMW:Error("Icon %s already has an essential module component with identifier %q", tostring(self.icon), identifier)
-		end
-		self.icon.EssentialModuleComponents[identifier] = component
-	end,
 	SetSkinnableComponent = function(self, component, frame)
 		self:AssertSelfIsInstance()
 		

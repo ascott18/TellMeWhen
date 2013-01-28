@@ -358,7 +358,7 @@
 						</Anchors>
 						<Scripts>
 							<OnValueChanged>
-								value = max(self:GetValue(), 0.1)
+								value = max(self:GetValue(), -math.huge) -- this works to remove floating point error (idk why)
 
 								self.Mid:SetFormattedText(TMW.L["ANIM_PIXELS"], value)
 
@@ -409,6 +409,35 @@
 							</OnValueChanged>
 						</Scripts>
 					</Slider>
+
+					<Frame name="$parentAnchorTo" parentKey="AnchorTo" inherits="TMW_DropDownMenuTemplate">
+						<Anchors>
+							<Anchor point="LEFT" x="-8" />
+						</Anchors>
+						<Layers>
+							<Layer level="ARTWORK">
+								<FontString name="$parentText" parentKey="text" inherits="GameFontHighlightSmall" justifyH="CENTER" justifyV="BOTTOM">
+									<Anchors>
+										<Anchor point="BOTTOM" relativePoint="TOP" y="-1"/>
+										<Anchor point="LEFT" x="-5"/>
+										<Anchor point="RIGHT" x="5"/>
+									</Anchors>
+								</FontString>
+							</Layer>
+						</Layers>
+						<Scripts>
+							<OnLoad>
+								self.text:SetText(TMW.L["ANCHORTO"])
+							
+								self.wrapTooltips = 1
+								self:Hide()
+								
+								UIDropDownMenu_SetWidth(self, 151)
+								
+								self.initialize = TMW.Classes.EventHandler.instancesByName.Animations.AnchorTo_Dropdown
+							</OnLoad>
+						</Scripts>
+					</Frame>
 
 				</Frames>
 			</Frame>
