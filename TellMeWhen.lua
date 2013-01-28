@@ -28,7 +28,7 @@ TMW.L = L
 TELLMEWHEN_VERSION = "6.1.2"
 TELLMEWHEN_VERSION_MINOR = strmatch(" @project-version@", " r%d+") or ""
 TELLMEWHEN_VERSION_FULL = TELLMEWHEN_VERSION .. TELLMEWHEN_VERSION_MINOR
-TELLMEWHEN_VERSIONNUMBER = 61222 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
+TELLMEWHEN_VERSIONNUMBER = 61223 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
 if TELLMEWHEN_VERSIONNUMBER > 62000 or TELLMEWHEN_VERSIONNUMBER < 61000 then return error("YOU SCREWED UP THE VERSION NUMBER OR DIDNT CHANGE THE SAFETY LIMITS") end -- safety check because i accidentally made the version number 414069 once
 
 TELLMEWHEN_MAXROWS = 20
@@ -262,6 +262,7 @@ function TMW.print(...)
 		prefix = prefix..":|r "
 		local func = TMW.debug and TMW.debug.print or _G.print
 		if ... == TMW then
+			prefix = "s" .. prefix
 			func(prefix, select(2,...))
 		else
 			func(prefix, ...)
@@ -1829,7 +1830,8 @@ function TMW:InitializeDatabase()
 	TMW:Fire("TMW_DB_INITIALIZED")
 end
 
-function TMW:OnProfile()
+function TMW:OnProfile(event, arg2, arg3)
+
 	for icon in TMW:InIcons() do
 		icon:SetInfo("texture", "")
 	end
@@ -1842,6 +1844,10 @@ function TMW:OnProfile()
 		TMW:CompileOptions() -- redo groups in the options
 		
 		TMW.IE:Load(1)
+	end
+	
+	if event == "OnProfileChanged" then
+		TMW:Printf(L["PROFILE_LOADED"], arg3)
 	end
 end
 
@@ -5969,15 +5975,25 @@ function TMW:SlashCommand(str)
 		cmd = "disable"
 	elseif cmd == L["CMD_TOGGLE"]:lower() or cmd == "toggle" then
 		cmd = "toggle"
+	elseif cmd == L["CMD_PROFILE"]:lower() or cmd == "profile" then
+		cmd = "profile"
 	elseif cmd == L["CMD_OPTIONS"]:lower() or cmd == "options" then
 		cmd = "options"
 	end
 
 	if cmd == "options" then
-		
 		if TMW:CheckCanDoLockedAction() then
 			TMW:LoadOptions()
 			LibStub("AceConfigDialog-3.0"):Open("TMW Options")
+		end
+	elseif cmd == "profile" then
+		if TMW.db.profiles[arg2] then
+			TMW.db:SetProfile(arg2)
+		else
+			TMW:Printf(L["CMD_PROFILE_INVALIDPROFILE"], arg2)
+			if not arg2:find(" ") then
+				TMW:Print(L["CMD_PROFILE_INVALIDPROFILE_SPACES"])
+			end
 		end
 	elseif cmd == "enable" or cmd == "disable" or cmd == "toggle" then
 		local groupID, iconID = tonumber(arg2), tonumber(arg3)

@@ -10,6 +10,13 @@ L["CMD_OPTIONS"] = "options"
 L["CMD_ENABLE"] = "enable"
 L["CMD_DISABLE"] = "disable"
 L["CMD_TOGGLE"] = "toggle"
+L["CMD_PROFILE"] = "profile"
+
+L["CMD_PROFILE_INVALIDPROFILE"] = "No profile named %q exists!"
+L["CMD_PROFILE_INVALIDPROFILE_SPACES"] = "Tip: If the profile name contains spaces, put quotes around it."
+
+L["PROFILE_LOADED"] = "Loaded profile: %s"
+
 
 L["ICON_TOOLTIP2NEW"] = [[|cff7fffffRight-click|r for icon options.
 |cff7fffffRight-click and drag|r to another icon to move/copy.

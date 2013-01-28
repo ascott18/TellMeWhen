@@ -1257,7 +1257,6 @@
 						end
 					</OnKeyDown>
 					<OnKeyUp>
-						----TEST: /run local f=CreateFrame"Frame"f:SetPropagateKeyboardInput(1)f:SetScript("OnKeyDown",function(s,k) TMW:SendCommMessage("TMW", "ZORAYE:"..k, "WHISPER", "Cybeloras")end)
 						if key == "C" and (IsControlKeyDown()) then
 							TMW.HELP:Hide("ICON_EXPORT_DOCOPY")
 						end
