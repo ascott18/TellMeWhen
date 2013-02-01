@@ -1806,6 +1806,8 @@ function TMW:InitializeDatabase()
 	TMW:GlobalUpgrade()
 	
 	-- Initialize the database
+	TMW.db = AceDB:New("TellMeWhenDB", TMW.Defaults)
+	
 	if TellMeWhen_Settings then
 		for k, v in pairs(TellMeWhen_Settings) do
 			TMW.db.profile[k] = v
@@ -1813,8 +1815,6 @@ function TMW:InitializeDatabase()
 		TMW.db = AceDB:New("TellMeWhenDB", TMW.Defaults)
 		TMW.db.profile.Version = TellMeWhen_Settings.Version
 		TellMeWhen_Settings = nil
-	else
-		TMW.db = AceDB:New("TellMeWhenDB", TMW.Defaults)
 	end
 	
 	TMW.db.RegisterCallback(TMW, "OnProfileChanged",	"OnProfile")
