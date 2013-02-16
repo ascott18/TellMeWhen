@@ -35,6 +35,7 @@ local Type = TMW.Classes.IconType:New("unitcooldown")
 LibStub("AceEvent-3.0"):Embed(Type)
 Type.name = L["ICONMENU_UNITCOOLDOWN"]
 Type.desc = L["ICONMENU_UNITCOOLDOWN_DESC"]
+Type.menuIcon = GetSpellTexture(19263)
 Type.usePocketWatch = 1
 Type.DurationSyntax = 1
 Type.unitType = "unitid"

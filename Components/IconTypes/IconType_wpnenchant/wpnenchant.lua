@@ -28,6 +28,7 @@ local Type = TMW.Classes.IconType:New("wpnenchant")
 LibStub("AceTimer-3.0"):Embed(Type)
 Type.name = L["ICONMENU_WPNENCHANT"]
 Type.desc = L["ICONMENU_WPNENCHANT_DESC"]
+Type.menuIcon = GetSpellTexture(8024)
 Type.AllowNoName = true
 
 -- AUTOMATICALLY GENERATED: UsesAttributes
@@ -194,7 +195,7 @@ local function WpnEnchant_OnEvent(icon, event, unit)
 			-- we couldn't get an enchant name.
 			-- Either we checked too early, or there is no enchant.
 			-- Assume that we checked too early, and check again in a little bit.
-			-- We check that unit is defined here because if we are calling from a timer, it will be false, and we dont want to endlessly chain timers.
+			-- We check that unit is defined here because if we are calling from a timer, unit will be false, and we dont want to endlessly chain timers.
 			-- A single func calling itself in 2 timers will create perpetual performance loss to the point of lockup. (duh....)
 			Type:ScheduleTimer(WpnEnchant_OnEvent, 0.1, icon)
 			Type:ScheduleTimer(WpnEnchant_OnEvent, 1, icon)

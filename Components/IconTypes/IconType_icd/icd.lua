@@ -27,6 +27,7 @@ local strlowerCache = TMW.strlowerCache
 local Type = TMW.Classes.IconType:New("icd")
 Type.name = L["ICONMENU_ICD"]
 Type.desc = L["ICONMENU_ICD_DESC"]
+Type.menuIcon = GetSpellTexture(28093)
 Type.usePocketWatch = 1
 Type.DurationSyntax = 1
 

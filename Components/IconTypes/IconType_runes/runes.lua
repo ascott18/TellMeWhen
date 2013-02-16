@@ -27,6 +27,7 @@ local Type = TMW.Classes.IconType:New("runes")
 LibStub("AceEvent-3.0"):Embed(Type)
 Type.name = L["ICONMENU_RUNES"]
 Type.desc = L["ICONMENU_RUNES_DESC"]
+Type.menuIcon = "Interface\\Addons\\TellMeWhen\\Textures\\DeathPresence"
 Type.hidden = pclass ~= "DEATHKNIGHT"
 Type.AllowNoName = true
 

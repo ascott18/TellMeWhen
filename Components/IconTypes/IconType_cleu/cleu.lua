@@ -30,6 +30,7 @@ local strlowerCache = TMW.strlowerCache
 local Type = TMW.Classes.IconType:New("cleu")
 Type.name = L["ICONMENU_CLEU"]
 Type.desc = L["ICONMENU_CLEU_DESC"]
+Type.menuIcon = GetSpellTexture(20066)
 Type.usePocketWatch = 1
 Type.AllowNoName = true
 Type.spacebefore = true

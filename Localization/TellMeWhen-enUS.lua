@@ -131,6 +131,9 @@ L["ICONMENU_TYPE"] = "Icon type"
 L["ICONMENU_SPELLCOOLDOWN"] = "Spell Cooldown"
 L["ICONMENU_SPELLCOOLDOWN_DESC"] = [[Tracks the cooldowns of spells from your spellbook.]]
 
+L["ICONMENU_SWINGTIMER"] = "Swing timer"
+L["ICONMENU_SWINGTIMER_DESC"] = [[Tracks the swing timers of your main hand and off hand weapons.]]
+
 L["ICONMENU_ITEMCOOLDOWN"] = "Item Cooldown"
 L["ICONMENU_ITEMCOOLDOWN_DESC"] = [[Tracks the cooldowns of items with Use effects.]]
 
@@ -1071,6 +1074,7 @@ L["PET_TYPE_CUNNING"] = "Cunning"
 L["PET_TYPE_TENACITY"] = "Tenacity"
 L["PET_TYPE_FEROCITY"] = "Ferocity"
 
+L["SWINGTIMER"] = "Swing Timer"
 L["MELEEHASTE"] = "Melee Haste"
 L["MELEECRIT"] = "Melee Crit"
 L["RANGEDHASTE"] = "Ranged Haste"

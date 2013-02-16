@@ -29,6 +29,7 @@ local Type = TMW.Classes.IconType:New("multistate")
 LibStub("AceEvent-3.0"):Embed(Type)
 Type.name = L["ICONMENU_MULTISTATECD"]
 Type.desc = L["ICONMENU_MULTISTATECD_DESC"]
+Type.menuIcon = "Interface\\Icons\\Spell_Holy_ConsumeMagic"
 
 -- AUTOMATICALLY GENERATED: UsesAttributes
 Type:UsesAttributes("spell")

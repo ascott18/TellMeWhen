@@ -43,6 +43,7 @@ local Type = TMW.Classes.IconType:New("dr")
 LibStub("AceEvent-3.0"):Embed(Type)
 Type.name = L["ICONMENU_DR"]
 Type.desc = L["ICONMENU_DR_DESC"]
+Type.menuIcon = GetSpellTexture(408)
 Type.usePocketWatch = 1
 Type.unitType = "unitid"
 

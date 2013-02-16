@@ -28,7 +28,7 @@ TMW.L = L
 TELLMEWHEN_VERSION = "6.1.2"
 TELLMEWHEN_VERSION_MINOR = strmatch(" @project-version@", " r%d+") or ""
 TELLMEWHEN_VERSION_FULL = TELLMEWHEN_VERSION .. TELLMEWHEN_VERSION_MINOR
-TELLMEWHEN_VERSIONNUMBER = 61225 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
+TELLMEWHEN_VERSIONNUMBER = 61226 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
 if TELLMEWHEN_VERSIONNUMBER > 62000 or TELLMEWHEN_VERSIONNUMBER < 61000 then return error("YOU SCREWED UP THE VERSION NUMBER OR DIDNT CHANGE THE SAFETY LIMITS") end -- safety check because i accidentally made the version number 414069 once
 
 TELLMEWHEN_MAXROWS = 20
@@ -79,6 +79,8 @@ local _, pclass = UnitClass("Player")
 local pname = UnitName("player")
 
 local DogTag = LibStub("LibDogTag-3.0", true)
+
+TMW.COMMON = {}
 
 TMW.CONST = {}
 TMW.CONST.CHAT_TYPE_INSTANCE_CHAT = "INSTANCE_CHAT"
@@ -5385,6 +5387,13 @@ function IconType:Register(order)
 	
 	-- Listen for any new processors, too, and update when they are created.
 	TMW:RegisterCallback("TMW_CLASS_IconDataProcessor_INSTANCE_NEW", "UpdateUsedProcessors", self)
+	
+	-- Covers the case of creating a type after login
+	-- (mainly used while debugging). Calling UpdateColors here prevents 
+	-- errors when types are created without a full TMW:Update()
+	if TMW.InitializedDatabase then
+		self:UpdateColors(true)
+	end
 	
 	return self -- why not?
 end

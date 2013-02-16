@@ -32,6 +32,7 @@ local strlowerCache = TMW.strlowerCache
 local Type = TMW.Classes.IconType:New("losecontrol")
 Type.name = L["LOSECONTROL_ICONTYPE"]	
 Type.desc = L["LOSECONTROL_ICONTYPE_DESC"]
+Type.menuIcon = "Interface\\Icons\\Spell_Shadow_Possession"
 Type.AllowNoName = true
 Type.usePocketWatch = 1
 

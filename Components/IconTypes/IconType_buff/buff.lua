@@ -32,6 +32,7 @@ local wow_501 = clientVersion >= 50100
 local Type = TMW.Classes.IconType:New("buff")
 Type.name = L["ICONMENU_BUFFDEBUFF"]
 Type.desc = L["ICONMENU_BUFFDEBUFF_DESC"]
+Type.menuIcon = GetSpellTexture(774)
 Type.usePocketWatch = 1
 Type.spacebefore = true
 Type.unitType = "unitid"

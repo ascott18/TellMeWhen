@@ -15,6 +15,7 @@
 <Include file="IconType_multistate\includes.config.xml"/>
 <Include file="IconType_reactive\includes.config.xml"/>
 <Include file="IconType_runes\includes.config.xml"/>
+<Include file="IconType_swingtimer\includes.config.xml"/>
 <Include file="IconType_totem\includes.config.xml"/>
 <Include file="IconType_unitcooldown\includes.config.xml"/>
 <Include file="IconType_wpnenchant\includes.config.xml"/>

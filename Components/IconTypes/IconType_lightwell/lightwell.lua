@@ -31,6 +31,7 @@ LibStub("AceEvent-3.0"):Embed(Type)
 Type.name = L["ICONMENU_LIGHTWELL"]
 Type.desc = L["ICONMENU_LIGHTWELL_DESC"]
 Type.hidden = pclass ~= "PRIEST"
+Type.menuIcon = "Interface\\Icons\\Spell_Holy_SummonLightwell"
 
 -- AUTOMATICALLY GENERATED: UsesAttributes
 Type:UsesAttributes("spell")

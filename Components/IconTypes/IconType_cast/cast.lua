@@ -26,6 +26,7 @@ local Type = TMW.Classes.IconType:New("cast")
 LibStub("AceEvent-3.0"):Embed(Type)
 Type.name = L["ICONMENU_CAST"]
 Type.desc = L["ICONMENU_CAST_DESC"]
+Type.menuIcon = "Interface\\Icons\\Temp"
 Type.AllowNoName = true
 Type.usePocketWatch = 1
 Type.unitType = "unitid"

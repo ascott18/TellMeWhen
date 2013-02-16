@@ -530,10 +530,11 @@ Env.SemicolonConcatCache = setmetatable(
 
 
 CNDT.COMMON = {}
-function CNDT.COMMON.formatSeconds(seconds, arg2)
-	if type(seconds) == "table" then -- if i set it directly as a metamethod
-		seconds = arg2
+function CNDT.COMMON.formatSeconds(seconds, alsoMightBeSeconds)
+	if type(seconds) == "table" then -- if i set this function directly as a metamethod
+		seconds = alsoMightBeSeconds
 	end
+	
 	local y =  seconds / 31556925.9936
 	local d = (seconds % 31556925.9936) / 86400
 	local h = (seconds % 31556925.9936 % 86400) / 3600

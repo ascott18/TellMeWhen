@@ -27,6 +27,7 @@ local Type = TMW.Classes.IconType:New("item")
 LibStub("AceEvent-3.0"):Embed(Type)
 Type.name = L["ICONMENU_ITEMCOOLDOWN"]
 Type.desc = L["ICONMENU_ITEMCOOLDOWN_DESC"]
+Type.menuIcon = "Interface\\Icons\\inv_jewelry_trinketpvp_01"
 
 -- AUTOMATICALLY GENERATED: UsesAttributes
 Type:UsesAttributes("spell")

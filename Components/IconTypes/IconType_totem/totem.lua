@@ -25,11 +25,27 @@ local strlowerCache = TMW.strlowerCache
 
 
 local Type = TMW.Classes.IconType:New("totem")
-Type.name = pclass == "DRUID" and L["ICONMENU_MUSHROOMS"]		or pclass == "DEATHKNIGHT" and L["ICONMENU_GHOUL"]		or pclass == "MAGE" and GetSpellInfo(116011)			or L["ICONMENU_TOTEM"]
-Type.desc = pclass == "DRUID" and L["ICONMENU_MUSHROOMS_DESC"]	or pclass == "DEATHKNIGHT" and L["ICONMENU_GHOUL_DESC"]	or pclass == "MAGE" and L["ICONMENU_RUNEOFPOWER_DESC"]	or L["ICONMENU_TOTEM_DESC"]
+if pclass == "DRUID" then
+	Type.name = L["ICONMENU_MUSHROOMS"]
+	Type.desc = L["ICONMENU_MUSHROOMS_DESC"]
+	Type.menuIcon = GetSpellTexture(88751)
+elseif pclass == "DEATHKNIGHT" then
+	Type.name = L["ICONMENU_GHOUL"]
+	Type.desc = L["ICONMENU_GHOUL_DESC"]
+	Type.menuIcon = GetSpellTexture(91800)
+elseif pclass == "MAGE" then
+	Type.name = GetSpellInfo(116011)
+	Type.desc = L["ICONMENU_RUNEOFPOWER_DESC"]
+	Type.menuIcon = GetSpellTexture(116011)
+else
+	Type.name = L["ICONMENU_TOTEM"]
+	Type.desc = L["ICONMENU_TOTEM_DESC"]
+	Type.menuIcon = GetSpellTexture(120668)
+end
+
 Type.AllowNoName = true
 Type.usePocketWatch = 1
-Type.hidden = pclass == "PRIEST" -- priest totems are lightwells, which is tracked with icon type "lightwell"
+Type.hidden = pclass == "PRIEST" -- priest totems are lightwells, which is tracked with the "lightwell" icon type
 
 
 -- AUTOMATICALLY GENERATED: UsesAttributes

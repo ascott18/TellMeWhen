@@ -36,6 +36,7 @@ local Type = TMW.Classes.IconType:New("cooldown")
 LibStub("AceEvent-3.0"):Embed(Type)
 Type.name = L["ICONMENU_SPELLCOOLDOWN"]
 Type.desc = L["ICONMENU_SPELLCOOLDOWN_DESC"]
+Type.menuIcon = "Interface\\Icons\\spell_holy_divineintervention"
 
 
 -- AUTOMATICALLY GENERATED: UsesAttributes
@@ -90,6 +91,7 @@ Type:RegisterConfigPanel_ConstructorFunc(150, "TellMeWhen_CooldownSettings", fun
 end)
 
 
+
 local function AutoShot_OnEvent(icon, event, unit, _, _, _, spellID)
 	if event == "UNIT_SPELLCAST_SUCCEEDED" and unit == "player" and spellID == 75 then
 		icon.asStart = TMW.time
@@ -124,6 +126,7 @@ local function AutoShot_OnUpdate(icon, time)
 		)
 	end
 end
+
 
 
 local function SpellCooldown_OnEvent(icon, event, unit)

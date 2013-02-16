@@ -30,6 +30,7 @@ local IsSpellInRange = LibStub("SpellRange-1.0").IsSpellInRange
 local Type = TMW.Classes.IconType:New("reactive")
 Type.name = L["ICONMENU_REACTIVE"]
 Type.desc = L["ICONMENU_REACTIVE_DESC"]
+Type.menuIcon = "Interface\\Icons\\ability_warrior_revenge"
 
 -- AUTOMATICALLY GENERATED: UsesAttributes
 Type:UsesAttributes("noMana")

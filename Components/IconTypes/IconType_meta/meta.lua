@@ -25,6 +25,7 @@ local Locked
 local Type = TMW.Classes.IconType:New("meta")
 Type.name = L["ICONMENU_META"]
 Type.desc = L["ICONMENU_META_DESC"]
+Type.menuIcon = "Interface\\Icons\\LevelUpIcon-LFD"
 Type.AllowNoName = true
 Type.NoColorSettings = true
 

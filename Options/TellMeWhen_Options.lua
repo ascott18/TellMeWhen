@@ -3055,18 +3055,29 @@ function IE:Type_DropDown()
 			end
 
 			local info = UIDropDownMenu_CreateInfo()
+			
 			info.text = Type.name
 			info.value = Type.type
+			
 			if Type.desc then
 				info.tooltipTitle = Type.tooltipTitle or Type.name
 				info.tooltipText = Type.desc
 				info.tooltipOnButton = true
 			end
+			
 			info.checked = (info.value == TMW.db.profile.Groups[groupID].Icons[iconID].Type)
 			info.func = IE.Type_Dropdown_OnClick
 			info.arg1 = Type
+			
 			info.disabled = tempshow
 			info.tooltipWhileDisabled = true
+			
+			info.icon = get(Type.menuIcon)
+			info.tCoordLeft = 0.07
+			info.tCoordRight = 0.93
+			info.tCoordTop = 0.07
+			info.tCoordBottom = 0.93
+				
 			UIDropDownMenu_AddButton(info, UIDROPDOWNMENU_MENU_LEVEL)
 
 			if Type.spaceafter then
