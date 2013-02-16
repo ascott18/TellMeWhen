@@ -119,7 +119,9 @@ L["CONDITIONALPHA_DESC"] = "This will be used when conditions fail, or if the du
 L["CONDITIONALPHA_CONDITIONICON"] = "Failed Duration"
 L["CONDITIONALPHA_CONDITIONICON_DESC"] = "This will be used when the duration requirements are not met. This setting will be ignored if the icon is already hidden by the other two opacity settings."
 L["CONDITIONALPHA_METAICON"] = "Failed Conditions"
-L["CONDITIONALPHA_METAICON_DESC"] = "This opacity will be used when conditions fail."
+L["CONDITIONALPHA_METAICON_DESC"] = [[This opacity will be used when conditions fail.
+
+Conditions can be configured in the %q tab.]]
 
 L["REQFAILED_ALPHA"] = "Opacity when failed"
 L["DURATIONALPHA_DESC"] = "Set the opacity level that the icon should display at when these duration requirements fail."
@@ -132,7 +134,13 @@ L["ICONMENU_SPELLCOOLDOWN"] = "Spell Cooldown"
 L["ICONMENU_SPELLCOOLDOWN_DESC"] = [[Tracks the cooldowns of spells from your spellbook.]]
 
 L["ICONMENU_SWINGTIMER"] = "Swing timer"
+L["ICONMENU_SWINGTIMER_SWINGING"] = "Swinging"
+L["ICONMENU_SWINGTIMER_NOTSWINGING"] = "Not Swinging"
 L["ICONMENU_SWINGTIMER_DESC"] = [[Tracks the swing timers of your main hand and off hand weapons.]]
+L["ICONTYPE_SWINGTIMER_TIP"] = [[Looking to track the timer of your %s? The %q icon type has the functionality that you desire. Simply set a %s to track %q (spellID %d)!
+
+You may also click the button below to automatically apply the proper settings.]]
+L["ICONTYPE_SWINGTIMER_TIP_APPLYSETTINGS"] = "Apply %s Settings"
 
 L["ICONMENU_ITEMCOOLDOWN"] = "Item Cooldown"
 L["ICONMENU_ITEMCOOLDOWN_DESC"] = [[Tracks the cooldowns of items with Use effects.]]

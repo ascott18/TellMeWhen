@@ -46,15 +46,14 @@ Type:RegisterIconDefaults{
 	SwingTimerSlot			= "MainHandSlot",
 }
 
---[[
-Type:RegisterConfigPanel_XMLTemplate(100, "TellMeWhen_ChooseName", {
-	text = L["CHOOSENAME_DIALOG"] .. "\r\n\r\n" .. L["CHOOSENAME_DIALOG_PETABILITIES"],
-})]]
+if pclass == "HUNTER" then
+	Type:RegisterConfigPanel_XMLTemplate(130, "TellMeWhen_AutoshootSwingTimerTip")
+end
 
 Type:RegisterConfigPanel_XMLTemplate(165, "TellMeWhen_WhenChecks", {
 	text = L["ICONMENU_SHOWWHEN"],
-	[0x2] = { text = "|cFF00FF00" .. L["ICONMENU_USABLE"],			},
-	[0x1] = { text = "|cFFFF0000" .. L["ICONMENU_UNUSABLE"],		},
+	[0x2] = { text = "|cFF00FF00" .. L["ICONMENU_SWINGTIMER_SWINGING"],			},
+	[0x1] = { text = "|cFFFF0000" .. L["ICONMENU_SWINGTIMER_NOTSWINGING"],		},
 })
 
 
@@ -96,13 +95,13 @@ local function SwingTimer_OnUpdate(icon, time)
 	if ready then
 		icon:SetInfo(
 			"alpha; start, duration",
-			icon.Alpha,
+			icon.UnAlpha,
 			0, 0
 		)
 	else
 		icon:SetInfo(
 			"alpha; start, duration",
-			icon.UnAlpha,
+			icon.Alpha,
 			SwingTimer.startTime, SwingTimer.duration
 		)
 	end
