@@ -146,23 +146,19 @@ local function SpellCooldown_OnUpdate(icon, time)
 	for i = 1, #NameArray do
 		local iName = NameArray[i]
 		
-		local start, duration, charges, maxCharges, stack
-		if TMW.ISMOP then
-			local start_charge, duration_charge
-			charges, maxCharges, start_charge, duration_charge = GetSpellCharges(iName)
-			if charges then
-				if charges < maxCharges then
-					start, duration = start_charge, duration_charge
-				else
-					start, duration = GetSpellCooldown(iName)
-				end
-				stack = charges
+		local start, duration, stack
+		
+		local charges, maxCharges, start_charge, duration_charge = GetSpellCharges(iName)
+		if charges then
+			if charges < maxCharges then
+				start, duration = start_charge, duration_charge
 			else
 				start, duration = GetSpellCooldown(iName)
-				stack = GetSpellCount(iName)
 			end
+			stack = charges
 		else
 			start, duration = GetSpellCooldown(iName)
+			stack = GetSpellCount(iName)
 		end
 		
 		if duration then

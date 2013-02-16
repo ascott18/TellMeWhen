@@ -28,7 +28,7 @@ TMW.L = L
 TELLMEWHEN_VERSION = "6.1.3"
 TELLMEWHEN_VERSION_MINOR = strmatch(" @project-version@", " r%d+") or ""
 TELLMEWHEN_VERSION_FULL = TELLMEWHEN_VERSION .. TELLMEWHEN_VERSION_MINOR
-TELLMEWHEN_VERSIONNUMBER = 61301 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
+TELLMEWHEN_VERSIONNUMBER = 61302 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
 if TELLMEWHEN_VERSIONNUMBER > 62000 or TELLMEWHEN_VERSIONNUMBER < 61000 then return error("YOU SCREWED UP THE VERSION NUMBER OR DIDNT CHANGE THE SAFETY LIMITS") end -- safety check because i accidentally made the version number 414069 once
 
 TELLMEWHEN_MAXROWS = 20
@@ -72,9 +72,6 @@ local loweredbackup = {}
 local time = GetTime() TMW.time = time
 local clientVersion = select(4, GetBuildInfo())
 local addonVersion = tonumber(GetAddOnMetadata("TellMeWhen", "X-Interface"))
-TMW.ISMOP = clientVersion >= 50000
-TMW.ISMOP = TMW.ISMOP and true or nil
-TMW.ISNOTMOP = not TMW.ISMOP and true or nil
 local _, pclass = UnitClass("Player")
 local pname = UnitName("player")
 
@@ -1198,7 +1195,6 @@ TMW.Defaults = {
 		Interval		=	UPD_INTV,
 		EffThreshold	=	15,
 		TextureName		= 	"Blizzard",
-		DrawEdge		=	not TMW.ISMOP and false,
 		SoundChannel	=	"SFX",
 		ReceiveComm		=	true,
 		WarnInvalids	=	false,
@@ -1312,7 +1308,7 @@ TMW.Group_Defaults 			  = TMW.Defaults.profile.Groups["**"]	-- shortcut
 TMW.Icon_Defaults 			  = TMW.Group_Defaults.Icons["**"]		-- shortcut
 
 
-TMW.GCDSpells = TMW.ISMOP and {
+TMW.GCDSpells = {
 	ROGUE		= 1752,		-- sinister strike
 	PRIEST		= 585,		-- smite
 	DRUID		= 5176,		-- wrath
@@ -1324,17 +1320,6 @@ TMW.GCDSpells = TMW.ISMOP and {
 	HUNTER		= 3044,		-- arcane shot
 	DEATHKNIGHT = 47541,	-- death coil
 	MONK		= 100780,	-- jab
-} or {
-	ROGUE		= 1752,		-- sinister strike
-	PRIEST		= 139, 		-- renew
-	DRUID		= 774, 		-- rejuvenation
-	WARRIOR		= 772, 		-- rend
-	MAGE		= 133, 		-- fireball
-	WARLOCK		= 687, 		-- demon armor
-	PALADIN		= 20154,	-- seal of righteousness
-	SHAMAN		= 324,		-- lightning shield
-	HUNTER		= 1978,		-- serpent sting
-	DEATHKNIGHT = 47541,	-- death coil
 }
 
 local GCDSpell = TMW.GCDSpells[pclass]
@@ -1351,7 +1336,7 @@ TMW.DS = {
 	Enraged = "Interface\\Icons\\ability_druid_challangingroar",
 }
 
-TMW.BE = TMW.ISMOP and {
+TMW.BE = {
 	--Most of these are thanks to Malazee @ US-Dalaran's chart: http://forums.wow-petopia.com/download/file.php?mode=view&id=4979 and spreadsheet https://spreadsheets.google.com/ccc?key=0Aox2ZHZE6e_SdHhTc0tZam05QVJDU0lONnp0ZVgzdkE&hl=en#gid=18
 	--Major credit to Wowhead (http://www.wowhead.com/guide=1100) for MoP spells
 	--Also credit to Damien of Icy Veins (http://www.icy-veins.com/forums/topic/512-mists-of-pandaria-raid-buffs-and-debuffs/) for some MoP spells
@@ -1412,68 +1397,6 @@ TMW.BE = TMW.ISMOP and {
 		--prefixing with _ doesnt really matter here since casts only match by name, but it may prevent confusion if people try and use these as buff/debuff equivs
 		Heals				= "50464;5185;8936;740;2050;2060;2061;32546;596;64843;635;82326;19750;331;77472;8004;1064;73920;124682;115175;116694",
 		PvPSpells			= "33786;339;20484;1513;982;64901;_605;5782;5484;10326;51514;118;12051",
-		Tier11Interrupts	= "_83703;_82752;_82636;_83070;_79710;_77896;_77569;_80734;_82411",
-		Tier12Interrupts	= "_97202;_100094",
-	},
-} or
-{
-	--Most of these are thanks to Malazee @ US-Dalaran's chart: http://forums.wow-petopia.com/download/file.php?mode=view&id=4979 and spreadsheet https://spreadsheets.google.com/ccc?key=0Aox2ZHZE6e_SdHhTc0tZam05QVJDU0lONnp0ZVgzdkE&hl=en#gid=18
-	--Many more new spells/corrections were provided by Catok of Curse
-
-	--NOTE: any id prefixed with "_" will have its localized name substituted in instead of being forced to match as an ID
-	debuffs = {
-		CrowdControl		= "_118;2637;33786;_1499;_19503;_19386;20066;10326;_9484;_6770;_2094;_51514;76780;_710;_5782;_6358;_49203;_605;82691", -- originally by calico0 of Curse
-		Bleeding			= "_94009;_1822;_1079;9007;33745;1943;703;43104;89775",
-		Incapacitated		= "20066;1776;49203",
-		Feared				= "_5782;5246;_8122;10326;1513;_5484;_6789;87204;20511",
-		Slowed				= "_116;_120;13810;_5116;_8056;3600;_1715;_12323;45524;_18223;_15407;_3409;26679;_51693;_2974;_58180;61391;_50434;_55741;44614;_7302;_8034;_63529;_15571", -- by algus2
-		Stunned				= "_1833;_408;_91800;_5211;_56;9005;22570;19577;56626;44572;853;2812;85388;64044;20549;46968;30283;20253;65929;7922;12809;50519;91797;47481;12355;24394;83047;39796;93986;89766;54786",
-		--DontMelee			= "5277;871;Retaliation;Dispersion;Hand of Sacrifice;Hand of Protection;Divine Shield;Divine Protection;Ice Block;Icebound Fortitude;Cyclone;Banish",  --does somebody want to update these for me?
-		--MovementSlowed	= "Incapacitating Shout;Chains of Ice;Icy Clutch;Slow;Daze;Hamstring;Piercing Howl;Wing Clip;Ice Trap;Frostbolt;Cone of Cold;Blast Wave;Mind Flay;Crippling Poison;Deadly Throw;Frost Shock;Earthbind;Curse of Exhaustion",
-		Disoriented			= "_19503;31661;_2094;_51514;90337;88625",
-		Silenced			= "_47476;78675;34490;_55021;_15487;1330;_24259;_18498;_25046;81261;31935;18425;31117",
-		Disarmed			= "_51722;_676;64058;50541;91644",
-		Rooted				= "_339;_122;23694;58373;64695;_19185;33395;4167;54706;50245;90327;16979;83301;83302;45334;19306;_55080;87195;63685;19387",
-		Shatterable			= "122;33395;_83302;_44572;_55080;_82691", -- by algus2
-		PhysicalDmgTaken	= "30070;58683;81326;50518;55749",
-		SpellDamageTaken	= "_1490;65142;_85547;60433;93068;34889;24844",
-		SpellCritTaken		= "17800;22959",
-		BleedDamageTaken	= "33878;33876;16511;_46857;50271;35290;57386",
-		ReducedAttackSpeed  = "6343;55095;58180;68055;8042;90314;50285",
-		ReducedCastingSpeed = "1714;5760;31589;73975;50274;50498",
-		ReducedArmor		= "_58567;91565;8647;_50498;35387",
-		ReducedHealing		= "12294;13218;56112;48301;82654;30213;54680",
-		ReducedPhysicalDone = "1160;99;26017;81130;702;24423",
-	},
-	buffs = {
-		ImmuneToStun		= "642;45438;19574;48792;1022;33786;710;46924;19263;6615",
-		ImmuneToMagicCC		= "642;45438;48707;19574;33786;710;46924;19263;31224;8178;23920;49039",
-		IncreasedStats		= "79061;79063;90363",
-		IncreasedDamage		= "75447;82930",
-		IncreasedCrit		= "24932;29801;51701;51470;24604;90309",
-		IncreasedAP			= "79102;53138;19506;30808",
-		IncreasedSPsix		= "_79058;_61316;_52109",
-		IncreasedSPten		= "77747;53646",
-		IncreasedSP			= "_79058;_61316;_52109;77747;53646", -- Backwards compatibility for MoP
-		IncreasedPhysHaste  = "55610;53290;8515",
-		IncreasedSpellHaste = "2895;24907;49868",
-		BurstHaste			= "2825;32182;80353;90355",
-		BonusAgiStr			= "6673;8076;57330;93435",
-		BonusStamina		= "79105;469;6307;90364",
-		BonusArmor			= "465;8072",
-		BonusMana			= "_79058;_61316;54424",
-		ManaRegen			= "54424;79102;5677",
-		BurstManaRegen		= "29166;16191;64901",
-		PushbackResistance  = "19746;87717",
-		Resistances			= "19891;8185",
-		DefensiveBuffs		= "48707;30823;33206;47585;871;48792;498;22812;61336;5277;74001;47788;19263;6940;_12976;31850;31224;42650;86657",
-		MiscHelpfulBuffs	= "89488;10060;23920;68992;31642;54428;2983;1850;29166;16689;53271;1044;31821;45182",
-		DamageBuffs			= "1719;12292;85730;50334;5217;3045;77801;34692;31884;51713;49016;12472;57933;64701;86700",
-	},
-	casts = {
-		--prefixing with _ doesnt really matter here since casts only match by name, but it may prevent confusion if people try and use these as buff/debuff equivs
-		Heals				= "50464;5185;8936;740;2050;2060;2061;32546;596;64843;635;82326;19750;331;77472;8004;1064;73920",
-		PvPSpells			= "33786;339;20484;1513;982;64901;_605;453;5782;5484;79268;10326;51514;118;12051",
 		Tier11Interrupts	= "_83703;_82752;_82636;_83070;_79710;_77896;_77569;_80734;_82411",
 		Tier12Interrupts	= "_97202;_100094",
 	},
@@ -2106,12 +2029,12 @@ function TMW:UpdateViaCoroutine()
 end
 
 TMW:RegisterEvent("PLAYER_REGEN_ENABLED", function()
-	if TMW.ISMOP and TMW.InitializedFully then
+	if TMW.InitializedFully then
 		TMW.Update = TMW.UpdateNormally
 	end
 end)
 TMW:RegisterEvent("PLAYER_REGEN_DISABLED", function()
-	if TMW.ISMOP and TMW.InitializedFully then
+	if TMW.InitializedFully then
 		if TMW.ALLOW_LOCKDOWN_CONFIG then
 			TMW.Update = TMW.UpdateViaCoroutine
 		elseif not TMW.Locked then
@@ -3085,9 +3008,7 @@ function TMW:PLAYER_ENTERING_WORLD()
 end
 
 function TMW:PLAYER_LOGIN()
-	if TMW.ISMOP then
-		TMW:RegisterEvent("PLAYER_SPECIALIZATION_CHANGED")
-	end
+	TMW:RegisterEvent("PLAYER_SPECIALIZATION_CHANGED")
 	TMW:RegisterEvent("PLAYER_TALENT_UPDATE", "PLAYER_SPECIALIZATION_CHANGED")
 	TMW:RegisterEvent("ACTIVE_TALENT_GROUP_CHANGED", "PLAYER_SPECIALIZATION_CHANGED")
 	
@@ -3103,25 +3024,15 @@ function TMW:PLAYER_SPECIALIZATION_CHANGED()
 	--TMW:Update()
 	
 	if not TMW.AddedTalentsToTextures then
-		if TMW.ISMOP then
-			for talent = 1, MAX_NUM_TALENTS do
-				local name, tex = GetTalentInfo(talent)
-				local lower = name and strlowerCache[name]
-				if lower then
-					SpellTexturesMetaIndex[lower] = tex
-				end
-			end
-		else
-			for tab = 1, GetNumTalentTabs() do
-				for talent = 1, GetNumTalents(tab) do
-					local name, tex = GetTalentInfo(tab, talent)
-					local lower = name and strlowerCache[name]
-					if lower then
-						SpellTexturesMetaIndex[lower] = tex
-					end
-				end
+		for talent = 1, MAX_NUM_TALENTS do
+			local name, tex = GetTalentInfo(talent)
+			local lower = name and strlowerCache[name]
+			
+			if lower then
+				SpellTexturesMetaIndex[lower] = tex
 			end
 		end
+		
 		TMW.AddedTalentsToTextures = 1
 	end
 end
@@ -3645,19 +3556,12 @@ end
 function Group.ShouldUpdateIcons(group)
 	local gs = group:GetSettings()
 
-	local GetActiveTalentGroup = GetActiveTalentGroup
-	local GetPrimaryTalentTree = GetPrimaryTalentTree
-	if TMW.ISMOP then
-		GetActiveTalentGroup = GetActiveSpecGroup
-		GetPrimaryTalentTree = GetSpecialization
-	end
-
 	if	(group:GetID() > TMW.db.profile.NumGroups) or
 		(not group.viewData) or
 		(not gs.Enabled) or
-		(GetActiveTalentGroup() == 1 and not gs.PrimarySpec) or
-		(GetActiveTalentGroup() == 2 and not gs.SecondarySpec) or
-		(GetPrimaryTalentTree() and not gs["Tree" .. GetPrimaryTalentTree()])
+		(GetActiveSpecGroup() == 1 and not gs.PrimarySpec) or
+		(GetActiveSpecGroup() == 2 and not gs.SecondarySpec) or
+		(GetSpecialization() and not gs["Tree" .. GetSpecialization()])
 	then
 		return false
 	end
@@ -5862,28 +5766,32 @@ function TMW:GetTexturePathFromSetting(setting)
 	setting = tonumber(setting) or setting
 		
 	if setting and setting ~= "" then
-		if TMW.ISMOP then
-			-- See http://us.battle.net/wow/en/forum/topic/5977979895#1 for the resoning behind this stupid shit right here.
-			if SpellTextures[setting] then
-				return SpellTextures[setting]
-			end
-			if strfind(setting, "[\\/]") then -- if there is a slash in it, then it is probably a full path
-				return setting:gsub("/", "\\")
-			else
-				-- if there isn't a slash in it, then it is probably be a wow icon in interface\icons.
-				-- it still might be a file in wow's root directory, but fuck, there is no way to tell for sure
-				return "Interface\\Icons\\" .. setting
-			end
-		else
-			TMW.TestTex:SetTexture(SpellTextures[setting])
-			if not TMW.TestTex:GetTexture() then
-				TMW.TestTex:SetTexture(setting)
-			end
-			if not TMW.TestTex:GetTexture() then
-				TMW.TestTex:SetTexture("Interface\\Icons\\" .. setting)
-			end
-			return TMW.TestTex:GetTexture()
+		-- See http://us.battle.net/wow/en/forum/topic/5977979895#1 for the resoning behind this stupid shit right here.
+		if SpellTextures[setting] then
+			return SpellTextures[setting]
 		end
+		if strfind(setting, "[\\/]") then -- if there is a slash in it, then it is probably a full path
+			return setting:gsub("/", "\\")
+		else
+			-- if there isn't a slash in it, then it is probably be a wow icon in interface\icons.
+			-- it still might be a file in wow's root directory, but fuck, there is no way to tell for sure
+			return "Interface\\Icons\\" .. setting
+		end
+		
+		--[[
+		-- Pre-MOP code for testing valid textures.
+		-- Kept here in a comment for ease of restoring it should it ever start working again.
+		
+		TMW.TestTex:SetTexture(SpellTextures[setting])
+		if not TMW.TestTex:GetTexture() then
+			TMW.TestTex:SetTexture(setting)
+		end
+		if not TMW.TestTex:GetTexture() then
+			TMW.TestTex:SetTexture("Interface\\Icons\\" .. setting)
+		end
+		return TMW.TestTex:GetTexture()
+		]]
+			
 	end
 end
 
@@ -5931,7 +5839,7 @@ function TMW:FormatSeconds(seconds, skipSmall, keepTrailing)
 end
 
 function TMW:CheckCanDoLockedAction(message)
-	if TMW.ISMOP and InCombatLockdown() and not TMW.ALLOW_LOCKDOWN_CONFIG then
+	if InCombatLockdown() and not TMW.ALLOW_LOCKDOWN_CONFIG then
 		if message ~= false then
 			TMW:Print(message or L["ERROR_ACTION_DENIED_IN_LOCKDOWN"])
 		end

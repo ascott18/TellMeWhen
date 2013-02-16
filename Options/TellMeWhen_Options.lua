@@ -1155,13 +1155,6 @@ function TMW:CompileOptions()
 									order = 1,
 									hidden = true,
 								},
-								DrawEdge = {
-									name = L["UIPANEL_DRAWEDGE"],
-									desc = L["UIPANEL_DRAWEDGE_DESC"],
-									type = "toggle",
-									order = 40,
-									hidden = TMW.ISMOP, -- Cooldown:SetDrawEdge was removed in MoP
-								},
 								SoundChannel = {
 									name = L["SOUND_CHANNEL"],
 									desc = L["SOUND_CHANNEL_DESC"],
@@ -1303,26 +1296,15 @@ function TMW:CompileOptions()
 	end
 	
 	local parent = TMW.GroupConfigTemplate.args.main.args
-	if TMW.ISMOP then
-		for i = 1, GetNumSpecializations() do
-			local _, name = GetSpecializationInfo(i)
-			parent["Tree"..i] = parent["Tree"..i] or {
-				type = "toggle",
-				name = name,
-				desc = L["UIPANEL_TREE_DESC"],
-				order = 7+i,
-			}
-		end
-	else
-		for i = 1, GetNumTalentTabs() do
-			local _, name = GetTalentTabInfo(i)
-			parent["Tree"..i] = parent["Tree"..i] or {
-				type = "toggle",
-				name = name,
-				desc = L["UIPANEL_TREE_DESC"],
-				order = 7+i,
-			}
-		end
+	
+	for i = 1, GetNumSpecializations() do
+		local _, name = GetSpecializationInfo(i)
+		parent["Tree"..i] = parent["Tree"..i] or {
+			type = "toggle",
+			name = name,
+			desc = L["UIPANEL_TREE_DESC"],
+			order = 7+i,
+		}
 	end
 
 	TMW.OptionsTable.args.groups.args.addgroupgroup.order = TMW.db.profile.NumGroups + 1

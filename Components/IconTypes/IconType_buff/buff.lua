@@ -279,7 +279,7 @@ local function Buff_OnUpdate(icon, time)
 				else
 					count = 0
 				end
-			elseif TMW.ISMOP then
+			else
 				-- This is really stupid, but there really isn't a more efficient way to do it.
 				-- As of WoW 5.0.4, there will be a boolean return at the end of UnitAura.
 				-- It could be v1, v2, v3, v4, or vN. There is no way to tell afaik, so we have to test the hard way.
@@ -307,18 +307,6 @@ local function Buff_OnUpdate(icon, time)
 					else
 						count = 0
 					end
-				else
-					count = 0
-				end
-			else
-				if v1 > 0 then
-					count = v1
-				elseif v2 > 0 then
-					count = v2
-				elseif v3 > 0 then
-					count = v3
-				elseif v4 > 0 then
-					count = v4
 				else
 					count = 0
 				end

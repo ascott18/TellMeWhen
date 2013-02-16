@@ -430,7 +430,7 @@ TMW:RegisterUpgrade(20100, {
 
 
 
-function CNDT:RAID_ROSTER_UPDATE()
+function CNDT:GROUP_ROSTER_UPDATE()
 	TMW.UNITS:UpdateTankAndAssistMap()
 	for oldunit in pairs(Env) do
 		if CNDT.SpecialUnitsUsed[oldunit] then
@@ -439,37 +439,7 @@ function CNDT:RAID_ROSTER_UPDATE()
 	end
 end
 
-Env = {
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
+Env = {	
 	strlower = strlower,
 	strlowerCache = TMW.strlowerCache,
 	strfind = strfind,
@@ -743,8 +713,8 @@ function CNDT:DoConditionSubstitutions(conditionData, condition, thisstr)
 				thisstr = gsub(thisstr, "c.Unit" .. append,		unit) -- sub it in as a variable
 				Env[unit] = unit
 				CNDT.SpecialUnitsUsed[unit] = true
-				CNDT:RegisterEvent(TMW.ISMOP and "GROUP_ROSTER_UPDATE" or "RAID_ROSTER_UPDATE", "RAID_ROSTER_UPDATE")
-				CNDT:RAID_ROSTER_UPDATE()
+				CNDT:RegisterEvent("GROUP_ROSTER_UPDATE")
+				CNDT:GROUP_ROSTER_UPDATE()
 			else
 				thisstr = gsub(thisstr, "c.Unit" .. append,	"\"" .. unit .. "\"") -- sub it in as a string
 			end
@@ -818,9 +788,9 @@ function CNDT:IsUnitEventUnit(unit)
 	elseif unit == "focus" then
 		return "PLAYER_FOCUS_CHANGED"
 	elseif unit:find("^raid%d+$") then
-		return TMW.ISMOP and "GROUP_ROSTER_UPDATE" or "RAID_ROSTER_UPDATE"
+		return "GROUP_ROSTER_UPDATE"
 	elseif unit:find("^party%d+$") then
-		return TMW.ISMOP and "GROUP_ROSTER_UPDATE" or "PARTY_MEMBERS_CHANGED"
+		return "GROUP_ROSTER_UPDATE"
 	elseif unit:find("^boss%d+$") then
 		return "INSTANCE_ENCOUNTER_ENGAGE_UNIT"
 	elseif unit:find("^arena%d+$") then
@@ -1196,9 +1166,9 @@ function ConditionObject:GetUnitChangedEventString(unit)
 	elseif unit == "focus" then
 		return self:GenerateNormalEventString("PLAYER_FOCUS_CHANGED")
 	elseif unit:find("^raid%d+$") then
-		return self:GenerateNormalEventString(TMW.ISMOP and "GROUP_ROSTER_UPDATE" or "RAID_ROSTER_UPDATE")
+		return self:GenerateNormalEventString("GROUP_ROSTER_UPDATE")
 	elseif unit:find("^party%d+$") then
-		return self:GenerateNormalEventString(TMW.ISMOP and "GROUP_ROSTER_UPDATE" or "PARTY_MEMBERS_CHANGED")
+		return self:GenerateNormalEventString("GROUP_ROSTER_UPDATE")
 	elseif unit:find("^boss%d+$") then
 		return self:GenerateNormalEventString("INSTANCE_ENCOUNTER_ENGAGE_UNIT")
 	elseif unit:find("^arena%d+$") then

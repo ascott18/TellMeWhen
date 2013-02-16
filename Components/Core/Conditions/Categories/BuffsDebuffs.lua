@@ -451,20 +451,3 @@ ConditionCategory:RegisterCondition(22,	 "OFFHAND", {
 	anticipate = [[local _, _, _, _, dur = GetWeaponEnchantInfo()
 		local VALUE = time + ((dur or 0)/1000) - c.Level]],
 })
-ConditionCategory:RegisterCondition(23,	 "THROWN", {
-	text = L["ICONMENU_WPNENCHANT"] .. " - " .. INVTYPE_THROWN,
-	category = L["CNDTCAT_BUFFSDEBUFFS"],
-	range = 120,
-	unit = false,
-	texttable = CNDT.COMMON.absentseconds,
-	icon = function() return GetInventoryItemTexture("player", GetInventorySlotInfo("RangedSlot")) or "Interface\\Icons\\inv_throwingknife_06" end,
-	tcoords = CNDT.COMMON.standardtcoords,
-	funcstr = [[(select(8, GetWeaponEnchantInfo()) or 0)/1000 c.Operator c.Level]],
-	events = function(ConditionObject, c)
-		return
-			ConditionObject:GenerateNormalEventString("UNIT_INVENTORY_CHANGED", "player")
-	end,
-	anticipate = [[local _, _, _, _, _, _, _, dur = GetWeaponEnchantInfo()
-		local VALUE = time + ((dur or 0)/1000) - c.Level]],
-	hidden = TMW.ISMOP or pclass ~= "ROGUE",
-})

@@ -276,7 +276,7 @@ ANN:RegisterEventHandlerDataNonSpecific(30, "SMART", {
 			end
 			SendChatMessage(Text, channel)
 		end
-	or TMW.ISMOP and
+	or
 		function(icon, data, Text)
 			local channel = "SAY"
 			if UnitInBattleground("player") then
@@ -284,18 +284,6 @@ ANN:RegisterEventHandlerDataNonSpecific(30, "SMART", {
 			elseif IsInRaid() then
 				channel = "RAID"
 			elseif IsInGroup() then
-				channel = "PARTY"
-			end
-			SendChatMessage(Text, channel)
-		end
-	or
-		function(icon, data, Text)
-			local channel = "SAY"
-			if UnitInBattleground("player") then
-				channel = TMW.CONST.CHAT_TYPE_INSTANCE_CHAT
-			elseif UnitInRaid("player") then
-				channel = "RAID"
-			elseif GetNumPartyMembers() > 1 then
 				channel = "PARTY"
 			end
 			SendChatMessage(Text, channel)

@@ -348,7 +348,7 @@ ConditionCategory:RegisterCondition(17,	 "SHADOW_ORBS", {
 		return
 			ConditionObject:GenerateNormalEventString("UNIT_POWER", "player")
 	end,
-	hidden = pclass ~= "PRIEST" or not TMW.ISMOP,
+	hidden = pclass ~= "PRIEST",
 })
 
 ConditionCategory:RegisterCondition(19.1, "BURNING_EMBERS", {
@@ -363,7 +363,7 @@ ConditionCategory:RegisterCondition(19.1, "BURNING_EMBERS", {
 		return
 			ConditionObject:GenerateNormalEventString("UNIT_POWER", "player")
 	end,
-	hidden = pclass ~= "WARLOCK" or not TMW.ISMOP,
+	hidden = pclass ~= "WARLOCK",
 })
 ConditionCategory:RegisterCondition(19.2, "BURNING_EMBERS_FRAGMENTS", {
 	text = L["BURNING_EMBERS_FRAGMENTS"],
@@ -378,7 +378,7 @@ ConditionCategory:RegisterCondition(19.2, "BURNING_EMBERS_FRAGMENTS", {
 		return
 			ConditionObject:GenerateNormalEventString("UNIT_POWER", "player")
 	end,
-	hidden = pclass ~= "WARLOCK" or not TMW.ISMOP,
+	hidden = pclass ~= "WARLOCK",
 })
 ConditionCategory:RegisterCondition(19.3, "DEMONIC_FURY", {
 	text = DEMONIC_FURY,
@@ -392,7 +392,7 @@ ConditionCategory:RegisterCondition(19.3, "DEMONIC_FURY", {
 		return
 			ConditionObject:GenerateNormalEventString("UNIT_POWER", "player")
 	end,
-	hidden = pclass ~= "WARLOCK" or not TMW.ISMOP,
+	hidden = pclass ~= "WARLOCK",
 })
 
 ConditionCategory:RegisterSpacer(40)

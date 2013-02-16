@@ -69,11 +69,6 @@ Type:RegisterConfigPanel_ConstructorFunc(120, "TellMeWhen_WeaponSlot", function(
 			value = "SecondaryHandSlot",
 			title = INVTYPE_WEAPONOFFHAND,
 		},
-		not TMW.ISMOP and {
-			setting = "WpnEnchantType",
-			value = "RangedSlot",
-			title = INVTYPE_THROWN,
-		} or nil,
 	})
 end)
 

@@ -5,6 +5,7 @@
  * New slash command for changing profiles: /tmw profile "Profile Name"
  * Animations can now be anchored to different components of an icon (when appropriate).
  * Added icons to the icon type select menu.
+ * All pre-MoP compatibility code has been removed.
  ** Bug Fixes:
  ** Designed a new protocol for sharing class spells to prevent the old version of it that was dramatically errored from leaking into a new version of it.
  ** LastUpdateTime-type values should now only be set after an update completes so that in the event of a "script ran too long" error, the update will be ran again in the next cycle.

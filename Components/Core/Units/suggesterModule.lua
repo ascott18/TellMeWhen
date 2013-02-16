@@ -153,16 +153,8 @@ function Module:UpdateGroupedPlayersMap()
 
 	wipe(groupedPlayers)
 	
-	local numRaidMembers, numPartyMembers
-	if TMW.ISMOP then
-		numRaidMembers = IsInRaid() and GetNumGroupMembers() or 0
-		
-		numPartyMembers = GetNumSubgroupMembers()
-	else		
-		numRaidMembers = GetNumRaidMembers()
-		
-		numPartyMembers = GetNumPartyMembers()
-	end	
+	local numRaidMembers = IsInRaid() and GetNumGroupMembers() or 0
+	local numPartyMembers = GetNumSubgroupMembers()
 	
 	groupedPlayers[UnitName("player")] = true
 	if UnitName("pet") then

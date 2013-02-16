@@ -257,7 +257,7 @@ local Classes = {
 	"SHAMAN",
 	"WARLOCK",
 	"WARRIOR",
-	TMW.ISMOP and "MONK" or nil,
+	"MONK",
 }
 ConditionCategory:RegisterCondition(11,	 "CLASS", {
 	text = L["CONDITIONPANEL_CLASS"],

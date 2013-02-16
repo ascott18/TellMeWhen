@@ -172,10 +172,6 @@ function CooldownSweep:SetupForIcon(icon)
 	
 	local attributes = icon.attributes
 	
-	if not TMW.ISMOP then
-		-- SetDrawEdge has been removed in MOP
-		self.cooldown:SetDrawEdge(TMW.db.profile.DrawEdge)
-	end	
 	
 	self:DURATION(icon, attributes.start, attributes.duration)
 	self:SPELLCHARGES(icon, attributes.charges, attributes.maxCharges)

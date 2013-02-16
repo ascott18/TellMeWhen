@@ -133,18 +133,18 @@ local UnitSet = TMW:NewClass("UnitSet"){
 				self.allUnitsChangeOnEvent = false
 
 			elseif unit:find("^raid%d+$") then -- the unit exactly
-				self.updateEvents[TMW.ISMOP and "GROUP_ROSTER_UPDATE" or "RAID_ROSTER_UPDATE"] = true
+				self.updateEvents["GROUP_ROSTER_UPDATE"] = true
 				UNITS.unitsWithExistsEvent[unit] = true
 			elseif unit:find("^raid%d+") then -- the unit as a base, with something else tacked onto it.
-				self.updateEvents[TMW.ISMOP and "GROUP_ROSTER_UPDATE" or "RAID_ROSTER_UPDATE"] = true
+				self.updateEvents["GROUP_ROSTER_UPDATE"] = true
 				UNITS.unitsWithBaseExistsEvent[unit] = unit:match("^(raid%d+)")
 				self.allUnitsChangeOnEvent = false
 
 			elseif unit:find("^party%d+$") then -- the unit exactly
-				self.updateEvents[TMW.ISMOP and "GROUP_ROSTER_UPDATE" or "PARTY_MEMBERS_CHANGED"] = true
+				self.updateEvents["GROUP_ROSTER_UPDATE"] = true
 				UNITS.unitsWithExistsEvent[unit] = true
 			elseif unit:find("^party%d+") then -- the unit as a base, with something else tacked onto it.
-				self.updateEvents[TMW.ISMOP and "GROUP_ROSTER_UPDATE" or "PARTY_MEMBERS_CHANGED"] = true
+				self.updateEvents["GROUP_ROSTER_UPDATE"] = true
 				UNITS.unitsWithBaseExistsEvent[unit] = unit:match("^(party%d+)")
 				self.allUnitsChangeOnEvent = false
 
@@ -166,7 +166,7 @@ local UnitSet = TMW:NewClass("UnitSet"){
 
 			elseif unit:find("^maintank") or unit:find("^mainassist") then
 				UNITS:UpdateTankAndAssistMap()
-				self.updateEvents[TMW.ISMOP and "GROUP_ROSTER_UPDATE" or "RAID_ROSTER_UPDATE"] = true
+				self.updateEvents["GROUP_ROSTER_UPDATE"] = true
 				UNITS.unitsWithExistsEvent[unit] = true
 				self.hasTankAndAssistRefs = true
 				UNITS.doTankAndAssistMap = true
@@ -178,8 +178,8 @@ local UnitSet = TMW:NewClass("UnitSet"){
 				-- it MIGHT be a player name (or a derrivative thereof),
 				-- so register some events so that we can exchange it out with a real unitID when possible.
 
-				self.updateEvents[TMW.ISMOP and "GROUP_ROSTER_UPDATE" or "RAID_ROSTER_UPDATE"] = true
-				self.updateEvents[TMW.ISMOP and "GROUP_ROSTER_UPDATE" or "PARTY_MEMBERS_CHANGED"] = true
+				self.updateEvents["GROUP_ROSTER_UPDATE"] = true
+				self.updateEvents["GROUP_ROSTER_UPDATE"] = true
 				self.updateEvents.UNIT_PET = true
 				UNITS.doGroupedPlayersMap = true
 
@@ -341,92 +341,18 @@ function UNITS:GetOriginalUnitTable(unitSettings)
 end
 TMW:MakeFunctionCached(UNITS, "GetOriginalUnitTable")
 
-if TMW.ISMOP then
-	function UNITS:UpdateTankAndAssistMap()
-		local mtMap, maMap = UNITS.mtMap, UNITS.maMap
+function UNITS:UpdateTankAndAssistMap()
+	local mtMap, maMap = UNITS.mtMap, UNITS.maMap
 
-		wipe(mtMap)
-		wipe(maMap)
+	wipe(mtMap)
+	wipe(maMap)
 
-		-- setup a table with (key, value) pairs as (oldnumber, newnumber)
-		-- oldnumber is 7 for raid7
-		-- newnumber is 1 for raid7 when the current maintank/assist is the 1st one found, 2 for the 2nd one found, etc)
-		
-		if IsInRaid() then
-			for i = 1, GetNumGroupMembers() do
-				local raidunit = "raid" .. i
-				if GetPartyAssignment("MAINTANK", raidunit) then
-					mtMap[#mtMap + 1] = i
-				elseif GetPartyAssignment("MAINASSIST", raidunit) then
-					maMap[#maMap + 1] = i
-				end
-			end
-		end
-	end
-
-	function UNITS:UpdateGroupedPlayersMap()
-		local gpMap = UNITS.gpMap
-
-		wipe(gpMap)
-
-		gpMap[strlowerCache[pname]] = "player"
-		local petname = UnitName("pet")
-		if petname then
-			gpMap[strlowerCache[petname]] = "pet"
-		end
-
-		-- setup a table with (key, value) pairs as (name, unitID)
-		
-		if IsInRaid() then
-			-- Raid Players
-			local numRaidMembers = GetNumGroupMembers()
-			for i = 1, numRaidMembers do
-				local raidunit = "raid" .. i
-				local name = UnitName(raidunit)
-				gpMap[strlowerCache[name]] = raidunit
-			end
-		
-			-- Raid Pets (Process after raid players so that players with names the same as pets dont get overwritten)
-			for i = 1, numRaidMembers do
-				local petunit = "raidpet" .. i
-				local name = UnitName(petunit)
-				if name then
-					-- dont overwrite a player with a pet
-					gpMap[strlowerCache[name]] = gpMap[strlowerCache[name]] or petunit
-				end
-			end
-		end
-		
-		-- Party Players
-		local numPartyMembers = GetNumSubgroupMembers()
-		for i = 1, numPartyMembers do
-			local raidunit = "party" .. i
-			local name = UnitName(raidunit)
-			gpMap[strlowerCache[name]] = raidunit
-		end
-		
-		-- Party Pets (Process after party players so that players with names the same as pets dont get overwritten)
-		for i = 1, numPartyMembers do
-			local petunit = "party" .. i
-			local name = UnitName(petunit)
-			if name then
-				-- dont overwrite a player with a pet
-				gpMap[strlowerCache[name]] = gpMap[strlowerCache[name]] or petunit
-			end
-		end
-	end
-else
-	function UNITS:UpdateTankAndAssistMap()
-		local mtMap, maMap = UNITS.mtMap, UNITS.maMap
-
-		wipe(mtMap)
-		wipe(maMap)
-
-		-- setup a table with (key, value) pairs as (oldnumber, newnumber)
-		-- oldnumber is 7 for raid7
-		-- newnumber is 1 for raid7 when the current maintank/assist is the 1st one found, 2 for the 2nd one found, etc)
-		
-		for i = 1, GetNumRaidMembers() do
+	-- setup a table with (key, value) pairs as (oldnumber, newnumber)
+	-- oldnumber is 7 for raid7
+	-- newnumber is 1 for raid7 when the current maintank/assist is the 1st one found, 2 for the 2nd one found, etc)
+	
+	if IsInRaid() then
+		for i = 1, GetNumGroupMembers() do
 			local raidunit = "raid" .. i
 			if GetPartyAssignment("MAINTANK", raidunit) then
 				mtMap[#mtMap + 1] = i
@@ -435,22 +361,24 @@ else
 			end
 		end
 	end
+end
 
-	function UNITS:UpdateGroupedPlayersMap()
-		local gpMap = UNITS.gpMap
+function UNITS:UpdateGroupedPlayersMap()
+	local gpMap = UNITS.gpMap
 
-		wipe(gpMap)
+	wipe(gpMap)
 
-		gpMap[strlowerCache[pname]] = "player"
-		local petname = UnitName("pet")
-		if petname then
-			gpMap[strlowerCache[petname]] = "pet"
-		end
+	gpMap[strlowerCache[pname]] = "player"
+	local petname = UnitName("pet")
+	if petname then
+		gpMap[strlowerCache[petname]] = "pet"
+	end
 
-		-- setup a table with (key, value) pairs as (name, unitID)
-		
+	-- setup a table with (key, value) pairs as (name, unitID)
+	
+	if IsInRaid() then
 		-- Raid Players
-		local numRaidMembers = GetNumRaidMembers()
+		local numRaidMembers = GetNumGroupMembers()
 		for i = 1, numRaidMembers do
 			local raidunit = "raid" .. i
 			local name = UnitName(raidunit)
@@ -466,23 +394,23 @@ else
 				gpMap[strlowerCache[name]] = gpMap[strlowerCache[name]] or petunit
 			end
 		end
-		
-		-- Party Players
-		local numPartyMembers = GetNumPartyMembers()
-		for i = 1, numPartyMembers do
-			local raidunit = "party" .. i
-			local name = UnitName(raidunit)
-			gpMap[strlowerCache[name]] = raidunit
-		end
-		
-		-- Party Pets (Process after party players so that players with names the same as pets dont get overwritten)
-		for i = 1, numPartyMembers do
-			local petunit = "party" .. i
-			local name = UnitName(petunit)
-			if name then
-				-- dont overwrite a player with a pet
-				gpMap[strlowerCache[name]] = gpMap[strlowerCache[name]] or petunit
-			end
+	end
+	
+	-- Party Players
+	local numPartyMembers = GetNumSubgroupMembers()
+	for i = 1, numPartyMembers do
+		local raidunit = "party" .. i
+		local name = UnitName(raidunit)
+		gpMap[strlowerCache[name]] = raidunit
+	end
+	
+	-- Party Pets (Process after party players so that players with names the same as pets dont get overwritten)
+	for i = 1, numPartyMembers do
+		local petunit = "party" .. i
+		local name = UnitName(petunit)
+		if name then
+			-- dont overwrite a player with a pet
+			gpMap[strlowerCache[name]] = gpMap[strlowerCache[name]] or petunit
 		end
 	end
 end

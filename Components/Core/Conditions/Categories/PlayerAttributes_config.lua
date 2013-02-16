@@ -144,22 +144,15 @@ Module.stances = {
 		[48266] = 	GetSpellInfo(48266), 	-- Frost Presence
 		[48265] = 	GetSpellInfo(48265), 	-- Unholy Presence	
 	},
-	PALADIN = TMW.ISMOP and {
+	PALADIN = {
 		[105361] = 	GetSpellInfo(105361), 	-- Seal of Command
 		[20165] = 	GetSpellInfo(20165), 	-- Seal of Insight
 		[20164] = 	GetSpellInfo(20164),	-- Seal of Justice
 		[20154] = 	GetSpellInfo(20154), 	-- Seal of Righteousness
 		[31801] = 	GetSpellInfo(31801),	-- Seal of Truth
-	} or {
-		[19746] = 	GetSpellInfo(19746), 	-- Concentration Aura
-		[32223] = 	GetSpellInfo(32223), 	-- Crusader Aura
-		[465] = 	GetSpellInfo(465),		-- Devotion Aura
-		[19891] = 	GetSpellInfo(19891), 	-- Resistance Aura
-		[7294] = 	GetSpellInfo(7294),		-- Retribution Aura	
 	},
 	WARLOCK = {
-		[47241] = 	GetSpellInfo(47241),	-- Metamorphosis	
-		[103958] = 	GetSpellInfo(103958),	-- Metamorphosis (ISMOP)
+		[103958] = 	GetSpellInfo(103958),	-- Metamorphosis
 		[114168] = 	GetSpellInfo(114168),	-- Dark Apotheosis
 	},
 	MONK = {
@@ -216,23 +209,11 @@ local Module = SUG:NewModule("talents", SUG:GetModule("spell"))
 Module.noMin = true
 Module.table = {}
 function Module:OnInitialize()
-	if TMW.ISMOP then
-		for talent = 1, MAX_NUM_TALENTS do
-			local name = GetTalentInfo(talent)
-			local lower = name and strlowerCache[name]
-			if lower then
-				self.table[lower] = talent
-			end
-		end
-	else
-		for tab = 1, GetNumTalentTabs() do
-			for talent = 1, GetNumTalents(tab) do
-				local name, tex = GetTalentInfo(tab, talent)
-				local lower = name and strlowerCache[name]
-				if lower then
-					self.table[lower] = {tab, talent, tex}
-				end
-			end
+	for talent = 1, MAX_NUM_TALENTS do
+		local name = GetTalentInfo(talent)
+		local lower = name and strlowerCache[name]
+		if lower then
+			self.table[lower] = talent
 		end
 	end
 end
@@ -243,31 +224,17 @@ function Module:Table_GetSorter()
 	return nil
 end
 function Module:Entry_AddToList_1(f, name)
-	if TMW.ISMOP then
-		local talent = self.table[name]
-		local name, tex = GetTalentInfo(talent) -- restore case
+	local talent = self.table[name]
+	local name, tex = GetTalentInfo(talent) -- restore case
 
-		f.Name:SetText(name)
+	f.Name:SetText(name)
 
-		f.tooltipmethod = "SetHyperlink"
-		f.tooltiparg = GetTalentLink(talent)
+	f.tooltipmethod = "SetHyperlink"
+	f.tooltiparg = GetTalentLink(talent)
 
-		f.insert = name
+	f.insert = name
 
-		f.Icon:SetTexture(tex)
-	else
-		local data = self.table[name]
-		name = GetTalentInfo(data[1], data[2]) -- restore case
-
-		f.Name:SetText(name)
-
-		f.tooltipmethod = "SetHyperlink"
-		f.tooltiparg = GetTalentLink(data[1], data[2])
-
-		f.insert = name
-
-		f.Icon:SetTexture(data[3])
-	end
+	f.Icon:SetTexture(tex)
 end
 function Module:Table_GetNormalSuggestions(suggestions, tbl, ...)
 	local atBeginning = SUG.atBeginning

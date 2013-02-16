@@ -91,7 +91,7 @@ local Cooldowns = setmetatable({}, {__index = function(t, k)
 end}) TMW.Cooldowns = Cooldowns
 
 local resetsOnCast = {
-	[23989] = TMW.ISMOP and { -- Readiness
+	[23989] = { -- Readiness
 		[120697] = 1, -- Lynx Rush
 		[19574] = 1, -- Bestial Wrath
 		[6991] = 1, -- Feed Pet
@@ -119,7 +119,7 @@ local resetsOnCast = {
 		[20736] = 1, -- Distracting Shot
 		[120679] = 1, -- Dire Beast
 		[34026] = 1, -- Kill Command
-		-- [121818] = 1, -- Stampeded (5 min cd, doesn't get reset)
+		-- [121818] = 1, -- Stampeed (5 min cd, doesn't get reset)
 		[5384] = 1, -- Feign Death
 		[19577] = 1, -- Intimidation
 		[1543] = 1, -- Flare
@@ -128,35 +128,6 @@ local resetsOnCast = {
 		[109259] = 1, -- Powershot
 		[117050] = 1, -- Glaive Toss
 		[120360] = 1, -- Barrrage
-	} or {
-		[19386] = 1,
-		[3674] = 1,
-		[19503] = 1,
-		[53209] = 1,
-		[34490] = 1,
-		[19577] = 1,
-		[53271] = 1,
-		[19263] = 1,
-		[781] = 1,
-		[5116] = 1,
-		[53351] = 1,
-		[3045] = 1,
-		[3034] = 1,
-		[34026] = 1,
-		[60192] = 1,
-		[34600] = 1,
-		[1499] = 1,
-		[13809] = 1,
-		[13795] = 1,
-		[1543] = 1,
-		[19434] = 1,
-		[20736] = 1,
-		[19306] = 1,
-		[3044] = 1,
-		[34477] = 1,
-		[2973] = 1,
-		[53301] = 1,
-		[2643] = 1,
 	},
 	
 	[108285] = { -- Call of the Elements
@@ -171,10 +142,6 @@ local resetsOnCast = {
 	},
 	[11958] = { -- coldsnap
 		[44572] = 1,
-		[31687] = TMW.ISNOTMOP,
-		[11426] = TMW.ISNOTMOP,
-		[12472] = TMW.ISNOTMOP,
-		[45438] = TMW.ISNOTMOP,
 		[120] = 1,
 		[122] = 1,
 	},
@@ -183,13 +150,6 @@ local resetsOnCast = {
 		[2983] = 1, -- Sprint
 		[1856] = 1, -- Vanish
 		[51722] = 1, -- Dismantle
-		[36554] = TMW.ISNOTMOP, -- Shadowstep
-		[1766] = TMW.ISNOTMOP, -- Kick
-		[76577] = TMW.ISNOTMOP, -- Smoke Bomb
-		[31224] = TMW.ISMOP, -- Cloak of Shadows
-	},
-	[60970] = TMW.ISNOTMOP and { --some warrior thing that resets intercept
-		[20252] = 1,
 	},
 	[50334] = { --druid berserk or something
 		[33878] = 1,
@@ -203,16 +163,8 @@ local resetsOnAura = {
 	[93622] = { -- Mangle! (from lacerate and thrash)
 		[33878] = 1, -- Mangle
 	},
-	[48517] = TMW.ISNOTMOP and { -- solar eclipse
-		[16886] = 1, -- Nature's Grace
-	},
-	[48518] = TMW.ISMOP and { -- lunar eclipse
+	[48518] = { -- lunar eclipse
 		[48505] = 1, -- Starfall
-	} or {
-		[16886] = 1, -- Nature's Grace
-	},
-	[64343] = TMW.ISNOTMOP and { -- impact
-		[2136] = 1, -- Fire Blast
 	},
 	[50227] = { -- Sword and Board
 		[23922] = 1, -- Shield Slam
@@ -237,7 +189,7 @@ local resetsOnAura = {
 	},
 }
 local spellBlacklist = {
-	[50288] = TMW.ISMOP, -- Starfall damage effect, causes the cooldown to be off by 10 seconds and prevents proper resets when tracking by name.
+	[50288] = 1, -- Starfall damage effect, causes the cooldown to be off by 10 seconds and prevents proper resets when tracking by name.
 }
 
 
@@ -356,17 +308,17 @@ function Type:PLAYER_ENTERING_WORLD()
 	isArena = zoneType == "arena"
 	if isArena and not wasArena then
 		wipe(resetForArena)
-		Type:RegisterEvent(TMW.ISMOP and "GROUP_ROSTER_UPDATE" or "RAID_ROSTER_UPDATE", "RAID_ROSTER_UPDATE")
+		Type:RegisterEvent("GROUP_ROSTER_UPDATE")
 		Type:RegisterEvent("ARENA_OPPONENT_UPDATE")
 	elseif not isArena then
-		Type:UnregisterEvent(TMW.ISMOP and "GROUP_ROSTER_UPDATE" or "RAID_ROSTER_UPDATE", "RAID_ROSTER_UPDATE")
+		Type:UnregisterEvent("GROUP_ROSTER_UPDATE")
 		Type:UnregisterEvent("ARENA_OPPONENT_UPDATE")
 	end
 end
 Type:RegisterEvent("PLAYER_ENTERING_WORLD")
 Type:RegisterEvent("ZONE_CHANGED_NEW_AREA", "PLAYER_ENTERING_WORLD")
 
-function Type:RAID_ROSTER_UPDATE()
+function Type:GROUP_ROSTER_UPDATE()
 	for i = 1, 40 do
 		local GUID = UnitGUID("raid" .. i)
 		if not GUID then

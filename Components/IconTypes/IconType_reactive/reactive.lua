@@ -126,21 +126,17 @@ local function Reactive_OnUpdate(icon, time)
 		local iName = NameArray[i]
 		n = i
 		
-		if TMW.ISMOP then
-			charges, maxCharges, start_charge, duration_charge = GetSpellCharges(iName)
-			if charges then
-				if charges < maxCharges then
-					start, duration = start_charge, duration_charge
-				else
-					start, duration = GetSpellCooldown(iName)
-				end
-				stack = charges
+		charges, maxCharges, start_charge, duration_charge = GetSpellCharges(iName)
+		if charges then
+			if charges < maxCharges then
+				start, duration = start_charge, duration_charge
 			else
 				start, duration = GetSpellCooldown(iName)
-				stack = GetSpellCount(iName)
 			end
+			stack = charges
 		else
 			start, duration = GetSpellCooldown(iName)
+			stack = GetSpellCount(iName)
 		end
 		
 		if duration then
@@ -181,21 +177,17 @@ local function Reactive_OnUpdate(icon, time)
 	local NameFirst = icon.NameFirst
 	if n > 1 then -- if more than 1 spell was checked, we need to get these again for the first spell, otherwise reuse the values obtained above since they are just for the first one
 		
-		if TMW.ISMOP then
-			charges, maxCharges, start_charge, duration_charge = GetSpellCharges(NameFirst)
-			if charges then
-				if charges < maxCharges then
-					start, duration = start_charge, duration_charge
-				else
-					start, duration = GetSpellCooldown(NameFirst)
-				end
-				stack = charges
+		charges, maxCharges, start_charge, duration_charge = GetSpellCharges(NameFirst)
+		if charges then
+			if charges < maxCharges then
+				start, duration = start_charge, duration_charge
 			else
 				start, duration = GetSpellCooldown(NameFirst)
-				stack = GetSpellCount(NameFirst)
 			end
+			stack = charges
 		else
 			start, duration = GetSpellCooldown(NameFirst)
+			stack = GetSpellCount(NameFirst)
 		end
 		
 		if IgnoreRunes and duration == 10 and icon.NameName ~= mindfreeze then
@@ -209,6 +201,7 @@ local function Reactive_OnUpdate(icon, time)
 			nomana = SpellHasNoMana(NameFirst)
 		end
 	end
+	
 	if duration then
 		icon:SetInfo("alpha; texture; start, duration; charges, maxCharges; stack, stackText; spell; inRange; noMana",
 			icon.UnAlpha,

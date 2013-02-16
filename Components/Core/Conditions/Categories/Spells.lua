@@ -142,8 +142,7 @@ ConditionCategory:RegisterCondition(2.5, "SPELLCHARGES", {
 			ConditionObject:GenerateNormalEventString("SPELL_UPDATE_COOLDOWN"),
 			ConditionObject:GenerateNormalEventString("SPELL_UPDATE_USABLE"),
 			ConditionObject:GenerateNormalEventString("SPELL_UPDATE_CHARGES")
-	end,
-	hidden = not TMW.ISMOP,		
+	end,	
 })
 ConditionCategory:RegisterCondition(2.6, "SPELLCHARGETIME", {
 	text = L["SPELLCHARGETIME"],

@@ -1893,19 +1893,9 @@ L["DefensiveBuffs"] = "Defensive Buffs"
 L["MiscHelpfulBuffs"] = "Misc. Helpful Buffs"
 L["DamageBuffs"] = "Damage Buffs"
 
--- TMW.ISMOP: these don't exist in MoP
+-- Deprecated
 L["DontMelee"] = "Don't Melee"
 L["MovementSlowed"] = "Movement Slowed"
-L["IncreasedDamage"] = "Increased Damage Done"
-L["BonusAgiStr"] = "Increased Agility/Strength"
-L["BonusArmor"] = "Increased Armor"
-L["BonusMana"] = "Increased Mana Pool"
-L["ManaRegen"] = "Increased Mana Regen"
-L["PushbackResistance"] = "Increased Pushback Resistance"
-L["Resistances"] = "Increased Spell Resistance"
-L["SpellCritTaken"] = "Increased Spell Crit Taken"
-L["BleedDamageTaken"] = "Increased Bleed Damage Taken"
-L["ReducedAttackSpeed"] = "Reduced Attack Speed"
 
 L["Heals"] = "Player Heals"
 L["PvPSpells"] = "PvP Crowd Control, etc."
