@@ -48,6 +48,7 @@ Hook:RegisterCompileFunctionSegmentHook("post", function(Processor, t)
 	
 	if attributes.alpha_durationFailed ~= alpha_durationFailed then
 		icon:SetInfo_INTERNAL("alpha_durationFailed", alpha_durationFailed)
+		doFireIconUpdated = true
 	end
 	--]]
 end)

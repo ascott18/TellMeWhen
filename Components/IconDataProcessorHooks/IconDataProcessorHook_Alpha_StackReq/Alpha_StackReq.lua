@@ -38,6 +38,7 @@ Hook:RegisterCompileFunctionSegmentHook("post", function(Processor, t)
 	
 	if attributes.alpha_stackFailed ~= alpha_stackFailed then
 		icon:SetInfo_INTERNAL("alpha_stackFailed", alpha_stackFailed)
+		doFireIconUpdated = true
 	end
 	--]]
 end)
