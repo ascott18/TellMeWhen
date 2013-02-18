@@ -23,6 +23,9 @@ local strlowerCache = TMW.strlowerCache
 
 local _, pclass = UnitClass("Player")
 
+local clientVersion = select(4, GetBuildInfo())
+local wow_502 = clientVersion >= 50200
+
 local IsInInstance, GetInstanceDifficulty, GetNumShapeshiftForms, GetShapeshiftFormInfo = 
 	  IsInInstance, GetInstanceDifficulty, GetNumShapeshiftForms, GetShapeshiftFormInfo
 local GetTalentInfo, GetNumTalentTabs, GetNumTalents, GetGlyphLink, GetSpellInfo = 
@@ -57,6 +60,14 @@ ConditionCategory:RegisterCondition(1,	 "INSTANCE", {
 	Env = {
 		GetZoneType = function()
 			local _, z = IsInInstance()
+			local instanceDifficulty
+			
+			if wow_502 then
+				_, _, instanceDifficulty = GetInstanceInfo()
+			else
+				instanceDifficulty = GetInstanceDifficulty()
+			end
+			
 			local instanceDifficulty = GetInstanceDifficulty()
 			if z == "pvp" then
 				-- Battleground (1)

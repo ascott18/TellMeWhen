@@ -1,11 +1,16 @@
-===v6.1.2===
+===v6.1.3===
  * New icon type: Swing Timer.
  * New conditions: Swing Timer - Main Hand; Swing Timer - Off Hand.
+ * Added textures to the icon type select menu.
+ * All pre-MoP compatibility code has been removed.
+ ** Bug Fixes:
+ ** Text from the Text Displays module should now always appear above all other icon elements.
+ ** Fixed: Core\Conditions\Categories\PlayerAttributes.lua:60: attempt to call upvalue "GetInstanceDifficulty" (a nil value)
+
+===v6.1.2===
  * Added a new tag [LocType] to display the category of loss of control icon types.
  * New slash command for changing profiles: /tmw profile "Profile Name"
  * Animations can now be anchored to different components of an icon (when appropriate).
- * Added icons to the icon type select menu.
- * All pre-MoP compatibility code has been removed.
  ** Bug Fixes:
  ** Designed a new protocol for sharing class spells to prevent the old version of it that was dramatically errored from leaking into a new version of it.
  ** LastUpdateTime-type values should now only be set after an update completes so that in the event of a "script ran too long" error, the update will be ran again in the next cycle.
@@ -20,7 +25,6 @@
  ** Fixed an issue with DetectFrame for GroupModule_GroupPosition(Thanks to ChairmanKaga, ticket #740).
  ** Event handlers that are changed from an event that has short condition checking enabled to an event that does not have condition checking should now function correctly.
  ** It should no longer be possible for the bottom of the icon editor to extend off your screen, preventing you from resizing it.
- ** Text from the Text Displays module should now always appear above all other icon elements.
  
 ===v6.1.1===
  * Added a new text output handler for the Instance channel, and updated existing chat output methods for this channel.
