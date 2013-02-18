@@ -324,14 +324,16 @@ ConditionCategory:RegisterCondition(9,	 "TALENTLEARNED", {
 	useSUG = "talents",
 	icon = function() return select(2, GetTalentInfo(1)) end,
 	tcoords = CNDT.COMMON.standardtcoords,
-	funcstr = [[TalentMap[LOWER(c.NameName)] == c.1nil]],
-	events = function(ConditionObject, c)
+	funcstr = function(ConditionObject, c)
 		-- this is handled externally because TalentMap is so extensive a process,
 		-- and if it ends up getting processed in an OnUpdate condition, it could be very bad.
 		CNDT:RegisterEvent("PLAYER_TALENT_UPDATE")
+		CNDT:RegisterEvent("ACTIVE_TALENT_GROUP_CHANGED", "PLAYER_TALENT_UPDATE")
 		CNDT:PLAYER_TALENT_UPDATE()
-		
-		-- we still only need to update the condition when talents change, though.
+	
+		return [[TalentMap[LOWER(c.NameName)] == c.1nil]]
+	end,
+	events = function(ConditionObject, c)
 		return
 			ConditionObject:GenerateNormalEventString("PLAYER_TALENT_UPDATE"),
 			ConditionObject:GenerateNormalEventString("ACTIVE_TALENT_GROUP_CHANGED")
@@ -388,11 +390,7 @@ ConditionCategory:RegisterCondition(11,	 "GLYPH", {
 	useSUG = "glyphs",
 	icon = "Interface\\Icons\\inv_inscription_tradeskill01",
 	tcoords = CNDT.COMMON.standardtcoords,
-	funcstr = [[GlyphLookup[c.NameFirst] == c.1nil]],
-	Env = {
-		GlyphLookup = {},
-	},
-	events = function(ConditionObject, c)
+	funcstr = function(ConditionObject, c)
 		-- this is handled externally because GlyphLookup is so extensive a process,
 		-- and if it does get stuck in an OnUpdate condition, it could be very bad.
 		CNDT:RegisterEvent("GLYPH_ADDED", 	 "GLYPH_UPDATED")
@@ -401,8 +399,13 @@ ConditionCategory:RegisterCondition(11,	 "GLYPH", {
 		CNDT:RegisterEvent("GLYPH_REMOVED",  "GLYPH_UPDATED")
 		CNDT:RegisterEvent("GLYPH_UPDATED",  "GLYPH_UPDATED")
 		CNDT:GLYPH_UPDATED()
-		
-		-- we still only need to update the condition when glyphs change, though.
+	
+		return [[GlyphLookup[c.NameFirst] == c.1nil]]
+	end,
+	Env = {
+		GlyphLookup = {},
+	},
+	events = function(ConditionObject, c)
 		return
 			ConditionObject:GenerateNormalEventString("GLYPH_ADDED"),
 			ConditionObject:GenerateNormalEventString("GLYPH_DISABLED"),
@@ -540,13 +543,14 @@ ConditionCategory:RegisterCondition(16,	 "TRACKING", {
 	useSUG = "tracking",
 	icon = "Interface\\MINIMAP\\TRACKING\\None",
 	tcoords = CNDT.COMMON.standardtcoords,
-	funcstr = [[Tracking[c.NameName] == c.1nil]],
-	events = function(ConditionObject, c)
-		-- this event handling it is really extensive, so keep it in a separate process
+	funcstr = function(ConditionObject, c)
+		-- this event handling it is really extensive, so keep it in a handler separate from the condition
 		CNDT:RegisterEvent("MINIMAP_UPDATE_TRACKING")
 		CNDT:MINIMAP_UPDATE_TRACKING()
-		
-		-- Tell the condition to also update when MINIMAP_UPDATE_TRACKING fires
+	
+		return [[[Tracking[c.NameName] == c.1nil]]
+	end,
+	events = function(ConditionObject, c)
 		return
 			ConditionObject:GenerateNormalEventString("MINIMAP_UPDATE_TRACKING")
 	end,

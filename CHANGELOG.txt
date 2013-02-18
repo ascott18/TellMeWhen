@@ -8,6 +8,7 @@
  ** Text from the Text Displays module should now always appear above all other icon elements.
  ** Fixed: {{{Core\Conditions\Categories\PlayerAttributes.lua:60: attempt to call upvalue "GetInstanceDifficulty" (a nil value) }}}
  ** The ALPHA_STACKREQ and ALPHA_DURATIONREQ data processor hooks should now properly trigger the TMW_ICON_UPDATED event when their state changes, which will allow meta icons (that check icons that implement these hooks) to properly update as needed.
+ ** The "Talent learned", "Glyph active", and "Tracking active" conditions should now always update properly when checked in a condition set where there are OnUpdate driven conditions in a higher position than these conditions.
 
 ===v6.1.2===
  * Added a new tag [LocType] to display the category of loss of control icon types.
