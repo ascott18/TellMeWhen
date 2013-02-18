@@ -152,6 +152,7 @@ View:ImplementsModule("IconModule_IconContainer_Masque", 100, function(Module, i
 	
 	local insets = Masque.isDefaultSkin and 1.5 or 0
 	local anchorTo = IconModule_Texture_Colored and IconModule_Texture_Colored.texture or icon
+	
 	if TimerBar_Overlay then
 		TimerBar_Overlay.bar:SetFrameLevel(icon:GetFrameLevel() + 1 + frameLevelOffset)
 		TimerBar_Overlay.bar:ClearAllPoints()

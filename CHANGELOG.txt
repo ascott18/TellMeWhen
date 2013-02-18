@@ -20,6 +20,7 @@
  ** Fixed an issue with DetectFrame for GroupModule_GroupPosition(Thanks to ChairmanKaga, ticket #740).
  ** Event handlers that are changed from an event that has short condition checking enabled to an event that does not have condition checking should now function correctly.
  ** It should no longer be possible for the bottom of the icon editor to extend off your screen, preventing you from resizing it.
+ ** Text from the Text Displays module should now always appear above all other icon elements.
  
 ===v6.1.1===
  * Added a new text output handler for the Instance channel, and updated existing chat output methods for this channel.

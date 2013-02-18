@@ -111,7 +111,6 @@ end
 
 function Type:Setup(icon, groupID, iconID)
 	
-
 	icon.FirstTexture = nil --TODO
 	
 	icon:SetInfo("reverse", true)

@@ -5,6 +5,7 @@
 ## Interface: 50100
 # DONT FORGET TO TOC BUMP TELLMEWHEN_OPTIONS TOO!!
 ## X-Interface: 50100
+## X-Compatible-With: 50200
 ## Title: TellMeWhen
 
 ## Version: 6.1.3

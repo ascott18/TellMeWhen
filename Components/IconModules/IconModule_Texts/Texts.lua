@@ -524,6 +524,10 @@ function Texts:OnNewInstance(icon)
 	self.kwargs = {} -- Stores the DogTag kwargs table that will be used by the module for all its text displays/FontStrings.
 	self.fontStrings = {} -- Stores all of the FontStrings that the midle has created.
 	
+	self.container = CreateFrame("Frame", nil, icon)
+	self.container:SetAllPoints(icon)
+	self.container:SetFrameLevel(icon:GetFrameLevel() + 2)
+	
 	-- We need to make sure that all strings that are Masque skinnable are always created
 	-- so that they can be available to IconModule_IconContainer_Masque when it requests them.
 	-- If Masque isn't installed, then don't bother - we will create them normally on demand.
@@ -547,9 +551,12 @@ function Texts:OnDisable()
 end
 
 function Texts:CreateFontString(id)
-	local icon = self.icon
-	local fontString = icon:CreateFontString(self:GetChildNameBase() .. id, "ARTWORK", "NumberFontNormalSmall")
+	local container = self.container
+	
+	local fontString = container:CreateFontString(self:GetChildNameBase() .. id, "ARTWORK", "NumberFontNormalSmall")
+	
 	self.fontStrings[id] = fontString
+	
 	return fontString
 end
 

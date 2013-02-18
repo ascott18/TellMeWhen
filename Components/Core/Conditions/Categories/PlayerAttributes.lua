@@ -477,11 +477,11 @@ ConditionCategory:RegisterCondition(14,	 "PETSPEC", {
 	},
 	funcstr = [[(GetSpecialization(nil, true) or 0) c.Operator c.Level]],
 	hidden = pclass ~= "HUNTER",
-	--events = function(ConditionObject, c)
-	-- TODO: MAYBE WRONG EVENTS, CHECK BEFORE UNCOMMENTING
-	--	return
-	--		ConditionObject:GenerateNormalEventString("UNIT_PET", "player")
-	--end,
+	events = function(ConditionObject, c)
+		return
+			ConditionObject:GenerateNormalEventString("UNIT_PET", "player"),
+			ConditionObject:GenerateNormalEventString("PET_SPECIALIZATION_CHANGED")
+	end,
 })
 ConditionCategory:RegisterCondition(15,	 "PETTREE", {
 	-- THIS CONDITION IS OUTDATED, BUT DON'T DELETE IT!

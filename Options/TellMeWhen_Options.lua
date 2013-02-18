@@ -436,7 +436,9 @@ function TMW:AnimateHeightChange(f, endHeight, duration)
 						f:SetHeight(f.__animateHeight_end)
 						return  
 					end
+					
 					local pct = (TMW.time - f.__animateHeight_startTime)/f.__animateHeight_duration
+					
 					f:SetHeight((pct*f.__animateHeight_delta)+f.__animateHeight_start)
 				end
 		end)    
