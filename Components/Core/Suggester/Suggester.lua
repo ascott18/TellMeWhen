@@ -725,6 +725,7 @@ end
 
 -- Currently unused. I'm not sure if I like this or not.
 -- It includes item textures (the plain texture suggestion module doesn't), but the sorting is really weird and also CPU-intensive
+--[===[
 local Module = SUG:NewModule("texture2", SUG:GetModule("default"), "AceEvent-3.0")
 local ItemCache_Cache
 Module.Sources = {
@@ -908,7 +909,7 @@ function Module:Entry_Colorize_1(f, id)
 		end
 	end
 end
-
+]===]
 
 
 local Module = SUG:NewModule("spellwithduration", SUG:GetModule("spell"))

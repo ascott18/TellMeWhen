@@ -3,6 +3,7 @@
  * New conditions: Swing Timer - Main Hand; Swing Timer - Off Hand.
  * Added textures to the icon type select menu.
  * All pre-MoP compatibility code has been removed.
+ * You can now use item slot IDs as dynamic Custom Texture values. Syntax is {{{$item.1}}}, where 1 is the item slot ID (1-19) that you want to use.
  
  * Bug Fixes:
  ** Text from the Text Displays module should now always appear above all other icon elements.
