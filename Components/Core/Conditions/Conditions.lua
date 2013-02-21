@@ -926,18 +926,14 @@ function ConditionObject:CompileUpdateFunction(Conditions)
 		local t = c.Type
 		local v = CNDT.ConditionsByType[t]
 		
-		-- DON'T RETURN OUT OF THE FOLLOWING CODE!
-		-- ALL CONDITIONS EXPECT THEIR EVENTS FUNCTION TO BE CALLED, 
-		-- EVEN IF THE ENTIRE CONDITIONOBJECT WILL BE ONUPDATE DRIVEN
-		
 		if v and v.events then
 			local voidNext
 			for n, argCheckerString in TMW:Vararg(TMW.get(v.events, self, c)) do
 				if argCheckerString == false or argCheckerString == nil then
-					--return
+					return
 				elseif type(argCheckerString) == "string" then
 					if argCheckerString == "OnUpdate" then
-						--return
+						return
 					elseif argCheckerString == "" then
 						TMW:Error("Condition.events shouldn't return blank strings! (From condition %q). Return STRING 'false' if you don't want the condition to update OnUpdate but it also has no events (basically, if it is static).", t)
 					else
@@ -946,7 +942,7 @@ function ConditionObject:CompileUpdateFunction(Conditions)
 				end
 			end
 		else
-			--return
+			return
 		end
 
 		-- handle code that anticipates when a change in state will occur.

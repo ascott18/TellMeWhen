@@ -28,7 +28,7 @@ TMW.L = L
 TELLMEWHEN_VERSION = "6.1.3"
 TELLMEWHEN_VERSION_MINOR = strmatch(" @project-version@", " r%d+") or ""
 TELLMEWHEN_VERSION_FULL = TELLMEWHEN_VERSION .. TELLMEWHEN_VERSION_MINOR
-TELLMEWHEN_VERSIONNUMBER = 61308 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
+TELLMEWHEN_VERSIONNUMBER = 61309 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
 if TELLMEWHEN_VERSIONNUMBER > 62000 or TELLMEWHEN_VERSIONNUMBER < 61000 then return error("YOU SCREWED UP THE VERSION NUMBER OR DIDNT CHANGE THE SAFETY LIMITS") end -- safety check because i accidentally made the version number 414069 once
 
 TELLMEWHEN_MAXROWS = 20
@@ -135,9 +135,8 @@ TMW.SpellTexturesBase = {
 	[strlowerCache[GetSpellInfo(42292)]] = "Interface\\Icons\\inv_jewelry_trinketpvp_0" .. (UnitFactionGroup("player") == "Horde" and "2" or "1"),
 }
 local SpellTexturesMetaIndex = TMW.SpellTexturesMetaIndex
-local SpellTexturesBase = TMW.SpellTexturesBase
 TMW.SpellTextures = setmetatable(
-CopyTable(SpellTexturesBase),
+CopyTable(TMW.SpellTexturesBase),
 {
 	__index = function(t, name)
 		if not name then return end
@@ -1917,7 +1916,7 @@ function TMW:UpdateNormally()
 	end
 	
 	wipe(SpellTextures)
-	SpellTextures = TMW:CopyTableInPlaceWithMeta(SpellTexturesBase, SpellTextures)
+	SpellTextures = TMW:CopyTableInPlaceWithMeta(TMW.SpellTexturesBase, SpellTextures)
 	
 	TMW:Fire("TMW_GLOBAL_UPDATE") -- the placement of this matters. Must be after options load, but before icons are updated
 
@@ -3967,7 +3966,7 @@ function Icon.TMW_CNDT_OBJ_PASSING_CHANGED(icon, event, ConditionObject, failed)
 	-- failed is boolean, never nil. nil is used for the conditionFailed attribute if there are no conditions on the icon.
 	if icon.ConditionObject == ConditionObject then
 		icon.NextUpdateTime = 0
-		-- alpha is set here to force an update on it
+		
 		icon:SetInfo("conditionFailed", failed)
 	end
 end
