@@ -2664,10 +2664,10 @@ TMW:NewClass("SettingEditBox", "EditBox", "SettingFrameBase"){
 		get(self.data.OnTextChanged, self, button) 
 	end,
 	
-	ReloadSetting = function(self)
+	ReloadSetting = function(self, eventMaybe)
 		local icon = CI.ic
 		if icon then
-			if self.setting then
+			if not (eventMaybe == "TMW_CONFIG_ICON_HISTORY_STATE_CREATED" and self:HasFocus()) and self.setting then
 				self:SetText(icon:GetSettings()[self.setting])
 			end
 			self:CheckInteractionStates()

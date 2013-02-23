@@ -305,6 +305,8 @@
 					<OnTextChanged>
 						local text = self:GetText()
 
+						print(debugstack())
+						
 						local allowNoUnit = self.supplementalData and self.supplementalData.allowNoUnit
 						
 						if text == "" then
