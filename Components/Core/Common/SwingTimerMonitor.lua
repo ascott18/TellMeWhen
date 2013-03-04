@@ -71,17 +71,14 @@ local function DualWieldEvent(_,_,_,event,_,src_guid)
 			frame:CheckTime()
 		end
 		
-		local MH_active = SwingTimers[MAINHAND_SLOT].active
-		local OH_active = SwingTimers[OFFHAND_SLOT].active
-		
 		-- This handles the case when lag throws timers out of sync.
 		-- Both timers get reset, and they should work themselves out within a few swings
-		if MH_active and OH_active then
+		if SwingTimers[MAINHAND_SLOT].active and SwingTimers[OFFHAND_SLOT].active then
 			SwingTimers[MAINHAND_SLOT].active = false
 			SwingTimers[OFFHAND_SLOT].active = false
 		end
 			
-		if MH_active then
+		if SwingTimers[MAINHAND_SLOT].active then
 			SwingTimers[OFFHAND_SLOT]:Start()
 		else
 			SwingTimers[MAINHAND_SLOT]:Start()

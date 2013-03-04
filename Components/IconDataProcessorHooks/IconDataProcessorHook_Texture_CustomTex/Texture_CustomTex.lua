@@ -61,7 +61,7 @@ function Hook:OnImplementIntoIcon(icon)
 		local varType, varData = CustomTex:match("^$([^%.:]+)%.?([^:]*)$")
 		
 		if varType then
-			varType = varType:trim(" ")
+			varType = varType:lower():trim(" ")
 		end
 		if varData then
 			varData = varData:trim(" ")

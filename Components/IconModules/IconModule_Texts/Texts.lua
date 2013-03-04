@@ -56,12 +56,9 @@ TMW:RegisterDatabaseDefaults{
 					StringName		= "",				-- Name of the string (user-readable)
 					Name 		  	= "Arial Narrow",	-- Name of the Font (Stupid key for this setting)
 					Size 		  	= 12,               -- Font size
-					--x 	 		  	= 0,                -- Anchor setting
-					--y 	 		  	= 0,                -- Anchor setting
-					--point 		  	= "CENTER",         -- Anchor setting
-					--relativePoint 	= "CENTER",         -- Anchor setting
 					Justify	 		= "CENTER",         -- 
 					Outline 	  	= "THICKOUTLINE",   -- Font outline
+					Shadow			= 0,
 					
 					Anchors = {
 						n = 1,
@@ -676,6 +673,8 @@ function Texts:OnKwargsUpdated()
 				end
 				
 				fontString.TMW_QueueForRemoval = nil
+				
+				fontString:SetShadowOffset(fontStringSettings.Shadow, -fontStringSettings.Shadow)
 				
 				DogTag:AddFontString(fontString, self.icon, styleString .. text, "TMW;Unit", self.kwargs)
 			end

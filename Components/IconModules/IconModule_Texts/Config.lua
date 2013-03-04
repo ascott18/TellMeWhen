@@ -899,6 +899,16 @@ local textFontStringTemplate = {
 					step = 1,
 					bigStep = 1,
 				},
+				Shadow = {
+					name = L["UIPANEL_FONT_SHADOW"],
+					desc = L["UIPANEL_FONT_SHADOW_DESC"],
+					type = "range",
+					order = 10,
+					min = 0,
+					softMax = 3,
+					step = 0.1,
+					bigStep = 0.5,
+				},
 			},
 		},
 		

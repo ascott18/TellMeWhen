@@ -203,7 +203,7 @@ function CONFIG.DropdownMenu_SelectTypes()
 			info.text = get(text)
 			
 			info.tooltipTitle = get(text)
-			info.tooltipText = (TMW.debug and data.value or "") .. (get(data.desc) or "")
+			info.tooltipText = (TMW.debug and (data.value and data.value .. "\r\n") or "") .. (get(data.desc) or "")
 			info.tooltipOnButton = true
 			
 			info.value = data.value
