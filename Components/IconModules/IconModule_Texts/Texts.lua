@@ -54,7 +54,7 @@ TMW:RegisterDatabaseDefaults{
 				-- Display defaults
 				["**"] = {
 					StringName		= "",				-- Name of the string (user-readable)
-					Name 		  	= "Arial Narrow",	-- Name of the Font (Stupid key for this setting)
+					Name 		  	= "Arial Narrow",	-- Name of the Font (Stupid key for this setting, but it dates back to antiquity)
 					Size 		  	= 12,               -- Font size
 					Justify	 		= "CENTER",         -- 
 					Outline 	  	= "THICKOUTLINE",   -- Font outline
