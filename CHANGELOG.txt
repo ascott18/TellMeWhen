@@ -1,3 +1,7 @@
+===v6.1.5===
+ * Bug Fixes:
+ ** Fixed an offset error with the Instance Type condition. 
+
 ===v6.1.4===
  * Bug Fixes:
  ** Forgot to remove a call to a method that was retired in 5.2 when I upgraded the code to work with 5.2 (GetInstanceDifficulty).

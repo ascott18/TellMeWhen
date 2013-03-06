@@ -74,7 +74,7 @@ ConditionCategory:RegisterCondition(1,	 "INSTANCE", {
 			elseif z == "arena" then
 				-- Arena (2)
 				return 2
-			elseif instanceDifficulty == 1 then
+			elseif instanceDifficulty == 0 then
 				-- None (0)
 				return 0
 			else
@@ -87,7 +87,7 @@ ConditionCategory:RegisterCondition(1,	 "INSTANCE", {
 				-- LFR (9)
 				-- Challenge Mode (10)
 				-- 40 man (11)
-				return 1 + instanceDifficulty --3-11
+				return 2 + instanceDifficulty --3-11
 			end
 		end,
 	},
