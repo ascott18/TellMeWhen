@@ -68,7 +68,6 @@ ConditionCategory:RegisterCondition(1,	 "INSTANCE", {
 				instanceDifficulty = GetInstanceDifficulty()
 			end
 			
-			local instanceDifficulty = GetInstanceDifficulty()
 			if z == "pvp" then
 				-- Battleground (1)
 				return 1
