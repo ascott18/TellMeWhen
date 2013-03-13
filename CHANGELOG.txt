@@ -1,3 +1,7 @@
+===v6.1.6===
+ * Bug Fixes:
+ ** The IncreasedStats equivalency should now always properly check for the Legacy of the Emperor buff
+
 ===v6.1.5===
  * Bug Fixes:
  ** Fixed an offset error with the Instance Type condition. 
