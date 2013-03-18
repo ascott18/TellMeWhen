@@ -1401,7 +1401,7 @@ function TMW:Group_Add(view)
 		TMW.db.profile.Groups[groupID].View = view
 		
 		local viewData = TMW.Views[view]
-		if viewData and viewData.Group_OnCreate then
+		if viewData then
 			viewData:Group_OnCreate(TMW.db.profile.Groups[groupID])
 		end
 	end

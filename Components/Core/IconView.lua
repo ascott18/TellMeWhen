@@ -17,19 +17,46 @@ local TMW = TMW
 local L = TMW.L
 local print = TMW.print
 
+--- IconView is the base class for all Icon Views. Icon Views allows users to customize the way that an icon's information is displayed on a macroscopic level. The default IV (also used as the fallback when a requested IconView cannot be found) is Icon. To create a new IconView, make a new instance of the IconView class.
+--
+-- @class file
+-- @name IconView.lua
+
+--- ----
+-- == Class Structure ==
+-- Inherits TMW.Classes.GroupComponent and TMW.Classes.IconComponent
+-- @class table
+-- @name TMW.Classes.IconView
+-- @field name [string] [REQUIRED] A localized string that names the IconView throughout TMW.
+-- @field desc [string] [REQUIRED] A localized string that describes the IconView throughout TMW.
+-- @field view [string] A short string that will identify the IconView across the addon. Set through the constructor, and should not be modified.
+-- @field order [number] A number that determines the display order of the IconView in configuration UIs. Set through IconView:Register and should not be modified.
+-- @field ModuleImplementors [table] [INTERNAL] A table that holds the data for all the IconView's module implementations. Should not be accessed or modified in any way outside of the API in this file.
 
 local IconView = TMW:NewClass("IconView", "GroupComponent", "IconComponent")
 IconView.ModuleImplementors = {}
 
+-- ----
+-- == Provided Methods ==
+--
+
+--- Constructor - Creates a new IconView
+-- @name IconView:New(view)
+-- @param view [string] A short string that will identify the IconView across the addon.
+-- @usage IconView = TMW.Classes.IconView:New("icon")
 function IconView:OnNewInstance(view)
 	self.view = view
 	
 	TMW.Icon_Defaults.SettingsPerView[view] = {}
-	self.IconDefaultsPerView = TMW.Icon_Defaults.SettingsPerView[view]
 	self:InheritTable(self.class, "ModuleImplementors")
 end
 
+--- Register the IconView for use in TellMeWhen. IconViews cannot be used or accessed until this method is called. Should be the very last line of code in the file that defines an IconView.
+-- @param order [number] The order of this IconView relative to other IconViews in configuration UI.
+-- @return self The IconView this method was called on.
+-- @usage IconView:Register(10)
 function IconView:Register(order)
+	self:AssertSelfIsInstance()
 	TMW:ValidateType("IconView.name", "IconView:Register(order)", self.name, "string")
 	TMW:ValidateType("IconView.desc", "IconView:Register(order)", self.desc, "string")
 	TMW:ValidateType("2 (order)", "IconView:Register(order)", order, "number")
@@ -58,9 +85,36 @@ end
 local function DefaultImplementorFunc(Module)
 	Module:Enable()
 end
+local doneImplementingDefaults
 
-function IconView:ImplementsModule(module, order, implementorFunc)
-	TMW:ValidateType(2, "IconView:ImplementsModule()", module, "string")
+--- Declare that the IconView should implement a specified IconModule or GroupModule.
+-- @param moduleName [string] A string that identifies the requested module. The module doesn't have to exist when :ImplementsModule is called, and if the module does not exist when it comes time to implement it, no error will be thrown.
+-- @param order [number] The order that this module should be implemented in, relative to other modules of the same kind (icon or group) implemented by this IconView. 
+-- @param implementorFunc [function|boolean|nil] One of the following:
+-- 		* [function] A function that will be called when the module is implemented into a group or icon. Should be used when a module requires some sort of setup (like anchoring to its parent GenericModuleImplementor) to function correctly. Signature of this method is (Module, ModuleImplementor).
+--		* [true] True to use the default implementor function, which is equivalent to {{{function(Module) Module:Enable() end}}}.
+--		* [false] False if the module should not implement. Should only be used as an override to disable the implementation of a module.
+--		* [nil] Nil if the module should implement, but no action should be taken when it is implemented (no implementorFunc will be called).
+-- @usage 
+--	IconView:ImplementsModule("GroupModule_GroupPosition", 1, true)
+--	
+--	IconView:ImplementsModule("IconModule_CooldownSweep", 20, function(Module, icon)
+--		-- icon.ShowTimer and icon.ShowTimerText are defined on icon because this method is called after implementation is complete.
+--		if icon.ShowTimer or icon.ShowTimerText then
+--			Module:Enable()
+--		end
+--		
+--		-- Configure the module. ICON_SIZE is defined elsewhere.
+--		Module.cooldown:ClearAllPoints()
+--		Module.cooldown:SetSize(ICON_SIZE, ICON_SIZE)
+--		Module.cooldown:SetPoint("CENTER", icon)
+--	end)
+function IconView:ImplementsModule(moduleName, order, implementorFunc)
+	if doneImplementingDefaults then
+		self:AssertSelfIsInstance()
+	end
+	
+	TMW:ValidateType(2, "IconView:ImplementsModule()", moduleName, "string")
 	TMW:ValidateType(3, "IconView:ImplementsModule()", order, "number")
 	
 	if implementorFunc == true then
@@ -69,13 +123,22 @@ function IconView:ImplementsModule(module, order, implementorFunc)
 	
 	self.ModuleImplementors[#self.ModuleImplementors+1] = {
 		order = order,
-		moduleName = module,
+		moduleName = moduleName,
 		implementorFunc = implementorFunc,
 	}
 	
 	TMW:SortOrderedTables(self.ModuleImplementors)
 end
 
+--- Query if an IconView implements a specified module.
+-- @param moduleName [string] A string that identifies the queried module.
+-- @return [boolean] Boolean indicating if the IconView does implement the queried module.
+-- @usage 
+-- Check if a module is implemented by a specific IconView.
+-- implements = TMW.Views.icon:DoesImplementModule("IconModule_CooldownSweep")
+-- 
+-- Check if a module is implemented by default to all IconViews (can be overridden on a per-IconView basis).
+-- implements = TMW.Classes.IconView:DoesImplementModule("IconModule_CooldownSweep")
 function IconView:DoesImplementModule(moduleName)
 	for i, implementationData in ipairs(self.ModuleImplementors) do
 		if moduleName == implementationData.moduleName then
@@ -86,6 +149,54 @@ function IconView:DoesImplementModule(moduleName)
 	return false
 end
 
+--- ----
+-- == Required Method Definitions ==
+--
+
+--- Method that will be called immediately after the IconView (and all its requested IconModules) has been implemented into an icon. Can be used to preform actions like setting the size of the icon, or other things that aren't already done by any of the icon's modules.
+-- @param icon [TMW.Classes.Icon] The icon the IconView was just implemented into.
+function IconView:Icon_Setup(icon)
+	self:AssertSelfIsInstance()
+	error("IconView:Icon_Setup(icon) is a required method, but the default was called!")
+end
+
+--- Method that will be called to position an icon that uses the IconView. This interacts closely with the icon sorting feature of TMW groups.
+-- @param icon [TMW.Classes.Icon] The icon that needs to be positioned.
+-- @param positionID [number] The iconID of the icon adjusted to what the iconID should be to have the icon in the correct position within its group. If no icon sorting is used by the icon's group, this will be equal to icon.ID and icon:GetID().
+function IconView:Icon_SetPoint(icon, positionID)
+	self:AssertSelfIsInstance()
+	error("IconView:Icon_SetPoint(icon, positionID) is a required method, but the default was called!")
+end
+
+--- Method that will be called immediately after the IconView (and all its requested GroupModules) has been implemented into a group. Can be used to preform actions like setting the size of the group, or other things that aren't already done by any of the group's modules.
+-- @param icon [TMW.Classes.Group] The group the IconView was just implemented into.
+function IconView:Group_Setup(group)
+	self:AssertSelfIsInstance()
+	error("IconView:Group_Setup(group) is a required method, but the default was called!")
+end
+
+
+--- ----
+-- == Optional Method Definitions ==
+--
+
+--- Method that will be called when a new group that uses this IconView is manually created by the user. Does not happen for importing a group. Should be used to modify the default settings of a group to better fit the view. 
+-- @param gs [TMW.Group_Defaults] The settings of the group that was just created. This method does not provide access to an actual TMW.Classes.Group since one will not have been created before this is called.
+-- @usage
+--	function IconView:Group_OnCreate(gs)
+--		-- Switch the default number of rows with the number of columns. This is the default behavior for TMW.Views.bar
+--		gs.Rows, gs.Columns = gs.Columns, gs.Rows
+--	end
+function IconView:Group_OnCreate(gs)
+	-- Optional method. Default implementation is no action.
+end
+
+
+--- ----
+-- == Internal Methods ==
+--
+
+--- [INTERNAL] Method called when the IconView is implemented into an icon. Should not be called manually. Should not be overriden. Purpose is to implement all the IconView's requested modules into the icon.
 function IconView:OnImplementIntoIcon(icon)
 	for i, implementationData in ipairs(self.ModuleImplementors) do
 		local moduleName = implementationData.moduleName
@@ -116,6 +227,7 @@ function IconView:OnImplementIntoIcon(icon)
 	end
 end
 
+--- [INTERNAL] Method called when the IconView is unimplemented from an icon. Should not be called manually. Should not be overriden. Purpose is to unimplement all the IconView's requested modules from the icon.
 function IconView:OnUnimplementFromIcon(icon)
 	for i, implementationData in ipairs(self.ModuleImplementors) do
 		local moduleName = implementationData.moduleName
@@ -131,6 +243,7 @@ function IconView:OnUnimplementFromIcon(icon)
 end
 
 
+--- [INTERNAL] Method called when the IconView is implemented into a group. Should not be called manually. Should not be overriden. Purpose is to implement all the IconView's requested modules into the group.
 function IconView:OnImplementIntoGroup(group)
 	for i, implementationData in ipairs(self.ModuleImplementors) do
 		local moduleName = implementationData.moduleName
@@ -161,6 +274,7 @@ function IconView:OnImplementIntoGroup(group)
 	end
 end
 
+--- [INTERNAL] Method called when the IconView is implemented into a group. Should not be called manually. Should not be overriden. Purpose is to implement all the IconView's requested modules into the group.
 function IconView:OnUnimplementFromGroup(group)
 	for i, implementationData in ipairs(self.ModuleImplementors) do
 		local moduleName = implementationData.moduleName
@@ -190,3 +304,4 @@ IconView:ImplementsModule("IconModule_GroupMover", 5, true)
 IconView:ImplementsModule("IconModule_Tooltip", 6, true)
 IconView:ImplementsModule("IconModule_IconEditorLoader", 7, true)
 
+doneImplementingDefaults = true

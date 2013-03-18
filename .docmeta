@@ -1,0 +1,3 @@
+type: luadoc
+input-file: **/IconView.lua
+output-page: "API/Icon View"
