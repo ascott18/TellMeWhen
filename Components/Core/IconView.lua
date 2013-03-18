@@ -17,14 +17,19 @@ local TMW = TMW
 local L = TMW.L
 local print = TMW.print
 
---- IconView is the base class for all Icon Views. Icon Views allows users to customize the way that an icon's information is displayed on a macroscopic level. The default IV (also used as the fallback when a requested IconView cannot be found) is Icon. To create a new IconView, make a new instance of the IconView class.
+--- TMW.Classes.IconView is the base class for all Icon Views.
+--
+-- Icon Views allows users to customize the way that an icon's information is displayed on a macroscopic level. The default Icon Views (also used as the fallback when a requested IconView cannot be found) is Icon. To create a new IconView, make a new instance of the IconView class.
 --
 -- @class file
 -- @name IconView.lua
 
 --- ----
--- == Class Structure ==
--- Inherits TMW.Classes.GroupComponent and TMW.Classes.IconComponent
+-- = Class Structure =
+-- @class file
+-- @name Class Struct
+
+--- Inherits TMW.Classes.GroupComponent and TMW.Classes.IconComponent
 -- @class table
 -- @name TMW.Classes.IconView
 -- @field name [string] [REQUIRED] A localized string that names the IconView throughout TMW.
@@ -41,7 +46,7 @@ IconView.ModuleImplementors = {}
 --
 
 --- Constructor - Creates a new IconView
--- @name IconView:New(view)
+-- @name IconView:New
 -- @param view [string] A short string that will identify the IconView across the addon.
 -- @usage IconView = TMW.Classes.IconView:New("icon")
 function IconView:OnNewInstance(view)
@@ -134,10 +139,10 @@ end
 -- @param moduleName [string] A string that identifies the queried module.
 -- @return [boolean] Boolean indicating if the IconView does implement the queried module.
 -- @usage 
--- Check if a module is implemented by a specific IconView.
+-- -- Check if a module is implemented by a specific IconView.
 -- implements = TMW.Views.icon:DoesImplementModule("IconModule_CooldownSweep")
 -- 
--- Check if a module is implemented by default to all IconViews (can be overridden on a per-IconView basis).
+-- -- Check if a module is implemented by default to all IconViews (can be overridden on a per-IconView basis).
 -- implements = TMW.Classes.IconView:DoesImplementModule("IconModule_CooldownSweep")
 function IconView:DoesImplementModule(moduleName)
 	for i, implementationData in ipairs(self.ModuleImplementors) do
@@ -169,7 +174,7 @@ function IconView:Icon_SetPoint(icon, positionID)
 end
 
 --- Method that will be called immediately after the IconView (and all its requested GroupModules) has been implemented into a group. Can be used to preform actions like setting the size of the group, or other things that aren't already done by any of the group's modules.
--- @param icon [TMW.Classes.Group] The group the IconView was just implemented into.
+-- @param group [TMW.Classes.Group] The group the IconView was just implemented into.
 function IconView:Group_Setup(group)
 	self:AssertSelfIsInstance()
 	error("IconView:Group_Setup(group) is a required method, but the default was called!")
