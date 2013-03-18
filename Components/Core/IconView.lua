@@ -18,12 +18,12 @@ local L = TMW.L
 local print = TMW.print
 
 --- {{{TMW.Classes.IconView}}} is the base class for all Icon Views.
--- @class file
--- @name IconView.lua
 -- IconView inherits explicitly from {{{TMW.Classes.GroupComponent}}} and {{{TMW.Classes.IconComponent}}}, and implicitly from the classes that they inherit. 
 --
 -- Icon Views allows users to customize the way that an icon's information is displayed on a macroscopic level. The default Icon View (also used as the fallback when a requested IconView cannot be found) is Icon. To create a new IconView, make a new instance of the IconView class.
 --
+-- @class file
+-- @name IconView.lua
 
 
 
