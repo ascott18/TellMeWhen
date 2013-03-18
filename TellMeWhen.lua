@@ -28,7 +28,7 @@ TMW.L = L
 TELLMEWHEN_VERSION = "6.1.6"
 TELLMEWHEN_VERSION_MINOR = strmatch(" @project-version@", " r%d+") or ""
 TELLMEWHEN_VERSION_FULL = TELLMEWHEN_VERSION .. TELLMEWHEN_VERSION_MINOR
-TELLMEWHEN_VERSIONNUMBER = 61601 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
+TELLMEWHEN_VERSIONNUMBER = 61602 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
 if TELLMEWHEN_VERSIONNUMBER > 62000 or TELLMEWHEN_VERSIONNUMBER < 61000 then return error("YOU SCREWED UP THE VERSION NUMBER OR DIDNT CHANGE THE SAFETY LIMITS") end -- safety check because i accidentally made the version number 414069 once
 
 TELLMEWHEN_MAXROWS = 20
@@ -3489,16 +3489,20 @@ end
 Group.Show_Blizz = Group.Show
 function Group.Show(group)
 	if not group.__shown then
+		TMW:Fire("TMW_GROUP_SHOW_PRE", group)
 		group:Show_Blizz()
 		group.__shown = 1
+		TMW:Fire("TMW_GROUP_SHOW_POST", group)
 	end
 end
 
 Group.Hide_Blizz = Group.Hide
 function Group.Hide(group)
 	if group.__shown then
+		TMW:Fire("TMW_GROUP_HIDE_PRE", group)
 		group:Hide_Blizz()
 		group.__shown = nil
+		TMW:Fire("TMW_GROUP_HIDE_POST", group)
 	end
 end
 
@@ -5864,7 +5868,7 @@ function TMW:LockToggle()
 	end
 	TMW.db.profile.Locked = not TMW.db.profile.Locked
 
-	TMW:Fire("TMW_LOCK_TOGGLED", TMW.Locked)
+	TMW:Fire("TMW_LOCK_TOGGLED", TMW.db.profile.Locked)
 
 	PlaySound("igCharacterInfoTab")
 	TMW:Update()

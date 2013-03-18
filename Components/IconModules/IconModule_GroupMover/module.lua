@@ -18,7 +18,7 @@ local L = TMW.L
 local print = TMW.print
 	
 
- isMoving = nil
+local isMoving = nil
 function TMW:Group_StopMoving(group)
 	group:StopMovingOrSizing()
 	
@@ -80,15 +80,29 @@ Module:SetScriptHandler("OnDragStop", function(Module, icon)
 	end
 end)
 
-WorldFrame:HookScript("OnMouseDown", function(WorldFrame, button)
-	-- Sometimes, if a group/icon does some things to itself while moving (I don't remember exactly what, but it is possible),
-	-- OnDragStop won't fire when it should. Having this here makes sure that the user doesn't get a group permanantly stuck to their cursor.
+
+-- Sometimes, if a group/icon does some things to itself while moving
+-- (Hiding/Showing seems to trigger this), OnDragStop won't fire when it should.
+-- Having these here makes sure that the user doesn't get a group permanantly stuck to their cursor.
 	
+WorldFrame:HookScript("OnMouseDown", function(WorldFrame, button)
 	if isMoving then
 		TMW:Group_StopMoving(isMoving)
 	end
 end)
 
+TMW:RegisterCallback("TMW_GROUP_HIDE_PRE", function(event, group)
+	if isMoving == group then
+		TMW:Group_StopMoving(isMoving)
+	end
+end)
+
+TMW:RegisterCallback("TMW_LOCK_TOGGLED", function(event, Locked)
+	if Locked and isMoving then
+		TMW:Group_StopMoving(isMoving)
+	end
+end)
+	
 Module:SetScriptHandler("OnMouseUp", function(Module, icon, button)
 	if not TMW.Locked then
 		if isMoving then
@@ -96,6 +110,7 @@ Module:SetScriptHandler("OnMouseUp", function(Module, icon, button)
 		end
 	end
 end)
+
 
 
 

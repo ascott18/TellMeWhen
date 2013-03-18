@@ -1,6 +1,8 @@
 ===v6.1.6===
  * Bug Fixes:
  ** The IncreasedStats equivalency should now always properly check for the Legacy of the Emperor buff
+ ** Groups being moved (dragged around) should now much  more reliably detatch from your cursor when they are supposed to.
+ ** Fixed an accidental inversion of the 1st param to TMW_LOCK_TOGGLED
 
 ===v6.1.5===
  * Bug Fixes:
