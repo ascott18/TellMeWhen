@@ -446,6 +446,8 @@ Env = {
 	floor = floor,
 	select = select,
 	min = min,
+	tonumber = tonumber,
+	isNumber = TMW.isNumber,
 	
 	print = TMW.print,
 	type = type,
@@ -457,7 +459,7 @@ Env = {
 	GCDSpell = TMW.GCDSpell,
 	
 	-- These are here as a primitive security measure to prevent some of the most basic forms of malicious Lua conditions.
-	-- This list isn't even exhaustive, but its a start.
+	-- This list isn't even exhaustive, and it is in no way exhaustive, but its a start.
     CancelLogout = error,
     DownloadSettings = error,
     ForceLogout = error,

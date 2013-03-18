@@ -228,6 +228,25 @@ ConditionCategory:RegisterCondition(9,	 "NAME", {
 			ConditionObject:GenerateNormalEventString("UNIT_NAME_UPDATE", CNDT:GetUnit(c.Unit))
 	end,
 })
+ConditionCategory:RegisterCondition(9.5,	 "NPCID", {
+	text = L["CONDITIONPANEL_NPCID"],
+	desc = L["CONDITIONPANEL_NPCID_DESC"],
+	min = 0,
+	max = 1,
+	name = function(editbox) TMW:TT(editbox, "CONDITIONPANEL_NPCIDTOMATCH", "CONDITIONPANEL_NPCIDTOOLTIP") editbox.label = L["CONDITIONPANEL_NPCIDTOMATCH"] end,
+	nooperator = true,
+	texttable = CNDT.COMMON.bool,
+	icon = "Interface\\LFGFrame\\LFGFrame-SearchIcon-Background",
+	tcoords = CNDT.COMMON.standardtcoords,
+	Env = {
+		UnitGUID = UnitGUID,
+	},
+	funcstr = [[c.1nil == (strfind(c.Name, SemicolonConcatCache[tonumber((UnitGUID(c.Unit) or "0x00000000000000000"):sub(-12, -9), 16)]) and 1)]],
+	events = function(ConditionObject, c)
+		return
+			ConditionObject:GetUnitChangedEventString(CNDT:GetUnit(c.Unit))
+	end,
+})
 ConditionCategory:RegisterCondition(10,	 "LEVEL", {
 	text = L["CONDITIONPANEL_LEVEL"],
 	min = -1,

@@ -1,4 +1,5 @@
 ===v6.1.6===
+ * New condition: NPC ID.
  * Bug Fixes:
  ** The IncreasedStats equivalency should now always properly check for the Legacy of the Emperor buff
  ** Groups being moved (dragged around) should now much  more reliably detatch from your cursor when they are supposed to.

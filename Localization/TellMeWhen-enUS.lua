@@ -1007,6 +1007,14 @@ L["CONDITIONPANEL_INTERRUPTIBLE"] = "Interruptible"
 L["CONDITIONPANEL_NAME"] = "Unit Name"
 L["CONDITIONPANEL_NAMETOMATCH"] = "Name to Match"
 L["CONDITIONPANEL_NAMETOOLTIP"] = "You can enter multiple names to be matched by separating each one with a semicolon (;). The condition will pass if any names are matched."
+L["CONDITIONPANEL_NPCID"] = "Unit NPC ID"
+L["CONDITIONPANEL_NPCID_DESC"] = [[Checks if a unit has a specified NPC ID.
+
+The NPC ID is the number found in the URL when looking at an NPC's Wowhead page (E.g. http://www.wowhead.com/npc=62943).
+
+Players and other units without an NPC ID will be treated as having an ID of 0 in this condition.]]
+L["CONDITIONPANEL_NPCIDTOMATCH"] = "ID to Match"
+L["CONDITIONPANEL_NPCIDTOOLTIP"] = "You can enter multiple NPC IDs to be matched by separating each one with a semicolon (;). The condition will pass if any IDs are matched."
 L["CONDITIONPANEL_INSTANCETYPE"] = "Instance Type"
 L["CONDITIONPANEL_GROUPTYPE"] = "Group Type"
 L["CONDITIONPANEL_SWIMMING"] = "Swimming"
