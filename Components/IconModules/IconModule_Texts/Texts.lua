@@ -578,7 +578,7 @@ function Texts:SetupForIcon(sourceIcon)
 		
 	if layoutSettings then
 		local IconModule_IconContainer_Masque = icon:GetModuleOrModuleChild("IconModule_IconContainer_Masque")	
-		local isDefaultSkin = IconModule_IconContainer_Masque and IconModule_IconContainer_Masque.isDefaultSkin
+		local isDefaultSkin = (not IconModule_IconContainer_Masque) or IconModule_IconContainer_Masque.isDefaultSkin
 			
 		for fontStringID, fontStringSettings in TMW:InNLengthTable(layoutSettings) do
 			fontStringID = self:GetFontStringID(fontStringID, fontStringSettings)

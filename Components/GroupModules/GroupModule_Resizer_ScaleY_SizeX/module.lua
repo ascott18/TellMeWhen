@@ -27,7 +27,7 @@ TMW:NewClass("GroupModule_Resizer_ScaleY_SizeX", "GroupModule_Resizer"){
 		--	arg1 (self) is resizeButton
 			
 		--	The 'std_' that prefixes a lot of variables means that it is comparable with all other 'std_' variables.
-			More specifically, it means that it does not depend on the scale of either the group nor UIParent.
+			More specifically, it means that it does not depend on the scale of neither the group nor UIParent.
 		]]
 		local self = resizeButton.module
 		
@@ -81,7 +81,7 @@ TMW:NewClass("GroupModule_Resizer_ScaleY_SizeX", "GroupModule_Resizer"){
 		newWidth = max(gspv.SizeY, newWidth)
 		gspv.SizeX = newWidth
 		
-		if not self.LastUpdate or self.LastUpdate <= TMW.time - self.UPD_INTV then
+		if not group.viewData.Group_SetupMacroAppearance or not self.LastUpdate or self.LastUpdate <= TMW.time - self.UPD_INTV then
 			-- Update the group completely very infrequently because of the high CPU usage.
 			
 			self.LastUpdate = TMW.time

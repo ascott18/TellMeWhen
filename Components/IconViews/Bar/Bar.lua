@@ -82,9 +82,7 @@ View:RegisterGroupDefaults{
 }
 
 
-View:ImplementsModule("IconModule_Alpha", 10, function(Module, icon)
-	Module:Enable()
-end)
+View:ImplementsModule("IconModule_Alpha", 10, true)
 View:ImplementsModule("IconModule_CooldownSweep", 20, function(Module, icon)
 	local group = icon.group
 	local gspv = group:GetSettingsPerView()
@@ -96,9 +94,7 @@ View:ImplementsModule("IconModule_CooldownSweep", 20, function(Module, icon)
 	Module.cooldown:SetPoint("LEFT", icon)
 	Module.cooldown:SetSize(gspv.SizeY, gspv.SizeY)
 end)
-View:ImplementsModule("IconModule_Backdrop", 25, function(Module, icon)
-	Module:Enable()
-end)
+View:ImplementsModule("IconModule_Backdrop", 25, true)
 View:ImplementsModule("IconModule_Texture_Colored", 30, function(Module, icon)
 	local group = icon.group
 	local gspv = group:GetSettingsPerView()
@@ -108,12 +104,8 @@ View:ImplementsModule("IconModule_Texture_Colored", 30, function(Module, icon)
 	Module.texture:SetPoint("LEFT", icon)
 	Module.texture:SetSize(gspv.SizeY, gspv.SizeY)
 end)
-View:ImplementsModule("IconModule_TimerBar_BarDisplay", 50, function(Module, icon)
-	Module:Enable()
-end)
-View:ImplementsModule("IconModule_Texts", 70, function(Module, icon)
-	Module:Enable()
-end)
+View:ImplementsModule("IconModule_TimerBar_BarDisplay", 50, true)
+View:ImplementsModule("IconModule_Texts", 70, true)
 View:ImplementsModule("IconModule_IconContainer_Masque", 100, function(Module, icon)
 	local Modules = icon.Modules
 	local Masque = Module
@@ -175,60 +167,11 @@ function View:Group_Setup(group)
 	group:SetSize(gs.Columns*(gspv.SizeX+gspv.SpacingX)-gspv.SpacingX, gs.Rows*(gspv.SizeY+gspv.SpacingY)-gspv.SpacingY)
 end
 
-function View:Icon_SetPoint(icon, positionID)
-	--[[
-		ABBR	DIR 1, DIR 2	VAL		VAL%4
-		RD		RIGHT, DOWN 	1		1 (normal)
-		LD		LEFT, DOWN		2		2
-		LU		LEFT, UP		3		3
-		RU		RIGHT, UP		4		0
-		DR		DOWN, RIGHT		5		1
-		DL		DOWN, LEFT		6		2
-		UL		UP, LEFT		7		3
-		UR		UP, RIGHT		8		0
-	]]
-	
+function View:Icon_GetSize(icon)
 	local group = icon.group
-	local gs = group:GetSettings()
 	local gspv = group:GetSettingsPerView()
-	local LayoutDirection = group.LayoutDirection
 	
-	local row, column
-	
-	if LayoutDirection >= 5 then
-		local Rows = group.Rows
-		
-		row = (positionID - 1) % Rows + 1
-		column = ceil(positionID / Rows)
-	else
-		local Columns = group.Columns
-		
-		row = ceil(positionID / Columns)
-		column = (positionID - 1) % Columns + 1
-	end
-	
-	local x, y = (gspv.SizeX + gspv.SpacingX)*(column-1), (gspv.SizeY + gspv.SpacingY)*(row-1)
-	
-	
-	local position = icon.position
-	position.relativeTo = group
-	
-	if LayoutDirection % 4 == 1 then
-		position.point, position.relativePoint = "TOPLEFT", "TOPLEFT"
-		position.x, position.y = x, -y
-	elseif LayoutDirection % 4 == 2 then
-		position.point, position.relativePoint = "TOPRIGHT", "TOPRIGHT"
-		position.x, position.y = -x, -y
-	elseif LayoutDirection % 4 == 3 then
-		position.point, position.relativePoint = "BOTTOMRIGHT", "BOTTOMRIGHT"
-		position.x, position.y = -x, y
-	elseif LayoutDirection % 4 == 0 then
-		position.point, position.relativePoint = "BOTTOMLEFT", "BOTTOMLEFT"
-		position.x, position.y = x, y
-	end
-	
-	icon:ClearAllPoints()
-	icon:SetPoint(position.point, position.relativeTo, position.relativePoint, position.x, position.y)
+	return gspv.SizeX, gspv.SizeY
 end
 
 function View:Group_SetSize(group)

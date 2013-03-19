@@ -96,8 +96,6 @@ View:RegisterGroupDefaults{
 	SettingsPerView = {
 		icon = {
 			TextLayout = "icon1",
-			SizeX = ICON_SIZE,
-			SizeY = ICON_SIZE,
 		}
 	}
 }
@@ -182,60 +180,8 @@ function View:Icon_Setup(icon)
 	icon:SetSize(ICON_SIZE, ICON_SIZE)
 end
 
-function View:Icon_SetPoint(icon, positionID)
-	--[[
-		ABBR	DIR 1, DIR 2	VAL		VAL%4
-		RD		RIGHT, DOWN 	1		1 (normal)
-		LD		LEFT, DOWN		2		2
-		LU		LEFT, UP		3		3
-		RU		RIGHT, UP		4		0
-		DR		DOWN, RIGHT		5		1
-		DL		DOWN, LEFT		6		2
-		UL		UP, LEFT		7		3
-		UR		UP, RIGHT		8		0
-	]]
-	
-	local group = icon.group
-	local gs = group:GetSettings()
-	local gspv = group:GetSettingsPerView()
-	local LayoutDirection = group.LayoutDirection
-	
-	local row, column
-	
-	if LayoutDirection >= 5 then
-		local Rows = group.Rows
-		
-		row = (positionID - 1) % Rows + 1
-		column = ceil(positionID / Rows)
-	else
-		local Columns = group.Columns
-		
-		row = ceil(positionID / Columns)
-		column = (positionID - 1) % Columns + 1
-	end
-	
-	local x, y = (ICON_SIZE + gspv.SpacingX)*(column-1), (ICON_SIZE + gspv.SpacingY)*(row-1)
-	
-	
-	local position = icon.position
-	position.relativeTo = group
-	
-	if LayoutDirection % 4 == 1 then
-		position.point, position.relativePoint = "TOPLEFT", "TOPLEFT"
-		position.x, position.y = x, -y
-	elseif LayoutDirection % 4 == 2 then
-		position.point, position.relativePoint = "TOPRIGHT", "TOPRIGHT"
-		position.x, position.y = -x, -y
-	elseif LayoutDirection % 4 == 3 then
-		position.point, position.relativePoint = "BOTTOMRIGHT", "BOTTOMRIGHT"
-		position.x, position.y = -x, y
-	elseif LayoutDirection % 4 == 0 then
-		position.point, position.relativePoint = "BOTTOMLEFT", "BOTTOMLEFT"
-		position.x, position.y = x, y
-	end
-	
-	icon:ClearAllPoints()
-	icon:SetPoint(position.point, position.relativeTo, position.relativePoint, position.x, position.y)
+function View:Icon_GetSize(icon)
+	return ICON_SIZE, ICON_SIZE
 end
 
 function View:Group_Setup(group)

@@ -22,6 +22,8 @@ local print = TMW.print
 --
 -- Icon Views allows users to customize the way that an icon's information is displayed on a macroscopic level. The default Icon View (also used as the fallback when a requested IconView cannot be found) is Icon. To create a new IconView, make a new instance of the IconView class.
 --
+-- Instructions on how to use this API can be found at [[api/icon-view/how-to-use/]]
+--
 -- @class file
 -- @name IconView.lua
 
@@ -174,12 +176,13 @@ function IconView:Icon_Setup(icon)
 	error("IconView:Icon_Setup(icon) is a required method, but the default was called!")
 end
 
---- [**Required Method Definition**] Method that will be called to position an icon that uses the IconView. This interacts closely with the icon sorting feature of TMW groups.
--- @param icon [TMW.Classes.Icon] The icon that needs to be positioned.
--- @param positionID [number] The iconID of the icon adjusted to what the iconID should be to have the icon in the correct position within its group. If no icon sorting is used by the icon's group, this will be equal to icon.ID and icon:GetID().
-function IconView:Icon_SetPoint(icon, positionID)
+--- [**Required Method Definition**] Method that will return the size of the icon. This is used to determine positioning information.
+-- @param icon [TMW.Classes.Icon] The icon whose size is being queried.
+-- @return x [number] The width of the icon.
+-- @return y [number] The height of the icon.
+function IconView:Icon_GetSize(icon)
 	self:AssertSelfIsInstance()
-	error("IconView:Icon_SetPoint(icon, positionID) is a required method, but the default was called!")
+	error("IconView:Icon_GetSize(icon) is a required method, but the default was called!")
 end
 
 --- [**Required Method Definition**] Method that will be called immediately after the IconView (and all its requested GroupModules) has been implemented into a group. Can be used to preform actions like setting the size of the group, or other things that aren't already done by any of the group's modules.
@@ -211,6 +214,65 @@ end
 ------------------------------------
 -- Internal Methods
 ------------------------------------
+
+--- [INTERNAL] Method that handles positioning of icons within a group. Soon to be deprecated (TODO)
+function IconView:Icon_SetPoint(icon, positionID)
+	self:AssertSelfIsInstance()
+	--[[
+		ABBR	DIR 1, DIR 2	VAL		VAL%4
+		RD		RIGHT, DOWN 	1		1 (normal)
+		LD		LEFT, DOWN		2		2
+		LU		LEFT, UP		3		3
+		RU		RIGHT, UP		4		0
+		DR		DOWN, RIGHT		5		1
+		DL		DOWN, LEFT		6		2
+		UL		UP, LEFT		7		3
+		UR		UP, RIGHT		8		0
+	]]
+	
+	local group = icon.group
+	local gs = group:GetSettings()
+	local gspv = group:GetSettingsPerView()
+	local LayoutDirection = group.LayoutDirection
+	
+	local row, column
+	
+	if LayoutDirection >= 5 then
+		local Rows = group.Rows
+		
+		row = (positionID - 1) % Rows + 1
+		column = ceil(positionID / Rows)
+	else
+		local Columns = group.Columns
+		
+		row = ceil(positionID / Columns)
+		column = (positionID - 1) % Columns + 1
+	end
+	
+	local sizeX, sizeY = self:Icon_GetSize(icon)
+	local x, y = (sizeX + gspv.SpacingX)*(column-1), (sizeY + gspv.SpacingY)*(row-1)
+	
+	
+	local position = icon.position
+	position.relativeTo = group
+	
+	if LayoutDirection % 4 == 1 then
+		position.point, position.relativePoint = "TOPLEFT", "TOPLEFT"
+		position.x, position.y = x, -y
+	elseif LayoutDirection % 4 == 2 then
+		position.point, position.relativePoint = "TOPRIGHT", "TOPRIGHT"
+		position.x, position.y = -x, -y
+	elseif LayoutDirection % 4 == 3 then
+		position.point, position.relativePoint = "BOTTOMRIGHT", "BOTTOMRIGHT"
+		position.x, position.y = -x, y
+	elseif LayoutDirection % 4 == 0 then
+		position.point, position.relativePoint = "BOTTOMLEFT", "BOTTOMLEFT"
+		position.x, position.y = x, y
+	end
+	
+	icon:ClearAllPoints()
+	icon:SetPoint(position.point, position.relativeTo, position.relativePoint, position.x, position.y)
+end
 
 -- [INTERNAL] Method called when the IconView is implemented into an icon. Should not be called manually. Should not be overriden. Purpose is to implement all the IconView's requested modules into the icon.
 function IconView:OnImplementIntoIcon(icon)
