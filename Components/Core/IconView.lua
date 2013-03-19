@@ -33,6 +33,8 @@ local print = TMW.print
 --- The fields avaiable to instances of TMW.Classes.IconView. TMW.Classes.IconView Inherits TMW.Classes.GroupComponent and TMW.Classes.IconComponent.
 -- @class table
 -- @name TMW.Classes.IconView
+-- @desc The fields avaiable to instances of TMW.Classes.IconView
+-- TMW.Classes.IconView Inherits TMW.Classes.GroupComponent and TMW.Classes.IconComponent
 -- @field name [string] [REQUIRED] A localized string that names the IconView throughout TMW.
 -- @field desc [string] [REQUIRED] A localized string that describes the IconView throughout TMW.
 -- @field view [string] A short string that will identify the IconView across the addon. Set through the constructor, and should not be modified.
