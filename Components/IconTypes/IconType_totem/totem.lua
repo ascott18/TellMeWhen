@@ -262,13 +262,13 @@ function Type:Setup(icon, groupID, iconID)
 	icon:Update()
 end
 
-function Type:GetIconMenuText(data)
-	local text = data.Name or ""
+function Type:GetIconMenuText(ics)
+	local text = ics.Name or ""
 	if text == "" then
 		text = "((" .. Type.name .. "))"
 	end
 
-	return text, data.Name and data.Name ~= ""  and data.Name .. "\r\n" or ""
+	return text, ics.Name and ics.Name ~= ""  and ics.Name .. "\r\n" or ""
 end
 
 function Type:FormatSpellForOutput(icon, data, doInsertLink)

@@ -3028,28 +3028,25 @@ end
 
 ---------- Dropdowns ----------
 function IE:Type_DropDown()
-	if not TMW.db then return end
-	local groupID, iconID = CI.g, CI.i
-
 	for _, Type in ipairs(TMW.OrderedTypes) do -- order in the order in which they are loaded in the .toc file
-		local tempshow = CI.ics.Type == Type.type and Type.hidden
-		if tempshow or not Type.hidden then
+		if CI.ics.Type == Type.type or not get(Type.hidden) then
 			if Type.spacebefore then
 				TMW.AddDropdownSpacer()
 			end
 
 			local info = UIDropDownMenu_CreateInfo()
 			
-			info.text = Type.name
+			info.text = get(Type.name)
 			info.value = Type.type
 			
-			if Type.desc then
-				info.tooltipTitle = Type.tooltipTitle or Type.name
-				info.tooltipText = Type.desc
+			local desc = get(Type.desc)
+			if desc then
+				info.tooltipTitle = Type.tooltipTitle or info.text
+				info.tooltipText = desc
 				info.tooltipOnButton = true
 			end
 			
-			info.checked = (info.value == TMW.db.profile.Groups[groupID].Icons[iconID].Type)
+			info.checked = (info.value == CI.ics.Type)
 			info.func = IE.Type_Dropdown_OnClick
 			info.arg1 = Type
 			

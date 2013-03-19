@@ -21,6 +21,8 @@
 
 
 
+<Script file="IconType.lua"/>
+
 <Script file="IconView.lua"/>
 
 </Ui>

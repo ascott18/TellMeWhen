@@ -14,24 +14,24 @@
 -- ADDON GLOBALS AND LOCALS
 -- ---------------------------------
 
--- Put requied libs here: (If they fail to load, they will make all of TMW will fail to load)
+-- Put requied libs here: (If they fail to load, they will make all of TMW fail to load)
 local AceDB = LibStub("AceDB-3.0")
 local L = LibStub("AceLocale-3.0"):GetLocale("TellMeWhen", true)
-
-local TMW = LibStub("AceAddon-3.0"):NewAddon(CreateFrame("Frame", "TMW", UIParent), "TellMeWhen", "AceEvent-3.0", "AceTimer-3.0", "AceConsole-3.0", "AceComm-3.0", "AceSerializer-3.0")
-TellMeWhen = TMW
--- TMW is set globally through CreateFrame
-
---L = setmetatable({}, {__index = function() return ("| ! "):rep(12) end}) -- stress testing for text widths
-TMW.L = L
 
 TELLMEWHEN_VERSION = "6.1.6"
 TELLMEWHEN_VERSION_MINOR = strmatch(" @project-version@", " r%d+") or ""
 TELLMEWHEN_VERSION_FULL = TELLMEWHEN_VERSION .. TELLMEWHEN_VERSION_MINOR
-TELLMEWHEN_VERSIONNUMBER = 61604 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
+TELLMEWHEN_VERSIONNUMBER = 61606 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
 if TELLMEWHEN_VERSIONNUMBER > 62000 or TELLMEWHEN_VERSIONNUMBER < 61000 then return error("YOU SCREWED UP THE VERSION NUMBER OR DIDNT CHANGE THE SAFETY LIMITS") end -- safety check because i accidentally made the version number 414069 once
 
 TELLMEWHEN_MAXROWS = 20
+
+_G.TMW = LibStub("AceAddon-3.0"):NewAddon(CreateFrame("Frame", "TMW", UIParent), "TellMeWhen", "AceEvent-3.0", "AceTimer-3.0", "AceConsole-3.0", "AceComm-3.0", "AceSerializer-3.0")
+_G.TellMeWhen = _G.TMW
+local TMW = _G.TMW
+
+--L = setmetatable({}, {__index = function() return ("| ! "):rep(12) end}) -- stress testing for text widths
+TMW.L = L
 
 
 -- GLOBALS: TellMeWhen, LibStub
@@ -1141,20 +1141,6 @@ do -- Class Lib
 end
 
 
-local RelevantToAll = {
-	__index = {
-		SettingsPerView = true,
-		Enabled = true,
-		Name = true,
-		Type = true,
-		Events = true,
-		Conditions = true,
-		UnitConditions = true,
-		ShowWhen = true,
-		Alpha = true,
-		UnAlpha = true,
-	}
-}
 
 TMW.Types = setmetatable({}, {
 	__index = function(t, k)
@@ -1632,7 +1618,7 @@ end
 -- --------------------------
 
 function TMW:OnInitialize()
-	if not TMW.Classes.IconView then
+	if not TMW.Classes.IconType then
 		-- this also includes upgrading from older than 3.0 (pre-Ace3 DB settings)
 		-- GLOBALS: StaticPopupDialogs, StaticPopup_Show, EXIT_GAME, CANCEL, ForceQuit
 		StaticPopupDialogs["TMW_RESTARTNEEDED"] = {
@@ -1646,7 +1632,7 @@ function TMW:OnInitialize()
 			whileDead = true,
 			preferredIndex = 3, -- http://forums.wowace.com/showthread.php?p=320956
 		}
-		StaticPopup_Show("TMW_RESTARTNEEDED", TELLMEWHEN_VERSION_FULL, L["ERROR_MISSINGFILE_REQFILE"]) -- arg3 could also be the name of a file, like "IconView.lua"
+		StaticPopup_Show("TMW_RESTARTNEEDED", TELLMEWHEN_VERSION_FULL, "IconType.lua") -- arg3 could also be L["ERROR_MISSINGFILE_REQFILE"]
 		return -- if required, return here
 	end
 	
@@ -5175,242 +5161,6 @@ TMW:NewClass("GroupModule", "GroupComponent", "ObjectModule"){
 	end,
 }
 
-
-
-local IconType = TMW:NewClass("IconType", "IconComponent")
-IconType.UsedAttributes = {}
-
-function IconType:OnNewInstance(type)
-	self.type = type
-	self.Icons = {}
-	self.UsedProcessors = {}
-	self.Colors = {}
-	
-	self:InheritTable(self.class, "UsedAttributes")
-end
-
-function IconType:UpdateColors(dontSetupIcons)
-	for k, v in pairs(TMW.db.profile.Colors[self.type]) do
-		if v.Override then
-			self.Colors[k] = v
-		else
-			self.Colors[k] = TMW.db.profile.Colors.GLOBAL[k]
-		end
-	end
-	
-	if not dontSetupIcons then
-		self:SetupIcons()
-	end
-end
-
-function IconType:SetupIcons()
-	for i = 1, #self.Icons do
-		self.Icons[i]:Setup()
-	end
-end
-
-function IconType:FormatSpellForOutput(icon, data, doInsertLink)
-	if data then
-		local name
-		if doInsertLink then
-			name = GetSpellLink(data)
-		else
-			name = GetSpellInfo(data)
-		end
-		if name then
-			return name
-		end
-	end
-	
-	return data, true
-end
-
-function IconType:GuessIconTexture(ics)
-	if ics.Name and ics.Name ~= "" then
-		local name = TMW:GetSpellNames(nil, ics.Name, 1)
-		if name then
-			return SpellTextures[name]
-		end
-	end
-end
-
-function IconType:DragReceived(icon, t, data, subType, param4)
-	local ics = icon:GetSettings()
-
-	if t ~= "spell" then
-		return
-	end
-
-	local input
-	if data == 0 and type(param4) == "number" then
-		-- I don't remember the purpose of this anymore.
-		-- It handles some special sort of spell, though, and is required.
-		input = GetSpellInfo(param4)
-	else
-		local type, baseSpellID = GetSpellBookItemInfo(data, subType)
-		
-		if not baseSpellID or type ~= "SPELL" then
-			return
-		end
-		
-		
-		local currentSpellName = GetSpellBookItemName(data, subType)		
-		local baseSpellName = GetSpellInfo(baseSpellID)
-		
-		input = baseSpellName or currentSpellName
-	end
-
-	ics.Name = TMW:CleanString(ics.Name .. ";" .. input)
-	return true -- signal success
-end
-
-function IconType:GetIconMenuText(data)
-	local text = data.Name or ""
-	local tooltip =	""--data.Name and data.Name ~= "" and data.Name .. "\r\n" or ""
-
-	return text, tooltip
-end
-
-function IconType:Register(order)
-	TMW:ValidateType("2 (order)", "IconType:Register(order)", order, "number")
-	
-	local typekey = self.type
-	
-	self.order = order
-	
-	self.RelevantSettings = self.RelevantSettings or {}
-	setmetatable(self.RelevantSettings, RelevantToAll)
-
-	if TMW.debug and rawget(TMW.Types, typekey) then
-		-- for tweaking and recreating icon types inside of WowLua so that I don't have to change the typekey every time.
-		typekey = typekey .. " - " .. date("%X")
-		self.name = typekey
-		self.type = typekey
-	end
-
-	TMW.Types[typekey] = self -- put it in the main Types table
-	tinsert(TMW.OrderedTypes, self) -- put it in the ordered table (used to order the type selection dropdown in the icon editor)
-	TMW:SortOrderedTables(TMW.OrderedTypes)
-	
-	-- Try to find processors for the attributes declared for the icon type.
-	-- It should find most since default processors are loaded before icon types.
-	self:UpdateUsedProcessors()
-	
-	-- Listen for any new processors, too, and update when they are created.
-	TMW:RegisterCallback("TMW_CLASS_IconDataProcessor_INSTANCE_NEW", "UpdateUsedProcessors", self)
-	
-	-- Covers the case of creating a type after login
-	-- (mainly used while debugging). Calling UpdateColors here prevents 
-	-- errors when types are created without a full TMW:Update()
-	if TMW.InitializedDatabase then
-		self:UpdateColors(true)
-	end
-	
-	return self -- why not?
-end
-
-function IconType:UsesAttributes(attributesString, uses)
-	if uses == false then
-		self.UsedAttributes[attributesString] = nil
-	else
-		self.UsedAttributes[attributesString] = true
-	end
-end
-
-function IconType:UpdateUsedProcessors()
-	for _, Processor in ipairs(IconDataProcessor.instances) do
-		if self.UsedAttributes[Processor.attributesString] then
-			self.UsedAttributes[Processor.attributesString] = nil
-			self.UsedProcessors[Processor] = true
-		end
-	end
-end
-
-function IconType:OnImplementIntoIcon(icon)
-	self.Icons[#self.Icons + 1] = icon
-
-	-- Implement all of the Processors that the Icon Type uses into the icon.
-	for Processor in pairs(self.UsedProcessors) do
-		Processor:ImplementIntoIcon(icon)
-	end
-	
-	
-	-- ProcessorHook:ImplementIntoIcon() needs to happen in a separate loop, 
-	-- and not as a method extension of Processor:ImplementIntoIcon(),
-	-- because ProcessorHooks need to check and see if the icon is implementing
-	-- all of the Processors that the hook has required for the hook to implement itself.
-	-- If this were to happen in the first loop here, then it would frequently fail because
-	-- dependencies might not be implemented before the hook would get implemented.
-	for Processor in pairs(self.UsedProcessors) do
-		for _, ProcessorHook in ipairs(Processor.hooks) do
-		
-			-- Assume that we have found all of the Processors that we need until we can't find one.
-			local foundAllProcessors = true
-			
-			-- Loop over all Processor requirements for this ProcessorHook
-			for processorRequirementName in pairs(ProcessorHook.processorRequirements) do
-				-- Get the actual Processor instance
-				local Processor = TMW.ProcessorsByName[processorRequirementName]
-				
-				-- If the Processor doesn't exist or the icon doesn't implement it,
-				-- fail the test and break the loop.
-				if not Processor or not tContains(icon.Components, Processor) then
-					foundAllProcessors = false
-					break
-				end
-			end
-			
-			-- Everything checked out, so implement it into the icon.
-			if foundAllProcessors then
-				ProcessorHook:ImplementIntoIcon(icon)
-			end
-		end
-	end
-end
-
-function IconType:OnUnimplementFromIcon(icon)
-	tDeleteItem(self.Icons, icon)
-	
-	-- Unimplement all of the Processors that the Icon Type uses from the icon.
-	for Processor in pairs(self.UsedProcessors) do
-	
-		-- ProcessorHooks are fine being unimplemented in the same loop since there
-		-- is no verification or anything like there is when imeplementing them
-		for _, ProcessorHook in ipairs(Processor.hooks) do
-			ProcessorHook:UnimplementFromIcon(icon)
-		end
-		
-		Processor:UnimplementFromIcon(icon)
-	end
-end
-
-
-function IconType:SetModuleAllowance(moduleName, allow)
-	local IconModule = TMW.Classes[moduleName]
-	
-	if IconModule and IconModule.SetAllowanceForType then
-		IconModule:SetAllowanceForType(self.type, allow)
-	elseif not IconModule then
-		TMW:RegisterCallback("TMW_CLASS_NEW", function(event, class)
-			if class.className == moduleName and class.SetAllowanceForType then
-				local IconModule = class
-				IconModule:SetAllowanceForType(self.type, allow)
-			end
-		end)
-	end
-end
-
-IconType:RegisterIconEvent(111, "OnEventsRestored", {
-	text = L["SOUND_EVENT_ONEVENTSRESTORED"],
-	desc = L["SOUND_EVENT_ONEVENTSRESTORED_DESC"],
-})
-
-IconType:UsesAttributes("alpha")
-IconType:UsesAttributes("alphaOverride")
-IconType:UsesAttributes("realAlpha") -- this is implied by the mere existance of IconAlphaManager
-IconType:UsesAttributes("conditionFailed")
-
---TODO: (misplaced note): implement something like IconModule:RegisterAnchor(frame, identifier, localizedName) so that other modules can anchor to it (mainly texts)
 
 
 -- ------------------

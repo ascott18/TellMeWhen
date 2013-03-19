@@ -144,8 +144,8 @@ function Type:DragReceived(icon, t, data, subType)
 	return true -- signal success
 end
 
-function Type:GetIconMenuText(data, groupID, iconID)
-	local text = Type.name .. " " .. L["ICONMENU_CNDTIC_ICONMENUTOOLTIP"]:format((data.Conditions and (data.Conditions.n or #data.Conditions)) or 0)
+function Type:GetIconMenuText(ics, groupID, iconID)
+	local text = Type.name .. " " .. L["ICONMENU_CNDTIC_ICONMENUTOOLTIP"]:format((ics.Conditions and (ics.Conditions.n or #ics.Conditions)) or 0)
 	
 	return text, "", true
 end

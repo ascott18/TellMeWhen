@@ -126,7 +126,7 @@ function Type:Setup(icon, groupID, iconID)
 	icon:Update()
 end
 
-function Type:GetIconMenuText(data)
+function Type:GetIconMenuText(ics)
 	--TODO
 	--[[local text = data.Name or ""
 	if text == "" then

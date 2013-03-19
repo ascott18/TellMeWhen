@@ -168,7 +168,7 @@ function Type:Setup(icon, groupID, iconID)
 	--icon:Update()
 end
 
-function Type:GetIconMenuText(data, groupID, iconID)
+function Type:GetIconMenuText(ics, groupID, iconID)
 	if iconID then
 		return L["fICON"]:format(iconID) .. " - " .. Type.name, ""
 	else
