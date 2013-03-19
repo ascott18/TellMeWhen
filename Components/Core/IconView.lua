@@ -11,6 +11,12 @@
 -- --------------------
 
 
+if not TMW then return end
+
+local TMW = TMW
+local L = TMW.L
+local print = TMW.print
+
 
 --- {{{TMW.Classes.IconView}}} is the class of all Icon Views.
 -- IconView inherits explicitly from {{{TMW.Classes.GroupComponent}}} and {{{TMW.Classes.IconComponent}}}, and implicitly from the classes that they inherit. 
@@ -21,13 +27,6 @@
 --
 -- @class file
 -- @name IconView.lua
-
-
-if not TMW then return end
-
-local TMW = TMW
-local L = TMW.L
-local print = TMW.print
 
 
 
