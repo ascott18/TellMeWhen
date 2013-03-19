@@ -56,7 +56,7 @@ local RelevantToAll = {
 -- @name IconType.lua
 
 
---- @class table
+-- @class table
 -- @name TMW.Classes.IconType
 -- @desc The fields avaiable to instances of TMW.Classes.IconType
 -- TMW.Classes.IconType Inherits TMW.Classes.IconComponent

@@ -30,7 +30,7 @@ local print = TMW.print
 
 
 
---- @class table
+-- @class table
 -- @name TMW.Classes.IconView
 -- @desc The fields avaiable to instances of TMW.Classes.IconView
 -- TMW.Classes.IconView Inherits TMW.Classes.GroupComponent and TMW.Classes.IconComponent
