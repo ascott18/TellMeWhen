@@ -48,7 +48,7 @@ local RelevantToAll = {
 --
 -- IconType inherits explicitly from {{{TMW.Classes.IconComponent}}}, and implicitly from the classes that they inherit. 
 --
--- Icon Types take data from the WoW API, filter and manipulate it, and then pass it on to one or more {{{TMW.Classes.IconDataProcessor}}} through the icon:SetInfo method.. The default Icon Type (also used as the fallback when a requested IconView cannot be found) is identified by a blank string (""). To create a new IconType, make a new instance of the IconType class.
+-- Icon Types take data from the WoW API, filter and manipulate it, and then pass it on to one or more {{{TMW.Classes.IconDataProcessor}}} through the icon:SetInfo method. The default Icon Type (also used as the fallback when a requested IconView cannot be found) is identified by a blank string (""). To create a new IconType, make a new instance of the IconType class.
 --
 -- Instructions on how to use this API can be found at [[api/icon-type/how-to-use/]]
 --
@@ -56,10 +56,9 @@ local RelevantToAll = {
 -- @name IconType.lua
 
 
+--- The fields avaiable to instances of TMW.Classes.IconType. TMW.Classes.IconType inherits from TMW.Classes.IconComponent.
 -- @class table
 -- @name TMW.Classes.IconType
--- @desc The fields avaiable to instances of TMW.Classes.IconType
--- TMW.Classes.IconType Inherits TMW.Classes.IconComponent
 -- @field name [function->|string] A localized string that names the IconType throughout TMW.
 -- @field desc [function->|string|nil] A localized string that describes the IconType throughout TMW.
 -- @field tooltipTitle [function->|string|nil] A localized string that will be used as the title of the description tooltip for the IconType. Defaults to IconType.name.
@@ -160,7 +159,7 @@ end
 
 -- [REQUIRED, FALLBACK]
 --- Handles dragging spells, items, and other things onto an icon.
--- @paramsig (icon, ...)
+-- @paramsig icon, ...
 -- @param icon [TMW.Classes.Icon] The icon that the dragged data was released onto.
 -- @param ... [...] The return values from [[http://wowprogramming.com/docs/api/GetCursorInfo|GetCursorInfo()]]. Don't call GetCursorInfo yourself in your definition, because TMW will pass in its own data in special cases that can't be obtained from GetCursorInfo.
 -- @return [boolean|nil] Should return true if data from the drag was succesfully added to the icon, otherwise nil.
@@ -266,7 +265,7 @@ end
 
 local doneImplementingDefaults
 --- Declare that an IconType uses a specified attributesString.
--- @param attributesString [string] The attributesString (an attributesString is passed as a segment of the first arg to {{{icon:SetInfo(attributesStrings, ...)}}}, and also as the second arg to the constructor of a TMW.Classes.IconDataProcessor) whose state is being set.
+-- @param attributesString [string] The attributesString whose usage state is being set. (an attributesString is passed as a segment of the first arg to {{{icon:SetInfo(attributesStrings, ...)}}}, and also as the second arg to the constructor of a TMW.Classes.IconDataProcessor).
 -- @param uses [boolean|nil] False if the IconType does NOT use the specified attributesString. True or nil if it does use the attributesString.
 function IconType:UsesAttributes(attributesString, uses)
 	if doneImplementingDefaults then
