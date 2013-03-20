@@ -77,6 +77,7 @@ IconType.UsedAttributes = {}
 --- Constructor - Creates a new IconType
 -- @name IconType:New
 -- @param type [string] A short string that will identify the IconType across the addon.
+-- @return [TMW.Classes.IconType] A new IconType instance.
 -- @usage IconType = TMW.Classes.IconType:New("cooldown")
 function IconType:OnNewInstance(type)
 	self.type = type
@@ -114,9 +115,9 @@ function IconType:SetupIcons()
 end
 
 -- [REQUIRED, FALLBACK]
---- Formats a spell, as passed to {{{icon:SetInfo("spell", spell)}}}, for human-readable output.
+--- Formats a spell, as passed to {{{icon:SetInfo("spell", spell)}}}, for human-readable output. This is a base method written for handling spells. It should be overridden for IconTypes that don't take spell input for their ics.Name setting.
 -- @param icon [TMW.Classes.Icon] The icon that the spell is being formatted for.
--- @param data [*] The data that needs to be formatted, as it was passed to {{{icon:SetInfo("spell", data)}}}.
+-- @param data [.*] The data that needs to be formatted, as it was passed to {{{icon:SetInfo("spell", data)}}}.
 -- @param doInsertLink [boolean] Whether or not a [[http://wowprogramming.com/docs/api_types#hyperlink|clickable link]] should be returned.
 -- @return [string] The formatted data. suitable for human-readable output.
 -- @return [boolean|nil] True if the formatted data might not have proper capitalization (caller will attempt to correct capitalization if this is true).
@@ -141,7 +142,7 @@ function IconType:FormatSpellForOutput(icon, data, doInsertLink)
 end
 
 -- [REQUIRED, FALLBACK]
---- Attempts to figure out what the configuration texture of an icon will be without actually creating the icon.
+--- Attempts to figure out what the configuration texture of an icon will be without actually creating the icon. This is a base method written for handling spells. It should be overridden for IconTypes that don't take spell input for their ics.Name setting.
 -- @param ics [TMW.Icon_Defaults] The settings of the icon that the texture is being guessed for.
 -- @return [string] The guessed texture of the icon. 
 -- @usage -- This method should only be called internally by TellMeWhen and some of its components. 
@@ -158,7 +159,7 @@ function IconType:GuessIconTexture(ics)
 end
 
 -- [REQUIRED, FALLBACK]
---- Handles dragging spells, items, and other things onto an icon.
+--- Handles dragging spells, items, and other things onto an icon. This is a base method written for handling spells. It should be overridden for IconTypes that don't take spell input for their ics.Name setting.
 -- @paramsig icon, ...
 -- @param icon [TMW.Classes.Icon] The icon that the dragged data was released onto.
 -- @param ... [...] The return values from [[http://wowprogramming.com/docs/api/GetCursorInfo|GetCursorInfo()]]. Don't call GetCursorInfo yourself in your definition, because TMW will pass in its own data in special cases that can't be obtained from GetCursorInfo.
@@ -196,7 +197,7 @@ function IconType:DragReceived(icon, t, data, subType, param4)
 end
 
 -- [REQUIRED, FALLBACK]
---- Returns brief information about what an icon is configured to track. Used mainly in import/export menus.
+--- Returns brief information about what an icon is configured to track. Used mainly in import/export menus. This is a default method, and may be overridden if it does not provide the desired functionality for an IconType.
 -- @param ics [TMW.Icon_Defaults] The settings of the icon that information is being requested about.
 -- @param groupID [number] The ID of the group of the icon that information is being requested for. Does not necessarily correlate to an icon that exists in the currently active profile.
 -- @param iconID [number] The ID of the icon that information is being requested for. Does not necessarily correlate to an icon that exists in the currently active profile.
@@ -267,6 +268,8 @@ local doneImplementingDefaults
 --- Declare that an IconType uses a specified attributesString.
 -- @param attributesString [string] The attributesString whose usage state is being set. (an attributesString is passed as a segment of the first arg to {{{icon:SetInfo(attributesStrings, ...)}}}, and also as the second arg to the constructor of a TMW.Classes.IconDataProcessor).
 -- @param uses [boolean|nil] False if the IconType does NOT use the specified attributesString. True or nil if it does use the attributesString.
+-- @usage IconType:UsesAttributes("start, duration")
+-- IconType:UsesAttributes("conditionFailed", false)
 function IconType:UsesAttributes(attributesString, uses)
 	if doneImplementingDefaults then
 		self:AssertSelfIsInstance()
@@ -294,7 +297,7 @@ function IconType:UpdateUsedProcessors()
 end
 
 -- [INTERNAL]
-function IconType:OnImplementIntoIcon(icon)
+function IconType:OnImplementIntoIcon(icon)	
 	self.Icons[#self.Icons + 1] = icon
 
 	-- Implement all of the Processors that the Icon Type uses into the icon.
@@ -318,7 +321,7 @@ function IconType:OnImplementIntoIcon(icon)
 			-- Loop over all Processor requirements for this ProcessorHook
 			for processorRequirementName in pairs(ProcessorHook.processorRequirements) do
 				-- Get the actual Processor instance
-				local Processor = TMW.ProcessorsByName[processorRequirementName]
+				local Processor = TMW.Classes.IconDataProcessor.ProcessorsByName[processorRequirementName]
 				
 				-- If the Processor doesn't exist or the icon doesn't implement it,
 				-- fail the test and break the loop.

@@ -8,7 +8,7 @@
 # X-Compatible-With: 50200
 ## Title: TellMeWhen
 
-## Version: 6.1.6
+## Version: 6.2.0
 ## Author: Cybeloras of Aerie Peak/Detheroc/Mal'Ganis
 
 ## Notes: Provides visual, auditory, and textual notifications about cooldowns, buffs, and pretty much every other element of combat.

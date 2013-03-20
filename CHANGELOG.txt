@@ -1,5 +1,6 @@
-===v6.1.6===
+===v6.2.0===
  * New condition: NPC ID.
+ * Mass refactoring has taken place. You will need to restart WoW when upgrading to this version of TellMeWhen.
  * Bug Fixes:
  ** The IncreasedStats equivalency should now always properly check for the Legacy of the Emperor buff
  ** Groups being moved (dragged around) should now much  more reliably detatch from your cursor when they are supposed to.

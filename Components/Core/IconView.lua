@@ -17,6 +17,9 @@ local TMW = TMW
 local L = TMW.L
 local print = TMW.print
 
+local rawget, date, tinsert, ipairs, error, ceil
+	= rawget, date, tinsert, ipairs, error, ceil
+
 
 --- {{{TMW.Classes.IconView}}} is the class of all Icon Views.
 -- IconView inherits explicitly from {{{TMW.Classes.GroupComponent}}} and {{{TMW.Classes.IconComponent}}}, and implicitly from the classes that they inherit. 

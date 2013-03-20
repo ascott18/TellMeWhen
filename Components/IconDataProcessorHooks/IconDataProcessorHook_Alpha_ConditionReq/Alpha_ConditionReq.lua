@@ -37,7 +37,7 @@ TMW.IconAlphaManager:AddHandler(10, "ALPHA_CONDITIONFAILED")
 -- This IconDataProcessorHook does not RegisterCompileFunctionSegmentHook(). 
 -- Since it only really matters when conditionFailed changes, we listen to CONDITION's changedEvent,
 -- and call SetInfo_INTERNAL to set alpha_conditionFailed as needed.
-TMW:RegisterCallback(TMW.ProcessorsByName.CONDITION.changedEvent, function(event, icon, conditionFailed)
+TMW:RegisterCallback(TMW.Classes.IconDataProcessor.ProcessorsByName.CONDITION.changedEvent, function(event, icon, conditionFailed)
 	if conditionFailed then
 		icon:SetInfo_INTERNAL("alpha_conditionFailed", icon.ConditionAlpha)
 	else

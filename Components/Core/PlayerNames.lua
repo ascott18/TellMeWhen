@@ -82,8 +82,6 @@ function NAMES:OnInitialize()
 	-- Now, it is managed by TMW's unit code, so only units that can possibly exist will be checked.
 	self.unitList = TMW:GetUnits(self, self.CONST.UNIT_LIST)
 
-	addids = nil -- into the garbage you go!
-
 	self:UpdateClassColors()
 
 	if CUSTOM_CLASS_COLORS then

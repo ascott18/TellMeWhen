@@ -6,3 +6,31 @@
     type: luadoc
     input-file: "Components/Core/IconType.lua"
     output-page: "API/Icon Type/API Documentation"
+-
+    type: luadoc
+    input-file: "Components/Core/Icon.lua"
+    output-page: "API/Icon/API Documentation"
+-
+    type: luadoc
+    input-file: "Components/Core/Group.lua"
+    output-page: "API/Group/API Documentation"
+-
+    type: luadoc
+    input-file: "Components/Core/GroupModule.lua"
+    output-page: "API/Group Module/API Documentation"
+-
+    type: luadoc
+    input-file: "Components/Core/IconModule.lua"
+    output-page: "API/Icon Module/API Documentation"
+-
+    type: luadoc
+    input-file: "Components/Core/IconDataProcessor.lua"
+    output-page: "API/Icon Data Processor/API Documentation"
+-
+    type: luadoc
+    input-file: "Components/Core/IconDataProcessorHook.lua"
+    output-page: "API/Icon Data Processor Hook/API Documentation"
+-
+    type: luadoc
+    input-files: "Components/Core/BaseClasses/*.lua"
+    output-directory: "API/Base Classes"

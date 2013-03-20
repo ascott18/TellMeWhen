@@ -77,23 +77,6 @@ ConditionCategory:RegisterCondition(1,	 "ICON", {
 		end
 		return gsub(str, "c.Icon", c.Icon)
 	end,
---[[	events = function(ConditionObject, c)
-		ConditionObject:SetNumEventArgs(1)
-		
-		local t = {}
-		for _, IconDataProcessor_name in TMW:Vararg("REALALPHA", "SHOWN") do
-			local IconDataProcessor = TMW.ProcessorsByName[IconDataProcessor_name]
-			local changedEvent = IconDataProcessor and IconDataProcessor.changedEvent
-			
-			if changedEvent then
-				ConditionObject:RequestEvent(changedEvent)
-				
-				t[#t+1] = "event == '" .. changedEvent .. "' and arg1 == " .. c.Icon
-			end
-		end
-		
-		return unpack(t)
-	end,]]
 })
 TMW:RegisterCallback("TMW_CNDT_GROUP_DRAWGROUP", function(event, CndtGroup, conditionData, conditionSettings)
 	if conditionData and conditionData.isicon then
@@ -117,7 +100,7 @@ local function RegisterShownHiddenTimerCallback()
 	if hasRegisteredShownHiddenTimerCallback then return end
 	hasRegisteredShownHiddenTimerCallback = true
 	
-	TMW:RegisterCallback(TMW.ProcessorsByName.REALALPHA.changedEvent, function(event, icon, realAlpha, oldalpha)
+	TMW:RegisterCallback(TMW.Classes.IconDataProcessor.ProcessorsByName.REALALPHA.changedEvent, function(event, icon, realAlpha, oldalpha)
 		if realAlpha == 0 then
 			icon.__CNDT__ICONSHOWNTME = 0
 			icon.__CNDT__ICONHIDDENTME = TMW.time
