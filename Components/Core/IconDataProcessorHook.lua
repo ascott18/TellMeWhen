@@ -86,7 +86,7 @@ end
 --		]]
 --	end)
 function IconDataProcessorHook:RegisterCompileFunctionSegmentHook(order, func)
-	self:AssertSelfIsInstace()
+	self:AssertSelfIsInstance()
 	-- These hooks are not much of hooks at all,
 	-- since they go directly in the body of the function
 	-- and can modify input variables before they are processed.
@@ -102,7 +102,7 @@ end
 -- @param processorName [string] The name of a {{{TMW.Classes.IconDataProcessor}}} (as passed to the first param of its constructor) that is required.
 -- @usage Hook:RegisterProcessorRequirement("DURATION")
 function IconDataProcessorHook:RegisterProcessorRequirement(processorName)
-	self:AssertSelfIsInstace()
+	self:AssertSelfIsInstance()
 	self.processorRequirements[processorName] = true
 end
 
