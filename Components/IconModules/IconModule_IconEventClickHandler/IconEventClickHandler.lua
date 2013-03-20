@@ -49,7 +49,7 @@ function Module:OnDisable()
 	-- Would just end up interfering with something else that needs clicks to be registered.
 end
 
-Module:SetIconEventListner("TMW_ICON_SETUP_POST", function(event, icon)
+Module:SetIconEventListner("TMW_ICON_SETUP_POST", function(Module, icon)
 	-- This only runs if the module is enabled and we actually need click interation on the icon so that it can handle the events as needed.
 	
 	icon:EnableMouse(1)

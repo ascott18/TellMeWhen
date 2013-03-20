@@ -156,7 +156,7 @@ function CooldownSweep:SetupForIcon(icon)
 	local elvui = IsAddOnLoaded("ElvUI")
 	
 	if tukui then
-		-- Tukui forcibly disables its own timers if OmniCC is installed.
+		-- Tukui forcibly disables its own timers if OmniCC is installed, so no worry about overlap.
 		self.cooldown.noCooldownCount = not icon.ShowTimerText
 		self.cooldown.noOCC = not icon.ShowTimerText
 	elseif elvui then

@@ -128,13 +128,6 @@ local function AutoShot_OnUpdate(icon, time)
 end
 
 
-
-local function SpellCooldown_OnEvent(icon, event, unit)
-	if event ~= "UNIT_POWER_FREQUENT" or unit == "player" then
-		icon.NextUpdateTime = 0
-	end
-end
-
 local usableData = {}
 local unusableData = {}
 local function SpellCooldown_OnUpdate(icon, time)    

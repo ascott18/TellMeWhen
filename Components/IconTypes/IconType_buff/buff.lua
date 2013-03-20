@@ -157,7 +157,7 @@ local function Buff_OnUpdate(icon, time)
 	local d = Sort == -1 and huge or 0
 	for u = 1, #Units do
 		local unit = Units[u]
-		if unitsWithExistsEvent[unit] or UnitExists(unit) then -- if unitsWithExistsEvent[unit] is true then the unit is managed by TMW's unit framework, so we dont need to check that it exists.
+		if icon.UnitSet:UnitExists(unit) then
 			if Sort or NAL > EFF_THR then
 				for z=1, huge do --huge because i can and it breaks when there are no more buffs anyway
 					local _buffName, _, _iconTexture, _count, _dispelType, _duration, _expirationTime, _, canSteal, _, _id, _, _, _, _v1, _v2, _v3, _v4 = UnitAura(unit, z, Filter)
@@ -262,6 +262,7 @@ local function Buff_OnUpdate(icon, time)
 			end
 		end
 	end
+	
 	if buffName then
 		if icon.ShowTTText then
 			if wow_501 then
@@ -377,6 +378,7 @@ function Type:Setup(icon, groupID, iconID)
 	
 	if icon.UnitSet.allUnitsChangeOnEvent then
 		icon:SetUpdateMethod("manual")
+		
 		for event in pairs(icon.UnitSet.updateEvents) do
 			icon:RegisterSimpleUpdateEvent(event)
 		end

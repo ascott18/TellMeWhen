@@ -41,6 +41,7 @@ TMW.UNITS = UNITS
 UNITS.mtMap, UNITS.maMap = {}, {}
 UNITS.gpMap = {}
 UNITS.unitsWithExistsEvent = {}
+local unitsWithExistsEvent = UNITS.unitsWithExistsEvent
 UNITS.unitsWithBaseExistsEvent = {}
 
 UNITS.Units = {
@@ -91,6 +92,9 @@ end
 
 -- Private Methods/Stuff:
 local UnitSet = TMW:NewClass("UnitSet"){
+	UnitExists = function(self, unit)
+		return unitsWithExistsEvent[unit] or UnitExists(unit)
+	end,
 
 	OnNewInstance = function(self, unitSettings, Conditions)		
 		self.Conditions = Conditions

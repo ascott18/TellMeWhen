@@ -2306,17 +2306,6 @@ function IE:NotifyChanges(...)
 	end
 end
 
-function IE:IsSettingRelevantToIcon(icon, setting)
-	if icon.typeData.RelevantSettings[setting] ~= nil then
-		return icon.typeData.RelevantSettings[setting]
-	end
-	for i, Component in ipairs(icon.Components) do
-		if Component.IconSettingDefaults[setting] ~= nil then
-			return true
-		end
-	end
-end
-
 function IE:Reset()
 	local groupID, iconID = CI.g, CI.i
 	
@@ -3612,11 +3601,11 @@ function EVENTS:SetupEventSettings()
 	EventSettingsContainer.Icon			 		:Hide()
 
 	--set settings
-	EventSettingsContainer.PassThrough	 :SetChecked(Settings.PassThrough)
-	EventSettingsContainer.OnlyShown	 	 :SetChecked(Settings.OnlyShown)
-	EventSettingsContainer.CndtJustPassed :SetChecked(Settings.CndtJustPassed)
-	EventSettingsContainer.PassingCndt	 :SetChecked(Settings.PassingCndt)
-	EventSettingsContainer.Value		 	 :SetText(Settings.Value)
+	EventSettingsContainer.PassThrough	 		:SetChecked(Settings.PassThrough)
+	EventSettingsContainer.OnlyShown	 		:SetChecked(Settings.OnlyShown)
+	EventSettingsContainer.CndtJustPassed 		:SetChecked(Settings.CndtJustPassed)
+	EventSettingsContainer.PassingCndt	 		:SetChecked(Settings.PassingCndt)
+	EventSettingsContainer.Value		 	 	:SetText(Settings.Value)
 
 	TMW:SetUIDropdownText(EventSettingsContainer.Icon, Settings.Icon, TMW.InIcons, L["CHOOSEICON"])
 	EventSettingsContainer.Icon.IconPreview:SetIcon(_G[Settings.Icon])
@@ -3647,14 +3636,14 @@ function EVENTS:SetupEventSettings()
 	if EventSettingsContainer.PassingCndt				:GetChecked() then
 		EventSettingsContainer.Operator.ValueLabel		:SetFontObject(GameFontHighlight)
 		EventSettingsContainer.Operator					:Enable()
-		EventSettingsContainer.Value						:Enable()
+		EventSettingsContainer.Value					:Enable()
 		if settingsUsedByEvent and not settingsUsedByEvent.CndtJustPassed == "FORCE" then
 			EventSettingsContainer.CndtJustPassed		:Enable()
 		end
 	else
 		EventSettingsContainer.Operator.ValueLabel		:SetFontObject(GameFontDisable)
 		EventSettingsContainer.Operator					:Disable()
-		EventSettingsContainer.Value						:Disable()
+		EventSettingsContainer.Value					:Disable()
 		EventSettingsContainer.CndtJustPassed			:Disable()
 	end
 

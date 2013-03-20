@@ -112,7 +112,7 @@ local function Cast_OnUpdate(icon, time)
 
 	for u = 1, #Units do
 		local unit = Units[u]
-		if unitsWithExistsEvent[unit] or UnitExists(unit) then -- if unitsWithExistsEvent[unit] is true then the unit is managed by TMW's unit framework, so we dont need to check that it exists.
+		if icon.UnitSet:UnitExists(unit) then
 			local name, _, _, iconTexture, start, endTime, _, _, notInterruptible = UnitCastingInfo(unit)
 			local reverse = false -- must be false
 			if not name then
