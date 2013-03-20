@@ -36,7 +36,7 @@ local GroupComponent = TMW:NewClass("GroupComponent", "GenericComponent")
 -- @param defaults [table] A table of default settings that will be merged into {{{TMW.Group_Defaults}}}.
 -- @usage
 --	GroupComponent:RegisterGroupDefaults{
---		SomeNoneViewDependentSetting = true,
+--		SomeNonViewDependentSetting = true,
 --		SettingsPerView = {
 --			icon = {
 --				TextLayout = "icon1",

@@ -149,9 +149,12 @@ function IconModule:SetIconEventListner(event, func)
 end
 
 
---- Creates an event handler that listens to changes in data from the specified {{{TMW.Classes.IconDataProcessor}}}. This method is essentially a wrapper for {{{TMW.Classes.IconModule:SetIconEventListner(TMW.Classes.IconDataProcessor.changedEvent [,func])}}}
+--- Creates an event handler that listens to changes in data from the specified {{{TMW.Classes.IconDataProcessor}}}. This method is essentially a wrapper for {{{TMW.Classes.IconModule:SetIconEventListner( TMW.Classes.IconDataProcessor.ProcessorsByName[processorName].changedEvent [,func])}}}
 -- @param processorName [string] Identifier of a {{{TMW.Classes.IconDataProcessor}}} as was passed as the first arg to the consturctor of {{{TMW.Classes.IconDataProcessor}}}.
--- @param func [function|false|nil] Function that will be called when the data of the {{{TMW.Classes.IconDataProcessor}}} has changed for the icon that an instance of this {{{TMW.Classes.IconModule}}} is implemented into, and if {{{TMW.Classes.IconModule.IsEnabled == true}}} for that instance. If false, the data listener for the {{{TMW.Classes.IconDataProcessor}}} will be removed from the module. If nil, the function used will be {{{self[processorName]}}}. Signature of the function is {{{(icon, ...)}}}.
+-- @param func [function|false|nil]:
+-- * A function that will be called when the data of the {{{TMW.Classes.IconDataProcessor}}} has changed for the icon that an instance of this {{{TMW.Classes.IconModule}}} is implemented into, and if {{{TMW.Classes.IconModule.IsEnabled == true}}} for that instance. 
+-- * If false, the data listener for the {{{TMW.Classes.IconDataProcessor}}} will be removed from the module. 
+-- * If nil, the function used will be {{{self[processorName]}}}. Signature of the function is {{{(icon, ...)}}}.
 -- @usage
 -- -- Example usage from IconModule_Texture:
 --	function IconModule_Texture:TEXTURE(icon, texture)
@@ -265,8 +268,9 @@ function IconModule:SetDefaultAllowanceForTypes(allow)
 end
 
 --- Checks whether instances of this {{{TMW.Classes.IconModule}}} will be allowed to implement into icons that implements a specified {{{TMW.Classes.IconType}}}.
--- @param typeName [string] The identifier of a {{{TMW.Class.IconType}}} as passed to the first param of {{{TMW.Class.IconType}}}'s constructor.
--- @return [boolean] True if instances of a {{{TMW.Classes.IconModule}}} will be allowed to implement alongside the sddf
+-- @param typeName [string] The identifier of a {{{TMW.Class.IconType}}} instance as passed to the first param of {{{TMW.Class.IconType}}}'s constructor.
+-- @return [boolean] True if instances of a {{{TMW.Classes.IconModule}}} will be allowed to implement alongside the specified {{{TMW.Class.IconType}}} instance.
+-- @usage isAllowed = IconModule_PowerBar_Overlay:IsAllowedByType("meta")
 function IconModule:IsAllowedByType(typeName)
 	local typeAllowance = self.TypeAllowances[typeName]
 	if typeAllowance ~= nil then

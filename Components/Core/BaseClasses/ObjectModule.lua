@@ -51,7 +51,7 @@ function ObjectModule:OnClassInherit_ObjectModule(newClass)
 	newClass:InheritTable(self, "ScriptHandlers")
 end
 
---- Enables an instance of a {{{TMW.Classes.ObjectModule}}}.
+--- Enables an instance of a {{{TMW.Classes.ObjectModule}}}. An {{{TMW.Classes.ObjectModule}}} should and will only function when it is enabled.
 function ObjectModule:Enable()
 	self:AssertSelfIsInstance()
 	
@@ -68,7 +68,7 @@ function ObjectModule:Enable()
 	end
 end
 
---- Disables an instance of a {{{TMW.Classes.ObjectModule}}}.
+--- Disables an instance of a {{{TMW.Classes.ObjectModule}}}. An {{{TMW.Classes.ObjectModule}}} should and will only function when it is enabled.
 function ObjectModule:Disable()
 	self:AssertSelfIsInstance()
 	
@@ -85,7 +85,15 @@ function ObjectModule:Disable()
 	end
 end
 
---- Sets a script handler that interacts with any {{{TMW.Classes.GenericModuleImplementor}}} that have implemented an instance of this {{{TMW.Classes.ObjectModule}}}. This script handler will only be active when {{{TMW.Classes.ObjectModule.IsEnabled == true}}}. This method must be called on a class - you cannot set the script handler separately for individual instances of {{{TMW.Classes.ObjectModule}}}.
+--- Sets a script handler that interacts with any {{{TMW.Classes.GenericModuleImplementor}}} that have implemented an instance of this {{{TMW.Classes.ObjectModule}}}. This script handler will only be active when {{{TMW.Classes.ObjectModule.IsEnabled == true}}} for an implemented instance. This method must be called on a class - you cannot set the script handler separately for individual instances of {{{TMW.Classes.ObjectModule}}}.
+-- @param script [string] A script to set, like "OnClick" or "OnDragStart".
+-- @param func [function|nil] A function that will be used a script handler. Pass nil to remove any inherited script handlers.
+-- @usage -- Example usage from IconModule_RecieveSpellDrags:
+--	Module:SetScriptHandler("OnReceiveDrag", function(Module, icon, button)
+--		if not TMW.Locked and TMW.ID then
+--			TMW.ID:SpellItemToIcon(icon)
+--		end
+--	end)
 function ObjectModule:SetScriptHandler(script, func)
 	self:AssertSelfIsClass()
 	
@@ -95,7 +103,7 @@ function ObjectModule:SetScriptHandler(script, func)
 end
 
 
---- Provides a wrapper around {{{TMW.Class.IconView}}}{{{:ImplementsModule()}}} that allows you to implement modules into a {{{TMW.Classes.IconView}}} without having direct access to it.
+--- Provides a wrapper around {{{TMW.Class.IconView}}}{{{:ImplementsModule()}}} that allows you to instruct an instance of {{{TMW.Classes.IconView}}} to implement a module without having direct access to that view instance.
 -- @param viewName [string] The identifier of a {{{TMW.Class.IconView}}} as passed to the first param of {{{TMW.Class.IconView}}}'s constructor.
 -- @param order [number] The order that this module should be implemented in, relative to other modules of the same kind (icon or group) implemented by the specified {{{TMW.Classes.IconView}}}. 
 -- @param implementorFunc [function|boolean|nil] See {{{TMW.Classes.IconView}}}'s documentation for a description of this param.

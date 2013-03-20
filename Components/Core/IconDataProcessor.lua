@@ -41,10 +41,11 @@ IconDataProcessor.ProcessorsByName = {}
 --- Constructor - Creates a new {{{TMW.Classes.IconDataProcessor}}}.
 -- @name IconDataProcessor:New
 -- @param name [string] A name for this {{{TMW.Classes.IconDataProcessor}}}. Should be brief, and should be all capital letters.
--- @param attributes [string] A comma-delimited string of attributes that will be passed as part of the first arg of {{{TMW.Classes.Icon}}}{{{:SetInfo(attributesString, ...)}}}. If multiple attributes are given, they must always be passed to :SetInfo together, and always in the same order. Each attribute token may only be used in one IconDataProcessor across TellMeWhen.
+-- @param attributes [string] A comma-delimited string of attributes that will be passed as part of the first param to {{{TMW.Classes.Icon}}}{{{:SetInfo(attributesString, ...)}}}. If multiple attributes are given, they must always be passed to :SetInfo together, and always in the same order. Each attribute token may only be used in one IconDataProcessor across TellMeWhen.
 -- @return [{{{TMW.Classes.IconDataProcessor}}}] An instance of a new IconDataProcessor.
 -- @usage
 -- local Processor = TMW.Classes.IconDataProcessor:New("NOMANA", "noMana")
+-- 
 -- local Processor = TMW.Classes.IconDataProcessor:New("DURATION", "start, duration")
 function IconDataProcessor:OnNewInstance(name, attributes)
 	TMW:ValidateType("2 (name)", "IconDataProcessor:New(name, attributes)", name, "string")
@@ -83,10 +84,11 @@ function IconDataProcessor:OnNewInstance(name, attributes)
 end
 
 --- Asserts if another {{{TMW.Classes.IconDataProcessor}}} exists. Throws an error if it does not exist.
--- @param dependency [string] The name of a {{{TMW.Classes.IconDataProcessor}}}, as passed as the first param to its constructor, that is is a dependency of another.
-function IconDataProcessor:AssertDependency(dependency)
-	if not self.ProcessorsByName[dependency] then
-		error(("Dependency %q of processor %q was not found!"):format(dependency, self.name), 2)
+-- @param name [string] The name of a {{{TMW.Classes.IconDataProcessor}}}, as passed as the first param to its constructor, that is is a dependency of another.
+-- @usage Processor:AssertDependency("UNIT")
+function IconDataProcessor:AssertDependency(name)
+	if not self.ProcessorsByName[name] then
+		error(("Dependency %q of processor %q was not found!"):format(name, self.name), 2)
 	end
 end
 
@@ -114,7 +116,7 @@ end
 -- * Any other local variables that have been set through {{{TMW.Classes.IconDataProcessorComponent}}}{{{:DeclareUpValue()}}}.
 -- @param t [table] An array of strings that will be concatenated together to form the body of the :SetInfo() method.
 -- @usage
--- -- Example usage in the RANGE IconDataProcessor:
+-- -- Example usage in the INRANGE IconDataProcessor:
 --	function Processor:CompileFunctionSegment(t)
 --		t[#t+1] = [[
 --		

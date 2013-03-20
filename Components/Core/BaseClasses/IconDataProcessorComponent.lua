@@ -17,7 +17,7 @@ local TMW = TMW
 local L = TMW.L
 local print = TMW.print
 
---- {{{TMW.Classes.IconDataProcessorComponent}}} is a base class of {{TMW.Classes.IconDataProcessor}}} and {{TMW.Classes.IconDataProcessorHook}}}.
+--- {{{TMW.Classes.IconDataProcessorComponent}}} is a base class of {{{TMW.Classes.IconDataProcessor}}} and {{{TMW.Classes.IconDataProcessorHook}}}.
 --
 -- {{{TMW.Classes.IconDataProcessorComponent}}} inherits from {{{TMW.Classes.IconComponent}}}, and implicitly from the classes that it inherits. 
 --

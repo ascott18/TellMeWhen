@@ -56,17 +56,17 @@ function IconDataProcessorHook:OnNewInstance(name, processorToHook)
 end
 
 --- Registers a CompileFunctionSegment function (similar behavior to {{{TMW.Classes.IconDataProcessor}}}{{{:CompileFunctionSegment()}}} that will be called when the segment of {{{TMW.Classes.Icon}}}{{{:SetInfo()}}} for the {{{TMW.Classes.IconDataProcessor}}} that this {{{TMW.Classes.IconDataProcessorHook}}} is hooking is being compiled.
--- @param order [string] Must be "pre" or "post". "pre will cause this hook to be compiled before the {{{TMW.Classes.IconDataProcessor}}} that it is hooking gets compiled. "post" will cause this hook to be compiled afterwords.
+-- @param order [string] Must be "pre" or "post". "pre" will cause this hook to be compiled before the {{{TMW.Classes.IconDataProcessor}}} that it is hooking gets compiled. "post" will cause this hook to be compiled afterwords.
 -- @param func [function] A function that will be called to compile part of {{{TMW.Classes.Icon}}}{{{:SetInfo()}}}. Called with signature {{{(Processor, t)}}}. {{{Processor}}} is the {{{TMW.Classes.IconDataProcessor}}} instance hooked by this IconDataProcessorHook. {{{t}}} is the string table that will be concatenated to form the whole :SetInfo() method.
 -- @usage
---	-- Example usage from IconDataProcessorHook_Texture_CustomTex (name is "TEXTURE_CUSTOMTEX"):
+--	-- Example usage from TEXTURE_CUSTOMTEX:
 --	Hook:RegisterCompileFunctionSegmentHook("pre", function(Processor, t)
 --		t[#t+1] = [[
 --		texture = icon.CustomTex_OverrideTex or texture -- if a texture override is specified, then use it instead
 --		]]
 --	end)
 --
---	-- Example usage from IconDataProcessorHook_Alpha_DurationReq (name is "ALPHA_DURATIONREQ"):
+--	-- Example usage from ALPHA_DURATIONREQ:
 --	Hook:RegisterCompileFunctionSegmentHook("post", function(Processor, t)
 --		t[#t+1] = [[
 --	
@@ -86,6 +86,7 @@ end
 --		]]
 --	end)
 function IconDataProcessorHook:RegisterCompileFunctionSegmentHook(order, func)
+	self:AssertSelfIsInstace()
 	-- These hooks are not much of hooks at all,
 	-- since they go directly in the body of the function
 	-- and can modify input variables before they are processed.
@@ -101,6 +102,7 @@ end
 -- @param processorName [string] The name of a {{{TMW.Classes.IconDataProcessor}}} (as passed to the first param of its constructor) that is required.
 -- @usage Hook:RegisterProcessorRequirement("DURATION")
 function IconDataProcessorHook:RegisterProcessorRequirement(processorName)
+	self:AssertSelfIsInstace()
 	self.processorRequirements[processorName] = true
 end
 

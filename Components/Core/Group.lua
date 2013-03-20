@@ -27,12 +27,13 @@ local UnitAffectingCombat, GetActiveSpecGroup, GetSpecialization
 --
 -- Group inherits explicitly from {{{Blizzard.Frame}}} and from {{{TMW.Classes.GenericModuleImplementor}}}, and implicitly from the classes that it inherits. 
 --
--- Description of Class here
+-- Description of Class here <THIS DOCUMENTATION HAS NOT YET BEEN WRITTEN>
 --
 -- @class file
 -- @name Group.lua
 
 
+-- TODO: DOCUMENT GROUP!
 
 -- -----------
 -- GROUPS
