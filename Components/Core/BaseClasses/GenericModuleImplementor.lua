@@ -49,7 +49,7 @@ function GenericModuleImplementor:GetModuleOrModuleChild(moduleName, allowDisabl
 	local Modules = self.Modules
 	
 	local Module = Modules[moduleName]
-	if Module and (allowDisabled or Module.IsEnabled) then
+	if Module and self.ComponentsLookup[Module] and (allowDisabled or Module.IsEnabled) then
 		return Module
 	else
 		local ModuleClassToSearchFor = TMW.Classes[moduleName]
@@ -59,7 +59,7 @@ function GenericModuleImplementor:GetModuleOrModuleChild(moduleName, allowDisabl
 		end
 		
 		for _, Module in pairs(Modules) do
-			if Module.class.inherits[ModuleClassToSearchFor] and (allowDisabled or Module.IsEnabled) then
+			if Module.class.inherits[ModuleClassToSearchFor] and self.ComponentsLookup[Module] and (allowDisabled or Module.IsEnabled) then
 				return Module
 			end
 		end

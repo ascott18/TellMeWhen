@@ -148,23 +148,23 @@ View:ImplementsModule("GroupModule_Resizer_ScaleY_SizeX", 10, function(Module, g
 		Module:Enable()
 	end
 end)
+View:ImplementsModule("GroupModule_IconPosition_Sortable", 20, true)
+	
 	
 function View:Icon_SetSize(icon)
-	local group = icon.group
-	local gspv = group:GetSettingsPerView()
-	
-	icon:SetSize(gspv.SizeX, gspv.SizeY)
+	icon:SetSize(self:Icon_GetSize(icon))
 end
 
 function View:Icon_Setup(icon)
-	self:Icon_SetSize(icon)
+	
 end
 
 function View:Group_Setup(group)
-	local gs = group:GetSettings()
-	local gspv = group:GetSettingsPerView()
+	self:Group_SetSize(group)
 	
-	group:SetSize(gs.Columns*(gspv.SizeX+gspv.SpacingX)-gspv.SpacingX, gs.Rows*(gspv.SizeY+gspv.SpacingY)-gspv.SpacingY)
+	for icon in TMW:InIcons(group.ID) do
+		self:Icon_SetSize(icon)
+	end
 end
 
 function View:Icon_GetSize(icon)
@@ -179,16 +179,6 @@ function View:Group_SetSize(group)
 	local gspv = group:GetSettingsPerView()
 	
 	group:SetSize(gs.Columns*(gspv.SizeX+gspv.SpacingX)-gspv.SpacingX, gs.Rows*(gspv.SizeY+gspv.SpacingY)-gspv.SpacingY)
-end
-
-function View:Group_SetupMacroAppearance(group)
-	self:Group_SetSize(group)
-	
-	for icon in TMW:InIcons(group.ID) do
-		self:Icon_SetSize(icon)
-	end
-	
-	group:SortIcons()
 end
 
 function View:Group_OnCreate(gs)

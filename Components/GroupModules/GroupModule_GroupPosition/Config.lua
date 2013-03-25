@@ -17,6 +17,7 @@ local TMW = TMW
 local L = TMW.L
 local print = TMW.print
 
+
 local findid = TMW.FindGroupIDFromInfo
 local stratas = {
 	"BACKGROUND",
@@ -33,11 +34,12 @@ for k, v in pairs(stratas) do
 	strataDisplay[k] = L["STRATA_"..v]
 end
 
-TMW.GroupConfigTemplate.args.position = {
+
+TMW.Classes.GroupModule_GroupPosition:RegisterConfigTable("args.position.args", "Position", {
 	type = "group",
-	order = 20,
-	name = L["UIPANEL_POSITION"],
-	desc = L["UIPANEL_POSITION_DESC"],
+	order = 5,
+	name = "",
+	desc = "",
 	set = function(info, val)
 		local g = findid(info)
 		TMW.db.profile.Groups[g].Point[info[#info]] = val
@@ -51,11 +53,9 @@ TMW.GroupConfigTemplate.args.position = {
 	get = function(info)
 		return TMW.db.profile.Groups[findid(info)].Point[info[#info]]
 	end,
-	hidden = function(info)
-		local g = findid(info)
-		
-		return not TMW[g] or not TMW[g]:GetModuleOrModuleChild("GroupModule_GroupPosition", true)
-	end,
+	dialogInline = true,
+	guiInline = true,
+	
 	args = {
 		point = {
 			name = L["UIPANEL_POINT"],
@@ -99,24 +99,37 @@ TMW.GroupConfigTemplate.args.position = {
 			step = 1,
 			bigStep = 1,
 		},
-		scale = {
+	},
+})
+
+TMW.Classes.GroupModule_GroupPosition:RegisterConfigTable("args.position.args", "scaleAndStrata", {
+	type = "group",
+	order = 10,
+	name = "",
+	desc = "",
+	set = function(info, val)
+		local g = findid(info)
+		TMW.db.profile.Groups[g][info[#info]] = val
+
+		local Module = TMW[g]:GetModuleOrModuleChild("GroupModule_GroupPosition")
+		
+		if Module then
+			Module:SetPos()
+		end
+	end,
+	get = function(info) return TMW.db.profile.Groups[findid(info)][info[#info]] end,
+	dialogInline = true,
+	guiInline = true,
+	
+	args = {
+		
+		Scale = {
 			name = L["UIPANEL_SCALE"],
 			type = "range",
 			order = 6,
 			min = 0.6,
 			softMax = 10,
 			bigStep = 0.01,
-			set = function(info, val)
-				local g = findid(info)
-				TMW.db.profile.Groups[g].Scale = val
-		
-				local Module = TMW[g]:GetModuleOrModuleChild("GroupModule_GroupPosition")
-				
-				if Module then
-					Module:SetPos()
-				end
-			end,
-			get = function(info) return TMW.db.profile.Groups[findid(info)].Scale end,
 		},
 		Level = {
 			name = L["UIPANEL_LEVEL"],
@@ -125,17 +138,6 @@ TMW.GroupConfigTemplate.args.position = {
 			min = 5,
 			softMax = 100,
 			step = 1,
-			set = function(info, val)
-				local g = findid(info)
-				TMW.db.profile.Groups[g].Level = val
-		
-				local Module = TMW[g]:GetModuleOrModuleChild("GroupModule_GroupPosition")
-				
-				if Module then
-					Module:SetPos()
-				end
-			end,
-			get = function(info) return TMW.db.profile.Groups[findid(info)].Level end,
 		},
 		Strata = {
 			name = L["UIPANEL_STRATA"],
@@ -144,7 +146,7 @@ TMW.GroupConfigTemplate.args.position = {
 			order = 8,
 			set = function(info, val)
 				local g = findid(info)
-				TMW.db.profile.Groups[g].Strata = stratas[val]
+				TMW.db.profile.Groups[g][info[#info]] = stratas[val]
 		
 				local Module = TMW[g]:GetModuleOrModuleChild("GroupModule_GroupPosition")
 				
@@ -153,7 +155,7 @@ TMW.GroupConfigTemplate.args.position = {
 				end
 			end,
 			get = function(info)
-				local val = TMW.db.profile.Groups[findid(info)].Strata
+				local val = TMW.db.profile.Groups[findid(info)][info[#info]]
 				for k, v in pairs(stratas) do
 					if v == val then
 						return k
@@ -162,26 +164,58 @@ TMW.GroupConfigTemplate.args.position = {
 			end,
 			values = strataDisplay,
 		},
-		lock = {
-			name = L["UIPANEL_LOCK"],
-			desc = L["UIPANEL_LOCK_DESC"],
-			type = "toggle",
-			order = 40,
-			set = function(info, val)
-				local g = findid(info)
-				TMW.db.profile.Groups[g].Locked = val
-		
-				TMW[g]:Setup()
-			end,
-			get = function(info) return TMW.db.profile.Groups[findid(info)].Locked end
-		},
-		reset = {
-			name = L["UIPANEL_GROUPRESET"],
-			desc = L["UIPANEL_TOOLTIP_GROUPRESET"],
-			type = "execute",
-			order = 50,
-			func = function(info) TMW:Group_ResetPosition(findid(info)) end
-		},
 	},
-}
-	
+})
+
+TMW.Classes.GroupModule_GroupPosition:RegisterConfigTable("args.position.args", "reset", {
+	name = L["UIPANEL_GROUPRESET"],
+	desc = L["UIPANEL_TOOLTIP_GROUPRESET"],
+	type = "execute",
+	order = 50,
+	func = function(info)
+		local groupID = findid(info)
+		local gs = TMW.db.profile.Groups[groupID]
+		
+		for k, v in pairs(TMW.Group_Defaults.Point) do
+			gs.Point[k] = v
+		end
+		gs.Scale = 1
+		gs.Locked = false
+		
+		TMW.IE:NotifyChanges()
+		TMW[groupID]:Setup()
+	end,
+})
+
+
+
+
+TMW.Classes.SharableDataType.types.group:RegisterMenuBuilder(10, function(self, result, editbox)
+	local groupID = result[1]
+	local gs = result.data
+	local IMPORTS, EXPORTS = editbox:GetAvailableImportExportTypes()
+
+	-- copy group position
+	local info = UIDropDownMenu_CreateInfo()
+	info.text = L["COPYGROUP"] .. " - " .. L["COPYPOSSCALE"]
+	info.func = function()
+		CloseDropDownMenus()
+		local destgroupID = IMPORTS.group_overwrite
+		local destgs = TMW.db.profile.Groups[destgroupID]
+		
+		-- Restore all default settings first.
+		-- Not a special table (["**"]), so just normally copy it.
+		-- Setting it nil won't recreate it like other settings tables, so re-copy from defaults.
+		destgs.Point = CopyTable(TMW.Group_Defaults.Point)
+		
+		TMW:CopyTableInPlaceWithMeta(gs.Point, destgs.Point, true)
+
+		destgs.Scale = gs.Scale or TMW.Group_Defaults.Scale
+		destgs.Level = gs.Level or TMW.Group_Defaults.Level
+		
+		TMW[destgroupID]:Setup()
+	end
+	info.notCheckable = true
+	info.disabled = not IMPORTS.group_overwrite
+	UIDropDownMenu_AddButton(info, UIDROPDOWNMENU_MENU_LEVEL)
+end)

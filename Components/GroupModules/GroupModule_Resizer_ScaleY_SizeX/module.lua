@@ -21,6 +21,7 @@ local print = TMW.print
 TMW:NewClass("GroupModule_Resizer_ScaleY_SizeX", "GroupModule_Resizer"){
 	tooltipText = L["RESIZE_TOOLTIP_SCALEY_SIZEX"],
 	UPD_INTV = 1,
+	LastUpdate = 0,
 	
 	SizeUpdate = function(resizeButton)
 		--[[ Notes:
@@ -81,20 +82,21 @@ TMW:NewClass("GroupModule_Resizer_ScaleY_SizeX", "GroupModule_Resizer"){
 		newWidth = max(gspv.SizeY, newWidth)
 		gspv.SizeX = newWidth
 		
-		if not group.viewData.Group_SetupMacroAppearance or not self.LastUpdate or self.LastUpdate <= TMW.time - self.UPD_INTV then
+			
+		-- This needs to be done before we :Setup() or otherwise bad things happen.
+		local GroupModule_GroupPosition = group:GetModuleOrModuleChild("GroupModule_GroupPosition")
+		GroupModule_GroupPosition:UpdatePositionAfterMovement()
+			
+		if self.LastUpdate <= TMW.time - self.UPD_INTV then
 			-- Update the group completely very infrequently because of the high CPU usage.
 			
 			self.LastUpdate = TMW.time
-			
-			-- This needs to be done before we :Setup() or otherwise bad things happen.
-			local GroupModule_GroupPosition = group:GetModuleOrModuleChild("GroupModule_GroupPosition")
-			GroupModule_GroupPosition:UpdatePositionAfterMovement()
 		
 			group:Setup()
 		else
-			-- Only do the things that will determine most of the group's appearance on every frame.
+			-- Don't setup icons most of the time. Only setup the group.
 			
-			group.viewData:Group_SetupMacroAppearance(group)
+			group:Setup(true)
 		end
 	end,
 }

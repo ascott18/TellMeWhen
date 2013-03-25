@@ -21,7 +21,7 @@ local L = LibStub("AceLocale-3.0"):GetLocale("TellMeWhen", true)
 TELLMEWHEN_VERSION = "6.2.0"
 TELLMEWHEN_VERSION_MINOR = strmatch(" @project-version@", " r%d+") or ""
 TELLMEWHEN_VERSION_FULL = TELLMEWHEN_VERSION .. TELLMEWHEN_VERSION_MINOR
-TELLMEWHEN_VERSIONNUMBER = 62003 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
+TELLMEWHEN_VERSIONNUMBER = 62004 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
 if TELLMEWHEN_VERSIONNUMBER > 63000 or TELLMEWHEN_VERSIONNUMBER < 62000 then return error("YOU SCREWED UP THE VERSION NUMBER OR DIDNT CHANGE THE SAFETY LIMITS") end -- safety check because i accidentally made the version number 414069 once
 
 TELLMEWHEN_MAXROWS = 20
@@ -372,6 +372,8 @@ function TMW:ValidateType(argN, methodName, var, reqType, errLvl)
 			if varType == reqType then
 				isGood = false
 				break
+			else
+				foundMatch = true
 			end
 		else
 			if varType == reqType then
@@ -1220,36 +1222,17 @@ TMW.Defaults = {
 				CheckOrder		= -1,
 				PrimarySpec		= true,
 				SecondarySpec	= true,
-				LayoutDirection = 1,
 				Tree1 			= true,
 				Tree2 			= true,
 				Tree3 			= true,
 				Tree4 			= true,
-				SortPriorities = {
-					{Method = "id",				Order =	1,	},
-					{Method = "duration",		Order =	1,	},
-					{Method = "stacks",			Order =	-1,	},
-					{Method = "visiblealpha",	Order =	-1,	},
-					{Method = "visibleshown",	Order =	-1,	},
-					{Method = "alpha",			Order =	-1,	},
-					{Method = "shown",			Order =	-1,	},
-				},
-				Point = {
-					point 		  = "CENTER",
-					relativeTo 	  = "UIParent",
-					relativePoint = "CENTER",
-					x 			  = 0,
-					y 			  = 0,
-				},
-				SettingsPerView			= {
+				SettingsPerView	= {
 					["**"] = {
-						SpacingX		= 0,
-						SpacingY		= 0,
 					}
 				},
 				Icons = {
 					["**"] = {
-						ShowWhen				= 0x2, -- bit order: 0, 0, alpha, unalpha
+						ShowWhen				= 0x2, -- bit order: x, x, alpha, unalpha
 						Enabled					= false,
 						Name					= "",
 						Type					= "",
@@ -1355,7 +1338,7 @@ TMW.BE = {
 		IncreasedAP			= "57330;19506;6673",
 		IncreasedPhysHaste  = "55610;113742;30809;128432;128433",
 		IncreasedStats		= "1126;_117666;20217;90363",
-		BonusStamina		= "21562;103127;469;90364",
+		BonusStamina		= "21562;109773;469;90364",
 		IncreasedSpellHaste = "24907;15473;51470;49868;135678",
 		IncreasedCrit		= "24932;1459;61316;97229;24604;90309;126373;126309;116781",
 		
@@ -1609,7 +1592,7 @@ end
 -- --------------------------
 
 function TMW:OnInitialize()
-	if not TMW.Classes.Icon then
+	if not TMW.Classes.GroupModule_IconPosition then
 		-- this also includes upgrading from older than 3.0 (pre-Ace3 DB settings)
 		-- GLOBALS: StaticPopupDialogs, StaticPopup_Show, EXIT_GAME, CANCEL, ForceQuit
 		StaticPopupDialogs["TMW_RESTARTNEEDED"] = {
@@ -1853,14 +1836,6 @@ function TMW:OnUpdate()					-- THE MAGICAL ENGINE OF DOING EVERYTHING
 					IconsToUpdate[i]:Update()
 				end
 			end
-
-			for g = 1, #TMW do
-				local group = TMW[g]
-				if group.shouldSortIcons and group.iconSortNeeded then
-					group:SortIcons()
-					group.iconSortNeeded = nil
-				end
-			end
 		end
 
 		TMW:Fire("TMW_ONUPDATE_TIMECONSTRAINED_POST", time, Locked)
@@ -2071,13 +2046,6 @@ function TMW:GetBaseUpgrades()			-- upgrade functions
 				elseif ics.ShowWhen == "always" then
 					ics.ShowWhen = 0x3
 				end
-			end,
-		},
-		[60005] = {
-			group = function(self, gs)
-				gs.SettingsPerView.icon.SpacingX = gs.Spacing or 0
-				gs.SettingsPerView.icon.SpacingY = gs.Spacing or 0
-				gs.Spacing = nil
 			end,
 		},
 		[51023] = {
@@ -2317,11 +2285,6 @@ function TMW:GetBaseUpgrades()			-- upgrade functions
 					end
 					TMW.db.profile.Font = nil
 				end
-			end,
-		},
-		[41402] = {
-			group = function(self, gs)
-				gs.Point.defined = nil
 			end,
 		},
 		[41301] = {
@@ -2754,10 +2717,10 @@ function TMW:GlobalUpgrade()
 		if TellMeWhenDB.Version < 41402 then
 			for _, p in pairs(TellMeWhenDB.profiles) do
 				if p.Groups then
-					for _, g in pairs(p.Groups) do
-						if g.Point then
-							g.Point.point = g.Point.point or "TOPLEFT"
-							g.Point.relativePoint = g.Point.relativePoint or "TOPLEFT"
+					for _, gs in pairs(p.Groups) do
+						if gs.Point then
+							gs.Point.point = gs.Point.point or "TOPLEFT"
+							gs.Point.relativePoint = gs.Point.relativePoint or "TOPLEFT"
 						end
 					end
 				end
@@ -3065,7 +3028,16 @@ function UpdateTableManager:UpdateTable_Register(target)
 		error("No update table was found for " .. tostring(self.GetName and self[0] and self:GetName() or self) .. ". Set one using self:UpdateTable_Set(table).")
 	end
 	
-	target = target or self
+	TMW:ValidateType("2 (target)", "UpdateTableManager:UpdateTable_Register(target)", target, "!boolean")
+	
+	if target == nil then
+		if self.class == UpdateTableManager then
+		TMW:ValidateType("2 (target)", "UpdateTableManager:UpdateTable_Register(target)", target, "!nil")
+		else
+			target = self
+		end
+	end
+	
 
 	local oldLength = #self.UpdateTable_UpdateTable
 

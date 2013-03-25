@@ -18,7 +18,7 @@ local L = TMW.L
 local print = TMW.print
 
 
-TMW.GroupConfigTemplate.args.main.args.Alpha = {
+TMW.Classes.GroupModule_Alpha:RegisterConfigTable("args.main.args", "Alpha", {
 	name = L["UIPANEL_GROUPALPHA"],
 	desc = L["UIPANEL_GROUPALPHA_DESC"],
 	type = "range",
@@ -26,4 +26,4 @@ TMW.GroupConfigTemplate.args.main.args.Alpha = {
 	min = 0,
 	max = 1,
 	step = 0.01,
-}
+})

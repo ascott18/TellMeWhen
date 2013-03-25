@@ -47,9 +47,6 @@ function Group.OnNewInstance(group, ...)
 	TMW[groupID] = group
 
 	group.ID = groupID
-	group.SortedIcons = {}
-	group.SortedIconsManager = TMW.Classes.UpdateTableManager:New()
-	group.SortedIconsManager:UpdateTable_Set(group.SortedIcons)
 end
 
 function Group.__tostring(group)
@@ -63,86 +60,7 @@ end
 Group:UpdateTable_SetAutoSort(Group.ScriptSort)
 TMW:RegisterCallback("TMW_GLOBAL_UPDATE_POST", "UpdateTable_PerformAutoSort", Group)
 
-function Group:TMW_ICON_UPDATED(event, icon)
-	-- note that this callback is not inherited - it simply handles all groups
-	icon.group.iconSortNeeded = true
-end
-TMW:RegisterCallback("TMW_ICON_UPDATED", Group)
 
-function Group.IconSorter(iconA, iconB)
-	local group = iconA.group
-	local SortPriorities = group.SortPriorities
-	
-	local attributesA = iconA.attributes
-	local attributesB = iconB.attributes
-	
-	for p = 1, #SortPriorities do
-		local settings = SortPriorities[p]
-		local method = settings.Method
-		local order = settings.Order
-
-		if TMW.Locked or method == "id" then
-			-- Force sorting by ID when unlocked.
-			-- Don't force the first one to be "id" because it also depends on the order that the user has set.
-			
-			if method == "id" then
-				return iconA.ID*order < iconB.ID*order
-
-			elseif method == "alpha" then
-				local a, b = attributesA.realAlpha, attributesB.realAlpha
-				if a ~= b then
-					return a*order < b*order
-				end
-
-			elseif method == "visiblealpha" then
-				local a, b = iconA:GetAlpha(), iconB:GetAlpha()
-				if a ~= b then
-					return a*order < b*order
-				end
-
-			elseif method == "stacks" then
-				local a, b = attributesA.stack or 0, attributesB.stack or 0
-				if a ~= b then
-					return a*order < b*order
-				end
-
-			elseif method == "shown" then
-				local a, b = (attributesA.shown and attributesA.realAlpha > 0) and 1 or 0, (attributesB.shown and attributesB.realAlpha > 0) and 1 or 0
-				if a ~= b then
-					return a*order < b*order
-				end
-
-			elseif method == "visibleshown" then
-				local a, b = (attributesA.shown and iconA:GetAlpha() > 0) and 1 or 0, (attributesB.shown and iconB:GetAlpha() > 0) and 1 or 0
-				if a ~= b then
-					return a*order < b*order
-				end
-
-			elseif method == "duration" then				
-				local time = TMW.time
-				
-				local durationA = attributesA.duration - (time - attributesA.start)
-				local durationB = attributesB.duration - (time - attributesB.start)
-
-				if durationA ~= durationB then
-					return durationA*order < durationB*order
-				end
-			end
-		end
-	end
-end
-
---TODO: make group icon sorting into a group module. Icon placement in general should be handled by a module.
--- Also make icon sorting itself much more modular (to allow extensions)
-function Group.SortIcons(group)
-	local SortedIcons = group.SortedIcons
-	sort(SortedIcons, group.IconSorter)
-
-	for positionedID = 1, #SortedIcons do
-		local icon = SortedIcons[positionedID]
-		icon.viewData:Icon_SetPoint(icon, positionedID)
-	end
-end
 
 Group.SetScript_Blizz = Group.SetScript
 function Group.SetScript(group, handler, func)
@@ -199,16 +117,6 @@ function Group.TMW_CNDT_OBJ_PASSING_CHANGED(group, event, ConditionObject, faile
 	end
 end
 
-TMW:RegisterCallback("TMW_CONFIG_ICON_RECONCILIATION_REQUESTED",
-function(event, replace, limitSourceGroup)
-	for gs, groupID in TMW:InGroupSettings() do
-		if not limitSourceGroup or groupID == limitSourceGroup then
-			if type(gs.Point.relativeTo) == "string" then
-				replace(gs.Point, "relativeTo")
-			end
-		end
-	end
-end)
 
 function Group.GetSettings(group)
 	return TMW.db.profile.Groups[group:GetID()]
@@ -272,7 +180,7 @@ function Group.Setup_Conditions(group)
 	end
 end
 	
-function Group.Setup(group)
+function Group.Setup(group, noIconSetup)
 	local gs = group:GetSettings()
 	local groupID = group:GetID()
 	
@@ -310,34 +218,28 @@ function Group.Setup(group)
 			viewData:Group_Setup(group)
 		end
 		
-		-- Setup icons
-		for iconID = 1, group.numIcons do
-			local icon = group[iconID]
-			if not icon then
-				icon = TMW.Classes.Icon:New("Button", group:GetName() .. "_Icon" .. iconID, group, "TellMeWhen_IconTemplate", iconID)
+		if not noIconSetup then
+			-- Setup icons
+			for iconID = 1, group.numIcons do
+				local icon = group[iconID]
+				if not icon then
+					icon = TMW.Classes.Icon:New("Button", group:GetName() .. "_Icon" .. iconID, group, "TellMeWhen_IconTemplate", iconID)
+				end
+
+				TMW.safecall(icon.Setup, icon)
 			end
 
-			TMW.safecall(icon.Setup, icon)
-		
-			group.SortedIconsManager:UpdateTable_Register(icon)
+			for iconID = group.numIcons+1, #group do
+				local icon = group[iconID]
+				icon:DisableIcon()
+			end
 		end
-
-		for iconID = group.numIcons+1, #group do
-			local icon = group[iconID]
-			icon:DisableIcon()
-			group.SortedIconsManager:UpdateTable_Unregister(icon)
-		end
-		group.shouldSortIcons = group.SortPriorities[1].Method ~= "id" and group.numIcons > 1
 	else
 		for iconID = 1, #group do
 			local icon = group[iconID]
 			icon:DisableIcon()
-			group.SortedIconsManager:UpdateTable_Unregister(icon)
 		end
-		group.shouldSortIcons = false
 	end
-
-	group:SortIcons()
 
 	group:Setup_Conditions()
 	

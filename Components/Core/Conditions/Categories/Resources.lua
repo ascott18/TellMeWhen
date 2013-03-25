@@ -236,28 +236,6 @@ ConditionCategory:RegisterCondition(13.2, "ECLIPSE_DIRECTION", {
 	end,
 })
 
-ConditionCategory:RegisterCondition(14,	 "HAPPINESS", {
-	text = HAPPINESS,
-	min = 1,
-	max = 3,
-	midt = true,
-	texttable = function(k) return _G["PET_HAPPINESS" .. k] end,
-	unit = PET,
-	icon = "Interface\\PetPaperDollFrame\\UI-PetHappiness",
-	tcoords = {0.390625, 0.5491, 0.03, 0.3305},
-	Env = {
-		GetPetHappiness = GetPetHappiness,
-	},
-	funcstr = GetPetHappiness and [[(GetPetHappiness() or 0) c.Operator c.Level]] or [[true]], -- dummy string to keep support for wowCN
-	hidden = not GetPetHappiness or pclass ~= "HUNTER", -- dont show if GetPetHappiness doesnt exist (if happiness is removed in the client version), not not because it must be false, not nil
-	events = function(ConditionObject, c)
-		return
-			ConditionObject:GetUnitChangedEventString(CNDT:GetUnit("pet")),
-			ConditionObject:GenerateNormalEventString("UNIT_HAPPINESS", "pet"),
-			ConditionObject:GenerateNormalEventString("UNIT_POWER", "pet")
-	end,
-})
-
 ConditionCategory:RegisterCondition(15,	 "RUNES", {
 	text = RUNES,
 	tooltip = L["CONDITIONPANEL_RUNES_DESC"],

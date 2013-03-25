@@ -40,7 +40,6 @@ local COLOR_UNLOCKED = {
 	g=1,
 	Gray=false,
 }
---TODO: the whole colors thing needs to be completely redone. This is a really depressing todo, but you need to do it.
 function Texture_Colored:UPDATE(icon)
 	local attributes = icon.attributes
 	local duration, inrange, nomana = attributes.duration, attributes.inRange, attributes.noMana

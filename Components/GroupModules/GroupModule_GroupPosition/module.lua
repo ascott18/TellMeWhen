@@ -17,11 +17,6 @@ local TMW = TMW
 local L = TMW.L
 local print = TMW.print
 
-
-
-
-
----------- Position ----------
 local Ruler = CreateFrame("Frame")
 local function GetAnchoredPoints(group)
 	local gs = group:GetSettings()
@@ -47,84 +42,113 @@ local function GetAnchoredPoints(group)
 end
 
 
-TMW:NewClass("GroupModule_GroupPosition", "GroupModule"){
-	
-	OnEnable = function(self)
-		self:SetPos()	
-	end,
-	
-	OnDisable = function(self)
-		TMW:UnregisterCallback("TMW_ONUPDATE_TIMECONSTRAINED_PRE", "DetectFrame", self)
-	end,
 
-	DetectFrame = function(self, event, time, Locked)		
-		local frameToFind = self.frameToFind
-		
-		if _G[frameToFind] then
-			self:SetPos()
-			TMW:UnregisterCallback("TMW_ONUPDATE_TIMECONSTRAINED_PRE", "DetectFrame", self)
-		end
-	end,
-	
-	UpdatePositionAfterMovement = function(self)
-		self:CalibrateAnchors()
-		
-		self:SetPos()
-	end,
-	
+local GroupPosition = TMW:NewClass("GroupModule_GroupPosition", "GroupModule")
 
-	CalibrateAnchors = function(self)
-		local group = self.group
-		
-		local gs = group:GetSettings()
-		local p = gs.Point
-	
-		p.point, p.relativeTo, p.relativePoint, p.x, p.y = GetAnchoredPoints(group)
-	end,
 
-	SetPos = function(self)
-		local group = self.group
-		local groupID = group:GetID()
-		
-		local gs = group:GetSettings()
-		local p = gs.Point
-		
-		group:ClearAllPoints()
-		
-		if p.relativeTo == "" then
-			p.relativeTo = "UIParent"
-		end
-		
-		p.relativeTo = type(p.relativeTo) == "table" and p.relativeTo:GetName() or p.relativeTo
-		local relativeTo = _G[p.relativeTo]
-		
-		if not relativeTo then
-			self.frameToFind = p.relativeTo
-			TMW:RegisterCallback("TMW_ONUPDATE_TIMECONSTRAINED_PRE", "DetectFrame", self)
-			group:SetPoint("CENTER", UIParent)
-		else
-			local success, err = pcall(group.SetPoint, group, p.point, relativeTo, p.relativePoint, p.x, p.y)
-			if not success and err:find("trying to anchor to itself") then
-				TMW:Error(err)
-				TMW:Print(L["ERROR_ANCHORSELF"]:format(L["fGROUP"]):format(TMW:GetGroupName(groupID, groupID, 1)))
-
-				p.relativeTo = "UIParent"
-				p.point = "CENTER"
-				p.relativePoint = "CENTER"
-				p.x = 0
-				p.y = 0
-
-				return self:SetPos()
-			end
-		end
-		
-		group:SetFrameStrata(gs.Strata)
-		group:SetFrameLevel(gs.Level)
-		group:SetScale(gs.Scale)
-	end
+GroupPosition:RegisterGroupDefaults{
+	Point = {
+		point 		  = "CENTER",
+		relativeTo 	  = "UIParent",
+		relativePoint = "CENTER",
+		x 			  = 0,
+		y 			  = 0,
+	},
 }
 
+TMW:RegisterUpgrade(41402, {
+	group = function(self, gs)
+		gs.Point.defined = nil
+	end,
+})
 
+
+function GroupPosition:OnEnable()
+	self:SetPos()	
+end
+
+function GroupPosition:OnDisable()
+	TMW:UnregisterCallback("TMW_ONUPDATE_TIMECONSTRAINED_PRE", "DetectFrame", self)
+end
+
+
+function GroupPosition:DetectFrame(event, time, Locked)		
+	local frameToFind = self.frameToFind
+	
+	if _G[frameToFind] then
+		self:SetPos()
+		TMW:UnregisterCallback("TMW_ONUPDATE_TIMECONSTRAINED_PRE", "DetectFrame", self)
+	end
+end
+
+function GroupPosition:UpdatePositionAfterMovement()
+	self:CalibrateAnchors()
+	
+	self:SetPos()
+end
+
+
+function GroupPosition:CalibrateAnchors()
+	local group = self.group
+	
+	local gs = group:GetSettings()
+	local p = gs.Point
+
+	p.point, p.relativeTo, p.relativePoint, p.x, p.y = GetAnchoredPoints(group)
+end
+
+function GroupPosition:SetPos()
+	local group = self.group
+	local groupID = group:GetID()
+	
+	local gs = group:GetSettings()
+	local p = gs.Point
+	
+	group:ClearAllPoints()
+	
+	if p.relativeTo == "" then
+		p.relativeTo = "UIParent"
+	end
+	
+	p.relativeTo = type(p.relativeTo) == "table" and p.relativeTo:GetName() or p.relativeTo
+	local relativeTo = _G[p.relativeTo]
+	
+	if not relativeTo then
+		self.frameToFind = p.relativeTo
+		TMW:RegisterCallback("TMW_ONUPDATE_TIMECONSTRAINED_PRE", "DetectFrame", self)
+		group:SetPoint("CENTER", UIParent)
+	else
+		local success, err = pcall(group.SetPoint, group, p.point, relativeTo, p.relativePoint, p.x, p.y)
+		if not success and err:find("trying to anchor to itself") then
+			TMW:Error(err)
+			TMW:Print(L["ERROR_ANCHORSELF"]:format(L["fGROUP"]):format(TMW:GetGroupName(groupID, groupID, 1)))
+
+			p.relativeTo = "UIParent"
+			p.point = "CENTER"
+			p.relativePoint = "CENTER"
+			p.x = 0
+			p.y = 0
+
+			return self:SetPos()
+		end
+	end
+	
+	group:SetFrameStrata(gs.Strata)
+	group:SetFrameLevel(gs.Level)
+	group:SetScale(gs.Scale)
+end
+
+
+TMW:RegisterCallback("TMW_CONFIG_ICON_RECONCILIATION_REQUESTED",
+function(event, replace, limitSourceGroup)
+	for gs, groupID in TMW:InGroupSettings() do
+		if not limitSourceGroup or groupID == limitSourceGroup then
+			if type(gs.Point.relativeTo) == "string" then
+				replace(gs.Point, "relativeTo")
+			end
+		end
+	end
+end)
 
 
 

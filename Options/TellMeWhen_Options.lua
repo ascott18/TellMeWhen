@@ -427,8 +427,8 @@ function TMW:AnimateHeightChange(f, endHeight, duration)
 	f:SetHeight(endHeight)
 	do return end
 	
-	if not f.__animateHeightHooked2 then
-		f.__animateHeightHooked2 = true
+	if not f.__animateHeightHooked then
+		f.__animateHeightHooked = true
 		f:HookScript("OnUpdate", function(f)
 				if f.__animateHeight_duration then
 					if TMW.time - f.__animateHeight_startTime > f.__animateHeight_duration then
@@ -482,129 +482,6 @@ local importExportBoxTemplate = {
 	--hidden = function() return IE.ExportBox:IsVisible() end,
 } TMW.importExportBoxTemplate = importExportBoxTemplate
 
-local groupSortPriorities = {
-	"id",
-	"duration",
-	"stacks",
-	"visiblealpha",
-	"visibleshown",
-	"alpha",
-	"shown",
-}
-local groupSortValues = {
-	L["UIPANEL_GROUPSORT_id"],
-	L["UIPANEL_GROUPSORT_duration"],
-	L["UIPANEL_GROUPSORT_stacks"],
-	L["UIPANEL_GROUPSORT_visiblealpha"],
-	L["UIPANEL_GROUPSORT_visibleshown"],
-	L["UIPANEL_GROUPSORT_alpha"],
-	L["UIPANEL_GROUPSORT_shown"],
-}
-local groupSortMethodTemplate -- this is intentional
-groupSortMethodTemplate = {
-	type = "group",
-	name = function(info)
-		return ""
-	end,
-	order = function(info)
-		return tonumber(info[#info])
-	end,
-	disabled = function(info, priorityID)
-		local g = findid(info)
-		local priorityID = priorityID or tonumber(info[#info-1])
-		for k, v in pairs(TMW.db.profile.Groups[g].SortPriorities) do
-			if k < priorityID and v.Method == "id" then
-				return true
-			end
-		end
-	end,
-	dialogInline = true,
-	guiInline = true,
-	args = {
-		method = {
-			name = function(info)
-				local priorityID = tonumber(info[#info-1])
-				return L["UIPANEL_GROUPSORT_METHODNAME"]:format(priorityID)
-			end,
-			desc = function(info)
-				local g = findid(info)
-				local priorityID = tonumber(info[#info-1])
-				local Method = TMW.db.profile.Groups[g].SortPriorities[priorityID].Method
-
-				local desc = L["UIPANEL_GROUPSORT_METHODNAME_DESC"]:format(priorityID) .. "\r\n\r\n" .. L["UIPANEL_GROUPSORT_" .. Method .. "_DESC"]
-				if groupSortMethodTemplate.disabled(info, priorityID) then
-					desc = desc .. "\r\n\r\n" .. L["UIPANEL_GROUPSORT_METHODDISABLED_DESC"]
-				end
-				return desc
-			end,
-			type = "select",
-			width = "double",
-			values = groupSortValues,
-			style = "dropdown",
-			order = 1,
-			get = function(info)
-				local g = findid(info)
-				local priorityID = tonumber(info[#info-1])
-				local Method = TMW.db.profile.Groups[g].SortPriorities[priorityID].Method
-				for k, v in pairs(groupSortPriorities) do
-					if Method == v then
-						return k
-					end
-				end
-			end,
-			set = function(info, val)
-				local g = findid(info)
-				local priorityID = tonumber(info[#info-1])
-				local oldPriority = TMW.db.profile.Groups[g].SortPriorities[priorityID]
-				local newPriority
-				for k, v in pairs(TMW.db.profile.Groups[g].SortPriorities) do
-					if v.Method == groupSortPriorities[val] then
-						TMW.db.profile.Groups[g].SortPriorities[k] = oldPriority
-						TMW.db.profile.Groups[g].SortPriorities[priorityID] = v
-						break
-					end
-				end
-				TMW[g]:Setup()
-			end,
-		},
-		OrderAscending = {
-			name = L["UIPANEL_GROUPSORT_SORTASCENDING"],
-			desc = L["UIPANEL_GROUPSORT_SORTASCENDING_DESC"],
-			type = "toggle",
-			width = "half",
-			order = 2,
-			get = function(info)
-				local g = findid(info)
-				local priorityID = tonumber(info[#info-1])
-				return TMW.db.profile.Groups[g].SortPriorities[priorityID].Order == 1
-			end,
-			set = function(info)
-				local g = findid(info)
-				local priorityID = tonumber(info[#info-1])
-				TMW.db.profile.Groups[g].SortPriorities[priorityID].Order = 1
-				TMW[g]:Setup()
-			end,
-		},
-		OrderDescending = {
-			name = L["UIPANEL_GROUPSORT_SORTDESCENDING"],
-			desc = L["UIPANEL_GROUPSORT_SORTDESCENDING_DESC"],
-			type = "toggle",
-			width = "half",
-			order = 3,
-			get = function(info)
-				local g = findid(info)
-				local priorityID = tonumber(info[#info-1])
-				return TMW.db.profile.Groups[g].SortPriorities[priorityID].Order == -1
-			end,
-			set = function(info)
-				local g = findid(info)
-				local priorityID = tonumber(info[#info-1])
-				TMW.db.profile.Groups[g].SortPriorities[priorityID].Order = -1
-				TMW[g]:Setup()
-			end,
-		},
-	}
-}
 TMW.GroupConfigTemplate = {
 	type = "group",
 	childGroups = "tab",
@@ -672,48 +549,6 @@ TMW.GroupConfigTemplate = {
 					step = 1,
 					bigStep = 1,
 				},
-				SpacingX = {
-					name = L["UIPANEL_ICONSPACINGX"],
-					desc = L["UIPANEL_ICONSPACING_DESC"],
-					type = "range",
-					order = 22,
-					min = -5,
-					softMax = 20,
-					step = 0.1,
-					bigStep = 1,
-					set = function(info, val)
-						local g = findid(info)
-						local gs = TMW.db.profile.Groups[g]
-						gs.SettingsPerView[gs.View][info[#info]] = val
-						TMW[g]:Setup()
-					end,
-					get = function(info)
-						local g = findid(info)
-						local gs = TMW.db.profile.Groups[g]
-						return gs.SettingsPerView[gs.View][info[#info]]
-					end,
-				},
-				SpacingY = {
-					name = L["UIPANEL_ICONSPACINGY"],
-					desc = L["UIPANEL_ICONSPACING_DESC"],
-					type = "range",
-					order = 23,
-					min = -5,
-					softMax = 20,
-					step = 0.1,
-					bigStep = 1,
-					set = function(info, val)
-						local g = findid(info)
-						local gs = TMW.db.profile.Groups[g]
-						gs.SettingsPerView[gs.View][info[#info]] = val
-						TMW[g]:Setup()
-					end,
-					get = function(info)
-						local g = findid(info)
-						local gs = TMW.db.profile.Groups[g]
-						return gs.SettingsPerView[gs.View][info[#info]]
-					end,
-				},
 				
 				CheckOrder = {
 					name = L["CHECKORDER"],
@@ -722,23 +557,6 @@ TMW.GroupConfigTemplate = {
 					values = checkorder,
 					style = "dropdown",
 					order = 26,
-				},
-				LayoutDirection = {
-					name = L["LAYOUTDIRECTION"],
-					desc = L["LAYOUTDIRECTION_DESC"],
-					type = "select",
-					values = {
-						L["LAYOUTDIRECTION_1"],
-						L["LAYOUTDIRECTION_2"],
-						L["LAYOUTDIRECTION_3"],
-						L["LAYOUTDIRECTION_4"],
-						L["LAYOUTDIRECTION_5"],
-						L["LAYOUTDIRECTION_6"],
-						L["LAYOUTDIRECTION_7"],
-						L["LAYOUTDIRECTION_8"],
-					},  
-					style = "dropdown",
-					order = 27,
 				},
 				View = {
 					name = L["UIPANEL_GROUPTYPE"],
@@ -814,20 +632,26 @@ TMW.GroupConfigTemplate = {
 				ImportExport = importExportBoxTemplate,
 			},
 		},
-
-		Sorting = {
-			name = L["UIPANEL_GROUPSORT"],
-			desc = L["UIPANEL_GROUPSORT_DESC"],
+		position = {
 			type = "group",
-			order = 10,
-			args = (function()
-				-- cheesy (or clever) inline dynamic table generation
-				local t = {}
-				for i = 1, #TMW.Group_Defaults.SortPriorities do
-					t[tostring(i)] = groupSortMethodTemplate
-				end
-				return t
-			end)()
+			order = 20,
+			name = L["UIPANEL_POSITION"],
+			desc = L["UIPANEL_POSITION_DESC"],
+			args = {
+				lock = {
+					name = L["UIPANEL_LOCK"],
+					desc = L["UIPANEL_LOCK_DESC"],
+					type = "toggle",
+					order = 40,
+					set = function(info, val)
+						local g = findid(info)
+						TMW.db.profile.Groups[g].Locked = val
+				
+						TMW[g]:Setup()
+					end,
+					get = function(info) return TMW.db.profile.Groups[findid(info)].Locked end
+				},
+			},
 		},
 	}
 }
@@ -1741,7 +1565,6 @@ ID:RegisterIconDragHandler(40,	-- Split
 
 
 		local gs = TMW.db.profile.Groups[groupID]
-		--gs.Icons = blankIcons
 
 		-- group tweaks
 		gs.Rows = 1
@@ -1751,19 +1574,16 @@ ID:RegisterIconDragHandler(40,	-- Split
 		-- adjustments and positioning
 		local p = gs.Point
 		p.point, p.relativeTo, p.relativePoint, p.x, p.y = ID.texture:GetPoint(2)
-		p.x, p.y = p.x/UIParent:GetScale()*.85, p.y/UIParent:GetScale()*.85
+		p.x, p.y = p.x/UIParent:GetScale()*ID.F:GetScale(), p.y/UIParent:GetScale()*ID.F:GetScale()
 		p.relativeTo = "UIParent"
-		TMW:Group_StopMoving(ID.srcicon.group)
-
-
+		
 		TMW[groupID]:Setup()
 
-		-- move the actual icon
-		-- move the actual settings
+		-- move the actual icon settings
 		gs.Icons[1] = ID.srcicon.group.Icons[ID.srcicon:GetID()]
 		ID.srcicon.group.Icons[ID.srcicon:GetID()] = nil
 
-		-- preserve buff/debuff/other types textures
+		-- preserve textures
 		if group and group[1] then
 			group[1]:SetInfo("texture", ID.srcicon.attributes.texture)
 		end
@@ -2910,110 +2730,7 @@ function IE:Equiv_GenerateTips(equiv)
 	return r
 end
 
---[=[
-local function equivSorter(a, b)
-	if a == "IncreasedSPsix" and b == "IncreasedSPten" then
-		return true
-	elseif b == "IncreasedSPsix" and a == "IncreasedSPten" then
-		return false
-	else
-		return L[a] < L[b]
-	end
-end
-function IE:Equiv_DropDown()
-	if (UIDROPDOWNMENU_MENU_LEVEL == 2) then
-		if TMW.BE[UIDROPDOWNMENU_MENU_VALUE] then
-			for k, v in TMW:OrderedPairs(TMW.BE[UIDROPDOWNMENU_MENU_VALUE], equivSorter) do
-				local info = UIDropDownMenu_CreateInfo()
-				info.func = IE.Equiv_DropDown_OnClick
-				info.text = L[k]
-				local text = IE:Equiv_GenerateTips(k)
 
-				info.icon = TMW.SpellTextures[TMW.EquivFirstIDLookup[k]]
-				info.tCoordLeft = 0.07
-				info.tCoordRight = 0.93
-				info.tCoordTop = 0.07
-				info.tCoordBottom = 0.93
-
-				info.tooltipTitle = k
-				info.tooltipText = text
-				info.tooltipOnButton = true
-				info.value = k
-				info.arg1 = k
-				info.notCheckable = true
-				UIDropDownMenu_AddButton(info, 2)
-			end
-		elseif UIDROPDOWNMENU_MENU_VALUE == "dispel" then
-			for k, v in TMW:OrderedPairs(TMW.DS) do
-				local v = TMW.DS[k]
-				local info = UIDropDownMenu_CreateInfo()
-				info.func = IE.Equiv_DropDown_OnClick
-				info.text = L[k]
-
-				local first = strsplit(TMW.EquivFirstIDLookup[k], ";")
-				info.icon = v
-				info.tCoordLeft = 0.07
-				info.tCoordRight = 0.93
-				info.tCoordTop = 0.07
-				info.tCoordBottom = 0.93
-
-				info.value = k
-				info.arg1 = k
-				info.notCheckable = true
-				UIDropDownMenu_AddButton(info, 2)
-			end
-		end
-		return
-	end
-
-	local info = UIDropDownMenu_CreateInfo()
-	info.text = L["ICONMENU_BUFF"]
-	info.value = "buffs"
-	info.hasArrow = true
-	info.colorCode = "|cFF00FF00"
-	info.notCheckable = true
-	UIDropDownMenu_AddButton(info)
-
-	--some stuff is reused for this one
-	info.text = L["ICONMENU_DEBUFF"]
-	info.value = "debuffs"
-	info.colorCode = "|cFFFF0000"
-	UIDropDownMenu_AddButton(info)
-
-	info.text = L["ICONMENU_CASTS"]
-	info.value = "casts"
-	info.colorCode = nil
-	UIDropDownMenu_AddButton(info)
-
-	info.text = L["ICONMENU_DRS"]
-	info.value = "dr"
-	info.colorCode = nil
-	UIDropDownMenu_AddButton(info)
-
-	info.text = L["ICONMENU_DISPEL"]
-	info.value = "dispel"
-	UIDropDownMenu_AddButton(info)
-end
-
-function IE:Equiv_DropDown_OnClick(value)
-	error("Sorry, but this dropdown is currently defunct. Please use the suggetion list or type things in manually") --TODO: remove this ( the dropdown) probably
-	-- TODO: tie this closer to the choosename panel
-	local e = IE.Panels.Name
-	e:Insert("; " .. value .. "; ")
-	local new = TMW:CleanString(e)
-	e:SetText(new)
-	local _, position = strfind(new, gsub(value, "([%-])", "%%%1"))
-	position = tonumber(position) + 2
-
-	-- WARNING: lame coding from here to the end of this function.
-	e:SetFocus()
-	e:ClearFocus()
-	e:SetFocus()
-	e:HighlightText(0, 0)
-	e:SetCursorPosition(position)
-	CloseDropDownMenus()
-end
-]=]
 
 ---------- Dropdowns ----------
 function IE:Type_DropDown()

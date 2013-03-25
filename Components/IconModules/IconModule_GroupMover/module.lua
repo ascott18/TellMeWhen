@@ -18,8 +18,9 @@ local L = TMW.L
 local print = TMW.print
 	
 
+	--TODO: migrate these methods to GroupModule_GroupPosition (or get rid of them)
 local isMoving = nil
-function TMW:Group_StopMoving(group)
+local function stopMoving(group)
 	group:StopMovingOrSizing()
 	
 	isMoving = nil
@@ -31,17 +32,6 @@ function TMW:Group_StopMoving(group)
 	
 	TMW.IE:NotifyChanges()
 end
-
-function TMW:Group_ResetPosition(groupID)
-	for k, v in pairs(TMW.Group_Defaults.Point) do
-		TMW.db.profile.Groups[groupID].Point[k] = v
-	end
-	TMW.db.profile.Groups[groupID].Scale = 1
-	TMW.db.profile.Groups[groupID].Locked = false
-	TMW.IE:NotifyChanges()
-	TMW[groupID]:Setup()
-end
-
 
 	
 local Module = TMW:NewClass("IconModule_GroupMover", "IconModule"){
@@ -76,7 +66,7 @@ end)
 
 Module:SetScriptHandler("OnDragStop", function(Module, icon)
 	if isMoving then
-		TMW:Group_StopMoving(isMoving)
+		stopMoving(isMoving)
 	end
 end)
 
@@ -87,26 +77,26 @@ end)
 	
 WorldFrame:HookScript("OnMouseDown", function(WorldFrame, button)
 	if isMoving then
-		TMW:Group_StopMoving(isMoving)
+		stopMoving(isMoving)
 	end
 end)
 
 TMW:RegisterCallback("TMW_GROUP_HIDE_PRE", function(event, group)
 	if isMoving == group then
-		TMW:Group_StopMoving(isMoving)
+		stopMoving(isMoving)
 	end
 end)
 
 TMW:RegisterCallback("TMW_LOCK_TOGGLED", function(event, Locked)
 	if Locked and isMoving then
-		TMW:Group_StopMoving(isMoving)
+		stopMoving(isMoving)
 	end
 end)
 	
 Module:SetScriptHandler("OnMouseUp", function(Module, icon, button)
 	if not TMW.Locked then
 		if isMoving then
-			TMW:Group_StopMoving(isMoving)
+			stopMoving(isMoving)
 		end
 	end
 end)
@@ -186,6 +176,6 @@ TMW.ID:RegisterIconDragHandler(30,	-- Anchor
 
 		-- do adjustments and positioning
 		-- i cheat. we didnt really stop moving anything, but i'm going to hijack this function anyway.
-		TMW:Group_StopMoving(ID.srcicon.group)
+		stopMoving(ID.srcicon.group)
 	end
 )

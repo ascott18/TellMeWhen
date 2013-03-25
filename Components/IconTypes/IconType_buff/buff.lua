@@ -365,13 +365,6 @@ function Type:Setup(icon, groupID, iconID)
 	-- need to force any icon looking for moonfire to check all auras on the target because of a blizzard bug in WoW 4.1.
 	-- TODO: verify that the issue persists
 
-	-- icon.NAL = icon.Sort and EFF_THR + 1 or icon.NAL
-	-- NOTE: we dont do this anymore because this is checked directly in the function instead of doing stupid shit like this.
-	-- Force icons that sort to check all because it must find check all auras
-	-- in order to make a final decision on whether or not something has the highest/lowest duration.
-	-- Two buffs with the same name/ID can have different durations on a unit.
-	-- Normal aura checking will stop when it finds the first one and go to check the next item in NameArray.
-
 	icon.FirstTexture = SpellTextures[icon.NameFirst]
 
 	icon:SetInfo("texture; reverse", TMW:GetConfigIconTexture(icon), true)

@@ -252,25 +252,30 @@ local commonConditions = {
 	"STANCE",
 }
 
-local function AddConditionToDropDown(conditionData)	
+local function AddConditionToDropDown(conditionData)
+	local append = TMW.debug and get(conditionData.hidden) and "(DBG)" or ""
+	
 	local info = UIDropDownMenu_CreateInfo()
+	
 	info.func = CNDT.TypeMenu_DropDown_OnClick
-	info.text = conditionData.text
+	info.text = (conditionData.text or "??") .. append
+	
 	info.tooltipTitle = conditionData.text
 	info.tooltipText = conditionData.tooltip
 	info.tooltipOnButton = true
+	
 	info.value = conditionData.value
 	info.arg1 = conditionData
 	info.icon = get(conditionData.icon)
+	
 	if conditionData.tcoords then
 		info.tCoordLeft = conditionData.tcoords[1]
 		info.tCoordRight = conditionData.tcoords[2]
 		info.tCoordTop = conditionData.tcoords[3]
 		info.tCoordBottom = conditionData.tcoords[4]
 	end
-	UIDropDownMenu_AddButton(info, UIDROPDOWNMENU_MENU_LEVEL)
 	
-	return true
+	UIDropDownMenu_AddButton(info, UIDROPDOWNMENU_MENU_LEVEL)
 end
 
 
@@ -326,7 +331,7 @@ function CNDT:TypeMenu_DropDown()
 		local CurrentConditionSet = CNDT.CurrentConditionSet
 		
 		for k, conditionData in ipairs(categoryData.conditionData) do
-			local shouldAdd = not get(conditionData.hidden)
+			local shouldAdd = not get(conditionData.hidden) --or TMW.debug
 			
 			if not conditionData.IS_SPACER and CurrentConditionSet.ConditionTypeFilter then
 				if not CurrentConditionSet:ConditionTypeFilter(conditionData) then

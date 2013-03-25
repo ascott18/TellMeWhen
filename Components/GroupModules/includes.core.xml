@@ -6,6 +6,9 @@
  
  <Include file="GroupModule_GroupPosition\includes.core.xml"/>
  
+ <Include file="GroupModule_IconPosition\includes.core.xml"/>
+ <Include file="GroupModule_IconPosition_Sortable\includes.core.xml"/>
+ 
  <Include file="GroupModule_Alpha\includes.core.xml"/>
 
 </Ui>
