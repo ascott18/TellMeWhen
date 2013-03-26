@@ -200,24 +200,24 @@ function Group.Setup(group, noIconSetup)
 	
 	group:DisableAllModules()
 	
+	-- Setup the groups's view:
+	
+	-- UnSetup the old view
+	if viewData_old then
+		if viewData_old ~= viewData and viewData_old.Group_UnSetup then
+			viewData_old:Group_UnSetup(group)
+		end
+		
+		viewData_old:UnimplementFromGroup(group)
+	end
+	
+	-- Setup the current view
+	viewData:ImplementIntoGroup(group)
+	if viewData then
+		viewData:Group_Setup(group)
+	end
+		
 	if group:ShouldUpdateIcons() then
-		-- Setup the groups's view:
-		
-		-- UnSetup the old view
-		if viewData_old then
-			if viewData_old ~= viewData and viewData_old.Group_UnSetup then
-				viewData_old:Group_UnSetup(group)
-			end
-			
-			viewData_old:UnimplementFromGroup(group)
-		end
-		
-		-- Setup the current view
-		viewData:ImplementIntoGroup(group)
-		if viewData then
-			viewData:Group_Setup(group)
-		end
-		
 		if not noIconSetup then
 			-- Setup icons
 			for iconID = 1, group.numIcons do
