@@ -215,10 +215,13 @@ function IconPosition_Sortable:TMW_ICON_UPDATED(event, icon)
 end
 
 function IconPosition_Sortable:TMW_GROUP_SETUP_POST(event, group)
-	if self.group == group then
+	if self.group == group and group:ShouldUpdateIcons() then
 	
 		for iconID = 1, group.numIcons do
-			self.SortedIconsManager:UpdateTable_Register(group[iconID])
+			local icon = group[iconID]
+			if icon then
+				self.SortedIconsManager:UpdateTable_Register(group[iconID])
+			end
 		end
 	
 		self:PositionIcons()
