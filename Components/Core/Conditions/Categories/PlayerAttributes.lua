@@ -65,7 +65,7 @@ ConditionCategory:RegisterCondition(1,	 "INSTANCE", {
 			if wow_502 then
 				_, _, instanceDifficulty = GetInstanceInfo()
 			else
-				instanceDifficulty = GetInstanceDifficulty()
+				instanceDifficulty = GetInstanceDifficulty() - 1
 			end
 			
 			if z == "pvp" then
