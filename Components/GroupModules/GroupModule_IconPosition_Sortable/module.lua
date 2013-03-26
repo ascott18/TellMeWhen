@@ -42,7 +42,6 @@ function IconPosition_Sortable:OnNewInstance_IconPosition_Sortable()
 	self.SortedIcons = {}
 	self.SortedIconsManager = TMW.Classes.UpdateTableManager:New()
 	self.SortedIconsManager:UpdateTable_Set(self.SortedIcons)
-	wlp(self.group, self.SortedIcons[1])
 end
 
 
@@ -118,7 +117,6 @@ function IconPosition_Sortable:Icon_SetPoint(icon, positionID)
 	end
 	
 	local position = icon.position
-	wlp(group, self.SortedIcons, icon, self.SortedIcons[1], position)
 	position.relativeTo = group
 	position.point, position.relativePoint = point, point
 	position.x, position.y = x, y

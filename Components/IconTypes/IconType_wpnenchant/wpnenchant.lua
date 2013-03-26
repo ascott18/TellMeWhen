@@ -83,6 +83,15 @@ Type:RegisterConfigPanel_ConstructorFunc(150, "TellMeWhen_WpnEnchantSettings", f
 	})
 end)
 
+TMW:RegisterUpgrade(62008, {
+	icon = function(self, ics)
+		if ics.WpnEnchantType == "RangedSlot" then
+			ics.WpnEnchantType = "MainHandSlot"
+		end
+	end,
+})
+
+
 local Parser = CreateFrame("GameTooltip", "TellMeWhen_Parser", TMW, "GameTooltipTemplate")
 local function GetWeaponEnchantName(slot)
 	Parser:SetOwner(UIParent, "ANCHOR_NONE")
@@ -130,6 +139,7 @@ end
 TMW:RegisterCallback("TMW_GLOBAL_UPDATE", function()
 	WpnEnchDurs = TMW.db.global.WpnEnchDurs
 end)
+
 
 local SlotsToNumbers = {
 	MainHandSlot = 1,
