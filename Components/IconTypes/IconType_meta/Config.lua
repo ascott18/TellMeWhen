@@ -24,6 +24,11 @@ local _G = _G
 local pairs, tinsert, tremove = 
 	  pairs, tinsert, tremove
 
+local Type = rawget(TMW.Types, "meta")
+
+if not Type then return end
+
+
 -- GLOBALS: UIDROPDOWNMENU_MENU_LEVEL, UIDROPDOWNMENU_MENU_VALUE, UIDropDownMenu_AddButton, UIDropDownMenu_CreateInfo, CloseDropDownMenus
 -- GLOBALS: TellMeWhen_MetaIconOptions
 -- GLOBALS: CreateFrame
@@ -51,6 +56,17 @@ TMW.ID:RegisterIconDragHandler(20,
 	end
 )
 
+
+
+function Type:GetIconMenuText(ics, groupID, iconID)
+	local text = Type.name .. " " .. L["ICONMENU_META_ICONMENUTOOLTIP"]:format(ics.Icons and #ics.Icons or 0)
+	
+	return text, "", true
+end
+
+function Type:GuessIconTexture(ics)
+	return "Interface\\Icons\\LevelUpIcon-LFD"
+end
 
 
 local ME = TMW:NewModule("MetaEditor")

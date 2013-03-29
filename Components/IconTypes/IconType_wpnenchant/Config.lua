@@ -21,6 +21,35 @@ local SUG = TMW.SUG
 local strlowerCache = TMW.strlowerCache
 local SpellTextures = TMW.SpellTextures
 
+local Type = rawget(TMW.Types, "wpnenchant")
+
+if not Type then return end
+
+
+
+function Type:GuessIconTexture(ics)
+	return GetInventoryItemTexture("player", GetInventorySlotInfo(ics.WpnEnchantType or "MainHandSlot"))
+	or GetInventoryItemTexture("player", "MainHandSlot")
+end
+
+function Type:GetIconMenuText(ics)
+	local text = ""
+	if ics.WpnEnchantType == "MainHandSlot" or not ics.WpnEnchantType then
+		text = INVTYPE_WEAPONMAINHAND
+	elseif ics.WpnEnchantType == "SecondaryHandSlot" then
+		text = INVTYPE_WEAPONOFFHAND
+	elseif ics.WpnEnchantType == "RangedSlot" then
+		text = INVTYPE_THROWN
+	end
+	
+	text = text .. " - " .. L["ICONMENU_WPNENCHANT"]
+
+	local tooltip =	""--(data.Name and data.Name ~= "" and data.Name .. "\r\n" or "")
+
+	return text, tooltip
+end
+
+
 
 local Module = SUG:NewModule("wpnenchant", SUG:GetModule("default"), "AceEvent-3.0")
 Module.noMin = true

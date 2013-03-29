@@ -21,9 +21,35 @@ local SUG = TMW.SUG
 local strlowerCache = TMW.strlowerCache
 local SpellTextures = TMW.SpellTextures
 
+local Type = rawget(TMW.Types, "item")
+
+if not Type then return end
+
 
 local ItemCache = TMW:GetModule("ItemCache")
 local ItemCache_Cache
+
+
+function Type:GuessIconTexture(ics)
+	if ics.Name and ics.Name ~= "" then
+		local id = TMW:GetItemIDs(nil, ics.Name, 1)
+		if id then
+			return GetItemIcon(id)
+		end
+	end
+end
+
+function Type:DragReceived(icon, t, data, subType)
+	local ics = icon:GetSettings()
+
+	if t ~= "item" or not data then
+		return
+	end
+
+	ics.Name = TMW:CleanString(ics.Name .. ";" .. data)
+	return true -- signal success
+end
+
 
 local Module = SUG:NewModule("itemwithslots", SUG:GetModule("item"))
 Module.Slots = {}

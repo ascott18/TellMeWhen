@@ -141,7 +141,6 @@ function IconType:FormatSpellForOutput(icon, data, doInsertLink)
 	return data, true
 end
 
---TODO: move declarations of GuessIconTexture, DragReceived, GetIconMenuText to icon types' config.lua files if possible.
 -- [REQUIRED, FALLBACK]
 --- Attempts to figure out what the configuration texture of an icon will be without actually creating the icon. This is a base method written for handling spells. It should be overridden for IconTypes that don't take spell input for their ics.Name setting. It is acceptable to delay the declaration of overrides of this method until after TellMeWhen_Options has loaded if needed.
 -- @param ics [TMW.Icon_Defaults] The settings of the icon that the texture is being guessed for.

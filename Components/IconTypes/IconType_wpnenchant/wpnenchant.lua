@@ -263,26 +263,4 @@ function Type:FormatSpellForOutput(icon, data, doInsertLink)
 	return icon.LastEnchantName or data or icon.EnchantName
 end
 
-function Type:GuessIconTexture(ics)
-	return GetInventoryItemTexture("player", GetInventorySlotInfo(ics.WpnEnchantType or "MainHandSlot"))
-	or GetInventoryItemTexture("player", "MainHandSlot")
-end
-
-function Type:GetIconMenuText(ics)
-	local text = ""
-	if ics.WpnEnchantType == "MainHandSlot" or not ics.WpnEnchantType then
-		text = INVTYPE_WEAPONMAINHAND
-	elseif ics.WpnEnchantType == "SecondaryHandSlot" then
-		text = INVTYPE_WEAPONOFFHAND
-	elseif ics.WpnEnchantType == "RangedSlot" then
-		text = INVTYPE_THROWN
-	end
-	
-	text = text .. " - " .. L["ICONMENU_WPNENCHANT"]
-
-	local tooltip =	""--(data.Name and data.Name ~= "" and data.Name .. "\r\n" or "")
-
-	return text, tooltip
-end
-
 Type:Register(110)

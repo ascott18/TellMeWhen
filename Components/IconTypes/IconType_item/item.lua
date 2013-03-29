@@ -271,25 +271,6 @@ function Type:FormatSpellForOutput(icon, data, doInsertLink)
 	return data, true
 end
 
-function Type:GuessIconTexture(ics)
-	if ics.Name and ics.Name ~= "" then
-		local id = TMW:GetItemIDs(nil, ics.Name, 1)
-		if id then
-			return GetItemIcon(id)
-		end
-	end
-end
-
-function Type:DragReceived(icon, t, data, subType)
-	local ics = icon:GetSettings()
-
-	if t ~= "item" or not data then
-		return
-	end
-
-	ics.Name = TMW:CleanString(ics.Name .. ";" .. data)
-	return true -- signal success
-end
 
 
 Type:Register(20)

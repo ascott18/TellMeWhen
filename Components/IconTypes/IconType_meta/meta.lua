@@ -331,14 +331,4 @@ TMW:RegisterCallback("TMW_CONFIG_ICON_RECONCILIATION_REQUESTED", function(event,
 	end
 end)
 
-function Type:GetIconMenuText(ics, groupID, iconID)
-	local text = Type.name .. " " .. L["ICONMENU_META_ICONMENUTOOLTIP"]:format(ics.Icons and #ics.Icons or 0)
-	
-	return text, "", true
-end
-
-function Type:GuessIconTexture(ics)
-	return "Interface\\Icons\\LevelUpIcon-LFD"
-end
-
 Type:Register(310)
