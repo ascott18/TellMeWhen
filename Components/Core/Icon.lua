@@ -325,6 +325,7 @@ function Icon.TMW_CNDT_OBJ_PASSING_CHANGED(icon, event, ConditionObject, failed)
 	end
 end
 
+local EventSettingsWasPassingConditionMap = {}
 function Icon.ProcessQueuedEvents(icon)
 	local EventsToFire = icon.EventsToFire
 	if EventsToFire and icon.eventIsQueued then
@@ -353,13 +354,14 @@ function Icon.ProcessQueuedEvents(icon)
 						conditionResult = conditionChecker(icon, EventSettings)
 						
 						if EventSettings.CndtJustPassed then
-							if conditionResult ~= EventSettings.wasPassingCondition then
-								EventSettings.wasPassingCondition = conditionResult
+							if conditionResult ~= EventSettingsWasPassingConditionMap[EventSettings] then
+								EventSettingsWasPassingConditionMap[EventSettings] = conditionResult
 							else
 								conditionResult = false
 							end
 						end
 					end
+					
 					shouldProcess = conditionResult
 				end
 

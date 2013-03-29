@@ -21,7 +21,7 @@ local L = LibStub("AceLocale-3.0"):GetLocale("TellMeWhen", true)
 TELLMEWHEN_VERSION = "6.2.0"
 TELLMEWHEN_VERSION_MINOR = strmatch(" @project-version@", " r%d+") or ""
 TELLMEWHEN_VERSION_FULL = TELLMEWHEN_VERSION .. TELLMEWHEN_VERSION_MINOR
-TELLMEWHEN_VERSIONNUMBER = 62011 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
+TELLMEWHEN_VERSIONNUMBER = 62012 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
 if TELLMEWHEN_VERSIONNUMBER > 63000 or TELLMEWHEN_VERSIONNUMBER < 62000 then return error("YOU SCREWED UP THE VERSION NUMBER OR DIDNT CHANGE THE SAFETY LIMITS") end -- safety check because i accidentally made the version number 414069 once
 
 TELLMEWHEN_MAXROWS = 20
@@ -89,8 +89,6 @@ if clientVersion < 50100 then
 	end
 	TMW.CONST.CHAT_TYPE_INSTANCE_CHAT = "BATTLEGROUND"
 end
-
---TODO: (misplaced note) export any needed text layouts with icons that need them
 
 TMW.Print = TMW.Print or _G.print
 TMW.Warn = setmetatable(
@@ -1303,9 +1301,6 @@ TMW.BE = {
 
 	--NOTE: any id prefixed with "_" will have its localized name substituted in instead of being forced to match as an ID
 	debuffs = {
-		-- NEW IN 6.0.0:
-		
-		-- VERIFIED 6.0.0:
 		ReducedArmor		= "113746",
 		PhysicalDmgTaken	= "81326;35290;50518;57386;55749",
 		SpellDamageTaken	= "93068;_1490;34889;24844;116202",
@@ -1326,15 +1321,10 @@ TMW.BE = {
 		-- EXISTING WAS CHECKED, DIDN'T LOOK FOR NEW ONES YET:
 		CrowdControl		= "_118;2637;33786;113506;_1499;_19503;_19386;20066;10326;_9484;_6770;_2094;_51514;76780;_710;_5782;_6358;_605;_82691;115078", -- originally by calico0 of Curse
 		
-		--DontMelee			= "5277;871;Retaliation;Dispersion;Hand of Sacrifice;Hand of Protection;Divine Shield;Divine Protection;Ice Block;Icebound Fortitude;Cyclone;Banish",  --does somebody want to update these for me?
-		--MovementSlowed	= "Incapacitating Shout;Chains of Ice;Icy Clutch;Slow;Daze;Hamstring;Piercing Howl;Wing Clip;Ice Trap;Frostbolt;Cone of Cold;Blast Wave;Mind Flay;Crippling Poison;Deadly Throw;Frost Shock;Earthbind;Curse of Exhaustion",
 	},
 	buffs = {
-		-- NEW IN 6.0.0:
 		IncreasedMastery	= "19740;116956;93435;127830",
 		IncreasedSP			= "1459;61316;77747;109773;126309",
-		
-		-- VERIFIED 6.0.0:
 		IncreasedAP			= "57330;19506;6673",
 		IncreasedPhysHaste  = "55610;113742;30809;128432;128433",
 		IncreasedStats		= "1126;_117666;20217;90363",
@@ -1705,8 +1695,6 @@ function TMW:InitializeDatabase()
 	TMW.db.RegisterCallback(TMW, "OnProfileCopied",		"OnProfile")
 	TMW.db.RegisterCallback(TMW, "OnProfileReset",		"OnProfile")
 	TMW.db.RegisterCallback(TMW, "OnNewProfile",		"OnProfile")
-	TMW.db.RegisterCallback(TMW, "OnProfileShutdown",	"ShutdownProfile")
-	TMW.db.RegisterCallback(TMW, "OnDatabaseShutdown",	"ShutdownProfile")
 	
 	-- Handle normal upgrades after the database has been initialized.
 	TMW:Upgrade()
@@ -1732,22 +1720,6 @@ function TMW:OnProfile(event, arg2, arg3)
 	
 	if event == "OnProfileChanged" then
 		TMW:Printf(L["PROFILE_LOADED"], arg3)
-	end
-end
-
-TMW.DatabaseCleanups = {
-	icon = function(ics, groupID, iconID)
-		if ics.Events then
-			for _, t in TMW:InNLengthTable(ics.Events) do
-				t.wasPassingCondition = nil --TODO: make this unnecessary
-			end
-		end
-	end,
-}
-function TMW:ShutdownProfile()
-	-- get rid of settings that are stored in database tables for convenience, but dont need to be kept.
-	for ics, groupID, iconID in TMW:InIconSettings() do
-		TMW.DatabaseCleanups.icon(ics, groupID, iconID)
 	end
 end
 

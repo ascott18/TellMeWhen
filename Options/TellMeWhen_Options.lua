@@ -3049,10 +3049,6 @@ function TMW:CleanDefaults(settings, defaults, blocker)
 end
 
 function TMW:CleanSettings(type, settings, defaults)
-	local DatabaseCleanup = TMW.DatabaseCleanups[type]
-	if DatabaseCleanup then
-		DatabaseCleanup(settings)
-	end
 	return TMW:CleanDefaults(settings, defaults)
 end
 
