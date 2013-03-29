@@ -1,4 +1,4 @@
-﻿{
+{
 	61,	--Dalaran Jewelcrafter\'s Token
 	81,	--Epicurean\'s Award
 	241,	--Champion\'s Seal
@@ -27,4 +27,7 @@
 	692,	--Conquest Random BG Meta
 	697,	--Elder Charm of Good Fortune
 	698,	--Zen Jewelcrafter\'s Token
+	738,	--Lesser Charm of Good Fortune
+	752,	--Mogu Rune of Fate
+	754,	--Mantid Archaeology Fragment
 }

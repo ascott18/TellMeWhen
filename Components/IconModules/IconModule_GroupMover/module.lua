@@ -18,7 +18,6 @@ local L = TMW.L
 local print = TMW.print
 	
 
-	--TODO: migrate these methods to GroupModule_GroupPosition (or get rid of them)
 local isMoving = nil
 local function stopMoving(group)
 	group:StopMovingOrSizing()

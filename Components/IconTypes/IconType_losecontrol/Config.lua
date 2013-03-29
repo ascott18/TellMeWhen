@@ -22,6 +22,7 @@ local Type = rawget(TMW.Types, "losecontrol")
 
 if not Type then return end
 
+
 Type.CONFIG = {}
 local CONFIG = Type.CONFIG
 
@@ -129,8 +130,12 @@ CONFIG.Types = {
 	[LOSS_OF_CONTROL_DISPLAY_FEAR] = { -- "Feared"
 		value = "FEAR",
 	},
-	
 }
+CONFIG.TypesByValue = {}
+for k, v in pairs(CONFIG.Types) do
+	v.text = k
+	CONFIG.TypesByValue[v.value] = v
+end
 
 CONFIG.schools = {
 	[0x1 ] = "|cffFFFF00" .. SPELL_SCHOOL0_CAP,
@@ -157,8 +162,8 @@ end
 
 function CONFIG.DropdownMenu_OnClick_All(dropDownButton, LoseContolTypes)
 	if not LoseContolTypes[dropDownButton.value] then
-		TMW.CI.ics.LoseContolTypes = TMW:CopyTableInPlaceWithMeta(TMW.Icon_Defaults.LoseContolTypes, {})
-		LoseContolTypes = TMW.CI.ics.LoseContolTypes
+		wipe(LoseContolTypes)
+		LoseContolTypes = TMW:CopyTableInPlaceWithMeta(TMW.DEFAULT_ICON_SETTINGS.LoseContolTypes, LoseContolTypes)
 	end
 	
 	LoseContolTypes[dropDownButton.value] = not LoseContolTypes[dropDownButton.value]
@@ -269,3 +274,33 @@ function CONFIG:DropdownMenu_SetText()
 	end
 	UIDropDownMenu_SetText(TellMeWhen_LoseControlTypes.LocTypes, L["LOSECONTROL_DROPDOWNLABEL"] .. n)
 end
+
+
+function Type:GetIconMenuText(ics)
+	local text = ""
+	
+	if not ics.LoseContolTypes then
+		return "", ""
+	end
+	
+	if ics.LoseContolTypes[""] then
+		text = L["LOSECONTROL_TYPE_ALL"]
+	else
+		for locType, v in pairs(ics.LoseContolTypes) do
+			local data = CONFIG.TypesByValue[locType]
+			if locType == "SCHOOL_INTERRUPT" then
+				if v ~= 0 then
+					text = text .. ", " .. data.text
+				end
+			elseif v and data then
+				text = text .. ", " .. data.text
+			end
+		end
+		if text ~= "" then
+			text = text:sub(3)
+		end
+	end
+
+	return text, text and text ~= ""  and text .. "\r\n" or ""
+end
+

@@ -1,4 +1,4 @@
-﻿-- Script to extract currency information 
+-- Script to extract currency information 
 
 -- lua distribution used is at: http://w3.impa.br/~diego/software/luasocket/
 -- includes LuaSocket library
@@ -49,4 +49,4 @@ print(str)
 
 
 str = str .. [[}]]
-io.open("B:\\Games\\World Of Warcraft\\Interface\\AddOns\\TellMeWhen\\Scripts\\WeaponAugments.lua", "w"):write(str)
+io.open("C:\\Program Files\\World Of Warcraft\\Interface\\AddOns\\TellMeWhen\\Scripts\\WeaponAugments.lua", "w"):write(str)

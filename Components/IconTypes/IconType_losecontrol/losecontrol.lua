@@ -72,17 +72,19 @@ local function LoseControl_OnUpdate(icon, time)
 	for eventIndex = 1, GetNumEvents() do 
 		local locType, spellID, text, texture, start, _, duration, lockoutSchool = GetEventInfo(eventIndex)
 		
-		local isValidType
-		if locType == "SCHOOL_INTERRUPT" then
-			local setting = LoseContolTypes[locType]
-			if setting ~= 0 and lockoutSchool and lockoutSchool ~= 0 and bit.band(lockoutSchool, setting) ~= 0 then
-				isValidType = true
-			end
-		else
-			for locType, v in pairs(LoseContolTypes) do
-				if v and _G["LOSS_OF_CONTROL_DISPLAY_" .. locType] == text then
+		local isValidType = LoseContolTypes[""]
+		if not isValidType then
+			if locType == "SCHOOL_INTERRUPT" then
+				local setting = LoseContolTypes[locType]
+				if setting ~= 0 and lockoutSchool and lockoutSchool ~= 0 and bit.band(lockoutSchool, setting) ~= 0 then
 					isValidType = true
-					break
+				end
+			else
+				for locType, v in pairs(LoseContolTypes) do
+					if v and _G["LOSS_OF_CONTROL_DISPLAY_" .. locType] == text then
+						isValidType = true
+						break
+					end
 				end
 			end
 		end
@@ -99,9 +101,8 @@ local function LoseControl_OnUpdate(icon, time)
 		end
 	end
 	
-	icon:SetInfo("alpha; texture; start, duration; spell; locCategory",
+	icon:SetInfo("alpha; start, duration; spell; locCategory",
 		icon.UnAlpha,
-		icon.FirstTexture,
 		0, 0,
 		nil,
 		nil
@@ -111,11 +112,10 @@ end
 
 function Type:Setup(icon, groupID, iconID)
 	
-	icon.FirstTexture = nil --TODO
-	
-	icon:SetInfo("reverse", true)
-
-	icon:SetInfo("texture", TMW:GetConfigIconTexture(icon))
+	icon:SetInfo("reverse; texture",
+		true,
+		TMW:GetConfigIconTexture(icon)
+	)
 
 	icon:SetUpdateMethod("manual")
 	
@@ -123,25 +123,18 @@ function Type:Setup(icon, groupID, iconID)
 	icon:RegisterSimpleUpdateEvent("LOSS_OF_CONTROL_ADDED")
 	
 	icon:SetUpdateFunction(LoseControl_OnUpdate)
+	
 	icon:Update()
-end
-
-function Type:GetIconMenuText(ics)
-	--TODO
-	--[[local text = data.Name or ""
-	if text == "" then
-		text = "((" .. Type.name .. "))"
-	end]]
-
-	return "", "" --data.Name and data.Name ~= ""  and data.Name .. "\r\n" or ""
 end
 
 Type:Register(102)
 
 
 
+
 local Processor = TMW.Classes.IconDataProcessor:New("LOC_CATEGORY", "locCategory")
 -- Processor:CompileFunctionSegment(t) is default.
+
 Processor:RegisterDogTag("TMW", "LocType", {
 	code = function (groupID, iconID)
 		local icon = TMW[groupID][iconID]

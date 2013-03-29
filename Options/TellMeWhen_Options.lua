@@ -451,6 +451,9 @@ function TMW:AnimateHeightChange(f, endHeight, duration)
 	f.__animateHeight_duration = duration
 end
 
+
+
+
 -- --------------
 -- MAIN OPTIONS
 -- --------------
@@ -1277,6 +1280,7 @@ function TMW:Group_HasIconData(groupID)
 end
 
 
+
 -- ----------------------
 -- ICON DRAGGER
 -- ----------------------
@@ -1836,7 +1840,6 @@ function IE:RegisterTab(tab, attachedFrame)
 end
 
 function IE:StartMoving()
-	print(debugstack())
 	IE.startX, IE.startY = select(4, IE:GetPoint())
 	IE.cursorStartX, IE.cursorStartY = GetCursorPosition()
 	IE.isMoving = true
@@ -2820,6 +2823,7 @@ function IE:GetRealNames(Name) -- TODO: MODULARIZE THIS
 		else
 			name, _, texture = GetSpellInfo(v)
 			texture = texture or SpellTextures[name or v]
+			
 			if not name and Cache then
 				local lowerv = strlower(v)
 				for id, lowername in pairs(Cache) do
@@ -2833,6 +2837,7 @@ function IE:GetRealNames(Name) -- TODO: MODULARIZE THIS
 					end
 				end
 			end
+			
 			name = name or v or ""
 			texture = texture or SpellTextures[name]
 		end
@@ -3077,10 +3082,10 @@ TMW:RegisterCallback("TMW_CONFIG_REQUEST_AVAILABLE_IMPORT_EXPORT_TYPES", functio
 end)
 
 
+
 -- ----------------------
 -- UNDO/REDO
 -- ----------------------
-
 
 ---------- Comparison ----------
 function IE:DeepCompare(t1, t2, ...)
@@ -3271,6 +3276,7 @@ function IE:BackFowardsChanged()
 		IE.CanFowards = true
 	end
 end
+
 
 
 

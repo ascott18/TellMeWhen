@@ -6,6 +6,7 @@
  ** Groups being moved (dragged around) should now much  more reliably detatch from your cursor when they are supposed to.
  ** Fixed an accidental inversion of the 1st param to TMW_LOCK_TOGGLED
  ** Replaced Blood Pact with Dark Intent for the IncreasedStamina equivalency.
+ ** The "All Types" setting for Loss of Control icons should now work as intended.
 
 ===v6.1.5===
  * Bug Fixes:

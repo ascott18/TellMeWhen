@@ -93,8 +93,7 @@ ConditionCategory:RegisterCondition(3,	 "COMBAT", {
 		else
 			return
 				ConditionObject:GetUnitChangedEventString(CNDT:GetUnit(c.Unit)),
-				ConditionObject:GenerateNormalEventString("UNIT_FLAGS", CNDT:GetUnit(c.Unit)),
-				ConditionObject:GenerateNormalEventString("UNIT_DYNAMIC_FLAGS", CNDT:GetUnit(c.Unit)) -- idk if UNIT_DYNAMIC_FLAGS is needed. but lets do it anyway.
+				ConditionObject:GenerateNormalEventString("UNIT_FLAGS", CNDT:GetUnit(c.Unit))
 		end
 	end,
 })
@@ -153,9 +152,7 @@ ConditionCategory:RegisterCondition(6,	 "REACT", {
 		return
 			ConditionObject:GetUnitChangedEventString(CNDT:GetUnit(c.Unit)),
 			ConditionObject:GenerateNormalEventString("UNIT_FLAGS", CNDT:GetUnit(c.Unit)),
-			ConditionObject:GenerateNormalEventString("UNIT_DYNAMIC_FLAGS", CNDT:GetUnit(c.Unit)),
-			ConditionObject:GenerateNormalEventString("UNIT_FLAGS", "player"),
-			ConditionObject:GenerateNormalEventString("UNIT_DYNAMIC_FLAGS", "player")
+			ConditionObject:GenerateNormalEventString("UNIT_FLAGS", "player")
 	end,
 })
 ConditionCategory:RegisterCondition(6.2,	 "ISPLAYER", {

@@ -141,8 +141,9 @@ function IconType:FormatSpellForOutput(icon, data, doInsertLink)
 	return data, true
 end
 
+--TODO: move declarations of GuessIconTexture, DragReceived, GetIconMenuText to icon types' config.lua files if possible.
 -- [REQUIRED, FALLBACK]
---- Attempts to figure out what the configuration texture of an icon will be without actually creating the icon. This is a base method written for handling spells. It should be overridden for IconTypes that don't take spell input for their ics.Name setting.
+--- Attempts to figure out what the configuration texture of an icon will be without actually creating the icon. This is a base method written for handling spells. It should be overridden for IconTypes that don't take spell input for their ics.Name setting. It is acceptable to delay the declaration of overrides of this method until after TellMeWhen_Options has loaded if needed.
 -- @param ics [TMW.Icon_Defaults] The settings of the icon that the texture is being guessed for.
 -- @return [string] The guessed texture of the icon. 
 -- @usage -- This method should only be called internally by TellMeWhen and some of its components. 
@@ -159,7 +160,7 @@ function IconType:GuessIconTexture(ics)
 end
 
 -- [REQUIRED, FALLBACK]
---- Handles dragging spells, items, and other things onto an icon. This is a base method written for handling spells. It should be overridden for IconTypes that don't take spell input for their ics.Name setting.
+--- Handles dragging spells, items, and other things onto an icon. This is a base method written for handling spells. It should be overridden for IconTypes that don't take spell input for their ics.Name setting. It is acceptable to delay the declaration of overrides of this method until after TellMeWhen_Options has loaded if needed.
 -- @paramsig icon, ...
 -- @param icon [TMW.Classes.Icon] The icon that the dragged data was released onto.
 -- @param ... [...] The return values from [[http://wowprogramming.com/docs/api/GetCursorInfo|GetCursorInfo()]]. Don't call GetCursorInfo yourself in your definition, because TMW will pass in its own data in special cases that can't be obtained from GetCursorInfo.
@@ -197,7 +198,7 @@ function IconType:DragReceived(icon, t, data, subType, param4)
 end
 
 -- [REQUIRED, FALLBACK]
---- Returns brief information about what an icon is configured to track. Used mainly in import/export menus. This is a default method, and may be overridden if it does not provide the desired functionality for an IconType.
+--- Returns brief information about what an icon is configured to track. Used mainly in import/export menus. This is a default method, and may be overridden if it does not provide the desired functionality for an IconType. It is acceptable to delay the declaration of overrides of this method until after TellMeWhen_Options has loaded if needed.
 -- @param ics [TMW.Icon_Defaults] The settings of the icon that information is being requested about.
 -- @param groupID [number] The ID of the group of the icon that information is being requested for. Does not necessarily correlate to an icon that exists in the currently active profile.
 -- @param iconID [number] The ID of the icon that information is being requested for. Does not necessarily correlate to an icon that exists in the currently active profile.

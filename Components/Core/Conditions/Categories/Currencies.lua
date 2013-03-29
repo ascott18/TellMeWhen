@@ -37,7 +37,10 @@ local currencies = {
 	241,	--Champion\'s Seal
 	515,	--Darkmoon Prize Ticket
 	"SPACE",
+	738,	--Lesser Charm of Good Fortune
 	697,	--Elder Charm of Good Fortune
+	752,	--Mogu Rune of Fate
+	"SPACE",
 	614,	--Mote of Darkness
 	615,	--Essence of Corrupted Deathwing
 	"SPACE",
@@ -61,6 +64,7 @@ local currencies = {
 	
 	676,	--Pandaren Archaeology Fragment
 	677,	--Mogu Archaeology Fragment
+	754,	--Mantid Archaeology Fragment
 }
 
 
@@ -94,7 +98,7 @@ function CNDT:CURRENCY_DISPLAY_UPDATE()
 			local name, amount, texture, _, _, totalMax = GetCurrencyInfo(id)
 			if name ~= "" then
 				data.text = name
-				data.icon = "Interface\\Icons\\"..texture
+				data.icon = texture
 				data.hidden = false
 				if TMWOptDB then
 					TMWOptDB.Currencies = TMWOptDB.Currencies or {}
@@ -108,7 +112,7 @@ function CNDT:CURRENCY_DISPLAY_UPDATE()
 					local name, texture = strmatch(TMWOptDB.Currencies[id], "(.*)^(.*)")
 					if name and texture then
 						data.text = name
-						data.icon = "Interface\\Icons\\"..texture
+						data.icon = texture
 						data.hidden = false
 					end
 				end

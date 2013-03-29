@@ -1,4 +1,4 @@
-﻿-- Script to extract currency information 
+-- Script to extract currency information 
 
 -- lua distribution used is at: http://w3.impa.br/~diego/software/luasocket/
 -- includes LuaSocket library

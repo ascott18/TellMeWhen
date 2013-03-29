@@ -56,9 +56,13 @@ L["ERROR_NOTINITIALIZED_INTERFACEPANEL_EXPLANATION"] = [[It looks like TellMeWhe
 
 Because of this, TellMeWhen will not be able to function, and you will not be able to configure any of its settings.
 
-Please enable Lua errors (%s > %s > %s if you have not already), reload your UI, and post any errors that you get to a ticket at http://wow.curseforge.com/addons/tellmewhen/create-ticket/
+If you saw a message when you logged in that said that a complete restart of WoW is required to use TMW, then please do so.
 
-I apologize for the inconvenience, but this is a rare occurrence, and any information about it that you can provide will help to get it fixed right away!]]
+If you did not see that message, then please enable Lua errors (%s > %s > %s) if you have not already, reload your UI, and post any errors that you get that mention TellMeWhen to a ticket at http://wow.curseforge.com/addons/tellmewhen/create-ticket/
+
+I apologize for the inconvenience, but this is a rare occurrence, and any information about it that you can provide will help to get it fixed right away!
+
+Thank you for using TellMeWhen!]]
 
 L["SAFESETUP_TRIGGERED"] = "Running safe & slow setup..."
 L["SAFESETUP_COMPLETE"] = "Safe & slow setup complete."
