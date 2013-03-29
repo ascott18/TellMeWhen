@@ -95,13 +95,27 @@ local function MultiStateCD_OnEvent(icon, event)
 end
 
 
---TODO: add support for spell charges (see cooldown/reactive for other implementation)
 local function MultiStateCD_OnUpdate(icon, time)
 
 	local Slot = icon.Slot
-	local start, duration = GetActionCooldown(Slot)
-	if duration then
-
+	
+	local start, duration, stack
+	
+	local charges, maxCharges, start_charge, duration_charge = GetActionCharges(Slot)
+	if charges then
+		if charges < maxCharges then
+			start, duration = start_charge, duration_charge
+		else
+			start, duration = GetActionCooldown(Slot)
+		end
+		stack = charges
+	else
+		start, duration = GetActionCooldown(Slot)
+		stack = GetActionCount(Slot)
+	end	
+		
+	
+	if duration then	
 		local inrange, nomana = 1
 
 		if icon.RangeCheck then
@@ -115,19 +129,23 @@ local function MultiStateCD_OnUpdate(icon, time)
 		spellID = actionType == "spell" and spellID or icon.NameFirst
 
 		if (duration == 0 or OnGCD(duration)) and inrange == 1 and not nomana then
-			icon:SetInfo("alpha; texture; start, duration; spell; inRange; noMana",
+			icon:SetInfo("alpha; texture; start, duration; charges, maxCharges; stack, stackText; spell; inRange; noMana",
 				icon.Alpha,
 				GetActionTexture(Slot) or "Interface\\Icons\\INV_Misc_QuestionMark",
 				start, duration,
+				charges, maxCharges,
+				stack, stack,
 				spellID,
 				inrange,
 				nomana
 			)
 		else
-			icon:SetInfo("alpha; texture; start, duration; spell; inRange; noMana",
+			icon:SetInfo("alpha; texture; start, duration; charges, maxCharges; stack, stackText; spell; inRange; noMana",
 				icon.UnAlpha,
 				GetActionTexture(Slot) or "Interface\\Icons\\INV_Misc_QuestionMark",
 				start, duration,
+				charges, maxCharges,
+				stack, stack,
 				spellID,
 				inrange,
 				nomana
