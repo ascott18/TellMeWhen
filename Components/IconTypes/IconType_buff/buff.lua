@@ -361,9 +361,7 @@ function Type:Setup(icon, groupID, iconID)
 		if icon.Filterh then icon.Filterh = icon.Filterh .. "|PLAYER" end
 	end
 	
-	icon.NAL = icon.NameNameHash[strlower(GetSpellInfo(8921))] and EFF_THR + 1 or #icon.NameArray
-	-- need to force any icon looking for moonfire to check all auras on the target because of a blizzard bug in WoW 4.1.
-	-- TODO: verify that the issue persists
+	icon.NAL = #icon.NameArray
 
 	icon.FirstTexture = SpellTextures[icon.NameFirst]
 
