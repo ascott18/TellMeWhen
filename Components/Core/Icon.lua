@@ -22,11 +22,11 @@ local pairs, error, rawget, next, wipe, tinsert, sort, strsplit, table, assert, 
 
 
 --- {{{TMW.Classes.Icon}}} is the class of all Icons.
---
+-- 
 -- Icon inherits explicitly from {{{Blizzard.Button}}} and from {{{TMW.Classes.GenericModuleImplementor}}}, and implicitly from the classes that it inherits. 
---
+-- 
 -- Icon is the class of all TMW icons, which are the very heart of what TMW is and what it does. Icons provide the methods and functionality that Icon Types need to do their jobs. They also provide other API, like icon event handling, and they provide all the methods needed for setup and updating. Icon themselves do not create or provide any appearance, child frames, or layers - this is functionality that is given to Icon Modules.
---
+-- 
 -- @class file
 -- @name Icon.lua
 
@@ -123,7 +123,7 @@ function Icon.CheckUpdateTableRegistration(icon)
 end
 
 --- Sets the function that will be called when the icon needs to be updated.
---
+-- 
 -- Func will be called with signature (icon, time). Time is equal to TMW.time and GetTime().
 -- @name Icon:SetUpdateFunction
 -- @paramsig func
@@ -191,7 +191,7 @@ function Icon.IsBeingEdited(icon)
 end
 
 --- Queues an icon event to be fired.
---
+-- 
 -- The event must have been registed through {{{TMW.Classes.IconComponent}}}{{{:RegisterIconEvent()}}}.
 -- @name Icon:QueueEvent
 -- @paramsig eventInfo
@@ -200,8 +200,8 @@ end
 --	if icon.EventHandlersSet.OnHide then
 --		icon:QueueEvent("OnHide")
 --	end
---
---
+-- 
+-- 
 -- -- From IconModule_IconEventConditionHandler: (An example of calling by passing in an eventSettings table)
 --	local function TMW_CNDT_OBJ_PASSING_CHANGED(event, ConditionObject, failed)
 --		if not failed then
@@ -254,7 +254,7 @@ end
 
 Icon.Update_Method = "auto"
 --- Sets the update method that will be used by the icon.
---
+-- 
 -- Setting to "auto" causes the icon to be updated every single update cycle (within the limits of the Update Interval user setting).
 -- 
 -- Setting to "manual" causes the icon to be updated only when {{{icon.NextUpdateTime < TMW.time}}}, or when {{{icon:Update(true)}}} is called (this should not be done outside of special circumstances. Manual updating should be restricted to using only icon.NextUpdateTime).
@@ -354,7 +354,7 @@ function Icon.UnregisterSimpleUpdateEvent(icon, event)
 end
 
 --- Unregisters all simple update events that have been registed for the icon with Icon:RegisterSimpleUpdateEvent().
---
+-- 
 -- This is done automatically every time an icon is setup, and should not be called manually outside of exceptional circumstances.
 -- @name Icon:UnregisterAllSimpleUpdateEvents
 -- @paramsig 
@@ -368,7 +368,7 @@ function Icon.UnregisterAllSimpleUpdateEvents(icon)
 end
 
 --- Attempts to update an icon.
---
+-- 
 -- This should normally only be called at the end of a {{{TMW.Classes.IconType}}}{{{:Setup()}}} method (unless your IconTypes's proper functionality requires that you not do so). 
 -- You may also call it anywhere else as you deem appropriate, but in most normal situations, there is no need to do so. 
 -- 
@@ -421,13 +421,13 @@ end
 
 local EventSettingsWasPassingConditionMap = {}
 --- Triggers processing of all icon events that have been queued through {{{icon:QueueEvent()}}}.
---
+-- 
 -- Icon events will only be fired if their conditions pass (if they have any) and if limitations like the "Continue to lower events" user setting don't prevent more than one event from being fired.
 -- Events are fired in the order that they are configured by the user, not in the order that they are queued.
---
+-- 
 -- This method is automatically called at the end of a TMW update cycle for all icons that have queued an event,
 -- so it should only be called after an event is queued outside of normal icon updating (like in an OnEvent handler or in a script handler).
---
+-- 
 -- Search TellMeWhen's source for calls of this method and of {{{icon:QueueEvent()}}} for examples of proper usage.
 -- @name Icon:ProcessQueuedEvents
 -- @paramsig 
@@ -495,7 +495,7 @@ end
 
 
 --- Completely disables and rests an icon to a near-default state.
---
+-- 
 -- Unimplements all {{{TMW.Classes.IconComponent}}}s, resets update function and method, unregisters all events, and hides the icon.
 -- @name Icon:DisableIcon
 -- @paramsig 
@@ -522,7 +522,7 @@ function Icon.DisableIcon(icon)
 end
 
 --- Completely sets up an icon.
---
+-- 
 -- Implements all requested {{{TMW.Classes.IconComponent}}}s, processes settings, sets up conditions, calls {{{TMW.Classes.IconType}}}{{{:Setup()}}}, and prepares the icon to be updated or configured.
 --
 -- This method should not be called manually while TellMeWhen is locked. It may be called liberally from wherever you see fit when in configuration mode.
@@ -914,7 +914,7 @@ end})
 
 
 --- Sets attributes of an icon.
---
+-- 
 -- The attributes passed to this function will be processed by a {{{TMW.Classes.IconDataProcessor}}} (and possibly one or more {{{TMW.Classes.IconDataProcessorHook}}}) and interested {{{TMW.Classes.IconModule}}}s will be notified of any changes to the attributes.
 -- @name Icon:SetInfo
 -- @paramsig signature, ...
@@ -965,7 +965,7 @@ end})
 
 --- icon:SetInfo_INTERNAL() is a slightly modified version of icon:SetInfo() that doesn't fire TMW_ICON_UPDATED because it must only be called from within SetInfo (inside IconDataProcessorHooks).
 -- SetInfo will fire TMW_ICON_UPDATED at the end (and only once, isntead of multiple times), so SetInfo_INTERNAL won't fire it at all to prevent excessive firings.
---
+-- 
 -- When in doubt, don't use this method - use a regular icon:SetInfo() call instead.
 -- @name Icon:SetInfo_INTERNAL
 -- @paramsig signature, ...
