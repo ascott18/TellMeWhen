@@ -19,7 +19,8 @@ local print = TMW.print
 	
 
 	
-local IconDragger = TMW:NewModule("IconDragger", "AceTimer-3.0", "AceEvent-3.0") TMW.IconDragger = IconDragger
+local IconDragger = TMW:NewModule("IconDragger", "AceTimer-3.0", "AceEvent-3.0")
+TMW.IconDragger = IconDragger
 
 function IconDragger:OnInitialize()
 	WorldFrame:HookScript("OnMouseDown", function() -- this contains other bug fix stuff too
@@ -269,17 +270,17 @@ function IconDragger:Handler(method)
 	CloseDropDownMenus()
 
 	-- save misc. settings
-	IE:SaveSettings()
+	TMW.IE:SaveSettings()
 
 	-- attempt to create a backup before doing anything
-	IE:AttemptBackup(IconDragger.srcicon)
-	IE:AttemptBackup(IconDragger.desticon)
+	TMW.IE:AttemptBackup(IconDragger.srcicon)
+	TMW.IE:AttemptBackup(IconDragger.desticon)
 
 	-- finally, invoke the method to handle the operation.
 	method(IconDragger)
 
 	-- then, update things
 	TMW:Update()
-	IE:Load(1)
+	TMW.IE:Load(1)
 end
 
