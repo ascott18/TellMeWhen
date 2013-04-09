@@ -31,10 +31,6 @@ local pairs, error, rawget, next, wipe, tinsert, sort, strsplit, table, assert, 
 -- @name Icon.lua
 
 
--- TODO: DOCUMENT ICON!
-
-
-
 local bitband = bit.band
 
 local function ClearScripts(f)
@@ -128,6 +124,7 @@ end
 -- @name Icon:SetUpdateFunction
 -- @paramsig func
 -- @param func [function|nil] The function that will be called when the icon needs to be updated. Nil to stop the icon from being updated. An error may be thrown if icon:Update() is called manually when the update function has been set nil.
+-- @usage icon:SetUpdateFunction(MultiStateCD_OnUpdate)
 function Icon.SetUpdateFunction(icon, func)
 	icon.UpdateFunction = func
 	
@@ -166,6 +163,8 @@ end
 -- @name Icon:GetSettings
 -- @paramsig
 -- @return [{{{TMW.Icon_Defaults}}}] The settings table that holds the settings for the icon.
+-- @usage local ics = icon:GetSettings()
+-- print(icon:GetName() .. "'s enabled setting is set to " .. ics.Enabled)
 function Icon.GetSettings(icon)
 	return TMW.db.profile.Groups[icon.group:GetID()].Icons[icon:GetID()]
 end
@@ -175,6 +174,9 @@ end
 -- @paramsig view
 -- @param [string|nil] The identifier of the {{{TMW.Classes.IconView}}} to get settings for, or nil to use the icon's current view.
 -- @return [{{{TMW.Icon_Defaults.SettingsPerView[view]}}}] The settings table that holds the view-specific settings for the icon.
+-- @usage local icspv = icon:GetSettingsPerView()
+-- 
+-- local icspv = icon:GetSettingsPerView("bar")
 function Icon.GetSettingsPerView(icon, view)
 	view = view or icon.group:GetSettings().View
 	return icon:GetSettings().SettingsPerView[view]
@@ -255,12 +257,13 @@ end
 Icon.Update_Method = "auto"
 --- Sets the update method that will be used by the icon.
 -- 
--- Setting to "auto" causes the icon to be updated every single update cycle (within the limits of the Update Interval user setting).
+-- Setting to "auto" causes the icon to be updated every single update cycle (within the limits of the Update Interval user setting). "auto" is the default value.
 -- 
 -- Setting to "manual" causes the icon to be updated only when {{{icon.NextUpdateTime < TMW.time}}}, or when {{{icon:Update(true)}}} is called (this should not be done outside of special circumstances. Manual updating should be restricted to using only icon.NextUpdateTime).
 -- @name Icon:SetUpdateMethod
 -- @paramsig method
 -- @param method [string] A string the indicates the update method that will be used for the icon. Must be either "auto" or "manual".
+-- @usage icon:SetUpdateMethod("manual")
 function Icon.SetUpdateMethod(icon, method)
 	if TMW.db.profile.DEBUG_ForceAutoUpdate then
 		method = "auto"
@@ -963,7 +966,8 @@ local SetInfoInternalFuncs = setmetatable({}, { __index = function(self, signatu
 	return func
 end})
 
---- icon:SetInfo_INTERNAL() is a slightly modified version of icon:SetInfo() that doesn't fire TMW_ICON_UPDATED because it must only be called from within SetInfo (inside IconDataProcessorHooks).
+--- icon:SetInfo_INTERNAL() is a slightly modified version of icon:SetInfo() that doesn't fire TMW_ICON_UPDATED at the end.
+-- It must only be called from within SetInfo (inside IconDataProcessorHooks).
 -- SetInfo will fire TMW_ICON_UPDATED at the end (and only once, isntead of multiple times), so SetInfo_INTERNAL won't fire it at all to prevent excessive firings.
 -- 
 -- When in doubt, don't use this method - use a regular icon:SetInfo() call instead.
