@@ -122,7 +122,9 @@ function Icon.CheckUpdateTableRegistration(icon)
 	end
 end
 
---- Sets the function that will be called when the icon needs to be updated. Func will be called with signature (icon, time). Time is equal to TMW.time and GetTime().
+--- Sets the function that will be called when the icon needs to be updated.
+--
+-- Func will be called with signature (icon, time). Time is equal to TMW.time and GetTime().
 -- @name Icon:SetUpdateFunction
 -- @paramsig func
 -- @param func [function|nil] The function that will be called when the icon needs to be updated. Nil to stop the icon from being updated. An error may be thrown if icon:Update() is called manually when the update function has been set nil.
@@ -168,7 +170,7 @@ function Icon.GetSettings(icon)
 	return TMW.db.profile.Groups[icon.group:GetID()].Icons[icon:GetID()]
 end
 
---- Returns the settings table that holds the view-specific settings for the icon
+--- Returns the settings table that holds the view-specific settings for the icon.
 -- @name Icon:GetSettingsPerView
 -- @paramsig view
 -- @param [string|nil] The identifier of the {{{TMW.Classes.IconView}}} to get settings for, or nil to use the icon's current view.
@@ -188,10 +190,33 @@ function Icon.IsBeingEdited(icon)
 	end
 end
 
---- Queues an icon event to be fired. The event must be registed through {{{TMW.Classes.IconComponent}}}{{{:RegisterIconEvent()}}}.
+--- Queues an icon event to be fired.
+--
+-- The event must have been registed through {{{TMW.Classes.IconComponent}}}{{{:RegisterIconEvent()}}}.
 -- @name Icon:QueueEvent
 -- @paramsig eventInfo
--- @param eventInfo [string|table] Either a string that identifies the event (as registered with {{{TMW.Classes.IconComponent}}}{{{:RegisterIconEvent()}}}) that will be fired (all events of that type will be attempted to be fire), or a table that is in {{{icon:GetSettings().Events}}} (only that specific event and its settings will be fired). The event will not actually be fired until {{{icon:ProcessQueuedEvents()}}} is called.
+-- @param eventInfo [string|table] Either a string that identifies the event (as registered with {{{TMW.Classes.IconComponent}}}{{{:RegisterIconEvent()}}}) that will be fired (all events of that type will be attempted to be fire), or a table of event settings that is in {{{icon:GetSettings().Events}}} (only that specific event and its settings will be fired). The event will not actually be fired until {{{icon:ProcessQueuedEvents()}}} is called.
+-- @usage -- From IconDataProcessor_Alpha_Real: (An example of calling by passing an event identifier)
+--	if icon.EventHandlersSet.OnHide then
+--		icon:QueueEvent("OnHide")
+--	end
+--
+--
+-- -- From IconModule_IconEventConditionHandler: (An example of calling by passing in an eventSettings table)
+--	local function TMW_CNDT_OBJ_PASSING_CHANGED(event, ConditionObject, failed)
+--		if not failed then
+--			local matches = MapConditionObjectToEventSettings[ConditionObject]
+--			-- MapConditionObjectToEventSettings maps TMW.CLasses.ConditionObject instances to the eventSettings they were created for
+--			-- matches is a table that contains {[eventSettings] = icon} pairs. These tables were setup in the module's :OnEnable() method.
+--			-- See IconModule_IconEventConditionHandler's code for complete implementation.
+--			if matches then
+--				for eventSettings, icon in pairs(matches) do
+--					icon:QueueEvent(eventSettings)
+--					icon:ProcessQueuedEvents()
+--				end
+--			end
+--		end
+--	end
 function Icon.QueueEvent(icon, eventInfo)
 	icon.EventsToFire[eventInfo] = true
 	icon.eventIsQueued = true
@@ -229,9 +254,13 @@ end
 
 Icon.Update_Method = "auto"
 --- Sets the update method that will be used by the icon.
+--
+-- Setting to "auto" causes the icon to be updated every single update cycle (within the limits of the Update Interval user setting).
+-- 
+-- Setting to "manual" causes the icon to be updated only when {{{icon.NextUpdateTime < TMW.time}}}, or when {{{icon:Update(true)}}} is called (this should not be done outside of special circumstances. Manual updating should be restricted to using only icon.NextUpdateTime).
 -- @name Icon:SetUpdateMethod
 -- @paramsig method
--- @param method [string] A string the indicates the update method that will be used for the icon. Must be either "auto" or "manual". Setting to "auto" causes the icon to be updated every single update cycle (within the limits of the Update Interval user setting). Setting to "manual" causes the icon to be updated only when {{{icon.NextUpdateTime < TMW.time}}}, or when {{{icon:Update(true)}}} is called (this should not be done outside of special circumstances. Manual updating should be restricted to using only icon.NextUpdateTime).
+-- @param method [string] A string the indicates the update method that will be used for the icon. Must be either "auto" or "manual".
 function Icon.SetUpdateMethod(icon, method)
 	if TMW.db.profile.DEBUG_ForceAutoUpdate then
 		method = "auto"
@@ -310,6 +339,7 @@ function Icon.RegisterSimpleUpdateEvent(icon, event, arg1)
 	IconEventUpdateEngine:RegisterEvent(event)
 end
 
+--- Unregisters a simple update event that has been registed for the icon with Icon:RegisterSimpleUpdateEvent().
 -- @name Icon:UnregisterSimpleUpdateEvent
 -- @paramsig event
 -- @param event [string] A Blizzard event that should be unregisted from the SimpleUpdateEvent system as was previously registered through {{{icon:RegisterSimpleUpdateEvent()}}}.
@@ -323,7 +353,9 @@ function Icon.UnregisterSimpleUpdateEvent(icon, event)
 	end
 end
 
---- Unregisters all simple update events that have been registed for the icon with Icon:RegisterSimpleUpdateEvent(). This is done automatically every time an icon is setup, and should not be called manually outside of exceptional circumstances.
+--- Unregisters all simple update events that have been registed for the icon with Icon:RegisterSimpleUpdateEvent().
+--
+-- This is done automatically every time an icon is setup, and should not be called manually outside of exceptional circumstances.
 -- @name Icon:UnregisterAllSimpleUpdateEvents
 -- @paramsig 
 function Icon.UnregisterAllSimpleUpdateEvents(icon)
@@ -335,9 +367,13 @@ function Icon.UnregisterAllSimpleUpdateEvents(icon)
 	end
 end
 
---- Requests an update of the icon. This should normally only be called at the end of a {{{TMW.Classes.IconType}}}{{{:Setup()}}} method when it is desired. 
--- It may also be called anywhere else deemed appropriate, but in most normal situations, there is no need. 
+--- Attempts to update an icon.
+--
+-- This should normally only be called at the end of a {{{TMW.Classes.IconType}}}{{{:Setup()}}} method (unless your IconTypes's proper functionality requires that you not do so). 
+-- You may also call it anywhere else as you deem appropriate, but in most normal situations, there is no need to do so. 
+-- 
 -- It is automatically called for every valid icon that has an update function defined (through {{{icon:SetUpdateFunction()}}}) each update cycle in the TMW icon update engine.
+-- 
 -- It is limited to the updating only as often as the Update Interval user-setting allows (maximum of once per frame/per OnUpdate script call) (unless the force param is used).
 -- It updates the icon's conditions as needed and then calls the icon's update function to trigger the chain of updating from icon type -> icon data processor (and hooks) -> icon modules & icon events.
 -- @name Icon:Update
@@ -384,7 +420,15 @@ function Icon.TMW_CNDT_OBJ_PASSING_CHANGED(icon, event, ConditionObject, failed)
 end
 
 local EventSettingsWasPassingConditionMap = {}
---- Triggers processing of all icon events that have been queued through {{{icon:QueueEvent()}}}. Icon events will only be fired if their conditions pass (if they have any) and if limitations like the "Continue to lower events" user setting don't prevent more than one event from being fired. Events are fired in the order that they are configured by the user, not in the order that they are queued. This method is automatically called at the end of a TMW update cycle for all icons that have queued an event, so it should only be called after an event is queued outside of normal icon updating (like in an OnEvent handler or in a script handler). Search TellMeWhen's source for calls of this method and of {{{icon:QueueEvent()}}} for examples of proper usage.
+--- Triggers processing of all icon events that have been queued through {{{icon:QueueEvent()}}}.
+--
+-- Icon events will only be fired if their conditions pass (if they have any) and if limitations like the "Continue to lower events" user setting don't prevent more than one event from being fired.
+-- Events are fired in the order that they are configured by the user, not in the order that they are queued.
+--
+-- This method is automatically called at the end of a TMW update cycle for all icons that have queued an event,
+-- so it should only be called after an event is queued outside of normal icon updating (like in an OnEvent handler or in a script handler).
+--
+-- Search TellMeWhen's source for calls of this method and of {{{icon:QueueEvent()}}} for examples of proper usage.
 -- @name Icon:ProcessQueuedEvents
 -- @paramsig 
 function Icon.ProcessQueuedEvents(icon)
@@ -450,7 +494,9 @@ function Icon.ProcessQueuedEvents(icon)
 end
 
 
---- Completely disables and rests an icon to a near-default state. Unimplements all {{{TMW.Classes.IconComponent}}}s, resets update function and method, unregisters all events, and hides the icon.
+--- Completely disables and rests an icon to a near-default state.
+--
+-- Unimplements all {{{TMW.Classes.IconComponent}}}s, resets update function and method, unregisters all events, and hides the icon.
 -- @name Icon:DisableIcon
 -- @paramsig 
 function Icon.DisableIcon(icon)
@@ -475,7 +521,13 @@ function Icon.DisableIcon(icon)
 	TMW:Fire("TMW_ICON_DISABLE", icon)
 end
 
---- Completely sets up an icon, implementing all requested {{{TMW.Classes.IconComponent}}}s, processing settings, setting up conditions, calling {{{TMW.Classes.IconType}}}{{{:Setup()}}}, and preparing the icon to be updated or configured. This method should not be called manually while TellMeWhen is locked. It may be called liberally from wherever you see fit when in configuration mode.
+--- Completely sets up an icon.
+--
+-- Implements all requested {{{TMW.Classes.IconComponent}}}s, processes settings, sets up conditions, calls {{{TMW.Classes.IconType}}}{{{:Setup()}}}, and prepares the icon to be updated or configured.
+--
+-- This method should not be called manually while TellMeWhen is locked. It may be called liberally from wherever you see fit when in configuration mode.
+-- @name Icon:Setup
+-- @paramsig 
 function Icon.Setup(icon)
 	if not icon or not icon[0] then return end
 	
@@ -861,7 +913,9 @@ local SetInfoFuncs = setmetatable({}, { __index = function(self, signature)
 end})
 
 
---- Sets attributes of an icon. The attributes passed to this function will be processed by a {{{TMW.Classes.IconDataProcessor}}} (and possibly one or more {{{TMW.Classes.IconDataProcessorHook}}}) and interested {{{TMW.Classes.IconModule}}}s will be notified of any changes to the attributes.
+--- Sets attributes of an icon.
+--
+-- The attributes passed to this function will be processed by a {{{TMW.Classes.IconDataProcessor}}} (and possibly one or more {{{TMW.Classes.IconDataProcessorHook}}}) and interested {{{TMW.Classes.IconModule}}}s will be notified of any changes to the attributes.
 -- @name Icon:SetInfo
 -- @paramsig signature, ...
 -- @param signature [string] A semicolon-delimited string of attribute strings as passed to the constructor of a {{{TMW.Classes.IconDataProcessor}}}.
@@ -909,12 +963,13 @@ local SetInfoInternalFuncs = setmetatable({}, { __index = function(self, signatu
 	return func
 end})
 
---- icon:SetInfo_INTERNAL() is a slightly modified version of icon:SetInfo() that doesn't fire TMW_ICON_UPDATED because
--- it must only be called from within SetInfo (inside IconDataProcessorHooks).
+--- icon:SetInfo_INTERNAL() is a slightly modified version of icon:SetInfo() that doesn't fire TMW_ICON_UPDATED because it must only be called from within SetInfo (inside IconDataProcessorHooks).
 -- SetInfo will fire TMW_ICON_UPDATED at the end (and only once, isntead of multiple times), so SetInfo_INTERNAL won't fire it at all to prevent excessive firings.
+--
+-- When in doubt, don't use this method - use a regular icon:SetInfo() call instead.
 -- @name Icon:SetInfo_INTERNAL
 -- @paramsig signature, ...
--- @see Icon:SetInfo(signature, ...)
+-- @see Icon:SetInfo()
 -- @returns [boolean] If true, and if SetInfo_INTERNAL is being called from within the body of an {{{TMW.Classes.IconDataProcessorHook}}}, {{{doFireIconUpdated}}} (local variable within the {{{icon:SetInfo()}}} method) should be set to true.
 -- @usage -- An example from Components/Core/IconDataProcessors/IconDataProcessor_Unit_DogTag/Unit_DogTag.lua:
 --	Hook:RegisterCompileFunctionSegmentHook("post", function(Processor, t)
