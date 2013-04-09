@@ -22,11 +22,11 @@ local pairs, type, rawget, assert, tostring
 	
 
 --- {{{TMW.Classes.IconModule}}} is a base class of any modules that will be implemented into a {{{TMW.Classes.Icon}}}. A {{{TMW.Classes.IconModule}}} provides frames, script handling, and other functionality to classes that inherit from it.
---
+-- 
 -- {{{TMW.Classes.IconModule}}} inherits from {{{TMW.Classes.IconComponent}}} and {{{TMW.Classes.ObjectModule}}}, and implicitly from the classes that they inherit. 
---
+-- 
 -- {{{TMW.Classes.IconModule}}} provides a common base for these objects. It provides methods for event handling, data handling, component skinning with Masque, and exposing frames for anchoring purposes. It is an abstract class, and should not be directly instantiated. All classes that inherit from {{{TMW.Classes.IconModule}}} should not be instantiated outside of the internal code used by a {{{TMW.Classes.IconView}}}. To create a new module, create a new class and inherit {{{TMW.Classes.IconModule}}} or another class that directly or indirectly inherits from {{{TMW.Classes.IconModule}}}. 
---
+-- 
 -- @class file
 -- @name IconModule.lua
 
@@ -211,9 +211,9 @@ end
 -- @usage -- Example usage from IconModule_CooldownSweep:
 --	local L = LibStub("AceLocale-3.0"):NewLocale("TellMeWhen", "enUS", true)
 --	L["IconModule_CooldownSweepCooldown"] = "Cooldown Sweep"
---
+-- 
 --	-- <...>
---
+-- 
 --	TMW.Classes.IconModule_CooldownSweep:RegisterAnchorableFrame("Cooldown")
 --	
 --	function TMW.Classes.IconModule_CooldownSweep:OnNewInstance(icon)

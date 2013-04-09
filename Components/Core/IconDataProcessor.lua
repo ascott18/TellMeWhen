@@ -22,9 +22,9 @@ local pairs, error, strsplit, ipairs
 	
 
 --- {{{TMW.Classes.IconDataProcessor}}} is the class of all IconDataProcessors. IconDataProcessors handle the input to {{{TMW.Classes.Icon}}}{{{:SetInfo()}}}, process the data (performing validation and other manipulation), and then expose it for use by instances of {{{TMW.Classes.IconModule}}}, {{{TMW.Classes.IconDataProcessorHook}}}s, and other {{{TMW.Classes.IconDataProcessor}}}s.
---
+-- 
 -- {{{TMW.Classes.IconDataProcessor}}} inherits from {{{TMW.Classes.IconDataProcessorComponent}}}, and implicitly from the classes that it inherits. 
---
+-- 
 -- @class file
 -- @name IconDataProcessor.lua
 
@@ -106,7 +106,7 @@ function IconDataProcessor:CompileFunctionHooks(t, orderRequested)
 end
 
 --- Compiles the segment of the {{{TMW.Classes.Icon}}}{{{:SetInfo()}}} method that will be used to process the data for this {{{TMW.Classes.IconDataProcessor}}}. This method should be overridden for any IconDataProcessors that process more than one attribute, or any IconDataProcessors that do more than simply record and notify changes to a single attribute. If changes are many to any attributes, the processor's {{{.changedEvent}}} should be fired (see usage below), and doFireIconUpdated should be set true. IconDataProcessors are also commonly used to trigger icon events (seen in the second usage example below).
---
+-- 
 -- Local variables are provided for:
 -- * Each incoming attribute that is being processed,
 -- * {{{icon = self}}}
@@ -131,7 +131,7 @@ end
 --		end
 --		]]
 --	end
---
+-- 
 -- -- Example usage in the SPELL IconDataProcessor:
 --	function Processor:CompileFunctionSegment(t)
 --		t[#t+1] = [[

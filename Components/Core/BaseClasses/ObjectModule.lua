@@ -21,9 +21,9 @@ local pairs = pairs
 
 
 --- {{{TMW.Classes.ObjectModule}}} is a base class of any objects that will be implemented into a {{{TMW.Classes.GenericModuleImplementor}}}. A {{{TMW.Classes.ObjectModule}}} provides frames, script handling, and other functionality to a {{{TMW.Classes.GenericModuleImplementor}}}. 
---
+-- 
 -- ObjectModule provides a common base for these objects, and it provides methods for enabling, disabling, and modifying script handlers. It is an abstract class, and should not be directly instantiated. All classes that inherit from {{{TMW.Classes.ObjectModule}}} should not be instantiated outside of the internal code used by a {{{TMW.Classes.IconView}}}. To create a new module, create a new class and inherit {{{TMW.Classes.ObjectModule}}} or another class that directly or indirectly inherits from {{{TMW.Classes.ObjectModule}}}.
---
+-- 
 -- @class file
 -- @name ObjectModule.lua
 

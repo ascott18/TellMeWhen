@@ -25,9 +25,9 @@ local DogTag = LibStub("LibDogTag-3.0", true)
 
 
 --- {{{TMW.Classes.IconComponent}}} is a base class of any objects that will be implemented into a {{{TMW.Classes.Icon}}}
---
+-- 
 -- IconComponent provides a common base for these objects, and it provides various methods for registering default icon settings, Icon Editor configuration panels, and Icon events. It is an abstract class, and should not be directly instantiated.
---
+-- 
 -- @class file
 -- @name IconComponent.lua
 
@@ -214,7 +214,7 @@ end
 --		someData1 = 4,
 --		someData2 = "Some other data",
 --	})
---
+-- 
 -- 	-- Accessing supplementalData:
 --	TMW:RegisterCallback("TMW_CONFIG_PANEL_SETUP", function(event, frame, panelInfo)
 --		if frame:GetName() == "TellMeWhen_ConfigPanel_Example" then

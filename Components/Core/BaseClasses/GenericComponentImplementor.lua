@@ -19,9 +19,9 @@ local print = TMW.print
 
 
 --- {{{TMW.Classes.GenericComponentImplementor}}} is a base class of any objects that implement any instances of {{{TMW.Classes.GenericComponent}}}
---
+-- 
 -- GenericComponentImplementor provides a common base for these objects, and it provides the {{{self.Components}}} and {{{self.ComponentsLookup}}} tables to its instances. It is an abstract class, and should not be directly instantiated.
---
+-- 
 -- @class file
 -- @name GenericComponentImplementor.lua
 

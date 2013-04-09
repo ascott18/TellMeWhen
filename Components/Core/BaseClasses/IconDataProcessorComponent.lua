@@ -18,11 +18,11 @@ local L = TMW.L
 local print = TMW.print
 
 --- {{{TMW.Classes.IconDataProcessorComponent}}} is a base class of {{{TMW.Classes.IconDataProcessor}}} and {{{TMW.Classes.IconDataProcessorHook}}}.
---
+-- 
 -- {{{TMW.Classes.IconDataProcessorComponent}}} inherits from {{{TMW.Classes.IconComponent}}}, and implicitly from the classes that it inherits. 
---
+-- 
 -- {{{TMW.Classes.IconDataProcessorComponent}}} provides a common base for these objects, and some basic functionality shared between the two. 
---
+-- 
 -- @class file
 -- @name IconDataProcessorComponent.lua
 

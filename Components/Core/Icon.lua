@@ -524,7 +524,7 @@ end
 --- Completely sets up an icon.
 -- 
 -- Implements all requested {{{TMW.Classes.IconComponent}}}s, processes settings, sets up conditions, calls {{{TMW.Classes.IconType}}}{{{:Setup()}}}, and prepares the icon to be updated or configured.
---
+-- 
 -- This method should not be called manually while TellMeWhen is locked. It may be called liberally from wherever you see fit when in configuration mode.
 -- @name Icon:Setup
 -- @paramsig 

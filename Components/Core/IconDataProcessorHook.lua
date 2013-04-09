@@ -21,9 +21,9 @@ local assert
 	= assert
 
 --- {{{TMW.Classes.IconDataProcessorHook}}} is the class of all IconDataProcessorHooks. A IconDataProcessorHook hooks into a {{{TMW.Classes.IconDataProcessor}}}, giving it a chance to modify icon attributes before they are given to their normal {{{TMW.Classes.IconDataProcessor}}}. An IconDataProcessorHook can also get access to icon attributes quicker than any other Icon Component, allowing them to read these attributes and set other attributes based on their value (this can be seen in the second usage example of {{{:RegisterCompileFunctionSegmentHook}}})
---
+-- 
 -- {{{TMW.Classes.IconDataProcessor}}} inherits from {{{TMW.Classes.IconDataProcessorComponent}}}, and implicitly from the classes that it inherits. 
---
+-- 
 -- @class file
 -- @name IconDataProcessorHook.lua
 
@@ -65,7 +65,7 @@ end
 --		texture = icon.CustomTex_OverrideTex or texture -- if a texture override is specified, then use it instead
 --		]]
 --	end)
---
+-- 
 --	-- Example usage from ALPHA_DURATIONREQ:
 --	Hook:RegisterCompileFunctionSegmentHook("post", function(Processor, t)
 --		t[#t+1] = [[

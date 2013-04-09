@@ -24,11 +24,11 @@ local UnitAffectingCombat, GetActiveSpecGroup, GetSpecialization
 
 
 --- {{{TMW.Classes.Group}}} is the class of all Icons.
---
+-- 
 -- Group inherits explicitly from {{{Blizzard.Frame}}} and from {{{TMW.Classes.GenericModuleImplementor}}}, and implicitly from the classes that it inherits. 
---
+-- 
 -- Description of Class here <THIS DOCUMENTATION HAS NOT YET BEEN WRITTEN>
---
+-- 
 -- @class file
 -- @name Group.lua
 

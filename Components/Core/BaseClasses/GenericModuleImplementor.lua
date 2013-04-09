@@ -22,11 +22,11 @@ local pairs, error
 
 
 --- {{{TMW.Classes.GenericModuleImplementor}}} is a base class of any objects that implement any instances of {{{TMW.Classes.ObjectModule}}}
---
+-- 
 -- {{{TMW.Classes.GenericModuleImplementor}}} inherits explicitly from {{{TMW.Classes.GenericComponentImplementor}}}, and implicitly from the classes that it inherits. 
---
+-- 
 -- GenericModuleImplementor provides a common base for these objects, and it provides the {{{self.Modules}}} table to its instances. It is an abstract class, and should not be directly instantiated.
---
+-- 
 -- @class file
 -- @name GenericModuleImplementor.lua
 

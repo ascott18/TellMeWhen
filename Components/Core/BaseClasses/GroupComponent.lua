@@ -23,9 +23,9 @@ local tDeleteItem = TMW.tDeleteItem
 
 
 --- {{{TMW.Classes.GroupComponent}}} is a base class of any objects that will be implemented into a {{{TMW.Classes.Group}}}
---
+-- 
 -- GroupComponent provides a common base for these objects, and it provides methods for registering default group settings and group configuration tables. It is an abstract class, and should not be directly instantiated.
---
+-- 
 -- @class file
 -- @name GroupComponent.lua
 
@@ -86,7 +86,7 @@ end
 --		max = 1,
 --		step = 0.01,
 --	})
---
+-- 
 --	-- Example of calling with a string path to the parent table:
 --	TMW.Classes.GroupModule_Alpha:RegisterConfigTable("args.main.args", "Alpha", {
 --		name = L["UIPANEL_GROUPALPHA"],
