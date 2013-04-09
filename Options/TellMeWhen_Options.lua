@@ -60,7 +60,7 @@ local strlowerCache = TMW.strlowerCache
 local SpellTextures = TMW.SpellTextures
 local print = TMW.print
 local Types = TMW.Types
-local IE, ID
+local IE
 
 
 ---------- Locals ----------
@@ -288,32 +288,9 @@ end
 
 ---------- Dropdown Utilities ----------
 function TMW:SetUIDropdownText(frame, value, tbl, text)
-	-- TODO: this function is absolutely horrifying. Do not use it for anything, and remove its usage everywhere.
 	frame.selectedValue = value
 
 	if tbl then
-		if tbl == TMW.InIcons and type(value) == "string" then
-			for icon in TMW:InIcons() do
-				if icon:GetName() == value then
-					local g, i = strmatch(value, "TellMeWhen_Group(%d+)_Icon(%d+)")
-					UIDropDownMenu_SetText(frame, TMW:GetIconMenuText(tonumber(g), tonumber(i), icon:GetSettings()))
-					return icon
-				end
-			end
-			local gID, iID = strmatch(value, "TellMeWhen_Group(%d+)_Icon(%d+)")
-			if gID and iID then
-				UIDropDownMenu_SetText(frame, format(L["GROUPICON"], TMW:GetGroupName(gID, gID, 1), iID))
-				return
-			else
-				local gID = tonumber(strmatch(value, "TellMeWhen_Group(%d+)$"))
-				if gID then
-					UIDropDownMenu_SetText(frame, TMW:GetGroupName(gID, gID))
-					return
-				end
-			end
-			UIDropDownMenu_SetText(frame, text)
-			return
-		end
 		for k, v in pairs(tbl) do
 			if v.value == value then
 				UIDropDownMenu_SetText(frame, v.text)
@@ -324,6 +301,33 @@ function TMW:SetUIDropdownText(frame, value, tbl, text)
 	UIDropDownMenu_SetText(frame, text or value)
 end
 
+function TMW:SetUIDropdownIconText(frame, iconName, text)
+	frame.selectedValue = iconName
+
+	-- Try to find the matching icon
+	for icon in TMW:InIcons() do
+		if icon:GetName() == iconName then
+			UIDropDownMenu_SetText(frame, TMW:GetIconMenuText(icon.group.ID, icon.ID, icon:GetSettings()))
+			return icon
+		end
+	end
+	
+	-- The icon didn't exist. Write a generic (group name, iconID) text instead.
+	local gID, iID = strmatch(iconName, "TellMeWhen_Group(%d+)_Icon(%d+)")
+	if gID and iID then
+		UIDropDownMenu_SetText(frame, format(L["GROUPICON"], TMW:GetGroupName(gID, gID, 1), iID))
+		return
+	else
+		local gID = tonumber(strmatch(iconName, "TellMeWhen_Group(%d+)$"))
+		if gID then
+			UIDropDownMenu_SetText(frame, TMW:GetGroupName(gID, gID))
+			return
+		end
+	end
+	
+	UIDropDownMenu_SetText(frame, text)
+end
+
 function TMW.AddDropdownSpacer()
 	local info = UIDropDownMenu_CreateInfo()
 	info.text = ""
@@ -332,7 +336,7 @@ function TMW.AddDropdownSpacer()
 	UIDropDownMenu_AddButton(info, UIDROPDOWNMENU_MENU_LEVEL)
 end
 
-function TMW:SetIconPreviewIcon(icon)
+function TMW.SetIconPreviewIcon(self, icon)
 	if not icon or not icon.IsIcon then
 		self:Hide()
 		return
@@ -356,7 +360,7 @@ do -- TMW:ReconcileData()
 		assert(isRunning, "TMW:ReconcileData() isn't running!")
 		
 		TMW:ValidateType(1, "replace()", table, "table")
-		assert(key ~= nil, "TMW: replace() - arg2 (key) cannot be nil")
+		TMW:ValidateType(2, "replace()", key, "!nil")
 		
 		local string = table[key]
 
@@ -1281,350 +1285,6 @@ end
 
 
 
--- ----------------------
--- ICON DRAGGER
--- ----------------------
-
-ID = TMW:NewModule("IconDragger", "AceTimer-3.0", "AceEvent-3.0") TMW.ID = ID
-
-function ID:OnInitialize()
-	hooksecurefunc("PickupSpellBookItem", function(...) ID.DraggingInfo = {...} end)
-	WorldFrame:HookScript("OnMouseDown", function() -- this contains other bug fix stuff too
-		ID.DraggingInfo = nil
-		ID.F:Hide()
-		ID.IsDragging = nil
-	end)
-	hooksecurefunc("ClearCursor", ID.BAR_HIDEGRID)
-	ID:RegisterEvent("PET_BAR_HIDEGRID", "BAR_HIDEGRID")
-	ID:RegisterEvent("ACTIONBAR_HIDEGRID", "BAR_HIDEGRID")
-
-
-	ID.DD.wrapTooltips = 1
-end
-
-function ID:BAR_HIDEGRID()
-	ID.DraggingInfo = nil
-end
-
-
----------- Spell/Item Dragging ----------
-function ID:SpellItemToIcon(icon, func, arg1)
-	if not icon.IsIcon then
-		return
-	end
-
-	local t, data, subType, param4
-	local input
-	if not (CursorHasSpell() or CursorHasItem()) and ID.DraggingInfo then
-		t = "spell"
-		data, subType = unpack(ID.DraggingInfo)
-	else
-		t, data, subType, param4 = GetCursorInfo()
-	end
-	ID.DraggingInfo = nil
-
-	if not t then
-		return
-	end
-
-	IE:SaveSettings()
-
-	-- create a backup before doing things
-	IE:AttemptBackup(icon)
-
-	-- handle the drag based on icon type
-	local success
-	if func then
-		success = func(arg1, icon, t, data, subType, param4)
-	else
-		success = icon.typeData:DragReceived(icon, t, data, subType, param4)
-	end
-	if not success then
-		return
-	end
-
-	ClearCursor()
-	icon:Setup()
-	IE:Load(1)
-end
-
-
----------- Icon Dragging ----------
-function ID:DropDown()
-	for i, handlerData in ipairs(ID.Handlers) do
-		local info = UIDropDownMenu_CreateInfo()
-		info.notCheckable = true
-		info.tooltipOnButton = true
-		
-		local shouldAddButton = handlerData.dropdownFunc(ID, info)
-		
-		info.func = ID.Handler
-		info.arg1 = handlerData.actionFunc
-		
-		if shouldAddButton then
-			UIDropDownMenu_AddButton(info, UIDROPDOWNMENU_MENU_LEVEL)
-		end
-	end	
-	
-	local info = UIDropDownMenu_CreateInfo()
-	info.text = CANCEL
-	info.notCheckable = true
-	UIDropDownMenu_AddButton(info, UIDROPDOWNMENU_MENU_LEVEL)
-
-	UIDropDownMenu_JustifyText(self, "LEFT")
-end
-
-function ID:Start(icon)
-	ID.srcicon = icon
-
-	local scale = icon.group:GetScale()*0.85
-	ID.F:SetScript("OnUpdate", function()
-		local x, y = GetCursorPosition()
-		ID.texture:SetPoint("CENTER", UIParent, "BOTTOMLEFT", x/scale, y/scale )
-		ID.back:SetPoint("CENTER", UIParent, "BOTTOMLEFT", x/scale, y/scale )
-	end)
-	ID.F:SetScale(scale)
-	local t = ID.srcicon.attributes.texture
-	ID.texture:SetTexture(t)
-	if t and t ~= "" then
-		ID.back:Hide()
-	else
-		ID.back:Show()
-	end
-	ID.F:Show()
-	ID.IsDragging = true
-	end
-
-function ID:SetIsDraggingFalse()
-	ID.IsDragging = false
-end
-
-function ID:CompleteDrag(script, icon)
-
-	ID.F:SetScript("OnUpdate", nil)
-	ID.F:Hide()
-	ID:ScheduleTimer("SetIsDraggingFalse", 0.1)
-
-	icon = icon or GetMouseFocus()
-
-	-- icon here is the destination
-	if ID.IsDragging then
-
-		if type(icon) == "table" and icon.IsIcon then -- if the frame that got the drag is an icon, set the destination stuff.
-
-			ID.desticon = icon
-			ID.destFrame = nil
-
-			if script == "OnDragStop" then -- wait for OnDragReceived
-				return
-			end
-
-			if ID.desticon.group:GetID() == ID.srcicon.group:GetID() and ID.desticon:GetID() == ID.srcicon:GetID() then
-				return
-			end
-
-			UIDropDownMenu_SetAnchor(ID.DD, 0, 0, "TOPLEFT", icon, "BOTTOMLEFT")
-
-		else
-			ID.desticon = nil
-			ID.destFrame = icon -- not actually an icon. just some frame.
-			local cursorX, cursorY = GetCursorPosition()
-			local UIScale = UIParent:GetScale()
-			UIDropDownMenu_SetAnchor(ID.DD, cursorX/UIScale, cursorY/UIScale, nil, UIParent, "BOTTOMLEFT")
-		end
-
-		if not DropDownList1:IsShown() or UIDROPDOWNMENU_OPEN_MENU ~= ID.DD then
-			if not ID.DD.Initialized then
-				UIDropDownMenu_Initialize(ID.DD, ID.DropDown, "DROPDOWN")
-				ID.DD.Initialized = true
-			end
-			ToggleDropDownMenu(1, nil, ID.DD)
-		end
-	end
-end
-
-ID.Handlers = {}
-function ID:RegisterIconDragHandler(order, dropdownFunc, actionFunc)
-	TMW:ValidateType("2 (order)", "ID:RegisterIconDragHandler(order, dropdownFunc, actionFunc)", order, "number")
-	TMW:ValidateType("3 (func)", "ID:RegisterIconDragHandler(order, dropdownFunc, actionFunc)", dropdownFunc, "function")
-	TMW:ValidateType("4 (func)", "ID:RegisterIconDragHandler(order, dropdownFunc, actionFunc)", actionFunc, "function")
-	
-	tinsert(ID.Handlers, {
-		order = order,
-		dropdownFunc = dropdownFunc,
-		actionFunc = actionFunc,
-	})
-	
-	TMW:SortOrderedTables(ID.Handlers)
-end
-
-ID:RegisterIconDragHandler(1,	-- Move
-	function(ID, info)
-		if ID.desticon then
-			info.text = L["ICONMENU_MOVEHERE"]
-			info.tooltipTitle = nil
-			info.tooltipText = nil
-			return true
-		end
-	end,
-	function(ID)
-		-- move the actual settings
-		local srcgs = ID.srcicon.group:GetSettings()
-		local srcics = ID.srcicon:GetSettings()
-		
-		TMW:PrepareIconSettingsForCopying(srcics, srcgs)
-		
-		ID.desticon.group:GetSettings().Icons[ID.desticon:GetID()] = srcgs.Icons[ID.srcicon:GetID()]
-		srcgs.Icons[ID.srcicon:GetID()] = nil
-		
-
-		-- preserve buff/debuff/other types textures
-		ID.desticon:SetInfo("texture", ID.srcicon.attributes.texture)
-
-		local srcicon, desticon = tostring(ID.srcicon), tostring(ID.desticon)
-
-		TMW:ReconcileData(srcicon, desticon)
-	end
-)
-ID:RegisterIconDragHandler(2,	-- Copy
-	function(ID, info)
-		if ID.desticon then
-			info.text = L["ICONMENU_COPYHERE"]
-			info.tooltipTitle = nil
-			info.tooltipText = nil
-			return true
-		end
-	end,
-	function(ID)
-		-- copy the settings
-		local srcgs = ID.srcicon.group:GetSettings()
-		local srcics = ID.srcicon:GetSettings()
-		TMW:PrepareIconSettingsForCopying(srcics, srcgs)
-		
-		ID.desticon.group:GetSettings().Icons[ID.desticon:GetID()] = TMW:CopyWithMetatable(srcics)
-
-		-- preserve buff/debuff/other types textures
-		ID.desticon:SetInfo("texture", ID.srcicon.attributes.texture)
-	end
-)
-ID:RegisterIconDragHandler(3,	-- Swap
-	function(ID, info)
-		if ID.desticon then
-			info.text = L["ICONMENU_SWAPWITH"]
-			info.tooltipTitle = nil
-			info.tooltipText = nil
-			return true
-		end
-	end,
-	function(ID)
-		-- swap the actual settings
-		local destgs = ID.desticon.group:GetSettings()
-		local destics = ID.desticon:GetSettings()
-		local srcgs = ID.srcicon.group:GetSettings()
-		local srcics = ID.srcicon:GetSettings()
-		TMW:PrepareIconSettingsForCopying(destics, destgs)
-		TMW:PrepareIconSettingsForCopying(srcics, srcgs)
-		
-		destgs.Icons[ID.desticon:GetID()] = srcics
-		srcgs.Icons[ID.srcicon:GetID()] = destics
-
-		-- preserve buff/debuff/other types textures
-		local desttex = ID.desticon.attributes.texture
-		ID.desticon:SetInfo("texture", ID.srcicon.attributes.texture)
-		ID.srcicon:SetInfo("texture", desttex)
-
-		local srcicon, desticon = tostring(ID.srcicon), tostring(ID.desticon)
-
-		TMW:ReconcileData(srcicon, desticon, srcicon .. "$", desticon .. "$", true)
-	end
-)
-
-
-ID:RegisterIconDragHandler(40,	-- Split
-	function(ID, info)
-		if ID.destFrame then
-			info.text = L["ICONMENU_SPLIT"]
-			info.tooltipTitle = L["ICONMENU_SPLIT"]
-			info.tooltipText = L["ICONMENU_SPLIT_DESC"]
-			return true
-		end
-	end,
-	function(ID)
-		local groupID, group = TMW:Group_Add()
-
-
-		-- back up the icon data of the source group
-		local SOURCE_ICONS = TMW.db.profile.Groups[ID.srcicon.group:GetID()].Icons
-		-- nullify it (we don't want to copy it)
-		TMW.db.profile.Groups[ID.srcicon.group:GetID()].Icons = nil
-
-		-- copy the source group.
-		-- pcall so that, in the rare event of some unforseen error, we don't lose the user's settings (they haven't yet been restored)
-		local success, err = pcall(TMW.CopyTableInPlaceWithMeta, TMW, TMW.db.profile.Groups[ID.srcicon.group:GetID()], TMW.db.profile.Groups[groupID])
-
-		-- restore the icon data of the source group
-		TMW.db.profile.Groups[ID.srcicon.group:GetID()].Icons = SOURCE_ICONS
-		-- now it is safe to error since we restored the old settings
-		assert(success, err)
-
-
-		local gs = TMW.db.profile.Groups[groupID]
-
-		-- group tweaks
-		gs.Rows = 1
-		gs.Columns = 1
-		gs.Name = ""
-
-		-- adjustments and positioning
-		local p = gs.Point
-		p.point, p.relativeTo, p.relativePoint, p.x, p.y = ID.texture:GetPoint(2)
-		p.x, p.y = p.x/UIParent:GetScale()*ID.F:GetScale(), p.y/UIParent:GetScale()*ID.F:GetScale()
-		p.relativeTo = "UIParent"
-		
-		TMW[groupID]:Setup()
-
-		-- move the actual icon settings
-		gs.Icons[1] = ID.srcicon.group.Icons[ID.srcicon:GetID()]
-		ID.srcicon.group.Icons[ID.srcicon:GetID()] = nil
-
-		-- preserve textures
-		if group and group[1] then
-			group[1]:SetInfo("texture", ID.srcicon.attributes.texture)
-		end
-
-		local srcicon, desticon = tostring(ID.srcicon), tostring("TellMeWhen_Group" .. groupID .. "_Icon1")
-
-		TMW:ReconcileData(srcicon, desticon)
-
-		TMW[groupID]:Setup()
-	end
-)
-
----------- Icon Handler ----------
-function ID:Handler(method)
-	-- close the menu
-	CloseDropDownMenus()
-
-	-- save misc. settings
-	IE:SaveSettings()
-
-	-- attempt to create a backup before doing anything
-	IE:AttemptBackup(ID.srcicon)
-	IE:AttemptBackup(ID.desticon)
-
-	-- finally, invoke the method to handle the operation.
-	method(ID)
-
-	-- then, update things
-	TMW:Update()
-	IE:Load(1)
-end
-
-
-
-
-
-
 
 
 -- ----------------------
@@ -1641,6 +1301,16 @@ IE.CONST = {
 }
 
 function IE:OnInitialize()
+
+	hooksecurefunc("PickupSpellBookItem", function(...) IE.DraggingInfo = {...} end)
+	WorldFrame:HookScript("OnMouseDown", function() -- this contains other bug fix stuff too
+		IE.DraggingInfo = nil
+	end)
+	hooksecurefunc("ClearCursor", IE.BAR_HIDEGRID)
+	IE:RegisterEvent("PET_BAR_HIDEGRID", "BAR_HIDEGRID")
+	IE:RegisterEvent("ACTIONBAR_HIDEGRID", "BAR_HIDEGRID")
+
+
 	-- Shittily initialize the database. Perhaps one day this will be a real Ace3DB. Till then, its just a table.
 	TMWOptDB = TMWOptDB or {}
 
@@ -1789,6 +1459,10 @@ function IE:OnUpdate()
 	end
 end
 
+function IE:BAR_HIDEGRID()
+	IE.DraggingInfo = nil
+end
+
 function IE:TMW_ONUPDATE_POST(...)
 	-- run updates for any icons that are queued
 	for i, icon in ipairs(IE.iconsToUpdate) do
@@ -1848,6 +1522,7 @@ end
 function IE:StopMovingOrSizing()
 	IE.isMoving = false
 end
+
 
 ---------- Interface ----------
 IE.AllDisplayPanels = {}
@@ -2145,6 +1820,47 @@ function IE:Reset()
 	IE:TabClick(IE.MainTab)
 end
 
+
+---------- Spell/Item Dragging ----------
+function IE:SpellItemToIcon(icon, func, arg1)
+	if not icon.IsIcon then
+		return
+	end
+
+	local t, data, subType, param4
+	local input
+	if not (CursorHasSpell() or CursorHasItem()) and IE.DraggingInfo then
+		t = "spell"
+		data, subType = unpack(IE.DraggingInfo)
+	else
+		t, data, subType, param4 = GetCursorInfo()
+	end
+	IE.DraggingInfo = nil
+
+	if not t then
+		return
+	end
+
+	IE:SaveSettings()
+
+	-- create a backup before doing things
+	IE:AttemptBackup(icon)
+
+	-- handle the drag based on icon type
+	local success
+	if func then
+		success = func(arg1, icon, t, data, subType, param4)
+	else
+		success = icon.typeData:DragReceived(icon, t, data, subType, param4)
+	end
+	if not success then
+		return
+	end
+
+	ClearCursor()
+	icon:Setup()
+	IE:Load(1)
+end
 
 
 ---------- Settings ----------
@@ -3326,7 +3042,7 @@ function EVENTS:SetupEventSettings()
 	EventSettingsContainer.PassingCndt	 		:SetChecked(Settings.PassingCndt)
 	EventSettingsContainer.Value		 	 	:SetText(Settings.Value)
 
-	TMW:SetUIDropdownText(EventSettingsContainer.Icon, Settings.Icon, TMW.InIcons, L["CHOOSEICON"])
+	TMW:SetUIDropdownIconText(EventSettingsContainer.Icon, Settings.Icon, L["CHOOSEICON"])
 	EventSettingsContainer.Icon.IconPreview:SetIcon(_G[Settings.Icon])
 
 	--show settings
@@ -3442,7 +3158,7 @@ function EVENTS:IconMenu_DropDown()
 	end
 end
 function EVENTS:IconMenu_DropDown_OnClick(frame)
-	TMW:SetUIDropdownText(frame, self.value, TMW.InIcons)
+	TMW:SetUIDropdownIconText(frame, self.value)
 	CloseDropDownMenus()
 
 	frame.IconPreview:SetIcon(_G[self.value])

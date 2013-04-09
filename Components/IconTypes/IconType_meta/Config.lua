@@ -34,12 +34,12 @@ if not Type then return end
 -- GLOBALS: CreateFrame
 
 
-TMW.ID:RegisterIconDragHandler(20,
-	function(ID, info)
-		if ID.desticon
-		and ID.srcicon:IsValid()
-		and ID.desticon.Type == "meta"
-		and ID.srcicon.group.viewData == ID.desticon.group.viewData
+TMW.IconDragger:RegisterIconDragHandler(20,
+	function(IconDragger, info)
+		if IconDragger.desticon
+		and IconDragger.srcicon:IsValid()
+		and IconDragger.desticon.Type == "meta"
+		and IconDragger.srcicon.group.viewData == IconDragger.desticon.group.viewData
 		then
 			info.text = L["ICONMENU_ADDMETA"]
 			info.tooltipTitle = nil
@@ -47,12 +47,12 @@ TMW.ID:RegisterIconDragHandler(20,
 			return true
 		end
 	end,
-	function(ID)
-		local Icons = TMW.db.profile.Groups[ID.desticon.group:GetID()].Icons[ID.desticon:GetID()].Icons
+	function(IconDragger)
+		local Icons = TMW.db.profile.Groups[IconDragger.desticon.group:GetID()].Icons[IconDragger.desticon:GetID()].Icons
 		if Icons[#Icons] == "" then
 			Icons[#Icons] = nil
 		end
-		tinsert(Icons, ID.srcicon:GetName())
+		tinsert(Icons, IconDragger.srcicon:GetName())
 	end
 )
 
@@ -87,7 +87,7 @@ function ME:LoadConfig()
 		end
 		mg:SetFrameLevel(TellMeWhen_MetaIconOptions:GetFrameLevel()+2)
 
-		TMW:SetUIDropdownText(mg.icon, v, TMW.InIcons, L["CHOOSEICON"])
+		TMW:SetUIDropdownIconText(mg.icon, v, L["CHOOSEICON"])
 		mg.icon.IconPreview:SetIcon(_G[v])
 	end
 

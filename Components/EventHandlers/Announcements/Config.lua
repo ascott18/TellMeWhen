@@ -166,21 +166,27 @@ function ANN:SelectChannel(channel)
 		else
 			ConfigFrames.Sticky:Hide()
 		end
+		
 		if channelsettings.icon then
 			ConfigFrames.ShowIconTex:SetChecked(EventSettings.Icon)
 			ConfigFrames.ShowIconTex:Show()
 		else
 			ConfigFrames.ShowIconTex:Hide()
 		end
+		
 		if channelsettings.defaultlocation then
 			local defaultlocation = get(channelsettings.defaultlocation)
 			local location = EventSettings.Location
+			
 			location = location and location ~= "" and location or defaultlocation
 			location = channelsettings.ddtext(location) and location or defaultlocation
+			
 			EventSettings.Location = location
 			local loc = channelsettings.ddtext(location)
-			TMW:SetUIDropdownText(ConfigFrames.Location, location)
+			
+			ConfigFrames.Location.selectedValue = location
 			UIDropDownMenu_SetText(ConfigFrames.Location, loc)
+			
 			ConfigFrames.Location:Show()
 		else
 			ConfigFrames.Location:Hide()
@@ -227,8 +233,9 @@ function ANN:Location_DropDown_OnClick(text)
 	
 	local ConfigFrames = ANN.ConfigContainer.ConfigFrames
 	
-	TMW:SetUIDropdownText(ConfigFrames.Location, dropdown.value)
-	UIDropDownMenu_SetText(ConfigFrames.Location, text)
+	ConfigFrames.Location.selectedValue = dropdown.value
+	UIDropDownMenu_SetText(ConfigFrames.Location, text)	
+	
 	EVENTS:GetEventSettings().Location = dropdown.value
 end
 

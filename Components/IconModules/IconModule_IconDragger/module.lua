@@ -25,30 +25,30 @@ function Module:OnNewInstance_IconDragger(icon)
 end
 
 Module:SetScriptHandler("OnMouseDown", function(Module, icon)
-	if not TMW.Locked then
-		local ID = TMW.ID
-		if not ID then return end
-		ID.DraggingInfo = nil
-		ID.F:Hide()
-		ID.IsDragging = nil
+	local IconDragger = TMW.IconDragger
+	
+	if not TMW.Locked and IconDragger then		
+		IconDragger.DraggingInfo = nil
+		IconDragger.DraggerFrame:Hide()
+		IconDragger.IsDragging = nil
 	end
 end)
 
 Module:SetScriptHandler("OnDragStart", function(Module, icon, button)
-	if not TMW.Locked and button == "RightButton" and TMW.ID then
-		TMW.ID:Start(icon)
+	if not TMW.Locked and button == "RightButton" and TMW.IconDragger then
+		TMW.IconDragger:Start(icon)
 	end
 end)
 
 Module:SetScriptHandler("OnReceiveDrag", function(Module, icon)
-	if TMW.ID then
-		TMW.ID:CompleteDrag("OnReceiveDrag", icon)
+	if TMW.IconDragger then
+		TMW.IconDragger:CompleteDrag("OnReceiveDrag", icon)
 	end
 end)
 
 Module:SetScriptHandler("OnDragStop", function(Module, icon)
-	if TMW.ID and TMW.ID.IsDragging then
-		TMW.ID:CompleteDrag("OnDragStop")
+	if TMW.IconDragger and TMW.IconDragger.IsDragging then
+		TMW.IconDragger:CompleteDrag("OnDragStop")
 	end
 end)
 

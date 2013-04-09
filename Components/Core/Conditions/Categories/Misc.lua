@@ -78,28 +78,11 @@ ConditionCategory:RegisterCondition(1,	 "ICON", {
 		return gsub(str, "c.Icon", c.Icon)
 	end,
 })
-TMW:RegisterCallback("TMW_CNDT_GROUP_DRAWGROUP", function(event, CndtGroup, conditionData, conditionSettings)
-	if conditionData and conditionData.isicon then
-		CndtGroup.TextIcon:SetText(L["ICONTOCHECK"])
-		CndtGroup.Icon:Show()
-		if conditionData.nooperator then
-			UIDropDownMenu_SetWidth(CndtGroup.Icon, 152)
-		else
-			UIDropDownMenu_SetWidth(CndtGroup.Icon, 100)
-		end
-	else
-		CndtGroup.TextIcon:SetText(nil)
-		CndtGroup.Icon:Hide()
-	end
-end)
+
 
 ConditionCategory:RegisterSpacer(1.1)
 
-local hasRegisteredShownHiddenTimerCallback
 local function RegisterShownHiddenTimerCallback()
-	if hasRegisteredShownHiddenTimerCallback then return end
-	hasRegisteredShownHiddenTimerCallback = true
-	
 	TMW:RegisterCallback(TMW.Classes.IconDataProcessor.ProcessorsByName.REALALPHA.changedEvent, function(event, icon, realAlpha, oldalpha)
 		if realAlpha == 0 then
 			icon.__CNDT__ICONSHOWNTME = 0
@@ -109,6 +92,8 @@ local function RegisterShownHiddenTimerCallback()
 			icon.__CNDT__ICONHIDDENTME = 0
 		end
 	end)
+	
+	RegisterShownHiddenTimerCallback = TMW.NULLFUNC
 end
 
 ConditionCategory:RegisterCondition(1.2,	"ICONSHOWNTME", {

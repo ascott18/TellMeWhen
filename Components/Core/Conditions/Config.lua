@@ -46,27 +46,6 @@ local operators = {
 
 local CNDT = TMW.CNDT -- created in TellMeWhen/conditions.lua
 
-TMW.ID:RegisterIconDragHandler(10,
-	function(ID, info)
-		if ID.desticon then
-			if ID.srcicon:IsValid() then
-				info.text = L["ICONMENU_APPENDCONDT"]
-				info.tooltipTitle = nil
-				info.tooltipText = nil
-				return true
-			end
-		end
-	end,
-	function(ID)
-		-- add a condition to the destination icon
-		local Condition = CNDT:AddCondition(TMW.db.profile.Groups[ID.desticon.group:GetID()].Icons[ID.desticon:GetID()].Conditions)
-
-		-- set the settings
-		Condition.Type = "ICON"
-		Condition.Icon = ID.srcicon:GetName()
-	end
-)
-
 function CNDT:OnInitialize()
 	
 end
@@ -357,8 +336,9 @@ function CNDT:TypeMenu_DropDown()
 end
 
 function CNDT:TypeMenu_DropDown_OnClick(data)
-	TMW:SetUIDropdownText(UIDROPDOWNMENU_OPEN_MENU, self.value)
+	UIDROPDOWNMENU_OPEN_MENU.selectedValue = self.value
 	UIDropDownMenu_SetText(UIDROPDOWNMENU_OPEN_MENU, data.text)
+	
 	local group = UIDROPDOWNMENU_OPEN_MENU:GetParent()
 	
 	local condition = group:GetConditionSettings()
@@ -416,7 +396,7 @@ function CNDT:IconMenu_DropDown()
 end
 
 function CNDT:IconMenu_DropDown_OnClick(frame)
-	TMW:SetUIDropdownText(frame, self.value, TMW.InIcons)
+	TMW:SetUIDropdownIconText(frame, self.value)
 	frame.IconPreview:SetIcon(_G[self.value])
 	CloseDropDownMenus()
 	
@@ -670,7 +650,7 @@ TMW:RegisterCallback("TMW_CNDT_GROUP_DRAWGROUP", function(event, CndtGroup, cond
 	CndtGroup.Type:Show()
 	CndtGroup.TextType:SetText(L["CONDITIONPANEL_TYPE"])
 
-	TMW:SetUIDropdownText(CndtGroup.Type, conditionSettings.Type)
+	CndtGroup.Type.selectedValue = conditionSettings.Type
 	UIDropDownMenu_SetText(CndtGroup.Type, conditionData and conditionData.text or (conditionSettings.Type .. ": UNKNOWN TYPE"))
 end)
 
@@ -694,7 +674,7 @@ end)
 TMW:RegisterCallback("TMW_CNDT_GROUP_DRAWGROUP", function(event, CndtGroup, conditionData, conditionSettings)
 
 
-	TMW:SetUIDropdownText(CndtGroup.Icon, conditionSettings.Icon, TMW.InIcons)
+	TMW:SetUIDropdownIconText(CndtGroup.Icon, conditionSettings.Icon)
 	CndtGroup.Icon.IconPreview:SetIcon(_G[conditionSettings.Icon])
 end)
 

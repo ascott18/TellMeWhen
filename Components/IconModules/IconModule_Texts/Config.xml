@@ -60,10 +60,9 @@
 						<Scripts>
 							<OnLoad>
 								self.wrapTooltips = 1
-								--function self:Init()
-									UIDropDownMenu_Initialize(self, TMW.TEXT.CopyString_DropDown, "DROPDOWN")
-								--	self.Init = function() end
-								--end
+								
+								--TODO: make sure this dropdown still works
+								self.initialize = TMW.TEXT.CopyString_DropDown
 							</OnLoad>
 						</Scripts>
 					</Frame>

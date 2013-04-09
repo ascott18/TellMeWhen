@@ -2,4 +2,8 @@
 <!-- 
 <Include file="config.xml"/>
  -->
+ 
+<Script file="IconDragger.lua"/>
+<Include file="IconDragger.xml"/>
+
 </Ui>

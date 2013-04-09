@@ -21,14 +21,14 @@ local print = TMW.print
 local Module = TMW:NewClass("IconModule_RecieveSpellDrags", "IconModule")
 
 Module:SetScriptHandler("OnClick", function(Module, icon, button)
-	if not TMW.Locked and TMW.ID and button == "LeftButton" then
-		TMW.ID:SpellItemToIcon(icon)
+	if not TMW.Locked and TMW.IE and button == "LeftButton" then
+		TMW.IE:SpellItemToIcon(icon)
 	end
 end)
 
 Module:SetScriptHandler("OnReceiveDrag", function(Module, icon, button)
-	if not TMW.Locked and TMW.ID then
-		TMW.ID:SpellItemToIcon(icon)
+	if not TMW.Locked and TMW.IE then
+		TMW.IE:SpellItemToIcon(icon)
 	end
 end)
 

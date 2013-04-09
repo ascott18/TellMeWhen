@@ -39,7 +39,6 @@
 				<Anchors>
 					<Anchor point="TOP" y="-5"/>
 					<Anchor point="LEFT" x="9" />
-					<!-- <Anchor point="RIGHT" x="-25" /> -->
 					<Anchor point="RIGHT" x="-9" />
 				</Anchors>
 				<Layers>
@@ -51,24 +50,6 @@
 						</FontString>
 					</Layer>
 				</Layers>
-				<!-- <Frames>
-					<Frame name="$parentEquivs" inherits="TMW_DropDownMenuTemplate" parentKey="Equivs">
-						<Anchors>
-							<Anchor point="LEFT" relativePoint="RIGHT" x="-15" y="-4"/>
-						</Anchors>
-						<Scripts>
-							<OnLoad>
-								self.Left:Hide()
-								self.Middle:Hide()
-								self.Right:Hide()
-								self.Text:Hide()
-								UIDropDownMenu_SetWidth(self, 1)
-								TMW:TT(self, "CHOOSENAME_DIALOG_DDDEFAULT", "CHOOSENAME_EQUIVS_TOOLTIP")
-								self.initialize = TMW.IE.Equiv_DropDown
-							</OnLoad>
-						</Scripts>
-					</Frame>
-				</Frames> -->
 				<Scripts>
 					<OnLoad>
 						local supplementalData
@@ -199,10 +180,10 @@
 						GameTooltip:Hide()
 					</OnLeave>
 					<OnReceiveDrag>
-						TMW.ID:SpellItemToIcon(TMW.CI.ic)
+						TMW.IE:SpellItemToIcon(TMW.CI.ic)
 					</OnReceiveDrag>
 					<OnMouseUp>
-						TMW.ID:SpellItemToIcon(TMW.CI.ic)
+						TMW.IE:SpellItemToIcon(TMW.CI.ic)
 					</OnMouseUp>
 					<OnTextChanged>
 						local text = self:GetText()
@@ -1650,37 +1631,6 @@
 	
 	<!-- END TEMPLATES -->
 
-
-	<Button name="TellMeWhen_IconDragger" hidden="true" enableMouse="false" frameStrata="HIGH">
-		<Size x="30" y="30"/>
-		<Layers>
-			<Layer level="ARTWORK">
-				<Texture name="$parentIcon" parentKey="texture" file="Interface\Icons\INV_Misc_QuestionMark">
-					<Size x="30" y="30"/>
-				</Texture>
-			</Layer>
-			<Layer level="BACKGROUND">
-				<Texture name="$parentBack" parentKey="back" file="Interface\Buttons\UI-EmptySlot-Disabled">
-					<Size x="46" y="46"/>
-				</Texture>
-			</Layer>
-		</Layers>
-		<Scripts>
-			<OnLoad>
-				self:SetAlpha(0.5)
-				TMW.ID.F = self
-				for k, v in pairs(self) do
-					if k ~= 0 then
-						TMW.ID[k] = v
-					end
-				end
-			</OnLoad>
-		</Scripts>
-		<Frames>
-			<Frame name="$parentDD" inherits="TMW_DropDownMenuTemplate" parentKey="DD"/>
-		</Frames>
-	</Button>
-
 	<Frame name="TellMeWhen_ConfigWarning" hidden="true" movable="true" toplevel="true" clampedToScreen="true" enableMouse="true" frameStrata="DIALOG">
 		<Size x="330"/>
 		<Anchors>
@@ -1917,10 +1867,10 @@
 						self:RegisterForDrag("LeftButton")
 					</OnLoad>
 					<OnReceiveDrag>
-						TMW.ID:SpellItemToIcon(TMW.CI.ic)
+						TMW.IE:SpellItemToIcon(TMW.CI.ic)
 					</OnReceiveDrag>
 					<OnMouseUp>
-						TMW.ID:SpellItemToIcon(TMW.CI.ic)
+						TMW.IE:SpellItemToIcon(TMW.CI.ic)
 					</OnMouseUp>
 					<OnDragStart>
 						TMW.IE:StartMoving()

@@ -103,22 +103,22 @@ end)
 
 
 
-TMW.ID:RegisterIconDragHandler(30,	-- Anchor
-	function(ID, info)
+TMW.IconDragger:RegisterIconDragHandler(30,	-- Anchor
+	function(IconDragger, info)
 		local name, desc
 
-		local srcname = TMW:GetGroupName(ID.srcicon.group:GetID(), ID.srcicon.group:GetID())
+		local srcname = TMW:GetGroupName(IconDragger.srcicon.group:GetID(), IconDragger.srcicon.group:GetID())
 
-		if ID.desticon and ID.srcicon.group:GetID() ~= ID.desticon.group:GetID() then
-			local destname = L["fGROUP"]:format(TMW:GetGroupName(ID.desticon.group:GetID(), ID.desticon.group:GetID(), 1))
+		if IconDragger.desticon and IconDragger.srcicon.group:GetID() ~= IconDragger.desticon.group:GetID() then
+			local destname = L["fGROUP"]:format(TMW:GetGroupName(IconDragger.desticon.group:GetID(), IconDragger.desticon.group:GetID(), 1))
 			name = L["ICONMENU_ANCHORTO"]:format(destname)
 			desc = L["ICONMENU_ANCHORTO_DESC"]:format(srcname, destname, destname, srcname)
 
-		elseif ID.destFrame and ID.destFrame:GetName() then
-			if ID.destFrame == WorldFrame and ID.srcicon.group.Point.relativeTo ~= "UIParent" then
+		elseif IconDragger.destFrame and IconDragger.destFrame:GetName() then
+			if IconDragger.destFrame == WorldFrame and IconDragger.srcicon.group.Point.relativeTo ~= "UIParent" then
 			
 				
-				local currentFrameName = ID.srcicon.group.Point.relativeTo
+				local currentFrameName = IconDragger.srcicon.group.Point.relativeTo
 				
 				local groupID = currentFrameName:match("^TellMeWhen_Group(%d+)")
 				local iconID = currentFrameName:match("^TellMeWhen_Group%d+_Icon(%d+)")
@@ -132,8 +132,8 @@ TMW.ID:RegisterIconDragHandler(30,	-- Anchor
 				name = L["ICONMENU_ANCHORTO_UIPARENT"]
 				desc = L["ICONMENU_ANCHORTO_UIPARENT_DESC"]:format(srcname, currentFrameName)
 
-			elseif ID.destFrame ~= WorldFrame then
-				local destname = ID.destFrame:GetName()
+			elseif IconDragger.destFrame ~= WorldFrame then
+				local destname = IconDragger.destFrame:GetName()
 				name = L["ICONMENU_ANCHORTO"]:format(destname)
 				desc = L["ICONMENU_ANCHORTO_DESC"]:format(srcname, destname, destname, srcname)
 			end
@@ -146,35 +146,35 @@ TMW.ID:RegisterIconDragHandler(30,	-- Anchor
 			return true
 		end
 	end,
-	function(ID)
-		if ID.desticon then
+	function(IconDragger)
+		if IconDragger.desticon then
 			-- we are anchoring to another TMW group, so dont operate on the same group.
-			if ID.desticon.group == ID.srcicon.group then
+			if IconDragger.desticon.group == IconDragger.srcicon.group then
 				return
 			end
 
 			-- set the setting
-			ID.srcicon.group.Point.relativeTo = ID.desticon.group:GetName()
+			IconDragger.srcicon.group.Point.relativeTo = IconDragger.desticon.group:GetName()
 		else
-			local name = ID.destFrame:GetName()
+			local name = IconDragger.destFrame:GetName()
 			-- we are anchoring to some other frame entirely.
-			if ID.destFrame == WorldFrame then
+			if IconDragger.destFrame == WorldFrame then
 				-- If it was dragged to WorldFrame then reset the anchor to UIParent (the text in the dropdown is custom for this circumstance)
 				name = "UIParent"
-			elseif ID.destFrame == ID.srcicon.group then
+			elseif IconDragger.destFrame == IconDragger.srcicon.group then
 				-- this should never ever ever ever ever ever ever ever ever happen.
 				return
-			elseif not ID.destFrame:GetName() then
+			elseif not IconDragger.destFrame:GetName() then
 				-- make sure it actually has a name
 				return
 			end
 
 			-- set the setting
-			ID.srcicon.group.Point.relativeTo = name
+			IconDragger.srcicon.group.Point.relativeTo = name
 		end
 
 		-- do adjustments and positioning
 		-- i cheat. we didnt really stop moving anything, but i'm going to hijack this function anyway.
-		stopMoving(ID.srcicon.group)
+		stopMoving(IconDragger.srcicon.group)
 	end
 )

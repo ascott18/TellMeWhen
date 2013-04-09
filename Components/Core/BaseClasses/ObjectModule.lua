@@ -90,8 +90,8 @@ end
 -- @param func [function|nil] A function that will be used a script handler. Pass nil to remove any inherited script handlers.
 -- @usage -- Example usage from IconModule_RecieveSpellDrags:
 --	Module:SetScriptHandler("OnReceiveDrag", function(Module, icon, button)
---		if not TMW.Locked and TMW.ID then
---			TMW.ID:SpellItemToIcon(icon)
+--		if not TMW.Locked and TMW.IE then
+--			TMW.IE:SpellItemToIcon(icon)
 --		end
 --	end)
 function ObjectModule:SetScriptHandler(script, func)
