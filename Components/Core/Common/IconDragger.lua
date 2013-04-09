@@ -241,7 +241,7 @@ IconDragger:RegisterIconDragHandler(40,	-- Split
 
 		-- adjustments and positioning
 		local p = gs.Point
-		p.point, p.relativeTo, p.relativePoint, p.x, p.y = IconDragger.texture:GetPoint(2)
+		p.point, p.relativeTo, p.relativePoint, p.x, p.y = IconDragger.DraggerFrame.texture:GetPoint(2)
 		
 		p.relativeTo = "UIParent"
 		
