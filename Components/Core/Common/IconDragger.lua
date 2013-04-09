@@ -228,6 +228,7 @@ IconDragger:RegisterIconDragHandler(40,	-- Split
 
 		-- restore the icon data of the source group
 		TMW.db.profile.Groups[IconDragger.srcicon.group:GetID()].Icons = SOURCE_ICONS
+		
 		-- now it is safe to error since we restored the old settings
 		assert(success, err)
 

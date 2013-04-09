@@ -61,7 +61,6 @@
 							<OnLoad>
 								self.wrapTooltips = 1
 								
-								--TODO: make sure this dropdown still works
 								self.initialize = TMW.TEXT.CopyString_DropDown
 							</OnLoad>
 						</Scripts>

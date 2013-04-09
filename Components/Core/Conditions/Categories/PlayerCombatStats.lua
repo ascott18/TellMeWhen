@@ -350,7 +350,6 @@ ConditionCategory:RegisterCondition(35,	 "MANAREGEN", {
 	icon = "Interface\\Icons\\spell_magic_managain",
 	tcoords = CNDT.COMMON.standardtcoords,
 	funcstr = [[GetManaRegen() c.Operator c.Level]], -- anyone know of an event that can be reliably listened to to get this?
-	-- events = EVENTS NEEDED FOR THIS!! TODO
 })
 ConditionCategory:RegisterCondition(36,	 "MANAREGENCOMBAT", {
 	text = MANA_REGEN_COMBAT,
@@ -361,6 +360,5 @@ ConditionCategory:RegisterCondition(36,	 "MANAREGENCOMBAT", {
 	icon = "Interface\\Icons\\spell_frost_summonwaterelemental",
 	tcoords = CNDT.COMMON.standardtcoords,
 	funcstr = [[select(2, GetManaRegen()) c.Operator c.Level]],
-	-- events = EVENTS NEEDED FOR THIS!! TODO
 })
 
