@@ -15,7 +15,8 @@
 <Script file="PlayerCombatStats_config.lua"/>
 
 <Script file="Currencies_config.lua"/>
-
-<Script file="Misc_config.lua"/> -->
+ -->
+ 
+<Script file="Misc_config.lua"/>
 
 </Ui>
