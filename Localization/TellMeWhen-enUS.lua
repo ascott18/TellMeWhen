@@ -1643,12 +1643,13 @@ L["CLEU_SPELL_CAST_START"] = "Spell Cast Start"
 L["CLEU_SPELL_CAST_START_DESC"] = [[Occurs when a spell begins casting.
 
 NOTE: To prevent potential abuse, Blizzard has excluded the destination unit from this event, so you cannot filter by it.]]
-L["CLEU_SPELL_CAST_SUCCESS"] = "Instant Spell Cast Success"
+
+L["CLEU_SPELL_CAST_SUCCESS"] = "Spell Cast Success"
 L["CLEU_SPELL_CAST_SUCCESS_DESC"] = [[Occurs when an instant cast spell.
 
-NOTE: Before Mists of Pandaria, this would track any spell cast success. Now, it only tracks instant casts.
-
 NOTE: To prevent potential abuse, Blizzard has excluded the destination unit from this event, so you cannot filter by it.]]
+--(CLEU_SPELL_CAST_SUCCESS_DESC) "NOTE: Before Mists of Pandaria, this would track any spell cast success. Now, it only tracks instant casts." -- doesnt seem to do this anymore
+
 L["CLEU_SPELL_DAMAGE"] = "Spell Damage"
 L["CLEU_SPELL_DAMAGE_DESC"] = [[Occurs when any spell does any damage.]]
 L["CLEU_SPELL_DAMAGE_CRIT"] = "Spell Crit"

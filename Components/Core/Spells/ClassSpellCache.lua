@@ -267,8 +267,12 @@ ClassSpellCache:RegisterEvent("PLAYER_REGEN_ENABLED", function()
 end)
 
 function ClassSpellCache:PLAYER_ENTERING_WORLD()
-	self:SendCommMessage(self.CONST.COMM_SLUG, self:Serialize("RCSL"), "RAID")
-	self:SendCommMessage(self.CONST.COMM_SLUG, self:Serialize("RCSL"), "PARTY")
+	if IsInRaid() then
+		self:SendCommMessage(self.CONST.COMM_SLUG, self:Serialize("RCSL"), "RAID")
+	end
+	if IsInGroup() then
+		self:SendCommMessage(self.CONST.COMM_SLUG, self:Serialize("RCSL"), "PARTY")
+	end
 	self:SendCommMessage(self.CONST.COMM_SLUG, self:Serialize("RCSL"), TMW.CONST.CHAT_TYPE_INSTANCE_CHAT)
 end
 

@@ -8,6 +8,7 @@
  ** Fixed an accidental inversion of the 1st param to TMW_LOCK_TOGGLED
  ** Replaced Blood Pact with Dark Intent for the IncreasedStamina equivalency.
  ** The "All Types" setting for Loss of Control icons should now work as intended.
+ ** Fixed: Components\IconModules\IconModule_Alpha\Alpha.lua:145 attempt to perform arithmetic on field "actualAlphaAtLastChange" (a nil value)
 
 ===v6.1.5===
  * Bug Fixes:

@@ -21,6 +21,7 @@ local huge = math.huge
 
 local Alpha = TMW:NewClass("IconModule_Alpha", "IconModule")
 Alpha.dontInherit = true
+Alpha.actualAlphaAtLastChange = 1
 
 Alpha:RegisterIconDefaults{
 	FakeHidden				= false,
