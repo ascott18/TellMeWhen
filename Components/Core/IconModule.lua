@@ -154,7 +154,7 @@ end
 -- @param func [function|false|nil]:
 -- * A function that will be called when the data of the {{{TMW.Classes.IconDataProcessor}}} has changed for the icon that an instance of this {{{TMW.Classes.IconModule}}} is implemented into, and if {{{TMW.Classes.IconModule.IsEnabled == true}}} for that instance. 
 -- * If false, the data listener for the {{{TMW.Classes.IconDataProcessor}}} will be removed from the module. 
--- * If nil, the function used will be {{{self[processorName]}}}. Signature of the function is {{{(icon, ...)}}}.
+-- * If nil, the function used will be {{{self[processorName]}}}. Signature of the function is {{{(icon, ...)}}} where the vararg represents each attribute handled by the {{{TMW.Classes.IconDataProcessor}}}.
 -- @usage
 -- -- Example usage from IconModule_Texture:
 --	function IconModule_Texture:TEXTURE(icon, texture)

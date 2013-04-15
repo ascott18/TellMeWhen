@@ -21,7 +21,7 @@ local L = LibStub("AceLocale-3.0"):GetLocale("TellMeWhen", true)
 TELLMEWHEN_VERSION = "6.2.0"
 TELLMEWHEN_VERSION_MINOR = strmatch(" @project-version@", " r%d+") or ""
 TELLMEWHEN_VERSION_FULL = TELLMEWHEN_VERSION .. TELLMEWHEN_VERSION_MINOR
-TELLMEWHEN_VERSIONNUMBER = 62020 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
+TELLMEWHEN_VERSIONNUMBER = 62021 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
 if TELLMEWHEN_VERSIONNUMBER > 63000 or TELLMEWHEN_VERSIONNUMBER < 62000 then return error("YOU SCREWED UP THE VERSION NUMBER OR DIDNT CHANGE THE SAFETY LIMITS") end -- safety check because i accidentally made the version number 414069 once
 
 TELLMEWHEN_MAXROWS = 20
@@ -257,6 +257,7 @@ function TMW.print(...)
 	return ...
 end
 local print = TMW.print
+
 function TMW:Debug(...)
 	if TMW.debug or not TMW.Initialized then
 		TMW.print(format(...))
@@ -660,16 +661,17 @@ do -- Iterators
 		end
 
 		local function next(t, state)
+			local orderedIndex = tables[t]
+			
 			if state == nil then
-
-				local key = tables[t][1]
+				local key = orderedIndex[1]
 				return key, t[key]
 			end
 
 			local key
-			for i = 1, #tables[t] do
-				if tables[t][i] == state then
-					key = tables[t][i+1]
+			for i = 1, #orderedIndex do
+				if orderedIndex[i] == state then
+					key = orderedIndex[i+1]
 					break
 				end
 			end
@@ -678,7 +680,7 @@ do -- Iterators
 				return key, t[key]
 			end
 
-			unused[#unused+1] = wipe(tables[t])
+			unused[#unused+1] = wipe(orderedIndex)
 			tables[t] = nil
 			return
 		end
@@ -1738,15 +1740,30 @@ end
 function TMW:OnCommReceived(prefix, text, channel, who)
 	if prefix == "TMWV" and strsub(text, 1, 1) == "M" and not TMW.VersionWarned and TMW.db.global.VersionWarning then
 		local major, minor, revision = strmatch(text, "M:(.*)%^m:(.*)%^R:(.*)%^")
-		TMW:Debug("%s has v%s%s (%s)", who, major, minor, revision)
 		revision = tonumber(revision)
-		if not (revision and major and minor and revision > TELLMEWHEN_VERSIONNUMBER and revision ~= 414069) then
-			return
-		elseif not ((minor == "" and who ~= "Cybeloras") or (tonumber(strsub(revision, 1, 3)) > tonumber(strsub(TELLMEWHEN_VERSIONNUMBER, 1, 3)) + 1)) then
+		
+		TMW:Debug("%s has v%s%s (%s)", who, major, minor, revision)
+		
+		if
+			not (revision and major and minor)
+			or revision <= TELLMEWHEN_VERSIONNUMBER
+			or revision == 414069
+			or (who == "Cybeloras" and not TMW.debug)
+			or minor ~= "" and TELLMEWHEN_VERSION_MINOR == ""
+		then
+			-- If some of the data is missing (i dont know why it would be),
+			-- or if the notified revision is less than the currently installed revision,
+			-- or if the notified revision is 414069 (the time I fucked up the version number),
+			-- or if the notification is from me (Cybeloras),
+			-- or if the notification is from an alpha version and the installed version is not an alpha version,
+			-- then don't notify.
 			return
 		end
+		
 		TMW.VersionWarned = true
 		TMW:Printf(L["NEWVERSION"], major .. minor)
+		
+	-- Handles data transmission (icons, groups, profiles, etc)
 	elseif prefix == "TMW" and TMW.db.profile.ReceiveComm then
 		TMW.Received = TMW.Received or {}
 		TMW.Received[text] = who or true
@@ -2907,15 +2924,22 @@ end
 function TMW:PLAYER_ENTERING_WORLD()
 	TMW.EnteredWorld = true
 	
+	-- Don't send version broadcast messages in developer mode.
 	if not TMW.debug then
-		-- Don't send version broadcast messages in developer mode.
+		local versionCommString = "M:" .. TELLMEWHEN_VERSION .. "^m:" .. TELLMEWHEN_VERSION_MINOR .. "^R:" .. TELLMEWHEN_VERSIONNUMBER .. "^"
 		
 		if IsInGuild() then
-			TMW:SendCommMessage("TMWV", "M:" .. TELLMEWHEN_VERSION .. "^m:" .. TELLMEWHEN_VERSION_MINOR .. "^R:" .. TELLMEWHEN_VERSIONNUMBER .. "^", "GUILD")
+			TMW:SendCommMessage("TMWV", versionCommString, "GUILD")
 		end
-		TMW:SendCommMessage("TMWV", "M:" .. TELLMEWHEN_VERSION .. "^m:" .. TELLMEWHEN_VERSION_MINOR .. "^R:" .. TELLMEWHEN_VERSIONNUMBER .. "^", "RAID")
-		TMW:SendCommMessage("TMWV", "M:" .. TELLMEWHEN_VERSION .. "^m:" .. TELLMEWHEN_VERSION_MINOR .. "^R:" .. TELLMEWHEN_VERSIONNUMBER .. "^", "PARTY")
-		TMW:SendCommMessage("TMWV", "M:" .. TELLMEWHEN_VERSION .. "^m:" .. TELLMEWHEN_VERSION_MINOR .. "^R:" .. TELLMEWHEN_VERSIONNUMBER .. "^", TMW.CONST.CHAT_TYPE_INSTANCE_CHAT)
+		if IsInRaid() then
+			TMW:SendCommMessage("TMWV", versionCommString, "RAID")
+		end
+		if IsInGroup() then
+			TMW:SendCommMessage("TMWV", versionCommString, "PARTY")
+		end
+		if IsInInstance() then
+			TMW:SendCommMessage("TMWV", versionCommString, TMW.CONST.CHAT_TYPE_INSTANCE_CHAT)
+		end
 	end
 end
 

@@ -23,8 +23,12 @@ local CurrentSourceOrDestinationHandler
 local SharableDataType = TMW:NewClass("SharableDataType")
 SharableDataType.types = {}
 
-function SharableDataType:OnNewInstance(type)
+function SharableDataType:OnNewInstance(type, order)
+	TMW:ValidateType("2 (type)", "SharableDataType:New(type, order)", type, "string")
+	TMW:ValidateType("3 (order)", "SharableDataType:New(type, order)", order, "number")
+	
 	self.type = type
+	self.order = order
 	SharableDataType.types[type] = self
 	self.MenuBuilders = {}
 end
@@ -48,11 +52,11 @@ end
 
 
 ---------- Database ----------
-local database = SharableDataType:New("database")
+local database = SharableDataType:New("database", 0)
 function database:Import_BuildContainingDropdownEntry(result)
 	-- this is currently unused. Do something with it if it ever does get used
 	--(but it is unlikely that i will ever use it)
-	
+	error("UNIMPLEMENTED!")
 	local info = UIDropDownMenu_CreateInfo()
 	info.text = L["<DATABASE>"]
 	info.value = result
@@ -77,7 +81,7 @@ end
 
 
 ---------- Profile ----------
-local profile = SharableDataType:New("profile")
+local profile = SharableDataType:New("profile", 10)
 
 function profile:Import_ImportData(editbox, data, version, noOverwrite)
 	if noOverwrite then -- noOverwrite is a name in this case.
@@ -219,7 +223,7 @@ end
 
 
 ---------- Group ----------
-local group = SharableDataType:New("group")
+local group = SharableDataType:New("group", 20)
 local NUM_GROUPS_PER_SUBMENU = 10
 
 
@@ -382,36 +386,6 @@ group:RegisterMenuBuilder(1, function(self, result, editbox)
 	UIDropDownMenu_AddButton(info, UIDROPDOWNMENU_MENU_LEVEL)
 end)
 
-group:RegisterMenuBuilder(10, function(self, result, editbox)
-	local groupID = result[1]
-	local gs = result.data
-	local IMPORTS, EXPORTS = editbox:GetAvailableImportExportTypes()
-
-	-- copy group position
-	local info = UIDropDownMenu_CreateInfo()
-	info.text = L["COPYGROUP"] .. " - " .. L["COPYPOSSCALE"]
-	info.func = function()
-		CloseDropDownMenus()
-		local destgroupID = IMPORTS.group_overwrite
-		local destgs = TMW.db.profile.Groups[destgroupID]
-		
-		-- Restore all default settings first.
-		-- Not a special table (["**"]), so just normally copy it.
-		-- Setting it nil won't recreate it like other settings tables, so re-copy from defaults.
-		destgs.Point = CopyTable(TMW.Group_Defaults.Point)
-		
-		TMW:CopyTableInPlaceWithMeta(gs.Point, destgs.Point, true)
-
-		destgs.Scale = gs.Scale or TMW.Group_Defaults.Scale
-		destgs.Level = gs.Level or TMW.Group_Defaults.Level
-		
-		TMW[destgroupID]:Setup()
-	end
-	info.notCheckable = true
-	info.disabled = not IMPORTS.group_overwrite
-	UIDropDownMenu_AddButton(info, UIDROPDOWNMENU_MENU_LEVEL)
-end)
-
 group:RegisterMenuBuilder(20, function(self, result, editbox)
 	local groupID = result[1]
 	local gs = result.data
@@ -459,7 +433,7 @@ end
 
 
 ---------- Icon ----------
-local icon = SharableDataType:New("icon")
+local icon = SharableDataType:New("icon", 30)
 local NUM_ICONS_PER_SUBMENU = 10
 
 function icon:Import_ImportData(editbox, data, version)
@@ -837,6 +811,9 @@ end
 -- -----------------------
 -- EXPORT DESTINATIONS
 -- -----------------------
+local function DestinationsOrderedSort(a, b)
+	return SharableDataType.instances[a].order < SharableDataType.instances[b].order
+end
 
 local ExportDestination = TMW:NewClass("ExportDestination")
 ExportDestination.types = {}
@@ -847,7 +824,7 @@ end
 function ExportDestination:HandleTopLevelMenu(editbox)
 	local IMPORTS, EXPORTS = editbox:GetAvailableImportExportTypes()
 	
-	for k, dataType in pairs(SharableDataType.instances) do
+	for k, dataType in TMW:OrderedPairs(SharableDataType.instances, DestinationsOrderedSort) do
 		if EXPORTS[dataType.type] then
 			local info = UIDropDownMenu_CreateInfo()
 			info.tooltipText = self.Export_DescriptionPrepend
@@ -861,7 +838,7 @@ function ExportDestination:HandleTopLevelMenu(editbox)
 			dataType:Export_SetButtonAttributes(editbox, info)
 			
 			-- Color everything before the first colon a light blue (highlights the type of data being exported, for clarity)
-			info.text = info.text:gsub("^(.-):", "|cff7fffff%1|r:")
+			info.text = info.text:gsub("^(.-):", "|cff00ffff%1|r:")
 			
 			info.func = function()
 				self:Export(dataType:Export_GetArgs(editbox, info))--editbox, type, settings, defaults, ...

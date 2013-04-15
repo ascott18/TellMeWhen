@@ -1107,7 +1107,7 @@ end)
 -- IMPORT/EXPORT
 -- -------------------
 
-local textlayout = TMW.Classes.SharableDataType:New("textlayout")
+local textlayout = TMW.Classes.SharableDataType:New("textlayout", 15)
 
 function textlayout:Import_ImportData(_, data, version, GUID)
 	assert(type(GUID) == "string")
