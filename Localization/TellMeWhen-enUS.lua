@@ -1059,6 +1059,22 @@ For more help, go to http://www.wowpedia.org/Making_a_macro]]
 L["MACROCONDITION_EB_DESC"] = "If using a single condition, opening and closing brackets are optional. Brackets are required if using multiple conditionals."
 L["MOUSEOVERCONDITION"] = "Mouse is Over"
 L["MOUSEOVERCONDITION_DESC"] = "This condition checks if your mouse is over the icon or group that the condition is attached to."
+L["CONDITION_WEEKDAY"] = "Weekday"
+L["CONDITION_WEEKDAY_DESC"] = [[Checks the current weekday.
+
+The time checked is your local time, based off your computer's clock. It does not check against server time.]]
+L["CONDITION_TIMEOFDAY"] = "Time of Day"
+L["CONDITION_TIMEOFDAY_DESC"] = [[The condition checks the current time of day.
+
+The time checked is your local time, based off your computer's clock. It does not check against server time.]]
+L["CONDITION_QUESTCOMPLETE"] = "Quest Complete"
+L["CONDITION_QUESTCOMPLETE_DESC"] = "Checks if a quest is completed."
+L["QUESTIDTOCHECK"] = "QuestID to Check"
+L["CONDITION_QUESTCOMPLETE_EB_DESC"] = [[Enter the questID of the quest that you wish to check.
+
+QuestIDs can be obtained from the URL when viewing the quest on a database site like Wowhead.
+
+E.g The questID for http://www.wowhead.com/quest=28716/heros-call-twilight-highlands is 28716]]
 L["NOTINRANGE"] = "Not in range"
 L["INRANGE"] = "In range"
 

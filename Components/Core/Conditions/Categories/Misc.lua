@@ -17,6 +17,8 @@ local TMW = TMW
 local L = TMW.L
 local print = TMW.print
 
+local date = date
+
 local CNDT = TMW.CNDT
 local Env = CNDT.Env
 
@@ -81,6 +83,7 @@ ConditionCategory:RegisterCondition(1,	 "ICON", {
 
 
 ConditionCategory:RegisterSpacer(1.1)
+
 
 local function RegisterShownHiddenTimerCallback()
 	TMW:RegisterCallback(TMW.Classes.IconDataProcessor.ProcessorsByName.REALALPHA.changedEvent, function(event, icon, realAlpha, oldalpha)
@@ -155,7 +158,9 @@ ConditionCategory:RegisterCondition(1.3,	"ICONHIDDENTME", {
 	end,
 })
 
+
 ConditionCategory:RegisterSpacer(1.5)
+
 
 ConditionCategory:RegisterCondition(2,	 "MACRO", {
 	text = L["MACROCONDITION"],
@@ -196,7 +201,112 @@ ConditionCategory:RegisterCondition(3,	 "MOUSEOVER", {
 	-- events = -- there is no good way to handle events for this condition
 })
 
-ConditionCategory:RegisterCondition(4,	 "LUA", {
+
+ConditionCategory:RegisterSpacer(10)
+
+
+ConditionCategory:RegisterCondition(11,	 "WEEKDAY", {
+	text = L["CONDITION_WEEKDAY"],
+	tooltip = L["CONDITION_WEEKDAY_DESC"],
+	min = 1,
+	max = 7,
+	texttable = function(k)
+		-- July 2012 started on a sunday, so we can represent the day as (k) to get the weekday easily.
+		return date("%A", time{year=2012, month=7, day=k, hour=0} )
+	end,
+	unit = false,
+	icon = "Interface\\Icons\\Spell_Nature_TimeStop",
+	tcoords = CNDT.COMMON.standardtcoords,
+	Env = {
+		date = date,
+	},
+	funcstr = function(c, parent)
+		return [[tonumber(date("%w")) + 1 c.Operator c.Level]]
+	end,
+	events = "false",
+	anticipate = function(c)
+		-- This is kinda horrible, but calculating the exact time until the day changes over takes more CPU.
+		-- Just make sure the condition updates at least once per minute. That is infrequent enough to not matter at all.
+		return [[VALUE = time + 60]]
+	end,
+})
+
+ConditionCategory:RegisterCondition(12,	 "TIMEOFDAY", {
+	text = L["CONDITION_TIMEOFDAY"],
+	tooltip = L["CONDITION_TIMEOFDAY_DESC"],
+	min = 0,
+	max = 24*60-1,
+	texttable = function(k)
+		return GameTime_GetFormattedTime(floor(k/60), k%60, true)
+		--return CNDT.COMMON.formatSeconds(k*60)
+	end,
+	unit = false,
+	icon = "Interface\\Icons\\Ability_Racial_TimeIsMoney",
+	tcoords = CNDT.COMMON.standardtcoords,
+	Env = {
+		GetDaysElapsedMinutes = function()
+			local h, m = strsplit(" ", date("%H %M"))
+			local h, m = tonumber(h), tonumber(m)
+			
+			return h*60 + m
+		end,
+	},
+	funcstr = function(c, parent)
+		return [[GetDaysElapsedMinutes() c.Operator c.Level]]
+	end,
+	events = "false",
+	anticipate = function(c)
+		-- This is kinda horrible, but calculating the exact time until the minute changes over takes more CPU.
+		-- Just make sure the condition updates at least once per 10 seconds. That is infrequent enough to not matter at all.
+		return [[VALUE = time + 10]]
+	end,
+})
+
+
+ConditionCategory:RegisterSpacer(19.5)
+
+
+ConditionCategory:RegisterCondition(21,	 "QUESTCOMPLETE", {
+	text = L["CONDITION_QUESTCOMPLETE"],
+	tooltip = L["CONDITION_QUESTCOMPLETE_DESC"],
+	min = 0,
+	max = 1,
+	texttable = CNDT.COMMON.bool,
+	nooperator = true,
+	name = function(editbox) TMW:TT(editbox, "CONDITION_QUESTCOMPLETE", "CONDITION_QUESTCOMPLETE_EB_DESC") editbox.label = L["QUESTIDTOCHECK"] end,
+	unit = false,
+	icon = "Interface\\Icons\\inv_misc_punchcards_yellow",
+	tcoords = CNDT.COMMON.standardtcoords,
+	Env = {
+		IsQuestFlaggedCompleted = IsQuestFlaggedCompleted,
+		GetQuestResetTime = GetQuestResetTime,
+	},
+	funcstr = function(c)
+		if c.Name ~= "" then
+			return [[IsQuestFlaggedCompleted(c.NameFirst) == c.1nil]]
+		else
+			return [[false]]
+		end
+	end,
+	events = function(ConditionObject, c)
+		return
+			ConditionObject:GenerateNormalEventString("PLAYER_ENTERING_WORLD"),
+			ConditionObject:GenerateNormalEventString("QUEST_FINISHED"),
+			ConditionObject:GenerateNormalEventString("QUEST_LOG_UPDATE")
+	end,
+	anticipate = function(c)
+		return [[VALUE = time + GetQuestResetTime()]]
+	end,
+	
+	
+	-- events = TODO: find events
+})
+
+
+ConditionCategory:RegisterSpacer(29.5)
+
+
+ConditionCategory:RegisterCondition(30,	 "LUA", {
 	text = L["LUACONDITION"],
 	tooltip = L["LUACONDITION_DESC"],
 	min = 0,

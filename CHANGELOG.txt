@@ -2,6 +2,12 @@
  * New condition: NPC ID.
  * Mass refactoring has taken place. You will need to restart WoW when upgrading to this version of TellMeWhen.
  * Multi-state Cooldown icons can now keep track of spell charges.
+ 
+ * New Conditions:
+ ** Weekday
+ ** Time of Day
+ ** Quest Complete
+ 
  * Bug Fixes:
  ** The IncreasedStats equivalency should now always properly check for the Legacy of the Emperor buff
  ** Groups being moved (dragged around) should now much  more reliably detatch from your cursor when they are supposed to.

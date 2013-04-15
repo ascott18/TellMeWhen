@@ -219,3 +219,4 @@ TMW.Classes.SharableDataType.types.group:RegisterMenuBuilder(10, function(self, 
 	info.disabled = not IMPORTS.group_overwrite
 	UIDropDownMenu_AddButton(info, UIDROPDOWNMENU_MENU_LEVEL)
 end)
+
