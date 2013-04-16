@@ -212,7 +212,7 @@ ConditionCategory:RegisterCondition(11,	 "WEEKDAY", {
 	max = 7,
 	texttable = function(k)
 		-- July 2012 started on a sunday, so we can represent the day as (k) to get the weekday easily.
-		return date("%A", time{year=2012, month=7, day=k, hour=0} )
+		return _G["WEEKDAY_" .. date("%A", time{year=2012, month=7, day=k, hour=0}):upper() ]
 	end,
 	unit = false,
 	icon = "Interface\\Icons\\Spell_Nature_TimeStop",
