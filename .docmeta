@@ -36,17 +36,17 @@
     output-directory: "API/Base Classes"
 -
     type: luadoc
-    input-files: "Components/Core/Conditions/ConditionObject.lua"
+    input-file: "Components/Core/Conditions/ConditionObject.lua"
     output-directory: "API/Conditions/API Documentation"
 -
     type: luadoc
-    input-files: "Components/Core/Conditions/ConditionCategory.lua"
+    input-file: "Components/Core/Conditions/ConditionCategory.lua"
     output-directory: "API/Conditions/API Documentation"
 -
     type: luadoc
-    input-files: "Components/Core/Conditions/ConditionObjectConstructor.lua"
+    input-file: "Components/Core/Conditions/ConditionObjectConstructor.lua"
     output-directory: "API/Conditions/API Documentation"
 -
-    type: luadoc
-    input-files: "Documentation/Conditions/ConditionDataSpecification.txt"
+    type: wikicreole
+    input-file: "Documentation/Conditions/ConditionDataSpecification.txt"
     output-page: "API/Conditions/API Documentation/Condition Data Specification"
