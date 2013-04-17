@@ -21,7 +21,7 @@ local L = LibStub("AceLocale-3.0"):GetLocale("TellMeWhen", true)
 TELLMEWHEN_VERSION = "6.2.0"
 TELLMEWHEN_VERSION_MINOR = strmatch(" @project-version@", " r%d+") or ""
 TELLMEWHEN_VERSION_FULL = TELLMEWHEN_VERSION .. TELLMEWHEN_VERSION_MINOR
-TELLMEWHEN_VERSIONNUMBER = 62023 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
+TELLMEWHEN_VERSIONNUMBER = 62024 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
 if TELLMEWHEN_VERSIONNUMBER > 63000 or TELLMEWHEN_VERSIONNUMBER < 62000 then return error("YOU SCREWED UP THE VERSION NUMBER OR DIDNT CHANGE THE SAFETY LIMITS") end -- safety check because i accidentally made the version number 414069 once
 
 TELLMEWHEN_MAXROWS = 20
@@ -1077,9 +1077,7 @@ do -- Class Lib
 			
 			local func = lineOne:match("in function `(.*)'")
 			local caller = lineTwo:match("in function `(.*)'")
-			
-			print(debugstack(2))
-			
+						
 			if not self[caller] then
 				local method = self.className .. ":" .. func .. "()"
 				local out = method .. " is a protected method and can only be called by methods within its own class."

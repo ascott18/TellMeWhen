@@ -21,7 +21,7 @@ local CNDT = TMW.CNDT
 
 
 --- A {{{TMW.Classes.ConditionCategory}}} provides an interface for registering condition types.
---
+-- 
 -- It should not be directly instantiated - use CNDT:GetCategory() to get or create a category.
 -- 
 -- @class file

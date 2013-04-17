@@ -27,6 +27,7 @@ local huge = math.huge
 
 --- A {{{TMW.Classes.ConditionObject}}} represents a group of individual conditions. 
 -- 
+-- 
 -- It stores state information about them and provides methods for keeping them properly updated. ConditionObjects should not be manually instantiated - you should use {{{CNDT:GetConditionObject()}}} or {{{ConditionObjectConstructor:Construct()}}} (which wraps {{{CNDT:GetConditionObject()}}}) instead. 
 -- 
 -- Only the methods documented here may be called outside of the conditions core.

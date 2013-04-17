@@ -46,7 +46,7 @@ The funcstr field is the only one that is required required. Errors may happen w
 * percent
 ** [Boolean] Set to true if the condition is checking a percentage value. The {{{c.Level}}} substitution in {{{funcstr}}} will be the slider level divided by 100. If used, {{{min}}} should be set to 0 and {{{max}}} to 100.
 
-=== Absolute Min/Max:
+=== Absolute Min/Max
 * min
 ** [Function>|Table>|Number] Minimum slider value.
 ** Decimal amounts can cause unpredictable behavior based on Icon Editor scale & screen resolution, so stick to integers.
@@ -195,7 +195,7 @@ end<</code>>
 
 
 
-=== Funcstr Substitutions
+=== Funcstr/Anticipate Substitutions
 * "c.Level"
 ** Represents the raw numeric value of the slider. The substituted value will have been divided by 100 if the {{{percent}}} field is set to true.
 
