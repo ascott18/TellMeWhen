@@ -37,15 +37,15 @@
 -
     type: luadoc
     input-file: "Components/Core/Conditions/ConditionObject.lua"
-    output-directory: "API/Conditions/API Documentation"
+    output-page: "API/Conditions/API Documentation/ConditionObject"
 -
     type: luadoc
     input-file: "Components/Core/Conditions/ConditionCategory.lua"
-    output-directory: "API/Conditions/API Documentation"
+    output-page: "API/Conditions/API Documentation/ConditionCategory"
 -
     type: luadoc
     input-file: "Components/Core/Conditions/ConditionObjectConstructor.lua"
-    output-directory: "API/Conditions/API Documentation"
+    output-page: "API/Conditions/API Documentation/ConditionObjectConstructor"
 -
     type: wikicreole
     input-file: "Documentation/Conditions/ConditionDataSpecification.txt"
