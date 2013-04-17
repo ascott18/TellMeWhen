@@ -47,6 +47,6 @@
     input-file: "Components/Core/Conditions/ConditionObjectConstructor.lua"
     output-page: "API/Conditions/API Documentation/ConditionObjectConstructor"
 -
-    type: wikicreole
+    type: creole
     input-file: "Documentation/Conditions/ConditionDataSpecification.txt"
     output-page: "API/Conditions/API Documentation/Condition Data Specification"
