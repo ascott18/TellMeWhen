@@ -57,6 +57,32 @@ Icon.QueuedIcons = {}
 Icon.NextUpdateTime = math.huge
 local QueuedIcons = Icon.QueuedIcons
 
+
+TMW.CNDT:RegisterConditionImplementingClass("Icon")
+TMW.CNDT:RegisterConditionSet("Icon", {
+	parentSettingType = "icon",
+	parentDefaults = TMW.Icon_Defaults,
+	
+	settingKey = "Conditions",
+	GetSettings = function(self)
+		if TMW.CI.ics then
+			return TMW.CI.ics.Conditions
+		end
+	end,
+	
+	iterFunc = TMW.InIconSettings,
+	iterArgs = {
+		[1] = TMW,
+	},
+	
+	GetTab = function(self)
+		return TMW.IE.IconConditionTab
+	end,
+	tabText = L["CONDITIONS"],
+	tabTooltip = L["ICONCONDITIONS_DESC"],
+})
+
+
 -- [INTERNAL]
 function Icon.OnNewInstance(icon, ...)	
 	local _, name, group, _, iconID = ... -- the CreateFrame args
@@ -199,26 +225,26 @@ end
 -- @paramsig eventInfo
 -- @param eventInfo [string|table] Either a string that identifies the event (as registered with {{{TMW.Classes.IconComponent}}}{{{:RegisterIconEvent()}}}) that will be fired (all events of that type will be attempted to be fire), or a table of event settings that is in {{{icon:GetSettings().Events}}} (only that specific event and its settings will be fired). The event will not actually be fired until {{{icon:ProcessQueuedEvents()}}} is called.
 -- @usage -- From IconDataProcessor_Alpha_Real: (An example of calling by passing an event identifier)
---	if icon.EventHandlersSet.OnHide then
---		icon:QueueEvent("OnHide")
---	end
+--  if icon.EventHandlersSet.OnHide then
+--    icon:QueueEvent("OnHide")
+--  end
 -- 
 -- 
 -- -- From IconModule_IconEventConditionHandler: (An example of calling by passing in an eventSettings table)
---	local function TMW_CNDT_OBJ_PASSING_CHANGED(event, ConditionObject, failed)
---		if not failed then
---			local matches = MapConditionObjectToEventSettings[ConditionObject]
---			-- MapConditionObjectToEventSettings maps TMW.CLasses.ConditionObject instances to the eventSettings they were created for
---			-- matches is a table that contains {[eventSettings] = icon} pairs. These tables were setup in the module's :OnEnable() method.
---			-- See IconModule_IconEventConditionHandler's code for complete implementation.
---			if matches then
---				for eventSettings, icon in pairs(matches) do
---					icon:QueueEvent(eventSettings)
---					icon:ProcessQueuedEvents()
---				end
---			end
---		end
---	end
+--  local function TMW_CNDT_OBJ_PASSING_CHANGED(event, ConditionObject, failed)
+--    if not failed then
+--      local matches = MapConditionObjectToEventSettings[ConditionObject]
+--      -- MapConditionObjectToEventSettings maps TMW.CLasses.ConditionObject instances to the eventSettings they were created for.
+--      -- matches is a table that contains {[eventSettings] = icon} pairs. These tables were setup in the module's :OnEnable() method.
+--      -- See IconModule_IconEventConditionHandler's code for complete implementation.
+--      if matches then
+--        for eventSettings, icon in pairs(matches) do
+--          icon:QueueEvent(eventSettings)
+--          icon:ProcessQueuedEvents()
+--        end
+--      end
+--    end
+--  end
 function Icon.QueueEvent(icon, eventInfo)
 	icon.EventsToFire[eventInfo] = true
 	icon.eventIsQueued = true
@@ -924,25 +950,25 @@ end})
 -- @param signature [string] A semicolon-delimited string of attribute strings as passed to the constructor of a {{{TMW.Classes.IconDataProcessor}}}.
 -- @param ... [...] Any number of params that will match up one-for-one with the signature passed in.
 -- @usage icon:SetInfo("texture", "Interface\\AddOns\\TellMeWhen\\Textures\\Disabled")
---	
---	-- From IconTypes/IconType_wpnenchant:
---	icon:SetInfo("alpha; start, duration; spell",
---		icon.UnAlpha,
---		0, 0,
---		nil
---	)
+--  
+--  -- From IconTypes/IconType_wpnenchant:
+--  icon:SetInfo("alpha; start, duration; spell",
+--    icon.UnAlpha,
+--    0, 0,
+--    nil
+--  )
 -- 
---	-- From IconTypes/IconType_multistate:
---	icon:SetInfo("alpha; texture; start, duration; charges, maxCharges; stack, stackText; spell; inRange; noMana",
---		icon.UnAlpha,
---		GetActionTexture(Slot) or "Interface\\Icons\\INV_Misc_QuestionMark",
---		start, duration,
---		charges, maxCharges,
---		stack, stack,
---		spellID,
---		inrange,
---		nomana
---	)
+--  -- From IconTypes/IconType_multistate:
+--  icon:SetInfo("alpha; texture; start, duration; charges, maxCharges; stack, stackText; spell; inRange; noMana",
+--    icon.UnAlpha,
+--    GetActionTexture(Slot) or "Interface\\Icons\\INV_Misc_QuestionMark",
+--    start, duration,
+--    charges, maxCharges,
+--    stack, stack,
+--    spellID,
+--    inrange,
+--    nomana
+--  )
 function Icon.SetInfo(icon, signature, ...)
 	SetInfoFuncs[signature](icon, ...)
 end
@@ -976,27 +1002,27 @@ end})
 -- @see Icon:SetInfo()
 -- @returns [boolean] If true, and if SetInfo_INTERNAL is being called from within the body of an {{{TMW.Classes.IconDataProcessorHook}}}, {{{doFireIconUpdated}}} (local variable within the {{{icon:SetInfo()}}} method) should be set to true.
 -- @usage -- An example from Components/Core/IconDataProcessors/IconDataProcessor_Unit_DogTag/Unit_DogTag.lua:
---	Hook:RegisterCompileFunctionSegmentHook("post", function(Processor, t)
---		t[#t+1] = [[
---		local dogTagUnit
---		
---		if icon.typeData.unitType == "unitid" then
---			dogTagUnit = unit
---			if not DogTag.IsLegitimateUnit[dogTagUnit] then
---				dogTagUnit = dogTagUnit and TMW_UNITS:TestUnit(dogTagUnit)
---				if not DogTag.IsLegitimateUnit[dogTagUnit] then
---					dogTagUnit = "player"
---				end
---			end
---		else
---			dogTagUnit = "player"
---		end
---		
---		if attributes.dogTagUnit ~= dogTagUnit then
---			doFireIconUpdated = icon:SetInfo_INTERNAL("dogTagUnit", dogTagUnit) or doFireIconUpdate
---		end
---		--]]
---	end)
+--  Hook:RegisterCompileFunctionSegmentHook("post", function(Processor, t)
+--    t[#t+1] = [[
+--    local dogTagUnit
+--    
+--    if icon.typeData.unitType == "unitid" then
+--      dogTagUnit = unit
+--      if not DogTag.IsLegitimateUnit[dogTagUnit] then
+--        dogTagUnit = dogTagUnit and TMW_UNITS:TestUnit(dogTagUnit)
+--        if not DogTag.IsLegitimateUnit[dogTagUnit] then
+--          dogTagUnit = "player"
+--        end
+--      end
+--    else
+--      dogTagUnit = "player"
+--    end
+--    
+--    if attributes.dogTagUnit ~= dogTagUnit then
+--      doFireIconUpdated = icon:SetInfo_INTERNAL("dogTagUnit", dogTagUnit) or doFireIconUpdate
+--    end
+--    --]]
+--  end)
 function Icon.SetInfo_INTERNAL(icon, signature, ...)
 	SetInfoInternalFuncs[signature](icon, ...)
 end

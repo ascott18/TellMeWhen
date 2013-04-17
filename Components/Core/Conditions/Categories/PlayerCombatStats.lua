@@ -39,7 +39,6 @@ local ConditionCategory = CNDT:GetCategory("STATS", 6, L["CNDTCAT_STATS"], true,
 
 ConditionCategory:RegisterCondition(1,	 "STRENGTH", {
 	text = _G["SPELL_STAT1_NAME"],
-	category = L["CNDTCAT_STATS"],
 	range = 5000,
 	unit = PLAYER,
 	texttable = CNDT.COMMON.commanumber,
@@ -53,7 +52,6 @@ ConditionCategory:RegisterCondition(1,	 "STRENGTH", {
 })
 ConditionCategory:RegisterCondition(2,	 "AGILITY", {
 	text = _G["SPELL_STAT2_NAME"],
-	category = L["CNDTCAT_STATS"],
 	range = 5000,
 	unit = PLAYER,
 	texttable = CNDT.COMMON.commanumber,
@@ -67,7 +65,6 @@ ConditionCategory:RegisterCondition(2,	 "AGILITY", {
 })
 ConditionCategory:RegisterCondition(3,	 "STAMINA", {
 	text = _G["SPELL_STAT3_NAME"],
-	category = L["CNDTCAT_STATS"],
 	range = 5000,
 	unit = PLAYER,
 	texttable = CNDT.COMMON.commanumber,
@@ -81,7 +78,6 @@ ConditionCategory:RegisterCondition(3,	 "STAMINA", {
 })
 ConditionCategory:RegisterCondition(4,	 "INTELLECT", {
 	text = _G["SPELL_STAT4_NAME"],
-	category = L["CNDTCAT_STATS"],
 	range = 5000,
 	unit = PLAYER,
 	texttable = CNDT.COMMON.commanumber,
@@ -95,7 +91,6 @@ ConditionCategory:RegisterCondition(4,	 "INTELLECT", {
 })
 ConditionCategory:RegisterCondition(5,	 "SPIRIT", {
 	text = _G["SPELL_STAT5_NAME"],
-	category = L["CNDTCAT_STATS"],
 	range = 5000,
 	unit = PLAYER,
 	texttable = CNDT.COMMON.commanumber,
@@ -109,7 +104,6 @@ ConditionCategory:RegisterCondition(5,	 "SPIRIT", {
 })
 ConditionCategory:RegisterCondition(6,	 "MASTERY", {
 	text = STAT_MASTERY,
-	category = L["CNDTCAT_STATS"],
 	min = 0,
 	max = 100,
 	unit = PLAYER,
@@ -127,7 +121,6 @@ ConditionCategory:RegisterSpacer(10)
 local UnitAttackPower = UnitAttackPower
 ConditionCategory:RegisterCondition(11,	 "MELEEAP", {
 	text = MELEE_ATTACK_POWER,
-	category = L["CNDTCAT_STATS"],
 	range = 5000,
 	unit = PLAYER,
 	texttable = CNDT.COMMON.commanumber,
@@ -148,7 +141,6 @@ ConditionCategory:RegisterCondition(11,	 "MELEEAP", {
 
 ConditionCategory:RegisterCondition(12,	 "MELEECRIT", {
 	text = L["MELEECRIT"],
-	category = L["CNDTCAT_STATS"],
 	percent = true,
 	texttable = CNDT.COMMON.pluspercent,
 	min = 0,
@@ -164,7 +156,6 @@ ConditionCategory:RegisterCondition(12,	 "MELEECRIT", {
 })
 ConditionCategory:RegisterCondition(13,	 "MELEEHASTE", {
 	text = L["MELEEHASTE"],
-	category = L["CNDTCAT_STATS"],
 	percent = true,
 	texttable = CNDT.COMMON.pluspercent,
 	min = 0,
@@ -180,7 +171,6 @@ ConditionCategory:RegisterCondition(13,	 "MELEEHASTE", {
 })
 ConditionCategory:RegisterCondition(14,	 "EXPERTISE", {
 	text = _G["COMBAT_RATING_NAME"..CR_EXPERTISE],
-	category = L["CNDTCAT_STATS"],
 	min = 0,
 	max = 100,
 	unit = PLAYER,
@@ -197,7 +187,6 @@ ConditionCategory:RegisterSpacer(20)
 
 ConditionCategory:RegisterCondition(21,	 "RANGEAP", {
 	text = RANGED_ATTACK_POWER,
-	category = L["CNDTCAT_STATS"],
 	range = 5000,
 	unit = PLAYER,
 	texttable = CNDT.COMMON.commanumber,
@@ -211,7 +200,6 @@ ConditionCategory:RegisterCondition(21,	 "RANGEAP", {
 })
 ConditionCategory:RegisterCondition(22,	 "RANGEDCRIT", {
 	text = L["RANGEDCRIT"],
-	category = L["CNDTCAT_STATS"],
 	percent = true,
 	texttable = CNDT.COMMON.pluspercent,
 	min = 0,
@@ -227,7 +215,6 @@ ConditionCategory:RegisterCondition(22,	 "RANGEDCRIT", {
 })
 ConditionCategory:RegisterCondition(23,	 "RANGEDHASTE", {
 	text = L["RANGEDHASTE"],
-	category = L["CNDTCAT_STATS"],
 	percent = true,
 	texttable = CNDT.COMMON.pluspercent,
 	min = 0,
@@ -251,7 +238,6 @@ end
 local GetSpellBonusDamage = GetSpellBonusDamage
 ConditionCategory:RegisterCondition(31,	 "SPELLDMG", {
 	text = STAT_SPELLDAMAGE,
-	category = L["CNDTCAT_STATS"],
 	range = 5000,
 	unit = PLAYER,
 	texttable = CNDT.COMMON.commanumber,
@@ -279,7 +265,6 @@ ConditionCategory:RegisterCondition(31,	 "SPELLDMG", {
 
 ConditionCategory:RegisterCondition(32,	 "SPELLHEALING", {
 	text = STAT_SPELLHEALING,
-	category = L["CNDTCAT_STATS"],
 	range = 5000,
 	unit = PLAYER,
 	texttable = CNDT.COMMON.commanumber,
@@ -295,7 +280,6 @@ ConditionCategory:RegisterCondition(32,	 "SPELLHEALING", {
 local GetSpellCritChance = GetSpellCritChance
 ConditionCategory:RegisterCondition(33,	 "SPELLCRIT", {
 	text = L["SPELLCRIT"],
-	category = L["CNDTCAT_STATS"],
 	min = 0,
 	max = 100,
 	percent = true,
@@ -324,7 +308,6 @@ ConditionCategory:RegisterCondition(33,	 "SPELLCRIT", {
 
 ConditionCategory:RegisterCondition(34,	 "SPELLHASTE", {
 	text = L["SPELLHASTE"],
-	category = L["CNDTCAT_STATS"],
 	min = 0,
 	max = 100,
 	percent = true,
@@ -343,7 +326,6 @@ ConditionCategory:RegisterCondition(34,	 "SPELLHASTE", {
 Env.GetManaRegen = GetManaRegen
 ConditionCategory:RegisterCondition(35,	 "MANAREGEN", {
 	text = MANA_REGEN,
-	category = L["CNDTCAT_STATS"],
 	range = 1000/5,
 	unit = PLAYER,
 	texttable = function(k) return format(L["MP5"], CNDT.COMMON.commanumber(k)*5) end,
@@ -353,7 +335,6 @@ ConditionCategory:RegisterCondition(35,	 "MANAREGEN", {
 })
 ConditionCategory:RegisterCondition(36,	 "MANAREGENCOMBAT", {
 	text = MANA_REGEN_COMBAT,
-	category = L["CNDTCAT_STATS"],
 	range = 1000/5,
 	unit = PLAYER,
 	texttable = function(k) return format(L["MP5"], CNDT.COMMON.commanumber(k)*5) end,

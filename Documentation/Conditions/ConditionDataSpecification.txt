@@ -1,0 +1,241 @@
+
+= Condition Data Specification
+
+The Condition Data table is a table that completely describes a condition. See {{{TMW.Classes.ConditionCategory}}}{{{:RegisterCondition()}}} for information about where this table is passed to.
+
+The funcstr field is the only one that is required required. Errors may happen with the omission of some, though.
+
+
+== Information & Appearance
+* text 
+** [String] Localized name of the condition.
+
+* tooltip
+** [String] Localized description of the condition.
+
+* icon 
+** [Function>|Table>|String] Icon texture that will be shown in the condition type selection dropdown menu for this condition.
+
+* tcoords 
+** [Table] Array-style table that defines the tex coords that will be set for the icon in the dropdown.
+** {[1] = left, [2] = right, [3] = top, [4] = bottom}. See also: [[http://wowprogramming.com/docs/widgets/Texture/SetTexCoord]].
+** Set to {{{CNDT.COMMON.standardtcoords}}} for any standard ability or item icon.
+
+* hidden
+** [Function>|Boolean] True if the condition should be hidden from the dropdown menu.
+
+== Slider & Value - Text
+* texttable 
+** [Function>|Table>|String] Maps numeric slider values with the text that should be displayed for it.
+
+* mint
+** [String] Set to override the label shown on the slider for its lowest value. Default label is the value of texttable at that value.
+
+* midt
+** [String] Set to a label that will be displayed in the middle of the slider. By default, no middle label is used unless this field is set.
+
+* maxt
+** [String] Set to override the label shown on the slider for its highest value. Default label is the value of texttable at that value.
+
+
+== Slider & Value - Behavior & Range
+* step
+** [Function>|Table>|Number] The granularity of the slider input. In most cases, this should only ever get set to 0.1. Amounts much smaller than this can cause unpredictable behavior based on Icon Editor scale & screen resolution, so stick to integers.
+** All input will be validated and rounded to the nearest step.
+
+* percent
+** [Boolean] Set to true if the condition is checking a percentage value. The {{{c.Level}}} substitution in {{{funcstr}}} will be the slider level divided by 100. If used, {{{min}}} should be set to 0 and {{{max}}} to 100.
+
+=== Absolute Min/Max:
+* min
+** [Function>|Table>|Number] Minimum slider value.
+** Decimal amounts can cause unpredictable behavior based on Icon Editor scale & screen resolution, so stick to integers.
+** If using a range, input will still be constrained against this value. In most cases, this should be set to 0 when using a range (to prevent negative values).
+
+* max
+** [Function>|Table>|Number] Maximum slider value.
+** Decimal amounts can cause unpredictable behavior based on Icon Editor scale & screen resolution, so stick to integers.
+** If your maximum value is above a few thousand, you should also define a range to make configuration easier for the user. Input will still be limited to your defined maximum.
+
+=== Variable Range
+* range
+** [Function>|Table>|Number] Range of values that the slider should show at any given time.
+** Range should be used when the minimum and/or maximum value for a condition are very extreme (roughly > 1,000) or infinite.
+** When a condition accepts a range, users can also right-click the slider to switch to editbox input mode, which allows for manual input.
+** Manual input is still validated against the defined step and min/max for the condition. 
+** Minor side note: When the value of the slider is less than this value, the actual range on the slider will be (range/2 + value).
+
+
+== Configuration Frame Visibility & Setup
+* noslide
+** [Boolean] True to hide the slider.
+
+* unit [Boolean|String]
+** False to hide unit configuration (if the condition doesn't check any units).
+** Localized string to set some text in place of the unit configuration that shows that the condition checks only one unit. This is visual only - it does not change the settings of any condition being edited.
+** If left undefined/nil, the unit configuration editbox will be shown.
+
+* name
+** [Function] Function that, if defined, will cause the first input editbox to be shown and will be called with its only parameter set to that editbox.
+** Use the function to set {{{editbox.label}}} and to call {{{TMW:TT(editbox, ...)}}}.
+** If undefined, the first input editbox will not be shown.
+** Value is stored in the condition settings as the "Name" setting.
+** Works OK if the slider is also shown.
+
+* name2
+** [Function] Function that, if defined, will cause the second input editbox to be shown and will be called with its only parameter set to that editbox.
+** Use the function to set {{{editbox.label}}} and to call {{{TMW:TT(editbox, ...)}}}.
+** If undefined, the second input editbox will not be shown.
+** Value is stored in the condition settings as the "Name2" setting.
+** There are no rules against it, but the second editbox should probably not be shown unless the first is also shown.
+** Ugly things will happen if you try and use the second input editbox without hiding the slider with {{{noslide}}}
+
+* check
+**  [Function] Function that, if defined, will cause the first input editbox's checkbox to be shown and will be called with its only parameter set to that checkbox.
+** Doesn't do anything unless {{{name}}} is also defined.
+** Use the function to call {{{TMW:TT(check, ...)}}}.
+** The checkbox is shown on top of the end of the first editbox.
+** Value is stored in the condition settings as the "Checked" setting.
+
+* check2
+**  [Function] Function that, if defined, will cause the second input editbox's checkbox to be shown and will be called with its only parameter set to that checkbox.
+** Doesn't do anything unless {{{name2}}} is also defined.
+** Use the function to call {{{TMW:TT(check, ...)}}}.
+** The checkbox is shown on top of the end of the second editbox.
+** Value is stored in the condition settings as the "Checked2" setting.
+
+* nooperator
+** [Boolean] True if the operator dropdown should be hidden for the condition.
+** The dropdown defaults to being shown if this value is undefined/nil.
+** Operator's value is stored in the condition settings as a string in the "Operator" setting.
+
+* isicon
+** [Boolean] Set true to show the icon selection dropdown.
+** The dropdown defaults to being hidden if this value is undefined/nil.
+
+== Editbox Suggestion List Interaction
+* useSUG
+** [String] Name of a suggestion list module that should be used for the input editboxes that are controlled by the {{{name}}} and {{{name2}}} fields.
+
+* allowMultipleSUGEntires
+** [Boolean] True if the input allows multiple, semicolon-delimited values. Defaults to false.
+** When set to true, inputting from the suggestion list will keep the editbox focused and will automatically input a semicolon.
+** When undefined/nil/false, inputting from the suggestion list clears the focus from the editbox and does not input a semicolon.
+
+
+== Misc Settings Behavior
+* defaultUnit
+** [String] if the unit of a condition is set to "player" (the normal default) when its type is changed to this condition, it will be changed to the value defined by this field.
+** Use only if checking "player" in the condition doesn't make sense (like in the UnitExists condition).
+
+
+== Checking & Updating Functions
+* Env
+** [Table] A table whose [key] value pairs will be added into TMW.CNDT.Env (the function environment for all conditions) when the condition is used for the fist time.
+** Any methods used in {{{funcstr}}} or {{{anticipate}}} must be defined in TMW.CNDT.Env or an error will be thrown when they called (because they are out-of-scope by default unless defined).
+
+* funcstr 
+** [Function>|String] A string, or a function that returns a string when called with the parameters {{{(conditionSettings, parent)}}} (parent represents the group or icon that is requesting the condition), that represents a single Lua expression that will be evaluated to determine the state of the condition.
+** There are many substitutions that are automatically performed on {{{funcstr}}} to insert settings. For more information about the implementation of these, look at CNDT:DoConditionSubstitutions() in Conditions.lua. All available substitutions are listed below.
+** Some examples of funcstrs:
+*** <<code lua>> [[UnitIsUnit(c.Unit, c.Unit2) == c.1nil]] <</code>>
+*** <<code lua>> [[(select(3, UnitDetailedThreatSituation("player", c.Unit)) or 0) c.Operator c.Level]] <</code>>
+*** <<code lua>> funcstr = function(c)
+		return [[AuraStacks(c.Unit, c.NameFirst, c.NameName, "HELPFUL]] .. (c.Checked and " PLAYER" or "") .. [[") c.Operator c.Level]]
+	end, <</code>>
+
+
+* events 
+** [Function>|String(...)] A string, or a function that returns one or more strings when called with the parameters {{{(ConditionObject, conditionSettings)}}}. Each string represents a Lua expression that will be used to check the event and event args of a Blizzard event or a TMW event to determine if that event firing should trigger a condition update.
+** This function is also responsible for notifying the ConditionObject what events that it should be registering for and how many args it can expect to check.
+** If false, nil, or "OnUpdate" (as a string) is returned, or if the {{{events}}} field is undefined entirely, the condition will default to being OnUpdate driven.
+** If a single "false" (as a string) is returned, the condition will only update when its {{{anticipate}}} function deems necessary or when an update is forced.
+** Here are some examples of {{{events}}} functions:
+*** <<code lua>>events = function(ConditionObject, c)
+  return
+    ConditionObject:GenerateNormalEventString("UNIT_INVENTORY_CHANGED", "player")
+end <</code>>
+*** <<code lua>>-- Calling ConditionObject:GetUnitChangedEventString() is
+-- mandatory for proper functionality when checking units.
+events = function(ConditionObject, c)
+  return
+    ConditionObject:GetUnitChangedEventString(CNDT:GetUnit(c.Unit)),
+    ConditionObject:GenerateNormalEventString("UNIT_AURA", CNDT:GetUnit(c.Unit))
+end <</code>>
+*** <<code lua>>-- An example of manually requesting events,
+-- numbers of args, and arg checker strings.
+events = function(ConditionObject, c)
+  ConditionObject:RequestEvent("TMW_COMMON_SWINGTIMER_CHANGED")
+  ConditionObject:SetNumEventArgs(1)
+  return
+    "event == 'TMW_COMMON_SWINGTIMER_CHANGED' and arg1.slot == " .. GetInventorySlotInfo("MainHandSlot")
+end <</code>>
+
+
+* anticipate
+** [Function>|String] A string, or a function that returns a string when called with the parameter {{{(conditionSettings)}}}, that represents a Lua chunk that will set a value that will determine what time the condition should be checked at next.
+** The value that must be set is {{{local VALUE}}}, and it must be comparable with TMW.time (which is the same as GetTime()).
+** Some examples of {{{anticipate}}} functions:
+*** <<code lua>>anticipate = [[
+  local start, duration = GetSpellCooldown(c.GCDReplacedNameFirst)
+  local VALUE = duration and start + (duration - c.Level) or huge
+]]<</code>>
+*** <<code lua>>anticipate = [[local _, dur = GetWeaponEnchantInfo()
+  local VALUE = time + ((dur or 0)/1000) - c.Level]] <</code>>
+*** <<code lua>>anticipate = function(c)
+  return [[local dur, duration, expirationTime = AuraDur(c.Unit, c.NameFirst, c.NameName, "HARMFUL]] .. (c.Checked and " PLAYER" or "") .. [[")
+  local VALUE
+  if dur and dur > 0 then
+    VALUE = expirationTime and (expirationTime - c.Level*duration) or 0
+  else
+    VALUE = 0
+  end]]
+end<</code>>
+
+
+
+
+=== Funcstr Substitutions
+* "c.Level"
+** Represents the raw numeric value of the slider. The substituted value will have been divided by 100 if the {{{percent}}} field is set to true.
+
+* "c.True"
+** Substitutes true when the slider is set to 0, otherwise substitutes false.
+* "c.False"
+** Substitutes true when the slider is set to 1, otherwise substitutes false.
+* "c.1nil"
+** Substitutes 1 when the slider is set to 0, otherwise substitutes nil.
+* "c.1nil"
+** Substitutes 1 when the slider is set to 1, otherwise substitutes nil.
+
+* "c.Operator"
+** Substitutes a valid Lua operator (<, >, <=, >=, ~=, ==).
+
+* "c.Unit"
+** A processed representation of the unit in the normal unit editbox. You should always use this substitution when working with a condition that checks units - never access the Unit setting directly from the settings table when it is passed into the {{{funcstr}}} call because that is a raw, unprocessed setting.
+* "c.Unit2"
+** A processed representation of the unit in the first input editbox. You should always use this substitution when working with a condition that checks two units - never access the "Name" setting directly from the settings table when it is passed into the {{{funcstr}}} call because that is a raw, unprocessed setting. This should only be used in conditions where checking two units is needed.
+
+
+* "c.NameRaw" & "c.Name2Raw"
+** Substitutes the raw data from the first and second editboxes, respectively.
+* "c.Name" & "c.Name2"
+** Substitutes the data from the first and second editboxes after it has been cleaned of redundant semicolons, made lowercase, and then wrapped in semicolons at beginning and end. The usage of this is a bit unintuitive, so please refer to TMW's source for its implementations. The primary use of this substitution is when a condition can check over multiple values with semicolon-delimited input.
+
+* "c.NameFirst" & "c.NameFirst2"
+** Substitues the value from the first and second editboxes, respectively. If there are multiple, semicolon-delimited values, only the first will be substituted.
+* "c.GCDReplacedNameFirst" & "c.GCDReplacedNameFirst2"
+** Behaves exactly like "c.NameFirst" except that if the value of the setting is equal to "gcd", TMW.GCDSpell will be substituted instead.
+* "c.NameName" & "c.NameName2"
+** Substitues the spell name from the first and second editboxes, respectively. If there are multiple, semicolon-delimited values, only the first will be substituted. If the value inputted into these textboxes is not a valid spell, the raw value from the textbox will be used.
+
+* "c.ItemID" & "c.ItemID2"
+** Substitutes the itemID (or what will evaluate to a reference to the itemID) of the input from the first and second editboxes, respectively. You should always use this substitution when working with a condition that checks items - never access the "Name" or "Name2" setting directly from the settings table when it is passed into the {{{funcstr}}} call because that is a raw, unprocessed setting. 
+
+* "c.Checked" & "c.Checked2"
+** Substitutes the boolean that represents the checked states of the first and second editboxes' check boxes, respectively.
+
+* "LOWER(...)"
+** A preprocessor function that will strlower anything in the vararg (strings or anything else). May not behave if the vararg contains any parentheses, so take caution.
+
+	

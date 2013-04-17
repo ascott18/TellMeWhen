@@ -23,11 +23,10 @@ local CNDT = TMW.CNDT
 local Env = CNDT.Env
 
 
-local ConditionCategory = CNDT:GetCategory("MISC", 8, L["CNDTCAT_MISC"], false, false)
+local ConditionCategory = CNDT:GetCategory("MISC", 10, L["CNDTCAT_MISC"], false, false)
 
 ConditionCategory:RegisterCondition(0,	 "", {
 	text = L["CONDITIONPANEL_DEFAULT"],
-	value = "",
 	hidden = true,
 	noslide = true,
 	unit = false,
@@ -318,7 +317,7 @@ ConditionCategory:RegisterCondition(30,	 "LUA", {
 	icon = "Interface\\Icons\\INV_Misc_Gear_01",
 	tcoords = CNDT.COMMON.standardtcoords,
 	funcstr = function(c)
-		setmetatable(TMW.CNDT.Env, TMW.CNDT.EnvMeta)
+		setmetatable(CNDT.Env, CNDT.EnvMeta)
 		return c.Name ~= "" and c.Name or "true"
 	end,
 	

@@ -135,7 +135,6 @@ local ConditionCategory = CNDT:GetCategory("BUFFSDEBUFFS", 5, L["CNDTCAT_BUFFSDE
 
 ConditionCategory:RegisterCondition(1,	 "BUFFDUR", {
 	text = L["ICONMENU_BUFF"] .. " - " .. L["DURATION"],
-	category = L["CNDTCAT_BUFFSDEBUFFS"],
 	range = 30,
 	step = 0.1,
 	name = function(editbox) TMW:TT(editbox, "BUFFTOCHECK", "BUFFCNDT_DESC") editbox.label = L["BUFFTOCHECK"] end,
@@ -164,7 +163,6 @@ ConditionCategory:RegisterCondition(1,	 "BUFFDUR", {
 })
 ConditionCategory:RegisterCondition(2.5, "BUFFPERC", {
 	text = L["ICONMENU_BUFF"] .. " - " .. L["DURATION"] .. " - " .. L["PERCENTAGE"],
-	category = L["CNDTCAT_BUFFSDEBUFFS"],
 	min = 0,
 	max = 100,
 	percent = true,
@@ -194,7 +192,6 @@ ConditionCategory:RegisterCondition(2.5, "BUFFPERC", {
 })
 ConditionCategory:RegisterCondition(2,	 "BUFFDURCOMP", {
 	text = L["ICONMENU_BUFF"] .. " - " .. L["DURATION"] .. " - " .. L["COMPARISON"],
-	category = L["CNDTCAT_BUFFSDEBUFFS"],
 	noslide = true,
 	name = function(editbox) TMW:TT(editbox, "BUFFTOCOMP1", "CNDT_ONLYFIRST") editbox.label = L["BUFFTOCOMP1"] end,
 	check = function(check) TMW:TT(check, "ONLYCHECKMINE", "ONLYCHECKMINE_DESC") end,
@@ -214,7 +211,6 @@ ConditionCategory:RegisterCondition(2,	 "BUFFDURCOMP", {
 })
 ConditionCategory:RegisterCondition(3,	 "BUFFSTACKS", {
 	text = L["ICONMENU_BUFF"] .. " - " .. L["STACKS"],
-	category = L["CNDTCAT_BUFFSDEBUFFS"],
 	range = 20,
 	name = function(editbox) TMW:TT(editbox, "BUFFTOCHECK", "BUFFCNDT_DESC") editbox.label = L["BUFFTOCHECK"] end,
 	useSUG = true,
@@ -234,7 +230,6 @@ ConditionCategory:RegisterCondition(3,	 "BUFFSTACKS", {
 ConditionCategory:RegisterCondition(4,	 "BUFFTOOLTIP", {
 	text = L["ICONMENU_BUFF"] .. " - " .. L["TOOLTIPSCAN"],
 	tooltip = L["TOOLTIPSCAN_DESC"],
-	category = L["CNDTCAT_BUFFSDEBUFFS"],
 	range = 500,
 	--texttable = {[0] = "0 ("..L["ICONMENU_ABSENT"]..")"},
 	name = function(editbox) TMW:TT(editbox, "BUFFTOCHECK", "TOOLTIPSCAN_DESC") editbox.label = L["BUFFTOCHECK"] end,
@@ -254,7 +249,6 @@ ConditionCategory:RegisterCondition(4,	 "BUFFTOOLTIP", {
 ConditionCategory:RegisterCondition(5,	 "BUFFNUMBER", {
 	text = L["ICONMENU_BUFF"] .. " - " .. L["NUMAURAS"],
 	tooltip = L["NUMAURAS_DESC"],
-	category = L["CNDTCAT_BUFFSDEBUFFS"],
 	min = 0,
 	max = 20,
 	name = function(editbox) TMW:TT(editbox, "BUFFTOCHECK", "BUFFCNDT_DESC") editbox.label = L["BUFFTOCHECK"] end,
@@ -277,7 +271,6 @@ ConditionCategory:RegisterSpacer(10)
 
 ConditionCategory:RegisterCondition(11,	 "DEBUFFDUR", {
 	text = L["ICONMENU_DEBUFF"] .. " - " .. L["DURATION"],
-	category = L["CNDTCAT_BUFFSDEBUFFS"],
 	range = 30,
 	step = 0.1,
 	name = function(editbox) TMW:TT(editbox, "DEBUFFTOCHECK", "BUFFCNDT_DESC") editbox.label = L["DEBUFFTOCHECK"] end,
@@ -306,7 +299,6 @@ ConditionCategory:RegisterCondition(11,	 "DEBUFFDUR", {
 })
 ConditionCategory:RegisterCondition(12.5,"DEBUFFPERC", {
 	text = L["ICONMENU_DEBUFF"] .. " - " .. L["DURATION"] .. " - " .. L["PERCENTAGE"],
-	category = L["CNDTCAT_BUFFSDEBUFFS"],
 	min = 0,
 	max = 100,
 	percent = true,
@@ -336,7 +328,6 @@ ConditionCategory:RegisterCondition(12.5,"DEBUFFPERC", {
 })
 ConditionCategory:RegisterCondition(12,	 "DEBUFFDURCOMP", {
 	text = L["ICONMENU_DEBUFF"] .. " - " .. L["DURATION"] .. " - " .. L["COMPARISON"],
-	category = L["CNDTCAT_BUFFSDEBUFFS"],
 	noslide = true,
 	name = function(editbox) TMW:TT(editbox, "DEBUFFTOCOMP1", "CNDT_ONLYFIRST") editbox.label = L["DEBUFFTOCOMP1"] end,
 	check = function(check) TMW:TT(check, "ONLYCHECKMINE", "ONLYCHECKMINE_DESC") end,
@@ -357,7 +348,6 @@ ConditionCategory:RegisterCondition(12,	 "DEBUFFDURCOMP", {
 })
 ConditionCategory:RegisterCondition(13,	 "DEBUFFSTACKS", {
 	text = L["ICONMENU_DEBUFF"] .. " - " .. L["STACKS"],
-	category = L["CNDTCAT_BUFFSDEBUFFS"],
 	range = 20,
 	name = function(editbox) TMW:TT(editbox, "DEBUFFTOCHECK", "BUFFCNDT_DESC") editbox.label = L["DEBUFFTOCHECK"] end,
 	useSUG = true,
@@ -377,7 +367,6 @@ ConditionCategory:RegisterCondition(13,	 "DEBUFFSTACKS", {
 ConditionCategory:RegisterCondition(14,	 "DEBUFFTOOLTIP", {
 	text = L["ICONMENU_DEBUFF"] .. " - " .. L["TOOLTIPSCAN"],
 	tooltip = L["TOOLTIPSCAN_DESC"],
-	category = L["CNDTCAT_BUFFSDEBUFFS"],
 	range = 500,
 	--texttable = {[0] = "0 ("..L["ICONMENU_ABSENT"]..")"},
 	name = function(editbox) TMW:TT(editbox, "DEBUFFTOCHECK", "TOOLTIPSCAN_DESC") editbox.label = L["DEBUFFTOCHECK"] end,
@@ -397,7 +386,6 @@ ConditionCategory:RegisterCondition(14,	 "DEBUFFTOOLTIP", {
 ConditionCategory:RegisterCondition(15,	 "DEBUFFNUMBER", {
 	text = L["ICONMENU_DEBUFF"] .. " - " .. L["NUMAURAS"],
 	tooltip = L["NUMAURAS_DESC"],
-	category = L["CNDTCAT_BUFFSDEBUFFS"],
 	min = 0,
 	max = 20,
 	name = function(editbox) TMW:TT(editbox, "DEBUFFTOCHECK", "BUFFCNDT_DESC") editbox.label = L["DEBUFFTOCHECK"] end,
@@ -421,7 +409,6 @@ ConditionCategory:RegisterSpacer(20)
 Env.GetWeaponEnchantInfo = GetWeaponEnchantInfo
 ConditionCategory:RegisterCondition(21,	 "MAINHAND", {
 	text = L["ICONMENU_WPNENCHANT"] .. " - " .. INVTYPE_WEAPONMAINHAND,
-	category = L["CNDTCAT_BUFFSDEBUFFS"],
 	range = 120,
 	unit = false,
 	texttable = CNDT.COMMON.absentseconds,
@@ -437,7 +424,6 @@ ConditionCategory:RegisterCondition(21,	 "MAINHAND", {
 })
 ConditionCategory:RegisterCondition(22,	 "OFFHAND", {
 	text = L["ICONMENU_WPNENCHANT"] .. " - " .. INVTYPE_WEAPONOFFHAND,
-	category = L["CNDTCAT_BUFFSDEBUFFS"],
 	range = 120,
 	unit = false,
 	texttable = CNDT.COMMON.absentseconds,

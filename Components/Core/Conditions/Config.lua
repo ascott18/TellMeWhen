@@ -158,12 +158,12 @@ function CNDT:GetTabText(conditionSetName)
 		return "<ERROR: SETTINGS NOT FOUND!>"
 	end
 	
-	local parenthesesAreValid, errorMessage, fmt_1, fmt_2 = CNDT:CheckParentheses(Conditions)
+	local parenthesesAreValid, errorMessage = CNDT:CheckParentheses(Conditions)
 		
 	if parenthesesAreValid then
 		TMW.HELP:Hide("CNDT_PARENTHESES_ERROR")
 	else
-		TMW.HELP:Show("CNDT_PARENTHESES_ERROR", nil, TellMeWhen_IconEditor.Conditions, 0, 0, errorMessage, fmt_1, fmt_2)
+		TMW.HELP:Show("CNDT_PARENTHESES_ERROR", nil, TellMeWhen_IconEditor.Conditions, 0, 0, errorMessage)
 	end
 	
 	local n = Conditions.n
@@ -243,7 +243,7 @@ local function AddConditionToDropDown(conditionData)
 	info.tooltipText = conditionData.tooltip
 	info.tooltipOnButton = true
 	
-	info.value = conditionData.value
+	info.value = conditionData.identifier
 	info.arg1 = conditionData
 	info.icon = get(conditionData.icon)
 	
@@ -342,7 +342,7 @@ function CNDT:TypeMenu_DropDown_OnClick(data)
 	local group = UIDROPDOWNMENU_OPEN_MENU:GetParent()
 	
 	local condition = group:GetConditionSettings()
-	if data.defaultUnit then
+	if data.defaultUnit and condition.Unit == "player" then
 		condition.Unit = data.defaultUnit
 	end
 	condition.Type = self.value
@@ -892,14 +892,14 @@ function CndtGroup:SetSliderMinMax(level)
 	local data = self:GetConditionData()
 	if not data then return end
 	
-	level = level and CNDT:ValidateLevelForCondition(level, data.value)
+	level = level and CNDT:ValidateLevelForCondition(level, data.identifier)
 	
 	local Slider = self.Slider
 	local SliderInputBox = self.SliderInputBox
 	
 	
 	if data.range then
-		local deviation = data.range/2
+		local deviation = get(data.range)/2
 		local val = level or Slider:GetValue()
 
 		local newmin = max(0, val-deviation)
@@ -925,7 +925,7 @@ function CndtGroup:SetSliderMinMax(level)
 	end
 	Slider.Mid:SetText(Mid)
 
-	Slider:SetValueStep(data.step or 1)
+	Slider:SetValueStep(get(data.step) or 1)
 	
 	if level then
 		Slider:SetValue(level)

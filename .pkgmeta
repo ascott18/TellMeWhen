@@ -48,9 +48,8 @@ move-folders:
 ignore:
     - scrapper.lua
     - USEDLOCALE.lua
-    - Lib
     - Options/scrapper.lua
     - Options/USEDLOCALE.lua
+    - Lib
     - Scripts
-    - Tests
-    - Committ
+    - Documentation

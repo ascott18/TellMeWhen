@@ -1153,6 +1153,7 @@ L["CNDTCAT_ATTRIBUTES_PLAYER"] = "Player Attributes"
 L["CNDTCAT_STATS"] = "Combat Stats"
 L["CNDTCAT_RESOURCES"] = "Resources"
 L["CNDTCAT_CURRENCIES"] = "Currencies"
+L["CNDTCAT_ARCHFRAGS"] = "Archaeology Fragments"
 L["CNDTCAT_MISC"] = "Miscellaneous"
 
 L["CONDITIONPANEL_MOUNTED"] = "Mounted"

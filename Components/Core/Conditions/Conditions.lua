@@ -34,15 +34,75 @@ local clientVersion = select(4, GetBuildInfo())
 local strlowerCache = TMW.strlowerCache
 local isNumber = TMW.isNumber
 local huge = math.huge
-
-local time = GetTime()
 	
-local CNDT = TMW:NewModule("Conditions", "AceEvent-3.0", "AceSerializer-3.0") TMW.CNDT = CNDT
+local CNDT = TMW:NewModule("Conditions", "AceEvent-3.0", "AceSerializer-3.0")
+TMW.CNDT = CNDT
+
+
+CNDT.ConditionsByType = {}
 CNDT.SpecialUnitsUsed = {}
 
-local functionCache = {} CNDT.functionCache = functionCache
 
-TMW.Condition_Defaults = {
+
+
+
+----------------------------------------------
+-- CNDT.COMMON
+----------------------------------------------
+
+CNDT.COMMON = {}
+function CNDT.COMMON.formatSeconds(seconds, alsoMightBeSeconds)
+	if type(seconds) == "table" then -- if i set this function directly as a metamethod
+		seconds = alsoMightBeSeconds
+	end
+	
+	local y =  seconds / 31556925.9936
+	local d = (seconds % 31556925.9936) / 86400
+	local h = (seconds % 31556925.9936 % 86400) / 3600
+	local m = (seconds % 31556925.9936 % 86400  % 3600) / 60
+	local s = (seconds % 31556925.9936 % 86400  % 3600  % 60)
+
+	s = tonumber(format("%.1f", s))
+	if s < 10 then
+		s = "0" .. s
+	end
+
+	if y >= 1 then return format("%d:%d:%02d:%02d:%s", y, d, h, m, s) end
+	if d >= 1 then return format("%d:%02d:%02d:%s", d, h, m, s) end
+	if h >= 1 then return format("%d:%02d:%s", h, m, s) end
+	return format("%d:%s", m, s)
+end
+local formatSeconds = CNDT.COMMON.formatSeconds
+
+-- preset text tables that are frequently used
+CNDT.COMMON.commanumber = function(k)
+	k = gsub(k, "(%d)(%d%d%d)$", "%1,%2", 1)
+	local found
+	repeat
+		k, found = gsub(k, "(%d)(%d%d%d),", "%1,%2,", 1)
+	until found == 0
+
+	return k
+end
+CNDT.COMMON.percent = function(k) return k.."%" end
+CNDT.COMMON.pluspercent = function(k) return "+"..k.."%" end
+CNDT.COMMON.bool = {[0] = L["TRUE"],[1] = L["FALSE"],}
+CNDT.COMMON.usableunusable = {[0] = L["ICONMENU_USABLE"],[1] = L["ICONMENU_UNUSABLE"],}
+CNDT.COMMON.presentabsent = {[0] = L["ICONMENU_PRESENT"],[1] = L["ICONMENU_ABSENT"],}
+CNDT.COMMON.absentseconds = setmetatable({[0] = formatSeconds(0).." ("..L["ICONMENU_ABSENT"]..")"}, {__index = formatSeconds})
+CNDT.COMMON.usableseconds = setmetatable({[0] = formatSeconds(0).." ("..L["ICONMENU_USABLE"]..")"}, {__index = formatSeconds})
+CNDT.COMMON.standardtcoords = {0.07, 0.93, 0.07, 0.93}
+
+
+
+
+
+
+----------------------------------------------
+-- Condition Settings, Defaults, & Upgrades
+----------------------------------------------
+
+CNDT.Condition_Defaults = {
 	n 					= 0,
 	["**"] = {
 		AndOr 	   		= "AND",
@@ -60,25 +120,30 @@ TMW.Condition_Defaults = {
 		Runes 	   		= {},
 	},
 }
-setmetatable(TMW.Condition_Defaults["**"], {
+setmetatable(CNDT.Condition_Defaults["**"], {
 	__newindex = function(self, k, v)
 		if TMW.InitializedDatabase then
 			error("New condition defaults cannot be added after the database has already been initialized", 2)
 		end
+		
 		TMW:Fire("TMW_CNDT_DEFAULTS_NEWVAL", k, v)
+		
 		rawset(self, k, v)
 	end,
 })
 
-function CNDT:RegisterConditionDefaults(self, defaults)
-	assert(type(defaults) == "table", "arg1 to RegisterGroupDefaults must be a table")
+
+--- Registers default condition settings. Must be called before TMW's database is initialized.
+-- @param defaults [table] A table that will be merged into CNDT.Condition_Defaults
+function CNDT:RegisterConditionDefaults(defaults)
+	TMW:ValidateType("2 (defaults)", "CNDT:RegisterConditionDefaults(defaults)", defaults, "table")
 	
 	if TMW.InitializedDatabase then
-		error(("Defaults for conditions are being registered too late. They need to be registered before the database is initialized."):format(self.name or "<??>"))
+		error("Defaults for conditions are being registered too late. They need to be registered before the database is initialized.")
 	end
 	
 	-- Copy the defaults into the main defaults table.
-	TMW:MergeDefaultsTables(defaults, TMW.Condition_Defaults["**"])
+	TMW:MergeDefaultsTables(defaults, CNDT.Condition_Defaults["**"])
 end
 
 
@@ -430,16 +495,15 @@ TMW:RegisterUpgrade(20100, {
 
 
 
-function CNDT:GROUP_ROSTER_UPDATE()
-	TMW.UNITS:UpdateTankAndAssistMap()
-	for oldunit in pairs(Env) do
-		if CNDT.SpecialUnitsUsed[oldunit] then
-			TMW.UNITS:SubstituteTankAndAssistUnit(oldunit, Env, oldunit, true)
-		end
-	end
-end
 
-Env = {	
+
+
+----------------------------------------------
+-- Checker/Anticipator Function Environment
+----------------------------------------------
+
+--- The function environment used for condition checker functions and update anticipator functions.
+CNDT.Env = {	
 	strlower = strlower,
 	strlowerCache = TMW.strlowerCache,
 	strfind = strfind,
@@ -458,8 +522,23 @@ Env = {
 	TMW = TMW,
 	GCDSpell = TMW.GCDSpell,
 	
+	SemicolonConcatCache = setmetatable(
+	{}, {
+		__index = function(t, i)
+			if not i then return end
+
+			local o = ";" .. strlowerCache[i] .. ";"
+			
+			-- escape ()[]-+*. since the purpose of this is to be the 2nd arg to strfind
+			o = o:gsub("([%(%)%%%[%]%-%+%*%.])", "%%%1")
+			
+			t[i] = o
+			return o
+		end,
+	}),
+	
 	-- These are here as a primitive security measure to prevent some of the most basic forms of malicious Lua conditions.
-	-- This list isn't even exhaustive, and it is in no way exhaustive, but its a start.
+	-- This list isn't even exhaustive, and it is in no way cracker-proof, but its a start.
     CancelLogout = error,
     DownloadSettings = error,
     ForceLogout = error,
@@ -478,168 +557,29 @@ Env = {
     StartDuel = error,
     DeleteGMTicket = error,
 
-} CNDT.Env = Env
+} Env = CNDT.Env
+
+CNDT.EnvMeta = {
+	__index = _G,
+	--__newindex = _G,
+}
 
 TMW:RegisterCallback("TMW_ONUPDATE_PRE", function(event, time_arg)
-	time = time_arg
 	Env.time = time_arg
 end)
 
-Env.SemicolonConcatCache = setmetatable(
-{}, {
-	__index = function(t, i)
-		if not i then return end
-
-		local o = ";" .. strlowerCache[i] .. ";"
-		
-		-- escape ()[]-+*. since the purpose of this is to be the 2nd arg to strfind
-		o = o:gsub("([%(%)%%%[%]%-%+%*%.])", "%%%1")
-		
-		t[i] = o
-		return o
-	end,
-})
-
-
-CNDT.COMMON = {}
-function CNDT.COMMON.formatSeconds(seconds, alsoMightBeSeconds)
-	if type(seconds) == "table" then -- if i set this function directly as a metamethod
-		seconds = alsoMightBeSeconds
-	end
-	
-	local y =  seconds / 31556925.9936
-	local d = (seconds % 31556925.9936) / 86400
-	local h = (seconds % 31556925.9936 % 86400) / 3600
-	local m = (seconds % 31556925.9936 % 86400  % 3600) / 60
-	local s = (seconds % 31556925.9936 % 86400  % 3600  % 60)
-
-	s = tonumber(format("%.1f", s))
-	if s < 10 then
-		s = "0" .. s
-	end
-
-	if y >= 1 then return format("%d:%d:%02d:%02d:%s", y, d, h, m, s) end
-	if d >= 1 then return format("%d:%02d:%02d:%s", d, h, m, s) end
-	if h >= 1 then return format("%d:%02d:%s", h, m, s) end
-	return format("%d:%s", m, s)
-end
-local formatSeconds = CNDT.COMMON.formatSeconds
-
--- preset text tables that are frequently used
-CNDT.COMMON.commanumber = function(k)
-	k = gsub(k, "(%d)(%d%d%d)$", "%1,%2", 1)
-	local found
-	repeat
-		k, found = gsub(k, "(%d)(%d%d%d),", "%1,%2,", 1)
-	until found == 0
-
-	return k
-end
-CNDT.COMMON.percent = function(k) return k.."%" end
-CNDT.COMMON.pluspercent = function(k) return "+"..k.."%" end
-CNDT.COMMON.bool = {[0] = L["TRUE"],[1] = L["FALSE"],}
-CNDT.COMMON.usableunusable = {[0] = L["ICONMENU_USABLE"],[1] = L["ICONMENU_UNUSABLE"],}
-CNDT.COMMON.presentabsent = {[0] = L["ICONMENU_PRESENT"],[1] = L["ICONMENU_ABSENT"],}
-CNDT.COMMON.absentseconds = setmetatable({[0] = formatSeconds(0).." ("..L["ICONMENU_ABSENT"]..")"}, {__index = formatSeconds})
-CNDT.COMMON.usableseconds = setmetatable({[0] = formatSeconds(0).." ("..L["ICONMENU_USABLE"]..")"}, {__index = formatSeconds})
-CNDT.COMMON.standardtcoords = {0.07, 0.93, 0.07, 0.93}
-
-CNDT.Categories = {}
-CNDT.CategoriesByID = {}
-CNDT.ConditionsByType = {}
-
-TMW:NewClass("ConditionCategory"){
-	OnNewInstance = function(self, identifier, order, name, spaceBefore, spaceAfter)
-		self.identifier = identifier
-		self.order = order
-		self.name = name
-		
-		self.spaceBefore = spaceBefore
-		self.spaceAfter = spaceAfter
-		
-		self.conditionData = {}
-	
-		tinsert(CNDT.Categories, self)
-		TMW:SortOrderedTables(CNDT.Categories)
-		
-		CNDT.CategoriesByID[identifier] = self
-	end,
-	
-	RegisterCondition = function(self, order, value, conditionData)
-		TMW:ValidateType("2 (order)", "ConditionCategory:RegisterCondition()", order, "number")
-		TMW:ValidateType("3 (value)", "ConditionCategory:RegisterCondition()", value, "string")
-		TMW:ValidateType("4 (conditionData)", "ConditionCategory:RegisterCondition()", conditionData, "table")
-		
-		TMW:ValidateType("funcstr", "conditionData", conditionData.funcstr, "string;function")
-		
-		if CNDT.ConditionsByType[value] then
-			error(("Condition %q already exists."):format(value), 2)
-		end
-		
-		conditionData.categoryIdentifier = self.identifier
-		conditionData.value = value
-		conditionData.order = order
-		
-		tinsert(self.conditionData, conditionData)
-		TMW:SortOrderedTables(self.conditionData)
-		
-		CNDT.ConditionsByType[value] = conditionData
-	end,
-	
-	RegisterSpacer = function(self, order)
-		TMW:ValidateType("2 (order)", "ConditionCategory:RegisterCondition()", order, "number")
-		
-		local conditionData = {
-			IS_SPACER = true,
-			order = order
-		}
-		
-		tinsert(self.conditionData, conditionData)
-		TMW:SortOrderedTables(self.conditionData)
-	end,
-}
-
-function CNDT:GetCategory(identifier, order, categoryName, spaceBefore, spaceAfter)
-	TMW:ValidateType("2 (identifier)", "CNDT:GetCategory()", identifier, "string")
-	
-	if CNDT.CategoriesByID[identifier] then
-		return CNDT.CategoriesByID[identifier]
-	end
-	
-	TMW:ValidateType("3 (order)", "CNDT:GetCategory()", order, "number")
-	TMW:ValidateType("4 (categoryName)", "CNDT:GetCategory()", categoryName, "string")
-	
-	return TMW.Classes.ConditionCategory:New(identifier, order, categoryName, spaceBefore, spaceAfter)
-end
-
-
-	
-local EnvMeta = {
-	__index = _G,
-	--__newindex = _G,
-} TMW.CNDT.EnvMeta = EnvMeta
-
-function CNDT:TMW_GLOBAL_UPDATE()
+TMW:RegisterCallback("TMW_GLOBAL_UPDATE", function()
 	Env.Locked = TMW.Locked
-end
-TMW:RegisterCallback("TMW_GLOBAL_UPDATE", CNDT)
-
-function CNDT:TMW_GLOBAL_UPDATE_POST()
-	for _, ConditionObject in pairs(TMW.Classes.ConditionObject.instances) do
-		ConditionObject:Check()
-	end
-end
-TMW:RegisterCallback("TMW_GLOBAL_UPDATE_POST", CNDT)
-
-TMW:RegisterCallback("TMW_CONFIG_ICON_RECONCILIATION_REQUESTED", function(event, replace, limitSourceGroup)
-	for Condition, _, groupID in TMW:InConditionSettings() do
-		if not limitSourceGroup or groupID == limitSourceGroup then
-			if Condition.Icon ~= "" and type(Condition.Icon) == "string" then
-				replace(Condition, "Icon")
-			end
-		end
-	end
 end)
+
+
+
+
+
+
+----------------------------------------------
+-- Checker/Anticipator Function Helpers
+----------------------------------------------
 
 local function strWrap(string)
 	local num = isNumber[string]
@@ -649,6 +589,7 @@ local function strWrap(string)
 		return format("%q", string)
 	end
 end
+
 
 local function SetupItemIDReplacer()
 	local hasZeroes = true
@@ -680,130 +621,134 @@ local function SetupItemIDReplacer()
 		end
 	end)
 	
-	SetupItemIDReplacer = nil
+	SetupItemIDReplacer = TMW.NULLFUNC
 end
-
 function CNDT:GetItemIDRefForConditionChecker(name)
 	if name == ";" or name == 0 then
 		return 0
 	end
+	
 	local id = TMW:GetItemIDs(nil, name, 1)
 	if id and id ~= 0 then
 		return id
 	end
-	if SetupItemIDReplacer then
-		SetupItemIDReplacer()
-	end
+	
+	SetupItemIDReplacer()
+	
+	-- Invoke the metamethod. Don't care about the results.
 	local _ = Env.ItemLookup[name]
+	
 	return "ItemLookup[" .. strWrap(name) .. "]"
 end
 
+
+--- Obtains the first unit from a unit setting and makes sure it is clean. Should be called whenever using unit settings, like in the {{{conditionData.events}}} function.
+-- @param setting [string] A raw condition setting that represents a unit.
+-- @return [string] The cleaned first unit from the setting passed in.
 function CNDT:GetUnit(setting)
 	return TMW.UNITS:GetOriginalUnitTable(setting)[1] or ""
 end
 
-function CNDT:DoConditionSubstitutions(conditionData, condition, thisstr)
+-- [INTERNAL]
+function CNDT:GROUP_ROSTER_UPDATE()
+	TMW.UNITS:UpdateTankAndAssistMap()
+	
+	for oldunit in pairs(Env) do
+		if CNDT.SpecialUnitsUsed[oldunit] then
+			TMW.UNITS:SubstituteTankAndAssistUnit(oldunit, Env, oldunit, true)
+		end
+	end
+end
+
+-- [INTERNAL]
+function CNDT:DoConditionSubstitutions(conditionData, conditionSettings, funcstr)
+	-- Substitutes all the c.XXXXX substitutions into a string.
+	
 	for _, append in TMW:Vararg("2", "") do -- Unit2 MUST be before Unit
-		if strfind(thisstr, "c.Unit" .. append) then
+		if strfind(funcstr, "c.Unit" .. append) then
 			local unit
 			if append == "2" then
-				unit = CNDT:GetUnit(condition.Name)
+				unit = CNDT:GetUnit(conditionSettings.Name)
 			elseif append == "" then
-				unit = CNDT:GetUnit(condition.Unit)
+				unit = CNDT:GetUnit(conditionSettings.Unit)
 			end
 			if (strfind(unit, "maintank") or strfind(unit, "mainassist")) then
-				thisstr = gsub(thisstr, "c.Unit" .. append,		unit) -- sub it in as a variable
+				funcstr = gsub(funcstr, "c.Unit" .. append,		unit) -- sub it in as a variable
 				Env[unit] = unit
 				CNDT.SpecialUnitsUsed[unit] = true
 				CNDT:RegisterEvent("GROUP_ROSTER_UPDATE")
 				CNDT:GROUP_ROSTER_UPDATE()
 			else
-				thisstr = gsub(thisstr, "c.Unit" .. append,	"\"" .. unit .. "\"") -- sub it in as a string
+				funcstr = gsub(funcstr, "c.Unit" .. append,	"\"" .. unit .. "\"") -- sub it in as a string
 			end
 		end
 	end
 
-	local name = gsub((condition.Name or ""), "; ", ";")
+	local name = gsub((conditionSettings.Name or ""), "; ", ";")
 	name = gsub(name, " ;", ";")
 	name = ";" .. name .. ";"
 	name = gsub(name, ";;", ";")
 	name = strtrim(name)
 	name = strlower(name)
 
-	local name2 = gsub((condition.Name2 or ""), "; ", ";")
+	local name2 = gsub((conditionSettings.Name2 or ""), "; ", ";")
 	name2 = gsub(name2, " ;", ";")
 	name2 = ";" .. name2 .. ";"
 	name2 = gsub(name2, ";;", ";")
 	name2 = strtrim(name2)
 	name2 = strlower(name2)
 
-	thisstr = thisstr:
-	gsub("c.Level", 		conditionData.percent and condition.Level/100 or condition.Level):
-	gsub("c.Checked", 		tostring(condition.Checked)):
-	gsub("c.Operator", 		condition.Operator):
+	funcstr = funcstr:
+	gsub("c.Level", 		conditionData.percent and conditionSettings.Level/100 or conditionSettings.Level):
+	gsub("c.Checked", 		tostring(conditionSettings.Checked)):
+	gsub("c.Checked2", 		tostring(conditionSettings.Checked2)):
+	gsub("c.Operator", 		conditionSettings.Operator):
 	
 	gsub("c.NameFirst2", 	strWrap(TMW:GetSpellNames(nil, name2, 1))): --Name2 must be before Name
 	gsub("c.NameName2", 	strWrap(TMW:GetSpellNames(nil, name2, 1, 1))):
 	gsub("c.ItemID2", 		CNDT:GetItemIDRefForConditionChecker(name2)):
-	gsub("c.Name2Raw", 		strWrap(condition.Name2)):
+	gsub("c.Name2Raw", 		strWrap(conditionSettings.Name2)):
 	gsub("c.Name2", 		strWrap(name2)):
 
 	gsub("c.NameFirst", 	strWrap(TMW:GetSpellNames(nil, name, 1))):
 	gsub("c.NameName", 		strWrap(TMW:GetSpellNames(nil, name, 1, 1))):
 	gsub("c.ItemID", 		CNDT:GetItemIDRefForConditionChecker(name)):
-	gsub("c.NameRaw", 		strWrap(condition.Name)):
+	gsub("c.NameRaw", 		strWrap(conditionSettings.Name)):
 	gsub("c.Name", 			strWrap(name)):
 
-	gsub("c.True", 			tostring(condition.Level == 0)):
-	gsub("c.False", 		tostring(condition.Level == 1)):
-	gsub("c.1nil", 			condition.Level == 0 and 1 or "nil"):
-	gsub("c.nil1", 			condition.Level == 1 and 1 or "nil"): -- reverse 1nil
+	gsub("c.True", 			tostring(conditionSettings.Level == 0)):
+	gsub("c.False", 		tostring(conditionSettings.Level == 1)):
+	gsub("c.1nil", 			conditionSettings.Level == 0 and 1 or "nil"):
+	gsub("c.nil1", 			conditionSettings.Level == 1 and 1 or "nil"): -- reverse 1nil
 
 	gsub("LOWER%((.-)%)",	strlower) -- fun gsub magic stuff
 
 	-- extra fun stuff
-	if thisstr:find("c.GCDReplacedNameFirst2") then
+	if funcstr:find("c.GCDReplacedNameFirst2") then
 		local name = TMW:GetSpellNames(nil, name2, 1)
 		if name == "gcd" then
 			name = TMW.GCDSpell
 		end
-		thisstr = thisstr:gsub("c.GCDReplacedNameFirst2", "\"" .. name .. "\"")
+		funcstr = funcstr:gsub("c.GCDReplacedNameFirst2", "\"" .. name .. "\"")
 	end
-	if thisstr:find("c.GCDReplacedNameFirst") then
+	if funcstr:find("c.GCDReplacedNameFirst") then
 		local name = TMW:GetSpellNames(nil, name, 1)
 		if name == "gcd" then
 			name = TMW.GCDSpell
 		end
-		thisstr = thisstr:gsub("c.GCDReplacedNameFirst", "\"" .. name .. "\"")
+		funcstr = funcstr:gsub("c.GCDReplacedNameFirst", "\"" .. name .. "\"")
 	end
 
-	return thisstr
+	return funcstr
 end
 
-function CNDT:IsUnitEventUnit(unit)
-	if unit == "player" then
-		return ""
-	elseif unit == "target" then
-		return "PLAYER_TARGET_CHANGED"
-	elseif unit == "pet" then
-		return "UNIT_PET|'player'"
-	elseif unit == "focus" then
-		return "PLAYER_FOCUS_CHANGED"
-	elseif unit:find("^raid%d+$") then
-		return "GROUP_ROSTER_UPDATE"
-	elseif unit:find("^party%d+$") then
-		return "GROUP_ROSTER_UPDATE"
-	elseif unit:find("^boss%d+$") then
-		return "INSTANCE_ENCOUNTER_ENGAGE_UNIT"
-	elseif unit:find("^arena%d+$") then
-		return "ARENA_OPPONENT_UPDATE"
-	end
-	
-	return "OnUpdate"
-end
-
-
+-- [INTERNAL]
 function CNDT:GetConditionCheckFunctionString(parent, Conditions)
+	-- Compiles the function checker string for the conditions.
+	-- Doesn't depend on a ConditionObject because this function is used to 
+	-- check the cache for a ConditionObject that might already exist for the conditions.
+	-- The return from this function is passed to ConditionObject's constructor.
+	
 	local funcstr = ""
 	
 	if not CNDT:CheckParentheses(Conditions) then
@@ -881,420 +826,10 @@ function CNDT:GetConditionCheckFunctionString(parent, Conditions)
 	return funcstr
 end
 
-
-
-
-local ConditionObject = TMW:NewClass("ConditionObject")
-ConditionObject.numArgsForEventString = 1
-
-function ConditionObject:OnNewInstance(Conditions, conditionString)
-	self.conditionString = conditionString
-
-	self.AutoUpdateRequests = {}
-	self.RequestedEvents = {}
-	
-	self.UpdateNeeded = true
-	self.NextUpdateTime = huge
-	self.UpdateMethod = "OnUpdate"
-	
-	local types = ""
-	if TMW.debug then
-		types = tostring(self):gsub("table: ", "_0x")
-	end
-	for n, condition in TMW:InNLengthTable(Conditions) do
-		types = types .. "_" .. condition.Type
-	end
-	self.funcIdentifier = types
-	
-	local func, err = loadstring(conditionString, "Condition" .. self.funcIdentifier)
-	if func then
-		func = setfenv(func, TMW.CNDT.Env)
-		self.CheckFunction = setfenv(func, TMW.CNDT.Env)
-	elseif err then
-		TMW:Error(err)
-	end
-	
-	self:CompileUpdateFunction(Conditions)
-	self:Check()
-end
-
-local argCheckerStringsReusable = {}
-function ConditionObject:CompileUpdateFunction(Conditions)
-	local argCheckerStrings = wipe(argCheckerStringsReusable)
-	local numAnticipatorResults = 0
-	local anticipatorstr = ""
-
-	for _, c in TMW:InNLengthTable(Conditions) do
-		local t = c.Type
-		local v = CNDT.ConditionsByType[t]
-		
-		if v and v.events then
-			local voidNext
-			for n, argCheckerString in TMW:Vararg(TMW.get(v.events, self, c)) do
-				if argCheckerString == false or argCheckerString == nil then
-					return
-				elseif type(argCheckerString) == "string" then
-					if argCheckerString == "OnUpdate" then
-						return
-					elseif argCheckerString == "" then
-						TMW:Error("Condition.events shouldn't return blank strings! (From condition %q). Return STRING 'false' if you don't want the condition to update OnUpdate but it also has no events (basically, if it is static).", t)
-					else
-						argCheckerStrings[argCheckerString] = true
-					end
-				end
-			end
-		else
-			return
-		end
-
-		-- handle code that anticipates when a change in state will occur.
-		-- this is usually used to predict when a duration threshold will be used, but you could really use it for whatever you want.
-		if v.anticipate then
-			numAnticipatorResults = numAnticipatorResults + 1
-
-			local thisstr = TMW.get(v.anticipate, c) -- get the anticipator string from the condition data
-			thisstr = CNDT:DoConditionSubstitutions(v, c, thisstr) -- substitute in any user settings
-
-			-- append a check to make sure that the smallest value out of all anticipation checks isnt less than the current time.
-			thisstr = thisstr .. [[
-			
-			if VALUE <= time then
-				VALUE = huge
-			end
-			]]
-
-			-- change VALUE to the appropriate ANTICIPATOR_RESULT#
-			thisstr = thisstr:gsub("VALUE", "ANTICIPATOR_RESULT" .. numAnticipatorResults)
-
-			anticipatorstr = anticipatorstr .. "\r\n" .. thisstr
-		end
-	end
-
-	if not next(argCheckerStrings) then
-		return
-	end
-
-	local doesAnticipate
-	if anticipatorstr ~= "" then
-		local allVars = ""
-		for i = 1, numAnticipatorResults do
-			allVars = allVars .. "ANTICIPATOR_RESULT" .. i .. ","
-		end
-		allVars = allVars:sub(1, -2)
-
-		anticipatorstr = anticipatorstr .. ([[
-		local nextTime = %s
-		if nextTime == 0 then
-			nextTime = huge
-		end
-		ConditionObject.NextUpdateTime = nextTime]]):format((numAnticipatorResults == 1 and allVars or "min(" .. allVars .. ")"))
-
-		doesAnticipate = true
-	end
-
-	self.UpdateMethod = "OnEvent" --DEBUG: COMMENTING THIS LINE FORCES ALL CONDITIONS TO BE ONUPDATE DRIVEN
-	if TMW.db.profile.DEBUG_ForceAutoUpdate then
-		self.UpdateMethod = "OnUpdate"
-	end
-	
-	-- Begin creating the final string that will be used to make the function.
-	local funcstr = "if not event then return \r\n elseif ( \r\n"
-	
-	-- Compile all of the arg checker strings into one single composite that can be checked in an (if ... then) statement.
-	local argCheckerStringComposite = ""
-	for argCheckerString in pairs(argCheckerStrings) do
-		if argCheckerString ~= "" then
-			argCheckerStringComposite = argCheckerStringComposite .. "    (" .. argCheckerString .. ") or \r\n"
-		end
-	end
-	
-	if argCheckerStringComposite ~= "" then
-		-- If any arg checkers were added to the composite (it isnt a blank string),
-		-- trim off the final ") or " at the end of it.
-		argCheckerStringComposite = argCheckerStringComposite:sub(1, -6) .. "\r\n"
-	else
-		-- The arg checker string should never ever be blank. Raise an error if it was.
-		TMW:Error("The arg checker string compiled for ConditionObject %s was blank. This should not have happened.", tostring(self))
-	end
-
-	-- Tack on the composite arg checker string to the function, and then close the elseif that it goes into.
-	funcstr = funcstr .. argCheckerStringComposite .. [[) then
-		if ConditionObject.doesAutoUpdate then
-			ConditionObject:Check()
-		else
-			ConditionObject.UpdateNeeded = true
-		end
-	end]]
-
-	-- Add the anticipator function string to the beginning of the function string, before event handling happens.
-	funcstr = anticipatorstr .. "\r\n" .. funcstr
-	
-	-- Finally, create the header of the function that will get all of the args passed into it.
-	local argHeader = [[local ConditionObject, event]]
-	for i = 1, self.numArgsForEventString do 
-		argHeader = argHeader .. [[, arg]] .. i
-	end
-	
-	-- argHeader now looks like: local ConditionObject, event, arg1, arg2, arg3, ..., argN
-	
-	-- Set the variables that accept the args to the vararg with all of the function input,
-	-- and tack on the body of the function
-	funcstr = argHeader .. " = ... \r\n" .. funcstr
-
-	funcstr = funcstr:gsub("	", "    ") -- tabs to spaces
-	
-	local func, err = loadstring(funcstr, "ConditionEvents" .. self.funcIdentifier)
-	if func then
-		func = setfenv(func, Env)
-	elseif err then
-		TMW:Error(err)
-	end
-	
-	self.updateString = funcstr
-
-	self.AnticipateFunction = doesAnticipate and func
-	self.UpdateFunction = func
-
-	-- Register the events and the object with the UpdateEngine
-	self:RegisterForUpdating()
-end
-
-function ConditionObject:Check()
-	if self.CheckFunction then
-		
-		local failed = not self:CheckFunction()
-		if self.Failed ~= failed then
-			self.Failed = failed
-			TMW:Fire("TMW_CNDT_OBJ_PASSING_CHANGED", self, failed)
-		end
-	
-		if self.UpdateMethod == "OnEvent" then
-			if self.AnticipateFunction then
-				self:AnticipateFunction()
-			end
-			
-			self.UpdateNeeded = nil
-		end
-		
-		if self.NextUpdateTime < time then
-			self.NextUpdateTime = huge
-		end
-	end
-end
-
-function ConditionObject:RequestAutoUpdates(parent, doRequest)
-	if doRequest then
-		if not next(self.AutoUpdateRequests) then
-			self.doesAutoUpdate = true
-			self:RegisterForUpdating()
-		end
-		
-		self.AutoUpdateRequests[parent] = true
-	else
-		self.AutoUpdateRequests[parent] = nil
-		
-		if not next(self.AutoUpdateRequests) then
-			self.doesAutoUpdate = false
-			--self:UnregisterForUpdating()
-		end
-	end
-end
-
-function ConditionObject:RegisterForUpdating()
-	CNDT.UpdateEngine:RegisterObject(self)
-end
-
-function ConditionObject:UnregisterForUpdating()
-	CNDT.UpdateEngine:UnregisterObject(self)
-end
-
-function ConditionObject:SetNumEventArgs(num)
-	self.numArgsForEventString = max(self.numArgsForEventString, num)
-end
-
-function ConditionObject:RequestEvent(event)
-	-- Note that this function does not actually register the event with CNDT.UpdateEngine
-	-- It simply tells the object that it needs to register the event with CNDT.UpdateEngine
-	-- once processing is done and it has been determined that the entire condition set can be event driven
-	-- (if it has no OnUpdate conditions in it)
-	self.RequestedEvents[event] = true
-end
-
-function ConditionObject:GenerateNormalEventString(event, ...)
-	self:RequestEvent(event)
-	self:SetNumEventArgs(select("#", ...))
-	
-	local str = "event == '"
-    str = str .. event
-    str = str .. "'"
-    
-	for n, arg in TMW:Vararg(...) do
-		
-		local arg_type = type(arg)
-		if 
-			arg_type ~= "number" and 
-			arg_type ~= "string" and 
-			arg_type ~= "boolean" and 
-			arg_type ~= "nil" 
-		then
-			TMW:Error("Unsupported event arg type: " .. arg_type)
-		elseif arg ~= nil then
-			str = str .. " and arg"
-			str = str .. n
-			str = str .. " == "
-			
-			if arg_type == "string" then
-				str = str .. "'"
-				str = str .. arg
-				str = str .. "'"
-			else -- number, boolean
-				str = str .. tostring(arg)
-			end
-		end
-	end
-	
-	return str
-end
-
-function ConditionObject:GetUnitChangedEventString(unit)
-	if unit == "player" then
-		-- Returning false (as a string, not a boolean) won't cause responses to any events,
-		-- and it also won't make the ConditionObject default to being OnUpdate driven.
-		
-		return "false"
-	elseif unit == "target" then
-		return self:GenerateNormalEventString("PLAYER_TARGET_CHANGED")
-	elseif unit == "pet" then
-		return self:GenerateNormalEventString("UNIT_PET", "player")
-	elseif unit == "focus" then
-		return self:GenerateNormalEventString("PLAYER_FOCUS_CHANGED")
-	elseif unit:find("^raid%d+$") then
-		return self:GenerateNormalEventString("GROUP_ROSTER_UPDATE")
-	elseif unit:find("^party%d+$") then
-		return self:GenerateNormalEventString("GROUP_ROSTER_UPDATE")
-	elseif unit:find("^boss%d+$") then
-		return self:GenerateNormalEventString("INSTANCE_ENCOUNTER_ENGAGE_UNIT")
-	elseif unit:find("^arena%d+$") then
-		return self:GenerateNormalEventString("ARENA_OPPONENT_UPDATE")
-	end
-	
-	return false
-end
-
-
-	
-local ConditionObjectConstructor = TMW:NewClass("ConditionObjectConstructor"){
-	status = "ready",
-	
-	GetStatus = function(self)
-		return self.status
-	end,
-	LoadParentAndConditions = function(self, parent, Conditions)
-		-- Loads the parent and the Condition settings that will be used to
-		-- construct a ConditionObject.
-		
-		assert(self.status == "ready", "Cannot :LoadParentAndConditions() to a ConditionObjectConstructor whose status is not 'ready'!")
-		
-		self.parent = parent
-		self.Conditions = Conditions
-		self.ConditionsToConstructWith = Conditions
-		
-		self.status = "loaded"
-	end,
-	GetPostUserModifiableConditions = function(self)
-		-- Returns a copy of the settings table that was defined through :LoadConditions()
-		-- that can be modified without changing user settings. If this modified version of the conditions is created,
-		-- it will be used to :Construct() the ConditionObject instead of the original conditions.
-		
-		if self.ModifiableConditions then
-			return self.ModifiableConditions
-		end
-	
-		self.ModifiableConditions = TMW:CopyWithMetatable(self.Conditions)
-		self.ConditionsToConstructWith = self.ModifiableConditions
-		
-		return self.ModifiableConditions
-	end,
-	
-	Modify_AppendNew = function(self)
-		-- Adds a single condition to the end.
-		-- Returns this condition so that it can be manually configured however necessary.
-		
-		local ModifiableConditions = self:GetPostUserModifiableConditions()
-		local mod = ModifiableConditions -- Alias for brevity
-		
-		mod.n = mod.n + 1
-		
-		return mod[mod.n]
-	end,
-	Modify_WrapExistingAndAppendNew = function(self)
-		-- Wraps all existing conditions in parenthesis (if needed) and adds a single condition to the end.
-		-- Returns this condition so that it can be manually configured however necessary.
-		
-		local ModifiableConditions = self:GetPostUserModifiableConditions()
-		local mod = ModifiableConditions -- Alias for brevity
-		
-		mod.n = mod.n + 1
-		if mod.n > 2 then
-			mod[1].PrtsBefore = mod[1].PrtsBefore + 1
-			mod[mod.n-1].PrtsAfter = mod[mod.n-1].PrtsAfter + 1
-		end
-		
-		return mod[mod.n]
-	end,
-		
-	Construct = function(self)
-		-- Constructs and returns a ConditionObject that will reflect any modifications
-		-- that were done through the ConditionObjectConstructor.
-		
-		local ConditionObject = CNDT:GetConditionObject(self.parent, self.ConditionsToConstructWith)
-		
-		self:Terminate()
-		
-		return ConditionObject
-	end,
-	Terminate = function(self)
-		-- Terminates the ConditionObjectConstructor and prepares it for reuse.
-		-- This is automatically called after performing :Construct().
-		
-		self.parent = nil
-		self.Conditions = nil
-		self.ConditionsToConstructWith = nil
-		self.ModifiableConditions = nil
-		
-		self.status = "ready"
-	end,
-}
-
-
-
--- Public:
-function CNDT:GetConditionObjectConstructor()
-	for _, instance in pairs(ConditionObjectConstructor.instances) do
-		if instance:GetStatus() == "ready" then
-			return instance
-		end
-	end
-	
-	return ConditionObjectConstructor:New()
-end
-
-function CNDT:GetConditionObject(parent, Conditions)
-	local conditionString = CNDT:GetConditionCheckFunctionString(parent, Conditions)
-	
-	if conditionString and conditionString ~= "" then
-		local instances = ConditionObject.instances
-		for i = 1, #instances do
-			local instance = instances[i]
-			if instance.conditionString == conditionString then
-				return instance
-			end
-		end
-		return ConditionObject:New(Conditions, conditionString)
-	end
-end
-
-function CNDT:CheckParentheses(settings)
+-- [INTERNAL]
+function CNDT:CheckParentheses(settings)	
+	-- Returns true if the parentheses for a set of condition settings are valid, otherwise false
+	-- Second return is a localized error message if they are invalid.
 
 	if settings.n < 3 then
 		return true
@@ -1324,10 +859,10 @@ function CNDT:CheckParentheses(settings)
 			typeNeeded, num = "(", numclose-numopen
 		end
 		
-		return false, L["PARENTHESIS_WARNING1"], num, L["PARENTHESIS_TYPE_" .. typeNeeded]
+		return false, L["PARENTHESIS_WARNING1"]:format(num, L["PARENTHESIS_TYPE_" .. typeNeeded])
 	elseif unopened > 0 then
 		
-		return false, L["PARENTHESIS_WARNING2"], unopened
+		return false, L["PARENTHESIS_WARNING2"]:format(unopened)
 	else
 		
 		return true
@@ -1336,174 +871,110 @@ end
 
 
 
--- Private:
-CNDT.UpdateEngine = CreateFrame("Frame")
 
-function CNDT.UpdateEngine:CreateUpdateTableManager()
-	local manager = TMW.Classes.UpdateTableManager:New()
-	
-	manager:UpdateTable_Set()
-	
-	return manager.UpdateTable_UpdateTable, manager
-end
 
-TMW:NewClass("EventUpdateTableManager", "UpdateTableManager"){
-	OnNewInstance_EventUpdateTableManager = function(self, event)
-		self.event = event
-		self:UpdateTable_Set()
-	end,
-	
-	UpdateTable_OnUsed = function(self)
-		CNDT.UpdateEngine:RegisterEvent(self.event)
-	end,
-	UpdateTable_OnUnused = function(self)
-		CNDT.UpdateEngine:UnregisterEvent(self.event)
-	end,
 
-}
-function CNDT.UpdateEngine:CreateEventUpdateTableManager(event)
-	local manager = TMW.Classes.EventUpdateTableManager:New(event)
-	
-	return manager.UpdateTable_UpdateTable, manager
-end
+----------------------------------------------
+-- Public Constructor Wrapper Methods
+----------------------------------------------
 
-local OnUpdate_UpdateTable, OnUpdate_UpdateTableManager = CNDT.UpdateEngine:CreateUpdateTableManager()
-local OnAnticipate_UpdateTable, OnAnticipate_UpdateTableManager = CNDT.UpdateEngine:CreateUpdateTableManager()
-
-CNDT.UpdateEngine.EventUpdateTables = {}
-CNDT.UpdateEngine.EventUpdateTableManagers = {}
-
-function CNDT.UpdateEngine:RegisterObjForOnEvent(ConditionObject)
-	for event in pairs(ConditionObject.RequestedEvents) do
-		self:RegisterObjForEvent(ConditionObject, event)
-	end
-	
-	if ConditionObject.AnticipateFunction and ConditionObject.doesAutoUpdate then
-		OnAnticipate_UpdateTableManager:UpdateTable_Register(ConditionObject)
-	end
-end
-function CNDT.UpdateEngine:RegisterObjForEvent(ConditionObject, event)
-	
-	if event:find("^TMW_") then
-		TMW:RegisterCallback(event, ConditionObject.UpdateFunction, ConditionObject)
-	else		
-		local UpdateTableManager = CNDT.UpdateEngine.EventUpdateTableManagers[event]
-		if not UpdateTableManager then
-			local UpdateTable
-			UpdateTable, UpdateTableManager = self:CreateEventUpdateTableManager(event)
-			
-			CNDT.UpdateEngine.EventUpdateTableManagers[event] = UpdateTableManager
-			CNDT.UpdateEngine.EventUpdateTables[event] = UpdateTable
-		end
-		
-		UpdateTableManager:UpdateTable_Register(ConditionObject)		
-	end	
-end
-
-function CNDT.UpdateEngine:UnregisterObjForOnEvent(ConditionObject)
-	for event in pairs(ConditionObject.RequestedEvents) do
-		self:UnregisterObjForEvent(ConditionObject, event)
-	end
-	
-	if ConditionObject.AnticipateFunction then
-		OnAnticipate_UpdateTableManager:UpdateTable_Unregister(ConditionObject)
-	end
-end
-function CNDT.UpdateEngine:UnregisterObjForEvent(ConditionObject, event)
-	if event:find("^TMW_") then
-		TMW:UnregisterCallback(event, ConditionObject.UpdateFunction, ConditionObject)
-	else
-		local UpdateTableManager = CNDT.UpdateEngine.EventUpdateTableManagers[event]
-		if UpdateTableManager then
-			UpdateTableManager:UpdateTable_Unregister(ConditionObject)
+--- Gets a {{{TMW.Classes.ConditionObjectConstructor}}} instance.
+-- If a pre-used one is not available for use, a new one will be created.
+-- @return [{{{TMW.Classes.ConditionObjectConstructor}}}] An instance of a {{{TMW.Classes.ConditionObjectConstructor}}}.
+function CNDT:GetConditionObjectConstructor()
+	for _, instance in pairs(TMW.Classes.ConditionObjectConstructor.instances) do
+		if instance.status == "ready" then
+			return instance
 		end
 	end
-end
-
-function CNDT.UpdateEngine:OnEvent(event, ...)
-	local UpdateTable = self.EventUpdateTables[event]
 	
-	if UpdateTable then
-		for i = 1, #UpdateTable do
-			local ConditionObject = UpdateTable[i]
-			ConditionObject:UpdateFunction(event, ...)
-		end
-	end
-end
-CNDT.UpdateEngine:SetScript("OnEvent", CNDT.UpdateEngine.OnEvent)
-
-
-
-function CNDT.UpdateEngine:RegisterObjForOnUpdate(ConditionObject)
-	OnUpdate_UpdateTableManager:UpdateTable_Register(ConditionObject)
-end
-function CNDT.UpdateEngine:UnregisterObjForOnUpdate(ConditionObject)
-	OnUpdate_UpdateTableManager:UpdateTable_Unregister(ConditionObject)
+	return TMW.Classes.ConditionObjectConstructor:New()
 end
 
-function CNDT.UpdateEngine:OnUpdate(event, time, Locked)
-	if Locked then
-		for i = 1, #OnUpdate_UpdateTable do
-			local ConditionObject = OnUpdate_UpdateTable[i]
-			
-			ConditionObject:Check()
-		end
-		
-		for i = 1, #OnAnticipate_UpdateTable do
-			local ConditionObject = OnAnticipate_UpdateTable[i]
-			if ConditionObject.NextUpdateTime < time then
-				ConditionObject:Check()
+--- Gets a {{{TMW.Classes.ConditionObject}}} for the specified parent and condition settings.
+-- @param parent [table] The parent object of the ConditionObject.
+-- @param conditionSettings [table] The condition settings that the ConditionObject will be created for.
+-- @return [{{{TMW.Classes.ConditionObject}}}|nil] A {{{TMW.Classes.ConditionObject}}} instance (may be previously cached or may be a new instance), or nil if the conditions passed in were invalid.
+function CNDT:GetConditionObject(parent, conditionSettings)
+	local conditionString = CNDT:GetConditionCheckFunctionString(parent, conditionSettings)
+	
+	if conditionString and conditionString ~= "" then
+		local instances = TMW.Classes.ConditionObject.instances
+		for i = 1, #instances do
+			local instance = instances[i]
+			if instance.conditionString == conditionString then
+				return instance
 			end
 		end
-	end
-
-end
-TMW:RegisterCallback("TMW_ONUPDATE_TIMECONSTRAINED_PRE", "OnUpdate", CNDT.UpdateEngine)
-
--- Top level methods for auto-updating, still private because they are called by ConditionObject
-function CNDT.UpdateEngine:RegisterObject(ConditionObject)
-	if ConditionObject.UpdateMethod == "OnUpdate" then
-		self:RegisterObjForOnUpdate(ConditionObject)
-		
-	elseif ConditionObject.UpdateMethod == "OnEvent" then
-		self:RegisterObjForOnEvent(ConditionObject)
-	end
-end
-function CNDT.UpdateEngine:UnregisterObject(ConditionObject)
-	if ConditionObject.UpdateMethod == "OnUpdate" then
-		self:UnregisterObjForOnUpdate(ConditionObject)
-		
-	elseif ConditionObject.UpdateMethod == "OnEvent" then
-		self:UnregisterObjForOnEvent(ConditionObject)
+		return TMW.Classes.ConditionObject:New(conditionSettings, conditionString)
 	end
 end
 
--- End Private
 
+
+
+
+
+
+----------------------------------------------
+-- Condition Categories
+----------------------------------------------
+
+CNDT.Categories = {}
+CNDT.CategoriesByID = {}
+
+function CNDT:GetCategory(identifier, order, categoryName, spaceBefore, spaceAfter)
+	TMW:ValidateType("2 (identifier)", "CNDT:GetCategory()", identifier, "string")
+	
+	if CNDT.CategoriesByID[identifier] then
+		return CNDT.CategoriesByID[identifier]
+	end
+	
+	TMW:ValidateType("3 (order)", "CNDT:GetCategory()", order, "number")
+	TMW:ValidateType("4 (categoryName)", "CNDT:GetCategory()", categoryName, "string")
+	
+	return TMW.Classes.ConditionCategory:New(identifier, order, categoryName, spaceBefore, spaceAfter)
+end
+
+
+
+
+
+
+
+----------------------------------------------
+-- Condition Sets & ConditionImplementor
+----------------------------------------------
+
+CNDT.ConditionSets = {}
+local ConditionSets = CNDT.ConditionSets
 
 TMW:NewClass("ConditionImplementor"){
 	OnNewInstance_ConditionImplementor = function(self)
-		if self.GetName then
+		if type(self.GetName) == "function" then
 			Env[self:GetName()] = self
 		end
 	end,
-	Conditions_GetConstructor = function(self, Conditions)
+	
+	--- Gets a {{{TMW.Classes.ConditionObjectConstructor}}} and loads in self as the parent and the passed in settings as the settings.
+	-- @name ConditionImplementor:Conditions_GetConstructor
+	-- @paramsig conditionSettings
+	-- @param conditionSettings [table] The condition settings that will be loaded into the ConditionObjectConstructor.
+	-- @return [{{{TMW.Classes.ConditionObjectConstructor}}}] An instance of a ConditionObjectConstructor.
+	-- @usage local ConditionObjectConstructor = icon:Conditions_GetConstructor(icon.Conditions)
+	-- icon.ConditionObject = ConditionObjectConstructor:Construct()
+	Conditions_GetConstructor = function(self, conditionSettings)
 		local ConditionObjectConstructor = TMW.CNDT:GetConditionObjectConstructor()
 		
-		ConditionObjectConstructor:LoadParentAndConditions(self, Conditions)
+		ConditionObjectConstructor:LoadParentAndConditions(self, conditionSettings)
 		
 		return ConditionObjectConstructor
 	end,
 }
 
-
-
-
-
-
-CNDT.ConditionSets = {}
-local ConditionSets = CNDT.ConditionSets
-
+--- Registers a Condition Set. A condition set defines an implementation of conditions.
+-- @param identifier [string] An identifier for this condition set.
+-- @param conditionSetData [table] A table that defines how the condition set is implemented. See the TODO: CONDITION SET DATA SPECIFICATION
 function CNDT:RegisterConditionSet(identifier, conditionSetData)
 	local data = conditionSetData
 	
@@ -1535,7 +1006,7 @@ function CNDT:RegisterConditionSet(identifier, conditionSetData)
 	
 	data.identifier = identifier
 	
-	local defaults = TMW.Condition_Defaults
+	local defaults = CNDT.Condition_Defaults
 	if data.modifiedDefaults then
 		defaults = CopyTable(defaults)
 		TMW:CopyTableInPlaceWithMeta(data.modifiedDefaults, defaults["**"], true)
@@ -1553,6 +1024,11 @@ function CNDT:RegisterConditionSet(identifier, conditionSetData)
 		end)
 	end
 end
+
+--- Inherits {{{TMW.Classes.ConditionImplementor}}} into the specified class. This should be done when a class implements a ConditionSet.
+-- Provides the {{{ConditionImplementor:Conditions_GetConstructor()}}} method to that class.
+-- @param className [string] The name of a class that ConditionImplementor should be inherited into.
+-- @usage TMW.CNDT:RegisterConditionImplementingClass("Icon")
 function CNDT:RegisterConditionImplementingClass(className)
 	TMW:ValidateType("2 (className)", "CNDT:RegisterConditionImplementingClass()", className, "string")
 	
@@ -1560,57 +1036,13 @@ function CNDT:RegisterConditionImplementingClass(className)
 		error(("No class named %q exists to embed ConditionImplementor into."):format(className), 2)
 	end
 	
+	if next(TMW.Classes[className].instances) then
+		error(("Class %q already has instances created! Can't make it into a condition implementing class."):format(className), 2)
+	end
+	
 	TMW.Classes[className]:Inherit("ConditionImplementor")
 end
 
-
-CNDT:RegisterConditionImplementingClass("Icon")
-CNDT:RegisterConditionSet("Icon", {
-	parentSettingType = "icon",
-	parentDefaults = TMW.Icon_Defaults,
-	
-	settingKey = "Conditions",
-	GetSettings = function(self)
-		if TMW.CI.ics then
-			return TMW.CI.ics.Conditions
-		end
-	end,
-	
-	iterFunc = TMW.InIconSettings,
-	iterArgs = {
-		[1] = TMW,
-	},
-	
-	GetTab = function(self)
-		return TMW.IE.IconConditionTab
-	end,
-	tabText = L["CONDITIONS"],
-	tabTooltip = L["ICONCONDITIONS_DESC"],
-})
-
-CNDT:RegisterConditionImplementingClass("Group")
-CNDT:RegisterConditionSet("Group", {
-	parentSettingType = "group",
-	parentDefaults = TMW.Group_Defaults,
-	
-	settingKey = "Conditions",
-	GetSettings = function(self)
-		if TMW.CI.g then
-			return TMW.db.profile.Groups[TMW.CI.g].Conditions
-		end
-	end,
-	
-	iterFunc = TMW.InGroupSettings,
-	iterArgs = {
-		[1] = TMW,
-	},
-	
-	GetTab = function(self)
-		return TMW.IE.GroupConditionTab
-	end,
-	tabText = L["GROUPCONDITIONS"],
-	tabTooltip = L["GROUPCONDITIONS_DESC"],
-})
 
 TMW:RegisterCallback("TMW_UPGRADE_REQUESTED", function(event, type, version, ...)
 	local parentSettings = ...
@@ -1674,8 +1106,23 @@ do -- InConditionSettings
 		return condition, state.currentConditionID, state.cg, state.ci -- condition data, conditionID, groupID, iconID
 	end
 
+	--- Iterates over all condition settings for all condition sets.
+	-- @return An interator that provides (conditionSettings, conditionID, groupID, iconID) for each iteration.
+	-- @usage	for conditionSettings, conditionID, groupID, iconID in TMW:InConditionSettings() do
+	--		print(conditionSettings, conditionID, groupID, iconID)
+	--	end
 	function TMW:InConditionSettings()
 		return iter, getstate()
 	end
 end
 
+
+TMW:RegisterCallback("TMW_CONFIG_ICON_RECONCILIATION_REQUESTED", function(event, replace, limitSourceGroup)
+	for Condition, _, groupID in TMW:InConditionSettings() do
+		if not limitSourceGroup or groupID == limitSourceGroup then
+			if Condition.Icon ~= "" and type(Condition.Icon) == "string" then
+				replace(Condition, "Icon")
+			end
+		end
+	end
+end)

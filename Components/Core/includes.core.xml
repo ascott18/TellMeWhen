@@ -4,6 +4,16 @@
 
 
 
+<Include file="Help\includes.core.xml"/>
+<Include file="Common\includes.core.xml"/>
+<Include file="Spells\includes.core.xml"/>
+<Include file="Suggester\includes.core.xml"/>
+<Include file="Conditions\includes.core.xml"/>
+<Include file="Units\includes.core.xml"/>
+<Include file="Resizer_Generic\includes.core.xml"/>
+
+
+
 <Script file="IconType.lua"/>
 <Script file="IconView.lua"/>
 
@@ -15,15 +25,6 @@
 <Script file="IconDataProcessor.lua"/>
 <Script file="IconDataProcessorHook.lua"/>
 
-
-
-<Include file="Help\includes.core.xml"/>
-<Include file="Common\includes.core.xml"/>
-<Include file="Spells\includes.core.xml"/>
-<Include file="Suggester\includes.core.xml"/>
-<Include file="Conditions\includes.core.xml"/>
-<Include file="Units\includes.core.xml"/>
-<Include file="Resizer_Generic\includes.core.xml"/>
 
 
 <Script file="PlayerNames.lua"/>

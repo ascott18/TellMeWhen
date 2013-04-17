@@ -56,26 +56,26 @@ end
 -- @param eventHandlerName [string] name of an instance of {{{TMW.Classes.EventHandler}}} that the data should be registered and validated with. The instance does not have to exist before this method is called.
 -- @param ... [...] Data as required by the {{{TMW.Classes.EventHandler}}} that it is being registered with. See the documentation of the {{{OnRegisterEventHandlerDataTable}}} method of individual {{{TMW.Classes.EventHandler}}} instances for more information.
 -- @usage
---	IconComponent:RegisterEventHandlerData("Animations", 60, "ACTVTNGLOW", {
---		text = L["ANIM_ACTVTNGLOW"],
---		desc = L["ANIM_ACTVTNGLOW_DESC"],
---		ConfigFrames = {
---			"Duration",
---			"Infinite",
---		},
---		Play = function(icon, eventSettings)
---			-- ... function body withheld for brevity.
---		end
---		OnUpdate = function(icon, table)
---			-- ... function body withheld for brevity.
---		end
---		OnStart = function(icon, table)
---			-- ... function body withheld for brevity.
---		end
---		OnStop = function(icon, table)
---			-- ... function body withheld for brevity.
---		end
---	})
+--  IconComponent:RegisterEventHandlerData("Animations", 60, "ACTVTNGLOW", {
+--    text = L["ANIM_ACTVTNGLOW"],
+--    desc = L["ANIM_ACTVTNGLOW_DESC"],
+--    ConfigFrames = {
+--      "Duration",
+--      "Infinite",
+--    },
+--    Play = function(icon, eventSettings)
+--      -- ... function body withheld for brevity.
+--    end
+--    OnUpdate = function(icon, table)
+--      -- ... function body withheld for brevity.
+--    end
+--    OnStart = function(icon, table)
+--      -- ... function body withheld for brevity.
+--    end
+--    OnStop = function(icon, table)
+--      -- ... function body withheld for brevity.
+--    end
+--  })
 function IconComponent:RegisterEventHandlerData(eventHandlerName, ...)
 	local EventHandler = TMW:GetEventHandler(eventHandlerName)
 	
@@ -105,13 +105,13 @@ end
 --- Register a set of icon defaults with an {{{TMW.Classes.IconComponent}}}. These defaults will be merged into {{{TMW.Icon_Defaults}}} and the value of their settings for each icon will be avaialable as {{{TMW.Classes.Icon[settingKey]}}} when this {{{TMW.Classes.IconComponent}}} has been implemented into a {{{TMW.Classes.Icon}}}.
 -- @param defaults [table] A table of default settings that will be merged into {{{TMW.Icon_Defaults}}}.
 -- @usage -- Taken from TMW.Types.meta:
---	Type:RegisterIconDefaults{
---		Sort					= false,
---		CheckNext				= false,
---		Icons					= {
---			[1]					= "",
---		},   
---	}
+--  Type:RegisterIconDefaults{
+--    Sort          = false,
+--    CheckNext        = false,
+--    Icons          = {
+--      [1]          = "",
+--    },   
+--  }
 function IconComponent:RegisterIconDefaults(defaults)
 	TMW:ValidateType("2 (defaults)", "IconComponent:RegisterIconDefaults(defaults)", defaults, "table")
 	
@@ -138,28 +138,28 @@ end
 -- 	* table.valueSuffix [string|nil] - An optional string that describes what kind of data is being checked by conditionChecker.
 -- 	* table.conditionChecker [function|nil] - An optional function with signature (icon, eventSettings) that will return a boolean that indicates if the condition set for the event has succeeded based on the icon's current state.
 -- @usage -- Taken from IconDataProcessor_Alpha_Real
---	Processor:RegisterIconEvent(12, "OnHide", {
---		text = L["SOUND_EVENT_ONHIDE"],
---		desc = L["SOUND_EVENT_ONHIDE_DESC"],
---		settings = {
---			OnlyShown = "FORCEDISABLED",
---		},
---	})
---	Processor:RegisterIconEvent(13, "OnAlphaInc", {
---		text = L["SOUND_EVENT_ONALPHAINC"],
---		desc = L["SOUND_EVENT_ONALPHAINC_DESC"],
---		settings = {
---			Operator = true,
---			Value = true,
---			CndtJustPassed = true,
---			PassingCndt = true,
---		},
---		valueName = L["ALPHA"],
---		valueSuffix = "%",
---		conditionChecker = function(icon, eventSettings)
---			return TMW.CompareFuncs[eventSettings.Operator](icon.attributes.realAlpha * 100, eventSettings.Value)
---		end,
---	})
+--  Processor:RegisterIconEvent(12, "OnHide", {
+--    text = L["SOUND_EVENT_ONHIDE"],
+--    desc = L["SOUND_EVENT_ONHIDE_DESC"],
+--    settings = {
+--      OnlyShown = "FORCEDISABLED",
+--    },
+--  })
+--  Processor:RegisterIconEvent(13, "OnAlphaInc", {
+--    text = L["SOUND_EVENT_ONALPHAINC"],
+--    desc = L["SOUND_EVENT_ONALPHAINC_DESC"],
+--    settings = {
+--      Operator = true,
+--      Value = true,
+--      CndtJustPassed = true,
+--      PassingCndt = true,
+--    },
+--    valueName = L["ALPHA"],
+--    valueSuffix = "%",
+--    conditionChecker = function(icon, eventSettings)
+--      return TMW.CompareFuncs[eventSettings.Operator](icon.attributes.realAlpha * 100, eventSettings.Value)
+--    end,
+--  })
 function IconComponent:RegisterIconEvent(order, event, eventData)
 	TMW:ValidateType("2 (order)", "IconComponent:RegisterIconEvent()", order, "number")
 	TMW:ValidateType("3 (event)", "IconComponent:RegisterIconEvent()", event, "string")
@@ -208,20 +208,20 @@ end
 -- @param xmlTemplateName [string] The name of an XML template. This template must inherit from the XML template {{{TellMeWhen_OptionsModuleContainer}}}. The frame will be created once it is needed, and it will be named after the template it is based on (the string passed as this param). Some XML templates for commonly used settings are built into TMW, like {{{TellMeWhen_ChooseName}}} and {{{TellMeWhen_WhenChecks}}}.
 -- @param supplementalData [.*] Any data that will be associated with the created frame when it is used for this specific {{{TellMeWhen.Classes.IconComponent}}} implementation. This data can be accessed through the 2nd arg of event {{{TMW_CONFIG_PANEL_SETUP}}} as can be seen in the usage example below.
 -- @usage
---	-- Registering an XML Template config panel:
---	Type:RegisterConfigPanel_XMLTemplate(100, "TellMeWhen_ConfigPanel_Example", {
---		text = "Title for the panel",
---		someData1 = 4,
---		someData2 = "Some other data",
---	})
+--  -- Registering an XML Template config panel:
+--  Type:RegisterConfigPanel_XMLTemplate(100, "TellMeWhen_ConfigPanel_Example", {
+--    text = "Title for the panel",
+--    someData1 = 4,
+--    someData2 = "Some other data",
+--  })
 -- 
--- 	-- Accessing supplementalData:
---	TMW:RegisterCallback("TMW_CONFIG_PANEL_SETUP", function(event, frame, panelInfo)
---		if frame:GetName() == "TellMeWhen_ConfigPanel_Example" then
---			local supplementalData = panelInfo.supplementalData
---			frame.Header:SetText(supplementalData.text)
---		end
---	end)
+--   -- Accessing supplementalData:
+--  TMW:RegisterCallback("TMW_CONFIG_PANEL_SETUP", function(event, frame, panelInfo)
+--    if frame:GetName() == "TellMeWhen_ConfigPanel_Example" then
+--      local supplementalData = panelInfo.supplementalData
+--      frame.Header:SetText(supplementalData.text)
+--    end
+--  end)
 function IconComponent:RegisterConfigPanel_XMLTemplate(order, xmlTemplateName, supplementalData)
 	TMW:ValidateType(2, "IconComponent:RegisterConfigPanel_XMLTemplate()", order, "number")
 	TMW:ValidateType(3, "IconComponent:RegisterConfigPanel_XMLTemplate()", xmlTemplateName, "string")
@@ -237,27 +237,27 @@ end
 -- @param func [function] A function that will be called immediately after the frame for this panel has been constructed. The panel inherits from XML template {{{TellMeWhen_OptionsModuleContainer}}}, and will be passed as the first arg to this function.
 -- @param supplementalData [.*] Any data that will be associated with the created frame when it is used for this specific {{{TellMeWhen.Classes.IconComponent}}} implementation. This data can be accessed through the 2nd arg of event {{{TMW_CONFIG_PANEL_SETUP}}} as can be seen in the usage example below. Using {{{supplementalData}}} with {{{:RegisterConfigPanel_ConstructorFunc}}} is highly impractical since panels created using this method cannot be shared with other {{{TMW.Classes.IconComponent}}}, and the purpose of {{{supplementalData}}} is to encourage the reusability of frames.
 -- @usage
---	-- Taken from the example at http://wow.curseforge.com/addons/tellmewhen/pages/api/icon-type/how-to-use/
---	Type:RegisterConfigPanel_ConstructorFunc(150, "TellMeWhen_TestTypeSettings", function(self)
---		self.Header:SetText(Type.name)
---		TMW.IE:BuildSimpleCheckSettingFrame(self, {
---			{
---				setting = "RangeCheck",
---				title = L["ICONMENU_RANGECHECK"],
---				tooltip = L["ICONMENU_RANGECHECK_DESC"],
---			},
---			{
---				setting = "ManaCheck",
---				title = L["ICONMENU_MANACHECK"],
---				tooltip = L["ICONMENU_MANACHECK_DESC"],
---			},
---			{
---				setting = "TestType_SomeSetting",
---				title = "Some Custom Setting",
---				tooltip = "Check for stack text to be 'Hello'. Uncheck for stack text to be 'World'",
---			},
---		})
---	end)
+--  -- Taken from the example at http://wow.curseforge.com/addons/tellmewhen/pages/api/icon-type/how-to-use/
+--  Type:RegisterConfigPanel_ConstructorFunc(150, "TellMeWhen_TestTypeSettings", function(self)
+--    self.Header:SetText(Type.name)
+--    TMW.IE:BuildSimpleCheckSettingFrame(self, {
+--      {
+--        setting = "RangeCheck",
+--        title = L["ICONMENU_RANGECHECK"],
+--        tooltip = L["ICONMENU_RANGECHECK_DESC"],
+--      },
+--      {
+--        setting = "ManaCheck",
+--        title = L["ICONMENU_MANACHECK"],
+--        tooltip = L["ICONMENU_MANACHECK_DESC"],
+--      },
+--      {
+--        setting = "TestType_SomeSetting",
+--        title = "Some Custom Setting",
+--        tooltip = "Check for stack text to be 'Hello'. Uncheck for stack text to be 'World'",
+--      },
+--    })
+--  end)
 function IconComponent:RegisterConfigPanel_ConstructorFunc(order, frameName, func, supplementalData)
 	TMW:ValidateType(2, "IconComponent:RegisterConfigPanel_ConstructorFunc()", order, "number")
 	TMW:ValidateType(3, "IconComponent:RegisterConfigPanel_ConstructorFunc()", frameName, "string")

@@ -33,6 +33,7 @@ ConditionCategory:RegisterCondition(1,	 "EXISTS", {
 	nooperator = true,
 	icon = "Interface\\Icons\\ABILITY_SEAL",
 	tcoords = CNDT.COMMON.standardtcoords,
+	defaultUnit = "target",
 	Env = {
 		UnitExists = UnitExists,
 	},
@@ -139,6 +140,7 @@ ConditionCategory:RegisterCondition(6,	 "REACT", {
 	text = L["ICONMENU_REACT"],
 	min = 1,
 	max = 2,
+	defaultUnit = "target",
 	texttable = {[1] = L["ICONMENU_HOSTILE"], [2] = L["ICONMENU_FRIEND"]},
 	nooperator = true,
 	icon = "Interface\\Icons\\Warrior_talent_icon_FuryInTheBlood",
@@ -155,10 +157,11 @@ ConditionCategory:RegisterCondition(6,	 "REACT", {
 			ConditionObject:GenerateNormalEventString("UNIT_FLAGS", "player")
 	end,
 })
-ConditionCategory:RegisterCondition(6.2,	 "ISPLAYER", {
+ConditionCategory:RegisterCondition(6.2, "ISPLAYER", {
 	text = L["ICONMENU_ISPLAYER"],
 	min = 0,
 	max = 1,
+	defaultUnit = "target",
 	texttable = CNDT.COMMON.bool,
 	nooperator = true,
 	icon = "Interface\\Icons\\INV_Misc_Head_Human_02",
@@ -225,9 +228,9 @@ ConditionCategory:RegisterCondition(9,	 "NAME", {
 			ConditionObject:GenerateNormalEventString("UNIT_NAME_UPDATE", CNDT:GetUnit(c.Unit))
 	end,
 })
-ConditionCategory:RegisterCondition(9.5,	 "NPCID", {
+ConditionCategory:RegisterCondition(9.5, "NPCID", {
 	text = L["CONDITIONPANEL_NPCID"],
-	desc = L["CONDITIONPANEL_NPCID_DESC"],
+	tooltip = L["CONDITIONPANEL_NPCID_DESC"],
 	min = 0,
 	max = 1,
 	name = function(editbox) TMW:TT(editbox, "CONDITIONPANEL_NPCIDTOMATCH", "CONDITIONPANEL_NPCIDTOOLTIP") editbox.label = L["CONDITIONPANEL_NPCIDTOMATCH"] end,
@@ -314,6 +317,7 @@ ConditionCategory:RegisterCondition(12,	 "CLASSIFICATION", {
 	text = L["CONDITIONPANEL_CLASSIFICATION"],
 	min = 1,
 	max = #unitClassifications,
+	defaultUnit = "target",
 	texttable = function(k) return L[unitClassifications[k]] end,
 	icon = "Interface\\Icons\\achievement_pvp_h_03",
 	tcoords = CNDT.COMMON.standardtcoords,
@@ -333,6 +337,7 @@ ConditionCategory:RegisterCondition(13,	 "CREATURETYPE", {
 	text = L["CONDITIONPANEL_CREATURETYPE"],
 	min = 0,
 	max = 1,
+	defaultUnit = "target",
 	name = function(editbox)
 		TMW:TT(editbox, "CONDITIONPANEL_CREATURETYPE_LABEL", "CONDITIONPANEL_CREATURETYPE_DESC")
 		editbox.label = L["CONDITIONPANEL_CREATURETYPE_LABEL"]
@@ -429,6 +434,7 @@ ConditionCategory:RegisterCondition(17,	 "THREATSCALED", {
 	tooltip = L["CONDITIONPANEL_THREAT_SCALED_DESC"],
 	min = 0,
 	max = 100,
+	defaultUnit = "target",
 	texttable = CNDT.COMMON.percent,
 	icon = "Interface\\Icons\\spell_misc_emotionangry",
 	tcoords = CNDT.COMMON.standardtcoords,
@@ -443,6 +449,7 @@ ConditionCategory:RegisterCondition(18,	 "THREATRAW", {
 	tooltip = L["CONDITIONPANEL_THREAT_RAW_DESC"],
 	min = 0,
 	max = 130,
+	defaultUnit = "target",
 	texttable = CNDT.COMMON.percent,
 	icon = "Interface\\Icons\\spell_misc_emotionhappy",
 	tcoords = CNDT.COMMON.standardtcoords,

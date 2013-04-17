@@ -42,6 +42,32 @@ local UnitAffectingCombat, GetActiveSpecGroup, GetSpecialization
 local Group = TMW:NewClass("Group", "Frame", "UpdateTableManager", "GenericModuleImplementor")
 Group:UpdateTable_Set(TMW.GroupsToUpdate)
 
+
+TMW.CNDT:RegisterConditionImplementingClass("Group")
+TMW.CNDT:RegisterConditionSet("Group", {
+	parentSettingType = "group",
+	parentDefaults = TMW.Group_Defaults,
+	
+	settingKey = "Conditions",
+	GetSettings = function(self)
+		if TMW.CI.g then
+			return TMW.db.profile.Groups[TMW.CI.g].Conditions
+		end
+	end,
+	
+	iterFunc = TMW.InGroupSettings,
+	iterArgs = {
+		[1] = TMW,
+	},
+	
+	GetTab = function(self)
+		return TMW.IE.GroupConditionTab
+	end,
+	tabText = L["GROUPCONDITIONS"],
+	tabTooltip = L["GROUPCONDITIONS_DESC"],
+})
+
+
 function Group.OnNewInstance(group, ...)
 	local _, name, _, _, groupID = ... -- the CreateFrame args
 	TMW[groupID] = group
