@@ -87,7 +87,7 @@ function ConditionObjectConstructor:Modify_WrapExistingAndAppendNew()
 	return mod[mod.n]
 end
 
---- Constructs the conditions that have been loaded into this ConditionObjectConstructor into a {{{TMW.Classes.ConditionObject}}}.
+--- Constructs  a {{{TMW.Classes.ConditionObject}}} from the conditions that have been loaded into this ConditionObjectConstructor.
 -- If :GetPostUserModifiableConditions() was called, that copy of condition settings will be used instead.
 -- @return [{{{TMW.Classes.ConditionObject}}}] A ConditionObject based on the ConditionObjectConstructor's settings.
 function ConditionObjectConstructor:Construct()	

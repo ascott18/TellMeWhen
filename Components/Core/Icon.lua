@@ -58,7 +58,7 @@ Icon.NextUpdateTime = math.huge
 local QueuedIcons = Icon.QueuedIcons
 
 
-TMW.CNDT:RegisterConditionImplementingClass("Icon")
+TMW.CNDT:RegisterConditionSetImplementingClass("Icon")
 TMW.CNDT:RegisterConditionSet("Icon", {
 	parentSettingType = "icon",
 	parentDefaults = TMW.Icon_Defaults,

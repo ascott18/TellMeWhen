@@ -1,0 +1,111 @@
+
+= Condition Set Table Specification
+
+The Condition Set table is a table that completely describes an implementation of the conditions framework in TellMeWhen. See {{{TMW.Classes.ConditionCategory}}}{{{:RegisterCondition()}}} for information about where this table is passed to.
+
+
+== Table Fields
+
+* parentSettingType [Required]
+** [String] The type of settings that are the direct parent of the Condition Set.
+** This is used to include the implementation of these conditions in any condition setting upgrades that are needed.
+** Possible values include (but are not limited to):
+*** "icon"
+*** "group"
+*** "iconEventHandler"
+*** "profile"
+
+* parentDefaults [Required]
+** [Table] The AceDB-3.0 defaults table that will hold the Condition Set's settings keyed with the {{{settingKey}}} field.
+** Possible values include (but are not limited to):
+*** TMW.Icon_Defaults
+*** TMW.Group_Defaults
+*** TMW.Icon_Defaults.Events["**"]
+
+* settingKey [Required]
+** [String] The key that will be used to store the settings in the {{{parentDefaults}}} table.
+
+* modifiedDefaults [Optional]
+** [Table] A table that will be merged into the settings of every new condition that is created for this Condition Set.
+
+* ConditionTypeFilter [Optional]
+** [Function] A function that will be passed parameters {{{(self, conditionData)}}} where self is this Condition Set table and conditionData is a [[http://wow.curseforge.com/addons/tellmewhen/pages/api/conditions/api-documentation/condition-data-specification|Condition Data table]].
+** Should return a boolean indicating if that condition should be allowed for use with the Condition Set.
+** If nil is returned, the condition will not be allowed. If this function is undefined, all conditions will be allowed.
+
+* GetSettings [Required]
+** [Function] Function that returns a table of the settings for the Condition Set that are currently being edited by the Icon Editor.
+** Called with {{{self}}} (this Condition Set table) as the first param.
+
+* iterFunc [Required]
+** [Function] An iterator function that can be called to iterate over all of the parent settings of this Condition Set.
+** Possible values include (but are not limited to; define your own if needed):
+*** TMW.InIconSettings
+*** TMW.InGroupSettings
+
+* iterArgs [Required]
+** The static args that will be passed to the {{{iterFunc}}} when it is called.
+** For TMW.InIconSettings and TMW.InGroupSettings as the {{{iterFunc}}}, this is just {{{ {[1] = TMW} }}}.
+
+* useDynamicTab [Optional]
+** [Boolean] Set true if the dynamic condition tab should be used. You should almost certainly set this to true (and not use GetTab) unless you have a damn good reason not to.
+** You must define either this field or the {{{GetTab}}} function.
+
+* GetTab [Optional]
+** [Function] A function that returns a tab in the Icon Editor that will be used to edit conditions in this Condition Set.
+** Called with {{{self}}} (this Condition Set table) as the first param.
+** You must define either this function or the {{{useDynamicTab}}} field.
+
+* ShouldShowTab [Required if useDynamicTab == true]
+** [Function] A function that will return a boolean indicating if the dynamic tab should be shown.
+** Only define this if {{{useDynamicTab}}} is true.
+** The tab will always be hidden once another tab is selected, but this function will help hide it when other things change.
+** This function is called in an OnUpdate script to ensure that the tab will be hidden (almost) immediately once this function's return becomes false.
+
+* tabText [Required]
+** [String] The text that will be shown on the Icon Editor tab that is editing conditions for this Condition Set.
+
+
+== Example 
+
+This is the definition of the UnitSet Condition Set.
+
+<<code lua>>
+local CNDT = TMW.CNDT
+CNDT:RegisterConditionSetImplementingClass("UnitSet")
+
+local ConditionSet = {
+  parentSettingType = "icon",
+  parentDefaults = TMW.Icon_Defaults,
+  modifiedDefaults = {
+    Unit = "unit",
+  },
+  
+  settingKey = "UnitConditions",
+  GetSettings = function(self)
+    return TMW.CI.ics.UnitConditions
+  end,
+  
+  iterFunc = TMW.InIconSettings,
+  iterArgs = {
+    [1] = TMW,
+  },
+
+  useDynamicTab = true,
+  ShouldShowTab = function(self)
+    return TellMeWhen_Unit and TellMeWhen_Unit:IsShown()
+  end,
+  tabText = L["UNITCONDITIONS"],
+  tabTooltip = L["UNITCONDITIONS_TAB_DESC"],
+  
+  ConditionTypeFilter = function(self, conditionData)
+    if conditionData.unit == nil then
+      return true
+    elseif conditionData.identifier == "LUA" then
+      return true
+    end
+  end,
+}
+
+CNDT:RegisterConditionSet("Unit", ConditionSet)
+<</code>>

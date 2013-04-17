@@ -499,7 +499,7 @@ end
 
 do
 	local CNDT = TMW.CNDT
-	CNDT:RegisterConditionImplementingClass("UnitSet")
+	CNDT:RegisterConditionSetImplementingClass("UnitSet")
 	
 	TMW:RegisterUpgrade(60344, {
 		icon = function(self, ics)
@@ -536,7 +536,7 @@ do
 		ConditionTypeFilter = function(self, conditionData)
 			if conditionData.unit == nil then
 				return true
-			elseif conditionData.value == "LUA" then
+			elseif conditionData.identifier == "LUA" then
 				return true
 			end
 		end,

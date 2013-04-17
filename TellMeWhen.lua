@@ -21,7 +21,7 @@ local L = LibStub("AceLocale-3.0"):GetLocale("TellMeWhen", true)
 TELLMEWHEN_VERSION = "6.2.0"
 TELLMEWHEN_VERSION_MINOR = strmatch(" @project-version@", " r%d+") or ""
 TELLMEWHEN_VERSION_FULL = TELLMEWHEN_VERSION .. TELLMEWHEN_VERSION_MINOR
-TELLMEWHEN_VERSIONNUMBER = 62024 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
+TELLMEWHEN_VERSIONNUMBER = 62025 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
 if TELLMEWHEN_VERSIONNUMBER > 63000 or TELLMEWHEN_VERSIONNUMBER < 62000 then return error("YOU SCREWED UP THE VERSION NUMBER OR DIDNT CHANGE THE SAFETY LIMITS") end -- safety check because i accidentally made the version number 414069 once
 
 TELLMEWHEN_MAXROWS = 20
@@ -2779,11 +2779,11 @@ function TMW:Upgrade()
 	end
 	
 	if TellMeWhenDB.Version < TELLMEWHEN_VERSIONNUMBER then
-		TMW:DoUpgrade("global", TellMeWhenDB.Version)
+		TMW:DoUpgrade("global", TellMeWhenDB.Version, TMW.db.global)
 	end
 	
 	if TMW.db.profile.Version < TELLMEWHEN_VERSIONNUMBER then
-		TMW:DoUpgrade("profile", TMW.db.profile.Version)
+		TMW:DoUpgrade("profile", TMW.db.profile.Version, TMW.db.profile)
 	end
 end
 

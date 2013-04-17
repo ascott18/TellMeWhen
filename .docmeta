@@ -40,6 +40,10 @@
     output-page: "API/Conditions/API Documentation/ConditionObject"
 -
     type: luadoc
+    input-file: "Components/Core/Conditions/Conditions.lua"
+    output-page: "API/Conditions/API Documentation/Conditions Core"
+-
+    type: luadoc
     input-file: "Components/Core/Conditions/ConditionCategory.lua"
     output-page: "API/Conditions/API Documentation/ConditionCategory"
 -
@@ -50,3 +54,7 @@
     type: creole
     input-file: "Documentation/Conditions/ConditionDataSpecification.txt"
     output-page: "API/Conditions/API Documentation/Condition Data Specification"
+-
+    type: creole
+    input-file: "Documentation/Conditions/ConditionSetSpecification.txt"
+    output-page: "API/Conditions/API Documentation/Condition Set Specification"

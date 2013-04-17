@@ -43,7 +43,7 @@ local Group = TMW:NewClass("Group", "Frame", "UpdateTableManager", "GenericModul
 Group:UpdateTable_Set(TMW.GroupsToUpdate)
 
 
-TMW.CNDT:RegisterConditionImplementingClass("Group")
+TMW.CNDT:RegisterConditionSetImplementingClass("Group")
 TMW.CNDT:RegisterConditionSet("Group", {
 	parentSettingType = "group",
 	parentDefaults = TMW.Group_Defaults,

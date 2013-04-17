@@ -44,6 +44,16 @@ CNDT.SpecialUnitsUsed = {}
 
 
 
+--- Conditions.lua contains the conditions core.
+-- 
+-- In it you can find methods for getting condition categories, condition objects, and condition constructors.
+-- 
+-- {{{CNDT}}} is an alias for {{{TMW.CNDT}}}
+-- 
+-- @class file
+-- @name Conditions.lua
+
+
 
 
 ----------------------------------------------
@@ -923,6 +933,12 @@ end
 CNDT.Categories = {}
 CNDT.CategoriesByID = {}
 
+--- Gets a {{{TMW.Classes.ConditionCategory}}} instance. If one does not already exist with the specified identifier, a new one will be created.
+-- @param identifier [string] A string that will uniquely identify this category.
+-- @param order [number] The order of this category, relative to other categories, in the condition type dropdown menu.
+-- @param categoryName [string] Localized name of the category.
+-- @param spaceBefore [boolean|nil] True if there should be a space before this category is listed in the condition type dropdown menu.
+-- @param spaceAfter [boolean|nil] True if there should be a space after this category is listed in the condition type dropdown menu.
 function CNDT:GetCategory(identifier, order, categoryName, spaceBefore, spaceAfter)
 	TMW:ValidateType("2 (identifier)", "CNDT:GetCategory()", identifier, "string")
 	
@@ -943,21 +959,21 @@ end
 
 
 ----------------------------------------------
--- Condition Sets & ConditionImplementor
+-- Condition Sets & ConditionSetImplementor
 ----------------------------------------------
 
 CNDT.ConditionSets = {}
 local ConditionSets = CNDT.ConditionSets
 
-TMW:NewClass("ConditionImplementor"){
-	OnNewInstance_ConditionImplementor = function(self)
+TMW:NewClass("ConditionSetImplementor"){
+	OnNewInstance_ConditionSetImplementor = function(self)
 		if type(self.GetName) == "function" then
 			Env[self:GetName()] = self
 		end
 	end,
 	
 	--- Gets a {{{TMW.Classes.ConditionObjectConstructor}}} and loads in self as the parent and the passed in settings as the settings.
-	-- @name ConditionImplementor:Conditions_GetConstructor
+	-- @name ConditionSetImplementor:Conditions_GetConstructor
 	-- @paramsig conditionSettings
 	-- @param conditionSettings [table] The condition settings that will be loaded into the ConditionObjectConstructor.
 	-- @return [{{{TMW.Classes.ConditionObjectConstructor}}}] An instance of a ConditionObjectConstructor.
@@ -974,7 +990,7 @@ TMW:NewClass("ConditionImplementor"){
 
 --- Registers a Condition Set. A condition set defines an implementation of conditions.
 -- @param identifier [string] An identifier for this condition set.
--- @param conditionSetData [table] A table that defines how the condition set is implemented. See the TODO: CONDITION SET DATA SPECIFICATION
+-- @param conditionSetData [table] A table that defines how the condition set is implemented. See the [[http://wow.curseforge.com/addons/tellmewhen/pages/api/conditions/api-documentation/condition-set-specification|Condition Set Specification]]
 function CNDT:RegisterConditionSet(identifier, conditionSetData)
 	local data = conditionSetData
 	
@@ -985,7 +1001,9 @@ function CNDT:RegisterConditionSet(identifier, conditionSetData)
 	TMW:ValidateType("parentDefaults", "conditionSetData", data.parentDefaults, "table")
 	TMW:ValidateType("modifiedDefaults", "conditionSetData", data.modifiedDefaults, "table;nil")
 	
-	TMW:ValidateType("settingKey", "conditionSetData", data.settingKey, "number;string")
+	TMW:ValidateType("ConditionTypeFilter", "conditionSetData", data.ConditionTypeFilter, "function;nil")
+	
+	TMW:ValidateType("settingKey", "conditionSetData", data.settingKey, "string")
 	TMW:ValidateType("GetSettings", "conditionSetData", data.GetSettings, "function")
 	
 	TMW:ValidateType("iterFunc", "conditionSetData", data.iterFunc, "function")
@@ -993,15 +1011,26 @@ function CNDT:RegisterConditionSet(identifier, conditionSetData)
 	
 	TMW:ValidateType("useDynamicTab", "conditionSetData", data.useDynamicTab, "boolean;nil")
 	TMW:ValidateType("GetTab", "conditionSetData", data.GetTab, "function;nil")
-	TMW:ValidateType("ShouldShowTab", "conditionSetData", data.ShouldShowTab, "function;nil")
 	TMW:ValidateType("tabText", "conditionSetData", data.tabText, "string")
+	
+	if data.useDynamicTab then
+		TMW:ValidateType("ShouldShowTab", "conditionSetData", data.ShouldShowTab, "function")
+	end
+	
+	if not (data.useDynamicTab or data.GetTab) then
+		error("You must define either useDynamicTab or GetTab in your Condition Set.", 2)
+	end
 	
 	if ConditionSets[identifier] then
 		error(("A condition set is already registered with the identifier %q"):format(identifier), 2)
 	end
 	
 	if TMW.InitializedDatabase then
-		error(("ConditionSet %q is being registered too late. It needs to be registered before the database is initialized."):format(self.name or "<??>"))
+		error(("ConditionSet %q is being registered too late. It needs to be registered before the database is initialized."):format(self.name or "<??>"), 2)
+	end
+	
+	if data.parentSettingType == "condition" then
+		error("You can't nest a condition set implementation within conditions. That will just create a nightmare of recursion that the framework isn't prepared to handle.", 2)
 	end
 	
 	data.identifier = identifier
@@ -1025,22 +1054,22 @@ function CNDT:RegisterConditionSet(identifier, conditionSetData)
 	end
 end
 
---- Inherits {{{TMW.Classes.ConditionImplementor}}} into the specified class. This should be done when a class implements a ConditionSet.
--- Provides the {{{ConditionImplementor:Conditions_GetConstructor()}}} method to that class.
--- @param className [string] The name of a class that ConditionImplementor should be inherited into.
--- @usage TMW.CNDT:RegisterConditionImplementingClass("Icon")
-function CNDT:RegisterConditionImplementingClass(className)
-	TMW:ValidateType("2 (className)", "CNDT:RegisterConditionImplementingClass()", className, "string")
+--- Inherits {{{TMW.Classes.ConditionSetImplementor}}} into the specified class. This should be done when a class implements a ConditionSet.
+-- Provides the {{{ConditionSetImplementor:Conditions_GetConstructor()}}} method to that class.
+-- @param className [string] The name of a class that ConditionSetImplementor should be inherited into.
+-- @usage TMW.CNDT:RegisterConditionSetImplementingClass("Icon")
+function CNDT:RegisterConditionSetImplementingClass(className)
+	TMW:ValidateType("2 (className)", "CNDT:RegisterConditionSetImplementingClass()", className, "string")
 	
 	if not TMW.Classes[className] then
-		error(("No class named %q exists to embed ConditionImplementor into."):format(className), 2)
+		error(("No class named %q exists to embed ConditionSetImplementor into."):format(className), 2)
 	end
 	
 	if next(TMW.Classes[className].instances) then
-		error(("Class %q already has instances created! Can't make it into a condition implementing class."):format(className), 2)
+		error(("Class %q already has instances created! Can't make it into a condition set implementing class."):format(className), 2)
 	end
 	
-	TMW.Classes[className]:Inherit("ConditionImplementor")
+	TMW.Classes[className]:Inherit("ConditionSetImplementor")
 end
 
 
@@ -1049,9 +1078,27 @@ TMW:RegisterCallback("TMW_UPGRADE_REQUESTED", function(event, type, version, ...
 	
 	for identifier, conditionSetData in pairs(ConditionSets) do
 		if conditionSetData.parentSettingType == type then
+			local isGood = true
 			
-			for conditionID, condition in TMW:InNLengthTable(parentSettings[conditionSetData.settingKey]) do
-				TMW:DoUpgrade("condition", version, condition, conditionID)
+			if type(parentSettings) ~= "table" then
+				TMW:Error("ConditionSet %q is defined as having child settings of '%q', " .. 
+				"but that settings type does not provide a settings table as the 4th arg "..
+				"(right after version) to TMW:DoUpgrade(type, version, ...)", identifier, type)
+				isGood = false
+			end
+			
+			local conditions = isGood and parentSettings[conditionSetData.settingKey]
+			
+			if type(conditions) ~= "table" or type(conditions.n) ~= "number" then
+				TMW:Error("ConditionSet %q does not have a settingKey that corresponds " .. 
+				"to a valid table of condition settings in the settings of its defined parentSettingType", identifier)
+				isGood = false
+			end
+			
+			if isGood then
+				for conditionID, condition in TMW:InNLengthTable(parentSettings[conditionSetData.settingKey]) do
+					TMW:DoUpgrade("condition", version, condition, conditionID)
+				end
 			end
 			
 		end

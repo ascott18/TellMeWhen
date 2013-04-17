@@ -1,5 +1,5 @@
 
-= Condition Data Specification
+= Condition Data Table Specification
 
 The Condition Data table is a table that completely describes a condition. See {{{TMW.Classes.ConditionCategory}}}{{{:RegisterCondition()}}} for information about where this table is passed to.
 
@@ -7,6 +7,10 @@ The funcstr field is the only one that is required required. Errors may happen w
 
 
 == Information & Appearance
+* identifier 
+** [String] The identifier of the condition data.
+** Do not define this yourself - it is passed into the {{{:RegisterCondition()}}} method and will be assigned internally.
+
 * text 
 ** [String] Localized name of the condition.
 
