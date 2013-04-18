@@ -18,11 +18,10 @@ To check if a category already exists, look in CNDT.CategoriesByID[identifier].
 <<code lua>>
 local ConditionCategory
 if CNDT.CategoriesByID["ATTRIBUTES_PLAYER"] then
-	ConditionCategory = CNDT:GetCategory("ATTRIBUTES_PLAYER", 2, L["CNDTCAT_ATTRIBUTES_PLAYER"], true, false)
+  ConditionCategory = CNDT:GetCategory("ATTRIBUTES_PLAYER", 2, L["CNDTCAT_ATTRIBUTES_PLAYER"], true, false)
 else
-	error("Category not defined!")
+  error("Category not defined!")
 end
-
 <</code>>
 
 
@@ -36,32 +35,100 @@ See the documentation of that function and the [[http://wow.curseforge.com/addon
 
 The {{{funcstr}}} field is what actually makes your condition do what it does. Its contents should evaluate to a single boolean value. If you need any sort of complex logic, you will probably need to write an external function in the {{{Env}}} table and reference that from within your funcstr. You should avoid using an external function if you can, though, since doing so will increase CPU usage.
 
-Funcstr, when compiled, will look something like this:
+Funcstr, when compiled with other conditions into a full function, will look something like this:
 <<code lua>>
 local ConditionObject = ... 
- return (
-     (1 == IsResting()) -- 1_RESTING
- )
+return (
+     ((1 == IsResting()) -- 1_RESTING
+    and(UnitHealth("player")/(UnitHealthMax("player")+epsilon) <= 0.48)) -- 2_HEALTH
+    or (AuraDur("player", "serendipity", "serendipity", "HELPFUL", time) > 1.8) -- 3_BUFFDUR
+    
+)
 <</code>>
 
+The icon and conditions that were the source of the above generated code:
+<<code none>>
+^1^T^SConditions^T ^N1^T ^SType^SRESTING ^SPrtsBefore^N1 ^t^N2^T ^SType^SHEALTH ^SPrtsAfter^N1 ^SOperator^S<= ^SLevel^N48 ^t^N3^T ^SType^SBUFFDUR ^SOperator^S> ^SName^SSerendipity ^SLevel^N1.8 ^SAndOr^SOR ^t^Sn^N3 ^t^t^N62025^S~`~| ^Sicon^^
+<</code>>
+
+Take note that the condition checker function takes advantage of Lua's [[http://en.wikipedia.org/wiki/Short-circuit_evaluation|Short-circuit Evaluation]] so that only the least amount of conditions are actually checked before Lua can be certain of the state of the entire condition set.
+
+
+=== Events
+
+The {{{events}}} function allows the condition to tell a {{{TMW.Classes.ConditionObject}}} what events can be listened to in order to make sure the condition stays updated.
+
+There are two parts to this:
+
+==== Requesting Events
+
+The first job of the {{{events}}} function is to request the events that will be needed to keep the conditions updated. This is done automatically when using {{{TMW.Classes.ConditionObject}}}{{{:GenerateNormalEventString()}}} and {{{TMW.Classes.ConditionObject}}}{{{:GetUnitChangedEventString()}}}, but it can also be done manually by calling {{{TMW.Classes.ConditionObject}}}{{{:RequestEvent()}}} and {{{TMW.Classes.ConditionObject}}}{{{:SetNumEventArgs()}}} together.
+
+
+==== Generating Arg Checker Strings
+
+The second job of the {{{events}}} function is to return strings of Lua that will be used to check the args of events that are requested to determine if an update should be preformed. These are generated automatically when using {{{TMW.Classes.ConditionObject}}}{{{:GenerateNormalEventString()}}} and {{{TMW.Classes.ConditionObject}}}{{{:GetUnitChangedEventString()}}}, but the {{{events}}} function still must return them.
+
+You also can create these manually. They look something like this:
+
 <<code lua>>
-ConditionCategory:RegisterCondition(5,	 "RESTING", {
-	text = L["CONDITIONPANEL_RESTING"],
-	min = 0,
-	max = 1,
-	texttable = CNDT.COMMON.bool,
-	nooperator = true,
-	unit = PLAYER,
-	icon = "Interface\\CHARACTERFRAME\\UI-StateIcon",
-	tcoords = {0.0625, 0.453125, 0.046875, 0.421875},
-	Env = {
-		IsResting = IsResting,
-	},
-	funcstr = [[c.1nil == IsResting()]],
-	events = function(ConditionObject, c)
-		return
-			ConditionObject:GenerateNormalEventString("PLAYER_UPDATE_RESTING"),
-			ConditionObject:GenerateNormalEventString("PLAYER_ENTERING_WORLD")
-	end,
+-- E.g. #1:
+"event == 'PLAYER_UPDATE_RESTING'"
+
+-- E.g. #2:
+"event == 'UNIT_HEALTH_FREQUENT' and arg1 == 'player'"
+<</code>>
+
+Event args can be accessed through variables named "arg1", "arg2", etc. assuming that the proper number of args have been requested using {{{TMW.Classes.ConditionObject}}}{{{:SetNumEventArgs()}}}. When generating event strings manually, it is also important to requested the needed events using {{{TMW.Classes.ConditionObject}}}{{{:RequestEvent()}}}.
+
+
+=== Anticipate
+
+The {{{anticipate}}} function lets an event-driven condition calculate when its next update should be preformed based on the settings of the condition it is checking and the current gameplay state (length of cooldowns, time remaining on buffs, etc).
+
+It should be a string that represents a full Lua chunk. The only thing that it needs to do is declare a local variable named "VALUE" (which will be renamed by the condition compiler) at the top level of the chunk's scope and assign a number to that variable. The number assigned should either be 0 (or any value less than the curret time) or {{{math.huge}}} if no update is needed at any point in the forseeable future, or a number comparable to {{{TMW.time}}} and {{{GetTime()}}} that represents the time at which the condition should be updated next.
+
+The most common logic that you will be using in this chunk is to figure out the time at which the gameplay element that you are tracking (E.g a cooldown, buff/debuff, totem, etc.) will expire, and then subtract the time that the user has set for the condition from that value.
+
+An example of this can be seen in the Spell Cooldown condition, among many others:
+
+<<code lua>>
+anticipate = [[
+  local start, duration = GetSpellCooldown(c.GCDReplacedNameFirst)
+  local VALUE = duration and start + duration - c.Level or huge
+]]
+<</code>>
+
+In the above code, {{{start + duration}}} will give the time that the cooldown will finish, and {{{ - c.Level}}} will subtract the user-set "time of interest" from that amount to get the desired time for the next condition update.
+
+If the cooldown is not valid, {{{VALUE}}} will be assigned {{{math.huge}}}, which means that no update is requested for the forseeable future.
+
+If the cooldown is ready, {{{start}}} and {{{duration}}} will both be 0, so the value returned must be less than or equal to 0, which also means that no update is requested for the forseeable future.
+
+
+=== Events & Anticipate Together
+
+The event handler function, which contains the arg checker strings, is combined with the anticipate function. That means that any time an event 
+
+
+<<code lua>>
+ConditionCategory:RegisterCondition(5,   "RESTING", {
+  text = L["CONDITIONPANEL_RESTING"],
+  min = 0,
+  max = 1,
+  texttable = CNDT.COMMON.bool,
+  nooperator = true,
+  unit = PLAYER,
+  icon = "Interface\\CHARACTERFRAME\\UI-StateIcon",
+  tcoords = {0.0625, 0.453125, 0.046875, 0.421875},
+  Env = {
+    IsResting = IsResting,
+  },
+  funcstr = [[c.1nil == IsResting()]],
+  events = function(ConditionObject, c)
+    return
+      ConditionObject:GenerateNormalEventString("PLAYER_UPDATE_RESTING"),
+      ConditionObject:GenerateNormalEventString("PLAYER_ENTERING_WORLD")
+  end,
 })
 <</code>>

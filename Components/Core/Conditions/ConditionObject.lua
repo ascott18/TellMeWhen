@@ -124,6 +124,8 @@ function ConditionObject:CompileUpdateFunction(Conditions)
 			-- change VALUE to the appropriate ANTICIPATOR_RESULT#
 			thisstr = thisstr:gsub("VALUE", "ANTICIPATOR_RESULT" .. numAnticipatorResults)
 
+			thisstr = "-- Anticipator #" .. numAnticipatorResults .. "\r\n" .. thisstr
+			
 			anticipatorstr = anticipatorstr .. "\r\n" .. thisstr
 		end
 	end
@@ -141,6 +143,8 @@ function ConditionObject:CompileUpdateFunction(Conditions)
 		allVars = allVars:sub(1, -2)
 
 		anticipatorstr = anticipatorstr .. ([[
+		
+		-- Calculate next update time:
 		local nextTime = %s
 		if nextTime == 0 then
 			nextTime = huge
@@ -177,15 +181,16 @@ function ConditionObject:CompileUpdateFunction(Conditions)
 
 	-- Tack on the composite arg checker string to the function, and then close the elseif that it goes into.
 	funcstr = funcstr .. argCheckerStringComposite .. [[) then
+	]] .. anticipatorstr .. [[
+	
+	
+		-- Check the condition:
 		if ConditionObject.doesAutoUpdate then
 			ConditionObject:Check()
 		else
 			ConditionObject.UpdateNeeded = true
 		end
 	end]]
-
-	-- Add the anticipator function string to the beginning of the function string, before event handling happens.
-	funcstr = anticipatorstr .. "\r\n" .. funcstr
 	
 	-- Finally, create the header of the function that will get all of the args passed into it.
 	local argHeader = [[local ConditionObject, event]]
@@ -341,7 +346,8 @@ end
 -- @param ... [number|string|boolean|nil] Any number of args that must match the args of the event in order to trigger a condition update.
 -- @return [string] A string that will be used to check the event and its args to determine if a condition update is needed.
 -- E.g. <<code lua>> "event == 'SPELL_UPDATE_COOLDOWN'" <</code>>
--- E.g. <<code lua>> "event == 'UNIT_INVENTORY_CHANGED' and arg1 == 'player'" <</code>>-- @usage events = function(ConditionObject, c)
+-- E.g. <<code lua>> "event == 'UNIT_INVENTORY_CHANGED' and arg1 == 'player'" <</code>>
+-- @usage events = function(ConditionObject, c)
 --   return
 --     ConditionObject:GenerateNormalEventString("GROUP_ROSTER_UPDATE")
 -- end,
