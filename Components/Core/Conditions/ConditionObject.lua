@@ -160,7 +160,7 @@ function ConditionObject:CompileUpdateFunction(Conditions)
 	end
 	
 	-- Begin creating the final string that will be used to make the function.
-	local funcstr = "if not event then return \r\n elseif ( \r\n"
+	local funcstr = "if (not event or \r\n"
 	
 	-- Compile all of the arg checker strings into one single composite that can be checked in an (if ... then) statement.
 	local argCheckerStringComposite = ""
@@ -184,6 +184,10 @@ function ConditionObject:CompileUpdateFunction(Conditions)
 	]] .. anticipatorstr .. [[
 	
 	
+		-- Don't check the condition or schedule a check if event is nil
+		-- since event is only nil when manually calling from within :Check()
+		if not event then return end
+		
 		-- Check the condition:
 		if ConditionObject.doesAutoUpdate then
 			ConditionObject:Check()

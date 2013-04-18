@@ -108,7 +108,7 @@ If the cooldown is ready, {{{start}}} and {{{duration}}} will both be 0, so the 
 
 === Events & Anticipate Together
 
-The event handler function, which contains the arg checker strings, is combined with the anticipate function. That means that any time an event 
+The event handler function, which contains the arg checker strings, is combined with the anticipate function. That means that any time an event is handled, the anticipator function will also be called and the next update
 
 
 <<code lua>>
