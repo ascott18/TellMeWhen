@@ -108,27 +108,103 @@ If the cooldown is ready, {{{start}}} and {{{duration}}} will both be 0, so the 
 
 === Events & Anticipate Together
 
-The event handler function, which contains the arg checker strings, is combined with the anticipate function. That means that any time an event is handled, the anticipator function will also be called and the next update
+The event handler function, which contains the arg checker strings, is combined with the anticipate function. That means that any time an event is handled, the anticipator code will also be called and the next update will be scheduled.
 
+Here is an example of a fully compiled function:
+<<code lua>>
+local ConditionObject, event, arg1 = ... 
+if (not event or 
+  (event == 'UNIT_AURA' and arg1 == 'player') or 
+  (event == 'PLAYER_UPDATE_RESTING') or 
+  (event == 'SPELL_UPDATE_USABLE') or 
+  (event == 'SPELL_UPDATE_COOLDOWN') or 
+  (event == 'UNIT_HEALTH_FREQUENT' and arg1 == 'player') or 
+  (false) or 
+  (event == 'PLAYER_ENTERING_WORLD') or 
+  (event == 'UNIT_MAXHEALTH' and arg1 == 'player') 
+) then
+  
+  -- Anticipator #1
+  local start, duration = GetSpellCooldown("fade")
+  local ANTICIPATOR_RESULT1 = duration and start + (duration - 0) or huge
+  
+  if ANTICIPATOR_RESULT1 <= time then
+    ANTICIPATOR_RESULT1 = huge
+  end
+  
+  -- Anticipator #2
+  local dur, duration, expirationTime = AuraDur("player", "renew", "renew", "HELPFUL", time)
+  local ANTICIPATOR_RESULT2
+  if dur and dur > 0 then
+    ANTICIPATOR_RESULT2 = expirationTime and expirationTime - 7 or 0
+  else
+    ANTICIPATOR_RESULT2 = 0
+  end            
+  if ANTICIPATOR_RESULT2 <= time then
+    ANTICIPATOR_RESULT2 = huge
+  end
+  
+  -- Calculate next update time:
+  local nextTime = min(ANTICIPATOR_RESULT1,ANTICIPATOR_RESULT2)
+  if nextTime == 0 then
+    nextTime = huge
+  end
+  ConditionObject.NextUpdateTime = nextTime    
+  
+  -- Don't check the condition or request an immediate check if event is nil
+  -- since event is only nil when manually calling from within :Check()
+  if not event then return end
+  
+  -- Check the condition:
+  if ConditionObject.doesAutoUpdate then
+    ConditionObject:Check()
+  else
+    ConditionObject.UpdateNeeded = true
+  end
+end
+<</code>>
+
+You may have noticed the line in the if ... then segment that essentially checks {{{if (false) then ...}}}. That is just an idiosyncrasy that arises when a condition checks the unit "player". It doesn't cause any negative effects - it is simply a placeholder that gets substituted in when there is no event to be checked.
+
+Here is the icon and conditions that generated this function:
+<<code none>>
+^1^T^SConditions^T ^N1^T ^SType^SRESTING ^SPrtsBefore^N1 ^t^N2^T ^SType^SHEALTH ^SPrtsAfter^N1 ^SOperator^S<= ^SLevel^N48 ^t^N3^T ^SType^SSPELLCD ^SName^SFade ^SAndOr^SOR ^t^N4^T ^SType^SBUFFDUR ^SOperator^S> ^SName^SRenew ^SLevel^N7 ^t^Sn^N4 ^t^t^N62028^S~`~| ^Sicon^^
+<</code>>
+
+
+= Full Example
+
+Here is the full code for the Buff - Duration condition, which contains many of the ideas and concepts that were explained in this guide:
 
 <<code lua>>
-ConditionCategory:RegisterCondition(5,   "RESTING", {
-  text = L["CONDITIONPANEL_RESTING"],
-  min = 0,
-  max = 1,
-  texttable = CNDT.COMMON.bool,
-  nooperator = true,
-  unit = PLAYER,
-  icon = "Interface\\CHARACTERFRAME\\UI-StateIcon",
-  tcoords = {0.0625, 0.453125, 0.046875, 0.421875},
-  Env = {
-    IsResting = IsResting,
-  },
-  funcstr = [[c.1nil == IsResting()]],
+ConditionCategory:RegisterCondition(1,   "BUFFDUR", {
+  text = L["ICONMENU_BUFF"] .. " - " .. L["DURATION"],
+  range = 30,
+  step = 0.1,
+  name = function(editbox) TMW:TT(editbox, "BUFFTOCHECK", "BUFFCNDT_DESC") editbox.label = L["BUFFTOCHECK"] end,
+  useSUG = true,
+  check = function(check) TMW:TT(check, "ONLYCHECKMINE", "ONLYCHECKMINE_DESC") end,
+  texttable = CNDT.COMMON.absentseconds,
+  icon = "Interface\\Icons\\spell_nature_rejuvenation",
+  tcoords = CNDT.COMMON.standardtcoords,
+  funcstr = function(c)
+    return [[AuraDur(c.Unit, c.NameFirst, c.NameName, "HELPFUL]] .. (c.Checked and " PLAYER" or "") .. [[", time) c.Operator c.Level]]
+  end,
   events = function(ConditionObject, c)
     return
-      ConditionObject:GenerateNormalEventString("PLAYER_UPDATE_RESTING"),
-      ConditionObject:GenerateNormalEventString("PLAYER_ENTERING_WORLD")
+      ConditionObject:GetUnitChangedEventString(CNDT:GetUnit(c.Unit)),
+      ConditionObject:GenerateNormalEventString("UNIT_AURA", CNDT:GetUnit(c.Unit))
+  end,
+  anticipate = function(c)
+    return [[local dur, duration, expirationTime = AuraDur(c.Unit, c.NameFirst, c.NameName, "HELPFUL]] .. (c.Checked and " PLAYER" or "") .. [[", time)
+    local VALUE
+    if dur and dur > 0 then
+      VALUE = expirationTime and expirationTime - c.Level or 0
+    else
+      VALUE = 0
+    end]]
   end,
 })
 <</code>>
+
+For those fields in the condition table that were not explained here, please refer to the [[http://wow.curseforge.com/addons/tellmewhen/pages/api/conditions/api-documentation/condition-data-specification|Condition Data Specification]].

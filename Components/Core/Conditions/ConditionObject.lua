@@ -184,7 +184,7 @@ function ConditionObject:CompileUpdateFunction(Conditions)
 	]] .. anticipatorstr .. [[
 	
 	
-		-- Don't check the condition or schedule a check if event is nil
+		-- Don't check the condition or request an immediate check if event is nil
 		-- since event is only nil when manually calling from within :Check()
 		if not event then return end
 		
@@ -208,7 +208,7 @@ function ConditionObject:CompileUpdateFunction(Conditions)
 	-- and tack on the body of the function
 	funcstr = argHeader .. " = ... \r\n" .. funcstr
 
-	funcstr = funcstr:gsub("	", "    ") -- tabs to spaces
+	funcstr = funcstr:gsub("	", "  ") -- tabs to spaces
 	
 	local func, err = loadstring(funcstr, "ConditionEvents" .. self.funcIdentifier)
 	if func then
