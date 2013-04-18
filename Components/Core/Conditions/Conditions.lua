@@ -1073,17 +1073,17 @@ function CNDT:RegisterConditionSetImplementingClass(className)
 end
 
 
-TMW:RegisterCallback("TMW_UPGRADE_REQUESTED", function(event, type, version, ...)
+TMW:RegisterCallback("TMW_UPGRADE_REQUESTED", function(event, settingType, version, ...)
 	local parentSettings = ...
 	
 	for identifier, conditionSetData in pairs(ConditionSets) do
-		if conditionSetData.parentSettingType == type then
+		if conditionSetData.parentSettingType == settingType then
 			local isGood = true
 			
 			if type(parentSettings) ~= "table" then
 				TMW:Error("ConditionSet %q is defined as having child settings of '%q', " .. 
 				"but that settings type does not provide a settings table as the 4th arg "..
-				"(right after version) to TMW:DoUpgrade(type, version, ...)", identifier, type)
+				"(right after version) to TMW:DoUpgrade(settingType, version, ...)", identifier, settingType)
 				isGood = false
 			end
 			

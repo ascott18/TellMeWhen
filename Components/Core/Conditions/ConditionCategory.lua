@@ -106,6 +106,7 @@ end
 
 --- Registers a spacer in the category's dropdown menu at the specified order (relative to other conditions)
 -- @param order [number] The relative order that the spacer should be placed in.
+-- @usage ConditionCategory:RegisterSpacer(10)
 function ConditionCategory:RegisterSpacer(order)
 	TMW:ValidateType("2 (order)", "ConditionCategory:RegisterCondition()", order, "number")
 	

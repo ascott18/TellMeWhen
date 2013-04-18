@@ -58,3 +58,7 @@
     type: creole
     input-file: "Documentation/Conditions/ConditionSetSpecification.txt"
     output-page: "API/Conditions/API Documentation/Condition Set Specification"
+-
+    type: creole
+    input-file: "Documentation/Conditions/HowToCreateConditions.txt"
+    output-page: "API/Conditions/How To/Create A Condition"

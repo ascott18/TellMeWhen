@@ -1,0 +1,67 @@
+
+= How To: Create a Condition
+
+This page serves as a simple guide on how to use the ConditionCategory API.
+
+
+== Get the Category.
+
+The first thing you need to do is call CNDT:GetCategory(). If you know the category you are wanting to get already exists, you can omit all parameters except the first (identifier).
+
+<<code lua>>
+-- Create a new category
+local ConditionCategory = CNDT:GetCategory("CUSTOMCAT", 20, L["CNDTCAT_CUSTOMCAT"], true, false)
+<</code>>
+
+To check if a category already exists, look in CNDT.CategoriesByID[identifier].
+
+<<code lua>>
+local ConditionCategory
+if CNDT.CategoriesByID["ATTRIBUTES_PLAYER"] then
+	ConditionCategory = CNDT:GetCategory("ATTRIBUTES_PLAYER", 2, L["CNDTCAT_ATTRIBUTES_PLAYER"], true, false)
+else
+	error("Category not defined!")
+end
+
+<</code>>
+
+
+== Create the Condition
+
+Next, define the condition that you wish to create using {{{TMW.Classes.ConditionCategory}}}{{{:RegisterCondition()}}}
+
+See the documentation of that function and the [[http://wow.curseforge.com/addons/tellmewhen/pages/api/conditions/api-documentation/condition-data-specification|Condition Data Specification]] for more information.
+
+=== Funcstr
+
+The {{{funcstr}}} field is what actually makes your condition do what it does. Its contents should evaluate to a single boolean value. If you need any sort of complex logic, you will probably need to write an external function in the {{{Env}}} table and reference that from within your funcstr. You should avoid using an external function if you can, though, since doing so will increase CPU usage.
+
+Funcstr, when compiled, will look something like this:
+<<code lua>>
+local ConditionObject = ... 
+ return (
+     (1 == IsResting()) -- 1_RESTING
+ )
+<</code>>
+
+<<code lua>>
+ConditionCategory:RegisterCondition(5,	 "RESTING", {
+	text = L["CONDITIONPANEL_RESTING"],
+	min = 0,
+	max = 1,
+	texttable = CNDT.COMMON.bool,
+	nooperator = true,
+	unit = PLAYER,
+	icon = "Interface\\CHARACTERFRAME\\UI-StateIcon",
+	tcoords = {0.0625, 0.453125, 0.046875, 0.421875},
+	Env = {
+		IsResting = IsResting,
+	},
+	funcstr = [[c.1nil == IsResting()]],
+	events = function(ConditionObject, c)
+		return
+			ConditionObject:GenerateNormalEventString("PLAYER_UPDATE_RESTING"),
+			ConditionObject:GenerateNormalEventString("PLAYER_ENTERING_WORLD")
+	end,
+})
+<</code>>
