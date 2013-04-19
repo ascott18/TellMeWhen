@@ -228,7 +228,7 @@ function Type:Setup(icon, groupID, iconID)
 
 	icon.FirstTexture = SpellTextures[icon.NameFirst]
 
-	icon:SetInfo("texture", TMW:GetConfigIconTexture(icon))
+	icon:SetInfo("texture", self:GetConfigIconTexture(icon))
 	
 	if pclass ~= "DEATHKNIGHT" then
 		icon.IgnoreRunes =  nil

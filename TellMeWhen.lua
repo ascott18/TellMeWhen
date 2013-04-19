@@ -18,7 +18,7 @@
 TELLMEWHEN_VERSION = "6.2.0"
 TELLMEWHEN_VERSION_MINOR = strmatch(" @project-version@", " r%d+") or ""
 TELLMEWHEN_VERSION_FULL = TELLMEWHEN_VERSION .. TELLMEWHEN_VERSION_MINOR
-TELLMEWHEN_VERSIONNUMBER = 62029 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
+TELLMEWHEN_VERSIONNUMBER = 62030 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
 if TELLMEWHEN_VERSIONNUMBER > 63000 or TELLMEWHEN_VERSIONNUMBER < 62000 then return error("YOU SCREWED UP THE VERSION NUMBER OR DIDNT CHANGE THE SAFETY LIMITS") end -- safety check because i accidentally made the version number 414069 once
 
 TELLMEWHEN_MAXROWS = 20
@@ -336,7 +336,7 @@ TMW.DS = {
 function TMW:ProcessEquivalencies()
 	for dispeltype, icon in pairs(TMW.DS) do
 	--	SpellTexturesMetaIndex[dispeltype] = icon
-		SpellTexturesMetaIndex[strlower(dispeltype)] = icon
+		TMW.SpellTexturesMetaIndex[strlower(dispeltype)] = icon
 	end
 	
 	TMW:Fire("TMW_EQUIVS_PROCESSING")
@@ -358,8 +358,8 @@ function TMW:ProcessEquivalencies()
 					if name then
 						TMW:LowerNames(name) -- this will insert the spell name into the table of spells for capitalization restoration.
 						str = gsub(str, id, name)
-						SpellTexturesMetaIndex[realID] = tex
-						SpellTexturesMetaIndex[TMW.strlowerCache[name]] = tex
+						TMW.SpellTexturesMetaIndex[realID] = tex
+						TMW.SpellTexturesMetaIndex[TMW.strlowerCache[name]] = tex
 
 					else  -- this should never ever ever happen except in new patches if spellIDs were wrong (experience talking)
 						
