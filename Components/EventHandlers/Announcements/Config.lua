@@ -27,11 +27,11 @@ local CI = TMW.CI
 
 
 local EVENTS = TMW.EVENTS
-local ANN = TMW.ANN
-ANN.handlerName = L["ANN_TAB"]
+local Announcements = EVENTS:GetEventHandler("Announcements")
+Announcements.handlerName = L["ANN_TAB"]
 
 TMW:RegisterCallback("TMW_OPTIONS_LOADED", function(event)
-	TMW:ConvertContainerToScrollFrame(ANN.ConfigContainer.ConfigFrames)
+	TMW:ConvertContainerToScrollFrame(Announcements.ConfigContainer.ConfigFrames)
 
 end)
 
@@ -39,7 +39,7 @@ end)
 
 
 ---------- Events ----------
-function ANN:GetChannelFrame(frameID, previousFrame)
+function Announcements:GetChannelFrame(frameID, previousFrame)
 	local ChannelList = self.ConfigContainer.ChannelList
 	
 	local frame = ChannelList[frameID]
@@ -53,8 +53,8 @@ function ANN:GetChannelFrame(frameID, previousFrame)
 end
 
 local channelsToDisplay = {}
-function ANN:LoadSettingsForEventID(id)
-	ANN.ConfigContainer.EditBox:ClearFocus()
+function Announcements:LoadSettingsForEventID(id)
+	Announcements.ConfigContainer.EditBox:ClearFocus()
 	
 	wipe(channelsToDisplay)
 	
@@ -111,16 +111,16 @@ function ANN:LoadSettingsForEventID(id)
 	
 	
 	local EventSettings = EVENTS:GetEventSettings()
-	ANN:SelectChannel(EventSettings.Channel)
-	ANN.ConfigContainer.EditBox:SetText(EventSettings.Text)
+	Announcements:SelectChannel(EventSettings.Channel)
+	Announcements.ConfigContainer.EditBox:SetText(EventSettings.Text)
 end
 
-function ANN:SetupEventDisplay(eventID)
+function Announcements:SetupEventDisplay(eventID)
 	if not eventID then return end
 
 	local EventSettings = EVENTS:GetEventSettings(eventID)
 	local channel = EventSettings.Channel
-	local channelsettings = ANN.AllChannelsByChannel[channel]
+	local channelsettings = Announcements.AllChannelsByChannel[channel]
 
 
 	if channelsettings then
@@ -139,14 +139,14 @@ end
 
 
 ---------- ChannelList ----------
-function ANN:SelectChannel(channel)
+function Announcements:SelectChannel(channel)
 	local EventSettings = EVENTS:GetEventSettings()
 	local channelFrame
 
-	local ConfigFrames = ANN.ConfigContainer.ConfigFrames
+	local ConfigFrames = Announcements.ConfigContainer.ConfigFrames
 	
-	for i=1, #ANN.ConfigContainer.ChannelList do
-		local f = ANN.ConfigContainer.ChannelList[i]
+	for i=1, #Announcements.ConfigContainer.ChannelList do
+		local f = Announcements.ConfigContainer.ChannelList[i]
 		if f and f:IsShown() then
 			if f.channel == channel then
 				channelFrame = f
@@ -158,7 +158,7 @@ function ANN:SelectChannel(channel)
 	end
 	self.currentChannelSetting = channel
 
-	local channelsettings = ANN.AllChannelsByChannel[channel]
+	local channelsettings = Announcements.AllChannelsByChannel[channel]
 	if channelsettings then
 		if channelsettings.sticky then
 			ConfigFrames.Sticky:SetChecked(EventSettings.Sticky)
@@ -222,16 +222,16 @@ end
 
 
 ---------- Interface ----------
-function ANN:Location_DropDown()
-	local channelSettings = ANN.AllChannelsByChannel[ANN.currentChannelSetting]
+function Announcements:Location_DropDown()
+	local channelSettings = Announcements.AllChannelsByChannel[Announcements.currentChannelSetting]
 	if channelSettings and channelSettings.dropdown then
 		channelSettings.dropdown()
 	end
 end
-function ANN:Location_DropDown_OnClick(text)
+function Announcements:Location_DropDown_OnClick(text)
 	local dropdown = self
 	
-	local ConfigFrames = ANN.ConfigContainer.ConfigFrames
+	local ConfigFrames = Announcements.ConfigContainer.ConfigFrames
 	
 	ConfigFrames.Location.selectedValue = dropdown.value
 	UIDropDownMenu_SetText(ConfigFrames.Location, text)	

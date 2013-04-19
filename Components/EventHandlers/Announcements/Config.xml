@@ -8,7 +8,9 @@
 				end
 
 				TMW.EVENTS:LoadConfig()
-				TMW.ANN:SelectChannel(self.channel)
+				
+				local Announcements = TMW.EVENTS:GetEventHandler("Announcements")
+				Announcements:SelectChannel(self.channel)
 			</OnClick>
 		</Scripts>
 	</Button>
@@ -194,7 +196,9 @@
 							<OnLoad>
 								self.Header:SetText(TMW.L["ANN_SUB_CHANNEL"])
 								UIDropDownMenu_SetWidth(self, 135)
-								self.initialize = TMW.ANN.Location_DropDown
+								
+								local Announcements = TMW.EVENTS:GetEventHandler("Announcements")
+								self.initialize = Announcements.Location_DropDown
 							</OnLoad>
 						</Scripts>
 					</Frame>

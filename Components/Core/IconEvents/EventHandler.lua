@@ -17,6 +17,7 @@ local TMW = TMW
 local L = TMW.L
 local print = TMW.print
 
+local safecall = TMW.safecall
 
 TMW.EVENTS = {}
 local EVENTS = TMW.EVENTS
@@ -164,7 +165,7 @@ function EventHandler:RegisterEventHandlerDataTable(eventHandlerData)
 	TMW:ValidateType("eventHandlerData.eventHandler", "EventHandler:RegisterEventHandlerDataTable(eventHandlerData)", eventHandlerData.eventHandler, "table")
 	TMW:ValidateType("eventHandlerData.eventHandlerName", "EventHandler:RegisterEventHandlerDataTable(eventHandlerData)", eventHandlerData.eventHandlerName, "string")
 	
-	TMW.safecall(self.OnRegisterEventHandlerDataTable, self, eventHandlerData, unpack(eventHandlerData))
+	safecall(self.OnRegisterEventHandlerDataTable, self, eventHandlerData, unpack(eventHandlerData))
 	
 	tinsert(self.AllEventHandlerData, eventHandlerData)
 end

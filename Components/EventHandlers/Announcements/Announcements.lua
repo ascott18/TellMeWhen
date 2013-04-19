@@ -41,14 +41,14 @@ local wow_501 = clientVersion >= 50100
 local DogTag = LibStub("LibDogTag-3.0")
 
 
-local ANN = TMW.Classes.EventHandler:New("Announcements")
-TMW.ANN = ANN
+local EVENTS = TMW.EVENTS
+local Announcements = TMW.Classes.EventHandler:New("Announcements")
 
-ANN.kwargs = {}
-ANN.AllChannelsByChannel = {}
-ANN.AllChannelsOrdered = {}
+Announcements.kwargs = {}
+Announcements.AllChannelsByChannel = {}
+Announcements.AllChannelsOrdered = {}
 
-ANN:RegisterEventDefaults{
+Announcements:RegisterEventDefaults{
 	Text 	  		= "",
 	Channel			= "",
 	Location  		= "",
@@ -68,7 +68,6 @@ TMW:RegisterUpgrade(60312, {
 		end
 	end,
 })
-
 TMW:RegisterUpgrade(60014, {
 	-- I just discovered that announcements use a boolean "Icon" event setting for the "Show icon texture" setting
 	-- that conflicts with another event setting. Try to salvage what we can.
@@ -78,7 +77,6 @@ TMW:RegisterUpgrade(60014, {
 		end
 	end,
 })
-
 TMW:RegisterUpgrade(51002, {
 	-- This is the upgrade that handles the transition from TMW's ghetto text substitutions to DogTag.
 	
@@ -94,7 +92,6 @@ TMW:RegisterUpgrade(51002, {
 		end
 	end,
 })
-
 TMW:RegisterUpgrade(43009, {
 	iconEventHandler = function(self, eventSettings)
 		if eventSettings.Location == "FRAME1" then
@@ -106,15 +103,13 @@ TMW:RegisterUpgrade(43009, {
 		end
 	end,
 })
-
 TMW:RegisterUpgrade(43005, {
 	icon = function(self, ics)
-		-- whoops, forgot to to this a while back when ANN was replaced with the new event data structure
+		-- whoops, forgot to to this a while back when Announcements was replaced with the new event data structure
 		-- (really really old sctructure as of 8-8-12, just putting this here with the rest of the announcement stuff.)
-		ics.ANN = nil
+		ics.Announcements = nil
 	end,
 })
-
 TMW:RegisterUpgrade(42103, {
 	iconEventHandler = function(self, eventSettings)
 		if eventSettings.Announce then
@@ -123,7 +118,6 @@ TMW:RegisterUpgrade(42103, {
 		end
 	end,
 })
-
 TMW:RegisterUpgrade(42102, {
 	icon = function(self, ics)
 		local Events = ics.Events
@@ -143,13 +137,13 @@ TMW:RegisterUpgrade(42102, {
 })
 
 
-function ANN:ProcessIconEventSettings(event, eventSettings)
+function Announcements:ProcessIconEventSettings(event, eventSettings)
 	if eventSettings.Channel ~= "" then
 		return true
 	end
 end
 
-function ANN:HandleEvent(icon, eventSettings)
+function Announcements:HandleEvent(icon, eventSettings)
 	local Channel = eventSettings.Channel
 	if Channel ~= "" then
 		local Text = eventSettings.Text
@@ -159,16 +153,16 @@ function ANN:HandleEvent(icon, eventSettings)
 			return
 		end
 
-		wipe(ANN.kwargs)
-		ANN.kwargs.icon = icon.ID
-		ANN.kwargs.group = icon.group.ID
-		ANN.kwargs.unit = icon.attributes.dogTagUnit
-		ANN.kwargs.link = true
+		wipe(Announcements.kwargs)
+		Announcements.kwargs.icon = icon.ID
+		Announcements.kwargs.group = icon.group.ID
+		Announcements.kwargs.unit = icon.attributes.dogTagUnit
+		Announcements.kwargs.link = true
 
 		if chandata.isBlizz then
 			Text = Text:gsub("Name([^F])", "NameForceUncolored%1")
 		end
-		Text = DogTag:Evaluate(Text, "TMW;Unit", ANN.kwargs)
+		Text = DogTag:Evaluate(Text, "TMW;Unit", Announcements.kwargs)
 		
 		-- DogTag returns nil if the result is an empty string, so make sure Text is non-nil
 		if Text then
@@ -177,8 +171,8 @@ function ANN:HandleEvent(icon, eventSettings)
 			elseif chandata.isBlizz then
 				local Location = eventSettings.Location
 				if Channel == "WHISPER" then
-					ANN.kwargs.link = false
-					Location = DogTag:Evaluate(Location, "TMW;Unit", ANN.kwargs)
+					Announcements.kwargs.link = false
+					Location = DogTag:Evaluate(Location, "TMW;Unit", Announcements.kwargs)
 					Location = Location:gsub("|c%x%x%x%x%x%x%x%x", ""):gsub("|r", "") -- strip color codes
 				end
 				SendChatMessage(Text, Channel, nil, Location)
@@ -190,12 +184,12 @@ function ANN:HandleEvent(icon, eventSettings)
 end
 
 
-function ANN:OnRegisterEventHandlerDataTable(eventHandlerData, order, channel, channelData)
+function Announcements:OnRegisterEventHandlerDataTable(eventHandlerData, order, channel, channelData)
 	TMW:ValidateType("2 (order)", '[RegisterEventHandlerData - Announcements](order, channel, channelData)', order, "number")
 	TMW:ValidateType("3 (channel)", '[RegisterEventHandlerData - Announcements](order, channel, channelData)', channel, "string")
 	TMW:ValidateType("4 (channelData)", '[RegisterEventHandlerData - Announcements](order, channel, channelData)', channelData, "table")
 	
-	assert(not ANN.AllChannelsByChannel[channel], ("A channel %q is already registered!"):format(channel))
+	assert(not Announcements.AllChannelsByChannel[channel], ("A channel %q is already registered!"):format(channel))
 	
 	channelData.order = order
 	channelData.channel = channel
@@ -203,41 +197,41 @@ function ANN:OnRegisterEventHandlerDataTable(eventHandlerData, order, channel, c
 	eventHandlerData.channel = channel
 	eventHandlerData.channelData = channelData
 	
-	ANN.AllChannelsByChannel[channel] = channelData
+	Announcements.AllChannelsByChannel[channel] = channelData
 	
-	tinsert(ANN.AllChannelsOrdered,channelData)
-	TMW:SortOrderedTables(ANN.AllChannelsOrdered)
+	tinsert(Announcements.AllChannelsOrdered,channelData)
+	TMW:SortOrderedTables(Announcements.AllChannelsOrdered)
 end
 
-ANN:RegisterEventHandlerDataNonSpecific(0, "", {
+Announcements:RegisterEventHandlerDataNonSpecific(0, "", {
 	text = NONE,
 })
-ANN:RegisterEventHandlerDataNonSpecific(10, "SAY", {
+Announcements:RegisterEventHandlerDataNonSpecific(10, "SAY", {
 	text = CHAT_MSG_SAY,
 	isBlizz = 1,
 })
-ANN:RegisterEventHandlerDataNonSpecific(12, "YELL", {
+Announcements:RegisterEventHandlerDataNonSpecific(12, "YELL", {
 	text = CHAT_MSG_YELL,
 	isBlizz = 1,
 })
-ANN:RegisterEventHandlerDataNonSpecific(14, "WHISPER", {
+Announcements:RegisterEventHandlerDataNonSpecific(14, "WHISPER", {
 	text = WHISPER,
 	isBlizz = 1,
 	editbox = 1,
 })
-ANN:RegisterEventHandlerDataNonSpecific(16, "PARTY", {
+Announcements:RegisterEventHandlerDataNonSpecific(16, "PARTY", {
 	text = CHAT_MSG_PARTY,
 	isBlizz = 1,
 })
-ANN:RegisterEventHandlerDataNonSpecific(20, "RAID", {
+Announcements:RegisterEventHandlerDataNonSpecific(20, "RAID", {
 	text = CHAT_MSG_RAID,
 	isBlizz = 1,
 })
-ANN:RegisterEventHandlerDataNonSpecific(22, "RAID_WARNING", {
+Announcements:RegisterEventHandlerDataNonSpecific(22, "RAID_WARNING", {
 	text = CHAT_MSG_RAID_WARNING,
 	isBlizz = 1,
 })
-ANN:RegisterEventHandlerDataNonSpecific(24, "BATTLEGROUND", {
+Announcements:RegisterEventHandlerDataNonSpecific(24, "BATTLEGROUND", {
 	text = CHAT_MSG_BATTLEGROUND,
 	isBlizz = 1,
 	handler =
@@ -249,7 +243,7 @@ ANN:RegisterEventHandlerDataNonSpecific(24, "BATTLEGROUND", {
 		end
 	or nil,
 })
-ANN:RegisterEventHandlerDataNonSpecific(25, "INSTANCE_CHAT", {
+Announcements:RegisterEventHandlerDataNonSpecific(25, "INSTANCE_CHAT", {
 	text = INSTANCE_CHAT,
 	isBlizz = 1,
 	hidden = not wow_501,
@@ -259,7 +253,7 @@ ANN:RegisterEventHandlerDataNonSpecific(25, "INSTANCE_CHAT", {
 		end
 	end,
 })
-ANN:RegisterEventHandlerDataNonSpecific(30, "SMART", {
+Announcements:RegisterEventHandlerDataNonSpecific(30, "SMART", {
 	text = L["CHAT_MSG_SMART"],
 	desc = L["CHAT_MSG_SMART_DESC"],
 	isBlizz = 1, -- flagged to not use override %t and %f substitutions, and also not to try and color any names
@@ -290,7 +284,7 @@ ANN:RegisterEventHandlerDataNonSpecific(30, "SMART", {
 		end
 	,
 })
-ANN:RegisterEventHandlerDataNonSpecific(40, "CHANNEL", {
+Announcements:RegisterEventHandlerDataNonSpecific(40, "CHANNEL", {
 	text = L["CHAT_MSG_CHANNEL"],
 	desc = L["CHAT_MSG_CHANNEL_DESC"],
 	isBlizz = 1, -- flagged to not use override %t and %f substitutions, and also not to try and color any names
@@ -301,11 +295,11 @@ ANN:RegisterEventHandlerDataNonSpecific(40, "CHANNEL", {
 			if not num then break end
 
 			local info = UIDropDownMenu_CreateInfo()
-			info.func = TMW.ANN.Location_DropDown_OnClick
+			info.func = Announcements.Location_DropDown_OnClick
 			info.text = name
 			info.arg1 = name
 			info.value = name
-			info.checked = name == TMW.EVENTS:GetEventSettings().Location
+			info.checked = name == EVENTS:GetEventSettings().Location
 			UIDropDownMenu_AddButton(info, UIDROPDOWNMENU_MENU_LEVEL)
 		end
 	end,
@@ -331,20 +325,20 @@ ANN:RegisterEventHandlerDataNonSpecific(40, "CHANNEL", {
 		end
 	end,
 })
-ANN:RegisterEventHandlerDataNonSpecific(50, "GUILD", {
+Announcements:RegisterEventHandlerDataNonSpecific(50, "GUILD", {
 	text = CHAT_MSG_GUILD,
 	isBlizz = 1,
 })
-ANN:RegisterEventHandlerDataNonSpecific(52, "OFFICER", {
+Announcements:RegisterEventHandlerDataNonSpecific(52, "OFFICER", {
 	text = CHAT_MSG_OFFICER,
 	isBlizz = 1,
 })
-ANN:RegisterEventHandlerDataNonSpecific(60, "EMOTE", {
+Announcements:RegisterEventHandlerDataNonSpecific(60, "EMOTE", {
 	text = CHAT_MSG_EMOTE,
 	isBlizz = 1,
 })
 
-ANN:RegisterEventHandlerDataNonSpecific(70, "FRAME", {
+Announcements:RegisterEventHandlerDataNonSpecific(70, "FRAME", {
 	-- GLOBALS: DEFAULT_CHAT_FRAME, FCF_GetChatWindowInfo
 	text = L["CHAT_FRAME"],
 	icon = 1,
@@ -357,11 +351,11 @@ ANN:RegisterEventHandlerDataNonSpecific(70, "FRAME", {
 			if shown or docked then
 				local name = _G["ChatFrame"..i].name
 				local info = UIDropDownMenu_CreateInfo()
-				info.func = TMW.ANN.Location_DropDown_OnClick
+				info.func = Announcements.Location_DropDown_OnClick
 				info.text = name
 				info.arg1 = name
 				info.value = name
-				info.checked = name == TMW.EVENTS:GetEventSettings().Location
+				info.checked = name == EVENTS:GetEventSettings().Location
 				UIDropDownMenu_AddButton(info, UIDROPDOWNMENU_MENU_LEVEL)
 			end
 			i = i + 1
@@ -396,7 +390,7 @@ ANN:RegisterEventHandlerDataNonSpecific(70, "FRAME", {
 })
 
 local bullshitTable = {}
-ANN:RegisterEventHandlerDataNonSpecific(71, "RAID_WARNING_FAKE", {
+Announcements:RegisterEventHandlerDataNonSpecific(71, "RAID_WARNING_FAKE", {
 	text = L["RAID_WARNING_FAKE"],
 	desc = L["RAID_WARNING_FAKE_DESC"],
 	icon = 1,
@@ -419,7 +413,7 @@ ANN:RegisterEventHandlerDataNonSpecific(71, "RAID_WARNING_FAKE", {
 })
 
 local bullshitTable = {}
-ANN:RegisterEventHandlerDataNonSpecific(72, "ERRORS_FRAME", {
+Announcements:RegisterEventHandlerDataNonSpecific(72, "ERRORS_FRAME", {
 	text = L["ERRORS_FRAME"],
 	desc = L["ERRORS_FRAME_DESC"],
 	icon = 1,
@@ -435,7 +429,7 @@ ANN:RegisterEventHandlerDataNonSpecific(72, "ERRORS_FRAME", {
 })
 
 local sctcolor = {r=1, b=1, g=1}
-ANN:RegisterEventHandlerDataNonSpecific(81, "SCT", {
+Announcements:RegisterEventHandlerDataNonSpecific(81, "SCT", {
 	-- GLOBALS: SCT
 	text = "Scrolling Combat Text",
 	hidden = function() return not (SCT and SCT:IsEnabled()) end,
@@ -451,19 +445,19 @@ ANN:RegisterEventHandlerDataNonSpecific(81, "SCT", {
 	},
 	dropdown = function()
 		if not SCT then return end
-		for id, name in pairs(ANN.AllChannelsByChannel.SCT.frames) do
+		for id, name in pairs(Announcements.AllChannelsByChannel.SCT.frames) do
 			local info = UIDropDownMenu_CreateInfo()
-			info.func = TMW.ANN.Location_DropDown_OnClick
+			info.func = Announcements.Location_DropDown_OnClick
 			info.text = name
 			info.arg1 = info.text
 			info.value = id
-			info.checked = id == TMW.EVENTS:GetEventSettings().Location
+			info.checked = id == EVENTS:GetEventSettings().Location
 			UIDropDownMenu_AddButton(info, UIDROPDOWNMENU_MENU_LEVEL)
 		end
 	end,
 	ddtext = function(value)
 		if not SCT then return end
-		return ANN.AllChannelsByChannel.SCT.frames[value]
+		return Announcements.AllChannelsByChannel.SCT.frames[value]
 	end,
 	handler = function(icon, data, Text)
 		if SCT then
@@ -473,7 +467,7 @@ ANN:RegisterEventHandlerDataNonSpecific(81, "SCT", {
 	end,
 })
 
-ANN:RegisterEventHandlerDataNonSpecific(83, "MSBT", {
+Announcements:RegisterEventHandlerDataNonSpecific(83, "MSBT", {
 	-- GLOBALS: MikSBT
 	text = "MikSBT",
 	hidden = function() return not MikSBT end,
@@ -487,8 +481,8 @@ ANN:RegisterEventHandlerDataNonSpecific(83, "MSBT", {
 			local info = UIDropDownMenu_CreateInfo()
 			info.text = scrollAreaName
 			info.value = scrollAreaKey
-			info.checked = scrollAreaKey == TMW.EVENTS:GetEventSettings().Location
-			info.func = TMW.ANN.Location_DropDown_OnClick
+			info.checked = scrollAreaKey == EVENTS:GetEventSettings().Location
+			info.func = Announcements.Location_DropDown_OnClick
 			info.arg1 = scrollAreaName
 			UIDropDownMenu_AddButton(info, UIDROPDOWNMENU_MENU_LEVEL)
 		end
@@ -506,7 +500,7 @@ ANN:RegisterEventHandlerDataNonSpecific(83, "MSBT", {
 		end
 	end,
 })
-ANN:RegisterEventHandlerDataNonSpecific(85, "PARROT", {
+Announcements:RegisterEventHandlerDataNonSpecific(85, "PARROT", {
 	-- GLOBALS: Parrot
 	text = "Parrot",
 	hidden = function() return not (Parrot and ((Parrot.IsEnabled and Parrot:IsEnabled()) or Parrot:IsActive())) end,
@@ -521,9 +515,9 @@ ANN:RegisterEventHandlerDataNonSpecific(85, "PARROT", {
 			local info = UIDropDownMenu_CreateInfo()
 			info.text = n
 			info.value = k
-			info.func = TMW.ANN.Location_DropDown_OnClick
+			info.func = Announcements.Location_DropDown_OnClick
 			info.arg1 = n
-			info.checked = k == TMW.EVENTS:GetEventSettings().Location
+			info.checked = k == EVENTS:GetEventSettings().Location
 			UIDropDownMenu_AddButton(info, UIDROPDOWNMENU_MENU_LEVEL)
 		end
 	end,
@@ -540,7 +534,7 @@ ANN:RegisterEventHandlerDataNonSpecific(85, "PARROT", {
 		end
 	end,
 })
-ANN:RegisterEventHandlerDataNonSpecific(88, "FCT", {
+Announcements:RegisterEventHandlerDataNonSpecific(88, "FCT", {
 	-- GLOBALS: CombatText_AddMessage, CombatText_StandardScroll, SHOW_COMBAT_TEXT
 	text = COMBAT_TEXT_LABEL,
 	desc = L["ANN_FCT_DESC"],

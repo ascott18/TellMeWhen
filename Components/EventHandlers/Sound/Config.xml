@@ -29,7 +29,8 @@
 						self:GetParent():LockHighlight()
 					</OnEnter>
 					<OnLeave>
-						if TMW.SND.selectedListID ~= self:GetParent().listID then
+						local Sound = TMW.EVENTS:GetEventHandler("Sound")
+						if Sound.selectedListID ~= self:GetParent().listID then
 							self:GetParent():UnlockHighlight()
 						end
 					</OnLeave>
@@ -50,7 +51,9 @@
 				end
 
 				TMW.EVENTS:LoadConfig()
-				TMW.SND:SelectSound(name)
+				
+				local Sound = TMW.EVENTS:GetEventHandler("Sound")
+				Sound:SelectSound(name)
 			</OnClick>
 			<OnMouseWheel>
 				self:GetParent().ScrollBar:SetValue(self:GetParent().ScrollBar:GetValue() - delta)
@@ -88,7 +91,8 @@
 								self:SetValueStep(1)
 							</OnLoad>
 							<OnValueChanged>
-								TMW.SND:SetSoundsOffset(value)
+								local Sound = TMW.EVENTS:GetEventHandler("Sound")
+								Sound:SetSoundsOffset(value)
 							</OnValueChanged>
 						</Scripts>
 					</Slider>
@@ -113,7 +117,8 @@
 				</Layers>
 				<Scripts>
 					<OnSizeChanged>
-						TMW.SND:SetSoundsOffset(TMW.SND.offs)
+						local Sound = TMW.EVENTS:GetEventHandler("Sound")
+						Sound:SetSoundsOffset(Sound.offs)
 					</OnSizeChanged>
 				</Scripts>
 			</Frame>
@@ -202,7 +207,11 @@
 						if TMW.CI.ics and TMW.EVENTS.currentEventID then
 							TMW.EVENTS:GetEventSettings().Sound = t
 						end
-						TMW.SND:SelectSound(t)
+						
+						
+						local Sound = TMW.EVENTS:GetEventHandler("Sound")
+						Sound:SelectSound(t)
+						
 						TMW.IE:ScheduleIconSetup()
 						self:GetScript("OnTextChanged")(self)
 

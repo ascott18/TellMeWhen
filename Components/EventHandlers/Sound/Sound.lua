@@ -27,7 +27,6 @@ local LSM = LibStub("LibSharedMedia-3.0")
 
 
 local Sound = TMW.Classes.EventHandler:New("Sound")
-TMW.SND = Sound
 
 Sound:RegisterEventDefaults{
 	Sound = "None",
