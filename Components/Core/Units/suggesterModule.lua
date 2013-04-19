@@ -115,7 +115,7 @@ function Module:Table_GetSpecialSuggestions(suggestions, tbl, ...)
 		suggestions[#suggestions + 1] = "%A"
 	end
 	
-	TMW.removeTableDuplicates(suggestions)
+	TMW.tRemoveDuplicates(suggestions)
 end
 
 function Module.Sorter_Units(a, b)

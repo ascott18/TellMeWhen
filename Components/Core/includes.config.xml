@@ -1,8 +1,8 @@
 ﻿<Ui>
 
-<Include file="Help\includes.config.xml"/>
-
 <Include file="Common\includes.config.xml"/>
+
+<Include file="Help\includes.config.xml"/>
 
 <Include file="Spells\includes.config.xml"/>
 

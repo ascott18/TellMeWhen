@@ -248,7 +248,7 @@ function Type:Setup(icon, groupID, iconID)
 		icon.OnlyInBags = true
 	end
 
-	icon:SetInfo("texture", TMW:GetConfigIconTexture(icon, 1))
+	icon:SetInfo("texture", Type:GetConfigIconTexture(icon))
 
 	icon:SetUpdateFunction(ItemCooldown_OnUpdate)
 	icon:Update()
@@ -271,6 +271,22 @@ function Type:FormatSpellForOutput(icon, data, doInsertLink)
 	return data, true
 end
 
+function Type:GetConfigIconTexture(icon)
+	if icon.Name == "" then
+		return "Interface\\Icons\\INV_Misc_QuestionMark", nil
+	else
+		local tbl = TMW:GetItemIDs(nil, icon.Name)
+
+		for _, name in ipairs(tbl) do
+			local t = GetItemIcon(name)
+			if t then
+				return t, true
+			end
+		end
+		
+		return "Interface\\Icons\\INV_Misc_QuestionMark", false
+	end
+end
 
 
 Type:Register(20)

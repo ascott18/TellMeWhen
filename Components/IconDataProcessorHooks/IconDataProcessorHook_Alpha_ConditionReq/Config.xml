@@ -14,6 +14,8 @@
 					<OnLoad>
 						self.text:SetWidth(self:GetWidth())
 						
+						TMW.IE:RegisterRapidSetting("ConditionAlpha")
+
 						TMW.IE:CreateSettingFrameFromData(self, "SettingSlider_Alpha", {
 							title = TMW.L["REQFAILED_ALPHA"],
 							tooltip = TMW.L["CONDITIONALPHA_METAICON_DESC"],

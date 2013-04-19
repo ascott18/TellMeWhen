@@ -255,7 +255,7 @@ local function Load_Generic_Check(self, frame, EventSettings)
 end
 
 
-TMW:RegisterRapidSetting("Duration")
+TMW.IE:RegisterRapidSetting("Duration")
 Animations:RegisterConfigFrame("Duration", {
 	frame = "Duration",
 	topPadding = 13,
@@ -264,7 +264,7 @@ Animations:RegisterConfigFrame("Duration", {
 	Load = Load_Generic_Slider,
 })
 
-TMW:RegisterRapidSetting("Magnitude")
+TMW.IE:RegisterRapidSetting("Magnitude")
 Animations:RegisterConfigFrame("Magnitude", {
 	frame = "Magnitude",
 	topPadding = 13,
@@ -273,7 +273,7 @@ Animations:RegisterConfigFrame("Magnitude", {
 	Load = Load_Generic_Slider,
 })
 
-TMW:RegisterRapidSetting("Period")
+TMW.IE:RegisterRapidSetting("Period")
 Animations:RegisterConfigFrame("Period", {
 	frame = "Period",
 	topPadding = 13,
@@ -282,7 +282,7 @@ Animations:RegisterConfigFrame("Period", {
 	Load = Load_Generic_Slider,
 })
 
-TMW:RegisterRapidSetting("Thickness")
+TMW.IE:RegisterRapidSetting("Thickness")
 Animations:RegisterConfigFrame("Thickness", {
 	frame = "Thickness",
 	topPadding = 13,
@@ -291,7 +291,7 @@ Animations:RegisterConfigFrame("Thickness", {
 	Load = Load_Generic_Slider,
 })
 
-TMW:RegisterRapidSetting("Size_anim")
+TMW.IE:RegisterRapidSetting("Size_anim")
 Animations:RegisterConfigFrame("Size_anim", {
 	frame = "Size_anim",
 	topPadding = 13,
@@ -316,7 +316,7 @@ Animations:RegisterConfigFrame("AlphaStandalone", {
 	end,
 })
 
-TMW:RegisterRapidSetting("SizeX")
+TMW.IE:RegisterRapidSetting("SizeX")
 Animations:RegisterConfigFrame("SizeX", {
 	frame = "SizeX",
 	topPadding = 13,
@@ -325,7 +325,7 @@ Animations:RegisterConfigFrame("SizeX", {
 	Load = Load_Generic_Slider,
 })
 
-TMW:RegisterRapidSetting("SizeY")
+TMW.IE:RegisterRapidSetting("SizeY")
 Animations:RegisterConfigFrame("SizeY", {
 	frame = "SizeY",
 	topPadding = 13,
@@ -359,10 +359,10 @@ Animations:RegisterConfigFrame("Image", {
 	end,
 })
 
-TMW:RegisterRapidSetting("r_anim")
-TMW:RegisterRapidSetting("g_anim")
-TMW:RegisterRapidSetting("b_anim")
-TMW:RegisterRapidSetting("a_anim")
+TMW.IE:RegisterRapidSetting("r_anim")
+TMW.IE:RegisterRapidSetting("g_anim")
+TMW.IE:RegisterRapidSetting("b_anim")
+TMW.IE:RegisterRapidSetting("a_anim")
 Animations:RegisterConfigFrame("Color", {
 	frame = "Color",
 	topPadding = 4,

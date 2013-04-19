@@ -2,4 +2,8 @@
 
 <Script file="SwingTimerMonitor.lua"/>
 
+<Script file="UpdateTableManager.lua"/>
+
+<Script file="PlayerNames.lua"/>
+
 </Ui>

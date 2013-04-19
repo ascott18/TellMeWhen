@@ -470,7 +470,7 @@ function Type:Setup(icon, groupID, iconID)
 	Type:RegisterEvent("COMBAT_LOG_EVENT_UNFILTERED")
 	Type:RegisterEvent("UNIT_SPELLCAST_SUCCEEDED")
 
-	icon:SetInfo("texture", TMW:GetConfigIconTexture(icon))
+	icon:SetInfo("texture", Type:GetConfigIconTexture(icon))
 
 	icon:SetUpdateFunction(UnitCooldown_OnUpdate)
 	icon:Update()

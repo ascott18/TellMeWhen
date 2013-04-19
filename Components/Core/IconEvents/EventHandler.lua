@@ -17,8 +17,6 @@ local TMW = TMW
 local L = TMW.L
 local print = TMW.print
 
-local safecall = TMW.safecall
-
 TMW.EVENTS = {}
 local EVENTS = TMW.EVENTS
 LibStub("AceTimer-3.0"):Embed(EVENTS)
@@ -165,7 +163,7 @@ function EventHandler:RegisterEventHandlerDataTable(eventHandlerData)
 	TMW:ValidateType("eventHandlerData.eventHandler", "EventHandler:RegisterEventHandlerDataTable(eventHandlerData)", eventHandlerData.eventHandler, "table")
 	TMW:ValidateType("eventHandlerData.eventHandlerName", "EventHandler:RegisterEventHandlerDataTable(eventHandlerData)", eventHandlerData.eventHandlerName, "string")
 	
-	safecall(self.OnRegisterEventHandlerDataTable, self, eventHandlerData, unpack(eventHandlerData))
+	TMW.safecall(self.OnRegisterEventHandlerDataTable, self, eventHandlerData, unpack(eventHandlerData))
 	
 	tinsert(self.AllEventHandlerData, eventHandlerData)
 end
@@ -233,7 +231,7 @@ TMW:RegisterCallback("TMW_ONUPDATE_TIMECONSTRAINED_POST", function(event, time, 
 		sort(QueuedIcons, Icon.ScriptSort)
 		for i = 1, #QueuedIcons do
 			local icon = QueuedIcons[i]
-			safecall(icon.ProcessQueuedEvents, icon)
+			TMW.safecall(icon.ProcessQueuedEvents, icon)
 		end
 		wipe(QueuedIcons)
 	end

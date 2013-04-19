@@ -104,7 +104,7 @@ function profile:Import_ImportData(editbox, data, version, noOverwrite)
 		if version > TELLMEWHEN_VERSIONNUMBER then
 			TMW:Print(L["FROMNEWERVERSION"])
 		else
-			TMW:Upgrade()
+			TMW:UpgradeProfile()
 		end
 	end
 end

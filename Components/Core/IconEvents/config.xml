@@ -461,7 +461,7 @@
 
 								local t = TMW:CleanString(self)
 								if strfind(t, ":") then
-									t = t:toseconds()
+									t = TMW.toSeconds(t)
 								end
 								t = tonumber(t) or 0
 								self:SetText(t)

@@ -150,7 +150,7 @@ function Type:Setup(icon, groupID, iconID)
 	icon.ICDStartTime = icon.ICDStartTime or 0
 	icon.ICDDuration = icon.ICDDuration or 0
 
-	icon:SetInfo("texture", TMW:GetConfigIconTexture(icon))
+	icon:SetInfo("texture", Type:GetConfigIconTexture(icon))
 
 	--[[ keep these events per icon isntead of global like unitcooldowns are so that ...
 	well i had a reason here but it didnt make sense when i came back and read it a while later. Just do it. I guess.]]

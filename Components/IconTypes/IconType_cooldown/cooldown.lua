@@ -259,7 +259,7 @@ function Type:Setup(icon, groupID, iconID)
 	else
 		icon.FirstTexture = SpellTextures[icon.NameFirst]
 		
-		icon:SetInfo("texture; reverse", TMW:GetConfigIconTexture(icon), false)
+		icon:SetInfo("texture; reverse", Type:GetConfigIconTexture(icon), false)
 		
 		
 		if not icon.RangeCheck then

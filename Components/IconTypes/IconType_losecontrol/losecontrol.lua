@@ -114,7 +114,7 @@ function Type:Setup(icon, groupID, iconID)
 	
 	icon:SetInfo("reverse; texture",
 		true,
-		TMW:GetConfigIconTexture(icon)
+		Type:GetConfigIconTexture(icon)
 	)
 
 	icon:SetUpdateMethod("manual")

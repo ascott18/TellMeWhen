@@ -1415,6 +1415,9 @@ function IE:OnInitialize()
 	self.resizer.resizeButton:SetScale(2)
 	
 	TMW:Fire("TMW_OPTIONS_LOADED")
+	
+	TMW:UnregisterAllCallbacks("TMW_OPTIONS_LOADED")
+	IE.OnInitialize = TMW.NULLFUNC
 end
 
 function IE:OnUpdate()
@@ -2799,6 +2802,23 @@ end)
 -- UNDO/REDO
 -- ----------------------
 
+
+IE.RapidSettings = {
+	-- settings that can be changed very rapidly, i.e. via mouse wheel or in a color picker
+	-- consecutive changes of these settings will be ignored by the undo/redo module
+	r = true,
+	g = true,
+	b = true,
+	a = true,
+	Size = true,
+	Level = true,
+	Alpha = true,
+	UnAlpha = true,
+}
+function IE:RegisterRapidSetting(setting)
+	IE.RapidSettings[setting] = true
+end
+
 ---------- Comparison ----------
 function IE:DeepCompare(t1, t2, ...)
 	-- heavily modified version of http://snippets.luacode.org/snippets/Deep_Comparison_of_Two_Values_3
@@ -2891,7 +2911,7 @@ function IE:AttemptBackup(icon)
 			-- if the last setting that was changed is the same as the most recent setting that was changed,
 			-- and if the setting is one that can be changed very rapidly,
 			-- delete the previous history point so that we dont murder our memory usage and piss off the user as they undo a number from 1 to 10, 0.1 per click.
-			if icon.lastChangePath == result and TMW.RapidSettings[changedSetting] then
+			if icon.lastChangePath == result and IE.RapidSettings[changedSetting] then
 				icon.history[#icon.history] = nil
 				icon.historyState = #icon.history
 			end

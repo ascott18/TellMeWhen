@@ -251,7 +251,7 @@ function Type:Setup(icon, groupID, iconID)
 	elseif pclass == "MAGE" then
 		icon:SetInfo("texture", GetSpellTexture(116011))
 	else
-		icon:SetInfo("texture", TMW:GetConfigIconTexture(icon))
+		icon:SetInfo("texture", Type:GetConfigIconTexture(icon))
 	end
 
 	icon:SetUpdateMethod("manual")

@@ -339,7 +339,7 @@ function UNITS:GetOriginalUnitTable(unitSettings)
 	local Units = TMW:SplitNames(unitSettings) -- get a table of everything
 
 	-- REMOVE DUPLICATES
-	TMW.removeTableDuplicates(Units)
+	TMW.tRemoveDuplicates(Units)
 
 	return Units
 end

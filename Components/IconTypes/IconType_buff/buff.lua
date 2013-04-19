@@ -365,7 +365,7 @@ function Type:Setup(icon, groupID, iconID)
 
 	icon.FirstTexture = SpellTextures[icon.NameFirst]
 
-	icon:SetInfo("texture; reverse", TMW:GetConfigIconTexture(icon), true)
+	icon:SetInfo("texture; reverse", Type:GetConfigIconTexture(icon), true)
 	
 	if icon.UnitSet.allUnitsChangeOnEvent then
 		icon:SetUpdateMethod("manual")

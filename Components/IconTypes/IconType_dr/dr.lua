@@ -258,7 +258,7 @@ do	-- CheckCategories
 
 		for i, IDorName in ipairs(icon.NameArray) do
 			for category, str in pairs(TMW.BE.dr) do
-				if TMW:StringIsInSemicolonList(str, IDorName) or TMW:GetSpellNames(icon, str, nil, 1, 1)[IDorName] then
+				if TMW:IsStringInSemicolonList(str, IDorName) or TMW:GetSpellNames(icon, str, nil, 1, 1)[IDorName] then
 					if not firstCategory then
 						firstCategory = category
 					end
@@ -321,7 +321,7 @@ function Type:Setup(icon, groupID, iconID)
 	-- Do the Right Thing and tell people if their DRs mismatch
 	CheckCategories(icon)
 
-	icon:SetInfo("texture", TMW:GetConfigIconTexture(icon))
+	icon:SetInfo("texture", Type:GetConfigIconTexture(icon))
 
 	if icon.UnitSet.allUnitsChangeOnEvent then
 		icon:SetUpdateMethod("manual")

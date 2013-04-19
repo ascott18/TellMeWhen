@@ -158,6 +158,41 @@ function IconType:GuessIconTexture(ics)
 	end
 end
 
+
+
+-- [FALLBACK]
+--- Gets the icon texture that will be used for the icon in configuration mode. This is a base method written for handling spells. It should be overridden for IconTypes that don't take spell input for their ics.Name setting. It is acceptable to delay the declaration of overrides of this method until after TellMeWhen_Options has loaded if needed.
+-- @param icon [TMW.Classes.Icon] The icon to get the config mode texture for.
+-- @return [string] The texture path of the texture to use.
+-- @usage icon:SetInfo("texture", Type:GetConfigIconTexture(icon))
+function IconType:GetConfigIconTexture(icon)
+	if icon.Name == "" and not self.AllowNoName then
+		return "Interface\\Icons\\INV_Misc_QuestionMark", nil
+	else
+	
+		if icon.Name ~= "" then
+			local tbl = TMW:GetSpellNames(nil, icon.Name)
+
+			for _, name in ipairs(tbl) do
+				local t = SpellTextures[name]
+				if t then
+					return t, true
+				end
+			end
+		end
+		
+		if self.usePocketWatch then
+			if icon:IsBeingEdited() == 1 then
+				TMW.HELP:Show("ICON_POCKETWATCH_FIRSTSEE", nil, TMW.IE.icontexture, 0, 0, L["HELP_POCKETWATCH"])
+			end
+			return "Interface\\Icons\\INV_Misc_PocketWatch_01", false
+		else
+			return "Interface\\Icons\\INV_Misc_QuestionMark", false
+		end
+	end
+end
+
+
 -- [REQUIRED, FALLBACK]
 --- Handles dragging spells, items, and other things onto an icon. This is a base method written for handling spells. It should be overridden for IconTypes that don't take spell input for their ics.Name setting. It is acceptable to delay the declaration of overrides of this method until after TellMeWhen_Options has loaded if needed.
 -- @paramsig icon, ...

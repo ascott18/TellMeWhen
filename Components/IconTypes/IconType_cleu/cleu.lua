@@ -354,7 +354,7 @@ function Type:Setup(icon, groupID, iconID)
 	-- more efficient than checking icon.CLEUEvents[""] every OnEvent
 	icon.AllowAnyEvents = icon.CLEUEvents[""]
 
-	icon:SetInfo("texture", TMW:GetConfigIconTexture(icon))
+	icon:SetInfo("texture", Type:GetConfigIconTexture(icon))
 
 	-- safety mechanism
 	if icon.AllowAnyEvents and not icon.SourceUnits and not icon.DestUnits and not icon.NameHash and not icon.SourceFlags and not icon.DestFlags then

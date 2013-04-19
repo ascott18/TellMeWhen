@@ -154,7 +154,7 @@ function Type:Setup(icon, groupID, iconID)
 --	icon.NameHash = TMW:GetSpellNames(icon, icon.Name, nil, nil, 1)
 	icon.NameNameHash = TMW:GetSpellNames(icon, icon.Name, nil, 1, 1)
 
-	icon:SetInfo("texture", TMW:GetConfigIconTexture(icon))
+	icon:SetInfo("texture", Type:GetConfigIconTexture(icon))
 	
 	icon.Units, icon.UnitSet = TMW:GetUnits(icon, icon.Unit, icon:GetSettings().UnitConditions)
 	

@@ -25,7 +25,6 @@ local Hook = TMW.Classes.IconDataProcessorHook:New("ALPHA_CONDITIONREQ", "CONDIT
 Hook:RegisterIconDefaults{
 	ConditionAlpha			= 0,
 }
-TMW:RegisterRapidSetting("ConditionAlpha")
 
 Hook:RegisterConfigPanel_XMLTemplate(229, "TellMeWhen_ConditionRequirements")
 
