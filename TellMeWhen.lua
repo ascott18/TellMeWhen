@@ -1063,15 +1063,20 @@ do -- Class Lib
 		end,
 		
 		AssertSelfIsClass = function(self)
-			assert(self.isTMWClass, ("Caller must be the class %q, not an instance of the class"):format(self.className))
+			if not self.isTMWClass then
+				error(("Caller must be the class %q, not an instance of the class"):format(self.className), 3)
+			end
 		end,
 		
 		AssertSelfIsInstance = function(self)
-			assert(self.isTMWClassInstance, ("Caller must be an instance of the class %q, not the class itself"):format(self.className))
+			if not self.isTMWClassInstance then
+				error(("Caller must be an instance of the class %q, not the class itself"):format(self.className), 3)
+			end
 		end,
 		
 		AssertIsProtectedCall = function(self, message)
 			-- debugstack can be a bit heavy on CPU usage, so use this sparingly
+			-- it is also very buggy and unreliable, so ideally, never use it at all.
 			
 			local lineOne, lineTwo = ("\n"):split(debugstack(2))
 			
@@ -1244,18 +1249,6 @@ TMW.Defaults = {
 						SettingsPerView			= {
 							["**"] = {
 							}
-						},
-						Events 					= {
-							n					= 0,
-							["**"] 				= {
-								OnlyShown 		= false,
-								Operator 		= "<",
-								Value 			= 0,
-								CndtJustPassed 	= false,
-								PassingCndt		= false,
-								PassThrough		= true,
-								Icon			= "",
-							},
 						},
 					},
 				},
@@ -1584,7 +1577,7 @@ end
 -- --------------------------
 
 function TMW:OnInitialize()
-	if not TMW.Classes.ConditionObject then
+	if not TMW.Classes.EventHandler then
 		-- this also includes upgrading from older than 3.0 (pre-Ace3 DB settings)
 		-- GLOBALS: StaticPopupDialogs, StaticPopup_Show, EXIT_GAME, CANCEL, ForceQuit
 		StaticPopupDialogs["TMW_RESTARTNEEDED"] = {
@@ -1598,7 +1591,7 @@ function TMW:OnInitialize()
 			whileDead = true,
 			preferredIndex = 3, -- http://forums.wowace.com/showthread.php?p=320956
 		}
-		StaticPopup_Show("TMW_RESTARTNEEDED", TELLMEWHEN_VERSION_FULL, "ConditionObject.lua") -- arg3 could also be L["ERROR_MISSINGFILE_REQFILE"]
+		StaticPopup_Show("TMW_RESTARTNEEDED", TELLMEWHEN_VERSION_FULL, "EventHandler.lua") -- arg3 could also be L["ERROR_MISSINGFILE_REQFILE"]
 		return -- if required, return here
 	end
 	
@@ -2090,28 +2083,6 @@ function TMW:GetBaseUpgrades()			-- upgrade functions
 		[48025] = {
 			icon = function(self, ics)
 				ics.Name = gsub(ics.Name, "(CrowdControl)", "%1; " .. GetSpellInfo(339))
-			end,
-		},
-		[48010] = {
-			icon = function(self, ics)
-				-- OnlyShown was disabled for OnHide (not togglable anymore), so make sure that icons dont get stuck with it enabled
-				local OnHide = rawget(ics.Events, "OnHide")
-				if OnHide then
-					OnHide.OnlyShown = false
-				end
-			end,
-		},
-		[47321] = {
-			icon = function(self, ics)
-				ics.Events["**"] = nil -- wtf?
-			end,
-		},
-		[47320] = {
-			iconEventHandler = function(self, eventSettings)
-				-- these numbers got really screwy (0.8000000119), put then back to what they should be (0.8)
-				eventSettings.Duration 	= eventSettings.Duration  and tonumber(format("%0.1f",	eventSettings.Duration))
-				eventSettings.Magnitude = eventSettings.Magnitude and tonumber(format("%1f",	eventSettings.Magnitude))
-				eventSettings.Period  	= eventSettings.Period    and tonumber(format("%0.1f",	eventSettings.Period))
 			end,
 		},
 		[47002] = {
@@ -2742,26 +2713,6 @@ function TMW:GlobalUpgrade()
 				HelpSettings.PocketWatch = nil
 			end
 		end
-		
-		if TellMeWhenDB.Version < 50035 then
-			for _, p in pairs(TellMeWhenDB.profiles) do
-				if p.Groups then
-					for _, gs in pairs(p.Groups) do
-						if gs.Icons then
-							for _, ics in pairs(gs.Icons) do
-								if ics.Events then
-									for k, eventSettings in pairs(ics.Events) do
-										if type(eventSettings) == "table" and eventSettings.PassThrough == nil then
-											eventSettings.PassThrough = false
-										end
-									end
-								end
-							end
-						end
-					end
-				end
-			end
-		end
 	end
 	
 	TMW:Fire("TMW_DB_PRE_DEFAULT_UPGRADES")
@@ -3104,173 +3055,6 @@ function UpdateTableManager:UpdateTable_PerformAutoSort()
 end
 
 
-
-
-local EventHandler = TMW:NewClass("EventHandler", "AceEvent-3.0", "AceTimer-3.0")
-EventHandler.instancesByName = {}
-
-TMW:RegisterUpgrade(50020, {
-	-- Upgrade from the old event system that only allowed one event of each type per icon.
-	icon = function(self, ics)
-		local Events = ics.Events
-		for event, eventSettings in pairs(CopyTable(Events)) do -- dont use InNLengthTable here
-			if type(event) == "string" and event ~= "n" then
-				local addedAnEvent
-				for eventHandlerName, EventHandler in pairs(TMW.Classes.EventHandler.instancesByName) do
-					local hasHandlerOfType = EventHandler:ProcessIconEventSettings(event, eventSettings)
-					if type(rawget(Events, "n") or 0) == "table" then
-						Events.n = 0
-					end
-					if hasHandlerOfType then
-						Events.n = (rawget(Events, "n") or 0) + 1
-						Events[Events.n] = CopyTable(eventSettings)
-						Events[Events.n].Type = eventHandlerName
-						Events[Events.n].Event = event
-						Events[Events.n].PassThrough = true
-
-						addedAnEvent = true
-					end
-				end
-
-				-- the last new event added for each original event should retain
-				-- the original PassThrough setting instead of being forced to be true (Events[Events.n].PassThrough = true)
-				-- in order to retain previous functionality
-				if addedAnEvent then
-					Events[Events.n].PassThrough = eventSettings.PassThrough
-				end
-				Events[event] = nil
-			end
-		end
-	end,
-})
-
-TMW:RegisterCallback("TMW_UPGRADE_REQUESTED", function(event, type, version, ...)
-	if type == "icon" then
-		local ics, groupID, iconID = ...
-		
-		-- delegate to events
-		for eventID, eventSettings in TMW:InNLengthTable(ics.Events) do
-			TMW:DoUpgrade("iconEventHandler", version, eventSettings, eventID, groupID, iconID)
-		end
-	end
-end)
-
-function TMW:GetEventHandler(eventHandlerName)
-	return EventHandler.instancesByName[eventHandlerName]
-end
-
-function TMW:RegisterEventHandlerData(eventHandlerName, ...)
-	local EventHandler = TMW:GetEventHandler(eventHandlerName)
-	
-	if EventHandler then
-		EventHandler:RegisterEventHandlerDataNonSpecific(...)
-	else
-		local args = {...}
-		TMW:RegisterCallback("TMW_CLASS_EventHandler_INSTANCE_NEW", function(event, class, EventHandler)
-			if EventHandler.eventHandlerName == eventHandlerName then
-				EventHandler:RegisterEventHandlerDataNonSpecific(unpack(args))
-			end
-		end)
-	end
-end
-
-
-function EventHandler:OnNewInstance_EventHandler(eventHandlerName)
-	self.eventHandlerName = eventHandlerName
-	self.AllEventHandlerData = {}
-	self.NonSpecificEventHandlerData = {}
-	
-	EventHandler.instancesByName[eventHandlerName] = self
-end
-
-function EventHandler:RegisterEventHandlerDataTable(eventHandlerData)
-	-- This function simply makes sure that we can keep track of all eventHandlerData that has been registed.
-	-- Without it, we would have to search through every single IconComponent when an event is fired to get this data.
-	
-	-- Feel free to extend this method in instances of EventHandler to make it easier to perform these data lookups.
-	-- But, this method should probably never be called by anything except the event core (no third-party calls)
-	
-	TMW:ValidateType("eventHandlerData.eventHandler", "EventHandler:RegisterEventHandlerDataTable(eventHandlerData)", eventHandlerData.eventHandler, "table")
-	TMW:ValidateType("eventHandlerData.eventHandlerName", "EventHandler:RegisterEventHandlerDataTable(eventHandlerData)", eventHandlerData.eventHandlerName, "string")
-	
-	TMW.safecall(self.OnRegisterEventHandlerDataTable, self, eventHandlerData, unpack(eventHandlerData))
-	
-	tinsert(self.AllEventHandlerData, eventHandlerData)
-end
-
-function EventHandler:RegisterEventHandlerDataNonSpecific(...)
-	-- Registers event handler data that isn't tied to a specific IconComponent.
-	-- This method may be overwritten in instances of EventHandler with a method that throws an error if nonspecific event handler data (not tied to an IconComponent) isn't supported.
-	
-	self:AssertSelfIsInstance()
-	
-	local eventHandlerData = {
-		eventHandler = self,
-		eventHandlerName = self.eventHandlerName,
-		...,
-	}
-	
-	self:RegisterEventHandlerDataTable(eventHandlerData)
-	
-	tinsert(self.NonSpecificEventHandlerData, eventHandlerData)
-end
-
-function EventHandler:RegisterEventDefaults(defaults)
-	assert(type(defaults) == "table", "arg1 to RegisterGroupDefaults must be a table")
-	
-	if TMW.InitializedDatabase then
-		error(("Defaults for EventHandler %q are being registered too late. They need to be registered before the database is initialized."):format(self.name or "<??>"))
-	end
-	
-	-- Copy the defaults into the main defaults table.
-	TMW:MergeDefaultsTables(defaults, TMW.Icon_Defaults.Events["**"])
-end
-	
-TMW:RegisterCallback("TMW_ICON_SETUP_PRE", function(_, icon)
-	wipe(icon.EventHandlersSet)
-
-	for _, eventSettings in TMW:InNLengthTable(icon.Events) do
-		local event = eventSettings.Event
-		if event then
-			local EventHandler = TMW:GetEventHandler(eventSettings.Type, true)
-			
-			local thisHasEventHandlers = EventHandler and EventHandler:ProcessIconEventSettings(event, eventSettings)
-
-			if thisHasEventHandlers then
-				TMW:Fire("TMW_ICON_EVENTS_PROCESSED_EVENT_FOR_USE", icon, event, eventSettings)
-				
-				icon.EventHandlersSet[event] = true
-				icon.EventsToFire = icon.EventsToFire or {}
-			end
-		end
-	end
-end)
-
-TMW:RegisterCallback("TMW_ONUPDATE_TIMECONSTRAINED_POST", function(event, time, Locked)
-	local Icon = TMW.Classes.Icon
-	local QueuedIcons = Icon.QueuedIcons
-	
-	if Locked and QueuedIcons[1] then
-		sort(QueuedIcons, Icon.ScriptSort)
-		for i = 1, #QueuedIcons do
-			local icon = QueuedIcons[i]
-			safecall(icon.ProcessQueuedEvents, icon)
-		end
-		wipe(QueuedIcons)
-	end
-end)
-
-TMW:RegisterCallback("TMW_GLOBAL_UPDATE_POST", function(event, time, Locked)
-	wipe(TMW.Classes.Icon.QueuedIcons)
-end)
-
-TMW:RegisterCallback("TMW_ICON_SETUP_PRE", function(event, icon)
-	-- make sure events dont fire while, or shortly after, we are setting up
-	icon.runEvents = nil
-	
-	TMW:CancelTimer(icon.runEventsTimerHandler, 1)
-	icon.runEventsTimerHandler = TMW.ScheduleTimer(icon, "RestoreEvents", UPD_INTV*2.1)
-end)
 
 
  

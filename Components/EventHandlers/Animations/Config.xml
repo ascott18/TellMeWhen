@@ -8,7 +8,7 @@
 		</Anchors>
 		<Scripts>
 			<OnMouseUp>
-				TMW.Classes.EventHandler.instancesByName.Animations:SetSliderMinMax(self)
+				TMW.EVENTS:GetEventHandler("Animations"):SetSliderMinMax(self)
 			</OnMouseUp>
 			<OnLoad>
 				local frameName = self:GetName():gsub(self:GetParent():GetName(), ""):upper()
@@ -21,7 +21,7 @@
 				self.range = 10
 
 				--self:SetValueStep(self.step)
-				TMW.Classes.EventHandler.instancesByName.Animations:SetSliderMinMax(self)
+				TMW.EVENTS:GetEventHandler("Animations"):SetSliderMinMax(self)
 
 				self:EnableMouseWheel(true)
 				self.getvalue = self.GetValue
@@ -45,7 +45,7 @@
 				if delta == 1 or delta == -1 then
 					delta = delta*(self.step or 1)
 				end
-				TMW.Classes.EventHandler.instancesByName.Animations:SetSliderMinMax(self, self:GetValue()+delta)
+				TMW.EVENTS:GetEventHandler("Animations"):SetSliderMinMax(self, self:GetValue()+delta)
 			</OnMouseWheel>
 			<OnEnable>
 				self:SetAlpha(1)
@@ -65,7 +65,7 @@
 				end
 
 				TMW.EVENTS:LoadConfig()
-				TMW.Classes.EventHandler.instancesByName.Animations:SelectAnimation(self.animation)
+				TMW.EVENTS:GetEventHandler("Animations"):SelectAnimation(self.animation)
 			</OnClick>
 		</Scripts>
 	</Button>
@@ -311,7 +311,7 @@
 								self.Low:SetText("0%")
 								self.High:SetText("100%")
 
-								TMW.Classes.EventHandler.instancesByName.Animations:SetSliderMinMax(self)
+								TMW.EVENTS:GetEventHandler("Animations"):SetSliderMinMax(self)
 
 								self:EnableMouseWheel(true)
 
@@ -434,7 +434,7 @@
 								
 								UIDropDownMenu_SetWidth(self, 151)
 								
-								self.initialize = TMW.Classes.EventHandler.instancesByName.Animations.AnchorTo_Dropdown
+								self.initialize = TMW.EVENTS:GetEventHandler("Animations").AnchorTo_Dropdown
 							</OnLoad>
 						</Scripts>
 					</Frame>

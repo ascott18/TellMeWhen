@@ -77,7 +77,7 @@ end
 --    end
 --  })
 function IconComponent:RegisterEventHandlerData(eventHandlerName, ...)
-	local EventHandler = TMW:GetEventHandler(eventHandlerName)
+	local EventHandler = TMW.EVENTS:GetEventHandler(eventHandlerName)
 	
 	local eventHandlerData = {
 		eventHandler = EventHandler,

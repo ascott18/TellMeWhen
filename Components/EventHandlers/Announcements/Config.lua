@@ -28,7 +28,7 @@ local CI = TMW.CI
 
 local EVENTS = TMW.EVENTS
 local ANN = TMW.ANN
-ANN.tabText = L["ANN_TAB"]
+ANN.handlerName = L["ANN_TAB"]
 
 TMW:RegisterCallback("TMW_OPTIONS_LOADED", function(event)
 	TMW:ConvertContainerToScrollFrame(ANN.ConfigContainer.ConfigFrames)
@@ -131,9 +131,9 @@ function ANN:SetupEventDisplay(eventID)
 		elseif chan == NONE then
 			data = "|cff808080" .. chan .. "|r"
 		end
-		EVENTS.EventHandlerFrames[eventID].DataText:SetText("|cffcccccc" .. self.tabText .. ":|r " .. data)
+		EVENTS.EventHandlerFrames[eventID].DataText:SetText("|cffcccccc" .. self.handlerName .. ":|r " .. data)
 	else
-		EVENTS.EventHandlerFrames[eventID].DataText:SetText("|cffcccccc" .. self.tabText .. ":|r UNKNOWN: " .. (channel or "?"))
+		EVENTS.EventHandlerFrames[eventID].DataText:SetText("|cffcccccc" .. self.handlerName .. ":|r UNKNOWN: " .. (channel or "?"))
 	end
 end
 

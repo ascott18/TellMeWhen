@@ -500,7 +500,7 @@ function Icon.ProcessQueuedEvents(icon)
 				end
 
 				if shouldProcess and icon.runEvents and icon.attributes.shown then
-					local EventHandler = TMW:GetEventHandler(EventSettings.Type, true)
+					local EventHandler = TMW.EVENTS:GetEventHandler(EventSettings.Type)
 					if EventHandler then
 						local handled = EventHandler:HandleEvent(icon, EventSettings)
 						if handled then

@@ -168,7 +168,7 @@ local function TMW_ICON_UPDATED(icon, event, ic)
 end
 
 
-if TMW.Classes.EventHandler.instancesByName.Animations then
+if TMW.EVENTS:GetEventHandler("Animations") then
 
 	TMW:RegisterCallback("TMW_ICON_META_INHERITED_ICON_CHANGED", function(event, icon, icToUse)
 		if icon:Animations_Has() then

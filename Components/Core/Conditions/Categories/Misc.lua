@@ -320,43 +320,5 @@ ConditionCategory:RegisterCondition(30,	 "LUA", {
 		setmetatable(CNDT.Env, CNDT.EnvMeta)
 		return c.Name ~= "" and c.Name or "true"
 	end,
-	
-	--[=[
-	Just don't do this anymore. The only person who knows about it is me.
-	And i have only given it to one person in an export string.
-	
-	events = function(ConditionObject, c)
-		-- allows parsing of events from the code string. EG:
-		-- --EVENTS:'PLAYER_ENTERING_WORLD','PLAYER_LOGIN'
-		-- --[[EVENTS:'PLAYER_ENTERING_WORLD','UNIT_AURA','target']]
-		
-		
-		
-		if true then return end
-		
-		
-		
-		
-		
-		local eventString = strmatch(c.Name, "EVENTS:([^ \t]-)\]?")
-		if eventString then
-			CNDT.LuaTemporaryConditionTable = c
-			local func = [[
-				local c = TMW.CNDT.LuaTemporaryConditionTable
-			return ]] .. eventString
-			local func, err = loadstring(func)
-			if func then
-				-- we do this convoluted shit because the function is supposed to return a list of events,
-				-- but the first ret from pcall is success, which isn't expected as a ret value,
-				-- but we still need to return all other values (and an unknown number of them),
-				-- which makes unpack ideal for this.
-				local t = {pcall(func)}
-				local success = tremove(t, 1)
-				if success then
-					return unpack(t)
-				end
-			end
-		end
-	end,]=]
 })
 

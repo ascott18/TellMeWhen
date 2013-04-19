@@ -34,21 +34,9 @@ L["CNDT_SLIDER_DESC_CLICKSWAP_TOSLIDER_DISALLOWED"] = L["CNDT_SLIDER_DESC_CLICKS
 -- GLOBALS: UIDropDownMenu_AddButton, UIDropDownMenu_CreateInfo, UIDropDownMenu_SetText, UIDropDownMenu_GetSelectedValue
 -- GLOBALS: CloseDropDownMenus
 
-local operators = {
-	{ tooltipText = L["CONDITIONPANEL_EQUALS"], 		value = "==", 	text = "==" },
-	{ tooltipText = L["CONDITIONPANEL_NOTEQUAL"], 	 	value = "~=", 	text = "~=" },
-	{ tooltipText = L["CONDITIONPANEL_LESS"], 			value = "<", 	text = "<" 	},
-	{ tooltipText = L["CONDITIONPANEL_LESSEQUAL"], 		value = "<=", 	text = "<=" },
-	{ tooltipText = L["CONDITIONPANEL_GREATER"], 		value = ">", 	text = ">" 	},
-	{ tooltipText = L["CONDITIONPANEL_GREATEREQUAL"], 	value = ">=", 	text = ">=" },
-}
-
 
 local CNDT = TMW.CNDT -- created in TellMeWhen/conditions.lua
 
-function CNDT:OnInitialize()
-	
-end
 
 ---------- Interface/Data ----------
 function CNDT:LoadConfig(conditionSetName)
@@ -407,7 +395,7 @@ end
 
 
 function CNDT:OperatorMenu_DropDown()
-	for k, v in pairs(operators) do
+	for k, v in pairs(TMW.operators) do
 		local info = UIDropDownMenu_CreateInfo()
 		info.func = CNDT.OperatorMenu_DropDown_OnClick
 		info.text = v.text
@@ -663,7 +651,7 @@ TMW:RegisterCallback("TMW_CNDT_GROUP_DRAWGROUP", function(event, CndtGroup, cond
 		CndtGroup.TextOperator:SetText(L["CONDITIONPANEL_OPERATOR"])
 		CndtGroup.Operator:Show()
 
-		local v = TMW:SetUIDropdownText(CndtGroup.Operator, conditionSettings.Operator, operators)
+		local v = TMW:SetUIDropdownText(CndtGroup.Operator, conditionSettings.Operator, TMW.operators)
 		if v then
 			TMW:TT(CndtGroup.Operator, v.tooltipText, nil, 1)
 		end

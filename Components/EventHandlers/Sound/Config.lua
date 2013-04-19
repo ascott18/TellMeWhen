@@ -32,7 +32,7 @@ local LSM = LibStub("LibSharedMedia-3.0")
 
 local EVENTS = TMW.EVENTS
 local SND = TMW.SND
-SND.tabText = L["SOUND_TAB"]
+SND.handlerName = L["SOUND_TAB"]
 SND.LSM = LSM
 
 TMW.HELP:NewCode("SND_INVALID_CUSTOM")
@@ -88,7 +88,7 @@ function SND:SetupEventDisplay(eventID)
 		name = "|cff808080" .. NONE
 	end
 
-	EVENTS.EventHandlerFrames[eventID].DataText:SetText("|cffcccccc" .. self.tabText .. ":|r " .. name)
+	EVENTS.EventHandlerFrames[eventID].DataText:SetText("|cffcccccc" .. self.handlerName .. ":|r " .. name)
 end
 
 

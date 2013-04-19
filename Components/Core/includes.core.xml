@@ -10,6 +10,7 @@
 <Include file="Suggester\includes.core.xml"/>
 <Include file="Conditions\includes.core.xml"/>
 <Include file="Units\includes.core.xml"/>
+<Include file="IconEvents\includes.core.xml"/>
 <Include file="Resizer_Generic\includes.core.xml"/>
 
 

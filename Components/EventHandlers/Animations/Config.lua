@@ -25,15 +25,15 @@ local pairs, ipairs, max =
  -- GLOBALS: CreateFrame, NORMAL_FONT_COLOR, NONE
 
 local EVENTS = TMW.EVENTS
-local EventHandler = TMW.Classes.EventHandler.instancesByName.Animations
-EventHandler.tabText = L["ANIM_TAB"]
+local Animations = TMW.EVENTS:GetEventHandler("Animations")
+Animations.handlerName = L["ANIM_TAB"]
 
 TMW:RegisterCallback("TMW_OPTIONS_LOADED", function(event)
-	TMW:ConvertContainerToScrollFrame(EventHandler.ConfigContainer.ConfigFrames)
-	local AnimationList = EventHandler.ConfigContainer.AnimationList
+	TMW:ConvertContainerToScrollFrame(Animations.ConfigContainer.ConfigFrames)
+	local AnimationList = Animations.ConfigContainer.AnimationList
 
-	EventHandler.ConfigContainer.ListHeader:SetText(L["ANIM_ANIMTOUSE"])
-	EventHandler.ConfigContainer.SettingsHeader:SetText(L["ANIM_ANIMSETTINGS"])
+	Animations.ConfigContainer.ListHeader:SetText(L["ANIM_ANIMTOUSE"])
+	Animations.ConfigContainer.SettingsHeader:SetText(L["ANIM_ANIMSETTINGS"])
 
 end)
 
@@ -45,8 +45,9 @@ TMW:RegisterCallback("TMW_ICON_SETUP_POST", function(event, icon)
 	end
 end)
 
+
 ---------- Events ----------
-function EventHandler:GetAnimationFrame(frameID, previousFrame)
+function Animations:GetAnimationFrame(frameID, previousFrame)
 	local AnimationList = self.ConfigContainer.AnimationList
 	
 	local frame = AnimationList[frameID]
@@ -60,8 +61,8 @@ function EventHandler:GetAnimationFrame(frameID, previousFrame)
 end
 
 local animationsToDisplay = {}
-function EventHandler:LoadSettingsForEventID(id)
-	local AnimationList = EventHandler.ConfigContainer.AnimationList
+function Animations:LoadSettingsForEventID(id)
+	local AnimationList = Animations.ConfigContainer.AnimationList
 	
 	local previousFrame
 	
@@ -116,7 +117,7 @@ function EventHandler:LoadSettingsForEventID(id)
 	self:SelectAnimation(EventSettings.Animation)
 end
 
-function EventHandler:SetupEventDisplay(eventID)
+function Animations:SetupEventDisplay(eventID)
 	if not eventID then return end
 
 	local animation = EVENTS:GetEventSettings(eventID).Animation
@@ -128,21 +129,21 @@ function EventHandler:SetupEventDisplay(eventID)
 			text = "|cff808080" .. text
 		end
 
-		EVENTS.EventHandlerFrames[eventID].DataText:SetText("|cffcccccc" .. self.tabText .. ":|r " .. text)
+		EVENTS.EventHandlerFrames[eventID].DataText:SetText("|cffcccccc" .. self.handlerName .. ":|r " .. text)
 	else
-		EVENTS.EventHandlerFrames[eventID].DataText:SetText("|cffcccccc" .. self.tabText .. ":|r UNKNOWN: " .. (animation or "?"))
+		EVENTS.EventHandlerFrames[eventID].DataText:SetText("|cffcccccc" .. self.handlerName .. ":|r UNKNOWN: " .. (animation or "?"))
 	end
 end
 
 
 
 ---------- Animations ----------
-function EventHandler:SelectAnimation(animation)
+function Animations:SelectAnimation(animation)
 	local EventSettings = EVENTS:GetEventSettings()
 	local animationFrame
 	
-	for i=1, #EventHandler.ConfigContainer.AnimationList do
-		local f = EventHandler.ConfigContainer.AnimationList[i]
+	for i=1, #Animations.ConfigContainer.AnimationList do
+		local f = Animations.ConfigContainer.AnimationList[i]
 		if f and f:IsShown() then
 			if f.animation == animation then
 				animationFrame = f
@@ -154,9 +155,9 @@ function EventHandler:SelectAnimation(animation)
 	end
 	self.currentAnimationSetting = animation
 	
-	local Frames = EventHandler.ConfigContainer.ConfigFrames
+	local Frames = Animations.ConfigContainer.ConfigFrames
 	
-	for configFrameIdentifier, configFrameData in pairs(EventHandler.ConfigFrameData) do
+	for configFrameIdentifier, configFrameData in pairs(Animations.ConfigFrameData) do
 		
 		local frame = configFrameData.frame
 		if type(frame) == "string" then
@@ -172,7 +173,7 @@ function EventHandler:SelectAnimation(animation)
 	
 	local lastFrame, lastFrameBottomPadding
 	for i, configFrameIdentifier in ipairs(ConfigFrames) do
-		local configFrameData = EventHandler.ConfigFrameData[configFrameIdentifier]
+		local configFrameData = Animations.ConfigFrameData[configFrameIdentifier]
 		
 		if not configFrameData then
 			TMW:Error("Values in animationData.ConfigFrames for animation %q must resolve to a table registered via Animations:RegisterConfigFrame()", animation)
@@ -211,7 +212,7 @@ end
 
 
 ---------- Interface ----------
-function EventHandler:SetSliderMinMax(Slider, level)
+function Animations:SetSliderMinMax(Slider, level)
 	-- level is passed in only when the setting is changing or being loaded
 	if Slider.range then
 		local deviation = Slider.range/2
@@ -230,8 +231,8 @@ function EventHandler:SetSliderMinMax(Slider, level)
 	end
 end
 
-EventHandler.ConfigFrameData = {}
-function EventHandler:RegisterConfigFrame(identifier, configFrameData)
+Animations.ConfigFrameData = {}
+function Animations:RegisterConfigFrame(identifier, configFrameData)
 	configFrameData.identifier = identifier
 	TMW:ValidateType("identifier", "RegisterConfigFrame(identifier, configFrameData)", identifier, "string")
 	
@@ -241,11 +242,11 @@ function EventHandler:RegisterConfigFrame(identifier, configFrameData)
 	TMW:ValidateType("configFrameData.topPadding", "RegisterConfigFrame(identifier, configFrameData)", configFrameData.topPadding, "number;nil")
 	TMW:ValidateType("configFrameData.bottomPadding", "RegisterConfigFrame(identifier, configFrameData)", configFrameData.bottomPadding, "number;nil")
 	
-	EventHandler.ConfigFrameData[identifier] = configFrameData
+	Animations.ConfigFrameData[identifier] = configFrameData
 end
 
 local function Load_Generic_Slider(self, frame, EventSettings)
-	EventHandler:SetSliderMinMax(frame, EventSettings[self.identifier])
+	Animations:SetSliderMinMax(frame, EventSettings[self.identifier])
 	frame:Enable()
 end
 
@@ -255,7 +256,7 @@ end
 
 
 TMW:RegisterRapidSetting("Duration")
-EventHandler:RegisterConfigFrame("Duration", {
+Animations:RegisterConfigFrame("Duration", {
 	frame = "Duration",
 	topPadding = 13,
 	bottomPadding = 13,
@@ -264,7 +265,7 @@ EventHandler:RegisterConfigFrame("Duration", {
 })
 
 TMW:RegisterRapidSetting("Magnitude")
-EventHandler:RegisterConfigFrame("Magnitude", {
+Animations:RegisterConfigFrame("Magnitude", {
 	frame = "Magnitude",
 	topPadding = 13,
 	bottomPadding = 13,
@@ -273,7 +274,7 @@ EventHandler:RegisterConfigFrame("Magnitude", {
 })
 
 TMW:RegisterRapidSetting("Period")
-EventHandler:RegisterConfigFrame("Period", {
+Animations:RegisterConfigFrame("Period", {
 	frame = "Period",
 	topPadding = 13,
 	bottomPadding = 13,
@@ -282,7 +283,7 @@ EventHandler:RegisterConfigFrame("Period", {
 })
 
 TMW:RegisterRapidSetting("Thickness")
-EventHandler:RegisterConfigFrame("Thickness", {
+Animations:RegisterConfigFrame("Thickness", {
 	frame = "Thickness",
 	topPadding = 13,
 	bottomPadding = 13,
@@ -291,7 +292,7 @@ EventHandler:RegisterConfigFrame("Thickness", {
 })
 
 TMW:RegisterRapidSetting("Size_anim")
-EventHandler:RegisterConfigFrame("Size_anim", {
+Animations:RegisterConfigFrame("Size_anim", {
 	frame = "Size_anim",
 	topPadding = 13,
 	bottomPadding = 13,
@@ -299,24 +300,24 @@ EventHandler:RegisterConfigFrame("Size_anim", {
 	Load = function(self, frame, EventSettings)
 		frame.min = -math.huge
 		
-		EventHandler:SetSliderMinMax(frame, EventSettings[self.identifier])
+		Animations:SetSliderMinMax(frame, EventSettings[self.identifier])
 		frame:Enable()
 	end,
 })
 
-EventHandler:RegisterConfigFrame("AlphaStandalone", {
+Animations:RegisterConfigFrame("AlphaStandalone", {
 	frame = "AlphaStandalone",
 	topPadding = 13,
 	bottomPadding = 13,
 	
 	Load = function(self, frame, EventSettings)
-		EventHandler:SetSliderMinMax(frame, EventSettings.a_anim*100)
+		Animations:SetSliderMinMax(frame, EventSettings.a_anim*100)
 		frame:Enable()
 	end,
 })
 
 TMW:RegisterRapidSetting("SizeX")
-EventHandler:RegisterConfigFrame("SizeX", {
+Animations:RegisterConfigFrame("SizeX", {
 	frame = "SizeX",
 	topPadding = 13,
 	bottomPadding = 13,
@@ -325,7 +326,7 @@ EventHandler:RegisterConfigFrame("SizeX", {
 })
 
 TMW:RegisterRapidSetting("SizeY")
-EventHandler:RegisterConfigFrame("SizeY", {
+Animations:RegisterConfigFrame("SizeY", {
 	frame = "SizeY",
 	topPadding = 13,
 	bottomPadding = 13,
@@ -333,14 +334,14 @@ EventHandler:RegisterConfigFrame("SizeY", {
 	Load = Load_Generic_Slider,
 })
 
-EventHandler:RegisterConfigFrame("Fade", {
+Animations:RegisterConfigFrame("Fade", {
 	frame = "Fade",
 	--topPadding = 13,
 	--bottomPadding = 13,
 	Load = Load_Generic_Check,
 })
 
-EventHandler:RegisterConfigFrame("Infinite", {
+Animations:RegisterConfigFrame("Infinite", {
 	frame = "Infinite",
 	--topPadding = 13,
 	--bottomPadding = 13,
@@ -348,7 +349,7 @@ EventHandler:RegisterConfigFrame("Infinite", {
 })
 
 
-EventHandler:RegisterConfigFrame("Image", {
+Animations:RegisterConfigFrame("Image", {
 	frame = "Image",
 	topPadding = 4,
 	bottomPadding = 7,
@@ -362,7 +363,7 @@ TMW:RegisterRapidSetting("r_anim")
 TMW:RegisterRapidSetting("g_anim")
 TMW:RegisterRapidSetting("b_anim")
 TMW:RegisterRapidSetting("a_anim")
-EventHandler:RegisterConfigFrame("Color", {
+Animations:RegisterConfigFrame("Color", {
 	frame = "Color",
 	topPadding = 4,
 	bottomPadding = 4,
@@ -375,17 +376,17 @@ EventHandler:RegisterConfigFrame("Color", {
 })
 
 
-EventHandler:RegisterConfigFrame("AnchorTo", {
+Animations:RegisterConfigFrame("AnchorTo", {
 	frame = "AnchorTo",
 	topPadding = 14,
 	bottomPadding = 4,
 	
 	Load = function(self, frame, EventSettings)
-		EventHandler:AnchorTo_Dropdown_SetText(EventHandler.ConfigFrames.AnchorTo, EventSettings.AnchorTo)
+		Animations:AnchorTo_Dropdown_SetText(EventSettings.AnchorTo)
 	end,
 })
 
-function EventHandler:AnchorTo_Dropdown()
+function Animations:AnchorTo_Dropdown()
 	for _, IconModule in pairs(TMW.CI.ic.Modules) do
 		for identifier, localizedName in pairs(IconModule.anchorableChildren) do
 			if type(localizedName) == "string" then
@@ -399,7 +400,7 @@ function EventHandler:AnchorTo_Dropdown()
 				info.tooltipOnButton = true]]
 
 				info.value = completeIdentifier
-				info.func = EventHandler.AnchorTo_Dropdown_OnClick
+				info.func = Animations.AnchorTo_Dropdown_OnClick
 				
 				info.checked = EVENTS:GetEventSettings().AnchorTo == completeIdentifier
 
@@ -409,8 +410,8 @@ function EventHandler:AnchorTo_Dropdown()
 		end
 	end
 end
-
-function EventHandler:AnchorTo_Dropdown_SetText(frame, setting)
+function Animations:AnchorTo_Dropdown_SetText(setting)
+	local frame = Animations.ConfigContainer.ConfigFrames.AnchorTo
 	local text = ""
 	
 	for _, IconModule in pairs(TMW.CI.ic.Modules) do
@@ -427,9 +428,13 @@ function EventHandler:AnchorTo_Dropdown_SetText(frame, setting)
 	
 	UIDropDownMenu_SetText(frame, "????")
 end
-
-function EventHandler:AnchorTo_Dropdown_OnClick(event, value)
+function Animations:AnchorTo_Dropdown_OnClick(event, value)
 	EVENTS:GetEventSettings().AnchorTo = self.value
 	
-	EventHandler:AnchorTo_Dropdown_SetText(EventHandler.ConfigFrames.AnchorTo, self.value)
+	Animations:AnchorTo_Dropdown_SetText(self.value)
 end
+
+
+
+
+

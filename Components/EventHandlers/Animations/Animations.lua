@@ -145,7 +145,7 @@ function EventHandler:OnRegisterEventHandlerDataTable(eventHandlerData, order, a
 	TMW:ValidateType("ConfigFrames", "animationData", animationData.ConfigFrames, "table")
 	
 	for i, configFrameIdentifier in ipairs(animationData.ConfigFrames) do
-		TMW:ValidateType(i, "animationDat.ConfigFrames", configFrameIdentifier, "string")
+		TMW:ValidateType(i, "animationData.ConfigFrames", configFrameIdentifier, "string")
 	end
 	
 	animationData.order = order

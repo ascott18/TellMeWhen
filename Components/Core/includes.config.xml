@@ -12,6 +12,8 @@
 
 <Include file="Units\includes.config.xml"/>
 
+<Include file="IconEvents\includes.config.xml"/>
+
 <Include file="Resizer_Generic\includes.config.xml"/>
 
 </Ui>
