@@ -25,7 +25,7 @@ local huge = math.huge
 
 
 
---- A {{{TMW.Classes.ConditionObject}}} represents a group of individual conditions. 
+--- A [[http://wow.curseforge.com/addons/tellmewhen/pages/api/conditions/api-documentation/condition-object/|ConditionObject]] represents a group of individual conditions. 
 -- 
 -- 
 -- It stores state information about them and provides methods for keeping them properly updated. ConditionObjects should not be manually instantiated - you should use {{{CNDT:GetConditionObject()}}} or {{{ConditionObjectConstructor:Construct()}}} (which wraps {{{CNDT:GetConditionObject()}}}) instead. 

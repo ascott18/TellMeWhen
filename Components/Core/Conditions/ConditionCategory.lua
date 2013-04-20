@@ -20,7 +20,7 @@ local print = TMW.print
 local CNDT = TMW.CNDT
 
 
---- A {{{TMW.Classes.ConditionCategory}}} provides an interface for registering condition types.
+--- A [[http://wow.curseforge.com/addons/tellmewhen/pages/api/conditions/api-documentation/condition-category/|ConditionCategory]] provides an interface for registering condition types.
 -- 
 -- It should not be directly instantiated - use CNDT:GetCategory() to get or create a category.
 -- 

@@ -1,7 +1,7 @@
 
 = Condition Set Table Specification
 
-The Condition Set table is a table that completely describes an implementation of the conditions framework in TellMeWhen. See {{{TMW.Classes.ConditionCategory}}}{{{:RegisterCondition()}}} for information about where this table is passed to.
+The Condition Set table is a table that completely describes an implementation of the conditions framework in TellMeWhen. See [[http://wow.curseforge.com/addons/tellmewhen/pages/api/conditions/api-documentation/condition-category/|ConditionCategory]]{{{:RegisterCondition()}}} for information about where this table is passed to.
 
 
 == Table Fields

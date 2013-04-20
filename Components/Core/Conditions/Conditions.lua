@@ -901,10 +901,10 @@ function CNDT:GetConditionObjectConstructor()
 	return TMW.Classes.ConditionObjectConstructor:New()
 end
 
---- Gets a {{{TMW.Classes.ConditionObject}}} for the specified parent and condition settings.
+--- Gets a [[http://wow.curseforge.com/addons/tellmewhen/pages/api/conditions/api-documentation/condition-object/|ConditionObject]] for the specified parent and condition settings.
 -- @param parent [table] The parent object of the ConditionObject.
 -- @param conditionSettings [table] The condition settings that the ConditionObject will be created for.
--- @return [{{{TMW.Classes.ConditionObject}}}|nil] A {{{TMW.Classes.ConditionObject}}} instance (may be previously cached or may be a new instance), or nil if the conditions passed in were invalid.
+-- @return [[[http://wow.curseforge.com/addons/tellmewhen/pages/api/conditions/api-documentation/condition-object/|ConditionObject]]|nil] A [[http://wow.curseforge.com/addons/tellmewhen/pages/api/conditions/api-documentation/condition-object/|ConditionObject]] instance (may be previously cached or may be a new instance), or nil if the conditions passed in were invalid.
 function CNDT:GetConditionObject(parent, conditionSettings)
 	local conditionString = CNDT:GetConditionCheckFunctionString(parent, conditionSettings)
 	
@@ -933,7 +933,7 @@ end
 CNDT.Categories = {}
 CNDT.CategoriesByID = {}
 
---- Gets a {{{TMW.Classes.ConditionCategory}}} instance. If one does not already exist with the specified identifier, a new one will be created.
+--- Gets a [[http://wow.curseforge.com/addons/tellmewhen/pages/api/conditions/api-documentation/condition-category/|ConditionCategory]] instance. If one does not already exist with the specified identifier, a new one will be created.
 -- @param identifier [string] A string that will uniquely identify this category.
 -- @param order [number] The order of this category, relative to other categories, in the condition type dropdown menu.
 -- @param categoryName [string] Localized name of the category.
