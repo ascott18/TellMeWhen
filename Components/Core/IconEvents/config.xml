@@ -561,6 +561,9 @@
 				TMW.EVENTS.EventSettingsContainer = self.EventSettingsContainer
 				
 			</OnLoad>
+			<OnShow>
+				TMW.EVENTS:LoadConfig()
+			</OnShow>
 		</Scripts>
 	</Frame>
 		

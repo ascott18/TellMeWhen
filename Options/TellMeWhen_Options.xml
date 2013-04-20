@@ -96,13 +96,13 @@
 						end)
 						
 						TMW.Classes.ChatEdit_InsertLink_Hook:New(self, function(self, text, linkType, linkID)
-							--TODO: modularize to icon types
-							if TMW.CI.ics.Type == "item" and linkType ~= "item" then
+							if TMW.Types[TMW.CI.ics.Type].checksItems and linkType ~= "item" then
 								-- notify failure if the icon is an item cooldown icon and the link is not an item link
 								return false
-							elseif TMW.CI.ics.Type ~= "item" and linkType ~= "spell" and linkType ~= "enchant" then
+							elseif not TMW.Types[TMW.CI.ics.Type].checksItems and linkType ~= "spell" and linkType ~= "enchant" then
 								-- notify failure if the icon is not an item cooldown and the link isn't a spell or enchant link
-								-- DONT just check (TMW.CI.ics.Type ~= "item" and linkType == "item") because there are link types we want to exclude, like achievements.
+								-- DONT just check (not TMW.Types[TMW.CI.ics.Type].checksItems and linkType == "item")
+								-- because there are link types we want to exclude, like achievements.
 								return false
 							end
 
@@ -889,23 +889,7 @@
 		</Scripts>
 		<FontString inherits="GameFontHighlight"/>
 	</EditBox>
-	<Button name="TellMeWhen_TabTemplate" inherits="CharacterFrameTabButtonTemplate" virtual="true">
-		<Scripts>
-			<OnClick>
-				TMW.IE:TabClick(self)
-			</OnClick>
-			<OnShow>
-				PanelTemplates_TabResize(self, -6)
-				self:SetFrameLevel(self:GetParent():GetFrameLevel() - 1)
-			</OnShow>
-			<OnHide>
-				self:SetWidth(TMW.IE.CONST.TAB_OFFS_X)
-			</OnHide>
-			<OnSizeChanged>
-				PanelTemplates_TabResize(self, -6)
-			</OnSizeChanged>
-		</Scripts>
-	</Button>
+	
 	<Button name="TellMeWhen_ButtonTemplate" virtual="true">
 		<Size x="144" y="15"/>
 		<NormalFont style="GameFontNormal"/>
@@ -1487,69 +1471,6 @@
 		</Layers>
 		
 		<Frames>
-			<Button name="$parentTab1" parentKey="MainTab"				inherits="TellMeWhen_TabTemplate">
-				<Scripts>
-					<OnLoad>
-						TMW.IE:RegisterTab(self, "Main")
-						self:SetText(TMW.L["MAIN"])
-						TMW:TT(self, "MAIN", "MAIN_DESC")
-					</OnLoad>
-				</Scripts>
-			</Button>
-			<Button name="$parentTab2" parentKey="IconConditionTab"		inherits="TellMeWhen_TabTemplate">
-				<Scripts>
-					<OnLoad>
-						TMW.IE:RegisterTab(self, "Conditions")
-						function self:OnClick()
-							TMW.CNDT:LoadConfig("Icon") --TODO: this (and group conditons tab) should be with CNDT's config. Rewrite IE.Tabs to make this possible.
-						end
-					</OnLoad>
-				</Scripts>
-			</Button>
-			<Button name="$parentTab3" parentKey="EventsTab"			inherits="TellMeWhen_TabTemplate">
-				<Scripts>
-					<OnLoad>
-						TMW.IE:RegisterTab(self, "Events")
-						self:SetText(TMW.L["EVENTS_TAB"])
-						TMW:TT(self, "EVENTS_TAB", "EVENTS_TAB_DESC")
-						function self:OnClick()
-							TMW.EVENTS:LoadConfig() --TODO: this should be with event's config (see above comment about the conditions tabs, too)
-						end
-					</OnLoad>
-				</Scripts>
-			</Button>
-			<Button name="$parentTab4" parentKey="GroupConditionTab"	inherits="TellMeWhen_TabTemplate">
-				<Scripts>
-					<OnLoad>
-						TMW.IE:RegisterTab(self, "Conditions")
-						function self:OnClick()
-							TMW.CNDT:LoadConfig("Group")
-						end
-					</OnLoad>
-				</Scripts>
-			</Button>
-			<Button name="$parentTab5" parentKey="MainOptionsTab"		inherits="TellMeWhen_TabTemplate">
-				<Scripts>
-					<OnLoad>
-						TMW.IE:RegisterTab(self, "MainOptions")
-						self:SetText(TMW.L["GROUPADDONSETTINGS"])
-						TMW:TT(self, "GROUPADDONSETTINGS", "GROUPADDONSETTINGS_DESC")
-						function self:OnClick()
-							TMW:CompileOptions()
-							TMW.IE:NotifyChanges("groups", "#Group " .. TMW.CI.g)
-							LibStub("AceConfigDialog-3.0"):Open("TMW IEOptions", TMW.IE.MainOptionsWidget)
-						end
-					</OnLoad>
-				</Scripts>
-			</Button>
-			<Button name="$parentTab6" parentKey="DynamicConditionTab"	inherits="TellMeWhen_TabTemplate">
-				<Scripts>
-					<OnLoad>
-						self:Hide()
-						TMW.IE:RegisterTab(self, "Conditions")
-					</OnLoad>
-				</Scripts>
-			</Button>
 			
 			<Frame name="$parentMain" parentKey="Main" hidden="true">
 				<Anchors>
@@ -1941,12 +1862,11 @@
 			<OnLoad>
 				self:SetFrameLevel(20)
 				self:RegisterForDrag("LeftButton")
+				
 				for k, v in pairs(self) do
 					TMW.IE[k] = v
-					if strfind(k, "Tab") and type(v) == "table" then
-						self.numTabs = max(self.numTabs or 0, v:GetID())
-					end
 				end
+				
 				tinsert(UISpecialFrames, self:GetName())
 			</OnLoad>
 			<OnSizeChanged>

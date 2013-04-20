@@ -427,7 +427,6 @@ function TMW:AnimateHeightChange(f, endHeight, duration)
 	-- This function currently disabled because of frame level issues.
 	-- Top frames need to be above lower frames, but editboxes seem to go underneath everything for some reason.
 	-- It doesn't look awful, but I'm going to leave it disabled till I decide otherwise.
-	-- TODO
 	f:SetHeight(endHeight)
 	do return end
 	
@@ -455,7 +454,27 @@ function TMW:AnimateHeightChange(f, endHeight, duration)
 	f.__animateHeight_duration = duration
 end
 
+do	-- TMW:GetParser()
+	local Parser, LT1, LT2, LT3, RT1, RT2, RT3
+	function TMW:GetParser()
+		if not Parser then
+			Parser = CreateFrame("GameTooltip")
 
+			LT1 = Parser:CreateFontString()
+			RT1 = Parser:CreateFontString()
+			Parser:AddFontStrings(LT1, RT1)
+
+			LT2 = Parser:CreateFontString()
+			RT2 = Parser:CreateFontString()
+			Parser:AddFontStrings(LT2, RT2)
+
+			LT3 = Parser:CreateFontString()
+			RT3 = Parser:CreateFontString()
+			Parser:AddFontStrings(LT3, RT3)
+		end
+		return Parser, LT1, LT2, LT3, RT1, RT2, RT3
+	end
+end
 
 
 -- --------------
@@ -1410,6 +1429,8 @@ function IE:OnInitialize()
 		end,
 	}
 
+	IE:CreateTabs()
+	
 	self.resizer = TMW.Classes.IconEditor_Resizer_ScaleX_SizeY:New(self)
 	self.resizer:OnEnable()
 	self.resizer.resizeButton:SetScale(2)
@@ -1418,6 +1439,120 @@ function IE:OnInitialize()
 	
 	TMW:UnregisterAllCallbacks("TMW_OPTIONS_LOADED")
 	IE.OnInitialize = TMW.NULLFUNC
+end
+
+TMW:NewClass("IconEditorTab", "Button"){
+	
+	NewTab = function(self, order, attachedFrame)
+		self:AssertSelfIsClass()
+		
+		TMW:ValidateType("2 (order)", "IconEditorTab:NewTab(order, attachedFrame)", order, "number")
+		TMW:ValidateType("3 (attachedFrame)", "IconEditorTab:NewTab(order, attachedFrame)", attachedFrame, "string")
+		
+		tab = self:New("Button", "TellMeWhen_IconEditorTab" .. #IE.Tabs + 1, TellMeWhen_IconEditor, "CharacterFrameTabButtonTemplate")
+		
+		tab.doesIcon = 1
+		tab.doesGroup = 1
+	
+		tab.order = order
+		tab.attachedFrame = attachedFrame
+		
+		IE.Tabs[#IE.Tabs + 1] = tab
+		tab:SetID(#IE.Tabs)
+		
+		TellMeWhen_IconEditor.numTabs = #IE.Tabs
+		
+		TMW:SortOrderedTables(IE.Tabs)
+		
+		
+		for id, tab in pairs(IE.Tabs) do
+			if id == 1 then
+				tab:SetPoint("BOTTOMLEFT", 0, -30)
+			else
+				tab:SetPoint("LEFT", IE.Tabs[id - 1], "RIGHT", IE.CONST.TAB_OFFS_X, 0)
+			end
+		end
+		
+		PanelTemplates_TabResize(tab, -6)
+				
+		return tab
+	end,
+	
+	OnClick = function(self)
+		self:ClickHandler()
+	end,
+	
+	ClickHandler = function(self)
+		-- invoke blizzard's tab click function to set the apperance of all the tabs
+		PanelTemplates_Tab_OnClick(self, self:GetParent())
+		PlaySound("igCharacterInfoTab")
+
+		-- hide all tabs' frames, including the current tab so that the OnHide and OnShow scripts fire
+		for _, tab in ipairs(IE.Tabs) do
+			local frame = tab.attachedFrame
+			if TellMeWhen_IconEditor[frame] then
+				TellMeWhen_IconEditor[frame]:Hide()
+			end
+		end
+
+		local oldTab = IE.CurrentTab
+		
+		-- state the current tab.
+		-- this is used in many other places, including inside some OnShow scripts, so it MUST go before the :Show()s below
+		IE.CurrentTab = self
+
+		-- show the selected tab's frame
+		if TellMeWhen_IconEditor[self.attachedFrame] then
+			TellMeWhen_IconEditor[self.attachedFrame]:Show()
+		else
+			TMW:Error(("Couldn't find child of TellMeWhen_IconEditor with key %q"):format(self.attachedFrame))
+		end
+		-- show the icon editor
+		IE:Show()
+		
+		TMW:Fire("TMW_CONFIG_TAB_CLICKED", IE.CurrentTab, oldTab)
+	end,
+	
+	OnShow = function(self)
+		PanelTemplates_TabResize(self, -6)
+		self:SetFrameLevel(self:GetParent():GetFrameLevel() - 1)
+	end,
+	OnHide = function(self)
+		self:SetWidth(TMW.IE.CONST.TAB_OFFS_X)
+	end,
+	
+	OnSizeChanged = function(self)
+		PanelTemplates_TabResize(self, -6)
+	end,
+	
+	SetTitleComponents = function(self, doesIcon, doesGroup)
+		self.doesIcon = doesIcon
+		self.doesGroup = doesGroup
+	end,
+	
+	METHOD_EXTENSIONS = {
+		SetText = function(self, text)
+			PanelTemplates_TabResize(self, -6)
+		end,
+	}
+}
+
+function IE:CreateTabs()
+	IE.MainTab = TMW.Classes.IconEditorTab:NewTab(1, "Main")
+	IE.MainTab:SetText(TMW.L["MAIN"])
+	TMW:TT(IE.MainTab, "MAIN", "MAIN_DESC")
+	
+	IE.MainOptionsTab = TMW.Classes.IconEditorTab:NewTab(20, "MainOptions")
+	IE.MainOptionsTab:SetTitleComponents()
+	
+	IE.MainOptionsTab:SetText(TMW.L["GROUPADDONSETTINGS"])
+	TMW:TT(IE.MainOptionsTab, "GROUPADDONSETTINGS", "GROUPADDONSETTINGS_DESC")
+	
+	IE.MainOptionsTab:ExtendMethod("ClickHandler", function()
+		TMW:CompileOptions()
+		TMW.IE:NotifyChanges("groups", "#Group " .. TMW.CI.g)
+		LibStub("AceConfigDialog-3.0"):Open("TMW IEOptions", TMW.IE.MainOptionsWidget)
+	end)		
 end
 
 function IE:OnUpdate()
@@ -1431,21 +1566,28 @@ function IE:OnUpdate()
 	-- update the top of the icon editor with the information of the current icon.
 	-- this is done in an OnUpdate because it is just too hard to track when the texture changes sometimes.
 	-- I don't want to fill up the main addon with configuration code to notify the IE of texture changes
-	local titlePrepend = "TellMeWhen v" .. TELLMEWHEN_VERSION_FULL .. " - "
+	local titlePrepend = "TellMeWhen v" .. TELLMEWHEN_VERSION_FULL
 	
-	if IE.CurrentTab:GetID() > #IE.Tabs - 2 then
-		-- the last 2 tabs are group config, so dont show icon info
-		self.FS1:SetFormattedText(titlePrepend .. L["fGROUP"], TMW:GetGroupName(groupID, groupID, 1))
-		self.icontexture:SetTexture(nil)
-		self.BackButton:Hide()
-		self.ForwardsButton:Hide()
-	else
-		self.FS1:SetFormattedText(titlePrepend .. L["GROUPICON"], TMW:GetGroupName(groupID, groupID, 1), iconID)
+	local tab = IE.CurrentTab
+	
+	if tab.doesGroup and tab.doesIcon then
+		self.FS1:SetFormattedText(titlePrepend .. " - " .. L["GROUPICON"], TMW:GetGroupName(groupID, groupID, 1), iconID)
 		if icon then
 			self.icontexture:SetTexture(icon.attributes.texture)
 		end
 		self.BackButton:Show()
 		self.ForwardsButton:Show()
+	else
+		self.icontexture:SetTexture(nil)
+		self.BackButton:Hide()
+		self.ForwardsButton:Hide()
+		
+		if tab.doesGroup then
+			-- the last 2 tabs are group config, so dont show icon info
+			self.FS1:SetFormattedText(titlePrepend .. " - " .. L["fGROUP"], TMW:GetGroupName(groupID, groupID, 1))
+		else
+			self.FS1:SetText(titlePrepend)
+		end
 	end
 	
 	
@@ -1501,20 +1643,6 @@ IE:RegisterEvent("PLAYER_REGEN_DISABLED", function()
 		LibStub("AceConfigDialog-3.0"):Close("TMW Options")
 	end
 end)
-
-function IE:RegisterTab(tab, attachedFrame)
-	local id = #IE.Tabs + 1
-	
-	if id == 1 then
-		tab:SetPoint("BOTTOMLEFT", 0, -30)
-	else
-		tab:SetPoint("LEFT", IE.Tabs[id - 1], "RIGHT", IE.CONST.TAB_OFFS_X, 0)
-	end
-	
-	IE.Tabs[id] = tab
-	tab:SetID(id)
-	tab.attachedFrame = attachedFrame
-end
 
 function IE:StartMoving()
 	IE.startX, IE.startY = select(4, IE:GetPoint())
@@ -1683,7 +1811,7 @@ function IE:Load(isRefresh, icon, isHistoryChange)
 		if isRefresh then
 			return
 		else
-			IE:TabClick(IE.MainTab)
+			IE.MainTab:ClickHandler()
 		end
 	end
 
@@ -1747,42 +1875,6 @@ function IE:LoadFirstValidIcon()
 	
 	TMW.IE:Hide()
 end
-	
-function IE:TabClick(self)
-	-- invoke blizzard's tab click function to set the apperance of all the tabs
-	PanelTemplates_Tab_OnClick(self, self:GetParent())
-	PlaySound("igCharacterInfoTab")
-
-	-- hide all tabs' frames, including the current tab so that the OnHide and OnShow scripts fire
-	for id, tab in ipairs(IE.Tabs) do
-		local frame = tab.attachedFrame
-		if TellMeWhen_IconEditor[frame] then
-			TellMeWhen_IconEditor[frame]:Hide()
-		end
-	end
-
-	local oldTab = IE.CurrentTab
-	
-	-- state the current tab.
-	-- this is used in many other places, including inside some OnShow scripts, so it MUST go before the :Show()s below
-	IE.CurrentTab = self
-
-	-- show the selected tab's frame
-	if TellMeWhen_IconEditor[self.attachedFrame] then
-		TellMeWhen_IconEditor[self.attachedFrame]:Show()
-	else
-		TMW:Error(("Couldn't find child of TellMeWhen_IconEditor with key %q"):format(self.attachedFrame))
-	end
-	-- show the icon editor
-	IE:Show()
-
-	-- special handling for certain tabs.
-	if self.OnClick then
-		self:OnClick()
-	end
-	
-	TMW:Fire("TMW_CONFIG_TAB_CLICKED", IE.CurrentTab, oldTab)
-end
 
 function IE:NotifyChanges(...)
 	-- this is used to select the same group in all open TMW configuration windows
@@ -1820,7 +1912,7 @@ function IE:Reset()
 	
 	IE:Load(1)
 	
-	IE:TabClick(IE.MainTab)
+	IE.MainTab:ClickHandler()
 end
 
 
@@ -1962,8 +2054,8 @@ TMW:NewClass("SettingCheckButton", "CheckButton", "SettingFrameBase"){
 	end,
 }
 TMW:NewClass("SettingSlider", "Slider", "SettingFrameBase"){
-	-- This class sucks. I didn't even finish writing it. If you need it for something, write it youself. Sorry.
-	-- TODO: maybe finish writing this?
+	-- This class may be incomplete for any implementations you might need.
+	-- Inherit from it and finish/override any methods that you need to.
 	
 	OnValueChanged = function(self, value)
 		if CI.ics and self.setting then
@@ -2510,11 +2602,12 @@ end
 
 ---------- Tooltips ----------
 --local cachednames = {}
-function IE:GetRealNames(Name) -- TODO: MODULARIZE THIS
+function IE:GetRealNames(Name)
 	-- gets a string to set as a tooltip of all of the spells names in the name box in the IE. Splits up equivalancies and turns IDs into names
 	local text = TMW:CleanString(Name)
 	
-	local SoI = CI.ics.Type == "item" and "item" or "spell"
+	local CI_typeData = Types[CI.ics.Type]
+	local SoI = CI_typeData.checksItems and "item" or "spell"
 	
 	-- Note 11/12/12 (WoW 5.0.4) - caching causes incorrect results with "replacement spells" after switching specs like the corruption/immolate pair 
 	--if cachednames[CI.ics.Type .. SoI .. text] then return cachednames[CI.ics.Type .. SoI .. text] end
@@ -2525,7 +2618,7 @@ function IE:GetRealNames(Name) -- TODO: MODULARIZE THIS
 	else
 		tbl = TMW:GetSpellNames(nil, text)
 	end
-	local durations = Types[CI.ics.Type].DurationSyntax and TMW:GetSpellDurations(nil, text)
+	local durations = CI_typeData.DurationSyntax and TMW:GetSpellDurations(nil, text)
 
 	local str = ""
 	local numadded = 0

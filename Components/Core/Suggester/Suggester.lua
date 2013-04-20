@@ -55,28 +55,6 @@ function SUG:OnInitialize()
 	TMWOptDB.ClassSpellCache = nil -- this is old, get rid of it
 end
 
-do	-- SUG:GetParser()
-	local Parser, LT1, LT2, LT3, RT1, RT2, RT3
-	function SUG:GetParser()
-		if not Parser then
-			Parser = CreateFrame("GameTooltip")
-
-			LT1 = Parser:CreateFontString()
-			RT1 = Parser:CreateFontString()
-			Parser:AddFontStrings(LT1, RT1)
-
-			LT2 = Parser:CreateFontString()
-			RT2 = Parser:CreateFontString()
-			Parser:AddFontStrings(LT2, RT2)
-
-			LT3 = Parser:CreateFontString()
-			RT3 = Parser:CreateFontString()
-			Parser:AddFontStrings(LT3, RT3)
-		end
-		return Parser, LT1, LT2, LT3, RT1, RT2, RT3
-	end
-end
-
 TMW:RegisterCallback("TMW_ICON_TYPE_CHANGED", function(event, icon)
 	if icon == TMW.CI.ic then
 		SUG.redoIfSame = 1
@@ -923,7 +901,7 @@ function Module:Entry_OnClick(f, button)
 	local insert
 
 	local spellID = f.tooltiparg
-	local Parser, LT1, LT2, LT3, RT1, RT2, RT3 = SUG:GetParser()
+	local Parser, LT1, LT2, LT3, RT1, RT2, RT3 = TMW:GetParser()
 	Parser:SetOwner(UIParent, "ANCHOR_NONE")
 	Parser:SetSpellByID(spellID)
 
@@ -1050,7 +1028,7 @@ function Module:Entry_IsValid(id)
 		return true
 	end
 
-	local Parser, LT1, LT2, LT3 = SUG:GetParser()
+	local Parser, LT1, LT2, LT3 = TMW:GetParser()
 
 	Parser:SetOwner(UIParent, "ANCHOR_NONE") -- must set the owner before text can be obtained.
 	Parser:SetSpellByID(id)

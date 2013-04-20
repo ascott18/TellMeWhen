@@ -296,9 +296,6 @@ ConditionCategory:RegisterCondition(21,	 "QUESTCOMPLETE", {
 	anticipate = function(c)
 		return [[VALUE = time + GetQuestResetTime()]]
 	end,
-	
-	
-	-- events = TODO: find events
 })
 
 

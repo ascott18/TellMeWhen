@@ -27,13 +27,11 @@ local UnitAffectingCombat, GetActiveSpecGroup, GetSpecialization
 -- 
 -- Group inherits explicitly from {{{Blizzard.Frame}}} and from {{{TMW.Classes.GenericModuleImplementor}}}, and implicitly from the classes that it inherits. 
 -- 
--- Description of Class here <THIS DOCUMENTATION HAS NOT YET BEEN WRITTEN>
+-- Group is the class of all TMW groups, which serve as a container for TMW icons. The job of a group is to size & position icons and to provide functionality that can affect multiple icons at once, such as only showing in certain specs. They provide all the methods needed for setup and updating themselves and the icons within them. Icons themselves do not create or provide any child frames or layers - this is functionality that is given to Group Modules & individual icons.
 -- 
 -- @class file
 -- @name Group.lua
 
-
--- TODO: DOCUMENT GROUP!
 
 -- -----------
 -- GROUPS
@@ -43,31 +41,44 @@ local Group = TMW:NewClass("Group", "Frame", "UpdateTableManager", "GenericModul
 Group:UpdateTable_Set(TMW.GroupsToUpdate)
 
 
-TMW.CNDT:RegisterConditionSetImplementingClass("Group")
-TMW.CNDT:RegisterConditionSet("Group", {
-	parentSettingType = "group",
-	parentDefaults = TMW.Group_Defaults,
+do
+	local tab
 	
-	settingKey = "Conditions",
-	GetSettings = function(self)
-		if TMW.CI.g then
-			return TMW.db.profile.Groups[TMW.CI.g].Conditions
-		end
-	end,
+	TMW.CNDT:RegisterConditionSetImplementingClass("Group")
+	TMW.CNDT:RegisterConditionSet("Group", {
+		parentSettingType = "group",
+		parentDefaults = TMW.Group_Defaults,
+		
+		settingKey = "Conditions",
+		GetSettings = function(self)
+			if TMW.CI.g then
+				return TMW.db.profile.Groups[TMW.CI.g].Conditions
+			end
+		end,
+		
+		iterFunc = TMW.InGroupSettings,
+		iterArgs = {
+			[1] = TMW,
+		},
+		
+		GetTab = function(self)
+			return tab
+		end,
+		tabText = L["GROUPCONDITIONS"],
+		tabTooltip = L["GROUPCONDITIONS_DESC"],
+	})
 	
-	iterFunc = TMW.InGroupSettings,
-	iterArgs = {
-		[1] = TMW,
-	},
-	
-	GetTab = function(self)
-		return TMW.IE.GroupConditionTab
-	end,
-	tabText = L["GROUPCONDITIONS"],
-	tabTooltip = L["GROUPCONDITIONS_DESC"],
-})
+	TMW:RegisterCallback("TMW_OPTIONS_LOADED", function()
+		tab = TMW.Classes.IconEditorTab:NewTab(15, "Conditions")
+		tab:SetTitleComponents(nil, 1)
+		
+		tab:ExtendMethod("ClickHandler", function()
+			TMW.CNDT:LoadConfig("Icon")
+		end)
+	end)
+end
 
-
+-- [INTERNAL]
 function Group.OnNewInstance(group, ...)
 	local _, name, _, _, groupID = ... -- the CreateFrame args
 	TMW[groupID] = group
@@ -75,10 +86,12 @@ function Group.OnNewInstance(group, ...)
 	group.ID = groupID
 end
 
+-- [INTERNAL]
 function Group.__tostring(group)
 	return group:GetName()
 end
 
+-- [INTERNAL]
 function Group.ScriptSort(groupA, groupB)
 	local gOrder = -TMW.db.profile.CheckOrder
 	return groupA.ID*gOrder < groupB.ID*gOrder
@@ -88,12 +101,14 @@ TMW:RegisterCallback("TMW_GLOBAL_UPDATE_POST", "UpdateTable_PerformAutoSort", Gr
 
 
 
+-- [INTERNAL]
 Group.SetScript_Blizz = Group.SetScript
 function Group.SetScript(group, handler, func)
 	group[handler] = func
 	group:SetScript_Blizz(handler, func)
 end
 
+-- [INTERNAL]
 Group.Show_Blizz = Group.Show
 function Group.Show(group)
 	if not group.__shown then
@@ -104,6 +119,7 @@ function Group.Show(group)
 	end
 end
 
+-- [INTERNAL]
 Group.Hide_Blizz = Group.Hide
 function Group.Hide(group)
 	if group.__shown then
@@ -114,6 +130,7 @@ function Group.Hide(group)
 	end
 end
 
+-- [INTERNAL]
 function Group.Update(group)
 	local ConditionObject = group.ConditionObject
 	
@@ -133,10 +150,12 @@ function Group.Update(group)
 	end
 end
 
+-- [INTERNAL]
 function Group.OnEvent(group, event)
 	group:Update()
 end
 
+-- [INTERNAL]
 function Group.TMW_CNDT_OBJ_PASSING_CHANGED(group, event, ConditionObject, failed)
 	if group.ConditionObject == ConditionObject then
 		group:Update()
@@ -144,16 +163,34 @@ function Group.TMW_CNDT_OBJ_PASSING_CHANGED(group, event, ConditionObject, faile
 end
 
 
+--- Returns the settings table that holds the settings for the group.
+-- @name Group:GetSettings
+-- @paramsig
+-- @return [{{{TMW.Group_Defaults}}}] The settings table that holds the settings for the group.
+-- @usage local gs = group:GetSettings()
+-- print(group:GetName() .. "'s enabled setting is set to " .. gs.Enabled)
 function Group.GetSettings(group)
 	return TMW.db.profile.Groups[group:GetID()]
 end
 
+--- Returns the settings table that holds the view-specific settings for the group.
+-- @name Group:GetSettingsPerView
+-- @paramsig view
+-- @param [string|nil] The identifier of the {{{TMW.Classes.IconView}}} to get settings for, or nil to use the group's current view.
+-- @return [{{{TMW.Group_Defaults.SettingsPerView[view]}}}] The settings table that holds the view-specific settings for the group.
+-- @usage local icspv = group:GetSettingsPerView()
+-- 
+-- local icspv = group:GetSettingsPerView("bar")
 function Group.GetSettingsPerView(group, view)
 	local gs = group:GetSettings()
 	view = view or gs.View
 	return gs.SettingsPerView[view]
 end
 
+--- Gets whether or not the group's icons should be updated based on the group's settings
+-- @name Group:GetSettingsPerView
+-- @paramsig
+-- @return [boolean] True if the group should show and update its icons; otherwise false.
 function Group.ShouldUpdateIcons(group)
 	local gs = group:GetSettings()
 
@@ -170,6 +207,10 @@ function Group.ShouldUpdateIcons(group)
 	return true
 end
 
+--- Checks if the group is valid to be checked in meta icons & conditions.
+-- Currently just a wrapper around Group:ShouldUpdateIcons()
+-- @paramsig
+-- @return [boolean] True if the group should show and update its icons; otherwise false.
 function Group.IsValid(group)
 	-- checks if the group can be checked in metas/conditions
 
@@ -178,7 +219,7 @@ end
 
 
 
-
+-- [INTERNAL]
 function Group.Setup_Conditions(group)
 	-- Clear out/reset any previous conditions and condition-related stuff on the group
 	group.ConditionObject = nil
@@ -205,7 +246,16 @@ function Group.Setup_Conditions(group)
 		group:UpdateTable_Unregister()
 	end
 end
-	
+
+
+--- Completely sets up a group.
+-- 
+-- Implements all requested {{{TMW.Classes.GroupComponent}}}s, processes settings, sets up conditions, and then sets up all the icons that it contains.
+-- 
+-- This method should not be called manually while TellMeWhen is locked. It may be called liberally from wherever you see fit when in configuration mode.
+-- @name Icon:Setup
+-- @paramsig noIconSetup
+-- @param noIconSetup [boolean] True to prevent the group from setting up all of its icons. Nil/false to update all icons along with the group.
 function Group.Setup(group, noIconSetup)
 	local gs = group:GetSettings()
 	local groupID = group:GetID()

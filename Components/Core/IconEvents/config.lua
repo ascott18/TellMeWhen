@@ -33,7 +33,9 @@ EVENTS.CONST = {
 	EVENT_INVALID_REASON_MISSINGCOMPONENT = 2,
 }
 
-
+local EventsTab = TMW.Classes.IconEditorTab:NewTab(10, "Events")
+EventsTab:SetText(TMW.L["EVENTS_TAB"])
+TMW:TT(EventsTab, "EVENTS_TAB", "EVENTS_TAB_DESC")
 
 
 function EVENTS:LoadConfig()
@@ -288,11 +290,10 @@ function EVENTS:SetTabText()
 	local n = self:GetNumUsedEvents()
 
 	if n > 0 then
-		IE.EventsTab:SetText(L["EVENTS_TAB"] .. " |cFFFF5959(" .. n .. ")")
+		EventsTab:SetText(L["EVENTS_TAB"] .. " |cFFFF5959(" .. n .. ")")
 	else
-		IE.EventsTab:SetText(L["EVENTS_TAB"] .. " (" .. n .. ")")
+		EventsTab:SetText(L["EVENTS_TAB"] .. " (" .. n .. ")")
 	end
-	PanelTemplates_TabResize(IE.EventsTab, -6)
 end
 
 

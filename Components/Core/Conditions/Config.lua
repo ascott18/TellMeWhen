@@ -52,13 +52,22 @@ function CNDT:LoadConfig(conditionSetName)
 	
 	if ConditionSet.useDynamicTab then
 		if conditionSetName then
-			TMW.IE.DynamicConditionTab:Show()
+			CNDT.DynamicConditionTab:Show()
 		
 			-- Only click the tab if we are manually loading the conditionSet (should only happen on user input/hardware event)
-			TMW.IE:TabClick(TMW.IE.DynamicConditionTab)
+			CNDT.DynamicConditionTab:ClickHandler()
+			
+			if ConditionSet.parentSettingType == "profile" then
+				CNDT.DynamicConditionTab:SetTitleComponents(nil, nil)
+			elseif ConditionSet.parentSettingType == "group" then
+				CNDT.DynamicConditionTab:SetTitleComponents(nil, 1)
+			else
+				CNDT.DynamicConditionTab:SetTitleComponents(1, 1)
+			end
+			
 		end
 	else
-		TMW.IE.DynamicConditionTab:Hide()
+		CNDT.DynamicConditionTab:Hide()
 	end
 	
 	
@@ -99,14 +108,19 @@ end)
 
 
 -- Dynamic Conditions Tab handling
+
+CNDT.DynamicConditionTab = TMW.Classes.IconEditorTab:NewTab(25, "Conditions")
+CNDT.DynamicConditionTab:SetTitleComponents()
+CNDT.DynamicConditionTab:Hide()
+
 TMW:RegisterCallback("TMW_CONFIG_ICON_LOADED_CHANGED", function(event, icon)
-	if TMW.IE.CurrentTab == TMW.IE.DynamicConditionTab then
-		TMW.IE:TabClick(TMW.IE.MainTab)
+	if TMW.IE.CurrentTab == CNDT.DynamicConditionTab then
+		TMW.IE.MainTab:ClickHandler()
 	end
 end)
 TMW:RegisterCallback("TMW_CONFIG_TAB_CLICKED", function(event, currentTab, oldTab)
-	if oldTab == TMW.IE.DynamicConditionTab then
-		TMW.IE.DynamicConditionTab:Hide()
+	if oldTab == CNDT.DynamicConditionTab then
+		CNDT.DynamicConditionTab:Hide()
 	end
 end)
 
@@ -116,14 +130,14 @@ f:SetScript("OnUpdate", function()
 	
 	if CurrentConditionSet and CurrentConditionSet.useDynamicTab and CurrentConditionSet.ShouldShowTab then
 		if not CurrentConditionSet:ShouldShowTab() then
-			if TMW.IE.CurrentTab == TMW.IE.DynamicConditionTab then
-				TMW.IE:TabClick(TMW.IE.MainTab)
+			if TMW.IE.CurrentTab == CNDT.DynamicConditionTab then
+				TMW.IE.MainTab:ClickHandler()
 			else
-				TMW.IE.DynamicConditionTab:Hide()
+				CNDT.DynamicConditionTab:Hide()
 			end
 		end
 	else
-		TMW.IE.DynamicConditionTab:Hide()
+		CNDT.DynamicConditionTab:Hide()
 	end
 end)
 
@@ -167,14 +181,10 @@ end
 function CNDT:SetTabText(conditionSetName)
 	local ConditionSet = CNDT.ConditionSets[conditionSetName] or CNDT.CurrentConditionSet
 	
-	local tab = ConditionSet.useDynamicTab and TMW.IE.DynamicConditionTab or ConditionSet:GetTab()
+	local tab = ConditionSet.useDynamicTab and CNDT.DynamicConditionTab or ConditionSet:GetTab()
 	
 	tab:SetText(CNDT:GetTabText(conditionSetName))
 	TMW:TT(tab, ConditionSet.tabText, ConditionSet.tabTooltip, 1, 1)
-
-	if tab:IsShown() then
-		PanelTemplates_TabResize(tab, -6)
-	end
 end
 
 

@@ -25,7 +25,7 @@ local pairs, error, rawget, next, wipe, tinsert, sort, strsplit, table, assert, 
 -- 
 -- Icon inherits explicitly from {{{Blizzard.Button}}} and from {{{TMW.Classes.GenericModuleImplementor}}}, and implicitly from the classes that it inherits. 
 -- 
--- Icon is the class of all TMW icons, which are the very heart of what TMW is and what it does. Icons provide the methods and functionality that Icon Types need to do their jobs. They also provide other API, like icon event handling, and they provide all the methods needed for setup and updating. Icon themselves do not create or provide any appearance, child frames, or layers - this is functionality that is given to Icon Modules.
+-- Icon is the class of all TMW icons, which are the very heart of what TMW is and what it does. Icons provide the methods and functionality that Icon Types need to do their jobs. They also provide other API, like icon event handling, and they provide all the methods needed for setup and updating. Icons themselves do not create or provide any appearance, child frames, or layers - this is functionality that is given to Icon Modules.
 -- 
 -- @class file
 -- @name Icon.lua
@@ -57,31 +57,41 @@ Icon.QueuedIcons = {}
 Icon.NextUpdateTime = math.huge
 local QueuedIcons = Icon.QueuedIcons
 
-
-TMW.CNDT:RegisterConditionSetImplementingClass("Icon")
-TMW.CNDT:RegisterConditionSet("Icon", {
-	parentSettingType = "icon",
-	parentDefaults = TMW.Icon_Defaults,
+do
+	local tab
 	
-	settingKey = "Conditions",
-	GetSettings = function(self)
-		if TMW.CI.ics then
-			return TMW.CI.ics.Conditions
-		end
-	end,
+	TMW.CNDT:RegisterConditionSetImplementingClass("Icon")
+	TMW.CNDT:RegisterConditionSet("Icon", {
+		parentSettingType = "icon",
+		parentDefaults = TMW.Icon_Defaults,
+		
+		settingKey = "Conditions",
+		GetSettings = function(self)
+			if TMW.CI.ics then
+				return TMW.CI.ics.Conditions
+			end
+		end,
+		
+		iterFunc = TMW.InIconSettings,
+		iterArgs = {
+			[1] = TMW,
+		},
+		
+		GetTab = function(self)
+			return tab
+		end,
+		tabText = L["CONDITIONS"],
+		tabTooltip = L["ICONCONDITIONS_DESC"],
+	})
 	
-	iterFunc = TMW.InIconSettings,
-	iterArgs = {
-		[1] = TMW,
-	},
-	
-	GetTab = function(self)
-		return TMW.IE.IconConditionTab
-	end,
-	tabText = L["CONDITIONS"],
-	tabTooltip = L["ICONCONDITIONS_DESC"],
-})
-
+	TMW:RegisterCallback("TMW_OPTIONS_LOADED", function()
+		tab = TMW.Classes.IconEditorTab:NewTab(5, "Conditions")
+		
+		tab:ExtendMethod("ClickHandler", function()
+			TMW.CNDT:LoadConfig("Icon")
+		end)
+	end)
+end
 
 -- [INTERNAL]
 function Icon.OnNewInstance(icon, ...)	

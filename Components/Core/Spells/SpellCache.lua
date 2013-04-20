@@ -145,7 +145,7 @@ TMW:RegisterCallback("TMW_OPTIONS_LOADED", function()
 		end
 		TMWOptDB.WoWVersion = clientVersion
 
-		local Parser, LT1 = TMW.SUG:GetParser() --TODO: this should not depend on SUG
+		local Parser, LT1 = TMW:GetParser()
 
 		local SPELL_CAST_CHANNELED = SPELL_CAST_CHANNELED
 		local yield, resume = coroutine.yield, coroutine.resume
