@@ -135,6 +135,8 @@ local function CLEU_OnEvent(icon, _, t, event, h, sourceGUID, sourceName, source
 			-- fire it in addition to, not in place of, SPELL_DAMAGE
 			CLEU_OnEvent(icon, _, t, "SPELL_DAMAGE_CRIT", h, sourceGUID, sourceName, sourceFlags, sourceRaidFlags, destGUID, destName, destFlags, destRaidFlags, arg1, arg2, arg3, arg4, arg5, ...)
 		end
+	elseif clientVersion == 50200 and (event == "SPELL_DISPEL" or event == "SPELL_DISPEL_FAILED" or event == "SPELL_STOLEN") then
+		arg1, arg2, arg4, arg5 = arg4, arg5, arg1, arg2
 	end
 
 	if icon.AllowAnyEvents or icon.CLEUEvents[event] then
