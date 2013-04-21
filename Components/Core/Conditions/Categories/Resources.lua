@@ -28,6 +28,16 @@ Env.UnitPower = UnitPower
 Env.UnitPowerMax = UnitPowerMax
 
 
+TMW:RegisterUpgrade(62032, {
+	condition = function(self, condition)
+		-- Don't show these help messages for users who already use the settings.
+		if condition.Type == "RUNES" then
+			condition.Checked = false
+		end
+	end,
+})
+
+
 local ConditionCategory = CNDT:GetCategory("RESOURCES", 1, L["CNDTCAT_RESOURCES"], false, false)
 
 ConditionCategory:RegisterCondition(1,	 "HEALTH", {
@@ -256,7 +266,11 @@ ConditionCategory:RegisterCondition(15,	 "RUNES", {
 					k=k-6
 					str = str .. [[(GetRuneType(]]..k..[[)==4 and GetRuneCount(]]..k..[[)==1)]]
 				else
-					str = str .. [[(GetRuneCount(]]..k..[[)==1)]]
+					if c.Checked then
+						str = str .. [[(GetRuneType(]]..k..[[)~=4 and GetRuneCount(]]..k..[[)==1)]]
+					else
+						str = str .. [[(GetRuneCount(]]..k..[[)==1)]]
+					end
 				end
 			end
 		end
@@ -276,8 +290,10 @@ ConditionCategory:RegisterCondition(15,	 "RUNES", {
 TMW:RegisterCallback("TMW_CNDT_GROUP_DRAWGROUP", function(event, CndtGroup, conditionData, conditionSettings)
 	if conditionData and conditionData.identifier == "RUNES" then
 		CndtGroup.Runes:Show()
+		CndtGroup.RunesCheck:Show()
 	else
 		CndtGroup.Runes:Hide()
+		CndtGroup.RunesCheck:Hide()
 	end
 end)
 

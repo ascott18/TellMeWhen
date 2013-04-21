@@ -3,7 +3,7 @@
 
 The Condition Data table is a table that completely describes a condition. See [[http://wow.curseforge.com/addons/tellmewhen/pages/api/conditions/api-documentation/condition-category/|ConditionCategory]]{{{:RegisterCondition()}}} for information about where this table is passed to.
 
-The funcstr field is the only one that is required required. Errors may happen with the omission of some, though.
+The funcstr field is the only one that is required. Errors may happen with the omission of some others, though.
 
 
 == Information & Appearance
@@ -44,26 +44,27 @@ The funcstr field is the only one that is required required. Errors may happen w
 
 == Slider & Value - Behavior & Range
 * step
-** [Function>|Table>|Number] The granularity of the slider input. In most cases, this should only ever get set to 0.1. Amounts much smaller than this can cause unpredictable behavior based on Icon Editor scale & screen resolution, so stick to integers.
+** [Function>|Number] The granularity of the slider input. In most cases, this should only ever get set to 0.1. Amounts much smaller than this can cause unpredictable behavior based on Icon Editor scale & screen resolution, so stick to integers.
 ** All input will be validated and rounded to the nearest step.
+** The default value is 1.
 
 * percent
 ** [Boolean] Set to true if the condition is checking a percentage value. The {{{c.Level}}} substitution in {{{funcstr}}} will be the slider level divided by 100. If used, {{{min}}} should be set to 0 and {{{max}}} to 100.
 
 === Absolute Min/Max
 * min
-** [Function>|Table>|Number] Minimum slider value.
+** [Function>|Number] Minimum slider value.
 ** Decimal amounts can cause unpredictable behavior based on Icon Editor scale & screen resolution, so stick to integers.
 ** If using a range, input will still be constrained against this value. In most cases, this should be set to 0 when using a range (to prevent negative values).
 
 * max
-** [Function>|Table>|Number] Maximum slider value.
+** [Function>|Number] Maximum slider value.
 ** Decimal amounts can cause unpredictable behavior based on Icon Editor scale & screen resolution, so stick to integers.
 ** If your maximum value is above a few thousand, you should also define a range to make configuration easier for the user. Input will still be limited to your defined maximum.
 
 === Variable Range
 * range
-** [Function>|Table>|Number] Range of values that the slider should show at any given time.
+** [Function>|Number] Range of values that the slider should show at any given time.
 ** Range should be used when the minimum and/or maximum value for a condition are very extreme (roughly > 1,000) or infinite.
 ** When a condition accepts a range, users can also right-click the slider to switch to editbox input mode, which allows for manual input.
 ** Manual input is still validated against the defined step and min/max for the condition. 

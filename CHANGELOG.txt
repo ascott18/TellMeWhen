@@ -2,6 +2,7 @@
  * New condition: NPC ID.
  * Mass refactoring has taken place. You will need to restart WoW when upgrading to this version of TellMeWhen.
  * Multi-state Cooldown icons can now keep track of spell charges.
+ * Added a new setting to the Runes condition that allows you to force the condition to check for non-death runes.
  
  * New Conditions:
  ** Weekday

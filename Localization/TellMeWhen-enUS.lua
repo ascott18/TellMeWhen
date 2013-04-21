@@ -983,6 +983,10 @@ L["CONDITIONPANEL_RUNES_DESC"] = [=[Use this condition type to only show the ico
 Each rune is a check button. A check mark will require that the rune be usable, an 'X' will require that the rune be unusable, no mark will ignore the rune.
 
 The runes in the second row are the death rune version of each rune above.]=]
+L["CONDITIONPANEL_RUNES_CHECK"] = "Force top-row runes to only match non-death runes."
+L["CONDITIONPANEL_RUNES_CHECK_DESC"] = [=[Normally, confuring the runes in the top row for this condition will let them match either a normal rune or a death rune in that slot.
+
+Enable this option to force the runes in the top row to only match non-death runes.]=]
 L["CONDITIONPANEL_PVPFLAG"] = "Unit is PvP Flagged"
 L["CONDITIONPANEL_LEVEL"] = "Unit Level"
 L["CONDITIONPANEL_CLASS"] = "Unit Class"

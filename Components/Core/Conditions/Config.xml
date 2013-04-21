@@ -1,7 +1,7 @@
 ﻿<Ui>
 
 	<Button name="TellMeWhen_ConditionEditorRuneCheckTemplate" virtual="true">
-		<Size x="35" y="29"/>
+		<Size x="33" y="29"/>
 		<Layers>
 			<Layer level="OVERLAY">
 				<Texture name="$parentCheck" parentKey="Check" file="">
@@ -13,7 +13,7 @@
 			</Layer>
 			<Layer level="ARTWORK">
 				<Texture parentKey="texture">
-					<Size x="28" y="28"/>
+					<Size x="26" y="26"/>
 					<Anchors>
 						<Anchor point="CENTER"/>
 					</Anchors>
@@ -157,6 +157,8 @@
 		</Scripts>
 	<!-- 	<HighlightTexture urgency="5" file="Interface\Buttons\UI-CheckBox-Highlight" alphaMode="ADD"/> -->
 	</CheckButton>
+	
+	
 	<Frame name="TellMeWhen_ConditionGroup" inherits="TellMeWhen_BorderedFrame" virtual="true">
 		<Size x="563" y="69"/>
 		<Anchors>
@@ -370,10 +372,45 @@
 					</OnEditFocusLost>
 				</Scripts>
 			</EditBox>
+			<CheckButton name="$parentCheck" inherits="TellMeWhen_CheckTemplate" parentKey="Check">
+				<Size x="26" y="26"/>
+				<Anchors>
+					<Anchor point="RIGHT" relativeTo="$parentEditBox" x="5" y="-1"/>
+				</Anchors>
+				<Scripts>
+					<OnLoad>
+						self:SetFrameLevel(self:GetParent().EditBox:GetFrameLevel() + 1)
+						self:GetNormalTexture():SetVertexColor(1, 0, 0, 1)
+					</OnLoad>
+					<OnClick>
+						local CndtGroup = self:GetParent()
+						CndtGroup:GetConditionSettings().Checked = not not self:GetChecked()
+						CndtGroup:LoadAndDraw()
+					</OnClick>
+				</Scripts>
+			</CheckButton>
+			<CheckButton name="$parentCheck2" inherits="TellMeWhen_CheckTemplate" parentKey="Check2">
+				<Size x="26" y="26"/>
+				<Anchors>
+					<Anchor point="RIGHT" relativeTo="$parentEditBox2" x="5" y="-1"/>
+				</Anchors>
+				<Scripts>
+					<OnLoad>
+						self:SetFrameLevel(self:GetParent().EditBox:GetFrameLevel() + 1)
+						self:GetNormalTexture():SetVertexColor(1, 0, 0, 1)
+					</OnLoad>
+					<OnClick>
+						local CndtGroup = self:GetParent()
+						CndtGroup:GetConditionSettings().Checked2 = not not self:GetChecked()
+						CndtGroup:LoadAndDraw()
+					</OnClick>
+				</Scripts>
+			</CheckButton>
+
 			<Frame name="$parentRunes" parentKey="Runes" hidden="true">
 				<Size x="1" y="1"/>
 				<Anchors>
-					<Anchor point="TOPLEFT" relativeTo="$parentType" relativePoint="TOPRIGHT" x="10" y="8"/>
+					<Anchor point="TOPLEFT" relativeTo="$parentType" relativePoint="TOPRIGHT" x="-9" y="8"/>
 				</Anchors>
 				<Frames>
 					<Button name="$parentBlood1" parentKey="blood1" inherits="TellMeWhen_ConditionEditorRuneCheckTemplate" id="1">
@@ -442,15 +479,21 @@
 
 				</Frames>
 			</Frame>
-			<CheckButton name="$parentCheck" inherits="TellMeWhen_CheckTemplate" parentKey="Check">
+			<CheckButton name="$parentRunesCheck" inherits="TellMeWhen_CheckTemplate" parentKey="RunesCheck">
 				<Size x="26" y="26"/>
 				<Anchors>
-					<Anchor point="RIGHT" relativeTo="$parentEditBox" x="5" y="-1"/>
+					<Anchor point="LEFT" relativeTo="$parentRunesUnholy2" relativePoint="RIGHT" x="5"/>
 				</Anchors>
 				<Scripts>
 					<OnLoad>
-						self:SetFrameLevel(self:GetParent().EditBox:GetFrameLevel() + 1)
-						self:GetNormalTexture():SetVertexColor(1, 0, 0, 1)
+						self.text:SetText(TMW.L["CONDITIONPANEL_RUNES_CHECK"])
+						self.text:SetPoint("TOP", 0, -4)
+						self.text:SetPoint("RIGHT", self:GetParent(), "RIGHT")
+						self.text:SetHeight(40)
+						self.text:SetMaxLines(5)
+						self.text:SetJustifyV("TOP")
+						
+						TMW:TT(self, "CONDITIONPANEL_RUNES_CHECK", "CONDITIONPANEL_RUNES_CHECK_DESC")
 					</OnLoad>
 					<OnClick>
 						local CndtGroup = self:GetParent()
@@ -459,25 +502,7 @@
 					</OnClick>
 				</Scripts>
 			</CheckButton>
-			<CheckButton name="$parentCheck2" inherits="TellMeWhen_CheckTemplate" parentKey="Check2">
-				<Size x="26" y="26"/>
-				<Anchors>
-					<Anchor point="RIGHT" relativeTo="$parentEditBox2" x="5" y="-1"/>
-				</Anchors>
-				<Scripts>
-					<OnLoad>
-						self:SetFrameLevel(self:GetParent().EditBox:GetFrameLevel() + 1)
-						self:GetNormalTexture():SetVertexColor(1, 0, 0, 1)
-					</OnLoad>
-					<OnClick>
-						local CndtGroup = self:GetParent()
-						CndtGroup:GetConditionSettings().Checked2 = not not self:GetChecked()
-						CndtGroup:LoadAndDraw()
-					</OnClick>
-				</Scripts>
-			</CheckButton>
-
-
+			
 			<Button name="$parentAndOr" parentKey="AndOr">
 				<Size x="40" y="20"/>
 				<Anchors>

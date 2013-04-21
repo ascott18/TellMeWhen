@@ -904,7 +904,7 @@ end
 --- Gets a [[http://wow.curseforge.com/addons/tellmewhen/pages/api/conditions/api-documentation/condition-object/|ConditionObject]] for the specified parent and condition settings.
 -- @param parent [table] The parent object of the ConditionObject.
 -- @param conditionSettings [table] The condition settings that the ConditionObject will be created for.
--- @return [[[http://wow.curseforge.com/addons/tellmewhen/pages/api/conditions/api-documentation/condition-object/|ConditionObject]]|nil] A [[http://wow.curseforge.com/addons/tellmewhen/pages/api/conditions/api-documentation/condition-object/|ConditionObject]] instance (may be previously cached or may be a new instance), or nil if the conditions passed in were invalid.
+-- @return [ [[http://wow.curseforge.com/addons/tellmewhen/pages/api/conditions/api-documentation/condition-object/|ConditionObject]]|nil] A [[http://wow.curseforge.com/addons/tellmewhen/pages/api/conditions/api-documentation/condition-object/|ConditionObject]] instance (may be previously cached or may be a new instance), or nil if the conditions passed in were invalid.
 function CNDT:GetConditionObject(parent, conditionSettings)
 	local conditionString = CNDT:GetConditionCheckFunctionString(parent, conditionSettings)
 	
