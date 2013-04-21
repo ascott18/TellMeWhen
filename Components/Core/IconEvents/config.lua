@@ -398,7 +398,7 @@ function EVENTS.OperatorMenu_DropDown(frame)
 			info.value = v.value
 			info.tooltipTitle = v.tooltipText
 			info.tooltipOnButton = true
-			info.arg1 = self
+			info.arg1 = frame
 			UIDropDownMenu_AddButton(info)
 		end
 	end
