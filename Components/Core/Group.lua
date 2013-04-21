@@ -41,7 +41,7 @@ local Group = TMW:NewClass("Group", "Frame", "UpdateTableManager", "GenericModul
 Group:UpdateTable_Set(TMW.GroupsToUpdate)
 
 
-do
+do	-- TMW.CNDT implementation
 	local tab
 	
 	TMW.CNDT:RegisterConditionSetImplementingClass("Group")
@@ -73,7 +73,7 @@ do
 		tab:SetTitleComponents(nil, 1)
 		
 		tab:ExtendMethod("ClickHandler", function()
-			TMW.CNDT:LoadConfig("Icon")
+			TMW.CNDT:LoadConfig("Group")
 		end)
 	end)
 end
