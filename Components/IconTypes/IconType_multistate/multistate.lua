@@ -32,9 +32,11 @@ Type.desc = L["ICONMENU_MULTISTATECD_DESC"]
 Type.menuIcon = "Interface\\Icons\\Spell_Holy_ConsumeMagic"
 
 -- AUTOMATICALLY GENERATED: UsesAttributes
-Type:UsesAttributes("spell")
 Type:UsesAttributes("noMana")
+Type:UsesAttributes("spell")
+Type:UsesAttributes("charges, maxCharges")
 Type:UsesAttributes("inRange")
+Type:UsesAttributes("stack, stackText")
 Type:UsesAttributes("start, duration")
 Type:UsesAttributes("alpha")
 Type:UsesAttributes("texture")

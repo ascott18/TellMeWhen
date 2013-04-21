@@ -14,8 +14,10 @@ local TMW = TMW
 if not TMW then return end
 local L = TMW.L
 
-local GetRuneType, GetRuneCooldown =
-	  GetRuneType, GetRuneCooldown
+local GetRuneType, GetRuneCooldown
+	= GetRuneType, GetRuneCooldown
+local bit, wipe, ipairs, ceil
+	= bit, wipe, ipairs, ceil
 local OnGCD = TMW.OnGCD
 local print = TMW.print
 local _, pclass = UnitClass("Player")
@@ -33,6 +35,8 @@ Type.AllowNoName = true
 
 -- AUTOMATICALLY GENERATED: UsesAttributes
 Type:UsesAttributes("spell")
+Type:UsesAttributes("charges, maxCharges")
+Type:UsesAttributes("stack, stackText")
 Type:UsesAttributes("start, duration")
 Type:UsesAttributes("alpha")
 Type:UsesAttributes("texture")
@@ -40,8 +44,29 @@ Type:UsesAttributes("texture")
 
 Type:RegisterIconDefaults{
 	Sort					= false,
-	RuneSlots				= 0x3F, --(111111)
+	RuneSlots				= 0xFFF, --(111111 111111)
+	RunesAsCharges			= false,
+	
+	--[[ From the LSB, RuneSlots corresponds to:
+		[0x3]   blood runes 1&2
+		[0xC]   unholy runes 1&2
+		[0x30]  frost runes 1&2
+		[0xC0]  blood death runes 1&2
+		[0x300] unholy death runes 1&2
+		[0xC00] frost death runes 1&2
+	]]
 }
+
+Type:RegisterConfigPanel_ConstructorFunc(120, "TellMeWhen_RuneSettings", function(self)
+	self.Header:SetText(Type.name)
+	TMW.IE:BuildSimpleCheckSettingFrame(self, {
+		{
+			setting = "RunesAsCharges",
+			title = L["ICONMENU_RUNES_CHARGES"],
+			tooltip = L["ICONMENU_RUNES_CHARGES_DESC"],
+		}
+	})
+end)
 
 Type:RegisterConfigPanel_XMLTemplate(165, "TellMeWhen_WhenChecks", {
 	text = L["ICONMENU_SHOWWHEN"],
@@ -53,6 +78,16 @@ Type:RegisterConfigPanel_XMLTemplate(150, "TellMeWhen_Runes")
 
 Type:RegisterConfigPanel_XMLTemplate(170, "TellMeWhen_SortSettings")
 
+TMW:RegisterUpgrade(62033, {
+	icon = function(self, ics)
+		-- Import the setting from TotemSlots, which was what this setting used to be
+		if ics.Type == "runes" then
+			local firstSix = bit.band(0x3F, ics.RuneSlots)
+			local secondSix = bit.lshift(firstSix, 6)
+			ics.RuneSlots = bit.bor(secondSix, firstSix)
+		end
+	end,
+})
 TMW:RegisterUpgrade(51024, {
 	icon = function(self, ics)
 		-- Import the setting from TotemSlots, which was what this setting used to be
@@ -81,36 +116,51 @@ local huge = math.huge
 local function Runes_OnUpdate(icon, time)
 
 	local Slots, Sort = icon.Slots, icon.Sort
-	local readyslot
-	local unstart, unduration, unslot
+	local readyslot, readyslotType
+	local unstart, unduration, unslot, unslotType
 	local d = Sort == -1 and huge or 0
 
-	for iSlot = 1, #Slots do -- be careful here. slots that are explicitly disabled by the user are set false. slots that are disabled internally are set nil.
+	local usableCount = 0
+	
+	for iSlot = 1, #Slots do
 		if Slots[iSlot] then
-			local start, duration, runeReady = GetRuneCooldown(iSlot)
+			local isDeath = false
+			if iSlot > 6 then
+				iSlot = iSlot - 6
+				isDeath = true
+			end
+			local runeType = GetRuneType(iSlot)
+			
+			if isDeath == (runeType == 4) then
+				local start, duration, runeReady = GetRuneCooldown(iSlot)
+				
+				if start == 0 then duration = 0 end
+				if start > time then runeReady = false end
 
-			if start == 0 then duration = 0 end
-			if start > time then runeReady = false end
-
-			if runeReady then
-				if not readyslot then
-					readyslot = iSlot
-				end
-				if icon.Alpha > 0 then
-					break
-				end
-			else
-				if Sort then
-					local _d = duration - (time - start)
-					if d*Sort < _d*Sort then
-						unstart, unduration, unslot, d = start, duration, iSlot, _d
+				if runeReady then
+					usableCount = usableCount + 1
+					if not readyslot then
+						readyslot = iSlot
+						readyslotType = runeType
 					end
-				else
-					if not unstart or (unstart > time and start < time) then
-						unstart, unduration, unslot = start, duration, iSlot
-					end
-					if start < time and icon.Alpha == 0 then
+					--[[if icon.Alpha > 0 then
 						break
+					end]]
+				else
+					if Sort then
+						local _d = duration - (time - start)
+						if d*Sort < _d*Sort then
+							unstart, unduration, unslot, d = start, duration, iSlot, _d
+							unslotType = runeType
+						end
+					else
+						if not unstart or (unstart > time and start < time) then
+							unstart, unduration, unslot = start, duration, iSlot
+							unslotType = runeType
+						end
+						--[[if start < time and icon.Alpha == 0 then
+							break
+						end]]
 					end
 				end
 			end
@@ -118,22 +168,33 @@ local function Runes_OnUpdate(icon, time)
 	end
 
 	if readyslot then
-		local type = GetRuneType(readyslot)
-
-		icon:SetInfo("alpha; texture; start, duration; spell",
-			icon.Alpha,
-			textures[type],
-			0, 0,
-			type -- MAYBE: change this arg? (to a special arg instead of spell)
-		)
-	elseif unslot then
-		local type = GetRuneType(unslot)
-		
-		icon:SetInfo("alpha; texture; start, duration; spell",
+		if icon.RunesAsCharges and unslot then
+			icon:SetInfo("alpha; texture; start, duration; charges, maxCharges; stack, stackText; spell",
+				icon.Alpha,
+				textures[readyslotType],
+				unstart, unduration,
+				usableCount, icon.RuneSlotsUsed,
+				usableCount, usableCount,
+				runeNames[readyslotType] -- MAYBE: change this arg? (to a special arg instead of spell)
+			)
+		else
+			icon:SetInfo("alpha; texture; start, duration; charges, maxCharges; stack, stackText; spell",
+				icon.Alpha,
+				textures[readyslotType],
+				0, 0,
+				nil, nil,
+				usableCount, usableCount,
+				runeNames[readyslotType] -- MAYBE: change this arg? (to a special arg instead of spell)
+			)
+		end
+	elseif unslot then		
+		icon:SetInfo("alpha; texture; start, duration; charges, maxCharges; stack, stackText; spell",
 			icon.UnAlpha,
-			textures[type],
+			textures[unslotType],
 			unstart, unduration,
-			type -- MAYBE: change this arg? (to a special arg instead of spell)
+			0, 0,
+			nil, nil,
+			runeNames[unslotType] -- MAYBE: change this arg? (to a special arg instead of spell)
 		)
 	end
 end
@@ -145,14 +206,25 @@ end
 
 function Type:Setup(icon, groupID, iconID)
 	icon.Slots = wipe(icon.Slots or {})
-	for i=1, 6 do
+	for i=1, 12 do
 		local settingBit = bit.lshift(1, i - 1)
 		icon.Slots[i] = bit.band(icon.RuneSlots, settingBit) == settingBit
+	end
+	
+	icon.RuneSlotsUsed = 0
+	for i = 1, 6 do
+		if icon.Slots[i] or icon.Slots[i+6] then
+			icon.RuneSlotsUsed = icon.RuneSlotsUsed + 1
+		end
 	end
 
 	for k, v in ipairs(icon.Slots) do
 		if v then
-			icon.FirstTexture = textures[ceil(k/2)]
+			if k > 6 then
+				icon.FirstTexture = textures[4]
+			else
+				icon.FirstTexture = textures[ceil(k/2)]
+			end
 			break
 		end
 	end

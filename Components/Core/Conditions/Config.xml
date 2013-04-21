@@ -49,17 +49,13 @@
 
 
 				-- detect what texture should be used
-				for k, v in pairs(self:GetParent()) do
-					if v == self then
-						local runeName = gsub(self:GetName(), self:GetParent():GetName(), "")
-						local runeType, death = runeName:match("(.*)%d(.*)")
+				local runeName = gsub(self:GetName(), self:GetParent():GetName(), "")
+				local runeType, death = runeName:match("(.*)%d(.*)")
 
-						if death and death ~= "" then
-							self.texture:SetTexture("Interface\\AddOns\\TellMeWhen\\Textures\\" .. runeType)
-						else
-							self.texture:SetTexture("Interface\\PlayerFrame\\UI-PlayerFrame-Deathknight-" .. runeType)
-						end
-					end
+				if death and death ~= "" then
+					self.texture:SetTexture("Interface\\AddOns\\TellMeWhen\\Textures\\" .. runeType)
+				else
+					self.texture:SetTexture("Interface\\PlayerFrame\\UI-PlayerFrame-Deathknight-" .. runeType)
 				end
 
 			</OnLoad>

@@ -5,7 +5,7 @@
 		<Layers>
 			<Layer level="OVERLAY">
 				<Texture name="$parentCheck" parentKey="Check" file="">
-					<Size x="27" y="27"/>
+					<Size x="24" y="24"/>
 					<Anchors>
 						<Anchor point="CENTER"/>
 					</Anchors>
@@ -13,7 +13,7 @@
 			</Layer>
 			<Layer level="ARTWORK">
 				<Texture parentKey="texture" file="Interface\PlayerFrame\UI-PlayerFrame-Deathknight-Blood">
-					<Size x="27" y="27"/>
+					<Size x="28" y="28"/>
 					<Anchors>
 						<Anchor point="CENTER"/>
 					</Anchors>
@@ -32,7 +32,7 @@
 		</Scripts>
 	</Button>
 	<Frame name="TellMeWhen_Runes" inherits="TellMeWhen_OptionsModuleContainer" virtual="true">
-		<Size y="40"/>
+		<Size y="70"/>
 		<Frames>
 			<Button name="$parentBlood1" parentKey="1" inherits="TellMeWhen_TypeCheckRuneTemplate" id="1">
 				<Anchors>
@@ -64,6 +64,38 @@
 					<Anchor point="LEFT" relativeTo="$parentFrost1" relativePoint="RIGHT"/>
 				</Anchors>
 			</Button>
+			
+			<Button name="$parentBlood1Death" parentKey="7" inherits="TellMeWhen_TypeCheckRuneTemplate" id="7">
+				<Anchors>
+					<Anchor point="LEFT" relativeTo="$parentBlood1" relativePoint="LEFT"/>
+					<Anchor point="TOP" relativeTo="$parentBlood1" relativePoint="BOTTOM" y="-4"/>
+				</Anchors>
+			</Button>
+			<Button name="$parentBlood2Death" parentKey="8" inherits="TellMeWhen_TypeCheckRuneTemplate" id="8">
+				<Anchors>
+					<Anchor point="LEFT" relativeTo="$parentBlood1Death" relativePoint="RIGHT"/>
+				</Anchors>
+			</Button>
+			<Button name="$parentUnholy1Death" parentKey="9" inherits="TellMeWhen_TypeCheckRuneTemplate" id="9">
+				<Anchors>
+					<Anchor point="LEFT" relativeTo="$parentBlood2Death" relativePoint="RIGHT"/>
+				</Anchors>
+			</Button>
+			<Button name="$parentUnholy2Death" parentKey="10" inherits="TellMeWhen_TypeCheckRuneTemplate" id="10">
+				<Anchors>
+					<Anchor point="LEFT" relativeTo="$parentUnholy1Death" relativePoint="RIGHT"/>
+				</Anchors>
+			</Button>
+			<Button name="$parentFrost1Death" parentKey="11" inherits="TellMeWhen_TypeCheckRuneTemplate" id="11">
+				<Anchors>
+					<Anchor point="LEFT" relativeTo="$parentUnholy2Death" relativePoint="RIGHT"/>
+				</Anchors>
+			</Button>
+			<Button name="$parentFrost2Death" parentKey="12" inherits="TellMeWhen_TypeCheckRuneTemplate" id="12">
+				<Anchors>
+					<Anchor point="LEFT" relativeTo="$parentFrost1Death" relativePoint="RIGHT"/>
+				</Anchors>
+			</Button>
 		</Frames>
 		<Scripts>
 			<OnLoad>
@@ -75,6 +107,15 @@
 					self["4"],
 					self["5"],
 					self["6"]
+				)
+				
+				TMW.IE:DistributeFrameAnchorsLaterally(self, 6,
+					self["7"],
+					self["8"],
+					self["9"],
+					self["10"],
+					self["11"],
+					self["12"]
 				)
 				
 			</OnLoad>

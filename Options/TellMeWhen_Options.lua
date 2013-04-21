@@ -2238,9 +2238,15 @@ TMW:NewClass("SettingRuneButton", "Button", "SettingFrameBase", "BitflagSettingF
 	end,
 	OnCreate = function(self)
 		-- detect what texture should be used
-		local runeType = gsub(self:GetName(), self:GetParent():GetName(), "")
-		runeType = gsub(runeType, "%d", "")
-		self.texture:SetTexture("Interface\\PlayerFrame\\UI-PlayerFrame-Deathknight-" .. runeType)
+		local runeName = gsub(self:GetName(), self:GetParent():GetName(), "")
+		local runeType, death = runeName:match("(.*)%d(.*)")
+		
+		if death and death ~= "" then
+			self.texture:SetTexture("Interface\\AddOns\\TellMeWhen\\Textures\\" .. runeType)
+		else
+			self.texture:SetTexture("Interface\\PlayerFrame\\UI-PlayerFrame-Deathknight-" .. runeType)
+		end
+		
 	end,
 }
 

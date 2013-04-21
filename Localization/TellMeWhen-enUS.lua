@@ -199,6 +199,8 @@ L["ICONMENU_LIGHTWELL_DESC"] = [=[Tracks the duration and charges of your %s.]=]
 
 L["ICONMENU_RUNES"] = "Rune Cooldown"
 L["ICONMENU_RUNES_DESC"] = [[Tracks rune cooldowns]]
+L["ICONMENU_RUNES_CHARGES"] = "Unusable runes as charges"
+L["ICONMENU_RUNES_CHARGES_DESC"] = "Enable this setting to cause the icon to treat any runes that are cooling down as an extra charge (shown in the cooldown sweep) when the icon is displaying a usable rune."
 
 L["ICONMENU_CLEU"] = "Combat Event"
 L["ICONMENU_CLEU_DESC"] = [=[Tracks combat events.

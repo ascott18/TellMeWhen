@@ -3,6 +3,8 @@
  * Mass refactoring has taken place. You will need to restart WoW when upgrading to this version of TellMeWhen.
  * Multi-state Cooldown icons can now keep track of spell charges.
  * Added a new setting to the Runes condition that allows you to force the condition to check for non-death runes.
+ * Rune icons can now distinguish between checking normal runes and death runes
+ * Rune icons have an option to show extra unusable runes as charges.
  
  * New Conditions:
  ** Weekday
