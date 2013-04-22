@@ -146,20 +146,23 @@ end
 
 local huge = math.huge
 local function Buff_OnUpdate(icon, time)
-
+	-- WARNING: THIS CODE IS HORRIFYING. ENTER AT YOUR OWN RISK!
+	
+	
 	local Units, NameArray, NameNameArray, NameHash, Filter, Filterh, Sort
 	= icon.Units, icon.NameArray, icon.NameNameArray, icon.NameHash, icon.Filter, icon.Filterh, icon.Sort
 	local NotStealable = not icon.Stealable
-	local NAL = icon.NAL
+	local NAL = #icon.NameArray
 
 	local buffName, _, iconTexture, count, dispelType, duration, expirationTime, canSteal, id, v1, v2, v3, v4
 	local useUnit
 	local d = Sort == -1 and huge or 0
+	
 	for u = 1, #Units do
 		local unit = Units[u]
 		if icon.UnitSet:UnitExists(unit) then
 			if Sort or NAL > EFF_THR then
-				for z=1, huge do --huge because i can and it breaks when there are no more buffs anyway
+				for z=1, huge do
 					local _buffName, _, _iconTexture, _count, _dispelType, _duration, _expirationTime, _, canSteal, _, _id, _, _, _, _v1, _v2, _v3, _v4 = UnitAura(unit, z, Filter)
 					_dispelType = _dispelType == "" and "Enraged" or _dispelType -- Bug: Enraged is an empty string
 					if not _buffName then
@@ -265,7 +268,7 @@ local function Buff_OnUpdate(icon, time)
 	
 	if buffName then
 		if icon.ShowTTText then
-			if wow_501 then
+			--if wow_501 then
 				-- WoW 5.1 moved the stupid boolean return value that used to be at the end
 				-- to before the variable returns where it belongs,
 				-- so we can simplify our checking a bit (no need to check variable types anymore; just check if they are non-nil).
@@ -280,7 +283,7 @@ local function Buff_OnUpdate(icon, time)
 				else
 					count = 0
 				end
-			else
+			--[[else
 				-- This is really stupid, but there really isn't a more efficient way to do it.
 				-- As of WoW 5.0.4, there will be a boolean return at the end of UnitAura.
 				-- It could be v1, v2, v3, v4, or vN. There is no way to tell afaik, so we have to test the hard way.
@@ -311,7 +314,7 @@ local function Buff_OnUpdate(icon, time)
 				else
 					count = 0
 				end
-			end
+			end]]
 		end
 
 		icon:SetInfo("alpha; texture; start, duration; stack, stackText; spell; unit, GUID",
@@ -360,8 +363,6 @@ function Type:Setup(icon, groupID, iconID)
 		icon.Filter = icon.Filter .. "|PLAYER"
 		if icon.Filterh then icon.Filterh = icon.Filterh .. "|PLAYER" end
 	end
-	
-	icon.NAL = #icon.NameArray
 
 	icon.FirstTexture = SpellTextures[icon.NameFirst]
 

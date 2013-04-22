@@ -1093,4 +1093,6 @@ function Module:Table_GetSpecialSuggestions(suggestions, tbl, ...)
 	end
 end
 
+local Module = SUG:NewModule("buffNoDS", SUG:GetModule("buff"))
+Module.Table_GetSpecialSuggestions = TMW.NULLFUNC
 

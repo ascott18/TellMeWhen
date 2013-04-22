@@ -132,5 +132,5 @@ function Type:Setup(icon, groupID, iconID)
 end
 
 
-Type:Register(80)
+Type:Register(155)
 

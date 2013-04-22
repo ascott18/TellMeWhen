@@ -1,6 +1,7 @@
 ﻿<Ui>
 
 <Include file="IconType_buff\includes.config.xml"/>
+<Include file="IconType_buffcheck\includes.config.xml"/>
 <Include file="IconType_cast\includes.config.xml"/>
 <Include file="IconType_cleu\includes.config.xml"/>
 <Include file="IconType_conditionicon\includes.config.xml"/>

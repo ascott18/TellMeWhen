@@ -30,6 +30,7 @@ Type.name = L["ICONMENU_WPNENCHANT"]
 Type.desc = L["ICONMENU_WPNENCHANT_DESC"]
 Type.menuIcon = GetSpellTexture(8024)
 Type.AllowNoName = true
+Type.spaceafter = true
 
 -- AUTOMATICALLY GENERATED: UsesAttributes
 Type:UsesAttributes("spell")

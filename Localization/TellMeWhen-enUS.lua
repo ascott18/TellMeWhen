@@ -137,7 +137,7 @@ L["ICONMENU_TYPE"] = "Icon type"
 L["ICONMENU_SPELLCOOLDOWN"] = "Spell Cooldown"
 L["ICONMENU_SPELLCOOLDOWN_DESC"] = [[Tracks the cooldowns of spells from your spellbook.]]
 
-L["ICONMENU_SWINGTIMER"] = "Swing timer"
+L["ICONMENU_SWINGTIMER"] = "Swing Timer"
 L["ICONMENU_SWINGTIMER_SWINGING"] = "Swinging"
 L["ICONMENU_SWINGTIMER_NOTSWINGING"] = "Not Swinging"
 L["ICONMENU_SWINGTIMER_DESC"] = [[Tracks the swing timers of your main hand and off hand weapons.]]
@@ -151,6 +151,13 @@ L["ICONMENU_ITEMCOOLDOWN_DESC"] = [[Tracks the cooldowns of items with Use effec
 
 L["ICONMENU_BUFFDEBUFF"] = "Buff/Debuff"
 L["ICONMENU_BUFFDEBUFF_DESC"] = [[Tracks buffs and/or debuffs.]]
+
+L["ICONMENU_BUFFCHECK"] = "Buff/Debuff Check"
+L["ICONMENU_BUFFCHECK_DESC"] = [[Checks if a buff is absent from any unit that you check.
+
+Use this icon type to check for missing raid buffs.
+
+Most other situations should use the %q icon type.]]
 
 L["ICONMENU_REACTIVE"] = "Reactive Ability"
 L["ICONMENU_REACTIVE_DESC"] = [[Tracks the usability of reactive abilities.
@@ -329,6 +336,11 @@ L["ICONMENU_CHOSEICONTOEDIT"] = "Chose an icon to edit:"
 L["ICONMENU_PRESENT"] = "Present"
 L["ICONMENU_ABSENT"] = "Absent"
 L["ICONMENU_ALWAYS"] = "Always"
+
+L["ICONMENU_ABSENTONANY"] = "Absent on Any Unit"
+L["ICONMENU_ABSENTONANY_DESC"] = "Set the opacity level that the icon should show at when any unit being checked is missing all of the buffs/debuffs being checked."
+L["ICONMENU_PRESENTONALL"] = "Present on All Units"
+L["ICONMENU_PRESENTONALL_DESC"] = "Set the opacity level that the icon should show at when all units being checked have at least one of the buffs/debuffs being checked."
 
 L["ICONMENU_CNDTSHOWWHEN"] = "Show when conditions"
 L["ICONMENU_FAIL2"] = "Conditions Fail"
