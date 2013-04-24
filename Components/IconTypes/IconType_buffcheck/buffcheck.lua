@@ -17,8 +17,8 @@ local L = TMW.L
 local EFF_THR
 local tonumber, strlower =
 	  tonumber, strlower
-local UnitAura, UnitExists =
-	  TMW.UnitAura, UnitExists
+local UnitAura, UnitExists, UnitIsDeadOrGhost =
+	  TMW.UnitAura, UnitExists, UnitIsDeadOrGhost
 local print = TMW.print
 local SpellTextures = TMW.SpellTextures
 local strlowerCache = TMW.strlowerCache
@@ -131,7 +131,7 @@ local function BuffCheck_OnUpdate(icon, time)
 	
 	for u = 1, #Units do
 		local unit = Units[u]
-		if icon.UnitSet:UnitExists(unit) then
+		if icon.UnitSet:UnitExists(unit) and not UnitIsDeadOrGhost(unit) then
 			local unitHas = false
 			
 			local _iconTexture, _id, _count, _duration, _expirationTime
