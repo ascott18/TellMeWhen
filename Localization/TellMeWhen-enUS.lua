@@ -52,6 +52,9 @@ L["ERROR_ACTION_DENIED_IN_LOCKDOWN"] = "Cannot do that in combat if the %q optio
 L["ERROR_NOTLOADED_ERROR"] = "TellMeWhen has failed to load! Are you missing a required library?"
 L["ERROR_NOTINITIALIZED_NO_LOAD"] = "TellMeWhen_Options cannot be loaded if TellMeWhen failed to initialize!"
 L["ERROR_NOTINITIALIZED_NO_ACTION"] = "TellMeWhen cannot perform that action if the addon failed to initialize!"
+L["ERROR_NOOPTIONSLOAD_INCOMBAT"] = [[Cannot load TellMeWhen's options while in combat if the %q option isn't enabled.
+
+They will automatically be loaded when you leave combat if this window is still open.]]
 L["ERROR_NOTINITIALIZED_INTERFACEPANEL_EXPLANATION"] = [[It looks like TellMeWhen has failed to initialize.
 
 Because of this, TellMeWhen will not be able to function, and you will not be able to configure any of its settings.

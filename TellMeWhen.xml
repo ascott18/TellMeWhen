@@ -55,15 +55,35 @@
 				InterfaceOptions_AddCategory(self)
 				
 				self.text:SetText(TMW.L["ERROR_NOTINITIALIZED_INTERFACEPANEL_EXPLANATION"])
+				
+				self:RegisterEvent("PLAYER_REGEN_ENABLED")
+				self:RegisterEvent("PLAYER_REGEN_DISABLED")
 			</OnLoad>
 			<OnShow>
-				TMW:LoadOptions()
-				if TMW.AddedToBlizz then
-					InterfaceOptionsFrame_OpenToCategory(TMW.AddedToBlizz)
-				else
-					self.text:SetWidth(self:GetWidth() - 150)
+				self.text:SetWidth(self:GetWidth() - 150)
+				
+				if TMW:CheckCanDoLockedAction(false) then
+					TMW:LoadOptions()
+					
+					if TMW.AddedToBlizz then
+						InterfaceOptionsFrame_OpenToCategory(TMW.AddedToBlizz)
+						
+						self:UnregisterAllEvents()
+					end
 				end
 			</OnShow>
+			<OnEvent>
+				if event == "PLAYER_REGEN_ENABLED" then
+					self.text:SetText(TMW.L["ERROR_NOTINITIALIZED_INTERFACEPANEL_EXPLANATION"])
+					
+					if self:IsShown() then
+						self:Hide()
+						self:Show()
+					end
+				elseif event == "PLAYER_REGEN_DISABLED" and not TMW.ALLOW_LOCKDOWN_CONFIG then
+					self.text:SetText(TMW.L["ERROR_NOOPTIONSLOAD_INCOMBAT"])
+				end
+			</OnEvent>
 		</Scripts>
 	</Frame>
 </Ui>
