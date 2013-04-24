@@ -130,12 +130,16 @@ end)
 local EventHandler = TMW:NewClass("EventHandler")
 EventHandler.instancesByName = {}
 
-
+--- Gets an EventHandler instance by name
+-- You may also use {{{TMW.EVENTS:GetEventHandler(eventHandlerName)}}} to accomplish the same thing.
+-- @param eventHandlerName [string] The identifier of the event handler being requested.
+-- @return [EventHandler|nil] The requested EventHandler instance, or nil if it was not found.
 function EventHandler:GetEventHandler(eventHandlerName)
 	self:AssertSelfIsClass()
 	
 	return EventHandler.instancesByName[eventHandlerName]
 end
+
 
 function EVENTS:GetEventHandler(eventHandlerName)
 	return EventHandler:GetEventHandler(eventHandlerName)
@@ -143,6 +147,9 @@ end
 
 
 
+--- Creates a new EventHandler.
+-- @name EventHandler:New
+-- @param eventHandlerName [string] An identifier for the event handler.
 function EventHandler:OnNewInstance_EventHandler(eventHandlerName)
 	self.eventHandlerName = eventHandlerName
 	self.AllEventHandlerData = {}
@@ -151,6 +158,7 @@ function EventHandler:OnNewInstance_EventHandler(eventHandlerName)
 	EventHandler.instancesByName[eventHandlerName] = self
 end
 
+-- [INTERNAL]
 function EventHandler:RegisterEventHandlerDataTable(eventHandlerData)
 	-- This function simply makes sure that we can keep track of all eventHandlerData that has been registed.
 	-- Without it, we would have to search through every single IconComponent when an event is fired to get this data.
@@ -168,10 +176,9 @@ function EventHandler:RegisterEventHandlerDataTable(eventHandlerData)
 	tinsert(self.AllEventHandlerData, eventHandlerData)
 end
 
-function EventHandler:RegisterEventHandlerDataNonSpecific(...)
-	-- Registers event handler data that isn't tied to a specific IconComponent.
-	-- This method may be overwritten in instances of EventHandler with a method that throws an error if nonspecific event handler data (not tied to an IconComponent) isn't supported.
-	
+--- Registers event handler data that isn't tied to a specific IconComponent.
+-- This method may be overwritten in instances of EventHandler with a method that throws an error if nonspecific event handler data (not tied to an IconComponent) isn't supported.
+function EventHandler:RegisterEventHandlerDataNonSpecific(...)	
 	self:AssertSelfIsInstance()
 	
 	local eventHandlerData = {
@@ -185,6 +192,20 @@ function EventHandler:RegisterEventHandlerDataNonSpecific(...)
 	tinsert(self.NonSpecificEventHandlerData, eventHandlerData)
 end
 
+--- Registers default settings for icon events
+-- @param defaults [table] The defaults table that will be merged into {{{TMW.Icon_Defaults.Events["**"]}}}
+-- @usage -- Example usage in the Announcements event handler:
+--  Announcements:RegisterEventDefaults{
+--    Text = "",
+--    Channel = "",
+--    Location = "",
+--    Sticky = false,
+--    ShowIconTex = true,
+--    r = 1,
+--    g = 1,
+--    b = 1,
+--    Size = 0,
+--  }
 function EventHandler:RegisterEventDefaults(defaults)
 	assert(type(defaults) == "table", "arg1 to RegisterGroupDefaults must be a table")
 		
