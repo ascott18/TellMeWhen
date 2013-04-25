@@ -235,7 +235,8 @@ function TMW:GetIconMenuText(g, i, ics)
 	local typeData = Types[Type]
 
 	local text, tooltip, dontShorten = typeData:GetIconMenuText(ics, g, i)
-
+	text = tostring(text)
+	
 	tooltip = tooltip or ""
 	
 	text = text == "" and L["UNNAMED"] or text
