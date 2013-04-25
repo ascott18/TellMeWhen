@@ -85,7 +85,7 @@ do
 	})
 	
 	TMW:RegisterCallback("TMW_OPTIONS_LOADED", function()
-		tab = TMW.Classes.IconEditorTab:NewTab(5, "Conditions")
+		tab = TMW.Classes.IconEditorTab:NewTab("CNDTICON", 5, "Conditions")
 		
 		tab:ExtendMethod("ClickHandler", function()
 			TMW.CNDT:LoadConfig("Icon")
@@ -221,10 +221,10 @@ end
 --- Determines if the icon is currently being edited in the Icon Editor.
 -- @name Icon:IsBeingEdited
 -- @paramsig
--- @return [number|nil] If the icon is being edited, returns the ID of the currently active Icon Editor tab. Returns nil if the icon is not being edited in the Icon Editor.
+-- @return [string|nil] If the icon is being edited, returns the identifier string of the currently active Icon Editor tab. Returns nil if the icon is not being edited in the Icon Editor.
 function Icon.IsBeingEdited(icon)
 	if TMW.IE and TMW.CI.ic == icon and TMW.IE.CurrentTab and TMW.IE:IsVisible() then
-		return TMW.IE.CurrentTab:GetID()
+		return TMW.IE.CurrentTab.identifier
 	end
 end
 

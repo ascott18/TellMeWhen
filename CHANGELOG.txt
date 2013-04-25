@@ -21,6 +21,7 @@
  ** The "All Types" setting for Loss of Control icons should now work as intended.
  ** Attempted to fix issue where the "You are not in a raid" message would be cause by TellMeWhen.
  ** Fixed: Components\IconModules\IconModule_Alpha\Alpha.lua:145 attempt to perform arithmetic on field "actualAlphaAtLastChange" (a nil value)
+ ** Fixed: IconType_unitcooldown\unitcooldown.lua:270 attempt to index local "NameHash" (a boolean value)
 
 ===v6.1.5===
  * Bug Fixes:

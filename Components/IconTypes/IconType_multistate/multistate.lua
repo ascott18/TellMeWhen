@@ -168,7 +168,7 @@ function Type:Setup(icon, groupID, iconID)
 	icon.Slot = 0
 	MultiStateCD_OnEvent(icon, "ACTIONBAR_SLOT_CHANGED") -- the placement of this matters. so does the event arg
 
-	if icon:IsBeingEdited() == 1 then
+	if icon:IsBeingEdited() == "MAIN" then
 		-- icon.Slot was just obtained by the OnEvent method call
 		if icon.Slot == 0 and originalNameFirst and originalNameFirst ~= "" and TellMeWhen_ChooseName then
 			TMW.HELP:Show("ICON_MS_NOTFOUND", icon, TellMeWhen_ChooseName, 0, 0, L["HELP_MS_NOFOUND"], TMW:RestoreCase(originalNameFirst))

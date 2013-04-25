@@ -69,7 +69,7 @@ do	-- TMW.CNDT implementation
 	})
 	
 	TMW:RegisterCallback("TMW_OPTIONS_LOADED", function()
-		tab = TMW.Classes.IconEditorTab:NewTab(15, "Conditions")
+		tab = TMW.Classes.IconEditorTab:NewTab("CNDTGROUP", 15, "Conditions")
 		tab:SetTitleComponents(nil, 1)
 		
 		tab:ExtendMethod("ClickHandler", function()
@@ -253,7 +253,7 @@ end
 -- Implements all requested {{{TMW.Classes.GroupComponent}}}s, processes settings, sets up conditions, and then sets up all the icons that it contains.
 -- 
 -- This method should not be called manually while TellMeWhen is locked. It may be called liberally from wherever you see fit when in configuration mode.
--- @name Icon:Setup
+-- @name Group:Setup
 -- @paramsig noIconSetup
 -- @param noIconSetup [boolean] True to prevent the group from setting up all of its icons. Nil/false to update all icons along with the group.
 function Group.Setup(group, noIconSetup)

@@ -82,6 +82,8 @@ end)
 Type:RegisterConfigPanel_XMLTemplate(170, "TellMeWhen_SortSettings")
 
 local ManualIcons = {}
+local ManualIconsManager = TMW.Classes.UpdateTableManager:New()
+ManualIconsManager:UpdateTable_Set(ManualIcons)
 
 
 local Cooldowns = setmetatable({}, {__index = function(t, k)
@@ -280,6 +282,7 @@ function Type:UNIT_SPELLCAST_SUCCEEDED(event, unit, spellName, _, _, spellID)
 		-- For some reason, this is firing for unit "npc," (yes, there is a comma there).
 		-- It also seems to fire for "npc" without a comma, so ignore that too it it doesnt have a GUID.
 		-- Obviously this is invalid, but if you find anything else invalid then scream about it too.
+		
 		-- Addendum 6-17-12: Fired for arena1 and GUID was nil. Seems this is a more common issue than I though,
 		-- so remove all errors and just ignore things without GUIDs.
 		
@@ -350,7 +353,8 @@ end
 
 local function UnitCooldown_OnUpdate(icon, time)
 	local unstart, unname, unduration, usename, dobreak, useUnit, unUnit
-	local Alpha, NameArray, OnlySeen, Sort, Durations, Units = icon.Alpha, icon.NameArray, icon.OnlySeen, icon.Sort, icon.Durations, icon.Units
+	local Alpha, NameArray, OnlySeen, Sort, Durations, Units =
+	icon.Alpha, icon.NameArray, icon.OnlySeen, icon.Sort, icon.Durations, icon.Units
 	local NAL = #NameArray
 	local d = Sort == -1 and huge or 0
 	
@@ -451,20 +455,13 @@ function Type:Setup(icon, groupID, iconID)
 	
 	if icon.UnitSet.allUnitsChangeOnEvent then
 		icon:SetUpdateMethod("manual")
+		ManualIconsManager:UpdateTable_Register(icon)
+		
 		for event in pairs(icon.UnitSet.updateEvents) do
 			icon:RegisterSimpleUpdateEvent(event)
 		end
 		
 		TMW:RegisterCallback("TMW_UNITSET_UPDATED", UnitCooldown_OnEvent, icon)
-	end
-	
-	-- THIS DOESNT REALLY BELONG HERE, BUT IT NEEDS TO BE HERE SO IT ALWAYS GETS UPDATED PROPERLY.
-	wipe(ManualIcons)
-	for i = 1, #Type.Icons do
-		local ic = Type.Icons[i]
-		if ic.Update_Method == "manual" then
-			ManualIcons[#ManualIcons + 1] = ic
-		end
 	end
 
 	Type:RegisterEvent("COMBAT_LOG_EVENT_UNFILTERED")
@@ -476,5 +473,13 @@ function Type:Setup(icon, groupID, iconID)
 	icon:Update()
 end
 
+TMW:RegisterCallback("TMW_GLOBAL_UPDATE", function(event, icon)
+	Type:UnregisterEvent("COMBAT_LOG_EVENT_UNFILTERED")
+	Type:UnregisterEvent("UNIT_SPELLCAST_SUCCEEDED")
+end)
+
+TMW:RegisterCallback("TMW_ICON_DISABLE", function(event, icon)
+	ManualIconsManager:UpdateTable_Unregister(icon)
+end)
 
 Type:Register(40)

@@ -33,7 +33,7 @@ EVENTS.CONST = {
 	EVENT_INVALID_REASON_MISSINGCOMPONENT = 2,
 }
 
-local EventsTab = TMW.Classes.IconEditorTab:NewTab(10, "Events")
+local EventsTab = TMW.Classes.IconEditorTab:NewTab("ICONEVENTS", 10, "Events")
 EventsTab:SetText(TMW.L["EVENTS_TAB"])
 TMW:TT(EventsTab, "EVENTS_TAB", "EVENTS_TAB_DESC")
 

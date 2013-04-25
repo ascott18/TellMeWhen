@@ -131,8 +131,8 @@ end)
 local function DR_OnEvent(icon, event, arg1, cevent, _, _, _, _, _, destGUID, _, destFlags, _, spellID, spellName, _, auraType)
 	if event == "COMBAT_LOG_EVENT_UNFILTERED" then
 		if auraType == "DEBUFF" and (cevent == "SPELL_AURA_REMOVED" or cevent == "SPELL_AURA_APPLIED" or (icon.CheckRefresh and cevent == "SPELL_AURA_REFRESH")) then
-			local ND = icon.NameHash
-			if ND[spellID] or ND[strlowerCache[spellName]] then
+			local NameHash = icon.NameHash
+			if NameHash[spellID] or NameHash[strlowerCache[spellName]] then
 				if PvEDRs[spellID] or bitband(destFlags, CL_CONTROL_PLAYER) == CL_CONTROL_PLAYER then
 					local dr = icon.DRInfo[destGUID]
 					if cevent == "SPELL_AURA_APPLIED" then
@@ -288,7 +288,7 @@ do	-- CheckCategories
 		local result = func(icon, icon.NameArray)
 		icon:SetInfo("spell", result.firstCategory)
 
-		if icon:IsBeingEdited() == 1 and TellMeWhen_ChooseName then
+		if icon:IsBeingEdited() == "MAIN" and TellMeWhen_ChooseName then
 			if result.doWarn then
 				TMW.HELP:Show("ICON_DR_MISMATCH", icon, TellMeWhen_ChooseName, 0, 0, L["WARN_DRMISMATCH"] .. result.append)
 			else

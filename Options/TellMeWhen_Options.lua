@@ -1444,17 +1444,19 @@ end
 
 TMW:NewClass("IconEditorTab", "Button"){
 	
-	NewTab = function(self, order, attachedFrame)
+	NewTab = function(self, identifier, order, attachedFrame)
 		self:AssertSelfIsClass()
 		
-		TMW:ValidateType("2 (order)", "IconEditorTab:NewTab(order, attachedFrame)", order, "number")
-		TMW:ValidateType("3 (attachedFrame)", "IconEditorTab:NewTab(order, attachedFrame)", attachedFrame, "string")
+		TMW:ValidateType("2 (identifier)", "IconEditorTab:NewTab(identifier, order, attachedFrame)", identifier, "string")
+		TMW:ValidateType("3 (order)", "IconEditorTab:NewTab(identifier, order, attachedFrame)", order, "number")
+		TMW:ValidateType("4 (attachedFrame)", "IconEditorTab:NewTab(identifier, order, attachedFrame)", attachedFrame, "string")
 		
 		tab = self:New("Button", "TellMeWhen_IconEditorTab" .. #IE.Tabs + 1, TellMeWhen_IconEditor, "CharacterFrameTabButtonTemplate")
 		
 		tab.doesIcon = 1
 		tab.doesGroup = 1
 	
+		tab.identifier = identifier
 		tab.order = order
 		tab.attachedFrame = attachedFrame
 		
@@ -1539,13 +1541,13 @@ TMW:NewClass("IconEditorTab", "Button"){
 }
 
 function IE:CreateTabs()
-	IE.MainTab = TMW.Classes.IconEditorTab:NewTab(1, "Main")
+	IE.MainTab = TMW.Classes.IconEditorTab:NewTab("MAIN", 1, "Main")
 	IE.MainTab:SetText(TMW.L["MAIN"])
 	TMW:TT(IE.MainTab, "MAIN", "MAIN_DESC")
 	
-	IE.MainOptionsTab = TMW.Classes.IconEditorTab:NewTab(20, "MainOptions")
-	IE.MainOptionsTab:SetTitleComponents()
 	
+	IE.MainOptionsTab = TMW.Classes.IconEditorTab:NewTab("GROUPOPTS", 20, "MainOptions")
+	IE.MainOptionsTab:SetTitleComponents()
 	IE.MainOptionsTab:SetText(TMW.L["GROUPADDONSETTINGS"])
 	TMW:TT(IE.MainOptionsTab, "GROUPADDONSETTINGS", "GROUPADDONSETTINGS_DESC")
 	
@@ -2876,11 +2878,14 @@ end
 
 
 TMW:RegisterCallback("TMW_CONFIG_REQUEST_AVAILABLE_IMPORT_EXPORT_TYPES", function(event, editbox, import, export)
-	if editbox == TMW.IE.ExportBox then		
-		import.group_overwrite = CI.g
-		export.group = CI.g
+	if editbox == TMW.IE.ExportBox then	
 		
-		if IE.CurrentTab:GetID() <= 4 then
+		if IE.CurrentTab.doesGroup then	
+			import.group_overwrite = CI.g
+			export.group = CI.g
+		end
+		
+		if IE.CurrentTab.doesIcon then
 			import.icon = CI.i
 			export.icon = CI.i
 		end

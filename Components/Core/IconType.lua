@@ -182,7 +182,7 @@ function IconType:GetConfigIconTexture(icon)
 		end
 		
 		if self.usePocketWatch then
-			if icon:IsBeingEdited() == 1 then
+			if icon:IsBeingEdited() == "MAIN" then
 				TMW.HELP:Show("ICON_POCKETWATCH_FIRSTSEE", nil, TMW.IE.icontexture, 0, 0, L["HELP_POCKETWATCH"])
 			end
 			return "Interface\\Icons\\INV_Misc_PocketWatch_01", false

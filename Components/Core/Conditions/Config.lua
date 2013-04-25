@@ -109,7 +109,7 @@ end)
 
 -- Dynamic Conditions Tab handling
 
-CNDT.DynamicConditionTab = TMW.Classes.IconEditorTab:NewTab(25, "Conditions")
+CNDT.DynamicConditionTab = TMW.Classes.IconEditorTab:NewTab("CNDTDYN", 25, "Conditions")
 CNDT.DynamicConditionTab:SetTitleComponents()
 CNDT.DynamicConditionTab:Hide()
 
