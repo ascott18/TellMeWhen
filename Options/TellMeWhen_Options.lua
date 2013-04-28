@@ -1122,7 +1122,10 @@ function TMW:CompileOptions()
 			},
 		}
 		TMW.OptionsTable.args.profiles = LibStub("AceDBOptions-3.0"):GetOptionsTable(TMW.db)
-		TMW.OptionsTable.args.profiles.args = CopyTable(TMW.OptionsTable.args.profiles.args) -- dont copy the entire table because it contains a reference to db ... and will copy the entire TMW.db.
+		
+		-- dont copy the entire profiles table because it contains a reference to db
+		TMW.OptionsTable.args.profiles.args = CopyTable(TMW.OptionsTable.args.profiles.args)
+		
 		TMW.OptionsTable.args.profiles.args.importexportdesc = {
 			order = 90,
 			type = "description",

@@ -16,4 +16,6 @@
 
 <Include file="Resizer_Generic\includes.config.xml"/>
 
+<Include file="Snippets\includes.config.xml"/>
+
 </Ui>

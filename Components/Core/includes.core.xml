@@ -12,6 +12,7 @@
 <Include file="Units\includes.core.xml"/>
 <Include file="IconEvents\includes.core.xml"/>
 <Include file="Resizer_Generic\includes.core.xml"/>
+<Include file="Snippets\includes.core.xml"/>
 
 
 

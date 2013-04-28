@@ -589,8 +589,8 @@ local textLayoutTemplate = {
 					warning = warning .. "\r\n\r\n" .. L["TEXTLAYOUTS_DELETELAYOUT_CONFIRM_NUM"]:format(n)
 				elseif IsControlKeyDown() then
 					return false
-				elseif TEXT:Layout_IsDefault(TEXT:GetTextLayoutSettings(layout)) and n == 0 then
-					return false
+				--elseif TEXT:Layout_IsDefault(TEXT:GetTextLayoutSettings(layout)) and n == 0 then
+				--	return false
 				end
 				return warning
 			end,
@@ -1136,7 +1136,7 @@ function textlayout:Import_ImportData(_, data, version, GUID)
 		if version > TELLMEWHEN_VERSIONNUMBER then
 			TMW:Print(L["FROMNEWERVERSION"])
 		else
-			TMW:DoUpgrade("textlayout", version, GUID)
+			TMW:DoUpgrade("textlayout", version, textlayout, GUID)
 		end
 	end
 	TMW:Update()

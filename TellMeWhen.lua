@@ -18,7 +18,7 @@
 TELLMEWHEN_VERSION = "6.2.0"
 TELLMEWHEN_VERSION_MINOR = strmatch(" @project-version@", " r%d+") or ""
 TELLMEWHEN_VERSION_FULL = TELLMEWHEN_VERSION .. TELLMEWHEN_VERSION_MINOR
-TELLMEWHEN_VERSIONNUMBER = 62044 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
+TELLMEWHEN_VERSIONNUMBER = 62045 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
 if TELLMEWHEN_VERSIONNUMBER > 63000 or TELLMEWHEN_VERSIONNUMBER < 62000 then return error("YOU SCREWED UP THE VERSION NUMBER OR DIDNT CHANGE THE SAFETY LIMITS") end -- safety check because i accidentally made the version number 414069 once
 
 TELLMEWHEN_MAXROWS = 20
@@ -131,8 +131,6 @@ TMW.Defaults = {
 		},
 		HelpSettings = {
 		},
-		--[[CodeSnippets = {
-		},]]
 		HasImported			= false,
 		ConfigWarning		= true,
 		VersionWarning		= true,
@@ -152,11 +150,9 @@ TMW.Defaults = {
 		--SUG_atBeginning	=	true,
 		ColorNames		=	true,
 		--AlwaysSubLinks	=	false,
-	--[[	CodeSnippets = {
-		},]]
-		ColorMSQ	 	 = false,
-		OnlyMSQ		 	 = false,
-		ColorGCD		 = true,
+		ColorMSQ	 	= false,
+		OnlyMSQ		 	= false,
+		ColorGCD		= true,
 
 		Colors = {
 			["**"] = {
@@ -632,7 +628,11 @@ function TMW.tRemoveDuplicates(table)
 end
 
 function TMW.OrderSort(a, b)
-	return a.order < b.order
+	if a.Order then
+		return a.Order < b.Order
+	else
+		return a.order < b.order
+	end
 end
 function TMW:SortOrderedTables(parentTable)
 	sort(parentTable, TMW.OrderSort)
@@ -952,7 +952,7 @@ do -- InNLengthTable
 		if arg then
 			return iter, getstate(0, arg)
 		else
-			error("Bag argument #1 to 'TMW:InNLengthTable(arg)'. Expected table, got nil.")
+			error("Bag argument #1 to 'TMW:InNLengthTable(arg)'. Expected table, got nil.", 2)
 		end
 	end
 end
@@ -1795,7 +1795,7 @@ function TMW:Initialize()
 	-- most commonly used to see if the user has configured an icon at all.
 	TMW.DEFAULT_ICON_SETTINGS = TMW.db.profile.Groups[0].Icons[0]
 	TMW.db.profile.Groups[0] = nil
-
+	
 	
 	--------------- Communications ---------------
 	
@@ -1807,6 +1807,9 @@ function TMW:Initialize()
 	
 	-- Channel TMWV is used for version notifications.
 	TMW:RegisterComm("TMWV")
+	
+	TMW:Fire("TMW_INITIALIZE")
+	TMW:UnregisterAllCallbacks("TMW_INITIALIZE")
 	
 	TMW.InitializedFully = true
 end
@@ -2965,6 +2968,8 @@ function TMW:OnProfile(event, arg2, arg3)
 	if event == "OnProfileChanged" then
 		TMW:Printf(L["PROFILE_LOADED"], arg3)
 	end
+	
+	TMW:Fire("TMW_ON_PROFILE", event, arg2, arg3)
 end
 
 

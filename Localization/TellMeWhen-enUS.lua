@@ -1205,6 +1205,58 @@ L["TOOLTIPSCAN_DESC"] = "This condition type will allow you to check the first v
 
 
 
+
+
+L["CODESNIPPET_RENAME"] = "Code Snippet Name"
+L["CODESNIPPET_RENAME_DESC"] = [[Choose a name for this snippet so it can be easily identified by you.
+
+Names don't have to be unique.]]
+L["CODESNIPPET_ORDER"] = "Run Order"
+L["CODESNIPPET_ORDER_DESC"] = [[Set the order in which this snippet should be run relative to other snippets.
+
+%s and %s will be mixed together based on this value when they are run.
+
+Decimal amounts are valid. Consistent order is not guarenteed if two snippets share the same order.]]
+L["CODESNIPPET_CODE"] = "Lua Code to Run"
+L["CODESNIPPET_CODE_DESC"] = [[Set the Lua code that will be ran by this snippet when TellMeWhen is intialized.]]
+
+L["CODESNIPPETS"] = "Lua Code Snippets"
+L["CODESNIPPETS_TITLE"] = "Lua Snippets (Advanced)"
+L["CODESNIPPETS_DESC"] = [[This feature allows you to write chunks of Lua code that will be ran when TellMeWhen is being initialized.
+
+It is an advanced feature for those who have experience with Lua (or for those who have been given a snippet by another TellMeWhen user).
+
+Uses might include writing custom functions for use in Lua conditions (be sure to define those in TMW.CNDT.Env).
+
+Snippets can be defined either per-profile or globally (they will run for all profiles).]]
+L["CODESNIPPET_GLOBAL"] = "Global Snippets"
+L["CODESNIPPET_PROFILE"] = "Profile Snippets"
+
+L["CODESNIPPET_ADD"] = "Create new Snippet"
+L["CODESNIPPET_DELETE"] = "Delete Snippet"
+L["CODESNIPPET_DELETE_DESC"] = [[Click to delete this code snippet.
+
+Hold |cff7fffffCtrl|r to bypass confirmation.]]
+L["CODESNIPPET_DELETE_CONFIRM"] = "Are you sure you want to delete the code snippet %q?"
+L["CODESNIPPET_RUNNOW"] = "Run Snippet Now"
+L["CODESNIPPET_RUNNOW_DESC"] = [[Click to run this code snippet.
+
+Hold |cff7fffffCtrl|r to bypass confirmation if the snippet has already been ran.]]
+L["CODESNIPPET_RUNNOW_CONFIRM"] = [[Are you sure you want to run the code snippet %s again?
+
+(It has already been run at least once this session)
+
+You can hold |cff7fffffCtrl|r when clicking the %s button to bypass confirmation.]]
+
+L["CODESNIPPETS_DEFAULTNAME"] = "New Snippet"
+
+L["CODESNIPPETS_IMPORT_GLOBAL"] = "New Global Snippet"
+L["CODESNIPPETS_IMPORT_GLOBAL_DESC"] = [[Import the snippet as a global snippet.]]
+L["CODESNIPPETS_IMPORT_PROFILE"] = "New Profile Snippet"
+L["CODESNIPPETS_IMPORT_PROFILE_DESC"] = [[Import the snippet as a profile-specific snippet.]]
+
+L["fCODESNIPPET"] = "Code Snippet: %s"
+
 -- ----------
 -- STUFF THAT I GOT SICK OF ADDING PREFIXES TOO AND PUTTING IN THE RIGHT PLACE
 -- ----------
