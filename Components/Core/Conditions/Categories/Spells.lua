@@ -632,7 +632,7 @@ ConditionCategory:RegisterCondition(31,	 "CASTING", {
 })
 
 
-local CastCounts = {}
+local CastCounts
 local function CASTCOUNT_COMBAT_LOG_EVENT_UNFILTERED(e, _, cleuEvent, _, sourceGUID, _, _, _, _, _, _, _, spellID, spellName)
 	if cleuEvent == "SPELL_CAST_SUCCESS" then
 		spellName = spellName and strlowerCache[spellName]
@@ -648,34 +648,40 @@ local function CASTCOUNT_COMBAT_LOG_EVENT_UNFILTERED(e, _, cleuEvent, _, sourceG
 		
 	end
 end
+function Env.UnitCastCount(...)
+	CastCounts = {}
+	CNDT:RegisterEvent("COMBAT_LOG_EVENT_UNFILTERED", CASTCOUNT_COMBAT_LOG_EVENT_UNFILTERED)
+	
+	Env.UnitCastCount = function(unit, spell)
+		local GUID = UnitGUID(unit)
+		if not GUID then
+			return 0
+		end
+		
+		local casts = CastCounts[GUID]
+		
+		if not casts then
+			return 0
+		end
+		
+		if not isNumber[spell] then
+			spell = casts[spell] or spell -- spell name keys have values that are spellIDs
+		end
+		return casts[spell] or 0
+	end
+	
+	return Env.UnitCastCount(...)
+end
 ConditionCategory:RegisterCondition(32,	 "CASTCOUNT", {
 	text = L["CONDITIONPANEL_CASTCOUNT"],
 	tooltip = L["CONDITIONPANEL_CASTCOUNT_DESC"],
 	range = 10,
 	icon = "Interface\\Icons\\spell_nature_lightningoverload",
 	name = function(editbox) TMW:TT(editbox, "SPELLTOCHECK", "CNDT_ONLYFIRST") editbox.label = L["SPELLTOCHECK"] end,
-	tcoords = {0.05, 0.95, 0.03, 0.97},
-	Env = {
-		UnitCastCount = function(unit, spell)
-			local GUID = UnitGUID(unit)
-			if not GUID then
-				return 0
-			end
-			
-			local casts = CastCounts[GUID]
-			
-			if not casts then
-				return 0
-			end
-			
-			if not isNumber[spell] then
-				spell = casts[spell] or spell -- spell name keys have values that are spellIDs
-			end
-			return casts[spell] or 0
-		end,
-	},
+	tcoords = CNDT.COMMON.standardtcoords,
 	funcstr = function()
-		CNDT:RegisterEvent("COMBAT_LOG_EVENT_UNFILTERED", CASTCOUNT_COMBAT_LOG_EVENT_UNFILTERED)
+		 -- attempt initialization if it hasn't been done already
+		Env.UnitCastCount("none", "none")
 		
 		return [[UnitCastCount(c.Unit, c.NameFirst) c.Operator c.Level]]
 	end,
