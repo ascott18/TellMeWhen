@@ -13,6 +13,8 @@
 
 if not TMW then return end
 
+local CNDT = TMW.CNDT
+
 local TMW = TMW
 local L = TMW.L
 local print = TMW.print
