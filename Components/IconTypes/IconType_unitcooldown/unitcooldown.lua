@@ -28,6 +28,8 @@ local isNumber = TMW.isNumber
 local strlowerCache = TMW.strlowerCache
 local SpellTextures = TMW.SpellTextures
 
+local bit_band = bit.band
+
 local clientVersion = select(4, GetBuildInfo())
 
 
@@ -195,7 +197,7 @@ local spellBlacklist = {
 }
 
 
-function Type:COMBAT_LOG_EVENT_UNFILTERED(e, _, cleuEvent, _, sourceGUID, _, _, _, _, _, _, _, spellID, spellName)
+function Type:COMBAT_LOG_EVENT_UNFILTERED(e, _, cleuEvent, _, sourceGUID, _, _, _, destGUID, _, destFlags, _, spellID, spellName)
 	if cleuEvent == "SPELL_CAST_SUCCESS"
 	or cleuEvent == "SPELL_AURA_APPLIED"
 	or cleuEvent == "SPELL_AURA_REFRESH"
@@ -271,6 +273,12 @@ function Type:COMBAT_LOG_EVENT_UNFILTERED(e, _, cleuEvent, _, sourceGUID, _, _, 
 			local NameHash = icon.NameHash
 			if NameHash and NameHash[spellID] or NameHash[spellName] then
 				icon.NextUpdateTime = 0
+			end
+		end
+	elseif cleuEvent == "UNIT_DIED" then
+		if destFlags then
+			if bit_band(destFlags, COMBATLOG_OBJECT_TYPE_PLAYER) ~= COMBATLOG_OBJECT_TYPE_PLAYER then
+				Cooldowns[destGUID] = nil
 			end
 		end
 	end

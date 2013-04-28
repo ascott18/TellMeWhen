@@ -29,6 +29,9 @@ local OnGCD = TMW.OnGCD
 local GetTotemInfo = GetTotemInfo
 local UnitGUID = UnitGUID
 local max, strfind, format = max, strfind, format
+local bit_band = bit.band
+
+local COMBATLOG_OBJECT_TYPE_PLAYER = COMBATLOG_OBJECT_TYPE_PLAYER
 
 Env.GetSpellCooldown = GetSpellCooldown
 Env.GetItemCooldown = GetItemCooldown
@@ -633,7 +636,7 @@ ConditionCategory:RegisterCondition(31,	 "CASTING", {
 
 
 local CastCounts
-local function CASTCOUNT_COMBAT_LOG_EVENT_UNFILTERED(e, _, cleuEvent, _, sourceGUID, _, _, _, _, _, _, _, spellID, spellName)
+local function CASTCOUNT_COMBAT_LOG_EVENT_UNFILTERED(e, _, cleuEvent, _, sourceGUID, _, _, _, destGUID, _, destFlags, _, spellID, spellName)
 	if cleuEvent == "SPELL_CAST_SUCCESS" then
 		spellName = spellName and strlowerCache[spellName]
 		local castsForGUID = CastCounts[sourceGUID]
@@ -645,11 +648,18 @@ local function CASTCOUNT_COMBAT_LOG_EVENT_UNFILTERED(e, _, cleuEvent, _, sourceG
 		
 		castsForGUID[spellName] = spellID
 		castsForGUID[spellID] = (castsForGUID[spellID] or 0) + 1
-		
+	
+	elseif cleuEvent == "UNIT_DIED" then
+		if destFlags then
+			if bit_band(destFlags, COMBATLOG_OBJECT_TYPE_PLAYER) ~= COMBATLOG_OBJECT_TYPE_PLAYER then
+				CastCounts[destGUID] = nil
+			end
+		end
 	end
 end
 function Env.UnitCastCount(...)
 	CastCounts = {}
+	CNDT.CastCounts =CastCounts
 	CNDT:RegisterEvent("COMBAT_LOG_EVENT_UNFILTERED", CASTCOUNT_COMBAT_LOG_EVENT_UNFILTERED)
 	
 	Env.UnitCastCount = function(unit, spell)
@@ -678,6 +688,7 @@ ConditionCategory:RegisterCondition(32,	 "CASTCOUNT", {
 	range = 10,
 	icon = "Interface\\Icons\\spell_nature_lightningoverload",
 	name = function(editbox) TMW:TT(editbox, "SPELLTOCHECK", "CNDT_ONLYFIRST") editbox.label = L["SPELLTOCHECK"] end,
+	useSUG = true,
 	tcoords = CNDT.COMMON.standardtcoords,
 	funcstr = function()
 		 -- attempt initialization if it hasn't been done already
@@ -688,6 +699,6 @@ ConditionCategory:RegisterCondition(32,	 "CASTCOUNT", {
 	events = function(ConditionObject, c)
 		return
 			ConditionObject:GetUnitChangedEventString(CNDT:GetUnit(c.Unit)),
-			ConditionObject:GenerateNormalEventString("COMBAT_LOG_EVENT_UNFILTERED")
+			ConditionObject:GenerateNormalEventString("COMBAT_LOG_EVENT_UNFILTERED", nil, "SPELL_CAST_SUCCESS")
 	end,
 })
