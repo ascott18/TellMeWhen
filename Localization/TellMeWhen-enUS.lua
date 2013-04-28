@@ -1024,6 +1024,8 @@ L["CONDITIONPANEL_THREAT_RAW_DESC"] = [[This condition checks your raw threat pe
 Players in melee range pull aggro at 110%
 Players at range pull aggro at 130%
 Players with aggro have a raw threat percentage of 255%]]
+L["CONDITIONPANEL_CASTCOUNT"] = "Spell Cast Count"
+L["CONDITIONPANEL_CASTCOUNT_DESC"] = [[Checks the number of times that a unit has cast a certain spell.]]
 L["CONDITIONPANEL_CASTTOMATCH"] = "Spell to Match"
 L["CONDITIONPANEL_CASTTOMATCH_DESC"] = [[Enter a spell name here to make the condition only pass if the spell cast matches it exactly.
 

@@ -22,11 +22,13 @@ local _, pclass = UnitClass("player")
 local CNDT = TMW.CNDT
 local Env = CNDT.Env
 
+local isNumber = TMW.isNumber
 local strlowerCache = TMW.strlowerCache
 local OnGCD = TMW.OnGCD
 
 local GetTotemInfo = GetTotemInfo
-local strfind, format = strfind, format
+local UnitGUID = UnitGUID
+local max, strfind, format = max, strfind, format
 
 Env.GetSpellCooldown = GetSpellCooldown
 Env.GetItemCooldown = GetItemCooldown
@@ -626,5 +628,60 @@ ConditionCategory:RegisterCondition(31,	 "CASTING", {
 			ConditionObject:GenerateNormalEventString("UNIT_SPELLCAST_CHANNEL_INTERRUPTED", CNDT:GetUnit(c.Unit)),
 			ConditionObject:GenerateNormalEventString("UNIT_SPELLCAST_INTERRUPTIBLE", CNDT:GetUnit(c.Unit)),
 			ConditionObject:GenerateNormalEventString("UNIT_SPELLCAST_NOT_INTERRUPTIBLE", CNDT:GetUnit(c.Unit))
+	end,
+})
+
+
+local CastCounts = {}
+local function CASTCOUNT_COMBAT_LOG_EVENT_UNFILTERED(e, _, cleuEvent, _, sourceGUID, _, _, _, _, _, _, _, spellID, spellName)
+	if cleuEvent == "SPELL_CAST_SUCCESS" then
+		spellName = spellName and strlowerCache[spellName]
+		local castsForGUID = CastCounts[sourceGUID]
+		
+		if not castsForGUID then
+			castsForGUID = {}
+			CastCounts[sourceGUID] = castsForGUID
+		end
+		
+		castsForGUID[spellName] = spellID
+		castsForGUID[spellID] = (castsForGUID[spellID] or 0) + 1
+		
+	end
+end
+ConditionCategory:RegisterCondition(32,	 "CASTCOUNT", {
+	text = L["CONDITIONPANEL_CASTCOUNT"],
+	tooltip = L["CONDITIONPANEL_CASTCOUNT_DESC"],
+	range = 10,
+	icon = "Interface\\Icons\\spell_nature_lightningoverload",
+	name = function(editbox) TMW:TT(editbox, "SPELLTOCHECK", "CNDT_ONLYFIRST") editbox.label = L["SPELLTOCHECK"] end,
+	tcoords = {0.05, 0.95, 0.03, 0.97},
+	Env = {
+		UnitCastCount = function(unit, spell)
+			local GUID = UnitGUID(unit)
+			if not GUID then
+				return 0
+			end
+			
+			local casts = CastCounts[GUID]
+			
+			if not casts then
+				return 0
+			end
+			
+			if not isNumber[spell] then
+				spell = casts[spell] or spell -- spell name keys have values that are spellIDs
+			end
+			return casts[spell] or 0
+		end,
+	},
+	funcstr = function()
+		CNDT:RegisterEvent("COMBAT_LOG_EVENT_UNFILTERED", CASTCOUNT_COMBAT_LOG_EVENT_UNFILTERED)
+		
+		return [[UnitCastCount(c.Unit, c.NameFirst) c.Operator c.Level]]
+	end,
+	events = function(ConditionObject, c)
+		return
+			ConditionObject:GetUnitChangedEventString(CNDT:GetUnit(c.Unit)),
+			ConditionObject:GenerateNormalEventString("COMBAT_LOG_EVENT_UNFILTERED")
 	end,
 })

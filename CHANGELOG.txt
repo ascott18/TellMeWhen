@@ -12,6 +12,7 @@
  ** Weekday
  ** Time of Day
  ** Quest Complete
+ ** Spell Cast Count
  
  * Bug Fixes:
  ** The IncreasedStats equivalency should now always properly check for the Legacy of the Emperor buff

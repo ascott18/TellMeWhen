@@ -361,13 +361,15 @@ local function UnitCooldown_OnUpdate(icon, time)
 	for u = 1, #Units do
 		local unit = Units[u]
 		local GUID = UnitGUID(unit)
-		local cooldowns = GUID and Cooldowns[GUID]
+		local cooldowns = GUID and rawget(Cooldowns, GUID)
 
 		if cooldowns then
 			for i = 1, NAL do
 				local iName = NameArray[i]
 				if not isNumber[iName] then
-					iName = cooldowns[iName] or iName-- spell name keys have values that are the spellid of the name, we need the spellid for the texture (thats why i did it like this)
+					-- spell name keys have values that are the spellid of the name,
+					-- we need the spellid for the texture (thats why i did it like this)
+					iName = cooldowns[iName] or iName
 				end
 				local _start
 				if OnlySeen then
