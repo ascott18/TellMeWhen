@@ -689,7 +689,7 @@ function CNDT:DoConditionSubstitutions(conditionData, conditionSettings, funcstr
 				CNDT:RegisterEvent("GROUP_ROSTER_UPDATE")
 				CNDT:GROUP_ROSTER_UPDATE()
 			else
-				funcstr = gsub(funcstr, "c.Unit" .. append,	"\"" .. unit .. "\"") -- sub it in as a string
+				funcstr = gsub(funcstr, "c.Unit" .. append,	strWrap(unit)) -- sub it in as a string
 			end
 		end
 	end
@@ -739,14 +739,14 @@ function CNDT:DoConditionSubstitutions(conditionData, conditionSettings, funcstr
 		if name == "gcd" then
 			name = TMW.GCDSpell
 		end
-		funcstr = funcstr:gsub("c.GCDReplacedNameFirst2", "\"" .. name .. "\"")
+		funcstr = funcstr:gsub("c.GCDReplacedNameFirst2", strWrap(name))
 	end
 	if funcstr:find("c.GCDReplacedNameFirst") then
 		local name = TMW:GetSpellNames(nil, name, 1)
 		if name == "gcd" then
 			name = TMW.GCDSpell
 		end
-		funcstr = funcstr:gsub("c.GCDReplacedNameFirst", "\"" .. name .. "\"")
+		funcstr = funcstr:gsub("c.GCDReplacedNameFirst", strWrap(name))
 	end
 
 	return funcstr
