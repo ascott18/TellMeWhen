@@ -98,11 +98,11 @@ local snippetTemplate = {
 			end,
 			confirm = function(info)
 				local snippet = getSnippetSettings(info)
-								
-				if SNIPPETS:HasRanSnippet(snippet) then
-					return L["CODESNIPPET_RUNNOW_CONFIRM"]:format(snippet.Name)
-				elseif IsControlKeyDown() then
+				
+				if IsControlKeyDown() then
 					return false
+				elseif SNIPPETS:HasRanSnippet(snippet) then
+					return L["CODESNIPPET_RUNNOW_CONFIRM"]:format(snippet.Name)
 				end
 				
 				return false

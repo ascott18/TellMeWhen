@@ -2748,7 +2748,8 @@ end
 
 function TMW:MakeSerializedDataPretty(string)
 	return string:
-	gsub("(^[^tT%d][^^]*^[^^]*)", "%1 "): -- add spaces to clean it up a little
+	gsub("(^[^tT%d][^^]*^[^^]*)", "%1 "): -- add spaces between tables to clean it up a little
+	gsub("~J", "~J "): -- ~J is the escape for a newline
 	gsub("%^ ^", "^^") -- remove double space at the end
 end
 
