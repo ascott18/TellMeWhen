@@ -267,6 +267,27 @@ ConditionCategory:RegisterCondition(5,	 "BUFFNUMBER", {
 	end,
 })
 
+ConditionCategory:RegisterSpacer(8)
+
+ConditionCategory:RegisterCondition(9,	 "ABSORBAMT", {
+	text = L["ABSORBAMT"],
+	tooltip = L["ABSORBAMT_DESC"],
+	range = 50000,
+	icon = "Interface\\Icons\\spell_holy_powerwordshield",
+	tcoords = CNDT.COMMON.standardtcoords,
+	Env = {
+		UnitGetTotalAbsorbs = UnitGetTotalAbsorbs,
+	},
+	funcstr = function(c)
+		return [[UnitGetTotalAbsorbs(c.Unit) c.Operator c.Level]]
+	end,
+	events = function(ConditionObject, c)
+		return
+			ConditionObject:GetUnitChangedEventString(CNDT:GetUnit(c.Unit)),
+			ConditionObject:GenerateNormalEventString("UNIT_ABSORB_AMOUNT_CHANGED", CNDT:GetUnit(c.Unit))
+	end,
+})
+
 ConditionCategory:RegisterSpacer(10)
 
 ConditionCategory:RegisterCondition(11,	 "DEBUFFDUR", {

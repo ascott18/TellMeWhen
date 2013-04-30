@@ -1205,6 +1205,12 @@ L["NUMAURAS_DESC"] = [[This condition checks the number of an aura active - not 
 L["TOOLTIPSCAN"] = "Aura Variable"
 L["TOOLTIPSCAN_DESC"] = "This condition type will allow you to check the first variable associated with an aura. Numbers are provided by Blizzard API and do not necessarily match numbers found on the tooltip of the aura. There is also no guarantee that a number will be obtained for an aura. In most practical cases, though, the correct number will be checked."
 
+L["INCHEALS"] = "Unit Incoming heals"
+L["INCHEALS_DESC"] = [[Checks the total amount of healing that is incoming to the unit (HoTs and casts in progress).
+
+Only works for friendly units. Hostile units will always be reported as having 0 incoming heals.]]
+L["ABSORBAMT"] = "Absorbtion shield amount"
+L["ABSORBAMT_DESC"] = "Checks the total amount of absorbtion shields that the unit has."
 
 
 

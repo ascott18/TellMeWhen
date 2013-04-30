@@ -180,6 +180,29 @@ ConditionCategory:RegisterCondition(6.2, "ISPLAYER", {
 ConditionCategory:RegisterSpacer(6.5)
 
 
+ConditionCategory:RegisterCondition(6.7,	 "INCHEALS", {
+	text = L["INCHEALS"],
+	tooltip = L["INCHEALS_DESC"],
+	range = 50000,
+	icon = "Interface\\Icons\\spell_holy_flashheal",
+	tcoords = CNDT.COMMON.standardtcoords,
+	Env = {
+		UnitGetIncomingHeals = UnitGetIncomingHeals,
+	},
+	funcstr = function(c)
+		return [[(UnitGetIncomingHeals(c.Unit) or 0) c.Operator c.Level]]
+	end,
+	events = function(ConditionObject, c)
+		return
+			ConditionObject:GetUnitChangedEventString(CNDT:GetUnit(c.Unit)),
+			ConditionObject:GenerateNormalEventString("UNIT_HEAL_PREDICTION", CNDT:GetUnit(c.Unit))
+	end,
+})
+
+
+ConditionCategory:RegisterSpacer(6.9)
+
+
 Env.GetUnitSpeed = GetUnitSpeed
 ConditionCategory:RegisterCondition(7,	 "SPEED", {
 	text = L["SPEED"],
