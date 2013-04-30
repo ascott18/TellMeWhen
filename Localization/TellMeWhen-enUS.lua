@@ -2006,6 +2006,7 @@ L["IncreasedSPsix"] = "Increased Spellpower (6%)"
 L["IncreasedSPten"] = "Increased Spellpower (10%)"
 L["IncreasedPhysHaste"] = "Increased Physical Haste"
 L["IncreasedSpellHaste"] = "Increased Spell Haste"
+L["DamageShield"] = "Damage Shield"
 --L["BurstHaste"] = "Heroism/Bloodlust" -- defined in static formats
 L["BonusStamina"] = "Increased Stamina"
 L["BurstManaRegen"] = "Burst Mana Regen"
