@@ -1,10 +1,10 @@
 ﻿<Ui>
 
 	<Frame name="TellMeWhen_ConditionIconSettings" inherits="TellMeWhen_OptionsModuleContainer" virtual="true">
-		<Size y="40"/>
+		<Size y="95"/>
 		<Frames>
 			<EditBox name="$parentConditionDur" parentKey="ConditionDur" inherits="TellMeWhen_TimeEditBoxTemplate">
-				<Size x="40" y="15"/>
+				<Size x="60" y="15"/>
 				<Anchors>
 					<Anchor point="TOPLEFT" x="33" y="-17"/>
 				</Anchors>
@@ -27,7 +27,7 @@
 				</Scripts>
 			</EditBox>
 			<EditBox name="$parentUnConditionDur" parentKey="UnConditionDur" inherits="TellMeWhen_TimeEditBoxTemplate">
-				<Size x="40" y="15"/>
+				<Size x="60" y="15"/>
 				<Anchors>
 					<Anchor point="LEFT" relativeTo="$parentConditionDur" relativePoint="RIGHT" x="35"/>
 				</Anchors>
@@ -97,7 +97,8 @@
 			<CheckButton name="$parentOnlyIfCounting" inherits="TellMeWhen_CheckTemplate" parentKey="OnlyIfCounting">
 				<Size x="28" y="28"/>
 				<Anchors>
-					<Anchor point="LEFT" relativeTo="$parentUnConditionDur" relativePoint="RIGHT" x="10" y="-0.5"/>
+					<Anchor point="LEFT" x="5" />
+					<Anchor point="TOP" relativeTo="$parentConditionDurEnabled" relativePoint="BOTTOM" y="-1"/>
 				</Anchors>
 				<Scripts>
 					<OnLoad>						
@@ -105,6 +106,36 @@
 							setting = "OnlyIfCounting",
 							title = TMW.L["ICONMENU_ONLYIFCOUNTING"],
 							tooltip = TMW.L["ICONMENU_ONLYIFCOUNTING_DESC"],
+							
+							OnClick = function(self)
+								if TMW.CI.ics.OnlyIfCounting then
+									TMW.CI.ics.OnlyIfNotCounting = false
+								end
+							end,
+						})
+						
+						self:ConstrainLabel(self:GetParent(), "RIGHT")
+					</OnLoad>
+				</Scripts>
+			</CheckButton>
+			
+			<CheckButton name="$parentOnlyIfNotCounting" inherits="TellMeWhen_CheckTemplate" parentKey="OnlyIfNotCounting">
+				<Size x="28" y="28"/>
+				<Anchors>
+					<Anchor point="TOPLEFT" relativeTo="$parentOnlyIfCounting" relativePoint="BOTTOMLEFT" x="0" y="2"/>
+				</Anchors>
+				<Scripts>
+					<OnLoad>						
+						TMW.IE:CreateSettingFrameFromData(self, {
+							setting = "OnlyIfNotCounting",
+							title = TMW.L["ICONMENU_ONLYIFNOTCOUNTING"],
+							tooltip = TMW.L["ICONMENU_ONLYIFNOTCOUNTING_DESC"],
+							
+							OnClick = function(self)
+								if TMW.CI.ics.OnlyIfNotCounting then
+									TMW.CI.ics.OnlyIfCounting = false
+								end
+							end,
 						})
 						
 						self:ConstrainLabel(self:GetParent(), "RIGHT")

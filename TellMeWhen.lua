@@ -18,7 +18,7 @@
 TELLMEWHEN_VERSION = "6.2.0"
 TELLMEWHEN_VERSION_MINOR = strmatch(" @project-version@", " r%d+") or ""
 TELLMEWHEN_VERSION_FULL = TELLMEWHEN_VERSION .. TELLMEWHEN_VERSION_MINOR
-TELLMEWHEN_VERSIONNUMBER = 62047 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
+TELLMEWHEN_VERSIONNUMBER = 62048 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
 if TELLMEWHEN_VERSIONNUMBER > 63000 or TELLMEWHEN_VERSIONNUMBER < 62000 then return error("YOU SCREWED UP THE VERSION NUMBER OR DIDNT CHANGE THE SAFETY LIMITS") end -- safety check because i accidentally made the version number 414069 once
 
 TELLMEWHEN_MAXROWS = 20
@@ -1205,12 +1205,13 @@ end
 
 
 ---------------------------------
--- Callback & Class libs
+-- Callback lib
 ---------------------------------
 
 do -- Callback Lib
 	-- because quite frankly, i hate the way LibCallback works.
 	local callbackregistry = {}
+	
 	function TMW:RegisterCallback(event, func, arg1)
 		TMW:ValidateType("2 (event)", "TMW:RegisterCallback(event, func, arg1)", event, "string")
 		if not event:find("^TMW_") then
@@ -1317,339 +1318,6 @@ do -- Callback Lib
 	end
 end
 
-do -- Class Lib
-	TMW.Classes = {}
-	local metamethods = {
-		__add = true,
-		__call = true,
-		__concat = true,
-		__div = true,
-		__le = true,
-		__lt = true,
-		__mod = true,
-		__mul = true,
-		__pow = true,
-		__sub = true,
-		__tostring = true,
-		__unm = true,
-	}
-	
-	local function callFunc(class, instance, func, ...)
-	
-		-- check for all functions that dont match exactly, like OnNewInstance_1, _2, _3, ...
-		-- functions can be named whatever you want, but a numbering system helps make sure that
-		-- they are called in the order that you want them to be called in
-		for k, v in pairs(class.instancemeta.__index) do
-			if type(k) == "string" and k:find("^" .. func) and k ~= func then
-				safecall(v, instance, ...)
-			end
-		end
-		
-		if instance.isTMWClassInstance then
-			-- If this is being called on an instance of a class instead of a class,
-			-- search the instance itself for matching functions too.
-			-- This will never step on the toes of class.instancemeta.__index because
-			-- iterating over an instance will only yield things explicity set on an instance -
-			-- it will never directly contain anything inherited from a class.
-			for k, v in pairs(instance) do
-				if type(k) == "string" and k:find("^" .. func) and k ~= func then
-					safecall(v, instance, ...)
-				end
-			end
-		end
-		
-		
-		-- now check for the function that exactly matches. this should be called last because
-		-- it should be the function that handles the real class being instantiated, not any inherited classes
-		local normalFunc = instance[func]
-		if normalFunc then
-			safecall(normalFunc, instance, ...)
-		end
-	end
-
-	local function initializeClass(self)
-		if not self.instances[1] then
-			-- set any defined metamethods
-			for k, v in pairs(self.instancemeta.__index) do
-				if metamethods[k] then
-					self.instancemeta[k] = v
-				end
-			end
-			
-			callFunc(self, self, "OnFirstInstance")
-		end
-	end
-	
-	local __call = function(self, arg)
-		-- allow something like TMW:NewClass("Name"){Foo = function() end, Bar = 5}
-		if type(arg) == "table" then
-			for k, v in pairs(arg) do
-				if k == "METHOD_EXTENSIONS" and type(v) == "table" then
-					for methodName, func in pairs(v) do
-						self:ExtendMethod(methodName, func)
-					end
-				else
-					self[k] = v
-				end
-			end
-		end
-		return self
-	end
-	
-	local inherit = function(self, source)		
-		if source then
-			local metatable = getmetatable(self)
-			
-			local index, didInherit
-			if TMW.Classes[source] then
-				callFunc(TMW.Classes[source], TMW.Classes[source], "OnClassInherit", self)
-				index = getmetatable(TMW.Classes[source]).__index
-				didInherit = true
-			elseif LibStub(source, true) then
-				local lib = LibStub(source, true)
-				if lib.Embed then
-					lib:Embed(metatable.__index)
-					didInherit = true
-				else
-					error(("Library %q does not hasourcee an Embed method"):format(source), 2)
-				end
-			elseif type(source) == "table" then
-				index = source
-				didInherit = true
-			else
-				local success, frame = pcall(CreateFrame, source)
-				if success and frame then
-					-- Need to do hide the frame or else if we made an editbox,
-					-- it will block all keyboard input for some reason
-					frame:Hide()
-	
-					self.isFrameObject = source or self.isFrameObject
-					rawset(self, "isFrameObject", rawget(self, "isFrameObject") or source)
-					
-					metatable.__index.isFrameObject = metatable.__index.isFrameObject or source
-					
-					index = getmetatable(frame).__index
-					didInherit = true
-				end
-			end
-
-			if not didInherit then
-				error(("Could not figure out how to inherit %s into class %s. Are you sure it exists?"):format(source, self.className), 3)
-			end
-			
-			if index then
-				for k, source in pairs(index) do
-					metatable.__index[k] = metatable.__index[k] or source
-				end
-			end
-		end
-	end
-	
-	function TMW:NewClass(className, ...)
-		TMW:ValidateType(2, "TMW:NewClass()", className, "string")
-		
-		if TMW.Classes[className] then
-			error("TMW: A class with name " .. className .. " already exists. You can't overwrite existing classes, so pick a different name", 2)
-		end
-		
-		local metatable = {
-			__index = {},
-			__call = __call,
-		}
-		
-		local class = {
-			className = className,
-			instances = {},
-			inherits = {},
-			inheritedBy = {},
-			embeds = {},
-			isTMWClass = true,
-		}
-
-		class.instancemeta = {__index = metatable.__index}
-		
-		setmetatable(class, metatable)
-		metatable.__newindex = metatable.__index
-
-		for n, v in TMW:Vararg(TMW.Classes.Class and "Class", ...) do
-			--TMW.Warn(strconcat(tostringall(n, v, className, ...)))
-		--	if v then
-				inherit(class, v)
-		---	end
-		end
-
-		TMW.Classes[className] = class
-		
-		TMW:Fire("TMW_CLASS_NEW", class)
-
-		return class
-	end
-	
-	-- Define the base class. All other classes implicitly inherit from this class.
-	TMW:NewClass("Class"){
-		New = function(self, ...)
-			local instance
-			if ... and self.isFrameObject then
-				instance = CreateFrame(...)
-			else
-				instance = {}
-			end
-
-			-- if this is the first instance of the class, do some magic to it:
-			initializeClass(self)
-
-			instance.class = self
-			instance.className = self.className
-			instance.isTMWClassInstance = true
-
-			setmetatable(instance, self.instancemeta)
-
-			self.instances[#self.instances + 1] = instance
-			
-			for k, v in pairs(self.instancemeta.__index) do
-				if self.isFrameObject and instance.HasScript and instance:HasScript(k) then
-					instance:HookScript(k, v)
-				end
-			end
-
-			callFunc(self, instance, "OnNewInstance", ...)
-			
-			TMW:Fire("TMW_CLASS_" .. self.className .. "_INSTANCE_NEW", self, instance)
-			
-			return instance
-		end,
-
-		Embed = function(self, target, canOverwrite)
-			-- if this is the first instance (not really an instance here, but we need to anyway) of the class, do some magic to it:
-			initializeClass(self)
-
-			self.embeds[target] = true
-
-			for k, v in pairs(self.instancemeta.__index) do
-				if target[k] and target[k] ~= v and not canOverwrite then
-					TMW:Error("Error embedding class %s into target %s: Field %q already exists on the target.", self.className, tostring(target:GetName() or target), k)
-				else
-					target[k] = v
-				end
-			end
-			
-			for k, v in pairs(self.instancemeta.__index) do
-				if self.isFrameObject and target.HasScript and target:HasScript(k) then
-					target:HookScript(k, v)
-				end
-			end
-
-			callFunc(self, target, "OnNewInstance")
-
-			target.class = self
-			target.className = self.className
-			
-			return target
-		end,
-
-		Disembed = function(self, target, clearDifferentValues)
-			self.embeds[target] = false
-
-			for k, v in pairs(self.instancemeta.__index) do
-				if (target[k] == v) or (target[k] and clearDifferentValues) then
-					target[k] = nil
-				else
-					TMW:Error("Error disembedding class %s from target %s: Field %q should exist on the target, but it doesnt.", self.className, tostring(target:GetName() or target), k)
-				end
-			end
-
-			return target
-		end,
-
-		ExtendMethod = function(self, method, newFunction)
-			local existingFunction = self[method]
-			if existingFunction then
-				self[method] = function(...)
-					existingFunction(...)
-					newFunction(...)
-				end
-			else
-				self[method] = newFunction
-			end
-		end,
-		
-		AssertSelfIsClass = function(self)
-			if not self.isTMWClass then
-				error(("Caller must be the class %q, not an instance of the class"):format(self.className), 3)
-			end
-		end,
-		
-		AssertSelfIsInstance = function(self)
-			if not self.isTMWClassInstance then
-				error(("Caller must be an instance of the class %q, not the class itself"):format(self.className), 3)
-			end
-		end,
-		
-		AssertIsProtectedCall = function(self, message)
-			-- debugstack can be a bit heavy on CPU usage, so use this sparingly
-			-- it is also very buggy and unreliable, so ideally, never use it at all.
-			
-			local lineOne, lineTwo = ("\n"):split(debugstack(2))
-			
-			local func = lineOne:match("in function `(.*)'")
-			local caller = lineTwo:match("in function `(.*)'")
-						
-			if not self[caller] then
-				local method = self.className .. ":" .. func .. "()"
-				local out = method .. " is a protected method and can only be called by methods within its own class."
-				
-				if message then
-					out = out .. " " .. message
-				end
-				
-				error(out, 3)
-			end        
-		end,
-		
-		Inherit = function(self, source)
-			self:AssertSelfIsClass()
-		
-			inherit(self, source)
-		end,
-		
-		InheritTable = function(self, sourceClass, tableKey)
-			TMW:ValidateType(2, "Class:InheritTable()", sourceClass, "table")
-			TMW:ValidateType(3, "Class:InheritTable()", tableKey, "string")
-			
-			self[tableKey] = {}
-			for k, v in pairs(sourceClass[tableKey]) do
-				self[tableKey][k] = v
-			end
-			
-			-- not needed to return the table, but helpful because
-			-- sometimes i set a variable to the result by mistake,
-			-- and if i forget that this doesnt work then i spend a long time debugging
-			-- trying to figure out why a single attributes table
-			-- is shared by all icons... yeah, i did that once.
-			return self[tableKey]
-		end,
-		
-		CallFunc = function(self, funcName, ...)
-			if self.isTMWClass then
-				callFunc(self, self, funcName)
-			else
-				callFunc(self.class, self, funcName, ...)
-			end
-		end,
-		
-		OnClassInherit_Class = function(self, newClass)
-			for class in pairs(self.inherits) do
-				newClass.inherits[class] = true
-				class.inheritedBy[newClass] = true
-			end
-			
-			newClass.inherits[self] = true
-			self.inheritedBy[newClass] = true
-		end,
-	}
-end
-
-
 
 
 
@@ -1743,7 +1411,7 @@ end
 
 -- ADDON ENTRY POINT: EVERYTHING STARTS FROM HERE!
 function TMW:OnInitialize()
-	if not TMW.Classes.UpdateTableManager then
+	if not TMW.Classes then
 		-- this also includes upgrading from older than 3.0 (pre-Ace3 DB settings)
 		-- GLOBALS: StaticPopupDialogs, StaticPopup_Show, EXIT_GAME, CANCEL, ForceQuit
 		StaticPopupDialogs["TMW_RESTARTNEEDED"] = {
@@ -1757,7 +1425,7 @@ function TMW:OnInitialize()
 			whileDead = true,
 			preferredIndex = 3, -- http://forums.wowace.com/showthread.php?p=320956
 		}
-		StaticPopup_Show("TMW_RESTARTNEEDED", TELLMEWHEN_VERSION_FULL, "UpdateTableManager.lua") -- arg3 could also be L["ERROR_MISSINGFILE_REQFILE"]
+		StaticPopup_Show("TMW_RESTARTNEEDED", TELLMEWHEN_VERSION_FULL, "Class.lua") -- arg3 could also be L["ERROR_MISSINGFILE_REQFILE"]
 		return -- if required, return here
 	end
 	

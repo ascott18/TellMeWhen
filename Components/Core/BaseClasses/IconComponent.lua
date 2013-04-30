@@ -189,9 +189,7 @@ function IconComponent:RegisterIconEvent(order, event, eventData)
 end
 
 -- [INTERNAL]
-function IconComponent:RegisterConfigPanel(order, panelType, supplementalData)
-	self:AssertIsProtectedCall("Use the RegisterConfigPanel_<type> functions instead.")
-	
+function IconComponent:RegisterConfigPanel(order, panelType, supplementalData)	
 	local t = {
 		component = self,
 		panelType = panelType,

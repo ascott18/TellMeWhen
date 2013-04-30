@@ -39,6 +39,7 @@ Type:RegisterIconDefaults{
 	ConditionDurEnabled		= false,
 	UnConditionDurEnabled  	= false,
 	OnlyIfCounting			= false,
+	OnlyIfNotCounting		= false,
 }
 
 TMW:RegisterUpgrade(47204, {
@@ -97,6 +98,8 @@ local function ConditionIcon_OnUpdate(icon, time)
 		end
 
 		if icon.OnlyIfCounting and d <= 0 then
+			alpha = 0
+		elseif icon.OnlyIfNotCounting and d > 0 then
 			alpha = 0
 		end
 		

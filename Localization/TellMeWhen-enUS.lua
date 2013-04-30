@@ -549,6 +549,8 @@ L["ICONMENU_IGNORENOMANA_DESC"] = [[Check this to cause the ability to not be tr
 Useful for abilities such as %s or %s]]
 L["ICONMENU_ONLYIFCOUNTING"] = "Only show if timer is active"
 L["ICONMENU_ONLYIFCOUNTING_DESC"] = "Check this to make the icon show only if there is currently an active timer running on the icon with a duration greater than 0."
+L["ICONMENU_ONLYIFNOTCOUNTING"] = "Only show if timer is not active"
+L["ICONMENU_ONLYIFNOTCOUNTING_DESC"] = "Check this to make the icon show only if there is NOT an active timer running on the icon with a duration greater than 0."
 
 
 -- -------------

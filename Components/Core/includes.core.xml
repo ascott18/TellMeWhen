@@ -1,5 +1,7 @@
 ﻿<Ui>
 
+<Script file="Class.lua"/>
+
 <Include file="BaseClasses\includes.core.xml"/>
 
 
