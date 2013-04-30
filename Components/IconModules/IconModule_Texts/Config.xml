@@ -98,8 +98,6 @@
 						TMW.SUG:EnableEditBox(self, "dogtags")
 					
 						TMW:RegisterCallback("TMW_CONFIG_SAVE_SETTINGS", "ClearFocus", self)
-						
-						self:SetTextInsets(1, 2, 2, 2)
 					</OnLoad>
 					<OnTextChanged>
 						local text = self:GetText()

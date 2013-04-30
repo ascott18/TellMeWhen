@@ -101,8 +101,6 @@
 							end,
 							doCleanString = true,
 						})
-						
-						self:SetTextInsets(1, 2, 1.5, 1.5)
 					</OnLoad>
 				</Scripts>
 			</EditBox>
@@ -155,7 +153,6 @@
 							end,
 							doCleanString = true,
 						})
-						self:SetTextInsets(1, 2, 2, 2)
 					</OnLoad>
 				</Scripts>
 			</EditBox>

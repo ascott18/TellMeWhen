@@ -1,0 +1,73 @@
+﻿<Ui>
+	
+	<Frame name="$parentLua" inherits="TellMeWhen_EventContainer" parentKey="Lua">
+		<Layers>
+			<Layer level="ARTWORK">
+				<FontString name="$parentError" inherits="GameFontRed" parentKey="Error" justifyH="LEFT">
+					<Anchors>
+						<Anchor point="TOPLEFT" x="5" y="0"/>
+					</Anchors>
+				</FontString>
+			</Layer>
+		</Layers>
+		<Frames>
+			<Frame name="$parentCodeContainer" parentKey="CodeContainer">
+				<Anchors>
+					<Anchor point="TOP" relativeTo="$parentError" relativePoint="BOTTOM" y="-0"/>
+					<Anchor point="LEFT" y="-20"/>
+					<Anchor point="BOTTOMRIGHT" />
+					<!-- <Anchor point="BOTTOMRIGHT" x="-30" y="15"/> -->
+				</Anchors>
+				<Frames>
+					<EditBox name="$parentCode" parentKey="Code" inherits="TellMeWhen_InputBoxTemplate" multiline="true">
+						<Size y="15"/>
+						<Anchors>
+							<Anchor point="TOPLEFT" x="2"/>
+							<Anchor point="TOPRIGHT" x="-15" />
+							<!-- <Anchor point="BOTTOMRIGHT" x="-30" y="15"/> -->
+						</Anchors>
+						<Scripts>
+							<OnLoad>
+								self.label = TMW.L["EVENTHANDLER_LUA_CODE"]
+								TMW:TT(self, "EVENTHANDLER_LUA_CODE", "EVENTHANDLER_LUA_CODE_DESC")
+								
+								self:GetParent():GetParent().Code = self
+								
+								TMW:RegisterCallback("TMW_CONFIG_SAVE_SETTINGS", "ClearFocus", self)
+							</OnLoad>
+							<OnEditFocusLost>
+								EditBox_ClearHighlight(self)
+
+								if TMW.CI.ics and TMW.EVENTS.currentEventID then
+									TMW.EVENTS:GetEventSettings().Lua = self:GetText()
+								end
+								TMW.IE:ScheduleIconSetup()
+								self:GetScript("OnTextChanged")(self)
+
+								TMW.EVENTS:LoadConfig()
+							</OnEditFocusLost>
+							<OnEnterPressed>
+								--if self:IsMultiLine() and IsModifierKeyDown() then
+									self:Insert("\r\n")
+								--else
+									--self:ClearFocus()
+								--end
+							</OnEnterPressed>
+							<OnTabPressed>
+								self:Insert("   ")
+							</OnTabPressed>
+						</Scripts>
+					</EditBox>
+				
+				</Frames>
+			
+				<Scripts>
+					<OnLoad>
+						TMW:ConvertContainerToScrollFrame(self, false, -2, 8)
+					</OnLoad>
+				</Scripts>
+			</Frame>
+		</Frames>
+	</Frame>
+	
+</Ui>

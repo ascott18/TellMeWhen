@@ -1703,6 +1703,13 @@ L["ANIM_ICONCLEAR_DESC"] = "Stops all animations that are playing on the current
 L["ANIM_ANCHOR_NOT_FOUND"] = "Couldn't find frame named %q to anchor an animation to. Is this frame not used by the icon's current view?"
 
 
+L["EVENTHANDLER_LUA_TAB"] = "Lua (Advanced)"
+L["EVENTHANDLER_LUA_LUA"] = "Lua"
+L["EVENTHANDLER_LUA_CODE"] = "Lua Code to Execute"
+L["EVENTHANDLER_LUA_CODE_DESC"] = "Type the Lua code that should be executed when the event is triggered here."
+
+
+
 L["CLEU_"] = "Any event" -- match any event
 L["CLEU_DAMAGE_SHIELD"] = "Damage Shield"
 L["CLEU_DAMAGE_SHIELD_DESC"] = "Occurs when a damage shield (%s, %s, etc., but not %s) damage a unit."

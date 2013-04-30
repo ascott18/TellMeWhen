@@ -25,7 +25,6 @@
 								return value:gsub([[\\]], [[\]])
 							end,
 						})
-						self:SetTextInsets(2, 2, 2, 2)
 						
 						
 						function self:DragReceived(icon, t, data, subType)

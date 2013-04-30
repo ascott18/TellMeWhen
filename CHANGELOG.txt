@@ -1,6 +1,7 @@
 ===v6.2.0===
  * New Icon Type: Buff/Debuff Check (for checking missing raid buffs).
  * New advanced feature: Lua Snippets
+ * New advanced icon event handler: Lua Execution
  
  * Mass refactoring has taken place. You will need to restart WoW when upgrading to this version of TellMeWhen.
  * Multi-state Cooldown icons can now keep track of spell charges.

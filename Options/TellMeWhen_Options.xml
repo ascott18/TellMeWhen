@@ -65,7 +65,6 @@
 						
 						self:RegisterEvent("MODIFIER_STATE_CHANGED")
 						self.BackgroundText:SetWidth(self:GetWidth())
-						self:SetTextInsets(1, 2, 1.5, 1.5)
 						
 						-- Turn it into a setting frame (automatically handles loading settings)
 						TMW.IE:CreateSettingFrameFromData(self, {
@@ -226,7 +225,6 @@
 						self:RegisterEvent("MODIFIER_STATE_CHANGED")
 						self.label = TMW.L["ICONMENU_UNITSTOWATCH"]
 						self.BackgroundText:SetWidth(self:GetWidth())
-						self:SetTextInsets(2, 2, 2, 2)
 
 						self.normalTooltip = TMW.L["ICONMENU_UNIT_DESC"]
 						
@@ -810,7 +808,7 @@
 		<Size y="15"/>
 		<HitRectInsets left="-1" right="-1" top="-1" bottom="-1" />
 		<TextInsets>
-			<AbsInset left="1" />
+			<AbsInset left="2" right="2" top="2" bottom="2"/>
 		</TextInsets>
 		<Layers>
 			<Layer level="BACKGROUND">
