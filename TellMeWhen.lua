@@ -18,7 +18,7 @@
 TELLMEWHEN_VERSION = "6.2.0"
 TELLMEWHEN_VERSION_MINOR = strmatch(" @project-version@", " r%d+") or ""
 TELLMEWHEN_VERSION_FULL = TELLMEWHEN_VERSION .. TELLMEWHEN_VERSION_MINOR
-TELLMEWHEN_VERSIONNUMBER = 62052 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
+TELLMEWHEN_VERSIONNUMBER = 62053 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
 if TELLMEWHEN_VERSIONNUMBER > 63000 or TELLMEWHEN_VERSIONNUMBER < 62000 then return error("YOU SCREWED UP THE VERSION NUMBER OR DIDNT CHANGE THE SAFETY LIMITS") end -- safety check because i accidentally made the version number 414069 once
 
 TELLMEWHEN_MAXROWS = 20
@@ -3160,7 +3160,9 @@ function TMW:GetSpellNames(icon, setting, firstOnly, toname, hash, keepDurations
 	local buffNames = TMW:SplitNames(setting) -- get a table of everything
 
 	--INSERT EQUIVALENCIES
-	local k = #buffNames --start at the end of the table, that way we dont have to worry about increasing the key of buffNames to work with every time we insert something
+	 --start at the end of the table, that way we dont have to worry
+	 --about increasing the key of buffNames to work with every time we insert something
+	local k = #buffNames
 	while k > 0 do
 		local eqtt = TMW:EquivToTable(buffNames[k]) -- get the table form of the equivalency string
 		if eqtt then
@@ -3191,6 +3193,23 @@ function TMW:GetSpellNames(icon, setting, firstOnly, toname, hash, keepDurations
 		buffNames = TMW:LowerNames(buffNames)
 	end
 
+	-- Remove invalid SpellIDs.
+	local k = #buffNames
+	while k > 0 do
+		local v = buffNames[k]
+		if type(v) == "number" and v >= 2^31 then
+			-- Invalid spellID. Remove it to prevent integer overflow errors.
+			tremove(buffNames, k)
+			if not icon then
+				printstack()
+			end
+			TMW.Warn(L["ERROR_INVALID_SPELLID"]:format(tostring(icon or "<UNKNOWN ICON>"), v))
+		else
+			-- The entry was valid, so move backwards towards the beginning.
+			k = k - 1
+		end
+	end
+	
 	if hash then
 		local hash = {}
 		for k, v in ipairs(buffNames) do

@@ -171,7 +171,7 @@ function IconType:GetConfigIconTexture(icon)
 	else
 	
 		if icon.Name ~= "" then
-			local tbl = TMW:GetSpellNames(nil, icon.Name)
+			local tbl = TMW:GetSpellNames(icon, icon.Name)
 
 			for _, name in ipairs(tbl) do
 				local t = SpellTextures[name]

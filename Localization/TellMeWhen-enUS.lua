@@ -67,6 +67,8 @@ I apologize for the inconvenience, but this is a rare occurrence, and any inform
 
 Thank you for using TellMeWhen!]]
 
+L["ERROR_INVALID_SPELLID"] = "%s is checking an invalid spellID: %s. Please remove it to avoid undesired icon behavior."
+
 L["SAFESETUP_TRIGGERED"] = "Running safe & slow setup..."
 L["SAFESETUP_COMPLETE"] = "Safe & slow setup complete."
 L["SAFESETUP_FAILED"] = "Safe & slow setup FAILED: %s"

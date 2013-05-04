@@ -8,6 +8,7 @@
  * Added a new setting to the Runes condition that allows you to force the condition to check for non-death runes.
  * Rune icons can now distinguish between checking normal runes and death runes.
  * Rune icons have an option to show extra unusable runes as charges.
+ * Added a buff equivalency to track absorbtion shields ("DamageShield").
  
  * New Conditions:
  ** NPC ID

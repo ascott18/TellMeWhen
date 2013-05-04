@@ -2614,7 +2614,7 @@ end
 
 ---------- Tooltips ----------
 --local cachednames = {}
-function IE:GetRealNames(Name)
+function IE:GetRealNames(Name, icon)
 	-- gets a string to set as a tooltip of all of the spells names in the name box in the IE. Splits up equivalancies and turns IDs into names
 	local text = TMW:CleanString(Name)
 	
@@ -2626,11 +2626,11 @@ function IE:GetRealNames(Name)
 
 	local tbl
 	if SoI == "item" then
-		tbl = TMW:GetItemIDs(nil, text)
+		tbl = TMW:GetItemIDs(icon, text)
 	else
-		tbl = TMW:GetSpellNames(nil, text)
+		tbl = TMW:GetSpellNames(icon, text)
 	end
-	local durations = CI_typeData.DurationSyntax and TMW:GetSpellDurations(nil, text)
+	local durations = CI_typeData.DurationSyntax and TMW:GetSpellDurations(icon, text)
 
 	local str = ""
 	local numadded = 0
