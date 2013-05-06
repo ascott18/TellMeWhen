@@ -462,6 +462,7 @@ ConditionCategory:RegisterCondition(13,	 "PETMODE", {
 					return PetModes[name]
 				end
 			end
+			return 3
 		end,
 	},
 	funcstr = [[GetActivePetMode() c.Operator c.Level]],
