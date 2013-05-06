@@ -547,7 +547,7 @@ ConditionCategory:RegisterCondition(16,	 "TRACKING", {
 		CNDT:RegisterEvent("MINIMAP_UPDATE_TRACKING")
 		CNDT:MINIMAP_UPDATE_TRACKING()
 	
-		return [[[Tracking[c.NameName] == c.1nil]]
+		return [[Tracking[c.NameName] == c.1nil]]
 	end,
 	events = function(ConditionObject, c)
 		return
