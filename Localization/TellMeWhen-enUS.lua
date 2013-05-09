@@ -225,6 +225,19 @@ L["ICONMENU_META_DESC"] = [=[Combines multiple icons into one.
 Icons that have %q checked will still be shown in a meta icon if they would otherwise be shown.]=]
 L["ICONMENU_META_ICONMENUTOOLTIP"] = "(%d |4Icon:Icons;)"
 
+L["ICONMENU_META_INHERITANCEBEHAVIOR"] = "Advanced Inheritance Behavior"
+L["ICONMENU_META_INHERITANCEBEHAVIOR_CNDTALPHA"] = "Inherit failed condition opacity"
+L["ICONMENU_META_INHERITANCEBEHAVIOR_CNDTALPHA_DESC"] = [[By default, meta icons will not inherit the opacity of an icon that results from its conditions failing (unless that opacity caused the icon to be hidden).
+
+Enable this setting to override that behavior and inherit the failed condition opacity from the icon the meta icon is inheriting from.
+
+Please note that if you enable this setting and this meta icon is checking conditions of its own, those conditions will have no effect.]]
+L["ICONMENU_META_INHERITANCEBEHAVIOR_CNDTALPHA_HELP"] = [[Hi there!
+
+I just wanted to make sure that you are aware that the conditions of this meta icon will not function when this setting is enabled - they will yield to the conditions of the inherited icon.
+
+That's all. Have fun configuring TMW!]]
+
 
 L["ICONTYPE_DEFAULT_HEADER"] = "Instructions"
 L["ICONTYPE_DEFAULT_INSTRUCTIONS"] = [[To get started configuring this icon, select an icon type from the %q dropdown menu above.

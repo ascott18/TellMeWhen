@@ -258,3 +258,5 @@ end)
 TMW:RegisterCallback("TMW_CONFIG_ICON_LOADED", function(event, icon)
 	HELP:ShowNext()
 end)
+
+

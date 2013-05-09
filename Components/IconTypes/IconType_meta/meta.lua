@@ -45,16 +45,40 @@ Type:SetModuleAllowance("IconModule_Texts", false)
 Type:SetModuleAllowance("IconModule_CooldownSweep", false)
 
 Type:RegisterIconDefaults{
-	Sort					= false,
-	CheckNext				= false,
-	Icons					= {
-		[1]					= "",
+	Sort						= false,
+	CheckNext					= false,
+	MetaInheritConditionAlpha	= false,
+	Icons						= {
+		[1]						= "",
 	},   
 }
 
 Type:RegisterConfigPanel_XMLTemplate(150, "TellMeWhen_MetaIconOptions")
 
+Type:RegisterConfigPanel_ConstructorFunc(160, "TellMeWhen_MetaIconInheritanceBehavior", function(self)
+	self.Header:SetText(TMW.L["ICONMENU_META_INHERITANCEBEHAVIOR"])
+	TMW.IE:BuildSimpleCheckSettingFrame(self, {
+		numPerRow = 1,
+		{
+			setting = "MetaInheritConditionAlpha",
+			title = L["ICONMENU_META_INHERITANCEBEHAVIOR_CNDTALPHA"],
+			tooltip = L["ICONMENU_META_INHERITANCEBEHAVIOR_CNDTALPHA_DESC"],
+			OnClick = function(self)
+				if TMW.CI.ics.Conditions.n > 0 then
+					if not self.hasRegisteredCode then
+						self.hasRegisteredCode = true
+						TMW.HELP:NewCode("META_INHERIT_CNDTALPHA", 100, true)
+					end
+				
+					TMW.HELP:Show("META_INHERIT_CNDTALPHA", TMW.CI.ic, self, 0, 0, L["ICONMENU_META_INHERITANCEBEHAVIOR_CNDTALPHA_HELP"])
+				end
+			end,
+		},
+	})
+end)
+
 Type:RegisterConfigPanel_XMLTemplate(170, "TellMeWhen_MetaSortSettings")
+
 
 TMW:RegisterUpgrade(24100, {
 	icon = function(self, ics)
@@ -152,6 +176,13 @@ local function Meta_OnUpdate(icon, time)
 		icToUse.__lastMetaCheck = time
 		if force or icon.metaUpdateQueued then
 			icon.metaUpdateQueued = nil
+			
+			if icon.MetaInheritConditionAlpha then
+				-- SetInfo_INTERNAL is OK here because we will call a normal SetInfo immediately after
+				-- (well, at least InheritDataFromIcon does fire TMW_ICON_UPDATED, which is what matters).
+				icon:SetInfo_INTERNAL("alpha_conditionFailed", icToUse.attributes.alpha_conditionFailed)
+			end
+			
 			icon:InheritDataFromIcon(icToUse)
 		end
 	elseif icon.attributes.realAlpha ~= 0 and icon.metaUpdateQueued then

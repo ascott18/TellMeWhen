@@ -202,7 +202,7 @@ local FirstStances = {
 	DRUID = 5487, 		-- Bear Form
 	PRIEST = 15473, 	-- Shadowform
 	ROGUE = 1784, 		-- Stealth
-	HUNTER = 82661, 	-- Aspect of the Fox
+	HUNTER = 13165, 	-- Aspect of the Fox
 	DEATHKNIGHT = 48263,-- Blood Presence
 	PALADIN = 105361, 	-- Seal of Command
 	WARLOCK = 103958, 	-- Metamorphosis
@@ -228,7 +228,7 @@ ConditionCategory:RegisterCondition(6,	 "STANCE", {
 	allowMultipleSUGEntires = true,
 	unit = PLAYER,
 	icon = function()
-		return GetSpellTexture(FirstStances[pclass] or FirstStances.WARRIOR)
+		return GetSpellTexture(FirstStances[pclass] or FirstStances.WARRIOR) or GetSpellTexture(FirstStances.WARRIOR)
 	end,
 	tcoords = CNDT.COMMON.standardtcoords,
 	Env = {

@@ -133,11 +133,10 @@ Module.stances = {
 		[1784] = 	GetSpellInfo(1784), 	-- Stealth	
 	},
 	HUNTER = {
-		[82661] = 	GetSpellInfo(82661), 	-- Aspect of the Fox
 		[13165] = 	GetSpellInfo(13165), 	-- Aspect of the Hawk
+		[109260] = 	GetSpellInfo(109260), 	-- Aspect of the Iron Hawk
 		[5118] = 	GetSpellInfo(5118), 	-- Aspect of the Cheetah
 		[13159] = 	GetSpellInfo(13159), 	-- Aspect of the Pack
-		[20043] = 	GetSpellInfo(20043), 	-- Aspect of the Wild	
 	},
 	DEATHKNIGHT = {
 		[48263] = 	GetSpellInfo(48263), 	-- Blood Presence
