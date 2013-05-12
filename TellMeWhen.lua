@@ -18,7 +18,7 @@
 TELLMEWHEN_VERSION = "6.2.0"
 TELLMEWHEN_VERSION_MINOR = strmatch(" @project-version@", " r%d+") or ""
 TELLMEWHEN_VERSION_FULL = TELLMEWHEN_VERSION .. TELLMEWHEN_VERSION_MINOR
-TELLMEWHEN_VERSIONNUMBER = 62055 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
+TELLMEWHEN_VERSIONNUMBER = 62056 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
 if TELLMEWHEN_VERSIONNUMBER > 63000 or TELLMEWHEN_VERSIONNUMBER < 62000 then return error("YOU SCREWED UP THE VERSION NUMBER OR DIDNT CHANGE THE SAFETY LIMITS") end -- safety check because i accidentally made the version number 414069 once
 
 TELLMEWHEN_MAXROWS = 20
@@ -1240,12 +1240,13 @@ do -- Callback Lib
 				error("A string was supplied as the function, but a table was not supplied that the function could be pulled from.", 2)
 			end
 		elseif type_func == "table" then
-			if type_arg1 == "nil" then
-				arg1 = func
-				func = func[event]
-			else
-				error("If arg3 (func) is a table, arg4 cannot be defined.", 2)
-			end
+			--if type_arg1 == "nil" then
+				local object = func
+				func = object[arg1 or event]
+				arg1 = object
+			--else
+			--	error("If arg3 (func) is a table, arg4 cannot be defined.", 2)
+			--end
 		end
 		arg1 = arg1 or true
 		
@@ -1275,8 +1276,8 @@ do -- Callback Lib
 	function TMW:UnregisterCallback(event, func, arg1)
 		if type(func) == "table" then
 			local object = func
+			func = object[arg1 or event]
 			arg1 = object
-			func = object[event]
 		end
 		arg1 = arg1 or true
 
@@ -1296,6 +1297,7 @@ do -- Callback Lib
 		local funcs = callbackregistry[event]
 		if funcs then
 			wipe(funcs)
+			callbackregistry[event] = nil
 		end
 	end
 	
@@ -1533,6 +1535,7 @@ function TMW:InitializeDatabase()
 	TMW:UpgradeGlobal()
 	TMW:UpgradeProfile()
 	
+	-- This isn't used after the DB is initialized, so get rid of it.
 	TMW.UpgradeGlobal = nil
 	
 	TMW:Fire("TMW_DB_INITIALIZED")

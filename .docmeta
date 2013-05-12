@@ -62,3 +62,11 @@
     type: creole
     input-file: "Documentation/Conditions/HowToCreateConditions.txt"
     output-page: "API/Conditions/How To/Create A Condition"
+-
+    type: luadoc
+    input-file: "Components/Core/Class.lua"
+    output-page: "API/Core Systems/Classes/API Documentation"
+-
+    type: luadoc
+    input-file: "Documentation/Callback.lua"
+    output-page: "API/Core Systems/Callbacks/API Documentation"

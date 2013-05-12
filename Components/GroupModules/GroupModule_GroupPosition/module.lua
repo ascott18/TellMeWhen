@@ -68,7 +68,7 @@ function GroupPosition:OnEnable()
 end
 
 function GroupPosition:OnDisable()
-	TMW:UnregisterCallback("TMW_ONUPDATE_TIMECONSTRAINED_PRE", "DetectFrame", self)
+	TMW:UnregisterCallback("TMW_ONUPDATE_TIMECONSTRAINED_PRE", self, "DetectFrame")
 end
 
 
@@ -77,7 +77,7 @@ function GroupPosition:DetectFrame(event, time, Locked)
 	
 	if _G[frameToFind] then
 		self:SetPos()
-		TMW:UnregisterCallback("TMW_ONUPDATE_TIMECONSTRAINED_PRE", "DetectFrame", self)
+		TMW:UnregisterCallback("TMW_ONUPDATE_TIMECONSTRAINED_PRE", self, "DetectFrame")
 	end
 end
 
