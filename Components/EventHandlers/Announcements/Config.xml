@@ -51,7 +51,7 @@
 						
 						TMW.SUG:EnableEditBox(self, "dogtags")
 						
-						TMW:RegisterCallback("TMW_CONFIG_SAVE_SETTINGS", "ClearFocus", self)
+						TMW:RegisterCallback("TMW_CONFIG_SAVE_SETTINGS", self, "ClearFocus")
 						
 						TMW.HELP:NewCode("ANN_LINK_INSERTED", nil, true)
 						

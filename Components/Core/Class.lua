@@ -103,23 +103,21 @@ local inherit = function(self, source)
 		local metatable = getmetatable(self)
 		
 		local index, didInherit
+		
+		-- TMW class inheritance
 		if TMW.Classes[source] then
 			TMW.Classes[source]:CallFunc("OnClassInherit", self)
 			
 			index = getmetatable(TMW.Classes[source]).__index
 			didInherit = true
-		elseif LibStub(source, true) then
-			local lib = LibStub(source, true)
-			if lib.Embed then
-				lib:Embed(metatable.__index)
-				didInherit = true
-			else
-				error(("Library %q does not have an Embed method"):format(source), 2)
-			end
+		
+		-- Table inheritance
 		elseif type(source) == "table" then
 			index = source
 			didInherit = true
 		else
+		
+			-- Blizzard widget inheritance
 			local success, frame = pcall(CreateFrame, source)
 			if success and frame then
 				-- Need to do hide the frame or else if we made an editbox,
@@ -133,6 +131,16 @@ local inherit = function(self, source)
 				
 				index = getmetatable(frame).__index
 				didInherit = true
+			
+			-- LibSub lib inheritance
+			elseif LibStub(source, true) then
+				local lib = LibStub(source, true)
+				if lib.Embed then
+					lib:Embed(metatable.__index)
+					didInherit = true
+				else
+					error(("Library %q does not have an Embed method"):format(source), 2)
+				end
 			end
 		end
 
@@ -150,11 +158,11 @@ end
 
 --- Creates a new class.
 -- @param className [String] The name of the class to be created.
--- @param ... [String(...)|Table(...)] A list of things to inherit from. Valid parameters include the following (and each will be checked in the following order):
+-- @param ... [...] A list of things to inherit from. Valid parameters include the following (and each will be checked in the following order):
 -- * The name of another TellMeWhen class.
--- * The name of a LibStub library that has an :Embed() method (many Ace3 libs do).
 -- * A table whose values will be merged into the class.
 -- * The name of a Blizzard widget (like Frame, Button, EditBox, etc.) The class created will inherit the methods of that widget type, and instances of the class will be based on a new frame of that widget type.
+-- * The name of a LibStub library that has an :Embed() method (many Ace3 libs do).
 -- 
 -- When conflicts between members of different inherited things arise, previously inherited members will not be overwritten.
 -- @return [Class] A new class that inherits from TMW.Classes.Class and all other requested inheritances.
@@ -193,6 +201,7 @@ function TMW:NewClass(className, ...)
 
 	TMW.Classes[className] = class
 	
+	--- This is a test of a random luadoc comment
 	TMW:Fire("TMW_CLASS_NEW", class)
 
 	return class
@@ -209,8 +218,9 @@ local Class = TMW:NewClass("Class")
 --
 -- All class methods and members will be accessed via metamethods.
 -- 
--- If the class inherits from a Blizzard widget, any methods that are valid script handler names for the widget type (like "OnClick" or "OnShow") will be hooked as script handlers on the instance.
--- @param [Vararg] ... - The constructor parameters of the new instance. If the class being instantiated inherits from a Blizzard widget, these will be passed directly to CreateFrame(...). In all cases, they will be passed to calls of any class methods whose name **begins** with "OnNewInstance" (E.g. {{{Class:OnNewInstance_Class(self, ...)}}}).
+-- If the class inherits from a Blizzard widget, any class methods that are valid script handler names for the widget type (like "OnClick" or "OnShow") will be hooked as script handlers on the instance.
+-- @param ... [...] The constructor parameters of the new instance. If the class being instantiated inherits from a Blizzard widget, these will be passed directly to CreateFrame(...). In all cases, they will be passed to calls of any class methods whose name **begins** with "OnNewInstance" (E.g. {{{Class:OnNewInstance_Class(self, ...)}}}).
+-- @return A new instance of the class.
 function Class:New(...)
 	local instance
 	if self.isFrameObject then
@@ -248,7 +258,7 @@ end
 --- Embeds the class into an already existing table.
 -- @param target [table] The table to embed the class into. Effectively turns the target into an instance of the class.
 -- @param canOverwrite [boolean|nil] True to suppress the non-breaking errors that will be thrown when a member of the class already exists on the target (naming conflict).
--- @param ... [Vararg] The paramters that will be passed to the class's OnNewInstance methods (see Class:New(...)'s documentation for more info).
+-- @param ... [...] The parameters that will be passed to the class's OnNewInstance methods (see Class:New(...)'s documentation for more info).
 -- @return Returns the target that was passed in.
 function Class:Embed(target, canOverwrite, ...)
 	TMW:ValidateType("2 (target)", "Class:Embed(target, canOverwrite)", target, "table")
@@ -280,7 +290,10 @@ function Class:Embed(target, canOverwrite, ...)
 	return target
 end
 
---- Disembeds the class from the target. This is not always reliable if there were naming conflicts when the class was embedded or if the target has overwritten any of the class's members that were embedded.
+--- Disembeds the class from the target.
+-- 
+-- This is not always reliable if there were naming conflicts when the class was embedded or if the target has overwritten any of the class's members that were embedded.
+-- Can only be used on a target that previously had Class:Embed() called on it.
 -- @param target [table] The table to disembed the class from.
 -- @param clearDifferentValues [boolean|nil] True to suppress the non-breaking errors that will be thrown if one of the class's members is missing from the target or has had its value changed.
 -- @return Returns the target that was passed in.
@@ -306,7 +319,9 @@ end
 
 
 
---- Extends the specified method so that it when called, it will first call the original method being extended, and then it will call newFunction. Effectively a post-hook.
+--- Extends the specified method so that it when called, it will first call the original method being extended, and then it will call newFunction.
+-- 
+-- Effectively functions as a post-hook.
 -- 
 -- If the requested method is not defined when this is called, newFunction will simply be set as that method with no hooking involved.
 -- @param method [String] The name of the method on the class that should be extended.
@@ -325,14 +340,18 @@ end
 
 
 
---- Asserts that self is a TellMeWhen class. Throws a breaking error if it is not.
+--- Asserts that self is a TellMeWhen class.
+-- 
+-- Throws a breaking error if it is not.
 function Class:AssertSelfIsClass()
 	if not self.isTMWClass then
 		error(("Caller must be the class %q, not an instance of the class"):format(self.className), 3)
 	end
 end
 
---- Asserts that self is an instance of a TellMeWhen class. Throws a breaking error if it is not.
+--- Asserts that self is an instance of a TellMeWhen class.
+-- 
+-- Throws a breaking error if it is not.
 function Class:AssertSelfIsInstance()
 	if not self.isTMWClassInstance then
 		error(("Caller must be an instance of the class %q, not the class itself"):format(self.className), 3)
@@ -341,7 +360,9 @@ end
 
 
 
---- Inherits the source into the class. Source must be one of the valid inheritance types documented in TMW:NewClass()'s documentation.
+--- Inherits the source into the class.
+-- 
+-- The source parameter must be one of the valid inheritance types documented in TMW:NewClass()'s documentation.
 -- @param [String|Table] The source that should be inherited into the class.
 -- @see TMW:NewClass()
 function Class:Inherit(source)
@@ -374,6 +395,16 @@ end
 --- Calls all the functions of a class that begin with funcName.
 -- @param funcName [string] The beginning of the method name that must be matched in order for the method to be called.
 -- @param ... The parameters that will be passed, after a reference to self, to the function(s) when they are called.
+-- @usage -- Example usage from within the Class core on how this method is used.
+-- -- It may be used externally, of course
+-- 
+-- -- Used to notify a class that the first instance of it has been created
+-- -- so that it may preform any class-level initialization needed.
+-- class:CallFunc("OnFirstInstance")
+-- 
+-- Used when an instance of a class is created.
+-- Essentially functions as a constructor in traditional OOP.
+-- instance:CallFunc("OnNewInstance", ...)
 function Class:CallFunc(funcName, ...)
 	if self.isTMWClass then
 		callFunc(self, self, funcName, ...)

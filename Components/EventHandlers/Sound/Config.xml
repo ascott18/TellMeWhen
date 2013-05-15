@@ -165,7 +165,7 @@
 						TMW:TT(self, "SOUND_CUSTOM", "SOUND_CUSTOM_DESC")
 						self.label = TMW.L["SOUND_CUSTOM"]
 						
-						TMW:RegisterCallback("TMW_CONFIG_SAVE_SETTINGS", "ClearFocus", self)
+						TMW:RegisterCallback("TMW_CONFIG_SAVE_SETTINGS", self, "ClearFocus")
 					</OnLoad>
 					<OnEnter>
 						self.Background:Show()

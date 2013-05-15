@@ -454,7 +454,7 @@
 						</Layers>
 						<Scripts>
 							<OnLoad>
-								TMW:RegisterCallback("TMW_CONFIG_SAVE_SETTINGS", "ClearFocus", self)
+								TMW:RegisterCallback("TMW_CONFIG_SAVE_SETTINGS", self, "ClearFocus")
 							</OnLoad>
 							<OnEditFocusLost>
 								EditBox_ClearHighlight(self)

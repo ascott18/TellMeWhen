@@ -136,7 +136,7 @@ function Icon.ScriptSort(iconA, iconB)
 	return gA*gOrder < gB*gOrder
 end
 Icon:UpdateTable_SetAutoSort(Icon.ScriptSort)
-TMW:RegisterCallback("TMW_GLOBAL_UPDATE_POST", "UpdateTable_PerformAutoSort", Icon)
+TMW:RegisterCallback("TMW_GLOBAL_UPDATE_POST", Icon, "UpdateTable_PerformAutoSort")
 
 -- [WRAPPER] (no documentation needed)
 Icon.SetScript_Blizz = Icon.SetScript
@@ -767,7 +767,7 @@ TMW.IconAlphaManager = {
 			
 			handler.attribute = IconDataProcessor.attributesStringNoSpaces
 			
-			TMW:RegisterCallback(IconDataProcessor.changedEvent, "UPDATE", self)
+			TMW:RegisterCallback(IconDataProcessor.changedEvent, self, "UPDATE")
 			
 			TMW:UnregisterCallback("TMW_CLASS_IconDataProcessor_INSTANCE_NEW", self.SetupHandler, handler)
 		end

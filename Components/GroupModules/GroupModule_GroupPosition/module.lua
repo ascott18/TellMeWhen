@@ -72,7 +72,7 @@ function GroupPosition:OnDisable()
 end
 
 
-function GroupPosition:DetectFrame(event, time, Locked)		
+function GroupPosition:DetectFrame(event, time, Locked)
 	local frameToFind = self.frameToFind
 	
 	if _G[frameToFind] then
@@ -115,7 +115,7 @@ function GroupPosition:SetPos()
 	
 	if not relativeTo then
 		self.frameToFind = p.relativeTo
-		TMW:RegisterCallback("TMW_ONUPDATE_TIMECONSTRAINED_PRE", "DetectFrame", self)
+		TMW:RegisterCallback("TMW_ONUPDATE_TIMECONSTRAINED_PRE", self, "DetectFrame")
 		group:SetPoint("CENTER", UIParent)
 	else
 		local success, err = pcall(group.SetPoint, group, p.point, relativeTo, p.relativePoint, p.x, p.y)

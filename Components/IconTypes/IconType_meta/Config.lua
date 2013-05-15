@@ -104,7 +104,7 @@ function ME:LoadConfig()
 		ME[1].delete:Hide()
 	end
 end
-TMW:RegisterCallback("TMW_CONFIG_ICON_LOADED", ME.LoadConfig, ME)
+TMW:RegisterCallback("TMW_CONFIG_ICON_LOADED", ME, "LoadConfig")
 
 
 ---------- Click Handlers ----------

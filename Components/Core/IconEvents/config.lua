@@ -87,7 +87,7 @@ function EVENTS:LoadConfig()
 
 	self:SetTabText()
 end
-TMW:RegisterCallback("TMW_CONFIG_ICON_LOADED", "LoadConfig", EVENTS)
+TMW:RegisterCallback("TMW_CONFIG_ICON_LOADED", EVENTS, "LoadConfig")
 
 function EVENTS:LoadEventID(id)
 	local eventFrame = self.EventHandlerFrames[id]

@@ -97,7 +97,7 @@ function Group.ScriptSort(groupA, groupB)
 	return groupA.ID*gOrder < groupB.ID*gOrder
 end
 Group:UpdateTable_SetAutoSort(Group.ScriptSort)
-TMW:RegisterCallback("TMW_GLOBAL_UPDATE_POST", "UpdateTable_PerformAutoSort", Group)
+TMW:RegisterCallback("TMW_GLOBAL_UPDATE_POST", Group, "UpdateTable_PerformAutoSort")
 
 
 

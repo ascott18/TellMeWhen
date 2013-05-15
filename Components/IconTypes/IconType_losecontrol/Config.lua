@@ -152,7 +152,7 @@ function CONFIG:LoadConfig()
 		CONFIG:DropdownMenu_SetText()
 	end
 end
-TMW:RegisterCallback("TMW_CONFIG_ICON_LOADED", CONFIG.LoadConfig, CONFIG)
+TMW:RegisterCallback("TMW_CONFIG_ICON_LOADED", CONFIG, "LoadConfig")
 
 function CONFIG.DropdownMenu_OnClick_Normal(dropDownButton, LoseContolTypes)
 	LoseContolTypes[dropDownButton.value] = not LoseContolTypes[dropDownButton.value]

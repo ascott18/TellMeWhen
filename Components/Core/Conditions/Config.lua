@@ -590,9 +590,9 @@ function CndtGroup:OnNewInstance()
 	
 	self:Hide()
 	
-	TMW:RegisterCallback("TMW_CONFIG_SAVE_SETTINGS", "ClearFocus", self.Unit)
-	TMW:RegisterCallback("TMW_CONFIG_SAVE_SETTINGS", "ClearFocus", self.EditBox)
-	TMW:RegisterCallback("TMW_CONFIG_SAVE_SETTINGS", "ClearFocus", self.EditBox2)
+	TMW:RegisterCallback("TMW_CONFIG_SAVE_SETTINGS", self.Unit, "ClearFocus")
+	TMW:RegisterCallback("TMW_CONFIG_SAVE_SETTINGS", self.EditBox, "ClearFocus")
+	TMW:RegisterCallback("TMW_CONFIG_SAVE_SETTINGS", self.EditBox2, "ClearFocus")
 end
 
 function CndtGroup:LoadAndDraw()

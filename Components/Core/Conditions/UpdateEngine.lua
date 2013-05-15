@@ -159,7 +159,7 @@ function UpdateEngine:OnUpdate(event, time, Locked)
 	end
 
 end
-TMW:RegisterCallback("TMW_ONUPDATE_TIMECONSTRAINED_PRE", "OnUpdate", UpdateEngine)
+TMW:RegisterCallback("TMW_ONUPDATE_TIMECONSTRAINED_PRE", UpdateEngine, "OnUpdate")
 
 
 -- Automatically update all ConditionObjects after a TMW_GLOBAL_UPDATE_POST.

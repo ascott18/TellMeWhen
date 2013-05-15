@@ -97,7 +97,7 @@
 						self.BackgroundText:SetWidth(self:GetWidth())
 						TMW.SUG:EnableEditBox(self, "dogtags")
 					
-						TMW:RegisterCallback("TMW_CONFIG_SAVE_SETTINGS", "ClearFocus", self)
+						TMW:RegisterCallback("TMW_CONFIG_SAVE_SETTINGS", self, "ClearFocus")
 					</OnLoad>
 					<OnTextChanged>
 						local text = self:GetText()

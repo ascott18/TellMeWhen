@@ -18,7 +18,7 @@
 TELLMEWHEN_VERSION = "6.2.0"
 TELLMEWHEN_VERSION_MINOR = strmatch(" @project-version@", " r%d+") or ""
 TELLMEWHEN_VERSION_FULL = TELLMEWHEN_VERSION .. TELLMEWHEN_VERSION_MINOR
-TELLMEWHEN_VERSIONNUMBER = 62056 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
+TELLMEWHEN_VERSIONNUMBER = 62057 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
 if TELLMEWHEN_VERSIONNUMBER > 63000 or TELLMEWHEN_VERSIONNUMBER < 62000 then return error("YOU SCREWED UP THE VERSION NUMBER OR DIDNT CHANGE THE SAFETY LIMITS") end -- safety check because i accidentally made the version number 414069 once
 
 TELLMEWHEN_MAXROWS = 20
@@ -1212,11 +1212,13 @@ end
 ---------------------------------
 
 do -- Callback Lib
-	-- because quite frankly, i hate the way LibCallback works.
+	-- because quite frankly, i hate the way CallbackHandler-1.0 works.
 	local callbackregistry = {}
 	
 	function TMW:RegisterCallback(event, func, arg1)
 		TMW:ValidateType("2 (event)", "TMW:RegisterCallback(event, func, arg1)", event, "string")
+		TMW:ValidateType("3 (func)", "TMW:RegisterCallback(event, func, arg1)", func, "function;table")
+		
 		if not event:find("^TMW_") then
 			-- All TMW events must begin with TMW_
 			error("TMW events must begin with 'TMW_'", 2)
@@ -1231,27 +1233,15 @@ do -- Callback Lib
 			callbackregistry[event] = funcsForEvent
 		end
 		
-		local type_func, type_arg1 = type(func), type(arg1)
-		
-		if type_func == "string" then
-			if type_arg1 == "table" then
-				func = arg1[func]
-			else
-				error("A string was supplied as the function, but a table was not supplied that the function could be pulled from.", 2)
-			end
-		elseif type_func == "table" then
-			--if type_arg1 == "nil" then
-				local object = func
-				func = object[arg1 or event]
-				arg1 = object
-			--else
-			--	error("If arg3 (func) is a table, arg4 cannot be defined.", 2)
-			--end
+		if type(func) == "table" then
+			local object = func
+			func = object[arg1 or event]
+			arg1 = object
 		end
 		arg1 = arg1 or true
 		
 		if type(func) ~= "function" then
-			error("We tried really hard, but we couldn't figure the function you wanted to register as the callback!", 2)
+			error("Couldn't find the function to register as a callback.", 2)
 		end
 		
 		

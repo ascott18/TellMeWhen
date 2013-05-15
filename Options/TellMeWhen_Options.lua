@@ -2270,7 +2270,7 @@ TMW:NewClass("SettingEditBox", "EditBox", "SettingFrameBase"){
 	},
 	
 	OnCreate_EditboxBase = function(self)
-		TMW:RegisterCallback("TMW_CONFIG_SAVE_SETTINGS", self.ClearFocus, self)
+		TMW:RegisterCallback("TMW_CONFIG_SAVE_SETTINGS", self, "ClearFocus")
 	end,
 	
 	OnEditFocusLost = function(self, button)
@@ -2428,9 +2428,9 @@ function IE:CreateSettingFrameFromData(frame, arg2, arg3)
 	class:Embed(frame, true)
 	
 	-- Setup callbacks that will load the settings when needed.
-	TMW:RegisterCallback("TMW_CONFIG_ICON_LOADED", "ReloadSetting", frame)
-	TMW:RegisterCallback("TMW_CONFIG_ICON_HISTORY_STATE_CREATED", "ReloadSetting", frame)
-	TMW:RegisterCallback("TMW_CONFIG_ICON_HISTORY_STATE_CHANGED", "ReloadSetting", frame)
+	TMW:RegisterCallback("TMW_CONFIG_ICON_LOADED", frame, "ReloadSetting")
+	TMW:RegisterCallback("TMW_CONFIG_ICON_HISTORY_STATE_CREATED", frame, "ReloadSetting")
+	TMW:RegisterCallback("TMW_CONFIG_ICON_HISTORY_STATE_CHANGED", frame, "ReloadSetting")
 
 	-- set appearance and settings
 	frame.data = data

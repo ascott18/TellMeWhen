@@ -75,7 +75,7 @@ function Env.AuraDur(unit, name, namename, filter)
 	
 	
 	if not buffName then
-		return 0, 0
+		return 0, 0, 0
 	else
 		return expirationTime == 0 and huge or expirationTime - TMW.time, duration, expirationTime
 	end
@@ -144,7 +144,7 @@ ConditionCategory:RegisterCondition(1,	 "BUFFDUR", {
 	icon = "Interface\\Icons\\spell_nature_rejuvenation",
 	tcoords = CNDT.COMMON.standardtcoords,
 	funcstr = function(c)
-		return [[AuraDur(c.Unit, c.NameFirst, c.NameName, "HELPFUL]] .. (c.Checked and " PLAYER" or "") .. [[", time) c.Operator c.Level]]
+		return [[AuraDur(c.Unit, c.NameFirst, c.NameName, "HELPFUL]] .. (c.Checked and " PLAYER" or "") .. [[") c.Operator c.Level]]
 	end,
 	events = function(ConditionObject, c)
 		return
@@ -152,7 +152,7 @@ ConditionCategory:RegisterCondition(1,	 "BUFFDUR", {
 			ConditionObject:GenerateNormalEventString("UNIT_AURA", CNDT:GetUnit(c.Unit))
 	end,
 	anticipate = function(c)
-		return [[local dur, duration, expirationTime = AuraDur(c.Unit, c.NameFirst, c.NameName, "HELPFUL]] .. (c.Checked and " PLAYER" or "") .. [[", time)
+		return [[local dur, duration, expirationTime = AuraDur(c.Unit, c.NameFirst, c.NameName, "HELPFUL]] .. (c.Checked and " PLAYER" or "") .. [[")
 		local VALUE
 		if dur and dur > 0 then
 			VALUE = expirationTime and expirationTime - c.Level or 0
@@ -201,7 +201,7 @@ ConditionCategory:RegisterCondition(2,	 "BUFFDURCOMP", {
 	icon = "Interface\\Icons\\spell_nature_rejuvenation",
 	tcoords = CNDT.COMMON.standardtcoords,
 	funcstr = function(c)
-		return [[AuraDur(c.Unit, c.NameFirst, c.NameName, "HELPFUL]] .. (c.Checked and " PLAYER" or "") .. [[", time) c.Operator AuraDur(c.Unit, c.NameFirst2, c.NameName2, "HELPFUL]] .. (c.Checked2 and " PLAYER" or "") .. [[", time)]]
+		return [[AuraDur(c.Unit, c.NameFirst, c.NameName, "HELPFUL]] .. (c.Checked and " PLAYER" or "") .. [[") c.Operator AuraDur(c.Unit, c.NameFirst2, c.NameName2, "HELPFUL]] .. (c.Checked2 and " PLAYER" or "") .. [[")]]
 	end,
 	events = function(ConditionObject, c)
 		return
@@ -301,7 +301,7 @@ ConditionCategory:RegisterCondition(11,	 "DEBUFFDUR", {
 	icon = "Interface\\Icons\\spell_shadow_abominationexplosion",
 	tcoords = CNDT.COMMON.standardtcoords,
 	funcstr = function(c)
-		return [[AuraDur(c.Unit, c.NameFirst, c.NameName, "HARMFUL]] .. (c.Checked and " PLAYER" or "") .. [[", time) c.Operator c.Level]]
+		return [[AuraDur(c.Unit, c.NameFirst, c.NameName, "HARMFUL]] .. (c.Checked and " PLAYER" or "") .. [[") c.Operator c.Level]]
 	end,
 	events = function(ConditionObject, c)
 		return
@@ -309,7 +309,7 @@ ConditionCategory:RegisterCondition(11,	 "DEBUFFDUR", {
 			ConditionObject:GenerateNormalEventString("UNIT_AURA", CNDT:GetUnit(c.Unit))
 	end,
 	anticipate = function(c)
-		return [[local dur, duration, expirationTime = AuraDur(c.Unit, c.NameFirst, c.NameName, "HARMFUL]] .. (c.Checked and " PLAYER" or "") .. [[", time)
+		return [[local dur, duration, expirationTime = AuraDur(c.Unit, c.NameFirst, c.NameName, "HARMFUL]] .. (c.Checked and " PLAYER" or "") .. [[")
 		local VALUE
 		if dur and dur > 0 then
 			VALUE = expirationTime and expirationTime - c.Level or 0
@@ -358,7 +358,7 @@ ConditionCategory:RegisterCondition(12,	 "DEBUFFDURCOMP", {
 	icon = "Interface\\Icons\\spell_shadow_abominationexplosion",
 	tcoords = CNDT.COMMON.standardtcoords,
 	funcstr = function(c)
-		return [[AuraDur(c.Unit, c.NameFirst, c.NameName, "HARMFUL]] .. (c.Checked and " PLAYER" or "") .. [[", time) c.Operator AuraDur(c.Unit, c.NameFirst2, c.NameName2, "HARMFUL]] .. (c.Checked2 and " PLAYER" or "") .. [[", time)]]
+		return [[AuraDur(c.Unit, c.NameFirst, c.NameName, "HARMFUL]] .. (c.Checked and " PLAYER" or "") .. [[") c.Operator AuraDur(c.Unit, c.NameFirst2, c.NameName2, "HARMFUL]] .. (c.Checked2 and " PLAYER" or "") .. [[")]]
 	end,
 	events = function(ConditionObject, c)
 		return

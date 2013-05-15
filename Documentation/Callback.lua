@@ -37,7 +37,7 @@ end
 
 --- Unregisters all callbacks registered for a certain event.
 -- 
--- Should only be used after firing an event that is guaranteed to only be fired once.
+-- Should only be used for cleanup & garbage collection after firing an event that is guaranteed to only be fired once.
 -- @param event [String] The event to unregister all callbacks for.
 function TMW:UnregisterAllCallbacks(event)
 

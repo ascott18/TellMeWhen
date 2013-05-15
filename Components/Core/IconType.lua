@@ -287,7 +287,7 @@ function IconType:Register(order)
 	self:UpdateUsedProcessors()
 	
 	-- Listen for any new processors, too, and update when they are created.
-	TMW:RegisterCallback("TMW_CLASS_IconDataProcessor_INSTANCE_NEW", "UpdateUsedProcessors", self)
+	TMW:RegisterCallback("TMW_CLASS_IconDataProcessor_INSTANCE_NEW", self, "UpdateUsedProcessors")
 	
 	-- Covers the case of creating a type after login
 	-- (mainly used while debugging). Calling UpdateColors here prevents 
