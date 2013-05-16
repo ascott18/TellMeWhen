@@ -18,7 +18,7 @@
 TELLMEWHEN_VERSION = "6.2.0"
 TELLMEWHEN_VERSION_MINOR = strmatch(" @project-version@", " r%d+") or ""
 TELLMEWHEN_VERSION_FULL = TELLMEWHEN_VERSION .. TELLMEWHEN_VERSION_MINOR
-TELLMEWHEN_VERSIONNUMBER = 62057 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
+TELLMEWHEN_VERSIONNUMBER = 62058 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
 if TELLMEWHEN_VERSIONNUMBER > 63000 or TELLMEWHEN_VERSIONNUMBER < 62000 then return error("YOU SCREWED UP THE VERSION NUMBER OR DIDNT CHANGE THE SAFETY LIMITS") end -- safety check because i accidentally made the version number 414069 once
 
 TELLMEWHEN_MAXROWS = 20
@@ -1214,10 +1214,32 @@ end
 do -- Callback Lib
 	-- because quite frankly, i hate the way CallbackHandler-1.0 works.
 	local callbackregistry = {}
+	local firingsInProgress = 0
+	TMW.callbackregistry=callbackregistry
+	
+	function removeNils(table)
+		local numNils = 0
+		
+		for i = 1, table.n do
+			local v = table[i]
+			if v == nil then
+				numNils = numNils + 1
+			else
+				table[i - numNils] = v
+			end
+		end
+		
+		for i = table.n - numNils + 1, table.n do
+			table[i] = nil
+		end
+		
+		table.n = #table
+	end
 	
 	function TMW:RegisterCallback(event, func, arg1)
 		TMW:ValidateType("2 (event)", "TMW:RegisterCallback(event, func, arg1)", event, "string")
 		TMW:ValidateType("3 (func)", "TMW:RegisterCallback(event, func, arg1)", func, "function;table")
+		TMW:ValidateType("4 (arg1)", "TMW:RegisterCallback(event, func, arg1)", arg1, "!boolean")
 		
 		if not event:find("^TMW_") then
 			-- All TMW events must begin with TMW_
@@ -1244,21 +1266,28 @@ do -- Callback Lib
 			error("Couldn't find the function to register as a callback.", 2)
 		end
 		
-		
 
 		local args
 		for i = 1, #funcsForEvent do
 			local tbl = funcsForEvent[i]
 			if tbl.func == func then
 				args = tbl
-				if not tContains(args, arg1) then
-					args[#args + 1] = arg1
+				local found
+				for i = 1, args.n do
+					if args[i] == arg1 then
+						found = true
+						break
+					end
+				end
+				if not found then
+					args.n = args.n + 1
+					args[args.n] = arg1
 				end
 				break
 			end
 		end
 		if not args then
-			args = {func = func, arg1}
+			args = {func = func, n = 1, arg1}
 			funcsForEvent[#funcsForEvent + 1] = args
 		end
 	end
@@ -1275,8 +1304,22 @@ do -- Callback Lib
 		if funcs then
 			for t = 1, #funcs do
 				local tbl = funcs[t]
-				if tbl.func == func then
-					tDeleteItem(tbl, arg1)
+				if tbl and tbl.func == func then
+					for i = 1, tbl.n do
+						if tbl[i] == arg1 then
+							tbl[i] = nil
+						end
+					end
+					
+					if firingsInProgress == 0 then
+						removeNils(tbl)
+						if tbl.n == 0 then
+							wipe(tbl)
+							tremove(funcs, t)
+						end
+					end
+					
+					break
 				end
 			end
 		end
@@ -1286,29 +1329,63 @@ do -- Callback Lib
 		
 		local funcs = callbackregistry[event]
 		if funcs then
+			for k, v in pairs(funcs) do
+				wipe(v)
+			end
 			wipe(funcs)
 			callbackregistry[event] = nil
 		end
 	end
 	
-	function TMW:Fire(event, ...)		
+	function TMW:Fire(event, ...)
 		local funcs = callbackregistry[event]
 
 		if funcs then
+			local oldFiringsInProgress = firingsInProgress
+			firingsInProgress = firingsInProgress + 1
+			
+			local funcsNeedsFix
 			for t = 1, #funcs do
 				local tbl = funcs[t]
-				local method = tbl.func
+				local method = tbl and tbl.func
+				
 				if method then
-					for a = 1, #tbl do
-						local arg1 = tbl[a]
-						if arg1 ~= true then
+					local tblNeedsFix
+					
+					for index = 1, tbl.n do
+						local arg1 = tbl[index]
+						
+						if arg1 == nil then
+							tblNeedsFix = true
+						elseif arg1 ~= true then
 							safecall(method, arg1, event, ...)
 						else
 							safecall(method, event, ...)
 						end
 					end
+					
+					if tblNeedsFix then
+						removeNils(tbl)
+						if tbl.n == 0 then
+							funcsNeedsFix = true
+						end
+					end
 				end
 			end
+			
+			if funcsNeedsFix then
+				for t = #funcs, 1, -1 do
+					if funcs[t].n == 0 then
+						wipe(funcs[t])
+						tremove(funcs, t)
+					end
+				end
+				if #funcs == 0 then
+					callbackregistry[event] = nil
+				end
+			end
+			
+			firingsInProgress = oldFiringsInProgress
 		end
 	end
 end
@@ -3193,9 +3270,6 @@ function TMW:GetSpellNames(icon, setting, firstOnly, toname, hash, keepDurations
 		if type(v) == "number" and v >= 2^31 then
 			-- Invalid spellID. Remove it to prevent integer overflow errors.
 			tremove(buffNames, k)
-			if not icon then
-				printstack()
-			end
 			TMW.Warn(L["ERROR_INVALID_SPELLID"]:format(tostring(icon or "<UNKNOWN ICON>"), v))
 		else
 			-- The entry was valid, so move backwards towards the beginning.

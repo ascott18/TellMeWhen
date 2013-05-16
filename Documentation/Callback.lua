@@ -1,5 +1,10 @@
+--- TMW's callback system is pretty simple.
+-- 
+-- It behaves in much the same way that one would expect any callback system to work. Here is the documentation.
+-- 
+-- @class file
+-- @name Callback.lua
 
--- Documentation skeleton for TMW's callback system.
 
 --- Registers a callback.
 -- 
