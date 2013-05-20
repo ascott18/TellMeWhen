@@ -21,9 +21,9 @@ local pairs, error
 	= pairs, error
 
 
---- {{{TMW.Classes.GenericModuleImplementor}}} is a base class of any objects that implement any instances of {{{TMW.Classes.ObjectModule}}}
+--- [[api/base-classes/generic-module-implementor/|GenericModuleImplementor]] is a base class of any objects that implement any instances of [[api/base-classes/object-module/|ObjectModule]]
 -- 
--- {{{TMW.Classes.GenericModuleImplementor}}} inherits explicitly from {{{TMW.Classes.GenericComponentImplementor}}}, and implicitly from the classes that it inherits. 
+-- [[api/base-classes/generic-module-implementor/|GenericModuleImplementor]] inherits explicitly from [[api/base-classes/generic-component-implementor/|GenericComponentImplementor]], and implicitly from the classes that it inherits. 
 -- 
 -- GenericModuleImplementor provides a common base for these objects, and it provides the {{{self.Modules}}} table to its instances. It is an abstract class, and should not be directly instantiated.
 -- 
@@ -33,7 +33,7 @@ local pairs, error
 
 -- @class table
 -- @name TMW.Classes.GenericModuleImplementor
--- @field Modules [table] An array of all the {{{TMW.Classes.ObjectModule}}} that have been implemented into this {{{TMW.Classes.GenericModuleImplementor}}}. No modifications to this table should be made outside of methods that belong to classes that explicitly inherit from {{{TMW.Classes.ObjectModule}}}.
+-- @field Modules [table] An array of all the [[api/base-classes/object-module/|ObjectModule]] that have been implemented into this [[api/base-classes/generic-module-implementor/|GenericModuleImplementor]]. No modifications to this table should be made outside of methods that belong to classes that explicitly inherit from [[api/base-classes/object-module/|ObjectModule]].
 local GenericModuleImplementor = TMW:NewClass("GenericModuleImplementor", "GenericComponentImplementor")
 
 -- [INHERITED CTOR]
@@ -41,10 +41,10 @@ function GenericModuleImplementor:OnNewInstance_GenericModuleImplementor()
 	self.Modules = {}
 end
 
---- Searches for an instance of a specified {{{TMW.Classes.ObjectModule}}}, or any instances that inherit from the specified {{{TMW.Classes.ObjectModule}}}, that has been implemented into this {{{TMW.Classes.GenericModuleImplementor}}}.
--- @param moduleName [string] Class name of a {{{TMW.Classes.ObjectModule}}} to search for. An error is thrown if {{{TMW.Classes[moduleName] == nil}}}.
--- @param allowDisabled [boolean|nil] True if the method should return an {{{TMW.Classes.ObjectModule}}} instance that was found even if {{{TMW.Classes.ObjectModule.IsEnabled == false}}} for the instance.
--- @return [{{{TMW.Classes.ObjectModule}}}|nil] A matching {{{TMW.Classes.ObjectModule}}}, or nil if none was found.
+--- Searches for an instance of a specified [[api/base-classes/object-module/|ObjectModule]], or any instances that inherit from the specified [[api/base-classes/object-module/|ObjectModule]], that has been implemented into this [[api/base-classes/generic-module-implementor/|GenericModuleImplementor]].
+-- @param moduleName [string] Class name of a [[api/base-classes/object-module/|ObjectModule]] to search for. An error is thrown if {{{TMW.Classes[moduleName] == nil}}}.
+-- @param allowDisabled [boolean|nil] True if the method should return an [[api/base-classes/object-module/|ObjectModule]] instance that was found even if {{{ObjectModule.IsEnabled == false}}} for the instance.
+-- @return [[[api/base-classes/object-module/|ObjectModule]]|nil] A matching [[api/base-classes/object-module/|ObjectModule]], or nil if none was found.
 function GenericModuleImplementor:GetModuleOrModuleChild(moduleName, allowDisabled)
 	local Modules = self.Modules
 	

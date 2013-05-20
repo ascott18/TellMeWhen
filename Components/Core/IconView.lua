@@ -21,12 +21,12 @@ local rawget, date, tinsert, ipairs, error, ceil
 	= rawget, date, tinsert, ipairs, error, ceil
 
 
---- {{{TMW.Classes.IconView}}} is the class of all Icon Views.
--- IconView inherits explicitly from {{{TMW.Classes.GroupComponent}}} and {{{TMW.Classes.IconComponent}}}, and implicitly from the classes that they inherit. 
+--- [[api/icon-views/api-documentation/|IconView]] is the class of all Icon Views.
+-- IconView inherits explicitly from [[api/base-classes/group-component/|GroupComponent]] and [[api/base-classes/icon-component/|IconComponent]], and implicitly from the classes that they inherit. 
 -- 
 -- Icon Views allows users to customize the way that an icon's information is displayed on a macroscopic level. The default Icon View (also used as the fallback when a requested IconView cannot be found) is "icon". To create a new IconView, make a new instance of the IconView class.
 -- 
--- Instructions on how to use this API can be found at [[api/icon-view/how-to-use/]]
+-- Instructions on how to use this API can be found at [[api/icon-views/how-to-use/]]
 -- 
 -- @class file
 -- @name IconView.lua

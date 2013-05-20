@@ -20,11 +20,11 @@ local print = TMW.print
 local type
 	= type
 
---- {{{TMW.Classes.GroupModule}}} is a base class of any modules that will be implemented into a {{{TMW.Classes.Group}}}. A {{{TMW.Classes.GroupModule}}} provides frames, script handling, and other functionality to classes that inherit from it.
+--- [[api/group-module/api-documentation/|GroupModule]] is a base class of any modules that will be implemented into a [[api/group/api-documentation/|Group]]. A [[api/group-module/api-documentation/|GroupModule]] provides frames, script handling, and other functionality to classes that inherit from it.
 -- 
--- {{{TMW.Classes.GroupModule}}} inherits from {{{TMW.Classes.GroupComponent}}} and {{{TMW.Classes.ObjectModule}}}.
+-- [[api/group-module/api-documentation/|GroupModule]] inherits from [[api/base-classes/group-component/|GroupComponent]] and [[api/base-classes/object-module/|ObjectModule]].
 -- 
--- {{{TMW.Classes.GroupModule}}} provides a common base for these objects. **It does not provide any methods beyond those inherited from its subclasses**. It is an abstract class, and should not be directly instantiated. All classes that inherit from {{{TMW.Classes.GroupModule}}} should not be instantiated outside of the internal code used by a {{{TMW.Classes.IconView}}}. To create a new module, create a new class and inherit {{{TMW.Classes.GroupModule}}} or another class that directly or indirectly inherits from {{{TMW.Classes.GroupModule}}}. 
+-- [[api/group-module/api-documentation/|GroupModule]] provides a common base for these objects. **It does not provide any methods beyond those inherited from its subclasses**. It is an abstract class, and should not be directly instantiated. All classes that inherit from [[api/group-module/api-documentation/|GroupModule]] should not be instantiated outside of the internal code used by a [[api/icon-views/api-documentation/|IconView]]. To create a new module, create a new class and inherit [[api/group-module/api-documentation/|GroupModule]] or another class that directly or indirectly inherits from [[api/group-module/api-documentation/|GroupModule]]. 
 -- 
 -- @class file
 -- @name GroupModule.lua

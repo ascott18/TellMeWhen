@@ -1,0 +1,216 @@
+Icon Views dictate how information is displayed in TellMeWhen. An Icon View is essentially a collection of Group Modules and Icon Modules that work together in order to display information in varying ways. The two Icon Views that come with TellMeWhen are Icon and Bar.
+
+TellMeWhen has an API that allows you to create your own IconViews. The documentation of the API itself can be found at [[api/icon-views/api-documentation/]]. This page serves as a source of instruction in how to properly create an Icon Views.
+
+In the interest of brevity, Icon View will be abbreviated IV in this guide.
+
+
+== Creating the Icon View
+An IV should be defined entirely in its own file. To begin, create a new instance of TMW.Classes.IconView (File header code and constants should be defined here too):
+
+<<code lua>>
+if not TMW then return end
+local TMW = TMW
+
+local VIEW_IDENTIFIER = "test"
+local ICON_SIZE = 30
+
+local View = TMW.Classes.IconView:New(VIEW_IDENTIFIER)
+<</code>>
+
+=== Declaring Required Fields
+IVs require that you declare their .name and .desc fields before they can be registered with TMW:
+
+<<code lua>>
+View.name = "Test View"
+View.desc = "An Icon View created to demonstrate the TMW IconView API"
+<</code>>
+
+=== Declaring Defaults
+Next, we need to declare some default settings for our IV. We won't use any default icon settings for this one, so that part will be blank. I have included the code that you would use to define them if you had any here, but when creating an IV in practice, you don't need to call View:RegisterIconDefaults if you don't have any icon-specific settings in your view.
+
+<<code lua>>
+View:RegisterIconDefaults{
+	SettingsPerView = {
+		[VIEW_IDENTIFIER] = {
+			-- Icon defaults would go here
+		}
+	}
+}
+
+View:RegisterGroupDefaults{
+	SettingsPerView = {
+		[VIEW_IDENTIFIER] = {
+		
+			-- "icon1" is the default text layout for the "icon" IconView. We will use it since it will mostly suit our purposes.
+			-- See IconModule_Texts's documentation for information about how to create custom text layouts.
+			TextLayout = "icon1",
+			
+			-- Default icon size
+			SizeX = ICON_SIZE,
+			SizeY = ICON_SIZE,
+		}
+	}
+}
+<</code>>
+
+As you can see, we did declare some default group settings. The {{{TextLayout}}} setting is used by {{{IconModule_Texts}}}, which will use a completely empty layout as the default for our IV unless it is defined otherwise. The {{{SizeX}}} and {{{SizeY}}} settings are required by {{{GroupModule_Resizer_ScaleY_SizeX}}} are used by our IV to determine sizing information. More about those modules in a moment.
+
+=== Implementing Modules
+Next, we are going to implement some Group and Icon Modules into our IV. There are already many modules that are implemented by default into every icon type, so we don't have to worry about those. To see what modules these are, look at the bottom of the {{{TellMeWhen/Components/Core/IconView.lua}}} file.
+
+<<code lua>>
+View:ImplementsModule("IconModule_Alpha", 10, true)
+View:ImplementsModule("IconModule_Texts", 60, true)
+View:ImplementsModule("IconModule_Texture_Colored", 30, function(Module, icon)
+	Module:Enable()
+	Module.texture:ClearAllPoints()
+	Module.texture:SetAllPoints(icon)
+end)
+
+View:ImplementsModule("GroupModule_Resizer_ScaleY_SizeX", 10, function(Module, group)
+	if TMW.Locked or group.Locked then
+		Module:Disable()
+	else
+		Module:Enable()
+	end
+end)
+<</code>>
+
+The first two modules we implemented don't require any sort of special handling - just implement them and forget about them. As mentioned earlier, {{{IconModule_Texts}}} does require that the {{{TextLayout}}} setting in the IV's {{{SettingsPerView}}} table for group defaults refer to a valid text layout.
+
+{{{IconModule_Texture_Colored}}} requires that we enable the module (since we are declaring our own function to implement the module instead of just passing true. We also have to set the position of the module's component, Module.texture. Actions like this vary between modules, but you can generally refer to the documentation of a module to determine how best to implement it into an IV.
+
+{{{GroupModule_Resizer_ScaleY_SizeX}}} will handle resizing groups that use our IV. This is the same resizing module that is used by the "bar" IV that is included with TellMeWhen. Don't worry about the internals of it for the purposes of this tutorial - just know that in our implementer function, we only want to to be enabled when TellMeWhen is unlocked and the group is also unlocked; otherwise it should be disabled.
+
+=== Defining Required Methods
+There are three methods that an IV must define:
+
+<<code lua>>
+function View:Icon_Setup(icon)
+	local group = icon.group
+	local gspv = group:GetSettingsPerView()
+	
+	icon:SetSize(gspv.SizeX, gspv.SizeY)
+end
+
+function View:Group_Setup(group)
+	local gs = group:GetSettings()
+	local gspv = group:GetSettingsPerView()
+	
+	group:SetSize(gs.Columns * (gspv.SizeX + gspv.SpacingX) - gspv.SpacingX,
+				  gs.Rows * (gspv.SizeY + gspv.SpacingY) - gspv.SpacingY)
+end
+
+function View:Icon_GetSize(icon)
+	local group = icon.group
+	local gspv = group:GetSettingsPerView()
+	
+	return gspv.SizeX, gspv.SizeY
+end
+<</code>>
+
+Information about what these methods are used for and what you should write in them can be found in the [[api/icon-views/api-documentation/|API documentation for IconView]].
+
+=== Defining Optional Method(s)
+Currently there is only one optional method for IVs:
+
+<<code lua>>
+function View:Group_OnCreate(gs)
+	gs.Rows, gs.Columns = 2, 2
+end
+<</code>>
+
+Once again, information about this method can be found in the [[api/icon-views/api-documentation/|API documentation for IconView]].
+
+=== Registering the IconView
+Once we are done with everything, we have to register the IV we have created:
+
+<<code lua>>
+View:Register(20)
+<</code>>
+
+The IV will not be available for use in TMW if you don't do this.
+
+== Complete File
+Congratulations! You just created your first IconView for TellMeWhen! Here is the complete code for it:
+
+<<code lua>>
+
+if not TMW then return end
+local TMW = TMW
+
+local VIEW_IDENTIFIER = "test"
+local ICON_SIZE = 30
+
+local View = TMW.Classes.IconView:New(VIEW_IDENTIFIER)
+
+View.name = "Test View"
+View.desc = "An Icon View created to demonstrate the TMW IconView API"
+
+View:RegisterIconDefaults{
+	SettingsPerView = {
+		[VIEW_IDENTIFIER] = {
+			-- Icon defaults would go here
+		}
+	}
+}
+
+View:RegisterGroupDefaults{
+	SettingsPerView = {
+		[VIEW_IDENTIFIER] = {
+		
+			-- "icon1" is the default text layout for the "icon" IconView. We will use it since it will mostly suit our purposes.
+			TextLayout = "icon1",
+			
+			-- Default icon size
+			SizeX = ICON_SIZE,
+			SizeY = ICON_SIZE,
+		}
+	}
+}
+
+View:ImplementsModule("IconModule_Alpha", 10, true)
+View:ImplementsModule("IconModule_Texts", 60, true)
+View:ImplementsModule("IconModule_Texture_Colored", 30, function(Module, icon)
+	Module:Enable()
+	Module.texture:ClearAllPoints()
+	Module.texture:SetAllPoints(icon)
+end)
+
+View:ImplementsModule("GroupModule_Resizer_ScaleY_SizeX", 10, function(Module, group)
+	if TMW.Locked or group.Locked then
+		Module:Disable()
+	else
+		Module:Enable()
+	end
+end)
+
+function View:Icon_Setup(icon)
+	local group = icon.group
+	local gspv = group:GetSettingsPerView()
+	
+	icon:SetSize(gspv.SizeX, gspv.SizeY)
+end
+
+function View:Group_Setup(group)
+	local gs = group:GetSettings()
+	local gspv = group:GetSettingsPerView()
+	
+	group:SetSize(gs.Columns * (gspv.SizeX + gspv.SpacingX) - gspv.SpacingX,
+				  gs.Rows * (gspv.SizeY + gspv.SpacingY) - gspv.SpacingY)
+end
+
+function View:Icon_GetSize(icon)
+	local group = icon.group
+	local gspv = group:GetSettingsPerView()
+	
+	return gspv.SizeX, gspv.SizeY
+end
+
+function View:Group_OnCreate(gs)
+	gs.Rows, gs.Columns = 2, 2
+end
+
+View:Register(20)
+<</code>>

@@ -17,11 +17,11 @@ local TMW = TMW
 local L = TMW.L
 local print = TMW.print
 
---- {{{TMW.Classes.IconDataProcessorComponent}}} is a base class of {{{TMW.Classes.IconDataProcessor}}} and {{{TMW.Classes.IconDataProcessorHook}}}.
+--- [[api/base-classes/icon-data-processor-component/|IconDataProcessorComponent]] is a base class of [[api/icon-data-processor/api-documentation/|IconDataProcessor]] and [[api/icon-data-processor-hook/api-documentation/|IconDataProcessorHook]].
 -- 
--- {{{TMW.Classes.IconDataProcessorComponent}}} inherits from {{{TMW.Classes.IconComponent}}}, and implicitly from the classes that it inherits. 
+-- [[api/base-classes/icon-data-processor-component/|IconDataProcessorComponent]] inherits from [[api/base-classes/icon-component/|IconComponent]], and implicitly from the classes that it inherits. 
 -- 
--- {{{TMW.Classes.IconDataProcessorComponent}}} provides a common base for these objects, and some basic functionality shared between the two. 
+-- [[api/base-classes/icon-data-processor-component/|IconDataProcessorComponent]] provides a common base for these objects, and some basic functionality shared between the two. 
 -- 
 -- @class file
 -- @name IconDataProcessorComponent.lua
@@ -30,7 +30,7 @@ local print = TMW.print
 local IconDataProcessorComponent = TMW:NewClass("IconDataProcessorComponent", "IconComponent")
 IconDataProcessorComponent.SIUVs = {}
 
---- Declare upvalues that will be available to the {{{TMW.Classes.Icon}}}{{{:SetInfo()}}} method (any therefore avaiable to any {{{TMW.Classes.IconDataProcessor}}} and any {{{TMW.Classes.IconDataProcessorHook}}}).
+--- Declare upvalues that will be available to the [[api/icon/api-documentation/|Icon]]{{{:SetInfo()}}} method (any therefore avaiable to any [[api/icon-data-processor/api-documentation/|IconDataProcessor]] and any [[api/icon-data-processor-hook/api-documentation/|IconDataProcessorHook]]).
 -- @param variables [string] A string that will be on the left side of an assignment operator.
 -- @param ... [...] Any number of params (can be zero, but not recommended outside of special circumstances) that will get assigned to {{{variables}}},
 -- @usage

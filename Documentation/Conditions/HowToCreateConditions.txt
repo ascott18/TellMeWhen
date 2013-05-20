@@ -27,9 +27,9 @@ end
 
 == Create the Condition
 
-Next, define the condition that you wish to create using [[http://wow.curseforge.com/addons/tellmewhen/pages/api/conditions/api-documentation/condition-category/|ConditionCategory]]{{{:RegisterCondition()}}}
+Next, define the condition that you wish to create using [[api/conditions/api-documentation/condition-category/|ConditionCategory]]{{{:RegisterCondition()}}}
 
-See the documentation of that function and the [[http://wow.curseforge.com/addons/tellmewhen/pages/api/conditions/api-documentation/condition-data-specification|Condition Data Specification]] for more information.
+See the documentation of that function and the [[api/conditions/api-documentation/condition-data-specification|Condition Data Specification]] for more information.
 
 Some of the more complex fields & functions are described in greater detail below.
 
@@ -59,18 +59,18 @@ Take note that the condition checker function takes advantage of Lua's [[http://
 
 === Events
 
-The {{{events}}} function allows the condition to tell a [[http://wow.curseforge.com/addons/tellmewhen/pages/api/conditions/api-documentation/condition-object/|ConditionObject]] what events can be listened to in order to make sure the condition stays updated.
+The {{{events}}} function allows the condition to tell a [[api/conditions/api-documentation/condition-object/|ConditionObject]] what events can be listened to in order to make sure the condition stays updated.
 
 There are two parts to this:
 
 ==== Requesting Events
 
-The first job of the {{{events}}} function is to request the events that will be needed to keep the conditions updated. This is done automatically when using [[http://wow.curseforge.com/addons/tellmewhen/pages/api/conditions/api-documentation/condition-object/|ConditionObject]]{{{:GenerateNormalEventString()}}} and [[http://wow.curseforge.com/addons/tellmewhen/pages/api/conditions/api-documentation/condition-object/|ConditionObject]]{{{:GetUnitChangedEventString()}}}, but it can also be done manually by calling [[http://wow.curseforge.com/addons/tellmewhen/pages/api/conditions/api-documentation/condition-object/|ConditionObject]]{{{:RequestEvent()}}} and [[http://wow.curseforge.com/addons/tellmewhen/pages/api/conditions/api-documentation/condition-object/|ConditionObject]]{{{:SetNumEventArgs()}}} together.
+The first job of the {{{events}}} function is to request the events that will be needed to keep the conditions updated. This is done automatically when using [[api/conditions/api-documentation/condition-object/|ConditionObject]]{{{:GenerateNormalEventString()}}} and [[api/conditions/api-documentation/condition-object/|ConditionObject]]{{{:GetUnitChangedEventString()}}}, but it can also be done manually by calling [[api/conditions/api-documentation/condition-object/|ConditionObject]]{{{:RequestEvent()}}} and [[api/conditions/api-documentation/condition-object/|ConditionObject]]{{{:SetNumEventArgs()}}} together.
 
 
 ==== Generating Arg Checker Strings
 
-The second job of the {{{events}}} function is to return strings of Lua that will be used to check the args of events that are requested to determine if an update should be preformed. These are generated automatically when using [[http://wow.curseforge.com/addons/tellmewhen/pages/api/conditions/api-documentation/condition-object/|ConditionObject]]{{{:GenerateNormalEventString()}}} and [[http://wow.curseforge.com/addons/tellmewhen/pages/api/conditions/api-documentation/condition-object/|ConditionObject]]{{{:GetUnitChangedEventString()}}}, but the {{{events}}} function still must return them.
+The second job of the {{{events}}} function is to return strings of Lua that will be used to check the args of events that are requested to determine if an update should be preformed. These are generated automatically when using [[api/conditions/api-documentation/condition-object/|ConditionObject]]{{{:GenerateNormalEventString()}}} and [[api/conditions/api-documentation/condition-object/|ConditionObject]]{{{:GetUnitChangedEventString()}}}, but the {{{events}}} function still must return them.
 
 You also can create these manually. They look something like this:
 
@@ -82,7 +82,7 @@ You also can create these manually. They look something like this:
 "event == 'UNIT_HEALTH_FREQUENT' and arg1 == 'player'"
 <</code>>
 
-Event args can be accessed through variables named "arg1", "arg2", etc. assuming that the proper number of args have been requested using [[http://wow.curseforge.com/addons/tellmewhen/pages/api/conditions/api-documentation/condition-object/|ConditionObject]]{{{:SetNumEventArgs()}}}. When generating event strings manually, it is also important to requested the needed events using [[http://wow.curseforge.com/addons/tellmewhen/pages/api/conditions/api-documentation/condition-object/|ConditionObject]]{{{:RequestEvent()}}}.
+Event args can be accessed through variables named "arg1", "arg2", etc. assuming that the proper number of args have been requested using [[api/conditions/api-documentation/condition-object/|ConditionObject]]{{{:SetNumEventArgs()}}}. When generating event strings manually, it is also important to requested the needed events using [[api/conditions/api-documentation/condition-object/|ConditionObject]]{{{:RequestEvent()}}}.
 
 
 === Anticipate
@@ -210,4 +210,4 @@ ConditionCategory:RegisterCondition(1,   "BUFFDUR", {
 })
 <</code>>
 
-For those fields in the condition table that were not explained here, please refer to the [[http://wow.curseforge.com/addons/tellmewhen/pages/api/conditions/api-documentation/condition-data-specification|Condition Data Specification]].
+For those fields in the condition table that were not explained here, please refer to the [[api/conditions/api-documentation/condition-data-specification|Condition Data Specification]].

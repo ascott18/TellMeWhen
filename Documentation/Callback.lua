@@ -1,4 +1,4 @@
---- TMW's callback system is pretty simple.
+--- TMW's callback system is pretty simple. 
 -- 
 -- It behaves in much the same way that one would expect any callback system to work. Here is the documentation.
 -- 

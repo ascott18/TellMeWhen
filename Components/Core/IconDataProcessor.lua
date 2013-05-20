@@ -21,9 +21,9 @@ local pairs, error, strsplit, ipairs
 	= pairs, error, strsplit, ipairs
 	
 
---- {{{TMW.Classes.IconDataProcessor}}} is the class of all IconDataProcessors. IconDataProcessors handle the input to {{{TMW.Classes.Icon}}}{{{:SetInfo()}}}, process the data (performing validation and other manipulation), and then expose it for use by instances of {{{TMW.Classes.IconModule}}}, {{{TMW.Classes.IconDataProcessorHook}}}s, and other {{{TMW.Classes.IconDataProcessor}}}s.
+--- [[api/icon-data-processor/api-documentation/|IconDataProcessor]] is the class of all IconDataProcessors. IconDataProcessors handle the input to [[api/icon/api-documentation/|Icon]]{{{:SetInfo()}}}, process the data (performing validation and other manipulation), and then expose it for use by instances of [[api/icon-module/api-documentation/|IconModule]], [[api/icon-data-processor-hook/api-documentation/|IconDataProcessorHook]]s, and other [[api/icon-data-processor/api-documentation/|IconDataProcessor]]s.
 -- 
--- {{{TMW.Classes.IconDataProcessor}}} inherits from {{{TMW.Classes.IconDataProcessorComponent}}}, and implicitly from the classes that it inherits. 
+-- [[api/icon-data-processor/api-documentation/|IconDataProcessor]] inherits from [[api/base-classes/icon-data-processor-component/|IconDataProcessorComponent]], and implicitly from the classes that it inherits. 
 -- 
 -- @class file
 -- @name IconDataProcessor.lua
@@ -38,11 +38,11 @@ IconDataProcessor.NumAttributes = 0
 IconDataProcessor.ProcessorsByName = {}
 
 
---- Constructor - Creates a new {{{TMW.Classes.IconDataProcessor}}}.
+--- Constructor - Creates a new [[api/icon-data-processor/api-documentation/|IconDataProcessor]].
 -- @name IconDataProcessor:New
--- @param name [string] A name for this {{{TMW.Classes.IconDataProcessor}}}. Should be brief, and should be all capital letters.
--- @param attributes [string] A comma-delimited string of attributes that will be passed as part of the first param to {{{TMW.Classes.Icon}}}{{{:SetInfo(attributesString, ...)}}}. If multiple attributes are given, they must always be passed to :SetInfo together, and always in the same order. Each attribute token may only be used in one IconDataProcessor across TellMeWhen.
--- @return [{{{TMW.Classes.IconDataProcessor}}}] An instance of a new IconDataProcessor.
+-- @param name [string] A name for this [[api/icon-data-processor/api-documentation/|IconDataProcessor]]. Should be brief, and should be all capital letters.
+-- @param attributes [string] A comma-delimited string of attributes that will be passed as part of the first param to [[api/icon/api-documentation/|Icon]]{{{:SetInfo(attributesString, ...)}}}. If multiple attributes are given, they must always be passed to :SetInfo together, and always in the same order. Each attribute token may only be used in one IconDataProcessor across TellMeWhen.
+-- @return [[[api/icon-data-processor/api-documentation/|IconDataProcessor]]] An instance of a new IconDataProcessor.
 -- @usage
 -- local Processor = TMW.Classes.IconDataProcessor:New("NOMANA", "noMana")
 -- 
@@ -83,8 +83,8 @@ function IconDataProcessor:OnNewInstance(name, attributes)
 	TMW.Classes.Icon:ClearSetInfoFunctionCache()
 end
 
---- Asserts if another {{{TMW.Classes.IconDataProcessor}}} exists. Throws an error if it does not exist.
--- @param name [string] The name of a {{{TMW.Classes.IconDataProcessor}}}, as passed as the first param to its constructor, that is is a dependency of another.
+--- Asserts if another [[api/icon-data-processor/api-documentation/|IconDataProcessor]] exists. Throws an error if it does not exist.
+-- @param name [string] The name of a [[api/icon-data-processor/api-documentation/|IconDataProcessor]], as passed as the first param to its constructor, that is is a dependency of another.
 -- @usage Processor:AssertDependency("UNIT")
 function IconDataProcessor:AssertDependency(name)
 	if not self.ProcessorsByName[name] then
@@ -105,7 +105,7 @@ function IconDataProcessor:CompileFunctionHooks(t, orderRequested)
 	end
 end
 
---- Compiles the segment of the {{{TMW.Classes.Icon}}}{{{:SetInfo()}}} method that will be used to process the data for this {{{TMW.Classes.IconDataProcessor}}}. This method should be overridden for any IconDataProcessors that process more than one attribute, or any IconDataProcessors that do more than simply record and notify changes to a single attribute. If changes are many to any attributes, the processor's {{{.changedEvent}}} should be fired (see usage below), and doFireIconUpdated should be set true. IconDataProcessors are also commonly used to trigger icon events (seen in the second usage example below).
+--- Compiles the segment of the [[api/icon/api-documentation/|Icon]]{{{:SetInfo()}}} method that will be used to process the data for this [[api/icon-data-processor/api-documentation/|IconDataProcessor]]. This method should be overridden for any IconDataProcessors that process more than one attribute, or any IconDataProcessors that do more than simply record and notify changes to a single attribute. If changes are many to any attributes, the processor's {{{.changedEvent}}} should be fired (see usage below), and doFireIconUpdated should be set true. IconDataProcessors are also commonly used to trigger icon events (seen in the second usage example below).
 -- 
 -- Local variables are provided for:
 -- * Each incoming attribute that is being processed,
@@ -113,7 +113,7 @@ end
 -- * {{{attributes = icon.attributes}}}
 -- * {{{EventHandlersSet = icon.EventHandlersSet}}}
 -- * A reference, by name, to every IconDataProcessor (E.g. {{{DURATION = TMW.Classes.IconDataProcessor.ProcessorsByName.DURATION}}})
--- * Any other local variables that have been set through {{{TMW.Classes.IconDataProcessorComponent}}}{{{:DeclareUpValue()}}}.
+-- * Any other local variables that have been set through [[api/base-classes/icon-data-processor-component/|IconDataProcessorComponent]]{{{:DeclareUpValue()}}}.
 -- @param t [table] An array of strings that will be concatenated together to form the body of the :SetInfo() method.
 -- @usage
 -- -- Example usage in the INRANGE IconDataProcessor:

@@ -1,7 +1,7 @@
 
 = Condition Set Table Specification
 
-The Condition Set table is a table that completely describes an implementation of the conditions framework in TellMeWhen. See [[http://wow.curseforge.com/addons/tellmewhen/pages/api/conditions/api-documentation/condition-category/|ConditionCategory]]{{{:RegisterCondition()}}} for information about where this table is passed to.
+The Condition Set table is a table that completely describes an implementation of the conditions framework in TellMeWhen. See [[api/conditions/api-documentation/condition-category/|ConditionCategory]]{{{:RegisterCondition()}}} for information about where this table is passed to.
 
 
 == Table Fields
@@ -29,7 +29,7 @@ The Condition Set table is a table that completely describes an implementation o
 ** [Table] A table that will be merged into the settings of every new condition that is created for this Condition Set.
 
 * ConditionTypeFilter [Optional]
-** [Function] A function that will be passed parameters {{{(self, conditionData)}}} where self is this Condition Set table and conditionData is a [[http://wow.curseforge.com/addons/tellmewhen/pages/api/conditions/api-documentation/condition-data-specification|Condition Data table]].
+** [Function] A function that will be passed parameters {{{(self, conditionData)}}} where self is this Condition Set table and conditionData is a [[api/conditions/api-documentation/condition-data-specification|Condition Data table]].
 ** Should return a boolean indicating if that condition should be allowed for use with the Condition Set.
 ** If nil is returned, the condition will not be allowed. If this function is undefined, all conditions will be allowed.
 

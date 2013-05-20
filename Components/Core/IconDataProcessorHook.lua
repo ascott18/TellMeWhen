@@ -20,9 +20,9 @@ local print = TMW.print
 local assert
 	= assert
 
---- {{{TMW.Classes.IconDataProcessorHook}}} is the class of all IconDataProcessorHooks. A IconDataProcessorHook hooks into a {{{TMW.Classes.IconDataProcessor}}}, giving it a chance to modify icon attributes before they are given to their normal {{{TMW.Classes.IconDataProcessor}}}. An IconDataProcessorHook can also get access to icon attributes quicker than any other Icon Component, allowing them to read these attributes and set other attributes based on their value (this can be seen in the second usage example of {{{:RegisterCompileFunctionSegmentHook}}})
+--- [[api/icon-data-processor-hook/api-documentation/|IconDataProcessorHook]] is the class of all IconDataProcessorHooks. A IconDataProcessorHook hooks into a [[api/icon-data-processor/api-documentation/|IconDataProcessor]], giving it a chance to modify icon attributes before they are given to their normal [[api/icon-data-processor/api-documentation/|IconDataProcessor]]. An IconDataProcessorHook can also get access to icon attributes quicker than any other Icon Component, allowing them to read these attributes and set other attributes based on their value (this can be seen in the second usage example of {{{:RegisterCompileFunctionSegmentHook}}})
 -- 
--- {{{TMW.Classes.IconDataProcessor}}} inherits from {{{TMW.Classes.IconDataProcessorComponent}}}, and implicitly from the classes that it inherits. 
+-- [[api/icon-data-processor/api-documentation/|IconDataProcessor]] inherits from [[api/base-classes/icon-data-processor-component/|IconDataProcessorComponent]], and implicitly from the classes that it inherits. 
 -- 
 -- @class file
 -- @name IconDataProcessorHook.lua
@@ -31,11 +31,11 @@ local assert
 local IconDataProcessorHook = TMW:NewClass("IconDataProcessorHook", "IconDataProcessorComponent")
 
 
---- Constructor - Creates a new {{{TMW.Classes.IconDataProcessorHook}}}.
+--- Constructor - Creates a new [[api/icon-data-processor-hook/api-documentation/|IconDataProcessorHook]].
 -- @name IconDataProcessorHook:New
--- @param name [string] A name for this {{{TMW.Classes.IconDataProcessorHook}}}. Should be brief, and should be all capital letters.
--- @param processorToHook [string] The name of a {{{TMW.Classes.IconDataProcessor}}} (as passed to the first param of its constructor) to hook.
--- @return [{{{TMW.Classes.IconDataProcessorHook}}}] An instance of a new IconDataProcessorHook.
+-- @param name [string] A name for this [[api/icon-data-processor-hook/api-documentation/|IconDataProcessorHook]]. Should be brief, and should be all capital letters.
+-- @param processorToHook [string] The name of a [[api/icon-data-processor/api-documentation/|IconDataProcessor]] (as passed to the first param of its constructor) to hook.
+-- @return [[[api/icon-data-processor-hook/api-documentation/|IconDataProcessorHook]]] An instance of a new IconDataProcessorHook.
 -- @usage
 -- local Hook = TMW.Classes.IconDataProcessorHook:New("TEXTURE_CUSTOMTEX", "TEXTURE")
 function IconDataProcessorHook:OnNewInstance(name, processorToHook)
@@ -55,9 +55,9 @@ function IconDataProcessorHook:OnNewInstance(name, processorToHook)
 	self:RegisterProcessorRequirement(processorToHook)
 end
 
---- Registers a CompileFunctionSegment function (similar behavior to {{{TMW.Classes.IconDataProcessor}}}{{{:CompileFunctionSegment()}}} that will be called when the segment of {{{TMW.Classes.Icon}}}{{{:SetInfo()}}} for the {{{TMW.Classes.IconDataProcessor}}} that this {{{TMW.Classes.IconDataProcessorHook}}} is hooking is being compiled.
--- @param order [string] Must be "pre" or "post". "pre" will cause this hook to be compiled before the {{{TMW.Classes.IconDataProcessor}}} that it is hooking gets compiled. "post" will cause this hook to be compiled afterwords.
--- @param func [function] A function that will be called to compile part of {{{TMW.Classes.Icon}}}{{{:SetInfo()}}}. Called with signature {{{(Processor, t)}}}. {{{Processor}}} is the {{{TMW.Classes.IconDataProcessor}}} instance hooked by this IconDataProcessorHook. {{{t}}} is the string table that will be concatenated to form the whole :SetInfo() method.
+--- Registers a CompileFunctionSegment function (similar behavior to [[api/icon-data-processor/api-documentation/|IconDataProcessor]]{{{:CompileFunctionSegment()}}} that will be called when the segment of [[api/icon/api-documentation/|Icon]]{{{:SetInfo()}}} for the [[api/icon-data-processor/api-documentation/|IconDataProcessor]] that this [[api/icon-data-processor-hook/api-documentation/|IconDataProcessorHook]] is hooking is being compiled.
+-- @param order [string] Must be "pre" or "post". "pre" will cause this hook to be compiled before the [[api/icon-data-processor/api-documentation/|IconDataProcessor]] that it is hooking gets compiled. "post" will cause this hook to be compiled afterwords.
+-- @param func [function] A function that will be called to compile part of [[api/icon/api-documentation/|Icon]]{{{:SetInfo()}}}. Called with signature {{{(Processor, t)}}}. {{{Processor}}} is the [[api/icon-data-processor/api-documentation/|IconDataProcessor]] instance hooked by this IconDataProcessorHook. {{{t}}} is the string table that will be concatenated to form the whole :SetInfo() method.
 -- @usage
 --	-- Example usage from TEXTURE_CUSTOMTEX:
 --	Hook:RegisterCompileFunctionSegmentHook("pre", function(Processor, t)
@@ -98,8 +98,8 @@ function IconDataProcessorHook:RegisterCompileFunctionSegmentHook(order, func)
 	TMW.Classes.Icon:ClearSetInfoFunctionCache()
 end
 
---- Require that a {{{TMW.Classes.IconDataProcessor}}} must be implemented into a {{{TMW.Classes.Icon}}} before this {{{TMW.Classes.IconDataProcessorHook}}} will be allowed to implement into the icon. This is called by default for the {{{TMW.Classes.IconDataProcessor}}} that is being hooked, but you may need to require other {{{TMW.Classes.IconDataProcessor}}}s as well for your specific needs.
--- @param processorName [string] The name of a {{{TMW.Classes.IconDataProcessor}}} (as passed to the first param of its constructor) that is required.
+--- Require that a [[api/icon-data-processor/api-documentation/|IconDataProcessor]] must be implemented into a [[api/icon/api-documentation/|Icon]] before this [[api/icon-data-processor-hook/api-documentation/|IconDataProcessorHook]] will be allowed to implement into the icon. This is called by default for the [[api/icon-data-processor/api-documentation/|IconDataProcessor]] that is being hooked, but you may need to require other [[api/icon-data-processor/api-documentation/|IconDataProcessor]]s as well for your specific needs.
+-- @param processorName [string] The name of a [[api/icon-data-processor/api-documentation/|IconDataProcessor]] (as passed to the first param of its constructor) that is required.
 -- @usage Hook:RegisterProcessorRequirement("DURATION")
 function IconDataProcessorHook:RegisterProcessorRequirement(processorName)
 	self:AssertSelfIsInstance()

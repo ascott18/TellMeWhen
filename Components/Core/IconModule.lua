@@ -21,11 +21,11 @@ local pairs, type, rawget, assert, tostring
 	= pairs, type, rawget, assert, tostring
 	
 
---- {{{TMW.Classes.IconModule}}} is a base class of any modules that will be implemented into a {{{TMW.Classes.Icon}}}. A {{{TMW.Classes.IconModule}}} provides frames, script handling, and other functionality to classes that inherit from it.
+--- [[api/icon-module/api-documentation/|IconModule]] is a base class of any modules that will be implemented into a [[api/icon/api-documentation/|Icon]]. A [[api/icon-module/api-documentation/|IconModule]] provides frames, script handling, and other functionality to classes that inherit from it.
 -- 
--- {{{TMW.Classes.IconModule}}} inherits from {{{TMW.Classes.IconComponent}}} and {{{TMW.Classes.ObjectModule}}}, and implicitly from the classes that they inherit. 
+-- [[api/icon-module/api-documentation/|IconModule]] inherits from [[api/base-classes/icon-component/|IconComponent]] and [[api/base-classes/object-module/|ObjectModule]], and implicitly from the classes that they inherit. 
 -- 
--- {{{TMW.Classes.IconModule}}} provides a common base for these objects. It provides methods for event handling, data handling, component skinning with Masque, and exposing frames for anchoring purposes. It is an abstract class, and should not be directly instantiated. All classes that inherit from {{{TMW.Classes.IconModule}}} should not be instantiated outside of the internal code used by a {{{TMW.Classes.IconView}}}. To create a new module, create a new class and inherit {{{TMW.Classes.IconModule}}} or another class that directly or indirectly inherits from {{{TMW.Classes.IconModule}}}. 
+-- [[api/icon-module/api-documentation/|IconModule]] provides a common base for these objects. It provides methods for event handling, data handling, component skinning with Masque, and exposing frames for anchoring purposes. It is an abstract class, and should not be directly instantiated. All classes that inherit from [[api/icon-module/api-documentation/|IconModule]] should not be instantiated outside of the internal code used by a [[api/icon-views/api-documentation/|IconView]]. To create a new module, create a new class and inherit [[api/icon-module/api-documentation/|IconModule]] or another class that directly or indirectly inherits from [[api/icon-module/api-documentation/|IconModule]]. 
 -- 
 -- @class file
 -- @name IconModule.lua
@@ -96,8 +96,8 @@ function IconModule:OnUnimplementFromIcon(icon)
 	self.IsImplemented = nil
 end
 
---- Sets up a module for a certain icon. This method should be overridden as needed by subclasses of {{{TMW.Classes.IconModule}}}. Please be aware that you cannot assume that {{{self.icon == icon}}} will always be true - this method is also used to setup a meta icon's modules to match the behavior of another icon. See implementations of this method in the {{{TMW.Classes.IconModule}}}s provided in TellMeWhen.
--- @param icon [{{{TMW.Classes.Icon}}}] An icon that this module should be setup for.
+--- Sets up a module for a certain icon. This method should be overridden as needed by subclasses of [[api/icon-module/api-documentation/|IconModule]]. Please be aware that you cannot assume that {{{self.icon == icon}}} will always be true - this method is also used to setup a meta icon's modules to match the behavior of another icon. See implementations of this method in the [[api/icon-module/api-documentation/|IconModule]]s provided in TellMeWhen.
+-- @param icon [[[api/icon/api-documentation/|Icon]]] An icon that this module should be setup for.
 -- @usage -- Example implementations of this method:
 --	
 --	-- From IconModule_Alpha:
@@ -123,9 +123,9 @@ function IconModule:SetupForIcon(icon)
 	-- Default is to do nothing.
 end
 
---- Create an event listener for TMW events that are fired with icon as their first arg (these events are always prefixed with "TMW_ICON_"). The function will only be called if the icon that the event was fired for is the icon that an instance of this {{{TMW.Classes.IconModule}}} has been implemented into, and if {{{TMW.Classes.IconModule.IsEnabled == true}}} for that instance. This method must be called on a class - you cannot set icon event handlers separately for individual instances of {{{TMW.Classes.IconModule}}} using this method.
+--- Create an event listener for TMW events that are fired with icon as their first arg (these events are always prefixed with "TMW_ICON_"). The function will only be called if the icon that the event was fired for is the icon that an instance of this [[api/icon-module/api-documentation/|IconModule]] has been implemented into, and if {{{IconModule.IsEnabled == true}}} for that instance. This method must be called on a class - you cannot set icon event handlers separately for individual instances of [[api/icon-module/api-documentation/|IconModule]] using this method.
 -- @param event [string] An event. Should be prefixed with "TMW_ICON_".
--- @param func [function|false] A function that will be called in response to firings of the event for the icon that this {{{TMW.Classes.IconModule}}} is implemented into. Called with signature (Module, icon). If false, the event handler will be removed from the module. 
+-- @param func [function|false] A function that will be called in response to firings of the event for the icon that this [[api/icon-module/api-documentation/|IconModule]] is implemented into. Called with signature (Module, icon). If false, the event handler will be removed from the module. 
 -- @usage
 -- -- Example usage from IconModule_PowerBar_Overlay:
 --	PowerBar_Overlay:SetIconEventListner("TMW_ICON_SETUP_POST", function(Module, icon)
@@ -149,12 +149,12 @@ function IconModule:SetIconEventListner(event, func)
 end
 
 
---- Creates an event handler that listens to changes in data from the specified {{{TMW.Classes.IconDataProcessor}}}. This method is essentially a wrapper for {{{TMW.Classes.IconModule:SetIconEventListner( TMW.Classes.IconDataProcessor.ProcessorsByName[processorName].changedEvent [,func])}}}
--- @param processorName [string] Identifier of a {{{TMW.Classes.IconDataProcessor}}} as was passed as the first arg to the consturctor of {{{TMW.Classes.IconDataProcessor}}}.
+--- Creates an event handler that listens to changes in data from the specified [[api/icon-data-processor/api-documentation/|IconDataProcessor]]. This method is essentially a wrapper for {{{TMW.Classes.IconModule:SetIconEventListner( TMW.Classes.IconDataProcessor.ProcessorsByName[processorName].changedEvent [,func])}}}
+-- @param processorName [string] Identifier of a [[api/icon-data-processor/api-documentation/|IconDataProcessor]] as was passed as the first arg to the consturctor of [[api/icon-data-processor/api-documentation/|IconDataProcessor]].
 -- @param func [function|false|nil]:
--- * A function that will be called when the data of the {{{TMW.Classes.IconDataProcessor}}} has changed for the icon that an instance of this {{{TMW.Classes.IconModule}}} is implemented into, and if {{{TMW.Classes.IconModule.IsEnabled == true}}} for that instance. 
--- * If false, the data listener for the {{{TMW.Classes.IconDataProcessor}}} will be removed from the module. 
--- * If nil, the function used will be {{{self[processorName]}}}. Signature of the function is {{{(icon, ...)}}} where the vararg represents each attribute handled by the {{{TMW.Classes.IconDataProcessor}}}.
+-- * A function that will be called when the data of the [[api/icon-data-processor/api-documentation/|IconDataProcessor]] has changed for the icon that an instance of this [[api/icon-module/api-documentation/|IconModule]] is implemented into, and if {{{IconModule.IsEnabled == true}}} for that instance. 
+-- * If false, the data listener for the [[api/icon-data-processor/api-documentation/|IconDataProcessor]] will be removed from the module. 
+-- * If nil, the function used will be {{{self[processorName]}}}. Signature of the function is {{{(icon, ...)}}} where the vararg represents each attribute handled by the [[api/icon-data-processor/api-documentation/|IconDataProcessor]].
 -- @usage
 -- -- Example usage from IconModule_Texture:
 --	function IconModule_Texture:TEXTURE(icon, texture)
@@ -229,9 +229,9 @@ function IconModule:RegisterAnchorableFrame(name)
 end
 
 
---- Sets whether or not instances of this {{{TMW.Classes.IconModule}}} will be allowed to implement into an icon that implements a specified {{{TMW.Classes.IconType}}}. This method is also wrapped by the {{{TMW.Classes.IconType}}} method {{{SetModuleAllowance}}}.
--- @param typeName [string] The identifier of a {{{TMW.Class.IconType}}} as passed to the first param of {{{TMW.Class.IconType}}}'s constructor.
--- @param allow [boolean] Whether or not the {{{TMW.Classes.IconModule}}} should be allowed to implement into an icon that also implements the specified {{{TMW.Classes.IconType}}}.
+--- Sets whether or not instances of this [[api/icon-module/api-documentation/|IconModule]] will be allowed to implement into an icon that implements a specified [[api/icon-type/api-documentation/|IconType]]. This method is also wrapped by the [[api/icon-type/api-documentation/|IconType]] method {{{SetModuleAllowance}}}.
+-- @param typeName [string] The identifier of a [[api/icon-type/api-documentation/|IconType]] as passed to the first param of [[api/icon-type/api-documentation/|IconType]]'s constructor.
+-- @param allow [boolean] Whether or not the [[api/icon-module/api-documentation/|IconModule]] should be allowed to implement into an icon that also implements the specified [[api/icon-type/api-documentation/|IconType]].
 -- @usage
 -- -- Prevents a custom IconModule from implementing into meta icons:
 -- IconModule:SetAllowanceForType("meta", false)
@@ -250,8 +250,8 @@ function IconModule:SetAllowanceForType(typeName, allow)
 	end
 end
 
---- Sets the default allowance for implementing instances of this {{{TMW.Classes.IconModule}}}. Default value is {{{true}}}, meaning that modules will be implemented as requested unless it has been set otherwise by a call to {{{:SetAllowanceForType(typeName, false)}}}. Set to {{{false}}} to prevent instances of this {{{TMW.Classes.IconModule}}} from implementing unless they have been explicitly allowed by a call to {{{:SetAllowanceForType(typeName, true)}}}.
--- @param allow [boolean] The default type allowance for instances of this {{{TMW.Classes.IconModule}}}.
+--- Sets the default allowance for implementing instances of this [[api/icon-module/api-documentation/|IconModule]]. Default value is {{{true}}}, meaning that modules will be implemented as requested unless it has been set otherwise by a call to {{{:SetAllowanceForType(typeName, false)}}}. Set to {{{false}}} to prevent instances of this [[api/icon-module/api-documentation/|IconModule]] from implementing unless they have been explicitly allowed by a call to {{{:SetAllowanceForType(typeName, true)}}}.
+-- @param allow [boolean] The default type allowance for instances of this [[api/icon-module/api-documentation/|IconModule]].
 -- @usage
 -- -- Example of usage by PowerBar_Overlay, which should only be explicitly allowed by icons
 -- -- that export something that is likely to be a spell to the SPELL IconDataProcessor.
@@ -267,9 +267,9 @@ function IconModule:SetDefaultAllowanceForTypes(allow)
 	self.defaultAllowanceForTypes = allow
 end
 
---- Checks whether instances of this {{{TMW.Classes.IconModule}}} will be allowed to implement into icons that implements a specified {{{TMW.Classes.IconType}}}.
--- @param typeName [string] The identifier of a {{{TMW.Class.IconType}}} instance as passed to the first param of {{{TMW.Class.IconType}}}'s constructor.
--- @return [boolean] True if instances of a {{{TMW.Classes.IconModule}}} will be allowed to implement alongside the specified {{{TMW.Class.IconType}}} instance.
+--- Checks whether instances of this [[api/icon-module/api-documentation/|IconModule]] will be allowed to implement into icons that implements a specified [[api/icon-type/api-documentation/|IconType]].
+-- @param typeName [string] The identifier of a [[api/icon-type/api-documentation/|IconType]] instance as passed to the first param of [[api/icon-type/api-documentation/|IconType]]'s constructor.
+-- @return [boolean] True if instances of a [[api/icon-module/api-documentation/|IconModule]] will be allowed to implement alongside the specified [[api/icon-type/api-documentation/|IconType]] instance.
 -- @usage isAllowed = IconModule_PowerBar_Overlay:IsAllowedByType("meta")
 function IconModule:IsAllowedByType(typeName)
 	local typeAllowance = self.TypeAllowances[typeName]

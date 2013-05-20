@@ -18,7 +18,7 @@ local L = TMW.L
 local print = TMW.print
 
 
---- {{{TMW.Classes.GenericComponentImplementor}}} is a base class of any objects that implement any instances of {{{TMW.Classes.GenericComponent}}}
+--- [[api/base-classes/generic-component-implementor/|GenericComponentImplementor]] is a base class of any objects that implement any instances of [[api/base-classes/generic-component/|GenericComponent]]
 -- 
 -- GenericComponentImplementor provides a common base for these objects, and it provides the {{{self.Components}}} and {{{self.ComponentsLookup}}} tables to its instances. It is an abstract class, and should not be directly instantiated.
 -- 
@@ -28,8 +28,8 @@ local print = TMW.print
 
 -- @class table
 -- @name TMW.Classes.GenericComponentImplementor
--- @field Components [table] An array of all the {{{TMW.Classes.GenericComponent}}} that have been implemented into this {{{TMW.Classes.GenericComponentImplementor}}}. No modifications to this table should be made outside of methods that belong to classes that explicitly inherit from {{{TMW.Classes.GenericComponent}}}.
--- @field ComponentsLookup [table] A dictionary of all the {{{TMW.Classes.GenericComponent}}} that have been implemented into this {{{TMW.Classes.GenericComponentImplementor}}}. No modifications to this table should be made outside of methods that belong to classes that explicitly inherit from {{{TMW.Classes.GenericComponent}}}.
+-- @field Components [table] An array of all the [[api/base-classes/generic-component/|GenericComponent]] that have been implemented into this [[api/base-classes/generic-component-implementor/|GenericComponentImplementor]]. No modifications to this table should be made outside of methods that belong to classes that explicitly inherit from [[api/base-classes/generic-component/|GenericComponent]].
+-- @field ComponentsLookup [table] A dictionary of all the [[api/base-classes/generic-component/|GenericComponent]] that have been implemented into this [[api/base-classes/generic-component-implementor/|GenericComponentImplementor]]. No modifications to this table should be made outside of methods that belong to classes that explicitly inherit from [[api/base-classes/generic-component/|GenericComponent]].
 TMW:NewClass("GenericComponentImplementor"){
 	OnNewInstance_GenericComponentImplementor = function(self)
 		self.Components = {}

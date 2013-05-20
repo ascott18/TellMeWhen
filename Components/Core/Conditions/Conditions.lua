@@ -888,9 +888,9 @@ end
 -- Public Constructor Wrapper Methods
 ----------------------------------------------
 
---- Gets a {{{TMW.Classes.ConditionObjectConstructor}}} instance.
+--- Gets a [[api/conditions/api-documentation/condition-object-constructor/|ConditionObjectConstructor]] instance.
 -- If a pre-used one is not available for use, a new one will be created.
--- @return [{{{TMW.Classes.ConditionObjectConstructor}}}] An instance of a {{{TMW.Classes.ConditionObjectConstructor}}}.
+-- @return [[[api/conditions/api-documentation/condition-object-constructor/|ConditionObjectConstructor]]] An instance of a [[api/conditions/api-documentation/condition-object-constructor/|ConditionObjectConstructor]].
 function CNDT:GetConditionObjectConstructor()
 	for _, instance in pairs(TMW.Classes.ConditionObjectConstructor.instances) do
 		if instance.status == "ready" then
@@ -901,10 +901,10 @@ function CNDT:GetConditionObjectConstructor()
 	return TMW.Classes.ConditionObjectConstructor:New()
 end
 
---- Gets a [[http://wow.curseforge.com/addons/tellmewhen/pages/api/conditions/api-documentation/condition-object/|ConditionObject]] for the specified parent and condition settings.
+--- Gets a [[api/conditions/api-documentation/condition-object/|ConditionObject]] for the specified parent and condition settings.
 -- @param parent [table] The parent object of the ConditionObject.
 -- @param conditionSettings [table] The condition settings that the ConditionObject will be created for.
--- @return [ [[http://wow.curseforge.com/addons/tellmewhen/pages/api/conditions/api-documentation/condition-object/|ConditionObject]]|nil] A [[http://wow.curseforge.com/addons/tellmewhen/pages/api/conditions/api-documentation/condition-object/|ConditionObject]] instance (may be previously cached or may be a new instance), or nil if the conditions passed in were invalid.
+-- @return [ [[api/conditions/api-documentation/condition-object/|ConditionObject]]|nil] A [[api/conditions/api-documentation/condition-object/|ConditionObject]] instance (may be previously cached or may be a new instance), or nil if the conditions passed in were invalid.
 function CNDT:GetConditionObject(parent, conditionSettings)
 	local conditionString = CNDT:GetConditionCheckFunctionString(parent, conditionSettings)
 	
@@ -933,7 +933,7 @@ end
 CNDT.Categories = {}
 CNDT.CategoriesByID = {}
 
---- Gets a [[http://wow.curseforge.com/addons/tellmewhen/pages/api/conditions/api-documentation/condition-category/|ConditionCategory]] instance. If one does not already exist with the specified identifier, a new one will be created.
+--- Gets a [[api/conditions/api-documentation/condition-category/|ConditionCategory]] instance. If one does not already exist with the specified identifier, a new one will be created.
 -- @param identifier [string] A string that will uniquely identify this category.
 -- @param order [number] The order of this category, relative to other categories, in the condition type dropdown menu.
 -- @param categoryName [string] Localized name of the category.
@@ -972,15 +972,15 @@ TMW:NewClass("ConditionSetImplementor"){
 		end
 	end,
 	
-	--- Gets a {{{TMW.Classes.ConditionObjectConstructor}}} and loads in self as the parent and the passed in settings as the settings.
+	--- Gets a [[api/conditions/api-documentation/condition-object-constructor/|ConditionObjectConstructor]] and loads in self as the parent and the passed in settings as the settings.
 	-- @name ConditionSetImplementor:Conditions_GetConstructor
 	-- @paramsig conditionSettings
 	-- @param conditionSettings [table] The condition settings that will be loaded into the ConditionObjectConstructor.
-	-- @return [{{{TMW.Classes.ConditionObjectConstructor}}}] An instance of a ConditionObjectConstructor.
+	-- @return [[[api/conditions/api-documentation/condition-object-constructor/|ConditionObjectConstructor]]] An instance of a ConditionObjectConstructor.
 	-- @usage local ConditionObjectConstructor = icon:Conditions_GetConstructor(icon.Conditions)
 	-- icon.ConditionObject = ConditionObjectConstructor:Construct()
 	Conditions_GetConstructor = function(self, conditionSettings)
-		local ConditionObjectConstructor = TMW.CNDT:GetConditionObjectConstructor()
+		local ConditionObjectConstructor = CNDT:GetConditionObjectConstructor()
 		
 		ConditionObjectConstructor:LoadParentAndConditions(self, conditionSettings)
 		
@@ -990,7 +990,7 @@ TMW:NewClass("ConditionSetImplementor"){
 
 --- Registers a Condition Set. A condition set defines an implementation of conditions.
 -- @param identifier [string] An identifier for this condition set.
--- @param conditionSetData [table] A table that defines how the condition set is implemented. See the [[http://wow.curseforge.com/addons/tellmewhen/pages/api/conditions/api-documentation/condition-set-specification|Condition Set Specification]]
+-- @param conditionSetData [table] A table that defines how the condition set is implemented. See the [[api/conditions/api-documentation/condition-set-specification|Condition Set Specification]]
 function CNDT:RegisterConditionSet(identifier, conditionSetData)
 	local data = conditionSetData
 	
@@ -1054,7 +1054,7 @@ function CNDT:RegisterConditionSet(identifier, conditionSetData)
 	end
 end
 
---- Inherits {{{TMW.Classes.ConditionSetImplementor}}} into the specified class. This should be done when a class implements a ConditionSet.
+--- Inherits {{{TMW.Classes.ConditionSetImplementor}}} (Its only method is documented on this page) into the specified class. This should be done when a class implements a ConditionSet.
 -- Provides the {{{ConditionSetImplementor:Conditions_GetConstructor()}}} method to that class.
 -- @param className [string] The name of a class that ConditionSetImplementor should be inherited into.
 -- @usage TMW.CNDT:RegisterConditionSetImplementingClass("Icon")

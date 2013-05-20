@@ -20,7 +20,7 @@ local print = TMW.print
 local CNDT = TMW.CNDT
 
 
---- A {{{TMW.Classes.ConditionObjectConstructor}}} aids in the creation of a [[http://wow.curseforge.com/addons/tellmewhen/pages/api/conditions/api-documentation/condition-object/|ConditionObject]]
+--- A [[api/conditions/api-documentation/condition-object-constructor/|ConditionObjectConstructor]] aids in the creation of a [[api/conditions/api-documentation/condition-object/|ConditionObject]]
 -- 
 -- It provides methods for modifying the settings of conditions before they are created without actually changing a user's settings.
 -- 
@@ -32,9 +32,9 @@ local ConditionObjectConstructor = TMW:NewClass("ConditionObjectConstructor")
 
 ConditionObjectConstructor.status = "ready"
 
---- Loads the parent and the Condition settings that will be used to construct a [[http://wow.curseforge.com/addons/tellmewhen/pages/api/conditions/api-documentation/condition-object/|ConditionObject]].
--- @param parent [table] The parent of the [[http://wow.curseforge.com/addons/tellmewhen/pages/api/conditions/api-documentation/condition-object/|ConditionObject]] that will be created.
--- @param Conditions [table] The condition settings that will be used to create a [[http://wow.curseforge.com/addons/tellmewhen/pages/api/conditions/api-documentation/condition-object/|ConditionObject]].
+--- Loads the parent and the Condition settings that will be used to construct a [[api/conditions/api-documentation/condition-object/|ConditionObject]].
+-- @param parent [table] The parent of the [[api/conditions/api-documentation/condition-object/|ConditionObject]] that will be created.
+-- @param Conditions [table] The condition settings that will be used to create a [[api/conditions/api-documentation/condition-object/|ConditionObject]].
 function ConditionObjectConstructor:LoadParentAndConditions(parent, Conditions)	
 	assert(self.status == "ready", "Cannot :LoadParentAndConditions() to a ConditionObjectConstructor whose status is not 'ready'!")
 	
@@ -46,7 +46,7 @@ function ConditionObjectConstructor:LoadParentAndConditions(parent, Conditions)
 end
 
 --- Returns a copy of the settings table that was loaded through :LoadConditions() that can be modified without changing user settings.
--- This copy of settings will be used to :Construct() the [[http://wow.curseforge.com/addons/tellmewhen/pages/api/conditions/api-documentation/condition-object/|ConditionObject]] instead of the originally loaded conditions.
+-- This copy of settings will be used to :Construct() the [[api/conditions/api-documentation/condition-object/|ConditionObject]] instead of the originally loaded conditions.
 -- @return [table] A copy of the originally loaded condition settings that can be safely modified.
 function ConditionObjectConstructor:GetPostUserModifiableConditions()
 
@@ -87,9 +87,9 @@ function ConditionObjectConstructor:Modify_WrapExistingAndAppendNew()
 	return mod[mod.n]
 end
 
---- Constructs  a [[http://wow.curseforge.com/addons/tellmewhen/pages/api/conditions/api-documentation/condition-object/|ConditionObject]] from the conditions that have been loaded into this ConditionObjectConstructor.
+--- Constructs  a [[api/conditions/api-documentation/condition-object/|ConditionObject]] from the conditions that have been loaded into this ConditionObjectConstructor.
 -- If :GetPostUserModifiableConditions() was called, that copy of condition settings will be used instead.
--- @return [[[http://wow.curseforge.com/addons/tellmewhen/pages/api/conditions/api-documentation/condition-object/|ConditionObject]]] A ConditionObject based on the ConditionObjectConstructor's settings.
+-- @return [[[api/conditions/api-documentation/condition-object/|ConditionObject]]] A ConditionObject based on the ConditionObjectConstructor's settings.
 function ConditionObjectConstructor:Construct()	
 	local ConditionObject = CNDT:GetConditionObject(self.parent, self.ConditionsToConstructWith)
 	

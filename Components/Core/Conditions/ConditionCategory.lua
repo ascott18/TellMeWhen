@@ -20,7 +20,7 @@ local print = TMW.print
 local CNDT = TMW.CNDT
 
 
---- A [[http://wow.curseforge.com/addons/tellmewhen/pages/api/conditions/api-documentation/condition-category/|ConditionCategory]] provides an interface for registering condition types.
+--- A [[api/conditions/api-documentation/condition-category/|ConditionCategory]] provides an interface for registering condition types.
 -- 
 -- It should not be directly instantiated - use CNDT:GetCategory() to get or create a category.
 -- 
@@ -56,7 +56,7 @@ end
 --- Registers a condition to the category.
 -- @param order [number] The order that the condition should be listed in its category's dropdown menu.
 -- @param identifier [string] A string (all capital letters, and keep it fairly short) that will identify the condition.
--- @param conditionData [table] The data that describes the condition's appearance, function, and configuration options. See the [[http://wow.curseforge.com/addons/tellmewhen/pages/api/conditions/api-documentation/condition-data-specification|Condition Data Specification]]
+-- @param conditionData [table] The data that describes the condition's appearance, function, and configuration options. See the [[api/conditions/api-documentation/condition-data-specification|Condition Data Specification]]
 -- @usage 
 --  ConditionCategory:RegisterCondition(1,   "SPELLCD", {
 --    text = L["SPELLCOOLDOWN"],

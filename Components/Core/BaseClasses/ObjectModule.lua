@@ -20,9 +20,9 @@ local print = TMW.print
 local pairs = pairs
 
 
---- {{{TMW.Classes.ObjectModule}}} is a base class of any objects that will be implemented into a {{{TMW.Classes.GenericModuleImplementor}}}. A {{{TMW.Classes.ObjectModule}}} provides frames, script handling, and other functionality to a {{{TMW.Classes.GenericModuleImplementor}}}. 
+--- [[api/base-classes/object-module/|ObjectModule]] is a base class of any objects that will be implemented into a [[api/base-classes/generic-module-implementor/|GenericModuleImplementor]]. A [[api/base-classes/object-module/|ObjectModule]] provides frames, script handling, and other functionality to a [[api/base-classes/generic-module-implementor/|GenericModuleImplementor]]. 
 -- 
--- ObjectModule provides a common base for these objects, and it provides methods for enabling, disabling, and modifying script handlers. It is an abstract class, and should not be directly instantiated. All classes that inherit from {{{TMW.Classes.ObjectModule}}} should not be instantiated outside of the internal code used by a {{{TMW.Classes.IconView}}}. To create a new module, create a new class and inherit {{{TMW.Classes.ObjectModule}}} or another class that directly or indirectly inherits from {{{TMW.Classes.ObjectModule}}}.
+-- ObjectModule provides a common base for these objects, and it provides methods for enabling, disabling, and modifying script handlers. It is an abstract class, and should not be directly instantiated. All classes that inherit from [[api/base-classes/object-module/|ObjectModule]] should not be instantiated outside of the internal code used by a [[api/icon-views/api-documentation/|IconView]]. To create a new module, create a new class and inherit [[api/base-classes/object-module/|ObjectModule]] or another class that directly or indirectly inherits from [[api/base-classes/object-module/|ObjectModule]].
 -- 
 -- @class file
 -- @name ObjectModule.lua
@@ -51,7 +51,7 @@ function ObjectModule:OnClassInherit_ObjectModule(newClass)
 	newClass:InheritTable(self, "ScriptHandlers")
 end
 
---- Enables an instance of a {{{TMW.Classes.ObjectModule}}}. An {{{TMW.Classes.ObjectModule}}} should and will only function when it is enabled.
+--- Enables an instance of a [[api/base-classes/object-module/|ObjectModule]]. An [[api/base-classes/object-module/|ObjectModule]] should, and will, only function when it is enabled.
 function ObjectModule:Enable()
 	self:AssertSelfIsInstance()
 	
@@ -68,7 +68,7 @@ function ObjectModule:Enable()
 	end
 end
 
---- Disables an instance of a {{{TMW.Classes.ObjectModule}}}. An {{{TMW.Classes.ObjectModule}}} should and will only function when it is enabled.
+--- Disables an instance of a [[api/base-classes/object-module/|ObjectModule]]. An [[api/base-classes/object-module/|ObjectModule]] should, and will, only function when it is enabled.
 function ObjectModule:Disable()
 	self:AssertSelfIsInstance()
 	
@@ -85,7 +85,7 @@ function ObjectModule:Disable()
 	end
 end
 
---- Sets a script handler that interacts with any {{{TMW.Classes.GenericModuleImplementor}}} that have implemented an instance of this {{{TMW.Classes.ObjectModule}}}. This script handler will only be active when {{{TMW.Classes.ObjectModule.IsEnabled == true}}} for an implemented instance. This method must be called on a class - you cannot set the script handler separately for individual instances of {{{TMW.Classes.ObjectModule}}}.
+--- Sets a script handler that interacts with any [[api/base-classes/generic-module-implementor/|GenericModuleImplementor]] that have implemented an instance of this [[api/base-classes/object-module/|ObjectModule]]. This script handler will only be active when {{{ObjectModule.IsEnabled == true}}} for an implemented instance. This method must be called on a class - you cannot set the script handler separately for individual instances of [[api/base-classes/object-module/|ObjectModule]].
 -- @param script [string] A script to set, like "OnClick" or "OnDragStart".
 -- @param func [function|nil] A function that will be used a script handler. Pass nil to remove any inherited script handlers.
 -- @usage -- Example usage from IconModule_RecieveSpellDrags:
@@ -103,11 +103,11 @@ function ObjectModule:SetScriptHandler(script, func)
 end
 
 
---- Provides a wrapper around {{{TMW.Class.IconView}}}{{{:ImplementsModule()}}} that allows you to instruct an instance of {{{TMW.Classes.IconView}}} to implement a module without having direct access to that view instance.
--- @param viewName [string] The identifier of a {{{TMW.Class.IconView}}} as passed to the first param of {{{TMW.Class.IconView}}}'s constructor.
--- @param order [number] The order that this module should be implemented in, relative to other modules of the same kind (icon or group) implemented by the specified {{{TMW.Classes.IconView}}}. 
--- @param implementorFunc [function|boolean|nil] See {{{TMW.Classes.IconView}}}'s documentation for a description of this param.
--- @see http://wow.curseforge.com/addons/tellmewhen/pages/api/icon-views/api-documentation/#w-icon-view-implements-module-module-name-order-implementor
+--- Provides a wrapper around [[api/icon-views/api-documentation/|IconView]]{{{:ImplementsModule()}}} that allows you to instruct an instance of [[api/icon-views/api-documentation/|IconView]] to implement a module without having direct access to that view instance.
+-- @param viewName [string] The identifier of a [[api/icon-views/api-documentation/|IconView]] as passed to the first param of [[api/icon-views/api-documentation/|IconView]]'s constructor.
+-- @param order [number] The order that this module should be implemented in, relative to other modules of the same kind (icon or group) implemented by the specified [[api/icon-views/api-documentation/|IconView]]. 
+-- @param implementorFunc [function|boolean|nil] See [[api/icon-views/api-documentation/|IconView]]'s documentation for a description of this param.
+-- @see api/icon-views/api-documentation/#w-icon-view-implements-module-module-name-order-implementor
 function ObjectModule:SetImplementorForView(viewName, order, implementorFunc)
 	self:AssertSelfIsClass()
 	

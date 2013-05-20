@@ -24,7 +24,7 @@ local tDeleteItem = TMW.tDeleteItem
 local DogTag = LibStub("LibDogTag-3.0", true)
 
 
---- {{{TMW.Classes.IconComponent}}} is a base class of any objects that will be implemented into a {{{TMW.Classes.Icon}}}
+--- [[api/base-classes/icon-component/|IconComponent]] is a base class of any objects that will be implemented into a [[api/icon/api-documentation/|Icon]]
 -- 
 -- IconComponent provides a common base for these objects, and it provides various methods for registering default icon settings, Icon Editor configuration panels, and Icon events. It is an abstract class, and should not be directly instantiated.
 -- 
@@ -52,7 +52,7 @@ function IconComponent:OnNewInstance_IconComponent()
 	self:InheritTable(self.class, "IconEvents")
 end
 
---- Register some icon event handler data with a {{{TMW.Classes.EventHandler}}}. This event handler data will only be avaialable to a {{{TMW.Classes.EventHandler}}} when the {{{TMW.Classes.Icon}}} for which an event is behind handled implements this {{{TMW.Classes.IconComponent}}}.
+--- Register some icon event handler data with a {{{TMW.Classes.EventHandler}}}. This event handler data will only be avaialable to a {{{TMW.Classes.EventHandler}}} when the [[api/icon/api-documentation/|Icon]] for which an event is being handled implements this [[api/base-classes/icon-component/|IconComponent]].
 -- @param eventHandlerName [string] name of an instance of {{{TMW.Classes.EventHandler}}} that the data should be registered and validated with. The instance does not have to exist before this method is called.
 -- @param ... [...] Data as required by the {{{TMW.Classes.EventHandler}}} that it is being registered with. See the documentation of the {{{OnRegisterEventHandlerDataTable}}} method of individual {{{TMW.Classes.EventHandler}}} instances for more information.
 -- @usage
@@ -102,7 +102,7 @@ function IconComponent:RegisterEventHandlerData(eventHandlerName, ...)
 	end
 end
 
---- Register a set of icon defaults with an {{{TMW.Classes.IconComponent}}}. These defaults will be merged into {{{TMW.Icon_Defaults}}} and the value of their settings for each icon will be avaialable as {{{TMW.Classes.Icon[settingKey]}}} when this {{{TMW.Classes.IconComponent}}} has been implemented into a {{{TMW.Classes.Icon}}}.
+--- Register a set of icon defaults with an [[api/base-classes/icon-component/|IconComponent]]. These defaults will be merged into {{{TMW.Icon_Defaults}}} and the value of their settings for each icon will be avaialable as {{{TMW.Classes.Icon[settingKey]}}} when this [[api/base-classes/icon-component/|IconComponent]] has been implemented into a [[api/icon/api-documentation/|Icon]].
 -- @param defaults [table] A table of default settings that will be merged into {{{TMW.Icon_Defaults}}}.
 -- @usage -- Taken from TMW.Types.meta:
 --  Type:RegisterIconDefaults{
@@ -127,7 +127,7 @@ function IconComponent:RegisterIconDefaults(defaults)
 	TMW:MergeDefaultsTables(defaults, self.IconSettingDefaults)
 end
 
---- Registers an icon event with an {{{TMW.Classes.IconComponent}}}. This event will be available for use with an {{{TMW.Classes.Icon}}} when this {{{TMW.Classes.IconComponent}}} has been implemented into a {{{TMW.Classes.Icon}}}.
+--- Registers an icon event with an [[api/base-classes/icon-component/|IconComponent]]. This event will be available for use with an [[api/icon/api-documentation/|Icon]] when this [[api/base-classes/icon-component/|IconComponent]] has been implemented into a [[api/icon/api-documentation/|Icon]].
 -- @param order [number] The order of this icon event relative to other events when displayed in configuration UIs.
 -- @param event [string] The identifier of the event that will be used across TMW to refer to the event being registered.
 -- @param eventData [table] A table containing the following fields that describe the event:
@@ -233,9 +233,9 @@ end
 -- @param order [number] The order of the config panel relative to other panels in the Icon Editor.
 -- @param frameName [string] The name that will be given to the panel when it is created.
 -- @param func [function] A function that will be called immediately after the frame for this panel has been constructed. The panel inherits from XML template {{{TellMeWhen_OptionsModuleContainer}}}, and will be passed as the first arg to this function.
--- @param supplementalData [.*] Any data that will be associated with the created frame when it is used for this specific {{{TellMeWhen.Classes.IconComponent}}} implementation. This data can be accessed through the 2nd arg of event {{{TMW_CONFIG_PANEL_SETUP}}} as can be seen in the usage example below. Using {{{supplementalData}}} with {{{:RegisterConfigPanel_ConstructorFunc}}} is highly impractical since panels created using this method cannot be shared with other {{{TMW.Classes.IconComponent}}}, and the purpose of {{{supplementalData}}} is to encourage the reusability of frames.
+-- @param supplementalData [.*] Any data that will be associated with the created frame when it is used for this specific {{{TellMeWhen.Classes.IconComponent}}} implementation. This data can be accessed through the 2nd arg of event {{{TMW_CONFIG_PANEL_SETUP}}} as can be seen in the usage example below. Using {{{supplementalData}}} with {{{:RegisterConfigPanel_ConstructorFunc}}} is highly impractical since panels created using this method cannot be shared with other [[api/base-classes/icon-component/|IconComponent]], and the purpose of {{{supplementalData}}} is to encourage the reusability of frames.
 -- @usage
---  -- Taken from the example at http://wow.curseforge.com/addons/tellmewhen/pages/api/icon-type/how-to-use/
+--  -- Taken from the example at api/icon-type/how-to-use/
 --  Type:RegisterConfigPanel_ConstructorFunc(150, "TellMeWhen_TestTypeSettings", function(self)
 --    self.Header:SetText(Type.name)
 --    TMW.IE:BuildSimpleCheckSettingFrame(self, {

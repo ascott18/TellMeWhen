@@ -1,7 +1,7 @@
 
 = Condition Data Table Specification
 
-The Condition Data table is a table that completely describes a condition. See [[http://wow.curseforge.com/addons/tellmewhen/pages/api/conditions/api-documentation/condition-category/|ConditionCategory]]{{{:RegisterCondition()}}} for information about where this table is passed to.
+The Condition Data table is a table that completely describes a condition. See [[api/conditions/api-documentation/condition-category/|ConditionCategory]]{{{:RegisterCondition()}}} for information about where this table is passed to.
 
 The funcstr field is the only one that is required. Errors may happen with the omission of some others, though.
 

@@ -21,9 +21,9 @@ local pairs, error, rawget, next, wipe, tinsert, sort, strsplit, table, assert, 
 	= pairs, error, rawget, next, wipe, tinsert, sort, strsplit, table, assert, loadstring, ipairs, tostring, assert
 
 
---- {{{TMW.Classes.Icon}}} is the class of all Icons.
+--- [[api/icon/api-documentation/|Icon]] is the class of all Icons.
 -- 
--- Icon inherits explicitly from {{{Blizzard.Button}}} and from {{{TMW.Classes.GenericModuleImplementor}}}, and implicitly from the classes that it inherits. 
+-- Icon inherits explicitly from {{{Blizzard.Button}}} and from [[api/base-classes/generic-module-implementor/|GenericModuleImplementor]], and implicitly from the classes that it inherits. 
 -- 
 -- Icon is the class of all TMW icons, which are the very heart of what TMW is and what it does. Icons provide the methods and functionality that Icon Types need to do their jobs. They also provide other API, like icon event handling, and they provide all the methods needed for setup and updating. Icons themselves do not create or provide any appearance, child frames, or layers - this is functionality that is given to Icon Modules.
 -- 
@@ -208,7 +208,7 @@ end
 --- Returns the settings table that holds the view-specific settings for the icon.
 -- @name Icon:GetSettingsPerView
 -- @paramsig view
--- @param [string|nil] The identifier of the {{{TMW.Classes.IconView}}} to get settings for, or nil to use the icon's current view.
+-- @param [string|nil] The identifier of the [[api/icon-views/api-documentation/|IconView]] to get settings for, or nil to use the icon's current view.
 -- @return [{{{TMW.Icon_Defaults.SettingsPerView[view]}}}] The settings table that holds the view-specific settings for the icon.
 -- @usage local icspv = icon:GetSettingsPerView()
 -- 
@@ -230,10 +230,10 @@ end
 
 --- Queues an icon event to be fired.
 -- 
--- The event must have been registed through {{{TMW.Classes.IconComponent}}}{{{:RegisterIconEvent()}}}.
+-- The event must have been registed through [[api/base-classes/icon-component/|IconComponent]]{{{:RegisterIconEvent()}}}.
 -- @name Icon:QueueEvent
 -- @paramsig eventInfo
--- @param eventInfo [string|table] Either a string that identifies the event (as registered with {{{TMW.Classes.IconComponent}}}{{{:RegisterIconEvent()}}}) that will be fired (all events of that type will be attempted to be fire), or a table of event settings that is in {{{icon:GetSettings().Events}}} (only that specific event and its settings will be fired). The event will not actually be fired until {{{icon:ProcessQueuedEvents()}}} is called.
+-- @param eventInfo [string|table] Either a string that identifies the event (as registered with [[api/base-classes/icon-component/|IconComponent]]{{{:RegisterIconEvent()}}}) that will be fired (all events of that type will be attempted to be fire), or a table of event settings that is in {{{icon:GetSettings().Events}}} (only that specific event and its settings will be fired). The event will not actually be fired until {{{icon:ProcessQueuedEvents()}}} is called.
 -- @usage -- From IconDataProcessor_Alpha_Real: (An example of calling by passing an event identifier)
 --  if icon.EventHandlersSet.OnHide then
 --    icon:QueueEvent("OnHide")
@@ -361,7 +361,7 @@ end)
 -- @name Icon:RegisterSimpleUpdateEvent
 -- @paramsig event, arg1
 -- @param event [string] A Blizzard event.
--- @param arg1 [//any//] An optional arg that must match the first arg of the Blizzard event for the icon update to be triggered. Nil to cause the icon to be updated for any firings of the event, regardless of its first arg. Any event handling that requires checking more than just the first arg should be done manually by the {{{TMW.Classes.IconType}}} that needs it (use {{{icon:RegisterEvent(event)}}} and {{{icon:SetScript("OnEvent", func)}}} where func is a function that will parse the event args and sets {{{icon.NextUpdateTime}}} to the value of TMW.time at which the icon should be update next, or 0 if an immediate update should happen.
+-- @param arg1 [//any//] An optional arg that must match the first arg of the Blizzard event for the icon update to be triggered. Nil to cause the icon to be updated for any firings of the event, regardless of its first arg. Any event handling that requires checking more than just the first arg should be done manually by the [[api/icon-type/api-documentation/|IconType]] that needs it (use {{{icon:RegisterEvent(event)}}} and {{{icon:SetScript("OnEvent", func)}}} where func is a function that will parse the event args and sets {{{icon.NextUpdateTime}}} to the value of TMW.time at which the icon should be update next, or 0 if an immediate update should happen.
 -- @usage icon:RegisterSimpleUpdateEvent("SPELL_UPDATE_COOLDOWN")
 -- icon:RegisterSimpleUpdateEvent("UNIT_POWER_FREQUENT", "player")
 function Icon.RegisterSimpleUpdateEvent(icon, event, arg1)
@@ -408,7 +408,7 @@ end
 
 --- Attempts to update an icon.
 -- 
--- This should normally only be called at the end of a {{{TMW.Classes.IconType}}}{{{:Setup()}}} method (unless your IconTypes's proper functionality requires that you not do so). 
+-- This should normally only be called at the end of a [[api/icon-type/api-documentation/|IconType]]{{{:Setup()}}} method (unless your IconTypes's proper functionality requires that you not do so). 
 -- You may also call it anywhere else as you deem appropriate, but in most normal situations, there is no need to do so. 
 -- 
 -- It is automatically called for every valid icon that has an update function defined (through {{{icon:SetUpdateFunction()}}}) each update cycle in the TMW icon update engine.
@@ -535,7 +535,7 @@ end
 
 --- Completely disables and rests an icon to a near-default state.
 -- 
--- Unimplements all {{{TMW.Classes.IconComponent}}}s, resets update function and method, unregisters all events, and hides the icon.
+-- Unimplements all [[api/base-classes/icon-component/|IconComponent]]s, resets update function and method, unregisters all events, and hides the icon.
 -- @name Icon:DisableIcon
 -- @paramsig 
 function Icon.DisableIcon(icon)
@@ -562,7 +562,7 @@ end
 
 --- Completely sets up an icon.
 -- 
--- Implements all requested {{{TMW.Classes.IconComponent}}}s, processes settings, sets up conditions, calls {{{TMW.Classes.IconType}}}{{{:Setup()}}}, and prepares the icon to be updated or configured.
+-- Implements all requested [[api/base-classes/icon-component/|IconComponent]]s, processes settings, sets up conditions, calls [[api/icon-type/api-documentation/|IconType]]{{{:Setup()}}}, and prepares the icon to be updated or configured.
 -- 
 -- This method should not be called manually while TellMeWhen is locked. It may be called liberally from wherever you see fit when in configuration mode.
 -- @name Icon:Setup
@@ -954,10 +954,10 @@ end})
 
 --- Sets attributes of an icon.
 -- 
--- The attributes passed to this function will be processed by a {{{TMW.Classes.IconDataProcessor}}} (and possibly one or more {{{TMW.Classes.IconDataProcessorHook}}}) and interested {{{TMW.Classes.IconModule}}}s will be notified of any changes to the attributes.
+-- The attributes passed to this function will be processed by a [[api/icon-data-processor/api-documentation/|IconDataProcessor]] (and possibly one or more [[api/icon-data-processor-hook/api-documentation/|IconDataProcessorHook]]) and interested [[api/icon-module/api-documentation/|IconModule]]s will be notified of any changes to the attributes.
 -- @name Icon:SetInfo
 -- @paramsig signature, ...
--- @param signature [string] A semicolon-delimited string of attribute strings as passed to the constructor of a {{{TMW.Classes.IconDataProcessor}}}.
+-- @param signature [string] A semicolon-delimited string of attribute strings as passed to the constructor of a [[api/icon-data-processor/api-documentation/|IconDataProcessor]].
 -- @param ... [...] Any number of params that will match up one-for-one with the signature passed in.
 -- @usage icon:SetInfo("texture", "Interface\\AddOns\\TellMeWhen\\Textures\\Disabled")
 --  
@@ -1010,7 +1010,7 @@ end})
 -- @name Icon:SetInfo_INTERNAL
 -- @paramsig signature, ...
 -- @see Icon:SetInfo()
--- @returns [boolean] If true, and if SetInfo_INTERNAL is being called from within the body of an {{{TMW.Classes.IconDataProcessorHook}}}, {{{doFireIconUpdated}}} (local variable within the {{{icon:SetInfo()}}} method) should be set to true.
+-- @returns [boolean] If true, and if SetInfo_INTERNAL is being called from within the body of an [[api/icon-data-processor-hook/api-documentation/|IconDataProcessorHook]], {{{doFireIconUpdated}}} (local variable within the {{{icon:SetInfo()}}} method) should be set to true.
 -- @usage -- An example from Components/Core/IconDataProcessors/IconDataProcessor_Unit_DogTag/Unit_DogTag.lua:
 --  Hook:RegisterCompileFunctionSegmentHook("post", function(Processor, t)
 --    t[#t+1] = [[

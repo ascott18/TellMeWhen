@@ -22,7 +22,7 @@ local error
 local tDeleteItem = TMW.tDeleteItem
 
 
---- {{{TMW.Classes.GroupComponent}}} is a base class of any objects that will be implemented into a {{{TMW.Classes.Group}}}
+--- [[api/base-classes/group-component/|GroupComponent]] is a base class of any objects that will be implemented into a [[api/group/api-documentation/|Group]]
 -- 
 -- GroupComponent provides a common base for these objects, and it provides methods for registering default group settings and group configuration tables. It is an abstract class, and should not be directly instantiated.
 -- 
@@ -72,7 +72,7 @@ local function getParentTableFromPath(path)
 	return parentTable
 end
 
---- Registers an AceConfig-3.0 options table that will only be displayed for groups that implement this {{{TMW.Classes.GroupComponent}}}. May be called before TellMeWhen_Options has been loaded.
+--- Registers an AceConfig-3.0 options table that will only be displayed for groups that implement this [[api/base-classes/group-component/|GroupComponent]]. May be called before TellMeWhen_Options has been loaded.
 -- @param parentTable [table|string] The parent table that {{{configTable}}} will be put in. Should be an AceConfig-3.0 {{{args}}} table, and should be nested within {{{TMW.GroupConfigTemplate}}}. If passed a string, this should be a period-delimited path to the desired parentTable, relative to {{{TMW.GroupConfigTemplate}}}. A string should be passed when calling this method before TellMeWhen_Options has been loaded.
 -- @param key [string] The key that {{{configTable}}} will be assigned within {{{parentTable}}}.
 -- @param configTable [table] The table that contains the necessary AceConfig-3.0 settings data.

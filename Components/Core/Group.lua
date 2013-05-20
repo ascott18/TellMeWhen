@@ -23,9 +23,9 @@ local UnitAffectingCombat, GetActiveSpecGroup, GetSpecialization
 	= UnitAffectingCombat, GetActiveSpecGroup, GetSpecialization
 
 
---- {{{TMW.Classes.Group}}} is the class of all Icons.
+--- [[api/group/api-documentation/|Group]] is the class of all Icons.
 -- 
--- Group inherits explicitly from {{{Blizzard.Frame}}} and from {{{TMW.Classes.GenericModuleImplementor}}}, and implicitly from the classes that it inherits. 
+-- Group inherits explicitly from {{{Blizzard.Frame}}} and from [[api/base-classes/generic-module-implementor/|GenericModuleImplementor]], and implicitly from the classes that it inherits. 
 -- 
 -- Group is the class of all TMW groups, which serve as a container for TMW icons. The job of a group is to size & position icons and to provide functionality that can affect multiple icons at once, such as only showing in certain specs. They provide all the methods needed for setup and updating themselves and the icons within them. Icons themselves do not create or provide any child frames or layers - this is functionality that is given to Group Modules & individual icons.
 -- 
@@ -176,7 +176,7 @@ end
 --- Returns the settings table that holds the view-specific settings for the group.
 -- @name Group:GetSettingsPerView
 -- @paramsig view
--- @param [string|nil] The identifier of the {{{TMW.Classes.IconView}}} to get settings for, or nil to use the group's current view.
+-- @param [string|nil] The identifier of the [[api/icon-views/api-documentation/|IconView]] to get settings for, or nil to use the group's current view.
 -- @return [{{{TMW.Group_Defaults.SettingsPerView[view]}}}] The settings table that holds the view-specific settings for the group.
 -- @usage local icspv = group:GetSettingsPerView()
 -- 
@@ -250,7 +250,7 @@ end
 
 --- Completely sets up a group.
 -- 
--- Implements all requested {{{TMW.Classes.GroupComponent}}}s, processes settings, sets up conditions, and then sets up all the icons that it contains.
+-- Implements all requested [[api/base-classes/group-component/|GroupComponent]]s, processes settings, sets up conditions, and then sets up all the icons that it contains.
 -- 
 -- This method should not be called manually while TellMeWhen is locked. It may be called liberally from wherever you see fit when in configuration mode.
 -- @name Group:Setup

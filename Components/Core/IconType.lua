@@ -44,11 +44,11 @@ local RelevantToAll = {
 
 
 
---- {{{TMW.Classes.IconType}}} is the class of all Icon Types.
+--- [[api/icon-type/api-documentation/|IconType]] is the class of all Icon Types.
 -- 
--- IconType inherits explicitly from {{{TMW.Classes.IconComponent}}}, and implicitly from the classes that they inherit. 
+-- IconType inherits explicitly from [[api/base-classes/icon-component/|IconComponent]], and implicitly from the classes that they inherit. 
 -- 
--- Icon Types take data from the WoW API, filter and manipulate it, and then pass it on to one or more {{{TMW.Classes.IconDataProcessor}}} through the icon:SetInfo method. The default Icon Type (also used as the fallback when a requested IconView cannot be found) is identified by a blank string (""). To create a new IconType, make a new instance of the IconType class.
+-- Icon Types take data from the WoW API, filter and manipulate it, and then pass it on to one or more [[api/icon-data-processor/api-documentation/|IconDataProcessor]] through the icon:SetInfo method. The default Icon Type (also used as the fallback when a requested IconView cannot be found) is identified by a blank string (""). To create a new IconType, make a new instance of the IconType class.
 -- 
 -- Instructions on how to use this API can be found at [[api/icon-type/how-to-use/]]
 -- 
