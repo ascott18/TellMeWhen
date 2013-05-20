@@ -107,7 +107,7 @@ end
 -- @param viewName [string] The identifier of a [[api/icon-views/api-documentation/|IconView]] as passed to the first param of [[api/icon-views/api-documentation/|IconView]]'s constructor.
 -- @param order [number] The order that this module should be implemented in, relative to other modules of the same kind (icon or group) implemented by the specified [[api/icon-views/api-documentation/|IconView]]. 
 -- @param implementorFunc [function|boolean|nil] See [[api/icon-views/api-documentation/|IconView]]'s documentation for a description of this param.
--- @see api/icon-views/api-documentation/#w-icon-view-implements-module-module-name-order-implementor
+-- @see http://wow.curseforge.com/addons/tellmewhen/pages/api/icon-views/api-documentation/#w-icon-view-implements-module-module-name-order-implementor
 function ObjectModule:SetImplementorForView(viewName, order, implementorFunc)
 	self:AssertSelfIsClass()
 	
