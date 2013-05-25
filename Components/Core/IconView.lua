@@ -36,8 +36,8 @@ local rawget, date, tinsert, ipairs, error, ceil
 --- The fields avaiable to instances of TMW.Classes.IconView. TMW.Classes.IconView Inherits TMW.Classes.GroupComponent and TMW.Classes.IconComponent.
 -- @class table
 -- @name TMW.Classes.IconView
--- @field name [string] [REQUIRED] A localized string that names the IconView throughout TMW.
--- @field desc [string] [REQUIRED] A localized string that describes the IconView throughout TMW.
+-- @field name [string] [REQUIRED] A localized string that names the IconView.
+-- @field desc [string] [REQUIRED] A localized string that describes the IconView.
 -- @field view [string] A short string that will identify the IconView across the addon. Set through the constructor, and should not be modified.
 -- @field order [number] A number that determines the display order of the IconView in configuration UIs. Set through IconView:Register and should not be modified.
 
@@ -105,7 +105,7 @@ end
 local doneImplementingDefaults
 
 --- Declare that the IconView should implement a specified IconModule or GroupModule.
--- @param moduleName [string] A string that identifies the requested module. The module doesn't have to exist when :ImplementsModule is called, and if the module does not exist when it comes time to implement it, no error will be thrown.
+-- @param moduleName [string] A string that identifies the requested module's class. The module doesn't have to exist when {{{:ImplementsModule()}}} is called, and if the module class does not exist when it comes time to implement it, no error will be thrown.
 -- @param order [number] The order that this module should be implemented in, relative to other modules of the same kind (icon or group) implemented by this IconView. 
 -- @param implementorFunc [function|boolean|nil] One of the following:
 -- 		* [function] A function that will be called when the module is implemented into a group or icon. Should be used when a module requires some sort of setup (like anchoring to its parent GenericModuleImplementor) to function correctly. Signature of this method is (Module, ModuleImplementor).

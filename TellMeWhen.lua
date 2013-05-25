@@ -15,10 +15,10 @@
 -- ADDON GLOBALS AND LOCALS
 -- ---------------------------------
 
-TELLMEWHEN_VERSION = "6.2.1"
+TELLMEWHEN_VERSION = "6.2.2"
 TELLMEWHEN_VERSION_MINOR = strmatch(" @project-version@", " r%d+") or ""
 TELLMEWHEN_VERSION_FULL = TELLMEWHEN_VERSION .. TELLMEWHEN_VERSION_MINOR
-TELLMEWHEN_VERSIONNUMBER = 62102 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
+TELLMEWHEN_VERSIONNUMBER = 62201 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
 if TELLMEWHEN_VERSIONNUMBER > 63000 or TELLMEWHEN_VERSIONNUMBER < 62000 then
 	-- safety check because i accidentally made the version number 414069 once
 	return error("YOU SCREWED UP THE VERSION NUMBER OR DIDNT CHANGE THE SAFETY LIMITS")
@@ -26,7 +26,7 @@ end
 
 TELLMEWHEN_MAXROWS = 20
 
--- Put requied libs here: (If they fail to load, they will make all of TMW fail to load)
+-- Put required libs here: (If they fail to load, they will make all of TMW fail to load)
 local AceDB = LibStub("AceDB-3.0")
 local L = LibStub("AceLocale-3.0"):GetLocale("TellMeWhen", true)
 

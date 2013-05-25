@@ -59,17 +59,17 @@ local RelevantToAll = {
 --- The fields avaiable to instances of TMW.Classes.IconType. TMW.Classes.IconType inherits from TMW.Classes.IconComponent.
 -- @class table
 -- @name TMW.Classes.IconType
--- @field name [function->|string] A localized string that names the IconType throughout TMW.
--- @field desc [function->|string|nil] A localized string that describes the IconType throughout TMW.
--- @field tooltipTitle [function->|string|nil] A localized string that will be used as the title of the description tooltip for the IconType. Defaults to IconType.name.
+-- @field name [function->|string] A localized string that names the IconType.
+-- @field desc [function->|string|nil] A localized string that describes the IconType.
+-- @field tooltipTitle [function->|string|nil] A localized string that will be used as the title of the description tooltip for the IconType. Defaults to {{{IconType.name}}}.
 -- @field menuIcon [function->|string|nil] Path to the texture that will be displayed in the type selection menu.
 -- @field spacebefore [boolean|nil] True if there should be an empty row displayed before this IconType in the type selection menu.
 -- @field spaceafter [boolean|nil] True if there should be an empty row displayed after this IconType in the type selection menu.
 -- @field hidden [function->|boolean|nil] True if the IconType should not be displayed in the type selection menu.
 
--- @field Icons [table] Array of icons that use this IconType. Automatically updated, and should not be modified.
--- @field type [string] A short string that will identify the IconType across the addon. Set through the constructor, and should not be modified.
--- @field order [number] A number that determines the display order of the IconType in configuration UIs. Set through IconType:Register and should not be modified.
+-- @field Icons [table] [READ-ONLY] Array of icons that use this IconType. Automatically updated, and should not be modified.
+-- @field type [string] [READ-ONLY] A short string that will identify the IconType across the addon. Set through the constructor, and should not be modified.
+-- @field order [number] [READ-ONLY] A number that determines the display order of the IconType in configuration UIs. Set through {{{IconType:Register()}}} and should not be modified.
 
 local IconType = TMW:NewClass("IconType", "IconComponent")
 IconType.UsedAttributes = {}

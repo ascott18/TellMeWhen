@@ -834,7 +834,7 @@
  * Many conditions! Now, handle them!
  * Fixed an issue with cooldowns looking bad on circular LBF skins
  * Overlay bars now go underneath the border of LBF skins
- * Bars and timers will be set to ignore GCD in this version. You will need to toggle this off if you don't want it. (Sorry, i screwed something up in beta9)
+ * Bars and timers will be set to ignore GCD in this version. You will need to toggle this off if you don't want it. (Sorry, i screwed something up in beta 9)
  * Fixed a bug that caused icons that shouldn't be shown to not be hidden when switching profiles or removing rows/columns.
  * Textures should properly reset when switching profiles.
  * Switched to SVN instead of manual file uploads, yay!
@@ -844,17 +844,17 @@
  * Colors on the suggestion list should now be final (known player auras are now shown with a different color than known NPC auras - if you installed the first version of 4.0.1 beta, you may see a few wrong spells, but they will be updated the next time you see them)
  * Fixed the tooltip that appears whilst you mouseover the name editbox in the icon editor with shift held down
  * Fixed a missing translation
- * Reset your aura cache to remove incorrect entires that were put in prior to version 4.0.1 beta3
+ * Reset your aura cache to remove incorrect entires that were put in prior to version 4.0.1 beta 3
  * Spell cast conditions now allow you to specify if the cast must be interruptible.
  * Icon dropdowns for meta icons and icon shown conditions now divide the icons up by group (fix for too many icons syndrome, and to make it easier to find the one you need)
 
-===v4.0.0 beta9===
+===v4.0.0 beta 9===
  * Actually added mainassist and maintank to the unit dropdowns.
  * Fixed an obscure error caused by casts with no start time (this happened on Al'Akir, and only for a split second)
- * Made it impossible for the addon to destroy your settings when upgrading to beta8 from a version older than 3.0.0 after you had already upgraded one character's settings. (This wasn't happening anyway because a restart is absolutely required when upgrading to beta8 from any version)
+ * Made it impossible for the addon to destroy your settings when upgrading to beta 8 from a version older than 3.0.0 after you had already upgraded one character's settings. (This wasn't happening anyway because a restart is absolutely required when upgrading to beta 8 from any version)
  * Fixed an error that was causing Kong UI Hider to break with TMW installed and at least one group enabled.
 
-===v4.0.0 beta8===
+===v4.0.0 beta 8===
  * New condition: Resting.
  * New condition: Encounter Resource, for tracking the level of encounter-specific 'resources' like corruption on Cho'gall and sound on Atramedes.
  * New condition: Talent Tree, for specifying what talent tree must be active.
@@ -874,11 +874,11 @@
  * You can now specify which totem slots to check for totem icons, and it should now be more clear what this icon type can be used for (Totems, Non-MoG ghoul, Wild Mushrooms)
  * Implemented a much more elegant method of generating group settings.
 
-===v4.0.0 beta7===
+===v4.0.0 beta 7===
  * Replaced the checkbox system in the condition editor with a simpler add/remove button, and added buttons to move conditions up or down.
  * Fixed a bug that was breaking multi-state cooldown icons that used spell names.
 
-===v4.0.0 beta6===
+===v4.0.0 beta 6===
  * Made some efficiency improvements in the area of timers and bars; be on the lookout for things that shouldn't be happening.
  * Fixed inverted bars in several cases.
  * Buff icons now show the power bar of whatever icon is currently shown (only matters if you were checking multiple buffs with different costs).
@@ -891,11 +891,11 @@
  * Weapon enchant icons now support cooldown bars.
  * Totem and weapon enchant icons now reverse their timers (so they wipe the bright part away rather than wiping the dark part away).
 
-===v4.0.0 beta5===
+===v4.0.0 beta 5===
  * You will now be alerted when a guild member logs on with a version of TMW that is newer than yours.
  * Unit cooldown icons should properly obey 'Only if seen' when using spellIDs.
 
-===v4.0.0 beta4===
+===v4.0.0 beta 4===
  * Rewrote the entire icon core, kinda. It could be cleaner, but at least its more efficient.
  * Many things are now cached instead of being remade every time, resulting in a reduction of garbage generation by about 1300% (yes, really)
  * Enraged has been added as a dispel type, but it is not truly a dispel type like magic and poison are, just a big list of every known enrage (from http://db.mmo-champion.com/spells/?dispel_type=9)
@@ -910,7 +910,7 @@
  * Added trap launcher frost trap to the CrowdControl preset.
  * Added a resize tick to the icon editor, and removed the editor scale setting from the options in favor of this resize method.
 
-===v4.0.0 beta3===
+===v4.0.0 beta 3===
  * Reactive icons should now properly dim when unusable and set to always show
  * Cooldown and reactive icons should now hide when checking an invalid spell (spellIDs are ALWAYS valid, names of spells you haven't learned (or pet spells if you toggle config mode without your pet out) aren't)
  * TellMeWhen's options are now a separate addon. You will need to completely restart WoW when upgrading past this version if you want to configure anything.
@@ -920,12 +920,12 @@
  * Conditions now save immediately upon any change made to them, instead of only when closing or reloading the icon editor.
  * The tooltip over the name dialog that appears when you hold down a modifier key should now properly only attempt to get item names if the icon is an item cooldown icon.
 
-===v4.0.0 beta2===
+===v4.0.0 beta 2===
  * Pet abilities can now be dragged onto an icon.
  * Ignore Runes should no longer appear as an option for reactive icons for non-DKs.
  * The icon editor should display the proper settings for each icon type instead of always meta icon settings.
 
-===v4.0.0 beta1===
+===v4.0.0 beta 1===
  * Well, that was a quick jump from 3.0 to 4.0
  * New icon type: Unit cooldown. This icon type will allow you to track the cooldown of any spell of any valid unit, provided that you specify the cooldown length. Instant casts and channeled spells are guaranteed 99.9% accurate, but spells with cast times that either apply a buff/debuff or do direct damage/healing can be off by about +- 1 second because of travel time.
  * Completely revamped icon configuration. Gone is the dropdown, in is a dialog that combines all of the old dialogs (4 of them) into one. This will pave the way for many more useful settings, like some of the ones below.
@@ -1131,11 +1131,11 @@
  * New Feature: Option to toggle the showing of text on timers. Still requires OmniCC
  * New Feature: Weapon enchant icons can now check ranged slots
 
-===v2.0.0 beta8===
+===v2.0.0 beta 8===
  * BUTTONFACADEOMG
  * I think the LDB plugin came with this one too? or maybe that was 7
 
-===v2.0.0 beta7===
+===v2.0.0 beta 7===
  * Should be the last
 
 ===v2.0.0 beta 6===
@@ -1144,14 +1144,14 @@
  * Some things
  * Release soon?
 
-===v2.0.0 beta5===
+===v2.0.0 beta 5===
  * Probably the last beta release before public release
 
-===v2.0.0 beta4===
+===v2.0.0 beta 4===
  * Just a little fix
 
-===v2.0.0 beta3===
- * Main purpose of this release was to skip beta2
+===v2.0.0 beta 3===
+ * Main purpose of this release was to skip beta 2
  * Number of groups and number of conditions is now adjustable
  * Many new conditions (2)
  * Various improvements
@@ -1160,7 +1160,7 @@
  * Support for poisons on thrown weapons
  * New units! Can now check mouseover, mouseovertarget, and vehicle (but who cares about vehicles?)
 
-===v2.0.0 beta1===
+===v2.0.0 beta 1===
  * Woah!
  * It's Localized! (Kinda)
  * Conditions can now check to see if another icon is shown. The possibilities are endless!
