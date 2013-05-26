@@ -117,8 +117,8 @@ end)
 
 Type:RegisterConfigPanel_XMLTemplate(165, "TellMeWhen_WhenChecks", {
 	text = L["ICONMENU_SHOWWHEN"],
-	[0x2] = { text = "|cFF00FF00" .. L["ICONMENU_PRESENT"], 	},
-	[0x1] = { text = "|cFFFF0000" .. L["ICONMENU_ABSENT"], 		},
+	[0x2] = { text = "|cFF00FF00" .. L["ICONMENU_PRESENTONANY"], 	tooltipText = L["ICONMENU_PRESENTONANY_DESC"],	},
+	[0x1] = { text = "|cFFFF0000" .. L["ICONMENU_ABSENTONALL"], 	tooltipText = L["ICONMENU_ABSENTONALL_DESC"],	},
 })
 
 Type:RegisterConfigPanel_XMLTemplate(170, "TellMeWhen_SortSettings")
