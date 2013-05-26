@@ -31,7 +31,8 @@ TMW.Icon_Defaults.Events = {
 		CndtJustPassed 	= false,
 		PassingCndt		= false,
 		PassThrough		= true,
-		Icon			= "",
+		Event			= "", -- the event being handled (e.g "OnDurationChanged")
+		Type			= "", -- the event handler handling the event (e.g. "Sound")
 	},
 }
 

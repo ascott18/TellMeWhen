@@ -31,6 +31,7 @@ end
 EVENTS.CONST = {
 	EVENT_INVALID_REASON_MISSINGHANDLER = 1,
 	EVENT_INVALID_REASON_MISSINGCOMPONENT = 2,
+	EVENT_INVALID_REASON_MISSINGEVENT = 3,
 }
 
 local EventsTab = TMW.Classes.IconEditorTab:NewTab("ICONEVENTS", 10, "Events")
@@ -39,7 +40,15 @@ TMW:TT(EventsTab, "EVENTS_TAB", "EVENTS_TAB_DESC")
 
 
 function EVENTS:LoadConfig()
-	self:CreateEventButtons()
+	local EventHandlerFrames = self.EventHandlerFrames
+	local previousFrame
+
+	local yAdjustTitle, yAdjustText = 0, 0
+	local locale = GetLocale()
+	if locale == "zhCN" or locale == "zhTW" then
+		yAdjustTitle, yAdjustText = 3, -3
+	end
+
 	
 	local oldID = max(1, self.currentEventID or 1)
 
@@ -50,32 +59,106 @@ function EVENTS:LoadConfig()
 		-- So, for example, if oldID == 3 and TMW.CI.ics.Events.n == 6,
 		-- eventID will be iterated as 3, 4, 5, 6, 1, 2
 		local eventID = ((i-2+oldID) % TMW.CI.ics.Events.n) + 1
+		i = nil -- i should not be used after this point since it won't correspond to any meaningful data.
+
+
+		-- Get the frame that this event will be listed in.
 		local frame = self.EventHandlerFrames[eventID]
-		
+		if not frame then
+			-- If the frame doesn't exist, then create it.
+			frame = CreateFrame("Button", EventHandlerFrames:GetName().."Event"..eventID, EventHandlerFrames, "TellMeWhen_Event", eventID)
+			EventHandlerFrames[eventID] = frame
+
+			frame:SetPoint("TOPLEFT", previousFrame, "BOTTOMLEFT")
+			frame:SetPoint("TOPRIGHT", previousFrame, "BOTTOMRIGHT")
+
+			local p, t, r, x, y = frame.EventName:GetPoint(1)
+			frame.EventName:SetPoint(p, t, r, x, y + yAdjustTitle)
+			local p, t, r, x, y = frame.EventName:GetPoint(2)
+			frame.EventName:SetPoint(p, t, r, x, y + yAdjustTitle)
+			local p, t, r, x, y = frame.DataText:GetPoint(1)
+			frame.DataText:SetPoint(p, t, r, x, y + yAdjustText)
+			local p, t, r, x, y = frame.DataText:GetPoint(2)
+			frame.DataText:SetPoint(p, t, r, x, y + yAdjustText)
+		end
+		previousFrame = frame
+		frame:Show()
+
+
 		-- Check if this eventID is valid, and load it if it is.
 		local isValid, reason = EVENTS:IsEventIDValid(eventID)
+		local eventSettings = TMW.CI.ics.Events[eventID]
+		local eventData = TMW.EventList[eventSettings.Event]
 		
+		-- If we have the event's data, set the event name of the frame to the localized name of the event.
+		-- If we don't have the event's data, set the event name of the raw identifier of the event.
+		if eventData then
+			frame.EventName:SetText(eventID .. ") " .. eventData.text)
+		else
+			frame.EventName:SetText(eventID .. ") " .. eventSettings.Event)
+		end
+
 		if isValid then
+			-- The event is valid and all needed components were found,
+			-- so set up the button.
+
+			frame:Enable()
+
+			frame.event = eventData.event
+			frame.eventData = eventData
+
+			frame.normalDesc = eventData.desc .. "\r\n\r\n" .. L["EVENTS_HANDLERS_GLOBAL_DESC"]
+			TMW:TT(frame, eventData.text, frame.normalDesc, 1, 1)
+
+			-- This delegates the setup of frame.DataText to the event handler
+			-- so that it can put useful information about the user's settings
+			-- (e.g. "Sound: TMW - Pling3" or "Animation: Icon: Shake")
+			local EventHandler = EVENTS:GetEventHandlerForEventSettings(eventID)
+			EventHandler:SetupEventDisplay(eventID)
+
+			-- If we have not yet loaded an event for this configuration load,
+			-- then load this event. The proper event settings and event handler
+			-- configuration will be shown and setup with stored settings.
 			if not didLoad then
 				EVENTS:LoadEventID(eventID)
 				didLoad = true
 			end
-			
-			local EventHandler = EVENTS:GetEventHandlerForEventSettings(eventID)
-			EventHandler:SetupEventDisplay(eventID)
-			frame:Enable()
+
 		else
 			frame:Disable()
-			
+
 			if reason == EVENTS.CONST.EVENT_INVALID_REASON_MISSINGHANDLER then
-				frame.DataText:SetText("|cFFFF5050UNKNOWN TYPE:|r " .. tostring(EVENTS:GetEventSettings(i).Type))
+				-- The handler (E.g. Sound, Animation, etc.) of the event settings was not found.
+				frame.DataText:SetText("|cFFFF5050UNKNOWN HANDLER:|r " .. tostring(EVENTS:GetEventSettings(eventID).Type))
+			elseif reason == EVENTS.CONST.EVENT_INVALID_REASON_MISSINGEVENT then
+				-- The event (E.g. "OnSomethingHappened") was not found
+				frame.DataText:SetText("|cFFFF5050UNKNOWN EVENT|r")
 			elseif reason == EVENTS.CONST.EVENT_INVALID_REASON_MISSINGCOMPONENT then
+				-- The event was found, but it is not available for the current icon's configuration.
+				-- This is a non-critical error, so we format the error message nicely for the user.
 				frame.DataText:SetText(L["SOUND_EVENT_DISABLEDFORTYPE"])
-				TMW:TT(frame, frame.eventData.text, L["SOUND_EVENT_DISABLEDFORTYPE_DESC2"]:format(TMW.Types[TMW.CI.ics.Type].name), 1, 1)
+				TMW:TT(frame, eventData.text, L["SOUND_EVENT_DISABLEDFORTYPE_DESC2"]:format(TMW.Types[TMW.CI.ics.Type].name), 1, 1)
 			end
 		end
 	end
-	
+
+	-- Hide unused frames
+	for i = max(TMW.CI.ics.Events.n + 1, 1), #EventHandlerFrames do
+		EventHandlerFrames[i]:Hide()
+	end
+
+	-- Position the first frame
+	if EventHandlerFrames[1] then
+		EventHandlerFrames[1]:SetPoint("TOPLEFT", EventHandlerFrames, "TOPLEFT", 0, 0)
+		EventHandlerFrames[1]:SetPoint("TOPRIGHT", EventHandlerFrames, "TOPRIGHT", 0, 0)
+	end
+
+	-- Set the height of the first 
+	local frame1Height = EventHandlerFrames[1] and EventHandlerFrames[1]:GetHeight() or 0
+	EventHandlerFrames:SetHeight(max(TMW.CI.ics.Events.n*frame1Height, 1))
+
+	-- If an event handler's configuration was not loaded for an event,
+	-- hide all handler configuration panels
 	if not didLoad then
 		for _, EventHandler in ipairs(TMW.Classes.EventHandler.instances) do
 			EventHandler.ConfigContainer:Hide()
@@ -84,35 +167,36 @@ function EVENTS:LoadConfig()
 		IE.Events.HelpText:Show()
 	end
 
-
+	-- Set the text on the tab that will show how many used events we have.
 	self:SetTabText()
 end
 TMW:RegisterCallback("TMW_CONFIG_ICON_LOADED", EVENTS, "LoadConfig")
 
-function EVENTS:LoadEventID(id)
-	local eventFrame = self.EventHandlerFrames[id]
+function EVENTS:LoadEventID(eventID)
+	-- Loads the configuration for the specified e
+	local eventFrame = self.EventHandlerFrames[eventID]
 	
-	EVENTS.currentEventID = id ~= 0 and id or nil
+	EVENTS.currentEventID = eventID ~= 0 and eventID or nil
 
 	for _, EventHandler in ipairs(TMW.Classes.EventHandler.instances) do
 		EventHandler.ConfigContainer:Hide()
 	end
 	IE.Events.HelpText:Show()
 	
-	local EventHandler = self:GetEventHandlerForEventSettings(id)
+	local EventHandler = self:GetEventHandlerForEventSettings(eventID)
 	if EventHandler then
 		EventHandler.ConfigContainer:Show()
 		IE.Events.HelpText:Hide()
 		
 		EVENTS.currentEventHandler = EventHandler
 		
-		EventHandler:LoadSettingsForEventID(id)
+		EventHandler:LoadSettingsForEventID(eventID)
 		EVENTS:LoadEventSettings()
 	end
 
 	IE.Events.ScrollFrame.adjustmentQueued = true
 
-	if not eventFrame or id == 0 or not eventFrame:IsShown() then
+	if not eventFrame or eventID == 0 or not eventFrame:IsShown() then
 		return
 	end
 
@@ -162,7 +246,7 @@ function EVENTS:LoadEventSettings()
 	TMW:SetUIDropdownIconText(EventSettingsContainer.Icon, Settings.Icon, L["CHOOSEICON"])
 	EventSettingsContainer.Icon.IconPreview:SetIcon(_G[Settings.Icon])
 
-	--show settings
+	--show settings as needed
 	for setting, frame in pairs(EventSettingsContainer) do
 		if type(frame) == "table" then
 			local state = settingsUsedByEvent and settingsUsedByEvent[setting]
@@ -212,67 +296,6 @@ end
 
 
 
-function EVENTS:CreateEventButtons()
-	local EventHandlerFrames = self.EventHandlerFrames
-	local previousFrame
-
-	local yAdjustTitle, yAdjustText = 0, 0
-	local locale = GetLocale()
-	if locale == "zhCN" or locale == "zhTW" then
-		yAdjustTitle, yAdjustText = 3, -3
-	end
-	local Settings = self:GetEventSettings()
-
-	for i, eventSettings in TMW:InNLengthTable(TMW.CI.ics.Events) do
-		local eventData = TMW.EventList[eventSettings.Event]
-		local frame = EventHandlerFrames[i]
-		
-		if not frame then
-			frame = CreateFrame("Button", EventHandlerFrames:GetName().."Event"..i, EventHandlerFrames, "TellMeWhen_Event", i)
-			EventHandlerFrames[i] = frame
-			frame:SetPoint("TOPLEFT", previousFrame, "BOTTOMLEFT")
-			frame:SetPoint("TOPRIGHT", previousFrame, "BOTTOMRIGHT")
-
-			local p, t, r, x, y = frame.EventName:GetPoint(1)
-			frame.EventName:SetPoint(p, t, r, x, y + yAdjustTitle)
-			local p, t, r, x, y = frame.EventName:GetPoint(2)
-			frame.EventName:SetPoint(p, t, r, x, y + yAdjustTitle)
-			local p, t, r, x, y = frame.DataText:GetPoint(1)
-			frame.DataText:SetPoint(p, t, r, x, y + yAdjustText)
-			local p, t, r, x, y = frame.DataText:GetPoint(2)
-			frame.DataText:SetPoint(p, t, r, x, y + yAdjustText)
-		end
-
-		if eventData then
-			frame:Show()
-
-			frame.event = eventData.event
-			frame.eventData = eventData
-
-			frame.EventName:SetText(i .. ") " .. eventData.text)
-
-			frame.normalDesc = eventData.desc .. "\r\n\r\n" .. L["EVENTS_HANDLERS_GLOBAL_DESC"]
-			TMW:TT(frame, eventData.text, frame.normalDesc, 1, 1)
-		else
-			frame.EventName:SetText(i .. ") UNKNOWN EVENT: " .. tostring(eventSettings.Event))
-			frame:Disable()
-
-		end
-		previousFrame = frame
-	end
-
-	for i = max(TMW.CI.ics.Events.n + 1, 1), #EventHandlerFrames do
-		EventHandlerFrames[i]:Hide()
-	end
-
-	if EventHandlerFrames[1] then
-		EventHandlerFrames[1]:SetPoint("TOPLEFT", EventHandlerFrames, "TOPLEFT", 0, 0)
-		EventHandlerFrames[1]:SetPoint("TOPRIGHT", EventHandlerFrames, "TOPRIGHT", 0, 0)
-	end
-
-	EventHandlerFrames:SetHeight(max(TMW.CI.ics.Events.n*(EventHandlerFrames[1] and EventHandlerFrames[1]:GetHeight() or 0), 1))
-end
-
 function EVENTS:AdjustScrollFrame()
 	local ScrollFrame = IE.Events.ScrollFrame
 	local eventFrame = self.EventHandlerFrames[self.currentEventID]
@@ -287,7 +310,7 @@ function EVENTS:AdjustScrollFrame()
 end
 
 function EVENTS:SetTabText()
-	local n = self:GetNumUsedEvents()
+	local n = EVENTS:GetNumUsedEvents()
 
 	if n > 0 then
 		EventsTab:SetText(L["EVENTS_TAB"] .. " |cFFFF5959(" .. n .. ")")
@@ -299,12 +322,16 @@ end
 
 
 function EVENTS:IsEventIDValid(id)
-	local ValidEvents = EVENTS:GetValidEvents()
+	local validEvents = EVENTS:GetValidEvents()
 	
-	local EventSettings = EVENTS:GetEventSettings(id)
+	local eventSettings = EVENTS:GetEventSettings(id)
 	
-	if ValidEvents[EventSettings.Event] then
-		local Module = EVENTS:GetEventHandlerForEventSettings(EventSettings)
+	if not TMW.EventList[eventSettings.Event] then
+		-- The event does not exist
+		return false, EVENTS.CONST.EVENT_INVALID_REASON_MISSINGEVENT
+		
+	elseif validEvents[eventSettings.Event] then
+		local Module = EVENTS:GetEventHandlerForEventSettings(eventSettings)
 		if Module then
 			-- This event is valid and can be loaded
 			return true, 0
@@ -326,11 +353,12 @@ end
 
 function EVENTS:GetNumUsedEvents()
 	local n = 0
-	for i = 1, #self.EventHandlerFrames do
-		local f = self.EventHandlerFrames[i]
-		local Module = EVENTS:GetEventHandlerForEventSettings(i)
+
+	for i, eventSettings in TMW:InNLengthTable(TMW.CI.ics.Events) do
+		local Module = EVENTS:GetEventHandlerForEventSettings(eventSettings)
+
 		if Module then
-			local has = Module:ProcessIconEventSettings(f.event, self:GetEventSettings(i))
+			local has = Module:ProcessIconEventSettings(eventSettings.Event, eventSettings)
 			if has then
 				n = n + 1
 			end
@@ -498,14 +526,14 @@ function EVENTS.AddEvent_Dropdown_OnClick(button, event, type)
 	TMW.CI.ics.Events.n = TMW.CI.ics.Events.n + 1
 
 	local eventID = TMW.CI.ics.Events.n
-	local EventSettings = EVENTS:GetEventSettings(eventID)
+	local eventSettings = EVENTS:GetEventSettings(eventID)
 
-	EventSettings.Event = event
-	EventSettings.Type = type
+	eventSettings.Event = event
+	eventSettings.Type = type
 
 	local eventData = TMW.EventList[event]
 	if eventData and eventData.applyDefaultsToSetting then
-		eventData.applyDefaultsToSetting(EventSettings)
+		eventData.applyDefaultsToSetting(eventSettings)
 	end
 
 	EVENTS:LoadConfig()
@@ -541,13 +569,13 @@ function EVENTS:ChangeEvent_Dropdown()
 end
 function EVENTS:ChangeEvent_Dropdown_OnClick(eventButton, event)
 	local n = eventButton:GetID()
-	local EventSettings = TMW.CI.ics.Events[n]
+	local eventSettings = TMW.CI.ics.Events[n]
 
-	EventSettings.Event = event
+	eventSettings.Event = event
 
 	local eventData = TMW.EventList[event]
 	if eventData and eventData.applyDefaultsToSetting then
-		eventData.applyDefaultsToSetting(EventSettings)
+		eventData.applyDefaultsToSetting(eventSettings)
 	end
 
 	EVENTS:LoadConfig()

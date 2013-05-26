@@ -168,7 +168,7 @@ function Announcements:SelectChannel(channel)
 		end
 		
 		if channelsettings.icon then
-			ConfigFrames.ShowIconTex:SetChecked(EventSettings.Icon)
+			ConfigFrames.ShowIconTex:SetChecked(EventSettings.ShowIconTex)
 			ConfigFrames.ShowIconTex:Show()
 		else
 			ConfigFrames.ShowIconTex:Hide()

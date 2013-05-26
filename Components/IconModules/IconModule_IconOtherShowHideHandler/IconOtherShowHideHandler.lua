@@ -23,6 +23,10 @@ local type = type
 local Module = TMW:NewClass("IconModule_IconEventOtherShowHideHandler", "IconModule")
 Module.dontInherit = true
 
+TMW.Classes.EventHandler:RegisterEventDefaults{
+	Icon			= "",
+}
+
 TMW:RegisterUpgrade(60014, {
 	-- I just discovered that this module use a string "Icon" event setting for the icon to watch
 	-- that conflicts with other event settings. Try to fix it.
