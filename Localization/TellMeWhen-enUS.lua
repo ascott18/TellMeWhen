@@ -109,7 +109,7 @@ L["ICONMENU_CHOOSENAME_MULTISTATE"] = "Choose spell to check"
 L["ICONMENU_CHOOSENAME_ORBLANK"] = "|cff7fffffOR|r leave blank to track all"
 L["ICONMENU_ENABLE"] = "Enabled"
 L["ICONMENU_ENABLE_DESC"] = "Icons will only function when they are enabled."
-L["CHOOSENAME_EQUIVS_TOOLTIP"] = [[You can select predefined sets of buffs, debuffs, spell casts, diminishing returns, or dispel types (Magic, Curse, etc.) from this menu to insert into the "%s" editbox.]]
+--L["CHOOSENAME_EQUIVS_TOOLTIP"] = [[You can select predefined sets of buffs, debuffs, spell casts, diminishing returns, or dispel types (Magic, Curse, etc.) from this menu to insert into the "%s" editbox.]]
 L["CHOOSENAME_DIALOG_DDDEFAULT"] = "Predefined Spell Sets/Dispel Types"
 L["CHOOSENAME_DIALOG"] = [=[Enter the Name or ID of what you want this icon to monitor. You can add multiple entries (any combination of names, IDs, and equivalencies) by separating them with semicolons (;).
 
@@ -353,7 +353,7 @@ L["ICONMENU_CHOSEICONTOEDIT"] = "Chose an icon to edit:"
 
 L["ICONMENU_PRESENT"] = "Present"
 L["ICONMENU_ABSENT"] = "Absent"
-L["ICONMENU_ALWAYS"] = "Always"
+--L["ICONMENU_ALWAYS"] = "Always"
 
 L["ICONMENU_ABSENTONANY"] = "Any Absent"
 L["ICONMENU_ABSENTONANY_DESC"] = "Set the icon opacity level for when any unit being checked is missing all of the buffs/debuffs being checked."
@@ -852,7 +852,7 @@ L["LAYOUTDIRECTION_8"] = "Up then Right"
 L["TEXTLAYOUTS"] = "Text Layouts"
 L["TEXTLAYOUTS_TAB"] = "Text Displays"
 L["TEXTLAYOUTS_HEADER_LAYOUT"] = "Text Layout"
-L["TEXTLAYOUTS_HEADER_DISPLAY"] = "Text Display"
+--L["TEXTLAYOUTS_HEADER_DISPLAY"] = "Text Display"
 L["TEXTLAYOUTS_fSTRING"] = "Display %s"
 L["TEXTLAYOUTS_fSTRING2"] = "Display %d: %s"
 L["TEXTLAYOUTS_fSTRING3"] = "Text Display: %s"

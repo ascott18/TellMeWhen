@@ -18,7 +18,7 @@
 TELLMEWHEN_VERSION = "6.2.2"
 TELLMEWHEN_VERSION_MINOR = strmatch(" @project-version@", " r%d+") or ""
 TELLMEWHEN_VERSION_FULL = TELLMEWHEN_VERSION .. TELLMEWHEN_VERSION_MINOR
-TELLMEWHEN_VERSIONNUMBER = 62203 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
+TELLMEWHEN_VERSIONNUMBER = 62204 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
 if TELLMEWHEN_VERSIONNUMBER > 63000 or TELLMEWHEN_VERSIONNUMBER < 62000 then
 	-- safety check because i accidentally made the version number 414069 once
 	return error("YOU SCREWED UP THE VERSION NUMBER OR DIDNT CHANGE THE SAFETY LIMITS")
@@ -3136,9 +3136,9 @@ end
 
 local loweredbackup = {}
 function TMW:LowerNames(str)
-	-- converts a string, or all values of a table, to lowercase. Numbers are kept as numbers.
+	-- Converts a string, or all values of a table, to lowercase. Numbers are kept as numbers.
 	
-	if type(str) == "table" then -- handle a table with recursion
+	if type(str) == "table" then -- Handle a table with recursion
 		for k, v in pairs(str) do
 			str[k] = TMW:LowerNames(v)
 		end
@@ -3155,12 +3155,12 @@ function TMW:LowerNames(str)
 	local ret = tonumber(str) or strlower(str)
 	if type(ret) == "string" then
 		if loweredbackup[ret] then
-			-- dont replace names that are proper case with names that arent.
+			-- Dont replace names that are proper case with names that arent.
 			-- Generally, assume that strings with more capitals after non-letters are more proper than ones with less
 			local _, oldcount = gsub(loweredbackup[ret], "[^%a]%u", "%1")
 			local _, newcount = gsub(str, "[^%a]%u", "%1")
 
-			-- check the first letter of each string for a capital
+			-- Check the first letter of each string for a capital
 			if strfind(loweredbackup[ret], "^%u") then
 				oldcount = oldcount + 1
 			end
@@ -3168,12 +3168,12 @@ function TMW:LowerNames(str)
 				newcount = newcount + 1
 			end
 
-			-- the new string has more than the old, so use it instead
+			-- The new string has more than the old, so use it instead
 			if newcount > oldcount then
 				loweredbackup[ret] = str
 			end
 		else
-			-- there wasn't a string before, so set the base
+			-- There wasn't a string before, so set the base
 			loweredbackup[ret] = str
 		end
 	end
@@ -3197,34 +3197,58 @@ function TMW:RestoreCase(str)
 end
 
 function TMW:EquivToTable(name)
-	-- this function checks to see if a string is a valid equivalency. If it is, all the spells that it represents will be put into an array and returned. If it isn't, nil will be returned.
+	-- This function checks to see if a string is a valid equivalency.
+	-- If it is, all the spells that it represents will be put into an array and returned.
+	-- If it isn't, nil will be returned.
 
-	name = strlower(name) -- everything in this function is handled as lowercase to prevent issues with user input capitalization. DONT use TMW:LowerNames() here, because the input is not the output
-	local eqname, duration = strmatch(name, "(.-):([%d:%s%.]*)$") -- see if the string being checked has a duration attached to it (it really shouldn't because there is currently no point in doing so, but a user did try this and made a bug report, so I fixed it anyway
-	name = eqname or name -- if there was a duration, then replace the old name with the actual name without the duration attached
+	-- Everything in this function is handled as lowercase to prevent issues with user input capitalization.
+	-- DONT use TMW:LowerNames() here, because the input is not the output
+	name = strlower(name) 
 
-	local names -- scope the variable
-	for k, v in pairs(TMW.BE) do -- check in subtables ('buffs', 'debuffs', 'casts', etc)
+	-- See if the string being checked has a duration attached to it
+	-- (It really shouldn't because there is currently no point in doing so,
+	-- But a user did try this and made a bug report, so I fixed it anyway
+	local eqname, duration = strmatch(name, "(.-):([%d:%s%.]*)$") 
+
+	-- If there was a duration, then replace the old name with the actual name without the duration attached
+	name = eqname or name 
+
+	local names
+
+	-- Iterate over all of TMW.BE's sub-categories ('buffs', 'debuffs', 'casts', etc)
+	for k, v in pairs(TMW.BE) do
+		-- Iterate over each equivalency in the category
 		for equiv, str in pairs(v) do
 			if strlower(equiv) == name then
+				-- We found a matching equivalency, so stop searching.
 				names = str
-				break -- break subtable loop
+				break
 			end
 		end
-		if names then break end -- break main loop
+		if names then break end
 	end
 
-	if not names then return end -- if we didnt find an equivalency string then get out
+	-- If we didnt find an equivalency string then get out
+	if not names then return end
 
+	-- Split the string into a table of spells.
+	local tbl = { strsplit(";", names) }
 
-	local tbl = { strsplit(";", names) } -- split the string into a table
+	-- For each spell in the equivalency:
 	for a, b in pairs(tbl) do
-		local new = strtrim(b) -- take off trailing spaces
-		new = tonumber(new) or new -- make sure it is a number if it can be
-		if duration then -- tack on the duration that should be applied to all spells if there was one
+		-- Take off trailing spaces
+		local new = strtrim(b) 
+
+		-- Make sure it is a number if it can be
+		new = tonumber(new) or new 
+
+		-- Tack on the duration that should be applied to all spells if there was a duration
+		if duration then 
 			new = new .. ":" .. duration
 		end
-		tbl[a] = new -- stick it in the table
+
+		-- Done. Stick the new value in the return table.
+		tbl[a] = new
 	end
 
 	return tbl
@@ -3232,14 +3256,14 @@ end
 TMW:MakeFunctionCached(TMW, "EquivToTable")
 
 function TMW:GetSpellNames(icon, setting, firstOnly, toname, hash, keepDurations, allowRenaming)
-	local buffNames = TMW:SplitNames(setting) -- get a table of everything
+	local buffNames = TMW:SplitNames(setting) -- Get a table of everything
 
 	--INSERT EQUIVALENCIES
 	 --start at the end of the table, that way we dont have to worry
 	 --about increasing the key of buffNames to work with every time we insert something
 	local k = #buffNames
 	while k > 0 do
-		local eqtt = TMW:EquivToTable(buffNames[k]) -- get the table form of the equivalency string
+		local eqtt = TMW:EquivToTable(buffNames[k]) -- Get the table form of the equivalency string
 		if eqtt then
 			local n = k	--point to start inserting the values at
 			tremove(buffNames, k)	--take the actual equavalancey itself out, because it isnt an actual spell name or anything
@@ -3260,7 +3284,7 @@ function TMW:GetSpellNames(icon, setting, firstOnly, toname, hash, keepDurations
 		for k, buffName in pairs(buffNames) do
 			if strfind(buffName, ":[%d:%s%.]*$") then
 				local new = strmatch(buffName, "(.-):[%d:%s%.]*$")
-				buffNames[k] = tonumber(new) or new -- turn it into a number if it is one
+				buffNames[k] = tonumber(new) or new -- Turn it into a number if it is one
 			end
 		end
 	end
@@ -3286,26 +3310,28 @@ function TMW:GetSpellNames(icon, setting, firstOnly, toname, hash, keepDurations
 		local hash = {}
 		for k, v in ipairs(buffNames) do
 			if toname and (allowRenaming or tonumber(v)) then
-				v = GetSpellInfo(v or "") or v -- turn the value into a name if needed
+				v = GetSpellInfo(v or "") or v -- Turn the value into a name if needed
 			end
 
 			v = TMW:LowerNames(v)
-			hash[v] = k -- put the final value in the table as well (may or may not be the same as the original value. Value should be NameArrray's key, for use with the duration table.
+			hash[v] = k -- Put the final value in the table as well (may or may not be the same as the original value. Value should be NameArrray's key, for use with the duration table.
 		end
 		return hash
 	end
 	if toname then
 		if firstOnly then
+			-- Turn the first value into a name and return it
 			local ret = buffNames[1] or ""
 			if (allowRenaming or tonumber(ret)) then
-				ret = GetSpellInfo(ret) or ret -- turn the first value into a name and return it
+				ret = GetSpellInfo(ret) or ret 
 			end
 			if icon then ret = TMW:LowerNames(ret) end
 			return ret
 		else
+			-- Convert everything to a name
 			for k, v in ipairs(buffNames) do
 				if (allowRenaming or tonumber(v)) then
-					buffNames[k] = GetSpellInfo(v or "") or v --convert everything to a name
+					buffNames[k] = GetSpellInfo(v or "") or v 
 				end
 			end
 			if icon then TMW:LowerNames(buffNames) end
