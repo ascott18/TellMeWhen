@@ -1384,7 +1384,7 @@
 	
 	<!-- END TEMPLATES -->
 
-	<Frame name="TellMeWhen_ConfigWarning" hidden="true" movable="true" toplevel="true" clampedToScreen="true" enableMouse="true" frameStrata="DIALOG">
+	<Frame name="TellMeWhen_ConfigWarning" hidden="true" movable="true" toplevel="true" clampedToScreen="true" enableMouse="true" frameStrata="DIALOG" parent="UIParent">
 		<Size x="330"/>
 		<Anchors>
 			<Anchor point="TOP" relativeTo="UIParent" y="-60"/>

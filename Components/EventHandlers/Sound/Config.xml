@@ -23,7 +23,8 @@
 				</Anchors>
 				<Scripts>
 					<OnClick>
-						PlaySoundFile(self:GetParent().soundfile, TMW.db.profile.SoundChannel)
+						local Sound = TMW.EVENTS:GetEventHandler("Sound")
+						Sound:TestSound(self, self:GetParent().soundfile)
 					</OnClick>
 					<OnEnter>
 						self:GetParent():LockHighlight()
@@ -135,7 +136,8 @@
 						<HighlightTexture file="Interface\Common\VoiceChat-On"/>
 						<Scripts>
 							<OnClick>
-								PlaySoundFile(self:GetParent():GetText(), TMW.db.profile.SoundChannel)
+								local Sound = TMW.EVENTS:GetEventHandler("Sound")
+								Sound:TestSound(self, self:GetParent():GetText())
 							</OnClick>
 							<OnEnter>
 								self:GetParent().Background:Show()

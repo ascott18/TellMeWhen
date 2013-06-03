@@ -56,6 +56,7 @@ TMW:RegisterCallback("TMW_OPTIONS_LOADED", function()
 	Sounds.ScrollBar:SetValue(0)
 end)
 
+
 function Sound:GetNumFramesNeeded()
 	local Sounds = Sound.ConfigContainer.SoundList
 	return floor(Sounds:GetHeight()/Sounds.None:GetHeight()) - 1
@@ -226,5 +227,56 @@ function Sound:SelectSound(name)
 	end
 
 	self:SetupEventDisplay(self.currentEventID)
+end
+
+
+
+---------- Tests ----------
+local soundChannels = {
+	-- GLOBALS: SOUND_VOLUME, MUSIC_VOLUME, AMBIENCE_VOLUME
+	SFX = {
+		text = ENABLE_SOUNDFX,
+		enableCVar = "Sound_EnableSFX",
+		volumeCVar = "Sound_SFXVolume",
+	},
+	Music = {
+		text = MUSIC_VOLUME,
+		enableCVar = "Sound_EnableMusic",
+		volumeCVar = "Sound_MusicVolume",
+	},
+	Ambience = {
+		text = AMBIENCE_VOLUME,
+		enableCVar = "Sound_EnableAmbience",
+		volumeCVar = "Sound_AmbienceVolume",
+	},
+	Master = {
+		text = MASTER_VOLUME,
+		enableCVar = "Sound_EnableAllSound",
+		volumeCVar = "Sound_MasterVolume",
+	},
+}
+
+TMW.HELP:NewCode("SOUND_TEST_ERROR", 10, false)
+
+function Sound:TestSound(button, soundFile)
+	PlaySoundFile(soundFile, TMW.db.profile.SoundChannel)
+
+	local error
+
+	if GetCVar("Sound_EnableAllSound") == "0" then
+		error = L["SOUND_ERROR_ALLDISABLED"]
+	else
+		local channelData = soundChannels[TMW.db.profile.SoundChannel]
+
+		if GetCVar(channelData.enableCVar) == "0" then
+			error = L["SOUND_ERROR_DISABLED"]:format(channelData.text)
+		elseif GetCVar(channelData.volumeCVar) == "0" then
+			error = L["SOUND_ERROR_MUTED"]:format(channelData.text)
+		end
+	end
+
+	if error then
+		TMW.HELP:Show("SOUND_TEST_ERROR", TMW.CI.ic, button, 0, 0, error)
+	end	
 end
 

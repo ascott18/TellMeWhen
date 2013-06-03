@@ -1625,6 +1625,20 @@ L["SOUND_CHANNEL_DESC"] = [[Choose the sound channel and volume setting that you
 Selecting %q will let sounds be played even when sounds are turned off.]]
 L["SOUND_CHANNEL_MASTER"] = "Master"
 
+L["SOUND_ERROR_ALLDISABLED"] = [["This sound cannot be tested because the game sounds are completely disabled.
+
+Change this setting in Blizzard's sound options.]]
+L["SOUND_ERROR_DISABLED"] = [[This sound cannot be tested because the %q sound channel is disabled.
+
+Change this setting in Blizzard's sound options.
+
+You can also change the sound channel that TellMeWhen is configured to use in TellMeWhen's main options ('/tmw options')]]
+L["SOUND_ERROR_MUTED"] = [[This sound cannot be tested because the volume for the %q sound channel is set to zero.
+
+Change this setting in Blizzard's sound options.
+
+You can also change the sound channel that TellMeWhen is configured to use in TellMeWhen's main options ('/tmw options')]]
+
 L["SOUNDERROR1"] = "File must have an extension!"
 L["SOUNDERROR2"] = [[Custom WAV files are not supported by WoW 4.0+
 

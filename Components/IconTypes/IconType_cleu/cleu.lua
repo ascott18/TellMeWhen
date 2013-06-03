@@ -414,7 +414,7 @@ Processor:RegisterDogTag("TMW", "Source", {
 	events = TMW:CreateDogTagEventString("CLEU_SOURCEUNIT"),
 	ret = "string",
 	doc = L["DT_DOC_Source"],
-	example = ('[Source] => "target"; [Source(4, 5)] => %q; [Source:Name] => "Kobold"; [Source(4, 5):Name] => %q'):format(UnitName("player"), TMW.NAMES and TMW.NAMES:TryToAcquireName(UnitName("player"), true) or "???"),
+	example = ('[Source] => "target"; [Source(4, 5)] => %q; [Source:Name] => "Kobold"; [Source(4, 5):Name] => %q'):format(UnitName("player"), TMW.NAMES and TMW.NAMES:TryToAcquireName("player", true) or "???"),
 	category = L["ICON"],
 })
 
@@ -452,7 +452,7 @@ Processor:RegisterDogTag("TMW", "Destination", {
 	events = TMW:CreateDogTagEventString("CLEU_DESTUNIT"),
 	ret = "string",
 	doc = L["DT_DOC_Destination"],
-	example = ('[Destination] => "target"; [Destination(4, 5)] => %q; [Destination:Name] => "Kobold"; [Destination(4, 5):Name] => %q'):format(UnitName("player"), TMW.NAMES and TMW.NAMES:TryToAcquireName(UnitName("player"), true) or "???"),
+	example = ('[Destination] => "target"; [Destination(4, 5)] => %q; [Destination:Name] => "Kobold"; [Destination(4, 5):Name] => %q'):format(UnitName("player"), TMW.NAMES and TMW.NAMES:TryToAcquireName("player", true) or "???"),
 	category = L["ICON"],
 })
 

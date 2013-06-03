@@ -1,3 +1,6 @@
+===v6.2.2===
+ * Added a few more popup notifications when invalid settings/actions are entered/performed
+
 ===v6.2.0===
  * New Icon Type: Buff/Debuff Check (for checking missing raid buffs).
  * New advanced feature: Lua Snippets
