@@ -1956,6 +1956,7 @@ To see the correct texture now, change the first spell being checked into a Spel
 
 L["HELP_NOUNITS"] = [[You must enter at least one unit!]]
 L["HELP_NOUNIT"] = [[You must enter a unit!]]
+L["HELP_ONLYONEUNIT"] = [[Conditions only accept one unit, but you have entered %d |4unit:units;.]]
 L["HELP_MS_NOFOUND"] = [[The ability %q could not be found on your action bars.
 
 Ensure that the ability is on your action bars, in its default state, and that it is not only a macro that is putting the spell on your action bars. Otherwise, this icon will not function properly.]]

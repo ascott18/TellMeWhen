@@ -35,6 +35,10 @@ L["CNDT_SLIDER_DESC_CLICKSWAP_TOSLIDER_DISALLOWED"] = L["CNDT_SLIDER_DESC_CLICKS
 -- GLOBALS: CloseDropDownMenus
 
 
+TMW.HELP:NewCode("CNDT_UNIT_MISSING", 10, false)
+TMW.HELP:NewCode("CNDT_UNIT_ONLYONE", 20, false)
+
+
 local CNDT = TMW.CNDT -- created in TellMeWhen/conditions.lua
 
 

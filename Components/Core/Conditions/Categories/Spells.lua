@@ -659,7 +659,7 @@ local function CASTCOUNT_COMBAT_LOG_EVENT_UNFILTERED(e, _, cleuEvent, _, sourceG
 end
 function Env.UnitCastCount(...)
 	CastCounts = {}
-	CNDT.CastCounts =CastCounts
+	CNDT.CastCounts = CastCounts
 	CNDT:RegisterEvent("COMBAT_LOG_EVENT_UNFILTERED", CASTCOUNT_COMBAT_LOG_EVENT_UNFILTERED)
 	
 	Env.UnitCastCount = function(unit, spell)
