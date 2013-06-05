@@ -1625,7 +1625,7 @@ L["SOUND_CHANNEL_DESC"] = [[Choose the sound channel and volume setting that you
 Selecting %q will let sounds be played even when sounds are turned off.]]
 L["SOUND_CHANNEL_MASTER"] = "Master"
 
-L["SOUND_ERROR_ALLDISABLED"] = [["This sound cannot be tested because the game sounds are completely disabled.
+L["SOUND_ERROR_ALLDISABLED"] = [[This sound cannot be tested because the game sounds are completely disabled.
 
 Change this setting in Blizzard's sound options.]]
 L["SOUND_ERROR_DISABLED"] = [[This sound cannot be tested because the %q sound channel is disabled.
