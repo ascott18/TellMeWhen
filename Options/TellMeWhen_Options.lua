@@ -1731,7 +1731,7 @@ function IE:PositionPanels()
 			
 			local hue = 1/1.5
 			
-			frame.Background:SetTexture(hue, hue, hue)
+			frame.Background:SetTexture(hue, hue, hue) -- HUEHUEHUE
 			frame.Background:SetGradientAlpha("VERTICAL", 1, 1, 1, 0.05, 1, 1, 1, 0.10)
 			
 			frame:Show()
@@ -2021,8 +2021,9 @@ TMW:NewClass("SettingCheckButton", "CheckButton", "SettingFrameBase"){
 			
 			if self.data.value == nil then
 				CI.ics[self.setting] = checked
-			elseif checked then
+			else --if checked then
 				CI.ics[self.setting] = self.data.value
+				self:SetChecked(true)
 			end
 			IE:ScheduleIconSetup()
 		end
@@ -2030,10 +2031,18 @@ TMW:NewClass("SettingCheckButton", "CheckButton", "SettingFrameBase"){
 		-- Cheater! (We arent getting anything)
 		-- (I'm using get as a wrapper so I don't have to check if the function exists before calling it)
 		get(self.data.OnClick, self, button) 
+
+		self:OnState()
 	end,
 	OnCreate = function(self)
 		self.text:SetText(get(self.data.label or self.data.title))
 		self:SetMotionScriptsWhileDisabled(true)
+	end,
+
+	OnState = function(self)
+		-- Cheater! (We arent getting anything)
+		-- (I'm using get as a wrapper so I don't have to check if the function exists before calling it)
+		get(self.data.OnState, self) 
 	end,
 	
 	ConstrainLabel = function(self, anchorTo, anchorPoint, ...)
@@ -2055,7 +2064,7 @@ TMW:NewClass("SettingCheckButton", "CheckButton", "SettingFrameBase"){
 				self:SetChecked(icon:GetSettings()[self.setting])
 			end
 			self:CheckInteractionStates()
-			self:OnClick("LeftButton")
+			self:OnState()
 		end
 	end,
 }
@@ -3003,7 +3012,7 @@ function IE:AttemptBackup(icon)
 		-- notify the undo and redo buttons that there was a change so they can :Enable() or :Disable()
 		IE:UndoRedoChanged()
 	else
-		-- the needed stuff for undo and redu already exists, so lets delve into the meat of the process.
+		-- the needed stuff for undo and redo already exists, so lets delve into the meat of the process.
 
 		-- compare the current icon settings with what we have in the currently used history point
 		-- the currently used history point may or may not be the most recent settings of the icon, but we want to check ics against what is being used.

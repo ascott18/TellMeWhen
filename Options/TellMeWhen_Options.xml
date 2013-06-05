@@ -375,6 +375,7 @@
 		<Scripts>
 			<OnLoad>
 				self.Header:SetText(TMW.L["SORTBY"])
+
 				TMW.IE:BuildSimpleCheckSettingFrame(self, {
 					numPerRow = 3,
 					{
@@ -394,6 +395,66 @@
 						value = 1,
 						title = TMW.L["ICONMENU_SORTDESC"],
 						tooltip = TMW.L["ICONMENU_SORTDESC_DESC"],
+					},
+				})
+			</OnLoad>
+		</Scripts>
+	</Frame>
+	
+	<Frame name="TellMeWhen_SortSettingsWithStacks" inherits="TellMeWhen_OptionsModuleContainer" virtual="true">
+		<Size y="92"/>
+		<Scripts>
+			<OnLoad>
+				local function disableStackSort()
+					TMW.CI.ics.StackSort = false
+				end
+				local function disableDurSort()
+					TMW.CI.ics.Sort = false
+				end
+
+				self.Header:SetText(TMW.L["SORTBY"])
+				TMW.IE:BuildSimpleCheckSettingFrame(self, {
+					numPerRow = 3,
+					{
+						setting = "Sort",
+						value = false,
+						title = TMW.L["SORTBYNONE_DURATION"],
+						tooltip = TMW.L["SORTBYNONE_DESC"],
+					},
+					{
+						setting = "Sort",
+						value = -1,
+						title = TMW.L["ICONMENU_SORTASC"],
+						tooltip = TMW.L["ICONMENU_SORTASC_DESC"],
+						OnClick = disableStackSort,
+					},
+					{
+						setting = "Sort",
+						value = 1,
+						title = TMW.L["ICONMENU_SORTDESC"],
+						tooltip = TMW.L["ICONMENU_SORTDESC_DESC"],
+						OnClick = disableStackSort,
+					},
+
+					{
+						setting = "StackSort",
+						value = false,
+						title = TMW.L["SORTBYNONE_STACKS"],
+						tooltip = TMW.L["SORTBYNONE_DESC"],
+					},
+					{
+						setting = "StackSort",
+						value = -1,
+						title = TMW.L["ICONMENU_SORT_STACKS_ASC"],
+						tooltip = TMW.L["ICONMENU_SORT_STACKS_ASC_DESC"],
+						OnClick = disableDurSort,
+					},
+					{
+						setting = "StackSort",
+						value = 1,
+						title = TMW.L["ICONMENU_SORT_STACKS_DESC"],
+						tooltip = TMW.L["ICONMENU_SORT_STACKS_DESC_DESC"],
+						OnClick = disableDurSort,
 					},
 				})
 			</OnLoad>

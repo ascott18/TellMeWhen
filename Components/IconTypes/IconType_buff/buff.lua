@@ -51,6 +51,7 @@ Type:SetModuleAllowance("IconModule_PowerBar_Overlay", true)
 
 Type:RegisterIconDefaults{
 	Sort					= false,
+	StackSort				= false,
 	Unit					= "player", 
 	BuffOrDebuff			= "HELPFUL", 
 	Stealable				= false,     
@@ -121,7 +122,7 @@ Type:RegisterConfigPanel_XMLTemplate(165, "TellMeWhen_WhenChecks", {
 	[0x1] = { text = "|cFFFF0000" .. L["ICONMENU_ABSENTONALL"], 	tooltipText = L["ICONMENU_ABSENTONALL_DESC"],	},
 })
 
-Type:RegisterConfigPanel_XMLTemplate(170, "TellMeWhen_SortSettings")
+Type:RegisterConfigPanel_XMLTemplate(170, "TellMeWhen_SortSettingsWithStacks")
 
 
 TMW:RegisterCallback("TMW_GLOBAL_UPDATE", function()
@@ -149,14 +150,15 @@ local function Buff_OnUpdate(icon, time)
 	-- WARNING: THIS CODE IS HORRIFYING. ENTER AT YOUR OWN RISK!
 	
 	
-	local Units, NameArray, NameNameArray, NameHash, Filter, Filterh, Sort
-	= icon.Units, icon.NameArray, icon.NameNameArray, icon.NameHash, icon.Filter, icon.Filterh, icon.Sort
+	local Units, NameArray, NameNameArray, NameHash, Filter, Filterh, Sort, StackSort
+	= icon.Units, icon.NameArray, icon.NameNameArray, icon.NameHash, icon.Filter, icon.Filterh, icon.Sort, icon.StackSort
 	local NotStealable = not icon.Stealable
 	local NAL = #icon.NameArray
 
-	local buffName, _, iconTexture, count, dispelType, duration, expirationTime, canSteal, id, v1, v2, v3, v4
+	local buffName, _, iconTexture, dispelType, duration, expirationTime, count, canSteal, id, v1, v2, v3, v4
 	local useUnit
 	local d = Sort == -1 and huge or 0
+	local s = StackSort == -1 and huge or -1
 	
 	for u = 1, #Units do
 		local unit = Units[u]
@@ -170,9 +172,17 @@ local function Buff_OnUpdate(icon, time)
 					elseif (NameHash[_id] or NameHash[_dispelType] or NameHash[strlowerCache[_buffName]]) and (NotStealable or canSteal) then
 						if Sort then
 							local _d = (_expirationTime == 0 and huge) or _expirationTime - time
-							if d*Sort < _d*Sort then
+
+							if not buffName or d*Sort < _d*Sort then
 								buffName, iconTexture, count, duration, expirationTime, id, v1, v2, v3, v4, useUnit, d =
 								_buffName, _iconTexture, _count, _duration, _expirationTime, _id, _v1, _v2, _v3, _v4, unit, _d
+							end
+						elseif StackSort then
+							local _s = _count or 0
+
+							if not buffName or s*StackSort < _s*StackSort then
+								buffName, iconTexture, count, duration, expirationTime, id, v1, v2, v3, v4, useUnit, s =
+								_buffName, _iconTexture, _count, _duration, _expirationTime, _id, _v1, _v2, _v3, _v4, unit, _s
 							end
 						else
 							buffName, iconTexture, count, duration, expirationTime, id, v1, v2, v3, v4, useUnit =
@@ -190,13 +200,21 @@ local function Buff_OnUpdate(icon, time)
 						elseif (NameHash[_id] or NameHash[_dispelType] or NameHash[strlowerCache[_buffName]]) and (NotStealable or canSteal) then
 							if Sort then
 								local _d = (_expirationTime == 0 and huge) or _expirationTime - time
-								if d*Sort < _d*Sort then
+
+								if not buffName or d*Sort < _d*Sort then
 									buffName, iconTexture, count, duration, expirationTime, id, v1, v2, v3, v4, useUnit, d =
 									_buffName, _iconTexture, _count, _duration, _expirationTime, _id, _v1, _v2, _v3, _v4, unit, _d
 								end
+							elseif StackSort then
+								local _s = _count or 1
+
+								if not buffName or s*StackSort < _s*StackSort then
+									buffName, iconTexture, count, duration, expirationTime, id, v1, v2, v3, v4, useUnit, s =
+									_buffName, _iconTexture, _count, _duration, _expirationTime, _id, _v1, _v2, _v3, _v4, unit, _s
+								end
 							else
 								buffName, iconTexture, count, duration, expirationTime, id, v1, v2, v3, v4, useUnit =
-								 _buffName, _iconTexture, _count, _duration, _expirationTime, _id, _v1, _v2, _v3, _v4, unit
+								_buffName, _iconTexture, _count, _duration, _expirationTime, _id, _v1, _v2, _v3, _v4, unit
 								break
 							end
 						end
@@ -283,38 +301,6 @@ local function Buff_OnUpdate(icon, time)
 				else
 					count = 0
 				end
-			--[[else
-				-- This is really stupid, but there really isn't a more efficient way to do it.
-				-- As of WoW 5.0.4, there will be a boolean return at the end of UnitAura.
-				-- It could be v1, v2, v3, v4, or vN. There is no way to tell afaik, so we have to test the hard way.
-				if isNumber[v1] then
-					if v1 > 0 then
-						count = v1
-					elseif isNumber[v2] then
-						if v2 > 0 then
-							count = v2
-						elseif isNumber[v3] then
-							if v3 > 0 then
-								count = v3
-							elseif isNumber[v4] then
-								if v4 > 0 then
-									count = v4
-								else
-									count = 0
-								end
-							else
-								count = 0
-							end
-						else
-							count = 0
-						end
-					else
-						count = 0
-					end
-				else
-					count = 0
-				end
-			end]]
 		end
 
 		icon:SetInfo("alpha; texture; start, duration; stack, stackText; spell; unit, GUID",

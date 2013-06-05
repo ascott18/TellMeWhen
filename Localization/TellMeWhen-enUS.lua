@@ -479,7 +479,11 @@ L["ICONMENU_CLEU_NOREFRESH_DESC"] = "Check to cause the icon to ignore events th
 
 L["SORTBY"] = "Prioritize"
 L["SORTBYNONE"] = "Normally"
-L["SORTBYNONE_DESC"] = [[If checked, spells will be checked in and appear in the order that they were entered into the "%s" editbox. If this icon is a buff/debuff icon and the number of auras being checked exceeds the efficiency threshold setting, auras will be checked in the order that they would normally appear on the unit's unit frame.]]
+L["SORTBYNONE_DURATION"] = "Normal Duration"
+L["SORTBYNONE_STACKS"] = "Normal Stacks"
+L["SORTBYNONE_DESC"] = [[If checked, spells will be checked in and appear in the order that they were entered into the "%s" editbox.
+
+If this icon is a buff/debuff icon and the number of auras being checked exceeds the efficiency threshold setting, auras will be checked in the order that they would normally appear on the unit's unit frame.]]
 L["SORTBYNONE_META_DESC"] = [[If checked, icons will be checked in the order that was configured above.]]
 L["ICONMENU_SORTASC"] = "Low duration"
 L["ICONMENU_SORTASC_DESC"] = "Check this box to prioritize and show spells with the lowest duration."
@@ -487,6 +491,11 @@ L["ICONMENU_SORTASC_META_DESC"] = "Check this box to prioritize and show icons w
 L["ICONMENU_SORTDESC"] = "High duration"
 L["ICONMENU_SORTDESC_DESC"] = "Check this box to prioritize and show spells with the highest duration."
 L["ICONMENU_SORTDESC_META_DESC"] = "Check this box to prioritize and show icons with the highest duration."
+
+L["ICONMENU_SORT_STACKS_ASC"] = "Low stacks"
+L["ICONMENU_SORT_STACKS_ASC_DESC"] = "Check this box to prioritize and show spells with the lowest stacks."
+L["ICONMENU_SORT_STACKS_DESC"] = "High stacks"
+L["ICONMENU_SORT_STACKS_DESC_DESC"] = "Check this box to prioritize and show spells with the highest stacks."
 
 L["ICONMENU_MOVEHERE"] = "Move here"
 L["ICONMENU_COPYHERE"] = "Copy here"

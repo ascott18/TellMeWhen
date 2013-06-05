@@ -107,7 +107,7 @@
 							title = TMW.L["ICONMENU_ONLYIFCOUNTING"],
 							tooltip = TMW.L["ICONMENU_ONLYIFCOUNTING_DESC"],
 							
-							OnClick = function(self)
+							OnState = function(self)
 								if TMW.CI.ics.OnlyIfCounting then
 									TMW.CI.ics.OnlyIfNotCounting = false
 								end
@@ -131,7 +131,7 @@
 							title = TMW.L["ICONMENU_ONLYIFNOTCOUNTING"],
 							tooltip = TMW.L["ICONMENU_ONLYIFNOTCOUNTING_DESC"],
 							
-							OnClick = function(self)
+							OnState = function(self)
 								if TMW.CI.ics.OnlyIfNotCounting then
 									TMW.CI.ics.OnlyIfCounting = false
 								end

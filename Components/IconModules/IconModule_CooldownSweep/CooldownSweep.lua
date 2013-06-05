@@ -43,7 +43,7 @@ CooldownSweep:RegisterConfigPanel_ConstructorFunc(200, "TellMeWhen_TimerSettings
 			setting = "ShowTimerText",
 			title = L["ICONMENU_SHOWTIMERTEXT"],
 			tooltip = L["ICONMENU_SHOWTIMERTEXT_DESC"],
-			OnClick = function(self)
+			OnState = function(self)
 				if TMW.CI.ics.ShowTimerText then
 					if	not (OmniCC or IsAddOnLoaded("OmniCC")) -- Tukui is handled by OmniCC == true
 					and	not IsAddOnLoaded("tullaCC")
