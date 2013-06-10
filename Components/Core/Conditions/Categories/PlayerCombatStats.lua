@@ -127,12 +127,12 @@ ConditionCategory:RegisterCondition(11,	 "MELEEAP", {
 	icon = "Interface\\Icons\\INV_Sword_04",
 	tcoords = CNDT.COMMON.standardtcoords,
 	Env = {
-		UnitAttackPower = function(unit)
+		MELEEAP_UnitAttackPower = function(unit)
 			local base, pos, neg = UnitAttackPower(unit)
 			return base + pos + neg
 		end,
 	},
-	funcstr = [[UnitAttackPower("player") c.Operator c.Level]],
+	funcstr = [[MELEEAP_UnitAttackPower("player") c.Operator c.Level]],
 	events = function(ConditionObject, c)
 		return
 			ConditionObject:GenerateNormalEventString("UNIT_ATTACK_POWER", "player")
@@ -192,7 +192,13 @@ ConditionCategory:RegisterCondition(21,	 "RANGEAP", {
 	texttable = CNDT.COMMON.commanumber,
 	icon = "Interface\\Icons\\INV_Weapon_Bow_07",
 	tcoords = CNDT.COMMON.standardtcoords,
-	funcstr = [[UnitRangedAttackPower("player") c.Operator c.Level]],
+	Env = {
+		RANGEAP_UnitRangedAttackPower = function(unit)
+			local base, pos, neg = UnitRangedAttackPower(unit)
+			return base + pos + neg
+		end,
+	},
+	funcstr = [[RANGEAP_UnitRangedAttackPower("player") c.Operator c.Level]],
 	events = function(ConditionObject, c)
 		return
 			ConditionObject:GenerateNormalEventString("UNIT_RANGED_ATTACK_POWER", "player")
