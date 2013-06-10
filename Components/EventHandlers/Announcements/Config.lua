@@ -112,7 +112,9 @@ function Announcements:LoadSettingsForEventID(id)
 	
 	local EventSettings = EVENTS:GetEventSettings()
 	Announcements:SelectChannel(EventSettings.Channel)
+
 	Announcements.ConfigContainer.EditBox:SetText(EventSettings.Text)
+	Announcements.ConfigContainer.EditBox.Error:SetText(TMW:TestDogTagString(CI.ic, EventSettings.Text))
 end
 
 function Announcements:SetupEventDisplay(eventID)

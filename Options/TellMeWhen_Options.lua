@@ -351,6 +351,67 @@ function TMW.SetIconPreviewIcon(self, icon)
 end
 
 
+---------- DogTag Utilities ----------
+do
+	local DogTag = LibStub("LibDogTag-3.0")
+	local EvaluateError
+
+	local function test(success, ...)
+		if success then
+			local arg1, arg2 = ...
+			local numArgs = select("#", ...)
+			if numArgs == 2 and arg2 == nil and type(arg1) == "string" then
+				return arg1
+			end
+		end
+	end
+
+	if DogTag and DogTag.tagError then
+		hooksecurefunc(DogTag, "tagError", function(_, _, text)
+			EvaluateError = text
+		end)
+	end
+
+	-- Tests a dogtag string. Returns a string if there is an error.
+	function TMW:TestDogTagString(icon, text, ns, kwargs)
+		icon:Setup()
+		
+		ns = ns or "TMW;Unit;Stats"
+		kwargs = kwargs or {
+			icon = icon.ID,
+			group = icon.group.ID,
+			unit = icon.attributes.dogTagUnit,
+		}
+
+		-- Test the string and its tags & syntax
+		local func = loadstring(DogTag:CreateFunctionFromCode(text, ns, kwargs))
+		local success, newfunc = pcall(func)
+
+		if not success then
+			return "CRITICAL ERROR: " .. newfunc
+		end
+
+		func = func and success and newfunc
+
+		if not func then
+			return
+		end
+
+		local tagError = test(pcall(func, kwargs))
+
+		if tagError then
+			return "ERROR: " .. tagError
+		else
+			EvaluateError = nil
+			DogTag:Evaluate(text, ns, kwargs)
+
+			if EvaluateError then
+				return "CRITICAL ERROR: " .. EvaluateError
+			end
+		end
+	end
+end
+
 ---------- Misc Utilities ----------
 do -- TMW:ReconcileData()
 	local isRunning
@@ -476,6 +537,8 @@ do	-- TMW:GetParser()
 		return Parser, LT1, LT2, LT3, RT1, RT2, RT3
 	end
 end
+
+
 
 
 -- --------------

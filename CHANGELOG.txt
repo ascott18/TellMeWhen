@@ -1,6 +1,8 @@
 ===v6.2.2===
  * Buff/Debuff icons can now sort by stacks.
- * Added a few more popup notifications when invalid settings/actions are entered/performed
+ * Added a few more popup notifications when invalid settings/actions are entered/performed.
+ * Icons will now be automatically enabled when you select an icon type.
+ * Incorporated LibDogTag-Stats-3.0 into TellMeWhen's various implementations of LibDogTag-3.0.
 
  * Bug Fixes:
  ** Buff/Debuff icons that are set to sort by low duration should now display unlimited duration auras when there is nothing else to display.

@@ -260,27 +260,8 @@ function TEXT:LoadConfig()
 			end
 			TMW:TT(frame.Default, "TEXTLAYOUTS_STRING_SETDEFAULT", L["TEXTLAYOUTS_STRING_SETDEFAULT_DESC"]:format(DefaultText), nil, 1)
 			
-			CI.ic:Setup()
-			frame.Error:SetText()
-			local kwargs = {
-				icon = CI.ic.ID,
-				group = CI.ic.group.ID,
-				unit = CI.ic.attributes.dogTagUnit,
-			}
-			
-			local func = loadstring(DogTag:CreateFunctionFromCode(text, "TMW;Unit;Stats", kwargs))
-			local success, newfunc = pcall(func)
-			func = func and success and newfunc
-			local tagError = func and TEXT:TestDogTagFunc(pcall(func, kwargs))
-			if tagError then
-				frame.Error:SetText("ERROR: " .. tagError)
-			else
-				TEXT.EvaluateError = nil
-				DogTag:Evaluate(text, "TMW;Unit;Stats", kwargs)
-				if TEXT.EvaluateError then
-					frame.Error:SetText("CRITICAL ERROR: " .. TEXT.EvaluateError)
-				end
-			end
+			-- Ttest the string and its tags & syntax
+			frame.Error:SetText(TMW:TestDogTagString(CI.ic, text, "TMW;Unit;Stats"))
 			
 			previousFrame = frame
 			

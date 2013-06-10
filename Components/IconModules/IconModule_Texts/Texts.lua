@@ -676,7 +676,7 @@ function Texts:OnKwargsUpdated()
 				
 				fontString:SetShadowOffset(fontStringSettings.Shadow, -fontStringSettings.Shadow)
 				
-				DogTag:AddFontString(fontString, self.icon, styleString .. text, "TMW;Unit", self.kwargs)
+				DogTag:AddFontString(fontString, self.icon, styleString .. text, "TMW;Unit;Stats", self.kwargs)
 			end
 		end
 	end

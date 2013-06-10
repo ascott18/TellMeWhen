@@ -37,6 +37,11 @@
 								<Anchor point="BOTTOM" relativePoint="TOP" y="1"/>
 							</Anchors>
 						</FontString>
+						<FontString name="$parentError" parentKey="Error" inherits="GameFontRed" justifyH="LEFT" >
+							<Anchors>
+								<Anchor point="TOPLEFT" relativeTo="$parent" relativePoint="BOTTOMLEFT" x="0" y="-2"/>
+							</Anchors>
+						</FontString>
 					</Layer>
 				</Layers>
 				<Scripts>
@@ -48,6 +53,7 @@
 						self.BackgroundText:SetWidth(self:GetWidth())
 						
 						self.Header:SetText(TMW.L["ANN_EDITBOX"])
+						self.Error:SetWidth(self:GetWidth() - 27)
 						
 						TMW.SUG:EnableEditBox(self, "dogtags")
 						
@@ -155,7 +161,7 @@
 			<Frame name="$parentChannelList" parentKey="ChannelList">
 				<Size x="150" y="10"/>
 				<Anchors>
-					<Anchor point="TOPLEFT" relativeTo="$parentEditBox" relativePoint="BOTTOMLEFT" x="-5" y="-25"/>
+					<Anchor point="TOPLEFT" relativeTo="$parentEditBoxError" relativePoint="BOTTOMLEFT" x="-5" y="-25"/>
 					<Anchor point="BOTTOM" y="-0"/>
 				</Anchors>
 				<Frames>
@@ -168,7 +174,7 @@
 						TMW:ConvertContainerToScrollFrame(self, true, nil, 8)
 						
 						ChannelListHeader:SetText(TMW.L["ANN_CHANTOUSE"])
-						ChannelListHeader:SetPoint("BOTTOM", self.ScrollFrame, "TOP", 3, 1)
+						ChannelListHeader:SetPoint("BOTTOM", self.ScrollFrame, "TOP", 7, 1)
 					</OnLoad>
 				</Scripts>
 			</Frame>
