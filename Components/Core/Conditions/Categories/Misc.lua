@@ -80,10 +80,6 @@ ConditionCategory:RegisterCondition(1,	 "ICON", {
 	end,
 })
 
-
-ConditionCategory:RegisterSpacer(1.1)
-
-
 local function RegisterShownHiddenTimerCallback()
 	TMW:RegisterCallback(TMW.Classes.IconDataProcessor.ProcessorsByName.REALALPHA.changedEvent, function(event, icon, realAlpha, oldalpha)
 		if realAlpha == 0 then
@@ -158,32 +154,6 @@ ConditionCategory:RegisterCondition(1.3,	"ICONHIDDENTME", {
 })
 
 
-ConditionCategory:RegisterSpacer(1.5)
-
-
-ConditionCategory:RegisterCondition(2,	 "MACRO", {
-	text = L["MACROCONDITION"],
-	tooltip = L["MACROCONDITION_DESC"],
-	min = 0,
-	max = 1,
-	nooperator = true,
-	noslide = true,
-	name = function(editbox) TMW:TT(editbox, "MACROCONDITION", "MACROCONDITION_EB_DESC") editbox.label = L["MACROTOEVAL"] end,
-	unit = false,
-	icon = "Interface\\Icons\\inv_misc_punchcards_yellow",
-	tcoords = CNDT.COMMON.standardtcoords,
-	Env = {
-		SecureCmdOptionParse = SecureCmdOptionParse,
-	},
-	funcstr = function(c)
-		local text = c.Name
-		text = (not strfind(text, "^%[") and ("[" .. text)) or text
-		text = (not strfind(text, "%]$") and (text .. "]")) or text
-		return [[SecureCmdOptionParse("]] .. text .. [[")]]
-	end,
-	-- events = absolutely no events
-})
-
 ConditionCategory:RegisterCondition(3,	 "MOUSEOVER", {
 	text = L["MOUSEOVERCONDITION"],
 	tooltip = L["MOUSEOVERCONDITION_DESC"],
@@ -201,7 +171,10 @@ ConditionCategory:RegisterCondition(3,	 "MOUSEOVER", {
 })
 
 
+
 ConditionCategory:RegisterSpacer(10)
+
+
 
 
 ConditionCategory:RegisterCondition(11,	 "WEEKDAY", {
@@ -262,7 +235,9 @@ ConditionCategory:RegisterCondition(12,	 "TIMEOFDAY", {
 })
 
 
+
 ConditionCategory:RegisterSpacer(19.5)
+
 
 
 ConditionCategory:RegisterCondition(21,	 "QUESTCOMPLETE", {
@@ -299,10 +274,36 @@ ConditionCategory:RegisterCondition(21,	 "QUESTCOMPLETE", {
 })
 
 
+
 ConditionCategory:RegisterSpacer(29.5)
 
 
-ConditionCategory:RegisterCondition(30,	 "LUA", {
+
+
+ConditionCategory:RegisterCondition(30,	 "MACRO", {
+	text = L["MACROCONDITION"],
+	tooltip = L["MACROCONDITION_DESC"],
+	min = 0,
+	max = 1,
+	nooperator = true,
+	noslide = true,
+	name = function(editbox) TMW:TT(editbox, "MACROCONDITION", "MACROCONDITION_EB_DESC") editbox.label = L["MACROTOEVAL"] end,
+	unit = false,
+	icon = "Interface\\Icons\\inv_misc_punchcards_yellow",
+	tcoords = CNDT.COMMON.standardtcoords,
+	Env = {
+		SecureCmdOptionParse = SecureCmdOptionParse,
+	},
+	funcstr = function(c)
+		local text = c.Name
+		text = (not strfind(text, "^%[") and ("[" .. text)) or text
+		text = (not strfind(text, "%]$") and (text .. "]")) or text
+		return [[SecureCmdOptionParse("]] .. text .. [[")]]
+	end,
+	-- events = absolutely no events
+})
+
+ConditionCategory:RegisterCondition(31,	 "LUA", {
 	text = L["LUACONDITION"],
 	tooltip = L["LUACONDITION_DESC"],
 	min = 0,

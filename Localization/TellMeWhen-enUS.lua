@@ -499,7 +499,7 @@ L["ICONMENU_MOVEHERE"] = "Move here"
 L["ICONMENU_COPYHERE"] = "Copy here"
 L["ICONMENU_SWAPWITH"] = "Swap with"
 L["ICONMENU_ADDMETA"] = "Add to Meta Icon"
-L["ICONMENU_APPENDCONDT"] = "Add as 'Icon Shown' condition"
+L["ICONMENU_APPENDCONDT"] = "Add as %q condition"
 L["ICONMENU_ANCHORTO"] = "Anchor to %s"
 L["ICONMENU_ANCHORTO_DESC"] = [[Anchor %s to %s, so that whenever %s moves, %s will move with it.
 
@@ -1001,7 +1001,7 @@ L["CONDITIONPANEL_VEHICLE"] = "Unit Controls Vehicle"
 L["CONDITIONPANEL_POWER_DESC"] = [=[Will check for energy if the unit is a druid in cat form, rage if the unit is a warrior, etc.]=]
 L["ECLIPSE_DIRECTION"] = "Eclipse Direction"
 L["CONDITIONPANEL_ECLIPSE_DESC"] = [=[Eclipse has a range of -100 (a lunar eclipse) to 100 (a solar eclipse).  Input -80 if you want the icon to work with a value of 80 lunar power.]=]
-L["CONDITIONPANEL_ICON"] = "Icon Shown"
+L["CONDITIONPANEL_ICON"] = "Icon is Shown"
 L["CONDITIONPANEL_ICON_SHOWN"] = "Shown"
 L["CONDITIONPANEL_ICON_HIDDEN"] = "Hidden"
 L["CONDITIONPANEL_ICON_DESC"] = [=[The condition checks whether the icon specified is shown or hidden.
