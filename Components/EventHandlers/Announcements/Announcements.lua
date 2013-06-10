@@ -162,7 +162,7 @@ function Announcements:HandleEvent(icon, eventSettings)
 		if chandata.isBlizz then
 			Text = Text:gsub("Name([^F])", "NameForceUncolored%1")
 		end
-		Text = DogTag:Evaluate(Text, "TMW;Unit", Announcements.kwargs)
+		Text = DogTag:Evaluate(Text, "TMW;Unit;Stats", Announcements.kwargs)
 		
 		-- DogTag returns nil if the result is an empty string, so make sure Text is non-nil
 		if Text then

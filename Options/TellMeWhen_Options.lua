@@ -2610,6 +2610,12 @@ function IE:Type_DropDown()
 end
 
 function IE:Type_Dropdown_OnClick()
+	-- Automatically enable the icon when the user chooses an icon type
+	-- when the icon was of the default (unconfigured) type.
+	if CI.ics.Type == "" then
+		CI.ics.Enabled = true
+	end
+
 	CI.ics.Type = self.value
 	CI.ic:SetInfo("texture", nil)
 

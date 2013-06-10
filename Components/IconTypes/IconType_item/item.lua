@@ -74,7 +74,7 @@ Type:RegisterConfigPanel_ConstructorFunc(150, "TellMeWhen_ItemSettings", functio
 			setting = "OnlyEquipped",
 			title = L["ICONMENU_ONLYEQPPD"],
 			tooltip = L["ICONMENU_ONLYEQPPD_DESC"],
-			OnClick = function(self, button)
+			OnState = function(self, button)
 				if self:GetChecked() then
 					TMW.CI.ics.OnlyInBags = true
 					self:GetParent().OnlyInBags:ReloadSetting()

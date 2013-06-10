@@ -18,7 +18,8 @@
 TELLMEWHEN_VERSION = "6.2.2"
 TELLMEWHEN_VERSION_MINOR = strmatch(" @project-version@", " r%d+") or ""
 TELLMEWHEN_VERSION_FULL = TELLMEWHEN_VERSION .. TELLMEWHEN_VERSION_MINOR
-TELLMEWHEN_VERSIONNUMBER = 62207 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
+TELLMEWHEN_VERSIONNUMBER = 62208 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
+
 if TELLMEWHEN_VERSIONNUMBER > 63000 or TELLMEWHEN_VERSIONNUMBER < 62000 then
 	-- safety check because i accidentally made the version number 414069 once
 	return error("YOU SCREWED UP THE VERSION NUMBER OR DIDNT CHANGE THE SAFETY LIMITS")
@@ -291,7 +292,7 @@ TMW.BE = {
 		Feared				= "_5782;5246;_8122;10326;1513;111397;_5484;_6789;_87204;20511;112928;113004;113792;113056",
 		Bleeding			= "_1822;_1079;9007;33745;1943;_703;_115767;89775;_11977;106830;77758",
 		
-		-- EXISTING WAS CHECKED, DIDN'T LOOK FOR NEW ONES YET:
+		-- EXISTING WAS CHECKED, DIDN'T LOOK FOR NEW (mists of pandaria)  ONES YET:
 		CrowdControl		= "_118;2637;33786;113506;_1499;_19503;_19386;20066;10326;_9484;_6770;_2094;_51514;76780;_710;_5782;_6358;_605;_82691;115078", -- originally by calico0 of Curse
 		
 	},
@@ -308,7 +309,7 @@ TMW.BE = {
 		-- From l337g0g0 of Curse:
 		DamageShield		= "_17;_11426;116849;115295;114908;110913;108416;112048;86273;114214;47753;65148;108008;1463;108366;119839;_6229;115635;77535",
 		
-		-- EXISTING WAS CHECKED, DIDN'T LOOK FOR NEW ONES YET:
+		-- EXISTING WAS CHECKED, DIDN'T LOOK FOR NEW (mists of pandaria) ONES YET:
 		ImmuneToStun		= "642;45438;19574;48792;1022;33786;710;46924;19263;6615",
 		ImmuneToMagicCC		= "642;45438;48707;19574;33786;710;46924;19263;31224;8178;23920;49039",
 		BurstHaste			= "2825;32182;80353;90355",
@@ -318,7 +319,8 @@ TMW.BE = {
 		DamageBuffs			= "1719;12292;50334;5217;3045;77801;34692;31884;51713;49016;12472;57933;86700;51271;_107574;114050;114051",
 	},
 	casts = {
-		--prefixing with _ doesnt really matter here since casts only match by name, but it may prevent confusion if people try and use these as buff/debuff equivs
+		--prefixing with _ doesnt really matter here since casts only match by name,
+		-- but it may prevent confusion if people try and use these as buff/debuff equivs
 		Heals				= "50464;5185;8936;740;2050;2060;2061;32546;596;64843;635;82326;19750;331;77472;8004;1064;73920;124682;115175;116694",
 		PvPSpells			= "33786;339;20484;1513;982;64901;_605;5782;5484;10326;51514;118;12051;20066",
 		Tier11Interrupts	= "_83703;_82752;_82636;_83070;_79710;_77896;_77569;_80734;_82411",
@@ -345,31 +347,48 @@ function TMW:ProcessEquivalencies()
 	TMW:UnregisterAllCallbacks("TMW_EQUIVS_PROCESSING")
 	TMW.ProcessEquivalencies = nil
 
+	-- TMW.OldBE is used by TellMeWhen_Options.lua to create some tables to allow reverse-lookups
+	-- of equavalancies for things like the suggestion list.
 	TMW.OldBE = CopyTable(TMW.BE)
+	
 	for category, b in pairs(TMW.OldBE) do
 		for equiv, str in pairs(b) do
-			b[equiv] = gsub(str, "_", "") -- REMOVE UNDERSCORES FROM OLDBE
+		
+			-- remove underscores from TMW.OldBE's entries
+			b[equiv] = gsub(str, "_", "")
 
-			-- turn all IDs prefixed with "_" into their localized name. Dont do this on every single one, but do use it for spells that do not have any other spells with the same name but different effects.
+			-- turn all IDs prefixed with "_" into their localized name.
+			-- When defining equavalancies, dont put a _ on every single one,
+			-- but do use it for spells that do not have any other spells with the same name and different effects.
+			
 			while strfind(str, "_") do
-				local id = strmatch(str, "_%d+") -- id includes the underscore, trimmed off below
-				local realID = tonumber(strmatch(str, "_(%d+)"))
-				if id then
-					local name, _, tex = GetSpellInfo(strtrim(id, " _"))
+				local idWithUnderscore = strmatch(str, "_%d+")
+				local idWithoutUnderscore = tonumber(strmatch(str, "_(%d+)"))
+				
+				if idWithUnderscore then
+					local name, _, tex = GetSpellInfo(idWithoutUnderscore)
+					
+					-- name will be nil if the ID isn't a valid spell (possibly the spell was removed in a patch).
 					if name then
-						TMW:LowerNames(name) -- this will insert the spell name into the table of spells for capitalization restoration.
-						str = gsub(str, id, name)
-						TMW.SpellTexturesMetaIndex[realID] = tex
+						-- this will insert the spell name into the table of spells for capitalization restoration.
+						TMW:LowerNames(name) 
+						
+						-- replace the underscored spellID with the name substitution
+						str = gsub(str, idWithUnderscore, name, 1)
+						
+						-- map the spell's name and ID to its texture for the spell texture cache
+						TMW.SpellTexturesMetaIndex[idWithoutUnderscore] = tex
 						TMW.SpellTexturesMetaIndex[TMW.strlowerCache[name]] = tex
 
-					else  -- this should never ever ever happen except in new patches if spellIDs were wrong (experience talking)
+					else
 						
-						if clientVersion >= addonVersion then -- dont warn for old clients using newer versions
-							TMW:Error("Invalid spellID found: %s (%s - %s)! Please report this on TMW's CurseForge page, especially if you are currently on the PTR!", realID, category, equiv)
+						if clientVersion >= addonVersion then -- only warn for newer clients using older versions
+							TMW:Error("Invalid spellID found: %s (%s - %s)! Please report this on TMW's CurseForge page!",
+							idWithoutUnderscore, category, equiv)
 						end
 						
-						
-						str = gsub(str, id, realID) -- still need to substitute it to prevent recusion
+						-- substitute it back in without the underscore to prevent recusion
+						str = gsub(str, idWithUnderscore, idWithoutUnderscore, 1)
 					end
 				end
 			end
@@ -430,8 +449,10 @@ end
 -- Caches
 ---------------------------------
 
+
 TMW.strlowerCache = setmetatable(
 {}, {
+	__mode = "kv",
 	__index = function(t, i)
 		if not i then return end
 		local o
@@ -456,21 +477,27 @@ TMW.SpellTexturesBase = {
 }
 local SpellTexturesMetaIndex = TMW.SpellTexturesMetaIndex
 TMW.SpellTextures = setmetatable(
-CopyTable(TMW.SpellTexturesBase),
-{
-	__index = function(t, name)
-		if not name then return end
+	CopyTable(TMW.SpellTexturesBase),
+	{
+		__index = function(t, name)
+			if not name then return end
 
-		-- rawget the strlower because hardcoded entries (talents, mainly) are put into the table as lowercase
-		local tex = rawget(t, strlowerCache[name]) or GetSpellTexture(name) or SpellTexturesMetaIndex[name] or rawget(SpellTexturesMetaIndex, strlowerCache[name])
+			
+			local tex =
+				rawget(t, strlowerCache[name]) or -- rawget the strlower because hardcoded entries (talents, mainly) are put into the table as lowercase
+				GetSpellTexture(name) or
+				SpellTexturesMetaIndex[name] or
+				rawget(SpellTexturesMetaIndex, strlowerCache[name])
 
-		t[name] = tex
-		return tex
-	end,
-	__call = function(t, i)
-		return t[i]
-	end,
-}) local SpellTextures = TMW.SpellTextures
+
+			t[name] = tex
+			return tex
+		end,
+		__call = function(t, i)
+			return t[i]
+		end,
+	}
+) local SpellTextures = TMW.SpellTextures
 
 TMW.isNumber = setmetatable(
 {}, {
@@ -593,6 +620,7 @@ function TMW.tContains(table, item, returnNum)
 	for k, v in pairs(table) do
 		if v == item then
 			if not returnNum then
+				-- Return only the key of the first match
 				return k
 			else
 				num = num + 1
@@ -600,6 +628,8 @@ function TMW.tContains(table, item, returnNum)
 			end
 		end
 	end
+
+	-- Return the key of the first match and also the total number of matches
 	return firstkey, num
 end local tContains = TMW.tContains
 
@@ -2561,14 +2591,14 @@ local function safecall_coroutine(func, ...)
 	return true, func(...)
 end
 
-local function CheckCoroutineTermination(...)
+local function CheckCoroutineTermination()
 	if UpdateCoroutine and debugprofilestop() - CoroutineStartTime > COROUTINE_MAX_TIME_PER_FRAME then
 		coroutine.yield(UpdateCoroutine)
 	end
 end
 
 local function OnUpdateDuringCoroutine(self)
-	-- This is an OnUpdate script, but don't be too concerned with performance because it is only using
+	-- This is an OnUpdate script, but don't be too concerned with performance because it is only used
 	-- when lock toggling in combat. Safety of the code (don't let it error!) is far more important than performance here.
 	time = GetTime()
 	TMW.time = time
@@ -2589,7 +2619,7 @@ local function OnUpdateDuringCoroutine(self)
 		TMW:SetScript("OnUpdate", TMW.OnUpdate)
 	else
 		-- Yielding a coroutine inside a pcall/xpcall isn't permitted,
-		-- so we will just have to YOLO (sorry) here and throw all error handling out the window.
+		-- so we will just have to temporarily throw all error protection out the window.
 		TMW.safecall = safecall_coroutine
 		safecall = safecall_coroutine
 		
@@ -2668,6 +2698,7 @@ function TMW:ScheduledUpdateHandler()
 	if TMW:CheckCanDoLockedAction(false) then
 		TMW:Update()
 	else
+		-- We can't update now. Try again in 5 seconds.
 		TMW:ScheduleUpdate(5)
 	end
 end

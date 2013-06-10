@@ -242,8 +242,6 @@ That's all. Have fun configuring TMW!]]
 L["ICONTYPE_DEFAULT_HEADER"] = "Instructions"
 L["ICONTYPE_DEFAULT_INSTRUCTIONS"] = [[To get started configuring this icon, select an icon type from the %q dropdown menu above.
 
-Be sure to also check the %q setting so that this icon will function.
-
 Remember that icons will only work when TellMeWhen is in its locked state, so type '/tmw' when you are finished with configuration.
 
 

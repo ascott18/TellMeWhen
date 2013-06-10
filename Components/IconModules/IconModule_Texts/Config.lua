@@ -268,7 +268,7 @@ function TEXT:LoadConfig()
 				unit = CI.ic.attributes.dogTagUnit,
 			}
 			
-			local func = loadstring(DogTag:CreateFunctionFromCode(text, "TMW;Unit", kwargs))
+			local func = loadstring(DogTag:CreateFunctionFromCode(text, "TMW;Unit;Stats", kwargs))
 			local success, newfunc = pcall(func)
 			func = func and success and newfunc
 			local tagError = func and TEXT:TestDogTagFunc(pcall(func, kwargs))
@@ -276,7 +276,7 @@ function TEXT:LoadConfig()
 				frame.Error:SetText("ERROR: " .. tagError)
 			else
 				TEXT.EvaluateError = nil
-				DogTag:Evaluate(text, "TMW;Unit", kwargs)
+				DogTag:Evaluate(text, "TMW;Unit;Stats", kwargs)
 				if TEXT.EvaluateError then
 					frame.Error:SetText("CRITICAL ERROR: " .. TEXT.EvaluateError)
 				end

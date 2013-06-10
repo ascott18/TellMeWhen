@@ -1576,9 +1576,11 @@
 						<Scripts>
 							<OnLoad>
 								self.wrapTooltips = 1
-								UIDropDownMenu_SetWidth(self, 190)
 								self.initialize = TMW.IE.Type_DropDown
+								
+								UIDropDownMenu_SetWidth(self, 190)
 								UIDropDownMenu_SetText(self, TMW.L["ICONMENU_TYPE"])
+
 								self.Button:HookScript("OnClick", function(self)
 									TMW.IE:SaveSettings()
 								end)

@@ -288,7 +288,7 @@ ConditionCategory:RegisterCondition(33,	 "SPELLCRIT", {
 	icon = "Interface\\Icons\\inv_gizmo_supersappercharge",
 	tcoords = CNDT.COMMON.standardtcoords,
 	Env = {
-		GetSpellCritChance = function()
+		SPELLCRIT_GetSpellCritChance = function()
 			return min(
 				GetSpellCritChance(2),
 				GetSpellCritChance(3),
@@ -299,7 +299,7 @@ ConditionCategory:RegisterCondition(33,	 "SPELLCRIT", {
 			)
 		end,
 	},
-	funcstr = [[GetSpellCritChance() c.Operator c.Level]],
+	funcstr = [[SPELLCRIT_GetSpellCritChance() c.Operator c.Level]],
 	events = function(ConditionObject, c)
 		return
 			ConditionObject:GenerateNormalEventString("COMBAT_RATING_UPDATE")
