@@ -31,7 +31,7 @@ Env.GetExpertise = GetExpertise
 Env.GetCritChance = GetCritChance
 Env.GetRangedCritChance = GetRangedCritChance
 Env.GetSpellCritChance = GetSpellCritChance
-Env.GetMastery = GetMastery
+Env.GetMasteryEffect = GetMasteryEffect
 Env.GetSpellBonusDamage = GetSpellBonusDamage
 Env.GetSpellBonusHealing = GetSpellBonusHealing
 	
@@ -109,7 +109,7 @@ ConditionCategory:RegisterCondition(6,	 "MASTERY", {
 	unit = PLAYER,
 	icon = "Interface\\Icons\\spell_holy_championsbond",
 	tcoords = CNDT.COMMON.standardtcoords,
-	funcstr = [[GetMastery() c.Operator c.Level]],
+	funcstr = [[GetMasteryEffect() c.Operator c.Level]],
 	events = function(ConditionObject, c)
 		return
 			ConditionObject:GenerateNormalEventString("MASTERY_UPDATE")
