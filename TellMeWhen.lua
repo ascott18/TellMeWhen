@@ -18,7 +18,7 @@
 TELLMEWHEN_VERSION = "6.2.2"
 TELLMEWHEN_VERSION_MINOR = strmatch(" @project-version@", " r%d+") or ""
 TELLMEWHEN_VERSION_FULL = TELLMEWHEN_VERSION .. TELLMEWHEN_VERSION_MINOR
-TELLMEWHEN_VERSIONNUMBER = 62212 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
+TELLMEWHEN_VERSIONNUMBER = 62213 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
 
 if TELLMEWHEN_VERSIONNUMBER > 63000 or TELLMEWHEN_VERSIONNUMBER < 62000 then
 	-- safety check because i accidentally made the version number 414069 once
@@ -78,6 +78,8 @@ local time = GetTime() TMW.time = time
 
 local clientVersion = select(4, GetBuildInfo())
 local addonVersion = tonumber(GetAddOnMetadata("TellMeWhen", "X-Interface"))
+
+local wow_504 = clientVersion >= 50400
 
 local _, pclass = UnitClass("Player")
 
@@ -288,7 +290,7 @@ TMW.BE = {
 		Silenced			= "_47476;_78675;_34490;_55021;_15487;_1330;_24259;_18498;_25046;31935;31117;102051;116709",
 		Shatterable			= "122;33395;_44572;_82691", -- by algus2
 		Disoriented			= "_19503;31661;_2094;_51514;90337;88625;105421;99",
-		Slowed				= "_116;_120;_13810;_5116;_8056;_3600;_1715;_12323;116095;_110300;_20170;_115180;45524;_18223;_15407;_3409;26679;_58180;61391;44614;_7302;_8034;_63529;_15571;_7321;_7992;123586;47960;129923", -- by algus2 
+		Slowed				= "_116;_120;_13810;_5116;_8056;_3600;_1715;_12323;116095;_20170;_115180;45524;_18223;_15407;_3409;26679;_58180;61391;44614;_7302;_8034;_63529;_15571;_7321;_7992;123586;47960;129923", -- by algus2 
 		Feared				= "_5782;5246;_8122;10326;1513;111397;_5484;_6789;_87204;20511;112928;113004;113792;113056",
 		Bleeding			= "_1822;_1079;9007;33745;1943;_703;_115767;89775;_11977;106830;77758",
 		
@@ -327,6 +329,10 @@ TMW.BE = {
 		Tier12Interrupts	= "_97202;_100094",
 	},
 }
+if not wow_504 then
+	-- TODO: Remove this code when 5.4 goes live.
+	TMW.BE.debuffs.Slowed = TMW.BE.debuffs.Slowed .. ";_110300"
+end
 
 TMW.DS = {
 	Magic 	= "Interface\\Icons\\spell_fire_immolation",
