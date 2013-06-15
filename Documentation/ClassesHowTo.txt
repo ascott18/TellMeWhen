@@ -1,10 +1,8 @@
 
-= How To: Use TellMeWhen's Class/OOP System
-
 This page serves as an introduction on how TellMeWhen's class system works.
 
 
-== Creating Classes
+= Creating Classes
 
 Creating a class with TMW's class system is simple:
 
@@ -14,7 +12,7 @@ Creating a class with TMW's class system is simple:
 
 You can now add methods and fields to MyClass that will be accessible to any instances of the class.
 
-=== Inheritance
+== Inheritance
 
 To create a class that inherits from other classes, add additional parameters after the name of the class in its declaration:
 
@@ -24,11 +22,11 @@ To create a class that inherits from other classes, add additional parameters af
 
 TMW's class systems supports multiple inheritance. Classes will take precedence in the order that they are inherited in case of any conflicting members between two inherited classes. For example, if both Foo and Bar had a DoSomething method here, Bar's method would be used for MyClass and Foo's method would be ignored.
 
-==== Inheritance Behavior
+=== Inheritance Behavior
 
 All classes implicitly inherit from [[api/core-systems/classes/api-documentation/|TMW.Classes.Class]].
 
-Inheritance is done by compiling all inherited objects & fields into an __index metatable that will be used by all instances of that class. This is also the table that values will be copied from when inheriting from another TellMeWhen class.
+Inheritance is done by compiling all inherited objects & fields into an _{{{}}}_index metatable that will be used by all instances of that class. This is also the table that values will be copied from when inheriting from another TellMeWhen class.
 
 Tables that are defined at the class level will be shared between all instances of the class. the same is true for functions since both are reference types in Lua. Making changes to the values of a table that is defined for a class be accessing it through an instance will still modify that table for all instances. All other Lua types defined on a class will be modified separately per instance when accessed through an instance.
 
@@ -36,7 +34,7 @@ In order to have a unique table for each instance of a class, you must define th
 
 Because TMW's class system uses metatables to give instances access to their classes' methods and fields, changes made to the members of a class (like defining a new function for a class or changing the value of a variable) will be reflected in all instances of that class immediately. Subclasses and their instances will not be affected, though, since the inheritance of a class is taken as a snapshot of the class at the moment of inheritance.
 
-==== Inheritance Types
+=== Inheritance Types
 
 The following things may be inherited into any TMW class:
 
@@ -74,7 +72,7 @@ Here is an example of a class that uses all four of these:
 <</code>>
 
 
-==== Special Inheritance handling
+=== Special Inheritance handling
 
 When inherited one TMW class from another, the OnClassInherit method will be called for the class being inherited. The class that inherited that class will be passed in as a parameter. All methods that begin with "OnClassInherit" will be called when this happens.
 
@@ -103,7 +101,7 @@ This can be useful for copying a table from a parent class to a child class. For
 
 Without the OnClassInherit method, both classes would reference the same Data table, so the second print would output "def" even though that assignment was made through Bar.
 
-== Instantiating Classes
+= Instantiating Classes
 
 Instantiating a TMW class is easy:
 
@@ -113,7 +111,7 @@ Instantiating a TMW class is easy:
 	Bar = Foo:New()
 <</code>>
 
-=== Constructors
+== Constructors
 
 Constructor methods are defined on a class as "OnNewInstance" followed by any additional characters to prevent conflicts with inherited constructors. All methods of a class, including inherited methods, that begin with "OnNewInstance" will be called as constructors.
 
@@ -134,7 +132,7 @@ Constructor methods are defined on a class as "OnNewInstance" followed by any ad
 	TMW:Print(Bar.ID2) -- prints 11
 <</code>>
 
-=== Handling the First Instance
+== Handling the First Instance
 
 A special method is available for handling the first time that a class in instantiated. This method is "OnFirstInstance" and it works in the same way that OnNewInstance and OnClassInherit work. All methods of a class, including inherited methods, that begin with "OnFirstInstance" will be called when the first instance is created. This method is called with the class being instantiated as self with no other args.
 
