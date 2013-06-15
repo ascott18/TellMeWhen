@@ -67,6 +67,10 @@
     input-file: "Components/Core/Class.lua"
     output-page: "API/Core Systems/Classes/API Documentation"
 -
+    type: creole
+    input-file: "Documentation/ClassesHowTo.txt"
+    output-page: "API/Core Systems/Classes/How To"
+-
     type: luadoc
     input-file: "Documentation/Callback.lua"
     output-page: "API/Core Systems/Callbacks/API Documentation"

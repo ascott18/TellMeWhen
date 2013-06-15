@@ -70,7 +70,7 @@ local function callFunc(class, instance, func, ...)
 end
 
 local function initializeClass(self)
-	if not self.instances[1] then
+	if not self.initialized then
 		-- set any defined metamethods
 		for k, v in pairs(self.instancemeta.__index) do
 			if metamethods[k] then
@@ -79,6 +79,8 @@ local function initializeClass(self)
 		end
 		
 		self:CallFunc("OnFirstInstance")
+
+		self.initialized = true
 	end
 end
 
@@ -104,17 +106,27 @@ local inherit = function(self, source)
 		
 		local index, didInherit
 		
-		-- TMW class inheritance
+		-- TMW class inheritance (passed in class name)
 		if TMW.Classes[source] then
 			TMW.Classes[source]:CallFunc("OnClassInherit", self)
 			
 			index = getmetatable(TMW.Classes[source]).__index
 			didInherit = true
 		
-		-- Table inheritance
 		elseif type(source) == "table" then
-			index = source
-			didInherit = true
+
+			-- TMW class inheritance (passed in class table)
+			if source.isTMWClass and TMW.Classes[source.className] then
+				source:CallFunc("OnClassInherit", self)
+				
+				index = getmetatable(source).__index
+				didInherit = true
+
+			else
+				-- Table inheritance
+				index = source
+				didInherit = true
+			end
 		else
 		
 			-- Blizzard widget inheritance
@@ -139,7 +151,7 @@ local inherit = function(self, source)
 					lib:Embed(metatable.__index)
 					didInherit = true
 				else
-					error(("Library %q does not have an Embed method"):format(source), 2)
+					TMW:Error("Library %q does not have an Embed method", source)
 				end
 			end
 		end
@@ -402,6 +414,7 @@ end
 -- -- so that it may preform any class-level initialization needed.
 -- class:CallFunc("OnFirstInstance")
 -- 
+-- Another example:
 -- Used when an instance of a class is created.
 -- Essentially functions as a constructor in traditional OOP.
 -- instance:CallFunc("OnNewInstance", ...)

@@ -1,0 +1,152 @@
+
+= How To: Use TellMeWhen's Class/OOP System
+
+This page serves as an introduction on how TellMeWhen's class system works.
+
+
+== Creating Classes
+
+Creating a class with TMW's class system is simple:
+
+<<code lua>>
+	MyClass = TMW:NewClass("MyClass")
+<</code>>
+
+You can now add methods and fields to MyClass that will be accessible to any instances of the class.
+
+=== Inheritance
+
+To create a class that inherits from other classes, add additional parameters after the name of the class in its declaration:
+
+<<code lua>>
+	MyClass = TMW:NewClass("MyClass", "Foo", "Bar")
+<</code>>
+
+TMW's class systems supports multiple inheritance. Classes will take precedence in the order that they are inherited in case of any conflicting members between two inherited classes. For example, if both Foo and Bar had a DoSomething method here, Bar's method would be used for MyClass and Foo's method would be ignored.
+
+==== Inheritance Behavior
+
+All classes implicitly inherit from [[api/core-systems/classes/api-documentation/|TMW.Classes.Class]].
+
+Inheritance is done by compiling all inherited objects & fields into an __index metatable that will be used by all instances of that class. This is also the table that values will be copied from when inheriting from another TellMeWhen class.
+
+Tables that are defined at the class level will be shared between all instances of the class. the same is true for functions since both are reference types in Lua. Making changes to the values of a table that is defined for a class be accessing it through an instance will still modify that table for all instances. All other Lua types defined on a class will be modified separately per instance when accessed through an instance.
+
+In order to have a unique table for each instance of a class, you must define that table in the instance constructor (see below).
+
+Because TMW's class system uses metatables to give instances access to their classes' methods and fields, changes made to the members of a class (like defining a new function for a class or changing the value of a variable) will be reflected in all instances of that class immediately. Subclasses and their instances will not be affected, though, since the inheritance of a class is taken as a snapshot of the class at the moment of inheritance.
+
+==== Inheritance Types
+
+The following things may be inherited into any TMW class:
+
+* Other TellMeWhen classes (pass in the name of the class)
+* Lua tables (pass in the table)
+* Blizzard widgets (like Frame, Button, TextBox, etc.)
+** Instances of a class that inherits from a Blizzard widget will be based on a new widget from a CreateFrame() call, and the parameters passed to the call to Class:New(...) will be passed to CreateFrame(...)
+* LibStub libraries that have an :Embed() method (pass in the name of the library)
+
+Here is an example of a class that uses all four of these:
+
+<<code lua>>
+	Base = TMW:NewClass("Base")
+	function Base:DoSomething()
+		TMW:Print(self.className)
+	end
+
+	local constants = {
+		SOME_CONST = 1,
+		DELAY_CONST = 2,
+	}
+
+	CompositeButton = TMW:NewClass("CompositeButton", "Button", "Base", constants, "AceTimer-3.0")
+	function CompositeButton:StartSomething()
+		self:AssertSelfIsInstance()
+
+		TMW:Printf("Starting a timer for button %q", self:GetName())
+		Button:ScheduleTimer("DoSomething", self.DELAY_CONST)
+	end
+
+	Button = CompositeButton:New("Button", "AButton", UIParent)
+	
+	Button:StartSomething()
+
+<</code>>
+
+
+==== Special Inheritance handling
+
+When inherited one TMW class from another, the OnClassInherit method will be called for the class being inherited. The class that inherited that class will be passed in as a parameter. All methods that begin with "OnClassInherit" will be called when this happens.
+
+This can be useful for copying a table from a parent class to a child class. For example:
+
+<<code lua>>
+	Foo = TMW:NewClass("Foo")
+
+	Foo.Data = {}
+
+	function Foo:OnClassInherit_Foo(newClass)
+		newClass:InheritTable(self, "Data")
+	end
+
+	Foo.Data[1] = "abc"
+
+	Bar = TMW:NewClass("Bar", "Foo")
+
+	Bar.Data[2] = "def"
+
+	TMW:Print(Foo.Data[1]) -- Prints "abc"
+	TMW:Print(Foo.Data[2]) -- Prints nil
+	TMW:Print(Bar.Data[1]) -- Prints "abc"
+	TMW:Print(Bar.Data[2]) -- Prints "def"
+<</code>>
+
+Without the OnClassInherit method, both classes would reference the same Data table, so the second print would output "def" even though that assignment was made through Bar.
+
+== Instantiating Classes
+
+Instantiating a TMW class is easy:
+
+<<code lua>>
+	Foo = TMW:NewClas("Foo")
+
+	Bar = Foo:New()
+<</code>>
+
+=== Constructors
+
+Constructor methods are defined on a class as "OnNewInstance" followed by any additional characters to prevent conflicts with inherited constructors. All methods of a class, including inherited methods, that begin with "OnNewInstance" will be called as constructors.
+
+<<code lua>>
+	Foo = TMW:NewClas("Foo")
+
+	function Foo:OnNewInstance(ID)
+		self.ID = ID
+	end
+
+	function Foo:OnNewInstance_Foo(ID)
+		self.ID2 = ID + 10
+	end
+
+
+	Bar = Foo:New(1)
+	TMW:Print(Bar.ID) -- prints 1
+	TMW:Print(Bar.ID2) -- prints 11
+<</code>>
+
+=== Handling the First Instance
+
+A special method is available for handling the first time that a class in instantiated. This method is "OnFirstInstance" and it works in the same way that OnNewInstance and OnClassInherit work. All methods of a class, including inherited methods, that begin with "OnFirstInstance" will be called when the first instance is created. This method is called with the class being instantiated as self with no other args.
+
+This can be useful for modular features that might need to prepare some plug-ins for usage when the first instance of a class that will use them is created. See TellMeWhen/Components/Core/IconModule.lua for an example of this.
+
+<<code lua>>
+	Foo = TMW:NewClass("Foo")
+
+	function Foo:OnFirstInstance()
+		TMW:Print("First instance of", self.className)
+	end
+
+	Bar = Foo:New() -- prints "First instance of Foo"
+	Baz = Foo:New() -- nothing is printed.
+<</code>>

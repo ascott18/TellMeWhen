@@ -48,6 +48,7 @@ function IconModule:OnFirstInstance_IconModule()
 	
 	for event, func in pairs(self.EventListners) do
 		if type(func) == "function" then
+
 			TMW:RegisterCallback(event, function(event, icon, ...)
 				local Module = icon.Modules[className]
 				
@@ -55,6 +56,7 @@ function IconModule:OnFirstInstance_IconModule()
 					func(Module, icon, ...)
 				end
 			end)
+			
 		end
 	end
 	
