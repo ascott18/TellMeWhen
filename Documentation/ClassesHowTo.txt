@@ -26,7 +26,7 @@ TMW's class systems supports multiple inheritance. Classes will take precedence 
 
 All classes implicitly inherit from [[api/core-systems/classes/api-documentation/|TMW.Classes.Class]].
 
-Inheritance is done by compiling all inherited objects & fields into an _{{{}}}_index metatable that will be used by all instances of that class. This is also the table that values will be copied from when inheriting from another TellMeWhen class.
+Inheritance is done by compiling all inherited objects & fields into an _index metatable that will be used by all instances of that class. This is also the table that values will be copied from when inheriting from another TellMeWhen class.
 
 Tables that are defined at the class level will be shared between all instances of the class. the same is true for functions since both are reference types in Lua. Making changes to the values of a table that is defined for a class be accessing it through an instance will still modify that table for all instances. All other Lua types defined on a class will be modified separately per instance when accessed through an instance.
 
@@ -74,7 +74,7 @@ Here is an example of a class that uses all four of these:
 
 === Special Inheritance handling
 
-When inherited one TMW class from another, the OnClassInherit method will be called for the class being inherited. The class that inherited that class will be passed in as a parameter. All methods that begin with "OnClassInherit" will be called when this happens.
+When inheriting one TMW class from another, the OnClassInherit method will be called for the class being inherited. The class that inherited that class will be passed in as a parameter. All methods that begin with "OnClassInherit" will be called when this happens.
 
 This can be useful for copying a table from a parent class to a child class. For example:
 
@@ -82,12 +82,11 @@ This can be useful for copying a table from a parent class to a child class. For
 	Foo = TMW:NewClass("Foo")
 
 	Foo.Data = {}
+	Foo.Data[1] = "abc"
 
 	function Foo:OnClassInherit_Foo(newClass)
 		newClass:InheritTable(self, "Data")
 	end
-
-	Foo.Data[1] = "abc"
 
 	Bar = TMW:NewClass("Bar", "Foo")
 
@@ -106,7 +105,7 @@ Without the OnClassInherit method, both classes would reference the same Data ta
 Instantiating a TMW class is easy:
 
 <<code lua>>
-	Foo = TMW:NewClas("Foo")
+	Foo = TMW:NewClass("Foo")
 
 	Bar = Foo:New()
 <</code>>
@@ -116,7 +115,7 @@ Instantiating a TMW class is easy:
 Constructor methods are defined on a class as "OnNewInstance" followed by any additional characters to prevent conflicts with inherited constructors. All methods of a class, including inherited methods, that begin with "OnNewInstance" will be called as constructors.
 
 <<code lua>>
-	Foo = TMW:NewClas("Foo")
+	Foo = TMW:NewClass("Foo")
 
 	function Foo:OnNewInstance(ID)
 		self.ID = ID
