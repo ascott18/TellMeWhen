@@ -196,6 +196,7 @@ function TMW:NewClass(className, ...)
 		inherits = {},
 		inheritedBy = {},
 		embeds = {},
+		initialized = false,
 		isTMWClass = true,
 	}
 
@@ -269,7 +270,7 @@ end
 
 --- Embeds the class into an already existing table.
 -- @param target [table] The table to embed the class into. Effectively turns the target into an instance of the class.
--- @param canOverwrite [boolean|nil] True to suppress the non-breaking errors that will be thrown when a member of the class already exists on the target (naming conflict).
+-- @param canOverwrite [boolean|nil] True to suppress the non-breaking errors that will be thrown when a member of the class already exists on the target (naming conflicts).
 -- @param ... [...] The parameters that will be passed to the class's OnNewInstance methods (see Class:New(...)'s documentation for more info).
 -- @return Returns the target that was passed in.
 function Class:Embed(target, canOverwrite, ...)
@@ -414,9 +415,9 @@ end
 -- -- so that it may preform any class-level initialization needed.
 -- class:CallFunc("OnFirstInstance")
 -- 
--- Another example:
--- Used when an instance of a class is created.
--- Essentially functions as a constructor in traditional OOP.
+-- -- Another example:
+-- -- Used when an instance of a class is created.
+-- -- Functions as the instance constructor. See the How To page for more info.
 -- instance:CallFunc("OnNewInstance", ...)
 function Class:CallFunc(funcName, ...)
 	if self.isTMWClass then
@@ -428,7 +429,7 @@ end
 
 
 
--- [INTERAL]
+-- [INTERNAL]
 function Class:OnClassInherit_Class(newClass)
 	for class in pairs(self.inherits) do
 		newClass.inherits[class] = true

@@ -28,7 +28,7 @@ All classes implicitly inherit from [[api/core-systems/classes/api-documentation
 
 Inheritance is done by compiling all inherited objects & fields into an _index metatable that will be used by all instances of that class. This is also the table that values will be copied from when inheriting from another TellMeWhen class.
 
-Tables that are defined at the class level will be shared between all instances of the class. the same is true for functions since both are reference types in Lua. Making changes to the values of a table that is defined for a class be accessing it through an instance will still modify that table for all instances. All other Lua types defined on a class will be modified separately per instance when accessed through an instance.
+Tables that are defined at the class level will be shared between all instances of the class. the same is true for functions since both are reference types in Lua. Making changes to the values of a table that is defined for a class be accessing it through an instance will still modify that table for all instances. All other Lua types defined on a class will be modified per instance when accessed through an instance.
 
 In order to have a unique table for each instance of a class, you must define that table in the instance constructor (see below).
 
