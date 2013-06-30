@@ -23,12 +23,13 @@ local SpellCache = TMW:NewModule("SpellCache", "AceEvent-3.0", "AceTimer-3.0")
 
 local Cache
 local CurrentItems = {}
-local NumCachePerFrame = 500
+local NumCachePerFrame = 200
 local IsCaching
+
 
 SpellCache.CONST = {
 	-- A rough estimate of the highest spellID in the game. Doesn't have to be accurate at all - visual only.
-	MAX_SPELLID_GUESS = 132000,
+	MAX_SPELLID_GUESS = 150000,
 	
 	-- Maximum number of non-existant spellIDs that will be checked before the cache is declared complete.
 	MAX_FAILED_SPELLS = 2000,
@@ -63,6 +64,27 @@ SpellCache.CONST = {
 local CONST = SpellCache.CONST
 
 
+TMW.IE:RegisterDatabaseDefaults{
+	locale = {
+		SpellCacheLength = CONST.MAX_SPELLID_GUESS,
+		SpellCacheWoWVersion = 0,
+		IncompleteSpellCache = false,
+		SpellCache = {
+
+		},
+	},
+}
+
+TMW.IE:RegisterUpgrade(62217, {
+	global = function(self)
+		TMW.IE.db.global.SpellCache = nil
+		TMW.IE.db.global.CacheLength = nil
+		TMW.IE.db.global.IncompleteCache = nil
+		TMW.IE.db.global.WoWVersion = nil
+	end,
+})
+
+
 -- PUBLIC:
 
 --[[ Returns the main cache table. Structure:
@@ -95,7 +117,7 @@ end
 
 -- Gets the expected length of the finished cache.
 function SpellCache:GetExpectedCacheLength()
-	return TMWOptDB.CacheLength
+	return TMW.IE.db.locale.SpellCacheLength
 end
 
 -- Returns whether or not the cache is currently in progress.
@@ -111,12 +133,13 @@ end
 -- PRIVATE:
 
 TMW:RegisterCallback("TMW_OPTIONS_LOADED", function()
-	TMWOptDB.SpellCache = TMWOptDB.SpellCache or {}
 
-	Cache = TMWOptDB.SpellCache
+	Cache = TMW.IE.db.locale.SpellCache
 
-	if TMWOptDB.IncompleteCache or not TMWOptDB.WoWVersion or TMWOptDB.WoWVersion < clientVersion then
-		TMWOptDB.IncompleteCache = true
+	if TMW.IE.db.locale.IncompleteSpellCache
+	or TMW.IE.db.locale.SpellCacheWoWVersion < clientVersion
+	then
+		TMW.IE.db.locale.IncompleteSpellCache = true
 		
 		local function findword(str, word)
 			if not strfind(str, word) then
@@ -133,17 +156,17 @@ TMW:RegisterCallback("TMW_OPTIONS_LOADED", function()
 		
 		local index, spellsFailed = 0, 0
 
-		TMWOptDB.CacheLength = TMWOptDB.CacheLength or CONST.MAX_SPELLID_GUESS
-		TMW:Fire("TMW_SPELLCACHE_EXPECTEDCACHELENGTH_UPDATED", TMWOptDB.CacheLength)
+		TMW:Fire("TMW_SPELLCACHE_EXPECTEDCACHELENGTH_UPDATED", TMW.IE.db.locale.SpellCacheLength)
 
-		if TMWOptDB.WoWVersion and TMWOptDB.WoWVersion < clientVersion then
+		if TMW.IE.db.locale.SpellCacheWoWVersion < clientVersion then
 			wipe(Cache)
-		elseif TMWOptDB.IncompleteCache then
+		elseif TMW.IE.db.locale.IncompleteSpellCache then
 			for id in pairs(Cache) do
 				index = max(index, id)
 			end
 		end
-		TMWOptDB.WoWVersion = clientVersion
+
+		TMW.IE.db.locale.SpellCacheWoWVersion = clientVersion
 
 		local Parser, LT1 = TMW:GetParser()
 
@@ -203,8 +226,8 @@ TMW:RegisterCallback("TMW_OPTIONS_LOADED", function()
 		local f = CreateFrame("Frame")
 		f:SetScript("OnUpdate", function()
 			if not resume(co) then
-				TMWOptDB.IncompleteCache = false
-				TMWOptDB.CacheLength = index
+				TMW.IE.db.locale.IncompleteSpellCache = false
+				TMW.IE.db.locale.SpellCacheLength = index
 
 				f:SetScript("OnUpdate", nil)
 

@@ -4,6 +4,7 @@
  * Icons will now be automatically enabled when you select an icon type.
  * Incorporated LibDogTag-Stats-3.0 into TellMeWhen's various implementations of LibDogTag-3.0.
  * The Mastery condition now uses GetMasteryEffect() isntead of GetMastery(). The condition will now be comparable to the total percentage increase granted by mastery instead of the value that has to be multiplied by your spec's mastery coefficient (which is no longer shown in Blizzard's character sheet.)
+ * TMWOptDB now uses AceDB-3.0. One benefit of this is that the suggestion list will now always be locale-appropriate.
 
  * Bug Fixes:
  ** Buff/Debuff icons that are set to sort by low duration should now properly display unlimited duration auras when there is nothing else to display.
@@ -70,19 +71,18 @@
  * Animations can now be anchored to different components of an icon (when appropriate).
  
  * Bug Fixes:
- ** Designed a new protocol for sharing class spells to prevent the old version of it that was dramatically errored from leaking into a new version of it.
- ** --LastUpdateTime-type values should now only be set after an update completes so that in the event of a "script ran too long" error, the update will be ran again in the next cycle.--
+ ** Designed a new protocol for sharing class spells to prevent the old version of it that was dramatically flawed from leaking into a new version of it.
  ** Icon Color Flash animations should now work correctly.
  ** Rewrote (but mostly just refactored) the database initialization process so that it runs in a much more logical fashion, and also so it allows for upgrades in the "global" DB namespace to run when they are supposed to.
  ** Rewrote (but mostly just refactored) event configuration code.
  ** The [Opacity] tag should now properly return a number instead of a boolean.
  ** Added Mind Quickening to the IncreasedSpellHaste equivalency
  ** Fixed {{{[string "ConditionEvents_SPELLCHARGETIME"] line 3: attempt to call global 'GetSpellCharges' (a nil value)}}}
- ** The group Only show in combat setting is now handled by the group's event handlers to prevent Script ran too long errors (hopefully).
+ ** The group "Only show in combat" setting is now handled by the group's event handlers (instead of conditions) to prevent Script ran too long errors (hopefully).
  ** Invented a new method for moving the Icon Editor so that it won't jump around all over the place anymore.
  ** Fixed an issue with DetectFrame for GroupModule_GroupPosition (Thanks to ChairmanKaga, ticket #740).
  ** Event handlers that are changed from an event that has short condition checking enabled to an event that does not have condition checking should now function correctly.
- ** It should no longer be possible for the bottom of the icon editor to extend off your screen, preventing you from resizing it.
+ ** It should no longer be possible for the bottom of the icon editor to extend off your screen and preventing you from resizing it.
  
 ===v6.1.1===
  * Added a new text output handler for the Instance channel, and updated existing chat output methods for this channel.
@@ -246,7 +246,7 @@
  * Bug Fixes:
  ** (r483) Unit Cooldown icons checking spells by name should now function properly.
  ** (r483) Cooldown sweeps and other icon components are no longer anonymous frames, returning to their previous nomenclature appended by an underscore and the icon's view type (Currently only "icon", more coming soon)
- ** (r483) Fixed a faulty upgrade of the "PassThrough" setting when upgrading past 50035. Settings that already had this faulty upgrade occur may notice that the "Pass Through" setting on some of their events was toggled from checked to unchecked.
+ ** (r483) Fixed a faulty upgrade of the "Pass Through" setting when upgrading past 50035. Settings that already had this faulty upgrade occur may notice that the "Pass Through" setting on some of their events was toggled from checked to unchecked.
 
 ===v5.0.0===
  * Super cool changes:
@@ -841,7 +841,7 @@
  * **IMPORTANT**: Instead of typing "raid" for units raid1 through raid25, you now must type "raid1-25". This will allow for much more flexibility, e.g. raid1-10.
  * More Efficiency! Yayyy! (New stuff, plus a fix to a bug in the icon engine that was making it check every single icon, even when they were hidden)
  * New option for icon cooldowns: Only if in bags. (Note that this is forcibly checked if 'Only if equipped' is checked, and an item that is equipped is considered to be in your bags.
- * Fixed a bunch of things that were broken
+ * Fixed a bunch of things that were broken (sorry for being vague)
  * Many conditions! Now, handle them!
  * Fixed an issue with cooldowns looking bad on circular LBF skins
  * Overlay bars now go underneath the border of LBF skins
@@ -949,7 +949,7 @@
  * New condition: 'Swimming'. Checks if you are swimming or not
  * New condition: 'Mounted'. Checks if you are mounted or not
  * Icon spacing is now defined per group.
- * You can now manually define the anchors, offsets, scale, and frame level of a group. You can also lock the group, preventing any movement or resizing by click-and-drag (recommended if you want to keep it anchored to the top of you raid frames, or something else that moves dynamically).
+ * You can now manually define the anchors, offsets, scale, and frame level of a group. You can also lock the group, preventing any movement or resizing by click-and-drag (recommended if you want to keep it anchored to the top of your raid frames, or something else that moves dynamically).
  * You can now disable the warning that is printed to chat when a meta icon or a condition is checking an invalid icon.
  * You can now right-click-and-drag an icon to another icon slot in order to move or copy it.
  * You can now drag a spell from your spellbook or an item from your bags/character sheet onto an icon to quickly set it up. If an icon is already configured, the name will be appended to the end of the list of names.

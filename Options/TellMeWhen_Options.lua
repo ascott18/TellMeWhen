@@ -18,6 +18,7 @@ TMW.WidthCol1 = 150
 ---------- Libraries ----------
 local LSM = LibStub("LibSharedMedia-3.0")
 local LMB = LibStub("Masque", true) or (LibMasque and LibMasque("Button"))
+local AceDB = LibStub("AceDB-3.0")
 
 -- GLOBALS: LibStub
 -- GLOBALS: TMWOptDB
@@ -1389,6 +1390,16 @@ IE.CONST = {
 }
 
 function IE:OnInitialize()
+	
+	TMW:Fire("TMW_OPTIONS_LOADING")
+	TMW:UnregisterAllCallbacks("TMW_OPTIONS_LOADING")
+
+	-- Make TMW.IE be the same as IE.
+	-- IE[0] = TellMeWhen_IconEditor[0] (already done in .xml)
+	local meta = CopyTable(getmetatable(IE))
+	meta.__index = getmetatable(TellMeWhen_IconEditor).__index
+	setmetatable(IE, meta)
+
 
 	hooksecurefunc("PickupSpellBookItem", function(...) IE.DraggingInfo = {...} end)
 	WorldFrame:HookScript("OnMouseDown", function() -- this contains other bug fix stuff too
@@ -1399,14 +1410,8 @@ function IE:OnInitialize()
 	IE:RegisterEvent("ACTIONBAR_HIDEGRID", "BAR_HIDEGRID")
 
 
-	-- Shittily initialize the database. Perhaps one day this will be a real Ace3DB. Till then, its just a table.
-	TMWOptDB = TMWOptDB or {}
+	IE:InitializeDatabase()
 
-	-- Make TMW.IE be the same as IE.
-	-- IE[0] = TellMeWhen_IconEditor[0] (already done in .xml)
-	local meta = CopyTable(getmetatable(IE))
-	meta.__index = getmetatable(TellMeWhen_IconEditor).__index
-	setmetatable(IE, meta)
 
 	IE:HookScript("OnShow", function()
 		TMW:RegisterCallback("TMW_ONUPDATE_POST", IE)
@@ -1473,7 +1478,7 @@ function IE:OnInitialize()
 			-- Set the scale that we just determined. This is critical because we have to parent:GetEffectiveScale()
 			-- in order to determine the proper width, which depends on the current scale of the parent.
 			parent:SetScale(newScale)
-			TMW.db.global.EditorScale = newScale
+			IE.db.global.EditorScale = newScale
 			
 			
 			-- We have all the data needed to find the new position of the parent.
@@ -1494,7 +1499,7 @@ function IE:OnInitialize()
 			newHeight = min(IE.CONST.IE_HEIGHT_MAX, newHeight)
 			
 			parent:SetHeight(newHeight)
-			TMW.db.global.EditorHeight = newHeight
+			IE.db.global.EditorHeight = newHeight
 		end,
 	}
 
@@ -1505,10 +1510,271 @@ function IE:OnInitialize()
 	self.resizer.resizeButton:SetScale(2)
 	
 	TMW:Fire("TMW_OPTIONS_LOADED")
-	
 	TMW:UnregisterAllCallbacks("TMW_OPTIONS_LOADED")
-	IE.OnInitialize = TMW.NULLFUNC
+	IE.OnInitialize = nil
 end
+
+
+
+
+---------------------------------
+-- Database Management
+---------------------------------
+
+IE.Defaults = {
+	global = {
+		EditorScale		= 0.9,
+		EditorHeight	= 600,
+		ConfigWarning	= true,
+	},
+}
+
+IE.UpgradeTable = {}
+IE.UpgradeTableByVersions = {}
+
+function IE:RegisterDatabaseDefaults(defaults)
+	assert(type(defaults) == "table", "arg1 to RegisterProfileDefaults must be a table")
+	
+	if IE.InitializedDatabase then
+		error("Defaults are being registered too late. They need to be registered before the database is initialized.", 2)
+	end
+	
+	-- Copy the defaults into the main defaults table.
+	TMW:MergeDefaultsTables(defaults, IE.Defaults)
+end
+
+function IE:GetBaseUpgrades()			-- upgrade functions
+	return {
+		[62218] = {
+			global = function(self)
+				IE.db.global.EditorScale = TMW.db.global.EditorScale
+				TMW.db.global.EditorScale = nil
+				
+				IE.db.global.EditorHeight = TMW.db.global.EditorHeight
+				TMW.db.global.EditorHeight = nil
+				
+				IE.db.global.ConfigWarning = TMW.db.global.ConfigWarning
+				TMW.db.global.ConfigWarning = nil
+				
+			end,
+			profile = function(self)
+				-- Do Stuff
+			end,
+		},
+	}
+end
+
+function IE:RegisterUpgrade(version, data)
+	assert(not data.Version, "Upgrade data cannot store a value with key 'Version' because it is a reserved key.")
+	
+	if IE.HaveUpgradedOnce then
+		error("Upgrades are being registered too late. They need to be registered before any upgrades occur.", 2)
+	end
+	
+	local upgradeSet = IE.UpgradeTableByVersions[version]
+	if upgradeSet then
+		-- An upgrade set already exists for this version, so we need to merge the two.
+		for k, v in pairs(data) do
+			if upgradeSet[k] ~= nil then
+				if type(v) == "function" then
+					-- If we already have a function with the same key (E.g. 'icon' or 'group')
+					-- then hook the existing function so that both run
+					hooksecurefunc(upgradeSet, k, v)
+				else
+					-- If we already have data with the same key (some kind of helper data for the upgrade)
+					-- then raise an error because there will certainly be conflicts.
+					error(("A value with key %q already exists for upgrades for version %d. Please choose a different key to store it in to prevent conflicts.")
+					:format(k, version), 2)
+				end
+			else
+				-- There was nothing already in place, so just stick it in the upgrade set as-is.
+				upgradeSet[k] = v
+			end
+		end
+	else
+		-- An upgrade set doesn't exist for this version,
+		-- so just use the table that was passed in and process it as a new upgrade set.
+		data.Version = version
+		IE.UpgradeTableByVersions[version] = data
+		tinsert(IE.UpgradeTable, data)
+	end
+end
+
+function IE:SortUpgradeTable()
+	sort(IE.UpgradeTable, TMW.UpgradeTableSorter)
+end
+
+function IE:GetUpgradeTable()	
+	if IE.GetBaseUpgrades then		
+		for version, data in pairs(IE:GetBaseUpgrades()) do
+			IE:RegisterUpgrade(version, data)
+		end
+		
+		IE.GetBaseUpgrades = nil
+	end
+	
+	IE:SortUpgradeTable()
+	
+	return IE.UpgradeTable
+end
+
+
+function IE:DoUpgrade(type, version, ...)
+	assert(_G.type(type) == "string")
+	assert(_G.type(version) == "number")
+	
+	-- upgrade the actual requested setting
+	for k, v in ipairs(IE:GetUpgradeTable()) do
+		if v.Version > version then
+			if v[type] then
+				v[type](v, ...)
+			end
+		end
+	end
+	
+	TMW:Fire("TMW_IE_UPGRADE_REQUESTED", type, version, ...)
+
+	-- delegate out to sub-types
+	if type == "global" then
+	
+		-- delegate to locale
+		for locale, ls in pairs(IE.db.locale) do
+			IE:DoUpgrade("locale", version, ls, locale)
+		end
+	
+		--All Global Upgrades Complete
+		TMWOptDB.Version = TELLMEWHEN_VERSIONNUMBER
+	elseif type == "profile" then
+		
+		-- Put any sub-type upgrade delegation here...
+		
+
+		
+		--All Profile Upgrades Complete
+		IE.db.profile.Version = TELLMEWHEN_VERSIONNUMBER
+	end
+	
+	IE.HaveUpgradedOnce = true
+end
+
+
+function IE:RawUpgrade()
+
+	IE.RawUpgrade = nil
+	
+
+	-- Begin DB upgrades that need to be done before defaults are added.
+	-- Upgrades here should always do everything needed to every single profile,
+	-- and remember to check if a table exists before iterating/indexing it.
+
+	if TMWOptDB.profiles then
+		--[[
+		if TMWOptDB.Version < 41402 then
+			...
+
+			for _, p in pairs(TMWOptDB.profiles) do
+				...
+			end
+		end
+		]]
+		
+	end
+	
+	TMW:Fire("TMW_IE_DB_PRE_DEFAULT_UPGRADES")
+	TMW:UnregisterAllCallbacks("TMW_IE_DB_PRE_DEFAULT_UPGRADES")
+end
+
+function IE:UpgradeGlobal()
+	if TMWOptDB.Version < TELLMEWHEN_VERSIONNUMBER then
+		IE:DoUpgrade("global", TMWOptDB.Version, IE.db.global)
+	end
+
+	-- This function isn't needed anymore
+	IE.UpgradeGlobal = nil
+end
+
+function IE:UpgradeProfile()
+	-- Set the version for the current profile to the current version if it is a new profile.
+	IE.db.profile.Version = IE.db.profile.Version or TELLMEWHEN_VERSIONNUMBER
+		
+	if TMWOptDB.Version < TELLMEWHEN_VERSIONNUMBER then
+		IE:DoUpgrade("global", TMWOptDB.Version, IE.db.global)
+	end
+	
+	if IE.db.profile.Version < TELLMEWHEN_VERSIONNUMBER then
+		IE:DoUpgrade("profile", IE.db.profile.Version, IE.db.profile)
+	end
+end
+
+
+function IE:InitializeDatabase()
+	
+	IE.InitializeDatabase = nil
+	
+	IE.InitializedDatabase = true
+	
+	TMW:Fire("TMW_IE_DB_INITIALIZING")
+	TMW:UnregisterAllCallbacks("TMW_IE_DB_INITIALIZING")
+	
+	--------------- Database ---------------
+	local TMWOptDB_alias
+	if TMWOptDB and TMWOptDB.Version == nil then
+		-- if TMWOptDB.Version is nil then we are upgrading from a version from before
+		-- AceDB-3.0 was used for the options settings.
+
+		TMWOptDB_alias = TMWOptDB
+
+		-- Overwrite the old database (we will restore from the alias in a second)
+		-- 62216 was the first version to use AceDB-3.0
+		_G.TMWOptDB = {Version = 62216}
+	end
+	
+	
+	-- Handle upgrades that need to be done before defaults are added to the database.
+	-- Primary purpose of this is to properly upgrade settings if a default has changed.
+	IE:RawUpgrade()
+	
+	-- Initialize the database
+	IE.db = AceDB:New("TMWOptDB", IE.Defaults)
+	
+	if TMWOptDB_alias then
+		for k, v in pairs(TMWOptDB_alias) do
+			IE.db.global[k] = v
+		end
+		
+		IE.db = AceDB:New("TMWOptDB", IE.Defaults)
+	end
+	
+	IE.db.RegisterCallback(IE, "OnProfileChanged",	"OnProfile")
+	IE.db.RegisterCallback(IE, "OnProfileCopied",	"OnProfile")
+	IE.db.RegisterCallback(IE, "OnProfileReset",	"OnProfile")
+	IE.db.RegisterCallback(IE, "OnNewProfile",		"OnProfile")
+	
+	-- Handle normal upgrades after the database has been initialized.
+	IE:UpgradeGlobal()
+	IE:UpgradeProfile()
+	
+	TMW:Fire("TMW_DB_INITIALIZED")
+	TMW:UnregisterAllCallbacks("TMW_DB_INITIALIZED")
+end
+
+function IE:OnProfile(event, arg2, arg3)
+
+	TMW:CompileOptions() -- redo groups in the options
+	
+	-- Reload the icon editor.
+	IE:Load(1)
+	
+	TMW:Fire("TMW_IE_ON_PROFILE", event, arg2, arg3)
+end
+
+TMW:RegisterCallback("TMW_ON_PROFILE", function(event, arg2, arg3)
+	IE.db:SetProfile(TMW.db:GetCurrentProfile())
+end)
+
+ 
+
+
 
 TMW:NewClass("IconEditorTab", "Button"){
 	
@@ -1878,6 +2144,7 @@ function IE:Load(isRefresh, icon, isHistoryChange)
 		
 		TMW:Fire("TMW_CONFIG_ICON_LOADED_CHANGED", icon, ic_old)
 	end
+
 	if not IE:IsShown() then
 		if isRefresh then
 			return
@@ -1903,12 +2170,12 @@ function IE:Load(isRefresh, icon, isHistoryChange)
 	IE.ExportBox:SetText("")
 	
 	if 0 > IE:GetBottom() then
-		TMW.db.global.EditorScale = TMW.Defaults.global.EditorScale
-		TMW.db.global.EditorHeight = TMW.Defaults.global.EditorHeight
+		IE.db.global.EditorScale = IE.Defaults.global.EditorScale
+		IE.db.global.EditorHeight = IE.Defaults.global.EditorHeight
 	end
 	
-	IE:SetScale(TMW.db.global.EditorScale)
-	IE:SetHeight(TMW.db.global.EditorHeight)
+	IE:SetScale(IE.db.global.EditorScale)
+	IE:SetHeight(IE.db.global.EditorHeight)
 
 	CI.ics.Type = CI.ics.Type
 	if CI.ics.Type == "" then

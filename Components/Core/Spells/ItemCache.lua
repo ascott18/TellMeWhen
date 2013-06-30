@@ -27,6 +27,22 @@ local CurrentItems = {}
 local doUpdateCache = true
 
 
+TMW.IE:RegisterDatabaseDefaults{
+	locale = {
+		XPac_ItemCache = 0,
+		ItemCache = {
+
+		},
+	},
+}
+
+TMW.IE:RegisterUpgrade(62217, {
+	global = function(self)
+		TMW.IE.db.global.ItemCache = nil
+		TMW.IE.db.global.XPac_ItemCache = nil
+	end,
+})
+
 -- PUBLIC:
 
 --[[ Returns the main cache table. Structure:
@@ -64,18 +80,17 @@ end
 -- PRIVATE:
 
 TMW:RegisterCallback("TMW_OPTIONS_LOADED", function()
-	TMWOptDB.ItemCache = TMWOptDB.ItemCache or {}	
-	
+
+	Cache = TMW.IE.db.locale.ItemCache
+
 	-- Wipe the item cache if user is running a new expansion
 	-- (User probably doesn't have most item in the cache anymore,
 	-- and probably doesn't care about the rest)
 	local XPac = tonumber(strsub(clientVersion, 1, 1))
-	if TMWOptDB.XPac_ItemCache ~= XPac then
-		wipe(TMWOptDB.ItemCache)
-		TMWOptDB.XPac_ItemCache = XPac
+	if TMW.IE.db.locale.XPac_ItemCache < XPac then
+		wipe(Cache)
+		TMW.IE.db.locale.XPac_ItemCache = XPac
 	end
-
-	Cache = TMWOptDB.ItemCache
 	
 	--Start requests so that we can validate itemIDs.
 	for id in pairs(Cache) do

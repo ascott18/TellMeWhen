@@ -18,7 +18,7 @@
 TELLMEWHEN_VERSION = "6.2.2"
 TELLMEWHEN_VERSION_MINOR = strmatch(" @project-version@", " r%d+") or ""
 TELLMEWHEN_VERSION_FULL = TELLMEWHEN_VERSION .. TELLMEWHEN_VERSION_MINOR
-TELLMEWHEN_VERSIONNUMBER = 62215 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
+TELLMEWHEN_VERSIONNUMBER = 62218 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
 
 if TELLMEWHEN_VERSIONNUMBER > 63000 or TELLMEWHEN_VERSIONNUMBER < 62000 then
 	-- safety check because i accidentally made the version number 414069 once
@@ -130,17 +130,16 @@ local GroupsToUpdate = TMW.GroupsToUpdate
 
 TMW.Defaults = {
 	global = {
-		EditorScale		= 0.9,
-		EditorHeight	= 600,
-		WpnEnchDurs	= {
-			["*"] = 0,
-		},
 		HelpSettings = {
 		},
 		HasImported			= false,
-		ConfigWarning		= true,
 		VersionWarning		= true,
 		AllowCombatConfig	= false,
+	},
+	locale = {
+		WpnEnchDurs	= {
+			["*"] = 0,
+		},
 	},
 	profile = {
 	--	Version			= 	TELLMEWHEN_VERSIONNUMBER,  -- DO NOT DEFINE VERSION AS A DEFAULT, OTHERWISE WE CANT TRACK IF A USER HAS AN OLD VERSION BECAUSE IT WILL ALWAYS DEFAULT TO THE LATEST
@@ -329,7 +328,7 @@ TMW.BE = {
 		Tier12Interrupts	= "_97202;_100094",
 	},
 }
-if not wow_504 then
+if GetSpellInfo(110300) then
 	-- TODO: Remove this code when 5.4 goes live.
 	TMW.BE.debuffs.Slowed = TMW.BE.debuffs.Slowed .. ";_110300"
 end
@@ -1643,9 +1642,6 @@ function TMW:InitializeDatabase()
 	TMW:UpgradeGlobal()
 	TMW:UpgradeProfile()
 	
-	-- This isn't used after the DB is initialized, so get rid of it.
-	TMW.UpgradeGlobal = nil
-	
 	TMW:Fire("TMW_DB_INITIALIZED")
 	TMW:UnregisterAllCallbacks("TMW_DB_INITIALIZED")
 end
@@ -1678,6 +1674,16 @@ TMW.UpgradeTableByVersions = {}
 
 function TMW:GetBaseUpgrades()			-- upgrade functions
 	return {
+		[62216] = {
+			global = function(self)
+				if type(TMW.db.global.WpnEnchDurs) == "table" then
+					for k, v in pairs(TMW.db.global.WpnEnchDurs) do
+						TMW.db.locale.WpnEnchDurs[k] = max(TMW.db.locale.WpnEnchDurs[k] or 0, v)
+					end
+					TMW.db.global.WpnEnchDurs = nil
+				end
+			end
+		},
 		[60027] = {
 			icon = function(self, ics)
 				ics.Name = ics.Name:gsub("IncreasedSPsix", "IncreasedSP")
@@ -1839,12 +1845,8 @@ function TMW:GetBaseUpgrades()			-- upgrade functions
 		},
 		[44009] = {
 			profile = function(self)
-				if type(TMW.db.profile.WpnEnchDurs) == "table" then
-					for k, v in pairs(TMW.db.profile.WpnEnchDurs) do
-						TMW.db.global.WpnEnchDurs[k] = max(TMW.db.global.WpnEnchDurs[k] or 0, v)
-					end
-					TMW.db.profile.WpnEnchDurs = nil
-				end
+				TMW.db.profile.WpnEnchDurs = nil
+
 				TMW.db.profile.HasImported = nil
 			end,
 		},
@@ -2354,6 +2356,10 @@ function TMW:DoUpgrade(type, version, ...)
 
 	-- delegate out to sub-types
 	if type == "global" then
+		-- delegate to locale
+		for locale, ls in pairs(TMW.db.locale) do
+			TMW:DoUpgrade("locale", version, ls, locale)
+		end
 	
 		--All Global Upgrades Complete
 		TellMeWhenDB.Version = TELLMEWHEN_VERSIONNUMBER
@@ -2442,6 +2448,9 @@ function TMW:UpgradeGlobal()
 	if TellMeWhenDB.Version < TELLMEWHEN_VERSIONNUMBER then
 		TMW:DoUpgrade("global", TellMeWhenDB.Version, TMW.db.global)
 	end
+
+	-- This isn't needed anymore
+	TMW.UpgradeGlobal = nil
 end
 
 function TMW:UpgradeProfile()
@@ -2741,12 +2750,6 @@ function TMW:OnProfile(event, arg2, arg3)
 	TMW:UpgradeProfile()
 
 	TMW:Update()
-	
-	if TMW.IE then
-		TMW:CompileOptions() -- redo groups in the options
-		
-		TMW.IE:Load(1)
-	end
 	
 	if event == "OnProfileChanged" then
 		TMW:Printf(L["PROFILE_LOADED"], arg3)

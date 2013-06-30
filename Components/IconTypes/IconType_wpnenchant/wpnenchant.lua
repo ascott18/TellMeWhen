@@ -138,7 +138,7 @@ local function UpdateWeaponEnchantInfo(slot, selectIndex)
 end
 
 TMW:RegisterCallback("TMW_GLOBAL_UPDATE", function()
-	WpnEnchDurs = TMW.db.global.WpnEnchDurs
+	WpnEnchDurs = TMW.db.locale.WpnEnchDurs
 end)
 
 

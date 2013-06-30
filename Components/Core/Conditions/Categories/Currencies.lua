@@ -108,20 +108,23 @@ function CNDT:CURRENCY_DISPLAY_UPDATE()
 			if id ~= "SPACE" then
 				local data = CNDT.ConditionsByType["CURRENCY" .. id]
 				local name, amount, texture, _, _, totalMax = GetCurrencyInfo(id)
+
 				if name ~= "" then
 					data.text = name
 					data.icon = texture
 					data.hidden = false
-					if TMWOptDB then
-						TMWOptDB.Currencies = TMWOptDB.Currencies or {}
-						TMWOptDB.Currencies[id] = name .. "^" .. texture
+					if TMW.IE then
+						TMW.IE.db.locale.Currencies[id] = name .. "^" .. texture
 					end
 					--[[if totalMax > 0 then -- not using this till blizzard fixes the bug where it shows the honor and conquest caps as 40,000
 						data.max = totalMax
 					end]]
-				elseif TMWOptDB and TMWOptDB.Currencies then
-					if TMWOptDB.Currencies[id] then
-						local name, texture = strmatch(TMWOptDB.Currencies[id], "(.*)^(.*)")
+
+				elseif TMW.IE then
+
+					local cachedCurrencyData = TMW.IE.db.locale.Currencies[id]
+					if cachedCurrencyData then
+						local name, texture = strmatch(cachedCurrencyData, "(.*)^(.*)")
 						if name and texture then
 							data.text = name
 							data.icon = texture
@@ -133,6 +136,24 @@ function CNDT:CURRENCY_DISPLAY_UPDATE()
 		end
 	end
 end
+
 CNDT:RegisterEvent("CURRENCY_DISPLAY_UPDATE")
 CNDT:CURRENCY_DISPLAY_UPDATE()
+
+TMW:RegisterCallback("TMW_OPTIONS_LOADING", function()
+	TMW.IE:RegisterDatabaseDefaults{
+		locale = {
+			Currencies	= {
+
+			},
+		},
+	}
+
+	TMW.IE:RegisterUpgrade(62217, {
+		global = function(self)
+			TMW.IE.db.global.Currencies = nil
+		end,
+	})
+end)
+
 TMW:RegisterCallback("TMW_OPTIONS_LOADED", CNDT, "CURRENCY_DISPLAY_UPDATE")

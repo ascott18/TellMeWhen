@@ -153,7 +153,7 @@ function Module:OnInitialize()
 			local dobreak
 			enchant = name:match(enchant)
 			if enchant then
-				for ench in pairs(TMW.db.global.WpnEnchDurs) do
+				for ench in pairs(TMW.db.locale.WpnEnchDurs) do
 					if ench:lower():find(enchant:gsub("([%%%[%]%-%+])", "%%%1"):lower()) then
 						-- the enchant was found in the list of known enchants, so add it
 						self.Spells[ench] = id
@@ -180,7 +180,7 @@ function Module:OnInitialize()
 		end
 	end
 
-	for k, v in pairs(TMW.db.global.WpnEnchDurs) do
+	for k, v in pairs(TMW.db.locale.WpnEnchDurs) do
 		if not self.Table[k] then
 			self.Table[k] = k
 		end
@@ -212,7 +212,7 @@ function Module:Etc_DoItemLookups()
 end
 function Module:Table_Get()
 
-	for k, v in pairs(TMW.db.global.WpnEnchDurs) do
+	for k, v in pairs(TMW.db.locale.WpnEnchDurs) do
 		if not self.Table[k] then
 			self.Table[k] = k
 		end
@@ -306,8 +306,8 @@ function Module.Sorter(a, b)
 	end
 
 	-- its a very small table to sort, so i can get away with this (efficiency wise)
-	local haveA = rawget(TMW.db.global.WpnEnchDurs, a)
-	local haveB = rawget(TMW.db.global.WpnEnchDurs, b)
+	local haveA = rawget(TMW.db.locale.WpnEnchDurs, a)
+	local haveB = rawget(TMW.db.locale.WpnEnchDurs, b)
 	if haveA or haveB then
 		if haveA and haveB then
 			return a < b
@@ -341,7 +341,7 @@ function Module:Entry_Colorize_1(f, name)
 	if PlayerSpells[Module.Spells[name]] or (CurrentItems[ strlowerCache[ name ]]) then
 		f.Background:SetVertexColor(.41, .8, .94, 1) --color all spells and items that you have mage blue
 		
-	elseif rawget(TMW.db.global.WpnEnchDurs, name) then
+	elseif rawget(TMW.db.locale.WpnEnchDurs, name) then
 		f.Background:SetVertexColor(.79, .30, 1, 1) -- color all known weapon enchants purple
 	end
 end

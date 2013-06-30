@@ -30,8 +30,6 @@ local strfind, strmatch, format, gsub, strsub, strtrim, strlen, strsplit, strlow
 
 -- GLOBALS: GameTooltip, GameTooltip_SetDefaultAnchor
 
-local TMWOptDB
-
 local ClassSpellCache = TMW:GetModule("ClassSpellCache")
 local AuraCache = TMW:GetModule("AuraCache")
 local SpellCache = TMW:GetModule("SpellCache")
@@ -41,6 +39,14 @@ local SUG = TMW:NewModule("Suggester", "AceEvent-3.0", "AceComm-3.0", "AceSerial
 TMW.SUG = SUG
 
 
+TMW.IE:RegisterUpgrade(62217, {
+	global = function(self)
+		-- These are both old and unused. Kill them.
+		TMW.IE.db.global.CastCache = nil
+		TMW.IE.db.global.ClassSpellCache = nil
+	end,
+})
+
 ---------- Locals/Data ----------
 local SUGIsNumberInput
 local SUGpreTable = {}
@@ -49,10 +55,7 @@ local ClassSpellLookup = ClassSpellCache:GetSpellLookup()
 
 ---------- Initialization/Database/Spell Caching ----------
 function SUG:OnInitialize()
-	TMWOptDB = _G.TMWOptDB -- Getting from _G is important
-
-	TMWOptDB.CastCache = nil -- not used anymore, spells are validated as they are displayed now.
-	TMWOptDB.ClassSpellCache = nil -- this is old, get rid of it
+	-- Nothing at the moment...
 end
 
 TMW:RegisterCallback("TMW_ICON_TYPE_CHANGED", function(event, icon)
