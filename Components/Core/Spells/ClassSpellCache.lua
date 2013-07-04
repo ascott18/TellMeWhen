@@ -267,7 +267,7 @@ ClassSpellCache:RegisterEvent("PLAYER_REGEN_ENABLED", function()
 end)
 
 function ClassSpellCache:PLAYER_ENTERING_WORLD()
-	if IsInRaid() then
+	if IsInRaid(LE_PARTY_CATEGORY_HOME) then
 		self:SendCommMessage(self.CONST.COMM_SLUG, self:Serialize("RCSL"), "RAID")
 	end
 	if IsInGroup() then

@@ -263,7 +263,7 @@ Announcements:RegisterEventHandlerDataNonSpecific(30, "SMART", {
 			local channel = "SAY"
 			if IsInGroup(LE_PARTY_CATEGORY_INSTANCE) then
 				channel = TMW.CONST.CHAT_TYPE_INSTANCE_CHAT
-			elseif IsInRaid() then
+			elseif IsInRaid(LE_PARTY_CATEGORY_HOME) then
 				channel = "RAID"
 			elseif IsInGroup() then
 				channel = "PARTY"

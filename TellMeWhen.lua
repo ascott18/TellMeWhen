@@ -18,7 +18,7 @@
 TELLMEWHEN_VERSION = "6.2.2"
 TELLMEWHEN_VERSION_MINOR = strmatch(" @project-version@", " r%d+") or ""
 TELLMEWHEN_VERSION_FULL = TELLMEWHEN_VERSION .. TELLMEWHEN_VERSION_MINOR
-TELLMEWHEN_VERSIONNUMBER = 62218 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
+TELLMEWHEN_VERSIONNUMBER = 62219 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
 
 if TELLMEWHEN_VERSIONNUMBER > 63000 or TELLMEWHEN_VERSIONNUMBER < 62000 then
 	-- safety check because i accidentally made the version number 414069 once
@@ -313,7 +313,7 @@ TMW.BE = {
 		-- EXISTING WAS CHECKED, DIDN'T LOOK FOR NEW (mists of pandaria) ONES YET:
 		ImmuneToStun		= "642;45438;19574;48792;1022;33786;710;46924;19263;6615",
 		ImmuneToMagicCC		= "642;45438;48707;19574;33786;710;46924;19263;31224;8178;23920;49039",
-		BurstHaste			= "2825;32182;80353;90355",
+		BurstHaste			= "2825;32182;80353;90355;146555",
 		BurstManaRegen		= "29166;16191;64901",
 		DefensiveBuffs		= "48707;30823;33206;47585;871;48792;498;22812;61336;5277;74001;47788;19263;6940;31850;31224;42650;86657;118038;115176;115308;120954;115295;51271",
 		MiscHelpfulBuffs	= "96267;10060;23920;68992;54428;2983;1850;29166;16689;53271;1044;31821;45182",
@@ -388,7 +388,7 @@ function TMW:ProcessEquivalencies()
 					else
 						
 						if clientVersion >= addonVersion then -- only warn for newer clients using older versions
-							TMW:Error("Invalid spellID found: %s (%s - %s)! Please report this on TMW's CurseForge page!",
+							TMW:Debug("Invalid spellID found: %s (%s - %s)!",
 							idWithoutUnderscore, category, equiv)
 						end
 						
@@ -2904,7 +2904,7 @@ function TMW:PLAYER_ENTERING_WORLD()
 		if IsInGuild() then
 			TMW:SendCommMessage("TMWV", versionCommString, "GUILD")
 		end
-		if IsInRaid() then
+		if IsInRaid(LE_PARTY_CATEGORY_HOME) then
 			TMW:SendCommMessage("TMWV", versionCommString, "RAID")
 		end
 		if IsInGroup() then

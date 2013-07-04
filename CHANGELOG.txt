@@ -9,6 +9,7 @@
  * Bug Fixes:
  ** Buff/Debuff icons that are set to sort by low duration should now properly display unlimited duration auras when there is nothing else to display.
  ** The Ranged Attack Power condition should now always use the proper RAP value.
+ ** Fixed some "You are not in a raid group" errors.
 
 ===v6.2.0===
  * New Icon Type: Buff/Debuff Check (for checking missing raid buffs).
