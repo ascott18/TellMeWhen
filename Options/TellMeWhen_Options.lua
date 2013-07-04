@@ -1547,13 +1547,13 @@ function IE:GetBaseUpgrades()			-- upgrade functions
 	return {
 		[62218] = {
 			global = function(self)
-				IE.db.global.EditorScale = TMW.db.global.EditorScale
+				IE.db.global.EditorScale = TMW.db.global.EditorScale or 0.9
 				TMW.db.global.EditorScale = nil
 				
-				IE.db.global.EditorHeight = TMW.db.global.EditorHeight
+				IE.db.global.EditorHeight = TMW.db.global.EditorHeight or 600
 				TMW.db.global.EditorHeight = nil
 				
-				IE.db.global.ConfigWarning = TMW.db.global.ConfigWarning
+				IE.db.global.ConfigWarning = TMW.db.global.ConfigWarning or true
 				TMW.db.global.ConfigWarning = nil
 				
 			end,
