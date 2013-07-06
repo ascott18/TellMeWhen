@@ -336,8 +336,6 @@ local function CLEU_OnUpdate(icon, time)
 			start, duration
 		)
 	end
-
-	--icon.LastUpdate = time -- sometimes we call this function whenever the hell we want ("OnEvent"), so at least have the decency to delay the next update (nevermind, might cause weird event behav)
 end
 
 
