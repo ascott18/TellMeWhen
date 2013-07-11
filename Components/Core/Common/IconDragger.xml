@@ -1,4 +1,4 @@
-<Ui>
+﻿<Ui>
 	<Button name="TellMeWhen_IconDragger" hidden="true" enableMouse="false" frameStrata="HIGH">
 		<Size x="30" y="30"/>
 		<Layers>

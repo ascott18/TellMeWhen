@@ -1,4 +1,4 @@
-<Ui>
+﻿<Ui>
 
 
 	<Button name="TellMeWhen_Event" motionScriptsWhileDisabled="true" inherits="TellMeWhen_BorderedFrame" virtual="true" >

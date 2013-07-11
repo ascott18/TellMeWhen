@@ -1,4 +1,4 @@
-<Ui>
+﻿<Ui>
 	<Button name="$parentIconEventOnCondition" parentKey="IconEventOnCondition" parent="TellMeWhen_IconEditorEventsEventSettingsContainer" inherits="TellMeWhen_ButtonTemplate">
 		<Size x="200" y="16"/>
 		<Anchors>

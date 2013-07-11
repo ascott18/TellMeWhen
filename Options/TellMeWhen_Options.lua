@@ -1667,7 +1667,7 @@ function IE:RawUpgrade()
 	-- Upgrades here should always do everything needed to every single profile,
 	-- and remember to check if a table exists before iterating/indexing it.
 
-	if TMWOptDB.profiles then
+	if TMWOptDB and TMWOptDB.profiles then
 		--[[
 		if TMWOptDB.Version < 41402 then
 			...
@@ -1727,6 +1727,15 @@ function IE:InitializeDatabase()
 		-- Overwrite the old database (we will restore from the alias in a second)
 		-- 62216 was the first version to use AceDB-3.0
 		_G.TMWOptDB = {Version = 62216}
+
+	elseif type(TMWOptDB) ~= "table" then
+		-- TMWOptDB might not exist if this is a fresh install
+		-- or if the user is upgrading from a really old version that doesn't use TMWOptDB.
+		_G.TMWOptDB = {Version = TELLMEWHEN_VERSIONNUMBER}
+	
+	else
+		TMW:Error("WTF just happened?! TMWOptDB was an unknown type. Sorry. I don't know what happened.")
+		_G.TMWOptDB = nil
 	end
 	
 	
