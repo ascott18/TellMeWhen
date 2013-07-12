@@ -304,19 +304,28 @@ function UNITS:GetOriginalUnitTable(unitSettings)
 	gsub("|cffff0000", ""): -- strip color codes (NOTE LOWERCASE)
 	gsub("|r", ""):
 	gsub("#", "") -- strip the # from the dropdown 
+	.. " "
 
 
 	--SUBSTITUTE "party" with "party1-4", etc
+	local unitSettings_new = ""
 	for _, wholething in TMW:Vararg(strsplit(";", unitSettings)) do
+		local added = false
+
 		local unit = strtrim(wholething)
 		for k, unitData in pairs(UNITS.Units) do
-			if unitData.range and (unit == unitData.value or (unit:find("^" .. unitData.value .. ".") and not unit:find("[%d]"))) then
-				unit = unit:gsub("^" .. unitData.value, unitData.value .. "1-" .. unitData.range)
-				unitSettings = unitSettings:gsub(wholething, unit)
+			if unitData.value == unit and unitData.range then
+				unitSettings_new = unitSettings_new .. "; " .. unit .. "1-" .. unitData.range
+				added = true
 				break
 			end
 		end
+
+		if not added then
+			unitSettings_new = unitSettings_new .. "; " .. unit
+		end
 	end
+	unitSettings = TMW:CleanString(unitSettings_new)
 
 	--SUBSTITUTE RAID1-10 WITH RAID1;RAID2;RAID3;...RAID10
 	for wholething, unit, firstnum, lastnum, append in gmatch(unitSettings, "(([%a%d]+) ?(%d+) ?%- ?(%d+) ?([%a%d]*)) ?;?") do
