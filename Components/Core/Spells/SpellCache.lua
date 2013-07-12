@@ -37,12 +37,14 @@ SpellCache.CONST = {
 	-- A list of spells that should be excluded from the cache
 	INVALID_SPELLS = {
 		[1852] = true, -- GM spell named silenced, interferes with equiv
+		--[[
+		-- I added in special handling for these in the suggetion list. No longer need to manually exclude interferences.
 		[47923] = true, -- spell named stunned, interferes
 		[65918] = true, -- spell named stunned, interferes
 		[78320] = true, -- spell named stunned, interferes
 		[71216] = true, -- enraged, interferes
 		[59208] = true, -- enraged, interferes
-		[118542] = true, -- disarmed, interferes
+		[118542] = true, -- disarmed, interferes]]
 	},
 	
 	-- A list of textures, spells that have these textures should be excluded from the cache.

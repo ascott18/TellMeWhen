@@ -45,22 +45,22 @@ local unitsWithExistsEvent = UNITS.unitsWithExistsEvent
 UNITS.unitsWithBaseExistsEvent = {}
 
 UNITS.Units = {
-	{ value = "player", 			text = PLAYER .. " " .. L["PLAYER_DESC"]  		  },
-	{ value = "target", 			text = TARGET 									  },
-	{ value = "targettarget", 		text = L["ICONMENU_TARGETTARGET"] 				  },
-	{ value = "focus", 				text = L["ICONMENU_FOCUS"] 						  },
-	{ value = "focustarget", 		text = L["ICONMENU_FOCUSTARGET"] 				  },
-	{ value = "pet", 				text = PET 										  },
-	{ value = "pettarget", 			text = L["ICONMENU_PETTARGET"] 					  },
-	{ value = "mouseover", 			text = L["ICONMENU_MOUSEOVER"] 					  },
-	{ value = "mouseovertarget",	text = L["ICONMENU_MOUSEOVERTARGET"]  			  },
-	{ value = "vehicle", 			text = L["ICONMENU_VEHICLE"] 					  },
-	{ value = "party", 				text = PARTY, 			range = MAX_PARTY_MEMBERS },
-	{ value = "raid", 				text = RAID, 			range = MAX_RAID_MEMBERS  },
-	{ value = "arena",				text = ARENA, 			range = 5				  },
-	{ value = "boss", 				text = BOSS, 			range = MAX_BOSS_FRAMES	  },
-	{ value = "maintank", 			text = L["MAINTANK"], 	range = MAX_RAID_MEMBERS  },
-	{ value = "mainassist", 		text = L["MAINASSIST"],	range = MAX_RAID_MEMBERS  },
+	{ value = "player", 			text = PLAYER .. " " .. L["PLAYER_DESC"]  						  },
+	{ value = "target", 			text = TARGET 													  },
+	{ value = "targettarget", 		text = L["ICONMENU_TARGETTARGET"] 								  },
+	{ value = "focus", 				text = L["ICONMENU_FOCUS"] 										  },
+	{ value = "focustarget", 		text = L["ICONMENU_FOCUSTARGET"] 								  },
+	{ value = "pet", 				text = PET 														  },
+	{ value = "pettarget", 			text = L["ICONMENU_PETTARGET"] 									  },
+	{ value = "mouseover", 			text = L["ICONMENU_MOUSEOVER"] 									  },
+	{ value = "mouseovertarget",	text = L["ICONMENU_MOUSEOVERTARGET"]  							  },
+	{ value = "vehicle", 			text = L["ICONMENU_VEHICLE"] 									  },
+	{ value = "party", 				text = PARTY, 							range = MAX_PARTY_MEMBERS },
+	{ value = "raid", 				text = RAID, 							range = MAX_RAID_MEMBERS  },
+	{ value = "arena",				text = ARENA, 							range = 5				  },
+	{ value = "boss", 				text = BOSS, 							range = MAX_BOSS_FRAMES	  },
+	{ value = "maintank", 			text = L["MAINTANK"], 					range = MAX_RAID_MEMBERS  },
+	{ value = "mainassist", 		text = L["MAINASSIST"],					range = MAX_RAID_MEMBERS  },
 }
 
 
@@ -299,17 +299,20 @@ TMW:MakeFunctionCached(UNITS, "GetUnitSet")
 function UNITS:GetOriginalUnitTable(unitSettings)
 	unitSettings = TMW:CleanString(unitSettings):
 	lower(): -- all units should be lowercase
+	-- Stripping color codes doesn't matter now since they aren't inserted now ("#" isnt inserted either)
+	-- but keep this here for compatibility with old setups.
 	gsub("|cffff0000", ""): -- strip color codes (NOTE LOWERCASE)
 	gsub("|r", ""):
-	gsub("#", "") -- strip the # from the dropdown
+	gsub("#", "") -- strip the # from the dropdown 
 
 
 	--SUBSTITUTE "party" with "party1-4", etc
 	for _, wholething in TMW:Vararg(strsplit(";", unitSettings)) do
 		local unit = strtrim(wholething)
 		for k, unitData in pairs(UNITS.Units) do
-			if unitData.value == unit and unitData.range then
-				unitSettings = gsub(unitSettings, wholething, unit .. "1-" .. unitData.range)
+			if unitData.range and (unit == unitData.value or (unit:find("^" .. unitData.value .. ".") and not unit:find("[%d]"))) then
+				unit = unit:gsub("^" .. unitData.value, unitData.value .. "1-" .. unitData.range)
+				unitSettings = unitSettings:gsub(wholething, unit)
 				break
 			end
 		end

@@ -1475,6 +1475,13 @@ L["SUG_INSERTITEMSLOT"] = "%s to insert as an item slot ID"
 L["SUG_INSERTEQUIV"] = "%s to insert equivalency"
 L["SUG_INSERTTEXTSUB"] = "%s to insert tag"
 
+L["SUG_INSERTNAME_INTERFERE"] = [[%s to insert as a name
+
+|TInterface\AddOns\TellMeWhen\Textures\Alert:0:2|t|cffffa500CAUTION: |TInterface\AddOns\TellMeWhen\Textures\Alert:0:2|t|cffff1111
+This spell interferes with an equivalency.
+It probably won't be tracked if inserted by name.
+You should insert by ID instead.|r]]
+
 L["SUG_PATTERNMATCH_FISHINGLURE"] = "Fishing Lure %(%+%d+ Fishing Skill%)" -- enUS
 L["SUG_PATTERNMATCH_WEIGHTSTONE"] = "Weighted %(%+%d+ Damage%)"
 L["SUG_PATTERNMATCH_SHARPENINGSTONE"] = "Sharpened %(%+%d+ Damage%)"
@@ -1482,6 +1489,14 @@ L["SUG_MATCH_WPNENCH_ENCH"] = "(.*) Weapon" -- inconsistent key. oops.
 
 L["SUG_ATBEGINING"] = "Suggester: Match beginning"
 L["SUG_ATBEGINING_DESC"] = "If checked, the suggestion list will only display spells that start with the same name as the spell that is being typed in. Otherwise, it will match any part of a spell."
+
+L["SUG_FIRSTHELP_DESC"] = [[This is the suggestion list. You can insert entries from it to speed up configuration.
+
+If you are inserting by name, you do not need to chose the entry with the correct ID - all that matters is that you pick the correct name.
+
+In almost all cases, it is best to track things by name. You only need to track things by ID if there are multiple things with the same name but with different effects that could overlap.
+
+Press tab at any time to insert the first entry shown. Right-click to insert an ID if you are typing a name, and vice-versa.]]
 
 
 

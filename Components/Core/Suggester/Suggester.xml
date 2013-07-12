@@ -289,16 +289,22 @@
 				TMW.SUG.Suggest = self
 				self.Header:SetText(TMW.L["SUGGESTIONS"])
 				self.InfoText:SetText(TMW.L["CACHING"])
+
+  				TMW.HELP:NewCode("SUG_FIRSTHELP", 100, true)
 				
 				local firstItem = TMW.SUG:GetFrame(1)
 				firstItem:SetPoint("TOP", 0, -6 - TMW.SUG[1]:GetHeight())
 				firstItem.ClearAllPoints = TMW.NULLFUNC
 				firstItem.SetPoint = TMW.NULLFUNC
 				firstItem.SetSize = TMW.NULLFUNC
+
+				TMW.SUG[1]:HookScript("OnShow", function(self)
+					TMW.HELP:Show("SUG_FIRSTHELP", nil, self, 3, 0, TMW.L["SUG_FIRSTHELP_DESC"])
+				end)
 				
 				-- Tukui_Skins tries to reposition this frame, but it totally ruins the resizability of it,
 				-- so just disallow repositioning.
-			--	self.SetPoint = TMW.NULLFUNC
+				--	self.SetPoint = TMW.NULLFUNC
 				--self.ClearAllPoints = TMW.NULLFUNC
 			</OnLoad>
 			<OnSizeChanged>						

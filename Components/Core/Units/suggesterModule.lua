@@ -95,9 +95,9 @@ function Module:Table_GetNormalSuggestions(suggestions, tbl, ...)
 	local atBeginning = SUG.atBeginning
 	
 	for index, unitData in pairs(tbl) do
-		--if strfind(unitData.value, atBeginning) then
+		if strfind(unitData.value, atBeginning) then
 			suggestions[#suggestions + 1] = index
-	--	end
+		end
 	end
 end
 
@@ -124,18 +124,26 @@ function Module.Sorter_Units(a, b)
 	local special_a, special_b = strsub(a, 1, 1), strsub(b, 1, 1)
 	local prefix_a, prefix_b = strsub(a, 1, 2), strsub(b, 1, 2)
 	
-	local haveA, haveB = prefix_a == "%A", prefix_b == "%A"
+	local lastName = SUG.lastName
+
+	local t_a, t_b = Module.table[a], Module.table[b]
+	local haveA, haveB = t_a and strfind(t_a.value, lastName), t_b and strfind(t_b.value, lastName)
 	if (haveA and not haveB) or (haveB and not haveA) then
 		return haveA
 	end
-	
+
 	local haveA, haveB = special_a ~= "%", special_b ~= "%"
-	if (haveA and not haveB) or (haveB and not haveA) then
+	if (haveA ~= haveB) then
 		return haveA
 	end
 	
 	local haveA, haveB = prefix_a == "%P", prefix_b == "%P"
-	if (haveA and not haveB) or (haveB and not haveA) then
+	if (haveA ~= haveB) then
+		return haveA
+	end
+	
+	local haveA, haveB = prefix_a == "%A", prefix_b == "%A"
+	if (haveA ~= haveB) then
 		return haveA
 	end
 	

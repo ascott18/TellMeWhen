@@ -328,6 +328,7 @@ local EditboxHooks = {
 	OnTabPressed = function(self)
 		if self.SUG_Enabled and SUG[1] and SUG[1].insert and SUG[1]:IsVisible() and not SUG.CurrentModule.noTab then
 			SUG[1]:Click("LeftButton")
+			TMW.HELP:Hide("SUG_FIRSTHELP")
 		end
 	end,
 }
@@ -653,8 +654,15 @@ function Module:Entry_AddToList_1(f, id)
 		f.tooltipmethod = "SetSpellByID"
 		f.tooltiparg = id
 
-		f.insert = SUG.inputType == "number" and id or name
-		f.insert2 = SUG.inputType ~= "number" and id or name
+		if TMW.EquivFirstIDLookup[name] then
+			-- Things that conflict with equivalencies should only be inserted as IDs
+			f.insert = id
+			f.insert2 = name
+			f.overrideInsertName = TMW.L["SUG_INSERTNAME_INTERFERE"]
+		else
+			f.insert = SUG.inputType == "number" and id or name
+			f.insert2 = SUG.inputType ~= "number" and id or name
+		end
 
 		f.Icon:SetTexture(SpellTextures[id])
 	end

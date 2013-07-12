@@ -1732,10 +1732,6 @@ function IE:InitializeDatabase()
 		-- TMWOptDB might not exist if this is a fresh install
 		-- or if the user is upgrading from a really old version that doesn't use TMWOptDB.
 		_G.TMWOptDB = {Version = TELLMEWHEN_VERSIONNUMBER}
-	
-	else
-		TMW:Error("WTF just happened?! TMWOptDB was an unknown type. Sorry. I don't know what happened.")
-		_G.TMWOptDB = nil
 	end
 	
 	
