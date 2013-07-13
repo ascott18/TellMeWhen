@@ -8,6 +8,7 @@
  * The suggestion list for units is now much more useful.
  * The suggestion list now has a warning in the tooltip when inserting spells that interfere with the names of equivalencies.
  * The suggestion list now pops up a help message the first time it is shown.
+ * The group sorting option to sort by duration now treats spells that are on the GCD as having no cooldown.
 
 
  * Bug Fixes:

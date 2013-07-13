@@ -17,7 +17,7 @@ local TMW = TMW
 local L = TMW.L
 local print = TMW.print
 
-
+local OnGCD = TMW.OnGCD
 
 local IconPosition_Sortable = TMW:NewClass("GroupModule_IconPosition_Sortable", "GroupModule_IconPosition")
 
@@ -26,13 +26,13 @@ IconPosition_Sortable:RegisterGroupDefaults{
 	LayoutDirection = 1,
 	
 	SortPriorities = {
-		{Method = "id",				Order =	1,	},
-		{Method = "duration",		Order =	1,	},
-		{Method = "stacks",			Order =	-1,	},
-		{Method = "visiblealpha",	Order =	-1,	},
-		{Method = "visibleshown",	Order =	-1,	},
-		{Method = "alpha",			Order =	-1,	},
-		{Method = "shown",			Order =	-1,	},
+		{ Method = "id",			Order =	1,	},
+		{ Method = "duration",		Order =	1,	},
+		{ Method = "stacks",		Order =	-1,	},
+		{ Method = "visiblealpha",	Order =	-1,	},
+		{ Method = "visibleshown",	Order =	-1,	},
+		{ Method = "alpha",			Order =	-1,	},
+		{ Method = "shown",			Order =	-1,	},
 	},
 }
 
@@ -177,8 +177,11 @@ function IconPosition_Sortable.IconSorter(iconA, iconB)
 			elseif method == "duration" then				
 				local time = TMW.time
 				
-				local durationA = attributesA.duration - (time - attributesA.start)
-				local durationB = attributesB.duration - (time - attributesB.start)
+				local durationA = attributesA.duration
+				local durationB = attributesB.duration
+
+				durationA = OnGCD(durationA) and 0 or durationA - (time - attributesA.start)
+				durationB = OnGCD(durationB) and 0 or durationB - (time - attributesB.start)
 
 				if durationA ~= durationB then
 					return durationA*order < durationB*order
