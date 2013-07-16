@@ -1106,7 +1106,7 @@ L["ONLYCHECKMINE_DESC"] = "Check this to cause this condition to only check for 
 L["LUACONDITION"] = "Lua (Advanced)"
 L["LUACONDITION_DESC"] = [[This condition type allows you to evaluate Lua code to determine the state of a condition.
 
-The input is not an 'if .. then' statement, nor is it a function closure. It is a regular statement to be evaluated, e.g. 'a and b or c'.  If complex functionality is required, use a call to a function, e.g. 'CheckStuff()', that is defined externally.
+The input is not an 'if .. then' statement, nor is it a function closure. It is a regular statement to be evaluated, e.g. 'a and b or c'.  If complex functionality is required, use a call to a function, e.g. 'CheckStuff()', that is defined externally (perhaps using TMW's Lua snippets feature).
 
 If more help is needed (but not help about how to write Lua code), open a ticket on CurseForge. For help on how to write Lua, go to the internet.]]
 L["MACROCONDITION"] = "Macro Conditional"
@@ -1273,7 +1273,7 @@ It is an advanced feature for those who have experience with Lua (or for those w
 
 Uses might include writing custom functions for use in Lua conditions (be sure to define those in TMW.CNDT.Env).
 
-Snippets can be defined either per-profile or globally (they will run for all profiles).]]
+Snippets can be defined either per-profile or globally (global snippets will run for all profiles).]]
 L["CODESNIPPET_GLOBAL"] = "Global Snippets"
 L["CODESNIPPET_PROFILE"] = "Profile Snippets"
 

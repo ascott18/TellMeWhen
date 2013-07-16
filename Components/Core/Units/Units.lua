@@ -559,6 +559,11 @@ do
 			end
 		end,
 	}
-	TMW:RegisterCallback("TMW_CNDT_GROUP_DRAWGROUP", ConditionSet)
 	CNDT:RegisterConditionSet("Unit", ConditionSet)
+
+	TMW:RegisterCallback("TMW_OPTIONS_LOADED", function()
+		-- This can't happen until after TMW_OPTIONS_LOADED because it has to be registered
+		-- after the default callbacks are registered
+		TMW:RegisterCallback("TMW_CNDT_GROUP_DRAWGROUP", ConditionSet)
+	end)
 end

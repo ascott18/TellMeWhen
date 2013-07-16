@@ -190,6 +190,9 @@ Module.table = {
 	{ value = "unittarget",	text = L["UNITCONDITIONS_STATICUNIT_TARGET"],	desc = L["UNITCONDITIONS_STATICUNIT_TARGET_DESC"]	},
 }
 
+function Module:Table_GetSorter()
+	return nil
+end
 
 function Module:Table_GetSpecialSuggestions(suggestions, tbl, ...)
 	-- No specials
