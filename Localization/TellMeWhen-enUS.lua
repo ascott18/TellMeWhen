@@ -67,6 +67,16 @@ I apologize for the inconvenience, but this is a rare occurrence, and any inform
 
 Thank you for using TellMeWhen!]]
 
+L["ERROR_GAMEMENU_INTERFACE_OPTIONS_FUCKED"] = [[TellMeWhen's options have successfully loaded, but something happened that is preventing them from being displayed here correctly.
+
+Try closing the interface options (this window) and reopening them.
+
+If that doesn't work, then you can still access TellMeWhen's options by typing "/tmw options"
+
+Sorry about the inconvenience!]]
+
+
+
 L["ERROR_INVALID_SPELLID"] = "%s is checking an invalid spellID: %s. Please remove it to avoid undesired icon behavior."
 
 L["SAFESETUP_TRIGGERED"] = "Running safe & slow setup..."

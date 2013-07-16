@@ -66,6 +66,13 @@
 					TMW:LoadOptions()
 					
 					if TMW.AddedToBlizz then
+						self.text:SetText(TMW.L["ERROR_GAMEMENU_INTERFACE_OPTIONS_FUCKED"])
+
+						InterfaceOptionsFrame_OpenToCategory(TMW.AddedToBlizz)
+
+						-- Sometimes a lot of things fuck up and I have to do this.
+						-- It might not even work (which is why ERROR_GAMEMENU_INTERFACE_OPTIONS_FUCKED exists)
+						InterfaceOptionsFrame_OnShow()
 						InterfaceOptionsFrame_OpenToCategory(TMW.AddedToBlizz)
 						
 						self:UnregisterAllEvents()
