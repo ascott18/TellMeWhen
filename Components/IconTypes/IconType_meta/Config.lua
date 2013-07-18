@@ -34,7 +34,7 @@ if not Type then return end
 -- GLOBALS: CreateFrame
 
 
-TMW.IconDragger:RegisterIconDragHandler(20,
+TMW.IconDragger:RegisterIconDragHandler(220,
 	function(IconDragger, info)
 		if IconDragger.desticon
 		and IconDragger.srcicon:IsValid()
@@ -48,7 +48,7 @@ TMW.IconDragger:RegisterIconDragHandler(20,
 		end
 	end,
 	function(IconDragger)
-		local Icons = TMW.db.profile.Groups[IconDragger.desticon.group:GetID()].Icons[IconDragger.desticon:GetID()].Icons
+		local Icons = IconDragger.desticon:GetSettings().Icons
 		if Icons[#Icons] == "" then
 			Icons[#Icons] = nil
 		end

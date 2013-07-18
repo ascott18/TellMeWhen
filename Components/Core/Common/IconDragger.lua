@@ -32,8 +32,12 @@ end
 
 ---------- Icon Dragging ----------
 function IconDragger:DropDownFunc()
+	local lastAddedCentury = 1
+	local hasAddedOne = false
+
 	for i, handlerData in ipairs(IconDragger.Handlers) do
 		local info = UIDropDownMenu_CreateInfo()
+
 		info.notCheckable = true
 		info.tooltipOnButton = true
 		
@@ -41,11 +45,27 @@ function IconDragger:DropDownFunc()
 		
 		info.func = IconDragger.Handler
 		info.arg1 = handlerData.actionFunc
-		
+
 		if shouldAddButton then
+			-- Spacers are placed between each increment of 100 in the order.
+			local thisCentury = floor(handlerData.order/100) + 1
+
+			if hasAddedOne and lastAddedCentury < thisCentury then
+				TMW.AddDropdownSpacer()
+			end
+
 			UIDropDownMenu_AddButton(info, UIDROPDOWNMENU_MENU_LEVEL)
+
+			lastAddedCentury = thisCentury
+			hasAddedOne = true
 		end
+
+
 	end	
+
+	if hasAddedOne then
+		TMW.AddDropdownSpacer()
+	end
 	
 	local info = UIDropDownMenu_CreateInfo()
 	info.text = CANCEL

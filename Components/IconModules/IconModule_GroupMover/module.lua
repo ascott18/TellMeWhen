@@ -103,7 +103,7 @@ end)
 
 
 
-TMW.IconDragger:RegisterIconDragHandler(30,	-- Anchor
+TMW.IconDragger:RegisterIconDragHandler(330,	-- Anchor
 	function(IconDragger, info)
 		local name, desc
 

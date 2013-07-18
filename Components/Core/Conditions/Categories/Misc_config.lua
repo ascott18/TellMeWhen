@@ -37,7 +37,7 @@ TMW:RegisterCallback("TMW_CNDT_GROUP_DRAWGROUP", function(event, CndtGroup, cond
 end)
 
 
-TMW.IconDragger:RegisterIconDragHandler(10,
+TMW.IconDragger:RegisterIconDragHandler(210, -- Add as icon shown condition
 	function(IconDragger, info)
 		if IconDragger.desticon then
 			if IconDragger.srcicon:IsValid() then
@@ -50,7 +50,7 @@ TMW.IconDragger:RegisterIconDragHandler(10,
 	end,
 	function(IconDragger)
 		-- add a condition to the destination icon
-		local Condition = CNDT:AddCondition(TMW.db.profile.Groups[IconDragger.desticon.group:GetID()].Icons[IconDragger.desticon:GetID()].Conditions)
+		local Condition = CNDT:AddCondition(IconDragger.desticon:GetSettings().Conditions)
 
 		-- set the settings
 		Condition.Type = "ICON"

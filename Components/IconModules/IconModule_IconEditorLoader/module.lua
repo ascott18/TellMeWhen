@@ -26,10 +26,12 @@ local icons = {}
 local DD = CreateFrame("Frame", nil, UIParent, "TMW_DropDownMenuTemplate")
 DD:Hide()
 DD.wrapTooltips = 1
+
 local function Dropdown_OnClick(button, icon)
 	icon.group:Raise()
 	TMW.IE:Load(nil, icon)
 end
+
 DD.initialize = function(dropdown)
 	local info = UIDropDownMenu_CreateInfo()
 	info.text = L["ICONMENU_CHOSEICONTOEDIT"]

@@ -357,7 +357,8 @@ L["ICONMENU_VEHICLE"] = "Vehicle"
 L["MAINTANK"] = "Main Tank"
 L["MAINASSIST"] = "Main Assist"
 
-L["ICONMENU_CHOSEICONTOEDIT"] = "Chose an icon to edit:"
+L["ICONMENU_CHOSEICONTOEDIT"] = "Choose an icon to edit:"
+L["ICONMENU_CHOSEICONTODRAGTO"] = "Choose an icon to drag to:"
 
 L["ICONMENU_PRESENT"] = "Present"
 L["ICONMENU_ABSENT"] = "Absent"
@@ -520,6 +521,8 @@ L["ICONMENU_ANCHORTO_UIPARENT_DESC"] = [[Reset anchor of %s back to your screen 
 Advanced anchor settings are available in the group options.]]
 L["ICONMENU_SPLIT"] = "Split into new group"
 L["ICONMENU_SPLIT_DESC"] = "Create a new group and move this icon into it. Many group settings will carry over to the new group."
+L["ICONMENU_COPYEVENTHANDLERS"] = "Copy %d |4Event Handler:Event Handlers;"
+L["ICONMENU_COPYCONDITIONS"] = "Copy %d |4Condition:Conditions;"
 
 L["ANCHORTO"] = "Anchor To"
 

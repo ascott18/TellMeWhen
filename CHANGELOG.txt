@@ -9,6 +9,8 @@
  * The suggestion list now has a warning in the tooltip when inserting spells that interfere with the names of equivalencies.
  * The suggestion list now pops up a help message the first time it is shown.
  * The group sorting option to sort by duration now treats spells that are on the GCD as having no cooldown.
+ * You can now copy an icon's events and conditions by right-click-dragging the icon to another icon.
+ * When right-click-dragging an icon to an icon that has multiple icons in the same place, you can now choose which one you would like the destination to be.
 
 
  * Bug Fixes:

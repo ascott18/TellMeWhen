@@ -39,6 +39,28 @@ EventsTab:SetText(TMW.L["EVENTS_TAB"])
 TMW:TT(EventsTab, "EVENTS_TAB", "EVENTS_TAB_DESC")
 
 
+
+---------- Icon Dragger ----------
+TMW.IconDragger:RegisterIconDragHandler(120, -- Copy Event Handlers
+	function(IconDragger, info)
+		if IconDragger.desticon
+		and IconDragger.srcicon:GetSettings().Events.n > 0
+		then
+			info.text = L["ICONMENU_COPYEVENTHANDLERS"]:format(IconDragger.srcicon:GetSettings().Events.n)
+			info.tooltipTitle = nil
+			info.tooltipText = nil
+			return true
+		end
+	end,
+	function(IconDragger)
+		-- copy the settings
+		local srcics = IconDragger.srcicon:GetSettings()
+		
+		IconDragger.desticon:GetSettings().Events = TMW:CopyWithMetatable(srcics.Events)
+	end
+)
+
+
 function EVENTS:LoadConfig()
 	local EventHandlerFrames = self.EventHandlerFrames
 	local previousFrame

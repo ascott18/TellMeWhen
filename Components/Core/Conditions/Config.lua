@@ -42,6 +42,28 @@ TMW.HELP:NewCode("CNDT_UNIT_ONLYONE", 20, false)
 local CNDT = TMW.CNDT -- created in TellMeWhen/conditions.lua
 
 
+
+---------- Icon Dragger ----------
+TMW.IconDragger:RegisterIconDragHandler(110, -- Copy Conditions
+	function(IconDragger, info)
+		if IconDragger.desticon
+		and IconDragger.srcicon:GetSettings().Conditions.n > 0
+		then
+			info.text = L["ICONMENU_COPYCONDITIONS"]:format(IconDragger.srcicon:GetSettings().Conditions.n)
+			info.tooltipTitle = nil
+			info.tooltipText = nil
+			return true
+		end
+	end,
+	function(IconDragger)
+		-- copy the settings
+		local srcics = IconDragger.srcicon:GetSettings()
+		
+		IconDragger.desticon:GetSettings().Conditions = TMW:CopyWithMetatable(srcics.Conditions)
+	end
+)
+
+
 ---------- Interface/Data ----------
 function CNDT:LoadConfig(conditionSetName)
 	local ConditionSet

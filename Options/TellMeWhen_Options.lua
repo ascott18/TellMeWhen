@@ -250,7 +250,7 @@ function TMW:GetIconMenuText(g, i, ics)
 	end
 
 	tooltip =	tooltip ..
-				((typeData.name) or "") ..
+				((Type ~= "" and typeData.name) or "") ..
 				((ics.Enabled and "") or "\r\n(" .. L["DISABLED"] .. ")")
 
 	return text, textshort, tooltip
@@ -332,12 +332,13 @@ function TMW:SetUIDropdownIconText(frame, iconName, text)
 	UIDropDownMenu_SetText(frame, text)
 end
 
+local spacerInfo = {
+	text = "",
+	isTitle = true,
+	notCheckable = true,
+}
 function TMW.AddDropdownSpacer()
-	local info = UIDropDownMenu_CreateInfo()
-	info.text = ""
-	info.isTitle = true
-	info.notCheckable = true
-	UIDropDownMenu_AddButton(info, UIDROPDOWNMENU_MENU_LEVEL)
+	UIDropDownMenu_AddButton(spacerInfo, UIDROPDOWNMENU_MENU_LEVEL)
 end
 
 function TMW.SetIconPreviewIcon(self, icon)
