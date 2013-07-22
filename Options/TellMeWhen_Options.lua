@@ -2979,7 +2979,7 @@ function IE:GetRealNames(Name, icon)
 
 	local tbl
 	if SoI == "item" then
-		tbl = TMW:GetItemIDs(icon, text)
+		tbl = TMW:GetItems(icon, text)
 	else
 		tbl = TMW:GetSpellNames(icon, text)
 	end
@@ -2995,8 +2995,8 @@ function IE:GetRealNames(Name, icon)
 	for k, v in pairs(tbl) do
 		local name, texture
 		if SoI == "item" then
-			name = GetItemInfo(v) or v or ""
-			texture = GetItemIcon(v)
+			name = v:GetName() or v.what or ""
+			texture = v:GetIcon()
 		else
 			name, _, texture = GetSpellInfo(v)
 			texture = texture or SpellTextures[name or v]

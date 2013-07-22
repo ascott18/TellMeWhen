@@ -95,63 +95,41 @@ Type:RegisterConfigPanel_ConstructorFunc(150, "TellMeWhen_ItemSettings", functio
 end)
 
 
--- yay for caching!
-local ItemCount = setmetatable({}, {__index = function(tbl, k)
-	if not k then return end
-	local count = GetItemCount(k, nil, 1)
-	tbl[k] = count
-	return count
-end}) Type.ItemCount = ItemCount
-function Type:UPDATE_ITEM_COUNT()
-	for k in pairs(ItemCount) do
-		ItemCount[k] = GetItemCount(k, nil, 1)
-	end
-end
 
 local function ItemCooldown_OnEvent(icon, event, unit)
-	if event == "PLAYER_EQUIPMENT_CHANGED" or (event == "UNIT_INVENTORY_CHANGED" and unit == "player") then
-		-- the reason for handling DoUpdateIDs is because this event will fire several times at once sometimes,
-		-- but there is no reason to recheck things until they are needed next.
-		if icon.ShouldUpdateIDs then
-			icon.DoUpdateIDs = true
-		end
-	end
 	icon.NextUpdateTime = 0
 end
 
 local function ItemCooldown_OnUpdate(icon, time)
-	if icon.DoUpdateIDs then
-		local Name = icon.Name
-		icon.NameFirst = TMW:GetItemIDs(icon, Name, 1)
-		icon.NameArray = TMW:GetItemIDs(icon, Name)
-		icon.NameNameArray = TMW:GetItemIDs(icon, icon.Name, nil, 1)
-		icon.DoUpdateIDs = nil
-	end
 
 	local n, inrange, equipped, start, duration, count = 1
-	local RangeCheck, OnlyEquipped, OnlyInBags, NameArray = icon.RangeCheck, icon.OnlyEquipped, icon.OnlyInBags, icon.NameArray
+
+	local RangeCheck, OnlyEquipped, OnlyInBags, Items =
+	icon.RangeCheck, icon.OnlyEquipped, icon.OnlyInBags, icon.Items
 	
-	for i = 1, #NameArray do
-		local iName = NameArray[i]
+	for i = 1, #Items do
+		local item = Items[i]
 		n = i
-		start, duration = GetItemCooldown(iName)
+
+		start, duration = item:GetCooldown()
+
 		if duration then
-			inrange, equipped, count = 1, true, ItemCount[iName]
+			inrange, equipped, count = 1, true, item:GetCount()
 			if RangeCheck then
-				inrange = IsItemInRange(iName, "target") or 1
+				inrange = item:IsInRange("target") or 1
 			end
 
-			if (OnlyEquipped and not IsEquippedItem(iName)) or (OnlyInBags and (count == 0)) then
+			if (OnlyEquipped and not item:GetEquipped()) or (OnlyInBags and (count == 0)) then
 				equipped = false
 			end
 			
 			if equipped and inrange == 1 and (duration == 0 or OnGCD(duration)) then --usable
 				icon:SetInfo("alpha; texture; start, duration; stack, stackText; spell; inRange",
 					icon.Alpha,
-					GetItemIcon(iName) or "Interface\\Icons\\INV_Misc_QuestionMark",
+					item:GetIcon() or "Interface\\Icons\\INV_Misc_QuestionMark",
 					start, duration,
 					count, icon.EnableStacks and count,
-					iName,
+					item:GetID(),
 					inrange
 				)
 				return
@@ -159,27 +137,33 @@ local function ItemCooldown_OnUpdate(icon, time)
 		end
 	end
 
-	local NameFirst2
+	local item2
 	if OnlyInBags then
-		for i = 1, #NameArray do
-			local iName = NameArray[i]
-			if (OnlyEquipped and IsEquippedItem(iName)) or (not OnlyEquipped and ItemCount[iName] > 0) then
-				NameFirst2 = iName
+		for i = 1, #Items do
+			local item = Items[i]
+			if (OnlyEquipped and item:GetEquipped()) or (not OnlyEquipped and item:GetCount() > 0) then
+				item2 = item
 				break
 			end
 		end
-		if not NameFirst2 then
+		if not item2 then
 			icon:SetInfo("alpha", 0)
 			return
 		end
 	else
-		NameFirst2 = icon.NameFirst
+		item2 = Items[1]
 	end
-	if n > 1 then -- if there is more than 1 spell that was checked then we need to get these again for the first spell, otherwise reuse the values obtained above since they are just for the first one
-		start, duration = GetItemCooldown(NameFirst2)
-		inrange, count = 1, ItemCount[NameFirst2]
+
+	-- if there is more than 1 spell that was checked
+	-- then we need to get these again for the first spell,
+	-- otherwise reuse the values obtained above since they are just for the first one
+
+	if n > 1 then
+		start, duration = item2:GetCooldown()
+
+		inrange, count = 1, item2:GetCount()
 		if RangeCheck then
-			inrange = IsItemInRange(NameFirst2, "target") or 1
+			inrange = item2:IsInRange("target") or 1
 		end
 		isGCD = OnGCD(duration)
 	end
@@ -189,10 +173,10 @@ local function ItemCooldown_OnUpdate(icon, time)
 		end
 		icon:SetInfo("alpha; texture; start, duration; stack, stackText; spell; inRange",
 			icon.UnAlpha,
-			GetItemIcon(NameFirst2),
+			item2:GetIcon(),
 			start, duration,
 			count, icon.EnableStacks and count,
-			NameFirst2,
+			item2:GetID(),
 			inrange
 		)
 	else
@@ -202,40 +186,8 @@ end
 
 
 function Type:Setup(icon, groupID, iconID)
-	icon.NameFirst = TMW:GetItemIDs(icon, icon.Name, 1)
-	icon.NameArray = TMW:GetItemIDs(icon, icon.Name)
-	icon.NameNameArray = TMW:GetItemIDs(icon, icon.Name, nil, 1)
+	icon.Items = TMW:GetItems(icon, icon.Name)
 
-	local splitNames = TMW:SplitNames(icon.Name)
-	icon.ShouldUpdateIDs = nil
-	if #splitNames ~= #icon.NameArray or not icon.NameFirst or icon.NameFirst == 0 then
-		icon:RegisterEvent("UNIT_INVENTORY_CHANGED")
-		icon:SetScript("OnEvent", ItemCooldown_OnEvent)
-		icon.ShouldUpdateIDs = true
-	else
-		for k, v in pairs(icon.NameArray) do
-			if v == 0 then
-				icon:RegisterEvent("UNIT_INVENTORY_CHANGED")
-				icon:SetScript("OnEvent", ItemCooldown_OnEvent)
-				icon.ShouldUpdateIDs = true
-			end
-		end
-		for _, n in ipairs(splitNames) do
-			n = tonumber(strtrim(n))
-			if n and n <= INVSLOT_LAST_EQUIPPED then
-				icon:RegisterEvent("PLAYER_EQUIPMENT_CHANGED")
-				icon:SetScript("OnEvent", ItemCooldown_OnEvent)
-				icon.ShouldUpdateIDs = true
-				break
-			end
-		end
-	end
-	
-	-- Must come before the icon events are set. (Addendum 6-20-12: I have no idea why, but no reason to change it now)
-	Type:RegisterEvent("BAG_UPDATE", "UPDATE_ITEM_COUNT")
-	-- Added BAG_UPDATE_COOLDOWN 6-20-12 after discovering that BAG_UPDATE doesnt trigger for Mana Gems, possibly other items too
-	Type:RegisterEvent("BAG_UPDATE_COOLDOWN", "UPDATE_ITEM_COUNT")
-	
 	if not icon.RangeCheck then
 		icon:RegisterSimpleUpdateEvent("UNIT_INVENTORY_CHANGED", "player")
 		icon:RegisterSimpleUpdateEvent("PLAYER_EQUIPMENT_CHANGED")
@@ -276,10 +228,10 @@ function Type:GetConfigIconTexture(icon)
 	if icon.Name == "" then
 		return "Interface\\Icons\\INV_Misc_QuestionMark", nil
 	else
-		local tbl = TMW:GetItemIDs(nil, icon.Name)
+		local tbl = TMW:GetItems(nil, icon.Name)
 
-		for _, name in ipairs(tbl) do
-			local t = GetItemIcon(name)
+		for _, item in ipairs(tbl) do
+			local t = item:GetIcon()
 			if t then
 				return t, true
 			end

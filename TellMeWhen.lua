@@ -18,7 +18,7 @@
 TELLMEWHEN_VERSION = "6.2.2"
 TELLMEWHEN_VERSION_MINOR = strmatch(" @project-version@", " r%d+") or ""
 TELLMEWHEN_VERSION_FULL = TELLMEWHEN_VERSION .. TELLMEWHEN_VERSION_MINOR
-TELLMEWHEN_VERSIONNUMBER = 62227 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
+TELLMEWHEN_VERSIONNUMBER = 62228 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
 
 if TELLMEWHEN_VERSIONNUMBER > 63000 or TELLMEWHEN_VERSIONNUMBER < 62000 then
 	-- safety check because i accidentally made the version number 414069 once
@@ -581,13 +581,13 @@ function TMW:MakeSingleArgFunctionCached(obj, method)
     elseif type(obj) == "function" then
         func = obj
     else
-        error("Usage: TMW:MakeFunctionCached(object/function [, method])")
+        error("Usage: TMW:MakeFunctionCached(object/function [, method])", 2)
     end
 
     local cache = {}
     local wrapper = function(arg1In, arg2In)
         if arg2In ~= nil then
-            error("Cannot MakeSingleArgFunctionCached functions with more than 1 arg")
+            error("Cannot MakeSingleArgFunctionCached functions with more than 1 arg", 2)
         end
 		
         if cache[arg1In] then
@@ -596,7 +596,7 @@ function TMW:MakeSingleArgFunctionCached(obj, method)
 
         local arg1Out, arg2Out = func(arg1In)
         if arg2Out ~= nil then
-            error("Cannot cache functions with more than 1 return arg")
+            error("Cannot cache functions with more than 1 return arg", 2)
         end
 
         cache[arg1In] = arg1Out
@@ -1523,12 +1523,12 @@ end
 
 -- ADDON ENTRY POINT: EVERYTHING STARTS FROM HERE!
 function TMW:OnInitialize()
+	-- if the file IS required for gross functionality
 	if not TMW.Classes then
 		-- this also includes upgrading from older than 3.0 (pre-Ace3 DB settings)
 		-- GLOBALS: StaticPopupDialogs, StaticPopup_Show, EXIT_GAME, CANCEL, ForceQuit
 		StaticPopupDialogs["TMW_RESTARTNEEDED"] = {
-			text = L["ERROR_MISSINGFILE"], -- if the file is required for functionality
-			--text = L["ERROR_MISSINGFILE_NOREQ"], -- if the file is NOT required for functionality
+			text = L["ERROR_MISSINGFILE"], 
 			button1 = EXIT_GAME,
 			button2 = CANCEL,
 			OnAccept = ForceQuit,
@@ -1537,8 +1537,22 @@ function TMW:OnInitialize()
 			whileDead = true,
 			preferredIndex = 3, -- http://forums.wowace.com/showthread.php?p=320956
 		}
-		StaticPopup_Show("TMW_RESTARTNEEDED", TELLMEWHEN_VERSION_FULL, "Class.lua") -- arg3 could also be L["ERROR_MISSINGFILE_REQFILE"]
-		return -- if required, return here
+		StaticPopup_Show("TMW_RESTARTNEEDED", TELLMEWHEN_VERSION_FULL, "TellMeWhen/Components/Core/Class.lua") -- arg3 could also be L["ERROR_MISSINGFILE_REQFILE"]
+		return
+
+	-- if the file is NOT required for gross functionality
+	elseif not TMW.Classes.Item then
+		StaticPopupDialogs["TMW_RESTARTNEEDED"] = {
+			text = L["ERROR_MISSINGFILE_NOREQ"], 
+			button1 = EXIT_GAME,
+			button2 = CANCEL,
+			OnAccept = ForceQuit,
+			timeout = 0,
+			showAlert = true,
+			whileDead = true,
+			preferredIndex = 3, -- http://forums.wowace.com/showthread.php?p=320956
+		}
+		StaticPopup_Show("TMW_RESTARTNEEDED", TELLMEWHEN_VERSION_FULL, "TellMeWhen/Components/Core/Common/Item.lua") -- arg3 could also be L["ERROR_MISSINGFILE_REQFILE"]
 	end
 	
 	--------------- Events/OnUpdate ---------------
@@ -3414,56 +3428,6 @@ function TMW:GetSpellDurations(icon, setting)
 end
 TMW:MakeFunctionCached(TMW, "GetSpellDurations")
 
-function TMW:GetItemIDs(icon, setting, firstOnly, toname)
-	-- note: these cannot be cached because of slotIDs
-
-	local names = TMW:SplitNames(setting)
-	
-	-- REMOVE SPELL DURATIONS (FOR WHATEVER REASON THE USER MIGHT HAVE PUT THEM IN FOR ITEMS)
-	for k, item in pairs(names) do
-		if strfind(item, ":[%d:%s%.]*$") then
-			local new = strmatch(item, "(.-):[%d:%s%.]*$")
-			names[k] = tonumber(new) or new -- turn it into a number if it is one
-		end
-	end
-	if icon then
-		names = TMW:LowerNames(names)
-	end
-
-	for k, item in ipairs(names) do
-		item = strtrim(item) -- trim trailing spaces
-		local itemID = tonumber(item) --if it is a number then it might be the itemID if them item
-		if not itemID then -- if it wasnt a number then we need to get the itemID of the item
-			local _, itemLink = GetItemInfo(item) -- the itemID can be found in the itemlink
-			if itemLink then
-				itemID = strmatch(itemLink, ":(%d+)") -- extract the itemID from the link
-			end
-		elseif itemID <= 19 then -- if the itemID was <= 19 then it must be a slotID
-			itemID = GetInventoryItemID("player", itemID) -- get the itemID of the slot
-		end
-		names[k] = tonumber(itemID) or 0 -- finally, put the itemID into the return table
-	end
-
-	for k, v in pairs(names) do
-		if v == 0 then
-			tremove(names, k)
-		end
-	end
-
-	if toname then
-		for k, v in ipairs(names) do
-			names[k] = GetItemInfo(v or "") or v -- convert things to names
-		end
-		if firstOnly then
-			return names[1] or 0
-		end
-		return names
-	end
-	if firstOnly then
-		return names[1] or 0
-	end
-	return names
-end
 
 --TMW.TestTex = TMW:CreateTexture()
 function TMW:GetTexturePathFromSetting(setting)

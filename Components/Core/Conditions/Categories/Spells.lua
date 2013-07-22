@@ -282,18 +282,18 @@ ConditionCategory:RegisterCondition(11,	 "ITEMCD", {
 	range = 30,
 	step = 0.1,
 	name = function(editbox) TMW:TT(editbox, L["ITEMCOOLDOWN"], "CNDT_ONLYFIRST", 1) editbox.label = L["ITEMTOCHECK"] end,
-	useSUG = "item",
+	useSUG = "itemwithslots",
 	unit = PLAYER,
 	texttable = CNDT.COMMON.usableseconds,
 	icon = "Interface\\Icons\\inv_jewelry_trinketpvp_01",
 	tcoords = CNDT.COMMON.standardtcoords,
-	funcstr = [[ItemCooldownDuration(c.ItemID) c.Operator c.Level]],
+	funcstr = [[c.Item:GetCooldownDurationNoGCD() c.Operator c.Level]],
 	events = function(ConditionObject, c)
 		return
 			ConditionObject:GenerateNormalEventString("BAG_UPDATE_COOLDOWN")
 	end,
 	anticipate = [[
-		local start, duration = GetItemCooldown(c.ItemID)
+		local start, duration = c.Item:GetCooldown()
 		local VALUE = duration and start + (duration - c.Level) or huge
 	]],
 })
@@ -302,19 +302,19 @@ ConditionCategory:RegisterCondition(12,	 "ITEMCDCOMP", {
 	noslide = true,
 	name = function(editbox) TMW:TT(editbox, "ITEMTOCOMP1", "CNDT_ONLYFIRST") editbox.label = L["ITEMTOCOMP1"] end,
 	name2 = function(editbox) TMW:TT(editbox, "ITEMTOCOMP2", "CNDT_ONLYFIRST") editbox.label = L["ITEMTOCOMP2"] end,
-	useSUG = "item",
+	useSUG = "itemwithslots",
 	unit = PLAYER,
 	icon = "Interface\\Icons\\inv_jewelry_trinketpvp_01",
 	tcoords = CNDT.COMMON.standardtcoords,
-	funcstr = [[ItemCooldownDuration(c.ItemID) c.Operator ItemCooldownDuration(c.ItemID2)]],
+	funcstr = [[c.Item:GetCooldownDurationNoGCD() c.Operator c.Item2:GetCooldownDurationNoGCD()]],
 	events = function(ConditionObject, c)
 		return
 			ConditionObject:GenerateNormalEventString("BAG_UPDATE_COOLDOWN")
 	end,
 	-- what a shitty anticipate func
 	anticipate = [[
-		local start, duration = GetItemCooldown(c.ItemID)
-		local start2, duration2 = GetItemCooldown(c.ItemID2)
+		local start, duration = c.Item:GetCooldown()
+		local start2, duration2 = c.Item2:GetCooldown()
 		local VALUE
 		if duration and duration2 then
 			local v1, v2 = start + duration, start2 + duration2
@@ -333,7 +333,7 @@ ConditionCategory:RegisterCondition(13,	 "ITEMRANGE", {
 	min = 0,
 	max = 1,
 	name = function(editbox) TMW:TT(editbox, "CONDITIONPANEL_ITEMRANGE", "CNDT_ONLYFIRST") editbox.label = L["ITEMTOCHECK"] end,
-	useSUG = "item",
+	useSUG = "itemwithslots",
 	nooperator = true,
 	texttable = {[0] = L["INRANGE"], [1] = L["NOTINRANGE"]},
 	icon = "Interface\\Icons\\ability_hunter_snipershot",
@@ -342,7 +342,7 @@ ConditionCategory:RegisterCondition(13,	 "ITEMRANGE", {
 		IsItemInRange = IsItemInRange,
 	},
 	funcstr = function(c)
-		return 1-c.Level .. [[ == (IsItemInRange(c.ItemID, c.Unit) or 0)]]
+		return 1-c.Level .. [[ == (c.Item:IsInRange(c.Unit) or 0)]]
 	end,
 	-- events = absolutely none
 })
@@ -352,14 +352,14 @@ ConditionCategory:RegisterCondition(14,	 "ITEMINBAGS", {
 	max = 50,
 	texttable = function(k) return format(ITEM_SPELL_CHARGES, k) end,
 	name = function(editbox) TMW:TT(editbox, "ITEMINBAGS", "CNDT_ONLYFIRST") editbox.label = L["ITEMTOCHECK"] end,
-	useSUG = "item",
+	useSUG = "itemwithslots",
 	unit = false,
 	icon = "Interface\\Icons\\inv_misc_bag_08",
 	tcoords = CNDT.COMMON.standardtcoords,
 	Env = {
 		GetItemCount = GetItemCount,
 	},
-	funcstr = [[GetItemCount(c.ItemID, nil, 1) c.Operator c.Level]],
+	funcstr = [[c.Item:GetCount() c.Operator c.Level]],
 	events = function(ConditionObject, c)
 		return
 			ConditionObject:GenerateNormalEventString("BAG_UPDATE"),
@@ -373,14 +373,14 @@ ConditionCategory:RegisterCondition(15,	 "ITEMEQUIPPED", {
 	nooperator = true,
 	texttable = CNDT.COMMON.bool,
 	name = function(editbox) TMW:TT(editbox, "ITEMEQUIPPED", "CNDT_ONLYFIRST") editbox.label = L["ITEMTOCHECK"] end,
-	useSUG = "item",
+	useSUG = "itemwithslots",
 	unit = false,
 	icon = "Interface\\PaperDoll\\UI-PaperDoll-Slot-MainHand",
 	tcoords = CNDT.COMMON.standardtcoords,
 	Env = {
 		IsEquippedItem = IsEquippedItem,
 	},
-	funcstr = [[c.1nil == IsEquippedItem(c.ItemID)]],
+	funcstr = [[c.1nil == c.Item:GetEquipped()]],
 	events = function(ConditionObject, c)
 		return
 			ConditionObject:GenerateNormalEventString("BAG_UPDATE"),

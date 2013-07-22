@@ -17,6 +17,7 @@
  ** Buff/Debuff icons that are set to sort by low duration should now properly display unlimited duration auras when there is nothing else to display.
  ** The Ranged Attack Power condition should now always use the proper RAP value.
  ** Fixed some "You are not in a raid group" errors.
+ ** All features in TellMeWhen that track items (including Item Cooldown icons and any item conditions) are universally able to accept slotIDs as input, and all features will now correctly distinguished equipped items from items in your bag when tracking by slotID. This is the result of a new, robust system for managing items.
 
 ===v6.2.0===
  * New Icon Type: Buff/Debuff Check (for checking missing raid buffs).

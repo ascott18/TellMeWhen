@@ -6,4 +6,6 @@
 
 <Script file="PlayerNames.lua"/>
 
+<Script file="Item.lua"/>
+
 </Ui>

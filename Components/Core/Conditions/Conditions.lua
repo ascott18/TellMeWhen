@@ -600,55 +600,17 @@ local function strWrap(string)
 	end
 end
 
+Env.ItemRefs = {}
+function CNDT:GetItemRefForConditionChecker(name)
+	local item = TMW:GetItems(nil, name)[1]
 
-local function SetupItemIDReplacer()
-	local hasZeroes = true
-	local function metamethod(self, name)
-		local id = TMW:GetItemIDs(nil, name, 1)
-		if not id then
-			id = 0
-		end
-		if id == 0 then
-			hasZeroes = true
-		end
-		self[name] = id
-		return id
+	if not item then
+		item = TMW:GetNullRefItem()
 	end
-	Env.ItemLookup = setmetatable({}, {__index = metamethod})
-	local ItemLookup = Env.ItemLookup
-	
-	CNDT:RegisterEvent("BAG_UPDATE", function()
-		if hasZeroes then
-			hasZeroes = false
-			for k, v in pairs(ItemLookup) do
-				if v == 0 then
-					v = metamethod(ItemLookup, k)
-				end
-				if v == 0 then
-					hasZeroes = true
-				end
-			end
-		end
-	end)
-	
-	SetupItemIDReplacer = TMW.NULLFUNC
-end
-function CNDT:GetItemIDRefForConditionChecker(name)
-	if name == ";" or name == 0 then
-		return 0
-	end
-	
-	local id = TMW:GetItemIDs(nil, name, 1)
-	if id and id ~= 0 then
-		return id
-	end
-	
-	SetupItemIDReplacer()
-	
-	-- Invoke the metamethod. Don't care about the results.
-	local _ = Env.ItemLookup[name]
-	
-	return "ItemLookup[" .. strWrap(name) .. "]"
+
+	Env.ItemRefs[name] = item
+
+	return "ItemRefs[" .. strWrap(name) .. "]"
 end
 
 
@@ -669,6 +631,141 @@ function CNDT:GROUP_ROSTER_UPDATE()
 		end
 	end
 end
+
+
+CNDT.Substitutions = {
+{	src = "c.Level",
+	rep = function(conditionData, conditionSettings, name, name2)
+		return conditionData.percent and conditionSettings.Level/100 or conditionSettings.Level
+	end,
+},{
+	src = "c.Checked",
+	rep = function(conditionData, conditionSettings, name, name2)
+		return tostring(conditionSettings.Checked)
+	end,
+},{
+	src = "c.Checked2",
+	rep = function(conditionData, conditionSettings, name, name2)
+		return tostring(conditionSettings.Checked2)
+	end,
+},{
+	src = "c.Operator",
+	rep = function(conditionData, conditionSettings, name, name2)
+		return conditionSettings.Operator
+	end,
+},
+
+{
+	src = "c.NameFirst2",
+	rep = function(conditionData, conditionSettings, name, name2)
+		return strWrap(TMW:GetSpellNames(nil, name2, 1))
+	end,
+},{
+	src = "c.NameName2",
+	rep = function(conditionData, conditionSettings, name, name2)
+		return strWrap(TMW:GetSpellNames(nil, name2, 1, 1))
+	end,
+},{
+	src = "c.ItemID2",
+	rep = "error('Condition sub c.ItemID is obsolete')",
+},{
+	src = "c.Name2Raw",
+	rep = function(conditionData, conditionSettings, name, name2)
+		return strWrap(conditionSettings.Name2)
+	end,
+},{
+	src = "c.Name2",
+	rep = function(conditionData, conditionSettings, name, name2)
+		return strWrap(name2)
+	end,
+},
+
+{
+	src = "c.NameFirst",
+	rep = function(conditionData, conditionSettings, name, name2)
+		return strWrap(TMW:GetSpellNames(nil, name, 1))
+	end,
+},{
+	src = "c.NameName",
+	rep = function(conditionData, conditionSettings, name, name2)
+		return strWrap(TMW:GetSpellNames(nil, name, 1, 1))
+	end,
+},{
+	src = "c.ItemID",
+	rep = "error('Condition sub c.ItemID is obsolete')",
+},{
+	src = "c.NameRaw",
+	rep = function(conditionData, conditionSettings, name, name2)
+		return strWrap(conditionSettings.Name)
+	end,
+},{
+	src = "c.Name",
+	rep = function(conditionData, conditionSettings, name, name2)
+		return strWrap(name)
+	end,
+},
+
+{
+	src = "c.True",
+	rep = 	function(conditionData, conditionSettings, name, name2)
+		return tostring(conditionSettings.Level == 0)
+	end,
+},{
+	src = "c.False",
+	rep = function(conditionData, conditionSettings, name, name2)
+		return tostring(conditionSettings.Level == 1)
+	end,
+},{
+	src = "c.1nil",
+	rep = function(conditionData, conditionSettings, name, name2)
+		return conditionSettings.Level == 0 and 1 or "nil"
+	end,
+},{
+	src = "c.nil1",
+	rep = function(conditionData, conditionSettings, name, name2)
+		-- reverse 1nil
+		return conditionSettings.Level == 1 and 1 or "nil"
+	end,
+},
+
+{
+	src = "c.GCDReplacedNameFirst2",
+	rep = function(conditionData, conditionSettings, name, name2)
+		local name = TMW:GetSpellNames(nil, name2, 1)
+		if name == "gcd" then
+			name = TMW.GCDSpell
+		end
+		return strWrap(name)
+	end,
+},{
+	src = "c.GCDReplacedNameFirst",
+	rep = function(conditionData, conditionSettings, name, name2)
+		local name = TMW:GetSpellNames(nil, name, 1)
+		if name == "gcd" then
+			name = TMW.GCDSpell
+		end
+		return strWrap(name)
+	end,
+},
+
+{
+	src = "c.Item2",
+	rep = function(conditionData, conditionSettings, name, name2)
+		return CNDT:GetItemRefForConditionChecker(name2)
+	end,
+},{
+	src = "c.Item",
+	rep = function(conditionData, conditionSettings, name, name2)
+		return CNDT:GetItemRefForConditionChecker(name)
+	end,
+},
+
+
+{
+	src = "LOWER%((.-)%)",
+	rep = strlower,
+},}
+
 
 -- [INTERNAL]
 function CNDT:DoConditionSubstitutions(conditionData, conditionSettings, funcstr)
@@ -708,45 +805,10 @@ function CNDT:DoConditionSubstitutions(conditionData, conditionSettings, funcstr
 	name2 = strtrim(name2)
 	name2 = strlower(name2)
 
-	funcstr = funcstr:
-	gsub("c.Level", 		conditionData.percent and conditionSettings.Level/100 or conditionSettings.Level):
-	gsub("c.Checked", 		tostring(conditionSettings.Checked)):
-	gsub("c.Checked2", 		tostring(conditionSettings.Checked2)):
-	gsub("c.Operator", 		conditionSettings.Operator):
-	
-	gsub("c.NameFirst2", 	strWrap(TMW:GetSpellNames(nil, name2, 1))): --Name2 must be before Name
-	gsub("c.NameName2", 	strWrap(TMW:GetSpellNames(nil, name2, 1, 1))):
-	gsub("c.ItemID2", 		CNDT:GetItemIDRefForConditionChecker(name2)):
-	gsub("c.Name2Raw", 		strWrap(conditionSettings.Name2)):
-	gsub("c.Name2", 		strWrap(name2)):
-
-	gsub("c.NameFirst", 	strWrap(TMW:GetSpellNames(nil, name, 1))):
-	gsub("c.NameName", 		strWrap(TMW:GetSpellNames(nil, name, 1, 1))):
-	gsub("c.ItemID", 		CNDT:GetItemIDRefForConditionChecker(name)):
-	gsub("c.NameRaw", 		strWrap(conditionSettings.Name)):
-	gsub("c.Name", 			strWrap(name)):
-
-	gsub("c.True", 			tostring(conditionSettings.Level == 0)):
-	gsub("c.False", 		tostring(conditionSettings.Level == 1)):
-	gsub("c.1nil", 			conditionSettings.Level == 0 and 1 or "nil"):
-	gsub("c.nil1", 			conditionSettings.Level == 1 and 1 or "nil"): -- reverse 1nil
-
-	gsub("LOWER%((.-)%)",	strlower) -- fun gsub magic stuff
-
-	-- extra fun stuff
-	if funcstr:find("c.GCDReplacedNameFirst2") then
-		local name = TMW:GetSpellNames(nil, name2, 1)
-		if name == "gcd" then
-			name = TMW.GCDSpell
+	for k, subData in pairs(CNDT.Substitutions) do
+		if funcstr:find(subData.src) then
+			funcstr = funcstr:gsub(subData.src, TMW.get(subData.rep, conditionData, conditionSettings, name, name2))
 		end
-		funcstr = funcstr:gsub("c.GCDReplacedNameFirst2", strWrap(name))
-	end
-	if funcstr:find("c.GCDReplacedNameFirst") then
-		local name = TMW:GetSpellNames(nil, name, 1)
-		if name == "gcd" then
-			name = TMW.GCDSpell
-		end
-		funcstr = funcstr:gsub("c.GCDReplacedNameFirst", strWrap(name))
 	end
 
 	return funcstr

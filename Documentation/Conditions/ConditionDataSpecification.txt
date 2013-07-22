@@ -234,8 +234,8 @@ end<</code>>
 * "c.NameName" & "c.NameName2"
 ** Substitues the spell name from the first and second editboxes, respectively. If there are multiple, semicolon-delimited values, only the first will be substituted. If the value inputted into these textboxes is not a valid spell, the raw value from the textbox will be used.
 
-* "c.ItemID" & "c.ItemID2"
-** Substitutes the itemID (or what will evaluate to a reference to the itemID) of the input from the first and second editboxes, respectively. You should always use this substitution when working with a condition that checks items - never access the "Name" or "Name2" setting directly from the settings table when it is passed into the {{{funcstr}}} call because that is a raw, unprocessed setting. 
+* "c.Item" & "c.Item2"
+** Substitutes a reference to the TMW.Classes.Item-derived object constructed for the input from the first and second editboxes, respectively. You should always use this substitution when working with a condition that checks items - never access the "Name" or "Name2" setting directly from the settings table when it is passed into the {{{funcstr}}} call because that is a raw, unprocessed setting. Example usage for these includes things like {{{c.Item:GetCount() c.Operator c.Level}}}.
 
 * "c.Checked" & "c.Checked2"
 ** Substitutes the boolean that represents the checked states of the first and second editboxes' check boxes, respectively.
