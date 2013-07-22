@@ -763,7 +763,7 @@ CNDT.Substitutions = {
 
 {
 	src = "LOWER%((.-)%)",
-	rep = strlower,
+	rep = function() return strlower end,
 },}
 
 
