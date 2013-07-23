@@ -16,9 +16,13 @@
 -- ---------------------------------
 
 TELLMEWHEN_VERSION = "6.2.2"
-TELLMEWHEN_VERSION_MINOR = strmatch(" @project-version@", " r%d+") or ""
+TELLMEWHEN_VERSION_MINOR = ""
+local projectVersion = "@project-version@"
+if strmatch(projectVersion, "%-%d+%-") then
+	TELLMEWHEN_VERSION_MINOR = (" r%d (%s)"):format(strmatch(projectVersion, "%-(%d+)%-(.*)"))
+end
 TELLMEWHEN_VERSION_FULL = TELLMEWHEN_VERSION .. TELLMEWHEN_VERSION_MINOR
-TELLMEWHEN_VERSIONNUMBER = 62229 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
+TELLMEWHEN_VERSIONNUMBER = 62230 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL
 
 if TELLMEWHEN_VERSIONNUMBER > 63000 or TELLMEWHEN_VERSIONNUMBER < 62000 then
 	-- safety check because i accidentally made the version number 414069 once
