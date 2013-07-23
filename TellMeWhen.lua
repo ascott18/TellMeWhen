@@ -24,7 +24,7 @@ if strmatch(projectVersion, "%-%d+%-") then
 end
 
 TELLMEWHEN_VERSION_FULL = TELLMEWHEN_VERSION .. TELLMEWHEN_VERSION_MINOR
-TELLMEWHEN_VERSIONNUMBER = 62301 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL (for versioning of settings)
+TELLMEWHEN_VERSIONNUMBER = 62302 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL (for versioning of)
 
 if TELLMEWHEN_VERSIONNUMBER > 63000 or TELLMEWHEN_VERSIONNUMBER < 62000 then
 	-- safety check because i accidentally made the version number 414069 once
@@ -32,7 +32,6 @@ if TELLMEWHEN_VERSIONNUMBER > 63000 or TELLMEWHEN_VERSIONNUMBER < 62000 then
 end 
 
 TELLMEWHEN_MAXROWS = 20
-
 
 -- Put required libs here: (If they fail to load, they will make all of TMW fail to load)
 local AceDB = LibStub("AceDB-3.0")
@@ -3032,19 +3031,19 @@ function TMW:DoValidityCheck()
 	wipe(TMW.ValidityCheckQueue)
 end
 
-function TMW:GetGroupName(n, g, short)
-	n = tonumber(n) or n
-	g = tonumber(g) or g
+function TMW:GetGroupName(name, groupID, short)
+	name = tonumber(name) or name
+	groupID = tonumber(groupID) or groupID
 	
-	if n and n == g then
-		n = TMW.db.profile.Groups[g].Name
+	if name and name == groupID and type(groupID) == "number" then
+		name = TMW.db.profile.Groups[groupID].Name
 	end
-	if (not n) or n == "" then
-		if short then return g end
-		return format(L["fGROUP"], g)
+	if (not name) or name == "" then
+		if short then return groupID end
+		return format(L["fGROUP"], groupID)
 	end
-	if short then return n .. " (" .. g .. ")" end
-	return n .. " (" .. format(L["fGROUP"], g) .. ")"
+	if short then return name .. " (" .. groupID .. ")" end
+	return name .. " (" .. format(L["fGROUP"], groupID) .. ")"
 end
 
 

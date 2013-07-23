@@ -524,7 +524,9 @@ L["ICONMENU_SPLIT_DESC"] = "Create a new group and move this icon into it. Many 
 L["ICONMENU_COPYEVENTHANDLERS"] = "Copy %d |4Event Handler:Event Handlers;"
 L["ICONMENU_COPYEVENTHANDLERS_DESC"] = "Copy %s's %d |4Event Handler:Event Handlers; to %s."
 L["ICONMENU_COPYCONDITIONS"] = "Copy %d |4Condition:Conditions;"
+L["ICONMENU_COPYCONDITIONS_GROUP"] = "Copy %d Group |4Condition:Conditions;"
 L["ICONMENU_COPYCONDITIONS_DESC"] = "Copy %s's %d |4Condition:Conditions; to %s."
+L["ICONMENU_COPYCONDITIONS_DESC_OVERWRITE"] = "This will overwrite %d existing |4condition:conditions;"
 
 L["ANCHORTO"] = "Anchor To"
 

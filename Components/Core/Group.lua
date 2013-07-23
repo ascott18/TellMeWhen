@@ -75,6 +75,37 @@ do	-- TMW.CNDT implementation
 		tab:ExtendMethod("ClickHandler", function()
 			TMW.CNDT:LoadConfig("Group")
 		end)
+
+		TMW.IconDragger:RegisterIconDragHandler(320, -- Copy Conditions
+			function(IconDragger, info)
+				local n = IconDragger.srcicon.group:GetSettings().Conditions.n
+
+				if IconDragger.desticon and IconDragger.desticon.group ~= IconDragger.srcicon.group and n > 0 then
+					if IconDragger.desticon.group:GetSettings().Conditions.n > 0 then
+						info.text = L["ICONMENU_COPYCONDITIONS_GROUP"]:format(n) .. " |TInterface\\AddOns\\TellMeWhen\\Textures\\Alert:0:2|t"
+						
+						info.tooltipTitle = L["ICONMENU_COPYCONDITIONS_GROUP"]:format(n)
+						info.tooltipText = L["ICONMENU_COPYCONDITIONS_DESC"]:format(
+							IconDragger.srcicon.group:GetGroupName(), n, IconDragger.desticon.group:GetGroupName())
+						.. "\r\n\r\n|cFFFF5959|TInterface\\AddOns\\TellMeWhen\\Textures\\Alert:0:2|t"
+						.. L["ICONMENU_COPYCONDITIONS_DESC_OVERWRITE"]:format(IconDragger.desticon.group:GetSettings().Conditions.n)
+					else
+						info.text = L["ICONMENU_COPYCONDITIONS_GROUP"]:format(n)
+						info.tooltipTitle = info.text
+						info.tooltipText = L["ICONMENU_COPYCONDITIONS_DESC"]:format(
+							IconDragger.srcicon.group:GetGroupName(), n, IconDragger.desticon.group:GetGroupName())
+					end
+
+					return true
+				end
+			end,
+			function(IconDragger)
+				-- copy the settings
+				local srcgs = IconDragger.srcicon.group:GetSettings()
+				
+				IconDragger.desticon.group:GetSettings().Conditions = TMW:CopyWithMetatable(srcgs.Conditions)
+			end
+		)
 	end)
 end
 
@@ -89,6 +120,15 @@ end
 -- [INTERNAL]
 function Group.__tostring(group)
 	return group:GetName()
+end
+
+--- Wrapper around TMW:GetGroupName(name, groupID, short)
+-- @name Group:GetGroupName
+-- @paramsig short
+-- @param short [boolean] True to get a shortened version of the group's name
+-- @return [string] This group's human-readable name.
+function Group.GetGroupName(group, short)
+	return TMW:GetGroupName(group.ID, group.ID, short)
 end
 
 -- [INTERNAL]

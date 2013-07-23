@@ -43,13 +43,14 @@ TMW:TT(EventsTab, "EVENTS_TAB", "EVENTS_TAB_DESC")
 ---------- Icon Dragger ----------
 TMW.IconDragger:RegisterIconDragHandler(120, -- Copy Event Handlers
 	function(IconDragger, info)
-		if IconDragger.desticon
-		and IconDragger.srcicon:GetSettings().Events.n > 0
-		then
-			local n = IconDragger.srcicon:GetSettings().Events.n
+		local n = IconDragger.srcicon:GetSettings().Events.n
+
+		if IconDragger.desticon and n > 0 then
 			info.text = L["ICONMENU_COPYEVENTHANDLERS"]:format(n)
 			info.tooltipTitle = info.text
-			info.tooltipText = L["ICONMENU_COPYEVENTHANDLERS_DESC"]:format(IconDragger.srcicon:GetFullNameWithTexture(), n, IconDragger.desticon:GetFullNameWithTexture())
+			info.tooltipText = L["ICONMENU_COPYEVENTHANDLERS_DESC"]:format(
+				IconDragger.srcicon:GetFullNameWithTexture(), n, IconDragger.desticon:GetFullNameWithTexture())
+			
 			return true
 		end
 	end,

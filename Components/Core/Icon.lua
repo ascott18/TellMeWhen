@@ -90,7 +90,30 @@ do
 		tab:ExtendMethod("ClickHandler", function()
 			TMW.CNDT:LoadConfig("Icon")
 		end)
+
+		TMW.IconDragger:RegisterIconDragHandler(110, -- Copy Conditions
+			function(IconDragger, info)
+				local n = IconDragger.srcicon:GetSettings().Conditions.n
+				
+				if IconDragger.desticon and n > 0 then
+					info.text = L["ICONMENU_COPYCONDITIONS"]:format(n)
+					info.tooltipTitle = info.text
+					info.tooltipText = L["ICONMENU_COPYCONDITIONS_DESC"]:format(
+						IconDragger.srcicon:GetFullNameWithTexture(), n, IconDragger.desticon:GetFullNameWithTexture())
+
+					return true
+				end
+			end,
+			function(IconDragger)
+				-- copy the settings
+				local srcics = IconDragger.srcicon:GetSettings()
+				
+				IconDragger.desticon:GetSettings().Conditions = TMW:CopyWithMetatable(srcics.Conditions)
+			end
+		)
+
 	end)
+
 end
 
 -- [INTERNAL]
