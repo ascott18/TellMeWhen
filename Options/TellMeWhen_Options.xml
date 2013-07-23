@@ -1527,6 +1527,15 @@
 					<Color r="0.05" g="0.05" b="0.05" a="0.995"/>
 				</Texture>
 			</Layer>
+			<Layer level="OVERLAY">
+				<Texture name="$parentIconTexture" parentKey="icontexture">
+					<TexCoords left="0.07" right="0.93" top="0.07" bottom="0.93"/>
+					<Size x="18" y="18"/>
+					<Anchors>
+						<Anchor point="TOPLEFT" x="5" y="-5"/>
+					</Anchors>
+				</Texture>
+			</Layer>
 		</Layers>
 		
 		<Frames>
@@ -1800,7 +1809,8 @@
 			<Button name="$parentBackButton" parentKey="BackButton" >
 				<Size x="18" y="18"/>
 				<Anchors>
-					<Anchor point="TOPLEFT" x="42" y="-10"/>
+					<Anchor point="TOP" y="-10"/>
+					<Anchor point="LEFT" relativeKey="$parent.icontexture" relativePoint="RIGHT" x="10" />
 				</Anchors>
 				<HitRectInsets left="-2" right="-2" top="-2" bottom="-2" />
 				<Scripts>
@@ -1903,18 +1913,21 @@
 		</Frames>
 		<Layers>
 			<Layer level="OVERLAY">
-				<FontString name="$parentFS1" parentKey="FS1" inherits="GameFontNormal" justifyH="CENTER">
+				<FontString name="$parentHeader" parentKey="Header" inherits="GameFontNormal" justifyH="CENTER">
 					<Anchors>
-						<Anchor point="TOP" y="-7"/>
-						<Anchor point="LEFT" relativeTo="$parentForwardsButton" relativePoint="RIGHT"/>
+						<Anchor point="TOP" y="-8"/>
+						<Anchor point="LEFT" relativeTo="$parentForwardsButton" relativePoint="RIGHT" x="4"/>
 						<Anchor point="RIGHT" relativeTo="$parentClose" relativePoint="LEFT"/>
 					</Anchors>
 				</FontString>
-				<Texture name="$parentIconTexture" parentKey="icontexture">
-					<TexCoords left="0.07" right="0.93" top="0.07" bottom="0.93"/>
-					<Size x="18" y="18"/>
+			</Layer>
+
+			<Layer level="ARTWORK">
+				<Texture parentKey="HeaderBackground">
+					<Color r="0.4" g="0.4" b="0.4" a="0.1"/>
 					<Anchors>
-						<Anchor point="TOPLEFT" x="5" y="-5"/>
+						<Anchor point="TOPLEFT" y="-4"/> <!-- This gets changed dynamically in TellMeWhen_Options.lua -->
+						<Anchor point="BOTTOMRIGHT" relativePoint="TOPRIGHT" y="-24"/>
 					</Anchors>
 				</Texture>
 			</Layer>

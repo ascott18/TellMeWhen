@@ -231,7 +231,7 @@
 	
 	<Frame name="$parentEvents" parent="TellMeWhen_IconEditor" setAllPoints="true" parentKey="Events">
 		<Anchors>
-			<Anchor point="TOPLEFT" y="-23"/>
+			<Anchor point="TOPLEFT" y="-26"/>
 			<Anchor point="BOTTOMRIGHT" y="26"/>
 		</Anchors>
 		
@@ -532,7 +532,7 @@
 			<Layer level="OVERLAY">
 				<FontString inherits="GameFontNormalLarge" parentKey="EventListHeader" justifyH="LEFT" text="">
 					<Anchors>
-						<Anchor point="BOTTOM" relativeTo="$parentEventHandlerFramesScrollFrame" relativePoint="TOP" y="30"/>
+						<Anchor point="BOTTOM" relativeKey="$parent.AddEvent" relativePoint="TOP" y="1"/>
 					</Anchors>
 				</FontString>
 				<FontString hidden="true" inherits="GameFontNormalLarge" parentKey="EventSettingsContainerHeader" justifyH="CENTER">

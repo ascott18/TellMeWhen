@@ -809,15 +809,12 @@ L["UNDO_ICON_DESC"] = "Undo the last change made to this icon's settings."
 L["REDO_ICON"] = "Redo"
 L["REDO_ICON_DESC"] = "Redo the last change made to this icon's settings."
 L["BACK_IE"] = "Back"
-L["BACK_IE_DESC"] = "Load the last icon that was edited (%s |T%s:0|t)."
+L["BACK_IE_DESC"] = "Load the last icon that was edited\r\n\r\n%s |T%s:0|t."
 L["FORWARDS_IE"] = "Forwards"
-L["FORWARDS_IE_DESC"] = "Load the next icon that was edited (%s |T%s:0|t)."
+L["FORWARDS_IE_DESC"] = "Load the next icon that was edited\r\n\r\n%s |T%s:0|t."
 
 L["UIPANEL_MAIN_DESC"] = "Contains the main settings for the group."
-L["UIPANEL_FONT_Count"] = "Stack Text" -- proper case endings intended
-L["UIPANEL_FONT_Count_DESC"] = "Contains settings that control the display of the stack text on icons."
-L["UIPANEL_FONT_Bind"] = "Binding/Label Text"
-L["UIPANEL_FONT_Bind_DESC"] = "Contains settings that control the display of the binding/label text on icons."
+
 L["UIPANEL_FONTFACE"] = "Font Face"
 L["UIPANEL_FONT_DESC"] = "Chose the font to be used by the stack text on icons."
 L["UIPANEL_FONT_SIZE"] = "Font Size"

@@ -1913,23 +1913,43 @@ function IE:OnUpdate()
 	
 	local tab = IE.CurrentTab
 	
+	local groupName = TMW:GetGroupName(groupID, groupID, 1)
+
 	if tab.doesGroup and tab.doesIcon then
-		self.FS1:SetFormattedText(titlePrepend .. " - " .. L["GROUPICON"], TMW:GetGroupName(groupID, groupID, 1), iconID)
+		-- For IconEditor tabs that can configure icons
+
+		self.Header:SetFormattedText(titlePrepend .. " - " .. L["GROUPICON"], groupName, iconID)
+
+		if self.Header:IsTruncated() then
+			local truncAmt = 3
+			while self.Header:IsTruncated() and truncAmt < #groupName + 4 do
+				self.Header:SetFormattedText(titlePrepend .. " - " .. L["GROUPICON"], groupName:sub(1, -truncAmt - 4) .. "..." .. groupName:sub(-5), iconID)
+				truncAmt = truncAmt + 1
+			end
+		end
+
 		if icon then
 			self.icontexture:SetTexture(icon.attributes.texture)
 		end
 		self.BackButton:Show()
 		self.ForwardsButton:Show()
+
+		self.Header:SetPoint("LEFT", self.ForwardsButton, "RIGHT", 4, 0)
 	else
+		-- For IconEditor tabs that can't configure icons (tabs handled here might not configure groups either)
 		self.icontexture:SetTexture(nil)
 		self.BackButton:Hide()
 		self.ForwardsButton:Hide()
+
+		-- Setting this relative to icontexture makes it roughly centered
+		-- (it gets offset to the left by the exit button)
+		self.Header:SetPoint("LEFT", self.icontexture, "RIGHT", 4, 0)
 		
 		if tab.doesGroup then
-			-- the last 2 tabs are group config, so dont show icon info
-			self.FS1:SetFormattedText(titlePrepend .. " - " .. L["fGROUP"], TMW:GetGroupName(groupID, groupID, 1))
+			-- for group config tabs, don't show icon info. Just show group info.
+			self.Header:SetFormattedText(titlePrepend .. " - " .. L["fGROUP"], groupName)
 		else
-			self.FS1:SetText(titlePrepend)
+			self.Header:SetText(titlePrepend)
 		end
 	end
 	

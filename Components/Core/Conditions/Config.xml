@@ -718,7 +718,7 @@
 		<Frames>			
 			<Frame name="$parentGroups" parentKey="Groups" >
 				<Anchors>
-					<Anchor point="TOPLEFT" y="-27" x="-5"/>
+					<Anchor point="TOPLEFT" y="-29" x="-5"/>
 					<Anchor point="BOTTOMRIGHT" y="26"/>
 				</Anchors>
 				<Scripts>
