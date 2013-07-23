@@ -228,6 +228,14 @@ function Icon.IsBeingEdited(icon)
 	end
 end
 
+--- Returns a string that contains the texture of the icon plus the name of the group and the ID of the icon.
+-- @name Icon:GetFullNameWithTexture
+-- @paramsig
+-- @return [string] The string containing the texture of the icon plus the name of the group and the ID of the icon.
+function Icon.GetFullNameWithTexture(icon)
+	return ("|T%s:0|t%s"):format(icon.attributes.texture, L["GROUPICON"]:format(TMW:GetGroupName(icon.group.ID, icon.group.ID, 1), icon.ID))
+end
+
 --- Queues an icon event to be fired.
 -- 
 -- The event must have been registed through [[api/base-classes/icon-component/|IconComponent]]{{{:RegisterIconEvent()}}}.
