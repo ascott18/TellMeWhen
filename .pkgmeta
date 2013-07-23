@@ -54,3 +54,4 @@ ignore:
     - Lib
     - Scripts
     - Documentation
+    - README.md
