@@ -46,9 +46,10 @@ TMW.IconDragger:RegisterIconDragHandler(120, -- Copy Event Handlers
 		if IconDragger.desticon
 		and IconDragger.srcicon:GetSettings().Events.n > 0
 		then
-			info.text = L["ICONMENU_COPYEVENTHANDLERS"]:format(IconDragger.srcicon:GetSettings().Events.n)
-			info.tooltipTitle = nil
-			info.tooltipText = nil
+			local n = IconDragger.srcicon:GetSettings().Events.n
+			info.text = L["ICONMENU_COPYEVENTHANDLERS"]:format(n)
+			info.tooltipTitle = info.text
+			info.tooltipText = L["ICONMENU_COPYEVENTHANDLERS_DESC"]:format(IconDragger.srcicon:GetFullNameWithTexture(), n, IconDragger.desticon:GetFullNameWithTexture())
 			return true
 		end
 	end,

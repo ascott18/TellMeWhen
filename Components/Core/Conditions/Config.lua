@@ -49,9 +49,10 @@ TMW.IconDragger:RegisterIconDragHandler(110, -- Copy Conditions
 		if IconDragger.desticon
 		and IconDragger.srcicon:GetSettings().Conditions.n > 0
 		then
-			info.text = L["ICONMENU_COPYCONDITIONS"]:format(IconDragger.srcicon:GetSettings().Conditions.n)
-			info.tooltipTitle = nil
-			info.tooltipText = nil
+			local n = IconDragger.srcicon:GetSettings().Conditions.n
+			info.text = L["ICONMENU_COPYCONDITIONS"]:format(n)
+			info.tooltipTitle = info.text
+			info.tooltipText = L["ICONMENU_COPYCONDITIONS_DESC"]:format(IconDragger.srcicon:GetFullNameWithTexture(), n, IconDragger.desticon:GetFullNameWithTexture())
 			return true
 		end
 	end,
