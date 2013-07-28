@@ -106,15 +106,17 @@ TMW:RegisterEvent("BAG_UPDATE_COOLDOWN", UPDATE_ITEM_COUNT)
 
 function Item:OnNewInstance_Base(what)
 	self.what = what
-	self.icon = GetItemIcon(what)
 end
 
 
+function Item:GetIcon_saved()
+	return self.icon
+end
 function Item:IsInRange(unit)
 	return IsItemInRange(self.what, unit)
 end
 function Item:GetIcon()
-	return self.icon
+	return error("This function must be overridden by subclasses")
 end
 function Item:GetCount()
 	return ItemCount[self.what]
@@ -127,6 +129,9 @@ function Item:GetCooldown()
 end
 function Item:GetID()
 	error("This function must be overridden by subclasses")
+end
+function Item:GetName_saved()
+	return self.name
 end
 function Item:GetName()
 	error("This function must be overridden by subclasses")
@@ -189,25 +194,40 @@ end
 
 
 
+
 local ItemByID = TMW:NewClass("ItemByID", Item)
 
 function ItemByID:OnNewInstance(itemID)
 	TMW:ValidateType("2 (itemID)", "ItemByID:New(itemID)", itemID, "number")
 
 	self.itemID = itemID
-	self.name = GetItemInfo(itemID)
-	self.icon = GetItemIcon(itemID)
 end
 
+
+function ItemByID:GetIcon()
+	local icon = GetItemIcon(self.itemID)
+	if icon then
+		self.icon = icon
+		self.GetIcon = GetIcon_saved
+		return icon
+	end
+end
 
 function ItemByID:GetCooldown()
 	return GetItemCooldown(self.itemID)
 end
+
 function ItemByID:GetID()
 	return self.itemID
 end
+
 function ItemByID:GetName()
-	return self.name
+	local name = GetItemInfo(self.itemID)
+	if name then
+		self.name = name
+		self.GetName = GetName_saved
+		return name
+	end
 end
 
 
@@ -222,9 +242,17 @@ function ItemByName:OnNewInstance(itemName)
 
 	self.itemID = nil
 	self.name = itemName
-	self.icon = GetItemIcon(itemName)
 end
 
+
+function ItemByName:GetIcon()
+	local icon = GetItemIcon(self.name)
+	if icon then
+		self.icon = icon
+		self.GetIcon = GetIcon_saved
+		return icon
+	end
+end
 
 function ItemByName:GetCooldown()
 	local ID = self:GetID()
@@ -235,14 +263,23 @@ function ItemByName:GetCooldown()
 
 	return GetItemCooldown(ID)
 end
+
 function ItemByName:GetID()
 	local _, itemLink = GetItemInfo(self.name)
 	if itemLink then
 		return tonumber(strmatch(itemLink, ":(%d+)"))
 	end
 end
+
 function ItemByName:GetName()
-	return self.name
+	local name = GetItemInfo(self.name)
+	if name then
+		self.name = name
+		self.GetName = GetName_saved
+		return name
+	else
+		return self.name
+	end
 end
 
 
@@ -302,16 +339,31 @@ function ItemByLink:OnNewInstance(itemLink)
 	self.link = itemLink
 	self.itemID = tonumber(strmatch(itemLink, ":(%d+)"))
 	self.name = GetItemInfo(itemLink)
-	self.icon = GetItemIcon(itemLink)
 end
 
+
+function ItemByLink:GetIcon()
+	local icon = GetItemIcon(self.link)
+	if icon then
+		self.icon = icon
+		self.GetIcon = GetIcon_saved
+		return icon
+	end
+end
 
 function ItemByLink:GetCooldown()
 	return GetItemCooldown(self.itemID)
 end
+
 function ItemByLink:GetID()
 	return self.itemID
 end
+
 function ItemByLink:GetName()
-	return self.name
+	local name = GetItemInfo(self.link)
+	if name then
+		self.name = name
+		self.GetName = GetName_saved
+		return name
+	end
 end
