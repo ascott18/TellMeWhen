@@ -102,10 +102,10 @@ CONFIG.Types = {
 	[LOSS_OF_CONTROL_DISPLAY_SLEEP] = { -- "Asleep" 
 		value = "SLEEP",
 	},
-	[LOSS_OF_CONTROL_DISPLAY_SNARE] = { -- "Snared" 
+	--[[ [LOSS_OF_CONTROL_DISPLAY_SNARE] = { -- "Snared" 
 		value = "SNARE",
 		desc = L["LOSECONTROL_TYPE_DESC_USEUNKNOWN"],
-	},
+	}, ]]
 	[LOSS_OF_CONTROL_DISPLAY_TURN_UNDEAD] = { -- "Feared"
 		value = "TURN_UNDEAD",
 	},

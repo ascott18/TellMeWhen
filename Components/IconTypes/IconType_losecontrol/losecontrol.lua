@@ -65,6 +65,7 @@ Type:RegisterConfigPanel_XMLTemplate(165, "TellMeWhen_WhenChecks", {
 
 
 local function LoseControl_OnUpdate(icon, time)
+	-- PLEASE NOTE: LoseContolTypes IS SPELLED WRONG
 
 	local LoseContolTypes = icon.LoseContolTypes
 	
