@@ -3062,14 +3062,17 @@ end
 function IE:ScheduleIconSetup(groupID, iconID)
 	-- this is a handler to prevent the spamming of icon:Setup() and creating excessive garbage.
 	local icon
-	if type(groupID) == "table" then --allow omission of icon
+
+	if type(groupID) == "table" and groupID.IsIcon then --allow omission of IDs in favor of an icon ref.
 		icon = groupID
 	else
 		icon = TMW[groupID] and TMW[groupID][iconID]
 	end
+
 	if not icon then
 		icon = CI.ic
 	end
+
 	if not TMW.tContains(IE.iconsToUpdate, icon) then
 		tinsert(IE.iconsToUpdate, icon)
 	end
