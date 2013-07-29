@@ -24,7 +24,7 @@ if strmatch(projectVersion, "%-%d+%-") then
 end
 
 TELLMEWHEN_VERSION_FULL = TELLMEWHEN_VERSION .. TELLMEWHEN_VERSION_MINOR
-TELLMEWHEN_VERSIONNUMBER = 62302 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL (for versioning of)
+TELLMEWHEN_VERSIONNUMBER = 62303 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL (for versioning of)
 
 if TELLMEWHEN_VERSIONNUMBER > 63000 or TELLMEWHEN_VERSIONNUMBER < 62000 then
 	-- safety check because i accidentally made the version number 414069 once
@@ -646,32 +646,64 @@ end local tContains = TMW.tContains
 
 function TMW.tDeleteItem(table, item, onlyOne)
 	local i = 1
+	local removed
 	while table[i] do
 		if item == table[i] then
 			tremove(table, i)
 			if onlyOne then
-				return
+				return true
 			end
+			removed = true
 		else
 			i = i + 1
 		end
 	end
+
+	return removed
 end local tDeleteItem = TMW.tDeleteItem
 
 function TMW.tRemoveDuplicates(table)
-	--start at the end of the table so that we dont remove duplicates at the beginning of the table
-	local k = #table
-	while k > 0 do
-		local first, num = tContains(table, table[k], true)
-		if num > 1 then
-			-- if the current value occurs more than once then remove this entry of it
-			tremove(table, k)
-		else
-			-- there are no duplicates, so move backwards towards zero
-			k = k - 1 
+
+	local offs = 0
+
+	-- Start at the end of the table so that we don't remove duplicates from the beginning
+	for k = #table, 1, -1 do
+
+		-- offs is adjusted each time something is removed so that we don't waste time
+		-- searching for nil values when the table is shifted by a duplicate removal
+		k = k + offs
+
+		-- If we have reached the beginning of the table, we are done.
+		if k <= 0 then
+			return table
+		end
+		
+		-- item is the value being searched for
+		local item = table[k]
+
+		-- prevIndex tracks the last index where the searched-for value was found
+		local prevIndex
+
+		-- Once again start the iteration from the end because we don't want to have to 
+		-- deal with index shifting when we remove a value
+		for i = #table, 1, -1 do
+			if table[i] == item then
+
+				-- We found a match. If there has already been another match, remove that match 
+				-- and record this match as being the first one (closes to index 0) in the table.
+				if prevIndex then
+					tremove(table, prevIndex)
+					offs = offs - 1
+				end
+
+				-- Queue this match for removal should we find another match closer to the beginning.
+				prevIndex = i
+			end
 		end
 	end
 
+	-- Done. Return the table for ease-of-use.
+	return table
 end
 
 function TMW.OrderSort(a, b)
