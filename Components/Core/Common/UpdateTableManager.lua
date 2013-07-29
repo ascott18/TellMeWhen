@@ -71,7 +71,13 @@ function UpdateTableManager:UpdateTable_Unregister(target)
 		if oldLength > 0 and #self.UpdateTable_UpdateTable == 0 and self.UpdateTable_OnUnused then
 			self:UpdateTable_OnUnused()
 		end
+
+		-- Notify that a removal was done
+		return true
 	end
+
+	-- No removal was done
+	return false
 end
 
 function UpdateTableManager:UpdateTable_UnregisterAll()

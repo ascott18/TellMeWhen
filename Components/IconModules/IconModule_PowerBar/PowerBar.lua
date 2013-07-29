@@ -22,7 +22,6 @@ local GetSpellInfo, UnitPower =
 local pairs, wipe, _G =
 	  pairs, wipe, _G
 local PowerBarColor = PowerBarColor
-local tContains = TMW.tContains
 
 local defaultPowerTypes = {
 	ROGUE		= SPELL_POWER_ENERGY,
@@ -101,7 +100,9 @@ function PowerBar:SetSpell(spell)
 		self:UpdateTable_Register()
 		
 		self:Update()
-	elseif tContains(self.UpdateTable_UpdateTable, self) then
+
+	-- Removes the bar from the update table. True is returned if it was in there.
+	elseif self:UpdateTable_Unregister() then
 		local value = self.Invert and self.Max or 0
 		bar:SetValue(value)
 		self.__value = value
