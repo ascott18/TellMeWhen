@@ -3,7 +3,7 @@
  * Added a few more popup notifications when invalid settings/actions are entered/performed.
  * Icons will now be automatically enabled when you select an icon type.
  * Incorporated LibDogTag-Stats-3.0 into TellMeWhen's various implementations of LibDogTag-3.0.
- * The Mastery condition now uses GetMasteryEffect() isntead of GetMastery(). The condition will now be comparable to the total percentage increase granted by mastery instead of the value that has to be multiplied by your spec's mastery coefficient (which is no longer shown in Blizzard's character sheet.)
+ * The Mastery condition now uses GetMasteryEffect() instead of GetMastery(). The condition will now be comparable to the total percentage increase granted by mastery instead of the value that has to be multiplied by your spec's mastery coefficient (which is no longer shown in Blizzard's character sheet.)
  * TMWOptDB now uses AceDB-3.0. One benefit of this is that the suggestion list will now always be locale-appropriate.
  * The suggestion list for units is now much more useful.
  * The suggestion list now has a warning in the tooltip when inserting spells that interfere with the names of equivalencies.
