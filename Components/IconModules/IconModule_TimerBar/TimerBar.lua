@@ -40,7 +40,7 @@ function TimerBar:OnNewInstance(icon)
 	self.Max = 1
 	bar:SetMinMaxValues(0, self.Max)
 	
-	self:SetColors(TMW.Types[""].CBS, TMW.Types[""].CBC)
+	self:SetColors(TMW.Types[""].CBS, TMW.Types[""].CBM, TMW.Types[""].CBC)
 	
 	self.start = 0
 	self.duration = 0
@@ -101,15 +101,30 @@ function TimerBar:UpdateValue(force)
 
 		if value ~= 0 then
 			local co = self.completeColor
+			local ha = self.halfColor
 			local st = self.startColor
+
+			if Invert then
+				co, st = st, co
+			end
 			
-			local pct = value / self.Max
+			local pct = value / self.Max * 2
+			local mod = pct
+
+			if pct > 1 then
+				co = ha
+				pct = pct - 1
+			else
+				st = ha
+			end
+
 			local inv = 1-pct
+
 			self.bar:SetStatusBarColor(
-				(co.r * pct) + (st.r * inv),
-				(co.g * pct) + (st.g * inv),
-				(co.b * pct) + (st.b * inv),
-				(co.a * pct) + (st.a * inv)
+				(st.r * pct) + (co.r * inv),
+				(st.g * pct) + (co.g * inv),
+				(st.b * pct) + (co.b * inv),
+				(st.a * pct) + (co.a * inv)
 			)
 		end
 		self.__value = value
@@ -135,8 +150,9 @@ function TimerBar:SetCooldown(start, duration, isGCD)
 	end
 end
 
-function TimerBar:SetColors(startColor, completeColor)
+function TimerBar:SetColors(startColor, halfColor, completeColor)
 	self.startColor = startColor
+	self.halfColor = halfColor
 	self.completeColor = completeColor
 end
 

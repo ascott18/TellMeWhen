@@ -787,6 +787,7 @@ local viewSelectToggle = {
 
 local colorOrder = {
 	"CBS",
+	"CBM",
 	"CBC",
 
 	"OOR",
@@ -2366,6 +2367,17 @@ TMW:NewClass("SettingFrameBase"){
 	
 	SetTooltip = function(self, title, text)
 		TMW:TT(self, title, text, 1, 1, "IsEnabled")
+	end,
+	
+	ConstrainLabel = function(self, anchorTo, anchorPoint, ...)
+		assert(self.text, "frame does not have a self.text object to constrain.")
+
+		self.text:SetPoint("RIGHT", anchorTo, anchorPoint or "LEFT", ...)
+		
+		-- Have to do this or else the text won't multiline/wordwrap when it should.
+		-- 30 is just an arbitrarily large number.
+		self.text:SetHeight(30)
+		self.text:SetMaxLines(3)
 	end,
 	
 	OnCreate_SettingFrameBase = function(self)

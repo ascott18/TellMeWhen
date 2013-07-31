@@ -44,9 +44,6 @@ function Texture_Colored:UPDATE(icon)
 	local attributes = icon.attributes
 	local duration, inrange, nomana = attributes.duration, attributes.inRange, attributes.noMana
 --[[
-	CBC = 	{r=0,	g=1,	b=0		},	-- cooldown bar complete
-	CBS = 	{r=1,	g=0,	b=0		},	-- cooldown bar start
-
 	OOR	=	{r=0.5,	g=0.5,	b=0.5	},	-- out of range
 	OOM	=	{r=0.5,	g=0.5,	b=0.5	},	-- out of mana
 	OORM=	{r=0.5,	g=0.5,	b=0.5	},	-- out of range and mana

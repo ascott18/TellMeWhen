@@ -24,7 +24,7 @@ if strmatch(projectVersion, "%-%d+%-") then
 end
 
 TELLMEWHEN_VERSION_FULL = TELLMEWHEN_VERSION .. TELLMEWHEN_VERSION_MINOR
-TELLMEWHEN_VERSIONNUMBER = 62303 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL (for versioning of)
+TELLMEWHEN_VERSIONNUMBER = 62304 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL (for versioning of)
 
 if TELLMEWHEN_VERSIONNUMBER > 63000 or TELLMEWHEN_VERSIONNUMBER < 62000 then
 	-- safety check because i accidentally made the version number 414069 once
@@ -169,6 +169,7 @@ TMW.Defaults = {
 			["**"] = {
 				CBC = 	{r=0,	g=1,	b=0,	Override = false,	a=1,	},	-- cooldown bar complete
 				CBS = 	{r=1,	g=0,	b=0,	Override = false,	a=1,	},	-- cooldown bar start
+				CBM = 	{r=1,	g=1,	b=0,	Override = false,	a=1,	},	-- cooldown bar middle
 
 				OOR	=	{r=0.5,	g=0.5,	b=0.5,	Override = false,			},	-- out of range
 				OOM	=	{r=0.5,	g=0.5,	b=0.5,	Override = false,			},	-- out of mana
@@ -1726,6 +1727,28 @@ TMW.UpgradeTableByVersions = {}
 
 function TMW:GetBaseUpgrades()			-- upgrade functions
 	return {
+		[62304] = {
+			profile = function(self)
+				for k, v in pairs(TMW.db.profile.Colors) do
+					if not (
+						(v.CBC.r == 0 and v.CBC.g == 1 and v.CBC.b == 0 and 
+						 v.CBS.r == 1 and v.CBS.g == 0 and v.CBS.b == 0)  
+					or	(v.CBC.r == 1 and v.CBC.g == 0 and v.CBC.b == 0 and 
+						 v.CBS.r == 0 and v.CBS.g == 1 and v.CBS.b == 0))
+					then
+						v.CBM.r = (v.CBC.r + v.CBS.r) / 2
+						v.CBM.g = (v.CBC.g + v.CBS.g) / 2
+						v.CBM.b = (v.CBC.b + v.CBS.b) / 2
+					end
+
+					v.CBM.a = (v.CBC.a + v.CBS.a) / 2
+
+					if v.CBC.Override and v.CBS.Override then
+						v.CBM.Override = true
+					end
+				end
+			end
+		},
 		[62216] = {
 			global = function(self)
 				if type(TMW.db.global.WpnEnchDurs) == "table" then
