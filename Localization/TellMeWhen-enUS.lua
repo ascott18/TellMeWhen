@@ -416,6 +416,22 @@ L["ICONMENU_BAROFFS"] = [[This amount will be added to the bar in order to offse
 
 Useful for custom indicators of when you should begin casting a spell to prevent a buff from falling off, or to indicate the power required to cast a spell and still have some left over for an interrupt.]]
 
+L["ICONMENU_BAR_COLOR_START"] = "Start Color"
+L["ICONMENU_BAR_COLOR_START_DESC"] = "Color of the bar when the cooldown/duration has just begun."
+L["ICONMENU_BAR_COLOR_MIDDLE"] = "Halfway Color"
+L["ICONMENU_BAR_COLOR_MIDDLE_DESC"] = "Color of the bar when the cooldown/duration is halfway complete."
+L["ICONMENU_BAR_COLOR_COMPLETE"] = "Completion Color"
+L["ICONMENU_BAR_COLOR_COMPLETE_DESC"] = "Color of the bar when the cooldown/duration is complete."
+L["ICONMENU_ENABLECOLORS"] = "Enable Color Overrides"
+L["ICONMENU_ENABLECOLORS_DESC"] = [[Check this setting to allow the configuration and usage of the three color settings below.
+
+If left unchecked, the color settings in TellMeWhen's main options will be used.]]
+L["ICONMENU_ENABLECOLORS_HELP"] = [[Hey there!
+
+I just wanted to let you know that you can easily copy these colors to other bar-style icons by |cff7fffffright-clicking and dragging|r this icon to another.]]
+L["ICONMENU_COPYCOLORS_BARDISPLAY"] = "Copy Bar Colors"
+L["ICONMENU_COPYCOLORS_BARDISPLAY_DESC"] = "Copies the three bar colors of %s to %s."
+
 L["ICONMENU_REACT"] = "Unit Reaction"
 L["ICONMENU_FRIEND"] = "Friendly"
 L["ICONMENU_HOSTILE"] = "Hostile"
@@ -733,7 +749,7 @@ L["COLOR_MSQ_ONLY_DESC"] = "Checking this will cause ONLY the border of a Masque
 L["COLOR_IGNORE_GCD"] = "Colors ignore GCD"
 L["COLOR_IGNORE_GCD_DESC"] = "Checking this will prevent icon colors from changing simply because of the global cooldown."
 L["COLOR_OVERRIDEDEFAULT"] = "Use"
-L["COLOR_OVERRIDEDEFAULT_DESC"] = "Check this to override the *Global Colors* setting and use this setting instead."
+L["COLOR_OVERRIDEDEFAULT_DESC"] = "Check this to override the *Global Colors* settings and use this setting instead."
 L["COLOR_HEADER_DEFAULT"] = [[These colors will be used for any icon type that does not override them in the type's color settings.
 
 Solid white causes no change in the texture. Solid black will cause the texture to be sold black. Any gray or color in between will tint the icon.]]
@@ -747,6 +763,8 @@ L["COLOR_COLOR"] = "Color"
 
 L["COLOR_CBC"] 		 = "Cooldown Bar - Complete"	-- cooldown bar complete
 L["COLOR_CBC_DESC"]  = "Color of the cooldown/duration overlay bar when the cooldown/duration is complete"	-- cooldown bar complete
+L["COLOR_CBM"] 		 = "Cooldown Bar - Half"	-- cooldown bar middle
+L["COLOR_CBM_DESC"]  = "Color of the cooldown/duration overlay bar when the cooldown/duration is half complete"	-- cooldown bar middle
 L["COLOR_CBS"] 		 = "Cooldown Bar - Start"	-- cooldown bar start
 L["COLOR_CBS_DESC"]  = "Color of the cooldown/duration overlay bar when the cooldown/duration has just begun"	-- cooldown bar start
 
@@ -776,14 +794,14 @@ L["COLOR_CTS_DESC"]	 = [[Color of the icon when:
 
 The timer is active (unusable/present),
 %q is enabled,
-Both %q settings are not checked]]
+Only one %q setting is checked]]
 
 L["COLOR_COS"]		 = "Counting, Timer Hidden, Sometimes Shown"	-- counting withOUT timer somtimes
 L["COLOR_COS_DESC"]	 = [[Color of the icon when:
 
 The timer is active (unusable/present),
 %q is disabled,
-Both %q settings are not checked]]
+Only one %q setting is checked]]
 
 L["COLOR_NA"]		 = "Finished, Always Shown"	-- not counting always
 L["COLOR_NA_DESC"]	 = [[Color of the icon when:
@@ -795,7 +813,7 @@ L["COLOR_NS"]		 = "Finished, Sometimes Shown"	-- not counting somtimes
 L["COLOR_NS_DESC"]	 = [[Color of the icon when:
 
 The timer is finished (usable/absent),
-Both %q settings are not checked]]
+Only one %q setting is checked]]
 
 
 L["FONTCOLOR"] = "Font Color"

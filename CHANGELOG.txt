@@ -1,5 +1,14 @@
 ===v6.2.2===
+ * **Important**: The color settings for all timer bars (including bar group and timer overlay bars) have changed a bit:
+ ** The labels for these settings now correctly correspond to the state that they will be used for.
+ ** The colors will automatically switch when you enable the "Fill bar up" setting for a bar.
+ ** These changes will probably require you to reconfigure some of your settings.
+
+ * Icons in groups that use the Bar display method can now have their colors configured on a per-icon basis.
+ ** You can copy colors between icons by right-click dragging them.
  * Buff/Debuff icons can now sort by stacks.
+ * The group sorting option to sort by duration now treats spells that are on the GCD as having no cooldown.
+
  * Added a few more popup notifications when invalid settings/actions are entered/performed.
  * Icons will now be automatically enabled when you select an icon type.
  * Incorporated LibDogTag-Stats-3.0 into TellMeWhen's various implementations of LibDogTag-3.0.
@@ -8,7 +17,6 @@
  * The suggestion list for units is now much more useful.
  * The suggestion list now has a warning in the tooltip when inserting spells that interfere with the names of equivalencies.
  * The suggestion list now pops up a help message the first time it is shown.
- * The group sorting option to sort by duration now treats spells that are on the GCD as having no cooldown.
  * You can now copy an icon's events and conditions by right-click-dragging the icon to another icon.
  ** You can also copy group conditions between groups this way.
  * When right-click-dragging an icon to an icon that has multiple icons in the same place, you can now choose which one you would like the destination to be.

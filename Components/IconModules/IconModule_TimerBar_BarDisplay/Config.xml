@@ -1,10 +1,34 @@
 ﻿<Ui>
 
+
+
+	<Button name="TellMeWhen_BarDisplay_ColorButton" virtual="true">
+		<Size x="20" y="20"/>
+		<Layers>
+			<Layer level="BACKGROUND">
+				<Texture parentKey="background">
+					<Size x="17.5" y="17.5"/>
+					<Anchors>
+						<Anchor point="CENTER"/>
+					</Anchors>
+					<Color r="1.0" g="1.0" b="1.0"/>
+				</Texture>
+				<FontString name="$parenttext" parentKey="text" justifyH="LEFT" inherits="GameFontHighlightSmall">
+					<Anchors>
+						<Anchor point="LEFT" relativePoint="RIGHT" x="2"/>
+					</Anchors>
+				</FontString>
+			</Layer>
+		</Layers>
+		<NormalTexture name="$parentNormalTexture" file="Interface\ChatFrame\ChatFrameColorSwatch"/>
+	</Button>
+
 	<Frame name="TellMeWhen_BarDisplayBarOptions" inherits="TellMeWhen_OptionsModuleContainer" virtual="true">
-		<Size y="58"/>
+		<Size y="85"/>
 		<Frames>
 			<CheckButton name="$parentInvert" inherits="TellMeWhen_CheckTemplate" parentKey="Invert">
 				<Anchors>
+					<!-- Left anchor is handled by DistributeFrameAnchorsLaterally in parent's OnLoad -->
 					<Anchor point="TOP" y="-1"/>
 				</Anchors>
 				<Scripts>
@@ -19,6 +43,7 @@
 			</CheckButton>
 			
 			<CheckButton name="$parentBarGCD" inherits="TellMeWhen_CheckTemplate" parentKey="BarGCD">
+				<!-- Anchoring is handled by DistributeFrameAnchorsLaterally in parent's OnLoad -->
 				<Scripts>
 					<OnLoad>
 						TMW.IE:CreateSettingFrameFromData(self, {
@@ -30,10 +55,31 @@
 				</Scripts>
 			</CheckButton>
 			
+			<CheckButton name="$parentEnableColors" inherits="TellMeWhen_CheckTemplate" parentKey="EnableColors">
+				<Anchors>
+					<!-- Left anchor is handled by DistributeFrameAnchorsLaterally in parent's OnLoad -->
+					<Anchor point="TOP" relativeTo="$parentInvert" relativePoint="BOTTOM" y="3"/>
+				</Anchors>
+				<Scripts>
+					<OnLoad>
+						TMW.IE:CreateSettingFrameFromData(self, {
+							setting = "BarDisplay_EnableColors",
+							title = TMW.L["ICONMENU_ENABLECOLORS"],
+							tooltip = TMW.L["ICONMENU_ENABLECOLORS_DESC"],
+							OnState = function(self)
+								if self:GetChecked() then
+									TMW.HELP:Show("COLOR_COPY_DRAG", nil, self, 0, 0, TMW.L["ICONMENU_ENABLECOLORS_HELP"])
+								end
+							end,
+						})
+					</OnLoad>
+				</Scripts>
+			</CheckButton>
+			
 			<EditBox name="$parentFakeMax" inherits="TellMeWhen_TimeEditBoxTemplate" parentKey="FakeMax" autoFocus="false">
 				<Size x="45" y="15"/>
 				<Anchors>
-					<Anchor point="TOP" relativeTo="$parentInvert" relativePoint="BOTTOM" y="-2"/>
+					<Anchor point="TOP" relativeTo="$parentBarGCD" relativePoint="BOTTOM" y="-2"/>
 				</Anchors>
 				<Scripts>
 					<OnLoad>
@@ -43,7 +89,7 @@
 						self.text:SetPoint("LEFT", self, "RIGHT", 2, 0)
 						self.text:SetPoint("RIGHT", self:GetParent(), "RIGHT", -5, 0)
 						
-						self:SetPoint("LEFT", 11, 0)
+						self:SetPoint("LEFT", self:GetParent().BarGCD, "LEFT", 8, 0)
 						
 						TMW.IE:CreateSettingFrameFromData(self, {
 							setting = "BarDisplay_FakeMax",
@@ -59,6 +105,61 @@
 					</OnLoad>
 				</Scripts>
 			</EditBox>
+
+			<Button name="$parentColorStart" parentKey="ColorStart" inherits="TellMeWhen_BarDisplay_ColorButton">
+				<Anchors>
+					<Anchor point="TOP" relativeTo="$parentFakeMax" relativePoint="BOTTOM" y="-10" />
+				</Anchors>
+				<Scripts>
+					<OnLoad>
+						TMW.IE:CreateSettingFrameFromData(self, "SettingTimerBar_BarDisplay_ColorButton", {
+							setting = "BarDisplay_StartColor",
+							title = TMW.L["ICONMENU_BAR_COLOR_START"],
+							tooltip = TMW.L["ICONMENU_BAR_COLOR_START_DESC"],
+							disabled = function(self)
+								return not TMW.CI.ics.BarDisplay_EnableColors
+							end,
+						})
+					</OnLoad>
+				</Scripts>
+			</Button>
+
+			<Button name="$parentColorMiddle" parentKey="ColorMiddle" inherits="TellMeWhen_BarDisplay_ColorButton">
+				<Anchors>
+					<Anchor point="TOP" relativeTo="$parentColorStart" />
+				</Anchors>
+				<Scripts>
+					<OnLoad>
+						TMW.IE:CreateSettingFrameFromData(self, "SettingTimerBar_BarDisplay_ColorButton", {
+							setting = "BarDisplay_MiddleColor",
+							title = TMW.L["ICONMENU_BAR_COLOR_MIDDLE"],
+							tooltip = TMW.L["ICONMENU_BAR_COLOR_MIDDLE_DESC"],
+							disabled = function(self)
+								return not TMW.CI.ics.BarDisplay_EnableColors
+							end,
+						})
+					</OnLoad>
+				</Scripts>
+			</Button>
+
+			<Button name="$parentColorComplete" parentKey="ColorComplete" inherits="TellMeWhen_BarDisplay_ColorButton">
+				<Anchors>
+					<Anchor point="TOP" relativeTo="$parentColorStart" />
+				</Anchors>
+				<Scripts>
+					<OnLoad>
+						TMW.IE:CreateSettingFrameFromData(self, "SettingTimerBar_BarDisplay_ColorButton", {
+							setting = "BarDisplay_CompleteColor",
+							title = TMW.L["ICONMENU_BAR_COLOR_COMPLETE"],
+							tooltip = TMW.L["ICONMENU_BAR_COLOR_COMPLETE_DESC"],
+							disabled = function(self)
+								return not TMW.CI.ics.BarDisplay_EnableColors
+							end,
+						})
+					</OnLoad>
+				</Scripts>
+			</Button>
+
 		</Frames>
 		<Scripts>
 			<OnLoad>
@@ -66,8 +167,17 @@
 				
 				self.Invert:ConstrainLabel(self.BarGCD)
 				self.BarGCD:ConstrainLabel(self, "RIGHT", -1, 0)
+
+				self.EnableColors:ConstrainLabel(self.FakeMax)
+				self.FakeMax:ConstrainLabel(self, "RIGHT", -1, 0)
+
+				self.ColorStart:ConstrainLabel(self.ColorMiddle)
+				self.ColorMiddle:ConstrainLabel(self.ColorComplete)
+				self.ColorComplete:ConstrainLabel(self, "RIGHT", -1, 0)
 				
 				TMW.IE:DistributeFrameAnchorsLaterally(self, 2, self.Invert, self.BarGCD)
+				TMW.IE:DistributeFrameAnchorsLaterally(self, 2, self.EnableColors)
+				TMW.IE:DistributeFrameAnchorsLaterally(self, 3, self.ColorStart, self.ColorMiddle, self.ColorComplete)
 			</OnLoad>
 		</Scripts>
 	</Frame>
