@@ -34,7 +34,7 @@ if not Type then return end
 -- GLOBALS: CreateFrame
 
 
-TMW.IconDragger:RegisterIconDragHandler(220,
+TMW.IconDragger:RegisterIconDragHandler(220, -- Add to meta icon
 	function(IconDragger, info)
 		if IconDragger.desticon
 		and IconDragger.srcicon:IsValid()
