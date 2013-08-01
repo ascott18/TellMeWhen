@@ -2719,6 +2719,9 @@ TMW:NewClass("SettingWhenCheckSet", "Frame", "SettingFrameBase"){
 			end,
 		})
 		
+		-- Reparent the label text on the slider so that it will be at full opacity even while disabled.
+		self.Alpha.text:SetParent(self)
+
 		local parent = self:GetParent()
 		TMW:RegisterCallback("TMW_CONFIG_PANEL_SETUP", function(event, frame, panelInfo)
 			if frame == parent then
