@@ -162,13 +162,32 @@ end
 TMW:RegisterCallback("TMW_ONUPDATE_TIMECONSTRAINED_PRE", UpdateEngine, "OnUpdate")
 
 
--- Automatically update all ConditionObjects after a TMW_GLOBAL_UPDATE_POST.
-TMW:RegisterCallback("TMW_GLOBAL_UPDATE_POST", function()
-	for _, ConditionObject in pairs(TMW.Classes.ConditionObject.instances) do
-		ConditionObject:Check()
-	end
-end)
+-- Automatically update all used ConditionObjects after a TMW_GLOBAL_UPDATE_POST.
+do
+	local RequestedObjects = {}
+	local GetConditionObject_old = CNDT.GetConditionObject
 
+	-- Wrap around CNDT:GetConditionObject(...) so that we can figure out what ConditionObjects
+	-- were requested in this update cycle so we don't update unused condition objects.
+	function CNDT:GetConditionObject(...)
+		local ConditionObject = GetConditionObject_old(CNDT, ...)
+
+		if ConditionObject then
+			RequestedObjects[ConditionObject] = true
+		end
+
+		return ConditionObject
+	end
+
+	TMW:RegisterCallback("TMW_GLOBAL_UPDATE", function()
+		wipe(RequestedObjects)
+	end)
+	TMW:RegisterCallback("TMW_GLOBAL_UPDATE_POST", function()
+		for ConditionObject in pairs(RequestedObjects) do
+			ConditionObject:Check()
+		end
+	end)
+end
 
 
 

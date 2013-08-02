@@ -6,10 +6,11 @@
  
 <Script file="Conditions.lua"/>
 
-<Script file="UpdateEngine.lua"/>
-
 <Script file="ConditionObject.lua"/>
 <Script file="ConditionObjectConstructor.lua"/>
+
+
+<Script file="UpdateEngine.lua"/>
 
 
 <Script file="ConditionCategory.lua"/>
