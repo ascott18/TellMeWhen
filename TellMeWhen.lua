@@ -2622,7 +2622,7 @@ do	-- TMW:OnUpdate()
 	local Coroutine
 
 	-- Limit in milliseconds for each OnUpdate cycle.
-	local CoroutineLimit = 100
+	local CoroutineLimit = 50
 
 	local function checkYield()
 		if debugprofilestop() - start > CoroutineLimit then
