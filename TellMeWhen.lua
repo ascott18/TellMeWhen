@@ -24,7 +24,7 @@ if strmatch(projectVersion, "%-%d+%-") then
 end
 
 TELLMEWHEN_VERSION_FULL = TELLMEWHEN_VERSION .. TELLMEWHEN_VERSION_MINOR
-TELLMEWHEN_VERSIONNUMBER = 62305 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL (for versioning of)
+TELLMEWHEN_VERSIONNUMBER = 62306 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL (for versioning of)
 
 if TELLMEWHEN_VERSIONNUMBER > 63000 or TELLMEWHEN_VERSIONNUMBER < 62000 then
 	-- safety check because i accidentally made the version number 414069 once
@@ -2555,61 +2555,163 @@ end
 -- Update Functions
 ---------------------------------
 
-local updateInProgress, shouldSafeUpdate
--- This is the main update engine of TMW.
-function TMW:OnUpdate()
-	time = GetTime()
-	TMW.time = time
+do	-- TMW:OnUpdate_OLD()
+	local updateInProgress, shouldSafeUpdate
+	-- This is the main update engine of TMW.
+	function TMW:OnUpdate_OLD()
+		time = GetTime()
+		TMW.time = time
 
-	if updateInProgress then
-		-- If the previous update cycle didn't finish (updateInProgress is still true)
-		-- then we should enable safecalling icon updates in order to prevent catastrophic failure of the whole addon
-		-- if only one icon or icon type is malfunctioning.
-		if not shouldSafeUpdate then
-			TMW:Debug("Update error detected. Switching to safe update mode!")
+		if updateInProgress then
+			-- If the previous update cycle didn't finish (updateInProgress is still true)
+			-- then we should enable safecalling icon updates in order to prevent catastrophic failure of the whole addon
+			-- if only one icon or icon type is malfunctioning.
+			if not shouldSafeUpdate then
+				TMW:Debug("Update error detected. Switching to safe update mode!")
+			end
+			shouldSafeUpdate = true
 		end
-		shouldSafeUpdate = true
-	end
-	updateInProgress = true
-	
-	TMW:Fire("TMW_ONUPDATE_PRE", time, Locked)
-	
-	if LastUpdate <= time - UPD_INTV then
-		LastUpdate = time
-		_, GCD=GetSpellCooldown(GCDSpell)
-		TMW.GCD = GCD
-
-		TMW:Fire("TMW_ONUPDATE_TIMECONSTRAINED_PRE", time, Locked)
+		updateInProgress = true
 		
-		if Locked then
-			for i = 1, #GroupsToUpdate do
-				-- GroupsToUpdate only contains groups with conditions
-				local group = GroupsToUpdate[i]
-				local ConditionObject = group.ConditionObject
-				if ConditionObject and (ConditionObject.UpdateNeeded or ConditionObject.NextUpdateTime < time) then
-					ConditionObject:Check()
+		TMW:Fire("TMW_ONUPDATE_PRE", time, Locked)
+		
+		if LastUpdate <= time - UPD_INTV then
+			LastUpdate = time
+			_, GCD=GetSpellCooldown(GCDSpell)
+			TMW.GCD = GCD
+
+			TMW:Fire("TMW_ONUPDATE_TIMECONSTRAINED_PRE", time, Locked)
+			
+			if Locked then
+				for i = 1, #GroupsToUpdate do
+					-- GroupsToUpdate only contains groups with conditions
+					local group = GroupsToUpdate[i]
+					local ConditionObject = group.ConditionObject
+					if ConditionObject and (ConditionObject.UpdateNeeded or ConditionObject.NextUpdateTime < time) then
+						ConditionObject:Check()
+					end
+				end
+		
+				if shouldSafeUpdate then
+					for i = 1, #IconsToUpdate do
+						local icon = IconsToUpdate[i]
+						safecall(icon.Update, icon)
+					end
+				else
+					for i = 1, #IconsToUpdate do
+						--local icon = IconsToUpdate[i]
+						IconsToUpdate[i]:Update()
+					end
 				end
 			end
-	
-			if shouldSafeUpdate then
-				for i = 1, #IconsToUpdate do
-					local icon = IconsToUpdate[i]
-					safecall(icon.Update, icon)
-				end
-			else
-				for i = 1, #IconsToUpdate do
-					--local icon = IconsToUpdate[i]
-					IconsToUpdate[i]:Update()
-				end
-			end
+
+			TMW:Fire("TMW_ONUPDATE_TIMECONSTRAINED_POST", time, Locked)
 		end
 
-		TMW:Fire("TMW_ONUPDATE_TIMECONSTRAINED_POST", time, Locked)
+		updateInProgress = nil
+		
+		TMW:Fire("TMW_ONUPDATE_POST", time, Locked)
+	end
+end
+
+
+do	-- TMW:OnUpdate()
+
+	local updateInProgress, shouldSafeUpdate
+	local start
+	local Coroutine
+
+	-- Limit in milliseconds for each OnUpdate cycle.
+	local CoroutineLimit = 100
+
+	local function checkYield()
+		if debugprofilestop() - start > CoroutineLimit then
+            coroutine.yield(Coroutine)
+
+            TMW:Debug("OnUpdate yielded early at %s", time)
+        end
 	end
 
-	updateInProgress = nil
+	-- This is the main update engine of TMW.
+	local function OnUpdate()
+		while true do
+			time = GetTime()
+			TMW.time = time
+
+			if updateInProgress then
+				-- If the previous update cycle didn't finish (updateInProgress is still true)
+				-- then we should enable safecalling icon updates in order to prevent catastrophic failure of the whole addon
+				-- if only one icon or icon type is malfunctioning.
+				if not shouldSafeUpdate then
+					TMW:Debug("Update error detected. Switching to safe update mode!")
+				end
+				shouldSafeUpdate = true
+			end
+			updateInProgress = true
+			
+			TMW:Fire("TMW_ONUPDATE_PRE", time, Locked)
+			
+			if LastUpdate <= time - UPD_INTV then
+				LastUpdate = time
+				_, GCD=GetSpellCooldown(GCDSpell)
+				TMW.GCD = GCD
+
+				TMW:Fire("TMW_ONUPDATE_TIMECONSTRAINED_PRE", time, Locked)
+				
+				if Locked then
+					for i = 1, #GroupsToUpdate do
+						-- GroupsToUpdate only contains groups with conditions
+						local group = GroupsToUpdate[i]
+						local ConditionObject = group.ConditionObject
+						if ConditionObject and (ConditionObject.UpdateNeeded or ConditionObject.NextUpdateTime < time) then
+							ConditionObject:Check()
+							checkYield()
+						end
+					end
+			
+					if shouldSafeUpdate then
+						for i = 1, #IconsToUpdate do
+							local icon = IconsToUpdate[i]
+							safecall(icon.Update, icon)
+							checkYield()
+						end
+					else
+						for i = 1, #IconsToUpdate do
+							--local icon = IconsToUpdate[i]
+							IconsToUpdate[i]:Update()
+							checkYield()
+						end
+					end
+				end
+
+				TMW:Fire("TMW_ONUPDATE_TIMECONSTRAINED_POST", time, Locked)
+			end
+
+			updateInProgress = nil
+			
+			checkYield()
+
+			TMW:Fire("TMW_ONUPDATE_POST", time, Locked)
+
+			coroutine.yield(Coroutine)
+		end
+	end
+
 	
-	TMW:Fire("TMW_ONUPDATE_POST", time, Locked)
+
+	function TMW:OnUpdate()
+	    start = debugprofilestop()
+
+	    if not Coroutine or coroutine.status(Coroutine) == "dead" then
+	    	if Coroutine then
+	    		TMW:Debug("Rebirthed OnUpdate coroutine at %s", time)
+	    	end
+
+	    	Coroutine = coroutine.create(OnUpdate)
+	    end
+
+	    coroutine.resume(Coroutine)
+	end
 end
 
 
@@ -2624,7 +2726,8 @@ function TMW:UpdateNormally()
 		return
 	end
 	
-	time = GetTime() TMW.time = time
+	time = GetTime()
+	TMW.time = time
 	LastUpdate = 0
 
 	Locked = TMW.db.profile.Locked
