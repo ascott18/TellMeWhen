@@ -55,23 +55,23 @@ TMW.L = L
 
 ---------- Upvalues ----------
 local GetSpellCooldown, GetSpellInfo, GetSpellTexture =
-      GetSpellCooldown, GetSpellInfo, GetSpellTexture
+	  GetSpellCooldown, GetSpellInfo, GetSpellTexture
 local GetItemInfo, GetInventoryItemID, GetItemIcon =
-      GetItemInfo, GetInventoryItemID, GetItemIcon
+	  GetItemInfo, GetInventoryItemID, GetItemIcon
 local GetTalentInfo =
-      GetTalentInfo
+	  GetTalentInfo
 local UnitPower, UnitClass, UnitName, UnitAura =
-      UnitPower, UnitClass, UnitName, UnitAura
+	  UnitPower, UnitClass, UnitName, UnitAura
 local IsInGuild =
-      IsInGuild
+	  IsInGuild
 local GetAddOnInfo, IsAddOnLoaded, LoadAddOn, EnableAddOn =
-      GetAddOnInfo, IsAddOnLoaded, LoadAddOn, EnableAddOn
+	  GetAddOnInfo, IsAddOnLoaded, LoadAddOn, EnableAddOn
 local tonumber, tostring, type, pairs, ipairs, tinsert, tremove, sort, select, wipe, rawget, rawset, assert, pcall, error, getmetatable, setmetatable, loadstring, unpack, debugstack =
-      tonumber, tostring, type, pairs, ipairs, tinsert, tremove, sort, select, wipe, rawget, rawset, assert, pcall, error, getmetatable, setmetatable, loadstring, unpack, debugstack
+	  tonumber, tostring, type, pairs, ipairs, tinsert, tremove, sort, select, wipe, rawget, rawset, assert, pcall, error, getmetatable, setmetatable, loadstring, unpack, debugstack
 local strfind, strmatch, format, gsub, gmatch, strsub, strtrim, strsplit, strlower, strrep, strchar, strconcat, max, ceil, floor, random =
-      strfind, strmatch, format, gsub, gmatch, strsub, strtrim, strsplit, strlower, strrep, strchar, strconcat, max, ceil, floor, random
+	  strfind, strmatch, format, gsub, gmatch, strsub, strtrim, strsplit, strlower, strrep, strchar, strconcat, max, ceil, floor, random
 local _G, coroutine, table, GetTime, CopyTable =
-      _G, coroutine, table, GetTime, CopyTable
+	  _G, coroutine, table, GetTime, CopyTable
 local tostringall = tostringall
 
 ---------- Locals ----------
@@ -543,79 +543,79 @@ end})
 ---------------------------------
 
 function TMW:MakeFunctionCached(obj, method)
-    local func
-    if type(obj) == "table" and type(method) == "string" then
-        func = obj[method]
-    elseif type(obj) == "function" then
-        func = obj
-    else
-        error("Usage: TMW:MakeFunctionCached(object/function [, method])")
-    end
+	local func
+	if type(obj) == "table" and type(method) == "string" then
+		func = obj[method]
+	elseif type(obj) == "function" then
+		func = obj
+	else
+		error("Usage: TMW:MakeFunctionCached(object/function [, method])")
+	end
 
-    local cache = {}
-    local wrapper = function(...)
-        -- tostringall is a Blizzard function defined in UIParent.lua
+	local cache = {}
+	local wrapper = function(...)
+		-- tostringall is a Blizzard function defined in UIParent.lua
 		local cachestring = strconcat(tostringall(...))
 		--local cachestring = TMW:Serialize(...)
 		
-        if cache[cachestring] then
-            return cache[cachestring]
-        end
+		if cache[cachestring] then
+			return cache[cachestring]
+		end
 
-        local arg1, arg2 = func(...)
-        if arg2 ~= nil then
-            error("Cannot cache functions with more than 1 return arg")
-        end
+		local arg1, arg2 = func(...)
+		if arg2 ~= nil then
+			error("Cannot cache functions with more than 1 return arg")
+		end
 
-        cache[cachestring] = arg1
+		cache[cachestring] = arg1
 
-        return arg1
-    end
+		return arg1
+	end
 
-    if type(obj) == "table" then
-        obj[method] = wrapper
-    end
+	if type(obj) == "table" then
+		obj[method] = wrapper
+	end
 
-    return wrapper, cache
+	return wrapper, cache
 end
 
 function TMW:MakeSingleArgFunctionCached(obj, method)
 	-- MakeSingleArgFunctionCached is MUCH more efficient than MakeFunctionCached
 	-- and should be used whenever there is only 1 input arg
-    local func
-    if type(obj) == "table" and type(method) == "string" then
-        func = obj[method]
-    elseif type(obj) == "function" then
-        func = obj
-    else
-        error("Usage: TMW:MakeFunctionCached(object/function [, method])", 2)
-    end
+	local func
+	if type(obj) == "table" and type(method) == "string" then
+		func = obj[method]
+	elseif type(obj) == "function" then
+		func = obj
+	else
+		error("Usage: TMW:MakeFunctionCached(object/function [, method])", 2)
+	end
 
-    local cache = {}
-    local wrapper = function(arg1In, arg2In)
-        if arg2In ~= nil then
-            error("Cannot MakeSingleArgFunctionCached functions with more than 1 arg", 2)
-        end
+	local cache = {}
+	local wrapper = function(arg1In, arg2In)
+		if arg2In ~= nil then
+			error("Cannot MakeSingleArgFunctionCached functions with more than 1 arg", 2)
+		end
 		
-        if cache[arg1In] then
-            return cache[arg1In]
-        end
+		if cache[arg1In] then
+			return cache[arg1In]
+		end
 
-        local arg1Out, arg2Out = func(arg1In)
-        if arg2Out ~= nil then
-            error("Cannot cache functions with more than 1 return arg", 2)
-        end
+		local arg1Out, arg2Out = func(arg1In)
+		if arg2Out ~= nil then
+			error("Cannot cache functions with more than 1 return arg", 2)
+		end
 
-        cache[arg1In] = arg1Out
+		cache[arg1In] = arg1Out
 
-        return arg1Out
-    end
+		return arg1Out
+	end
 
-    if type(obj) == "table" then
-        obj[method] = wrapper
-    end
+	if type(obj) == "table" then
+		obj[method] = wrapper
+	end
 
-    return wrapper
+	return wrapper
 end
 
 
@@ -2619,17 +2619,17 @@ do	-- TMW:OnUpdate()
 
 	local updateInProgress, shouldSafeUpdate
 	local start
-	local Coroutine
 
 	-- Limit in milliseconds for each OnUpdate cycle.
 	local CoroutineLimit = 50
 
+--TODO: add a check to see if InCombatLockdown() before yielding or calling debugprofilestop
 	local function checkYield()
 		if debugprofilestop() - start > CoroutineLimit then
-            coroutine.yield(Coroutine)
+			coroutine.yield()
 
-            TMW:Debug("OnUpdate yielded early at %s", time)
-        end
+			TMW:Debug("OnUpdate yielded early at %s", time)
+		end
 	end
 
 	-- This is the main update engine of TMW.
@@ -2693,24 +2693,24 @@ do	-- TMW:OnUpdate()
 
 			TMW:Fire("TMW_ONUPDATE_POST", time, Locked)
 
-			coroutine.yield(Coroutine)
+			coroutine.yield()
 		end
 	end
 
 	
-
+	local Coroutine
 	function TMW:OnUpdate()
-	    start = debugprofilestop()
+		start = debugprofilestop()
 
-	    if not Coroutine or coroutine.status(Coroutine) == "dead" then
-	    	if Coroutine then
-	    		TMW:Debug("Rebirthed OnUpdate coroutine at %s", time)
-	    	end
+		if not Coroutine or coroutine.status(Coroutine) == "dead" then
+			if Coroutine then
+				TMW:Debug("Rebirthed OnUpdate coroutine at %s", time)
+			end
 
-	    	Coroutine = coroutine.create(OnUpdate)
-	    end
+			Coroutine = coroutine.create(OnUpdate)
+		end
 
-	    coroutine.resume(Coroutine)
+		coroutine.resume(Coroutine)
 	end
 end
 
