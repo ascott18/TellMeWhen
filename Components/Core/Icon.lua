@@ -563,7 +563,7 @@ function Icon.ProcessQueuedEvents(icon)
 end
 
 
---- Completely disables and rests an icon to a near-default state.
+--- Completely disables and resets an icon to a near-default state.
 -- 
 -- Unimplements all [[api/base-classes/icon-component/|IconComponent]]s, resets update function and method, unregisters all events, and hides the icon.
 -- @name Icon:DisableIcon
@@ -576,6 +576,11 @@ function Icon.DisableIcon(icon)
 	icon:SetUpdateMethod("auto")
 	icon:SetUpdateFunction(nil)
 	icon:Hide()
+
+	-- Reset condition stuff
+	icon.ConditionObject = nil
+	TMW:UnregisterCallback("TMW_CNDT_OBJ_PASSING_CHANGED", icon)
+	icon:SetInfo("conditionFailed", nil)
 
 	icon:DisableAllModules()
 	
@@ -644,24 +649,21 @@ function Icon.Setup(icon)
 
 	TMW:Fire("TMW_ICON_SETUP_PRE", icon)
 
-	-- Conditions
-	local ConditionObjectConstructor = icon:Conditions_GetConstructor(icon.Conditions)
-	icon.ConditionObject = ConditionObjectConstructor:Construct()
-	
-	if icon.ConditionObject then
-		TMW:RegisterCallback("TMW_CNDT_OBJ_PASSING_CHANGED", icon)
-		icon:SetInfo("conditionFailed", icon.ConditionObject.Failed)
-	else
-		TMW:UnregisterCallback("TMW_CNDT_OBJ_PASSING_CHANGED", icon)
-		icon:SetInfo("conditionFailed", nil)
-	end
-
 	-- force an update
 	icon.LastUpdate = 0
 	
 	-- actually run the icon's update function
 	if icon.Enabled or not TMW.Locked then
 	
+		------------ Conditions ------------
+		local ConditionObjectConstructor = icon:Conditions_GetConstructor(icon.Conditions)
+		icon.ConditionObject = ConditionObjectConstructor:Construct()
+		
+		if icon.ConditionObject then
+			TMW:RegisterCallback("TMW_CNDT_OBJ_PASSING_CHANGED", icon)
+			icon:SetInfo("conditionFailed", icon.ConditionObject.Failed)
+		end
+
 		------------ Icon Type ------------
 		typeData:ImplementIntoIcon(icon)
 		
