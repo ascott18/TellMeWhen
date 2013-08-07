@@ -1,4 +1,4 @@
-===v6.2.2===
+===v6.2.3===
  * **Important**: The color settings for all timer bars (including bar group and timer overlay bars) have changed a bit:
  ** The labels for these settings now correctly correspond to the state that they will be used for.
  ** The colors will automatically switch when you enable the "Fill bar up" setting for a bar.
@@ -6,6 +6,12 @@
 
  * Icons in groups that use the Bar display method can now have their colors configured on a per-icon basis.
  ** You can copy colors between icons by right-click dragging them.
+
+ * Bug Fixes:
+ ** Removed the "Snared" Loss of Control category from the configuration since it is most certainly not used by Blizzard.
+ ** Item-tracking icons and condition should now always get the correct data once it becomes available.
+
+===v6.2.2===
  * Buff/Debuff icons can now sort by stacks.
  * The group sorting option to sort by duration now treats spells that are on the GCD as having no cooldown.
 
@@ -21,13 +27,11 @@
  ** You can also copy group conditions between groups this way.
  * When right-click-dragging an icon to an icon that has multiple icons in the same place, you can now choose which one you would like the destination to be.
 
-
  * Bug Fixes:
  ** Buff/Debuff icons that are set to sort by low duration should now properly display unlimited duration auras when there is nothing else to display.
  ** The Ranged Attack Power condition should now always use the proper RAP value.
  ** Fixed some "You are not in a raid group" errors.
  ** All features in TellMeWhen that track items (including Item Cooldown icons and any item conditions) are universally able to accept slotIDs as input, and all features will now correctly distinguished equipped items from items in your bag when tracking by slotID. This is the result of a new, robust system for managing items.
- ** Removed the "Snared" Loss of Control category from the configuration since it is most certainly not used by Blizzard.
 
 ===v6.2.0===
  * New Icon Type: Buff/Debuff Check (for checking missing raid buffs).
