@@ -23,6 +23,10 @@ local LMB = LibStub("Masque", true) or (LibMasque and LibMasque("Button"))
 local IconContainer_Masque = TMW:NewClass("IconModule_IconContainer_Masque", "IconModule_IconContainer")
 
 
+if LibStub("LibButtonFacade", true) and select(6, GetAddOnInfo("Masque")) == "MISSING" then
+	TMW.Warn("TellMeWhen no longer supports ButtonFacade. If you wish to continue to skin your icons, please upgrade to ButtonFacade's successor, Masque.")
+end
+
 if not LMB then
 	IconContainer_Masque.isDefaultSkin = 1
 	-- IconModule_IconContainer_Masque will just be a clone of IconModule_IconContainer at this point.

@@ -1599,10 +1599,6 @@ function TMW:OnInitialize()
 
 	TMW:RegisterEvent("PLAYER_LOGIN")
 
-	if LibStub("LibButtonFacade", true) and select(6, GetAddOnInfo("Masque")) == "MISSING" then
-		TMW.Warn("TellMeWhen no longer supports ButtonFacade. If you wish to continue to skin your icons, please upgrade to ButtonFacade's successor, Masque.")
-	end
-
 	TMW:ProcessEquivalencies()
 	
 	TMW.OnInitialize = nil
