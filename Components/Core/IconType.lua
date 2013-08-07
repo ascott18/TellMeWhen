@@ -247,7 +247,7 @@ function IconType:GetIconMenuText(ics, groupID, iconID)
 	return text, tooltip
 end
 
---- Register the IconType for use in TellMeWhen. IconViews cannot be used or accessed until this method is called. Should be the very last line of code in the file that defines an IconType.
+--- Register the IconType for use in TellMeWhen. IconTypes cannot be used or accessed until this method is called. Should be the very last line of code in the file that defines an IconType.
 -- @param order [number] The order of this IconType relative to other IconTypes in configuration UI.
 -- @return self [TMW.Classes.IconType] The IconType this method was called on.
 -- @usage IconType:Register(10)
