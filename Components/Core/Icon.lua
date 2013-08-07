@@ -127,7 +127,6 @@ function Icon.OnNewInstance(icon, ...)
 	icon.EventHandlersSet = {}
 	icon.lmbButtonData = {}
 	icon.position = {}
-	icon.anchorableChildren = {}
 	
 	icon.attributes = icon:InheritTable(Icon, "attributes")
 end
