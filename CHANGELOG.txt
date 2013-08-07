@@ -5,7 +5,7 @@
  ** These changes will probably require you to reconfigure some of your settings.
 
  * Icons in groups that use the Bar display method can now have their colors configured on a per-icon basis.
- ** You can copy colors between icons by right-click dragging them.
+ ** You can copy colors between icons by right-click dragging one icon to another.
 
  * TellMeWhen now uses a coroutine-based update engine to help prevent the occasional "script ran too long" error.
  ** This version also includes an updated LibDogTag-3.0 and LibDogTag-Unit-3.0 that should no longer throw "script ran too long" errors.
