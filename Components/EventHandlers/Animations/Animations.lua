@@ -736,5 +736,20 @@ function AnimatedObject:Animations_Stop(arg1)
 		end
 	end
 end
+function AnimatedObject:Animations_StopAll()
+	local animations = self.animations
+
+	if animations then
+		for k, v in pairs(animations) do
+			self:Animations_Stop(v)
+		end
+	end
+end
 
 TMW.Classes.Icon:Inherit("AnimatedObject")
+
+TMW:RegisterCallback("TMW_ICON_DISABLE", function(event, icon, soft)
+	if not soft or not TMW.Locked then
+		icon:Animations_StopAll()
+	end
+end)

@@ -567,8 +567,9 @@ end
 -- 
 -- Unimplements all [[api/base-classes/icon-component/|IconComponent]]s, resets update function and method, unregisters all events, and hides the icon.
 -- @name Icon:DisableIcon
--- @paramsig 
-function Icon.DisableIcon(icon)
+-- @paramsig soft
+-- @param soft [boolean] True if the icon might not be getting permanantly disabled (in which case this method just serves as a reset)
+function Icon.DisableIcon(icon, soft)
 	
 	icon:UnregisterAllEvents()
 	icon:UnregisterAllSimpleUpdateEvents()
@@ -592,7 +593,7 @@ function Icon.DisableIcon(icon)
 		icon.viewData:UnimplementFromIcon(icon)
 	end
 	
-	TMW:Fire("TMW_ICON_DISABLE", icon)
+	TMW:Fire("TMW_ICON_DISABLE", icon, soft)
 end
 
 --- Completely sets up an icon.
@@ -618,7 +619,7 @@ function Icon.Setup(icon)
 	
 	local typeData_old = icon.typeData
 	
-	icon:DisableIcon()
+	icon:DisableIcon(true)
 	
 	icon.viewData = viewData
 	icon.typeData = typeData	

@@ -37,14 +37,6 @@ TMW:RegisterCallback("TMW_OPTIONS_LOADED", function(event)
 
 end)
 
-TMW:RegisterCallback("TMW_ICON_SETUP_POST", function(event, icon)
-	if not TMW.Locked and icon:Animations_Has() then
-		for k, v in pairs(icon:Animations_Get()) do
-			icon:Animations_Stop(v)
-		end
-	end
-end)
-
 
 ---------- Events ----------
 function Animations:GetAnimationFrame(frameID, previousFrame)
