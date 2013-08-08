@@ -1388,6 +1388,8 @@ L["NOTYPE"] = "<No Icon Type>"
 L["MISCELLANEOUS"] = "Miscellaneous"
 L["TEXTMANIP"] = "Text manipulation"
 L["DT_DOC_TMWFormatDuration"] = "Returns a string formatted by TellMeWhen's time format. Alternative to [FormatDuration]."
+L["DT_DOC_gsub"] = "Gives access to Lua's string.gsub function for DogTags for powerful string manipulation capabilities."
+L["DT_DOC_strfind"] = "Gives access to Lua's string.find function for DogTags for powerful string manipulation capabilities."
 L["DT_DOC_Name"] = "Returns the name of the unit. This is an improved version of the default [Name] tag provided by DogTag."
 
 L["DT_DOC_Source"] = "Returns the source unit or name of the last Combat Event that the icon processed. Best use in conjunction with the [Name] tag. (This tag should only be used with %s type icons)"

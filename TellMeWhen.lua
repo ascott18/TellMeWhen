@@ -24,7 +24,7 @@ if strmatch(projectVersion, "%-%d+%-") then
 end
 
 TELLMEWHEN_VERSION_FULL = TELLMEWHEN_VERSION .. TELLMEWHEN_VERSION_MINOR
-TELLMEWHEN_VERSIONNUMBER = 62402 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL (for versioning of)
+TELLMEWHEN_VERSIONNUMBER = 62403 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL (for versioning of)
 
 if TELLMEWHEN_VERSIONNUMBER > 63000 or TELLMEWHEN_VERSIONNUMBER < 62000 then
 	-- safety check because i accidentally made the version number 414069 once
@@ -3610,6 +3610,36 @@ if DogTag then
 		doc = L["DT_DOC_TMWFormatDuration"],
 		example = '[0.54:TMWFormatDuration] => "0.5"; [20:TMWFormatDuration] => "20"; [80:TMWFormatDuration] => "1:20"; [10000:TMWFormatDuration] => "2:46:40"',
 		category = L["TEXTMANIP"]
+	})
+
+	DogTag:AddTag("TMW", "gsub", {
+		code = gsub,
+		arg = {
+			'value', 'string', '@req',
+			'pattern', 'string', '@req',
+			'replacement', 'string', '@req',
+			'num', 'number', 0,
+		},
+		ret = "string;nil",
+		static = true,
+		doc = L["DT_DOC_gsub"],
+		example = '["Cybeloras - Aerie Peak":gsub(" ?%-.*", "")] => "Cybeloras"',
+		category = L["TEXTMANIP"],
+	})
+
+	DogTag:AddTag("TMW", "strfind", {
+		code = strfind,
+		arg = {
+			'value', 'string', '@req',
+			'pattern', 'string', '@req',
+			'init', 'number', 0,
+			'plain', 'boolean', false,
+		},
+		ret = "number;nil",
+		static = true,
+		doc = L["DT_DOC_strfind"],
+		example = '["Cybeloras - Aerie Peak":strfind("%-")] => "11"',
+		category = L["TEXTMANIP"],
 	})
 end
 
