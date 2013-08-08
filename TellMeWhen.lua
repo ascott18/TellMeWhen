@@ -24,7 +24,7 @@ if strmatch(projectVersion, "%-%d+%-") then
 end
 
 TELLMEWHEN_VERSION_FULL = TELLMEWHEN_VERSION .. TELLMEWHEN_VERSION_MINOR
-TELLMEWHEN_VERSIONNUMBER = 62404 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL (for versioning of)
+TELLMEWHEN_VERSIONNUMBER = 62405 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL (for versioning of)
 
 if TELLMEWHEN_VERSIONNUMBER > 63000 or TELLMEWHEN_VERSIONNUMBER < 62000 then
 	-- safety check because i accidentally made the version number 414069 once
@@ -3613,12 +3613,16 @@ if DogTag then
 	})
 
 	DogTag:AddTag("TMW", "gsub", {
-		code = gsub,
+		code = function(...)
+			print(...)
+			print(gsub(...))
+			return gsub(...)
+			end,
 		arg = {
 			'value', 'string', '@req',
 			'pattern', 'string', '@req',
 			'replacement', 'string', '@req',
-			'num', 'number', 0,
+			'num', 'number;nil', 'nil',
 		},
 		ret = "string;nil",
 		static = true,
