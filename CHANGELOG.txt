@@ -1,5 +1,6 @@
 ===v6.2.4===
  * Added DogTags for string.gsub and string.find.
+ * Added Yu'lon's Barrier to the DamageShield equivalency.
 
  * Bug Fixes:
  ** IconModule_Alpha\Alpha.lua:84: attempt to index local "IconModule_Alpha" (a nil value)
