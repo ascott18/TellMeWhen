@@ -468,7 +468,7 @@ function EVENTS.IconMenu_DropDown(frame)
 			if icon:IsValid() and UIDROPDOWNMENU_MENU_VALUE == groupID and TMW.CI.ic ~= icon then
 				local info = UIDropDownMenu_CreateInfo()
 
-				local text, textshort, tooltip = TMW:GetIconMenuText(groupID, iconID)
+				local text, textshort, tooltip = TMW:GetIconMenuText(groupID, iconID, icon:GetSettings())
 				if text:sub(-2) == "))" then
 					textshort = textshort .. " " .. L["fICON"]:format(iconID)
 				end

@@ -24,7 +24,7 @@ local findid = TMW.FindGroupIDFromInfo
 local set = function(info, val)
 	local g = findid(info)
 	
-	local gs = TMW.db.profile.Groups[g]
+	local gs = TMW[g]:GetSettings()
 	gs.SettingsPerView[gs.View][info[#info]] = val
 	
 	local Module = TMW[g]:GetModuleOrModuleChild("GroupModule_IconPosition")
@@ -35,7 +35,7 @@ local set = function(info, val)
 end
 local get = function(info)
 	local g = findid(info)
-	local gs = TMW.db.profile.Groups[g]
+	local gs = TMW[g]:GetSettings()
 	return gs.SettingsPerView[gs.View][info[#info]]
 end
 

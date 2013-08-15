@@ -51,8 +51,8 @@ do	-- TMW.CNDT implementation
 		
 		settingKey = "Conditions",
 		GetSettings = function(self)
-			if TMW.CI.g then
-				return TMW.db.profile.Groups[TMW.CI.g].Conditions
+			if TMW.CI.gs then
+				return TMW.CI.gs.Conditions
 			end
 		end,
 		
@@ -203,6 +203,23 @@ function Group.TMW_CNDT_OBJ_PASSING_CHANGED(group, event, ConditionObject, faile
 end
 
 
+
+--- Returns the GUID of this group.
+-- @name Group:GetGUID
+-- @paramsig generate
+-- @param generate [boolean;nil] True if a GUID should be generated for the group if one does not already exist.
+-- @return [string;nil] The GUID of this group.
+function Group.GetGUID(group, generate)
+	local GUID = TMW.db.profile.Groups[group:GetID()]
+
+	if generate and not GUID then
+		GUID = TMW:GenerateGUID("group", TMW.CONST.ICON_GUID_SIZE)
+		TMW.db.profile.Groups[group:GetID()] = GUID
+	end
+
+	return GUID
+end
+
 --- Returns the settings table that holds the settings for the group.
 -- @name Group:GetSettings
 -- @paramsig
@@ -210,7 +227,7 @@ end
 -- @usage local gs = group:GetSettings()
 -- print(group:GetName() .. "'s enabled setting is set to " .. gs.Enabled)
 function Group.GetSettings(group)
-	return TMW.db.profile.Groups[group:GetID()]
+	return TMW:GetData(group:GetGUID(true))
 end
 
 --- Returns the settings table that holds the view-specific settings for the group.
@@ -299,7 +316,12 @@ end
 function Group.Setup(group, noIconSetup)
 	local gs = group:GetSettings()
 	local groupID = group:GetID()
-	
+	local GUID = group:GetGUID()
+
+	if GUID then
+		TMW:DeclareDataOwner(GUID, group)
+	end
+
 	for k, v in pairs(TMW.Group_Defaults) do
 		group[k] = gs[k]
 	end

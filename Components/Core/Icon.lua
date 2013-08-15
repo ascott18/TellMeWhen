@@ -152,7 +152,7 @@ function Icon.ScriptSort(iconA, iconB)
 	local gA = iconA.group.ID
 	local gB = iconB.group.ID
 	if gA == gB then
-		local iOrder = -TMW.db.profile.Groups[gA].CheckOrder
+		local iOrder = -iconA.group:GetSettings().CheckOrder
 		return iconA.ID*iOrder < iconB.ID*iOrder
 	end
 	return gA*gOrder < gB*gOrder
@@ -217,14 +217,40 @@ function Icon.OnHide(icon)
 	icon:SetInfo("shown", false)
 end
 
+
+--- Returns the GUID of this icon.
+-- @name Icon:GetGUID
+-- @paramsig generate
+-- @param generate [boolean;nil] True if a GUID should be generated for the icon if one does not already exist.
+-- @return [string;nil] The GUID of this icon, or nil if this icon is unconfigured.
+function Icon.GetGUID(icon, generate)
+	local GUID = icon.group:GetSettings().Icons[icon:GetID()]
+
+	if generate and not GUID then
+		GUID = TMW:GenerateGUID("icon", TMW.CONST.ICON_GUID_SIZE)
+		icon.group:GetSettings().Icons[icon:GetID()] = GUID
+	end
+
+	return GUID
+end
+
 --- Returns the settings table that holds the settings for the icon.
 -- @name Icon:GetSettings
--- @paramsig
+-- @paramsig noEdit
+-- @param noEdit [boolean;nil] True if the icon settings being returned are not going to be edited.
 -- @return [{{{TMW.Icon_Defaults}}}] The settings table that holds the settings for the icon.
 -- @usage local ics = icon:GetSettings()
 -- print(icon:GetName() .. "'s enabled setting is set to " .. ics.Enabled)
-function Icon.GetSettings(icon)
-	return TMW.db.profile.Groups[icon.group:GetID()].Icons[icon:GetID()]
+function Icon.GetSettings(icon, noEdit)
+
+	--local GUID = icon:GetGUID(not noEdit)
+	local GUID = icon:GetGUID()
+
+	if not GUID then
+		return TMW.DEFAULT_ICON_SETTINGS
+	end
+
+	return TMW:GetData(icon:GetGUID())
 end
 
 --- Returns the settings table that holds the view-specific settings for the icon.
@@ -578,6 +604,11 @@ function Icon.DisableIcon(icon, soft)
 	icon:SetUpdateFunction(nil)
 	icon:Hide()
 
+	local iconGUID = icon:GetGUID()
+	if iconGUID then
+		TMW:DeclareDataOwner(iconGUID, nil)
+	end
+
 	-- Reset condition stuff
 	icon.ConditionObject = nil
 	TMW:UnregisterCallback("TMW_CNDT_OBJ_PASSING_CHANGED", icon)
@@ -609,10 +640,11 @@ function Icon.Setup(icon)
 	local iconID = icon:GetID()
 	local group = icon.group
 	local groupID = group:GetID()
-	local ics = icon:GetSettings()
+	local ics = icon:GetSettings(true)
 	local typeData = TMW.Types[ics.Type]
 	local viewData = group.viewData
-	
+	local iconGUID = icon:GetGUID()
+
 	if not group:ShouldUpdateIcons() then return end
 	
 	icon.IsSettingUp = true
@@ -620,6 +652,10 @@ function Icon.Setup(icon)
 	local typeData_old = icon.typeData
 	
 	icon:DisableIcon(true)
+	
+	if iconGUID then
+		TMW:DeclareDataOwner(iconGUID, icon)
+	end
 	
 	icon.viewData = viewData
 	icon.typeData = typeData	

@@ -15,7 +15,7 @@
 -- ADDON GLOBALS AND LOCALS
 -- ---------------------------------
 
-TELLMEWHEN_VERSION = "6.2.4"
+TELLMEWHEN_VERSION = "7.0.0"
 
 TELLMEWHEN_VERSION_MINOR = ""
 local projectVersion = "@project-version@" -- comes out like "6.2.2-21-g4e91cee"
@@ -24,9 +24,9 @@ if strmatch(projectVersion, "%-%d+%-") then
 end
 
 TELLMEWHEN_VERSION_FULL = TELLMEWHEN_VERSION .. TELLMEWHEN_VERSION_MINOR
-TELLMEWHEN_VERSIONNUMBER = 62408 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL (for versioning of)
+TELLMEWHEN_VERSIONNUMBER = 70001 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL (for versioning of)
 
-if TELLMEWHEN_VERSIONNUMBER > 63000 or TELLMEWHEN_VERSIONNUMBER < 62000 then
+if TELLMEWHEN_VERSIONNUMBER > 71000 or TELLMEWHEN_VERSIONNUMBER < 70000 then
 	-- safety check because i accidentally made the version number 414069 once
 	return error("YOU SCREWED UP THE VERSION NUMBER OR DIDNT CHANGE THE SAFETY LIMITS")
 end 
@@ -119,7 +119,8 @@ TMW.EventList = {}
 TMW.COMMON = {}
 
 TMW.CONST = {
-	CHAT_TYPE_INSTANCE_CHAT = "INSTANCE_CHAT"
+	CHAT_TYPE_INSTANCE_CHAT = "INSTANCE_CHAT",
+	ICON_GUID_SIZE = 12,
 }
 
 TMW.IconsToUpdate, TMW.GroupsToUpdate = {}, {}
@@ -141,6 +142,9 @@ TMW.Defaults = {
 		HasImported			= false,
 		VersionWarning		= true,
 		AllowCombatConfig	= false,
+
+		Trunk = {},
+		ActiveTrunk = {},
 	},
 	locale = {
 		WpnEnchDurs	= {
@@ -184,56 +188,9 @@ TMW.Defaults = {
 				NS	=	{r=1,	g=1,	b=1,	Override = false,			},	-- not counting somtimes
 			},
 		},
-		Groups 		= 	{
-			[1] = {
-				Enabled			= true,
-			},
-			["**"] = {
-				Enabled			= false,
-				OnlyInCombat	= false,
-				Locked			= false,
-				View			= "icon",
-				Name			= "",
-				Strata			= "MEDIUM",
-				Scale			= 2.0,
-				Level			= 10,
-				Rows			= 1,
-				Columns			= 4,
-				CheckOrder		= -1,
-				PrimarySpec		= true,
-				SecondarySpec	= true,
-				Tree1 			= true,
-				Tree2 			= true,
-				Tree3 			= true,
-				Tree4 			= true,
-				SettingsPerView	= {
-					["**"] = {
-					}
-				},
-				Icons = {
-					["**"] = {
-						ShowWhen				= 0x2, -- bit order: x, x, alpha, unalpha
-						Enabled					= false,
-						Name					= "",
-						Type					= "",
-						Alpha					= 1,
-						UnAlpha					= 1,
-						Icons					= {
-							[1]					= "",
-						},
-						SettingsPerView			= {
-							["**"] = {
-							}
-						},
-					},
-				},
-			},
-		},
+		Groups = {},
 	},
 }
-
-TMW.Group_Defaults 	 = TMW.Defaults.profile.Groups["**"]
-TMW.Icon_Defaults 	 = TMW.Group_Defaults.Icons["**"]
 
 function TMW:RegisterDatabaseDefaults(defaults)
 	assert(type(defaults) == "table", "arg1 to RegisterProfileDefaults must be a table")
@@ -267,7 +224,64 @@ function TMW:MergeDefaultsTables(src, dest)
 	return dest -- not really needed, but what the hell why not
 end
 
+TMW.DatabaseTrunks = {}
+function TMW:RegisterDatabaseTrunk(name, defaults)
+	assert(type(name) == "string", "arg1 to RegisterDatabaseTrunk must be a string")
+	assert(type(defaults) == "table", "arg2 to RegisterDatabaseTrunk must be a table")
 
+	if TMW.InitializedDatabase then
+		error("Database trunk is being registered too late. It needs to be registered before the database is initialized.", 2)
+	end
+
+	TMW.DatabaseTrunks[name] = defaults
+
+	return defaults
+end
+
+TMW.Group_Defaults = TMW:RegisterDatabaseTrunk("group", {
+	["**"] = {
+		Enabled			= true,
+		OnlyInCombat	= false,
+		Locked			= false,
+		View			= "icon",
+		Name			= "",
+		Strata			= "MEDIUM",
+		Scale			= 2.0,
+		Level			= 10,
+		Rows			= 1,
+		Columns			= 4,
+		CheckOrder		= -1,
+		PrimarySpec		= true,
+		SecondarySpec	= true,
+		Tree1 			= true,
+		Tree2 			= true,
+		Tree3 			= true,
+		Tree4 			= true,
+		SettingsPerView	= {
+			["**"] = {
+			}
+		},
+		Icons = {},
+	},
+})["**"]
+
+TMW.Icon_Defaults = TMW:RegisterDatabaseTrunk("icon", {
+	["**"] = {
+		ShowWhen				= 0x2, -- bit order: x, x, alpha, unalpha
+		Enabled					= false,
+		Name					= "",
+		Type					= "",
+		Alpha					= 1,
+		UnAlpha					= 1,
+		Icons					= {
+			[1]					= "",
+		},
+		SettingsPerView			= {
+			["**"] = {
+			}
+		},
+	},
+})["**"]
 
 
 
@@ -1016,6 +1030,7 @@ do -- TMW.generateGUID(length)
 		return strsub(GUID, 1, length)
 	end
 
+
 	--[[
 	local charsLookup = {}
 	for k, v in pairs(chars) do
@@ -1033,7 +1048,12 @@ do -- TMW.generateGUID(length)
 	--]]
 end
 
-
+function TMW:GenerateGUID(type, length)
+	return type .. ":" .. TMW.generateGUID(length)
+end
+function TMW:ParseGUID(GUID)
+	return strmatch(GUID, "([a-z]+):(.+)")
+end
 
 
 
@@ -1089,7 +1109,8 @@ do -- InIconSettings
 		local ci = state.ci
 		ci = ci + 1	-- at least increment the icon
 		while true do
-			if ci <= state.mi and state.cg <= state.mg and TMW.db.profile.Groups[state.cg].Icons and not rawget(TMW.db.profile.Groups[state.cg].Icons, ci) then
+			local gs = TMW:GetData(TMW.db.profile.Groups[state.cg])
+			if ci <= state.mi and state.cg <= state.mg and gs and gs.Icons and not gs.Icons[ci] then
 				--if there is another icon and the group is valid but the icon settings dont exist, move to the next icon
 				ci = ci + 1
 			elseif state.cg <= state.mg and ci > state.mi then
@@ -1106,7 +1127,9 @@ do -- InIconSettings
 			end
 		end
 		state.ci = ci
-		return TMW.db.profile.Groups[state.cg].Icons[ci], state.cg, ci -- ics, groupID, iconID
+
+		local gs = TMW:GetData(TMW.db.profile.Groups[state.cg])
+		return TMW:GetData(gs.Icons[ci]), state.cg, ci -- ics, groupID, iconID
 	end
 
 	function TMW:InIconSettings(groupID)
@@ -1133,7 +1156,7 @@ do -- InGroupSettings
 			tinsert(states, state)
 			return
 		end
-		return TMW.db.profile.Groups[state.cg], state.cg -- setting table, groupID
+		return TMW:GetData(TMW.db.profile.Groups[state.cg]), state.cg -- setting table, groupID
 	end
 
 	function TMW:InGroupSettings()
@@ -1657,8 +1680,8 @@ function TMW:Initialize()
 
 	-- DEFAULT_ICON_SETTINGS is used for comparisons against a blank icon setup,
 	-- most commonly used to see if the user has configured an icon at all.
-	TMW.DEFAULT_ICON_SETTINGS = TMW.db.profile.Groups[0].Icons[0]
-	TMW.db.profile.Groups[0] = nil
+	TMW.DEFAULT_ICON_SETTINGS = TMW:GetData("icon:null")
+	TMW:DeleteData("icon:null")
 	
 	
 	--------------- Communications ---------------
@@ -1678,11 +1701,38 @@ function TMW:Initialize()
 	TMW.InitializedFully = true
 end
 
+function TMW:PLAYER_LOGIN()
+	TMW:UnregisterEvent("PLAYER_LOGIN")
+	TMW.PLAYER_LOGIN = nil
+	
+	TMW:RegisterEvent("PLAYER_ENTERING_WORLD")
+	TMW:RegisterEvent("PLAYER_SPECIALIZATION_CHANGED")
+	TMW:RegisterEvent("PLAYER_TALENT_UPDATE", "PLAYER_SPECIALIZATION_CHANGED")
+	TMW:RegisterEvent("ACTIVE_TALENT_GROUP_CHANGED", "PLAYER_SPECIALIZATION_CHANGED")
+	
+	-- Yeah,  I do it twice. Masque is a heap of broken shit and doesn't work unless its done twice.
+	-- Especially when logging in while in combat with the Allow Config in Combat option disabled
+	TMW:Update()
+	TMW:Update()
+end
+
+
+
+
+
+---------------------------------
+-- Database Functions
+---------------------------------
+
 function TMW:InitializeDatabase()
 	
 	TMW.InitializeDatabase = nil
 	
-	TMW.InitializedDatabase = true
+	for name, defaults in pairs(TMW.DatabaseTrunks) do
+		TMW.Defaults.global.Trunk[name] = {}
+
+		TMW:MergeDefaultsTables({ [name] = defaults }, TMW.Defaults.global.ActiveTrunk)
+	end
 	
 	TMW:Fire("TMW_DB_INITIALIZING")
 	TMW:UnregisterAllCallbacks("TMW_DB_INITIALIZING")
@@ -1705,8 +1755,11 @@ function TMW:InitializeDatabase()
 	-- Primary purpose of this is to properly upgrade settings if a default has changed.
 	TMW:RawUpgrade()
 	
+
 	-- Initialize the database
 	TMW.db = AceDB:New("TellMeWhenDB", TMW.Defaults)
+
+	TMW.InitializedDatabase = true
 	
 	if TellMeWhen_Settings then
 		for k, v in pairs(TellMeWhen_Settings) do
@@ -1721,6 +1774,8 @@ function TMW:InitializeDatabase()
 	TMW.db.RegisterCallback(TMW, "OnProfileCopied",		"OnProfile")
 	TMW.db.RegisterCallback(TMW, "OnProfileReset",		"OnProfile")
 	TMW.db.RegisterCallback(TMW, "OnNewProfile",		"OnProfile")
+
+	TMW.db.RegisterCallback(TMW, "OnDatabaseShutdown",	"OnDatabaseShutdown")
 	
 	-- Handle normal upgrades after the database has been initialized.
 	TMW:UpgradeGlobal()
@@ -1730,20 +1785,84 @@ function TMW:InitializeDatabase()
 	TMW:UnregisterAllCallbacks("TMW_DB_INITIALIZED")
 end
 
-function TMW:PLAYER_LOGIN()
-	TMW:UnregisterEvent("PLAYER_LOGIN")
-	TMW.PLAYER_LOGIN = nil
-	
-	TMW:RegisterEvent("PLAYER_ENTERING_WORLD")
-	TMW:RegisterEvent("PLAYER_SPECIALIZATION_CHANGED")
-	TMW:RegisterEvent("PLAYER_TALENT_UPDATE", "PLAYER_SPECIALIZATION_CHANGED")
-	TMW:RegisterEvent("ACTIVE_TALENT_GROUP_CHANGED", "PLAYER_SPECIALIZATION_CHANGED")
-	
-	-- Yeah,  I do it twice. Masque is a heap of broken shit and doesn't work unless its done twice.
-	-- Especially when logging in while in combat with the Allow Config in Combat option disabled
-	TMW:Update()
-	TMW:Update()
+function TMW:OnDatabaseShutdown()
+	TMW.db:RegisterDefaults(nil)
+
+	if TMW.db.global.ActiveTrunk then
+		for trunkName, activeTrunk in pairs(TMW.db.global.ActiveTrunk) do
+			for GUID, data in pairs(activeTrunk) do
+
+				if not TMW.db.global.Trunk then
+					TMW.db.global.Trunk = {}
+				end
+
+				local trunk = TMW.db.global.Trunk[trunkName]
+
+				if not trunk then
+					trunk = {}
+					TMW.db.global.Trunk[trunkName] = trunk
+				end
+
+				trunk[GUID] = data
+			end
+		end
+
+		TMW.db.global.ActiveTrunk = nil
+	end
 end
+
+
+TMW.GUIDToOwner = {}
+
+function TMW:GetData(GUID, raw, noRetrieve)
+	if not GUID then
+		return
+	end
+
+	trunkName = TMW:ParseGUID(GUID)
+
+	if not TMW.DatabaseTrunks[trunkName] then
+		error("There is no trunk for the data " .. GUID, 2)
+	end
+
+	local activeTrunk = TMW.db.global.ActiveTrunk[trunkName]
+
+	if not noRetrieve then
+		local data = TMW.db.global.Trunk[trunkName][GUID]
+		if data then
+			TMW.db.global.Trunk[trunkName][GUID] = nil
+
+			return TMW:CopyTableInPlaceWithMeta(data, activeTrunk[GUID])
+		end
+	end
+
+	if raw then
+		return rawget(activeTrunk, GUID)
+	else
+		return activeTrunk[GUID]
+	end
+end
+
+function TMW:DeleteData(GUID)
+	trunkName = TMW:ParseGUID(GUID)
+
+	if not TMW.DatabaseTrunks[trunkName] then
+		error("There is no trunk for the data " .. GUID, 2)
+	end
+
+	TMW.db.global.ActiveTrunk[trunkName][GUID] = nil
+	TMW.db.global.Trunk[trunkName][GUID] = nil
+	TMW.GUIDToOwner[GUID] = nil
+end
+
+function TMW:DeclareDataOwner(GUID, object)
+	TMW.GUIDToOwner[GUID] = object
+end
+
+function TMW:GetDataOwner(GUID)
+	return TMW.GUIDToOwner[GUID]
+end
+
 
 
 
@@ -2446,6 +2565,11 @@ end
 
 
 function TMW:DoUpgrade(type, version, ...)
+
+	do
+		return TMW:Debug("Upgrades are NYI")
+	end
+
 	assert(_G.type(type) == "string")
 	assert(_G.type(version) == "number")
 	
@@ -2544,6 +2668,30 @@ function TMW:RawUpgrade()
 				HelpSettings.PocketWatch = nil
 			end
 		end
+	--[[
+		if TellMeWhenDB.Version < 70001 then
+			for _, p in pairs(TellMeWhenDB.profiles) do
+				if p.Groups then
+					for groupID, gs in pairs(p.Groups) do
+						if gs.Icons then
+							for iconID, ics in pairs(gs.Icons) do
+								
+							end
+						end
+					end
+				end
+			end
+		end]]
+
+
+
+-- TODO: things for the new GUID system need to go here
+-- things to do include migrating all groups to GUIDs,
+-- migrating all icons to GUIDs
+-- and handling the fact that the default Enabled state for groups is now true instead of false
+
+
+
 	end
 	
 	TMW:Fire("TMW_DB_PRE_DEFAULT_UPGRADES")
@@ -3144,6 +3292,10 @@ end
 TMW.ValidityCheckQueue = {}
 
 function TMW:QueueValidityCheck(icon, groupID, iconID, g, i)
+	do
+	TMW:Debug("Validity check is NYI")
+	return
+end
 	if not TMW.db.profile.WarnInvalids then return end
 
 	local str = icon .. "^" .. groupID .. "^" .. (iconID or "nil") .. "^" .. g .. "^" .. i

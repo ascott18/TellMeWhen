@@ -174,6 +174,8 @@ IconDragger:RegisterIconDragHandler(2,	-- Copy
 	function(IconDragger, info)
 		if IconDragger.desticon then
 			info.text = L["ICONMENU_COPYHERE"]
+			info.text = "NOT YET IMPLEMENTED"
+			TMW:Debug("Icon copy nyi")
 			info.tooltipTitle = nil
 			info.tooltipText = nil
 			return true

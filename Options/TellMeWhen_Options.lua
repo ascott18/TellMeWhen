@@ -133,11 +133,9 @@ TMW.BackupDate = date("%I:%M:%S %p")
 
 TMW.CI = setmetatable({}, {__index = function(tbl, k)
 	if k == "ics" then
-		-- take no chances with errors occuring here
 		return tbl.ic and tbl.ic:GetSettings()
 	elseif k == "gs" then
-		-- take no chances with errors occuring here
-		return TMW.approachTable(TMW.db, "profile", "Groups", tbl.g)
+		return tbl.ic and tbl.ic.group:GetSettings()
 	end
 end}) local CI = TMW.CI		--current icon
 
@@ -232,11 +230,12 @@ end
 
 ---------- Icon Utilities ----------
 function TMW:GetIconMenuText(g, i, ics)
-	ics = ics or TMW.db.profile.Groups[tonumber(g)].Icons[tonumber(i)]
+	ics = ics or TMW:GetData(TMW:GetData(TMW.db.profile.Groups[tonumber(g)]) .Icons[tonumber(i)])
 
 	local Type = ics.Type or ""
 	local typeData = Types[Type]
 
+	-- TODO: figure out why groupID (g) and iconID (i) are needed by this method
 	local text, tooltip, dontShorten = typeData:GetIconMenuText(ics, g, i)
 	text = tostring(text)
 	
@@ -309,11 +308,10 @@ function TMW:SetUIDropdownIconText(frame, iconName, text)
 	frame.selectedValue = iconName
 
 	-- Try to find the matching icon
-	for icon in TMW:InIcons() do
-		if icon:GetName() == iconName then
-			UIDropDownMenu_SetText(frame, TMW:GetIconMenuText(icon.group.ID, icon.ID, icon:GetSettings()))
-			return icon
-		end
+	local icon = _G[iconName]
+	if icon then
+		UIDropDownMenu_SetText(frame, TMW:GetIconMenuText(icon.group.ID, icon.ID, icon:GetSettings()))
+		return icon
 	end
 	
 	-- The icon didn't exist. Write a generic (group name, iconID) text instead.
@@ -326,6 +324,28 @@ function TMW:SetUIDropdownIconText(frame, iconName, text)
 		if gID then
 			UIDropDownMenu_SetText(frame, TMW:GetGroupName(gID, gID))
 			return
+		end
+	end
+	
+	UIDropDownMenu_SetText(frame, text)
+end
+
+function TMW:SetUIDropdownGUIDText(frame, GUID, text)
+	frame.selectedValue = GUID
+
+	local owner = TMW.GUIDToOwner[GUID]
+	local type = TMW:ParseGUID(GUID)
+
+	if owner then
+		if type == "icon" then
+			local icon = owner
+			UIDropDownMenu_SetText(frame, TMW:GetIconMenuText(icon.group.ID, icon.ID, icon:GetSettings()))
+			return icon
+
+		elseif type == "group" then
+			local group = owner
+			UIDropDownMenu_SetText(frame, group:GetGroupName())
+			return group
 		end
 	end
 	
@@ -1170,10 +1190,13 @@ function TMW:CompileOptions()
 					order = 30,
 					set = function(info, val)
 						local g = findid(info)
-						TMW.db.profile.Groups[g][info[#info]] = val
+						TMW[g]:GetSettings()[info[#info]] = val
 						TMW[g]:Setup()
 					end,
-					get = function(info) return TMW.db.profile.Groups[findid(info)][info[#info]] end,
+					get = function(info)
+						local g = findid(info)
+						return TMW[g]:GetSettings()[info[#info]]
+					end,
 					args = {
 						addgroup = addGroupFunctionGroup,
 						importexport = importExportBoxTemplate,
@@ -1919,7 +1942,11 @@ function IE:OnUpdate()
 	if tab.doesGroup and tab.doesIcon then
 		-- For IconEditor tabs that can configure icons
 
-		self.Header:SetFormattedText(titlePrepend .. " - " .. L["GROUPICON"], groupName, iconID)
+		local append = ""
+		if TMW.debug then
+			append = " " .. icon:GetGUID()
+		end
+		self.Header:SetFormattedText(titlePrepend .. " - " .. L["GROUPICON"] .. append, groupName, iconID)
 
 		if self.Header:IsTruncated() then
 			local truncAmt = 3
@@ -2148,6 +2175,9 @@ function IE:Load(isRefresh, icon, isHistoryChange)
 		CI.i = icon:GetID()
 		CI.g = icon.group:GetID()
 		CI.ic = icon
+
+		-- Generate a GUID for the icon if it doesn't already have one.
+		icon:GetGUID(true)
 
 		if IE.history[#IE.history] ~= icon and not isHistoryChange then
 			-- if we are using an old history point (i.e. we hit back a few times and then loaded a new icon),

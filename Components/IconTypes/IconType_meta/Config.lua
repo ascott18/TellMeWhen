@@ -52,13 +52,13 @@ TMW.IconDragger:RegisterIconDragHandler(220, -- Add to meta icon
 		if Icons[#Icons] == "" then
 			Icons[#Icons] = nil
 		end
-		tinsert(Icons, IconDragger.srcicon:GetName())
+		tinsert(Icons, IconDragger.srcicon:GetGUID(true))
 	end
 )
 
 
 
-function Type:GetIconMenuText(ics, groupID, iconID)
+function Type:GetIconMenuText(ics)
 	local text = Type.name .. " " .. L["ICONMENU_META_ICONMENUTOOLTIP"]:format(ics.Icons and #ics.Icons or 0)
 	
 	return text, "", true
@@ -77,7 +77,7 @@ function ME:LoadConfig()
 	local groupID, iconID = CI.g, CI.i
 	local settings = CI.ics.Icons
 
-	for k, v in pairs(settings) do
+	for k, GUID in pairs(settings) do
 		local mg = ME[k] or CreateFrame("Frame", "TellMeWhen_MetaIconOptions" .. k, TellMeWhen_MetaIconOptions, "TellMeWhen_MetaGroup", k)
 		ME[k] = mg
 		mg:Show()
@@ -87,8 +87,10 @@ function ME:LoadConfig()
 		end
 		mg:SetFrameLevel(TellMeWhen_MetaIconOptions:GetFrameLevel()+2)
 
-		TMW:SetUIDropdownIconText(mg.icon, v, L["CHOOSEICON"])
-		mg.icon.IconPreview:SetIcon(_G[v])
+		local icon = TMW.GUIDToOwner[GUID]
+
+		TMW:SetUIDropdownGUIDText(mg.icon, GUID, L["CHOOSEICON"])
+		mg.icon.IconPreview:SetIcon(icon)
 	end
 
 	TMW:AnimateHeightChange(TellMeWhen_MetaIconOptions, (#settings * ME[1]:GetHeight()) + 35, 0.1)
@@ -131,14 +133,14 @@ end
 local addedGroups = {}
 function ME:IconMenu()
 	if UIDROPDOWNMENU_MENU_LEVEL == 1 then
-		local currentGroupView = TMW.CI.ic.group:GetSettings().View
+		local currentGroupView = TMW.CI.gs.View
 		for group, groupID in TMW:InGroups() do
 			if group:ShouldUpdateIcons() then
 				local info = UIDropDownMenu_CreateInfo()
 
 				info.text = TMW:GetGroupName(groupID, groupID --[[, 1]])
 
-				info.value = group:GetName()
+				info.value = group
 
 				if currentGroupView ~= group:GetSettings().View then
 					info.disabled = true
@@ -160,11 +162,11 @@ function ME:IconMenu()
 			end
 		end
 	elseif UIDROPDOWNMENU_MENU_LEVEL == 2 then
-		for icon, groupID, iconID in TMW:InIcons() do
-			if icon:IsValid() and icon.group:GetName() == UIDROPDOWNMENU_MENU_VALUE and CI.ic ~= icon then
+		for icon, groupID, iconID in TMW:InIcons(UIDROPDOWNMENU_MENU_VALUE.ID) do
+			if icon:IsValid() and CI.ic ~= icon then
 				local info = UIDropDownMenu_CreateInfo()
 
-				local text, textshort, tooltip = TMW:GetIconMenuText(groupID, iconID)
+				local text, textshort, tooltip = TMW:GetIconMenuText(groupID, iconID, icon:GetSettings())
 				if text:sub(-2) == "))" then
 					textshort = textshort .. " " .. L["fICON"]:format(iconID)
 				end
@@ -173,7 +175,7 @@ function ME:IconMenu()
 				info.tooltipOnButton = true
 				info.tooltipText = L["GROUPICON"]:format(TMW:GetGroupName(groupID, groupID, 1), iconID) .. "\r\n" .. tooltip
 
-				info.value = icon:GetName()
+				info.value = icon
 				info.func = ME.IconMenuOnClick
 				info.arg1 = self
 
@@ -189,7 +191,12 @@ function ME:IconMenu()
 end
 
 function ME:IconMenuOnClick(frame)
-	CI.ics.Icons[frame:GetParent():GetID()] = self.value
+	local GUID = self.value:GetGUID()
+
+	assert(GUID)
+
+	CI.ics.Icons[frame:GetParent():GetID()] = GUID
+
 	ME:LoadConfig()
 	CloseDropDownMenus()
 end

@@ -84,27 +84,16 @@ TMW:RegisterDatabaseDefaults{
 				n = 0,
 			},
 		},
-		Groups = {
-			["**"] = {
-				SettingsPerView = {
-					["**"] = {
-						TextLayout = "", -- Fall back on the blank layout if an IconView does not explicitly define a layout.
-					},
-				},
-				Icons = {
-					["**"] = {
-						SettingsPerView = {
-							["**"] = {
-								-- The table of texts that correspond to the displays defined by the text layout.
-								Texts = {},
-							},
-						},
-					},
-				},
-			},
-		},
 	},
 }
+
+TMW:MergeDefaultsTables({
+	SettingsPerView = {
+		["**"] = {
+			TextLayout = "", -- Fall back on the blank layout if an IconView does not explicitly define a layout.
+		},
+	},
+}, TMW.Group_Defaults)
 
 
 -- -------------------
@@ -266,7 +255,7 @@ TMW:RegisterUpgrade(51003, {
 	
 	-- Sets a group to use the specified text layout
 	SetLayoutToGroup = function(self, groupID, GUID)
-		TMW.db.profile.Groups[groupID].SettingsPerView.icon.TextLayout = GUID
+		TMW:GetData(TMW.db.profile.Groups[groupID]).SettingsPerView.icon.TextLayout = GUID
 		
 		-- the group setting is a fallback for icons, so there is no reason to set the layout for individual icons
 		for ics in TMW:InIconSettings(groupID) do
@@ -440,9 +429,8 @@ end)
 
 function TEXT:GetTextLayoutForIconID(groupID, iconID, view)
 	-- arg3, view, is optional. Defaults to the current view
-	local gs = TMW.db.profile.Groups[groupID]
-	local ics = gs.Icons[iconID]
-	
+	local gs = TMW:GetData(TMW.db.profile.Groups[groupID])
+	local ics = TMW:GetData(gs.Icons[iconID])
 	view = view or gs.View
 	
 	-- Get the GUID defined by the icon for the current IconView
@@ -513,6 +501,15 @@ end
 -- -------------------
 	
 local Texts = TMW:NewClass("IconModule_Texts", "IconModule")
+
+Texts:RegisterIconDefaults{
+	SettingsPerView = {
+		["**"] = {
+			-- The table of texts that correspond to the displays defined by the text layout.
+			Texts = {},
+		},
+	}
+}
 
 Texts:RegisterConfigPanel_XMLTemplate(400, "TellMeWhen_TextDisplayOptions")
 
