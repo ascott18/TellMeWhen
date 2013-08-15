@@ -24,7 +24,7 @@ if strmatch(projectVersion, "%-%d+%-") then
 end
 
 TELLMEWHEN_VERSION_FULL = TELLMEWHEN_VERSION .. TELLMEWHEN_VERSION_MINOR
-TELLMEWHEN_VERSIONNUMBER = 62407 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL (for versioning of)
+TELLMEWHEN_VERSIONNUMBER = 62408 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL (for versioning of)
 
 if TELLMEWHEN_VERSIONNUMBER > 63000 or TELLMEWHEN_VERSIONNUMBER < 62000 then
 	-- safety check because i accidentally made the version number 414069 once
@@ -1003,19 +1003,14 @@ do -- TMW.generateGUID(length)
 		currentTime = format("%0.7f", currentTime)
 		currentTime = gsub(currentTime, "%.", "")
 
-		if #currentTime % 2 ~= 0 then
-			currentTime = currentTime .. (random(10) - 1)
+		while #currentTime < length * 2 do
+			currentTime = currentTime .. random(0, 9)
 		end
 
 		local GUID = ""
-		for digits in gmatch(currentTime, "(..?)") do
-			
-			local char = chars[tonumber(digits) + 1]
-			GUID = GUID .. char
-		end
-		
-		while #GUID < length do
-			GUID = GUID .. chars[random(#chars)]
+		for digits in gmatch(currentTime, "(..)") do
+
+			GUID = GUID .. chars[tonumber(digits) + 1]
 		end
 		
 		return strsub(GUID, 1, length)
