@@ -24,7 +24,7 @@ if strmatch(projectVersion, "%-%d+%-") then
 end
 
 TELLMEWHEN_VERSION_FULL = TELLMEWHEN_VERSION .. TELLMEWHEN_VERSION_MINOR
-TELLMEWHEN_VERSIONNUMBER = 62406 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL (for versioning of)
+TELLMEWHEN_VERSIONNUMBER = 62407 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL (for versioning of)
 
 if TELLMEWHEN_VERSIONNUMBER > 63000 or TELLMEWHEN_VERSIONNUMBER < 62000 then
 	-- safety check because i accidentally made the version number 414069 once
@@ -959,34 +959,58 @@ end
 local safecall = TMW.safecall
 
 do -- TMW.generateGUID(length)
+
+	-- Create a table with 100 characters that will be used to create GUIDs
 	local chars = {}
-	for charbyte = 33, 122 do
-		if charbyte ~= 94 and charbyte ~= 96 then
-			chars[#chars + 1] = strchar(charbyte)    
+	for charbyte = 17, 21 do
+		chars[#chars + 1] = strchar(charbyte)
+	end
+	for charbyte = 28, 125 do
+		--[[
+		 94 (^ carat) excluded because AceSerializer uses it.
+		 96 (` tilde) excluded because it gets screwed up on CurseForge
+		 124 (| pipe) excluded because wow crashes when it is followed by a number
+		 	(forms an invalid escape sequence) and outputted
+		]]
+		if  charbyte ~= 94
+		and charbyte ~= 96
+		and charbyte ~= 124
+		then
+			chars[#chars + 1] = strchar(charbyte)
 		end 
 	end
-	
+
+	assert(#chars >= 100, "chars table for TMW.generateGUID is incomplete!")
+
 	function TMW.generateGUID(length)
-		assert(length and length > 6, "GUID length must be more than 6")
+		assert(length and length >= 8, "GUID length must be at least 8")
 		
-		-- the first 6 characters are based off of the current time.
-		-- anything after the first 6 are random.
+		-- the first 8.5 characters are based off of the current time.
+		-- anything after the first 8.5 are random.
 		
-		-- a length of 10 gives		57289761 possible GUIDs at that exact milisecond the function was called. 
-		-- a length of 12 gives 433626201009 possible GUIDs at that exact milisecond the function was called.
-		
-		-- _G.time is used to get UNIX time. GetTime is used to add millisecond precision,
+
+		-- Local collisions at length 8 are nearly impossible
+		-- (an insanely fast processor would be needed to make GUIDs fast enough so that two could collide)
+
+		-- Local collisions at length 9 are absolutely impossible
+
+
+
+		-- _G.time is used to get UNIX time. debugprofilestop is used to add millisecond precision,
 		-- although it is important to note that the milliseconds have nothing to do with UNIX time.
+		local time = debugprofilestop() / 1000
 		local currentTime = _G.time() + (time - floor(time))
-		currentTime = format("%0.2f", currentTime)
+		currentTime = format("%0.7f", currentTime)
 		currentTime = gsub(currentTime, "%.", "")
-		
+
+		if #currentTime % 2 ~= 0 then
+			currentTime = currentTime .. (random(10) - 1)
+		end
+
 		local GUID = ""
 		for digits in gmatch(currentTime, "(..?)") do
-			local len = #digits
-			local percent = tonumber(digits)/(10^len)
 			
-			local char = chars[floor((#chars-1)*percent) + 1]
+			local char = chars[tonumber(digits) + 1]
 			GUID = GUID .. char
 		end
 		
@@ -996,6 +1020,22 @@ do -- TMW.generateGUID(length)
 		
 		return strsub(GUID, 1, length)
 	end
+
+	--[[
+	local charsLookup = {}
+	for k, v in pairs(chars) do
+		charsLookup[v] = k
+	end
+
+	function TMW.timeFromGUID(guid)
+		local time = ""
+		for char in gmatch(guid:sub(1, 10), "(.)") do
+			time = time .. charsLookup[char] - 1
+		end
+
+		return tonumber(time)
+	end
+	--]]
 end
 
 
