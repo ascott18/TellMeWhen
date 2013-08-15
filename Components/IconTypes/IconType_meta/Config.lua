@@ -114,12 +114,12 @@ function ME:Insert(where)
 end
 
 function ME:Delete(self)
-	tremove(TMW.db.profile.Groups[CI.g].Icons[CI.i].Icons, self:GetParent():GetID())
+	tremove(CI.ics.Icons, self:GetParent():GetID())
 	ME:LoadConfig()
 end
 
 function ME:SwapIcons(id1, id2)
-	local Icons = TMW.CI.ics.Icons
+	local Icons = CI.ics.Icons
 	
 	Icons[id1], Icons[id2] = Icons[id2], Icons[id1]
 	
@@ -189,7 +189,7 @@ function ME:IconMenu()
 end
 
 function ME:IconMenuOnClick(frame)
-	TMW.db.profile.Groups[CI.g].Icons[CI.i].Icons[frame:GetParent():GetID()] = self.value
+	CI.ics.Icons[frame:GetParent():GetID()] = self.value
 	ME:LoadConfig()
 	CloseDropDownMenus()
 end

@@ -301,7 +301,7 @@ function Group.Setup(group, noIconSetup)
 	local groupID = group:GetID()
 	
 	for k, v in pairs(TMW.Group_Defaults) do
-		group[k] = TMW.db.profile.Groups[groupID][k]
+		group[k] = gs[k]
 	end
 	
 	group.__shown = group:IsShown()
