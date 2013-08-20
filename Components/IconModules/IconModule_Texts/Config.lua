@@ -1304,7 +1304,7 @@ function Module:Table_GetNormalSuggestions(suggestions, tbl, ...)
 		if namespaceName == "TMW" then
 			for tagName, tagData in pairs(namespace) do
 				if not tagData.noDoc
-				and tagName ~= "TMWFormatDuration"
+				and tagData.category ~= L["TEXTMANIP"]
 				then
 					suggestions[#suggestions + 1] = tagName
 				end
