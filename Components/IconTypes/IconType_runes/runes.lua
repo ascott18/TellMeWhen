@@ -121,7 +121,7 @@ local function Runes_OnUpdate(icon, time)
 	local d = Sort == -1 and huge or 0
 
 	local usableCount = 0
-	
+
 	for iSlot = 1, #Slots do
 		if Slots[iSlot] then
 			local isDeath = false
@@ -167,6 +167,7 @@ local function Runes_OnUpdate(icon, time)
 		end
 	end
 
+
 	if readyslot then
 		if icon.RunesAsCharges and unslot then
 			icon:SetInfo("alpha; texture; start, duration; charges, maxCharges; stack, stackText; spell",
@@ -187,7 +188,7 @@ local function Runes_OnUpdate(icon, time)
 				runeNames[readyslotType] -- MAYBE: change this arg? (to a special arg instead of spell)
 			)
 		end
-	elseif unslot then		
+	elseif unslot then
 		icon:SetInfo("alpha; texture; start, duration; charges, maxCharges; stack, stackText; spell",
 			icon.UnAlpha,
 			textures[unslotType],
@@ -195,6 +196,14 @@ local function Runes_OnUpdate(icon, time)
 			0, 0,
 			nil, nil,
 			runeNames[unslotType] -- MAYBE: change this arg? (to a special arg instead of spell)
+		)
+	else
+		icon:SetInfo("alpha; texture; start, duration; charges, maxCharges; stack, stackText",
+			icon.UnAlpha,
+			icon.FirstTexture,
+			0, 0,
+			0, 0,
+			nil, nil
 		)
 	end
 end
