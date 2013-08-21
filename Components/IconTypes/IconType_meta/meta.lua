@@ -80,18 +80,6 @@ end)
 Type:RegisterConfigPanel_XMLTemplate(170, "TellMeWhen_MetaSortSettings")
 
 
-TMW:RegisterUpgrade(24100, {
-	icon = function(self, ics)
-		if ics.Type == "meta" and type(ics.Icons) == "table" then
-			--make values the data, not the keys, so that we can customize the order that they are checked in
-			for k, v in pairs(ics.Icons) do
-				tinsert(ics.Icons, k)
-				ics.Icons[k] = nil
-			end
-		end
-	end,
-})
-
 do
 	local CCI_icon
 	local function CheckCompiledIcons(icon)

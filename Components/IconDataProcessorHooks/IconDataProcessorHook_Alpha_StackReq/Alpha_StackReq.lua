@@ -57,16 +57,6 @@ TMW:RegisterUpgrade(40080, {
 		ics.StackMax = floor(ics.StackMax)
 	end,
 })
-TMW:RegisterUpgrade(23000, {
-	icon = function(self, ics)
-		if ics.StackMin ~= TMW.Icon_Defaults.StackMin then
-			ics.StackMinEnabled = true
-		end
-		if ics.StackMax ~= TMW.Icon_Defaults.StackMax then
-			ics.StackMaxEnabled = true
-		end
-	end,
-})
 TMW:RegisterUpgrade(60010, {
 	icon = function(self, ics)
 		ics.StackAlpha = ics.ConditionAlpha
