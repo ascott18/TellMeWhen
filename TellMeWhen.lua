@@ -24,7 +24,7 @@ if strmatch(projectVersion, "%-%d+%-") then
 end
 
 TELLMEWHEN_VERSION_FULL = TELLMEWHEN_VERSION .. TELLMEWHEN_VERSION_MINOR
-TELLMEWHEN_VERSIONNUMBER = 62409 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL (for versioning of)
+TELLMEWHEN_VERSIONNUMBER = 62410 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL (for versioning of)
 
 if TELLMEWHEN_VERSIONNUMBER > 63000 or TELLMEWHEN_VERSIONNUMBER < 62000 then
 	-- safety check because i accidentally made the version number 414069 once
@@ -962,10 +962,11 @@ do -- TMW.generateGUID(length)
 
 	-- Create a table with 100 characters that will be used to create GUIDs
 	local chars = {}
-	for charbyte = 17, 21 do
+	--[[for charbyte = 17, 21 do
 		chars[#chars + 1] = strchar(charbyte)
-	end
-	for charbyte = 28, 125 do
+	end]]
+	--for charbyte = 28, 125 do
+	for charbyte = 33, 125 do
 		--[[
 		 94 (^ carat) excluded because AceSerializer uses it.
 		 96 (` tilde) excluded because it gets screwed up on CurseForge
@@ -977,13 +978,17 @@ do -- TMW.generateGUID(length)
 		and charbyte ~= 124
 		then
 			chars[#chars + 1] = strchar(charbyte)
-		end 
+		end
 	end
+	for charbyte = 161, 161 + 100 - #chars - 1 do
+		chars[#chars + 1] = "\194" .. strchar(charbyte)
+	end
+
 
 	assert(#chars >= 100, "chars table for TMW.generateGUID is incomplete!")
 
 	function TMW.generateGUID(length)
-		assert(length and length >= 8, "GUID length must be at least 8")
+		assert(length and length >= 9, "GUID length must be at least 9")
 		
 		-- the first 8.5 characters are based off of the current time.
 		-- anything after the first 8.5 are random.
@@ -1003,7 +1008,7 @@ do -- TMW.generateGUID(length)
 		currentTime = format("%0.7f", currentTime)
 		currentTime = gsub(currentTime, "%.", "")
 
-		while #currentTime < length * 2 do
+		while strlenutf8(currentTime) < length * 2 do
 			currentTime = currentTime .. random(0, 9)
 		end
 
@@ -1013,7 +1018,7 @@ do -- TMW.generateGUID(length)
 			GUID = GUID .. chars[tonumber(digits) + 1]
 		end
 		
-		return strsub(GUID, 1, length)
+		return GUID -- strsub(GUID, 1, length)
 	end
 
 	--[[
