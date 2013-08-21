@@ -46,6 +46,25 @@ function SharableDataType:RunMenuBuilders(result, editbox)
 	end
 end
 
+function SharableDataType:Import_ImportData(_, data, version, GUID)
+	assert(type(GUID) == "string")
+
+	if not TMW.DatabaseTypes[self.type] then
+		error("You must override Import_ImportData for types that don't match with a database type.")
+	end
+
+	TMW:CheckInData(GUID)
+	TMW.db.global.Trunk[self.type][GUID] = TMW:CopyWithoutMetatable(data)
+
+	if version then
+		if version > TELLMEWHEN_VERSIONNUMBER then
+			TMW:Print(L["FROMNEWERVERSION"])
+		else
+			TMW:DoUpgrade(self.type, version, textlayout, GUID)
+		end
+	end
+	TMW:Update()
+end
 
 
 

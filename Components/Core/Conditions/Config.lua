@@ -359,8 +359,8 @@ end
 
 function CNDT:IconMenu_DropDown()
 	if UIDROPDOWNMENU_MENU_LEVEL == 2 then
-		for icon, groupID, iconID in TMW:InIcons() do
-			if icon:IsValid() and UIDROPDOWNMENU_MENU_VALUE == groupID and CI.ic ~= icon then
+		for icon, groupID, iconID in TMW:InIcons(UIDROPDOWNMENU_MENU_VALUE) do
+			if icon:IsValid() and CI.ic ~= icon then
 				local info = UIDropDownMenu_CreateInfo()
 
 				local text, textshort, tooltip = TMW:GetIconMenuText(groupID, iconID, icon:GetSettings())

@@ -273,6 +273,9 @@ function TMW:GuessIconTexture(ics)
 	return tex
 end
 
+-- TODO: update this callback (and the whole system) for GUIDs
+-- this callback should allow required things to be included in a data packet.
+-- It should basically scan a data table and check what it depends upon.
 function TMW:PrepareIconSettingsForCopying(ics, gs)
 	TMW:Fire("TMW_ICON_PREPARE_SETTINGS_FOR_COPY", ics, gs)
 end
