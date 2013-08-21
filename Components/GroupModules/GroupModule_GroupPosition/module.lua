@@ -22,7 +22,7 @@ local function GetAnchoredPoints(group)
 	local gs = group:GetSettings()
 	local p = gs.Point
 
-	local relframe = _G[p.relativeTo] or UIParent
+	local relframe = TMW.GUIDToOwner[p.relativeTo] or _G[p.relativeTo] or UIParent
 	local point, relativePoint = p.point, p.relativePoint
 
 	if relframe == UIParent then
@@ -75,7 +75,7 @@ end
 function GroupPosition:DetectFrame(event, time, Locked)
 	local frameToFind = self.frameToFind
 	
-	if _G[frameToFind] then
+	if TMW.GUIDToOwner[frameToFind] or _G[frameToFind] then
 		self:SetPos()
 		TMW:UnregisterCallback("TMW_ONUPDATE_TIMECONSTRAINED_PRE", self, "DetectFrame")
 	end
@@ -110,8 +110,7 @@ function GroupPosition:SetPos()
 		p.relativeTo = "UIParent"
 	end
 	
-	p.relativeTo = type(p.relativeTo) == "table" and p.relativeTo:GetName() or p.relativeTo
-	local relativeTo = _G[p.relativeTo]
+	local relativeTo = TMW.GUIDToOwner[p.relativeTo] or _G[p.relativeTo]
 	
 	if not relativeTo then
 		self.frameToFind = p.relativeTo
@@ -137,18 +136,6 @@ function GroupPosition:SetPos()
 	group:SetFrameLevel(gs.Level)
 	group:SetScale(gs.Scale)
 end
-
-
-TMW:RegisterCallback("TMW_CONFIG_ICON_RECONCILIATION_REQUESTED",
-function(event, replace, limitSourceGroup)
-	for gs, groupID in TMW:InGroupSettings() do
-		if not limitSourceGroup or groupID == limitSourceGroup then
-			if type(gs.Point.relativeTo) == "string" then
-				replace(gs.Point, "relativeTo")
-			end
-		end
-	end
-end)
 
 
 
