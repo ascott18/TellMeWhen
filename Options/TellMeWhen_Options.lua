@@ -1944,7 +1944,7 @@ function IE:OnUpdate()
 
 		local append = ""
 		if TMW.debug then
-			append = " " .. icon:GetGUID()
+			append = " " .. icon:GetGUID():gsub("%%", "%%%%")
 		end
 		self.Header:SetFormattedText(titlePrepend .. " - " .. L["GROUPICON"] .. append, groupName, iconID)
 
@@ -3242,56 +3242,6 @@ function TMW:GetSettingsString(type, settings, defaults, ...)
 	settings = CopyTable(settings)
 	settings = TMW:CleanSettings(type, settings, defaults)
 	return TMW:SerializeData(settings, type, ...)
-end
-
-function TMW:CleanDefaults(settings, defaults, blocker)
-	-- make sure and pass in a COPY of the settings, not the original settings
-	-- the following function is a slightly modified version of the one that AceDB uses to strip defaults.
-
-	-- remove all metatables from the db, so we don't accidentally create new sub-tables through them
-	setmetatable(settings, nil)
-	-- loop through the defaults and remove their content
-	for k,v in pairs(defaults) do
-		if k == "*" or k == "**" then
-			if type(v) == "table" then
-				-- Loop through all the actual k,v pairs and remove
-				for key, value in pairs(settings) do
-					if type(value) == "table" then
-						-- if the key was not explicitly specified in the defaults table, just strip everything from * and ** tables
-						if defaults[key] == nil and (not blocker or blocker[key] == nil) then
-							TMW:CleanDefaults(value, v)
-							-- if the table is empty afterwards, remove it
-							if next(value) == nil then
-								settings[key] = nil
-							end
-						-- if it was specified, only strip ** content, but block values which were set in the key table
-						elseif k == "**" then
-							TMW:CleanDefaults(value, v, defaults[key])
-						end
-					end
-				end
-			elseif k == "*" then
-				-- check for non-table default
-				for key, value in pairs(settings) do
-					if defaults[key] == nil and v == value then
-						settings[key] = nil
-					end
-				end
-			end
-		elseif type(v) == "table" and type(settings[k]) == "table" then
-			-- if a blocker was set, dive into it, to allow multi-level defaults
-			TMW:CleanDefaults(settings[k], v, blocker and blocker[k])
-			if next(settings[k]) == nil then
-				settings[k] = nil
-			end
-		else
-			-- check if the current value matches the default, and that its not blocked by another defaults table
-			if settings[k] == defaults[k] and (not blocker or blocker[k] == nil) then
-				settings[k] = nil
-			end
-		end
-	end
-	return settings
 end
 
 function TMW:CleanSettings(type, settings, defaults)

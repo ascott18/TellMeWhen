@@ -48,7 +48,7 @@ TMW.L = L
 
 
 -- GLOBALS: LibStub
--- GLOBALS: TellMeWhenDB, TellMeWhen_Settings
+-- GLOBALS: TellMeWhenDB
 -- GLOBALS: TELLMEWHEN_VERSION, TELLMEWHEN_VERSION_MINOR, TELLMEWHEN_VERSION_FULL, TELLMEWHEN_VERSIONNUMBER, TELLMEWHEN_MAXROWS
 -- GLOBALS: UIDROPDOWNMENU_MENU_LEVEL, UIDropDownMenu_AddButton, UIDropDownMenu_CreateInfo
 -- GLOBALS: UIParent, CreateFrame, collectgarbage, geterrorhandler 
@@ -224,64 +224,62 @@ function TMW:MergeDefaultsTables(src, dest)
 	return dest -- not really needed, but what the hell why not
 end
 
-TMW.DatabaseTrunks = {}
-function TMW:RegisterDatabaseTrunk(name, defaults)
-	assert(type(name) == "string", "arg1 to RegisterDatabaseTrunk must be a string")
-	assert(type(defaults) == "table", "arg2 to RegisterDatabaseTrunk must be a table")
+TMW.DatabaseTypes = {}
+function TMW:RegisterDatabaseType(name, defaults)
+	assert(type(name) == "string", "arg1 to RegisterDatabaseType must be a string")
+	assert(type(defaults) == "table", "arg2 to RegisterDatabaseType must be a table")
 
 	if TMW.InitializedDatabase then
-		error("Database trunk is being registered too late. It needs to be registered before the database is initialized.", 2)
+		error("Database type is being registered too late. It needs to be registered before the database is initialized.", 2)
 	end
 
-	TMW.DatabaseTrunks[name] = defaults
+	TMW.DatabaseTypes[name] = defaults
+
+
+	TMW.Defaults.global.Trunk[name] = {}
+
+	TMW:MergeDefaultsTables({ [name] = {["**"] = defaults} }, TMW.Defaults.global.ActiveTrunk)
 
 	return defaults
 end
 
-TMW.Group_Defaults = TMW:RegisterDatabaseTrunk("group", {
-	["**"] = {
-		Enabled			= true,
-		OnlyInCombat	= false,
-		Locked			= false,
-		View			= "icon",
-		Name			= "",
-		Strata			= "MEDIUM",
-		Scale			= 2.0,
-		Level			= 10,
-		Rows			= 1,
-		Columns			= 4,
-		CheckOrder		= -1,
-		PrimarySpec		= true,
-		SecondarySpec	= true,
-		Tree1 			= true,
-		Tree2 			= true,
-		Tree3 			= true,
-		Tree4 			= true,
-		SettingsPerView	= {
-			["**"] = {
-			}
-		},
-		Icons = {},
+TMW.Group_Defaults = TMW:RegisterDatabaseType("group", {
+	Enabled			= true,
+	OnlyInCombat	= false,
+	Locked			= false,
+	View			= "icon",
+	Name			= "",
+	Strata			= "MEDIUM",
+	Scale			= 2.0,
+	Level			= 10,
+	Rows			= 1,
+	Columns			= 4,
+	CheckOrder		= -1,
+	PrimarySpec		= true,
+	SecondarySpec	= true,
+	Tree1 			= true,
+	Tree2 			= true,
+	Tree3 			= true,
+	Tree4 			= true,
+	SettingsPerView	= {
+		["**"] = {
+		}
 	},
-})["**"]
+	Icons = {},
+})
 
-TMW.Icon_Defaults = TMW:RegisterDatabaseTrunk("icon", {
-	["**"] = {
-		ShowWhen				= 0x2, -- bit order: x, x, alpha, unalpha
-		Enabled					= false,
-		Name					= "",
-		Type					= "",
-		Alpha					= 1,
-		UnAlpha					= 1,
-		Icons					= {
-			[1]					= "",
-		},
-		SettingsPerView			= {
-			["**"] = {
-			}
-		},
+TMW.Icon_Defaults = TMW:RegisterDatabaseType("icon", {
+	ShowWhen				= 0x2, -- bit order: x, x, alpha, unalpha
+	Enabled					= false,
+	Name					= "",
+	Type					= "",
+	Alpha					= 1,
+	UnAlpha					= 1,
+	SettingsPerView			= {
+		["**"] = {
+		}
 	},
-})["**"]
+})
 
 
 
@@ -972,6 +970,7 @@ do	-- TMW.safecall
 end
 local safecall = TMW.safecall
 
+
 do -- TMW.generateGUID(length)
 
 	-- Create a table with 100 characters that will be used to create GUIDs
@@ -1056,9 +1055,12 @@ end
 function TMW:GenerateGUID(type, length)
 	return type .. ":" .. TMW.generateGUID(length)
 end
+
 function TMW:ParseGUID(GUID)
 	return strmatch(GUID, "([a-z]+):(.+)")
 end
+
+
 
 
 
@@ -1088,12 +1090,10 @@ do -- InNLengthTable
 		return state.k, state.t[state.k]
 	end
 
-	function TMW:InNLengthTable(arg)
-		if arg then
-			return iter, getstate(0, arg)
-		else
-			error("Bag argument #1 to 'TMW:InNLengthTable(arg)'. Expected table, got nil.", 2)
-		end
+	function TMW:InNLengthTable(table)
+		TMW:ValidateType("2 (table)", "TMW:InNLengthTable(table)", table, "table")
+		
+		return iter, getstate(0, table)
 	end
 end
 
@@ -1348,7 +1348,6 @@ end
 
 
 
-
 ---------------------------------
 -- Callback lib
 ---------------------------------
@@ -1531,6 +1530,7 @@ do -- Callback Lib
 		end
 	end
 end
+
 
 
 
@@ -1733,19 +1733,13 @@ function TMW:InitializeDatabase()
 	
 	TMW.InitializeDatabase = nil
 	
-	for name, defaults in pairs(TMW.DatabaseTrunks) do
-		TMW.Defaults.global.Trunk[name] = {}
-
-		TMW:MergeDefaultsTables({ [name] = defaults }, TMW.Defaults.global.ActiveTrunk)
-	end
-	
 	TMW:Fire("TMW_DB_INITIALIZING")
 	TMW:UnregisterAllCallbacks("TMW_DB_INITIALIZING")
 	
 	--------------- Database ---------------
 	if type(TellMeWhenDB) ~= "table" then
 		-- TellMeWhenDB might not exist if this is a fresh install
-		-- or if the user is upgrading from a really old version that uses TellMeWhen_Settings.
+		-- or if the user is upgrading from a really old version
 		TellMeWhenDB = {Version = TELLMEWHEN_VERSIONNUMBER}
 	end
 	
@@ -1766,15 +1760,6 @@ function TMW:InitializeDatabase()
 
 	TMW.InitializedDatabase = true
 	
-	if TellMeWhen_Settings then
-		for k, v in pairs(TellMeWhen_Settings) do
-			TMW.db.profile[k] = v
-		end
-		TMW.db = AceDB:New("TellMeWhenDB", TMW.Defaults)
-		TMW.db.profile.Version = TellMeWhen_Settings.Version
-		TellMeWhen_Settings = nil
-	end
-	
 	TMW.db.RegisterCallback(TMW, "OnProfileChanged",	"OnProfile")
 	TMW.db.RegisterCallback(TMW, "OnProfileCopied",		"OnProfile")
 	TMW.db.RegisterCallback(TMW, "OnProfileReset",		"OnProfile")
@@ -1794,18 +1779,18 @@ function TMW:OnDatabaseShutdown()
 	TMW.db:RegisterDefaults(nil)
 
 	if TMW.db.global.ActiveTrunk then
-		for trunkName, activeTrunk in pairs(TMW.db.global.ActiveTrunk) do
+		for dataType, activeTrunk in pairs(TMW.db.global.ActiveTrunk) do
 			for GUID, data in pairs(activeTrunk) do
 
 				if not TMW.db.global.Trunk then
 					TMW.db.global.Trunk = {}
 				end
 
-				local trunk = TMW.db.global.Trunk[trunkName]
+				local trunk = TMW.db.global.Trunk[dataType]
 
 				if not trunk then
 					trunk = {}
-					TMW.db.global.Trunk[trunkName] = trunk
+					TMW.db.global.Trunk[dataType] = trunk
 				end
 
 				trunk[GUID] = data
@@ -1819,23 +1804,73 @@ end
 
 TMW.GUIDToOwner = {}
 
+function TMW:CleanDefaults(settings, defaults, blocker)
+	-- make sure and pass in a COPY of the settings, not the original settings
+	-- the following function is a slightly modified version of the one that AceDB uses to strip defaults.
+
+	-- remove all metatables from the db, so we don't accidentally create new sub-tables through them
+	setmetatable(settings, nil)
+	-- loop through the defaults and remove their content
+	for k,v in pairs(defaults) do
+		if k == "*" or k == "**" then
+			if type(v) == "table" then
+				-- Loop through all the actual k,v pairs and remove
+				for key, value in pairs(settings) do
+					if type(value) == "table" then
+						-- if the key was not explicitly specified in the defaults table, just strip everything from * and ** tables
+						if defaults[key] == nil and (not blocker or blocker[key] == nil) then
+							TMW:CleanDefaults(value, v)
+							-- if the table is empty afterwards, remove it
+							if next(value) == nil then
+								settings[key] = nil
+							end
+						-- if it was specified, only strip ** content, but block values which were set in the key table
+						elseif k == "**" then
+							TMW:CleanDefaults(value, v, defaults[key])
+						end
+					end
+				end
+			elseif k == "*" then
+				-- check for non-table default
+				for key, value in pairs(settings) do
+					if defaults[key] == nil and v == value then
+						settings[key] = nil
+					end
+				end
+			end
+		elseif type(v) == "table" and type(settings[k]) == "table" then
+			-- if a blocker was set, dive into it, to allow multi-level defaults
+			TMW:CleanDefaults(settings[k], v, blocker and blocker[k])
+			if next(settings[k]) == nil then
+				settings[k] = nil
+			end
+		else
+			-- check if the current value matches the default, and that its not blocked by another defaults table
+			if settings[k] == defaults[k] and (not blocker or blocker[k] == nil) then
+				settings[k] = nil
+			end
+		end
+	end
+	return settings
+end
+
 function TMW:GetData(GUID, raw, noRetrieve)
 	if not GUID then
 		return
 	end
 
-	trunkName = TMW:ParseGUID(GUID)
+	dataType = TMW:ParseGUID(GUID)
 
-	if not TMW.DatabaseTrunks[trunkName] then
-		error("There is no trunk for the data " .. GUID, 2)
+	if not TMW.DatabaseTypes[dataType] then
+		error("Data type for the guid is not registered" .. GUID, 2)
 	end
 
-	local activeTrunk = TMW.db.global.ActiveTrunk[trunkName]
+	local activeTrunk = TMW.db.global.ActiveTrunk[dataType]
 
 	if not noRetrieve then
-		local data = TMW.db.global.Trunk[trunkName][GUID]
+		local data = TMW.db.global.Trunk[dataType][GUID]
 		if data then
-			TMW.db.global.Trunk[trunkName][GUID] = nil
+			TMW.db.global.Trunk[dataType][GUID] = nil
 
 			return TMW:CopyTableInPlaceWithMeta(data, activeTrunk[GUID])
 		end
@@ -1848,15 +1883,49 @@ function TMW:GetData(GUID, raw, noRetrieve)
 	end
 end
 
-function TMW:DeleteData(GUID)
-	trunkName = TMW:ParseGUID(GUID)
+function TMW:CheckInData(GUID)
+	if not GUID then
+		return
+	end
 
-	if not TMW.DatabaseTrunks[trunkName] then
+	dataType = TMW:ParseGUID(GUID)
+
+	if not TMW.DatabaseTypes[dataType] then
+		error("Data type for the guid is not registered" .. GUID, 2)
+	end
+
+	local activeTrunk = TMW.db.global.ActiveTrunk[dataType]
+
+	local data = rawget(activeTrunk, GUID)
+
+	print(data, TMW.DatabaseTypes[dataType])
+
+	if not data then
+		return
+	end
+
+	data = TMW:CleanDefaults(data, TMW.DatabaseTypes[dataType])
+
+	if not next(data) then
+		data = nil
+	end
+
+	print(data)
+
+	TMW.db.global.Trunk[dataType][GUID] = data
+	activeTrunk[GUID] = nil
+
+end
+
+function TMW:DeleteData(GUID)
+	dataType = TMW:ParseGUID(GUID)
+
+	if not TMW.DatabaseTypes[dataType] then
 		error("There is no trunk for the data " .. GUID, 2)
 	end
 
-	TMW.db.global.ActiveTrunk[trunkName][GUID] = nil
-	TMW.db.global.Trunk[trunkName][GUID] = nil
+	TMW.db.global.ActiveTrunk[dataType][GUID] = nil
+	TMW.db.global.Trunk[dataType][GUID] = nil
 	TMW.GUIDToOwner[GUID] = nil
 end
 
@@ -2323,183 +2392,6 @@ function TMW:GetBaseUpgrades()			-- upgrade functions
 				end
 			end,
 		},
-		[30000] = {
-			profile = function(self)
-				TMW.db.profile.NumGroups = 10
-				TMW.db.profile.Condensed = nil
-				TMW.db.profile.NumCondits = nil
-				TMW.db.profile.DSN = nil
-				TMW.db.profile.UNUSEColor = nil
-				TMW.db.profile.USEColor = nil
-				
-				if TMW.db.profile.Font and TMW.db.profile.Font.Outline == "THICK" then
-					TMW.db.profile.Font.Outline = "THICKOUTLINE"
-				end
-			end,
-			
-			stances = {
-				{class = "WARRIOR", 	id = 2457}, 	-- Battle Stance
-				{class = "WARRIOR", 	id = 71}, 		-- Defensive Stance
-				{class = "WARRIOR", 	id = 2458}, 	-- Berserker Stance
-
-				{class = "DRUID", 		id = 5487}, 	-- Bear Form
-				{class = "DRUID", 		id = 768}, 		-- Cat Form
-				{class = "DRUID", 		id = 1066}, 	-- Aquatic Form
-				{class = "DRUID", 		id = 783}, 		-- Travel Form
-				{class = "DRUID", 		id = 24858}, 	-- Moonkin Form
-				{class = "DRUID", 		id = 33891}, 	-- Tree of Life
-				{class = "DRUID", 		id = 33943}, 	-- Flight Form
-				{class = "DRUID", 		id = 40120}, 	-- Swift Flight Form
-
-				{class = "PRIEST", 		id = 15473}, 	-- Shadowform
-
-				{class = "ROGUE", 		id = 1784}, 	-- Stealth
-
-				{class = "HUNTER", 		id = 82661}, 	-- Aspect of the Fox
-				{class = "HUNTER", 		id = 13165}, 	-- Aspect of the Hawk
-				{class = "HUNTER", 		id = 5118}, 	-- Aspect of the Cheetah
-				{class = "HUNTER", 		id = 13159}, 	-- Aspect of the Pack
-				{class = "HUNTER", 		id = 20043}, 	-- Aspect of the Wild
-
-				{class = "DEATHKNIGHT", id = 48263}, 	-- Blood Presence
-				{class = "DEATHKNIGHT", id = 48266}, 	-- Frost Presence
-				{class = "DEATHKNIGHT", id = 48265}, 	-- Unholy Presence
-
-				{class = "PALADIN", 	id = 19746}, 	-- Concentration Aura
-				{class = "PALADIN", 	id = 32223}, 	-- Crusader Aura
-				{class = "PALADIN", 	id = 465}, 		-- Devotion Aura
-				{class = "PALADIN", 	id = 19891}, 	-- Resistance Aura
-				{class = "PALADIN", 	id = 7294}, 	-- Retribution Aura
-
-				{class = "WARLOCK", 	id = 47241}, 	-- Metamorphosis
-			},
-	
-			setupcsn = function(self)
-				self.CSN = {
-					[0]	= NONE,
-				}
-
-				for _, stanceData in ipairs(self.stances) do
-					if stanceData.class == pclass then
-						local stanceName = GetSpellInfo(stanceData.id)
-						tinsert(self.CSN, stanceName)
-					end
-				end
-
-				for i, stanceName in pairs(self.CSN) do
-					self.CSN[stanceName] = i
-				end
-
-			end,
-
-			group = function(self, gs)
-				gs.LBFGroup = nil
-				
-				if not self.CSN then
-					self:setupcsn()
-				end
-				
-				if gs.Stance then
-					for k, v in pairs(gs.Stance) do
-						if self.CSN[k] then
-							if v then -- everything switched in this version
-								gs.Stance[self.CSN[k]] = false
-							else
-								gs.Stance[self.CSN[k]] = true
-							end
-							gs.Stance[k] = nil
-						end
-					end
-				end
-			end,
-			iconSettingsToClear = {
-				OORColor = true,
-				OOMColor = true,
-				Color = true,
-				ColorOverride = true,
-				UnColor = true,
-				DurationAndCD = true,
-				Shapeshift = true, -- i used this one during some initial testing for shapeshifts
-				UnitReact = true,
-			},
-			icon = function(self, ics, groupID, iconID)
-				for k in pairs(self.iconSettingsToClear) do
-					ics[k] = nil
-				end
-
-				-- this is part of the old CondenseSettings (but modified slightly),
-				-- just to get rid of values that are defined in the saved variables that dont need to be
-				-- (basically, they were set automatically on accident, most of them in early versions)
-				local nondefault = 0
-				local n = 0
-				for s, v in pairs(ics) do
-					if (type(v) ~= "table" and v ~= TMW.Icon_Defaults[s]) or (type(v) == "table" and #v ~= 0) then
-						nondefault = nondefault + 1
-						if (s == "Enabled") or (s == "ShowTimerText") then
-							n = n+1
-						end
-					end
-				end
-				if n == nondefault then
-					TMW.db.profile.Groups[groupID].Icons[iconID] = nil
-				end
-			end,
-		},
-		[24000] = {
-			icon = function(self, ics)
-				ics.Name = gsub(ics.Name, "StunnedOrIncapacitated", "Stunned;Incapacitated")
-				
-				-- Changed in 60027 to "IncreasedSP" instead of "IncreasedSPsix;IncreasedSPten"
-				--ics.Name = gsub(ics.Name, "IncreasedSPboth", "IncreasedSPsix;IncreasedSPten")
-				ics.Name = gsub(ics.Name, "IncreasedSPboth", "IncreasedSP")
-				
-				
-				if ics.Type == "darksim" then
-					ics.Type = "multistatecd"
-					ics.Name = "77606"
-				end
-			end,
-		},
-		[22100] = {
-			icon = function(self, ics)
-				if ics.UnitReact and ics.UnitReact ~= 0 then
-					local condition = ics.Conditions[#ics.Conditions + 1]
-					condition.Type = "REACT"
-					condition.Level = ics.UnitReact
-					condition.Unit = "target"
-				end
-			end,
-		},
-		[21200] = {
-			icon = function(self, ics)
-				if ics.WpnEnchantType == "thrown" then
-					ics.WpnEnchantType = "RangedSlot"
-				elseif ics.WpnEnchantType == "offhand" then
-					ics.WpnEnchantType = "SecondaryHandSlot"
-				elseif ics.WpnEnchantType == "mainhand" then --idk why this would happen, but you never know
-					ics.WpnEnchantType = "MainHandSlot"
-				end
-			end,
-		},
-		[15400] = {
-			icon = function(self, ics)
-				if ics.Alpha == 0.01 then ics.Alpha = 1 end
-			end,
-		},
-		[15300] = {
-			icon = function(self, ics)
-				if ics.Alpha > 1 then
-					ics.Alpha = (ics.Alpha / 100)
-				else
-					ics.Alpha = 1
-				end
-			end,
-		},
-		[12000] = {
-			profile = function(self)
-				TMW.db.profile.Spec = nil
-			end,
-		},
 
 	}
 end
@@ -2628,6 +2520,9 @@ function TMW:RawUpgrade()
 		TellMeWhenDB.Version = 41409
 	end
 
+	
+	TMW:Fire("TMW_DB_PRE_DEFAULT_UPGRADES")
+	TMW:UnregisterAllCallbacks("TMW_DB_PRE_DEFAULT_UPGRADES")
 
 	-- Begin DB upgrades that need to be done before defaults are added.
 	-- Upgrades here should always do everything needed to every single profile,
@@ -2673,34 +2568,143 @@ function TMW:RawUpgrade()
 				HelpSettings.PocketWatch = nil
 			end
 		end
-	--[[
+	
 		if TellMeWhenDB.Version < 70001 then
+			if not TellMeWhenDB.global then
+				TellMeWhenDB.global = {}
+			end
+
+			TellMeWhenDB.global.Trunk = {
+				group = {},
+				icon = {},
+				textlayout = {},
+			}
+
+
+			local function recursiveReplaceReferences(table, GUIDmap)
+				for k, v in pairs(table) do
+					if type(v) == "table" then
+						recursiveReplaceReferences(v, GUIDmap)
+					elseif GUIDmap[v] then
+						table[k] = GUIDmap[v]
+					end
+				end
+			end
+
 			for _, p in pairs(TellMeWhenDB.profiles) do
+
+				local GUIDmap = {}
+				local profileMixedTrunk = {}
+
 				if p.Groups then
 					for groupID, gs in pairs(p.Groups) do
+						if gs.Enabled == nil then
+							if groupID == 1 then
+								gs.Enabled = true
+							else
+								gs.Enabled = false
+							end
+						end
+
+						local GUID = TMW:GenerateGUID("group", TMW.CONST.ICON_GUID_SIZE)
+						TellMeWhenDB.global.Trunk.group[GUID] = gs
+						p.Groups[groupID] = GUID
+						GUIDmap["TellMeWhen_Group"..groupID] = GUID
+						profileMixedTrunk[GUID] = gs
+
+
 						if gs.Icons then
 							for iconID, ics in pairs(gs.Icons) do
-								
+								local GUID = TMW:GenerateGUID("icon", TMW.CONST.ICON_GUID_SIZE)
+								TellMeWhenDB.global.Trunk.icon[GUID] = ics
+								gs.Icons[iconID] = GUID
+								GUIDmap["TellMeWhen_Group"..groupID.."_Icon"..iconID] = GUID
+								profileMixedTrunk[GUID] = ics
 							end
 						end
 					end
 				end
+
+				if p.TextLayouts then
+					for oldGUID, layout in pairs(CopyTable(p.TextLayouts)) do
+						local GUID = TMW:GenerateGUID("textlayout", TMW.CONST.ICON_GUID_SIZE)
+						TellMeWhenDB.global.Trunk.textlayout[GUID] = layout
+						profileMixedTrunk[GUID] = layout
+						layout.GUID = GUID
+						p.TextLayouts[oldGUID] = nil
+						p.TextLayouts[GUID] = true
+						GUIDmap[oldGUID] = GUID
+					end
+				end
+
+				p.profileMixedTrunk = profileMixedTrunk
+				recursiveReplaceReferences(p, GUIDmap)
+				p.profileMixedTrunk = nil
 			end
-		end]]
 
 
 
--- TODO: things for the new GUID system need to go here
--- things to do include migrating all groups to GUIDs,
--- migrating all icons to GUIDs
--- and handling the fact that the default Enabled state for groups is now true instead of false
+			-- Create a temporary(ish) database that we will load the profiles through
+			-- in order to attach a version to each setting type.
+			local db = AceDB:New("TellMeWhenDB", TMW.Defaults)
+			TMW.db = db
+
+			local function DoRetrofitUpgrade(type, version, ...)
+				assert(_G.type(type) == "string")
+				assert(_G.type(version) == "number")
+				
+				-- upgrade the actual requested setting
+				for k, v in ipairs(TMW:GetUpgradeTable()) do
+					if v.Version > version then
+						if v[type] then
+							v[type](v, ...)
+						end
+					end
+				end
+				
+				TMW:Fire("TMW_UPGRADE_REQUESTED", type, version, ...)
+
+				-- delegate out to sub-types
+				if type == "profile" then
+
+					-- delegate to groups
+					for gs, groupID in TMW:InGroupSettings() do
+						DoRetrofitUpgrade("group", version, gs, groupID)
+
+						for ics, groupID, iconID in TMW:InIconSettings(groupID) do
+							DoRetrofitUpgrade("icon", version, ics, groupID, iconID)
+						end
+					end
+					
+					--All Profile Upgrades Complete
+					db.profile.Version = TELLMEWHEN_VERSIONNUMBER
+				end
+			end
+
+			local oldprofile = db:GetCurrentProfile()
+
+			for name, p in pairs(TellMeWhenDB.profiles) do
+				db:SetProfile(name)
 
 
+				if type(db.profile.Version) == "string" then
+					local v = gsub(db.profile.Version, "[^%d]", "") -- remove decimals
+					v = v..strrep("0", 5-#v)	-- append zeroes to create a 5 digit number
+					db.profile.Version = tonumber(v)
+				end
+				
+				if db.profile.Version < TELLMEWHEN_VERSIONNUMBER then
+					DoRetrofitUpgrade("profile", db.profile.Version, db.profile)
+				end
+			end
+
+			db:SetProfile(oldprofile)
+			TMW.db = nil
+
+			TellMeWhenDB.Version = 70001
+		end
 
 	end
-	
-	TMW:Fire("TMW_DB_PRE_DEFAULT_UPGRADES")
-	TMW:UnregisterAllCallbacks("TMW_DB_PRE_DEFAULT_UPGRADES")
 end
 
 function TMW:UpgradeGlobal()
@@ -2720,10 +2724,6 @@ function TMW:UpgradeProfile()
 		local v = gsub(TMW.db.profile.Version, "[^%d]", "") -- remove decimals
 		v = v..strrep("0", 5-#v)	-- append zeroes to create a 5 digit number
 		TMW.db.profile.Version = tonumber(v)
-	end
-	
-	if TellMeWhenDB.Version < TELLMEWHEN_VERSIONNUMBER then
-		TMW:DoUpgrade("global", TellMeWhenDB.Version, TMW.db.global)
 	end
 	
 	if TMW.db.profile.Version < TELLMEWHEN_VERSIONNUMBER then
