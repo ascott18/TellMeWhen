@@ -470,37 +470,6 @@ TMW:RegisterUpgrade(40080, {
 		end
 	end,
 })
-TMW:RegisterUpgrade(22010, {
-	icon = function(self, ics)
-		for k, condition in ipairs(ics.Conditions) do
-			if type(k) == "number" then
-				for k, v in pairs(condition) do
-					condition[k] = nil
-					condition[k:gsub("Condition", "")] = v
-				end
-			end
-		end
-	end,
-})
-TMW:RegisterUpgrade(22000, {
-	icon = function(self, ics)
-		for k, v in ipairs(ics.Conditions) do
-			if type(k) == "number" and ((v.ConditionType == "ICON") or (v.ConditionType == "EXISTS") or (v.ConditionType == "ALIVE")) then
-				v.ConditionLevel = 0
-			end
-		end
-	end,
-})
-TMW:RegisterUpgrade(20100, {
-	icon = function(self, ics)
-		for k, v in ipairs(ics.Conditions) do
-			v.ConditionLevel = tonumber(v.ConditionLevel) or 0
-			if type(k) == "number" and ((v.ConditionType == "SOUL_SHARDS") or (v.ConditionType == "HOLY_POWER")) and (v.ConditionLevel > 3) then
-				v.ConditionLevel = ceil((v.ConditionLevel/100)*3)
-			end
-		end
-	end,
-})
 
 
 
@@ -531,6 +500,7 @@ CNDT.Env = {
 
 	TMW = TMW,
 	GCDSpell = TMW.GCDSpell,
+	GUIDToOwner = TMW.GUIDToOwner,
 	
 	SemicolonConcatCache = setmetatable(
 	{}, {
@@ -757,6 +727,13 @@ CNDT.Substitutions = {
 	src = "c.Item",
 	rep = function(conditionData, conditionSettings, name, name2)
 		return CNDT:GetItemRefForConditionChecker(name)
+	end,
+},
+
+{
+	src = "c.Icon",
+	rep = function(conditionData, conditionSettings, name, name2)
+		return format("GUIDToOwner[%q]", conditionSettings.Icon)
 	end,
 },
 

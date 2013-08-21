@@ -675,10 +675,11 @@ end)
 
 -- Icon
 TMW:RegisterCallback("TMW_CNDT_GROUP_DRAWGROUP", function(event, CndtGroup, conditionData, conditionSettings)
+	local GUID = conditionSettings.Icon
+	local icon = TMW.GUIDToOwner[GUID]
 
-
-	TMW:SetUIDropdownIconText(CndtGroup.Icon, conditionSettings.Icon)
-	CndtGroup.Icon.IconPreview:SetIcon(_G[conditionSettings.Icon])
+	TMW:SetUIDropdownGUIDText(CndtGroup.Icon, GUID, L["CHOOSEICON"])
+	CndtGroup.Icon.IconPreview:SetIcon(icon)
 end)
 
 -- Runes

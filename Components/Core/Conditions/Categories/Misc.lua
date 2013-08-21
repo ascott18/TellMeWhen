@@ -58,7 +58,7 @@ ConditionCategory:RegisterCondition(1,	 "ICON", {
 	icon = "Interface\\Icons\\INV_Misc_PocketWatch_01",
 	tcoords = CNDT.COMMON.standardtcoords,
 	funcstr = function(c, icon)
-		if c.Icon == "" or c.Icon == icon:GetName() then
+		if c.Icon == "" or c.Icon == icon:GetGUID() then
 			return [[true]]
 		end
 
@@ -76,7 +76,7 @@ ConditionCategory:RegisterCondition(1,	 "ICON", {
 		else
 			str = str .. [[and c.Icon.attributes.realAlpha == 0]]
 		end
-		return gsub(str, "c.Icon", c.Icon)
+		return str
 	end,
 })
 
@@ -120,7 +120,7 @@ ConditionCategory:RegisterCondition(1.2,	"ICONSHOWNTME", {
 		RegisterShownHiddenTimerCallback()
 		
 		local str = [[c.Icon and c.Icon.attributes.shown and c.Icon.UpdateFunction and not c.Icon:Update() and c.Icon.attributes.realAlpha > 0 and time - (c.Icon.__CNDT__ICONSHOWNTME or 0) c.Operator c.Level]]
-		return gsub(str, "c.Icon", c.Icon)
+		return str
 	end,
 })
 ConditionCategory:RegisterCondition(1.3,	"ICONHIDDENTME", {
@@ -149,7 +149,7 @@ ConditionCategory:RegisterCondition(1.3,	"ICONHIDDENTME", {
 		RegisterShownHiddenTimerCallback()
 		
 		local str = [[c.Icon and c.Icon.attributes.shown and c.Icon.UpdateFunction and not c.Icon:Update() and c.Icon.attributes.realAlpha == 0 and time - (c.Icon.__CNDT__ICONHIDDENTME or 0) c.Operator c.Level]]
-		return gsub(str, "c.Icon", c.Icon)
+		return str
 	end,
 })
 
