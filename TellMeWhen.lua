@@ -1071,7 +1071,7 @@ function TMW:GenerateGUID(type, length)
 end
 
 function TMW:ParseGUID(GUID)
-	return strmatch(GUID, "([a-z]+):(.+)")
+	return strmatch(GUID, "([a-z]+):(.*)")
 end
 
 
@@ -1158,11 +1158,6 @@ do -- InIconSettings
 	end
 end
 
-
-
-
-
-
 do -- InSettings
 	local states = {}
 	local function getstate(dataType)
@@ -1210,9 +1205,6 @@ do -- InSettings
 		return iter, getstate(dataType)
 	end
 end
-
-
-
 
 do -- InGroupSettings
 	local states = {}

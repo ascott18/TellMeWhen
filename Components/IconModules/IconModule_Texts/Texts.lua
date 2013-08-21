@@ -275,7 +275,7 @@ function TEXT:GetTextLayoutForIconID(groupID, iconID, view)
 	view = view or gs.View
 	
 	-- Get the GUID defined by the icon for the current IconView
-	local GUID = ics.SettingsPerView[view].TextLayout
+	local GUID = ics and ics.SettingsPerView[view].TextLayout
 	
 	-- If the icon defines the GUID as a blank string,
 	-- it should default to whatever the group defines. (Intended behavior, btw.)
@@ -301,7 +301,7 @@ function TEXT:GetTextLayoutForIconID(groupID, iconID, view)
 		end
 		
 		-- Attempt to find the layout settings again.
-		layoutSettings = rawget(TMW.db.profile.TextLayouts, GUID)
+		layoutSettings = TMW:GetData(GUID, true)
 		
 		-- Freak the fuck out if it wasn't found;
 		-- Only happens if a view defines a default layout but doesn't actually define layout itself.

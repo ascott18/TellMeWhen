@@ -464,10 +464,10 @@ local function AddTextLayout()
 	
 	newLayout.Name = Name
 end
-local function UpdateIconsUsingTextLayout(layoutID)
+local function UpdateIconsUsingTextLayout(GUID)
 	for group, groupID in TMW:InGroups() do
 		for icon in TMW:InIcons(groupID) do
-			if icon:IsVisible() and TEXT:GetTextLayoutForIcon(icon) == layoutID then
+			if icon:IsVisible() and TEXT:GetTextLayoutForIcon(icon) == GUID then
 				-- setup entire groups because there is code that prevents excessive event firing
 				-- when updating a whole group vs a single icon
 				group:Setup()
