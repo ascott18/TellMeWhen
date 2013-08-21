@@ -43,62 +43,105 @@ TEXT.MasqueSkinnableTexts = {
 
 TMW:RegisterDatabaseDefaults{
 	profile = {
-		TextLayouts = {
-			-- Layout defaults
-			["**"] = {
-				n					= 1,		-- The number of text displays that this layout handles.
-				Name				= "",		-- The name of this layout. Aesthetic only, doesn't need to be unique.
-				GUID				= "",		-- The GUID of this layout. Must be unique for all layouts. This is what the layout is keyed as in its parent table, and is how layouts are identified everywhere.
-				NoEdit				= false,	-- True if the layout is a default layout and should not be modified.
-				
-				-- Display defaults
-				["**"] = {
-					StringName		= "",				-- Name of the string (user-readable)
-					Name 		  	= "Arial Narrow",	-- Name of the Font (Stupid key for this setting, but it dates back to antiquity)
-					Size 		  	= 12,               -- Font size
-					Justify	 		= "CENTER",         -- 
-					Outline 	  	= "THICKOUTLINE",   -- Font outline
-					Shadow			= 0,
-					
-					Anchors = {
-						n = 1,
-						["**"] = {
-							x 	 		  	= 0,                -- Anchor setting
-							y 	 		  	= 0,                -- Anchor setting
-							point 		  	= "CENTER",         -- Anchor setting
-							relativeTo	 	= "",         		-- Anchor setting
-							relativePoint 	= "CENTER",         -- Anchor setting
-						},
-					},
-					DefaultText		= "",               -- 
-					SkinAs			= "",               -- 
-				},
-			},
-			
-			-- The only time this layout should ever get used is if a view doesn't declare any default layout for itself.
-			-- It has no displays and cannot be edited. It should also be hidden from the text layout configuration in TMW's main options.
-			[""] = {
-				Name = L["TEXTLAYOUTS_DEFAULTS_NOLAYOUT"],
-				GUID = "",
-				NoEdit = true,
-				n = 0,
-			},
-		},
+		TextLayouts = {},
 	},
 }
+
+TMW:RegisterDatabaseType("textlayout", {
+	n					= 1,		-- The number of text displays that this layout handles.
+	Name				= "",		-- The name of this layout. Aesthetic only, doesn't need to be unique.
+	GUID				= "",		-- The GUID of this layout. Must be unique for all layouts. This is what the layout is keyed as in its parent table, and is how layouts are identified everywhere.
+	NoEdit				= false,	-- True if the layout is a default layout and should not be modified.
+	
+	-- Display defaults
+	["**"] = {
+		StringName		= "",				-- Name of the string (user-readable)
+		Name 		  	= "Arial Narrow",	-- Name of the Font (Stupid key for this setting, but it dates back to antiquity)
+		Size 		  	= 12,				-- Font size
+		Justify	 		= "CENTER",			-- 
+		Outline 	  	= "THICKOUTLINE",	-- Font outline
+		Shadow			= 0,
+		
+		Anchors = {
+			n = 1,
+			["**"] = {
+				x 	 		  	= 0,		-- Anchor setting
+				y 	 		  	= 0,		-- Anchor setting
+				point 		  	= "CENTER",	-- Anchor setting
+				relativeTo	 	= "",		-- Anchor setting
+				relativePoint 	= "CENTER",	-- Anchor setting
+			},
+		},
+		DefaultText		= "",
+		SkinAs			= "",
+	},
+})
+
+
+
+TEXT.DefaultLayouts = {}
+function TEXT:RegisterLayout(GUID, settings)
+	TEXT.DefaultLayouts[GUID] = settings
+	settings.GUID = GUID
+
+	TMW.Defaults.global.ActiveTrunk.textlayout[GUID] = settings
+	TMW.Defaults.profile.TextLayouts[GUID] = true
+end
+
+
+TEXT:RegisterLayout("textlayout:NULL", {
+	Name = L["TEXTLAYOUTS_DEFAULTS_NOLAYOUT"],
+	GUID = "textlayout:NULL",
+	NoEdit = true,
+	n = 0,
+})
+
 
 TMW:MergeDefaultsTables({
 	SettingsPerView = {
 		["**"] = {
-			TextLayout = "", -- Fall back on the blank layout if an IconView does not explicitly define a layout.
+			TextLayout = "textlayout:NULL", -- Fall back on the blank layout if an IconView does not explicitly define a layout.
 		},
 	},
 }, TMW.Group_Defaults)
 
 
+
+
 -- -------------------
 -- SETTINGS UPGRADES
 -- -------------------
+
+TMW:RegisterUpgrade(70002, {
+	profile = function(self, settings)
+		-- Removes old layout skeletons from the old GUID system.
+		for GUID, v in pairs(settings.TextLayouts) do
+			if not GUID:match("textlayout:.") then
+				settings.TextLayouts[GUID] = nil
+			end
+		end
+	end,
+
+	group = function(self, gs)
+		for viewName, settingsPerView in pairs(gs.SettingsPerView) do
+			local v = settingsPerView.TextLayout
+
+			if not v:find("^textlayout:") then
+				settingsPerView.TextLayout = "textlayout:" .. v
+			end
+		end
+	end,
+
+	icon = function(self, ics)
+		for viewName, settingsPerView in pairs(ics.SettingsPerView) do
+			local v = settingsPerView.TextLayout
+
+			if v and not v:find("^textlayout:") then
+				settingsPerView.TextLayout = "textlayout:" .. v
+			end
+		end
+	end,
+})
 
 TMW:RegisterUpgrade(60448, {
 	textlayout = function(self, settings, GUID)
@@ -171,7 +214,7 @@ TMW:RegisterUpgrade(60303, {
 })
 
 TMW:RegisterUpgrade(60038, {
-	group = function(self, gs, groupID)
+	group = function(self, gs)
 		gs.Fonts = nil
 	end
 })
@@ -196,200 +239,7 @@ TMW:RegisterUpgrade(51019, {
 		-- I don't know why this layout exists, but I know it was my fault, so I am going to delete it.
 		if GUID == "icon" and settings.GUID == "" then
 			TMW.db.profile.TextLayouts[GUID] = nil
-			TMW.Warn("TMW has deleted the invalid text layout keyed as 'icon' that was probably causing errors for you. If you were using it on any of your icons, then I apologize, but you probably weren't because it probably wasn't even named")
 		end
-	end,
-})
-
-TMW:RegisterUpgrade(51003, {
-	---------- Helper methods and data ----------
-	pairs = {
-		-- Matches [displayID] = oldGroupTextSettingsKey
-		[1] = "Bind",
-		[2] = "Count",
-	},
-	
-	-- The old defaults for the Count text (stacks) from the old text system.
-	Count = {
-		ConstrainWidth  = false,
-		point           = "BOTTOMRIGHT",
-		relativePoint   = "BOTTOMRIGHT",
-		
-		Name            = "Arial Narrow",
-		Size            = 12,
-		x               = -2,
-		y               = 2,
-		Outline         = "THICKOUTLINE",
-	},
-	
-	-- The old defaults for the Bind text from the old text system.
-	Bind = {
-		y               = -2,
-		point           = "TOPLEFT",
-		relativePoint   = "TOPLEFT",
-		
-		Name            = "Arial Narrow",
-		Size            = 12,
-		x               = -2,
-		Outline         = "THICKOUTLINE",
-		ConstrainWidth  = true,
-	},
-	
-	-- http://snippets.luacode.org/snippets/Deep_Comparison_of_Two_Values_3
-	deepcompare = function(self,t1,t2)
-		local ty1 = type(t1)
-		local ty2 = type(t2)
-		if ty1 ~= ty2 then return false end
-		-- non-table types can be directly compared
-		if ty1 ~= 'table' and ty2 ~= 'table' then return t1 == t2 end
-		for k1,v1 in pairs(t1) do
-			local v2 = t2[k1]
-			if v2 == nil or not self:deepcompare(v1,v2) then return false end
-		end
-		for k2,v2 in pairs(t2) do
-			local v1 = t1[k2]
-			if v1 == nil or not self:deepcompare(v1,v2) then return false end
-		end
-		return true
-	end,
-	
-	-- Sets a group to use the specified text layout
-	SetLayoutToGroup = function(self, groupID, GUID)
-		TMW:GetData(TMW.db.profile.Groups[groupID]).SettingsPerView.icon.TextLayout = GUID
-		
-		-- the group setting is a fallback for icons, so there is no reason to set the layout for individual icons
-		for ics in TMW:InIconSettings(groupID) do
-			ics.SettingsPerView.icon.TextLayout = nil
-		end
-	end,
-	
-	
-	---------- Upgrade method ----------
-	group = function(self, gs, groupID)
-		-- Create a layout table to start storing text layout data for this group in.
-		local layout = TMW.db.profile.TextLayouts[0]
-		
-		-- We don't actually want to define this as a real text layout yet, so take it out of TextLayouts.
-		TMW.db.profile.TextLayouts[0] = nil
-		
-		-- The old text system had two displays
-		layout.n = 2
-		
-		-- These are constants for each text display:
-		-- Display 1 is the binding/label text
-		layout[1].StringName = L["TEXTLAYOUTS_DEFAULTS_BINDINGLABEL"]
-		layout[1].SkinAs = "HotKey" 
-		
-		-- Display 2 is the stack text
-		layout[2].StringName = L["TEXTLAYOUTS_DEFAULTS_STACKS"]
-		layout[2].DefaultText = "[Stacks:Hide(0)]"
-		layout[2].SkinAs = "Count"
-		
-		for i = 1, layout.n do
-			-- displaySettings holds the settings for the text layout being created
-			local displaySettings = layout[i]
-			
-			-- settingsKey is the key that corresponds to the old text settings
-			local settingsKey = self.pairs[i]
-			-- source holds the old text settings
-			local source = gs.Fonts and gs.Fonts[settingsKey]
-			
-			-- Iterate over all of the old text settings.
-			for _, setting in TMW:Vararg(
-				"Name",
-				"Size",
-				"x",
-				"y",
-				"point",
-				"relativePoint",
-				"Outline",
-				"OverrideLBFPos",
-				"ConstrainWidth"
-			) do
-				-- (not source) :: If the old text settings are nil, then the entire display used all default settings, so inherit from defaults.
-					-- (So Ace3DB purged it completely because it wasn't needed)
-				-- (source[setting] == nil) :: If this specific setting is nil, then it was default, so inherit from defaults. 
-				if not source or source[setting] == nil then
-					-- self[settingsKey][setting] holds the old defaults for the text display we are creating a layout for.					
-					displaySettings[setting] = self[settingsKey][setting]
-				else
-					-- This setting was defined, so use the setting that was defined for it.
-					displaySettings[setting] = source[setting]
-				end
-			end
-			
-			-- OverrideLBFPos isn't used anymore, instead SkinAs is set to "" (signifying don't skin this display)
-			if displaySettings.OverrideLBFPos then
-				displaySettings.SkinAs = ""
-				displaySettings.OverrideLBFPos = nil
-			end
-			
-			-- Fix this typo (MONOCHORME) which has probably been here at least a year without being noticed... until now
-			if displaySettings.Outline == "MONOCHORME" then
-				displaySettings.Outline = "MONOCHROME"
-			end
-		end
-		
-		-- We are done constructing a text layout out of this group's old text settings.
-		-- Now, check and see if there alredy exists a layout with the exact same settings from a previous group's upgrade.
-		for GUID, layoutSettings in pairs(TMW.db.profile.TextLayouts) do
-		
-			if layoutSettings ~= layout then -- I don't know why this check was written, but leave it in.
-			
-				-- These three settings don't actually impact the group, so ignore them in the comparison.
-				-- Save them into variables, and then set them to their defaults.
-				local name, GUID, noedit = layoutSettings.Name, layoutSettings.GUID, layoutSettings.NoEdit
-				layoutSettings.Name, layoutSettings.GUID, layoutSettings.NoEdit = "", "", false
-				
-				-- Do the actual comparison to check if the layout we just created is a duplicate of one that already exists.
-				local isDuplicate = self:deepcompare(layoutSettings, layout)
-				
-				-- Restore the settings that we just set to defaults.
-				layoutSettings.Name, layoutSettings.GUID, layoutSettings.NoEdit = name, GUID, noedit
-				
-				if isDuplicate then
-					-- If the layout we just created is a duplicate of another, then set the pre-existing layout to the group.
-					-- The layout we just created just becomes garbage and will get picked up by the gc eventually.
-					self:SetLayoutToGroup(groupID, GUID)
-					return
-				end
-			end
-		end
-		
-		-- If we've made it to this point, then the layout we just created wasn't a duplicate.
-		
-		-- Create a GUID for the new layout and set it.
-		local GUID = TMW.generateGUID(12)
-		layout.GUID = GUID
-		
-		-- Determine a name for the new layout:
-		-- Start with this as the base name.
-		local Name = L["TEXTLAYOUTS_DEFAULTS_ICON1"]
-		repeat
-			-- Loop until we find a name that isn't used by any other layouts.
-			local found
-			for k, layoutSettings in pairs(TMW.db.profile.TextLayouts) do
-				if layoutSettings.Name == Name then
-					-- The current name is in use.
-					found = true
-					
-					-- Increase the number at the end of the name ("Icon Layout 1" becomes "Icon Layout 2", etc...)
-					Name = TMW.oneUpString(Name) or GUID -- fallback on the GUID if we cant increment the name for some reason
-					
-					-- Break the inner loop so that we can go through the outer loop again and check if the new name is in use.
-					break
-				end
-			end
-		until not found
-		
-		-- A unique name has now been determined. Set it on the layout.
-		layout.Name = Name
-		
-		-- Store the layout under the new GUID in the TextLayouts table.
-		TMW.db.profile.TextLayouts[GUID] = layout
-		
-		-- Set the new layout to the group we are upgrading.
-		self:SetLayoutToGroup(groupID, GUID)
 	end,
 })
 
@@ -416,15 +266,6 @@ TMW:RegisterUpgrade(51002, {
 	end,
 })
 
-TMW:RegisterCallback("TMW_UPGRADE_REQUESTED", function(event, type, version, ...)
-	-- When a profile settings upgrade is requested, update all text layouts.
-	
-	if type == "profile" then
-		for GUID, settings in pairs(TMW.db.profile.TextLayouts) do
-			TMW:DoUpgrade("textlayout", version, settings, GUID)
-		end
-	end
-end)
 
 
 function TEXT:GetTextLayoutForIconID(groupID, iconID, view)
@@ -443,7 +284,7 @@ function TEXT:GetTextLayoutForIconID(groupID, iconID, view)
 	end
 	
 	-- Rawget from TextLayouts to see if the layout exists.
-	local layoutSettings = GUID and rawget(TMW.db.profile.TextLayouts, GUID)
+	local layoutSettings = TMW:GetData(GUID, true)
 	
 	local isFallback
 	if not layoutSettings then
@@ -454,9 +295,9 @@ function TEXT:GetTextLayoutForIconID(groupID, iconID, view)
 		GUID = GroupDefaultsPerView[view] and GroupDefaultsPerView[view].TextLayout
 		
 		-- If the current IconView doesn't define a default layout (or if it doesn't define DefaultsPerView),
-		-- then fall back on the default for all IconViews, GUID == "", the blank layout
+		-- then fall back on the default for all IconViews, GUID == "textlayout:NULL", the blank layout
 		if not GUID then
-			GUID = ""
+			GUID = "textlayout:NULL"
 		end
 		
 		-- Attempt to find the layout settings again.
@@ -491,8 +332,6 @@ function TEXT:GetTextFromSettingsAndLayout(Texts, layoutSettings, textID)
 	
 	return text
 end
-
-
 
 
 
@@ -559,7 +398,7 @@ function Texts:SetupForIcon(sourceIcon)
 	
 	
 	local Texts = sourceIcon:GetSettingsPerView().Texts
-	local _, layoutSettings = TMW.TEXT:GetTextLayoutForIcon(sourceIcon) 
+	local _, layoutSettings = TEXT:GetTextLayoutForIcon(sourceIcon) 
 	self.layoutSettings = layoutSettings
 	self.Texts = Texts
 	

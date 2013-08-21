@@ -213,7 +213,7 @@ function Group.GetGUID(group, generate)
 	local GUID = TMW.db.profile.Groups[group:GetID()]
 
 	if generate and not GUID then
-		GUID = TMW:GenerateGUID("group", TMW.CONST.ICON_GUID_SIZE)
+		GUID = TMW:GenerateGUID("group", TMW.CONST.GUID_SIZE)
 		TMW.db.profile.Groups[group:GetID()] = GUID
 	end
 

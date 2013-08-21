@@ -227,7 +227,7 @@ function Icon.GetGUID(icon, generate)
 	local GUID = icon.group:GetSettings().Icons[icon:GetID()]
 
 	if generate and not GUID then
-		GUID = TMW:GenerateGUID("icon", TMW.CONST.ICON_GUID_SIZE)
+		GUID = TMW:GenerateGUID("icon", TMW.CONST.GUID_SIZE)
 		icon.group:GetSettings().Icons[icon:GetID()] = GUID
 	end
 

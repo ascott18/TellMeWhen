@@ -24,57 +24,55 @@ local View = TMW.Classes.IconView:New("bar")
 View.name = L["UIPANEL_GROUPTYPE_BAR"]
 View.desc = L["UIPANEL_GROUPTYPE_BAR_DESC"]
 
-TMW:RegisterDatabaseDefaults{
-	profile = {
-		TextLayouts = {
-			bar1 = {
-				Name = L["TEXTLAYOUTS_DEFAULTS_BAR1"],
-				GUID = "bar1",
-				NoEdit = true,
-				n = 2,
-				
-				-- Default Layout 1
-				{	-- [1] Duration		
-					StringName = L["TEXTLAYOUTS_DEFAULTS_DURATION"],
-					DefaultText = "[Duration(gcd=true):TMWFormatDuration]",	
-					Anchors = {
-						{
-							x = -2,
-							point = "RIGHT",
-							relativePoint = "RIGHT",
-						}, -- [1]
-					},
-				},
-				{	-- [2] Spell
-					StringName = L["TEXTLAYOUTS_DEFAULTS_SPELL"],		
-					DefaultText = "[Spell] [Stacks:Hide(0):Paren]",
-					
-					Justify = "LEFT",
-					Anchors = {
-						n = 2,
-						{
-							x = 2,
-							point = "LEFT",
-							relativeTo = "IconModule_IconContainer_MasqueIconContainer",
-							relativePoint = "RIGHT",
-						}, -- [1]
-						{
-							point = "RIGHT",
-							relativeTo = "$$1",
-							relativePoint = "LEFT",
-						}, -- [2]
-					},
-				},
+if TMW.TEXT then
+	
+	TMW.TEXT:RegisterLayout("textlayout:bar1", {
+		Name = L["TEXTLAYOUTS_DEFAULTS_BAR1"],
+		GUID = "textlayout:bar1",
+		NoEdit = true,
+		n = 2,
+		
+		-- Default Layout 1
+		{	-- [1] Duration		
+			StringName = L["TEXTLAYOUTS_DEFAULTS_DURATION"],
+			DefaultText = "[Duration(gcd=true):TMWFormatDuration]",	
+			Anchors = {
+				{
+					x = -2,
+					point = "RIGHT",
+					relativePoint = "RIGHT",
+				}, -- [1]
 			},
 		},
-	},
-}
+		{	-- [2] Spell
+			StringName = L["TEXTLAYOUTS_DEFAULTS_SPELL"],		
+			DefaultText = "[Spell] [Stacks:Hide(0):Paren]",
+			
+			Justify = "LEFT",
+			Anchors = {
+				n = 2,
+				{
+					x = 2,
+					point = "LEFT",
+					relativeTo = "IconModule_IconContainer_MasqueIconContainer",
+					relativePoint = "RIGHT",
+				}, -- [1]
+				{
+					point = "RIGHT",
+					relativeTo = "$$1",
+					relativePoint = "LEFT",
+				}, -- [2]
+			},
+		},
+	})
+
+end
 
 
 View:RegisterGroupDefaults{
 	SettingsPerView = {
 		bar = {
-			TextLayout = "bar1",
+			TextLayout = "textlayout:bar1",
 			SizeX = 100,
 			SizeY = 20,
 		}

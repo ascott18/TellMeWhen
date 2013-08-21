@@ -24,7 +24,7 @@ if strmatch(projectVersion, "%-%d+%-") then
 end
 
 TELLMEWHEN_VERSION_FULL = TELLMEWHEN_VERSION .. TELLMEWHEN_VERSION_MINOR
-TELLMEWHEN_VERSIONNUMBER = 70001 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL (for versioning of)
+TELLMEWHEN_VERSIONNUMBER = 70002 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL (for versioning of)
 
 if TELLMEWHEN_VERSIONNUMBER > 71000 or TELLMEWHEN_VERSIONNUMBER < 70000 then
 	-- safety check because i accidentally made the version number 414069 once
@@ -120,7 +120,7 @@ TMW.COMMON = {}
 
 TMW.CONST = {
 	CHAT_TYPE_INSTANCE_CHAT = "INSTANCE_CHAT",
-	ICON_GUID_SIZE = 12,
+	GUID_SIZE = 10,
 }
 
 TMW.IconsToUpdate, TMW.GroupsToUpdate = {}, {}
@@ -731,6 +731,20 @@ function TMW:SortOrderedTables(parentTable)
 	return parentTable
 end
 
+function TMW:CopyWithoutMetatable(source)
+	-- This is basically deepcopy without recursion prevention and without metatables
+	
+	local dest = {}
+	for k, v in pairs(source) do
+		if type(v) == "table" then
+			dest[k] = TMW:CopyWithMetatable(v)
+		else
+			dest[k] = v
+		end
+	end
+	return dest
+end
+
 function TMW:CopyWithMetatable(source)
 	-- This is basically deepcopy without recursion prevention
 	
@@ -1143,6 +1157,62 @@ do -- InIconSettings
 		return iter, getstate(groupID or 1, 0, groupID or TMW.db.profile.NumGroups, TELLMEWHEN_MAXROWS*TELLMEWHEN_MAXROWS)
 	end
 end
+
+
+
+
+
+
+do -- InSettings
+	local states = {}
+	local function getstate(dataType)
+		local state = wipe(tremove(states) or {})
+
+		state.dataType = dataType
+		state.stage = 1
+		state.extIter, state.extTable, state.extState = pairs(TMW.db.global.ActiveTrunk[dataType])
+
+		return state
+	end
+
+	local function iter(state)
+		local GUID, data = state.extIter(state.extTable, state.extState)
+
+		if not GUID then
+			if state.stage == 2 then
+				tinsert(states, state)
+				return
+			end
+			state.stage = 2
+			state.extIter, state.extTable, state.extState = pairs(TMW.db.global.Trunk[state.dataType])
+
+			return iter(state)
+		end
+
+		state.extState = GUID
+
+		if state[GUID] then
+			return iter(state)
+		end
+		state[GUID] = true
+
+		return data, GUID, state.stage == 1 and true or false -- data, guid, isActive
+	end
+
+	function TMW:InSettings(dataType)
+		-- current icon (the second param here) is incremented at the beginning of the iterator call,
+		-- so it should be passed in as 0, not 1
+
+		if not TMW.DatabaseTypes[dataType] then
+			error("Data type is not registered: " .. dataType, 2)
+		end
+
+		return iter, getstate(dataType)
+	end
+end
+
+
+
 
 do -- InGroupSettings
 	local states = {}
@@ -1859,10 +1929,10 @@ function TMW:GetData(GUID, raw, noRetrieve)
 		return
 	end
 
-	dataType = TMW:ParseGUID(GUID)
+	local dataType = TMW:ParseGUID(GUID)
 
 	if not TMW.DatabaseTypes[dataType] then
-		error("Data type for the guid is not registered" .. GUID, 2)
+		error("Data type for the guid is not registered: " .. GUID, 2)
 	end
 
 	local activeTrunk = TMW.db.global.ActiveTrunk[dataType]
@@ -1888,17 +1958,15 @@ function TMW:CheckInData(GUID)
 		return
 	end
 
-	dataType = TMW:ParseGUID(GUID)
+	local dataType = TMW:ParseGUID(GUID)
 
 	if not TMW.DatabaseTypes[dataType] then
-		error("Data type for the guid is not registered" .. GUID, 2)
+		error("Data type for the guid is not registered: " .. GUID, 2)
 	end
 
 	local activeTrunk = TMW.db.global.ActiveTrunk[dataType]
 
 	local data = rawget(activeTrunk, GUID)
-
-	print(data, TMW.DatabaseTypes[dataType])
 
 	if not data then
 		return
@@ -1910,18 +1978,27 @@ function TMW:CheckInData(GUID)
 		data = nil
 	end
 
-	print(data)
-
 	TMW.db.global.Trunk[dataType][GUID] = data
 	activeTrunk[GUID] = nil
+end
 
+function TMW:CheckInAll(dataType)
+	if not TMW.DatabaseTypes[dataType] then
+		error("Data type for the guid is not registered: " .. GUID, 2)
+	end
+
+	local activeTrunk = TMW.db.global.ActiveTrunk[dataType]
+
+	for GUID in pairs(activeTrunk) do
+		TMW:CheckInData(GUID)
+	end
 end
 
 function TMW:DeleteData(GUID)
-	dataType = TMW:ParseGUID(GUID)
+	local dataType = TMW:ParseGUID(GUID)
 
 	if not TMW.DatabaseTypes[dataType] then
-		error("There is no trunk for the data " .. GUID, 2)
+		error("Data type for the guid is not registered: " .. GUID, 2)
 	end
 
 	TMW.db.global.ActiveTrunk[dataType][GUID] = nil
@@ -2463,10 +2540,6 @@ end
 
 function TMW:DoUpgrade(type, version, ...)
 
-	do
-		return TMW:Debug("Upgrades are NYI")
-	end
-
 	assert(_G.type(type) == "string")
 	assert(_G.type(version) == "number")
 	
@@ -2484,27 +2557,31 @@ function TMW:DoUpgrade(type, version, ...)
 	-- delegate out to sub-types
 	if type == "global" then
 		-- delegate to locale
-		for locale, ls in pairs(TMW.db.locale) do
-			TMW:DoUpgrade("locale", version, ls, locale)
+		for locale, localeSettings in pairs(TMW.db.locale) do
+			TMW:DoUpgrade("locale", version, localeSettings, locale)
 		end
-	
+		
+		-- Delegate to all database types like icons and groups
+		for dataType in pairs(TMW.DatabaseTypes) do
+			TMW:CheckInAll(dataType)
+
+			local trunk = TMW.db.global.Trunk[dataType]
+
+			for GUID in pairs(trunk) do
+				local data = TMW:GetData(GUID)
+				TMW:DoUpgrade(dataType, version, data, GUID)
+			end
+
+			TMW:CheckInAll(dataType)
+		end
+
+
 		--All Global Upgrades Complete
 		TellMeWhenDB.Version = TELLMEWHEN_VERSIONNUMBER
 	elseif type == "profile" then
-		-- delegate to groups
-		for gs, groupID in TMW:InGroupSettings() do
-			TMW:DoUpgrade("group", version, gs, groupID)
-		end
 		
 		--All Profile Upgrades Complete
 		TMW.db.profile.Version = TELLMEWHEN_VERSIONNUMBER
-	elseif type == "group" then
-		local gs, groupID = ...
-		
-		-- delegate to icons
-		for ics, groupID, iconID in TMW:InIconSettings(groupID) do
-			TMW:DoUpgrade("icon", version, ics, groupID, iconID)
-		end
 	end
 	
 	TMW.HaveUpgradedOnce = true
@@ -2606,7 +2683,7 @@ function TMW:RawUpgrade()
 							end
 						end
 
-						local GUID = TMW:GenerateGUID("group", TMW.CONST.ICON_GUID_SIZE)
+						local GUID = TMW:GenerateGUID("group", TMW.CONST.GUID_SIZE)
 						TellMeWhenDB.global.Trunk.group[GUID] = gs
 						p.Groups[groupID] = GUID
 						GUIDmap["TellMeWhen_Group"..groupID] = GUID
@@ -2615,7 +2692,7 @@ function TMW:RawUpgrade()
 
 						if gs.Icons then
 							for iconID, ics in pairs(gs.Icons) do
-								local GUID = TMW:GenerateGUID("icon", TMW.CONST.ICON_GUID_SIZE)
+								local GUID = TMW:GenerateGUID("icon", TMW.CONST.GUID_SIZE)
 								TellMeWhenDB.global.Trunk.icon[GUID] = ics
 								gs.Icons[iconID] = GUID
 								GUIDmap["TellMeWhen_Group"..groupID.."_Icon"..iconID] = GUID
@@ -2627,13 +2704,16 @@ function TMW:RawUpgrade()
 
 				if p.TextLayouts then
 					for oldGUID, layout in pairs(CopyTable(p.TextLayouts)) do
-						local GUID = TMW:GenerateGUID("textlayout", TMW.CONST.ICON_GUID_SIZE)
-						TellMeWhenDB.global.Trunk.textlayout[GUID] = layout
-						profileMixedTrunk[GUID] = layout
-						layout.GUID = GUID
+						if oldGUID ~= "icon1" and oldGUID ~= "icon2" and oldGUID ~= "bar1" then
+							--local GUID = TMW:GenerateGUID("textlayout", TMW.CONST.GUID_SIZE)
+							local GUID = "textlayout:" .. oldGUID
+							TellMeWhenDB.global.Trunk.textlayout[GUID] = layout
+							profileMixedTrunk[GUID] = layout
+							layout.GUID = GUID
+							p.TextLayouts[GUID] = true
+							GUIDmap[oldGUID] = GUID
+						end
 						p.TextLayouts[oldGUID] = nil
-						p.TextLayouts[GUID] = true
-						GUIDmap[oldGUID] = GUID
 					end
 				end
 
@@ -2700,8 +2780,6 @@ function TMW:RawUpgrade()
 
 			db:SetProfile(oldprofile)
 			TMW.db = nil
-
-			TellMeWhenDB.Version = 70001
 		end
 
 	end

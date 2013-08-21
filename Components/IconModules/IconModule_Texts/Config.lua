@@ -38,8 +38,8 @@ if not TEXT then return end
 
 LibStub("AceHook-3.0"):Embed(TEXT)
 
-local DEFAULT_LAYOUT_SETTINGS = TMW.db.profile.TextLayouts["\000"]
-TMW.db.profile.TextLayouts["\000"] = nil
+local DEFAULT_LAYOUT_SETTINGS = TMW:GetData("textlayout:defaultlayoutsettings")
+TMW:DeleteData("textlayout:defaultlayoutsettings")
 
 local DEFAULT_DISPLAY_SETTINGS = DEFAULT_LAYOUT_SETTINGS[1]
 DEFAULT_LAYOUT_SETTINGS[1] = nil
@@ -51,7 +51,8 @@ function TEXT:GetTextLayoutSettings(GUID)
 	if GUID == "icon" then
 		TMW:Error("Attempted to access layout keyed as 'icon', which is a bad bug, so please report this error")
 	end
-	return GUID and rawget(TMW.db.profile.TextLayouts, GUID) or nil
+
+	return TMW:GetData(GUID, true)
 end
 
 function TEXT:GetStringName(settings, num, unnamed)
@@ -72,13 +73,10 @@ function TEXT:GetLayoutName(settings, GUID)
 	if GUID and not settings then
 		assert(type(GUID) == "string")
 		settings = TEXT:GetTextLayoutSettings(GUID)
-	elseif settings and not GUID then
-		GUID = settings.GUID
-	elseif not settings and not GUID then
+	elseif not settings then
 		error("You need to specify either settings or GUID for GetLayoutName")
 	end
 	
-	assert(type(GUID) == "string")
 	assert(type(settings) == "table")
 	
 	local Name = strtrim(settings.Name or "")
@@ -139,8 +137,10 @@ function TEXT.Layout_DropDown_Sort(GUID_a, GUID_b)
 end
 
 function TEXT:Layout_DropDown()
-	for GUID, settings in TMW:OrderedPairs(TMW.db.profile.TextLayouts, TEXT.Layout_DropDown_Sort) do
-		if GUID ~= "" then
+	for GUID in TMW:OrderedPairs(TMW.db.profile.TextLayouts, TEXT.Layout_DropDown_Sort) do
+		if GUID ~= "textlayout:NULL" then
+			local settings = TMW:GetData(GUID)
+
 			local info = UIDropDownMenu_CreateInfo()
 			
 			info.text = TEXT:GetLayoutName(settings, GUID)
@@ -276,7 +276,7 @@ function TEXT:LoadConfig()
 		
 		layoutName = TEXT:GetLayoutName(layoutSettings, GUID)
 	else
-		layoutName = "UNKNOWN LAYOUT: " .. (GUID or "<?>")
+		layoutName = "UNKNOWN: " .. (GUID or "<?>")
 	end
 
 	if TEXT[1] then
@@ -335,13 +335,13 @@ function TEXT:TMW_ICON_PREPARE_SETTINGS_FOR_COPY(event, ics, gs)
 end
 TMW:RegisterCallback("TMW_ICON_PREPARE_SETTINGS_FOR_COPY", TEXT)
 
-function TEXT:GetNumTimesUsed(layout)
+function TEXT:GetNumTimesUsed(GUID)
 	local n = 0	
 	TMW.TextLayout_NumTimesUsedTemp = wipe(TMW.TextLayout_NumTimesUsedTemp or {})
 	
 	for gs, groupID in TMW:InGroupSettings() do
 		for view, settings in pairs(gs.SettingsPerView) do
-			if settings.TextLayout == layout then
+			if settings.TextLayout == GUID then
 				n = n + (gs.Rows*gs.Columns)
 				TMW.TextLayout_NumTimesUsedTemp[groupID] = true
 				break
@@ -352,7 +352,7 @@ function TEXT:GetNumTimesUsed(layout)
 	for ics, groupID in TMW:InIconSettings() do
 		if not TMW.TextLayout_NumTimesUsedTemp[groupID] then
 			for view, settings in pairs(ics.SettingsPerView) do
-				if settings.TextLayout == layout then
+				if settings.TextLayout == GUID then
 					n = n + 1
 					break
 				end
@@ -387,8 +387,8 @@ TMW.GroupConfigTemplate.args.main.args.TextLayout = {
 	type = "select",
 	values = function(info)
 		local t = {}
-		for GUID, layoutSettings in pairs(TMW.db.profile.TextLayouts) do
-			t[GUID] = TEXT:GetLayoutName(layoutSettings, GUID)
+		for GUID in pairs(TMW.db.profile.TextLayouts) do
+			t[GUID] = TEXT:GetLayoutName(nil, GUID)
 		end
 		setmetatable(t, {__index = function(t, k) 
 			if k == "%FAKEGET%" then
@@ -416,7 +416,7 @@ TMW.GroupConfigTemplate.args.main.args.TextLayout = {
 		gs.SettingsPerView[gs.View].TextLayout = val
 		
 		-- the group setting is a fallback for icons, so there is no reason to set the layout for individual icons
-		-- we do need to reset icons to "" so that they will fall back to the group setting, though.
+		-- we do need to reset icons to nil so that they will fall back to the group setting, though.
 		for icon in TMW:InIcons(groupID) do
 			IE:AttemptBackup(icon)
 		end
@@ -436,23 +436,24 @@ TMW.GroupConfigTemplate.args.main.args.TextLayout = {
 }
 
 local textLayoutInfo = {
-	layout = 2,
+	layoutGUID = 2,
 	display = 3,
 	stringSetting = 4,
 }
-local function findlayout(info)
-	local layout = info[textLayoutInfo.layout]
-	return layout and strmatch(layout, "#TextLayout (.*)"), layout
+local function findlayoutGUID(info)
+	return info[textLayoutInfo.layoutGUID]
 end
 local function AddTextLayout()
-	local GUID = TMW.generateGUID(12)
-	local newLayout = TMW.db.profile.TextLayouts[GUID]
+	local GUID = TMW:GenerateGUID("textlayout", TMW.CONST.GUID_SIZE)
+	local newLayout = TMW:GetData(GUID)
 	newLayout.GUID = GUID
+	TMW.db.profile.TextLayouts[GUID] = true
 	
 	local Name = "New 1"
 	repeat
 		local found
-		for k, layoutSettings in pairs(TMW.db.profile.TextLayouts) do
+		for GUID in pairs(TMW.db.profile.TextLayouts) do
+			local layoutSettings = TMW:GetData(GUID)
 			if layoutSettings.Name == Name then
 				Name = TMW.oneUpString(Name)
 				found = true
@@ -479,13 +480,13 @@ end
 local textLayoutTemplate = {
 	type = "group",
 	name = function(info)
-		local layout = findlayout(info)
+		local GUID = findlayoutGUID(info)
 		
-		return TEXT:GetLayoutName(nil, layout)
+		return TEXT:GetLayoutName(nil, GUID)
 	end,
 	order = function(info)
-		local layout = findlayout(info)
-		local settings = TEXT:GetTextLayoutSettings(layout)
+		local GUID = findlayoutGUID(info)
+		local settings = TEXT:GetTextLayoutSettings(GUID)
 		
 		if settings.NoEdit then
 			return 1
@@ -494,13 +495,13 @@ local textLayoutTemplate = {
 		end
 	end,
 	disabled = function(info)
-		local layout = findlayout(info)
+		local GUID = findlayoutGUID(info)
 		local stringSetting = info[textLayoutInfo.stringSetting]
-		return stringSetting and TEXT:GetTextLayoutSettings(layout).NoEdit
+		return stringSetting and TEXT:GetTextLayoutSettings(GUID).NoEdit
 	end,
 	hidden = function(info)
-		local layout = findlayout(info)
-		return layout == ""
+		local GUID = findlayoutGUID(info)
+		return GUID == "textlayout:NULL"
 	end,
 	args = {
 		Name = {
@@ -510,18 +511,18 @@ local textLayoutTemplate = {
 			width = "full",
 			order = 1,
 			set = function(info, val)
-				local layout = findlayout(info)
-				TEXT:GetTextLayoutSettings(layout).Name = strtrim(val)
+				local GUID = findlayoutGUID(info)
+				TEXT:GetTextLayoutSettings(GUID).Name = strtrim(val)
 				TMW:Update()
 				TEXT:LoadConfig()
 			end,
 			get = function(info)
-				local layout = findlayout(info)
-				return TEXT:GetTextLayoutSettings(layout).Name
+				local GUID = findlayoutGUID(info)
+				return TEXT:GetTextLayoutSettings(GUID).Name
 			end,
 			disabled = function(info)
-				local layout = findlayout(info)
-				return TEXT:GetTextLayoutSettings(layout).NoEdit
+				local GUID = findlayoutGUID(info)
+				return TEXT:GetTextLayoutSettings(GUID).NoEdit
 			end,
 		},
 		addstring = {
@@ -530,16 +531,16 @@ local textLayoutTemplate = {
 			type = "execute",
 			order = 2,
 			func = function(info)
-				local layout = findlayout(info)
-				TEXT:GetTextLayoutSettings(layout).n = TEXT:GetTextLayoutSettings(layout).n + 1
+				local GUID = findlayoutGUID(info)
+				TEXT:GetTextLayoutSettings(GUID).n = TEXT:GetTextLayoutSettings(GUID).n + 1
 				IE:NotifyChanges()
 				TMW:CompileOptions()
 				TMW:Update()
 				TEXT:LoadConfig()
 			end,
 			disabled = function(info)
-				local layout = findlayout(info)
-				return TEXT:GetTextLayoutSettings(layout).NoEdit
+				local GUID = findlayoutGUID(info)
+				return TEXT:GetTextLayoutSettings(GUID).NoEdit
 			end,
 		},
 		delete = {
@@ -548,29 +549,31 @@ local textLayoutTemplate = {
 			type = "execute",
 			order = 10,
 			func = function(info)
-				local layout = findlayout(info)
+				local GUID = findlayoutGUID(info)
 				
 				IE:NotifyChanges("textlayouts") -- MUST HAPPEN BEFORE WE NIL THE LAYOUT (idk why. just do it, asshole)
-				
-				TMW.db.profile.TextLayouts[layout] = nil
+				--TODO: update for proper deletion with guids
+				TMW.db.profile.TextLayouts[GUID] = nil
+				TMW:DeleteData(GUID)
+
 				TMW:CompileOptions()
 				TMW:Update()
 				TEXT:LoadConfig()
 			end,
 			disabled = function(info)
-				local layout = findlayout(info)
-				return TEXT:GetTextLayoutSettings(layout).NoEdit
+				local GUID = findlayoutGUID(info)
+				return TEXT:GetTextLayoutSettings(GUID).NoEdit
 			end,
 			confirm = function(info)
-				local layout = findlayout(info)
-				local n = TEXT:GetNumTimesUsed(layout)
+				local GUID = findlayoutGUID(info)
+				local n = TEXT:GetNumTimesUsed(GUID)
 			
-				local warning = L["TEXTLAYOUTS_DELETELAYOUT_CONFIRM_BASE"]:format(TEXT:GetLayoutName(nil, layout))
+				local warning = L["TEXTLAYOUTS_DELETELAYOUT_CONFIRM_BASE"]:format(TEXT:GetLayoutName(nil, GUID))
 				if n > 0 then
 					warning = warning .. "\r\n\r\n" .. L["TEXTLAYOUTS_DELETELAYOUT_CONFIRM_NUM"]:format(n)
 				elseif IsControlKeyDown() then
 					return false
-				--elseif TEXT:Layout_IsDefault(TEXT:GetTextLayoutSettings(layout)) and n == 0 then
+				--elseif TEXT:Layout_IsDefault(TEXT:GetTextLayoutSettings(GUID)) and n == 0 then
 				--	return false
 				end
 				return warning
@@ -583,8 +586,8 @@ local textLayoutTemplate = {
 			order = 100,
 			disabled = false,
 			hidden = function(info)
-				local layout = findlayout(info)
-				return not TEXT:GetTextLayoutSettings(layout).NoEdit
+				local GUID = findlayoutGUID(info)
+				return not TEXT:GetTextLayoutSettings(GUID).NoEdit
 			end,
 		},
 		
@@ -595,8 +598,8 @@ local textLayoutTemplate = {
 			width = "double",
 			order = 110,
 			func = function(info)
-				local layout = findlayout(info)
-				TMW:Import(nil, TEXT:GetTextLayoutSettings(layout), TELLMEWHEN_VERSIONNUMBER, "textlayout", TMW.generateGUID(12))
+				local GUID = findlayoutGUID(info)
+				TMW:Import(nil, TEXT:GetTextLayoutSettings(GUID), TELLMEWHEN_VERSIONNUMBER, "textlayout", TMW:GenerateGUID("textlayout", TMW.CONST.GUID_SIZE))
 			end,
 			disabled = function(info)
 				return false
@@ -616,34 +619,38 @@ local anchorSet = {
 	guiInline = true,
 	dialogInline = true,			
 	set = function(info, val)
-		local layout = findlayout(info)
+		local GUID = findlayoutGUID(info)
 		local display = tonumber(info[textLayoutInfo.display])
 		local anchorNum = tonumber(info[textLayoutInfo.stringSetting + 1])
 		local setting = info[textLayoutInfo.stringSetting + 2]
-		TEXT:GetTextLayoutSettings(layout)[display].Anchors[anchorNum][setting] = val
-		UpdateIconsUsingTextLayout(layout)
+
+		TEXT:GetTextLayoutSettings(GUID)[display].Anchors[anchorNum][setting] = val
+
+		UpdateIconsUsingTextLayout(GUID)
 		TEXT:LoadConfig()
 	end,
 	get = function(info)
-		local layout = findlayout(info)
+		local GUID = findlayoutGUID(info)
 		local display = tonumber(info[textLayoutInfo.display])
 		local anchorNum = tonumber(info[textLayoutInfo.stringSetting + 1])
 		local setting = info[textLayoutInfo.stringSetting + 2]
 		
-		return TEXT:GetTextLayoutSettings(layout)[display].Anchors[anchorNum][setting]
+		return TEXT:GetTextLayoutSettings(GUID)[display].Anchors[anchorNum][setting]
 	end,
 	hidden = function(info)
-		local layout = findlayout(info)
+		local GUID = findlayoutGUID(info)
 		local display = tonumber(info[textLayoutInfo.display])
 		local setting = tonumber(info[textLayoutInfo.stringSetting + 1])
-		return TEXT:GetTextLayoutSettings(layout)[display].Anchors.n < setting
+
+		return TEXT:GetTextLayoutSettings(GUID)[display].Anchors.n < setting
 	end,
 	disabled = function(info)
-		local layout = findlayout(info)
+		local GUID = findlayoutGUID(info)
 		local display = tonumber(info[textLayoutInfo.display])
+
 		return
-			TEXT:GetTextLayoutSettings(layout).NoEdit or
-			(LMB and TEXT:GetTextLayoutSettings(layout)[display].SkinAs ~= "")
+			TEXT:GetTextLayoutSettings(GUID).NoEdit or
+			(LMB and TEXT:GetTextLayoutSettings(GUID)[display].SkinAs ~= "")
 	end,
 	order = function(info)
 		return tonumber(info[textLayoutInfo.stringSetting + 1]) + 10
@@ -666,10 +673,10 @@ local anchorSet = {
 				local t = {
 					[""] = L["ICON"],
 				}
-				local layout = findlayout(info)
+				local GUID = findlayoutGUID(info)
 				local display = tonumber(info[textLayoutInfo.display])
 				
-				for i, fontStringSettings in TMW:InNLengthTable(TEXT:GetTextLayoutSettings(layout)) do
+				for i, fontStringSettings in TMW:InNLengthTable(TEXT:GetTextLayoutSettings(GUID)) do
 					if i ~= display then
 						t["$$" .. i] = L["TEXTLAYOUTS_fSTRING3"]:format(TEXT:GetStringName(fontStringSettings, i))
 					end
@@ -724,24 +731,24 @@ local anchorSet = {
 			type = "execute",
 			order = 40,
 			func = function(info)
-				local layout = findlayout(info)
+				local GUID = findlayoutGUID(info)
 				local display = tonumber(info[textLayoutInfo.display])
-				local Anchors = TEXT:GetTextLayoutSettings(layout)[display].Anchors
+				local Anchors = TEXT:GetTextLayoutSettings(GUID)[display].Anchors
 				local anchorNum = tonumber(info[textLayoutInfo.stringSetting + 1])
 				
 				tremove(Anchors, anchorNum)
 				Anchors.n = Anchors.n - 1
 				
 				TMW:CompileOptions()
-				UpdateIconsUsingTextLayout(layout)
+				UpdateIconsUsingTextLayout(GUID)
 				TEXT:LoadConfig()
 			end,
 			disabled = function(info)
-				local layout = findlayout(info)
+				local GUID = findlayoutGUID(info)
 				local display = tonumber(info[textLayoutInfo.display])
-				local Anchors = TEXT:GetTextLayoutSettings(layout)[display].Anchors
+				local Anchors = TEXT:GetTextLayoutSettings(GUID)[display].Anchors
 				
-				return Anchors.n <= 1 or TEXT:GetTextLayoutSettings(layout).NoEdit
+				return Anchors.n <= 1 or TEXT:GetTextLayoutSettings(GUID).NoEdit
 			end,
 		},
 	},
@@ -750,30 +757,30 @@ local anchorSet = {
 local textFontStringTemplate = {
 	type = "group",
 	name = function(info)
-		local layout = findlayout(info)
+		local GUID = findlayoutGUID(info)
 		local display = tonumber(info[textLayoutInfo.display])
 		
-		return TEXT:GetStringName(TEXT:GetTextLayoutSettings(layout)[display], display)
+		return TEXT:GetStringName(TEXT:GetTextLayoutSettings(GUID)[display], display)
 	end,
 	order = function(info) return tonumber(info[#info]) end,
 	set = function(info, val)
-		local layout = findlayout(info)
+		local GUID = findlayoutGUID(info)
 		local display = tonumber(info[textLayoutInfo.display])
 		local setting = info[textLayoutInfo.stringSetting]
-		TEXT:GetTextLayoutSettings(layout)[display][setting] = val
-		UpdateIconsUsingTextLayout(layout)
+		TEXT:GetTextLayoutSettings(GUID)[display][setting] = val
+		UpdateIconsUsingTextLayout(GUID)
 		TEXT:LoadConfig()
 	end,
 	get = function(info)
-		local layout = findlayout(info)
+		local GUID = findlayoutGUID(info)
 		local display = tonumber(info[textLayoutInfo.display])
 		local setting = info[textLayoutInfo.stringSetting]
-		return TEXT:GetTextLayoutSettings(layout)[display][setting]
+		return TEXT:GetTextLayoutSettings(GUID)[display][setting]
 	end,
 	hidden = function(info)
-		local layout = findlayout(info)
+		local GUID = findlayoutGUID(info)
 		local display = tonumber(info[textLayoutInfo.display])
-		return layout and display and TEXT:GetTextLayoutSettings(layout).n < display
+		return GUID and display and TEXT:GetTextLayoutSettings(GUID).n < display
 	end,
 	args = {
 		StringName = {
@@ -790,22 +797,22 @@ local textFontStringTemplate = {
 			order = 2,
 			values = TEXT.MasqueSkinnableTexts,
 			set = function(info, val)
-				local layout = findlayout(info)
+				local GUID = findlayoutGUID(info)
 				local display = tonumber(info[textLayoutInfo.display])
 				local setting = info[textLayoutInfo.stringSetting]
 				assert(setting == "SkinAs")
-				for id, strSettings in TMW:InNLengthTable(TEXT:GetTextLayoutSettings(layout)) do
+				for id, strSettings in TMW:InNLengthTable(TEXT:GetTextLayoutSettings(GUID)) do
 					if strSettings[setting] == val and strSettings[setting] ~= "" then
 						strSettings[setting] = ""
 						TMW:Printf(L["TEXTLAYOUTS_RESETSKINAS"],
 							L["TEXTLAYOUTS_SKINAS"],
 							TEXT:GetStringName(strSettings, id),
-							TEXT:GetStringName(TEXT:GetTextLayoutSettings(layout)[display], display)
+							TEXT:GetStringName(TEXT:GetTextLayoutSettings(GUID)[display], display)
 						)
 					end
 				end
-				TEXT:GetTextLayoutSettings(layout)[display][setting] = val
-				UpdateIconsUsingTextLayout(layout)
+				TEXT:GetTextLayoutSettings(GUID)[display][setting] = val
+				UpdateIconsUsingTextLayout(GUID)
 				TEXT:LoadConfig()
 			end,
 			hidden = not LMB,
@@ -824,25 +831,25 @@ local textFontStringTemplate = {
 			guiInline = true,
 			dialogInline = true,			
 			set = function(info, val)
-				local layout = findlayout(info)
+				local GUID = findlayoutGUID(info)
 				local display = tonumber(info[textLayoutInfo.display])
 				local setting = info[textLayoutInfo.stringSetting + 1]
-				TEXT:GetTextLayoutSettings(layout)[display][setting] = val
-				UpdateIconsUsingTextLayout(layout)
+				TEXT:GetTextLayoutSettings(GUID)[display][setting] = val
+				UpdateIconsUsingTextLayout(GUID)
 				TEXT:LoadConfig()
 			end,
 			get = function(info)
-				local layout = findlayout(info)
+				local GUID = findlayoutGUID(info)
 				local display = tonumber(info[textLayoutInfo.display])
 				local setting = info[textLayoutInfo.stringSetting + 1]
-				return TEXT:GetTextLayoutSettings(layout)[display][setting]
+				return TEXT:GetTextLayoutSettings(GUID)[display][setting]
 			end,
 			disabled = function(info)
-				local layout = findlayout(info)
+				local GUID = findlayoutGUID(info)
 				local display = tonumber(info[textLayoutInfo.display])
 				return
-					TEXT:GetTextLayoutSettings(layout).NoEdit or
-					(LMB and TEXT:GetTextLayoutSettings(layout)[display].SkinAs ~= "")
+					TEXT:GetTextLayoutSettings(GUID).NoEdit or
+					(LMB and TEXT:GetTextLayoutSettings(GUID)[display].SkinAs ~= "")
 			end,
 			args = {
 				Name = {
@@ -866,8 +873,8 @@ local textFontStringTemplate = {
 					style = "dropdown",
 					order = 1,
 					disabled = function(info)
-						local layout = findlayout(info)
-						return TEXT:GetTextLayoutSettings(layout).NoEdit
+						local GUID = findlayoutGUID(info)
+						return TEXT:GetTextLayoutSettings(GUID).NoEdit
 					end,
 				},
 				Size = {
@@ -900,25 +907,25 @@ local textFontStringTemplate = {
 			guiInline = true,
 			dialogInline = true,			
 			set = function(info, val)
-				local layout = findlayout(info)
+				local GUID = findlayoutGUID(info)
 				local display = tonumber(info[textLayoutInfo.display])
 				local setting = info[textLayoutInfo.stringSetting + 1]
-				TEXT:GetTextLayoutSettings(layout)[display][setting] = val
-				UpdateIconsUsingTextLayout(layout)
+				TEXT:GetTextLayoutSettings(GUID)[display][setting] = val
+				UpdateIconsUsingTextLayout(GUID)
 				TEXT:LoadConfig()
 			end,
 			get = function(info)
-				local layout = findlayout(info)
+				local GUID = findlayoutGUID(info)
 				local display = tonumber(info[textLayoutInfo.display])
 				local setting = info[textLayoutInfo.stringSetting + 1]
-				return TEXT:GetTextLayoutSettings(layout)[display][setting]
+				return TEXT:GetTextLayoutSettings(GUID)[display][setting]
 			end,
 			disabled = function(info)
-				local layout = findlayout(info)
+				local GUID = findlayoutGUID(info)
 				local display = tonumber(info[textLayoutInfo.display])
 				return
-					TEXT:GetTextLayoutSettings(layout).NoEdit or
-					(LMB and TEXT:GetTextLayoutSettings(layout)[display].SkinAs ~= "")
+					TEXT:GetTextLayoutSettings(GUID).NoEdit or
+					(LMB and TEXT:GetTextLayoutSettings(GUID)[display].SkinAs ~= "")
 			end,
 			args = {
 				Justify = {
@@ -929,8 +936,8 @@ local textFontStringTemplate = {
 					style = "dropdown",
 					order = 1,
 					disabled = function(info)
-						local layout = findlayout(info)
-						return TEXT:GetTextLayoutSettings(layout).NoEdit
+						local GUID = findlayoutGUID(info)
+						return TEXT:GetTextLayoutSettings(GUID).NoEdit
 					end,
 				},
 				AddAnchor = {
@@ -939,17 +946,17 @@ local textFontStringTemplate = {
 					type = "execute",
 					order = 2,
 					func = function(info)
-						local layout = findlayout(info)
+						local GUID = findlayoutGUID(info)
 						local display = tonumber(info[textLayoutInfo.display])
-						local Anchors = TEXT:GetTextLayoutSettings(layout)[display].Anchors
+						local Anchors = TEXT:GetTextLayoutSettings(GUID)[display].Anchors
 						Anchors.n = Anchors.n + 1
 						TMW:CompileOptions()
-						UpdateIconsUsingTextLayout(layout)
+						UpdateIconsUsingTextLayout(GUID)
 						TEXT:LoadConfig()
 					end,
 					disabled = function(info)
-						local layout = findlayout(info)
-						return TEXT:GetTextLayoutSettings(layout).NoEdit
+						local GUID = findlayoutGUID(info)
+						return TEXT:GetTextLayoutSettings(GUID).NoEdit
 					end,
 				},
 			},
@@ -961,17 +968,17 @@ local textFontStringTemplate = {
 			type = "execute",
 			order = 3,
 			func = function(info)
-				local layout, rawLayoutKey = findlayout(info)
+				local GUID = findlayoutGUID(info)
 				local display = tonumber(info[textLayoutInfo.display])
 				
 				-- MUST HAPPEN BEFORE WE REMOVE THE DISPLAY
-				if TEXT:GetTextLayoutSettings(layout).n == display then
+				if TEXT:GetTextLayoutSettings(GUID).n == display then
 					IE:NotifyChanges("textlayouts", rawLayoutKey, display - 1)
 				else
 					IE:NotifyChanges("textlayouts", rawLayoutKey, display)
 				end
 				
-				for i, fontStringSettings in TMW:InNLengthTable(TEXT:GetTextLayoutSettings(layout)) do
+				for i, fontStringSettings in TMW:InNLengthTable(TEXT:GetTextLayoutSettings(GUID)) do
 					for _, anchorSettings in TMW:InNLengthTable(fontStringSettings.Anchors) do
 						local relativeTo = anchorSettings.relativeTo
 						if relativeTo:sub(1, 2) == "$$" then
@@ -985,8 +992,8 @@ local textFontStringTemplate = {
 					end
 				end
 				
-				tremove(TEXT:GetTextLayoutSettings(layout), display)
-				TEXT:GetTextLayoutSettings(layout).n = TEXT:GetTextLayoutSettings(layout).n - 1
+				tremove(TEXT:GetTextLayoutSettings(GUID), display)
+				TEXT:GetTextLayoutSettings(GUID).n = TEXT:GetTextLayoutSettings(GUID).n - 1
 				
 				TMW:CompileOptions()
 				IE:NotifyChanges()
@@ -994,14 +1001,14 @@ local textFontStringTemplate = {
 				TEXT:LoadConfig()
 			end,
 			disabled = function(info)
-				local layout = findlayout(info)
-				return textLayoutTemplate.disabled(info) or TEXT:GetTextLayoutSettings(layout).n == 1
+				local GUID = findlayoutGUID(info)
+				return textLayoutTemplate.disabled(info) or TEXT:GetTextLayoutSettings(GUID).n == 1
 			end,
 			confirm = function(info)
 			
-				local layout = findlayout(info)
+				local GUID = findlayoutGUID(info)
 				local display = tonumber(info[textLayoutInfo.display])
-				local displaySettings = TEXT:GetTextLayoutSettings(layout)[display]
+				local displaySettings = TEXT:GetTextLayoutSettings(GUID)[display]
 				
 				if IsControlKeyDown() then
 					return false
@@ -1018,8 +1025,8 @@ local textFontStringTemplate = {
 			order = 5,
 			disabled = false,
 			hidden = function(info)
-				local layout = findlayout(info)
-				return not TEXT:GetTextLayoutSettings(layout).NoEdit
+				local GUID = findlayoutGUID(info)
+				return not TEXT:GetTextLayoutSettings(GUID).NoEdit
 			end,
 		},
 	},
@@ -1065,7 +1072,8 @@ TMW:RegisterCallback("TMW_CONFIG_MAIN_OPTIONS_COMPILE", function(event, OptionsT
 			textlayouts_toplevel.args[k] = nil
 		end
 	end
-	for layoutID, layout in pairs(TMW.db.profile.TextLayouts) do
+	for GUID in pairs(TMW.db.profile.TextLayouts) do
+		local layout = TMW:GetData(GUID)
 		for fontStringID, fontString in TMW:InNLengthTable(layout) do
 			-- this will expand textLayoutTemplate's args tables to the needed number
 			-- unused textFontStringTemplate in it will not be removed - they are simply hidden.
@@ -1078,7 +1086,7 @@ TMW:RegisterCallback("TMW_CONFIG_MAIN_OPTIONS_COMPILE", function(event, OptionsT
 			end
 		end
 		
-		OptionsTable.args.textlayouts.args["#TextLayout " .. layoutID] = textLayoutTemplate
+		OptionsTable.args.textlayouts.args[GUID] = textLayoutTemplate
 	end
 end)
 
@@ -1093,25 +1101,15 @@ local textlayout = TMW.Classes.SharableDataType:New("textlayout", 15)
 function textlayout:Import_ImportData(_, data, version, GUID)
 	assert(type(GUID) == "string")
 	
-	TMW.db.profile.TextLayouts[GUID] = nil -- restore defaults
-	local textlayout = TMW.db.profile.TextLayouts[GUID]
-	TMW:CopyTableInPlaceWithMeta(data, textlayout, true)
-	textlayout.GUID = GUID
+	TMW:CheckInData(GUID)
+	TMW.db.global.Trunk[self.type][GUID] = TMW:CopyWithoutMetatable(data)
 
-	if textlayout.NoEdit then
-		textlayout.NoEdit = false -- must be false, not nil
-	end
-	
-	repeat
-		local found
-		for k, layoutSettings in pairs(TMW.db.profile.TextLayouts) do
-			if layoutSettings ~= textlayout and layoutSettings.Name == textlayout.Name then
-				textlayout.Name = TMW.oneUpString(textlayout.Name)
-				found = true
-				break
-			end
-		end
-	until not found
+	TMW.db.profile.TextLayouts[GUID] = true
+
+	local textlayout = TMW:GetData(GUID)
+
+	textlayout.GUID = GUID
+	textlayout.NoEdit = false
 	
 	if version then
 		if version > TELLMEWHEN_VERSIONNUMBER then
@@ -1198,7 +1196,7 @@ function textlayout:Import_BuildMenuData(result, editbox)
 		info.notCheckable = true
 		
 		info.func = function()
-			TMW:Import(editbox, settings, result.version, "textlayout", TMW.generateGUID(12))
+			TMW:Import(editbox, settings, result.version, "textlayout", TMW:GenerateGUID("textlayout", TMW.CONST.GUID_SIZE))
 		end
 		UIDropDownMenu_AddButton(info, UIDROPDOWNMENU_MENU_LEVEL)
 	else
@@ -1268,8 +1266,8 @@ TMW:RegisterCallback("TMW_CONFIG_REQUEST_AVAILABLE_IMPORT_EXPORT_TYPES", functio
 		export.textlayout = GUID
 	elseif editbox.IsImportExportWidget then
 		local info = editbox.obj.userdata		
-		import.textlayout_overwrite = findlayout(info)
-		export.textlayout = findlayout(info)
+		import.textlayout_overwrite = findlayoutGUID(info)
+		export.textlayout = findlayoutGUID(info)
 	end
 end)
 

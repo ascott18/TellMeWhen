@@ -28,74 +28,72 @@ View.desc = L["UIPANEL_GROUPTYPE_ICON_DESC"]
 
 local ICON_SIZE = 30
 
-TMW:RegisterDatabaseDefaults{
-	profile = {
-		TextLayouts = {
-			icon1 = {
-				Name = L["TEXTLAYOUTS_DEFAULTS_ICON1"],
-				GUID = "icon1",
-				NoEdit = true,
+if TMW.TEXT then
+	TMW.TEXT:RegisterLayout("textlayout:icon1", {
+		Name = L["TEXTLAYOUTS_DEFAULTS_ICON1"],
+		GUID = "textlayout:icon1",
+		NoEdit = true,
+		n = 2,
+		-- Default Layout 1
+		{	-- [1] Bind
+			Anchors = {
 				n = 2,
-				-- Default Layout 1
-				{	-- [1] Bind
-					Anchors = {
-						n = 2,
-						{
-							x 	 		  	= -2,
-							y 	 		  	= -2,
-							point 		  	= "TOPLEFT",
-							relativeTo	 	= "",
-							relativePoint 	= "TOPLEFT",
-						},
-						{
-							x 	 		  	= -2,
-							y 	 		  	= -2,
-							point 		  	= "TOPRIGHT",
-							relativeTo	 	= "",
-							relativePoint 	= "TOPRIGHT",
-						},
-					},
-					
-					StringName		= L["TEXTLAYOUTS_DEFAULTS_BINDINGLABEL"],
-					DefaultText		= "",
-					SkinAs			= "HotKey",
+				{
+					x 	 		  	= -2,
+					y 	 		  	= -2,
+					point 		  	= "TOPLEFT",
+					relativeTo	 	= "",
+					relativePoint 	= "TOPLEFT",
 				},
-				{	-- [2] Stacks
-					Anchors = {
-						n = 1,
-						{
-							x 	 		  	= -2,
-							y 	 		  	= 2,
-							point 		  	= "BOTTOMRIGHT",
-							relativeTo	 	= "",
-							relativePoint 	= "BOTTOMRIGHT",
-						},
-					},
-					
-					StringName		= L["TEXTLAYOUTS_DEFAULTS_STACKS"],
-					DefaultText		= "[Stacks:Hide(0)]",
-					SkinAs			= "Count",
+				{
+					x 	 		  	= -2,
+					y 	 		  	= -2,
+					point 		  	= "TOPRIGHT",
+					relativeTo	 	= "",
+					relativePoint 	= "TOPRIGHT",
 				},
 			},
-			icon2 = {
-				Name = L["TEXTLAYOUTS_DEFAULTS_CENTERNUMBER"],
-				GUID = "icon2",
-				NoEdit = true,
+			
+			StringName		= L["TEXTLAYOUTS_DEFAULTS_BINDINGLABEL"],
+			DefaultText		= "",
+			SkinAs			= "HotKey",
+		},
+		{	-- [2] Stacks
+			Anchors = {
 				n = 1,
 				{
-					StringName = L["TEXTLAYOUTS_DEFAULTS_NUMBER"],
-					ConstrainWidth = false,
-					Size = 24,
-				}, 
+					x 	 		  	= -2,
+					y 	 		  	= 2,
+					point 		  	= "BOTTOMRIGHT",
+					relativeTo	 	= "",
+					relativePoint 	= "BOTTOMRIGHT",
+				},
 			},
+			
+			StringName		= L["TEXTLAYOUTS_DEFAULTS_STACKS"],
+			DefaultText		= "[Stacks:Hide(0)]",
+			SkinAs			= "Count",
 		},
-	},
-}
+	})
+
+	TMW.TEXT:RegisterLayout("textlayout:icon2", {
+		Name = L["TEXTLAYOUTS_DEFAULTS_CENTERNUMBER"],
+		GUID = "textlayout:icon2",
+		NoEdit = true,
+		n = 1,
+		{
+			StringName = L["TEXTLAYOUTS_DEFAULTS_NUMBER"],
+			ConstrainWidth = false,
+			Size = 24,
+		}, 
+	})
+end
+
 
 View:RegisterGroupDefaults{
 	SettingsPerView = {
 		icon = {
-			TextLayout = "icon1",
+			TextLayout = "textlayout:icon1",
 		}
 	}
 }
