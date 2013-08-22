@@ -1756,7 +1756,7 @@ function TMW:Initialize()
 	-- Channel TMW is used for sharing data.
 	-- ReceiveComm is a setting that allows users to disable receiving shared data.
 	if TMW.db.profile.ReceiveComm then
-		TMW:RegisterComm("TMW")
+		TMW:RegisterComm("TMW_DATA")
 	end
 	
 	-- Channel TMWV is used for version notifications.
@@ -1943,6 +1943,36 @@ function TMW:GetData(GUID, raw, noRetrieve)
 	else
 		return activeTrunk[GUID]
 	end
+end
+
+function TMW:CloneData(GUID)
+	local oldData = TMW:GetData(GUID)
+
+	if not oldData then
+		return nil
+	end
+
+	local dataType = TMW:ParseGUID(GUID)
+
+	local newData = TMW:CopyWithMetatable(oldData)
+	local newGUID = TMW:GenerateGUID(dataType, TMW.CONST.GUID_SIZE)
+
+	TMW:StoreData(newGUID, newData)
+
+	return newGUID, newData
+end
+
+function TMW:StoreData(GUID, data)
+	TMW:ValidateType("2 (GUID)", "TMW:StoreData(GUID, data)", GUID, "string")
+	TMW:ValidateType("3 (data)", "TMW:StoreData(GUID, data)", data, "!nil")
+
+	local dataType = TMW:ParseGUID(GUID)
+
+	if not TMW.DatabaseTypes[dataType] then
+		error("Data type for the guid is not registered: " .. GUID, 2)
+	end
+
+	TMW.db.global.ActiveTrunk[dataType][GUID] = data
 end
 
 function TMW:CheckInData(GUID)
@@ -2530,6 +2560,100 @@ function TMW:GetUpgradeTable()
 end
 
 
+do	-- Upgrades from the pre-7.0.0 data format
+
+	local function recursiveReplaceReferences(table, GUIDmap)
+		for k, v in pairs(table) do
+			if type(v) == "table" then
+				recursiveReplaceReferences(v, GUIDmap)
+			elseif GUIDmap[v] then
+				table[k] = GUIDmap[v]
+			end
+		end
+	end
+
+	local upgraders = {
+		profile = function(profileName, profile, GUIDmap, Trunk)
+
+			if p.Groups then
+				for groupID, gs in pairs(p.Groups) do
+					p.Groups[groupID] = upgraders.group(groupID, gs, GUIDmap, Trunk)
+				end
+			end
+
+			if p.TextLayouts then
+				for oldGUID, layout in pairs(CopyTable(p.TextLayouts)) do
+					local newGUID = upgraders.textlayout(oldGUID, layout, GUIDmap, Trunk)
+					p.TextLayouts[oldGUID] = nil
+					if newGUID then
+						p.TextLayouts[newGUID] = true
+					end
+				end
+			end
+		end,
+
+		group = function(groupID, gs, GUIDmap, Trunk)
+			local GUID = TMW:GenerateGUID("group", TMW.CONST.GUID_SIZE)
+			
+			GUIDmap["TellMeWhen_Group"..groupID] = GUID
+			Trunk[GUID] = gs
+
+			if gs.Icons then
+				for iconID, ics in pairs(gs.Icons) do
+					local GUID = upgraders.icon(iconID, ics, GUIDmap, Trunk)
+					gs.Icons[iconID] = GUID
+					GUIDmap["TellMeWhen_Group"..groupID.."_Icon"..iconID] = GUID
+				end
+			end
+
+			return GUID
+		end,
+
+		icon = function(_, ics, GUIDmap, Trunk)
+			local GUID = TMW:GenerateGUID("icon", TMW.CONST.GUID_SIZE)
+
+			Trunk[GUID] = ics
+
+			return GUID
+		end,
+
+		textlayout = function(oldGUID, layout, GUIDmap, Trunk)
+			if oldGUID ~= "icon1" and oldGUID ~= "icon2" and oldGUID ~= "bar1" then
+				--local GUID = TMW:GenerateGUID("textlayout", TMW.CONST.GUID_SIZE)
+				local GUID = "textlayout:" .. oldGUID
+				Trunk[GUID] = layout
+				layout.GUID = GUID
+				
+				GUIDmap[oldGUID] = GUID
+
+				return GUID
+			end
+		end,
+	}
+
+	function TMW:RunUpgradeFromOld(name, data, func, Trunk)
+		local GUIDmap = {}
+		local mixedTrunk = {}
+
+		local ret = upgraders[func](name, data, GUIDmap, mixedTrunk)
+
+		for GUID, data in pairs(mixedTrunk) do
+			local dataType = TMW:ParseGUID(GUID)
+
+			if not Trunk[dataType] then
+				Trunk[dataType] = {}
+			end
+			Trunk[dataType][GUID] = data
+		end
+
+		data.__mixedTrunk = mixedTrunk
+		recursiveReplaceReferences(data, GUIDmap)
+		data.__mixedTrunk = nil
+
+		return ret
+	end
+end
+
 function TMW:DoUpgrade(type, version, ...)
 
 	assert(_G.type(type) == "string")
@@ -2643,27 +2767,10 @@ function TMW:RawUpgrade()
 				TellMeWhenDB.global = {}
 			end
 
-			TellMeWhenDB.global.Trunk = {
-				group = {},
-				icon = {},
-				textlayout = {},
-			}
+			TellMeWhenDB.global.Trunk = {}
 
 
-			local function recursiveReplaceReferences(table, GUIDmap)
-				for k, v in pairs(table) do
-					if type(v) == "table" then
-						recursiveReplaceReferences(v, GUIDmap)
-					elseif GUIDmap[v] then
-						table[k] = GUIDmap[v]
-					end
-				end
-			end
-
-			for _, p in pairs(TellMeWhenDB.profiles) do
-
-				local GUIDmap = {}
-				local profileMixedTrunk = {}
+			for profileName, profile in pairs(TellMeWhenDB.profiles) do
 
 				if p.Groups then
 					for groupID, gs in pairs(p.Groups) do
@@ -2674,44 +2781,10 @@ function TMW:RawUpgrade()
 								gs.Enabled = false
 							end
 						end
-
-						local GUID = TMW:GenerateGUID("group", TMW.CONST.GUID_SIZE)
-						TellMeWhenDB.global.Trunk.group[GUID] = gs
-						p.Groups[groupID] = GUID
-						GUIDmap["TellMeWhen_Group"..groupID] = GUID
-						profileMixedTrunk[GUID] = gs
-
-
-						if gs.Icons then
-							for iconID, ics in pairs(gs.Icons) do
-								local GUID = TMW:GenerateGUID("icon", TMW.CONST.GUID_SIZE)
-								TellMeWhenDB.global.Trunk.icon[GUID] = ics
-								gs.Icons[iconID] = GUID
-								GUIDmap["TellMeWhen_Group"..groupID.."_Icon"..iconID] = GUID
-								profileMixedTrunk[GUID] = ics
-							end
-						end
 					end
 				end
 
-				if p.TextLayouts then
-					for oldGUID, layout in pairs(CopyTable(p.TextLayouts)) do
-						if oldGUID ~= "icon1" and oldGUID ~= "icon2" and oldGUID ~= "bar1" then
-							--local GUID = TMW:GenerateGUID("textlayout", TMW.CONST.GUID_SIZE)
-							local GUID = "textlayout:" .. oldGUID
-							TellMeWhenDB.global.Trunk.textlayout[GUID] = layout
-							profileMixedTrunk[GUID] = layout
-							layout.GUID = GUID
-							p.TextLayouts[GUID] = true
-							GUIDmap[oldGUID] = GUID
-						end
-						p.TextLayouts[oldGUID] = nil
-					end
-				end
-
-				p.profileMixedTrunk = profileMixedTrunk
-				recursiveReplaceReferences(p, GUIDmap)
-				p.profileMixedTrunk = nil
+				TMW:RunUpgradeFromOld(profileName, profile, "profile", TellMeWhenDB.global.Trunk)
 			end
 
 
@@ -3321,7 +3394,7 @@ function TMW:OnCommReceived(prefix, text, channel, who)
 		TMW:Printf(L["NEWVERSION"], major .. minor)
 		
 	-- Handles data transmission (icons, groups, profiles, etc)
-	elseif prefix == "TMW" and TMW.db.profile.ReceiveComm then
+	elseif prefix == "TMW_DATA" and TMW.db.profile.ReceiveComm then
 		TMW.Received = TMW.Received or {}
 		TMW.Received[text] = who or true
 
@@ -3366,32 +3439,79 @@ end
 
 TMW.ValidityCheckQueue = {}
 
-function TMW:QueueValidityCheck(icon, groupID, iconID, g, i)
-	do
-	TMW:Debug("Validity check is NYI")
-	return
-end
-	if not TMW.db.profile.WarnInvalids then return end
-
-	local str = icon .. "^" .. groupID .. "^" .. (iconID or "nil") .. "^" .. g .. "^" .. i
-
-	TMW.ValidityCheckQueue[str] = 1
+function TMW:QueueValidityCheck(checker, checkee, description, ...)
+    if not TMW.db.profile.WarnInvalids then return end
+    
+    TMW.ValidityCheckQueue[{checker, checkee, description:format(...)}] = 1
 end
 
 function TMW:DoValidityCheck()
-	for str in pairs(TMW.ValidityCheckQueue) do
-		local icon, groupID, iconID, g, i = strsplit("^", str)
-		icon = _G[icon]
-		if not (icon and icon:IsValid()) then
-			if iconID ~= "nil" then
-				TMW.Warn(format(L["CONDITIONORMETA_CHECKINGINVALID"], groupID, iconID, g, i))
-			else
-				TMW.Warn(format(L["CONDITIONORMETA_CHECKINGINVALID_GROUP"], groupID, g, i))
-			end
-		end
-	end
-	wipe(TMW.ValidityCheckQueue)
+    for tbl in pairs(TMW.ValidityCheckQueue) do
+        local checkerIn, checkeeIn, description = unpack(tbl)
+        
+        local checker, checkee = checkerIn, checkeeIn
+        local checkerName = "???"
+        local checkeeName
+        
+        local message = description .. " "
+        local shouldWarn = true
+        
+        if type(checker) == "string" then
+            checker = TMW.GUIDToOwner[checkerIn]
+            if not checker then
+                TMW:Error("Invalid checker was passed to QueueValidityCheck: %q", checkerIn)
+                checkerName = "UNKNOWN" .. (TMW.debug and " " .. checkerIn)
+            end
+        end
+        
+        if type(checker) == "table" then
+            if checker.class == TMW.Classes.Icon then
+                checkerName = checker:GetFullNameWithTexture()
+            elseif checker.class == TMW.Classes.Group then
+                checkerName = checker:GetGroupName()
+            end
+        end
+        
+        message = message .. checkerName
+        
+        
+        if type(checkeeIn) == "string" then
+            checkee = TMW.GUIDToOwner[checkeeIn]
+            if not checkee then
+                
+            end
+        end
+        
+        if type(checkee) == "table" then
+            if checkee.class == TMW.Classes.Icon then
+                checkeeName = checkee:GetFullNameWithTexture()
+            elseif checkee.class == TMW.Classes.Group then
+                checkeeName = checkee:GetGroupName()
+            end
+            
+            if not checkee.IsValid then
+                error("checkee does not have an IsValid method: " .. tostring(checkeeIn))
+            end
+            
+            if checkee:IsValid() then
+                shouldWarn = false
+            end
+        end
+        
+        if checkeeName then
+            message = message .. "  (" .. checkeeName .. ") "
+        end
+        
+        message = message .. " " .. "is invalid."
+        
+        if shouldWarn then
+            TMW.Warn(message)
+        end
+    end
+    
+    wipe(TMW.ValidityCheckQueue)
 end
+
 
 function TMW:GetGroupName(name, groupID, short)
 	name = tonumber(name) or name

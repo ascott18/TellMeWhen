@@ -1202,13 +1202,3 @@ do -- InConditionSettings
 	end
 end
 
-
-TMW:RegisterCallback("TMW_CONFIG_ICON_RECONCILIATION_REQUESTED", function(event, replace, limitSourceGroup)
-	for Condition, _, groupID in TMW:InConditionSettings() do
-		if not limitSourceGroup or groupID == limitSourceGroup then
-			if Condition.Icon ~= "" and type(Condition.Icon) == "string" then
-				replace(Condition, "Icon")
-			end
-		end
-	end
-end)

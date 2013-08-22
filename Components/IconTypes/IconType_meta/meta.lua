@@ -299,13 +299,11 @@ function Type:Setup(icon, groupID, iconID)
 	icon.__currentIcon = nil -- reset this
 	icon.metaUpdateQueued = true -- force this
 
-	--[[
-	-- TODO: reimplement this
-	validity check:
+	-- validity check:
 	for i, icGUID in pairs(icon.Icons) do
-		TMW:QueueValidityCheck(groupID, iconID, icGUID)
+		TMW:QueueValidityCheck(icon, icGUID, L["VALIDITY_META_DESC"], i)
 	end
-]]
+
 	wipe(alreadyinserted)
 	icon.CompiledIcons = wipe(icon.CompiledIcons or {})
 	icon.CompiledIcons = GetFullIconTable(icon, icon.Icons)
@@ -357,17 +355,5 @@ function Type:TMW_GLOBAL_UPDATE()
 	Locked = TMW.Locked
 end
 TMW:RegisterCallback("TMW_GLOBAL_UPDATE", Type)
-
-TMW:RegisterCallback("TMW_CONFIG_ICON_RECONCILIATION_REQUESTED", function(event, replace, limitSourceGroup)
-	for ics, groupID in TMW:InIconSettings() do
-		if not limitSourceGroup or groupID == limitSourceGroup then
-			for k, ic in pairs(ics.Icons) do
-				if type(ic) == "string" then
-					replace(ics.Icons, k)
-				end
-			end
-		end
-	end
-end)
 
 Type:Register(310)

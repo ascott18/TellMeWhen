@@ -158,24 +158,18 @@ IconDragger:RegisterIconDragHandler(1,	-- Move
 		
 		TMW:PrepareIconSettingsForCopying(srcics, srcgs)
 		
-		IconDragger.desticon.group:GetSettings().Icons[IconDragger.desticon:GetID()] = srcgs.Icons[IconDragger.srcicon:GetID()]
+		IconDragger.desticon.group:GetSettings().Icons[IconDragger.desticon:GetID()] = srcicon:GetGUID()
 		srcgs.Icons[IconDragger.srcicon:GetID()] = nil
 		
 
 		-- preserve buff/debuff/other types textures
 		IconDragger.desticon:SetInfo("texture", IconDragger.srcicon.attributes.texture)
-
-		local srcicon, desticon = tostring(IconDragger.srcicon), tostring(IconDragger.desticon)
-
-		TMW:ReconcileData(srcicon, desticon)
 	end
 )
 IconDragger:RegisterIconDragHandler(2,	-- Copy
 	function(IconDragger, info)
 		if IconDragger.desticon then
 			info.text = L["ICONMENU_COPYHERE"]
-			info.text = "NOT YET IMPLEMENTED"
-			TMW:Debug("Icon copy nyi")
 			info.tooltipTitle = nil
 			info.tooltipText = nil
 			return true
@@ -187,7 +181,8 @@ IconDragger:RegisterIconDragHandler(2,	-- Copy
 		local srcics = IconDragger.srcicon:GetSettings()
 		TMW:PrepareIconSettingsForCopying(srcics, srcgs)
 		
-		IconDragger.desticon.group:GetSettings().Icons[IconDragger.desticon:GetID()] = TMW:CopyWithMetatable(srcics)
+		local newGUID = TMW:CloneData(IconDragger.srcicon:GetGUID())
+		IconDragger.desticon.group:GetSettings().Icons[IconDragger.desticon:GetID()] = newGUID
 
 		-- preserve buff/debuff/other types textures
 		IconDragger.desticon:SetInfo("texture", IconDragger.srcicon.attributes.texture)
@@ -218,10 +213,6 @@ IconDragger:RegisterIconDragHandler(3,	-- Swap
 		local desttex = IconDragger.desticon.attributes.texture
 		IconDragger.desticon:SetInfo("texture", IconDragger.srcicon.attributes.texture)
 		IconDragger.srcicon:SetInfo("texture", desttex)
-
-		local srcicon, desticon = tostring(IconDragger.srcicon), tostring(IconDragger.desticon)
-
-		TMW:ReconcileData(srcicon, desticon, srcicon .. "$", desticon .. "$", true)
 	end
 )
 
@@ -246,16 +237,16 @@ IconDragger:RegisterIconDragHandler(40,	-- Split
 
 		-- copy the source group.
 		-- pcall so that, in the rare event of some unforseen error, we don't lose the user's settings (they haven't yet been restored)
-		local success, err = pcall(TMW.CopyTableInPlaceWithMeta, TMW, TMW.db.profile.Groups[IconDragger.srcicon.group:GetID()], TMW.db.profile.Groups[groupID])
+		local success, err = pcall(TMW.CopyTableInPlaceWithMeta, TMW, IconDragger.srcicon.group:GetSettings(), group:GetSettings())
 
 		-- restore the icon data of the source group
-		TMW.db.profile.Groups[IconDragger.srcicon.group:GetID()].Icons = SOURCE_ICONS
+		IconDragger.srcicon.group:GetSettings().Icons = SOURCE_ICONS
 		
 		-- now it is safe to error since we restored the old settings
 		assert(success, err)
 
 
-		local gs = TMW.db.profile.Groups[groupID]
+		local gs = group:GetSettings()
 
 		-- group tweaks
 		gs.Rows = 1
@@ -268,20 +259,16 @@ IconDragger:RegisterIconDragHandler(40,	-- Split
 		
 		p.relativeTo = "UIParent"
 		
-		TMW[groupID]:Setup()
+		group:Setup()
 
 		-- move the actual icon settings
-		gs.Icons[1] = IconDragger.srcicon.group.Icons[IconDragger.srcicon:GetID()]
-		IconDragger.srcicon.group.Icons[IconDragger.srcicon:GetID()] = nil
+		gs.Icons[1] = IconDragger.srcicon:GetGUID()
+		IconDragger.srcicon.group:GetSettings().Icons[IconDragger.srcicon:GetID()] = nil
 
 		-- preserve textures
 		if group and group[1] then
 			group[1]:SetInfo("texture", IconDragger.srcicon.attributes.texture)
 		end
-
-		local srcicon, desticon = tostring(IconDragger.srcicon), tostring("TellMeWhen_Group" .. groupID .. "_Icon1")
-
-		TMW:ReconcileData(srcicon, desticon)
 
 		TMW[groupID]:Setup()
 	end
