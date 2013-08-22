@@ -1814,6 +1814,7 @@ end
 -- GUID Functions
 ---------------------------------
 
+TMW.PreviousGUIDToOwner = {}
 TMW.GUIDToOwner = {}
 
 function TMW:DeclareDataOwner(GUID, object)
@@ -1825,7 +1826,11 @@ function TMW:GetDataOwner(GUID)
 end
 
 function TMW:GetSettingsFromGUID(GUID)
-	local owner = TMW.GUIDToOwner[GUID]
+	if not GUID then
+		return nil
+	end
+
+	local owner = TMW.GUIDToOwner[GUID] or TMW.PreviousGUIDToOwner[GUID]
 	if owner and owner:GetGUID() == GUID then
 		return owner:GetSettings()
 	end
@@ -2882,6 +2887,7 @@ function TMW:UpdateNormally()
 		TMW:LoadOptions()
 	end
 	
+	TMW.GUIDToOwner, TMW.PreviousGUIDToOwner = TMW.PreviousGUIDToOwner, TMW.GUIDToOwner
 	wipe(TMW.GUIDToOwner)
 
 	wipe(SpellTextures)
