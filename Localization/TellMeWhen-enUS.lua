@@ -77,7 +77,7 @@ Sorry about the inconvenience!]]
 
 
 
-L["ERROR_INVALID_SPELLID"] = "%s is checking an invalid spellID: %s. Please remove it to avoid undesired icon behavior."
+L["ERROR_INVALID_SPELLID2"] = "An icon is checking an invalid spellID: %s. Please remove it to avoid undesired icon behavior."
 
 L["SAFESETUP_TRIGGERED"] = "Running safe & slow setup..."
 L["SAFESETUP_COMPLETE"] = "Safe & slow setup complete."

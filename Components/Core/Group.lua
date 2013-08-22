@@ -211,7 +211,7 @@ end
 function Group.GetGUID(group)
 	local GUID = group:GetSettings().GUID
 
-	if not GUID then
+	if not GUID or GUID == "" then
 		GUID = TMW:GenerateGUID("group", TMW.CONST.GUID_SIZE)
 		group:GetSettings().GUID = GUID
 		group.GUID = GUID

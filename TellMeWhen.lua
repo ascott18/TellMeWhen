@@ -1391,7 +1391,7 @@ do -- Callback Lib
 	local firingsInProgress = 0
 	TMW.callbackregistry=callbackregistry
 	
-	function removeNils(table)
+	local function removeNils(table)
 		local numNils = 0
 		
 		for i = 1, table.n do
@@ -1826,19 +1826,19 @@ function TMW:GetDataOwner(GUID)
 end
 
 function TMW:GetSettingsFromGUID(GUID)
-	if not GUID then
+	if not GUID or GUID == "" then
 		return nil
 	end
 
 	local owner = TMW.GUIDToOwner[GUID] or TMW.PreviousGUIDToOwner[GUID]
 	if owner and owner:GetGUID() == GUID then
-		return owner:GetSettings()
+		return owner:GetSettings(), owner
 	end
 
 	local dataType = TMW:ParseGUID(GUID)
 
 	if not dataType then
-		return
+		return nil
 	end
 
 	local iter
@@ -1852,9 +1852,9 @@ function TMW:GetSettingsFromGUID(GUID)
 	end
 
 	if iter then
-		for settings in iter(TMW) do
+		for settings, a, b in iter(TMW) do
 			if settings.GUID == GUID then
-				return settings
+				return settings, nil, a, b
 			end
 		end
 	end
@@ -3692,8 +3692,13 @@ function TMW:EquivToTable(name)
 end
 TMW:MakeFunctionCached(TMW, "EquivToTable")
 
-function TMW:GetSpellNames(icon, setting, firstOnly, toname, hash, keepDurations, allowRenaming)
+function TMW:GetSpellNames_static(doLower, setting, keepDurations)
+
 	local buffNames = TMW:SplitNames(setting) -- Get a table of everything
+	
+	if icon then
+		buffNames = TMW:LowerNames(buffNames)
+	end
 
 	--INSERT EQUIVALENCIES
 	 --start at the end of the table, that way we dont have to worry
@@ -3725,9 +3730,6 @@ function TMW:GetSpellNames(icon, setting, firstOnly, toname, hash, keepDurations
 			end
 		end
 	end
-	if icon then
-		buffNames = TMW:LowerNames(buffNames)
-	end
 
 	-- Remove invalid SpellIDs.
 	local k = #buffNames
@@ -3736,13 +3738,23 @@ function TMW:GetSpellNames(icon, setting, firstOnly, toname, hash, keepDurations
 		if type(v) == "number" and v >= 2^31 then
 			-- Invalid spellID. Remove it to prevent integer overflow errors.
 			tremove(buffNames, k)
-			TMW.Warn(L["ERROR_INVALID_SPELLID"]:format(tostring(icon or "<UNKNOWN ICON>"), v))
+			TMW.Warn(L["ERROR_INVALID_SPELLID2"]:format(v))
 		else
 			-- The entry was valid, so move backwards towards the beginning.
 			k = k - 1
 		end
 	end
-	
+
+	return buffNames
+end
+TMW:MakeFunctionCached(TMW, "GetSpellNames_static")
+
+function TMW:GetSpellNames(icon, setting, firstOnly, toname, hash, keepDurations, allowRenaming)
+	local buffNames = TMW:GetSpellNames_static(icon and true or false, setting, keepDurations)
+
+	-- buffNames MUST BE COPIED because the return from GetSpellNames_static is cached.
+	buffNames = CopyTable(buffNames)
+
 	if hash then
 		local hash = {}
 		for k, v in ipairs(buffNames) do
@@ -3755,6 +3767,7 @@ function TMW:GetSpellNames(icon, setting, firstOnly, toname, hash, keepDurations
 		end
 		return hash
 	end
+
 	if toname then
 		if firstOnly then
 			-- Turn the first value into a name and return it
@@ -3775,10 +3788,12 @@ function TMW:GetSpellNames(icon, setting, firstOnly, toname, hash, keepDurations
 			return buffNames
 		end
 	end
+
 	if firstOnly then
 		local ret = buffNames[1] or ""
 		return ret
 	end
+
 	return buffNames
 end
 do    -- TMW:GetSpellNames() cache management
