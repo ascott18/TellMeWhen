@@ -227,13 +227,13 @@ IconDragger:RegisterIconDragHandler(40,	-- Split
 		end
 	end,
 	function(IconDragger)
-		local groupID, group = TMW:Group_Add()
+		local group = TMW:Group_Add(IconDragger.srcicon.group:GetSettings().View)
 
 
 		-- back up the icon data of the source group
-		local SOURCE_ICONS = TMW.db.profile.Groups[IconDragger.srcicon.group:GetID()].Icons
+		local SOURCE_ICONS = IconDragger.srcicon.group:GetSettings().Icons
 		-- nullify it (we don't want to copy it)
-		TMW.db.profile.Groups[IconDragger.srcicon.group:GetID()].Icons = nil
+		IconDragger.srcicon.group:GetSettings().Icons = nil
 
 		-- copy the source group.
 		-- pcall so that, in the rare event of some unforseen error, we don't lose the user's settings (they haven't yet been restored)
@@ -270,7 +270,7 @@ IconDragger:RegisterIconDragHandler(40,	-- Split
 			group[1]:SetInfo("texture", IconDragger.srcicon.attributes.texture)
 		end
 
-		TMW[groupID]:Setup()
+		group:Setup()
 	end
 )
 

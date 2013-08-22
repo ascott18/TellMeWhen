@@ -17,7 +17,7 @@ local TMW = TMW
 local L = TMW.L
 local print = TMW.print
 
-local findid = TMW.FindGroupIDFromInfo
+local FindGroupIDFromInfo = TMW.FindGroupIDFromInfo
 
 
 ---------------------
@@ -77,7 +77,7 @@ groupSortMethodTemplate = {
 		return tonumber(info[#info])
 	end,
 	disabled = function(info, priorityID)
-		local g = findid(info)
+		local g = FindGroupIDFromInfo(info)
 		local priorityID = priorityID or tonumber(info[#info-1])
 		for k, v in pairs(TMW[g]:GetSettings().SortPriorities) do
 			if k < priorityID and v.Method == "id" then
@@ -94,7 +94,7 @@ groupSortMethodTemplate = {
 				return L["UIPANEL_GROUPSORT_METHODNAME"]:format(priorityID)
 			end,
 			desc = function(info)
-				local g = findid(info)
+				local g = FindGroupIDFromInfo(info)
 				local priorityID = tonumber(info[#info-1])
 				local Method = TMW[g]:GetSettings().SortPriorities[priorityID].Method
 
@@ -110,7 +110,7 @@ groupSortMethodTemplate = {
 			style = "dropdown",
 			order = 1,
 			get = function(info)
-				local g = findid(info)
+				local g = FindGroupIDFromInfo(info)
 				local priorityID = tonumber(info[#info-1])
 				local Method = TMW[g]:GetSettings().SortPriorities[priorityID].Method
 				for k, v in pairs(groupSortPriorities) do
@@ -120,7 +120,7 @@ groupSortMethodTemplate = {
 				end
 			end,
 			set = function(info, val)
-				local g = findid(info)
+				local g = FindGroupIDFromInfo(info)
 				local priorityID = tonumber(info[#info-1])
 				local oldPriority = TMW[g]:GetSettings().SortPriorities[priorityID]
 				local newPriority
@@ -141,12 +141,12 @@ groupSortMethodTemplate = {
 			width = "half",
 			order = 2,
 			get = function(info)
-				local g = findid(info)
+				local g = FindGroupIDFromInfo(info)
 				local priorityID = tonumber(info[#info-1])
 				return TMW[g]:GetSettings().SortPriorities[priorityID].Order == 1
 			end,
 			set = function(info)
-				local g = findid(info)
+				local g = FindGroupIDFromInfo(info)
 				local priorityID = tonumber(info[#info-1])
 				TMW[g]:GetSettings().SortPriorities[priorityID].Order = 1
 				TMW[g]:Setup()
@@ -159,12 +159,12 @@ groupSortMethodTemplate = {
 			width = "half",
 			order = 3,
 			get = function(info)
-				local g = findid(info)
+				local g = FindGroupIDFromInfo(info)
 				local priorityID = tonumber(info[#info-1])
 				return TMW[g]:GetSettings().SortPriorities[priorityID].Order == -1
 			end,
 			set = function(info)
-				local g = findid(info)
+				local g = FindGroupIDFromInfo(info)
 				local priorityID = tonumber(info[#info-1])
 				TMW[g]:GetSettings().SortPriorities[priorityID].Order = -1
 				TMW[g]:Setup()

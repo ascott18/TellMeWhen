@@ -246,26 +246,34 @@ local group = SharableDataType:New("group", 20)
 local NUM_GROUPS_PER_SUBMENU = 10
 
 
-function group:Import_ImportData(editbox, data, version, noOverwrite, oldgroupID, destgroupID)
-	if noOverwrite then
-		destgroupID = TMW:Group_Add()
+function group:Import_ImportData(editbox, data, version, createNewGroup, oldgroupID, destgroup)
+	if createNewGroup then
+		destgroup = TMW:Group_Add()
 	end
-	TMW.db.profile.Groups[destgroupID] = nil -- restore defaults, table recreated when passed in to CTIPWM
-	local gs = TMW.db.profile.Groups[destgroupID]
-	TMW:CopyTableInPlaceWithMeta(data, gs, true)
 
-	-- change any meta icon components to the new group if the meta and components are/were in the same group (icon conditions, too)
-	if oldgroupID then
-		local srcgr, destgr = "TellMeWhen_Group"..oldgroupID, TMW[destgroupID]:GetName()
+	local GUID = destgroup:GetGUID()
+	TMW:DeleteData(GUID)
 
-		TMW:ReconcileData(srcgr, destgr, srcgr, destgr, nil, destgroupID)
+	
+	if version < 70001 and type(oldgroupID) == "number" then
+		GUID = TMW:RunUpgradeFromOld(oldgroupID, data, "group", TellMeWhenDB.global.Trunk)
+	elseif version > 70000 and type(oldgroupID) == "string" then
+		GUID = oldgroupID
+	end
+
+	TMW.db.profile.Groups[destgroup.ID] = GUID
+	local gs = TMW:GetData(GUID)
+
+	if type(oldgroupID) ~= "number" then
+		TMW:DeleteData(GUID)
+		TMW:CopyTableInPlaceWithMeta(data, gs, true)
 	end
 
 	if version then
 		if version > TELLMEWHEN_VERSIONNUMBER then
 			TMW:Print(L["FROMNEWERVERSION"])
 		else
-			TMW:DoUpgrade("group", version, gs, destgroupID)
+			TMW:DoUpgrade("group", version, gs, GUID)
 		end
 	end
 end
@@ -412,9 +420,9 @@ group:RegisterMenuBuilder(20, function(self, result, editbox)
 
 	-- copy entire group - overwrite current
 	local info = UIDropDownMenu_CreateInfo()
-	info.text = L["COPYGROUP"] .. " - " .. L["OVERWRITEGROUP"]:format(IMPORTS.group_overwrite and TMW:GetGroupName(IMPORTS.group_overwrite, IMPORTS.group_overwrite, 1) or "?")
+	info.text = L["COPYGROUP"] .. " - " .. L["OVERWRITEGROUP"]:format(IMPORTS.group_overwrite and IMPORTS.group_overwrite:GetGroupName(1) or "?")
 	info.func = function()
-		TMW:Import(editbox, gs, result.version, "group", nil, groupID, IMPORTS.group_overwrite)
+		TMW:Import(editbox, gs, result.version, "group", false, groupID, IMPORTS.group_overwrite)
 	end
 	info.notCheckable = true
 	info.disabled = not IMPORTS.group_overwrite
@@ -433,18 +441,18 @@ end)
 group.Export_DescriptionAppend = L["EXPORT_SPECIALDESC2"]:format("4.6.0+")
 function group:Export_SetButtonAttributes(editbox, info)
 	local IMPORTS, EXPORTS = editbox:GetAvailableImportExportTypes()
-	local groupID = EXPORTS[self.type]
+	local group = EXPORTS[self.type]
 	
-	local text = L["fGROUP"]:format(TMW:GetGroupName(groupID, groupID, 1))
+	local text = L["fGROUP"]:format(group:GetGroupName(1))
 	info.text = text
 	info.tooltipTitle = text
 end
 function group:Export_GetArgs(editbox, info)
 	--editbox, type, settings, defaults, ...
 	local IMPORTS, EXPORTS = editbox:GetAvailableImportExportTypes()
-	local groupID = EXPORTS[self.type]
+	local group = EXPORTS[self.type]
 	
-	return editbox, self.type, TMW[groupID]:GetSettings(), TMW.Group_Defaults, groupID
+	return editbox, self.type, group:GetSettings(), TMW.Group_Defaults, group:GetGUID()
 end
 
 
@@ -455,19 +463,27 @@ end
 local icon = SharableDataType:New("icon", 30)
 local NUM_ICONS_PER_SUBMENU = 10
 
-function icon:Import_ImportData(editbox, data, version)
+function icon:Import_ImportData(editbox, data, version, GUID)
 	local IMPORTS, EXPORTS = editbox:GetAvailableImportExportTypes()
 	
-	local groupID, iconID = IMPORTS.group_overwrite, IMPORTS.icon
-	TMW.db.profile.Groups[groupID].Icons[iconID] = nil -- restore defaults
-	local ics = TMW.db.profile.Groups[groupID].Icons[iconID]
-	TMW:CopyTableInPlaceWithMeta(data, ics, true)
+	if not GUID then
+		GUID = TMW:GenerateGUID(self.type, TMW.CONST.GUID_SIZE)
+	end
+
+	local icon = IMPORTS.icon
+	local group = icon.group
+
+	TMW:DeleteData(icon:GetGUID())
+	TMW:StoreData(GUID, data)
+	group.Icons[icon.ID] = GUID
+
+	local ics = icon:GetSettings()
 
 	if version then
 		if version > TELLMEWHEN_VERSIONNUMBER then
 			TMW:Print(L["FROMNEWERVERSION"])
 		else
-			TMW:DoUpgrade("icon", version, ics, groupID, iconID)
+			TMW:DoUpgrade("icon", version, icon:GetSettings(), GUID)
 		end
 	end
 end
@@ -520,9 +536,9 @@ function icon:Import_BuildContainingDropdownEntry(result, editbox)
 		info.func = function()
 			if ic and ic:IsVisible() then
 				TMW.HELP:Show("ICON_IMPORT_CURRENTPROFILE", nil, editbox, 0, 0, L["HELP_IMPORT_CURRENTPROFILE"])
-				TMW[IMPORTS.group_overwrite][IMPORTS.icon]:SetInfo("texture", tex)
+				IMPORTS.icon:SetInfo("texture", tex)
 			else
-				TMW[IMPORTS.group_overwrite][IMPORTS.icon]:SetInfo("texture", nil)
+				IMPORTS.icon:SetInfo("texture", nil)
 			end
 			
 			if gs then
@@ -541,24 +557,21 @@ icon.Import_BuildMenuData = icon.Import_BuildContainingDropdownEntry
 
 function icon:Export_SetButtonAttributes(editbox, info)
 	local IMPORTS, EXPORTS = editbox:GetAvailableImportExportTypes()
-	local groupID = EXPORTS.group
-	local iconID = EXPORTS.icon
 	
-	local text = L["fICON"]:format(iconID, TMW:GetGroupName(groupID, groupID, 1))
+	local text = L["fICON"]:format(EXPORTS.icon.ID)
 	info.text = text
 	info.tooltipTitle = text
 end
 function icon:Export_GetArgs(editbox, info)
 	--editbox, type, settings, defaults, ...
 	local IMPORTS, EXPORTS = editbox:GetAvailableImportExportTypes()
-	local groupID = EXPORTS.group
-	local iconID = EXPORTS.icon
 	
-	local gs = TMW.db.profile.Groups[groupID]
-	local ics = gs.Icons[iconID]
+	local icon = EXPORTS.icon
+	local gs = icon.group:GetSettings()
+	local ics = icon:GetSettings()
 	TMW:PrepareIconSettingsForCopying(ics, gs)
 	
-	return editbox, self.type, ics, TMW.Icon_Defaults
+	return editbox, self.type, ics, TMW.Icon_Defaults, icon:GetGUID()
 end
 
 function icon:MakeHolderMenu(result, startID, endID)

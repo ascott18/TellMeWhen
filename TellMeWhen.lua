@@ -1148,7 +1148,8 @@ do -- InIconSettings
 		state.ci = ci
 
 		local gs = TMW:GetData(TMW.db.profile.Groups[state.cg])
-		return TMW:GetData(gs.Icons[ci]), state.cg, ci -- ics, groupID, iconID
+		local GUID = gs.Icons[ci]
+		return TMW:GetData(gs.Icons[ci]), GUID, state.cg, ci -- ics, groupID, iconID
 	end
 
 	function TMW:InIconSettings(groupID)
@@ -1223,7 +1224,8 @@ do -- InGroupSettings
 			tinsert(states, state)
 			return
 		end
-		return TMW:GetData(TMW.db.profile.Groups[state.cg]), state.cg -- setting table, groupID
+		local GUID = TMW.db.profile.Groups[state.cg]
+		return TMW:GetData(GUID), GUID, state.cg -- setting table, GUID, groupID
 	end
 
 	function TMW:InGroupSettings()
@@ -2813,11 +2815,11 @@ function TMW:RawUpgrade()
 				if type == "profile" then
 
 					-- delegate to groups
-					for gs, groupID in TMW:InGroupSettings() do
-						DoRetrofitUpgrade("group", version, gs, groupID)
+					for gs, GUID in TMW:InGroupSettings() do
+						DoRetrofitUpgrade("group", version, gs, GUID)
 
-						for ics, groupID, iconID in TMW:InIconSettings(groupID) do
-							DoRetrofitUpgrade("icon", version, ics, groupID, iconID)
+						for ics, GUID in TMW:InIconSettings(groupID) do
+							DoRetrofitUpgrade("icon", version, ics, GUID)
 						end
 					end
 					

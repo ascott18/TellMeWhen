@@ -97,7 +97,7 @@ function TEXT:CacheUsedStrings()
 		TEXT.usedStrings[text] = 0 -- set to 0, not nil, and dont wipe the table either
 	end
 	
-	for ics, groupID, iconID in TMW:InIconSettings() do
+	for ics, GUID, groupID, iconID in TMW:InIconSettings() do
 		for view, viewSettings in pairs(ics.SettingsPerView) do
 		
 			local GUID, layoutSettings = TEXT:GetTextLayoutForIconID(groupID, iconID, view)
@@ -339,7 +339,7 @@ function TEXT:GetNumTimesUsed(GUID)
 	local n = 0	
 	TMW.TextLayout_NumTimesUsedTemp = wipe(TMW.TextLayout_NumTimesUsedTemp or {})
 	
-	for gs, groupID in TMW:InGroupSettings() do
+	for gs, GUID, groupID in TMW:InGroupSettings() do
 		for view, settings in pairs(gs.SettingsPerView) do
 			if settings.TextLayout == GUID then
 				n = n + (gs.Rows*gs.Columns)
@@ -349,7 +349,7 @@ function TEXT:GetNumTimesUsed(GUID)
 		end
 	end
 	
-	for ics, groupID in TMW:InIconSettings() do
+	for ics, GUID, groupID in TMW:InIconSettings() do
 		if not TMW.TextLayout_NumTimesUsedTemp[groupID] then
 			for view, settings in pairs(ics.SettingsPerView) do
 				if settings.TextLayout == GUID then

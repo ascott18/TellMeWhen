@@ -18,7 +18,7 @@ local L = TMW.L
 local print = TMW.print
 
 
-local findid = TMW.FindGroupIDFromInfo
+local FindGroupIDFromInfo = TMW.FindGroupIDFromInfo
 local stratas = {
 	"BACKGROUND",
 	"LOW",
@@ -41,7 +41,7 @@ TMW.Classes.GroupModule_GroupPosition:RegisterConfigTable("args.position.args", 
 	name = "",
 	desc = "",
 	set = function(info, val)
-		local g = findid(info)
+		local g = FindGroupIDFromInfo(info)
 		TMW.db.profile.Groups[g].Point[info[#info]] = val
 		
 		local Module = TMW[g]:GetModuleOrModuleChild("GroupModule_GroupPosition")
@@ -51,7 +51,7 @@ TMW.Classes.GroupModule_GroupPosition:RegisterConfigTable("args.position.args", 
 		end
 	end,
 	get = function(info)
-		return TMW.db.profile.Groups[findid(info)].Point[info[#info]]
+		return TMW.db.profile.Groups[FindGroupIDFromInfo(info)].Point[info[#info]]
 	end,
 	dialogInline = true,
 	guiInline = true,
@@ -108,7 +108,7 @@ TMW.Classes.GroupModule_GroupPosition:RegisterConfigTable("args.position.args", 
 	name = "",
 	desc = "",
 	set = function(info, val)
-		local g = findid(info)
+		local g = FindGroupIDFromInfo(info)
 		TMW.db.profile.Groups[g][info[#info]] = val
 
 		local Module = TMW[g]:GetModuleOrModuleChild("GroupModule_GroupPosition")
@@ -117,7 +117,7 @@ TMW.Classes.GroupModule_GroupPosition:RegisterConfigTable("args.position.args", 
 			Module:SetPos()
 		end
 	end,
-	get = function(info) return TMW.db.profile.Groups[findid(info)][info[#info]] end,
+	get = function(info) return TMW.db.profile.Groups[FindGroupIDFromInfo(info)][info[#info]] end,
 	dialogInline = true,
 	guiInline = true,
 	
@@ -145,7 +145,7 @@ TMW.Classes.GroupModule_GroupPosition:RegisterConfigTable("args.position.args", 
 			style = "dropdown",
 			order = 8,
 			set = function(info, val)
-				local g = findid(info)
+				local g = FindGroupIDFromInfo(info)
 				TMW.db.profile.Groups[g][info[#info]] = stratas[val]
 		
 				local Module = TMW[g]:GetModuleOrModuleChild("GroupModule_GroupPosition")
@@ -155,7 +155,7 @@ TMW.Classes.GroupModule_GroupPosition:RegisterConfigTable("args.position.args", 
 				end
 			end,
 			get = function(info)
-				local val = TMW.db.profile.Groups[findid(info)][info[#info]]
+				local val = TMW.db.profile.Groups[FindGroupIDFromInfo(info)][info[#info]]
 				for k, v in pairs(stratas) do
 					if v == val then
 						return k
@@ -173,7 +173,7 @@ TMW.Classes.GroupModule_GroupPosition:RegisterConfigTable("args.position.args", 
 	type = "execute",
 	order = 50,
 	func = function(info)
-		local groupID = findid(info)
+		local groupID = FindGroupIDFromInfo(info)
 		local gs = TMW.db.profile.Groups[groupID]
 		
 		for k, v in pairs(TMW.Group_Defaults.Point) do
@@ -200,8 +200,8 @@ TMW.Classes.SharableDataType.types.group:RegisterMenuBuilder(10, function(self, 
 	info.text = L["COPYGROUP"] .. " - " .. L["COPYPOSSCALE"]
 	info.func = function()
 		CloseDropDownMenus()
-		local destgroupID = IMPORTS.group_overwrite
-		local destgs = TMW.db.profile.Groups[destgroupID]
+		local destgroup = IMPORTS.group_overwrite
+		local destgs = destgroup:GetSettings()
 		
 		-- Restore all default settings first.
 		-- Not a special table (["**"]), so just normally copy it.
@@ -213,7 +213,7 @@ TMW.Classes.SharableDataType.types.group:RegisterMenuBuilder(10, function(self, 
 		destgs.Scale = gs.Scale or TMW.Group_Defaults.Scale
 		destgs.Level = gs.Level or TMW.Group_Defaults.Level
 		
-		TMW[destgroupID]:Setup()
+		destgroup:Setup()
 	end
 	info.notCheckable = true
 	info.disabled = not IMPORTS.group_overwrite

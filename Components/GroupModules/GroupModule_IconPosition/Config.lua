@@ -17,12 +17,12 @@ local TMW = TMW
 local L = TMW.L
 local print = TMW.print
 
-local findid = TMW.FindGroupIDFromInfo
+local FindGroupIDFromInfo = TMW.FindGroupIDFromInfo
 
 
 
 local set = function(info, val)
-	local g = findid(info)
+	local g = FindGroupIDFromInfo(info)
 	
 	local gs = TMW[g]:GetSettings()
 	gs.SettingsPerView[gs.View][info[#info]] = val
@@ -34,7 +34,7 @@ local set = function(info, val)
 	end
 end
 local get = function(info)
-	local g = findid(info)
+	local g = FindGroupIDFromInfo(info)
 	local gs = TMW[g]:GetSettings()
 	return gs.SettingsPerView[gs.View][info[#info]]
 end

@@ -533,37 +533,63 @@ end
 -- --------------
 
 ---------- Data/Templates ----------
-local function findid(info)
+local function FindGroupGUIDFromInfo(info)
 	for i = #info, 1, -1 do
-		local n = tonumber(strmatch(info[i], "#Group (%d+)"))
-		if n then return n end
+		local dataType = TMW:ParseGUID(info[i])
+		if dataType then return info[i] end
 	end
-end TMW.FindGroupIDFromInfo = findid
+end TMW.FindGroupGUIDFromInfo = FindGroupGUIDFromInfo
+
+local function FindGroupFromInfo(info)
+	local GUID = FindGroupGUIDFromInfo(info)
+	local group = TMW.GUIDToOwner[GUID]
+
+	if group then
+		return group
+	end
+end TMW.FindGroupFromInfo = FindGroupFromInfo
+
+local function FindGroupIDFromInfo(info)
+	local group = FindGroupFromInfo(info)
+
+	if group then
+		return group.ID
+	end
+end TMW.FindGroupIDFromInfo = FindGroupIDFromInfo
+
 local checkorder = {
 	-- NOTE: these are actually backwards so they sort logically in AceConfig, but have their signs switched in the actual function (1 = -1; -1 = 1).
 	[-1] = L["ASCENDING"],
 	[1] = L["DESCENDING"],
 }
+
 local fontorder = {
 	Count = 40,
 	Bind = 50,
 }
+
 local importExportBoxTemplate = {
 	name = L["IMPORT_EXPORT"],
 	type = "input",
 	order = 200,
 	width = "full",
 	dialogControl = "TMW-ImportExport",
-	get = function() end,
-	set = function() end,
+	get = TMW.NULLFUNC,
+	set = TMW.NULLFUNC,
 	--hidden = function() return IE.ExportBox:IsVisible() end,
 } TMW.importExportBoxTemplate = importExportBoxTemplate
+
 
 TMW.GroupConfigTemplate = {
 	type = "group",
 	childGroups = "tab",
-	name = function(info) local g=findid(info) return TMW:GetGroupName(g, g) end,
-	order = function(info) return findid(info) end,
+	name = function(info)
+		local group = FindGroupFromInfo(info)
+		return group:GetGroupName()
+	end,
+	order = function(info)
+		return FindGroupIDFromInfo(info)
+	end,
 	args = {
 		main = {
 			type = "group",
@@ -583,9 +609,10 @@ TMW.GroupConfigTemplate = {
 					order = 2,
 					width = "double",
 					set = function(info, val)
-						local g = findid(info)
-						TMW.db.profile.Groups[g].Name = strtrim(val)
-						TMW[g]:Setup()
+						local group = FindGroupFromInfo(info)
+
+						group:GetSettings().Name = strtrim(val)
+						group:Setup()
 					end,
 				},
 				OnlyInCombat = {
@@ -643,16 +670,18 @@ TMW.GroupConfigTemplate = {
 					guiInline = true,
 					order = 30,
 					get = function(info)
-						local g = findid(info)
-						return TMW.db.profile.Groups[g][info[#info-1]] == info[#info]
+						local group = FindGroupFromInfo(info)
+
+						return group:GetSettings()[info[#info-1]] == info[#info]
 					end,
 					set = function(info)
-						local g = findid(info)
-						TMW.db.profile.Groups[g][info[#info-1]] = info[#info]
+						local group = FindGroupFromInfo(info)
+
+						group:GetSettings()[info[#info-1]] = info[#info]
 						
 						-- This intentional. Double setup is needed for dealing with Masque bullshit,
 						-- Second setup is addon-wide so that all icons and groups can become aware of the new view if needed.
-						TMW[g]:Setup()
+						group:Setup()
 						TMW:Update()
 						
 						IE:Load(1)
@@ -666,11 +695,14 @@ TMW.GroupConfigTemplate = {
 					type = "execute",
 					order = 48,
 					func = function(info)
-						TMW:Group_Swap(findid(info), findid(info) - 1)
-						IE:NotifyChanges("groups", "#Group " .. findid(info) - 1)
+						local groupID = FindGroupIDFromInfo(info)
+
+						TMW:Group_Swap(groupID, groupID - 1)
+
+						IE:NotifyChanges("groups", TMW[FindGroupIDFromInfo(info) - 1]:GetGUID())
 					end,
 					disabled = function(info)
-						return findid(info) == 1
+						return FindGroupIDFromInfo(info) == 1
 					end,
 				},
 				movedown = {
@@ -679,11 +711,14 @@ TMW.GroupConfigTemplate = {
 					type = "execute",
 					order = 49,
 					func = function(info)
-						TMW:Group_Swap(findid(info), findid(info) + 1)
-						IE:NotifyChanges("groups", "#Group " .. findid(info) + 1)
+						local groupID = FindGroupIDFromInfo(info)
+
+						TMW:Group_Swap(groupID, groupID + 1)
+
+						IE:NotifyChanges("groups", TMW[FindGroupIDFromInfo(info) + 1]:GetGUID())
 					end,
 					disabled = function(info)
-						return findid(info) == TMW.db.profile.NumGroups
+						return FindGroupIDFromInfo(info) == TMW.db.profile.NumGroups
 					end,
 				},
 				delete = {
@@ -692,7 +727,7 @@ TMW.GroupConfigTemplate = {
 					type = "execute",
 					order = 50,
 					func = function(info)
-						TMW:Group_Delete(findid(info))
+						TMW:Group_Delete(FindGroupIDFromInfo(info))
 					end,
 					disabled = function()
 						return TMW.db.profile.NumGroups == 1
@@ -700,7 +735,7 @@ TMW.GroupConfigTemplate = {
 					confirm = function(info)
 						if IsControlKeyDown() then
 							return false
-						elseif TMW:Group_HasIconData(findid(info)) then
+						elseif TMW:Group_HasIconData(FindGroupIDFromInfo(info)) then
 							return true
 						end
 						return false
@@ -721,12 +756,16 @@ TMW.GroupConfigTemplate = {
 					type = "toggle",
 					order = 40,
 					set = function(info, val)
-						local g = findid(info)
-						TMW.db.profile.Groups[g].Locked = val
-				
-						TMW[g]:Setup()
+						local group = FindGroupFromInfo(info)
+
+						group:GetSettings().Locked = val
+						group:Setup()
 					end,
-					get = function(info) return TMW.db.profile.Groups[findid(info)].Locked end
+					get = function(info)
+						local group = FindGroupFromInfo(info)
+
+						return group:GetSettings().Locked
+					end
 				},
 			},
 		},
@@ -1152,12 +1191,12 @@ function TMW:CompileOptions()
 					desc = L["UIPANEL_GROUPS_DESC"],
 					order = 30,
 					set = function(info, val)
-						local g = findid(info)
+						local g = FindGroupIDFromInfo(info)
 						TMW[g]:GetSettings()[info[#info]] = val
 						TMW[g]:Setup()
 					end,
 					get = function(info)
-						local g = findid(info)
+						local g = FindGroupIDFromInfo(info)
 						return TMW[g]:GetSettings()[info[#info]]
 					end,
 					args = {
@@ -1201,8 +1240,9 @@ function TMW:CompileOptions()
 			TMW.OptionsTable.args.groups.args[k] = nil
 		end
 	end
-	for g = 1, TMW.db.profile.NumGroups do
-		TMW.OptionsTable.args.groups.args["#Group " .. g] = TMW.GroupConfigTemplate
+
+	for gs, GUID in TMW:InGroupSettings() do
+		TMW.OptionsTable.args.groups.args[GUID] = TMW.GroupConfigTemplate
 	end
 	
 	local parent = TMW.GroupConfigTemplate.args.main.args
@@ -1293,20 +1333,27 @@ end
 function TMW:Group_Add(view)
 	local groupID = TMW.db.profile.NumGroups + 1
 	TMW.db.profile.NumGroups = groupID
-	TMW.db.profile.Groups[groupID].Enabled = true
+
+	local GUID = TMW:GenerateGUID("group", TMW.CONST.GUID_SIZE)
+	TMW.db.profile.Groups[groupID] = GUID
+
+	local gs = TMW:GetData(GUID)
+
 	if view then
-		TMW.db.profile.Groups[groupID].View = view
+		gs.View = view
 		
 		local viewData = TMW.Views[view]
 		if viewData then
-			viewData:Group_OnCreate(TMW.db.profile.Groups[groupID])
+			viewData:Group_OnCreate(gs)
 		end
 	end
+
 	TMW:Update()
 
 	TMW:CompileOptions()
-	IE:NotifyChanges("groups", "#Group " .. groupID)
-	return groupID, TMW[groupID]
+	IE:NotifyChanges("groups", GUID)
+
+	return TMW[groupID]
 end
 
 function TMW:Group_Swap(groupID1, groupID2)
@@ -1852,7 +1899,7 @@ function IE:CreateTabs()
 	
 	IE.MainOptionsTab:ExtendMethod("ClickHandler", function()
 		TMW:CompileOptions()
-		TMW.IE:NotifyChanges("groups", "#Group " .. TMW.CI.g)
+		TMW.IE:NotifyChanges("groups", TMW.CI.ic.group:GetGUID())
 		LibStub("AceConfigDialog-3.0"):Open("TMW IEOptions", TMW.IE.MainOptionsWidget)
 	end)		
 end
@@ -3191,13 +3238,13 @@ TMW:RegisterCallback("TMW_CONFIG_REQUEST_AVAILABLE_IMPORT_EXPORT_TYPES", functio
 	if editbox == TMW.IE.ExportBox then	
 		
 		if IE.CurrentTab.doesGroup then	
-			import.group_overwrite = CI.g
-			export.group = CI.g
+			import.group_overwrite = CI.ic.group
+			export.group = CI.ic.group
 		end
 		
 		if IE.CurrentTab.doesIcon then
-			import.icon = CI.i
-			export.icon = CI.i
+			import.icon = CI.ic
+			export.icon = CI.ic
 		end
 	end
 end)
@@ -3206,8 +3253,8 @@ TMW:RegisterCallback("TMW_CONFIG_REQUEST_AVAILABLE_IMPORT_EXPORT_TYPES", functio
 	if editbox.IsImportExportWidget then
 		local info = editbox.obj.userdata
 		
-		import.group_overwrite = findid(info)
-		export.group = findid(info)
+		import.group_overwrite = TMW.FindGroupFromInfo(info)
+		export.group = TMW.FindGroupFromInfo(info)
 	end
 end)
 
