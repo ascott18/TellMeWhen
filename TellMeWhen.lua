@@ -1837,13 +1837,18 @@ function TMW:GetSettingsFromGUID(GUID)
 
 	local dataType = TMW:ParseGUID(GUID)
 
+	if not dataType then
+		return
+	end
+
 	local iter
 	if dataType == "icon" then
 		iter = TMW.InIconSettings
 	elseif dataType == "group" then
 		iter = TMW.InGroupSettings
 	else
-		error("Unsupported GUID type for TMW:GetSettingsFromGUID()")
+		TMW:Error("Unsupported GUID type for TMW:GetSettingsFromGUID() - %q", GUID)
+		return nil
 	end
 
 	if iter then
@@ -3576,23 +3581,23 @@ function TMW:LowerNames(str)
 		return str
 	end
 
+	local str_lower = strlowerCache[str]
 	-- Dispel types retain their capitalization. Restore it here.
 	for ds in pairs(TMW.DS) do
-		if strlower(ds) == strlower(str) then
+		if strlowerCache[ds] == str_lower then
 			return ds
 		end
 	end
 
-	local ret = tonumber(str) or strlower(str)
-	if type(ret) == "string" then
-		if loweredbackup[ret] then
+	if type(str_lower) == "string" then
+		if loweredbackup[str_lower] then
 			-- Dont replace names that are proper case with names that arent.
 			-- Generally, assume that strings with more capitals after non-letters are more proper than ones with less
-			local _, oldcount = gsub(loweredbackup[ret], "[^%a]%u", "%1")
+			local _, oldcount = gsub(loweredbackup[str_lower], "[^%a]%u", "%1")
 			local _, newcount = gsub(str, "[^%a]%u", "%1")
 
 			-- Check the first letter of each string for a capital
-			if strfind(loweredbackup[ret], "^%u") then
+			if strfind(loweredbackup[str_lower], "^%u") then
 				oldcount = oldcount + 1
 			end
 			if strfind(str, "^%u") then
@@ -3601,15 +3606,15 @@ function TMW:LowerNames(str)
 
 			-- The new string has more than the old, so use it instead
 			if newcount > oldcount then
-				loweredbackup[ret] = str
+				loweredbackup[str_lower] = str
 			end
 		else
 			-- There wasn't a string before, so set the base
-			loweredbackup[ret] = str
+			loweredbackup[str_lower] = str
 		end
 	end
 
-	return ret
+	return str_lower
 end
 
 function TMW:RestoreCase(str)
@@ -3634,7 +3639,8 @@ function TMW:EquivToTable(name)
 
 	-- Everything in this function is handled as lowercase to prevent issues with user input capitalization.
 	-- DONT use TMW:LowerNames() here, because the input is not the output
-	name = strlower(name) 
+	name = strlowerCache[name]
+
 
 	-- See if the string being checked has a duration attached to it
 	-- (It really shouldn't because there is currently no point in doing so,
@@ -3650,7 +3656,7 @@ function TMW:EquivToTable(name)
 	for k, v in pairs(TMW.BE) do
 		-- Iterate over each equivalency in the category
 		for equiv, str in pairs(v) do
-			if strlower(equiv) == name then
+			if strlowerCache[equiv] == name then
 				-- We found a matching equivalency, so stop searching.
 				names = str
 				break

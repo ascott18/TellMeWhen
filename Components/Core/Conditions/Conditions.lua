@@ -773,6 +773,26 @@ CNDT.Substitutions = {
 	rep = function() return strlower end,
 },}
 
+local conditionNameSettingProcessedCache = setmetatable(
+{}, {
+	__mode = "kv",
+	__index = function(t, i)
+		if not i then return end
+
+		local name = gsub((i or ""), "; ", ";")
+		name = gsub(name, " ;", ";")
+		name = ";" .. name .. ";"
+		name = gsub(name, ";;", ";")
+		name = strtrim(name)
+		name = strlower(name)
+
+		t[i] = name
+		return name
+	end,
+	__call = function(t, i)
+		return t[i]
+	end,
+})
 
 -- [INTERNAL]
 function CNDT:DoConditionSubstitutions(conditionData, conditionSettings, funcstr)
@@ -798,19 +818,8 @@ function CNDT:DoConditionSubstitutions(conditionData, conditionSettings, funcstr
 		end
 	end
 
-	local name = gsub((conditionSettings.Name or ""), "; ", ";")
-	name = gsub(name, " ;", ";")
-	name = ";" .. name .. ";"
-	name = gsub(name, ";;", ";")
-	name = strtrim(name)
-	name = strlower(name)
-
-	local name2 = gsub((conditionSettings.Name2 or ""), "; ", ";")
-	name2 = gsub(name2, " ;", ";")
-	name2 = ";" .. name2 .. ";"
-	name2 = gsub(name2, ";;", ";")
-	name2 = strtrim(name2)
-	name2 = strlower(name2)
+	local name  = conditionNameSettingProcessedCache[conditionSettings.Name]
+	local name2 = conditionNameSettingProcessedCache[conditionSettings.Name2]
 
 	for k, subData in pairs(CNDT.Substitutions) do
 		if funcstr:find(subData.src) then
@@ -1231,14 +1240,3 @@ do -- InConditionSettings
 		return iter, getstate()
 	end
 end
-
-
-TMW:RegisterCallback("TMW_CONFIG_ICON_RECONCILIATION_REQUESTED", function(event, replace, limitSourceGroup)
-	for Condition, _, groupID in TMW:InConditionSettings() do
-		if not limitSourceGroup or groupID == limitSourceGroup then
-			if Condition.Icon ~= "" and type(Condition.Icon) == "string" then
-				replace(Condition, "Icon")
-			end
-		end
-	end
-end)
