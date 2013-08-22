@@ -96,8 +96,8 @@ do
 	local CCI_icon
 	local function CheckCompiledIcons(icon)
 		CCI_icon = icon
-		for _, ic in pairs(icon.CompiledIcons) do
-			ic = _G[ic]
+		for _, iconGUID in pairs(icon.CompiledIcons) do
+			local ic = TMW.GUIDToOwner[iconGUID]
 			if ic and ic.CompiledIcons and ic.Type == "meta" and ic.Enabled then
 				CheckCompiledIcons(ic)
 			end
@@ -129,9 +129,14 @@ local function Meta_OnUpdate(icon, time)
 	local d = Sort == -1 and huge or 0
 
 	for n = 1, #CompiledIcons do
-		local ic = _G[CompiledIcons[n]]
+		local ic = TMW.GUIDToOwner[CompiledIcons[n]]
 		local attributes = ic and ic.attributes
-		if ic and ic.UpdateFunction and attributes.shown and not (CheckNext and ic.__lastMetaCheck == time) and ic.viewData == icon.viewData then
+		if	ic
+			and ic.UpdateFunction
+			and attributes.shown
+			and not (CheckNext and ic.__lastMetaCheck == time)
+			and ic.viewData == icon.viewData
+		then
 			ic:Update()
 			
 			if attributes.realAlpha > 0 and attributes.shown then -- make sure to re-check attributes.shown (it might have changed from 2 lines ago)
@@ -193,7 +198,7 @@ end
 
 
 local function TMW_ICON_UPDATED(icon, event, ic)
-	if icon.IconsLookup[ic:GetName()] or ic == icon then
+	if icon.IconsLookup[ic:GetGUID()] or ic == icon then
 		icon.metaUpdateQueued = true
 	end
 end
@@ -233,49 +238,43 @@ end
 local InsertIcon, GetFullIconTable -- both need access to eachother, so scope them above their definitions
 
 local alreadyinserted = {}
-function InsertIcon(icon, ics, ic)
-	if ics.Type ~= "meta" or not icon.CheckNext then
-		alreadyinserted[ic] = true -- we might not have inserted if ic isnt enabled, but pretend that we did so we dont have to check again
-		if ics.Enabled then
-			tinsert(icon.CompiledIcons, ic)
+function InsertIcon(icon, GUID)
+	if GUID == icon:GetGUID() then
+		-- Meta icons should not check themselves.
+		return 
+	end
+
+	local ics = TMW:GetSettingsFromGUID(GUID)
+
+	if ics then
+		if ics.Type ~= "meta" or not icon.CheckNext then
+			alreadyinserted[GUID] = true
+			if ics.Enabled then
+				tinsert(icon.CompiledIcons, GUID)
+			end
+		elseif icon.CheckNext then
+			GetFullIconTable(icon, ics.Icons)
 		end
-	elseif icon.CheckNext then
-		GetFullIconTable(icon, ics.Icons, icon.CompiledIcons)
 	end
 end
 
 function GetFullIconTable(icon, icons) -- check what all the possible icons it can show are, for use with setting CheckNext
 	local thisIconsView = icon.group.viewData.view
 	
-	for _, ic in ipairs(icons) do
-		if not alreadyinserted[ic] then
-			alreadyinserted[ic] = true
+	for _, GUID in ipairs(icons) do
+		if not alreadyinserted[GUID] then
+			alreadyinserted[GUID] = true
 
-			local iconID = tonumber(strmatch(ic, "TellMeWhen_Group%d+_Icon(%d+)"))
-			local groupID = tonumber(strmatch(ic, "TellMeWhen_Group(%d+)"))
+			local type = TMW:ParseGUID(GUID)
 
-			if groupID and TMW.db.profile.Groups[groupID].View == thisIconsView then
-				if not iconID then -- a group. Expand it into icons.
-					local group = TMW[groupID]
-					
-					if group and group:ShouldUpdateIcons() then
-						local gs = group:GetSettings()
-
-						for ics, _, icID in TMW:InIconSettings(groupID) do
-							if ics.Enabled and icID <= gs.Rows*gs.Columns then
-								-- ic here is a group name. turn it into an icon
-								local ic = ic .. "_Icon" .. icID
-								
-								-- if a meta icon is set to check its own group, dont put the meta icon in there.
-								if ic ~= icon:GetName() then
-									InsertIcon(icon, ics, ic)
-								end
-							end
-						end
+			if type == "icon" then
+				InsertIcon(icon, GUID)
+			elseif type == "group" then
+				local gs = TMW:GetSettingsFromGUID(GUID)
+				if gs then
+					for k, ics in pairs(gs.Icons) do
+						InsertIcon(icon, ics.GUID)
 					end
-
-				else -- just an icon. put it in.
-					InsertIcon(icon, TMW.db.profile.Groups[groupID].Icons[iconID], ic)
 				end
 			end
 		end
@@ -289,10 +288,8 @@ function Type:Setup(icon, groupID, iconID)
 	icon.metaUpdateQueued = true -- force this
 
 	-- validity check:
-	for k, v in pairs(icon.Icons) do
-		local g, i = strmatch(v, "TellMeWhen_Group(%d+)_Icon(%d+)")
-		g, i = tonumber(g) or 0, tonumber(i) or 0
-		TMW:QueueValidityCheck(v, groupID, iconID, g, i)
+	for i, icGUID in pairs(icon.Icons) do
+		TMW:QueueValidityCheck(icon, icGUID, L["VALIDITY_META_DESC"], i)
 	end
 
 	wipe(alreadyinserted)
@@ -300,21 +297,18 @@ function Type:Setup(icon, groupID, iconID)
 	icon.CompiledIcons = GetFullIconTable(icon, icon.Icons)
 	
 	icon.IconsLookup = wipe(icon.IconsLookup or {})
-	for _, ic in pairs(icon.CompiledIcons) do
-		icon.IconsLookup[ic] = true
+	for _, icGUID in pairs(icon.CompiledIcons) do
+		icon.IconsLookup[icGUID] = true
 	end
-	for _, ic in pairs(icon.Icons) do -- make sure to get meta icons in the table even if they get expanded
-		icon.IconsLookup[ic] = true
+	for _, GUID in pairs(icon.Icons) do -- make sure to get meta icons in the table even if they get expanded
+		icon.IconsLookup[GUID] = true
 	end
 
-	
 	local dontUpdate = true
-	for _, ic in pairs(icon.CompiledIcons) do
-		-- ic might not exist, so we have to directly look up the settings
-		local g, i = strmatch(ic, "TellMeWhen_Group(%d+)_Icon(%d+)")
-		g, i = tonumber(g), tonumber(i)
-		assert(g and i)
-		if TMW.db.profile.Groups[g].Icons[i].Enabled then
+	for _, icGUID in pairs(icon.CompiledIcons) do
+		-- icon might not exist, so we have to directly look up the settings
+		local ics = TMW:GetSettingsFromGUID(icGUID)
+		if ics and ics.Enabled then
 			dontUpdate = nil
 			break
 		end
@@ -349,17 +343,5 @@ function Type:TMW_GLOBAL_UPDATE()
 	Locked = TMW.Locked
 end
 TMW:RegisterCallback("TMW_GLOBAL_UPDATE", Type)
-
-TMW:RegisterCallback("TMW_CONFIG_ICON_RECONCILIATION_REQUESTED", function(event, replace, limitSourceGroup)
-	for ics, groupID in TMW:InIconSettings() do
-		if not limitSourceGroup or groupID == limitSourceGroup then
-			for k, ic in pairs(ics.Icons) do
-				if type(ic) == "string" then
-					replace(ics.Icons, k)
-				end
-			end
-		end
-	end
-end)
 
 Type:Register(310)

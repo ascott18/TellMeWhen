@@ -359,11 +359,11 @@ end
 
 function CNDT:IconMenu_DropDown()
 	if UIDROPDOWNMENU_MENU_LEVEL == 2 then
-		for icon, groupID, iconID in TMW:InIcons() do
-			if icon:IsValid() and UIDROPDOWNMENU_MENU_VALUE == groupID and CI.ic ~= icon then
+		for icon, groupID, iconID in TMW:InIcons(UIDROPDOWNMENU_MENU_VALUE) do
+			if icon:IsValid() and CI.ic ~= icon then
 				local info = UIDropDownMenu_CreateInfo()
 
-				local text, textshort, tooltip = TMW:GetIconMenuText(groupID, iconID)
+				local text, textshort, tooltip = TMW:GetIconMenuText(groupID, iconID, icon:GetSettings())
 				if text:sub(-2) == "))" then
 					textshort = textshort .. " " .. L["fICON"]:format(iconID)
 				end
@@ -373,7 +373,7 @@ function CNDT:IconMenu_DropDown()
 				info.tooltipOnButton = true
 
 				info.arg1 = self
-				info.value = icon:GetName()
+				info.value = icon:GetGUID()
 				info.func = CNDT.IconMenu_DropDown_OnClick
 
 				info.tCoordLeft = 0.07
@@ -399,10 +399,14 @@ function CNDT:IconMenu_DropDown()
 end
 
 function CNDT:IconMenu_DropDown_OnClick(frame)
-	TMW:SetUIDropdownIconText(frame, self.value)
-	frame.IconPreview:SetIcon(_G[self.value])
 	CloseDropDownMenus()
 	
+	local GUID = self.value
+	local icon = TMW.GUIDToOwner[GUID]
+	
+	TMW:SetUIDropdownGUIDText(frame, GUID, L["CHOOSEICON"])
+	frame.IconPreview:SetIcon(icon)
+
 	local group = UIDROPDOWNMENU_OPEN_MENU:GetParent()
 	local condition = group:GetConditionSettings()
 	condition.Icon = self.value
@@ -675,10 +679,11 @@ end)
 
 -- Icon
 TMW:RegisterCallback("TMW_CNDT_GROUP_DRAWGROUP", function(event, CndtGroup, conditionData, conditionSettings)
+	local GUID = conditionSettings.Icon
+	local icon = TMW.GUIDToOwner[GUID]
 
-
-	TMW:SetUIDropdownIconText(CndtGroup.Icon, conditionSettings.Icon)
-	CndtGroup.Icon.IconPreview:SetIcon(_G[conditionSettings.Icon])
+	TMW:SetUIDropdownGUIDText(CndtGroup.Icon, GUID, L["CHOOSEICON"])
+	CndtGroup.Icon.IconPreview:SetIcon(icon)
 end)
 
 -- Runes

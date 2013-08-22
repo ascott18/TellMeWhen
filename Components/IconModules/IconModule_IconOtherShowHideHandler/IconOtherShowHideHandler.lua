@@ -57,6 +57,13 @@ Module:ExtendMethod("OnImplementIntoIcon", function(self, icon)
 	
 	if EventHandlersSet.OnIconShow or EventHandlersSet.OnIconHide then
 		self:Enable()
+
+		for i, EventSettings in TMW:InNLengthTable(icon.Events) do
+			if EventSettings.Event == "OnIconShow" or EventSettings.Event == "OnIconHide" then
+				TMW:QueueValidityCheck(icon, EventSettings.Icon, L["VALIDITY_ONICONSHOWHIDE_DESC"], i)
+			end
+		end
+		
 	else
 		self:Disable()
 	end
@@ -75,10 +82,10 @@ local function TMW_ICON_DATA_CHANGED_REALALPHA(icon, event, ic, alpha, oldalpha)
 		end
 		
 		if iconEvent and icon.EventHandlersSet[iconEvent] then
-			local icName = ic:GetName()
+			local icName = ic:GetGUID()
 			
 			for _, EventSettings in TMW:InNLengthTable(icon.Events) do
-				if EventSettings.Event == iconEvent and EventSettings.Icon == icName then
+				if EventSettings.Event == iconEvent and EventSettings.Icon == icGUID then
 					icon:QueueEvent(EventSettings)
 				end
 			end
@@ -93,15 +100,3 @@ end
 function Module:OnDisable()
 	TMW:UnregisterCallback("TMW_ICON_DATA_CHANGED_REALALPHA", TMW_ICON_DATA_CHANGED_REALALPHA, self.icon)
 end
-
-TMW:RegisterCallback("TMW_CONFIG_ICON_RECONCILIATION_REQUESTED", function(event, replace, limitSourceGroup)
-	for ics, groupID in TMW:InIconSettings() do
-		if not limitSourceGroup or groupID == limitSourceGroup then
-			for _, eventSettings in TMW:InNLengthTable(ics.Events) do
-				if type(eventSettings.Icon) == "string" then
-					replace(eventSettings, "Icon")
-				end
-			end
-		end
-	end
-end)

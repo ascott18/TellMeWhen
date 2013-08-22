@@ -531,6 +531,7 @@ CNDT.Env = {
 
 	TMW = TMW,
 	GCDSpell = TMW.GCDSpell,
+	GUIDToOwner = TMW.GUIDToOwner,
 	
 	SemicolonConcatCache = setmetatable(
 	{}, {
@@ -760,6 +761,12 @@ CNDT.Substitutions = {
 	end,
 },
 
+{
+	src = "c.Icon",
+	rep = function(conditionData, conditionSettings, name, name2)
+		return format("GUIDToOwner[%q]", conditionSettings.Icon:gsub("%%", "%%%%"))
+	end,
+},
 
 {
 	src = "LOWER%((.-)%)",

@@ -1378,6 +1378,10 @@ L["UNITCONDITIONS_STATICUNIT_DESC"] = "Causes the condition to check each unit t
 L["UNITCONDITIONS_STATICUNIT_TARGET"] = "<Icon Unit>'s target"
 L["UNITCONDITIONS_STATICUNIT_TARGET_DESC"] = "Causes the condition to check the target of each unit that the icon is checking."
 
+L["VALIDITY_CONDITION_DESC"] = "A target of a condition of"
+L["VALIDITY_META_DESC"] = "The #%d icon checked by meta icon"
+L["VALIDITY_ONICONSHOWHIDE_DESC"] = "The target of the #%d icon event of"
+L["VALIDITY_ISINVALID"] = "is invalid."
 
 L["MAIN"] = "Main"
 L["MAIN_DESC"] = "Contains the main options for this icon."

@@ -228,8 +228,19 @@ function Icon.GetSettings(icon)
 end
 
 --TODO: doc this
-function Icon.GetGUID(icon)
-	return icon.GUID
+function Icon.GetGUID(icon, generate)
+	local GUID = icon:GetSettings().GUID
+	if GUID == "" then
+		GUID = nil
+	end
+
+	if not GUID and generate then
+		GUID = TMW:GenerateGUID("icon", TMW.CONST.GUID_SIZE)
+		icon:GetSettings().GUID = GUID
+		icon.GUID = GUID
+	end
+
+	return GUID
 end
 
 --- Returns the settings table that holds the view-specific settings for the icon.
@@ -260,7 +271,7 @@ end
 -- @paramsig
 -- @return [string] The string containing the texture of the icon plus the name of the group and the ID of the icon.
 function Icon.GetFullNameWithTexture(icon)
-	return ("|T%s:0|t%s"):format(icon.attributes.texture, L["GROUPICON"]:format(TMW:GetGroupName(icon.group.ID, icon.group.ID, 1), icon.ID))
+	return ("|T%s:0|t%s"):format(icon.attributes.texture, L["GROUPICON"]:format(icon.group:GetGroupName(1), icon.ID))
 end
 
 --- Queues an icon event to be fired.
@@ -583,6 +594,11 @@ function Icon.DisableIcon(icon, soft)
 	icon:SetUpdateFunction(nil)
 	icon:Hide()
 
+	local iconGUID = icon:GetGUID()
+	if iconGUID then
+		TMW:DeclareDataOwner(iconGUID, nil)
+	end
+
 	-- Reset condition stuff
 	icon.ConditionObject = nil
 	TMW:UnregisterCallback("TMW_CNDT_OBJ_PASSING_CHANGED", icon)
@@ -617,6 +633,7 @@ function Icon.Setup(icon)
 	local ics = icon:GetSettings()
 	local typeData = TMW.Types[ics.Type]
 	local viewData = group.viewData
+	local iconGUID = icon:GetGUID()
 	
 	if not group:ShouldUpdateIcons() then return end
 	
@@ -625,6 +642,10 @@ function Icon.Setup(icon)
 	local typeData_old = icon.typeData
 	
 	icon:DisableIcon(true)
+
+	if iconGUID then
+		TMW:DeclareDataOwner(iconGUID, icon)
+	end
 	
 	icon.viewData = viewData
 	icon.typeData = typeData	

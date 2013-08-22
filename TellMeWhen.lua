@@ -24,7 +24,7 @@ if strmatch(projectVersion, "%-%d+%-") then
 end
 
 TELLMEWHEN_VERSION_FULL = TELLMEWHEN_VERSION .. TELLMEWHEN_VERSION_MINOR
-TELLMEWHEN_VERSIONNUMBER = 70001 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL (for versioning of)
+TELLMEWHEN_VERSIONNUMBER = 70002 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL (for versioning of)
 
 if TELLMEWHEN_VERSIONNUMBER > 71000 or TELLMEWHEN_VERSIONNUMBER < 70000 then
 	-- safety check because i accidentally made the version number 414069 once
@@ -1018,7 +1018,7 @@ do -- TMW.generateGUID(length)
 		 94 (^ carat) excluded because AceSerializer uses it.
 		 96 (` tilde) excluded because it gets screwed up on CurseForge
 		 124 (| pipe) excluded because wow crashes when it is followed by a number
-		 	(forms an invalid escape sequence) and outputted
+			(forms an invalid escape sequence) and outputted
 		]]
 		if  charbyte ~= 94
 		and charbyte ~= 96
@@ -1805,6 +1805,48 @@ function TMW:PLAYER_LOGIN()
 	TMW:Update()
 end
 
+
+
+
+
+
+---------------------------------
+-- GUID Functions
+---------------------------------
+
+TMW.GUIDToOwner = {}
+
+function TMW:DeclareDataOwner(GUID, object)
+	TMW.GUIDToOwner[GUID] = object
+end
+
+function TMW:GetDataOwner(GUID)
+	return TMW.GUIDToOwner[GUID]
+end
+
+function TMW:GetSettingsFromGUID(GUID)
+	local owner = TMW.GUIDToOwner[GUID]
+	if owner and owner:GetGUID() == GUID then
+		return owner:GetSettings()
+	end
+
+	local dataType = TMW:ParseGUID(GUID)
+
+	local iter
+	if dataType == "icon" then
+		iter = TMW.InIconSettings
+	elseif dataType == "group" then
+		iter = TMW.InGroupSettings
+	end
+
+	if iter then
+		for settings in iter(TMW) do
+			if settings.GUID == GUID then
+				return settings
+			end
+		end
+	end
+end
 
 
 
@@ -2840,6 +2882,8 @@ function TMW:UpdateNormally()
 		TMW:LoadOptions()
 	end
 	
+	wipe(TMW.GUIDToOwner)
+
 	wipe(SpellTextures)
 	SpellTextures = TMW:CopyTableInPlaceWithMeta(TMW.SpellTexturesBase, SpellTextures)
 	
@@ -3269,28 +3313,79 @@ end
 
 TMW.ValidityCheckQueue = {}
 
-function TMW:QueueValidityCheck(icon, groupID, iconID, g, i)
+function TMW:QueueValidityCheck(checker, checkee, description, ...)
 	if not TMW.db.profile.WarnInvalids then return end
-
-	local str = icon .. "^" .. groupID .. "^" .. (iconID or "nil") .. "^" .. g .. "^" .. i
-
-	TMW.ValidityCheckQueue[str] = 1
+	
+	TMW.ValidityCheckQueue[{checker, checkee, description:format(...)}] = 1
 end
 
 function TMW:DoValidityCheck()
-	for str in pairs(TMW.ValidityCheckQueue) do
-		local icon, groupID, iconID, g, i = strsplit("^", str)
-		icon = _G[icon]
-		if not (icon and icon:IsValid()) then
-			if iconID ~= "nil" then
-				TMW.Warn(format(L["CONDITIONORMETA_CHECKINGINVALID"], groupID, iconID, g, i))
-			else
-				TMW.Warn(format(L["CONDITIONORMETA_CHECKINGINVALID_GROUP"], groupID, g, i))
+	for tbl in pairs(TMW.ValidityCheckQueue) do
+		local checkerIn, checkeeIn, description = unpack(tbl)
+		
+		local checker, checkee = checkerIn, checkeeIn
+		local checkerName = "???"
+		local checkeeName
+		
+		local message = description .. " "
+		local shouldWarn = true
+		
+		if type(checker) == "string" then
+			checker = TMW.GUIDToOwner[checkerIn]
+			if not checker then
+				TMW:Error("Invalid checker was passed to QueueValidityCheck: %q", checkerIn)
+				checkerName = "UNKNOWN" .. (TMW.debug and " " .. checkerIn)
 			end
 		end
+		
+		if type(checker) == "table" then
+			if checker.class == TMW.Classes.Icon then
+				checkerName = checker:GetFullNameWithTexture()
+			elseif checker.class == TMW.Classes.Group then
+				checkerName = checker:GetGroupName()
+			end
+		end
+		
+		message = message .. checkerName
+		
+		
+		if type(checkeeIn) == "string" then
+			checkee = TMW.GUIDToOwner[checkeeIn]
+			if not checkee then
+				
+			end
+		end
+		
+		if type(checkee) == "table" then
+			if checkee.class == TMW.Classes.Icon then
+				checkeeName = checkee:GetFullNameWithTexture()
+			elseif checkee.class == TMW.Classes.Group then
+				checkeeName = checkee:GetGroupName()
+			end
+			
+			if not checkee.IsValid then
+				error("checkee does not have an IsValid method: " .. tostring(checkeeIn))
+			end
+			
+			if checkee:IsValid() then
+				shouldWarn = false
+			end
+		end
+		
+		if checkeeName then
+			message = message .. "  (" .. checkeeName .. ") "
+		end
+		
+		message = message .. " " .. "is invalid."
+		
+		if shouldWarn then
+			TMW.Warn(message)
+		end
 	end
+	
 	wipe(TMW.ValidityCheckQueue)
 end
+
 
 function TMW:GetGroupName(name, groupID, short)
 	name = tonumber(name) or name

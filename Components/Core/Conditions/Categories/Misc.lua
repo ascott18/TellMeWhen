@@ -58,17 +58,11 @@ ConditionCategory:RegisterCondition(1,	 "ICON", {
 	icon = "Interface\\Icons\\INV_Misc_PocketWatch_01",
 	tcoords = CNDT.COMMON.standardtcoords,
 	funcstr = function(c, icon)
-		if c.Icon == "" or c.Icon == icon:GetName() then
+		if c.Icon == "" or c.Icon == icon:GetGUID() then
 			return [[true]]
 		end
 
-		local g, i = strmatch(c.Icon, "TellMeWhen_Group(%d+)_Icon(%d+)")
-		g, i = tonumber(g) or 0, tonumber(i) or 0
-		if icon.IsIcon then
-			TMW:QueueValidityCheck(c.Icon, icon.group:GetID(), icon:GetID(), g, i)
-		elseif icon.class == TMW.Classes.Group then
-			TMW:QueueValidityCheck(c.Icon, icon:GetID(), nil, g, i)
-		end
+		TMW:QueueValidityCheck(icon, c.Icon, L["VALIDITY_CONDITION_DESC"])
 
 		local str = [[( c.Icon and c.Icon.attributes.shown and c.Icon.UpdateFunction and not c.Icon:Update())]]
 		if c.Level == 0 then
@@ -76,7 +70,7 @@ ConditionCategory:RegisterCondition(1,	 "ICON", {
 		else
 			str = str .. [[and c.Icon.attributes.realAlpha == 0]]
 		end
-		return gsub(str, "c.Icon", c.Icon)
+		return str
 	end,
 })
 
@@ -109,18 +103,12 @@ ConditionCategory:RegisterCondition(1.2,	"ICONSHOWNTME", {
 			return [[true]]
 		end
 		
-		local g, i = strmatch(c.Icon, "TellMeWhen_Group(%d+)_Icon(%d+)")
-		g, i = tonumber(g) or 0, tonumber(i) or 0
-		if icon.IsIcon then
-			TMW:QueueValidityCheck(c.Icon, icon.group:GetID(), icon:GetID(), g, i)
-		elseif icon.class == TMW.Classes.Group then
-			TMW:QueueValidityCheck(c.Icon, icon:GetID(), nil, g, i)
-		end
+		TMW:QueueValidityCheck(icon, c.Icon, L["VALIDITY_CONDITION_DESC"])
 
 		RegisterShownHiddenTimerCallback()
 		
 		local str = [[c.Icon and c.Icon.attributes.shown and c.Icon.UpdateFunction and not c.Icon:Update() and c.Icon.attributes.realAlpha > 0 and time - (c.Icon.__CNDT__ICONSHOWNTME or 0) c.Operator c.Level]]
-		return gsub(str, "c.Icon", c.Icon)
+		return str
 	end,
 })
 ConditionCategory:RegisterCondition(1.3,	"ICONHIDDENTME", {
@@ -138,18 +126,12 @@ ConditionCategory:RegisterCondition(1.3,	"ICONHIDDENTME", {
 			return [[true]]
 		end
 		
-		local g, i = strmatch(c.Icon, "TellMeWhen_Group(%d+)_Icon(%d+)")
-		g, i = tonumber(g) or 0, tonumber(i) or 0
-		if icon.IsIcon then
-			TMW:QueueValidityCheck(c.Icon, icon.group:GetID(), icon:GetID(), g, i)
-		elseif icon.class == TMW.Classes.Group then
-			TMW:QueueValidityCheck(c.Icon, icon:GetID(), nil, g, i)
-		end
+		TMW:QueueValidityCheck(icon, c.Icon, L["VALIDITY_CONDITION_DESC"])
 
 		RegisterShownHiddenTimerCallback()
 		
 		local str = [[c.Icon and c.Icon.attributes.shown and c.Icon.UpdateFunction and not c.Icon:Update() and c.Icon.attributes.realAlpha == 0 and time - (c.Icon.__CNDT__ICONHIDDENTME or 0) c.Operator c.Level]]
-		return gsub(str, "c.Icon", c.Icon)
+		return str
 	end,
 })
 

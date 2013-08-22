@@ -464,11 +464,11 @@ end
 
 function EVENTS.IconMenu_DropDown(frame)
 	if UIDROPDOWNMENU_MENU_LEVEL == 2 then
-		for icon, groupID, iconID in TMW:InIcons() do
-			if icon:IsValid() and UIDROPDOWNMENU_MENU_VALUE == groupID and TMW.CI.ic ~= icon then
+		for icon, groupID, iconID in TMW:InIcons(UIDROPDOWNMENU_MENU_VALUE) do
+			if icon:IsValid() and TMW.CI.ic ~= icon then
 				local info = UIDropDownMenu_CreateInfo()
 
-				local text, textshort, tooltip = TMW:GetIconMenuText(groupID, iconID)
+				local text, textshort, tooltip = TMW:GetIconMenuText(groupID, iconID, icon:GetSettings())
 				if text:sub(-2) == "))" then
 					textshort = textshort .. " " .. L["fICON"]:format(iconID)
 				end
@@ -477,7 +477,7 @@ function EVENTS.IconMenu_DropDown(frame)
 				info.tooltipText = format(L["GROUPICON"], TMW:GetGroupName(groupID, groupID, 1), iconID) .. "\r\n" .. tooltip
 				info.tooltipOnButton = true
 
-				info.value = icon:GetName()
+				info.value = icon:GetGUID()
 				info.arg1 = frame
 				info.func = EVENTS.IconMenu_DropDown_OnClick
 
@@ -504,10 +504,15 @@ function EVENTS.IconMenu_DropDown(frame)
 	end
 end
 function EVENTS.IconMenu_DropDown_OnClick(button, frame)
-	TMW:SetUIDropdownIconText(frame, button.value)
 	CloseDropDownMenus()
 
-	frame.IconPreview:SetIcon(_G[button.value])
+
+	local GUID = button.value
+	local icon = TMW.GUIDToOwner[GUID]
+
+	TMW:SetUIDropdownGUIDText(frame, GUID, L["CHOOSEICON"])
+	frame.IconPreview:SetIcon(icon)
+
 
 	EVENTS:GetEventSettings().Icon = button.value
 end

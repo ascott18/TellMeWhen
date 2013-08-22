@@ -51,8 +51,8 @@ do	-- TMW.CNDT implementation
 		
 		settingKey = "Conditions",
 		GetSettings = function(self)
-			if TMW.CI.g then
-				return TMW.db.profile.Groups[TMW.CI.g].Conditions
+			if TMW.CI.gs then
+				return TMW.CI.gs.Conditions
 			end
 		end,
 		
@@ -203,6 +203,23 @@ function Group.TMW_CNDT_OBJ_PASSING_CHANGED(group, event, ConditionObject, faile
 end
 
 
+
+--- Returns the GUID of this group.
+-- @name Group:GetGUID
+-- @paramsig 
+-- @return [string;nil] The GUID of this group.
+function Group.GetGUID(group)
+	local GUID = group:GetSettings().GUID
+
+	if not GUID then
+		GUID = TMW:GenerateGUID("group", TMW.CONST.GUID_SIZE)
+		group:GetSettings().GUID = GUID
+		group.GUID = GUID
+	end
+
+	return GUID
+end
+
 --- Returns the settings table that holds the settings for the group.
 -- @name Group:GetSettings
 -- @paramsig
@@ -299,6 +316,11 @@ end
 function Group.Setup(group, noIconSetup)
 	local gs = group:GetSettings()
 	local groupID = group:GetID()
+	local GUID = group:GetGUID()
+
+	if GUID then
+		TMW:DeclareDataOwner(GUID, group)
+	end
 	
 	for k, v in pairs(TMW.Group_Defaults) do
 		group[k] = gs[k]

@@ -373,7 +373,7 @@ function TEXT:Layout_IsDefault(layoutSettings)
 	layoutSettings.GUID = ""
 	
 	-- safecall to avoid any disasters because layoutSettings is modified and is awaiting the restoration of its original state.
-	local isDefault = TMW.safecall(IE.DeepCompare, IE, DEFAULT_LAYOUT_SETTINGS, layoutSettings)
+	local isDefault = TMW.safecall(TMW.DeepCompare, TMW, DEFAULT_LAYOUT_SETTINGS, layoutSettings)
 	
 	-- Put the GUID back in.
 	layoutSettings.GUID = GUID

@@ -332,6 +332,28 @@ function TMW:SetUIDropdownIconText(frame, iconName, text)
 	UIDropDownMenu_SetText(frame, text)
 end
 
+function TMW:SetUIDropdownGUIDText(frame, GUID, text)
+	frame.selectedValue = GUID
+
+	local owner = TMW.GUIDToOwner[GUID]
+	local type = TMW:ParseGUID(GUID)
+
+	if owner then
+		if type == "icon" then
+			local icon = owner
+			UIDropDownMenu_SetText(frame, TMW:GetIconMenuText(icon.group.ID, icon.ID, icon:GetSettings()))
+			return icon
+
+		elseif type == "group" then
+			local group = owner
+			UIDropDownMenu_SetText(frame, group:GetGroupName())
+			return group
+		end
+	end
+	
+	UIDropDownMenu_SetText(frame, text)
+end
+
 local spacerInfo = {
 	text = "",
 	isTitle = true,
@@ -1919,9 +1941,11 @@ function IE:OnUpdate()
 	if tab.doesGroup and tab.doesIcon then
 		-- For IconEditor tabs that can configure icons
 
+		local GUID = icon:GetGUID(true)
+		
 		local append = ""
 		if TMW.debug then
-			append = " " .. icon:GetGUID():gsub("%%", "%%%%")
+			append = " " .. GUID:gsub("%%", "%%%%")
 		end
 		self.Header:SetFormattedText(titlePrepend .. " - " .. L["GROUPICON"] .. append, groupName, iconID)
 
@@ -2152,6 +2176,9 @@ function IE:Load(isRefresh, icon, isHistoryChange)
 		CI.i = icon:GetID()
 		CI.g = icon.group:GetID()
 		CI.ic = icon
+
+		-- Generate a GUID for the icon if it doesn't already have one.
+		icon:GetGUID(true)
 
 		if IE.history[#IE.history] ~= icon and not isHistoryChange then
 			-- if we are using an old history point (i.e. we hit back a few times and then loaded a new icon),

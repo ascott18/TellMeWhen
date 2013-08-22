@@ -463,7 +463,7 @@ function icon:Import_BuildContainingDropdownEntry(result, editbox)
 	
 	local IMPORTS, EXPORTS = editbox:GetAvailableImportExportTypes()
 	
-	if not TMW.TMW:DeepCompare(TMW.DEFAULT_ICON_SETTINGS, ics) then
+	if not TMW:DeepCompare(TMW.DEFAULT_ICON_SETTINGS, ics) then
 		local info = UIDropDownMenu_CreateInfo()
 
 		local tex
@@ -578,7 +578,7 @@ group:RegisterMenuBuilder(30, function(self, result, editbox)
 	for iconID, ics in TMW:OrderedPairs(gs.Icons) do
 	
 		-- Ignore icons that are just blank/default icons.
-		if not TMW.TMW:DeepCompare(TMW.DEFAULT_ICON_SETTINGS, ics) then
+		if not TMW:DeepCompare(TMW.DEFAULT_ICON_SETTINGS, ics) then
 			precount = precount + 1
 		end
 		if precount > NUM_ICONS_PER_SUBMENU then
@@ -591,7 +591,7 @@ group:RegisterMenuBuilder(30, function(self, result, editbox)
 		for iconID, ics in TMW:OrderedPairs(gs.Icons) do
 		
 			-- Ignore icons that are just blank/default icons.
-			if not TMW.TMW:DeepCompare(TMW.DEFAULT_ICON_SETTINGS, ics) then
+			if not TMW:DeepCompare(TMW.DEFAULT_ICON_SETTINGS, ics) then
 			
 				-- If we haven't found an icon to start the current holder menu with, use this one.
 				if not startID then
