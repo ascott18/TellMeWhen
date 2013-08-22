@@ -57,6 +57,13 @@ Module:ExtendMethod("OnImplementIntoIcon", function(self, icon)
 	
 	if EventHandlersSet.OnIconShow or EventHandlersSet.OnIconHide then
 		self:Enable()
+
+		for i, EventSettings in TMW:InNLengthTable(icon.Events) do
+			if EventSettings.Event == "OnIconShow" or EventSettings.Event == "OnIconHide" then
+				TMW:QueueValidityCheck(icon, EventSettings.Icon, L["VALIDITY_ONICONSHOWHIDE_DESC"], i)
+			end
+		end
+		
 	else
 		self:Disable()
 	end
