@@ -1136,7 +1136,7 @@ TMW:RegisterCallback("TMW_UPGRADE_REQUESTED", function(event, settingType, versi
 			
 			if isGood then
 				for conditionID, condition in TMW:InNLengthTable(parentSettings[conditionSetData.settingKey]) do
-					TMW:DoUpgrade("condition", version, condition, conditionID)
+					TMW:DoUpgrade("condition", version, condition)
 				end
 			end
 			
