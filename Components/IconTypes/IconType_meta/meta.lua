@@ -262,33 +262,6 @@ function GetFullIconTable(icon, icons) -- check what all the possible icons it c
 					InsertIcon(icon, iconGUID)
 				end
 			end
---[[
-
-			if TMW.db.profile.Groups[groupID].View == thisIconsView then
-				if type == "group" then -- a group. Expand it into icons.
-					local group = TMW[groupID]
-					
-					if group and group:ShouldUpdateIcons() then
-						local gs = group:GetSettings()
-
-						for ics, _, icID in TMW:InIconSettings(groupID) do
-							if ics.Enabled and icID <= gs.Rows*gs.Columns then
-								-- ic here is a group name. turn it into an icon
-								local ic = ic .. "_Icon" .. icID
-								
-								-- if a meta icon is set to check its own group, dont put the meta icon in there.
-								if ic ~= icon:GetName() then
-									InsertIcon(icon, ics, ic)
-								end
-							end
-						end
-					end
-
-				else -- just an icon. put it in.
-					
-				end
-			end
-			]]
 		end
 	end
 	return icon.CompiledIcons
