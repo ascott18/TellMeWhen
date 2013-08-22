@@ -45,7 +45,7 @@ end
 
 -- Required methods
 function Lua:ProcessIconEventSettings(event, eventSettings)
-	return type(self:GetCompiledFunction(eventSettings.Lua)) == "function"
+	return eventSettings.Lua ~= TMW.Icon_Defaults.Events["**"].Lua and type(self:GetCompiledFunction(eventSettings.Lua)) == "function"
 end
 
 function Lua:HandleEvent(icon, eventSettings)
