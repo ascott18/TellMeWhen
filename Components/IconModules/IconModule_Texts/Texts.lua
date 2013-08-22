@@ -370,7 +370,7 @@ TMW:RegisterUpgrade(51003, {
 		-- If we've made it to this point, then the layout we just created wasn't a duplicate.
 		
 		-- Create a GUID for the new layout and set it.
-		local GUID = TMW.generateGUID(12)
+		local GUID = TMW:GenerateGUID("textlayout", TMW.CONST.GUID_SIZE)
 		layout.GUID = GUID
 		
 		-- Determine a name for the new layout:

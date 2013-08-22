@@ -445,7 +445,7 @@ local function findlayout(info)
 	return layout and strmatch(layout, "#TextLayout (.*)"), layout
 end
 local function AddTextLayout()
-	local GUID = TMW.generateGUID(12)
+	local GUID = TMW:GenerateGUID("textlayout", TMW.CONST.GUID_SIZE)
 	local newLayout = TMW.db.profile.TextLayouts[GUID]
 	newLayout.GUID = GUID
 	
@@ -596,7 +596,7 @@ local textLayoutTemplate = {
 			order = 110,
 			func = function(info)
 				local layout = findlayout(info)
-				TMW:Import(nil, TEXT:GetTextLayoutSettings(layout), TELLMEWHEN_VERSIONNUMBER, "textlayout", TMW.generateGUID(12))
+				TMW:Import(nil, TEXT:GetTextLayoutSettings(layout), TELLMEWHEN_VERSIONNUMBER, "textlayout", TMW:GenerateGUID("textlayout", TMW.CONST.GUID_SIZE))
 			end,
 			disabled = function(info)
 				return false
@@ -1198,7 +1198,7 @@ function textlayout:Import_BuildMenuData(result, editbox)
 		info.notCheckable = true
 		
 		info.func = function()
-			TMW:Import(editbox, settings, result.version, "textlayout", TMW.generateGUID(12))
+			TMW:Import(editbox, settings, result.version, "textlayout", TMW:GenerateGUID("textlayout", TMW.CONST.GUID_SIZE))
 		end
 		UIDropDownMenu_AddButton(info, UIDROPDOWNMENU_MENU_LEVEL)
 	else
