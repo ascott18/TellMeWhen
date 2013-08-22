@@ -227,6 +227,11 @@ function Icon.GetSettings(icon)
 	return TMW.db.profile.Groups[icon.group:GetID()].Icons[icon:GetID()]
 end
 
+--TODO: doc this
+function Icon.GetGUID(icon)
+	return icon.GUID
+end
+
 --- Returns the settings table that holds the view-specific settings for the icon.
 -- @name Icon:GetSettingsPerView
 -- @paramsig view

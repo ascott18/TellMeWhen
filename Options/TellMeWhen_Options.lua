@@ -1919,7 +1919,11 @@ function IE:OnUpdate()
 	if tab.doesGroup and tab.doesIcon then
 		-- For IconEditor tabs that can configure icons
 
-		self.Header:SetFormattedText(titlePrepend .. " - " .. L["GROUPICON"], groupName, iconID)
+		local append = ""
+		if TMW.debug then
+			append = " " .. icon:GetGUID():gsub("%%", "%%%%")
+		end
+		self.Header:SetFormattedText(titlePrepend .. " - " .. L["GROUPICON"] .. append, groupName, iconID)
 
 		if self.Header:IsTruncated() then
 			local truncAmt = 3

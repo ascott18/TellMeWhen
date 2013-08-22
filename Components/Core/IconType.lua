@@ -29,6 +29,7 @@ local tDeleteItem = TMW.tDeleteItem
 
 local RelevantToAll = {
 	__index = {
+		GUID = true,
 		SettingsPerView = true,
 		Enabled = true,
 		Name = true,

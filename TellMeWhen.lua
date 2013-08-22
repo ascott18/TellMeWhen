@@ -190,6 +190,7 @@ TMW.Defaults = {
 				Enabled			= true,
 			},
 			["**"] = {
+				GUID			= "",
 				Enabled			= false,
 				OnlyInCombat	= false,
 				Locked			= false,
@@ -213,16 +214,17 @@ TMW.Defaults = {
 				},
 				Icons = {
 					["**"] = {
-						ShowWhen				= 0x2, -- bit order: x, x, alpha, unalpha
-						Enabled					= false,
-						Name					= "",
-						Type					= "",
-						Alpha					= 1,
-						UnAlpha					= 1,
-						Icons					= {
-							[1]					= "",
+						GUID				= "",
+						ShowWhen			= 0x2, -- bit order: x, x, alpha, unalpha
+						Enabled				= false,
+						Name				= "",
+						Type				= "",
+						Alpha				= 1,
+						UnAlpha				= 1,
+						Icons				= {
+							[1]				= "",
 						},
-						SettingsPerView			= {
+						SettingsPerView		= {
 							["**"] = {
 							}
 						},
@@ -1817,10 +1819,71 @@ TMW.UpgradeTableByVersions = {}
 function TMW:GetBaseUpgrades()			-- upgrade functions
 	return {
 		[70001] = {
-			icon = function(self, ics)
 
+			recursiveReplaceReferences = function(self, table, GUIDmap)
+				for k, v in pairs(table) do
+					if type(v) == "table" then
+						self:recursiveReplaceReferences(v, GUIDmap)
+					elseif GUIDmap[v] then
+						table[k] = GUIDmap[v]
+					end
+				end
 			end,
-		}
+
+			runGUIDUpgrade = function(self, func, data, ...)
+				local GUIDmap = {}
+
+				func(self, GUIDmap, data, ...)
+
+				self:recursiveReplaceReferences(data, GUIDmap)
+			end,
+
+			guidupgrade_profile = function(self, GUIDmap, profile)
+				for groupID, gs in pairs(profile.Groups) do
+					self:guidupgrade_group(GUIDmap, gs, groupID)
+				end
+			end,
+
+			guidupgrade_group = function(self, GUIDmap, gs, groupID)
+				local GUID = TMW:GenerateGUID("group", TMW.CONST.GUID_SIZE)
+				gs.GUID = GUID
+
+				GUIDmap["TellMeWhen_Group" .. groupID] = GUID
+
+				for iconID, ics in pairs(gs.Icons) do
+					local GUID = self:guidupgrade_icon(GUIDmap, ics, groupID, iconID)
+					GUIDmap["TellMeWhen_Group" .. groupID .. "_Icon" .. iconID] = GUID
+				end
+
+				return GUID
+			end,
+
+			guidupgrade_icon = function(self, GUIDmap, ics, groupID, iconID)
+				if not self.IsIconDefault(ics) then
+					ics.GUID = TMW:GenerateGUID("icon", TMW.CONST.GUID_SIZE)
+					return ics.GUID
+				end
+			end,
+
+			IsIconDefault = function(ics)
+				return TMW:DeepCompare(ics, TMW.DEFAULT_ICON_SETTINGS)
+			end,
+
+			profile = function(self, profile)
+				self:runGUIDUpgrade(self.guidupgrade_profile, profile)
+			end,
+			group = function(self, gs, groupID)
+				if not gs.GUID then
+					self:runGUIDUpgrade(self.guidupgrade_group, gs, groupID)
+				end
+			end,
+			icon = function(self, ics, groupID, iconID)
+				if not ics.GUID then
+					self:runGUIDUpgrade(self.guidupgrade_icon, ics, groupID, iconID)
+				end
+			end,
+		},
+
 		[62304] = {
 			profile = function(self)
 				for k, v in pairs(TMW.db.profile.Colors) do

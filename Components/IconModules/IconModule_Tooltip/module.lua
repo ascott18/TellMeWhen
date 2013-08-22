@@ -70,6 +70,12 @@ Module:SetScriptHandler("OnEnter", function(Module, icon)
 		GameTooltip_SetDefaultAnchor(GameTooltip, icon)
 		GameTooltip:AddLine(TMW.get(Module.title, icon), HIGHLIGHT_FONT_COLOR.r, HIGHLIGHT_FONT_COLOR.g, HIGHLIGHT_FONT_COLOR.b, false)
 		GameTooltip:AddLine(TMW.get(Module.text, icon), NORMAL_FONT_COLOR.r, NORMAL_FONT_COLOR.g, NORMAL_FONT_COLOR.b, false)
+		
+		if TMW.debug then
+			GameTooltip:AddLine("")
+			GameTooltip:AddLine(icon:GetGUID(), HIGHLIGHT_FONT_COLOR.r, HIGHLIGHT_FONT_COLOR.g, HIGHLIGHT_FONT_COLOR.b, false)
+		end
+
 		GameTooltip:Show()
 	end
 end)
