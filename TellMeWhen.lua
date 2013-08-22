@@ -24,7 +24,7 @@ if strmatch(projectVersion, "%-%d+%-") then
 end
 
 TELLMEWHEN_VERSION_FULL = TELLMEWHEN_VERSION .. TELLMEWHEN_VERSION_MINOR
-TELLMEWHEN_VERSIONNUMBER = 70002 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL (for versioning of)
+TELLMEWHEN_VERSIONNUMBER = 70003 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL (for versioning of)
 
 if TELLMEWHEN_VERSIONNUMBER > 71000 or TELLMEWHEN_VERSIONNUMBER < 70000 then
 	-- safety check because i accidentally made the version number 414069 once
@@ -1759,7 +1759,7 @@ do -- TMW.generateGUID(length)
 	end
 
 
-	assert(#chars >= 100, "chars table for TMW.generateGUID is incomplete!")
+	assert(#chars == 100, "chars table for TMW.generateGUID is incomplete or too big!")
 
 	function TMW.generateGUID(length)
 		assert(length and length >= 9, "GUID length must be at least 9")
@@ -1885,7 +1885,7 @@ function TMW:GetBaseUpgrades()			-- upgrade functions
 
 				TMW.db:SetProfile(currentProfile)
 
-				TMW:Print("Finished one-time upgrade of all profiles.")
+				TMW:Print("Finished one-time upgrade of all profiles to v7.0.0.")
 
 				collectgarbage()
 			end,
