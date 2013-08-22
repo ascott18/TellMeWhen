@@ -54,6 +54,6 @@ TMW.IconDragger:RegisterIconDragHandler(210, -- Add as icon shown condition
 
 		-- set the settings
 		Condition.Type = "ICON"
-		Condition.Icon = IconDragger.srcicon:GetName()
+		Condition.Icon = IconDragger.srcicon:GetGUID(true)
 	end
 )
