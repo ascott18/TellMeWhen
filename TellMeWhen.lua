@@ -15,7 +15,7 @@
 -- ADDON GLOBALS AND LOCALS
 -- ---------------------------------
 
-TELLMEWHEN_VERSION = "6.2.4"
+TELLMEWHEN_VERSION = "7.0.0"
 
 TELLMEWHEN_VERSION_MINOR = ""
 local projectVersion = "@project-version@" -- comes out like "6.2.2-21-g4e91cee"
@@ -24,9 +24,9 @@ if strmatch(projectVersion, "%-%d+%-") then
 end
 
 TELLMEWHEN_VERSION_FULL = TELLMEWHEN_VERSION .. TELLMEWHEN_VERSION_MINOR
-TELLMEWHEN_VERSIONNUMBER = 62410 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL (for versioning of)
+TELLMEWHEN_VERSIONNUMBER = 70001 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL (for versioning of)
 
-if TELLMEWHEN_VERSIONNUMBER > 63000 or TELLMEWHEN_VERSIONNUMBER < 62000 then
+if TELLMEWHEN_VERSIONNUMBER > 71000 or TELLMEWHEN_VERSIONNUMBER < 70000 then
 	-- safety check because i accidentally made the version number 414069 once
 	return error("YOU SCREWED UP THE VERSION NUMBER OR DIDNT CHANGE THE SAFETY LIMITS")
 end 
@@ -119,7 +119,8 @@ TMW.EventList = {}
 TMW.COMMON = {}
 
 TMW.CONST = {
-	CHAT_TYPE_INSTANCE_CHAT = "INSTANCE_CHAT"
+	CHAT_TYPE_INSTANCE_CHAT = "INSTANCE_CHAT",
+	GUID_SIZE = 10,
 }
 
 TMW.IconsToUpdate, TMW.GroupsToUpdate = {}, {}
@@ -751,6 +752,50 @@ function TMW:CopyTableInPlaceWithMeta(src, dest, allowUnmatchedSourceTables)
 	return dest -- not really needed, but what the hell why not
 end
 
+function TMW:DeepCompare(t1, t2, ...)
+	-- heavily modified version of http://snippets.luacode.org/snippets/Deep_Comparison_of_Two_Values_3
+
+	-- attempt direct comparison
+	if t1 == t2 then
+		return true, ...
+	end
+
+	-- if the values are not the same (they made it through the check above) AND they are not both tables, then they cannot be the same, so exit.
+	local ty1 = type(t1)
+	if ty1 ~= "table" or ty1 ~= type(t2) then
+		return false, ...
+	end
+
+	-- compare table values
+
+	-- compare table 1 with table 2
+	for k1, v1 in pairs(t1) do
+		local v2 = t2[k1]
+
+		-- don't bother calling DeepCompare on the values if they are the same - it will just return true.
+		-- Only call it if the values are different (they are either 2 tables, or they actually are different non-table values)
+		-- by adding the (v1 ~= v2) check, efficiency is increased by about 300%.
+		if v1 ~= v2 and not TMW:DeepCompare(v1, v2, k1, ...) then
+
+			-- it only reaches this point if there is a difference between the 2 tables somewhere
+			-- so i dont feel bad about calling DeepCompare with the same args again
+			-- i need to because the key of the setting that changed is in there, and AttemptBackup needs that key
+			return TMW:DeepCompare(v1, v2, k1, ...)
+		end
+	end
+
+	-- compare table 2 with table 1
+	for k2, v2 in pairs(t2) do
+		local v1 = t1[k2]
+
+		-- see comments for t1
+		if v1 ~= v2 and not TMW:DeepCompare(v1, v2, k2, ...) then
+			return TMW:DeepCompare(v1, v2, k2, ...)
+		end
+	end
+
+	return true, ...
+end
 
 
 
@@ -1036,6 +1081,14 @@ do -- TMW.generateGUID(length)
 		return tonumber(time)
 	end
 	--]]
+end
+
+function TMW:GenerateGUID(type, length)
+	return type .. ":" .. TMW.generateGUID(length)
+end
+
+function TMW:ParseGUID(GUID)
+	return strmatch(GUID, "([a-z]+):(.*)")
 end
 
 
@@ -1763,6 +1816,11 @@ TMW.UpgradeTableByVersions = {}
 
 function TMW:GetBaseUpgrades()			-- upgrade functions
 	return {
+		[70001] = {
+			icon = function(self, ics)
+
+			end,
+		}
 		[62304] = {
 			profile = function(self)
 				for k, v in pairs(TMW.db.profile.Colors) do

@@ -1366,7 +1366,7 @@ end
 ---------- Etc ----------
 function TMW:Group_HasIconData(groupID)
 	for ics in TMW:InIconSettings(groupID) do
-		if not IE:DeepCompare(TMW.DEFAULT_ICON_SETTINGS, ics) then
+		if not TMW:DeepCompare(TMW.DEFAULT_ICON_SETTINGS, ics) then
 			return true
 		end
 	end
@@ -3320,51 +3320,6 @@ function IE:RegisterRapidSetting(setting)
 end
 
 ---------- Comparison ----------
-function IE:DeepCompare(t1, t2, ...)
-	-- heavily modified version of http://snippets.luacode.org/snippets/Deep_Comparison_of_Two_Values_3
-
-	-- attempt direct comparison
-	if t1 == t2 then
-		return true, ...
-	end
-
-	-- if the values are not the same (they made it through the check above) AND they are not both tables, then they cannot be the same, so exit.
-	local ty1 = type(t1)
-	if ty1 ~= "table" or ty1 ~= type(t2) then
-		return false, ...
-	end
-
-	-- compare table values
-
-	-- compare table 1 with table 2
-	for k1, v1 in pairs(t1) do
-		local v2 = t2[k1]
-
-		-- don't bother calling DeepCompare on the values if they are the same - it will just return true.
-		-- Only call it if the values are different (they are either 2 tables, or they actually are different non-table values)
-		-- by adding the (v1 ~= v2) check, efficiency is increased by about 300%.
-		if v1 ~= v2 and not IE:DeepCompare(v1, v2, k1, ...) then
-
-			-- it only reaches this point if there is a difference between the 2 tables somewhere
-			-- so i dont feel bad about calling DeepCompare with the same args again
-			-- i need to because the key of the setting that changed is in there, and AttemptBackup needs that key
-			return IE:DeepCompare(v1, v2, k1, ...)
-		end
-	end
-
-	-- compare table 2 with table 1
-	for k2, v2 in pairs(t2) do
-		local v1 = t1[k2]
-
-		-- see comments for t1
-		if v1 ~= v2 and not IE:DeepCompare(v1, v2, k2, ...) then
-			return IE:DeepCompare(v1, v2, k2, ...)
-		end
-	end
-
-	return true, ...
-end
-
 function IE:GetCompareResultsPath(match, ...)
 	if match then
 		return true
@@ -3400,7 +3355,7 @@ function IE:AttemptBackup(icon)
 		-- the currently used history point may or may not be the most recent settings of the icon, but we want to check ics against what is being used.
 		-- result is either (true) if there were no changes in the settings, or a string representing the key path to the first setting change that was detected.
 		--(it was likely only one setting that changed, but not always)
-		local result, changedSetting = IE:GetCompareResultsPath(IE:DeepCompare(icon.history[icon.historyState], icon:GetSettings()))
+		local result, changedSetting = IE:GetCompareResultsPath(TMW:DeepCompare(icon.history[icon.historyState], icon:GetSettings()))
 		if type(result) == "string" then
 			-- if we are using an old history point (i.e. we hit undo a few times and then made a change),
 			-- delete all history points from the current one forward so that we dont jump around wildly when undoing and redoing

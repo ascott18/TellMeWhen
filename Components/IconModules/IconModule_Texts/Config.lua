@@ -364,7 +364,7 @@ function TEXT:GetNumTimesUsed(layout)
 end
 
 function TEXT:Display_IsDefault(displaySettings)
-	return not not IE:DeepCompare(DEFAULT_DISPLAY_SETTINGS, displaySettings)
+	return not not TMW:DeepCompare(DEFAULT_DISPLAY_SETTINGS, displaySettings)
 end
 
 function TEXT:Layout_IsDefault(layoutSettings)
