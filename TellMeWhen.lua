@@ -1756,7 +1756,7 @@ function TMW:Initialize()
 	-- Channel TMW is used for sharing data.
 	-- ReceiveComm is a setting that allows users to disable receiving shared data.
 	if TMW.db.profile.ReceiveComm then
-		TMW:RegisterComm("TMW_DATA")
+		TMW:RegisterComm("TMW")
 	end
 	
 	-- Channel TMWV is used for version notifications.
