@@ -439,46 +439,6 @@ do
 end
 
 ---------- Misc Utilities ----------
-do -- TMW:ReconcileData()
-	local isRunning
-	local source_use, destination_use, matchSource_use, matchDestination_use, swap_use
-	
-	
-	local function replace(table, key)
-		assert(isRunning, "TMW:ReconcileData() isn't running!")
-		
-		TMW:ValidateType(1, "replace()", table, "table")
-		TMW:ValidateType(2, "replace()", key, "!nil")
-		
-		local string = table[key]
-
-		if matchSource_use and string:find(matchSource_use) then
-			table[key] = string:gsub(source_use, destination_use)
-		elseif not matchSource_use and source_use == string then
-			table[key] = destination_use
-		elseif swap_use and matchDestination_use and string:find(matchDestination_use) then
-			table[key] = string:gsub(destination_use, source_use)
-		elseif swap_use and not matchDestination_use and destination_use == string then
-			table[key] = source_use
-		end
-	end
-
-	function TMW:ReconcileData(source, destination, matchSource, matchDestination, swap, limitSourceGroup)
-		assert(not isRunning)
-		isRunning = true
-		
-		assert(source)
-		assert(destination)
-		
-		source_use, destination_use, matchSource_use, matchDestination_use, swap_use =
-		source,		destination,	 matchSource,	  matchDestination,		swap
-
-		TMW:Fire("TMW_CONFIG_ICON_RECONCILIATION_REQUESTED", replace, limitSourceGroup)
-		
-		isRunning = false
-	end
-end
-
 function TMW:ConvertContainerToScrollFrame(container, exteriorScrollBarPosition, scrollBarXOffs, scrollBarSizeX)
     
     
@@ -1314,17 +1274,6 @@ end
 function TMW:Group_Delete(groupID)
 	if TMW.db.profile.NumGroups == 1 then
 		return
-	end
-
-	for id = groupID + 1, TMW.db.profile.NumGroups do
-		local source = "TellMeWhen_Group" .. id
-		local destination = "TellMeWhen_Group" .. id - 1
-
-		-- check for groups exactly
-		TMW:ReconcileData(source, destination)
-
-		-- check for any icons of a group.
-		TMW:ReconcileData(source, destination, source .. "_Icon", destination .. "_Icon")
 	end
 
 	tremove(TMW.db.profile.Groups, groupID)

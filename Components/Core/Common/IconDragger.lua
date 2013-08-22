@@ -161,13 +161,8 @@ IconDragger:RegisterIconDragHandler(1,	-- Move
 		IconDragger.desticon.group:GetSettings().Icons[IconDragger.desticon:GetID()] = srcgs.Icons[IconDragger.srcicon:GetID()]
 		srcgs.Icons[IconDragger.srcicon:GetID()] = nil
 		
-
 		-- preserve buff/debuff/other types textures
 		IconDragger.desticon:SetInfo("texture", IconDragger.srcicon.attributes.texture)
-
-		local srcicon, desticon = tostring(IconDragger.srcicon), tostring(IconDragger.desticon)
-
-		TMW:ReconcileData(srcicon, desticon)
 	end
 )
 IconDragger:RegisterIconDragHandler(2,	-- Copy
@@ -219,8 +214,6 @@ IconDragger:RegisterIconDragHandler(3,	-- Swap
 		local desttex = IconDragger.desticon.attributes.texture
 		IconDragger.desticon:SetInfo("texture", IconDragger.srcicon.attributes.texture)
 		IconDragger.srcicon:SetInfo("texture", desttex)
-
-		local srcicon, desticon = tostring(IconDragger.srcicon), tostring(IconDragger.desticon)
 	end
 )
 

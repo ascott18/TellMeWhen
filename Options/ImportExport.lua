@@ -235,13 +235,6 @@ function group:Import_ImportData(editbox, data, version, noOverwrite, oldgroupID
 	local gs = TMW.db.profile.Groups[destgroupID]
 	TMW:CopyTableInPlaceWithMeta(data, gs, true)
 
-	-- change any meta icon components to the new group if the meta and components are/were in the same group (icon conditions, too)
-	if oldgroupID then
-		local srcgr, destgr = "TellMeWhen_Group"..oldgroupID, TMW[destgroupID]:GetName()
-
-		TMW:ReconcileData(srcgr, destgr, srcgr, destgr, nil, destgroupID)
-	end
-
 	if version then
 		if version > TELLMEWHEN_VERSIONNUMBER then
 			TMW:Print(L["FROMNEWERVERSION"])
