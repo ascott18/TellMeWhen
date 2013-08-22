@@ -198,7 +198,8 @@ end
 
 
 local function TMW_ICON_UPDATED(icon, event, ic)
-	if icon.IconsLookup[ic:GetGUID()] or ic == icon then
+	local GUID = ic:GetGUID()
+	if ic == icon or (GUID and icon.IconsLookup[GUID]) then
 		icon.metaUpdateQueued = true
 	end
 end

@@ -1842,6 +1842,8 @@ function TMW:GetSettingsFromGUID(GUID)
 		iter = TMW.InIconSettings
 	elseif dataType == "group" then
 		iter = TMW.InGroupSettings
+	else
+		error("Unsupported GUID type for TMW:GetSettingsFromGUID()")
 	end
 
 	if iter then
@@ -1866,13 +1868,31 @@ TMW.UpgradeTableByVersions = {}
 function TMW:GetBaseUpgrades()			-- upgrade functions
 	return {
 		[70001] = {
+			global = function(self)
+				local currentProfile = TMW.db:GetCurrentProfile()
+
+				for name, p in pairs(TMW.db.profiles) do
+					TMW.safecall(TMW.db.SetProfile, TMW.db, name)
+				end
+
+				TMW.db:SetProfile(currentProfile)
+
+				TMW:Print("Finished one-time upgrade of all profiles.")
+
+				collectgarbage()
+			end,
 
 			recursiveReplaceReferences = function(self, table, GUIDmap)
 				for k, v in pairs(table) do
 					if type(v) == "table" then
 						self:recursiveReplaceReferences(v, GUIDmap)
 					elseif GUIDmap[v] then
-						table[k] = GUIDmap[v]
+						local GUID = GUIDmap[v][2].GUID
+						if GUID == "" or not GUID then
+							GUID = TMW:GenerateGUID(GUIDmap[v][1], TMW.CONST.GUID_SIZE)
+						end
+						GUIDmap[v][2].GUID = GUID
+						table[k] = GUID
 					end
 				end
 			end,
@@ -1895,21 +1915,13 @@ function TMW:GetBaseUpgrades()			-- upgrade functions
 				local GUID = TMW:GenerateGUID("group", TMW.CONST.GUID_SIZE)
 				gs.GUID = GUID
 
-				GUIDmap["TellMeWhen_Group" .. groupID] = GUID
+				GUIDmap["TellMeWhen_Group" .. groupID] = {"group", gs}
 
 				for iconID, ics in pairs(gs.Icons) do
-					local GUID = self:guidupgrade_icon(GUIDmap, ics, groupID, iconID)
-					GUIDmap["TellMeWhen_Group" .. groupID .. "_Icon" .. iconID] = GUID
+					GUIDmap["TellMeWhen_Group" .. groupID .. "_Icon" .. iconID] = {"icon", ics}
 				end
 
 				return GUID
-			end,
-
-			guidupgrade_icon = function(self, GUIDmap, ics, groupID, iconID)
-				if not self.IsIconDefault(ics) then
-					ics.GUID = TMW:GenerateGUID("icon", TMW.CONST.GUID_SIZE)
-					return ics.GUID
-				end
 			end,
 
 			IsIconDefault = function(ics)
@@ -1920,13 +1932,8 @@ function TMW:GetBaseUpgrades()			-- upgrade functions
 				self:runGUIDUpgrade(self.guidupgrade_profile, profile)
 			end,
 			group = function(self, gs, groupID)
-				if not gs.GUID then
+				if gs.GUID == "" then
 					self:runGUIDUpgrade(self.guidupgrade_group, gs, groupID)
-				end
-			end,
-			icon = function(self, ics, groupID, iconID)
-				if not ics.GUID then
-					self:runGUIDUpgrade(self.guidupgrade_icon, ics, groupID, iconID)
 				end
 			end,
 		},
@@ -2066,6 +2073,12 @@ function TMW:GetBaseUpgrades()			-- upgrade functions
 						TMW.db.profile[oldKey] = nil
 					end
 				end
+
+				TMW.db.profile.PRESENTColor = nil
+				TMW.db.profile.ABSENTColor = nil
+
+				TMW.db.profile.Color = nil
+				TMW.db.profile.UnColor = nil
 
 			end,
 		},
@@ -2740,10 +2753,6 @@ function TMW:UpgradeProfile()
 		local v = gsub(TMW.db.profile.Version, "[^%d]", "") -- remove decimals
 		v = v..strrep("0", 5-#v)	-- append zeroes to create a 5 digit number
 		TMW.db.profile.Version = tonumber(v)
-	end
-	
-	if TellMeWhenDB.Version < TELLMEWHEN_VERSIONNUMBER then
-		TMW:DoUpgrade("global", TellMeWhenDB.Version, TMW.db.global)
 	end
 	
 	if TMW.db.profile.Version < TELLMEWHEN_VERSIONNUMBER then

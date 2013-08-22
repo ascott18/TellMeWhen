@@ -187,9 +187,8 @@ IconDragger:RegisterIconDragHandler(2,	-- Copy
 		
 		IconDragger.desticon.group:GetSettings().Icons[IconDragger.desticon:GetID()] = TMW:CopyWithMetatable(srcics)
 
-		-- Generate a new GUID for the copied icon
+		-- Erase the GUID from the new icon.
 		IconDragger.desticon:GetSettings().GUID = nil
-		IconDragger.desticon:GetGUID(true)
 
 		-- preserve buff/debuff/other types textures
 		IconDragger.desticon:SetInfo("texture", IconDragger.srcicon.attributes.texture)

@@ -1363,24 +1363,6 @@ function TMW:Group_Add(view)
 end
 
 function TMW:Group_Swap(groupID1, groupID2)
-	local source = "TellMeWhen_Group" .. groupID1
-	local destination = "TellMeWhen_Group" .. "TEMP"
-
-	TMW:ReconcileData(source, destination)
-	TMW:ReconcileData(source, destination, source .. "_Icon", destination .. "_Icon")
-
-	local source = "TellMeWhen_Group" .. groupID2
-	local destination = "TellMeWhen_Group" .. groupID1
-
-	TMW:ReconcileData(source, destination)
-	TMW:ReconcileData(source, destination, source .. "_Icon", destination .. "_Icon")
-	
-	
-	local source = "TellMeWhen_Group" .. "TEMP"
-	local destination = "TellMeWhen_Group" .. groupID2
-	TMW:ReconcileData(source, destination)
-	TMW:ReconcileData(source, destination, source .. "_Icon", destination .. "_Icon")
-
 	local Groups = TMW.db.profile.Groups
 	Groups[groupID1], Groups[groupID2] = Groups[groupID2], Groups[groupID1]
     
@@ -1947,10 +1929,10 @@ function IE:OnUpdate()
 	if tab.doesGroup and tab.doesIcon then
 		-- For IconEditor tabs that can configure icons
 
-		local GUID = icon:GetGUID(true)
+		local GUID = icon:GetGUID()
 
 		local append = ""
-		if TMW.debug then
+		if TMW.debug and GUID then
 			append = " " .. GUID:gsub("%%", "%%%%")
 		end
 		self.Header:SetFormattedText(titlePrepend .. " - " .. L["GROUPICON"] .. append, groupName, iconID)
@@ -2182,9 +2164,6 @@ function IE:Load(isRefresh, icon, isHistoryChange)
 		CI.i = icon:GetID()
 		CI.g = icon.group:GetID()
 		CI.ic = icon
-
-		-- Generate a GUID for the icon if it doesn't already have one.
-		icon:GetGUID(true)
 
 		if IE.history[#IE.history] ~= icon and not isHistoryChange then
 			-- if we are using an old history point (i.e. we hit back a few times and then loaded a new icon),
@@ -3351,6 +3330,7 @@ IE.RapidSettings = {
 	Level = true,
 	Alpha = true,
 	UnAlpha = true,
+	GUID = true,
 }
 function IE:RegisterRapidSetting(setting)
 	IE.RapidSettings[setting] = true

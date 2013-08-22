@@ -82,11 +82,13 @@ local function TMW_ICON_DATA_CHANGED_REALALPHA(icon, event, ic, alpha, oldalpha)
 		end
 		
 		if iconEvent and icon.EventHandlersSet[iconEvent] then
-			local icName = ic:GetGUID()
+			local icGUID = ic:GetGUID()
 			
-			for _, EventSettings in TMW:InNLengthTable(icon.Events) do
-				if EventSettings.Event == iconEvent and EventSettings.Icon == icGUID then
-					icon:QueueEvent(EventSettings)
+			if icGUID then
+				for _, EventSettings in TMW:InNLengthTable(icon.Events) do
+					if EventSettings.Event == iconEvent and EventSettings.Icon == icGUID then
+						icon:QueueEvent(EventSettings)
+					end
 				end
 			end
 		end

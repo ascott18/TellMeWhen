@@ -267,8 +267,8 @@ function EVENTS:LoadEventSettings()
 	EventSettingsContainer.PassingCndt	 		:SetChecked(Settings.PassingCndt)
 	EventSettingsContainer.Value		 	 	:SetText(Settings.Value)
 
-	TMW:SetUIDropdownIconText(EventSettingsContainer.Icon, Settings.Icon, L["CHOOSEICON"])
-	EventSettingsContainer.Icon.IconPreview:SetIcon(_G[Settings.Icon])
+	TMW:SetUIDropdownGUIDText(EventSettingsContainer.Icon, Settings.Icon, L["CHOOSEICON"])
+	EventSettingsContainer.Icon.IconPreview:SetIcon(TMW.GUIDToOwner[Settings.Icon])
 
 	--show settings as needed
 	for setting, frame in pairs(EventSettingsContainer) do
@@ -477,9 +477,10 @@ function EVENTS.IconMenu_DropDown(frame)
 				info.tooltipText = format(L["GROUPICON"], TMW:GetGroupName(groupID, groupID, 1), iconID) .. "\r\n" .. tooltip
 				info.tooltipOnButton = true
 
-				info.value = icon:GetGUID()
+				info.value = icon
 				info.arg1 = frame
 				info.func = EVENTS.IconMenu_DropDown_OnClick
+				info.checked = EVENTS:GetEventSettings().Icon == icon:GetGUID()
 
 				info.tCoordLeft = 0.07
 				info.tCoordRight = 0.93
@@ -507,14 +508,13 @@ function EVENTS.IconMenu_DropDown_OnClick(button, frame)
 	CloseDropDownMenus()
 
 
-	local GUID = button.value
-	local icon = TMW.GUIDToOwner[GUID]
+	local icon = button.value
+	local GUID = icon:GetGUID(true)
 
 	TMW:SetUIDropdownGUIDText(frame, GUID, L["CHOOSEICON"])
 	frame.IconPreview:SetIcon(icon)
 
-
-	EVENTS:GetEventSettings().Icon = button.value
+	EVENTS:GetEventSettings().Icon = GUID
 end
 
 function EVENTS.AddEvent_Dropdown(frame)

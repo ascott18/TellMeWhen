@@ -373,8 +373,12 @@ function CNDT:IconMenu_DropDown()
 				info.tooltipOnButton = true
 
 				info.arg1 = self
-				info.value = icon:GetGUID()
+				info.value = icon
 				info.func = CNDT.IconMenu_DropDown_OnClick
+
+				local group = self:GetParent()
+				local condition = group:GetConditionSettings()
+				info.checked = condition.Icon == icon:GetGUID()
 
 				info.tCoordLeft = 0.07
 				info.tCoordRight = 0.93
@@ -401,15 +405,15 @@ end
 function CNDT:IconMenu_DropDown_OnClick(frame)
 	CloseDropDownMenus()
 	
-	local GUID = self.value
-	local icon = TMW.GUIDToOwner[GUID]
+	local icon = self.value
+	local GUID = icon:GetGUID(true)
 	
 	TMW:SetUIDropdownGUIDText(frame, GUID, L["CHOOSEICON"])
 	frame.IconPreview:SetIcon(icon)
 
 	local group = UIDROPDOWNMENU_OPEN_MENU:GetParent()
 	local condition = group:GetConditionSettings()
-	condition.Icon = self.value
+	condition.Icon = GUID
 end
 
 

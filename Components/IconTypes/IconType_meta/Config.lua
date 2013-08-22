@@ -193,7 +193,7 @@ function ME:IconMenu()
 end
 
 function ME:IconMenuOnClick(frame)
-	local GUID = self.value:GetGUID()
+	local GUID = self.value:GetGUID(true)
 
 	assert(GUID)
 
