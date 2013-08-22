@@ -120,7 +120,7 @@ TMW.COMMON = {}
 
 TMW.CONST = {
 	CHAT_TYPE_INSTANCE_CHAT = "INSTANCE_CHAT",
-	GUID_SIZE = 10,
+	GUID_SIZE = 12,
 }
 
 TMW.IconsToUpdate, TMW.GroupsToUpdate = {}, {}
@@ -1005,93 +1005,6 @@ do	-- TMW.safecall
 end
 local safecall = TMW.safecall
 
-do -- TMW.generateGUID(length)
-
-	-- Create a table with 100 characters that will be used to create GUIDs
-	local chars = {}
-	--[[for charbyte = 17, 21 do
-		chars[#chars + 1] = strchar(charbyte)
-	end]]
-	--for charbyte = 28, 125 do
-	for charbyte = 33, 125 do
-		--[[
-		 94 (^ carat) excluded because AceSerializer uses it.
-		 96 (` tilde) excluded because it gets screwed up on CurseForge
-		 124 (| pipe) excluded because wow crashes when it is followed by a number
-			(forms an invalid escape sequence) and outputted
-		]]
-		if  charbyte ~= 94
-		and charbyte ~= 96
-		and charbyte ~= 124
-		then
-			chars[#chars + 1] = strchar(charbyte)
-		end
-	end
-	for charbyte = 161, 161 + 100 - #chars - 1 do
-		chars[#chars + 1] = "\194" .. strchar(charbyte)
-	end
-
-
-	assert(#chars >= 100, "chars table for TMW.generateGUID is incomplete!")
-
-	function TMW.generateGUID(length)
-		assert(length and length >= 9, "GUID length must be at least 9")
-		
-		-- the first 8.5 characters are based off of the current time.
-		-- anything after the first 8.5 are random.
-		
-
-		-- Local collisions at length 8 are nearly impossible
-		-- (an insanely fast processor would be needed to make GUIDs fast enough so that two could collide)
-
-		-- Local collisions at length 9 are absolutely impossible
-
-
-
-		-- _G.time is used to get UNIX time. debugprofilestop is used to add millisecond precision,
-		-- although it is important to note that the milliseconds have nothing to do with UNIX time.
-		local time = debugprofilestop() / 1000
-		local currentTime = _G.time() + (time - floor(time))
-		currentTime = format("%0.7f", currentTime)
-		currentTime = gsub(currentTime, "%.", "")
-
-		while strlenutf8(currentTime) < length * 2 do
-			currentTime = currentTime .. random(0, 9)
-		end
-
-		local GUID = ""
-		for digits in gmatch(currentTime, "(..)") do
-
-			GUID = GUID .. chars[tonumber(digits) + 1]
-		end
-		
-		return GUID -- strsub(GUID, 1, length)
-	end
-
-	--[[
-	local charsLookup = {}
-	for k, v in pairs(chars) do
-		charsLookup[v] = k
-	end
-
-	function TMW.timeFromGUID(guid)
-		local time = ""
-		for char in gmatch(guid:sub(1, 10), "(.)") do
-			time = time .. charsLookup[char] - 1
-		end
-
-		return tonumber(time)
-	end
-	--]]
-end
-
-function TMW:GenerateGUID(type, length)
-	return type .. ":" .. TMW.generateGUID(length)
-end
-
-function TMW:ParseGUID(GUID)
-	return strmatch(GUID, "([a-z]+):(.*)")
-end
 
 
 
@@ -1816,6 +1729,96 @@ end
 
 TMW.PreviousGUIDToOwner = {}
 TMW.GUIDToOwner = {}
+
+do -- TMW.generateGUID(length)
+
+	-- Create a table with 100 characters that will be used to create GUIDs
+	local chars = {}
+	--[[for charbyte = 17, 21 do
+		chars[#chars + 1] = strchar(charbyte)
+	end]]
+	--for charbyte = 28, 125 do
+	for charbyte = 33, 125 do
+		--[[
+		 58 (: colon) excluded for potential future use (it is already used as a separator in the GUID syntax, it may be useful later on)
+		 94 (^ carat) excluded because AceSerializer uses it.
+		 96 (` tilde) excluded because it gets screwed up on CurseForge
+		 124 (| pipe) excluded because wow crashes when it is followed by a number
+			(forms an invalid escape sequence) and outputted
+		]]
+		if  charbyte ~= 58
+		and charbyte ~= 94
+		and charbyte ~= 96
+		and charbyte ~= 124
+		then
+			chars[#chars + 1] = strchar(charbyte)
+		end
+	end
+	for charbyte = 161, 161 + 100 - #chars - 1 do
+		chars[#chars + 1] = "\194" .. strchar(charbyte)
+	end
+
+
+	assert(#chars >= 100, "chars table for TMW.generateGUID is incomplete!")
+
+	function TMW.generateGUID(length)
+		assert(length and length >= 9, "GUID length must be at least 9")
+		
+		-- the first 8.5 characters are based off of the current time.
+		-- anything after the first 8.5 are random.
+		
+
+		-- Local collisions at length 8 are nearly impossible
+		-- (an insanely fast processor would be needed to make GUIDs fast enough so that two could collide)
+
+		-- Local collisions at length 9 are absolutely impossible
+
+
+
+		-- _G.time is used to get UNIX time. debugprofilestop is used to add millisecond precision,
+		-- although it is important to note that the milliseconds have nothing to do with UNIX time.
+		local time = debugprofilestop() / 1000
+		local currentTime = _G.time() + (time - floor(time))
+		currentTime = format("%0.7f", currentTime)
+		currentTime = gsub(currentTime, "%.", "")
+
+		while strlenutf8(currentTime) < length * 2 do
+			currentTime = currentTime .. random(0, 9)
+		end
+
+		local GUID = ""
+		for digits in gmatch(currentTime, "(..)") do
+
+			GUID = GUID .. chars[tonumber(digits) + 1]
+		end
+		
+		return GUID -- strsub(GUID, 1, length)
+	end
+
+	--[[
+	local charsLookup = {}
+	for k, v in pairs(chars) do
+		charsLookup[v] = k
+	end
+
+	function TMW.timeFromGUID(guid)
+		local time = ""
+		for char in gmatch(guid:sub(1, 10), "(.)") do
+			time = time .. charsLookup[char] - 1
+		end
+
+		return tonumber(time)
+	end
+	--]]
+end
+
+function TMW:GenerateGUID(type, length)
+	return "TMW:" .. type .. ":" .. TMW.generateGUID(length)
+end
+
+function TMW:ParseGUID(GUID)
+	return strmatch(GUID, "TMW:([a-z]+):(.*)")
+end
 
 function TMW:DeclareDataOwner(GUID, object)
 	TMW.GUIDToOwner[GUID] = object
