@@ -140,7 +140,7 @@ function ME:IconMenu()
 
 				info.text = TMW:GetGroupName(groupID, groupID --[[, 1]])
 
-				info.value = group:GetGUID()
+				info.value = group
 
 				if currentGroupView ~= group:GetSettings().View then
 					info.disabled = true
@@ -157,6 +157,7 @@ function ME:IconMenu()
 				
 				info.func = ME.IconMenuOnClick
 				info.arg1 = self
+				info.checked = CI.ics.Icons[self:GetParent():GetID()] == group:GetGUID()
 
 				UIDropDownMenu_AddButton(info, UIDROPDOWNMENU_MENU_LEVEL)
 			end
@@ -175,9 +176,10 @@ function ME:IconMenu()
 				info.tooltipOnButton = true
 				info.tooltipText = L["GROUPICON"]:format(TMW:GetGroupName(groupID, groupID, 1), iconID) .. "\r\n" .. tooltip
 
-				info.value = icon:GetGUID(true)
+				info.value = icon
 				info.func = ME.IconMenuOnClick
 				info.arg1 = self
+				info.checked = CI.ics.Icons[self:GetParent():GetID()] == icon:GetGUID()
 
 				info.tCoordLeft = 0.07
 				info.tCoordRight = 0.93
@@ -191,7 +193,9 @@ function ME:IconMenu()
 end
 
 function ME:IconMenuOnClick(frame)
-	local GUID = self.value
+	local GUID = self.value:GetGUID()
+
+	assert(GUID)
 
 	CI.ics.Icons[frame:GetParent():GetID()] = GUID
 
