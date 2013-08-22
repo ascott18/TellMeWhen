@@ -187,6 +187,10 @@ IconDragger:RegisterIconDragHandler(2,	-- Copy
 		
 		IconDragger.desticon.group:GetSettings().Icons[IconDragger.desticon:GetID()] = TMW:CopyWithMetatable(srcics)
 
+		-- Generate a new GUID for the copied icon
+		IconDragger.desticon:GetSettings().GUID = nil
+		IconDragger.desticon:GetGUID(true)
+
 		-- preserve buff/debuff/other types textures
 		IconDragger.desticon:SetInfo("texture", IconDragger.srcicon.attributes.texture)
 	end
@@ -218,8 +222,6 @@ IconDragger:RegisterIconDragHandler(3,	-- Swap
 		IconDragger.srcicon:SetInfo("texture", desttex)
 
 		local srcicon, desticon = tostring(IconDragger.srcicon), tostring(IconDragger.desticon)
-
-		TMW:ReconcileData(srcicon, desticon, srcicon .. "$", desticon .. "$", true)
 	end
 )
 
@@ -244,7 +246,7 @@ IconDragger:RegisterIconDragHandler(40,	-- Split
 
 		-- copy the source group.
 		-- pcall so that, in the rare event of some unforseen error, we don't lose the user's settings (they haven't yet been restored)
-		local success, err = pcall(TMW.CopyTableInPlaceWithMeta, TMW, TMW.db.profile.Groups[IconDragger.srcicon.group:GetID()], TMW.db.profile.Groups[groupID])
+		local success, err = pcall(TMW.CopyTableInPlaceWithMeta, TMW, IconDragger.srcicon.group:GetSettings(), group:GetSettings())
 
 		-- restore the icon data of the source group
 		TMW.db.profile.Groups[IconDragger.srcicon.group:GetID()].Icons = SOURCE_ICONS
@@ -253,7 +255,11 @@ IconDragger:RegisterIconDragHandler(40,	-- Split
 		assert(success, err)
 
 
-		local gs = TMW.db.profile.Groups[groupID]
+		local gs = group:GetSettings()
+
+		-- Generate a new GUID for the new group.
+		gs.GUID = nil
+		group:GetGUID()
 
 		-- group tweaks
 		gs.Rows = 1
@@ -266,7 +272,7 @@ IconDragger:RegisterIconDragHandler(40,	-- Split
 		
 		p.relativeTo = "UIParent"
 		
-		TMW[groupID]:Setup()
+		group:Setup()
 
 		-- move the actual icon settings
 		gs.Icons[1] = IconDragger.srcicon.group.Icons[IconDragger.srcicon:GetID()]
@@ -277,11 +283,7 @@ IconDragger:RegisterIconDragHandler(40,	-- Split
 			group[1]:SetInfo("texture", IconDragger.srcicon.attributes.texture)
 		end
 
-		local srcicon, desticon = tostring(IconDragger.srcicon), tostring("TellMeWhen_Group" .. groupID .. "_Icon1")
-
-		TMW:ReconcileData(srcicon, desticon)
-
-		TMW[groupID]:Setup()
+		group:Setup()
 	end
 )
 

@@ -1339,8 +1339,10 @@ end
 
 function TMW:Group_Add(view)
 	local groupID = TMW.db.profile.NumGroups + 1
+
 	TMW.db.profile.NumGroups = groupID
 	TMW.db.profile.Groups[groupID].Enabled = true
+
 	if view then
 		TMW.db.profile.Groups[groupID].View = view
 		
@@ -1349,11 +1351,15 @@ function TMW:Group_Add(view)
 			viewData:Group_OnCreate(TMW.db.profile.Groups[groupID])
 		end
 	end
+
 	TMW:Update()
+
+	local group = TMW[groupID]
 
 	TMW:CompileOptions()
 	IE:NotifyChanges("groups", "#Group " .. groupID)
-	return groupID, TMW[groupID]
+
+	return group
 end
 
 function TMW:Group_Swap(groupID1, groupID2)
@@ -1942,7 +1948,7 @@ function IE:OnUpdate()
 		-- For IconEditor tabs that can configure icons
 
 		local GUID = icon:GetGUID(true)
-		
+
 		local append = ""
 		if TMW.debug then
 			append = " " .. GUID:gsub("%%", "%%%%")

@@ -229,7 +229,7 @@ local NUM_GROUPS_PER_SUBMENU = 10
 
 function group:Import_ImportData(editbox, data, version, noOverwrite, oldgroupID, destgroupID)
 	if noOverwrite then
-		destgroupID = TMW:Group_Add()
+		destgroupID = TMW:Group_Add().ID
 	end
 	TMW.db.profile.Groups[destgroupID] = nil -- restore defaults, table recreated when passed in to CTIPWM
 	local gs = TMW.db.profile.Groups[destgroupID]
