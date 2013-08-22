@@ -18,8 +18,6 @@ if not _G.C_LossOfControl then
 	return
 end
 
-local strlower =
-	  strlower
 local GetSpellTexture, GetSpellLink, GetSpellInfo =
 	  GetSpellTexture, GetSpellLink, GetSpellInfo
 local GetEventInfo = C_LossOfControl.GetEventInfo

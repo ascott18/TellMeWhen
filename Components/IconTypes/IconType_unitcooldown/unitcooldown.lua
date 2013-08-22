@@ -18,8 +18,8 @@ local TMW = TMW
 if not TMW then return end
 local L = TMW.L
 
-local strlower, type, wipe, pairs =
-	  strlower, type, wipe, pairs
+local type, wipe, pairs =
+	  type, wipe, pairs
 local UnitGUID, IsInInstance =
 	  UnitGUID, IsInInstance
 local print = TMW.print

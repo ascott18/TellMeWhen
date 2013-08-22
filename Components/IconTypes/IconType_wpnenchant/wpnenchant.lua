@@ -15,8 +15,8 @@ if not TMW then return end
 local L = TMW.L
 
 local WpnEnchDurs
-local _G, strlower, strmatch, strtrim, select, floor, ceil =
-	  _G, strlower, strmatch, strtrim, select, floor, ceil
+local _G, strmatch, strtrim, select, floor, ceil =
+	  _G, strmatch, strtrim, select, floor, ceil
 local GetInventoryItemTexture, GetInventorySlotInfo, GetWeaponEnchantInfo =
 	  GetInventoryItemTexture, GetInventorySlotInfo, GetWeaponEnchantInfo
 local print = TMW.print

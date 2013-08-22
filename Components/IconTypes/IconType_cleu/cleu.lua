@@ -15,8 +15,8 @@ if not TMW then return end
 local L = TMW.L
 
 local _G = _G
-local strlower, bit_band =
-	  strlower, bit.band
+local bit_band =
+	  bit.band
 local UnitGUID, GetSpellTexture, GetItemIcon =
 	  UnitGUID, GetSpellTexture, GetItemIcon
 local print = TMW.print

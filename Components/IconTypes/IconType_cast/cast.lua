@@ -14,8 +14,8 @@ local TMW = TMW
 if not TMW then return end
 local L = TMW.L
 
-local ipairs, strlower =
-	  ipairs, strlower
+local ipairs =
+	  ipairs
 local GetSpellLink, GetSpellInfo, UnitCastingInfo, UnitChannelInfo, UnitExists, UnitGUID =
 	  GetSpellLink, GetSpellInfo, UnitCastingInfo, UnitChannelInfo, UnitExists, UnitGUID
 local print = TMW.print

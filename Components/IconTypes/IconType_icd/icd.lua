@@ -14,8 +14,6 @@ local TMW = TMW
 if not TMW then return end
 local L = TMW.L
 
-local strlower =
-	  strlower
 local print = TMW.print
 local SpellTextures = TMW.SpellTextures
 

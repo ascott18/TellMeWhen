@@ -16,8 +16,6 @@ local L = TMW.L
 
 local _, pclass = UnitClass("Player")
 
-local strlower =
-	  strlower
 local GetTotemInfo, GetSpellTexture, GetSpellLink, GetSpellInfo =
 	  GetTotemInfo, GetSpellTexture, GetSpellLink, GetSpellInfo
 local print = TMW.print

@@ -15,8 +15,8 @@ if not TMW then return end
 local L = TMW.L
 
 local EFF_THR
-local tonumber, strlower =
-	  tonumber, strlower
+local tonumber =
+	  tonumber
 local UnitAura, UnitExists, UnitIsDeadOrGhost =
 	  TMW.UnitAura, UnitExists, UnitIsDeadOrGhost
 local print = TMW.print

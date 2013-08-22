@@ -14,8 +14,6 @@ local TMW = TMW
 if not TMW then return end
 local L = TMW.L
 
-local strlower =
-	  strlower
 local UnitGUID, GetGlyphSocketInfo, GetTotemInfo =
 	  UnitGUID, GetGlyphSocketInfo, GetTotemInfo
 local print = TMW.print

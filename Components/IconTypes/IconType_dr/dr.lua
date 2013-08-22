@@ -14,8 +14,8 @@ local TMW = TMW
 if not TMW then return end
 local L = TMW.L
 
-local strlower, gsub, bitband =
-	  strlower, gsub, bit.band
+local gsub, bitband =
+	  gsub, bit.band
 local UnitGUID =
 	  UnitGUID
 local print = TMW.print
