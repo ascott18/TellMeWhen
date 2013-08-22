@@ -236,20 +236,24 @@ IconDragger:RegisterIconDragHandler(40,	-- Split
 		end
 	end,
 	function(IconDragger)
-		local groupID, group = TMW:Group_Add()
+		local group = TMW:Group_Add()
 
 
 		-- back up the icon data of the source group
 		local SOURCE_ICONS = TMW.db.profile.Groups[IconDragger.srcicon.group:GetID()].Icons
-		-- nullify it (we don't want to copy it)
-		TMW.db.profile.Groups[IconDragger.srcicon.group:GetID()].Icons = nil
+
 
 		-- copy the source group.
 		-- pcall so that, in the rare event of some unforseen error, we don't lose the user's settings (they haven't yet been restored)
-		local success, err = pcall(TMW.CopyTableInPlaceWithMeta, TMW, IconDragger.srcicon.group:GetSettings(), group:GetSettings())
+		local success, err = pcall(function()
+			-- nullify it (we don't want to copy it)
+			IconDragger.srcicon.group:GetSettings().Icons = nil
+		
+			TMW:CopyTableInPlaceWithMeta(IconDragger.srcicon.group:GetSettings(), group:GetSettings())
+		end)
 
 		-- restore the icon data of the source group
-		TMW.db.profile.Groups[IconDragger.srcicon.group:GetID()].Icons = SOURCE_ICONS
+		IconDragger.srcicon.group:GetSettings().Icons = SOURCE_ICONS
 		
 		-- now it is safe to error since we restored the old settings
 		assert(success, err)
