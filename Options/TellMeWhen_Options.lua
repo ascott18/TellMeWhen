@@ -2234,6 +2234,8 @@ function IE:Reset()
 	
 	IE:SaveSettings() -- this is here just to clear the focus of editboxes, not to actually save things
 	
+	CI.ic:DisableIcon()
+	
 	TMW.db.profile.Groups[groupID].Icons[iconID] = nil
 	
 	TMW:Fire("TMW_ICON_SETTINGS_RESET", CI.ic)

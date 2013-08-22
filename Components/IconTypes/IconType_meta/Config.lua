@@ -138,7 +138,7 @@ function ME:IconMenu()
 			if group:ShouldUpdateIcons() then
 				local info = UIDropDownMenu_CreateInfo()
 
-				info.text = TMW:GetGroupName(groupID, groupID --[[, 1]])
+				info.text = group:GetGroupName()
 
 				info.value = group
 
@@ -174,7 +174,7 @@ function ME:IconMenu()
 				info.text = textshort
 				info.tooltipTitle = text
 				info.tooltipOnButton = true
-				info.tooltipText = L["GROUPICON"]:format(TMW:GetGroupName(groupID, groupID, 1), iconID) .. "\r\n" .. tooltip
+				info.tooltipText = L["GROUPICON"]:format(icon.group:GetGroupName(1), iconID) .. "\r\n" .. tooltip
 
 				info.value = icon
 				info.func = ME.IconMenuOnClick
