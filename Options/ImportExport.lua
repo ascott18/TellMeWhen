@@ -235,6 +235,12 @@ function group:Import_ImportData(editbox, data, version, noOverwrite, oldgroupID
 	local gs = TMW.db.profile.Groups[destgroupID]
 	TMW:CopyTableInPlaceWithMeta(data, gs, true)
 
+	--TODO: fix importing from old pre-GUID groups (the groupID passed into DoUpgrade here is wrong - it should be oldgroupID.)
+	-- make sure that importing groups from before the groupID was included still works (if that was ever the case - maybe it wasn't?)
+	-- also make sure that old upgrade methods don't use the groupID given here to access the settings table.
+
+	-- might want to consider adding a temporary value to the group settings table that will be used by the 70001 upgrade process to 
+	-- determine the old group name instead of relying on the groupID that gets passed to DoUpgrade.
 	if version then
 		if version > TELLMEWHEN_VERSIONNUMBER then
 			TMW:Print(L["FROMNEWERVERSION"])
