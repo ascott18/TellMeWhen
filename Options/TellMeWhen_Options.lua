@@ -978,7 +978,7 @@ function TMW:CompileOptions()
 
 	if TMW:AssertOptionsInitialized() then
 		return
-
+	end
 
 	if not TMW.OptionsTable then
 		TMW.OptionsTable = {
