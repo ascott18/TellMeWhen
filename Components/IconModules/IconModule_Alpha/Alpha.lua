@@ -49,7 +49,7 @@ Alpha:RegisterEventHandlerData("Animations", 40, "ICONALPHAFLASH", {
 		"Fade",
 	},
 
-	Play = function(icon, eventSettings, IconModule_Alpha)
+	Play = function(icon, eventSettings)
 		local Duration = 0
 		local Period = eventSettings.Period
 		if eventSettings.Infinite then
@@ -71,13 +71,11 @@ Alpha:RegisterEventHandlerData("Animations", 40, "ICONALPHAFLASH", {
 
 			Period = Period,
 			Fade = eventSettings.Fade,
-
-			IconModule_Alpha = IconModule_Alpha,
 		}
 	end,
 
 	OnUpdate = function(icon, table)
-		local IconModule_Alpha = table.IconModule_Alpha
+		local IconModule_Alpha = icon:GetModuleOrModuleChild("IconModule_Alpha")
 		local FlashPeriod = table.Period
 
 		local timePassed = TMW.time - table.Start
@@ -102,13 +100,13 @@ Alpha:RegisterEventHandlerData("Animations", 40, "ICONALPHAFLASH", {
 		end
 	end,
 	OnStart = function(icon, table)
-		local IconModule_Alpha = table.IconModule_Alpha
+		local IconModule_Alpha = icon:GetModuleOrModuleChild("IconModule_Alpha")
 		local FadeHandlers = IconModule_Alpha.FadeHandlers
 		
 		FadeHandlers[#FadeHandlers + 1] = "ICONALPHAFLASH"
 	end,
 	OnStop = function(icon, table)
-		local IconModule_Alpha = table.IconModule_Alpha
+		local IconModule_Alpha = icon:GetModuleOrModuleChild("IconModule_Alpha")
 		
 		if not IconModule_Alpha.FakeHidden then
 			icon:SetAlpha(icon.attributes.realAlpha)
@@ -124,19 +122,18 @@ Alpha:RegisterEventHandlerData("Animations", 50, "ICONFADE", {
 		"Duration",
 	},
 
-	Play = function(icon, eventSettings, IconModule_Alpha)
+	Play = function(icon, eventSettings)
 		icon:Animations_Start{
 			eventSettings = eventSettings,
 			Start = TMW.time,
 			Duration = eventSettings.Duration,
 
 			FadeDuration = eventSettings.Duration,
-			IconModule_Alpha = IconModule_Alpha,
 		}
 	end,
 
 	OnUpdate = function(icon, table)
-		local IconModule_Alpha = table.IconModule_Alpha
+		local IconModule_Alpha = icon:GetModuleOrModuleChild("IconModule_Alpha")
 		
 		local remaining = table.Duration - (TMW.time - table.Start)
 
@@ -151,12 +148,13 @@ Alpha:RegisterEventHandlerData("Animations", 50, "ICONFADE", {
 		end
 	end,
 	OnStart = function(icon, table)
-		local FadeHandlers = table.IconModule_Alpha.FadeHandlers
+		local IconModule_Alpha = icon:GetModuleOrModuleChild("IconModule_Alpha")
+		local FadeHandlers = IconModule_Alpha.FadeHandlers
 		
 		FadeHandlers[#FadeHandlers + 1] = "ICONFADE"
 	end,
 	OnStop = function(icon, table)
-		local IconModule_Alpha = table.IconModule_Alpha
+		local IconModule_Alpha = icon:GetModuleOrModuleChild("IconModule_Alpha")
 		
 		if not IconModule_Alpha.FakeHidden then
 			icon:SetAlpha(icon.attributes.realAlpha)

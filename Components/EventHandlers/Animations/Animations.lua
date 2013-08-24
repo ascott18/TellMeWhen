@@ -71,7 +71,7 @@ function EventHandler:HandleEvent(icon, eventSettings)
 			local eventHandlerData = NonSpecificEventHandlerData[i]
 			if eventHandlerData.animation == Animation then
 			
-				eventHandlerData.animationData.Play(icon, eventSettings, nil)
+				eventHandlerData.animationData.Play(icon, eventSettings)
 				return true
 				
 			end
@@ -86,7 +86,7 @@ function EventHandler:HandleEvent(icon, eventSettings)
 				local eventHandlerData = EventHandlerData[e]
 				if eventHandlerData.eventHandlerName == self.eventHandlerName and eventHandlerData.animation == Animation then
 		
-					eventHandlerData.animationData.Play(icon, eventSettings, IconComponent)
+					eventHandlerData.animationData.Play(icon, eventSettings)
 					return true
 			
 				end				
@@ -179,7 +179,7 @@ EventHandler:RegisterEventHandlerDataNonSpecific(10, "SCREENSHAKE", {
 		"Magnitude",
 	},
 
-	Play = function(icon, eventSettings, IconComponent)
+	Play = function(icon, eventSettings)
 		if not WorldFrame:IsProtected() or not InCombatLockdown() then
 
 			if not WorldFrame.Animations_Start then
@@ -237,7 +237,7 @@ EventHandler:RegisterEventHandlerDataNonSpecific(11, "SCREENFLASH", {
 		"Color",
 	},
 
-	Play = function(icon, eventSettings, IconComponent)
+	Play = function(icon, eventSettings)
 		local AnimationData = EventHandler.AllAnimationsByAnimation[eventSettings.Animation]
 
 		local Duration = 0
@@ -322,7 +322,7 @@ EventHandler:RegisterEventHandlerDataNonSpecific(20, "ICONSHAKE", {
 		"Magnitude",
 	},
 
-	Play = function(icon, eventSettings, IconComponent)
+	Play = function(icon, eventSettings)
 		icon:Animations_Start{
 			eventSettings = eventSettings,
 			Start = TMW.time,
@@ -364,7 +364,7 @@ EventHandler:RegisterEventHandlerDataNonSpecific(30, "ICONFLASH", {
 		"AnchorTo",
 	},
 
-	Play = function(icon, eventSettings, IconComponent)
+	Play = function(icon, eventSettings)
 		local Duration = 0
 		local Period = eventSettings.Period
 		if eventSettings.Infinite then
@@ -452,7 +452,7 @@ EventHandler:RegisterEventHandlerDataNonSpecific(70, "ICONBORDER", {
 		"AnchorTo",
 	},
 
-	Play = function(icon, eventSettings, IconComponent)
+	Play = function(icon, eventSettings)
 		local Duration = 0
 		local Period = eventSettings.Period
 		if eventSettings.Infinite then
@@ -570,7 +570,7 @@ EventHandler:RegisterEventHandlerDataNonSpecific(80, "ICONOVERLAYIMG", {
 		"AnchorTo",
 	},
 
-	Play = function(icon, eventSettings, IconComponent)
+	Play = function(icon, eventSettings)
 		local Duration = 0
 		local Period = eventSettings.Period
 		if eventSettings.Infinite then
@@ -653,7 +653,7 @@ EventHandler:RegisterEventHandlerDataNonSpecific(200, "ICONCLEAR", {
 	desc = L["ANIM_ICONCLEAR_DESC"],
 	ConfigFrames = {},
 
-	Play = function(icon, eventSettings, IconComponent)
+	Play = function(icon, eventSettings)
 		if icon:Animations_Has() then
 			for k, v in pairs(icon:Animations_Get()) do
 				-- instead of just calling :Animations_Stop() right here, set this attribute so that meta icons inheriting the animation will also stop it.

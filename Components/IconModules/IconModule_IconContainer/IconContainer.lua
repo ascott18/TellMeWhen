@@ -54,13 +54,11 @@ IconContainer:RegisterEventHandlerData("Animations", 60, "ACTVTNGLOW", {
 		"Infinite",
 	},
 
-	Play = function(icon, eventSettings, IconModule_IconContainer)
+	Play = function(icon, eventSettings)
 		icon:Animations_Start{
 			eventSettings = eventSettings,
 			Start = TMW.time,
 			Duration = eventSettings.Infinite and math.huge or eventSettings.Duration,
-
-			IconModule_IconContainer = IconModule_IconContainer,
 		}
 	end,
 
@@ -70,15 +68,18 @@ IconContainer:RegisterEventHandlerData("Animations", 60, "ACTVTNGLOW", {
 		end
 	end,
 	OnStart = function(icon, table)
-		local container = table.IconModule_IconContainer.container
+		local IconModule_IconContainer = icon:GetModuleOrModuleChild("IconModule_IconContainer")
+		local container = IconModule_IconContainer.container
 		
 		ActionButton_ShowOverlayGlow(container)
 		
 		-- overlay is a field created by ActionButton_ShowOverlayGlow
 		container.overlay:SetFrameLevel(icon:GetFrameLevel() + 3)
 	end,
-	OnStop = function(icon, table)		
-		ActionButton_HideOverlayGlow(table.IconModule_IconContainer.container)
+	OnStop = function(icon, table)
+		local IconModule_IconContainer = icon:GetModuleOrModuleChild("IconModule_IconContainer")
+		
+		ActionButton_HideOverlayGlow(IconModule_IconContainer.container)
 	end,
 })
 
