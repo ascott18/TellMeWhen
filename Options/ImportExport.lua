@@ -1,12 +1,26 @@
-﻿local TMW = TMW
+﻿-- --------------------
+-- TellMeWhen
+-- Originally by Nephthys of Hyjal <lieandswell@yahoo.com>
+
+-- Other contributions by:
+--		Sweetmms of Blackrock, Oozebull of Twisting Nether, Oodyboo of Mug'thol,
+--		Banjankri of Blackrock, Predeter of Proudmoore, Xenyr of Aszune
+
+-- Currently maintained by
+-- Cybeloras of Aerie Peak/Detheroc/Mal'Ganis
+-- --------------------
+
+
 if not TMW then return end
+
+local TMW = TMW
+local L = TMW.L
+local print = TMW.print
 
 -- GLOBALS: TELLMEWHEN_VERSIONNUMBER
 -- GLOBALS: UIDROPDOWNMENU_MENU_LEVEL, UIDROPDOWNMENU_MENU_VALUE
 -- GLOBALS: UIDropDownMenu_AddButton, UIDropDownMenu_CreateInfo, CloseDropDownMenus
 
-local print = TMW.print
-local L = TMW.L
 local get = TMW.get
 
 local tonumber, tostring, type, pairs, ipairs, tinsert, tremove, sort, wipe, next, rawget =
