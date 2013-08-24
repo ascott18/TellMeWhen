@@ -1920,6 +1920,14 @@ function TMW:GetBaseUpgrades()			-- upgrade functions
 				local GUID = TMW:GenerateGUID("group", TMW.CONST.GUID_SIZE)
 				gs.GUID = GUID
 
+				-- This will be set when importing a group from an external source.
+				-- The purpose is to help maintain icon references between icons in the same group
+				-- (this functionality used to be preformed by TMW:ReconcileData())
+				if type(gs.__UPGRADEHELPER_OLDGROUPID) == "number" then
+					groupID = gs.__UPGRADEHELPER_OLDGROUPID
+				end
+				gs.__UPGRADEHELPER_OLDGROUPID = nil
+
 				GUIDmap["TellMeWhen_Group" .. groupID] = {"group", gs}
 
 				for iconID, ics in pairs(gs.Icons) do
