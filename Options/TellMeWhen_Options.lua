@@ -975,6 +975,11 @@ end
 
 ---------- Options Table Compilation ----------
 function TMW:CompileOptions()
+
+	if TMW:AssertOptionsInitialized() then
+		return
+
+
 	if not TMW.OptionsTable then
 		TMW.OptionsTable = {
 			name = "TellMeWhen v" .. TELLMEWHEN_VERSION_FULL,
@@ -1238,6 +1243,15 @@ function TMW:CompileOptions()
 	end
 	
 	if not TMW.AddedToBlizz then
+		-- GLOBALS: INTERFACEOPTIONS_ADDONCATEGORIES, InterfaceAddOnsList_Update
+		for k, v in pairs(INTERFACEOPTIONS_ADDONCATEGORIES) do
+			if v.name == "TellMeWhen" and not v.obj then
+				tremove(INTERFACEOPTIONS_ADDONCATEGORIES, k)
+				InterfaceAddOnsList_Update()
+				break
+			end
+		end
+
 		TMW.AddedToBlizz = LibStub("AceConfigDialog-3.0"):AddToBlizOptions("TMW Options", "TellMeWhen")
 		
 		if TMW.AddedToBlizz and not TMW.ALLOW_LOCKDOWN_CONFIG then
@@ -1351,7 +1365,37 @@ IE.CONST = {
 }
 
 function IE:OnInitialize()
-	
+	-- if the file IS required for gross functionality
+	if not TMW.Classes then
+		-- GLOBALS: StaticPopupDialogs, StaticPopup_Show, EXIT_GAME, CANCEL, ForceQuit
+		StaticPopupDialogs["TMWOPT_RESTARTNEEDED"] = {
+			text = L["ERROR_MISSINGFILE_OPT"], 
+			button1 = EXIT_GAME,
+			button2 = CANCEL,
+			OnAccept = ForceQuit,
+			timeout = 0,
+			showAlert = true,
+			whileDead = true,
+			preferredIndex = 3, -- http://forums.wowace.com/showthread.php?p=320956
+		}
+		StaticPopup_Show("TMWOPT_RESTARTNEEDED", TELLMEWHEN_VERSION_FULL, "path/to/file.lua") -- arg3 could also be L["ERROR_MISSINGFILE_REQFILE"]
+		return
+
+	-- if the file is NOT required for gross functionality
+	elseif not TMW.Classes.IconEditor_Resizer_ScaleX_SizeY then
+		StaticPopupDialogs["TMWOPT_RESTARTNEEDED"] = {
+			text = L["ERROR_MISSINGFILE_OPT_NOREQ"], 
+			button1 = EXIT_GAME,
+			button2 = CANCEL,
+			OnAccept = ForceQuit,
+			timeout = 0,
+			showAlert = true,
+			whileDead = true,
+			preferredIndex = 3, -- http://forums.wowace.com/showthread.php?p=320956
+		}
+		StaticPopup_Show("TMWOPT_RESTARTNEEDED", TELLMEWHEN_VERSION_FULL, "TellMeWhen/Options/IconEditor_Resizer_ScaleX_SizeY.lua") -- arg3 could also be L["ERROR_MISSINGFILE_REQFILE"]
+	end
+
 	TMW:Fire("TMW_OPTIONS_LOADING")
 	TMW:UnregisterAllCallbacks("TMW_OPTIONS_LOADING")
 
@@ -1363,7 +1407,7 @@ function IE:OnInitialize()
 
 
 	hooksecurefunc("PickupSpellBookItem", function(...) IE.DraggingInfo = {...} end)
-	WorldFrame:HookScript("OnMouseDown", function() -- this contains other bug fix stuff too
+	WorldFrame:HookScript("OnMouseDown", function()
 		IE.DraggingInfo = nil
 	end)
 	hooksecurefunc("ClearCursor", IE.BAR_HIDEGRID)
@@ -1386,90 +1430,16 @@ function IE:OnInitialize()
 	IE.history = {}
 	IE.historyState = 0
 
-	TMW:NewClass("IconEditor_Resizer_ScaleX_SizeY", "Resizer_Generic"){
-		tooltipText = L["RESIZE_TOOLTIP"],
-		UPD_INTV = 1,
-		tooltipTitle = L["RESIZE"],
-		
-		OnEnable = function(self)
-			self:Show()
-			self.resizeButton:HookScript("OnShow", function(self)
-				self:SetFrameLevel(self:GetParent():GetFrameLevel() + 5)
-			end)
-			TMW:TT(self.resizeButton, self.tooltipTitle, self.tooltipText, 1, 1)
-		end,
-		
-		OnDisable = function(self)
-			self:Hide()
-		end,	
-		
-		SizeUpdate = function(resizeButton)
-			--[[ Notes:
-			--	arg1 (self) is resizeButton
-				
-			--	The 'std_' that prefixes a lot of variables means that it is comparable with all other 'std_' variables.
-				More specifically, it means that it does not depend on the scale of either the parent nor UIParent.
-			]]
-			local self = resizeButton.module
-			
-			local parent = self.parent
-			local uiScale = UIParent:GetScale()
-			
-			local std_cursorX, std_cursorY = self:GetStandardizedCursorCoordinates()
-
-			
-			
-			-- Calculate and set new scale:
-			local std_newWidth = abs(self.std_oldLeft - std_cursorX)
-			local ratio_SizeChangeX = std_newWidth/self.std_oldWidth
-			local newScale = ratio_SizeChangeX*self.oldScale
-			newScale = max(0.4, newScale)
-			--[[
-				Holy shit. Look at this wicked sick dimensional analysis:
-				
-				std_newWidth	oldScale
-				------------- X	-------- = newScale
-				std_oldWidth	    1
-
-				'std_Width' cancels out 'std_Width', and 'old' cancels out 'old', leaving us with 'new' and 'Scale'!
-				I just wanted to make sure I explained why this shit works, because this code used to be confusing as hell
-				(which is why I am rewriting it right now)
-			]]
-
-			-- Set the scale that we just determined. This is critical because we have to parent:GetEffectiveScale()
-			-- in order to determine the proper width, which depends on the current scale of the parent.
-			parent:SetScale(newScale)
-			IE.db.global.EditorScale = newScale
-			
-			
-			-- We have all the data needed to find the new position of the parent.
-			-- It must be recalculated because otherwise it will scale relative to where it is anchored to,
-			-- instead of being relative to the parent's top left corner, which is what it is supposed to be.
-			-- I don't remember why this calculation here works, so lets just leave it alone.
-			-- Note that it will be re-re-calculated once we are done resizing.
-			local newX = self.oldX * self.oldScale / newScale
-			local newY = self.oldY * self.oldScale / newScale
-			parent:ClearAllPoints()
-			parent:SetPoint("TOPLEFT", UIParent, "BOTTOMLEFT", newX, newY)
-			
-			
-			-- Calculate new width
-			local std_newFrameHeight = abs(std_cursorY - self.std_oldTop)
-			local newHeight = std_newFrameHeight/parent:GetEffectiveScale()
-			newHeight = max(IE.CONST.IE_HEIGHT_MIN, newHeight)
-			newHeight = min(IE.CONST.IE_HEIGHT_MAX, newHeight)
-			
-			parent:SetHeight(newHeight)
-			IE.db.global.EditorHeight = newHeight
-		end,
-	}
-
 	IE:CreateTabs()
 	
-	self.resizer = TMW.Classes.IconEditor_Resizer_ScaleX_SizeY:New(self)
-	self.resizer:OnEnable()
-	self.resizer.resizeButton:SetScale(2)
-	
+	if TMW.Classes.IconEditor_Resizer_ScaleX_SizeY then
+		self.resizer = TMW.Classes.IconEditor_Resizer_ScaleX_SizeY:New(self)
+		self.resizer:OnEnable()
+		self.resizer.resizeButton:SetScale(2)
+	end
+
+	IE.Initialized = true
+
 	TMW:Fire("TMW_OPTIONS_LOADED")
 	TMW:UnregisterAllCallbacks("TMW_OPTIONS_LOADED")
 	IE.OnInitialize = nil

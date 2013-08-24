@@ -33,17 +33,31 @@ L["CONFIGMODE_NEVERSHOW"] = "Don't show again"
 L["IMPORT_SUCCESSFUL"] = "Import successful!"
 L["IMPORTERROR_INVALIDTYPE"] = "Attempted to import data of an unknown type. Check to see if you have the latest version of TellMeWhen installed."
 L["IMPORTERROR_FAILEDPARSE"] = "There was an error processing the string. Ensure that you copied the entire string from the source."
+
+
+L["ERROR_MISSINGFILE_REQFILE"] = "A required file"
 L["ERROR_MISSINGFILE"] = [[A complete restart of WoW is required to use TellMeWhen %s:
 
 %s was not found.
 
 Would you like to restart WoW now?]]
-L["ERROR_MISSINGFILE_REQFILE"] = "A required file"
 L["ERROR_MISSINGFILE_NOREQ"] = [[A complete restart of WoW may be required to fully use TellMeWhen %s:
 
 %s was not found.
 
 Would you like to restart WoW now?]]
+L["ERROR_MISSINGFILE_OPT"] = [[A complete restart of WoW is required to configure TellMeWhen %s:
+
+%s was not found.
+
+Would you like to restart WoW now?]]
+L["ERROR_MISSINGFILE_OPT_NOREQ"] = [[A complete restart of WoW may be required to fully configure TellMeWhen %s:
+
+%s was not found.
+
+Would you like to restart WoW now?]]
+
+
 L["ERROR_ANCHORSELF"] = "%s was trying to anchor to itself, so TellMeWhen reset it's anchor to the center of the screen to prevent catastrophic failure."
 
 L["ERROR_NO_LOCKTOGGLE_IN_LOCKDOWN"] = "Cannot unlock TellMeWhen in combat if the %q option isn't enabled (type '/tmw options')."
@@ -52,16 +66,17 @@ L["ERROR_ACTION_DENIED_IN_LOCKDOWN"] = "Cannot do that in combat if the %q optio
 L["ERROR_NOTLOADED_ERROR"] = "TellMeWhen has failed to load! Are you missing a required library?"
 L["ERROR_NOTINITIALIZED_NO_LOAD"] = "TellMeWhen_Options cannot be loaded if TellMeWhen failed to initialize!"
 L["ERROR_NOTINITIALIZED_NO_ACTION"] = "TellMeWhen cannot perform that action if the addon failed to initialize!"
+L["ERROR_NOTINITIALIZED_OPT_NO_ACTION"] = "TellMeWhen_Options cannot perform that action if the addon failed to initialize!"
 L["ERROR_NOOPTIONSLOAD_INCOMBAT"] = [[Cannot load TellMeWhen's options while in combat if the %q option isn't enabled.
 
 They will automatically be loaded when you leave combat if this window is still open.]]
-L["ERROR_NOTINITIALIZED_INTERFACEPANEL_EXPLANATION"] = [[It looks like TellMeWhen has failed to initialize.
+L["ERROR_NOTINITIALIZED_INTERFACEPANEL_EXPLANATION"] = [[It looks like TellMeWhen or TellMeWhen_Options has failed to initialize.
 
-Because of this, TellMeWhen will not be able to function, and you will not be able to configure any of its settings.
+Because of this, TellMeWhen may not be able to function, and you will not be able to configure any of its settings.
 
-If you saw a message when you logged in that said that a complete restart of WoW is required to use TMW, then please do so.
+If you saw a message that said that a complete restart of WoW is required to use TMW, then please do so.
 
-If you did not see that message, then please enable Lua errors (%s > %s > %s) if you have not already, reload your UI, and post any errors that you get that mention TellMeWhen to a ticket at http://wow.curseforge.com/addons/tellmewhen/create-ticket/
+If you did not see that message, then please enable Lua errors (%s > %s > %s) if you have not already, reload your UI, and post any errors that you get that mention TellMeWhen to a ticket at |cff7fffffhttp://wow.curseforge.com/addons/tellmewhen/create-ticket/|r
 
 I apologize for the inconvenience, but this is a rare occurrence, and any information about it that you can provide will help to get it fixed right away!
 

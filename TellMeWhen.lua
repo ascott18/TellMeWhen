@@ -2918,12 +2918,16 @@ function TMW:UpdateNormally()
 	TMW.time = time
 	LastUpdate = 0
 
-	Locked = TMW.db.profile.Locked
-	TMW.Locked = Locked
 	
-	if not Locked then
+	if not TMW.db.profile.Locked then
 		TMW:LoadOptions()
+
+		if TMW:AssertOptionsInitialized() then
+			TMW.db.profile.Locked = true
+		end
 	end
+
+	TMW.Locked = TMW.db.profile.Locked
 	
 	TMW.GUIDToOwner, TMW.PreviousGUIDToOwner = TMW.PreviousGUIDToOwner, TMW.GUIDToOwner
 	wipe(TMW.GUIDToOwner)
@@ -2943,13 +2947,12 @@ function TMW:UpdateNormally()
 	end
 
 	for groupID = 1, max(TMW.db.profile.NumGroups, #TMW) do
-		-- cant use TMW.InGroups() because groups wont exist yet on the first call of this, so they would never be able to exists
-		-- even if it shouldn't be setup (i.e. it has been deleted or the user changed profiles)
+		-- Cant use TMW.InGroups() because groups wont exist yet on the first call of this.
 		local group = TMW[groupID] or TMW.Classes.Group:New("Frame", "TellMeWhen_Group" .. groupID, TMW, "TellMeWhen_GroupTemplate", groupID)
 		TMW.safecall(group.Setup, group)
 	end
 
-	if not Locked then
+	if not TMW.Locked then
 		TMW:DoValidityCheck()
 	end
 
@@ -3145,6 +3148,16 @@ function TMW:CheckCanDoLockedAction(message)
 	return true
 end
 
+function TMW:AssertOptionsInitialized()
+	if not TMW.IE or not TMW.IE.Initialized then
+		TMW:Print(L["ERROR_NOTINITIALIZED_OPT_NO_ACTION"])
+		
+		return true
+	end
+
+	return false
+end
+
 function TMW:LockToggle()
 	if not TMW:CheckCanDoLockedAction(L["ERROR_NO_LOCKTOGGLE_IN_LOCKDOWN"]) then
 		return
@@ -3188,6 +3201,11 @@ function TMW:SlashCommand(str)
 	if cmd == "options" then
 		if TMW:CheckCanDoLockedAction() then
 			TMW:LoadOptions()
+
+			if TMW:AssertOptionsInitialized() then
+				return
+			end
+
 			LibStub("AceConfigDialog-3.0"):Open("TMW Options")
 		end
 	elseif cmd == "profile" then
@@ -3244,14 +3262,6 @@ function TMW:LoadOptions(recursed)
 			TMW:Error(err) -- non breaking error
 		end
 	else
-		-- GLOBALS: INTERFACEOPTIONS_ADDONCATEGORIES, InterfaceAddOnsList_Update
-		for k, v in pairs(INTERFACEOPTIONS_ADDONCATEGORIES) do
-			if v.name == "TellMeWhen" and not v.obj then
-				tremove(INTERFACEOPTIONS_ADDONCATEGORIES, k)
-				InterfaceAddOnsList_Update()
-				break
-			end
-		end
 		TMW:CompileOptions()
 		collectgarbage()
 	end

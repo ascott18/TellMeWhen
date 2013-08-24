@@ -65,6 +65,10 @@
 				if TMW:CheckCanDoLockedAction(false) then
 					TMW:LoadOptions()
 					
+					if TMW:AssertOptionsInitialized() then
+						return
+					end
+
 					if TMW.AddedToBlizz then
 						self.text:SetText(TMW.L["ERROR_GAMEMENU_INTERFACE_OPTIONS_FUCKED"])
 

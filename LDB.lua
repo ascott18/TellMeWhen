@@ -33,6 +33,11 @@ dataobj.OnClick = function(self, button)
 	if button == "RightButton" then
 		if TMW:CheckCanDoLockedAction() then
 			TMW:LoadOptions()
+
+			if TMW:AssertOptionsInitialized() then
+				return
+			end
+			
 			LibStub("AceConfigDialog-3.0"):Open("TMW Options")
 		end
 	else

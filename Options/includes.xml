@@ -18,4 +18,6 @@
 
 <Include file="..\Components\includes.config.xml"/>
 
+<Script file="IconEditor_Resizer_ScaleX_SizeY.lua"/>
+
 </Ui>
