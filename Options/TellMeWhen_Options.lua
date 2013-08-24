@@ -1427,6 +1427,12 @@ function IE:OnInitialize()
 	IE:SetScript("OnUpdate", IE.OnUpdate)
 	IE.iconsToUpdate = {}
 
+	TMW:RegisterCallback("TMW_GROUP_SETUP_POST", function(event, group)
+		if CI.g == group.ID then
+			IE:CheckLoadedIconIsValid()
+		end
+	end)
+
 	IE.history = {}
 	IE.historyState = 0
 
@@ -2115,15 +2121,7 @@ function IE:Load(isRefresh, icon, isHistoryChange)
 		end
 	end
 
-	local groupID, iconID = CI.g, CI.i
-	if not groupID or not iconID then
-		return
-	elseif
-		not CI.ic.group:IsValid()
-		or not CI.ic:IsInRange()
-	then
-		return IE:LoadFirstValidIcon()
-	end
+	IE:CheckLoadedIconIsValid()
 
 	-- This is really really important. The icon must be setup so that it has the correct components implemented
 	-- so that the correct config panels will be loaded and shown for the icon.
@@ -2163,6 +2161,22 @@ function IE:Load(isRefresh, icon, isHistoryChange)
 		IE:AttemptBackup(CI.ic)
 	end
 	IE:UndoRedoChanged()
+end
+
+function IE:CheckLoadedIconIsValid()
+	if not TMW.IE:IsShown() then
+		return
+	end
+
+	local groupID, iconID = CI.g, CI.i
+	if not groupID or not iconID then
+		return
+	elseif
+		not CI.ic.group:IsValid()
+		or not CI.ic:IsInRange()
+	then
+		return IE:LoadFirstValidIcon()
+	end
 end
 
 function IE:LoadFirstValidIcon()
