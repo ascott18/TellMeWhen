@@ -338,9 +338,6 @@ ConditionCategory:RegisterCondition(13,	 "ITEMRANGE", {
 	texttable = {[0] = L["INRANGE"], [1] = L["NOTINRANGE"]},
 	icon = "Interface\\Icons\\ability_hunter_snipershot",
 	tcoords = CNDT.COMMON.standardtcoords,
-	Env = {
-		IsItemInRange = IsItemInRange,
-	},
 	funcstr = function(c)
 		return 1-c.Level .. [[ == (c.Item:IsInRange(c.Unit) or 0)]]
 	end,
@@ -356,9 +353,6 @@ ConditionCategory:RegisterCondition(14,	 "ITEMINBAGS", {
 	unit = false,
 	icon = "Interface\\Icons\\inv_misc_bag_08",
 	tcoords = CNDT.COMMON.standardtcoords,
-	Env = {
-		GetItemCount = GetItemCount,
-	},
 	funcstr = [[c.Item:GetCount() c.Operator c.Level]],
 	events = function(ConditionObject, c)
 		return
@@ -377,9 +371,6 @@ ConditionCategory:RegisterCondition(15,	 "ITEMEQUIPPED", {
 	unit = false,
 	icon = "Interface\\PaperDoll\\UI-PaperDoll-Slot-MainHand",
 	tcoords = CNDT.COMMON.standardtcoords,
-	Env = {
-		IsEquippedItem = IsEquippedItem,
-	},
 	funcstr = [[c.1nil == c.Item:GetEquipped()]],
 	events = function(ConditionObject, c)
 		return

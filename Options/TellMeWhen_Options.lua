@@ -34,29 +34,17 @@ local AceDB = LibStub("AceDB-3.0")
 ---------- Upvalues ----------
 local TMW = TMW
 local L = TMW.L
-local GetSpellInfo, GetContainerItemID, GetContainerItemLink =
-	  GetSpellInfo, GetContainerItemID, GetContainerItemLink
+local GetSpellInfo =
+	  GetSpellInfo
 local tonumber, tostring, type, pairs, ipairs, tinsert, tremove, sort, wipe, next, getmetatable, setmetatable, pcall, assert, rawget, rawset, unpack, select =
 	  tonumber, tostring, type, pairs, ipairs, tinsert, tremove, sort, wipe, next, getmetatable, setmetatable, pcall, assert, rawget, rawset, unpack, select
 local strfind, strmatch, format, gsub, strsub, strtrim, strlen, strsplit, strlower, max, min, floor, ceil, log10 =
 	  strfind, strmatch, format, gsub, strsub, strtrim, strlen, strsplit, strlower, max, min, floor, ceil, log10
-local GetItemInfo, GetItemIcon, GetInventoryItemID, GetInventoryItemLink, GetInventoryItemTexture, GetInventorySlotInfo, GetContainerNumSlots =
-	  GetItemInfo, GetItemIcon, GetInventoryItemID, GetInventoryItemLink, GetInventoryItemTexture, GetInventorySlotInfo, GetContainerNumSlots
-local GetNumTrackingTypes, GetTrackingInfo =
-	  GetNumTrackingTypes, GetTrackingInfo
-local GetBuildInfo, IsInGuild, UnitInBattleground, UnitRace, UnitName =
-	  GetBuildInfo, IsInGuild, UnitInBattleground, UnitRace, UnitName
-local GetSpellBookItemInfo, HasPetSpells, GetSpellTabInfo, GetActionInfo =
-	  GetSpellBookItemInfo, HasPetSpells, GetSpellTabInfo, GetActionInfo
-local GetNumTalentTabs, GetNumTalents, GetTalentInfo, GetTalentLink =
-	  GetNumTalentTabs, GetNumTalents, GetTalentInfo, GetTalentLink
-local GetCursorPosition, GetCursorInfo, GetMouseFocus, CursorHasSpell, CursorHasItem, ClearCursor =
-	  GetCursorPosition, GetCursorInfo, GetMouseFocus, CursorHasSpell, CursorHasItem, ClearCursor
-local _G, bit, CopyTable, hooksecurefunc, IsAddOnLoaded, IsMacClient, GetLocale, GetAchievementInfo, IsControlKeyDown, PlaySound =
-	  _G, bit, CopyTable, hooksecurefunc, IsAddOnLoaded, IsMacClient, GetLocale, GetAchievementInfo, IsControlKeyDown, PlaySound
-local _G = _G
-local bit = bit
-local CopyTable = CopyTable
+local GetCursorPosition, GetCursorInfo, CursorHasSpell, CursorHasItem, ClearCursor =
+	  GetCursorPosition, GetCursorInfo, CursorHasSpell, CursorHasItem, ClearCursor
+local _G, bit, CopyTable, hooksecurefunc, IsAddOnLoaded, IsControlKeyDown, PlaySound =
+	  _G, bit, CopyTable, hooksecurefunc, IsAddOnLoaded, IsControlKeyDown, PlaySound
+
 local strlowerCache = TMW.strlowerCache
 local SpellTextures = TMW.SpellTextures
 local print = TMW.print

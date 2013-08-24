@@ -14,8 +14,8 @@ local TMW = TMW
 if not TMW then return end
 local L = TMW.L
 
-local GetItemCooldown, IsItemInRange, IsEquippedItem, GetItemIcon, GetItemCount, GetItemInfo =
-	  GetItemCooldown, IsItemInRange, IsEquippedItem, GetItemIcon, GetItemCount, GetItemInfo
+local GetItemCooldown, IsItemInRange, IsEquippedItem, GetItemIcon, GetItemInfo =
+	  GetItemCooldown, IsItemInRange, IsEquippedItem, GetItemIcon, GetItemInfo
 local pairs =
 	  pairs
 local OnGCD = TMW.OnGCD
