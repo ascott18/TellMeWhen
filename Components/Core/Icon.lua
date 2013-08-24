@@ -370,6 +370,11 @@ function Icon.ScheduleNextUpdate(icon)
 	local currentIconDuration = attributes.duration - (time - attributes.start)
 	if currentIconDuration < 0 then currentIconDuration = 0 end
 
+	if currentIconDuration == 0 then
+		icon.NextUpdateTime = nil
+		return
+	end
+
 	icon.NextUpdate_Duration = 0
 	
 	--[[
