@@ -388,7 +388,9 @@ TMW.GroupConfigTemplate.args.main.args.TextLayout = {
 	values = function(info)
 		local t = {}
 		for GUID, layoutSettings in pairs(TMW.db.profile.TextLayouts) do
-			t[GUID] = TEXT:GetLayoutName(layoutSettings, GUID)
+			if GUID ~= "" then
+				t[GUID] = TEXT:GetLayoutName(layoutSettings, GUID)
+			end
 		end
 		setmetatable(t, {__index = function(t, k) 
 			if k == "%FAKEGET%" then

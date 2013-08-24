@@ -186,12 +186,9 @@ TMW.Defaults = {
 			},
 		},
 		Groups 		= 	{
-			[1] = {
-				Enabled			= true,
-			},
 			["**"] = {
 				GUID			= "",
-				Enabled			= false,
+				Enabled			= true,
 				OnlyInCombat	= false,
 				Locked			= false,
 				View			= "icon",
@@ -2736,6 +2733,22 @@ function TMW:RawUpgrade()
 
 				HelpSettings.ICON_POCKETWATCH_FIRSTSEE = HelpSettings.PocketWatch
 				HelpSettings.PocketWatch = nil
+			end
+		end
+
+		if TellMeWhenDB.Version < 70001 then
+			for _, p in pairs(TellMeWhenDB.profiles) do
+				if p.Groups then
+					for groupID, gs in pairs(p.Groups) do
+						if gs.Enabled == nil then
+							if groupID == 1 then
+								gs.Enabled = true
+							else
+								gs.Enabled = false
+							end
+						end
+					end
+				end
 			end
 		end
 	end
