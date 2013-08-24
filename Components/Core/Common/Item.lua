@@ -17,7 +17,14 @@ local TMW = TMW
 local L = TMW.L
 local print = TMW.print
 
+local IsEquippedItem, GetItemCount, GetItemInfo, GetItemCooldown, GetItemIcon, IsItemInRange
+	= IsEquippedItem, GetItemCount, GetItemInfo, GetItemCooldown, GetItemIcon, IsItemInRange
+local GetInventoryItemTexture, GetInventoryItemCooldown, GetInventoryItemID, GetInventoryItemLink
+	= GetInventoryItemTexture, GetInventoryItemCooldown, GetInventoryItemID, GetInventoryItemLink
+local tonumber, type, pairs, strfind, strmatch, ipairs, strtrim, error
+	= tonumber, type, pairs, strfind, strmatch, ipairs, strtrim, error
 
+local INVSLOT_LAST_EQUIPPED = INVSLOT_LAST_EQUIPPED
 
 local OnGCD = TMW.OnGCD
 
@@ -208,7 +215,7 @@ function ItemByID:GetIcon()
 	local icon = GetItemIcon(self.itemID)
 	if icon then
 		self.icon = icon
-		self.GetIcon = GetIcon_saved
+		self.GetIcon = self.GetIcon_saved
 		return icon
 	end
 end
@@ -225,7 +232,7 @@ function ItemByID:GetName()
 	local name = GetItemInfo(self.itemID)
 	if name then
 		self.name = name
-		self.GetName = GetName_saved
+		self.GetName = self.GetName_saved
 		return name
 	end
 end
@@ -249,7 +256,7 @@ function ItemByName:GetIcon()
 	local icon = GetItemIcon(self.name)
 	if icon then
 		self.icon = icon
-		self.GetIcon = GetIcon_saved
+		self.GetIcon = self.GetIcon_saved
 		return icon
 	end
 end
@@ -275,7 +282,7 @@ function ItemByName:GetName()
 	local name = GetItemInfo(self.name)
 	if name then
 		self.name = name
-		self.GetName = GetName_saved
+		self.GetName = self.GetName_saved
 		return name
 	else
 		return self.name
@@ -346,7 +353,7 @@ function ItemByLink:GetIcon()
 	local icon = GetItemIcon(self.link)
 	if icon then
 		self.icon = icon
-		self.GetIcon = GetIcon_saved
+		self.GetIcon = self.GetIcon_saved
 		return icon
 	end
 end
@@ -363,7 +370,7 @@ function ItemByLink:GetName()
 	local name = GetItemInfo(self.link)
 	if name then
 		self.name = name
-		self.GetName = GetName_saved
+		self.GetName = self.GetName_saved
 		return name
 	end
 end
