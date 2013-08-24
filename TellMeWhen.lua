@@ -56,8 +56,6 @@ TMW.L = L
 ---------- Upvalues ----------
 local GetSpellCooldown, GetSpellInfo, GetSpellTexture =
 	  GetSpellCooldown, GetSpellInfo, GetSpellTexture
-local GetItemInfo, GetInventoryItemID, GetItemIcon =
-	  GetItemInfo, GetInventoryItemID, GetItemIcon
 local GetTalentInfo =
 	  GetTalentInfo
 local UnitPower, UnitClass, UnitName, UnitAura =
@@ -2928,6 +2926,7 @@ function TMW:UpdateNormally()
 	end
 
 	TMW.Locked = TMW.db.profile.Locked
+	Locked = TMW.Locked
 	
 	TMW.GUIDToOwner, TMW.PreviousGUIDToOwner = TMW.PreviousGUIDToOwner, TMW.GUIDToOwner
 	wipe(TMW.GUIDToOwner)
@@ -2952,7 +2951,7 @@ function TMW:UpdateNormally()
 		TMW.safecall(group.Setup, group)
 	end
 
-	if not TMW.Locked then
+	if not Locked then
 		TMW:DoValidityCheck()
 	end
 
