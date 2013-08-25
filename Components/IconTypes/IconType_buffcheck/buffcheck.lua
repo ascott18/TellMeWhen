@@ -218,12 +218,12 @@ end
 
 
 function Type:Setup(icon, groupID, iconID)
-	icon.NameFirst = TMW:GetSpellNames(icon, icon.Name, 1)
-	--icon.NameName = TMW:GetSpellNames(icon, icon.Name, 1, 1)
-	icon.NameArray = TMW:GetSpellNames(icon, icon.Name)
-	icon.NameNameArray = TMW:GetSpellNames(icon, icon.Name, nil, 1)
-	icon.NameHash = TMW:GetSpellNames(icon, icon.Name, nil, nil, 1)
-	icon.NameNameHash = TMW:GetSpellNames(icon, icon.Name, nil, 1, 1)
+	icon.NameFirst = TMW:GetSpellNames(icon.Name, 1, 1)
+	--icon.NameName = TMW:GetSpellNames(icon.Name, 1, 1, 1)
+	icon.NameArray = TMW:GetSpellNames(icon.Name, 1)
+	icon.NameNameArray = TMW:GetSpellNames(icon.Name, 1, nil, 1)
+	icon.NameHash = TMW:GetSpellNames(icon.Name, 1, nil, nil, 1)
+	icon.NameNameHash = TMW:GetSpellNames(icon.Name, 1, nil, 1, 1)
 	
 	icon.Units, icon.UnitSet = TMW:GetUnits(icon, icon.Unit, icon:GetSettings().UnitConditions)
 
@@ -260,7 +260,7 @@ end
 
 function Type:GuessIconTexture(ics)
 	if ics.Name and ics.Name ~= "" then
-		local name = TMW:GetSpellNames(nil, ics.Name, 1)
+		local name = TMW:GetSpellNames(ics.Name, nil, 1)
 		if name then
 			return SpellTextures[name]
 		end

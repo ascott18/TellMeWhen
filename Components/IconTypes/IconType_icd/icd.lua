@@ -148,10 +148,10 @@ local function ICD_OnUpdate(icon, time)
 end
 
 function Type:Setup(icon, groupID, iconID)
-	icon.NameFirst = TMW:GetSpellNames(icon, icon.Name, 1)
-	icon.NameHash = TMW:GetSpellNames(icon, icon.Name, nil, nil, 1)
-	icon.NameNameArray = TMW:GetSpellNames(icon, icon.Name, nil, 1)
-	icon.Durations = TMW:GetSpellDurations(icon, icon.Name)
+	icon.NameFirst = TMW:GetSpellNames(icon.Name, 1, 1)
+	icon.NameHash = TMW:GetSpellNames(icon.Name, 1, nil, nil, 1)
+	icon.NameNameArray = TMW:GetSpellNames(icon.Name, 1, nil, 1)
+	icon.Durations = TMW:GetSpellDurations(icon.Name)
 
 	icon.ICDStartTime = icon.ICDStartTime or 0
 	icon.ICDDuration = icon.ICDDuration or 0

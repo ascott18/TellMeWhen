@@ -456,10 +456,9 @@ end
 
 
 function Type:Setup(icon, groupID, iconID)
-	icon.NameFirst = TMW:GetSpellNames(icon, icon.Name, 1)
-	icon.NameArray = TMW:GetSpellNames(icon, icon.Name)
-	icon.NameHash = TMW:GetSpellNames(icon, icon.Name, nil, nil, 1)
-	icon.Durations = TMW:GetSpellDurations(icon, icon.Name)
+	icon.NameArray = TMW:GetSpellNames(icon.Name, 1)
+	icon.NameHash = TMW:GetSpellNames(icon.Name, 1, nil, nil, 1)
+	icon.Durations = TMW:GetSpellDurations(icon.Name)
 
 	icon.Units, icon.UnitSet = TMW:GetUnits(icon, icon.Unit, icon:GetSettings().UnitConditions)
 	

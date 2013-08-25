@@ -355,7 +355,7 @@ function UNITS:GetOriginalUnitTable(unitSettings)
 
 	return Units
 end
-TMW:MakeFunctionCached(UNITS, "GetOriginalUnitTable")
+TMW:MakeSingleArgFunctionCached(UNITS, "GetOriginalUnitTable")
 
 function UNITS:UpdateTankAndAssistMap()
 	local mtMap, maMap = UNITS.mtMap, UNITS.maMap

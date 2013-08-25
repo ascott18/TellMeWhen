@@ -540,6 +540,53 @@ end})
 -- Function Caching
 ---------------------------------
 
+local cacheMetatable = {
+	__mode == 'kv'
+}
+
+local cacheKey
+do
+	local LOCAL_ToStringAllTemp = {}
+	local separator = "\031"
+
+	function cacheKey(...)
+	    local n = select('#', ...)
+	    -- Simple versions for common argument counts
+	    if (n == 1) then
+	        return tostring(...)
+	    elseif (n == 2) then
+	        local a, b = ...
+	        return tostring(a), separator, tostring(b);
+	    elseif (n == 3) then
+	        local a, b, c = ...
+	        return tostring(a), separator, tostring(b), separator, tostring(c);
+	    elseif (n == 0) then
+	        return
+	    end
+	    
+	    local needfix
+	    for i = 1, n do
+	        local v = select(i, ...)
+	        if (type(v) ~= "string") then
+	            needfix = i
+	            break
+	        end
+	    end
+	    if (not needfix) then return ... end
+	    
+	    wipe(LOCAL_ToStringAllTemp)
+	    for i = 1, needfix - 1 do
+	        LOCAL_ToStringAllTemp[i*2-1] = separator
+	        LOCAL_ToStringAllTemp[i*2] = select(i, ...)
+	    end
+	    for i = needfix, n do
+	        LOCAL_ToStringAllTemp[i*2-1] = separator
+	        LOCAL_ToStringAllTemp[i*2] = tostring(select(i, ...))
+	    end
+	    return unpack(LOCAL_ToStringAllTemp)
+	end
+end
+
 function TMW:MakeFunctionCached(obj, method)
 	local func
 	if type(obj) == "table" and type(method) == "string" then
@@ -550,11 +597,9 @@ function TMW:MakeFunctionCached(obj, method)
 		error("Usage: TMW:MakeFunctionCached(object/function [, method])")
 	end
 
-	local cache = {}
+	local cache = setmetatable({}, cacheMetatable)
 	local wrapper = function(...)
-		-- tostringall is a Blizzard function defined in UIParent.lua
-		local cachestring = strconcat(tostringall(...))
-		--local cachestring = TMW:Serialize(...)
+		local cachestring = strconcat(cacheKey(...))
 		
 		if cache[cachestring] then
 			return cache[cachestring]
@@ -580,18 +625,23 @@ end
 function TMW:MakeSingleArgFunctionCached(obj, method)
 	-- MakeSingleArgFunctionCached is MUCH more efficient than MakeFunctionCached
 	-- and should be used whenever there is only 1 input arg
-	local func
+	local func, firstarg
 	if type(obj) == "table" and type(method) == "string" then
 		func = obj[method]
+		firstarg = obj
 	elseif type(obj) == "function" then
 		func = obj
 	else
 		error("Usage: TMW:MakeFunctionCached(object/function [, method])", 2)
 	end
 
-	local cache = {}
+	local cache = setmetatable({}, cacheMetatable)
 	local wrapper = function(arg1In, arg2In)
-		if arg2In ~= nil then
+		local param1, param2 = arg1In, arg2In
+		if firstarg and firstarg == arg1In then
+			param1 = arg1In
+			arg1In = arg2In
+		elseif arg2In ~= nil then
 			error("Cannot MakeSingleArgFunctionCached functions with more than 1 arg", 2)
 		end
 		
@@ -599,7 +649,7 @@ function TMW:MakeSingleArgFunctionCached(obj, method)
 			return cache[arg1In]
 		end
 
-		local arg1Out, arg2Out = func(arg1In)
+		local arg1Out, arg2Out = func(param1, param2)
 		if arg2Out ~= nil then
 			error("Cannot cache functions with more than 1 return arg", 2)
 		end
@@ -3723,13 +3773,13 @@ function TMW:EquivToTable(name)
 
 	return tbl
 end
-TMW:MakeFunctionCached(TMW, "EquivToTable")
+TMW:MakeSingleArgFunctionCached(TMW, "EquivToTable")
 
 function TMW:GetSpellNames_static(doLower, setting, keepDurations)
 
 	local buffNames = TMW:SplitNames(setting) -- Get a table of everything
 	
-	if icon then
+	if doLower then
 		buffNames = TMW:LowerNames(buffNames)
 	end
 
@@ -3782,8 +3832,8 @@ function TMW:GetSpellNames_static(doLower, setting, keepDurations)
 end
 TMW:MakeFunctionCached(TMW, "GetSpellNames_static")
 
-function TMW:GetSpellNames(icon, setting, firstOnly, toname, hash, keepDurations, allowRenaming)
-	local buffNames = TMW:GetSpellNames_static(icon and true or false, setting, keepDurations)
+function TMW:GetSpellNames(setting, doLower, firstOnly, toname, hash, allowRenaming)
+	local buffNames = TMW:GetSpellNames_static(doLower, setting, false)
 
 	-- buffNames MUST BE COPIED because the return from GetSpellNames_static is cached.
 	buffNames = CopyTable(buffNames)
@@ -3841,8 +3891,9 @@ do    -- TMW:GetSpellNames() cache management
 	end)
 end
 
-function TMW:GetSpellDurations(icon, setting)
-	local NameArray = TMW:GetSpellNames(icon, setting, nil, nil, nil, 1)
+function TMW:GetSpellDurations(setting)
+	local NameArray = TMW:GetSpellNames_static(false, setting, true)
+
 	local DurationArray = CopyTable(NameArray)
 
 	-- EXTRACT SPELL DURATIONS
@@ -3857,7 +3908,7 @@ function TMW:GetSpellDurations(icon, setting)
 
 	return DurationArray
 end
-TMW:MakeFunctionCached(TMW, "GetSpellDurations")
+TMW:MakeSingleArgFunctionCached(TMW, "GetSpellDurations")
 
 
 --TMW.TestTex = TMW:CreateTexture()

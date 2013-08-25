@@ -239,7 +239,7 @@ end
 
 local CheckCategories
 do	-- CheckCategories
-	local func = TMW:MakeFunctionCached(function(icon, NameArray)
+	local func = TMW:MakeSingleArgFunctionCached(function(NameArray)
 		local categoryTEMP = setmetatable({}, {
 			__index = function(t, k)
 				-- a ghetto sort mechanism
@@ -256,9 +256,9 @@ do	-- CheckCategories
 		local firstCategory, doWarn
 		local append = ""
 
-		for i, IDorName in ipairs(icon.NameArray) do
+		for i, IDorName in ipairs(NameArray) do
 			for category, str in pairs(TMW.BE.dr) do
-				if TMW:IsStringInSemicolonList(str, IDorName) or TMW:GetSpellNames(icon, str, nil, 1, 1)[IDorName] then
+				if TMW:IsStringInSemicolonList(str, IDorName) or TMW:GetSpellNames(str, 1, nil, 1, 1)[IDorName] then
 					if not firstCategory then
 						firstCategory = category
 					end
@@ -285,7 +285,7 @@ do	-- CheckCategories
 	end)
 
 	CheckCategories = function(icon)
-		local result = func(icon, icon.NameArray)
+		local result = func(icon.NameArray)
 		icon:SetInfo("spell", result.firstCategory)
 
 		if icon:IsBeingEdited() == "MAIN" and TellMeWhen_ChooseName then
@@ -300,9 +300,9 @@ end
 
 
 function Type:Setup(icon, groupID, iconID)
-	icon.NameFirst = TMW:GetSpellNames(icon, icon.Name, 1)
-	icon.NameArray = TMW:GetSpellNames(icon, icon.Name)
-	icon.NameHash = TMW:GetSpellNames(icon, icon.Name, nil, nil, 1)
+	icon.NameFirst = TMW:GetSpellNames(icon.Name, 1, 1)
+	icon.NameArray = TMW:GetSpellNames(icon.Name, 1)
+	icon.NameHash = TMW:GetSpellNames(icon.Name, 1, nil, nil, 1)
 	
 	-- This looks really stupid, but it works exactly how it should.
 	local oldDRName = icon.Name

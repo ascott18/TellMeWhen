@@ -158,7 +158,7 @@ end
 
 
 function Type:Setup(icon, groupID, iconID)
-	icon.NameFirst = TMW:GetSpellNames(icon, icon.Name, 1, nil, nil, nil, 1)
+	icon.NameFirst = TMW:GetSpellNames(icon.Name, 1, 1, nil, nil, 1)
 	local originalNameFirst = icon.NameFirst
 
 	if icon.NameFirst and icon.NameFirst ~= "" and GetSpellLink(icon.NameFirst) and not tonumber(icon.NameFirst) then

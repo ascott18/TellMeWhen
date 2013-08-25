@@ -138,8 +138,8 @@
 								TMW.HELP:Show("ICON_DURS_FIRSTSEE", nil, TMW.IE.Main.Type, 20, 0, TMW.L["HELP_FIRSTUCD"])
 
 								local s = ""
-								local array = TMW:GetSpellNames(icon, self:GetText())
-								for k, v in pairs(TMW:GetSpellDurations(icon, self:GetText())) do
+								local array = TMW:GetSpellNames(self:GetText())
+								for k, v in pairs(TMW:GetSpellDurations(self:GetText())) do
 									if v == 0 then
 										s = s .. (s ~= "" and "; " or "") .. array[k]
 									end

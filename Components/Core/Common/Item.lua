@@ -61,7 +61,7 @@ function Item:GetRepresentation(what)
 		return nil
 	end
 end
-TMW:MakeFunctionCached(Item, "GetRepresentation")
+TMW:MakeSingleArgFunctionCached(Item, "GetRepresentation")
 
 function TMW:GetItems(icon, setting)
 	local names = TMW:SplitNames(setting)

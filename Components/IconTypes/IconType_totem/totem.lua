@@ -206,9 +206,9 @@ end
 
 function Type:Setup(icon, groupID, iconID)
 	if icon.Name then
-		icon.NameFirst = TMW:GetSpellNames(icon, icon.Name, 1, nil, nil, nil, 1)
-		icon.NameName = TMW:GetSpellNames(icon, icon.Name, 1, 1, nil, nil, 1)
-		icon.NameNameHash = TMW:GetSpellNames(icon, icon.Name, nil, 1, 1, nil, 1)
+		icon.NameFirst = TMW:GetSpellNames(icon.Name, 1, 1, nil, nil, 1)
+		icon.NameName = TMW:GetSpellNames(icon.Name, 1, 1, 1, nil, 1)
+		icon.NameNameHash = TMW:GetSpellNames(icon.Name, 1, nil, 1, 1, 1)
 	end
 	icon.Slots = wipe(icon.Slots or {})
 	for i=1, 4 do

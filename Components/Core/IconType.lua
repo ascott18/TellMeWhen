@@ -152,7 +152,7 @@ function IconType:GuessIconTexture(ics)
 	self:AssertSelfIsInstance()
 	
 	if ics.Name and ics.Name ~= "" then
-		local name = TMW:GetSpellNames(nil, ics.Name, 1)
+		local name = TMW:GetSpellNames(ics.Name, nil, 1)
 		if name then
 			return SpellTextures[name]
 		end
@@ -172,7 +172,7 @@ function IconType:GetConfigIconTexture(icon)
 	else
 	
 		if icon.Name ~= "" then
-			local tbl = TMW:GetSpellNames(icon, icon.Name)
+			local tbl = TMW:GetSpellNames(icon.Name, 1)
 
 			for _, name in ipairs(tbl) do
 				local t = SpellTextures[name]

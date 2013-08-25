@@ -2955,9 +2955,9 @@ function IE:GetRealNames(Name, icon)
 	if SoI == "item" then
 		tbl = TMW:GetItems(icon, text)
 	else
-		tbl = TMW:GetSpellNames(icon, text)
+		tbl = TMW:GetSpellNames(text, 1)
 	end
-	local durations = CI_typeData.DurationSyntax and TMW:GetSpellDurations(icon, text)
+	local durations = CI_typeData.DurationSyntax and TMW:GetSpellDurations(text)
 
 	local str = ""
 	local numadded = 0

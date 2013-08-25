@@ -235,7 +235,7 @@ local function WpnEnchant_OnEvent(icon, event, unit)
 end
 
 function Type:Setup(icon, groupID, iconID)
-	icon.NameHash = TMW:GetSpellNames(icon, icon.Name, nil, nil, 1)
+	icon.NameHash = TMW:GetSpellNames(icon.Name, 1, nil, nil, 1)
 	icon.SelectIndex = SlotsToNumbers[icon.WpnEnchantType] or 1
 	icon.Slot = GetInventorySlotInfo(icon.WpnEnchantType)
 	
