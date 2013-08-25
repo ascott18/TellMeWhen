@@ -374,7 +374,7 @@ local function UnitCooldown_OnUpdate(icon, time)
 		local cooldowns = GUID and rawget(Cooldowns, GUID)
 
 		if u == 1 and GUID and not cooldowns and not OnlySeen then
-			-- If this is the first unit, use a blank cooldowns table for it even if it doesn't exist
+			-- If this is the first unit, use a blank cooldowns table for it if it doesn't exist
 			-- so that we can still find the first usable spell.
 			cooldowns = BLANKTABLE
 		end

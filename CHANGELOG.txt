@@ -1,3 +1,15 @@
+===v7.0.0===
+ * All references from one icon or group to another in TellMeWhen are now tracked by a unique ID that is assigned to an icon that will stay with it no matter where it is moved or exported to.
+ ** This includes:
+ *** Meta icons
+ *** Icon Shown conditions (and the other conditions that track icons)
+ *** On Icon Show/On Icon Hide icon events
+ *** Group anchoring to other groups
+ ** The consequence of this is that you can now import/export icons and meta icons that include those icons separately and they will automatically find eachother once they are all imported.
+
+ * Bug Fixes:
+ ** Unit cooldown icons should now attempt to show the first usable spell even if no units being checked have casted any spells yet.
+
 ===v6.2.4===
  * Added DogTags for string.gsub and string.find.
  * Added Yu'lon's Barrier to the DamageShield equivalency.
