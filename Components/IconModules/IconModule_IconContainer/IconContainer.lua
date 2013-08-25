@@ -77,7 +77,7 @@ IconContainer:RegisterEventHandlerData("Animations", 60, "ACTVTNGLOW", {
 		container.overlay:SetFrameLevel(icon:GetFrameLevel() + 3)
 	end,
 	OnStop = function(icon, table)
-		local IconModule_IconContainer = icon:GetModuleOrModuleChild("IconModule_IconContainer")
+		local IconModule_IconContainer = icon:GetModuleOrModuleChild("IconModule_IconContainer", true)
 		
 		ActionButton_HideOverlayGlow(IconModule_IconContainer.container)
 	end,
