@@ -544,49 +544,6 @@ local cacheMetatable = {
 	__mode == 'kv'
 }
 
-local cacheKey
-do
-	local LOCAL_ToStringAllTemp = {}
-	local separator = "\031"
-
-	function cacheKey(...)
-	    local n = select('#', ...)
-	    -- Simple versions for common argument counts
-	    if (n == 1) then
-	        return tostring(...)
-	    elseif (n == 2) then
-	        local a, b = ...
-	        return tostring(a), separator, tostring(b);
-	    elseif (n == 3) then
-	        local a, b, c = ...
-	        return tostring(a), separator, tostring(b), separator, tostring(c);
-	    elseif (n == 0) then
-	        return
-	    end
-	    
-	    local needfix
-	    for i = 1, n do
-	        local v = select(i, ...)
-	        if (type(v) ~= "string") then
-	            needfix = i
-	            break
-	        end
-	    end
-	    if (not needfix) then return ... end
-	    
-	    wipe(LOCAL_ToStringAllTemp)
-	    for i = 1, needfix - 1 do
-	        LOCAL_ToStringAllTemp[i*2-1] = separator
-	        LOCAL_ToStringAllTemp[i*2] = select(i, ...)
-	    end
-	    for i = needfix, n do
-	        LOCAL_ToStringAllTemp[i*2-1] = separator
-	        LOCAL_ToStringAllTemp[i*2] = tostring(select(i, ...))
-	    end
-	    return unpack(LOCAL_ToStringAllTemp)
-	end
-end
-
 function TMW:MakeFunctionCached(obj, method)
 	local func
 	if type(obj) == "table" and type(method) == "string" then
@@ -599,7 +556,7 @@ function TMW:MakeFunctionCached(obj, method)
 
 	local cache = setmetatable({}, cacheMetatable)
 	local wrapper = function(...)
-		local cachestring = strconcat(cacheKey(...))
+		local cachestring = strjoin("\031", tostringall(...))
 		
 		if cache[cachestring] then
 			return cache[cachestring]
