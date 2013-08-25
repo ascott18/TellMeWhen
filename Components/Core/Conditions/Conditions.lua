@@ -603,7 +603,7 @@ end
 
 Env.ItemRefs = {}
 function CNDT:GetItemRefForConditionChecker(name)
-	local item = TMW:GetItems(nil, name)[1]
+	local item = TMW:GetItems(name)[1]
 
 	if not item then
 		item = TMW:GetNullRefItem()

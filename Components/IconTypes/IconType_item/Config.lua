@@ -32,7 +32,7 @@ local ItemCache_Cache
 
 function Type:GuessIconTexture(ics)
 	if ics.Name and ics.Name ~= "" then
-		local item = TMW:GetItems(nil, ics.Name)[1]
+		local item = TMW:GetItems(ics.Name)[1]
 		if item then
 			return item:GetIcon()
 		end

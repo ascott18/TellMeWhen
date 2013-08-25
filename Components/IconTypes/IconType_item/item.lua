@@ -186,7 +186,7 @@ end
 
 
 function Type:Setup(icon, groupID, iconID)
-	icon.Items = TMW:GetItems(icon, icon.Name)
+	icon.Items = TMW:GetItems(icon.Name)
 
 	if not icon.RangeCheck then
 		icon:RegisterSimpleUpdateEvent("UNIT_INVENTORY_CHANGED", "player")
@@ -228,7 +228,7 @@ function Type:GetConfigIconTexture(icon)
 	if icon.Name == "" then
 		return "Interface\\Icons\\INV_Misc_QuestionMark", nil
 	else
-		local tbl = TMW:GetItems(nil, icon.Name)
+		local tbl = TMW:GetItems(icon.Name)
 
 		for _, item in ipairs(tbl) do
 			local t = item:GetIcon()

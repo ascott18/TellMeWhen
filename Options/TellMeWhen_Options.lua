@@ -2953,7 +2953,7 @@ function IE:GetRealNames(Name, icon)
 
 	local tbl
 	if SoI == "item" then
-		tbl = TMW:GetItems(icon, text)
+		tbl = TMW:GetItems(text)
 	else
 		tbl = TMW:GetSpellNames(text, 1)
 	end

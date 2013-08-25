@@ -63,7 +63,7 @@ function Item:GetRepresentation(what)
 end
 TMW:MakeSingleArgFunctionCached(Item, "GetRepresentation")
 
-function TMW:GetItems(icon, setting)
+function TMW:GetItems(setting)
 	local names = TMW:SplitNames(setting)
 	
 	-- REMOVE SPELL DURATIONS (FOR WHATEVER REASON THE USER MIGHT HAVE PUT THEM IN FOR ITEMS)
@@ -72,10 +72,6 @@ function TMW:GetItems(icon, setting)
 			local new = strmatch(item, "(.-):[%d:%s%.]*$")
 			names[k] = tonumber(new) or new -- turn it into a number if it is one
 		end
-	end
-
-	if icon then
-		names = TMW:LowerNames(names)
 	end
 
 	local items = {}
