@@ -603,6 +603,8 @@ function Icon.DisableIcon(icon, soft)
 	if iconGUID then
 		TMW:DeclareDataOwner(iconGUID, nil)
 	end
+	
+	TMW:Fire("TMW_ICON_DISABLE", icon, soft)
 
 	-- Reset condition stuff
 	icon.ConditionObject = nil
@@ -618,8 +620,6 @@ function Icon.DisableIcon(icon, soft)
 	if icon.viewData then
 		icon.viewData:UnimplementFromIcon(icon)
 	end
-	
-	TMW:Fire("TMW_ICON_DISABLE", icon, soft)
 end
 
 --- Completely sets up an icon.
