@@ -359,6 +359,8 @@ local function UnitCooldown_OnEvent(icon, event, arg1)
 	end
 end
 
+local BLANKTABLE = {}
+
 local function UnitCooldown_OnUpdate(icon, time)
 	local unstart, unname, unduration, usename, dobreak, useUnit, unUnit
 	local Alpha, NameArray, OnlySeen, Sort, Durations, Units =
@@ -370,6 +372,12 @@ local function UnitCooldown_OnUpdate(icon, time)
 		local unit = Units[u]
 		local GUID = UnitGUID(unit)
 		local cooldowns = GUID and rawget(Cooldowns, GUID)
+
+		if u == 1 and GUID and not cooldowns and not OnlySeen then
+			-- If this is the first unit, use a blank cooldowns table for it even if it doesn't exist
+			-- so that we can still find the first usable spell.
+			cooldowns = BLANKTABLE
+		end
 
 		if cooldowns then
 			for i = 1, NAL do
@@ -432,7 +440,7 @@ local function UnitCooldown_OnUpdate(icon, time)
 			end
 		end
 	end
-
+print(icon, usename, unname)
 	if usename and Alpha > 0 then
 		icon:SetInfo("alpha; texture; start, duration; spell; unit, GUID",
 			icon.Alpha,
