@@ -99,7 +99,7 @@ TMW.IconDragger:RegisterIconDragHandler(250, -- Copy Bar Colors
 			info.text = L["ICONMENU_COPYCOLORS_BARDISPLAY"]
 			info.tooltipTitle = info.text
 			info.tooltipText = L["ICONMENU_COPYCOLORS_BARDISPLAY_DESC"]:format(
-				srcicon:GetFullNameWithTexture(), desticon:GetFullNameWithTexture())
+				srcicon:GetIconName(true), desticon:GetIconName(true))
 
 			return true
 		end

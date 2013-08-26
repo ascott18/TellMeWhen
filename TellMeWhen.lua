@@ -3400,7 +3400,7 @@ function TMW:DoValidityCheck()
 		
 		if type(checker) == "table" then
 			if checker.class == TMW.Classes.Icon then
-				checkerName = checker:GetFullNameWithTexture()
+				checkerName = checker:GetIconName(true)
 			elseif checker.class == TMW.Classes.Group then
 				checkerName = checker:GetGroupName()
 			end
@@ -3418,7 +3418,7 @@ function TMW:DoValidityCheck()
 		
 		if type(checkee) == "table" then
 			if checkee.class == TMW.Classes.Icon then
-				checkeeName = checkee:GetFullNameWithTexture()
+				checkeeName = checkee:GetIconName(true)
 			elseif checkee.class == TMW.Classes.Group then
 				checkeeName = checkee:GetGroupName()
 			end

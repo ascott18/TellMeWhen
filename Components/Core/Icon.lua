@@ -99,7 +99,7 @@ do
 					info.text = L["ICONMENU_COPYCONDITIONS"]:format(n)
 					info.tooltipTitle = info.text
 					info.tooltipText = L["ICONMENU_COPYCONDITIONS_DESC"]:format(
-						IconDragger.srcicon:GetFullNameWithTexture(), n, IconDragger.desticon:GetFullNameWithTexture())
+						IconDragger.srcicon:GetIconName(true), n, IconDragger.desticon:GetIconName(true))
 
 					return true
 				end
@@ -267,11 +267,18 @@ function Icon.IsBeingEdited(icon)
 end
 
 --- Returns a string that contains the texture of the icon plus the name of the group and the ID of the icon.
--- @name Icon:GetFullNameWithTexture
--- @paramsig
+-- @name Icon:GetIconName
+-- @paramsig texture
+-- @param texture [boolean] True if the texture should be prepended to the output, otherwise false or nil.
 -- @return [string] The string containing the texture of the icon plus the name of the group and the ID of the icon.
-function Icon.GetFullNameWithTexture(icon)
-	return ("|T%s:0|t%s"):format(icon.attributes.texture, L["GROUPICON"]:format(icon.group:GetGroupName(1), icon.ID))
+function Icon.GetIconName(icon, texture)
+	local name = L["GROUPICON"]:format(icon.group:GetGroupName(1), icon.ID)
+	
+	if texture then
+		return ("|T%s:0|t %s"):format(icon.attributes.texture, name)
+	else
+		return name
+	end
 end
 
 --- Queues an icon event to be fired.

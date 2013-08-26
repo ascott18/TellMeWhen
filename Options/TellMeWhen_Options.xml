@@ -1819,7 +1819,7 @@
 						local desc = function()
 							local icon = TMW.IE.history[TMW.IE.historyState - 1]
 							local iconID, groupID = icon:GetID(), icon.group:GetID()
-							return TMW.L["BACK_IE_DESC"]:format(TMW.L["GROUPICON"]:format(TMW:GetGroupName(groupID, groupID, 1), iconID), icon.attributes.texture)
+							return TMW.L["BACK_IE_DESC"]:format(TMW.L["GROUPICON"]:format(icon.group:GetGroupName(1), iconID), icon.attributes.texture)
 						end
 						TMW:TT(self, "BACK_IE", desc, nil, 1)
 
@@ -1859,7 +1859,7 @@
 						local desc = function()
 							local icon = TMW.IE.history[TMW.IE.historyState + 1]
 							local iconID, groupID = icon:GetID(), icon.group:GetID()
-							return TMW.L["FORWARDS_IE_DESC"]:format(TMW.L["GROUPICON"]:format(TMW:GetGroupName(groupID, groupID, 1), iconID), icon.attributes.texture)
+							return TMW.L["FORWARDS_IE_DESC"]:format(TMW.L["GROUPICON"]:format(icon.group:GetGroupName(1), iconID), icon.attributes.texture)
 						end
 						TMW:TT(self, "FORWARDS_IE", desc, nil, 1)
 

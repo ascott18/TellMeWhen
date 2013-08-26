@@ -369,7 +369,7 @@ function CNDT:IconMenu_DropDown()
 				end
 				info.text = textshort
 				info.tooltipTitle = text
-				info.tooltipText = L["GROUPICON"]:format(TMW:GetGroupName(groupID, groupID, 1), iconID) .. "\r\n" .. tooltip
+				info.tooltipText = L["GROUPICON"]:format(icon.group:GetGroupName(1), iconID) .. "\r\n" .. tooltip
 				info.tooltipOnButton = true
 
 				info.arg1 = self
@@ -392,7 +392,7 @@ function CNDT:IconMenu_DropDown()
 		for group, groupID in TMW:InGroups() do
 			if group:ShouldUpdateIcons() then
 				local info = UIDropDownMenu_CreateInfo()
-				info.text = TMW:GetGroupName(groupID, groupID)
+				info.text = group:GetGroupName()
 				info.hasArrow = true
 				info.notCheckable = true
 				info.value = groupID

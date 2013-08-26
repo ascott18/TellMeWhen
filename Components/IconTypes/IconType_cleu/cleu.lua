@@ -338,7 +338,7 @@ local function CLEU_OnUpdate(icon, time)
 	end
 end
 
-
+-- TODO: remove groupID and iconID from all Type:Setup() calls
 function Type:Setup(icon, groupID, iconID)
 	icon.NameHash = icon.Name ~= "" and TMW:GetSpellNames(icon.Name, 1, nil, nil, 1)
 	icon.NameHash = icon.Name ~= "" and TMW:GetSpellNames(icon.Name, 1, nil, nil, 1)
@@ -360,7 +360,7 @@ function Type:Setup(icon, groupID, iconID)
 	-- safety mechanism
 	if icon.AllowAnyEvents and not icon.SourceUnits and not icon.DestUnits and not icon.NameHash and not icon.SourceFlags and not icon.DestFlags then
 		if TMW.Locked and icon.Enabled then
-			TMW.Warn(L["CLEU_NOFILTERS"]:format(L["GROUPICON"]):format(TMW:GetGroupName(groupID, groupID, 1), iconID))
+			TMW.Warn(L["CLEU_NOFILTERS"]:format(L["GROUPICON"]):format(icon.group:GetGroupName(1), iconID))
 		end
 		return
 	end

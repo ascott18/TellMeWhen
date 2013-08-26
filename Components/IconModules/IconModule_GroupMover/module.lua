@@ -107,17 +107,17 @@ TMW.IconDragger:RegisterIconDragHandler(330,	-- Anchor
 	function(IconDragger, info)
 		local name, desc
 
-		local srcname = TMW:GetGroupName(IconDragger.srcicon.group:GetID(), IconDragger.srcicon.group:GetID())
+		local srcname = IconDragger.srcicon.group:GetGroupName()
 
 		if IconDragger.desticon and IconDragger.srcicon.group:GetID() ~= IconDragger.desticon.group:GetID() then
-			local destname = L["fGROUP"]:format(TMW:GetGroupName(IconDragger.desticon.group:GetID(), IconDragger.desticon.group:GetID(), 1))
+			local destname = L["fGROUP"]:format(IconDragger.desticon.group:GetGroupName(1))
 			name = L["ICONMENU_ANCHORTO"]:format(destname)
 			desc = L["ICONMENU_ANCHORTO_DESC"]:format(srcname, destname, destname, srcname)
 
 		elseif IconDragger.destFrame and IconDragger.destFrame:GetName() then
 			if IconDragger.destFrame == WorldFrame and IconDragger.srcicon.group.Point.relativeTo ~= "UIParent" then
 			
-				
+				--TODO: update this for GUIDs. Keep the existing code, but also add support for GUIDs.
 				local currentFrameName = IconDragger.srcicon.group.Point.relativeTo
 				
 				local groupID = currentFrameName:match("^TellMeWhen_Group(%d+)")

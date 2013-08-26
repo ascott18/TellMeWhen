@@ -49,7 +49,7 @@ TMW.IconDragger:RegisterIconDragHandler(120, -- Copy Event Handlers
 			info.text = L["ICONMENU_COPYEVENTHANDLERS"]:format(n)
 			info.tooltipTitle = info.text
 			info.tooltipText = L["ICONMENU_COPYEVENTHANDLERS_DESC"]:format(
-				IconDragger.srcicon:GetFullNameWithTexture(), n, IconDragger.desticon:GetFullNameWithTexture())
+				IconDragger.srcicon:GetIconName(true), n, IconDragger.desticon:GetIconName(true))
 			
 			return true
 		end
@@ -474,7 +474,7 @@ function EVENTS.IconMenu_DropDown(frame)
 				end
 				info.text = textshort
 				info.tooltipTitle = text
-				info.tooltipText = format(L["GROUPICON"], TMW:GetGroupName(groupID, groupID, 1), iconID) .. "\r\n" .. tooltip
+				info.tooltipText = format(L["GROUPICON"], icon.group:GetGroupName(1), iconID) .. "\r\n" .. tooltip
 				info.tooltipOnButton = true
 
 				info.value = icon
@@ -495,7 +495,7 @@ function EVENTS.IconMenu_DropDown(frame)
 		for group, groupID in TMW:InGroups() do
 			if group:ShouldUpdateIcons() then
 				local info = UIDropDownMenu_CreateInfo()
-				info.text = TMW:GetGroupName(groupID, groupID)
+				info.text = group:GetGroupName()
 				info.hasArrow = true
 				info.notCheckable = true
 				info.value = groupID

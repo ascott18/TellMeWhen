@@ -67,7 +67,7 @@ DD.initialize = function(dropdown)
 		local groupID, iconID = icon.group.ID, icon.ID
 		
 		local info = UIDropDownMenu_CreateInfo()
-		info.text = L["GROUPICON"]:format(TMW:GetGroupName(groupID, groupID, 1), iconID)
+		info.text = L["GROUPICON"]:format(icon.group:GetGroupName(1), iconID)
 		
 		local text, textshort, tooltip = TMW:GetIconMenuText(groupID, iconID, icon:GetSettings())
 		info.tooltipTitle = text
