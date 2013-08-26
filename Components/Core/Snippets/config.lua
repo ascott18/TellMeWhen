@@ -293,11 +293,13 @@ function codesnippet:Import_HolderMenuHandler(result, editbox, holderMenuData)
 	-- Create a menu for aech text layout in the profile.
 	if CodeSnippets then
 		for i, settings in TMW:InNLengthTable(CodeSnippets) do
-			self:Import_BuildContainingDropdownEntry({
-				data = settings,
-				type = self.type,
-				version = result.version,
-			}, editbox)
+			if settings then
+				self:Import_BuildContainingDropdownEntry({
+					data = settings,
+					type = self.type,
+					version = result.version,
+				}, editbox)
+			end
 		end
 	end
 end
@@ -311,7 +313,7 @@ function codesnippet:Import_BuildContainingDropdownEntry(result, editbox)
 	info.notCheckable = true
 	--info.tooltipTitle = format(L["fGROUP"], groupID)
 	--info.tooltipText = 
---	info.tooltipOnButton = true
+	--info.tooltipOnButton = true
 	UIDropDownMenu_AddButton(info, UIDROPDOWNMENU_MENU_LEVEL)
 end
 function codesnippet:Import_BuildMenuData(result, editbox)
