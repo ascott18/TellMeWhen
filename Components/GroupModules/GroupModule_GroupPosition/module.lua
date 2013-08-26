@@ -122,9 +122,24 @@ function GroupPosition:SetPos()
 		group:SetPoint("CENTER", UIParent)
 	else
 		local success, err = pcall(group.SetPoint, group, p.point, relativeTo, p.relativePoint, p.x, p.y)
-		if not success and err:find("trying to anchor to itself") then
+		if not success then
 			TMW:Error(err)
-			TMW:Print(L["ERROR_ANCHORSELF"]:format(L["fGROUP"]):format(group:GetGroupName(1)))
+			
+			if err:find("trying to anchor to itself") then
+				TMW:Print(L["ERROR_ANCHORSELF"]:format(L["fGROUP"]):format(group:GetGroupName(1)))
+
+			elseif err:find("dependent on this") then
+				local thisName = L["fGROUP"]:format(group:GetGroupName(1))
+				local relativeToName
+
+				if relativeTo.class == TMW.Classes.Group then
+					relativeToName = L["fGROUP"]:format(relativeTo:GetGroupName(1))
+				else
+					relativeToName = relativeTo:GetName()
+				end
+
+				TMW:Print(L["ERROR_ANCHOR_CYCLICALDEPS"]:format(thisName, relativeToName, relativeToName, thisName))
+			end
 
 			p.relativeTo = "UIParent"
 			p.point = "CENTER"

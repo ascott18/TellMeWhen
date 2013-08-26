@@ -59,6 +59,7 @@ Would you like to restart WoW now?]]
 
 
 L["ERROR_ANCHORSELF"] = "%s was trying to anchor to itself, so TellMeWhen reset it's anchor to the center of the screen to prevent catastrophic failure."
+L["ERROR_ANCHOR_CYCLICALDEPS"] = "%s was trying to anchor to %s, but the position of %s depends on the position of %s, so TellMeWhen reset it's anchor to the center of the screen to prevent catastrophic failure."
 
 L["ERROR_NO_LOCKTOGGLE_IN_LOCKDOWN"] = "Cannot unlock TellMeWhen in combat if the %q option isn't enabled (type '/tmw options')."
 L["ERROR_ACTION_DENIED_IN_LOCKDOWN"] = "Cannot do that in combat if the %q option isn't enabled (type '/tmw options')."
