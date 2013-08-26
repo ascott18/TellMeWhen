@@ -1138,12 +1138,14 @@ function textlayout:Import_HolderMenuHandler(result, editbox, holderMenuData)
 	-- Create a menu for aech text layout in the profile.
 	if TextLayouts then
 		for GUID, settings in pairs(TextLayouts) do
-			self:Import_BuildContainingDropdownEntry({
-				data = settings,
-				type = self.type,
-				version = result.version,
-				[1] = GUID,
-			}, editbox)
+			if GUID ~= "" and settings.GUID then
+				self:Import_BuildContainingDropdownEntry({
+					data = settings,
+					type = self.type,
+					version = result.version,
+					[1] = GUID,
+				}, editbox)
+			end
 		end
 	end
 end
@@ -1157,7 +1159,7 @@ function textlayout:Import_BuildContainingDropdownEntry(result, editbox)
 	info.notCheckable = true
 	--info.tooltipTitle = format(L["fGROUP"], groupID)
 	--info.tooltipText = 
---	info.tooltipOnButton = true
+	--info.tooltipOnButton = true
 	UIDropDownMenu_AddButton(info, UIDROPDOWNMENU_MENU_LEVEL)
 end
 function textlayout:Import_BuildMenuData(result, editbox)
@@ -1218,7 +1220,6 @@ function textlayout:Import_BuildMenuData(result, editbox)
 		UIDropDownMenu_AddButton(info, UIDROPDOWNMENU_MENU_LEVEL)
 	
 	end
-	
 end
 
 textlayout.Export_DescriptionAppend = L["EXPORT_SPECIALDESC2"]:format("6.0.0+")
@@ -1243,19 +1244,32 @@ end
 local SharableDataType_profile = TMW.Classes.SharableDataType.types.profile
 if SharableDataType_profile then
 	SharableDataType_profile:RegisterMenuBuilder(20, function(self, result, editbox)
-		local info = UIDropDownMenu_CreateInfo()
-		info.text = L["TEXTLAYOUTS"]
-		info.notCheckable = true
-		info.hasArrow = true
-		info.value = {
-			isHolderMenu = true,
-			result = result,
-			type = "textlayout",
-		}
-		info.disabled = not (result.data.TextLayouts and next(result.data.TextLayouts))
-		UIDropDownMenu_AddButton(info, UIDROPDOWNMENU_MENU_LEVEL)
-		
-		TMW.AddDropdownSpacer()
+
+		if result.data.TextLayouts then
+			local isGood = false
+			for GUID, settings in pairs(result.data.TextLayouts) do
+				if GUID ~= "" and settings.GUID then
+					isGood = true
+					break
+				end
+			end
+
+			if not isGood then return end
+
+			local info = UIDropDownMenu_CreateInfo()
+			info.text = L["TEXTLAYOUTS"]
+			info.notCheckable = true
+			info.hasArrow = true
+			info.value = {
+				isHolderMenu = true,
+				result = result,
+				type = "textlayout",
+			}
+			UIDropDownMenu_AddButton(info, UIDROPDOWNMENU_MENU_LEVEL)
+			
+			TMW.AddDropdownSpacer()
+		end
+
 	end)
 end
 
