@@ -402,9 +402,9 @@ TMW.GroupConfigTemplate.args.main.args.TextLayout = {
 		return t
 	end,
 	hidden = function(info)
-		local groupID = TMW.FindGroupIDFromInfo(info)
+		local group = TMW.FindGroupFromInfo(info)
 
-		local viewData = TMW[groupID] and TMW[groupID].viewData
+		local viewData = group and group.viewData
 		
 		return not viewData or not viewData:DoesImplementModule("IconModule_Texts")
 	end,
@@ -414,26 +414,26 @@ TMW.GroupConfigTemplate.args.main.args.TextLayout = {
 		return "%FAKEGET%"
 	end,
 	set = function(info, val)
-		local groupID = TMW.FindGroupIDFromInfo(info)
+		local group = TMW.FindGroupFromInfo(info)
 
-		local gs = TMW[groupID]:GetSettings()
+		local gs = group:GetSettings()
 		gs.SettingsPerView[gs.View].TextLayout = val
 		
 		-- the group setting is a fallback for icons, so there is no reason to set the layout for individual icons
 		-- we do need to reset icons to "" so that they will fall back to the group setting, though.
-		for icon in TMW:InIcons(groupID) do
+		for icon in TMW:InIcons(group.ID) do
 			IE:AttemptBackup(icon)
 		end
 		
-		for ics in TMW:InIconSettings(groupID) do
+		for ics in TMW:InIconSettings(group.ID) do
 			ics.SettingsPerView[gs.View].TextLayout = nil
 		end
 		
-		for icon in TMW:InIcons(groupID) do
+		for icon in TMW:InIcons(group.ID) do
 			IE:AttemptBackup(icon)
 		end
 		
-		TMW[groupID]:Setup()
+		group:Setup()
 		
 		IE:Load(1)
 	end,

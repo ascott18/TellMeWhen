@@ -105,9 +105,9 @@ function GroupComponent:RegisterConfigTable(parentTable, key, configTable)
 	TMW:ValidateType("4 (configTable)", "GroupComponent:RegisterConfigTable(parentTable, key, configTable)", configTable, "table")
 	
 	configTable.hidden = function(info)
-		local g = TMW.FindGroupIDFromInfo(info)
+		local group = TMW.FindGroupFromInfo(info)
 		
-		return not TMW[g] or not TMW[g]:GetModuleOrModuleChild(self.className, true)
+		return not group or not group:GetModuleOrModuleChild(self.className, true)
 	end
 		
 	if type(parentTable) == "string" and IsAddOnLoaded("TellMeWhen_Options") then
