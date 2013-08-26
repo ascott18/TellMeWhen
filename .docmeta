@@ -78,3 +78,7 @@
     type: creole
     input-file: "Documentation/IconTypeHowTo.txt"
     output-page: "API/Icon Type/How To"
+-
+    type: creole
+    input-file: "Documentation/IconViewHowTo.txt"
+    output-page: "API/Icon Views/How To"
