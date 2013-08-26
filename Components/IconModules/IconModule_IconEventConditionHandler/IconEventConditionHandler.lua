@@ -94,7 +94,7 @@ do
 	local InIconEventSettings
 	do -- InIconEventSettings
 		local states = {}
-		local function getstate(cg, ci, mg, mi)
+		local function getstate()
 			local state = wipe(tremove(states) or {})
 
 			state.currentEventID = 0
@@ -108,8 +108,7 @@ do
 			state.currentEventID = state.currentEventID + 1
 
 			if not state.currentEvents or state.currentEventID > (state.currentEvents.n or #state.currentEvents) then
-				local settings
-				settings, state.gs, state.cg, state.ci = state.extIter(state.extIterState)
+				local settings, gs, groupID, iconID = state.extIter(state.extIterState)
 				
 				if not settings then
 					tinsert(states, state)
@@ -127,8 +126,7 @@ do
 				return iter(state)
 			end
 			
-			--TODO: change this to provide icon settings and group settings, exclude groupID and iconIDs
-			return eventSettings, state.cg, state.ci -- event data, groupID, iconID
+			return eventSettings
 		end
 
 		InIconEventSettings = function()
