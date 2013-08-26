@@ -298,7 +298,7 @@ function GetFullIconTable(icon, icons) -- check what all the possible icons it c
 
 				if group and group:ShouldUpdateIcons() and gs.View == thisIconsView then
 
-					for ics, _, icID in TMW:InIconSettings(group.ID) do
+					for ics, _, _, icID in TMW:InIconSettings(group.ID) do
 						if ics.Enabled and icID <= gs.Rows*gs.Columns then
 							local ic = group[icID]
 							

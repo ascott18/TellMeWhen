@@ -109,7 +109,7 @@ do
 
 			if not state.currentEvents or state.currentEventID > (state.currentEvents.n or #state.currentEvents) then
 				local settings
-				settings, state.cg, state.ci = state.extIter(state.extIterState)
+				settings, state.gs, state.cg, state.ci = state.extIter(state.extIterState)
 				
 				if not settings then
 					tinsert(states, state)
@@ -127,6 +127,7 @@ do
 				return iter(state)
 			end
 			
+			--TODO: change this to provide icon settings and group settings, exclude groupID and iconIDs
 			return eventSettings, state.cg, state.ci -- event data, groupID, iconID
 		end
 

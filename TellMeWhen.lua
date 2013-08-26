@@ -1081,7 +1081,8 @@ do -- InIconSettings
 			end
 		end
 		state.ci = ci
-		return TMW.db.profile.Groups[state.cg].Icons[ci], state.cg, ci -- ics, groupID, iconID
+		local gs = TMW.db.profile.Groups[state.cg]
+		return gs.Icons[ci], gs, state.cg, ci -- ics, gs, groupID, iconID
 	end
 
 	function TMW:InIconSettings(groupID)
@@ -2685,7 +2686,7 @@ function TMW:DoUpgrade(type, version, ...)
 		local gs, groupID = ...
 		
 		-- delegate to icons
-		for ics, groupID, iconID in TMW:InIconSettings(groupID) do
+		for ics, gs, groupID, iconID in TMW:InIconSettings(groupID) do
 			TMW:DoUpgrade("icon", version, ics, groupID, iconID)
 		end
 	end

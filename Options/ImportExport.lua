@@ -280,14 +280,14 @@ function group:Import_ImportData(editbox, data, version, createNewGroup, oldgrou
 
 		local GUIDmap = {}
 
-		for gs, gID in TMW:InGroupSettings() do
-			if group.ID ~= gID then
+		for gs2, gID in TMW:InGroupSettings() do
+			if gs ~= gs2 then
 				existingGUIDs[gs.GUID] = true
 			end
 		end
-		for ics, gID in TMW:InIconSettings() do
+		for ics, gs2, gID in TMW:InIconSettings() do
 			if ics.GUID and ics.GUID ~= "" then
-				if group.ID ~= gID then
+				if gs ~= gs2 then
 					existingGUIDs[ics.GUID] = true
 				else
 					GUIDmap[ics.GUID] = TMW:GenerateGUID("icon", TMW.CONST.GUID_SIZE)
