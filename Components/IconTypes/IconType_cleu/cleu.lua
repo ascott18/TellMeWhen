@@ -360,7 +360,7 @@ function Type:Setup(icon, groupID, iconID)
 	-- safety mechanism
 	if icon.AllowAnyEvents and not icon.SourceUnits and not icon.DestUnits and not icon.NameHash and not icon.SourceFlags and not icon.DestFlags then
 		if TMW.Locked and icon.Enabled then
-			TMW.Warn(L["CLEU_NOFILTERS"]:format(L["GROUPICON"]):format(icon.group:GetGroupName(1), iconID))
+			TMW.Warn(L["CLEU_NOFILTERS"]:format(icon:GetIconName(true)))
 		end
 		return
 	end

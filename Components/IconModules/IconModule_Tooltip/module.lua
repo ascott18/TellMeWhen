@@ -22,7 +22,7 @@ local Module = TMW:NewClass("IconModule_Tooltip", "IconModule")
 local title_default = function(icon)
 	local groupID = icon.group:GetID()
 	
-	local line1 = "TellMeWhen " .. format(L["GROUPICON"], TMW:GetGroupName(groupID, groupID, 1), icon:GetID())
+	local line1 = "TellMeWhen " .. icon:GetIconName()
 		
 	if icon.group.Locked then
 		line1 = line1 .. " (" .. L["LOCKED"] .. ")"

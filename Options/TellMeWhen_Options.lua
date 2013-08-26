@@ -359,7 +359,7 @@ function TMW.SetIconPreviewIcon(self, icon)
 	end
 
 	local groupID = icon.group:GetID()
-	TMW:TT(self, format(L["GROUPICON"], TMW:GetGroupName(groupID, groupID, 1), icon:GetID()), "ICON_TOOLTIP2NEWSHORT", 1, nil)
+	TMW:TT(self, icon:GetIconName(), "ICON_TOOLTIP2NEWSHORT", 1, nil)
 	self.icon = icon
 	self.texture:SetTexture(icon and icon.attributes.texture)
 	self:Show()

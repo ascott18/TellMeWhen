@@ -369,7 +369,7 @@ function CNDT:IconMenu_DropDown()
 				end
 				info.text = textshort
 				info.tooltipTitle = text
-				info.tooltipText = L["GROUPICON"]:format(icon.group:GetGroupName(1), iconID) .. "\r\n" .. tooltip
+				info.tooltipText = icon:GetIconName() .. "\r\n" .. tooltip
 				info.tooltipOnButton = true
 
 				info.arg1 = self

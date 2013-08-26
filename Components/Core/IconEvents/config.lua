@@ -474,7 +474,7 @@ function EVENTS.IconMenu_DropDown(frame)
 				end
 				info.text = textshort
 				info.tooltipTitle = text
-				info.tooltipText = format(L["GROUPICON"], icon.group:GetGroupName(1), iconID) .. "\r\n" .. tooltip
+				info.tooltipText = icon:GetIconName() .. "\r\n" .. tooltip
 				info.tooltipOnButton = true
 
 				info.value = icon

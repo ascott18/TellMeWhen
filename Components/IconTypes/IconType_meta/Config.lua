@@ -174,7 +174,7 @@ function ME:IconMenu()
 				info.text = textshort
 				info.tooltipTitle = text
 				info.tooltipOnButton = true
-				info.tooltipText = L["GROUPICON"]:format(icon.group:GetGroupName(1), iconID) .. "\r\n" .. tooltip
+				info.tooltipText = icon:GetIconName() .. "\r\n" .. tooltip
 
 				info.value = icon
 				info.func = ME.IconMenuOnClick
