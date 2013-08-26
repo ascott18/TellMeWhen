@@ -210,14 +210,18 @@ function Type:Setup(icon, groupID, iconID)
 		icon.NameName = TMW:GetSpellNames(icon.Name, 1, 1, 1, nil, 1)
 		icon.NameNameHash = TMW:GetSpellNames(icon.Name, 1, nil, 1, 1, 1)
 	end
+
 	icon.Slots = wipe(icon.Slots or {})
 	for i=1, 4 do
 		local settingBit = bit.lshift(1, i - 1)
 		icon.Slots[i] = bit.band(icon.TotemSlots, settingBit) == settingBit
 	end
+
+	icon.FirstTexture = nil
 	if pclass == "DEATHKNIGHT" then
 		icon.NameFirst = ""
 		icon.NameName = GetSpellInfo(46584)
+		icon.FirstTexture = GetSpellTexture(46584)
 		icon.Slots[1] = true -- there is only one slot for DKs, and they dont have options to check certain slots
 		icon.Slots[2] = nil
 		icon.Slots[3] = nil
@@ -225,11 +229,13 @@ function Type:Setup(icon, groupID, iconID)
 	elseif pclass == "MAGE" then
 		icon.NameFirst = ""
 		icon.NameName = GetSpellInfo(116011)
+		icon.FirstTexture = GetSpellTexture(116011)
 		icon.Slots[3] = nil -- there is no rune 3
 		icon.Slots[4] = nil -- there is no rune 4
 	elseif pclass == "DRUID" then
 		icon.NameFirst = ""
 		icon.NameName = GetSpellInfo(88747)
+		icon.FirstTexture = GetSpellTexture(88747)
 		icon.Slots[4] = nil -- there is no mushroom 4
 	elseif pclass ~= "SHAMAN" then --enable all totems for people that dont have totem slot options (future-proof it)
 		icon.Slots[1] = true
@@ -238,17 +244,12 @@ function Type:Setup(icon, groupID, iconID)
 		icon.Slots[4] = true
 	end
 
-	icon.FirstTexture = icon.NameName and TMW.SpellTextures[icon.NameName]
-	
 	icon:SetInfo("reverse", true)
 
-	if pclass == "DRUID" then
-		icon:SetInfo("texture", GetSpellTexture(88747))
-	elseif pclass == "DEATHKNIGHT" then
-		icon:SetInfo("texture", GetSpellTexture(46584))
-	elseif pclass == "MAGE" then
-		icon:SetInfo("texture", GetSpellTexture(116011))
+	if icon.FirstTexture then
+		icon:SetInfo("texture", icon.FirstTexture)
 	else
+		icon.FirstTexture = icon.NameName and TMW.SpellTextures[icon.NameName]
 		icon:SetInfo("texture", Type:GetConfigIconTexture(icon))
 	end
 
