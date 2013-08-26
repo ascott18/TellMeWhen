@@ -39,7 +39,8 @@
 				self.current = {}
 				
 				self:SetFrameLevel(200)
-				self:SetFrameStrata("DIALOG")
+				self:SetFrameStrata("FULLSCREEN_DIALOG")
+				self:SetToplevel(true)
 
 				local arrow = self
 
