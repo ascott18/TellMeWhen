@@ -38,7 +38,11 @@ local function GetAnchoredPoints(group)
 	local X = Ruler:GetWidth()/UIParent:GetScale()/group:GetScale()
 	local Y = Ruler:GetHeight()/UIParent:GetScale()/group:GetScale()
 	
-	return point, relframe:GetName(), relativePoint, -X, Y
+	if TMW:ParseGUID(p.relativeTo) then
+		return point, p.relativeTo, relativePoint, -X, Y
+	else
+		return point, relframe:GetName(), relativePoint, -X, Y
+	end
 end
 
 

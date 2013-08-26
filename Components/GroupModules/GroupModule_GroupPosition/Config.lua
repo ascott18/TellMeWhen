@@ -71,8 +71,20 @@ TMW.Classes.GroupModule_GroupPosition:RegisterConfigTable("args.position.args", 
 		},
 		relativeTo = {
 			name = L["UIPANEL_RELATIVETO"],
-			desc = L["UIPANEL_RELATIVETO_DESC"],
+			desc = function(info)
+				local group = FindGroupFromInfo(info)
+				local relativeTo = group:GetSettings().Point[info[#info]]
+
+				local desc = L["UIPANEL_RELATIVETO_DESC"]
+
+				if TMW:ParseGUID(relativeTo) == "group" then
+					desc = desc .. "\r\n\r\n" .. L["UIPANEL_RELATIVETO_DESC_GUIDINFO"]
+				end
+				
+				return desc
+			end,
 			type = "input",
+			width = "double",
 			order = 2,
 		},
 		relativePoint = {

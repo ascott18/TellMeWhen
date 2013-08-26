@@ -116,17 +116,22 @@ TMW.IconDragger:RegisterIconDragHandler(330,	-- Anchor
 
 		elseif IconDragger.destFrame and IconDragger.destFrame:GetName() then
 			if IconDragger.destFrame == WorldFrame and IconDragger.srcicon.group.Point.relativeTo ~= "UIParent" then
-			
-				--TODO: update this for GUIDs. Keep the existing code, but also add support for GUIDs.
 				local currentFrameName = IconDragger.srcicon.group.Point.relativeTo
 				
-				local groupID = currentFrameName:match("^TellMeWhen_Group(%d+)")
-				local iconID = currentFrameName:match("^TellMeWhen_Group%d+_Icon(%d+)")
-				
-				if iconID and groupID then
-					currentFrameName = L["GROUPICON"]:format(TMW:GetGroupName(groupID, groupID, 1), iconID)
-				elseif groupID then
-					currentFrameName = TMW:GetGroupName(groupID, groupID)
+				local thing
+
+				if TMW:ParseGUID(currentFrameName) then
+					thing = TMW.GUIDToOwner[currentFrameName]
+				else
+					thing = _G[currentFrameName]
+				end
+
+				if type(thing) == "table" then
+					if thing.class == TMW.Classes.Icon then
+						currentFrameName = thing:GetIconName(1)
+					elseif thing.class == TMW.Classes.Group then
+						currentFrameName = thing:GetGroupName()
+					end
 				end
 				
 				name = L["ICONMENU_ANCHORTO_UIPARENT"]
@@ -154,7 +159,7 @@ TMW.IconDragger:RegisterIconDragHandler(330,	-- Anchor
 			end
 
 			-- set the setting
-			IconDragger.srcicon.group.Point.relativeTo = IconDragger.desticon.group:GetName()
+			IconDragger.srcicon.group:GetSettings().Point.relativeTo = IconDragger.desticon.group:GetGUID()
 		else
 			local name = IconDragger.destFrame:GetName()
 			-- we are anchoring to some other frame entirely.
@@ -170,7 +175,7 @@ TMW.IconDragger:RegisterIconDragHandler(330,	-- Anchor
 			end
 
 			-- set the setting
-			IconDragger.srcicon.group.Point.relativeTo = name
+			IconDragger.srcicon.group:GetSettings().Point.relativeTo = name
 		end
 
 		-- do adjustments and positioning
