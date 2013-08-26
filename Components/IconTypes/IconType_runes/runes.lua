@@ -213,7 +213,7 @@ function Type:FormatSpellForOutput(icon, data, doInsertLink)
 end
 
 
-function Type:Setup(icon, groupID, iconID)
+function Type:Setup(icon)
 	icon.Slots = wipe(icon.Slots or {})
 	for i=1, 12 do
 		local settingBit = bit.lshift(1, i - 1)
@@ -249,6 +249,7 @@ function Type:Setup(icon, groupID, iconID)
 	--icon:Update()
 end
 
+--TODO: fix this function's parameters everywhere
 function Type:GetIconMenuText(ics, groupID, iconID)
 	if iconID then
 		return L["fICON"]:format(iconID) .. " - " .. Type.name, ""

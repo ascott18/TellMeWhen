@@ -319,7 +319,7 @@ function GetFullIconTable(icon, icons) -- check what all the possible icons it c
 end
 
 
-function Type:Setup(icon, groupID, iconID)
+function Type:Setup(icon)
 	icon.__currentIcon = nil -- reset this
 	icon.metaUpdateQueued = true -- force this
 

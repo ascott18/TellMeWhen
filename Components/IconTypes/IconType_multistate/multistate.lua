@@ -157,7 +157,7 @@ local function MultiStateCD_OnUpdate(icon, time)
 end
 
 
-function Type:Setup(icon, groupID, iconID)
+function Type:Setup(icon)
 	icon.NameFirst = TMW:GetSpellNames(icon.Name, 1, 1, nil, nil, 1)
 	local originalNameFirst = icon.NameFirst
 

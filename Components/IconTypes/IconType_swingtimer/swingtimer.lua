@@ -109,7 +109,7 @@ end
 
 
 
-function Type:Setup(icon, groupID, iconID)
+function Type:Setup(icon)
 
 	icon:SetInfo("texture", GetSpellTexture(75))
 	

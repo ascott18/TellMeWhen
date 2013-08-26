@@ -121,7 +121,7 @@ function Type:FormatSpellForOutput(icon, data, doInsertLink)
 end
 
 
-function Type:Setup(icon, groupID, iconID)	
+function Type:Setup(icon)
 	icon:SetInfo("texture", "Interface\\Icons\\INV_Misc_QuestionMark")
 
 	icon:SetUpdateMethod("manual")

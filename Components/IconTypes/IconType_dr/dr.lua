@@ -299,7 +299,7 @@ do	-- CheckCategories
 end
 
 
-function Type:Setup(icon, groupID, iconID)
+function Type:Setup(icon)
 	icon.NameFirst = TMW:GetSpellNames(icon.Name, 1, 1)
 	icon.NameArray = TMW:GetSpellNames(icon.Name, 1)
 	icon.NameHash = TMW:GetSpellNames(icon.Name, 1, nil, nil, 1)

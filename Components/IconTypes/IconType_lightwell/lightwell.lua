@@ -138,7 +138,7 @@ local function LW_OnUpdate(icon, time)
 end
 
 
-function Type:Setup(icon, groupID, iconID)
+function Type:Setup(icon)
 	icon.NameFirst = CONST_SPELLID_LIGHTWELL_SUMMONSPELL
 
 	icon:SetInfo("texture; spell; reverse",

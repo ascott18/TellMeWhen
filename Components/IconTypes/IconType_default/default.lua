@@ -37,7 +37,7 @@ Type:SetModuleAllowance("IconModule_CooldownSweep", false)
 Type:RegisterConfigPanel_XMLTemplate(110, "TellMeWhen_DefaultInstructions")
 
 
-function Type:Setup(icon, groupID, iconID)
+function Type:Setup(icon)
 	if icon.Name ~= "" then
 		icon:SetInfo("texture", "Interface\\Icons\\INV_Misc_QuestionMark")
 	else

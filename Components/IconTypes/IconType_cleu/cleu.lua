@@ -338,8 +338,7 @@ local function CLEU_OnUpdate(icon, time)
 	end
 end
 
--- TODO: remove groupID and iconID from all Type:Setup() calls
-function Type:Setup(icon, groupID, iconID)
+function Type:Setup(icon)
 	icon.NameHash = icon.Name ~= "" and TMW:GetSpellNames(icon.Name, 1, nil, nil, 1)
 	icon.Durations = TMW:GetSpellDurations(icon.Name)
 

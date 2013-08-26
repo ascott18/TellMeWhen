@@ -147,7 +147,7 @@ local function ICD_OnUpdate(icon, time)
 	end
 end
 
-function Type:Setup(icon, groupID, iconID)
+function Type:Setup(icon)
 	icon.NameHash = TMW:GetSpellNames(icon.Name, 1, nil, nil, 1)
 	icon.Durations = TMW:GetSpellDurations(icon.Name)
 

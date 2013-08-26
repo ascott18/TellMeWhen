@@ -463,7 +463,7 @@ local function UnitCooldown_OnUpdate(icon, time)
 end
 
 
-function Type:Setup(icon, groupID, iconID)
+function Type:Setup(icon)
 	icon.NameArray = TMW:GetSpellNames(icon.Name, 1)
 	icon.NameHash = TMW:GetSpellNames(icon.Name, 1, nil, nil, 1)
 	icon.Durations = TMW:GetSpellDurations(icon.Name)

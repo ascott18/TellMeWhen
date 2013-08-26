@@ -217,7 +217,7 @@ local function BuffCheck_OnUpdate(icon, time)
 end
 
 
-function Type:Setup(icon, groupID, iconID)
+function Type:Setup(icon)
 	icon.NameFirst = TMW:GetSpellNames(icon.Name, 1, 1)
 	--icon.NameName = TMW:GetSpellNames(icon.Name, 1, 1, 1)
 	icon.NameArray = TMW:GetSpellNames(icon.Name, 1)

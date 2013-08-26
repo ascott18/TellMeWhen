@@ -233,7 +233,7 @@ local function SpellCooldown_OnUpdate(icon, time)
 end
 
 
-function Type:Setup(icon, groupID, iconID)
+function Type:Setup(icon)
 	icon.NameFirst = TMW:GetSpellNames(icon.Name, 1, 1, nil, nil, 1)
 	icon.NameName = TMW:GetSpellNames(icon.Name, 1, 1, 1, nil, 1)
 	icon.NameArray = TMW:GetSpellNames(icon.Name, 1, nil, nil, nil, 1)

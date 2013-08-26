@@ -149,7 +149,7 @@ local function Cast_OnUpdate(icon, time)
 end
 
 
-function Type:Setup(icon, groupID, iconID)
+function Type:Setup(icon)
 	icon.NameFirst = TMW:GetSpellNames(icon.Name, 1, 1)
 --	icon.NameHash = TMW:GetSpellNames(icon.Name, 1, nil, nil, 1)
 	icon.NameNameHash = TMW:GetSpellNames(icon.Name, 1, nil, 1, 1)

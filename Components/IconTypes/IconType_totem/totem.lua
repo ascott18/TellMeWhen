@@ -204,7 +204,7 @@ local function Totem_OnUpdate(icon, time)
 end
 
 
-function Type:Setup(icon, groupID, iconID)
+function Type:Setup(icon)
 	if icon.Name then
 		icon.NameFirst = TMW:GetSpellNames(icon.Name, 1, 1, nil, nil, 1)
 		icon.NameName = TMW:GetSpellNames(icon.Name, 1, 1, 1, nil, 1)

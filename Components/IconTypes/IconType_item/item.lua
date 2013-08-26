@@ -185,7 +185,7 @@ local function ItemCooldown_OnUpdate(icon, time)
 end
 
 
-function Type:Setup(icon, groupID, iconID)
+function Type:Setup(icon)
 	icon.Items = TMW:GetItems(icon.Name)
 
 	if not icon.RangeCheck then

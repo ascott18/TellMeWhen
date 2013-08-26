@@ -110,7 +110,7 @@ local function LoseControl_OnUpdate(icon, time)
 end
 
 
-function Type:Setup(icon, groupID, iconID)
+function Type:Setup(icon)
 	
 	icon:SetInfo("reverse; texture",
 		true,
