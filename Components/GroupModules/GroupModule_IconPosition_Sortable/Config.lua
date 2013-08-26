@@ -17,7 +17,7 @@ local TMW = TMW
 local L = TMW.L
 local print = TMW.print
 
-local findid = TMW.FindGroupIDFromInfo
+local FindGroupFromInfo = TMW.FindGroupFromInfo
 
 
 ---------------------
@@ -77,9 +77,10 @@ groupSortMethodTemplate = {
 		return tonumber(info[#info])
 	end,
 	disabled = function(info, priorityID)
-		local g = findid(info)
+		local group = FindGroupFromInfo(info)
 		local priorityID = priorityID or tonumber(info[#info-1])
-		for k, v in pairs(TMW[g]:GetSettings().SortPriorities) do
+
+		for k, v in pairs(group:GetSettings().SortPriorities) do
 			if k < priorityID and v.Method == "id" then
 				return true
 			end
@@ -94,9 +95,10 @@ groupSortMethodTemplate = {
 				return L["UIPANEL_GROUPSORT_METHODNAME"]:format(priorityID)
 			end,
 			desc = function(info)
-				local g = findid(info)
+				local group = FindGroupFromInfo(info)
+
 				local priorityID = tonumber(info[#info-1])
-				local Method = TMW[g]:GetSettings().SortPriorities[priorityID].Method
+				local Method = group:GetSettings().SortPriorities[priorityID].Method
 
 				local desc = L["UIPANEL_GROUPSORT_METHODNAME_DESC"]:format(priorityID) .. "\r\n\r\n" .. L["UIPANEL_GROUPSORT_" .. Method .. "_DESC"]
 				if groupSortMethodTemplate.disabled(info, priorityID) then
@@ -110,9 +112,11 @@ groupSortMethodTemplate = {
 			style = "dropdown",
 			order = 1,
 			get = function(info)
-				local g = findid(info)
+				local group = FindGroupFromInfo(info)
+
 				local priorityID = tonumber(info[#info-1])
-				local Method = TMW[g]:GetSettings().SortPriorities[priorityID].Method
+				local Method = group:GetSettings().SortPriorities[priorityID].Method
+
 				for k, v in pairs(groupSortPriorities) do
 					if Method == v then
 						return k
@@ -120,18 +124,21 @@ groupSortMethodTemplate = {
 				end
 			end,
 			set = function(info, val)
-				local g = findid(info)
+				local group = FindGroupFromInfo(info)
+				local gs = group:GetSettings()
+
 				local priorityID = tonumber(info[#info-1])
-				local oldPriority = TMW[g]:GetSettings().SortPriorities[priorityID]
-				local newPriority
-				for k, v in pairs(TMW[g]:GetSettings().SortPriorities) do
+				local oldPriority = gs.SortPriorities[priorityID]
+
+				for k, v in pairs(gs.SortPriorities) do
 					if v.Method == groupSortPriorities[val] then
-						TMW[g]:GetSettings().SortPriorities[k] = oldPriority
-						TMW[g]:GetSettings().SortPriorities[priorityID] = v
+						gs.SortPriorities[k] = oldPriority
+						gs.SortPriorities[priorityID] = v
 						break
 					end
 				end
-				TMW[g]:Setup()
+
+				group:Setup()
 			end,
 		},
 		OrderAscending = {
@@ -141,15 +148,17 @@ groupSortMethodTemplate = {
 			width = "half",
 			order = 2,
 			get = function(info)
-				local g = findid(info)
+				local group = FindGroupFromInfo(info)
 				local priorityID = tonumber(info[#info-1])
-				return TMW[g]:GetSettings().SortPriorities[priorityID].Order == 1
+
+				return group:GetSettings().SortPriorities[priorityID].Order == 1
 			end,
 			set = function(info)
-				local g = findid(info)
+				local group = FindGroupFromInfo(info)
 				local priorityID = tonumber(info[#info-1])
-				TMW[g]:GetSettings().SortPriorities[priorityID].Order = 1
-				TMW[g]:Setup()
+
+				group:GetSettings().SortPriorities[priorityID].Order = 1
+				group:Setup()
 			end,
 		},
 		OrderDescending = {
@@ -159,15 +168,17 @@ groupSortMethodTemplate = {
 			width = "half",
 			order = 3,
 			get = function(info)
-				local g = findid(info)
+				local group = FindGroupFromInfo(info)
 				local priorityID = tonumber(info[#info-1])
-				return TMW[g]:GetSettings().SortPriorities[priorityID].Order == -1
+
+				return group:GetSettings().SortPriorities[priorityID].Order == -1
 			end,
 			set = function(info)
-				local g = findid(info)
+				local group = FindGroupFromInfo(info)
 				local priorityID = tonumber(info[#info-1])
-				TMW[g]:GetSettings().SortPriorities[priorityID].Order = -1
-				TMW[g]:Setup()
+				
+				group:GetSettings().SortPriorities[priorityID].Order = -1
+				group:Setup()
 			end,
 		},
 	}

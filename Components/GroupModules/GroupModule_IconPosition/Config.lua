@@ -17,25 +17,25 @@ local TMW = TMW
 local L = TMW.L
 local print = TMW.print
 
-local findid = TMW.FindGroupIDFromInfo
+local FindGroupFromInfo = TMW.FindGroupFromInfo
 
 
 
 local set = function(info, val)
-	local g = findid(info)
-	local gs = TMW[g]:GetSettings()
+	local group = FindGroupFromInfo(info)
+	local gs = group:GetSettings()
 
 	gs.SettingsPerView[gs.View][info[#info]] = val
 	
-	local Module = TMW[g]:GetModuleOrModuleChild("GroupModule_IconPosition")
+	local Module = group:GetModuleOrModuleChild("GroupModule_IconPosition")
 	
 	if Module then
 		Module:PositionIcons()
 	end
 end
 local get = function(info)
-	local g = findid(info)
-	local gs = TMW[g]:GetSettings()
+	local group = FindGroupFromInfo(info)
+	local gs = group:GetSettings()
 	
 	return gs.SettingsPerView[gs.View][info[#info]]
 end

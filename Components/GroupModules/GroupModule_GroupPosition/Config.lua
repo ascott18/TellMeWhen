@@ -18,7 +18,8 @@ local L = TMW.L
 local print = TMW.print
 
 
-local findid = TMW.FindGroupIDFromInfo
+local FindGroupFromInfo = TMW.FindGroupFromInfo
+
 local stratas = {
 	"BACKGROUND",
 	"LOW",
@@ -41,18 +42,20 @@ TMW.Classes.GroupModule_GroupPosition:RegisterConfigTable("args.position.args", 
 	name = "",
 	desc = "",
 	set = function(info, val)
-		local g = findid(info)
-		TMW[g]:GetSettings().Point[info[#info]] = val
+		local group = FindGroupFromInfo(info)
+
+		group:GetSettings().Point[info[#info]] = val
 		
-		local Module = TMW[g]:GetModuleOrModuleChild("GroupModule_GroupPosition")
+		local Module = group:GetModuleOrModuleChild("GroupModule_GroupPosition")
 		
 		if Module then
 			Module:SetPos()
 		end
 	end,
 	get = function(info)
-		local g = findid(info)
-		return TMW[g]:GetSettings().Point[info[#info]]
+		local group = FindGroupFromInfo(info)
+
+		return group:GetSettings().Point[info[#info]]
 	end,
 	dialogInline = true,
 	guiInline = true,
@@ -109,18 +112,20 @@ TMW.Classes.GroupModule_GroupPosition:RegisterConfigTable("args.position.args", 
 	name = "",
 	desc = "",
 	set = function(info, val)
-		local g = findid(info)
-		TMW[g]:GetSettings()[info[#info]] = val
+		local group = FindGroupFromInfo(info)
 
-		local Module = TMW[g]:GetModuleOrModuleChild("GroupModule_GroupPosition")
+		group:GetSettings()[info[#info]] = val
+
+		local Module = group:GetModuleOrModuleChild("GroupModule_GroupPosition")
 		
 		if Module then
 			Module:SetPos()
 		end
 	end,
 	get = function(info)
-		local g = findid(info)
-		return TMW[g]:GetSettings()[info[#info]]
+		local group = FindGroupFromInfo(info)
+
+		return group:GetSettings()[info[#info]]
 	end,
 	dialogInline = true,
 	guiInline = true,
@@ -149,18 +154,19 @@ TMW.Classes.GroupModule_GroupPosition:RegisterConfigTable("args.position.args", 
 			style = "dropdown",
 			order = 8,
 			set = function(info, val)
-				local g = findid(info)
-				TMW[g]:GetSettings()[info[#info]] = stratas[val]
+				local group = FindGroupFromInfo(info)
+				group:GetSettings()[info[#info]] = stratas[val]
 		
-				local Module = TMW[g]:GetModuleOrModuleChild("GroupModule_GroupPosition")
+				local Module = group:GetModuleOrModuleChild("GroupModule_GroupPosition")
 				
 				if Module then
 					Module:SetPos()
 				end
 			end,
 			get = function(info)
-				local g = findid(info)
-				local val = TMW[g]:GetSettings()[info[#info]]
+				local group = FindGroupFromInfo(info)
+
+				local val = group:GetSettings()[info[#info]]
 				for k, v in pairs(stratas) do
 					if v == val then
 						return k
@@ -178,8 +184,8 @@ TMW.Classes.GroupModule_GroupPosition:RegisterConfigTable("args.position.args", 
 	type = "execute",
 	order = 50,
 	func = function(info)
-		local groupID = findid(info)
-		local gs = TMW[groupID]:GetSettings()
+		local group = FindGroupFromInfo(info)
+		local gs = group:GetSettings()
 		
 		for k, v in pairs(TMW.Group_Defaults.Point) do
 			gs.Point[k] = v
@@ -188,7 +194,7 @@ TMW.Classes.GroupModule_GroupPosition:RegisterConfigTable("args.position.args", 
 		gs.Locked = false
 		
 		TMW.IE:NotifyChanges()
-		TMW[groupID]:Setup()
+		group:Setup()
 	end,
 })
 

@@ -1392,7 +1392,7 @@
 					export.profile = true
 					
 					import.group_new = true
-					
+					--TODO: change export.group and export.icon to contain icon and groups rather than IDs
 					-- callbacks will insert into tables as desired
 					TMW:Fire("TMW_CONFIG_REQUEST_AVAILABLE_IMPORT_EXPORT_TYPES", self, import, export)
 					
