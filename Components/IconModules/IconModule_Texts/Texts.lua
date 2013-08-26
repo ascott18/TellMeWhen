@@ -438,11 +438,8 @@ TMW:RegisterCallback("TMW_UPGRADE_REQUESTED", function(event, type, version, ...
 end)
 
 
-function TEXT:GetTextLayoutForIconID(groupID, iconID, view)
-	--TODO: try to make this function not take a groupID and iconID as params - take an icon instead.
+function TEXT:GetTextLayoutForIconSettings(gs, ics, view)
 	-- arg3, view, is optional. Defaults to the current view
-	local gs = TMW.db.profile.Groups[groupID]
-	local ics = gs.Icons[iconID]
 	
 	view = view or gs.View
 	
@@ -484,7 +481,7 @@ function TEXT:GetTextLayoutForIconID(groupID, iconID, view)
 end
 
 function TEXT:GetTextLayoutForIcon(icon, view)
-	return TEXT:GetTextLayoutForIconID(icon.group.ID, icon.ID, view)
+	return TEXT:GetTextLayoutForIconSettings(icon.group:GetSettings(), icon:GetSettings(), view)
 end
 
 function TEXT:GetTextFromSettingsAndLayout(Texts, layoutSettings, textID)

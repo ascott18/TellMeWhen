@@ -102,7 +102,7 @@ function TEXT:CacheUsedStrings()
 	for ics, gs, groupID, iconID in TMW:InIconSettings() do
 		for view, viewSettings in pairs(ics.SettingsPerView) do
 		
-			local GUID, layoutSettings = TEXT:GetTextLayoutForIconID(groupID, iconID, view)
+			local GUID, layoutSettings = TEXT:GetTextLayoutForIconSettings(gs, ics, view)
 			local Texts = viewSettings.Texts
 			
 			-- Get text displays that are used by the current layout.
