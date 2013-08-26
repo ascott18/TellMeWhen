@@ -1844,7 +1844,7 @@ function IE:OnUpdate()
 	
 	local tab = IE.CurrentTab
 	
-	local groupName = TMW:GetGroupName(groupID, groupID, 1)
+	local groupName = icon.group:GetGroupName(1)
 
 	if tab.doesGroup and tab.doesIcon then
 		-- For IconEditor tabs that can configure icons
