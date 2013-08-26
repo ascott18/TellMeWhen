@@ -2109,8 +2109,6 @@ function IE:Load(isRefresh, icon, isHistoryChange)
 		end
 	end
 
-	IE:CheckLoadedIconIsValid()
-
 	-- This is really really important. The icon must be setup so that it has the correct components implemented
 	-- so that the correct config panels will be loaded and shown for the icon.
 	CI.ic:Setup()
@@ -2170,7 +2168,7 @@ end
 function IE:LoadFirstValidIcon()
 	for icon in TMW:InIcons() do
 		-- hack to get the first icon that exists and is shown
-		if icon:IsVisible() then
+		if icon:IsVisible() and icon.group:IsValid() and icon:IsInRange() then
 			return IE:Load(1, icon)
 		end
 	end
