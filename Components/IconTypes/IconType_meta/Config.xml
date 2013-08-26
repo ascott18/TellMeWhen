@@ -12,6 +12,9 @@
 					<OnLoad>
 						self:RegisterForDrag("LeftButton", "RightButton")
 						
+						self.SetGUID = TMW.SetUIDropdownGUID
+						self.SetIcon = TMW.SetUIDropdownIcon
+				
 						self.wrapTooltips = 1
 						self.initialize = TMW.ME.IconMenu
 						self.Button:SetFrameLevel(self:GetFrameLevel()+1)

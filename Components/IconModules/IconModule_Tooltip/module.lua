@@ -74,6 +74,7 @@ Module:SetScriptHandler("OnEnter", function(Module, icon)
 		if TMW.debug then
 			GameTooltip:AddLine("")
 			GameTooltip:AddLine(icon:GetGUID(), HIGHLIGHT_FONT_COLOR.r, HIGHLIGHT_FONT_COLOR.g, HIGHLIGHT_FONT_COLOR.b, false)
+			GameTooltip:AddLine(icon.group:GetGUID(), HIGHLIGHT_FONT_COLOR.r, HIGHLIGHT_FONT_COLOR.g, HIGHLIGHT_FONT_COLOR.b, false)
 		end
 
 		GameTooltip:Show()

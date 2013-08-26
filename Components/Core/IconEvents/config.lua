@@ -267,8 +267,7 @@ function EVENTS:LoadEventSettings()
 	EventSettingsContainer.PassingCndt	 		:SetChecked(Settings.PassingCndt)
 	EventSettingsContainer.Value		 	 	:SetText(Settings.Value)
 
-	TMW:SetUIDropdownGUIDText(EventSettingsContainer.Icon, Settings.Icon, L["CHOOSEICON"])
-	EventSettingsContainer.Icon.IconPreview:SetIcon(TMW.GUIDToOwner[Settings.Icon])
+	EventSettingsContainer.Icon:SetGUID(Settings.Icon)
 
 	--show settings as needed
 	for setting, frame in pairs(EventSettingsContainer) do
@@ -511,8 +510,7 @@ function EVENTS.IconMenu_DropDown_OnClick(button, frame)
 	local icon = button.value
 	local GUID = icon:GetGUID(true)
 
-	TMW:SetUIDropdownGUIDText(frame, GUID, L["CHOOSEICON"])
-	frame.IconPreview:SetIcon(icon)
+	frame:SetIcon(icon)
 
 	EVENTS:GetEventSettings().Icon = GUID
 end

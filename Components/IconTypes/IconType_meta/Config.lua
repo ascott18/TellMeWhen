@@ -87,10 +87,7 @@ function ME:LoadConfig()
 		end
 		mg:SetFrameLevel(TellMeWhen_MetaIconOptions:GetFrameLevel()+2)
 
-		local icon = TMW.GUIDToOwner[GUID]
-
-		TMW:SetUIDropdownGUIDText(mg.icon, GUID, L["CHOOSEICON"])
-		mg.icon.IconPreview:SetIcon(icon)
+		mg.icon:SetGUID(GUID)
 	end
 
 	TMW:AnimateHeightChange(TellMeWhen_MetaIconOptions, (#settings * ME[1]:GetHeight()) + 35, 0.1)

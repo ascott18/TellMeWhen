@@ -332,10 +332,30 @@ function TMW.SetIconPreviewIcon(self, icon)
 	end
 
 	local groupID = icon.group:GetID()
-	TMW:TT(self, icon:GetIconName(), "ICON_TOOLTIP2NEWSHORT", 1, nil)
+	local desc = L["ICON_TOOLTIP2NEWSHORT"]
+
+	if TMW.debug then
+		desc = desc .. "\r\n\r\n|cffffffff" .. icon:GetGUID() .. "\r\n" .. icon.group:GetGUID()
+	end
+
+	TMW:TT(self, icon:GetIconName(), desc, 1, 1)
 	self.icon = icon
 	self.texture:SetTexture(icon and icon.attributes.texture)
 	self:Show()
+end
+
+function TMW.SetUIDropdownGUID(self, GUID)
+	local icon = TMW.GUIDToOwner[GUID]
+
+	TMW:SetUIDropdownGUIDText(self, GUID, L["CHOOSEICON"])
+	self.IconPreview:SetIcon(icon)
+end
+
+function TMW.SetUIDropdownIcon(self, icon)
+	local GUID = icon:GetGUID()
+
+	TMW:SetUIDropdownGUIDText(self, GUID, L["CHOOSEICON"])
+	self.IconPreview:SetIcon(icon)
 end
 
 

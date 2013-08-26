@@ -1224,6 +1224,12 @@
 				<PushedTexture file="Interface\Buttons\UI-Quickslot-Depress"/>
 			</Button>
 		</Frames>
+		<Scripts>
+			<OnLoad>
+				self.SetGUID = TMW.SetUIDropdownGUID
+				self.SetIcon = TMW.SetUIDropdownIcon
+			</OnLoad>
+		</Scripts>
 	</Frame>
 
 	<EditBox name="TellMeWhen_ExportBoxTemplate" inherits="TellMeWhen_InputBoxTemplate" virtual="true">

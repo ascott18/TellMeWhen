@@ -408,8 +408,7 @@ function CNDT:IconMenu_DropDown_OnClick(frame)
 	local icon = self.value
 	local GUID = icon:GetGUID(true)
 	
-	TMW:SetUIDropdownGUIDText(frame, GUID, L["CHOOSEICON"])
-	frame.IconPreview:SetIcon(icon)
+	frame:SetIcon(icon)
 
 	local group = UIDROPDOWNMENU_OPEN_MENU:GetParent()
 	local condition = group:GetConditionSettings()
@@ -684,10 +683,8 @@ end)
 -- Icon
 TMW:RegisterCallback("TMW_CNDT_GROUP_DRAWGROUP", function(event, CndtGroup, conditionData, conditionSettings)
 	local GUID = conditionSettings.Icon
-	local icon = TMW.GUIDToOwner[GUID]
 
-	TMW:SetUIDropdownGUIDText(CndtGroup.Icon, GUID, L["CHOOSEICON"])
-	CndtGroup.Icon.IconPreview:SetIcon(icon)
+	CndtGroup.Icon:SetGUID(GUID)
 end)
 
 -- Runes

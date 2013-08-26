@@ -179,6 +179,9 @@
 				</Anchors>
 				<Scripts>
 					<OnLoad>
+						self.SetGUID = TMW.SetUIDropdownGUID
+						self.SetIcon = TMW.SetUIDropdownIcon
+
 						self.wrapTooltips = 1
 						self:Hide()
 						UIDropDownMenu_SetWidth(self, 152)
