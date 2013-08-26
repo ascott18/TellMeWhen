@@ -232,7 +232,7 @@ IconDragger:RegisterIconDragHandler(40,	-- Split
 
 
 		-- back up the icon data of the source group
-		local SOURCE_ICONS = TMW.db.profile.Groups[IconDragger.srcicon.group:GetID()].Icons
+		local SOURCE_ICONS = IconDragger.srcicon.group:GetSettings().Icons
 
 
 		-- copy the source group.

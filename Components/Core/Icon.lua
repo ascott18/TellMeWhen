@@ -152,7 +152,7 @@ function Icon.ScriptSort(iconA, iconB)
 	local gA = iconA.group.ID
 	local gB = iconB.group.ID
 	if gA == gB then
-		local iOrder = -TMW.db.profile.Groups[gA].CheckOrder
+		local iOrder = -TMW[gA]:GetSettings().CheckOrder
 		return iconA.ID*iOrder < iconB.ID*iOrder
 	end
 	return gA*gOrder < gB*gOrder
@@ -224,7 +224,7 @@ end
 -- @usage local ics = icon:GetSettings()
 -- print(icon:GetName() .. "'s enabled setting is set to " .. ics.Enabled)
 function Icon.GetSettings(icon)
-	return TMW.db.profile.Groups[icon.group:GetID()].Icons[icon:GetID()]
+	return icon.group:GetSettings().Icons[icon:GetID()]
 end
 
 --TODO: doc this

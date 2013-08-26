@@ -220,6 +220,7 @@ end
 
 ---------- Icon Utilities ----------
 function TMW:GetIconMenuText(g, i, ics)
+	--TODO: this function sucks. Change it. It should only take one param
 	ics = ics or TMW.db.profile.Groups[tonumber(g)].Icons[tonumber(i)]
 
 	local Type = ics.Type or ""
@@ -571,7 +572,7 @@ TMW.GroupConfigTemplate = {
 					width = "double",
 					set = function(info, val)
 						local g = findid(info)
-						TMW.db.profile.Groups[g].Name = strtrim(val)
+						TMW[g]:GetSettings().Name = strtrim(val)
 						TMW[g]:Setup()
 					end,
 				},
@@ -631,11 +632,11 @@ TMW.GroupConfigTemplate = {
 					order = 30,
 					get = function(info)
 						local g = findid(info)
-						return TMW.db.profile.Groups[g][info[#info-1]] == info[#info]
+						return TMW[g]:GetSettings()[info[#info-1]] == info[#info]
 					end,
 					set = function(info)
 						local g = findid(info)
-						TMW.db.profile.Groups[g][info[#info-1]] = info[#info]
+						TMW[g]:GetSettings()[info[#info-1]] = info[#info]
 						
 						-- This intentional. Double setup is needed for dealing with Masque bullshit,
 						-- Second setup is addon-wide so that all icons and groups can become aware of the new view if needed.
@@ -709,11 +710,14 @@ TMW.GroupConfigTemplate = {
 					order = 40,
 					set = function(info, val)
 						local g = findid(info)
-						TMW.db.profile.Groups[g].Locked = val
+						TMW[g]:GetSettings().Locked = val
 				
 						TMW[g]:Setup()
 					end,
-					get = function(info) return TMW.db.profile.Groups[findid(info)].Locked end
+					get = function(info)
+						local g = findid(info)
+						return TMW[g]:GetSettings().Locked
+					end
 				},
 			},
 		},
@@ -1145,10 +1149,13 @@ function TMW:CompileOptions()
 					order = 30,
 					set = function(info, val)
 						local g = findid(info)
-						TMW.db.profile.Groups[g][info[#info]] = val
+						TMW[g]:GetSettings()[info[#info]] = val
 						TMW[g]:Setup()
 					end,
-					get = function(info) return TMW.db.profile.Groups[findid(info)][info[#info]] end,
+					get = function(info)
+						local g = findid(info)
+						return TMW[g]:GetSettings()[info[#info]]
+					end,
 					args = {
 						addgroup = addGroupFunctionGroup,
 						importexport = importExportBoxTemplate,
@@ -2199,14 +2206,12 @@ function IE:NotifyChanges(...)
 	end
 end
 
-function IE:Reset()
-	local groupID, iconID = CI.g, CI.i
-	
+function IE:Reset()	
 	IE:SaveSettings() -- this is here just to clear the focus of editboxes, not to actually save things
 	
 	CI.ic:DisableIcon()
 	
-	TMW.db.profile.Groups[groupID].Icons[iconID] = nil
+	TMW.CI.gs.Icons[CI.i] = nil
 	
 	TMW:Fire("TMW_ICON_SETTINGS_RESET", CI.ic)
 	
@@ -3334,8 +3339,8 @@ function IE:DoUndoRedo(direction)
 
 	icon.historyState = icon.historyState + direction
 
-	TMW.db.profile.Groups[CI.g].Icons[CI.i] = nil -- recreated when passed into CTIPWM
-	TMW:CopyTableInPlaceWithMeta(icon.history[icon.historyState], TMW.db.profile.Groups[CI.g].Icons[CI.i])
+	TMW.CI.gs.Icons[CI.i] = nil -- recreated when passed into CTIPWM
+	TMW:CopyTableInPlaceWithMeta(icon.history[icon.historyState], CI.ics)
 	
 	CI.ic:Setup() -- do an immediate setup for good measure
 	

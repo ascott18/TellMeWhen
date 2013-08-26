@@ -265,18 +265,18 @@ TMW:RegisterUpgrade(51003, {
 	end,
 	
 	-- Sets a group to use the specified text layout
-	SetLayoutToGroup = function(self, groupID, GUID)
-		TMW.db.profile.Groups[groupID].SettingsPerView.icon.TextLayout = GUID
+	SetLayoutToGroup = function(self, gs, GUID)
+		gs.SettingsPerView.icon.TextLayout = GUID
 		
 		-- the group setting is a fallback for icons, so there is no reason to set the layout for individual icons
-		for ics in TMW:InIconSettings(groupID) do
+		for iconID, ics in pairs(gs.Icons) do
 			ics.SettingsPerView.icon.TextLayout = nil
 		end
 	end,
 	
 	
 	---------- Upgrade method ----------
-	group = function(self, gs, groupID)
+	group = function(self, gs)
 		-- Create a layout table to start storing text layout data for this group in.
 		local layout = TMW.db.profile.TextLayouts[0]
 		
@@ -361,7 +361,7 @@ TMW:RegisterUpgrade(51003, {
 				if isDuplicate then
 					-- If the layout we just created is a duplicate of another, then set the pre-existing layout to the group.
 					-- The layout we just created just becomes garbage and will get picked up by the gc eventually.
-					self:SetLayoutToGroup(groupID, GUID)
+					self:SetLayoutToGroup(gs, GUID)
 					return
 				end
 			end
@@ -400,7 +400,7 @@ TMW:RegisterUpgrade(51003, {
 		TMW.db.profile.TextLayouts[GUID] = layout
 		
 		-- Set the new layout to the group we are upgrading.
-		self:SetLayoutToGroup(groupID, GUID)
+		self:SetLayoutToGroup(gs, GUID)
 	end,
 })
 
@@ -439,6 +439,7 @@ end)
 
 
 function TEXT:GetTextLayoutForIconID(groupID, iconID, view)
+	--TODO: try to make this function not take a groupID and iconID as params - take an icon instead.
 	-- arg3, view, is optional. Defaults to the current view
 	local gs = TMW.db.profile.Groups[groupID]
 	local ics = gs.Icons[iconID]
