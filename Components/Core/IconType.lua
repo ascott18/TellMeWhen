@@ -235,11 +235,9 @@ end
 -- [REQUIRED, FALLBACK]
 --- Returns brief information about what an icon is configured to track. Used mainly in import/export menus. This is a default method, and may be overridden if it does not provide the desired functionality for an IconType. It is acceptable to delay the declaration of overrides of this method until after TellMeWhen_Options has loaded if needed.
 -- @param ics [TMW.Icon_Defaults] The settings of the icon that information is being requested about.
--- @param groupID [number] The ID of the group of the icon that information is being requested for. Does not necessarily correlate to an icon that exists in the currently active profile.
--- @param iconID [number] The ID of the icon that information is being requested for. Does not necessarily correlate to an icon that exists in the currently active profile.
 -- @return [string] The title text that can be displayed in a tooltip.
 -- @return [string] The body text that can be displayed in a tooltip.
-function IconType:GetIconMenuText(ics, groupID, iconID)
+function IconType:GetIconMenuText(ics)
 	self:AssertSelfIsInstance()
 	
 	local text = ics.Name or ""

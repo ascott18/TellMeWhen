@@ -219,19 +219,16 @@ function TMW.approachTable(t, ...)
 end
 
 ---------- Icon Utilities ----------
-function TMW:GetIconMenuText(g, i, ics)
-	--TODO: this function sucks. Change it. It should only take one param
-	ics = ics or TMW.db.profile.Groups[tonumber(g)].Icons[tonumber(i)]
-
+function TMW:GetIconMenuText(ics)
 	local Type = ics.Type or ""
 	local typeData = Types[Type]
 
-	local text, tooltip, dontShorten = typeData:GetIconMenuText(ics, g, i)
+	local text, tooltip, dontShorten = typeData:GetIconMenuText(ics)
 	text = tostring(text)
 	
 	tooltip = tooltip or ""
 	
-	text = text == "" and L["UNNAMED"] or text
+	text = text == "" and (L["UNNAMED"] .. ((Type ~= "" and typeData and (" - " .. typeData.name) or ""))) or text
 	local textshort = not dontShorten and strsub(text, 1, 40) or text
 
 	if strlen(text) > 40 and not dontShorten then
@@ -303,12 +300,16 @@ function TMW:SetUIDropdownGUIDText(frame, GUID, text)
 	if owner then
 		if type == "icon" then
 			local icon = owner
-			UIDropDownMenu_SetText(frame, TMW:GetIconMenuText(icon.group.ID, icon.ID, icon:GetSettings()))
+
+			UIDropDownMenu_SetText(frame, icon:GetIconMenuText())
+
 			return icon
 
 		elseif type == "group" then
 			local group = owner
+
 			UIDropDownMenu_SetText(frame, group:GetGroupName())
+
 			return group
 		end
 	end

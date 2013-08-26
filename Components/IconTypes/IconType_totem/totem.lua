@@ -261,15 +261,6 @@ function Type:Setup(icon)
 	icon:Update()
 end
 
-function Type:GetIconMenuText(ics)
-	local text = ics.Name or ""
-	if text == "" then
-		text = "((" .. Type.name .. "))"
-	end
-
-	return text, ics.Name and ics.Name ~= ""  and ics.Name .. "\r\n" or ""
-end
-
 function Type:FormatSpellForOutput(icon, data, doInsertLink)
 	data = data or icon.NameFirst
 	

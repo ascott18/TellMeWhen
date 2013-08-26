@@ -301,6 +301,6 @@ function Type:GetIconMenuText(ics)
 		end
 	end
 
-	return text, text and text ~= ""  and text .. "\r\n" or ""
+	return text, ""
 end
 

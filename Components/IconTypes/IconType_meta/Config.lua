@@ -164,14 +164,11 @@ function ME:IconMenu()
 			if icon:IsValid() and CI.ic ~= icon then
 				local info = UIDropDownMenu_CreateInfo()
 
-				local text, textshort, tooltip = TMW:GetIconMenuText(groupID, iconID, icon:GetSettings())
-				if text:sub(-2) == "))" then
-					textshort = textshort .. " " .. L["fICON"]:format(iconID)
-				end
+				local text, textshort, tooltip = icon:GetIconMenuText()
 				info.text = textshort
 				info.tooltipTitle = text
 				info.tooltipOnButton = true
-				info.tooltipText = icon:GetIconName() .. "\r\n" .. tooltip
+				info.tooltipText = tooltip
 
 				info.value = icon
 				info.func = ME.IconMenuOnClick

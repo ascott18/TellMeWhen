@@ -418,7 +418,7 @@ Instances of IconType have a bunch of methods that they may wish to (and in many
 
 The overridable IT methods are:
 * IconType:FormatSpellForOutput(icon, data, doInsertLink)
-* IconType:GetIconMenuText(ics, groupID, iconID)
+* IconType:GetIconMenuText(ics)
 * IconType:DragReceived(icon, t, data, subType, param4)
 * IconType:GuessIconTexture(ics)
 

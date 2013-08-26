@@ -44,9 +44,7 @@ function Type:GetIconMenuText(ics)
 	
 	text = text .. " - " .. L["ICONMENU_WPNENCHANT"]
 
-	local tooltip =	""--(data.Name and data.Name ~= "" and data.Name .. "\r\n" or "")
-
-	return text, tooltip
+	return text, ""
 end
 
 

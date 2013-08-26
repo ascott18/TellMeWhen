@@ -190,14 +190,5 @@ function Type:GuessIconTexture(ics)
 	return "Interface\\Icons\\Temp"
 end
 
-function Type:GetIconMenuText(ics, groupID, iconID)
-	local text = ics.Name or ""
-	if text == "" then
-		text = L["fICON"]:format(iconID) .. " - " .. Type.name
-	end
-
-	return text, ""--ics.Name and ics.Name ~= "" and ics.Name .. "\r\n" or ""
-end
-
 Type:Register(150)
 

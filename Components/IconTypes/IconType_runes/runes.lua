@@ -249,12 +249,37 @@ function Type:Setup(icon)
 	--icon:Update()
 end
 
---TODO: fix this function's parameters everywhere
-function Type:GetIconMenuText(ics, groupID, iconID)
-	if iconID then
-		return L["fICON"]:format(iconID) .. " - " .. Type.name, ""
+function Type:GetIconMenuText(ics)
+	local RuneSlots = ics.RuneSlots or 0xFFF
+
+	local Slots = {}
+
+	local str = ""
+
+	for slot = 1, 12, 2 do
+		local settingBit = bit.lshift(1, slot - 1)
+		local slotEnabled = bit.band(RuneSlots, settingBit) == settingBit
+
+		local settingBit2 = bit.lshift(1, slot)
+		local slot2Enabled = bit.band(RuneSlots, settingBit) == settingBit
+
+		local n = (slotEnabled and 1 or 0) + (slot2Enabled and 1 or 0)
+
+		if n > 0 then
+			local runeName = runeNames[(ceil(slot/2) - 1) % 3 + 1]
+			if slot > 6 then
+				runeName = runeNames[4] .. " (" .. runeName .. ")"
+			end
+
+			str = str .. n .. "x " .. runeName .. ", "
+
+		end
+	end
+
+	if str ~= "" then
+		return str:sub(1, -3), ""
 	else
-		return "((" .. Type.name .. "))", ""
+		return "", ""
 	end
 end
 

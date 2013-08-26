@@ -69,7 +69,7 @@ DD.initialize = function(dropdown)
 		local info = UIDropDownMenu_CreateInfo()
 		info.text = icon:GetIconName()
 		
-		local text, textshort, tooltip = TMW:GetIconMenuText(groupID, iconID, icon:GetSettings())
+		local text, textshort, tooltip = icon:GetIconMenuText()
 		info.tooltipTitle = text
 		info.tooltipText = tooltip
 		info.tooltipOnButton = true

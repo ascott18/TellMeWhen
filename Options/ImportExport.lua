@@ -581,7 +581,7 @@ function icon:Import_BuildContainingDropdownEntry(result, editbox)
 			tex = TMW:GuessIconTexture(ics)
 		end
 
-		local text, textshort, tooltipText = TMW:GetIconMenuText(groupID, iconID, ics)
+		local text, textshort, tooltipText = TMW:GetIconMenuText(ics)
 		if text:sub(-2) == "))" and iconID then
 			textshort = textshort .. " " .. L["fICON"]:format(iconID)
 		end

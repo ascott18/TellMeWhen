@@ -281,6 +281,19 @@ function Icon.GetIconName(icon, texture)
 	end
 end
 
+--- Returns information about the icon that should be included when listing it in a dropdown menu. Wrapper around TMW:GetIconMenuText() with the groupID and iconID added to the tooltip.
+-- @name Icon:GetIconMenuText
+-- @paramsig 
+-- @return [string] The string that should be used as the tooltip title for the menu item.
+-- @return [string] The string that should be used as the text for the menu item. This is a tuncation of the first return.
+-- @return [string] The string that should be used as the tooltip text for the menu item.
+function Icon.GetIconMenuText(icon)
+	local text, textshort, tooltip = TMW:GetIconMenuText(icon:GetSettings())
+	tooltip = icon:GetIconName() .. "\r\n" .. tooltip
+
+	return text, textshort, tooltip
+end
+
 --- Queues an icon event to be fired.
 -- 
 -- The event must have been registed through [[api/base-classes/icon-component/|IconComponent]]{{{:RegisterIconEvent()}}}.

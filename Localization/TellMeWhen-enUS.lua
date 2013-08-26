@@ -1402,7 +1402,7 @@ L["VALIDITY_ISINVALID"] = "is invalid."
 
 L["MAIN"] = "Main"
 L["MAIN_DESC"] = "Contains the main options for this icon."
-L["UNNAMED"] = "((Unnamed))"
+L["UNNAMED"] = "(Unnamed)"
 L["NOTYPE"] = "<No Icon Type>"
 
 
