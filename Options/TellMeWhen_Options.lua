@@ -3234,13 +3234,13 @@ TMW:RegisterCallback("TMW_CONFIG_REQUEST_AVAILABLE_IMPORT_EXPORT_TYPES", functio
 	if editbox == TMW.IE.ExportBox then	
 		
 		if IE.CurrentTab.doesGroup then	
-			import.group_overwrite = CI.g
-			export.group = CI.g
+			import.group_overwrite = CI.ic.group
+			export.group = CI.ic.group
 		end
 		
 		if IE.CurrentTab.doesIcon then
-			import.icon = CI.i
-			export.icon = CI.i
+			import.icon = CI.ic
+			export.icon = CI.ic
 		end
 	end
 end)
@@ -3249,8 +3249,8 @@ TMW:RegisterCallback("TMW_CONFIG_REQUEST_AVAILABLE_IMPORT_EXPORT_TYPES", functio
 	if editbox.IsImportExportWidget then
 		local info = editbox.obj.userdata
 		
-		import.group_overwrite = FindGroupFromInfo(info).ID
-		export.group = FindGroupFromInfo(info).ID
+		import.group_overwrite = FindGroupFromInfo(info)
+		export.group = FindGroupFromInfo(info)
 	end
 end)
 
