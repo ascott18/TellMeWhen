@@ -2029,10 +2029,10 @@ function IE:PositionPanels()
 	
 	local IE_FL = IE:GetFrameLevel()
 	for i = 1, #ParentLeft do
-		ParentLeft[i]:SetFrameLevel(IE_FL + (#ParentLeft-i+1)*10)
+		ParentLeft[i]:SetFrameLevel(IE_FL + 3) --(#ParentLeft-i+1)*3)
 	end
 	for i = 1, #ParentRight do
-		ParentRight[i]:SetFrameLevel(IE_FL + (#ParentRight-i+1)*10)
+		ParentRight[i]:SetFrameLevel(IE_FL + 3) --(#ParentRight-i+1)*3)
 	end
 end
 

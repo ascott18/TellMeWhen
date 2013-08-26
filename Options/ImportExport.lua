@@ -32,11 +32,14 @@ local CurrentSourceOrDestinationHandler
 
 
 local function showGUIDConflictHelp(editbox, ...)
-	if not TMW.HELP.Codes.IMPORT_NEWGUIDS then
+	if not HELP:IsCodeRegistered("IMPORT_NEWGUIDS") then
 		TMW.HELP:NewCode("IMPORT_NEWGUIDS", 1, false)
 	end
 	TMW.HELP:Show("IMPORT_NEWGUIDS", nil, editbox, 0, 0, ...)
 end
+
+
+
 
 -- -----------------------
 -- DATA TYPES
@@ -869,6 +872,7 @@ end
 local Comm = ImportSource:New("Comm")
 local DeserializedData = {}
 Comm.displayText = L["IMPORT_FROMCOMM"]
+Comm.displayDescription = L["IMPORT_FROMCOMM_DESC"]
 Comm.displayDisabled = function()
 	Comm:DeserializeReceivedData()
 	return not (DeserializedData and next(DeserializedData))
@@ -1039,7 +1043,7 @@ function TMW.IE:Copy_DropDown(...)
 			info.text = get(importSource.displayText, EDITBOX)
 			
 			if importSource.displayDescription then
-				info.tooltipTitle = importSource.displayText
+				info.tooltipTitle = get(importSource.displayText, EDITBOX)
 				info.tooltipText = importSource.displayDescription
 				info.tooltipOnButton = true
 				info.tooltipWhileDisabled = true

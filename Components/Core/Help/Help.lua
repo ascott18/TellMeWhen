@@ -46,7 +46,8 @@ HELP.OnlyOnce = {
 }
 
 function HELP:OnInitialize()
-	self.Frame = TellMeWhen_HelpFrame
+	self.Arrow = TellMeWhen_HelpFrame
+	self.Frame = TellMeWhen_HelpFrame.body
 	self.Queued = {}
 end
 
@@ -127,7 +128,7 @@ end
 
 function HELP:NewCode(code, order, OnlyOnce)
 	TMW:ValidateType(2, "HELP:NewCode(code, order, OnlyOnce)", code, "string")
-	assert(not TMW.tContains(HELP.Codes, code), "HELP code " .. code .. " is already registered!")
+	assert(not HELP:IsCodeRegistered(code), "HELP code " .. code .. " is already registered!")
 	
 	if order then
 		order = min(order, #HELP.Codes + 1)
@@ -140,6 +141,11 @@ function HELP:NewCode(code, order, OnlyOnce)
 		HELP.OnlyOnce[code] = true
 	end
 end
+
+function HELP:IsCodeRegistered(code)
+	return TMW.tContains(HELP.Codes, code)
+end
+
 
 
 ---------- Queue Management ----------
@@ -168,7 +174,7 @@ end
 function HELP:ShowNext()
 	-- if there nothing currently being displayed, hide the frame.
 	if not HELP.showingHelp then
-		HELP.Frame:Hide()
+		HELP.Arrow:Hide()
 	end
 
 	-- if we are already showing something, then don't overwrite it.
@@ -203,13 +209,13 @@ function HELP:ShowNext()
 	-- show the frame with the data
 	local text = format(help.text, unpack(help))
 
-	HELP.Frame:ClearAllPoints()
-	HELP.Frame:SetPoint("TOPRIGHT", help.frame, "LEFT", (help.x or 0) - 30, (help.y or 0) + 28)
+	HELP.Arrow:ClearAllPoints()
+	HELP.Arrow:SetPoint("RIGHT", help.frame, "LEFT", (help.x or 0) - 0, (help.y or 0) + 0)
 	HELP.Frame.text:SetText(text)
 	HELP.Frame:SetHeight(HELP.Frame.text:GetHeight() + 38)
-	HELP.Frame:SetWidth(min(250, HELP.Frame.text:GetStringWidth() + 30))
+	HELP.Frame:SetWidth(min(280, HELP.Frame.text:GetStringWidth() + 30))
 
-	HELP.Frame:Show()
+	HELP.Arrow:Show()
 
 
 	-- if the help had a setting associated, set it now

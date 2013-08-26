@@ -1475,9 +1475,9 @@ L["fTEXTLAYOUT"] = "Text Layout: %s"
 
 L["IMPORT_NEWGUIDS"] = [[The data you just imported conflicted with the unique identifiers of %d |4group:groups; and %d |4icon:icons;. This probably means that you have imported this data before.
 
-New unique identifiers have been assigned to the imported data. Icons that were not imported in this operation that are supposed to reference the new data may not function as desired - they will instead reference the old icons in your profile that conflicted with the new data.
+New unique identifiers have been assigned to the imported data. Icons that you import in the future that are supposed to reference the new data may not function as desired - they will instead reference the old icons in your profile that conflicted with the new data.
 
-If you intended to replace old data, please re-import it to the correct location.]]
+If you intended to replace existing data, please re-import it to the correct location.]]
 L["IMPORT_NEWGUIDS_ICON"] = "Text Layout: %s"
 
 
