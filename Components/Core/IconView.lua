@@ -172,7 +172,7 @@ end
 -- Required Method Definitions 
 ------------------------------------
 
---- [**Required Method Definition**] Method that will be called immediately after the IconView (and all its requested IconModules) has been implemented into an icon. Can be used to preform actions like setting the size of the icon, or other things that aren't already done by any of the icon's modules.
+--- [**Required Method Definition**] Method that will be called immediately before the IconView (and all its requested IconModules) has been implemented into an icon. Should be used to preform actions like setting the size of the icon and other things that the icon's modules depend upon.
 -- @param icon [TMW.Classes.Icon] The icon the IconView was just implemented into.
 function IconView:Icon_Setup(icon)
 	self:AssertSelfIsInstance()
@@ -210,6 +210,12 @@ end
 --	end
 function IconView:Group_OnCreate(gs)
 	-- Optional method. Default implementation is no action.
+end
+
+--- [**Optional Method Definition**] Method that will be called immediately after the IconView (and all its requested IconModules) has been implemented into an icon. Can be used to preform actions that depend on the icon's modules being implemented.
+-- @param icon [TMW.Classes.Icon] The icon the IconView was just implemented into.
+function IconView:Icon_Setup_Post(icon)
+	self:AssertSelfIsInstance()
 end
 
 

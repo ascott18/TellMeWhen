@@ -8,6 +8,7 @@
  ** The consequence of this is that you can now import/export icons and meta icons that include those icons separately and they will automatically find eachother once they are all imported.
 
  * Bug Fixes:
+ ** Icons should now always have the correct size after their view changes or the size or ID of a group changes.
  ** Unit cooldown icons should now attempt to show the first usable spell even if no units being checked have casted any spells yet.
 
 ===v6.2.4===

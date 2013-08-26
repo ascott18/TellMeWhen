@@ -177,9 +177,12 @@ View:ImplementsModule("GroupModule_Resizer_ScaleXY", 10, function(Module, group)
 end)
 View:ImplementsModule("GroupModule_IconPosition_Sortable", 20, true)
 	
-	
+function View:Icon_SetSize(icon)
+	icon:SetSize(self:Icon_GetSize(icon))
+end
+
 function View:Icon_Setup(icon)
-	icon:SetSize(ICON_SIZE, ICON_SIZE)
+	self:Icon_SetSize(icon)
 end
 
 function View:Icon_GetSize(icon)

@@ -1715,7 +1715,7 @@ function TMW:PLAYER_LOGIN()
 	TMW:RegisterEvent("PLAYER_TALENT_UPDATE", "PLAYER_SPECIALIZATION_CHANGED")
 	TMW:RegisterEvent("ACTIVE_TALENT_GROUP_CHANGED", "PLAYER_SPECIALIZATION_CHANGED")
 	
-	-- Yeah,  I do it twice. Masque is a heap of broken shit and doesn't work unless its done twice.
+	-- This should be done twice to get everything aware of everything else's GUID.
 	-- Especially when logging in while in combat with the Allow Config in Combat option disabled
 	TMW:Update()
 	TMW:Update()

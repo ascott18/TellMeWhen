@@ -156,14 +156,14 @@ function View:Icon_SetSize(icon)
 end
 
 function View:Icon_Setup(icon)
-	
+	self:Icon_SetSize(icon)
 end
 
 function View:Group_Setup(group)
 	self:Group_SetSize(group)
 	
 	for icon in TMW:InIcons(group.ID) do
-		self:Icon_SetSize(icon)
+		self:Icon_Setup(icon)
 	end
 end
 

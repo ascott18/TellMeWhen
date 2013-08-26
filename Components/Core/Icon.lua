@@ -711,8 +711,9 @@ function Icon.Setup(icon)
 		end		
 		
 		------------ Icon View ------------
-		viewData:ImplementIntoIcon(icon)
 		viewData:Icon_Setup(icon)
+		viewData:ImplementIntoIcon(icon)
+		viewData:Icon_Setup_Post(icon)
 		
 		
 		TMW.safecall(typeData.Setup, typeData, icon, groupID, iconID)
