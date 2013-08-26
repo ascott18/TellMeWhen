@@ -32,7 +32,7 @@ local CurrentSourceOrDestinationHandler
 
 
 local function showGUIDConflictHelp(editbox, ...)
-	if not HELP:IsCodeRegistered("IMPORT_NEWGUIDS") then
+	if not TMW.HELP:IsCodeRegistered("IMPORT_NEWGUIDS") then
 		TMW.HELP:NewCode("IMPORT_NEWGUIDS", 1, false)
 	end
 	TMW.HELP:Show("IMPORT_NEWGUIDS", nil, editbox, 0, 0, ...)
@@ -282,7 +282,7 @@ function group:Import_ImportData(editbox, data, version, noOverwrite, oldgroupID
 			end
 		end
 		for ics, gID in TMW:InIconSettings() do
-			if ics.GUID ~= "" then
+			if ics.GUID and ics.GUID ~= "" then
 				if destgroupID ~= gID then
 					existingGUIDs[ics.GUID] = true
 				else
