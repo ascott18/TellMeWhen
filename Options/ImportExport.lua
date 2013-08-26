@@ -30,6 +30,14 @@ local strfind, strmatch, format, gsub, strsub, strtrim, max, min, strlower, floo
 
 local CurrentSourceOrDestinationHandler
 
+
+local function showGUIDConflictHelp(editbox, ...)
+	if not TMW.HELP.Codes.IMPORT_NEWGUIDS then
+		TMW.HELP:NewCode("IMPORT_NEWGUIDS", 1, false)
+	end
+	TMW.HELP:Show("IMPORT_NEWGUIDS", nil, editbox, 0, 0, ...)
+end
+
 -- -----------------------
 -- DATA TYPES
 -- -----------------------
@@ -240,6 +248,15 @@ end
 local group = SharableDataType:New("group", 20)
 local NUM_GROUPS_PER_SUBMENU = 10
 
+local function remapGUIDs(data, GUIDmap)
+	for k, v in pairs(data) do
+		if type(v) == "table" then
+			remapGUIDs(v, GUIDmap)
+		elseif GUIDmap[v] then
+			data[k] = GUIDmap[v]
+		end
+	end
+end
 
 function group:Import_ImportData(editbox, data, version, noOverwrite, oldgroupID, destgroupID)
 	if noOverwrite then
@@ -251,6 +268,50 @@ function group:Import_ImportData(editbox, data, version, noOverwrite, oldgroupID
 
 	if version < 70000 then
 		gs.__UPGRADEHELPER_OLDGROUPID = oldgroupID
+	elseif version >= 70000	then
+		local existingGUIDs = {}
+
+		local GUIDmap = {}
+
+		for gs, gID in TMW:InGroupSettings() do
+			if destgroupID ~= gID then
+				existingGUIDs[gs.GUID] = true
+			end
+		end
+		for ics, gID in TMW:InIconSettings() do
+			if ics.GUID ~= "" then
+				if destgroupID ~= gID then
+					existingGUIDs[ics.GUID] = true
+				else
+					GUIDmap[ics.GUID] = TMW:GenerateGUID("icon", TMW.CONST.GUID_SIZE)
+				end
+			end
+		end
+
+		GUIDmap[gs.GUID] = TMW:GenerateGUID("group", TMW.CONST.GUID_SIZE)
+
+		for k, v in pairs(GUIDmap) do
+			if not existingGUIDs[k] then
+				GUIDmap[k] = nil
+			end
+		end
+
+		if next(GUIDmap) then
+			local groupCount, iconCount = 0, 0
+			for k, v in pairs(GUIDmap) do
+				local dataType = TMW:ParseGUID(k)
+				if dataType == "group" then
+					groupCount = groupCount + 1
+				elseif dataType == "icon" then
+					iconCount = iconCount + 1
+				end
+			end
+
+			TMW:Printf(L["IMPORT_NEWGUIDS"], groupCount, iconCount)
+			showGUIDConflictHelp(editbox, L["IMPORT_NEWGUIDS"], groupCount, iconCount)
+
+			remapGUIDs(gs, GUIDmap)
+		end
 	end
 
 	if version then
@@ -454,6 +515,29 @@ function icon:Import_ImportData(editbox, data, version)
 	TMW.db.profile.Groups[groupID].Icons[iconID] = nil -- restore defaults
 	local ics = TMW.db.profile.Groups[groupID].Icons[iconID]
 	TMW:CopyTableInPlaceWithMeta(data, ics, true)
+
+
+	if version >= 70000 and ics.GUID ~= "" then
+		local existed = false
+
+		for ics2 in TMW:InIconSettings() do
+			if ics2 ~= ics and ics2.GUID == ics.GUID then
+				existed = true
+				break
+			end
+		end
+
+		if existed then
+			TMW:Printf(L["IMPORT_NEWGUIDS"], 0, 1)
+			showGUIDConflictHelp(editbox, L["IMPORT_NEWGUIDS"], 0, 1)
+
+			local GUIDmap = {
+				[ics.GUID] = TMW:GenerateGUID("icon", TMW.CONST.GUID_SIZE)
+			}
+			remapGUIDs(ics, GUIDmap)
+		end
+	end
+
 
 	if version then
 		if version > TELLMEWHEN_VERSIONNUMBER then
