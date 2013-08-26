@@ -555,7 +555,7 @@ function icon:Import_ImportData(editbox, data, version)
 		if version > TELLMEWHEN_VERSIONNUMBER then
 			TMW:Print(L["FROMNEWERVERSION"])
 		else
-			TMW:DoUpgrade("icon", version, ics, group.ID, icon.ID)
+			TMW:DoUpgrade("icon", version, ics, gs, icon.ID)
 		end
 	end
 end

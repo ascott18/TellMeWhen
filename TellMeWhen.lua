@@ -2503,7 +2503,7 @@ function TMW:GetBaseUpgrades()			-- upgrade functions
 				Shapeshift = true, -- i used this one during some initial testing for shapeshifts
 				UnitReact = true,
 			},
-			icon = function(self, ics, groupID, iconID)
+			icon = function(self, ics, gs, iconID)
 				for k in pairs(self.iconSettingsToClear) do
 					ics[k] = nil
 				end
@@ -2522,7 +2522,7 @@ function TMW:GetBaseUpgrades()			-- upgrade functions
 					end
 				end
 				if n == nondefault then
-					TMW.db.profile.Groups[groupID].Icons[iconID] = nil
+					gs.Icons[iconID] = nil
 				end
 			end,
 		},
@@ -2687,7 +2687,7 @@ function TMW:DoUpgrade(type, version, ...)
 		
 		-- delegate to icons
 		for ics, gs, groupID, iconID in TMW:InIconSettings(groupID) do
-			TMW:DoUpgrade("icon", version, ics, groupID, iconID)
+			TMW:DoUpgrade("icon", version, ics, gs, iconID)
 		end
 	end
 	
