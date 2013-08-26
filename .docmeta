@@ -74,3 +74,7 @@
     type: luadoc
     input-file: "Documentation/Callback.lua"
     output-page: "API/Core Systems/Callbacks/API Documentation"
+-
+    type: creole
+    input-file: "Documentation/IconTypeHowTo.txt"
+    output-page: "API/Icon Type/How To"

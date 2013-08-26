@@ -1,0 +1,430 @@
+Icon Types take information from WoW's API, manipulate and filter it based on user settings, and then present the information obtained to IconDataProcessors through the icon:SetInfo() method. This information is stored on the icon (in icon.attributes), and the IDPs notify all interested IconModules that the icon's data has changed.
+
+All of the Icon Types that are built into TellMeWhen are based on the IconType API, and this API is available for anybody who wishes to make an Icon Type for TMW.
+
+In the interest of brevity, Icon Type will be abbreviated IT in this guide.
+
+== Creating an Icon Type
+An IT should be defined entirely in its own file. To begin, create a new instance of TMW.Classes.IconType:
+
+<<code lua>>
+local TMW = TMW
+if not TMW then return end
+
+local L = TMW.L
+local IsSpellInRange = LibStub("SpellRange-1.0").IsSpellInRange
+local SpellTextures = TMW.SpellTextures
+local SpellHasNoMana = TMW.SpellHasNoMana
+local OnGCD = TMW.OnGCD
+
+local Type = TMW.Classes.IconType:New("test")
+<</code>>
+
+=== Declaring Required Fields
+ITs require that you declare at least their .name and .desc fields before they can be registered with TMW. There are other fields available too (Look under TMW.Classes.IconType in [[api/icon-type/api-documentation/]] for them).
+
+<<code lua>>
+Type.name = "Test Type"
+Type.desc = "An Icon Type created to demonstrate the TMW IconType API"
+Type.menuIcon = "Interface\\Icons\\spell_holy_divineintervention"
+Type.spacebefore = true
+<</code>>
+
+=== Declaring Attributes Used
+In order to make sure that the appropriate IconDataProcessors get implemented into an icon that uses our IT, ITs must explicitly declare what attributes are used in their icon:SetInfo() calls:
+
+<<code lua>>
+Type:UsesAttributes("alpha")
+Type:UsesAttributes("start, duration")
+Type:UsesAttributes("stack, stackText")
+Type:UsesAttributes("spell")
+Type:UsesAttributes("texture")
+Type:UsesAttributes("inRange")
+Type:UsesAttributes("noMana")
+Type:UsesAttributes("reverse")
+<</code>>
+
+These attribute strings must match those that are passed as the second param to IconDataProcessor's constructor.
+
+=== Registering Default Settings
+Next up, we will register the default settings that will be used by our IT using the standard IconComponent method, :RegisterIconDefaults(). See that method's documentation for information about how it functions.
+
+<<code lua>>
+Type:RegisterIconDefaults{
+	RangeCheck				= false,
+	ManaCheck				= false,
+	TestType_SomeSetting		= false,
+}
+<</code>>
+
+
+=== Registering Config Panels
+As with all things that inherit from IconComponent, you can register both XML templates and constructor functions as config panels in the Icon Editor.
+
+<<code lua>>
+Type:RegisterConfigPanel_XMLTemplate(100, "TellMeWhen_ChooseName", {
+	text = L["CHOOSENAME_DIALOG"] .. "\r\n\r\n" .. L["CHOOSENAME_DIALOG_PETABILITIES"],
+})
+
+Type:RegisterConfigPanel_XMLTemplate(165, "TellMeWhen_WhenChecks", {
+	text = L["ICONMENU_SHOWWHEN"],
+	[0x2] = { text = "|cFF00FF00" .. L["ICONMENU_USABLE"],			},
+	[0x1] = { text = "|cFFFF0000" .. L["ICONMENU_UNUSABLE"],		},
+})
+
+Type:RegisterConfigPanel_ConstructorFunc(150, "TellMeWhen_TestTypeSettings", function(self)
+	self.Header:SetText(Type.name)
+	TMW.IE:BuildSimpleCheckSettingFrame(self, {
+		{
+			setting = "RangeCheck",
+			title = L["ICONMENU_RANGECHECK"],
+			tooltip = L["ICONMENU_RANGECHECK_DESC"],
+		},
+		{
+			setting = "ManaCheck",
+			title = L["ICONMENU_MANACHECK"],
+			tooltip = L["ICONMENU_MANACHECK_DESC"],
+		},
+		{
+			setting = "TestType_SomeSetting",
+			title = "Some Custom Setting",
+			tooltip = "This describes this setting",
+		},
+	})
+end)
+<</code>>
+
+Here, we registered two XML template config panels that are used throughout TMW (TellMeWhen_ChooseName and TellMeWhen_WhenChecks) and one constructor function that contains both checkboxes for some default settings and a checkbox for a setting that is specific to the IT we are creating.
+
+=== Making an Update Function
+The Update function is what interacts with the WoW API, processes it, and then spits it out to the IconDataProcessors. This function is named OnUpdate in all existing ITs in TMW because all ITs used to be OnUpdate driven. If there are events that respond to all possible state changes for the icon, you can build an IT that is OnEvent-driven instead of OnUpdate-driven.
+
+The IT we are building will serve as an extremely simple cooldown tracker, with some useless functionality added in to demonstrate using custom settings.
+
+Note that icon:SetInfo is only called once for all possible code paths. This should always be the goal of the ITs you build - never call icon:SetInfo it twice in a single call to the Update function unless absolutely necessary. Some IconDataProcessors will depend on many attributes being set at the same time, so splitting up your icon:SetInfo calls can cause faulty behavior.
+
+<<code lua>>
+local function TestType_OnUpdate(icon, time)    
+	local NameFirst = icon.NameFirst
+
+	local start, duration = GetSpellCooldown(NameFirst)
+	
+	-- Useless functionality here
+	local stack, stackText
+	if icon.TestType_SomeSetting then
+		stack = 0
+		stackText = "Hello"
+	else
+		stack = 1
+		stackText = "World"
+	end
+	
+	if duration then
+		local inrange = 1
+		local nomana
+		
+		if icon.RangeCheck then
+			inrange = IsSpellInRange(NameFirst, "target") or 1
+		end
+		if icon.ManaCheck then
+			nomana = SpellHasNoMana(NameFirst)
+		end
+		
+		if inrange == 1 and not nomana and (duration == 0 or OnGCD(duration)) then
+			-- Usable
+			
+			icon:SetInfo(
+				"alpha; texture; start, duration; spell; inRange; noMana; stack, stackText",
+				icon.Alpha, SpellTextures[NameFirst], start, duration, NameFirst, inrange, nomana, stack, stackText
+			)
+		else
+			-- Unusable
+			
+			icon:SetInfo(
+				"alpha; texture; start, duration; spell; inRange; noMana; stack, stackText",
+				icon.UnAlpha, SpellTextures[NameFirst], start, duration, NameFirst, inrange, nomana, stack, stackText
+			)
+		end
+	else
+		icon:SetInfo("alpha", 0)
+	end
+end
+<</code>>
+
+=== The Type:Setup() Method
+Every IT must have a :Setup method. This method is called when the type is implemented into an icon.
+
+Its purpose is to:
+ * Perform data processing on settings to get them into a form that can be fed to the IT's OnUpdate method, 
+ * Perform preliminary setup procedures for the icon self (like setting the texture in configuration mode, or setting icon attributes that will be static).
+ * Determine the update method of the IT (OnUpdate or OnEvent)
+ * Register any events needed for proper OnEvent-driven updating
+ * Register the IT's Update function.
+ * Do other fancy things that may be needed to get your IT, and any of its settings, working properly.
+
+Here is the :Setup method for our Test Type:
+
+<<code lua>>
+function Type:Setup(icon)
+	icon.NameFirst = TMW:GetSpellNames(icon, icon.Name, 1, nil, nil, nil, 1)
+	
+	icon:SetInfo("texture; reverse", TMW:GetConfigIconTexture(icon), false)
+	
+	if not icon.RangeCheck then
+		icon:RegisterSimpleUpdateEvent("SPELL_UPDATE_COOLDOWN")
+		icon:RegisterSimpleUpdateEvent("SPELL_UPDATE_USABLE")
+		icon:RegisterSimpleUpdateEvent("SPELL_UPDATE_CHARGES")
+		
+		if icon.ManaCheck then
+			icon:RegisterSimpleUpdateEvent("UNIT_POWER_FREQUENT", "player")
+			-- icon:RegisterSimpleUpdateEvent("SPELL_UPDATE_USABLE")-- already registered
+		end
+		
+		icon:SetUpdateMethod("manual")
+	end
+	
+	icon:SetUpdateFunction(TestType_OnUpdate)
+	
+	icon:Update()
+end
+<</code>>
+
+=== Register the IconType
+We are now done creating our IT. All we have to do now is register it with TMW:
+
+<<code lua>>
+Type:Register(200)
+<</code>>
+
+== Complete Code
+Here is the complete code of the IT we just created:
+<<code lua>>
+
+local TMW = TMW
+if not TMW then return end
+
+local L = TMW.L
+local IsSpellInRange = LibStub("SpellRange-1.0").IsSpellInRange
+local SpellTextures = TMW.SpellTextures
+local SpellHasNoMana = TMW.SpellHasNoMana
+local OnGCD = TMW.OnGCD
+
+local Type = TMW.Classes.IconType:New("test")
+
+Type.name = "Test Type"
+Type.desc = "An Icon Type created to demonstrate the TMW IconType API"
+Type.menuIcon = "Interface\\Icons\\spell_holy_divineintervention"
+Type.spacebefore = true
+
+Type:UsesAttributes("alpha")
+Type:UsesAttributes("start, duration")
+Type:UsesAttributes("stack, stackText")
+Type:UsesAttributes("spell")
+Type:UsesAttributes("texture")
+Type:UsesAttributes("inRange")
+Type:UsesAttributes("noMana")
+Type:UsesAttributes("reverse")
+
+Type:RegisterIconDefaults{
+	RangeCheck			= false,
+	ManaCheck			= false,
+	TestType_SomeSetting	= false,
+}
+
+Type:RegisterConfigPanel_XMLTemplate(100, "TellMeWhen_ChooseName", {
+	text = L["CHOOSENAME_DIALOG"] .. "\r\n\r\n" .. L["CHOOSENAME_DIALOG_PETABILITIES"],
+})
+
+Type:RegisterConfigPanel_XMLTemplate(165, "TellMeWhen_WhenChecks", {
+	text = L["ICONMENU_SHOWWHEN"],
+	[0x2] = { text = "|cFF00FF00" .. L["ICONMENU_USABLE"],			},
+	[0x1] = { text = "|cFFFF0000" .. L["ICONMENU_UNUSABLE"],		},
+})
+
+Type:RegisterConfigPanel_ConstructorFunc(150, "TellMeWhen_TestTypeSettings", function(self)
+	self.Header:SetText(Type.name)
+	TMW.IE:BuildSimpleCheckSettingFrame(self, {
+		{
+			setting = "RangeCheck",
+			title = L["ICONMENU_RANGECHECK"],
+			tooltip = L["ICONMENU_RANGECHECK_DESC"],
+		},
+		{
+			setting = "ManaCheck",
+			title = L["ICONMENU_MANACHECK"],
+			tooltip = L["ICONMENU_MANACHECK_DESC"],
+		},
+		{
+			setting = "TestType_SomeSetting",
+			title = "Some Custom Setting",
+			tooltip = "Check for stack text to be 'Hello'. Uncheck for stack text to be 'World'",
+		},
+	})
+end)
+
+
+local function TestType_OnUpdate(icon, time)    
+	local NameFirst = icon.NameFirst
+
+	local start, duration = GetSpellCooldown(NameFirst)
+	
+	-- Useless functionality here
+	local stack, stackText
+	if icon.TestType_SomeSetting then
+		stack = 0
+		stackText = "Hello"
+	else
+		stack = 1
+		stackText = "World"
+	end
+	
+	if duration then
+		local inrange = 1
+		local nomana
+		
+		if icon.RangeCheck then
+			inrange = IsSpellInRange(NameFirst, "target") or 1
+		end
+		if icon.ManaCheck then
+			nomana = SpellHasNoMana(NameFirst)
+		end
+		
+		if inrange == 1 and not nomana and (duration == 0 or OnGCD(duration)) then
+			-- Usable
+			
+			icon:SetInfo(
+				"alpha; texture; start, duration; spell; inRange; noMana; stack, stackText",
+				icon.Alpha, SpellTextures[NameFirst], start, duration, NameFirst, inrange, nomana, stack, stackText
+			)
+		else
+			-- Unusable
+			
+			icon:SetInfo(
+				"alpha; texture; start, duration; spell; inRange; noMana; stack, stackText",
+				icon.UnAlpha, SpellTextures[NameFirst], start, duration, NameFirst, inrange, nomana, stack, stackText
+			)
+		end
+	else
+		icon:SetInfo("alpha", 0)
+	end
+end
+
+
+function Type:Setup(icon)
+	icon.NameFirst = TMW:GetSpellNames(icon, icon.Name, 1, nil, nil, nil, 1)
+	
+	icon:SetInfo("texture; reverse", TMW:GetConfigIconTexture(icon), false)
+	
+	if not icon.RangeCheck then
+		icon:RegisterSimpleUpdateEvent("SPELL_UPDATE_COOLDOWN")
+		icon:RegisterSimpleUpdateEvent("SPELL_UPDATE_USABLE")
+		icon:RegisterSimpleUpdateEvent("SPELL_UPDATE_CHARGES")
+		
+		if icon.ManaCheck then
+			icon:RegisterSimpleUpdateEvent("UNIT_POWER_FREQUENT", "player")
+			-- icon:RegisterSimpleUpdateEvent("SPELL_UPDATE_USABLE")-- already registered
+		end
+		
+		icon:SetUpdateMethod("manual")
+	end
+	
+	icon:SetUpdateFunction(TestType_OnUpdate)
+	
+	icon:Update()
+end
+
+
+Type:Register(200)
+<</code>>
+
+== Setting Update Methods & Event Handlers
+ITs can have two methods of update: OnUpdate ("auto") and OnEvent ("manual"). Before the IconType:Setup() method is called, the update method will always be set to "auto". If your IT, given its current settings, can listen to events to detect all of its state changes, you may call {{{icon:SetUpdateMethod("manual")}}} to switch to OnEvent-driven updating.
+
+When using OnEvent-driven updating, there are two ways of triggering updates. One is to call {{{icon:RegisterSimpleUpdateEvent(event, arg1)}}} if the event your are listening to has no args that you care about, or if it only has one arg that you need to match once specific value (E.g. unit == "player"). RegisterSimpleUpdateEvent's event handling is kept completely separate from the icon (it is handled by IconEventUpdateEngine, which itself isn't documented.)
+
+The other way is to call {{{icon:SetScript("OnEvent", IconType_OnEvent)}}}, which behaves just like a normal OnEvent script handler (this function will also be defined on icon as {{{icon.OnEvent}}}. You need to call icon:RegisterEvent(event) on the events you want to use with this. Inside your IconType_OnEvent function, you should do whatever processing you need to do, and then set {{{icon.NextUpdateTime = 0}}} for an immediate update, or {{{icon.NextUpdateTime = time}}} where {{{time}}} is comparable to {{{TMW.time}}} and is the time at which the next icon update should happen.
+
+Whenever an icon update is triggered, it will call the function that was passed to {{{icon:SetUpdateFunction(func)}}} in the IT's :Setup() method.
+
+== Units
+Many ITs use unit configuration to let the user determine what units an icon should check. Introducing unit configuration into an IT does introduce quite a bit of complexity, though.
+
+=== Adding the Unit Configuration Panel
+To use units in your IT, you need to first implement the unit configuration panel into it:
+<<code lua>>
+Type:RegisterConfigPanel_XMLTemplate(105, "TellMeWhen_Unit", {
+	implementsConditions = true,
+})
+<</code>>
+
+It is recommended that you do allow unit conditions for your unit configuration implementation.
+
+In your your IconType:Setup() method, you should add the following line:
+<<code lua>>
+icon.Units, icon.UnitSet = TMW:GetUnits(icon, icon.Unit, icon:GetSettings().UnitConditions)
+<</code>>
+
+{{{icon.Units}}} is an ordered array of all the units that your icon should be checking. It is a table managed by a {{{TMW.Classes.UnitSet}}}, which is in turn managed by TMW's units framework. What this means is that it will be intelligently created and processed - a duplicate of an existing {{{UnitSet}}} will never be created, and the {{{icon.Units}}} table will never have units that do not exist in the current game environment (E.g. it won't include {{{"party"}}} and {{{"raid"}}} units if you are playing solo) to greatly improve CPU efficiency.
+
+In order to implement units correctly into an IT, code like this should be found in your IT's :Setup() method (this code was taken directly from the Buff/Debuff IT):
+<<code lua>>
+if icon.UnitSet.allUnitsChangeOnEvent then
+	icon:SetUpdateMethod("manual")
+	
+	for event in pairs(icon.UnitSet.updateEvents) do
+		icon:RegisterSimpleUpdateEvent(event)
+	end
+
+	icon:RegisterEvent("UNIT_AURA") -- this is specific to the Buff/Debuff icon type
+
+	icon:SetScript("OnEvent", Buff_OnEvent)
+	TMW:RegisterCallback("TMW_UNITSET_UPDATED", Buff_OnEvent, icon)
+end
+<</code>>
+
+And your OnEvent function should include the following handling for {{{TMW_UNITSET_UPDATED}}}, in addition to any other event handling (like the handling here for {{{UNIT_AURA}}}) needed in the function for your IT (again, this is taken directly from the Buff/Debuff IT):
+<<code lua>>
+local function Buff_OnEvent(icon, event, arg1)
+	if event == "UNIT_AURA" then
+		local Units = icon.Units
+		for u = 1, #Units do
+			if arg1 == Units[u] then
+				icon.NextUpdateTime = 0
+				return
+			end
+		end
+	elseif event == "TMW_UNITSET_UPDATED" and arg1 == icon.UnitSet then
+		icon.NextUpdateTime = 0
+	end
+end
+<</code>>
+
+In your IT's Update function, the iteration over the {{{icon.Units}}} table might look something like this:
+<<code lua>>
+for u = 1, #Units do
+	local unit = Units[u]
+	if icon.UnitSet.UnitExists(unit) then
+		-- Do something with unit
+	end
+end
+<</code>>
+
+{{{icon.UnitSet.UnitExists}}} is an improved version of the Blizzard UnitExists function that only actually calls the Blizzard API if needed, since UnitSets are aware of what units definitely exist if they are in the icon.Units table.
+
+It is also worth noting that you don't have to use a call to {{{UnitExists}}} if you don't need to. Several of TMW's ITs need a call to {{{UnitGUID}}}, which also doubles as a check to see if the unit exists, so there is no reason to do both.
+
+== Overridable Icon Type Methods
+Instances of IconType have a bunch of methods that they may wish to (and in many cases, certainly should) override. Refer to the [[api/icon-type/api-documentation|API Documentation]] for  descriptions of what these methods are and what functionality they should provide. You may also wish to search through TMW's source code and the ITs that are included in it to look at how these methods are implemented in various ITs.
+
+The overridable IT methods are:
+* IconType:FormatSpellForOutput(icon, data, doInsertLink)
+* IconType:GetIconMenuText(ics, groupID, iconID)
+* IconType:DragReceived(icon, t, data, subType, param4)
+* IconType:GuessIconTexture(ics)
+
+{{{FormatSpellForOutput}}} is especially critical since it is used in normal functionality, outside of configuration mode.
+
+== Tips on Creating an Icon Type
+ITs can get pretty out of hand pretty quickly as far as complexity goes. When creating a new IT, I highly recommend that you take the existing IT in TMW that has a function most similar to what you are wanting to do (especially take the settings that your new IT will need into consideration. Once you get unit configuration involved, or any non-checkbox based configuration panels involved, the configuration and the code you need to handle it all gets quite complicated).
+
+
