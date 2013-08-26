@@ -1950,7 +1950,7 @@ function TMW:GetBaseUpgrades()			-- upgrade functions
 			profile = function(self, profile)
 				self:runGUIDUpgrade(self.guidupgrade_profile, profile)
 			end,
-			group = function(self, gs, groupID)
+			group = function(self, gs, groups, groupID)
 				if gs.GUID == "" then
 					self:runGUIDUpgrade(self.guidupgrade_group, gs, groupID)
 				end
@@ -2677,7 +2677,7 @@ function TMW:DoUpgrade(type, version, ...)
 	elseif type == "profile" then
 		-- delegate to groups
 		for gs, groupID in TMW:InGroupSettings() do
-			TMW:DoUpgrade("group", version, gs, groupID)
+			TMW:DoUpgrade("group", version, gs, db.profile.Groups, groupID)
 		end
 		
 		--All Profile Upgrades Complete

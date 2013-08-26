@@ -182,7 +182,7 @@ TMW:RegisterUpgrade(60303, {
 })
 
 TMW:RegisterUpgrade(60038, {
-	group = function(self, gs, groupID)
+	group = function(self, gs)
 		gs.Fonts = nil
 	end
 })

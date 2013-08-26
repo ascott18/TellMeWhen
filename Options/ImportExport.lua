@@ -325,7 +325,7 @@ function group:Import_ImportData(editbox, data, version, createNewGroup, oldgrou
 		if version > TELLMEWHEN_VERSIONNUMBER then
 			TMW:Print(L["FROMNEWERVERSION"])
 		else
-			TMW:DoUpgrade("group", version, gs, group.ID)
+			TMW:DoUpgrade("group", version, gs, db.profile.Groups, group.ID)
 		end
 	end
 end
