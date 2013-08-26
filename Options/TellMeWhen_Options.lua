@@ -294,33 +294,6 @@ function TMW:SetUIDropdownText(frame, value, tbl, text)
 	UIDropDownMenu_SetText(frame, text or value)
 end
 
-function TMW:SetUIDropdownIconText(frame, iconName, text)
-	frame.selectedValue = iconName
-
-	-- Try to find the matching icon
-	for icon in TMW:InIcons() do
-		if icon:GetName() == iconName then
-			UIDropDownMenu_SetText(frame, TMW:GetIconMenuText(icon.group.ID, icon.ID, icon:GetSettings()))
-			return icon
-		end
-	end
-	
-	-- The icon didn't exist. Write a generic (group name, iconID) text instead.
-	local gID, iID = strmatch(iconName, "TellMeWhen_Group(%d+)_Icon(%d+)")
-	if gID and iID then
-		UIDropDownMenu_SetText(frame, format(L["GROUPICON"], TMW:GetGroupName(gID, gID, 1), iID))
-		return
-	else
-		local gID = tonumber(strmatch(iconName, "TellMeWhen_Group(%d+)$"))
-		if gID then
-			UIDropDownMenu_SetText(frame, TMW:GetGroupName(gID, gID))
-			return
-		end
-	end
-	
-	UIDropDownMenu_SetText(frame, text)
-end
-
 function TMW:SetUIDropdownGUIDText(frame, GUID, text)
 	frame.selectedValue = GUID
 
