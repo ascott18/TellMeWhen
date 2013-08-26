@@ -133,6 +133,7 @@ View:ImplementsModule("IconModule_IconContainer_Masque", 100, function(Module, i
 	local Masque = Module
 	
 	Masque.container:ClearAllPoints()
+	Masque.container:SetSize(icon:GetSize())
 	Masque.container:SetAllPoints()	
 	Masque:Enable()
 
