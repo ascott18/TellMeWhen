@@ -179,10 +179,10 @@
 						GameTooltip:Hide()
 					</OnLeave>
 					<OnReceiveDrag>
-						TMW.IE:SpellItemToIcon(TMW.CI.ic)
+						TMW.IE:SpellItemToIcon(TMW.CI.icon)
 					</OnReceiveDrag>
 					<OnMouseUp>
-						TMW.IE:SpellItemToIcon(TMW.CI.ic)
+						TMW.IE:SpellItemToIcon(TMW.CI.icon)
 					</OnMouseUp>
 					<OnTextChanged>
 						local text = self:GetText()
@@ -292,7 +292,7 @@
 								TMW.HELP:Hide("ICON_UNIT_MISSING")
 							else
 								self.BackgroundText:SetText("|cFFFF5050" .. self.label)
-								TMW.HELP:Show("ICON_UNIT_MISSING", TMW.CI.ic, self, 0, 0, TMW.L["HELP_NOUNITS"])
+								TMW.HELP:Show("ICON_UNIT_MISSING", TMW.CI.icon, self, 0, 0, TMW.L["HELP_NOUNITS"])
 							end
 						else
 							self.BackgroundText:SetText(nil)
@@ -1634,10 +1634,10 @@
 						self:RegisterForDrag("LeftButton")
 					</OnLoad>
 					<OnReceiveDrag>
-						TMW.IE:SpellItemToIcon(TMW.CI.ic)
+						TMW.IE:SpellItemToIcon(TMW.CI.icon)
 					</OnReceiveDrag>
 					<OnMouseUp>
-						TMW.IE:SpellItemToIcon(TMW.CI.ic)
+						TMW.IE:SpellItemToIcon(TMW.CI.icon)
 					</OnMouseUp>
 					<OnDragStart>
 						TMW.IE:StartMoving()

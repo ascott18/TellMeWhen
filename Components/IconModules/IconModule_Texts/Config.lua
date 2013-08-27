@@ -145,7 +145,7 @@ function TEXT:Layout_DropDown()
 			
 			info.text = TEXT:GetLayoutName(settings, GUID)
 			info.value = GUID
-			info.checked = GUID == TEXT:GetTextLayoutForIcon(CI.ic)
+			info.checked = GUID == TEXT:GetTextLayoutForIcon(CI.icon)
 			
 			local displays = ""
 			for i, fontStringSettings in TMW:InNLengthTable(settings) do
@@ -163,7 +163,7 @@ function TEXT:Layout_DropDown()
 end
 
 function TEXT:Layout_DropDown_OnClick()
-	CI.ic:GetSettingsPerView().TextLayout = self.value
+	CI.icon:GetSettingsPerView().TextLayout = self.value
 	TEXT:LoadConfig()
 	IE:ScheduleIconSetup()
 end
@@ -198,7 +198,7 @@ end
 function TEXT:CopyString_DropDown_OnClick(frame)
 	local id = frame:GetParent():GetParent():GetID()
 	
-	CI.ic:GetSettingsPerView().Texts[id] = self.value
+	CI.icon:GetSettingsPerView().Texts[id] = self.value
 	TEXT:LoadConfig()
 	IE:ScheduleIconSetup()
 end
@@ -222,8 +222,8 @@ end
 function TEXT:LoadConfig()
 	if not TellMeWhen_TextDisplayOptions then return end
 	
-	local Texts = CI.ic:GetSettingsPerView().Texts
-	local GUID, layoutSettings, isFallback = TEXT:GetTextLayoutForIcon(CI.ic)
+	local Texts = CI.icon:GetSettingsPerView().Texts
+	local GUID, layoutSettings, isFallback = TEXT:GetTextLayoutForIcon(CI.icon)
 	
 	TEXT:CacheUsedStrings()
 	
@@ -261,7 +261,7 @@ function TEXT:LoadConfig()
 			TMW:TT(frame.Default, "TEXTLAYOUTS_STRING_SETDEFAULT", L["TEXTLAYOUTS_STRING_SETDEFAULT_DESC"]:format(DefaultText), nil, 1)
 			
 			-- Ttest the string and its tags & syntax
-			frame.Error:SetText(TMW:TestDogTagString(CI.ic, text, "TMW;Unit;Stats"))
+			frame.Error:SetText(TMW:TestDogTagString(CI.icon, text, "TMW;Unit;Stats"))
 			
 			previousFrame = frame
 			

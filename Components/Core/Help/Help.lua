@@ -243,8 +243,8 @@ end
 
 
 TMW:RegisterCallback("TMW_ICON_TYPE_CHANGED", function(event, icon, typeData, typeData_old)
-	if TMW.CI.ic then
-		HELP:HideForIcon(TMW.CI.ic)
+	if TMW.CI.icon then
+		HELP:HideForIcon(TMW.CI.icon)
 	end
 end)
 

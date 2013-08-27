@@ -74,10 +74,10 @@
 
 					</OnLoad>
 					<OnReceiveDrag>
-						TMW.IE:SpellItemToIcon(TMW.CI.ic, self.DragReceived, self)
+						TMW.IE:SpellItemToIcon(TMW.CI.icon, self.DragReceived, self)
 					</OnReceiveDrag>
 					<OnMouseUp>
-						TMW.IE:SpellItemToIcon(TMW.CI.ic, self.DragReceived, self)
+						TMW.IE:SpellItemToIcon(TMW.CI.icon, self.DragReceived, self)
 					</OnMouseUp>
 				</Scripts>
 			</EditBox>

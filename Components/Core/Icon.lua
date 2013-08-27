@@ -262,7 +262,7 @@ end
 -- @paramsig
 -- @return [string|nil] If the icon is being edited, returns the identifier string of the currently active Icon Editor tab. Returns nil if the icon is not being edited in the Icon Editor.
 function Icon.IsBeingEdited(icon)
-	if TMW.IE and TMW.CI.ic == icon and TMW.IE.CurrentTab and TMW.IE:IsVisible() then
+	if TMW.IE and TMW.CI.icon == icon and TMW.IE.CurrentTab and TMW.IE:IsVisible() then
 		return TMW.IE.CurrentTab.identifier
 	end
 end

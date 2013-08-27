@@ -64,7 +64,7 @@ function Animations:LoadSettingsForEventID(id)
 		tinsert(animationsToDisplay, eventHandlerData.animationData)
 	end
 	
-	for i, GenericComponent in ipairs(CI.ic.Components) do
+	for i, GenericComponent in ipairs(CI.icon.Components) do
 		if GenericComponent.EventHandlerData then
 			for i, eventHandlerData in ipairs(GenericComponent.EventHandlerData) do
 				if eventHandlerData.eventHandler == self then
@@ -379,7 +379,7 @@ Animations:RegisterConfigFrame("AnchorTo", {
 })
 
 function Animations:AnchorTo_Dropdown()
-	for _, IconModule in pairs(TMW.CI.ic.Modules) do
+	for _, IconModule in pairs(TMW.CI.icon.Modules) do
 		for identifier, localizedName in pairs(IconModule.anchorableChildren) do
 			if type(localizedName) == "string" then
 				local completeIdentifier = IconModule.className .. identifier
@@ -406,7 +406,7 @@ function Animations:AnchorTo_Dropdown_SetText(setting)
 	local frame = Animations.ConfigContainer.ConfigFrames.AnchorTo
 	local text = ""
 	
-	for _, IconModule in pairs(TMW.CI.ic.Modules) do
+	for _, IconModule in pairs(TMW.CI.icon.Modules) do
 		for identifier, localizedName in pairs(IconModule.anchorableChildren) do
 			local completeIdentifier = IconModule.className .. identifier
 			if completeIdentifier == setting and type(localizedName) == "string" then

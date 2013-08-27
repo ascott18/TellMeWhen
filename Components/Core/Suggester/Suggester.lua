@@ -59,7 +59,7 @@ function SUG:OnInitialize()
 end
 
 TMW:RegisterCallback("TMW_ICON_TYPE_CHANGED", function(event, icon)
-	if icon == TMW.CI.ic then
+	if icon == TMW.CI.icon then
 		SUG.redoIfSame = 1
 		SUG.Suggest:Hide()
 	end

@@ -70,7 +70,7 @@ Type:RegisterConfigPanel_ConstructorFunc(160, "TellMeWhen_MetaIconInheritanceBeh
 						TMW.HELP:NewCode("META_INHERIT_CNDTALPHA", 100, true)
 					end
 				
-					TMW.HELP:Show("META_INHERIT_CNDTALPHA", TMW.CI.ic, self, 0, 0, L["ICONMENU_META_INHERITANCEBEHAVIOR_CNDTALPHA_HELP"])
+					TMW.HELP:Show("META_INHERIT_CNDTALPHA", TMW.CI.icon, self, 0, 0, L["ICONMENU_META_INHERITANCEBEHAVIOR_CNDTALPHA_HELP"])
 				end
 			end,
 		},

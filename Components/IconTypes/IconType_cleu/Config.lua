@@ -189,7 +189,7 @@ function CONFIG:CheckMasks()
 			for maskName, mask in pairs(CONFIG.BetterMasks) do
 				if bit.band(TMW.CI.ics[key], mask) == 0 then
 					local category = L["CLEU_" .. maskName]
-					TMW.HELP:Show("CLEU_WHOLECATEGORYEXCLUDED", TMW.CI.ic, TellMeWhen_CLEUOptions[key], 23, 3, L["CLEU_WHOLECATEGORYEXCLUDED"], category)
+					TMW.HELP:Show("CLEU_WHOLECATEGORYEXCLUDED", TMW.CI.icon, TellMeWhen_CLEUOptions[key], 23, 3, L["CLEU_WHOLECATEGORYEXCLUDED"], category)
 					return
 				end
 			end

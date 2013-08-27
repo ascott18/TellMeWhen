@@ -25,7 +25,7 @@ local IE = TMW.IE
 function TMW.Classes.EventHandler:TestEvent(eventID)
 	local eventSettings = EVENTS:GetEventSettings(eventID)
 
-	self:HandleEvent(TMW.CI.ic, eventSettings)
+	self:HandleEvent(TMW.CI.icon, eventSettings)
 end
 
 EVENTS.CONST = {
@@ -409,7 +409,7 @@ function EVENTS:GetValidEvents()
 	
 	ValidEvents = wipe(ValidEvents or {})
 	
-	for _, Component in ipairs(TMW.CI.ic.Components) do
+	for _, Component in ipairs(TMW.CI.icon.Components) do
 		for _, eventData in ipairs(Component.IconEvents) do
 			-- Put it in the table as an indexed field.
 			ValidEvents[#ValidEvents+1] = eventData
@@ -464,7 +464,7 @@ end
 function EVENTS.IconMenu_DropDown(frame)
 	if UIDROPDOWNMENU_MENU_LEVEL == 2 then
 		for icon in UIDROPDOWNMENU_MENU_VALUE:InIcons() do
-			if icon:IsValid() and TMW.CI.ic ~= icon then
+			if icon:IsValid() and TMW.CI.icon ~= icon then
 				local info = UIDropDownMenu_CreateInfo()
 
 				local text, textshort, tooltip = icon:GetIconMenuText()

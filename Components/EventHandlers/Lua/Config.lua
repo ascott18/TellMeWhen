@@ -46,7 +46,7 @@ function Lua:TestEvent(eventID)
 	local func = self:GetCompiledFunction(code)
 	
 	if func then
-		local success, err = pcall(func, TMW.CI.ic)
+		local success, err = pcall(func, TMW.CI.icon)
 		
 		if not success then
 			Lua:SetError(code, "RUNTIME", err)

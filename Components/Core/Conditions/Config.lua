@@ -360,7 +360,7 @@ end
 function CNDT:IconMenu_DropDown()
 	if UIDROPDOWNMENU_MENU_LEVEL == 2 then
 		for icon in UIDROPDOWNMENU_MENU_VALUE:InIcons() do
-			if icon:IsValid() and CI.ic ~= icon then
+			if icon:IsValid() and CI.icon ~= icon then
 				local info = UIDropDownMenu_CreateInfo()
 
 				local text, textshort, tooltip = icon:GetIconMenuText()

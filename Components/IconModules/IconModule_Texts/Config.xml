@@ -162,7 +162,7 @@
 						
 						if TMW.CI.ics then
 							text = text:gsub("|c%x%x%x%x%x%x%x%x", ""):gsub("|r", "")
-							TMW.CI.ics.SettingsPerView[TMW.CI.ic.viewData.view].Texts[self:GetParent():GetID()] = text
+							TMW.CI.ics.SettingsPerView[TMW.CI.icon.viewData.view].Texts[self:GetParent():GetID()] = text
 						end
 						
 						TMW.IE:ScheduleIconSetup()
@@ -269,7 +269,7 @@
 								-- The tooltip is handled in TEXT:LoadConfig()
 							</OnLoad>
 							<OnClick>
-								local GUID, layoutSettings = TMW.TEXT:GetTextLayoutForIcon(TMW.CI.ic)
+								local GUID, layoutSettings = TMW.TEXT:GetTextLayoutForIcon(TMW.CI.icon)
 								
 								TMW.IE.MainOptionsTab:ClickHandler()
 								

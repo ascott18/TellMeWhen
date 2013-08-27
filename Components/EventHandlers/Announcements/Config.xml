@@ -71,7 +71,7 @@
 							
 							self.editbox:Insert(text)
 							
-							TMW.HELP:Show("ANN_LINK_INSERTED", TMW.CI.ic, self.editbox, 0, 0, TMW.L["HELP_ANN_LINK_INSERTED"])
+							TMW.HELP:Show("ANN_LINK_INSERTED", TMW.CI.icon, self.editbox, 0, 0, TMW.L["HELP_ANN_LINK_INSERTED"])
 
 							-- notify success
 							return true

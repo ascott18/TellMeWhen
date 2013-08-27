@@ -76,7 +76,7 @@ TMW:NewClass("SettingTimerBar_BarDisplay_ColorButton", "Button", "SettingFrameBa
 	end,
 
 	ReloadSetting = function(self)
-		local icon = CI.ic
+		local icon = CI.icon
 		if icon then
 			local c = icon:GetSettings()[self.setting]
 

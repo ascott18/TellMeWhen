@@ -68,7 +68,7 @@ function Announcements:LoadSettingsForEventID(id)
 		tinsert(channelsToDisplay, channelData)
 	end
 	
-	for i, GenericComponent in ipairs(CI.ic.Components) do
+	for i, GenericComponent in ipairs(CI.icon.Components) do
 		if GenericComponent.EventHandlerData then
 			for i, eventHandlerData in ipairs(GenericComponent.EventHandlerData) do
 				if eventHandlerData.eventHandler == self then
@@ -114,7 +114,7 @@ function Announcements:LoadSettingsForEventID(id)
 	Announcements:SelectChannel(EventSettings.Channel)
 
 	Announcements.ConfigContainer.EditBox:SetText(EventSettings.Text)
-	Announcements.ConfigContainer.EditBox.Error:SetText(TMW:TestDogTagString(CI.ic, EventSettings.Text))
+	Announcements.ConfigContainer.EditBox.Error:SetText(TMW:TestDogTagString(CI.icon, EventSettings.Text))
 end
 
 function Announcements:SetupEventDisplay(eventID)

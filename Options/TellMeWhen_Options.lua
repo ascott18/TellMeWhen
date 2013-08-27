@@ -1975,7 +1975,7 @@ function IE:TMW_ONUPDATE_POST(...)
 	-- check and see if the settings of the current icon have changed.
 	-- if they have, create a history point (or at least try to)
 	-- IMPORTANT: do this after running icon updates <because of an old antiquated reason which no longer applies, but if it ain't broke, don't fix it>
-	IE:AttemptBackup(TMW.CI.ic)
+	IE:AttemptBackup(TMW.CI.icon)
 end
 
 function IE:TMW_GLOBAL_UPDATE()
@@ -2032,8 +2032,8 @@ function IE:PositionPanels()
 	end
 
 	wipe(panelList)
-	for _, Component in pairs(CI.ic.Components) do
-		if Component:ShouldShowConfigPanels(CI.ic) then
+	for _, Component in pairs(CI.icon.Components) do
+		if Component:ShouldShowConfigPanels(CI.icon) then
 			for _, panelInfo in pairs(Component.ConfigPanels) do
 				tinsert(panelList, panelInfo)
 			end		
@@ -2231,7 +2231,7 @@ function IE:Load(isRefresh, icon, isHistoryChange)
 		-- It is intended that this happens at the end instead of the beginning.
 		-- Table accesses that trigger metamethods flesh out an icon's settings with new things that aren't there pre-load (usually)
 		if icon then
-			IE:AttemptBackup(CI.ic)
+			IE:AttemptBackup(CI.icon)
 		end
 
 		TMW:Fire("TMW_CONFIG_ICON_LOADED", CI.icon)
@@ -2249,7 +2249,7 @@ function IE:CheckLoadedIconIsValid()
 		return
 	elseif
 		not CI.group:IsValid()
-		or not CI.ic:IsInRange()
+		or not CI.icon:IsInRange()
 	then
 		TMW.IE:Load(nil, false)
 	end
@@ -2281,13 +2281,13 @@ end
 function IE:Reset()	
 	IE:SaveSettings() -- this is here just to clear the focus of editboxes, not to actually save things
 	
-	CI.ic:DisableIcon()
+	CI.icon:DisableIcon()
 	
-	TMW.CI.gs.Icons[CI.ic.ID] = nil
+	TMW.CI.gs.Icons[CI.icon.ID] = nil
 	
-	TMW:Fire("TMW_ICON_SETTINGS_RESET", CI.ic)
+	TMW:Fire("TMW_ICON_SETTINGS_RESET", CI.icon)
 	
-	CI.ic:Setup()
+	CI.icon:Setup()
 	
 	IE:Load(1)
 	
@@ -2439,7 +2439,7 @@ TMW:NewClass("SettingCheckButton", "CheckButton", "SettingFrameBase"){
 	end,
 	
 	ReloadSetting = function(self)
-		local icon = CI.ic
+		local icon = CI.icon
 		
 		if icon then
 			if self.data.value ~= nil then
@@ -2480,7 +2480,7 @@ TMW:NewClass("SettingSlider", "Slider", "SettingFrameBase"){
 	end,
 	
 	ReloadSetting = function(self)
-		local icon = CI.ic
+		local icon = CI.icon
 		
 		if icon then
 			self:SetValue(icon:GetSettings()[self.setting])
@@ -2499,7 +2499,7 @@ TMW:NewClass("SettingSlider", "Slider", "SettingFrameBase"){
 TMW:NewClass("SettingSlider_Alpha", "SettingSlider"){
 	METHOD_EXTENSIONS = {
 		OnEnable = function(self)
-			local icon = CI.ic
+			local icon = CI.icon
 			
 			if icon then
 				self:SetValue(icon:GetSettings()[self.setting]*100)
@@ -2561,7 +2561,7 @@ TMW:NewClass("SettingSlider_Alpha", "SettingSlider"){
 	end,
 	
 	OnValueChanged = function(self, value)
-		local icon = CI.ic
+		local icon = CI.icon
 		
 		if icon and not self.fakeNextSetValue then
 			CI.ics[self.setting] = value / 100
@@ -2572,7 +2572,7 @@ TMW:NewClass("SettingSlider_Alpha", "SettingSlider"){
 	end,
 	
 	ReloadSetting = function(self)
-		local icon = CI.ic
+		local icon = CI.icon
 		
 		if icon then
 			self:SetValue(icon:GetSettings()[self.setting]*100)
@@ -2610,7 +2610,7 @@ TMW:NewClass("BitflagSettingFrameBase"){
 	end,
 	
 	ReloadSetting = function(self)
-		local icon = CI.ic
+		local icon = CI.icon
 		if icon then
 			self:SetChecked(bit.band(icon:GetSettings()[self.setting], self.bit) == self.bit)
 		end
@@ -2693,7 +2693,7 @@ TMW:NewClass("SettingEditBox", "EditBox", "SettingFrameBase"){
 	end,
 	
 	ReloadSetting = function(self, eventMaybe)
-		local icon = CI.ic
+		local icon = CI.icon
 		if icon then
 			if not (eventMaybe == "TMW_CONFIG_ICON_HISTORY_STATE_CREATED" and self:HasFocus()) and self.setting then
 				self:SetText(icon:GetSettings()[self.setting])
@@ -3004,11 +3004,11 @@ function IE:Type_Dropdown_OnClick()
 	end
 
 	CI.ics.Type = self.value
-	CI.ic:SetInfo("texture", nil)
+	CI.icon:SetInfo("texture", nil)
 
 	CI.ics.Type = self.value
 	
-	CI.ic:Setup()
+	CI.icon:Setup()
 	
 	IE:Load(1)
 end
@@ -3099,7 +3099,7 @@ function IE:ScheduleIconSetup(groupID, iconID)
 	end
 
 	if not icon then
-		icon = CI.ic
+		icon = CI.icon
 	end
 
 	if not TMW.tContains(IE.iconsToUpdate, icon) then
@@ -3411,10 +3411,10 @@ function IE:DoUndoRedo(direction)
 
 	icon.historyState = icon.historyState + direction
 
-	TMW.CI.gs.Icons[CI.ic.ID] = nil -- recreated when passed into CTIPWM
+	TMW.CI.gs.Icons[CI.icon.ID] = nil -- recreated when passed into CTIPWM
 	TMW:CopyTableInPlaceWithMeta(icon.history[icon.historyState], CI.ics)
 	
-	CI.ic:Setup() -- do an immediate setup for good measure
+	CI.icon:Setup() -- do an immediate setup for good measure
 	
 	TMW:Fire("TMW_CONFIG_ICON_HISTORY_STATE_CHANGED", icon)
 
