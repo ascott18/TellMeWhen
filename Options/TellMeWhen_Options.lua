@@ -693,10 +693,6 @@ TMW.GroupConfigTemplate = {
 						local group = FindGroupFromInfo(info)
 						TMW:Group_Delete(group)
 					end,
-					disabled = function(info)
-						local group = FindGroupFromInfo(info)
-						return group.Domain == "profile" and TMW.db.profile.NumGroups == 1
-					end,
 					confirm = function(info)
 						if IsControlKeyDown() then
 							return false
@@ -725,10 +721,6 @@ TMW.GroupConfigTemplate = {
 						IE:Load(1)
 						TMW:CompileOptions()
 						IE:NotifyChanges()
-					end,
-					disabled = function(info)
-						local group = FindGroupFromInfo(info)
-						return group.Domain == "profile" and TMW.db.profile.NumGroups == 1
 					end,
 				},
 				ImportExport = importExportBoxTemplate,
@@ -1332,10 +1324,6 @@ end
 function TMW:Group_Delete(group)
 	local domain = group.Domain
 	local groupID = group.ID
-
-	if domain == "profile" and TMW.db[domain].NumGroups == 1 then
-		error("can't have less than one profile group")
-	end
 
 	tremove(TMW.db[domain].Groups, groupID)
 	TMW.db[domain].NumGroups = TMW.db[domain].NumGroups - 1
