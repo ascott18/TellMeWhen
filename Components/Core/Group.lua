@@ -122,13 +122,28 @@ function Group.__tostring(group)
 	return group:GetName()
 end
 
---- Wrapper around TMW:GetGroupName(name, groupID, short)
+--- Gets the name of the group in a nice, presentable format.
 -- @name Group:GetGroupName
 -- @paramsig short
--- @param short [boolean] True to get a shortened version of the group's name
+-- @param short [boolean] True to exclude "Group: " from the parenthetical that gives the group's ID. 
 -- @return [string] This group's human-readable name.
 function Group.GetGroupName(group, short)
-	return TMW:GetGroupName(group.ID, group.ID, short)
+	local groupID = group.ID
+	
+	local name = group:GetSettings().Name
+
+	if not name or name == "" then
+		if short then
+			return groupID
+		end
+		return format(L["fGROUP"], groupID)
+	end
+
+	if short then
+		return name .. " (" .. groupID .. ")"
+	end
+
+	return name .. " (" .. format(L["fGROUP"], groupID) .. ")"
 end
 
 -- [INTERNAL]

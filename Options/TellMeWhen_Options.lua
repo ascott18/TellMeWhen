@@ -1309,14 +1309,15 @@ function TMW:Group_Add(view)
 	local groupID = TMW.db.profile.NumGroups + 1
 
 	TMW.db.profile.NumGroups = groupID
-	TMW.db.profile.Groups[groupID].Enabled = true
+
+	local gs = TMW.db.profile.Groups[groupID]
 
 	if view then
-		TMW.db.profile.Groups[groupID].View = view
+		gs.View = view
 		
 		local viewData = TMW.Views[view]
 		if viewData then
-			viewData:Group_OnCreate(TMW.db.profile.Groups[groupID])
+			viewData:Group_OnCreate(gs)
 		end
 	end
 

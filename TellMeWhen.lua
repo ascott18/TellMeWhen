@@ -3449,17 +3449,17 @@ end
 
 
 function TMW:GetGroupName(name, groupID, short)
-	name = tonumber(name) or name
-	groupID = tonumber(groupID) or groupID
-	
-	if name and name == groupID and type(groupID) == "number" then
-		name = TMW.db.profile.Groups[groupID].Name
-	end
 	if (not name) or name == "" then
-		if short then return groupID end
+		if short then
+			return groupID
+		end
 		return format(L["fGROUP"], groupID)
 	end
-	if short then return name .. " (" .. groupID .. ")" end
+
+	if short then
+		return name .. " (" .. groupID .. ")"
+	end
+
 	return name .. " (" .. format(L["fGROUP"], groupID) .. ")"
 end
 
