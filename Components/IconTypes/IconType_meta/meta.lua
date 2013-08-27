@@ -288,17 +288,15 @@ function GetFullIconTable(icon, icons) -- check what all the possible icons it c
 			if type == "icon" then
 				InsertIcon(icon, GUID, nil)
 			elseif type == "group" then
-				local group = TMW.GUIDToOwner[GUID]
-				
-				local gs, group, groupID = TMW:GetSettingsFromGUID(GUID)
+				local gs, group, domain, groupID = TMW:GetSettingsFromGUID(GUID)
 
 				if not group then
-					group = TMW[groupID]
+					group = TMW[domain][groupID]
 				end
 
 				if group and group:ShouldUpdateIcons() and gs.View == thisIconsView then
 
-					for ics, _, _, icID in TMW:InIconSettings(group.ID) do
+					for ics, _, _, _, icID in group:InIconSettings() do
 						if ics.Enabled and icID <= gs.Rows*gs.Columns then
 							local ic = group[icID]
 							

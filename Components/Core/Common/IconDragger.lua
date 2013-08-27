@@ -228,8 +228,8 @@ IconDragger:RegisterIconDragHandler(40,	-- Split
 		end
 	end,
 	function(IconDragger)
-		local group = TMW:Group_Add()
-
+		--TODO: add separatate menus for split to profilegroup and split to globalgroup
+		local group = TMW:Group_Add("profile")
 
 		-- back up the icon data of the source group
 		local SOURCE_ICONS = IconDragger.srcicon.group:GetSettings().Icons

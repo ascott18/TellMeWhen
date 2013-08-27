@@ -46,6 +46,9 @@ local DogTag = LibStub("LibDogTag-3.0", true)
 --L = setmetatable({}, {__index = function() return ("| ! "):rep(12) end}) -- stress testing for text widths
 TMW.L = L
 
+-- Tables that will hold groups from each domain.
+TMW.global = {}
+TMW.profile = {}
 
 -- GLOBALS: LibStub
 -- GLOBALS: TellMeWhenDB, TellMeWhen_Settings
@@ -140,6 +143,9 @@ TMW.Defaults = {
 		HasImported			= false,
 		VersionWarning		= true,
 		AllowCombatConfig	= false,
+
+		NumGroups			=	0,
+		-- Groups = {} -- this will be set to the profile group defaults in a second.
 	},
 	locale = {
 		WpnEnchDurs	= {
@@ -187,6 +193,7 @@ TMW.Defaults = {
 			["**"] = {
 				GUID			= "",
 				Enabled			= true,
+				EnabledProfiles	= {}, -- Only used by global groups
 				OnlyInCombat	= false,
 				Locked			= false,
 				View			= "icon",
@@ -230,6 +237,7 @@ TMW.Defaults = {
 	},
 }
 
+TMW.Defaults.global.Groups = TMW.Defaults.profile.Groups
 TMW.Group_Defaults 	 = TMW.Defaults.profile.Groups["**"]
 TMW.Icon_Defaults 	 = TMW.Group_Defaults.Icons["**"]
 
@@ -1049,46 +1057,57 @@ end
 
 do -- InIconSettings
 	local states = {}
-	local function getstate(cg, ci, mg, mi)
+	local function getstate(domain, groupID)
 		local state = wipe(tremove(states) or {})
 
-		state.cg = cg	-- Current Group
-		state.ci = ci	-- Current Icon
-		state.mg = mg	-- Max Group
-		state.mi = mi	-- Max Icon
+		if not (domain and groupID) then
+			state.gsIter, state.gsState = TMW:InGroupSettings()
+			state.groupSettings, state.domain, state.groupID = state.gsIter(state.gsState)
+		else
+			state.groupSettings, state.domain, state.groupID = TMW.db[domain].Groups[groupID], domain, groupID
+		end
+
+		state.iconID = 0
+
+		state.maxIconID = TELLMEWHEN_MAXROWS*TELLMEWHEN_MAXROWS
 
 		return state
 	end
 
 	local function iter(state)
-		local ci = state.ci
-		ci = ci + 1	-- at least increment the icon
+		local iconID = state.iconID
+		iconID = iconID + 1	-- at least increment the icon
+
 		while true do
-			if ci <= state.mi and state.cg <= state.mg and TMW.db.profile.Groups[state.cg].Icons and not rawget(TMW.db.profile.Groups[state.cg].Icons, ci) then
-				--if there is another icon and the group is valid but the icon settings dont exist, move to the next icon
-				ci = ci + 1
-			elseif state.cg <= state.mg and ci > state.mi then
-				-- if there is another group and the icon exceeds the max, move to the first icon of the next group
-				state.cg = state.cg + 1
-				ci = 1
-			elseif state.cg > state.mg then
+			if not state.groupSettings then
 				-- if there isnt another group, then stop
 				tinsert(states, state)
 				return
+			elseif iconID <= state.maxIconID and not rawget(state.groupSettings.Icons, iconID) then
+				-- if the icon settings dont exist and there is another icon, move to the next icon
+				iconID = iconID + 1
+			elseif iconID > state.maxIconID then
+				if state.gsIter then
+					state.groupSettings, state.domain, state.groupID = state.gsIter(state.gsState)
+					iconID = 0
+				else
+					state.groupSettings = nil
+				end
 			else
 				-- we finally found something valid, so use it
 				break
 			end
 		end
-		state.ci = ci
-		local gs = TMW.db.profile.Groups[state.cg]
-		return gs.Icons[ci], gs, state.cg, ci -- ics, gs, groupID, iconID
+
+		state.iconID = iconID
+		local gs = state.groupSettings
+		return gs.Icons[iconID], gs, state.domain, state.groupID, iconID -- ics, gs, domain, groupID, iconID
 	end
 
-	function TMW:InIconSettings(groupID)
+	function TMW:InIconSettings(domain, groupID)
 		-- current icon (the second param here) is incremented at the beginning of the iterator call,
 		-- so it should be passed in as 0, not 1
-		return iter, getstate(groupID or 1, 0, groupID or TMW.db.profile.NumGroups, TELLMEWHEN_MAXROWS*TELLMEWHEN_MAXROWS)
+		return iter, getstate(domain, groupID)
 	end
 end
 
@@ -1097,59 +1116,34 @@ do -- InGroupSettings
 	local function getstate(cg, mg)
 		local state = wipe(tremove(states) or {})
 
-		state.cg = cg
-		state.mg = mg
+		state.domain = "global"
+		state.cg = 0
+		state.mg = TMW.db[state.domain].NumGroups
 
 		return state
 	end
 
 	local function iter(state)
 		state.cg = state.cg + 1
+
 		if state.cg > state.mg then
+			if state.domain == "global" then
+				state.domain = "profile"
+				state.cg = 0
+				state.mg = TMW.db[state.domain].NumGroups
+
+				return iter(state)
+			end
+
 			tinsert(states, state)
 			return
 		end
-		return TMW.db.profile.Groups[state.cg], state.cg -- setting table, groupID
+
+		return TMW.db[state.domain].Groups[state.cg], state.domain, state.cg -- group settings, domain, groupID
 	end
 
 	function TMW:InGroupSettings()
-		return iter, getstate(0, TMW.db.profile.NumGroups)
-	end
-end
-
-do -- InIcons
-	local states = {}
-	local function getstate(cg, ci, mg, mi)
-		local state = wipe(tremove(states) or {})
-
-		state.cg = cg
-		state.ci = ci
-		state.mg = mg
-		state.mi = mi
-
-		return state
-	end
-
-	local function iter(state)
-		state.ci = state.ci + 1
-		while true do
-			if state.ci <= state.mi and TMW[state.cg] and not TMW[state.cg][state.ci] then
-				state.ci = state.ci + 1
-			elseif state.cg < state.mg and (state.ci > state.mi or not TMW[state.cg]) then
-				state.cg = state.cg + 1
-				state.ci = 1
-			elseif state.cg > state.mg then
-				tinsert(states, state)
-				return
-			else
-				break
-			end
-		end
-		return TMW[state.cg] and TMW[state.cg][state.ci], state.cg, state.ci -- icon, groupID, iconID
-	end
-
-	function TMW:InIcons(groupID)
-		return iter, getstate(groupID or 1, 0, groupID or TMW.db.profile.NumGroups, TELLMEWHEN_MAXROWS*TELLMEWHEN_MAXROWS)
+		return iter, getstate()
 	end
 end
 
@@ -1158,24 +1152,34 @@ do -- InGroups
 	local function getstate(cg, mg)
 		local state = wipe(tremove(states) or {})
 
-		state.cg = cg
-		state.mg = mg
+		state.domain = "global"
+		state.cg = 0
+		state.mg = #TMW[state.domain]
 
 		return state
 	end
 
 	local function iter(state)
-		local cg = state.cg + 1
-		state.cg = cg
-		if cg > state.mg then
+		state.cg = state.cg + 1
+
+		if state.cg > state.mg then
+			if state.domain == "global" then
+				state.domain = "profile"
+				state.cg = 0
+				state.mg = #TMW[state.domain]
+
+				return iter(state)
+			end
+
 			tinsert(states, state)
 			return
 		end
-		return TMW[cg], cg -- group, groupID
+
+		return TMW[state.domain][state.cg], state.domain, state.cg -- group, domain, groupID
 	end
 
 	function TMW:InGroups()
-		return iter, getstate(0, TMW.db.profile.NumGroups)
+		return iter, getstate()
 	end
 end
 
@@ -1858,9 +1862,9 @@ function TMW:GetSettingsFromGUID(GUID)
 	end
 
 	if iter then
-		for settings, a, b in iter(TMW) do
+		for settings, a, b, c in iter(TMW) do
 			if settings.GUID == GUID then
-				return settings, nil, a, b
+				return settings, nil, a, b, c
 			end
 		end
 	end
@@ -2220,10 +2224,12 @@ function TMW:GetBaseUpgrades()			-- upgrade functions
 				-- because TMW.db.profile.Font wont exist at that point.
 				-- we only want to do it to groups that exist in whatever profile is being upgraded
 				if TMW.db.profile.Font then
-					for gs in TMW:InGroupSettings() do
-						gs.Font = gs.Font or {}
-						for k, v in pairs(TMW.db.profile.Font) do
-							gs.Font[k] = v
+					for gs, domain in TMW:InGroupSettings() do
+						if domain == "profile" then
+							gs.Font = gs.Font or {}
+							for k, v in pairs(TMW.db.profile.Font) do
+								gs.Font[k] = v
+							end
 						end
 					end
 					TMW.db.profile.Font = nil
@@ -2671,22 +2677,33 @@ function TMW:DoUpgrade(type, version, ...)
 		for locale, ls in pairs(TMW.db.locale) do
 			TMW:DoUpgrade("locale", version, ls, locale)
 		end
+
+		-- delegate to groups
+		for gs, domain, groupID in TMW:InGroupSettings() do
+			if domain == type then
+				TMW:DoUpgrade("group", version, gs, domain, groupID)
+			end
+		end
 	
 		--All Global Upgrades Complete
 		TellMeWhenDB.Version = TELLMEWHEN_VERSIONNUMBER
+
 	elseif type == "profile" then
 		-- delegate to groups
-		for gs, groupID in TMW:InGroupSettings() do
-			TMW:DoUpgrade("group", version, gs, db.profile.Groups, groupID)
+		for gs, domain, groupID in TMW:InGroupSettings() do
+			if domain == type then
+				TMW:DoUpgrade("group", version, gs, domain, groupID)
+			end
 		end
 		
 		--All Profile Upgrades Complete
 		TMW.db.profile.Version = TELLMEWHEN_VERSIONNUMBER
+
 	elseif type == "group" then
-		local gs, groupID = ...
+		local gs, domain, groupID = ...
 		
 		-- delegate to icons
-		for ics, gs, groupID, iconID in TMW:InIconSettings(groupID) do
+		for ics, gs, domain, groupID, iconID in TMW:InIconSettings(domain, groupID) do
 			TMW:DoUpgrade("icon", version, ics, gs, iconID)
 		end
 	end
@@ -2953,9 +2970,26 @@ function TMW:UpdateNormally()
 		Type:UpdateColors(true)
 	end
 
-	for groupID = 1, max(TMW.db.profile.NumGroups, #TMW) do
+	for groupID = 1, max(TMW.db.profile.NumGroups, #TMW.profile) do
 		-- Cant use TMW.InGroups() because groups wont exist yet on the first call of this.
-		local group = TMW[groupID] or TMW.Classes.Group:New("Frame", "TellMeWhen_Group" .. groupID, TMW, "TellMeWhen_GroupTemplate", groupID)
+		local group = TMW.profile[groupID] or
+			TMW.Classes.Group:New("Frame", "TellMeWhen_Group" .. groupID, TMW, "TellMeWhen_GroupTemplate", groupID)
+
+		group.Domain = "profile"
+		TMW[groupID] = group
+		TMW[group.Domain][groupID] = group
+
+		TMW.safecall(group.Setup, group)
+	end
+
+	for groupID = 1, max(TMW.db.global.NumGroups, #TMW.global) do
+		-- Cant use TMW.InGroups() because groups wont exist yet on the first call of this.
+		local group = TMW.global[groupID] or
+			TMW.Classes.Group:New("Frame", "TellMeWhen_GlobalGroup" .. groupID, TMW, "TellMeWhen_GroupTemplate", groupID)
+
+		group.Domain = "global"
+		TMW[group.Domain][groupID] = group
+
 		TMW.safecall(group.Setup, group)
 	end
 
@@ -3122,8 +3156,12 @@ end
 
 function TMW:OnProfile(event, arg2, arg3)
 
-	for icon in TMW:InIcons() do
-		icon:SetInfo("texture", "")
+	for group, domain in TMW:InGroups() do
+		if domain == "profile" then
+			for icon in group:InIcons() do
+				icon:SetInfo("texture", "")
+			end
+		end
 	end
 	
 	TMW:UpgradeProfile()

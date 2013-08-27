@@ -463,7 +463,7 @@ end
 
 function EVENTS.IconMenu_DropDown(frame)
 	if UIDROPDOWNMENU_MENU_LEVEL == 2 then
-		for icon, groupID, iconID in TMW:InIcons(UIDROPDOWNMENU_MENU_VALUE) do
+		for icon in UIDROPDOWNMENU_MENU_VALUE:InIcons() do
 			if icon:IsValid() and TMW.CI.ic ~= icon then
 				local info = UIDropDownMenu_CreateInfo()
 
@@ -488,13 +488,13 @@ function EVENTS.IconMenu_DropDown(frame)
 			end
 		end
 	elseif UIDROPDOWNMENU_MENU_LEVEL == 1 then
-		for group, groupID in TMW:InGroups() do
+		for group in TMW:InGroups() do
 			if group:ShouldUpdateIcons() then
 				local info = UIDropDownMenu_CreateInfo()
 				info.text = group:GetGroupName()
 				info.hasArrow = true
 				info.notCheckable = true
-				info.value = groupID
+				info.value = group
 				UIDropDownMenu_AddButton(info, UIDROPDOWNMENU_MENU_LEVEL)
 			end
 		end

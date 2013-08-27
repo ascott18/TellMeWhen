@@ -517,9 +517,9 @@ end
 ---------- Data/Templates ----------
 local function FindGroupFromInfo(info)
 	for i = #info, 1, -1 do
-		local n = tonumber(strmatch(info[i], "#Group (%d+)"))
-		if n then
-			return TMW[n]
+		local domain, n = strmatch(info[i], "#Group ([a-z]+) (%d+)")
+		if domain and n then
+			return TMW[domain][tonumber(n)]
 		end
 	end
 end TMW.FindGroupFromInfo = FindGroupFromInfo
@@ -552,7 +552,8 @@ TMW.GroupConfigTemplate = {
 		return group:GetGroupName()
 	end,
 	order = function(info)
-		return FindGroupFromInfo(info):GetID()
+		local group = FindGroupFromInfo(info)
+		return group:GetID() + (group.Domain == "profile" and 1e6 or 0)
 	end,
 	args = {
 		main = {
@@ -657,9 +658,11 @@ TMW.GroupConfigTemplate = {
 					type = "execute",
 					order = 48,
 					func = function(info)
-						TMW:Group_Swap(FindGroupFromInfo(info).ID, FindGroupFromInfo(info).ID - 1)
+						local domain = FindGroupFromInfo(info).Domain
 
-						IE:NotifyChanges("groups", "#Group " .. FindGroupFromInfo(info).ID - 1)
+						TMW:Group_Swap(domain, FindGroupFromInfo(info).ID, FindGroupFromInfo(info).ID - 1)
+
+						IE:NotifyChanges("groups", "#Group " .. domain .. " " .. FindGroupFromInfo(info).ID - 1)
 					end,
 					disabled = function(info)
 						return FindGroupFromInfo(info).ID == 1
@@ -671,9 +674,11 @@ TMW.GroupConfigTemplate = {
 					type = "execute",
 					order = 49,
 					func = function(info)
-						TMW:Group_Swap(FindGroupFromInfo(info).ID, FindGroupFromInfo(info).ID + 1)
+						local domain = FindGroupFromInfo(info).Domain
 
-						IE:NotifyChanges("groups", "#Group " .. FindGroupFromInfo(info).ID + 1)
+						TMW:Group_Swap(domain, FindGroupFromInfo(info).ID, FindGroupFromInfo(info).ID + 1)
+
+						IE:NotifyChanges("groups", "#Group " .. domain .. " " .. FindGroupFromInfo(info).ID + 1)
 					end,
 					disabled = function(info)
 						return FindGroupFromInfo(info).ID == TMW.db.profile.NumGroups
@@ -686,10 +691,11 @@ TMW.GroupConfigTemplate = {
 					order = 50,
 					func = function(info)
 						local group = FindGroupFromInfo(info)
-						TMW:Group_Delete(group.ID)
+						TMW:Group_Delete(group)
 					end,
-					disabled = function()
-						return TMW.db.profile.NumGroups == 1
+					disabled = function(info)
+						local group = FindGroupFromInfo(info)
+						return group.Domain == "profile" and TMW.db.profile.NumGroups == 1
 					end,
 					confirm = function(info)
 						if IsControlKeyDown() then
@@ -698,6 +704,31 @@ TMW.GroupConfigTemplate = {
 							return true
 						end
 						return false
+					end,
+				},
+				switch = {
+					name = function(info)
+						local group = FindGroupFromInfo(info)
+						if group.Domain == "global" then
+							return L["DOMAIN_PROFILE_SWITCHTO"]
+						else
+							return L["DOMAIN_GLOBAL_SWITCHTO"]
+						end
+					end,
+					type = "execute",
+					width = "full",
+					order = 60,
+					func = function(info)
+						local group = FindGroupFromInfo(info)
+						group:SwitchDomain()
+
+						IE:Load(1)
+						TMW:CompileOptions()
+						IE:NotifyChanges()
+					end,
+					disabled = function(info)
+						local group = FindGroupFromInfo(info)
+						return group.Domain == "profile" and TMW.db.profile.NumGroups == 1
 					end,
 				},
 				ImportExport = importExportBoxTemplate,
@@ -751,7 +782,8 @@ local addGroupButton = {
 		return TMW.Views[info[#info]].order
 	end,
 	func = function(info)
-		TMW:Group_Add(info[#info])
+		--TODO: add separatate buttons for profilegroup and globalgroup
+		TMW:Group_Add("profile", info[#info])
 	end,
 }
 local viewSelectToggle = {
@@ -1172,6 +1204,7 @@ function TMW:CompileOptions()
 						addgroupgroup = {
 							type = "group",
 							name = L["UIPANEL_ADDGROUP"],
+							order = math.huge,
 							args = {
 								addgroup = addGroupFunctionGroup,
 								importexport = importExportBoxTemplate,
@@ -1207,8 +1240,14 @@ function TMW:CompileOptions()
 			TMW.OptionsTable.args.groups.args[k] = nil
 		end
 	end
+
+	-- Profile groups
 	for g = 1, TMW.db.profile.NumGroups do
-		TMW.OptionsTable.args.groups.args["#Group " .. g] = TMW.GroupConfigTemplate
+		TMW.OptionsTable.args.groups.args["#Group profile " .. g] = TMW.GroupConfigTemplate
+	end
+	-- Global Groups
+	for g = 1, TMW.db.global.NumGroups do
+		TMW.OptionsTable.args.groups.args["#Group global " .. g] = TMW.GroupConfigTemplate
 	end
 	
 	local parent = TMW.GroupConfigTemplate.args.main.args
@@ -1223,7 +1262,7 @@ function TMW:CompileOptions()
 		}
 	end
 
-	TMW.OptionsTable.args.groups.args.addgroupgroup.order = TMW.db.profile.NumGroups + 1
+	--TMW.OptionsTable.args.groups.args.addgroupgroup.order = TMW.db.profile.NumGroups + 1
 
 	
 	-- Dynamic Color Settings --
@@ -1290,27 +1329,32 @@ end
 -- -------------
 
 ---------- Add/Delete ----------
-function TMW:Group_Delete(groupID)
-	if TMW.db.profile.NumGroups == 1 then
-		return
+function TMW:Group_Delete(group)
+	local domain = group.Domain
+	local groupID = group.ID
+
+	if domain == "profile" and TMW.db[domain].NumGroups == 1 then
+		error("can't have less than one profile group")
 	end
 
-	tremove(TMW.db.profile.Groups, groupID)
-	TMW.db.profile.NumGroups = TMW.db.profile.NumGroups - 1
+	tremove(TMW.db[domain].Groups, groupID)
+	TMW.db[domain].NumGroups = TMW.db[domain].NumGroups - 1
 
 	TMW:Update()
+
 	IE:Load(1)
 	TMW:CompileOptions()
 	IE:NotifyChanges()
+
 	CloseDropDownMenus()
 end
 
-function TMW:Group_Add(view)
-	local groupID = TMW.db.profile.NumGroups + 1
+function TMW:Group_Add(domain, view)
+	local groupID = TMW.db[domain].NumGroups + 1
 
-	TMW.db.profile.NumGroups = groupID
+	TMW.db[domain].NumGroups = groupID
 
-	local gs = TMW.db.profile.Groups[groupID]
+	local gs = TMW.db[domain].Groups[groupID]
 
 	if view then
 		gs.View = view
@@ -1323,19 +1367,20 @@ function TMW:Group_Add(view)
 
 	TMW:Update()
 
-	local group = TMW[groupID]
+	local group = TMW[domain][groupID]
 
 	TMW:CompileOptions()
-	IE:NotifyChanges("groups", "#Group " .. groupID)
+	IE:NotifyChanges("groups", "#Group " .. domain .. " " .. groupID)
 
 	return group
 end
 
-function TMW:Group_Swap(groupID1, groupID2)
-	local Groups = TMW.db.profile.Groups
+function TMW:Group_Swap(domain, groupID1, groupID2)
+	local Groups = TMW.db[domain].Groups
 	Groups[groupID1], Groups[groupID2] = Groups[groupID2], Groups[groupID1]
     
     TMW:Update()
+
 	IE:Load(1)
 	TMW:CompileOptions()
 	IE:NotifyChanges()
@@ -1344,7 +1389,7 @@ end
 
 ---------- Etc ----------
 function TMW:Group_HasIconData(group)
-	for ics in TMW:InIconSettings(group.ID) do
+	for ics in group:InIconSettings() do
 		if not TMW:DeepCompare(TMW.DEFAULT_ICON_SETTINGS, ics) then
 			return true
 		end
@@ -1835,7 +1880,7 @@ function IE:CreateTabs()
 	
 	IE.MainOptionsTab:ExtendMethod("ClickHandler", function()
 		TMW:CompileOptions()
-		TMW.IE:NotifyChanges("groups", "#Group " .. TMW.CI.g)
+		TMW.IE:NotifyChanges("groups", "#Group " .. TMW.CI.ic.group.Domain .. " " .. TMW.CI.g)
 		LibStub("AceConfigDialog-3.0"):Open("TMW IEOptions", TMW.IE.MainOptionsWidget)
 	end)		
 end
@@ -2184,10 +2229,12 @@ function IE:CheckLoadedIconIsValid()
 end
 
 function IE:LoadFirstValidIcon()
-	for icon in TMW:InIcons() do
-		-- hack to get the first icon that exists and is shown
-		if icon:IsVisible() and icon.group:IsValid() and icon:IsInRange() then
-			return IE:Load(1, icon)
+	for group in TMW:InGroups() do
+		for icon in group:InIcons() do
+			-- hack to get the first icon that exists and is shown
+			if icon:IsVisible() and icon.group:IsValid() and icon:IsInRange() then
+				return IE:Load(1, icon)
+			end
 		end
 	end
 	

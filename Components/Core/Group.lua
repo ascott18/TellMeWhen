@@ -112,7 +112,6 @@ end
 -- [INTERNAL]
 function Group.OnNewInstance(group, ...)
 	local _, name, _, _, groupID = ... -- the CreateFrame args
-	TMW[groupID] = group
 
 	group.ID = groupID
 end
@@ -132,18 +131,23 @@ function Group.GetGroupName(group, short)
 	
 	local name = group:GetSettings().Name
 
+	local prepend = ""
+	if group.Domain == "global" then
+		prepend = L["DOMAIN_GLOBAL"] .. " "
+	end
+
 	if not name or name == "" then
 		if short then
-			return groupID
+			return tostring(groupID)
 		end
-		return format(L["fGROUP"], groupID)
+		return format(prepend .. L["fGROUP"], groupID)
 	end
 
 	if short then
 		return name .. " (" .. groupID .. ")"
 	end
 
-	return name .. " (" .. format(L["fGROUP"], groupID) .. ")"
+	return name .. " (" .. prepend .. format(L["fGROUP"], groupID) .. ")"
 end
 
 -- [INTERNAL]
@@ -219,6 +223,53 @@ end
 
 
 
+-- [INTERNAL]
+function Group.SwitchDomain(group)
+	local gs = group:GetSettings()
+
+	tremove(TMW.db[group.Domain].Groups, group.ID)
+	TMW.db[group.Domain].NumGroups = TMW.db[group.Domain].NumGroups - 1
+
+	local newDomain = group.Domain == "global" and "profile" or "global"
+
+	TMW.db[newDomain].NumGroups = TMW.db[newDomain].NumGroups + 1
+	TMW.db[newDomain].Groups[TMW.db[newDomain].NumGroups] = gs
+
+	if newDomain == "profile" then
+		wipe(gs.EnabledProfiles)
+	end
+
+	TMW:Update()
+end
+
+
+-- [INTERNAL]
+local function iterInIcons(group, icon)
+	if icon == nil then
+		icon = group[1]
+	else
+		icon = group[icon.ID + 1]
+	end
+	
+	return icon, icon and icon.ID
+end
+
+--- Gets in iterator that iterates over each icon in the group.
+-- @name Group:InIcons
+-- @paramsig 
+-- @return Iterator that gives (icon, iconID) for each icon in the group (regardless of whether it is currently used/shown)
+function Group.InIcons(group)
+	return iterInIcons, group
+end
+
+--- Gets in iterator that iterates over the settings of each icon in the group.
+-- @name Group:InIcons
+-- @paramsig 
+-- @return Iterator that gives (ics, gs, domain, groupID, iconID) for each icon in the group (regardless of whether it is currently used/shown)
+function Group.InIconSettings(group)
+	return TMW:InIconSettings(group.Domain, group.ID)
+end
+
 --- Returns the GUID of this group.
 -- @name Group:GetGUID
 -- @paramsig 
@@ -242,7 +293,7 @@ end
 -- @usage local gs = group:GetSettings()
 -- print(group:GetName() .. "'s enabled setting is set to " .. gs.Enabled)
 function Group.GetSettings(group)
-	return TMW.db.profile.Groups[group:GetID()]
+	return TMW.db[group.Domain].Groups[group:GetID()]
 end
 
 --- Returns the settings table that holds the view-specific settings for the group.

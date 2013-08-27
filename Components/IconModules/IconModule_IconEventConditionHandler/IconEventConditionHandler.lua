@@ -108,13 +108,13 @@ do
 			state.currentEventID = state.currentEventID + 1
 
 			if not state.currentEvents or state.currentEventID > (state.currentEvents.n or #state.currentEvents) then
-				local settings, gs, groupID, iconID = state.extIter(state.extIterState)
+				local ics = state.extIter(state.extIterState)
 				
-				if not settings then
+				if not ics then
 					tinsert(states, state)
 					return
 				end
-				state.currentEvents = settings.Events
+				state.currentEvents = ics.Events
 				state.currentEventID = 0
 				
 				return iter(state)

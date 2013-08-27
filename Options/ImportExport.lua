@@ -261,15 +261,15 @@ local function remapGUIDs(data, GUIDmap)
 	end
 end
 
-function group:Import_ImportData(editbox, data, version, createNewGroup, oldgroupID, destgroup)
+function group:Import_ImportData(editbox, data, version, domain, createNewGroup, oldgroupID, destgroup)
 	local group
 	if createNewGroup then
-		group = TMW:Group_Add()
+		group = TMW:Group_Add(domain, nil)
 	else
 		group = destgroup
 	end
 
-	TMW.db.profile.Groups[group.ID] = nil -- restore defaults, table recreated when passed in to CTIPWM
+	TMW.db[domain].Groups[group.ID] = nil -- restore defaults, table recreated when passed in to CTIPWM
 	local gs = group:GetSettings()
 	TMW:CopyTableInPlaceWithMeta(data, gs, true)
 
@@ -280,12 +280,12 @@ function group:Import_ImportData(editbox, data, version, createNewGroup, oldgrou
 
 		local GUIDmap = {}
 
-		for gs2, gID in TMW:InGroupSettings() do
+		for gs2 in TMW:InGroupSettings() do
 			if gs ~= gs2 then
 				existingGUIDs[gs.GUID] = true
 			end
 		end
-		for ics, gs2, gID in TMW:InIconSettings() do
+		for ics, gs2 in TMW:InIconSettings() do
 			if ics.GUID and ics.GUID ~= "" then
 				if gs ~= gs2 then
 					existingGUIDs[ics.GUID] = true
@@ -325,7 +325,7 @@ function group:Import_ImportData(editbox, data, version, createNewGroup, oldgrou
 		if version > TELLMEWHEN_VERSIONNUMBER then
 			TMW:Print(L["FROMNEWERVERSION"])
 		else
-			TMW:DoUpgrade("group", version, gs, db.profile.Groups, group.ID)
+			TMW:DoUpgrade("group", version, gs, TMW.db[domain].Groups, group.ID)
 		end
 	end
 end
@@ -476,17 +476,26 @@ group:RegisterMenuBuilder(20, function(self, result, editbox)
 	local info = UIDropDownMenu_CreateInfo()
 	info.text = L["COPYGROUP"] .. " - " .. L["OVERWRITEGROUP"]:format(group and group:GetGroupName(1) or "?")
 	info.func = function()
-		TMW:Import(editbox, gs, result.version, "group", false, groupID, group)
+		TMW:Import(editbox, gs, result.version, "group", group.Domain, false, groupID, group)
 	end
 	info.notCheckable = true
 	info.disabled = not IMPORTS.group_overwrite
 	UIDropDownMenu_AddButton(info, UIDROPDOWNMENU_MENU_LEVEL)
 
-	-- copy entire group - create new group
+	-- copy entire group - create new group in profile
 	local info = UIDropDownMenu_CreateInfo()
-	info.text = L["COPYGROUP"] .. " - " .. L["MAKENEWGROUP"]
+	info.text = L["COPYGROUP"] .. " - " .. L["MAKENEWGROUP"] .. " - " .. L["GROUP_DOMAIN_PROFILE"]
 	info.func = function()
-		TMW:Import(editbox, gs, result.version, "group", true, groupID)
+		TMW:Import(editbox, gs, result.version, "group", "profile", true, groupID)
+	end
+	info.notCheckable = true
+	UIDropDownMenu_AddButton(info, UIDROPDOWNMENU_MENU_LEVEL)
+
+	-- copy entire group - create new group in global
+	local info = UIDropDownMenu_CreateInfo()
+	info.text = L["COPYGROUP"] .. " - " .. L["MAKENEWGROUP"] .. " - " .. L["GROUP_DOMAIN_GLOBAL"]
+	info.func = function()
+		TMW:Import(editbox, gs, result.version, "group", "global", true, groupID)
 	end
 	info.notCheckable = true
 	UIDropDownMenu_AddButton(info, UIDROPDOWNMENU_MENU_LEVEL)

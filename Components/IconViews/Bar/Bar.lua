@@ -162,7 +162,7 @@ end
 function View:Group_Setup(group)
 	self:Group_SetSize(group)
 	
-	for icon in TMW:InIcons(group.ID) do
+	for icon in group:InIcons() do
 		self:Icon_Setup(icon)
 	end
 end

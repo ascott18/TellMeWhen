@@ -99,7 +99,7 @@ function TEXT:CacheUsedStrings()
 		TEXT.usedStrings[text] = 0 -- set to 0, not nil, and dont wipe the table either
 	end
 	
-	for ics, gs, groupID, iconID in TMW:InIconSettings() do
+	for ics, gs in TMW:InIconSettings() do
 		for view, viewSettings in pairs(ics.SettingsPerView) do
 		
 			local GUID, layoutSettings = TEXT:GetTextLayoutForIconSettings(gs, ics, view)
@@ -421,15 +421,15 @@ TMW.GroupConfigTemplate.args.main.args.TextLayout = {
 		
 		-- the group setting is a fallback for icons, so there is no reason to set the layout for individual icons
 		-- we do need to reset icons to "" so that they will fall back to the group setting, though.
-		for icon in TMW:InIcons(group.ID) do
+		for icon in group:InIcons() do
 			IE:AttemptBackup(icon)
 		end
 		
-		for ics in TMW:InIconSettings(group.ID) do
+		for ics in group:InIconSettings() do
 			ics.SettingsPerView[gs.View].TextLayout = nil
 		end
 		
-		for icon in TMW:InIcons(group.ID) do
+		for icon in group:InIcons() do
 			IE:AttemptBackup(icon)
 		end
 		
@@ -468,8 +468,8 @@ local function AddTextLayout()
 	newLayout.Name = Name
 end
 local function UpdateIconsUsingTextLayout(layoutID)
-	for group, groupID in TMW:InGroups() do
-		for icon in TMW:InIcons(groupID) do
+	for group in TMW:InGroups() do
+		for icon in group:InIcons() do
 			if icon:IsVisible() and TEXT:GetTextLayoutForIcon(icon) == layoutID then
 				-- setup entire groups because there is code that prevents excessive event firing
 				-- when updating a whole group vs a single icon

@@ -17,6 +17,11 @@ L["CMD_PROFILE_INVALIDPROFILE_SPACES"] = "Tip: If the profile name contains spac
 
 L["PROFILE_LOADED"] = "Loaded profile: %s"
 
+L["DOMAIN_PROFILE"] = "Profile"
+L["DOMAIN_PROFILE_SWITCHTO"] = "Move this group to profile %q"
+L["DOMAIN_GLOBAL"] = "|cff00c300Global|r"
+L["DOMAIN_GLOBAL_SWITCHTO"] = "Make this group global"
+
 
 L["ICON_TOOLTIP2NEW"] = [[|cff7fffffRight-click|r for icon options.
 |cff7fffffRight-click and drag|r to another icon to move/copy.

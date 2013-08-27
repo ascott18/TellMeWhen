@@ -238,6 +238,7 @@ function Icon.GetGUID(icon, generate)
 		GUID = TMW:GenerateGUID("icon", TMW.CONST.GUID_SIZE)
 		icon:GetSettings().GUID = GUID
 		icon.GUID = GUID
+		icon:Setup()
 	end
 
 	return GUID
@@ -274,6 +275,10 @@ end
 function Icon.GetIconName(icon, texture)
 	local name = L["GROUPICON"]:format(icon.group:GetGroupName(1), icon.ID)
 	
+	if icon.group.Domain == "global" then
+		name = L["DOMAIN_GLOBAL"] .. " " .. name
+	end
+
 	if texture then
 		return ("|T%s:0|t %s"):format(icon.attributes.texture, name)
 	else

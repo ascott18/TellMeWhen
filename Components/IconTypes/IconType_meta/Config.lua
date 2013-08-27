@@ -131,7 +131,8 @@ local addedGroups = {}
 function ME:IconMenu()
 	if UIDROPDOWNMENU_MENU_LEVEL == 1 then
 		local currentGroupView = TMW.CI.gs.View
-		for group, groupID in TMW:InGroups() do
+		
+		for group in TMW:InGroups() do
 			if group:ShouldUpdateIcons() then
 				local info = UIDropDownMenu_CreateInfo()
 
@@ -160,7 +161,7 @@ function ME:IconMenu()
 			end
 		end
 	elseif UIDROPDOWNMENU_MENU_LEVEL == 2 then
-		for icon, groupID, iconID in TMW:InIcons(UIDROPDOWNMENU_MENU_VALUE.ID) do
+		for icon in UIDROPDOWNMENU_MENU_VALUE:InIcons() do
 			if icon:IsValid() and CI.ic ~= icon then
 				local info = UIDropDownMenu_CreateInfo()
 

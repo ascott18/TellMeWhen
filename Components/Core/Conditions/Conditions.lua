@@ -1184,7 +1184,7 @@ TMW:RegisterCallback("TMW_UPGRADE_REQUESTED", function(event, settingType, versi
 	
 end)
 
-
+--[=[
 do -- InConditionSettings
 	local states = {}
 	local function getstate()
@@ -1202,10 +1202,9 @@ do -- InConditionSettings
 		state.currentConditionID = state.currentConditionID + 1
 
 		if not state.currentConditions or state.currentConditionID > (state.currentConditions.n or #state.currentConditions) then
-			local settings
-			settings, state.cg, state.ci = state.extIter(state.extIterState)
+			local parentTable = state.extIter(state.extIterState)
 			
-			if not settings then
+			if not parentTable then
 				state.currentConditionSetKey, state.currentConditionSet = next(ConditionSets, state.currentConditionSetKey)
 				if state.currentConditionSetKey then
 					state.extIter, state.extIterState = state.currentConditionSet.iterFunc(unpack(state.currentConditionSet.iterArgs))
@@ -1216,7 +1215,9 @@ do -- InConditionSettings
 					return
 				end
 			end
-			state.currentConditions = settings[state.currentConditionSet.settingKey]
+
+			state.parentTable = parentTable
+			state.currentConditions = parentTable[state.currentConditionSet.settingKey]
 			state.currentConditionID = 0
 			
 			return iter(state)
@@ -1228,15 +1229,17 @@ do -- InConditionSettings
 			return iter(state)
 		end
 		
-		return condition, state.currentConditionID, state.cg, state.ci -- condition data, conditionID, groupID, iconID
+		return condition, state.currentConditionID, state.parentTable -- condition data, conditionID, parentTable
 	end
 
 	--- Iterates over all condition settings for all condition sets.
-	-- @return An interator that provides (conditionSettings, conditionID, groupID, iconID) for each iteration.
-	-- @usage	for conditionSettings, conditionID, groupID, iconID in TMW:InConditionSettings() do
-	--		print(conditionSettings, conditionID, groupID, iconID)
+	-- @return An interator that provides (conditionSettings, conditionID, parentTable) for each iteration.
+	-- @usage	for conditionSettings, conditionID, parentTable in TMW:InConditionSettings() do
+	--		print(conditionSettings, conditionID)
+	--		assert(conditionSetting == parentTable[conditionID])
 	--	end
 	function TMW:InConditionSettings()
 		return iter, getstate()
 	end
 end
+]=]
