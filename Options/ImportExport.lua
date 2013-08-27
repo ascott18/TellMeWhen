@@ -506,7 +506,7 @@ function group:Export_SetButtonAttributes(editbox, info)
 	local IMPORTS, EXPORTS = editbox:GetAvailableImportExportTypes()
 	local group = EXPORTS[self.type]
 	
-	local text = group:GetGroupName(1)
+	local text = group:GetGroupName()
 	info.text = text
 	info.tooltipTitle = text
 end
@@ -640,9 +640,15 @@ function icon:Export_SetButtonAttributes(editbox, info)
 	local IMPORTS, EXPORTS = editbox:GetAvailableImportExportTypes()
 	local icon = EXPORTS.icon
 	
-	local text = icon:GetIconName(1)
+	local text = L["fICON"]:format(icon.ID)
 	info.text = text
 	info.tooltipTitle = text
+
+	info.icon = icon.attributes.texture
+	info.tCoordLeft = 0.07
+	info.tCoordRight = 0.93
+	info.tCoordTop = 0.07
+	info.tCoordBottom = 0.93
 end
 function icon:Export_GetArgs(editbox, info)
 	--editbox, type, settings, defaults, ...
