@@ -440,7 +440,7 @@ local function UnitCooldown_OnUpdate(icon, time)
 			end
 		end
 	end
-print(icon, usename, unname)
+	
 	if usename and Alpha > 0 then
 		icon:SetInfo("alpha; texture; start, duration; spell; unit, GUID",
 			icon.Alpha,
