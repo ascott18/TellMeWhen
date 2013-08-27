@@ -504,7 +504,7 @@ local textLayoutTemplate = {
 	end,
 	hidden = function(info)
 		local layout = findlayout(info)
-		return layout == ""
+		return layout == "" or not TEXT:GetTextLayoutSettings(layout)
 	end,
 	args = {
 		Name = {
@@ -1082,7 +1082,7 @@ TMW:RegisterCallback("TMW_CONFIG_MAIN_OPTIONS_COMPILE", function(event, OptionsT
 			end
 		end
 		
-		OptionsTable.args.textlayouts.args["#TextLayout " .. layoutID] = textLayoutTemplate
+		textlayouts_toplevel.args["#TextLayout " .. layoutID] = textLayoutTemplate
 	end
 end)
 
