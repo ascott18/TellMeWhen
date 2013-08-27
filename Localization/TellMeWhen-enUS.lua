@@ -13,7 +13,7 @@ L["CMD_TOGGLE"] = "toggle"
 L["CMD_PROFILE"] = "profile"
 
 L["CMD_PROFILE_INVALIDPROFILE"] = "No profile named %q exists!"
-L["CMD_PROFILE_INVALIDPROFILE_SPACES"] = "Tip: If the profile name contains spaces, put quotes around it."
+L["CMD_PROFILE_INVALIDPROFILE_SPACES"] = "Tip: aIf the profile name contains spaces, put quotes around it."
 
 L["PROFILE_LOADED"] = "Loaded profile: %s"
 
@@ -22,6 +22,15 @@ L["DOMAIN_PROFILE_SWITCHTO"] = "Move this group to profile %q"
 L["DOMAIN_GLOBAL"] = "|cff00c300Global|r"
 L["DOMAIN_GLOBAL_SWITCHTO"] = "Make this group global"
 
+L["IE_NOLOADED"] = [[There isn't an icon currently loaded into the Icon Editor.
+
+To load an icon, right-click on it.
+
+If there are no icons visible on your screen, click the %q tab below or type '/tmw options' to view the settings of your groups.
+
+From there, you can add a new group or configure an existing group to be available to your character's current class specialization.
+
+Type '/tmw' to leave configuration mode.]]
 
 L["ICON_TOOLTIP2NEW"] = [[|cff7fffffRight-click|r for icon options.
 |cff7fffffRight-click and drag|r to another icon to move/copy.

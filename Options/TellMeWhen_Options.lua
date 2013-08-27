@@ -120,12 +120,15 @@ TMW.Backupdb = CopyTable(TellMeWhenDB)
 TMW.BackupDate = date("%I:%M:%S %p")
 
 TMW.CI = setmetatable({}, {__index = function(tbl, k)
-	if k == "ics" then
-		-- take no chances with errors occuring here
-		return tbl.ic and tbl.ic:GetSettings()
+	if k == "ic" then
+		return tbl.icon
+	elseif k == "group" then
+		return tbl.icon and tbl.icon.group
+	elseif k == "ics" then
+		return tbl.icon and tbl.icon:GetSettings()
 	elseif k == "gs" then
 		-- take no chances with errors occuring here
-		return TMW.approachTable(TMW.db, "profile", "Groups", tbl.g)
+		return tbl.group and tbl.group:GetSettings()
 	end
 end}) local CI = TMW.CI		--current icon
 
@@ -1467,7 +1470,7 @@ function IE:OnInitialize()
 	IE.iconsToUpdate = {}
 
 	TMW:RegisterCallback("TMW_GROUP_SETUP_POST", function(event, group)
-		if CI.g == group.ID then
+		if CI.group == group then
 			IE:CheckLoadedIconIsValid()
 		end
 	end)
@@ -1797,10 +1800,15 @@ TMW:NewClass("IconEditorTab", "Button"){
 	end,
 	
 	OnClick = function(self)
-		self:ClickHandler()
+		if self.doesGroup and not CI.icon then
+			self:ClickHandlerBase(IE.NotLoadedMessage)
+		else
+			IE.NotLoadedMessage:Hide()
+			self:ClickHandler()
+		end
 	end,
 	
-	ClickHandler = function(self)
+	ClickHandlerBase = function(self, frame)
 		-- invoke blizzard's tab click function to set the apperance of all the tabs
 		PanelTemplates_Tab_OnClick(self, self:GetParent())
 		PlaySound("igCharacterInfoTab")
@@ -1812,6 +1820,7 @@ TMW:NewClass("IconEditorTab", "Button"){
 				TellMeWhen_IconEditor[frame]:Hide()
 			end
 		end
+		IE.NotLoadedMessage:Hide()
 
 		local oldTab = IE.CurrentTab
 		
@@ -1820,15 +1829,22 @@ TMW:NewClass("IconEditorTab", "Button"){
 		IE.CurrentTab = self
 
 		-- show the selected tab's frame
-		if TellMeWhen_IconEditor[self.attachedFrame] then
-			TellMeWhen_IconEditor[self.attachedFrame]:Show()
-		else
-			TMW:Error(("Couldn't find child of TellMeWhen_IconEditor with key %q"):format(self.attachedFrame))
+		if frame then
+			frame:Show()
 		end
 		-- show the icon editor
 		IE:Show()
 		
 		TMW:Fire("TMW_CONFIG_TAB_CLICKED", IE.CurrentTab, oldTab)
+	end,
+	
+	ClickHandler = function(self)
+		local frame = TellMeWhen_IconEditor[self.attachedFrame]
+		if not frame then
+			TMW:Error(("Couldn't find child of TellMeWhen_IconEditor with key %q"):format(self.attachedFrame))
+		end
+
+		self:ClickHandlerBase(frame)
 	end,
 	
 	OnShow = function(self)
@@ -1868,18 +1884,15 @@ function IE:CreateTabs()
 	
 	IE.MainOptionsTab:ExtendMethod("ClickHandler", function()
 		TMW:CompileOptions()
-		TMW.IE:NotifyChanges("groups", "#Group " .. TMW.CI.ic.group.Domain .. " " .. TMW.CI.g)
+		if TMW.CI.group then
+			TMW.IE:NotifyChanges("groups", "#Group " .. TMW.CI.group.Domain .. " " .. TMW.CI.group.ID)
+		end
 		LibStub("AceConfigDialog-3.0"):Open("TMW IEOptions", TMW.IE.MainOptionsWidget)
 	end)		
 end
 
 function IE:OnUpdate()
-	local groupID, iconID = TMW.CI.g, TMW.CI.i
-	local icon = TMW.CI.ic
-
-	if not groupID then
-		return
-	end
+	local icon = CI.icon
 
 	-- update the top of the icon editor with the information of the current icon.
 	-- this is done in an OnUpdate because it is just too hard to track when the texture changes sometimes.
@@ -1887,11 +1900,11 @@ function IE:OnUpdate()
 	local titlePrepend = "TellMeWhen v" .. TELLMEWHEN_VERSION_FULL
 	
 	local tab = IE.CurrentTab
-	
-	local groupName = icon.group:GetGroupName(1)
 
-	if tab.doesGroup and tab.doesIcon then
+	if icon and tab.doesGroup and tab.doesIcon then
 		-- For IconEditor tabs that can configure icons
+
+		local groupName = CI.group:GetGroupName(1)
 
 		local GUID = icon:GetGUID()
 
@@ -1899,12 +1912,12 @@ function IE:OnUpdate()
 		if TMW.debug and GUID then
 			append = " " .. GUID:gsub("%%", "%%%%")
 		end
-		self.Header:SetFormattedText(titlePrepend .. " - " .. L["GROUPICON"] .. append, groupName, iconID)
+		self.Header:SetFormattedText(titlePrepend .. " - " .. L["GROUPICON"] .. append, groupName, icon.ID)
 
 		if self.Header:IsTruncated() then
 			local truncAmt = 3
 			while self.Header:IsTruncated() and truncAmt < #groupName + 4 do
-				self.Header:SetFormattedText(titlePrepend .. " - " .. L["GROUPICON"], groupName:sub(1, -truncAmt - 4) .. "..." .. groupName:sub(-5), iconID)
+				self.Header:SetFormattedText(titlePrepend .. " - " .. L["GROUPICON"], groupName:sub(1, -truncAmt - 4) .. "..." .. groupName:sub(-5), icon.ID)
 				truncAmt = truncAmt + 1
 			end
 		end
@@ -1926,9 +1939,9 @@ function IE:OnUpdate()
 		-- (it gets offset to the left by the exit button)
 		self.Header:SetPoint("LEFT", self.icontexture, "RIGHT", 4, 0)
 		
-		if tab.doesGroup then
+		if CI.group and tab.doesGroup then
 			-- for group config tabs, don't show icon info. Just show group info.
-			self.Header:SetFormattedText(titlePrepend .. " - " .. L["fGROUP"], groupName)
+			self.Header:SetFormattedText(titlePrepend .. " - " .. L["fGROUP"], CI.group:GetGroupName(1))
 		else
 			self.Header:SetText(titlePrepend)
 		end
@@ -1988,6 +2001,12 @@ IE:RegisterEvent("PLAYER_REGEN_DISABLED", function()
 	end
 end)
 
+TMW:RegisterCallback("TMW_LOCK_TOGGLED", function(event, Locked)
+	if Locked and not CI.icon then
+		IE:Hide()
+	end
+end)
+
 function IE:StartMoving()
 	IE.startX, IE.startY = select(4, IE:GetPoint())
 	IE.cursorStartX, IE.cursorStartY = GetCursorPosition()
@@ -2008,6 +2027,10 @@ function IE:PositionPanels()
 		frame:Hide()
 	end
 	
+	if not CI.icon then
+		return
+	end
+
 	wipe(panelList)
 	for _, Component in pairs(CI.ic.Components) do
 		if Component:ShouldShowConfigPanels(CI.ic) then
@@ -2119,37 +2142,46 @@ function IE:DistributeFrameAnchorsLaterally(parent, numPerRow, ...)
 end
 
 function IE:Load(isRefresh, icon, isHistoryChange)
-	if type(icon) == "table" then
-		PlaySound("igCharacterInfoTab")
-		IE:SaveSettings()
-		
-		local ic_old = CI.ic
-		
-		CI.i = icon:GetID()
-		CI.g = icon.group:GetID()
-		CI.ic = icon
+	if icon ~= nil then
+		local ic_old = CI.icon
 
-		if IE.history[#IE.history] ~= icon and not isHistoryChange then
-			-- if we are using an old history point (i.e. we hit back a few times and then loaded a new icon),
-			-- delete all history points from the current one forward so that we dont jump around wildly when backing and forwarding
-			for i = IE.historyState + 1, #IE.history do
-				IE.history[i] = nil
+		if type(icon) == "table" then
+			PlaySound("igCharacterInfoTab")
+			IE:SaveSettings()
+			
+			CI.icon = icon
+
+			if IE.history[#IE.history] ~= icon and not isHistoryChange then
+				-- if we are using an old history point (i.e. we hit back a few times and then loaded a new icon),
+				-- delete all history points from the current one forward so that we dont jump around wildly when backing and forwarding
+				for i = IE.historyState + 1, #IE.history do
+					IE.history[i] = nil
+				end
+
+				IE.history[#IE.history + 1] = icon
+
+				-- set the history state to the latest point
+				IE.historyState = #IE.history
+				-- notify the back and forwards buttons that there was a change so they can :Enable() or :Disable()
+				IE:BackFowardsChanged()
+			end
+			
+			if ic_old ~= CI.icon then
+				IE.Main.PanelsLeft.ScrollFrame:SetVerticalScroll(0)
+				IE.Main.PanelsRight.ScrollFrame:SetVerticalScroll(0)
 			end
 
-			IE.history[#IE.history + 1] = icon
 
-			-- set the history state to the latest point
-			IE.historyState = #IE.history
-			-- notify the back and forwards buttons that there was a change so they can :Enable() or :Disable()
-			IE:BackFowardsChanged()
+		elseif icon == false then
+			CI.icon = nil
+
+			if IE.CurrentTab then
+				IE.CurrentTab:OnClick()
+			end
+
 		end
-		
-		if ic_old ~= CI.ic then
-			IE.Main.PanelsLeft.ScrollFrame:SetVerticalScroll(0)
-			IE.Main.PanelsRight.ScrollFrame:SetVerticalScroll(0)
-		end
-		
-		TMW:Fire("TMW_CONFIG_ICON_LOADED_CHANGED", icon, ic_old)
+
+		TMW:Fire("TMW_CONFIG_ICON_LOADED_CHANGED", CI.icon, ic_old)
 	end
 
 	if not IE:IsShown() then
@@ -2160,10 +2192,6 @@ function IE:Load(isRefresh, icon, isHistoryChange)
 		end
 	end
 
-	-- This is really really important. The icon must be setup so that it has the correct components implemented
-	-- so that the correct config panels will be loaded and shown for the icon.
-	CI.ic:Setup()
-	
 	IE.ExportBox:SetText("")
 	
 	if 0 > IE:GetBottom() then
@@ -2174,30 +2202,42 @@ function IE:Load(isRefresh, icon, isHistoryChange)
 	IE:SetScale(IE.db.global.EditorScale)
 	IE:SetHeight(IE.db.global.EditorHeight)
 
-	CI.ics.Type = CI.ics.Type
-	if CI.ics.Type == "" then
-		UIDropDownMenu_SetText(IE.Main.Type, L["ICONMENU_TYPE"])
-	else
-		local Type = rawget(TMW.Types, CI.ics.Type)
-		if Type then
-			UIDropDownMenu_SetText(IE.Main.Type, Type.name)
-		else
-			UIDropDownMenu_SetText(IE.Main.Type, CI.ics.Type .. ": UNKNOWN TYPE")
-		end
-	end
 	
 	IE:PositionPanels()
 	
-	TMW:Fire("TMW_CONFIG_ICON_LOADED", CI.ic)
-	
-	IE:ScheduleIconSetup()
-	
-	-- It is intended that this happens at the end instead of the beginning.
-	-- Table accesses that trigger metamethods flesh out an icon's settings with new things that aren't there pre-load (usually)
-	if icon then
-		IE:AttemptBackup(CI.ic)
-	end
 	IE:UndoRedoChanged()
+
+	if CI.icon then
+		-- This is really really important. The icon must be setup so that it has the correct components implemented
+		-- so that the correct config panels will be loaded and shown for the icon.
+		CI.icon:Setup()
+		
+		CI.ics.Type = CI.ics.Type
+		if CI.ics.Type == "" then
+			UIDropDownMenu_SetText(IE.Main.Type, L["ICONMENU_TYPE"])
+		else
+			local Type = rawget(TMW.Types, CI.ics.Type)
+			if Type then
+				UIDropDownMenu_SetText(IE.Main.Type, Type.name)
+			else
+				UIDropDownMenu_SetText(IE.Main.Type, CI.ics.Type .. ": UNKNOWN TYPE")
+			end
+		end
+
+		IE.ResetButton:Enable()
+
+		IE:ScheduleIconSetup()
+
+		-- It is intended that this happens at the end instead of the beginning.
+		-- Table accesses that trigger metamethods flesh out an icon's settings with new things that aren't there pre-load (usually)
+		if icon then
+			IE:AttemptBackup(CI.ic)
+		end
+
+		TMW:Fire("TMW_CONFIG_ICON_LOADED", CI.icon)
+	else
+		IE.ResetButton:Disable()
+	end
 end
 
 function IE:CheckLoadedIconIsValid()
@@ -2205,28 +2245,14 @@ function IE:CheckLoadedIconIsValid()
 		return
 	end
 
-	local groupID, iconID = CI.g, CI.i
-	if not groupID or not iconID then
+	if not CI.icon then
 		return
 	elseif
-		not CI.ic.group:IsValid()
+		not CI.group:IsValid()
 		or not CI.ic:IsInRange()
 	then
-		return IE:LoadFirstValidIcon()
+		TMW.IE:Load(nil, false)
 	end
-end
-
-function IE:LoadFirstValidIcon()
-	for group in TMW:InGroups() do
-		for icon in group:InIcons() do
-			-- hack to get the first icon that exists and is shown
-			if icon:IsVisible() and icon.group:IsValid() and icon:IsInRange() then
-				return IE:Load(1, icon)
-			end
-		end
-	end
-	
-	TMW.IE:Hide()
 end
 
 function IE:NotifyChanges(...)
@@ -2257,7 +2283,7 @@ function IE:Reset()
 	
 	CI.ic:DisableIcon()
 	
-	TMW.CI.gs.Icons[CI.i] = nil
+	TMW.CI.gs.Icons[CI.ic.ID] = nil
 	
 	TMW:Fire("TMW_ICON_SETTINGS_RESET", CI.ic)
 	
@@ -3264,13 +3290,13 @@ TMW:RegisterCallback("TMW_CONFIG_REQUEST_AVAILABLE_IMPORT_EXPORT_TYPES", functio
 	if editbox == TMW.IE.ExportBox then	
 		
 		if IE.CurrentTab.doesGroup then	
-			import.group_overwrite = CI.ic.group
-			export.group = CI.ic.group
+			import.group_overwrite = CI.group
+			export.group = CI.group
 		end
 		
 		if IE.CurrentTab.doesIcon then
-			import.icon = CI.ic
-			export.icon = CI.ic
+			import.icon = CI.icon
+			export.icon = CI.icon
 		end
 	end
 end)
@@ -3377,7 +3403,7 @@ function IE:AttemptBackup(icon)
 end
 
 function IE:DoUndoRedo(direction)
-	local icon = CI.ic
+	local icon = CI.icon
 	
 	IE:UndoRedoChanged()
 
@@ -3385,7 +3411,7 @@ function IE:DoUndoRedo(direction)
 
 	icon.historyState = icon.historyState + direction
 
-	TMW.CI.gs.Icons[CI.i] = nil -- recreated when passed into CTIPWM
+	TMW.CI.gs.Icons[CI.ic.ID] = nil -- recreated when passed into CTIPWM
 	TMW:CopyTableInPlaceWithMeta(icon.history[icon.historyState], CI.ics)
 	
 	CI.ic:Setup() -- do an immediate setup for good measure
@@ -3401,7 +3427,7 @@ end
 
 ---------- Interface ----------
 function IE:UndoRedoChanged()
-	local icon = CI.ic
+	local icon = CI.icon
 	
 	if icon then
 		if not icon.historyState or icon.historyState - 1 < 1 then

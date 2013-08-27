@@ -74,7 +74,6 @@ TMW.ME = ME
 
 function ME:LoadConfig()
 	if not TellMeWhen_MetaIconOptions then return end
-	local groupID, iconID = CI.g, CI.i
 	local settings = CI.ics.Icons
 
 	for k, GUID in pairs(settings) do

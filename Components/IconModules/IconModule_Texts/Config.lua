@@ -1279,8 +1279,8 @@ TMW:RegisterCallback("TMW_CONFIG_REQUEST_AVAILABLE_IMPORT_EXPORT_TYPES", functio
 	
 	import.textlayout_new = true
 	
-	if editbox == TMW.IE.ExportBox then
-		local GUID = TEXT:GetTextLayoutForIcon(CI.ic)
+	if editbox == TMW.IE.ExportBox and CI.icon then
+		local GUID = TEXT:GetTextLayoutForIcon(CI.icon)
 		
 		import.textlayout_overwrite = GUID
 		export.textlayout = GUID

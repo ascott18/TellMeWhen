@@ -530,7 +530,7 @@ do
 		
 		settingKey = "UnitConditions",
 		GetSettings = function(self)
-			return TMW.CI.ics.UnitConditions
+			return TMW.CI.ics and TMW.CI.ics.UnitConditions
 		end,
 		
 		iterFunc = TMW.InIconSettings,

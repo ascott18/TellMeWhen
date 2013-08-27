@@ -1647,6 +1647,57 @@
 					</OnDragStop>
 				</Scripts>
 			</Frame>
+
+			<Frame name="$parentNotLoadedMessage" parentKey="NotLoadedMessage" hidden="true">
+				<Anchors>
+					<Anchor point="TOPLEFT" y="-23"/>
+					<Anchor point="BOTTOMRIGHT" y="26"/>
+				</Anchors>
+				
+				<Frames>
+					<Frame name="$parentMessage" inherits="TellMeWhen_BorderedFrame" parentKey="Message">
+						<Size y="1"/>
+						<Anchors>
+							<Anchor point="TOP" y="-35"/>
+							<Anchor point="LEFT" x="15" />
+							<Anchor point="RIGHT" x="-15" />
+
+						</Anchors>
+						<Layers>
+							<Layer level="ARTWORK">
+								<FontString name="$parentText" parentKey="text" wordwrap="true" inherits="GameFontHighlight">
+									<Anchors>
+										<Anchor point="TOP" y="-10"/>
+									</Anchors>
+								</FontString>
+							</Layer>
+						</Layers>
+						<Scripts>
+							<OnLoad>
+								self.text:SetText(TMW.L["IE_NOLOADED"])
+								
+								self.text:SetWidth(self:GetWidth() - 25)
+								self:SetHeight(self.text:GetStringHeight() + 22)
+							</OnLoad>
+							<OnSizeChanged>
+								self:SetHeight(self.text:GetStringHeight() + 22)
+							</OnSizeChanged>
+						</Scripts>
+					</Frame>
+				</Frames>
+
+				<Scripts>
+					<OnLoad>
+						self:RegisterForDrag("LeftButton")
+					</OnLoad>
+					<OnDragStart>
+						TMW.IE:StartMoving()
+					</OnDragStart>
+					<OnDragStop>
+						TMW.IE:StopMovingOrSizing()
+					</OnDragStop>
+				</Scripts>
+			</Frame>
 			
 			<Frame name="$parentMainOptions" hidden="true" setAllPoints="true" parentKey="MainOptions" >
 				<Frames>
