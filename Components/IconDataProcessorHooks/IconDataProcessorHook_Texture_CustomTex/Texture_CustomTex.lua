@@ -55,7 +55,7 @@ function Hook:PLAYER_EQUIPMENT_CHANGED()
 end
 
 function Hook:OnImplementIntoIcon(icon)
-	local CustomTex = icon.CustomTex
+	local CustomTex = icon.CustomTex:trim()
 	
 	if CustomTex:sub(1, 1) == "$" then
 		local varType, varData = CustomTex:match("^$([^%.:]+)%.?([^:]*)$")
@@ -80,7 +80,7 @@ function Hook:OnImplementIntoIcon(icon)
 			end
 		end
 	else
-		icon.CustomTex_OverrideTex = TMW:GetTexturePathFromSetting(icon.CustomTex)
+		icon.CustomTex_OverrideTex = TMW:GetTexturePathFromSetting(CustomTex)
 	end
 	
 end
