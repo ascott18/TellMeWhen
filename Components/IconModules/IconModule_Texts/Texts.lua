@@ -84,27 +84,26 @@ TMW:RegisterDatabaseDefaults{
 				n = 0,
 			},
 		},
-		Groups = {
-			["**"] = {
-				SettingsPerView = {
-					["**"] = {
-						TextLayout = "", -- Fall back on the blank layout if an IconView does not explicitly define a layout.
-					},
-				},
-				Icons = {
-					["**"] = {
-						SettingsPerView = {
-							["**"] = {
-								-- The table of texts that correspond to the displays defined by the text layout.
-								Texts = {},
-							},
-						},
-					},
-				},
-			},
-		},
 	},
 }
+
+TMW:MergeDefaultsTables({
+	SettingsPerView = {
+		["**"] = {
+			-- Fall back on the blank layout if an IconView does not explicitly define a layout.
+			TextLayout = "", 
+		},
+	},
+}, TMW.Group_Defaults)
+
+TMW:MergeDefaultsTables({
+	SettingsPerView = {
+		["**"] = {
+			-- The table of texts that correspond to the displays defined by the text layout.
+			Texts = {},
+		},
+	},
+}, TMW.Icon_Defaults)
 
 
 -- -------------------
