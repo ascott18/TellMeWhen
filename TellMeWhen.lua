@@ -2915,6 +2915,8 @@ function TMW:UpdateNormally()
 		Type:UpdateColors(true)
 	end
 
+
+
 	for groupID = 1, max(TMW.db.profile.NumGroups, #TMW.profile) do
 		-- Cant use TMW.InGroups() because groups wont exist yet on the first call of this.
 		local group = TMW.profile[groupID] or
@@ -2936,6 +2938,8 @@ function TMW:UpdateNormally()
 
 		TMW.safecall(group.Setup, group)
 	end
+
+
 
 	if not Locked then
 		TMW:DoValidityCheck()

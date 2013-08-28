@@ -1984,9 +1984,10 @@ function IE:OnUpdate()
 		local GUID = icon:GetGUID()
 
 		local append = ""
-		if TMW.debug and GUID then
+		--[[if TMW.debug and GUID then
 			append = " " .. GUID:gsub("%%", "%%%%")
-		end
+		end]]
+		
 		self.Header:SetFormattedText(titlePrepend .. " - " .. L["GROUPICON"] .. append, groupName, icon.ID)
 
 		if self.Header:IsTruncated() then
