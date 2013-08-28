@@ -1430,11 +1430,11 @@ L["DT_DOC_gsub"] = "Gives access to Lua's string.gsub function for DogTags for p
 L["DT_DOC_strfind"] = "Gives access to Lua's string.find function for DogTags for powerful string manipulation capabilities."
 L["DT_DOC_Name"] = "Returns the name of the unit. This is an improved version of the default [Name] tag provided by DogTag."
 
-L["DT_DOC_Source"] = "Returns the source unit or name of the last Combat Event that the icon processed. Best use in conjunction with the [Name] tag. (This tag should only be used with %s type icons)"
-L["DT_DOC_Destination"] = "Returns the destination unit or name of the last Combat Event that the icon processed. Best use in conjunction with the [Name] tag. (This tag should only be used with %s type icons)"
-L["DT_DOC_Extra"] = "Returns the extra spell from the last Combat Event that the icon processed. (This tag should only be used with %s type icons)"
+L["DT_DOC_Source"] = "Returns the source unit or name of the last Combat Event that the icon processed. Best use in conjunction with the [Name] tag. (This tag should only be used with %s type icons)."
+L["DT_DOC_Destination"] = "Returns the destination unit or name of the last Combat Event that the icon processed. Best use in conjunction with the [Name] tag. (This tag should only be used with %s type icons)."
+L["DT_DOC_Extra"] = "Returns the extra spell from the last Combat Event that the icon processed. (This tag should only be used with %s type icons)."
 
-L["DT_DOC_LocType"] = "Returns the type of the control loss effect that the icon is displaying for. (This tag should only be used with %s type icons)"
+L["DT_DOC_LocType"] = "Returns the type of the control loss effect that the icon is displaying for. (This tag should only be used with %s type icons)."
 
 L["DT_DOC_IsShown"] = "Returns whether or not an icon is shown."
 L["DT_DOC_Opacity"] = "Returns the opacity of an icon. Return value is between 0 and 1."
@@ -1444,7 +1444,8 @@ L["DT_DOC_Stacks"] = "Returns the current stacks of the icon"
 L["DT_DOC_Unit"] = "Returns the unit or the name of the unit that the icon is checking. Best use in conjunction with the [Name] tag."
 L["DT_DOC_PreviousUnit"] = "Returns the unit or the name of the unit that the icon is checked prior to the current unit. Best use in conjunction with the [Name] tag."
 
-L["ERROR_MISSINGLAYOUT"] = "Couldn't find the text layout for %s. Falling back on the default layout."
+L["DT_INSERTGUID_TOOLTIP"] = "|cff7fffffShift-click|r to insert this icon's identifier into a DogTag."
+L["DT_INSERTGUID_GENERIC_DESC"] = [[If you would like one icon to display information about another, |cff7fffffShift-click|r that icon to insert its unique identifier that you can pass as the tag's "icon" parameter.]]
 
 L["SENDSUCCESSFUL"] = "Sent successfully"
 L["MESSAGERECIEVE"] = "%s has sent you some TellMeWhen data! You can import this data into TellMeWhen using the %q button, located at the bottom of the icon editor."

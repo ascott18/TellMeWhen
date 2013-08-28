@@ -70,8 +70,8 @@ Processor:RegisterDogTag("TMW", "Stacks", {
 	},
 	events = TMW:CreateDogTagEventString("STACK"),
 	ret = "number",
-	doc = L["DT_DOC_Stacks"],
-	example = '[Stacks] => "9"; [Stacks(4, 5)] => "3"',
+	doc = L["DT_DOC_Stacks"] .. "\r\n \r\n" .. L["DT_INSERTGUID_GENERIC_DESC"],
+	example = '[Stacks] => "9"; [Stacks(icon="TMW:icon:1I7MnrXDCz8T")] => "3"',
 	category = L["ICON"],
 })
 

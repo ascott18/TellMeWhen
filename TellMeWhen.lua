@@ -2921,7 +2921,6 @@ function TMW:UpdateNormally()
 			TMW.Classes.Group:New("Frame", "TellMeWhen_Group" .. groupID, TMW, "TellMeWhen_GroupTemplate", groupID)
 
 		group.Domain = "profile"
-		TMW[groupID] = group
 		TMW[group.Domain][groupID] = group
 
 		TMW.safecall(group.Setup, group)

@@ -64,8 +64,8 @@ Processor:RegisterDogTag("TMW", "Unit", {
 	},
 	events = TMW:CreateDogTagEventString("UNIT"),
 	ret = "string",
-	doc = L["DT_DOC_Unit"],
-	example = '[Unit] => "target"; [Unit(4, 5)] => "focus"; [Unit:Name] => "Kobold"; [Unit(4, 5):Name] => "Gamon"',
+	doc = L["DT_DOC_Unit"] .. "\r\n \r\n" .. L["DT_INSERTGUID_GENERIC_DESC"],
+	example = '[Unit] => "target"; [Unit(icon="TMW:icon:1I7MnrXDCz8T")] => "focus"; [Unit:Name] => "Kobold"; [Unit(icon="TMW:icon:1I7MnrXDCz8T"):Name] => "Gamon"',
 	category = L["ICON"],
 })
 Processor:RegisterDogTag("TMW", "PreviousUnit", {
@@ -83,8 +83,8 @@ Processor:RegisterDogTag("TMW", "PreviousUnit", {
 	},
 	events = TMW:CreateDogTagEventString("UNIT"),
 	ret = "string",
-	doc = L["DT_DOC_PreviousUnit"],
-	example = '[PreviousUnit] => "target"; [PreviousUnit(4, 5)] => "focus"; [PreviousUnit:Name] => "Kobold"; [PreviousUnit(4, 5):Name] => "Gamon"',
+	doc = L["DT_DOC_PreviousUnit"] .. "\r\n \r\n" .. L["DT_INSERTGUID_GENERIC_DESC"],
+	example = '[PreviousUnit] => "target"; [PreviousUnit(icon="TMW:icon:1I7MnrXDCz8T")] => "focus"; [PreviousUnit:Name] => "Kobold"; [PreviousUnit(icon="TMW:icon:1I7MnrXDCz8T"):Name] => "Gamon"',
 	category = L["ICON"],
 })
 

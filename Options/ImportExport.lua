@@ -253,10 +253,20 @@ local NUM_GROUPS_PER_SUBMENU = 10
 
 local function remapGUIDs(data, GUIDmap)
 	for k, v in pairs(data) do
-		if type(v) == "table" then
+		local type = type(v)
+		if type == "table" then
 			remapGUIDs(v, GUIDmap)
-		elseif GUIDmap[v] then
-			data[k] = GUIDmap[v]
+		elseif type == "string" then
+			if GUIDmap[v] then
+				data[k] = GUIDmap[v]
+			else
+				for oldGUID, newGUID in pairs(GUIDmap) do
+					oldGUID = oldGUID:gsub("([%-%+])", "%%%1")
+					if v:find(oldGUID) then
+						data[k] = v:gsub(oldGUID, newGUID)
+					end
+				end
+			end
 		end
 	end
 end

@@ -100,9 +100,9 @@ function Processor:CompileFunctionSegment(t)
 end
 
 Processor:RegisterDogTag("TMW", "IsShown", {	
-	code = function (groupID, iconID)
-		local group = TMW[groupID]
-		local icon = group and group[iconID]
+	code = function(icon)
+		icon = TMW.GUIDToOwner[icon]
+
 		if icon then
 			local attributes = icon.attributes
 			return not not attributes.shown and attributes.realAlpha > 0
@@ -115,14 +115,14 @@ Processor:RegisterDogTag("TMW", "IsShown", {
 	},
 	events = TMW:CreateDogTagEventString("SHOWN", "REALALPHA"),
 	ret = "boolean",
-	doc = L["DT_DOC_IsShown"],
-	example = '[IsShown] => "true"; [IsShown(icon=3, group=2)] => "false"',
+	doc = L["DT_DOC_IsShown"] .. "\r\n \r\n" .. L["DT_INSERTGUID_GENERIC_DESC"],
+	example = '[IsShown] => "true"; [IsShown(icon="TMW:icon:1I7MnrXDCz8T")] => "false"',
 	category = L["ICON"],
 })
 Processor:RegisterDogTag("TMW", "Opacity", {	
-	code = function (groupID, iconID, link)
-		local group = TMW[groupID]
-		local icon = group and group[iconID]
+	code = function(icon)
+		icon = TMW.GUIDToOwner[icon]
+		
 		if icon then
 			return icon.attributes.realAlpha
 		else
@@ -134,7 +134,7 @@ Processor:RegisterDogTag("TMW", "Opacity", {
 	},
 	events = TMW:CreateDogTagEventString("REALALPHA"),
 	ret = "number",
-	doc = L["DT_DOC_Opacity"],
-	example = '[Opacity] => "1"; [Opacity(icon=3, group=2)] => "0.42"',
+	doc = L["DT_DOC_Opacity"] .. "\r\n \r\n" .. L["DT_INSERTGUID_GENERIC_DESC"],
+	example = '[Opacity] => "1"; [Opacity(icon="TMW:icon:1I7MnrXDCz8T")] => "0.42"',
 	category = L["ICON"],
 })

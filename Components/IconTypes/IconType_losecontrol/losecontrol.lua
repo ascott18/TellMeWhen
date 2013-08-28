@@ -154,7 +154,7 @@ Processor:RegisterDogTag("TMW", "LocType", {
 	},
 	events = TMW:CreateDogTagEventString("LOC_CATEGORY"),
 	ret = "string",
-	doc = L["DT_DOC_LocType"],
-	example = ('[LocType] => %q; [LocType(4, 5)] => %q'):format(LOSS_OF_CONTROL_DISPLAY_STUN, LOSS_OF_CONTROL_DISPLAY_FEAR),
+	doc = L["DT_DOC_LocType"] .. "\r\n \r\n" .. L["DT_INSERTGUID_GENERIC_DESC"],
+	example = ('[LocType] => %q; [LocType(icon="TMW:icon:1I7MnrXDCz8T")] => %q'):format(LOSS_OF_CONTROL_DISPLAY_STUN, LOSS_OF_CONTROL_DISPLAY_FEAR),
 	category = L["ICON"],
 })

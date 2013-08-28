@@ -152,8 +152,8 @@ Processor:RegisterDogTag("TMW", "Duration", {
 	},
 	events = "FastUpdate",
 	ret = "number",
-	doc = L["DT_DOC_Duration"],
-	example = '[Duration] => "1.435"; [Duration(gcd=false)] => "0"; [Duration:TMWFormatDuration] => "1.4"; [Duration(4, 5)] => "97.32156"; [Duration(4, 5):TMWFormatDuration] => "1:37"',
+	doc = L["DT_DOC_Duration"] .. "\r\n \r\n" .. L["DT_INSERTGUID_GENERIC_DESC"],
+	example = '[Duration] => "1.435"; [Duration(gcd=false)] => "0"; [Duration:TMWFormatDuration] => "1.4"; [Duration(icon="TMW:icon:1I7MnrXDCz8T")] => "97.32156"; [Duration(icon="TMW:icon:1I7MnrXDCz8T"):TMWFormatDuration] => "1:37"',
 	category = L["ICON"],
 })
 

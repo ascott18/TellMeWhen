@@ -409,8 +409,8 @@ Processor:RegisterDogTag("TMW", "Source", {
 	},
 	events = TMW:CreateDogTagEventString("CLEU_SOURCEUNIT"),
 	ret = "string",
-	doc = L["DT_DOC_Source"],
-	example = ('[Source] => "target"; [Source(4, 5)] => %q; [Source:Name] => "Kobold"; [Source(4, 5):Name] => %q'):format(UnitName("player"), TMW.NAMES and TMW.NAMES:TryToAcquireName("player", true) or "???"),
+	doc = L["DT_DOC_Source"] .. "\r\n \r\n" .. L["DT_INSERTGUID_GENERIC_DESC"],
+	example = ('[Source] => "target"; [Source(icon="TMW:icon:1I7MnrXDCz8T")] => %q; [Source:Name] => "Kobold"; [Source(icon="TMW:icon:1I7MnrXDCz8T"):Name] => %q'):format(UnitName("player"), TMW.NAMES and TMW.NAMES:TryToAcquireName("player", true) or "???"),
 	category = L["ICON"],
 })
 
@@ -447,8 +447,8 @@ Processor:RegisterDogTag("TMW", "Destination", {
 	},
 	events = TMW:CreateDogTagEventString("CLEU_DESTUNIT"),
 	ret = "string",
-	doc = L["DT_DOC_Destination"],
-	example = ('[Destination] => "target"; [Destination(4, 5)] => %q; [Destination:Name] => "Kobold"; [Destination(4, 5):Name] => %q'):format(UnitName("player"), TMW.NAMES and TMW.NAMES:TryToAcquireName("player", true) or "???"),
+	doc = L["DT_DOC_Destination"] .. "\r\n \r\n" .. L["DT_INSERTGUID_GENERIC_DESC"],
+	example = ('[Destination] => "target"; [Destination(icon="TMW:icon:1I7MnrXDCz8T")] => %q; [Destination:Name] => "Kobold"; [Destination(icon="TMW:icon:1I7MnrXDCz8T"):Name] => %q'):format(UnitName("player"), TMW.NAMES and TMW.NAMES:TryToAcquireName("player", true) or "???"),
 	category = L["ICON"],
 })
 
@@ -479,7 +479,7 @@ Processor:RegisterDogTag("TMW", "Extra", {
 	},
 	events = TMW:CreateDogTagEventString("CLEU_EXTRASPELL"),
 	ret = "string",
-	doc = L["DT_DOC_Extra"],
-	example = ('[Extra] => %q; [Extra(link=true)] => %q; [Extra(4, 5)] => %q; [Extra(4, 5, true)] => %q'):format(GetSpellInfo(5782), GetSpellLink(5782), GetSpellInfo(5308), GetSpellLink(5308)),
+	doc = L["DT_DOC_Extra"] .. "\r\n \r\n" .. L["DT_INSERTGUID_GENERIC_DESC"],
+	example = ('[Extra] => %q; [Extra(link=true)] => %q; [Extra(icon="TMW:icon:1I7MnrXDCz8T")] => %q; [Extra(icon="TMW:icon:1I7MnrXDCz8T", link=true)] => %q'):format(GetSpellInfo(5782), GetSpellLink(5782), GetSpellInfo(5308), GetSpellLink(5308)),
 	category = L["ICON"],
 })

@@ -62,8 +62,8 @@ Processor:RegisterDogTag("TMW", "Spell", {
 	},
 	events = TMW:CreateDogTagEventString("SPELL"),
 	ret = "string",
-	doc = L["DT_DOC_Spell"],
-	example = ('[Spell] => %q; [Spell(link=true)] => %q; [Spell(4, 5)] => %q; [Spell(4, 5, true)] => %q'):format(GetSpellInfo(2139), GetSpellLink(2139), GetSpellInfo(1766), GetSpellLink(1766)),
+	doc = L["DT_DOC_Spell"] .. "\r\n \r\n" .. L["DT_INSERTGUID_GENERIC_DESC"],
+	example = ('[Spell] => %q; [Spell(link=true)] => %q; [Spell(icon="TMW:icon:1I7MnrXDCz8T")] => %q; [Spell(icon="TMW:icon:1I7MnrXDCz8T", link=true)] => %q'):format(GetSpellInfo(2139), GetSpellLink(2139), GetSpellInfo(1766), GetSpellLink(1766)),
 	category = L["ICON"],
 })
 
