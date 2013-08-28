@@ -165,6 +165,38 @@ database:RegisterMenuBuilder(10, function(self, result, editbox)
 		TMW.AddDropdownSpacer()
 	end
 end)
+
+
+database:RegisterMenuBuilder(15, function(self, result, editbox)
+	
+	if result.data.global.NumGroups > 0 then
+		database:MakeGroupHolderMenu(result, result.data.global)
+	end
+	
+end)
+
+
+function database:MakeGroupHolderMenu(result, parentTable)	
+	local info = UIDropDownMenu_CreateInfo()
+	info.text = L["UIPANEL_GROUPS_GLOBAL"]
+	info.notCheckable = true
+	info.hasArrow = true
+	
+	-- This table will be stored in UIDROPDOWNMENU_MENU_VALUE when this holder menu is expanded.
+	-- It is also passed as arg4 to Import_HolderMenuHandler(self, result, editbox, holderMenuData)
+	info.value = {
+		isHolderMenu = true,
+		result = result,
+		type = "group",
+		parentTable = parentTable,
+	}
+	
+	UIDropDownMenu_AddButton(info, UIDROPDOWNMENU_MENU_LEVEL)
+
+	TMW.AddDropdownSpacer()
+end
+
+
 database:RegisterMenuBuilder(20, function(self, result, editbox)
 	local db = result.data
 	local currentProfile = TMW.db:GetCurrentProfile()
@@ -358,7 +390,7 @@ function group:Import_BuildContainingDropdownEntry(result)
 end
 group.Import_BuildMenuData = group.RunMenuBuilders
 
-profile:RegisterMenuBuilder(40, function(self, result, editbox)
+function group.MenuBuilder(_, result, editbox)
 	-- group header
 	local info = UIDropDownMenu_CreateInfo()
 	info.text = L["UIPANEL_GROUPS"]
@@ -412,7 +444,9 @@ profile:RegisterMenuBuilder(40, function(self, result, editbox)
 			end
 		end
 	end
-end)
+end
+
+profile:RegisterMenuBuilder(40, group.MenuBuilder)
 
 function group:MakeHolderMenu(result, startID, endID)	
 	local info = UIDropDownMenu_CreateInfo()
@@ -434,29 +468,40 @@ function group:MakeHolderMenu(result, startID, endID)
 end
 
 function group:Import_HolderMenuHandler(result, editbox, holderMenuData)
-	-- Header
-	local info = UIDropDownMenu_CreateInfo()
-	info.text = L["UIPANEL_GROUPS"] .. ": " .. holderMenuData.startID .. " - " .. holderMenuData.endID
-	info.isTitle = true
-	info.notCheckable = true
-	UIDropDownMenu_AddButton(info, UIDROPDOWNMENU_MENU_LEVEL)
-	
-	TMW.AddDropdownSpacer()
-	
-	-- Add icons to the holder menu.
-	for groupID, gs in TMW:OrderedPairs(result.data.Groups) do
-	
-		-- Check to see if this group is within the range specified by the holder menu that is being built.
-		if type(groupID) == "number" and groupID >= 1 and groupID <= (tonumber(result.data.NumGroups) or 10) 
-			and groupID >= holderMenuData.startID and groupID <= holderMenuData.endID then
+
+	if holderMenuData.parentTable then
+		local result = {
+			parentResult = holderMenuData.result,
+			data = holderMenuData.parentTable,
+			version = holderMenuData.result.version,
+		}
+		group.MenuBuilder(nil, result, editbox)
+
+	else
+		-- Header
+		local info = UIDropDownMenu_CreateInfo()
+		info.text = L["UIPANEL_GROUPS"] .. ": " .. holderMenuData.startID .. " - " .. holderMenuData.endID
+		info.isTitle = true
+		info.notCheckable = true
+		UIDropDownMenu_AddButton(info, UIDROPDOWNMENU_MENU_LEVEL)
 		
-			SharableDataType.types.group:Import_BuildContainingDropdownEntry({
-				parentResult = result,
-				data = gs,
-				type = "group",
-				version = result.version,
-				[1] = groupID,
-			}, editbox)
+		TMW.AddDropdownSpacer()
+		
+		-- Add icons to the holder menu.
+		for groupID, gs in TMW:OrderedPairs(result.data.Groups) do
+		
+			-- Check to see if this group is within the range specified by the holder menu that is being built.
+			if type(groupID) == "number" and groupID >= 1 and groupID <= (tonumber(result.data.NumGroups) or 10) 
+				and groupID >= holderMenuData.startID and groupID <= holderMenuData.endID then
+			
+				SharableDataType.types.group:Import_BuildContainingDropdownEntry({
+					parentResult = result,
+					data = gs,
+					type = "group",
+					version = result.version,
+					[1] = groupID,
+				}, editbox)
+			end
 		end
 	end
 end
@@ -494,7 +539,7 @@ group:RegisterMenuBuilder(20, function(self, result, editbox)
 
 	-- copy entire group - create new group in profile
 	local info = UIDropDownMenu_CreateInfo()
-	info.text = L["COPYGROUP"] .. " - " .. L["MAKENEWGROUP"] .. " - " .. L["GROUP_DOMAIN_PROFILE"]
+	info.text = L["COPYGROUP"] .. " - " .. L["MAKENEWGROUP_PROFILE"]
 	info.func = function()
 		TMW:Import(editbox, gs, result.version, "group", "profile", true, groupID)
 	end
@@ -503,7 +548,7 @@ group:RegisterMenuBuilder(20, function(self, result, editbox)
 
 	-- copy entire group - create new group in global
 	local info = UIDropDownMenu_CreateInfo()
-	info.text = L["COPYGROUP"] .. " - " .. L["MAKENEWGROUP"] .. " - " .. L["GROUP_DOMAIN_GLOBAL"]
+	info.text = L["COPYGROUP"] .. " - " .. L["MAKENEWGROUP_GLOBAL"]
 	info.func = function()
 		TMW:Import(editbox, gs, result.version, "group", "global", true, groupID)
 	end
@@ -516,7 +561,7 @@ function group:Export_SetButtonAttributes(editbox, info)
 	local IMPORTS, EXPORTS = editbox:GetAvailableImportExportTypes()
 	local group = EXPORTS[self.type]
 	
-	local text = group:GetGroupName()
+	local text = group:GetGroupName():gsub("|r", "|cff00ffff")
 	info.text = text
 	info.tooltipTitle = text
 end

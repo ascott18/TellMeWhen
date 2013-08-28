@@ -655,6 +655,7 @@ When unlocked, you can move/size icon groups and right click individual icons to
 You can also type /tellmewhen or /tmw to lock/unlock.]]
 L["UIPANEL_MAINOPT"] = "Main Options"
 L["UIPANEL_GROUPS"] = "Groups"
+L["UIPANEL_GROUPS_GLOBAL"] = "|cff00c300Global|r Groups"
 L["UIPANEL_GROUPS_DESC"] = "Settings for each group in this TellMeWhen profile."
 L["UIPANEL_GROUPS_GLOBAL_DESC"] = "Settings for the groups that are available to all your TellMeWhen profiles."
 
@@ -1372,6 +1373,8 @@ L["COPYPOSSCALE"] = "Copy position/scale"
 L["COPYGROUP"] = "Copy Group"
 L["OVERWRITEGROUP"] = "|cFFFF5959Overwrite|r Group: %s"
 L["MAKENEWGROUP"] = "|cff59ff59Create|r New Group"
+L["MAKENEWGROUP_PROFILE"] = "|cff59ff59Create|r New Profile Group"
+L["MAKENEWGROUP_GLOBAL"] = "|cff59ff59Create|r New |cff00c300Global|r Group"
 
 
 --[=[L["CNDT_SLIDER_DESC_BASE"] = [[|cff7fffffMousewheel|r to adjust.
