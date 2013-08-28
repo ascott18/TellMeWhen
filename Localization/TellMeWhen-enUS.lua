@@ -566,6 +566,7 @@ L["ICONMENU_ANCHORTO_UIPARENT_DESC"] = [[Reset anchor of %s back to your screen 
 
 Advanced anchor settings are available in the group options.]]
 L["ICONMENU_SPLIT"] = "Split into new group"
+L["ICONMENU_SPLIT_GLOBAL"] = "Split into new |cff00c300global|r group"
 L["ICONMENU_SPLIT_DESC"] = "Create a new group and move this icon into it. Many group settings will carry over to the new group."
 L["ICONMENU_COPYEVENTHANDLERS"] = "Copy %d |4Event Handler:Event Handlers;"
 L["ICONMENU_COPYEVENTHANDLERS_DESC"] = "Copy %s's %d |4Event Handler:Event Handlers; to %s."
@@ -655,6 +656,7 @@ You can also type /tellmewhen or /tmw to lock/unlock.]]
 L["UIPANEL_MAINOPT"] = "Main Options"
 L["UIPANEL_GROUPS"] = "Groups"
 L["UIPANEL_GROUPS_DESC"] = "Settings for each group in this TellMeWhen profile."
+L["UIPANEL_GROUPS_GLOBAL_DESC"] = "Settings for the groups that are available to all your TellMeWhen profiles."
 
 L["UIPANEL_GROUPTYPE"] = "Group Display Method"
 L["UIPANEL_GROUPTYPE_DESC"] = "Choose how you would like icons within this group to be displayed."
@@ -667,6 +669,7 @@ L["UIPANEL_ICONS"] = "Icons"
 L["UIPANEL_COLORS"] = "Colors"
 L["UIPANEL_COLORS_DESC"] = "Settings that control the coloring/tinting of icons based on their attributes."
 L["UIPANEL_ENABLEGROUP"] = "Enable Group"
+L["UIPANEL_ENABLEGROUP_FORPROFILE"] = "Enable Group for profile %q"
 L["UIPANEL_GROUPNAME"] = "Rename Group"
 L["UIPANEL_ROWS"] = "Rows"
 L["UIPANEL_COLUMNS"] = "Columns"

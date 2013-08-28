@@ -520,8 +520,10 @@ end
 ---------- Data/Templates ----------
 local function FindGroupFromInfo(info)
 	for i = #info, 1, -1 do
-		local domain, n = strmatch(info[i], "#Group ([a-z]+) (%d+)")
-		if domain and n then
+		local n = strmatch(info[i], "#Group (%d+)")
+		if n then
+			local domain = strmatch(info[i-1], "groups_(.+)")
+
 			return TMW[domain][tonumber(n)]
 		end
 	end
@@ -547,6 +549,14 @@ local importExportBoxTemplate = {
 	--hidden = function() return IE.ExportBox:IsVisible() end,
 } TMW.importExportBoxTemplate = importExportBoxTemplate
 
+local specializationSettingHidden = function(info)
+	local group = FindGroupFromInfo(info)
+	if group.Domain == "global" then
+		return true
+	end
+	return false
+end
+
 TMW.GroupConfigTemplate = {
 	type = "group",
 	childGroups = "tab",
@@ -556,7 +566,7 @@ TMW.GroupConfigTemplate = {
 	end,
 	order = function(info)
 		local group = FindGroupFromInfo(info)
-		return group:GetID() + (group.Domain == "profile" and 1e6 or 0)
+		return group:GetID()
 	end,
 	args = {
 		main = {
@@ -566,16 +576,45 @@ TMW.GroupConfigTemplate = {
 			order = 1,
 			args = {
 				Enabled = {
-					name = L["UIPANEL_ENABLEGROUP"],
+					name = function(info)
+						local group = FindGroupFromInfo(info)
+
+						if group.Domain == "global" then
+							return L["UIPANEL_ENABLEGROUP_FORPROFILE"]:format(TMW.db:GetCurrentProfile())
+						elseif group.Domain == "profile" then
+							return L["UIPANEL_ENABLEGROUP"]
+						end
+					end,
 					desc = L["UIPANEL_TOOLTIP_ENABLEGROUP"],
 					type = "toggle",
 					order = 1,
+					width = "full",
+					set = function(info, val)
+						local group = FindGroupFromInfo(info)
+						
+						if group.Domain == "global" then
+							group:GetSettings().EnabledProfiles[TMW.db:GetCurrentProfile()] = val
+						elseif group.Domain == "profile" then
+							group:GetSettings().Enabled = val
+						end
+
+						group:Setup()
+					end,
+					get = function(info)
+						local group = FindGroupFromInfo(info)
+
+						if group.Domain == "global" then
+							return group:GetSettings().EnabledProfiles[TMW.db:GetCurrentProfile()]
+						elseif group.Domain == "profile" then
+							return group:GetSettings().Enabled
+						end
+					end,
 				},
 				Name = {
 					name = L["UIPANEL_GROUPNAME"],
 					type = "input",
 					order = 2,
-					width = "double",
+					width = "full",
 					set = function(info, val)
 						local group = FindGroupFromInfo(info)
 
@@ -594,12 +633,14 @@ TMW.GroupConfigTemplate = {
 					desc = L["UIPANEL_TOOLTIP_PRIMARYSPEC"],
 					type = "toggle",
 					order = 6,
+					hidden = specializationSettingHidden,
 				},
 				SecondarySpec = {
 					name = L["UIPANEL_SECONDARYSPEC"],
 					desc = L["UIPANEL_TOOLTIP_SECONDARYSPEC"],
 					type = "toggle",
 					order = 7,
+					hidden = specializationSettingHidden,
 				},
 				Columns = {
 					name = L["UIPANEL_COLUMNS"],
@@ -665,7 +706,7 @@ TMW.GroupConfigTemplate = {
 
 						TMW:Group_Swap(domain, FindGroupFromInfo(info).ID, FindGroupFromInfo(info).ID - 1)
 
-						IE:NotifyChanges("groups", "#Group " .. domain .. " " .. FindGroupFromInfo(info).ID - 1)
+						IE:NotifyChanges("groups_" .. domain, "#Group " .. FindGroupFromInfo(info).ID - 1)
 					end,
 					disabled = function(info)
 						return FindGroupFromInfo(info).ID == 1
@@ -681,10 +722,11 @@ TMW.GroupConfigTemplate = {
 
 						TMW:Group_Swap(domain, FindGroupFromInfo(info).ID, FindGroupFromInfo(info).ID + 1)
 
-						IE:NotifyChanges("groups", "#Group " .. domain .. " " .. FindGroupFromInfo(info).ID + 1)
+						IE:NotifyChanges("groups_" .. domain, "#Group " .. FindGroupFromInfo(info).ID + 1)
 					end,
 					disabled = function(info)
-						return FindGroupFromInfo(info).ID == TMW.db.profile.NumGroups
+						local group = FindGroupFromInfo(info)
+						return group.ID == TMW.db[group.Domain].NumGroups
 					end,
 				},
 				delete = {
@@ -709,7 +751,7 @@ TMW.GroupConfigTemplate = {
 					name = function(info)
 						local group = FindGroupFromInfo(info)
 						if group.Domain == "global" then
-							return L["DOMAIN_PROFILE_SWITCHTO"]
+							return L["DOMAIN_PROFILE_SWITCHTO"]:format(TMW.db:GetCurrentProfile())
 						else
 							return L["DOMAIN_GLOBAL_SWITCHTO"]
 						end
@@ -777,8 +819,13 @@ local addGroupButton = {
 		return TMW.Views[info[#info]].order
 	end,
 	func = function(info)
-		--TODO: add separatate buttons for profilegroup and globalgroup
-		TMW:Group_Add("profile", info[#info])
+		for i = #info, 1, -1 do
+			local domain = strmatch(info[i], "groups_(.+)")
+
+			if domain then
+				return TMW:Group_Add(domain, info[#info])
+			end
+		end
 	end,
 }
 local viewSelectToggle = {
@@ -1177,11 +1224,42 @@ function TMW:CompileOptions()
 					args = {},
 				},
 				
-				groups = {
+				groups_global = {
 					type = "group",
-					name = L["UIPANEL_GROUPS"],
-					desc = L["UIPANEL_GROUPS_DESC"],
+					name = L["UIPANEL_GROUPS"] .. " - " .. L["DOMAIN_GLOBAL"],
+					desc = L["UIPANEL_GROUPS_GLOBAL_DESC"],
 					order = 30,
+					set = function(info, val)
+						local group = FindGroupFromInfo(info)
+						
+						group:GetSettings()[info[#info]] = val
+						group:Setup()
+					end,
+					get = function(info)
+						local group = FindGroupFromInfo(info)
+
+						return group:GetSettings()[info[#info]]
+					end,
+					args = {
+						addgroup = addGroupFunctionGroup,
+						importexport = importExportBoxTemplate,
+						addgroupgroup = {
+							type = "group",
+							name = L["UIPANEL_ADDGROUP"],
+							order = 2000,
+							args = {
+								addgroup = addGroupFunctionGroup,
+								importexport = importExportBoxTemplate,
+							},
+						},
+					},
+				},
+				
+				groups_profile = {
+					type = "group",
+					name = L["UIPANEL_GROUPS"] .. " - " .. L["DOMAIN_PROFILE"],
+					desc = L["UIPANEL_GROUPS_DESC"],
+					order = 31,
 					set = function(info, val)
 						local group = FindGroupFromInfo(info)
 						
@@ -1230,19 +1308,18 @@ function TMW:CompileOptions()
 	end
 
 	-- Dynamic Group Settings --
-	for k, v in pairs(TMW.OptionsTable.args.groups.args) do
-		if v == TMW.GroupConfigTemplate then
-			TMW.OptionsTable.args.groups.args[k] = nil
-		end
-	end
+	for _, domain in TMW:Vararg("profile", "global") do
+		local args = TMW.OptionsTable.args["groups_"..domain].args
 
-	-- Profile groups
-	for g = 1, TMW.db.profile.NumGroups do
-		TMW.OptionsTable.args.groups.args["#Group profile " .. g] = TMW.GroupConfigTemplate
-	end
-	-- Global Groups
-	for g = 1, TMW.db.global.NumGroups do
-		TMW.OptionsTable.args.groups.args["#Group global " .. g] = TMW.GroupConfigTemplate
+		for k, v in pairs(args) do
+			if v == TMW.GroupConfigTemplate then
+				args[k] = nil
+			end
+		end
+
+		for g = 1, TMW.db[domain].NumGroups do
+			args["#Group " .. g] = TMW.GroupConfigTemplate
+		end
 	end
 	
 	local parent = TMW.GroupConfigTemplate.args.main.args
@@ -1254,11 +1331,9 @@ function TMW:CompileOptions()
 			name = name,
 			desc = L["UIPANEL_TREE_DESC"],
 			order = 7+i,
+			hidden = specializationSettingHidden,
 		}
 	end
-
-	--TMW.OptionsTable.args.groups.args.addgroupgroup.order = TMW.db.profile.NumGroups + 1
-
 	
 	-- Dynamic Color Settings --
 	TMW.OptionsTable.args.colors.args.GLOBAL = colorIconTypeTemplate
@@ -1361,7 +1436,7 @@ function TMW:Group_Add(domain, view)
 	local group = TMW[domain][groupID]
 
 	TMW:CompileOptions()
-	IE:NotifyChanges("groups", "#Group " .. domain .. " " .. groupID)
+	IE:NotifyChanges("groups_" .. domain, "#Group " .. groupID)
 
 	return group
 end
@@ -1884,8 +1959,8 @@ function IE:CreateTabs()
 	
 	IE.MainOptionsTab:ExtendMethod("ClickHandler", function()
 		TMW:CompileOptions()
-		if TMW.CI.group then
-			TMW.IE:NotifyChanges("groups", "#Group " .. TMW.CI.group.Domain .. " " .. TMW.CI.group.ID)
+		if CI.group then
+			IE:NotifyChanges("groups_" .. TMW.CI.group.Domain, "#Group " .. TMW.CI.group.ID)
 		end
 		LibStub("AceConfigDialog-3.0"):Open("TMW IEOptions", TMW.IE.MainOptionsWidget)
 	end)		
@@ -3088,16 +3163,8 @@ end
 
 
 ---------- Icon Update Scheduler ----------
-function IE:ScheduleIconSetup(groupID, iconID)
-	-- this is a handler to prevent the spamming of icon:Setup() and creating excessive garbage.
-	local icon
-
-	if type(groupID) == "table" and groupID.IsIcon then --allow omission of IDs in favor of an icon ref.
-		icon = groupID
-	else
-		icon = TMW[groupID] and TMW[groupID][iconID]
-	end
-
+function IE:ScheduleIconSetup(icon)
+	-- this is a handler to prevent the spamming of icon:Setup().
 	if not icon then
 		icon = CI.icon
 	end

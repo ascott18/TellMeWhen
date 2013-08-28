@@ -236,7 +236,7 @@ function Group.SwitchDomain(group)
 	TMW.db[newDomain].Groups[TMW.db[newDomain].NumGroups] = gs
 
 	if newDomain == "profile" then
-		wipe(gs.EnabledProfiles)
+		--wipe(gs.EnabledProfiles)
 	end
 
 	TMW:Update()
@@ -317,17 +317,31 @@ end
 function Group.ShouldUpdateIcons(group)
 	local gs = group:GetSettings()
 
-	if	(group:GetID() > TMW.db.profile.NumGroups) or
+	if	(group:GetID() > TMW.db[group.Domain].NumGroups) or
 		(not group.viewData) or
-		(not gs.Enabled) or
+		(not group:IsEnabled())
+	then return false
+
+	elseif group.Domain == "profile" and (
 		(GetActiveSpecGroup() == 1 and not gs.PrimarySpec) or
 		(GetActiveSpecGroup() == 2 and not gs.SecondarySpec) or
-		(GetSpecialization() and not gs["Tree" .. GetSpecialization()])
-	then
-		return false
+		(GetSpecialization() and not gs["Tree" .. GetSpecialization()]))
+	then return false
+	
 	end
 
 	return true
+end
+
+--- Gets the current enabled state of the group. This function exists because a different setting is used for profile groups and global groups.
+-- @paramsig
+-- @return [boolean] True if the group is enabled; otherwise false.
+function Group.IsEnabled(group)
+	if group.Domain == "global" then
+		return group.EnabledProfiles[TMW.db:GetCurrentProfile()]
+	else
+		return group.Enabled
+	end
 end
 
 --- Checks if the group is valid to be checked in meta icons & conditions.
@@ -335,8 +349,6 @@ end
 -- @paramsig
 -- @return [boolean] True if the group should show and update its icons; otherwise false.
 function Group.IsValid(group)
-	-- checks if the group can be checked in metas/conditions
-
 	return group:ShouldUpdateIcons()
 end
 
