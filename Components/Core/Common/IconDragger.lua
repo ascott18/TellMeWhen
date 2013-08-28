@@ -127,6 +127,22 @@ function IconDragger:CompleteDrag(script, icon)
 	end
 end
 
+function IconDragger:NoProfileToGlobal(invert)
+	local srcicon = IconDragger.srcicon
+	local desticon = IconDragger.desticon
+
+	if not (srcicon and desticon) then
+		return nil
+	end
+
+	if srcicon.group.Domain == "profile" and desticon.group.Domain == "global" then
+		return invert
+	end
+
+	return true
+end
+
+
 IconDragger.Handlers = {}
 function IconDragger:RegisterIconDragHandler(order, dropdownFunc, actionFunc)
 	TMW:ValidateType("2 (order)", "IconDragger:RegisterIconDragHandler(order, dropdownFunc, actionFunc)", order, "number")
@@ -217,8 +233,62 @@ IconDragger:RegisterIconDragHandler(3,	-- Swap
 	end
 )
 
+local function Split(IconDragger, domain)
+	local group = TMW:Group_Add(domain)
 
-IconDragger:RegisterIconDragHandler(40,	-- Split
+	-- back up the icon data of the source group
+	local SOURCE_ICONS = IconDragger.srcicon.group:GetSettings().Icons
+
+
+	-- copy the source group.
+	-- pcall so that, in the rare event of some unforseen error, we don't lose the user's settings (they haven't yet been restored)
+	local success, err = pcall(function()
+		-- nullify it (we don't want to copy it)
+		IconDragger.srcicon.group:GetSettings().Icons = nil
+	
+		TMW:CopyTableInPlaceWithMeta(IconDragger.srcicon.group:GetSettings(), group:GetSettings())
+	end)
+
+	-- restore the icon data of the source group
+	IconDragger.srcicon.group:GetSettings().Icons = SOURCE_ICONS
+	
+	-- now it is safe to error since we restored the old settings
+	assert(success, err)
+
+
+	local gs = group:GetSettings()
+
+	-- Generate a new GUID for the new group.
+	gs.GUID = nil
+	group:GetGUID()
+
+	-- group tweaks
+	gs.Rows = 1
+	gs.Columns = 1
+	gs.Name = ""
+
+	-- adjustments and positioning
+	local p = gs.Point
+	p.point, p.relativeTo, p.relativePoint, p.x, p.y = IconDragger.DraggerFrame.texture:GetPoint(2)
+	
+	p.relativeTo = "UIParent"
+	
+	group:Setup()
+
+	-- move the actual icon settings
+	gs.Icons[1] = IconDragger.srcicon.group.Icons[IconDragger.srcicon:GetID()]
+	IconDragger.srcicon.group.Icons[IconDragger.srcicon:GetID()] = nil
+
+	-- preserve textures
+	if group and group[1] then
+		group[1]:SetInfo("texture", IconDragger.srcicon.attributes.texture)
+	end
+
+	group:Setup()
+end
+
+
+IconDragger:RegisterIconDragHandler(40,	-- Split to profile
 	function(IconDragger, info)
 		if IconDragger.destFrame then
 			info.text = L["ICONMENU_SPLIT"]
@@ -228,58 +298,20 @@ IconDragger:RegisterIconDragHandler(40,	-- Split
 		end
 	end,
 	function(IconDragger)
-		--TODO: add separatate menus for split to profilegroup and split to globalgroup
-		local group = TMW:Group_Add("profile")
-
-		-- back up the icon data of the source group
-		local SOURCE_ICONS = IconDragger.srcicon.group:GetSettings().Icons
-
-
-		-- copy the source group.
-		-- pcall so that, in the rare event of some unforseen error, we don't lose the user's settings (they haven't yet been restored)
-		local success, err = pcall(function()
-			-- nullify it (we don't want to copy it)
-			IconDragger.srcicon.group:GetSettings().Icons = nil
-		
-			TMW:CopyTableInPlaceWithMeta(IconDragger.srcicon.group:GetSettings(), group:GetSettings())
-		end)
-
-		-- restore the icon data of the source group
-		IconDragger.srcicon.group:GetSettings().Icons = SOURCE_ICONS
-		
-		-- now it is safe to error since we restored the old settings
-		assert(success, err)
-
-
-		local gs = group:GetSettings()
-
-		-- Generate a new GUID for the new group.
-		gs.GUID = nil
-		group:GetGUID()
-
-		-- group tweaks
-		gs.Rows = 1
-		gs.Columns = 1
-		gs.Name = ""
-
-		-- adjustments and positioning
-		local p = gs.Point
-		p.point, p.relativeTo, p.relativePoint, p.x, p.y = IconDragger.DraggerFrame.texture:GetPoint(2)
-		
-		p.relativeTo = "UIParent"
-		
-		group:Setup()
-
-		-- move the actual icon settings
-		gs.Icons[1] = IconDragger.srcicon.group.Icons[IconDragger.srcicon:GetID()]
-		IconDragger.srcicon.group.Icons[IconDragger.srcicon:GetID()] = nil
-
-		-- preserve textures
-		if group and group[1] then
-			group[1]:SetInfo("texture", IconDragger.srcicon.attributes.texture)
+		Split(IconDragger, "profile")
+	end
+)
+IconDragger:RegisterIconDragHandler(41,	-- Split to global
+	function(IconDragger, info)
+		if IconDragger.destFrame then
+			info.text = L["ICONMENU_SPLIT_GLOBAL"]
+			info.tooltipTitle = L["ICONMENU_SPLIT_GLOBAL"]
+			info.tooltipText = L["ICONMENU_SPLIT_DESC"]
+			return true
 		end
-
-		group:Setup()
+	end,
+	function(IconDragger)
+		Split(IconDragger, "global")
 	end
 )
 
