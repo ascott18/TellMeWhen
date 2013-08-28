@@ -111,8 +111,7 @@ Processor:RegisterDogTag("TMW", "IsShown", {
 		end
 	end,
 	arg = {
-		'group', 'number', '@req',
-		'icon', 'number', '@req',
+		'icon', 'string', '@req',
 	},
 	events = TMW:CreateDogTagEventString("SHOWN", "REALALPHA"),
 	ret = "boolean",
@@ -131,8 +130,7 @@ Processor:RegisterDogTag("TMW", "Opacity", {
 		end
 	end,
 	arg = {
-		'group', 'number', '@req',
-		'icon', 'number', '@req',
+		'icon', 'string', '@req',
 	},
 	events = TMW:CreateDogTagEventString("REALALPHA"),
 	ret = "number",

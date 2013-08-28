@@ -50,9 +50,9 @@ Processor:RegisterIconEvent(41, "OnUnit", {
 })
 
 Processor:RegisterDogTag("TMW", "Unit", {
-	code = function (groupID, iconID)
-		local group = TMW[groupID]
-		local icon = group and group[iconID]
+	code = function(icon)
+		icon = TMW.GUIDToOwner[icon]
+		
 		if icon then
 			return icon.attributes.unit or ""
 		else
@@ -60,8 +60,7 @@ Processor:RegisterDogTag("TMW", "Unit", {
 		end
 	end,
 	arg = {
-		'group', 'number', '@req',
-		'icon', 'number', '@req',
+		'icon', 'string', '@req',
 	},
 	events = TMW:CreateDogTagEventString("UNIT"),
 	ret = "string",
@@ -70,9 +69,9 @@ Processor:RegisterDogTag("TMW", "Unit", {
 	category = L["ICON"],
 })
 Processor:RegisterDogTag("TMW", "PreviousUnit", {
-	code = function (groupID, iconID)
-		local group = TMW[groupID]
-		local icon = group and group[iconID]
+	code = function(icon)
+		icon = TMW.GUIDToOwner[icon]
+		
 		if icon then
 			return icon.__lastUnitChecked or ""
 		else
@@ -80,8 +79,7 @@ Processor:RegisterDogTag("TMW", "PreviousUnit", {
 		end
 	end,
 	arg = {
-		'group', 'number', '@req',
-		'icon', 'number', '@req',
+		'icon', 'string', '@req',
 	},
 	events = TMW:CreateDogTagEventString("UNIT"),
 	ret = "string",

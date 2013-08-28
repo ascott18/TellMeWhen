@@ -154,8 +154,8 @@ function Announcements:HandleEvent(icon, eventSettings)
 		end
 
 		wipe(Announcements.kwargs)
-		Announcements.kwargs.icon = icon.ID
-		Announcements.kwargs.group = icon.group.ID
+		Announcements.kwargs.icon = icon:GetGUID()
+		--Announcements.kwargs.group = icon.group.ID
 		Announcements.kwargs.unit = icon.attributes.dogTagUnit
 		Announcements.kwargs.link = true
 

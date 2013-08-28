@@ -58,16 +58,15 @@ Processor:RegisterIconEvent(51, "OnStack", {
 })
 	
 Processor:RegisterDogTag("TMW", "Stacks", {
-	code = function (groupID, iconID)
-		local group = TMW[groupID]
-		local icon = group and group[iconID]
+	code = function(icon)
+		icon = TMW.GUIDToOwner[icon]
+		
 		local stacks = icon and icon.attributes.stackText or 0
 		
 		return isNumber[stacks] or stacks
 	end,
 	arg = {
-		'group', 'number', '@req',
-		'icon', 'number', '@req',
+		'icon', 'string', '@req',
 	},
 	events = TMW:CreateDogTagEventString("STACK"),
 	ret = "number",

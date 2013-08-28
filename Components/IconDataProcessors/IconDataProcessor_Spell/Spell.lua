@@ -42,9 +42,9 @@ Processor:RegisterIconEvent(31, "OnSpell", {
 })
 	
 Processor:RegisterDogTag("TMW", "Spell", {
-	code = function (groupID, iconID, link)
-		local group = TMW[groupID]
-		local icon = group and group[iconID]
+	code = function(icon, link)
+		icon = TMW.GUIDToOwner[icon]
+
 		if icon then
 			local name, checkcase = icon.typeData:FormatSpellForOutput(icon, icon.attributes.spell, link)
 			name = name or ""
@@ -57,8 +57,7 @@ Processor:RegisterDogTag("TMW", "Spell", {
 		end
 	end,
 	arg = {
-		'group', 'number', '@req',
-		'icon', 'number', '@req',
+		'icon', 'string', '@req',
 		'link', 'boolean', false,
 	},
 	events = TMW:CreateDogTagEventString("SPELL"),

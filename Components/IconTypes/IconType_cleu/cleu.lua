@@ -391,8 +391,9 @@ function Processor:CompileFunctionSegment(t)
 	--]]
 end
 Processor:RegisterDogTag("TMW", "Source", {
-	code = function (groupID, iconID)
-		local icon = TMW[groupID][iconID]
+	code = function(icon)
+		icon = TMW.GUIDToOwner[icon]
+		
 		if icon then
 			if icon.Type ~= "cleu" then
 				return ""
@@ -404,8 +405,7 @@ Processor:RegisterDogTag("TMW", "Source", {
 		end
 	end,
 	arg = {
-		'group', 'number', '@req',
-		'icon', 'number', '@req',
+		'icon', 'string', '@req',
 	},
 	events = TMW:CreateDogTagEventString("CLEU_SOURCEUNIT"),
 	ret = "string",
@@ -429,8 +429,9 @@ function Processor:CompileFunctionSegment(t)
 	--]]
 end
 Processor:RegisterDogTag("TMW", "Destination", {
-	code = function (groupID, iconID)
-		local icon = TMW[groupID][iconID]
+	code = function(icon)
+		icon = TMW.GUIDToOwner[icon]
+		
 		if icon then
 			if icon.Type ~= "cleu" then
 				return ""
@@ -442,8 +443,7 @@ Processor:RegisterDogTag("TMW", "Destination", {
 		end
 	end,
 	arg = {
-		'group', 'number', '@req',
-		'icon', 'number', '@req',
+		'icon', 'string', '@req',
 	},
 	events = TMW:CreateDogTagEventString("CLEU_DESTUNIT"),
 	ret = "string",
@@ -455,8 +455,9 @@ Processor:RegisterDogTag("TMW", "Destination", {
 local Processor = TMW.Classes.IconDataProcessor:New("CLEU_EXTRASPELL", "extraSpell")
 -- Processor:CompileFunctionSegment(t) is default.
 Processor:RegisterDogTag("TMW", "Extra", {
-	code = function (groupID, iconID, link)
-		local icon = TMW[groupID][iconID]
+	code = function(icon, link)
+		icon = TMW.GUIDToOwner[icon]
+		
 		if icon then
 			if icon.Type ~= "cleu" then
 				return ""
@@ -473,8 +474,7 @@ Processor:RegisterDogTag("TMW", "Extra", {
 		end
 	end,
 	arg = {
-		'group', 'number', '@req',
-		'icon', 'number', '@req',
+		'icon', 'string', '@req',
 		'link', 'boolean', false,
 	},
 	events = TMW:CreateDogTagEventString("CLEU_EXTRASPELL"),

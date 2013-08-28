@@ -582,14 +582,6 @@ function icon:Import_BuildContainingDropdownEntry(result, editbox)
 	if not TMW:DeepCompare(TMW.DEFAULT_ICON_SETTINGS, ics) then
 		local info = UIDropDownMenu_CreateInfo()
 
-		local tex
-		local ic = TMW.db:GetCurrentProfile() == profilename and groupID and iconID and TMW[groupID] and TMW[groupID][iconID]
-		if ic and ic.attributes.texture then
-			tex = ic.attributes.texture
-		else
-			tex = TMW:GuessIconTexture(ics)
-		end
-
 		local text, textshort, tooltipText = TMW:GetIconMenuText(ics)
 		if text:sub(-2) == "))" and iconID then
 			textshort = textshort .. " " .. L["fICON"]:format(iconID)
@@ -608,7 +600,7 @@ function icon:Import_BuildContainingDropdownEntry(result, editbox)
 
 		info.notCheckable = true
 
-		info.icon = tex
+		info.icon = TMW:GuessIconTexture(ics)
 		info.tCoordLeft = 0.07
 		info.tCoordRight = 0.93
 		info.tCoordTop = 0.07

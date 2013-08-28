@@ -193,7 +193,10 @@ TMW.Defaults = {
 			["**"] = {
 				GUID			= "",
 				Enabled			= true,
-				EnabledProfiles	= {}, -- Only used by global groups
+				EnabledProfiles	= {
+					 -- Only used by global groups
+					["*"]		= true,
+				},
 				OnlyInCombat	= false,
 				Locked			= false,
 				View			= "icon",
@@ -3207,7 +3210,7 @@ function TMW:SlashCommand(str)
 	elseif cmd == "enable" or cmd == "disable" or cmd == "toggle" then
 		local groupID, iconID = tonumber(arg2), tonumber(arg3)
 
-		local group = groupID and groupID <= TMW.db.profile.NumGroups and TMW[groupID]
+		local group = groupID and groupID <= TMW.db.profile.NumGroups and TMW.profile[groupID]
 		local icon = iconID and group and group[iconID]
 		local obj = icon or group
 		if obj then
@@ -3892,7 +3895,7 @@ end
 ---------------------------------
 
 local DogTagEventHandler = function(event, icon)
-	DogTag:FireEvent(event, icon.group.ID, icon.ID)
+	DogTag:FireEvent(event, icon:GetGUID())
 end
 
 function TMW:CreateDogTagEventString(...)
@@ -3903,7 +3906,7 @@ function TMW:CreateDogTagEventString(...)
 		if i > 1 then
 			eventString = eventString .. ";"
 		end
-		eventString = eventString .. Processor.changedEvent .. "#$group#$icon"
+		eventString = eventString .. Processor.changedEvent .. "#$icon"
 	end
 	return eventString
 end

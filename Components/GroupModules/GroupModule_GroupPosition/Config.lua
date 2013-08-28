@@ -223,8 +223,7 @@ TMW.Classes.SharableDataType.types.group:RegisterMenuBuilder(10, function(self, 
 	info.text = L["COPYGROUP"] .. " - " .. L["COPYPOSSCALE"]
 	info.func = function()
 		CloseDropDownMenus()
-		local destgroupID = IMPORTS.group_overwrite
-		local destgroup = TMW[destgroupID]
+		local destgroup = IMPORTS.group_overwrite
 		local destgs = destgroup:GetSettings()
 		
 		-- Restore all default settings first.

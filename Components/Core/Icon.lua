@@ -152,7 +152,7 @@ function Icon.ScriptSort(iconA, iconB)
 	local gA = iconA.group.ID
 	local gB = iconB.group.ID
 	if gA == gB then
-		local iOrder = -TMW[gA]:GetSettings().CheckOrder
+		local iOrder = -iconA.group.CheckOrder
 		return iconA.ID*iOrder < iconB.ID*iOrder
 	end
 	return gA*gOrder < gB*gOrder
@@ -234,11 +234,21 @@ function Icon.GetGUID(icon, generate)
 		GUID = nil
 	end
 
-	if not GUID and generate then
-		GUID = TMW:GenerateGUID("icon", TMW.CONST.GUID_SIZE)
-		icon:GetSettings().GUID = GUID
-		icon.GUID = GUID
-		icon:Setup()
+	if not GUID then
+		if not icon.TempGUID then
+			icon.TempGUID = TMW:GenerateGUID("icon", TMW.CONST.GUID_SIZE)
+			GUID = icon.TempGUID
+		end
+		if generate then
+			GUID = icon.TempGUID
+			icon.TempGUID = nil
+
+			icon:GetSettings().GUID = GUID
+			icon.GUID = GUID
+			icon:Setup()
+		else
+			return icon.TempGUID
+		end
 	end
 
 	return GUID

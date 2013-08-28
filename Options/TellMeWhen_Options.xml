@@ -1210,10 +1210,10 @@
 						self:SetSize(previewSize, previewSize)
 					</OnShow>
 					<OnMouseUp>
-						if button == "RightButton" then
-							TMW.IE:Load(nil, self.icon)
-						end
 						if TMW.IE then
+							if button == "RightButton" then
+								TMW.IE:Load(nil, self.icon)
+							end
 							TMW.IE:ScheduleIconSetup(self.icon)
 						end
 					</OnMouseUp>

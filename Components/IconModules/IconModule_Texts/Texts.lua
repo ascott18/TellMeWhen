@@ -564,8 +564,7 @@ function Texts:SetupForIcon(sourceIcon)
 	self.Texts = Texts
 	
 	wipe(self.kwargs)
-	self.kwargs.icon = sourceIcon.ID
-	self.kwargs.group = sourceIcon.group.ID
+	self.kwargs.icon = sourceIcon:GetGUID()
 	self.kwargs.unit = sourceIcon.attributes.dogTagUnit
 	--self.kwargs.shouldcolor = TMW.db.profile.ColorNames
 	

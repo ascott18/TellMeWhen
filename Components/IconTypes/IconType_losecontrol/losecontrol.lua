@@ -136,8 +136,9 @@ local Processor = TMW.Classes.IconDataProcessor:New("LOC_CATEGORY", "locCategory
 -- Processor:CompileFunctionSegment(t) is default.
 
 Processor:RegisterDogTag("TMW", "LocType", {
-	code = function (groupID, iconID)
-		local icon = TMW[groupID][iconID]
+	code = function(icon)
+		icon = TMW.GUIDToOwner[icon]
+		
 		if icon then
 			if icon.Type ~= "losecontrol" then
 				return ""
@@ -149,8 +150,7 @@ Processor:RegisterDogTag("TMW", "LocType", {
 		end
 	end,
 	arg = {
-		'group', 'number', '@req',
-		'icon', 'number', '@req',
+		'icon', 'string', '@req',
 	},
 	events = TMW:CreateDogTagEventString("LOC_CATEGORY"),
 	ret = "string",

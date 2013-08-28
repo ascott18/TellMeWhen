@@ -128,9 +128,9 @@ end)
 
 local OnGCD = TMW.OnGCD
 Processor:RegisterDogTag("TMW", "Duration", {
-	code = function (groupID, iconID, gcd)
-		local group = TMW[groupID]
-		local icon = group and group[iconID]
+	code = function(icon, gcd)
+		icon = TMW.GUIDToOwner[icon]
+
 		if icon then
 			local attributes = icon.attributes
 			local duration = attributes.duration
@@ -147,8 +147,7 @@ Processor:RegisterDogTag("TMW", "Duration", {
 		end
 	end,
 	arg = {
-		'group', 'number', '@req',
-		'icon', 'number', '@req',
+		'icon', 'string', '@req',
 		'gcd', 'boolean', true,
 	},
 	events = "FastUpdate",
