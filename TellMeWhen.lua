@@ -1739,7 +1739,7 @@ TMW.PreviousGUIDToOwner = {}
 TMW.GUIDToOwner = {}
 
 
-local chars = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz-_"
+local chars = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz=_"
 function TMW.generateGUID(length)
     local ret = format("%.12o", _G.time())
     
