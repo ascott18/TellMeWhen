@@ -72,12 +72,17 @@ Module:SetScriptHandler("OnMouseUp", function(Module, icon, button)
 			tinsert(icons, instance.icon)
 		end	
 	end
-	if not TMW.Locked and button == "RightButton" then
-		if #icons == 1 then
-			TMW.IE:Load(nil, icon)
-		elseif #icons > 1 then
-			CloseDropDownMenus()
-			ToggleDropDownMenu(1, nil, DD, icon, 0, 0)
+	if not TMW.Locked then
+		if button == "RightButton" then
+			if #icons == 1 then
+				TMW.IE:Load(nil, icon)
+			elseif #icons > 1 then
+				CloseDropDownMenus()
+				ToggleDropDownMenu(1, nil, DD, icon, 0, 0)
+			end
+			
+		elseif TMW.DOGTAGS.AcceptingIcon and IsShiftKeyDown() and button == "LeftButton" then
+			TMW.DOGTAGS:InsertIcon(icon)
 		end
 	end
 end)

@@ -1,12 +1,12 @@
 ﻿<Ui>
 
-<Include file="Common\includes.config.xml"/>
-
 <Include file="Help\includes.config.xml"/>
 
 <Include file="Spells\includes.config.xml"/>
 
 <Include file="Suggester\includes.config.xml"/>
+
+<Include file="Common\includes.config.xml"/>
 
 <Include file="Conditions\includes.config.xml"/>
 

@@ -6,4 +6,6 @@
 <Script file="IconDragger.lua"/>
 <Include file="IconDragger.xml"/>
 
+<Include file="DogTags\includes.config.xml"/>
+
 </Ui>

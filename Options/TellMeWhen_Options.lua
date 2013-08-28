@@ -1499,7 +1499,7 @@ function IE:OnInitialize()
 		return
 
 	-- if the file is NOT required for gross functionality
-	elseif not TMW.Classes.IconEditor_Resizer_ScaleX_SizeY then
+	elseif not TMW.DOGTAGS then
 		StaticPopupDialogs["TMWOPT_RESTARTNEEDED"] = {
 			text = L["ERROR_MISSINGFILE_OPT_NOREQ"], 
 			button1 = EXIT_GAME,
@@ -1510,7 +1510,7 @@ function IE:OnInitialize()
 			whileDead = true,
 			preferredIndex = 3, -- http://forums.wowace.com/showthread.php?p=320956
 		}
-		StaticPopup_Show("TMWOPT_RESTARTNEEDED", TELLMEWHEN_VERSION_FULL, "TellMeWhen/Options/IconEditor_Resizer_ScaleX_SizeY.lua") -- arg3 could also be L["ERROR_MISSINGFILE_REQFILE"]
+		StaticPopup_Show("TMWOPT_RESTARTNEEDED", TELLMEWHEN_VERSION_FULL, "TellMeWhen/Components/Core/Common/DogTags/config.lua") -- arg3 could also be L["ERROR_MISSINGFILE_REQFILE"]
 	end
 
 	TMW:Fire("TMW_OPTIONS_LOADING")

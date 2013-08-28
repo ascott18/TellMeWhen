@@ -8,4 +8,6 @@
 
 <Script file="Item.lua"/>
 
+<Include file="DogTags\includes.core.xml"/>
+
 </Ui>
