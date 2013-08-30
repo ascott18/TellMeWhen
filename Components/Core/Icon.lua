@@ -667,7 +667,6 @@ end
 function Icon.Setup(icon)
 	if not icon or not icon[0] then return end
 	
-	local iconID = icon:GetID()
 	local group = icon.group
 	local ics = icon:GetSettings()
 	local typeData = TMW.Types[ics.Type]
