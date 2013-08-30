@@ -258,6 +258,10 @@ ConditionCategory:RegisterCondition(6,	 "STANCE", {
 	hidden = not FirstStances[pclass],
 })
 
+
+ConditionCategory:RegisterSpacer(6.5)
+
+
 ConditionCategory:RegisterCondition(7,	 "SPEC", {
 	text = L["UIPANEL_SPEC"],
 	min = 1,
@@ -300,6 +304,42 @@ ConditionCategory:RegisterCondition(8,	 "TREE", {
 	end,
 })
 
+
+local SpeclizationRoles = {
+	TANK = 1,
+	DAMAGER = 2,
+	HEALER = 3,
+}
+ConditionCategory:RegisterCondition(8.1, "TREEROLE", {
+	text = L["UIPANEL_SPECIALIZATIONROLE"],
+	tooltip = L["UIPANEL_SPECIALIZATIONROLE_DESC"],
+	min = 1,
+	max = 3,
+	midt = true,
+	texttable = function(i)
+		for k, v in pairs(SpeclizationRoles) do
+			if i == v then
+				return _G[k]
+			end
+		end
+	end,
+	unit = PLAYER,
+	icon = "Interface\\LFGFrame\\UI-LFG-ICON-ROLES",
+	tcoords = {GetTexCoordsForRole("HEALER")},
+	Env = {
+		GetSpecialization = GetSpecialization,
+		GetSpecializationInfo = GetSpecializationInfo,
+		SpeclizationRoles = SpeclizationRoles,
+	},
+	funcstr = [[(SpeclizationRoles[select(6, GetSpecializationInfo(GetSpecialization() or 0))] or 0) c.Operator c.Level]],
+	events = function(ConditionObject, c)
+		return
+			ConditionObject:GenerateNormalEventString("PLAYER_SPECIALIZATION_CHANGED")
+	end,
+})
+
+
+ConditionCategory:RegisterSpacer(8.9)
 
 
 CNDT.Env.TalentMap = {}

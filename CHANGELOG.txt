@@ -10,6 +10,8 @@
  *** Group anchoring to other groups
  ** The consequence of this is that you can now import/export icons and meta icons that include those icons separately and they will automatically find eachother once they are all imported.
 
+ * New Condition: Specialization Role
+
  * Bug Fixes:
  ** Icons should now always have the correct size after their view changes or the size or ID of a group changes.
 
