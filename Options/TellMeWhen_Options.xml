@@ -1450,7 +1450,7 @@
 	
 	<!-- END TEMPLATES -->
 
-	<Frame name="TellMeWhen_ConfigWarning" hidden="true" movable="true" toplevel="true" clampedToScreen="true" enableMouse="true" frameStrata="DIALOG" parent="UIParent">
+	<Frame name="TellMeWhen_SimpleDialog" hidden="true" movable="true" toplevel="true" clampedToScreen="true" enableMouse="true" frameStrata="DIALOG" parent="UIParent" virtual="true">
 		<Size x="330"/>
 		<Anchors>
 			<Anchor point="TOP" relativeTo="UIParent" y="-60"/>
@@ -1467,28 +1467,6 @@
 			</EdgeSize>
 		</Backdrop>
 		<TitleRegion name="$parentTitleRegion" setAllPoints="true"/>
-		<Frames>
-			<Button name="$parentExit" parentKey="Exit" inherits="TellMeWhen_ButtonTemplate">
-				<Size x="150" y="15"/>
-				<Anchors>
-					<Anchor point="BOTTOMLEFT" x="13" y="13"/>
-				</Anchors>
-				<Scripts>
-					<OnLoad> self:SetText(TMW.L["CONFIGMODE_EXIT"]) </OnLoad>
-					<OnClick>TMW:LockToggle() </OnClick>
-				</Scripts>
-			</Button>
-			<Button name="$parentNeverAgain" parentKey="NeverAgain" inherits="TellMeWhen_ButtonTemplate">
-				<Size x="150" y="15"/>
-				<Anchors>
-					<Anchor point="BOTTOMRIGHT" x="-13" y="13"/>
-				</Anchors>
-				<Scripts>
-					<OnLoad> self:SetText(TMW.L["CONFIGMODE_NEVERSHOW"]) </OnLoad>
-					<OnClick>TMW.db.global.ConfigWarning = false self:GetParent():Hide() </OnClick>
-				</Scripts>
-			</Button>
-		</Frames>
 		<Layers>
 			<Layer level="ARTWORK">
 				<Texture file="Interface\DialogFrame\UI-DialogBox-Header" parentKey="header">
@@ -1509,6 +1487,36 @@
 				</FontString>
 			</Layer>
 		</Layers>
+	</Frame>
+
+	<Frame name="TellMeWhen_ConfigWarning" inherits="TellMeWhen_SimpleDialog" >
+		<Frames>
+			<Button name="$parentExit" parentKey="Exit" inherits="TellMeWhen_ButtonTemplate">
+				<Size x="150" y="15"/>
+				<Anchors>
+					<Anchor point="BOTTOMLEFT" x="13" y="13"/>
+				</Anchors>
+				<Scripts>
+					<OnLoad> self:SetText(TMW.L["CONFIGMODE_EXIT"]) </OnLoad>
+					<OnClick>TMW:LockToggle() </OnClick>
+				</Scripts>
+			</Button>
+			<Button name="$parentNeverAgain" parentKey="NeverAgain" inherits="TellMeWhen_ButtonTemplate">
+				<Size x="150" y="15"/>
+				<Anchors>
+					<Anchor point="BOTTOMRIGHT" x="-13" y="13"/>
+				</Anchors>
+				<Scripts>
+					<OnLoad>
+						self:SetText(TMW.L["CONFIGMODE_NEVERSHOW"])
+					</OnLoad>
+					<OnClick>
+						TMW.db.global.ConfigWarning = false
+						self:GetParent():Hide()
+					</OnClick>
+				</Scripts>
+			</Button>
+		</Frames>
 		<Scripts>
 			<OnLoad>
 				self.title:SetText("TellMeWhen")
@@ -1516,6 +1524,38 @@
 				self:SetScale(0.85)
 				self.desc:SetWidth(self:GetWidth() - 30)
 				self:SetHeight(self.desc:GetHeight() + 75)
+			</OnLoad>
+		</Scripts>
+	</Frame>
+
+	<Frame name="TellMeWhen_NoGroupsWarning" inherits="TellMeWhen_SimpleDialog" >
+		<Frames>
+			<Button name="$parentGroupOptions" inherits="TellMeWhen_ButtonTemplate">
+				<Size x="250" y="15"/>
+				<Anchors>
+					<Anchor point="BOTTOM" y="13"/>
+				</Anchors>
+				<Scripts>
+					<OnLoad>
+						self:SetText(TMW.L["MAINOPTIONS_SHOW"])
+					</OnLoad>
+					<OnClick>
+						if TMW:AssertOptionsInitialized() then
+							return
+						end
+
+						LibStub("AceConfigDialog-3.0"):Open("TMW Options")
+					</OnClick>
+				</Scripts>
+			</Button>
+		</Frames>
+		<Scripts>
+			<OnLoad>
+				self.title:SetText("TellMeWhen")
+				self.desc:SetText(TMW.L["NOGROUPS_DIALOG_BODY"])
+				self:SetScale(0.85)
+				self.desc:SetWidth(self:GetWidth() - 30)
+				self:SetHeight(self.desc:GetHeight() + 80)
 			</OnLoad>
 		</Scripts>
 	</Frame>

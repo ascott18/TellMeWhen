@@ -2073,7 +2073,7 @@ function IE:TMW_ONUPDATE_POST(...)
 	IE:AttemptBackup(TMW.CI.icon)
 end
 
-function IE:TMW_GLOBAL_UPDATE()
+TMW:RegisterCallback("TMW_GLOBAL_UPDATE", function()
 	-- GLOBALS: TellMeWhen_ConfigWarning
 	if not TMW.Locked then
 		if TMW.db.global.ConfigWarning then
@@ -2086,8 +2086,23 @@ function IE:TMW_GLOBAL_UPDATE()
 	end
 
 	IE:SaveSettings()
-end
-TMW:RegisterCallback("TMW_GLOBAL_UPDATE", IE)
+end)
+
+TMW:RegisterCallback("TMW_GROUP_SETUP_POST", function()
+	-- GLOBALS: TellMeWhen_NoGroupsWarning
+	if not TMW.Locked then
+		for group in TMW:InGroups() do
+			if group:IsVisible() then
+				TellMeWhen_NoGroupsWarning:Hide()
+				return
+			end
+		end
+
+		TellMeWhen_NoGroupsWarning:Show()
+	else
+		TellMeWhen_NoGroupsWarning:Hide()
+	end
+end)
 
 IE:RegisterEvent("PLAYER_REGEN_DISABLED", function()
 	if not TMW.ALLOW_LOCKDOWN_CONFIG then

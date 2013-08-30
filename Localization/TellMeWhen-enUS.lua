@@ -49,6 +49,14 @@ L["IMPORTERROR_INVALIDTYPE"] = "Attempted to import data of an unknown type. Che
 L["IMPORTERROR_FAILEDPARSE"] = "There was an error processing the string. Ensure that you copied the entire string from the source."
 
 
+L["NOGROUPS_DIALOG_BODY"] = [[Your current TellMeWhen configuration and/or player specialization does not allow any TellMeWhen groups to be shown, so there is nothing to configure.
+
+If you would like to change the settings of an existing group or create a new group, open TellMeWhen's main options by typing '/tmw options' or click the button below.
+
+Type '/tellmewhen' or '/tmw' to leave configuration mode.]]
+L["MAINOPTIONS_SHOW"] = "Group Options"
+
+
 L["ERROR_MISSINGFILE_REQFILE"] = "A required file"
 L["ERROR_MISSINGFILE"] = [[A complete restart of WoW is required to use TellMeWhen %s:
 
