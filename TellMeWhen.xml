@@ -6,6 +6,48 @@
 		<Size x="1" y="1"/>
 	</Frame>
 
+	<Texture name="TellMeWhen_GlobalGroupBorder" virtual="true">
+		<Size x="1" y="1"/>
+		<Color r="0" g="0.7647" b="0" a="0.4"/>
+	</Texture>
+
+	<Frame name="TellMeWhen_GlobalGroupTemplate" inherits="TellMeWhen_GroupTemplate" virtual="true">
+		<Frames>
+			<Frame parentKey="Borders" setAllPoints="true">
+				<Layers>
+					<Layer level="BACKGROUND">
+
+						<Texture parentKey="BorderTop" inherits="TellMeWhen_GlobalGroupBorder">
+							<Anchors>
+								<Anchor point="TOPLEFT" x="-1" y="1"/>
+								<Anchor point="TOPRIGHT" x="1" y="1"/>
+							</Anchors>
+						</Texture>
+						<Texture parentKey="BorderBottom" inherits="TellMeWhen_GlobalGroupBorder">
+							<Anchors>
+								<Anchor point="BOTTOMLEFT" x="-1" y="-1"/>
+								<Anchor point="BOTTOMRIGHT" x="1" y="-1"/>
+							</Anchors>
+						</Texture>
+						<Texture parentKey="BorderLeft" inherits="TellMeWhen_GlobalGroupBorder">
+							<Anchors>
+								<Anchor point="TOPLEFT" relativeKey="$parent.BorderTop" relativePoint="BOTTOMLEFT"/>
+								<Anchor point="BOTTOMLEFT" relativeKey="$parent.BorderBottom" relativePoint="TOPLEFT"/>
+							</Anchors>
+						</Texture>
+						<Texture parentKey="BorderRight" inherits="TellMeWhen_GlobalGroupBorder">
+							<Anchors>
+								<Anchor point="TOPRIGHT" relativeKey="$parent.BorderTop" relativePoint="BOTTOMRIGHT"/>
+								<Anchor point="BOTTOMRIGHT" relativeKey="$parent.BorderBottom" relativePoint="TOPRIGHT"/>
+							</Anchors>
+						</Texture>
+
+					</Layer>
+				</Layers>
+			</Frame>
+		</Frames>
+	</Frame>
+
 	<Button name="TellMeWhen_IconTemplate" virtual="true" enableMouse="true">
 		<Size x="30" y="30"/>
 	</Button>

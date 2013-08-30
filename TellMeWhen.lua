@@ -2931,7 +2931,7 @@ function TMW:UpdateNormally()
 	for groupID = 1, max(TMW.db.global.NumGroups, #TMW.global) do
 		-- Cant use TMW.InGroups() because groups wont exist yet on the first call of this.
 		local group = TMW.global[groupID] or
-			TMW.Classes.Group:New("Frame", "TellMeWhen_GlobalGroup" .. groupID, TMW, "TellMeWhen_GroupTemplate", groupID)
+			TMW.Classes.Group:New("Frame", "TellMeWhen_GlobalGroup" .. groupID, TMW, "TellMeWhen_GlobalGroupTemplate", groupID)
 
 		group.Domain = "global"
 		TMW[group.Domain][groupID] = group

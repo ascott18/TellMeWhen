@@ -561,7 +561,7 @@ TMW.GroupConfigTemplate = {
 	childGroups = "tab",
 	name = function(info)
 		local group = FindGroupFromInfo(info)
-		return group:GetGroupName()
+		return group:GetGroupName(1)
 	end,
 	order = function(info)
 		local group = FindGroupFromInfo(info)
@@ -1978,21 +1978,28 @@ function IE:OnUpdate()
 	if icon and tab.doesGroup and tab.doesIcon then
 		-- For IconEditor tabs that can configure icons
 
-		local groupName = CI.group:GetGroupName(1)
-
-		local GUID = icon:GetGUID()
-
-		local append = ""
-		--[[if TMW.debug and GUID then
-			append = " " .. GUID:gsub("%%", "%%%%")
-		end]]
+		local groupName = icon.group:GetGroupName(1)
+		local name = L["GROUPICON"]:format(groupName, icon.ID)
+		if icon.group.Domain == "global" then
+			name = L["DOMAIN_GLOBAL"] .. " " .. name
+		end
 		
-		self.Header:SetFormattedText(titlePrepend .. " - " .. L["GROUPICON"] .. append, groupName, icon.ID)
+		self.Header:SetText(titlePrepend .. " - " .. name)
+
+		self.Header:SetFontObject(GameFontNormal)
 
 		if self.Header:IsTruncated() then
+			self.Header:SetFontObject(GameFontNormalSmall)
 			local truncAmt = 3
 			while self.Header:IsTruncated() and truncAmt < #groupName + 4 do
-				self.Header:SetFormattedText(titlePrepend .. " - " .. L["GROUPICON"], groupName:sub(1, -truncAmt - 4) .. "..." .. groupName:sub(-5), icon.ID)
+
+
+				local name = L["GROUPICON"]:format(groupName:sub(1, -truncAmt - 4) .. "..." .. groupName:sub(-4), icon.ID)
+				if icon.group.Domain == "global" then
+					name = L["DOMAIN_GLOBAL"] .. " " .. name
+				end
+
+				self.Header:SetText(titlePrepend .. " - " .. name)
 				truncAmt = truncAmt + 1
 			end
 		end
@@ -2016,7 +2023,11 @@ function IE:OnUpdate()
 		
 		if CI.group and tab.doesGroup then
 			-- for group config tabs, don't show icon info. Just show group info.
-			self.Header:SetFormattedText(titlePrepend .. " - " .. L["fGROUP"], CI.group:GetGroupName(1))
+			local name = L["fGROUP"]:format(CI.group:GetGroupName(1))
+			if icon.group.Domain == "global" then
+				name = L["DOMAIN_GLOBAL"] .. " " .. name
+			end
+			self.Header:SetText(titlePrepend .. " - " .. name)
 		else
 			self.Header:SetText(titlePrepend)
 		end

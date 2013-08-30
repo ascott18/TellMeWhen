@@ -413,6 +413,15 @@ function Group.Setup(group, noIconSetup)
 
 	TMW:Fire("TMW_GROUP_SETUP_PRE", group)
 	
+
+	if group.Borders then
+		if TMW.Locked then
+			group.Borders:Hide()
+		else
+			group.Borders:Show()
+		end
+	end
+	
 	group:DisableAllModules()
 	
 	-- Setup the groups's view:
