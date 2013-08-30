@@ -70,15 +70,20 @@ function Module:Table_GetNormalSuggestions(suggestions, tbl, ...)
 		end
 	else
 		for index, name in pairs(tbl) do
+			local matcher = lastName
+			if #lastName < 2 then
+				matcher = atBeginning
+			end
+			
 			-- name here is Glyph of Fancy Spell
-			if strfind(name, atBeginning) then
+			if strfind(name, matcher) then
 				suggestions[#suggestions + 1] = index
 			else
 			
 				-- name here is Fancy Spell
 				name = GetGlyphInfo(index)
 				name = strlowerCache[name]
-				if strfind(name, atBeginning) then
+				if strfind(name, matcher) then
 					suggestions[#suggestions + 1] = index
 				end
 			end
