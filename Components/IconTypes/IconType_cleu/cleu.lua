@@ -410,7 +410,7 @@ Processor:RegisterDogTag("TMW", "Source", {
 	events = TMW:CreateDogTagEventString("CLEU_SOURCEUNIT"),
 	ret = "string",
 	doc = L["DT_DOC_Source"] .. "\r\n \r\n" .. L["DT_INSERTGUID_GENERIC_DESC"],
-	example = ('[Source] => "target"; [Source(icon="TMW:icon:1I7MnrXDCz8T")] => %q; [Source:Name] => "Kobold"; [Source(icon="TMW:icon:1I7MnrXDCz8T"):Name] => %q'):format(UnitName("player"), TMW.NAMES and TMW.NAMES:TryToAcquireName("player", true) or "???"),
+	example = ('[Source] => "target"; [Source:Name] => "Kobold"; [Source(icon="TMW:icon:1I7MnrXDCz8T")] => %q; [Source(icon="TMW:icon:1I7MnrXDCz8T"):Name] => %q'):format(UnitName("player"), TMW.NAMES and TMW.NAMES:TryToAcquireName("player", true) or "???"),
 	category = L["ICON"],
 })
 
@@ -448,7 +448,7 @@ Processor:RegisterDogTag("TMW", "Destination", {
 	events = TMW:CreateDogTagEventString("CLEU_DESTUNIT"),
 	ret = "string",
 	doc = L["DT_DOC_Destination"] .. "\r\n \r\n" .. L["DT_INSERTGUID_GENERIC_DESC"],
-	example = ('[Destination] => "target"; [Destination(icon="TMW:icon:1I7MnrXDCz8T")] => %q; [Destination:Name] => "Kobold"; [Destination(icon="TMW:icon:1I7MnrXDCz8T"):Name] => %q'):format(UnitName("player"), TMW.NAMES and TMW.NAMES:TryToAcquireName("player", true) or "???"),
+	example = ('[Destination] => "target"; [Destination:Name] => "Kobold"; [Destination(icon="TMW:icon:1I7MnrXDCz8T")] => %q; [Destination(icon="TMW:icon:1I7MnrXDCz8T"):Name] => %q'):format(UnitName("player"), TMW.NAMES and TMW.NAMES:TryToAcquireName("player", true) or "???"),
 	category = L["ICON"],
 })
 
