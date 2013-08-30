@@ -38,7 +38,9 @@ TMW:NewClass("Resizer_Generic"){
 		
 		-- A new function is requied for each resizeButton/parent combo because it has to be able to reference both.
 		parent:HookScript("OnSizeChanged", function(parent)
-			self.resizeButton:SetScale(1.6/parent:GetEffectiveScale())
+			local scale = 1.6 / parent:GetEffectiveScale()
+			scale = max(scale, 0.6)
+			self.resizeButton:SetScale(scale)
 		end)
 	end,
 
