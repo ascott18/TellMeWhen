@@ -584,7 +584,16 @@ TMW.GroupConfigTemplate = {
 							return L["UIPANEL_ENABLEGROUP"]
 						end
 					end,
-					desc = L["UIPANEL_TOOLTIP_ENABLEGROUP"],
+					desc = function(info)
+						local group = FindGroupFromInfo(info)
+
+						if group.Domain == "global" then
+							return L["UIPANEL_TOOLTIP_ENABLEGROUP_GLOBAL_DESC"]
+						elseif group.Domain == "profile" then
+							return L["UIPANEL_TOOLTIP_ENABLEGROUP"]
+						end
+					end,
+
 					type = "toggle",
 					order = 1,
 					width = "full",
