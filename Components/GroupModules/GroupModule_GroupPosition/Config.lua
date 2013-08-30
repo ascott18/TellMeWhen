@@ -214,7 +214,7 @@ TMW.Classes.GroupModule_GroupPosition:RegisterConfigTable("args.position.args", 
 
 
 TMW.Classes.SharableDataType.types.group:RegisterMenuBuilder(10, function(self, result, editbox)
-	local groupID = result[1]
+	-- local groupID = result[1]
 	local gs = result.data
 	local IMPORTS, EXPORTS = editbox:GetAvailableImportExportTypes()
 

@@ -1899,7 +1899,7 @@ function TMW:GetBaseUpgrades()			-- upgrade functions
 			profile = function(self, profile)
 				self:runGUIDUpgrade(self.guidupgrade_profile, profile)
 			end,
-			group = function(self, gs, groups, groupID)
+			group = function(self, gs, domain, groupID)
 				if gs.GUID == "" then
 					self:runGUIDUpgrade(self.guidupgrade_group, gs, groupID)
 				end

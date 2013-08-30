@@ -1159,9 +1159,7 @@ function textlayout:Import_BuildContainingDropdownEntry(result, editbox)
 	info.value = result
 	info.hasArrow = true
 	info.notCheckable = true
-	--info.tooltipTitle = format(L["fGROUP"], groupID)
-	--info.tooltipText = 
-	--info.tooltipOnButton = true
+	
 	UIDropDownMenu_AddButton(info, UIDROPDOWNMENU_MENU_LEVEL)
 end
 function textlayout:Import_BuildMenuData(result, editbox)

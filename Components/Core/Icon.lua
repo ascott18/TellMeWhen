@@ -669,7 +669,6 @@ function Icon.Setup(icon)
 	
 	local iconID = icon:GetID()
 	local group = icon.group
-	local groupID = group:GetID()
 	local ics = icon:GetSettings()
 	local typeData = TMW.Types[ics.Type]
 	local viewData = group.viewData

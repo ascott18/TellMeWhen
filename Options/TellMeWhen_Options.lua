@@ -335,7 +335,6 @@ function TMW.SetIconPreviewIcon(self, icon)
 		return
 	end
 
-	local groupID = icon.group:GetID()
 	local desc = L["ICON_TOOLTIP2NEWSHORT"]
 
 	if TMW.debug then

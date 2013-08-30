@@ -64,8 +64,7 @@ DD.initialize = function(dropdown)
 	UIDropDownMenu_AddButton(info, UIDROPDOWNMENU_MENU_LEVEL)
 
 	for i, icon in pairs(icons) do
-		local groupID, iconID = icon.group.ID, icon.ID
-		
+			
 		local info = UIDropDownMenu_CreateInfo()
 		info.text = icon:GetIconName()
 		

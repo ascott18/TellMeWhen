@@ -103,7 +103,6 @@ end
 
 function GroupPosition:SetPos()
 	local group = self.group
-	local groupID = group:GetID()
 	
 	local gs = group:GetSettings()
 	local p = gs.Point

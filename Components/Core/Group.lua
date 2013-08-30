@@ -393,7 +393,6 @@ end
 -- @param noIconSetup [boolean] True to prevent the group from setting up all of its icons. Nil/false to update all icons along with the group.
 function Group.Setup(group, noIconSetup)
 	local gs = group:GetSettings()
-	local groupID = group:GetID()
 	local GUID = group:GetGUID()
 
 	if GUID then
