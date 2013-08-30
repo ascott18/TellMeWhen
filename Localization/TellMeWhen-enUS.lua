@@ -339,31 +339,6 @@ You can use your own textures too as long as they are placed in WoW's directory 
 
 L["ICONMENU_CUSTOMTEX_MOPAPPEND_DESC"] = [[If this texture is showing as solid green, and your custom texture is in WoW's root folder, then please move it into a subdirectory of WoW's root and update the setting here accordingly to allow it to work correctly. If the custom texture is set to a spell, and it is either a spell name or a spell that no longer exists, then you should try and change it to a spellID of a spell that does exist.]]
 
-L["ICONMENU_BINDTEXT_DESC"] = [[Any text in this editbox will be shown on the icon where the keybinding is normally displayed on an action bar. This does NOT set a keybinding to this TellMeWhen icon. It is simply a visual reminder that will be shown on the icon. The text can be configured in this group's settings.]]
-
-
-L["SUG_SUBSTITUTION_t"] = "Target's Name"
-L["SUG_SUBSTITUTION_t_DESC"] = "Name of the unit you are currently targeting"
-L["SUG_SUBSTITUTION_f"] = "Focus's Name"
-L["SUG_SUBSTITUTION_f_DESC"] = "Name of the unit you currently have focused"
-L["SUG_SUBSTITUTION_m"] = "Mouseover's Name"
-L["SUG_SUBSTITUTION_m_DESC"] = "Name of the unit you are currently mousing over"
-L["SUG_SUBSTITUTION_p"] = "Previous Unit"
-L["SUG_SUBSTITUTION_p_DESC"] = "Name of the unit that was checked before the current unit"
-L["SUG_SUBSTITUTION_u"] = "Current Unit"
-L["SUG_SUBSTITUTION_u_DESC"] = "Name of current unit being checked"
-L["SUG_SUBSTITUTION_s"] = "Current Spell/Item/Etc"
-L["SUG_SUBSTITUTION_s_DESC"] = "Name of the current spell/item/etc being checked"
-L["SUG_SUBSTITUTION_d"] = "Duration Remaining"
-L["SUG_SUBSTITUTION_d_DESC"] = "The duration remaining on the icon's timer"
-L["SUG_SUBSTITUTION_k"] = "Current Stacks"
-L["SUG_SUBSTITUTION_k_DESC"] = "Whatever is currently displayed as the icon's stack text"
-L["SUG_SUBSTITUTION_o"] = "Source Unit"
-L["SUG_SUBSTITUTION_o_DESC"] = "Whatever unit caused the action in the last combat event that the icon handled."
-L["SUG_SUBSTITUTION_e"] = "Destination Unit"
-L["SUG_SUBSTITUTION_e_DESC"] = "Whatever unit received the action in the last combat event that the icon handled."
-L["SUG_SUBSTITUTION_x"] = "Extra Spell"
-L["SUG_SUBSTITUTION_x_DESC"] = "Combat events like dispels, interrupts, and aura breaking have additional data about which spell caused the event. This will substitute in that spell from the last combat log event."
 
 L["ICONMENU_COMPONENTICONS"] = "Component Icons & Groups"
 
@@ -730,9 +705,7 @@ L["UIPANEL_ICONSPACING_DESC"] = "Distance that icons within a group are away fro
 L["UIPANEL_ADDGROUP"] = "+ Add Another Group +"
 L["UIPANEL_ADDGROUP_DESC"] = "The new group will be assigned the next available groupID"
 L["UIPANEL_DELGROUP"] = "Delete this Group"
-L["UIPANEL_DELGROUP_DESC"] = [[Any groups after this group will have their ID shifted up one, and any icons that are checking icons in groups that will be shifted will have their settings automatically updated.
-
-Hold |cff7fffffCtrl|r to bypass confirmation.]]
+L["UIPANEL_DELGROUP_DESC2"] = "Hold |cff7fffffCtrl|r to bypass confirmation."
 L["UIPANEL_GROUPMOVEUP"] = "Move up"
 L["UIPANEL_GROUPMOVEUP_DESC"] = "Shifts this group's groupID up by one"
 L["UIPANEL_GROUPMOVEDOWN"] = "Move Down"

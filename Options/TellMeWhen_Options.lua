@@ -739,7 +739,7 @@ TMW.GroupConfigTemplate = {
 				},
 				delete = {
 					name = L["UIPANEL_DELGROUP"],
-					desc = L["UIPANEL_DELGROUP_DESC"],
+					desc = L["UIPANEL_DELGROUP_DESC2"],
 					type = "execute",
 					order = 50,
 					func = function(info)
