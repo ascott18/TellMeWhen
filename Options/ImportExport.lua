@@ -324,7 +324,7 @@ function group:Import_ImportData(editbox, data, version, domain, createNewGroup,
 
 		for gs2 in TMW:InGroupSettings() do
 			if gs ~= gs2 then
-				existingGUIDs[gs.GUID] = true
+				existingGUIDs[gs2.GUID] = true
 			end
 		end
 		for ics, gs2 in TMW:InIconSettings() do
@@ -529,7 +529,8 @@ group:RegisterMenuBuilder(20, function(self, result, editbox)
 
 	-- copy entire group - overwrite current
 	local info = UIDropDownMenu_CreateInfo()
-	info.text = L["COPYGROUP"] .. " - " .. L["OVERWRITEGROUP"]:format(group and group:GetGroupName(1) or "?")
+	-- IMPORT_PROFILE_OVERWRITE is used here even though we aren't importing a profile
+	info.text = L["COPYGROUP"] .. " - " .. L["IMPORT_PROFILE_OVERWRITE"]:format(group and group:GetGroupName() or "?")
 	info.func = function()
 		TMW:Import(editbox, gs, result.version, "group", group.Domain, false, groupID, group)
 	end
