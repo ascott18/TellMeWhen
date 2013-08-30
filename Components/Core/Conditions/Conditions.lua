@@ -1126,7 +1126,7 @@ function CNDT:RegisterConditionSet(identifier, conditionSetData)
 	ConditionSets[identifier] = data
 	
 	if not data.useDynamicTab then
-		TMW:RegisterCallback("TMW_CONFIG_ICON_LOADED", function(event, icon)
+		TMW:RegisterCallback("TMW_CONFIG_LOADED", function(event, icon)
 			CNDT:SetTabText(identifier)
 		end)
 	end

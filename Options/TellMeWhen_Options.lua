@@ -2269,11 +2269,12 @@ function IE:Load(isRefresh, icon, isHistoryChange)
 
 		elseif icon == false then
 			CI.icon = nil
+		end
 
-			if IE.CurrentTab then
-				IE.CurrentTab:OnClick()
-			end
-
+		if IE.CurrentTab then
+			IE.CurrentTab:OnClick()
+		else
+			IE.MainTab:OnClick()
 		end
 
 		TMW:Fire("TMW_CONFIG_ICON_LOADED_CHANGED", CI.icon, ic_old)
@@ -2283,7 +2284,7 @@ function IE:Load(isRefresh, icon, isHistoryChange)
 		if isRefresh then
 			return
 		else
-			IE.MainTab:ClickHandler()
+			IE:Show()
 		end
 	end
 
@@ -2333,6 +2334,8 @@ function IE:Load(isRefresh, icon, isHistoryChange)
 	else
 		IE.ResetButton:Disable()
 	end
+
+	TMW:Fire("TMW_CONFIG_LOADED")
 end
 
 function IE:CheckLoadedIconIsValid()
@@ -2386,7 +2389,7 @@ function IE:Reset()
 	
 	IE:Load(1)
 	
-	IE.MainTab:ClickHandler()
+	IE.MainTab:Click()
 end
 
 

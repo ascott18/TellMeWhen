@@ -190,9 +190,6 @@ function EVENTS:LoadConfig()
 		self.EventSettingsContainer:Hide()
 		IE.Events.HelpText:Show()
 	end
-
-	-- Set the text on the tab that will show how many used events we have.
-	self:SetTabText()
 end
 TMW:RegisterCallback("TMW_CONFIG_ICON_LOADED", EVENTS, "LoadConfig")
 
@@ -341,6 +338,7 @@ function EVENTS:SetTabText()
 		EventsTab:SetText(L["EVENTS_TAB"] .. " (" .. n .. ")")
 	end
 end
+TMW:RegisterCallback("TMW_CONFIG_LOADED", EVENTS, "SetTabText")
 
 
 
@@ -376,6 +374,10 @@ end
 
 function EVENTS:GetNumUsedEvents()
 	local n = 0
+
+	if not TMW.CI.ics then
+		return 0
+	end
 
 	for i, eventSettings in TMW:InNLengthTable(TMW.CI.ics.Events) do
 		local Module = EVENTS:GetEventHandlerForEventSettings(eventSettings)

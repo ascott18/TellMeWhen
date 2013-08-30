@@ -120,7 +120,7 @@ CNDT.DynamicConditionTab:Hide()
 
 TMW:RegisterCallback("TMW_CONFIG_ICON_LOADED_CHANGED", function(event, icon)
 	if TMW.IE.CurrentTab == CNDT.DynamicConditionTab then
-		TMW.IE.MainTab:ClickHandler()
+		TMW.IE.MainTab:Click()
 	end
 end)
 TMW:RegisterCallback("TMW_CONFIG_TAB_CLICKED", function(event, currentTab, oldTab)
@@ -136,7 +136,7 @@ f:SetScript("OnUpdate", function()
 	if CurrentConditionSet and CurrentConditionSet.useDynamicTab and CurrentConditionSet.ShouldShowTab then
 		if not CurrentConditionSet:ShouldShowTab() then
 			if TMW.IE.CurrentTab == CNDT.DynamicConditionTab then
-				TMW.IE.MainTab:ClickHandler()
+				TMW.IE.MainTab:Click()
 			else
 				CNDT.DynamicConditionTab:Hide()
 			end
@@ -162,7 +162,7 @@ function CNDT:GetTabText(conditionSetName)
 	local tabText = ConditionSet.tabText
 	
 	if not Conditions then
-		return "<ERROR: SETTINGS NOT FOUND!>"
+		return tabText .. " (0)"
 	end
 	
 	local parenthesesAreValid, errorMessage = CNDT:CheckParentheses(Conditions)
@@ -177,9 +177,9 @@ function CNDT:GetTabText(conditionSetName)
 
 	if n > 0 then
 		local prefix = (not parenthesesAreValid and "|TInterface\\AddOns\\TellMeWhen\\Textures\\Alert:0:2|t|cFFFF0000" or "")
-		return (prefix .. tabText .. " |cFFFF5959(" .. n .. ")")
+		return prefix .. tabText .. " |cFFFF5959(" .. n .. ")"
 	else
-		return (tabText .. " (" .. n .. ")")
+		return tabText .. " (" .. n .. ")"
 	end
 end
 
