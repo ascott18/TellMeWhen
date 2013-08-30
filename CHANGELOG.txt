@@ -12,7 +12,6 @@
 
  * Bug Fixes:
  ** Icons should now always have the correct size after their view changes or the size or ID of a group changes.
- ** Unit cooldown icons should now attempt to show the first usable spell even if no units being checked have casted any spells yet.
 
 ===v6.2.4===
  * Added DogTags for string.gsub and string.find.
@@ -21,6 +20,7 @@
  * Bug Fixes:
  ** IconModule_Alpha\Alpha.lua:84: attempt to index local "IconModule_Alpha" (a nil value)
  ** Rune icons will now behave properly when no runes are found that match the types configured for the icon.
+ ** Unit cooldown icons should now attempt to show the first usable spell even if no units being checked have casted any spells yet.
 
 ===v6.2.3===
  * **Important**: The color settings for all timer bars (including bar group and timer overlay bars) have changed a bit:
