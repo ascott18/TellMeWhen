@@ -127,6 +127,21 @@ function IconDragger:CompleteDrag(script, icon)
 	end
 end
 
+function IconDragger:NoGlobalToProfile(invert)
+	local srcicon = IconDragger.srcicon
+	local desticon = IconDragger.desticon
+
+	if not (srcicon and desticon) then
+		return nil
+	end
+
+	if srcicon.group.Domain == "global" and desticon.group.Domain == "profile" then
+		return invert
+	end
+
+	return true
+end
+
 function IconDragger:NoProfileToGlobal(invert)
 	local srcicon = IconDragger.srcicon
 	local desticon = IconDragger.desticon
