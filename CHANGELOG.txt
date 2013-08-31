@@ -11,6 +11,7 @@
  ** The consequence of this is that you can now import/export icons and meta icons that include those icons separately and they will automatically find eachother once they are all imported.
 
  * New Condition: Specialization Role
+ * You can now enter "none" or "blank" as a custom texture for an icon to force it to display no texture.
 
  * Bug Fixes:
  ** Icons should now always have the correct size after their view changes or the size or ID of a group changes.

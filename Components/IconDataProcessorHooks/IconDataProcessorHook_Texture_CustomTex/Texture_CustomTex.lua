@@ -79,6 +79,8 @@ function Hook:OnImplementIntoIcon(icon)
 				UpdateVarTex_item(icon, varData)
 			end
 		end
+	elseif CustomTex:lower() == "blank" or CustomTex:lower() == "none" then
+		icon.CustomTex_OverrideTex = ""
 	else
 		icon.CustomTex_OverrideTex = TMW:GetTexturePathFromSetting(CustomTex)
 	end
