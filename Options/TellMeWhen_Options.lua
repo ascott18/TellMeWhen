@@ -395,7 +395,7 @@ do
 		}
 
 		-- Test the string and its tags & syntax
-		local func = loadstring(DogTag:CreateFunctionFromCode(text, ns, kwargs))
+		local func = loadstring(DogTag:CreateFunctionFromCode(text, ns, kwargs, true))
 		local success, newfunc = pcall(func)
 
 		if not success then

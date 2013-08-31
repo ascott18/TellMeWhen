@@ -114,7 +114,7 @@ function Announcements:LoadSettingsForEventID(id)
 	Announcements:SelectChannel(EventSettings.Channel)
 
 	Announcements.ConfigContainer.EditBox:SetText(EventSettings.Text)
-	Announcements.ConfigContainer.EditBox.Error:SetText(TMW:TestDogTagString(CI.icon, EventSettings.Text))
+	Announcements.ConfigContainer.EditBox.Error:SetText(TMW:TestDogTagString(CI.icon, EventSettings.Text, "TMW;Unit;Stats"))
 end
 
 function Announcements:SetupEventDisplay(eventID)
