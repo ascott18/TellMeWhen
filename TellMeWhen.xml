@@ -8,7 +8,7 @@
 
 	<Texture name="TellMeWhen_GlobalGroupBorder" virtual="true">
 		<Size x="1" y="1"/>
-		<Color r="0" g="0.7647" b="0" a="0.4"/>
+		<Color r="0" g="0.7647" b="0" a="0.75"/>
 	</Texture>
 
 	<Frame name="TellMeWhen_GlobalGroupTemplate" inherits="TellMeWhen_GroupTemplate" virtual="true">
@@ -46,6 +46,11 @@
 				</Layers>
 			</Frame>
 		</Frames>
+		<Scripts>
+			<OnSizeChanged>
+				self.Borders:SetScale(1.2/self:GetScale())
+			</OnSizeChanged>
+		</Scripts>
 	</Frame>
 
 	<Button name="TellMeWhen_IconTemplate" virtual="true" enableMouse="true">
