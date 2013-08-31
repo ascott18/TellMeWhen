@@ -395,7 +395,15 @@ do
 		}
 
 		-- Test the string and its tags & syntax
-		local func = loadstring(DogTag:CreateFunctionFromCode(text, ns, kwargs, true))
+
+		-- These operations are required when passing true as the 4th param (notDebug)
+		-- notDebug has to be true because otherwise DogTag will throw errors if the
+		-- user's input contains newlines. 
+		local kwargTypes = DogTag.kwargsToKwargTypes[kwargs]
+		ns = DogTag.fixNamespaceList[ns]
+
+		local funcString = DogTag:CreateFunctionFromCode(text, ns, kwargs, true)
+		local func = loadstring(funcString)
 		local success, newfunc = pcall(func)
 
 		if not success then

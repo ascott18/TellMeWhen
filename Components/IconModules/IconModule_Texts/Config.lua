@@ -261,7 +261,7 @@ function TEXT:LoadConfig()
 			TMW:TT(frame.Default, "TEXTLAYOUTS_STRING_SETDEFAULT", L["TEXTLAYOUTS_STRING_SETDEFAULT_DESC"]:format(DefaultText), nil, 1)
 			
 			-- Ttest the string and its tags & syntax
-			frame.Error:SetText(TMW:TestDogTagString(CI.icon, text, "TMW;Unit;Stats"))
+			frame.Error:SetText(TMW:TestDogTagString(CI.icon, text))
 			
 			previousFrame = frame
 			
