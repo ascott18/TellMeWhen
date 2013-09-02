@@ -333,6 +333,8 @@ L["ICONMENU_CUSTOMTEX_DESC"] = [[If you want to override the texture shown by th
 
 You may also enter a texture path, such as 'Interface/Icons/spell_nature_healingtouch', or just 'spell_nature_healingtouch' if the path is 'Interface/Icons'
 
+Entering "none" or "blank" will cause the icon to show no texture.
+
 You can view a list of dynamic textures by typing "$" (dollar sign; ALT-36) in this box.
 
 You can use your own textures too as long as they are placed in WoW's directory (set this field to the path to the texture relative to WoW's root folder), are .tga or .blp format, and have dimensions that are powers of 2 (32, 64, 128, etc)]]
