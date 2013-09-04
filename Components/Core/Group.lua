@@ -312,9 +312,13 @@ end
 
 
 local function helper_currentSpecMatchesRole(Role)
+	if Role == 0x7 then
+		return true
+	end
+
 	local currentSpec = GetSpecialization()
 	if not currentSpec then
-		return Role == 0x7
+		return false
 	end
 
 	local _, _, _, _, _, role = GetSpecializationInfo(currentSpec)
