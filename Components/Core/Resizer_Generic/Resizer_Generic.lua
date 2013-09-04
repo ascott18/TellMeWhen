@@ -75,7 +75,7 @@ TMW:NewClass("Resizer_Generic"){
 		return x*scale, y*scale
 	end,
 	
-	StartSizing = function(resizeButton)
+	StartSizing = function(resizeButton, button)
 		local self = resizeButton.module
 		local parent = self.parent
 		
@@ -87,8 +87,14 @@ TMW:NewClass("Resizer_Generic"){
 		self.oldEffectiveScale = parent:GetEffectiveScale()
 		
 		self.oldX, self.oldY = parent:GetLeft(), parent:GetTop()
+
+		self.button = button
 		
-		resizeButton:SetScript("OnUpdate", self.SizeUpdate)
+		if button == "RightButton" and self.SizeUpdate_RightButton then
+			resizeButton:SetScript("OnUpdate", self.SizeUpdate_RightButton)
+		else
+			resizeButton:SetScript("OnUpdate", self.SizeUpdate)
+		end
 	end,
 	
 	StopSizing = function(resizeButton)

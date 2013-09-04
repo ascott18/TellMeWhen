@@ -34,7 +34,19 @@ TMW:NewClass("GroupModule_Resizer", "GroupModule", "Resizer_Generic"){
 			self.resizeButton:SetFrameLevel(group:GetFrameLevel() + 3)
 			
 			self.resizeButton.__noWrapTooltipText = true
-			TMW:TT(self.resizeButton, self.tooltipTitle, self.tooltipText, 1, 1)
+			TMW:TT(self.resizeButton, self.tooltipTitle, self.tooltipText .. "\r\n" .. L["RESIZE_TOOLTIP_CHANGEDIMS"], 1, 1)
+		end,
+
+		StartSizing = function(resizeButton)
+			local self = resizeButton.module
+			local group = self.group
+
+			self.oldColumns, self.oldRows = group.Columns, group.Rows
+
+			if self.button == "RightButton" then
+				group:ClearAllPoints()
+				group:SetPoint("TOPLEFT", UIParent, "BOTTOMLEFT", self.oldX, self.oldY)
+			end
 		end,
 	},
 	
@@ -63,5 +75,36 @@ TMW:NewClass("GroupModule_Resizer", "GroupModule", "Resizer_Generic"){
 		group:Setup()
 		
 		TMW.IE:NotifyChanges()
+	end,
+
+	SizeUpdate_RightButton = function(resizeButton)
+		local self = resizeButton.module
+		local group = self.group
+
+		local std_cursorX, std_cursorY = self:GetStandardizedCursorCoordinates()
+
+		-- Calculate new number of columns and groups:
+		local std_newWidth = std_cursorX - self.std_oldLeft
+		local ratio_SizeChangeX = std_newWidth/self.std_oldWidth
+		local newColumns = floor(self.oldColumns * ratio_SizeChangeX + 0.5)
+		newColumns = min(TELLMEWHEN_MAXROWS, max(1, newColumns))
+		
+		local std_newHeight = self.std_oldTop - std_cursorY
+		local ratio_SizeChangeY = std_newHeight/self.std_oldHeight
+		local newRows = floor(self.oldRows * ratio_SizeChangeY + 0.5)
+		newRows = min(TELLMEWHEN_MAXROWS, max(1, newRows))
+		
+		if newColumns ~= group.Columns or newRows ~= group.Rows then
+			local gs = group:GetSettings()
+
+			local GroupModule_GroupPosition = group:GetModuleOrModuleChild("GroupModule_GroupPosition")
+			GroupModule_GroupPosition:UpdatePositionAfterMovement()
+
+			gs.Rows = newRows
+			gs.Columns = newColumns
+	
+			group:Setup()
+
+		end
 	end,
 }
