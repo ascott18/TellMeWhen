@@ -569,7 +569,11 @@ TMW.GroupConfigTemplate = {
 	childGroups = "tab",
 	name = function(info)
 		local group = FindGroupFromInfo(info)
-		return group:GetGroupName(1)
+		if group.Name ~= "" then
+			return group:GetGroupName(1)
+		else
+			return group:GetGroupName()
+		end
 	end,
 	order = function(info)
 		local group = FindGroupFromInfo(info)
