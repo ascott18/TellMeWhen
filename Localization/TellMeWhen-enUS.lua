@@ -2175,10 +2175,6 @@ L["worldboss"] = "World Boss"
 
 L["RaidWarningFrame"] = "Raid Warning Frame"
 
-L["DAMAGER"] = "Damage"
-L["HEALER"] = "Heal"
-L["TANK"] = "Tank"
-
 
 L["DR-RandomStun"] = "Random stuns"
 L["DR-ControlledStun"] = "Controlled stuns"

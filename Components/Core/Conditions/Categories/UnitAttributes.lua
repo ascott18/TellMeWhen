@@ -398,7 +398,7 @@ ConditionCategory:RegisterCondition(14,	 "ROLE", {
 	text = L["CONDITIONPANEL_ROLE"],
 	min = 1,
 	max = #playerDungeonRoles,
-	texttable = setmetatable({[1]=NONE}, {__index = function(t, k) return L[playerDungeonRoles[k]] end}),
+	texttable = setmetatable({}, {__index = function(t, k) return _G[playerDungeonRoles[k]] end}),
 	icon = "Interface\\LFGFrame\\UI-LFG-ICON-ROLES",
 	tcoords = {GetTexCoordsForRole("DAMAGER")},
 	Env = {
