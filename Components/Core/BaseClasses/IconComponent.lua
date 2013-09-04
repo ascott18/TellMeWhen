@@ -34,6 +34,8 @@ local DogTag = LibStub("LibDogTag-3.0", true)
 
 local IconComponent = TMW:NewClass("IconComponent")
 
+IconComponent.InstancesAreSingletons = true
+
 IconComponent.IconSettingDefaults = {}
 IconComponent.EventHandlerData = {}
 IconComponent.ConfigPanels = {}
@@ -47,9 +49,11 @@ function IconComponent:OnClassInherit_IconComponent(newClass)
 end
 
 function IconComponent:OnNewInstance_IconComponent()
-	self:InheritTable(self.class, "IconSettingDefaults")
-	self:InheritTable(self.class, "ConfigPanels")
-	self:InheritTable(self.class, "IconEvents")
+	if self.class.InstancesAreSingletons then
+		self:InheritTable(self.class, "IconSettingDefaults")
+		self:InheritTable(self.class, "ConfigPanels")
+		self:InheritTable(self.class, "IconEvents")
+	end
 end
 
 --- Register some icon event handler data with a {{{TMW.Classes.EventHandler}}}. This event handler data will only be avaialable to a {{{TMW.Classes.EventHandler}}} when the [[api/icon/api-documentation/|Icon]] for which an event is being handled implements this [[api/base-classes/icon-component/|IconComponent]].

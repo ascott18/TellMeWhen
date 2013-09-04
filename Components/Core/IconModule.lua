@@ -32,6 +32,7 @@ local pairs, type, rawget, assert, tostring
 
 
 local IconModule = TMW:NewClass("IconModule", "IconComponent", "ObjectModule")
+IconModule.InstancesAreSingletons = false
 
 IconModule.EventListners = {}
 IconModule.TypeAllowances = {}
