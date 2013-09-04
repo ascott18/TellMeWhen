@@ -27,10 +27,10 @@
 						self:SetFrameLevel(self:GetFrameLevel()+2)
 					</OnLoad>
 					<OnClick>
-						if TMW.CI.ics then
+						if TMW.CI.icon then
 							local id = self:GetParent():GetID()
 							
-							TMW.CI.ics.SettingsPerView[TMW.CI.gs.View].Texts[id] = nil
+							TMW.CI.icon:GetSettingsPerView().Texts[id] = nil
 							
 							TMW.IE:ScheduleIconSetup()
 						end
@@ -160,9 +160,9 @@
 						
 						local text = self:GetText():trim("; \t\r\n")
 						
-						if TMW.CI.ics then
+						if TMW.CI.icon then
 							text = text:gsub("|c%x%x%x%x%x%x%x%x", ""):gsub("|r", "")
-							TMW.CI.ics.SettingsPerView[TMW.CI.icon.viewData.view].Texts[self:GetParent():GetID()] = text
+							TMW.CI.icon:GetSettingsPerView().Texts[self:GetParent():GetID()] = text
 						end
 						
 						TMW.IE:ScheduleIconSetup()
@@ -235,8 +235,8 @@
 								TMW:TT(self, "TEXTLAYOUTS_LAYOUT_SETDEFAULTS", "TEXTLAYOUTS_LAYOUT_SETDEFAULTS_DESC")
 							</OnLoad>
 							<OnClick>							
-								if TMW.CI.ics then
-									wipe(TMW.CI.ics.SettingsPerView[TMW.CI.gs.View].Texts)
+								if TMW.CI.icon then
+									wipe(TMW.CI.icon:GetSettingsPerView().Texts)
 								end
 							
 								TMW.IE:ScheduleIconSetup()

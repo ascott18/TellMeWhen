@@ -23,9 +23,9 @@ local FindGroupFromInfo = TMW.FindGroupFromInfo
 
 local set = function(info, val)
 	local group = FindGroupFromInfo(info)
-	local gs = group:GetSettings()
+	local gspv = group:GetSettingsPerView()
 
-	gs.SettingsPerView[gs.View][info[#info]] = val
+	gspv[info[#info]] = val
 	
 	local Module = group:GetModuleOrModuleChild("GroupModule_IconPosition")
 	
@@ -35,9 +35,9 @@ local set = function(info, val)
 end
 local get = function(info)
 	local group = FindGroupFromInfo(info)
-	local gs = group:GetSettings()
+	local gspv = group:GetSettingsPerView()
 	
-	return gs.SettingsPerView[gs.View][info[#info]]
+	return gspv[info[#info]]
 end
 
 TMW.Classes.GroupModule_IconPosition:RegisterConfigTable("args.main.args", "SpacingX", {

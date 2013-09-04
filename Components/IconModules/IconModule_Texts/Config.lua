@@ -426,7 +426,10 @@ TMW.GroupConfigTemplate.args.main.args.TextLayout = {
 		end
 		
 		for ics in group:InIconSettings() do
-			ics.SettingsPerView[gs.View].TextLayout = nil
+			local icspv = rawget(ics.SettingsPerView, gs.View)
+			if icspv then
+				icspv.TextLayout = nil
+			end
 		end
 		
 		for icon in group:InIcons() do
