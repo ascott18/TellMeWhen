@@ -290,7 +290,7 @@ function GetFullIconTable(icon, icons) -- check what all the possible icons it c
 			elseif type == "group" then
 				local gs, group, domain, groupID = TMW:GetSettingsFromGUID(GUID)
 
-				if not group then
+				if gs and not group then
 					group = TMW[domain][groupID]
 				end
 
