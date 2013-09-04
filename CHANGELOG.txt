@@ -10,6 +10,7 @@
  *** Group anchoring to other groups
  ** The consequence of this is that you can now import/export icons and meta icons that include those icons separately and they will automatically find eachother once they are all imported.
 
+ * You can now right-click-and-drag the group resize handle to easily change the number of rows and columns of a group.
  * New Condition: Specialization Role
  * You can now enter "none" or "blank" as a custom texture for an icon to force it to display no texture.
 
