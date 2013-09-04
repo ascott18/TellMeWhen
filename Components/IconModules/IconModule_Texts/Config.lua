@@ -68,7 +68,7 @@ function TEXT:GetStringName(settings, num, unnamed)
 	return Name
 end
 
-function TEXT:GetLayoutName(settings, GUID)
+function TEXT:GetLayoutName(settings, GUID, noDefaultWrapper)
 	if GUID and not settings then
 		assert(type(GUID) == "string")
 		settings = TEXT:GetTextLayoutSettings(GUID)
@@ -86,7 +86,7 @@ function TEXT:GetLayoutName(settings, GUID)
 	if Name == "" then
 		Name = L["TEXTLAYOUTS_UNNAMED"]
 	end
-	if settings.NoEdit then
+	if settings.NoEdit and not noDefaultWrapper then
 		Name = L["TEXTLAYOUTS_DEFAULTS_WRAPPER"]:format(Name)
 	end
 	
@@ -274,7 +274,7 @@ function TEXT:LoadConfig()
 		
 		TEXT:ResizeParentFrame()
 		
-		layoutName = TEXT:GetLayoutName(layoutSettings, GUID)
+		layoutName = TEXT:GetLayoutName(layoutSettings, GUID, true)
 	else
 		layoutName = "UNKNOWN LAYOUT: " .. (GUID or "<?>")
 	end
