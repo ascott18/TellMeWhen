@@ -58,7 +58,7 @@ IconView.ModuleImplementors = {}
 function IconView:OnNewInstance(view)
 	self.view = view
 	
-	TMW.Icon_Defaults.SettingsPerView[view] = {}
+	--TMW.Icon_Defaults.SettingsPerView[view] = {}
 	self:InheritTable(self.class, "ModuleImplementors")
 end
 
