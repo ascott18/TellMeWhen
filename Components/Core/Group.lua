@@ -310,6 +310,31 @@ function Group.GetSettingsPerView(group, view)
 	return gs.SettingsPerView[view]
 end
 
+
+local function helper_currentSpecMatchesRole(Role)
+	local currentSpec = GetSpecialization()
+	if not currentSpec then
+		return Role == 0x7
+	end
+
+	local _, _, _, _, _, role = GetSpecializationInfo(currentSpec)
+
+	local currentBit
+	if role == "DAMAGER" then
+		currentBit = 0x1
+	elseif role == "HEALER" then
+		currentBit = 0x2
+	elseif role == "TANK" then
+		currentBit = 0x4
+	end
+
+	if bit.band(Role, currentBit) == currentBit then
+		return true
+	end
+
+	return false
+end
+
 --- Gets whether or not the group's icons should be updated based on the group's settings
 -- @name Group:GetSettingsPerView
 -- @paramsig
@@ -319,7 +344,8 @@ function Group.ShouldUpdateIcons(group)
 
 	if	(group:GetID() > TMW.db[group.Domain].NumGroups) or
 		(not group.viewData) or
-		(not group:IsEnabled())
+		(not group:IsEnabled()) or 
+		(not helper_currentSpecMatchesRole(group.Role))
 	then return false
 
 	elseif group.Domain == "profile" and (

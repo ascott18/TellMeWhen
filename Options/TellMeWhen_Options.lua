@@ -579,6 +579,17 @@ TMW.GroupConfigTemplate = {
 		local group = FindGroupFromInfo(info)
 		return group:GetID()
 	end,
+	set = function(info, val)
+		local group = FindGroupFromInfo(info)
+		
+		group:GetSettings()[info[#info]] = val
+		group:Setup()
+	end,
+	get = function(info)
+		local group = FindGroupFromInfo(info)
+
+		return group:GetSettings()[info[#info]]
+	end,
 	args = {
 		main = {
 			type = "group",
@@ -652,14 +663,14 @@ TMW.GroupConfigTemplate = {
 					name = L["UIPANEL_PRIMARYSPEC"],
 					desc = L["UIPANEL_TOOLTIP_PRIMARYSPEC"],
 					type = "toggle",
-					order = 6,
+					order = 7,
 					hidden = specializationSettingHidden,
 				},
 				SecondarySpec = {
 					name = L["UIPANEL_SECONDARYSPEC"],
 					desc = L["UIPANEL_TOOLTIP_SECONDARYSPEC"],
 					type = "toggle",
-					order = 7,
+					order = 8,
 					hidden = specializationSettingHidden,
 				},
 				Columns = {
@@ -820,6 +831,28 @@ TMW.GroupConfigTemplate = {
 	}
 }
 
+for i, role in TMW:Vararg("DAMAGER", "HEALER", "TANK") do
+	local settingBit = bit.lshift(1, i-1)
+	TMW.GroupConfigTemplate.args.main.args[role] = {
+		type = "toggle",
+		name = _G[role],
+		desc = L["UIPANEL_ROLE_DESC"],
+		order = 9+i,
+		set = function(info, val)
+			local group = FindGroupFromInfo(info)
+			local gs = group:GetSettings()
+
+			gs.Role = bit.bxor(gs.Role, settingBit)
+
+			group:Setup()
+		end,
+		get = function(info)
+			local group = FindGroupFromInfo(info)
+
+			return bit.band(group:GetSettings().Role, settingBit) == settingBit
+		end,
+	}
+end
 local addGroupFunctionGroup = {
 	type = "group",
 	name = L["UIPANEL_ADDGROUP"],
@@ -1249,17 +1282,6 @@ function TMW:CompileOptions()
 					name = L["UIPANEL_GROUPS"] .. " - " .. L["DOMAIN_GLOBAL"],
 					desc = L["UIPANEL_GROUPS_GLOBAL_DESC"],
 					order = 30,
-					set = function(info, val)
-						local group = FindGroupFromInfo(info)
-						
-						group:GetSettings()[info[#info]] = val
-						group:Setup()
-					end,
-					get = function(info)
-						local group = FindGroupFromInfo(info)
-
-						return group:GetSettings()[info[#info]]
-					end,
 					args = {
 						addgroup = addGroupFunctionGroup,
 						importexport = importExportBoxTemplate,
@@ -1280,17 +1302,6 @@ function TMW:CompileOptions()
 					name = L["UIPANEL_GROUPS"] .. " - " .. L["DOMAIN_PROFILE"],
 					desc = L["UIPANEL_GROUPS_DESC"],
 					order = 31,
-					set = function(info, val)
-						local group = FindGroupFromInfo(info)
-						
-						group:GetSettings()[info[#info]] = val
-						group:Setup()
-					end,
-					get = function(info)
-						local group = FindGroupFromInfo(info)
-
-						return group:GetSettings()[info[#info]]
-					end,
 					args = {
 						addgroup = addGroupFunctionGroup,
 						importexport = importExportBoxTemplate,
@@ -1350,7 +1361,7 @@ function TMW:CompileOptions()
 			type = "toggle",
 			name = name,
 			desc = L["UIPANEL_TREE_DESC"],
-			order = 7+i,
+			order = 12+i,
 			hidden = specializationSettingHidden,
 		}
 	end
