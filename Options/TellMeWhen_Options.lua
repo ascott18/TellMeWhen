@@ -1850,8 +1850,10 @@ end
 
 function IE:OnProfile(event, arg2, arg3)
 
-	TMW:CompileOptions() -- redo groups in the options
-	
+	if IE.Initialized then
+		TMW:CompileOptions() -- redo groups in the options
+	end
+
 	-- Reload the icon editor.
 	IE:Load(1)
 	
