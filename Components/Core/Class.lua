@@ -100,6 +100,10 @@ local __call = function(self, arg)
 	return self
 end
 
+local weakMetatable = {
+	__mode = "kv"
+}
+
 local inherit = function(self, source)		
 	if source then
 		local metatable = getmetatable(self)
@@ -235,6 +239,10 @@ local Class = TMW:NewClass("Class")
 -- @param ... [...] The constructor parameters of the new instance. If the class being instantiated inherits from a Blizzard widget, these will be passed directly to CreateFrame(...). In all cases, they will be passed to calls of any class methods whose name **begins** with "OnNewInstance" (E.g. {{{Class:OnNewInstance_Class(self, ...)}}}).
 -- @return A new instance of the class.
 function Class:New(...)
+	if self.isTMWClassInstance then
+		self = self.class
+	end
+	
 	local instance
 	if self.isFrameObject then
 		instance = CreateFrame(...)
@@ -425,6 +433,13 @@ function Class:CallFunc(funcName, ...)
 	else
 		callFunc(self.class, self, funcName, ...)
 	end
+end
+
+
+--- Sets the __mode of the instances table of the class to "kv" so that instances will be garbage collected when they are orphaned everywhere else.
+-- This behavior will not be inherited by subclasses.
+function Class:MakeInstancesWeak()
+	setmetatable(self.instances, weakMetatable)
 end
 
 
