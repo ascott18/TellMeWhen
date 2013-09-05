@@ -243,14 +243,20 @@ function IconView:OnImplementIntoIcon(icon)
 		
 			-- Check to see if an instance of the Module already exists for the icon before creating one.
 			local Module = icon.Modules[moduleName]
-			if not Module then
+			
+			-- Don't create the module if it is disallowed for the default icon type and the icon uses the default icon type.
+			if not Module and not (icon.typeData.type == "" and not ModuleClass:IsAllowedByType("")) then
 				Module = ModuleClass:New(icon)
 			end
+
+
+			if Module then
 			
-			Module.implementationData = implementationData
-			
-			-- Implement the module into the icon.
-			Module:ImplementIntoIcon(icon)
+				Module.implementationData = implementationData
+				
+				-- Implement the module into the icon.
+				Module:ImplementIntoIcon(icon)
+			end
 		end
 	end
 end

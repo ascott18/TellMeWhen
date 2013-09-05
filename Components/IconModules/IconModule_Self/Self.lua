@@ -20,10 +20,11 @@ local print = TMW.print
 -- The point of this module is to expose the icon itself to the
 -- anchorable frames list.
 	
-local Self = TMW:NewClass("IconModule_Self", "IconModule")
+local Module = TMW:NewClass("IconModule_Self", "IconModule")
+Module:SetAllowanceForType("", false)
 
-Self:RegisterAnchorableFrame("Icon")
+Module:RegisterAnchorableFrame("Icon")
 
-function Self:OnNewInstance(icon)
+function Module:OnNewInstance(icon)
 	_G[self:GetChildNameBase() .. "Icon"] = icon
 end

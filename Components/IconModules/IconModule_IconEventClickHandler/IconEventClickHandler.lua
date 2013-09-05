@@ -19,6 +19,7 @@ local print = TMW.print
 	
 
 local Module = TMW:NewClass("IconModule_IconEventClickHandler", "IconModule")
+Module:SetAllowanceForType("", false)
 Module.dontInherit = true
 
 Module:RegisterIconEvent(91, "OnLeftClick", {

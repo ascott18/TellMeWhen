@@ -21,6 +21,7 @@ local print = TMW.print
 local MapConditionObjectToEventSettings = {}
 
 local Module = TMW:NewClass("IconModule_IconEventConditionHandler", "IconModule")
+Module:SetAllowanceForType("", false)
 Module.dontInherit = true
 
 Module:RegisterIconEvent(101, "OnCondition", {

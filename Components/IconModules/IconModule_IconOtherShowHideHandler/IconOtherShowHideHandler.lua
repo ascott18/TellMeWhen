@@ -21,6 +21,7 @@ local type = type
 	
 
 local Module = TMW:NewClass("IconModule_IconEventOtherShowHideHandler", "IconModule")
+Module:SetAllowanceForType("", false)
 Module.dontInherit = true
 
 TMW.Classes.EventHandler:RegisterEventDefaults{

@@ -721,12 +721,14 @@ function Icon.Setup(icon)
 	if icon.Enabled or not TMW.Locked then
 	
 		------------ Conditions ------------
-		local ConditionObjectConstructor = icon:Conditions_GetConstructor(icon.Conditions)
-		icon.ConditionObject = ConditionObjectConstructor:Construct()
-		
-		if icon.ConditionObject then
-			TMW:RegisterCallback("TMW_CNDT_OBJ_PASSING_CHANGED", icon)
-			icon:SetInfo("conditionFailed", icon.ConditionObject.Failed)
+		if icon.typeData.type ~= "" then
+			local ConditionObjectConstructor = icon:Conditions_GetConstructor(icon.Conditions)
+			icon.ConditionObject = ConditionObjectConstructor:Construct()
+			
+			if icon.ConditionObject then
+				TMW:RegisterCallback("TMW_CNDT_OBJ_PASSING_CHANGED", icon)
+				icon:SetInfo("conditionFailed", icon.ConditionObject.Failed)
+			end
 		end
 
 		------------ Icon Type ------------
