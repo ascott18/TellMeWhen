@@ -34,7 +34,7 @@ local CONFIG = Type.CONFIG
 CONFIG.Types = {
 	-- Unconfirmed:
 	[LOSS_OF_CONTROL_DISPLAY_BANISH] = { -- "Banished"
-		value = "FEAR",
+		value = "BANISH",
 	},
 	[LOSS_OF_CONTROL_DISPLAY_CHARM] = { -- "Charmed"  
 		value = "CHARM",

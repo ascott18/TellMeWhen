@@ -5,6 +5,7 @@
  * Bug Fixes:
  ** IconModule_Alpha\Alpha.lua:84: attempt to index local "IconModule_Alpha" (a nil value)
  ** Rune icons will now behave properly when no runes are found that match the types configured for the icon.
+ ** The Banish loss of control type was accidentally linked to the Fear loss of control type - this has been fixed.
 
 ===v6.2.3===
  * **Important**: The color settings for all timer bars (including bar group and timer overlay bars) have changed a bit:
