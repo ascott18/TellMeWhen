@@ -300,7 +300,7 @@ local SharableDataType_profile = TMW.Classes.SharableDataType.types.profile
 SharableDataType_profile:RegisterMenuBuilder(19, function(Item_profile)
 
 	if Item_profile.Settings.CodeSnippets then
-		local Bundle = TMW.Classes.Bundle:New("codesnippet")
+		local SettingsBundle = TMW.Classes.SettingsBundle:New("codesnippet")
 
 		for n, snippet in TMW:InNLengthTable(Item_profile.Settings.CodeSnippets) do
 			local Item = TMW.Classes.SettingsItem:New("codesnippet")
@@ -308,11 +308,11 @@ SharableDataType_profile:RegisterMenuBuilder(19, function(Item_profile)
 			Item:SetParent(Item_profile)
 			Item.Settings = snippet
 
-			Bundle:Add(Item)
+			SettingsBundle:Add(Item)
 
 		end
 
-		if Bundle:CreateParentedMenuEntry(L["CODESNIPPETS"]) then
+		if SettingsBundle:CreateParentedMenuEntry(L["CODESNIPPETS"]) then
 			TMW.AddDropdownSpacer()
 		end
 	end

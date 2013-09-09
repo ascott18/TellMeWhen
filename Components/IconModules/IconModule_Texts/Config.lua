@@ -1165,7 +1165,7 @@ SharableDataType_profile:RegisterMenuBuilder(20, function(Item_profile)
 		if not isGood then return end
 
 
-		local Bundle = TMW.Classes.Bundle:New("textlayout")
+		local SettingsBundle = TMW.Classes.SettingsBundle:New("textlayout")
 
 		for GUID, layout in pairs(Item_profile.Settings.TextLayouts) do
 			local Item = TMW.Classes.SettingsItem:New("textlayout")
@@ -1174,11 +1174,11 @@ SharableDataType_profile:RegisterMenuBuilder(20, function(Item_profile)
 			Item.Settings = layout
 			Item:SetExtra("GUID", GUID)
 
-			Bundle:Add(Item)
+			SettingsBundle:Add(Item)
 
 		end
 
-		if Bundle:CreateParentedMenuEntry(L["TEXTLAYOUTS"]) then
+		if SettingsBundle:CreateParentedMenuEntry(L["TEXTLAYOUTS"]) then
 			TMW.AddDropdownSpacer()
 		end
 	end
