@@ -121,13 +121,16 @@ View:ImplementsModule("IconModule_IconContainer_Masque", 100, function(Module, i
 	local CooldownSweep = Modules.IconModule_CooldownSweep
 	local TimerBar_BarDisplay = Modules.IconModule_TimerBar_BarDisplay
 	
-	if Masque.isDefaultSkin then
-		CooldownSweep.cooldown:SetFrameLevel(icon:GetFrameLevel() + 3)
-		--TimerBar_BarDisplay.bar:SetFrameLevel(icon:GetFrameLevel() + 1)
-	else
-		CooldownSweep.cooldown:SetFrameLevel(icon:GetFrameLevel() + 2)
-		--TimerBar_BarDisplay.bar:SetFrameLevel(icon:GetFrameLevel() + -1)
+	if CooldownSweep then
+		if Masque.isDefaultSkin then
+			CooldownSweep.cooldown:SetFrameLevel(icon:GetFrameLevel() + 3)
+			--TimerBar_BarDisplay.bar:SetFrameLevel(icon:GetFrameLevel() + 1)
+		else
+			CooldownSweep.cooldown:SetFrameLevel(icon:GetFrameLevel() + 2)
+			--TimerBar_BarDisplay.bar:SetFrameLevel(icon:GetFrameLevel() + -1)
+		end
 	end
+	
 	TimerBar_BarDisplay.bar:SetFrameLevel(icon:GetFrameLevel() + -0)
 	
 	TimerBar_BarDisplay.bar:ClearAllPoints()
