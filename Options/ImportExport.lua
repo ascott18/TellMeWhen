@@ -28,7 +28,6 @@ local tonumber, tostring, type, pairs, ipairs, tinsert, tremove, sort, wipe, nex
 local strfind, strmatch, format, gsub, strsub, strtrim, max, min, strlower, floor, log10 =
 	  strfind, strmatch, format, gsub, strsub, strtrim, max, min, strlower, floor, log10
 
-local CurrentSourceOrDestinationHandler
 
 
 local function showGUIDConflictHelp(editbox, ...)
@@ -41,12 +40,179 @@ end
 
 
 
+
+
+local SharableDataType
+
+local EDITBOX
+
+
+
+
+local Item = TMW:NewClass("SettingsItem")
+Item:MakeInstancesWeak()
+
+function Item:OnNewInstance(type, parent)
+	assert(type)
+
+	self.Type = type
+	self.parent = parent
+	self.Version = parent and parent.Version
+	self.extra = {}
+end
+
+function Item:GetEditbox()
+	return EDITBOX
+end
+
+function Item:SetExtra(k, v)
+	self.extra[k] = v
+end
+function Item:GetExtra(k)
+	return self.extra[k]
+end
+
+function Item:SetParent(parent)
+	self.parent = parent
+	self.Version = self.Version or parent.Version
+end
+
+
+function Item:CreateMenuEntry()
+	local info = UIDropDownMenu_CreateInfo()
+	info.value = self
+	info.hasArrow = true
+	info.notCheckable = true
+
+	SharableDataType.types[self.Type]:Import_CreateMenuEntry(info, self)
+
+	self.Header = info.text
+
+	UIDropDownMenu_AddButton(info, UIDROPDOWNMENU_MENU_LEVEL)
+end
+
+function Item:BuildChildMenu()
+	if self.Header then
+		local info = UIDropDownMenu_CreateInfo()
+		info.text = self.Header
+		info.isTitle = true
+		info.notCheckable = true
+		UIDropDownMenu_AddButton(info, UIDROPDOWNMENU_MENU_LEVEL)
+
+		TMW.AddDropdownSpacer()
+	end
+
+	SharableDataType.types[self.Type]:RunMenuBuilders(self)
+end
+
+function Item:Import(...)
+	TMW:Import(self, ...)
+end
+
+
+
+
+
+
+
+local Bundle = TMW:NewClass("SettingsBundle")
+Bundle:MakeInstancesWeak()
+function Bundle:OnNewInstance(type)
+	assert(type)
+
+	self.Type = type
+	self.Items = {}
+end
+
+function Bundle:Add(Item)
+	assert(Item.class == TMW.Classes.SettingsItem)
+	assert(Item.Type == self.Type)
+
+	tinsert(self.Items, Item)
+end
+function Bundle:InItems()
+	return pairs(self.Items)
+end
+function Bundle:GetLength()
+	return #self.Items
+end
+
+function Bundle:First()
+	return self.Items[1]
+end
+function Bundle:Last()
+	return self.Items[#self.Items]
+end
+
+function Bundle:Evaluate()
+	local numPerGroup = SharableDataType.types[self.Type].numPerGroup
+
+	if #self.Items > numPerGroup then
+		local Bundle = Bundle:New(self.Type)
+
+		for n, Item in self:InItems() do
+			if Bundle:GetLength() >= numPerGroup then
+				Bundle:CreateGroupedMenuEntry()
+				Bundle = Bundle:New(self.Type)
+			end
+
+			Bundle:Add(Item)
+		end
+		Bundle:CreateGroupedMenuEntry()
+	else
+		if self.Header then
+			local info = UIDropDownMenu_CreateInfo()
+			info.text = self.Header
+			info.isTitle = true
+			info.notCheckable = true
+			UIDropDownMenu_AddButton(info, UIDROPDOWNMENU_MENU_LEVEL)
+
+			TMW.AddDropdownSpacer()
+		end
+
+		for n, Item in self:InItems() do
+			Item:CreateMenuEntry()
+		end
+	end
+end
+
+function Bundle:CreateGroupedMenuEntry()
+	local info = UIDropDownMenu_CreateInfo()
+	info.notCheckable = true
+	info.hasArrow = true
+	info.value = self
+
+	info.text = SharableDataType.types[self.Type]:Import_GetGroupedBundleEntryText(self)
+	self.Header = info.text
+
+	UIDropDownMenu_AddButton(info, UIDROPDOWNMENU_MENU_LEVEL)
+end
+
+function Bundle:CreateParentedMenuEntry(text)
+	if self:GetLength() > 0 then
+		local info = UIDropDownMenu_CreateInfo()
+		info.text = text
+		self.Header = text
+		info.notCheckable = true
+		info.hasArrow = true
+		info.value = self
+		UIDropDownMenu_AddButton(info, UIDROPDOWNMENU_MENU_LEVEL)
+
+		return true
+	end
+end
+
+
+
+
 -- -----------------------
 -- DATA TYPES
 -- -----------------------
 
-local SharableDataType = TMW:NewClass("SharableDataType")
+SharableDataType = TMW:NewClass("SharableDataType")
 SharableDataType.types = {}
+SharableDataType.numPerGroup = 15
+SharableDataType.extrasMap = {}
 
 function SharableDataType:OnNewInstance(type, order)
 	TMW:ValidateType("2 (type)", "SharableDataType:New(type, order)", type, "string")
@@ -65,11 +231,18 @@ function SharableDataType:RegisterMenuBuilder(order, func)
 	
 	TMW:SortOrderedTables(self.MenuBuilders)
 end
-function SharableDataType:RunMenuBuilders(result, editbox)
+function SharableDataType:RunMenuBuilders(Item)
 	for i, data in ipairs(self.MenuBuilders) do
-		TMW.safecall(data.func, self, result, editbox)
+		TMW.safecall(data.func, Item)
 	end
 end
+function SharableDataType:AddExtras(Item, ...)
+	for i, v in pairs(self.extrasMap) do
+		Item:SetExtra(v, select(i, ...))
+	end
+end
+
+
 
 
 
@@ -78,27 +251,8 @@ end
 
 ---------- Database ----------
 local database = SharableDataType:New("database", 0)
-function database:Import_BuildContainingDropdownEntry(result)
-	-- this is currently unused. Do something with it if it ever does get used
-	--(but it is unlikely that i will ever use it)
-	error("UNIMPLEMENTED!")
-	local info = UIDropDownMenu_CreateInfo()
-	info.text = L["<DATABASE>"]
-	info.value = result
-	info.hasArrow = true
-	info.notCheckable = true
-	UIDropDownMenu_AddButton(info, UIDROPDOWNMENU_MENU_LEVEL)
-end
-database.Import_BuildMenuData = database.RunMenuBuilders
 
 
-function database:Export_SetButtonAttributes(editbox, info)
-	-- CURRENTLY UNUSED
-end
-function database:Export_GetArgs(editbox, info)
-	--editbox, type, settings, defaults, ...
-	-- CURRENTLY UNUSED
-end
 
 
 
@@ -107,145 +261,118 @@ end
 
 ---------- Profile ----------
 local profile = SharableDataType:New("profile", 10)
+profile.extrasMap = {"Name"}
 
-function profile:Import_ImportData(editbox, data, version, noOverwrite)
-	if noOverwrite then -- noOverwrite is a name in this case.
+function profile:Import_ImportData(Item, profileName)
+	if profileName then
 
 		-- generate a new name if the profile already exists
-		local newname = noOverwrite
-		while TMW.db.profiles[newname] do
-			newname = TMW.oneUpString(newname)
+		while TMW.db.profiles[profileName] do
+			profileName = TMW.oneUpString(profileName)
 		end
 
 		-- put the data in the profile (no reason to CTIPWM when we can just do this) and set the profile
-		TMW.db.profiles[newname] = CopyTable(data)
-		TMW.db:SetProfile(newname)
+		TMW.db.profiles[profileName] = CopyTable(Item.Settings)
+		TMW.db:SetProfile(profileName)
 	else
 		TMW.db:ResetProfile()
-		TMW:CopyTableInPlaceWithMeta(data, TMW.db.profile, true)
+		TMW:CopyTableInPlaceWithMeta(Item.Settings, TMW.db.profile, true)
 	end
 
-	if version then
-		if version > TELLMEWHEN_VERSIONNUMBER then
+	if Item.Version then
+		if Item.Version > TELLMEWHEN_VERSIONNUMBER then
 			TMW:Print(L["FROMNEWERVERSION"])
 		else
 			TMW:UpgradeProfile()
 		end
 	end
 end
-function profile:Import_BuildContainingDropdownEntry(result)
-	local info = UIDropDownMenu_CreateInfo()
-	info.text = result[1]
-	info.value = result
-	info.hasArrow = true
-	info.notCheckable = true
-	UIDropDownMenu_AddButton(info, UIDROPDOWNMENU_MENU_LEVEL)
+
+function profile:Import_CreateMenuEntry(info, Item)
+	info.text = Item:GetExtra("Name")
 end
 
-profile.Import_BuildMenuData = profile.RunMenuBuilders
+function profile:Import_GetGroupedBundleEntryText(Bundle)
+	local First = Bundle:First():GetExtra("Name")
+	local Last = Bundle:Last():GetExtra("Name")
 
-database:RegisterMenuBuilder(10, function(self, result, editbox)
-	
-	local db = result.data
-	-- current profile
+	return L["UIPANEL_PROFILES"] .. ": " ..
+	(First:match("(.-)%-") or First:gsub(1, 20)):trim(" -") .. " - " ..
+	(Last:match("(.-)%-") or Last:gsub(1, 20)):trim(" -")
+end
+
+
+-- Current Profile
+database:RegisterMenuBuilder(10, function(Item_database)
+	local db = Item_database.Settings
 	local currentProfile = TMW.db:GetCurrentProfile()
-	
-	assert(currentProfile)
 	
 	-- This might not evaluate to true if the import type is the backup database and this profile didn't exist when backup was created
 	if db.profiles[currentProfile] then
-		SharableDataType.types.profile:Import_BuildContainingDropdownEntry({
-			parentResult = result,
-			data = db.profiles[currentProfile],
-			type = "profile",
-			version = db.profiles[currentProfile].Version,
-			[1] = currentProfile,
-		}, editbox)
+		local Item = Item:New("profile")
+
+		Item:SetParent(Item_database)
+		Item.Settings = db.profiles[currentProfile]
+		Item:SetExtra("Name", currentProfile)
+
+		Item:CreateMenuEntry()
 
 		TMW.AddDropdownSpacer()
 	end
 end)
 
-
-database:RegisterMenuBuilder(15, function(self, result, editbox)
-	
-	if result.data.global.NumGroups > 0 then
-		database:MakeGroupHolderMenu(result, result.data.global)
-	end
-	
-end)
-
-
-function database:MakeGroupHolderMenu(result, parentTable)	
-	local info = UIDropDownMenu_CreateInfo()
-	info.text = L["UIPANEL_GROUPS_GLOBAL"]
-	info.notCheckable = true
-	info.hasArrow = true
-	
-	-- This table will be stored in UIDROPDOWNMENU_MENU_VALUE when this holder menu is expanded.
-	-- It is also passed as arg4 to Import_HolderMenuHandler(self, result, editbox, holderMenuData)
-	info.value = {
-		isHolderMenu = true,
-		result = result,
-		type = "group",
-		parentTable = parentTable,
-	}
-	
-	UIDropDownMenu_AddButton(info, UIDROPDOWNMENU_MENU_LEVEL)
-
-	TMW.AddDropdownSpacer()
-end
-
-
-database:RegisterMenuBuilder(20, function(self, result, editbox)
-	local db = result.data
+-- All other profiles
+database:RegisterMenuBuilder(20, function(Item_database)
+	print("blah2")
+	local db = Item_database.Settings
 	local currentProfile = TMW.db:GetCurrentProfile()
-	
+
+	local Bundle = Bundle:New("profile")
+
 	--other profiles
 	for profilename, profiletable in TMW:OrderedPairs(db.profiles) do
 		-- current profile and default are handled separately
 		if profilename ~= currentProfile and profilename ~= "Default" then
-			SharableDataType.types.profile:Import_BuildContainingDropdownEntry({
-				parentResult = result,
-				data = profiletable,
-				type = "profile",
-				version = profiletable.Version,
-				[1] = profilename,
-			}, editbox)
+			local Item = Item:New("profile")
+
+			Item:SetParent(Item_database)
+			Item.Settings = profiletable
+			Item.Version = profiletable.Version
+			Item:SetExtra("Name", profilename)
+
+			Bundle:Add(Item)
 		end
 	end
+
+	Bundle:Evaluate()
 end)
-database:RegisterMenuBuilder(30, function(self, result, editbox)
-	local db = result.data
+
+-- Default Profile
+database:RegisterMenuBuilder(30, function(Item_database)
+	local db = Item_database.Settings
 	local currentProfile = TMW.db:GetCurrentProfile()
 	
 	--default profile
 	if db.profiles["Default"] and currentProfile ~= "Default" then
-		SharableDataType.types.profile:Import_BuildContainingDropdownEntry({
-			parentResult = result,
-			data = db.profiles.Default,
-			type = "profile",
-			version = db.profiles.Default.Version,
-			[1] = "Default",
-		}, editbox)
+		local Item = Item:New("profile")
+
+		Item:SetParent(Item_database)
+		Item.Settings = db.profiles.Default
+		Item.Version = db.profiles.Default.Version
+		Item:SetExtra("Name", "Default")
+
+		Item:CreateMenuEntry()
 	end
 end)
 
-profile:RegisterMenuBuilder(1, function(self, result, editbox)
-	-- header
-	local info = UIDropDownMenu_CreateInfo()
-	info.text = result[1]
-	info.isTitle = true
-	info.notCheckable = true
-	UIDropDownMenu_AddButton(info, UIDROPDOWNMENU_MENU_LEVEL)
-end)
 
-profile:RegisterMenuBuilder(10, function(self, result, editbox)
+-- Copy Profile
+profile:RegisterMenuBuilder(10, function(Item_profile)
 	-- copy entire profile - overwrite current
 	local info = UIDropDownMenu_CreateInfo()
 	info.text = L["IMPORT_PROFILE"] .. " - " .. L["IMPORT_PROFILE_OVERWRITE"]:format(TMW.db:GetCurrentProfile())
 	info.func = function()
-		TMW:Import(editbox, result.data, result.version, "profile")
+		Item:Import()
 	end
 	info.notCheckable = true
 	UIDropDownMenu_AddButton(info, UIDROPDOWNMENU_MENU_LEVEL)
@@ -254,7 +381,7 @@ profile:RegisterMenuBuilder(10, function(self, result, editbox)
 	local info = UIDropDownMenu_CreateInfo()
 	info.text = L["IMPORT_PROFILE"] .. " - " .. L["IMPORT_PROFILE_NEW"]
 	info.func = function()
-		TMW:Import(editbox, result.data, result.version, "profile", result[1]) -- newname forces a new profile to be created named newname
+		Item:Import(Item_profile:GetExtra("Name"))
 	end
 	info.notCheckable = true
 	UIDropDownMenu_AddButton(info, UIDROPDOWNMENU_MENU_LEVEL)
@@ -262,16 +389,19 @@ profile:RegisterMenuBuilder(10, function(self, result, editbox)
 	TMW.AddDropdownSpacer()
 end)
 
+
+
 profile.Export_DescriptionAppend = L["EXPORT_SPECIALDESC2"]:format("6.0.3+")
 function profile:Export_SetButtonAttributes(editbox, info)
 	local text = L["fPROFILE"]:format(TMW.db:GetCurrentProfile())
 	info.text = text
 	info.tooltipTitle = text
 end
-function profile:Export_GetArgs(editbox, info)
-	--editbox, type, settings, defaults, ...
-	return editbox, self.type, TMW.db.profile, TMW.Defaults.profile, TMW.db:GetCurrentProfile()
+function profile:Export_GetArgs(editbox)
+	-- settings, defaults, ...
+	return TMW.db.profile, TMW.Defaults.profile, TMW.db:GetCurrentProfile()
 end
+
 
 
 
@@ -281,7 +411,8 @@ end
 
 ---------- Group ----------
 local group = SharableDataType:New("group", 20)
-local NUM_GROUPS_PER_SUBMENU = 10
+group.numPerGroup = 10
+group.extrasMap = {"groupID"}
 
 local function remapGUIDs(data, GUIDmap)
 	for k, v in pairs(data) do
@@ -303,7 +434,8 @@ local function remapGUIDs(data, GUIDmap)
 	end
 end
 
-function group:Import_ImportData(editbox, data, version, domain, createNewGroup, oldgroupID, destgroup)
+function group:Import_ImportData(Item_group, domain, createNewGroup, oldgroupID, destgroup)
+	print(domain, createNewGroup, oldgroupID, destgroup)
 	local group
 	if createNewGroup then
 		group = TMW:Group_Add(domain, nil)
@@ -311,9 +443,11 @@ function group:Import_ImportData(editbox, data, version, domain, createNewGroup,
 		group = destgroup
 	end
 
+	local version = Item_group.Version
+
 	TMW.db[domain].Groups[group.ID] = nil -- restore defaults, table recreated when passed in to CTIPWM
 	local gs = group:GetSettings()
-	TMW:CopyTableInPlaceWithMeta(data, gs, true)
+	TMW:CopyTableInPlaceWithMeta(Item_group.Settings, gs, true)
 
 	if version < 70000 then
 		gs.__UPGRADEHELPER_OLDGROUPID = oldgroupID
@@ -357,7 +491,7 @@ function group:Import_ImportData(editbox, data, version, domain, createNewGroup,
 			end
 
 			TMW:Printf(L["IMPORT_NEWGUIDS"], groupCount, iconCount)
-			showGUIDConflictHelp(editbox, L["IMPORT_NEWGUIDS"], groupCount, iconCount)
+			showGUIDConflictHelp(EDITBOX, L["IMPORT_NEWGUIDS"], groupCount, iconCount)
 
 			remapGUIDs(gs, GUIDmap)
 		end
@@ -371,26 +505,56 @@ function group:Import_ImportData(editbox, data, version, domain, createNewGroup,
 		end
 	end
 end
-function group:Import_BuildContainingDropdownEntry(result)
-	local groupID = result[1]
-	local gs = result.data
-	local info = UIDropDownMenu_CreateInfo()
+
+function group:Import_CreateMenuEntry(info, Item)
+	local gs = Item.Settings
+	local groupID = Item:GetExtra("groupID")
+
 	info.text = TMW:GetGroupName(gs.Name, groupID)
-	info.value = result
-	info.hasArrow = true
-	info.notCheckable = true
 	info.tooltipTitle = format(L["fGROUP"], groupID)
 	info.tooltipText = 	(L["UIPANEL_ROWS"] .. ": " .. (gs.Rows or 1) .. "\r\n") ..
 					L["UIPANEL_COLUMNS"] .. ": " .. (gs.Columns or 4) ..
-					((gs.PrimarySpec or gs.PrimarySpec == nil) and "\r\n" .. L["UIPANEL_PRIMARYSPEC"] or "") ..
-					((gs.SecondarySpec or gs.SecondarySpec == nil) and "\r\n" .. L["UIPANEL_SECONDARYSPEC"] or "") ..
 					((gs.Enabled and "") or "\r\n(" .. L["DISABLED"] .. ")")
 	info.tooltipOnButton = true
-	UIDropDownMenu_AddButton(info, UIDROPDOWNMENU_MENU_LEVEL)
 end
-group.Import_BuildMenuData = group.RunMenuBuilders
 
-function group.MenuBuilder(_, result, editbox)
+function group:Import_GetGroupedBundleEntryText(Bundle)
+	return L["UIPANEL_GROUPS"] .. ": " ..
+	Bundle:First():GetExtra("groupID") .. " - " ..
+	Bundle:Last():GetExtra("groupID")
+end
+
+
+-- Global Group Listing
+database:RegisterMenuBuilder(15, function(Item_database)
+	
+	local global = Item_database.Settings.global
+	local Bundle = Bundle:New("group")
+
+	local numGroups = global.NumGroups
+
+	if numGroups and numGroups > 1 then
+		for groupID, gs in TMW:OrderedPairs(global.Groups) do
+			if groupID >= 1 and groupID <= numGroups then
+				local Item = Item:New("group")
+
+				Item:SetParent(Item_database)
+				Item.Settings = gs
+				Item:SetExtra("groupID", groupID)
+
+				Bundle:Add(Item)
+				
+			end
+		end
+
+		Bundle:CreateParentedMenuEntry(L["UIPANEL_GROUPS_GLOBAL"])
+
+		TMW.AddDropdownSpacer()
+	end
+end)
+
+-- Profile Group Listing
+profile:RegisterMenuBuilder(40, function(Item_profile)
 	-- group header
 	local info = UIDropDownMenu_CreateInfo()
 	info.text = L["UIPANEL_GROUPS"]
@@ -398,132 +562,34 @@ function group.MenuBuilder(_, result, editbox)
 	info.notCheckable = true
 	UIDropDownMenu_AddButton(info, UIDROPDOWNMENU_MENU_LEVEL)
 
-	local hasMadeOneHolderMenu
-	
-	local startID, lastID = 1
-	
-	local numGroups = tonumber(result.data.NumGroups) or 10
-	
-	if numGroups > NUM_GROUPS_PER_SUBMENU then
-		for groupID = 1, numGroups do
-			if not startID then
-				startID = groupID
-			end
-				
-			-- Check to see if we have enough icons to build a holder menu.
-			if groupID % NUM_GROUPS_PER_SUBMENU == 0 then
-				
-				group:MakeHolderMenu(result, startID, groupID)
-				
-				-- nil out startID so that it will be set again for the next valid group found,
-				-- which will be the start of the next holder menu.
-				startID = nil
-			end
-			
-			-- lastID will hold the last groupID that is valid in the group once the loop ends.
-			-- It's recorded so that we don't need to loop back over the icons again to figure this out.
-			lastID = groupID
-		end
-		
-		-- Create a holder menu for any remaining icons that didn't get one inside the loop, if needed.
-		if startID then			
-			group:MakeHolderMenu(result, startID, lastID)
-		end
-	else
-		-- If there would only be one submenu, don't create submenus, and instead just put all groups directly in.
-		for groupID, gs in TMW:OrderedPairs(result.data.Groups) do
-			if type(groupID) == "number" and groupID >= 1 and groupID <= (tonumber(result.data.NumGroups) or 10) then
-				SharableDataType.types.group:Import_BuildContainingDropdownEntry({
-					parentResult = result,
-					data = gs,
-					type = "group",
-					version = result.version,
-					[1] = groupID,
-				}, editbox)
-				
-			end
+
+	local profile = Item_profile.Settings
+	local Bundle = Bundle:New("group")
+
+	local numGroups = tonumber(profile.NumGroups) or 1
+
+	for groupID, gs in TMW:OrderedPairs(profile.Groups) do
+		if groupID >= 1 and groupID <= numGroups then
+			local Item = Item:New("group")
+
+			Item:SetParent(Item_profile)
+			Item.Settings = gs
+			Item:SetExtra("groupID", groupID)
+
+			Bundle:Add(Item)
 		end
 	end
-end
 
-profile:RegisterMenuBuilder(40, group.MenuBuilder)
-
-function group:MakeHolderMenu(result, startID, endID)	
-	local info = UIDropDownMenu_CreateInfo()
-	info.text = L["UIPANEL_GROUPS"] .. ": " .. startID .. " - " .. endID
-	info.notCheckable = true
-	info.hasArrow = true
-	
-	-- This table will be stored in UIDROPDOWNMENU_MENU_VALUE when this holder menu is expanded.
-	-- It is also passed as arg4 to Import_HolderMenuHandler(self, result, editbox, holderMenuData)
-	info.value = {
-		isHolderMenu = true,
-		result = result,
-		type = "group",
-		startID = startID,
-		endID = endID,
-	}
-	
-	UIDropDownMenu_AddButton(info, UIDROPDOWNMENU_MENU_LEVEL)	
-end
-
-function group:Import_HolderMenuHandler(result, editbox, holderMenuData)
-
-	if holderMenuData.parentTable then
-		local result = {
-			parentResult = holderMenuData.result,
-			data = holderMenuData.parentTable,
-			version = holderMenuData.result.version,
-		}
-		group.MenuBuilder(nil, result, editbox)
-
-	else
-		-- Header
-		local info = UIDropDownMenu_CreateInfo()
-		info.text = L["UIPANEL_GROUPS"] .. ": " .. holderMenuData.startID .. " - " .. holderMenuData.endID
-		info.isTitle = true
-		info.notCheckable = true
-		UIDropDownMenu_AddButton(info, UIDROPDOWNMENU_MENU_LEVEL)
-		
-		TMW.AddDropdownSpacer()
-		
-		-- Add icons to the holder menu.
-		for groupID, gs in TMW:OrderedPairs(result.data.Groups) do
-		
-			-- Check to see if this group is within the range specified by the holder menu that is being built.
-			if type(groupID) == "number" and groupID >= 1 and groupID <= (tonumber(result.data.NumGroups) or 10) 
-				and groupID >= holderMenuData.startID and groupID <= holderMenuData.endID then
-			
-				SharableDataType.types.group:Import_BuildContainingDropdownEntry({
-					parentResult = result,
-					data = gs,
-					type = "group",
-					version = result.version,
-					[1] = groupID,
-				}, editbox)
-			end
-		end
-	end
-end
-
-group:RegisterMenuBuilder(1, function(self, result, editbox)
-	local groupID = result[1]
-	local gs = result.data
-	
-	-- header
-	local info = UIDropDownMenu_CreateInfo()
-	local profilename = TMW.approachTable(result, "parentResult", 1)
-	--info.text = (profilename and profilename .. ": " or "") .. TMW:GetGroupName(gs.Name, groupID)
-	info.text = TMW:GetGroupName(gs.Name, groupID)
-	info.isTitle = true
-	info.notCheckable = true
-	UIDropDownMenu_AddButton(info, UIDROPDOWNMENU_MENU_LEVEL)
+	Bundle:Evaluate()
 end)
 
-group:RegisterMenuBuilder(20, function(self, result, editbox)
-	local groupID = result[1]
-	local gs = result.data
-	local IMPORTS, EXPORTS = editbox:GetAvailableImportExportTypes()
+
+-- Copy Group
+group:RegisterMenuBuilder(20, function(Item_group)
+	local groupID = Item_group:GetExtra("groupID")
+	local gs = Item_group.Settings
+
+	local IMPORTS, EXPORTS = EDITBOX:GetAvailableImportExportTypes()
 
 	local group = IMPORTS.group_overwrite
 
@@ -532,7 +598,7 @@ group:RegisterMenuBuilder(20, function(self, result, editbox)
 	-- IMPORT_PROFILE_OVERWRITE is used here even though we aren't importing a profile
 	info.text = L["COPYGROUP"] .. " - " .. L["IMPORT_PROFILE_OVERWRITE"]:format(group and group:GetGroupName() or "?")
 	info.func = function()
-		TMW:Import(editbox, gs, result.version, "group", group.Domain, false, groupID, group)
+		Item_group:Import(group.Domain, false, groupID, group)
 	end
 	info.notCheckable = true
 	info.disabled = not IMPORTS.group_overwrite
@@ -542,7 +608,7 @@ group:RegisterMenuBuilder(20, function(self, result, editbox)
 	local info = UIDropDownMenu_CreateInfo()
 	info.text = L["COPYGROUP"] .. " - " .. L["MAKENEWGROUP_PROFILE"]
 	info.func = function()
-		TMW:Import(editbox, gs, result.version, "group", "profile", true, groupID)
+		Item_group:Import("profile", true, groupID)
 	end
 	info.notCheckable = true
 	UIDropDownMenu_AddButton(info, UIDROPDOWNMENU_MENU_LEVEL)
@@ -551,28 +617,35 @@ group:RegisterMenuBuilder(20, function(self, result, editbox)
 	local info = UIDropDownMenu_CreateInfo()
 	info.text = L["COPYGROUP"] .. " - " .. L["MAKENEWGROUP_GLOBAL"]
 	info.func = function()
-		TMW:Import(editbox, gs, result.version, "group", "global", true, groupID)
+		Item_group:Import("global", true, groupID)
 	end
 	info.notCheckable = true
 	UIDropDownMenu_AddButton(info, UIDROPDOWNMENU_MENU_LEVEL)
 end)
 
+
+
 group.Export_DescriptionAppend = L["EXPORT_SPECIALDESC2"]:format("4.6.0+")
+
 function group:Export_SetButtonAttributes(editbox, info)
 	local IMPORTS, EXPORTS = editbox:GetAvailableImportExportTypes()
 	local group = EXPORTS[self.type]
 	
-	local text = group:GetGroupName():gsub("|r", "|cff00ffff")
+	local text = L["fGROUP"]:format(group:GetGroupName(1):gsub("|r", "|cff00ffff"))
 	info.text = text
 	info.tooltipTitle = text
 end
-function group:Export_GetArgs(editbox, info)
-	--editbox, type, settings, defaults, ...
+
+function group:Export_GetArgs(editbox)
+	-- settings, defaults, ...
 	local IMPORTS, EXPORTS = editbox:GetAvailableImportExportTypes()
 	local group = EXPORTS[self.type]
 	
-	return editbox, self.type, group:GetSettings(), TMW.Group_Defaults, group.ID
+	return group:GetSettings(), TMW.Group_Defaults, group.ID
 end
+
+
+
 
 
 
@@ -580,10 +653,10 @@ end
 
 ---------- Icon ----------
 local icon = SharableDataType:New("icon", 30)
-local NUM_ICONS_PER_SUBMENU = 10
+icon.extrasMap = {}
 
-function icon:Import_ImportData(editbox, data, version)
-	local IMPORTS, EXPORTS = editbox:GetAvailableImportExportTypes()
+function icon:Import_ImportData(Item)
+	local IMPORTS, EXPORTS = EDITBOX:GetAvailableImportExportTypes()
 	
 	local icon = IMPORTS.icon
 	local group = IMPORTS.group_overwrite
@@ -591,9 +664,10 @@ function icon:Import_ImportData(editbox, data, version)
 
 	gs.Icons[icon.ID] = nil -- restore defaults
 	local ics = icon:GetSettings()
-	TMW:CopyTableInPlaceWithMeta(data, ics, true)
+	TMW:CopyTableInPlaceWithMeta(Item.Settings, ics, true)
 
 
+	local version = Item.Version
 	if version >= 70000 and ics.GUID ~= "" then
 		local existed = false
 
@@ -606,7 +680,7 @@ function icon:Import_ImportData(editbox, data, version)
 
 		if existed then
 			TMW:Printf(L["IMPORT_NEWGUIDS"], 0, 1)
-			showGUIDConflictHelp(editbox, L["IMPORT_NEWGUIDS"], 0, 1)
+			showGUIDConflictHelp(EDITBOX, L["IMPORT_NEWGUIDS"], 0, 1)
 
 			local GUIDmap = {
 				[ics.GUID] = TMW:GenerateGUID("icon", TMW.CONST.GUID_SIZE)
@@ -625,64 +699,98 @@ function icon:Import_ImportData(editbox, data, version)
 	end
 end
 
-function icon:Import_BuildContainingDropdownEntry(result, editbox)
-	local ics = result.data
-	local iconID = tonumber(result[1])
-	local groupID = TMW.approachTable(result, "parentResult", 1)
-	local profilename = TMW.approachTable(result, "parentResult", "parentResult", 1)
-	local gs = TMW.approachTable(result, "parentResult", "data")
-	local version = result.version
-	
-	local IMPORTS, EXPORTS = editbox:GetAvailableImportExportTypes()
-	
-	if not TMW:DeepCompare(TMW.DEFAULT_ICON_SETTINGS, ics) then
-		local info = UIDropDownMenu_CreateInfo()
+function icon:Import_CreateMenuEntry(info, Item)
+	local ics = Item.Settings
+	local iconID = Item:GetExtra("iconID")
 
-		local text, textshort, tooltipText = TMW:GetIconMenuText(ics)
-		if text:sub(-2) == "))" and iconID then
-			textshort = textshort .. " " .. L["fICON"]:format(iconID)
-		end
-		info.text = textshort
-		info.tooltipTitle = (groupID and format(L["GROUPICON"], TMW:GetGroupName(gs and gs.Name, groupID, 1), iconID)) or (iconID and L["fICON"]:format(iconID)) or L["ICON"]
-		info.tooltipOnButton = true
-			
-		info.disabled = not IMPORTS.icon
-		if info.disabled then
-			info.tooltipText = L["IMPORT_ICON_DISABLED_DESC"]
-			info.tooltipWhileDisabled = true
+	local Item_group = Item.parent
+	local groupID = Item_group and Item_group:GetExtra("groupID")
+	local gs = Item_group and Item_group.Settings
+	local version = Item.Version
+
+
+	local IMPORTS, EXPORTS = EDITBOX:GetAvailableImportExportTypes()
+	
+	local text, textshort, tooltipText = TMW:GetIconMenuText(ics)
+	if text:sub(-2) == "))" and iconID then
+		textshort = textshort .. " " .. L["fICON"]:format(iconID)
+	end
+	info.text = textshort
+	info.tooltipTitle = (groupID and format(L["GROUPICON"], TMW:GetGroupName(gs and gs.Name, groupID, 1), iconID)) or (iconID and L["fICON"]:format(iconID)) or L["ICON"]
+	info.tooltipOnButton = true
+		
+	info.disabled = not IMPORTS.icon
+	if info.disabled then
+		info.tooltipText = L["IMPORT_ICON_DISABLED_DESC"]
+		info.tooltipWhileDisabled = true
+	else
+		info.tooltipText = tooltipText
+	end
+
+	info.hasArrow = false
+
+	info.icon = TMW:GuessIconTexture(ics)
+	info.tCoordLeft = 0.07
+	info.tCoordRight = 0.93
+	info.tCoordTop = 0.07
+	info.tCoordBottom = 0.93
+
+	info.func = function()
+		if ic and ic:IsVisible() then
+			TMW.HELP:Show("ICON_IMPORT_CURRENTPROFILE", nil, editbox, 0, 0, L["HELP_IMPORT_CURRENTPROFILE"])
+			IMPORTS.icon:SetInfo("texture", tex)
 		else
-			info.tooltipText = tooltipText
+			IMPORTS.icon:SetInfo("texture", nil)
 		end
-
-		info.notCheckable = true
-
-		info.icon = TMW:GuessIconTexture(ics)
-		info.tCoordLeft = 0.07
-		info.tCoordRight = 0.93
-		info.tCoordTop = 0.07
-		info.tCoordBottom = 0.93
-
-		info.func = function()
-			if ic and ic:IsVisible() then
-				TMW.HELP:Show("ICON_IMPORT_CURRENTPROFILE", nil, editbox, 0, 0, L["HELP_IMPORT_CURRENTPROFILE"])
-				IMPORTS.icon:SetInfo("texture", tex)
-			else
-				IMPORTS.icon:SetInfo("texture", nil)
-			end
-			
-			if gs then
-				TMW:PrepareIconSettingsForCopying(ics, gs)
-			end
-			
-			TMW:Import(editbox, ics, version, "icon")
+		
+		if gs then
+			TMW:PrepareIconSettingsForCopying(ics, gs)
 		end
-		info.arg1 = ics
-		info.arg2 = version
-
-		UIDropDownMenu_AddButton(info, UIDROPDOWNMENU_MENU_LEVEL)
+		
+		Item:Import()
 	end
 end
-icon.Import_BuildMenuData = icon.Import_BuildContainingDropdownEntry
+
+function icon:Import_GetGroupedBundleEntryText(Bundle)
+	return L["UIPANEL_ICONS"] .. ": " ..
+	Bundle:First():GetExtra("iconID") .. " - " ..
+	Bundle:Last():GetExtra("iconID")
+end
+
+
+-- Group's Icons
+group:RegisterMenuBuilder(30, function(Item_group)
+	
+	if Item_group.Settings.Icons then
+		TMW.AddDropdownSpacer()
+
+		-- Header
+		local info = UIDropDownMenu_CreateInfo()
+		info.text = L["UIPANEL_ICONS"]
+		info.isTitle = true
+		info.notCheckable = true
+		UIDropDownMenu_AddButton(info, UIDROPDOWNMENU_MENU_LEVEL)
+
+
+		local Bundle = Bundle:New("icon")
+
+		for iconID, ics in TMW:OrderedPairs(Item_group.Settings.Icons) do
+			if not TMW:DeepCompare(TMW.DEFAULT_ICON_SETTINGS, ics) then
+				local Item = Item:New("icon")
+
+				Item:SetParent(Item_group)
+				Item.Settings = ics
+				Item:SetExtra("iconID", iconID)
+
+				Bundle:Add(Item)
+			end
+		end
+
+		Bundle:Evaluate()
+	end
+end)
+
+
 
 function icon:Export_SetButtonAttributes(editbox, info)
 	local IMPORTS, EXPORTS = editbox:GetAvailableImportExportTypes()
@@ -698,8 +806,9 @@ function icon:Export_SetButtonAttributes(editbox, info)
 	info.tCoordTop = 0.07
 	info.tCoordBottom = 0.93
 end
-function icon:Export_GetArgs(editbox, info)
-	--editbox, type, settings, defaults, ...
+
+function icon:Export_GetArgs(editbox)
+	-- settings, defaults, ...
 	local IMPORTS, EXPORTS = editbox:GetAvailableImportExportTypes()
 	local icon = EXPORTS.icon
 	
@@ -707,164 +816,9 @@ function icon:Export_GetArgs(editbox, info)
 	local ics = icon:GetSettings()
 	TMW:PrepareIconSettingsForCopying(ics, gs)
 	
-	return editbox, self.type, ics, TMW.Icon_Defaults
+	return ics, TMW.Icon_Defaults
 end
 
-function icon:MakeHolderMenu(result, startID, endID)
-	local info = UIDropDownMenu_CreateInfo()
-	info.text = L["UIPANEL_ICONS"] .. ": " .. startID .. " - " .. endID
-	info.notCheckable = true
-	info.hasArrow = true
-	
-	-- This table will be stored in UIDROPDOWNMENU_MENU_VALUE when this holder menu is expanded.
-	-- It is also passed as arg4 to Import_HolderMenuHandler(self, result, editbox, holderMenuData)
-	info.value = {
-		isHolderMenu = true,
-		result = result,
-		type = "icon",
-		startID = startID,
-		endID = endID,
-	}
-	
-	UIDropDownMenu_AddButton(info, UIDROPDOWNMENU_MENU_LEVEL)	
-end
-
-group:RegisterMenuBuilder(30, function(self, result, editbox)
-	local gs = result.data
-	
-	if not gs.Icons then
-		return
-	end
-	
-	local hasMadeOneHolderMenu
-	
-	local startID, lastID
-	local count = 0
-	
-	local shouldBuildHolders = false
-	local precount = 0
-	for iconID, ics in TMW:OrderedPairs(gs.Icons) do
-	
-		-- Ignore icons that are just blank/default icons.
-		if not TMW:DeepCompare(TMW.DEFAULT_ICON_SETTINGS, ics) then
-			precount = precount + 1
-		end
-		if precount > NUM_ICONS_PER_SUBMENU then
-			shouldBuildHolders = true
-			break
-		end
-	end
-	
-	if shouldBuildHolders then
-		for iconID, ics in TMW:OrderedPairs(gs.Icons) do
-		
-			-- Ignore icons that are just blank/default icons.
-			if not TMW:DeepCompare(TMW.DEFAULT_ICON_SETTINGS, ics) then
-			
-				-- If we haven't found an icon to start the current holder menu with, use this one.
-				if not startID then
-					startID = iconID
-				end
-				
-				count = count + 1
-				
-				-- Check to see if we have enough icons to build a holder menu.
-				if count % NUM_ICONS_PER_SUBMENU == 0 then
-				
-					-- Add a spacer and header if we haven't added one yet.
-					if not hasMadeOneHolderMenu then
-						TMW.AddDropdownSpacer()
-						
-						local info = UIDropDownMenu_CreateInfo()
-						info.text = L["UIPANEL_ICONS"]
-						info.isTitle = true
-						info.notCheckable = true
-						UIDropDownMenu_AddButton(info, UIDROPDOWNMENU_MENU_LEVEL)
-						
-						hasMadeOneHolderMenu = true
-					end
-					
-					icon:MakeHolderMenu(result, startID, iconID)
-					
-					-- nil out startID so that it will be set again for the next valid icon found,
-					-- which will be the start of the next holder menu.
-					startID = nil
-				end
-				
-				-- lastID will hold the last iconID that is valid in the group once the loop ends.
-				-- It's recorded so that we don't need to loop back over the icons again to figure this out.
-				lastID = iconID
-			end
-		end
-		
-		-- Create a holder menu for any remaining icons that didn't get one inside the loop, if needed.
-		if startID then
-			-- Add a spacer and header if we haven't added one yet.
-			if not hasMadeOneHolderMenu then
-				TMW.AddDropdownSpacer()
-				
-				local info = UIDropDownMenu_CreateInfo()
-				info.text = L["UIPANEL_ICONS"]
-				info.isTitle = true
-				info.notCheckable = true
-				UIDropDownMenu_AddButton(info, UIDROPDOWNMENU_MENU_LEVEL)
-						
-				--hasMadeOneHolderMenu = true -- doesn't matter at this point
-			end
-			
-			icon:MakeHolderMenu(result, startID, lastID)
-		end	
-	elseif precount > 0 then
-		TMW.AddDropdownSpacer()
-		
-		local info = UIDropDownMenu_CreateInfo()
-		info.text = L["UIPANEL_ICONS"]
-		info.isTitle = true
-		info.notCheckable = true
-		UIDropDownMenu_AddButton(info, UIDROPDOWNMENU_MENU_LEVEL)
-		
-		for iconID, ics in TMW:OrderedPairs(gs.Icons) do
-		
-			-- The icon was in range, so create a result object for the icon and build a dropdown entry for it.
-			SharableDataType.types.icon:Import_BuildContainingDropdownEntry({
-				data = ics,
-				version = result.version,
-				type = "icon",
-				[1] = iconID,
-			}, editbox)
-		end
-	end	
-end)
-
-function icon:Import_HolderMenuHandler(result, editbox, holderMenuData)	
-	local groupID = result[1]
-	local gs = result.data
-
-	-- Header
-	local info = UIDropDownMenu_CreateInfo()
-	info.text = L["UIPANEL_ICONS"] .. ": " .. holderMenuData.startID .. " - " .. holderMenuData.endID
-	info.isTitle = true
-	info.notCheckable = true
-	UIDropDownMenu_AddButton(info, UIDROPDOWNMENU_MENU_LEVEL)
-	
-	TMW.AddDropdownSpacer()
-	
-	-- Add icons to the holder menu.
-	for iconID, ics in TMW:OrderedPairs(gs.Icons) do
-	
-		-- Check to see if this icon is within the range specified by the holder menu that is being built.
-		if iconID >= holderMenuData.startID and iconID <= holderMenuData.endID then
-		
-			-- The icon was in range, so create a result object for the icon and build a dropdown entry for it.
-			SharableDataType.types.icon:Import_BuildContainingDropdownEntry({
-				data = ics,
-				version = result.version,
-				type = "icon",
-				[1] = iconID,
-			}, editbox)
-		end
-	end
-end
 
 
 
@@ -877,35 +831,45 @@ end
 
 local ImportSource = TMW:NewClass("ImportSource")
 ImportSource.types = {}
+
 function ImportSource:OnNewInstance(type)
 	self.type = type
 	ImportSource.types[type] = self
 end
 
 
+
+
 ---------- Profile ----------
 local Profile = ImportSource:New("Profile")
 Profile.displayText = L["IMPORT_FROMLOCAL"]
+
 function Profile:HandleTopLevelMenu(editbox)
-	database:Import_BuildMenuData({
-		data = TMW.db,
-		type = "database",
-		--version = TellMeWhenDB.Version, (not really)
-	}, editbox)
+	local Item = Item:New("database")
+
+	Item.Settings = TMW.db
+	Item.Version = TellMeWhenDB.Version
+
+	Item:BuildChildMenu()
 end
+
+
 
 
 ---------- Backup ----------
 local Backup = ImportSource:New("Backup")
 Backup.displayText = L["IMPORT_FROMBACKUP"]
 Backup.displayDescription = L["IMPORT_FROMBACKUP_DESC"]:format(TMW.BackupDate)
-function Backup:HandleTopLevelMenu(editbox)
-	database:Import_BuildMenuData({
-		data = TMW.Backupdb,
-		type = "database",
-		--version = TellMeWhenDB.Version, (not really)
-	}, editbox)
+
+function Backup:HandleTopLevelMenu()
+	local Item = Item:New("database")
+
+	Item.Settings = TMW.Backupdb
+	Item.Version = TMW.Backupdb.Version
+
+	Item:BuildChildMenu()
 end
+
 function Backup:TMW_CONFIG_IMPORTEXPORT_DROPDOWNDRAW(event, destination)
 	if destination == self then
 		local info = UIDropDownMenu_CreateInfo()
@@ -917,25 +881,42 @@ function Backup:TMW_CONFIG_IMPORTEXPORT_DROPDOWNDRAW(event, destination)
 		TMW.AddDropdownSpacer()
 	end
 end
+
 TMW:RegisterCallback("TMW_CONFIG_IMPORTEXPORT_DROPDOWNDRAW", Backup)
+
+
+
 
 ---------- String ----------
 local String = ImportSource:New("String")
-String.displayText = function(editbox)
-	return (editbox.DoPulseValidString and "|cff00ff00" or "") .. L["IMPORT_FROMSTRING"]
+String.displayText = function()
+	return (EDITBOX.DoPulseValidString and "|cff00ff00" or "") .. L["IMPORT_FROMSTRING"]
 end
-String.displayDisabled = function(editbox)
-	local t = strtrim(editbox:GetText())
+String.displayDisabled = function()
+	local t = strtrim(EDITBOX:GetText())
 	return not (t ~= "" and TMW:DeserializeData(t))
 end
 String.displayDescription = L["IMPORT_FROMSTRING_DESC"]
-function String:HandleTopLevelMenu(editbox)
-	local t = strtrim(editbox:GetText())
+
+function String:HandleTopLevelMenu()
+	--TODO: the return from TMW:DeserializeData() sucks
+	-- also, type:AddExtras is undefined.
+
+	local t = strtrim(EDITBOX:GetText())
 	local editboxResult = t ~= "" and TMW:DeserializeData(t)
 	
 	local type = SharableDataType.types[editboxResult.type]
-	type:Import_BuildMenuData(editboxResult, editbox)
+
+	local Item = Item:New(editboxResult.type)
+
+	Item.Settings = editboxResult.data
+	Item.Version = editboxResult.version
+	type:AddExtras(Item, unpack(editboxResult))
+
+	Item:BuildChildMenu()
 end
+
+
 
 
 ---------- Comm ----------
@@ -947,6 +928,7 @@ Comm.displayDisabled = function()
 	Comm:DeserializeReceivedData()
 	return not (DeserializedData and next(DeserializedData))
 end
+
 function Comm:DeserializeReceivedData()
 	if TMW.Received then
 		 -- deserialize received comm
@@ -966,36 +948,53 @@ function Comm:DeserializeReceivedData()
 		end
 	end
 end
+
 function Comm:HandleTopLevelMenu(editbox)
 	Comm:DeserializeReceivedData()
 	
 	for k, result in ipairs(DeserializedData) do
 		local type = SharableDataType.types[result.type]
-		type:Import_BuildContainingDropdownEntry(result, editbox)
+
+		local Item = Item:New(result.type)
+
+		Item.Settings = result.data
+		Item.Version = result.version
+		type:AddExtras(Item, unpack(result))
+
+		Item:BuildChildMenu()
 	end
 end
+
+
+
+
+
 
 
 
 -- -----------------------
 -- EXPORT DESTINATIONS
 -- -----------------------
+
 local function DestinationsOrderedSort(a, b)
 	return SharableDataType.instances[a].order < SharableDataType.instances[b].order
 end
 
 local ExportDestination = TMW:NewClass("ExportDestination")
 ExportDestination.types = {}
+
 function ExportDestination:OnNewInstance(type)
 	self.type = type
 	ExportDestination.types[type] = self
 end
-function ExportDestination:HandleTopLevelMenu(editbox)
-	local IMPORTS, EXPORTS = editbox:GetAvailableImportExportTypes()
+
+function ExportDestination:HandleTopLevelMenu()
+	local IMPORTS, EXPORTS = EDITBOX:GetAvailableImportExportTypes()
 	
 	for k, dataType in TMW:OrderedPairs(SharableDataType.instances, DestinationsOrderedSort) do
 		if EXPORTS[dataType.type] then
 			local info = UIDropDownMenu_CreateInfo()
+
 			info.tooltipText = self.Export_DescriptionPrepend
 			if dataType.Export_DescriptionAppend then
 				info.tooltipText = info.tooltipText .. "\r\n\r\n" .. dataType.Export_DescriptionAppend
@@ -1004,13 +1003,14 @@ function ExportDestination:HandleTopLevelMenu(editbox)
 			info.tooltipWhileDisabled = true
 			info.notCheckable = true
 			
-			dataType:Export_SetButtonAttributes(editbox, info)
+			dataType:Export_SetButtonAttributes(EDITBOX, info)
 			
 			-- Color everything before the first colon a light blue (highlights the type of data being exported, for clarity)
 			info.text = info.text:gsub("^(.-):", "|cff00ffff%1|r:")
 			
 			info.func = function()
-				self:Export(dataType:Export_GetArgs(editbox, info))--editbox, type, settings, defaults, ...
+				-- editbox, type, settings, defaults, ...
+				self:Export(editbox, dataType.type, dataType:Export_GetArgs(EDITBOX))
 			end
 			
 			UIDropDownMenu_AddButton(info, UIDROPDOWNMENU_MENU_LEVEL)
@@ -1019,19 +1019,26 @@ function ExportDestination:HandleTopLevelMenu(editbox)
 end
 
 
+
+
 ---------- String ----------
 local String = ExportDestination:New("String")
 String.Export_DescriptionPrepend = L["EXPORT_TOSTRING_DESC"]
+
 function String:Export(editbox, type, settings, defaults, ...)
 	local s = TMW:GetSettingsString(type, settings, defaults, ...)
 	s = TMW:MakeSerializedDataPretty(s)
 	TMW.LastExportedString = s
+
 	editbox:SetText(s)
 	editbox:HighlightText()
 	editbox:SetFocus()
+
 	CloseDropDownMenus()
+
 	TMW.HELP:Show("ICON_EXPORT_DOCOPY", nil, editbox, 0, 0, L["HELP_EXPORT_DOCOPY_" .. (IsMacClient() and "MAC" or "WIN")])
 end
+
 function String:SetButtonAttributes(editbox, info)
 	info.text = L["EXPORT_TOSTRING"]
 	info.tooltipTitle = L["EXPORT_TOSTRING"]
@@ -1040,12 +1047,15 @@ function String:SetButtonAttributes(editbox, info)
 end
 
 
+
+
 ---------- Comm ----------
 local Comm = ExportDestination:New("Comm")
 Comm.Export_DescriptionPrepend = L["EXPORT_TOCOMM_DESC"]
+
 function Comm:Export(editbox, type, settings, defaults, ...)
 	local player = strtrim(editbox:GetText())
-	if player and #player > 1 then -- and #player < 13 you can send to cross server people in a battleground ("Cybeloras-Mal'Ganis"), so it can be more than 13
+	if player and #player > 1 then
 		local s = TMW:GetSettingsString(type, settings, defaults, ...)
 
 		if player == "RAID" or player == "GUILD" then -- note the upper case
@@ -1057,10 +1067,12 @@ function Comm:Export(editbox, type, settings, defaults, ...)
 	
 	CloseDropDownMenus()
 end
+
 function Comm:SetButtonAttributes(editbox, info)
 	local player = strtrim(editbox:GetText())
 	local playerLength = strlenutf8(player)
 	info.disabled = (strfind(player, "[`~^%d!@#%$%%&%*%(%)%+=_]") or playerLength <= 1 or playerLength > 35) and true
+
 	local text
 	if player == "RAID" or player == "GUILD" then
 		text = L["EXPORT_TO" .. player]
@@ -1070,12 +1082,19 @@ function Comm:SetButtonAttributes(editbox, info)
 			text = text .. ": " .. player
 		end
 	end
+
 	info.text = text
 	info.tooltipTitle = text
 	info.tooltipText = L["EXPORT_TOCOMM_DESC"]
+
 	info.value = "EXPORT_TOCOMM"
 	info.hasArrow = not info.disabled
 end
+
+
+
+
+
 
 
 
@@ -1083,31 +1102,38 @@ end
 -- DROPDOWN
 -- -----------------------
 
-function TMW.IE:Copy_DropDown(...)
+local CurrentHandler
+function TMW.IE:ImportExport_DropDown(...)
 	local DROPDOWN = self
-	local EDITBOX = DROPDOWN:GetParent()
-	
+	EDITBOX = DROPDOWN:GetParent()
+	TMW.IE.ImportExport_Editbox = EDITBOX
+
+	local VALUE = UIDROPDOWNMENU_MENU_VALUE
+
 	if UIDROPDOWNMENU_MENU_LEVEL == 1 then
-		CurrentSourceOrDestinationHandler = nil
+		CurrentHandler = nil
 	elseif UIDROPDOWNMENU_MENU_LEVEL == 2 then
-		assert(type(UIDROPDOWNMENU_MENU_VALUE) == "table")
-		CurrentSourceOrDestinationHandler = UIDROPDOWNMENU_MENU_VALUE
+		assert(type(VALUE) == "table")
+		CurrentHandler = VALUE
 	end
 	
-	TMW:Fire("TMW_CONFIG_IMPORTEXPORT_DROPDOWNDRAW", CurrentSourceOrDestinationHandler)
+	TMW:Fire("TMW_CONFIG_IMPORTEXPORT_DROPDOWNDRAW", CurrentHandler)
 	
 	if UIDROPDOWNMENU_MENU_LEVEL == 2 then
-		UIDROPDOWNMENU_MENU_VALUE:HandleTopLevelMenu(EDITBOX)
+		VALUE:HandleTopLevelMenu()
+
 	elseif UIDROPDOWNMENU_MENU_LEVEL == 1 then
+
 		----------IMPORT----------
 		
-		--heading
+		-- heading
 		local info = UIDropDownMenu_CreateInfo()
 		info.text = L["IMPORT_HEADING"]
 		info.isTitle = true
 		info.notCheckable = true
 		UIDropDownMenu_AddButton(info, UIDROPDOWNMENU_MENU_LEVEL)
 
+		-- List of Import Sources
 		for k, importSource in pairs(ImportSource.instances) do
 			local info = UIDropDownMenu_CreateInfo()
 			info.text = get(importSource.displayText, EDITBOX)
@@ -1128,15 +1154,19 @@ function TMW.IE:Copy_DropDown(...)
 
 
 		TMW.AddDropdownSpacer()
+
+
+
 		----------EXPORT----------
 
-		--heading
+		-- heading
 		info = UIDropDownMenu_CreateInfo()
 		info.text = L["EXPORT_HEADING"]
 		info.isTitle = true
 		info.notCheckable = true
 		UIDropDownMenu_AddButton(info, UIDROPDOWNMENU_MENU_LEVEL)
 		
+		-- List of export destinations
 		for k, exportDestination in pairs(ExportDestination.instances) do
 			local info = UIDropDownMenu_CreateInfo()
 			info.tooltipOnButton = true
@@ -1150,14 +1180,17 @@ function TMW.IE:Copy_DropDown(...)
 			UIDropDownMenu_AddButton(info, UIDROPDOWNMENU_MENU_LEVEL)
 		end
 		
-	elseif type(UIDROPDOWNMENU_MENU_VALUE) == "table" then
-		if UIDROPDOWNMENU_MENU_VALUE.isHolderMenu then
-			SharableDataType.types[UIDROPDOWNMENU_MENU_VALUE.type]:Import_HolderMenuHandler(UIDROPDOWNMENU_MENU_VALUE.result, EDITBOX, UIDROPDOWNMENU_MENU_VALUE)
+	elseif type(VALUE) == "table" then
+		if VALUE.class == Item then
+			VALUE:BuildChildMenu()
+		elseif VALUE.class == Bundle then
+			VALUE:Evaluate()
 		else
-			SharableDataType.types[UIDROPDOWNMENU_MENU_VALUE.type]:Import_BuildMenuData(UIDROPDOWNMENU_MENU_VALUE, EDITBOX)
+			error("Bad value at " .. UIDROPDOWNMENU_MENU_LEVEL)
 		end
 	end
 end
+
 
 
 

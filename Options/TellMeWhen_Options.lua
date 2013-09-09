@@ -3245,17 +3245,22 @@ end
 -- -----------------------
 
 ---------- High-level Functions ----------
-function TMW:Import(editbox, settings, version, type, ...)
+function TMW:Import(SettingsItem, ...)
+	local settings = SettingsItem.Settings
+	local version = SettingsItem.Version
+	local type = SettingsItem.Type
+
 	assert(settings, "Missing settings to import")
 	assert(version, "Missing version of settings")
 	assert(type, "No settings type specified!")
+
 	CloseDropDownMenus()
 
-	TMW:Fire("TMW_IMPORT_PRE", editbox, settings, version, type, ...)
+	TMW:Fire("TMW_IMPORT_PRE", SettingsItem, ...)
 	
-	local SharableDataType = TMW.approachTable(TMW, "Classes", "SharableDataType", "types", type)
+	local SharableDataType = TMW.approachTable(TMW, "Classes", "SharableDataType", "types", SettingsItem.Type)
 	if SharableDataType and SharableDataType.Import_ImportData then
-		SharableDataType:Import_ImportData(editbox, settings, version, ...)
+		SharableDataType:Import_ImportData(SettingsItem, ...)
 
 		TMW:Update()
 		IE:Load(1)
@@ -3265,7 +3270,7 @@ function TMW:Import(editbox, settings, version, type, ...)
 		TMW:Print(L["IMPORTERROR_INVALIDTYPE"])
 	end
 
-	TMW:Fire("TMW_IMPORT_POST", editbox, settings, version, type, ...)
+	TMW:Fire("TMW_IMPORT_POST", SettingsItem, ...)
 	
 	--TMW:ScheduleTimer("CompileOptions", 0.2) -- i dont know why i have to delay it, but I do.
 	TMW:CompileOptions()

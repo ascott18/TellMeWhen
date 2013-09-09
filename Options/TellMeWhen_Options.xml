@@ -1278,7 +1278,7 @@
 						self.wrapTooltips = 1
 						self:Hide()
 						UIDropDownMenu_SetWidth(self, 1)
-						self.initialize = TMW.IE.Copy_DropDown
+						self.initialize = TMW.IE.ImportExport_DropDown
 						--self.displayMode = "MENU"
 					</OnLoad>
 					<OnKeyDown>

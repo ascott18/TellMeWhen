@@ -260,15 +260,25 @@ function SNIPPETS:DeleteSnippet(scope, id)
 	parent.n = parent.n - 1
 end
 
+
+
+
+
+
+-- -----------------------
+-- IMPORT/EXPORT
+-- -----------------------
+
 local codesnippet = TMW.Classes.SharableDataType:New("codesnippet", 20)
 
-function codesnippet:Import_ImportData(_, data, version, scope)
-	assert(type(scope) == "string")
+function codesnippet:Import_ImportData(Item, domain)
+	assert(type(domain) == "string")
 	
-	local snippet = SNIPPETS:AddSnippet(scope)
+	local snippet = SNIPPETS:AddSnippet(domain)
 	
-	TMW:CopyTableInPlaceWithMeta(data, snippet, true)
+	TMW:CopyTableInPlaceWithMeta(Item.Settings, snippet, true)
 
+	local version = Item.Version
 	if version then
 		if version > TELLMEWHEN_VERSIONNUMBER then
 			TMW:Print(L["FROMNEWERVERSION"])
@@ -279,43 +289,38 @@ function codesnippet:Import_ImportData(_, data, version, scope)
 	
 	TMW:Update()
 end
-function codesnippet:Import_HolderMenuHandler(result, editbox, holderMenuData)
-	local CodeSnippets = result.data.CodeSnippets
-	
-	local info = UIDropDownMenu_CreateInfo()
-	info.text = L["CODESNIPPETS"]
-	info.isTitle = true
-	info.notCheckable = true
-	UIDropDownMenu_AddButton(info, UIDROPDOWNMENU_MENU_LEVEL)
-	
-	TMW.AddDropdownSpacer()
-	
-	-- Create a menu for aech text layout in the profile.
-	if CodeSnippets then
-		for i, settings in TMW:InNLengthTable(CodeSnippets) do
-			if settings then
-				self:Import_BuildContainingDropdownEntry({
-					data = settings,
-					type = self.type,
-					version = result.version,
-				}, editbox)
-			end
+
+function codesnippet:Import_CreateMenuEntry(info, Item)
+	info.text = Item.Settings.Name
+end
+
+
+-- Profile Snippets
+local SharableDataType_profile = TMW.Classes.SharableDataType.types.profile
+SharableDataType_profile:RegisterMenuBuilder(19, function(Item_profile)
+
+	if Item_profile.Settings.CodeSnippets then
+		local Bundle = TMW.Classes.Bundle:New("codesnippet")
+
+		for n, snippet in TMW:InNLengthTable(Item_profile.Settings.CodeSnippets) do
+			local Item = TMW.Classes.SettingsItem:New("codesnippet")
+
+			Item:SetParent(Item_profile)
+			Item.Settings = snippet
+
+			Bundle:Add(Item)
+
+		end
+
+		if Bundle:CreateParentedMenuEntry(L["CODESNIPPETS"]) then
+			TMW.AddDropdownSpacer()
 		end
 	end
-end
-function codesnippet:Import_BuildContainingDropdownEntry(result, editbox)	
-	local settings = result.data
-	
-	local info = UIDropDownMenu_CreateInfo()
-	info.text = settings.Name
-	info.value = result
-	info.hasArrow = true
-	info.notCheckable = true
-	
-	UIDropDownMenu_AddButton(info, UIDROPDOWNMENU_MENU_LEVEL)
-end
-function codesnippet:Import_BuildMenuData(result, editbox)
-	local settings = result.data
+end)
+
+-- Import Snippet
+codesnippet:RegisterMenuBuilder(1, function(Item_codesnippet)
+	local settings = Item_codesnippet.Settings
 	
 	local info = UIDropDownMenu_CreateInfo()
 	info.text = L["fCODESNIPPET"]:format(settings.Name)
@@ -325,7 +330,7 @@ function codesnippet:Import_BuildMenuData(result, editbox)
 	
 	TMW.AddDropdownSpacer()
 	
-	local IMPORTS, EXPORTS = editbox:GetAvailableImportExportTypes()
+	local IMPORTS, EXPORTS = Item_codesnippet:GetEditbox():GetAvailableImportExportTypes()
 	
 	-- Import as global snippet
 	if IMPORTS.codesnippet_global then
@@ -337,7 +342,7 @@ function codesnippet:Import_BuildMenuData(result, editbox)
 		info.notCheckable = true
 		
 		info.func = function()
-			TMW:Import(editbox, settings, result.version, "codesnippet", "global")
+			Item_codesnippet:Import("global")
 		end
 		UIDropDownMenu_AddButton(info, UIDROPDOWNMENU_MENU_LEVEL)
 	end
@@ -352,13 +357,15 @@ function codesnippet:Import_BuildMenuData(result, editbox)
 		info.notCheckable = true
 		
 		info.func = function()
-			TMW:Import(editbox, settings, result.version, "codesnippet", "profile")
+			Item_codesnippet:Import("profile")
 		end
 		UIDropDownMenu_AddButton(info, UIDROPDOWNMENU_MENU_LEVEL)
 	end
-end
+end)
+
 
 codesnippet.Export_DescriptionAppend = L["EXPORT_SPECIALDESC2"]:format("6.2.0+")
+
 function codesnippet:Export_SetButtonAttributes(editbox, info)
 	local IMPORTS, EXPORTS = editbox:GetAvailableImportExportTypes()
 	local settings = EXPORTS[self.type]
@@ -367,34 +374,16 @@ function codesnippet:Export_SetButtonAttributes(editbox, info)
 	info.text = text
 	info.tooltipTitle = text
 end
-function codesnippet:Export_GetArgs(editbox, info)
+
+function codesnippet:Export_GetArgs(editbox)
 	local IMPORTS, EXPORTS = editbox:GetAvailableImportExportTypes()
 	
 	local settings = EXPORTS[self.type]
 	
-	--editbox, type, settings, defaults, ...
-	return editbox, self.type, settings, SNIPPETS.Snippet_Defaults["**"]
+	-- settings, defaults, ...
+	return settings, SNIPPETS.Snippet_Defaults["**"]
 end
 
-local SharableDataType_profile = TMW.Classes.SharableDataType.types.profile
-if SharableDataType_profile then
-	SharableDataType_profile:RegisterMenuBuilder(19, function(self, result, editbox)
-	
-		if result.data.CodeSnippets and result.data.CodeSnippets.n > 0 then
-			local info = UIDropDownMenu_CreateInfo()
-			info.text = L["CODESNIPPETS"]
-			info.notCheckable = true
-			info.hasArrow = true
-			info.value = {
-				isHolderMenu = true,
-				result = result,
-				type = "codesnippet",
-			}
-			
-			UIDropDownMenu_AddButton(info, UIDROPDOWNMENU_MENU_LEVEL)
-		end
-	end)
-end
 
 TMW:RegisterCallback("TMW_CONFIG_REQUEST_AVAILABLE_IMPORT_EXPORT_TYPES", function(event, editbox, import, export)
 	

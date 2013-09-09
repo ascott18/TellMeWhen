@@ -645,6 +645,8 @@ L["UIPANEL_GROUPS_GLOBAL"] = "|cff00c300Global|r Groups"
 L["UIPANEL_GROUPS_DESC"] = "Settings for each group in this TellMeWhen profile."
 L["UIPANEL_GROUPS_GLOBAL_DESC"] = "Settings for the groups that are available to all your TellMeWhen profiles."
 
+L["UIPANEL_PROFILES"] = "Profiles"
+
 L["UIPANEL_GROUPTYPE"] = "Group Display Method"
 L["UIPANEL_GROUPTYPE_DESC"] = "Choose how you would like icons within this group to be displayed."
 L["UIPANEL_GROUPTYPE_ICON"] = "Icon"

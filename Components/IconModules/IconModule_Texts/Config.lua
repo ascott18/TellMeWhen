@@ -603,7 +603,15 @@ local textLayoutTemplate = {
 			order = 110,
 			func = function(info)
 				local layout = findlayout(info)
-				TMW:Import(nil, TEXT:GetTextLayoutSettings(layout), TELLMEWHEN_VERSIONNUMBER, "textlayout", TMW:GenerateGUID("textlayout", TMW.CONST.GUID_SIZE))
+
+				local GUID = TMW:GenerateGUID("textlayout", TMW.CONST.GUID_SIZE)
+
+				local Item = TMW.Classes.SettingsItem:New("textlayout")
+				Item.Settings = TEXT:GetTextLayoutSettings(layout)
+				Item.Version = TELLMEWHEN_VERSIONNUMBER
+				Item:SetExtra("GUID", GUID)
+
+				Item:Import(GUID)
 			end,
 			disabled = function(info)
 				return false
@@ -1091,18 +1099,23 @@ end)
 
 
 
+
+
+
+
 -- -------------------
 -- IMPORT/EXPORT
 -- -------------------
 
 local textlayout = TMW.Classes.SharableDataType:New("textlayout", 15)
+textlayout.extrasMap = {"GUID"}
 
-function textlayout:Import_ImportData(_, data, version, GUID)
+function textlayout:Import_ImportData(Item, GUID)
 	assert(type(GUID) == "string")
 	
 	TMW.db.profile.TextLayouts[GUID] = nil -- restore defaults
 	local textlayout = TMW.db.profile.TextLayouts[GUID]
-	TMW:CopyTableInPlaceWithMeta(data, textlayout, true)
+	TMW:CopyTableInPlaceWithMeta(Item.Settings, textlayout, true)
 	textlayout.GUID = GUID
 
 	if textlayout.NoEdit then
@@ -1120,6 +1133,7 @@ function textlayout:Import_ImportData(_, data, version, GUID)
 		end
 	until not found
 	
+	local version = Item.Version
 	if version then
 		if version > TELLMEWHEN_VERSIONNUMBER then
 			TMW:Print(L["FROMNEWERVERSION"])
@@ -1129,54 +1143,53 @@ function textlayout:Import_ImportData(_, data, version, GUID)
 	end
 	TMW:Update()
 end
-function textlayout:Import_HolderMenuHandler(result, editbox, holderMenuData)
-	local TextLayouts = result.data.TextLayouts
-	
-	local info = UIDropDownMenu_CreateInfo()
-	info.text = L["TEXTLAYOUTS"]
-	info.isTitle = true
-	info.notCheckable = true
-	UIDropDownMenu_AddButton(info, UIDROPDOWNMENU_MENU_LEVEL)
-	
-	TMW.AddDropdownSpacer()
-	
-	-- Create a menu for aech text layout in the profile.
-	if TextLayouts then
-		for GUID, settings in pairs(TextLayouts) do
+
+function textlayout:Import_CreateMenuEntry(info, Item)
+	info.text = TMW.TEXT:GetLayoutName(Item.Settings, Item:GetExtra("GUID"))
+end
+
+
+-- Profile's text layouts
+local SharableDataType_profile = TMW.Classes.SharableDataType.types.profile
+SharableDataType_profile:RegisterMenuBuilder(20, function(Item_profile)
+
+	if Item_profile.Settings.TextLayouts then
+		local isGood = false
+		for GUID, settings in pairs(Item_profile.Settings.TextLayouts) do
 			if GUID ~= "" and settings.GUID then
-				self:Import_BuildContainingDropdownEntry({
-					data = settings,
-					type = self.type,
-					version = result.version,
-					[1] = GUID,
-				}, editbox)
+				isGood = true
+				break
 			end
 		end
+
+		if not isGood then return end
+
+
+		local Bundle = TMW.Classes.Bundle:New("textlayout")
+
+		for GUID, layout in pairs(Item_profile.Settings.TextLayouts) do
+			local Item = TMW.Classes.SettingsItem:New("textlayout")
+
+			Item:SetParent(Item_profile)
+			Item.Settings = layout
+			Item:SetExtra("GUID", GUID)
+
+			Bundle:Add(Item)
+
+		end
+
+		if Bundle:CreateParentedMenuEntry(L["TEXTLAYOUTS"]) then
+			TMW.AddDropdownSpacer()
+		end
 	end
-end
-function textlayout:Import_BuildContainingDropdownEntry(result, editbox)	
-	local settings = result.data
-	
-	local info = UIDropDownMenu_CreateInfo()
-	info.text = TMW.TEXT:GetLayoutName(settings, result[1])
-	info.value = result
-	info.hasArrow = true
-	info.notCheckable = true
-	
-	UIDropDownMenu_AddButton(info, UIDROPDOWNMENU_MENU_LEVEL)
-end
-function textlayout:Import_BuildMenuData(result, editbox)
-	local settings = result.data
-	local GUID = result[1]
+end)
+
+-- Import Layout
+textlayout:RegisterMenuBuilder(1, function(Item_textlayout)
+	local settings = Item_textlayout.Settings
+	local GUID = Item_textlayout:GetExtra("GUID")
+
 	assert(type(GUID) == "string")
-	
-	local info = UIDropDownMenu_CreateInfo()
-	info.text = TMW.TEXT:GetLayoutName(settings, GUID)
-	info.isTitle = true
-	info.notCheckable = true
-	UIDropDownMenu_AddButton(info, UIDROPDOWNMENU_MENU_LEVEL)
-	
-	TMW.AddDropdownSpacer()
 	
 	local layoutSettings = TMW.TEXT:GetTextLayoutSettings(GUID)
 	
@@ -1192,7 +1205,7 @@ function textlayout:Import_BuildMenuData(result, editbox)
 		info.notCheckable = true
 		
 		info.func = function()
-			TMW:Import(editbox, settings, result.version, "textlayout", GUID)
+			Item_textlayout:Import(GUID)
 		end
 		UIDropDownMenu_AddButton(info, UIDROPDOWNMENU_MENU_LEVEL)
 		
@@ -1205,7 +1218,7 @@ function textlayout:Import_BuildMenuData(result, editbox)
 		info.notCheckable = true
 		
 		info.func = function()
-			TMW:Import(editbox, settings, result.version, "textlayout", TMW:GenerateGUID("textlayout", TMW.CONST.GUID_SIZE))
+			Item_textlayout:Import(TMW:GenerateGUID("textlayout", TMW.CONST.GUID_SIZE))
 		end
 		UIDropDownMenu_AddButton(info, UIDROPDOWNMENU_MENU_LEVEL)
 	else
@@ -1218,14 +1231,16 @@ function textlayout:Import_BuildMenuData(result, editbox)
 		info.notCheckable = true
 		
 		info.func = function()
-			TMW:Import(editbox, settings, result.version, "textlayout", GUID)
+			Item_textlayout:Import(GUID)
 		end
 		UIDropDownMenu_AddButton(info, UIDROPDOWNMENU_MENU_LEVEL)
 	
 	end
-end
+end)
+
 
 textlayout.Export_DescriptionAppend = L["EXPORT_SPECIALDESC2"]:format("6.0.0+")
+
 function textlayout:Export_SetButtonAttributes(editbox, info)
 	local IMPORTS, EXPORTS = editbox:GetAvailableImportExportTypes()
 	local GUID = EXPORTS[self.type]
@@ -1234,47 +1249,17 @@ function textlayout:Export_SetButtonAttributes(editbox, info)
 	info.text = text
 	info.tooltipTitle = text
 end
-function textlayout:Export_GetArgs(editbox, info)
-	--editbox, type, settings, defaults, ...
+
+function textlayout:Export_GetArgs(editbox)
+	-- settings, defaults, ...
 	local IMPORTS, EXPORTS = editbox:GetAvailableImportExportTypes()
 	local GUID = EXPORTS[self.type]
 	assert(type(GUID) == "string")
 	local settings = TMW.TEXT:GetTextLayoutSettings(GUID)
 	
-	return editbox, self.type, settings, TMW.Defaults.profile.TextLayouts["**"], GUID
+	return settings, TMW.Defaults.profile.TextLayouts["**"], GUID
 end
 
-local SharableDataType_profile = TMW.Classes.SharableDataType.types.profile
-if SharableDataType_profile then
-	SharableDataType_profile:RegisterMenuBuilder(20, function(self, result, editbox)
-
-		if result.data.TextLayouts then
-			local isGood = false
-			for GUID, settings in pairs(result.data.TextLayouts) do
-				if GUID ~= "" and settings.GUID then
-					isGood = true
-					break
-				end
-			end
-
-			if not isGood then return end
-
-			local info = UIDropDownMenu_CreateInfo()
-			info.text = L["TEXTLAYOUTS"]
-			info.notCheckable = true
-			info.hasArrow = true
-			info.value = {
-				isHolderMenu = true,
-				result = result,
-				type = "textlayout",
-			}
-			UIDropDownMenu_AddButton(info, UIDROPDOWNMENU_MENU_LEVEL)
-			
-			TMW.AddDropdownSpacer()
-		end
-
-	end)
-end
 
 TMW:RegisterCallback("TMW_CONFIG_REQUEST_AVAILABLE_IMPORT_EXPORT_TYPES", function(event, editbox, import, export)
 	
