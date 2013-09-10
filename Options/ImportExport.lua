@@ -323,7 +323,6 @@ end)
 
 -- All other profiles
 database:RegisterMenuBuilder(20, function(Item_database)
-	print("blah2")
 	local db = Item_database.Settings
 	local currentProfile = TMW.db:GetCurrentProfile()
 
@@ -791,6 +790,11 @@ group:RegisterMenuBuilder(30, function(Item_group)
 end)
 
 
+icon:RegisterMenuBuilder(10, function(Item_icon)
+	Item_icon:CreateMenuEntry()
+end)
+
+
 
 function icon:Export_SetButtonAttributes(editbox, info)
 	local IMPORTS, EXPORTS = editbox:GetAvailableImportExportTypes()
@@ -904,7 +908,7 @@ function String:HandleTopLevelMenu()
 
 	local t = strtrim(EDITBOX:GetText())
 	local editboxResult = t ~= "" and TMW:DeserializeData(t)
-	
+	print(editboxResult)
 	local type = SharableDataType.types[editboxResult.type]
 
 	local Item = Item:New(editboxResult.type)
@@ -913,6 +917,7 @@ function String:HandleTopLevelMenu()
 	Item.Version = editboxResult.version
 	type:AddExtras(Item, unpack(editboxResult))
 
+print(Item)
 	Item:BuildChildMenu()
 end
 
