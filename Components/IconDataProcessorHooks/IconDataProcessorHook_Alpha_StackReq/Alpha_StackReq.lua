@@ -51,10 +51,10 @@ Hook:RegisterIconDefaults{
 	StackAlpha				= 0,
 }
 Hook:RegisterConfigPanel_XMLTemplate(225, "TellMeWhen_StackRequirements")
-TMW:RegisterUpgrade(40080, {
+TMW:RegisterUpgrade(60000, {
 	icon = function(self, ics)
-		ics.StackMin = floor(ics.StackMin)
-		ics.StackMax = floor(ics.StackMax)
+		ics.StackMin = floor(tonumber(ics.StackMin)) or 0
+		ics.StackMax = floor(tonumber(ics.StackMax)) or 0
 	end,
 })
 TMW:RegisterUpgrade(23000, {

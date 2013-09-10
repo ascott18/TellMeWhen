@@ -77,6 +77,9 @@ end)
 TMW:RegisterUpgrade(60010, {
 	icon = function(self, ics)
 		ics.DurationAlpha = ics.ConditionAlpha
+
+		ics.DurationMin = tonumber(ics.DurationMin) or 0
+		ics.DurationMax = tonumber(ics.DurationMax) or 0
 	end,
 })
 
