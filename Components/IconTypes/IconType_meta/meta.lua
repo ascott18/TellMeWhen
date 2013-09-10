@@ -322,8 +322,10 @@ function Type:Setup(icon)
 	icon.metaUpdateQueued = true -- force this
 
 	-- validity check:
-	for i, icGUID in pairs(icon.Icons) do
-		TMW:QueueValidityCheck(icon, icGUID, L["VALIDITY_META_DESC"], i)
+	if icon.Enabled then
+		for i, icGUID in pairs(icon.Icons) do
+			TMW:QueueValidityCheck(icon, icGUID, L["VALIDITY_META_DESC"], i)
+		end
 	end
 
 	wipe(alreadyinserted)
