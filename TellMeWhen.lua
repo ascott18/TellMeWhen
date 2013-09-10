@@ -86,8 +86,6 @@ local time = GetTime() TMW.time = time
 local clientVersion = select(4, GetBuildInfo())
 local addonVersion = tonumber(GetAddOnMetadata("TellMeWhen", "X-Interface"))
 
-local wow_504 = clientVersion >= 50400
-
 local _, pclass = UnitClass("Player")
 
 
@@ -345,10 +343,6 @@ TMW.BE = {
 		Tier12Interrupts	= "_97202;_100094",
 	},
 }
-if GetSpellInfo(110300) then
-	-- TODO: Remove this code when 5.4 goes live.
-	TMW.BE.debuffs.Slowed = TMW.BE.debuffs.Slowed .. ";_110300"
-end
 
 TMW.DS = {
 	Magic 	= "Interface\\Icons\\spell_fire_immolation",
