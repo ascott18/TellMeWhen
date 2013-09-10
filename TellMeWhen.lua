@@ -24,7 +24,7 @@ if strmatch(projectVersion, "%-%d+%-") then
 end
 
 TELLMEWHEN_VERSION_FULL = TELLMEWHEN_VERSION .. TELLMEWHEN_VERSION_MINOR
-TELLMEWHEN_VERSIONNUMBER = 62413 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL (for versioning of)
+TELLMEWHEN_VERSIONNUMBER = 62414 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL (for versioning of)
 
 if TELLMEWHEN_VERSIONNUMBER > 63000 or TELLMEWHEN_VERSIONNUMBER < 62000 then
 	-- safety check because i accidentally made the version number 414069 once
@@ -84,8 +84,6 @@ local time = GetTime() TMW.time = time
 
 local clientVersion = select(4, GetBuildInfo())
 local addonVersion = tonumber(GetAddOnMetadata("TellMeWhen", "X-Interface"))
-
-local wow_504 = clientVersion >= 50400
 
 local _, pclass = UnitClass("Player")
 
@@ -335,10 +333,6 @@ TMW.BE = {
 		Tier12Interrupts	= "_97202;_100094",
 	},
 }
-if GetSpellInfo(110300) then
-	-- TODO: Remove this code when 5.4 goes live.
-	TMW.BE.debuffs.Slowed = TMW.BE.debuffs.Slowed .. ";_110300"
-end
 
 TMW.DS = {
 	Magic 	= "Interface\\Icons\\spell_fire_immolation",
