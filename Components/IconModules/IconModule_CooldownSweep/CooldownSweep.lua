@@ -135,6 +135,11 @@ function CooldownSweep:OnNewInstance(icon)
 	self.cooldown = CreateFrame("Cooldown", self:GetChildNameBase() .. "Cooldown", icon, "CooldownFrameTemplate")
 	
 	self:SetSkinnableComponent("Cooldown", self.cooldown)
+
+
+	if ElvUI and ElvUI[1].RegisterCooldown then
+		ElvUI[1]:RegisterCooldown(self.cooldown)
+	end
 end
 
 function CooldownSweep:OnDisable()
@@ -162,8 +167,6 @@ function CooldownSweep:SetupForIcon(icon)
 	elseif elvui then
 		self.cooldown.noCooldownCount = not icon.ShowTimerText -- For OmniCC/tullaCC/most other cooldown count mods (I think LUI uses this too)
 		self.cooldown.noOCC = not icon.ShowTimerTextnoOCC -- For ElvUI
-
-		ElvUI[1]:RegisterCooldown(self.cooldown)
 	else
 		self.cooldown.noCooldownCount = not icon.ShowTimerText -- For OmniCC/tullaCC/most other cooldown count mods (I think LUI uses this too)
 	end
