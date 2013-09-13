@@ -291,7 +291,7 @@ function codesnippet:Import_ImportData(Item, domain)
 end
 
 function codesnippet:Import_CreateMenuEntry(info, Item)
-	info.text = Item.Settings.Name
+	info.text = Item.Settings.Name or L["CODESNIPPETS_DEFAULTNAME"]
 end
 
 
@@ -303,13 +303,16 @@ SharableDataType_profile:RegisterMenuBuilder(19, function(Item_profile)
 		local SettingsBundle = TMW.Classes.SettingsBundle:New("codesnippet")
 
 		for n, snippet in TMW:InNLengthTable(Item_profile.Settings.CodeSnippets) do
-			local Item = TMW.Classes.SettingsItem:New("codesnippet")
+			if snippet then
 
-			Item:SetParent(Item_profile)
-			Item.Settings = snippet
+				local Item = TMW.Classes.SettingsItem:New("codesnippet")
 
-			SettingsBundle:Add(Item)
+				Item:SetParent(Item_profile)
+				Item.Settings = snippet
 
+				SettingsBundle:Add(Item)
+
+			end
 		end
 
 		if SettingsBundle:CreateParentedMenuEntry(L["CODESNIPPETS"]) then
@@ -319,17 +322,7 @@ SharableDataType_profile:RegisterMenuBuilder(19, function(Item_profile)
 end)
 
 -- Import Snippet
-codesnippet:RegisterMenuBuilder(1, function(Item_codesnippet)
-	local settings = Item_codesnippet.Settings
-	
-	local info = UIDropDownMenu_CreateInfo()
-	info.text = L["fCODESNIPPET"]:format(settings.Name)
-	info.isTitle = true
-	info.notCheckable = true
-	UIDropDownMenu_AddButton(info, UIDROPDOWNMENU_MENU_LEVEL)
-	
-	TMW.AddDropdownSpacer()
-	
+codesnippet:RegisterMenuBuilder(1, function(Item_codesnippet)	
 	local IMPORTS, EXPORTS = Item_codesnippet:GetEditbox():GetAvailableImportExportTypes()
 	
 	-- Import as global snippet
