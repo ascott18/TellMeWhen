@@ -20,6 +20,9 @@
  ** Icons should now always have the correct size after their view changes or the size or ID of a group changes.
  ** Fixed an issue where strings imported from older version of TellMeWhen (roughly pre-v6.0.0) could have their StackMin/Max and DurationMin/Max settings as strings instead of numbers.
 
+===v6.2.5===
+ * ElvUI's timer texts are once again supported by TellMeWhen.
+
 ===v6.2.4===
  * Added DogTags for string.gsub and string.find.
  * Added Yu'lon's Barrier to the DamageShield equivalency.
