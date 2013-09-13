@@ -162,13 +162,11 @@ function CooldownSweep:SetupForIcon(icon)
 	elseif elvui then
 		self.cooldown.noCooldownCount = not icon.ShowTimerText -- For OmniCC/tullaCC/most other cooldown count mods (I think LUI uses this too)
 		self.cooldown.noOCC = not icon.ShowTimerTextnoOCC -- For ElvUI
+
+		ElvUI[1]:RegisterCooldown(self.cooldown)
 	else
 		self.cooldown.noCooldownCount = not icon.ShowTimerText -- For OmniCC/tullaCC/most other cooldown count mods (I think LUI uses this too)
 	end
-	--[[
-	self.cooldown.noCooldownCount = not icon.ShowTimerText -- For OmniCC/tullaCC/most other cooldown count mods (I think LUI uses this too)
-	self.cooldown.noOCC = not icon.ShowTimerTextnoOCC -- For ElvUI
-	]]
 	
 	local attributes = icon.attributes
 	

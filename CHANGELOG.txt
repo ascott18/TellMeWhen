@@ -1,3 +1,6 @@
+===v6.2.5===
+ * ElvUI's timer texts are once again supported by TellMeWhen.
+
 ===v6.2.4===
  * Added DogTags for string.gsub and string.find.
  * Added Yu'lon's Barrier to the DamageShield equivalency.
