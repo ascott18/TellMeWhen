@@ -15,18 +15,18 @@
 		<Frames>
 			<Frame parentKey="Borders" setAllPoints="true">
 				<Layers>
-					<Layer level="BACKGROUND">
+					<Layer level="OVERLAY">
 
 						<Texture parentKey="BorderTop" inherits="TellMeWhen_GlobalGroupBorder">
 							<Anchors>
-								<Anchor point="TOPLEFT" x="-1" y="1"/>
-								<Anchor point="TOPRIGHT" x="1" y="1"/>
+								<Anchor point="TOPLEFT" x="0" y="0"/>
+								<Anchor point="TOPRIGHT" x="0" y="0"/>
 							</Anchors>
 						</Texture>
 						<Texture parentKey="BorderBottom" inherits="TellMeWhen_GlobalGroupBorder">
 							<Anchors>
-								<Anchor point="BOTTOMLEFT" x="-1" y="-1"/>
-								<Anchor point="BOTTOMRIGHT" x="1" y="-1"/>
+								<Anchor point="BOTTOMLEFT" x="0" y="0"/>
+								<Anchor point="BOTTOMRIGHT" x="0" y="0"/>
 							</Anchors>
 						</Texture>
 						<Texture parentKey="BorderLeft" inherits="TellMeWhen_GlobalGroupBorder">
@@ -48,7 +48,7 @@
 		</Frames>
 		<Scripts>
 			<OnSizeChanged>
-				self.Borders:SetScale(1.2/self:GetScale())
+				self.Borders:SetScale(1.3/self:GetScale())
 			</OnSizeChanged>
 		</Scripts>
 	</Frame>
