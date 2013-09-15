@@ -106,6 +106,8 @@ function Item:BuildChildMenu()
 end
 
 function Item:Import(...)
+	self:AssertSelfIsInstance()
+	
 	TMW:Import(self, ...)
 end
 
@@ -371,7 +373,7 @@ profile:RegisterMenuBuilder(10, function(Item_profile)
 	local info = UIDropDownMenu_CreateInfo()
 	info.text = L["IMPORT_PROFILE"] .. " - " .. L["IMPORT_PROFILE_OVERWRITE"]:format(TMW.db:GetCurrentProfile())
 	info.func = function()
-		Item:Import()
+		Item_profile:Import()
 	end
 	info.notCheckable = true
 	UIDropDownMenu_AddButton(info, UIDROPDOWNMENU_MENU_LEVEL)
@@ -380,7 +382,7 @@ profile:RegisterMenuBuilder(10, function(Item_profile)
 	local info = UIDropDownMenu_CreateInfo()
 	info.text = L["IMPORT_PROFILE"] .. " - " .. L["IMPORT_PROFILE_NEW"]
 	info.func = function()
-		Item:Import(Item_profile:GetExtra("Name"))
+		Item_profile:Import(Item_profile:GetExtra("Name"))
 	end
 	info.notCheckable = true
 	UIDropDownMenu_AddButton(info, UIDROPDOWNMENU_MENU_LEVEL)
