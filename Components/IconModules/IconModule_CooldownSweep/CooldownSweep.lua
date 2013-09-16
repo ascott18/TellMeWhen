@@ -142,6 +142,21 @@ function CooldownSweep:OnNewInstance(icon)
 	end
 end
 
+
+if ElvUI and ElvUI[1].OnSetCooldown then
+	local E = ElvUI[1]
+	local old_OnSetCooldown = E.OnSetCooldown
+
+	function E:OnSetCooldown(...)
+		if self.noOCC then
+			return
+		end
+
+		return old_OnSetCooldown(self, ...)
+	end
+end
+
+
 function CooldownSweep:OnDisable()
 	local cd = self.cooldown
 	
