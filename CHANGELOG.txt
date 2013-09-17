@@ -1,7 +1,8 @@
 ===v6.2.6===
  * Added a hack to ElvUI's timer texts to obey the setting in TellMeWhen. Previously, they would be enabled for all icons because of a change made by ElvUI's developers.
+ * Spell Cooldown icons that are tracking by spellID instead of by name should once again reflect spell charges properly (this functionality was disrupted by a bug introduced by Blizzard in patch 5.4).
 
- ===v6.2.5===
+===v6.2.5===
  * ElvUI's timer texts are once again supported by TellMeWhen.
 
 ===v6.2.4===

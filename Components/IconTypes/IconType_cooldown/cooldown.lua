@@ -141,7 +141,7 @@ local function SpellCooldown_OnUpdate(icon, time)
 		
 		local start, duration, stack
 		
-		local charges, maxCharges, start_charge, duration_charge = GetSpellCharges(iName)
+		local charges, maxCharges, start_charge, duration_charge = GetSpellCharges(NameNameArray[i])
 		if charges then
 			if charges < maxCharges then
 				start, duration = start_charge, duration_charge
