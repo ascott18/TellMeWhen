@@ -8,7 +8,7 @@
  *** Icon Shown conditions (and the other conditions that track icons)
  *** On Icon Show/On Icon Hide icon events
  *** Group anchoring to other groups
- ** The consequence of this is that you can now import/export icons and meta icons that include those icons separately and they will automatically find eachother once they are all imported (as long as these export strings were created with TMW v7.0.0+)
+ ** The consequence of this is that you can now, for example, import/export meta icons and the icons checked by the meta icons separately and they will automatically find eachother once they are all imported (as long as these export strings were created with TMW v7.0.0+)
 
  * You can now right-click-and-drag the group resize handle to easily change the number of rows and columns of a group.
  * Added group settings that allow you to specify when a group should be shown based on the role that your current specialization fulfills.
@@ -21,8 +21,9 @@
  ** Fixed an issue where strings imported from older version of TellMeWhen (roughly pre-v6.0.0) could have their StackMin/Max and DurationMin/Max settings as strings instead of numbers.
 
 ===v6.2.6===
- * Added a hack to ElvUI's timer texts to obey the setting in TellMeWhen. Previously, they would be enabled for all icons because of a change made by ElvUI's developers.
- * Spell Cooldown icons that are tracking by spellID instead of by name should once again reflect spell charges properly (this functionality was disrupted by a bug introduced by Blizzard in patch 5.4).
+ * Bug Fixes:
+ ** Added a hack to ElvUI's timer texts so that they will once again obey the setting in TellMeWhen. Previously, they would be enabled for all icons because of a change made by ElvUI's developers.
+ ** Spell Cooldown icons that are tracking by spellID instead of by name should once again reflect spell charges properly (this functionality was disrupted by a bug introduced by Blizzard in patch 5.4).
 
 ===v6.2.5===
  * ElvUI's timer texts are once again supported by TellMeWhen.
