@@ -46,17 +46,19 @@ function Env.AuraStacks(unit, name, namename, filter)
 	end
 end
 
-function Env.AuraCount(unit, name, namename, filter)
+function Env.AuraCount(unit, nameRaw, filter)
 	local n = 0
-	local isID = isNumber[name]
-	for z = 1, 60 do
+	local names = TMW:GetSpellNames(nameRaw, 1, nil, nil, 1)
+
+	for z = 1, 200 do
 		local buffName, _, _, _, _, _, _, _, _, _, id = UnitAura(unit, z, filter)
 		if not buffName then
 			return n
-		elseif (isID and isID == id) or (not isID and strlowerCache[buffName] == name) then
+		elseif names[id] or names[strlowerCache[buffName]] then
 			n = n + 1
 		end
 	end
+
 	return n
 end
 
@@ -251,14 +253,14 @@ ConditionCategory:RegisterCondition(5,	 "BUFFNUMBER", {
 	tooltip = L["NUMAURAS_DESC"],
 	min = 0,
 	max = 20,
-	name = function(editbox) TMW:TT(editbox, "BUFFTOCHECK", "BUFFCNDT_DESC") editbox.label = L["BUFFTOCHECK"] end,
+	name = function(editbox) TMW:TT(editbox, "BUFFTOCHECK", "CNDT_MULTIPLEVALID") editbox.label = L["BUFFTOCHECK"] end,
 	useSUG = true,
 	check = function(check) TMW:TT(check, "ONLYCHECKMINE", "ONLYCHECKMINE_DESC") end,
 	texttable = function(k) return format(L["ACTIVE"], k) end,
 	icon = "Interface\\Icons\\ability_paladin_sacredcleansing",
 	tcoords = CNDT.COMMON.standardtcoords,
 	funcstr = function(c)
-		return [[AuraCount(c.Unit, c.NameFirst, c.NameName, "HELPFUL]] .. (c.Checked and " PLAYER" or "") .. [[") c.Operator c.Level]]
+		return [[AuraCount(c.Unit, c.NameRaw, "HELPFUL]] .. (c.Checked and " PLAYER" or "") .. [[") c.Operator c.Level]]
 	end,
 	events = function(ConditionObject, c)
 		return
@@ -409,14 +411,14 @@ ConditionCategory:RegisterCondition(15,	 "DEBUFFNUMBER", {
 	tooltip = L["NUMAURAS_DESC"],
 	min = 0,
 	max = 20,
-	name = function(editbox) TMW:TT(editbox, "DEBUFFTOCHECK", "BUFFCNDT_DESC") editbox.label = L["DEBUFFTOCHECK"] end,
+	name = function(editbox) TMW:TT(editbox, "DEBUFFTOCHECK", "CNDT_MULTIPLEVALID") editbox.label = L["DEBUFFTOCHECK"] end,
 	useSUG = true,
 	check = function(check) TMW:TT(check, "ONLYCHECKMINE", "ONLYCHECKMINE_DESC") end,
 	texttable = function(k) return format(L["ACTIVE"], k) end,
 	icon = "Interface\\Icons\\spell_deathknight_frostfever",
 	tcoords = CNDT.COMMON.standardtcoords,
 	funcstr = function(c)
-		return [[AuraCount(c.Unit, c.NameFirst, c.NameName, "HARMFUL]] .. (c.Checked and " PLAYER" or "") .. [[") c.Operator c.Level]]
+		return [[AuraCount(c.Unit, c.NameRaw, "HARMFUL]] .. (c.Checked and " PLAYER" or "") .. [[") c.Operator c.Level]]
 	end,
 	events = function(ConditionObject, c)
 		return

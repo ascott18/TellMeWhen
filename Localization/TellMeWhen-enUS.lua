@@ -1244,6 +1244,7 @@ L["MP5"] = "%d MP5"
 L["REACTIVECNDT_DESC"] = "This condition only checks the reactive state of the ability, not the cooldown of it."
 L["BUFFCNDT_DESC"] = "Only the first spell will be checked, all others will be ignored."
 L["CNDT_ONLYFIRST"] = "Only the first spell/item will be checked - semicolon-delimited lists are not valid for this condition type."
+L["CNDT_MULTIPLEVALID"] = "You can enter multiple names/IDs to check by separating each with a semicolon."
 L["CNDT_TOTEMNAME"] = "Totem Name(s)"
 L["CNDT_TOTEMNAME_DESC"] = [[Set blank to track any totems of the selected type.
 

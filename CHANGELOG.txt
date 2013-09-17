@@ -13,8 +13,9 @@
  * You can now right-click-and-drag the group resize handle to easily change the number of rows and columns of a group.
  * Added group settings that allow you to specify when a group should be shown based on the role that your current specialization fulfills.
  * You can now enter "none" or "blank" as a custom texture for an icon to force it to display no texture.
- * New Condition: Specialization Role
  * Dramatically decreased memory usage, especially for icons that have no icon type assigned.
+ * New Condition: Specialization Role
+ * The Buff/Debuff - Number of conditions now accept semicolon-delimited lists of multiple auras that should be counted.
 
  * Bug Fixes:
  ** Icons should now always have the correct size after their view changes or the size or ID of a group changes.
