@@ -738,7 +738,7 @@ function icon:Import_CreateMenuEntry(info, Item)
 
 	info.func = function()
 		if ic and ic:IsVisible() then
-			TMW.HELP:Show("ICON_IMPORT_CURRENTPROFILE", nil, editbox, 0, 0, L["HELP_IMPORT_CURRENTPROFILE"])
+			TMW.HELP:Show("ICON_IMPORT_CURRENTPROFILE", nil, EDITBOX, 0, 0, L["HELP_IMPORT_CURRENTPROFILE"])
 			IMPORTS.icon:SetInfo("texture", tex)
 		else
 			IMPORTS.icon:SetInfo("texture", nil)
@@ -850,7 +850,7 @@ end
 local Profile = ImportSource:New("Profile")
 Profile.displayText = L["IMPORT_FROMLOCAL"]
 
-function Profile:HandleTopLevelMenu(editbox)
+function Profile:HandleTopLevelMenu()
 	local Item = Item:New("database")
 
 	Item.Settings = TMW.db
@@ -919,8 +919,7 @@ function String:HandleTopLevelMenu()
 	Item.Version = editboxResult.version
 	type:AddExtras(Item, unpack(editboxResult))
 
-print(Item)
-	Item:BuildChildMenu()
+	Item:CreateMenuEntry()
 end
 
 
@@ -968,7 +967,7 @@ function Comm:HandleTopLevelMenu(editbox)
 		Item.Version = result.version
 		type:AddExtras(Item, unpack(result))
 
-		Item:BuildChildMenu()
+		Item:CreateMenuEntry()
 	end
 end
 
@@ -1016,8 +1015,8 @@ function ExportDestination:HandleTopLevelMenu()
 			info.text = info.text:gsub("^(.-):", "|cff00ffff%1|r:")
 			
 			info.func = function()
-				-- editbox, type, settings, defaults, ...
-				self:Export(editbox, dataType.type, dataType:Export_GetArgs(EDITBOX))
+				-- type, settings, defaults, ...
+				self:Export(dataType.type, dataType:Export_GetArgs(EDITBOX))
 			end
 			
 			UIDropDownMenu_AddButton(info, UIDROPDOWNMENU_MENU_LEVEL)
@@ -1032,18 +1031,18 @@ end
 local String = ExportDestination:New("String")
 String.Export_DescriptionPrepend = L["EXPORT_TOSTRING_DESC"]
 
-function String:Export(editbox, type, settings, defaults, ...)
+function String:Export(type, settings, defaults, ...)
 	local s = TMW:GetSettingsString(type, settings, defaults, ...)
 	s = TMW:MakeSerializedDataPretty(s)
 	TMW.LastExportedString = s
 
-	editbox:SetText(s)
-	editbox:HighlightText()
-	editbox:SetFocus()
+	EDITBOX:SetText(s)
+	EDITBOX:HighlightText()
+	EDITBOX:SetFocus()
 
 	CloseDropDownMenus()
 
-	TMW.HELP:Show("ICON_EXPORT_DOCOPY", nil, editbox, 0, 0, L["HELP_EXPORT_DOCOPY_" .. (IsMacClient() and "MAC" or "WIN")])
+	TMW.HELP:Show("ICON_EXPORT_DOCOPY", nil, EDITBOX, 0, 0, L["HELP_EXPORT_DOCOPY_" .. (IsMacClient() and "MAC" or "WIN")])
 end
 
 function String:SetButtonAttributes(editbox, info)
@@ -1060,15 +1059,15 @@ end
 local Comm = ExportDestination:New("Comm")
 Comm.Export_DescriptionPrepend = L["EXPORT_TOCOMM_DESC"]
 
-function Comm:Export(editbox, type, settings, defaults, ...)
-	local player = strtrim(editbox:GetText())
+function Comm:Export(type, settings, defaults, ...)
+	local player = strtrim(EDITBOX:GetText())
 	if player and #player > 1 then
 		local s = TMW:GetSettingsString(type, settings, defaults, ...)
 
 		if player == "RAID" or player == "GUILD" then -- note the upper case
-			TMW:SendCommMessage("TMW", s, player, nil, "BULK", editbox.callback, editbox)
+			TMW:SendCommMessage("TMW", s, player, nil, "BULK", EDITBOX.callback, EDITBOX)
 		else
-			TMW:SendCommMessage("TMW", s, "WHISPER", player, "BULK", editbox.callback, editbox)
+			TMW:SendCommMessage("TMW", s, "WHISPER", player, "BULK", EDITBOX.callback, EDITBOX)
 		end
 	end
 	

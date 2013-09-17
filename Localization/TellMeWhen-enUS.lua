@@ -134,7 +134,7 @@ L["CONDITIONORMETA_CHECKINGINVALID_GROUP"] = "Warning! Group %d is checking an i
 L["WARN_DRMISMATCH"] = [[Warning! You are checking the diminishing returns on spells from two different known categories.
 
 All spells must be from the same diminishing returns category for the icon to function properly. The following categories and spells were detected:]]
-L["FROMNEWERVERSION"] = "You are importing data that was created in a newer version of TellMeWhen than your version. Some settings might not work until you upgrade to the latest version."
+L["FROMNEWERVERSION"] = "You have imported data that was created in a newer version of TellMeWhen than your version. Some settings might not work until you upgrade to the latest version."
 
 -- -------------
 -- ICONMENU
