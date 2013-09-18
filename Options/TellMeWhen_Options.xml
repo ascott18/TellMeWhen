@@ -1435,13 +1435,13 @@
 				end
 				if userInput then
 					CloseDropDownMenus()
-				end
 
-				local editboxResult = TMW.LastExportedString ~= text and TMW:DeserializeData(text)
-				if editboxResult then
-					self.DoPulseValidString = 1
-				else
-					self.DoPulseValidString = nil
+					local editboxResults = TMW.LastExportedString ~= text and TMW:DeserializeData(text)
+					if editboxResults then
+						self.DoPulseValidString = 1
+					else
+						self.DoPulseValidString = nil
+					end
 				end
 			</OnTextChanged>
 		</Scripts>

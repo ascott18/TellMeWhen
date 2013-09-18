@@ -905,21 +905,22 @@ end
 String.displayDescription = L["IMPORT_FROMSTRING_DESC"]
 
 function String:HandleTopLevelMenu()
-	--TODO: the return from TMW:DeserializeData() sucks
-	-- also, type:AddExtras is undefined.
-
 	local t = strtrim(EDITBOX:GetText())
-	local editboxResult = t ~= "" and TMW:DeserializeData(t)
-	print(editboxResult)
-	local type = SharableDataType.types[editboxResult.type]
+	local editboxResults = t ~= "" and TMW:DeserializeData(t)
 
-	local Item = Item:New(editboxResult.type)
+	if editboxResults then
+		for _, result in pairs(editboxResults) do 
+			local type = SharableDataType.types[result.type]
 
-	Item.Settings = editboxResult.data
-	Item.Version = editboxResult.version
-	type:AddExtras(Item, unpack(editboxResult))
+			local Item = Item:New(result.type)
 
-	Item:CreateMenuEntry()
+			Item.Settings = result.data
+			Item.Version = result.version
+			type:AddExtras(Item, unpack(result))
+
+			Item:CreateMenuEntry()
+		end
+	end
 end
 
 
@@ -941,11 +942,13 @@ function Comm:DeserializeReceivedData()
 		for k, who in pairs(TMW.Received) do
 			-- deserialize received data now because we dont do it as they are received; AceSerializer is only embedded in _Options
 			if type(k) == "string" and who then
-				local result = TMW:DeserializeData(k)
-				if result then
-					tinsert(DeserializedData, result)
-					result.who = who
-					TMW.Received[k] = nil
+				local results = TMW:DeserializeData(k)
+				if results then
+					for _, result in pairs(results) do
+						tinsert(DeserializedData, result)
+						result.who = who
+						TMW.Received[k] = nil
+					end
 				end
 			end
 		end
@@ -1032,7 +1035,7 @@ local String = ExportDestination:New("String")
 String.Export_DescriptionPrepend = L["EXPORT_TOSTRING_DESC"]
 
 function String:Export(type, settings, defaults, ...)
-	local s = TMW:GetSettingsString(type, settings, defaults, ...)
+	local s = TMW:GetSettingsStrings(nil, type, settings, defaults, ...)
 	s = TMW:MakeSerializedDataPretty(s)
 	TMW.LastExportedString = s
 
@@ -1062,7 +1065,7 @@ Comm.Export_DescriptionPrepend = L["EXPORT_TOCOMM_DESC"]
 function Comm:Export(type, settings, defaults, ...)
 	local player = strtrim(EDITBOX:GetText())
 	if player and #player > 1 then
-		local s = TMW:GetSettingsString(type, settings, defaults, ...)
+		local s = TMW:GetSettingsStrings(nil, type, settings, defaults, ...)
 
 		if player == "RAID" or player == "GUILD" then -- note the upper case
 			TMW:SendCommMessage("TMW", s, player, nil, "BULK", EDITBOX.callback, EDITBOX)

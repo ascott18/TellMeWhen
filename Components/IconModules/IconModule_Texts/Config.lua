@@ -1277,3 +1277,18 @@ TMW:RegisterCallback("TMW_CONFIG_REQUEST_AVAILABLE_IMPORT_EXPORT_TYPES", functio
 	end
 end)
 
+
+TMW:RegisterCallback("TMW_EXPORT_SETTINGS_REQUESTED", function(event, strings, type, settings)
+	if type == "icon" or type == "group" then
+		for view, settingsPerView in pairs(settings.SettingsPerView) do
+			local GUID = settingsPerView.TextLayout
+
+			if GUID and GUID ~= "" then
+				local layout = rawget(TMW.db.profile.TextLayouts, GUID)
+				if layout and not layout.NoEdit then
+					TMW:GetSettingsStrings(strings, "textlayout", layout, TMW.Defaults.profile.TextLayouts["**"], GUID)
+				end
+			end
+		end
+	end
+end)

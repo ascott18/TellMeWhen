@@ -389,4 +389,20 @@ function Type:TMW_GLOBAL_UPDATE()
 end
 TMW:RegisterCallback("TMW_GLOBAL_UPDATE", Type)
 
+
+TMW:RegisterCallback("TMW_EXPORT_SETTINGS_REQUESTED", function(event, strings, type, settings)
+	if type == "icon" and settings.Type == "meta" then
+		for k, GUID in pairs(settings.Icons) do
+			if GUID ~= settings.GUID then
+				local type = TMW:ParseGUID(GUID)
+				local settings = TMW:GetSettingsFromGUID(GUID)
+				if type == "icon" and settings then
+					TMW:GetSettingsStrings(strings, type, settings, TMW.Icon_Defaults)
+				end
+			end
+		end
+	end
+end)
+
+
 Type:Register(310)

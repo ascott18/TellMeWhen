@@ -3293,10 +3293,10 @@ function TMW:MakeSerializedDataPretty(string)
 	gsub("%^ ^", "^^") -- remove double space at the end
 end
 
-function TMW:DeserializeData(string)
+function TMW:DeserializeDatum(string)
 	local success, data, version, spaceControl, type = TMW:Deserialize(string)
 	
-	if not success then
+	if not success or not data then
 		-- corrupt/incomplete string
 		return nil
 	end
@@ -3304,13 +3304,13 @@ function TMW:DeserializeData(string)
 	if spaceControl then
 		if spaceControl:find("`|") then
 			-- EVERYTHING is fucked up. try really hard to salvage it. It probably won't be completely successful
-			return TMW:DeserializeData(string:gsub("`", "~`"):gsub("~`|", "~`~|"))
+			return TMW:DeserializeDatum(string:gsub("`", "~`"):gsub("~`|", "~`~|"))
 		elseif spaceControl:find("`") then
 			-- if spaces have become corrupt, then reformat them and... re-deserialize (lol)
-			return TMW:DeserializeData(string:gsub("`", "~`"))
+			return TMW:DeserializeDatum(string:gsub("`", "~`"))
 		elseif spaceControl:find("~|") then
 			-- if pipe characters have been screwed up by blizzard's cute little method of escaping things combined with AS-3.0's cute way of escaping things, try to fix them.
-			return TMW:DeserializeData(string:gsub("~||", "~|"))
+			return TMW:DeserializeDatum(string:gsub("~||", "~|"))
 		end
 	end
 
@@ -3349,6 +3349,26 @@ function TMW:DeserializeData(string)
 	return result
 end
 
+function TMW:DeserializeData(str)
+	if not str then 
+		return
+	end
+
+	local results
+
+	str = gsub(str, "[%c ]", "")
+
+	for string in gmatch(str, "(^%d+.-^^)") do
+		results = results or {}
+
+		local result = TMW:DeserializeDatum(string)
+
+		tinsert(results, result)
+	end
+
+	return results
+end
+
 
 ---------- Settings Manipulation ----------
 function TMW:GetSettingsString(type, settings, defaults, ...)
@@ -3357,10 +3377,29 @@ function TMW:GetSettingsString(type, settings, defaults, ...)
 	assert(defaults, "No defaults specified!")
 
 	-- ... contains additional data that may or may not be used/needed
-	IE:SaveSettings()
 	settings = CopyTable(settings)
 	settings = TMW:CleanSettings(type, settings, defaults)
 	return TMW:SerializeData(settings, type, ...)
+end
+
+function TMW:GetSettingsStrings(strings, type, settings, defaults, ...)
+	assert(settings, "No data to serialize!")
+	assert(type, "No data type specified!")
+	assert(defaults, "No defaults specified!")
+
+	IE:SaveSettings()
+	local strings = strings or {}
+
+	local string = TMW:GetSettingsString(type, settings, defaults, ...)
+	if not TMW.tContains(strings, string) then
+		tinsert(strings, string)
+
+		TMW:Fire("TMW_EXPORT_SETTINGS_REQUESTED", strings, type, settings)
+	end
+	
+	TMW.tRemoveDuplicates(strings)
+
+	return table.concat(strings, " ")
 end
 
 function TMW:CleanDefaults(settings, defaults, blocker)
