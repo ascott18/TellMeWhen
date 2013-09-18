@@ -2594,7 +2594,10 @@ TMW:NewClass("SettingSlider", "Slider", "SettingFrameBase"){
 	-- This class may be incomplete for any implementations you might need.
 	-- Inherit from it and finish/override any methods that you need to.
 	
-	OnValueChanged = function(self, value)
+	OnValueChanged = function(self)
+		if TMW:Do504SliderBugFix(self) then return end
+		value = self:GetValue()
+
 		if CI.ics and self.setting then
 		
 			value = get(self.data.ModifySettingValue, self, value) or value
@@ -2699,6 +2702,9 @@ TMW:NewClass("SettingSlider_Alpha", "SettingSlider"){
 	end,
 	
 	OnValueChanged = function(self, value)
+		if TMW:Do504SliderBugFix(self) then return end
+		value = self:GetValue()
+
 		local icon = CI.icon
 		
 		if icon and not self.fakeNextSetValue then
@@ -3396,7 +3402,7 @@ function TMW:GetSettingsStrings(strings, type, settings, defaults, ...)
 
 		TMW:Fire("TMW_EXPORT_SETTINGS_REQUESTED", strings, type, settings)
 	end
-	
+
 	TMW.tRemoveDuplicates(strings)
 
 	return table.concat(strings, " ")

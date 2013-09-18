@@ -1013,6 +1013,16 @@ do	-- TMW.safecall
 end
 local safecall = TMW.safecall
 
+function TMW:Do504SliderBugFix(slider)
+	if not slider._onsetting then -- is single threaded 
+		slider._onsetting = true
+		slider:SetValue(slider:GetValue())
+		slider._onsetting = false
+	else
+		-- Returning true will trigger the calling function to also return.
+		return true
+	end
+end
 
 
 

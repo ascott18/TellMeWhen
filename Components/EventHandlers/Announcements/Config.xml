@@ -394,10 +394,12 @@
 								self.High:SetText(maxValue)
 							</OnMinMaxChanged>
 							<OnValueChanged>
-								local val = self:GetValue()
-								self.Mid:SetText(val == 0 and TMW.L["DEFAULT"] or val)
+								if TMW:Do504SliderBugFix(self) then return end
+								value = self:GetValue()
+
+								self.Mid:SetText(value == 0 and TMW.L["DEFAULT"] or value)
 								if TMW.CI.ics then
-									TMW.EVENTS:GetEventSettings().Size = val
+									TMW.EVENTS:GetEventSettings().Size = value
 									TMW.IE:ScheduleIconSetup()
 								end
 							</OnValueChanged>

@@ -101,6 +101,8 @@
 						</Anchors>
 						<Scripts>
 							<OnValueChanged>
+								if TMW:Do504SliderBugFix(self) then return end
+
 								value = max(self:GetValue(), 0.1)
 
 								self.Mid:SetFormattedText(TMW.L["ANIM_SECONDS"], TMW:FormatSeconds(value, nil, true))
@@ -145,7 +147,9 @@
 						</Anchors>
 						<Scripts>
 							<OnValueChanged>
+								if TMW:Do504SliderBugFix(self) then return end
 								value = self:GetValue()
+
 
 								self.Mid:SetFormattedText(TMW.L["ANIM_PIXELS"], value)
 
@@ -164,6 +168,8 @@
 						</Anchors>
 						<Scripts>
 							<OnValueChanged>
+								if TMW:Do504SliderBugFix(self) then return end
+
 								value = max(self:GetValue(), 0) -- whatever... just do it
 
 								self.Mid:SetFormattedText(TMW.L["ANIM_SECONDS"], TMW:FormatSeconds(value, nil, true))
@@ -320,6 +326,10 @@
 								self.High:SetTextColor(color, color, color, 1)
 							</OnLoad>
 							<OnValueChanged>
+								if TMW:Do504SliderBugFix(self) then return end
+								value = self:GetValue()
+
+
 								self.Mid:SetText(value)
 
 								if TMW.CI.ics then
@@ -339,6 +349,8 @@
 						</Anchors>
 						<Scripts>
 							<OnValueChanged>
+								if TMW:Do504SliderBugFix(self) then return end
+
 								value = max(self:GetValue(), 0.1)
 
 								self.Mid:SetFormattedText(TMW.L["ANIM_PIXELS"], value)
@@ -358,6 +370,8 @@
 						</Anchors>
 						<Scripts>
 							<OnValueChanged>
+								if TMW:Do504SliderBugFix(self) then return end
+
 								value = max(self:GetValue(), -math.huge) -- this works to remove floating point error (idk why)
 
 								self.Mid:SetFormattedText(TMW.L["ANIM_PIXELS"], value)
@@ -377,6 +391,8 @@
 						</Anchors>
 						<Scripts>
 							<OnValueChanged>
+								if TMW:Do504SliderBugFix(self) then return end
+
 								self.range = 100
 								value = max(self:GetValue(), 1)
 

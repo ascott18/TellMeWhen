@@ -251,7 +251,10 @@
 						end
 						
 						local conditionData = CndtGroup:GetConditionData()
+
 						local value = self:GetValue()
+						value = TMW.CNDT:ValidateLevelForCondition(value, conditionData.identifier)
+
 						CndtGroup.ValText:SetText(TMW.get(conditionData.texttable, value) or value)
 					</OnUpdate>
 					<OnMouseDown>
