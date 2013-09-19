@@ -135,26 +135,8 @@ function CooldownSweep:OnNewInstance(icon)
 	self.cooldown = CreateFrame("Cooldown", self:GetChildNameBase() .. "Cooldown", icon, "CooldownFrameTemplate")
 	
 	self:SetSkinnableComponent("Cooldown", self.cooldown)
-
-
-	if ElvUI and ElvUI[1].RegisterCooldown then
-		ElvUI[1]:RegisterCooldown(self.cooldown)
-	end
 end
 
-
-if ElvUI and ElvUI[1].OnSetCooldown then
-	local E = ElvUI[1]
-	local old_OnSetCooldown = E.OnSetCooldown
-
-	function E:OnSetCooldown(...)
-		if self.noOCC then
-			return
-		end
-
-		return old_OnSetCooldown(self, ...)
-	end
-end
 
 
 function CooldownSweep:OnDisable()
@@ -166,14 +148,15 @@ function CooldownSweep:OnDisable()
 	self:UpdateCooldown()
 end
 
+local tukui = IsAddOnLoaded("Tukui")
+local elvui = IsAddOnLoaded("ElvUI")
+
 function CooldownSweep:SetupForIcon(icon)
 	self.ShowTimer = icon.ShowTimer
 	self.ShowTimerText = icon.ShowTimerText
 	self.ShowTimerTextnoOCC = icon.ShowTimerTextnoOCC
 	self.ClockGCD = icon.ClockGCD
 	
-	local tukui = IsAddOnLoaded("Tukui")
-	local elvui = IsAddOnLoaded("ElvUI")
 	
 	if tukui then
 		-- Tukui forcibly disables its own timers if OmniCC is installed, so no worry about overlap.
@@ -199,6 +182,13 @@ function CooldownSweep:UpdateCooldown()
 	local duration = cd.duration
 	
 	cd:SetCooldown(cd.start, duration, cd.charges, cd.maxCharges)
+
+	if ElvUI and not self.noOCC then
+		local E = ElvUI[1]
+		if E and E.OnSetCooldown and E.private.cooldown.enable then
+			E.OnSetCooldown(cd, cd.start, duration, cd.charges, cd.maxCharges)
+		end
+	end
 	
 	if duration > 0 then
 		cd:Show()
