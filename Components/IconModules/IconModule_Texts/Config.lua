@@ -322,6 +322,10 @@ function TEXT:SetTextDisplayContainerHeight(frame)
 end
 
 function TEXT:TMW_ICON_PREPARE_SETTINGS_FOR_COPY(event, ics, gs)
+	if not ics.SettingsPerView then
+		return
+	end
+	
 	for view, settingsPerView in pairs(ics.SettingsPerView) do
 		local GUID = settingsPerView.TextLayout
 		if not GUID then
