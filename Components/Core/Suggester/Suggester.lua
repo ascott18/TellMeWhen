@@ -1072,7 +1072,7 @@ function Module:Entry_AddToList_2(f, id)
 
 		f.insert = dispeltype
 
-		f.tooltiptitle = dispeltype
+		f.tooltiptitle = L[dispeltype]
 		f.tooltiptext = L["ICONMENU_DISPEL"]
 
 		f.Icon:SetTexture(TMW.DS[id])
