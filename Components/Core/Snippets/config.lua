@@ -194,23 +194,25 @@ local addSnippetButton = {
 		TMW:Update()
 	end,
 }
+local snippetDesc = {
+	order = 0,
+	type = "description",
+	name = L["CODESNIPPETS_DESC"] .. "\r\n\r\n",
+}
 
 local allSnippets = {
 	type = "group",
 	name = L["CODESNIPPETS_TITLE"],
 	order = 50,
 	args = {
-		desc = {
-			order = 0,
-			type = "description",
-			name = L["CODESNIPPETS_DESC"],
-		},
+		desc = snippetDesc,
 		
 		global = {
 			type = "group",
 			name = L["CODESNIPPET_GLOBAL"],
 			order = 1,
 			args = {
+				desc = snippetDesc,
 				addSnippet = addSnippetButton,
 			},
 		},
@@ -219,6 +221,7 @@ local allSnippets = {
 			name = L["CODESNIPPET_PROFILE"],
 			order = 2,
 			args = {
+				desc = snippetDesc,
 				addSnippet = addSnippetButton,
 			},
 		},
