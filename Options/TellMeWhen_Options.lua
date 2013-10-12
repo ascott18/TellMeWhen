@@ -835,7 +835,7 @@ for i, role in TMW:Vararg("DAMAGER", "HEALER", "TANK") do
 	local settingBit = bit.lshift(1, i-1)
 	TMW.GroupConfigTemplate.args.main.args[role] = {
 		type = "toggle",
-		name = _G[role],
+		name = L["ROLEf"]:format(_G[role]),
 		desc = L["UIPANEL_ROLE_DESC"],
 		order = 9+i,
 		set = function(info, val)
@@ -1359,7 +1359,7 @@ function TMW:CompileOptions()
 		local _, name = GetSpecializationInfo(i)
 		parent["Tree"..i] = parent["Tree"..i] or {
 			type = "toggle",
-			name = name,
+			name = L["TREEf"]:format(name),
 			desc = L["UIPANEL_TREE_DESC"],
 			order = 12+i,
 			hidden = specializationSettingHidden,
