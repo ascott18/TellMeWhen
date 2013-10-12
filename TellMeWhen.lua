@@ -225,9 +225,6 @@ TMW.Defaults = {
 						Type				= "",
 						Alpha				= 1,
 						UnAlpha				= 1,
-						Icons				= {
-							[1]				= "",
-						},
 						SettingsPerView		= {
 							["**"] = {
 							}
