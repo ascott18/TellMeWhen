@@ -80,7 +80,6 @@ Type:RegisterConfigPanel_XMLTemplate(170, "TellMeWhen_SortSettings")
 
 TMW:RegisterUpgrade(62033, {
 	icon = function(self, ics)
-		-- Import the setting from TotemSlots, which was what this setting used to be
 		if ics.Type == "runes" then
 			local firstSix = bit.band(0x3F, ics.RuneSlots)
 			local secondSix = bit.lshift(firstSix, 6)
