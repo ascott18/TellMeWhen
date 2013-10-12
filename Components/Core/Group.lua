@@ -278,9 +278,15 @@ function Group.GetGUID(group)
 	local GUID = group:GetSettings().GUID
 
 	if not GUID or GUID == "" then
+
+		if group:GetID() > TMW.db[group.Domain].NumGroups then
+			-- If this group is out of range, don't generate a GUID for it
+			-- and don't report a GUID for it.
+			return nil
+		end
+
 		GUID = TMW:GenerateGUID("group", TMW.CONST.GUID_SIZE)
 		group:GetSettings().GUID = GUID
-		group.GUID = GUID
 	end
 
 	return GUID
@@ -423,11 +429,6 @@ end
 -- @param noIconSetup [boolean] True to prevent the group from setting up all of its icons. Nil/false to update all icons along with the group.
 function Group.Setup(group, noIconSetup)
 	local gs = group:GetSettings()
-	local GUID = group:GetGUID()
-
-	if GUID then
-		TMW:DeclareDataOwner(GUID, group)
-	end
 	
 	for k, v in pairs(TMW.Group_Defaults) do
 		group[k] = gs[k]
@@ -444,6 +445,7 @@ function Group.Setup(group, noIconSetup)
 	TMW:Fire("TMW_GROUP_SETUP_PRE", group)
 	
 
+	-- The green border for global groups
 	if group.Borders then
 		if TMW.Locked then
 			group.Borders:Hide()
