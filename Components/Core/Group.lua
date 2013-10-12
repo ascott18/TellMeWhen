@@ -429,6 +429,11 @@ end
 -- @param noIconSetup [boolean] True to prevent the group from setting up all of its icons. Nil/false to update all icons along with the group.
 function Group.Setup(group, noIconSetup)
 	local gs = group:GetSettings()
+	local GUID = group:GetGUID()
+
+	if GUID then
+		TMW:DeclareDataOwner(GUID, group)
+	end
 	
 	for k, v in pairs(TMW.Group_Defaults) do
 		group[k] = gs[k]
