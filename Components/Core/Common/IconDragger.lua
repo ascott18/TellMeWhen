@@ -321,7 +321,7 @@ IconDragger:RegisterIconDragHandler(41,	-- Split to global
 		if IconDragger.destFrame then
 			info.text = L["ICONMENU_SPLIT_GLOBAL"]
 			info.tooltipTitle = L["ICONMENU_SPLIT_GLOBAL"]
-			info.tooltipText = L["ICONMENU_SPLIT_DESC"]
+			info.tooltipText = L["ICONMENU_SPLIT_DESC"] .. "\r\n\r\n" .. L["GLOBAL_GROUP_GENERIC_DESC"]
 			return true
 		end
 	end,

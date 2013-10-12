@@ -21,6 +21,7 @@ L["DOMAIN_PROFILE"] = "Profile"
 L["DOMAIN_PROFILE_SWITCHTO"] = "Move this group to profile %q"
 L["DOMAIN_GLOBAL"] = "|cff00c300Global|r"
 L["DOMAIN_GLOBAL_SWITCHTO"] = "Make this group global"
+L["GLOBAL_GROUP_GENERIC_DESC"] = "|cff00c300Global|r groups are those that are be available to all your TellMeWhen profiles on this WoW account."
 
 L["IE_NOLOADED"] = [[There isn't an icon currently loaded into the Icon Editor.
 
@@ -170,6 +171,10 @@ L["CHOOSEICON"] = "Choose an icon to check"
 L["CHOOSEICON_DESC"] = [=[|cff7fffffClick|r to choose an icon/group.
 |cff7fffffLeft-Click and drag|r to rearrange.
 |cff7fffffRight-Click and drag|r to swap.]=]
+
+L["UNKNOWN_ICON"] = "<Unknown/Unavailable Icon>"
+L["UNKNOWN_GROUP"] = "<Unknown/Unavailable Group>"
+L["UNKNOWN_UNKNOWN"] = "<Unknown ???>"
 
 L["ICONMENU_ALPHA"] = "Opacity"
 L["CONDITIONALPHA"] = "Failed Conditions/Reqs."
@@ -643,7 +648,7 @@ L["UIPANEL_MAINOPT"] = "Main Options"
 L["UIPANEL_GROUPS"] = "Groups"
 L["UIPANEL_GROUPS_GLOBAL"] = "|cff00c300Global|r Groups"
 L["UIPANEL_GROUPS_DESC"] = "Settings for each group in this TellMeWhen profile."
-L["UIPANEL_GROUPS_GLOBAL_DESC"] = "Settings for the groups that are available to all your TellMeWhen profiles."
+L["UIPANEL_GROUPS_GLOBAL_DESC"] = "Settings for the groups that are available to all your TellMeWhen profiles on this WoW account."
 
 L["UIPANEL_PROFILES"] = "Profiles"
 

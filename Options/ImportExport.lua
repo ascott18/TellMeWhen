@@ -309,7 +309,8 @@ database:RegisterMenuBuilder(10, function(Item_database)
 	local db = Item_database.Settings
 	local currentProfile = TMW.db:GetCurrentProfile()
 	
-	-- This might not evaluate to true if the import type is the backup database and this profile didn't exist when backup was created
+	-- This might not evaluate to true if the import source is the backup database
+	-- and this profile didn't exist when backup was created
 	if db.profiles[currentProfile] then
 		local Item = Item:New("profile")
 

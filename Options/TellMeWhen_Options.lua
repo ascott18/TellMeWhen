@@ -315,6 +315,15 @@ function TMW:SetUIDropdownGUIDText(frame, GUID, text)
 
 			return group
 		end
+
+	elseif GUID and GUID ~= "" then
+		if type == "icon" then
+			text = L["UNKNOWN_ICON"]
+		elseif type == "group" then
+			text = L["UNKNOWN_GROUP"]
+		else
+			text = L["UNKNOWN_UNKNOWN"]
+		end
 	end
 	
 	UIDropDownMenu_SetText(frame, text)
@@ -785,6 +794,12 @@ TMW.GroupConfigTemplate = {
 							return L["DOMAIN_PROFILE_SWITCHTO"]:format(TMW.db:GetCurrentProfile())
 						else
 							return L["DOMAIN_GLOBAL_SWITCHTO"]
+						end
+					end,
+					desc = function(info)
+						local group = FindGroupFromInfo(info)
+						if group.Domain == "profile" then
+							return L["GLOBAL_GROUP_GENERIC_DESC"]
 						end
 					end,
 					type = "execute",
